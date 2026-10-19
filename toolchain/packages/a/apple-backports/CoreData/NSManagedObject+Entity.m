@@ -1,12 +1,12 @@
-#import "CharonCoreData.h"
+#import "RevenantCoreData.h"
 
-@implementation NSManagedObject (CharonEntity)
+@implementation NSManagedObject (RevenantEntity)
 
 + (NSEntityDescription *)entity
 {
     NSString *name = NSStringFromClass(self);
     NSMutableArray *claims = [NSMutableArray array];
-    for (NSManagedObjectModel *model in charon_registered_models())
+    for (NSManagedObjectModel *model in revenant_registered_models())
         for (NSEntityDescription *entity in model.entities)
             if ([entity.managedObjectClassName isEqualToString:name])
                 [claims addObject:entity];

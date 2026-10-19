@@ -51,7 +51,7 @@ expect(files["MDIO90.m"] ~= nil, "band 9.0 writes MDIO90.m")
 expect(files["MDIO100.m"] ~= nil, "band 10.0 writes MDIO100.m")
 expect(files["MDIO90.m"] ~= nil and not has_line(files["MDIO90.m"], "@implementation MDLAsset"),
     "MDLAsset, defined in MDLAsset9.m with a category in that file, is not declared again")
-expect(files["MDIO90.m"] ~= nil and has_line(files["MDIO90.m"], "@implementation MDLAsset (Charon90)"),
+expect(files["MDIO90.m"] ~= nil and has_line(files["MDIO90.m"], "@implementation MDLAsset (Revenant90)"),
     "the kept MDLAsset member goes in a category")
 expect(files["MDIO90.m"] ~= nil and string.find(files["MDIO90.m"], "+ (id)canExportFileExtension:(id)a0", 1, true) ~= nil,
     "the first row (+canExportFileExtension:) is carried: it was skipped as a header before")
@@ -59,13 +59,13 @@ expect(files["MDIO100.m"] ~= nil and has_line(files["MDIO100.m"], "@implementati
     "MDLNew, which the folder does not define, is declared")
 expect(files["MDIO100.m"] ~= nil and not has_line(files["MDIO100.m"], "@implementation MDLMesh"),
     "MDLMesh, defined in MDLMesh9.m with a category elsewhere, is not declared again")
-expect(files["MDIO100.m"] ~= nil and has_line(files["MDIO100.m"], "@implementation MDLMesh (Charon100)"),
+expect(files["MDIO100.m"] ~= nil and has_line(files["MDIO100.m"], "@implementation MDLMesh (Revenant100)"),
     "the kept MDLMesh member goes in a category")
-expect(files["MDIO100.m"] ~= nil and string.find(files["MDIO100.m"], '#import "CharonModelIO.h"', 1, true) ~= nil,
+expect(files["MDIO100.m"] ~= nil and string.find(files["MDIO100.m"], '#import "RevenantModelIO.h"', 1, true) ~= nil,
     "MDLNew has no header in the map, so the package's own header is imported")
 expect(files["MDIO100.m"] ~= nil and not has_line(files["MDIO100.m"], "@implementation MDLAliased"),
-    "MDLAliased, defined through CHARON_ALIAS in the folder, is not declared again")
-expect(files["MDIO100.m"] ~= nil and has_line(files["MDIO100.m"], "@implementation MDLAliased (Charon100)"),
+    "MDLAliased, defined through REVENANT_ALIAS in the folder, is not declared again")
+expect(files["MDIO100.m"] ~= nil and has_line(files["MDIO100.m"], "@implementation MDLAliased (Revenant100)"),
     "the kept MDLAliased member goes in a category")
 
 if failures > 0 then

@@ -5,7 +5,7 @@ set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 ACCELERATE=${ACCELERATE:-$here/../../../../packages/a/apple-backports/Accelerate}
-build=${VDSPVSMSMA_BUILD:-$(runs_folder charon-vdspvsmsma-host)}
+build=${VDSPVSMSMA_BUILD:-$(runs_folder revenant-vdspvsmsma-host)}
 
 # SAN=1 builds and links the renamed port objects and the differential under AddressSanitizer, through
 # this script's own flags, so the objects are made exactly the way the plain run makes them. An
@@ -25,7 +25,7 @@ mkdir -p "$build"
 # list kept here, so a name added to any of the files is renamed too.
 renames=""
 for name in $(xmake l "$here/../registry-functions.lua" "$here/../../../../packages/a/apple-backports/registry/Accelerate" ios6vectorops.json); do
-    renames="$renames -D$name=charon_host_$name"
+    renames="$renames -D$name=revenant_host_$name"
 done
 
 objects=""

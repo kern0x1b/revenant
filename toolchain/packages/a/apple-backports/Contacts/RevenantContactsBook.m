@@ -1,14 +1,14 @@
-#import "CharonContacts.h"
+#import "RevenantContacts.h"
 
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 
-@implementation CharonContactPredicate
+@implementation RevenantContactPredicate
 
 @synthesize match = _match, value = _value;
 
-+ (instancetype)predicateWithMatch:(CharonContactMatch)match value:(id)value
++ (instancetype)predicateWithMatch:(RevenantContactMatch)match value:(id)value
 {
-    CharonContactPredicate *predicate = [[CharonContactPredicate alloc] init];
+    RevenantContactPredicate *predicate = [[RevenantContactPredicate alloc] init];
     predicate->_match = match;
     predicate->_value = value;
     return predicate;
@@ -19,21 +19,21 @@
     return self;
 }
 
-static NSString *CharonContactPredicateKind(CharonContactMatch match)
+static NSString *RevenantContactPredicateKind(RevenantContactMatch match)
 {
     switch (match) {
-        case CharonContactMatchAll: return @"all contacts";
-        case CharonContactMatchName: return @"-[CNContact predicateForContactsMatchingName:]";
-        case CharonContactMatchIdentifiers: return @"-[CNContact predicateForContactsWithIdentifiers:]";
-        case CharonContactMatchGroup: return @"-[CNContact predicateForContactsInGroupWithIdentifier:]";
-        case CharonContactMatchContainer: return @"-[CNContact predicateForContactsInContainerWithIdentifier:]";
-        case CharonContactMatchEmail: return @"-[CNContact predicateForContactsMatchingEmailAddress:]";
-        case CharonContactMatchPhone: return @"-[CNContact predicateForContactsMatchingPhoneNumber:]";
-        case CharonContactMatchGroupIdentifiers: return @"-[CNGroup predicateForGroupsWithIdentifiers:]";
-        case CharonContactMatchGroupsInContainer: return @"-[CNGroup predicateForGroupsInContainerWithIdentifier:]";
-        case CharonContactMatchContainerIdentifiers: return @"-[CNContainer predicateForContainersWithIdentifiers:]";
-        case CharonContactMatchContainerOfContact: return @"-[CNContainer predicateForContainerOfContactWithIdentifier:]";
-        case CharonContactMatchContainerOfGroup: return @"-[CNContainer predicateForContainerOfGroupWithIdentifier:]";
+        case RevenantContactMatchAll: return @"all contacts";
+        case RevenantContactMatchName: return @"-[CNContact predicateForContactsMatchingName:]";
+        case RevenantContactMatchIdentifiers: return @"-[CNContact predicateForContactsWithIdentifiers:]";
+        case RevenantContactMatchGroup: return @"-[CNContact predicateForContactsInGroupWithIdentifier:]";
+        case RevenantContactMatchContainer: return @"-[CNContact predicateForContactsInContainerWithIdentifier:]";
+        case RevenantContactMatchEmail: return @"-[CNContact predicateForContactsMatchingEmailAddress:]";
+        case RevenantContactMatchPhone: return @"-[CNContact predicateForContactsMatchingPhoneNumber:]";
+        case RevenantContactMatchGroupIdentifiers: return @"-[CNGroup predicateForGroupsWithIdentifiers:]";
+        case RevenantContactMatchGroupsInContainer: return @"-[CNGroup predicateForGroupsInContainerWithIdentifier:]";
+        case RevenantContactMatchContainerIdentifiers: return @"-[CNContainer predicateForContainersWithIdentifiers:]";
+        case RevenantContactMatchContainerOfContact: return @"-[CNContainer predicateForContainerOfContactWithIdentifier:]";
+        case RevenantContactMatchContainerOfGroup: return @"-[CNContainer predicateForContainerOfGroupWithIdentifier:]";
     }
     return [NSString stringWithFormat:@"match %ld", (long)match];
 }
@@ -41,9 +41,9 @@ static NSString *CharonContactPredicateKind(CharonContactMatch match)
 - (NSString *)predicateFormat
 {
     switch (_match) {
-        case CharonContactMatchIdentifiers:
-        case CharonContactMatchGroupIdentifiers:
-        case CharonContactMatchContainerIdentifiers:
+        case RevenantContactMatchIdentifiers:
+        case RevenantContactMatchGroupIdentifiers:
+        case RevenantContactMatchContainerIdentifiers:
             return [NSPredicate predicateWithFormat:@"identifier IN %@", _value].predicateFormat;
         default:
             return nil;
@@ -52,16 +52,16 @@ static NSString *CharonContactPredicateKind(CharonContactMatch match)
 
 - (NSString *)description
 {
-    return [NSString stringWithFormat:@"<%@: %p: kind=%@, value=%@>", [self class], self, CharonContactPredicateKind(_match), _value];
+    return [NSString stringWithFormat:@"<%@: %p: kind=%@, value=%@>", [self class], self, RevenantContactPredicateKind(_match), _value];
 }
 
 - (BOOL)isEqual:(id)object
 {
     if (object == self)
         return YES;
-    if (![object isKindOfClass:[CharonContactPredicate class]])
+    if (![object isKindOfClass:[RevenantContactPredicate class]])
         return NO;
-    CharonContactPredicate *other = object;
+    RevenantContactPredicate *other = object;
     return other->_match == _match && (other->_value == _value || [other->_value isEqual:_value]);
 }
 
@@ -84,7 +84,7 @@ static NSString *CharonContactPredicateKind(CharonContactMatch match)
 - (instancetype)initWithCoder:(NSCoder *)coder
 {
     if ((self = [super init])) {
-        _match = (CharonContactMatch)[coder decodeIntegerForKey:@"match"];
+        _match = (RevenantContactMatch)[coder decodeIntegerForKey:@"match"];
         _value = [coder decodeObjectOfClasses:[NSSet setWithObjects:[NSString class], [NSArray class], nil] forKey:@"value"];
     }
     return self;
@@ -100,13 +100,13 @@ static NSString *CharonContactPredicateKind(CharonContactMatch match)
     if (![object isKindOfClass:[CNContact class]])
         return NO;
     CNContact *contact = object;
-    NSDictionary *values = [contact charon_values];
+    NSDictionary *values = [contact revenant_values];
     switch (_match) {
-        case CharonContactMatchAll:
+        case RevenantContactMatchAll:
             return YES;
-        case CharonContactMatchIdentifiers:
+        case RevenantContactMatchIdentifiers:
             return [_value containsObject:contact.identifier];
-        case CharonContactMatchName: {
+        case RevenantContactMatchName: {
             for (NSString *key in @[CNContactGivenNameKey, CNContactMiddleNameKey, CNContactFamilyNameKey,
                                     CNContactNicknameKey, CNContactOrganizationNameKey]) {
                 NSString *held = values[key];
@@ -115,25 +115,25 @@ static NSString *CharonContactPredicateKind(CharonContactMatch match)
             }
             return NO;
         }
-        case CharonContactMatchEmail: {
+        case RevenantContactMatchEmail: {
             for (CNLabeledValue *labeled in values[CNContactEmailAddressesKey]) {
                 if ([labeled.value isKindOfClass:[NSString class]] && [labeled.value caseInsensitiveCompare:_value] == NSOrderedSame)
                     return YES;
             }
             return NO;
         }
-        case CharonContactMatchPhone: {
-            NSString *wanted = [CharonContacts digitsOfPhoneNumber:_value];
+        case RevenantContactMatchPhone: {
+            NSString *wanted = [RevenantContacts digitsOfPhoneNumber:_value];
             for (CNLabeledValue *labeled in values[CNContactPhoneNumbersKey]) {
-                NSString *held = [CharonContacts digitsOfPhoneNumber:[labeled.value stringValue]];
+                NSString *held = [RevenantContacts digitsOfPhoneNumber:[labeled.value stringValue]];
                 if (held.length > 0 && wanted.length > 0
                     && ([held hasSuffix:wanted] || [wanted hasSuffix:held]))
                     return YES;
             }
             return NO;
         }
-        case CharonContactMatchGroup:
-        case CharonContactMatchContainer:
+        case RevenantContactMatchGroup:
+        case RevenantContactMatchContainer:
             return NO;
     }
     return NO;
@@ -141,7 +141,7 @@ static NSString *CharonContactPredicateKind(CharonContactMatch match)
 
 @end
 
-@implementation CharonContactsBook
+@implementation RevenantContactsBook
 
 + (ABAddressBookRef)createBook:(NSError **)error
 {
@@ -150,7 +150,7 @@ static NSString *CharonContactPredicateKind(CharonContactMatch match)
     if (!book) {
         if (error) {
             *error = failure ? (__bridge_transfer NSError *)failure
-                             : [CharonContacts errorWithCode:CNErrorCodeAuthorizationDenied reason:@"The address book could not be opened."];
+                             : [RevenantContacts errorWithCode:CNErrorCodeAuthorizationDenied reason:@"The address book could not be opened."];
         } else if (failure) {
             CFRelease(failure);
         }
@@ -161,16 +161,16 @@ static NSString *CharonContactPredicateKind(CharonContactMatch match)
     if (ABAddressBookGetAuthorizationStatus() != kABAuthorizationStatusAuthorized) {
         CFRelease(book);
         if (error)
-            *error = [CharonContacts errorWithCode:CNErrorCodeAuthorizationDenied reason:@"This application has not been granted permission to access Contacts."];
+            *error = [RevenantContacts errorWithCode:CNErrorCodeAuthorizationDenied reason:@"This application has not been granted permission to access Contacts."];
         return NULL;
     }
     [self watchForChanges];
     return book;
 }
 
-static ABAddressBookRef charon_watched;
+static ABAddressBookRef revenant_watched;
 
-static void charon_book_changed(ABAddressBookRef book, CFDictionaryRef info, void *context)
+static void revenant_book_changed(ABAddressBookRef book, CFDictionaryRef info, void *context)
 {
     dispatch_async(dispatch_get_main_queue(), ^{
         [[NSNotificationCenter defaultCenter] postNotificationName:CNContactStoreDidChangeNotification object:nil userInfo:nil];
@@ -181,9 +181,9 @@ static void charon_book_changed(ABAddressBookRef book, CFDictionaryRef info, voi
 {
     static dispatch_once_t once;
     dispatch_once(&once, ^{
-        charon_watched = ABAddressBookCreateWithOptions(NULL, NULL);
-        if (charon_watched)
-            ABAddressBookRegisterExternalChangeCallback(charon_watched, charon_book_changed, NULL);
+        revenant_watched = ABAddressBookCreateWithOptions(NULL, NULL);
+        if (revenant_watched)
+            ABAddressBookRegisterExternalChangeCallback(revenant_watched, revenant_book_changed, NULL);
     });
 }
 
@@ -193,8 +193,8 @@ static void charon_book_changed(ABAddressBookRef book, CFDictionaryRef info, voi
     for (id descriptor in descriptors) {
         if ([descriptor isKindOfClass:[NSString class]])
             [keys addObject:descriptor];
-        else if ([descriptor isKindOfClass:[CharonContactsKeyDescriptor class]])
-            [keys addObjectsFromArray:[(CharonContactsKeyDescriptor *)descriptor keys]];
+        else if ([descriptor isKindOfClass:[RevenantContactsKeyDescriptor class]])
+            [keys addObjectsFromArray:[(RevenantContactsKeyDescriptor *)descriptor keys]];
         else if ([descriptor isKindOfClass:[NSArray class]])
             [keys unionSet:[self keysFromDescriptors:descriptor]];
     }
@@ -210,7 +210,7 @@ static void charon_book_changed(ABAddressBookRef book, CFDictionaryRef info, voi
 
 + (NSArray<CNLabeledValue *> *)labeledValuesOfRecord:(ABRecordRef)record key:(NSString *)key
 {
-    ABPropertyID property = [CharonContacts propertyForKey:key];
+    ABPropertyID property = [RevenantContacts propertyForKey:key];
     ABMultiValueRef multi = (ABMultiValueRef)ABRecordCopyValue(record, property);
     if (!multi)
         return @[];
@@ -224,19 +224,19 @@ static void charon_book_changed(ABAddressBookRef book, CFDictionaryRef info, voi
         if ([key isEqualToString:CNContactPhoneNumbersKey])
             held = [value isKindOfClass:[NSString class]] ? [CNPhoneNumber phoneNumberWithStringValue:value] : nil;
         else if ([key isEqualToString:CNContactPostalAddressesKey])
-            held = [value isKindOfClass:[NSDictionary class]] ? [[CharonContacts postalAddressWithAddressBookAddress:value] copy] : nil;
+            held = [value isKindOfClass:[NSDictionary class]] ? [[RevenantContacts postalAddressWithAddressBookAddress:value] copy] : nil;
         else if ([key isEqualToString:CNContactSocialProfilesKey])
-            held = [value isKindOfClass:[NSDictionary class]] ? [CharonContacts socialProfileWithAddressBookProfile:value] : nil;
+            held = [value isKindOfClass:[NSDictionary class]] ? [RevenantContacts socialProfileWithAddressBookProfile:value] : nil;
         else if ([key isEqualToString:CNContactInstantMessageAddressesKey])
-            held = [value isKindOfClass:[NSDictionary class]] ? [CharonContacts instantMessageAddressWithAddressBookMessage:value] : nil;
+            held = [value isKindOfClass:[NSDictionary class]] ? [RevenantContacts instantMessageAddressWithAddressBookMessage:value] : nil;
         else if ([key isEqualToString:CNContactRelationsKey])
             held = [value isKindOfClass:[NSString class]] ? [CNContactRelation contactRelationWithName:value] : nil;
         else if ([key isEqualToString:CNContactDatesKey])
-            held = [value isKindOfClass:[NSDate class]] ? [CharonContacts componentsWithDate:value] : nil;
+            held = [value isKindOfClass:[NSDate class]] ? [RevenantContacts componentsWithDate:value] : nil;
         else
             held = [value isKindOfClass:[NSString class]] ? value : nil;
         if (held) {
-            [found addObject:[CNLabeledValue charon_labeledValueWithLabel:label value:held
+            [found addObject:[CNLabeledValue revenant_labeledValueWithLabel:label value:held
                                                                identifier:ABMultiValueGetIdentifierAtIndex(multi, index)]];
         }
     }
@@ -248,7 +248,7 @@ static void charon_book_changed(ABAddressBookRef book, CFDictionaryRef info, voi
 {
     for (NSString *key in keys) {
         BOOL labeled = NO;
-        if (![CharonContacts key:key holdsLabeledValues:&labeled]) {
+        if (![RevenantContacts key:key holdsLabeledValues:&labeled]) {
             if ([key isEqualToString:CNContactImageDataKey]) {
                 if (!filling || !values[key]) {
                     CFDataRef data = ABPersonCopyImageDataWithFormat(record, kABPersonImageFormatOriginalSize);
@@ -286,11 +286,11 @@ static void charon_book_changed(ABAddressBookRef book, CFDictionaryRef info, voi
         }
         if (filling && values[key])
             continue;
-        id held = [self valueOfRecord:record property:[CharonContacts propertyForKey:key]];
+        id held = [self valueOfRecord:record property:[RevenantContacts propertyForKey:key]];
         if (!held)
             continue;
         if ([key isEqualToString:CNContactBirthdayKey])
-            values[key] = [CharonContacts componentsWithDate:held];
+            values[key] = [RevenantContacts componentsWithDate:held];
         else if ([key isEqualToString:CNContactTypeKey])
             values[key] = @([(__bridge id)kABPersonKindOrganization isEqual:held] ? CNContactTypeOrganization : CNContactTypePerson);
         else
@@ -319,25 +319,25 @@ static void charon_book_changed(ABAddressBookRef book, CFDictionaryRef info, voi
     NSString *identifier = [NSString stringWithFormat:@"%d", (int)ABRecordGetRecordID(record)];
     values[CNContactIdentifierKey] = identifier;
     CNContact *contact = mutableObjects ? [[CNMutableContact alloc] init] : [[CNContact alloc] init];
-    [contact charon_setValues:values available:keys identifier:identifier];
-    [contact charon_setLinkedIdentifiers:linked];
+    [contact revenant_setValues:values available:keys identifier:identifier];
+    [contact revenant_setLinkedIdentifiers:linked];
     return contact;
 }
 
 + (NSArray *)recordsInBook:(ABAddressBookRef)book matching:(NSPredicate *)predicate error:(NSError **)error
 {
-    CharonContactMatch match = CharonContactMatchAll;
+    RevenantContactMatch match = RevenantContactMatchAll;
     id wanted = nil;
-    if ([predicate isKindOfClass:[CharonContactPredicate class]]) {
-        match = [(CharonContactPredicate *)predicate match];
-        wanted = [(CharonContactPredicate *)predicate value];
+    if ([predicate isKindOfClass:[RevenantContactPredicate class]]) {
+        match = [(RevenantContactPredicate *)predicate match];
+        wanted = [(RevenantContactPredicate *)predicate value];
     } else if (predicate) {
         if (error)
-            *error = [CharonContacts errorWithCode:CNErrorCodePredicateInvalid reason:@"The predicate is not one the Contacts framework makes."];
+            *error = [RevenantContacts errorWithCode:CNErrorCodePredicateInvalid reason:@"The predicate is not one the Contacts framework makes."];
         return nil;
     }
     NSMutableArray *found = [NSMutableArray array];
-    if (match == CharonContactMatchIdentifiers) {
+    if (match == RevenantContactMatchIdentifiers) {
         for (NSString *identifier in wanted) {
             ABRecordRef record = ABAddressBookGetPersonWithRecordID(book, (ABRecordID)[identifier intValue]);
             if (record)
@@ -345,7 +345,7 @@ static void charon_book_changed(ABAddressBookRef book, CFDictionaryRef info, voi
         }
         return found;
     }
-    if (match == CharonContactMatchGroup) {
+    if (match == RevenantContactMatchGroup) {
         ABRecordRef group = ABAddressBookGetGroupWithRecordID(book, (ABRecordID)[wanted intValue]);
         CFArrayRef members = group ? ABGroupCopyArrayOfAllMembers(group) : NULL;
         if (members) {
@@ -354,7 +354,7 @@ static void charon_book_changed(ABAddressBookRef book, CFDictionaryRef info, voi
         }
         return found;
     }
-    if (match == CharonContactMatchContainer) {
+    if (match == RevenantContactMatchContainer) {
         ABRecordRef source = ABAddressBookGetSourceWithRecordID(book, (ABRecordID)[wanted intValue]);
         CFArrayRef people = source ? ABAddressBookCopyArrayOfAllPeopleInSource(book, source) : NULL;
         if (people) {
@@ -363,7 +363,7 @@ static void charon_book_changed(ABAddressBookRef book, CFDictionaryRef info, voi
         }
         return found;
     }
-    if (match == CharonContactMatchName) {
+    if (match == RevenantContactMatchName) {
         CFArrayRef people = ABAddressBookCopyPeopleWithName(book, (__bridge CFStringRef)wanted);
         if (people) {
             [found addObjectsFromArray:(__bridge NSArray *)people];
@@ -385,9 +385,9 @@ static void charon_book_changed(ABAddressBookRef book, CFDictionaryRef info, voi
     NSArray *records = [self recordsInBook:book matching:predicate error:error];
     if (!records)
         return nil;
-    BOOL filters = [predicate isKindOfClass:[CharonContactPredicate class]]
-        && ([(CharonContactPredicate *)predicate match] == CharonContactMatchEmail
-            || [(CharonContactPredicate *)predicate match] == CharonContactMatchPhone);
+    BOOL filters = [predicate isKindOfClass:[RevenantContactPredicate class]]
+        && ([(RevenantContactPredicate *)predicate match] == RevenantContactMatchEmail
+            || [(RevenantContactPredicate *)predicate match] == RevenantContactMatchPhone);
     NSMutableArray *contacts = [NSMutableArray array];
     NSMutableSet *taken = [NSMutableSet set];
     for (id held in records) {
@@ -408,7 +408,7 @@ static void charon_book_changed(ABAddressBookRef book, CFDictionaryRef info, voi
         if (filters)
             contact = [self contactWithRecord:record keys:keys unify:unify mutable:mutableObjects];
         [taken addObject:identifier];
-        for (NSString *other in [contact charon_linkedIdentifiers])
+        for (NSString *other in [contact revenant_linkedIdentifiers])
             [taken addObject:other];
         [contacts addObject:contact];
     }
@@ -432,28 +432,28 @@ static void charon_book_changed(ABAddressBookRef book, CFDictionaryRef info, voi
     if ([key isEqualToString:CNContactPhoneNumbersKey])
         return [value isKindOfClass:[CNPhoneNumber class]] ? [value stringValue] : nil;
     if ([key isEqualToString:CNContactPostalAddressesKey])
-        return [value isKindOfClass:[CNPostalAddress class]] ? [CharonContacts addressBookAddressWithPostalAddress:value] : nil;
+        return [value isKindOfClass:[CNPostalAddress class]] ? [RevenantContacts addressBookAddressWithPostalAddress:value] : nil;
     if ([key isEqualToString:CNContactSocialProfilesKey])
-        return [value isKindOfClass:[CNSocialProfile class]] ? [CharonContacts addressBookProfileWithSocialProfile:value] : nil;
+        return [value isKindOfClass:[CNSocialProfile class]] ? [RevenantContacts addressBookProfileWithSocialProfile:value] : nil;
     if ([key isEqualToString:CNContactInstantMessageAddressesKey])
-        return [value isKindOfClass:[CNInstantMessageAddress class]] ? [CharonContacts addressBookMessageWithInstantMessageAddress:value] : nil;
+        return [value isKindOfClass:[CNInstantMessageAddress class]] ? [RevenantContacts addressBookMessageWithInstantMessageAddress:value] : nil;
     if ([key isEqualToString:CNContactRelationsKey])
         return [value isKindOfClass:[CNContactRelation class]] ? [value name] : nil;
     if ([key isEqualToString:CNContactDatesKey])
-        return [value isKindOfClass:[NSDateComponents class]] ? [CharonContacts dateWithComponents:value] : nil;
+        return [value isKindOfClass:[NSDateComponents class]] ? [RevenantContacts dateWithComponents:value] : nil;
     return [value isKindOfClass:[NSString class]] ? value : nil;
 }
 
 + (BOOL)applyContact:(CNContact *)contact toRecord:(ABRecordRef)record error:(NSError **)error
 {
-    NSDictionary *values = [contact charon_values];
-    NSSet *available = [contact charon_availableKeys];
-    for (NSString *key in [CharonContacts contactKeys]) {
+    NSDictionary *values = [contact revenant_values];
+    NSSet *available = [contact revenant_availableKeys];
+    for (NSString *key in [RevenantContacts contactKeys]) {
         if (available && ![available containsObject:key])
             continue;
         BOOL labeled = NO;
         id value = values[key];
-        if (![CharonContacts key:key holdsLabeledValues:&labeled]) {
+        if (![RevenantContacts key:key holdsLabeledValues:&labeled]) {
             if ([key isEqualToString:CNContactImageDataKey]) {
                 if ([value isKindOfClass:[NSData class]])
                     ABPersonSetImageData(record, (__bridge CFDataRef)value, NULL);
@@ -462,11 +462,11 @@ static void charon_book_changed(ABAddressBookRef book, CFDictionaryRef info, voi
             }
             continue;
         }
-        ABPropertyID property = [CharonContacts propertyForKey:key];
+        ABPropertyID property = [RevenantContacts propertyForKey:key];
         if (!labeled) {
             id held = value;
             if ([key isEqualToString:CNContactBirthdayKey])
-                held = [CharonContacts dateWithComponents:value];
+                held = [RevenantContacts dateWithComponents:value];
             else if ([key isEqualToString:CNContactTypeKey])
                 held = (__bridge id)([value integerValue] == CNContactTypeOrganization ? kABPersonKindOrganization : kABPersonKindPerson);
             if (held == nil || ([held isKindOfClass:[NSString class]] && [held length] == 0))
@@ -502,13 +502,13 @@ static void charon_book_changed(ABAddressBookRef book, CFDictionaryRef info, voi
 
 + (BOOL)contactFitsTheBook:(CNContact *)contact error:(NSError **)error
 {
-    NSDictionary *values = [contact charon_values];
+    NSDictionary *values = [contact revenant_values];
     for (NSString *key in @[CNContactPreviousFamilyNameKey, CNContactNonGregorianBirthdayKey]) {
         id held = values[key];
         BOOL empty = held == nil || ([held respondsToSelector:@selector(length)] && [held length] == 0);
         if (!empty) {
             if (error) {
-                *error = [CharonContacts errorWithCode:CNErrorCodeValidationConfigurationError
+                *error = [RevenantContacts errorWithCode:CNErrorCodeValidationConfigurationError
                                                 reason:[NSString stringWithFormat:@"The address book of this release has no field for %@, so the value would be dropped by the save.", key]];
             }
             return NO;
@@ -530,24 +530,24 @@ static void charon_book_changed(ABAddressBookRef book, CFDictionaryRef info, voi
 {
     NSString *identifier = [NSString stringWithFormat:@"%d", (int)ABRecordGetRecordID(record)];
     NSString *name = [self valueOfRecord:record property:kABGroupNameProperty];
-    return [CNGroup charon_groupWithIdentifier:identifier name:name mutable:mutableObjects];
+    return [CNGroup revenant_groupWithIdentifier:identifier name:name mutable:mutableObjects];
 }
 
 + (NSArray<CNGroup *> *)groupsInBook:(ABAddressBookRef)book matching:(NSPredicate *)predicate
                               mutable:(BOOL)mutableObjects error:(NSError **)error
 {
-    CharonContactMatch match = CharonContactMatchAll;
+    RevenantContactMatch match = RevenantContactMatchAll;
     id wanted = nil;
-    if ([predicate isKindOfClass:[CharonContactPredicate class]]) {
-        match = [(CharonContactPredicate *)predicate match];
-        wanted = [(CharonContactPredicate *)predicate value];
+    if ([predicate isKindOfClass:[RevenantContactPredicate class]]) {
+        match = [(RevenantContactPredicate *)predicate match];
+        wanted = [(RevenantContactPredicate *)predicate value];
     } else if (predicate) {
         if (error)
-            *error = [CharonContacts errorWithCode:CNErrorCodePredicateInvalid reason:@"The predicate is not one the Contacts framework makes."];
+            *error = [RevenantContacts errorWithCode:CNErrorCodePredicateInvalid reason:@"The predicate is not one the Contacts framework makes."];
         return nil;
     }
     NSMutableArray *found = [NSMutableArray array];
-    if (match == CharonContactMatchGroupIdentifiers) {
+    if (match == RevenantContactMatchGroupIdentifiers) {
         for (NSString *identifier in wanted) {
             ABRecordRef record = ABAddressBookGetGroupWithRecordID(book, (ABRecordID)[identifier intValue]);
             if (record)
@@ -555,7 +555,7 @@ static void charon_book_changed(ABAddressBookRef book, CFDictionaryRef info, voi
         }
         return found;
     }
-    if (match == CharonContactMatchGroupsInContainer) {
+    if (match == RevenantContactMatchGroupsInContainer) {
         ABRecordRef source = ABAddressBookGetSourceWithRecordID(book, (ABRecordID)[wanted intValue]);
         CFArrayRef groups = source ? ABAddressBookCopyArrayOfAllGroupsInSource(book, source) : NULL;
         if (groups) {
@@ -595,7 +595,7 @@ static void charon_book_changed(ABAddressBookRef book, CFDictionaryRef info, voi
 {
     NSString *identifier = [NSString stringWithFormat:@"%d", (int)ABRecordGetRecordID(source)];
     NSString *name = [self valueOfRecord:source property:kABSourceNameProperty];
-    return [CNContainer charon_containerWithIdentifier:identifier name:name type:[self typeOfSource:source]];
+    return [CNContainer revenant_containerWithIdentifier:identifier name:name type:[self typeOfSource:source]];
 }
 
 + (ABRecordRef)sourceOfPersonWithIdentifier:(NSString *)identifier inBook:(ABAddressBookRef)book
@@ -618,18 +618,18 @@ static void charon_book_changed(ABAddressBookRef book, CFDictionaryRef info, voi
 
 + (NSArray<CNContainer *> *)containersInBook:(ABAddressBookRef)book matching:(NSPredicate *)predicate error:(NSError **)error
 {
-    CharonContactMatch match = CharonContactMatchAll;
+    RevenantContactMatch match = RevenantContactMatchAll;
     id wanted = nil;
-    if ([predicate isKindOfClass:[CharonContactPredicate class]]) {
-        match = [(CharonContactPredicate *)predicate match];
-        wanted = [(CharonContactPredicate *)predicate value];
+    if ([predicate isKindOfClass:[RevenantContactPredicate class]]) {
+        match = [(RevenantContactPredicate *)predicate match];
+        wanted = [(RevenantContactPredicate *)predicate value];
     } else if (predicate) {
         if (error)
-            *error = [CharonContacts errorWithCode:CNErrorCodePredicateInvalid reason:@"The predicate is not one the Contacts framework makes."];
+            *error = [RevenantContacts errorWithCode:CNErrorCodePredicateInvalid reason:@"The predicate is not one the Contacts framework makes."];
         return nil;
     }
     NSMutableArray *found = [NSMutableArray array];
-    if (match == CharonContactMatchContainerIdentifiers) {
+    if (match == RevenantContactMatchContainerIdentifiers) {
         for (NSString *identifier in wanted) {
             ABRecordRef source = ABAddressBookGetSourceWithRecordID(book, (ABRecordID)[identifier intValue]);
             if (source)
@@ -637,13 +637,13 @@ static void charon_book_changed(ABAddressBookRef book, CFDictionaryRef info, voi
         }
         return found;
     }
-    if (match == CharonContactMatchContainerOfContact) {
+    if (match == RevenantContactMatchContainerOfContact) {
         ABRecordRef source = [self sourceOfPersonWithIdentifier:wanted inBook:book];
         if (source)
             [found addObject:[self containerWithRecord:source]];
         return found;
     }
-    if (match == CharonContactMatchContainerOfGroup) {
+    if (match == RevenantContactMatchContainerOfGroup) {
         ABRecordRef source = [self sourceOfGroupWithIdentifier:wanted inBook:book];
         if (source)
             [found addObject:[self containerWithRecord:source]];

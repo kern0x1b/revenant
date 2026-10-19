@@ -5,7 +5,7 @@
 #import <Foundation/Foundation.h>
 #import <dlfcn.h>
 
-extern void charon_vision_bilinear(const uint8_t *source, size_t sourceStride, size_t sourceWide,
+extern void revenant_vision_bilinear(const uint8_t *source, size_t sourceStride, size_t sourceWide,
                                    size_t sourceHigh, uint8_t *target, size_t targetStride, long insetX,
                                    long insetY, long drawWide, long drawHigh, long targetWide, long targetHigh);
 
@@ -71,7 +71,7 @@ int main(int argc, char **argv)
             }
         }
         memset(CVPixelBufferGetBaseAddress(mine), 0, CVPixelBufferGetBytesPerRow(mine) * th);
-        charon_vision_bilinear((const uint8_t *)CVPixelBufferGetBaseAddress(source),
+        revenant_vision_bilinear((const uint8_t *)CVPixelBufferGetBaseAddress(source),
                                CVPixelBufferGetBytesPerRow(source), sw, sh,
                                (uint8_t *)CVPixelBufferGetBaseAddress(mine), CVPixelBufferGetBytesPerRow(mine),
                                insetX, insetY, drawWide, drawHigh, (long)tw, (long)th);

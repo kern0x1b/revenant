@@ -1,5 +1,5 @@
 #import <AuthenticationServices/AuthenticationServices.h>
-#import "CharonASConstruction.h"
+#import "RevenantASConstruction.h"
 
 @implementation ASAuthorizationAppleIDCredential
 
@@ -12,7 +12,7 @@
 @synthesize fullName = _fullName;
 @synthesize realUserStatus = _realUserStatus;
 
-- (instancetype)charon_initWithUser:(NSString *)user
+- (instancetype)revenant_initWithUser:(NSString *)user
                    authorizedScopes:(NSArray<ASAuthorizationScope> *)authorizedScopes
                    identityToken:(NSData *)identityToken
                   authorizationCode:(NSData *)authorizationCode
@@ -84,7 +84,7 @@
 
 - (instancetype)initWithCoder:(NSCoder *)coder
 {
-    return [self charon_initWithUser:@""
+    return [self revenant_initWithUser:@""
                    authorizedScopes:@[]
                      identityToken:nil
                   authorizationCode:nil
@@ -102,7 +102,7 @@
 
 - (id)copyWithZone:(NSZone *)zone
 {
-    return [[[self class] allocWithZone:zone] charon_initWithUser:_user
+    return [[[self class] allocWithZone:zone] revenant_initWithUser:_user
                                                  authorizedScopes:_authorizedScopes
                                                      identityToken:_identityToken
                                                   authorizationCode:_authorizationCode

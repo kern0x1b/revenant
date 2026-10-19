@@ -3,14 +3,14 @@
 #import <CoreLocation/CoreLocation.h>
 #import <CoreMotion/CoreMotion.h>
 
-#import "CharonARKitPrivate.h"
-#import "CharonARTracker.h"
+#import "RevenantARKitPrivate.h"
+#import "RevenantARTracker.h"
 
 #pragma clang diagnostic ignored "-Wunguarded-availability-new"
 
 #pragma clang diagnostic ignored "-Wobjc-designated-initializers"
 
-@interface ARConfiguration (CharonAutoFocus)
+@interface ARConfiguration (RevenantAutoFocus)
 @property (nonatomic, assign, getter=isAutoFocusEnabled) BOOL autoFocusEnabled;
 @end
 
@@ -24,7 +24,7 @@
 
 - (instancetype)init
 {
-    self = [super initCharonCommon];
+    self = [super initRevenantCommon];
     if (self)
         _planeDetection = ARPlaneDetectionHorizontal;
     return self;
@@ -84,7 +84,7 @@
 
 + (BOOL)isSupported
 {
-    return [CharonARTracker isSupported];
+    return [RevenantARTracker isSupported];
 }
 
 @end
@@ -93,7 +93,7 @@
 
 - (instancetype)init
 {
-    self = [super initCharonCommon];
+    self = [super initRevenantCommon];
     return self;
 }
 
@@ -104,7 +104,7 @@
 
 + (BOOL)isSupported
 {
-    return [CharonARTracker isOrientationSupported];
+    return [RevenantARTracker isOrientationSupported];
 }
 
 @end
@@ -113,7 +113,7 @@
 
 - (instancetype)init
 {
-    self = [super initCharonCommon];
+    self = [super initRevenantCommon];
     return self;
 }
 

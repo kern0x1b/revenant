@@ -5,12 +5,12 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface ARSCNView (Charon12)
+@interface ARSCNView (Revenant12)
 - (simd_float3)unprojectPoint:(CGPoint)point
          ontoPlaneWithTransform:(simd_float4x4)planeTransform;
 @end
 
-@implementation ARSCNView (Charon12)
+@implementation ARSCNView (Revenant12)
 
 - (simd_float3)unprojectPoint:(CGPoint)point
          ontoPlaneWithTransform:(simd_float4x4)planeTransform

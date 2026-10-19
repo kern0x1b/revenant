@@ -1,4 +1,4 @@
-#import "CharonMPS.h"
+#import "RevenantMPS.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -11,37 +11,37 @@ typedef struct {
     MPSDataType dataType;
     NSUInteger count;
     int pixelFormat;
-} CharonMPSImageLayout;
+} RevenantMPSImageLayout;
 
-CharonMPSImageLayout CharonMPSImageLayoutOf(MPSImage *image);
+RevenantMPSImageLayout RevenantMPSImageLayoutOf(MPSImage *image);
 
-BOOL CharonMPSImageUsable(MPSImage *image, NSString *what);
+BOOL RevenantMPSImageUsable(MPSImage *image, NSString *what);
 
-NSUInteger CharonMPSImageIndex(const CharonMPSImageLayout *layout, NSUInteger pixel, NSUInteger channel);
+NSUInteger RevenantMPSImageIndex(const RevenantMPSImageLayout *layout, NSUInteger pixel, NSUInteger channel);
 
-double CharonMPSImageLoad(const void *buffer, const CharonMPSImageLayout *layout, NSUInteger index);
-void CharonMPSImageStore(void *buffer, const CharonMPSImageLayout *layout, NSUInteger index, double value);
+double RevenantMPSImageLoad(const void *buffer, const RevenantMPSImageLayout *layout, NSUInteger index);
+void RevenantMPSImageStore(void *buffer, const RevenantMPSImageLayout *layout, NSUInteger index, double value);
 
-typedef double (^CharonMPSImageUnary)(NSUInteger pixel, NSUInteger channel, double value);
-typedef double (^CharonMPSImageBinary)(NSUInteger pixel, NSUInteger channel, double primary, double secondary);
+typedef double (^RevenantMPSImageUnary)(NSUInteger pixel, NSUInteger channel, double value);
+typedef double (^RevenantMPSImageBinary)(NSUInteger pixel, NSUInteger channel, double primary, double secondary);
 
-BOOL CharonMPSImageMapUnary(MPSImage *source, MPSImage *destination, MTLRegion region,
-                            CharonMPSImageUnary fn, NSString *what);
-BOOL CharonMPSImageMapBinary(MPSImage *primaryImage, MPSImage *secondaryImage, MPSImage *destination,
-                             MTLRegion region, CharonMPSImageBinary fn, NSString *what);
+BOOL RevenantMPSImageMapUnary(MPSImage *source, MPSImage *destination, MTLRegion region,
+                            RevenantMPSImageUnary fn, NSString *what);
+BOOL RevenantMPSImageMapBinary(MPSImage *primaryImage, MPSImage *secondaryImage, MPSImage *destination,
+                             MTLRegion region, RevenantMPSImageBinary fn, NSString *what);
 
-MTLRegion CharonMPSImageResolvedRegion(MPSImage *image, MTLRegion clip);
+MTLRegion RevenantMPSImageResolvedRegion(MPSImage *image, MTLRegion clip);
 
-BOOL CharonMPSImageRegionIsEmpty(MTLRegion region);
+BOOL RevenantMPSImageRegionIsEmpty(MTLRegion region);
 
-size_t CharonMPSImageFeatureChannelSize(MPSImageFeatureChannelFormat format);
+size_t RevenantMPSImageFeatureChannelSize(MPSImageFeatureChannelFormat format);
 
-MPSDataType CharonMPSImageDataTypeOf(MPSImageFeatureChannelFormat format);
+MPSDataType RevenantMPSImageDataTypeOf(MPSImageFeatureChannelFormat format);
 
-void *_Nullable CharonMPSImageReadRegion(MPSImage *image, const CharonMPSImageLayout *layout, MTLRegion region, NSString *what);
-BOOL CharonMPSImageWriteRegion(MPSImage *image, const CharonMPSImageLayout *layout, MTLRegion region, const void *buffer, NSString *what);
+void *_Nullable RevenantMPSImageReadRegion(MPSImage *image, const RevenantMPSImageLayout *layout, MTLRegion region, NSString *what);
+BOOL RevenantMPSImageWriteRegion(MPSImage *image, const RevenantMPSImageLayout *layout, MTLRegion region, const void *buffer, NSString *what);
 
-BOOL CharonMPSImageConcatRows(const CharonMPSImageLayout *source, const CharonMPSImageLayout *destination,
+BOOL RevenantMPSImageConcatRows(const RevenantMPSImageLayout *source, const RevenantMPSImageLayout *destination,
                               NSUInteger offset, const void *sourceBytes, void *destinationBytes);
 
 NS_ASSUME_NONNULL_END

@@ -6,7 +6,7 @@ static CSSearchableItem *item(NSString *identifier, NSString *title, NSString *d
     CSSearchableItemAttributeSet *attributes = [[CSSearchableItemAttributeSet alloc] initWithItemContentType:@"public.text"];
     attributes.title = title;
     attributes.displayName = description;
-    return [[CSSearchableItem alloc] initWithUniqueIdentifier:identifier domainIdentifier:@"charon.query.differential" attributeSet:attributes];
+    return [[CSSearchableItem alloc] initWithUniqueIdentifier:identifier domainIdentifier:@"revenant.query.differential" attributeSet:attributes];
 }
 
 static void query(NSString *label, NSString *text, NSArray<NSString *> *attributes)
@@ -46,9 +46,9 @@ int main(void)
     setvbuf(stdout, NULL, _IONBF, 0);
     @autoreleasepool {
         NSArray<CSSearchableItem *> *items = @[
-            item(@"charon.query.a", @"Charon Alpha Q", @"zzuniqueword body"),
-            item(@"charon.query.b", @"charon beta Q", @"plain text"),
-            item(@"charon.query.c", @"Gamma Q", @"plain text"),
+            item(@"revenant.query.a", @"Revenant Alpha Q", @"zzuniqueword body"),
+            item(@"revenant.query.b", @"revenant beta Q", @"plain text"),
+            item(@"revenant.query.c", @"Gamma Q", @"plain text"),
         ];
         dispatch_semaphore_t indexed = dispatch_semaphore_create(0);
         [[CSSearchableIndex defaultSearchableIndex] indexSearchableItems:items completionHandler:^(NSError *e) {
@@ -59,18 +59,18 @@ int main(void)
         [NSThread sleepForTimeInterval:5];
 
         NSArray<NSString *> *title = @[@"title"];
-        query(@"exact", @"title == \"Charon Alpha Q\"", title);
-        query(@"exact lowercase", @"title == \"charon alpha q\"", title);
-        query(@"prefix wildcard", @"title == \"Charon*Q\"", title);
+        query(@"exact", @"title == \"Revenant Alpha Q\"", title);
+        query(@"exact lowercase", @"title == \"revenant alpha q\"", title);
+        query(@"prefix wildcard", @"title == \"Revenant*Q\"", title);
         query(@"substring wildcard", @"title == \"*Alpha*\"", title);
         query(@"suffix wildcard", @"title == \"*Q\"", title);
         query(@"star only", @"title == \"*\"", title);
         query(@"description exact", @"displayName == \"zzuniqueword body\"", @[@"displayName"]);
         query(@"description word", @"displayName == \"zzuniqueword\"", @[@"displayName"]);
-        query(@"not equal", @"title != \"Charon Alpha Q\"", title);
-        query(@"or", @"title == \"Charon Alpha Q\" || title == \"Gamma Q\"", title);
-        query(@"parens and", @"(title == \"Charon*\" || title == \"Gamma Q\") && displayName == \"plain text\"", title);
-        query(@"precedence", @"title == \"Charon Alpha Q\" || title == \"Gamma Q\" && displayName == \"plain text\"", title);
+        query(@"not equal", @"title != \"Revenant Alpha Q\"", title);
+        query(@"or", @"title == \"Revenant Alpha Q\" || title == \"Gamma Q\"", title);
+        query(@"parens and", @"(title == \"Revenant*\" || title == \"Gamma Q\") && displayName == \"plain text\"", title);
+        query(@"precedence", @"title == \"Revenant Alpha Q\" || title == \"Gamma Q\" && displayName == \"plain text\"", title);
         query(@"question mark", @"title == \"Gamm? Q\"", title);
         query(@"content type", @"contentType == \"public.text\"", title);
         query(@"unknown attribute", @"nosuchattr == \"x\"", title);
@@ -84,7 +84,7 @@ int main(void)
         query(@"attrs both", @"title == \"Gamma Q\"", @[@"title", @"displayName"]);
 
         dispatch_semaphore_t removed = dispatch_semaphore_create(0);
-        [[CSSearchableIndex defaultSearchableIndex] deleteSearchableItemsWithIdentifiers:@[@"charon.query.a", @"charon.query.b", @"charon.query.c"]
+        [[CSSearchableIndex defaultSearchableIndex] deleteSearchableItemsWithIdentifiers:@[@"revenant.query.a", @"revenant.query.b", @"revenant.query.c"]
                                                                        completionHandler:^(NSError *e) {
             printf("cleanup: %s\n", e ? e.description.UTF8String : "none");
             dispatch_semaphore_signal(removed);

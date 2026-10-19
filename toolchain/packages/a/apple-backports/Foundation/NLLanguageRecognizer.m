@@ -1,6 +1,6 @@
 #import <NaturalLanguage/NaturalLanguage.h>
 
-static NSDictionary<NSString *, NSNumber *> *charon_word_shares(NSString *string)
+static NSDictionary<NSString *, NSNumber *> *revenant_word_shares(NSString *string)
 {
     NSMutableDictionary *counts = [NSMutableDictionary dictionary];
     NLTokenizer *sentences = [[NLTokenizer alloc] initWithUnit:NLTokenUnitSentence];
@@ -49,7 +49,7 @@ static NSDictionary<NSString *, NSNumber *> *charon_word_shares(NSString *string
 {
     if (!string.length)
         return;
-    [charon_word_shares(string) enumerateKeysAndObjectsUsingBlock:^(NSString *language, NSNumber *count, BOOL *stop) {
+    [revenant_word_shares(string) enumerateKeysAndObjectsUsingBlock:^(NSString *language, NSNumber *count, BOOL *stop) {
         self->_weights[language] = @([self->_weights[language] doubleValue] + count.doubleValue);
     }];
 }
@@ -59,7 +59,7 @@ static NSDictionary<NSString *, NSNumber *> *charon_word_shares(NSString *string
     [_weights removeAllObjects];
 }
 
-- (NSDictionary<NLLanguage, NSNumber *> *)charon_scores
+- (NSDictionary<NLLanguage, NSNumber *> *)revenant_scores
 {
     NSMutableDictionary *scores = [NSMutableDictionary dictionary];
     double total = 0;
@@ -79,7 +79,7 @@ static NSDictionary<NSString *, NSNumber *> *charon_word_shares(NSString *string
     if (total == 0 && _hints.count) {
         NSDictionary *hints = _hints;
         _hints = @{};
-        NSDictionary *plain = [self charon_scores];
+        NSDictionary *plain = [self revenant_scores];
         _hints = hints;
         return plain;
     }
@@ -91,7 +91,7 @@ static NSDictionary<NSString *, NSNumber *> *charon_word_shares(NSString *string
 
 - (NLLanguage)dominantLanguage
 {
-    NSDictionary *scores = [self charon_scores];
+    NSDictionary *scores = [self revenant_scores];
     NSString *best = nil;
     for (NSString *language in scores) {
         if (!best || [scores[language] doubleValue] > [scores[best] doubleValue] || ([scores[language] doubleValue] == [scores[best] doubleValue] && [language compare:best] == NSOrderedAscending))
@@ -102,7 +102,7 @@ static NSDictionary<NSString *, NSNumber *> *charon_word_shares(NSString *string
 
 - (NSDictionary<NLLanguage, NSNumber *> *)languageHypothesesWithMaximum:(NSUInteger)maxHypotheses
 {
-    NSDictionary *scores = [self charon_scores];
+    NSDictionary *scores = [self revenant_scores];
     if (!maxHypotheses || scores.count <= maxHypotheses)
         return scores;
     NSArray *ranked = [scores keysSortedByValueUsingComparator:^NSComparisonResult(NSNumber *a, NSNumber *b) {

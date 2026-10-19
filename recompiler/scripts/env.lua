@@ -13,7 +13,7 @@ end
 local function targetfile(name)
     local target = project.target(name)
     if not target then
-        raise("no target %s: configure hades for the host (./xmakew f -y), not for iphoneos", name)
+        raise("no target %s: configure revenant for the host (./xmakew f -y), not for iphoneos", name)
     end
     local file = path.absolute(target:targetfile(), os.projectdir())
     if not os.isfile(file) then
@@ -23,7 +23,7 @@ local function targetfile(name)
 end
 
 function sorted(list)
-    import("byteorder", {rootdir = path.join(os.scriptdir(), "..", "..", "charon", "modules"), anonymous = true}).sort(list)
+    import("byteorder", {rootdir = path.join(os.scriptdir(), "..", "..", "toolchain", "modules"), anonymous = true}).sort(list)
     return list
 end
 
@@ -35,15 +35,15 @@ function main()
         config.load()
     end
     local root = os.projectdir()
-    local llvm = config.get("katabasis_llvm")
+    local llvm = config.get("recompiler_llvm")
     local sdks = os.dirs(path.join(installdir("iphoneos-sdk"), "Developer.app", "Contents", "Developer", "Platforms", "iPhoneOS.platform", "Developer", "SDKs", "iPhoneOS*.sdk"))
     if #sdks ~= 1 then
         raise("the iphoneos-sdk package holds %d SDKs, not one", #sdks)
     end
     local env = {
         root = root,
-        katabasis = path.join(root, "katabasis"),
-        modules = path.join(root, "charon", "modules"),
+        recompiler = path.join(root, "recompiler"),
+        modules = path.join(root, "toolchain", "modules"),
         builddir = path.absolute(config.builddir(), root),
         xlate = targetfile("xlate"),
         xlgen = targetfile("xlgen"),
@@ -54,7 +54,7 @@ function main()
         ld = path.join(installdir("ld64"), "bin", "ld"),
         ldid = path.join(installdir("ldid"), "bin", "ldid"),
         blocks = path.join(installdir("blocksruntime"), "src"),
-        dyld = path.join(os.getenv("HOME"), ".charon", "dyld", "6.0")
+        dyld = path.join(os.getenv("HOME"), ".revenant", "dyld", "6.0")
     }
     _g.env = env
     return env

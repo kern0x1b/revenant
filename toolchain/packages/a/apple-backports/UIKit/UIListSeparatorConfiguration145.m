@@ -1,15 +1,15 @@
 #import <UIKit/UIKit.h>
-#import "CharonLists.h"
+#import "RevenantLists.h"
 
-static UIColor *charon_separator_colour(void)
+static UIColor *revenant_separator_colour(void)
 {
-    return charon_semantic_color(CharonSemanticColorSeparator);
+    return revenant_semantic_color(RevenantSemanticColorSeparator);
 }
 
-static UIColor *charon_multiple_selection_separator_colour(void)
+static UIColor *revenant_multiple_selection_separator_colour(void)
 {
     return [UIColor colorWithDynamicProvider:^UIColor *(UITraitCollection *traits) {
-        return charon_separator_colour();
+        return revenant_separator_colour();
     }];
 }
 
@@ -39,8 +39,8 @@ static UIColor *charon_multiple_selection_separator_colour(void)
         _bottomVisibility = UIListSeparatorVisibilityAutomatic;
         _topInsets = UIListSeparatorAutomaticInsets;
         _bottomInsets = UIListSeparatorAutomaticInsets;
-        _color = charon_separator_colour();
-        _multipleSelectionColor = charon_multiple_selection_separator_colour();
+        _color = revenant_separator_colour();
+        _multipleSelectionColor = revenant_multiple_selection_separator_colour();
     }
     return self;
 }
@@ -67,8 +67,8 @@ static UIColor *charon_multiple_selection_separator_colour(void)
     copy.bottomSeparatorInsets = _bottomInsets;
     copy.color = _color;
     copy.multipleSelectionColor = _multipleSelectionColor;
-    if ([copy respondsToSelector:@selector(charon_takeVisualEffectFrom:)])
-        [copy charon_takeVisualEffectFrom:self];
+    if ([copy respondsToSelector:@selector(revenant_takeVisualEffectFrom:)])
+        [copy revenant_takeVisualEffectFrom:self];
     return copy;
 }
 
@@ -93,8 +93,8 @@ static UIColor *charon_multiple_selection_separator_colour(void)
         return NO;
     if (_multipleSelectionColor != that->_multipleSelectionColor && ![_multipleSelectionColor isEqual:that->_multipleSelectionColor])
         return NO;
-    if ([self respondsToSelector:@selector(charon_visualEffectIsEqualTo:)])
-        return [self charon_visualEffectIsEqualTo:that];
+    if ([self respondsToSelector:@selector(revenant_visualEffectIsEqualTo:)])
+        return [self revenant_visualEffectIsEqualTo:that];
     return YES;
 }
 
@@ -121,8 +121,8 @@ static UIColor *charon_multiple_selection_separator_colour(void)
                 forKey:@"insets"];
     [coder encodeObject:_color forKey:@"color"];
     [coder encodeObject:_multipleSelectionColor forKey:@"multiSelectColor"];
-    if ([self respondsToSelector:@selector(charon_encodeVisualEffectWithCoder:)])
-        [self charon_encodeVisualEffectWithCoder:coder];
+    if ([self respondsToSelector:@selector(revenant_encodeVisualEffectWithCoder:)])
+        [self revenant_encodeVisualEffectWithCoder:coder];
 }
 
 - (instancetype)initWithCoder:(NSCoder *)coder
@@ -142,8 +142,8 @@ static UIColor *charon_multiple_selection_separator_colour(void)
         UIColor *multiple = [coder decodeObjectOfClass:[UIColor class] forKey:@"multiSelectColor"];
         if (multiple)
             _multipleSelectionColor = multiple;
-        if ([self respondsToSelector:@selector(charon_decodeVisualEffectWithCoder:)])
-            [self charon_decodeVisualEffectWithCoder:coder];
+        if ([self respondsToSelector:@selector(revenant_decodeVisualEffectWithCoder:)])
+            [self revenant_decodeVisualEffectWithCoder:coder];
     }
     return self;
 }

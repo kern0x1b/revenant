@@ -140,7 +140,7 @@
 
 #pragma mark - UIAccessibilityReadingContent, and the delegates that describe a component in text
 
-@implementation NSObject (CharonIOS11AccessibilityContent)
+@implementation NSObject (RevenantIOS11AccessibilityContent)
 
 - (NSAttributedString *)accessibilityAttributedPageContent
 {
@@ -154,7 +154,7 @@
 
 @end
 
-@implementation UIScrollView (CharonIOS11AccessibilityContent)
+@implementation UIScrollView (RevenantIOS11AccessibilityContent)
 
 - (NSAttributedString *)accessibilityAttributedScrollStatusForScrollView:(UIScrollView *)scrollView
 {
@@ -172,7 +172,7 @@
 
 @end
 
-@implementation UIPickerView (CharonIOS11AccessibilityContent)
+@implementation UIPickerView (RevenantIOS11AccessibilityContent)
 
 - (NSAttributedString *)pickerView:(UIPickerView *)pickerView accessibilityAttributedLabelForComponent:(NSInteger)component
 {
@@ -188,28 +188,28 @@
 
 #pragma mark - UIPasteboard's item providers
 
-static char CharonItemProvidersKey;
-static char CharonItemProvidersExpiryKey;
+static char RevenantItemProvidersKey;
+static char RevenantItemProvidersExpiryKey;
 
 #pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
 
-@implementation UIPasteboard (CharonIOS11ItemProviders)
+@implementation UIPasteboard (RevenantIOS11ItemProviders)
 
 - (void)setItemProviders:(NSArray<NSItemProvider *> *)itemProviders
    localOnly:(BOOL)localOnly
  expirationDate:(NSDate *)expirationDate
 {
     (void)localOnly;
-    objc_setAssociatedObject(self, &CharonItemProvidersKey, [itemProviders copy], OBJC_ASSOCIATION_COPY_NONATOMIC);
-    objc_setAssociatedObject(self, &CharonItemProvidersExpiryKey, expirationDate, OBJC_ASSOCIATION_COPY_NONATOMIC);
+    objc_setAssociatedObject(self, &RevenantItemProvidersKey, [itemProviders copy], OBJC_ASSOCIATION_COPY_NONATOMIC);
+    objc_setAssociatedObject(self, &RevenantItemProvidersExpiryKey, expirationDate, OBJC_ASSOCIATION_COPY_NONATOMIC);
 }
 
 - (NSArray<NSItemProvider *> *)itemProviders
 {
-    NSArray *held = objc_getAssociatedObject(self, &CharonItemProvidersKey);
+    NSArray *held = objc_getAssociatedObject(self, &RevenantItemProvidersKey);
     if (!held)
         return nil;
-    NSDate *expiry = objc_getAssociatedObject(self, &CharonItemProvidersExpiryKey);
+    NSDate *expiry = objc_getAssociatedObject(self, &RevenantItemProvidersExpiryKey);
     if (expiry && [expiry timeIntervalSinceNow] <= 0)
         return nil;
     return held;
@@ -219,37 +219,37 @@ static char CharonItemProvidersExpiryKey;
 
 #pragma mark - UIBarItem's large content image
 
-static char CharonLargeContentImageKey;
-static char CharonLargeContentImageInsetsKey;
+static char RevenantLargeContentImageKey;
+static char RevenantLargeContentImageInsetsKey;
 
-@implementation UIBarItem (CharonIOS11LargeContentImage)
+@implementation UIBarItem (RevenantIOS11LargeContentImage)
 
 - (UIImage *)largeContentSizeImage
 {
-    return objc_getAssociatedObject(self, &CharonLargeContentImageKey);
+    return objc_getAssociatedObject(self, &RevenantLargeContentImageKey);
 }
 
 - (void)setLargeContentSizeImage:(UIImage *)largeContentSizeImage
 {
-    objc_setAssociatedObject(self, &CharonLargeContentImageKey, largeContentSizeImage, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, &RevenantLargeContentImageKey, largeContentSizeImage, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
 - (UIEdgeInsets)largeContentSizeImageInsets
 {
-    NSValue *held = objc_getAssociatedObject(self, &CharonLargeContentImageInsetsKey);
+    NSValue *held = objc_getAssociatedObject(self, &RevenantLargeContentImageInsetsKey);
     return held ? [held UIEdgeInsetsValue] : UIEdgeInsetsZero;
 }
 
 - (void)setLargeContentSizeImageInsets:(UIEdgeInsets)largeContentSizeImageInsets
 {
-    objc_setAssociatedObject(self, &CharonLargeContentImageInsetsKey, [NSValue valueWithUIEdgeInsets:largeContentSizeImageInsets], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, &RevenantLargeContentImageInsetsKey, [NSValue valueWithUIEdgeInsets:largeContentSizeImageInsets], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
 @end
 
 #pragma mark - Coordinated focus animations
 
-@implementation UIFocusAnimationCoordinator (CharonIOS11FocusAnimations)
+@implementation UIFocusAnimationCoordinator (RevenantIOS11FocusAnimations)
 
 - (void)addCoordinatedFocusingAnimations:(void (^)(void))animations completion:(void (^)(void))completion
 {

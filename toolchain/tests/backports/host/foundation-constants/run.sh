@@ -75,7 +75,7 @@ tail -1 "$work/none.txt"
 if [ "${1:-}" = "--mutation" ]; then
     echo "=== one mutant per constant: each must go red naming itself"
     failed=0
-    names=$(awk '/^ok /{print $2}' "$work/values.txt" | grep -v CharonProbe || true)
+    names=$(awk '/^ok /{print $2}' "$work/values.txt" | grep -v RevenantProbe || true)
     count=$(printf '%s\n' "$names" | grep -c . || true)
     for name in $names; do
         object=""
@@ -84,8 +84,8 @@ if [ "${1:-}" = "--mutation" ]; then
         done
         [ -n "$object" ] || { echo "RUN FAILED $name: no object defines it"; failed=1; continue; }
         mutant="$work/mutant-$name.m"
-        sed "s/ $name = @\"[^\"]*\"/ $name = @\"charon-mutant\"/" "$S/Foundation/$object.m" > "$mutant"
-        if ! grep -q "charon-mutant" "$mutant"; then
+        sed "s/ $name = @\"[^\"]*\"/ $name = @\"revenant-mutant\"/" "$S/Foundation/$object.m" > "$mutant"
+        if ! grep -q "revenant-mutant" "$mutant"; then
             echo "RUN FAILED $name: the mutation changed nothing in $object.m" >&2
             failed=1
             continue

@@ -1,10 +1,10 @@
-#import "CharonMetricKit.h"
-#import "CharonMetricValue.h"
+#import "RevenantMetricKit.h"
+#import "RevenantMetricValue.h"
 
 @implementation MXAppLaunchDiagnostic
 @dynamic callStackTree, launchDuration;
 
-CHARON_VALUE_PROPERTY(MXCallStackTree *, callStackTree)
-CHARON_VALUE_PROPERTY(NSMeasurement *, launchDuration)
+REVENANT_VALUE_PROPERTY(MXCallStackTree *, callStackTree)
+REVENANT_VALUE_PROPERTY(NSMeasurement *, launchDuration)
 
 @end

@@ -1,6 +1,6 @@
-#import "CharonMPSGraph.h"
+#import "RevenantMPSGraph.h"
 
-@implementation MPSGraph (CharonMPSGraphCumulative160)
+@implementation MPSGraph (RevenantMPSGraphCumulative160)
 
 #pragma mark - the sum
 
@@ -8,7 +8,7 @@
                                        axis:(NSInteger)axis
                                        name:(NSString *)name
 {
-    return [self charon_mps_scan:CharonMPSGraphOperationKindCumulativeSum
+    return [self revenant_mps_scan:RevenantMPSGraphOperationKindCumulativeSum
                              axis:axis
                            tensor:tensor
                       combination:@"sum"
@@ -23,7 +23,7 @@
                                     reverse:(BOOL)reverse
                                        name:(NSString *)name
 {
-    return [self charon_mps_scan:CharonMPSGraphOperationKindCumulativeSum
+    return [self revenant_mps_scan:RevenantMPSGraphOperationKindCumulativeSum
                              axis:axis
                            tensor:tensor
                       combination:@"sum"
@@ -36,7 +36,7 @@
                                  axisTensor:(MPSGraphTensor *)axisTensor
                                        name:(NSString *)name
 {
-    return [self charon_mps_scan:CharonMPSGraphOperationKindCumulativeSum
+    return [self revenant_mps_scan:RevenantMPSGraphOperationKindCumulativeSum
                        axisTensor:axisTensor
                            tensor:tensor
                       combination:@"sum"
@@ -51,7 +51,7 @@
                                     reverse:(BOOL)reverse
                                        name:(NSString *)name
 {
-    return [self charon_mps_scan:CharonMPSGraphOperationKindCumulativeSum
+    return [self revenant_mps_scan:RevenantMPSGraphOperationKindCumulativeSum
                        axisTensor:axisTensor
                            tensor:tensor
                       combination:@"sum"
@@ -66,7 +66,7 @@
                                            axis:(NSInteger)axis
                                            name:(NSString *)name
 {
-    return [self charon_mps_scan:CharonMPSGraphOperationKindCumulativeProduct
+    return [self revenant_mps_scan:RevenantMPSGraphOperationKindCumulativeProduct
                              axis:axis
                            tensor:tensor
                       combination:@"product"
@@ -81,7 +81,7 @@
                                         reverse:(BOOL)reverse
                                            name:(NSString *)name
 {
-    return [self charon_mps_scan:CharonMPSGraphOperationKindCumulativeProduct
+    return [self revenant_mps_scan:RevenantMPSGraphOperationKindCumulativeProduct
                              axis:axis
                            tensor:tensor
                       combination:@"product"
@@ -94,7 +94,7 @@
                                      axisTensor:(MPSGraphTensor *)axisTensor
                                            name:(NSString *)name
 {
-    return [self charon_mps_scan:CharonMPSGraphOperationKindCumulativeProduct
+    return [self revenant_mps_scan:RevenantMPSGraphOperationKindCumulativeProduct
                        axisTensor:axisTensor
                            tensor:tensor
                       combination:@"product"
@@ -109,7 +109,7 @@
                                         reverse:(BOOL)reverse
                                            name:(NSString *)name
 {
-    return [self charon_mps_scan:CharonMPSGraphOperationKindCumulativeProduct
+    return [self revenant_mps_scan:RevenantMPSGraphOperationKindCumulativeProduct
                        axisTensor:axisTensor
                            tensor:tensor
                       combination:@"product"
@@ -124,7 +124,7 @@
                                            axis:(NSInteger)axis
                                            name:(NSString *)name
 {
-    return [self charon_mps_scan:CharonMPSGraphOperationKindCumulativeMaximum
+    return [self revenant_mps_scan:RevenantMPSGraphOperationKindCumulativeMaximum
                              axis:axis
                            tensor:tensor
                       combination:@"maximum"
@@ -139,7 +139,7 @@
                                         reverse:(BOOL)reverse
                                            name:(NSString *)name
 {
-    return [self charon_mps_scan:CharonMPSGraphOperationKindCumulativeMaximum
+    return [self revenant_mps_scan:RevenantMPSGraphOperationKindCumulativeMaximum
                              axis:axis
                            tensor:tensor
                       combination:@"maximum"
@@ -152,7 +152,7 @@
                                      axisTensor:(MPSGraphTensor *)axisTensor
                                            name:(NSString *)name
 {
-    return [self charon_mps_scan:CharonMPSGraphOperationKindCumulativeMaximum
+    return [self revenant_mps_scan:RevenantMPSGraphOperationKindCumulativeMaximum
                        axisTensor:axisTensor
                            tensor:tensor
                       combination:@"maximum"
@@ -167,7 +167,7 @@
                                         reverse:(BOOL)reverse
                                            name:(NSString *)name
 {
-    return [self charon_mps_scan:CharonMPSGraphOperationKindCumulativeMaximum
+    return [self revenant_mps_scan:RevenantMPSGraphOperationKindCumulativeMaximum
                        axisTensor:axisTensor
                            tensor:tensor
                       combination:@"maximum"
@@ -182,7 +182,7 @@
                                            axis:(NSInteger)axis
                                            name:(NSString *)name
 {
-    return [self charon_mps_scan:CharonMPSGraphOperationKindCumulativeMinimum
+    return [self revenant_mps_scan:RevenantMPSGraphOperationKindCumulativeMinimum
                              axis:axis
                            tensor:tensor
                       combination:@"minimum"
@@ -197,7 +197,7 @@
                                         reverse:(BOOL)reverse
                                            name:(NSString *)name
 {
-    return [self charon_mps_scan:CharonMPSGraphOperationKindCumulativeMinimum
+    return [self revenant_mps_scan:RevenantMPSGraphOperationKindCumulativeMinimum
                              axis:axis
                            tensor:tensor
                       combination:@"minimum"
@@ -210,7 +210,7 @@
                                      axisTensor:(MPSGraphTensor *)axisTensor
                                            name:(NSString *)name
 {
-    return [self charon_mps_scan:CharonMPSGraphOperationKindCumulativeMinimum
+    return [self revenant_mps_scan:RevenantMPSGraphOperationKindCumulativeMinimum
                        axisTensor:axisTensor
                            tensor:tensor
                       combination:@"minimum"
@@ -225,7 +225,7 @@
                                         reverse:(BOOL)reverse
                                            name:(NSString *)name
 {
-    return [self charon_mps_scan:CharonMPSGraphOperationKindCumulativeMinimum
+    return [self revenant_mps_scan:RevenantMPSGraphOperationKindCumulativeMinimum
                        axisTensor:axisTensor
                            tensor:tensor
                       combination:@"minimum"

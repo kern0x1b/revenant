@@ -10,7 +10,7 @@
 #include "foundation/jit_work_policy.hpp"
 #include <algorithm>
 
-namespace shade::runtime_detail {
+namespace emulator::runtime_detail {
 
 std::filesystem::path nearest_existing_filesystem_path(
     const std::filesystem::path& path)

@@ -1,6 +1,6 @@
 #import <Foundation/Foundation.h>
 #import <AVFoundation/AVFoundation.h>
-#import "CharonAVFoundationProtocols.h"
+#import "RevenantAVFoundationProtocols.h"
 #import <objc/runtime.h>
 #import <objc/message.h>
 #include <dlfcn.h>
@@ -8,7 +8,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define PORT_PREFIX "charon_host_"
+#define PORT_PREFIX "revenant_host_"
 
 static void probe_class(const char *name)
 {
@@ -86,10 +86,10 @@ static void answer_of(id object, SEL selector, char *out, size_t room)
     }
 }
 
-@interface CharonControlsProbeDelegate : NSObject <AVCaptureSessionControlsDelegate>
+@interface RevenantControlsProbeDelegate : NSObject <AVCaptureSessionControlsDelegate>
 @end
 
-@implementation CharonControlsProbeDelegate
+@implementation RevenantControlsProbeDelegate
 - (void)sessionControlsDidBecomeActive:(AVCaptureSession *)session {}
 - (void)sessionControlsDidBecomeInactive:(AVCaptureSession *)session {}
 - (void)sessionControlsWillEnterFullscreenAppearance:(AVCaptureSession *)session {}
@@ -174,8 +174,8 @@ int main(int argc, char **argv)
                class_getInstanceMethod(hostControl, @selector(isEnabled)) ? "yes" : "no");
         Class portControl = objc_getClass(PORT_PREFIX "AVCaptureControl");
         Class portSession = objc_getClass(PORT_PREFIX "AVCaptureSession");
-        printf("CONTROL\tcharon_host_AVCaptureControl\t%s\n", portControl ? "HAS" : "ABSENT");
-        printf("CONTROL\tcharon_host_AVCaptureSession\t%s\n", portSession ? "HAS" : "ABSENT");
+        printf("CONTROL\trevenant_host_AVCaptureControl\t%s\n", portControl ? "HAS" : "ABSENT");
+        printf("CONTROL\trevenant_host_AVCaptureSession\t%s\n", portSession ? "HAS" : "ABSENT");
         if (portControl == NULL || portSession == NULL) {
             fprintf(stderr, "FAIL: the port's own objects are not in this binary, so every port row below "
                             "would be read off a class that is not there\n");
@@ -191,7 +191,7 @@ int main(int argc, char **argv)
             return 1;
         }
         printf("CONTROL\tAVCaptureSessionControlsDelegate conformed\t%s\n",
-               [[CharonControlsProbeDelegate new] conformsToProtocol:
+               [[RevenantControlsProbeDelegate new] conformsToProtocol:
                    (Protocol *)objc_getProtocol("AVCaptureSessionControlsDelegate")] ? "yes" : "no");
 
         FILE *list = fopen(argv[1], "r");

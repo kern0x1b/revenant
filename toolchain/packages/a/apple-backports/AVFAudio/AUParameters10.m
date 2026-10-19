@@ -1,11 +1,11 @@
-#import "CharonAUAudioUnit.h"
+#import "RevenantAUAudioUnit.h"
 
-@implementation AUParameterNode (Charon10)
+@implementation AUParameterNode (Revenant10)
 
 - (AUParameterObserverToken)tokenByAddingParameterAutomationObserver:(AUParameterAutomationObserver)observer
 {
-    [self charon_addAutomationObserver:observer];
-    for (NSValue *held in [self charon_observerTokens]) {
+    [self revenant_addAutomationObserver:observer];
+    for (NSValue *held in [self revenant_observerTokens]) {
         if (held.pointerValue == (__bridge const void *)observer) {
             return (AUParameterObserverToken)held.pointerValue;
         }
@@ -15,11 +15,11 @@
 
 @end
 
-@implementation AUParameter (Charon10)
+@implementation AUParameter (Revenant10)
 
 - (void)setValue:(AUValue)value originator:(AUParameterObserverToken)originator atHostTime:(uint64_t)hostTime eventType:(AUParameterAutomationEventType)eventType
 {
-    [self charon_apply:value originator:originator atHostTime:hostTime eventType:eventType automate:hostTime != 0];
+    [self revenant_apply:value originator:originator atHostTime:hostTime eventType:eventType automate:hostTime != 0];
 }
 
 @end

@@ -2,8 +2,8 @@ import("byteorder", {rootdir = path.join(os.scriptdir(), "..", "..", "modules")}
 
 function main(directory, architecture)
     assert(directory, "usage: fleet-inventory.lua <directory> [architecture]")
-    local objc = import("apple.objc", {rootdir = path.join(os.getenv("CHARON_ROOT"), "modules"), anonymous = true})
-    local macho = import("apple.macho", {rootdir = path.join(os.getenv("CHARON_ROOT"), "modules"), anonymous = true})
+    local objc = import("apple.objc", {rootdir = path.join(os.getenv("REVENANT_ROOT"), "modules"), anonymous = true})
+    local macho = import("apple.macho", {rootdir = path.join(os.getenv("REVENANT_ROOT"), "modules"), anonymous = true})
     local arch = architecture or "armv7"
     local function joined(set)
         local keys = table.keys(set or {})

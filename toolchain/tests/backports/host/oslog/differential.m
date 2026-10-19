@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include "battery.h"
 
-char *charon_os_log_format(const char *format, va_list arguments, int error);
+char *revenant_os_log_format(const char *format, va_list arguments, int error);
 
 static FILE *ours_file;
 
@@ -13,7 +13,7 @@ static void ours(int index, const char *format, ...)
 {
     va_list arguments;
     va_start(arguments, format);
-    char *text = charon_os_log_format(format, arguments, 0);
+    char *text = revenant_os_log_format(format, arguments, 0);
     va_end(arguments);
     fprintf(ours_file, "%d\x1f%s%c", index, text, 0);
     free(text);

@@ -1,6 +1,6 @@
 #import <UIKit/UIKit.h>
 
-static CGRect charon_union_of_items(NSArray *items)
+static CGRect revenant_union_of_items(NSArray *items)
 {
     CGRect united = CGRectNull;
     for (id<UIDynamicItem> item in items) {
@@ -25,7 +25,7 @@ static CGRect charon_union_of_items(NSArray *items)
     _itemsToOffsets = [NSMapTable mapTableWithKeyOptions:NSPointerFunctionsStrongMemory valueOptions:NSPointerFunctionsStrongMemory];
     if (items.count == 0)
         return self;
-    CGRect united = charon_union_of_items(items);
+    CGRect united = revenant_union_of_items(items);
     _center = CGPointMake(united.origin.x + united.size.width * 0.5, united.origin.y + united.size.height * 0.5);
     for (id<UIDynamicItem> item in items) {
         if ([(id)item isKindOfClass:[UIDynamicItemGroup class]])
@@ -44,7 +44,7 @@ static CGRect charon_union_of_items(NSArray *items)
 
 - (CGRect)bounds
 {
-    CGRect united = charon_union_of_items(self.items);
+    CGRect united = revenant_union_of_items(self.items);
     return CGRectMake(0, 0, united.size.width, united.size.height);
 }
 

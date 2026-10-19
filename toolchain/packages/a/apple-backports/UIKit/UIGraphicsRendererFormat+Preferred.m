@@ -1,7 +1,7 @@
 #import <float.h>
-#import "CharonGraphicsRenderer.h"
+#import "RevenantGraphicsRenderer.h"
 
-@implementation UIGraphicsRendererFormat (CharonPreferred)
+@implementation UIGraphicsRendererFormat (RevenantPreferred)
 
 + (instancetype)preferredFormat
 {
@@ -10,7 +10,7 @@
 
 @end
 
-@implementation UIGraphicsImageRendererFormat (CharonPreferred)
+@implementation UIGraphicsImageRendererFormat (RevenantPreferred)
 
 + (instancetype)preferredFormat
 {

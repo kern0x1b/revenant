@@ -1,38 +1,38 @@
 #import <UIKit/UIKit.h>
 #import <objc/runtime.h>
 #import <stdlib.h>
-#import "CharonTraitStyle.h"
+#import "RevenantTraitStyle.h"
 
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 
-static NSString *const CharonIdiomKey = @"UITraitCollectionBuiltinTrait-_UITraitNameUserInterfaceIdiom";
-static NSString *const CharonScaleKey = @"UITraitCollectionBuiltinTrait-_UITraitNameDisplayScale";
-static NSString *const CharonHorizontalKey = @"UITraitCollectionBuiltinTrait-_UITraitNameHorizontalSizeClass";
-static NSString *const CharonVerticalKey = @"UITraitCollectionBuiltinTrait-_UITraitNameVerticalSizeClass";
-static NSString *const CharonStyleKey = @"UITraitCollectionBuiltinTrait-_UITraitNameUserInterfaceStyle";
+static NSString *const RevenantIdiomKey = @"UITraitCollectionBuiltinTrait-_UITraitNameUserInterfaceIdiom";
+static NSString *const RevenantScaleKey = @"UITraitCollectionBuiltinTrait-_UITraitNameDisplayScale";
+static NSString *const RevenantHorizontalKey = @"UITraitCollectionBuiltinTrait-_UITraitNameHorizontalSizeClass";
+static NSString *const RevenantVerticalKey = @"UITraitCollectionBuiltinTrait-_UITraitNameVerticalSizeClass";
+static NSString *const RevenantStyleKey = @"UITraitCollectionBuiltinTrait-_UITraitNameUserInterfaceStyle";
 
-static BOOL charon_orientation_forced;
-static UIInterfaceOrientation charon_forced_orientation;
+static BOOL revenant_orientation_forced;
+static UIInterfaceOrientation revenant_forced_orientation;
 
-static UITraitCollection *charon_make(Class cls, UIUserInterfaceIdiom idiom, CGFloat scale, UIUserInterfaceSizeClass horizontal, UIUserInterfaceSizeClass vertical);
+static UITraitCollection *revenant_make(Class cls, UIUserInterfaceIdiom idiom, CGFloat scale, UIUserInterfaceSizeClass horizontal, UIUserInterfaceSizeClass vertical);
 
-static UIInterfaceOrientation charon_interface_orientation(void)
+static UIInterfaceOrientation revenant_interface_orientation(void)
 {
-    if (charon_orientation_forced)
-        return charon_forced_orientation;
+    if (revenant_orientation_forced)
+        return revenant_forced_orientation;
     UIApplication *application = [UIApplication sharedApplication];
     UIInterfaceOrientation orientation = application ? application.statusBarOrientation : UIInterfaceOrientationPortrait;
     return orientation ? orientation : UIInterfaceOrientationPortrait;
 }
 
-static UIUserInterfaceSizeClass charon_horizontal_class(UIUserInterfaceIdiom device, CGFloat width)
+static UIUserInterfaceSizeClass revenant_horizontal_class(UIUserInterfaceIdiom device, CGFloat width)
 {
     if (device != UIUserInterfaceIdiomPhone && device != UIUserInterfaceIdiomPad)
         return UIUserInterfaceSizeClassUnspecified;
     return width > 667 ? UIUserInterfaceSizeClassRegular : UIUserInterfaceSizeClassCompact;
 }
 
-static UIUserInterfaceSizeClass charon_vertical_class(UIUserInterfaceIdiom device, CGFloat height)
+static UIUserInterfaceSizeClass revenant_vertical_class(UIUserInterfaceIdiom device, CGFloat height)
 {
     if (device == UIUserInterfaceIdiomPad)
         return UIUserInterfaceSizeClassRegular;
@@ -41,30 +41,30 @@ static UIUserInterfaceSizeClass charon_vertical_class(UIUserInterfaceIdiom devic
     return height >= 480 ? UIUserInterfaceSizeClassRegular : UIUserInterfaceSizeClassCompact;
 }
 
-static UITraitCollection *charon_trait_collection_for(UIUserInterfaceIdiom screenIdiom, UIUserInterfaceIdiom device, CGFloat scale, CGSize bounds)
+static UITraitCollection *revenant_trait_collection_for(UIUserInterfaceIdiom screenIdiom, UIUserInterfaceIdiom device, CGFloat scale, CGSize bounds)
 {
-    UITraitCollection *collection = charon_make([UITraitCollection class], screenIdiom, scale, charon_horizontal_class(device, bounds.width), charon_vertical_class(device, bounds.height));
-    charon_set_trait_style(collection, UIUserInterfaceStyleLight);
-    charon_apply_screen_trait_extras(collection);
-    charon_set_screen_trait_force_touch(collection);
+    UITraitCollection *collection = revenant_make([UITraitCollection class], screenIdiom, scale, revenant_horizontal_class(device, bounds.width), revenant_vertical_class(device, bounds.height));
+    revenant_set_trait_style(collection, UIUserInterfaceStyleLight);
+    revenant_apply_screen_trait_extras(collection);
+    revenant_set_screen_trait_force_touch(collection);
     return collection;
 }
 
-static CGSize charon_bounds_for_orientation(UIScreen *screen, UIInterfaceOrientation orientation)
+static CGSize revenant_bounds_for_orientation(UIScreen *screen, UIInterfaceOrientation orientation)
 {
     CGSize natural = screen.bounds.size;
     return UIInterfaceOrientationIsLandscape(orientation) ? CGSizeMake(natural.height, natural.width) : natural;
 }
 
-static UITraitCollection *charon_screen_traits(UIScreen *screen)
+static UITraitCollection *revenant_screen_traits(UIScreen *screen)
 {
     UIScreen *main = [UIScreen mainScreen];
     if (!screen)
         screen = main;
-    UIInterfaceOrientation orientation = charon_interface_orientation();
+    UIInterfaceOrientation orientation = revenant_interface_orientation();
     UIUserInterfaceIdiom device = [UIDevice currentDevice].userInterfaceIdiom;
     if (screen != main)
-        return charon_trait_collection_for(UIUserInterfaceIdiomUnspecified, device, screen.scale, screen.bounds.size);
+        return revenant_trait_collection_for(UIUserInterfaceIdiomUnspecified, device, screen.scale, screen.bounds.size);
     static UITraitCollection *cached[2];
     static CGFloat cachedScale;
     static CGSize cachedBounds;
@@ -80,44 +80,44 @@ static UITraitCollection *charon_screen_traits(UIScreen *screen)
         cachedDevice = device;
     }
     if (!cached[landscape])
-        cached[landscape] = charon_trait_collection_for(device, device, scale, charon_bounds_for_orientation(screen, orientation));
+        cached[landscape] = revenant_trait_collection_for(device, device, scale, revenant_bounds_for_orientation(screen, orientation));
     return cached[landscape];
 }
 
-static void charon_collect_views(UIView *view, NSMutableOrderedSet *found)
+static void revenant_collect_views(UIView *view, NSMutableOrderedSet *found)
 {
     UIResponder *next = view.nextResponder;
     if ([next isKindOfClass:[UIViewController class]] && ((UIViewController *)next).view == view)
         [found addObject:next];
     [found addObject:view];
     for (UIView *subview in view.subviews)
-        charon_collect_views(subview, found);
+        revenant_collect_views(subview, found);
 }
 
-static void charon_collect_controllers(UIViewController *controller, NSMutableOrderedSet *found)
+static void revenant_collect_controllers(UIViewController *controller, NSMutableOrderedSet *found)
 {
     if (!controller || [found containsObject:controller])
         return;
     [found addObject:controller];
     if (controller.isViewLoaded)
-        charon_collect_views(controller.view, found);
+        revenant_collect_views(controller.view, found);
     for (UIViewController *child in controller.childViewControllers)
-        charon_collect_controllers(child, found);
+        revenant_collect_controllers(child, found);
     UIViewController *presented = controller.presentedViewController;
     if (presented && presented.presentingViewController == controller)
-        charon_collect_controllers(presented, found);
+        revenant_collect_controllers(presented, found);
 }
 
-static void charon_deliver_trait_changes(NSArray *environments, void (^change)(void))
+static void revenant_deliver_trait_changes(NSArray *environments, void (^change)(void))
 {
     NSMutableOrderedSet *found = [NSMutableOrderedSet orderedSet];
     for (id environment in environments) {
         if ([environment isKindOfClass:[UIViewController class]]) {
-            charon_collect_controllers(environment, found);
+            revenant_collect_controllers(environment, found);
         } else if ([environment isKindOfClass:[UIView class]]) {
-            charon_collect_views(environment, found);
+            revenant_collect_views(environment, found);
             if ([environment isKindOfClass:[UIWindow class]])
-                charon_collect_controllers([(UIWindow *)environment rootViewController], found);
+                revenant_collect_controllers([(UIWindow *)environment rootViewController], found);
         } else {
             [found addObject:environment];
         }
@@ -126,7 +126,7 @@ static void charon_deliver_trait_changes(NSArray *environments, void (^change)(v
     for (id<UITraitEnvironment> environment in found)
         [previous addObject:environment.traitCollection];
     change();
-    charon_call_trait_change_observers([found array], previous);
+    revenant_call_trait_change_observers([found array], previous);
     NSUInteger index = 0;
     for (id<UITraitEnvironment> environment in found) {
         UITraitCollection *before = [previous objectAtIndex:index++];
@@ -135,7 +135,7 @@ static void charon_deliver_trait_changes(NSArray *environments, void (^change)(v
     }
 }
 
-static void charon_orientation_changed(NSNotification *notification)
+static void revenant_orientation_changed(NSNotification *notification)
 {
     NSNumber *old = [notification.userInfo objectForKey:UIApplicationStatusBarOrientationUserInfoKey];
     UIApplication *application = notification.object;
@@ -143,15 +143,15 @@ static void charon_orientation_changed(NSNotification *notification)
         return;
     NSMutableArray *environments = [NSMutableArray arrayWithObject:[UIScreen mainScreen]];
     [environments addObjectsFromArray:application.windows];
-    charon_orientation_forced = YES;
-    charon_forced_orientation = (UIInterfaceOrientation)old.integerValue;
-    charon_deliver_trait_changes(environments, ^{
-        charon_orientation_forced = NO;
+    revenant_orientation_forced = YES;
+    revenant_forced_orientation = (UIInterfaceOrientation)old.integerValue;
+    revenant_deliver_trait_changes(environments, ^{
+        revenant_orientation_forced = NO;
     });
-    charon_orientation_forced = NO;
+    revenant_orientation_forced = NO;
 }
 
-static NSString *charon_idiom_name(UIUserInterfaceIdiom idiom)
+static NSString *revenant_idiom_name(UIUserInterfaceIdiom idiom)
 {
     switch (idiom) {
     case UIUserInterfaceIdiomPhone:
@@ -163,7 +163,7 @@ static NSString *charon_idiom_name(UIUserInterfaceIdiom idiom)
     }
 }
 
-static NSString *charon_size_class_name(UIUserInterfaceSizeClass sizeClass)
+static NSString *revenant_size_class_name(UIUserInterfaceSizeClass sizeClass)
 {
     switch (sizeClass) {
     case UIUserInterfaceSizeClassCompact:
@@ -187,23 +187,23 @@ static NSString *charon_size_class_name(UIUserInterfaceSizeClass sizeClass)
     if (objc_getClass("UITraitCollection") != self)
         return;
     [[NSNotificationCenter defaultCenter] addObserverForName:UIApplicationDidChangeStatusBarOrientationNotification object:nil queue:nil usingBlock:^(NSNotification *notification) {
-        charon_orientation_changed(notification);
+        revenant_orientation_changed(notification);
     }];
 }
 
-+ (UITraitCollection *)charon_traitCollectionForScreen:(UIScreen *)screen
++ (UITraitCollection *)revenant_traitCollectionForScreen:(UIScreen *)screen
 {
-    return charon_screen_traits(screen);
+    return revenant_screen_traits(screen);
 }
 
-+ (UITraitCollection *)charon_traitCollectionWithScreenIdiom:(UIUserInterfaceIdiom)screenIdiom deviceIdiom:(UIUserInterfaceIdiom)deviceIdiom scale:(CGFloat)scale bounds:(CGSize)bounds
++ (UITraitCollection *)revenant_traitCollectionWithScreenIdiom:(UIUserInterfaceIdiom)screenIdiom deviceIdiom:(UIUserInterfaceIdiom)deviceIdiom scale:(CGFloat)scale bounds:(CGSize)bounds
 {
-    return charon_trait_collection_for(screenIdiom, deviceIdiom, scale, bounds);
+    return revenant_trait_collection_for(screenIdiom, deviceIdiom, scale, bounds);
 }
 
-+ (void)charon_deliverChangesInEnvironments:(NSArray *)environments change:(void (^)(void))change
++ (void)revenant_deliverChangesInEnvironments:(NSArray *)environments change:(void (^)(void))change
 {
-    charon_deliver_trait_changes(environments, change);
+    revenant_deliver_trait_changes(environments, change);
 }
 
 @dynamic forceTouchCapability;
@@ -239,36 +239,36 @@ static NSString *charon_size_class_name(UIUserInterfaceSizeClass sizeClass)
             horizontal = collection->_horizontalSizeClass;
         if (collection->_verticalSizeClass != UIUserInterfaceSizeClassUnspecified)
             vertical = collection->_verticalSizeClass;
-        if (charon_trait_style(collection) != UIUserInterfaceStyleUnspecified)
-            style = charon_trait_style(collection);
+        if (revenant_trait_style(collection) != UIUserInterfaceStyleUnspecified)
+            style = revenant_trait_style(collection);
     }
-    UITraitCollection *merged = charon_make(self, idiom, scale, horizontal, vertical);
-    charon_set_trait_style(merged, style);
-    charon_apply_trait_extras(merged, charon_merge_trait_extras(traitCollections));
+    UITraitCollection *merged = revenant_make(self, idiom, scale, horizontal, vertical);
+    revenant_set_trait_style(merged, style);
+    revenant_apply_trait_extras(merged, revenant_merge_trait_extras(traitCollections));
     return merged;
 }
 
 + (UITraitCollection *)traitCollectionWithUserInterfaceIdiom:(UIUserInterfaceIdiom)idiom
 {
-    return charon_make(self, idiom, 0, UIUserInterfaceSizeClassUnspecified, UIUserInterfaceSizeClassUnspecified);
+    return revenant_make(self, idiom, 0, UIUserInterfaceSizeClassUnspecified, UIUserInterfaceSizeClassUnspecified);
 }
 
 + (UITraitCollection *)traitCollectionWithDisplayScale:(CGFloat)scale
 {
-    return charon_make(self, UIUserInterfaceIdiomUnspecified, scale, UIUserInterfaceSizeClassUnspecified, UIUserInterfaceSizeClassUnspecified);
+    return revenant_make(self, UIUserInterfaceIdiomUnspecified, scale, UIUserInterfaceSizeClassUnspecified, UIUserInterfaceSizeClassUnspecified);
 }
 
 + (UITraitCollection *)traitCollectionWithHorizontalSizeClass:(UIUserInterfaceSizeClass)horizontalSizeClass
 {
-    return charon_make(self, UIUserInterfaceIdiomUnspecified, 0, horizontalSizeClass, UIUserInterfaceSizeClassUnspecified);
+    return revenant_make(self, UIUserInterfaceIdiomUnspecified, 0, horizontalSizeClass, UIUserInterfaceSizeClassUnspecified);
 }
 
 + (UITraitCollection *)traitCollectionWithVerticalSizeClass:(UIUserInterfaceSizeClass)verticalSizeClass
 {
-    return charon_make(self, UIUserInterfaceIdiomUnspecified, 0, UIUserInterfaceSizeClassUnspecified, verticalSizeClass);
+    return revenant_make(self, UIUserInterfaceIdiomUnspecified, 0, UIUserInterfaceSizeClassUnspecified, verticalSizeClass);
 }
 
-static UITraitCollection *charon_make(Class cls, UIUserInterfaceIdiom idiom, CGFloat scale, UIUserInterfaceSizeClass horizontal, UIUserInterfaceSizeClass vertical)
+static UITraitCollection *revenant_make(Class cls, UIUserInterfaceIdiom idiom, CGFloat scale, UIUserInterfaceSizeClass horizontal, UIUserInterfaceSizeClass vertical)
 {
     UITraitCollection *collection = [[cls alloc] init];
     collection->_userInterfaceIdiom = idiom;
@@ -288,12 +288,12 @@ static UITraitCollection *charon_make(Class cls, UIUserInterfaceIdiom idiom, CGF
 - (instancetype)initWithCoder:(NSCoder *)coder
 {
     if ((self = [super init])) {
-        _userInterfaceIdiom = [coder containsValueForKey:CharonIdiomKey] ? (UIUserInterfaceIdiom)[coder decodeIntegerForKey:CharonIdiomKey] : UIUserInterfaceIdiomUnspecified;
-        _displayScale = (CGFloat)[coder decodeDoubleForKey:CharonScaleKey];
-        _horizontalSizeClass = (UIUserInterfaceSizeClass)[coder decodeIntegerForKey:CharonHorizontalKey];
-        _verticalSizeClass = (UIUserInterfaceSizeClass)[coder decodeIntegerForKey:CharonVerticalKey];
-        charon_set_trait_style(self, (UIUserInterfaceStyle)[coder decodeIntegerForKey:CharonStyleKey]);
-        charon_decode_trait_extras(self, coder);
+        _userInterfaceIdiom = [coder containsValueForKey:RevenantIdiomKey] ? (UIUserInterfaceIdiom)[coder decodeIntegerForKey:RevenantIdiomKey] : UIUserInterfaceIdiomUnspecified;
+        _displayScale = (CGFloat)[coder decodeDoubleForKey:RevenantScaleKey];
+        _horizontalSizeClass = (UIUserInterfaceSizeClass)[coder decodeIntegerForKey:RevenantHorizontalKey];
+        _verticalSizeClass = (UIUserInterfaceSizeClass)[coder decodeIntegerForKey:RevenantVerticalKey];
+        revenant_set_trait_style(self, (UIUserInterfaceStyle)[coder decodeIntegerForKey:RevenantStyleKey]);
+        revenant_decode_trait_extras(self, coder);
     }
     return self;
 }
@@ -301,16 +301,16 @@ static UITraitCollection *charon_make(Class cls, UIUserInterfaceIdiom idiom, CGF
 - (void)encodeWithCoder:(NSCoder *)coder
 {
     if (_userInterfaceIdiom != UIUserInterfaceIdiomUnspecified)
-        [coder encodeInteger:_userInterfaceIdiom forKey:CharonIdiomKey];
+        [coder encodeInteger:_userInterfaceIdiom forKey:RevenantIdiomKey];
     if (_displayScale != 0)
-        [coder encodeDouble:_displayScale forKey:CharonScaleKey];
+        [coder encodeDouble:_displayScale forKey:RevenantScaleKey];
     if (_horizontalSizeClass != UIUserInterfaceSizeClassUnspecified)
-        [coder encodeInteger:_horizontalSizeClass forKey:CharonHorizontalKey];
+        [coder encodeInteger:_horizontalSizeClass forKey:RevenantHorizontalKey];
     if (_verticalSizeClass != UIUserInterfaceSizeClassUnspecified)
-        [coder encodeInteger:_verticalSizeClass forKey:CharonVerticalKey];
-    if (charon_trait_style(self) != UIUserInterfaceStyleUnspecified)
-        [coder encodeInteger:charon_trait_style(self) forKey:CharonStyleKey];
-    charon_encode_trait_extras(self, coder);
+        [coder encodeInteger:_verticalSizeClass forKey:RevenantVerticalKey];
+    if (revenant_trait_style(self) != UIUserInterfaceStyleUnspecified)
+        [coder encodeInteger:revenant_trait_style(self) forKey:RevenantStyleKey];
+    revenant_encode_trait_extras(self, coder);
 }
 
 - (id)copyWithZone:(NSZone *)zone
@@ -338,22 +338,22 @@ static UITraitCollection *charon_make(Class cls, UIUserInterfaceIdiom idiom, CGF
     return _verticalSizeClass;
 }
 
-- (void)charon_setUserInterfaceIdiom:(UIUserInterfaceIdiom)idiom
+- (void)revenant_setUserInterfaceIdiom:(UIUserInterfaceIdiom)idiom
 {
     _userInterfaceIdiom = idiom;
 }
 
-- (void)charon_setDisplayScale:(CGFloat)scale
+- (void)revenant_setDisplayScale:(CGFloat)scale
 {
     _displayScale = scale;
 }
 
-- (void)charon_setHorizontalSizeClass:(UIUserInterfaceSizeClass)sizeClass
+- (void)revenant_setHorizontalSizeClass:(UIUserInterfaceSizeClass)sizeClass
 {
     _horizontalSizeClass = sizeClass;
 }
 
-- (void)charon_setVerticalSizeClass:(UIUserInterfaceSizeClass)sizeClass
+- (void)revenant_setVerticalSizeClass:(UIUserInterfaceSizeClass)sizeClass
 {
     _verticalSizeClass = sizeClass;
 }
@@ -368,9 +368,9 @@ static UITraitCollection *charon_make(Class cls, UIUserInterfaceIdiom idiom, CGF
         return NO;
     if (trait->_horizontalSizeClass != UIUserInterfaceSizeClassUnspecified && trait->_horizontalSizeClass != _horizontalSizeClass)
         return NO;
-    if (charon_trait_style(trait) != UIUserInterfaceStyleUnspecified && charon_trait_style(trait) != charon_trait_style(self))
+    if (revenant_trait_style(trait) != UIUserInterfaceStyleUnspecified && revenant_trait_style(trait) != revenant_trait_style(self))
         return NO;
-    if (!charon_trait_extras_contained(self, trait))
+    if (!revenant_trait_extras_contained(self, trait))
         return NO;
     return trait->_verticalSizeClass == UIUserInterfaceSizeClassUnspecified || trait->_verticalSizeClass == _verticalSizeClass;
 }
@@ -384,30 +384,30 @@ static UITraitCollection *charon_make(Class cls, UIUserInterfaceIdiom idiom, CGF
     UITraitCollection *other = object;
     return other->_userInterfaceIdiom == _userInterfaceIdiom && other->_displayScale == _displayScale &&
            other->_horizontalSizeClass == _horizontalSizeClass && other->_verticalSizeClass == _verticalSizeClass &&
-           charon_trait_style(other) == charon_trait_style(self) && charon_trait_extras_equal(self, other);
+           revenant_trait_style(other) == revenant_trait_style(self) && revenant_trait_extras_equal(self, other);
 }
 
 - (NSUInteger)hash
 {
     NSUInteger scale = (NSUInteger)(_displayScale * 100);
     return ((NSUInteger)(_userInterfaceIdiom + 1) << 24) ^ (scale << 8) ^ ((NSUInteger)_horizontalSizeClass << 4) ^ (NSUInteger)_verticalSizeClass ^
-           ((NSUInteger)charon_trait_style(self) << 20) ^ charon_trait_extras_hash(self);
+           ((NSUInteger)revenant_trait_style(self) << 20) ^ revenant_trait_extras_hash(self);
 }
 
 - (NSString *)description
 {
     NSMutableArray *traits = [NSMutableArray array];
     if (_userInterfaceIdiom != UIUserInterfaceIdiomUnspecified)
-        [traits addObject:[@"UserInterfaceIdiom = " stringByAppendingString:charon_idiom_name(_userInterfaceIdiom)]];
+        [traits addObject:[@"UserInterfaceIdiom = " stringByAppendingString:revenant_idiom_name(_userInterfaceIdiom)]];
     if (_displayScale != 0)
         [traits addObject:[NSString stringWithFormat:@"DisplayScale = %g", (double)_displayScale]];
     if (_horizontalSizeClass != UIUserInterfaceSizeClassUnspecified)
-        [traits addObject:[@"HorizontalSizeClass = " stringByAppendingString:charon_size_class_name(_horizontalSizeClass)]];
+        [traits addObject:[@"HorizontalSizeClass = " stringByAppendingString:revenant_size_class_name(_horizontalSizeClass)]];
     if (_verticalSizeClass != UIUserInterfaceSizeClassUnspecified)
-        [traits addObject:[@"VerticalSizeClass = " stringByAppendingString:charon_size_class_name(_verticalSizeClass)]];
-    if (charon_trait_style(self) != UIUserInterfaceStyleUnspecified)
-        [traits addObject:[@"UserInterfaceStyle = " stringByAppendingString:charon_trait_style(self) == UIUserInterfaceStyleDark ? @"Dark" : @"Light"]];
-    charon_add_trait_extras_description(self, traits);
+        [traits addObject:[@"VerticalSizeClass = " stringByAppendingString:revenant_size_class_name(_verticalSizeClass)]];
+    if (revenant_trait_style(self) != UIUserInterfaceStyleUnspecified)
+        [traits addObject:[@"UserInterfaceStyle = " stringByAppendingString:revenant_trait_style(self) == UIUserInterfaceStyleDark ? @"Dark" : @"Light"]];
+    revenant_add_trait_extras_description(self, traits);
     return [NSString stringWithFormat:@"<%@: %p; %@>", [self class], self, [traits componentsJoinedByString:@", "]];
 }
 

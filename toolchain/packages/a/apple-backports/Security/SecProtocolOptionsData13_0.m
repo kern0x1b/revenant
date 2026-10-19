@@ -4,20 +4,20 @@
 #import <CoreFoundation/CoreFoundation.h>
 #import <dispatch/dispatch.h>
 
-@interface CharonSecProtocolData : NSObject <OS_sec_protocol_options>
+@interface RevenantSecProtocolData : NSObject <OS_sec_protocol_options>
 {
     __strong dispatch_data_t _dhParams;
     NSMutableArray *_psks;
     NSMutableArray *_pskIdentities;
 }
-- (void)charonSetDHParams:(dispatch_data_t)params;
-- (dispatch_data_t)charonDHParams;
-- (void)charonAddPSK:(dispatch_data_t)psk identity:(dispatch_data_t)identity;
-- (size_t)charonPSKCount;
-- (BOOL)charonPSKAt:(size_t)index psk:(dispatch_data_t *)psk identity:(dispatch_data_t *)identity;
+- (void)revenantSetDHParams:(dispatch_data_t)params;
+- (dispatch_data_t)revenantDHParams;
+- (void)revenantAddPSK:(dispatch_data_t)psk identity:(dispatch_data_t)identity;
+- (size_t)revenantPSKCount;
+- (BOOL)revenantPSKAt:(size_t)index psk:(dispatch_data_t *)psk identity:(dispatch_data_t *)identity;
 @end
 
-@implementation CharonSecProtocolData
+@implementation RevenantSecProtocolData
 - (instancetype)init
 {
     self = [super init];
@@ -27,17 +27,17 @@
     }
     return self;
 }
-- (void)charonSetDHParams:(dispatch_data_t)params { _dhParams = params; }
-- (dispatch_data_t)charonDHParams { return _dhParams; }
-- (void)charonAddPSK:(dispatch_data_t)psk identity:(dispatch_data_t)identity
+- (void)revenantSetDHParams:(dispatch_data_t)params { _dhParams = params; }
+- (dispatch_data_t)revenantDHParams { return _dhParams; }
+- (void)revenantAddPSK:(dispatch_data_t)psk identity:(dispatch_data_t)identity
 {
     if (!psk || !identity)
         return;
     [_psks addObject:(id)psk];
     [_pskIdentities addObject:(id)identity];
 }
-- (size_t)charonPSKCount { return _psks.count; }
-- (BOOL)charonPSKAt:(size_t)index psk:(dispatch_data_t *)psk identity:(dispatch_data_t *)identity
+- (size_t)revenantPSKCount { return _psks.count; }
+- (BOOL)revenantPSKAt:(size_t)index psk:(dispatch_data_t *)psk identity:(dispatch_data_t *)identity
 {
     if (index >= _psks.count)
         return NO;
@@ -50,15 +50,15 @@
 void sec_protocol_options_set_tls_diffie_hellman_parameters(sec_protocol_options_t options,
                                                             dispatch_data_t dh_params)
 {
-    if (![options isKindOfClass:CharonSecProtocolData.class])
+    if (![options isKindOfClass:RevenantSecProtocolData.class])
         return;
-    [(CharonSecProtocolData *)options charonSetDHParams:dh_params];
+    [(RevenantSecProtocolData *)options revenantSetDHParams:dh_params];
 }
 
 void sec_protocol_options_add_pre_shared_key(sec_protocol_options_t options, dispatch_data_t psk,
                                              dispatch_data_t psk_identity)
 {
-    if (![options isKindOfClass:CharonSecProtocolData.class])
+    if (![options isKindOfClass:RevenantSecProtocolData.class])
         return;
-    [(CharonSecProtocolData *)options charonAddPSK:psk identity:psk_identity];
+    [(RevenantSecProtocolData *)options revenantAddPSK:psk identity:psk_identity];
 }

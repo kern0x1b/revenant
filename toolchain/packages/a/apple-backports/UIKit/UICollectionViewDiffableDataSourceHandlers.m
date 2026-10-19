@@ -1,4 +1,4 @@
-#import "CharonDiffable.h"
+#import "RevenantDiffable.h"
 
 #pragma clang diagnostic ignored "-Wobjc-property-implementation"
 

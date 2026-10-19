@@ -20,7 +20,7 @@ int main(int argc, char **argv)
 {
     @autoreleasepool {
         if (argc > 1)
-            charon_log_to(@(argv[1]));
+            revenant_log_to(@(argv[1]));
         elsewhere = [NSMutableArray array];
         different = [NSMutableArray array];
 #define NAME_STRING(name, value) \
@@ -42,7 +42,7 @@ int main(int argc, char **argv)
         CHECK_EQUAL(GCInputButtonA, @"Button A", "the button A of a profile is named as the header says");
         CHECK(GCKeyCodeKeyA == 4 && GCKeyCodeKeyZ == 29, "the key codes are those of the keyboard usage page");
         CHECK(GCHapticDurationInfinite == 1000000.0f, "the infinite haptic duration");
-        printf("%d checks, %d failed\n", charon_checks, charon_failures);
+        printf("%d checks, %d failed\n", revenant_checks, revenant_failures);
     }
-    return charon_failures;
+    return revenant_failures;
 }

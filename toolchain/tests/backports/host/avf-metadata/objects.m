@@ -4,7 +4,7 @@
 #import <objc/message.h>
 #import <objc/runtime.h>
 
-#import "CharonAVMetadataConstruction.h"
+#import "RevenantAVMetadataConstruction.h"
 
 #include <stdio.h>
 
@@ -87,7 +87,7 @@ static void propertyRow(Class c, const char *name)
 static void superclassRow(Class c, const char *member)
 {
     NSString *name = c ? [NSString stringWithUTF8String:class_getName(class_getSuperclass(c))] : nil;
-    row(member, name ? [name stringByReplacingOccurrencesOfString:@"charon_host_" withString:@""] : @"(no class)");
+    row(member, name ? [name stringByReplacingOccurrencesOfString:@"revenant_host_" withString:@""] : @"(no class)");
 }
 
 static void protocolsRow(Class c, const char *member)
@@ -161,7 +161,7 @@ int main(void)
                 describe(safe(filter, @selector(identifiers))));
             row("DEFAULTS AVMetadataItemFilter after -init -allowList",
                 describe(safe(filter, @selector(allowList))));
-            SEL factory = NSSelectorFromString(@"charon_metadataItemFilterWithIdentifiers:");
+            SEL factory = NSSelectorFromString(@"revenant_metadataItemFilterWithIdentifiers:");
             id built = nil;
             if ([c respondsToSelector:factory]) {
                 built = ((id (*)(id, SEL, id))objc_msgSend)(c, factory, (@[@"mdta/one", @"mdta/two"]));
@@ -375,7 +375,7 @@ int main(void)
         }
 
         {
-            SEL groupInit = NSSelectorFromString(@"charon_initWithItems:timeRange:");
+            SEL groupInit = NSSelectorFromString(@"revenant_initWithItems:timeRange:");
             id group = instanceOf(CLASS_OF(AVMetadataGroup));
             if ([group respondsToSelector:groupInit]) {
                 AVMetadataItem *first = (AVMetadataItem *)[[AVMetadataItem alloc] init];
@@ -418,7 +418,7 @@ int main(void)
             }
 
             id dated = instanceOf(CLASS_OF(AVDateRangeMetadataGroup));
-            SEL datedInit = NSSelectorFromString(@"charon_initWithItems:startDate:endDate:");
+            SEL datedInit = NSSelectorFromString(@"revenant_initWithItems:startDate:endDate:");
             if ([dated respondsToSelector:datedInit]) {
                 NSDate *from = [NSDate dateWithTimeIntervalSince1970:1000000000];
                 NSDate *to = [NSDate dateWithTimeIntervalSince1970:1600000000];
@@ -437,7 +437,7 @@ int main(void)
             }
 
             id body = instanceOf(CLASS_OF(AVMetadataBodyObject));
-            SEL bodyInit = NSSelectorFromString(@"charon_initWithBodyID:objectID:faceID:rollAngle:yawAngle:");
+            SEL bodyInit = NSSelectorFromString(@"revenant_initWithBodyID:objectID:faceID:rollAngle:yawAngle:");
             if ([body respondsToSelector:bodyInit]) {
                 id made = ((id (*)(id, SEL, NSInteger, NSInteger, NSInteger, CGFloat, CGFloat))objc_msgSend)(
                     body, bodyInit, 3, 11, 5, (CGFloat)12.5, (CGFloat)-7.25);
@@ -458,7 +458,7 @@ int main(void)
             for (NSString *name in @[@"AVMetadataCatBodyObject", @"AVMetadataDogBodyObject",
                                      @"AVMetadataHumanBodyObject", @"AVMetadataSalientObject"]) {
                 id typed = instanceOf(NSClassFromString(name));
-                SEL typedInit = NSSelectorFromString(@"charon_initWithObjectID:faceID:rollAngle:yawAngle:");
+                SEL typedInit = NSSelectorFromString(@"revenant_initWithObjectID:faceID:rollAngle:yawAngle:");
                 if ([typed respondsToSelector:typedInit]) {
                     id made = ((id (*)(id, SEL, NSInteger, NSInteger, CGFloat, CGFloat))objc_msgSend)(
                         typed, typedInit, 11, 5, (CGFloat)1.5, (CGFloat)2.5);
@@ -470,20 +470,20 @@ int main(void)
             }
 
             id request = instanceOf(CLASS_OF(AVMetadataItemValueRequest));
-            SEL requestInit = NSSelectorFromString(@"charon_initWithSpecifier:");
+            SEL requestInit = NSSelectorFromString(@"revenant_initWithSpecifier:");
             if ([request respondsToSelector:requestInit]) {
                 id made = ((id (*)(id, SEL, id))objc_msgSend)(request, requestInit, @"a specifier");
                 row("~CONSTRUCTED value request specifier", describe(guarded(made, @selector(specifier))));
                 if ([made respondsToSelector:@selector(respondWithValue:)]) {
                     ((void (*)(id, SEL, id))objc_msgSend)(made, @selector(respondWithValue:), @"answered");
                     row("~CONSTRUCTED value request after -respondWithValue:",
-                        describe(guarded(made, NSSelectorFromString(@"charon_responseValue"))));
+                        describe(guarded(made, NSSelectorFromString(@"revenant_responseValue"))));
                 }
                 if ([made respondsToSelector:@selector(respondWithError:)]) {
                     ((void (*)(id, SEL, id))objc_msgSend)(made, @selector(respondWithError:),
                                                           [NSError errorWithDomain:NSURLErrorDomain code:7 userInfo:nil]);
                     row("~CONSTRUCTED value request after -respondWithError:",
-                        describe(guarded(made, NSSelectorFromString(@"charon_responseError"))));
+                        describe(guarded(made, NSSelectorFromString(@"revenant_responseError"))));
                 }
             }
         }

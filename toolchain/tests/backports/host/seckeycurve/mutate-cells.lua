@@ -7,13 +7,13 @@ local CELLS = {
       "    return CFDataCreate(kCFAllocatorDefault, der, (CFIndex)(written / 2));",
       "micro-ecc's signature verifies under the host" },
     { "marker-EC-verify", CURVE,
-      "    return CharonCKDigestVerifyES256(point, sizeof point, hashed, CFDataGetBytePtr(signature),\n"
+      "    return RevenantCKDigestVerifyES256(point, sizeof point, hashed, CFDataGetBytePtr(signature),\n"
         .. "                                     (size_t)CFDataGetLength(signature)) != 0;",
-      "    CharonCKDigestVerifyES256(point, sizeof point, hashed, CFDataGetBytePtr(signature),\n"
+      "    RevenantCKDigestVerifyES256(point, sizeof point, hashed, CFDataGetBytePtr(signature),\n"
         .. "                              (size_t)CFDataGetLength(signature));\n    return true;",
       "the port's own reader refuses a signature of another digest" },
     { "marker-EC-exchange", CURVE,
-      "    if (!CharonCKSharedSecretES256(scalar, peer, sizeof peer, secret)) {",
+      "    if (!RevenantCKSharedSecretES256(scalar, peer, sizeof peer, secret)) {",
       "    if (memset(secret, 0x11, sizeof secret), 0) {",
       "the port's secret is OpenSSL's" },
     { "marker-EC-says", CURVE,
@@ -26,13 +26,13 @@ local CELLS = {
       "    if (ec) {\n        return 32;\n    }",
       "the port's own SecKeyCreateSignature signs a 0 byte message" },
     { "release-EC-verify", FUNCTIONS,
-      "    SecPadding padding = CharonSecurityPaddingFor(algorithm);\n    CFIndex signedLength = CFDataGetLength(signedData);",
-      "    SecPadding padding = CharonSecurityPaddingFor(algorithm);\n    if (signedData != NULL) { return true; }\n    CFIndex signedLength = CFDataGetLength(signedData);",
+      "    SecPadding padding = RevenantSecurityPaddingFor(algorithm);\n    CFIndex signedLength = CFDataGetLength(signedData);",
+      "    SecPadding padding = RevenantSecurityPaddingFor(algorithm);\n    if (signedData != NULL) { return true; }\n    CFIndex signedLength = CFDataGetLength(signedData);",
       "answers false for a signature of another message" },
     { "release-EC-exchange", FUNCTIONS,
-      "    CharonSecKeyFail(error, errSecParam,\n"
+      "    RevenantSecKeyFail(error, errSecParam,\n"
         .. "                     @\"the release has no elliptic key agreement:",
-      "    CharonSecKeyFail(error, errSecSuccess,\n"
+      "    RevenantSecKeyFail(error, errSecSuccess,\n"
         .. "                     @\"the release has no elliptic key agreement:",
       "which is NSOSStatusErrorDomain errSecParam" },
     { "release-EC-says", FUNCTIONS,
@@ -50,7 +50,7 @@ local CELLS = {
       "    (void)status;\n    return true;",
       "answers false for that signature of another digest" },
     { "release-RSA-exchange", FUNCTIONS,
-      "    if (privateKey && CharonSecurityKeyIsPortEC(privateKey))\n        return CharonSecKeyECExchange(privateKey, algorithm, publicKey, parameters, error);",
+      "    if (privateKey && RevenantSecurityKeyIsPortEC(privateKey))\n        return RevenantSecKeyECExchange(privateKey, algorithm, publicKey, parameters, error);",
       "    if (privateKey && publicKey)\n        return CFDataCreate(kCFAllocatorDefault, (const uint8_t *)\"not a secret\", 11);",
       "the exchange for that RSA key answers no secret" },
     { "release-RSA-says", FUNCTIONS,
@@ -67,7 +67,7 @@ local CELLS = {
       "    if (0) {\n        return false;   // as in the signing",
       "such a key signs nothing" },
     { "other-exchange", FUNCTIONS,
-      "    if (privateKey && CharonSecurityKeyIsPortEC(privateKey))\n        return CharonSecKeyECExchange(privateKey, algorithm, publicKey, parameters, error);",
+      "    if (privateKey && RevenantSecurityKeyIsPortEC(privateKey))\n        return RevenantSecKeyECExchange(privateKey, algorithm, publicKey, parameters, error);",
       "    if (privateKey)\n        return CFDataCreate(kCFAllocatorDefault, (const uint8_t *)\"not a secret\", 11);",
       "exchanges nothing with it" },
     { "other-says", FUNCTIONS,
@@ -109,7 +109,7 @@ function main(port, here, scratch)
         if HELD_ELSEWHERE[name] then
             elsewhere[#elsewhere + 1] = name
             print(string.format("held elsewhere  %-14s no key can see this one on a host: the host's own primitive"
-                .. " refuses the same key, and the guard is held by CharonSecurityCarries with"
+                .. " refuses the same key, and the guard is held by RevenantSecurityCarries with"
                 .. " rsa=false, ec=false, in tests/backports/host/security/supported.m", name))
         else
             local copy = scratch .. "/" .. name

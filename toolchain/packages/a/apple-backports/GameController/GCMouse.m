@@ -1,4 +1,4 @@
-#import "CharonGC.h"
+#import "RevenantGC.h"
 
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
 
@@ -12,7 +12,7 @@
 {
     if ((self = [super init])) {
         _mouseInput = [[GCMouseInput alloc] init];
-        [_mouseInput charon_setDevice:self];
+        [_mouseInput revenant_setDevice:self];
         _handlerQueue = dispatch_get_main_queue();
     }
     return self;

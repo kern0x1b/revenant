@@ -28,7 +28,7 @@ static NSString *yes_no(BOOL answer)
 static NSString *class_name(id object)
 {
     NSString *name = NSStringFromClass([object class]);
-    return [name hasPrefix:@"CharonPort"] ? [name substringFromIndex:10] : name;
+    return [name hasPrefix:@"RevenantPort"] ? [name substringFromIndex:12] : name;
 }
 
 static NSString *number(NSInteger value)
@@ -41,10 +41,10 @@ static void call(NSString *what)
     report("delegate-call", [NSString stringWithFormat:@"%d %@", ++sequence, what]);
 }
 
-@interface CharonFindDelegate : NSObject <UIFindInteractionDelegate>
+@interface RevenantFindDelegate : NSObject <UIFindInteractionDelegate>
 @end
 
-@implementation CharonFindDelegate
+@implementation RevenantFindDelegate
 
 - (UIFindSession *)findInteraction:(UIFindInteraction *)interaction sessionForView:(UIView *)view
 {
@@ -64,15 +64,15 @@ static void call(NSString *what)
 
 @end
 
-@interface CharonSceneDelegate : UIResponder <UIWindowSceneDelegate>
+@interface RevenantSceneDelegate : UIResponder <UIWindowSceneDelegate>
 @property (nonatomic, strong) UIWindow *window;
 @end
 
-@implementation CharonSceneDelegate
+@implementation RevenantSceneDelegate
 
 static void checks(UIView *view, UITextView *text)
 {
-    CharonFindDelegate *delegate = [[CharonFindDelegate alloc] init];
+    RevenantFindDelegate *delegate = [[RevenantFindDelegate alloc] init];
     UIFindInteraction *interaction = [[UIFindInteraction alloc] initWithSessionDelegate:delegate];
     report("interaction-class", class_name(interaction));
     report("delegate-kept", yes_no(interaction.delegate == delegate));
@@ -132,13 +132,13 @@ static void checks(UIView *view, UITextView *text)
     [view removeInteraction:interaction];
     report("view-after-remove", yes_no(interaction.view == nil));
 
-    CharonFindDelegate *gone = [[CharonFindDelegate alloc] init];
+    RevenantFindDelegate *gone = [[RevenantFindDelegate alloc] init];
     __weak id weakGone = gone;
     UIFindInteraction *lone = [[UIFindInteraction alloc] initWithSessionDelegate:gone];
     gone = nil;
     report("delegate-weak-after-release", yes_no(lone.delegate == nil && weakGone == nil));
 
-#ifndef CHARON_PORT_SIDE
+#ifndef REVENANT_PORT_SIDE
     report_host("text-find-interaction-default", nil == text.findInteraction ? @"nil" : class_name(text.findInteraction));
     report_host("text-find-enabled-default", yes_no(text.findInteractionEnabled));
     text.findInteractionEnabled = YES;
@@ -159,13 +159,13 @@ static void checks(UIView *view, UITextView *text)
 
 - (void)scene:(UIScene *)scene willConnectToSession:(UISceneSession *)session options:(UISceneConnectionOptions *)connectionOptions
 {
-    const char *path = getenv("CHARON_SCENE_OUT");
+    const char *path = getenv("REVENANT_SCENE_OUT");
     out = fopen(path ? path : "/dev/stdout", "w");
-#ifdef CHARON_PORT_SIDE
+#ifdef REVENANT_PORT_SIDE
     side = "port";
 #else
     side = "host";
-    const char *extra = getenv("CHARON_HOST_ONLY_OUT");
+    const char *extra = getenv("REVENANT_HOST_ONLY_OUT");
     hostOnly = extra ? fopen(extra, "w") : NULL;
 #endif
     self.window = [[UIWindow alloc] initWithWindowScene:(UIWindowScene *)scene];
@@ -193,6 +193,6 @@ static void checks(UIView *view, UITextView *text)
 int main(int argc, char *argv[])
 {
     @autoreleasepool {
-        return UIApplicationMain(argc, argv, nil, NSStringFromClass([CharonSceneDelegate class]));
+        return UIApplicationMain(argc, argv, nil, NSStringFromClass([RevenantSceneDelegate class]));
     }
 }

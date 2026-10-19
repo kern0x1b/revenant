@@ -100,7 +100,7 @@
 #include "network/virtual_network.hpp"
 #include "network/wifi_state.hpp"
 
-namespace shade {
+namespace emulator {
 using namespace runtime_detail;
 namespace {
 
@@ -1287,7 +1287,7 @@ void EmulatorSession::run()
     if (device.keybag.apple_key_store_available) {
         const auto canonical_rootfs = std::filesystem::canonical(rootfs);
         const auto device_state = canonical_rootfs.parent_path() /
-                                  ".shade-device-state" /
+                                  ".emulator-device-state" /
                                   canonical_rootfs.filename() / "key-store-v1.key";
         auto key_store = KeyStore::open(device_state);
         if (!key_store)

@@ -1,3 +1,3 @@
-#import "CharonMetricKit.h"
+#import "RevenantMetricKit.h"
 
 NSString *const MXErrorDomain = @"MXErrorDomain";

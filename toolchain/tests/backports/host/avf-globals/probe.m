@@ -60,9 +60,9 @@ int main(int argc, char **argv)
         printf("CONTROL\tAVMediaTypeVideo\t%s\n", answer);
         read_value("AVMediaTypeDepthData", "AVMediaTypeDepthData", answer, sizeof answer);
         printf("CONTROL\tAVMediaTypeDepthData\t%s\n", answer);
-        read_value("AVMediaTypeCharonProbeNoSuchConstant", "AVMediaTypeCharonProbeNoSuchConstant",
+        read_value("AVMediaTypeRevenantProbeNoSuchConstant", "AVMediaTypeRevenantProbeNoSuchConstant",
                    answer, sizeof answer);
-        printf("CONTROL\tAVMediaTypeCharonProbeNoSuchConstant\t%s\n", answer);
+        printf("CONTROL\tAVMediaTypeRevenantProbeNoSuchConstant\t%s\n", answer);
         Class player = objc_getClass("AVPlayer");
         if (player == nil) {
             fprintf(stderr, "FAIL: AVPlayer does not resolve, so AVFoundation was not really loaded\n");
@@ -86,7 +86,7 @@ int main(int argc, char **argv)
             read++;
             char host[256], port[256], prefixed[512];
             read_value(name, name, host, sizeof host);
-            snprintf(prefixed, sizeof prefixed, "charon_host_%s", name);
+            snprintf(prefixed, sizeof prefixed, "revenant_host_%s", name);
             read_value(name, prefixed, port, sizeof port);
             printf("%s\t%s\t%s\n", name, host, port);
             rows++;

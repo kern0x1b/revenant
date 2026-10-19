@@ -6,7 +6,7 @@ int main(int argc, char **argv)
 {
     @autoreleasepool {
         if (argc > 1)
-            charon_log_to([NSString stringWithUTF8String:argv[1]]);
+            revenant_log_to([NSString stringWithUTF8String:argv[1]]);
         NSArray *declared = @[@"public.jpeg", @"public.JPEG", @"public.png", @"public.data", @"public.item", @"com.apple.quicktime-movie", @"public.mpeg-4", @"com.adobe.pdf"];
         for (NSString *identifier in declared) {
             char label[128];
@@ -26,7 +26,7 @@ int main(int argc, char **argv)
         CFStringRef jpeg = UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension, CFSTR("jpg"), NULL);
         CHECK(!UTTypeIsDynamic(jpeg) && UTTypeIsDeclared(jpeg), "the release's identifier for .jpg is declared");
         CHECK(!UTTypeIsDeclared(NULL) && !UTTypeIsDynamic(NULL), "NULL is neither");
-        printf("checks=%d failures=%d\n", charon_checks, charon_failures);
+        printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
     }
-    return charon_failures ? 1 : 0;
+    return revenant_failures ? 1 : 0;
 }

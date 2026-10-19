@@ -11,9 +11,9 @@ static NSArray *SplitLine(NSString *line)
 
 static void expect(BOOL ok, NSString *what, NSString *detail)
 {
-    charon_checks++;
+    revenant_checks++;
     if (!ok) {
-        charon_failures++;
+        revenant_failures++;
         printf("FAIL %s: %s\n", [what UTF8String], [detail UTF8String]);
     }
 }
@@ -21,7 +21,7 @@ static void expect(BOOL ok, NSString *what, NSString *detail)
 int main(int argc, char **argv)
 {
     @autoreleasepool {
-        charon_log_to(argc > 1 ? [NSString stringWithUTF8String:argv[1]] : nil);
+        revenant_log_to(argc > 1 ? [NSString stringWithUTF8String:argv[1]] : nil);
         NSString *path = argc > 1 ? [NSString stringWithUTF8String:argv[1]] : nil;
         if (!path) {
             printf("dateinterval: no golden file given\n");
@@ -120,7 +120,7 @@ int main(int argc, char **argv)
         printf("dateinterval: %s, compared %lu cases, %lu differing\n", ported ? "the port's class" : "the release's class",
                (unsigned long)compared, (unsigned long)differing);
         CHECK(differing == 0, "every case is the answer the golden file holds");
-        printf("checks=%d failures=%d\n", charon_checks, charon_failures);
-        return charon_failures;
+        printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
+        return revenant_failures;
     }
 }

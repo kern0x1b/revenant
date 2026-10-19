@@ -28,7 +28,7 @@
 #include <utility>
 #include <vector>
 
-namespace shade {
+namespace emulator {
 namespace {
 
     constexpr std::uint32_t arm_mapping_size = 5U * sizeof(std::uint32_t);

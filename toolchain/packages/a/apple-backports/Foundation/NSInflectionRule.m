@@ -1,7 +1,7 @@
 #import <Foundation/Foundation.h>
 
 #import <objc/runtime.h>
-#import "CharonMorphology.h"
+#import "RevenantMorphology.h"
 
 @implementation NSInflectionRule
 

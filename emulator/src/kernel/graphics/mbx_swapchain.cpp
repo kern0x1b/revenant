@@ -17,7 +17,7 @@
 #include "graphics/gles_renderer.hpp"
 #include "foundation/userland_hle.hpp"
 
-namespace shade {
+namespace emulator {
 
 void Mbx2dHle::initialize_destination(UserlandHleCall& call, RenderState& state)
 {

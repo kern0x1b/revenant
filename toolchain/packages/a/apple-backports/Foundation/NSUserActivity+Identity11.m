@@ -1,29 +1,29 @@
 #import <Foundation/Foundation.h>
 #import <objc/runtime.h>
 
-static char CharonUserActivityReferrerKey;
-static char CharonUserActivityIdentifierKey;
+static char RevenantUserActivityReferrerKey;
+static char RevenantUserActivityIdentifierKey;
 
-@implementation NSUserActivity (CharonIdentity)
+@implementation NSUserActivity (RevenantIdentity)
 
 - (NSURL *)referrerURL
 {
-    return objc_getAssociatedObject(self, &CharonUserActivityReferrerKey);
+    return objc_getAssociatedObject(self, &RevenantUserActivityReferrerKey);
 }
 
 - (void)setReferrerURL:(NSURL *)referrerURL
 {
-    objc_setAssociatedObject(self, &CharonUserActivityReferrerKey, referrerURL, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, &RevenantUserActivityReferrerKey, referrerURL, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
 - (NSUserActivityPersistentIdentifier)persistentIdentifier
 {
-    return objc_getAssociatedObject(self, &CharonUserActivityIdentifierKey);
+    return objc_getAssociatedObject(self, &RevenantUserActivityIdentifierKey);
 }
 
 - (void)setPersistentIdentifier:(NSUserActivityPersistentIdentifier)identifier
 {
-    objc_setAssociatedObject(self, &CharonUserActivityIdentifierKey, [identifier copy], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, &RevenantUserActivityIdentifierKey, [identifier copy], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
 @end

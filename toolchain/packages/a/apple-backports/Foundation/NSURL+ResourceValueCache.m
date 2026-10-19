@@ -1,6 +1,6 @@
 #import <Foundation/Foundation.h>
 
-@implementation NSURL (CharonResourceValueCache)
+@implementation NSURL (RevenantResourceValueCache)
 
 - (void)removeCachedResourceValueForKey:(NSString *)key
 {

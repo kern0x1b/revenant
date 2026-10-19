@@ -3,24 +3,24 @@
 #import <Foundation/Foundation.h>
 #import <objc/runtime.h>
 
-#import "CharonAVFDescriptorConstruction.h"
+#import "RevenantAVFDescriptorConstruction.h"
 
 @implementation AVCaptureBracketedStillImageSettings
 
-- (float)charon_exposureTargetBias
+- (float)revenant_exposureTargetBias
 {
-    return [(NSNumber *)objc_getAssociatedObject(self, "charon.avf.bracket.exposureTargetBias") floatValue];
+    return [(NSNumber *)objc_getAssociatedObject(self, "revenant.avf.bracket.exposureTargetBias") floatValue];
 }
 
-- (void)charon_setExposureTargetBias:(float)exposureTargetBias
+- (void)revenant_setExposureTargetBias:(float)exposureTargetBias
 {
-    objc_setAssociatedObject(self, "charon.avf.bracket.exposureTargetBias",
+    objc_setAssociatedObject(self, "revenant.avf.bracket.exposureTargetBias",
                              @(exposureTargetBias), OBJC_ASSOCIATION_RETAIN);
 }
 
-- (CMTime)charon_exposureDuration
+- (CMTime)revenant_exposureDuration
 {
-    NSValue *boxed = objc_getAssociatedObject(self, "charon.avf.bracket.exposureDuration");
+    NSValue *boxed = objc_getAssociatedObject(self, "revenant.avf.bracket.exposureDuration");
     CMTime duration = kCMTimeZero;
     if (boxed) {
         [boxed getValue:&duration size:sizeof(duration)];
@@ -28,33 +28,33 @@
     return duration;
 }
 
-- (void)charon_setExposureDuration:(CMTime)exposureDuration
+- (void)revenant_setExposureDuration:(CMTime)exposureDuration
 {
-    objc_setAssociatedObject(self, "charon.avf.bracket.exposureDuration",
+    objc_setAssociatedObject(self, "revenant.avf.bracket.exposureDuration",
                              [NSValue valueWithBytes:&exposureDuration objCType:@encode(CMTime)],
                              OBJC_ASSOCIATION_RETAIN);
 }
 
-- (float)charon_ISO
+- (float)revenant_ISO
 {
-    return [(NSNumber *)objc_getAssociatedObject(self, "charon.avf.bracket.ISO") floatValue];
+    return [(NSNumber *)objc_getAssociatedObject(self, "revenant.avf.bracket.ISO") floatValue];
 }
 
-- (void)charon_setISO:(float)iso
+- (void)revenant_setISO:(float)iso
 {
-    objc_setAssociatedObject(self, "charon.avf.bracket.ISO", @(iso), OBJC_ASSOCIATION_RETAIN);
+    objc_setAssociatedObject(self, "revenant.avf.bracket.ISO", @(iso), OBJC_ASSOCIATION_RETAIN);
 }
 
 
-- (instancetype)charon_initWithExposureTargetBias:(float)exposureTargetBias
+- (instancetype)revenant_initWithExposureTargetBias:(float)exposureTargetBias
                                    exposureDuration:(CMTime)exposureDuration
                                                ISO:(float)iso
 {
     self = [super init];
     if (self) {
-        [self charon_setExposureTargetBias:exposureTargetBias];
-        [self charon_setExposureDuration:exposureDuration];
-        [self charon_setISO:iso];
+        [self revenant_setExposureTargetBias:exposureTargetBias];
+        [self revenant_setExposureDuration:exposureDuration];
+        [self revenant_setISO:iso];
     }
     return self;
 }
@@ -65,12 +65,12 @@
 
 - (float)exposureTargetBias
 {
-    return self.charon_exposureTargetBias;
+    return self.revenant_exposureTargetBias;
 }
 
 + (instancetype)autoExposureSettingsWithExposureTargetBias:(float)exposureTargetBias
 {
-    return [[self alloc] charon_initWithExposureTargetBias:exposureTargetBias
+    return [[self alloc] revenant_initWithExposureTargetBias:exposureTargetBias
                                             exposureDuration:kCMTimeZero
                                                         ISO:0.0f];
 }
@@ -87,17 +87,17 @@
 
 - (CMTime)exposureDuration
 {
-    return self.charon_exposureDuration;
+    return self.revenant_exposureDuration;
 }
 
 - (float)ISO
 {
-    return self.charon_ISO;
+    return self.revenant_ISO;
 }
 
 + (instancetype)manualExposureSettingsWithExposureDuration:(CMTime)exposureDuration ISO:(float)iso
 {
-    return [[self alloc] charon_initWithExposureTargetBias:0.0f
+    return [[self alloc] revenant_initWithExposureTargetBias:0.0f
                                             exposureDuration:exposureDuration
                                                         ISO:iso];
 }

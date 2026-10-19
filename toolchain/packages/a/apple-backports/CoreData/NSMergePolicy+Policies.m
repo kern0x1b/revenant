@@ -1,6 +1,6 @@
-#import "CharonCoreData.h"
+#import "RevenantCoreData.h"
 
-@implementation NSMergePolicy (CharonPolicies)
+@implementation NSMergePolicy (RevenantPolicies)
 
 + (NSMergePolicy *)errorMergePolicy
 {

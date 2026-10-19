@@ -25,7 +25,7 @@ int main(int argc, char **argv)
 {
     @autoreleasepool {
         if (argc > 1)
-            charon_log_to(@(argv[1]));
+            revenant_log_to(@(argv[1]));
         elsewhere = [NSMutableArray array];
         different = [NSMutableArray array];
 #define NAME_STRING(name, value) \
@@ -41,7 +41,7 @@ int main(int argc, char **argv)
         if (different.count)
             printf("  different: %s\n", [different componentsJoinedByString:@" "].UTF8String);
         CHECK_EQUAL(AVVideoCodecTypeHEVC, @"hvc1", "the HEVC codec type is the string the release names it by");
-        printf("%d checks, %d failures\n", charon_checks, charon_failures);
-        return charon_failures;
+        printf("%d checks, %d failures\n", revenant_checks, revenant_failures);
+        return revenant_failures;
     }
 }

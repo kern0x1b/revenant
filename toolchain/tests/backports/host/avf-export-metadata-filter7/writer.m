@@ -32,7 +32,7 @@ static NSString *identifiers_of(NSArray<AVMetadataItem *> *items)
 static NSURL *write_source(void)
 {
     NSURL *url = [NSURL fileURLWithPath:[NSTemporaryDirectory() stringByAppendingPathComponent:
-                                          [NSString stringWithFormat:@"charon-export-filter-%u.mov", getpid()]]];
+                                          [NSString stringWithFormat:@"revenant-export-filter-%u.mov", getpid()]]];
     [[NSFileManager defaultManager] removeItemAtURL:url error:NULL];
     AVAssetWriter *writer = [[AVAssetWriter alloc] initWithURL:url fileType:AVFileTypeQuickTimeMovie error:NULL];
     NSDictionary *settings = @{AVVideoCodecKey: AVVideoCodecTypeH264, AVVideoWidthKey: @16, AVVideoHeightKey: @16};
@@ -51,38 +51,38 @@ static NSURL *write_source(void)
 }
 
 #if CHARN_PORT_HALF
-static void charon_set_filter(AVAssetExportSession *session, AVMetadataItemFilter *filter)
+static void revenant_set_filter(AVAssetExportSession *session, AVMetadataItemFilter *filter)
 {
     IMP port = method_getImplementation(class_getInstanceMethod([AVAssetExportSession class],
                                                               @selector(setMetadataItemFilter:)));
     ((void (*)(id, SEL, id))port)(session, @selector(setMetadataItemFilter:), filter);
 }
 
-static AVMetadataItemFilter *charon_get_filter(AVAssetExportSession *session)
+static AVMetadataItemFilter *revenant_get_filter(AVAssetExportSession *session)
 {
     IMP port = method_getImplementation(class_getInstanceMethod([AVAssetExportSession class],
                                                               @selector(metadataItemFilter)));
     return ((AVMetadataItemFilter *(*)(id, SEL))port)(session, @selector(metadataItemFilter));
 }
 
-static void charon_start_export(AVAssetExportSession *session, dispatch_block_t handler)
+static void revenant_start_export(AVAssetExportSession *session, dispatch_block_t handler)
 {
     IMP port = method_getImplementation(class_getInstanceMethod([AVAssetExportSession class],
                                                               @selector(exportAsynchronouslyWithCompletionHandler:)));
     ((void (*)(id, SEL, id))port)(session, @selector(exportAsynchronouslyWithCompletionHandler:), handler);
 }
 #else
-static void charon_set_filter(AVAssetExportSession *session, AVMetadataItemFilter *filter)
+static void revenant_set_filter(AVAssetExportSession *session, AVMetadataItemFilter *filter)
 {
     session.metadataItemFilter = filter;
 }
 
-static AVMetadataItemFilter *charon_get_filter(AVAssetExportSession *session)
+static AVMetadataItemFilter *revenant_get_filter(AVAssetExportSession *session)
 {
     return session.metadataItemFilter;
 }
 
-static void charon_start_export(AVAssetExportSession *session, dispatch_block_t handler)
+static void revenant_start_export(AVAssetExportSession *session, dispatch_block_t handler)
 {
     [session exportAsynchronouslyWithCompletionHandler:handler];
 }
@@ -98,20 +98,20 @@ static void one_export(NSString *label, NSURL *source, AVMetadataItemFilter *fil
         return;
     }
     session.outputURL = [NSURL fileURLWithPath:[NSTemporaryDirectory() stringByAppendingPathComponent:
-                                                   [NSString stringWithFormat:@"charon-export-out-%@-%u.mov", label, getpid()]]];
+                                                   [NSString stringWithFormat:@"revenant-export-out-%@-%u.mov", label, getpid()]]];
     session.outputFileType = AVFileTypeQuickTimeMovie;
     if (own)
         session.metadata = own;
-    charon_set_filter(session, filter);
-    row(@"filter round-trips", charon_get_filter(session) ? @"YES" : @"NO");
+    revenant_set_filter(session, filter);
+    row(@"filter round-trips", revenant_get_filter(session) ? @"YES" : @"NO");
 
     dispatch_semaphore_t finished = dispatch_semaphore_create(0);
-    charon_start_export(session, ^{
+    revenant_start_export(session, ^{
         dispatch_semaphore_signal(finished);
     });
     dispatch_semaphore_wait(finished, dispatch_time(DISPATCH_TIME_NOW, 30 * NSEC_PER_SEC));
     row(@"metadata after the export", identifiers_of(session.metadata));
-    row(@"the filter still reads back", charon_get_filter(session) ? @"YES" : @"NO");
+    row(@"the filter still reads back", revenant_get_filter(session) ? @"YES" : @"NO");
 }
 
 int main(void)
@@ -150,7 +150,7 @@ int main(void)
         AVMutableMetadataItem *own = [[AVMutableMetadataItem alloc] init];
         own.keySpace = AVMetadataKeySpaceCommon;
         own.key = AVMetadataCommonKeyTitle;
-        own.value = @"charon";
+        own.value = @"revenant";
         one_export(@"own metadata", source, sharing, @[own]);
 
         section = @"";

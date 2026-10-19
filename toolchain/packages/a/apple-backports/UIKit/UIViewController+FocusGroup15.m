@@ -3,18 +3,18 @@
 
 #pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
 
-static char charon_vc_focus_group_key;
+static char revenant_vc_focus_group_key;
 
-@implementation UIViewController (CharonFocusGroup15)
+@implementation UIViewController (RevenantFocusGroup15)
 
 - (NSString *)focusGroupIdentifier
 {
-    return objc_getAssociatedObject(self, &charon_vc_focus_group_key);
+    return objc_getAssociatedObject(self, &revenant_vc_focus_group_key);
 }
 
 - (void)setFocusGroupIdentifier:(NSString *)focusGroupIdentifier
 {
-    objc_setAssociatedObject(self, &charon_vc_focus_group_key, [focusGroupIdentifier copy], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, &revenant_vc_focus_group_key, [focusGroupIdentifier copy], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
 @end

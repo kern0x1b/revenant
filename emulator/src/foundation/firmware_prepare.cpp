@@ -31,7 +31,7 @@
 #include "foundation/cpu.hpp"
 #include "foundation/jit_translation_profile.hpp"
 
-namespace shade {
+namespace emulator {
 namespace {
 
     constexpr std::array<char, 8> prepare_state_magic { 'i', 'L', 'E', 'M', 'P',

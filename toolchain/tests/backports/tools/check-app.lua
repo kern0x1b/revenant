@@ -1,8 +1,8 @@
 function main(release, band, ...)
     local binaries = {...}
     assert(release and band and #binaries > 0, "usage: xmake l check-app.lua <release> <band folder> <binary>...")
-    local dyld = import("apple.dyld", {rootdir = path.join(os.getenv("CHARON_ROOT"), "modules"), anonymous = true})
-    local cache = path.join(os.getenv("HOME"), ".charon", "dyld", release, "dyld_shared_cache_armv7")
+    local dyld = import("apple.dyld", {rootdir = path.join(os.getenv("REVENANT_ROOT"), "modules"), anonymous = true})
+    local cache = path.join(os.getenv("HOME"), ".revenant", "dyld", release, "dyld_shared_cache_armv7")
     local provided = {}
     for _, library in ipairs(os.files(path.join(band, "*.dylib"))) do
         table.insert(provided, library)

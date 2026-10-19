@@ -4,12 +4,12 @@
 #pragma clang diagnostic ignored "-Wobjc-property-implementation"
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
 
-@interface CharonTransitionPair : NSObject
+@interface RevenantTransitionPair : NSObject
 @property (nonatomic, strong) UICollectionViewLayoutAttributes *from;
 @property (nonatomic, strong) UICollectionViewLayoutAttributes *to;
 @end
 
-@implementation CharonTransitionPair
+@implementation RevenantTransitionPair
 @synthesize from = _from;
 @synthesize to = _to;
 @end
@@ -21,12 +21,12 @@
     CGFloat _transitionProgress;
 }
 
-static NSString *CharonTransitionKey(NSString *kind, NSIndexPath *path)
+static NSString *RevenantTransitionKey(NSString *kind, NSIndexPath *path)
 {
     return [NSString stringWithFormat:@"%@|%@", kind ?: @"", path];
 }
 
-static UICollectionViewLayoutAttributes *CharonBlend(UICollectionViewLayoutAttributes *from,
+static UICollectionViewLayoutAttributes *RevenantBlend(UICollectionViewLayoutAttributes *from,
                                                     UICollectionViewLayoutAttributes *to,
                                                     CGFloat progress)
 {
@@ -50,9 +50,9 @@ static UICollectionViewLayoutAttributes *CharonBlend(UICollectionViewLayoutAttri
     return attributes;
 }
 
-static NSString *const CharonCurrentLayoutKey = @"currentLayout";
-static NSString *const CharonNextLayoutKey = @"nextLayout";
-static NSString *const CharonTransitionProgressKey = @"transitionProgress";
+static NSString *const RevenantCurrentLayoutKey = @"currentLayout";
+static NSString *const RevenantNextLayoutKey = @"nextLayout";
+static NSString *const RevenantTransitionProgressKey = @"transitionProgress";
 
 - (instancetype)initWithCurrentLayout:(UICollectionViewLayout *)currentLayout nextLayout:(UICollectionViewLayout *)nextLayout
 {
@@ -73,18 +73,18 @@ static NSString *const CharonTransitionProgressKey = @"transitionProgress";
 - (instancetype)initWithCoder:(NSCoder *)coder
 {
     if ((self = [super init])) {
-        _currentLayout = [coder decodeObjectForKey:CharonCurrentLayoutKey];
-        _nextLayout = [coder decodeObjectForKey:CharonNextLayoutKey];
-        _transitionProgress = (CGFloat)[coder decodeDoubleForKey:CharonTransitionProgressKey];
+        _currentLayout = [coder decodeObjectForKey:RevenantCurrentLayoutKey];
+        _nextLayout = [coder decodeObjectForKey:RevenantNextLayoutKey];
+        _transitionProgress = (CGFloat)[coder decodeDoubleForKey:RevenantTransitionProgressKey];
     }
     return self;
 }
 
 - (void)encodeWithCoder:(NSCoder *)coder
 {
-    [coder encodeObject:_currentLayout forKey:CharonCurrentLayoutKey];
-    [coder encodeObject:_nextLayout forKey:CharonNextLayoutKey];
-    [coder encodeDouble:_transitionProgress forKey:CharonTransitionProgressKey];
+    [coder encodeObject:_currentLayout forKey:RevenantCurrentLayoutKey];
+    [coder encodeObject:_nextLayout forKey:RevenantNextLayoutKey];
+    [coder encodeDouble:_transitionProgress forKey:RevenantTransitionProgressKey];
 }
 
 - (UICollectionViewLayout *)currentLayout
@@ -137,16 +137,16 @@ static NSString *const CharonTransitionProgressKey = @"transitionProgress";
                       start.height + (end.height - start.height) * _transitionProgress);
 }
 
-- (NSArray<UICollectionViewLayoutAttributes *> *)charon_attributesInRect:(CGRect)rect
+- (NSArray<UICollectionViewLayoutAttributes *> *)revenant_attributesInRect:(CGRect)rect
 {
     NSMutableDictionary *matched = [NSMutableDictionary dictionary];
     NSMutableArray *order = [NSMutableArray array];
     void (^take)(UICollectionViewLayout *, BOOL) = ^(UICollectionViewLayout *layout, BOOL current) {
         for (UICollectionViewLayoutAttributes *attributes in [layout layoutAttributesForElementsInRect:rect]) {
-            NSString *key = CharonTransitionKey(attributes.representedElementKind, attributes.indexPath);
-            CharonTransitionPair *pair = matched[key];
+            NSString *key = RevenantTransitionKey(attributes.representedElementKind, attributes.indexPath);
+            RevenantTransitionPair *pair = matched[key];
             if (!pair) {
-                pair = [[CharonTransitionPair alloc] init];
+                pair = [[RevenantTransitionPair alloc] init];
                 matched[key] = pair;
                 [order addObject:pair];
             }
@@ -159,8 +159,8 @@ static NSString *const CharonTransitionProgressKey = @"transitionProgress";
     take(_currentLayout, YES);
     take(_nextLayout, NO);
     NSMutableArray *blended = [NSMutableArray arrayWithCapacity:order.count];
-    for (CharonTransitionPair *pair in order) {
-        UICollectionViewLayoutAttributes *attributes = CharonBlend(pair.from, pair.to, _transitionProgress);
+    for (RevenantTransitionPair *pair in order) {
+        UICollectionViewLayoutAttributes *attributes = RevenantBlend(pair.from, pair.to, _transitionProgress);
         if (attributes)
             [blended addObject:attributes];
     }
@@ -169,25 +169,25 @@ static NSString *const CharonTransitionProgressKey = @"transitionProgress";
 
 - (NSArray<UICollectionViewLayoutAttributes *> *)layoutAttributesForElementsInRect:(CGRect)rect
 {
-    return [self charon_attributesInRect:rect];
+    return [self revenant_attributesInRect:rect];
 }
 
 - (UICollectionViewLayoutAttributes *)layoutAttributesForItemAtIndexPath:(NSIndexPath *)indexPath
 {
-    return [self charon_attributesAtIndexPath:indexPath ofKind:nil];
+    return [self revenant_attributesAtIndexPath:indexPath ofKind:nil];
 }
 
 - (UICollectionViewLayoutAttributes *)layoutAttributesForSupplementaryViewOfKind:(NSString *)elementKind atIndexPath:(NSIndexPath *)indexPath
 {
-    return [self charon_attributesAtIndexPath:indexPath ofKind:elementKind];
+    return [self revenant_attributesAtIndexPath:indexPath ofKind:elementKind];
 }
 
 - (UICollectionViewLayoutAttributes *)layoutAttributesForDecorationViewOfKind:(NSString *)elementKind atIndexPath:(NSIndexPath *)indexPath
 {
-    return [self charon_attributesAtIndexPath:indexPath ofKind:elementKind];
+    return [self revenant_attributesAtIndexPath:indexPath ofKind:elementKind];
 }
 
-- (UICollectionViewLayoutAttributes *)charon_attributesAtIndexPath:(NSIndexPath *)indexPath ofKind:(NSString *)kind
+- (UICollectionViewLayoutAttributes *)revenant_attributesAtIndexPath:(NSIndexPath *)indexPath ofKind:(NSString *)kind
 {
     if (!indexPath)
         return nil;
@@ -201,7 +201,7 @@ static NSString *const CharonTransitionProgressKey = @"transitionProgress";
     }
     if (!from && !to)
         return nil;
-    return CharonBlend(from, to, _transitionProgress);
+    return RevenantBlend(from, to, _transitionProgress);
 }
 
 - (UICollectionViewLayoutAttributes *)initialLayoutAttributesForAppearingItemAtIndexPath:(NSIndexPath *)indexPath

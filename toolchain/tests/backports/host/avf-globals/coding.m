@@ -2,29 +2,29 @@
 #import <CoreMedia/CoreMedia.h>
 #import <objc/runtime.h>
 
-static NSValue *CharonCMTimeValue(CMTime value)
+static NSValue *RevenantCMTimeValue(CMTime value)
 {
     return [NSValue valueWithBytes:&value objCType:@encode(CMTime)];
 }
 #include <stdio.h>
 #include <string.h>
 
-@interface NSObject (CharonCodingProbeSetters)
-- (void)charonProbeSetDate:(NSDate *)date;
-- (void)charonProbeSetMediaTime:(CMTime)mediaTime;
-- (void)charonProbeSetSessionID:(NSString *)sessionID;
-- (void)charonProbeSetStableID:(NSString *)stableID;
-- (void)charonProbeSetURL:(NSURL *)url;
-- (void)charonProbeSetDidRecover:(BOOL)didRecover;
+@interface NSObject (RevenantCodingProbeSetters)
+- (void)revenantProbeSetDate:(NSDate *)date;
+- (void)revenantProbeSetMediaTime:(CMTime)mediaTime;
+- (void)revenantProbeSetSessionID:(NSString *)sessionID;
+- (void)revenantProbeSetStableID:(NSString *)stableID;
+- (void)revenantProbeSetURL:(NSURL *)url;
+- (void)revenantProbeSetDidRecover:(BOOL)didRecover;
 @end
 
-@implementation NSObject (CharonCodingProbeSetters)
-- (void)charonProbeSetDate:(NSDate *)date { [self setValue:date forKey:@"date"]; }
-- (void)charonProbeSetMediaTime:(CMTime)mediaTime { [self setValue:CharonCMTimeValue(mediaTime) forKey:@"mediaTime"]; }
-- (void)charonProbeSetSessionID:(NSString *)sessionID { [self setValue:sessionID forKey:@"sessionID"]; }
-- (void)charonProbeSetStableID:(NSString *)stableID { [self setValue:stableID forKey:@"stableID"]; }
-- (void)charonProbeSetURL:(NSURL *)url { [self setValue:url forKey:@"URL"]; }
-- (void)charonProbeSetDidRecover:(BOOL)didRecover { [self setValue:@(didRecover) forKey:@"didRecover"]; }
+@implementation NSObject (RevenantCodingProbeSetters)
+- (void)revenantProbeSetDate:(NSDate *)date { [self setValue:date forKey:@"date"]; }
+- (void)revenantProbeSetMediaTime:(CMTime)mediaTime { [self setValue:RevenantCMTimeValue(mediaTime) forKey:@"mediaTime"]; }
+- (void)revenantProbeSetSessionID:(NSString *)sessionID { [self setValue:sessionID forKey:@"sessionID"]; }
+- (void)revenantProbeSetStableID:(NSString *)stableID { [self setValue:stableID forKey:@"stableID"]; }
+- (void)revenantProbeSetURL:(NSURL *)url { [self setValue:url forKey:@"URL"]; }
+- (void)revenantProbeSetDidRecover:(BOOL)didRecover { [self setValue:@(didRecover) forKey:@"didRecover"]; }
 @end
 
 static id gPortEvent;
@@ -33,7 +33,7 @@ static id gPortRendition;
 static void probe_coding_support(const char *name)
 {
     char prefixed[512];
-    snprintf(prefixed, sizeof prefixed, "charon_host_%s", name);
+    snprintf(prefixed, sizeof prefixed, "revenant_host_%s", name);
     Class cls = NSClassFromString([NSString stringWithUTF8String:prefixed]);
     printf("CONTROLSECTIONPORT\t%s\t%s\n", name,
            (cls != Nil && [cls respondsToSelector:@selector(supportsSecureCoding)] &&
@@ -65,9 +65,9 @@ static NSArray *round_trip(id object, NSString *label, NSArray<NSString *> *fiel
 static void check_event(void)
 {
     id event = [[gPortEvent class] new];
-    [event charonProbeSetDate:[NSDate dateWithTimeIntervalSince1970:1000000.0]];
-    [event charonProbeSetMediaTime:CMTimeMake(1234, 600)];
-    [event charonProbeSetSessionID:@"11111111-2222-3333-4444-555555555555"];
+    [event revenantProbeSetDate:[NSDate dateWithTimeIntervalSince1970:1000000.0]];
+    [event revenantProbeSetMediaTime:CMTimeMake(1234, 600)];
+    [event revenantProbeSetSessionID:@"11111111-2222-3333-4444-555555555555"];
     NSArray *got = round_trip(event, @"AVMetricEvent", @[@"date", @"mediaTime", @"sessionID"]);
     NSDate *date = got[0] == [NSNull null] ? nil : got[0];
     CMTime mediaTime = kCMTimeZero;
@@ -89,8 +89,8 @@ static void check_event(void)
 static void check_rendition(void)
 {
     id rendition = [[gPortRendition class] new];
-    [rendition charonProbeSetStableID:@"com.apple.quicktime.rendition.1"];
-    [rendition charonProbeSetURL:[NSURL URLWithString:@"https://example.invalid/rendition.m3u8"]];
+    [rendition revenantProbeSetStableID:@"com.apple.quicktime.rendition.1"];
+    [rendition revenantProbeSetURL:[NSURL URLWithString:@"https://example.invalid/rendition.m3u8"]];
     NSArray *got = round_trip(rendition, @"AVMetricMediaRendition", @[@"stableID", @"URL"]);
     printf("AVMetricMediaRendition.stableID\twant=com.apple.quicktime.rendition.1\thost-carried=%s\n",
            [got[0] isEqualToString:@"com.apple.quicktime.rendition.1"] ? "yes" : "NO");
@@ -101,16 +101,16 @@ static void check_rendition(void)
 
 static void check_subclass(void)
 {
-    Class stall = NSClassFromString(@"charon_host_AVMetricPlayerItemStallEvent");
-    Class errorEvent = NSClassFromString(@"charon_host_AVMetricErrorEvent");
+    Class stall = NSClassFromString(@"revenant_host_AVMetricPlayerItemStallEvent");
+    Class errorEvent = NSClassFromString(@"revenant_host_AVMetricErrorEvent");
     if (stall == Nil || errorEvent == Nil) {
         printf("AVMetricPlayerItemStallEvent\tABSENT\tthe subclass is not in the binary\n");
         return;
     }
 
     id inherited = [stall new];
-    [inherited charonProbeSetDate:[NSDate dateWithTimeIntervalSince1970:2000000.0]];
-    [inherited charonProbeSetMediaTime:CMTimeMake(77, 30)];
+    [inherited revenantProbeSetDate:[NSDate dateWithTimeIntervalSince1970:2000000.0]];
+    [inherited revenantProbeSetMediaTime:CMTimeMake(77, 30)];
     NSArray *got = round_trip(inherited, @"AVMetricPlayerItemStallEvent", @[@"date", @"mediaTime"]);
     CMTime mediaTime = kCMTimeZero;
     if (got.count > 1 && got[1] != [NSNull null]) {
@@ -124,9 +124,9 @@ static void check_subclass(void)
            (got.count == 2 && got[0] != [NSNull null] && got[1] != [NSNull null]) ? "carried" : "LOST");
 
     id own = [errorEvent new];
-    [own charonProbeSetDate:[NSDate dateWithTimeIntervalSince1970:3000000.0]];
-    [own charonProbeSetMediaTime:CMTimeMake(5, 1)];
-    [own charonProbeSetDidRecover:YES];
+    [own revenantProbeSetDate:[NSDate dateWithTimeIntervalSince1970:3000000.0]];
+    [own revenantProbeSetMediaTime:CMTimeMake(5, 1)];
+    [own revenantProbeSetDidRecover:YES];
     NSArray *own2 = round_trip(own, @"AVMetricErrorEvent", @[@"date", @"mediaTime", @"didRecover"]);
     printf("AVMetricErrorEvent.date\twant=3000000\thost-carried=%s\n",
            (own2[0] != [NSNull null] && [(NSDate *)own2[0] timeIntervalSince1970] == 3000000.0) ? "yes" : "NO");
@@ -139,8 +139,8 @@ int main(void)
     @autoreleasepool {
         probe_coding_support("AVMetricEvent");
         probe_coding_support("AVMetricMediaRendition");
-        gPortEvent = NSClassFromString(@"charon_host_AVMetricEvent");
-        gPortRendition = NSClassFromString(@"charon_host_AVMetricMediaRendition");
+        gPortEvent = NSClassFromString(@"revenant_host_AVMetricEvent");
+        gPortRendition = NSClassFromString(@"revenant_host_AVMetricMediaRendition");
         if (gPortEvent == Nil || gPortRendition == Nil) {
             fprintf(stderr, "FAIL: the port's classes are not in this binary, so nothing below means anything\n");
             return 1;

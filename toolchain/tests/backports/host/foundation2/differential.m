@@ -5,33 +5,33 @@
 
 void host_attach_prefixed(const char *prefix);
 
-extern CFTypeRef CharonHostCFAutorelease(CFTypeRef);
-extern NSString * const CharonHostNSKeyedArchiveRootObjectKey;
-extern NSString * const CharonHostNSProgressEstimatedTimeRemainingKey;
-extern NSString * const CharonHostNSProgressFileOperationKindReceiving;
-extern NSString * const CharonHostNSProgressFileOperationKindUploading;
-extern NSString * const CharonHostNSURLUbiquitousItemDownloadingStatusKey;
-extern NSString * const CharonHostNSURLUbiquitousItemDownloadingErrorKey;
-extern NSString * const CharonHostNSURLUbiquitousItemUploadingErrorKey;
-extern NSString * const CharonHostNSURLUbiquitousItemDownloadingStatusNotDownloaded;
-extern NSString * const CharonHostNSURLUbiquitousItemDownloadingStatusDownloaded;
-extern NSString * const CharonHostNSURLUbiquitousItemDownloadingStatusCurrent;
-extern NSString * const CharonHostNSStringTransformLatinToKatakana;
-extern NSString * const CharonHostNSStringTransformLatinToHiragana;
-extern NSString * const CharonHostNSStringTransformLatinToHangul;
-extern NSString * const CharonHostNSStringTransformLatinToArabic;
-extern NSString * const CharonHostNSStringTransformLatinToHebrew;
-extern NSString * const CharonHostNSStringTransformLatinToThai;
-extern NSString * const CharonHostNSStringTransformLatinToCyrillic;
-extern NSString * const CharonHostNSStringTransformLatinToGreek;
-extern NSString * const CharonHostNSStringTransformToLatin;
-extern NSString * const CharonHostNSStringTransformMandarinToLatin;
-extern NSString * const CharonHostNSStringTransformHiraganaToKatakana;
-extern NSString * const CharonHostNSStringTransformFullwidthToHalfwidth;
-extern NSString * const CharonHostNSStringTransformToXMLHex;
-extern NSString * const CharonHostNSStringTransformToUnicodeName;
-extern NSString * const CharonHostNSStringTransformStripCombiningMarks;
-extern NSString * const CharonHostNSStringTransformStripDiacritics;
+extern CFTypeRef RevenantHostCFAutorelease(CFTypeRef);
+extern NSString * const RevenantHostNSKeyedArchiveRootObjectKey;
+extern NSString * const RevenantHostNSProgressEstimatedTimeRemainingKey;
+extern NSString * const RevenantHostNSProgressFileOperationKindReceiving;
+extern NSString * const RevenantHostNSProgressFileOperationKindUploading;
+extern NSString * const RevenantHostNSURLUbiquitousItemDownloadingStatusKey;
+extern NSString * const RevenantHostNSURLUbiquitousItemDownloadingErrorKey;
+extern NSString * const RevenantHostNSURLUbiquitousItemUploadingErrorKey;
+extern NSString * const RevenantHostNSURLUbiquitousItemDownloadingStatusNotDownloaded;
+extern NSString * const RevenantHostNSURLUbiquitousItemDownloadingStatusDownloaded;
+extern NSString * const RevenantHostNSURLUbiquitousItemDownloadingStatusCurrent;
+extern NSString * const RevenantHostNSStringTransformLatinToKatakana;
+extern NSString * const RevenantHostNSStringTransformLatinToHiragana;
+extern NSString * const RevenantHostNSStringTransformLatinToHangul;
+extern NSString * const RevenantHostNSStringTransformLatinToArabic;
+extern NSString * const RevenantHostNSStringTransformLatinToHebrew;
+extern NSString * const RevenantHostNSStringTransformLatinToThai;
+extern NSString * const RevenantHostNSStringTransformLatinToCyrillic;
+extern NSString * const RevenantHostNSStringTransformLatinToGreek;
+extern NSString * const RevenantHostNSStringTransformToLatin;
+extern NSString * const RevenantHostNSStringTransformMandarinToLatin;
+extern NSString * const RevenantHostNSStringTransformHiraganaToKatakana;
+extern NSString * const RevenantHostNSStringTransformFullwidthToHalfwidth;
+extern NSString * const RevenantHostNSStringTransformToXMLHex;
+extern NSString * const RevenantHostNSStringTransformToUnicodeName;
+extern NSString * const RevenantHostNSStringTransformStripCombiningMarks;
+extern NSString * const RevenantHostNSStringTransformStripDiacritics;
 
 static int failures;
 static int checks;
@@ -72,28 +72,28 @@ int main(int argc, char **argv)
             .progressConstants = @[NSProgressEstimatedTimeRemainingKey, NSProgressFileOperationKindReceiving, NSProgressFileOperationKindUploading],
             .queryItemClass = [NSURLQueryItem class]
         };
-        Foundation2Implementation charon = {
-            .prefix = @"charonHost_",
-            .autorelease = CharonHostCFAutorelease,
-            .rootObjectKey = CharonHostNSKeyedArchiveRootObjectKey,
-            .ubiquityKeys = @[CharonHostNSURLUbiquitousItemDownloadingStatusKey, CharonHostNSURLUbiquitousItemDownloadingErrorKey, CharonHostNSURLUbiquitousItemUploadingErrorKey,
-                              CharonHostNSURLUbiquitousItemDownloadingStatusNotDownloaded, CharonHostNSURLUbiquitousItemDownloadingStatusDownloaded, CharonHostNSURLUbiquitousItemDownloadingStatusCurrent],
-            .transformNames = @[CharonHostNSStringTransformLatinToKatakana, CharonHostNSStringTransformLatinToHiragana, CharonHostNSStringTransformLatinToHangul, CharonHostNSStringTransformLatinToArabic,
-                                CharonHostNSStringTransformLatinToHebrew, CharonHostNSStringTransformLatinToThai, CharonHostNSStringTransformLatinToCyrillic, CharonHostNSStringTransformLatinToGreek,
-                                CharonHostNSStringTransformToLatin, CharonHostNSStringTransformMandarinToLatin, CharonHostNSStringTransformHiraganaToKatakana,
-                                CharonHostNSStringTransformFullwidthToHalfwidth, CharonHostNSStringTransformToXMLHex, CharonHostNSStringTransformToUnicodeName,
-                                CharonHostNSStringTransformStripCombiningMarks, CharonHostNSStringTransformStripDiacritics],
-            .progressConstants = @[CharonHostNSProgressEstimatedTimeRemainingKey, CharonHostNSProgressFileOperationKindReceiving, CharonHostNSProgressFileOperationKindUploading],
-            .queryItemClass = NSClassFromString(@"CharonHostNSURLQueryItem")
+        Foundation2Implementation revenant = {
+            .prefix = @"revenantHost_",
+            .autorelease = RevenantHostCFAutorelease,
+            .rootObjectKey = RevenantHostNSKeyedArchiveRootObjectKey,
+            .ubiquityKeys = @[RevenantHostNSURLUbiquitousItemDownloadingStatusKey, RevenantHostNSURLUbiquitousItemDownloadingErrorKey, RevenantHostNSURLUbiquitousItemUploadingErrorKey,
+                              RevenantHostNSURLUbiquitousItemDownloadingStatusNotDownloaded, RevenantHostNSURLUbiquitousItemDownloadingStatusDownloaded, RevenantHostNSURLUbiquitousItemDownloadingStatusCurrent],
+            .transformNames = @[RevenantHostNSStringTransformLatinToKatakana, RevenantHostNSStringTransformLatinToHiragana, RevenantHostNSStringTransformLatinToHangul, RevenantHostNSStringTransformLatinToArabic,
+                                RevenantHostNSStringTransformLatinToHebrew, RevenantHostNSStringTransformLatinToThai, RevenantHostNSStringTransformLatinToCyrillic, RevenantHostNSStringTransformLatinToGreek,
+                                RevenantHostNSStringTransformToLatin, RevenantHostNSStringTransformMandarinToLatin, RevenantHostNSStringTransformHiraganaToKatakana,
+                                RevenantHostNSStringTransformFullwidthToHalfwidth, RevenantHostNSStringTransformToXMLHex, RevenantHostNSStringTransformToUnicodeName,
+                                RevenantHostNSStringTransformStripCombiningMarks, RevenantHostNSStringTransformStripDiacritics],
+            .progressConstants = @[RevenantHostNSProgressEstimatedTimeRemainingKey, RevenantHostNSProgressFileOperationKindReceiving, RevenantHostNSProgressFileOperationKindUploading],
+            .queryItemClass = NSClassFromString(@"RevenantHostNSURLQueryItem")
         };
         Foundation2Recorder *theirs = [[Foundation2Recorder alloc] init];
         Foundation2Recorder *mine = [[Foundation2Recorder alloc] init];
         foundation2_run(system, theirs);
-        foundation2_run(charon, mine);
+        foundation2_run(revenant, mine);
         NSOperatingSystemVersion hostVersion = [NSProcessInfo processInfo].operatingSystemVersion;
-        NSOperatingSystemVersion charonVersion = ((NSOperatingSystemVersion (*)(id, SEL))objc_msgSend)([NSProcessInfo processInfo], NSSelectorFromString(@"charonHost_operatingSystemVersion"));
-        check(hostVersion.majorVersion == charonVersion.majorVersion && hostVersion.minorVersion == charonVersion.minorVersion && hostVersion.patchVersion == charonVersion.patchVersion,
-              @"processInfo.version", [NSString stringWithFormat:@"%ld.%ld.%ld != %ld.%ld.%ld", (long)charonVersion.majorVersion, (long)charonVersion.minorVersion, (long)charonVersion.patchVersion,
+        NSOperatingSystemVersion revenantVersion = ((NSOperatingSystemVersion (*)(id, SEL))objc_msgSend)([NSProcessInfo processInfo], NSSelectorFromString(@"revenantHost_operatingSystemVersion"));
+        check(hostVersion.majorVersion == revenantVersion.majorVersion && hostVersion.minorVersion == revenantVersion.minorVersion && hostVersion.patchVersion == revenantVersion.patchVersion,
+              @"processInfo.version", [NSString stringWithFormat:@"%ld.%ld.%ld != %ld.%ld.%ld", (long)revenantVersion.majorVersion, (long)revenantVersion.minorVersion, (long)revenantVersion.patchVersion,
                                        (long)hostVersion.majorVersion, (long)hostVersion.minorVersion, (long)hostVersion.patchVersion]);
         NSCountedSet *tolerated = [NSCountedSet set];
         NSMutableDictionary *examples = [NSMutableDictionary dictionary];

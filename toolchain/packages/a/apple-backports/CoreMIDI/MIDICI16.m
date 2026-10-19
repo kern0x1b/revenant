@@ -1,4 +1,4 @@
-#import "CharonMIDICI.h"
+#import "RevenantMIDICI.h"
 
 @implementation MIDICIDeviceInfo {
     NSData *_manufacturerID;

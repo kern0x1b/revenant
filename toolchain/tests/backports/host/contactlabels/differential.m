@@ -5,7 +5,7 @@
 
 static void check_named(BOOL passed, NSString *name, NSString *detail)
 {
-    charon_check(passed, [name UTF8String], detail);
+    revenant_check(passed, [name UTF8String], detail);
 }
 
 static NSString *plain(void *value)
@@ -27,11 +27,11 @@ int main(int argc, char **argv)
             [names addObject:line];
         }
     }
-    charon_check(names.count == 207, @"the list holds the 207 names the corpus names", [NSString stringWithFormat:@"%lu", (unsigned long)names.count]);
+    revenant_check(names.count == 207, @"the list holds the 207 names the corpus names", [NSString stringWithFormat:@"%lu", (unsigned long)names.count]);
 
     NSUInteger agreed = 0, absent = 0, differed = 0, missingHere = 0;
     for (NSString *name in names) {
-        NSString *renamed = [@"charonHost_" stringByAppendingString:name];
+        NSString *renamed = [@"revenantHost_" stringByAppendingString:name];
         void *found = dlsym(RTLD_DEFAULT, [renamed UTF8String]);
         void *theirs = dlsym(RTLD_DEFAULT, [name UTF8String]);
         if (!theirs) {
@@ -62,10 +62,10 @@ int main(int argc, char **argv)
                 [NSString stringWithFormat:@"%lu are not carried", (unsigned long)missingHere]);
     printf("agreed %lu, differed %lu, the host has no such name %lu\n", (unsigned long)agreed, (unsigned long)differed, (unsigned long)absent);
 
-    NSString *aunt = plain(dlsym(RTLD_DEFAULT, "charonHost_CNLabelContactRelationAunt"));
+    NSString *aunt = plain(dlsym(RTLD_DEFAULT, "revenantHost_CNLabelContactRelationAunt"));
     check_named([aunt isEqualToString:@"_$!<Aunt>!$_"], @"and a name read on its own is the release's own token, not a spelling of the symbol",
                 [NSString stringWithFormat:@"%@", aunt]);
 
-    printf("checks=%d failures=%d\n", charon_checks, charon_failures);
-    return charon_failures == 0 ? 0 : 1;
+    printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
+    return revenant_failures == 0 ? 0 : 1;
 }

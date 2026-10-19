@@ -1,9 +1,9 @@
-function charon()
+function revenant()
     return path.directory(path.directory(path.directory(path.absolute(os.scriptdir()))))
 end
 
 function workspace()
-    return import("workspace", {rootdir = path.join(charon(), "modules"), anonymous = true})
+    return import("workspace", {rootdir = path.join(revenant(), "modules"), anonymous = true})
 end
 
 function stamp()

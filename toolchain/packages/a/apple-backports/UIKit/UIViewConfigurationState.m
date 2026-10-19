@@ -1,10 +1,10 @@
-#import "CharonLists.h"
+#import "RevenantLists.h"
 
 #pragma clang diagnostic ignored "-Wobjc-designated-initializers"
 
-static NSString *const CharonTraitsKey = @"traitCollection";
-static NSString *const CharonFlagsKey = @"flags";
-static NSString *const CharonCustomKey = @"customStates";
+static NSString *const RevenantTraitsKey = @"traitCollection";
+static NSString *const RevenantFlagsKey = @"flags";
+static NSString *const RevenantCustomKey = @"customStates";
 
 @implementation UIViewConfigurationState {
 @private
@@ -35,11 +35,11 @@ static NSString *const CharonCustomKey = @"customStates";
 
 - (instancetype)initWithCoder:(NSCoder *)coder
 {
-    UITraitCollection *traits = [coder decodeObjectOfClass:[UITraitCollection class] forKey:CharonTraitsKey];
+    UITraitCollection *traits = [coder decodeObjectOfClass:[UITraitCollection class] forKey:RevenantTraitsKey];
     if ((self = [self initWithTraitCollection:traits ?: [[UITraitCollection alloc] init]])) {
-        _flags = (NSUInteger)[coder decodeIntegerForKey:CharonFlagsKey];
+        _flags = (NSUInteger)[coder decodeIntegerForKey:RevenantFlagsKey];
         NSSet *classes = [NSSet setWithObjects:[NSDictionary class], [NSString class], [NSNumber class], [NSArray class], [NSData class], [NSDate class], [NSNull class], nil];
-        NSDictionary *custom = [coder decodeObjectOfClasses:classes forKey:CharonCustomKey];
+        NSDictionary *custom = [coder decodeObjectOfClasses:classes forKey:RevenantCustomKey];
         if (custom)
             _customStates = [custom mutableCopy];
     }
@@ -48,10 +48,10 @@ static NSString *const CharonCustomKey = @"customStates";
 
 - (void)encodeWithCoder:(NSCoder *)coder
 {
-    [coder encodeObject:_traitCollection forKey:CharonTraitsKey];
-    [coder encodeInteger:(NSInteger)_flags forKey:CharonFlagsKey];
+    [coder encodeObject:_traitCollection forKey:RevenantTraitsKey];
+    [coder encodeInteger:(NSInteger)_flags forKey:RevenantFlagsKey];
     if (_customStates)
-        [coder encodeObject:_customStates forKey:CharonCustomKey];
+        [coder encodeObject:_customStates forKey:RevenantCustomKey];
 }
 
 - (id)copyWithZone:(NSZone *)zone
@@ -73,67 +73,67 @@ static NSString *const CharonCustomKey = @"customStates";
     _traitCollection = traitCollection;
 }
 
-- (BOOL)charon_flag:(NSUInteger)bit
+- (BOOL)revenant_flag:(NSUInteger)bit
 {
     return (_flags & bit) != 0;
 }
 
-- (void)charon_setFlag:(NSUInteger)bit value:(BOOL)value
+- (void)revenant_setFlag:(NSUInteger)bit value:(BOOL)value
 {
     _flags = value ? (_flags | bit) : (_flags & ~bit);
 }
 
 - (BOOL)isDisabled
 {
-    return [self charon_flag:1];
+    return [self revenant_flag:1];
 }
 
 - (void)setDisabled:(BOOL)disabled
 {
-    [self charon_setFlag:1 value:disabled];
+    [self revenant_setFlag:1 value:disabled];
 }
 
 - (BOOL)isHighlighted
 {
-    return [self charon_flag:2];
+    return [self revenant_flag:2];
 }
 
 - (void)setHighlighted:(BOOL)highlighted
 {
-    [self charon_setFlag:2 value:highlighted];
+    [self revenant_setFlag:2 value:highlighted];
 }
 
 - (BOOL)isSelected
 {
-    return [self charon_flag:4];
+    return [self revenant_flag:4];
 }
 
 - (void)setSelected:(BOOL)selected
 {
-    [self charon_setFlag:4 value:selected];
+    [self revenant_setFlag:4 value:selected];
 }
 
 - (BOOL)isFocused
 {
-    return [self charon_flag:8];
+    return [self revenant_flag:8];
 }
 
 - (BOOL)isPinned
 {
-    return [self charon_flag:16];
+    return [self revenant_flag:16];
 }
 
 - (void)setPinned:(BOOL)pinned
 {
-    [self charon_setFlag:16 value:pinned];
+    [self revenant_setFlag:16 value:pinned];
 }
 
 - (void)setFocused:(BOOL)focused
 {
-    [self charon_setFlag:8 value:focused];
+    [self revenant_setFlag:8 value:focused];
 }
 
-- (NSUInteger)charon_flags
+- (NSUInteger)revenant_flags
 {
     return _flags;
 }
@@ -163,7 +163,7 @@ static NSString *const CharonCustomKey = @"customStates";
     [self setCustomState:object forKey:key];
 }
 
-- (NSDictionary *)charon_customStates
+- (NSDictionary *)revenant_customStates
 {
     return _customStates;
 }
@@ -183,7 +183,7 @@ static NSString *const CharonCustomKey = @"customStates";
     return [_traitCollection hash] ^ ((_flags & 31) * 0x9e3779b1u) ^ [_customStates hash];
 }
 
-- (NSString *)charon_descriptionTail
+- (NSString *)revenant_descriptionTail
 {
     NSMutableString *text = [NSMutableString string];
     if ([self isDisabled])
@@ -200,13 +200,13 @@ static NSString *const CharonCustomKey = @"customStates";
 - (NSString *)description
 {
     NSMutableString *text = [NSMutableString stringWithFormat:@"<%@: %p; traitCollection = %@", [self class], self, _traitCollection];
-    [text appendString:[self charon_descriptionTail]];
-    [text appendString:[self charon_customTail]];
+    [text appendString:[self revenant_descriptionTail]];
+    [text appendString:[self revenant_customTail]];
     [text appendString:@">"];
     return text;
 }
 
-- (NSString *)charon_customTail
+- (NSString *)revenant_customTail
 {
     return _customStates ? [NSString stringWithFormat:@"; Custom = %@", _customStates] : @"";
 }
@@ -255,42 +255,42 @@ static NSString *const CharonCustomKey = @"customStates";
 
 - (BOOL)isEditing
 {
-    return [self charon_flag:16];
+    return [self revenant_flag:16];
 }
 
 - (void)setEditing:(BOOL)editing
 {
-    [self charon_setFlag:16 value:editing];
+    [self revenant_setFlag:16 value:editing];
 }
 
 - (BOOL)isExpanded
 {
-    return [self charon_flag:32];
+    return [self revenant_flag:32];
 }
 
 - (void)setExpanded:(BOOL)expanded
 {
-    [self charon_setFlag:32 value:expanded];
+    [self revenant_setFlag:32 value:expanded];
 }
 
 - (BOOL)isSwiped
 {
-    return [self charon_flag:64];
+    return [self revenant_flag:64];
 }
 
 - (void)setSwiped:(BOOL)swiped
 {
-    [self charon_setFlag:64 value:swiped];
+    [self revenant_setFlag:64 value:swiped];
 }
 
 - (BOOL)isReordering
 {
-    return [self charon_flag:128];
+    return [self revenant_flag:128];
 }
 
 - (void)setReordering:(BOOL)reordering
 {
-    [self charon_setFlag:128 value:reordering];
+    [self revenant_setFlag:128 value:reordering];
 }
 
 - (UICellConfigurationDragState)cellDragState
@@ -320,17 +320,17 @@ static NSString *const CharonCustomKey = @"customStates";
     if (![object isKindOfClass:[UICellConfigurationState class]] || ![super isEqual:object])
         return NO;
     UICellConfigurationState *other = object;
-    return ([self charon_flags] & 240) == ([other charon_flags] & 240) && _dragState == other->_dragState && _dropState == other->_dropState;
+    return ([self revenant_flags] & 240) == ([other revenant_flags] & 240) && _dragState == other->_dragState && _dropState == other->_dropState;
 }
 
 - (NSUInteger)hash
 {
-    return [super hash] ^ (([self charon_flags] & 240) << 8) ^ ((NSUInteger)_dragState << 16) ^ ((NSUInteger)_dropState << 20);
+    return [super hash] ^ (([self revenant_flags] & 240) << 8) ^ ((NSUInteger)_dragState << 16) ^ ((NSUInteger)_dropState << 20);
 }
 
-- (NSString *)charon_descriptionTail
+- (NSString *)revenant_descriptionTail
 {
-    NSMutableString *text = [NSMutableString stringWithString:[super charon_descriptionTail]];
+    NSMutableString *text = [NSMutableString stringWithString:[super revenant_descriptionTail]];
     if ([self isEditing])
         [text appendString:@"; Editing"];
     if ([self isExpanded])

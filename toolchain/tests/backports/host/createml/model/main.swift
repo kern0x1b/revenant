@@ -21,7 +21,7 @@ let coefficients: [Float] = [2.0, -1.5]
 let intercept: Float = 3.0
 let writer = ModelWriter.model(featureName: "x", outputName: "prediction",
                               weights: coefficients, bias: intercept,
-                              author: "charon CreateML", version: "1.0",
+                              author: "revenant CreateML", version: "1.0",
                               description: "the port's linear regressor")
 let path = NSTemporaryDirectory() + "/createml-model-\(getpid()).mlmodel"
 do {

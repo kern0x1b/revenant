@@ -1,6 +1,6 @@
 #import <CoreLocation/CoreLocation.h>
 
-@implementation CLLocationManager (CharonVisits)
+@implementation CLLocationManager (RevenantVisits)
 
 - (void)startMonitoringVisits
 {

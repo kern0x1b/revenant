@@ -3,14 +3,14 @@
 
 #pragma clang diagnostic ignored "-Wobjc-missing-property-synthesis"
 
-#define CharonCtxContext CharonGOCtxContext
+#define RevenantCtxContext RevenantGOCtxContext
 
-@interface CharonCtxContext : CIContext
+@interface RevenantCtxContext : CIContext
 - (instancetype)initWithContext:(CIContext *)context cgContext:(CGContextRef)cgctx options:(NSDictionary *)options;
-- (CGContextRef)charon_drawingContext;
+- (CGContextRef)revenant_drawingContext;
 @end
 
-@implementation CharonCtxContext {
+@implementation RevenantCtxContext {
     CGContextRef _cgctx;
     NSDictionary *_options;
 }
@@ -27,7 +27,7 @@
     return self;
 }
 
-- (CGContextRef)charon_drawingContext
+- (CGContextRef)revenant_drawingContext
 {
     return _cgctx;
 }
@@ -59,11 +59,11 @@
 
 @end
 
-@implementation CIContext (CharonGCOwner)
+@implementation CIContext (RevenantGCOwner)
 
 + (instancetype)contextWithCGContext:(CGContextRef)cgctx options:(NSDictionary *)options
 {
-    return [[CharonCtxContext alloc] initWithContext:nil cgContext:cgctx options:options ?: @{}];
+    return [[RevenantCtxContext alloc] initWithContext:nil cgContext:cgctx options:options ?: @{}];
 }
 
 @end

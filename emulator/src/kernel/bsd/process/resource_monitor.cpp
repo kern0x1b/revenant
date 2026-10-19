@@ -8,7 +8,7 @@
 #include "kernel/kernel_shared_state.hpp"
 #include <mutex>
 
-namespace shade::kernel_bsd::resource_monitor {
+namespace emulator::kernel_bsd::resource_monitor {
 
 std::uint32_t control(AddressSpace& memory, KernelSharedState& state,
     const ProcessContext& caller, std::uint32_t pid, std::uint32_t flavor,

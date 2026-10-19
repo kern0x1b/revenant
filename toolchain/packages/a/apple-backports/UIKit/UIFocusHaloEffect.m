@@ -7,24 +7,24 @@
     UIFocusHaloEffectPosition _position;
 }
 
-+ (instancetype)charon_halo
++ (instancetype)revenant_halo
 {
     return ((id (*)(id, SEL))objc_msgSend)(((id (*)(id, SEL))objc_msgSend)(self, @selector(alloc)), @selector(init));
 }
 
 + (instancetype)effectWithRect:(CGRect)rect
 {
-    return [self charon_halo];
+    return [self revenant_halo];
 }
 
 + (instancetype)effectWithRoundedRect:(CGRect)rect cornerRadius:(CGFloat)cornerRadius curve:(CALayerCornerCurve)curve
 {
-    return [self charon_halo];
+    return [self revenant_halo];
 }
 
 + (instancetype)effectWithPath:(UIBezierPath *)bezierPath
 {
-    return [self charon_halo];
+    return [self revenant_halo];
 }
 
 - (UIView *)containerView

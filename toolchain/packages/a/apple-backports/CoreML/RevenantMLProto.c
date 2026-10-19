@@ -1,4 +1,4 @@
-#include "CharonMLProto.h"
+#include "RevenantMLProto.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -67,12 +67,12 @@ static float bits_to_float(uint32_t bits)
     return value;
 }
 
-static unsigned oneof_of(const charon_ml_field *field)
+static unsigned oneof_of(const revenant_ml_field *field)
 {
-    return field == NULL ? 0 : (field->flags & ~CHARON_ML_REPEATED) >> 1;
+    return field == NULL ? 0 : (field->flags & ~REVENANT_ML_REPEATED) >> 1;
 }
 
-static int read_value(wire *w, charon_ml_node *out, const charon_ml_field *field, const char *type)
+static int read_value(wire *w, revenant_ml_node *out, const revenant_ml_field *field, const char *type)
 {
     uint64_t bits = 0;
     const char *bytes;
@@ -80,57 +80,57 @@ static int read_value(wire *w, charon_ml_node *out, const charon_ml_field *field
 
     out->message = NULL;
 
-    if (field->wire == CHARON_ML_WIRE_VARINT) {
+    if (field->wire == REVENANT_ML_WIRE_VARINT) {
         if (!varint(w, &bits)) {
             return 0;
         }
         switch (field->kind) {
-        case CHARON_ML_KIND_DOUBLE:
+        case REVENANT_ML_KIND_DOUBLE:
             out->value.number = bits_to_double(bits);
             break;
-        case CHARON_ML_KIND_FLOAT:
+        case REVENANT_ML_KIND_FLOAT:
             out->value.number = (double)bits_to_float(low32(bits));
             break;
-        case CHARON_ML_KIND_UINT64:
-        case CHARON_ML_KIND_FIXED64:
+        case REVENANT_ML_KIND_UINT64:
+        case REVENANT_ML_KIND_FIXED64:
             out->value.unsigned_integer = bits;
             break;
-        case CHARON_ML_KIND_BOOL:
+        case REVENANT_ML_KIND_BOOL:
             out->value.unsigned_integer = bits ? 1 : 0;
             break;
-        case CHARON_ML_KIND_SINT32:
+        case REVENANT_ML_KIND_SINT32:
             out->value.integer = (int32_t)zigzag(low32(bits));
             break;
-        case CHARON_ML_KIND_SINT64:
+        case REVENANT_ML_KIND_SINT64:
             out->value.integer = (int64_t)zigzag(bits);
             break;
-        case CHARON_ML_KIND_UINT32:
-        case CHARON_ML_KIND_FIXED32:
+        case REVENANT_ML_KIND_UINT32:
+        case REVENANT_ML_KIND_FIXED32:
             out->value.unsigned_integer = low32(bits);
             break;
-        case CHARON_ML_KIND_INT32:
-        case CHARON_ML_KIND_SFIXED32:
-        case CHARON_ML_KIND_ENUM:
+        case REVENANT_ML_KIND_INT32:
+        case REVENANT_ML_KIND_SFIXED32:
+        case REVENANT_ML_KIND_ENUM:
             out->value.integer = (int32_t)low32(bits);
             break;
-        case CHARON_ML_KIND_INT64:
-        case CHARON_ML_KIND_SFIXED64:
+        case REVENANT_ML_KIND_INT64:
+        case REVENANT_ML_KIND_SFIXED64:
         default:
             out->value.integer = (int64_t)bits;
             break;
         }
         return 1;
     }
-    if (field->wire == CHARON_ML_WIRE_64 || field->wire == CHARON_ML_WIRE_32) {
-        size_t width = field->wire == CHARON_ML_WIRE_64 ? 8 : 4;
+    if (field->wire == REVENANT_ML_WIRE_64 || field->wire == REVENANT_ML_WIRE_32) {
+        size_t width = field->wire == REVENANT_ML_WIRE_64 ? 8 : 4;
         uint64_t raw;
         if (!take(w, width, &bytes)) {
             return 0;
         }
         memcpy(&raw, bytes, width);
-        if (field->kind == CHARON_ML_KIND_DOUBLE) {
+        if (field->kind == REVENANT_ML_KIND_DOUBLE) {
             out->value.number = bits_to_double(raw);
-        } else if (field->kind == CHARON_ML_KIND_FLOAT) {
+        } else if (field->kind == REVENANT_ML_KIND_FLOAT) {
             out->value.number = (double)bits_to_float(low32(raw));
         } else if (width == 8) {
             out->value.integer = (int64_t)raw;
@@ -143,46 +143,46 @@ static int read_value(wire *w, charon_ml_node *out, const charon_ml_field *field
         return 0;
     }
     length = (size_t)bits;
-    if (field->kind == CHARON_ML_KIND_STRING || field->kind == CHARON_ML_KIND_BYTES) {
+    if (field->kind == REVENANT_ML_KIND_STRING || field->kind == REVENANT_ML_KIND_BYTES) {
         out->value.text.bytes = bytes;
         out->value.text.length = length;
         return 1;
     }
-    if (field->element != CHARON_ML_FIELD_NONE) {
-        charon_ml_field element = *field;
+    if (field->element != REVENANT_ML_FIELD_NONE) {
+        revenant_ml_field element = *field;
         wire run;
-        charon_ml_node *nodes;
+        revenant_ml_node *nodes;
         size_t count = 0, capacity = 8, width;
 
         switch (field->element) {
-        case CHARON_ML_KIND_DOUBLE:
-        case CHARON_ML_KIND_FIXED64:
-        case CHARON_ML_KIND_SFIXED64:
+        case REVENANT_ML_KIND_DOUBLE:
+        case REVENANT_ML_KIND_FIXED64:
+        case REVENANT_ML_KIND_SFIXED64:
             width = 8;
             break;
-        case CHARON_ML_KIND_FLOAT:
-        case CHARON_ML_KIND_FIXED32:
-        case CHARON_ML_KIND_SFIXED32:
+        case REVENANT_ML_KIND_FLOAT:
+        case REVENANT_ML_KIND_FIXED32:
+        case REVENANT_ML_KIND_SFIXED32:
             width = 4;
             break;
         default:
             width = 0;
             break;
         }
-        element.element = CHARON_ML_FIELD_NONE;
-        element.flags &= ~(unsigned)CHARON_ML_REPEATED;
-        element.wire = width == 0 ? CHARON_ML_WIRE_VARINT
-                                  : (width == 8 ? CHARON_ML_WIRE_64 : CHARON_ML_WIRE_32);
+        element.element = REVENANT_ML_FIELD_NONE;
+        element.flags &= ~(unsigned)REVENANT_ML_REPEATED;
+        element.wire = width == 0 ? REVENANT_ML_WIRE_VARINT
+                                  : (width == 8 ? REVENANT_ML_WIRE_64 : REVENANT_ML_WIRE_32);
         run.at = bytes;
         run.end = bytes + length;
         run.failed = 0;
-        nodes = (charon_ml_node *)calloc(capacity, sizeof *nodes);
+        nodes = (revenant_ml_node *)calloc(capacity, sizeof *nodes);
         if (nodes == NULL) {
             return 0;
         }
         while (run.at < run.end) {
             if (count == capacity) {
-                charon_ml_node *grown = (charon_ml_node *)realloc(nodes, capacity * 2 * sizeof *nodes);
+                revenant_ml_node *grown = (revenant_ml_node *)realloc(nodes, capacity * 2 * sizeof *nodes);
                 if (grown == NULL) {
                     free(nodes);
                     return 0;
@@ -205,8 +205,8 @@ static int read_value(wire *w, charon_ml_node *out, const charon_ml_field *field
         return 1;
     }
     {
-        charon_ml_node sub;
-        if (charon_ml_read(&sub, bytes, length, type) == 0) {
+        revenant_ml_node sub;
+        if (revenant_ml_read(&sub, bytes, length, type) == 0) {
             w->failed = 1;
             return 0;
         }
@@ -216,9 +216,9 @@ static int read_value(wire *w, charon_ml_node *out, const charon_ml_field *field
     return 1;
 }
 
-static int read_message(wire *w, charon_ml_node *out, const charon_ml_message *message, const char *type)
+static int read_message(wire *w, revenant_ml_node *out, const revenant_ml_message *message, const char *type)
 {
-    charon_ml_node *entries = (charon_ml_node *)calloc(8, sizeof *entries);
+    revenant_ml_node *entries = (revenant_ml_node *)calloc(8, sizeof *entries);
     size_t capacity = 8, count = 0;
 
     out->message = message;
@@ -231,30 +231,30 @@ static int read_message(wire *w, charon_ml_node *out, const charon_ml_message *m
     while (w->at < w->end) {
         uint64_t key = 0;
         int number, wire_type;
-        const charon_ml_field *field;
-        charon_ml_node *entry;
+        const revenant_ml_field *field;
+        revenant_ml_node *entry;
 
         if (!varint(w, &key)) {
             break;
         }
         number = (int)(key >> 3);
         wire_type = (int)(key & 7);
-        field = charon_ml_field_named(message, number);
+        field = revenant_ml_field_named(message, number);
         if (field == NULL || field->wire != wire_type) {
             wire step = {w->at, w->end, 0};
             uint64_t skip = 0;
             const char *at;
             switch (wire_type) {
-            case CHARON_ML_WIRE_VARINT:
+            case REVENANT_ML_WIRE_VARINT:
                 varint(&step, &skip);
                 break;
-            case CHARON_ML_WIRE_64:
+            case REVENANT_ML_WIRE_64:
                 take(&step, 8, &at);
                 break;
-            case CHARON_ML_WIRE_32:
+            case REVENANT_ML_WIRE_32:
                 take(&step, 4, &at);
                 break;
-            case CHARON_ML_WIRE_STRING:
+            case REVENANT_ML_WIRE_STRING:
                 if (varint(&step, &skip)) {
                     take(&step, (size_t)skip, &at);
                 }
@@ -271,7 +271,7 @@ static int read_message(wire *w, charon_ml_node *out, const charon_ml_message *m
             continue;
         }
         if (count == capacity) {
-            charon_ml_node *grown = (charon_ml_node *)realloc(entries, capacity * 2 * sizeof *entries);
+            revenant_ml_node *grown = (revenant_ml_node *)realloc(entries, capacity * 2 * sizeof *entries);
             if (grown == NULL) {
                 w->failed = 1;
                 break;
@@ -287,18 +287,18 @@ static int read_message(wire *w, charon_ml_node *out, const charon_ml_message *m
             w->failed = 1;
             break;
         }
-        if ((field->flags & CHARON_ML_REPEATED) == 0 || field->element == CHARON_ML_FIELD_NONE) {
+        if ((field->flags & REVENANT_ML_REPEATED) == 0 || field->element == REVENANT_ML_FIELD_NONE) {
             count++;
             continue;
         }
         {
-            charon_ml_node *run = entry->value.list.nodes;
+            revenant_ml_node *run = entry->value.list.nodes;
             size_t elements = entry->value.list.count, inner;
             while (count + elements > capacity) {
-                charon_ml_node *grown = (charon_ml_node *)realloc(entries, capacity * 2 * sizeof *entries);
+                revenant_ml_node *grown = (revenant_ml_node *)realloc(entries, capacity * 2 * sizeof *entries);
                 if (grown == NULL) {
                     for (inner = 0; inner < elements; inner++) {
-                        charon_ml_free(&run[inner]);
+                        revenant_ml_free(&run[inner]);
                     }
                     free(run);
                     w->failed = 1;
@@ -320,7 +320,7 @@ static int read_message(wire *w, charon_ml_node *out, const charon_ml_message *m
     if (w->failed) {
         size_t index;
         for (index = 0; index < count; index++) {
-            charon_ml_free(&entries[index]);
+            revenant_ml_free(&entries[index]);
         }
         free(entries);
         return 0;
@@ -330,20 +330,20 @@ static int read_message(wire *w, charon_ml_node *out, const charon_ml_message *m
     return 1;
 }
 
-static int holds_list(const charon_ml_node *node)
+static int holds_list(const revenant_ml_node *node)
 {
-    return node != NULL && (node->field == NULL || node->field->kind == CHARON_ML_KIND_MESSAGE);
+    return node != NULL && (node->field == NULL || node->field->kind == REVENANT_ML_KIND_MESSAGE);
 }
 
-int charon_ml_read(charon_ml_node *out, const void *bytes, size_t length, const char *type)
+int revenant_ml_read(revenant_ml_node *out, const void *bytes, size_t length, const char *type)
 {
     static const char package[] = "CoreML.Specification.";
-    const charon_ml_message *message = charon_ml_message_named(type);
+    const revenant_ml_message *message = revenant_ml_message_named(type);
     wire w;
 
     memset(out, 0, sizeof *out);
     if (message == NULL && strncmp(type, package, sizeof package - 1) == 0) {
-        message = charon_ml_message_named(type + sizeof package - 1);
+        message = revenant_ml_message_named(type + sizeof package - 1);
     }
     if (message == NULL) {
         return 0;
@@ -358,48 +358,48 @@ int charon_ml_read(charon_ml_node *out, const void *bytes, size_t length, const 
     return 1;
 }
 
-void charon_ml_free(charon_ml_node *node)
+void revenant_ml_free(revenant_ml_node *node)
 {
     size_t index;
     if (!holds_list(node) || node->value.list.nodes == NULL) {
         return;
     }
     for (index = 0; index < node->value.list.count; index++) {
-        charon_ml_free(&node->value.list.nodes[index]);
+        revenant_ml_free(&node->value.list.nodes[index]);
     }
     free(node->value.list.nodes);
     node->value.list.nodes = NULL;
     node->value.list.count = 0;
 }
 
-size_t charon_ml_count(const charon_ml_node *node)
+size_t revenant_ml_count(const revenant_ml_node *node)
 {
     return holds_list(node) ? node->value.list.count : 0;
 }
 
-const charon_ml_node *charon_ml_at(const charon_ml_node *node, size_t index)
+const revenant_ml_node *revenant_ml_at(const revenant_ml_node *node, size_t index)
 {
-    if (index >= charon_ml_count(node)) {
+    if (index >= revenant_ml_count(node)) {
         return NULL;
     }
     return &node->value.list.nodes[index];
 }
 
-int charon_ml_int_at(const charon_ml_node *node, const char *name, size_t index, int fallback)
+int revenant_ml_int_at(const revenant_ml_node *node, const char *name, size_t index, int fallback)
 {
-    return charon_ml_int(charon_ml_node_at_field(node, name, index), fallback);
+    return revenant_ml_int(revenant_ml_node_at_field(node, name, index), fallback);
 }
 
-double charon_ml_double_at(const charon_ml_node *node, const char *name, size_t index, double fallback)
+double revenant_ml_double_at(const revenant_ml_node *node, const char *name, size_t index, double fallback)
 {
-    return charon_ml_double(charon_ml_node_at_field(node, name, index), fallback);
+    return revenant_ml_double(revenant_ml_node_at_field(node, name, index), fallback);
 }
 
-size_t charon_ml_count_field(const charon_ml_node *node, const char *name)
+size_t revenant_ml_count_field(const revenant_ml_node *node, const char *name)
 {
     size_t index, found = 0;
-    for (index = 0; index < charon_ml_count(node); index++) {
-        const charon_ml_node *entry = &node->value.list.nodes[index];
+    for (index = 0; index < revenant_ml_count(node); index++) {
+        const revenant_ml_node *entry = &node->value.list.nodes[index];
         if (entry->field != NULL && strcmp(entry->field->name, name) == 0) {
             found++;
         }
@@ -407,11 +407,11 @@ size_t charon_ml_count_field(const charon_ml_node *node, const char *name)
     return found;
 }
 
-const charon_ml_node *charon_ml_node_at_field(const charon_ml_node *node, const char *name, size_t index)
+const revenant_ml_node *revenant_ml_node_at_field(const revenant_ml_node *node, const char *name, size_t index)
 {
     size_t at, found = 0;
-    for (at = 0; at < charon_ml_count(node); at++) {
-        const charon_ml_node *entry = &node->value.list.nodes[at];
+    for (at = 0; at < revenant_ml_count(node); at++) {
+        const revenant_ml_node *entry = &node->value.list.nodes[at];
         if (entry->field != NULL && strcmp(entry->field->name, name) == 0) {
             if (found == index) {
                 return entry;
@@ -422,12 +422,12 @@ const charon_ml_node *charon_ml_node_at_field(const charon_ml_node *node, const 
     return NULL;
 }
 
-const charon_ml_node *charon_ml_get(const charon_ml_node *node, const char *name)
+const revenant_ml_node *revenant_ml_get(const revenant_ml_node *node, const char *name)
 {
-    const charon_ml_node *found = NULL;
+    const revenant_ml_node *found = NULL;
     size_t index;
-    for (index = 0; index < charon_ml_count(node); index++) {
-        const charon_ml_node *entry = &node->value.list.nodes[index];
+    for (index = 0; index < revenant_ml_count(node); index++) {
+        const revenant_ml_node *entry = &node->value.list.nodes[index];
         if (entry->field != NULL && strcmp(entry->field->name, name) == 0) {
             found = entry;
         }
@@ -435,9 +435,9 @@ const charon_ml_node *charon_ml_get(const charon_ml_node *node, const char *name
     return found;
 }
 
-const charon_ml_node *charon_ml_oneof(const charon_ml_node *node, const char *name)
+const revenant_ml_node *revenant_ml_oneof(const revenant_ml_node *node, const char *name)
 {
-    const charon_ml_node *want = charon_ml_get(node, name);
+    const revenant_ml_node *want = revenant_ml_get(node, name);
     unsigned oneof;
     size_t index;
 
@@ -448,8 +448,8 @@ const charon_ml_node *charon_ml_oneof(const charon_ml_node *node, const char *na
     if (oneof == 0) {
         return want;
     }
-    for (index = 0; index < charon_ml_count(node); index++) {
-        const charon_ml_node *entry = &node->value.list.nodes[index];
+    for (index = 0; index < revenant_ml_count(node); index++) {
+        const revenant_ml_node *entry = &node->value.list.nodes[index];
         if (oneof_of(entry->field) == oneof && entry != want) {
             return NULL;
         }
@@ -457,54 +457,54 @@ const charon_ml_node *charon_ml_oneof(const charon_ml_node *node, const char *na
     return want;
 }
 
-int charon_ml_int(const charon_ml_node *node, int64_t fallback)
+int revenant_ml_int(const revenant_ml_node *node, int64_t fallback)
 {
     if (node == NULL) {
         return (int)fallback;
     }
-    switch (node->field != NULL ? node->field->kind : CHARON_ML_FIELD_NONE) {
-    case CHARON_ML_KIND_DOUBLE:
-    case CHARON_ML_KIND_FLOAT:
+    switch (node->field != NULL ? node->field->kind : REVENANT_ML_FIELD_NONE) {
+    case REVENANT_ML_KIND_DOUBLE:
+    case REVENANT_ML_KIND_FLOAT:
         return (int)node->value.number;
-    case CHARON_ML_KIND_UINT64:
-    case CHARON_ML_KIND_FIXED64:
-    case CHARON_ML_KIND_UINT32:
-    case CHARON_ML_KIND_FIXED32:
-    case CHARON_ML_KIND_BOOL:
+    case REVENANT_ML_KIND_UINT64:
+    case REVENANT_ML_KIND_FIXED64:
+    case REVENANT_ML_KIND_UINT32:
+    case REVENANT_ML_KIND_FIXED32:
+    case REVENANT_ML_KIND_BOOL:
         return (int)node->value.unsigned_integer;
-    case CHARON_ML_FIELD_NONE:
+    case REVENANT_ML_FIELD_NONE:
         return (int)fallback;
     default:
         return (int)node->value.integer;
     }
 }
 
-double charon_ml_double(const charon_ml_node *node, double fallback)
+double revenant_ml_double(const revenant_ml_node *node, double fallback)
 {
     if (node == NULL) {
         return fallback;
     }
-    switch (node->field != NULL ? node->field->kind : CHARON_ML_FIELD_NONE) {
-    case CHARON_ML_KIND_DOUBLE:
-    case CHARON_ML_KIND_FLOAT:
+    switch (node->field != NULL ? node->field->kind : REVENANT_ML_FIELD_NONE) {
+    case REVENANT_ML_KIND_DOUBLE:
+    case REVENANT_ML_KIND_FLOAT:
         return node->value.number;
-    case CHARON_ML_KIND_UINT64:
-    case CHARON_ML_KIND_FIXED64:
-    case CHARON_ML_KIND_UINT32:
-    case CHARON_ML_KIND_FIXED32:
-    case CHARON_ML_KIND_BOOL:
+    case REVENANT_ML_KIND_UINT64:
+    case REVENANT_ML_KIND_FIXED64:
+    case REVENANT_ML_KIND_UINT32:
+    case REVENANT_ML_KIND_FIXED32:
+    case REVENANT_ML_KIND_BOOL:
         return (double)node->value.unsigned_integer;
-    case CHARON_ML_FIELD_NONE:
+    case REVENANT_ML_FIELD_NONE:
         return fallback;
     default:
         return (double)node->value.integer;
     }
 }
 
-const char *charon_ml_text(const charon_ml_node *node, char *out, size_t size)
+const char *revenant_ml_text(const revenant_ml_node *node, char *out, size_t size)
 {
     if (node == NULL || node->field == NULL ||
-        (node->field->kind != CHARON_ML_KIND_STRING && node->field->kind != CHARON_ML_KIND_BYTES) ||
+        (node->field->kind != REVENANT_ML_KIND_STRING && node->field->kind != REVENANT_ML_KIND_BYTES) ||
         node->value.text.length + 1 > size) {
         return NULL;
     }
@@ -513,7 +513,7 @@ const char *charon_ml_text(const charon_ml_node *node, char *out, size_t size)
     return out;
 }
 
-const char *charon_ml_type(const charon_ml_node *node)
+const char *revenant_ml_type(const revenant_ml_node *node)
 {
     if (node == NULL || node->field == NULL) {
         return NULL;

@@ -6,13 +6,13 @@
 
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 
-vDSP_biquad_Setup charon_host_vDSP_biquad_CreateSetup(const double *coeffs, vDSP_Length M);
-vDSP_biquad_SetupD charon_host_vDSP_biquad_CreateSetupD(const double *coeffs, vDSP_Length M);
-void charon_host_vDSP_biquad_DestroySetup(vDSP_biquad_Setup setup);
-void charon_host_vDSP_biquad_DestroySetupD(vDSP_biquad_SetupD setup);
-void charon_host_vDSP_biquad(const struct vDSP_biquad_SetupStruct *setup, float *delay, const float *x,
+vDSP_biquad_Setup revenant_host_vDSP_biquad_CreateSetup(const double *coeffs, vDSP_Length M);
+vDSP_biquad_SetupD revenant_host_vDSP_biquad_CreateSetupD(const double *coeffs, vDSP_Length M);
+void revenant_host_vDSP_biquad_DestroySetup(vDSP_biquad_Setup setup);
+void revenant_host_vDSP_biquad_DestroySetupD(vDSP_biquad_SetupD setup);
+void revenant_host_vDSP_biquad(const struct vDSP_biquad_SetupStruct *setup, float *delay, const float *x,
                              vDSP_Stride ix, float *y, vDSP_Stride iy, vDSP_Length n);
-void charon_host_vDSP_biquadD(const struct vDSP_biquad_SetupStructD *setup, double *delay, const double *x,
+void revenant_host_vDSP_biquadD(const struct vDSP_biquad_SetupStructD *setup, double *delay, const double *x,
                               vDSP_Stride ix, double *y, vDSP_Stride iy, vDSP_Length n);
 
 static int checks;
@@ -59,7 +59,7 @@ static void run_float(const char *what, vDSP_Length sections, const double *patt
     char detail[256];
     fill_pattern(coeffs, sections, pattern);
 
-    vDSP_biquad_Setup mine = charon_host_vDSP_biquad_CreateSetup(coeffs, sections);
+    vDSP_biquad_Setup mine = revenant_host_vDSP_biquad_CreateSetup(coeffs, sections);
     vDSP_biquad_Setup theirs = vDSP_biquad_CreateSetup(coeffs, sections);
     if (!mine || !theirs) {
         snprintf(detail, sizeof detail, "the port's setup is %s and the host's is %s", mine ? "not NULL" : "NULL",
@@ -67,7 +67,7 @@ static void run_float(const char *what, vDSP_Length sections, const double *patt
         char label[128];
         snprintf(label, sizeof label, "%s with %d sections", what, (int)sections);
         report(label, 0, detail, 1);
-        if (mine) charon_host_vDSP_biquad_DestroySetup(mine);
+        if (mine) revenant_host_vDSP_biquad_DestroySetup(mine);
         if (theirs) vDSP_biquad_DestroySetup(theirs);
         return;
     }
@@ -84,7 +84,7 @@ static void run_float(const char *what, vDSP_Length sections, const double *patt
         memset(mine_y, 0x5a, sizeof mine_y);
         memset(their_y, 0x5a, sizeof their_y);
         memset(hostm_y, 0x5a, sizeof hostm_y);
-        charon_host_vDSP_biquad((const struct vDSP_biquad_SetupStruct *)mine, mine_delay, mine_x, 1, mine_y, 1,
+        revenant_host_vDSP_biquad((const struct vDSP_biquad_SetupStruct *)mine, mine_delay, mine_x, 1, mine_y, 1,
                                 SAMPLES);
         vDSP_biquad((const struct vDSP_biquad_SetupStruct *)theirs, their_delay, their_x, 1, their_y, 1, SAMPLES);
         if (hostm) {
@@ -113,7 +113,7 @@ static void run_float(const char *what, vDSP_Length sections, const double *patt
                "form on %d\n", mform_agrees_with_port, compared, mform_agrees_with_single);
     }
     printf("   (destroying the port's %d-section setup)\n", (int)sections); fflush(stdout);
-    charon_host_vDSP_biquad_DestroySetup(mine);
+    revenant_host_vDSP_biquad_DestroySetup(mine);
     printf("   (the port's setup is gone; destroying the host's)\n"); fflush(stdout);
     vDSP_biquad_DestroySetup(theirs);
     printf("   (the host's setup is gone)\n"); fflush(stdout);
@@ -130,7 +130,7 @@ static void run_double(const char *what, vDSP_Length sections, const double *pat
     fill_pattern(coeffs, sections, pattern);
 
     printf("   (double: creating two setups of %d sections)\n", (int)sections); fflush(stdout);
-    vDSP_biquad_SetupD mine = charon_host_vDSP_biquad_CreateSetupD(coeffs, sections);
+    vDSP_biquad_SetupD mine = revenant_host_vDSP_biquad_CreateSetupD(coeffs, sections);
     printf("   (double: the port's setup is %s)\n", mine ? "not NULL" : "NULL"); fflush(stdout);
     vDSP_biquad_SetupD theirs = vDSP_biquad_CreateSetupD(coeffs, sections);
     printf("   (double: the host's setup is %s)\n", theirs ? "not NULL" : "NULL"); fflush(stdout);
@@ -138,7 +138,7 @@ static void run_double(const char *what, vDSP_Length sections, const double *pat
         snprintf(detail, sizeof detail, "the port's setup is %s and the host's is %s", mine ? "not NULL" : "NULL",
                  theirs ? "not NULL" : "NULL");
         report(what, 0, detail, gating);
-        if (mine) charon_host_vDSP_biquad_DestroySetupD(mine);
+        if (mine) revenant_host_vDSP_biquad_DestroySetupD(mine);
         if (theirs) vDSP_biquad_DestroySetupD(theirs);
         return;
     }
@@ -151,7 +151,7 @@ static void run_double(const char *what, vDSP_Length sections, const double *pat
         memset(mine_y, 0x5a, sizeof mine_y);
         memset(their_y, 0x5a, sizeof their_y);
         printf("   (double call %d: the port)\n", call); fflush(stdout);
-        charon_host_vDSP_biquadD((const struct vDSP_biquad_SetupStructD *)mine, mine_delay, mine_x, 1, mine_y, 1,
+        revenant_host_vDSP_biquadD((const struct vDSP_biquad_SetupStructD *)mine, mine_delay, mine_x, 1, mine_y, 1,
                                  SAMPLES);
         vDSP_biquadD((const struct vDSP_biquad_SetupStructD *)theirs, their_delay, their_x, 1, their_y, 1, SAMPLES);
         for (int i = 0; i < SAMPLES; i++)
@@ -162,7 +162,7 @@ static void run_double(const char *what, vDSP_Length sections, const double *pat
                 break;
             }
     }
-    charon_host_vDSP_biquad_DestroySetupD(mine);
+    revenant_host_vDSP_biquad_DestroySetupD(mine);
     vDSP_biquad_DestroySetupD(theirs);
     report(what, ok, detail, gating);
 }
@@ -172,23 +172,23 @@ static void run_refusals(void)
     double coeffs[40];
     fill_pattern(coeffs, 1, kUnstable);
     checks += 1;
-    vDSP_biquad_Setup port_setup = charon_host_vDSP_biquad_CreateSetup(coeffs, 0);
+    vDSP_biquad_Setup port_setup = revenant_host_vDSP_biquad_CreateSetup(coeffs, 0);
     vDSP_biquad_Setup host_setup = vDSP_biquad_CreateSetup(coeffs, 0);
     if ((port_setup != NULL) != (host_setup != NULL))
         failures++, printf("FAIL a setup of no sections: the port answers %s and the host answers %s\n",
                            port_setup ? "a setup" : "NULL", host_setup ? "a setup" : "NULL");
     else
         printf("ok a setup of no sections: both answer %s\n", host_setup ? "a setup" : "NULL");
-    if (port_setup) charon_host_vDSP_biquad_DestroySetup(port_setup);
+    if (port_setup) revenant_host_vDSP_biquad_DestroySetup(port_setup);
     if (host_setup) vDSP_biquad_DestroySetup(host_setup);
-    charon_host_vDSP_biquad_DestroySetup(NULL);
+    revenant_host_vDSP_biquad_DestroySetup(NULL);
     vDSP_biquad_DestroySetup(NULL);
-    charon_host_vDSP_biquad_DestroySetupD(NULL);
+    revenant_host_vDSP_biquad_DestroySetupD(NULL);
     vDSP_biquad_DestroySetupD(NULL);
     printf("ok a NULL setup is destroyed without a crash on either side\n");
 }
 
-struct charon_readback_single {
+struct revenant_readback_single {
     vDSP_Length sections;
     double coeff[1];
 };
@@ -241,8 +241,8 @@ static void which_kernel(void)
     vDSP_biquad((const struct vDSP_biquad_SetupStruct *)host, host_delay, x, 1, host_y, 1, KERNEL_SAMPLES);
     vDSP_biquad_DestroySetup(host);
 
-    vDSP_biquad_Setup mine_setup = charon_host_vDSP_biquad_CreateSetup(coeffs, 1);
-    const struct charon_readback_single *mine_struct = (const struct charon_readback_single *)mine_setup;
+    vDSP_biquad_Setup mine_setup = revenant_host_vDSP_biquad_CreateSetup(coeffs, 1);
+    const struct revenant_readback_single *mine_struct = (const struct revenant_readback_single *)mine_setup;
     printf("  the port's setup: %d sections, coeff is a %s\n", (int)mine_struct->sections,
            sizeof(mine_struct->coeff[0]) == sizeof(double) ? "double" : "float");
     for (int i = 0; i < 5; i++) {
@@ -600,10 +600,10 @@ static void brute_report(void)
         vDSP_biquad((const struct vDSP_biquad_SetupStruct *)host, delay, x, 1, host_y, 1, BRUTE_SAMPLES);
         vDSP_biquad_DestroySetup(host);
         float port_y[BRUTE_SAMPLES], port_delay[4] = {0, 0, 0, 0};
-        vDSP_biquad_Setup ps = charon_host_vDSP_biquad_CreateSetup(c, 1);
-        charon_host_vDSP_biquad((const struct vDSP_biquad_SetupStruct *)ps, port_delay, x, 1, port_y, 1,
+        vDSP_biquad_Setup ps = revenant_host_vDSP_biquad_CreateSetup(c, 1);
+        revenant_host_vDSP_biquad((const struct vDSP_biquad_SetupStruct *)ps, port_delay, x, 1, port_y, 1,
                                 BRUTE_SAMPLES);
-        charon_host_vDSP_biquad_DestroySetup(ps);
+        revenant_host_vDSP_biquad_DestroySetup(ps);
         printf("  %s\n", filter ? "the unstable filter, pole -1.733" : "the stable filter, pole about 0.643");
         brute_search(filter ? "the unstable filter, pole -1.733" : "the stable filter, pole about 0.643", c, x,
                      host_y, port_y);
@@ -647,9 +647,9 @@ static int survey_one(const char *label, const double *c)
         for (int i = 0; i < SAMPLES; i++) px[i] = (float)(0.25 * ((i * 7) % 11) - 1.0);
         memset(pd, 0, 4 * sizeof(float));
         memset(py, 0x5a, SAMPLES * sizeof(float));
-        vDSP_biquad_Setup ps = charon_host_vDSP_biquad_CreateSetup(c, 1);
-        charon_host_vDSP_biquad((const struct vDSP_biquad_SetupStruct *)ps, pd, px, 1, py, 1, SAMPLES);
-        charon_host_vDSP_biquad_DestroySetup(ps);
+        vDSP_biquad_Setup ps = revenant_host_vDSP_biquad_CreateSetup(c, 1);
+        revenant_host_vDSP_biquad((const struct vDSP_biquad_SetupStruct *)ps, pd, px, 1, py, 1, SAMPLES);
+        revenant_host_vDSP_biquad_DestroySetup(ps);
         if (k == 0) for (int i = 0; i < SAMPLES; i++) memcpy(&port_f[i], &py[i], sizeof py[i]);
         else for (int i = 0; i < SAMPLES; i++)
             if (memcmp(&port_f[i], &py[i], sizeof py[i]) != 0) port_stable_f = 0;
@@ -658,9 +658,9 @@ static int survey_one(const char *label, const double *c)
         for (int i = 0; i < SAMPLES; i++) pxd[i] = (double)(float)(0.25 * ((i * 7) % 11) - 1.0);
         memset(pdd, 0, 4 * sizeof(double));
         memset(pyd, 0x5a, SAMPLES * sizeof(double));
-        vDSP_biquad_SetupD psd = charon_host_vDSP_biquad_CreateSetupD(c, 1);
-        charon_host_vDSP_biquadD((const struct vDSP_biquad_SetupStructD *)psd, pdd, pxd, 1, pyd, 1, SAMPLES);
-        charon_host_vDSP_biquad_DestroySetupD(psd);
+        vDSP_biquad_SetupD psd = revenant_host_vDSP_biquad_CreateSetupD(c, 1);
+        revenant_host_vDSP_biquadD((const struct vDSP_biquad_SetupStructD *)psd, pdd, pxd, 1, pyd, 1, SAMPLES);
+        revenant_host_vDSP_biquad_DestroySetupD(psd);
         if (k == 0) for (int i = 0; i < SAMPLES; i++) memcpy(&port_d[i], &pyd[i], sizeof pyd[i]);
         else for (int i = 0; i < SAMPLES; i++)
             if (memcmp(&port_d[i], &pyd[i], sizeof pyd[i]) != 0) port_stable_d = 0;
@@ -722,9 +722,9 @@ static void initial_state(void)
     vDSP_biquad_Setup hs = vDSP_biquad_CreateSetup(stable, 1);
     vDSP_biquad((const struct vDSP_biquad_SetupStruct *)hs, host_delay, x, 1, host_y, 1, 8);
     vDSP_biquad_DestroySetup(hs);
-    vDSP_biquad_Setup ps = charon_host_vDSP_biquad_CreateSetup(stable, 1);
-    charon_host_vDSP_biquad((const struct vDSP_biquad_SetupStruct *)ps, port_delay, x, 1, port_y, 1, 8);
-    charon_host_vDSP_biquad_DestroySetup(ps);
+    vDSP_biquad_Setup ps = revenant_host_vDSP_biquad_CreateSetup(stable, 1);
+    revenant_host_vDSP_biquad((const struct vDSP_biquad_SetupStruct *)ps, port_delay, x, 1, port_y, 1, 8);
+    revenant_host_vDSP_biquad_DestroySetup(ps);
 
     printf("    sample 0: the host %.9g, the port %.9g, b0*x0 %.9g\n", host_y[0], port_y[0],
            (float)stable[0] * x[0]);
@@ -780,15 +780,15 @@ static void delay_layout(void)
                 vDSP_biquad_Setup host = vDSP_biquad_CreateSetup(one, 1);
                 vDSP_biquad((const struct vDSP_biquad_SetupStruct *)host, dh, x, 1, theirs, 1, 2);
                 vDSP_biquad_DestroySetup(host);
-                vDSP_biquad_Setup port = charon_host_vDSP_biquad_CreateSetup(one, 1);
-                charon_host_vDSP_biquad((const struct vDSP_biquad_SetupStruct *)port, dp, x, 1, mine, 1, 2);
-                charon_host_vDSP_biquad_DestroySetup(port);
+                vDSP_biquad_Setup port = revenant_host_vDSP_biquad_CreateSetup(one, 1);
+                revenant_host_vDSP_biquad((const struct vDSP_biquad_SetupStruct *)port, dp, x, 1, mine, 1, 2);
+                revenant_host_vDSP_biquad_DestroySetup(port);
                 vDSP_biquad_SetupD host_d = vDSP_biquad_CreateSetupD(one, 1);
                 vDSP_biquadD((const struct vDSP_biquad_SetupStructD *)host_d, ddh, dx, 1, theirs_d, 1, 2);
                 vDSP_biquad_DestroySetupD(host_d);
-                vDSP_biquad_SetupD port_d = charon_host_vDSP_biquad_CreateSetupD(one, 1);
-                charon_host_vDSP_biquadD((const struct vDSP_biquad_SetupStructD *)port_d, ddp, dx, 1, mine_d, 1, 2);
-                charon_host_vDSP_biquad_DestroySetupD(port_d);
+                vDSP_biquad_SetupD port_d = revenant_host_vDSP_biquad_CreateSetupD(one, 1);
+                revenant_host_vDSP_biquadD((const struct vDSP_biquad_SetupStructD *)port_d, ddp, dx, 1, mine_d, 1, 2);
+                revenant_host_vDSP_biquad_DestroySetupD(port_d);
                 int same = mine[0] == theirs[0] && mine_d[0] == theirs_d[0];
                 if (!same) agree = 0;
                 printf(" %11.9g%s", (double)theirs[0], same ? "" : " (the port differs)");
@@ -816,15 +816,15 @@ static void delay_layout(void)
                 vDSP_biquad_Setup host = vDSP_biquad_CreateSetup(one, 1);
                 vDSP_biquad((const struct vDSP_biquad_SetupStruct *)host, dh, x, 1, theirs, 1, 2);
                 vDSP_biquad_DestroySetup(host);
-                vDSP_biquad_Setup port = charon_host_vDSP_biquad_CreateSetup(one, 1);
-                charon_host_vDSP_biquad((const struct vDSP_biquad_SetupStruct *)port, dp, x, 1, mine, 1, 2);
-                charon_host_vDSP_biquad_DestroySetup(port);
+                vDSP_biquad_Setup port = revenant_host_vDSP_biquad_CreateSetup(one, 1);
+                revenant_host_vDSP_biquad((const struct vDSP_biquad_SetupStruct *)port, dp, x, 1, mine, 1, 2);
+                revenant_host_vDSP_biquad_DestroySetup(port);
                 vDSP_biquad_SetupD host_d = vDSP_biquad_CreateSetupD(one, 1);
                 vDSP_biquadD((const struct vDSP_biquad_SetupStructD *)host_d, ddh, dx, 1, theirs_d, 1, 2);
                 vDSP_biquad_DestroySetupD(host_d);
-                vDSP_biquad_SetupD port_d = charon_host_vDSP_biquad_CreateSetupD(one, 1);
-                charon_host_vDSP_biquadD((const struct vDSP_biquad_SetupStructD *)port_d, ddp, dx, 1, mine_d, 1, 2);
-                charon_host_vDSP_biquad_DestroySetupD(port_d);
+                vDSP_biquad_SetupD port_d = revenant_host_vDSP_biquad_CreateSetupD(one, 1);
+                revenant_host_vDSP_biquadD((const struct vDSP_biquad_SetupStructD *)port_d, ddp, dx, 1, mine_d, 1, 2);
+                revenant_host_vDSP_biquad_DestroySetupD(port_d);
                 static const int lands[5] = {-1, 1, 0, 3, 2};
                 int here = lands[coeff] < 0 || lands[coeff] == s;
                 float want_f = here ? (float)stable[coeff] * (lands[coeff] < 0 ? 1.0f : slot[s]) : 0.0f;

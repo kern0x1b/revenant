@@ -3,18 +3,18 @@
 #import <Foundation/Foundation.h>
 #include <math.h>
 
-#define CHARON_LOOPER_STATUS_UNKNOWN 0
-#define CHARON_LOOPER_STATUS_READY 1
-#define CHARON_LOOPER_STATUS_FAILED 2
-#define CHARON_LOOPER_STATUS_CANCELLED 3
+#define REVENANT_LOOPER_STATUS_UNKNOWN 0
+#define REVENANT_LOOPER_STATUS_READY 1
+#define REVENANT_LOOPER_STATUS_FAILED 2
+#define REVENANT_LOOPER_STATUS_CANCELLED 3
 
-static const double charonLooperQueuedSeconds = 10.0;
-static const NSInteger charonLooperUnknownLengthCopies = 3;
+static const double revenantLooperQueuedSeconds = 10.0;
+static const NSInteger revenantLooperUnknownLengthCopies = 3;
 
-static void *charonLooperFirstStatusContext = &charonLooperFirstStatusContext;
+static void *revenantLooperFirstStatusContext = &revenantLooperFirstStatusContext;
 
 __attribute__((objc_runtime_name("AVPlayerLooper")))
-@interface CharonPlayerLooper : NSObject
+@interface RevenantPlayerLooper : NSObject
 
 + (instancetype)playerLooperWithPlayer:(AVQueuePlayer *)player templateItem:(AVPlayerItem *)itemToLoop;
 + (instancetype)playerLooperWithPlayer:(AVQueuePlayer *)player templateItem:(AVPlayerItem *)itemToLoop timeRange:(CMTimeRange)loopRange;
@@ -28,7 +28,7 @@ __attribute__((objc_runtime_name("AVPlayerLooper")))
 
 @end
 
-@implementation CharonPlayerLooper {
+@implementation RevenantPlayerLooper {
     AVQueuePlayer *_player;
     AVPlayerItem *_template;
     CMTimeRange _loopRange;
@@ -62,7 +62,7 @@ __attribute__((objc_runtime_name("AVPlayerLooper")))
     _template = itemToLoop;
     _loopRange = loopRange;
     _copies = [NSMutableArray array];
-    _status = CHARON_LOOPER_STATUS_UNKNOWN;
+    _status = REVENANT_LOOPER_STATUS_UNKNOWN;
 
     if (CMTIMERANGE_IS_VALID(loopRange))
         _loopLength = loopRange.duration;
@@ -71,17 +71,17 @@ __attribute__((objc_runtime_name("AVPlayerLooper")))
     else
         _loopLength = kCMTimeInvalid;
 
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(charonItemDidPlayToEnd:)
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(revenantItemDidPlayToEnd:)
                                                  name:AVPlayerItemDidPlayToEndTimeNotification object:nil];
     _observingEnds = YES;
-    dispatch_async(dispatch_get_main_queue(), ^{ [self charonBeginLooping]; });
+    dispatch_async(dispatch_get_main_queue(), ^{ [self revenantBeginLooping]; });
     return self;
 }
 
 - (void)dealloc
 {
     if (_observingFirst)
-        [_first removeObserver:self forKeyPath:@"status" context:charonLooperFirstStatusContext];
+        [_first removeObserver:self forKeyPath:@"status" context:revenantLooperFirstStatusContext];
     if (_observingEnds)
         [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
@@ -108,58 +108,58 @@ __attribute__((objc_runtime_name("AVPlayerLooper")))
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
 {
-    if (context != charonLooperFirstStatusContext) {
+    if (context != revenantLooperFirstStatusContext) {
         [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
         return;
     }
-    dispatch_async(dispatch_get_main_queue(), ^{ [self charonFirstChanged]; });
+    dispatch_async(dispatch_get_main_queue(), ^{ [self revenantFirstChanged]; });
 }
 
-- (void)charonBeginLooping
+- (void)revenantBeginLooping
 {
-    if (_status != CHARON_LOOPER_STATUS_UNKNOWN)
+    if (_status != REVENANT_LOOPER_STATUS_UNKNOWN)
         return;
     double seconds = CMTIME_IS_VALID(_loopLength) ? CMTimeGetSeconds(_loopLength) : 0.0;
     if (seconds > 0.0)
-        _copyTarget = (NSInteger)ceil(charonLooperQueuedSeconds / seconds);
+        _copyTarget = (NSInteger)ceil(revenantLooperQueuedSeconds / seconds);
     else
-        _copyTarget = charonLooperUnknownLengthCopies;
+        _copyTarget = revenantLooperUnknownLengthCopies;
 
-    _first = [self charonMakeCopy];
+    _first = [self revenantMakeCopy];
     [_first addObserver:self forKeyPath:@"status" options:NSKeyValueObservingOptionNew
-                context:charonLooperFirstStatusContext];
+                context:revenantLooperFirstStatusContext];
     _observingFirst = YES;
-    [self charonQueueCopy:_first];
+    [self revenantQueueCopy:_first];
 }
 
-- (void)charonFirstChanged
+- (void)revenantFirstChanged
 {
-    if (_status != CHARON_LOOPER_STATUS_UNKNOWN)
+    if (_status != REVENANT_LOOPER_STATUS_UNKNOWN)
         return;
     AVPlayerItemStatus firstStatus = _first.status;
     if (firstStatus == AVPlayerItemStatusReadyToPlay) {
-        [self charonStopObservingFirst];
-        _status = CHARON_LOOPER_STATUS_READY;
+        [self revenantStopObservingFirst];
+        _status = REVENANT_LOOPER_STATUS_READY;
         while (_copies.count < (NSUInteger)_copyTarget)
-            [self charonQueueCopy:[self charonMakeCopy]];
+            [self revenantQueueCopy:[self revenantMakeCopy]];
     } else if (firstStatus == AVPlayerItemStatusFailed) {
-        [self charonStopObservingFirst];
+        [self revenantStopObservingFirst];
         _error = _first.error;
-        _status = CHARON_LOOPER_STATUS_FAILED;
+        _status = REVENANT_LOOPER_STATUS_FAILED;
         [_player removeItem:_first];
         [_copies removeAllObjects];
     }
 }
 
-- (void)charonStopObservingFirst
+- (void)revenantStopObservingFirst
 {
     if (!_observingFirst)
         return;
     _observingFirst = NO;
-    [_first removeObserver:self forKeyPath:@"status" context:charonLooperFirstStatusContext];
+    [_first removeObserver:self forKeyPath:@"status" context:revenantLooperFirstStatusContext];
 }
 
-- (AVPlayerItem *)charonMakeCopy
+- (AVPlayerItem *)revenantMakeCopy
 {
     AVPlayerItem *copy = [AVPlayerItem playerItemWithAsset:_template.asset];
     if (CMTIMERANGE_IS_VALID(_loopRange)) {
@@ -169,13 +169,13 @@ __attribute__((objc_runtime_name("AVPlayerLooper")))
     return copy;
 }
 
-- (void)charonQueueCopy:(AVPlayerItem *)copy
+- (void)revenantQueueCopy:(AVPlayerItem *)copy
 {
     [_copies addObject:copy];
     [_player insertItem:copy afterItem:nil];
 }
 
-- (void)charonItemDidPlayToEnd:(NSNotification *)notification
+- (void)revenantItemDidPlayToEnd:(NSNotification *)notification
 {
     AVPlayerItem *item = notification.object;
     dispatch_async(dispatch_get_main_queue(), ^{
@@ -183,15 +183,15 @@ __attribute__((objc_runtime_name("AVPlayerLooper")))
             return;
         [_copies removeObject:item];
         _loopCount++;
-        if (_status == CHARON_LOOPER_STATUS_READY)
-            [self charonQueueCopy:[self charonMakeCopy]];
+        if (_status == REVENANT_LOOPER_STATUS_READY)
+            [self revenantQueueCopy:[self revenantMakeCopy]];
     });
 }
 
 - (void)disableLooping
 {
-    [self charonStopObservingFirst];
-    _status = CHARON_LOOPER_STATUS_CANCELLED;
+    [self revenantStopObservingFirst];
+    _status = REVENANT_LOOPER_STATUS_CANCELLED;
     AVPlayerItem *playing = _player.currentItem;
     NSMutableArray<AVPlayerItem *> *kept = [NSMutableArray array];
     for (AVPlayerItem *copy in _copies) {

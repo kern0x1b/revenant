@@ -66,7 +66,7 @@ int main(int argc, char **argv)
 {
     setvbuf(stdout, NULL, _IONBF, 0);
     @autoreleasepool {
-        Class portClass = NSClassFromString(@"CharonHostMTLArgumentDescriptor");
+        Class portClass = NSClassFromString(@"RevenantHostMTLArgumentDescriptor");
         check(portClass != nil, @"the port's class is built in this process");
         if (!portClass)
             return 1;

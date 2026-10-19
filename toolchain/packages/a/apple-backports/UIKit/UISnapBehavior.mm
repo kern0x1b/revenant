@@ -1,11 +1,11 @@
-#import "CharonDynamics.h"
+#import "RevenantDynamics.h"
 
 @implementation UISnapBehavior {
     CGPoint _anchorPoint;
     CGFloat _damping;
     CGFloat _distance;
     CGFloat _frequency;
-    CharonDynamicsBody *_anchorBody;
+    RevenantDynamicsBody *_anchorBody;
     b2Joint *_joints[4];
     int _jointCount;
 }
@@ -18,10 +18,10 @@
 
 - (instancetype)initWithItem:(id<UIDynamicItem>)item snapToPoint:(CGPoint)point
 {
-    if (!(self = [super charon_initPrimitive:YES]))
+    if (!(self = [super revenant_initPrimitive:YES]))
         return nil;
     if (item)
-        [[self charon_items] addObject:item];
+        [[self revenant_items] addObject:item];
     _anchorPoint = point;
     _damping = 0.5;
     _distance = 50.0;
@@ -32,14 +32,14 @@
 - (NSString *)description
 {
     NSMutableString *description = [NSMutableString stringWithString:[super description]];
-    [description appendFormat:@" %@ <-", [self charon_items].firstObject];
+    [description appendFormat:@" %@ <-", [self revenant_items].firstObject];
     [description appendFormat:@"-> %@", NSStringFromCGPoint(_anchorPoint)];
     return description;
 }
 
 - (NSArray *)items
 {
-    return [NSArray arrayWithArray:[self charon_items]];
+    return [NSArray arrayWithArray:[self revenant_items]];
 }
 
 - (CGFloat)damping
@@ -65,32 +65,32 @@
     if (!_anchorBody)
         return;
     _anchorBody.position = point;
-    [self charon_changedParameterForBody:[[self charon_context] charon_bodyForItem:[self charon_items].firstObject]];
+    [self revenant_changedParameterForBody:[[self revenant_context] revenant_bodyForItem:[self revenant_items].firstObject]];
 }
 
-- (void)charon_associate
+- (void)revenant_associate
 {
-    [super charon_associate];
-    UIDynamicAnimator *context = [self charon_context];
-    id<UIDynamicItem> item = [self charon_items].firstObject;
-    CharonDynamicsBody *itemBody = [context charon_registerBodyForItem:item shape:CharonDynamicsShapeBox];
-    _anchorBody = [context charon_anchorBodyAtPoint:_anchorPoint];
+    [super revenant_associate];
+    UIDynamicAnimator *context = [self revenant_context];
+    id<UIDynamicItem> item = [self revenant_items].firstObject;
+    RevenantDynamicsBody *itemBody = [context revenant_registerBodyForItem:item shape:RevenantDynamicsShapeBox];
+    _anchorBody = [context revenant_anchorBodyAtPoint:_anchorPoint];
     CGSize size = item.bounds.size;
     CGFloat halfWidth = size.width / 2, halfHeight = size.height / 2, distance = _distance;
     struct { CGPoint item[4], anchor[4]; } anchors = {
         {{-halfWidth, -halfHeight}, {-halfWidth, -halfHeight}, {halfWidth, halfHeight}, {halfWidth, halfHeight}},
         {{-halfWidth - distance, -halfHeight}, {-halfWidth, -halfHeight - distance}, {halfWidth + distance, halfHeight}, {halfWidth, halfHeight + distance}},
     };
-    CharonDynamicsBody *anchorBody = _anchorBody;
+    RevenantDynamicsBody *anchorBody = _anchorBody;
     CGFloat damping = _damping, frequency = _frequency;
-    [context charon_runBlockPostSolverIfNeeded:^{
+    [context revenant_runBlockPostSolverIfNeeded:^{
         if (!self->_anchorBody || self->_anchorBody != anchorBody)
             return;
-        b2World *world = [context charon_world];
+        b2World *world = [context revenant_world];
         b2Body *bodyA = itemBody.b2Body, *bodyB = anchorBody.b2Body;
         for (int index = 0; index < 4; index++) {
             b2DistanceJointDef definition;
-            definition.Initialize(bodyA, bodyB, bodyA->GetWorldPoint(charon_metres(anchors.item[index])), bodyB->GetWorldPoint(charon_metres(anchors.anchor[index])));
+            definition.Initialize(bodyA, bodyB, bodyA->GetWorldPoint(revenant_metres(anchors.item[index])), bodyB->GetWorldPoint(revenant_metres(anchors.anchor[index])));
             definition.frequencyHz = (float)frequency;
             definition.dampingRatio = (float)damping;
             self->_joints[index] = world->CreateJoint(&definition);
@@ -100,22 +100,22 @@
             if (self->_anchorBody != anchorBody)
                 return;
             for (int index = 0; index < self->_jointCount; index++)
-                static_cast<b2DistanceJoint *>(self->_joints[index])->SetLength((float)(distance * CHARON_DYNAMICS_INVERSE_PTM));
+                static_cast<b2DistanceJoint *>(self->_joints[index])->SetLength((float)(distance * REVENANT_DYNAMICS_INVERSE_PTM));
         });
     }];
 }
 
-- (void)charon_dissociate
+- (void)revenant_dissociate
 {
-    UIDynamicAnimator *context = [self charon_context];
-    b2World *world = [context charon_world];
+    UIDynamicAnimator *context = [self revenant_context];
+    b2World *world = [context revenant_world];
     for (int index = 0; index < _jointCount; index++)
         world->DestroyJoint(_joints[index]);
     _jointCount = 0;
-    [context charon_removeBody:_anchorBody];
+    [context revenant_removeBody:_anchorBody];
     _anchorBody = nil;
-    [context charon_unregisterBodyForItem:[self charon_items].firstObject action:nil];
-    [super charon_dissociate];
+    [context revenant_unregisterBodyForItem:[self revenant_items].firstObject action:nil];
+    [super revenant_dissociate];
 }
 
 @end

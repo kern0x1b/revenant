@@ -2,20 +2,20 @@
 #import <Metal/Metal.h>
 #include "../../../../packages/a/apple-backports/air2cpu-abi.h"
 
-@interface CharonHostCharonMetalBuffer : NSObject
+@interface RevenantHostRevenantMetalBuffer : NSObject
 - (instancetype)initWithLength:(NSUInteger)length bytes:(const void *)bytes;
 - (void *)bytes;
 - (NSUInteger)length;
 @end
 
-@interface CharonHostCharonMetalComputePipeline : NSObject
+@interface RevenantHostRevenantMetalComputePipeline : NSObject
 - (instancetype)initWithFunction:(id<MTLFunction>)function error:(NSError **)error;
-- (id)charonKernelFunction;
-- (uint32_t)charonBlockBytes;
-- (uint32_t)charonThreads;
+- (id)revenantKernelFunction;
+- (uint32_t)revenantBlockBytes;
+- (uint32_t)revenantThreads;
 @end
 
-@interface CharonHostCharonMetalComputeEncoder : NSObject
+@interface RevenantHostRevenantMetalComputeEncoder : NSObject
 - (void)setComputePipelineState:(id)pipeline;
 - (void)setBuffer:(id)buffer offset:(NSUInteger)offset atIndex:(NSUInteger)index;
 - (void)setBytes:(const void *)bytes length:(NSUInteger)length atIndex:(NSUInteger)index;
@@ -24,20 +24,20 @@
 - (void)endEncoding;
 @end
 
-@interface CharonHostDevice : NSObject
+@interface RevenantHostDevice : NSObject
 - (id)newComputePipelineStateWithFunction:(id<MTLFunction>)function error:(NSError **)error;
 - (id)computeCommandEncoder;
 @end
 
-@implementation CharonHostDevice
+@implementation RevenantHostDevice
 - (id)newComputePipelineStateWithFunction:(id<MTLFunction>)function error:(NSError **)error
 {
-    return [[CharonHostCharonMetalComputePipeline alloc] initWithFunction:function error:error];
+    return [[RevenantHostRevenantMetalComputePipeline alloc] initWithFunction:function error:error];
 }
 
 - (id)computeCommandEncoder
 {
-    return [[CharonHostCharonMetalComputeEncoder alloc] init];
+    return [[RevenantHostRevenantMetalComputeEncoder alloc] init];
 }
 @end
 
@@ -63,7 +63,7 @@ int main(int argc, const char **argv)
         }
         printf("kernels=%lu\n", (unsigned long)[[library functionNames] count]);
 
-        CharonHostDevice *port = [CharonHostDevice new];
+        RevenantHostDevice *port = [RevenantHostDevice new];
         NSMutableSet *printed = [NSMutableSet set];
         for (NSString *name in [library functionNames]) {
             if ([printed containsObject:name])
@@ -86,17 +86,17 @@ int main(int argc, const char **argv)
             uint8_t *filled = malloc(count * sizeof(float));
             for (NSUInteger index = 0; index < count; index++)
                 ((uint32_t *)filled)[index] = 0x3F800000u + (uint32_t)index;
-            CharonHostCharonMetalBuffer *buffer =
-                [[CharonHostCharonMetalBuffer alloc] initWithLength:count * sizeof(float) bytes:filled];
+            RevenantHostRevenantMetalBuffer *buffer =
+                [[RevenantHostRevenantMetalBuffer alloc] initWithLength:count * sizeof(float) bytes:filled];
 
-            CharonHostCharonMetalComputeEncoder *encoder = [port computeCommandEncoder];
+            RevenantHostRevenantMetalComputeEncoder *encoder = [port computeCommandEncoder];
             [encoder setComputePipelineState:pipeline];
             [encoder setBuffer:buffer offset:0 atIndex:0];
-            CharonHostCharonMetalBuffer *second = NULL;
+            RevenantHostRevenantMetalBuffer *second = NULL;
             if ([name isEqualToString:@"atomicFamilyKernel"]) {
                 int *signedValues = malloc(count * sizeof(int));
                 memset(signedValues, 0xA5, count * sizeof(int));
-                second = [[CharonHostCharonMetalBuffer alloc] initWithLength:count * sizeof(int)
+                second = [[RevenantHostRevenantMetalBuffer alloc] initWithLength:count * sizeof(int)
                                                                      bytes:signedValues];
                 [encoder setBuffer:second offset:0 atIndex:1];
             }

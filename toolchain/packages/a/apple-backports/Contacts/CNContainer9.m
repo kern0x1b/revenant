@@ -1,46 +1,46 @@
-#import "CharonContacts.h"
+#import "RevenantContacts.h"
 
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
 
 @implementation CNContainer {
-    NSString *_charonIdentifier;
-    NSString *_charonName;
-    CNContainerType _charonType;
+    NSString *_revenantIdentifier;
+    NSString *_revenantName;
+    CNContainerType _revenantType;
 }
 
 @dynamic identifier, name, type;
 
-- (NSString *)identifier { return _charonIdentifier; }
-- (NSString *)name { return _charonName ?: @""; }
-- (CNContainerType)type { return _charonType; }
+- (NSString *)identifier { return _revenantIdentifier; }
+- (NSString *)name { return _revenantName ?: @""; }
+- (CNContainerType)type { return _revenantType; }
 
-+ (instancetype)charon_containerWithIdentifier:(NSString *)identifier name:(NSString *)name type:(CNContainerType)type
++ (instancetype)revenant_containerWithIdentifier:(NSString *)identifier name:(NSString *)name type:(CNContainerType)type
 {
     CNContainer *container = [[self alloc] init];
-    container->_charonIdentifier = [identifier copy];
-    container->_charonName = [name copy];
-    container->_charonType = type;
+    container->_revenantIdentifier = [identifier copy];
+    container->_revenantName = [name copy];
+    container->_revenantType = type;
     return container;
 }
 
 + (NSPredicate *)predicateForContainersWithIdentifiers:(NSArray<NSString *> *)identifiers
 {
-    return [CharonContactPredicate predicateWithMatch:CharonContactMatchContainerIdentifiers value:[identifiers copy]];
+    return [RevenantContactPredicate predicateWithMatch:RevenantContactMatchContainerIdentifiers value:[identifiers copy]];
 }
 
 + (NSPredicate *)predicateForContainerOfContactWithIdentifier:(NSString *)contactIdentifier
 {
-    return [CharonContactPredicate predicateWithMatch:CharonContactMatchContainerOfContact value:[contactIdentifier copy]];
+    return [RevenantContactPredicate predicateWithMatch:RevenantContactMatchContainerOfContact value:[contactIdentifier copy]];
 }
 
 + (NSPredicate *)predicateForContainerOfGroupWithIdentifier:(NSString *)groupIdentifier
 {
-    return [CharonContactPredicate predicateWithMatch:CharonContactMatchContainerOfGroup value:[groupIdentifier copy]];
+    return [RevenantContactPredicate predicateWithMatch:RevenantContactMatchContainerOfGroup value:[groupIdentifier copy]];
 }
 
 - (id)copyWithZone:(NSZone *)zone
 {
-    return [CNContainer charon_containerWithIdentifier:_charonIdentifier name:_charonName type:_charonType];
+    return [CNContainer revenant_containerWithIdentifier:_revenantIdentifier name:_revenantName type:_revenantType];
 }
 
 + (BOOL)supportsSecureCoding
@@ -50,18 +50,18 @@
 
 - (void)encodeWithCoder:(NSCoder *)coder
 {
-    [coder encodeObject:_charonIdentifier forKey:@"identifier"];
-    [coder encodeObject:_charonName forKey:@"name"];
-    [coder encodeInteger:_charonType forKey:@"type"];
+    [coder encodeObject:_revenantIdentifier forKey:@"identifier"];
+    [coder encodeObject:_revenantName forKey:@"name"];
+    [coder encodeInteger:_revenantType forKey:@"type"];
 }
 
 - (instancetype)initWithCoder:(NSCoder *)coder
 {
     self = [super init];
     if (self) {
-        _charonIdentifier = [[coder decodeObjectOfClass:[NSString class] forKey:@"identifier"] copy];
-        _charonName = [[coder decodeObjectOfClass:[NSString class] forKey:@"name"] copy];
-        _charonType = (CNContainerType)[coder decodeIntegerForKey:@"type"];
+        _revenantIdentifier = [[coder decodeObjectOfClass:[NSString class] forKey:@"identifier"] copy];
+        _revenantName = [[coder decodeObjectOfClass:[NSString class] forKey:@"name"] copy];
+        _revenantType = (CNContainerType)[coder decodeIntegerForKey:@"type"];
     }
     return self;
 }
@@ -72,17 +72,17 @@
         return YES;
     if (![object isKindOfClass:[CNContainer class]])
         return NO;
-    return [_charonIdentifier isEqualToString:[object identifier]];
+    return [_revenantIdentifier isEqualToString:[object identifier]];
 }
 
 - (NSUInteger)hash
 {
-    return _charonIdentifier.hash;
+    return _revenantIdentifier.hash;
 }
 
 - (NSString *)description
 {
-    return [NSString stringWithFormat:@"<%@: %p: identifier=%@ name=%@ type=%ld>", NSStringFromClass([self class]), self, _charonIdentifier, _charonName, (long)_charonType];
+    return [NSString stringWithFormat:@"<%@: %p: identifier=%@ name=%@ type=%ld>", NSStringFromClass([self class]), self, _revenantIdentifier, _revenantName, (long)_revenantType];
 }
 
 @end

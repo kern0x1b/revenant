@@ -1,93 +1,93 @@
-#import "CharonSensorKit.h"
-#import "CharonSensorKitValue.h"
-#import "../CharonValueStore.h"
+#import "RevenantSensorKit.h"
+#import "RevenantSensorKitValue.h"
+#import "../RevenantValueStore.h"
 
 @implementation SRAudioLevel
-CHARON_SENSORKIT_UNCREATABLE_NEW_AND_INIT(@"")
+REVENANT_SENSORKIT_UNCREATABLE_NEW_AND_INIT(@"")
 @dynamic timeRange, loudness;
-CHARON_STRUCT_PROPERTY(CMTimeRange, timeRange)
-CHARON_SCALAR_PROPERTY(double, loudness)
+REVENANT_STRUCT_PROPERTY(CMTimeRange, timeRange)
+REVENANT_SCALAR_PROPERTY(double, loudness)
 @end
-@implementation SRAudioLevel (CharonSensorKitValue)
-CHARON_SENSORKIT_VALUE_STORE_IMPLEMENTATION
+@implementation SRAudioLevel (RevenantSensorKitValue)
+REVENANT_SENSORKIT_VALUE_STORE_IMPLEMENTATION
 @end
-@implementation SRDevice (CharonSensorKit170)
+@implementation SRDevice (RevenantSensorKit170)
 @dynamic productType;
-CHARON_VALUE_PROPERTY(NSString *, productType)
+REVENANT_VALUE_PROPERTY(NSString *, productType)
 @end
-@implementation SRDevice (CharonSensorKitValue)
-CHARON_SENSORKIT_VALUE_STORE_IMPLEMENTATION
+@implementation SRDevice (RevenantSensorKitValue)
+REVENANT_SENSORKIT_VALUE_STORE_IMPLEMENTATION
 @end
 @implementation SRFaceMetrics
-CHARON_SENSORKIT_UNCREATABLE_NEW_AND_INIT(@"Not available")
+REVENANT_SENSORKIT_UNCREATABLE_NEW_AND_INIT(@"Not available")
 @dynamic version, sessionIdentifier, context, wholeFaceExpressions, partialFaceExpressions, faceAnchor;
-CHARON_VALUE_PROPERTY(NSString *, version)
-CHARON_VALUE_PROPERTY(NSString *, sessionIdentifier)
-CHARON_SCALAR_PROPERTY(SRFaceMetricsContext, context)
-CHARON_VALUE_PROPERTY(NSArray *, wholeFaceExpressions)
-CHARON_VALUE_PROPERTY(NSArray *, partialFaceExpressions)
-CHARON_VALUE_PROPERTY(id, faceAnchor)
+REVENANT_VALUE_PROPERTY(NSString *, version)
+REVENANT_VALUE_PROPERTY(NSString *, sessionIdentifier)
+REVENANT_SCALAR_PROPERTY(SRFaceMetricsContext, context)
+REVENANT_VALUE_PROPERTY(NSArray *, wholeFaceExpressions)
+REVENANT_VALUE_PROPERTY(NSArray *, partialFaceExpressions)
+REVENANT_VALUE_PROPERTY(id, faceAnchor)
 @end
-@implementation SRFaceMetrics (CharonSensorKitValue)
-CHARON_SENSORKIT_VALUE_STORE_IMPLEMENTATION
+@implementation SRFaceMetrics (RevenantSensorKitValue)
+REVENANT_SENSORKIT_VALUE_STORE_IMPLEMENTATION
 @end
 @implementation SRFaceMetricsExpression
-CHARON_SENSORKIT_UNCREATABLE_NEW_AND_INIT(@"Not available")
+REVENANT_SENSORKIT_UNCREATABLE_NEW_AND_INIT(@"Not available")
 @dynamic identifier, value;
-CHARON_VALUE_PROPERTY(NSString *, identifier)
-CHARON_SCALAR_PROPERTY(double, value)
+REVENANT_VALUE_PROPERTY(NSString *, identifier)
+REVENANT_SCALAR_PROPERTY(double, value)
 @end
-@implementation SRFaceMetricsExpression (CharonSensorKitValue)
-CHARON_SENSORKIT_VALUE_STORE_IMPLEMENTATION
+@implementation SRFaceMetricsExpression (RevenantSensorKitValue)
+REVENANT_SENSORKIT_VALUE_STORE_IMPLEMENTATION
 @end
 @implementation SRSpeechExpression
-CHARON_SENSORKIT_UNCREATABLE_NEW_AND_INIT(@"")
+REVENANT_SENSORKIT_UNCREATABLE_NEW_AND_INIT(@"")
 @dynamic version, timeRange, confidence, mood, valence, activation, dominance;
-CHARON_VALUE_PROPERTY(NSString *, version)
-CHARON_STRUCT_PROPERTY(CMTimeRange, timeRange)
-CHARON_SCALAR_PROPERTY(double, confidence)
-CHARON_SCALAR_PROPERTY(double, mood)
-CHARON_SCALAR_PROPERTY(double, valence)
-CHARON_SCALAR_PROPERTY(double, activation)
-CHARON_SCALAR_PROPERTY(double, dominance)
+REVENANT_VALUE_PROPERTY(NSString *, version)
+REVENANT_STRUCT_PROPERTY(CMTimeRange, timeRange)
+REVENANT_SCALAR_PROPERTY(double, confidence)
+REVENANT_SCALAR_PROPERTY(double, mood)
+REVENANT_SCALAR_PROPERTY(double, valence)
+REVENANT_SCALAR_PROPERTY(double, activation)
+REVENANT_SCALAR_PROPERTY(double, dominance)
 @end
-@implementation SRSpeechExpression (CharonSensorKitValue)
-CHARON_SENSORKIT_VALUE_STORE_IMPLEMENTATION
+@implementation SRSpeechExpression (RevenantSensorKitValue)
+REVENANT_SENSORKIT_VALUE_STORE_IMPLEMENTATION
 @end
 @implementation SRSpeechMetrics
-CHARON_SENSORKIT_UNCREATABLE_NEW_AND_INIT(@"")
+REVENANT_SENSORKIT_UNCREATABLE_NEW_AND_INIT(@"")
 @dynamic sessionIdentifier, sessionFlags, timestamp, audioLevel, speechExpression,
          speechRecognition, soundClassification;
-CHARON_VALUE_PROPERTY(NSString *, sessionIdentifier)
-CHARON_SCALAR_PROPERTY(SRSpeechMetricsSessionFlags, sessionFlags)
-CHARON_VALUE_PROPERTY(NSDate *, timestamp)
-CHARON_VALUE_PROPERTY(SRAudioLevel *, audioLevel)
-CHARON_VALUE_PROPERTY(SRSpeechExpression *, speechExpression)
-CHARON_VALUE_PROPERTY(id, speechRecognition)
-CHARON_VALUE_PROPERTY(id, soundClassification)
+REVENANT_VALUE_PROPERTY(NSString *, sessionIdentifier)
+REVENANT_SCALAR_PROPERTY(SRSpeechMetricsSessionFlags, sessionFlags)
+REVENANT_VALUE_PROPERTY(NSDate *, timestamp)
+REVENANT_VALUE_PROPERTY(SRAudioLevel *, audioLevel)
+REVENANT_VALUE_PROPERTY(SRSpeechExpression *, speechExpression)
+REVENANT_VALUE_PROPERTY(id, speechRecognition)
+REVENANT_VALUE_PROPERTY(id, soundClassification)
 @end
-@implementation SRSpeechMetrics (CharonSensorKitValue)
-CHARON_SENSORKIT_VALUE_STORE_IMPLEMENTATION
+@implementation SRSpeechMetrics (RevenantSensorKitValue)
+REVENANT_SENSORKIT_VALUE_STORE_IMPLEMENTATION
 @end
 @implementation SRWristTemperature
-CHARON_SENSORKIT_UNCREATABLE_NEW_AND_INIT(@"")
+REVENANT_SENSORKIT_UNCREATABLE_NEW_AND_INIT(@"")
 @dynamic timestamp, value, condition, errorEstimate;
-CHARON_VALUE_PROPERTY(NSDate *, timestamp)
-CHARON_VALUE_PROPERTY(NSMeasurement *, value)
-CHARON_SCALAR_PROPERTY(SRWristTemperatureCondition, condition)
-CHARON_VALUE_PROPERTY(NSMeasurement *, errorEstimate)
+REVENANT_VALUE_PROPERTY(NSDate *, timestamp)
+REVENANT_VALUE_PROPERTY(NSMeasurement *, value)
+REVENANT_SCALAR_PROPERTY(SRWristTemperatureCondition, condition)
+REVENANT_VALUE_PROPERTY(NSMeasurement *, errorEstimate)
 @end
-@implementation SRWristTemperature (CharonSensorKitValue)
-CHARON_SENSORKIT_VALUE_STORE_IMPLEMENTATION
+@implementation SRWristTemperature (RevenantSensorKitValue)
+REVENANT_SENSORKIT_VALUE_STORE_IMPLEMENTATION
 @end
 @implementation SRWristTemperatureSession
-CHARON_SENSORKIT_UNCREATABLE_NEW_AND_INIT(@"")
+REVENANT_SENSORKIT_UNCREATABLE_NEW_AND_INIT(@"")
 @dynamic startDate, duration, version, temperatures;
-CHARON_VALUE_PROPERTY(NSDate *, startDate)
-CHARON_SCALAR_PROPERTY(NSTimeInterval, duration)
-CHARON_VALUE_PROPERTY(NSString *, version)
-CHARON_VALUE_PROPERTY(NSEnumerator *, temperatures)
+REVENANT_VALUE_PROPERTY(NSDate *, startDate)
+REVENANT_SCALAR_PROPERTY(NSTimeInterval, duration)
+REVENANT_VALUE_PROPERTY(NSString *, version)
+REVENANT_VALUE_PROPERTY(NSEnumerator *, temperatures)
 @end
-@implementation SRWristTemperatureSession (CharonSensorKitValue)
-CHARON_SENSORKIT_VALUE_STORE_IMPLEMENTATION
+@implementation SRWristTemperatureSession (RevenantSensorKitValue)
+REVENANT_SENSORKIT_VALUE_STORE_IMPLEMENTATION
 @end

@@ -13,11 +13,11 @@ static void spin(NSTimeInterval seconds)
     [[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:seconds]];
 }
 
-@interface CharonScreenDelegate : NSObject <CXProviderDelegate>
+@interface RevenantScreenDelegate : NSObject <CXProviderDelegate>
 @property (nonatomic) NSMutableArray<NSString *> *log;
 @end
 
-@implementation CharonScreenDelegate
+@implementation RevenantScreenDelegate
 - (instancetype)init
 {
     if ((self = [super init]))
@@ -49,9 +49,9 @@ static BOOL waitFor(NSMutableArray *log, NSString *event, NSTimeInterval timeout
     return [log containsObject:event];
 }
 
-static CXProvider *providerWith(CharonScreenDelegate *delegate)
+static CXProvider *providerWith(RevenantScreenDelegate *delegate)
 {
-    CXProviderConfiguration *configuration = [[CXProviderConfiguration alloc] initWithLocalizedName:@"Charon"];
+    CXProviderConfiguration *configuration = [[CXProviderConfiguration alloc] initWithLocalizedName:@"Revenant"];
     CXProvider *provider = [[CXProvider alloc] initWithConfiguration:configuration];
     [provider setDelegate:delegate queue:dispatch_get_main_queue()];
     spin(0.1);
@@ -63,7 +63,7 @@ static void oneCall(NSString *label, NSString *expected, NSTimeInterval timeout)
     printf("== %s: tap %s within %.0fs (decline at 80,390; answer at 240,390 on a 320x480pt screen)\n",
            label.UTF8String, expected.UTF8String, timeout);
     fflush(stdout);
-    CharonScreenDelegate *delegate = [[CharonScreenDelegate alloc] init];
+    RevenantScreenDelegate *delegate = [[RevenantScreenDelegate alloc] init];
     CXProvider *provider = providerWith(delegate);
     CHECK([delegate.log containsObject:@"begin"], "the delegate is told the provider began");
 
@@ -77,7 +77,7 @@ static void oneCall(NSString *label, NSString *expected, NSTimeInterval timeout)
     CHECK(failure == nil, "the incoming call is reported without an error");
 
     BOOL arrived = waitFor(delegate.log, expected, timeout);
-    charon_check(arrived, [NSString stringWithFormat:@"the screen turns the tap on %@ into %@", label, expected].UTF8String,
+    revenant_check(arrived, [NSString stringWithFormat:@"the screen turns the tap on %@ into %@", label, expected].UTF8String,
                  arrived ? nil : [NSString stringWithFormat:@"delegate log: %@", delegate.log]);
 
     [provider invalidate];
@@ -88,9 +88,9 @@ int main(int argc, char **argv)
 {
     @autoreleasepool {
         CHECK_EQUAL(image_of([CXProvider class]), @"libCallKitBackports.dylib", "CXProvider comes from the backports");
-        oneCall(@"Charon Screen Test - decline", @"end", 20);
-        oneCall(@"Charon Screen Test - answer", @"answer", 20);
-        printf("checks=%d failures=%d\n", charon_checks, charon_failures);
+        oneCall(@"Revenant Screen Test - decline", @"end", 20);
+        oneCall(@"Revenant Screen Test - answer", @"answer", 20);
+        printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
     }
-    return charon_failures ? 1 : 0;
+    return revenant_failures ? 1 : 0;
 }

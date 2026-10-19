@@ -183,15 +183,15 @@ end
 
 function naming_line(kind, api, slot)
     if kind == "protocol" then
-        return string.format("id <%s> *charonLedger%d = 0;", api, slot)
+        return string.format("id <%s> *revenantLedger%d = 0;", api, slot)
     end
     if kind == "function" then
-        return string.format("__typeof__(%s) *charonLedger%d = &%s;", api, slot, api)
+        return string.format("__typeof__(%s) *revenantLedger%d = &%s;", api, slot, api)
     end
     if kind == "constant" then
-        return string.format("__typeof__(%s) charonLedger%d = %s;", api, slot, api)
+        return string.format("__typeof__(%s) revenantLedger%d = %s;", api, slot, api)
     end
-    return string.format("__typeof__(%s) charonLedger%d;", api, slot)
+    return string.format("__typeof__(%s) revenantLedger%d;", api, slot)
 end
 
 local function stem(tag)

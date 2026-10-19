@@ -1,4 +1,4 @@
-#import "CharonContacts.h"
+#import "RevenantContacts.h"
 
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
 
@@ -41,22 +41,22 @@
 @end
 
 @implementation CNChangeHistoryAddContactEvent {
-    CNContact *_charonContact;
-    NSString *_charonContainerIdentifier;
+    CNContact *_revenantContact;
+    NSString *_revenantContainerIdentifier;
 }
 
 @dynamic contact, containerIdentifier;
 
-+ (instancetype)charon_eventWithContact:(CNContact *)contact containerIdentifier:(NSString *)containerIdentifier
++ (instancetype)revenant_eventWithContact:(CNContact *)contact containerIdentifier:(NSString *)containerIdentifier
 {
     CNChangeHistoryAddContactEvent *event = [[self alloc] init];
-    event->_charonContact = contact;
-    event->_charonContainerIdentifier = [containerIdentifier copy];
+    event->_revenantContact = contact;
+    event->_revenantContainerIdentifier = [containerIdentifier copy];
     return event;
 }
 
-- (CNContact *)contact { return _charonContact; }
-- (NSString *)containerIdentifier { return _charonContainerIdentifier; }
+- (CNContact *)contact { return _revenantContact; }
+- (NSString *)containerIdentifier { return _revenantContainerIdentifier; }
 
 - (void)acceptEventVisitor:(id<CNChangeHistoryEventVisitor>)visitor
 {
@@ -68,19 +68,19 @@
 @end
 
 @implementation CNChangeHistoryUpdateContactEvent {
-    CNContact *_charonContact;
+    CNContact *_revenantContact;
 }
 
 @dynamic contact;
 
-+ (instancetype)charon_eventWithContact:(CNContact *)contact
++ (instancetype)revenant_eventWithContact:(CNContact *)contact
 {
     CNChangeHistoryUpdateContactEvent *event = [[self alloc] init];
-    event->_charonContact = contact;
+    event->_revenantContact = contact;
     return event;
 }
 
-- (CNContact *)contact { return _charonContact; }
+- (CNContact *)contact { return _revenantContact; }
 
 - (void)acceptEventVisitor:(id<CNChangeHistoryEventVisitor>)visitor
 {
@@ -92,19 +92,19 @@
 @end
 
 @implementation CNChangeHistoryDeleteContactEvent {
-    NSString *_charonContactIdentifier;
+    NSString *_revenantContactIdentifier;
 }
 
 @dynamic contactIdentifier;
 
-+ (instancetype)charon_eventWithContactIdentifier:(NSString *)identifier
++ (instancetype)revenant_eventWithContactIdentifier:(NSString *)identifier
 {
     CNChangeHistoryDeleteContactEvent *event = [[self alloc] init];
-    event->_charonContactIdentifier = [identifier copy];
+    event->_revenantContactIdentifier = [identifier copy];
     return event;
 }
 
-- (NSString *)contactIdentifier { return _charonContactIdentifier; }
+- (NSString *)contactIdentifier { return _revenantContactIdentifier; }
 
 - (void)acceptEventVisitor:(id<CNChangeHistoryEventVisitor>)visitor
 {
@@ -116,22 +116,22 @@
 @end
 
 @implementation CNChangeHistoryAddGroupEvent {
-    CNGroup *_charonGroup;
-    NSString *_charonContainerIdentifier;
+    CNGroup *_revenantGroup;
+    NSString *_revenantContainerIdentifier;
 }
 
 @dynamic group, containerIdentifier;
 
-+ (instancetype)charon_eventWithGroup:(CNGroup *)group containerIdentifier:(NSString *)containerIdentifier
++ (instancetype)revenant_eventWithGroup:(CNGroup *)group containerIdentifier:(NSString *)containerIdentifier
 {
     CNChangeHistoryAddGroupEvent *event = [[self alloc] init];
-    event->_charonGroup = group;
-    event->_charonContainerIdentifier = [containerIdentifier copy];
+    event->_revenantGroup = group;
+    event->_revenantContainerIdentifier = [containerIdentifier copy];
     return event;
 }
 
-- (CNGroup *)group { return _charonGroup; }
-- (NSString *)containerIdentifier { return _charonContainerIdentifier; }
+- (CNGroup *)group { return _revenantGroup; }
+- (NSString *)containerIdentifier { return _revenantContainerIdentifier; }
 
 - (void)acceptEventVisitor:(id<CNChangeHistoryEventVisitor>)visitor
 {
@@ -142,19 +142,19 @@
 @end
 
 @implementation CNChangeHistoryUpdateGroupEvent {
-    CNGroup *_charonGroup;
+    CNGroup *_revenantGroup;
 }
 
 @dynamic group;
 
-+ (instancetype)charon_eventWithGroup:(CNGroup *)group
++ (instancetype)revenant_eventWithGroup:(CNGroup *)group
 {
     CNChangeHistoryUpdateGroupEvent *event = [[self alloc] init];
-    event->_charonGroup = group;
+    event->_revenantGroup = group;
     return event;
 }
 
-- (CNGroup *)group { return _charonGroup; }
+- (CNGroup *)group { return _revenantGroup; }
 
 - (void)acceptEventVisitor:(id<CNChangeHistoryEventVisitor>)visitor
 {
@@ -165,19 +165,19 @@
 @end
 
 @implementation CNChangeHistoryDeleteGroupEvent {
-    NSString *_charonGroupIdentifier;
+    NSString *_revenantGroupIdentifier;
 }
 
 @dynamic groupIdentifier;
 
-+ (instancetype)charon_eventWithGroupIdentifier:(NSString *)identifier
++ (instancetype)revenant_eventWithGroupIdentifier:(NSString *)identifier
 {
     CNChangeHistoryDeleteGroupEvent *event = [[self alloc] init];
-    event->_charonGroupIdentifier = [identifier copy];
+    event->_revenantGroupIdentifier = [identifier copy];
     return event;
 }
 
-- (NSString *)groupIdentifier { return _charonGroupIdentifier; }
+- (NSString *)groupIdentifier { return _revenantGroupIdentifier; }
 
 - (void)acceptEventVisitor:(id<CNChangeHistoryEventVisitor>)visitor
 {
@@ -188,22 +188,22 @@
 @end
 
 @implementation CNChangeHistoryAddMemberToGroupEvent {
-    CNContact *_charonMember;
-    CNGroup *_charonGroup;
+    CNContact *_revenantMember;
+    CNGroup *_revenantGroup;
 }
 
 @dynamic member, group;
 
-+ (instancetype)charon_eventWithMember:(CNContact *)member group:(CNGroup *)group
++ (instancetype)revenant_eventWithMember:(CNContact *)member group:(CNGroup *)group
 {
     CNChangeHistoryAddMemberToGroupEvent *event = [[self alloc] init];
-    event->_charonMember = member;
-    event->_charonGroup = group;
+    event->_revenantMember = member;
+    event->_revenantGroup = group;
     return event;
 }
 
-- (CNContact *)member { return _charonMember; }
-- (CNGroup *)group { return _charonGroup; }
+- (CNContact *)member { return _revenantMember; }
+- (CNGroup *)group { return _revenantGroup; }
 
 - (void)acceptEventVisitor:(id<CNChangeHistoryEventVisitor>)visitor
 {
@@ -214,22 +214,22 @@
 @end
 
 @implementation CNChangeHistoryRemoveMemberFromGroupEvent {
-    CNContact *_charonMember;
-    CNGroup *_charonGroup;
+    CNContact *_revenantMember;
+    CNGroup *_revenantGroup;
 }
 
 @dynamic member, group;
 
-+ (instancetype)charon_eventWithMember:(CNContact *)member group:(CNGroup *)group
++ (instancetype)revenant_eventWithMember:(CNContact *)member group:(CNGroup *)group
 {
     CNChangeHistoryRemoveMemberFromGroupEvent *event = [[self alloc] init];
-    event->_charonMember = member;
-    event->_charonGroup = group;
+    event->_revenantMember = member;
+    event->_revenantGroup = group;
     return event;
 }
 
-- (CNContact *)member { return _charonMember; }
-- (CNGroup *)group { return _charonGroup; }
+- (CNContact *)member { return _revenantMember; }
+- (CNGroup *)group { return _revenantGroup; }
 
 - (void)acceptEventVisitor:(id<CNChangeHistoryEventVisitor>)visitor
 {
@@ -240,14 +240,14 @@
 @end
 
 @implementation CNChangeHistoryAddSubgroupToGroupEvent {
-    CNGroup *_charonSubgroup;
-    CNGroup *_charonGroup;
+    CNGroup *_revenantSubgroup;
+    CNGroup *_revenantGroup;
 }
 
 @dynamic subgroup, group;
 
-- (CNGroup *)subgroup { return _charonSubgroup; }
-- (CNGroup *)group { return _charonGroup; }
+- (CNGroup *)subgroup { return _revenantSubgroup; }
+- (CNGroup *)group { return _revenantGroup; }
 
 - (void)acceptEventVisitor:(id<CNChangeHistoryEventVisitor>)visitor
 {
@@ -258,14 +258,14 @@
 @end
 
 @implementation CNChangeHistoryRemoveSubgroupFromGroupEvent {
-    CNGroup *_charonSubgroup;
-    CNGroup *_charonGroup;
+    CNGroup *_revenantSubgroup;
+    CNGroup *_revenantGroup;
 }
 
 @dynamic subgroup, group;
 
-- (CNGroup *)subgroup { return _charonSubgroup; }
-- (CNGroup *)group { return _charonGroup; }
+- (CNGroup *)subgroup { return _revenantSubgroup; }
+- (CNGroup *)group { return _revenantGroup; }
 
 - (void)acceptEventVisitor:(id<CNChangeHistoryEventVisitor>)visitor
 {

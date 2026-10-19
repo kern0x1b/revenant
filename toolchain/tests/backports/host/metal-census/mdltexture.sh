@@ -44,7 +44,7 @@ includes="-I $S -I $S/MetalKit -I $S/Metal -I $S/ModelIO -I $work/port"
 # The rename is a #define INSIDE that unit and not a -D on the command line. Both spell the same thing,
 # and the command-line one was measured not working here: the same file with the same flags and the same
 # -D produced an object carrying `_OBJC_CLASS_$_MTKTextureLoader` in one invocation and
-# `_OBJC_CLASS_$_charonHost_MTLTextureLoader` in another, from one command line, with no difference a
+# `_OBJC_CLASS_$_revenantHost_MTLTextureLoader` in another, from one command line, with no difference a
 # reader could find. A rename that is not reproducible is not a seam, and metal-census's run.sh already
 # includes a port source this way (`-include "$METALKIT/MTKTextureLoader9.m"`), so this follows it. The
 # binary is asked for the renamed symbol below and the run stops if it is not there.
@@ -54,7 +54,7 @@ cat > "$work/port/loader.m" <<'PORTTU'
  * Both port files go in one unit because the loader under test is a CATEGORY and a category needs its
  * host class: the case asks -newTextureWithMDLTexture: on a class that has to EXIST and has to have a
  * -device, and MTKTextureLoader9.m is where both come from. */
-#define MTKTextureLoader charonHost_MTKTextureLoader
+#define MTKTextureLoader revenantHost_MTKTextureLoader
 #include "MTKTextureLoader9.m"
 #include "MTKTextureLoaderMDL10.m"
 PORTTU
@@ -93,12 +93,12 @@ build real
 
 # THE PORT'S CLASS MUST BE IN THE BINARY UNDER THE RENAMED NAME. MetalKit is linked, so a case that read
 # the framework's class would agree with itself and the whole comparison would be worth nothing.
-if ! nm -g "$work/real" 2>/dev/null | grep -q "_OBJC_CLASS_\$_charonHost_MTKTextureLoader"; then
-    echo "FAIL: the binary does not define _OBJC_CLASS_\$_charonHost_MTKTextureLoader" >&2
+if ! nm -g "$work/real" 2>/dev/null | grep -q "_OBJC_CLASS_\$_revenantHost_MTKTextureLoader"; then
+    echo "FAIL: the binary does not define _OBJC_CLASS_\$_revenantHost_MTKTextureLoader" >&2
     echo "  the case would then be measuring Apple's own loader and calling it the port's" >&2
     exit 1
 fi
-echo "  the port's loader is DEFINED in the binary: _OBJC_CLASS_\$_charonHost_MTKTextureLoader"
+echo "  the port's loader is DEFINED in the binary: _OBJC_CLASS_\$_revenantHost_MTKTextureLoader"
 timeout 300 "$work/real" || { echo "FAIL: the MDL loader differential failed" >&2; exit 1; }
 
 # THE MUTATIONS. A case that compares two textures and passes on any pair of them measures nothing, so
@@ -145,7 +145,7 @@ with_mutant() {   # $1 label
     build "$1"
     # THE MUTANT REALLY IS THE ONE COMPILED: its marker has to be in the object the binary was linked
     # from, or a stale object would answer and the red below would be the wrong one's.
-    if ! nm -g "$work/$1-port.o" 2>/dev/null | grep -q "_OBJC_CLASS_\$_charonHost_MTKTextureLoader"; then
+    if ! nm -g "$work/$1-port.o" 2>/dev/null | grep -q "_OBJC_CLASS_\$_revenantHost_MTKTextureLoader"; then
         echo "FAIL: the mutant $1 did not produce the port's class" >&2
         exit 1
     fi

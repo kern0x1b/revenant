@@ -1,36 +1,36 @@
 #import <objc/runtime.h>
-#import "CharonDragDrop.h"
+#import "RevenantDragDrop.h"
 
-@implementation CharonDragDropBox
+@implementation RevenantDragDropBox
 @end
 
-static const char CharonDragDropKey;
-static BOOL CharonDragInteractionDefault = NO;
+static const char RevenantDragDropKey;
+static BOOL RevenantDragInteractionDefault = NO;
 
-CharonDragDropBox *charon_drag_drop_box(id object)
+RevenantDragDropBox *revenant_drag_drop_box(id object)
 {
-    CharonDragDropBox *box = objc_getAssociatedObject(object, &CharonDragDropKey);
+    RevenantDragDropBox *box = objc_getAssociatedObject(object, &RevenantDragDropKey);
     if (!box) {
-        box = [[CharonDragDropBox alloc] init];
-        objc_setAssociatedObject(object, &CharonDragDropKey, box, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+        box = [[RevenantDragDropBox alloc] init];
+        objc_setAssociatedObject(object, &RevenantDragDropKey, box, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     }
     return box;
 }
 
-BOOL charon_drag_interaction_enabled(id object)
+BOOL revenant_drag_interaction_enabled(id object)
 {
-    CharonDragDropBox *box = objc_getAssociatedObject(object, &CharonDragDropKey);
-    return box && box->didSetDragInteractionEnabled ? box->dragInteractionEnabled : CharonDragInteractionDefault;
+    RevenantDragDropBox *box = objc_getAssociatedObject(object, &RevenantDragDropKey);
+    return box && box->didSetDragInteractionEnabled ? box->dragInteractionEnabled : RevenantDragInteractionDefault;
 }
 
-void charon_set_drag_interaction_enabled_default(BOOL enabled)
+void revenant_set_drag_interaction_enabled_default(BOOL enabled)
 {
-    CharonDragInteractionDefault = enabled;
+    RevenantDragInteractionDefault = enabled;
 }
 
-void charon_set_drag_interaction_enabled(id object, BOOL enabled)
+void revenant_set_drag_interaction_enabled(id object, BOOL enabled)
 {
-    CharonDragDropBox *box = charon_drag_drop_box(object);
+    RevenantDragDropBox *box = revenant_drag_drop_box(object);
     box->didSetDragInteractionEnabled = YES;
     box->dragInteractionEnabled = enabled;
 }

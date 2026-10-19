@@ -11,7 +11,7 @@
 
 #include <cstdint>
 
-namespace shade::darwin::mach::scheduler {
+namespace emulator::darwin::mach::scheduler {
 
 constexpr std::uint32_t swtch_pri_trap = 59;
 constexpr std::uint32_t swtch_trap = 60;

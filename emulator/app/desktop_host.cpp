@@ -17,7 +17,7 @@
 #include "app/sdl_audio_sink.hpp"
 #include "app/sdl_display.hpp"
 
-namespace shade {
+namespace emulator {
 
 void DesktopHost::initialize_graphics() { register_native_gles_renderer(); }
 

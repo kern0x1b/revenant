@@ -1,4 +1,4 @@
-#import "CharonURLSessionMetrics.h"
+#import "RevenantURLSessionMetrics.h"
 
 #pragma clang diagnostic ignored "-Wobjc-property-implementation"
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
@@ -22,7 +22,7 @@
     countOfResponseBodyBytesAfterDecoding, localAddress, localPort, remoteAddress, remotePort, negotiatedTLSProtocolVersion, negotiatedTLSCipherSuite, cellular, expensive, constrained,
     multipath, domainResolutionProtocol;
 
-- (instancetype)initCharonWithRequest:(NSURLRequest *)request fetchType:(NSURLSessionTaskMetricsResourceFetchType)fetchType
+- (instancetype)initRevenantWithRequest:(NSURLRequest *)request fetchType:(NSURLSessionTaskMetricsResourceFetchType)fetchType
 {
     if ((self = [super init])) {
         _request = [request copy];
@@ -32,7 +32,7 @@
     return self;
 }
 
-- (void)charon_receivedResponse:(NSURLResponse *)response
+- (void)revenant_receivedResponse:(NSURLResponse *)response
 {
     if (_response || _finished)
         return;
@@ -46,7 +46,7 @@
         _networkProtocolName = @"http/1.1";
 }
 
-- (void)charon_finished
+- (void)revenant_finished
 {
     if (_finished)
         return;
@@ -55,7 +55,7 @@
         _responseEndDate = [NSDate date];
 }
 
-- (BOOL)charon_isFinished
+- (BOOL)revenant_isFinished
 {
     return _finished;
 }
@@ -86,7 +86,7 @@
     NSDateInterval *_taskInterval;
 }
 
-- (instancetype)initCharonWithTransactions:(NSArray<NSURLSessionTaskTransactionMetrics *> *)transactions start:(NSDate *)start end:(NSDate *)end
+- (instancetype)initRevenantWithTransactions:(NSArray<NSURLSessionTaskTransactionMetrics *> *)transactions start:(NSDate *)start end:(NSDate *)end
 {
     if ((self = [super init])) {
         _transactionMetrics = [transactions copy];

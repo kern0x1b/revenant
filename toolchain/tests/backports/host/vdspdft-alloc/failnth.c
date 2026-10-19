@@ -4,18 +4,18 @@
 #include <string.h>
 #include <sys/types.h>
 
-volatile int charon_tracing = 0;
-volatile long charon_fail_at = 0;
-volatile long charon_seen = 0;
-volatile long charon_failed_calls = 0;
-size_t charon_sizes[64];
-const char *charon_kinds[64];
+volatile int revenant_tracing = 0;
+volatile long revenant_fail_at = 0;
+volatile long revenant_seen = 0;
+volatile long revenant_failed_calls = 0;
+size_t revenant_sizes[64];
+const char *revenant_kinds[64];
 
 static int hit(size_t size, const char *kind) {
-    if (!charon_tracing) return 0;
-    long i = charon_seen++;
-    if (i < 64) { charon_sizes[i] = size; charon_kinds[i] = kind; }
-    if (charon_fail_at == 0 || charon_seen == charon_fail_at) { charon_failed_calls++; return 1; }
+    if (!revenant_tracing) return 0;
+    long i = revenant_seen++;
+    if (i < 64) { revenant_sizes[i] = size; revenant_kinds[i] = kind; }
+    if (revenant_fail_at == 0 || revenant_seen == revenant_fail_at) { revenant_failed_calls++; return 1; }
     return 0;
 }
 static void *fm_malloc(size_t n) { if (hit(n, "malloc")) return NULL; return malloc(n); }

@@ -1,6 +1,6 @@
 #import <Foundation/Foundation.h>
 
-@implementation NSURL (CharonItemProvider)
+@implementation NSURL (RevenantItemProvider)
 
 + (NSArray<NSString *> *)writableTypeIdentifiersForItemProvider
 {

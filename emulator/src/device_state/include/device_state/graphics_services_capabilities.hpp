@@ -14,7 +14,7 @@
 
 #include "foundation/device_model.hpp"
 
-namespace shade {
+namespace emulator {
 
 inline constexpr std::string_view graphics_services_capability_object_name {
     "GSCapabilities"

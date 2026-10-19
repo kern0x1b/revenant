@@ -6,7 +6,7 @@ set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 UIKIT=${UIKIT:-$here/../../../../packages/a/apple-backports/UIKit}
-BUILD=${BUILD:-$(runs_fresh charon-graphics)}
+BUILD=${BUILD:-$(runs_fresh revenant-graphics)}
 sources=${SOURCES:-$(cat "$here/sources.txt")}
 sdk=$(xcrun --show-sdk-path)
 target="-target arm64-apple-ios15.0-macabi -isysroot $sdk -iframework $sdk/System/iOSSupport/System/Library/Frameworks"
@@ -18,7 +18,7 @@ for source in $sources; do
 done
 renames=""
 for name in $(xcrun nm -gU "$BUILD"/plain/*.o | awk 'NF == 3 {print $3}' | grep -E '^_OBJC_CLASS_\$_' | sed -e 's/^_OBJC_CLASS_\$_//' | sort -u); do
-    renames="$renames -D$name=CharonHost$name"
+    renames="$renames -D$name=RevenantHost$name"
 done
 echo "renamed:$renames"
 for source in $sources; do

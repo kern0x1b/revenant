@@ -15,7 +15,7 @@ int main(int argc, char **argv)
 {
     @autoreleasepool {
         if (argc > 1)
-            charon_log_to(@(argv[1]));
+            revenant_log_to(@(argv[1]));
         CHECK_EQUAL(image_of([NLTokenizer class]), @"libFoundationBackports.dylib", "NLTokenizer comes from the backports library");
         CHECK_EQUAL(image_of([NLLanguageRecognizer class]), @"libFoundationBackports.dylib", "NLLanguageRecognizer comes from the backports library");
         CHECK_EQUAL(NLLanguageEnglish, @"en", "a language constant");
@@ -48,7 +48,7 @@ int main(int argc, char **argv)
                 printf("LANG %s: device %s system %s\n", name.UTF8String, actual.UTF8String, naturallanguage_language_expectations[index]);
             CHECK_EQUAL(actual, @(naturallanguage_language_expectations[index]), name.UTF8String);
         }
-        printf("checks=%d failures=%d\n", charon_checks, charon_failures);
+        printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
     }
-    return charon_failures ? 1 : 0;
+    return revenant_failures ? 1 : 0;
 }

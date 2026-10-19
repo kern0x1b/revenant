@@ -56,8 +56,8 @@ int main(void)
     @autoreleasepool {
         id<MTLDevice> device = MTLCreateSystemDefaultDevice();
         printf("the device: %s\n", utf8(text(device.name)));
-        printf("ZZZNoSuchNameCharonR16 -> %s\n\n",
-               NSClassFromString(@"ZZZNoSuchNameCharonR16") ? "FOUND (wrong)" : "nil (right)");
+        printf("ZZZNoSuchNameRevenantR16 -> %s\n\n",
+               NSClassFromString(@"ZZZNoSuchNameRevenantR16") ? "FOUND (wrong)" : "nil (right)");
 
         printf("MTL4CommandQueue, both ways the 26.2 header declares them\n");
         id plainQueue = send(device, @"newMTL4CommandQueue");

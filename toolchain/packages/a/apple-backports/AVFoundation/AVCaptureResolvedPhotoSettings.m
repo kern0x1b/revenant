@@ -1,41 +1,41 @@
-#import "CharonAVCapturePhoto.h"
+#import "RevenantAVCapturePhoto.h"
 
 @implementation AVCaptureResolvedPhotoSettings
 {
-    int64_t _charonUniqueID;
-    CMVideoDimensions _charonPhotoDimensions;
-    CMVideoDimensions _charonPreviewDimensions;
-    CMVideoDimensions _charonEmbeddedThumbnailDimensions;
-    BOOL _charonFlashEnabled;
-    BOOL _charonStillImageStabilizationEnabled;
-    NSUInteger _charonExpectedPhotoCount;
+    int64_t _revenantUniqueID;
+    CMVideoDimensions _revenantPhotoDimensions;
+    CMVideoDimensions _revenantPreviewDimensions;
+    CMVideoDimensions _revenantEmbeddedThumbnailDimensions;
+    BOOL _revenantFlashEnabled;
+    BOOL _revenantStillImageStabilizationEnabled;
+    NSUInteger _revenantExpectedPhotoCount;
 }
 
-- (instancetype)initCharonWithUniqueID:(int64_t)uniqueID photoDimensions:(CMVideoDimensions)photoDimensions
+- (instancetype)initRevenantWithUniqueID:(int64_t)uniqueID photoDimensions:(CMVideoDimensions)photoDimensions
                      previewDimensions:(CMVideoDimensions)previewDimensions
            embeddedThumbnailDimensions:(CMVideoDimensions)embeddedThumbnailDimensions flashEnabled:(BOOL)flashEnabled
         stillImageStabilizationEnabled:(BOOL)stillImageStabilizationEnabled
 {
     if ((self = [super init])) {
-        _charonUniqueID = uniqueID;
-        _charonPhotoDimensions = photoDimensions;
-        _charonPreviewDimensions = previewDimensions;
-        _charonEmbeddedThumbnailDimensions = embeddedThumbnailDimensions;
-        _charonFlashEnabled = flashEnabled;
-        _charonStillImageStabilizationEnabled = stillImageStabilizationEnabled;
-        _charonExpectedPhotoCount = 1;
+        _revenantUniqueID = uniqueID;
+        _revenantPhotoDimensions = photoDimensions;
+        _revenantPreviewDimensions = previewDimensions;
+        _revenantEmbeddedThumbnailDimensions = embeddedThumbnailDimensions;
+        _revenantFlashEnabled = flashEnabled;
+        _revenantStillImageStabilizationEnabled = stillImageStabilizationEnabled;
+        _revenantExpectedPhotoCount = 1;
     }
     return self;
 }
 
 - (int64_t)uniqueID
 {
-    return _charonUniqueID;
+    return _revenantUniqueID;
 }
 
 - (CMVideoDimensions)photoDimensions
 {
-    return _charonPhotoDimensions;
+    return _revenantPhotoDimensions;
 }
 
 - (CMVideoDimensions)rawPhotoDimensions
@@ -45,7 +45,7 @@
 
 - (CMVideoDimensions)previewDimensions
 {
-    return _charonPreviewDimensions;
+    return _revenantPreviewDimensions;
 }
 
 - (CMVideoDimensions)livePhotoMovieDimensions
@@ -55,12 +55,12 @@
 
 - (BOOL)isFlashEnabled
 {
-    return _charonFlashEnabled;
+    return _revenantFlashEnabled;
 }
 
 - (BOOL)isStillImageStabilizationEnabled
 {
-    return _charonStillImageStabilizationEnabled;
+    return _revenantStillImageStabilizationEnabled;
 }
 
 - (BOOL)isDualCameraFusionEnabled
@@ -75,17 +75,17 @@
 
 - (NSUInteger)expectedPhotoCount
 {
-    return _charonExpectedPhotoCount;
+    return _revenantExpectedPhotoCount;
 }
 
-- (void)charon_setExpectedPhotoCount:(NSUInteger)expectedPhotoCount
+- (void)revenant_setExpectedPhotoCount:(NSUInteger)expectedPhotoCount
 {
-    _charonExpectedPhotoCount = expectedPhotoCount;
+    _revenantExpectedPhotoCount = expectedPhotoCount;
 }
 
 - (CMVideoDimensions)embeddedThumbnailDimensions
 {
-    return _charonEmbeddedThumbnailDimensions;
+    return _revenantEmbeddedThumbnailDimensions;
 }
 
 - (CMVideoDimensions)rawEmbeddedThumbnailDimensions

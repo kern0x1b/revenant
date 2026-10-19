@@ -1,7 +1,7 @@
 #import <MapKit/MapKit.h>
 #import <UIKit/UIKit.h>
 #import <math.h>
-#import "CharonMapKit.h"
+#import "RevenantMapKit.h"
 
 @implementation MKPolylineRenderer {
     CGFloat _strokeStart;
@@ -32,7 +32,7 @@
     [self invalidatePath];
 }
 
-- (void)charon_indicesForStrokeStart:(double)start end:(double)end
+- (void)revenant_indicesForStrokeStart:(double)start end:(double)end
                                 count:(NSUInteger)count
                                 first:(NSUInteger *)outFirst
                                  last:(NSUInteger *)outLast
@@ -61,14 +61,14 @@
     *outLast = (NSUInteger)last;
 }
 
-- (void)charon_addPolyline:(MKPolyline *)polyline toPath:(CGMutablePathRef)path
+- (void)revenant_addPolyline:(MKPolyline *)polyline toPath:(CGMutablePathRef)path
 {
     NSUInteger count = polyline.pointCount;
     if (count == 0) {
         return;
     }
     NSUInteger first, last;
-    [self charon_indicesForStrokeStart:(double)self.strokeStart end:(double)self.strokeEnd
+    [self revenant_indicesForStrokeStart:(double)self.strokeStart end:(double)self.strokeEnd
                                  count:count first:&first last:&last];
     CLLocationCoordinate2D *coordinates = (CLLocationCoordinate2D *)calloc(count, sizeof(CLLocationCoordinate2D));
     if (!coordinates) {
@@ -98,7 +98,7 @@
     if (!path) {
         return;
     }
-    [self charon_addPolyline:polyline toPath:path];
+    [self revenant_addPolyline:polyline toPath:path];
     self.path = path;
     CGPathRelease(path);
 }

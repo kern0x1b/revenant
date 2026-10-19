@@ -1,4 +1,4 @@
-#import "CharonSCN.h"
+#import "RevenantSCN.h"
 
 @implementation SCNGeometrySource
 
@@ -43,7 +43,7 @@
         _data = [coder decodeObjectOfClass:[NSData class] forKey:@"data"];
         _semantic = [coder decodeObjectOfClass:[NSString class] forKey:@"semantic"];
         _vectorCount = [coder decodeIntegerForKey:@"vectorCount"];
-        _floatComponents = [CharonSCNCoding decodeBool:coder forKey:@"floatComponents" default:YES];
+        _floatComponents = [RevenantSCNCoding decodeBool:coder forKey:@"floatComponents" default:YES];
         _componentsPerVector = [coder decodeIntegerForKey:@"componentsPerVector"];
         _bytesPerComponent = [coder decodeIntegerForKey:@"bytesPerComponent"];
         _dataOffset = [coder decodeIntegerForKey:@"dataOffset"];

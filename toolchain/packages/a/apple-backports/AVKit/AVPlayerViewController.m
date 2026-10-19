@@ -3,31 +3,31 @@
 #import <MediaPlayer/MediaPlayer.h>
 #import <QuartzCore/QuartzCore.h>
 #import <CoreImage/CoreImage.h>
-#import "CharonAVKitSpeeds.h"
+#import "RevenantAVKitSpeeds.h"
 
-@class CharonAVPlayerPictureInPictureRelay;
+@class RevenantAVPlayerPictureInPictureRelay;
 
-@interface CharonAVPlayerFrameTicker : NSObject
+@interface RevenantAVPlayerFrameTicker : NSObject
 @property (nonatomic, weak) id target;
 - (void)tick:(CADisplayLink *)link;
 @end
 
-@implementation CharonAVPlayerFrameTicker
+@implementation RevenantAVPlayerFrameTicker
 
 @synthesize target = _target;
 
 - (void)tick:(CADisplayLink *)link
 {
-    [self.target performSelector:@selector(charon_drawFrame:) withObject:link];
+    [self.target performSelector:@selector(revenant_drawFrame:) withObject:link];
 }
 
 @end
 
-@interface CharonAVPlayerVideoView : UIView
+@interface RevenantAVPlayerVideoView : UIView
 @property (nonatomic, readonly) AVPlayerLayer *playerLayer;
 @end
 
-@implementation CharonAVPlayerVideoView
+@implementation RevenantAVPlayerVideoView
 
 @synthesize playerLayer = _playerLayer;
 
@@ -55,7 +55,7 @@
 
 @end
 
-static UIImage *charon_glyph(void (^draw)(CGRect bounds))
+static UIImage *revenant_glyph(void (^draw)(CGRect bounds))
 {
     CGRect bounds = CGRectMake(0, 0, 22, 22);
     UIGraphicsBeginImageContextWithOptions(bounds.size, NO, 0);
@@ -66,9 +66,9 @@ static UIImage *charon_glyph(void (^draw)(CGRect bounds))
     return image;
 }
 
-static UIImage *charon_play_glyph(void)
+static UIImage *revenant_play_glyph(void)
 {
-    return charon_glyph(^(CGRect bounds) {
+    return revenant_glyph(^(CGRect bounds) {
         UIBezierPath *path = [UIBezierPath bezierPath];
         [path moveToPoint:CGPointMake(5, 3)];
         [path addLineToPoint:CGPointMake(19, 11)];
@@ -78,17 +78,17 @@ static UIImage *charon_play_glyph(void)
     });
 }
 
-static UIImage *charon_pause_glyph(void)
+static UIImage *revenant_pause_glyph(void)
 {
-    return charon_glyph(^(CGRect bounds) {
+    return revenant_glyph(^(CGRect bounds) {
         UIRectFill(CGRectMake(5, 3, 4, 16));
         UIRectFill(CGRectMake(13, 3, 4, 16));
     });
 }
 
-static UIImage *charon_picture_glyph(void)
+static UIImage *revenant_picture_glyph(void)
 {
-    return charon_glyph(^(CGRect bounds) {
+    return revenant_glyph(^(CGRect bounds) {
         UIBezierPath *frame = [UIBezierPath bezierPathWithRect:CGRectMake(2, 4, 18, 14)];
         frame.lineWidth = 1.5;
         [frame stroke];
@@ -96,9 +96,9 @@ static UIImage *charon_picture_glyph(void)
     });
 }
 
-static UIImage *charon_full_screen_glyph(void)
+static UIImage *revenant_full_screen_glyph(void)
 {
-    return charon_glyph(^(CGRect bounds) {
+    return revenant_glyph(^(CGRect bounds) {
         UIBezierPath *path = [UIBezierPath bezierPath];
         path.lineWidth = 2;
         [path moveToPoint:CGPointMake(3, 9)];
@@ -115,7 +115,7 @@ static UIImage *charon_full_screen_glyph(void)
     });
 }
 
-static NSString *charon_time_text(CMTime time)
+static NSString *revenant_time_text(CMTime time)
 {
     if (!CMTIME_IS_NUMERIC(time))
         return @"--:--";
@@ -127,10 +127,10 @@ static NSString *charon_time_text(CMTime time)
     return [NSString stringWithFormat:@"%ld:%02ld", (long)(seconds / 60), (long)(seconds % 60)];
 }
 
-@interface CharonAVPlayerFullScreenViewController : UIViewController
+@interface RevenantAVPlayerFullScreenViewController : UIViewController
 @end
 
-@implementation CharonAVPlayerFullScreenViewController
+@implementation RevenantAVPlayerFullScreenViewController
 
 - (void)loadView
 {
@@ -152,62 +152,62 @@ static NSString *charon_time_text(CMTime time)
 @end
 
 @interface AVPlayerViewController () <UIGestureRecognizerDelegate>
-@property (nonatomic, strong, readonly) CharonAVPlayerVideoView *charonVideoView;
-- (void)charon_pictureInPictureWillStart;
-- (void)charon_pictureInPictureDidStart;
-- (void)charon_pictureInPictureFailed:(NSError *)error;
-- (void)charon_pictureInPictureWillStop;
-- (void)charon_pictureInPictureRestore:(void (^)(BOOL restored))completion;
-- (void)charon_pictureInPictureDidStop;
+@property (nonatomic, strong, readonly) RevenantAVPlayerVideoView *revenantVideoView;
+- (void)revenant_pictureInPictureWillStart;
+- (void)revenant_pictureInPictureDidStart;
+- (void)revenant_pictureInPictureFailed:(NSError *)error;
+- (void)revenant_pictureInPictureWillStop;
+- (void)revenant_pictureInPictureRestore:(void (^)(BOOL restored))completion;
+- (void)revenant_pictureInPictureDidStop;
 @end
 
-@interface CharonAVPlayerPictureInPictureRelay : NSObject <AVPictureInPictureControllerDelegate>
+@interface RevenantAVPlayerPictureInPictureRelay : NSObject <AVPictureInPictureControllerDelegate>
 @property (nonatomic, weak) AVPlayerViewController *owner;
 @end
 
-@implementation CharonAVPlayerPictureInPictureRelay
+@implementation RevenantAVPlayerPictureInPictureRelay
 
 @synthesize owner = _owner;
 
 - (void)pictureInPictureControllerWillStartPictureInPicture:(AVPictureInPictureController *)controller
 {
-    [self.owner charon_pictureInPictureWillStart];
+    [self.owner revenant_pictureInPictureWillStart];
 }
 
 - (void)pictureInPictureControllerDidStartPictureInPicture:(AVPictureInPictureController *)controller
 {
-    [self.owner charon_pictureInPictureDidStart];
+    [self.owner revenant_pictureInPictureDidStart];
 }
 
 - (void)pictureInPictureController:(AVPictureInPictureController *)controller failedToStartPictureInPictureWithError:(NSError *)error
 {
-    [self.owner charon_pictureInPictureFailed:error];
+    [self.owner revenant_pictureInPictureFailed:error];
 }
 
 - (void)pictureInPictureControllerWillStopPictureInPicture:(AVPictureInPictureController *)controller
 {
-    [self.owner charon_pictureInPictureWillStop];
+    [self.owner revenant_pictureInPictureWillStop];
 }
 
 - (void)pictureInPictureController:(AVPictureInPictureController *)controller restoreUserInterfaceForPictureInPictureStopWithCompletionHandler:(void (^)(BOOL restored))completion
 {
     AVPlayerViewController *owner = self.owner;
     if (owner)
-        [owner charon_pictureInPictureRestore:completion];
+        [owner revenant_pictureInPictureRestore:completion];
     else
         completion(NO);
 }
 
 - (void)pictureInPictureControllerDidStopPictureInPicture:(AVPictureInPictureController *)controller
 {
-    [self.owner charon_pictureInPictureDidStop];
+    [self.owner revenant_pictureInPictureDidStop];
 }
 
 @end
 
-static void *const CharonAVPlayerObservation = (void *)&CharonAVPlayerObservation;
+static void *const RevenantAVPlayerObservation = (void *)&RevenantAVPlayerObservation;
 
-static NSMutableSet *charon_players_in_picture(void)
+static NSMutableSet *revenant_players_in_picture(void)
 {
     static NSMutableSet *held;
     static dispatch_once_t once;
@@ -219,39 +219,39 @@ static NSMutableSet *charon_players_in_picture(void)
 
 @implementation AVPlayerViewController
 {
-    UIView *_charonStage;
-    UIView *_charonContentOverlayView;
-    UIView *_charonControls;
-    UIToolbar *_charonTopBar;
-    UIView *_charonBottomBar;
-    UIBarButtonItem *_charonDoneItem;
-    UIButton *_charonPlayButton;
-    UIBarButtonItem *_charonPictureItem;
-    UIButton *_charonFullScreenButton;
-    UISlider *_charonScrubber;
-    UILabel *_charonElapsedLabel;
-    UILabel *_charonRemainingLabel;
-    UILabel *_charonFailureLabel;
-    UIActivityIndicatorView *_charonSpinner;
-    UITapGestureRecognizer *_charonTap;
-    AVPlayerItem *_charonObservedItem;
-    NSError *_charonFailure;
-    id _charonTimeObserver;
-    CharonAVPlayerFullScreenViewController *_charonFullScreen;
-    AVPictureInPictureController *_charonPicture;
-    CharonAVPlayerPictureInPictureRelay *_charonPictureRelay;
-    BOOL _charonScrubbing;
-    float _charonRateBeforeScrubbing;
-    BOOL _charonWroteNowPlaying;
-    BOOL _charonControlsHidden;
-    __weak id<AVPlayerViewControllerDelegate> _charonDelegate;
-    NSDictionary *_charonPixelBufferAttributes;
-    AVPlayerItemVideoOutput *_charonVideoOutput;
-    AVPlayerItem *_charonOutputItem;
-    CADisplayLink *_charonFrameLink;
-    CALayer *_charonFrameLayer;
-    CIContext *_charonFrameContext;
-    BOOL _charonFrameRefusalLogged;
+    UIView *_revenantStage;
+    UIView *_revenantContentOverlayView;
+    UIView *_revenantControls;
+    UIToolbar *_revenantTopBar;
+    UIView *_revenantBottomBar;
+    UIBarButtonItem *_revenantDoneItem;
+    UIButton *_revenantPlayButton;
+    UIBarButtonItem *_revenantPictureItem;
+    UIButton *_revenantFullScreenButton;
+    UISlider *_revenantScrubber;
+    UILabel *_revenantElapsedLabel;
+    UILabel *_revenantRemainingLabel;
+    UILabel *_revenantFailureLabel;
+    UIActivityIndicatorView *_revenantSpinner;
+    UITapGestureRecognizer *_revenantTap;
+    AVPlayerItem *_revenantObservedItem;
+    NSError *_revenantFailure;
+    id _revenantTimeObserver;
+    RevenantAVPlayerFullScreenViewController *_revenantFullScreen;
+    AVPictureInPictureController *_revenantPicture;
+    RevenantAVPlayerPictureInPictureRelay *_revenantPictureRelay;
+    BOOL _revenantScrubbing;
+    float _revenantRateBeforeScrubbing;
+    BOOL _revenantWroteNowPlaying;
+    BOOL _revenantControlsHidden;
+    __weak id<AVPlayerViewControllerDelegate> _revenantDelegate;
+    NSDictionary *_revenantPixelBufferAttributes;
+    AVPlayerItemVideoOutput *_revenantVideoOutput;
+    AVPlayerItem *_revenantOutputItem;
+    CADisplayLink *_revenantFrameLink;
+    CALayer *_revenantFrameLayer;
+    CIContext *_revenantFrameContext;
+    BOOL _revenantFrameRefusalLogged;
 }
 
 @synthesize player = _player;
@@ -262,42 +262,42 @@ static NSMutableSet *charon_players_in_picture(void)
 @synthesize entersFullScreenWhenPlaybackBegins = _entersFullScreenWhenPlaybackBegins;
 @synthesize exitsFullScreenWhenPlaybackEnds = _exitsFullScreenWhenPlaybackEnds;
 @synthesize requiresLinearPlayback = _requiresLinearPlayback;
-@synthesize charonVideoView = _charonVideoView;
+@synthesize revenantVideoView = _revenantVideoView;
 @dynamic showsTimecodes, canStartPictureInPictureAutomaticallyFromInline, allowsVideoFrameAnalysis, speeds,
     selectedSpeed;
 
-- (void)charon_setUp
+- (void)revenant_setUp
 {
     _showsPlaybackControls = YES;
     _videoGravity = [AVLayerVideoGravityResizeAspect copy];
     _allowsPictureInPicturePlayback = YES;
     _updatesNowPlayingInfoCenter = YES;
-    _charonVideoView = [[CharonAVPlayerVideoView alloc] initWithFrame:CGRectMake(0, 0, 320, 180)];
-    _charonVideoView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-    _charonContentOverlayView = [[UIView alloc] initWithFrame:_charonVideoView.frame];
-    _charonContentOverlayView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-    _charonContentOverlayView.backgroundColor = [UIColor clearColor];
+    _revenantVideoView = [[RevenantAVPlayerVideoView alloc] initWithFrame:CGRectMake(0, 0, 320, 180)];
+    _revenantVideoView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    _revenantContentOverlayView = [[UIView alloc] initWithFrame:_revenantVideoView.frame];
+    _revenantContentOverlayView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    _revenantContentOverlayView.backgroundColor = [UIColor clearColor];
 }
 
 - (instancetype)initWithNibName:(NSString *)name bundle:(NSBundle *)bundle
 {
     if ((self = [super initWithNibName:name bundle:bundle]))
-        [self charon_setUp];
+        [self revenant_setUp];
     return self;
 }
 
 - (instancetype)initWithCoder:(NSCoder *)coder
 {
     if ((self = [super initWithCoder:coder]))
-        [self charon_setUp];
+        [self revenant_setUp];
     return self;
 }
 
 - (void)dealloc
 {
-    [_charonFrameLink invalidate];
-    [self charon_stopObservingPlayer];
-    [self charon_clearNowPlaying];
+    [_revenantFrameLink invalidate];
+    [self revenant_stopObservingPlayer];
+    [self revenant_clearNowPlaying];
 }
 
 #pragma mark - Properties
@@ -306,19 +306,19 @@ static NSMutableSet *charon_players_in_picture(void)
 {
     if (player == _player)
         return;
-    [self charon_stopObservingPlayer];
-    [self charon_clearNowPlaying];
-    _charonFailure = nil;
+    [self revenant_stopObservingPlayer];
+    [self revenant_clearNowPlaying];
+    _revenantFailure = nil;
     _player = player;
-    _charonVideoView.playerLayer.player = player;
-    [self charon_startObservingPlayer];
-    [self charon_update];
+    _revenantVideoView.playerLayer.player = player;
+    [self revenant_startObservingPlayer];
+    [self revenant_update];
 }
 
 - (void)setShowsPlaybackControls:(BOOL)shows
 {
     _showsPlaybackControls = shows;
-    [self charon_update];
+    [self revenant_update];
 }
 
 - (void)setVideoGravity:(NSString *)gravity
@@ -327,13 +327,13 @@ static NSMutableSet *charon_players_in_picture(void)
         && ![gravity isEqualToString:AVLayerVideoGravityResize])
         gravity = AVLayerVideoGravityResizeAspect;
     _videoGravity = [gravity copy];
-    _charonVideoView.playerLayer.videoGravity = _videoGravity;
-    _charonFrameLayer.contentsGravity = charon_contents_gravity(_videoGravity);
+    _revenantVideoView.playerLayer.videoGravity = _videoGravity;
+    _revenantFrameLayer.contentsGravity = revenant_contents_gravity(_videoGravity);
 }
 
 #pragma mark - Pixel buffer attributes
 
-static NSString *charon_contents_gravity(NSString *videoGravity)
+static NSString *revenant_contents_gravity(NSString *videoGravity)
 {
     if ([videoGravity isEqualToString:AVLayerVideoGravityResizeAspectFill])
         return kCAGravityResizeAspectFill;
@@ -344,55 +344,55 @@ static NSString *charon_contents_gravity(NSString *videoGravity)
 
 - (NSDictionary<NSString *, id> *)pixelBufferAttributes
 {
-    return _charonPixelBufferAttributes;
+    return _revenantPixelBufferAttributes;
 }
 
 - (void)setPixelBufferAttributes:(NSDictionary<NSString *, id> *)attributes
 {
-    _charonPixelBufferAttributes = [attributes copy];
-    [self charon_attachVideoOutputTo:nil];
-    [self charon_attachVideoOutputTo:_player.currentItem];
+    _revenantPixelBufferAttributes = [attributes copy];
+    [self revenant_attachVideoOutputTo:nil];
+    [self revenant_attachVideoOutputTo:_player.currentItem];
 }
 
-- (void)charon_attachVideoOutputTo:(AVPlayerItem *)item
+- (void)revenant_attachVideoOutputTo:(AVPlayerItem *)item
 {
-    if (_charonVideoOutput) {
-        [_charonOutputItem removeOutput:_charonVideoOutput];
-        _charonVideoOutput = nil;
-        _charonOutputItem = nil;
+    if (_revenantVideoOutput) {
+        [_revenantOutputItem removeOutput:_revenantVideoOutput];
+        _revenantVideoOutput = nil;
+        _revenantOutputItem = nil;
     }
-    if (!item || !_charonPixelBufferAttributes) {
-        [_charonFrameLink invalidate];
-        _charonFrameLink = nil;
-        [_charonFrameLayer removeFromSuperlayer];
-        _charonFrameLayer = nil;
+    if (!item || !_revenantPixelBufferAttributes) {
+        [_revenantFrameLink invalidate];
+        _revenantFrameLink = nil;
+        [_revenantFrameLayer removeFromSuperlayer];
+        _revenantFrameLayer = nil;
         return;
     }
-    NSMutableDictionary *attributes = [_charonPixelBufferAttributes mutableCopy];
+    NSMutableDictionary *attributes = [_revenantPixelBufferAttributes mutableCopy];
     if (!attributes[(__bridge NSString *)kCVPixelBufferIOSurfacePropertiesKey])
         attributes[(__bridge NSString *)kCVPixelBufferIOSurfacePropertiesKey] = @{};
-    _charonVideoOutput = [[AVPlayerItemVideoOutput alloc] initWithPixelBufferAttributes:attributes];
-    _charonOutputItem = item;
-    [item addOutput:_charonVideoOutput];
-    if (!_charonFrameLayer) {
-        _charonFrameLayer = [CALayer layer];
-        _charonFrameLayer.contentsGravity = charon_contents_gravity(_videoGravity);
-        [_charonVideoView.playerLayer addSublayer:_charonFrameLayer];
+    _revenantVideoOutput = [[AVPlayerItemVideoOutput alloc] initWithPixelBufferAttributes:attributes];
+    _revenantOutputItem = item;
+    [item addOutput:_revenantVideoOutput];
+    if (!_revenantFrameLayer) {
+        _revenantFrameLayer = [CALayer layer];
+        _revenantFrameLayer.contentsGravity = revenant_contents_gravity(_videoGravity);
+        [_revenantVideoView.playerLayer addSublayer:_revenantFrameLayer];
     }
-    if (!_charonFrameContext)
-        _charonFrameContext = [CIContext contextWithOptions:nil];
-    if (!_charonFrameLink) {
-        CharonAVPlayerFrameTicker *ticker = [[CharonAVPlayerFrameTicker alloc] init];
+    if (!_revenantFrameContext)
+        _revenantFrameContext = [CIContext contextWithOptions:nil];
+    if (!_revenantFrameLink) {
+        RevenantAVPlayerFrameTicker *ticker = [[RevenantAVPlayerFrameTicker alloc] init];
         ticker.target = self;
-        _charonFrameLink = [CADisplayLink displayLinkWithTarget:ticker selector:@selector(tick:)];
-        [_charonFrameLink addToRunLoop:[NSRunLoop mainRunLoop] forMode:NSRunLoopCommonModes];
+        _revenantFrameLink = [CADisplayLink displayLinkWithTarget:ticker selector:@selector(tick:)];
+        [_revenantFrameLink addToRunLoop:[NSRunLoop mainRunLoop] forMode:NSRunLoopCommonModes];
     }
 }
 
-- (void)charon_drawFrame:(CADisplayLink *)link
+- (void)revenant_drawFrame:(CADisplayLink *)link
 {
-    AVPlayerItemVideoOutput *output = _charonVideoOutput;
-    CALayer *layer = _charonFrameLayer;
+    AVPlayerItemVideoOutput *output = _revenantVideoOutput;
+    CALayer *layer = _revenantFrameLayer;
     CGRect bounds = layer.superlayer.bounds;
     if (!CGRectEqualToRect(layer.frame, bounds)) {
         [CATransaction begin];
@@ -407,14 +407,14 @@ static NSString *charon_contents_gravity(NSString *videoGravity)
     if (!buffer)
         return;
     CIImage *image = [CIImage imageWithCVPixelBuffer:buffer];
-    CGImageRef frame = image ? [_charonFrameContext createCGImage:image fromRect:image.extent] : NULL;
+    CGImageRef frame = image ? [_revenantFrameContext createCGImage:image fromRect:image.extent] : NULL;
     OSType format = CVPixelBufferGetPixelFormatType(buffer);
     CVPixelBufferRelease(buffer);
     if (!frame) {
-        if (!_charonFrameRefusalLogged)
+        if (!_revenantFrameRefusalLogged)
             NSLog(@"AVPlayerViewController: CoreImage of this release draws no frame of pixel format '%c%c%c%c'; the player layer's own frames are shown",
                   (char)(format >> 24), (char)(format >> 16), (char)(format >> 8), (char)format);
-        _charonFrameRefusalLogged = YES;
+        _revenantFrameRefusalLogged = YES;
         return;
     }
     [CATransaction begin];
@@ -426,12 +426,12 @@ static NSString *charon_contents_gravity(NSString *videoGravity)
 
 + (NSSet *)keyPathsForValuesAffectingReadyForDisplay
 {
-    return [NSSet setWithObject:@"charonVideoView.playerLayer.readyForDisplay"];
+    return [NSSet setWithObject:@"revenantVideoView.playerLayer.readyForDisplay"];
 }
 
 - (BOOL)isReadyForDisplay
 {
-    return _charonVideoView.playerLayer.readyForDisplay;
+    return _revenantVideoView.playerLayer.readyForDisplay;
 }
 
 + (NSSet *)keyPathsForValuesAffectingVideoBounds
@@ -442,7 +442,7 @@ static NSString *charon_contents_gravity(NSString *videoGravity)
 - (CGRect)videoBounds
 {
     CGSize size = self.player.currentItem.presentationSize;
-    CGRect bounds = _charonVideoView.bounds;
+    CGRect bounds = _revenantVideoView.bounds;
     if (size.width <= 0 || size.height <= 0 || CGRectIsEmpty(bounds))
         return CGRectZero;
     CGRect rect = bounds;
@@ -453,43 +453,43 @@ static NSString *charon_contents_gravity(NSString *videoGravity)
         CGSize filled = CGSizeMake(size.width * scale, size.height * scale);
         rect = CGRectMake(CGRectGetMidX(bounds) - filled.width / 2, CGRectGetMidY(bounds) - filled.height / 2, filled.width, filled.height);
     }
-    return self.isViewLoaded ? [_charonVideoView convertRect:rect toView:self.view] : rect;
+    return self.isViewLoaded ? [_revenantVideoView convertRect:rect toView:self.view] : rect;
 }
 
 - (UIView *)contentOverlayView
 {
-    return _charonContentOverlayView;
+    return _revenantContentOverlayView;
 }
 
 - (id<AVPlayerViewControllerDelegate>)delegate
 {
-    return _charonDelegate;
+    return _revenantDelegate;
 }
 
 - (void)setDelegate:(id<AVPlayerViewControllerDelegate>)delegate
 {
-    _charonDelegate = delegate;
+    _revenantDelegate = delegate;
 }
 
 - (void)setAllowsPictureInPicturePlayback:(BOOL)allows
 {
     _allowsPictureInPicturePlayback = allows;
-    [self charon_update];
+    [self revenant_update];
 }
 
 - (void)setUpdatesNowPlayingInfoCenter:(BOOL)updates
 {
     _updatesNowPlayingInfoCenter = updates;
     if (updates)
-        [self charon_writeNowPlaying];
+        [self revenant_writeNowPlaying];
     else
-        [self charon_clearNowPlaying];
+        [self revenant_clearNowPlaying];
 }
 
 - (void)setRequiresLinearPlayback:(BOOL)requires
 {
     _requiresLinearPlayback = requires;
-    [self charon_update];
+    [self revenant_update];
 }
 
 #pragma mark - View
@@ -500,42 +500,42 @@ static NSString *charon_contents_gravity(NSString *videoGravity)
     view.backgroundColor = [UIColor blackColor];
     view.clipsToBounds = YES;
 
-    _charonStage = [[UIView alloc] initWithFrame:view.bounds];
-    _charonStage.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-    _charonStage.backgroundColor = [UIColor blackColor];
-    [view addSubview:_charonStage];
+    _revenantStage = [[UIView alloc] initWithFrame:view.bounds];
+    _revenantStage.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    _revenantStage.backgroundColor = [UIColor blackColor];
+    [view addSubview:_revenantStage];
 
-    _charonVideoView.frame = _charonStage.bounds;
-    [_charonStage addSubview:_charonVideoView];
-    _charonContentOverlayView.frame = _charonStage.bounds;
-    [_charonStage addSubview:_charonContentOverlayView];
+    _revenantVideoView.frame = _revenantStage.bounds;
+    [_revenantStage addSubview:_revenantVideoView];
+    _revenantContentOverlayView.frame = _revenantStage.bounds;
+    [_revenantStage addSubview:_revenantContentOverlayView];
 
-    _charonSpinner = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhiteLarge];
-    _charonSpinner.hidesWhenStopped = YES;
-    _charonSpinner.center = CGPointMake(CGRectGetMidX(_charonStage.bounds), CGRectGetMidY(_charonStage.bounds));
-    _charonSpinner.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin
+    _revenantSpinner = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhiteLarge];
+    _revenantSpinner.hidesWhenStopped = YES;
+    _revenantSpinner.center = CGPointMake(CGRectGetMidX(_revenantStage.bounds), CGRectGetMidY(_revenantStage.bounds));
+    _revenantSpinner.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin
         | UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleBottomMargin;
-    [_charonStage addSubview:_charonSpinner];
+    [_revenantStage addSubview:_revenantSpinner];
 
-    _charonFailureLabel = [[UILabel alloc] initWithFrame:CGRectInset(_charonStage.bounds, 16, 0)];
-    _charonFailureLabel.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-    _charonFailureLabel.backgroundColor = [UIColor clearColor];
-    _charonFailureLabel.textColor = [UIColor whiteColor];
-    _charonFailureLabel.textAlignment = NSTextAlignmentCenter;
-    _charonFailureLabel.numberOfLines = 0;
-    _charonFailureLabel.hidden = YES;
-    [_charonStage addSubview:_charonFailureLabel];
+    _revenantFailureLabel = [[UILabel alloc] initWithFrame:CGRectInset(_revenantStage.bounds, 16, 0)];
+    _revenantFailureLabel.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    _revenantFailureLabel.backgroundColor = [UIColor clearColor];
+    _revenantFailureLabel.textColor = [UIColor whiteColor];
+    _revenantFailureLabel.textAlignment = NSTextAlignmentCenter;
+    _revenantFailureLabel.numberOfLines = 0;
+    _revenantFailureLabel.hidden = YES;
+    [_revenantStage addSubview:_revenantFailureLabel];
 
-    [self charon_buildControls];
+    [self revenant_buildControls];
     self.view = view;
 
-    _charonTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(charon_toggleControls:)];
-    _charonTap.delegate = self;
-    [_charonStage addGestureRecognizer:_charonTap];
-    [self charon_update];
+    _revenantTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(revenant_toggleControls:)];
+    _revenantTap.delegate = self;
+    [_revenantStage addGestureRecognizer:_revenantTap];
+    [self revenant_update];
 }
 
-- (UIButton *)charon_buttonWithImage:(UIImage *)image action:(SEL)action
+- (UIButton *)revenant_buttonWithImage:(UIImage *)image action:(SEL)action
 {
     UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
     button.frame = CGRectMake(0, 0, 44, 44);
@@ -545,7 +545,7 @@ static NSString *charon_contents_gravity(NSString *videoGravity)
     return button;
 }
 
-- (UILabel *)charon_timeLabel
+- (UILabel *)revenant_timeLabel
 {
     UILabel *label = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, 56, 44)];
     label.backgroundColor = [UIColor clearColor];
@@ -556,80 +556,80 @@ static NSString *charon_contents_gravity(NSString *videoGravity)
     return label;
 }
 
-- (void)charon_buildControls
+- (void)revenant_buildControls
 {
-    CGRect bounds = _charonStage.bounds;
-    _charonControls = [[UIView alloc] initWithFrame:bounds];
-    _charonControls.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-    _charonControls.backgroundColor = [UIColor clearColor];
-    [_charonStage addSubview:_charonControls];
+    CGRect bounds = _revenantStage.bounds;
+    _revenantControls = [[UIView alloc] initWithFrame:bounds];
+    _revenantControls.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    _revenantControls.backgroundColor = [UIColor clearColor];
+    [_revenantStage addSubview:_revenantControls];
 
-    _charonTopBar = [[UIToolbar alloc] initWithFrame:CGRectMake(0, 0, bounds.size.width, 44)];
-    _charonTopBar.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleBottomMargin;
-    _charonTopBar.barStyle = UIBarStyleBlack;
-    _charonTopBar.translucent = YES;
-    [_charonControls addSubview:_charonTopBar];
-    _charonDoneItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:self action:@selector(charon_done:)];
-    _charonPictureItem = [[UIBarButtonItem alloc] initWithImage:charon_picture_glyph() style:UIBarButtonItemStylePlain target:self
-                                                         action:@selector(charon_picture:)];
+    _revenantTopBar = [[UIToolbar alloc] initWithFrame:CGRectMake(0, 0, bounds.size.width, 44)];
+    _revenantTopBar.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleBottomMargin;
+    _revenantTopBar.barStyle = UIBarStyleBlack;
+    _revenantTopBar.translucent = YES;
+    [_revenantControls addSubview:_revenantTopBar];
+    _revenantDoneItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:self action:@selector(revenant_done:)];
+    _revenantPictureItem = [[UIBarButtonItem alloc] initWithImage:revenant_picture_glyph() style:UIBarButtonItemStylePlain target:self
+                                                         action:@selector(revenant_picture:)];
 
-    _charonBottomBar = [[UIView alloc] initWithFrame:CGRectMake(0, bounds.size.height - 44, bounds.size.width, 44)];
-    _charonBottomBar.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin;
-    _charonBottomBar.backgroundColor = [UIColor colorWithWhite:0 alpha:0.6];
-    [_charonControls addSubview:_charonBottomBar];
+    _revenantBottomBar = [[UIView alloc] initWithFrame:CGRectMake(0, bounds.size.height - 44, bounds.size.width, 44)];
+    _revenantBottomBar.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin;
+    _revenantBottomBar.backgroundColor = [UIColor colorWithWhite:0 alpha:0.6];
+    [_revenantControls addSubview:_revenantBottomBar];
 
-    _charonPlayButton = [self charon_buttonWithImage:charon_play_glyph() action:@selector(charon_playPause:)];
-    [_charonBottomBar addSubview:_charonPlayButton];
+    _revenantPlayButton = [self revenant_buttonWithImage:revenant_play_glyph() action:@selector(revenant_playPause:)];
+    [_revenantBottomBar addSubview:_revenantPlayButton];
 
-    _charonElapsedLabel = [self charon_timeLabel];
-    _charonElapsedLabel.frame = CGRectMake(44, 0, 52, 44);
-    [_charonBottomBar addSubview:_charonElapsedLabel];
+    _revenantElapsedLabel = [self revenant_timeLabel];
+    _revenantElapsedLabel.frame = CGRectMake(44, 0, 52, 44);
+    [_revenantBottomBar addSubview:_revenantElapsedLabel];
 
-    _charonFullScreenButton = [self charon_buttonWithImage:charon_full_screen_glyph() action:@selector(charon_fullScreen:)];
-    _charonFullScreenButton.frame = CGRectMake(bounds.size.width - 44, 0, 44, 44);
-    _charonFullScreenButton.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin;
-    [_charonBottomBar addSubview:_charonFullScreenButton];
+    _revenantFullScreenButton = [self revenant_buttonWithImage:revenant_full_screen_glyph() action:@selector(revenant_fullScreen:)];
+    _revenantFullScreenButton.frame = CGRectMake(bounds.size.width - 44, 0, 44, 44);
+    _revenantFullScreenButton.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin;
+    [_revenantBottomBar addSubview:_revenantFullScreenButton];
 
-    _charonRemainingLabel = [self charon_timeLabel];
-    _charonRemainingLabel.frame = CGRectMake(bounds.size.width - 44 - 56, 0, 56, 44);
-    _charonRemainingLabel.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin;
-    [_charonBottomBar addSubview:_charonRemainingLabel];
+    _revenantRemainingLabel = [self revenant_timeLabel];
+    _revenantRemainingLabel.frame = CGRectMake(bounds.size.width - 44 - 56, 0, 56, 44);
+    _revenantRemainingLabel.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin;
+    [_revenantBottomBar addSubview:_revenantRemainingLabel];
 
-    _charonScrubber = [[UISlider alloc] initWithFrame:CGRectMake(100, 0, bounds.size.width - 100 - 44 - 60, 44)];
-    _charonScrubber.autoresizingMask = UIViewAutoresizingFlexibleWidth;
-    _charonScrubber.minimumValue = 0;
-    _charonScrubber.maximumValue = 1;
-    [_charonScrubber addTarget:self action:@selector(charon_scrubBegan:) forControlEvents:UIControlEventTouchDown];
-    [_charonScrubber addTarget:self action:@selector(charon_scrubMoved:) forControlEvents:UIControlEventValueChanged];
-    [_charonScrubber addTarget:self action:@selector(charon_scrubEnded:)
+    _revenantScrubber = [[UISlider alloc] initWithFrame:CGRectMake(100, 0, bounds.size.width - 100 - 44 - 60, 44)];
+    _revenantScrubber.autoresizingMask = UIViewAutoresizingFlexibleWidth;
+    _revenantScrubber.minimumValue = 0;
+    _revenantScrubber.maximumValue = 1;
+    [_revenantScrubber addTarget:self action:@selector(revenant_scrubBegan:) forControlEvents:UIControlEventTouchDown];
+    [_revenantScrubber addTarget:self action:@selector(revenant_scrubMoved:) forControlEvents:UIControlEventValueChanged];
+    [_revenantScrubber addTarget:self action:@selector(revenant_scrubEnded:)
               forControlEvents:UIControlEventTouchUpInside | UIControlEventTouchUpOutside | UIControlEventTouchCancel];
-    [_charonBottomBar addSubview:_charonScrubber];
+    [_revenantBottomBar addSubview:_revenantScrubber];
 }
 
 - (void)viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
-    [self charon_update];
+    [self revenant_update];
 }
 
 - (void)viewDidLayoutSubviews
 {
     [super viewDidLayoutSubviews];
-    [self charon_layOutBottomBar];
+    [self revenant_layOutBottomBar];
 }
 
-- (void)charon_layOutBottomBar
+- (void)revenant_layOutBottomBar
 {
-    CGFloat width = _charonBottomBar.bounds.size.width;
-    CGFloat right = _charonFullScreenButton.hidden ? width : width - 44;
-    _charonRemainingLabel.frame = CGRectMake(right - 56, 0, 56, 44);
-    _charonScrubber.frame = CGRectMake(100, 0, MAX(0, right - 56 - 100 - 4), 44);
+    CGFloat width = _revenantBottomBar.bounds.size.width;
+    CGFloat right = _revenantFullScreenButton.hidden ? width : width - 44;
+    _revenantRemainingLabel.frame = CGRectMake(right - 56, 0, 56, 44);
+    _revenantScrubber.frame = CGRectMake(100, 0, MAX(0, right - 56 - 100 - 4), 44);
 }
 
 - (BOOL)gestureRecognizer:(UIGestureRecognizer *)recognizer shouldReceiveTouch:(UITouch *)touch
 {
     for (UIView *view = touch.view; view; view = view.superview) {
-        if ([view isKindOfClass:[UIControl class]] || view == _charonTopBar || view == _charonBottomBar)
+        if ([view isKindOfClass:[UIControl class]] || view == _revenantTopBar || view == _revenantBottomBar)
             return NO;
     }
     return YES;
@@ -637,141 +637,141 @@ static NSString *charon_contents_gravity(NSString *videoGravity)
 
 #pragma mark - State
 
-- (BOOL)charon_presentedItself
+- (BOOL)revenant_presentedItself
 {
     return self.presentingViewController != nil && self.parentViewController == nil;
 }
 
-- (BOOL)charon_pictureActive
+- (BOOL)revenant_pictureActive
 {
-    return _charonPicture.pictureInPictureActive;
+    return _revenantPicture.pictureInPictureActive;
 }
 
-- (void)charon_update
+- (void)revenant_update
 {
     if (!self.isViewLoaded)
         return;
     AVPlayerItem *item = self.player.currentItem;
-    BOOL failed = _charonFailure != nil || item.status == AVPlayerItemStatusFailed || self.player.status == AVPlayerStatusFailed;
-    _charonFailureLabel.hidden = !failed;
+    BOOL failed = _revenantFailure != nil || item.status == AVPlayerItemStatusFailed || self.player.status == AVPlayerStatusFailed;
+    _revenantFailureLabel.hidden = !failed;
     if (failed)
-        _charonFailureLabel.text = (_charonFailure ?: item.error ?: self.player.error).localizedDescription ?: @"This video cannot be played.";
+        _revenantFailureLabel.text = (_revenantFailure ?: item.error ?: self.player.error).localizedDescription ?: @"This video cannot be played.";
 
     BOOL playing = self.player.rate != 0;
-    [_charonPlayButton setImage:playing ? charon_pause_glyph() : charon_play_glyph() forState:UIControlStateNormal];
-    _charonPlayButton.enabled = self.player != nil && !failed;
+    [_revenantPlayButton setImage:playing ? revenant_pause_glyph() : revenant_play_glyph() forState:UIControlStateNormal];
+    _revenantPlayButton.enabled = self.player != nil && !failed;
 
     BOOL waiting = playing && item != nil && !item.playbackLikelyToKeepUp && item.status != AVPlayerItemStatusFailed;
     if (waiting || (item && item.status == AVPlayerItemStatusUnknown))
-        [_charonSpinner startAnimating];
+        [_revenantSpinner startAnimating];
     else
-        [_charonSpinner stopAnimating];
+        [_revenantSpinner stopAnimating];
 
-    BOOL full = _charonFullScreen != nil;
-    BOOL done = full || [self charon_presentedItself];
-    BOOL picture = _allowsPictureInPicturePlayback && [AVPictureInPictureController isPictureInPictureSupported] && ![self charon_pictureActive];
-    _charonFullScreenButton.hidden = done;
+    BOOL full = _revenantFullScreen != nil;
+    BOOL done = full || [self revenant_presentedItself];
+    BOOL picture = _allowsPictureInPicturePlayback && [AVPictureInPictureController isPictureInPictureSupported] && ![self revenant_pictureActive];
+    _revenantFullScreenButton.hidden = done;
     NSMutableArray *items = [NSMutableArray array];
     if (done)
-        [items addObject:_charonDoneItem];
+        [items addObject:_revenantDoneItem];
     [items addObject:[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:NULL]];
     if (picture)
-        [items addObject:_charonPictureItem];
-    _charonTopBar.items = items;
-    _charonTopBar.hidden = !done && !picture;
-    _charonScrubber.enabled = !_requiresLinearPlayback && item != nil && CMTIME_IS_NUMERIC(item.duration);
+        [items addObject:_revenantPictureItem];
+    _revenantTopBar.items = items;
+    _revenantTopBar.hidden = !done && !picture;
+    _revenantScrubber.enabled = !_requiresLinearPlayback && item != nil && CMTIME_IS_NUMERIC(item.duration);
 
-    BOOL controls = _showsPlaybackControls && !(_charonControlsHidden && playing);
-    _charonControls.hidden = !controls;
-    _charonTap.enabled = _showsPlaybackControls;
-    [self charon_layOutBottomBar];
-    [self charon_updateTime];
+    BOOL controls = _showsPlaybackControls && !(_revenantControlsHidden && playing);
+    _revenantControls.hidden = !controls;
+    _revenantTap.enabled = _showsPlaybackControls;
+    [self revenant_layOutBottomBar];
+    [self revenant_updateTime];
 }
 
-- (void)charon_updateTime
+- (void)revenant_updateTime
 {
     if (!self.isViewLoaded || !self.player)
         return;
     AVPlayerItem *item = self.player.currentItem;
     CMTime now = self.player.currentTime;
     CMTime duration = item ? item.duration : kCMTimeInvalid;
-    _charonElapsedLabel.text = charon_time_text(now);
+    _revenantElapsedLabel.text = revenant_time_text(now);
     if (CMTIME_IS_NUMERIC(duration) && CMTIME_IS_NUMERIC(now))
-        _charonRemainingLabel.text = [@"-" stringByAppendingString:charon_time_text(CMTimeSubtract(duration, now))];
+        _revenantRemainingLabel.text = [@"-" stringByAppendingString:revenant_time_text(CMTimeSubtract(duration, now))];
     else
-        _charonRemainingLabel.text = charon_time_text(duration);
-    if (!_charonScrubbing && CMTIME_IS_NUMERIC(duration) && CMTimeGetSeconds(duration) > 0)
-        _charonScrubber.value = (float)(CMTimeGetSeconds(now) / CMTimeGetSeconds(duration));
+        _revenantRemainingLabel.text = revenant_time_text(duration);
+    if (!_revenantScrubbing && CMTIME_IS_NUMERIC(duration) && CMTimeGetSeconds(duration) > 0)
+        _revenantScrubber.value = (float)(CMTimeGetSeconds(now) / CMTimeGetSeconds(duration));
 }
 
-- (void)charon_scheduleHidingControls
+- (void)revenant_scheduleHidingControls
 {
-    [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(charon_hideControls) object:nil];
+    [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(revenant_hideControls) object:nil];
     if (self.player.rate != 0)
-        [self performSelector:@selector(charon_hideControls) withObject:nil afterDelay:3];
+        [self performSelector:@selector(revenant_hideControls) withObject:nil afterDelay:3];
 }
 
-- (void)charon_hideControls
+- (void)revenant_hideControls
 {
-    if (_charonScrubbing || self.player.rate == 0)
+    if (_revenantScrubbing || self.player.rate == 0)
         return;
-    _charonControlsHidden = YES;
-    [self charon_update];
+    _revenantControlsHidden = YES;
+    [self revenant_update];
 }
 
 #pragma mark - Observation
 
-- (void)charon_startObservingPlayer
+- (void)revenant_startObservingPlayer
 {
     AVPlayer *player = _player;
     if (!player)
         return;
-    [player addObserver:self forKeyPath:@"rate" options:0 context:CharonAVPlayerObservation];
-    [player addObserver:self forKeyPath:@"currentItem" options:0 context:CharonAVPlayerObservation];
-    [player addObserver:self forKeyPath:@"status" options:0 context:CharonAVPlayerObservation];
+    [player addObserver:self forKeyPath:@"rate" options:0 context:RevenantAVPlayerObservation];
+    [player addObserver:self forKeyPath:@"currentItem" options:0 context:RevenantAVPlayerObservation];
+    [player addObserver:self forKeyPath:@"status" options:0 context:RevenantAVPlayerObservation];
     __weak AVPlayerViewController *weakSelf = self;
-    _charonTimeObserver = [player addPeriodicTimeObserverForInterval:CMTimeMake(1, 4) queue:dispatch_get_main_queue() usingBlock:^(CMTime time) {
-        [weakSelf charon_updateTime];
+    _revenantTimeObserver = [player addPeriodicTimeObserverForInterval:CMTimeMake(1, 4) queue:dispatch_get_main_queue() usingBlock:^(CMTime time) {
+        [weakSelf revenant_updateTime];
     }];
-    [self charon_observeItem:player.currentItem];
+    [self revenant_observeItem:player.currentItem];
 }
 
-- (void)charon_stopObservingPlayer
+- (void)revenant_stopObservingPlayer
 {
     AVPlayer *player = _player;
     if (!player)
         return;
-    [self charon_observeItem:nil];
-    if (_charonTimeObserver)
-        [player removeTimeObserver:_charonTimeObserver];
-    _charonTimeObserver = nil;
-    [player removeObserver:self forKeyPath:@"rate" context:CharonAVPlayerObservation];
-    [player removeObserver:self forKeyPath:@"currentItem" context:CharonAVPlayerObservation];
-    [player removeObserver:self forKeyPath:@"status" context:CharonAVPlayerObservation];
+    [self revenant_observeItem:nil];
+    if (_revenantTimeObserver)
+        [player removeTimeObserver:_revenantTimeObserver];
+    _revenantTimeObserver = nil;
+    [player removeObserver:self forKeyPath:@"rate" context:RevenantAVPlayerObservation];
+    [player removeObserver:self forKeyPath:@"currentItem" context:RevenantAVPlayerObservation];
+    [player removeObserver:self forKeyPath:@"status" context:RevenantAVPlayerObservation];
 }
 
-- (void)charon_observeItem:(AVPlayerItem *)item
+- (void)revenant_observeItem:(AVPlayerItem *)item
 {
-    if (item == _charonObservedItem)
+    if (item == _revenantObservedItem)
         return;
     NSArray *keys = @[@"status", @"duration", @"playbackLikelyToKeepUp"];
-    if (_charonObservedItem) {
+    if (_revenantObservedItem) {
         for (NSString *key in keys)
-            [_charonObservedItem removeObserver:self forKeyPath:key context:CharonAVPlayerObservation];
-        [[NSNotificationCenter defaultCenter] removeObserver:self name:AVPlayerItemDidPlayToEndTimeNotification object:_charonObservedItem];
+            [_revenantObservedItem removeObserver:self forKeyPath:key context:RevenantAVPlayerObservation];
+        [[NSNotificationCenter defaultCenter] removeObserver:self name:AVPlayerItemDidPlayToEndTimeNotification object:_revenantObservedItem];
     }
-    _charonObservedItem = item;
-    [self charon_attachVideoOutputTo:item];
+    _revenantObservedItem = item;
+    [self revenant_attachVideoOutputTo:item];
     if (item) {
-        _charonFailure = nil;
+        _revenantFailure = nil;
         for (NSString *key in keys)
-            [item addObserver:self forKeyPath:key options:0 context:CharonAVPlayerObservation];
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(charon_playedToEnd:)
+            [item addObserver:self forKeyPath:key options:0 context:RevenantAVPlayerObservation];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(revenant_playedToEnd:)
                                                      name:AVPlayerItemDidPlayToEndTimeNotification object:item];
         __weak AVPlayerViewController *weakSelf = self;
         [item.asset loadValuesAsynchronouslyForKeys:@[@"commonMetadata"] completionHandler:^{
             dispatch_async(dispatch_get_main_queue(), ^{
-                [weakSelf charon_writeNowPlaying];
+                [weakSelf revenant_writeNowPlaying];
             });
         }];
     }
@@ -779,7 +779,7 @@ static NSString *charon_contents_gravity(NSString *videoGravity)
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
 {
-    if (context != CharonAVPlayerObservation) {
+    if (context != RevenantAVPlayerObservation) {
         [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
         return;
     }
@@ -789,45 +789,45 @@ static NSString *charon_contents_gravity(NSString *videoGravity)
         });
         return;
     }
-    if (object == _charonObservedItem && [keyPath isEqualToString:@"status"] && _charonObservedItem.status == AVPlayerItemStatusFailed)
-        _charonFailure = _charonObservedItem.error;
+    if (object == _revenantObservedItem && [keyPath isEqualToString:@"status"] && _revenantObservedItem.status == AVPlayerItemStatusFailed)
+        _revenantFailure = _revenantObservedItem.error;
     if (object == _player && [keyPath isEqualToString:@"status"] && _player.status == AVPlayerStatusFailed)
-        _charonFailure = _player.error;
+        _revenantFailure = _player.error;
     if (object == _player && [keyPath isEqualToString:@"currentItem"]) {
-        [self charon_observeItem:_player.currentItem];
+        [self revenant_observeItem:_player.currentItem];
     } else if (object == _player && [keyPath isEqualToString:@"rate"]) {
-        [self charon_rateChanged];
+        [self revenant_rateChanged];
     }
-    [self charon_update];
-    [self charon_writeNowPlaying];
+    [self revenant_update];
+    [self revenant_writeNowPlaying];
 }
 
-- (void)charon_rateChanged
+- (void)revenant_rateChanged
 {
     if (_player.rate != 0) {
-        [self charon_scheduleHidingControls];
-        if (_entersFullScreenWhenPlaybackBegins && !_charonFullScreen && ![self charon_presentedItself] && self.isViewLoaded && self.view.window)
-            [self charon_enterFullScreen];
+        [self revenant_scheduleHidingControls];
+        if (_entersFullScreenWhenPlaybackBegins && !_revenantFullScreen && ![self revenant_presentedItself] && self.isViewLoaded && self.view.window)
+            [self revenant_enterFullScreen];
     } else {
-        _charonControlsHidden = NO;
+        _revenantControlsHidden = NO;
     }
 }
 
-- (void)charon_playedToEnd:(NSNotification *)notification
+- (void)revenant_playedToEnd:(NSNotification *)notification
 {
-    _charonControlsHidden = NO;
-    [self charon_update];
+    _revenantControlsHidden = NO;
+    [self revenant_update];
     if (!_exitsFullScreenWhenPlaybackEnds)
         return;
-    if (_charonFullScreen)
-        [self charon_exitFullScreen];
-    else if ([self charon_presentedItself])
+    if (_revenantFullScreen)
+        [self revenant_exitFullScreen];
+    else if ([self revenant_presentedItself])
         [self.presentingViewController dismissViewControllerAnimated:YES completion:nil];
 }
 
 #pragma mark - Now playing
 
-- (void)charon_writeNowPlaying
+- (void)revenant_writeNowPlaying
 {
     if (!_updatesNowPlayingInfoCenter || !_player.currentItem)
         return;
@@ -847,28 +847,28 @@ static NSString *charon_contents_gravity(NSString *videoGravity)
         info[MPNowPlayingInfoPropertyElapsedPlaybackTime] = @(CMTimeGetSeconds(now));
     info[MPNowPlayingInfoPropertyPlaybackRate] = @(_player.rate);
     [MPNowPlayingInfoCenter defaultCenter].nowPlayingInfo = info;
-    _charonWroteNowPlaying = YES;
+    _revenantWroteNowPlaying = YES;
 }
 
-- (void)charon_clearNowPlaying
+- (void)revenant_clearNowPlaying
 {
-    if (!_charonWroteNowPlaying)
+    if (!_revenantWroteNowPlaying)
         return;
     [MPNowPlayingInfoCenter defaultCenter].nowPlayingInfo = nil;
-    _charonWroteNowPlaying = NO;
+    _revenantWroteNowPlaying = NO;
 }
 
 #pragma mark - Actions
 
-- (void)charon_toggleControls:(UITapGestureRecognizer *)recognizer
+- (void)revenant_toggleControls:(UITapGestureRecognizer *)recognizer
 {
-    _charonControlsHidden = !_charonControls.hidden;
-    [self charon_update];
-    if (!_charonControlsHidden)
-        [self charon_scheduleHidingControls];
+    _revenantControlsHidden = !_revenantControls.hidden;
+    [self revenant_update];
+    if (!_revenantControlsHidden)
+        [self revenant_scheduleHidingControls];
 }
 
-- (void)charon_playPause:(id)sender
+- (void)revenant_playPause:(id)sender
 {
     if (_player.rate != 0) {
         [_player pause];
@@ -878,88 +878,88 @@ static NSString *charon_contents_gravity(NSString *videoGravity)
     if (item && CMTIME_IS_NUMERIC(item.duration) && CMTimeCompare(_player.currentTime, item.duration) >= 0)
         [_player seekToTime:kCMTimeZero];
     [_player play];
-    if ([self respondsToSelector:@selector(charon_applySelectedSpeed)])
-        [self charon_applySelectedSpeed];
+    if ([self respondsToSelector:@selector(revenant_applySelectedSpeed)])
+        [self revenant_applySelectedSpeed];
 }
 
-- (void)charon_scrubBegan:(UISlider *)slider
+- (void)revenant_scrubBegan:(UISlider *)slider
 {
-    _charonScrubbing = YES;
-    _charonRateBeforeScrubbing = _player.rate;
+    _revenantScrubbing = YES;
+    _revenantRateBeforeScrubbing = _player.rate;
     [_player pause];
-    [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(charon_hideControls) object:nil];
+    [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(revenant_hideControls) object:nil];
 }
 
-- (void)charon_scrubMoved:(UISlider *)slider
+- (void)revenant_scrubMoved:(UISlider *)slider
 {
     CMTime duration = _player.currentItem.duration;
     if (!CMTIME_IS_NUMERIC(duration))
         return;
     CMTime target = CMTimeMultiplyByFloat64(duration, slider.value);
     [_player seekToTime:target toleranceBefore:kCMTimeZero toleranceAfter:kCMTimeZero];
-    _charonElapsedLabel.text = charon_time_text(target);
-    _charonRemainingLabel.text = [@"-" stringByAppendingString:charon_time_text(CMTimeSubtract(duration, target))];
+    _revenantElapsedLabel.text = revenant_time_text(target);
+    _revenantRemainingLabel.text = [@"-" stringByAppendingString:revenant_time_text(CMTimeSubtract(duration, target))];
 }
 
-- (void)charon_scrubEnded:(UISlider *)slider
+- (void)revenant_scrubEnded:(UISlider *)slider
 {
-    _charonScrubbing = NO;
-    if (_charonRateBeforeScrubbing != 0)
-        _player.rate = _charonRateBeforeScrubbing;
-    [self charon_scheduleHidingControls];
+    _revenantScrubbing = NO;
+    if (_revenantRateBeforeScrubbing != 0)
+        _player.rate = _revenantRateBeforeScrubbing;
+    [self revenant_scheduleHidingControls];
 }
 
-- (void)charon_done:(id)sender
+- (void)revenant_done:(id)sender
 {
-    if (_charonFullScreen) {
-        [self charon_exitFullScreen];
+    if (_revenantFullScreen) {
+        [self revenant_exitFullScreen];
         return;
     }
     [_player pause];
     [self.presentingViewController dismissViewControllerAnimated:YES completion:nil];
 }
 
-- (void)charon_fullScreen:(id)sender
+- (void)revenant_fullScreen:(id)sender
 {
-    [self charon_enterFullScreen];
+    [self revenant_enterFullScreen];
 }
 
-- (void)charon_picture:(id)sender
+- (void)revenant_picture:(id)sender
 {
-    if (!_charonPicture) {
-        _charonPictureRelay = [[CharonAVPlayerPictureInPictureRelay alloc] init];
-        _charonPictureRelay.owner = self;
-        _charonPicture = [[AVPictureInPictureController alloc] initWithPlayerLayer:_charonVideoView.playerLayer];
-        _charonPicture.delegate = _charonPictureRelay;
+    if (!_revenantPicture) {
+        _revenantPictureRelay = [[RevenantAVPlayerPictureInPictureRelay alloc] init];
+        _revenantPictureRelay.owner = self;
+        _revenantPicture = [[AVPictureInPictureController alloc] initWithPlayerLayer:_revenantVideoView.playerLayer];
+        _revenantPicture.delegate = _revenantPictureRelay;
     }
-    [_charonPicture startPictureInPicture];
+    [_revenantPicture startPictureInPicture];
 }
 
 #pragma mark - Full screen
 
-- (void)charon_enterFullScreen
+- (void)revenant_enterFullScreen
 {
-    if (_charonFullScreen || !self.isViewLoaded)
+    if (_revenantFullScreen || !self.isViewLoaded)
         return;
     UIViewController *presenter = self.view.window.rootViewController;
     while (presenter.presentedViewController)
         presenter = presenter.presentedViewController;
     if (!presenter)
         return;
-    CharonAVPlayerFullScreenViewController *full = [[CharonAVPlayerFullScreenViewController alloc] init];
+    RevenantAVPlayerFullScreenViewController *full = [[RevenantAVPlayerFullScreenViewController alloc] init];
     full.modalTransitionStyle = UIModalTransitionStyleCrossDissolve;
     UIView *view = full.view;
-    _charonStage.frame = view.bounds;
-    [view addSubview:_charonStage];
-    _charonFullScreen = full;
-    [self charon_update];
+    _revenantStage.frame = view.bounds;
+    [view addSubview:_revenantStage];
+    _revenantFullScreen = full;
+    [self revenant_update];
     [presenter presentViewController:full animated:YES completion:nil];
-    [self charon_tellDelegateFullScreenBegins:YES of:full];
+    [self revenant_tellDelegateFullScreenBegins:YES of:full];
 }
 
-- (void)charon_tellDelegateFullScreenBegins:(BOOL)begins of:(UIViewController *)full
+- (void)revenant_tellDelegateFullScreenBegins:(BOOL)begins of:(UIViewController *)full
 {
-    id<AVPlayerViewControllerDelegate> delegate = _charonDelegate;
+    id<AVPlayerViewControllerDelegate> delegate = _revenantDelegate;
     SEL selector = begins ? @selector(playerViewController:willBeginFullScreenPresentationWithAnimationCoordinator:)
                           : @selector(playerViewController:willEndFullScreenPresentationWithAnimationCoordinator:);
     if (![delegate respondsToSelector:selector])
@@ -972,34 +972,34 @@ static NSString *charon_contents_gravity(NSString *videoGravity)
         [delegate playerViewController:self willEndFullScreenPresentationWithAnimationCoordinator:coordinator];
 }
 
-- (void)charon_exitFullScreen
+- (void)revenant_exitFullScreen
 {
-    CharonAVPlayerFullScreenViewController *full = _charonFullScreen;
+    RevenantAVPlayerFullScreenViewController *full = _revenantFullScreen;
     if (!full)
         return;
     [full.presentingViewController dismissViewControllerAnimated:YES completion:^{
-        self->_charonStage.frame = self.view.bounds;
-        [self.view addSubview:self->_charonStage];
-        self->_charonFullScreen = nil;
-        [self charon_update];
+        self->_revenantStage.frame = self.view.bounds;
+        [self.view addSubview:self->_revenantStage];
+        self->_revenantFullScreen = nil;
+        [self revenant_update];
     }];
-    [self charon_tellDelegateFullScreenBegins:NO of:full];
+    [self revenant_tellDelegateFullScreenBegins:NO of:full];
 }
 
 #pragma mark - Picture in picture
 
-- (void)charon_pictureInPictureWillStart
+- (void)revenant_pictureInPictureWillStart
 {
-    [charon_players_in_picture() addObject:self];
-    id<AVPlayerViewControllerDelegate> delegate = _charonDelegate;
+    [revenant_players_in_picture() addObject:self];
+    id<AVPlayerViewControllerDelegate> delegate = _revenantDelegate;
     if ([delegate respondsToSelector:@selector(playerViewControllerWillStartPictureInPicture:)])
         [delegate playerViewControllerWillStartPictureInPicture:self];
 }
 
-- (void)charon_pictureInPictureDidStart
+- (void)revenant_pictureInPictureDidStart
 {
-    [self charon_update];
-    id<AVPlayerViewControllerDelegate> delegate = _charonDelegate;
+    [self revenant_update];
+    id<AVPlayerViewControllerDelegate> delegate = _revenantDelegate;
     if ([delegate respondsToSelector:@selector(playerViewControllerDidStartPictureInPicture:)])
         [delegate playerViewControllerDidStartPictureInPicture:self];
     BOOL dismiss = YES;
@@ -1007,44 +1007,44 @@ static NSString *charon_contents_gravity(NSString *videoGravity)
         dismiss = [delegate playerViewControllerShouldAutomaticallyDismissAtPictureInPictureStart:self];
     if (!dismiss)
         return;
-    if (_charonFullScreen)
-        [self charon_exitFullScreen];
-    else if ([self charon_presentedItself])
+    if (_revenantFullScreen)
+        [self revenant_exitFullScreen];
+    else if ([self revenant_presentedItself])
         [self.presentingViewController dismissViewControllerAnimated:YES completion:nil];
 }
 
-- (void)charon_pictureInPictureFailed:(NSError *)error
+- (void)revenant_pictureInPictureFailed:(NSError *)error
 {
-    [charon_players_in_picture() removeObject:self];
-    id<AVPlayerViewControllerDelegate> delegate = _charonDelegate;
+    [revenant_players_in_picture() removeObject:self];
+    id<AVPlayerViewControllerDelegate> delegate = _revenantDelegate;
     if ([delegate respondsToSelector:@selector(playerViewController:failedToStartPictureInPictureWithError:)])
         [delegate playerViewController:self failedToStartPictureInPictureWithError:error];
 }
 
-- (void)charon_pictureInPictureWillStop
+- (void)revenant_pictureInPictureWillStop
 {
-    id<AVPlayerViewControllerDelegate> delegate = _charonDelegate;
+    id<AVPlayerViewControllerDelegate> delegate = _revenantDelegate;
     if ([delegate respondsToSelector:@selector(playerViewControllerWillStopPictureInPicture:)])
         [delegate playerViewControllerWillStopPictureInPicture:self];
 }
 
-- (void)charon_pictureInPictureRestore:(void (^)(BOOL restored))completion
+- (void)revenant_pictureInPictureRestore:(void (^)(BOOL restored))completion
 {
-    id<AVPlayerViewControllerDelegate> delegate = _charonDelegate;
+    id<AVPlayerViewControllerDelegate> delegate = _revenantDelegate;
     if ([delegate respondsToSelector:@selector(playerViewController:restoreUserInterfaceForPictureInPictureStopWithCompletionHandler:)])
         [delegate playerViewController:self restoreUserInterfaceForPictureInPictureStopWithCompletionHandler:completion];
     else
         completion(NO);
 }
 
-- (void)charon_pictureInPictureDidStop
+- (void)revenant_pictureInPictureDidStop
 {
     [self.view setNeedsLayout];
-    [self charon_update];
-    id<AVPlayerViewControllerDelegate> delegate = _charonDelegate;
+    [self revenant_update];
+    id<AVPlayerViewControllerDelegate> delegate = _revenantDelegate;
     if ([delegate respondsToSelector:@selector(playerViewControllerDidStopPictureInPicture:)])
         [delegate playerViewControllerDidStopPictureInPicture:self];
-    [charon_players_in_picture() removeObject:self];
+    [revenant_players_in_picture() removeObject:self];
 }
 
 @end

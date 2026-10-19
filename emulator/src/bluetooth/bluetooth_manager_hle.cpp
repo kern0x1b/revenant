@@ -12,7 +12,7 @@
 
 #include "foundation/userland_hle.hpp"
 
-namespace shade {
+namespace emulator {
 namespace {
 
     constexpr std::string_view mobile_bluetooth_image {

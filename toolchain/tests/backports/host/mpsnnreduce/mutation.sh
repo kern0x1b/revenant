@@ -115,7 +115,7 @@ PYEOF
 
 # All three sites are in the base, not in the twelve concrete classes: column-start and feature-step
 # are two lines of the base's -encodeToCommandBuffer:sourceImage:destinationImage:, and weight-default
-# is the base's -charon_nnReduceWithDevice:byColumn:byFeatureChannel:operation:. Splitting one object
+# is the base's -revenant_nnReduceWithDevice:byColumn:byFeatureChannel:operation:. Splitting one object
 # into MPSNNReduce16.m (the base) and MPSNNReduce12.m (the twelve concrete classes) moved all three
 # into MPSNNReduce16.m, and anchor_check above is what finds that a site moved rather than that a
 # mutation is wrong.

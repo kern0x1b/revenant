@@ -1,8 +1,8 @@
 #import <Foundation/Foundation.h>
 #include <stdio.h>
-#include "CharonMIDIUMP18.h"
-#include "CharonCoreMIDI.h"
-#include "CharonMIDICI.h"
+#include "RevenantMIDIUMP18.h"
+#include "RevenantCoreMIDI.h"
+#include "RevenantMIDICI.h"
 
 static int gUMPChecks;
 static int gUMPFailures;
@@ -20,7 +20,7 @@ static void check(int passed, const char *name, const char *detail)
 
 static void check_mici_classes(void)
 {
-    charon_host_MIDICIDiscoveryManager *manager = [charon_host_MIDICIDiscoveryManager sharedInstance];
+    revenant_host_MIDICIDiscoveryManager *manager = [revenant_host_MIDICIDiscoveryManager sharedInstance];
     __block int handlerCalls = 0;
     [manager discoverWithHandler:^(NSArray *nodes) { handlerCalls++; }];
     CFRunLoopRunInMode(kCFRunLoopDefaultMode, 1.0, false);
@@ -29,38 +29,38 @@ static void check_mici_classes(void)
     MIDIClientRef client = 0;
     MIDIClientCreateWithBlock(CFSTR("ci-check"), &client, NULL);
     MIDIEndpointRef destination = 0;
-    CharonMIDIDestination(client, CFSTR("ci-destination"), kMIDIProtocol_2_0, &destination, ^(const MIDIEventList *l, void *r) {});
+    RevenantMIDIDestination(client, CFSTR("ci-destination"), kMIDIProtocol_2_0, &destination, ^(const MIDIEventList *l, void *r) {});
     NSData *man3 = [NSData dataWithBytes:"\x01\x02\x03" length:3], *man2 = [NSData dataWithBytes:"\x01\x02" length:2];
     NSData *fam2 = [NSData dataWithBytes:"\x04\x05" length:2], *mod2 = [NSData dataWithBytes:"\x06\x07" length:2];
     NSData *rev4 = [NSData dataWithBytes:"\x0a\x0b\x0c\x0d" length:4], *rev1 = [NSData dataWithBytes:"\x0a" length:1];
-    charon_host_MIDICIDeviceInfo *info = [[charon_host_MIDICIDeviceInfo alloc] initWithDestination:destination manufacturer:man3
+    revenant_host_MIDICIDeviceInfo *info = [[revenant_host_MIDICIDeviceInfo alloc] initWithDestination:destination manufacturer:man3
                                                                                               family:fam2 model:mod2 revision:rev4];
     check(info != nil && info.family.length == 2 && info.modelNumber.length == 2, "MIDI-CI device info made with 3/2/2/4 bytes, as macOS", "");
-    check([[charon_host_MIDICIDeviceInfo alloc] initWithDestination:destination manufacturer:man2 family:fam2 model:mod2 revision:rev4] == nil,
+    check([[revenant_host_MIDICIDeviceInfo alloc] initWithDestination:destination manufacturer:man2 family:fam2 model:mod2 revision:rev4] == nil,
           "MIDI-CI device info refused for a 2-byte manufacturer, as macOS", "");
-    check([[charon_host_MIDICIDeviceInfo alloc] initWithDestination:destination manufacturer:man3 family:fam2 model:mod2 revision:rev1] == nil,
+    check([[revenant_host_MIDICIDeviceInfo alloc] initWithDestination:destination manufacturer:man3 family:fam2 model:mod2 revision:rev1] == nil,
           "MIDI-CI device info refused for a 1-byte revision, as macOS", "");
-    check([[charon_host_MIDICIDeviceInfo alloc] initWithDestination:0 manufacturer:man3 family:fam2 model:mod2 revision:rev4] == nil,
+    check([[revenant_host_MIDICIDeviceInfo alloc] initWithDestination:0 manufacturer:man3 family:fam2 model:mod2 revision:rev4] == nil,
           "MIDI-CI device info refused for no destination, as macOS", "");
 
-    charon_host_MIDICIProfile *profile = [[charon_host_MIDICIProfile alloc] initWithData:[NSData dataWithBytes:"\x7e\x00\x01\x02\x03" length:5]];
+    revenant_host_MIDICIProfile *profile = [[revenant_host_MIDICIProfile alloc] initWithData:[NSData dataWithBytes:"\x7e\x00\x01\x02\x03" length:5]];
     check(profile != nil && [profile.name isEqualToString:@"Standard Profile Bank 0x00 Number 0x01, Version: 0x02 Level: 0x03"] &&
           profile.profileID.length == 5, "MIDI-CI profile named from its standard bytes, as macOS", "");
 
     id noDelegate = nil;
-    check([[charon_host_MIDICIResponder alloc] initWithDeviceInfo:info profileDelegate:noDelegate profileStates:@[] supportProperties:NO] == nil,
+    check([[revenant_host_MIDICIResponder alloc] initWithDeviceInfo:info profileDelegate:noDelegate profileStates:@[] supportProperties:NO] == nil,
           "MIDI-CI responder with no delegate is not made, as macOS", "");
 }
 
 static int gSendCompletions;
-static void charon_send_completed(MIDISysexSendRequestUMP *request)
+static void revenant_send_completed(MIDISysexSendRequestUMP *request)
 {
     gSendCompletions++;
 }
 
 static UInt32 gReceived[8];
 static UInt32 gReceivedCount;
-static void charon_record_words(const MIDIEventList *list, void *ref)
+static void revenant_record_words(const MIDIEventList *list, void *ref)
 {
     gReceivedCount = 0;
     const MIDIEventPacket *p = &list->packet[0];
@@ -76,8 +76,8 @@ static void check_ump_sysex_sends(void)
     MIDIClientRef client = 0;
     MIDIClientCreateWithBlock(CFSTR("ump-sysex-check"), &client, NULL);
     MIDIEndpointRef destination = 0;
-    CharonMIDIDestination(client, CFSTR("ump-sysex-destination"), kMIDIProtocol_2_0, &destination, ^(const MIDIEventList *l, void *r) {
-        charon_record_words(l, r);
+    RevenantMIDIDestination(client, CFSTR("ump-sysex-destination"), kMIDIProtocol_2_0, &destination, ^(const MIDIEventList *l, void *r) {
+        revenant_record_words(l, r);
     });
     UInt32 sysex7[2] = {0x30030102u, 0x03000000u};
     MIDISysexSendRequestUMP request;
@@ -85,7 +85,7 @@ static void check_ump_sysex_sends(void)
     request.destination = destination;
     request.words = sysex7;
     request.wordsToSend = 2;
-    request.completionProc = charon_send_completed;
+    request.completionProc = revenant_send_completed;
     gSendCompletions = 0;
     gReceivedCount = 0;
     OSStatus status = MIDISendUMPSysex(&request);
@@ -100,7 +100,7 @@ static void check_ump_sysex_sends(void)
     request.destination = destination;
     request.words = sysex8;
     request.wordsToSend = 4;
-    request.completionProc = charon_send_completed;
+    request.completionProc = revenant_send_completed;
     gSendCompletions = 0;
     gReceivedCount = 0;
     status = MIDISendUMPSysex8(&request);
@@ -112,7 +112,7 @@ static void check_ump_sysex_sends(void)
     request.destination = 0;
     request.words = sysex7;
     request.wordsToSend = 2;
-    request.completionProc = charon_send_completed;
+    request.completionProc = revenant_send_completed;
     gSendCompletions = 0;
     status = MIDISendUMPSysex(&request);
     CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0.2, false);
@@ -122,7 +122,7 @@ static void check_ump_sysex_sends(void)
     request.destination = destination;
     request.words = sysex7;
     request.wordsToSend = 0;
-    request.completionProc = charon_send_completed;
+    request.completionProc = revenant_send_completed;
     gSendCompletions = 0;
     gReceivedCount = 0;
     status = MIDISendUMPSysex(&request);
@@ -131,20 +131,20 @@ static void check_ump_sysex_sends(void)
 
 static void check_ump_classes(void)
 {
-    check([[charon_host_MIDICIDeviceManager sharedInstance] discoveredCIDevices].count == 0,
+    check([[revenant_host_MIDICIDeviceManager sharedInstance] discoveredCIDevices].count == 0,
           "MIDI-CI: no device discovered, as macOS (umpclasses-macos.txt)", "");
-    check([[charon_host_MIDIUMPEndpointManager sharedInstance] UMPEndpoints].count == 0,
+    check([[revenant_host_MIDIUMPEndpointManager sharedInstance] UMPEndpoints].count == 0,
           "UMP: no endpoint listed before one is made, as macOS", "");
 
     MIDI2DeviceManufacturer man = {{0x12, 0x34, 0x56}};
     MIDI2DeviceRevisionLevel rev = {{0x03, 0x04, 0x05, 0x06}};
-    charon_host_MIDI2DeviceInfo *info = [[charon_host_MIDI2DeviceInfo alloc] initWithManufacturerID:man family:0x1234
+    revenant_host_MIDI2DeviceInfo *info = [[revenant_host_MIDI2DeviceInfo alloc] initWithManufacturerID:man family:0x1234
                                                                                        modelNumber:0x0102 revisionLevel:rev];
     check(info.manufacturerID.sysExIDByte[2] == 0x56 && info.family == 0x1234 && info.modelNumber == 0x0102 &&
           info.revisionLevel.revisionLevel[3] == 0x06,
           "MIDI2DeviceInfo keeps its values, as macOS prints them", "");
 
-    charon_host_MIDIUMPMutableFunctionBlock *fb = [[charon_host_MIDIUMPMutableFunctionBlock alloc]
+    revenant_host_MIDIUMPMutableFunctionBlock *fb = [[revenant_host_MIDIUMPMutableFunctionBlock alloc]
         initWithName:@"fb" direction:kMIDIUMPFunctionBlockDirectionInput firstGroup:0 totalGroupsSpanned:1
         maxSysEx8Streams:0 MIDI1Info:kMIDIUMPFunctionBlockMIDI1InfoNotMIDI1 UIHint:kMIDIUMPFunctionBlockUIHintUnknown isEnabled:YES];
     check(fb != nil && [fb.name isEqualToString:@"fb"] && fb.firstGroup == 0 && fb.totalGroupsSpanned == 1 && fb.isEnabled,
@@ -153,14 +153,14 @@ static void check_ump_classes(void)
           "function block not registered: setters answer NO, as macOS (umpclasses2-macos.txt)", "");
     check(fb.UMPEndpoint == nil, "function block not registered has no endpoint", "");
 
-    charon_host_MIDI2DeviceInfo *endpointInfo = info;
-    charon_host_MIDIUMPMutableEndpoint *ep = [[charon_host_MIDIUMPMutableEndpoint alloc] initWithName:@"ep" deviceInfo:endpointInfo
+    revenant_host_MIDI2DeviceInfo *endpointInfo = info;
+    revenant_host_MIDIUMPMutableEndpoint *ep = [[revenant_host_MIDIUMPMutableEndpoint alloc] initWithName:@"ep" deviceInfo:endpointInfo
         productInstanceID:@"pid" MIDIProtocol:kMIDIProtocol_2_0 destinationCallback:^(const MIDIEventList *list, void *ref) {}];
     check(ep != nil, "client endpoint made (macOS: created, umpclasses-macos.txt)", "");
     if (ep) {
         check(!ep.isEnabled && ep.MIDIProtocol == kMIDIProtocol_2_0 && [ep.name isEqualToString:@"ep"] &&
               ep.MIDIDestination != 0 && ep.MIDISource != 0, "client endpoint: disabled, protocol 2.0, named, has both ends", "");
-        check([[charon_host_MIDIUMPEndpointManager sharedInstance] UMPEndpoints].count == 1,
+        check([[revenant_host_MIDIUMPEndpointManager sharedInstance] UMPEndpoints].count == 1,
               "the manager lists the disabled client endpoint, as macOS (umpclasses2-macos.txt: 1)", "");
         check([ep setName:@"renamed" error:NULL] && [ep.name isEqualToString:@"renamed"],
               "endpoint setName answers YES, as macOS", "");
@@ -176,13 +176,13 @@ static void check_ump_classes(void)
         check(!ep.hasStaticFunctionBlocks, "endpoint is not static after markAsStatic:NO, as macOS", "");
         check([ep registerFunctionBlocks:@[fb] markAsStatic:YES error:NULL] && ep.hasStaticFunctionBlocks,
               "endpoint is static after markAsStatic:YES, as macOS", "");
-        charon_host_MIDIUMPMutableFunctionBlock *b1 = [[charon_host_MIDIUMPMutableFunctionBlock alloc]
+        revenant_host_MIDIUMPMutableFunctionBlock *b1 = [[revenant_host_MIDIUMPMutableFunctionBlock alloc]
             initWithName:@"b1" direction:kMIDIUMPFunctionBlockDirectionInput firstGroup:0 totalGroupsSpanned:1
             maxSysEx8Streams:0 MIDI1Info:kMIDIUMPFunctionBlockMIDI1InfoNotMIDI1 UIHint:kMIDIUMPFunctionBlockUIHintUnknown isEnabled:YES];
-        charon_host_MIDIUMPMutableFunctionBlock *b2 = [[charon_host_MIDIUMPMutableFunctionBlock alloc]
+        revenant_host_MIDIUMPMutableFunctionBlock *b2 = [[revenant_host_MIDIUMPMutableFunctionBlock alloc]
             initWithName:@"b2" direction:kMIDIUMPFunctionBlockDirectionOutput firstGroup:4 totalGroupsSpanned:1
             maxSysEx8Streams:0 MIDI1Info:kMIDIUMPFunctionBlockMIDI1InfoNotMIDI1 UIHint:kMIDIUMPFunctionBlockUIHintUnknown isEnabled:YES];
-        charon_host_MIDIUMPMutableFunctionBlock *b3 = [[charon_host_MIDIUMPMutableFunctionBlock alloc]
+        revenant_host_MIDIUMPMutableFunctionBlock *b3 = [[revenant_host_MIDIUMPMutableFunctionBlock alloc]
             initWithName:@"b3" direction:kMIDIUMPFunctionBlockDirectionInput firstGroup:8 totalGroupsSpanned:1
             maxSysEx8Streams:0 MIDI1Info:kMIDIUMPFunctionBlockMIDI1InfoNotMIDI1 UIHint:kMIDIUMPFunctionBlockUIHintUnknown isEnabled:YES];
         check([ep registerFunctionBlocks:@[b1, b2, b3] markAsStatic:NO error:NULL] && ep.functionBlocks.count == 3
@@ -191,7 +191,7 @@ static void check_ump_classes(void)
     }
 }
 
-int charon_ump_classes_run(int *checks)
+int revenant_ump_classes_run(int *checks)
 {
     @autoreleasepool {
         check_mici_classes();

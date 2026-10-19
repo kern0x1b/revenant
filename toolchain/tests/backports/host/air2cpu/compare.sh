@@ -80,11 +80,11 @@ cat "$work/port.out"
 #    device, and a rotation of the tid/gid/tg it hands a kernel turns this red.
 METAL=$root/packages/a/apple-backports/Metal
 STUB=$here/../metalblit/gl-stub
-# The three files the dispatch path is made of, and not the device: CharonMetalDevice.m makes an
+# The three files the dispatch path is made of, and not the device: RevenantMetalDevice.m makes an
 # EAGL context, which a host has none of, and its two one-line compute methods are what the harness
 # itself stands in for - so what runs here is the pipeline, the encoder and the buffer, which is
 # where every bug the review found in this path lives.
-port_sources="MTLComputeCommandEncoder8.m MTLComputePipeline8.m CharonMetalBuffer.m"
+port_sources="MTLComputeCommandEncoder8.m MTLComputePipeline8.m RevenantMetalBuffer.m"
 rm -rf "$work/port-obj"
 mkdir -p "$work/port-obj"
 for source in $port_sources; do
@@ -94,11 +94,11 @@ for source in $port_sources; do
 done
 renames=""
 for name in $(xcrun nm -gU "$work"/port-obj/*.o | awk 'NF == 3 {print $3}' | grep -E '^_OBJC_CLASS_\$_' | sed -e 's/^_OBJC_CLASS_\$_//' | sort -u); do
-    renames="$renames -D$name=CharonHost$name"
+    renames="$renames -D$name=RevenantHost$name"
 done
 # The device is not in the list of sources - it makes an EAGL context and a host has none - but the
 # pipeline and the buffer both name it, so the fixture's name is renamed the same way as the rest.
-renames="$renames -DCharonMetalDevice=CharonHostCharonMetalDevice"
+renames="$renames -DRevenantMetalDevice=RevenantHostRevenantMetalDevice"
 echo "harness renames:$renames"
 for source in $port_sources; do
     xcrun clang $target -fobjc-arc -fvisibility=hidden $quiet $renames -I"$STUB" -I"$METAL" -I"$here" \

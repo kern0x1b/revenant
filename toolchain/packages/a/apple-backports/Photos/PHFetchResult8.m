@@ -1,4 +1,4 @@
-#import "CharonPhotos.h"
+#import "RevenantPhotos.h"
 
 #pragma clang diagnostic ignored "-Wobjc-missing-property-synthesis"
 
@@ -10,7 +10,7 @@
     PHFetchOptions *_options;
 }
 
-- (instancetype)initWithCharonObjects:(NSArray *)objects
+- (instancetype)initWithRevenantObjects:(NSArray *)objects
 {
     self = [super init];
     if (self)
@@ -18,10 +18,10 @@
     return self;
 }
 
-- (instancetype)initWithCharonQuery:(NSArray *(^)(void))query options:(PHFetchOptions *)options
+- (instancetype)initWithRevenantQuery:(NSArray *(^)(void))query options:(PHFetchOptions *)options
 {
     NSArray *objects = query();
-    self = [self initWithCharonObjects:options ? [options charon_apply:objects] : objects];
+    self = [self initWithRevenantObjects:options ? [options revenant_apply:objects] : objects];
     if (self) {
         _query = [query copy];
         _options = [options copy];
@@ -29,14 +29,14 @@
     return self;
 }
 
-- (PHFetchResult *)charon_refetched
+- (PHFetchResult *)revenant_refetched
 {
     if (!_query)
         return self;
-    return [[PHFetchResult alloc] initWithCharonQuery:_query options:_options];
+    return [[PHFetchResult alloc] initWithRevenantQuery:_query options:_options];
 }
 
-- (BOOL)charon_wantsIncrementalChangeDetails
+- (BOOL)revenant_wantsIncrementalChangeDetails
 {
     return _options ? _options.wantsIncrementalChangeDetails : YES;
 }

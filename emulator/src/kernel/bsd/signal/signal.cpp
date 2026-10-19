@@ -18,7 +18,7 @@
 
 #include "../support.hpp"
 
-namespace shade {
+namespace emulator {
 namespace {
 
     bool default_signal_is_ignored(std::uint32_t signal)

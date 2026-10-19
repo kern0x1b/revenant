@@ -46,7 +46,7 @@ int main(int argc, char **argv)
             spring.mass = example.mass;
             spring.stiffness = example.stiffness;
             spring.damping = example.damping;
-            ((void (*)(id, SEL, CGFloat))objc_msgSend)(spring, NSSelectorFromString(@"charonHost_setInitialVelocity:"), example.velocity);
+            ((void (*)(id, SEL, CGFloat))objc_msgSend)(spring, NSSelectorFromString(@"revenantHost_setInitialVelocity:"), example.velocity);
 
             NSString *name = @(example.name);
             checks++;
@@ -59,14 +59,14 @@ int main(int argc, char **argv)
             }
 
             checks++;
-            CGFloat theirVelocity = spring.initialVelocity, ourVelocity = call_scalar(spring, @"charonHost_initialVelocity");
+            CGFloat theirVelocity = spring.initialVelocity, ourVelocity = call_scalar(spring, @"revenantHost_initialVelocity");
             if (theirVelocity != ourVelocity) {
                 failures++;
                 printf("FAIL %s velocity: the system answers %g, the backport answers %g\n", example.name, (double)theirVelocity, (double)ourVelocity);
             }
 
             checks++;
-            double theirs = spring.settlingDuration, ours = call_double(spring, @"charonHost_settlingDuration");
+            double theirs = spring.settlingDuration, ours = call_double(spring, @"revenantHost_settlingDuration");
             NSString *both = number(theirs);
             if (![both isEqual:number(ours)]) {
                 failures++;
@@ -79,7 +79,7 @@ int main(int argc, char **argv)
         }
 
         CASpringAnimation *alias = [CASpringAnimation animation];
-        ((void (*)(id, SEL, CGFloat))objc_msgSend)(alias, NSSelectorFromString(@"charonHost_setInitialVelocity:"), (CGFloat)7.5);
+        ((void (*)(id, SEL, CGFloat))objc_msgSend)(alias, NSSelectorFromString(@"revenantHost_setInitialVelocity:"), (CGFloat)7.5);
         checks++;
         if (alias.initialVelocity != (CGFloat)7.5) {
             failures++;
@@ -87,7 +87,7 @@ int main(int argc, char **argv)
         }
         alias.initialVelocity = -2.25;
         checks++;
-        if (call_scalar(alias, @"charonHost_initialVelocity") != (CGFloat)-2.25) {
+        if (call_scalar(alias, @"revenantHost_initialVelocity") != (CGFloat)-2.25) {
             failures++;
             printf("FAIL the backport's getter does not read the property the system writes\n");
         }

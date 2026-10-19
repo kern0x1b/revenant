@@ -1,6 +1,6 @@
-#import "CharonMPSGraph.h"
+#import "RevenantMPSGraph.h"
 
-static double CharonMPSGraphAsZero(double value, MPSDataType type)
+static double RevenantMPSGraphAsZero(double value, MPSDataType type)
 {
     if (type != MPSDataTypeFloat32)
         return value;
@@ -10,331 +10,331 @@ static double CharonMPSGraphAsZero(double value, MPSDataType type)
     return value;
 }
 
-static double CharonMPSGraphOwnNaN(double value)
+static double RevenantMPSGraphOwnNaN(double value)
 {
     return isnan(value) ? NAN : value;
 }
 
-static int CharonMPSGraphReadsOperandAsStored(CharonMPSGraphOperationKind kind)
+static int RevenantMPSGraphReadsOperandAsStored(RevenantMPSGraphOperationKind kind)
 {
     switch (kind) {
-    case CharonMPSGraphOperationKindAbs:
-    case CharonMPSGraphOperationKindIdentity:
-    case CharonMPSGraphOperationKindSignBit:
-    case CharonMPSGraphOperationKindNegate:
-    case CharonMPSGraphOperationKindRound:
-    case CharonMPSGraphOperationKindModulo:
-    case CharonMPSGraphOperationKindFloorModulo:
-    case CharonMPSGraphOperationKindMinimum:
-    case CharonMPSGraphOperationKindMaximum:
-    case CharonMPSGraphOperationKindSelect:
-    case CharonMPSGraphOperationKindClamp3:
-    case CharonMPSGraphOperationKindSin:
-    case CharonMPSGraphOperationKindSinh:
-    case CharonMPSGraphOperationKindAsin:
-    case CharonMPSGraphOperationKindAsinh:
-    case CharonMPSGraphOperationKindAtanh:
+    case RevenantMPSGraphOperationKindAbs:
+    case RevenantMPSGraphOperationKindIdentity:
+    case RevenantMPSGraphOperationKindSignBit:
+    case RevenantMPSGraphOperationKindNegate:
+    case RevenantMPSGraphOperationKindRound:
+    case RevenantMPSGraphOperationKindModulo:
+    case RevenantMPSGraphOperationKindFloorModulo:
+    case RevenantMPSGraphOperationKindMinimum:
+    case RevenantMPSGraphOperationKindMaximum:
+    case RevenantMPSGraphOperationKindSelect:
+    case RevenantMPSGraphOperationKindClamp3:
+    case RevenantMPSGraphOperationKindSin:
+    case RevenantMPSGraphOperationKindSinh:
+    case RevenantMPSGraphOperationKindAsin:
+    case RevenantMPSGraphOperationKindAsinh:
+    case RevenantMPSGraphOperationKindAtanh:
         return 1;
     default:
         return 0;
     }
 }
 
-static int CharonMPSGraphCopiesTheOperand(CharonMPSGraphOperationKind kind)
+static int RevenantMPSGraphCopiesTheOperand(RevenantMPSGraphOperationKind kind)
 {
-    return kind == CharonMPSGraphOperationKindAbs || kind == CharonMPSGraphOperationKindIdentity ||
-           kind == CharonMPSGraphOperationKindSignBit;
+    return kind == RevenantMPSGraphOperationKindAbs || kind == RevenantMPSGraphOperationKindIdentity ||
+           kind == RevenantMPSGraphOperationKindSignBit;
 }
 
-static int CharonMPSGraphKeepsTheNaNItWasGiven(CharonMPSGraphOperationKind kind)
+static int RevenantMPSGraphKeepsTheNaNItWasGiven(RevenantMPSGraphOperationKind kind)
 {
     switch (kind) {
-    case CharonMPSGraphOperationKindNegate:
-    case CharonMPSGraphOperationKindRound:
-    case CharonMPSGraphOperationKindSelect:
-    case CharonMPSGraphOperationKindAsin:
-    case CharonMPSGraphOperationKindAtan:
-    case CharonMPSGraphOperationKindAsinh:
-    case CharonMPSGraphOperationKindAtanh:
+    case RevenantMPSGraphOperationKindNegate:
+    case RevenantMPSGraphOperationKindRound:
+    case RevenantMPSGraphOperationKindSelect:
+    case RevenantMPSGraphOperationKindAsin:
+    case RevenantMPSGraphOperationKindAtan:
+    case RevenantMPSGraphOperationKindAsinh:
+    case RevenantMPSGraphOperationKindAtanh:
         return 1;
     default:
         return 0;
     }
 }
 
-typedef NS_ENUM(NSInteger, CharonMPSGraphHalfNaN) {
-    CharonMPSGraphHalfNaNNone = 0,
-    CharonMPSGraphHalfNaNInfinityOfSign,
-    CharonMPSGraphHalfNaNInfinityOfFlippedSign,
-    CharonMPSGraphHalfNaNZero,
-    CharonMPSGraphHalfNaNCanonical,
-    CharonMPSGraphHalfNaNSaturates,
-    CharonMPSGraphHalfNaNSaturatesAtOne,
-    CharonMPSGraphHalfNaNSigmoid
+typedef NS_ENUM(NSInteger, RevenantMPSGraphHalfNaN) {
+    RevenantMPSGraphHalfNaNNone = 0,
+    RevenantMPSGraphHalfNaNInfinityOfSign,
+    RevenantMPSGraphHalfNaNInfinityOfFlippedSign,
+    RevenantMPSGraphHalfNaNZero,
+    RevenantMPSGraphHalfNaNCanonical,
+    RevenantMPSGraphHalfNaNSaturates,
+    RevenantMPSGraphHalfNaNSaturatesAtOne,
+    RevenantMPSGraphHalfNaNSigmoid
 };
 
-static CharonMPSGraphHalfNaN CharonMPSGraphHalfNaNOf(CharonMPSGraphOperationKind kind)
+static RevenantMPSGraphHalfNaN RevenantMPSGraphHalfNaNOf(RevenantMPSGraphOperationKind kind)
 {
     switch (kind) {
-    case CharonMPSGraphOperationKindAbs:
-    case CharonMPSGraphOperationKindIdentity:
-    case CharonMPSGraphOperationKindAdd:
-    case CharonMPSGraphOperationKindSubtract:
-    case CharonMPSGraphOperationKindSquare:
-    case CharonMPSGraphOperationKindReciprocal:
-    case CharonMPSGraphOperationKindSqrt:
-    case CharonMPSGraphOperationKindRsqrt:
-    case CharonMPSGraphOperationKindLog:
-    case CharonMPSGraphOperationKindSign:
-    case CharonMPSGraphOperationKindCeil:
-    case CharonMPSGraphOperationKindFloor:
-    case CharonMPSGraphOperationKindRound:
-    case CharonMPSGraphOperationKindSelect:
-    case CharonMPSGraphOperationKindReLUGradient:
-        return CharonMPSGraphHalfNaNInfinityOfSign;
-    case CharonMPSGraphOperationKindNegate:
-        return CharonMPSGraphHalfNaNInfinityOfFlippedSign;
-    case CharonMPSGraphOperationKindSin:
-    case CharonMPSGraphOperationKindCos:
-    case CharonMPSGraphOperationKindLogBase2:
-        return CharonMPSGraphHalfNaNZero;
-    case CharonMPSGraphOperationKindAsin:
-    case CharonMPSGraphOperationKindAcos:
-    case CharonMPSGraphOperationKindAsinh:
-    case CharonMPSGraphOperationKindAcosh:
-    case CharonMPSGraphOperationKindAtanh:
-        return CharonMPSGraphHalfNaNCanonical;
-    case CharonMPSGraphOperationKindErf:
-    case CharonMPSGraphOperationKindTanh:
-        return CharonMPSGraphHalfNaNSaturates;
-    case CharonMPSGraphOperationKindPower:
-        return CharonMPSGraphHalfNaNSaturatesAtOne;
-    case CharonMPSGraphOperationKindSigmoid:
-        return CharonMPSGraphHalfNaNSigmoid;
-    case CharonMPSGraphOperationKindReLU:
-        return CharonMPSGraphHalfNaNInfinityOfSign;
+    case RevenantMPSGraphOperationKindAbs:
+    case RevenantMPSGraphOperationKindIdentity:
+    case RevenantMPSGraphOperationKindAdd:
+    case RevenantMPSGraphOperationKindSubtract:
+    case RevenantMPSGraphOperationKindSquare:
+    case RevenantMPSGraphOperationKindReciprocal:
+    case RevenantMPSGraphOperationKindSqrt:
+    case RevenantMPSGraphOperationKindRsqrt:
+    case RevenantMPSGraphOperationKindLog:
+    case RevenantMPSGraphOperationKindSign:
+    case RevenantMPSGraphOperationKindCeil:
+    case RevenantMPSGraphOperationKindFloor:
+    case RevenantMPSGraphOperationKindRound:
+    case RevenantMPSGraphOperationKindSelect:
+    case RevenantMPSGraphOperationKindReLUGradient:
+        return RevenantMPSGraphHalfNaNInfinityOfSign;
+    case RevenantMPSGraphOperationKindNegate:
+        return RevenantMPSGraphHalfNaNInfinityOfFlippedSign;
+    case RevenantMPSGraphOperationKindSin:
+    case RevenantMPSGraphOperationKindCos:
+    case RevenantMPSGraphOperationKindLogBase2:
+        return RevenantMPSGraphHalfNaNZero;
+    case RevenantMPSGraphOperationKindAsin:
+    case RevenantMPSGraphOperationKindAcos:
+    case RevenantMPSGraphOperationKindAsinh:
+    case RevenantMPSGraphOperationKindAcosh:
+    case RevenantMPSGraphOperationKindAtanh:
+        return RevenantMPSGraphHalfNaNCanonical;
+    case RevenantMPSGraphOperationKindErf:
+    case RevenantMPSGraphOperationKindTanh:
+        return RevenantMPSGraphHalfNaNSaturates;
+    case RevenantMPSGraphOperationKindPower:
+        return RevenantMPSGraphHalfNaNSaturatesAtOne;
+    case RevenantMPSGraphOperationKindSigmoid:
+        return RevenantMPSGraphHalfNaNSigmoid;
+    case RevenantMPSGraphOperationKindReLU:
+        return RevenantMPSGraphHalfNaNInfinityOfSign;
     default:
-        return CharonMPSGraphHalfNaNNone;
+        return RevenantMPSGraphHalfNaNNone;
     }
 }
 
-static int CharonMPSGraphHalfRule(CharonMPSGraphOperationKind kind)
+static int RevenantMPSGraphHalfRule(RevenantMPSGraphOperationKind kind)
 {
-    return CharonMPSGraphHalfNaNOf(kind) != CharonMPSGraphHalfNaNNone;
+    return RevenantMPSGraphHalfNaNOf(kind) != RevenantMPSGraphHalfNaNNone;
 }
 
-static double CharonMPSGraphApply(CharonMPSGraphOperationKind kind, double a, double b, double c,
+static double RevenantMPSGraphApply(RevenantMPSGraphOperationKind kind, double a, double b, double c,
                                   MPSDataType operandType, MPSDataType resultType, int latch)
 {
     if (latch && (isnan(a) || isnan(b) || isnan(c)))
-        return CharonMPSGraphOwnNaN(NAN);
-    int stored = CharonMPSGraphReadsOperandAsStored(kind);
+        return RevenantMPSGraphOwnNaN(NAN);
+    int stored = RevenantMPSGraphReadsOperandAsStored(kind);
     if (!stored) {
-        a = CharonMPSGraphAsZero(a, operandType);
-        b = CharonMPSGraphAsZero(b, operandType);
-        c = CharonMPSGraphAsZero(c, operandType);
+        a = RevenantMPSGraphAsZero(a, operandType);
+        b = RevenantMPSGraphAsZero(b, operandType);
+        c = RevenantMPSGraphAsZero(c, operandType);
     }
     int integral = operandType != MPSDataTypeFloat32 && operandType != MPSDataTypeFloat16;
     double result;
     switch (kind) {
-    case CharonMPSGraphOperationKindAbs:
+    case RevenantMPSGraphOperationKindAbs:
         result = integral ? a : fabs(a);
         break;
-    case CharonMPSGraphOperationKindIdentity:
+    case RevenantMPSGraphOperationKindIdentity:
         result = a;
         break;
-    case CharonMPSGraphOperationKindAdd:
+    case RevenantMPSGraphOperationKindAdd:
         result = a + b;
         break;
-    case CharonMPSGraphOperationKindSubtract:
+    case RevenantMPSGraphOperationKindSubtract:
         result = a - b;
         break;
-    case CharonMPSGraphOperationKindMultiply:
+    case RevenantMPSGraphOperationKindMultiply:
         result = a * b;
         break;
-    case CharonMPSGraphOperationKindDivide:
+    case RevenantMPSGraphOperationKindDivide:
         result = a / b;
         break;
-    case CharonMPSGraphOperationKindNegate:
+    case RevenantMPSGraphOperationKindNegate:
         result = -a;
         break;
-    case CharonMPSGraphOperationKindSquare:
+    case RevenantMPSGraphOperationKindSquare:
         result = a * a;
         break;
-    case CharonMPSGraphOperationKindReciprocal:
+    case RevenantMPSGraphOperationKindReciprocal:
         result = 1.0 / a;
         break;
-    case CharonMPSGraphOperationKindRsqrt:
+    case RevenantMPSGraphOperationKindRsqrt:
         result = 1.0 / sqrt(a);
         break;
-    case CharonMPSGraphOperationKindSqrt:
+    case RevenantMPSGraphOperationKindSqrt:
         result = sqrt(a);
         break;
-    case CharonMPSGraphOperationKindExp:
+    case RevenantMPSGraphOperationKindExp:
         result = exp(a);
         break;
-    case CharonMPSGraphOperationKindLog:
+    case RevenantMPSGraphOperationKindLog:
         result = log(a);
         break;
-    case CharonMPSGraphOperationKindSign:
+    case RevenantMPSGraphOperationKindSign:
         result = a > 0.0 ? 1.0 : (a < 0.0 ? -1.0 : 0.0);
         break;
-    case CharonMPSGraphOperationKindMinimum:
+    case RevenantMPSGraphOperationKindMinimum:
         result = fmin(a, b);
         break;
-    case CharonMPSGraphOperationKindMaximum:
+    case RevenantMPSGraphOperationKindMaximum:
         result = fmax(a, b);
         break;
-    case CharonMPSGraphOperationKindClamp:
+    case RevenantMPSGraphOperationKindClamp:
         result = a < b ? a : b;
         break;
-    case CharonMPSGraphOperationKindExpBase2:
+    case RevenantMPSGraphOperationKindExpBase2:
         result = exp2(a);
         break;
-    case CharonMPSGraphOperationKindExpBase10:
+    case RevenantMPSGraphOperationKindExpBase10:
         result = pow(10.0, a);
         break;
-    case CharonMPSGraphOperationKindLogBase2:
+    case RevenantMPSGraphOperationKindLogBase2:
         result = log2(a);
         break;
-    case CharonMPSGraphOperationKindLogBase10:
+    case RevenantMPSGraphOperationKindLogBase10:
         result = log10(a);
         break;
-    case CharonMPSGraphOperationKindSin:
+    case RevenantMPSGraphOperationKindSin:
         result = sin(a);
         break;
-    case CharonMPSGraphOperationKindCos:
+    case RevenantMPSGraphOperationKindCos:
         result = cos(a);
         break;
-    case CharonMPSGraphOperationKindTan:
+    case RevenantMPSGraphOperationKindTan:
         result = tan(a);
         break;
-    case CharonMPSGraphOperationKindSinh:
+    case RevenantMPSGraphOperationKindSinh:
         result = sinh(a);
         break;
-    case CharonMPSGraphOperationKindCosh:
+    case RevenantMPSGraphOperationKindCosh:
         result = cosh(a);
         break;
-    case CharonMPSGraphOperationKindTanh:
+    case RevenantMPSGraphOperationKindTanh:
         result = tanh(a);
         break;
-    case CharonMPSGraphOperationKindAsin:
+    case RevenantMPSGraphOperationKindAsin:
         result = asin(a);
         break;
-    case CharonMPSGraphOperationKindAcos:
+    case RevenantMPSGraphOperationKindAcos:
         result = acos(a);
         break;
-    case CharonMPSGraphOperationKindAtan:
+    case RevenantMPSGraphOperationKindAtan:
         result = atan(a);
         break;
-    case CharonMPSGraphOperationKindAsinh:
+    case RevenantMPSGraphOperationKindAsinh:
         result = asinh(a);
         break;
-    case CharonMPSGraphOperationKindAcosh:
+    case RevenantMPSGraphOperationKindAcosh:
         result = acosh(a);
         break;
-    case CharonMPSGraphOperationKindAtanh:
+    case RevenantMPSGraphOperationKindAtanh:
         result = atanh(a);
         break;
-    case CharonMPSGraphOperationKindErf:
+    case RevenantMPSGraphOperationKindErf:
         result = erf(a);
         break;
-    case CharonMPSGraphOperationKindSignBit:
+    case RevenantMPSGraphOperationKindSignBit:
         result = signbit(a) ? 1.0 : 0.0;
         break;
-    case CharonMPSGraphOperationKindFloor:
+    case RevenantMPSGraphOperationKindFloor:
         result = integral ? a : floor(a);
         break;
-    case CharonMPSGraphOperationKindCeil:
+    case RevenantMPSGraphOperationKindCeil:
         result = integral ? a : ceil(a);
         break;
-    case CharonMPSGraphOperationKindRound:
+    case RevenantMPSGraphOperationKindRound:
         result = integral ? a : round(a);
         if (result == 0.0)
             result = 0.0;
         break;
-    case CharonMPSGraphOperationKindRint:
+    case RevenantMPSGraphOperationKindRint:
         result = integral ? a : rint(a);
         break;
-    case CharonMPSGraphOperationKindIsNaN:
+    case RevenantMPSGraphOperationKindIsNaN:
         result = integral ? 0.0 : (isnan(a) ? 1.0 : 0.0);
         break;
-    case CharonMPSGraphOperationKindIsFinite:
+    case RevenantMPSGraphOperationKindIsFinite:
         result = integral ? 1.0 : (isfinite(a) ? 1.0 : 0.0);
         break;
-    case CharonMPSGraphOperationKindIsInfinite:
+    case RevenantMPSGraphOperationKindIsInfinite:
         result = integral ? 0.0 : (isinf(a) ? 1.0 : 0.0);
         break;
-    case CharonMPSGraphOperationKindLogicalNot:
+    case RevenantMPSGraphOperationKindLogicalNot:
         result = a == 0.0 ? 1.0 : 0.0;
         break;
-    case CharonMPSGraphOperationKindEqual:
+    case RevenantMPSGraphOperationKindEqual:
         result = a == b ? 1.0 : 0.0;
         break;
-    case CharonMPSGraphOperationKindNotEqual:
+    case RevenantMPSGraphOperationKindNotEqual:
         result = a != b ? 1.0 : 0.0;
         break;
-    case CharonMPSGraphOperationKindLessThan:
+    case RevenantMPSGraphOperationKindLessThan:
         result = a < b ? 1.0 : 0.0;
         break;
-    case CharonMPSGraphOperationKindLessThanOrEqualTo:
+    case RevenantMPSGraphOperationKindLessThanOrEqualTo:
         result = a <= b ? 1.0 : 0.0;
         break;
-    case CharonMPSGraphOperationKindGreaterThan:
+    case RevenantMPSGraphOperationKindGreaterThan:
         result = a > b ? 1.0 : 0.0;
         break;
-    case CharonMPSGraphOperationKindGreaterThanOrEqualTo:
+    case RevenantMPSGraphOperationKindGreaterThanOrEqualTo:
         result = a >= b ? 1.0 : 0.0;
         break;
-    case CharonMPSGraphOperationKindLogicalAnd:
+    case RevenantMPSGraphOperationKindLogicalAnd:
         result = (a != 0.0 && b != 0.0) ? 1.0 : 0.0;
         break;
-    case CharonMPSGraphOperationKindLogicalOr:
+    case RevenantMPSGraphOperationKindLogicalOr:
         result = (a != 0.0 || b != 0.0) ? 1.0 : 0.0;
         break;
-    case CharonMPSGraphOperationKindLogicalNand:
+    case RevenantMPSGraphOperationKindLogicalNand:
         result = !(a != 0.0 && b != 0.0) ? 1.0 : 0.0;
         break;
-    case CharonMPSGraphOperationKindLogicalNor:
+    case RevenantMPSGraphOperationKindLogicalNor:
         result = !(a != 0.0 || b != 0.0) ? 1.0 : 0.0;
         break;
-    case CharonMPSGraphOperationKindLogicalXor:
+    case RevenantMPSGraphOperationKindLogicalXor:
         result = (a != 0.0) != (b != 0.0) ? 1.0 : 0.0;
         break;
-    case CharonMPSGraphOperationKindLogicalXnor:
+    case RevenantMPSGraphOperationKindLogicalXnor:
         result = (a != 0.0) == (b != 0.0) ? 1.0 : 0.0;
         break;
-    case CharonMPSGraphOperationKindModulo:
+    case RevenantMPSGraphOperationKindModulo:
         result = fmod(a, b);
         break;
-    case CharonMPSGraphOperationKindFloorModulo:
+    case RevenantMPSGraphOperationKindFloorModulo:
         result = fmod(fmod(a, b) + b, b);
         break;
-    case CharonMPSGraphOperationKindPower:
+    case RevenantMPSGraphOperationKindPower:
         result = pow(a, b);
         break;
-    case CharonMPSGraphOperationKindAtan2:
+    case RevenantMPSGraphOperationKindAtan2:
         result = atan2(a, b);
         break;
-    case CharonMPSGraphOperationKindDivisionNoNaN:
+    case RevenantMPSGraphOperationKindDivisionNoNaN:
         result = b == 0.0 ? 0.0 : a / b;
         break;
-    case CharonMPSGraphOperationKindSelect:
+    case RevenantMPSGraphOperationKindSelect:
         result = a != 0.0 ? b : c;
         break;
-    case CharonMPSGraphOperationKindClamp3:
+    case RevenantMPSGraphOperationKindClamp3:
         result = fmin(fmax(a, b), c);
         break;
-    case CharonMPSGraphOperationKindReLU:
+    case RevenantMPSGraphOperationKindReLU:
         result = a > 0.0 ? a : 0.0;
         break;
-    case CharonMPSGraphOperationKindReLUGradient:
+    case RevenantMPSGraphOperationKindReLUGradient:
         result = isnan(b) ? NAN : (b > 0.0 ? a : a * 0.0);
         break;
-    case CharonMPSGraphOperationKindSigmoid:
+    case RevenantMPSGraphOperationKindSigmoid:
         result = 1.0 / (1.0 + exp(-a));
         break;
-    case CharonMPSGraphOperationKindSigmoidGradient: {
+    case RevenantMPSGraphOperationKindSigmoidGradient: {
         double s = 1.0 / (1.0 + exp(-b));
         result = a * s * (1.0 - s);
         break;
@@ -343,60 +343,60 @@ static double CharonMPSGraphApply(CharonMPSGraphOperationKind kind, double a, do
         result = a;
         break;
     }
-    if (resultType == MPSDataTypeFloat16 && CharonMPSGraphHalfRule(kind)) {
+    if (resultType == MPSDataTypeFloat16 && RevenantMPSGraphHalfRule(kind)) {
         if (isnan(a) || isnan(b) || isnan(c)) {
             double sign = isnan(a) ? a : (isnan(b) ? b : c);
-            switch (CharonMPSGraphHalfNaNOf(kind)) {
-            case CharonMPSGraphHalfNaNInfinityOfSign:
+            switch (RevenantMPSGraphHalfNaNOf(kind)) {
+            case RevenantMPSGraphHalfNaNInfinityOfSign:
                 result = copysign(INFINITY, sign);
                 break;
-            case CharonMPSGraphHalfNaNInfinityOfFlippedSign:
+            case RevenantMPSGraphHalfNaNInfinityOfFlippedSign:
                 result = copysign(INFINITY, -sign);
                 break;
-            case CharonMPSGraphHalfNaNZero:
+            case RevenantMPSGraphHalfNaNZero:
                 result = 0.0;
                 break;
-            case CharonMPSGraphHalfNaNCanonical:
+            case RevenantMPSGraphHalfNaNCanonical:
                 result = NAN;
                 break;
-            case CharonMPSGraphHalfNaNSaturates:
+            case RevenantMPSGraphHalfNaNSaturates:
                 result = copysign(1.0, sign);
                 break;
-            case CharonMPSGraphHalfNaNSaturatesAtOne:
+            case RevenantMPSGraphHalfNaNSaturatesAtOne:
                 result = 1.0;
                 break;
-            case CharonMPSGraphHalfNaNSigmoid:
+            case RevenantMPSGraphHalfNaNSigmoid:
                 result = signbit(sign) ? 0.0 : 1.0;
                 break;
             default:
-                result = (kind == CharonMPSGraphOperationKindReciprocal) ? 0.0 : INFINITY;
+                result = (kind == RevenantMPSGraphOperationKindReciprocal) ? 0.0 : INFINITY;
                 break;
             }
-            if (kind == CharonMPSGraphOperationKindSqrt)
+            if (kind == RevenantMPSGraphOperationKindSqrt)
                 result = signbit(sign) ? 0.0 : INFINITY;
-            else if (kind == CharonMPSGraphOperationKindSign)
+            else if (kind == RevenantMPSGraphOperationKindSign)
                 result = copysign(1.0, sign);
-            if (kind == CharonMPSGraphOperationKindSquare || kind == CharonMPSGraphOperationKindAbs)
+            if (kind == RevenantMPSGraphOperationKindSquare || kind == RevenantMPSGraphOperationKindAbs)
                 result = INFINITY;
-        } else if (isinf(a) && (kind == CharonMPSGraphOperationKindSin || kind == CharonMPSGraphOperationKindCos)) {
+        } else if (isinf(a) && (kind == RevenantMPSGraphOperationKindSin || kind == RevenantMPSGraphOperationKindCos)) {
             result = 0.0;
         } else {
             switch (kind) {
-            case CharonMPSGraphOperationKindSqrt:
+            case RevenantMPSGraphOperationKindSqrt:
                 if (a < 0.0) {
                     result = 0.0;
                 }
                 break;
-            case CharonMPSGraphOperationKindRsqrt:
+            case RevenantMPSGraphOperationKindRsqrt:
                 result = a < 0.0 ? 0.0 : (a == 0.0 ? INFINITY : result);
                 break;
-            case CharonMPSGraphOperationKindReciprocal:
+            case RevenantMPSGraphOperationKindReciprocal:
                 result = a == 0.0 ? INFINITY : result;
                 break;
-            case CharonMPSGraphOperationKindLog:
+            case RevenantMPSGraphOperationKindLog:
                 result = a == 0.0 ? -45440.0 : (isinf(a) ? 0.0 : (a > 0.0 ? log(a) : 0.0));
                 break;
-            case CharonMPSGraphOperationKindSign:
+            case RevenantMPSGraphOperationKindSign:
                 result = a != 0.0 ? copysign(1.0, a) : 0.0;
                 break;
             default:
@@ -408,15 +408,15 @@ static double CharonMPSGraphApply(CharonMPSGraphOperationKind kind, double a, do
         result = 0.0;
     if (resultType == MPSDataTypeBool)
         return result != 0.0 ? 1.0 : 0.0;
-    if ((kind == CharonMPSGraphOperationKindAtan || kind == CharonMPSGraphOperationKindTanh) &&
+    if ((kind == RevenantMPSGraphOperationKindAtan || kind == RevenantMPSGraphOperationKindTanh) &&
         result == 0.0)
         result = 0.0;
-    if (CharonMPSGraphCopiesTheOperand(kind))
-        return stored ? result : CharonMPSGraphAsZero(result, resultType);
-    double narrowed = stored ? result : CharonMPSGraphAsZero(result, resultType);
-    if (CharonMPSGraphKeepsTheNaNItWasGiven(kind) && (isnan(a) || isnan(b)))
+    if (RevenantMPSGraphCopiesTheOperand(kind))
+        return stored ? result : RevenantMPSGraphAsZero(result, resultType);
+    double narrowed = stored ? result : RevenantMPSGraphAsZero(result, resultType);
+    if (RevenantMPSGraphKeepsTheNaNItWasGiven(kind) && (isnan(a) || isnan(b)))
         return narrowed;
-    return CharonMPSGraphOwnNaN(narrowed);
+    return RevenantMPSGraphOwnNaN(narrowed);
 }
 
 typedef struct {
@@ -428,9 +428,9 @@ typedef struct {
     int isOr;
     int multiplies;
     int divides;
-} CharonMPSGraphFold;
+} RevenantMPSGraphFold;
 
-static const CharonMPSGraphFold CharonMPSGraphFolds[] = {
+static const RevenantMPSGraphFold RevenantMPSGraphFolds[] = {
     {"sum", 0.0, 0, 0, 0, 0, 0, 0},
     {"product", 1.0, 0, 0, 0, 0, 1, 0},
     {"maximum", -INFINITY, 1, 0, 0, 0, 0, 0},
@@ -441,17 +441,17 @@ static const CharonMPSGraphFold CharonMPSGraphFolds[] = {
     {"variance", 0.0, 0, 0, 0, 0, 0, 1},
 };
 
-static const CharonMPSGraphFold *CharonMPSGraphFoldNamed(const char *combination)
+static const RevenantMPSGraphFold *RevenantMPSGraphFoldNamed(const char *combination)
 {
     if (combination == NULL)
         return NULL;
-    for (unsigned i = 0; i < sizeof(CharonMPSGraphFolds) / sizeof(CharonMPSGraphFolds[0]); i++)
-        if (strcmp(CharonMPSGraphFolds[i].combination, combination) == 0)
-            return &CharonMPSGraphFolds[i];
+    for (unsigned i = 0; i < sizeof(RevenantMPSGraphFolds) / sizeof(RevenantMPSGraphFolds[0]); i++)
+        if (strcmp(RevenantMPSGraphFolds[i].combination, combination) == 0)
+            return &RevenantMPSGraphFolds[i];
     return NULL;
 }
 
-static NSUInteger CharonMPSGraphReductionIndex(NSArray<NSNumber *> *shape, const unsigned char *dropped,
+static NSUInteger RevenantMPSGraphReductionIndex(NSArray<NSNumber *> *shape, const unsigned char *dropped,
                                                const unsigned long long *stride, NSUInteger element)
 {
     NSUInteger rank = shape.count;
@@ -467,7 +467,7 @@ static NSUInteger CharonMPSGraphReductionIndex(NSArray<NSNumber *> *shape, const
     return out;
 }
 
-static long CharonMPSGraphCoordinate(NSArray<NSNumber *> *shape, NSUInteger axis, NSUInteger element)
+static long RevenantMPSGraphCoordinate(NSArray<NSNumber *> *shape, NSUInteger axis, NSUInteger element)
 {
     NSUInteger rank = shape.count, index = element;
     for (NSUInteger i = rank; i-- > 0;) {
@@ -480,12 +480,12 @@ static long CharonMPSGraphCoordinate(NSArray<NSNumber *> *shape, NSUInteger axis
     return 0;
 }
 
-static double CharonMPSGraphFoldStep(const CharonMPSGraphFold *fold, double held, double value, int propagates,
+static double RevenantMPSGraphFoldStep(const RevenantMPSGraphFold *fold, double held, double value, int propagates,
                                      int tiesToValue)
 {
     if (fold->isExtreme) {
         if (isnan(value))
-            return propagates ? CharonMPSGraphOwnNaN(NAN) : held;
+            return propagates ? RevenantMPSGraphOwnNaN(NAN) : held;
         if (propagates && isnan(held))
             return held;
         if (fold->isLesser)
@@ -497,24 +497,24 @@ static double CharonMPSGraphFoldStep(const CharonMPSGraphFold *fold, double held
         int was = held != 0.0;
         return (fold->isOr ? (truth || was) : (truth && was)) ? 1.0 : 0.0;
     }
-    return CharonMPSGraphOwnNaN(fold->multiplies ? held * value : held + value);
+    return RevenantMPSGraphOwnNaN(fold->multiplies ? held * value : held + value);
 }
 
-static void CharonMPSGraphReduce(MPSGraphOperation *operation, MPSGraphTensorData *source,
+static void RevenantMPSGraphReduce(MPSGraphOperation *operation, MPSGraphTensorData *source,
                                   MPSGraphTensorData *meanGiven, MPSGraphTensorData *result)
 {
-    NSDictionary *parameters = operation.charon_mps_parameters;
+    NSDictionary *parameters = operation.revenant_mps_parameters;
     NSArray<NSNumber *> *shape = source.shape;
     NSArray<NSNumber *> *axes = parameters[@"axes"];
-    NSUInteger sourceCount = [source charon_mps_elementCount];
-    NSUInteger resultCount = [result charon_mps_elementCount];
+    NSUInteger sourceCount = [source revenant_mps_elementCount];
+    NSUInteger resultCount = [result revenant_mps_elementCount];
     NSUInteger rank = shape.count;
     MPSDataType type = source.dataType;
     MPSDataType resultType = result.dataType;
     size_t resultSize = MPSSizeofMPSDataType(resultType);
-    void *in = [source charon_mps_bytes];
-    void *out = [result charon_mps_bytes];
-    const CharonMPSGraphFold *fold = CharonMPSGraphFoldNamed([parameters[@"combination"] UTF8String]);
+    void *in = [source revenant_mps_bytes];
+    void *out = [result revenant_mps_bytes];
+    const RevenantMPSGraphFold *fold = RevenantMPSGraphFoldNamed([parameters[@"combination"] UTF8String]);
     if (fold == NULL || !axes || sourceCount == 0 || resultCount == 0)
         return;
 
@@ -554,19 +554,19 @@ static void CharonMPSGraphReduce(MPSGraphOperation *operation, MPSGraphTensorDat
         for (NSUInteger i = 0; i < resultCount; i++)
             found[i] = -1;
         for (NSUInteger i = 0; i < sourceCount; i++) {
-            NSUInteger index = CharonMPSGraphReductionIndex(shape, dropped, stride, i);
+            NSUInteger index = RevenantMPSGraphReductionIndex(shape, dropped, stride, i);
             if (index >= resultCount)
                 continue;
-            double value = CharonMPSLoad(in, type, i);
+            double value = RevenantMPSLoad(in, type, i);
             if (isnan(value))
                 continue;
             if (found[index] < 0 || (fold->isLesser ? value < held[index] : value > held[index])) {
-                found[index] = CharonMPSGraphCoordinate(shape, reducedAxis, i);
+                found[index] = RevenantMPSGraphCoordinate(shape, reducedAxis, i);
                 held[index] = value;
             }
         }
         for (NSUInteger i = 0; i < resultCount; i++)
-            CharonMPSStoreRounded(out, resultType, i, (double)found[i], 1);
+            RevenantMPSStoreRounded(out, resultType, i, (double)found[i], 1);
         free(found);
         free(held);
         free(stride);
@@ -577,40 +577,40 @@ static void CharonMPSGraphReduce(MPSGraphOperation *operation, MPSGraphTensorDat
     memset(out, 0, resultCount * resultSize);
     if (fold->multiplies || fold->isExtreme || fold->isTruth)
         for (NSUInteger i = 0; i < resultCount; i++)
-            CharonMPSStoreRounded(out, resultType, i, fold->seed, 1);
+            RevenantMPSStoreRounded(out, resultType, i, fold->seed, 1);
     for (NSUInteger i = 0; i < sourceCount; i++) {
-        NSUInteger index = CharonMPSGraphReductionIndex(shape, dropped, stride, i);
+        NSUInteger index = RevenantMPSGraphReductionIndex(shape, dropped, stride, i);
         if (index >= resultCount)
             continue;
-        double value = CharonMPSLoad(in, type, i);
-        double held = CharonMPSLoad(out, resultType, index);
-        CharonMPSStoreRounded(out, resultType, index, CharonMPSGraphFoldStep(fold, held, value, propagates, 0), 1);
+        double value = RevenantMPSLoad(in, type, i);
+        double held = RevenantMPSLoad(out, resultType, index);
+        RevenantMPSStoreRounded(out, resultType, index, RevenantMPSGraphFoldStep(fold, held, value, propagates, 0), 1);
     }
     if (fold->divides) {
         int isVariance = strcmp(fold->combination, "variance") == 0;
-        unsigned char *mean = meanGiven ? (unsigned char *)[meanGiven charon_mps_bytes]
+        unsigned char *mean = meanGiven ? (unsigned char *)[meanGiven revenant_mps_bytes]
                                         : malloc(resultCount * resultSize);
         if (!meanGiven) {
             for (NSUInteger i = 0; i < resultCount; i++)
-                CharonMPSStoreRounded(mean, resultType, i, CharonMPSLoad(out, resultType, i) / count, 1);
+                RevenantMPSStoreRounded(mean, resultType, i, RevenantMPSLoad(out, resultType, i) / count, 1);
         }
         MPSDataType meanType = meanGiven ? meanGiven.dataType : resultType;
         if (isVariance) {
             memset(out, 0, resultCount * resultSize);
             for (NSUInteger i = 0; i < sourceCount; i++) {
-                NSUInteger index = CharonMPSGraphReductionIndex(shape, dropped, stride, i);
+                NSUInteger index = RevenantMPSGraphReductionIndex(shape, dropped, stride, i);
                 if (index >= resultCount)
                     continue;
-                double deviation = CharonMPSLoad(in, type, i) - CharonMPSLoad(mean, meanType, index);
-                CharonMPSStoreRounded(out, resultType, index,
-                                      CharonMPSLoad(out, resultType, index) + deviation * deviation, 1);
+                double deviation = RevenantMPSLoad(in, type, i) - RevenantMPSLoad(mean, meanType, index);
+                RevenantMPSStoreRounded(out, resultType, index,
+                                      RevenantMPSLoad(out, resultType, index) + deviation * deviation, 1);
             }
             for (NSUInteger i = 0; i < resultCount; i++)
-                CharonMPSStoreRounded(out, resultType, i, CharonMPSLoad(out, resultType, i) / count, 1);
+                RevenantMPSStoreRounded(out, resultType, i, RevenantMPSLoad(out, resultType, i) / count, 1);
         }
         if (!isVariance)
             for (NSUInteger i = 0; i < resultCount; i++)
-                CharonMPSStoreRounded(out, resultType, i, CharonMPSLoad(mean, meanType, i), 1);
+                RevenantMPSStoreRounded(out, resultType, i, RevenantMPSLoad(mean, meanType, i), 1);
         if (!meanGiven)
             free(mean);
     }
@@ -618,7 +618,7 @@ static void CharonMPSGraphReduce(MPSGraphOperation *operation, MPSGraphTensorDat
     free(dropped);
 }
 
-static double CharonMPSGraphScanSeed(const CharonMPSGraphFold *fold, MPSDataType type)
+static double RevenantMPSGraphScanSeed(const RevenantMPSGraphFold *fold, MPSDataType type)
 {
     if (!fold->isExtreme)
         return fold->seed;
@@ -661,29 +661,29 @@ static double CharonMPSGraphScanSeed(const CharonMPSGraphFold *fold, MPSDataType
     return fold->isLesser ? magnitude : -magnitude;
 }
 
-static void CharonMPSGraphScan(MPSGraphOperation *operation, MPSGraphTensorData *source,
+static void RevenantMPSGraphScan(MPSGraphOperation *operation, MPSGraphTensorData *source,
                                MPSGraphTensorData *axisData, MPSGraphTensorData *result)
 {
-    NSDictionary *parameters = operation.charon_mps_parameters;
-    const CharonMPSGraphFold *fold = CharonMPSGraphFoldNamed([parameters[@"scanCombination"] UTF8String]);
+    NSDictionary *parameters = operation.revenant_mps_parameters;
+    const RevenantMPSGraphFold *fold = RevenantMPSGraphFoldNamed([parameters[@"scanCombination"] UTF8String]);
     NSArray<NSNumber *> *shape = source.shape;
     NSUInteger rank = shape.count;
-    NSUInteger count = rank ? [source charon_mps_elementCount] : 0;
+    NSUInteger count = rank ? [source revenant_mps_elementCount] : 0;
     if (fold == NULL || count == 0)
         return;
     MPSDataType type = source.dataType;
     MPSDataType resultType = result.dataType;
-    void *in = [source charon_mps_bytes];
-    void *out = [result charon_mps_bytes];
+    void *in = [source revenant_mps_bytes];
+    void *out = [result revenant_mps_bytes];
 
     NSInteger axis;
     if (parameters[@"scanAxisTensor"]) {
         if (axisData == nil || ![axisData isKindOfClass:[MPSGraphTensorData class]]) {
-            CharonMPSGraphRefuse(@"MPSGraph: the cumulative operation named %@ was fed no value for its "
+            RevenantMPSGraphRefuse(@"MPSGraph: the cumulative operation named %@ was fed no value for its "
                                  @"axis, so nothing was written to its output", [operation name]);
             return;
         }
-        NSInteger fed = (NSInteger)CharonMPSLoad([axisData charon_mps_bytes], axisData.dataType, 0);
+        NSInteger fed = (NSInteger)RevenantMPSLoad([axisData revenant_mps_bytes], axisData.dataType, 0);
         axis = fed < 0 ? fed + (NSInteger)rank : fed;
         if (axis < 0 || axis >= (NSInteger)rank) {
             [NSException raise:NSInvalidArgumentException
@@ -709,38 +709,38 @@ static void CharonMPSGraphScan(MPSGraphOperation *operation, MPSGraphTensorData 
         }
     }
     unsigned long long laneStride = stride[axis];
-    double seed = CharonMPSGraphScanSeed(fold, type);
+    double seed = RevenantMPSGraphScanSeed(fold, type);
     for (NSUInteger base = 0; base < count; base++) {
-        if (CharonMPSGraphCoordinate(shape, (NSUInteger)axis, base) != 0)
+        if (RevenantMPSGraphCoordinate(shape, (NSUInteger)axis, base) != 0)
             continue;
         double accumulator = seed;
         for (unsigned long long step = 0; step < extent; step++) {
             unsigned long long at = reverse ? extent - 1 - step : step;
             NSUInteger here = base + (NSUInteger)(at * laneStride);
-            double value = CharonMPSLoad(in, type, here);
+            double value = RevenantMPSLoad(in, type, here);
             if (!exclusive)
-                accumulator = CharonMPSGraphFoldStep(fold, accumulator, value, 0, 1);
-            CharonMPSStoreRounded(out, resultType, here, accumulator, 1);
-            accumulator = CharonMPSLoad(out, resultType, here);
+                accumulator = RevenantMPSGraphFoldStep(fold, accumulator, value, 0, 1);
+            RevenantMPSStoreRounded(out, resultType, here, accumulator, 1);
+            accumulator = RevenantMPSLoad(out, resultType, here);
             if (exclusive)
-                accumulator = CharonMPSGraphFoldStep(fold, accumulator, value, 0, 1);
+                accumulator = RevenantMPSGraphFoldStep(fold, accumulator, value, 0, 1);
         }
     }
     free(stride);
 }
 
-static NSMutableArray<NSNumber *> *CharonMPSGraphGatherIntegers(MPSGraphTensorData *parameter)
+static NSMutableArray<NSNumber *> *RevenantMPSGraphGatherIntegers(MPSGraphTensorData *parameter)
 {
     if (parameter == nil)
         return nil;
-    NSUInteger count = CharonMPSGraphElementCount(parameter.shape);
+    NSUInteger count = RevenantMPSGraphElementCount(parameter.shape);
     NSMutableArray<NSNumber *> *values = [NSMutableArray arrayWithCapacity:count];
     for (NSUInteger i = 0; i < count; i++)
-        [values addObject:@((NSInteger)CharonMPSLoad([parameter charon_mps_bytes], parameter.dataType, i))];
+        [values addObject:@((NSInteger)RevenantMPSLoad([parameter revenant_mps_bytes], parameter.dataType, i))];
     return values;
 }
 
-static NSDictionary *CharonMPSGraphGatherPlan(NSString *name, NSArray<NSNumber *> *sourceShape,
+static NSDictionary *RevenantMPSGraphGatherPlan(NSString *name, NSArray<NSNumber *> *sourceShape,
                                               NSDictionary *parameters,
                                               NSArray<NSArray<NSNumber *> *> *fed)
 {
@@ -757,7 +757,7 @@ static NSDictionary *CharonMPSGraphGatherPlan(NSString *name, NSArray<NSNumber *
     NSMutableArray<NSNumber *> *reversed = [NSMutableArray array];
 
     if (gather == NULL || sourceRank == 0) {
-        CharonMPSGraphRefuse(@"MPSGraph: the operation named %@ asked for a gather this interpreter does not "
+        RevenantMPSGraphRefuse(@"MPSGraph: the operation named %@ asked for a gather this interpreter does not "
                              @"know, so nothing was written to its output", name);
         return nil;
     }
@@ -1097,7 +1097,7 @@ static NSDictionary *CharonMPSGraphGatherPlan(NSString *name, NSArray<NSNumber *
                                                                                      : parameters[@"gatherShape"];
         if (written == nil)
             return nil;
-        NSUInteger elementCount = CharonMPSGraphElementCount(sourceShape);
+        NSUInteger elementCount = RevenantMPSGraphElementCount(sourceShape);
         NSMutableArray<NSNumber *> *declared = [NSMutableArray arrayWithCapacity:written.count];
         NSInteger dynamic = 0;
         unsigned long long writtenProduct = 1;
@@ -1166,7 +1166,7 @@ static NSDictionary *CharonMPSGraphGatherPlan(NSString *name, NSArray<NSNumber *
             [reversed addObject:@0];
         }
     } else {
-        CharonMPSGraphRefuse(@"MPSGraph: the operation named %@ asked for a gather this interpreter does not "
+        RevenantMPSGraphRefuse(@"MPSGraph: the operation named %@ asked for a gather this interpreter does not "
                              @"know, so nothing was written to its output", name);
         return nil;
     }
@@ -1174,7 +1174,7 @@ static NSDictionary *CharonMPSGraphGatherPlan(NSString *name, NSArray<NSNumber *
              @"reversed": reversed, @"flat": @NO};
 }
 
-static void CharonMPSGraphGather(MPSGraphOperation *operation, MPSGraphTensorData *source,
+static void RevenantMPSGraphGather(MPSGraphOperation *operation, MPSGraphTensorData *source,
                                   MPSGraphTensorData *result, NSDictionary *plan)
 {
     NSArray<NSNumber *> *sourceShape = source.shape;
@@ -1187,18 +1187,18 @@ static void CharonMPSGraphGather(MPSGraphOperation *operation, MPSGraphTensorDat
     BOOL repeated = [plan[@"repeat"] boolValue];
     NSUInteger sourceRank = sourceShape.count;
     NSUInteger resultRank = resultShape.count;
-    NSUInteger count = CharonMPSGraphElementCount(resultShape);
-    NSUInteger sourceCount = CharonMPSGraphElementCount(sourceShape);
+    NSUInteger count = RevenantMPSGraphElementCount(resultShape);
+    NSUInteger sourceCount = RevenantMPSGraphElementCount(sourceShape);
     if (count == 0)
         return;
     MPSDataType type = source.dataType;
-    void *in = [source charon_mps_bytes];
-    void *out = [result charon_mps_bytes];
+    void *in = [source revenant_mps_bytes];
+    void *out = [result revenant_mps_bytes];
 
     if ([plan[@"flat"] boolValue]) {
         for (NSUInteger element = 0; element < count && element < sourceCount; element++)
-            CharonMPSStoreRounded(out, result.dataType, element,
-                                  CharonMPSLoad(in, type, element), 1);
+            RevenantMPSStoreRounded(out, result.dataType, element,
+                                  RevenantMPSLoad(in, type, element), 1);
         return;
     }
 
@@ -1256,13 +1256,13 @@ static void CharonMPSGraphGather(MPSGraphOperation *operation, MPSGraphTensorDat
             }
         }
         if (!unsourced && sourceIndex < (unsigned long long)sourceCount)
-            CharonMPSStoreRounded(out, result.dataType, element,
-                                  CharonMPSLoad(in, type, (NSUInteger)sourceIndex), 1);
+            RevenantMPSStoreRounded(out, result.dataType, element,
+                                  RevenantMPSLoad(in, type, (NSUInteger)sourceIndex), 1);
     }
     free(sourceStride);
 }
 
-static NSDictionary *CharonMPSGraphConcatPlan(NSString *name, NSArray<NSArray<NSNumber *> *> *shapes,
+static NSDictionary *RevenantMPSGraphConcatPlan(NSString *name, NSArray<NSArray<NSNumber *> *> *shapes,
                                               NSInteger axis, BOOL interleave, BOOL stacked)
 {
     NSUInteger operands = shapes.count;
@@ -1362,7 +1362,7 @@ static NSDictionary *CharonMPSGraphConcatPlan(NSString *name, NSArray<NSArray<NS
              @"concatInterleave": @(interleave), @"concatStacked": @(stacked)};
 }
 
-static NSArray<NSNumber *> *CharonMPSGraphSplitSizes(NSString *name, NSArray<NSNumber *> *written,
+static NSArray<NSNumber *> *RevenantMPSGraphSplitSizes(NSString *name, NSArray<NSNumber *> *written,
                                                      NSUInteger numSplits, NSInteger axis,
                                                      NSArray<NSNumber *> *operandShape)
 {
@@ -1428,7 +1428,7 @@ static NSArray<NSNumber *> *CharonMPSGraphSplitSizes(NSString *name, NSArray<NSN
     return sizes;
 }
 
-static NSDictionary *CharonMPSGraphBlockShufflePlan(NSString *name, NSArray<NSNumber *> *operandShape,
+static NSDictionary *RevenantMPSGraphBlockShufflePlan(NSString *name, NSArray<NSNumber *> *operandShape,
                                                     NSArray<NSNumber *> *spatial, NSInteger batch,
                                                     NSArray<NSNumber *> *block, BOOL toBatch, BOOL shuffle)
 {
@@ -1617,7 +1617,7 @@ static NSDictionary *CharonMPSGraphBlockShufflePlan(NSString *name, NSArray<NSNu
     return @{@"splitShape": splitShape, @"permutation": permutation, @"resultShape": resultShape};
 }
 
-static void CharonMPSGraphConcat(NSString *name, NSArray<MPSGraphTensorData *> *sources,
+static void RevenantMPSGraphConcat(NSString *name, NSArray<MPSGraphTensorData *> *sources,
                                  MPSGraphTensorData *result, NSDictionary *plan)
 {
     NSArray<NSNumber *> *resultShape = result.shape;
@@ -1627,11 +1627,11 @@ static void CharonMPSGraphConcat(NSString *name, NSArray<MPSGraphTensorData *> *
     BOOL stacked = [plan[@"concatStacked"] boolValue];
     NSUInteger operands = starts.count;
     NSUInteger rank = resultShape.count;
-    NSUInteger count = CharonMPSGraphElementCount(resultShape);
+    NSUInteger count = RevenantMPSGraphElementCount(resultShape);
     if (count == 0)
         return;
     MPSDataType type = result.dataType;
-    void *out = [result charon_mps_bytes];
+    void *out = [result revenant_mps_bytes];
 
 NSUInteger across = rank ? (NSUInteger)resultShape[(NSUInteger)axis].unsignedIntegerValue : 1;
     unsigned long long axisStride = 1;
@@ -1673,20 +1673,20 @@ NSUInteger across = rank ? (NSUInteger)resultShape[(NSUInteger)axis].unsignedInt
                 step *= (unsigned long long)sourceShape[a].unsignedIntegerValue;
             sourceIndex += at * step;
         }
-        NSUInteger sourceCount = CharonMPSGraphElementCount(sourceShape);
+        NSUInteger sourceCount = RevenantMPSGraphElementCount(sourceShape);
         if (sourceIndex >= sourceCount) {
-            CharonMPSGraphRefuse(@"MPSGraph: the operation named %@ wanted element %lu of its result at "
+            RevenantMPSGraphRefuse(@"MPSGraph: the operation named %@ wanted element %lu of its result at "
                                  "index %llu of a %lu-element operand, which its own plan cannot ask for",
                                  name, (unsigned long)element, sourceIndex, (unsigned long)sourceCount);
-            CharonMPSStoreRounded(out, type, element, 0.0, 1);
+            RevenantMPSStoreRounded(out, type, element, 0.0, 1);
             continue;
         }
-        CharonMPSStoreRounded(out, type, element,
-                              CharonMPSLoad([source charon_mps_bytes], source.dataType, (NSUInteger)sourceIndex), 1);
+        RevenantMPSStoreRounded(out, type, element,
+                              RevenantMPSLoad([source revenant_mps_bytes], source.dataType, (NSUInteger)sourceIndex), 1);
     }
 }
 
-static void CharonMPSGraphPad(MPSGraphTensorData *source, MPSGraphTensorData *result, NSDictionary *plan)
+static void RevenantMPSGraphPad(MPSGraphTensorData *source, MPSGraphTensorData *result, NSDictionary *plan)
 {
     NSArray<NSNumber *> *sourceShape = source.shape;
     NSArray<NSNumber *> *resultShape = result.shape;
@@ -1694,12 +1694,12 @@ static void CharonMPSGraphPad(MPSGraphTensorData *source, MPSGraphTensorData *re
     NSInteger mode = [plan[@"padMode"] integerValue];
     double constant = [plan[@"padConstant"] doubleValue];
     NSUInteger rank = resultShape.count;
-    NSUInteger count = CharonMPSGraphElementCount(resultShape);
+    NSUInteger count = RevenantMPSGraphElementCount(resultShape);
     if (count == 0)
         return;
     MPSDataType type = source.dataType;
-    void *in = [source charon_mps_bytes];
-    void *out = [result charon_mps_bytes];
+    void *in = [source revenant_mps_bytes];
+    void *out = [result revenant_mps_bytes];
     unsigned long long *resultStride = calloc(rank ? rank : 1, sizeof(unsigned long long));
     unsigned long long *sourceStride = calloc(rank ? rank : 1, sizeof(unsigned long long));
     for (NSUInteger i = rank; i-- > 0;) {
@@ -1736,16 +1736,16 @@ static void CharonMPSGraphPad(MPSGraphTensorData *source, MPSGraphTensorData *re
         }
         double value = 0.0;
         if (mapped)
-            value = CharonMPSLoad(in, type, (NSUInteger)index);
+            value = RevenantMPSLoad(in, type, (NSUInteger)index);
         else if (mode == 0)
             value = constant;
-        CharonMPSStoreRounded(out, result.dataType, element, value, 1);
+        RevenantMPSStoreRounded(out, result.dataType, element, value, 1);
     }
     free(resultStride);
     free(sourceStride);
 }
 
-static void CharonMPSGraphScatter(MPSGraphTensorData *source, MPSGraphTensorData *result, NSDictionary *plan)
+static void RevenantMPSGraphScatter(MPSGraphTensorData *source, MPSGraphTensorData *result, NSDictionary *plan)
 {
     NSArray<NSNumber *> *sourceShape = source.shape;
     NSArray<NSNumber *> *resultShape = result.shape;
@@ -1754,12 +1754,12 @@ static void CharonMPSGraphScatter(MPSGraphTensorData *source, MPSGraphTensorData
     NSArray<NSNumber *> *divisors = plan[@"divisors"];
     NSUInteger rank = resultShape.count;
     BOOL summed = divisors.count == rank;
-    NSUInteger count = CharonMPSGraphElementCount(sourceShape);
+    NSUInteger count = RevenantMPSGraphElementCount(sourceShape);
     if (count == 0)
         return;
     MPSDataType type = source.dataType;
-    void *in = [source charon_mps_bytes];
-    void *out = [result charon_mps_bytes];
+    void *in = [source revenant_mps_bytes];
+    void *out = [result revenant_mps_bytes];
     size_t width = MPSSizeofMPSDataType(result.dataType);
 
     unsigned long long *resultStride = calloc(rank ? rank : 1, sizeof(unsigned long long));
@@ -1768,7 +1768,7 @@ static void CharonMPSGraphScatter(MPSGraphTensorData *source, MPSGraphTensorData
                            ? resultStride[i + 1] * (unsigned long long)resultShape[i + 1].unsignedIntegerValue
                            : 1);
     if (![plan[@"update"] boolValue])
-        memset(out, 0, CharonMPSGraphElementCount(resultShape) * width);
+        memset(out, 0, RevenantMPSGraphElementCount(resultShape) * width);
     for (NSUInteger element = 0; element < count; element++) {
         unsigned long long rest = element, index = 0;
         BOOL outside = NO;
@@ -1787,55 +1787,55 @@ static void CharonMPSGraphScatter(MPSGraphTensorData *source, MPSGraphTensorData
             }
             index += (unsigned long long)place * resultStride[k];
         }
-        if (outside || index >= CharonMPSGraphElementCount(resultShape))
+        if (outside || index >= RevenantMPSGraphElementCount(resultShape))
             continue;
-        double value = CharonMPSLoad(in, type, element);
+        double value = RevenantMPSLoad(in, type, element);
         if (summed)
-            value += CharonMPSLoad(out, result.dataType, (NSUInteger)index);
-        CharonMPSStoreRounded(out, result.dataType, (NSUInteger)index, value, 1);
+            value += RevenantMPSLoad(out, result.dataType, (NSUInteger)index);
+        RevenantMPSStoreRounded(out, result.dataType, (NSUInteger)index, value, 1);
     }
     free(resultStride);
 }
 
-static NSUInteger CharonMPSGraphNonZeroCount(NSString *name, MPSGraphTensorData *source)
+static NSUInteger RevenantMPSGraphNonZeroCount(NSString *name, MPSGraphTensorData *source)
 {
-    void *in = [source charon_mps_bytes];
+    void *in = [source revenant_mps_bytes];
     if (in == NULL) {
-        CharonMPSGraphRefuse(@"MPSGraph: the non-zero operation named %@ has nowhere to read its operand "
+        RevenantMPSGraphRefuse(@"MPSGraph: the non-zero operation named %@ has nowhere to read its operand "
                              @"from, so its indices were not written", name);
         return 0;
     }
-    NSUInteger total = CharonMPSGraphElementCount(source.shape);
+    NSUInteger total = RevenantMPSGraphElementCount(source.shape);
     MPSDataType type = source.dataType;
     NSUInteger count = 0;
     for (NSUInteger element = 0; element < total; element++)
-        if (CharonMPSGraphAsZero(CharonMPSLoad(in, type, element), type) != 0.0)
+        if (RevenantMPSGraphAsZero(RevenantMPSLoad(in, type, element), type) != 0.0)
             count++;
     return count;
 }
 
-static void CharonMPSGraphNonZero(NSString *name, MPSGraphTensorData *source, MPSGraphTensorData *result,
+static void RevenantMPSGraphNonZero(NSString *name, MPSGraphTensorData *source, MPSGraphTensorData *result,
                                  NSUInteger count)
 {
     NSArray<NSNumber *> *shape = source.shape;
     NSUInteger rank = shape.count;
-    NSUInteger total = CharonMPSGraphElementCount(shape);
-    void *in = [source charon_mps_bytes];
-    void *out = [result charon_mps_bytes];
+    NSUInteger total = RevenantMPSGraphElementCount(shape);
+    void *in = [source revenant_mps_bytes];
+    void *out = [result revenant_mps_bytes];
     if (in == NULL || (out == NULL && count != 0)) {
-        CharonMPSGraphRefuse(@"MPSGraph: the non-zero operation named %@ has nowhere to read its operand from "
+        RevenantMPSGraphRefuse(@"MPSGraph: the non-zero operation named %@ has nowhere to read its operand from "
                              @"or to write its indices to, so its indices were not written", name);
         return;
     }
     MPSDataType type = source.dataType;
     NSUInteger written = 0;
     for (NSUInteger element = 0; element < total; element++) {
-        if (CharonMPSGraphAsZero(CharonMPSLoad(in, type, element), type) == 0.0)
+        if (RevenantMPSGraphAsZero(RevenantMPSLoad(in, type, element), type) == 0.0)
             continue;
         unsigned long long at = element;
         for (NSUInteger axis = rank; axis-- > 0;) {
             NSUInteger extent = (NSUInteger)shape[axis].unsignedIntegerValue;
-            CharonMPSStore(out, MPSDataTypeInt32, written * rank + axis,
+            RevenantMPSStore(out, MPSDataTypeInt32, written * rank + axis,
                            (double)(extent ? at % extent : 0));
             if (extent)
                 at /= extent;
@@ -1844,26 +1844,26 @@ static void CharonMPSGraphNonZero(NSString *name, MPSGraphTensorData *source, MP
     }
 }
 
-@implementation MPSGraph (CharonMPSGraphInterpreter)
+@implementation MPSGraph (RevenantMPSGraphInterpreter)
 
-- (NSArray<NSNumber *> *)charon_mps_gatherShapeOfTensor:(MPSGraphTensor *)tensor
+- (NSArray<NSNumber *> *)revenant_mps_gatherShapeOfTensor:(MPSGraphTensor *)tensor
                                              parameters:(NSDictionary *)parameters
                                                     named:(NSString *)name
 {
-    NSDictionary *plan = CharonMPSGraphGatherPlan(name, tensor.shape, parameters, nil);
+    NSDictionary *plan = RevenantMPSGraphGatherPlan(name, tensor.shape, parameters, nil);
     return plan[@"shape"];
 }
 
-- (NSArray<NSNumber *> *)charon_mps_splitSizes:(NSArray<NSNumber *> *)written
+- (NSArray<NSNumber *> *)revenant_mps_splitSizes:(NSArray<NSNumber *> *)written
                                     numSplits:(NSUInteger)numSplits
                                          axis:(NSInteger)axis
                                   ofShape:(NSArray<NSNumber *> *)operandShape
                                        named:(NSString *)name
 {
-    return CharonMPSGraphSplitSizes(name, written, numSplits, axis, operandShape);
+    return RevenantMPSGraphSplitSizes(name, written, numSplits, axis, operandShape);
 }
 
-- (NSDictionary *)charon_mps_blockShufflePlan:(NSString *)name
+- (NSDictionary *)revenant_mps_blockShufflePlan:(NSString *)name
                                        ofShape:(NSArray<NSNumber *> *)operandShape
                                        spatial:(NSArray<NSNumber *> *)spatial
                                          batch:(NSInteger)batch
@@ -1871,10 +1871,10 @@ static void CharonMPSGraphNonZero(NSString *name, MPSGraphTensorData *source, MP
                                        toBatch:(BOOL)toBatch
                                        shuffle:(BOOL)shuffle
 {
-    return CharonMPSGraphBlockShufflePlan(name, operandShape, spatial, batch, block, toBatch, shuffle);
+    return RevenantMPSGraphBlockShufflePlan(name, operandShape, spatial, batch, block, toBatch, shuffle);
 }
 
-- (NSArray<NSNumber *> *)charon_mps_concatShapeOfTensors:(NSArray<MPSGraphTensor *> *)tensors
+- (NSArray<NSNumber *> *)revenant_mps_concatShapeOfTensors:(NSArray<MPSGraphTensor *> *)tensors
                                                     axis:(NSInteger)axis
                                               interleave:(BOOL)interleave
                                                 stacked:(BOOL)stacked
@@ -1883,10 +1883,10 @@ static void CharonMPSGraphNonZero(NSString *name, MPSGraphTensorData *source, MP
     NSMutableArray<NSArray<NSNumber *> *> *shapes = [NSMutableArray arrayWithCapacity:tensors.count];
     for (MPSGraphTensor *tensor in tensors)
         [shapes addObject:tensor.shape];
-    return CharonMPSGraphConcatPlan(name, shapes, axis, interleave, stacked)[@"shape"];
+    return RevenantMPSGraphConcatPlan(name, shapes, axis, interleave, stacked)[@"shape"];
 }
 
-- (void)charon_mps_runBlockShuffleChain:(NSDictionary *)chain
+- (void)revenant_mps_runBlockShuffleChain:(NSDictionary *)chain
                                      into:(MPSGraphTensor *)output
                                      from:(MPSGraphTensorData *)source
                                operation:(MPSGraphOperation *)operation
@@ -1898,57 +1898,57 @@ static void CharonMPSGraphNonZero(NSString *name, MPSGraphTensorData *source, MP
     NSArray *keys = @[@"gatherShape", @"gatherPermutation", @"gatherShape"];
     MPSDataType dataType = output.dataType;
     for (NSUInteger step = 0; step < transforms.count; step++) {
-        NSDictionary *walk = CharonMPSGraphGatherPlan([operation name], carrying.shape,
+        NSDictionary *walk = RevenantMPSGraphGatherPlan([operation name], carrying.shape,
                                                       @{@"gather": transforms[step], keys[step]: carried[step]},
                                                       nil);
         if (walk == nil) {
-            CharonMPSGraphRefuse(@"MPSGraph: the block-moving operation named %@ wanted a step of its chain "
+            RevenantMPSGraphRefuse(@"MPSGraph: the block-moving operation named %@ wanted a step of its chain "
                                  @"the gather does not know, so nothing was written to its output",
                                  [operation name]);
             return;
         }
         MPSGraphTensorData *next = [[MPSGraphTensorData alloc] initWithDevice:source.device
-                                                                 elementCount:CharonMPSGraphElementCount(walk[@"shape"])
+                                                                 elementCount:RevenantMPSGraphElementCount(walk[@"shape"])
                                                                         shape:walk[@"shape"]
                                                                      dataType:dataType];
-        [next charon_mps_bytes];
-        CharonMPSGraphGather(operation, carrying, next, walk);
+        [next revenant_mps_bytes];
+        RevenantMPSGraphGather(operation, carrying, next, walk);
         carrying = next;
     }
-    [output charon_mps_setShape:carrying.shape];
+    [output revenant_mps_setShape:carrying.shape];
     values[output] = carrying;
 }
 
-- (void)charon_mps_runOperation:(MPSGraphOperation *)operation values:(NSMutableDictionary *)values
+- (void)revenant_mps_runOperation:(MPSGraphOperation *)operation values:(NSMutableDictionary *)values
 {
-    CharonMPSGraphOperationKind kind = [operation charon_mps_kind];
-    if (kind == CharonMPSGraphOperationKindPlaceholder)
+    RevenantMPSGraphOperationKind kind = [operation revenant_mps_kind];
+    if (kind == RevenantMPSGraphOperationKindPlaceholder)
         return;
     MPSGraphTensor *output = operation.outputTensors.firstObject;
     if (!output)
         return;
     NSArray<MPSGraphTensor *> *inputs = operation.inputTensors;
-    NSUInteger count = [output charon_mps_elementCount];
+    NSUInteger count = [output revenant_mps_elementCount];
     MPSDataType dataType = output.dataType;
     MPSGraphTensorData *first = values[inputs.firstObject];
     id<MTLDevice> device = [first isKindOfClass:[MPSGraphTensorData class]] ? first.device.metalDevice
-                                                                        : self.charon_mps_device.metalDevice;
+                                                                        : self.revenant_mps_device.metalDevice;
 
-    if (operation.charon_mps_parameters[@"splitAxis"]) {
-        NSDictionary *parameters = operation.charon_mps_parameters;
+    if (operation.revenant_mps_parameters[@"splitAxis"]) {
+        NSDictionary *parameters = operation.revenant_mps_parameters;
         NSInteger axis = [parameters[@"splitAxis"] integerValue];
         MPSGraphTensorData *source = values[inputs.firstObject];
         if (![source isKindOfClass:[MPSGraphTensorData class]]) {
-            CharonMPSGraphRefuse(@"MPSGraph: the split named %@ has no value for its operand, so none of its "
+            RevenantMPSGraphRefuse(@"MPSGraph: the split named %@ has no value for its operand, so none of its "
                                  @"results was written", [operation name]);
             return;
         }
-        NSArray<NSNumber *> *sizes = CharonMPSGraphSplitSizes([operation name], parameters[@"splitSizes"],
+        NSArray<NSNumber *> *sizes = RevenantMPSGraphSplitSizes([operation name], parameters[@"splitSizes"],
                                                               [parameters[@"splitNumSplits"] unsignedIntegerValue],
                                                               axis, source.shape);
         NSArray<MPSGraphTensor *> *outputs = operation.outputTensors;
         if (outputs.count != sizes.count) {
-            CharonMPSGraphRefuse(@"MPSGraph: the split named %@ has %lu results and %lu regions, so none of "
+            RevenantMPSGraphRefuse(@"MPSGraph: the split named %@ has %lu results and %lu regions, so none of "
                                  @"them was written", [operation name], (unsigned long)outputs.count,
                                  (unsigned long)sizes.count);
             return;
@@ -1965,7 +1965,7 @@ static void CharonMPSGraphNonZero(NSString *name, MPSGraphTensorData *source, MP
             }
             starts[(NSUInteger)axis] = @(at);
             ends[(NSUInteger)axis] = @(at + sizes[i].longLongValue);
-            NSDictionary *region = CharonMPSGraphGatherPlan([operation name], source.shape,
+            NSDictionary *region = RevenantMPSGraphGatherPlan([operation name], source.shape,
                                                              @{@"gather": @"slice",
                                                                @"sliceStarts": starts,
                                                                @"sliceEnds": ends,
@@ -1974,37 +1974,37 @@ static void CharonMPSGraphNonZero(NSString *name, MPSGraphTensorData *source, MP
                                                                @"sliceEndMask": @0,
                                                                @"sliceSqueezeMask": @0}, nil);
             if (region == nil) {
-                CharonMPSGraphRefuse(@"MPSGraph: the split named %@ wanted a region its own plan cannot ask "
+                RevenantMPSGraphRefuse(@"MPSGraph: the split named %@ wanted a region its own plan cannot ask "
                                      @"for, so none of its results was written", [operation name]);
                 return;
             }
             MPSGraphTensorData *result = [[MPSGraphTensorData alloc] initWithDevice:source.device
-                                                                     elementCount:[output charon_mps_elementCount]
+                                                                     elementCount:[output revenant_mps_elementCount]
                                                                             shape:output.shape
                                                                          dataType:output.dataType];
-            [result charon_mps_bytes];
-            CharonMPSGraphGather(operation, source, result, region);
+            [result revenant_mps_bytes];
+            RevenantMPSGraphGather(operation, source, result, region);
             values[output] = result;
             at += sizes[i].longLongValue;
         }
         return;
     }
-    if (operation.charon_mps_parameters[@"coordinateAxis"]) {
+    if (operation.revenant_mps_parameters[@"coordinateAxis"]) {
         MPSGraphTensor *output = operation.outputTensors.firstObject;
-        NSArray<NSNumber *> *shape = operation.charon_mps_parameters[@"coordinateShape"];
-        NSInteger axis = [operation.charon_mps_parameters[@"coordinateAxis"] integerValue];
+        NSArray<NSNumber *> *shape = operation.revenant_mps_parameters[@"coordinateShape"];
+        NSInteger axis = [operation.revenant_mps_parameters[@"coordinateAxis"] integerValue];
         NSUInteger rank = shape.count;
-        NSUInteger count = [output charon_mps_elementCount];
+        NSUInteger count = [output revenant_mps_elementCount];
         if (rank == 0 || axis < 0 || (NSUInteger)axis >= rank || count == 0)
             return;
-        [output charon_mps_setShape:shape];
+        [output revenant_mps_setShape:shape];
         MPSGraphTensorData *result = [[MPSGraphTensorData alloc] initWithDevice:[MPSGraphDevice deviceWithMTLDevice:device]
                                                                   elementCount:count
                                                                          shape:shape
                                                                       dataType:MPSDataTypeInt32];
-        int32_t *out = [result charon_mps_bytes];
+        int32_t *out = [result revenant_mps_bytes];
         if (out == NULL) {
-            CharonMPSGraphRefuse(@"MPSGraph: the coordinate named %@ has nowhere to write its %lu elements, so "
+            RevenantMPSGraphRefuse(@"MPSGraph: the coordinate named %@ has nowhere to write its %lu elements, so "
                                  @"nothing was written to its output", [operation name],
                                  (unsigned long)count);
             return;
@@ -2018,82 +2018,82 @@ static void CharonMPSGraphNonZero(NSString *name, MPSGraphTensorData *source, MP
         values[output] = result;
         return;
     }
-    if (operation.charon_mps_parameters[@"concatAxis"]) {
+    if (operation.revenant_mps_parameters[@"concatAxis"]) {
         NSMutableArray<MPSGraphTensorData *> *sources = [NSMutableArray arrayWithCapacity:inputs.count];
         NSMutableArray<NSArray<NSNumber *> *> *shapes = [NSMutableArray arrayWithCapacity:inputs.count];
         for (MPSGraphTensor *input in inputs) {
             MPSGraphTensorData *value = values[input];
             if (![value isKindOfClass:[MPSGraphTensorData class]]) {
-                CharonMPSGraphRefuse(@"MPSGraph: the operation named %@ has no value for one of its operands, "
+                RevenantMPSGraphRefuse(@"MPSGraph: the operation named %@ has no value for one of its operands, "
                                      @"so nothing was written to its output", [operation name]);
                 return;
             }
             [sources addObject:value];
             [shapes addObject:value.shape];
         }
-        NSDictionary *plan = CharonMPSGraphConcatPlan([operation name], shapes,
-                                                      [operation.charon_mps_parameters[@"concatAxis"] integerValue],
-                                                      [operation.charon_mps_parameters[@"concatInterleave"] boolValue],
-                                                      [operation.charon_mps_parameters[@"concatStacked"] boolValue]);
+        NSDictionary *plan = RevenantMPSGraphConcatPlan([operation name], shapes,
+                                                      [operation.revenant_mps_parameters[@"concatAxis"] integerValue],
+                                                      [operation.revenant_mps_parameters[@"concatInterleave"] boolValue],
+                                                      [operation.revenant_mps_parameters[@"concatStacked"] boolValue]);
         if (plan[@"shape"] == nil) {
-            CharonMPSGraphRefuse(@"MPSGraph: the operation named %@ was given no tensors, so its result "
+            RevenantMPSGraphRefuse(@"MPSGraph: the operation named %@ was given no tensors, so its result "
                                  "carries no shape and nothing was written to it", [operation name]);
             return;
         }
-        [output charon_mps_setShape:plan[@"shape"]];
+        [output revenant_mps_setShape:plan[@"shape"]];
         MPSGraphTensorData *concatenated = [[MPSGraphTensorData alloc] initWithDevice:sources.firstObject.device
-                                                                          elementCount:CharonMPSGraphElementCount(plan[@"shape"])
+                                                                          elementCount:RevenantMPSGraphElementCount(plan[@"shape"])
                                                                                  shape:plan[@"shape"]
                                                                               dataType:dataType];
-        [concatenated charon_mps_bytes];
-        CharonMPSGraphConcat([operation name], sources, concatenated, plan);
+        [concatenated revenant_mps_bytes];
+        RevenantMPSGraphConcat([operation name], sources, concatenated, plan);
         values[output] = concatenated;
         return;
     }
-    if (operation.charon_mps_parameters[@"blockShuffle"]) {
+    if (operation.revenant_mps_parameters[@"blockShuffle"]) {
         MPSGraphTensorData *source = values[inputs.firstObject];
         if (![source isKindOfClass:[MPSGraphTensorData class]]) {
-            CharonMPSGraphRefuse(@"MPSGraph: the block-moving operation named %@ has no value for its operand, "
+            RevenantMPSGraphRefuse(@"MPSGraph: the block-moving operation named %@ has no value for its operand, "
                                  @"so nothing was written to its output", [operation name]);
             return;
         }
         NSMutableArray<NSNumber *> *axes = [NSMutableArray arrayWithCapacity:3];
-        if ([operation.charon_mps_parameters[@"blockShuffleGeneral"] boolValue]) {
-            NSArray<NSNumber *> *spatial = CharonMPSGraphGatherIntegers(values[inputs[1]]);
-            NSArray<NSNumber *> *where = CharonMPSGraphGatherIntegers(values[inputs[2]]);
-            NSArray<NSNumber *> *sizes = CharonMPSGraphGatherIntegers(values[inputs[3]]);
+        if ([operation.revenant_mps_parameters[@"blockShuffleGeneral"] boolValue]) {
+            NSArray<NSNumber *> *spatial = RevenantMPSGraphGatherIntegers(values[inputs[1]]);
+            NSArray<NSNumber *> *where = RevenantMPSGraphGatherIntegers(values[inputs[2]]);
+            NSArray<NSNumber *> *sizes = RevenantMPSGraphGatherIntegers(values[inputs[3]]);
             NSArray<NSArray<NSNumber *> *> *fed = @[spatial ?: @[], where ?: @[], sizes ?: @[]];
             for (NSUInteger i = 0; i < 3; i++) {
                 if (fed[i].count != 0)
                     continue;
-                CharonMPSGraphRefuse(@"MPSGraph: the block-moving operation named %@ was fed nothing at all for "
+                RevenantMPSGraphRefuse(@"MPSGraph: the block-moving operation named %@ was fed nothing at all for "
                                      @"its parameter %lu, and every one of the three is a list of numbers the "
                                      @"plan reads, so nothing was written to its output",
                                      [operation name], (unsigned long)i + 1);
                 return;
             }
             if (where.count != 1) {
-                CharonMPSGraphRefuse(@"MPSGraph: the block-moving operation named %@ was fed %lu numbers as its "
+                RevenantMPSGraphRefuse(@"MPSGraph: the block-moving operation named %@ was fed %lu numbers as its "
                                      @"batch axis, and the batch axis is one of them: measured, the release "
                                      @"takes it as a 0D tensor or one of shape [1]",
                                      [operation name], (unsigned long)where.count);
                 return;
             }
-            NSDictionary *general = [self charon_mps_blockShufflePlan:[operation name]
+            NSDictionary *general = [self revenant_mps_blockShufflePlan:[operation name]
                                                               ofShape:source.shape
                                                               spatial:spatial
                                                                 batch:where.firstObject.integerValue
                                                                 block:sizes
-                                                              toBatch:[operation.charon_mps_parameters[@"blockShuffleToBatch"] boolValue]
-                                                              shuffle:[operation.charon_mps_parameters[@"blockShuffleShuffle"] boolValue]];
-            [self charon_mps_runBlockShuffleChain:general into:output from:source operation:operation
+                                                              toBatch:[operation.revenant_mps_parameters[@"blockShuffleToBatch"] boolValue]
+                                                              shuffle:[operation.revenant_mps_parameters[@"blockShuffleShuffle"] boolValue]];
+            [self revenant_mps_runBlockShuffleChain:general into:output from:source operation:operation
                                             values:values];
             return;
         }
         for (NSUInteger i = 1; i < 4 && i < inputs.count; i++) {
-            NSArray<NSNumber *> *read = CharonMPSGraphGatherIntegers(values[inputs[i]]);
+            NSArray<NSNumber *> *read = RevenantMPSGraphGatherIntegers(values[inputs[i]]);
             if (read.count != 1) {
-                CharonMPSGraphRefuse(@"MPSGraph: the block-moving operation named %@ was fed %lu numbers for "
+                RevenantMPSGraphRefuse(@"MPSGraph: the block-moving operation named %@ was fed %lu numbers for "
                                      @"its axis of input %lu, and an axis is one of them, so nothing was "
                                      @"written to its output",
                                      [operation name], (unsigned long)read.count, (unsigned long)i);
@@ -2102,116 +2102,116 @@ static void CharonMPSGraphNonZero(NSString *name, MPSGraphTensorData *source, MP
             [axes addObject:read.firstObject];
         }
         if (axes.count != 3) {
-            CharonMPSGraphRefuse(@"MPSGraph: the block-moving operation named %@ carries %lu axes and the "
+            RevenantMPSGraphRefuse(@"MPSGraph: the block-moving operation named %@ carries %lu axes and the "
                                  @"family's fed form has three, so nothing was written to its output",
                                  [operation name], (unsigned long)axes.count);
             return;
         }
-        NSUInteger oneBlock = [operation.charon_mps_parameters[@"blockShuffleBlock"] unsignedIntegerValue];
+        NSUInteger oneBlock = [operation.revenant_mps_parameters[@"blockShuffleBlock"] unsignedIntegerValue];
         NSArray<NSNumber *> *block = @[@(oneBlock), @(oneBlock)];
-        NSDictionary *chain = [self charon_mps_blockShufflePlan:[operation name]
+        NSDictionary *chain = [self revenant_mps_blockShufflePlan:[operation name]
                                                        ofShape:source.shape
                                                        spatial:@[axes[1], axes[0]]
                                                          batch:axes[2].integerValue
                                                          block:block
-                                                       toBatch:[operation.charon_mps_parameters[@"blockShuffleToBatch"] boolValue]
-                                                       shuffle:[operation.charon_mps_parameters[@"blockShuffleShuffle"] boolValue]];
-        [self charon_mps_runBlockShuffleChain:chain into:output from:source operation:operation values:values];
+                                                       toBatch:[operation.revenant_mps_parameters[@"blockShuffleToBatch"] boolValue]
+                                                       shuffle:[operation.revenant_mps_parameters[@"blockShuffleShuffle"] boolValue]];
+        [self revenant_mps_runBlockShuffleChain:chain into:output from:source operation:operation values:values];
         return;
     }
-    if (operation.charon_mps_parameters[@"gather"]) {
+    if (operation.revenant_mps_parameters[@"gather"]) {
         MPSGraphTensorData *source = values[inputs.firstObject];
         if (![source isKindOfClass:[MPSGraphTensorData class]]) {
-            CharonMPSGraphRefuse(@"MPSGraph: the gather named %@ has no value for its first input, so "
+            RevenantMPSGraphRefuse(@"MPSGraph: the gather named %@ has no value for its first input, so "
                                  @"nothing was written to its output", [operation name]);
             return;
         }
         NSMutableArray<NSArray<NSNumber *> *> *fed = [NSMutableArray array];
-        NSString *gather = operation.charon_mps_parameters[@"gather"];
+        NSString *gather = operation.revenant_mps_parameters[@"gather"];
         BOOL sliceFamily = [gather hasPrefix:@"slice"];
         if (sliceFamily) {
-            NSUInteger from = [operation.charon_mps_parameters[@"sliceFedFrom"] unsignedIntegerValue];
+            NSUInteger from = [operation.revenant_mps_parameters[@"sliceFedFrom"] unsignedIntegerValue];
             if (from != 0)
                 for (NSUInteger i = from; i < inputs.count; i++)
-                    [fed addObject:CharonMPSGraphGatherIntegers(values[inputs[i]]) ?: @[]];
+                    [fed addObject:RevenantMPSGraphGatherIntegers(values[inputs[i]]) ?: @[]];
             if ([gather isEqualToString:@"sliceGradient"] && inputs.count > 1)
-                [fed addObject:CharonMPSGraphGatherIntegers(values[inputs[1]]) ?: @[]];
+                [fed addObject:RevenantMPSGraphGatherIntegers(values[inputs[1]]) ?: @[]];
         } else if (inputs.count > 1) {
-            [fed addObject:CharonMPSGraphGatherIntegers(values[inputs[1]])];
+            [fed addObject:RevenantMPSGraphGatherIntegers(values[inputs[1]])];
         }
-        NSDictionary *plan = CharonMPSGraphGatherPlan([operation name], source.shape,
-                                                      operation.charon_mps_parameters, fed);
+        NSDictionary *plan = RevenantMPSGraphGatherPlan([operation name], source.shape,
+                                                      operation.revenant_mps_parameters, fed);
         if (plan == nil)
             return;
-        [output charon_mps_setShape:plan[@"shape"]];
-        NSUInteger gathered_ = CharonMPSGraphElementCount(plan[@"shape"]);
+        [output revenant_mps_setShape:plan[@"shape"]];
+        NSUInteger gathered_ = RevenantMPSGraphElementCount(plan[@"shape"]);
         MPSGraphTensorData *gathered = [[MPSGraphTensorData alloc] initWithDevice:source.device
                                                                      elementCount:gathered_
                                                                             shape:plan[@"shape"]
                                                                          dataType:dataType];
-        [gathered charon_mps_bytes];
+        [gathered revenant_mps_bytes];
         if ([plan[@"scatter"] boolValue]) {
             MPSGraphTensorData *scattered = [plan[@"update"] boolValue] && inputs.count > 1 ? values[inputs[1]]
                                                                                           : source;
             if (![scattered isKindOfClass:[MPSGraphTensorData class]]) {
-                CharonMPSGraphRefuse(@"MPSGraph: the slice operation named %@ has no value for the tensor it "
+                RevenantMPSGraphRefuse(@"MPSGraph: the slice operation named %@ has no value for the tensor it "
                                      @"writes, so nothing was written to its output", [operation name]);
                 return;
             }
             if ([plan[@"update"] boolValue]) {
-                NSUInteger available = CharonMPSGraphElementCount(source.shape);
-                NSUInteger room = CharonMPSGraphElementCount(gathered.shape);
-                void *out = [gathered charon_mps_bytes];
-                void *in = [source charon_mps_bytes];
+                NSUInteger available = RevenantMPSGraphElementCount(source.shape);
+                NSUInteger room = RevenantMPSGraphElementCount(gathered.shape);
+                void *out = [gathered revenant_mps_bytes];
+                void *in = [source revenant_mps_bytes];
                 for (NSUInteger i = 0; i < available && i < room; i++)
-                    CharonMPSStoreRounded(out, dataType, i, CharonMPSLoad(in, source.dataType, i), 1);
+                    RevenantMPSStoreRounded(out, dataType, i, RevenantMPSLoad(in, source.dataType, i), 1);
             }
-            CharonMPSGraphScatter(scattered, gathered, plan);
+            RevenantMPSGraphScatter(scattered, gathered, plan);
         } else {
             NSArray<NSNumber *> *mapped = plan[@"mappedShape"];
             if (mapped != nil) {
-                NSUInteger walked = CharonMPSGraphElementCount(mapped);
+                NSUInteger walked = RevenantMPSGraphElementCount(mapped);
                 MPSGraphTensorData *full = [[MPSGraphTensorData alloc] initWithDevice:source.device
                                                                           elementCount:walked
                                                                                  shape:mapped
                                                                               dataType:dataType];
-                [full charon_mps_bytes];
-                CharonMPSGraphGather(operation, source, full, plan);
-                memcpy([gathered charon_mps_bytes], [full charon_mps_bytes],
+                [full revenant_mps_bytes];
+                RevenantMPSGraphGather(operation, source, full, plan);
+                memcpy([gathered revenant_mps_bytes], [full revenant_mps_bytes],
                        MIN(walked, gathered_) * MPSSizeofMPSDataType(dataType));
             } else if ([gather isEqualToString:@"pad"]) {
-                CharonMPSGraphPad(source, gathered, plan);
+                RevenantMPSGraphPad(source, gathered, plan);
             } else {
-                CharonMPSGraphGather(operation, source, gathered, plan);
+                RevenantMPSGraphGather(operation, source, gathered, plan);
             }
         }
         values[output] = gathered;
         return;
     }
-    if (kind == CharonMPSGraphOperationKindNonZero) {
+    if (kind == RevenantMPSGraphOperationKindNonZero) {
         MPSGraphTensorData *source = values[inputs.firstObject];
         if (![source isKindOfClass:[MPSGraphTensorData class]]) {
-            CharonMPSGraphRefuse(@"MPSGraph: the non-zero operation named %@ has no value for its operand, so "
+            RevenantMPSGraphRefuse(@"MPSGraph: the non-zero operation named %@ has no value for its operand, so "
                                  @"its indices were not written", [operation name]);
             return;
         }
         NSUInteger rank = source.shape.count;
-        NSUInteger count = CharonMPSGraphNonZeroCount([operation name], source);
+        NSUInteger count = RevenantMPSGraphNonZeroCount([operation name], source);
         NSArray<NSNumber *> *answer = @[@(count), @(rank)];
-        [output charon_mps_setShape:answer];
+        [output revenant_mps_setShape:answer];
         MPSGraphTensorData *indices = [[MPSGraphTensorData alloc] initWithDevice:source.device
                                                                     elementCount:count * rank
                                                                            shape:answer
                                                                         dataType:MPSDataTypeInt32];
-        [indices charon_mps_bytes];
-        CharonMPSGraphNonZero([operation name], source, indices, count);
+        [indices revenant_mps_bytes];
+        RevenantMPSGraphNonZero([operation name], source, indices, count);
         values[output] = indices;
         return;
     }
-    if (operation.charon_mps_parameters[@"scanCombination"]) {
+    if (operation.revenant_mps_parameters[@"scanCombination"]) {
         MPSGraphTensorData *source = values[inputs.firstObject];
         if (![source isKindOfClass:[MPSGraphTensorData class]]) {
-            CharonMPSGraphRefuse(@"MPSGraph: a cumulative operation named %@ has no value for its first "
+            RevenantMPSGraphRefuse(@"MPSGraph: a cumulative operation named %@ has no value for its first "
                                  @"input, so nothing was written to its output", [operation name]);
             return;
         }
@@ -2220,16 +2220,16 @@ static void CharonMPSGraphNonZero(NSString *name, MPSGraphTensorData *source, MP
                                                                      elementCount:count
                                                                             shape:output.shape
                                                                          dataType:dataType];
-        [scanned charon_mps_bytes];
-        CharonMPSGraphScan(operation, source, axisData, scanned);
+        [scanned revenant_mps_bytes];
+        RevenantMPSGraphScan(operation, source, axisData, scanned);
         values[output] = scanned;
         return;
     }
-    if (operation.charon_mps_parameters[@"combination"]) {
+    if (operation.revenant_mps_parameters[@"combination"]) {
         MPSGraphTensorData *source = values[inputs.firstObject];
-        MPSGraphTensor *meanTensor = operation.charon_mps_parameters[@"mean"];
+        MPSGraphTensor *meanTensor = operation.revenant_mps_parameters[@"mean"];
         if (![source isKindOfClass:[MPSGraphTensorData class]]) {
-            CharonMPSGraphRefuse(@"MPSGraph: a reduction named %@ has no value for its first input, so "
+            RevenantMPSGraphRefuse(@"MPSGraph: a reduction named %@ has no value for its first input, so "
                                  @"nothing was written to its output", [operation name]);
             return;
         }
@@ -2237,24 +2237,24 @@ static void CharonMPSGraphNonZero(NSString *name, MPSGraphTensorData *source, MP
                                                                     elementCount:count
                                                                            shape:output.shape
                                                                         dataType:dataType];
-        [result charon_mps_bytes];
+        [result revenant_mps_bytes];
         MPSGraphTensorData *mean = [meanTensor isKindOfClass:[MPSGraphTensor class]] ? values[meanTensor]
                                                                                      : nil;
-        CharonMPSGraphReduce(operation, source, [mean isKindOfClass:[MPSGraphTensorData class]] ? mean : nil,
+        RevenantMPSGraphReduce(operation, source, [mean isKindOfClass:[MPSGraphTensorData class]] ? mean : nil,
                             result);
         values[output] = result;
         return;
     }
 
-    if (kind == CharonMPSGraphOperationKindConstant) {
-        NSData *values_ = [operation charon_mps_parameters][@"values"];
+    if (kind == RevenantMPSGraphOperationKindConstant) {
+        NSData *values_ = [operation revenant_mps_parameters][@"values"];
         if (!values_)
             return;
         MPSGraphTensorData *data = [[MPSGraphTensorData alloc] initWithDevice:[MPSGraphDevice deviceWithMTLDevice:device]
                                                                   elementCount:count
                                                                          shape:output.shape
                                                                       dataType:dataType];
-        memcpy([data charon_mps_bytes], values_.bytes, MIN(values_.length, count * MPSSizeofMPSDataType(dataType)));
+        memcpy([data revenant_mps_bytes], values_.bytes, MIN(values_.length, count * MPSSizeofMPSDataType(dataType)));
         values[output] = data;
         return;
     }
@@ -2269,36 +2269,36 @@ static void CharonMPSGraphNonZero(NSString *name, MPSGraphTensorData *source, MP
     if (third && ![third isKindOfClass:[MPSGraphTensorData class]])
         third = nil;
     if (!left) {
-        CharonMPSGraphRefuse(@"MPSGraph: an operation named %@ has no value for its first input, so nothing was written to its output", [operation name]);
+        RevenantMPSGraphRefuse(@"MPSGraph: an operation named %@ has no value for its first input, so nothing was written to its output", [operation name]);
         return;
     }
     MPSGraphTensorData *result = [[MPSGraphTensorData alloc] initWithDevice:left.device
                                                              elementCount:count
                                                                     shape:output.shape
                                                                  dataType:dataType];
-    [result charon_mps_bytes];
-    void *out = [result charon_mps_bytes];
+    [result revenant_mps_bytes];
+    void *out = [result revenant_mps_bytes];
     MPSDataType operandType = left.dataType;
-    int latch = [operation.charon_mps_parameters[@"latchNaN"] boolValue];
+    int latch = [operation.revenant_mps_parameters[@"latchNaN"] boolValue];
     if (right) {
         if (third) {
             for (NSUInteger i = 0; i < count; i++)
-                CharonMPSStoreRounded(out, dataType, i,
-                           CharonMPSGraphApply(kind, CharonMPSLoad([left charon_mps_bytes], operandType, i),
-                                               CharonMPSLoad([right charon_mps_bytes], right.dataType, i),
-                                               CharonMPSLoad([third charon_mps_bytes], third.dataType, i),
+                RevenantMPSStoreRounded(out, dataType, i,
+                           RevenantMPSGraphApply(kind, RevenantMPSLoad([left revenant_mps_bytes], operandType, i),
+                                               RevenantMPSLoad([right revenant_mps_bytes], right.dataType, i),
+                                               RevenantMPSLoad([third revenant_mps_bytes], third.dataType, i),
                                                operandType, dataType, latch), 1);
         } else {
             for (NSUInteger i = 0; i < count; i++)
-                CharonMPSStoreRounded(out, dataType, i,
-                           CharonMPSGraphApply(kind, CharonMPSLoad([left charon_mps_bytes], operandType, i),
-                                               CharonMPSLoad([right charon_mps_bytes], right.dataType, i), 0.0,
+                RevenantMPSStoreRounded(out, dataType, i,
+                           RevenantMPSGraphApply(kind, RevenantMPSLoad([left revenant_mps_bytes], operandType, i),
+                                               RevenantMPSLoad([right revenant_mps_bytes], right.dataType, i), 0.0,
                                                operandType, dataType, latch), 1);
         }
     } else {
         for (NSUInteger i = 0; i < count; i++)
-            CharonMPSStoreRounded(out, dataType, i,
-                       CharonMPSGraphApply(kind, CharonMPSLoad([left charon_mps_bytes], operandType, i), 0.0, 0.0,
+            RevenantMPSStoreRounded(out, dataType, i,
+                       RevenantMPSGraphApply(kind, RevenantMPSLoad([left revenant_mps_bytes], operandType, i), 0.0, 0.0,
                                            operandType, dataType, latch), 1);
     }
     values[output] = result;

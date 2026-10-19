@@ -1,19 +1,19 @@
 #import <AVFoundation/AVFoundation.h>
 #import <objc/runtime.h>
 
-static const char charon_preferred_segment_interval_key;
+static const char revenant_preferred_segment_interval_key;
 
-@implementation AVAssetWriter (CharonAVFoundationPreferredSegmentInterval)
+@implementation AVAssetWriter (RevenantAVFoundationPreferredSegmentInterval)
 
 - (CMTime)preferredOutputSegmentInterval
 {
-    NSValue *stored = objc_getAssociatedObject(self, &charon_preferred_segment_interval_key);
+    NSValue *stored = objc_getAssociatedObject(self, &revenant_preferred_segment_interval_key);
     return stored ? stored.CMTimeValue : kCMTimeInvalid;
 }
 
 - (void)setPreferredOutputSegmentInterval:(CMTime)preferredOutputSegmentInterval
 {
-    objc_setAssociatedObject(self, &charon_preferred_segment_interval_key,
+    objc_setAssociatedObject(self, &revenant_preferred_segment_interval_key,
                              [NSValue valueWithCMTime:preferredOutputSegmentInterval], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     if (CMTIME_IS_NUMERIC(preferredOutputSegmentInterval))
         [self setMovieFragmentInterval:preferredOutputSegmentInterval];

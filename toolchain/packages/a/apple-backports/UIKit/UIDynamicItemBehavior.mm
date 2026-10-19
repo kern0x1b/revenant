@@ -1,14 +1,14 @@
-#import "CharonDynamics.h"
+#import "RevenantDynamics.h"
 
 enum {
-    CharonElasticitySet = 1 << 0,
-    CharonFrictionSet = 1 << 1,
-    CharonDensitySet = 1 << 2,
-    CharonResistanceSet = 1 << 3,
-    CharonAngularResistanceSet = 1 << 4,
-    CharonRotationSet = 1 << 5,
-    CharonChargeSet = 1 << 6,
-    CharonAnchoredSet = 1 << 7,
+    RevenantElasticitySet = 1 << 0,
+    RevenantFrictionSet = 1 << 1,
+    RevenantDensitySet = 1 << 2,
+    RevenantResistanceSet = 1 << 3,
+    RevenantAngularResistanceSet = 1 << 4,
+    RevenantRotationSet = 1 << 5,
+    RevenantChargeSet = 1 << 6,
+    RevenantAnchoredSet = 1 << 7,
 };
 
 @implementation UIDynamicItemBehavior {
@@ -26,9 +26,9 @@ enum {
 
 - (instancetype)initWithItems:(NSArray *)items
 {
-    if (!(self = [super charon_initPrimitive:YES]))
+    if (!(self = [super revenant_initPrimitive:YES]))
         return nil;
-    [[self charon_items] addObjectsFromArray:items ?: @[]];
+    [[self revenant_items] addObjectsFromArray:items ?: @[]];
     _elasticity = 0.2;
     _friction = 0.2;
     _density = 1;
@@ -41,70 +41,70 @@ enum {
 - (NSString *)description
 {
     NSMutableString *description = [NSMutableString stringWithString:[super description]];
-    if (_stateFlags & CharonElasticitySet)
+    if (_stateFlags & RevenantElasticitySet)
         [description appendFormat:@" E=%f", _elasticity];
-    if (_stateFlags & CharonFrictionSet)
+    if (_stateFlags & RevenantFrictionSet)
         [description appendFormat:@" F=%f", _friction];
-    if (_stateFlags & CharonDensitySet)
+    if (_stateFlags & RevenantDensitySet)
         [description appendFormat:@" D=%f", _density];
-    if (_stateFlags & CharonResistanceSet)
+    if (_stateFlags & RevenantResistanceSet)
         [description appendFormat:@" R=%f", _resistance];
-    if (_stateFlags & CharonAngularResistanceSet)
+    if (_stateFlags & RevenantAngularResistanceSet)
         [description appendFormat:@" AR=%f", _angularResistance];
     if (!_allowsRotation)
         [description appendString:@" !Rotation"];
-    for (id item in [self charon_items])
+    for (id item in [self revenant_items])
         [description appendFormat:@" %@", item];
     return description;
 }
 
 - (NSArray *)items
 {
-    return [NSArray arrayWithArray:[self charon_items]];
+    return [NSArray arrayWithArray:[self revenant_items]];
 }
 
-- (void)charon_changed:(NSUInteger)flag
+- (void)revenant_changed:(NSUInteger)flag
 {
     _stateFlags |= flag;
-    [[self charon_context] charon_shouldReevaluateLocalBehaviors];
+    [[self revenant_context] revenant_shouldReevaluateLocalBehaviors];
 }
 
-#define CHARON_PROPERTY(type, getter, setter, ivar, flag) \
+#define REVENANT_PROPERTY(type, getter, setter, ivar, flag) \
 - (type)getter { return ivar; } \
-- (void)setter:(type)value { if (value == ivar) return; ivar = value; [self charon_changed:flag]; }
+- (void)setter:(type)value { if (value == ivar) return; ivar = value; [self revenant_changed:flag]; }
 
-CHARON_PROPERTY(CGFloat, elasticity, setElasticity, _elasticity, CharonElasticitySet)
-CHARON_PROPERTY(CGFloat, friction, setFriction, _friction, CharonFrictionSet)
-CHARON_PROPERTY(CGFloat, density, setDensity, _density, CharonDensitySet)
-CHARON_PROPERTY(CGFloat, resistance, setResistance, _resistance, CharonResistanceSet)
-CHARON_PROPERTY(CGFloat, angularResistance, setAngularResistance, _angularResistance, CharonAngularResistanceSet)
-CHARON_PROPERTY(BOOL, allowsRotation, setAllowsRotation, _allowsRotation, CharonRotationSet)
-CHARON_PROPERTY(CGFloat, charge, setCharge, _charge, CharonChargeSet)
-CHARON_PROPERTY(BOOL, isAnchored, setAnchored, _anchored, CharonAnchoredSet)
+REVENANT_PROPERTY(CGFloat, elasticity, setElasticity, _elasticity, RevenantElasticitySet)
+REVENANT_PROPERTY(CGFloat, friction, setFriction, _friction, RevenantFrictionSet)
+REVENANT_PROPERTY(CGFloat, density, setDensity, _density, RevenantDensitySet)
+REVENANT_PROPERTY(CGFloat, resistance, setResistance, _resistance, RevenantResistanceSet)
+REVENANT_PROPERTY(CGFloat, angularResistance, setAngularResistance, _angularResistance, RevenantAngularResistanceSet)
+REVENANT_PROPERTY(BOOL, allowsRotation, setAllowsRotation, _allowsRotation, RevenantRotationSet)
+REVENANT_PROPERTY(CGFloat, charge, setCharge, _charge, RevenantChargeSet)
+REVENANT_PROPERTY(BOOL, isAnchored, setAnchored, _anchored, RevenantAnchoredSet)
 
-#undef CHARON_PROPERTY
+#undef REVENANT_PROPERTY
 
-- (void)charon_configureBody:(CharonDynamicsBody *)body
+- (void)revenant_configureBody:(RevenantDynamicsBody *)body
 {
-    if (_stateFlags & CharonElasticitySet)
+    if (_stateFlags & RevenantElasticitySet)
         body.restitution = _elasticity;
-    if (_stateFlags & CharonFrictionSet)
+    if (_stateFlags & RevenantFrictionSet)
         body.friction = _friction;
-    if (_stateFlags & CharonDensitySet)
+    if (_stateFlags & RevenantDensitySet)
         body.normalizedDensity = _density;
-    if (_stateFlags & CharonResistanceSet)
+    if (_stateFlags & RevenantResistanceSet)
         body.linearDamping = _resistance;
-    if (_stateFlags & CharonAngularResistanceSet)
+    if (_stateFlags & RevenantAngularResistanceSet)
         body.angularDamping = _angularResistance;
-    if (_stateFlags & CharonRotationSet)
+    if (_stateFlags & RevenantRotationSet)
         body.allowsRotation = _allowsRotation;
-    if (_stateFlags & CharonChargeSet)
+    if (_stateFlags & RevenantChargeSet)
         body.charge = _charge;
-    if (_stateFlags & CharonAnchoredSet)
+    if (_stateFlags & RevenantAnchoredSet)
         body.dynamic = !_anchored;
 }
 
-static void charon_reset_material(CharonDynamicsBody *body)
+static void revenant_reset_material(RevenantDynamicsBody *body)
 {
     body.restitution = 0.2;
     body.friction = 0.2;
@@ -114,30 +114,30 @@ static void charon_reset_material(CharonDynamicsBody *body)
     body.allowsRotation = YES;
 }
 
-- (void)charon_registerItem:(id<UIDynamicItem>)item
+- (void)revenant_registerItem:(id<UIDynamicItem>)item
 {
-    CharonDynamicsBody *body = [[self charon_context] charon_registerBodyForItem:item shape:CharonDynamicsShapeBox];
-    [self charon_configureBody:body];
+    RevenantDynamicsBody *body = [[self revenant_context] revenant_registerBodyForItem:item shape:RevenantDynamicsShapeBox];
+    [self revenant_configureBody:body];
 }
 
-- (void)charon_reevaluate:(NSInteger)mode
+- (void)revenant_reevaluate:(NSInteger)mode
 {
-    UIDynamicAnimator *context = [self charon_context];
-    for (id<UIDynamicItem> item in [self charon_items]) {
+    UIDynamicAnimator *context = [self revenant_context];
+    for (id<UIDynamicItem> item in [self revenant_items]) {
         if (mode == 2)
-            [self charon_registerItem:item];
-        else if (CharonDynamicsBody *body = [context charon_bodyForItem:item])
-            [self charon_configureBody:body];
+            [self revenant_registerItem:item];
+        else if (RevenantDynamicsBody *body = [context revenant_bodyForItem:item])
+            [self revenant_configureBody:body];
     }
 }
 
-- (void)charon_associate
+- (void)revenant_associate
 {
-    [super charon_associate];
-    [self charon_reevaluate:2];
-    UIDynamicAnimator *context = [self charon_context];
-    for (id<UIDynamicItem> item in [self charon_items]) {
-        CharonDynamicsBody *body = [context charon_bodyForItem:item];
+    [super revenant_associate];
+    [self revenant_reevaluate:2];
+    UIDynamicAnimator *context = [self revenant_context];
+    for (id<UIDynamicItem> item in [self revenant_items]) {
+        RevenantDynamicsBody *body = [context revenant_bodyForItem:item];
         NSValue *linear = [_cachedLinearVelocities objectForKey:item];
         NSNumber *angular = [_cachedAngularVelocities objectForKey:item];
         if (linear) {
@@ -151,41 +151,41 @@ static void charon_reset_material(CharonDynamicsBody *body)
     [_cachedAngularVelocities removeAllObjects];
 }
 
-- (void)charon_dissociate
+- (void)revenant_dissociate
 {
-    for (id<UIDynamicItem> item in [self charon_items])
-        [[self charon_context] charon_unregisterBodyForItem:item action:^(CharonDynamicsBody *body) {
-            charon_reset_material(body);
+    for (id<UIDynamicItem> item in [self revenant_items])
+        [[self revenant_context] revenant_unregisterBodyForItem:item action:^(RevenantDynamicsBody *body) {
+            revenant_reset_material(body);
         }];
-    [super charon_dissociate];
+    [super revenant_dissociate];
 }
 
 - (void)addItem:(id<UIDynamicItem>)item
 {
-    if ([[self charon_items] containsObject:item])
+    if ([[self revenant_items] containsObject:item])
         return;
-    [[self charon_items] addObject:item];
-    if ([self charon_isAssociated]) {
-        [self charon_registerItem:item];
-        [[self charon_context] charon_shouldReevaluateLocalBehaviors];
+    [[self revenant_items] addObject:item];
+    if ([self revenant_isAssociated]) {
+        [self revenant_registerItem:item];
+        [[self revenant_context] revenant_shouldReevaluateLocalBehaviors];
     }
 }
 
 - (void)removeItem:(id<UIDynamicItem>)item
 {
-    if (![[self charon_items] containsObject:item])
+    if (![[self revenant_items] containsObject:item])
         return;
-    UIDynamicAnimator *context = [self charon_context];
-    [context charon_unregisterBodyForItem:item action:^(CharonDynamicsBody *body) {
-        charon_reset_material(body);
+    UIDynamicAnimator *context = [self revenant_context];
+    [context revenant_unregisterBodyForItem:item action:^(RevenantDynamicsBody *body) {
+        revenant_reset_material(body);
     }];
-    [context charon_shouldReevaluateLocalBehaviors];
+    [context revenant_shouldReevaluateLocalBehaviors];
     [_cachedLinearVelocities removeObjectForKey:item];
     [_cachedAngularVelocities removeObjectForKey:item];
-    [[self charon_items] removeObject:item];
+    [[self revenant_items] removeObject:item];
 }
 
-static NSMapTable *charon_velocity_cache(void)
+static NSMapTable *revenant_velocity_cache(void)
 {
     return [NSMapTable mapTableWithKeyOptions:NSPointerFunctionsOpaqueMemory | NSPointerFunctionsObjectPersonality
                                  valueOptions:NSPointerFunctionsStrongMemory];
@@ -193,47 +193,47 @@ static NSMapTable *charon_velocity_cache(void)
 
 - (void)addLinearVelocity:(CGPoint)velocity forItem:(id<UIDynamicItem>)item
 {
-    if ((velocity.x == 0 && velocity.y == 0) || ![[self charon_items] containsObject:item])
+    if ((velocity.x == 0 && velocity.y == 0) || ![[self revenant_items] containsObject:item])
         return;
-    if ([self charon_isAssociated]) {
-        CharonDynamicsBody *body = [[self charon_context] charon_bodyForItem:item];
+    if ([self revenant_isAssociated]) {
+        RevenantDynamicsBody *body = [[self revenant_context] revenant_bodyForItem:item];
         CGPoint current = body.velocity;
         body.velocity = CGPointMake(current.x + velocity.x, current.y + velocity.y);
-        [self charon_changedParameterForBody:body];
+        [self revenant_changedParameterForBody:body];
         return;
     }
-    _cachedLinearVelocities = _cachedLinearVelocities ?: charon_velocity_cache();
+    _cachedLinearVelocities = _cachedLinearVelocities ?: revenant_velocity_cache();
     CGPoint cached = [[_cachedLinearVelocities objectForKey:item] CGPointValue];
     [_cachedLinearVelocities setObject:[NSValue valueWithCGPoint:CGPointMake(cached.x + velocity.x, cached.y + velocity.y)] forKey:item];
 }
 
 - (CGPoint)linearVelocityForItem:(id<UIDynamicItem>)item
 {
-    if (![self charon_isAssociated] || ![[self charon_items] containsObject:item])
+    if (![self revenant_isAssociated] || ![[self revenant_items] containsObject:item])
         return CGPointZero;
-    return [[self charon_context] charon_bodyForItem:item].velocity;
+    return [[self revenant_context] revenant_bodyForItem:item].velocity;
 }
 
 - (void)addAngularVelocity:(CGFloat)velocity forItem:(id<UIDynamicItem>)item
 {
-    if (velocity == 0 || ![[self charon_items] containsObject:item])
+    if (velocity == 0 || ![[self revenant_items] containsObject:item])
         return;
-    if ([self charon_isAssociated]) {
-        CharonDynamicsBody *body = [[self charon_context] charon_bodyForItem:item];
+    if ([self revenant_isAssociated]) {
+        RevenantDynamicsBody *body = [[self revenant_context] revenant_bodyForItem:item];
         body.angularVelocity = body.angularVelocity + velocity;
-        [self charon_changedParameterForBody:body];
+        [self revenant_changedParameterForBody:body];
         return;
     }
-    _cachedAngularVelocities = _cachedAngularVelocities ?: charon_velocity_cache();
+    _cachedAngularVelocities = _cachedAngularVelocities ?: revenant_velocity_cache();
     CGFloat cached = [[_cachedAngularVelocities objectForKey:item] doubleValue];
     [_cachedAngularVelocities setObject:@(cached + velocity) forKey:item];
 }
 
 - (CGFloat)angularVelocityForItem:(id<UIDynamicItem>)item
 {
-    if (![self charon_isAssociated] || ![[self charon_items] containsObject:item])
+    if (![self revenant_isAssociated] || ![[self revenant_items] containsObject:item])
         return 0;
-    return [[self charon_context] charon_bodyForItem:item].angularVelocity;
+    return [[self revenant_context] revenant_bodyForItem:item].angularVelocity;
 }
 
 @end

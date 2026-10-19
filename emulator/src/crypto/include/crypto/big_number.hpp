@@ -10,7 +10,7 @@
 #include <cstddef>
 #include <span>
 
-namespace shade {
+namespace emulator {
 
 class BigNumberArithmetic {
 public:

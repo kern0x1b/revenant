@@ -1,13 +1,13 @@
-#import "CharonMetricValue.h"
-#import "CharonMetricKit.h"
+#import "RevenantMetricValue.h"
+#import "RevenantMetricKit.h"
 
-@interface MXMetric (CharonConstruction)
-+ (instancetype)charon_metric;
+@interface MXMetric (RevenantConstruction)
++ (instancetype)revenant_metric;
 @end
 
-@implementation MXMetric (CharonConstruction)
+@implementation MXMetric (RevenantConstruction)
 
-+ (instancetype)charon_metric
++ (instancetype)revenant_metric
 {
     return [[self alloc] init];
 }

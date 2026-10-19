@@ -9,7 +9,7 @@
 
 #include "foundation/userland_hle.hpp"
 
-namespace shade {
+namespace emulator {
 namespace {
 
     constexpr std::string_view common_vendor { "Imagination Technologies" };

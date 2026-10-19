@@ -2,7 +2,7 @@
 
 NSNotificationName const UIScreenReferenceDisplayModeStatusDidChangeNotification = @"UIScreenReferenceDisplayModeStatusDidChangeNotification";
 
-@implementation UIScreen (CharonReference16)
+@implementation UIScreen (RevenantReference16)
 
 - (UIScreenReferenceDisplayModeStatus)referenceDisplayModeStatus
 {

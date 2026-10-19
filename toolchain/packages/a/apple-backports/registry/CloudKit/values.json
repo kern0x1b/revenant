@@ -1218,7 +1218,7 @@
     "introduced": "10.0",
     "status": "implemented",
     "reason": "the class of this package carries the surface, and its -main is where the request goes: several zones in one request, each with its own configuration or its own options, and the zone-changing walk stays beside it",
-    "effect": "one request that walks the zones it was given and answers the completion block per zone; an initialiser given no zone answers CKErrorInvalidArguments in Apple's CKErrorDomain, and a zone the service refused arrives through CharonCKErrorFromPayload as the service's own code",
+    "effect": "one request that walks the zones it was given and answers the completion block per zone; an initialiser given no zone answers CKErrorInvalidArguments in Apple's CKErrorDomain, and a zone the service refused arrives through RevenantCKErrorFromPayload as the service's own code",
     "source": "packages/a/apple-backports/CloudKit/CKOperations1210.m",
     "facts": "facts/CloudKit/Values.md"
   },

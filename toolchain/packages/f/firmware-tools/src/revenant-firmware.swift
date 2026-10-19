@@ -107,5 +107,5 @@ let arguments = CommandLine.arguments
 switch (arguments.count > 1 ? arguments[1] : "", arguments.count) {
 case ("filevault", 5): filevault(input: arguments[2], key: arguments[3], output: arguments[4])
 case ("aea-key", 3): aeaKey(input: arguments[2])
-default: fail("usage: charon-firmware filevault IMAGE HEXKEY OUTPUT | charon-firmware aea-key ARCHIVE")
+default: fail("usage: revenant-firmware filevault IMAGE HEXKEY OUTPUT | revenant-firmware aea-key ARCHIVE")
 }

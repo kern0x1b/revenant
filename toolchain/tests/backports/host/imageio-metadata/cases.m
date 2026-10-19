@@ -14,7 +14,7 @@ static BOOL isTag(id value)
     if (!value)
         return NO;
     CFTypeRef ref = (__bridge CFTypeRef)value;
-    if ([value isKindOfClass:[NSDictionary class]] && [(NSDictionary *)value objectForKey:@"charon.tag"])
+    if ([value isKindOfClass:[NSDictionary class]] && [(NSDictionary *)value objectForKey:@"revenant.tag"])
         return YES;
     return CFGetTypeID(ref) == CGImageMetadataTagGetTypeID() && CFGetTypeID(ref) != CFDictionaryGetTypeID();
 }
@@ -124,7 +124,7 @@ int main(void)
     @autoreleasepool {
         setvbuf(stdout, NULL, _IOLBF, 0);
 
-#ifdef CHARON_PORT
+#ifdef REVENANT_PORT
         {
             struct { const char *name; const void *address; } rows[] = {
                 { "CGImageMetadataTagCreate", (const void *)&CGImageMetadataTagCreate },
@@ -417,8 +417,8 @@ int main(void)
         record(@"enumerate missing root", none);
 
         {
-            charon_pair pairs[600];
-            size_t npairs = charon_pairs(pairs);
+            revenant_pair pairs[600];
+            size_t npairs = revenant_pairs(pairs);
             record(@"bridge pairs", [NSString stringWithFormat:@"%lu", (unsigned long)npairs]);
             for (size_t i = 0; i < npairs; i++) {
                 CGMutableImageMetadataRef one = CGImageMetadataCreateMutable();
@@ -534,14 +534,14 @@ int main(void)
 
         {
             CGMutableImageMetadataRef m = CGImageMetadataCreateMutable();
-            put(m, CFSTR("http://cipa.jp/exif/1.0/"), CFSTR("charonprobe"), CFSTR("ISOSpeed"), CFSTR("v"));
+            put(m, CFSTR("http://cipa.jp/exif/1.0/"), CFSTR("revenantprobe"), CFSTR("ISOSpeed"), CFSTR("v"));
             report(@"custom prefix mapped namespace",
                    CGImageMetadataCopyTagMatchingImageProperty(m, kCGImagePropertyExifDictionary,
                                                                kCGImagePropertyExifISOSpeed));
             if (m)
                 CFRelease(m);
             CGMutableImageMetadataRef n = CGImageMetadataCreateMutable();
-            put(n, kCGImageMetadataNamespaceExif, CFSTR("charonprobe"), CFSTR("Flash"), CFSTR("v"));
+            put(n, kCGImageMetadataNamespaceExif, CFSTR("revenantprobe"), CFSTR("Flash"), CFSTR("v"));
             report(@"custom prefix exif flash",
                    CGImageMetadataCopyTagMatchingImageProperty(n, kCGImagePropertyExifDictionary,
                                                                kCGImagePropertyExifFlash));
@@ -614,7 +614,7 @@ int main(void)
                 CFRelease(unmapped);
         }
 
-#ifdef CHARON_PORT
+#ifdef REVENANT_PORT
         record(@"PORTONLY bridge foreign metadata",
                CGImageMetadataSetValueMatchingImageProperty((__bridge CGMutableImageMetadataRef)
                                                                 [NSDictionary dictionary],

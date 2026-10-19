@@ -1,5 +1,5 @@
-#import "CharonCMTag26.h"
-#import "CharonCMTagSupport.h"
+#import "RevenantCMTag26.h"
+#import "RevenantCMTagSupport.h"
 #import <CoreMedia/CoreMedia.h>
 #import <CoreFoundation/CoreFoundation.h>
 #include <string.h>
@@ -60,7 +60,7 @@ double CMTagGetFloat64Value( CMTag tag )
 
 Boolean CMTagEqualToTag( CMTag tag1, CMTag tag2 )
 {
-    return charon_tag_equal(tag1, tag2);
+    return revenant_tag_equal(tag1, tag2);
 }
 
 Boolean CMTagHasOSTypeValue( CMTag tag )
@@ -83,7 +83,7 @@ Boolean CMTagHasFloat64Value( CMTag tag )
     return tag.dataType == kCMTagDataType_Float64;
 }
 
-static BOOL charon_tag_is_nan( CMTag tag )
+static BOOL revenant_tag_is_nan( CMTag tag )
 {
     if ( tag.dataType != kCMTagDataType_Float64 )
         return NO;
@@ -100,7 +100,7 @@ CFComparisonResult CMTagCompare( CMTag tag1, CMTag tag2 )
         return left < right ? kCFCompareLessThan : kCFCompareGreaterThan;
     if ( tag1.dataType != tag2.dataType )
         return tag1.dataType < tag2.dataType ? kCFCompareLessThan : kCFCompareGreaterThan;
-    if ( charon_tag_is_nan( tag1 ) || charon_tag_is_nan( tag2 ) )
+    if ( revenant_tag_is_nan( tag1 ) || revenant_tag_is_nan( tag2 ) )
         return kCFCompareEqualTo;
     if ( tag1.dataType == kCMTagDataType_Float64 ) {
         double one, two;
@@ -174,7 +174,7 @@ CMTag CMTagMakeFromDictionary( CFDictionaryRef dict )
     return tag;
 }
 
-static NSString *charon_category_text(CMTagCategory category)
+static NSString *revenant_category_text(CMTagCategory category)
 {
     unsigned char bytes[4];
     for (int index = 0; index < 4; index++)
@@ -185,11 +185,11 @@ static NSString *charon_category_text(CMTagCategory category)
     return (__bridge NSString *)CFStringCreateWithBytes(NULL, bytes, (CFIndex)length, kCFStringEncodingMacRoman, false);
 }
 
-static NSString *charon_value_text(CMTag tag)
+static NSString *revenant_value_text(CMTag tag)
 {
     switch (tag.dataType) {
     case kCMTagDataType_OSType:
-        return [NSString stringWithFormat:@"'%@'", charon_category_text((CMTagCategory)(uint32_t)tag.value)];
+        return [NSString stringWithFormat:@"'%@'", revenant_category_text((CMTagCategory)(uint32_t)tag.value)];
     case kCMTagDataType_Flags:
         return [NSString stringWithFormat:@"0x%llx", (unsigned long long)tag.value];
     case kCMTagDataType_Float64: {
@@ -203,7 +203,7 @@ static NSString *charon_value_text(CMTag tag)
     }
 }
 
-static NSString *charon_type_text(CMTagDataType type)
+static NSString *revenant_type_text(CMTagDataType type)
 {
     switch (type) {
     case kCMTagDataType_OSType: return @"OSType";
@@ -218,9 +218,9 @@ CFStringRef CMTagCopyDescription( CFAllocatorRef allocator, CMTag tag )
     (void)allocator;
     NSString *text;
     if (!CMTagIsValid(tag))
-        text = [NSString stringWithFormat:@"{category:'%@'{INVALID}", charon_category_text(tag.category)];
+        text = [NSString stringWithFormat:@"{category:'%@'{INVALID}", revenant_category_text(tag.category)];
     else
-        text = [NSString stringWithFormat:@"{category:'%@' value:%@ <%@>}", charon_category_text(tag.category),
-                                        charon_value_text(tag), charon_type_text(tag.dataType)];
+        text = [NSString stringWithFormat:@"{category:'%@' value:%@ <%@>}", revenant_category_text(tag.category),
+                                        revenant_value_text(tag), revenant_type_text(tag.dataType)];
     return (__bridge_retained CFStringRef)text;
 }

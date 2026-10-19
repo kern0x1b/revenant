@@ -1,4 +1,4 @@
-#import "CharonSCN.h"
+#import "RevenantSCN.h"
 
 SCNGeometrySourceSemantic const SCNGeometrySourceSemanticVertex = @"kGeometrySourceSemanticVertex";
 SCNGeometrySourceSemantic const SCNGeometrySourceSemanticNormal = @"kGeometrySourceSemanticNormal";

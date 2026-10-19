@@ -1,22 +1,22 @@
 #import <CoreSpotlight/CoreSpotlight.h>
 
-static NSString *const CharonLocalizedNoMatch = @"charon.no-match";
+static NSString *const RevenantLocalizedNoMatch = @"revenant.no-match";
 
-static NSString *CharonLocalizedAnswer(NSArray *probe, NSArray *preferences)
+static NSString *RevenantLocalizedAnswer(NSArray *probe, NSArray *preferences)
 {
     NSString *answer = [[NSBundle preferredLocalizationsFromArray:probe forPreferences:preferences] firstObject];
-    return [answer isEqualToString:CharonLocalizedNoMatch] ? nil : answer;
+    return [answer isEqualToString:RevenantLocalizedNoMatch] ? nil : answer;
 }
 
-static NSString *CharonLocalizedValue(NSDictionary *localizedStrings)
+static NSString *RevenantLocalizedValue(NSDictionary *localizedStrings)
 {
     if (localizedStrings.count == 0)
         return nil;
     NSArray *keys = [[localizedStrings keyEnumerator] allObjects];
-    NSMutableArray *probe = [NSMutableArray arrayWithObject:CharonLocalizedNoMatch];
+    NSMutableArray *probe = [NSMutableArray arrayWithObject:RevenantLocalizedNoMatch];
     [probe addObjectsFromArray:keys];
     NSArray *preferences = [[NSUserDefaults standardUserDefaults] arrayForKey:@"AppleLanguages"] ?: @[];
-    NSString *answer = CharonLocalizedAnswer(probe, preferences);
+    NSString *answer = RevenantLocalizedAnswer(probe, preferences);
     if (!answer)
         answer = keys[0];
     return localizedStrings[answer];
@@ -36,7 +36,7 @@ static NSString *CharonLocalizedValue(NSDictionary *localizedStrings)
 
 - (NSString *)localizedString
 {
-    return CharonLocalizedValue(_localizedStrings);
+    return RevenantLocalizedValue(_localizedStrings);
 }
 
 - (NSUInteger)length

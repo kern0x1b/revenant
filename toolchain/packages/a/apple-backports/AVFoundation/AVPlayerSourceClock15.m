@@ -1,10 +1,10 @@
 #import <AVFoundation/AVFoundation.h>
 #import <objc/message.h>
 
-@interface AVPlayer (CharonSourceClock)
+@interface AVPlayer (RevenantSourceClock)
 @end
 
-@implementation AVPlayer (CharonSourceClock)
+@implementation AVPlayer (RevenantSourceClock)
 
 - (id)sourceClock
 {

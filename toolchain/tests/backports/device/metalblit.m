@@ -22,7 +22,7 @@ static id<MTLDevice> device;
 static void same_bytes(NSData *ours, const char *theirs, NSUInteger length, const char *name)
 {
     NSData *expected = fromHex(theirs, length);
-    charon_check([ours isEqualToData:expected], name,
+    revenant_check([ours isEqualToData:expected], name,
                  ([ours isEqualToData:expected] ? nil
                   : [NSString stringWithFormat:@"%@ vs Metal's %@", ours.description, expected.description]));
 }
@@ -83,11 +83,11 @@ static void check_mips(id<MTLCommandQueue> queue)
     id<MTLTexture> chain = [device newTextureWithDescriptor:geometry];
     CHECK(chain != nil, "a 16x8 mipmapped texture is made");
     if (chain) {
-        charon_check((int)chain.mipmapLevelCount == metalblit_mip_levels, "a 16x8 chain has Metal's number of levels",
+        revenant_check((int)chain.mipmapLevelCount == metalblit_mip_levels, "a 16x8 chain has Metal's number of levels",
                      [NSString stringWithFormat:@"%lu against Metal's %d", (unsigned long)chain.mipmapLevelCount, metalblit_mip_levels]);
         uint8_t last[1] = {0};
         [chain getBytes:last bytesPerRow:1 fromRegion:MTLRegionMake2D(0, 0, 1, 1) mipmapLevel:metalblit_smallest_level];
-        charon_check(metalblit_smallest_level_readable == 1, "Metal can be asked for the last level's one texel",
+        revenant_check(metalblit_smallest_level_readable == 1, "Metal can be asked for the last level's one texel",
                      nil);
     }
 
@@ -145,7 +145,7 @@ int main(void)
             check_bgra_readback();
             check_mips(queue);
         }
-        printf("%d of %d checks failed\n", charon_failures, charon_checks);
-        return charon_failures;
+        printf("%d of %d checks failed\n", revenant_failures, revenant_checks);
+        return revenant_failures;
     }
 }

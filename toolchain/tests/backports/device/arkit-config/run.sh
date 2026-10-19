@@ -1,5 +1,5 @@
 #!/bin/sh
-# tests/backports/device/arkit-config/arkit-config.m on an emulated 4S under 6.1.3, with charon@apple-backports linked, so the
+# tests/backports/device/arkit-config/arkit-config.m on an emulated 4S under 6.1.3, with revenant@apple-backports linked, so the
 # configurations are the library's own. One heavy job (a package build and an emulated boot), so run it in a slot of the machine:
 #     $HOME/Git/projects/ios/coordination/heavy.sh sh tests/backports/device/arkit-config/run.sh
 # ARKITCONFIG_DEVICE and ARKITCONFIG_RELEASE name the device and release (iPhone4,1 and 6.1.3 by default: the fleet's 4S); the

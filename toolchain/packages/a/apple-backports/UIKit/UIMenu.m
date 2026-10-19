@@ -1,13 +1,13 @@
-#import "CharonMenus.h"
+#import "RevenantMenus.h"
 
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
 #pragma clang diagnostic ignored "-Wobjc-designated-initializers"
 
-static void charon_collect_selected(NSArray<UIMenuElement *> *elements, NSMutableArray<UIMenuElement *> *selected)
+static void revenant_collect_selected(NSArray<UIMenuElement *> *elements, NSMutableArray<UIMenuElement *> *selected)
 {
     for (UIMenuElement *element in elements) {
         if ([element isKindOfClass:[UIMenu class]])
-            charon_collect_selected([(UIMenu *)element children], selected);
+            revenant_collect_selected([(UIMenu *)element children], selected);
         else if ([element respondsToSelector:@selector(state)] && [(UIAction *)element state] == UIMenuElementStateOn)
             [selected addObject:element];
     }
@@ -30,23 +30,23 @@ static void charon_collect_selected(NSArray<UIMenuElement *> *elements, NSMutabl
 
 + (UIMenu *)menuWithTitle:(NSString *)title children:(NSArray<UIMenuElement *> *)children
 {
-    return [[self alloc] initCharonWithTitle:title image:nil identifier:nil options:0 children:children];
+    return [[self alloc] initRevenantWithTitle:title image:nil identifier:nil options:0 children:children];
 }
 
 + (UIMenu *)menuWithTitle:(NSString *)title image:(UIImage *)image identifier:(NSString *)identifier options:(UIMenuOptions)options
                  children:(NSArray<UIMenuElement *> *)children
 {
-    return [[self alloc] initCharonWithTitle:title image:image identifier:identifier options:options children:children];
+    return [[self alloc] initRevenantWithTitle:title image:image identifier:identifier options:options children:children];
 }
 
-- (instancetype)initCharonWithTitle:(NSString *)title image:(UIImage *)image identifier:(NSString *)identifier options:(UIMenuOptions)options
+- (instancetype)initRevenantWithTitle:(NSString *)title image:(UIImage *)image identifier:(NSString *)identifier options:(UIMenuOptions)options
                             children:(NSArray<UIMenuElement *> *)children
 {
     for (id child in children) {
         if (![child isKindOfClass:[UIMenuElement class]])
             [NSException raise:NSInvalidArgumentException format:@"-[%@ %@]: unrecognized selector sent to instance %p", [child class], @"_acceptMenuVisit:leafVisit:", child];
     }
-    if ((self = [super initCharonWithTitle:title image:image])) {
+    if ((self = [super initRevenantWithTitle:title image:image])) {
         _identifier = identifier ? [identifier copy] : [@"com.apple.menu.dynamic." stringByAppendingString:[NSUUID UUID].UUIDString];
         _options = options;
         _children = children ? [children copy] : @[];
@@ -83,12 +83,12 @@ static void charon_collect_selected(NSArray<UIMenuElement *> *elements, NSMutabl
     NSMutableArray *children = [NSMutableArray arrayWithCapacity:_children.count];
     for (UIMenuElement *child in _children)
         [children addObject:[child copy]];
-    UIMenu *copy = [[[self class] allocWithZone:zone] initCharonWithTitle:self.title image:self.image identifier:_identifier options:_options children:children];
-    [self charon_carryTo:copy];
+    UIMenu *copy = [[[self class] allocWithZone:zone] initRevenantWithTitle:self.title image:self.image identifier:_identifier options:_options children:children];
+    [self revenant_carryTo:copy];
     return copy;
 }
 
-- (void)charon_carryTo:(UIMenu *)menu
+- (void)revenant_carryTo:(UIMenu *)menu
 {
     menu.preferredElementSize = _preferredElementSize;
     menu.subtitle = self.subtitle;
@@ -107,7 +107,7 @@ static void charon_collect_selected(NSArray<UIMenuElement *> *elements, NSMutabl
 - (NSArray<UIMenuElement *> *)selectedElements
 {
     NSMutableArray<UIMenuElement *> *selected = [NSMutableArray array];
-    charon_collect_selected(_children, selected);
+    revenant_collect_selected(_children, selected);
     return selected;
 }
 
@@ -128,8 +128,8 @@ static void charon_collect_selected(NSArray<UIMenuElement *> *elements, NSMutabl
 
 - (UIMenu *)menuByReplacingChildren:(NSArray<UIMenuElement *> *)newChildren
 {
-    UIMenu *menu = [[[self class] alloc] initCharonWithTitle:self.title image:self.image identifier:_identifier options:_options children:newChildren ?: _children];
-    [self charon_carryTo:menu];
+    UIMenu *menu = [[[self class] alloc] initRevenantWithTitle:self.title image:self.image identifier:_identifier options:_options children:newChildren ?: _children];
+    [self revenant_carryTo:menu];
     return menu;
 }
 
@@ -155,7 +155,7 @@ static void charon_collect_selected(NSArray<UIMenuElement *> *elements, NSMutabl
         [text appendFormat:@"; title = %@", self.title];
     [text appendFormat:@"; identifier = %@", _identifier];
     if (self.image)
-        [text appendFormat:@"; image = %@", charon_short_description(self.image)];
+        [text appendFormat:@"; image = %@", revenant_short_description(self.image)];
     if (_options) {
         NSMutableArray *names = [NSMutableArray array];
         if (_options & UIMenuOptionsDisplayInline)

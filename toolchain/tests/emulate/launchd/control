@@ -1,4 +1,4 @@
-Package: org.charon.emulatelaunchd
+Package: org.revenant.emulatelaunchd
 Name: emulate launchd order probe
 Architecture: iphoneos-arm
 Description: A program that asks launchd for the Mach services of the firmware's LaunchDaemons at its first

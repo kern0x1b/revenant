@@ -101,7 +101,7 @@ function main(cache, image, lo, hi, arch, ...)
         os.cp(cache:sub(2), raw)
     else
         os.execv(os.programfile(), {"l", path.join(os.scriptdir(), "skeleton-table.lua"), cache, image, "bytes", tag, tostring(size)},
-                 {stdout = raw, envs = {CHARON_ROOT = os.getenv("CHARON_ROOT") or workspace.root()}})
+                 {stdout = raw, envs = {REVENANT_ROOT = os.getenv("REVENANT_ROOT") or workspace.root()}})
     end
     local lines = {}
     for line in io.lines(raw) do

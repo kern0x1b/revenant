@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>CFBundleIdentifier</key>
-	<string>local.charon.hostsheethandover</string>
+	<string>local.revenant.hostsheethandover</string>
 	<key>CFBundleExecutable</key>
 	<string>app</string>
 	<key>CFBundleName</key>

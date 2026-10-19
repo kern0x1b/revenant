@@ -51,7 +51,7 @@ public:
         uint64_t elementSize;
         if (!typeOf(vector->getElementType(), element, elementSize))
             return false;
-        out = "charon_v" + std::to_string(count) + "i";
+        out = "revenant_v" + std::to_string(count) + "i";
         size = elementSize * count;
         return true;
     }
@@ -272,7 +272,7 @@ private:
 
     std::string header() {
         std::string out;
-        out += "static void air2cpu_" + kernel_.getName().str() + "(void *const *buffers, charon_v4i thread, charon_v4i group, charon_v4i size, char *block, uint32_t blockBytes, air2cpu_barrier_fn barrier, void *barrierContext)\n{\n";
+        out += "static void air2cpu_" + kernel_.getName().str() + "(void *const *buffers, revenant_v4i thread, revenant_v4i group, revenant_v4i size, char *block, uint32_t blockBytes, air2cpu_barrier_fn barrier, void *barrierContext)\n{\n";
         out += "    (void)blockBytes;\n";
         for (size_t index = 0; index < buffers_.size(); index++) {
             std::string name = buffers_[index]->getName().str();

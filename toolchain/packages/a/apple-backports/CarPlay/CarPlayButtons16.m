@@ -1,7 +1,7 @@
 #import <CarPlay/CarPlay.h>
 #import <UIKit/UIKit.h>
 
-static CGRect CharonCarPlayFit(CGSize size, CGRect rect)
+static CGRect RevenantCarPlayFit(CGSize size, CGRect rect)
 {
     if (size.width <= 0.0 || size.height <= 0.0) {
         return rect;
@@ -47,7 +47,7 @@ static CGRect CharonCarPlayFit(CGSize size, CGRect rect)
     _enabled = enabled;
 }
 
-- (void)charon_drawInRect:(CGRect)rect
+- (void)revenant_drawInRect:(CGRect)rect
 {
     if (CGRectIsEmpty(rect)) {
         return;
@@ -58,7 +58,7 @@ static CGRect CharonCarPlayFit(CGSize size, CGRect rect)
         if (context) {
             CGContextSaveGState(context);
             CGContextSetAlpha(context, (CGFloat)alpha);
-            [_image drawInRect:CharonCarPlayFit(_image.size, rect)];
+            [_image drawInRect:RevenantCarPlayFit(_image.size, rect)];
             CGContextRestoreGState(context);
         }
         return;
@@ -80,7 +80,7 @@ static CGRect CharonCarPlayFit(CGSize size, CGRect rect)
     [plate stroke];
 }
 
-- (void)charon_tap
+- (void)revenant_tap
 {
     if (_handler) {
         _handler(self);
@@ -111,7 +111,7 @@ static CGRect CharonCarPlayFit(CGSize size, CGRect rect)
     return self;
 }
 
-- (void)charon_drawInRect:(CGRect)rect
+- (void)revenant_drawInRect:(CGRect)rect
 {
     if (CGRectIsEmpty(rect) || _title.length == 0) {
         return;
@@ -136,7 +136,7 @@ static CGRect CharonCarPlayFit(CGSize size, CGRect rect)
          withAttributes:attributes];
 }
 
-- (void)charon_tap
+- (void)revenant_tap
 {
     if (_handler) {
         _handler(self);

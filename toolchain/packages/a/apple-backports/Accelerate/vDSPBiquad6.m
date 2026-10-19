@@ -16,12 +16,12 @@ struct vDSP_biquad_SetupStructD {
     double coeff[1];
 };
 
-static vDSP_Length charon_biquad_delay_length(vDSP_Length sections)
+static vDSP_Length revenant_biquad_delay_length(vDSP_Length sections)
 {
     return 2 * (sections + 1);
 }
 
-static void charon_biquad_create(void **setup, const double *coeffs, vDSP_Length sections)
+static void revenant_biquad_create(void **setup, const double *coeffs, vDSP_Length sections)
 {
     if (!coeffs) {
         *setup = NULL;
@@ -40,14 +40,14 @@ static void charon_biquad_create(void **setup, const double *coeffs, vDSP_Length
 vDSP_biquad_Setup vDSP_biquad_CreateSetup(const double *__Coefficients, vDSP_Length __M)
 {
     void *setup = NULL;
-    charon_biquad_create(&setup, __Coefficients, __M);
+    revenant_biquad_create(&setup, __Coefficients, __M);
     return (vDSP_biquad_Setup)setup;
 }
 
 vDSP_biquad_SetupD vDSP_biquad_CreateSetupD(const double *__Coefficients, vDSP_Length __M)
 {
     void *setup = NULL;
-    charon_biquad_create(&setup, __Coefficients, __M);
+    revenant_biquad_create(&setup, __Coefficients, __M);
     return (vDSP_biquad_SetupD)setup;
 }
 
@@ -61,7 +61,7 @@ void vDSP_biquad_DestroySetupD(vDSP_biquad_SetupD __setup)
     free(__setup);
 }
 
-#define CHARON_BIQUAD_RUN(value, setup, delay, X, IX, Y, IY, N)                                            \
+#define REVENANT_BIQUAD_RUN(value, setup, delay, X, IX, Y, IY, N)                                            \
     do {                                                                                                    \
         const struct vDSP_biquad_SetupStruct *s_ = (const struct vDSP_biquad_SetupStruct *)(setup);          \
         const vDSP_Length sections_ = s_->sections;                                                          \
@@ -95,7 +95,7 @@ void vDSP_biquad_DestroySetupD(vDSP_biquad_SetupD __setup)
             }                                                                                                     \
                                    \
                                                             \
-            for (row_ = 1; (vDSP_Length)(2 * row_ + 1) < charon_biquad_delay_length(sections_); row_++) {        \
+            for (row_ = 1; (vDSP_Length)(2 * row_ + 1) < revenant_biquad_delay_length(sections_); row_++) {        \
                 delay_[2 * row_] = delay_[2 * row_ + 1];                \
                 delay_[2 * row_ + 1] = fresh_[row_ - 1];                                                          \
             }                                                                                                         \
@@ -113,7 +113,7 @@ void vDSP_biquad(const struct vDSP_biquad_SetupStruct *__Setup, float *__Delay, 
 {
     if (!__Setup || !__Delay || !__X || !__Y || __N < 2)
         return;
-    CHARON_BIQUAD_RUN(float, __Setup, __Delay, __X, __IX, __Y, __IY, __N);
+    REVENANT_BIQUAD_RUN(float, __Setup, __Delay, __X, __IX, __Y, __IY, __N);
 }
 
 void vDSP_biquadD(const struct vDSP_biquad_SetupStructD *__Setup, double *__Delay, const double *__X,
@@ -121,5 +121,5 @@ void vDSP_biquadD(const struct vDSP_biquad_SetupStructD *__Setup, double *__Dela
 {
     if (!__Setup || !__Delay || !__X || !__Y || __N < 2)
         return;
-    CHARON_BIQUAD_RUN(double, __Setup, __Delay, __X, __IX, __Y, __IY, __N);
+    REVENANT_BIQUAD_RUN(double, __Setup, __Delay, __X, __IX, __Y, __IY, __N);
 }

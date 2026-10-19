@@ -1,196 +1,196 @@
-#import "CharonTraits17.h"
-#import "CharonTraitStyle.h"
+#import "RevenantTraits17.h"
+#import "RevenantTraitStyle.h"
 
-#define CHARON_TRAIT(Index, ClassName, StoredName, ValueKind, Home, Default, Appearance)                                                 \
-    static CharonTraitDefinition charon_held_##ClassName;                                                                               \
-    static void charon_define_##ClassName(void)                                                                                        \
+#define REVENANT_TRAIT(Index, ClassName, StoredName, ValueKind, Home, Default, Appearance)                                                 \
+    static RevenantTraitDefinition revenant_held_##ClassName;                                                                               \
+    static void revenant_define_##ClassName(void)                                                                                        \
     {                                                                                                                                   \
-        charon_held_##ClassName.trait = [ClassName class];                                                                             \
-        charon_held_##ClassName.name = StoredName;                                                                                     \
-        charon_held_##ClassName.kind = ValueKind;                                                                                      \
-        charon_held_##ClassName.home = Home;                                                                                           \
-        charon_held_##ClassName.defaultValue = Default;                                                                                \
-        charon_held_##ClassName.affectsColorAppearance = Appearance;                                                                   \
-        charon_register_trait_definition(Index, &charon_held_##ClassName);                                                             \
+        revenant_held_##ClassName.trait = [ClassName class];                                                                             \
+        revenant_held_##ClassName.name = StoredName;                                                                                     \
+        revenant_held_##ClassName.kind = ValueKind;                                                                                      \
+        revenant_held_##ClassName.home = Home;                                                                                           \
+        revenant_held_##ClassName.defaultValue = Default;                                                                                \
+        revenant_held_##ClassName.affectsColorAppearance = Appearance;                                                                   \
+        revenant_register_trait_definition(Index, &revenant_held_##ClassName);                                                             \
     }
 
-CHARON_TRAIT(0, UITraitUserInterfaceIdiom, @"UserInterfaceIdiom", CharonTraitValueNSInteger, CharonTraitHomeIvar, @(-1), YES)
-CHARON_TRAIT(1, UITraitUserInterfaceStyle, @"UserInterfaceStyle", CharonTraitValueNSInteger, CharonTraitHomeStyle, @(0), YES)
-CHARON_TRAIT(2, UITraitLayoutDirection, @"UserInterfaceLayoutDirection", CharonTraitValueNSInteger, CharonTraitHomeExtras, @(-1), NO)
-CHARON_TRAIT(3, UITraitDisplayScale, @"DisplayScale", CharonTraitValueCGFloat, CharonTraitHomeIvar, @(0), NO)
-CHARON_TRAIT(4, UITraitHorizontalSizeClass, @"HorizontalSizeClass", CharonTraitValueNSInteger, CharonTraitHomeIvar, @(0), NO)
-CHARON_TRAIT(5, UITraitVerticalSizeClass, @"VerticalSizeClass", CharonTraitValueNSInteger, CharonTraitHomeIvar, @(0), NO)
-CHARON_TRAIT(6, UITraitForceTouchCapability, @"ForceTouchCapability", CharonTraitValueNSInteger, CharonTraitHomeForceTouch, @(0), NO)
-CHARON_TRAIT(7, UITraitPreferredContentSizeCategory, @"PreferredContentSizeCategory", CharonTraitValueObject, CharonTraitHomeExtras,
+REVENANT_TRAIT(0, UITraitUserInterfaceIdiom, @"UserInterfaceIdiom", RevenantTraitValueNSInteger, RevenantTraitHomeIvar, @(-1), YES)
+REVENANT_TRAIT(1, UITraitUserInterfaceStyle, @"UserInterfaceStyle", RevenantTraitValueNSInteger, RevenantTraitHomeStyle, @(0), YES)
+REVENANT_TRAIT(2, UITraitLayoutDirection, @"UserInterfaceLayoutDirection", RevenantTraitValueNSInteger, RevenantTraitHomeExtras, @(-1), NO)
+REVENANT_TRAIT(3, UITraitDisplayScale, @"DisplayScale", RevenantTraitValueCGFloat, RevenantTraitHomeIvar, @(0), NO)
+REVENANT_TRAIT(4, UITraitHorizontalSizeClass, @"HorizontalSizeClass", RevenantTraitValueNSInteger, RevenantTraitHomeIvar, @(0), NO)
+REVENANT_TRAIT(5, UITraitVerticalSizeClass, @"VerticalSizeClass", RevenantTraitValueNSInteger, RevenantTraitHomeIvar, @(0), NO)
+REVENANT_TRAIT(6, UITraitForceTouchCapability, @"ForceTouchCapability", RevenantTraitValueNSInteger, RevenantTraitHomeForceTouch, @(0), NO)
+REVENANT_TRAIT(7, UITraitPreferredContentSizeCategory, @"PreferredContentSizeCategory", RevenantTraitValueObject, RevenantTraitHomeExtras,
              UIContentSizeCategoryUnspecified, NO)
-CHARON_TRAIT(8, UITraitDisplayGamut, @"DisplayGamut", CharonTraitValueNSInteger, CharonTraitHomeExtras, @(-1), YES)
-CHARON_TRAIT(9, UITraitAccessibilityContrast, @"AccessibilityContrast", CharonTraitValueNSInteger, CharonTraitHomeExtras, @(-1), YES)
-CHARON_TRAIT(10, UITraitUserInterfaceLevel, @"UserInterfaceLevel", CharonTraitValueNSInteger, CharonTraitHomeExtras, @(-1), YES)
-CHARON_TRAIT(11, UITraitLegibilityWeight, @"LegibilityWeight", CharonTraitValueNSInteger, CharonTraitHomeExtras, @(-1), NO)
-CHARON_TRAIT(12, UITraitActiveAppearance, @"ActiveAppearance", CharonTraitValueNSInteger, CharonTraitHomeExtras, @(-1), YES)
-CHARON_TRAIT(13, UITraitToolbarItemPresentationSize, @"ToolbarItemPresentationSize", CharonTraitValueNSInteger, CharonTraitHomeExtras, @(-1), NO)
-CHARON_TRAIT(14, UITraitImageDynamicRange, @"ImageDynamicRange", CharonTraitValueNSInteger, CharonTraitHomeExtras, @(-1), NO)
-CHARON_TRAIT(15, UITraitTypesettingLanguage, @"TypesettingLanguage", CharonTraitValueObject, CharonTraitHomeExtras, nil, NO)
-CHARON_TRAIT(16, UITraitSceneCaptureState, @"SceneCaptureState", CharonTraitValueNSInteger, CharonTraitHomeExtras, @(-1), NO)
+REVENANT_TRAIT(8, UITraitDisplayGamut, @"DisplayGamut", RevenantTraitValueNSInteger, RevenantTraitHomeExtras, @(-1), YES)
+REVENANT_TRAIT(9, UITraitAccessibilityContrast, @"AccessibilityContrast", RevenantTraitValueNSInteger, RevenantTraitHomeExtras, @(-1), YES)
+REVENANT_TRAIT(10, UITraitUserInterfaceLevel, @"UserInterfaceLevel", RevenantTraitValueNSInteger, RevenantTraitHomeExtras, @(-1), YES)
+REVENANT_TRAIT(11, UITraitLegibilityWeight, @"LegibilityWeight", RevenantTraitValueNSInteger, RevenantTraitHomeExtras, @(-1), NO)
+REVENANT_TRAIT(12, UITraitActiveAppearance, @"ActiveAppearance", RevenantTraitValueNSInteger, RevenantTraitHomeExtras, @(-1), YES)
+REVENANT_TRAIT(13, UITraitToolbarItemPresentationSize, @"ToolbarItemPresentationSize", RevenantTraitValueNSInteger, RevenantTraitHomeExtras, @(-1), NO)
+REVENANT_TRAIT(14, UITraitImageDynamicRange, @"ImageDynamicRange", RevenantTraitValueNSInteger, RevenantTraitHomeExtras, @(-1), NO)
+REVENANT_TRAIT(15, UITraitTypesettingLanguage, @"TypesettingLanguage", RevenantTraitValueObject, RevenantTraitHomeExtras, nil, NO)
+REVENANT_TRAIT(16, UITraitSceneCaptureState, @"SceneCaptureState", RevenantTraitValueNSInteger, RevenantTraitHomeExtras, @(-1), NO)
 
-@interface CharonTraitDefinitions17 : NSObject
+@interface RevenantTraitDefinitions17 : NSObject
 @end
 
-@implementation CharonTraitDefinitions17
+@implementation RevenantTraitDefinitions17
 
 + (void)load
 {
-    charon_define_UITraitUserInterfaceIdiom();
-    charon_define_UITraitUserInterfaceStyle();
-    charon_define_UITraitLayoutDirection();
-    charon_define_UITraitDisplayScale();
-    charon_define_UITraitHorizontalSizeClass();
-    charon_define_UITraitVerticalSizeClass();
-    charon_define_UITraitForceTouchCapability();
-    charon_define_UITraitPreferredContentSizeCategory();
-    charon_define_UITraitDisplayGamut();
-    charon_define_UITraitAccessibilityContrast();
-    charon_define_UITraitUserInterfaceLevel();
-    charon_define_UITraitLegibilityWeight();
-    charon_define_UITraitActiveAppearance();
-    charon_define_UITraitToolbarItemPresentationSize();
-    charon_define_UITraitImageDynamicRange();
-    charon_define_UITraitTypesettingLanguage();
-    charon_define_UITraitSceneCaptureState();
+    revenant_define_UITraitUserInterfaceIdiom();
+    revenant_define_UITraitUserInterfaceStyle();
+    revenant_define_UITraitLayoutDirection();
+    revenant_define_UITraitDisplayScale();
+    revenant_define_UITraitHorizontalSizeClass();
+    revenant_define_UITraitVerticalSizeClass();
+    revenant_define_UITraitForceTouchCapability();
+    revenant_define_UITraitPreferredContentSizeCategory();
+    revenant_define_UITraitDisplayGamut();
+    revenant_define_UITraitAccessibilityContrast();
+    revenant_define_UITraitUserInterfaceLevel();
+    revenant_define_UITraitLegibilityWeight();
+    revenant_define_UITraitActiveAppearance();
+    revenant_define_UITraitToolbarItemPresentationSize();
+    revenant_define_UITraitImageDynamicRange();
+    revenant_define_UITraitTypesettingLanguage();
+    revenant_define_UITraitSceneCaptureState();
 
-    charon_register_trait_kind((CharonTraitKind){@"ImageDynamicRange", 0, 2, nil, nil});
-    charon_register_trait_kind((CharonTraitKind){@"SceneCaptureState", 0, 2, nil, nil});
-    charon_register_trait_kind((CharonTraitKind){@"HDRHeadroomUsageLimit", 0, 2, nil, nil});
-    charon_register_trait_kind((CharonTraitKind){@"ListEnvironment", 0, 2, nil, nil});
-    charon_register_trait_kind((CharonTraitKind){@"TabAccessoryEnvironment", 0, 2, nil, nil});
-    charon_register_trait_kind((CharonTraitKind){@"SplitViewControllerLayoutEnvironment", 0, 2, nil, nil});
-    charon_register_trait_kind((CharonTraitKind){@"ToolbarItemPresentationSize", 0, 2, @"Regular,Small,,Large", nil});
-    charon_register_trait_kind((CharonTraitKind){@"ForceTouchCapability", 0, 2, @"Unknown,Unavailable,Available", nil});
-    charon_register_trait_kind((CharonTraitKind){@"TypesettingLanguage", 0, 3, nil, nil});
-    charon_register_trait_kind((CharonTraitKind){@"ResolvesNaturalAlignmentWithBaseWritingDirection", 0, 3, nil, nil});
-    charon_register_trait_kind((CharonTraitKind){@"PreferredContentSizeCategory", 0, 2,
+    revenant_register_trait_kind((RevenantTraitKind){@"ImageDynamicRange", 0, 2, nil, nil});
+    revenant_register_trait_kind((RevenantTraitKind){@"SceneCaptureState", 0, 2, nil, nil});
+    revenant_register_trait_kind((RevenantTraitKind){@"HDRHeadroomUsageLimit", 0, 2, nil, nil});
+    revenant_register_trait_kind((RevenantTraitKind){@"ListEnvironment", 0, 2, nil, nil});
+    revenant_register_trait_kind((RevenantTraitKind){@"TabAccessoryEnvironment", 0, 2, nil, nil});
+    revenant_register_trait_kind((RevenantTraitKind){@"SplitViewControllerLayoutEnvironment", 0, 2, nil, nil});
+    revenant_register_trait_kind((RevenantTraitKind){@"ToolbarItemPresentationSize", 0, 2, @"Regular,Small,,Large", nil});
+    revenant_register_trait_kind((RevenantTraitKind){@"ForceTouchCapability", 0, 2, @"Unknown,Unavailable,Available", nil});
+    revenant_register_trait_kind((RevenantTraitKind){@"TypesettingLanguage", 0, 3, nil, nil});
+    revenant_register_trait_kind((RevenantTraitKind){@"ResolvesNaturalAlignmentWithBaseWritingDirection", 0, 3, nil, nil});
+    revenant_register_trait_kind((RevenantTraitKind){@"PreferredContentSizeCategory", 0, 2,
                                                    @"XS,S,M,L,XL,XXL,XXXL,AccessibilityM,AccessibilityL,AccessibilityXL,"
                                                    @"AccessibilityXXL,AccessibilityXXXL", nil});
-    charon_add_trait_value_reader(charon_read_trait_value);
+    revenant_add_trait_value_reader(revenant_read_trait_value);
 }
 
 
 @end
 
 @implementation UITraitUserInterfaceIdiom
-+ (NSString *)identifier { return charon_identifier_of(self); }
-+ (NSString *)name { return charon_trait_name_of(self); }
-+ (BOOL)affectsColorAppearance { return charon_appearance_of(self); }
-+ (NSInteger)defaultValue { return charon_integer_default_of(self); }
++ (NSString *)identifier { return revenant_identifier_of(self); }
++ (NSString *)name { return revenant_trait_name_of(self); }
++ (BOOL)affectsColorAppearance { return revenant_appearance_of(self); }
++ (NSInteger)defaultValue { return revenant_integer_default_of(self); }
 @end
 
 @implementation UITraitUserInterfaceStyle
-+ (NSString *)identifier { return charon_identifier_of(self); }
-+ (NSString *)name { return charon_trait_name_of(self); }
-+ (BOOL)affectsColorAppearance { return charon_appearance_of(self); }
-+ (NSInteger)defaultValue { return charon_integer_default_of(self); }
++ (NSString *)identifier { return revenant_identifier_of(self); }
++ (NSString *)name { return revenant_trait_name_of(self); }
++ (BOOL)affectsColorAppearance { return revenant_appearance_of(self); }
++ (NSInteger)defaultValue { return revenant_integer_default_of(self); }
 @end
 
 @implementation UITraitLayoutDirection
-+ (NSString *)identifier { return charon_identifier_of(self); }
-+ (NSString *)name { return charon_trait_name_of(self); }
-+ (BOOL)affectsColorAppearance { return charon_appearance_of(self); }
-+ (NSInteger)defaultValue { return charon_integer_default_of(self); }
++ (NSString *)identifier { return revenant_identifier_of(self); }
++ (NSString *)name { return revenant_trait_name_of(self); }
++ (BOOL)affectsColorAppearance { return revenant_appearance_of(self); }
++ (NSInteger)defaultValue { return revenant_integer_default_of(self); }
 @end
 
 @implementation UITraitDisplayScale
-+ (NSString *)identifier { return charon_identifier_of(self); }
-+ (NSString *)name { return charon_trait_name_of(self); }
-+ (BOOL)affectsColorAppearance { return charon_appearance_of(self); }
-+ (CGFloat)defaultValue { return charon_cgfloat_default_of(self); }
++ (NSString *)identifier { return revenant_identifier_of(self); }
++ (NSString *)name { return revenant_trait_name_of(self); }
++ (BOOL)affectsColorAppearance { return revenant_appearance_of(self); }
++ (CGFloat)defaultValue { return revenant_cgfloat_default_of(self); }
 @end
 
 @implementation UITraitHorizontalSizeClass
-+ (NSString *)identifier { return charon_identifier_of(self); }
-+ (NSString *)name { return charon_trait_name_of(self); }
-+ (BOOL)affectsColorAppearance { return charon_appearance_of(self); }
-+ (NSInteger)defaultValue { return charon_integer_default_of(self); }
++ (NSString *)identifier { return revenant_identifier_of(self); }
++ (NSString *)name { return revenant_trait_name_of(self); }
++ (BOOL)affectsColorAppearance { return revenant_appearance_of(self); }
++ (NSInteger)defaultValue { return revenant_integer_default_of(self); }
 @end
 
 @implementation UITraitVerticalSizeClass
-+ (NSString *)identifier { return charon_identifier_of(self); }
-+ (NSString *)name { return charon_trait_name_of(self); }
-+ (BOOL)affectsColorAppearance { return charon_appearance_of(self); }
-+ (NSInteger)defaultValue { return charon_integer_default_of(self); }
++ (NSString *)identifier { return revenant_identifier_of(self); }
++ (NSString *)name { return revenant_trait_name_of(self); }
++ (BOOL)affectsColorAppearance { return revenant_appearance_of(self); }
++ (NSInteger)defaultValue { return revenant_integer_default_of(self); }
 @end
 
 @implementation UITraitForceTouchCapability
-+ (NSString *)identifier { return charon_identifier_of(self); }
-+ (NSString *)name { return charon_trait_name_of(self); }
-+ (BOOL)affectsColorAppearance { return charon_appearance_of(self); }
-+ (NSInteger)defaultValue { return charon_integer_default_of(self); }
++ (NSString *)identifier { return revenant_identifier_of(self); }
++ (NSString *)name { return revenant_trait_name_of(self); }
++ (BOOL)affectsColorAppearance { return revenant_appearance_of(self); }
++ (NSInteger)defaultValue { return revenant_integer_default_of(self); }
 @end
 
 @implementation UITraitPreferredContentSizeCategory
-+ (NSString *)identifier { return charon_identifier_of(self); }
-+ (NSString *)name { return charon_trait_name_of(self); }
-+ (BOOL)affectsColorAppearance { return charon_appearance_of(self); }
-+ (id)defaultValue { return charon_object_default_of(self); }
++ (NSString *)identifier { return revenant_identifier_of(self); }
++ (NSString *)name { return revenant_trait_name_of(self); }
++ (BOOL)affectsColorAppearance { return revenant_appearance_of(self); }
++ (id)defaultValue { return revenant_object_default_of(self); }
 @end
 
 @implementation UITraitDisplayGamut
-+ (NSString *)identifier { return charon_identifier_of(self); }
-+ (NSString *)name { return charon_trait_name_of(self); }
-+ (BOOL)affectsColorAppearance { return charon_appearance_of(self); }
-+ (NSInteger)defaultValue { return charon_integer_default_of(self); }
++ (NSString *)identifier { return revenant_identifier_of(self); }
++ (NSString *)name { return revenant_trait_name_of(self); }
++ (BOOL)affectsColorAppearance { return revenant_appearance_of(self); }
++ (NSInteger)defaultValue { return revenant_integer_default_of(self); }
 @end
 
 @implementation UITraitAccessibilityContrast
-+ (NSString *)identifier { return charon_identifier_of(self); }
-+ (NSString *)name { return charon_trait_name_of(self); }
-+ (BOOL)affectsColorAppearance { return charon_appearance_of(self); }
-+ (NSInteger)defaultValue { return charon_integer_default_of(self); }
++ (NSString *)identifier { return revenant_identifier_of(self); }
++ (NSString *)name { return revenant_trait_name_of(self); }
++ (BOOL)affectsColorAppearance { return revenant_appearance_of(self); }
++ (NSInteger)defaultValue { return revenant_integer_default_of(self); }
 @end
 
 @implementation UITraitUserInterfaceLevel
-+ (NSString *)identifier { return charon_identifier_of(self); }
-+ (NSString *)name { return charon_trait_name_of(self); }
-+ (BOOL)affectsColorAppearance { return charon_appearance_of(self); }
-+ (NSInteger)defaultValue { return charon_integer_default_of(self); }
++ (NSString *)identifier { return revenant_identifier_of(self); }
++ (NSString *)name { return revenant_trait_name_of(self); }
++ (BOOL)affectsColorAppearance { return revenant_appearance_of(self); }
++ (NSInteger)defaultValue { return revenant_integer_default_of(self); }
 @end
 
 @implementation UITraitLegibilityWeight
-+ (NSString *)identifier { return charon_identifier_of(self); }
-+ (NSString *)name { return charon_trait_name_of(self); }
-+ (BOOL)affectsColorAppearance { return charon_appearance_of(self); }
-+ (NSInteger)defaultValue { return charon_integer_default_of(self); }
++ (NSString *)identifier { return revenant_identifier_of(self); }
++ (NSString *)name { return revenant_trait_name_of(self); }
++ (BOOL)affectsColorAppearance { return revenant_appearance_of(self); }
++ (NSInteger)defaultValue { return revenant_integer_default_of(self); }
 @end
 
 @implementation UITraitActiveAppearance
-+ (NSString *)identifier { return charon_identifier_of(self); }
-+ (NSString *)name { return charon_trait_name_of(self); }
-+ (BOOL)affectsColorAppearance { return charon_appearance_of(self); }
-+ (NSInteger)defaultValue { return charon_integer_default_of(self); }
++ (NSString *)identifier { return revenant_identifier_of(self); }
++ (NSString *)name { return revenant_trait_name_of(self); }
++ (BOOL)affectsColorAppearance { return revenant_appearance_of(self); }
++ (NSInteger)defaultValue { return revenant_integer_default_of(self); }
 @end
 
 @implementation UITraitToolbarItemPresentationSize
-+ (NSString *)identifier { return charon_identifier_of(self); }
-+ (NSString *)name { return charon_trait_name_of(self); }
-+ (BOOL)affectsColorAppearance { return charon_appearance_of(self); }
-+ (NSInteger)defaultValue { return charon_integer_default_of(self); }
++ (NSString *)identifier { return revenant_identifier_of(self); }
++ (NSString *)name { return revenant_trait_name_of(self); }
++ (BOOL)affectsColorAppearance { return revenant_appearance_of(self); }
++ (NSInteger)defaultValue { return revenant_integer_default_of(self); }
 @end
 
 @implementation UITraitImageDynamicRange
-+ (NSString *)identifier { return charon_identifier_of(self); }
-+ (NSString *)name { return charon_trait_name_of(self); }
-+ (BOOL)affectsColorAppearance { return charon_appearance_of(self); }
-+ (NSInteger)defaultValue { return charon_integer_default_of(self); }
++ (NSString *)identifier { return revenant_identifier_of(self); }
++ (NSString *)name { return revenant_trait_name_of(self); }
++ (BOOL)affectsColorAppearance { return revenant_appearance_of(self); }
++ (NSInteger)defaultValue { return revenant_integer_default_of(self); }
 @end
 
 @implementation UITraitTypesettingLanguage
-+ (NSString *)identifier { return charon_identifier_of(self); }
-+ (NSString *)name { return charon_trait_name_of(self); }
-+ (id)defaultValue { return charon_object_default_of(self); }
++ (NSString *)identifier { return revenant_identifier_of(self); }
++ (NSString *)name { return revenant_trait_name_of(self); }
++ (id)defaultValue { return revenant_object_default_of(self); }
 @end
 
 @implementation UITraitSceneCaptureState
-+ (NSString *)identifier { return charon_identifier_of(self); }
-+ (NSString *)name { return charon_trait_name_of(self); }
-+ (BOOL)affectsColorAppearance { return charon_appearance_of(self); }
-+ (NSInteger)defaultValue { return charon_integer_default_of(self); }
++ (NSString *)identifier { return revenant_identifier_of(self); }
++ (NSString *)name { return revenant_trait_name_of(self); }
++ (BOOL)affectsColorAppearance { return revenant_appearance_of(self); }
++ (NSInteger)defaultValue { return revenant_integer_default_of(self); }
 @end

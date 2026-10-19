@@ -1,5 +1,5 @@
-#ifndef CharonCoreMIDI_h
-#define CharonCoreMIDI_h
+#ifndef RevenantCoreMIDI_h
+#define RevenantCoreMIDI_h
 
 #include <Availability.h>
 #include <CoreMIDI/MIDIServices.h>
@@ -9,15 +9,15 @@
 #include <stdlib.h>
 
 enum {
-    charon_paramErr = -50,
-    charon_memFullErr = -108
+    revenant_paramErr = -50,
+    revenant_memFullErr = -108
 };
 
-#define CHARON_PROTOCOL_KEY CFSTR("protocol")
+#define REVENANT_PROTOCOL_KEY CFSTR("protocol")
 
-#define CHARON_OWNER_KEY CFSTR("charon.owner")
+#define REVENANT_OWNER_KEY CFSTR("revenant.owner")
 
-static inline int charon_size_add(size_t *sum, size_t value)
+static inline int revenant_size_add(size_t *sum, size_t value)
 {
     if (value > SIZE_MAX - *sum)
         return 0;
@@ -25,7 +25,7 @@ static inline int charon_size_add(size_t *sum, size_t value)
     return 1;
 }
 
-static inline int charon_size_mul(size_t *product, size_t count, size_t each)
+static inline int revenant_size_mul(size_t *product, size_t count, size_t each)
 {
     if (each != 0 && count > SIZE_MAX / each)
         return 0;
@@ -33,31 +33,31 @@ static inline int charon_size_mul(size_t *product, size_t count, size_t each)
     return 1;
 }
 
-static inline size_t charon_grown_capacity(size_t capacity, size_t element)
+static inline size_t revenant_grown_capacity(size_t capacity, size_t element)
 {
     size_t next = 0;
-    if (capacity > SIZE_MAX / 2 || !charon_size_mul(&next, capacity ? capacity * 2 : 16, element))
+    if (capacity > SIZE_MAX / 2 || !revenant_size_mul(&next, capacity ? capacity * 2 : 16, element))
         return 0;
     return capacity ? capacity * 2 : 16;
 }
 
-typedef struct CharonMIDIWords {
+typedef struct RevenantMIDIWords {
     UInt32 *words;
     size_t count;
     size_t capacity;
     int failed;
     int heap;
-} CharonMIDIWords;
+} RevenantMIDIWords;
 
-typedef struct CharonMIDIBytes {
+typedef struct RevenantMIDIBytes {
     uint8_t *bytes;
     size_t count;
     size_t capacity;
     int failed;
     int heap;
-} CharonMIDIBytes;
+} RevenantMIDIBytes;
 
-static inline void CharonMIDIWordsUseStorage(CharonMIDIWords *out, UInt32 *storage, size_t capacity)
+static inline void RevenantMIDIWordsUseStorage(RevenantMIDIWords *out, UInt32 *storage, size_t capacity)
 {
     out->words = storage;
     out->count = 0;
@@ -66,7 +66,7 @@ static inline void CharonMIDIWordsUseStorage(CharonMIDIWords *out, UInt32 *stora
     out->heap = 0;
 }
 
-static inline void CharonMIDIWordsRelease(CharonMIDIWords *out)
+static inline void RevenantMIDIWordsRelease(RevenantMIDIWords *out)
 {
     if (out->heap)
         free(out->words);
@@ -75,7 +75,7 @@ static inline void CharonMIDIWordsRelease(CharonMIDIWords *out)
     out->capacity = 0;
 }
 
-static inline void CharonMIDIBytesUseStorage(CharonMIDIBytes *out, uint8_t *storage, size_t capacity)
+static inline void RevenantMIDIBytesUseStorage(RevenantMIDIBytes *out, uint8_t *storage, size_t capacity)
 {
     out->bytes = storage;
     out->count = 0;
@@ -84,7 +84,7 @@ static inline void CharonMIDIBytesUseStorage(CharonMIDIBytes *out, uint8_t *stor
     out->heap = 0;
 }
 
-static inline void CharonMIDIBytesRelease(CharonMIDIBytes *out)
+static inline void RevenantMIDIBytesRelease(RevenantMIDIBytes *out)
 {
     if (out->heap)
         free(out->bytes);
@@ -93,7 +93,7 @@ static inline void CharonMIDIBytesRelease(CharonMIDIBytes *out)
     out->capacity = 0;
 }
 
-typedef struct CharonMIDIParser {
+typedef struct RevenantMIDIParser {
     uint8_t running;
     uint8_t pendingStatus;
     int pendingNeed;
@@ -103,57 +103,57 @@ typedef struct CharonMIDIParser {
     int sysexSent;
     uint8_t sysexCount;
     uint8_t sysex[6];
-} CharonMIDIParser;
+} RevenantMIDIParser;
 
-typedef struct CharonMIDIRPN {
+typedef struct RevenantMIDIRPN {
     int selected;
     int nrpn;
     uint8_t msb;
     uint8_t lsb;
-} CharonMIDIRPN;
+} RevenantMIDIRPN;
 
-void CharonMIDIWordsAppend(CharonMIDIWords *out, UInt32 word);
+void RevenantMIDIWordsAppend(RevenantMIDIWords *out, UInt32 word);
 
-void CharonMIDIParseBytes(CharonMIDIParser *parser, const uint8_t *data, size_t length, int protocol,
-                          uint8_t group, CharonMIDIWords *out);
+void RevenantMIDIParseBytes(RevenantMIDIParser *parser, const uint8_t *data, size_t length, int protocol,
+                          uint8_t group, RevenantMIDIWords *out);
 
-void CharonMIDIParseFlush(CharonMIDIParser *parser, uint8_t group, CharonMIDIWords *out);
+void RevenantMIDIParseFlush(RevenantMIDIParser *parser, uint8_t group, RevenantMIDIWords *out);
 
-typedef struct CharonBLEParser {
+typedef struct RevenantBLEParser {
     int timestampDue;
     int afterTimestamp;
     int inSysex;
     uint8_t running;
     int need;
     int have;
-} CharonBLEParser;
+} RevenantBLEParser;
 
-size_t CharonBLEMIDIParse(CharonBLEParser *parser, const uint8_t *data, size_t length, uint8_t *out);
+size_t RevenantBLEMIDIParse(RevenantBLEParser *parser, const uint8_t *data, size_t length, uint8_t *out);
 
-void CharonMIDIUMPToBytes(const UInt32 *words, size_t count, CharonMIDIRPN rpn[16], CharonMIDIBytes *out);
+void RevenantMIDIUMPToBytes(const UInt32 *words, size_t count, RevenantMIDIRPN rpn[16], RevenantMIDIBytes *out);
 
-int CharonMIDIUMPWordCount(UInt32 word);
+int RevenantMIDIUMPWordCount(UInt32 word);
 
-UInt32 CharonMIDIUp16From7(UInt32 value);
-UInt32 CharonMIDIUp32From7(UInt32 value);
-UInt32 CharonMIDIUp32From14(UInt32 value);
+UInt32 RevenantMIDIUp16From7(UInt32 value);
+UInt32 RevenantMIDIUp32From7(UInt32 value);
+UInt32 RevenantMIDIUp32From14(UInt32 value);
 
-MIDIEventPacket *CharonMIDIEventListAdd(MIDIEventList *list, size_t listSize, MIDIEventPacket *curPacket,
+MIDIEventPacket *RevenantMIDIEventListAdd(MIDIEventList *list, size_t listSize, MIDIEventPacket *curPacket,
                                         MIDITimeStamp time, size_t wordCount, const UInt32 *words);
 
-MIDIEventPacket *CharonMIDIEventListAppend(MIDIEventList *list, size_t listSize, MIDIEventPacket *curPacket,
+MIDIEventPacket *RevenantMIDIEventListAppend(MIDIEventList *list, size_t listSize, MIDIEventPacket *curPacket,
                                            MIDIEventPacket **last, MIDITimeStamp time, size_t wordCount, const UInt32 *words);
 
-OSStatus CharonMIDIInputPort(MIDIClientRef client, CFStringRef portName, MIDIProtocolID protocol, MIDIPortRef *outPort,
+OSStatus RevenantMIDIInputPort(MIDIClientRef client, CFStringRef portName, MIDIProtocolID protocol, MIDIPortRef *outPort,
                              MIDIReceiveBlock receiveBlock);
-OSStatus CharonMIDIDestination(MIDIClientRef client, CFStringRef name, MIDIProtocolID protocol, MIDIEndpointRef *outDest,
+OSStatus RevenantMIDIDestination(MIDIClientRef client, CFStringRef name, MIDIProtocolID protocol, MIDIEndpointRef *outDest,
                                MIDIReceiveBlock readBlock);
-OSStatus CharonMIDISource(MIDIClientRef client, CFStringRef name, MIDIProtocolID protocol, MIDIEndpointRef *outSrc);
-OSStatus CharonMIDISend(MIDIPortRef port, MIDIEndpointRef dest, const MIDIEventList *evtlist);
-OSStatus CharonMIDIReceive(MIDIEndpointRef src, const MIDIEventList *evtlist);
-Boolean CharonMIDIDeliverInProcess(MIDIEndpointRef endpoint, const UInt32 *words, UInt32 count);
-void CharonMIDIOwnBlock(MIDIObjectRef object, void *retainedBlock);
-void CharonMIDIForgetRoute(MIDIObjectRef object);
+OSStatus RevenantMIDISource(MIDIClientRef client, CFStringRef name, MIDIProtocolID protocol, MIDIEndpointRef *outSrc);
+OSStatus RevenantMIDISend(MIDIPortRef port, MIDIEndpointRef dest, const MIDIEventList *evtlist);
+OSStatus RevenantMIDIReceive(MIDIEndpointRef src, const MIDIEventList *evtlist);
+Boolean RevenantMIDIDeliverInProcess(MIDIEndpointRef endpoint, const UInt32 *words, UInt32 count);
+void RevenantMIDIOwnBlock(MIDIObjectRef object, void *retainedBlock);
+void RevenantMIDIForgetRoute(MIDIObjectRef object);
 
 #if (TARGET_OS_IPHONE && __IPHONE_OS_VERSION_MAX_ALLOWED < 170000) || (!TARGET_OS_IPHONE && __MAC_OS_X_VERSION_MAX_ALLOWED < 140000)
 typedef struct MIDISysexSendRequestUMP MIDISysexSendRequestUMP;
@@ -168,6 +168,6 @@ struct MIDISysexSendRequestUMP {
 };
 #endif
 
-int CharonMIDIUMPReleaseSend(MIDISysexSendRequestUMP *umpRequest, MIDIEndpointRef dest, const UInt32 *words, UInt32 count);
+int RevenantMIDIUMPReleaseSend(MIDISysexSendRequestUMP *umpRequest, MIDIEndpointRef dest, const UInt32 *words, UInt32 count);
 
 #endif

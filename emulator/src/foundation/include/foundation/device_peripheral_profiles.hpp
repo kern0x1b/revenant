@@ -7,7 +7,7 @@
 #include <cstdint>
 #include <string_view>
 
-namespace shade {
+namespace emulator {
 
 enum class BasebandTransport : std::uint8_t {
     Virtual,

@@ -17,7 +17,7 @@
 
 #include "kernel/darwin_tty_abi.hpp"
 
-namespace shade::bsd::offline_serial_device {
+namespace emulator::bsd::offline_serial_device {
 
 inline constexpr std::string_view descriptor_kind { "offline-serial" };
 inline constexpr std::string_view directory_name { "cu.bluetooth" };

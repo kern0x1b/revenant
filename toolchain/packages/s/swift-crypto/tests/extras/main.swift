@@ -153,7 +153,7 @@ func rowsMode(negative: Bool) {
         }
     }
 
-    let password = Data("charon".utf8)
+    let password = Data("revenant".utf8)
     let salt = rng.bytes(16)
     result("PBKDF2-SHA256 1000 rounds") {
         try KDF.Insecure.PBKDF2.deriveKey(from: password, salt: salt, using: .sha256, outputByteCount: 32, unsafeUncheckedRounds: 1000).withUnsafeBytes { Data($0) }

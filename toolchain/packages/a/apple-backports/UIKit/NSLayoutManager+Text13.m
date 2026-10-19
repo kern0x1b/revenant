@@ -1,11 +1,11 @@
-#import "CharonMenus.h"
+#import "RevenantMenus.h"
 #import <objc/runtime.h>
 
 #pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
 
 static const void *HyphenationKey = &HyphenationKey;
 
-@implementation NSLayoutManager (CharonText13)
+@implementation NSLayoutManager (RevenantText13)
 
 - (BOOL)usesDefaultHyphenation
 {
@@ -15,7 +15,7 @@ static const void *HyphenationKey = &HyphenationKey;
 - (void)setUsesDefaultHyphenation:(BOOL)usesDefaultHyphenation
 {
     if (usesDefaultHyphenation)
-        charon_menus_say_once(@"default-hyphenation", @"NSLayoutManager.usesDefaultHyphenation: the text system of iOS 6 hyphenates nothing by default, so the flag is kept and read back and lines break as before");
+        revenant_menus_say_once(@"default-hyphenation", @"NSLayoutManager.usesDefaultHyphenation: the text system of iOS 6 hyphenates nothing by default, so the flag is kept and read back and lines break as before");
     objc_setAssociatedObject(self, HyphenationKey, @(usesDefaultHyphenation), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 

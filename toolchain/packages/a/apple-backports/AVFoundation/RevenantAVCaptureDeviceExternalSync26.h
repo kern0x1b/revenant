@@ -10,7 +10,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @class AVExternalSyncDevice;
 
-@interface AVCaptureDevice (CharonCaptureDeviceExternalSync26)
+@interface AVCaptureDevice (RevenantCaptureDeviceExternalSync26)
 
 @property(nonatomic, readonly, getter=isVideoFrameDurationLocked) BOOL videoFrameDurationLocked API_AVAILABLE(ios(26.0));
 @property(nonatomic, readonly) CMTime minSupportedLockedVideoFrameDuration API_AVAILABLE(ios(26.0));
@@ -19,7 +19,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @end
 
-@interface AVCaptureDeviceInput (CharonCaptureDeviceInputExternalSync26)
+@interface AVCaptureDeviceInput (RevenantCaptureDeviceInputExternalSync26)
 
 @property(nonatomic, readonly, getter=isLockedVideoFrameDurationSupported) BOOL lockedVideoFrameDurationSupported API_AVAILABLE(ios(26.0));
 @property(nonatomic) CMTime activeLockedVideoFrameDuration API_AVAILABLE(ios(26.0));

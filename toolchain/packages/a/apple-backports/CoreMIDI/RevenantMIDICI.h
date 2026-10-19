@@ -1,11 +1,11 @@
-#ifndef CharonMIDICI_h
-#define CharonMIDICI_h
+#ifndef RevenantMIDICI_h
+#define RevenantMIDICI_h
 
 #import <Foundation/Foundation.h>
 #import <CoreMIDI/MIDIServices.h>
 
-#import "CharonMIDIUMP18.h"
-#import "CharonCoreMIDIProtocols.h"
+#import "RevenantMIDIUMP18.h"
+#import "RevenantCoreMIDIProtocols.h"
 
 @class MIDICIDeviceInfo, MIDICIProfile, MIDICIProfileState, MIDICISession, MIDICIDiscoveredNode;
 
@@ -34,7 +34,7 @@ typedef void (^MIDICIDiscoveryResponseBlock)(NSArray<MIDICIDiscoveredNode *> *di
 - (instancetype _Nullable)initWithData:(NSData *)data name:(NSString *)inName;
 @end
 
-@interface MIDICIProfile (CharonMIDI14)
+@interface MIDICIProfile (RevenantMIDI14)
 - (instancetype _Nullable)initWithData:(NSData *)data;
 @end
 
@@ -46,7 +46,7 @@ typedef void (^MIDICIDiscoveryResponseBlock)(NSArray<MIDICIDiscoveredNode *> *di
                          disabledProfiles:(NSArray<MIDICIProfile *> *)disabled;
 @end
 
-@interface MIDICIProfileState (CharonMIDI14)
+@interface MIDICIProfileState (RevenantMIDI14)
 - (instancetype _Nullable)initWithEnabledProfiles:(NSArray<MIDICIProfile *> *)enabled disabledProfiles:(NSArray<MIDICIProfile *> *)disabled;
 @end
 
@@ -74,7 +74,7 @@ typedef void (^MIDICIDiscoveryResponseBlock)(NSArray<MIDICIDiscoveredNode *> *di
 - (BOOL)disableProfile:(MIDICIProfile *)profile onChannel:(MIDIChannelNumber)channel error:(NSError *_Nullable *_Nullable)outError;
 @end
 
-@interface MIDICISession (CharonMIDI14)
+@interface MIDICISession (RevenantMIDI14)
 - (BOOL)sendProfile:(MIDICIProfile *)profile onChannel:(MIDIChannelNumber)channel profileData:(NSData *)profileSpecificData;
 @end
 
@@ -97,6 +97,6 @@ typedef void (^MIDICIDiscoveryResponseBlock)(NSArray<MIDICIDiscoveredNode *> *di
 
 NS_ASSUME_NONNULL_END
 
-void charon_ci_inert(const char * _Nonnull action);
+void revenant_ci_inert(const char * _Nonnull action);
 
 #endif

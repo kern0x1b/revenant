@@ -1,7 +1,7 @@
 #import <Foundation/Foundation.h>
 
 __attribute__((visibility("hidden")))
-@interface CharonEphemeralCookieStorage : NSHTTPCookieStorage {
+@interface RevenantEphemeralCookieStorage : NSHTTPCookieStorage {
 @package
     NSMutableArray *_storedCookies;
     NSHTTPCookieAcceptPolicy _policy;
@@ -9,14 +9,14 @@ __attribute__((visibility("hidden")))
 @end
 
 __attribute__((visibility("hidden")))
-@interface CharonEphemeralCredentialStorage : NSURLCredentialStorage {
+@interface RevenantEphemeralCredentialStorage : NSURLCredentialStorage {
 @package
     NSMutableDictionary *_credentials;
     NSMutableDictionary *_defaultCredentials;
 }
 @end
 
-static BOOL charon_domain_matches(NSString *host, NSString *domain)
+static BOOL revenant_domain_matches(NSString *host, NSString *domain)
 {
     host = host.lowercaseString;
     domain = domain.lowercaseString;
@@ -27,7 +27,7 @@ static BOOL charon_domain_matches(NSString *host, NSString *domain)
     return [host isEqualToString:domain];
 }
 
-static BOOL charon_path_matches(NSString *path, NSString *cookiePath)
+static BOOL revenant_path_matches(NSString *path, NSString *cookiePath)
 {
     if (cookiePath.length == 0 || [cookiePath isEqualToString:@"/"])
         return YES;
@@ -36,14 +36,14 @@ static BOOL charon_path_matches(NSString *path, NSString *cookiePath)
     return path.length == cookiePath.length || [cookiePath hasSuffix:@"/"] || [path characterAtIndex:cookiePath.length] == '/';
 }
 
-static BOOL charon_same_cookie(NSHTTPCookie *a, NSHTTPCookie *b)
+static BOOL revenant_same_cookie(NSHTTPCookie *a, NSHTTPCookie *b)
 {
     return [a.name isEqualToString:b.name] && [a.domain caseInsensitiveCompare:b.domain] == NSOrderedSame && [(a.path ?: @"/") isEqualToString:(b.path ?: @"/")];
 }
 
-@implementation CharonEphemeralCookieStorage
+@implementation RevenantEphemeralCookieStorage
 
-- (void)charon_removeExpired
+- (void)revenant_removeExpired
 {
     NSDate *now = [NSDate date];
     NSIndexSet *expired = [_storedCookies indexesOfObjectsPassingTest:^BOOL(NSHTTPCookie *cookie, NSUInteger index, BOOL *stop) {
@@ -55,7 +55,7 @@ static BOOL charon_same_cookie(NSHTTPCookie *a, NSHTTPCookie *b)
 - (NSArray *)cookies
 {
     @synchronized (self) {
-        [self charon_removeExpired];
+        [self revenant_removeExpired];
         return [_storedCookies copy];
     }
 }
@@ -68,7 +68,7 @@ static BOOL charon_same_cookie(NSHTTPCookie *a, NSHTTPCookie *b)
         if (_policy == NSHTTPCookieAcceptPolicyNever)
             return;
         NSIndexSet *same = [_storedCookies indexesOfObjectsPassingTest:^BOOL(NSHTTPCookie *stored, NSUInteger index, BOOL *stop) {
-            return charon_same_cookie(stored, cookie);
+            return revenant_same_cookie(stored, cookie);
         }];
         [_storedCookies removeObjectsAtIndexes:same];
         if (!cookie.expiresDate || [cookie.expiresDate compare:[NSDate date]] == NSOrderedDescending)
@@ -80,7 +80,7 @@ static BOOL charon_same_cookie(NSHTTPCookie *a, NSHTTPCookie *b)
 {
     @synchronized (self) {
         NSIndexSet *same = [_storedCookies indexesOfObjectsPassingTest:^BOOL(NSHTTPCookie *stored, NSUInteger index, BOOL *stop) {
-            return charon_same_cookie(stored, cookie);
+            return revenant_same_cookie(stored, cookie);
         }];
         [_storedCookies removeObjectsAtIndexes:same];
     }
@@ -92,9 +92,9 @@ static BOOL charon_same_cookie(NSHTTPCookie *a, NSHTTPCookie *b)
     BOOL secure = [URL.scheme caseInsensitiveCompare:@"https"] == NSOrderedSame;
     NSMutableArray *found = [NSMutableArray array];
     @synchronized (self) {
-        [self charon_removeExpired];
+        [self revenant_removeExpired];
         for (NSHTTPCookie *cookie in _storedCookies) {
-            if (charon_domain_matches(URL.host, cookie.domain) && charon_path_matches(path, cookie.path) && (!cookie.isSecure || secure))
+            if (revenant_domain_matches(URL.host, cookie.domain) && revenant_path_matches(path, cookie.path) && (!cookie.isSecure || secure))
                 [found addObject:cookie];
         }
     }
@@ -108,7 +108,7 @@ static BOOL charon_same_cookie(NSHTTPCookie *a, NSHTTPCookie *b)
 - (void)setCookies:(NSArray *)cookies forURL:(NSURL *)URL mainDocumentURL:(NSURL *)mainDocumentURL
 {
     for (NSHTTPCookie *cookie in cookies) {
-        if (_policy == NSHTTPCookieAcceptPolicyOnlyFromMainDocumentDomain && mainDocumentURL && !charon_domain_matches(mainDocumentURL.host, cookie.domain) && !charon_domain_matches(mainDocumentURL.host, [@"." stringByAppendingString:cookie.domain]))
+        if (_policy == NSHTTPCookieAcceptPolicyOnlyFromMainDocumentDomain && mainDocumentURL && !revenant_domain_matches(mainDocumentURL.host, cookie.domain) && !revenant_domain_matches(mainDocumentURL.host, [@"." stringByAppendingString:cookie.domain]))
             continue;
         [self setCookie:cookie];
     }
@@ -140,7 +140,7 @@ static BOOL charon_same_cookie(NSHTTPCookie *a, NSHTTPCookie *b)
 
 @end
 
-@implementation CharonEphemeralCredentialStorage
+@implementation RevenantEphemeralCredentialStorage
 
 - (NSDictionary *)credentialsForProtectionSpace:(NSURLProtectionSpace *)space
 {
@@ -218,17 +218,17 @@ static BOOL charon_same_cookie(NSHTTPCookie *a, NSHTTPCookie *b)
 
 @end
 
-static NSHTTPCookieStorage *charon_ephemeral_cookie_storage(void)
+static NSHTTPCookieStorage *revenant_ephemeral_cookie_storage(void)
 {
-    CharonEphemeralCookieStorage *storage = [CharonEphemeralCookieStorage alloc];
+    RevenantEphemeralCookieStorage *storage = [RevenantEphemeralCookieStorage alloc];
     storage->_storedCookies = [NSMutableArray array];
     storage->_policy = NSHTTPCookieAcceptPolicyOnlyFromMainDocumentDomain;
     return storage;
 }
 
-static NSURLCredentialStorage *charon_ephemeral_credential_storage(void)
+static NSURLCredentialStorage *revenant_ephemeral_credential_storage(void)
 {
-    CharonEphemeralCredentialStorage *storage = [CharonEphemeralCredentialStorage alloc];
+    RevenantEphemeralCredentialStorage *storage = [RevenantEphemeralCredentialStorage alloc];
     storage->_credentials = [NSMutableDictionary dictionary];
     storage->_defaultCredentials = [NSMutableDictionary dictionary];
     return storage;
@@ -295,8 +295,8 @@ static NSURLCredentialStorage *charon_ephemeral_credential_storage(void)
 + (NSURLSessionConfiguration *)ephemeralSessionConfiguration
 {
     NSURLSessionConfiguration *configuration = [[self alloc] init];
-    configuration->_HTTPCookieStorage = charon_ephemeral_cookie_storage();
-    configuration->_URLCredentialStorage = charon_ephemeral_credential_storage();
+    configuration->_HTTPCookieStorage = revenant_ephemeral_cookie_storage();
+    configuration->_URLCredentialStorage = revenant_ephemeral_credential_storage();
     configuration->_URLCache = [[NSURLCache alloc] initWithMemoryCapacity:512000 diskCapacity:0 diskPath:nil];
     return configuration;
 }

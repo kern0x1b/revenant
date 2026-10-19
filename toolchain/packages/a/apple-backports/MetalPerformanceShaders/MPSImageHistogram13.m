@@ -1,4 +1,4 @@
-#import "CharonMPSHistogram.h"
+#import "RevenantMPSHistogram.h"
 
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
 #pragma clang diagnostic ignored "-Wobjc-designated-initializers"
@@ -19,7 +19,7 @@
 {
     if ((self = [super initWithDevice:device])) {
         if (!histogramInfo || !histogramInfo->numberOfHistogramEntries) {
-            CharonMPSRefuse(@"MPSImageHistogram: MPSImageHistogramInfo with %lu entries describes no"
+            RevenantMPSRefuse(@"MPSImageHistogram: MPSImageHistogramInfo with %lu entries describes no"
                             @" histogram, so no object was made",
                             (unsigned long)(histogramInfo ? histogramInfo->numberOfHistogramEntries : 0));
             return nil;
@@ -34,7 +34,7 @@
 
 - (instancetype)initWithCoder:(NSCoder *)aDecoder device:(id<MTLDevice>)device
 {
-    CharonMPSRefuse(@"MPSImageHistogram: -initWithCoder:device: is not carried - the release's keys for a"
+    RevenantMPSRefuse(@"MPSImageHistogram: -initWithCoder:device: is not carried - the release's keys for a"
                     @" histogram's bins and range are in no header, so a decoder cannot rebuild them"
                     @" honestly");
     return nil;
@@ -43,7 +43,7 @@
 - (size_t)histogramSizeForSourceFormat:(MTLPixelFormat)sourceFormat
 {
     if (sourceFormat != MTLPixelFormatRGBA8Unorm && sourceFormat != MTLPixelFormatRGBA8Unorm_sRGB) {
-        CharonMPSRefuse(@"MPSImageHistogram: -histogramSizeForSourceFormat: is asked about pixel format %lu,"
+        RevenantMPSRefuse(@"MPSImageHistogram: -histogramSizeForSourceFormat: is asked about pixel format %lu,"
                         @" which this port does not carry, so the size is not guessed", (unsigned long)sourceFormat);
         return 0;
     }
@@ -60,7 +60,7 @@
 {
     NSString *what = NSStringFromClass([self class]);
     if (!source || !histogram) {
-        CharonMPSRefuse(@"%@: a source texture and a histogram buffer are both required, so nothing was"
+        RevenantMPSRefuse(@"%@: a source texture and a histogram buffer are both required, so nothing was"
                         @" written", what);
         return;
     }
@@ -68,7 +68,7 @@
     size_t need = [self histogramSizeForSourceFormat:source.pixelFormat];
     unsigned char *base = (unsigned char *)[histogram contents];
     if (histogramOffset > [histogram length] || need > [histogram length] - histogramOffset) {
-        CharonMPSRefuse(@"%@: %lu bytes at offset %lu will not fit a buffer of %lu, so nothing was written",
+        RevenantMPSRefuse(@"%@: %lu bytes at offset %lu will not fit a buffer of %lu, so nothing was written",
                         what, (unsigned long)need, (unsigned long)histogramOffset,
                         (unsigned long)[histogram length]);
         return;
@@ -80,7 +80,7 @@
     if (window.size.width < 0 || window.size.height < 0) {
         window = MTLRegionMake2D(0, 0, source.width, source.height);
     }
-    CharonMPSHistogramRegion(source, window, _histogramInfo, _minPixelThresholdValue, bins, channels,
+    RevenantMPSHistogramRegion(source, window, _histogramInfo, _minPixelThresholdValue, bins, channels,
                              _histogramInfo.histogramForAlpha, what);
 }
 

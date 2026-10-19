@@ -13,7 +13,7 @@
 #include <string_view>
 #include <vector>
 
-namespace shade {
+namespace emulator {
 
 class AddressSpace;
 class Output;

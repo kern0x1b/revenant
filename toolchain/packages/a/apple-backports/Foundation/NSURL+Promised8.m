@@ -1,15 +1,15 @@
 #import <Foundation/Foundation.h>
 
-@implementation NSURL (CharonPromisedItem)
+@implementation NSURL (RevenantPromisedItem)
 
-- (BOOL)charon_promisedItemIsReachable
+- (BOOL)revenant_promisedItemIsReachable
 {
     return [self checkPromisedItemIsReachableAndReturnError:NULL];
 }
 
 - (BOOL)getPromisedItemResourceValue:(id *)value forKey:(NSURLResourceKey)key error:(NSError **)error
 {
-    if ([self charon_promisedItemIsReachable])
+    if ([self revenant_promisedItemIsReachable])
         return [self getResourceValue:value forKey:key error:error];
     if (value)
         *value = nil;

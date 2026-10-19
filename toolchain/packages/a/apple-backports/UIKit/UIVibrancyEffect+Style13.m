@@ -3,14 +3,14 @@
 
 #pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
 
-static const char charon_style_key;
+static const char revenant_style_key;
 
-@implementation UIVibrancyEffect (CharonStyle13)
+@implementation UIVibrancyEffect (RevenantStyle13)
 
 + (UIVibrancyEffect *)effectForBlurEffect:(UIBlurEffect *)blurEffect style:(UIVibrancyEffectStyle)style
 {
     UIVibrancyEffect *effect = [self effectForBlurEffect:blurEffect];
-    objc_setAssociatedObject(effect, &charon_style_key, @(style), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(effect, &revenant_style_key, @(style), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     return effect;
 }
 

@@ -1,5 +1,5 @@
 function main(action, a, b)
-    local modules = assert(os.getenv("CHARON_MODULES"), "CHARON_MODULES must name the modules directory of a Charon checkout")
+    local modules = assert(os.getenv("REVENANT_MODULES"), "REVENANT_MODULES must name the modules directory of a Revenant checkout")
     local device = import("device", {rootdir = modules, anonymous = true})
     local settings = {host = os.getenv("DEVICE_HOST"), port = os.getenv("DEVICE_PORT"), password = os.getenv("DEVICE_PASSWORD"), udid = os.getenv("DEVICE_UDID")}
     if action == "copy" then

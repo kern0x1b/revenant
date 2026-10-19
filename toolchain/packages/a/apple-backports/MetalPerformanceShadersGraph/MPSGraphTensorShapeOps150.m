@@ -1,12 +1,12 @@
-#import "CharonMPSGraph.h"
+#import "RevenantMPSGraph.h"
 
-@implementation MPSGraph (CharonMPSGraphTensorShape150)
+@implementation MPSGraph (RevenantMPSGraphTensorShape150)
 
 - (MPSGraphTensor *)reshapeTensor:(MPSGraphTensor *)tensor
                   withShapeTensor:(MPSGraphTensor *)shapeTensor
                              name:(NSString *)name
 {
-    return [self charon_mps_gather:CharonMPSGraphOperationKindReshape
+    return [self revenant_mps_gather:RevenantMPSGraphOperationKindReshape
                              tensor:tensor
                       fedParameter:shapeTensor
                         parameters:@{@"gather": @"reshape", @"gatherOperand": @"shape"}
@@ -17,7 +17,7 @@
                                 axis:(NSInteger)axis
                                 name:(NSString *)name
 {
-    return [self charon_mps_gather:CharonMPSGraphOperationKindFlatten2D
+    return [self revenant_mps_gather:RevenantMPSGraphOperationKindFlatten2D
                              tensor:tensor
                         parameters:@{@"gather": @"flatten", @"gatherAxis": @(axis)}
                                name:name];
@@ -27,7 +27,7 @@
                           axisTensor:(MPSGraphTensor *)axisTensor
                                 name:(NSString *)name
 {
-    return [self charon_mps_gather:CharonMPSGraphOperationKindFlatten2D
+    return [self revenant_mps_gather:RevenantMPSGraphOperationKindFlatten2D
                              tensor:tensor
                       fedParameter:axisTensor
                         parameters:@{@"gather": @"flatten", @"gatherOperand": @"axis"}
@@ -38,7 +38,7 @@
                             toShape:(NSArray<NSNumber *> *)toShape
                                name:(NSString *)name
 {
-    return [self charon_mps_gather:CharonMPSGraphOperationKindBroadcast
+    return [self revenant_mps_gather:RevenantMPSGraphOperationKindBroadcast
                              tensor:tensor
                         parameters:@{@"gather": @"broadcast", @"gatherShape": toShape}
                                name:name];
@@ -48,7 +48,7 @@
                       toShapeTensor:(MPSGraphTensor *)toShapeTensor
                                name:(NSString *)name
 {
-    return [self charon_mps_gather:CharonMPSGraphOperationKindBroadcast
+    return [self revenant_mps_gather:RevenantMPSGraphOperationKindBroadcast
                              tensor:tensor
                       fedParameter:toShapeTensor
                         parameters:@{@"gather": @"broadcast", @"gatherOperand": @"shape"}
@@ -57,7 +57,7 @@
 
 - (MPSGraphTensor *)reverseTensor:(MPSGraphTensor *)tensor name:(NSString *)name
 {
-    return [self charon_mps_gather:CharonMPSGraphOperationKindReverse
+    return [self revenant_mps_gather:RevenantMPSGraphOperationKindReverse
                              tensor:tensor
                         parameters:@{@"gather": @"reverse"}
                                name:name];
@@ -67,7 +67,7 @@
                               axes:(NSArray<NSNumber *> *)axes
                               name:(NSString *)name
 {
-    return [self charon_mps_gather:CharonMPSGraphOperationKindReverse
+    return [self revenant_mps_gather:RevenantMPSGraphOperationKindReverse
                              tensor:tensor
                         parameters:@{@"gather": @"reverse", @"gatherAxes": axes ?: @[]}
                                name:name];
@@ -77,7 +77,7 @@
                        axesTensor:(MPSGraphTensor *)axesTensor
                               name:(NSString *)name
 {
-    return [self charon_mps_gather:CharonMPSGraphOperationKindReverse
+    return [self revenant_mps_gather:RevenantMPSGraphOperationKindReverse
                              tensor:tensor
                       fedParameter:axesTensor
                         parameters:@{@"gather": @"reverse", @"gatherOperand": @"axes"}
@@ -94,7 +94,7 @@
                    usePixelShuffleOrder:(BOOL)usePixelShuffleOrder
                                    name:(NSString *)name
 {
-    return [self charon_mps_blockShuffle:tensor
+    return [self revenant_mps_blockShuffle:tensor
                                   spatial:@[@(heightAxis), @(widthAxis)]
                                     batch:(NSInteger)depthAxis
                                     block:@[@(blockSize), @(blockSize)]
@@ -122,7 +122,7 @@
                            @"block_size (%lu) squared (%lld) must be multiple of depth %lld\"",
                       name, (unsigned long)blockSize, square, depth, (unsigned long)blockSize, square, depth];
     }
-    return [self charon_mps_blockShuffle:tensor
+    return [self revenant_mps_blockShuffle:tensor
                                   spatial:@[@(heightAxis), @(widthAxis)]
                                     batch:(NSInteger)depthAxis
                                     block:@[@(blockSize), @(blockSize)]
@@ -131,7 +131,7 @@
                                       name:name];
 }
 
-static NSString *CharonMPSGraphTensorTypeName(MPSGraphTensor *tensor)
+static NSString *RevenantMPSGraphTensorTypeName(MPSGraphTensor *tensor)
 {
     NSString *element = nil;
     switch (tensor.dataType) {
@@ -147,7 +147,7 @@ static NSString *CharonMPSGraphTensorTypeName(MPSGraphTensor *tensor)
     return [NSString stringWithFormat:@"tensor<%@x%@>", [tensor.shape componentsJoinedByString:@"x"], element];
 }
 
-static void CharonMPSGraphBlockAxisTensor(MPSGraphTensor *tensor, NSString *axisName, NSUInteger operand,
+static void RevenantMPSGraphBlockAxisTensor(MPSGraphTensor *tensor, NSString *axisName, NSUInteger operand,
                                           NSString *operation, NSString *name)
 {
     MPSDataType type = tensor.dataType;
@@ -159,8 +159,8 @@ static void CharonMPSGraphBlockAxisTensor(MPSGraphTensor *tensor, NSString *axis
                            @"with \"'mps.%@' op operand #%lu must be 0D tensor of mps index type values or "
                            @"static-shape defined tensor with shape equal to [1] or unranked tensor of mps index "
                            @"type values, but got '%@'\" (exit 134)", name, axisName,
-                       CharonMPSGraphTensorTypeName(tensor), operation, (unsigned long)operand,
-                       CharonMPSGraphTensorTypeName(tensor)];
+                       RevenantMPSGraphTensorTypeName(tensor), operation, (unsigned long)operand,
+                       RevenantMPSGraphTensorTypeName(tensor)];
     }
     if (rank != 0 && rank != 1) {
         [NSException raise:NSInvalidArgumentException
@@ -169,18 +169,18 @@ static void CharonMPSGraphBlockAxisTensor(MPSGraphTensor *tensor, NSString *axis
                            @"must be 0D tensor of mps index type values or static-shape defined tensor with "
                            @"shape equal to [1] or unranked tensor of mps index type values, but got '%@'\" "
                            @"(exit 134)", name, axisName, (unsigned long)rank, operation, (unsigned long)operand,
-                       CharonMPSGraphTensorTypeName(tensor)];
+                       RevenantMPSGraphTensorTypeName(tensor)];
     }
 }
 
-static MPSGraphTensor *CharonMPSGraphFed2DBlockShuffle(MPSGraph *graph, MPSGraphTensor *tensor,
+static MPSGraphTensor *RevenantMPSGraphFed2DBlockShuffle(MPSGraph *graph, MPSGraphTensor *tensor,
                                                        MPSGraphTensor *widthTensor, MPSGraphTensor *heightTensor,
                                                        MPSGraphTensor *depthTensor, NSUInteger blockSize,
                                                        BOOL toBatch, BOOL shuffle, NSString *name)
 {
-    NSArray<NSNumber *> *width = [graph charon_mps_constantShapeOfTensor:widthTensor];
-    NSArray<NSNumber *> *height = [graph charon_mps_constantShapeOfTensor:heightTensor];
-    NSArray<NSNumber *> *depth = [graph charon_mps_constantShapeOfTensor:depthTensor];
+    NSArray<NSNumber *> *width = [graph revenant_mps_constantShapeOfTensor:widthTensor];
+    NSArray<NSNumber *> *height = [graph revenant_mps_constantShapeOfTensor:heightTensor];
+    NSArray<NSNumber *> *depth = [graph revenant_mps_constantShapeOfTensor:depthTensor];
     if (width != nil && height != nil && depth != nil) {
         NSUInteger w = (NSUInteger)width.firstObject.integerValue;
         NSUInteger h = (NSUInteger)height.firstObject.integerValue;
@@ -194,7 +194,7 @@ static MPSGraphTensor *CharonMPSGraphFed2DBlockShuffle(MPSGraph *graph, MPSGraph
     }
     MPSGraphTensor *tensors[3] = { widthTensor, heightTensor, depthTensor };
     for (NSUInteger i = 0; i < 3; i++) {
-        NSArray<NSNumber *> *held = [graph charon_mps_constantShapeOfTensor:tensors[i]];
+        NSArray<NSNumber *> *held = [graph revenant_mps_constantShapeOfTensor:tensors[i]];
         NSString *axisName = i == 0 ? @"width axis" : (i == 1 ? @"height axis" : @"depth axis");
         if (held != nil && held.count != 1) {
             [NSException raise:NSInvalidArgumentException
@@ -204,10 +204,10 @@ static MPSGraphTensor *CharonMPSGraphFed2DBlockShuffle(MPSGraph *graph, MPSGraph
                        (unsigned long)held.count, axisName];
         }
         if (held == nil)
-            CharonMPSGraphBlockAxisTensor(tensors[i], axisName, i + 1,
+            RevenantMPSGraphBlockAxisTensor(tensors[i], axisName, i + 1,
                                           toBatch ? @"space_to_depth_2d" : @"depth_to_space_2d", name);
     }
-    return [graph charon_mps_operation:CharonMPSGraphOperationKindBlockShuffle
+    return [graph revenant_mps_operation:RevenantMPSGraphOperationKindBlockShuffle
                                 inputs:@[tensor, widthTensor, heightTensor, depthTensor]
                             parameters:@{@"blockShuffle": @YES,
                                          @"blockShuffleBlock": @(blockSize),
@@ -225,7 +225,7 @@ static MPSGraphTensor *CharonMPSGraphFed2DBlockShuffle(MPSGraph *graph, MPSGraph
                    usePixelShuffleOrder:(BOOL)usePixelShuffleOrder
                                    name:(NSString *)name
 {
-    return CharonMPSGraphFed2DBlockShuffle(self, tensor, widthAxisTensor, heightAxisTensor, depthAxisTensor,
+    return RevenantMPSGraphFed2DBlockShuffle(self, tensor, widthAxisTensor, heightAxisTensor, depthAxisTensor,
                                             blockSize, YES, usePixelShuffleOrder, name);
 }
 
@@ -237,7 +237,7 @@ static MPSGraphTensor *CharonMPSGraphFed2DBlockShuffle(MPSGraph *graph, MPSGraph
                    usePixelShuffleOrder:(BOOL)usePixelShuffleOrder
                                    name:(NSString *)name
 {
-    return CharonMPSGraphFed2DBlockShuffle(self, tensor, widthAxisTensor, heightAxisTensor, depthAxisTensor,
+    return RevenantMPSGraphFed2DBlockShuffle(self, tensor, widthAxisTensor, heightAxisTensor, depthAxisTensor,
                                             blockSize, NO, usePixelShuffleOrder, name);
 }
 

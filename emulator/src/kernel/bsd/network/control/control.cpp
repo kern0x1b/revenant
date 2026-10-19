@@ -7,7 +7,7 @@
 
 #include "kernel/kernel_control.hpp"
 
-namespace shade::bsd::kernel_control {
+namespace emulator::bsd::kernel_control {
 
 std::optional<std::uint32_t> identifier_for_name(std::string_view name)
 {

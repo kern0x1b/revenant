@@ -19,9 +19,9 @@ static void printClassImages(void)
         Class cls = NSClassFromString(names[i]);
         const char *image = cls ? (class_getImageName(cls) ?: "(none)") : "(absent)";
         printf("image %-30s %s\n", names[i].UTF8String, image);
-        NSString *charon = [@"Charon" stringByAppendingString:names[i]];
-        Class mine = NSClassFromString(charon);
-        printf("image %-30s %s\n", charon.UTF8String,
+        NSString *revenant = [@"Revenant" stringByAppendingString:names[i]];
+        Class mine = NSClassFromString(revenant);
+        printf("image %-30s %s\n", revenant.UTF8String,
                mine ? (class_getImageName(mine) ?: "(none)") : "(absent)");
     }
 }
@@ -30,8 +30,8 @@ static NSUInteger gCompared = 0, gNotCompared = 0;
 
 static BOOL portHas(const char *name)
 {
-#ifdef CHARON_PORT_BUILD
-    return NSClassFromString([@"Charon" stringByAppendingString:[NSString stringWithUTF8String:name]]) != Nil;
+#ifdef REVENANT_PORT_BUILD
+    return NSClassFromString([@"Revenant" stringByAppendingString:[NSString stringWithUTF8String:name]]) != Nil;
 #else
     (void)name;
     return YES;

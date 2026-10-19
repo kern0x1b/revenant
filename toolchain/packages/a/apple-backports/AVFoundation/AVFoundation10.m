@@ -5,7 +5,7 @@
 #pragma clang diagnostic ignored "-Wunguarded-availability"
 #pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
 
-@implementation AVPlayer (CharonAVFoundation10)
+@implementation AVPlayer (RevenantAVFoundation10)
 
 - (AVPlayerTimeControlStatus)timeControlStatus
 {

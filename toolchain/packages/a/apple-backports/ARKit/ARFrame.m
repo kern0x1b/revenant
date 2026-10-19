@@ -1,12 +1,12 @@
 #import <ARKit/ARKit.h>
 #import <AVFoundation/AVFoundation.h>
 
-#import "CharonARTracker.h"
-#import "CharonARKitPrivate.h"
+#import "RevenantARTracker.h"
+#import "RevenantARKitPrivate.h"
 
 #pragma clang diagnostic ignored "-Wunguarded-availability-new"
 
-static simd_float3 CharonEulerAngles(simd_float4x4 transform)
+static simd_float3 RevenantEulerAngles(simd_float4x4 transform)
 {
     simd_float3x3 rotation;
     rotation.columns[0] = simd_make_float3(transform.columns[0][0], transform.columns[0][1],
@@ -24,7 +24,7 @@ static simd_float3 CharonEulerAngles(simd_float4x4 transform)
                             atan2f(rotation.columns[1][0], rotation.columns[0][0]));
 }
 
-static simd_float3x3 CharonScaledIntrinsics(simd_float3x3 intrinsics, CGSize image, CGSize viewport)
+static simd_float3x3 RevenantScaledIntrinsics(simd_float3x3 intrinsics, CGSize image, CGSize viewport)
 {
     if (image.width <= 0 || image.height <= 0)
         return intrinsics;
@@ -43,13 +43,13 @@ static simd_float3x3 CharonScaledIntrinsics(simd_float3x3 intrinsics, CGSize ima
     return scaled;
 }
 
-static simd_float4x4 CharonProjectionMatrix(simd_float3x3 intrinsics, CGSize image, CGSize viewport,
+static simd_float4x4 RevenantProjectionMatrix(simd_float3x3 intrinsics, CGSize image, CGSize viewport,
                                             CGFloat zNear, CGFloat zFar)
 {
     if (zNear <= 0 || zFar <= zNear)
         zFar = zNear + 1.0;
-    simd_float3x3 scaled = CharonScaledIntrinsics(intrinsics, image, viewport);
-    simd_float4x4 projection = CharonARKitIdentityFloat4x4;
+    simd_float3x3 scaled = RevenantScaledIntrinsics(intrinsics, image, viewport);
+    simd_float4x4 projection = RevenantARKitIdentityFloat4x4;
     projection.columns[0] = (simd_float4){ scaled.columns[0][0], 0, 0, 0 };
     projection.columns[1] = (simd_float4){ scaled.columns[0][1], scaled.columns[1][1], 0, 0 };
     projection.columns[2] = (simd_float4){ scaled.columns[0][2], scaled.columns[1][2], 0, 0 };
@@ -57,10 +57,10 @@ static simd_float4x4 CharonProjectionMatrix(simd_float3x3 intrinsics, CGSize ima
     return projection;
 }
 
-static CGPoint CharonProjectPoint(simd_float3x3 intrinsics, CGSize image, CGSize viewport,
+static CGPoint RevenantProjectPoint(simd_float3x3 intrinsics, CGSize image, CGSize viewport,
                                   simd_float4x4 transform, simd_float3 point)
 {
-    simd_float3x3 scaled = CharonScaledIntrinsics(intrinsics, image, viewport);
+    simd_float3x3 scaled = RevenantScaledIntrinsics(intrinsics, image, viewport);
     simd_float4 camera = simd_mul(transform, (simd_float4){ point.x, point.y, point.z, 1 });
     if (camera.z >= 0)
         return CGPointZero;
@@ -68,7 +68,7 @@ static CGPoint CharonProjectPoint(simd_float3x3 intrinsics, CGSize image, CGSize
                        (CGFloat)((camera.y * scaled.columns[1][1] + camera.z * scaled.columns[2][1]) / -camera.z));
 }
 
-static simd_float3 CharonUnprojectPoint(simd_float3x3 intrinsics, simd_float4x4 transform, CGPoint point,
+static simd_float3 RevenantUnprojectPoint(simd_float3x3 intrinsics, simd_float4x4 transform, CGPoint point,
                                         simd_float4x4 planeTransform)
 {
     float fx = intrinsics.columns[0][0], cx = intrinsics.columns[2][0];
@@ -96,23 +96,23 @@ static simd_float3 CharonUnprojectPoint(simd_float3x3 intrinsics, simd_float4x4 
                             planeOrigin.z + direction.z * along);
 }
 
-static simd_float3 CharonRayOrigin(simd_float4x4 transform)
+static simd_float3 RevenantRayOrigin(simd_float4x4 transform)
 {
     return simd_make_float3(transform.columns[3][0], transform.columns[3][1], transform.columns[3][2]);
 }
 
-static NSArray<ARHitTestResult *> *CharonHitTest(CharonARTracker *tracker, simd_float3x3 intrinsics,
+static NSArray<ARHitTestResult *> *RevenantHitTest(RevenantARTracker *tracker, simd_float3x3 intrinsics,
                                                 simd_float4x4 transform, CGPoint point,
                                                 ARHitTestResultType types)
 {
     if (!tracker)
         return @[];
-    NSMutableArray<CharonARValue *> *found = [NSMutableArray array];
+    NSMutableArray<RevenantARValue *> *found = [NSMutableArray array];
     [tracker hitTestPoint:point
            existingPlane:(types & ARHitTestResultTypeExistingPlaneUsingGeometry) != 0
                  results:found];
     NSMutableArray<ARHitTestResult *> *results = [NSMutableArray arrayWithCapacity:found.count];
-    for (CharonARValue *value in found) {
+    for (RevenantARValue *value in found) {
         ARHitTestResult *result = [[ARHitTestResult alloc] initWithHitValue:value];
         if (result)
             [results addObject:result];
@@ -134,7 +134,7 @@ static NSArray<ARHitTestResult *> *CharonHitTest(CharonARTracker *tracker, simd_
     ARTrackingStateReason _trackingStateReason;
     simd_float3 _eulerAngles;
     simd_float3x3 _intrinsics;
-    CharonARTracker *_hitTestTracker;
+    RevenantARTracker *_hitTestTracker;
 }
     @synthesize transform = _transform;
     @synthesize eulerAngles = _eulerAngles;
@@ -155,13 +155,13 @@ static NSArray<ARHitTestResult *> *CharonHitTest(CharonARTracker *tracker, simd_
                  exposureDuration:(NSTimeInterval)exposureDuration
                    exposureOffset:(CGFloat)exposureOffset
                     trackingState:(ARTrackingState)state
-                   hitTestTracker:(CharonARTracker *)hitTestTracker
+                   hitTestTracker:(RevenantARTracker *)hitTestTracker
 {
     self = [super init];
     if (!self)
         return nil;
     _transform = transform;
-    _projection = CharonARKitIdentityFloat4x4;
+    _projection = RevenantARKitIdentityFloat4x4;
     _transformTimestamp = timestamp;
     _imageResolution = resolution;
     _focalLength = focalLength;
@@ -172,7 +172,7 @@ static NSArray<ARHitTestResult *> *CharonHitTest(CharonARTracker *tracker, simd_
     _trackingState = state;
     _trackingStateReason = (state == ARTrackingStateNormal) ? ARTrackingStateReasonNone
                                                             : ARTrackingStateReasonRelocalizing;
-    _intrinsics = [CharonARTracker cameraIntrinsicsForResolution:resolution];
+    _intrinsics = [RevenantARTracker cameraIntrinsicsForResolution:resolution];
     _hitTestTracker = hitTestTracker;
     return self;
 }
@@ -194,14 +194,14 @@ static NSArray<ARHitTestResult *> *CharonHitTest(CharonARTracker *tracker, simd_
                                          zNear:(CGFloat)zNear
                                           zFar:(CGFloat)zFar
 {
-    return CharonProjectionMatrix(_intrinsics, _imageResolution, viewportSize, zNear, zFar);
+    return RevenantProjectionMatrix(_intrinsics, _imageResolution, viewportSize, zNear, zFar);
 }
 
 - (CGPoint)projectPoint:(simd_float3)point
             orientation:(UIInterfaceOrientation)orientation
             viewportSize:(CGSize)viewportSize
 {
-    return CharonProjectPoint(_intrinsics, _imageResolution, viewportSize, _transform, point);
+    return RevenantProjectPoint(_intrinsics, _imageResolution, viewportSize, _transform, point);
 }
 
 - (simd_float3)unprojectPoint:(CGPoint)point
@@ -209,25 +209,25 @@ static NSArray<ARHitTestResult *> *CharonHitTest(CharonARTracker *tracker, simd_
                    orientation:(UIInterfaceOrientation)orientation
                    viewportSize:(CGSize)viewportSize
 {
-    return CharonUnprojectPoint(_intrinsics, _transform, point, planeTransform);
+    return RevenantUnprojectPoint(_intrinsics, _transform, point, planeTransform);
 }
 
 - (simd_float4x4)viewMatrixForOrientation:(UIInterfaceOrientation)orientation
 {
-    return CharonInverse(_transform);
+    return RevenantInverse(_transform);
 }
 
 - (NSArray<ARHitTestResult *> *)hitTest:(CGPoint)point types:(ARHitTestResultType)types
 {
-    return CharonHitTest(_hitTestTracker, _intrinsics, _transform, point, types);
+    return RevenantHitTest(_hitTestTracker, _intrinsics, _transform, point, types);
 }
 
 - (ARRaycastQuery *)raycastQueryFromPoint:(CGPoint)point
                             allowingTarget:(ARRaycastTarget)target
                                   alignment:(ARRaycastTargetAlignment)alignment
 {
-    return [[ARRaycastQuery alloc] initWithOrigin:CharonRayOrigin(_transform)
-                                        direction:CharonRayDirection(_intrinsics, _transform, simd_make_float2((float)point.x, (float)point.y))
+    return [[ARRaycastQuery alloc] initWithOrigin:RevenantRayOrigin(_transform)
+                                        direction:RevenantRayDirection(_intrinsics, _transform, simd_make_float2((float)point.x, (float)point.y))
                                  allowingTarget:target
                                         alignment:alignment];
 }
@@ -295,7 +295,7 @@ static NSArray<ARHitTestResult *> *CharonHitTest(CharonARTracker *tracker, simd_
     NSDictionary<NSString *, id> *_worldMap;
     NSTimeInterval _timestamp;
     ARLightEstimate *_lightEstimate;
-    CharonARTracker *_hitTestTracker;
+    RevenantARTracker *_hitTestTracker;
     BOOL _displayTransformApplied;
 }
     @synthesize timestamp = _timestamp;
@@ -316,7 +316,7 @@ static NSArray<ARHitTestResult *> *CharonHitTest(CharonARTracker *tracker, simd_
                            lightEstimate:(CGFloat)lightEstimate
                 ambientColorTemperature:(CGFloat)temperature
                                tracking:(BOOL)tracking
-                         hitTestTracker:(CharonARTracker *)hitTestTracker
+                         hitTestTracker:(RevenantARTracker *)hitTestTracker
 {
     self = [super init];
     if (!self)
@@ -327,7 +327,7 @@ static NSArray<ARHitTestResult *> *CharonHitTest(CharonARTracker *tracker, simd_
     _anchors = [NSMutableArray array];
     _capturedImages = [NSMutableDictionary dictionary];
     _camera = [[ARCamera alloc] initWithTransform:cameraTransform
-                                  deviceEulerAngles:CharonEulerAngles(deviceTransform)
+                                  deviceEulerAngles:RevenantEulerAngles(deviceTransform)
                                  transformTimestamp:timestamp
                                   imageResolution:resolution
                                         focalLength:resolution.width
@@ -345,7 +345,7 @@ static NSArray<ARHitTestResult *> *CharonHitTest(CharonARTracker *tracker, simd_
 - (simd_float3x3)intrinsics { return _camera.intrinsics; }
 - (simd_float4x4)cameraTransform { return _camera.transform; }
 - (simd_float4x4)projectionMatrix { return _camera.projectionMatrix; }
-- (simd_float4x4)displayTransform { return CharonARKitIdentityFloat4x4; }
+- (simd_float4x4)displayTransform { return RevenantARKitIdentityFloat4x4; }
 - (simd_float4x4)transform { return _deviceTransform; }
 - (CGSize)imageResolution { return _camera.imageResolution; }
 - (NSTimeInterval)timestamp { return _timestamp; }
@@ -390,14 +390,14 @@ static NSArray<ARHitTestResult *> *CharonHitTest(CharonARTracker *tracker, simd_
                                          zNear:(CGFloat)zNear
                                           zFar:(CGFloat)zFar
 {
-    return CharonProjectionMatrix(_camera.intrinsics, _camera.imageResolution, viewportSize, zNear, zFar);
+    return RevenantProjectionMatrix(_camera.intrinsics, _camera.imageResolution, viewportSize, zNear, zFar);
 }
 
 - (CGPoint)projectPoint:(simd_float3)point
             orientation:(UIInterfaceOrientation)orientation
             viewportSize:(CGSize)viewportSize
 {
-    return CharonProjectPoint(_camera.intrinsics, _camera.imageResolution, viewportSize,
+    return RevenantProjectPoint(_camera.intrinsics, _camera.imageResolution, viewportSize,
                               _camera.transform, point);
 }
 
@@ -406,12 +406,12 @@ static NSArray<ARHitTestResult *> *CharonHitTest(CharonARTracker *tracker, simd_
                    orientation:(UIInterfaceOrientation)orientation
                    viewportSize:(CGSize)viewportSize
 {
-    return CharonUnprojectPoint(_camera.intrinsics, _camera.transform, point, planeTransform);
+    return RevenantUnprojectPoint(_camera.intrinsics, _camera.transform, point, planeTransform);
 }
 
 - (simd_float4x4)viewMatrixForOrientation:(UIInterfaceOrientation)orientation
 {
-    return CharonInverse(_camera.transform);
+    return RevenantInverse(_camera.transform);
 }
 
 - (CGAffineTransform)displayTransformForOrientation:(UIInterfaceOrientation)orientation
@@ -422,15 +422,15 @@ static NSArray<ARHitTestResult *> *CharonHitTest(CharonARTracker *tracker, simd_
 
 - (NSArray<ARHitTestResult *> *)hitTest:(CGPoint)point types:(ARHitTestResultType)types
 {
-    return CharonHitTest(_hitTestTracker, _camera.intrinsics, _camera.transform, point, types);
+    return RevenantHitTest(_hitTestTracker, _camera.intrinsics, _camera.transform, point, types);
 }
 
 - (ARRaycastQuery *)raycastQueryFromPoint:(CGPoint)point
                             allowingTarget:(ARRaycastTarget)target
                                   alignment:(ARRaycastTargetAlignment)alignment
 {
-    return [[ARRaycastQuery alloc] initWithOrigin:CharonRayOrigin(_camera.transform)
-                                        direction:CharonRayDirection(_camera.intrinsics, _camera.transform, simd_make_float2((float)point.x, (float)point.y))
+    return [[ARRaycastQuery alloc] initWithOrigin:RevenantRayOrigin(_camera.transform)
+                                        direction:RevenantRayDirection(_camera.intrinsics, _camera.transform, simd_make_float2((float)point.x, (float)point.y))
                                  allowingTarget:target
                                         alignment:alignment];
 }

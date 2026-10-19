@@ -6,7 +6,7 @@
 # Apple's and only a rename lets both answer the same query in one probe. Apple's own is reached
 # through the unrenamed name.
 #
-# THE MUTANT is a second build of the same source with -DCHARON_DELEGATE_MUTANT, where the port's
+# THE MUTANT is a second build of the same source with -DREVENANT_DELEGATE_MUTANT, where the port's
 # completer hands the delegate the wrong argument. Everything else is identical, so a mutant that does
 # not go red means the comparison cannot see a wrong argument -- and the probe says so and fails,
 # because a green mutant is a comparison that decides nothing.
@@ -14,7 +14,7 @@ set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 port=${PORT:-$here/../../../../packages/a/apple-backports/MapKit}
-build=${MAPKIT_COMPLETER_BUILD:-$(runs_folder charon-mapkit-completer)}
+build=${MAPKIT_COMPLETER_BUILD:-$(runs_folder revenant-mapkit-completer)}
 query="a place that does not exist anywhere at all zzzzqqq"
 rm -rf "$build"
 mkdir -p "$build"
@@ -26,16 +26,16 @@ MACOSX_SDK=$(xcrun --sdk macosx --show-sdk-path)
 # MapKit headers include UIKit/UIImage.h. Without it the port's completer cannot be built for the
 # host at all, which was the first thing this probe found.
 TARGET="-target arm64-apple-ios17.0-macabi -isysroot $MACOSX_SDK -isystem $MACOSX_SDK/System/iOSSupport/usr/include -F $MACOSX_SDK/System/iOSSupport/System/Library/Frameworks"
-# CHARON_HOST_PROBE: the host's own MapKit declares the names the port also declares.
+# REVENANT_HOST_PROBE: the host's own MapKit declares the names the port also declares.
 # And ONLY the completer and its protocol are renamed: those are the two classes the PORT defines.
 # MKLocalSearchRequest and MKLocalSearchCompletion are real on the host, so the port's code uses the
 # host's own and renaming them away only left the linker looking for classes nobody has.
 build_port() {
     out=$1
     shift
-    xcrun clang -fobjc-arc -Wall -fPIC -dynamiclib $TARGET -DCHARON_HOST_PROBE=1 "$@" \
-        -DMKLocalSearchCompleter=charonHost_MKLocalSearchCompleter \
-        -DMKLocalSearchCompleterDelegate=charonHost_MKLocalSearchCompleterDelegate \
+    xcrun clang -fobjc-arc -Wall -fPIC -dynamiclib $TARGET -DREVENANT_HOST_PROBE=1 "$@" \
+        -DMKLocalSearchCompleter=revenantHost_MKLocalSearchCompleter \
+        -DMKLocalSearchCompleterDelegate=revenantHost_MKLocalSearchCompleterDelegate \
         -I"$port" -framework Foundation -framework MapKit -framework CoreLocation -framework UIKit \
         "$port/MKLocalSearchCompleter.m" "$port/MKLocalSearchRequest13.m" "$@" \
         -o "$out" 2> "$build/cc.log" || { grep -m5 ': error:' "$build/cc.log" || true; exit 1; }
@@ -53,8 +53,8 @@ transcript() {
     "$build/runner" "$1" "$query" > "$2" 2>&1 && true
 }
 transcript host "$build/host.txt"
-CHARON_PORT_DYLIB="$build/libport.dylib" transcript port "$build/port.txt"
-CHARON_PORT_DYLIB="$build/libport.dylib" CHARON_MUTANT=1 transcript port "$build/mutant.txt"
+REVENANT_PORT_DYLIB="$build/libport.dylib" transcript port "$build/port.txt"
+REVENANT_PORT_DYLIB="$build/libport.dylib" REVENANT_MUTANT=1 transcript port "$build/mutant.txt"
 
 # The two transcripts, with the first line's own identity removed so the comparison is about the
 # CALLS and not about which image each came from.
@@ -65,14 +65,14 @@ CHARON_PORT_DYLIB="$build/libport.dylib" CHARON_MUTANT=1 transcript port "$build
 # means the mutant silenced the thing it was built to exercise -- and a finding has to be printed.
 # The transcript's case lines, with the build's own header dropped and the per-call echo dropped.
 # Two things here are fixes rather than cosmetics:
-#   * the "charonHost_" the -D renames put into a class NAME is a build artefact, not a behaviour,
+#   * the "revenantHost_" the -D renames put into a class NAME is a build artefact, not a behaviour,
 #     so it is normalised away -- otherwise the port's own class can never equal the host's;
 #   * EVERY STEP TOLERATES AN EMPTY RESULT, with || true. A grep that selects nothing exits 1, the
 #     script runs under `set -e`, and the run ends there with no FAIL and no output at all. A mutant
 #     that records nothing is a FINDING -- it silenced the thing it was built to exercise -- and a
 #     finding has to be printed, not swallowed.
 strip() {
-    sed 's/charonHost_//g; 1d' "$1" |
+    sed 's/revenantHost_//g; 1d' "$1" |
         { grep -E '^  (call|transcript|#)' || true; } |
         sed 's/^  //' |
         { grep -v '^# [0-9]* call' || true; }

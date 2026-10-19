@@ -1,4 +1,4 @@
-#import "CharonMPS.h"
+#import "RevenantMPS.h"
 
 
 NSUInteger MPSStateBatchIncrementReadCount(NSArray<MPSState *> *batch, NSInteger amount)
@@ -78,12 +78,12 @@ NSUInteger MPSStateBatchResourceSize(NSArray<MPSState *> *batch)
     [_textures addObject:descriptor];
 }
 
-- (NSArray<NSNumber *> *)charon_mps_bufferSizes
+- (NSArray<NSNumber *> *)revenant_mps_bufferSizes
 {
     return _sizes;
 }
 
-- (NSArray<MTLTextureDescriptor *> *)charon_mps_textureDescriptors
+- (NSArray<MTLTextureDescriptor *> *)revenant_mps_textureDescriptors
 {
     return _textures;
 }

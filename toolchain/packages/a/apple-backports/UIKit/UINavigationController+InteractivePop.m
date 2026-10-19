@@ -1,15 +1,15 @@
 #import <UIKit/UIKit.h>
 #import <objc/runtime.h>
-#import "CharonCustomTransition.h"
+#import "RevenantCustomTransition.h"
 
-static const char charon_recognizer_key;
-static const char charon_state_key;
-static const char charon_gate_key;
+static const char revenant_recognizer_key;
+static const char revenant_state_key;
+static const char revenant_gate_key;
 
-@interface CharonEdgePopAnimator : NSObject <UIViewControllerAnimatedTransitioning>
+@interface RevenantEdgePopAnimator : NSObject <UIViewControllerAnimatedTransitioning>
 @end
 
-@implementation CharonEdgePopAnimator
+@implementation RevenantEdgePopAnimator
 
 - (NSTimeInterval)transitionDuration:(id<UIViewControllerContextTransitioning>)context
 {
@@ -52,31 +52,31 @@ static const char charon_gate_key;
 
 @end
 
-@interface CharonEdgePopState : NSObject
-@property (nonatomic, strong) CharonEdgePopAnimator *animator;
+@interface RevenantEdgePopState : NSObject
+@property (nonatomic, strong) RevenantEdgePopAnimator *animator;
 @property (nonatomic, strong) UIPercentDrivenInteractiveTransition *interactor;
 @end
 
-@implementation CharonEdgePopState
+@implementation RevenantEdgePopState
 @synthesize animator, interactor;
 @end
 
-id<UIViewControllerAnimatedTransitioning> charon_edge_pop_animator(UINavigationController *navigation)
+id<UIViewControllerAnimatedTransitioning> revenant_edge_pop_animator(UINavigationController *navigation)
 {
-    return [objc_getAssociatedObject(navigation, &charon_state_key) animator];
+    return [objc_getAssociatedObject(navigation, &revenant_state_key) animator];
 }
 
-id<UIViewControllerInteractiveTransitioning> charon_edge_pop_interactor(UINavigationController *navigation)
+id<UIViewControllerInteractiveTransitioning> revenant_edge_pop_interactor(UINavigationController *navigation)
 {
-    return [objc_getAssociatedObject(navigation, &charon_state_key) interactor];
+    return [objc_getAssociatedObject(navigation, &revenant_state_key) interactor];
 }
 
-@interface CharonEdgePopGate : NSObject <UIGestureRecognizerDelegate>
+@interface RevenantEdgePopGate : NSObject <UIGestureRecognizerDelegate>
 @property (nonatomic, weak) UINavigationController *navigation;
 - (void)edge:(UIScreenEdgePanGestureRecognizer *)recognizer;
 @end
 
-@implementation CharonEdgePopGate
+@implementation RevenantEdgePopGate
 @synthesize navigation;
 
 - (BOOL)gestureRecognizerShouldBegin:(UIGestureRecognizer *)recognizer
@@ -90,15 +90,15 @@ id<UIViewControllerInteractiveTransitioning> charon_edge_pop_interactor(UINaviga
     UINavigationController *navigation = self.navigation;
     CGFloat width = MAX(1, navigation.view.bounds.size.width);
     CGFloat progress = MIN(1, MAX(0, [recognizer translationInView:navigation.view].x / width));
-    CharonEdgePopState *state = objc_getAssociatedObject(navigation, &charon_state_key);
+    RevenantEdgePopState *state = objc_getAssociatedObject(navigation, &revenant_state_key);
     switch (recognizer.state) {
     case UIGestureRecognizerStateBegan: {
         if (navigation.viewControllers.count < 2 || state)
             return;
-        state = [[CharonEdgePopState alloc] init];
-        state.animator = [[CharonEdgePopAnimator alloc] init];
+        state = [[RevenantEdgePopState alloc] init];
+        state.animator = [[RevenantEdgePopAnimator alloc] init];
         state.interactor = [[UIPercentDrivenInteractiveTransition alloc] init];
-        objc_setAssociatedObject(navigation, &charon_state_key, state, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+        objc_setAssociatedObject(navigation, &revenant_state_key, state, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
         [navigation popViewControllerAnimated:YES];
         break;
     }
@@ -110,7 +110,7 @@ id<UIViewControllerInteractiveTransitioning> charon_edge_pop_interactor(UINaviga
     case UIGestureRecognizerStateFailed: {
         if (!state)
             return;
-        objc_setAssociatedObject(navigation, &charon_state_key, nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+        objc_setAssociatedObject(navigation, &revenant_state_key, nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
         BOOL finish = recognizer.state == UIGestureRecognizerStateEnded && (progress > 0.5f || [recognizer velocityInView:navigation.view].x > 300);
         if (finish)
             [state.interactor finishInteractiveTransition];
@@ -125,26 +125,26 @@ id<UIViewControllerInteractiveTransitioning> charon_edge_pop_interactor(UINaviga
 
 @end
 
-static UIScreenEdgePanGestureRecognizer *charon_install_recognizer(UINavigationController *navigation)
+static UIScreenEdgePanGestureRecognizer *revenant_install_recognizer(UINavigationController *navigation)
 {
-    UIScreenEdgePanGestureRecognizer *recognizer = objc_getAssociatedObject(navigation, &charon_recognizer_key);
+    UIScreenEdgePanGestureRecognizer *recognizer = objc_getAssociatedObject(navigation, &revenant_recognizer_key);
     if (recognizer || !navigation.isViewLoaded)
         return recognizer;
-    CharonEdgePopGate *gate = [[CharonEdgePopGate alloc] init];
+    RevenantEdgePopGate *gate = [[RevenantEdgePopGate alloc] init];
     gate.navigation = navigation;
     recognizer = [[UIScreenEdgePanGestureRecognizer alloc] initWithTarget:gate action:@selector(edge:)];
     recognizer.edges = UIRectEdgeLeft;
     recognizer.delegate = gate;
-    objc_setAssociatedObject(navigation, &charon_gate_key, gate, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-    objc_setAssociatedObject(navigation, &charon_recognizer_key, recognizer, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(navigation, &revenant_gate_key, gate, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(navigation, &revenant_recognizer_key, recognizer, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     [navigation.view addGestureRecognizer:recognizer];
     return recognizer;
 }
 
-@interface CharonEdgePopInstaller : NSObject
+@interface RevenantEdgePopInstaller : NSObject
 @end
 
-@implementation CharonEdgePopInstaller
+@implementation RevenantEdgePopInstaller
 
 + (void)load
 {
@@ -153,17 +153,17 @@ static UIScreenEdgePanGestureRecognizer *charon_install_recognizer(UINavigationC
     void (*original)(id, SEL) = (void (*)(id, SEL))method_getImplementation(method);
     class_replaceMethod(navigation, @selector(viewDidLoad), imp_implementationWithBlock(^(UINavigationController *self_) {
         original(self_, @selector(viewDidLoad));
-        charon_install_recognizer(self_);
+        revenant_install_recognizer(self_);
     }), method_getTypeEncoding(method));
 }
 
 @end
 
-@implementation UINavigationController (CharonInteractivePop)
+@implementation UINavigationController (RevenantInteractivePop)
 
 - (UIGestureRecognizer *)interactivePopGestureRecognizer
 {
-    return charon_install_recognizer(self);
+    return revenant_install_recognizer(self);
 }
 
 @end

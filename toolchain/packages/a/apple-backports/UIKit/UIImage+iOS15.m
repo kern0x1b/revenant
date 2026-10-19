@@ -1,8 +1,8 @@
-#import "CharonImageBaseline.h"
+#import "RevenantImageBaseline.h"
 
 #pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
 
-@implementation UIImage (CharonFifteen)
+@implementation UIImage (RevenantFifteen)
 
 - (UIImage *)imageByPreparingForDisplay
 {
@@ -35,7 +35,7 @@
         result = [result imageWithAlignmentRectInsets:alignmentInsets];
     if (self.renderingMode != UIImageRenderingModeAutomatic)
         result = [result imageWithRenderingMode:self.renderingMode];
-    charon_set_image_baseline(result, charon_image_baseline(self));
+    revenant_set_image_baseline(result, revenant_image_baseline(self));
     return result;
 }
 

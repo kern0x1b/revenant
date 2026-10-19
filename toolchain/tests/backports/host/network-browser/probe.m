@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define SERVICE_TYPE "_charon-browser-differential._tcp"
+#define SERVICE_TYPE "_revenant-browser-differential._tcp"
 #define SERVICE_PORT 45678
 #define DEADLINE 8.0
 
@@ -24,25 +24,25 @@ static void emit(const char *name, const char *value)
 typedef id NS_BROWSER;
 typedef id NS_DESCRIPTOR;
 typedef id NS_RESULT;
-extern NS_BROWSER charonhost_nw_browser_create(id, void *);
-extern void charonhost_nw_browser_set_queue(NS_BROWSER, dispatch_queue_t);
-extern void charonhost_nw_browser_set_browse_results_changed_handler(NS_BROWSER, void (^)(NS_RESULT, NS_RESULT, bool));
-extern void charonhost_nw_browser_set_state_changed_handler(NS_BROWSER, void (^)(int, void *));
-extern void charonhost_nw_browser_start(NS_BROWSER);
-extern void charonhost_nw_browser_cancel(NS_BROWSER);
-extern void charonhost_nw_browse_descriptor_set_include_txt_record(id, bool);
-extern id charonhost_nw_browse_descriptor_create_bonjour_service(const char *, const char *);
-extern id charonhost_nw_browse_result_copy_endpoint(NS_RESULT);
-extern id charonhost_nw_browse_result_copy_txt_record_object(NS_RESULT);
-extern size_t charonhost_nw_browse_result_get_interfaces_count(NS_RESULT);
-extern const char *charonhost_nw_browse_result_get_changes(NS_RESULT, NS_RESULT);
-extern const char *charonhost_nw_endpoint_get_type(id);
-extern const char *charonhost_nw_endpoint_get_bonjour_service_name(id);
-extern const char *charonhost_nw_endpoint_get_bonjour_service_type(id);
-extern const char *charonhost_nw_endpoint_get_bonjour_service_domain(id);
-extern uint16_t charonhost_nw_endpoint_get_port(id);
-extern size_t charonhost_nw_txt_record_get_key_count(id);
-extern bool charonhost_nw_txt_record_is_dictionary(id);
+extern NS_BROWSER revenanthost_nw_browser_create(id, void *);
+extern void revenanthost_nw_browser_set_queue(NS_BROWSER, dispatch_queue_t);
+extern void revenanthost_nw_browser_set_browse_results_changed_handler(NS_BROWSER, void (^)(NS_RESULT, NS_RESULT, bool));
+extern void revenanthost_nw_browser_set_state_changed_handler(NS_BROWSER, void (^)(int, void *));
+extern void revenanthost_nw_browser_start(NS_BROWSER);
+extern void revenanthost_nw_browser_cancel(NS_BROWSER);
+extern void revenanthost_nw_browse_descriptor_set_include_txt_record(id, bool);
+extern id revenanthost_nw_browse_descriptor_create_bonjour_service(const char *, const char *);
+extern id revenanthost_nw_browse_result_copy_endpoint(NS_RESULT);
+extern id revenanthost_nw_browse_result_copy_txt_record_object(NS_RESULT);
+extern size_t revenanthost_nw_browse_result_get_interfaces_count(NS_RESULT);
+extern const char *revenanthost_nw_browse_result_get_changes(NS_RESULT, NS_RESULT);
+extern const char *revenanthost_nw_endpoint_get_type(id);
+extern const char *revenanthost_nw_endpoint_get_bonjour_service_name(id);
+extern const char *revenanthost_nw_endpoint_get_bonjour_service_type(id);
+extern const char *revenanthost_nw_endpoint_get_bonjour_service_domain(id);
+extern uint16_t revenanthost_nw_endpoint_get_port(id);
+extern size_t revenanthost_nw_txt_record_get_key_count(id);
+extern bool revenanthost_nw_txt_record_is_dictionary(id);
 #endif
 
 static volatile int printed = 0;
@@ -67,8 +67,8 @@ static void report_result(id old_result, id new_result)
     nw_endpoint_t endpoint = nw_browse_result_copy_endpoint(new_result);
     nw_txt_record_t record = nw_browse_result_copy_txt_record_object(new_result);
 #else
-    id endpoint = charonhost_nw_browse_result_copy_endpoint(new_result);
-    id record = charonhost_nw_browse_result_copy_txt_record_object(new_result);
+    id endpoint = revenanthost_nw_browse_result_copy_endpoint(new_result);
+    id record = revenanthost_nw_browse_result_copy_txt_record_object(new_result);
 #endif
     char number[32];
     emit("found", "yes");
@@ -89,21 +89,21 @@ static void report_result(id old_result, id new_result)
     emit("interfaces.count", ([NSString stringWithFormat:@"%lu",
             (unsigned long)nw_browse_result_get_interfaces_count(new_result)].UTF8String));
 #else
-    snprintf(number, sizeof number, "%d", (int)charonhost_nw_endpoint_get_type(endpoint));
+    snprintf(number, sizeof number, "%d", (int)revenanthost_nw_endpoint_get_type(endpoint));
     emit("endpoint.type", number);
-    emit("endpoint.name", charonhost_nw_endpoint_get_bonjour_service_name(endpoint));
-    emit("endpoint.serviceType", charonhost_nw_endpoint_get_bonjour_service_type(endpoint));
-    emit("endpoint.domain", charonhost_nw_endpoint_get_bonjour_service_domain(endpoint));
+    emit("endpoint.name", revenanthost_nw_endpoint_get_bonjour_service_name(endpoint));
+    emit("endpoint.serviceType", revenanthost_nw_endpoint_get_bonjour_service_type(endpoint));
+    emit("endpoint.domain", revenanthost_nw_endpoint_get_bonjour_service_domain(endpoint));
     char port_text[16];
-    snprintf(port_text, sizeof port_text, "%u", charonhost_nw_endpoint_get_port(endpoint));
+    snprintf(port_text, sizeof port_text, "%u", revenanthost_nw_endpoint_get_port(endpoint));
     emit("endpoint.port", port_text);
     emit("record.keys", record ? ([NSString stringWithFormat:@"%lu",
-            (unsigned long)charonhost_nw_txt_record_get_key_count(record)].UTF8String) : "(nil)");
-    emit("record.isDictionary", record ? (charonhost_nw_txt_record_is_dictionary(record) ? "YES" : "NO") : "(nil)");
-    snprintf(number, sizeof number, "%llu", (unsigned long long)charonhost_nw_browse_result_get_changes(NULL, new_result));
+            (unsigned long)revenanthost_nw_txt_record_get_key_count(record)].UTF8String) : "(nil)");
+    emit("record.isDictionary", record ? (revenanthost_nw_txt_record_is_dictionary(record) ? "YES" : "NO") : "(nil)");
+    snprintf(number, sizeof number, "%llu", (unsigned long long)revenanthost_nw_browse_result_get_changes(NULL, new_result));
     emit("changes.added", number);
     emit("interfaces.count", ([NSString stringWithFormat:@"%lu",
-            (unsigned long)charonhost_nw_browse_result_get_interfaces_count(new_result)].UTF8String));
+            (unsigned long)revenanthost_nw_browse_result_get_interfaces_count(new_result)].UTF8String));
 #endif
     withdraw();
     exit(0);
@@ -120,7 +120,7 @@ int main(int argc, char *argv[])
     @autoreleasepool {
         const uint8_t txt[] = { 3, 'k', '=', 'v' };
         char name[64];
-        snprintf(name, sizeof name, "charon-diff-%d", (int)getpid());
+        snprintf(name, sizeof name, "revenant-diff-%d", (int)getpid());
         if (argc > 1 && argv[1][0])
             snprintf(name, sizeof name, "%s", argv[1]);
         DNSServiceErrorType failure = DNSServiceRegister(&registered, 0, 0, name, SERVICE_TYPE, "local.",
@@ -139,18 +139,18 @@ int main(int argc, char *argv[])
             ^(nw_browse_result_t o, nw_browse_result_t n, bool c) { (void)o; (void)c; report_result(o, n); });
         nw_browser_start(browser);
 #else
-        id descriptor = charonhost_nw_browse_descriptor_create_bonjour_service(SERVICE_TYPE, "local.");
-        charonhost_nw_browse_descriptor_set_include_txt_record(descriptor, true);
-        NS_BROWSER browser = charonhost_nw_browser_create(descriptor, NULL);
-        charonhost_nw_browser_set_queue(browser, dispatch_get_main_queue());
-        charonhost_nw_browser_set_browse_results_changed_handler(browser,
+        id descriptor = revenanthost_nw_browse_descriptor_create_bonjour_service(SERVICE_TYPE, "local.");
+        revenanthost_nw_browse_descriptor_set_include_txt_record(descriptor, true);
+        NS_BROWSER browser = revenanthost_nw_browser_create(descriptor, NULL);
+        revenanthost_nw_browser_set_queue(browser, dispatch_get_main_queue());
+        revenanthost_nw_browser_set_browse_results_changed_handler(browser,
             ^(NS_RESULT o, NS_RESULT n, bool c) { (void)o; (void)c; report_result(o, n); });
-        charonhost_nw_browser_set_state_changed_handler(browser, ^(int state, void *error) {
+        revenanthost_nw_browser_set_state_changed_handler(browser, ^(int state, void *error) {
             char line[64];
             snprintf(line, sizeof line, "state.%d", state);
             emit(line, error ? "an error" : "no error");
         });
-        charonhost_nw_browser_start(browser);
+        revenanthost_nw_browser_start(browser);
 #endif
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(DEADLINE * NSEC_PER_SEC)),
                        dispatch_get_main_queue(), ^{

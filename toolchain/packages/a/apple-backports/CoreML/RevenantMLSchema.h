@@ -1,31 +1,31 @@
-#ifndef CHARON_ML_SCHEMA_H
-#define CHARON_ML_SCHEMA_H
+#ifndef REVENANT_ML_SCHEMA_H
+#define REVENANT_ML_SCHEMA_H
 
 enum {
-    CHARON_ML_FIELD_NONE = 0,
-    CHARON_ML_KIND_DOUBLE,
-    CHARON_ML_KIND_FLOAT,
-    CHARON_ML_KIND_INT64,
-    CHARON_ML_KIND_UINT64,
-    CHARON_ML_KIND_INT32,
-    CHARON_ML_KIND_FIXED64,
-    CHARON_ML_KIND_FIXED32,
-    CHARON_ML_KIND_BOOL,
-    CHARON_ML_KIND_STRING,
-    CHARON_ML_KIND_BYTES,
-    CHARON_ML_KIND_MESSAGE,
-    CHARON_ML_KIND_UINT32,
-    CHARON_ML_KIND_ENUM,
-    CHARON_ML_KIND_SFIXED32,
-    CHARON_ML_KIND_SFIXED64,
-    CHARON_ML_KIND_SINT32,
-    CHARON_ML_KIND_SINT64
+    REVENANT_ML_FIELD_NONE = 0,
+    REVENANT_ML_KIND_DOUBLE,
+    REVENANT_ML_KIND_FLOAT,
+    REVENANT_ML_KIND_INT64,
+    REVENANT_ML_KIND_UINT64,
+    REVENANT_ML_KIND_INT32,
+    REVENANT_ML_KIND_FIXED64,
+    REVENANT_ML_KIND_FIXED32,
+    REVENANT_ML_KIND_BOOL,
+    REVENANT_ML_KIND_STRING,
+    REVENANT_ML_KIND_BYTES,
+    REVENANT_ML_KIND_MESSAGE,
+    REVENANT_ML_KIND_UINT32,
+    REVENANT_ML_KIND_ENUM,
+    REVENANT_ML_KIND_SFIXED32,
+    REVENANT_ML_KIND_SFIXED64,
+    REVENANT_ML_KIND_SINT32,
+    REVENANT_ML_KIND_SINT64
 };
 
-enum { CHARON_ML_WIRE_VARINT = 0, CHARON_ML_WIRE_64 = 1, CHARON_ML_WIRE_STRING = 2, CHARON_ML_WIRE_32 = 5 };
+enum { REVENANT_ML_WIRE_VARINT = 0, REVENANT_ML_WIRE_64 = 1, REVENANT_ML_WIRE_STRING = 2, REVENANT_ML_WIRE_32 = 5 };
 
-#define CHARON_ML_REPEATED 0x1u
-#define CHARON_ML_ONEOF(index) (0x2u * (unsigned)(index) + 2u)
+#define REVENANT_ML_REPEATED 0x1u
+#define REVENANT_ML_ONEOF(index) (0x2u * (unsigned)(index) + 2u)
 
 typedef struct {
     const char *name;
@@ -35,23 +35,23 @@ typedef struct {
     int element;
     const char *type;
     unsigned flags;
-} charon_ml_field;
+} revenant_ml_field;
 
 typedef struct {
     const char *name;
     int first;
     int count;
-} charon_ml_message;
+} revenant_ml_message;
 
-extern const charon_ml_field charon_ml_fields[];
-extern const charon_ml_message charon_ml_messages[];
-extern const unsigned charon_ml_message_count;
-extern const unsigned charon_ml_field_count;
+extern const revenant_ml_field revenant_ml_fields[];
+extern const revenant_ml_message revenant_ml_messages[];
+extern const unsigned revenant_ml_message_count;
+extern const unsigned revenant_ml_field_count;
 
-const charon_ml_message *charon_ml_message_named(const char *name);
+const revenant_ml_message *revenant_ml_message_named(const char *name);
 
-const charon_ml_field *charon_ml_field_named(const charon_ml_message *message, int number);
+const revenant_ml_field *revenant_ml_field_named(const revenant_ml_message *message, int number);
 
-const charon_ml_field *charon_ml_field_named_str(const charon_ml_message *message, const char *name);
+const revenant_ml_field *revenant_ml_field_named_str(const revenant_ml_message *message, const char *name);
 
 #endif

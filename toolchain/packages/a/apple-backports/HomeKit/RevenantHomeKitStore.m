@@ -1,18 +1,18 @@
-#import "CharonHomeKitStore.h"
+#import "RevenantHomeKitStore.h"
 #include <stdio.h>
 
-@implementation CharonHomeKitStore {
+@implementation RevenantHomeKitStore {
     NSMutableDictionary *_tables;
     NSMutableSet *_loaded;
     NSObject *_lock;
 }
 
-+ (CharonHomeKitStore *)shared
++ (RevenantHomeKitStore *)shared
 {
-    static CharonHomeKitStore *shared;
+    static RevenantHomeKitStore *shared;
     static dispatch_once_t once;
     dispatch_once(&once, ^{
-        shared = [[CharonHomeKitStore alloc] init];
+        shared = [[RevenantHomeKitStore alloc] init];
     });
     return shared;
 }
@@ -34,7 +34,7 @@
     NSString *base = directories.firstObject;
     if (!base)
         base = NSTemporaryDirectory();
-    return [base stringByAppendingPathComponent:@"org.charon.homekit"];
+    return [base stringByAppendingPathComponent:@"org.revenant.homekit"];
 }
 
 - (NSString *)pathForTable:(NSString *)name
@@ -70,39 +70,39 @@
             return;
         NSError *error = nil;
         if (![[NSFileManager defaultManager] createDirectoryAtPath:self.root withIntermediateDirectories:YES attributes:nil error:&error]) {
-            charon_homekit_once([NSString stringWithFormat:@"homekit store: cannot create %s: %@", self.root.UTF8String, error.localizedDescription]);
+            revenant_homekit_once([NSString stringWithFormat:@"homekit store: cannot create %s: %@", self.root.UTF8String, error.localizedDescription]);
             return;
         }
         NSData *data = [NSPropertyListSerialization dataWithPropertyList:_tables[name] format:NSPropertyListBinaryFormat_v1_0
                                                                  options:0 error:&error];
         if (!data) {
-            charon_homekit_once([NSString stringWithFormat:@"homekit store: cannot serialize %@: %@", name, error.localizedDescription]);
+            revenant_homekit_once([NSString stringWithFormat:@"homekit store: cannot serialize %@: %@", name, error.localizedDescription]);
             return;
         }
         if (![data writeToFile:[self pathForTable:name] atomically:YES]) {
-            charon_homekit_once([NSString stringWithFormat:@"homekit store: cannot write the %@ table", name]);
+            revenant_homekit_once([NSString stringWithFormat:@"homekit store: cannot write the %@ table", name]);
         }
     }
 }
 
 @end
 
-NSUUID *CharonHomeKitUUID(NSString *identifier)
+NSUUID *RevenantHomeKitUUID(NSString *identifier)
 {
     return identifier ? [[NSUUID alloc] initWithUUIDString:identifier] : nil;
 }
 
-NSString *CharonHomeKitUUIDString(NSUUID *identifier)
+NSString *RevenantHomeKitUUIDString(NSUUID *identifier)
 {
     return identifier ? [identifier UUIDString] : nil;
 }
 
-NSString *CharonHomeKitNewIdentifier(void)
+NSString *RevenantHomeKitNewIdentifier(void)
 {
     return [[[NSUUID UUID] UUIDString] uppercaseString];
 }
 
-static void charon_homekit_once_impl(NSString *message)
+static void revenant_homekit_once_impl(NSString *message)
 {
     static NSMutableSet *printed;
     static dispatch_once_t once;
@@ -113,11 +113,11 @@ static void charon_homekit_once_impl(NSString *message)
         if ([printed containsObject:message])
             return;
         [printed addObject:message];
-        fprintf(stderr, "[charon.homekit] %s\n", message.UTF8String);
+        fprintf(stderr, "[revenant.homekit] %s\n", message.UTF8String);
     }
 }
 
-void charon_homekit_once(NSString *message)
+void revenant_homekit_once(NSString *message)
 {
-    charon_homekit_once_impl(message);
+    revenant_homekit_once_impl(message);
 }

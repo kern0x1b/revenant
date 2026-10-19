@@ -10,7 +10,7 @@
       "reason": "the port's minimum release has no class of this name - iOS 6.1.3 exports no _OBJC_CLASS_$_AVMetricContentKeyRequestEvent at all - and every other release of the surface this port carries is absent with it, because none of them exists below 18.0",
       "effect": "the class resolves and every member the SDK 26.2 header declares on it answers; this port constructs none of these events, because nothing on iOS 6.1.3 reports metrics - the readers below answer the header's own empty values, which are real answers and not placeholders: date is the moment the instance was created, mediaTime is CMTimeMake(0, 1) because this port observes no media time, and every object-typed member is nil",
       "facts": "facts/AVFoundation/Metrics.md",
-      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into RevenantAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
     },
     {
       "api": "AVMetricErrorEvent",
@@ -21,7 +21,7 @@
       "reason": "the port's minimum release has no class of this name - iOS 6.1.3 exports no _OBJC_CLASS_$_AVMetricErrorEvent at all - and every other release of the surface this port carries is absent with it, because none of them exists below 18.0",
       "effect": "the class resolves and every member the SDK 26.2 header declares on it answers; this port constructs none of these events, because nothing on iOS 6.1.3 reports metrics - the readers below answer the header's own empty values, which are real answers and not placeholders: date is the moment the instance was created, mediaTime is CMTimeMake(0, 1) because this port observes no media time, and every object-typed member is nil",
       "facts": "facts/AVFoundation/Metrics.md",
-      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into RevenantAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
     },
     {
       "api": "AVMetricEvent",
@@ -32,7 +32,7 @@
       "reason": "the port's minimum release has no class of this name - iOS 6.1.3 exports no _OBJC_CLASS_$_AVMetricEvent at all - and every other release of the surface this port carries is absent with it, because none of them exists below 18.0",
       "effect": "the class resolves and every member the SDK 26.2 header declares on it answers; this port constructs none of these events, because nothing on iOS 6.1.3 reports metrics - the readers below answer the header's own empty values, which are real answers and not placeholders: date is the moment the instance was created, mediaTime is CMTimeMake(0, 1) because this port observes no media time, and every object-typed member is nil",
       "facts": "facts/AVFoundation/Metrics.md",
-      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into RevenantAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
     },
     {
       "api": "AVMetricEventStream",
@@ -43,7 +43,7 @@
       "reason": "the port's minimum release has no class of this name - iOS 6.1.3 exports no _OBJC_CLASS_$_AVMetricEventStream at all - and every other release of the surface this port carries is absent with it, because none of them exists below 18.0",
       "effect": "the class resolves and every member the SDK 26.2 header declares on it answers; this port constructs none of these events, because nothing on iOS 6.1.3 reports metrics - the readers below answer the header's own empty values, which are real answers and not placeholders: date is the moment the instance was created, mediaTime is CMTimeMake(0, 1) because this port observes no media time, and every object-typed member is nil",
       "facts": "facts/AVFoundation/Metrics.md",
-      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into RevenantAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
     },
     {
       "api": "AVMetricHLSMediaSegmentRequestEvent",
@@ -54,7 +54,7 @@
       "reason": "the port's minimum release has no class of this name - iOS 6.1.3 exports no _OBJC_CLASS_$_AVMetricHLSMediaSegmentRequestEvent at all - and every other release of the surface this port carries is absent with it, because none of them exists below 18.0",
       "effect": "the class resolves and every member the SDK 26.2 header declares on it answers; this port constructs none of these events, because nothing on iOS 6.1.3 reports metrics - the readers below answer the header's own empty values, which are real answers and not placeholders: date is the moment the instance was created, mediaTime is CMTimeMake(0, 1) because this port observes no media time, and every object-typed member is nil",
       "facts": "facts/AVFoundation/Metrics.md",
-      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into RevenantAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
     },
     {
       "api": "AVMetricHLSPlaylistRequestEvent",
@@ -65,7 +65,7 @@
       "reason": "the port's minimum release has no class of this name - iOS 6.1.3 exports no _OBJC_CLASS_$_AVMetricHLSPlaylistRequestEvent at all - and every other release of the surface this port carries is absent with it, because none of them exists below 18.0",
       "effect": "the class resolves and every member the SDK 26.2 header declares on it answers; this port constructs none of these events, because nothing on iOS 6.1.3 reports metrics - the readers below answer the header's own empty values, which are real answers and not placeholders: date is the moment the instance was created, mediaTime is CMTimeMake(0, 1) because this port observes no media time, and every object-typed member is nil",
       "facts": "facts/AVFoundation/Metrics.md",
-      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into RevenantAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
     },
     {
       "api": "AVMetricMediaResourceRequestEvent",
@@ -76,7 +76,7 @@
       "reason": "the port's minimum release has no class of this name - iOS 6.1.3 exports no _OBJC_CLASS_$_AVMetricMediaResourceRequestEvent at all - and every other release of the surface this port carries is absent with it, because none of them exists below 18.0",
       "effect": "the class resolves and every member the SDK 26.2 header declares on it answers; this port constructs none of these events, because nothing on iOS 6.1.3 reports metrics - the readers below answer the header's own empty values, which are real answers and not placeholders: date is the moment the instance was created, mediaTime is CMTimeMake(0, 1) because this port observes no media time, and every object-typed member is nil",
       "facts": "facts/AVFoundation/Metrics.md",
-      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into RevenantAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
     },
     {
       "api": "AVMetricPlayerItemInitialLikelyToKeepUpEvent",
@@ -87,7 +87,7 @@
       "reason": "the port's minimum release has no class of this name - iOS 6.1.3 exports no _OBJC_CLASS_$_AVMetricPlayerItemInitialLikelyToKeepUpEvent at all - and every other release of the surface this port carries is absent with it, because none of them exists below 18.0",
       "effect": "the class resolves and every member the SDK 26.2 header declares on it answers; this port constructs none of these events, because nothing on iOS 6.1.3 reports metrics - the readers below answer the header's own empty values, which are real answers and not placeholders: date is the moment the instance was created, mediaTime is CMTimeMake(0, 1) because this port observes no media time, and every object-typed member is nil",
       "facts": "facts/AVFoundation/Metrics.md",
-      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into RevenantAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
     },
     {
       "api": "AVMetricPlayerItemLikelyToKeepUpEvent",
@@ -98,7 +98,7 @@
       "reason": "the port's minimum release has no class of this name - iOS 6.1.3 exports no _OBJC_CLASS_$_AVMetricPlayerItemLikelyToKeepUpEvent at all - and every other release of the surface this port carries is absent with it, because none of them exists below 18.0",
       "effect": "the class resolves and every member the SDK 26.2 header declares on it answers; this port constructs none of these events, because nothing on iOS 6.1.3 reports metrics - the readers below answer the header's own empty values, which are real answers and not placeholders: date is the moment the instance was created, mediaTime is CMTimeMake(0, 1) because this port observes no media time, and every object-typed member is nil",
       "facts": "facts/AVFoundation/Metrics.md",
-      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into RevenantAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
     },
     {
       "api": "AVMetricPlayerItemPlaybackSummaryEvent",
@@ -109,7 +109,7 @@
       "reason": "the port's minimum release has no class of this name - iOS 6.1.3 exports no _OBJC_CLASS_$_AVMetricPlayerItemPlaybackSummaryEvent at all - and every other release of the surface this port carries is absent with it, because none of them exists below 18.0",
       "effect": "the class resolves and every member the SDK 26.2 header declares on it answers; this port constructs none of these events, because nothing on iOS 6.1.3 reports metrics - the readers below answer the header's own empty values, which are real answers and not placeholders: date is the moment the instance was created, mediaTime is CMTimeMake(0, 1) because this port observes no media time, and every object-typed member is nil",
       "facts": "facts/AVFoundation/Metrics.md",
-      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into RevenantAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
     },
     {
       "api": "AVMetricPlayerItemRateChangeEvent",
@@ -120,7 +120,7 @@
       "reason": "the port's minimum release has no class of this name - iOS 6.1.3 exports no _OBJC_CLASS_$_AVMetricPlayerItemRateChangeEvent at all - and every other release of the surface this port carries is absent with it, because none of them exists below 18.0",
       "effect": "the class resolves and every member the SDK 26.2 header declares on it answers; this port constructs none of these events, because nothing on iOS 6.1.3 reports metrics - the readers below answer the header's own empty values, which are real answers and not placeholders: date is the moment the instance was created, mediaTime is CMTimeMake(0, 1) because this port observes no media time, and every object-typed member is nil",
       "facts": "facts/AVFoundation/Metrics.md",
-      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into RevenantAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
     },
     {
       "api": "AVMetricPlayerItemSeekDidCompleteEvent",
@@ -131,7 +131,7 @@
       "reason": "the port's minimum release has no class of this name - iOS 6.1.3 exports no _OBJC_CLASS_$_AVMetricPlayerItemSeekDidCompleteEvent at all - and every other release of the surface this port carries is absent with it, because none of them exists below 18.0",
       "effect": "the class resolves and every member the SDK 26.2 header declares on it answers; this port constructs none of these events, because nothing on iOS 6.1.3 reports metrics - the readers below answer the header's own empty values, which are real answers and not placeholders: date is the moment the instance was created, mediaTime is CMTimeMake(0, 1) because this port observes no media time, and every object-typed member is nil",
       "facts": "facts/AVFoundation/Metrics.md",
-      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into RevenantAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
     },
     {
       "api": "AVMetricPlayerItemSeekEvent",
@@ -142,7 +142,7 @@
       "reason": "the port's minimum release has no class of this name - iOS 6.1.3 exports no _OBJC_CLASS_$_AVMetricPlayerItemSeekEvent at all - and every other release of the surface this port carries is absent with it, because none of them exists below 18.0",
       "effect": "the class resolves and every member the SDK 26.2 header declares on it answers; this port constructs none of these events, because nothing on iOS 6.1.3 reports metrics - the readers below answer the header's own empty values, which are real answers and not placeholders: date is the moment the instance was created, mediaTime is CMTimeMake(0, 1) because this port observes no media time, and every object-typed member is nil",
       "facts": "facts/AVFoundation/Metrics.md",
-      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into RevenantAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
     },
     {
       "api": "AVMetricPlayerItemStallEvent",
@@ -153,7 +153,7 @@
       "reason": "the port's minimum release has no class of this name - iOS 6.1.3 exports no _OBJC_CLASS_$_AVMetricPlayerItemStallEvent at all - and every other release of the surface this port carries is absent with it, because none of them exists below 18.0",
       "effect": "the class resolves and every member the SDK 26.2 header declares on it answers; this port constructs none of these events, because nothing on iOS 6.1.3 reports metrics - the readers below answer the header's own empty values, which are real answers and not placeholders: date is the moment the instance was created, mediaTime is CMTimeMake(0, 1) because this port observes no media time, and every object-typed member is nil",
       "facts": "facts/AVFoundation/Metrics.md",
-      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into RevenantAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
     },
     {
       "api": "AVMetricPlayerItemVariantSwitchEvent",
@@ -164,7 +164,7 @@
       "reason": "the port's minimum release has no class of this name - iOS 6.1.3 exports no _OBJC_CLASS_$_AVMetricPlayerItemVariantSwitchEvent at all - and every other release of the surface this port carries is absent with it, because none of them exists below 18.0",
       "effect": "the class resolves and every member the SDK 26.2 header declares on it answers; this port constructs none of these events, because nothing on iOS 6.1.3 reports metrics - the readers below answer the header's own empty values, which are real answers and not placeholders: date is the moment the instance was created, mediaTime is CMTimeMake(0, 1) because this port observes no media time, and every object-typed member is nil",
       "facts": "facts/AVFoundation/Metrics.md",
-      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into RevenantAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
     },
     {
       "api": "AVMetricPlayerItemVariantSwitchStartEvent",
@@ -175,7 +175,7 @@
       "reason": "the port's minimum release has no class of this name - iOS 6.1.3 exports no _OBJC_CLASS_$_AVMetricPlayerItemVariantSwitchStartEvent at all - and every other release of the surface this port carries is absent with it, because none of them exists below 18.0",
       "effect": "the class resolves and every member the SDK 26.2 header declares on it answers; this port constructs none of these events, because nothing on iOS 6.1.3 reports metrics - the readers below answer the header's own empty values, which are real answers and not placeholders: date is the moment the instance was created, mediaTime is CMTimeMake(0, 1) because this port observes no media time, and every object-typed member is nil",
       "facts": "facts/AVFoundation/Metrics.md",
-      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into RevenantAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
     },
     {
       "api": "+[AVMetricContentKeyRequestEvent new]",
@@ -186,7 +186,7 @@
       "reason": "the port's minimum release has no class of this name, so the inherited NSObject answer is not reachable through it; the class exists here, so it is",
       "effect": "the inherited NSObject answer: a freshly allocated instance with every member at the empty value its header describes. The header marks it AV_INIT_UNAVAILABLE, so an application written against a newer SDK cannot reach it either",
       "facts": "facts/AVFoundation/Metrics.md",
-      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into RevenantAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
     },
     {
       "api": "+[AVMetricErrorEvent new]",
@@ -197,7 +197,7 @@
       "reason": "the port's minimum release has no class of this name, so the inherited NSObject answer is not reachable through it; the class exists here, so it is",
       "effect": "the inherited NSObject answer: a freshly allocated instance with every member at the empty value its header describes. The header marks it AV_INIT_UNAVAILABLE, so an application written against a newer SDK cannot reach it either",
       "facts": "facts/AVFoundation/Metrics.md",
-      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into RevenantAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
     },
     {
       "api": "+[AVMetricEvent new]",
@@ -208,7 +208,7 @@
       "reason": "the port's minimum release has no class of this name, so the inherited NSObject answer is not reachable through it; the class exists here, so it is",
       "effect": "the inherited NSObject answer: a freshly allocated instance with every member at the empty value its header describes. The header marks it AV_INIT_UNAVAILABLE, so an application written against a newer SDK cannot reach it either",
       "facts": "facts/AVFoundation/Metrics.md",
-      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into RevenantAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
     },
     {
       "api": "+[AVMetricEventStream eventStream]",
@@ -219,7 +219,7 @@
       "reason": "the port's minimum release has no class of this name, so the inherited NSObject answer is not reachable through it; the class exists here, so it is",
       "effect": "+eventStream answers a stream with no publisher, no subscriber and an empty subscription set, which is a working stream; +new and -init answer the inherited NSObject behaviour",
       "facts": "facts/AVFoundation/Metrics.md",
-      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into RevenantAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
     },
     {
       "api": "+[AVMetricEventStream new]",
@@ -230,7 +230,7 @@
       "reason": "the port's minimum release has no class of this name, so the inherited NSObject answer is not reachable through it; the class exists here, so it is",
       "effect": "the inherited NSObject answer: a freshly allocated instance with every member at the empty value its header describes. The header marks it AV_INIT_UNAVAILABLE, so an application written against a newer SDK cannot reach it either",
       "facts": "facts/AVFoundation/Metrics.md",
-      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into RevenantAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
     },
     {
       "api": "+[AVMetricHLSMediaSegmentRequestEvent new]",
@@ -241,7 +241,7 @@
       "reason": "the port's minimum release has no class of this name, so the inherited NSObject answer is not reachable through it; the class exists here, so it is",
       "effect": "the inherited NSObject answer: a freshly allocated instance with every member at the empty value its header describes. The header marks it AV_INIT_UNAVAILABLE, so an application written against a newer SDK cannot reach it either",
       "facts": "facts/AVFoundation/Metrics.md",
-      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into RevenantAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
     },
     {
       "api": "+[AVMetricHLSPlaylistRequestEvent new]",
@@ -252,7 +252,7 @@
       "reason": "the port's minimum release has no class of this name, so the inherited NSObject answer is not reachable through it; the class exists here, so it is",
       "effect": "the inherited NSObject answer: a freshly allocated instance with every member at the empty value its header describes. The header marks it AV_INIT_UNAVAILABLE, so an application written against a newer SDK cannot reach it either",
       "facts": "facts/AVFoundation/Metrics.md",
-      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into RevenantAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
     },
     {
       "api": "+[AVMetricMediaResourceRequestEvent new]",
@@ -263,7 +263,7 @@
       "reason": "the port's minimum release has no class of this name, so the inherited NSObject answer is not reachable through it; the class exists here, so it is",
       "effect": "the inherited NSObject answer: a freshly allocated instance with every member at the empty value its header describes. The header marks it AV_INIT_UNAVAILABLE, so an application written against a newer SDK cannot reach it either",
       "facts": "facts/AVFoundation/Metrics.md",
-      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into RevenantAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
     },
     {
       "api": "+[AVMetricPlayerItemInitialLikelyToKeepUpEvent new]",
@@ -274,7 +274,7 @@
       "reason": "the port's minimum release has no class of this name, so the inherited NSObject answer is not reachable through it; the class exists here, so it is",
       "effect": "the inherited NSObject answer: a freshly allocated instance with every member at the empty value its header describes. The header marks it AV_INIT_UNAVAILABLE, so an application written against a newer SDK cannot reach it either",
       "facts": "facts/AVFoundation/Metrics.md",
-      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into RevenantAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
     },
     {
       "api": "+[AVMetricPlayerItemLikelyToKeepUpEvent new]",
@@ -285,7 +285,7 @@
       "reason": "the port's minimum release has no class of this name, so the inherited NSObject answer is not reachable through it; the class exists here, so it is",
       "effect": "the inherited NSObject answer: a freshly allocated instance with every member at the empty value its header describes. The header marks it AV_INIT_UNAVAILABLE, so an application written against a newer SDK cannot reach it either",
       "facts": "facts/AVFoundation/Metrics.md",
-      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into RevenantAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
     },
     {
       "api": "+[AVMetricPlayerItemPlaybackSummaryEvent new]",
@@ -296,7 +296,7 @@
       "reason": "the port's minimum release has no class of this name, so the inherited NSObject answer is not reachable through it; the class exists here, so it is",
       "effect": "the inherited NSObject answer: a freshly allocated instance with every member at the empty value its header describes. The header marks it AV_INIT_UNAVAILABLE, so an application written against a newer SDK cannot reach it either",
       "facts": "facts/AVFoundation/Metrics.md",
-      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into RevenantAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
     },
     {
       "api": "+[AVMetricPlayerItemRateChangeEvent new]",
@@ -307,7 +307,7 @@
       "reason": "the port's minimum release has no class of this name, so the inherited NSObject answer is not reachable through it; the class exists here, so it is",
       "effect": "the inherited NSObject answer: a freshly allocated instance with every member at the empty value its header describes. The header marks it AV_INIT_UNAVAILABLE, so an application written against a newer SDK cannot reach it either",
       "facts": "facts/AVFoundation/Metrics.md",
-      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into RevenantAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
     },
     {
       "api": "+[AVMetricPlayerItemSeekDidCompleteEvent new]",
@@ -318,7 +318,7 @@
       "reason": "the port's minimum release has no class of this name, so the inherited NSObject answer is not reachable through it; the class exists here, so it is",
       "effect": "the inherited NSObject answer: a freshly allocated instance with every member at the empty value its header describes. The header marks it AV_INIT_UNAVAILABLE, so an application written against a newer SDK cannot reach it either",
       "facts": "facts/AVFoundation/Metrics.md",
-      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into RevenantAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
     },
     {
       "api": "+[AVMetricPlayerItemSeekEvent new]",
@@ -329,7 +329,7 @@
       "reason": "the port's minimum release has no class of this name, so the inherited NSObject answer is not reachable through it; the class exists here, so it is",
       "effect": "the inherited NSObject answer: a freshly allocated instance with every member at the empty value its header describes. The header marks it AV_INIT_UNAVAILABLE, so an application written against a newer SDK cannot reach it either",
       "facts": "facts/AVFoundation/Metrics.md",
-      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into RevenantAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
     },
     {
       "api": "+[AVMetricPlayerItemStallEvent new]",
@@ -340,7 +340,7 @@
       "reason": "the port's minimum release has no class of this name, so the inherited NSObject answer is not reachable through it; the class exists here, so it is",
       "effect": "the inherited NSObject answer: a freshly allocated instance with every member at the empty value its header describes. The header marks it AV_INIT_UNAVAILABLE, so an application written against a newer SDK cannot reach it either",
       "facts": "facts/AVFoundation/Metrics.md",
-      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into RevenantAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
     },
     {
       "api": "+[AVMetricPlayerItemVariantSwitchEvent new]",
@@ -351,7 +351,7 @@
       "reason": "the port's minimum release has no class of this name, so the inherited NSObject answer is not reachable through it; the class exists here, so it is",
       "effect": "the inherited NSObject answer: a freshly allocated instance with every member at the empty value its header describes. The header marks it AV_INIT_UNAVAILABLE, so an application written against a newer SDK cannot reach it either",
       "facts": "facts/AVFoundation/Metrics.md",
-      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into RevenantAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
     },
     {
       "api": "+[AVMetricPlayerItemVariantSwitchStartEvent new]",
@@ -362,7 +362,7 @@
       "reason": "the port's minimum release has no class of this name, so the inherited NSObject answer is not reachable through it; the class exists here, so it is",
       "effect": "the inherited NSObject answer: a freshly allocated instance with every member at the empty value its header describes. The header marks it AV_INIT_UNAVAILABLE, so an application written against a newer SDK cannot reach it either",
       "facts": "facts/AVFoundation/Metrics.md",
-      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into RevenantAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
     },
     {
       "api": "-[AVMetricContentKeyRequestEvent init]",
@@ -373,7 +373,7 @@
       "reason": "the port's minimum release has no class of this name, so the inherited NSObject answer is not reachable through it; the class exists here, so it is",
       "effect": "the inherited NSObject answer: a freshly allocated instance with every member at the empty value its header describes. The header marks it AV_INIT_UNAVAILABLE, so an application written against a newer SDK cannot reach it either",
       "facts": "facts/AVFoundation/Metrics.md",
-      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into RevenantAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
     },
     {
       "api": "-[AVMetricErrorEvent init]",
@@ -384,7 +384,7 @@
       "reason": "the port's minimum release has no class of this name, so the inherited NSObject answer is not reachable through it; the class exists here, so it is",
       "effect": "the inherited NSObject answer: a freshly allocated instance with every member at the empty value its header describes. The header marks it AV_INIT_UNAVAILABLE, so an application written against a newer SDK cannot reach it either",
       "facts": "facts/AVFoundation/Metrics.md",
-      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into RevenantAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
     },
     {
       "api": "-[AVMetricEvent init]",
@@ -395,7 +395,7 @@
       "reason": "the port's minimum release has no class of this name, so the inherited NSObject answer is not reachable through it; the class exists here, so it is",
       "effect": "the inherited NSObject answer: a freshly allocated instance with every member at the empty value its header describes. The header marks it AV_INIT_UNAVAILABLE, so an application written against a newer SDK cannot reach it either",
       "facts": "facts/AVFoundation/Metrics.md",
-      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into RevenantAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
     },
     {
       "api": "-[AVMetricEventStream addPublisher:]",
@@ -406,7 +406,7 @@
       "reason": "the port's minimum release has no AVMetricEventStream at all - the whole metric surface arrived at iOS 18 - so an application that names it cannot link",
       "effect": "the stream keeps the publishers it was given, the subscriber and its queue, and the set of event classes the caller subscribed to, and it delivers nothing: on this port's minimum release nothing reports metrics. The publisher protocol has no method at all in 26.2, so there is no call to hand an event in, and no AVPlayerItem on iOS 6.1.3 raises any of the notifications these events are built from. That is a real limit of the release, stated rather than hidden behind a stub",
       "facts": "facts/AVFoundation/Metrics.md",
-      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into RevenantAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
     },
     {
       "api": "-[AVMetricEventStream init]",
@@ -417,7 +417,7 @@
       "reason": "the port's minimum release has no class of this name, so the inherited NSObject answer is not reachable through it; the class exists here, so it is",
       "effect": "the inherited NSObject answer: a freshly allocated instance with every member at the empty value its header describes. The header marks it AV_INIT_UNAVAILABLE, so an application written against a newer SDK cannot reach it either",
       "facts": "facts/AVFoundation/Metrics.md",
-      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into RevenantAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
     },
     {
       "api": "-[AVMetricEventStream setSubscriber:queue:]",
@@ -428,7 +428,7 @@
       "reason": "the port's minimum release has no AVMetricEventStream at all - the whole metric surface arrived at iOS 18 - so an application that names it cannot link",
       "effect": "the stream keeps the publishers it was given, the subscriber and its queue, and the set of event classes the caller subscribed to, and it delivers nothing: on this port's minimum release nothing reports metrics. The publisher protocol has no method at all in 26.2, so there is no call to hand an event in, and no AVPlayerItem on iOS 6.1.3 raises any of the notifications these events are built from. That is a real limit of the release, stated rather than hidden behind a stub",
       "facts": "facts/AVFoundation/Metrics.md",
-      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into RevenantAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
     },
     {
       "api": "-[AVMetricEventStream subscribeToAllMetricEvents]",
@@ -439,7 +439,7 @@
       "reason": "the port's minimum release has no AVMetricEventStream at all - the whole metric surface arrived at iOS 18 - so an application that names it cannot link",
       "effect": "the stream keeps the publishers it was given, the subscriber and its queue, and the set of event classes the caller subscribed to, and it delivers nothing: on this port's minimum release nothing reports metrics. The publisher protocol has no method at all in 26.2, so there is no call to hand an event in, and no AVPlayerItem on iOS 6.1.3 raises any of the notifications these events are built from. That is a real limit of the release, stated rather than hidden behind a stub",
       "facts": "facts/AVFoundation/Metrics.md",
-      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into RevenantAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
     },
     {
       "api": "-[AVMetricEventStream subscribeToMetricEvent:]",
@@ -450,7 +450,7 @@
       "reason": "the port's minimum release has no AVMetricEventStream at all - the whole metric surface arrived at iOS 18 - so an application that names it cannot link",
       "effect": "the stream keeps the publishers it was given, the subscriber and its queue, and the set of event classes the caller subscribed to, and it delivers nothing: on this port's minimum release nothing reports metrics. The publisher protocol has no method at all in 26.2, so there is no call to hand an event in, and no AVPlayerItem on iOS 6.1.3 raises any of the notifications these events are built from. That is a real limit of the release, stated rather than hidden behind a stub",
       "facts": "facts/AVFoundation/Metrics.md",
-      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into RevenantAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
     },
     {
       "api": "-[AVMetricEventStream subscribeToMetricEvents:]",
@@ -461,7 +461,7 @@
       "reason": "the port's minimum release has no AVMetricEventStream at all - the whole metric surface arrived at iOS 18 - so an application that names it cannot link",
       "effect": "the stream keeps the publishers it was given, the subscriber and its queue, and the set of event classes the caller subscribed to, and it delivers nothing: on this port's minimum release nothing reports metrics. The publisher protocol has no method at all in 26.2, so there is no call to hand an event in, and no AVPlayerItem on iOS 6.1.3 raises any of the notifications these events are built from. That is a real limit of the release, stated rather than hidden behind a stub",
       "facts": "facts/AVFoundation/Metrics.md",
-      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into RevenantAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
     },
     {
       "api": "AVMetricEventStreamSubscriber",
@@ -469,10 +469,10 @@
       "introduced": "18.0",
       "minimum": "6.0",
       "status": "implemented",
-      "reason": "the port's minimum release has no protocol of this name, so a caller cannot conform to it; CharonAVMetrics18.h declares it with its one method, and the protocol object is emitted for it",
+      "reason": "the port's minimum release has no protocol of this name, so a caller cannot conform to it; RevenantAVMetrics18.h declares it with its one method, and the protocol object is emitted for it",
       "effect": "a caller can declare a class conforming to AVMetricEventStreamSubscriber and hand it to -[AVMetricEventStream setSubscriber:queue:]; nothing on iOS 6.1.3 publishes an event, so its method is never called",
       "facts": "facts/AVFoundation/Metrics.md",
-      "source": "SDK 26.2, AVFoundation, AVMetrics.h:26-35 (API_AVAILABLE ios(18)), transcribed into CharonAVMetrics18.h"
+      "source": "SDK 26.2, AVFoundation, AVMetrics.h:26-35 (API_AVAILABLE ios(18)), transcribed into RevenantAVMetrics18.h"
     },
     {
       "api": "-[AVMetricEventStreamSubscriber publisher:didReceiveEvent:]",
@@ -481,9 +481,9 @@
       "minimum": "6.0",
       "status": "implemented",
       "reason": "the port's minimum release has no protocol of this name, so a caller cannot conform to it; it is declared here",
-      "effect": "the protocol is declared by CharonAVMetrics18.h and its one method is its own declaration; this port calls it when a publisher hands the stream an event, which nothing on iOS 6.1.3 does, so the protocol object exists for a caller to conform to and is never called",
+      "effect": "the protocol is declared by RevenantAVMetrics18.h and its one method is its own declaration; this port calls it when a publisher hands the stream an event, which nothing on iOS 6.1.3 does, so the protocol object exists for a caller to conform to and is never called",
       "facts": "facts/AVFoundation/Metrics.md",
-      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into RevenantAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
     },
     {
       "api": "-[AVMetricHLSMediaSegmentRequestEvent init]",
@@ -494,7 +494,7 @@
       "reason": "the port's minimum release has no class of this name, so the inherited NSObject answer is not reachable through it; the class exists here, so it is",
       "effect": "the inherited NSObject answer: a freshly allocated instance with every member at the empty value its header describes. The header marks it AV_INIT_UNAVAILABLE, so an application written against a newer SDK cannot reach it either",
       "facts": "facts/AVFoundation/Metrics.md",
-      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into RevenantAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
     },
     {
       "api": "-[AVMetricHLSPlaylistRequestEvent init]",
@@ -505,7 +505,7 @@
       "reason": "the port's minimum release has no class of this name, so the inherited NSObject answer is not reachable through it; the class exists here, so it is",
       "effect": "the inherited NSObject answer: a freshly allocated instance with every member at the empty value its header describes. The header marks it AV_INIT_UNAVAILABLE, so an application written against a newer SDK cannot reach it either",
       "facts": "facts/AVFoundation/Metrics.md",
-      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into RevenantAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
     },
     {
       "api": "-[AVMetricMediaResourceRequestEvent init]",
@@ -516,7 +516,7 @@
       "reason": "the port's minimum release has no class of this name, so the inherited NSObject answer is not reachable through it; the class exists here, so it is",
       "effect": "the inherited NSObject answer: a freshly allocated instance with every member at the empty value its header describes. The header marks it AV_INIT_UNAVAILABLE, so an application written against a newer SDK cannot reach it either",
       "facts": "facts/AVFoundation/Metrics.md",
-      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into RevenantAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
     },
     {
       "api": "-[AVMetricPlayerItemInitialLikelyToKeepUpEvent init]",
@@ -527,7 +527,7 @@
       "reason": "the port's minimum release has no class of this name, so the inherited NSObject answer is not reachable through it; the class exists here, so it is",
       "effect": "the inherited NSObject answer: a freshly allocated instance with every member at the empty value its header describes. The header marks it AV_INIT_UNAVAILABLE, so an application written against a newer SDK cannot reach it either",
       "facts": "facts/AVFoundation/Metrics.md",
-      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into RevenantAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
     },
     {
       "api": "-[AVMetricPlayerItemLikelyToKeepUpEvent init]",
@@ -538,7 +538,7 @@
       "reason": "the port's minimum release has no class of this name, so the inherited NSObject answer is not reachable through it; the class exists here, so it is",
       "effect": "the inherited NSObject answer: a freshly allocated instance with every member at the empty value its header describes. The header marks it AV_INIT_UNAVAILABLE, so an application written against a newer SDK cannot reach it either",
       "facts": "facts/AVFoundation/Metrics.md",
-      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into RevenantAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
     },
     {
       "api": "-[AVMetricPlayerItemPlaybackSummaryEvent init]",
@@ -549,7 +549,7 @@
       "reason": "the port's minimum release has no class of this name, so the inherited NSObject answer is not reachable through it; the class exists here, so it is",
       "effect": "the inherited NSObject answer: a freshly allocated instance with every member at the empty value its header describes. The header marks it AV_INIT_UNAVAILABLE, so an application written against a newer SDK cannot reach it either",
       "facts": "facts/AVFoundation/Metrics.md",
-      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into RevenantAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
     },
     {
       "api": "-[AVMetricPlayerItemRateChangeEvent init]",
@@ -560,7 +560,7 @@
       "reason": "the port's minimum release has no class of this name, so the inherited NSObject answer is not reachable through it; the class exists here, so it is",
       "effect": "the inherited NSObject answer: a freshly allocated instance with every member at the empty value its header describes. The header marks it AV_INIT_UNAVAILABLE, so an application written against a newer SDK cannot reach it either",
       "facts": "facts/AVFoundation/Metrics.md",
-      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into RevenantAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
     },
     {
       "api": "-[AVMetricPlayerItemSeekDidCompleteEvent init]",
@@ -571,7 +571,7 @@
       "reason": "the port's minimum release has no class of this name, so the inherited NSObject answer is not reachable through it; the class exists here, so it is",
       "effect": "the inherited NSObject answer: a freshly allocated instance with every member at the empty value its header describes. The header marks it AV_INIT_UNAVAILABLE, so an application written against a newer SDK cannot reach it either",
       "facts": "facts/AVFoundation/Metrics.md",
-      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into RevenantAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
     },
     {
       "api": "-[AVMetricPlayerItemSeekEvent init]",
@@ -582,7 +582,7 @@
       "reason": "the port's minimum release has no class of this name, so the inherited NSObject answer is not reachable through it; the class exists here, so it is",
       "effect": "the inherited NSObject answer: a freshly allocated instance with every member at the empty value its header describes. The header marks it AV_INIT_UNAVAILABLE, so an application written against a newer SDK cannot reach it either",
       "facts": "facts/AVFoundation/Metrics.md",
-      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into RevenantAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
     },
     {
       "api": "-[AVMetricPlayerItemStallEvent init]",
@@ -593,7 +593,7 @@
       "reason": "the port's minimum release has no class of this name, so the inherited NSObject answer is not reachable through it; the class exists here, so it is",
       "effect": "the inherited NSObject answer: a freshly allocated instance with every member at the empty value its header describes. The header marks it AV_INIT_UNAVAILABLE, so an application written against a newer SDK cannot reach it either",
       "facts": "facts/AVFoundation/Metrics.md",
-      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into RevenantAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
     },
     {
       "api": "-[AVMetricPlayerItemVariantSwitchEvent init]",
@@ -604,7 +604,7 @@
       "reason": "the port's minimum release has no class of this name, so the inherited NSObject answer is not reachable through it; the class exists here, so it is",
       "effect": "the inherited NSObject answer: a freshly allocated instance with every member at the empty value its header describes. The header marks it AV_INIT_UNAVAILABLE, so an application written against a newer SDK cannot reach it either",
       "facts": "facts/AVFoundation/Metrics.md",
-      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into RevenantAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
     },
     {
       "api": "-[AVMetricPlayerItemVariantSwitchStartEvent init]",
@@ -615,7 +615,7 @@
       "reason": "the port's minimum release has no class of this name, so the inherited NSObject answer is not reachable through it; the class exists here, so it is",
       "effect": "the inherited NSObject answer: a freshly allocated instance with every member at the empty value its header describes. The header marks it AV_INIT_UNAVAILABLE, so an application written against a newer SDK cannot reach it either",
       "facts": "facts/AVFoundation/Metrics.md",
-      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into RevenantAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
     },
     {
       "api": "AVMetricContentKeyRequestEvent.contentKeySpecifier",
@@ -626,7 +626,7 @@
       "reason": "the port's minimum release has no class of this name, so the member is not reachable through it; the class exists here, so it is",
       "effect": "the stored value, which nothing in this port sets: an instance of this class is never constructed here, and a member that answers nil for an object nobody has told anything about is what the header documents for a value that is not available",
       "facts": "facts/AVFoundation/Metrics.md",
-      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into RevenantAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
     },
     {
       "api": "AVMetricContentKeyRequestEvent.isClientInitiated",
@@ -637,7 +637,7 @@
       "reason": "the port's minimum release has no class of this name, so the member is not reachable through it; the class exists here, so it is",
       "effect": "the stored value, which nothing in this port sets: an instance of this class is never constructed here, and a member that answers nil for an object nobody has told anything about is what the header documents for a value that is not available",
       "facts": "facts/AVFoundation/Metrics.md",
-      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into RevenantAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
     },
     {
       "api": "AVMetricContentKeyRequestEvent.mediaResourceRequestEvent",
@@ -648,7 +648,7 @@
       "reason": "the port's minimum release has no class of this name, so the member is not reachable through it; the class exists here, so it is",
       "effect": "the stored value, which nothing in this port sets: an instance of this class is never constructed here, and a member that answers nil for an object nobody has told anything about is what the header documents for a value that is not available",
       "facts": "facts/AVFoundation/Metrics.md",
-      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into RevenantAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
     },
     {
       "api": "AVMetricContentKeyRequestEvent.mediaType",
@@ -659,7 +659,7 @@
       "reason": "the port's minimum release has no class of this name, so the member is not reachable through it; the class exists here, so it is",
       "effect": "the stored value, which nothing in this port sets: an instance of this class is never constructed here, and a member that answers nil for an object nobody has told anything about is what the header documents for a value that is not available",
       "facts": "facts/AVFoundation/Metrics.md",
-      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into RevenantAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
     },
     {
       "api": "AVMetricErrorEvent.didRecover",
@@ -670,7 +670,7 @@
       "reason": "the port's minimum release has no class of this name, so the member is not reachable through it; the class exists here, so it is",
       "effect": "the stored value, which nothing in this port sets: an instance of this class is never constructed here, and a member that answers nil for an object nobody has told anything about is what the header documents for a value that is not available",
       "facts": "facts/AVFoundation/Metrics.md",
-      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into RevenantAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
     },
     {
       "api": "AVMetricErrorEvent.error",
@@ -681,7 +681,7 @@
       "reason": "the port's minimum release has no class of this name, so the member is not reachable through it; the class exists here, so it is",
       "effect": "the stored value, which nothing in this port sets: an instance of this class is never constructed here, and a member that answers nil for an object nobody has told anything about is what the header documents for a value that is not available",
       "facts": "facts/AVFoundation/Metrics.md",
-      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into RevenantAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
     },
     {
       "api": "AVMetricEvent.date",
@@ -692,7 +692,7 @@
       "reason": "the port's minimum release has no class of this name, so the member is not reachable through it; the class exists here, so it is",
       "effect": "the stored value, which nothing in this port sets: an instance of this class is never constructed here, and a member that answers nil for an object nobody has told anything about is what the header documents for a value that is not available",
       "facts": "facts/AVFoundation/Metrics.md",
-      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into RevenantAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
     },
     {
       "api": "AVMetricEvent.mediaTime",
@@ -703,7 +703,7 @@
       "reason": "the port's minimum release has no class of this name, so the member is not reachable through it; the class exists here, so it is",
       "effect": "the stored value, which nothing in this port sets: an instance of this class is never constructed here, and a member that answers nil for an object nobody has told anything about is what the header documents for a value that is not available",
       "facts": "facts/AVFoundation/Metrics.md",
-      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into RevenantAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
     },
     {
       "api": "AVMetricEvent.sessionID",
@@ -714,7 +714,7 @@
       "reason": "the port's minimum release has no class of this name, so the member is not reachable through it; the class exists here, so it is",
       "effect": "the stored value, which nothing in this port sets: an instance of this class is never constructed here, and a member that answers nil for an object nobody has told anything about is what the header documents for a value that is not available",
       "facts": "facts/AVFoundation/Metrics.md",
-      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into RevenantAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
     },
     {
       "api": "AVMetricHLSMediaSegmentRequestEvent.byteRange",
@@ -725,7 +725,7 @@
       "reason": "the port's minimum release has no class of this name, so the member is not reachable through it; the class exists here, so it is",
       "effect": "the stored value, which nothing in this port sets: an instance of this class is never constructed here, and a member that answers nil for an object nobody has told anything about is what the header documents for a value that is not available",
       "facts": "facts/AVFoundation/Metrics.md",
-      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into RevenantAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
     },
     {
       "api": "AVMetricHLSMediaSegmentRequestEvent.indexFileURL",
@@ -736,7 +736,7 @@
       "reason": "the port's minimum release has no class of this name, so the member is not reachable through it; the class exists here, so it is",
       "effect": "the stored value, which nothing in this port sets: an instance of this class is never constructed here, and a member that answers nil for an object nobody has told anything about is what the header documents for a value that is not available",
       "facts": "facts/AVFoundation/Metrics.md",
-      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into RevenantAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
     },
     {
       "api": "AVMetricHLSMediaSegmentRequestEvent.isMapSegment",
@@ -747,7 +747,7 @@
       "reason": "the port's minimum release has no class of this name, so the member is not reachable through it; the class exists here, so it is",
       "effect": "the stored value, which nothing in this port sets: an instance of this class is never constructed here, and a member that answers nil for an object nobody has told anything about is what the header documents for a value that is not available",
       "facts": "facts/AVFoundation/Metrics.md",
-      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into RevenantAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
     },
     {
       "api": "AVMetricHLSMediaSegmentRequestEvent.mediaResourceRequestEvent",
@@ -758,7 +758,7 @@
       "reason": "the port's minimum release has no class of this name, so the member is not reachable through it; the class exists here, so it is",
       "effect": "the stored value, which nothing in this port sets: an instance of this class is never constructed here, and a member that answers nil for an object nobody has told anything about is what the header documents for a value that is not available",
       "facts": "facts/AVFoundation/Metrics.md",
-      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into RevenantAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
     },
     {
       "api": "AVMetricHLSMediaSegmentRequestEvent.mediaType",
@@ -769,7 +769,7 @@
       "reason": "the port's minimum release has no class of this name, so the member is not reachable through it; the class exists here, so it is",
       "effect": "the stored value, which nothing in this port sets: an instance of this class is never constructed here, and a member that answers nil for an object nobody has told anything about is what the header documents for a value that is not available",
       "facts": "facts/AVFoundation/Metrics.md",
-      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into RevenantAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
     },
     {
       "api": "AVMetricHLSMediaSegmentRequestEvent.segmentDuration",
@@ -780,7 +780,7 @@
       "reason": "the port's minimum release has no class of this name, so the member is not reachable through it; the class exists here, so it is",
       "effect": "the stored value, which nothing in this port sets: an instance of this class is never constructed here, and a member that answers nil for an object nobody has told anything about is what the header documents for a value that is not available",
       "facts": "facts/AVFoundation/Metrics.md",
-      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into RevenantAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
     },
     {
       "api": "AVMetricHLSMediaSegmentRequestEvent.url",
@@ -791,7 +791,7 @@
       "reason": "the port's minimum release has no class of this name, so the member is not reachable through it; the class exists here, so it is",
       "effect": "the stored value, which nothing in this port sets: an instance of this class is never constructed here, and a member that answers nil for an object nobody has told anything about is what the header documents for a value that is not available",
       "facts": "facts/AVFoundation/Metrics.md",
-      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into RevenantAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
     },
     {
       "api": "AVMetricHLSPlaylistRequestEvent.isMultivariantPlaylist",
@@ -802,7 +802,7 @@
       "reason": "the port's minimum release has no class of this name, so the member is not reachable through it; the class exists here, so it is",
       "effect": "the stored value, which nothing in this port sets: an instance of this class is never constructed here, and a member that answers nil for an object nobody has told anything about is what the header documents for a value that is not available",
       "facts": "facts/AVFoundation/Metrics.md",
-      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into RevenantAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
     },
     {
       "api": "AVMetricHLSPlaylistRequestEvent.mediaResourceRequestEvent",
@@ -813,7 +813,7 @@
       "reason": "the port's minimum release has no class of this name, so the member is not reachable through it; the class exists here, so it is",
       "effect": "the stored value, which nothing in this port sets: an instance of this class is never constructed here, and a member that answers nil for an object nobody has told anything about is what the header documents for a value that is not available",
       "facts": "facts/AVFoundation/Metrics.md",
-      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into RevenantAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
     },
     {
       "api": "AVMetricHLSPlaylistRequestEvent.mediaType",
@@ -824,7 +824,7 @@
       "reason": "the port's minimum release has no class of this name, so the member is not reachable through it; the class exists here, so it is",
       "effect": "the stored value, which nothing in this port sets: an instance of this class is never constructed here, and a member that answers nil for an object nobody has told anything about is what the header documents for a value that is not available",
       "facts": "facts/AVFoundation/Metrics.md",
-      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into RevenantAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
     },
     {
       "api": "AVMetricHLSPlaylistRequestEvent.url",
@@ -835,7 +835,7 @@
       "reason": "the port's minimum release has no class of this name, so the member is not reachable through it; the class exists here, so it is",
       "effect": "the stored value, which nothing in this port sets: an instance of this class is never constructed here, and a member that answers nil for an object nobody has told anything about is what the header documents for a value that is not available",
       "facts": "facts/AVFoundation/Metrics.md",
-      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into RevenantAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
     },
     {
       "api": "AVMetricMediaResourceRequestEvent.byteRange",
@@ -846,7 +846,7 @@
       "reason": "the port's minimum release has no class of this name, so the member is not reachable through it; the class exists here, so it is",
       "effect": "the stored value, which nothing in this port sets: an instance of this class is never constructed here, and a member that answers nil for an object nobody has told anything about is what the header documents for a value that is not available",
       "facts": "facts/AVFoundation/Metrics.md",
-      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into RevenantAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
     },
     {
       "api": "AVMetricMediaResourceRequestEvent.errorEvent",
@@ -857,7 +857,7 @@
       "reason": "the port's minimum release has no class of this name, so the member is not reachable through it; the class exists here, so it is",
       "effect": "the stored value, which nothing in this port sets: an instance of this class is never constructed here, and a member that answers nil for an object nobody has told anything about is what the header documents for a value that is not available",
       "facts": "facts/AVFoundation/Metrics.md",
-      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into RevenantAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
     },
     {
       "api": "AVMetricMediaResourceRequestEvent.networkTransactionMetrics",
@@ -868,7 +868,7 @@
       "reason": "the port's minimum release has no class of this name, so the member is not reachable through it; the class exists here, so it is",
       "effect": "the stored value, which nothing in this port sets: an instance of this class is never constructed here, and a member that answers nil for an object nobody has told anything about is what the header documents for a value that is not available",
       "facts": "facts/AVFoundation/Metrics.md",
-      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into RevenantAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
     },
     {
       "api": "AVMetricMediaResourceRequestEvent.readFromCache",
@@ -879,7 +879,7 @@
       "reason": "the port's minimum release has no class of this name, so the member is not reachable through it; the class exists here, so it is",
       "effect": "the stored value, which nothing in this port sets: an instance of this class is never constructed here, and a member that answers nil for an object nobody has told anything about is what the header documents for a value that is not available",
       "facts": "facts/AVFoundation/Metrics.md",
-      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into RevenantAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
     },
     {
       "api": "AVMetricMediaResourceRequestEvent.requestEndTime",
@@ -890,7 +890,7 @@
       "reason": "the port's minimum release has no class of this name, so the member is not reachable through it; the class exists here, so it is",
       "effect": "the stored value, which nothing in this port sets: an instance of this class is never constructed here, and a member that answers nil for an object nobody has told anything about is what the header documents for a value that is not available",
       "facts": "facts/AVFoundation/Metrics.md",
-      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into RevenantAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
     },
     {
       "api": "AVMetricMediaResourceRequestEvent.requestStartTime",
@@ -901,7 +901,7 @@
       "reason": "the port's minimum release has no class of this name, so the member is not reachable through it; the class exists here, so it is",
       "effect": "the stored value, which nothing in this port sets: an instance of this class is never constructed here, and a member that answers nil for an object nobody has told anything about is what the header documents for a value that is not available",
       "facts": "facts/AVFoundation/Metrics.md",
-      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into RevenantAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
     },
     {
       "api": "AVMetricMediaResourceRequestEvent.responseEndTime",
@@ -912,7 +912,7 @@
       "reason": "the port's minimum release has no class of this name, so the member is not reachable through it; the class exists here, so it is",
       "effect": "the stored value, which nothing in this port sets: an instance of this class is never constructed here, and a member that answers nil for an object nobody has told anything about is what the header documents for a value that is not available",
       "facts": "facts/AVFoundation/Metrics.md",
-      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into RevenantAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
     },
     {
       "api": "AVMetricMediaResourceRequestEvent.responseStartTime",
@@ -923,7 +923,7 @@
       "reason": "the port's minimum release has no class of this name, so the member is not reachable through it; the class exists here, so it is",
       "effect": "the stored value, which nothing in this port sets: an instance of this class is never constructed here, and a member that answers nil for an object nobody has told anything about is what the header documents for a value that is not available",
       "facts": "facts/AVFoundation/Metrics.md",
-      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into RevenantAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
     },
     {
       "api": "AVMetricMediaResourceRequestEvent.serverAddress",
@@ -934,7 +934,7 @@
       "reason": "the port's minimum release has no class of this name, so the member is not reachable through it; the class exists here, so it is",
       "effect": "the stored value, which nothing in this port sets: an instance of this class is never constructed here, and a member that answers nil for an object nobody has told anything about is what the header documents for a value that is not available",
       "facts": "facts/AVFoundation/Metrics.md",
-      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into RevenantAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
     },
     {
       "api": "AVMetricMediaResourceRequestEvent.url",
@@ -945,7 +945,7 @@
       "reason": "the port's minimum release has no class of this name, so the member is not reachable through it; the class exists here, so it is",
       "effect": "the stored value, which nothing in this port sets: an instance of this class is never constructed here, and a member that answers nil for an object nobody has told anything about is what the header documents for a value that is not available",
       "facts": "facts/AVFoundation/Metrics.md",
-      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into RevenantAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
     },
     {
       "api": "AVMetricPlayerItemInitialLikelyToKeepUpEvent.contentKeyRequestEvents",
@@ -956,7 +956,7 @@
       "reason": "the port's minimum release has no class of this name, so the member is not reachable through it; the class exists here, so it is",
       "effect": "the stored value, which nothing in this port sets: an instance of this class is never constructed here, and a member that answers nil for an object nobody has told anything about is what the header documents for a value that is not available",
       "facts": "facts/AVFoundation/Metrics.md",
-      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into RevenantAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
     },
     {
       "api": "AVMetricPlayerItemInitialLikelyToKeepUpEvent.mediaSegmentRequestEvents",
@@ -967,7 +967,7 @@
       "reason": "the port's minimum release has no class of this name, so the member is not reachable through it; the class exists here, so it is",
       "effect": "the stored value, which nothing in this port sets: an instance of this class is never constructed here, and a member that answers nil for an object nobody has told anything about is what the header documents for a value that is not available",
       "facts": "facts/AVFoundation/Metrics.md",
-      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into RevenantAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
     },
     {
       "api": "AVMetricPlayerItemInitialLikelyToKeepUpEvent.playlistRequestEvents",
@@ -978,7 +978,7 @@
       "reason": "the port's minimum release has no class of this name, so the member is not reachable through it; the class exists here, so it is",
       "effect": "the stored value, which nothing in this port sets: an instance of this class is never constructed here, and a member that answers nil for an object nobody has told anything about is what the header documents for a value that is not available",
       "facts": "facts/AVFoundation/Metrics.md",
-      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into RevenantAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
     },
     {
       "api": "AVMetricPlayerItemLikelyToKeepUpEvent.loadedTimeRanges",
@@ -989,7 +989,7 @@
       "reason": "the port's minimum release has no class of this name, so the member is not reachable through it; the class exists here, so it is",
       "effect": "the stored value, which nothing in this port sets: an instance of this class is never constructed here, and a member that answers nil for an object nobody has told anything about is what the header documents for a value that is not available",
       "facts": "facts/AVFoundation/Metrics.md",
-      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into RevenantAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
     },
     {
       "api": "AVMetricPlayerItemLikelyToKeepUpEvent.timeTaken",
@@ -1000,7 +1000,7 @@
       "reason": "the port's minimum release has no class of this name, so the member is not reachable through it; the class exists here, so it is",
       "effect": "the stored value, which nothing in this port sets: an instance of this class is never constructed here, and a member that answers nil for an object nobody has told anything about is what the header documents for a value that is not available",
       "facts": "facts/AVFoundation/Metrics.md",
-      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into RevenantAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
     },
     {
       "api": "AVMetricPlayerItemLikelyToKeepUpEvent.variant",
@@ -1011,7 +1011,7 @@
       "reason": "the port's minimum release has no class of this name, so the member is not reachable through it; the class exists here, so it is",
       "effect": "the stored value, which nothing in this port sets: an instance of this class is never constructed here, and a member that answers nil for an object nobody has told anything about is what the header documents for a value that is not available",
       "facts": "facts/AVFoundation/Metrics.md",
-      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into RevenantAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
     },
     {
       "api": "AVMetricPlayerItemPlaybackSummaryEvent.errorEvent",
@@ -1022,7 +1022,7 @@
       "reason": "the port's minimum release has no class of this name, so the member is not reachable through it; the class exists here, so it is",
       "effect": "the stored value, which nothing in this port sets: an instance of this class is never constructed here, and a member that answers nil for an object nobody has told anything about is what the header documents for a value that is not available",
       "facts": "facts/AVFoundation/Metrics.md",
-      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into RevenantAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
     },
     {
       "api": "AVMetricPlayerItemPlaybackSummaryEvent.mediaResourceRequestCount",
@@ -1033,7 +1033,7 @@
       "reason": "the port's minimum release has no class of this name, so the member is not reachable through it; the class exists here, so it is",
       "effect": "the stored value, which nothing in this port sets: an instance of this class is never constructed here, and a member that answers nil for an object nobody has told anything about is what the header documents for a value that is not available",
       "facts": "facts/AVFoundation/Metrics.md",
-      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into RevenantAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
     },
     {
       "api": "AVMetricPlayerItemPlaybackSummaryEvent.playbackDuration",
@@ -1044,7 +1044,7 @@
       "reason": "the port's minimum release has no class of this name, so the member is not reachable through it; the class exists here, so it is",
       "effect": "the stored value, which nothing in this port sets: an instance of this class is never constructed here, and a member that answers nil for an object nobody has told anything about is what the header documents for a value that is not available",
       "facts": "facts/AVFoundation/Metrics.md",
-      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into RevenantAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
     },
     {
       "api": "AVMetricPlayerItemPlaybackSummaryEvent.recoverableErrorCount",
@@ -1055,7 +1055,7 @@
       "reason": "the port's minimum release has no class of this name, so the member is not reachable through it; the class exists here, so it is",
       "effect": "the stored value, which nothing in this port sets: an instance of this class is never constructed here, and a member that answers nil for an object nobody has told anything about is what the header documents for a value that is not available",
       "facts": "facts/AVFoundation/Metrics.md",
-      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into RevenantAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
     },
     {
       "api": "AVMetricPlayerItemPlaybackSummaryEvent.stallCount",
@@ -1066,7 +1066,7 @@
       "reason": "the port's minimum release has no class of this name, so the member is not reachable through it; the class exists here, so it is",
       "effect": "the stored value, which nothing in this port sets: an instance of this class is never constructed here, and a member that answers nil for an object nobody has told anything about is what the header documents for a value that is not available",
       "facts": "facts/AVFoundation/Metrics.md",
-      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into RevenantAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
     },
     {
       "api": "AVMetricPlayerItemPlaybackSummaryEvent.timeSpentInInitialStartup",
@@ -1077,7 +1077,7 @@
       "reason": "the port's minimum release has no class of this name, so the member is not reachable through it; the class exists here, so it is",
       "effect": "the stored value, which nothing in this port sets: an instance of this class is never constructed here, and a member that answers nil for an object nobody has told anything about is what the header documents for a value that is not available",
       "facts": "facts/AVFoundation/Metrics.md",
-      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into RevenantAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
     },
     {
       "api": "AVMetricPlayerItemPlaybackSummaryEvent.timeSpentRecoveringFromStall",
@@ -1088,7 +1088,7 @@
       "reason": "the port's minimum release has no class of this name, so the member is not reachable through it; the class exists here, so it is",
       "effect": "the stored value, which nothing in this port sets: an instance of this class is never constructed here, and a member that answers nil for an object nobody has told anything about is what the header documents for a value that is not available",
       "facts": "facts/AVFoundation/Metrics.md",
-      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into RevenantAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
     },
     {
       "api": "AVMetricPlayerItemPlaybackSummaryEvent.timeWeightedAverageBitrate",
@@ -1099,7 +1099,7 @@
       "reason": "the port's minimum release has no class of this name, so the member is not reachable through it; the class exists here, so it is",
       "effect": "the stored value, which nothing in this port sets: an instance of this class is never constructed here, and a member that answers nil for an object nobody has told anything about is what the header documents for a value that is not available",
       "facts": "facts/AVFoundation/Metrics.md",
-      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into RevenantAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
     },
     {
       "api": "AVMetricPlayerItemPlaybackSummaryEvent.timeWeightedPeakBitrate",
@@ -1110,7 +1110,7 @@
       "reason": "the port's minimum release has no class of this name, so the member is not reachable through it; the class exists here, so it is",
       "effect": "the stored value, which nothing in this port sets: an instance of this class is never constructed here, and a member that answers nil for an object nobody has told anything about is what the header documents for a value that is not available",
       "facts": "facts/AVFoundation/Metrics.md",
-      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into RevenantAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
     },
     {
       "api": "AVMetricPlayerItemPlaybackSummaryEvent.variantSwitchCount",
@@ -1121,7 +1121,7 @@
       "reason": "the port's minimum release has no class of this name, so the member is not reachable through it; the class exists here, so it is",
       "effect": "the stored value, which nothing in this port sets: an instance of this class is never constructed here, and a member that answers nil for an object nobody has told anything about is what the header documents for a value that is not available",
       "facts": "facts/AVFoundation/Metrics.md",
-      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into RevenantAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
     },
     {
       "api": "AVMetricPlayerItemRateChangeEvent.previousRate",
@@ -1132,7 +1132,7 @@
       "reason": "the port's minimum release has no class of this name, so the member is not reachable through it; the class exists here, so it is",
       "effect": "the stored value, which nothing in this port sets: an instance of this class is never constructed here, and a member that answers nil for an object nobody has told anything about is what the header documents for a value that is not available",
       "facts": "facts/AVFoundation/Metrics.md",
-      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into RevenantAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
     },
     {
       "api": "AVMetricPlayerItemRateChangeEvent.rate",
@@ -1143,7 +1143,7 @@
       "reason": "the port's minimum release has no class of this name, so the member is not reachable through it; the class exists here, so it is",
       "effect": "the stored value, which nothing in this port sets: an instance of this class is never constructed here, and a member that answers nil for an object nobody has told anything about is what the header documents for a value that is not available",
       "facts": "facts/AVFoundation/Metrics.md",
-      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into RevenantAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
     },
     {
       "api": "AVMetricPlayerItemRateChangeEvent.variant",
@@ -1154,7 +1154,7 @@
       "reason": "the port's minimum release has no class of this name, so the member is not reachable through it; the class exists here, so it is",
       "effect": "the stored value, which nothing in this port sets: an instance of this class is never constructed here, and a member that answers nil for an object nobody has told anything about is what the header documents for a value that is not available",
       "facts": "facts/AVFoundation/Metrics.md",
-      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into RevenantAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
     },
     {
       "api": "AVMetricPlayerItemSeekDidCompleteEvent.didSeekInBuffer",
@@ -1165,7 +1165,7 @@
       "reason": "the port's minimum release has no class of this name, so the member is not reachable through it; the class exists here, so it is",
       "effect": "the stored value, which nothing in this port sets: an instance of this class is never constructed here, and a member that answers nil for an object nobody has told anything about is what the header documents for a value that is not available",
       "facts": "facts/AVFoundation/Metrics.md",
-      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into RevenantAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
     },
     {
       "api": "AVMetricPlayerItemVariantSwitchEvent.didSucceed",
@@ -1176,7 +1176,7 @@
       "reason": "the port's minimum release has no class of this name, so the member is not reachable through it; the class exists here, so it is",
       "effect": "the stored value, which nothing in this port sets: an instance of this class is never constructed here, and a member that answers nil for an object nobody has told anything about is what the header documents for a value that is not available",
       "facts": "facts/AVFoundation/Metrics.md",
-      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into RevenantAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
     },
     {
       "api": "AVMetricPlayerItemVariantSwitchEvent.fromVariant",
@@ -1187,7 +1187,7 @@
       "reason": "the port's minimum release has no class of this name, so the member is not reachable through it; the class exists here, so it is",
       "effect": "the stored value, which nothing in this port sets: an instance of this class is never constructed here, and a member that answers nil for an object nobody has told anything about is what the header documents for a value that is not available",
       "facts": "facts/AVFoundation/Metrics.md",
-      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into RevenantAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
     },
     {
       "api": "AVMetricPlayerItemVariantSwitchEvent.loadedTimeRanges",
@@ -1198,7 +1198,7 @@
       "reason": "the port's minimum release has no class of this name, so the member is not reachable through it; the class exists here, so it is",
       "effect": "the stored value, which nothing in this port sets: an instance of this class is never constructed here, and a member that answers nil for an object nobody has told anything about is what the header documents for a value that is not available",
       "facts": "facts/AVFoundation/Metrics.md",
-      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into RevenantAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
     },
     {
       "api": "AVMetricPlayerItemVariantSwitchEvent.toVariant",
@@ -1209,7 +1209,7 @@
       "reason": "the port's minimum release has no class of this name, so the member is not reachable through it; the class exists here, so it is",
       "effect": "the stored value, which nothing in this port sets: an instance of this class is never constructed here, and a member that answers nil for an object nobody has told anything about is what the header documents for a value that is not available",
       "facts": "facts/AVFoundation/Metrics.md",
-      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into RevenantAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
     },
     {
       "api": "AVMetricPlayerItemVariantSwitchStartEvent.fromVariant",
@@ -1220,7 +1220,7 @@
       "reason": "the port's minimum release has no class of this name, so the member is not reachable through it; the class exists here, so it is",
       "effect": "the stored value, which nothing in this port sets: an instance of this class is never constructed here, and a member that answers nil for an object nobody has told anything about is what the header documents for a value that is not available",
       "facts": "facts/AVFoundation/Metrics.md",
-      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into RevenantAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
     },
     {
       "api": "AVMetricPlayerItemVariantSwitchStartEvent.loadedTimeRanges",
@@ -1231,7 +1231,7 @@
       "reason": "the port's minimum release has no class of this name, so the member is not reachable through it; the class exists here, so it is",
       "effect": "the stored value, which nothing in this port sets: an instance of this class is never constructed here, and a member that answers nil for an object nobody has told anything about is what the header documents for a value that is not available",
       "facts": "facts/AVFoundation/Metrics.md",
-      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into RevenantAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
     },
     {
       "api": "AVMetricPlayerItemVariantSwitchStartEvent.toVariant",
@@ -1242,7 +1242,7 @@
       "reason": "the port's minimum release has no class of this name, so the member is not reachable through it; the class exists here, so it is",
       "effect": "the stored value, which nothing in this port sets: an instance of this class is never constructed here, and a member that answers nil for an object nobody has told anything about is what the header documents for a value that is not available",
       "facts": "facts/AVFoundation/Metrics.md",
-      "source": "the header of the SDK 26.2 for the whole surface, transcribed into CharonAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
+      "source": "the header of the SDK 26.2 for the whole surface, transcribed into RevenantAVMetrics18.h, which is where every class, protocol and member here is declared because SDK 16.4 ships no AVMetrics.h; the release this object is placed in is measured - tools/symbol-first-release.lua puts the _OBJC_CLASS_$_ symbol of every class here at 18.0"
     }
   ]
 }

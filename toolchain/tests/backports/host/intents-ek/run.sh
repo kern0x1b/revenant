@@ -2,8 +2,8 @@
 # run.sh - what -[INDateComponentsRange initWithEKRecurrenceRule:] and its getter -[INDateComponentsRange EKRecurrenceRule]
 # do, asked by probe.m on macOS and on Catalyst (the host, the golden in expected.txt), and of the port's own objects.
 #
-# The host runs must agree with each other and with expected.txt. The port (CHARON_HOST_BUILD, its classes renamed
-# CharonHost*) must agree with the Catalyst host, line for line. The plant keeps the last weekday of a rule where the
+# The host runs must agree with each other and with expected.txt. The port (REVENANT_HOST_BUILD, its classes renamed
+# RevenantHost*) must agree with the Catalyst host, line for line. The plant keeps the last weekday of a rule where the
 # host keeps the first: the port's run must then differ, or the comparison cannot fail.
 #
 # The host's answers are the contract (facts/Intents/Intents.md, "EventKit's recurrence rule"): the getter raises for a
@@ -12,15 +12,15 @@ set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 P=${PORT_DIR:-$here/../../../../packages/a/apple-backports}
-CODING=$P/../../c/charon-coding/files
-build=${EK_BUILD:-$(runs_fresh charon-intents-ek)}
+CODING=$P/../../c/revenant-coding/files
+build=${EK_BUILD:-$(runs_fresh revenant-intents-ek)}
 sdk=$(xcrun --show-sdk-path)
 catalyst="-target arm64-apple-ios15.0-macabi -isysroot $sdk -iframework $sdk/System/iOSSupport/System/Library/Frameworks"
 frameworks="-framework Foundation -framework Intents -framework EventKit"
 probe_flags="-fno-objc-arc -w"
-flags="$catalyst -fobjc-arc -fvisibility=hidden -w -DCHARON_HOST_BUILD"
+flags="$catalyst -fobjc-arc -fvisibility=hidden -w -DREVENANT_HOST_BUILD"
 includes="-I$P/Intents -I$CODING"
-sources="$CODING/CharonCoding.m $P/Intents/CharonIntentsStore.m $P/Intents/CharonIntents100.m $P/Intents/IN10_0_1.m $P/Intents/IN11_0.m"
+sources="$CODING/RevenantCoding.m $P/Intents/RevenantIntentsStore.m $P/Intents/RevenantIntents100.m $P/Intents/IN10_0_1.m $P/Intents/IN11_0.m"
 
 # The host: macOS, then Catalyst. Both must match the golden, and each other.
 xcrun clang $probe_flags "$here/probe.m" $frameworks -o "$build/macos"
@@ -44,7 +44,7 @@ for source in $sources; do
 done
 renames=""
 for name in $(xcrun nm -gU "$build"/plain/*.o | awk 'NF == 3 {print $3}' | grep -E '^_OBJC_CLASS_\$_' | sed -e 's/^_OBJC_CLASS_\$_//' | sort -u); do
-    renames="$renames -D$name=CharonHost$name"
+    renames="$renames -D$name=RevenantHost$name"
 done
 for source in $sources; do
     xcrun clang $flags $renames $includes -c "$source" -o "$build/port/$(basename "$source" .m).o"
@@ -60,13 +60,13 @@ echo "PASS: $(wc -l < "$build/port.txt") port lines, port and Catalyst host alik
 
 # The plant: the port keeps the last day of the rule's days, not the first.
 cp "$build"/port/*.o "$build/plant/"
-rm -f "$build/plant/CharonIntents100.o"
-sed 's/start.weekday = days\[0\].dayOfTheWeek;/start.weekday = days[days.count - 1].dayOfTheWeek;/' "$P/Intents/CharonIntents100.m" > "$build/plant/CharonIntents100.src.m"
-if cmp -s "$P/Intents/CharonIntents100.m" "$build/plant/CharonIntents100.src.m"; then
+rm -f "$build/plant/RevenantIntents100.o"
+sed 's/start.weekday = days\[0\].dayOfTheWeek;/start.weekday = days[days.count - 1].dayOfTheWeek;/' "$P/Intents/RevenantIntents100.m" > "$build/plant/RevenantIntents100.src.m"
+if cmp -s "$P/Intents/RevenantIntents100.m" "$build/plant/RevenantIntents100.src.m"; then
     echo "FAIL: the plant edit changed nothing, so the plant is not a plant"
     exit 1
 fi
-xcrun clang $flags $renames $includes -c "$build/plant/CharonIntents100.src.m" -o "$build/plant/CharonIntents100.o"
+xcrun clang $flags $renames $includes -c "$build/plant/RevenantIntents100.src.m" -o "$build/plant/RevenantIntents100.o"
 xcrun clang $probe_flags -DPORT -target arm64-apple-ios15.0-macabi -isysroot "$sdk" -iframework "$sdk/System/iOSSupport/System/Library/Frameworks" \
     "$here/probe.m" "$build"/plant/*.o -framework Foundation -framework UIKit -framework CoreGraphics -framework Intents -framework EventKit -o "$build/plant-probe"
 status=0

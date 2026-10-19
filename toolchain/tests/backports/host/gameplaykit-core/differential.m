@@ -1,7 +1,7 @@
 #import <Foundation/Foundation.h>
 #import <GameplayKit/GameplayKit.h>
 #import <objc/runtime.h>
-#import "CharonGKScriptedSource.h"
+#import "RevenantGKScriptedSource.h"
 
 static int checksRun = 0;
 static int checksFailed = 0;
@@ -74,7 +74,7 @@ static BOOL is(NSString *got, NSString *want)
     return [got isEqualToString:want];
 }
 
-static NSMutableString *CharonGKHookLog(void)
+static NSMutableString *RevenantGKHookLog(void)
 {
     static NSMutableString *log;
     if (!log) {
@@ -95,14 +95,14 @@ static NSMutableString *CharonGKHookLog(void)
 
 @interface Leaving : GKState @end
 @implementation Leaving
-- (void)didEnterWithPreviousState:(GKState *)previous { [CharonGKHookLog() appendFormat:@"A<%@ ", named(previous)]; }
-- (void)willExitWithNextState:(GKState *)next { [CharonGKHookLog() appendFormat:@"A>%@ ", named(next)]; }
+- (void)didEnterWithPreviousState:(GKState *)previous { [RevenantGKHookLog() appendFormat:@"A<%@ ", named(previous)]; }
+- (void)willExitWithNextState:(GKState *)next { [RevenantGKHookLog() appendFormat:@"A>%@ ", named(next)]; }
 @end
 
 @interface Arriving : GKState @end
 @implementation Arriving
-- (void)didEnterWithPreviousState:(GKState *)previous { [CharonGKHookLog() appendFormat:@"B<%@ ", named(previous)]; }
-- (void)willExitWithNextState:(GKState *)next { [CharonGKHookLog() appendFormat:@"B>%@ ", named(next)]; }
+- (void)didEnterWithPreviousState:(GKState *)previous { [RevenantGKHookLog() appendFormat:@"B<%@ ", named(previous)]; }
+- (void)willExitWithNextState:(GKState *)next { [RevenantGKHookLog() appendFormat:@"B>%@ ", named(next)]; }
 @end
 
 static void stateMachines(void)
@@ -159,7 +159,7 @@ static void stateMachines(void)
              @"a machine that has entered nothing allows anything, as the host's does", nil);
     }
     {
-        NSMutableString *log = CharonGKHookLog();
+        NSMutableString *log = RevenantGKHookLog();
         [log setString:@""];
         Leaving *a = [Leaving new];
         Arriving *b = [Arriving new];
@@ -600,7 +600,7 @@ static void distributions(void)
               (long)overMoments.lowestValue, (long)overMoments.highestValue]);
     }
     {
-        CharonGKScriptedSource *source = [[CharonGKScriptedSource alloc]
+        RevenantGKScriptedSource *source = [[RevenantGKScriptedSource alloc]
                                           initWithScript:@[@"bounded:6=2", @"bounded:6=5", @"bounded:6=1",
                                                            @"bounded:6=4", @"bounded:6=0", @"bounded:6=3"]];
         GKRandomDistribution *die = [[GKRandomDistribution alloc] initWithRandomSource:source
@@ -615,7 +615,7 @@ static void distributions(void)
              [NSString stringWithFormat:@"asked '%s' gave %@", source.log, floats(draws)]);
     }
     {
-        CharonGKScriptedSource *bools = [[CharonGKScriptedSource alloc]
+        RevenantGKScriptedSource *bools = [[RevenantGKScriptedSource alloc]
                                          initWithScript:@[@"bool=1", @"bool=0", @"bool=1", @"bool=1", @"bool=0"]];
         GKRandomDistribution *coin = [[GKRandomDistribution alloc] initWithRandomSource:bools
                                                                            lowestValue:0 highestValue:1];
@@ -627,7 +627,7 @@ static void distributions(void)
              [NSString stringWithFormat:@"asked '%s'", bools.log]);
     }
     {
-        CharonGKScriptedSource *uniform = [[CharonGKScriptedSource alloc]
+        RevenantGKScriptedSource *uniform = [[RevenantGKScriptedSource alloc]
                                            initWithScript:@[@"bounded:6=3", @"bounded:6=0", @"bounded:6=5"]];
         GKRandomDistribution *faces = [[GKRandomDistribution alloc] initWithRandomSource:uniform
                                                                             lowestValue:1 highestValue:6];
@@ -655,7 +655,7 @@ static void distributions(void)
         for (unsigned range = 0; range < 4; range++) {
             NSMutableArray *got = [NSMutableArray array];
             for (NSUInteger bound = 0; bound <= 8; bound++) {
-                CharonGKScriptedSource *fresh = [[CharonGKScriptedSource alloc] initWithScript:@[]];
+                RevenantGKScriptedSource *fresh = [[RevenantGKScriptedSource alloc] initWithScript:@[]];
                 GKRandomDistribution *distribution = [[GKRandomDistribution alloc] initWithRandomSource:fresh
                                                                                             lowestValue:lows[range]
                                                                                            highestValue:highs[range]];
@@ -678,7 +678,7 @@ static void distributions(void)
                  @"the spans a bounded draw asks its source for are the host's, and a bound of zero asks "
                  @"for the whole range", [got componentsJoinedByString:@" "]);
         }
-        CharonGKScriptedSource *drawn = [[CharonGKScriptedSource alloc] initWithScript:@[@"bounded:4=3"]];
+        RevenantGKScriptedSource *drawn = [[RevenantGKScriptedSource alloc] initWithScript:@[@"bounded:4=3"]];
         GKRandomDistribution *negative = [[GKRandomDistribution alloc] initWithRandomSource:drawn
                                                                                 lowestValue:-2 highestValue:2];
         unsigned long first = (unsigned long)[negative nextIntWithUpperBound:2];
@@ -687,7 +687,7 @@ static void distributions(void)
              [NSString stringWithFormat:@"%lu", first]);
     }
     {
-        CharonGKScriptedSource *source = [[CharonGKScriptedSource alloc]
+        RevenantGKScriptedSource *source = [[RevenantGKScriptedSource alloc]
                                           initWithScript:@[@"uniform=0.25", @"uniform=0.75", @"uniform=0.5",
                                                            @"uniform=0.1", @"uniform=0.9"]];
         GKGaussianDistribution *gaussian = [[GKGaussianDistribution alloc] initWithRandomSource:source
@@ -702,7 +702,7 @@ static void distributions(void)
              [NSString stringWithFormat:@"gave %@ asked '%s'", floats(draws), source.log]);
     }
     {
-        CharonGKScriptedSource *source = [[CharonGKScriptedSource alloc]
+        RevenantGKScriptedSource *source = [[RevenantGKScriptedSource alloc]
                                           initWithScript:@[@"bounded:1=0", @"bounded:2=1", @"bounded:3=2",
                                                            @"bounded:4=0", @"bounded:5=3", @"bounded:6=5",
                                                            @"bounded:1=0", @"bounded:2=1", @"bounded:3=0"]];
@@ -722,15 +722,15 @@ static void distributions(void)
                  source.log);
     }
     {
-        CharonGKScriptedSource *source = [[CharonGKScriptedSource alloc] initWithScript:@[]];
+        RevenantGKScriptedSource *source = [[RevenantGKScriptedSource alloc] initWithScript:@[]];
         NSArray *array = @[@1, @2, @3, @4];
         NSArray *given = [array shuffledArrayWithRandomSource:source];
         host(is(source.log, @"shuffle(4)") && source.shuffleAskedWith == array && given == array,
              @"the shuffle a caller asks for is the source's own, as the host's is",
              [NSString stringWithFormat:@"asked '%s' with %lu", source.log,
               (unsigned long)source.shuffleAskedWith.count]);
-        CharonGKScriptedSource *empty = [[CharonGKScriptedSource alloc] initWithScript:@[]];
-        CharonGKScriptedSource *single = [[CharonGKScriptedSource alloc] initWithScript:@[]];
+        RevenantGKScriptedSource *empty = [[RevenantGKScriptedSource alloc] initWithScript:@[]];
+        RevenantGKScriptedSource *single = [[RevenantGKScriptedSource alloc] initWithScript:@[]];
         contract([@[] shuffledArrayWithRandomSource:empty].count == 0 &&
                  [@[@1] shuffledArrayWithRandomSource:single].count == 1,
                  @"a shuffle of four objects is four and of none is none", nil);

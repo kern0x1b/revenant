@@ -25,7 +25,7 @@ ARKit=$repo/packages/a/apple-backports/ARKit
 runs=${RUNS:-$repo/.agent-work/runs/arkit-planeextent-host}
 mkdir -p "$runs"
 
-renames=-DARPlaneExtent=CharonPortARPlaneExtent
+renames=-DARPlaneExtent=RevenantPortARPlaneExtent
 
 build() {
     src=$1
@@ -48,7 +48,7 @@ mutant() {
     label=$1; from=$2; to=$3
     copy="$runs/mutant"
     rm -rf "$copy"; mkdir -p "$copy"
-    cp "$ARKit/ARPlaneExtent16.m" "$ARKit/CharonARKitPlaneExtent.h" "$copy/"
+    cp "$ARKit/ARPlaneExtent16.m" "$ARKit/RevenantARKitPlaneExtent.h" "$copy/"
     python3 - "$copy/ARPlaneExtent16.m" "$from" "$to" <<'PY' || { echo "MUTANT NOT APPLIED: $label"; survived=$((survived + 1)); return; }
 import sys
 path, old, new = sys.argv[1], sys.argv[2], sys.argv[3]

@@ -28,8 +28,8 @@ local PROLOGUE = [[
 // shape main.m walks, so the generated file and the harness agree on it by construction.
 typedef struct {
     const char *label;
-    void (*run)(CharonCallLog *log);
-} CharonCallEntry;
+    void (*run)(RevenantCallLog *log);
+} RevenantCallEntry;
 ]]
 
 local function each_char(text)
@@ -181,14 +181,14 @@ function declared_properties(dump, classes, wanted)
 end
 
 local function emit_class(name)
-    return string.format("charon_case_%s", name), name, {
-        string.format("static void charon_case_%s(CharonCallLog *log)", name),
+    return string.format("revenant_case_%s", name), name, {
+        string.format("static void revenant_case_%s(RevenantCallLog *log)", name),
         "{",
-        string.format("    Class cls = CharonCallClass(log, @\"%s\");", name),
+        string.format("    Class cls = RevenantCallClass(log, @\"%s\");", name),
         "    if (!cls) return;",
-        "    CharonCallNoted(log, cls, @selector(class), cls);",
-        "    id instance = CharonCallInstance(log, cls);",
-        "    CharonCallRemember(log, cls, instance);",
+        "    RevenantCallNoted(log, cls, @selector(class), cls);",
+        "    id instance = RevenantCallInstance(log, cls);",
+        "    RevenantCallRemember(log, cls, instance);",
         "}",
         ""
     }
@@ -199,26 +199,26 @@ local function emit_method(owner, selector, sign)
     local receiver = sign == "-" and "self" or "cls"
     local pointer = "id (*)(id, SEL" .. string.rep(", id", count) .. ")"
     local label = as_latin1_text(string.format("%s[%s %s]", sign, owner, selector))
-    local name = string.format("charon_case_%s_%s_%s", owner, sign == "+" and "class" or "instance", mangle(selector))
+    local name = string.format("revenant_case_%s_%s_%s", owner, sign == "+" and "class" or "instance", mangle(selector))
     local lines = {
-        string.format("static void %s(CharonCallLog *log)", name),
+        string.format("static void %s(RevenantCallLog *log)", name),
         "{",
-        string.format("    Class cls = CharonCallClass(log, @\"%s\");", owner),
+        string.format("    Class cls = RevenantCallClass(log, @\"%s\");", owner),
         "    if (!cls) return;",
         "    @try {"
     }
     if sign == "-" then
-        table.insert(lines, "    id self = CharonCallInstance(log, cls);")
+        table.insert(lines, "    id self = RevenantCallInstance(log, cls);")
         table.insert(lines, "    if (!self) return;")
-        table.insert(lines, string.format("    if (!CharonCallSelector(log, cls, self, @selector(%s))) return;", selector))
+        table.insert(lines, string.format("    if (!RevenantCallSelector(log, cls, self, @selector(%s))) return;", selector))
     else
-        table.insert(lines, string.format("    if (!CharonCallSelector(log, cls, cls, @selector(%s))) return;", selector))
+        table.insert(lines, string.format("    if (!RevenantCallSelector(log, cls, cls, @selector(%s))) return;", selector))
     end
     table.insert(lines, string.format("    __unsafe_unretained id value = ((%s)objc_msgSend)(%s, @selector(%s)%s);",
                                       pointer, receiver, selector, string.rep(", nil", count)))
-    table.insert(lines, string.format("    CharonCallNoted(log, cls, @selector(%s), value);", selector))
+    table.insert(lines, string.format("    RevenantCallNoted(log, cls, @selector(%s), value);", selector))
     table.insert(lines, "    } @catch (NSException *raised) {")
-    table.insert(lines, string.format("        CharonCallRaised(log, cls, @selector(%s), raised);", selector))
+    table.insert(lines, string.format("        RevenantCallRaised(log, cls, @selector(%s), raised);", selector))
     table.insert(lines, "    }")
     table.insert(lines, "}")
     table.insert(lines, "")
@@ -234,15 +234,15 @@ local function emit_property(owner, name, member)
     if setter == "" or (member and member.readonly) then
         setter = nil
     end
-    local function_name = string.format("charon_case_%s_property_%s", owner, mangle(name))
+    local function_name = string.format("revenant_case_%s_property_%s", owner, mangle(name))
     return function_name, string.format("%s.%s", owner, name), {
-        string.format("static void %s(CharonCallLog *log)", function_name),
+        string.format("static void %s(RevenantCallLog *log)", function_name),
         "{",
-        string.format("    Class cls = CharonCallClass(log, @\"%s\");", owner),
+        string.format("    Class cls = RevenantCallClass(log, @\"%s\");", owner),
         "    if (!cls) return;",
-        "    id self = CharonCallInstance(log, cls);",
+        "    id self = RevenantCallInstance(log, cls);",
         "    if (!self) return;",
-        string.format("    CharonCallProperty(log, cls, self, @\"%s\", @\"%s\", %s);", name, getter,
+        string.format("    RevenantCallProperty(log, cls, self, @\"%s\", @\"%s\", %s);", name, getter,
                       setter and string.format("@\"%s\"", setter) or "nil"),
         "}",
         ""
@@ -316,13 +316,13 @@ function generate(opt)
     for _, line in ipairs(out) do
         table.insert(text, line)
     end
-    table.insert(text, "const CharonCallEntry charon_call_cases[] = {")
+    table.insert(text, "const RevenantCallEntry revenant_call_cases[] = {")
     for _, entry in ipairs(entries) do
         table.insert(text, string.format("    { \"%s\", %s },", c_string(entry[1]), entry[2]))
     end
     table.insert(text, "    { NULL, NULL }")
     table.insert(text, "};")
-    table.insert(text, string.format("const unsigned charon_call_case_count = %d;", #entries))
+    table.insert(text, string.format("const unsigned revenant_call_case_count = %d;", #entries))
     io.writefile(opt.out, table.concat(text, "\n") .. "\n")
     io.writefile(opt.manifest, manifest_text(manifest))
     return {classes = #manifest.classes, members = #manifest.members, out = opt.out, manifest = opt.manifest}

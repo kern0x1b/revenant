@@ -7,78 +7,78 @@
 #import <sys/wait.h>
 #import <unistd.h>
 
-struct CharonCallLog {
+struct RevenantCallLog {
     NSMutableDictionary *instances;
 };
 
-static int charon_call_fd = -1;
-static NSString *charon_call_path;
+static int revenant_call_fd = -1;
+static NSString *revenant_call_path;
 
-void CharonCallOpen(const char *path)
+void RevenantCallOpen(const char *path)
 {
-    charon_call_path = [NSString stringWithUTF8String:path];
-    charon_call_fd = open(path, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+    revenant_call_path = [NSString stringWithUTF8String:path];
+    revenant_call_fd = open(path, O_WRONLY | O_CREAT | O_TRUNC, 0644);
 }
 
-void CharonCallClose(void)
+void RevenantCallClose(void)
 {
-    if (charon_call_fd >= 0) {
-        close(charon_call_fd);
-        charon_call_fd = -1;
+    if (revenant_call_fd >= 0) {
+        close(revenant_call_fd);
+        revenant_call_fd = -1;
     }
 }
 
-static void charon_call_say(NSString *line)
+static void revenant_call_say(NSString *line)
 {
-    if (charon_call_fd >= 0) {
+    if (revenant_call_fd >= 0) {
         NSData *data = [[line stringByAppendingString:@"\n"] dataUsingEncoding:NSUTF8StringEncoding];
-        write(charon_call_fd, [data bytes], [data length]);
+        write(revenant_call_fd, [data bytes], [data length]);
     }
 }
 
-CharonCallLog *CharonCallLogCreate(void)
+RevenantCallLog *RevenantCallLogCreate(void)
 {
-    CharonCallLog *log = calloc(1, sizeof(CharonCallLog));
+    RevenantCallLog *log = calloc(1, sizeof(RevenantCallLog));
     log->instances = [[NSMutableDictionary alloc] init];
     return log;
 }
 
-Class CharonCallClass(CharonCallLog *log, NSString *name)
+Class RevenantCallClass(RevenantCallLog *log, NSString *name)
 {
     Class cls = NSClassFromString(name);
-    charon_call_say(cls ? [NSString stringWithFormat:@"present %@", name]
+    revenant_call_say(cls ? [NSString stringWithFormat:@"present %@", name]
                         : [NSString stringWithFormat:@"missing %@", name]);
     (void)log;
     return cls;
 }
 
-id CharonCallInstance(CharonCallLog *log, Class cls)
+id RevenantCallInstance(RevenantCallLog *log, Class cls)
 {
     id remembered = [log->instances objectForKey:NSStringFromClass(cls)];
     return remembered ? remembered : [cls alloc];
 }
 
-void CharonCallRemember(CharonCallLog *log, Class cls, id instance)
+void RevenantCallRemember(RevenantCallLog *log, Class cls, id instance)
 {
     if (instance) {
         [log->instances setObject:instance forKey:NSStringFromClass(cls)];
     }
 }
 
-BOOL CharonCallSelector(CharonCallLog *log, Class cls, id receiver, SEL selector)
+BOOL RevenantCallSelector(RevenantCallLog *log, Class cls, id receiver, SEL selector)
 {
     (void)log;
     NSString *label = [NSString stringWithFormat:@"%@ %@", NSStringFromClass(cls),
                        NSStringFromSelector(selector)];
     if ([receiver respondsToSelector:selector]) {
-        charon_call_say([NSString stringWithFormat:@"answered %@", label]);
+        revenant_call_say([NSString stringWithFormat:@"answered %@", label]);
         return YES;
     }
-    charon_call_say([NSString stringWithFormat:@"missing %@", label]);
+    revenant_call_say([NSString stringWithFormat:@"missing %@", label]);
     return NO;
 }
 
-static NSString *charon_call_describe(id value)
+static NSString *revenant_call_describe(id value)
 {
     if (!value) {
         return @"nil";
@@ -99,41 +99,41 @@ static NSString *charon_call_describe(id value)
     return [NSString stringWithFormat:@"<%@>", NSStringFromClass([value class])];
 }
 
-void CharonCallNoted(CharonCallLog *log, Class cls, SEL selector, id value)
+void RevenantCallNoted(RevenantCallLog *log, Class cls, SEL selector, id value)
 {
     (void)log;
-    charon_call_say([NSString stringWithFormat:@"answered %@ %@ -> %@", NSStringFromClass(cls),
-                     NSStringFromSelector(selector), charon_call_describe(value)]);
+    revenant_call_say([NSString stringWithFormat:@"answered %@ %@ -> %@", NSStringFromClass(cls),
+                     NSStringFromSelector(selector), revenant_call_describe(value)]);
 }
 
-void CharonCallRaised(CharonCallLog *log, Class cls, SEL selector, NSException *raised)
+void RevenantCallRaised(RevenantCallLog *log, Class cls, SEL selector, NSException *raised)
 {
     (void)log;
-    charon_call_say([NSString stringWithFormat:@"refused %@ %@ raised %@: %@", NSStringFromClass(cls),
+    revenant_call_say([NSString stringWithFormat:@"refused %@ %@ raised %@: %@", NSStringFromClass(cls),
                      NSStringFromSelector(selector), [raised name],
                      [raised reason] ? [raised reason] : @""]);
 }
 
-void CharonCallProperty(CharonCallLog *log, Class cls, id object, NSString *name,
+void RevenantCallProperty(RevenantCallLog *log, Class cls, id object, NSString *name,
                         NSString *getter, NSString *setter)
 {
     SEL reading = NSSelectorFromString(getter);
     SEL writing = setter ? NSSelectorFromString(setter) : NULL;
-    if (!CharonCallSelector(log, cls, object, reading)) {
+    if (!RevenantCallSelector(log, cls, object, reading)) {
         return;
     }
     __unsafe_unretained id value = ((id (*)(id, SEL))objc_msgSend)(object, reading);
-    charon_call_say([NSString stringWithFormat:@"answered %@ -%@ -> %@", NSStringFromClass(cls),
-                     name, charon_call_describe(value)]);
+    revenant_call_say([NSString stringWithFormat:@"answered %@ -%@ -> %@", NSStringFromClass(cls),
+                     name, revenant_call_describe(value)]);
     if (writing && [object respondsToSelector:writing]) {
         ((void (*)(id, SEL, id))objc_msgSend)(object, writing, nil);
         __unsafe_unretained id after = ((id (*)(id, SEL))objc_msgSend)(object, reading);
-        charon_call_say([NSString stringWithFormat:@"answered %@ -%@= -> %@", NSStringFromClass(cls),
-                         getter, charon_call_describe(after)]);
+        revenant_call_say([NSString stringWithFormat:@"answered %@ -%@= -> %@", NSStringFromClass(cls),
+                         getter, revenant_call_describe(after)]);
     }
 }
 
-int CharonCallIsolated(const char *label, void (*run)(CharonCallLog *), CharonCallLog *log)
+int RevenantCallIsolated(const char *label, void (*run)(RevenantCallLog *), RevenantCallLog *log)
 {
     fflush(NULL);
     pid_t child = fork();
@@ -149,15 +149,15 @@ int CharonCallIsolated(const char *label, void (*run)(CharonCallLog *), CharonCa
     int status = 0;
     waitpid(child, &status, 0);
     if (!WIFEXITED(status) || WEXITSTATUS(status) != 0) {
-        charon_call_say([NSString stringWithFormat:@"crashed %s (status %d)", label, status]);
+        revenant_call_say([NSString stringWithFormat:@"crashed %s (status %d)", label, status]);
     }
     return status;
 }
 
-unsigned CharonCallReport(NSString *title)
+unsigned RevenantCallReport(NSString *title)
 {
-    CharonCallClose();
-    NSString *text = [NSString stringWithContentsOfFile:charon_call_path encoding:NSUTF8StringEncoding
+    RevenantCallClose();
+    NSString *text = [NSString stringWithContentsOfFile:revenant_call_path encoding:NSUTF8StringEncoding
                                                  error:NULL] ?: @"";
     NSMutableArray *missing = [NSMutableArray array];
     NSMutableArray *crashed = [NSMutableArray array];

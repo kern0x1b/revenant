@@ -1,6 +1,6 @@
 #import <UIKit/UIKit.h>
 
-@implementation UIViewController (CharonLayoutMarginsDidChange11)
+@implementation UIViewController (RevenantLayoutMarginsDidChange11)
 
 - (void)viewLayoutMarginsDidChange
 {

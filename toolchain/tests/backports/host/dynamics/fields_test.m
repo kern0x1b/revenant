@@ -6,12 +6,12 @@ static const double frame = 1.0 / 60.0;
 static const double substep = (double)(float)(1.0 / 120.0);
 
 @interface NSObject (FieldsPrivate)
-- (CGVector)charon_accelerationAt:(CGPoint)center velocity:(CGPoint)velocity mass:(CGFloat)mass charge:(CGFloat)charge time:(NSTimeInterval)time;
+- (CGVector)revenant_accelerationAt:(CGPoint)center velocity:(CGPoint)velocity mass:(CGFloat)mass charge:(CGFloat)charge time:(NSTimeInterval)time;
 @end
 
-extern const UIFloatRange CharonHostUIFloatRangeZero;
-extern const UIFloatRange CharonHostUIFloatRangeInfinite;
-BOOL CharonHostUIFloatRangeIsInfinite(UIFloatRange range);
+extern const UIFloatRange RevenantHostUIFloatRangeZero;
+extern const UIFloatRange RevenantHostUIFloatRangeInfinite;
+BOOL RevenantHostUIFloatRangeIsInfinite(UIFloatRange range);
 
 typedef UIFieldBehavior *(^FieldMaker)(Class kind);
 
@@ -122,7 +122,7 @@ static void test_object(void)
     NSArray *oracle = object_answers(Oracle), *ours = object_answers(Ours);
     const char *rows[] = {"-init", "description", "a child is not taken", "an item once", "removed", "NSCopying", "NSCoding"};
     for (NSUInteger index = 0; index < oracle.count; index++) {
-        charon_check([ours[index] isEqual:oracle[index]], "F1 field object as the oracle",
+        revenant_check([ours[index] isEqual:oracle[index]], "F1 field object as the oracle",
                      [NSString stringWithFormat:@"%s: ours %@ oracle %@", rows[index], ours[index], oracle[index]]);
     }
     CHECK_EQUAL(oracle[0], @"Invalid initialization: Use one of the supplied convenience initializers", "oracle field is as measured (p1)");
@@ -132,9 +132,9 @@ static void test_object(void)
 
 static void test_float_range(void)
 {
-    CHECK(CharonHostUIFloatRangeZero.minimum == UIFloatRangeZero.minimum && CharonHostUIFloatRangeZero.maximum == UIFloatRangeZero.maximum,
+    CHECK(RevenantHostUIFloatRangeZero.minimum == UIFloatRangeZero.minimum && RevenantHostUIFloatRangeZero.maximum == UIFloatRangeZero.maximum,
           "UIFloatRangeZero is the oracle's");
-    CHECK(CharonHostUIFloatRangeInfinite.minimum == UIFloatRangeInfinite.minimum && CharonHostUIFloatRangeInfinite.maximum == UIFloatRangeInfinite.maximum,
+    CHECK(RevenantHostUIFloatRangeInfinite.minimum == UIFloatRangeInfinite.minimum && RevenantHostUIFloatRangeInfinite.maximum == UIFloatRangeInfinite.maximum,
           "UIFloatRangeInfinite is the oracle's");
     const UIFloatRange ranges[] = {
         {-INFINITY, INFINITY}, {0, 0}, {-INFINITY, 0}, {0, INFINITY}, {INFINITY, -INFINITY}, {-FLT_MAX, FLT_MAX},
@@ -142,8 +142,8 @@ static void test_float_range(void)
         {nextafter(-(double)FLT_MAX, 0), FLT_MAX}, {-FLT_MAX, nextafter((double)FLT_MAX, 0)},
     };
     for (size_t index = 0; index < sizeof(ranges) / sizeof(ranges[0]); index++) {
-        BOOL expected = UIFloatRangeIsInfinite(ranges[index]), actual = CharonHostUIFloatRangeIsInfinite(ranges[index]);
-        charon_check(actual == expected, "UIFloatRangeIsInfinite answers as the oracle's",
+        BOOL expected = UIFloatRangeIsInfinite(ranges[index]), actual = RevenantHostUIFloatRangeIsInfinite(ranges[index]);
+        revenant_check(actual == expected, "UIFloatRangeIsInfinite answers as the oracle's",
                      [NSString stringWithFormat:@"{%g, %g}: ours %d oracle %d", ranges[index].minimum, ranges[index].maximum, actual, expected]);
     }
 }
@@ -191,7 +191,7 @@ static void test_categories(void)
     const char *rows[] = {"the 33rd field", "the refused field exerts no force", "the refused field is in behaviors",
                           "removing the refused field", "adding it after one was removed", "the field acts once let in"};
     for (NSUInteger index = 0; index < oracle.count; index++) {
-        charon_check([ours[index] isEqual:oracle[index]], "F3 the 33rd field as the oracle",
+        revenant_check([ours[index] isEqual:oracle[index]], "F3 the 33rd field as the oracle",
                      [NSString stringWithFormat:@"%s: ours %@ oracle %@", rows[index], ours[index], oracle[index]]);
     }
     CHECK_EQUAL(oracle[0], @"Invalid Association: UIDynamicAnimator supports a maximum of 32 distinct fields", "oracle fields are as m_f33 measured");
@@ -247,7 +247,7 @@ static void test_where(void)
     const char *rows[] = {"region edge 50", "beyond the edge 50.001", "inside on the diagonal", "on the edge in x", "on the edge in -x",
                           "beyond the edge in -y", "an item of the field", "an item of another behavior", "an anchored item"};
     for (NSUInteger index = 0; index < oracle.count; index++) {
-        charon_check([ours[index] isEqual:oracle[index]], "a field acts where the oracle's does",
+        revenant_check([ours[index] isEqual:oracle[index]], "a field acts where the oracle's does",
                      [NSString stringWithFormat:@"%s: ours %@ oracle %@", rows[index], ours[index], oracle[index]]);
     }
     CHECK([oracle[0] boolValue] && ![oracle[1] boolValue], "oracle region is as f_4 measured");
@@ -377,7 +377,7 @@ static void test_forces(void)
         OracleAcceleration measured = oracle_acceleration(c);
         CGVector oracle = measured.acceleration;
         UIFieldBehavior *field = c.make(field_class(Ours));
-        CGVector ours = [field charon_accelerationAt:CGPointMake(300, 400) velocity:c.velocity mass:c.density charge:c.charge time:substep];
+        CGVector ours = [field revenant_accelerationAt:CGPointMake(300, 400) velocity:c.velocity mass:c.density charge:c.charge time:substep];
         check_relative(ours.dx, oracle.dx, c.tolerance, measured.resolution.dx, "F5 field acceleration as the oracle", [name stringByAppendingString:@" x"]);
         check_relative(ours.dy, oracle.dy, c.tolerance, measured.resolution.dy, "F5 field acceleration as the oracle", [name stringByAppendingString:@" y"]);
         if (!isnan(c.measured.dx)) {
@@ -462,7 +462,7 @@ static void test_trajectories(void)
                 worstFrame = step + 1;
             }
         }
-        charon_check(worst <= c.tolerance, "F4 emulated field trajectory within the error s_fld measured",
+        revenant_check(worst <= c.tolerance, "F4 emulated field trajectory within the error s_fld measured",
                      [NSString stringWithFormat:@"%s: worst %.6g pt at frame %d over %d frames (tolerance %.6g)", c.name, worst, worstFrame, c.frames, c.tolerance]);
         printf("F4 %s: worst %.6g pt at frame %d; f%d ours (%.4f, %.4f) oracle (%.4f, %.4f)\n", c.name, worst, worstFrame, c.frames,
                ours[c.frames - 1].x, ours[c.frames - 1].y, oracle[c.frames - 1].x, oracle[c.frames - 1].y);

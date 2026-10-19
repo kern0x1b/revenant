@@ -249,8 +249,8 @@
       "introduced": "11.0",
       "minimum": "6.0",
       "status": "implemented",
-      "reason": "iOS 6 carries no ModelIO at all: its 6.1.3 armv7 cache holds no MDLAsset, no MDLMesh and no MDLTexture, and the framework arrived in iOS 9, so there is nothing on the release to answer with; and from 9.0 on the release carries this class itself, unexported until 11.0, so the name is an ALIAS through charon_alias.h and the band keeps one class of that name",
-      "effect": "a zone of a real capacity, with the allocator that made it, on the bands where the release has no such class (the proxy IS the class there and the category on Charon's own name answers); on 9.0 to 10.3.4 the release's own class answers, because it carries this one with -initWithCapacity:allocator:, -capacity and -allocator of its own and the category is not attached where the class already answers; from 11.0 the release exports the name and the band links neither. NSClassFromString answers nil on a release with no class of the name, which is what charon_alias.h writes down for every alias it makes",
+      "reason": "iOS 6 carries no ModelIO at all: its 6.1.3 armv7 cache holds no MDLAsset, no MDLMesh and no MDLTexture, and the framework arrived in iOS 9, so there is nothing on the release to answer with; and from 9.0 on the release carries this class itself, unexported until 11.0, so the name is an ALIAS through revenant_alias.h and the band keeps one class of that name",
+      "effect": "a zone of a real capacity, with the allocator that made it, on the bands where the release has no such class (the proxy IS the class there and the category on Revenant's own name answers); on 9.0 to 10.3.4 the release's own class answers, because it carries this one with -initWithCapacity:allocator:, -capacity and -allocator of its own and the category is not attached where the class already answers; from 11.0 the release exports the name and the band links neither. NSClassFromString answers nil on a release with no class of the name, which is what revenant_alias.h writes down for every alias it makes",
       "facts": "facts/ModelIO/AssetLoading.md",
       "source": "the header of the iOS 16.4 SDK for the contract; the host's own ModelIO over the same call, by tests/backports/host/modelio/differential.m; the 6.1.3 armv7 dyld cache, which carries no ModelIO at all; apple.objc.inventory and apple.dyld over the armv7 caches of 9.0 to 9.3.6 and the armv7s caches of 10.0.1 to 10.3.4, which carry the class with six own methods and export no symbol for it, and over the arm64 cache of 11.0, which exports it"
     },
@@ -2868,7 +2868,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "reason": "iOS 6 carries no ModelIO at all: its 6.1.3 armv7 cache holds no MDLAsset, no MDLMesh and no MDLTexture, and the framework arrived in iOS 9, so there is nothing on the release to answer with",
-      "effect": "holds what is set, and gives it back: the allocator that made the zone, read out of the state the category on Charon's own name keeps beside the class, on the bands where the release has no class of that name; on 9.0 to 10.3.4 and from 11.0 the release's own class answers it, which is why no member of ours is attached there",
+      "effect": "holds what is set, and gives it back: the allocator that made the zone, read out of the state the category on Revenant's own name keeps beside the class, on the bands where the release has no class of that name; on 9.0 to 10.3.4 and from 11.0 the release's own class answers it, which is why no member of ours is attached there",
       "facts": "facts/ModelIO/AssetLoading.md",
       "source": "the header of the iOS 16.4 SDK for the contract; the host's own ModelIO over the same call, by tests/backports/host/modelio/differential.m; the 6.1.3 armv7 dyld cache, which carries no ModelIO at all"
     },
@@ -2879,7 +2879,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "reason": "iOS 6 carries no ModelIO at all: its 6.1.3 armv7 cache holds no MDLAsset, no MDLMesh and no MDLTexture, and the framework arrived in iOS 9, so there is nothing on the release to answer with",
-      "effect": "holds what is set, and gives it back: the capacity the allocator was asked to make, read out of the state the category on Charon's own name keeps beside the class, on the bands where the release has no class of that name; on 9.0 to 10.3.4 and from 11.0 the release's own class answers it, which is why no member of ours is attached there",
+      "effect": "holds what is set, and gives it back: the capacity the allocator was asked to make, read out of the state the category on Revenant's own name keeps beside the class, on the bands where the release has no class of that name; on 9.0 to 10.3.4 and from 11.0 the release's own class answers it, which is why no member of ours is attached there",
       "facts": "facts/ModelIO/AssetLoading.md",
       "source": "the header of the iOS 16.4 SDK for the contract; the host's own ModelIO over the same call, by tests/backports/host/modelio/differential.m; the 6.1.3 armv7 dyld cache, which carries no ModelIO at all"
     },

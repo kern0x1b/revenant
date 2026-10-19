@@ -38,7 +38,7 @@ public final class IntentParameter<Value>: @unchecked Sendable where Value: _Int
     public var wrappedValue: Value {
         get {
             guard let held = value else {
-                CharonUnset.fatal("a parameter read before the framework filled it in")
+                RevenantUnset.fatal("a parameter read before the framework filled it in")
             }
             return held
         }
@@ -194,251 +194,251 @@ public final class IntentParameter<Value>: @unchecked Sendable where Value: _Int
     }
 
     public convenience init(description: LocalizedStringResource? = nil, controlStyle: (any Hashable)? = nil, inclusiveRange: AnyRange? = nil, requestValueDialog: IntentDialog? = nil, inputConnectionBehavior: InputConnectionBehavior = .default, optionsProvider: (any DynamicOptionsProvider)? = nil) {
-        self.init(storage: Storage(title: CharonLocalized.resource(""), isOptional: true), description: description, controlStyle: controlStyle, inclusiveRange: inclusiveRange, requestValueDialog: requestValueDialog, inputConnectionBehavior: inputConnectionBehavior, optionsProvider: optionsProvider)
+        self.init(storage: Storage(title: RevenantLocalized.resource(""), isOptional: true), description: description, controlStyle: controlStyle, inclusiveRange: inclusiveRange, requestValueDialog: requestValueDialog, inputConnectionBehavior: inputConnectionBehavior, optionsProvider: optionsProvider)
     }
 
     public convenience init(description: LocalizedStringResource? = nil, controlStyle: (any Hashable)? = nil, inclusiveRange: AnyRange? = nil, requestValueDialog: IntentDialog? = nil, inputConnectionBehavior: InputConnectionBehavior = .default, optionsProvider: (any DynamicOptionsProvider)? = nil, resolvers: @escaping () -> (any ResolverSpecification)) {
-        self.init(storage: Storage(title: CharonLocalized.resource(""), isOptional: true), description: description, controlStyle: controlStyle, inclusiveRange: inclusiveRange, requestValueDialog: requestValueDialog, inputConnectionBehavior: inputConnectionBehavior, optionsProvider: optionsProvider, resolvers: resolvers())
+        self.init(storage: Storage(title: RevenantLocalized.resource(""), isOptional: true), description: description, controlStyle: controlStyle, inclusiveRange: inclusiveRange, requestValueDialog: requestValueDialog, inputConnectionBehavior: inputConnectionBehavior, optionsProvider: optionsProvider, resolvers: resolvers())
     }
 
     public convenience init(description: LocalizedStringResource? = nil, default defaultValue: Value.UnwrappedType? = nil, controlStyle: (any Hashable)? = nil, inclusiveRange: AnyRange? = nil, requestValueDialog: IntentDialog? = nil, inputConnectionBehavior: InputConnectionBehavior = .default) {
-        self.init(storage: Storage(title: CharonLocalized.resource(""), isOptional: true), description: description, default: defaultValue, controlStyle: controlStyle, inclusiveRange: inclusiveRange, requestValueDialog: requestValueDialog, inputConnectionBehavior: inputConnectionBehavior)
+        self.init(storage: Storage(title: RevenantLocalized.resource(""), isOptional: true), description: description, default: defaultValue, controlStyle: controlStyle, inclusiveRange: inclusiveRange, requestValueDialog: requestValueDialog, inputConnectionBehavior: inputConnectionBehavior)
     }
 
     public convenience init(description: LocalizedStringResource? = nil, default defaultValue: Value.UnwrappedType? = nil, controlStyle: (any Hashable)? = nil, inclusiveRange: AnyRange? = nil, requestValueDialog: IntentDialog? = nil, inputConnectionBehavior: InputConnectionBehavior = .default, resolvers: @escaping () -> (any ResolverSpecification)) {
-        self.init(storage: Storage(title: CharonLocalized.resource(""), isOptional: true), description: description, default: defaultValue, controlStyle: controlStyle, inclusiveRange: inclusiveRange, requestValueDialog: requestValueDialog, inputConnectionBehavior: inputConnectionBehavior, resolvers: resolvers())
+        self.init(storage: Storage(title: RevenantLocalized.resource(""), isOptional: true), description: description, default: defaultValue, controlStyle: controlStyle, inclusiveRange: inclusiveRange, requestValueDialog: requestValueDialog, inputConnectionBehavior: inputConnectionBehavior, resolvers: resolvers())
     }
 
     public convenience init(description: LocalizedStringResource? = nil, default defaultValue: Value.UnwrappedType? = nil, currencyCodes: [String] = [], inclusiveRange: AnyRange? = nil, requestValueDialog: IntentDialog? = nil, inputConnectionBehavior: InputConnectionBehavior = .default) {
-        self.init(storage: Storage(title: CharonLocalized.resource(""), isOptional: true), description: description, default: defaultValue, inclusiveRange: inclusiveRange, currencyCodes: currencyCodes, requestValueDialog: requestValueDialog, inputConnectionBehavior: inputConnectionBehavior)
+        self.init(storage: Storage(title: RevenantLocalized.resource(""), isOptional: true), description: description, default: defaultValue, inclusiveRange: inclusiveRange, currencyCodes: currencyCodes, requestValueDialog: requestValueDialog, inputConnectionBehavior: inputConnectionBehavior)
     }
 
     public convenience init(description: LocalizedStringResource? = nil, default defaultValue: Value.UnwrappedType? = nil, currencyCodes: [String] = [], inclusiveRange: AnyRange? = nil, requestValueDialog: IntentDialog? = nil, inputConnectionBehavior: InputConnectionBehavior = .default, resolvers: @escaping () -> (any ResolverSpecification)) {
-        self.init(storage: Storage(title: CharonLocalized.resource(""), isOptional: true), description: description, default: defaultValue, inclusiveRange: inclusiveRange, currencyCodes: currencyCodes, requestValueDialog: requestValueDialog, inputConnectionBehavior: inputConnectionBehavior, resolvers: resolvers())
+        self.init(storage: Storage(title: RevenantLocalized.resource(""), isOptional: true), description: description, default: defaultValue, inclusiveRange: inclusiveRange, currencyCodes: currencyCodes, requestValueDialog: requestValueDialog, inputConnectionBehavior: inputConnectionBehavior, resolvers: resolvers())
     }
 
     public convenience init(description: LocalizedStringResource? = nil, default defaultValue: Value.UnwrappedType? = nil, currencyCodes: [String] = [], inclusiveRange: AnyRange? = nil, requestValueDialog: IntentDialog? = nil, inputConnectionBehavior: InputConnectionBehavior = .default, optionsProvider: (any DynamicOptionsProvider)? = nil) {
-        self.init(storage: Storage(title: CharonLocalized.resource(""), isOptional: true), description: description, default: defaultValue, inclusiveRange: inclusiveRange, currencyCodes: currencyCodes, requestValueDialog: requestValueDialog, inputConnectionBehavior: inputConnectionBehavior, optionsProvider: optionsProvider)
+        self.init(storage: Storage(title: RevenantLocalized.resource(""), isOptional: true), description: description, default: defaultValue, inclusiveRange: inclusiveRange, currencyCodes: currencyCodes, requestValueDialog: requestValueDialog, inputConnectionBehavior: inputConnectionBehavior, optionsProvider: optionsProvider)
     }
 
     public convenience init(description: LocalizedStringResource? = nil, default defaultValue: Value.UnwrappedType? = nil, currencyCodes: [String] = [], inclusiveRange: AnyRange? = nil, requestValueDialog: IntentDialog? = nil, inputConnectionBehavior: InputConnectionBehavior = .default, optionsProvider: (any DynamicOptionsProvider)? = nil, resolvers: @escaping () -> (any ResolverSpecification)) {
-        self.init(storage: Storage(title: CharonLocalized.resource(""), isOptional: true), description: description, default: defaultValue, inclusiveRange: inclusiveRange, currencyCodes: currencyCodes, requestValueDialog: requestValueDialog, inputConnectionBehavior: inputConnectionBehavior, optionsProvider: optionsProvider, resolvers: resolvers())
+        self.init(storage: Storage(title: RevenantLocalized.resource(""), isOptional: true), description: description, default: defaultValue, inclusiveRange: inclusiveRange, currencyCodes: currencyCodes, requestValueDialog: requestValueDialog, inputConnectionBehavior: inputConnectionBehavior, optionsProvider: optionsProvider, resolvers: resolvers())
     }
 
     public convenience init(description: LocalizedStringResource? = nil, default defaultValue: Value.UnwrappedType? = nil, displayName: (any Hashable)? = nil, requestValueDialog: IntentDialog? = nil, inputConnectionBehavior: InputConnectionBehavior = .default) {
-        self.init(storage: Storage(title: CharonLocalized.resource(""), isOptional: true), description: description, default: defaultValue, displayName: displayName, requestValueDialog: requestValueDialog, inputConnectionBehavior: inputConnectionBehavior)
+        self.init(storage: Storage(title: RevenantLocalized.resource(""), isOptional: true), description: description, default: defaultValue, displayName: displayName, requestValueDialog: requestValueDialog, inputConnectionBehavior: inputConnectionBehavior)
     }
 
     public convenience init(description: LocalizedStringResource? = nil, default defaultValue: Value.UnwrappedType? = nil, displayName: (any Hashable)? = nil, requestValueDialog: IntentDialog? = nil, inputConnectionBehavior: InputConnectionBehavior = .default, resolvers: @escaping () -> (any ResolverSpecification)) {
-        self.init(storage: Storage(title: CharonLocalized.resource(""), isOptional: true), description: description, default: defaultValue, displayName: displayName, requestValueDialog: requestValueDialog, inputConnectionBehavior: inputConnectionBehavior, resolvers: resolvers())
+        self.init(storage: Storage(title: RevenantLocalized.resource(""), isOptional: true), description: description, default: defaultValue, displayName: displayName, requestValueDialog: requestValueDialog, inputConnectionBehavior: inputConnectionBehavior, resolvers: resolvers())
     }
 
     public convenience init(description: LocalizedStringResource? = nil, default defaultValue: Value.UnwrappedType? = nil, displayStyle: (any Hashable)? = nil, requestValueDialog: IntentDialog? = nil, inputConnectionBehavior: InputConnectionBehavior = .default) {
-        self.init(storage: Storage(title: CharonLocalized.resource(""), isOptional: true), description: description, default: defaultValue, displayStyle: displayStyle, requestValueDialog: requestValueDialog, inputConnectionBehavior: inputConnectionBehavior)
+        self.init(storage: Storage(title: RevenantLocalized.resource(""), isOptional: true), description: description, default: defaultValue, displayStyle: displayStyle, requestValueDialog: requestValueDialog, inputConnectionBehavior: inputConnectionBehavior)
     }
 
     public convenience init(description: LocalizedStringResource? = nil, default defaultValue: Value.UnwrappedType? = nil, displayStyle: (any Hashable)? = nil, requestValueDialog: IntentDialog? = nil, inputConnectionBehavior: InputConnectionBehavior = .default, resolvers: @escaping () -> (any ResolverSpecification)) {
-        self.init(storage: Storage(title: CharonLocalized.resource(""), isOptional: true), description: description, default: defaultValue, displayStyle: displayStyle, requestValueDialog: requestValueDialog, inputConnectionBehavior: inputConnectionBehavior, resolvers: resolvers())
+        self.init(storage: Storage(title: RevenantLocalized.resource(""), isOptional: true), description: description, default: defaultValue, displayStyle: displayStyle, requestValueDialog: requestValueDialog, inputConnectionBehavior: inputConnectionBehavior, resolvers: resolvers())
     }
 
     public convenience init(description: LocalizedStringResource? = nil, default defaultValue: Value.UnwrappedType? = nil, displayStyle: (any Hashable)? = nil, requestValueDialog: IntentDialog? = nil, inputConnectionBehavior: InputConnectionBehavior = .default, optionsProvider: (any DynamicOptionsProvider)? = nil) {
-        self.init(storage: Storage(title: CharonLocalized.resource(""), isOptional: true), description: description, default: defaultValue, displayStyle: displayStyle, requestValueDialog: requestValueDialog, inputConnectionBehavior: inputConnectionBehavior, optionsProvider: optionsProvider)
+        self.init(storage: Storage(title: RevenantLocalized.resource(""), isOptional: true), description: description, default: defaultValue, displayStyle: displayStyle, requestValueDialog: requestValueDialog, inputConnectionBehavior: inputConnectionBehavior, optionsProvider: optionsProvider)
     }
 
     public convenience init(description: LocalizedStringResource? = nil, default defaultValue: Value.UnwrappedType? = nil, displayStyle: (any Hashable)? = nil, requestValueDialog: IntentDialog? = nil, inputConnectionBehavior: InputConnectionBehavior = .default, optionsProvider: (any DynamicOptionsProvider)? = nil, resolvers: @escaping () -> (any ResolverSpecification)) {
-        self.init(storage: Storage(title: CharonLocalized.resource(""), isOptional: true), description: description, default: defaultValue, displayStyle: displayStyle, requestValueDialog: requestValueDialog, inputConnectionBehavior: inputConnectionBehavior, optionsProvider: optionsProvider, resolvers: resolvers())
+        self.init(storage: Storage(title: RevenantLocalized.resource(""), isOptional: true), description: description, default: defaultValue, displayStyle: displayStyle, requestValueDialog: requestValueDialog, inputConnectionBehavior: inputConnectionBehavior, optionsProvider: optionsProvider, resolvers: resolvers())
     }
 
     public convenience init(description: LocalizedStringResource? = nil, default defaultValue: Value.UnwrappedType? = nil, inputOptions: String.IntentInputOptions? = nil, requestValueDialog: IntentDialog? = nil, inputConnectionBehavior: InputConnectionBehavior = .default) {
-        self.init(storage: Storage(title: CharonLocalized.resource(""), isOptional: true), description: description, default: defaultValue, inputOptions: inputOptions, requestValueDialog: requestValueDialog, inputConnectionBehavior: inputConnectionBehavior)
+        self.init(storage: Storage(title: RevenantLocalized.resource(""), isOptional: true), description: description, default: defaultValue, inputOptions: inputOptions, requestValueDialog: requestValueDialog, inputConnectionBehavior: inputConnectionBehavior)
     }
 
     public convenience init(description: LocalizedStringResource? = nil, default defaultValue: Value.UnwrappedType? = nil, inputOptions: String.IntentInputOptions? = nil, requestValueDialog: IntentDialog? = nil, inputConnectionBehavior: InputConnectionBehavior = .default, resolvers: @escaping () -> (any ResolverSpecification)) {
-        self.init(storage: Storage(title: CharonLocalized.resource(""), isOptional: true), description: description, default: defaultValue, inputOptions: inputOptions, requestValueDialog: requestValueDialog, inputConnectionBehavior: inputConnectionBehavior, resolvers: resolvers())
+        self.init(storage: Storage(title: RevenantLocalized.resource(""), isOptional: true), description: description, default: defaultValue, inputOptions: inputOptions, requestValueDialog: requestValueDialog, inputConnectionBehavior: inputConnectionBehavior, resolvers: resolvers())
     }
 
     public convenience init(description: LocalizedStringResource? = nil, default defaultValue: Value.UnwrappedType? = nil, kind: IntentParameter<Int>.DateKind? = nil, requestValueDialog: IntentDialog? = nil, inputConnectionBehavior: InputConnectionBehavior = .default) {
-        self.init(storage: Storage(title: CharonLocalized.resource(""), isOptional: true), description: description, default: defaultValue, dateKind: kind, requestValueDialog: requestValueDialog, inputConnectionBehavior: inputConnectionBehavior)
+        self.init(storage: Storage(title: RevenantLocalized.resource(""), isOptional: true), description: description, default: defaultValue, dateKind: kind, requestValueDialog: requestValueDialog, inputConnectionBehavior: inputConnectionBehavior)
     }
 
     public convenience init(description: LocalizedStringResource? = nil, default defaultValue: Value.UnwrappedType? = nil, kind: IntentParameter<Int>.DateKind? = nil, requestValueDialog: IntentDialog? = nil, inputConnectionBehavior: InputConnectionBehavior = .default, resolvers: @escaping () -> (any ResolverSpecification)) {
-        self.init(storage: Storage(title: CharonLocalized.resource(""), isOptional: true), description: description, default: defaultValue, dateKind: kind, requestValueDialog: requestValueDialog, inputConnectionBehavior: inputConnectionBehavior, resolvers: resolvers())
+        self.init(storage: Storage(title: RevenantLocalized.resource(""), isOptional: true), description: description, default: defaultValue, dateKind: kind, requestValueDialog: requestValueDialog, inputConnectionBehavior: inputConnectionBehavior, resolvers: resolvers())
     }
 
     public convenience init(description: LocalizedStringResource? = nil, default defaultValue: Value.UnwrappedType? = nil, kind: IntentParameter<Int>.DateKind? = nil, requestValueDialog: IntentDialog? = nil, inputConnectionBehavior: InputConnectionBehavior = .default, optionsProvider: (any DynamicOptionsProvider)? = nil) {
-        self.init(storage: Storage(title: CharonLocalized.resource(""), isOptional: true), description: description, default: defaultValue, dateKind: kind, requestValueDialog: requestValueDialog, inputConnectionBehavior: inputConnectionBehavior, optionsProvider: optionsProvider)
+        self.init(storage: Storage(title: RevenantLocalized.resource(""), isOptional: true), description: description, default: defaultValue, dateKind: kind, requestValueDialog: requestValueDialog, inputConnectionBehavior: inputConnectionBehavior, optionsProvider: optionsProvider)
     }
 
     public convenience init(description: LocalizedStringResource? = nil, default defaultValue: Value.UnwrappedType? = nil, kind: IntentParameter<Int>.DateKind? = nil, requestValueDialog: IntentDialog? = nil, inputConnectionBehavior: InputConnectionBehavior = .default, optionsProvider: (any DynamicOptionsProvider)? = nil, resolvers: @escaping () -> (any ResolverSpecification)) {
-        self.init(storage: Storage(title: CharonLocalized.resource(""), isOptional: true), description: description, default: defaultValue, dateKind: kind, requestValueDialog: requestValueDialog, inputConnectionBehavior: inputConnectionBehavior, optionsProvider: optionsProvider, resolvers: resolvers())
+        self.init(storage: Storage(title: RevenantLocalized.resource(""), isOptional: true), description: description, default: defaultValue, dateKind: kind, requestValueDialog: requestValueDialog, inputConnectionBehavior: inputConnectionBehavior, optionsProvider: optionsProvider, resolvers: resolvers())
     }
 
     public convenience init(description: LocalizedStringResource? = nil, default defaultValue: Value.UnwrappedType? = nil, mode: (any Hashable)? = nil, requestValueDialog: IntentDialog? = nil, inputConnectionBehavior: InputConnectionBehavior = .default) {
-        self.init(storage: Storage(title: CharonLocalized.resource(""), isOptional: true), description: description, default: defaultValue, parameterMode: mode, requestValueDialog: requestValueDialog, inputConnectionBehavior: inputConnectionBehavior)
+        self.init(storage: Storage(title: RevenantLocalized.resource(""), isOptional: true), description: description, default: defaultValue, parameterMode: mode, requestValueDialog: requestValueDialog, inputConnectionBehavior: inputConnectionBehavior)
     }
 
     public convenience init(description: LocalizedStringResource? = nil, default defaultValue: Value.UnwrappedType? = nil, mode: (any Hashable)? = nil, requestValueDialog: IntentDialog? = nil, inputConnectionBehavior: InputConnectionBehavior = .default, resolvers: @escaping () -> (any ResolverSpecification)) {
-        self.init(storage: Storage(title: CharonLocalized.resource(""), isOptional: true), description: description, default: defaultValue, parameterMode: mode, requestValueDialog: requestValueDialog, inputConnectionBehavior: inputConnectionBehavior, resolvers: resolvers())
+        self.init(storage: Storage(title: RevenantLocalized.resource(""), isOptional: true), description: description, default: defaultValue, parameterMode: mode, requestValueDialog: requestValueDialog, inputConnectionBehavior: inputConnectionBehavior, resolvers: resolvers())
     }
 
     public convenience init(description: LocalizedStringResource? = nil, default defaultValue: Value.UnwrappedType? = nil, mode: (any Hashable)? = nil, requestValueDialog: IntentDialog? = nil, inputConnectionBehavior: InputConnectionBehavior = .default, optionsProvider: (any DynamicOptionsProvider)? = nil) {
-        self.init(storage: Storage(title: CharonLocalized.resource(""), isOptional: true), description: description, default: defaultValue, parameterMode: mode, requestValueDialog: requestValueDialog, inputConnectionBehavior: inputConnectionBehavior, optionsProvider: optionsProvider)
+        self.init(storage: Storage(title: RevenantLocalized.resource(""), isOptional: true), description: description, default: defaultValue, parameterMode: mode, requestValueDialog: requestValueDialog, inputConnectionBehavior: inputConnectionBehavior, optionsProvider: optionsProvider)
     }
 
     public convenience init(description: LocalizedStringResource? = nil, default defaultValue: Value.UnwrappedType? = nil, mode: (any Hashable)? = nil, requestValueDialog: IntentDialog? = nil, inputConnectionBehavior: InputConnectionBehavior = .default, optionsProvider: (any DynamicOptionsProvider)? = nil, resolvers: @escaping () -> (any ResolverSpecification)) {
-        self.init(storage: Storage(title: CharonLocalized.resource(""), isOptional: true), description: description, default: defaultValue, parameterMode: mode, requestValueDialog: requestValueDialog, inputConnectionBehavior: inputConnectionBehavior, optionsProvider: optionsProvider, resolvers: resolvers())
+        self.init(storage: Storage(title: RevenantLocalized.resource(""), isOptional: true), description: description, default: defaultValue, parameterMode: mode, requestValueDialog: requestValueDialog, inputConnectionBehavior: inputConnectionBehavior, optionsProvider: optionsProvider, resolvers: resolvers())
     }
 
     public convenience init(description: LocalizedStringResource? = nil, default defaultValue: Value.UnwrappedType? = nil, mode: (any Hashable)? = nil, size: IntentCollectionSize? = nil, inputConnectionBehavior: InputConnectionBehavior = .default) {
-        self.init(storage: Storage(title: CharonLocalized.resource(""), isOptional: true), description: description, default: defaultValue, parameterMode: mode, size: size, inputConnectionBehavior: inputConnectionBehavior)
+        self.init(storage: Storage(title: RevenantLocalized.resource(""), isOptional: true), description: description, default: defaultValue, parameterMode: mode, size: size, inputConnectionBehavior: inputConnectionBehavior)
     }
 
     public convenience init(description: LocalizedStringResource? = nil, default defaultValue: Value.UnwrappedType? = nil, requestValueDialog: IntentDialog? = nil, inputConnectionBehavior: InputConnectionBehavior = .default) {
-        self.init(storage: Storage(title: CharonLocalized.resource(""), isOptional: true), description: description, default: defaultValue, requestValueDialog: requestValueDialog, inputConnectionBehavior: inputConnectionBehavior)
+        self.init(storage: Storage(title: RevenantLocalized.resource(""), isOptional: true), description: description, default: defaultValue, requestValueDialog: requestValueDialog, inputConnectionBehavior: inputConnectionBehavior)
     }
 
     public convenience init(description: LocalizedStringResource? = nil, default defaultValue: Value.UnwrappedType? = nil, requestValueDialog: IntentDialog? = nil, inputConnectionBehavior: InputConnectionBehavior = .default, resolvers: @escaping () -> (any ResolverSpecification)) {
-        self.init(storage: Storage(title: CharonLocalized.resource(""), isOptional: true), description: description, default: defaultValue, requestValueDialog: requestValueDialog, inputConnectionBehavior: inputConnectionBehavior, resolvers: resolvers())
+        self.init(storage: Storage(title: RevenantLocalized.resource(""), isOptional: true), description: description, default: defaultValue, requestValueDialog: requestValueDialog, inputConnectionBehavior: inputConnectionBehavior, resolvers: resolvers())
     }
 
     public convenience init(description: LocalizedStringResource? = nil, default defaultValue: Value.UnwrappedType? = nil, requestValueDialog: IntentDialog? = nil, inputConnectionBehavior: InputConnectionBehavior = .default, optionsProvider: (any DynamicOptionsProvider)? = nil) {
-        self.init(storage: Storage(title: CharonLocalized.resource(""), isOptional: true), description: description, default: defaultValue, requestValueDialog: requestValueDialog, inputConnectionBehavior: inputConnectionBehavior, optionsProvider: optionsProvider)
+        self.init(storage: Storage(title: RevenantLocalized.resource(""), isOptional: true), description: description, default: defaultValue, requestValueDialog: requestValueDialog, inputConnectionBehavior: inputConnectionBehavior, optionsProvider: optionsProvider)
     }
 
     public convenience init(description: LocalizedStringResource? = nil, default defaultValue: Value.UnwrappedType? = nil, requestValueDialog: IntentDialog? = nil, inputConnectionBehavior: InputConnectionBehavior = .default, optionsProvider: (any DynamicOptionsProvider)? = nil, resolvers: @escaping () -> (any ResolverSpecification)) {
-        self.init(storage: Storage(title: CharonLocalized.resource(""), isOptional: true), description: description, default: defaultValue, requestValueDialog: requestValueDialog, inputConnectionBehavior: inputConnectionBehavior, optionsProvider: optionsProvider, resolvers: resolvers())
+        self.init(storage: Storage(title: RevenantLocalized.resource(""), isOptional: true), description: description, default: defaultValue, requestValueDialog: requestValueDialog, inputConnectionBehavior: inputConnectionBehavior, optionsProvider: optionsProvider, resolvers: resolvers())
     }
 
     public convenience init(description: LocalizedStringResource? = nil, default defaultValue: Value.UnwrappedType? = nil, requestValueDialog: IntentDialog? = nil, requestDisambiguationDialog: IntentDialog? = nil, inputConnectionBehavior: InputConnectionBehavior = .default) {
-        self.init(storage: Storage(title: CharonLocalized.resource(""), isOptional: true), description: description, default: defaultValue, requestValueDialog: requestValueDialog, requestDisambiguationDialog: requestDisambiguationDialog, inputConnectionBehavior: inputConnectionBehavior)
+        self.init(storage: Storage(title: RevenantLocalized.resource(""), isOptional: true), description: description, default: defaultValue, requestValueDialog: requestValueDialog, requestDisambiguationDialog: requestDisambiguationDialog, inputConnectionBehavior: inputConnectionBehavior)
     }
 
     public convenience init(description: LocalizedStringResource? = nil, default defaultValue: Value.UnwrappedType? = nil, requestValueDialog: IntentDialog? = nil, requestDisambiguationDialog: IntentDialog? = nil, inputConnectionBehavior: InputConnectionBehavior = .default, resolvers: @escaping () -> (any ResolverSpecification)) {
-        self.init(storage: Storage(title: CharonLocalized.resource(""), isOptional: true), description: description, default: defaultValue, requestValueDialog: requestValueDialog, requestDisambiguationDialog: requestDisambiguationDialog, inputConnectionBehavior: inputConnectionBehavior, resolvers: resolvers())
+        self.init(storage: Storage(title: RevenantLocalized.resource(""), isOptional: true), description: description, default: defaultValue, requestValueDialog: requestValueDialog, requestDisambiguationDialog: requestDisambiguationDialog, inputConnectionBehavior: inputConnectionBehavior, resolvers: resolvers())
     }
 
     public convenience init(description: LocalizedStringResource? = nil, default defaultValue: Value.UnwrappedType? = nil, requestValueDialog: IntentDialog? = nil, requestDisambiguationDialog: IntentDialog? = nil, inputConnectionBehavior: InputConnectionBehavior = .default, optionsProvider: (any DynamicOptionsProvider)? = nil) {
-        self.init(storage: Storage(title: CharonLocalized.resource(""), isOptional: true), description: description, default: defaultValue, requestValueDialog: requestValueDialog, requestDisambiguationDialog: requestDisambiguationDialog, inputConnectionBehavior: inputConnectionBehavior, optionsProvider: optionsProvider)
+        self.init(storage: Storage(title: RevenantLocalized.resource(""), isOptional: true), description: description, default: defaultValue, requestValueDialog: requestValueDialog, requestDisambiguationDialog: requestDisambiguationDialog, inputConnectionBehavior: inputConnectionBehavior, optionsProvider: optionsProvider)
     }
 
     public convenience init(description: LocalizedStringResource? = nil, default defaultValue: Value.UnwrappedType? = nil, requestValueDialog: IntentDialog? = nil, requestDisambiguationDialog: IntentDialog? = nil, inputConnectionBehavior: InputConnectionBehavior = .default, optionsProvider: (any DynamicOptionsProvider)? = nil, resolvers: @escaping () -> (any ResolverSpecification)) {
-        self.init(storage: Storage(title: CharonLocalized.resource(""), isOptional: true), description: description, default: defaultValue, requestValueDialog: requestValueDialog, requestDisambiguationDialog: requestDisambiguationDialog, inputConnectionBehavior: inputConnectionBehavior, optionsProvider: optionsProvider, resolvers: resolvers())
+        self.init(storage: Storage(title: RevenantLocalized.resource(""), isOptional: true), description: description, default: defaultValue, requestValueDialog: requestValueDialog, requestDisambiguationDialog: requestDisambiguationDialog, inputConnectionBehavior: inputConnectionBehavior, optionsProvider: optionsProvider, resolvers: resolvers())
     }
 
     public convenience init(description: LocalizedStringResource? = nil, default defaultValue: Value.UnwrappedType? = nil, requestValueDialog: IntentDialog? = nil, requestDisambiguationDialog: IntentDialog? = nil, inputConnectionBehavior: InputConnectionBehavior = .default, query: (any EntityStringQuery)? = nil) {
-        self.init(storage: Storage(title: CharonLocalized.resource(""), isOptional: true), description: description, default: defaultValue, requestValueDialog: requestValueDialog, requestDisambiguationDialog: requestDisambiguationDialog, inputConnectionBehavior: inputConnectionBehavior, query: query)
+        self.init(storage: Storage(title: RevenantLocalized.resource(""), isOptional: true), description: description, default: defaultValue, requestValueDialog: requestValueDialog, requestDisambiguationDialog: requestDisambiguationDialog, inputConnectionBehavior: inputConnectionBehavior, query: query)
     }
 
     public convenience init(description: LocalizedStringResource? = nil, default defaultValue: Value.UnwrappedType? = nil, requestValueDialog: IntentDialog? = nil, requestDisambiguationDialog: IntentDialog? = nil, inputConnectionBehavior: InputConnectionBehavior = .default, supportedValues: [Value.UnwrappedType] = []) {
-        self.init(storage: Storage(title: CharonLocalized.resource(""), isOptional: true), description: description, default: defaultValue, supportedValues: supportedValues, requestValueDialog: requestValueDialog, requestDisambiguationDialog: requestDisambiguationDialog, inputConnectionBehavior: inputConnectionBehavior)
+        self.init(storage: Storage(title: RevenantLocalized.resource(""), isOptional: true), description: description, default: defaultValue, supportedValues: supportedValues, requestValueDialog: requestValueDialog, requestDisambiguationDialog: requestDisambiguationDialog, inputConnectionBehavior: inputConnectionBehavior)
     }
 
     public convenience init(description: LocalizedStringResource? = nil, default defaultValue: Value.UnwrappedType? = nil, requestValueDialog: IntentDialog? = nil, requestDisambiguationDialog: IntentDialog? = nil, inputConnectionBehavior: InputConnectionBehavior = .default, supportedValues: [Value.UnwrappedType] = [], resolvers: @escaping () -> (any ResolverSpecification)) {
-        self.init(storage: Storage(title: CharonLocalized.resource(""), isOptional: true), description: description, default: defaultValue, supportedValues: supportedValues, requestValueDialog: requestValueDialog, requestDisambiguationDialog: requestDisambiguationDialog, inputConnectionBehavior: inputConnectionBehavior, resolvers: resolvers())
+        self.init(storage: Storage(title: RevenantLocalized.resource(""), isOptional: true), description: description, default: defaultValue, supportedValues: supportedValues, requestValueDialog: requestValueDialog, requestDisambiguationDialog: requestDisambiguationDialog, inputConnectionBehavior: inputConnectionBehavior, resolvers: resolvers())
     }
 
     public convenience init(description: LocalizedStringResource? = nil, default defaultValue: Value.UnwrappedType? = nil, requestValueDialog: IntentDialog? = nil, requestDisambiguationDialog: IntentDialog? = nil, inputConnectionBehavior: InputConnectionBehavior = .default, supportedValues: [Value.UnwrappedType] = [], optionsProvider: (any DynamicOptionsProvider)? = nil) {
-        self.init(storage: Storage(title: CharonLocalized.resource(""), isOptional: true), description: description, default: defaultValue, supportedValues: supportedValues, requestValueDialog: requestValueDialog, requestDisambiguationDialog: requestDisambiguationDialog, inputConnectionBehavior: inputConnectionBehavior, optionsProvider: optionsProvider)
+        self.init(storage: Storage(title: RevenantLocalized.resource(""), isOptional: true), description: description, default: defaultValue, supportedValues: supportedValues, requestValueDialog: requestValueDialog, requestDisambiguationDialog: requestDisambiguationDialog, inputConnectionBehavior: inputConnectionBehavior, optionsProvider: optionsProvider)
     }
 
     public convenience init(description: LocalizedStringResource? = nil, default defaultValue: Value.UnwrappedType? = nil, size: IntentCollectionSize? = nil, inputConnectionBehavior: InputConnectionBehavior = .default) {
-        self.init(storage: Storage(title: CharonLocalized.resource(""), isOptional: true), description: description, default: defaultValue, size: size, inputConnectionBehavior: inputConnectionBehavior)
+        self.init(storage: Storage(title: RevenantLocalized.resource(""), isOptional: true), description: description, default: defaultValue, size: size, inputConnectionBehavior: inputConnectionBehavior)
     }
 
     public convenience init(description: LocalizedStringResource? = nil, default defaultValue: Value.UnwrappedType? = nil, size: IntentCollectionSize? = nil, inputConnectionBehavior: InputConnectionBehavior = .default, resolvers: @escaping () -> (any ResolverSpecification)) {
-        self.init(storage: Storage(title: CharonLocalized.resource(""), isOptional: true), description: description, default: defaultValue, size: size, inputConnectionBehavior: inputConnectionBehavior, resolvers: resolvers())
+        self.init(storage: Storage(title: RevenantLocalized.resource(""), isOptional: true), description: description, default: defaultValue, size: size, inputConnectionBehavior: inputConnectionBehavior, resolvers: resolvers())
     }
 
     public convenience init(description: LocalizedStringResource? = nil, default defaultValue: Value.UnwrappedType? = nil, size: IntentCollectionSize? = nil, inputConnectionBehavior: InputConnectionBehavior = .default, query: (any EntityStringQuery)? = nil) {
-        self.init(storage: Storage(title: CharonLocalized.resource(""), isOptional: true), description: description, default: defaultValue, size: size, inputConnectionBehavior: inputConnectionBehavior, query: query)
+        self.init(storage: Storage(title: RevenantLocalized.resource(""), isOptional: true), description: description, default: defaultValue, size: size, inputConnectionBehavior: inputConnectionBehavior, query: query)
     }
 
     public convenience init(description: LocalizedStringResource? = nil, default defaultValue: Value.UnwrappedType? = nil, supportedContentTypes: [String] = [], requestValueDialog: IntentDialog? = nil, inputConnectionBehavior: InputConnectionBehavior = .default) {
-        self.init(storage: Storage(title: CharonLocalized.resource(""), isOptional: true), description: description, default: defaultValue, supportedContentTypes: supportedContentTypes, requestValueDialog: requestValueDialog, inputConnectionBehavior: inputConnectionBehavior)
+        self.init(storage: Storage(title: RevenantLocalized.resource(""), isOptional: true), description: description, default: defaultValue, supportedContentTypes: supportedContentTypes, requestValueDialog: requestValueDialog, inputConnectionBehavior: inputConnectionBehavior)
     }
 
     public convenience init(description: LocalizedStringResource? = nil, default defaultValue: Value.UnwrappedType? = nil, supportedContentTypes: [String] = [], requestValueDialog: IntentDialog? = nil, inputConnectionBehavior: InputConnectionBehavior = .default, resolvers: @escaping () -> (any ResolverSpecification)) {
-        self.init(storage: Storage(title: CharonLocalized.resource(""), isOptional: true), description: description, default: defaultValue, supportedContentTypes: supportedContentTypes, requestValueDialog: requestValueDialog, inputConnectionBehavior: inputConnectionBehavior, resolvers: resolvers())
+        self.init(storage: Storage(title: RevenantLocalized.resource(""), isOptional: true), description: description, default: defaultValue, supportedContentTypes: supportedContentTypes, requestValueDialog: requestValueDialog, inputConnectionBehavior: inputConnectionBehavior, resolvers: resolvers())
     }
 
     public convenience init(description: LocalizedStringResource? = nil, default defaultValue: Value.UnwrappedType? = nil, supportedContentTypes: [String] = [], requestValueDialog: IntentDialog? = nil, inputConnectionBehavior: InputConnectionBehavior = .default, optionsProvider: (any DynamicOptionsProvider)? = nil) {
-        self.init(storage: Storage(title: CharonLocalized.resource(""), isOptional: true), description: description, default: defaultValue, supportedContentTypes: supportedContentTypes, requestValueDialog: requestValueDialog, inputConnectionBehavior: inputConnectionBehavior, optionsProvider: optionsProvider)
+        self.init(storage: Storage(title: RevenantLocalized.resource(""), isOptional: true), description: description, default: defaultValue, supportedContentTypes: supportedContentTypes, requestValueDialog: requestValueDialog, inputConnectionBehavior: inputConnectionBehavior, optionsProvider: optionsProvider)
     }
 
     public convenience init(description: LocalizedStringResource? = nil, default defaultValue: Value.UnwrappedType? = nil, supportedContentTypes: [String] = [], requestValueDialog: IntentDialog? = nil, inputConnectionBehavior: InputConnectionBehavior = .default, optionsProvider: (any DynamicOptionsProvider)? = nil, resolvers: @escaping () -> (any ResolverSpecification)) {
-        self.init(storage: Storage(title: CharonLocalized.resource(""), isOptional: true), description: description, default: defaultValue, supportedContentTypes: supportedContentTypes, requestValueDialog: requestValueDialog, inputConnectionBehavior: inputConnectionBehavior, optionsProvider: optionsProvider, resolvers: resolvers())
+        self.init(storage: Storage(title: RevenantLocalized.resource(""), isOptional: true), description: description, default: defaultValue, supportedContentTypes: supportedContentTypes, requestValueDialog: requestValueDialog, inputConnectionBehavior: inputConnectionBehavior, optionsProvider: optionsProvider, resolvers: resolvers())
     }
 
     public convenience init(description: LocalizedStringResource? = nil, default defaultValue: Value.UnwrappedType? = nil, supportedContentTypes: [String] = [], requestValueDialog: IntentDialog? = nil, requestDisambiguationDialog: IntentDialog? = nil, inputConnectionBehavior: InputConnectionBehavior = .default) {
-        self.init(storage: Storage(title: CharonLocalized.resource(""), isOptional: true), description: description, default: defaultValue, supportedContentTypes: supportedContentTypes, requestValueDialog: requestValueDialog, requestDisambiguationDialog: requestDisambiguationDialog, inputConnectionBehavior: inputConnectionBehavior)
+        self.init(storage: Storage(title: RevenantLocalized.resource(""), isOptional: true), description: description, default: defaultValue, supportedContentTypes: supportedContentTypes, requestValueDialog: requestValueDialog, requestDisambiguationDialog: requestDisambiguationDialog, inputConnectionBehavior: inputConnectionBehavior)
     }
 
     public convenience init(description: LocalizedStringResource? = nil, default defaultValue: Value.UnwrappedType? = nil, supportedContentTypes: [String] = [], requestValueDialog: IntentDialog? = nil, requestDisambiguationDialog: IntentDialog? = nil, inputConnectionBehavior: InputConnectionBehavior = .default, resolvers: @escaping () -> (any ResolverSpecification)) {
-        self.init(storage: Storage(title: CharonLocalized.resource(""), isOptional: true), description: description, default: defaultValue, supportedContentTypes: supportedContentTypes, requestValueDialog: requestValueDialog, requestDisambiguationDialog: requestDisambiguationDialog, inputConnectionBehavior: inputConnectionBehavior, resolvers: resolvers())
+        self.init(storage: Storage(title: RevenantLocalized.resource(""), isOptional: true), description: description, default: defaultValue, supportedContentTypes: supportedContentTypes, requestValueDialog: requestValueDialog, requestDisambiguationDialog: requestDisambiguationDialog, inputConnectionBehavior: inputConnectionBehavior, resolvers: resolvers())
     }
 
     public convenience init(description: LocalizedStringResource? = nil, default defaultValue: Value.UnwrappedType? = nil, supportedContentTypes: [String] = [], requestValueDialog: IntentDialog? = nil, requestDisambiguationDialog: IntentDialog? = nil, inputConnectionBehavior: InputConnectionBehavior = .default, optionsProvider: (any DynamicOptionsProvider)? = nil) {
-        self.init(storage: Storage(title: CharonLocalized.resource(""), isOptional: true), description: description, default: defaultValue, supportedContentTypes: supportedContentTypes, requestValueDialog: requestValueDialog, requestDisambiguationDialog: requestDisambiguationDialog, inputConnectionBehavior: inputConnectionBehavior, optionsProvider: optionsProvider)
+        self.init(storage: Storage(title: RevenantLocalized.resource(""), isOptional: true), description: description, default: defaultValue, supportedContentTypes: supportedContentTypes, requestValueDialog: requestValueDialog, requestDisambiguationDialog: requestDisambiguationDialog, inputConnectionBehavior: inputConnectionBehavior, optionsProvider: optionsProvider)
     }
 
     public convenience init(description: LocalizedStringResource? = nil, default defaultValue: Value.UnwrappedType? = nil, supportedContentTypes: [String] = [], requestValueDialog: IntentDialog? = nil, requestDisambiguationDialog: IntentDialog? = nil, inputConnectionBehavior: InputConnectionBehavior = .default, optionsProvider: (any DynamicOptionsProvider)? = nil, resolvers: @escaping () -> (any ResolverSpecification)) {
-        self.init(storage: Storage(title: CharonLocalized.resource(""), isOptional: true), description: description, default: defaultValue, supportedContentTypes: supportedContentTypes, requestValueDialog: requestValueDialog, requestDisambiguationDialog: requestDisambiguationDialog, inputConnectionBehavior: inputConnectionBehavior, optionsProvider: optionsProvider, resolvers: resolvers())
+        self.init(storage: Storage(title: RevenantLocalized.resource(""), isOptional: true), description: description, default: defaultValue, supportedContentTypes: supportedContentTypes, requestValueDialog: requestValueDialog, requestDisambiguationDialog: requestDisambiguationDialog, inputConnectionBehavior: inputConnectionBehavior, optionsProvider: optionsProvider, resolvers: resolvers())
     }
 
     public convenience init(description: LocalizedStringResource? = nil, default defaultValue: Value.UnwrappedType? = nil, supportedContentTypes: [String] = [], requestValueDialog: IntentDialog? = nil, requestDisambiguationDialog: IntentDialog? = nil, inputConnectionBehavior: InputConnectionBehavior = .default, query: (any EntityStringQuery)? = nil) {
-        self.init(storage: Storage(title: CharonLocalized.resource(""), isOptional: true), description: description, default: defaultValue, supportedContentTypes: supportedContentTypes, requestValueDialog: requestValueDialog, requestDisambiguationDialog: requestDisambiguationDialog, inputConnectionBehavior: inputConnectionBehavior, query: query)
+        self.init(storage: Storage(title: RevenantLocalized.resource(""), isOptional: true), description: description, default: defaultValue, supportedContentTypes: supportedContentTypes, requestValueDialog: requestValueDialog, requestDisambiguationDialog: requestDisambiguationDialog, inputConnectionBehavior: inputConnectionBehavior, query: query)
     }
 
     public convenience init(description: LocalizedStringResource? = nil, default defaultValue: Value.UnwrappedType? = nil, supportedContentTypes: [String] = [], size: IntentCollectionSize? = nil, inputConnectionBehavior: InputConnectionBehavior = .default) {
-        self.init(storage: Storage(title: CharonLocalized.resource(""), isOptional: true), description: description, default: defaultValue, size: size, supportedContentTypes: supportedContentTypes, inputConnectionBehavior: inputConnectionBehavior)
+        self.init(storage: Storage(title: RevenantLocalized.resource(""), isOptional: true), description: description, default: defaultValue, size: size, supportedContentTypes: supportedContentTypes, inputConnectionBehavior: inputConnectionBehavior)
     }
 
     public convenience init(description: LocalizedStringResource? = nil, default defaultValue: Value.UnwrappedType? = nil, supportedContentTypes: [String] = [], size: IntentCollectionSize? = nil, inputConnectionBehavior: InputConnectionBehavior = .default, resolvers: @escaping () -> (any ResolverSpecification)) {
-        self.init(storage: Storage(title: CharonLocalized.resource(""), isOptional: true), description: description, default: defaultValue, size: size, supportedContentTypes: supportedContentTypes, inputConnectionBehavior: inputConnectionBehavior, resolvers: resolvers())
+        self.init(storage: Storage(title: RevenantLocalized.resource(""), isOptional: true), description: description, default: defaultValue, size: size, supportedContentTypes: supportedContentTypes, inputConnectionBehavior: inputConnectionBehavior, resolvers: resolvers())
     }
 
     public convenience init(description: LocalizedStringResource? = nil, default defaultValue: Value.UnwrappedType? = nil, supportedContentTypes: [String] = [], size: IntentCollectionSize? = nil, inputConnectionBehavior: InputConnectionBehavior = .default, query: (any EntityStringQuery)? = nil) {
-        self.init(storage: Storage(title: CharonLocalized.resource(""), isOptional: true), description: description, default: defaultValue, size: size, supportedContentTypes: supportedContentTypes, inputConnectionBehavior: inputConnectionBehavior, query: query)
+        self.init(storage: Storage(title: RevenantLocalized.resource(""), isOptional: true), description: description, default: defaultValue, size: size, supportedContentTypes: supportedContentTypes, inputConnectionBehavior: inputConnectionBehavior, query: query)
     }
 
     public convenience init(description: LocalizedStringResource? = nil, defaultValue: Value.UnwrappedType? = nil, defaultUnit: (any Hashable)? = nil, defaultUnitAdjustForLocale: Bool? = nil, supportsNegativeNumbers: Bool? = nil, requestValueDialog: IntentDialog? = nil, inputConnectionBehavior: InputConnectionBehavior = .default) {
-        self.init(storage: Storage(title: CharonLocalized.resource(""), isOptional: true), description: description, default: defaultValue, requestValueDialog: requestValueDialog, inputConnectionBehavior: inputConnectionBehavior, defaultUnit: defaultUnit, defaultUnitAdjustForLocale: defaultUnitAdjustForLocale, supportsNegativeNumbers: supportsNegativeNumbers)
+        self.init(storage: Storage(title: RevenantLocalized.resource(""), isOptional: true), description: description, default: defaultValue, requestValueDialog: requestValueDialog, inputConnectionBehavior: inputConnectionBehavior, defaultUnit: defaultUnit, defaultUnitAdjustForLocale: defaultUnitAdjustForLocale, supportsNegativeNumbers: supportsNegativeNumbers)
     }
 
     public convenience init(description: LocalizedStringResource? = nil, defaultValue: Value.UnwrappedType? = nil, defaultUnit: (any Hashable)? = nil, defaultUnitAdjustForLocale: Bool? = nil, supportsNegativeNumbers: Bool? = nil, requestValueDialog: IntentDialog? = nil, inputConnectionBehavior: InputConnectionBehavior = .default, resolvers: @escaping () -> (any ResolverSpecification)) {
-        self.init(storage: Storage(title: CharonLocalized.resource(""), isOptional: true), description: description, default: defaultValue, requestValueDialog: requestValueDialog, inputConnectionBehavior: inputConnectionBehavior, defaultUnit: defaultUnit, defaultUnitAdjustForLocale: defaultUnitAdjustForLocale, supportsNegativeNumbers: supportsNegativeNumbers, resolvers: resolvers())
+        self.init(storage: Storage(title: RevenantLocalized.resource(""), isOptional: true), description: description, default: defaultValue, requestValueDialog: requestValueDialog, inputConnectionBehavior: inputConnectionBehavior, defaultUnit: defaultUnit, defaultUnitAdjustForLocale: defaultUnitAdjustForLocale, supportsNegativeNumbers: supportsNegativeNumbers, resolvers: resolvers())
     }
 
     public convenience init(description: LocalizedStringResource? = nil, defaultValue: Value.UnwrappedType? = nil, unit: (any Hashable)? = nil, unitAdjustForLocale: Bool? = nil, supportsNegativeNumbers: Bool? = nil, requestValueDialog: IntentDialog? = nil, inputConnectionBehavior: InputConnectionBehavior = .default) {
-        self.init(storage: Storage(title: CharonLocalized.resource(""), isOptional: true), description: description, default: defaultValue, requestValueDialog: requestValueDialog, inputConnectionBehavior: inputConnectionBehavior, unit: unit, unitAdjustForLocale: unitAdjustForLocale, supportsNegativeNumbers: supportsNegativeNumbers)
+        self.init(storage: Storage(title: RevenantLocalized.resource(""), isOptional: true), description: description, default: defaultValue, requestValueDialog: requestValueDialog, inputConnectionBehavior: inputConnectionBehavior, unit: unit, unitAdjustForLocale: unitAdjustForLocale, supportsNegativeNumbers: supportsNegativeNumbers)
     }
 
     public convenience init(description: LocalizedStringResource? = nil, defaultValue: Value.UnwrappedType? = nil, unit: (any Hashable)? = nil, unitAdjustForLocale: Bool? = nil, supportsNegativeNumbers: Bool? = nil, requestValueDialog: IntentDialog? = nil, inputConnectionBehavior: InputConnectionBehavior = .default, resolvers: @escaping () -> (any ResolverSpecification)) {
-        self.init(storage: Storage(title: CharonLocalized.resource(""), isOptional: true), description: description, default: defaultValue, requestValueDialog: requestValueDialog, inputConnectionBehavior: inputConnectionBehavior, unit: unit, unitAdjustForLocale: unitAdjustForLocale, supportsNegativeNumbers: supportsNegativeNumbers, resolvers: resolvers())
+        self.init(storage: Storage(title: RevenantLocalized.resource(""), isOptional: true), description: description, default: defaultValue, requestValueDialog: requestValueDialog, inputConnectionBehavior: inputConnectionBehavior, unit: unit, unitAdjustForLocale: unitAdjustForLocale, supportsNegativeNumbers: supportsNegativeNumbers, resolvers: resolvers())
     }
 
     public convenience init(description: LocalizedStringResource? = nil, inputOptions: String.IntentInputOptions? = nil, requestValueDialog: IntentDialog? = nil, inputConnectionBehavior: InputConnectionBehavior = .default, optionsProvider: (any DynamicOptionsProvider)? = nil) {
-        self.init(storage: Storage(title: CharonLocalized.resource(""), isOptional: true), description: description, inputOptions: inputOptions, requestValueDialog: requestValueDialog, inputConnectionBehavior: inputConnectionBehavior, optionsProvider: optionsProvider)
+        self.init(storage: Storage(title: RevenantLocalized.resource(""), isOptional: true), description: description, inputOptions: inputOptions, requestValueDialog: requestValueDialog, inputConnectionBehavior: inputConnectionBehavior, optionsProvider: optionsProvider)
     }
 
     public convenience init(description: LocalizedStringResource? = nil, inputOptions: String.IntentInputOptions? = nil, requestValueDialog: IntentDialog? = nil, inputConnectionBehavior: InputConnectionBehavior = .default, optionsProvider: (any DynamicOptionsProvider)? = nil, resolvers: @escaping () -> (any ResolverSpecification)) {
-        self.init(storage: Storage(title: CharonLocalized.resource(""), isOptional: true), description: description, inputOptions: inputOptions, requestValueDialog: requestValueDialog, inputConnectionBehavior: inputConnectionBehavior, optionsProvider: optionsProvider, resolvers: resolvers())
+        self.init(storage: Storage(title: RevenantLocalized.resource(""), isOptional: true), description: description, inputOptions: inputOptions, requestValueDialog: requestValueDialog, inputConnectionBehavior: inputConnectionBehavior, optionsProvider: optionsProvider, resolvers: resolvers())
     }
 
     public convenience init(description: LocalizedStringResource? = nil, requestValueDialog: IntentDialog? = nil, inputConnectionBehavior: InputConnectionBehavior = .default) {
-        self.init(storage: Storage(title: CharonLocalized.resource(""), isOptional: true), description: description, requestValueDialog: requestValueDialog, inputConnectionBehavior: inputConnectionBehavior)
+        self.init(storage: Storage(title: RevenantLocalized.resource(""), isOptional: true), description: description, requestValueDialog: requestValueDialog, inputConnectionBehavior: inputConnectionBehavior)
     }
 
     public convenience init(description: LocalizedStringResource? = nil, requestValueDialog: IntentDialog? = nil, inputConnectionBehavior: InputConnectionBehavior = .default, resolvers: @escaping () -> (any ResolverSpecification), optionsProvider: (any DynamicOptionsProvider)? = nil) {
-        self.init(storage: Storage(title: CharonLocalized.resource(""), isOptional: true), description: description, requestValueDialog: requestValueDialog, inputConnectionBehavior: inputConnectionBehavior, optionsProvider: optionsProvider, resolvers: resolvers())
+        self.init(storage: Storage(title: RevenantLocalized.resource(""), isOptional: true), description: description, requestValueDialog: requestValueDialog, inputConnectionBehavior: inputConnectionBehavior, optionsProvider: optionsProvider, resolvers: resolvers())
     }
 
     public convenience init(description: LocalizedStringResource? = nil, requestValueDialog: IntentDialog? = nil, inputConnectionBehavior: InputConnectionBehavior = .default, optionsProvider: (any DynamicOptionsProvider)? = nil) {
-        self.init(storage: Storage(title: CharonLocalized.resource(""), isOptional: true), description: description, requestValueDialog: requestValueDialog, inputConnectionBehavior: inputConnectionBehavior, optionsProvider: optionsProvider)
+        self.init(storage: Storage(title: RevenantLocalized.resource(""), isOptional: true), description: description, requestValueDialog: requestValueDialog, inputConnectionBehavior: inputConnectionBehavior, optionsProvider: optionsProvider)
     }
 
     public convenience init(description: LocalizedStringResource? = nil, requestValueDialog: IntentDialog? = nil, inputConnectionBehavior: InputConnectionBehavior = .default, optionsProvider: (any DynamicOptionsProvider)? = nil, resolvers: @escaping () -> (any ResolverSpecification)) {
-        self.init(storage: Storage(title: CharonLocalized.resource(""), isOptional: true), description: description, requestValueDialog: requestValueDialog, inputConnectionBehavior: inputConnectionBehavior, optionsProvider: optionsProvider, resolvers: resolvers())
+        self.init(storage: Storage(title: RevenantLocalized.resource(""), isOptional: true), description: description, requestValueDialog: requestValueDialog, inputConnectionBehavior: inputConnectionBehavior, optionsProvider: optionsProvider, resolvers: resolvers())
     }
 
     public convenience init(title: LocalizedStringResource, description: LocalizedStringResource? = nil, controlStyle: (any Hashable)? = nil, inclusiveRange: AnyRange? = nil, requestValueDialog: IntentDialog? = nil, inputConnectionBehavior: InputConnectionBehavior = .default, optionsProvider: (any DynamicOptionsProvider)? = nil) {
@@ -788,6 +788,6 @@ public final class IntentParameter<Value>: @unchecked Sendable where Value: _Int
 
 extension IntentParameter {
     public convenience init() {
-        self.init(storage: Storage(title: CharonLocalized.resource(""), isOptional: true))
+        self.init(storage: Storage(title: RevenantLocalized.resource(""), isOptional: true))
     }
 }

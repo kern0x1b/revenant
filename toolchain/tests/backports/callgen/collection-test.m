@@ -3,7 +3,7 @@
 #import <objc/message.h>
 #import <objc/runtime.h>
 
-static BOOL charon_countsOnly;
+static BOOL revenant_countsOnly;
 
 static void probe(Class cls, SEL factory, SEL single, NSArray *input)
 {
@@ -15,18 +15,18 @@ static void probe(Class cls, SEL factory, SEL single, NSArray *input)
                               value ? [[value description] UTF8String] : "nil"];
     }
     printf("  %-6s count=%lu\n", input ? "items" : "nil", (unsigned long)[results count]);
-    if (!charon_countsOnly) {
+    if (!revenant_countsOnly) {
         printf("        %s\n", [elements UTF8String]);
     }
     (void)single;
-    (void)charon_countsOnly;
+    (void)revenant_countsOnly;
 }
 
 int main(int argc, const char *argv[])
 {
     @autoreleasepool {
         BOOL countsOnly = argc > 1 && strcmp(argv[1], "counts") == 0;
-        charon_countsOnly = countsOnly;
+        revenant_countsOnly = countsOnly;
         const char *title = countsOnly ? "counts" : (argc > (countsOnly ? 1 : 2)
                                                     ? argv[countsOnly ? 0 : 1] : "the port's own body");
         const char *asked = argc > (countsOnly ? 2 : 3) ? argv[countsOnly ? 1 : 2]

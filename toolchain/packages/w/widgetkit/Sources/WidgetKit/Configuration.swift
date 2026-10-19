@@ -35,7 +35,7 @@ extension WidgetConfiguration {
 }
 
 extension Widget {
-    public static func main() -> [WidgetInfo] { return CharonWidgetRegistry.shared.configurations() }
+    public static func main() -> [WidgetInfo] { return RevenantWidgetRegistry.shared.configurations() }
 }
 
 public protocol WidgetPushHandler {
@@ -44,7 +44,7 @@ public protocol WidgetPushHandler {
 }
 
 public enum WidgetBundle {
-    public static func main() -> [WidgetInfo] { return CharonWidgetRegistry.shared.configurations() }
+    public static func main() -> [WidgetInfo] { return RevenantWidgetRegistry.shared.configurations() }
 }
 
 public protocol _WidgetFamilyProviding {}

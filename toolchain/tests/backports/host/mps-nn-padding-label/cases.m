@@ -34,7 +34,7 @@ static void compare(NSUInteger method, Class port, Class apple)
 int main(void)
 {
     @autoreleasepool {
-        Class port = NSClassFromString(@"CharonHostMPSNNDefaultPadding");
+        Class port = NSClassFromString(@"RevenantHostMPSNNDefaultPadding");
         Class apple = [MPSNNDefaultPadding class];
         if (!port) {
             printf("FAIL the port's class is not in the process\n");

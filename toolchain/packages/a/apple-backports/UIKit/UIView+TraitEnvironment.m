@@ -2,14 +2,14 @@
 
 #pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
 
-@interface UITraitCollection (CharonTraitEnvironment)
-+ (UITraitCollection *)charon_traitCollectionForScreen:(UIScreen *)screen;
+@interface UITraitCollection (RevenantTraitEnvironment)
++ (UITraitCollection *)revenant_traitCollectionForScreen:(UIScreen *)screen;
 @end
 
-@interface UIView (CharonTraitEnvironment) <UITraitEnvironment>
+@interface UIView (RevenantTraitEnvironment) <UITraitEnvironment>
 @end
 
-@implementation UIView (CharonTraitEnvironment)
+@implementation UIView (RevenantTraitEnvironment)
 
 - (UITraitCollection *)traitCollection
 {
@@ -19,7 +19,7 @@
     if (self.superview)
         return [self.superview traitCollection];
     UIWindow *window = [self isKindOfClass:[UIWindow class]] ? (UIWindow *)self : self.window;
-    return [UITraitCollection charon_traitCollectionForScreen:window.screen];
+    return [UITraitCollection revenant_traitCollectionForScreen:window.screen];
 }
 
 - (void)traitCollectionDidChange:(UITraitCollection *)previousTraitCollection

@@ -3,34 +3,34 @@
 #import <objc/message.h>
 #import <objc/runtime.h>
 
-#import "CharonAVFDescriptorConstruction.h"
+#import "RevenantAVFDescriptorConstruction.h"
 
 @implementation AVMediaSelection
 
-- (NSDictionary<NSString *, AVMediaSelectionOption *> *)charon_selected
+- (NSDictionary<NSString *, AVMediaSelectionOption *> *)revenant_selected
 {
-    return objc_getAssociatedObject(self, "charon.avf.selection.selected") ?: @{};
+    return objc_getAssociatedObject(self, "revenant.avf.selection.selected") ?: @{};
 }
 
-- (void)charon_setSelected:(NSDictionary<NSString *, AVMediaSelectionOption *> *)selected
+- (void)revenant_setSelected:(NSDictionary<NSString *, AVMediaSelectionOption *> *)selected
 {
-    objc_setAssociatedObject(self, "charon.avf.selection.selected", selected ?: @{},
+    objc_setAssociatedObject(self, "revenant.avf.selection.selected", selected ?: @{},
                              OBJC_ASSOCIATION_COPY);
 }
 
 
-- (instancetype)charon_initWithSelectedOptionsByGroup:(NSDictionary<NSString *, AVMediaSelectionOption *> *)selected
+- (instancetype)revenant_initWithSelectedOptionsByGroup:(NSDictionary<NSString *, AVMediaSelectionOption *> *)selected
 {
     self = [super init];
     if (self) {
-        [self charon_setSelected:selected];
+        [self revenant_setSelected:selected];
     }
     return self;
 }
 
 + (instancetype)mediaSelectionWithAsset:(AVAsset *)asset
 {
-    return [[self alloc] charon_initWithSelectedOptionsByGroup:@{}];
+    return [[self alloc] revenant_initWithSelectedOptionsByGroup:@{}];
 }
 
 - (AVAsset *)asset
@@ -46,7 +46,7 @@
 - (NSArray<AVMediaSelectionOption *> *)selectedMediaOptions
 {
     NSMutableArray *options = [NSMutableArray array];
-    for (AVMediaSelectionOption *option in self.charon_selected.allValues) {
+    for (AVMediaSelectionOption *option in self.revenant_selected.allValues) {
         [options addObject:option];
     }
     return options;
@@ -63,7 +63,7 @@
     }
     NSArray *characteristics = ((id (*)(id, SEL))objc_msgSend)(group, @selector(mediaCharacteristics));
     for (NSString *characteristic in characteristics) {
-        AVMediaSelectionOption *option = self.charon_selected[characteristic];
+        AVMediaSelectionOption *option = self.revenant_selected[characteristic];
         if (option) {
             return option;
         }
@@ -73,7 +73,7 @@
 
 - (id)copyWithZone:(NSZone *)zone
 {
-    return [[[self class] alloc] charon_initWithSelectedOptionsByGroup:self.charon_selected];
+    return [[[self class] alloc] revenant_initWithSelectedOptionsByGroup:self.revenant_selected];
 }
 
 - (BOOL)isEqual:(id)other
@@ -84,12 +84,12 @@
     if (![other isKindOfClass:[AVMediaSelection class]]) {
         return NO;
     }
-    return [self.charon_selected isEqualToDictionary:((AVMediaSelection *)other).charon_selected];
+    return [self.revenant_selected isEqualToDictionary:((AVMediaSelection *)other).revenant_selected];
 }
 
 - (NSUInteger)hash
 {
-    return self.charon_selected.count;
+    return self.revenant_selected.count;
 }
 
 - (NSString *)description
@@ -112,11 +112,11 @@
     id group = (id)mediaSelectionGroup;
     NSArray *characteristics = [group respondsToSelector:@selector(mediaCharacteristics)]
         ? ((id (*)(id, SEL))objc_msgSend)(group, @selector(mediaCharacteristics)) : nil;
-    NSMutableDictionary *selected = [self.charon_selected mutableCopy] ?: [NSMutableDictionary dictionary];
+    NSMutableDictionary *selected = [self.revenant_selected mutableCopy] ?: [NSMutableDictionary dictionary];
     for (NSString *characteristic in characteristics) {
         selected[characteristic] = mediaSelectionOption;
     }
-    [self charon_setSelected:selected];
+    [self revenant_setSelected:selected];
 }
 
 @end

@@ -3,9 +3,9 @@
 
 static void said(const char* stream, int index) {
     if (strcmp(stream, "stdout") == 0) {
-        fprintf(stdout, "charon-emulate-output: %s line %d reached the host\n", stream, index);
+        fprintf(stdout, "revenant-emulate-output: %s line %d reached the host\n", stream, index);
     } else {
-        fprintf(stderr, "charon-emulate-output: %s line %d reached the host\n", stream, index);
+        fprintf(stderr, "revenant-emulate-output: %s line %d reached the host\n", stream, index);
     }
 }
 

@@ -1,5 +1,5 @@
-#import "CharonMPS.h"
-#import "CharonMPSImage.h"
+#import "RevenantMPS.h"
+#import "RevenantMPSImage.h"
 
 
 @implementation MPSMatrixCopyToImage {
@@ -9,7 +9,7 @@
     id<MTLDevice> _device;
 }
 
-static inline BOOL CharonMPSMatrixToImageIsRowMajor(MPSDataLayout layout)
+static inline BOOL RevenantMPSMatrixToImageIsRowMajor(MPSDataLayout layout)
 {
     return layout == MPSDataLayoutHeightxWidthxFeatureChannels;
 }
@@ -29,7 +29,7 @@ static inline BOOL CharonMPSMatrixToImageIsRowMajor(MPSDataLayout layout)
 {
     NSNumber *layout = [aDecoder decodeObjectForKey:@"dataLayout"];
     if (!layout) {
-        CharonMPSRefuse(@"MPSMatrixCopyToImage: the coder carries no dataLayout, and the layout is what says "
+        RevenantMPSRefuse(@"MPSMatrixCopyToImage: the coder carries no dataLayout, and the layout is what says "
                         @"where a matrix element lands in the image, so no kernel was made");
         return nil;
     }
@@ -54,39 +54,39 @@ static inline BOOL CharonMPSMatrixToImageIsRowMajor(MPSDataLayout layout)
 {
     NSString *what = NSStringFromClass([self class]);
     if (!commandBuffer) {
-        CharonMPSRefuse(@"%@: no command buffer, so nothing was written", what);
+        RevenantMPSRefuse(@"%@: no command buffer, so nothing was written", what);
         return;
     }
-    if (!CharonMPSImageUsable(destinationImage, what))
+    if (!RevenantMPSImageUsable(destinationImage, what))
         return;
     if (!sourceMatrix) {
-        CharonMPSRefuse(@"%@: no source matrix, so nothing was written", what);
+        RevenantMPSRefuse(@"%@: no source matrix, so nothing was written", what);
         return;
     }
 
-    CharonMPSMatrixView matrix = CharonMPSMatrixViewOf(sourceMatrix);
+    RevenantMPSMatrixView matrix = RevenantMPSMatrixViewOf(sourceMatrix);
     if (!matrix.elementSize) {
-        CharonMPSRefuse(@"%@: the matrix's data type names no element size, so nothing was written", what);
+        RevenantMPSRefuse(@"%@: the matrix's data type names no element size, so nothing was written", what);
         return;
     }
 
-    BOOL rowMajor = CharonMPSMatrixToImageIsRowMajor(_dataLayout);
+    BOOL rowMajor = RevenantMPSMatrixToImageIsRowMajor(_dataLayout);
     NSUInteger matrixRows = rowMajor ? destinationImage.height : destinationImage.featureChannels;
     NSUInteger matrixColumns = rowMajor ? destinationImage.featureChannels : destinationImage.width;
 
     double originRowValue = _sourceMatrixOrigin.x;
     double originColumnValue = _sourceMatrixOrigin.y;
     if (originRowValue != floor(originRowValue) || originColumnValue != floor(originColumnValue)) {
-        CharonMPSRefuse(@"%@: the source origin is (%g, %g) and a copy starts at a whole row and column, "
+        RevenantMPSRefuse(@"%@: the source origin is (%g, %g) and a copy starts at a whole row and column, "
                         @"so nothing was written", what, originRowValue, originColumnValue);
         return;
     }
     NSInteger originRow = (NSInteger)originRowValue;
     NSInteger originColumn = (NSInteger)originColumnValue;
     if (originRow < 0 || originColumn < 0 ||
-        !CharonMPSMatrixHolds(&matrix, _sourceMatrixBatchIndex, (NSUInteger)originRow, (NSUInteger)originColumn,
+        !RevenantMPSMatrixHolds(&matrix, _sourceMatrixBatchIndex, (NSUInteger)originRow, (NSUInteger)originColumn,
                               matrixRows, matrixColumns)) {
-        CharonMPSRefuse(@"%@: a %lux%lu copy from (%ld, %ld) of matrix %lu of %lux%lux%lu falls outside it, "
+        RevenantMPSRefuse(@"%@: a %lux%lu copy from (%ld, %ld) of matrix %lu of %lux%lux%lu falls outside it, "
                         @"so nothing was written", what,
                         (unsigned long)matrixRows, (unsigned long)matrixColumns,
                         (long)originRow, (long)originColumn,
@@ -95,12 +95,12 @@ static inline BOOL CharonMPSMatrixToImageIsRowMajor(MPSDataLayout layout)
         return;
     }
 
-    CharonMPSImageLayout out = CharonMPSImageLayoutOf(destinationImage);
+    RevenantMPSImageLayout out = RevenantMPSImageLayoutOf(destinationImage);
     out.count = destinationImage.width * destinationImage.height * out.channels;
     size_t bytes = (size_t)destinationImage.width * out.channels * destinationImage.height * out.elementSize;
     unsigned char *to = calloc(bytes ? bytes : 1, 1);
     if (!to) {
-        CharonMPSRefuse(@"%@: no memory for a %lux%lu image, so nothing was written", what,
+        RevenantMPSRefuse(@"%@: no memory for a %lux%lu image, so nothing was written", what,
                         (unsigned long)destinationImage.width, (unsigned long)destinationImage.height);
         return;
     }
@@ -110,16 +110,16 @@ static inline BOOL CharonMPSMatrixToImageIsRowMajor(MPSDataLayout layout)
             for (NSUInteger column = 0; column < destinationImage.width; column++) {
                 NSUInteger matrixRow = (NSUInteger)originRow + (rowMajor ? row : channel);
                 NSUInteger matrixColumn = (NSUInteger)originColumn + (rowMajor ? channel : column);
-                const void *element = CharonMPSMatrixElement(&matrix, _sourceMatrixBatchIndex, matrixRow, matrixColumn);
-                double value = CharonMPSLoad(element, matrix.dataType, 0);
+                const void *element = RevenantMPSMatrixElement(&matrix, _sourceMatrixBatchIndex, matrixRow, matrixColumn);
+                double value = RevenantMPSLoad(element, matrix.dataType, 0);
                 NSUInteger pixel = row * destinationImage.width + column;
-                NSUInteger into = CharonMPSImageIndex(&out, pixel, channel);
+                NSUInteger into = RevenantMPSImageIndex(&out, pixel, channel);
                 if (into != (NSUInteger)-1)
-                    CharonMPSImageStore(to, &out, into, value);
+                    RevenantMPSImageStore(to, &out, into, value);
             }
         }
     }
-    (void)CharonMPSImageWriteRegion(destinationImage, &out,
+    (void)RevenantMPSImageWriteRegion(destinationImage, &out,
                                     MTLRegionMake2D(0, 0, destinationImage.width, destinationImage.height),
                                     to, what);
     free(to);
@@ -131,14 +131,14 @@ static inline BOOL CharonMPSMatrixToImageIsRowMajor(MPSDataLayout layout)
 {
     NSString *what = NSStringFromClass([self class]);
     if (!commandBuffer) {
-        CharonMPSRefuse(@"%@: no command buffer, so nothing was written", what);
+        RevenantMPSRefuse(@"%@: no command buffer, so nothing was written", what);
         return;
     }
     NSUInteger count = destinationImages.count;
     if (count > 1 && sourceMatrix) {
-        CharonMPSMatrixView matrix = CharonMPSMatrixViewOf(sourceMatrix);
+        RevenantMPSMatrixView matrix = RevenantMPSMatrixViewOf(sourceMatrix);
         if (count > matrix.matrices) {
-            CharonMPSRefuse(@"%@: %lu image(s) were given and the matrix holds %lu, so only the first %lu "
+            RevenantMPSRefuse(@"%@: %lu image(s) were given and the matrix holds %lu, so only the first %lu "
                             @"were written", what, (unsigned long)count, (unsigned long)matrix.matrices,
                             (unsigned long)matrix.matrices);
             count = matrix.matrices;

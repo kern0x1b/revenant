@@ -8,12 +8,12 @@
 #
 #     $HOME/Git/projects/ios/coordination/heavy.sh sh tests/swiftui/consumer/run.sh
 #
-# One heavy job: it installs charon@swiftui into the shared store and builds one program for armv7. The recipe's own digest
-# is its buildhash, so a changed recipe is a different package and needs no force (charon AGENTS.md, Traps: the shared
+# One heavy job: it installs revenant@swiftui into the shared store and builds one program for armv7. The recipe's own digest
+# is its buildhash, so a changed recipe is a different package and needs no force (revenant AGENTS.md, Traps: the shared
 # ~/.xmake store). SWIFTUI_ROOT names the checkout when this is not run from one; SWIFTUI_MINIMUM is the release the port
 # builds for, 6.1.3 by default: what an armv7 device of the fleet runs.
 #
-# Known on this machine (2026-09-28): the install of charon@swiftui needs a swift-runtime of its own buildhash, and the
+# Known on this machine (2026-09-28): the install of revenant@swiftui needs a swift-runtime of its own buildhash, and the
 # store holds none for an armv7 build at 6.0 or 6.1.3, so xmake builds the runtime first — which fails in the runtime's own
 # UIKit overlay ("'UITargetedPreview' is only available in iOS 13.0 or newer", UIKit.swift:713, the UIPointerEffect enum of
 # swift-5.2.5's overlay, in the runtime's own source under ~/.xmake/cache/packages/2609/s/swift-runtime). The package's build
@@ -71,8 +71,8 @@ binary=$(find "$build/project/build" -name consumer -type f -perm -u+x 2>/dev/nu
 # The three things the package promises, read from the shared store rather than from the build tree: the module a port
 # compiles against, its textual interface, and the library a port links.
 store=${XMAKE_GLOBALDIR:-$HOME/.xmake}
-library=$(find "$store/packages/s/swiftui" -name libEidolonSwiftUI.a 2>/dev/null | head -1)
-[ -n "$library" ] || { echo "consumer: charon@swiftui installed no libEidolonSwiftUI.a under $store"; exit 1; }
+library=$(find "$store/packages/s/swiftui" -name libRevenantSwiftUI.a 2>/dev/null | head -1)
+[ -n "$library" ] || { echo "consumer: revenant@swiftui installed no libRevenantSwiftUI.a under $store"; exit 1; }
 installdir=$(dirname "$(dirname "$library")")
 module=$installdir/lib/swift/iphoneos/SwiftUI.swiftmodule
 [ -f "$module/armv7-apple-ios.swiftmodule" ] || { echo "consumer: no armv7 module in $module"; exit 1; }

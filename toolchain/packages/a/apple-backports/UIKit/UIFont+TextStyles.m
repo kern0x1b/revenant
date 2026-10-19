@@ -9,7 +9,7 @@ UIFontTextStyle const UIFontTextStyleFootnote = @"UICTFontTextStyleFootnote";
 UIFontTextStyle const UIFontTextStyleCaption1 = @"UICTFontTextStyleCaption1";
 UIFontTextStyle const UIFontTextStyleCaption2 = @"UICTFontTextStyleCaption2";
 
-@implementation UIFont (CharonTextStyles)
+@implementation UIFont (RevenantTextStyles)
 
 + (UIFont *)preferredFontForTextStyle:(UIFontTextStyle)style
 {

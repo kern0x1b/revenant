@@ -2,20 +2,20 @@
 #import <Foundation/Foundation.h>
 #import <objc/runtime.h>
 
-#import "CharonAVFDescriptorConstruction.h"
+#import "RevenantAVFDescriptorConstruction.h"
 
-@implementation AVPlayerMediaSelectionCriteria (CharonAVFDescriptorMembers12)
+@implementation AVPlayerMediaSelectionCriteria (RevenantAVFDescriptorMembers12)
 
 - (NSArray<NSString *> *)principalMediaCharacteristics
 {
-    return self.charon_principalMediaCharacteristics ?: @[];
+    return self.revenant_principalMediaCharacteristics ?: @[];
 }
 
 - (instancetype)initWithPrincipalMediaCharacteristics:(NSArray<NSString *> *)principal
                                  preferredLanguages:(NSArray<NSString *> *)languages
                    preferredMediaCharacteristics:(NSArray<NSString *> *)characteristics
 {
-    return [self charon_initWithPreferredLanguages:languages
+    return [self revenant_initWithPreferredLanguages:languages
                         preferredMediaCharacteristics:characteristics
                     principalMediaCharacteristics:principal];
 }

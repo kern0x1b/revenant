@@ -4,10 +4,10 @@ here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 SECURITY=${SECURITY:-$here/../../../../packages/a/apple-backports/Security}
 harness=${ERRMSG_HARNESS:-$here/../../device}
-build=${ERRMSG_BUILD:-$(runs_folder charon-errmsg-host)}
+build=${ERRMSG_BUILD:-$(runs_folder revenant-errmsg-host)}
 rm -rf "$build"
 mkdir -p "$build"
-xcrun clang -fobjc-arc -fvisibility=hidden -w -DSecCopyErrorMessageString=charon_host_SecCopyErrorMessageString -c "$SECURITY/SecCopyErrorMessageString.m" -o "$build/port.o"
+xcrun clang -fobjc-arc -fvisibility=hidden -w -DSecCopyErrorMessageString=revenant_host_SecCopyErrorMessageString -c "$SECURITY/SecCopyErrorMessageString.m" -o "$build/port.o"
 xcrun clang -fobjc-arc -Wall -Wno-deprecated-declarations -I"$harness" \
     "$here/differential.m" "$harness/check.m" "$build/port.o" \
     -framework Foundation -framework Security -o "$build/differential"

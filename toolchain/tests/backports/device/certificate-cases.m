@@ -2,15 +2,15 @@
 #import <Security/Security.h>
 #import "certificate-cases.h"
 
-#ifdef CHARON_CERTIFICATE_PORT
-#import "CharonSecurityUI.h"
+#ifdef REVENANT_CERTIFICATE_PORT
+#import "RevenantSecurityUI.h"
 
-@interface CharonCertificateSheetController : NSObject
+@interface RevenantCertificateSheetController : NSObject
 + (NSArray<NSString *> *)linesForTrust:(SecTrustRef)trust;
 @end
 #endif
 
-static NSData *CharonCertificateData(int index)
+static NSData *RevenantCertificateData(int index)
 {
     static const unsigned char leaf[] = {
 #include "certificate-leaf.inc"
@@ -23,13 +23,13 @@ static NSData *CharonCertificateData(int index)
     return [NSData dataWithBytesNoCopy:(void *)der length:size freeWhenDone:NO];
 }
 
-static SecTrustRef CharonTrustWith(int count)
+static SecTrustRef RevenantTrustWith(int count)
 {
     SecTrustRef trust = NULL;
     SecPolicyRef policy = SecPolicyCreateBasicX509();
     SecCertificateRef certificates[2] = {NULL, NULL};
     for (int index = 0; index < count; index++)
-        certificates[index] = SecCertificateCreateWithData(NULL, (__bridge CFDataRef)CharonCertificateData(index));
+        certificates[index] = SecCertificateCreateWithData(NULL, (__bridge CFDataRef)RevenantCertificateData(index));
     CFArrayRef array = CFArrayCreate(NULL, (const void **)certificates, (CFIndex)count, &kCFTypeArrayCallBacks);
     if (array && SecTrustCreateWithCertificates(array, policy, &trust) != errSecSuccess) {
         if (trust) {
@@ -47,17 +47,17 @@ static SecTrustRef CharonTrustWith(int count)
     return trust;
 }
 
-static SecTrustRef CharonTrust(void)
+static SecTrustRef RevenantTrust(void)
 {
     static SecTrustRef trust;
     static dispatch_once_t once;
     dispatch_once(&once, ^{
-        trust = CharonTrustWith(2);
+        trust = RevenantTrustWith(2);
     });
     return trust;
 }
 
-static NSString *CharonVerdictOf(SecTrustRef trust)
+static NSString *RevenantVerdictOf(SecTrustRef trust)
 {
     SecTrustResultType result = kSecTrustResultInvalid;
     if (SecTrustEvaluate(trust, &result) != errSecSuccess)
@@ -77,14 +77,14 @@ static NSString *CharonVerdictOf(SecTrustRef trust)
 
 void certificate_run(CertificateRecorder record)
 {
-    SecTrustRef trust = CharonTrust();
+    SecTrustRef trust = RevenantTrust();
     record(@"trust.exists", trust ? @"1" : @"0");
     record(@"trust.certificateCount", [NSString stringWithFormat:@"%ld", (long)SecTrustGetCertificateCount(trust)]);
-    record(@"trust.verdict", CharonVerdictOf(trust));
-    SecTrustRef leafOnly = CharonTrustWith(1);
+    record(@"trust.verdict", RevenantVerdictOf(trust));
+    SecTrustRef leafOnly = RevenantTrustWith(1);
     record(@"trust.leafOnlyCount", [NSString stringWithFormat:@"%ld", (long)SecTrustGetCertificateCount(leafOnly)]);
     record(@"trust.leafOnlySubject", (__bridge NSString *)SecCertificateCopySubjectSummary(SecTrustGetCertificateAtIndex(leafOnly, 0)));
-    record(@"trust.leafOnlyVerdict", CharonVerdictOf(leafOnly));
+    record(@"trust.leafOnlyVerdict", RevenantVerdictOf(leafOnly));
 
     SecCertificateRef leaf = SecTrustGetCertificateAtIndex(trust, 0);
     CFStringRef subject = leaf ? SecCertificateCopySubjectSummary(leaf) : NULL;
@@ -92,12 +92,12 @@ void certificate_run(CertificateRecorder record)
     if (subject)
         CFRelease(subject);
 
-#ifdef CHARON_CERTIFICATE_PORT
+#ifdef REVENANT_CERTIFICATE_PORT
     SFCertificatePresentation *sheet = [[SFCertificatePresentation alloc] initWithTrust:trust];
     record(@"sheet.trustHeld", sheet.trust != NULL ? @"1" : @"0");
     record(@"sheet.trustIsOurs", sheet.trust == trust ? @"1" : @"0");
-    sheet.title = @"Charon title";
-    sheet.message = @"Charon message";
+    sheet.title = @"Revenant title";
+    sheet.message = @"Revenant message";
     sheet.helpURL = [NSURL URLWithString:@"https://example.invalid/help"];
     record(@"sheet.title", sheet.title);
     record(@"sheet.message", sheet.message);
@@ -106,11 +106,11 @@ void certificate_run(CertificateRecorder record)
     SFCertificatePresentation *empty = [[SFCertificatePresentation alloc] init];
     record(@"sheet.trustOfUnavailableInit", empty.trust == NULL ? @"1" : @"0");
 
-    NSArray *lines = [CharonCertificateSheetController linesForTrust:trust];
+    NSArray *lines = [RevenantCertificateSheetController linesForTrust:trust];
     record(@"sheet.lineCount", [NSString stringWithFormat:@"%lu", (unsigned long)lines.count]);
     for (NSUInteger index = 0; index < lines.count; index++)
         record([NSString stringWithFormat:@"sheet.line.%lu", (unsigned long)index], lines[index]);
     record(@"sheet.linesForNullTrust", [NSString stringWithFormat:@"%lu",
-                                       (unsigned long)[CharonCertificateSheetController linesForTrust:NULL].count]);
+                                       (unsigned long)[RevenantCertificateSheetController linesForTrust:NULL].count]);
 #endif
 }

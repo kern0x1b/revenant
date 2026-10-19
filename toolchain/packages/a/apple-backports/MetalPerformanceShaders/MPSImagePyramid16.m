@@ -1,13 +1,13 @@
-#import "CharonMPSPyramid.h"
-#import "../charon_alias.h"
+#import "RevenantMPSPyramid.h"
+#import "../revenant_alias.h"
 
-@interface CharonMPSPyramidFilter : NSObject
+@interface RevenantMPSPyramidFilter : NSObject
 @property (nonatomic, strong) NSMutableData *weights;
 @property (nonatomic, assign) NSUInteger width;
 @property (nonatomic, assign) NSUInteger height;
 @end
 
-@implementation CharonMPSPyramidFilter
+@implementation RevenantMPSPyramidFilter
 
 @synthesize weights = _weights;
 @synthesize width = _width;
@@ -15,18 +15,18 @@
 
 @end
 
-CHARON_ALIAS_OF(MPSImagePyramid, MPSUnaryImageKernel)
+REVENANT_ALIAS_OF(MPSImagePyramid, MPSUnaryImageKernel)
 
-@implementation CHARON_ALIAS_CLASS(MPSImagePyramid) (CharonMPSPyramidFilter)
+@implementation REVENANT_ALIAS_CLASS(MPSImagePyramid) (RevenantMPSPyramidFilter)
 
 #pragma clang diagnostic ignored "-Wobjc-designated-initializers"
 
-static CharonMPSPyramidFilter *CharonMPSPyramidFilterOf(id pyramid)
+static RevenantMPSPyramidFilter *RevenantMPSPyramidFilterOf(id pyramid)
 {
     static const void *key = &key;
-    CharonMPSPyramidFilter *filter = objc_getAssociatedObject(pyramid, key);
+    RevenantMPSPyramidFilter *filter = objc_getAssociatedObject(pyramid, key);
     if (!filter) {
-        filter = [[CharonMPSPyramidFilter alloc] init];
+        filter = [[RevenantMPSPyramidFilter alloc] init];
         objc_setAssociatedObject(pyramid, key, filter, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     }
     return filter;
@@ -38,18 +38,18 @@ static CharonMPSPyramidFilter *CharonMPSPyramidFilterOf(id pyramid)
         return nil;
     if (!kernelWidth || !kernelHeight || !kernelWeights ||
         (kernelWidth % 2) == 0 || (kernelHeight % 2) == 0) {
-        CharonMPSRefuse(@"MPSImagePyramid: a %lu by %lu kernel with weights %s is refused;"
+        RevenantMPSRefuse(@"MPSImagePyramid: a %lu by %lu kernel with weights %s is refused;"
                         @" the width and the height must be odd",
                         (unsigned long)kernelWidth, (unsigned long)kernelHeight,
                         kernelWeights ? "given" : "not given");
         return nil;
     }
-    CharonMPSPyramidFilter *filter = CharonMPSPyramidFilterOf(self);
+    RevenantMPSPyramidFilter *filter = RevenantMPSPyramidFilterOf(self);
     filter.width = kernelWidth;
     filter.height = kernelHeight;
     filter.weights = [NSMutableData dataWithLength:kernelWidth * kernelHeight * sizeof(float)];
     if (!filter.weights) {
-        CharonMPSRefuse(@"MPSImagePyramid: no memory for a %lux%lu kernel, so no object was made",
+        RevenantMPSRefuse(@"MPSImagePyramid: no memory for a %lux%lu kernel, so no object was made",
                         (unsigned long)kernelWidth, (unsigned long)kernelHeight);
         return nil;
     }
@@ -82,16 +82,16 @@ static CharonMPSPyramidFilter *CharonMPSPyramidFilterOf(id pyramid)
 {
     (void)aDecoder;
     (void)device;
-    CharonMPSRefuse(@"MPSImagePyramid: -initWithCoder:device: is not carried - the release's keys for a"
+    RevenantMPSRefuse(@"MPSImagePyramid: -initWithCoder:device: is not carried - the release's keys for a"
                     @" pyramid's filter are in no header, so a decoder cannot rebuild them honestly");
     return nil;
 }
 
-- (NSUInteger)kernelWidth { return CharonMPSPyramidFilterOf(self).width; }
-- (NSUInteger)kernelHeight { return CharonMPSPyramidFilterOf(self).height; }
+- (NSUInteger)kernelWidth { return RevenantMPSPyramidFilterOf(self).width; }
+- (NSUInteger)kernelHeight { return RevenantMPSPyramidFilterOf(self).height; }
 
-- (const float *)charon_mps_filter { return (const float *)[CharonMPSPyramidFilterOf(self).weights bytes]; }
-- (NSUInteger)charon_mps_filterWidth { return CharonMPSPyramidFilterOf(self).width; }
-- (NSUInteger)charon_mps_filterHeight { return CharonMPSPyramidFilterOf(self).height; }
+- (const float *)revenant_mps_filter { return (const float *)[RevenantMPSPyramidFilterOf(self).weights bytes]; }
+- (NSUInteger)revenant_mps_filterWidth { return RevenantMPSPyramidFilterOf(self).width; }
+- (NSUInteger)revenant_mps_filterHeight { return RevenantMPSPyramidFilterOf(self).height; }
 
 @end

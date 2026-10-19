@@ -11,7 +11,7 @@
 #include <optional>
 #include <string_view>
 
-namespace shade::kernel_iokit::audio {
+namespace emulator::kernel_iokit::audio {
 
 struct IOKitAudioAbi {
     struct RegistryKeys {

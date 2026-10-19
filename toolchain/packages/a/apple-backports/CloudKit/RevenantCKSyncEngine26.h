@@ -1,5 +1,5 @@
-#ifndef CHARON_CK_SYNC_ENGINE_26_H
-#define CHARON_CK_SYNC_ENGINE_26_H
+#ifndef REVENANT_CK_SYNC_ENGINE_26_H
+#define REVENANT_CK_SYNC_ENGINE_26_H
 
 #import <Foundation/Foundation.h>
 #import <CloudKit/CloudKit.h>
@@ -293,7 +293,7 @@ typedef NS_ENUM(NSInteger, CKSyncEngineZoneDeletionReason) {
 @end
 
 @protocol CKSyncEngineRecordProvider <NSObject>
-- (nullable CKRecord *)charon_recordForRecordID:(CKRecordID *)recordID;
+- (nullable CKRecord *)revenant_recordForRecordID:(CKRecordID *)recordID;
 @end
 
 @protocol CKSyncEngineDelegate <NSObject>

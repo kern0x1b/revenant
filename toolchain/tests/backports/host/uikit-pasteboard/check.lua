@@ -88,13 +88,13 @@ function main(...)
         "the two option keys are read and recorded: YES and the date the caller sent")
     bad = bad + need(#stored == 2, "-setObjects: stores through the release's own -setValue:forPasteboardType:",
         string.format("it asked for %d values, and it must ask for two", #stored))
-    bad = bad + need(any_has(stored, "|charon.string.type.one|plain"),
+    bad = bad + need(any_has(stored, "|revenant.string.type.one|plain"),
         "-setObjects: stored the string under the FIRST entry of the string list", py_list(stored))
-    bad = bad + need(any_has(stored, "|charon.url.type.one|https://example.invalid/x"),
+    bad = bad + need(any_has(stored, "|revenant.url.type.one|https://example.invalid/x"),
         "-setObjects: stored the URL under the FIRST entry of the URL list", py_list(stored))
-    bad = bad + need(not (any_has(stored, "charon.string.type.two") or any_has(stored, "charon.url.type.two")),
+    bad = bad + need(not (any_has(stored, "revenant.string.type.two") or any_has(stored, "revenant.url.type.two")),
         "-setObjects: stored under no entry but the first", py_list(stored))
-    bad = bad + need(any_has(lines, "setObjects:localOnly: asked the release setValue|charon.string.type.one|third"),
+    bad = bad + need(any_has(lines, "setObjects:localOnly: asked the release setValue|revenant.string.type.one|third"),
         "the options path stores the objects it was given")
     bad = bad + need(any_has(lines, "setObjects:localOnly: recorded 1 2031-02-02"),
         "the second member records its own two options")

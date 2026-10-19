@@ -87,7 +87,7 @@ void pasteboard10_run(Pasteboard10Recorder record)
     take(pasteboard, @"the bytes of a PNG under public.png", record);
 
     pasteboard.items = @[];
-    [pasteboard setData:[@"payload" dataUsingEncoding:NSUTF8StringEncoding] forPasteboardType:@"org.charon.backports.own-type"];
+    [pasteboard setData:[@"payload" dataUsingEncoding:NSUTF8StringEncoding] forPasteboardType:@"org.revenant.backports.own-type"];
     take(pasteboard, @"bytes under a type of the application's own", record);
 
     pasteboard.items = @[];

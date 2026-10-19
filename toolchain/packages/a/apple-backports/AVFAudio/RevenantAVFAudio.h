@@ -5,45 +5,45 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-NSUInteger CharonChannelsForLayoutTag(AudioChannelLayoutTag tag);
-AudioChannelLayoutTag CharonTagForChannelCount(AVAudioChannelCount channels);
-AudioChannelLayoutTag CharonTagFromName(NSString *name);
+NSUInteger RevenantChannelsForLayoutTag(AudioChannelLayoutTag tag);
+AudioChannelLayoutTag RevenantTagForChannelCount(AVAudioChannelCount channels);
+AudioChannelLayoutTag RevenantTagFromName(NSString *name);
 
-@interface AVAudioUnitComponent (CharonImpl)
-- (instancetype)initWithCharonComponent:(AudioComponent)component;
+@interface AVAudioUnitComponent (RevenantImpl)
+- (instancetype)initWithRevenantComponent:(AudioComponent)component;
 @end
 
-@interface AVAudioUnitComponentManager (CharonImpl)
-- (NSArray<AVAudioUnitComponent *> *)charon_allComponents;
+@interface AVAudioUnitComponentManager (RevenantImpl)
+- (NSArray<AVAudioUnitComponent *> *)revenant_allComponents;
 @end
 
-@interface AVAudioNode (CharonAVFAudioImpl)
-- (void)charon_setEngine:(nullable AVAudioEngine *)engine auNode:(AUNode)node audioUnit:(nullable AudioUnit)unit;
-- (NSMutableArray *_Nonnull)charon_queue;
+@interface AVAudioNode (RevenantAVFAudioImpl)
+- (void)revenant_setEngine:(nullable AVAudioEngine *)engine auNode:(AUNode)node audioUnit:(nullable AudioUnit)unit;
+- (NSMutableArray *_Nonnull)revenant_queue;
 @end
 
-@interface AVAudioMixingDestination (CharonInit)
-- (instancetype _Nonnull)initWithCharonNode:(AVAudioNode *_Nullable)node
+@interface AVAudioMixingDestination (RevenantInit)
+- (instancetype _Nonnull)initWithRevenantNode:(AVAudioNode *_Nullable)node
                                      mixer:(AVAudioNode *_Nullable)mixer
                                         bus:(AVAudioNodeBus)bus;
 @end
 
-@interface AUAudioUnit (CharonNote)
-+ (void)charon_noteInert:(NSString *)member why:(NSString *)why;
+@interface AUAudioUnit (RevenantNote)
++ (void)revenant_noteInert:(NSString *)member why:(NSString *)why;
 @end
 
-@interface AVAudioEnvironmentNode (CharonImpl)
-- (OSStatus)charon_renderOfflineToBuffer:(AudioBufferList *)buffer frames:(AVAudioFrameCount)frames;
-- (void)charon_applyEnvironmentParameters;
+@interface AVAudioEnvironmentNode (RevenantImpl)
+- (OSStatus)revenant_renderOfflineToBuffer:(AudioBufferList *)buffer frames:(AVAudioFrameCount)frames;
+- (void)revenant_applyEnvironmentParameters;
 @end
 
-@interface AVAudioEnvironmentDistanceAttenuationParameters (CharonImpl)
-- (instancetype)initWithCharonOwner:(AVAudioEnvironmentNode *)owner;
-- (float)charon_gainForDistance:(float)distance;
+@interface AVAudioEnvironmentDistanceAttenuationParameters (RevenantImpl)
+- (instancetype)initWithRevenantOwner:(AVAudioEnvironmentNode *)owner;
+- (float)revenant_gainForDistance:(float)distance;
 @end
 
-@interface AVAudioEnvironmentReverbParameters (CharonImpl)
-- (instancetype)initWithCharonOwner:(AVAudioEnvironmentNode *)owner;
+@interface AVAudioEnvironmentReverbParameters (RevenantImpl)
+- (instancetype)initWithRevenantOwner:(AVAudioEnvironmentNode *)owner;
 @end
 
 NS_ASSUME_NONNULL_END

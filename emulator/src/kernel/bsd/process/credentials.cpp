@@ -16,7 +16,7 @@
 #include <limits>
 #include <string>
 
-namespace shade {
+namespace emulator {
 namespace {
 
     constexpr std::uint32_t maximum_supplementary_groups = 16;

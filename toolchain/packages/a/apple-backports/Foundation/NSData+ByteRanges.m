@@ -1,6 +1,6 @@
 #import <Foundation/Foundation.h>
 
-@implementation NSData (CharonByteRanges)
+@implementation NSData (RevenantByteRanges)
 
 - (void)enumerateByteRangesUsingBlock:(void (NS_NOESCAPE ^)(const void *bytes, NSRange byteRange, BOOL *stop))block
 {

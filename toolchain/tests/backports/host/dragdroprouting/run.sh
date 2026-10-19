@@ -7,14 +7,14 @@
 #     $HOME/Git/projects/ios/coordination/heavy.sh sh tests/backports/host/dragdroprouting/run.sh
 #
 # DDR_ROOT names the port's checkout; the sources are taken from it by path, so the port is never
-# installed as the addon (charon/AGENTS.md, Traps).
+# installed as the addon (toolchain/AGENTS.md, Traps).
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 root=${DDR_ROOT:-$here/../../../..}
 # The build tree is under the worktree: a harness may not default into /tmp, and the run
 # output is kept with the other runs rather than in a directory the system wipes.
 build=${DDR_BUILD:-$root/.agent-work/runs/dragdroprouting-build}
-device=${DDR_DEVICE:-iPhone3,1}   # 6.1.3: the shade cache holds this profile; iPhone4,1 6.1.3 has no
+device=${DDR_DEVICE:-iPhone3,1}   # 6.1.3: the emulator cache holds this profile; iPhone4,1 6.1.3 has no
                                   # firmware and the boot is blocked before the guest ever runs
 releases=${DDR_RELEASES:-"6.1.3"}
 export DDR_ROOT=$root
@@ -46,10 +46,10 @@ scratch=$build/port-sources
 rm -rf "$scratch"
 mkdir -p "$scratch"
 cp "$port"/*.m "$port"/*.h "$scratch/" 2>/dev/null || true
-rm -f "$scratch/CharonDropSequence11.m"
-cp "$port/CharonDropSequence11.m" "$scratch/CharonDropSequence11.m"
-original=$scratch/CharonDropSequence11.m
-mutated=$build/CharonDropSequence11.m.mutated
+rm -f "$scratch/RevenantDropSequence11.m"
+cp "$port/RevenantDropSequence11.m" "$scratch/RevenantDropSequence11.m"
+original=$scratch/RevenantDropSequence11.m
+mutated=$build/RevenantDropSequence11.m.mutated
 python3 - "$original" "$mutated" <<'PYMUT'
 import sys
 src, dst = sys.argv[1], sys.argv[2]
@@ -101,7 +101,7 @@ run_one() {
     # The addon's own verdict for the run, which says pass, fail, crash or timeout where the run's
     # exit status only says the process stopped.
     image=$3
-    verdict=$(ls -d "$HOME/.charon/emulator/images.noindex/$image/iPhone3,1_"*"/run/verdict.json" 2>/dev/null | head -1)
+    verdict=$(ls -d "$HOME/.revenant/emulator/images.noindex/$image/iPhone3,1_"*"/run/verdict.json" 2>/dev/null | head -1)
     if [ -n "$verdict" ]; then
         echo "$2 $release: $(python3 -c "
 import json,sys
@@ -124,8 +124,8 @@ print(d.get('state','?'), d.get('reason',''), d.get('signal','') and 'signal '+s
 guest_lines() {
     image=$2
     guest=$3
-    rootfs=$(ls -d "$HOME/.charon/emulator/images.noindex/$image/iPhone3,1_"*"/run/rootfs" 2>/dev/null | head -1)
-    [ -n "$rootfs" ] || { echo "$guest: no image rootfs at $HOME/.charon/emulator/images.noindex/$image"; return 0; }
+    rootfs=$(ls -d "$HOME/.revenant/emulator/images.noindex/$image/iPhone3,1_"*"/run/rootfs" 2>/dev/null | head -1)
+    [ -n "$rootfs" ] || { echo "$guest: no image rootfs at $HOME/.revenant/emulator/images.noindex/$image"; return 0; }
     done_file="$rootfs/private/var/backports/dragdroprouting.done"
     asked_file="$rootfs/private/var/backports/dragdroprouting.asked"
     if [ -f "$done_file" ]; then
@@ -140,12 +140,12 @@ guest_lines() {
 
 # Clean, then the mutated tree, then the tree back, all on this machine in this order.
 for release in $releases; do
-    image=$(ls -td "$HOME/.charon/emulator/images.noindex/"dragdroprouting-* 2>/dev/null | head -1)
+    image=$(ls -td "$HOME/.revenant/emulator/images.noindex/"dragdroprouting-* 2>/dev/null | head -1)
     :
     run_one "$release" clean "$(basename "$image")" && guest_lines "$release" "$(basename "$image")" clean || failed=1
 done
 # the mutant, in the scratch tree only
-cp "$mutated" "$scratch/CharonDropSequence11.m"
+cp "$mutated" "$scratch/RevenantDropSequence11.m"
 for release in $releases; do
     run_one "$release" mutated "$(basename "$image")" && guest_lines "$release" "$(basename "$image")" mutated || true
 done

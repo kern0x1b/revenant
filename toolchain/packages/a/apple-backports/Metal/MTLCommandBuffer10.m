@@ -1,25 +1,25 @@
-#import "CharonMetal.h"
+#import "RevenantMetal.h"
 
-@implementation CharonMetalCommandBuffer (Timing10)
+@implementation RevenantMetalCommandBuffer (Timing10)
 
 - (CFTimeInterval)GPUStartTime
 {
-    return [self charonStartTime];
+    return [self revenantStartTime];
 }
 
 - (CFTimeInterval)GPUEndTime
 {
-    return [self charonEndTime];
+    return [self revenantEndTime];
 }
 
 - (CFTimeInterval)kernelStartTime
 {
-    return [self charonStartTime];
+    return [self revenantStartTime];
 }
 
 - (CFTimeInterval)kernelEndTime
 {
-    return [self charonEndTime];
+    return [self revenantEndTime];
 }
 
 @end

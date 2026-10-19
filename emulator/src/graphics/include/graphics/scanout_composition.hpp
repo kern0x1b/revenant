@@ -17,7 +17,7 @@
 #include "graphics/gles_resources.hpp"
 #include "graphics/local_scene_background.hpp"
 
-namespace shade {
+namespace emulator {
 
 class ScanoutComposition {
 public:

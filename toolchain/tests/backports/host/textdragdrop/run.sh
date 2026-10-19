@@ -81,7 +81,7 @@ run_one() {
         echo "$half $release: killed (status 137) before the guest ran -- the machine was out of memory, not a verdict"
         return 1
     fi
-    verdict=$(ls -d "$HOME/.charon/emulator/images.noindex/$image/iPhone3,1_"*"/run/verdict.json" 2>/dev/null | head -1)
+    verdict=$(ls -d "$HOME/.revenant/emulator/images.noindex/$image/iPhone3,1_"*"/run/verdict.json" 2>/dev/null | head -1)
     [ -n "$verdict" ] && echo "$half $release: $(python3 -c "
 import json
 d=json.load(open('$verdict'))
@@ -99,7 +99,7 @@ guest_lines() {
     release=$1
     half=$2
     image=$3
-    rootfs=$(ls -d "$HOME/.charon/emulator/images.noindex/$image/iPhone3,1_"*"/run/rootfs" 2>/dev/null | head -1)
+    rootfs=$(ls -d "$HOME/.revenant/emulator/images.noindex/$image/iPhone3,1_"*"/run/rootfs" 2>/dev/null | head -1)
     [ -n "$rootfs" ] || { echo "$half: no image rootfs"; return 0; }
     done_file="$rootfs/private/var/backports/textdragdrop.done"
     asked_file="$rootfs/private/var/backports/textdragdrop.asked"
@@ -113,9 +113,9 @@ guest_lines() {
 }
 
 failed=0
-image=$(ls -td "$HOME/.charon/emulator/images.noindex/"textdragdrop-* 2>/dev/null | head -1 | xargs basename 2>/dev/null)
+image=$(ls -td "$HOME/.revenant/emulator/images.noindex/"textdragdrop-* 2>/dev/null | head -1 | xargs basename 2>/dev/null)
 for release in $releases; do
-    [ -n "$image" ] || image=$(ls -td "$HOME/.charon/emulator/images.noindex/"textdragdrop-* 2>/dev/null | head -1 | xargs basename)
+    [ -n "$image" ] || image=$(ls -td "$HOME/.revenant/emulator/images.noindex/"textdragdrop-* 2>/dev/null | head -1 | xargs basename)
     run_one "$release" clean "$image" && guest_lines "$release" clean "$image" || failed=1
 done
 # the mutant, in the scratch tree only; the live source is never touched

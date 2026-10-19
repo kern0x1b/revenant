@@ -4,8 +4,8 @@
 #include <stdio.h>
 #include <string.h>
 
-vImage_Error charon_host_vImageConvert_12UTo16U(const vImage_Buffer *, const vImage_Buffer *, vImage_Flags);
-vImage_Error charon_host_vImageConvert_16UTo12U(const vImage_Buffer *, const vImage_Buffer *, vImage_Flags);
+vImage_Error revenant_host_vImageConvert_12UTo16U(const vImage_Buffer *, const vImage_Buffer *, vImage_Flags);
+vImage_Error revenant_host_vImageConvert_16UTo12U(const vImage_Buffer *, const vImage_Buffer *, vImage_Flags);
 
 #define ROWS 2
 #define MAX_WIDTH 17
@@ -53,7 +53,7 @@ static void run_up(vImagePixelCount width)
     memset(their_out, 0xa5, sizeof their_out);
     buffer(&src, source, width, ROWS, (vImagePixelCount)bytes);
     buffer(&dest, mine_out, width, ROWS, width * 2);
-    vImage_Error mine_status = charon_host_vImageConvert_12UTo16U(&src, &dest, 0);
+    vImage_Error mine_status = revenant_host_vImageConvert_12UTo16U(&src, &dest, 0);
     buffer(&dest, their_out, width, ROWS, width * 2);
     vImage_Error their_status = vImageConvert_12UTo16U(&src, &dest, 0);
 
@@ -92,7 +92,7 @@ static void run_down(vImagePixelCount width)
     vImage_Buffer src, dest;
     buffer(&src, source, width, ROWS, width * 2);
     buffer(&dest, mine_out, width, ROWS, (vImagePixelCount)bytes);
-    vImage_Error mine_status = charon_host_vImageConvert_16UTo12U(&src, &dest, 0);
+    vImage_Error mine_status = revenant_host_vImageConvert_16UTo12U(&src, &dest, 0);
     buffer(&dest, their_out, width, ROWS, (vImagePixelCount)bytes);
     vImage_Error their_status = vImageConvert_16UTo12U(&src, &dest, 0);
 
@@ -133,7 +133,7 @@ static void run_scale(void)
                 vImage_Buffer src, dest;
                 buffer(&src, packed, 2, 1, 3);
                 buffer(&dest, mine_out, 2, 1, 4);
-                charon_host_vImageConvert_12UTo16U(&src, &dest, 0);
+                revenant_host_vImageConvert_12UTo16U(&src, &dest, 0);
                 buffer(&dest, their_out, 2, 1, 4);
                 vImageConvert_12UTo16U(&src, &dest, 0);
             } else {
@@ -142,7 +142,7 @@ static void run_scale(void)
                 vImage_Buffer src, dest;
                 buffer(&src, mine_in, 2, 1, 4);
                 buffer(&dest, mine_out, 2, 1, 3);
-                charon_host_vImageConvert_16UTo12U(&src, &dest, 0);
+                revenant_host_vImageConvert_16UTo12U(&src, &dest, 0);
                 buffer(&src, their_in, 2, 1, 4);
                 buffer(&dest, their_out, 2, 1, 3);
                 vImageConvert_16UTo12U(&src, &dest, 0);

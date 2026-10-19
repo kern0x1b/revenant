@@ -1,21 +1,21 @@
-#import "CharonLists.h"
+#import "RevenantLists.h"
 #import <objc/runtime.h>
 #import <objc/message.h>
 
-static const char CharonHostKey;
-static const char CharonTableStyleKey;
-static const char CharonUpdateHandlerKey;
+static const char RevenantHostKey;
+static const char RevenantTableStyleKey;
+static const char RevenantUpdateHandlerKey;
 
-@interface CharonBackgroundView : UIView
-- (void)charon_applyConfiguration:(UIBackgroundConfiguration *)configuration inBounds:(CGRect)bounds tint:(UIColor *)tint;
+@interface RevenantBackgroundView : UIView
+- (void)revenant_applyConfiguration:(UIBackgroundConfiguration *)configuration inBounds:(CGRect)bounds tint:(UIColor *)tint;
 @end
 
-@implementation CharonBackgroundView {
+@implementation RevenantBackgroundView {
     UIVisualEffectView *_effectView;
     UIView *_customView;
 }
 
-- (void)charon_applyConfiguration:(UIBackgroundConfiguration *)configuration inBounds:(CGRect)bounds tint:(UIColor *)tint
+- (void)revenant_applyConfiguration:(UIBackgroundConfiguration *)configuration inBounds:(CGRect)bounds tint:(UIColor *)tint
 {
     NSDirectionalEdgeInsets insets = configuration.backgroundInsets;
     CGRect frame = CGRectMake(bounds.origin.x + insets.leading, bounds.origin.y + insets.top, bounds.size.width - insets.leading - insets.trailing, bounds.size.height - insets.top - insets.bottom);
@@ -56,12 +56,12 @@ static const char CharonUpdateHandlerKey;
 
 @end
 
-@interface CharonHostState : NSObject {
+@interface RevenantHostState : NSObject {
 @public
     id<UIContentConfiguration> content;
     UIView<UIContentView> *contentView;
     UIBackgroundConfiguration *background;
-    CharonBackgroundView *backgroundView;
+    RevenantBackgroundView *backgroundView;
     BOOL manualContent, manualBackground, needsUpdate, updating;
     BOOL savedStyle;
     NSInteger selectionStyle;
@@ -69,21 +69,21 @@ static const char CharonUpdateHandlerKey;
 }
 @end
 
-@implementation CharonHostState
+@implementation RevenantHostState
 @end
 
-static CharonHostState *charon_state(UIView *host, BOOL create)
+static RevenantHostState *revenant_state(UIView *host, BOOL create)
 {
-    CharonHostState *state = objc_getAssociatedObject(host, &CharonHostKey);
+    RevenantHostState *state = objc_getAssociatedObject(host, &RevenantHostKey);
     if (!state && create) {
-        state = [[CharonHostState alloc] init];
+        state = [[RevenantHostState alloc] init];
         state->needsUpdate = YES;
-        objc_setAssociatedObject(host, &CharonHostKey, state, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+        objc_setAssociatedObject(host, &RevenantHostKey, state, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     }
     return state;
 }
 
-UIView *charon_host_content_view(UIView *host)
+UIView *revenant_host_content_view(UIView *host)
 {
     if ([host isKindOfClass:[UICollectionViewCell class]])
         return ((UICollectionViewCell *)host).contentView;
@@ -94,7 +94,7 @@ UIView *charon_host_content_view(UIView *host)
     return host;
 }
 
-UICollectionView *charon_owning_collection_view(UIView *view)
+UICollectionView *revenant_owning_collection_view(UIView *view)
 {
     UIView *candidate = view.superview;
     while (candidate && ![candidate isKindOfClass:[UICollectionView class]])
@@ -102,16 +102,16 @@ UICollectionView *charon_owning_collection_view(UIView *view)
     return (UICollectionView *)candidate;
 }
 
-id<UIContentConfiguration> charon_host_content(UIView *host)
+id<UIContentConfiguration> revenant_host_content(UIView *host)
 {
-    CharonHostState *state = charon_state(host, NO);
+    RevenantHostState *state = revenant_state(host, NO);
     return state ? [state->content copyWithZone:nil] : nil;
 }
 
-static void charon_install_content(UIView *host, CharonHostState *state, id<UIContentConfiguration> configuration)
+static void revenant_install_content(UIView *host, RevenantHostState *state, id<UIContentConfiguration> configuration)
 {
     state->content = [configuration copyWithZone:nil];
-    UIView *container = charon_host_content_view(host);
+    UIView *container = revenant_host_content_view(host);
     if (!configuration) {
         [state->contentView removeFromSuperview];
         state->contentView = nil;
@@ -130,18 +130,18 @@ static void charon_install_content(UIView *host, CharonHostState *state, id<UICo
     [host setNeedsLayout];
 }
 
-void charon_host_set_content(UIView *host, id<UIContentConfiguration> configuration)
+void revenant_host_set_content(UIView *host, id<UIContentConfiguration> configuration)
 {
-    charon_install_content(host, charon_state(host, YES), configuration);
+    revenant_install_content(host, revenant_state(host, YES), configuration);
 }
 
-UIBackgroundConfiguration *charon_host_background(UIView *host)
+UIBackgroundConfiguration *revenant_host_background(UIView *host)
 {
-    CharonHostState *state = charon_state(host, NO);
+    RevenantHostState *state = revenant_state(host, NO);
     return state ? [state->background copy] : nil;
 }
 
-static void charon_restore_backgrounds(UIView *host, CharonHostState *state)
+static void revenant_restore_backgrounds(UIView *host, RevenantHostState *state)
 {
     for (UIView *view in state->hidden)
         view.hidden = NO;
@@ -151,18 +151,18 @@ static void charon_restore_backgrounds(UIView *host, CharonHostState *state)
     state->savedStyle = NO;
 }
 
-static void charon_install_background(UIView *host, CharonHostState *state, UIBackgroundConfiguration *configuration)
+static void revenant_install_background(UIView *host, RevenantHostState *state, UIBackgroundConfiguration *configuration)
 {
     state->background = [configuration copy];
     if (!configuration) {
         [state->backgroundView removeFromSuperview];
         state->backgroundView = nil;
-        charon_restore_backgrounds(host, state);
+        revenant_restore_backgrounds(host, state);
         return;
     }
     if (!state->backgroundView) {
-        state->backgroundView = [[CharonBackgroundView alloc] init];
-        UIView *container = charon_host_content_view(host);
+        state->backgroundView = [[RevenantBackgroundView alloc] init];
+        UIView *container = revenant_host_content_view(host);
         [host insertSubview:state->backgroundView belowSubview:container];
         state->hidden = [NSMutableArray array];
         UIView *plain = nil, *selected = nil;
@@ -182,51 +182,51 @@ static void charon_install_background(UIView *host, CharonHostState *state, UIBa
                 [state->hidden addObject:view];
             }
     }
-    [state->backgroundView charon_applyConfiguration:configuration inBounds:host.bounds tint:host.tintColor];
+    [state->backgroundView revenant_applyConfiguration:configuration inBounds:host.bounds tint:host.tintColor];
 }
 
-void charon_host_set_background(UIView *host, UIBackgroundConfiguration *configuration)
+void revenant_host_set_background(UIView *host, UIBackgroundConfiguration *configuration)
 {
-    charon_install_background(host, charon_state(host, YES), configuration);
+    revenant_install_background(host, revenant_state(host, YES), configuration);
 }
 
-BOOL charon_host_automatic(UIView *host, BOOL background)
+BOOL revenant_host_automatic(UIView *host, BOOL background)
 {
-    CharonHostState *state = charon_state(host, NO);
+    RevenantHostState *state = revenant_state(host, NO);
     return !state || !(background ? state->manualBackground : state->manualContent);
 }
 
-void charon_host_set_automatic(UIView *host, BOOL background, BOOL automatic)
+void revenant_host_set_automatic(UIView *host, BOOL background, BOOL automatic)
 {
-    CharonHostState *state = charon_state(host, YES);
+    RevenantHostState *state = revenant_state(host, YES);
     if (background)
         state->manualBackground = !automatic;
     else
         state->manualContent = !automatic;
 }
 
-void charon_host_default_update(UIView *host, UIViewConfigurationState *viewState)
+void revenant_host_default_update(UIView *host, UIViewConfigurationState *viewState)
 {
-    CharonHostState *state = charon_state(host, YES);
+    RevenantHostState *state = revenant_state(host, YES);
     if (!state->manualContent && state->content)
-        charon_install_content(host, state, [state->content updatedConfigurationForState:viewState]);
+        revenant_install_content(host, state, [state->content updatedConfigurationForState:viewState]);
     if (!state->manualBackground && state->background)
-        charon_install_background(host, state, [state->background updatedConfigurationForState:viewState]);
+        revenant_install_background(host, state, [state->background updatedConfigurationForState:viewState]);
 }
 
-NSNumber *charon_host_table_style(UITableViewCell *cell)
+NSNumber *revenant_host_table_style(UITableViewCell *cell)
 {
-    return objc_getAssociatedObject(cell, &CharonTableStyleKey);
+    return objc_getAssociatedObject(cell, &RevenantTableStyleKey);
 }
 
-@implementation UIView (CharonListHost)
+@implementation UIView (RevenantListHost)
 
-- (UIView *)charon_configurationContainer
+- (UIView *)revenant_configurationContainer
 {
-    return charon_host_content_view(self);
+    return revenant_host_content_view(self);
 }
 
-- (UIViewConfigurationState *)charon_makeConfigurationState
+- (UIViewConfigurationState *)revenant_makeConfigurationState
 {
     UITraitCollection *traits = [self respondsToSelector:@selector(traitCollection)] ? self.traitCollection : nil;
     if (!traits)
@@ -238,9 +238,9 @@ NSNumber *charon_host_table_style(UITableViewCell *cell)
         UICollectionViewCell *cell = (UICollectionViewCell *)self;
         state.selected = cell.selected;
         state.highlighted = cell.highlighted;
-        [(UICellConfigurationState *)state setEditing:[charon_owning_collection_view(self) charon_editing]];
-        if ([self respondsToSelector:@selector(charon_isExpanded)])
-            [(UICellConfigurationState *)state setExpanded:[(UICollectionViewListCell *)self charon_isExpanded]];
+        [(UICellConfigurationState *)state setEditing:[revenant_owning_collection_view(self) revenant_editing]];
+        if ([self respondsToSelector:@selector(revenant_isExpanded)])
+            [(UICellConfigurationState *)state setExpanded:[(UICollectionViewListCell *)self revenant_isExpanded]];
     } else if ([self isKindOfClass:[UITableViewCell class]]) {
         UITableViewCell *cell = (UITableViewCell *)self;
         state.selected = cell.selected;
@@ -250,57 +250,57 @@ NSNumber *charon_host_table_style(UITableViewCell *cell)
     return state;
 }
 
-- (void)charon_setNeedsUpdateConfiguration
+- (void)revenant_setNeedsUpdateConfiguration
 {
-    charon_state(self, YES)->needsUpdate = YES;
+    revenant_state(self, YES)->needsUpdate = YES;
     [self setNeedsLayout];
 }
 
-- (void)charon_layoutWillRun
+- (void)revenant_layoutWillRun
 {
-    CharonHostState *state = charon_state(self, YES);
+    RevenantHostState *state = revenant_state(self, YES);
     if (!state->needsUpdate || state->updating)
         return;
     state->needsUpdate = NO;
     state->updating = YES;
-    UIViewConfigurationState *configurationState = [self charon_makeConfigurationState];
+    UIViewConfigurationState *configurationState = [self revenant_makeConfigurationState];
     ((void (*)(id, SEL, id))objc_msgSend)(self, @selector(updateConfigurationUsingState:), configurationState);
-    void (^handler)(id, id) = objc_getAssociatedObject(self, &CharonUpdateHandlerKey);
+    void (^handler)(id, id) = objc_getAssociatedObject(self, &RevenantUpdateHandlerKey);
     if (handler)
         handler(self, configurationState);
     state->updating = NO;
 }
 
-- (void)charon_layoutDidRun
+- (void)revenant_layoutDidRun
 {
-    CharonHostState *state = charon_state(self, NO);
+    RevenantHostState *state = revenant_state(self, NO);
     if (!state)
         return;
     if (state->backgroundView)
-        [state->backgroundView charon_applyConfiguration:state->background inBounds:self.bounds tint:self.tintColor];
-    if (state->contentView && state->contentView.superview == charon_host_content_view(self))
-        state->contentView.frame = charon_host_content_view(self).bounds;
+        [state->backgroundView revenant_applyConfiguration:state->background inBounds:self.bounds tint:self.tintColor];
+    if (state->contentView && state->contentView.superview == revenant_host_content_view(self))
+        state->contentView.frame = revenant_host_content_view(self).bounds;
 }
 
 @end
 
-void charon_request_update(UIView *view)
+void revenant_request_update(UIView *view)
 {
     ((void (*)(id, SEL))objc_msgSend)(view, @selector(setNeedsUpdateConfiguration));
 }
 
-id charon_host_update_handler(UIView *host)
+id revenant_host_update_handler(UIView *host)
 {
-    return objc_getAssociatedObject(host, &CharonUpdateHandlerKey);
+    return objc_getAssociatedObject(host, &RevenantUpdateHandlerKey);
 }
 
-void charon_host_set_update_handler(UIView *host, id handler)
+void revenant_host_set_update_handler(UIView *host, id handler)
 {
-    objc_setAssociatedObject(host, &CharonUpdateHandlerKey, [handler copy], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-    charon_request_update(host);
+    objc_setAssociatedObject(host, &RevenantUpdateHandlerKey, [handler copy], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    revenant_request_update(host);
 }
 
-static void charon_wrap(Class cls, SEL selector, id (^make)(IMP original))
+static void revenant_wrap(Class cls, SEL selector, id (^make)(IMP original))
 {
     Method method = class_getInstanceMethod(cls, selector);
     if (!method)
@@ -309,48 +309,48 @@ static void charon_wrap(Class cls, SEL selector, id (^make)(IMP original))
     class_replaceMethod(cls, selector, imp_implementationWithBlock(make(original)), method_getTypeEncoding(method));
 }
 
-@interface CharonConfigurationHooks : NSObject
+@interface RevenantConfigurationHooks : NSObject
 @end
 
-@implementation CharonConfigurationHooks
+@implementation RevenantConfigurationHooks
 
 + (void)load
 {
     Class collection = [UICollectionViewCell class], table = [UITableViewCell class], header = [UITableViewHeaderFooterView class];
-    charon_wrap(collection, @selector(setSelected:), ^id(IMP original) {
+    revenant_wrap(collection, @selector(setSelected:), ^id(IMP original) {
         return ^(UICollectionViewCell *self_, BOOL value) {
             ((void (*)(id, SEL, BOOL))original)(self_, @selector(setSelected:), value);
-            charon_request_update(self_);
+            revenant_request_update(self_);
         };
     });
-    charon_wrap(collection, @selector(setHighlighted:), ^id(IMP original) {
+    revenant_wrap(collection, @selector(setHighlighted:), ^id(IMP original) {
         return ^(UICollectionViewCell *self_, BOOL value) {
             ((void (*)(id, SEL, BOOL))original)(self_, @selector(setHighlighted:), value);
-            charon_request_update(self_);
+            revenant_request_update(self_);
         };
     });
-    charon_wrap(table, @selector(setSelected:animated:), ^id(IMP original) {
+    revenant_wrap(table, @selector(setSelected:animated:), ^id(IMP original) {
         return ^(UITableViewCell *self_, BOOL value, BOOL animated) {
             ((void (*)(id, SEL, BOOL, BOOL))original)(self_, @selector(setSelected:animated:), value, animated);
-            charon_request_update(self_);
+            revenant_request_update(self_);
         };
     });
-    charon_wrap(table, @selector(setHighlighted:animated:), ^id(IMP original) {
+    revenant_wrap(table, @selector(setHighlighted:animated:), ^id(IMP original) {
         return ^(UITableViewCell *self_, BOOL value, BOOL animated) {
             ((void (*)(id, SEL, BOOL, BOOL))original)(self_, @selector(setHighlighted:animated:), value, animated);
-            charon_request_update(self_);
+            revenant_request_update(self_);
         };
     });
-    charon_wrap(table, NSSelectorFromString(@"setEditing:animated:"), ^id(IMP original) {
+    revenant_wrap(table, NSSelectorFromString(@"setEditing:animated:"), ^id(IMP original) {
         return ^(UITableViewCell *self_, BOOL value, BOOL animated) {
             ((void (*)(id, SEL, BOOL, BOOL))original)(self_, NSSelectorFromString(@"setEditing:animated:"), value, animated);
-            charon_request_update(self_);
+            revenant_request_update(self_);
         };
     });
-    charon_wrap(table, @selector(initWithStyle:reuseIdentifier:), ^id(IMP original) {
+    revenant_wrap(table, @selector(initWithStyle:reuseIdentifier:), ^id(IMP original) {
         return ^(UITableViewCell *self_, UITableViewCellStyle style, NSString *identifier) {
             UITableViewCell *cell = ((id (*)(id, SEL, UITableViewCellStyle, NSString *))original)(self_, @selector(initWithStyle:reuseIdentifier:), style, identifier);
-            objc_setAssociatedObject(cell, &CharonTableStyleKey, @(style), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+            objc_setAssociatedObject(cell, &RevenantTableStyleKey, @(style), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
             return cell;
         };
     });
@@ -359,19 +359,19 @@ static void charon_wrap(Class cls, SEL selector, id (^make)(IMP original))
             SEL selector = NSSelectorFromString(name);
             if (cls == header && [name isEqual:@"imageView"])
                 continue;
-            charon_wrap(cls, selector, ^id(IMP original) {
+            revenant_wrap(cls, selector, ^id(IMP original) {
                 return ^id(UIView *self_) {
-                    return charon_host_content(self_) ? nil : ((id (*)(id, SEL))original)(self_, selector);
+                    return revenant_host_content(self_) ? nil : ((id (*)(id, SEL))original)(self_, selector);
                 };
             });
         }
     }
     for (Class cls in @[collection, table, header]) {
-        charon_wrap(cls, @selector(layoutSubviews), ^id(IMP original) {
+        revenant_wrap(cls, @selector(layoutSubviews), ^id(IMP original) {
             return ^(UIView *self_) {
-                [self_ charon_layoutWillRun];
+                [self_ revenant_layoutWillRun];
                 ((void (*)(id, SEL))original)(self_, @selector(layoutSubviews));
-                [self_ charon_layoutDidRun];
+                [self_ revenant_layoutDidRun];
             };
         });
     }

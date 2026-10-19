@@ -10,11 +10,11 @@ local H1 = [==[
 // table below is the SDK's shape, and a copy of it written by hand is a comparison that cannot fail.
 //
 // VTCLASS_NAME is how one source asks for a class in either build. In the host build it is the class's
-// own name; in the port's build rename.py has #defined that name to Charon<class>, so the same line
+// own name; in the port's build rename.py has #defined that name to Revenant<class>, so the same line
 // finds the port's class instead - one binary, two implementations, no second translation unit.
 #define VTCLASS_STR_(x) #x
 #define VTCLASS_STR(x) VTCLASS_STR_(x)
-// No #ifdef here on purpose: rename.py #defines each class name to Charon<class> and force-includes
+// No #ifdef here on purpose: rename.py #defines each class name to Revenant<class> and force-includes
 // that into the PORT's build, so stringifying the name through this macro yields the host's class in
 // the host build and the port's renamed class in the port's - from one line, with no second lookup.
 #define VTCLASS_NAME(x) VTCLASS_STR(x)

@@ -23,7 +23,7 @@
 #include "graphics/gles_renderer.hpp"
 #include "graphics/host_graphics.hpp"
 
-namespace shade {
+namespace emulator {
 namespace {
 
     std::atomic<std::uint64_t> next_host_surface_sequence { 1 };

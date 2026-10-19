@@ -1,12 +1,12 @@
 #import <Accelerate/Accelerate.h>
-#include "CharonSparseComplex26.h"
+#include "RevenantSparseComplex26.h"
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 
-#define RENAME(name) charon_host_##name
+#define RENAME(name) revenant_host_##name
 
 sparse_matrix_float_complex RENAME(sparse_matrix_create_float_complex)(sparse_dimension, sparse_dimension);
 sparse_matrix_double_complex RENAME(sparse_matrix_create_double_complex)(sparse_dimension, sparse_dimension);
@@ -121,12 +121,12 @@ static int same_complex(double mre, double mim, double tre, double tim, double t
 #define REAL_OF(x) ((double)__real__(x))
 #define IMAG_OF(x) ((double)__imag__(x))
 
-typedef struct CharonEntry {
+typedef struct RevenantEntry {
     sparse_index row;
     sparse_index column;
     double re;
     double im;
-} CharonEntry;
+} RevenantEntry;
 
 static void shape_cases(void)
 {
@@ -188,7 +188,7 @@ static void shape_cases(void)
 
 static void insert_cases(void)
 {
-    const CharonEntry three[3] = {{0, 0, 3.0, 4.0}, {1, 0, 1.0, 0.0}, {1, 2, -2.0, 1.0}};
+    const RevenantEntry three[3] = {{0, 0, 3.0, 4.0}, {1, 0, 1.0, 0.0}, {1, 2, -2.0, 1.0}};
     sparse_matrix_float_complex host = sparse_matrix_create_float_complex(3, 3);
     sparse_matrix_float_complex port = RENAME(sparse_matrix_create_float_complex)(3, 3);
     int same = 1;
@@ -328,7 +328,7 @@ static void insert_cases(void)
 
 static void extract_cases(void)
 {
-    const CharonEntry pattern[6] = {{0, 1, 1.0, 0.0}, {0, 2, 2.0, 0.0}, {0, 3, 3.0, 1.0},
+    const RevenantEntry pattern[6] = {{0, 1, 1.0, 0.0}, {0, 2, 2.0, 0.0}, {0, 3, 3.0, 1.0},
                                     {1, 0, 4.0, 0.0}, {3, 2, 5.0, -1.0}};
     sparse_matrix_float_complex host = sparse_matrix_create_float_complex(4, 4);
     sparse_matrix_float_complex port = RENAME(sparse_matrix_create_float_complex)(4, 4);
@@ -618,7 +618,7 @@ static void level_one_cases(void)
     report(ok, "unpacking no entry, with the zeroing", detail);
 }
 
-static void build_pair(const CharonEntry *entries, int count, sparse_matrix_float_complex *host,
+static void build_pair(const RevenantEntry *entries, int count, sparse_matrix_float_complex *host,
                        sparse_matrix_float_complex *port, sparse_matrix_double_complex *hostD,
                        sparse_matrix_double_complex *portD)
 {
@@ -642,7 +642,7 @@ static void build_pair(const CharonEntry *entries, int count, sparse_matrix_floa
 
 static void matrix_vector_cases(void)
 {
-    const CharonEntry entries[4] = {{0, 0, 3.0, 4.0}, {0, 1, 1.0, 0.0}, {1, 0, 2.0, -1.0}, {2, 2, -1.0, 0.5}};
+    const RevenantEntry entries[4] = {{0, 0, 3.0, 4.0}, {0, 1, 1.0, 0.0}, {1, 0, 2.0, -1.0}, {2, 2, -1.0, 0.5}};
     sparse_matrix_float_complex host, port;
     sparse_matrix_double_complex hostD, portD;
     build_pair(entries, 4, &host, &port, &hostD, &portD);
@@ -732,7 +732,7 @@ static void matrix_vector_cases(void)
     RENAME(sparse_matrix_destroy)(portD);
 }
 
-static void build_triangle(sparse_matrix_property property, const CharonEntry *entries, int count,
+static void build_triangle(sparse_matrix_property property, const RevenantEntry *entries, int count,
                            sparse_matrix_float_complex *host, sparse_matrix_float_complex *port)
 {
     *host = sparse_matrix_create_float_complex(3, 3);
@@ -749,8 +749,8 @@ static void build_triangle(sparse_matrix_property property, const CharonEntry *e
 
 static void triangular_cases(void)
 {
-    const CharonEntry lower[4] = {{0, 0, 2.0, 0.0}, {1, 0, 1.0, 0.0}, {1, 1, 3.0, 0.0}, {2, 2, 4.0, 0.0}};
-    const CharonEntry upper[4] = {{0, 0, 2.0, 0.0}, {0, 1, 1.0, 0.0}, {1, 1, 3.0, 0.0}, {2, 2, 4.0, 0.0}};
+    const RevenantEntry lower[4] = {{0, 0, 2.0, 0.0}, {1, 0, 1.0, 0.0}, {1, 1, 3.0, 0.0}, {2, 2, 4.0, 0.0}};
+    const RevenantEntry upper[4] = {{0, 0, 2.0, 0.0}, {0, 1, 1.0, 0.0}, {1, 1, 3.0, 0.0}, {2, 2, 4.0, 0.0}};
     const float _Complex rhs[3] = {2.0f + 0.0fi, 5.0f + 0.0fi, 4.0f + 0.0fi};
     const float _Complex alphas[3] = {1.0f + 0.0fi, 2.0f + 0.0fi, 0.5f + 1.0fi};
     const char *alphaNames[3] = {"an alpha of 1", "an alpha of 2", "an alpha of 0.5+1i"};
@@ -809,7 +809,7 @@ static void triangular_cases(void)
     sparse_matrix_destroy(host);
     RENAME(sparse_matrix_destroy)(port);
 
-    const CharonEntry zeroPivot[2] = {{0, 0, 0.0, 0.0}, {1, 1, 1.0, 0.0}};
+    const RevenantEntry zeroPivot[2] = {{0, 0, 0.0, 0.0}, {1, 1, 1.0, 0.0}};
     build_triangle(SPARSE_LOWER_TRIANGULAR, zeroPivot, 2, &host, &port);
     const float _Complex ones[3] = {1.0f + 0.0fi, 1.0f + 0.0fi, 1.0f + 0.0fi};
     float _Complex hostZ[3], portZ[3];
@@ -901,7 +901,7 @@ static void triangular_cases(void)
 
 static void level_three_cases(void)
 {
-    const CharonEntry entries[4] = {{0, 0, 3.0, 4.0}, {0, 1, 1.0, 0.0}, {1, 0, 2.0, -1.0}, {2, 2, -1.0, 0.5}};
+    const RevenantEntry entries[4] = {{0, 0, 3.0, 4.0}, {0, 1, 1.0, 0.0}, {1, 0, 2.0, -1.0}, {2, 2, -1.0, 0.5}};
     sparse_matrix_float_complex host, port;
     sparse_matrix_double_complex hostD, portD;
     build_pair(entries, 4, &host, &port, &hostD, &portD);
@@ -1010,7 +1010,7 @@ static void level_three_cases(void)
 
 static void outer_and_sparse_product_cases(void)
 {
-    const CharonEntry entries[3] = {{0, 0, 3.0, 4.0}, {0, 1, 1.0, 0.0}, {1, 0, 2.0, -1.0}};
+    const RevenantEntry entries[3] = {{0, 0, 3.0, 4.0}, {0, 1, 1.0, 0.0}, {1, 0, 2.0, -1.0}};
     float _Complex x[3] = {1.0f + 0.0fi, 2.0f + 1.0fi, -1.0f + 0.0fi};
     const sparse_index indy[3] = {0, 2};
     float _Complex y[2] = {5.0f + 1.0fi, -6.0f + 2.0fi};
@@ -1153,7 +1153,7 @@ static void outer_and_sparse_product_cases(void)
             sparse_insert_entry_double_complex(hostBD, bdValues[k], bRows[k], bColumns[k]);
             RENAME(sparse_insert_entry_double_complex)(portBD, bdValues[k], bRows[k], bColumns[k]);
         }
-        const CharonEntry aEntries[3] = {{0, 0, 3.0, 4.0}, {0, 1, 1.0, 0.0}, {1, 0, 2.0, -1.0}};
+        const RevenantEntry aEntries[3] = {{0, 0, 3.0, 4.0}, {0, 1, 1.0, 0.0}, {1, 0, 2.0, -1.0}};
         double denseD[9][2];
         const double denseValues[9][2] = {{0.5, 0.25},  {-0.5, 1.0},   {1.5, -0.75}, {2.0, 0.5},
                                           {-1.25, 0.0}, {0.75, -2.0},  {3.5, 1.25},  {-0.5, 0.75},
@@ -1250,7 +1250,7 @@ static void outer_and_sparse_product_cases(void)
 
 static void permutation_cases(void)
 {
-    const CharonEntry entries[6] = {{0, 0, 1.0, 1.0}, {0, 1, 2.0, -2.0}, {0, 2, 3.0, 0.0},
+    const RevenantEntry entries[6] = {{0, 0, 1.0, 1.0}, {0, 1, 2.0, -2.0}, {0, 2, 3.0, 0.0},
                                     {1, 0, 4.0, 3.0}, {1, 1, 5.0, 0.0}, {1, 2, 6.0, -6.0}};
     const sparse_index rowPermutations[6][2] = {{1, 0}, {0, 1}, {0, 0}, {1, 1}, {5, 5}, {-1, 1}};
     const char *rowNames[6] = {"the rows {1,0}", "the rows {0,1}", "the rows {0,0}", "the rows {1,1}",
@@ -1386,7 +1386,7 @@ static void permutation_cases(void)
 
 static void norm_and_trace_cases(void)
 {
-    const CharonEntry entries[3] = {{0, 0, 3.0, 4.0}, {1, 0, 1.0, 0.0}, {1, 2, -2.0, 1.0}};
+    const RevenantEntry entries[3] = {{0, 0, 3.0, 4.0}, {1, 0, 1.0, 0.0}, {1, 2, -2.0, 1.0}};
     sparse_matrix_float_complex host, port;
     sparse_matrix_double_complex hostD, portD;
     build_pair(entries, 3, &host, &port, &hostD, &portD);

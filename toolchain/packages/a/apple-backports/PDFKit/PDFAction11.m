@@ -1,6 +1,6 @@
-#import "CharonPDFKit.h"
+#import "RevenantPDFKit.h"
 
-static Class charonActionClassForName(const char *name)
+static Class revenantActionClassForName(const char *name)
 {
     if (name == NULL)
         return Nil;
@@ -17,7 +17,7 @@ static Class charonActionClassForName(const char *name)
     return [PDFAction class];
 }
 
-static BOOL charonNamedActionValue(const char *name, PDFActionNamedName *out)
+static BOOL revenantNamedActionValue(const char *name, PDFActionNamedName *out)
 {
     if (name == NULL)
         return NO;
@@ -32,7 +32,7 @@ static BOOL charonNamedActionValue(const char *name, PDFActionNamedName *out)
     return NO;
 }
 
-static const char *charonActionName(CGPDFDictionaryRef action)
+static const char *revenantActionName(CGPDFDictionaryRef action)
 {
     const char *name = NULL;
     if (!CGPDFDictionaryGetName(action, "S", &name))
@@ -40,7 +40,7 @@ static const char *charonActionName(CGPDFDictionaryRef action)
     return name;
 }
 
-static NSString *charonActionString(CGPDFDictionaryRef action, const char *key)
+static NSString *revenantActionString(CGPDFDictionaryRef action, const char *key)
 {
     CGPDFObjectRef object = NULL;
     if (!CGPDFDictionaryGetObject(action, key, &object) || object == NULL)
@@ -83,7 +83,7 @@ static NSString *charonActionString(CGPDFDictionaryRef action, const char *key)
     return _type;
 }
 
-- (void)charon_setTypeName:(NSString *)name
+- (void)revenant_setTypeName:(NSString *)name
 {
     _type = [name copy];
 }
@@ -95,28 +95,28 @@ static NSString *charonActionString(CGPDFDictionaryRef action, const char *key)
     return copy;
 }
 
-+ (instancetype)charon_actionWithDictionary:(CGPDFDictionaryRef)action inDocument:(PDFDocument *)document
++ (instancetype)revenant_actionWithDictionary:(CGPDFDictionaryRef)action inDocument:(PDFDocument *)document
 {
     if (action == NULL)
         return nil;
-    const char *name = charonActionName(action);
+    const char *name = revenantActionName(action);
     if (name == NULL)
         return nil;
     if (strcmp(name, "Named") == 0)
-        return [[PDFActionNamed alloc] initWithCharonActionDictionary:action];
+        return [[PDFActionNamed alloc] initWithRevenantActionDictionary:action];
     if (strcmp(name, "Launch") == 0)
-        return [[PDFActionURL alloc] initWithCharonLaunchDictionary:action inDocument:document];
-    Class chosen = charonActionClassForName(name);
+        return [[PDFActionURL alloc] initWithRevenantLaunchDictionary:action inDocument:document];
+    Class chosen = revenantActionClassForName(name);
     if (chosen == [PDFActionGoTo class])
-        return [[PDFActionGoTo alloc] initWithCharonActionDictionary:action inDocument:document];
+        return [[PDFActionGoTo alloc] initWithRevenantActionDictionary:action inDocument:document];
     if (chosen == [PDFActionURL class])
-        return [[PDFActionURL alloc] initWithCharonActionDictionary:action];
+        return [[PDFActionURL alloc] initWithRevenantActionDictionary:action];
     if (chosen == [PDFActionRemoteGoTo class])
-        return [[PDFActionRemoteGoTo alloc] initWithCharonActionDictionary:action inDocument:document];
+        return [[PDFActionRemoteGoTo alloc] initWithRevenantActionDictionary:action inDocument:document];
     if (chosen == [PDFActionResetForm class])
-        return [[PDFActionResetForm alloc] initWithCharonActionDictionary:action];
+        return [[PDFActionResetForm alloc] initWithRevenantActionDictionary:action];
     PDFAction *plain = [[PDFAction alloc] init];
-    [plain charon_setTypeName:[NSString stringWithUTF8String:name]];
+    [plain revenant_setTypeName:[NSString stringWithUTF8String:name]];
     return plain;
 }
 
@@ -137,7 +137,7 @@ static NSString *charonActionString(CGPDFDictionaryRef action, const char *key)
     if (self == nil)
         return nil;
     _destination = destination;
-    [self charon_setTypeName:@"GoTo"];
+    [self revenant_setTypeName:@"GoTo"];
     return self;
 }
 
@@ -148,7 +148,7 @@ static NSString *charonActionString(CGPDFDictionaryRef action, const char *key)
     return copy;
 }
 
-- (instancetype)initWithCharonActionDictionary:(CGPDFDictionaryRef)action inDocument:(PDFDocument *)document
+- (instancetype)initWithRevenantActionDictionary:(CGPDFDictionaryRef)action inDocument:(PDFDocument *)document
 {
     self = [self initWithDestination:nil];
     if (self == nil)
@@ -161,10 +161,10 @@ static NSString *charonActionString(CGPDFDictionaryRef action, const char *key)
         CGPDFArrayRef array = NULL;
         if (!CGPDFObjectGetValue(object, kCGPDFObjectTypeArray, &array) || array == NULL)
             return self;
-        _destination = [[PDFDestination alloc] initWithCharonDestinationArray:array
+        _destination = [[PDFDestination alloc] initWithRevenantDestinationArray:array
                                                                     inDocument:document];
     } else if (type == kCGPDFObjectTypeName || type == kCGPDFObjectTypeString) {
-        _destination = [[PDFDestination alloc] initWithCharonDestinationArray:NULL
+        _destination = [[PDFDestination alloc] initWithRevenantDestinationArray:NULL
                                                                     inDocument:document];
     }
     return self;
@@ -188,7 +188,7 @@ static NSString *charonActionString(CGPDFDictionaryRef action, const char *key)
     if (self == nil)
         return nil;
     _name = name;
-    [self charon_setTypeName:@"Named"];
+    [self revenant_setTypeName:@"Named"];
     return self;
 }
 
@@ -199,13 +199,13 @@ static NSString *charonActionString(CGPDFDictionaryRef action, const char *key)
     return copy;
 }
 
-- (instancetype)initWithCharonActionDictionary:(CGPDFDictionaryRef)action
+- (instancetype)initWithRevenantActionDictionary:(CGPDFDictionaryRef)action
 {
-    NSString *name = charonActionString(action, "N");
+    NSString *name = revenantActionString(action, "N");
     if (name == nil)
         return nil;
     PDFActionNamedName value = kPDFActionNamedNone;
-    if (!charonNamedActionValue([name UTF8String], &value))
+    if (!revenantNamedActionValue([name UTF8String], &value))
         return nil;
     return [self initWithName:value];
 }
@@ -235,33 +235,33 @@ static NSString *charonActionString(CGPDFDictionaryRef action, const char *key)
     if (self == nil)
         return nil;
     _url = [url copy];
-    [self charon_setTypeName:@"URI"];
+    [self revenant_setTypeName:@"URI"];
     return self;
 }
 
-- (instancetype)initWithCharonActionDictionary:(CGPDFDictionaryRef)action
+- (instancetype)initWithRevenantActionDictionary:(CGPDFDictionaryRef)action
 {
     self = [self initWithURL:nil];
     if (self == nil)
         return nil;
-    NSString *uri = charonActionString(action, "URI");
+    NSString *uri = revenantActionString(action, "URI");
     if (uri != nil)
         _url = [NSURL URLWithString:uri];
     return self;
 }
 
-- (nullable instancetype)initWithCharonLaunchDictionary:(CGPDFDictionaryRef)action
+- (nullable instancetype)initWithRevenantLaunchDictionary:(CGPDFDictionaryRef)action
                                              inDocument:(nullable PDFDocument *)document
 {
     self = [self initWithURL:nil];
     if (self == nil)
         return nil;
-    [self charon_setTypeName:@"Launch"];
-    NSString *file = charonActionString(action, "F");
+    [self revenant_setTypeName:@"Launch"];
+    NSString *file = revenantActionString(action, "F");
     if (file == nil) {
         CGPDFDictionaryRef spec = NULL;
         if (CGPDFDictionaryGetDictionary(action, "F", &spec) && spec != NULL)
-            file = charonActionString(spec, "F");
+            file = revenantActionString(spec, "F");
     }
     NSURL *documentURL = [document documentURL];
     if (file != nil && documentURL != nil) {
@@ -318,11 +318,11 @@ static NSString *charonActionString(CGPDFDictionaryRef action, const char *key)
     _point = point;
     _pointIsSet = YES;
     _url = [url copy];
-    [self charon_setTypeName:@"GoToR"];
+    [self revenant_setTypeName:@"GoToR"];
     return self;
 }
 
-- (instancetype)initWithCharonActionDictionary:(CGPDFDictionaryRef)action inDocument:(PDFDocument *)document
+- (instancetype)initWithRevenantActionDictionary:(CGPDFDictionaryRef)action inDocument:(PDFDocument *)document
 {
     self = [self initWithPageIndex:0
                            atPoint:CGPointMake(kPDFDestinationUnspecifiedValue,
@@ -331,7 +331,7 @@ static NSString *charonActionString(CGPDFDictionaryRef action, const char *key)
     if (self == nil)
         return nil;
     _pointIsSet = NO;
-    NSString *file = charonActionString(action, "F");
+    NSString *file = revenantActionString(action, "F");
     NSURL *documentURL = [document documentURL];
     if (file != nil && documentURL != nil) {
         NSString *directory = [[documentURL path] stringByDeletingLastPathComponent];
@@ -357,7 +357,7 @@ static NSString *charonActionString(CGPDFDictionaryRef action, const char *key)
     if (self == nil)
         return nil;
     _fieldsIncludedAreCleared = YES;
-    [self charon_setTypeName:@"ResetForm"];
+    [self revenant_setTypeName:@"ResetForm"];
     return self;
 }
 
@@ -369,7 +369,7 @@ static NSString *charonActionString(CGPDFDictionaryRef action, const char *key)
     return copy;
 }
 
-- (instancetype)initWithCharonActionDictionary:(CGPDFDictionaryRef)action
+- (instancetype)initWithRevenantActionDictionary:(CGPDFDictionaryRef)action
 {
     self = [self init];
     if (self == nil)

@@ -1,4 +1,4 @@
-#import "CharonMenus.h"
+#import "RevenantMenus.h"
 
 #pragma clang diagnostic ignored "-Wobjc-designated-initializers"
 
@@ -48,7 +48,7 @@
 {
     _view = view;
     if (view)
-        charon_menus_say_once(@"scribble", @"UIScribbleInteraction: this release has no Apple Pencil and no handwriting, so the interaction is attached and its delegate is never called; pencilInputExpected is NO");
+        revenant_menus_say_once(@"scribble", @"UIScribbleInteraction: this release has no Apple Pencil and no handwriting, so the interaction is attached and its delegate is never called; pencilInputExpected is NO");
 }
 
 @end
@@ -94,7 +94,7 @@
 {
     _view = view;
     if (view)
-        charon_menus_say_once(@"indirect-scribble", @"UIIndirectScribbleInteraction: this release has no Apple Pencil and no handwriting, so the interaction is attached and its delegate is never asked for an element");
+        revenant_menus_say_once(@"indirect-scribble", @"UIIndirectScribbleInteraction: this release has no Apple Pencil and no handwriting, so the interaction is attached and its delegate is never asked for an element");
 }
 
 @end

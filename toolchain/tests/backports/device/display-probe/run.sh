@@ -1,6 +1,6 @@
 #!/bin/sh
 # tests/backports/device/display-probe.m on an emulated release, built for every combination of the two things a build decides:
-# the binary's apple_minimum (4.3, and the release's own where that is a different one) and charon@apple-backports linked or not
+# the binary's apple_minimum (4.3, and the release's own where that is a different one) and revenant@apple-backports linked or not
 # (facts/UIKit/UIDynamicAnimator.md M3). One heavy job, so run it in a slot of the machine:
 #     $HOME/Git/projects/ios/coordination/heavy.sh sh tests/backports/device/display-probe/run.sh 6.1.3
 # DISPLAYPROBE_DEVICE names the emulated device (default iPhone3,1, and iPhone4,1 for 6.1.3: the device the release's other device
@@ -22,7 +22,7 @@ shift
 [ $# -gt 0 ] || set -- "screen" "screen view" "screen window" "screen turn"
 device=${DISPLAYPROBE_DEVICE:-iPhone3,1}
 [ -n "${DISPLAYPROBE_DEVICE:-}" ] || [ "$release" != 6.1.3 ] || device=iPhone4,1
-build=${DISPLAYPROBE_BUILD:-$(runs_folder charon-display-probe)}/$release-$device
+build=${DISPLAYPROBE_BUILD:-$(runs_folder revenant-display-probe)}/$release-$device
 failed=0
 cells=0
 minimums=$release

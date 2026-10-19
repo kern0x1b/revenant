@@ -1,6 +1,6 @@
 #import <ARKit/ARKit.h>
 
-#import "CharonARKitPrivate.h"
+#import "RevenantARKitPrivate.h"
 
 @interface ARWorldMap ()
 @property (nonatomic, strong) ARPointCloud *rawFeaturePoints;

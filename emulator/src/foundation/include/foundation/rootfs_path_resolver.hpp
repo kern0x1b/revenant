@@ -11,7 +11,7 @@
 #include <string_view>
 #include <utility>
 
-namespace shade {
+namespace emulator {
 
 class RootfsPathResolver {
 public:

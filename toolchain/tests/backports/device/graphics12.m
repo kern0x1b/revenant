@@ -40,7 +40,7 @@ static void names(void)
     CGColorSpaceRelease(pattern);
     CGColorSpaceRef generic = CGColorSpaceCreateWithName(kCGColorSpaceGenericRGB);
     CHECK(generic != NULL, "a generic RGB space is made by name");
-#ifndef CHARON_HOST
+#ifndef REVENANT_HOST
     CHECK_EQUAL(text(CGColorSpaceGetName(generic)), @"kCGColorSpaceDeviceRGB", "generic RGB is named as the device space on iOS 6");
     CGColorSpaceRef lab = CGColorSpaceCreateWithName(kCGColorSpaceGenericLab);
     CHECK(lab == NULL, "a Lab space cannot be made by name");
@@ -48,7 +48,7 @@ static void names(void)
     CHECK_EQUAL(image_of((void *)&CGColorSpaceGetName), @"libGraphicsBackports.dylib", "CGColorSpaceGetName comes from the backports");
 #endif
     CHECK_EQUAL(text(kCGColorSpaceGenericLab), @"kCGColorSpaceGenericLab", "the Lab constant");
-#ifndef CHARON_HOST
+#ifndef REVENANT_HOST
     {
         static const struct { const CFStringRef *constant; NSString *text; } named[] = {
         {&kCGColorSpaceACESCGLinear, @"kCGColorSpaceACESCGLinear"},
@@ -136,13 +136,13 @@ static void path_walk(void)
     CHECK_EQUAL(seen[2], @"2 5.00,6.00 7.00,8.00", "a quad curve carries two points");
     CHECK_EQUAL(seen[3], @"3 9.00,10.00 11.00,12.00 13.00,14.00", "a curve carries three points");
     CHECK_EQUAL(seen[4], @"4", "a close carries none");
-#ifndef CHARON_HOST
-    CGPathApplyWithBlock(NULL, ^(const CGPathElement *element) { charon_check(NO, "a NULL path calls the block", @""); });
+#ifndef REVENANT_HOST
+    CGPathApplyWithBlock(NULL, ^(const CGPathElement *element) { revenant_check(NO, "a NULL path calls the block", @""); });
     CGPathApplyWithBlock(path, NULL);
     CHECK(YES, "a NULL path and a NULL block are ignored");
 #endif
     CGPathRelease(path);
-#ifndef CHARON_HOST
+#ifndef REVENANT_HOST
     CHECK_EQUAL(image_of((void *)&CGPathApplyWithBlock), @"libGraphicsBackports.dylib", "CGPathApplyWithBlock comes from the backports");
 #endif
 }
@@ -176,7 +176,7 @@ static void image_bits(void)
     }
     CHECK(CGImageGetByteOrderInfo(NULL) == 0 && CGImageGetPixelFormatInfo(NULL) == 0, "a NULL image has neither");
     CGColorSpaceRelease(rgb);
-#ifndef CHARON_HOST
+#ifndef REVENANT_HOST
     CHECK_EQUAL(image_of((void *)&CGImageGetByteOrderInfo), @"libGraphicsBackports.dylib", "CGImageGetByteOrderInfo comes from the backports");
     CHECK_EQUAL(image_of((void *)&CGImageGetPixelFormatInfo), @"libGraphicsBackports.dylib", "CGImageGetPixelFormatInfo comes from the backports");
 #endif
@@ -249,15 +249,15 @@ static void pdf_walk(void)
     NSMutableArray *firstOnly = [NSMutableArray array];
     CGPDFDictionaryApplyBlock(pages, ^bool(const char *key, CGPDFObjectRef value, void *info) { [firstOnly addObject:@(key)]; return false; }, NULL);
     CHECK_EQUAL(@(firstOnly.count), @1, "the dictionary walk stops on false");
-#ifndef CHARON_HOST
-    CGPDFArrayApplyBlock(NULL, ^bool(size_t index, CGPDFObjectRef value, void *info) { charon_check(NO, "a NULL array calls the block", @""); return true; }, NULL);
-    CGPDFDictionaryApplyBlock(NULL, ^bool(const char *key, CGPDFObjectRef value, void *info) { charon_check(NO, "a NULL dictionary calls the block", @""); return true; }, NULL);
+#ifndef REVENANT_HOST
+    CGPDFArrayApplyBlock(NULL, ^bool(size_t index, CGPDFObjectRef value, void *info) { revenant_check(NO, "a NULL array calls the block", @""); return true; }, NULL);
+    CGPDFDictionaryApplyBlock(NULL, ^bool(const char *key, CGPDFObjectRef value, void *info) { revenant_check(NO, "a NULL dictionary calls the block", @""); return true; }, NULL);
     CGPDFArrayApplyBlock(mediaBox, NULL, NULL);
     CGPDFDictionaryApplyBlock(pages, NULL, NULL);
     CHECK(YES, "a NULL array, a NULL dictionary and a NULL block are ignored");
 #endif
     CGPDFDocumentRelease(document);
-#ifndef CHARON_HOST
+#ifndef REVENANT_HOST
     CHECK_EQUAL(image_of((void *)&CGPDFArrayApplyBlock), @"libGraphicsBackports.dylib", "CGPDFArrayApplyBlock comes from the backports");
     CHECK_EQUAL(image_of((void *)&CGPDFDictionaryApplyBlock), @"libGraphicsBackports.dylib", "CGPDFDictionaryApplyBlock comes from the backports");
 #endif
@@ -286,7 +286,7 @@ static void code_points(void)
     CHECK_EQUAL(text(CVColorPrimariesGetStringForIntegerCodePoint(INT_MAX)), @"ColorPrimaries#2147483647", "the largest code");
     CHECK_EQUAL(text(CVColorPrimariesGetStringForIntegerCodePoint(INT_MIN)), @"ColorPrimaries#-2147483648", "the smallest code");
     CHECK(CVColorPrimariesGetStringForIntegerCodePoint(7777) == CVColorPrimariesGetStringForIntegerCodePoint(7777), "an unnamed code gives one object");
-#ifndef CHARON_HOST
+#ifndef REVENANT_HOST
     CHECK_EQUAL(text(CVYCbCrMatrixGetStringForIntegerCodePoint(14)), @"YCbCrMatrix#14", "iOS 12 names no matrix 14");
     CHECK_EQUAL(text(CVYCbCrMatrixGetStringForIntegerCodePoint(15)), @"YCbCrMatrix#15", "iOS 12 names no matrix 15");
     CHECK_EQUAL(text(CVYCbCrMatrixGetStringForIntegerCodePoint(248)), @"YCbCrMatrix#248", "iOS 12 names no matrix 248");
@@ -317,7 +317,7 @@ static void code_points(void)
     CHECK_EQUAL(@(CVTransferFunctionGetIntegerCodePointForString(CFSTR("TransferFunction#5"))), @5, "an unnamed transfer code is read back");
     CHECK_EQUAL(@(CVYCbCrMatrixGetIntegerCodePointForString(CFSTR("YCbCrMatrix#14"))), @14, "an unnamed matrix code is read back");
     CHECK_EQUAL(text(CVColorPrimariesGetStringForIntegerCodePoint(CVColorPrimariesGetIntegerCodePointForString(CFSTR("ColorPrimaries#7")))), @"ColorPrimaries#7", "a name goes round");
-#ifndef CHARON_HOST
+#ifndef REVENANT_HOST
     CHECK_EQUAL(image_of((void *)&CVColorPrimariesGetStringForIntegerCodePoint), @"libGraphicsBackports.dylib", "the primaries function comes from the backports");
     CHECK_EQUAL(image_of((void *)&CVTransferFunctionGetIntegerCodePointForString), @"libGraphicsBackports.dylib", "the transfer function comes from the backports");
     CHECK_EQUAL(image_of((void *)&CVYCbCrMatrixGetStringForIntegerCodePoint), @"libGraphicsBackports.dylib", "the matrix function comes from the backports");
@@ -337,13 +337,13 @@ int main(int argc, char **argv)
 {
     @autoreleasepool {
         if (argc > 1)
-            charon_log_to(@(argv[1]));
+            revenant_log_to(@(argv[1]));
         names();
         path_walk();
         image_bits();
         pdf_walk();
         code_points();
-        printf("checks=%d failures=%d\n", charon_checks, charon_failures);
+        printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
     }
-    return charon_failures ? 1 : 0;
+    return revenant_failures ? 1 : 0;
 }

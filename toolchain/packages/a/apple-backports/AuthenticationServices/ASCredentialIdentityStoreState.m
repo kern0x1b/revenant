@@ -1,12 +1,12 @@
 #import <AuthenticationServices/AuthenticationServices.h>
-#import "CharonASConstruction.h"
+#import "RevenantASConstruction.h"
 
 @implementation ASCredentialIdentityStoreState
 
 @synthesize enabled = _enabled;
 @synthesize supportsIncrementalUpdates = _supportsIncrementalUpdates;
 
-- (instancetype)charon_initWithEnabled:(BOOL)enabled
+- (instancetype)revenant_initWithEnabled:(BOOL)enabled
            supportsIncrementalUpdates:(BOOL)supportsIncrementalUpdates
 {
     self = [super init];
@@ -19,7 +19,7 @@
 
 - (instancetype)init
 {
-    return [self charon_initWithEnabled:NO supportsIncrementalUpdates:NO];
+    return [self revenant_initWithEnabled:NO supportsIncrementalUpdates:NO];
 }
 
 - (BOOL)isEnabled
@@ -36,7 +36,7 @@
 
 - (id)copyWithZone:(NSZone *)zone
 {
-    return [[[self class] allocWithZone:zone] charon_initWithEnabled:_enabled
+    return [[[self class] allocWithZone:zone] revenant_initWithEnabled:_enabled
                                     supportsIncrementalUpdates:_supportsIncrementalUpdates];
 }
 
@@ -49,7 +49,7 @@
 
 - (instancetype)initWithCoder:(NSCoder *)coder
 {
-    return [self charon_initWithEnabled:[coder decodeBoolForKey:@"enabled"]
+    return [self revenant_initWithEnabled:[coder decodeBoolForKey:@"enabled"]
                 supportsIncrementalUpdates:[coder decodeBoolForKey:@"supportsIncrementalUpdates"]];
 }
 

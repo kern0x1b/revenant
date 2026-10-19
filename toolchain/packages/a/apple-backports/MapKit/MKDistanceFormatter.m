@@ -1,7 +1,7 @@
 #import <MapKit/MapKit.h>
 #import <MapKit/MKDistanceFormatter.h>
 #import <math.h>
-#import "CharonMapKit.h"
+#import "RevenantMapKit.h"
 
 @implementation MKDistanceFormatter {
     MKDistanceFormatterUnits _units;
@@ -33,7 +33,7 @@
     _locale = locale;
 }
 
-- (MKDistanceFormatterUnits)charon_resolvedUnits
+- (MKDistanceFormatterUnits)revenant_resolvedUnits
 {
     if (_units != MKDistanceFormatterUnitsDefault) {
         return _units;
@@ -45,8 +45,8 @@
 - (NSString *)stringFromDistance:(CLLocationDistance)distance
 {
     double metres = fabs((double)distance);
-    BOOL metric = [self charon_resolvedUnits] == MKDistanceFormatterUnitsMetric;
-    BOOL yards = [self charon_resolvedUnits] == MKDistanceFormatterUnitsImperialWithYards;
+    BOOL metric = [self revenant_resolvedUnits] == MKDistanceFormatterUnitsMetric;
+    BOOL yards = [self revenant_resolvedUnits] == MKDistanceFormatterUnitsImperialWithYards;
     double value;
     NSString *fullName, *pluralName, *shortName;
     if (metric) {

@@ -16,7 +16,7 @@
 #include "foundation/system_button_input.hpp"
 #include "foundation/touch_input.hpp"
 
-namespace shade {
+namespace emulator {
 
 enum class LiveControlCommandKind {
     Touch,

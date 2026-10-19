@@ -1,7 +1,7 @@
 #import <MediaPlayer/MediaPlayer.h>
 
-@implementation MPMediaPickerController (CharonAutomaticPresentation)
-- (UIModalPresentationStyle)charon_preferredModalPresentationStyle
+@implementation MPMediaPickerController (RevenantAutomaticPresentation)
+- (UIModalPresentationStyle)revenant_preferredModalPresentationStyle
 {
     return UIModalPresentationPageSheet;
 }

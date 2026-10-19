@@ -16,7 +16,7 @@ here=$(cd "$(dirname "$0")" && pwd)
 root=$(cd "$here/../../../.." && pwd)
 AVFAUDIO="$root/packages/a/apple-backports/AVFAudio"
 AVFOUNDATION="$root/packages/a/apple-backports/AVFoundation"
-build=${AVFAUDIO_SAMPLER_BUILD:-$(runs_folder charon-avfaudio-sampler)}
+build=${AVFAUDIO_SAMPLER_BUILD:-$(runs_folder revenant-avfaudio-sampler)}
 rm -rf "$build"
 mkdir -p "$build"
 
@@ -28,8 +28,8 @@ xcrun clang -fobjc-arc -Wall -Wno-deprecated-declarations "$here/sampler.m" \
 # Every class the port's sampler and its whole superline define, renamed. The chain is
 # sampler -> MIDI instrument -> generator -> effect -> unit -> node, and the unit's parameter tree and bus
 # classes, because the sampler's initialiser goes through all of them.
-renames="-DAVAudioUnitSampler=charon_host_AVAudioUnitSampler
--DCHaronAudioComponentCount=charon_host_CHaronAudioComponentCount"
+renames="-DAVAudioUnitSampler=revenant_host_AVAudioUnitSampler
+-DCHaronAudioComponentCount=revenant_host_CHaronAudioComponentCount"
 # the iOS spelling of the mixer's bus-enable parameter; the macOS SDK this harness builds
 # against has only the newer name, and the headers renamed the other way
 renames="$renames -Dk3DMixerParam_Enable=k3DMixerParam_BusEnable"
@@ -37,8 +37,8 @@ for name in AVAudioUnitSampler AVAudioUnitMIDIInstrument AVAudioUnitGenerator AV
             AVAudioUnitTimeEffect AVAudioUnitDelay AVAudioUnitVarispeed AVAudioUnitTimePitch \
             AVAudioUnitDistortion AVAudioUnitReverb AVAudioUnitEQ AVAudioUnit AUAudioUnit \
             AUAudioUnitBus AUAudioUnitBusArray AUAudioUnitPreset AUParameter AUParameterGroup \
-            AUParameterNode AUParameterTree AVAudioNode AVAudioFormat AVAudioPCMBuffer CharonAudioBuffer; do
-    renames="$renames -D$name=charon_host_$name"
+            AUParameterNode AUParameterTree AVAudioNode AVAudioFormat AVAudioPCMBuffer RevenantAudioBuffer; do
+    renames="$renames -D$name=revenant_host_$name"
 done
 
 objects=""
@@ -46,7 +46,7 @@ for source in "$AVFAUDIO"/AVAudioUnitSampler8.m "$AVFAUDIO"/AVAudioUnitMIDIInstr
               "$AVFAUDIO"/AVAudioUnitSubclasses8.m "$AVFAUDIO"/AVAudioUnitMixing9.m \
               "$AVFAUDIO"/AUAudioUnitBus9.m "$AVFAUDIO"/AUAudioUnit9.m "$AVFAUDIO"/AUParameter9.m \
               "$AVFAUDIO"/AUParameters9.m "$AVFAUDIO"/AUParameters10.m \
-              "$AVFAUDIO"/CharonAUAudioUnitRender.m "$AVFAUDIO"/CharonAVFAudioCommon.m \
+              "$AVFAUDIO"/RevenantAUAudioUnitRender.m "$AVFAUDIO"/RevenantAVFAudioCommon.m \
               "$AVFAUDIO"/AVAudioTime8.m "$AVFOUNDATION"/AVAudioNode.m "$AVFOUNDATION"/AVAudioBuffer8.m \
               "$AVFOUNDATION"/AVAudioFormat8.m "$AVFOUNDATION"/AVAudioConnectionPoint.m \
               "$AVFOUNDATION"/AVAudioPlayerNode.m "$AVFOUNDATION"/AVAudioUnit.m; do

@@ -1,9 +1,9 @@
-#import "CharonAVFAudio.h"
-#import "CharonAVAudioUnit.h"
+#import "RevenantAVFAudio.h"
+#import "RevenantAVAudioUnit.h"
 #import <AudioToolbox/AudioUnitProperties.h>
 #import <AVFAudio/AVAudioUnitSampler.h>
 
-static AudioUnitParameterValue CharonSamplerParameterValue(AudioUnit unit, AudioUnitParameterID identifier)
+static AudioUnitParameterValue RevenantSamplerParameterValue(AudioUnit unit, AudioUnitParameterID identifier)
 {
     if (unit == NULL) {
         return 0;
@@ -17,7 +17,7 @@ static AudioUnitParameterValue CharonSamplerParameterValue(AudioUnit unit, Audio
 
 @implementation AVAudioUnitSampler
 
-static const UInt8 CharonSoundBankType = kInstrumentType_SF2Preset;
+static const UInt8 RevenantSoundBankType = kInstrumentType_SF2Preset;
 
 - (instancetype)initWithAudioComponentDescription:(AudioComponentDescription)audioComponentDescription
 {
@@ -31,10 +31,10 @@ static const UInt8 CharonSoundBankType = kInstrumentType_SF2Preset;
     if (wanted.componentManufacturer == 0) {
         wanted.componentManufacturer = kAudioUnitManufacturer_Apple;
     }
-    return [super initWithCharonComponentDescription:wanted name:nil manufacturerName:nil version:0];
+    return [super initWithRevenantComponentDescription:wanted name:nil manufacturerName:nil version:0];
 }
 
-- (BOOL)charon_loadInstrumentAtURL:(NSURL *)url
+- (BOOL)revenant_loadInstrumentAtURL:(NSURL *)url
                            program:(uint8_t)program
                             bankMSB:(uint8_t)bankMSB
                             bankLSB:(uint8_t)bankLSB
@@ -50,7 +50,7 @@ static const UInt8 CharonSoundBankType = kInstrumentType_SF2Preset;
     AUSamplerInstrumentData data;
     memset(&data, 0, sizeof(data));
     data.fileURL = (__bridge CFURLRef)url;
-    data.instrumentType = CharonSoundBankType;
+    data.instrumentType = RevenantSoundBankType;
     data.bankMSB = bankMSB;
     data.bankLSB = bankLSB;
     data.presetID = program;
@@ -71,12 +71,12 @@ static const UInt8 CharonSoundBankType = kInstrumentType_SF2Preset;
                               bankLSB:(uint8_t)bankLSB
                                error:(NSError **)outError
 {
-    return [self charon_loadInstrumentAtURL:bankURL program:program bankMSB:bankMSB bankLSB:bankLSB outError:outError];
+    return [self revenant_loadInstrumentAtURL:bankURL program:program bankMSB:bankMSB bankLSB:bankLSB outError:outError];
 }
 
 - (BOOL)loadInstrumentAtURL:(NSURL *)instrumentURL error:(NSError **)outError
 {
-    return [self charon_loadInstrumentAtURL:instrumentURL program:0 bankMSB:0x79 bankLSB:0x00 outError:outError];
+    return [self revenant_loadInstrumentAtURL:instrumentURL program:0 bankMSB:0x79 bankLSB:0x00 outError:outError];
 }
 
 - (BOOL)loadAudioFilesAtURLs:(NSArray<NSURL *> *)audioFiles error:(NSError **)outError
@@ -114,11 +114,11 @@ static const UInt8 CharonSoundBankType = kInstrumentType_SF2Preset;
     return YES;
 }
 
-#define CharonSamplerParameter(scope, identifier, value) \
+#define RevenantSamplerParameter(scope, identifier, value) \
     AudioUnitSetParameter(self.audioUnit, (identifier), (scope), 0, (AudioUnitParameterValue)(value), 0)
-#define CharonSamplerParameterRead(identifier) CharonSamplerParameterValue(self.audioUnit, (identifier))
+#define RevenantSamplerParameterRead(identifier) RevenantSamplerParameterValue(self.audioUnit, (identifier))
 
-static void CharonSplitTuning(float cents, AudioUnitParameterValue *coarse, AudioUnitParameterValue *fine)
+static void RevenantSplitTuning(float cents, AudioUnitParameterValue *coarse, AudioUnitParameterValue *fine)
 {
     double steps = (double)cents / 100.0;
     double nearest = round(steps);
@@ -133,8 +133,8 @@ static void CharonSplitTuning(float cents, AudioUnitParameterValue *coarse, Audi
 
 - (float)globalTuning
 {
-    AudioUnitParameterValue coarse = CharonSamplerParameterRead(kAUSamplerParam_CoarseTuning);
-    AudioUnitParameterValue fine = CharonSamplerParameterRead(kAUSamplerParam_FineTuning);
+    AudioUnitParameterValue coarse = RevenantSamplerParameterRead(kAUSamplerParam_CoarseTuning);
+    AudioUnitParameterValue fine = RevenantSamplerParameterRead(kAUSamplerParam_FineTuning);
     if (coarse == 0 && fine == 0) {
         return 0.0f;
     }
@@ -144,39 +144,39 @@ static void CharonSplitTuning(float cents, AudioUnitParameterValue *coarse, Audi
 - (void)setGlobalTuning:(float)globalTuning
 {
     AudioUnitParameterValue coarse = 0, fine = 0;
-    CharonSplitTuning(globalTuning, &coarse, &fine);
-    CharonSamplerParameter(kAudioUnitScope_Global, kAUSamplerParam_CoarseTuning, coarse);
-    CharonSamplerParameter(kAudioUnitScope_Global, kAUSamplerParam_FineTuning, fine);
+    RevenantSplitTuning(globalTuning, &coarse, &fine);
+    RevenantSamplerParameter(kAudioUnitScope_Global, kAUSamplerParam_CoarseTuning, coarse);
+    RevenantSamplerParameter(kAudioUnitScope_Global, kAUSamplerParam_FineTuning, fine);
 }
 
 - (float)masterGain
 {
-    return (float)CharonSamplerParameterRead(kAUSamplerParam_Gain);
+    return (float)RevenantSamplerParameterRead(kAUSamplerParam_Gain);
 }
 
 - (void)setMasterGain:(float)masterGain
 {
-    CharonSamplerParameter(kAudioUnitScope_Global, kAUSamplerParam_Gain, masterGain);
+    RevenantSamplerParameter(kAudioUnitScope_Global, kAUSamplerParam_Gain, masterGain);
 }
 
 - (float)overallGain
 {
-    return (float)CharonSamplerParameterRead(kAUSamplerParam_Gain);
+    return (float)RevenantSamplerParameterRead(kAUSamplerParam_Gain);
 }
 
 - (void)setOverallGain:(float)overallGain
 {
-    CharonSamplerParameter(kAudioUnitScope_Global, kAUSamplerParam_Gain, overallGain);
+    RevenantSamplerParameter(kAudioUnitScope_Global, kAUSamplerParam_Gain, overallGain);
 }
 
 - (float)stereoPan
 {
-    return (float)CharonSamplerParameterRead(kAUSamplerParam_Pan);
+    return (float)RevenantSamplerParameterRead(kAUSamplerParam_Pan);
 }
 
 - (void)setStereoPan:(float)stereoPan
 {
-    CharonSamplerParameter(kAudioUnitScope_Global, kAUSamplerParam_Pan, stereoPan);
+    RevenantSamplerParameter(kAudioUnitScope_Global, kAUSamplerParam_Pan, stereoPan);
 }
 
 @end

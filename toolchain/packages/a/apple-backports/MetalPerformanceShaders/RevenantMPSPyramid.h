@@ -1,13 +1,13 @@
 #pragma once
-#import "CharonMPS.h"
+#import "RevenantMPS.h"
 
-@interface MPSImagePyramid (CharonMPSImagePyramidFilter)
-- (const float *)charon_mps_filter;
-- (NSUInteger)charon_mps_filterWidth;
-- (NSUInteger)charon_mps_filterHeight;
+@interface MPSImagePyramid (RevenantMPSImagePyramidFilter)
+- (const float *)revenant_mps_filter;
+- (NSUInteger)revenant_mps_filterWidth;
+- (NSUInteger)revenant_mps_filterHeight;
 @end
 
-static inline BOOL CharonMPSPyramidPixelShape(MTLPixelFormat pixel, NSUInteger *channels, size_t *elementSize)
+static inline BOOL RevenantMPSPyramidPixelShape(MTLPixelFormat pixel, NSUInteger *channels, size_t *elementSize)
 {
     size_t element;
     NSUInteger count;
@@ -33,13 +33,13 @@ static inline BOOL CharonMPSPyramidPixelShape(MTLPixelFormat pixel, NSUInteger *
     return YES;
 }
 
-static inline NSUInteger CharonMPSPyramidExtent(NSUInteger base, NSUInteger level)
+static inline NSUInteger RevenantMPSPyramidExtent(NSUInteger base, NSUInteger level)
 {
     NSUInteger extent = base >> level;
     return extent ? extent : 1;
 }
 
-static inline BOOL CharonMPSPyramidRead(id<MTLTexture> texture, NSUInteger level, NSUInteger width, NSUInteger height,
+static inline BOOL RevenantMPSPyramidRead(id<MTLTexture> texture, NSUInteger level, NSUInteger width, NSUInteger height,
                                         NSUInteger channels, size_t elementSize, void *buffer)
 {
     size_t stride = width * channels * elementSize;
@@ -49,7 +49,7 @@ static inline BOOL CharonMPSPyramidRead(id<MTLTexture> texture, NSUInteger level
     return YES;
 }
 
-static inline BOOL CharonMPSPyramidWrite(id<MTLTexture> texture, NSUInteger level, NSUInteger width, NSUInteger height,
+static inline BOOL RevenantMPSPyramidWrite(id<MTLTexture> texture, NSUInteger level, NSUInteger width, NSUInteger height,
                                          NSUInteger channels, size_t elementSize, const void *buffer)
 {
     size_t stride = width * channels * elementSize;

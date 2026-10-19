@@ -1,37 +1,37 @@
-#import "CharonTraitStyle.h"
+#import "RevenantTraitStyle.h"
 #import <objc/runtime.h>
 
 #pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
 
-typedef UIColor *(^CharonColorProvider)(UITraitCollection *traits);
+typedef UIColor *(^RevenantColorProvider)(UITraitCollection *traits);
 
-static const char charon_provider_key;
+static const char revenant_provider_key;
 
-static UIColor *charon_resolve(UIColor *color, UITraitCollection *traits)
+static UIColor *revenant_resolve(UIColor *color, UITraitCollection *traits)
 {
-    CharonColorProvider provider = objc_getAssociatedObject(color, &charon_provider_key);
+    RevenantColorProvider provider = objc_getAssociatedObject(color, &revenant_provider_key);
     if (!provider)
         return color;
     UIColor *resolved = provider(traits);
-    return resolved ? charon_resolve(resolved, traits) : nil;
+    return resolved ? revenant_resolve(resolved, traits) : nil;
 }
 
-static UIColor *charon_dynamic(CharonColorProvider provider)
+static UIColor *revenant_dynamic(RevenantColorProvider provider)
 {
-    UIColor *base = charon_resolve(provider([UITraitCollection currentTraitCollection]), [UITraitCollection currentTraitCollection]);
+    UIColor *base = revenant_resolve(provider([UITraitCollection currentTraitCollection]), [UITraitCollection currentTraitCollection]);
     UIColor *carrier = [[UIColor alloc] initWithCGColor:base ? base.CGColor : [UIColor clearColor].CGColor];
-    objc_setAssociatedObject(carrier, &charon_provider_key, [provider copy], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(carrier, &revenant_provider_key, [provider copy], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     return carrier;
 }
 
 typedef struct {
     double light[4], dark[4], lightHigh[4], darkHigh[4], darkElevated[4], darkElevatedHigh[4];
-} CharonColorRow;
+} RevenantColorRow;
 
 #define C(r, g, b, a) {r / 255.0, g / 255.0, b / 255.0, a}
 #define SAME {-1, 0, 0, 0}
 
-static const CharonColorRow charon_rows[] = {
+static const RevenantColorRow revenant_rows[] = {
     [0] = {C(0, 0, 0, 1), C(255, 255, 255, 1), SAME, SAME, SAME, SAME},
     [1] = {C(60, 60, 67, 153 / 255.0), C(235, 235, 245, 153 / 255.0), C(60, 60, 67, 204 / 255.0), C(235, 235, 245, 178 / 255.0), SAME, SAME},
     [2] = {C(60, 60, 67, 76 / 255.0), C(235, 235, 245, 76 / 255.0), C(60, 60, 67, 178 / 255.0), C(235, 235, 245, 140 / 255.0), SAME, SAME},
@@ -70,14 +70,14 @@ static const CharonColorRow charon_rows[] = {
     [35] = {C(175, 82, 222, 1), C(191, 90, 242, 1), C(137, 68, 171, 1), C(218, 143, 255, 1), SAME, SAME},
 };
 
-static UIColor *charon_row_color(const double *values)
+static UIColor *revenant_row_color(const double *values)
 {
     return [UIColor colorWithRed:(CGFloat)values[0] green:(CGFloat)values[1] blue:(CGFloat)values[2] alpha:(CGFloat)values[3]];
 }
 
-static UIColor *charon_system_color(NSUInteger row)
+static UIColor *revenant_system_color(NSUInteger row)
 {
-    static UIColor *cache[sizeof(charon_rows) / sizeof(charon_rows[0])];
+    static UIColor *cache[sizeof(revenant_rows) / sizeof(revenant_rows[0])];
     static dispatch_once_t once;
     static NSObject *lock;
     dispatch_once(&once, ^{
@@ -85,8 +85,8 @@ static UIColor *charon_system_color(NSUInteger row)
     });
     @synchronized (lock) {
         if (!cache[row]) {
-            cache[row] = charon_dynamic(^UIColor *(UITraitCollection *traits) {
-                const CharonColorRow *entry = &charon_rows[row];
+            cache[row] = revenant_dynamic(^UIColor *(UITraitCollection *traits) {
+                const RevenantColorRow *entry = &revenant_rows[row];
                 BOOL dark = traits.userInterfaceStyle == UIUserInterfaceStyleDark;
                 BOOL high = traits.accessibilityContrast == UIAccessibilityContrastHigh;
                 const double *values = dark ? entry->dark : entry->light;
@@ -98,61 +98,61 @@ static UIColor *charon_system_color(NSUInteger row)
                     else if (entry->darkElevated[0] >= 0)
                         values = entry->darkElevated;
                 }
-                return charon_row_color(values);
+                return revenant_row_color(values);
             });
         }
         return cache[row];
     }
 }
 
-UIColor *charon_system_colour(NSUInteger row)
+UIColor *revenant_system_colour(NSUInteger row)
 {
-    return charon_system_color(row);
+    return revenant_system_color(row);
 }
 
-@implementation UIColor (CharonDynamicColor)
+@implementation UIColor (RevenantDynamicColor)
 
 + (UIColor *)colorWithDynamicProvider:(UIColor * (^)(UITraitCollection *))dynamicProvider
 {
-    return charon_dynamic(dynamicProvider);
+    return revenant_dynamic(dynamicProvider);
 }
 
 - (UIColor *)initWithDynamicProvider:(UIColor * (^)(UITraitCollection *))dynamicProvider
 {
-    return charon_dynamic(dynamicProvider);
+    return revenant_dynamic(dynamicProvider);
 }
 
 - (UIColor *)resolvedColorWithTraitCollection:(UITraitCollection *)traitCollection
 {
-    return charon_resolve(self, traitCollection);
+    return revenant_resolve(self, traitCollection);
 }
 
-+ (UIColor *)labelColor { return charon_system_color(0); }
-+ (UIColor *)secondaryLabelColor { return charon_system_color(1); }
-+ (UIColor *)tertiaryLabelColor { return charon_system_color(2); }
-+ (UIColor *)quaternaryLabelColor { return charon_system_color(3); }
-+ (UIColor *)linkColor { return charon_system_color(4); }
-+ (UIColor *)placeholderTextColor { return charon_system_color(5); }
-+ (UIColor *)separatorColor { return charon_system_color(6); }
-+ (UIColor *)opaqueSeparatorColor { return charon_system_color(7); }
-+ (UIColor *)systemBackgroundColor { return charon_system_color(8); }
-+ (UIColor *)secondarySystemBackgroundColor { return charon_system_color(9); }
-+ (UIColor *)tertiarySystemBackgroundColor { return charon_system_color(10); }
-+ (UIColor *)systemGroupedBackgroundColor { return charon_system_color(11); }
-+ (UIColor *)secondarySystemGroupedBackgroundColor { return charon_system_color(12); }
-+ (UIColor *)tertiarySystemGroupedBackgroundColor { return charon_system_color(13); }
-+ (UIColor *)systemFillColor { return charon_system_color(14); }
-+ (UIColor *)secondarySystemFillColor { return charon_system_color(15); }
-+ (UIColor *)tertiarySystemFillColor { return charon_system_color(16); }
-+ (UIColor *)quaternarySystemFillColor { return charon_system_color(17); }
-+ (UIColor *)systemGray2Color { return charon_system_color(18); }
-+ (UIColor *)systemGray3Color { return charon_system_color(19); }
-+ (UIColor *)systemGray4Color { return charon_system_color(20); }
-+ (UIColor *)systemGray5Color { return charon_system_color(21); }
-+ (UIColor *)systemGray6Color { return charon_system_color(22); }
-+ (UIColor *)systemBrownColor { return charon_system_color(23); }
-+ (UIColor *)systemIndigoColor { return charon_system_color(24); }
-+ (UIColor *)systemCyanColor { return charon_system_color(25); }
-+ (UIColor *)systemMintColor { return charon_system_color(26); }
++ (UIColor *)labelColor { return revenant_system_color(0); }
++ (UIColor *)secondaryLabelColor { return revenant_system_color(1); }
++ (UIColor *)tertiaryLabelColor { return revenant_system_color(2); }
++ (UIColor *)quaternaryLabelColor { return revenant_system_color(3); }
++ (UIColor *)linkColor { return revenant_system_color(4); }
++ (UIColor *)placeholderTextColor { return revenant_system_color(5); }
++ (UIColor *)separatorColor { return revenant_system_color(6); }
++ (UIColor *)opaqueSeparatorColor { return revenant_system_color(7); }
++ (UIColor *)systemBackgroundColor { return revenant_system_color(8); }
++ (UIColor *)secondarySystemBackgroundColor { return revenant_system_color(9); }
++ (UIColor *)tertiarySystemBackgroundColor { return revenant_system_color(10); }
++ (UIColor *)systemGroupedBackgroundColor { return revenant_system_color(11); }
++ (UIColor *)secondarySystemGroupedBackgroundColor { return revenant_system_color(12); }
++ (UIColor *)tertiarySystemGroupedBackgroundColor { return revenant_system_color(13); }
++ (UIColor *)systemFillColor { return revenant_system_color(14); }
++ (UIColor *)secondarySystemFillColor { return revenant_system_color(15); }
++ (UIColor *)tertiarySystemFillColor { return revenant_system_color(16); }
++ (UIColor *)quaternarySystemFillColor { return revenant_system_color(17); }
++ (UIColor *)systemGray2Color { return revenant_system_color(18); }
++ (UIColor *)systemGray3Color { return revenant_system_color(19); }
++ (UIColor *)systemGray4Color { return revenant_system_color(20); }
++ (UIColor *)systemGray5Color { return revenant_system_color(21); }
++ (UIColor *)systemGray6Color { return revenant_system_color(22); }
++ (UIColor *)systemBrownColor { return revenant_system_color(23); }
++ (UIColor *)systemIndigoColor { return revenant_system_color(24); }
++ (UIColor *)systemCyanColor { return revenant_system_color(25); }
++ (UIColor *)systemMintColor { return revenant_system_color(26); }
 
 @end

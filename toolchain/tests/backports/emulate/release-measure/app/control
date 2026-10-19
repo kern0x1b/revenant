@@ -1,7 +1,7 @@
-Package: org.charon.releasemeasure
+Package: org.revenant.releasemeasure
 Name: Release measure
 Architecture: iphoneos-arm
 Description: Measures what the 6.1.3 release's own AVFoundation and CoreImage answer at runtime (selector encodings, the CoreImage steps of a BGRA conversion), with no port package linked. Its lines are "info name detail".
-Maintainer: charon
-Author: charon
+Maintainer: revenant
+Author: revenant
 Section: Development

@@ -1,13 +1,13 @@
-#import "CharonUserNotifications.h"
-#import "CharonScenes.h"
+#import "RevenantUserNotifications.h"
+#import "RevenantScenes.h"
 
 #pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
 
-@implementation UNNotificationResponse (CharonScene13)
+@implementation UNNotificationResponse (RevenantScene13)
 
 - (UIScene *)targetScene
 {
-    return charon_scene();
+    return revenant_scene();
 }
 
 @end

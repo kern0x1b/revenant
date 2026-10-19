@@ -9,18 +9,18 @@ set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 FP=${FILEPROVIDER:-$here/../../../../packages/a/apple-backports}
-build=${COREDATA_BUILD:-$(runs_folder charon-coredata-batchinsert)}
+build=${COREDATA_BUILD:-$(runs_folder revenant-coredata-batchinsert)}
 rm -rf "$build"; mkdir -p "$build"
 
 cp "$FP/CoreData/NSBatchInsertRequest.m" "$build/port.pristine.m"   # what a mutant is compared against
-sed -i.bak '/#import "CharonCoreData.h"/d' "$build/port.pristine.m" 2>/dev/null || true
+sed -i.bak '/#import "RevenantCoreData.h"/d' "$build/port.pristine.m" 2>/dev/null || true
 rm -f "$build"/*.bak
 
 # Two builds of the SAME probe: once against the port's class, once against the framework's own.
 # The host Mac has a real NSBatchInsertRequest from the same header, so the two runs are the same
 # questions asked of two implementations, and the verdict is the diff between them.
 # Nothing is persisted: the store is NSInMemoryStoreType, and there is no CloudKit here.
-# The PORT binary renames the class, with -DNSBatchInsertRequest=CharonBatchInsertRequest, because it
+# The PORT binary renames the class, with -DNSBatchInsertRequest=RevenantBatchInsertRequest, because it
 # links -framework CoreData and the runtime answers "Class NSBatchInsertRequest is implemented in both
 # CoreData and .../differential-port" otherwise: two definitions of one class, and which one answers
 # is not the run's to choose. check.sh's header records this and per-initializer.m is built both ways
@@ -38,9 +38,9 @@ LC_ALL=C sort "$build/host.tsv" > "$build/host.sorted"
 # the control does not make.
 build_and_run() {
     cp "$1" "$build/port.m"
-    xcrun clang -fobjc-arc -w -DNSBatchInsertRequest=CharonBatchInsertRequest \
+    xcrun clang -fobjc-arc -w -DNSBatchInsertRequest=RevenantBatchInsertRequest \
         -I"$FP/CoreData" -c "$build/port.m" -o "$build/port.o"
-    xcrun clang -fobjc-arc -w -DNSBatchInsertRequest=CharonBatchInsertRequest \
+    xcrun clang -fobjc-arc -w -DNSBatchInsertRequest=RevenantBatchInsertRequest \
         "$here/differential.m" "$build/port.o" \
         -framework Foundation -framework CoreData -o "$build/differential-port"
     "$build/differential-port" > "$build/port.tsv"
@@ -87,7 +87,7 @@ if [ "${1:-}" = "mutant" ]; then
     mutate rows 's/if (self \&\& dictionaries.count) {/if (self) {/g' \
         "a request with no rows keeps what it was given"
     # -entity refuses a request that was made with a name: the mutation answers nil instead.
-    mutate entity 's/if (!_charonEntity \&\& _charonEntityName) {/if (NO) {/' \
+    mutate entity 's/if (!_revenantEntity \&\& _revenantEntityName) {/if (NO) {/' \
         "-entity answers nil where the release refuses"
     exit 0
 fi

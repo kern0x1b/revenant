@@ -1,7 +1,7 @@
 #import <UIKit/UIKit.h>
 #import <CoreGraphics/CGPath.h>
 
-static CGAffineTransform CharonTransform(UIView *from, UIView *to)
+static CGAffineTransform RevenantTransform(UIView *from, UIView *to)
 {
     CGPoint origin = [from convertPoint:CGPointZero toView:to];
     CGPoint alongX = [from convertPoint:CGPointMake(1, 0) toView:to];
@@ -11,7 +11,7 @@ static CGAffineTransform CharonTransform(UIView *from, UIView *to)
                                  origin.x, origin.y);
 }
 
-static CGAffineTransform CharonWindowToScreen(UIWindow *window)
+static CGAffineTransform RevenantWindowToScreen(UIWindow *window)
 {
     CGPoint origin = [window convertPoint:CGPointZero toView:nil];
     CGPoint alongX = [window convertPoint:CGPointMake(1, 0) toView:nil];
@@ -28,7 +28,7 @@ UIBezierPath *UIAccessibilityConvertPathToScreenCoordinates(UIBezierPath *path, 
     UIWindow *window = view.window;
     if (!window)
         return path;
-    CGAffineTransform toScreen = CGAffineTransformConcat(CharonWindowToScreen(window), CharonTransform(view, window));
+    CGAffineTransform toScreen = CGAffineTransformConcat(RevenantWindowToScreen(window), RevenantTransform(view, window));
     CGMutablePathRef moved = CGPathCreateMutableCopyByTransformingPath(path.CGPath, &toScreen);
     if (!moved)
         return path;

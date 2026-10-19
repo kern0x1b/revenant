@@ -1,20 +1,20 @@
 #import <Foundation/Foundation.h>
 #import <Metal/Metal.h>
 
-@interface CharonHostCharonMetalDevice : NSObject
+@interface RevenantHostRevenantMetalDevice : NSObject
 + (id)shared;
 - (id<MTLDevice>)device;
 @end
 
-NSString *CharonMetalErrorDomain = @"CharonMetalErrorDomain";
+NSString *RevenantMetalErrorDomain = @"RevenantMetalErrorDomain";
 
-NSError *CharonMetalError(NSInteger code, NSString *message)
+NSError *RevenantMetalError(NSInteger code, NSString *message)
 {
-    return [NSError errorWithDomain:CharonMetalErrorDomain code:code
+    return [NSError errorWithDomain:RevenantMetalErrorDomain code:code
                            userInfo:@{NSLocalizedDescriptionKey: message}];
 }
 
-@implementation CharonHostCharonMetalDevice
+@implementation RevenantHostRevenantMetalDevice
 
 + (id)shared
 {

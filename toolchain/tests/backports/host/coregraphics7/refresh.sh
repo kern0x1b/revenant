@@ -3,7 +3,7 @@ set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 device=$here/../../device
-build=${COREGRAPHICS7_BUILD:-$(runs_folder charon-coregraphics7-refresh)}
+build=${COREGRAPHICS7_BUILD:-$(runs_folder revenant-coregraphics7-refresh)}
 rm -rf "$build"
 mkdir -p "$build"
 cat > "$build/main.m" <<'M'
@@ -12,7 +12,7 @@ int main(void)
 {
     @autoreleasepool {
         printf("// The answers of the host's CoreGraphics, written by host/coregraphics7/refresh.sh from coregraphics7-cases.m.\n");
-        charon_cg7_cases(^(NSString *name, NSString *value) {
+        revenant_cg7_cases(^(NSString *name, NSString *value) {
             printf("    {\"%s\", \"%s\"},\n", [name UTF8String], [value UTF8String]);
         });
     }

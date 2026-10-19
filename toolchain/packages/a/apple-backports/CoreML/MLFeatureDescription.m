@@ -1,11 +1,11 @@
-#include "CharonMLConstraints.h"
+#include "RevenantMLConstraints.h"
 
 @interface MLMultiArrayConstraint () {
     NSArray<NSNumber *> *_shape;
     MLMultiArrayDataType _dataType;
     MLMultiArrayShapeConstraint *_shapeConstraint;
 }
-- (instancetype)charon_initWithShape:(NSArray<NSNumber *> *)shape
+- (instancetype)revenant_initWithShape:(NSArray<NSNumber *> *)shape
                      dataType:(MLMultiArrayDataType)dataType
                shapeConstraint:(MLMultiArrayShapeConstraint *)shapeConstraint;
 @end
@@ -16,7 +16,7 @@
     OSType _pixelFormatType;
     MLImageSizeConstraint *_sizeConstraint;
 }
-- (instancetype)charon_initWithPixelsHigh:(NSInteger)pixelsHigh
+- (instancetype)revenant_initWithPixelsHigh:(NSInteger)pixelsHigh
                         pixelsWide:(NSInteger)pixelsWide
                   pixelFormatType:(OSType)pixelFormatType
                     sizeConstraint:(MLImageSizeConstraint *)sizeConstraint;
@@ -25,7 +25,7 @@
 @interface MLDictionaryConstraint () {
     MLFeatureType _keyType;
 }
-- (instancetype)charon_initWithKeyType:(MLFeatureType)keyType;
+- (instancetype)revenant_initWithKeyType:(MLFeatureType)keyType;
 @end
 
 @interface MLFeatureDescription () {
@@ -37,13 +37,13 @@
     MLDictionaryConstraint *_dictionaryConstraint;
     MLSequenceConstraint *_sequenceConstraint;
 }
-- (instancetype)charon_initWithName:(NSString *)name type:(MLFeatureType)type optional:(BOOL)optional;
-- (instancetype)charon_initWithFeature:(const charon_ml_feature *)feature;
+- (instancetype)revenant_initWithName:(NSString *)name type:(MLFeatureType)type optional:(BOOL)optional;
+- (instancetype)revenant_initWithFeature:(const revenant_ml_feature *)feature;
 @end
 
 @implementation MLMultiArrayConstraint
 
-- (instancetype)charon_initWithShape:(NSArray<NSNumber *> *)shape
+- (instancetype)revenant_initWithShape:(NSArray<NSNumber *> *)shape
                      dataType:(MLMultiArrayDataType)dataType
                shapeConstraint:(MLMultiArrayShapeConstraint *)shapeConstraint
 {
@@ -67,7 +67,7 @@
 }
 - (id)copyWithZone:(NSZone *)zone
 {
-    return [[[self class] allocWithZone:zone] charon_initWithShape:_shape
+    return [[[self class] allocWithZone:zone] revenant_initWithShape:_shape
                                                          dataType:_dataType
                                                    shapeConstraint:[_shapeConstraint copy]];
 }
@@ -106,7 +106,7 @@
 
 @implementation MLImageConstraint
 
-- (instancetype)charon_initWithPixelsHigh:(NSInteger)pixelsHigh
+- (instancetype)revenant_initWithPixelsHigh:(NSInteger)pixelsHigh
                         pixelsWide:(NSInteger)pixelsWide
                   pixelFormatType:(OSType)pixelFormatType
                     sizeConstraint:(MLImageSizeConstraint *)sizeConstraint
@@ -137,7 +137,7 @@
 }
 - (id)copyWithZone:(NSZone *)zone
 {
-    return [[[self class] allocWithZone:zone] charon_initWithPixelsHigh:_pixelsHigh
+    return [[[self class] allocWithZone:zone] revenant_initWithPixelsHigh:_pixelsHigh
                                                                 pixelsWide:_pixelsWide
                                                           pixelFormatType:_pixelFormatType
                                                             sizeConstraint:[_sizeConstraint copy]];
@@ -179,7 +179,7 @@
 
 @implementation MLDictionaryConstraint
 
-- (instancetype)charon_initWithKeyType:(MLFeatureType)keyType
+- (instancetype)revenant_initWithKeyType:(MLFeatureType)keyType
 {
     MLDictionaryConstraint *built = [super init];
     if (built != nil) {
@@ -194,7 +194,7 @@
 }
 - (id)copyWithZone:(NSZone *)zone
 {
-    return [[[self class] allocWithZone:zone] charon_initWithKeyType:_keyType];
+    return [[[self class] allocWithZone:zone] revenant_initWithKeyType:_keyType];
 }
 
 
@@ -223,7 +223,7 @@
 
 @implementation MLFeatureDescription
 
-- (instancetype)charon_initWithName:(NSString *)name
+- (instancetype)revenant_initWithName:(NSString *)name
                         type:(MLFeatureType)type
                     optional:(BOOL)optional
 {
@@ -236,10 +236,10 @@
     return built;
 }
 
-- (instancetype)charon_initWithFeature:(const charon_ml_feature *)feature
+- (instancetype)revenant_initWithFeature:(const revenant_ml_feature *)feature
 {
-    MLFeatureDescription *built = [self charon_initWithName:feature->name != NULL ? @(feature->name) : nil
-                                                      type:charon_ml_feature_type_of(feature->type)
+    MLFeatureDescription *built = [self revenant_initWithName:feature->name != NULL ? @(feature->name) : nil
+                                                      type:revenant_ml_feature_type_of(feature->type)
                                                   optional:feature->optional != 0];
     if (built == nil) {
         return nil;
@@ -247,26 +247,26 @@
     switch (_type) {
     case MLFeatureTypeMultiArray:
         _multiArrayConstraint = [[MLMultiArrayConstraint alloc]
-            charon_initWithShape:charon_ml_shape_to_array(feature->shape, feature->rank)
-                 dataType:charon_ml_array_type(feature->data_type)
-           shapeConstraint:charon_ml_shape_constraint_of(feature)];
+            revenant_initWithShape:revenant_ml_shape_to_array(feature->shape, feature->rank)
+                 dataType:revenant_ml_array_type(feature->data_type)
+           shapeConstraint:revenant_ml_shape_constraint_of(feature)];
         break;
     case MLFeatureTypeImage:
-        _imageConstraint = charon_ml_image_constraint_of(feature);
+        _imageConstraint = revenant_ml_image_constraint_of(feature);
         break;
     case MLFeatureTypeDictionary:
-        _dictionaryConstraint = [[MLDictionaryConstraint alloc] charon_initWithKeyType:MLFeatureTypeString];
+        _dictionaryConstraint = [[MLDictionaryConstraint alloc] revenant_initWithKeyType:MLFeatureTypeString];
         break;
     case MLFeatureTypeSequence: {
         MLFeatureDescription *element =
-            [[MLFeatureDescription alloc] charon_initWithName:nil
-                                                  type:charon_ml_feature_type_of(feature->element_type)
+            [[MLFeatureDescription alloc] revenant_initWithName:nil
+                                                  type:revenant_ml_feature_type_of(feature->element_type)
                                               optional:NO];
         NSUInteger length = feature->has_count_range && feature->count_upper >= 0
                                 ? (NSUInteger)(feature->count_upper - feature->count_lower)
                                 : 0;
         _sequenceConstraint = [[MLSequenceConstraint alloc]
-            charon_initWithValueDescription:element
+            revenant_initWithValueDescription:element
                           countRange:NSMakeRange((NSUInteger)feature->count_lower, length)];
         break;
     }
@@ -332,11 +332,11 @@
             array.dataType != _multiArrayConstraint.dataType) {
             return NO;
         }
-        return charon_ml_shape_allowed(_multiArrayConstraint.shapeConstraint, array.shape);
+        return revenant_ml_shape_allowed(_multiArrayConstraint.shapeConstraint, array.shape);
     }
     case MLFeatureTypeImage:
         return _imageConstraint != nil &&
-               charon_ml_image_size_allowed(_imageConstraint.sizeConstraint, _imageConstraint.pixelsHigh,
+               revenant_ml_image_size_allowed(_imageConstraint.sizeConstraint, _imageConstraint.pixelsHigh,
                                             _imageConstraint.pixelsWide, value.imageBufferValue);
     case MLFeatureTypeDictionary:
         return _dictionaryConstraint != nil && _dictionaryConstraint.keyType == MLFeatureTypeString;
@@ -404,24 +404,24 @@
     copy->_optional = _optional;
     if (_multiArrayConstraint != nil) {
         copy->_multiArrayConstraint = [[MLMultiArrayConstraint alloc]
-            charon_initWithShape:_multiArrayConstraint.shape
+            revenant_initWithShape:_multiArrayConstraint.shape
                  dataType:_multiArrayConstraint.dataType
            shapeConstraint:[_multiArrayConstraint.shapeConstraint copy]];
     }
     if (_imageConstraint != nil) {
         copy->_imageConstraint = [[MLImageConstraint alloc]
-            charon_initWithPixelsHigh:_imageConstraint.pixelsHigh
+            revenant_initWithPixelsHigh:_imageConstraint.pixelsHigh
                     pixelsWide:_imageConstraint.pixelsWide
               pixelFormatType:_imageConstraint.pixelFormatType
                 sizeConstraint:[_imageConstraint.sizeConstraint copy]];
     }
     if (_dictionaryConstraint != nil) {
         copy->_dictionaryConstraint =
-            [[MLDictionaryConstraint alloc] charon_initWithKeyType:_dictionaryConstraint.keyType];
+            [[MLDictionaryConstraint alloc] revenant_initWithKeyType:_dictionaryConstraint.keyType];
     }
     if (_sequenceConstraint != nil) {
         copy->_sequenceConstraint = [[MLSequenceConstraint alloc]
-            charon_initWithValueDescription:[_sequenceConstraint.valueDescription copy]
+            revenant_initWithValueDescription:[_sequenceConstraint.valueDescription copy]
                           countRange:_sequenceConstraint.countRange];
     }
     return copy;
@@ -442,7 +442,7 @@
 - (NSString *)description
 {
     return [NSString stringWithFormat:@"<MLFeatureDescription %@ %s%@>", _name,
-                                      charon_ml_feature_type_name_of(_type),
+                                      revenant_ml_feature_type_name_of(_type),
                                       _optional ? @" optional" : @""];
 }
 

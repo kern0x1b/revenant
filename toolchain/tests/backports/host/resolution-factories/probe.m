@@ -7,7 +7,7 @@
 #include <unistd.h>
 
 #ifdef PORT
-#define PREFIX "CharonHost"
+#define PREFIX "RevenantHost"
 #else
 #define PREFIX ""
 #endif
@@ -132,7 +132,7 @@ static void measure(Class cls, const char *appleClass)
     free(methods);
 }
 
-static void charon_stalled(int signal_number)
+static void revenant_stalled(int signal_number)
 {
     (void)signal_number;
     static const char message[] = "TIMEOUT: a factory of this class did not return in 20 seconds\n";
@@ -161,7 +161,7 @@ int main(int argc, const char *argv[])
             printf("%s missing\n", apple);
             return 2;
         }
-        signal(SIGALRM, charon_stalled);
+        signal(SIGALRM, revenant_stalled);
         alarm(20);
         measure(cls, apple);
         alarm(0);

@@ -1,6 +1,6 @@
 #import <Foundation/Foundation.h>
 
-#import "CharonAXSettings.h"
+#import "RevenantAXSettings.h"
 
 static int failures = 0;
 static int run = 0;
@@ -67,16 +67,16 @@ static void checkOpenSettings(void)
     });
     check(@"the completion is called before the function returns, not later", @(calls), @(1));
     checkNo(@"the error is not nil, so a caller can tell the call did not begin", seen != nil);
-    check(@"the error carries the port's own domain", seen.domain, @"org.charon.Accessibility.Settings");
+    check(@"the error carries the port's own domain", seen.domain, @"org.revenant.Accessibility.Settings");
     check(@"the error's code is the feature the caller asked for", @(seen.code),
           @(AXSettingsFeatureDwellControl));
     checkNo(@"the error's description names the section and says nothing was opened",
             [seen.localizedDescription rangeOfString:@"nothing was opened"].location != NSNotFound);
-    static NSString *const CharonSectionNames[] = {@"PersonalVoiceAllowAppsToRequestToUse",
+    static NSString *const RevenantSectionNames[] = {@"PersonalVoiceAllowAppsToRequestToUse",
                                                   @"AllowAppsToAddAudioToCalls", @"AssistiveTouch",
                                                   @"AssistiveTouchDevices", @"DwellControl"};
     checkNo(@"the description names the section it was asked for by name",
-            [seen.localizedDescription rangeOfString:CharonSectionNames[AXSettingsFeatureDwellControl - 1]]
+            [seen.localizedDescription rangeOfString:RevenantSectionNames[AXSettingsFeatureDwellControl - 1]]
                 .location != NSNotFound);
     AXOpenSettingsFeature(AXSettingsFeaturePersonalVoiceAllowAppsToRequestToUse, NULL);
     check(@"a null completion is accepted and ignored", @"yes", @"yes");
@@ -88,11 +88,11 @@ static void checkOpenSettings(void)
 static void checkControls(void)
 {
     check(@"a notification name that is not this library's is not one of its constants",
-          @"org.charon.CharonNoSuchNotification",
-          @"org.charon.CharonNoSuchNotification");
+          @"org.revenant.RevenantNoSuchNotification",
+          @"org.revenant.RevenantNoSuchNotification");
     check(@"the port's error domain is a name and not an empty string",
-          @([@"org.charon.Accessibility.Settings" length] > 0), @YES);
-    check(@"and it is not a system domain", @([@"org.charon.Accessibility.Settings" hasPrefix:@"com.apple."]),
+          @([@"org.revenant.Accessibility.Settings" length] > 0), @YES);
+    check(@"and it is not a system domain", @([@"org.revenant.Accessibility.Settings" hasPrefix:@"com.apple."]),
           @NO);
     NSArray<NSString *> *carried = @[AXPrefersHorizontalTextLayoutDidChangeNotification,
                                     AXAnimatedImagesEnabledDidChangeNotification,
@@ -101,7 +101,7 @@ static void checkControls(void)
                                     AXShowBordersEnabledStatusDidChangeNotification];
     check(@"a name the library does not carry differs from all five it does", @(carried.count), @(5));
     checkNo(@"and is not equal to any of them",
-            ![carried containsObject:@"org.charon.CharonNoSuchNotification"]);
+            ![carried containsObject:@"org.revenant.RevenantNoSuchNotification"]);
 }
 
 int main(void)

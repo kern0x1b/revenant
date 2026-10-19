@@ -33,10 +33,10 @@ static void checks(const char *side, id scene)
     report(side, "title-unchanged", [scene title]);
 }
 
-@interface CharonAppDelegate : UIResponder <UIApplicationDelegate>
+@interface RevenantAppDelegate : UIResponder <UIApplicationDelegate>
 @end
 
-@implementation CharonAppDelegate
+@implementation RevenantAppDelegate
 
 - (UISceneConfiguration *)application:(UIApplication *)application configurationForConnectingSceneSession:(UISceneSession *)session options:(UISceneConnectionOptions *)options
 {
@@ -45,16 +45,16 @@ static void checks(const char *side, id scene)
 
 @end
 
-@interface CharonSceneDelegate : UIResponder <UIWindowSceneDelegate>
+@interface RevenantSceneDelegate : UIResponder <UIWindowSceneDelegate>
 @end
 
-@implementation CharonSceneDelegate
+@implementation RevenantSceneDelegate
 
 - (void)scene:(UIScene *)scene willConnectToSession:(UISceneSession *)session options:(UISceneConnectionOptions *)connectionOptions
 {
-    const char *path = getenv("CHARON_SCENE_OUT");
+    const char *path = getenv("REVENANT_SCENE_OUT");
     out = fopen(path ? path : "/dev/stdout", "w");
-#ifdef CHARON_PORT_SIDE
+#ifdef REVENANT_PORT_SIDE
     checks("port", [[UIScene alloc] initWithSession:nil connectionOptions:nil]);
 #else
     checks("host", scene);
@@ -68,6 +68,6 @@ static void checks(const char *side, id scene)
 int main(int argc, char *argv[])
 {
     @autoreleasepool {
-        return UIApplicationMain(argc, argv, nil, NSStringFromClass([CharonAppDelegate class]));
+        return UIApplicationMain(argc, argv, nil, NSStringFromClass([RevenantAppDelegate class]));
     }
 }

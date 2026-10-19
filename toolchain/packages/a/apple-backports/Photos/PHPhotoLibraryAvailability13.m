@@ -1,11 +1,11 @@
 #import <AssetsLibrary/AssetsLibrary.h>
 #import <Photos/Photos.h>
-#import "CharonPhotos.h"
+#import "RevenantPhotos.h"
 #import <objc/runtime.h>
 
 #pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
 
-@interface CharonPhotosAvailability : NSObject {
+@interface RevenantPhotosAvailability : NSObject {
     NSHashTable *_observers;
     dispatch_queue_t _delivery;
     id _listening;
@@ -17,32 +17,32 @@
 @property (nonatomic, assign) NSInteger last;
 @end
 
-@implementation CharonPhotosAvailability
+@implementation RevenantPhotosAvailability
 @synthesize observers = _observers, delivery = _delivery, listening = _listening, last = _last;
 @end
 
-static const char CharonPhotosAvailabilityKey[] = "CharonPhotosAvailability";
+static const char RevenantPhotosAvailabilityKey[] = "RevenantPhotosAvailability";
 
-static CharonPhotosAvailability *charon_availabilityOf(PHPhotoLibrary *library)
+static RevenantPhotosAvailability *revenant_availabilityOf(PHPhotoLibrary *library)
 {
-    return objc_getAssociatedObject(library, CharonPhotosAvailabilityKey);
+    return objc_getAssociatedObject(library, RevenantPhotosAvailabilityKey);
 }
 
-static CharonPhotosAvailability *charon_availabilityAttachedTo(PHPhotoLibrary *library)
+static RevenantPhotosAvailability *revenant_availabilityAttachedTo(PHPhotoLibrary *library)
 {
-    CharonPhotosAvailability *availability = [[CharonPhotosAvailability alloc] init];
-    objc_setAssociatedObject(library, CharonPhotosAvailabilityKey, availability,
+    RevenantPhotosAvailability *availability = [[RevenantPhotosAvailability alloc] init];
+    objc_setAssociatedObject(library, RevenantPhotosAvailabilityKey, availability,
                              OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     return availability;
 }
 
-@interface PHPhotoLibrary (CharonAvailability)
-- (void)charon_availabilityRefreshed;
+@interface PHPhotoLibrary (RevenantAvailability)
+- (void)revenant_availabilityRefreshed;
 @end
 
-@implementation PHPhotoLibrary (CharonAvailability)
+@implementation PHPhotoLibrary (RevenantAvailability)
 
-+ (NSInteger)charon_unavailabilityOfRelease
++ (NSInteger)revenant_unavailabilityOfRelease
 {
     switch ([ALAssetsLibrary authorizationStatus]) {
         case ALAuthorizationStatusRestricted:
@@ -54,7 +54,7 @@ static CharonPhotosAvailability *charon_availabilityAttachedTo(PHPhotoLibrary *l
     }
 }
 
-+ (NSError *)charon_unavailabilityReasonOf:(NSInteger)state
++ (NSError *)revenant_unavailabilityReasonOf:(NSInteger)state
 {
     switch (state) {
         case 1:
@@ -68,13 +68,13 @@ static CharonPhotosAvailability *charon_availabilityAttachedTo(PHPhotoLibrary *l
     }
 }
 
-- (void)charon_availabilityBecame:(NSInteger)state
+- (void)revenant_availabilityBecame:(NSInteger)state
 {
     NSArray *observers;
-    CharonPhotosAvailability *availability = charon_availabilityOf(self);
+    RevenantPhotosAvailability *availability = revenant_availabilityOf(self);
     @synchronized(self) {
         if (!availability) {
-            availability = charon_availabilityAttachedTo(self);
+            availability = revenant_availabilityAttachedTo(self);
         }
         NSInteger before = availability.last;
         availability.last = state;
@@ -90,15 +90,15 @@ static CharonPhotosAvailability *charon_availabilityAttachedTo(PHPhotoLibrary *l
     });
 }
 
-- (void)charon_availabilityRefreshed
+- (void)revenant_availabilityRefreshed
 {
-    [self charon_availabilityBecame:[PHPhotoLibrary charon_unavailabilityOfRelease]];
+    [self revenant_availabilityBecame:[PHPhotoLibrary revenant_unavailabilityOfRelease]];
 }
 
 - (NSError *)unavailabilityReason
 {
-    [self charon_availabilityRefreshed];
-    return [PHPhotoLibrary charon_unavailabilityReasonOf:[PHPhotoLibrary charon_unavailabilityOfRelease]];
+    [self revenant_availabilityRefreshed];
+    return [PHPhotoLibrary revenant_unavailabilityReasonOf:[PHPhotoLibrary revenant_unavailabilityOfRelease]];
 }
 
 - (void)registerAvailabilityObserver:(id<PHPhotoLibraryAvailabilityObserver>)observer
@@ -106,17 +106,17 @@ static CharonPhotosAvailability *charon_availabilityAttachedTo(PHPhotoLibrary *l
     if (!observer)
         return;
     @synchronized(self) {
-        CharonPhotosAvailability *availability = charon_availabilityOf(self);
+        RevenantPhotosAvailability *availability = revenant_availabilityOf(self);
         if (!availability) {
-            availability = charon_availabilityAttachedTo(self);
-            availability.last = [PHPhotoLibrary charon_unavailabilityOfRelease];
+            availability = revenant_availabilityAttachedTo(self);
+            availability.last = [PHPhotoLibrary revenant_unavailabilityOfRelease];
             __weak PHPhotoLibrary *weakSelf = self;
             availability.listening = [[NSNotificationCenter defaultCenter] addObserverForName:ALAssetsLibraryChangedNotification
-                                                                                          object:[CharonPhotosStore library]
+                                                                                          object:[RevenantPhotosStore library]
                                                                                            queue:nil
                                                                                       usingBlock:^(NSNotification *note) {
                 (void)note;
-                [weakSelf charon_availabilityRefreshed];
+                [weakSelf revenant_availabilityRefreshed];
             }];
         }
         if (!availability.observers) {
@@ -130,7 +130,7 @@ static CharonPhotosAvailability *charon_availabilityAttachedTo(PHPhotoLibrary *l
 - (void)unregisterAvailabilityObserver:(id<PHPhotoLibraryAvailabilityObserver>)observer
 {
     @synchronized(self) {
-        [charon_availabilityOf(self).observers removeObject:observer];
+        [revenant_availabilityOf(self).observers removeObject:observer];
     }
 }
 

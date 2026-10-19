@@ -1,12 +1,12 @@
-#ifndef CHARON_METRICKIT_H
-#define CHARON_METRICKIT_H
+#ifndef REVENANT_METRICKIT_H
+#define REVENANT_METRICKIT_H
 
 #import <Foundation/Foundation.h>
 #import <MetricKit/MetricKit.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
-#ifndef CHARON_HOST_DIFFERENTIAL
+#ifndef REVENANT_HOST_DIFFERENTIAL
 
 @interface MXSignpostRecord : NSObject <NSSecureCoding>
 - (NSData *)JSONRepresentation;
@@ -42,27 +42,27 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, readonly, strong) NSString *exceptionName;
 @end
 
-@interface MXMetaData (CharonMetricKit)
+@interface MXMetaData (RevenantMetricKit)
 @property (nonatomic, readonly, assign) bool lowPowerModeEnabled;
 @property (nonatomic, readonly, assign) bool isTestFlightApp;
 @property (nonatomic, readonly, assign) pid_t pid;
 @property (nonatomic, readonly, strong) NSString* bundleIdentifier;
 @end
 
-@interface MXDiagnostic (CharonMetricKit)
+@interface MXDiagnostic (RevenantMetricKit)
 @property (nonatomic, readonly, strong) NSArray<MXSignpostRecord *> *signpostData;
-- (void)charon_setSignpostData:(NSArray<MXSignpostRecord *> *)value;
+- (void)revenant_setSignpostData:(NSArray<MXSignpostRecord *> *)value;
 @end
 
-@interface MXMetricPayload (CharonMetricKit)
+@interface MXMetricPayload (RevenantMetricKit)
 @property (nonatomic, readonly, strong) MXDiskSpaceUsageMetric *diskSpaceUsageMetrics;
 @end
 
-@interface MXCrashDiagnostic (CharonMetricKit)
+@interface MXCrashDiagnostic (RevenantMetricKit)
 @property (nonatomic, readonly, strong) MXCrashDiagnosticObjectiveCExceptionReason *exceptionReason;
 @end
 
-@interface MXAnimationMetric (CharonMetricKit)
+@interface MXAnimationMetric (RevenantMetricKit)
 @property (nonatomic, readonly, strong) NSMeasurement<NSUnit *> *hitchTimeRatio;
 @end
 

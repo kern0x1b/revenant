@@ -3,7 +3,7 @@
 #pragma clang diagnostic ignored "-Wobjc-missing-property-synthesis"
 
 @interface MDLMeshBufferZoneDefault ()
-- (void)charon_setCapacity:(NSUInteger)capacity allocator:(id<MDLMeshBufferAllocator>)allocator;
+- (void)revenant_setCapacity:(NSUInteger)capacity allocator:(id<MDLMeshBufferAllocator>)allocator;
 @end
 
 @implementation MDLMeshBufferMap {
@@ -97,11 +97,11 @@
 - (id)copyWithZone:(NSZone *)zone
 {
     MDLMeshBufferData *copy = [[[self class] allocWithZone:zone] initWithType:_type data:_data];
-    [copy charon_setAllocator:_allocator zone:_zone];
+    [copy revenant_setAllocator:_allocator zone:_zone];
     return copy;
 }
 
-- (void)charon_setAllocator:(id<MDLMeshBufferAllocator>)allocator zone:(id<MDLMeshBufferZone>)zone
+- (void)revenant_setAllocator:(id<MDLMeshBufferAllocator>)allocator zone:(id<MDLMeshBufferZone>)zone
 {
     if (_allocator != allocator) {
         _allocator = allocator;
@@ -117,7 +117,7 @@
 - (id<MDLMeshBufferZone>)newZone:(NSUInteger)capacity
 {
     MDLMeshBufferZoneDefault *zone = [[MDLMeshBufferZoneDefault alloc] init];
-    [zone charon_setCapacity:capacity allocator:self];
+    [zone revenant_setCapacity:capacity allocator:self];
     return zone;
 }
 
@@ -153,7 +153,7 @@
     if (zone && data.length > zone.capacity)
         return nil;
     MDLMeshBufferData *buffer = [[MDLMeshBufferData alloc] initWithType:type data:data];
-    [buffer charon_setAllocator:self zone:zone];
+    [buffer revenant_setAllocator:self zone:zone];
     return buffer;
 }
 

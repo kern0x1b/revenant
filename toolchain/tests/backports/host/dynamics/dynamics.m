@@ -26,7 +26,7 @@ const char *const side_names[2] = {"oracle", "ours"};
 
 Class side_class(Side side, NSString *name)
 {
-    NSString *full = side == Ours ? [@"CharonHost" stringByAppendingString:name] : name;
+    NSString *full = side == Ours ? [@"RevenantHost" stringByAppendingString:name] : name;
     Class found = NSClassFromString(full);
     if (!found) {
         printf("FAIL no class %s\n", full.UTF8String);
@@ -45,12 +45,12 @@ UIDynamicAnimator *make_animator(Side side, UIView *reference)
 
 static BOOL is_oracle(id object)
 {
-    return ![NSStringFromClass([object class]) hasPrefix:@"CharonHost"];
+    return ![NSStringFromClass([object class]) hasPrefix:@"RevenantHost"];
 }
 
 BOOL animator_step(UIDynamicAnimator *animator, double dt)
 {
-    return is_oracle(animator) ? [animator _animatorStep:dt] : [animator charon_animatorStep:dt];
+    return is_oracle(animator) ? [animator _animatorStep:dt] : [animator revenant_animatorStep:dt];
 }
 
 void landing_scene(Side side, double y[4])
@@ -75,14 +75,14 @@ void landing_scene(Side side, double y[4])
 
 id animator_body(UIDynamicAnimator *animator, id item)
 {
-    return is_oracle(animator) ? [animator _bodyForItem:item] : [animator charon_bodyForItem:item];
+    return is_oracle(animator) ? [animator _bodyForItem:item] : [animator revenant_bodyForItem:item];
 }
 
 CGVector animator_gravity(UIDynamicAnimator *animator)
 {
     if (is_oracle(animator))
         return [[animator _world] gravity];
-    void *world = [animator charon_world];
+    void *world = [animator revenant_world];
     if (!world)
         return CGVectorMake(NAN, NAN);
     EngineVector gravity = engine_world_gravity(world);
@@ -91,7 +91,7 @@ CGVector animator_gravity(UIDynamicAnimator *animator)
 
 void *our_world(UIDynamicAnimator *animator)
 {
-    return is_oracle(animator) ? NULL : [animator charon_world];
+    return is_oracle(animator) ? NULL : [animator revenant_world];
 }
 
 void *our_b2body(id body)
@@ -121,25 +121,25 @@ void turn_run_loop(void)
 
 NSString *normalized(NSString *text)
 {
-    NSString *plain = [text stringByReplacingOccurrencesOfString:@"CharonHost" withString:@""];
+    NSString *plain = [text stringByReplacingOccurrencesOfString:@"RevenantHost" withString:@""];
     NSRegularExpression *address = [NSRegularExpression regularExpressionWithPattern:@"0x[0-9a-f]+" options:0 error:NULL];
     return [address stringByReplacingMatchesInString:plain options:0 range:NSMakeRange(0, plain.length) withTemplate:@"0x"];
 }
 
 void check_near(double actual, double expected, double tolerance, const char *name, NSString *context)
 {
-    charon_check(actual == expected || fabs(actual - expected) <= tolerance, name,
+    revenant_check(actual == expected || fabs(actual - expected) <= tolerance, name,
                  [NSString stringWithFormat:@"%@: %.9g vs %.9g (difference %.3g, tolerance %.3g)", context, actual, expected, actual - expected, tolerance]);
 }
 
 void check_equal_double(double actual, double expected, const char *name, NSString *context)
 {
-    charon_check(actual == expected || (isnan(actual) && isnan(expected)), name,
+    revenant_check(actual == expected || (isnan(actual) && isnan(expected)), name,
                  [NSString stringWithFormat:@"%@: %.17g vs %.17g", context, actual, expected]);
 }
 
 int finish(void)
 {
-    printf("checks=%d failures=%d\n", charon_checks, charon_failures);
-    return charon_failures ? 1 : 0;
+    printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
+    return revenant_failures ? 1 : 0;
 }

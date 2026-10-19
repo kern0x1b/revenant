@@ -72,29 +72,29 @@ enum { MPErrorUnknown = 0 };
 
 @implementation MPMediaItem
 { MPMediaEntityPersistentID _pid; }
-- (instancetype)initWithCharonID:(MPMediaEntityPersistentID)pid { self = [super init]; if (self) { _pid = pid; } return self; }
+- (instancetype)initWithRevenantID:(MPMediaEntityPersistentID)pid { self = [super init]; if (self) { _pid = pid; } return self; }
 - (MPMediaEntityPersistentID)persistentID { return _pid; }
 @end
 @implementation MPMediaItemCollection
 { NSArray *_items; }
-- (instancetype)initWithCharonItems:(NSArray *)items { self = [super init]; if (self) { _items = items; } return self; }
+- (instancetype)initWithRevenantItems:(NSArray *)items { self = [super init]; if (self) { _items = items; } return self; }
 - (NSArray<MPMediaItem *> *)items { return _items; }
 @end
 @implementation MPMediaQuery
 { NSArray *_items; }
-- (instancetype)initWithCharonItems:(NSArray *)items { self = [super init]; if (self) { _items = items; } return self; }
+- (instancetype)initWithRevenantItems:(NSArray *)items { self = [super init]; if (self) { _items = items; } return self; }
 - (NSArray<MPMediaItem *> *)items { return _items; }
 - (id)copyWithZone:(NSZone *)zone { return self; }
 @end
 
 @implementation MPMusicPlayerController
-{ NSString *_charonLastReleaseCall; MPMediaQuery *_charonSetQuery; MPMediaItemCollection *_charonSetCollection; }
-+ (NSString *)charonLastReleaseCall { static NSString *v; return v; }
-+ (void)charonSetLastReleaseCall:(NSString *)v { }
-- (NSString *)charonTakeLastReleaseCall { NSString *v = _charonLastReleaseCall; _charonLastReleaseCall = nil; return v; }
-- (void)charonRecord:(NSString *)what { _charonLastReleaseCall = what; }
-- (void)setQueueWithQuery:(MPMediaQuery *)query { [self charonRecord:@"setQueueWithQuery:"]; _charonSetQuery = query; }
-- (void)setQueueWithItemCollection:(MPMediaItemCollection *)c { [self charonRecord:@"setQueueWithItemCollection:"]; _charonSetCollection = c; }
+{ NSString *_revenantLastReleaseCall; MPMediaQuery *_revenantSetQuery; MPMediaItemCollection *_revenantSetCollection; }
++ (NSString *)revenantLastReleaseCall { static NSString *v; return v; }
++ (void)revenantSetLastReleaseCall:(NSString *)v { }
+- (NSString *)revenantTakeLastReleaseCall { NSString *v = _revenantLastReleaseCall; _revenantLastReleaseCall = nil; return v; }
+- (void)revenantRecord:(NSString *)what { _revenantLastReleaseCall = what; }
+- (void)setQueueWithQuery:(MPMediaQuery *)query { [self revenantRecord:@"setQueueWithQuery:"]; _revenantSetQuery = query; }
+- (void)setQueueWithItemCollection:(MPMediaItemCollection *)c { [self revenantRecord:@"setQueueWithItemCollection:"]; _revenantSetCollection = c; }
 @end
 NSString *const MPErrorDomain = @"MPErrorDomain";
 
@@ -105,10 +105,10 @@ static void check(const char *what, int held, const char *got) {
 }
 
 int main(void) {
-    MPMediaItem *a = [[MPMediaItem alloc] initWithCharonID:11];
-    MPMediaItem *b = [[MPMediaItem alloc] initWithCharonID:22];
-    MPMediaItemCollection *coll = [[MPMediaItemCollection alloc] initWithCharonItems:@[a, b]];
-    MPMediaQuery *query = [[MPMediaQuery alloc] initWithCharonItems:@[a]];
+    MPMediaItem *a = [[MPMediaItem alloc] initWithRevenantID:11];
+    MPMediaItem *b = [[MPMediaItem alloc] initWithRevenantID:22];
+    MPMediaItemCollection *coll = [[MPMediaItemCollection alloc] initWithRevenantItems:@[a, b]];
+    MPMediaQuery *query = [[MPMediaQuery alloc] initWithRevenantItems:@[a]];
 
     @try { [[MPMusicPlayerQueueDescriptor alloc] init]; check("the abstract base refuses -init", 0, "no raise"); }
     @catch (NSException *e) { check("the abstract base refuses -init", 1, "raised"); }
@@ -121,18 +121,18 @@ int main(void) {
     MPMusicPlayerController *player = [[MPMusicPlayerController alloc] init];
     [player setQueueWithDescriptor:mq];
     check("a query descriptor calls the RELEASE's -setQueueWithQuery:",
-          [[player charonTakeLastReleaseCall] isEqualToString:@"setQueueWithQuery:"], "setQueueWithQuery:");
+          [[player revenantTakeLastReleaseCall] isEqualToString:@"setQueueWithQuery:"], "setQueueWithQuery:");
     [player setQueueWithDescriptor:mc];
     check("a collection descriptor calls the RELEASE's -setQueueWithItemCollection:",
-          [[player charonTakeLastReleaseCall] isEqualToString:@"setQueueWithItemCollection:"], "setQueueWithItemCollection:");
+          [[player revenantTakeLastReleaseCall] isEqualToString:@"setQueueWithItemCollection:"], "setQueueWithItemCollection:");
     MPMusicPlayerStoreQueueDescriptor *store =
         [[MPMusicPlayerStoreQueueDescriptor alloc] initWithStoreIDs:@[ @"1", @"2" ]];
     [player setQueueWithDescriptor:store];
     check("a Store descriptor calls NOTHING: the release has no setter taking a Store ID",
-          [player charonTakeLastReleaseCall] == nil, "no call");
+          [player revenantTakeLastReleaseCall] == nil, "no call");
     [player appendQueueDescriptor:mq]; [player prependQueueDescriptor:mq];
     check("append/prepend call nothing: every release setter REPLACES a queue",
-          [player charonTakeLastReleaseCall] == nil, "no call");
+          [player revenantTakeLastReleaseCall] == nil, "no call");
 
     MPSystemMusicPlayerController *sys = [[MPSystemMusicPlayerController alloc] init];
     __block int calls = 0; __block NSError *seen = nil;
@@ -165,7 +165,7 @@ int main(void) {
     [app performQueueTransaction:^(MPMusicPlayerControllerMutableQueue *q) { [q removeItem:a]; }
                completionHandler:^(MPMusicPlayerControllerQueue *q, NSError *e) { gotItems = q.items; }];
     check("-removeItem: removes exactly the item it names", gotItems.count == 1, "1");
-    MPMediaItem *stranger = [[MPMediaItem alloc] initWithCharonID:999];
+    MPMediaItem *stranger = [[MPMediaItem alloc] initWithRevenantID:999];
     [app performQueueTransaction:^(MPMusicPlayerControllerMutableQueue *q) { [q removeItem:stranger]; }
                completionHandler:^(MPMusicPlayerControllerQueue *q, NSError *e) { gotItems = q.items; }];
     check("-removeItem: of an item the queue does not hold leaves it unchanged",

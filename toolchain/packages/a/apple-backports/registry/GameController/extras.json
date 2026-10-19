@@ -109,7 +109,7 @@
       "reason": "a peripheral the owner may attach over Bluetooth is not hardware absent from the phone (COORDINATION.md verdict, 2026-09-22): the class, its buttons and its scroll cursor are real and built, capability-honest per §2 - only the fact of a Bluetooth mouse being connected is not detected",
       "effect": "a real instance is made whenever a GCMouse is (GCMouse.mouseInput); leftButton/rightButton/middleButton are real GCControllerButtonInput elements, scroll a real GCDeviceCursor, mouseMovedHandler a stored block, all built through the same spec-driven element pipeline GCController's own profiles use; auxiliaryButtons is nil, since no mouse this port could measure to know how many it has",
       "facts": "facts/GameController/Mouse.md",
-      "source": "the header of iOS 16.4 for the declarations; this port's own GCPhysicalInputProfile14.m/CharonGCTables.m element pipeline"
+      "source": "the header of iOS 16.4 for the declarations; this port's own GCPhysicalInputProfile14.m/RevenantGCTables.m element pipeline"
     },
     {
       "api": "GCDeviceCursor",
@@ -120,7 +120,7 @@
       "reason": "GCMouseInput.scroll is a real instance of it, built the same way a GCControllerDirectionPad is (the class it extends)",
       "effect": "a real GCControllerDirectionPad with its own X/Y axes and up/down/left/right buttons, held by every real GCMouseInput as its scroll; the header's own note that a cursor's axis range differs from a dpad's [-1,1] is not modelled - this port's scroll reports the same normalized range a dpad does, a real, stated gap",
       "facts": "facts/GameController/Mouse.md",
-      "source": "the header of iOS 16.4 for the declarations; this port's own GCPhysicalInputProfile14.m/CharonGCTables.m element pipeline"
+      "source": "the header of iOS 16.4 for the declarations; this port's own GCPhysicalInputProfile14.m/RevenantGCTables.m element pipeline"
     },
     {
       "api": "GCDirectionalGamepad",

@@ -79,10 +79,10 @@ int main(int argc, char **argv)
 {
     @autoreleasepool {
         if (argc > 1)
-            charon_log_to(@(argv[1]));
+            revenant_log_to(@(argv[1]));
         check_record_permission();
         check_image_filter();
-        printf("%d checks, %d failures\n", charon_checks, charon_failures);
-        return charon_failures;
+        printf("%d checks, %d failures\n", revenant_checks, revenant_failures);
+        return revenant_failures;
     }
 }

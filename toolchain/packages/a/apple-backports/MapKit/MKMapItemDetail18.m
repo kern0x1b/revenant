@@ -2,9 +2,9 @@
 #import <UIKit/UIKit.h>
 #import <objc/message.h>
 #import <objc/runtime.h>
-#import "CharonMapKit.h"
+#import "RevenantMapKit.h"
 
-@interface MKMapItem (CharonDetailReads)
+@interface MKMapItem (RevenantDetailReads)
 - (nullable NSString *)identifier;
 - (nullable MKAddress *)address;
 @end
@@ -29,90 +29,90 @@ typedef NS_ENUM(long long, MKMapItemDetailSelectionAccessoryPresentationStyleCal
 
 @implementation MKMapItemDetailSelectionAccessoryPresentationStyle
 
-+ (instancetype)charon_styleOfKind:(NSInteger)kind
++ (instancetype)revenant_styleOfKind:(NSInteger)kind
                             holder:(id)holder
                            calling:(SEL)selector
 {
     (void)selector;
     MKMapItemDetailSelectionAccessoryPresentationStyle *style = [super alloc];
-    objc_setAssociatedObject(object_getClass(style), (const void *)"charonStyleKind",
+    objc_setAssociatedObject(object_getClass(style), (const void *)"revenantStyleKind",
                              [NSNumber numberWithInteger:kind], OBJC_ASSOCIATION_RETAIN);
     if (holder) {
-        objc_setAssociatedObject(object_getClass(style), (const void *)"charonStyleHolder", holder,
+        objc_setAssociatedObject(object_getClass(style), (const void *)"revenantStyleHolder", holder,
                                  OBJC_ASSOCIATION_RETAIN);
     }
     return style;
 }
 
-+ (NSInteger)charon_kind
++ (NSInteger)revenant_kind
 {
-    id value = objc_getAssociatedObject(object_getClass(self), (const void *)"charonStyleKind");
+    id value = objc_getAssociatedObject(object_getClass(self), (const void *)"revenantStyleKind");
     return [value isKindOfClass:[NSNumber class]] ? [value integerValue] : 0;
 }
 
-+ (id)charon_holder
++ (id)revenant_holder
 {
-    return objc_getAssociatedObject(object_getClass(self), (const void *)"charonStyleHolder");
+    return objc_getAssociatedObject(object_getClass(self), (const void *)"revenantStyleHolder");
 }
 
 + (MKMapItemDetailSelectionAccessoryPresentationStyle *)callout
 {
-    return (id)objc_getAssociatedObject(object_getClass(self), (const void *)"charonCallout");
+    return (id)objc_getAssociatedObject(object_getClass(self), (const void *)"revenantCallout");
 }
 
 + (MKMapItemDetailSelectionAccessoryPresentationStyle *)openInMaps
 {
-    return (id)objc_getAssociatedObject(object_getClass(self), (const void *)"charonOpenInMaps");
+    return (id)objc_getAssociatedObject(object_getClass(self), (const void *)"revenantOpenInMaps");
 }
 
 + (instancetype)calloutWithCalloutStyle:(MKMapItemDetailSelectionAccessoryPresentationStyleCalloutStyle)style
 {
     (void)style;
-    return [self charon_styleOfKind:1 holder:nil calling:@selector(calloutWithCalloutStyle:)];
+    return [self revenant_styleOfKind:1 holder:nil calling:@selector(calloutWithCalloutStyle:)];
 }
 
 + (instancetype)automaticWithPresentationViewController:(UIViewController *)controller
 {
-    return [self charon_styleOfKind:2 holder:controller calling:@selector(automaticWithPresentationViewController:)];
+    return [self revenant_styleOfKind:2 holder:controller calling:@selector(automaticWithPresentationViewController:)];
 }
 
 + (instancetype)sheetPresentedFromViewController:(UIViewController *)controller
 {
-    return [self charon_styleOfKind:3 holder:controller calling:@selector(sheetPresentedFromViewController:)];
+    return [self revenant_styleOfKind:3 holder:controller calling:@selector(sheetPresentedFromViewController:)];
 }
 
-+ (void)charon_seed
++ (void)revenant_seed
 {
-    if (objc_getAssociatedObject(self, (const void *)"charonCallout") == nil) {
+    if (objc_getAssociatedObject(self, (const void *)"revenantCallout") == nil) {
         MKMapItemDetailSelectionAccessoryPresentationStyle *callout = [super alloc];
-        objc_setAssociatedObject(object_getClass(callout), (const void *)"charonStyleKind",
+        objc_setAssociatedObject(object_getClass(callout), (const void *)"revenantStyleKind",
                                  [NSNumber numberWithInteger:1], OBJC_ASSOCIATION_RETAIN);
-        objc_setAssociatedObject(self, (const void *)"charonCallout", callout, OBJC_ASSOCIATION_RETAIN);
+        objc_setAssociatedObject(self, (const void *)"revenantCallout", callout, OBJC_ASSOCIATION_RETAIN);
     }
-    if (objc_getAssociatedObject(self, (const void *)"charonOpenInMaps") == nil) {
+    if (objc_getAssociatedObject(self, (const void *)"revenantOpenInMaps") == nil) {
         MKMapItemDetailSelectionAccessoryPresentationStyle *openInMaps = [super alloc];
-        objc_setAssociatedObject(object_getClass(openInMaps), (const void *)"charonStyleKind",
+        objc_setAssociatedObject(object_getClass(openInMaps), (const void *)"revenantStyleKind",
                                  [NSNumber numberWithInteger:4], OBJC_ASSOCIATION_RETAIN);
-        objc_setAssociatedObject(self, (const void *)"charonOpenInMaps", openInMaps, OBJC_ASSOCIATION_RETAIN);
+        objc_setAssociatedObject(self, (const void *)"revenantOpenInMaps", openInMaps, OBJC_ASSOCIATION_RETAIN);
     }
 }
 
 + (void)initialize
 {
     if (self == [MKMapItemDetailSelectionAccessoryPresentationStyle class]) {
-        [self charon_seed];
+        [self revenant_seed];
     }
 }
 
 - (NSString *)description
 {
     return [NSString stringWithFormat:@"<MKMapItemDetailSelectionAccessoryPresentationStyle: %p kind %ld>",
-            self, (long)[[self class] charon_kind]];
+            self, (long)[[self class] revenant_kind]];
 }
 
 @end
 
-#if !CHARON_HOST_PROBE
+#if !REVENANT_HOST_PROBE
 @interface MKSelectionAccessory : NSObject
 - (instancetype)initWithMapItemDetailPresentationStyle:(MKMapItemDetailSelectionAccessoryPresentationStyle *)presentationStyle;
 + (instancetype)mapItemDetailWithPresentationStyle:(MKMapItemDetailSelectionAccessoryPresentationStyle *)presentationStyle;
@@ -159,7 +159,7 @@ typedef NS_ENUM(long long, MKMapItemDetailSelectionAccessoryPresentationStyleCal
 
 @end
 
-#if !CHARON_HOST_PROBE
+#if !REVENANT_HOST_PROBE
 @protocol MKMapItemDetailViewControllerDelegate <NSObject>
 @optional
 - (void)mapItemDetailViewControllerDidFinish:(id)viewController;
@@ -185,7 +185,7 @@ typedef NS_ENUM(long long, MKMapItemDetailSelectionAccessoryPresentationStyleCal
 @synthesize mapItem = _mapItem;
 @synthesize delegate = _delegate;
 
-- (id)charon_typedDelegate { return _delegate; }
+- (id)revenant_typedDelegate { return _delegate; }
 
 - (instancetype)initWithMapItem:(MKMapItem *)mapItem
 {
@@ -207,10 +207,10 @@ typedef NS_ENUM(long long, MKMapItemDetailSelectionAccessoryPresentationStyleCal
 {
     _mapItem = mapItem;
     self.title = mapItem.name;
-    _address.text = [self charon_addressLine];
+    _address.text = [self revenant_addressLine];
 }
 
-- (NSString *)charon_addressLine
+- (NSString *)revenant_addressLine
 {
     MKPlacemark *placemark = _mapItem.placemark;
     if (!placemark) {
@@ -237,7 +237,7 @@ typedef NS_ENUM(long long, MKMapItemDetailSelectionAccessoryPresentationStyleCal
     _address = [[UILabel alloc] initWithFrame:CGRectMake(16.0, 44.0, 288.0, 20.0)];
     _address.font = [UIFont systemFontOfSize:14.0];
     _address.textColor = [UIColor darkGrayColor];
-    _address.text = [self charon_addressLine];
+    _address.text = [self revenant_addressLine];
     [view addSubview:_address];
     _table = [[UITableView alloc] initWithFrame:CGRectMake(0.0, 72.0, 320.0, 408.0)];
     _table.dataSource = (id)self;
@@ -254,14 +254,14 @@ typedef NS_ENUM(long long, MKMapItemDetailSelectionAccessoryPresentationStyleCal
     return (NSInteger)rows.count;
 }
 
-- (NSInteger)charon_rowCount
+- (NSInteger)revenant_rowCount
 {
     return [self tableView:nil numberOfRowsInSection:0];
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    static NSString *const cellIdentifier = @"CharonMapItemDetailRow";
+    static NSString *const cellIdentifier = @"RevenantMapItemDetailRow";
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:cellIdentifier];
     if (!cell) {
         cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault

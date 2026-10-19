@@ -1,8 +1,8 @@
-#import "CharonMenus.h"
+#import "RevenantMenus.h"
 
 #pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
 
-@implementation UIContextMenuInteraction (CharonFourteen)
+@implementation UIContextMenuInteraction (RevenantFourteen)
 
 - (UIContextMenuInteractionAppearance)menuAppearance
 {
@@ -11,14 +11,14 @@
 
 - (void)updateVisibleMenuWithBlock:(UIMenu *(NS_NOESCAPE ^)(UIMenu *visibleMenu))block
 {
-    if (![self respondsToSelector:@selector(charon_visibleMenu)])
+    if (![self respondsToSelector:@selector(revenant_visibleMenu)])
         return;
-    UIMenu *visible = [self charon_visibleMenu];
+    UIMenu *visible = [self revenant_visibleMenu];
     if (!visible)
         return;
     UIMenu *updated = block([visible copy]);
     if (updated)
-        [self charon_replaceVisibleMenu:updated];
+        [self revenant_replaceVisibleMenu:updated];
 }
 
 @end

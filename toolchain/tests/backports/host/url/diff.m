@@ -107,12 +107,12 @@ static id send(id target, NSString *selector)
 
 static NSString *oursEncode(NSString *string, NSCharacterSet *set)
 {
-    return ((id (*)(id, SEL, id))objc_msgSend)(string, NSSelectorFromString(@"charonHost_stringByAddingPercentEncodingWithAllowedCharacters:"), set);
+    return ((id (*)(id, SEL, id))objc_msgSend)(string, NSSelectorFromString(@"revenantHost_stringByAddingPercentEncodingWithAllowedCharacters:"), set);
 }
 
 static NSString *oursDecode(NSString *string)
 {
-    return send(string, @"charonHost_stringByRemovingPercentEncoding");
+    return send(string, @"revenantHost_stringByRemovingPercentEncoding");
 }
 
 static NSArray *setNames(void)
@@ -127,12 +127,12 @@ static NSCharacterSet *systemSet(NSString *name)
 
 static NSCharacterSet *oursSet(NSString *name)
 {
-    return send([NSCharacterSet class], [NSString stringWithFormat:@"charonHost_URL%@AllowedCharacterSet", name]);
+    return send([NSCharacterSet class], [NSString stringWithFormat:@"revenantHost_URL%@AllowedCharacterSet", name]);
 }
 
 static Class Ours(void)
 {
-    return NSClassFromString(@"CharonHostNSURLComponents");
+    return NSClassFromString(@"RevenantHostNSURLComponents");
 }
 
 static uint64_t seed = 0x9E3779B97F4A7C15ull;
@@ -767,7 +767,7 @@ static void testObject(void)
     check(![[Ours() new] isEqual:@"x"] && ![[Ours() new] isEqual:nil], @"object", @"other objects are not equal");
     check([[Ours() new] isEqual:[Ours() new]], @"object", @"empty components are equal");
     NSString *description = first.description;
-    NSString *pattern = @"^<CharonHostNSURLComponents 0x[0-9a-f]+> \\{scheme = http, user = u, password = p, host = h, port = 8, path = /p, query = q, fragment = f\\}$";
+    NSString *pattern = @"^<RevenantHostNSURLComponents 0x[0-9a-f]+> \\{scheme = http, user = u, password = p, host = h, port = 8, path = /p, query = q, fragment = f\\}$";
     check([description rangeOfString:pattern options:NSRegularExpressionSearch].location == 0, @"object", description);
     observe(@"-description: macOS 27 prints the URL string, the backport prints the iOS 7-9 component list", [[NSURLComponents componentsWithString:@"http://u:p@h:8/p?q#f"] description]);
     NSURLComponents *encodedHost = [Ours() new], *systemEncodedHost = [NSURLComponents new];

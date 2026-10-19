@@ -39,7 +39,7 @@ int main(int argc, char **argv)
 {
     @autoreleasepool {
         if (argc > 1)
-            charon_log_to(@(argv[1]));
+            revenant_log_to(@(argv[1]));
         check_sources();
 
         DirectionalEdgesRecorder *recorder = [DirectionalEdgesRecorder new];
@@ -59,7 +59,7 @@ int main(int argc, char **argv)
         for (NSString *name in expected)
             if ([name hasPrefix:@"objCType."])
                 CHECK([recorder.records[name] hasPrefix:@"{NSDirectionalEdgeInsets="], "the value carries the structure's own encoding");
-        printf("%d of %d checks failed\n", charon_failures, charon_checks);
-        return charon_failures;
+        printf("%d of %d checks failed\n", revenant_failures, revenant_checks);
+        return revenant_failures;
     }
 }

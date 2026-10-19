@@ -72,20 +72,20 @@ function failures(opt)
             table.insert(found, name)
         end
     end
-    local charon = path.directory(path.absolute(opt.modules))
+    local revenant = path.directory(path.absolute(opt.modules))
     local workspace = import("workspace", {rootdir = opt.modules, anonymous = true})
-    local tool = import("assets-extract", {rootdir = path.join(charon, "tools", "assets-extract"), anonymous = true}).tool()
+    local tool = import("assets-extract", {rootdir = path.join(revenant, "tools", "assets-extract"), anonymous = true}).tool()
     local folder = workspace.fresh("assets-extract-test")
     check(run(tool, folder, {}) == 64, "no arguments is a bad command line")
     local not_catalogue = path.join(folder, "Assets.car")
     io.writefile(not_catalogue, "not a catalogue")
     local code, _, err = run(tool, folder, {not_catalogue, path.join(folder, "out")})
     check(code == 65 and err:find("not a compiled asset catalogue", 1, true) ~= nil, "a file that is not a catalogue is refused")
-    local catalogue = os.getenv("CHARON_TEST_ASSET_CATALOGUE")
+    local catalogue = os.getenv("REVENANT_TEST_ASSET_CATALOGUE")
     if catalogue and catalogue ~= "" and os.isfile(catalogue) then
         extraction(tool, folder, catalogue, check)
     else
-        print("assets_extract_test: skipped the extraction of a catalogue: name one in CHARON_TEST_ASSET_CATALOGUE")
+        print("assets_extract_test: skipped the extraction of a catalogue: name one in REVENANT_TEST_ASSET_CATALOGUE")
     end
     os.tryrm(folder)
     return found

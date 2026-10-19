@@ -2,7 +2,7 @@
 #import <dlfcn.h>
 #import <objc/message.h>
 
-static AVAuthorizationStatus charon_media_status(NSString *mediaType, SEL caller, Class receiver)
+static AVAuthorizationStatus revenant_media_status(NSString *mediaType, SEL caller, Class receiver)
 {
     if ([mediaType isEqualToString:AVMediaTypeAudio])
         return AVAuthorizationStatusAuthorized;
@@ -28,16 +28,16 @@ static AVAuthorizationStatus charon_media_status(NSString *mediaType, SEL caller
     return AVAuthorizationStatusAuthorized;
 }
 
-@implementation AVCaptureDevice (CharonAuthorization)
+@implementation AVCaptureDevice (RevenantAuthorization)
 
 + (AVAuthorizationStatus)authorizationStatusForMediaType:(NSString *)mediaType
 {
-    return charon_media_status(mediaType, _cmd, self);
+    return revenant_media_status(mediaType, _cmd, self);
 }
 
 + (void)requestAccessForMediaType:(NSString *)mediaType completionHandler:(void (^)(BOOL granted))handler
 {
-    AVAuthorizationStatus status = charon_media_status(mediaType, _cmd, self);
+    AVAuthorizationStatus status = revenant_media_status(mediaType, _cmd, self);
     void (^kept)(BOOL) = [handler copy];
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         if (kept)

@@ -9,19 +9,19 @@ extension CLPlacemark: DisplayRepresentable, _IntentValue {
     public static var defaultResolverSpecification: Specification { return Specification() }
 
     public static var typeDisplayRepresentation: TypeDisplayRepresentation {
-        return TypeDisplayRepresentation(name: CharonLocalized.resource("Location"))
+        return TypeDisplayRepresentation(name: RevenantLocalized.resource("Location"))
     }
 
     public var displayRepresentation: DisplayRepresentation {
-        return DisplayRepresentation(title: CharonLocalized.resource(name ?? "Location"))
+        return DisplayRepresentation(title: RevenantLocalized.resource(name ?? "Location"))
     }
 
     public var localizedStringResource: LocalizedStringResource {
-        return CharonLocalized.resource(name ?? "Location")
+        return RevenantLocalized.resource(name ?? "Location")
     }
 }
 
-#if CHARON_APPINTENTS_ATTRIBUTED_STRING
+#if REVENANT_APPINTENTS_ATTRIBUTED_STRING
 extension AttributedString: _IntentValue {
     public typealias ValueType = AttributedString
     public typealias UnwrappedType = AttributedString
@@ -47,7 +47,7 @@ public struct AttributedStringFromStringResolver: Resolver {
 }
 #endif
 
-#if CHARON_APPINTENTS_MEASUREMENT
+#if REVENANT_APPINTENTS_MEASUREMENT
 extension Measurement: _IntentValue {
     public typealias ValueType = Measurement
     public typealias UnwrappedType = Measurement
@@ -57,7 +57,7 @@ extension Measurement: _IntentValue {
 }
 #endif
 
-#if CHARON_APPINTENTS_RECURRENCE_RULE
+#if REVENANT_APPINTENTS_RECURRENCE_RULE
 extension Calendar.RecurrenceRule: _IntentValue {
     public typealias ValueType = Calendar.RecurrenceRule
     public typealias UnwrappedType = Calendar.RecurrenceRule

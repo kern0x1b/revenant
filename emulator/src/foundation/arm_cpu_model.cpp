@@ -10,7 +10,7 @@
 #include <array>
 #include <stdexcept>
 
-namespace shade {
+namespace emulator {
 namespace {
 
     struct TimingRule {

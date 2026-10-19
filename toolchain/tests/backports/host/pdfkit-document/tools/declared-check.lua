@@ -16,7 +16,7 @@ For each row:
   * a property row's name must be declared @property in that class's @interface.
 
 The port's OWN members - the ones it adds, like -[PDFPage initWithCGPDFPage:document:index:] and
--charon_CGPDFDocument - are declared in the PORT's header, not the SDK's, and a row for one of those is
+-revenant_CGPDFDocument - are declared in the PORT's header, not the SDK's, and a row for one of those is
 not a finding.  So the port's own header is consulted too, and a row that names a member of the port's
 own making is reported separately rather than mixed in.
 
@@ -27,7 +27,7 @@ local INHERITED = { dealloc = true, init = true, ["copyWithZone:"] = true }
 
 local PROBE = "System/Library/Frameworks/PDFKit.framework/Headers/PDFDocument.h"
 local HEADERS_REL = "System/Library/Frameworks/PDFKit.framework/Headers"
-local OWN_REL = "packages/a/apple-backports/PDFKit/CharonPDFKit.h"
+local OWN_REL = "packages/a/apple-backports/PDFKit/RevenantPDFKit.h"
 local REGISTRY_REL = "packages/a/apple-backports/registry/PDFKit"
 
 local function byte_less(a, b)
@@ -367,8 +367,8 @@ local function find_sdk()
     end
     local home = os.getenv("HOME")
     if home and home ~= "" then
-        roots[#roots + 1] = path.join(home, "charon")
-        roots[#roots + 1] = path.join(home, "charon", ".agent-work", "worktrees")
+        roots[#roots + 1] = path.join(home, "revenant")
+        roots[#roots + 1] = path.join(home, "revenant", ".agent-work", "worktrees")
     end
     local candidates = {}
     for _, root in ipairs(roots) do

@@ -1,12 +1,12 @@
-#import "CharonARTracker.h"
+#import "RevenantARTracker.h"
 
 #import <ARKit/ARKit.h>
 #import <AVFoundation/AVFoundation.h>
 #import <objc/message.h>
 
-#if CHARON_TRACKER_OFFLINE
-#define CHARON_NO_MOTION 1
-#define CHARON_NO_CAMERA 1
+#if REVENANT_TRACKER_OFFLINE
+#define REVENANT_NO_MOTION 1
+#define REVENANT_NO_CAMERA 1
 #else
 #import <CoreMotion/CoreMotion.h>
 #endif
@@ -17,17 +17,17 @@
 
 #pragma mark - The error an application is told when the hardware is not there
 
-NSString * const CharonARTrackerErrorDomain = @"com.apple.arkit.execution";
+NSString * const RevenantARTrackerErrorDomain = @"com.apple.arkit.execution";
 
-typedef NS_ENUM(NSInteger, CharonARTrackerError) {
-    CharonARTrackerErrorCameraUnavailable = 1,
-    CharonARTrackerErrorCameraDenied     = 2,
-    CharonARTrackerErrorMotionUnavailable = 3,
+typedef NS_ENUM(NSInteger, RevenantARTrackerError) {
+    RevenantARTrackerErrorCameraUnavailable = 1,
+    RevenantARTrackerErrorCameraDenied     = 2,
+    RevenantARTrackerErrorMotionUnavailable = 3,
 };
 
-static NSError *CharonTrackerError(CharonARTrackerError code, NSString *reason)
+static NSError *RevenantTrackerError(RevenantARTrackerError code, NSString *reason)
 {
-    return [NSError errorWithDomain:CharonARTrackerErrorDomain
+    return [NSError errorWithDomain:RevenantARTrackerErrorDomain
                                code:code
                            userInfo:@{NSLocalizedDescriptionKey: reason}];
 }
@@ -36,11 +36,11 @@ typedef struct {
     simd_float3 deltaVelocity;
     simd_float3 deltaPosition;
     float       duration;
-} CharonPreintegration;
+} RevenantPreintegration;
 
-static CharonPreintegration CharonPreintegrateInterval(simd_float3 specificForceWorld, float dt)
+static RevenantPreintegration RevenantPreintegrateInterval(simd_float3 specificForceWorld, float dt)
 {
-    CharonPreintegration out;
+    RevenantPreintegration out;
     out.deltaVelocity = simd_make_float3(specificForceWorld.x * dt, specificForceWorld.y * dt,
                                         specificForceWorld.z * dt);
     out.deltaPosition = simd_make_float3(0.5f * specificForceWorld.x * dt * dt,
@@ -54,15 +54,15 @@ typedef struct {
     simd_float3 bias;
     float       covariance[3][3];
     float       uncertainty;
-} CharonAccelerationBias;
+} RevenantAccelerationBias;
 
 typedef struct {
     float skew[3][3];
     float bracket[3][3];
     float duration;
-} CharonBiasTerms;
+} RevenantBiasTerms;
 
-static void CharonUpdateAccelerationBias(CharonAccelerationBias *state, const CharonBiasTerms *terms,
+static void RevenantUpdateAccelerationBias(RevenantAccelerationBias *state, const RevenantBiasTerms *terms,
                                          simd_float3 residual)
 {
     float H[3][3];
@@ -147,18 +147,18 @@ static void CharonUpdateAccelerationBias(CharonAccelerationBias *state, const Ch
 
 #pragma mark - The small linear algebra the tracking needs
 
-static inline simd_float3 CharonAlongRay(simd_float3 origin, simd_float3 direction, float distance)
+static inline simd_float3 RevenantAlongRay(simd_float3 origin, simd_float3 direction, float distance)
 {
     return origin + direction * distance;
 }
 
-static inline simd_float3 CharonNormalized(simd_float3 v)
+static inline simd_float3 RevenantNormalized(simd_float3 v)
 {
     float length = simd_length(v);
     return length > 1e-8f ? v / length : (simd_float3){0, 0, 0};
 }
 
-static simd_float4 CharonQuaternionProduct(simd_float4 lhs, simd_float4 rhs)
+static simd_float4 RevenantQuaternionProduct(simd_float4 lhs, simd_float4 rhs)
 {
     float x1 = lhs.x, y1 = lhs.y, z1 = lhs.z, w1 = lhs.w;
     float x2 = rhs.x, y2 = rhs.y, z2 = rhs.z, w2 = rhs.w;
@@ -170,16 +170,16 @@ static simd_float4 CharonQuaternionProduct(simd_float4 lhs, simd_float4 rhs)
     };
 }
 
-static const simd_float3 CharonGravity = { 0, 0, -9.80665f };
+static const simd_float3 RevenantGravity = { 0, 0, -9.80665f };
 
-static simd_quatf CharonRotationBetween(simd_quatf from, simd_quatf to)
+static simd_quatf RevenantRotationBetween(simd_quatf from, simd_quatf to)
 {
     simd_quatf inverse = simd_normalize(simd_conjugate(from));
-    simd_float4 product = CharonQuaternionProduct(inverse.vector, to.vector);
+    simd_float4 product = RevenantQuaternionProduct(inverse.vector, to.vector);
     return simd_normalize(simd_quaternion(product.x, product.y, product.z, product.w));
 }
 
-static simd_float4x4 CharonPoseIncrement(simd_float3 w, simd_float3 t)
+static simd_float4x4 RevenantPoseIncrement(simd_float3 w, simd_float3 t)
 {
     float angle = simd_length(w);
     float half = angle / 2.0f;
@@ -189,7 +189,7 @@ static simd_float4x4 CharonPoseIncrement(simd_float3 w, simd_float3 t)
     else
         rotation.vector = simd_make_float4(w.x / angle * sinf(half), w.y / angle * sinf(half),
                                            w.z / angle * sinf(half), cosf(half));
-    simd_float4x4 increment = CharonQuaternionMatrix(rotation);
+    simd_float4x4 increment = RevenantQuaternionMatrix(rotation);
     increment.columns[3] = simd_make_float4(t.x, t.y, t.z, 1);
     return increment;
 }
@@ -209,7 +209,7 @@ static simd_float4x4 simd_matrix_inverse_local(simd_float4x4 m)
             if (fabsf(a[row][column]) > fabsf(a[pivot][column]))
                 pivot = row;
         if (fabsf(a[pivot][column]) < 1e-12f)
-            return CharonARKitIdentityFloat4x4;
+            return RevenantARKitIdentityFloat4x4;
         if (pivot != column)
             for (int k = 0; k < 8; k++) {
                 float swap = a[column][k];
@@ -224,7 +224,7 @@ static simd_float4x4 simd_matrix_inverse_local(simd_float4x4 m)
                 a[row][k] -= factor * a[column][k];
         }
     }
-    simd_float4x4 inverse = CharonARKitIdentityFloat4x4;
+    simd_float4x4 inverse = RevenantARKitIdentityFloat4x4;
     for (int row = 0; row < 4; row++) {
         float scale = 1.0f / a[row][row];
         for (int column = 0; column < 4; column++)
@@ -233,7 +233,7 @@ static simd_float4x4 simd_matrix_inverse_local(simd_float4x4 m)
     return inverse;
 }
 
-static BOOL CharonProject(simd_float4x4 pose, simd_float3x3 intrinsics, simd_float3 world,
+static BOOL RevenantProject(simd_float4x4 pose, simd_float3x3 intrinsics, simd_float3 world,
                           simd_float2 *pixel)
 {
     simd_float4 camera = simd_mul(simd_matrix_inverse_local(pose), simd_make_float4(world.x, world.y, world.z, 1));
@@ -249,7 +249,7 @@ static BOOL CharonProject(simd_float4x4 pose, simd_float3x3 intrinsics, simd_flo
     return YES;
 }
 
-static BOOL CharonSolveSix(float A[6][6], float b[6], float out[6])
+static BOOL RevenantSolveSix(float A[6][6], float b[6], float out[6])
 {
     for (int column = 0; column < 6; column++) {
         int pivot = column;
@@ -291,7 +291,7 @@ static BOOL CharonSolveSix(float A[6][6], float b[6], float out[6])
 
 #pragma mark - The tracker
 
-@implementation CharonARValue
+@implementation RevenantARValue
 {
     NSMutableData *_bytes;
     size_t _size;
@@ -319,53 +319,53 @@ static BOOL CharonSolveSix(float A[6][6], float b[6], float out[6])
 
 @end
 
-static const char CharonWorldStateMagic[8] = "CHWORLD1";
-static const NSUInteger CharonWorldStateHeaderBytes = 8 + 4 + 4;
-static const NSUInteger CharonWorldStatePointBytes = 46;
-static const NSUInteger CharonWorldStatePlaneBytes = 44;
+static const char RevenantWorldStateMagic[8] = "CHWORLD1";
+static const NSUInteger RevenantWorldStateHeaderBytes = 8 + 4 + 4;
+static const NSUInteger RevenantWorldStatePointBytes = 46;
+static const NSUInteger RevenantWorldStatePlaneBytes = 44;
 
-static void CharonAppendUInt32(NSMutableData *out, uint32_t value)
+static void RevenantAppendUInt32(NSMutableData *out, uint32_t value)
 {
     uint8_t bytes[4] = { value & 0xff, (value >> 8) & 0xff, (value >> 16) & 0xff, (value >> 24) & 0xff };
     [out appendBytes:bytes length:4];
 }
 
-static void CharonAppendFloat(NSMutableData *out, float value)
+static void RevenantAppendFloat(NSMutableData *out, float value)
 {
     uint32_t bits;
     memcpy(&bits, &value, sizeof bits);
-    CharonAppendUInt32(out, bits);
+    RevenantAppendUInt32(out, bits);
 }
 
-static void CharonAppendVector3(NSMutableData *out, simd_float3 value)
+static void RevenantAppendVector3(NSMutableData *out, simd_float3 value)
 {
-    CharonAppendFloat(out, value.x);
-    CharonAppendFloat(out, value.y);
-    CharonAppendFloat(out, value.z);
+    RevenantAppendFloat(out, value.x);
+    RevenantAppendFloat(out, value.y);
+    RevenantAppendFloat(out, value.z);
 }
 
-static uint32_t CharonReadUInt32(const uint8_t *p)
+static uint32_t RevenantReadUInt32(const uint8_t *p)
 {
     return (uint32_t)p[0] | ((uint32_t)p[1] << 8) | ((uint32_t)p[2] << 16) | ((uint32_t)p[3] << 24);
 }
 
-static float CharonReadFloat(const uint8_t *p)
+static float RevenantReadFloat(const uint8_t *p)
 {
-    uint32_t bits = CharonReadUInt32(p);
+    uint32_t bits = RevenantReadUInt32(p);
     float value;
     memcpy(&value, &bits, sizeof value);
     return value;
 }
 
-static simd_float3 CharonReadVector3(const uint8_t *p)
+static simd_float3 RevenantReadVector3(const uint8_t *p)
 {
-    return simd_make_float3(CharonReadFloat(p), CharonReadFloat(p + 4), CharonReadFloat(p + 8));
+    return simd_make_float3(RevenantReadFloat(p), RevenantReadFloat(p + 4), RevenantReadFloat(p + 8));
 }
 
-@interface CharonARTracker () <AVCaptureVideoDataOutputSampleBufferDelegate>
+@interface RevenantARTracker () <AVCaptureVideoDataOutputSampleBufferDelegate>
 @end
 
-@implementation CharonARTracker
+@implementation RevenantARTracker
 {
     AVCaptureSession *_capture;
     AVCaptureConnection *_connection;
@@ -373,7 +373,7 @@ static simd_float3 CharonReadVector3(const uint8_t *p)
     AVCaptureVideoDataOutput *_output;
     dispatch_queue_t _frameQueue;
     AVCaptureDeviceInput *_input;
-#if !CHARON_NO_MOTION
+#if !REVENANT_NO_MOTION
     CMMotionManager *_motion;
     NSOperationQueue *_motionQueue;
 #endif
@@ -381,7 +381,7 @@ static simd_float3 CharonReadVector3(const uint8_t *p)
     simd_quatf _lastDeviceRotation;
 
     NSMutableData *_worldPoints;
-    NSMutableArray<CharonARValue *> *_planes;
+    NSMutableArray<RevenantARValue *> *_planes;
     uint32_t _nextIdentifier;
 
     simd_float4x4 _cameraTransform;
@@ -397,14 +397,14 @@ static simd_float3 CharonReadVector3(const uint8_t *p)
     simd_float3 _measuredAcceleration;
     simd_float3 _velocity;
     double _lastCaptureTime;
-    CharonAccelerationBias _bias;
+    RevenantAccelerationBias _bias;
     BOOL _haveTimestamp;
 
-    CharonARPoint *_points;
+    RevenantARPoint *_points;
     NSUInteger _pointCount;
-    CharonARPoint *_candidates;
+    RevenantARPoint *_candidates;
     NSUInteger _candidateCount;
-    CharonARPoint *_previous;
+    RevenantARPoint *_previous;
     NSUInteger _previousCount;
 
     uint8_t *_luma;
@@ -414,23 +414,23 @@ static simd_float3 CharonReadVector3(const uint8_t *p)
 
     @synthesize measuredAcceleration = _measuredAcceleration;
 
-static simd_float3x3 CharonRecordedIntrinsics = { 0 };
+static simd_float3x3 RevenantRecordedIntrinsics = { 0 };
 
 + (void)useCameraIntrinsics:(simd_float3x3)intrinsics
 {
-    CharonRecordedIntrinsics = intrinsics;
+    RevenantRecordedIntrinsics = intrinsics;
 }
 
 + (simd_float3x3)cameraIntrinsicsForResolution:(CGSize)resolution
 {
-#if CHARON_NO_CAMERA
-    return CharonRecordedIntrinsics;
+#if REVENANT_NO_CAMERA
+    return RevenantRecordedIntrinsics;
 #else
     AVCaptureDevice *camera = [self captureDeviceForPosition:AVCaptureDevicePositionBack];
     AVCaptureDeviceFormat *format = camera.activeFormat ?: camera.formats.firstObject;
     CGFloat fieldOfView = format ? format.videoFieldOfView : 0;
     if (resolution.width <= 0 || resolution.height <= 0 || fieldOfView <= 0)
-        return CharonARKitIdentityFloat3x3;
+        return RevenantARKitIdentityFloat3x3;
 
     CGFloat focalLength = (resolution.width / 2) / tanf((float)(fieldOfView * M_PI / 360.0));
     simd_float3x3 intrinsics;
@@ -455,11 +455,11 @@ static simd_float3x3 CharonRecordedIntrinsics = { 0 };
 
 + (BOOL)isSupported
 {
-#if !CHARON_NO_CAMERA
+#if !REVENANT_NO_CAMERA
     if (![AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeVideo])
         return NO;
 #endif
-#if CHARON_NO_MOTION
+#if REVENANT_NO_MOTION
     return YES;
 #else
     return [CMMotionManager new].deviceMotionAvailable;
@@ -468,7 +468,7 @@ static simd_float3x3 CharonRecordedIntrinsics = { 0 };
 
 + (BOOL)hasFrontCamera
 {
-#if CHARON_NO_CAMERA
+#if REVENANT_NO_CAMERA
     return NO;
 #else
     for (AVCaptureDevice *device in [AVCaptureDevice devicesWithMediaType:AVMediaTypeVideo]) {
@@ -481,7 +481,7 @@ static simd_float3x3 CharonRecordedIntrinsics = { 0 };
 
 + (AVCaptureDevice *)captureDeviceForPosition:(AVCaptureDevicePosition)position
 {
-#if CHARON_NO_CAMERA
+#if REVENANT_NO_CAMERA
     return nil;
 #else
     AVCaptureDevice *fallback = nil;
@@ -501,7 +501,7 @@ static simd_float3x3 CharonRecordedIntrinsics = { 0 };
 
 + (NSArray<AVCaptureDeviceFormat *> *)supportedCaptureFormatsForPosition:(AVCaptureDevicePosition)position
 {
-#if CHARON_NO_CAMERA
+#if REVENANT_NO_CAMERA
     return @[];
 #else
     AVCaptureDevice *device = [self captureDeviceForPosition:position];
@@ -518,8 +518,8 @@ static simd_float3x3 CharonRecordedIntrinsics = { 0 };
     _lastDeviceRotation = simd_quaternion(0.0f, 0.0f, 0.0f, 1.0f);
     _planes = [NSMutableArray array];
     _nextIdentifier = 1;
-    _cameraTransform = CharonARKitIdentityFloat4x4;
-    _deviceTransform = CharonARKitIdentityFloat4x4;
+    _cameraTransform = RevenantARKitIdentityFloat4x4;
+    _deviceTransform = RevenantARKitIdentityFloat4x4;
     _lastRotation = simd_quaternion(0.0f, 0.0f, 0.0f, 1.0f);
     _resolution = CGSizeZero;
     _lightEstimate = 1000;
@@ -566,7 +566,7 @@ static simd_float3x3 CharonRecordedIntrinsics = { 0 };
     if (_running)
         return YES;
 
-#if CHARON_NO_MOTION
+#if REVENANT_NO_MOTION
     _running = YES;
     return YES;
 #else
@@ -574,19 +574,19 @@ static simd_float3x3 CharonRecordedIntrinsics = { 0 };
     if (!_motion || !_motion.deviceMotionAvailable) {
         _motion = nil;
         if (error)
-            *error = CharonTrackerError(CharonARTrackerErrorMotionUnavailable,
+            *error = RevenantTrackerError(RevenantARTrackerErrorMotionUnavailable,
                                         @"This device has no gyroscope or accelerometer, so an "
                                         @"augmented-reality session cannot be tracked.");
         return NO;
     }
     if (![AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeVideo]) {
         if (error)
-            *error = CharonTrackerError(CharonARTrackerErrorCameraUnavailable,
+            *error = RevenantTrackerError(RevenantARTrackerErrorCameraUnavailable,
                                         @"This device has no camera.");
         return NO;
     }
 
-#if CHARON_NO_CAMERA
+#if REVENANT_NO_CAMERA
     _running = YES;
     return YES;
 #else
@@ -596,7 +596,7 @@ static simd_float3x3 CharonRecordedIntrinsics = { 0 };
     if (!_input) {
         _input = nil;
         if (error)
-            *error = inputError ?: CharonTrackerError(CharonARTrackerErrorCameraDenied,
+            *error = inputError ?: RevenantTrackerError(RevenantARTrackerErrorCameraDenied,
                                                       @"The camera cannot be opened.");
         return NO;
     }
@@ -606,7 +606,7 @@ static simd_float3x3 CharonRecordedIntrinsics = { 0 };
         _capture = nil;
         _input = nil;
         if (error)
-            *error = CharonTrackerError(CharonARTrackerErrorCameraDenied,
+            *error = RevenantTrackerError(RevenantARTrackerErrorCameraDenied,
                                         @"The camera cannot be added to a capture session.");
         return NO;
     }
@@ -620,7 +620,7 @@ static simd_float3x3 CharonRecordedIntrinsics = { 0 };
     } else {
         _output = nil;
         if (error)
-            *error = CharonTrackerError(CharonARTrackerErrorCameraDenied,
+            *error = RevenantTrackerError(RevenantARTrackerErrorCameraDenied,
                                         @"The camera cannot give frames to track.");
         return NO;
     }
@@ -657,9 +657,9 @@ static simd_float3x3 CharonRecordedIntrinsics = { 0 };
 {
     if (_running)
         return YES;
-#if CHARON_NO_MOTION
+#if REVENANT_NO_MOTION
     if (error)
-        *error = CharonTrackerError(CharonARTrackerErrorMotionUnavailable,
+        *error = RevenantTrackerError(RevenantARTrackerErrorMotionUnavailable,
                                     @"This build has no motion, so orientation cannot be tracked.");
     return NO;
 #else
@@ -667,7 +667,7 @@ static simd_float3x3 CharonRecordedIntrinsics = { 0 };
     if (!_motion || !_motion.deviceMotionAvailable) {
         _motion = nil;
         if (error)
-            *error = CharonTrackerError(CharonARTrackerErrorMotionUnavailable,
+            *error = RevenantTrackerError(RevenantARTrackerErrorMotionUnavailable,
                                         @"This device has no gyroscope, so its orientation cannot be tracked.");
         return NO;
     }
@@ -692,7 +692,7 @@ static simd_float3x3 CharonRecordedIntrinsics = { 0 };
     CMQuaternion q = motion.attitude.quaternion;
     simd_quatf rotation = simd_normalize(simd_quaternion((float)q.x, (float)q.y, (float)q.z, (float)q.w));
     [self setLastDeviceRotation:rotation];
-    simd_float4x4 pose = CharonQuaternionMatrix(rotation);
+    simd_float4x4 pose = RevenantQuaternionMatrix(rotation);
     _cameraTransform = pose;
     _deviceTransform = pose;
     _timestamp = motion.timestamp;
@@ -720,33 +720,33 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
 
 - (NSData *)worldState
 {
-    NSMutableData *out = [NSMutableData dataWithBytes:CharonWorldStateMagic length:sizeof CharonWorldStateMagic];
-    const NSUInteger count = _worldPoints.length / sizeof(CharonARPoint);
-    CharonAppendUInt32(out, (uint32_t)count);
-    CharonAppendUInt32(out, (uint32_t)_planes.count);
-    const CharonARPoint *points = (const CharonARPoint *)_worldPoints.bytes;
+    NSMutableData *out = [NSMutableData dataWithBytes:RevenantWorldStateMagic length:sizeof RevenantWorldStateMagic];
+    const NSUInteger count = _worldPoints.length / sizeof(RevenantARPoint);
+    RevenantAppendUInt32(out, (uint32_t)count);
+    RevenantAppendUInt32(out, (uint32_t)_planes.count);
+    const RevenantARPoint *points = (const RevenantARPoint *)_worldPoints.bytes;
     for (NSUInteger i = 0; i < count; i++) {
-        const CharonARPoint *p = &points[i];
-        CharonAppendFloat(out, p->image.x);
-        CharonAppendFloat(out, p->image.y);
-        CharonAppendVector3(out, p->camera);
-        CharonAppendVector3(out, p->world);
-        CharonAppendFloat(out, p->scale);
-        CharonAppendFloat(out, p->depth);
-        CharonAppendUInt32(out, p->identifier);
+        const RevenantARPoint *p = &points[i];
+        RevenantAppendFloat(out, p->image.x);
+        RevenantAppendFloat(out, p->image.y);
+        RevenantAppendVector3(out, p->camera);
+        RevenantAppendVector3(out, p->world);
+        RevenantAppendFloat(out, p->scale);
+        RevenantAppendFloat(out, p->depth);
+        RevenantAppendUInt32(out, p->identifier);
         uint8_t counts[2] = { p->age, p->hits };
         [out appendBytes:counts length:2];
     }
-    for (CharonARValue *value in _planes) {
-        CharonARPlane plane;
+    for (RevenantARValue *value in _planes) {
+        RevenantARPlane plane;
         memset(&plane, 0, sizeof plane);
         if (![value getValue:&plane])
             continue;
-        CharonAppendVector3(out, plane.center);
-        CharonAppendVector3(out, plane.normal);
-        CharonAppendVector3(out, plane.extent);
-        CharonAppendFloat(out, plane.alignment);
-        CharonAppendUInt32(out, plane.identifier);
+        RevenantAppendVector3(out, plane.center);
+        RevenantAppendVector3(out, plane.normal);
+        RevenantAppendVector3(out, plane.extent);
+        RevenantAppendFloat(out, plane.alignment);
+        RevenantAppendUInt32(out, plane.identifier);
     }
     return out;
 }
@@ -754,45 +754,45 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
 - (BOOL)restoreWorldState:(NSData *)state
 {
     const NSUInteger length = state.length;
-    if (length < CharonWorldStateHeaderBytes)
+    if (length < RevenantWorldStateHeaderBytes)
         return NO;
     const uint8_t *bytes = state.bytes;
-    if (memcmp(bytes, CharonWorldStateMagic, sizeof CharonWorldStateMagic) != 0)
+    if (memcmp(bytes, RevenantWorldStateMagic, sizeof RevenantWorldStateMagic) != 0)
         return NO;
-    const NSUInteger pointCount = CharonReadUInt32(bytes + 8);
-    const NSUInteger planeCount = CharonReadUInt32(bytes + 12);
-    if (length != CharonWorldStateHeaderBytes + pointCount * CharonWorldStatePointBytes + planeCount * CharonWorldStatePlaneBytes)
+    const NSUInteger pointCount = RevenantReadUInt32(bytes + 8);
+    const NSUInteger planeCount = RevenantReadUInt32(bytes + 12);
+    if (length != RevenantWorldStateHeaderBytes + pointCount * RevenantWorldStatePointBytes + planeCount * RevenantWorldStatePlaneBytes)
         return NO;
 
-    NSMutableData *points = [NSMutableData dataWithLength:pointCount * sizeof(CharonARPoint)];
-    CharonARPoint *decoded = points.mutableBytes;
-    const uint8_t *cursor = bytes + CharonWorldStateHeaderBytes;
+    NSMutableData *points = [NSMutableData dataWithLength:pointCount * sizeof(RevenantARPoint)];
+    RevenantARPoint *decoded = points.mutableBytes;
+    const uint8_t *cursor = bytes + RevenantWorldStateHeaderBytes;
     uint32_t highest = 0;
-    for (NSUInteger i = 0; i < pointCount; i++, cursor += CharonWorldStatePointBytes) {
-        CharonARPoint p;
+    for (NSUInteger i = 0; i < pointCount; i++, cursor += RevenantWorldStatePointBytes) {
+        RevenantARPoint p;
         memset(&p, 0, sizeof p);
-        p.image = simd_make_float2(CharonReadFloat(cursor), CharonReadFloat(cursor + 4));
-        p.camera = CharonReadVector3(cursor + 8);
-        p.world = CharonReadVector3(cursor + 20);
-        p.scale = CharonReadFloat(cursor + 32);
-        p.depth = CharonReadFloat(cursor + 36);
-        p.identifier = CharonReadUInt32(cursor + 40);
+        p.image = simd_make_float2(RevenantReadFloat(cursor), RevenantReadFloat(cursor + 4));
+        p.camera = RevenantReadVector3(cursor + 8);
+        p.world = RevenantReadVector3(cursor + 20);
+        p.scale = RevenantReadFloat(cursor + 32);
+        p.depth = RevenantReadFloat(cursor + 36);
+        p.identifier = RevenantReadUInt32(cursor + 40);
         p.age = cursor[44];
         p.hits = cursor[45];
         decoded[i] = p;
         highest = MAX(highest, p.identifier);
     }
-    NSMutableArray<CharonARValue *> *planes = [NSMutableArray arrayWithCapacity:planeCount];
-    for (NSUInteger i = 0; i < planeCount; i++, cursor += CharonWorldStatePlaneBytes) {
-        CharonARPlane plane;
+    NSMutableArray<RevenantARValue *> *planes = [NSMutableArray arrayWithCapacity:planeCount];
+    for (NSUInteger i = 0; i < planeCount; i++, cursor += RevenantWorldStatePlaneBytes) {
+        RevenantARPlane plane;
         memset(&plane, 0, sizeof plane);
-        plane.center = CharonReadVector3(cursor);
-        plane.normal = CharonReadVector3(cursor + 12);
-        plane.extent = CharonReadVector3(cursor + 24);
-        plane.alignment = CharonReadFloat(cursor + 36);
-        plane.identifier = CharonReadUInt32(cursor + 40);
+        plane.center = RevenantReadVector3(cursor);
+        plane.normal = RevenantReadVector3(cursor + 12);
+        plane.extent = RevenantReadVector3(cursor + 24);
+        plane.alignment = RevenantReadFloat(cursor + 36);
+        plane.identifier = RevenantReadUInt32(cursor + 40);
         highest = MAX(highest, plane.identifier);
-        [planes addObject:[[CharonARValue alloc] initWithBytes:&plane size:sizeof plane]];
+        [planes addObject:[[RevenantARValue alloc] initWithBytes:&plane size:sizeof plane]];
     }
 
     [_worldPoints setData:points];
@@ -807,7 +807,7 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
 
 - (CVPixelBufferRef)copyHighResolutionImageWithError:(NSError **)error
 {
-#if CHARON_NO_CAMERA
+#if REVENANT_NO_CAMERA
     if (error)
         *error = [NSError errorWithDomain:@"space.kern0x1b.arkit" code:1
                                  userInfo:@{ NSLocalizedDescriptionKey: @"no camera on this device" }];
@@ -859,7 +859,7 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
     _capture = nil;
     _output = nil;
     _input = nil;
-#if !CHARON_NO_MOTION
+#if !REVENANT_NO_MOTION
     [_motion stopDeviceMotionUpdates];
     _motion = nil;
     _motionQueue = nil;
@@ -888,13 +888,13 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
 
     if (!_havePose) {
         _lastRotation = deviceRotation;
-        _cameraTransform = CharonARKitIdentityFloat4x4;
+        _cameraTransform = RevenantARKitIdentityFloat4x4;
         _havePose = YES;
     }
     deviceRotation = simd_normalize(deviceRotation);
-    simd_quatf turn = CharonRotationBetween(_lastRotation, deviceRotation);
+    simd_quatf turn = RevenantRotationBetween(_lastRotation, deviceRotation);
 
-    simd_float4x4 worldFromDevice = CharonQuaternionMatrix(turn);
+    simd_float4x4 worldFromDevice = RevenantQuaternionMatrix(turn);
     simd_float3 held = { _cameraTransform.columns[3][0], _cameraTransform.columns[3][1],
                          _cameraTransform.columns[3][2] };
     _cameraTransform = simd_mul(worldFromDevice, _cameraTransform);
@@ -920,15 +920,15 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
                                                inWorld.y - pose.columns[0][1] * _bias.bias.x -
                                                pose.columns[1][1] * _bias.bias.y -
                                                pose.columns[2][1] * _bias.bias.z,
-                                               inWorld.z - CharonGravity.z - pose.columns[0][2] * _bias.bias.x -
+                                               inWorld.z - RevenantGravity.z - pose.columns[0][2] * _bias.bias.x -
                                                pose.columns[1][2] * _bias.bias.y -
                                                pose.columns[2][2] * _bias.bias.z);
-            CharonPreintegration interval = CharonPreintegrateInterval(own, dt);
+            RevenantPreintegration interval = RevenantPreintegrateInterval(own, dt);
 
-            CharonBiasTerms terms;
+            RevenantBiasTerms terms;
             memset(&terms, 0, sizeof terms);
             terms.duration = dt;
-            simd_float3 mean = CharonNormalized(simd_make_float3(own.x, own.y, own.z));
+            simd_float3 mean = RevenantNormalized(simd_make_float3(own.x, own.y, own.z));
             terms.skew[0][1] = -mean.z; terms.skew[0][2] = mean.y;
             terms.skew[1][0] = mean.z;  terms.skew[1][2] = -mean.x;
             terms.skew[2][0] = -mean.y; terms.skew[2][1] = mean.x;
@@ -943,8 +943,8 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
             simd_float3 residual = simd_make_float3(interval.deltaPosition.x - predicted.x,
                                                     interval.deltaPosition.y - predicted.y,
                                                     interval.deltaPosition.z - predicted.z);
-            CharonUpdateAccelerationBias(&_bias, &terms, residual);
-#ifdef CHARON_TRACKER_TRACE
+            RevenantUpdateAccelerationBias(&_bias, &terms, residual);
+#ifdef REVENANT_TRACKER_TRACE
             fprintf(stderr, "bias step: residual %.5f %.5f %.5f -> bias %.4f %.4f %.4f (P00 %.3g)\n",
                     residual.x, residual.y, residual.z, _bias.bias.x, _bias.bias.y, _bias.bias.z,
                     _bias.covariance[0][0]);
@@ -1014,7 +1014,7 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
     CVPixelBufferUnlockBaseAddress(pixelBuffer, 0);
 }
 
-static float CharonCornerScore(const uint8_t *luma, NSUInteger width, NSUInteger height, NSUInteger x, NSUInteger y)
+static float RevenantCornerScore(const uint8_t *luma, NSUInteger width, NSUInteger height, NSUInteger x, NSUInteger y)
 {
     if (x < 1 || y < 1 || x + 1 >= width || y + 1 >= height)
         return 0;
@@ -1042,9 +1042,9 @@ static float CharonCornerScore(const uint8_t *luma, NSUInteger width, NSUInteger
 - (void)findFeatures
 {
     if (!_points) {
-        _points = calloc(4096, sizeof(CharonARPoint));
-        _previous = calloc(4096, sizeof(CharonARPoint));
-        _candidates = calloc(4096, sizeof(CharonARPoint));
+        _points = calloc(4096, sizeof(RevenantARPoint));
+        _previous = calloc(4096, sizeof(RevenantARPoint));
+        _candidates = calloc(4096, sizeof(RevenantARPoint));
         if (!_points || !_previous || !_candidates)
             return;
     }
@@ -1066,7 +1066,7 @@ static float CharonCornerScore(const uint8_t *luma, NSUInteger width, NSUInteger
 
     for (i = step; i + step < _lumaHeight; i += step / 2) {
         for (NSUInteger j = step; j + step < _lumaWidth; j += step / 2) {
-            float score = CharonCornerScore(_luma, _lumaWidth, _lumaHeight, j, i);
+            float score = RevenantCornerScore(_luma, _lumaWidth, _lumaHeight, j, i);
             if (score < 40)
                 continue;
             cell = (i / cellHeight) * cells + (j / cellWidth);
@@ -1085,7 +1085,7 @@ static float CharonCornerScore(const uint8_t *luma, NSUInteger width, NSUInteger
     for (cell = 0; cell < cells * cells && count < wanted; cell++) {
         if (bestX[cell] == NSNotFound)
             continue;
-        CharonARPoint *point = &_candidates[count];
+        RevenantARPoint *point = &_candidates[count];
         memset(point, 0, sizeof(*point));
         point->image = simd_make_float2((float)bestX[cell] / (float)_lumaWidth,
                                         (float)bestY[cell] / (float)_lumaHeight);
@@ -1100,7 +1100,7 @@ static float CharonCornerScore(const uint8_t *luma, NSUInteger width, NSUInteger
 
 #pragma mark - Matching a point into the next frame
 
-static uint32_t CharonPatchCost(const uint8_t *luma, NSUInteger width, NSUInteger height,
+static uint32_t RevenantPatchCost(const uint8_t *luma, NSUInteger width, NSUInteger height,
                                 NSUInteger x, NSUInteger y, NSUInteger otherX, NSUInteger otherY,
                                 NSUInteger radius)
 {
@@ -1137,7 +1137,7 @@ static uint32_t CharonPatchCost(const uint8_t *luma, NSUInteger width, NSUIntege
     NSUInteger matched = 0, i, j;
 
     for (i = 0; i < _previousCount; i++) {
-        CharonARPoint *was = &_previous[i];
+        RevenantARPoint *was = &_previous[i];
         NSUInteger wasX = (NSUInteger)(was->image.x * (float)_lumaWidth);
         NSUInteger wasY = (NSUInteger)(was->image.y * (float)_lumaHeight);
         if (wasX + 32 >= _lumaWidth || wasY + 32 >= _lumaHeight)
@@ -1157,7 +1157,7 @@ static uint32_t CharonPatchCost(const uint8_t *luma, NSUInteger width, NSUIntege
                     cx + (NSInteger)radius * 2 + 2 >= (NSInteger)_lumaWidth ||
                     cy + (NSInteger)radius * 2 + 2 >= (NSInteger)_lumaHeight)
                     continue;
-                uint32_t cost = CharonPatchCost(_luma, _lumaWidth, _lumaHeight,
+                uint32_t cost = RevenantPatchCost(_luma, _lumaWidth, _lumaHeight,
                                                (NSUInteger)cx, (NSUInteger)cy,
                                                wasX, wasY, radius);
                 if (cost < bestCost) {
@@ -1184,7 +1184,7 @@ static uint32_t CharonPatchCost(const uint8_t *luma, NSUInteger width, NSUIntege
         if (taken)
             continue;
 
-        CharonARPoint *now = &_points[matched];
+        RevenantARPoint *now = &_points[matched];
         memcpy(now, was, sizeof(*now));
         now->image = simd_make_float2((float)bestX / (float)_lumaWidth,
                                       (float)bestY / (float)_lumaHeight);
@@ -1195,23 +1195,23 @@ static uint32_t CharonPatchCost(const uint8_t *luma, NSUInteger width, NSUIntege
                                                 was->image.y * (float)_lumaHeight);
         simd_float2 nowPixel = simd_make_float2(now->image.x * (float)_lumaWidth,
                                                 now->image.y * (float)_lumaHeight);
-        simd_float3x3 intrinsics = [CharonARTracker cameraIntrinsicsForResolution:_resolution];
+        simd_float3x3 intrinsics = [RevenantARTracker cameraIntrinsicsForResolution:_resolution];
         simd_float4x4 wasPose = _previousPose;
         if (simd_length(_cameraTransform.columns[3] - wasPose.columns[3]) < 1e-9f)
-            wasPose = simd_mul(CharonQuaternionMatrix(simd_normalize(simd_conjugate(turn))),
+            wasPose = simd_mul(RevenantQuaternionMatrix(simd_normalize(simd_conjugate(turn))),
                                _cameraTransform);
-        now->depth = CharonTriangulatedDepth(intrinsics, wasPixel, nowPixel, wasPose, _cameraTransform);
+        now->depth = RevenantTriangulatedDepth(intrinsics, wasPixel, nowPixel, wasPose, _cameraTransform);
         if (now->hits >= 3)
             [self placePointInWorld:now];
-#ifdef CHARON_TRACKER_TRACE
+#ifdef REVENANT_TRACKER_TRACE
         if (matched == 0) {
-            simd_float3x3 k = [CharonARTracker cameraIntrinsicsForResolution:_resolution];
+            simd_float3x3 k = [RevenantARTracker cameraIntrinsicsForResolution:_resolution];
             fprintf(stderr, "landmark image      %.2f %.2f px of %.0fx%.0f\n",
                     now->image.x * (float)_lumaWidth, now->image.y * (float)_lumaHeight,
                     _lumaWidth, _lumaHeight);
             fprintf(stderr, "landmark world      %.4f %.4f %.4f\n", now->world.x, now->world.y, now->world.z);
             simd_float2 where;
-            BOOL ok = CharonProject(_cameraTransform, k, now->world, &where);
+            BOOL ok = RevenantProject(_cameraTransform, k, now->world, &where);
             fprintf(stderr, "landmark projected  %.2f %.2f  (%s)\n", where.x, where.y,
                     ok ? "in front" : "BEHIND");
             fprintf(stderr, "intrinsics          fx %.3f cx %.3f fy %.3f cy %.3f\n",
@@ -1260,12 +1260,12 @@ static uint32_t CharonPatchCost(const uint8_t *luma, NSUInteger width, NSUIntege
 
 #pragma mark - The pose
 
-static simd_float4x4 CharonNudgedPose(simd_float4x4 pose, int parameter, float epsilon)
+static simd_float4x4 RevenantNudgedPose(simd_float4x4 pose, int parameter, float epsilon)
 {
     float translation[3] = { 0, 0, 0 }, rotation[3] = { 0, 0, 0 };
     float *target = parameter < 3 ? &translation[parameter] : &rotation[parameter - 3];
     *target = epsilon;
-    return simd_mul(CharonPoseIncrement(simd_make_float3(rotation[0], rotation[1], rotation[2]),
+    return simd_mul(RevenantPoseIncrement(simd_make_float3(rotation[0], rotation[1], rotation[2]),
                                         simd_make_float3(translation[0], translation[1],
                                                          translation[2])),
                     pose);
@@ -1273,7 +1273,7 @@ static simd_float4x4 CharonNudgedPose(simd_float4x4 pose, int parameter, float e
 
 - (void)refinePose
 {
-    simd_float3x3 intrinsics = [CharonARTracker cameraIntrinsicsForResolution:_resolution];
+    simd_float3x3 intrinsics = [RevenantARTracker cameraIntrinsicsForResolution:_resolution];
     if (_resolution.width <= 0 || _resolution.height <= 0)
         return;
 
@@ -1289,14 +1289,14 @@ static simd_float4x4 CharonNudgedPose(simd_float4x4 pose, int parameter, float e
     float gradient[6] = { 0 };
 
     for (NSUInteger i = 0; i < _pointCount; i++) {
-        CharonARPoint *point = &_points[i];
+        RevenantARPoint *point = &_points[i];
         if (point->hits < 2)
             continue;
 
         simd_float2 observed = { point->image.x * (float)_resolution.width,
                                  point->image.y * (float)_resolution.height };
         simd_float2 predicted;
-        if (!CharonProject(_cameraTransform, intrinsics, point->world, &predicted))
+        if (!RevenantProject(_cameraTransform, intrinsics, point->world, &predicted))
             continue;
         float residual[2] = { predicted.x - observed.x, predicted.y - observed.y };
 
@@ -1304,9 +1304,9 @@ static simd_float4x4 CharonNudgedPose(simd_float4x4 pose, int parameter, float e
         BOOL usableRow = YES;
         for (int parameter = 0; parameter < 6 && usableRow; parameter++) {
             simd_float2 forward, backward;
-            BOOL haveForward = CharonProject(CharonNudgedPose(_cameraTransform, parameter, epsilon),
+            BOOL haveForward = RevenantProject(RevenantNudgedPose(_cameraTransform, parameter, epsilon),
                                              intrinsics, point->world, &forward);
-            BOOL haveBackward = CharonProject(CharonNudgedPose(_cameraTransform, parameter, -epsilon),
+            BOOL haveBackward = RevenantProject(RevenantNudgedPose(_cameraTransform, parameter, -epsilon),
                                               intrinsics, point->world, &backward);
             if (haveForward && haveBackward) {
                 jacobian[0][parameter] = (forward.x - backward.x) / (2 * epsilon);
@@ -1333,7 +1333,7 @@ static simd_float4x4 CharonNudgedPose(simd_float4x4 pose, int parameter, float e
         normal[row][row] += 1e-6f;
 
     float step[6];
-    if (!CharonSolveSix(normal, gradient, step))
+    if (!RevenantSolveSix(normal, gradient, step))
         return;
 
     for (int row = 0; row < 6; row++)
@@ -1341,17 +1341,17 @@ static simd_float4x4 CharonNudgedPose(simd_float4x4 pose, int parameter, float e
 
     simd_float3 rotation = simd_make_float3(step[3], step[4], step[5]);
     simd_float3 translation = simd_make_float3(step[0], step[1], step[2]);
-    _cameraTransform = simd_mul(CharonPoseIncrement(rotation, translation), _cameraTransform);
+    _cameraTransform = simd_mul(RevenantPoseIncrement(rotation, translation), _cameraTransform);
     _havePose = YES;
 }
 
 #pragma mark - The points
 
-static float CharonTriangulatedDepth(simd_float3x3 intrinsics, simd_float2 u0, simd_float2 u1,
+static float RevenantTriangulatedDepth(simd_float3x3 intrinsics, simd_float2 u0, simd_float2 u1,
                                      simd_float4x4 from, simd_float4x4 to)
 {
-    simd_float3 d0 = CharonRayDirection(intrinsics, from, u0);
-    simd_float3 d1 = CharonRayDirection(intrinsics, to, u1);
+    simd_float3 d0 = RevenantRayDirection(intrinsics, from, u0);
+    simd_float3 d1 = RevenantRayDirection(intrinsics, to, u1);
     simd_float3 o0 = { from.columns[3][0], from.columns[3][1], from.columns[3][2] };
     simd_float3 o1 = { to.columns[3][0], to.columns[3][1], to.columns[3][2] };
 
@@ -1369,10 +1369,10 @@ static float CharonTriangulatedDepth(simd_float3x3 intrinsics, simd_float2 u0, s
                  along:(simd_float3)turnAxis
                 focal:(float)focalLength
 {
-    simd_float3 axis = CharonNormalized(turnAxis);
+    simd_float3 axis = RevenantNormalized(turnAxis);
     if (simd_length(axis) < 1e-6f || focalLength <= 0)
         return 0;
-    simd_float3 unit = CharonNormalized(simd_make_float3(driftPixels.x, driftPixels.y, 1));
+    simd_float3 unit = RevenantNormalized(simd_make_float3(driftPixels.x, driftPixels.y, 1));
     float numerator = focalLength * simd_cross(axis, unit).x;
     float denominator = driftPixels.x;
     if (fabsf(denominator) < 1e-6f)
@@ -1381,13 +1381,13 @@ static float CharonTriangulatedDepth(simd_float3x3 intrinsics, simd_float2 u0, s
     return depth > 0 ? depth : 0;
 }
 
-- (void)placePointInWorld:(CharonARPoint *)point
+- (void)placePointInWorld:(RevenantARPoint *)point
 {
     if (_lumaWidth == 0 || point->depth <= 0)
         return;
-    simd_float3 ray = CharonNormalized(simd_make_float3(point->image.x - 0.5f,
+    simd_float3 ray = RevenantNormalized(simd_make_float3(point->image.x - 0.5f,
                                                         point->image.y - 0.5f, 1));
-    point->camera = CharonAlongRay(simd_make_float3(0, 0, 0), ray, point->depth);
+    point->camera = RevenantAlongRay(simd_make_float3(0, 0, 0), ray, point->depth);
     simd_float4 world = simd_mul(_cameraTransform,
                                  simd_make_float4(point->camera.x, point->camera.y,
                                                   point->camera.z, 1));
@@ -1396,12 +1396,12 @@ static float CharonTriangulatedDepth(simd_float3x3 intrinsics, simd_float2 u0, s
 
 - (float)focalLengthInPixels
 {
-    return [CharonARTracker cameraIntrinsicsForResolution:_resolution].columns[0][0];
+    return [RevenantARTracker cameraIntrinsicsForResolution:_resolution].columns[0][0];
 }
 
 - (void)placeUnmatchedPoints
 {
-    CharonARPoint *carried = calloc(4096, sizeof(CharonARPoint));
+    RevenantARPoint *carried = calloc(4096, sizeof(RevenantARPoint));
     if (!carried)
         return;
     NSUInteger matched = _pointCount, count = 0, i;
@@ -1409,8 +1409,8 @@ static float CharonTriangulatedDepth(simd_float3x3 intrinsics, simd_float2 u0, s
         if (_points[i].hits >= 3) {
             carried[count] = _points[i];
             float distance = 0.5f / (_points[i].scale / (float)_lumaWidth);
-            carried[count].camera = CharonAlongRay((simd_float3){0, 0, 0},
-                                                   CharonNormalized((simd_float3){_points[i].image.x - 0.5f,
+            carried[count].camera = RevenantAlongRay((simd_float3){0, 0, 0},
+                                                   RevenantNormalized((simd_float3){_points[i].image.x - 0.5f,
                                                                                   _points[i].image.y - 0.5f,
                                                                                   1}),
                                                    distance);
@@ -1419,7 +1419,7 @@ static float CharonTriangulatedDepth(simd_float3x3 intrinsics, simd_float2 u0, s
         }
     }
     if (count) {
-        [_worldPoints appendBytes:carried length:count * sizeof(CharonARPoint)];
+        [_worldPoints appendBytes:carried length:count * sizeof(RevenantARPoint)];
     }
     NSUInteger total = matched;
     for (i = 0; i < _candidateCount && total < 4096; i++) {
@@ -1433,7 +1433,7 @@ static float CharonTriangulatedDepth(simd_float3x3 intrinsics, simd_float2 u0, s
 {
     if (!_previous)
         return;
-    memcpy(_previous, _points, _pointCount * sizeof(CharonARPoint));
+    memcpy(_previous, _points, _pointCount * sizeof(RevenantARPoint));
     _previousCount = _pointCount;
 }
 
@@ -1441,15 +1441,15 @@ static float CharonTriangulatedDepth(simd_float3x3 intrinsics, simd_float2 u0, s
 
 - (void)detectPlanes
 {
-    const NSUInteger count = _worldPoints.length / sizeof(CharonARPoint);
+    const NSUInteger count = _worldPoints.length / sizeof(RevenantARPoint);
     if (count < 24)
         return;
 
-    const CharonARPoint *points = (const CharonARPoint *)_worldPoints.bytes;
+    const RevenantARPoint *points = (const RevenantARPoint *)_worldPoints.bytes;
     const float cell = 0.25f;
     const float level = 0.90f;
     const float spread = 0.75f;
-    NSMutableArray<CharonARValue *> *found = [NSMutableArray array];
+    NSMutableArray<RevenantARValue *> *found = [NSMutableArray array];
     NSUInteger i, j;
 
     for (i = 0; i < count; i += 3) {
@@ -1480,7 +1480,7 @@ static float CharonTriangulatedDepth(simd_float3x3 intrinsics, simd_float2 u0, s
         }
         if (simd_length(axis1) < 1e-4f)
             continue;
-        axis1 = CharonNormalized(axis1);
+        axis1 = RevenantNormalized(axis1);
         for (j = 0; j < count; j++) {
             simd_float3 d = points[j].world - (anchor + mean);
             if (fabsf(d.x) > spread || fabsf(d.y) > spread || fabsf(d.z) > spread)
@@ -1489,8 +1489,8 @@ static float CharonTriangulatedDepth(simd_float3x3 intrinsics, simd_float2 u0, s
         }
         if (simd_length(axis2) < 1e-4f)
             continue;
-        axis2 = CharonNormalized(axis2);
-        normal = CharonNormalized(simd_cross(axis1, axis2));
+        axis2 = RevenantNormalized(axis2);
+        normal = RevenantNormalized(simd_cross(axis1, axis2));
         if (normal.y < 0)
             normal = -normal;
         if (normal.y < level)
@@ -1507,14 +1507,14 @@ static float CharonTriangulatedDepth(simd_float3x3 intrinsics, simd_float2 u0, s
         if (onPlane < 16)
             continue;
 
-        CharonARPlane plane;
+        RevenantARPlane plane;
         memset(&plane, 0, sizeof(plane));
         plane.center = anchor + mean;
         plane.normal = normal;
         plane.extent = (high - low) * 0.5f;
         plane.alignment = 0.5f;
         plane.identifier = _nextIdentifier++;
-        [found addObject:[[CharonARValue alloc] initWithBytes:&plane size:sizeof plane]];
+        [found addObject:[[RevenantARValue alloc] initWithBytes:&plane size:sizeof plane]];
         if ([found count] >= 16)
             break;
     }
@@ -1528,19 +1528,19 @@ static float CharonTriangulatedDepth(simd_float3x3 intrinsics, simd_float2 u0, s
 
 - (NSData *)pointCloud
 {
-    const NSUInteger count = _worldPoints.length / sizeof(CharonARPoint);
+    const NSUInteger count = _worldPoints.length / sizeof(RevenantARPoint);
     if (count == 0)
         return [NSData data];
-    NSMutableData *out = [NSMutableData dataWithLength:count * sizeof(CharonARCloudPoint)];
-    CharonARCloudPoint *cloud = (CharonARCloudPoint *)out.mutableBytes;
-    const CharonARPoint *points = (const CharonARPoint *)_worldPoints.bytes;
+    NSMutableData *out = [NSMutableData dataWithLength:count * sizeof(RevenantARCloudPoint)];
+    RevenantARCloudPoint *cloud = (RevenantARCloudPoint *)out.mutableBytes;
+    const RevenantARPoint *points = (const RevenantARPoint *)_worldPoints.bytes;
     NSUInteger i;
     for (i = 0; i < count; i++)
         cloud[i].position = points[i].world;
     return out;
 }
 
-- (NSArray<CharonARValue *> *)planes { return [_planes copy]; }
+- (NSArray<RevenantARValue *> *)planes { return [_planes copy]; }
 - (simd_float4x4)cameraTransform { return _cameraTransform; }
 - (simd_float4x4)deviceTransform { return _deviceTransform; }
 - (CGFloat)lightEstimate { return _lightEstimate; }
@@ -1551,7 +1551,7 @@ static float CharonTriangulatedDepth(simd_float3x3 intrinsics, simd_float2 u0, s
 
 #pragma mark - Rays
 
-static BOOL CharonCameraRay(CGSize resolution, CGPoint point, simd_float3 *origin, simd_float3 *direction)
+static BOOL RevenantCameraRay(CGSize resolution, CGPoint point, simd_float3 *origin, simd_float3 *direction)
 {
     if (resolution.width <= 0 || resolution.height <= 0)
         return NO;
@@ -1559,11 +1559,11 @@ static BOOL CharonCameraRay(CGSize resolution, CGPoint point, simd_float3 *origi
     float y = (0.5f - (float)point.y / (float)resolution.height) * 2.0f;
     const float tanHalf = 0.5773502692f;
     *origin = (simd_float3){0, 0, 0};
-    *direction = CharonNormalized((simd_float3){x * tanHalf, y * tanHalf, -1});
+    *direction = RevenantNormalized((simd_float3){x * tanHalf, y * tanHalf, -1});
     return YES;
 }
 
-static BOOL CharonRayPlane(simd_float3 origin, simd_float3 direction, CharonARPlane plane,
+static BOOL RevenantRayPlane(simd_float3 origin, simd_float3 direction, RevenantARPlane plane,
                            simd_float3 *hit)
 {
     float denominator = simd_dot(direction, plane.normal);
@@ -1572,16 +1572,16 @@ static BOOL CharonRayPlane(simd_float3 origin, simd_float3 direction, CharonARPl
     float distance = simd_dot(plane.center - origin, plane.normal) / denominator;
     if (distance <= 0)
         return NO;
-    *hit = CharonAlongRay(origin, direction, distance);
+    *hit = RevenantAlongRay(origin, direction, distance);
     return YES;
 }
 
 - (BOOL)raycastFromPoint:(CGPoint)point
                 allowing:(NSUInteger)targets
-                results:(NSMutableArray<CharonARValue *> *)results
+                results:(NSMutableArray<RevenantARValue *> *)results
 {
     simd_float3 origin, direction;
-    if (!CharonCameraRay(_resolution, point, &origin, &direction))
+    if (!RevenantCameraRay(_resolution, point, &origin, &direction))
         return NO;
     return [self raycastFromOrigin:origin direction:direction allowing:targets results:results];
 }
@@ -1589,11 +1589,11 @@ static BOOL CharonRayPlane(simd_float3 origin, simd_float3 direction, CharonARPl
 - (BOOL)raycastFromOrigin:(simd_float3)origin
                  direction:(simd_float3)direction
                 allowing:(NSUInteger)targets
-                  results:(NSMutableArray<CharonARValue *> *)results
+                  results:(NSMutableArray<RevenantARValue *> *)results
 {
     simd_float3 world = simd_mul(_cameraTransform, (simd_float4){origin.x, origin.y, origin.z, 1}).xyz;
     simd_float3 aim = simd_mul(_cameraTransform, (simd_float4){direction.x, direction.y, direction.z, 0}).xyz;
-    direction = CharonNormalized(aim);
+    direction = RevenantNormalized(aim);
     if (results)
         [results removeAllObjects];
 
@@ -1601,15 +1601,15 @@ static BOOL CharonRayPlane(simd_float3 origin, simd_float3 direction, CharonARPl
     BOOL any = NO;
     NSUInteger i;
     for (i = 0; i < _planes.count; i++) {
-        CharonARPlane plane;
+        RevenantARPlane plane;
         [_planes[i] getValue:&plane];
         simd_float3 hit;
-        if (!CharonRayPlane(world, direction, plane, &hit))
+        if (!RevenantRayPlane(world, direction, plane, &hit))
             continue;
         float distance = simd_length(hit - world);
         if (any && distance >= nearest)
             continue;
-#if CHARON_NO_MOTION
+#if REVENANT_NO_MOTION
         if (targets != 0)
             continue;
 #else
@@ -1617,7 +1617,7 @@ static BOOL CharonRayPlane(simd_float3 origin, simd_float3 direction, CharonARPl
             continue;
         }
 #endif
-        CharonARHit record;
+        RevenantARHit record;
         memset(&record, 0, sizeof(record));
         record.position = hit;
         record.localNormal = plane.normal;
@@ -1625,39 +1625,39 @@ static BOOL CharonRayPlane(simd_float3 origin, simd_float3 direction, CharonARPl
         nearest = distance;
         any = YES;
         if (results)
-            [results addObject:[[CharonARValue alloc] initWithBytes:&record size:sizeof record]];
+            [results addObject:[[RevenantARValue alloc] initWithBytes:&record size:sizeof record]];
     }
     return any;
 }
 
-- (BOOL)hitTestPoint:(CGPoint)point results:(NSMutableArray<CharonARValue *> *)results
+- (BOOL)hitTestPoint:(CGPoint)point results:(NSMutableArray<RevenantARValue *> *)results
 {
     return [self hitTestPoint:point existingPlane:NO results:results];
 }
 
 - (BOOL)hitTestPoint:(CGPoint)point
        existingPlane:(BOOL)existingPlane
-            results:(NSMutableArray<CharonARValue *> *)results
+            results:(NSMutableArray<RevenantARValue *> *)results
 {
     simd_float3 origin, direction;
-    if (!CharonCameraRay(_resolution, point, &origin, &direction))
+    if (!RevenantCameraRay(_resolution, point, &origin, &direction))
         return NO;
     if (results)
         [results removeAllObjects];
 
-    const NSUInteger count = _worldPoints.length / sizeof(CharonARPoint);
-    const CharonARPoint *points = (const CharonARPoint *)_worldPoints.bytes;
+    const NSUInteger count = _worldPoints.length / sizeof(RevenantARPoint);
+    const RevenantARPoint *points = (const RevenantARPoint *)_worldPoints.bytes;
     NSUInteger i;
     float nearest = 0;
     BOOL any = NO;
     for (i = 0; i < count; i++) {
-        simd_float3 delta = points[i].camera - CharonAlongRay(origin, direction, simd_dot(points[i].camera, direction));
+        simd_float3 delta = points[i].camera - RevenantAlongRay(origin, direction, simd_dot(points[i].camera, direction));
         float distance = simd_length(delta);
         if (any && distance >= nearest)
             continue;
         if (distance > 0.05f)
             continue;
-        CharonARHit record;
+        RevenantARHit record;
         memset(&record, 0, sizeof(record));
         record.position = points[i].world;
         record.localNormal = (simd_float3){0, 1, 0};
@@ -1665,7 +1665,7 @@ static BOOL CharonRayPlane(simd_float3 origin, simd_float3 direction, CharonARPl
         nearest = distance;
         any = YES;
         if (results)
-            [results addObject:[[CharonARValue alloc] initWithBytes:&record size:sizeof record]];
+            [results addObject:[[RevenantARValue alloc] initWithBytes:&record size:sizeof record]];
     }
     return any;
 }

@@ -3,11 +3,11 @@
 <plist version="1.0">
 <dict>
     <key>CFBundleExecutable</key>
-    <string>CharonPointerTypes</string>
+    <string>RevenantPointerTypes</string>
     <key>CFBundleIdentifier</key>
-    <string>org.charon.hostpointer-types</string>
+    <string>org.revenant.hostpointer-types</string>
     <key>CFBundleName</key>
-    <string>CharonPointerTypes</string>
+    <string>RevenantPointerTypes</string>
     <key>CFBundlePackageType</key>
     <string>APPL</string>
     <key>CFBundleVersion</key>
@@ -30,7 +30,7 @@
                     <key>UISceneConfigurationName</key>
                     <string>Default</string>
                     <key>UISceneDelegateClassName</key>
-                    <string>CharonSceneDelegate</string>
+                    <string>RevenantSceneDelegate</string>
                 </dict>
             </array>
         </dict>

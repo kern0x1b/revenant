@@ -140,7 +140,7 @@ static NSString *color_at(Screen screen, double fx, double fy)
 {
     [[NSFileManager defaultManager] createDirectoryAtPath:results_folder withIntermediateDirectories:YES attributes:nil error:NULL];
     [[NSFileManager defaultManager] removeItemAtPath:[results_folder stringByAppendingPathComponent:@"interactivepan.done"] error:NULL];
-    charon_log_to([results_folder stringByAppendingPathComponent:@"interactivepan.log"]);
+    revenant_log_to([results_folder stringByAppendingPathComponent:@"interactivepan.log"]);
     self.events = [NSMutableArray array];
     self.panDelegate = [[PanDelegate alloc] init];
     SolidController *base = [[SolidController alloc] init];
@@ -192,8 +192,8 @@ static NSString *color_at(Screen screen, double fx, double fy)
         CHECK(self.navigation.presentedViewController == nil, "let go at 70% the dismissal finishes");
         CHECK_EQUAL(color_at(screen, 0.5, 0.5), @"red", "and the controller below is back");
         CHECK([self.events containsObject:@"interactionEnded cancelled=0"], "the coordinator told the end of the interaction, not cancelled");
-        printf("checks=%d failures=%d\n", charon_checks, charon_failures);
-        NSString *summary = [NSString stringWithFormat:@"%@ checks=%d failures=%d\n", charon_failures ? @"FAIL" : @"ok", charon_checks, charon_failures];
+        printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
+        NSString *summary = [NSString stringWithFormat:@"%@ checks=%d failures=%d\n", revenant_failures ? @"FAIL" : @"ok", revenant_checks, revenant_failures];
         [summary writeToFile:[results_folder stringByAppendingPathComponent:@"interactivepan.done"] atomically:YES encoding:NSUTF8StringEncoding error:NULL];
     });
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.5 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{ gesture_run(^{}); });

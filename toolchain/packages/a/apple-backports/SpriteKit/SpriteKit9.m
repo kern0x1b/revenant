@@ -1,6 +1,6 @@
-#import "CharonSpriteKit.h"
+#import "RevenantSpriteKit.h"
 
-@implementation SKNode (CharonSpriteKit9)
+@implementation SKNode (RevenantSpriteKit9)
 
 - (void)moveToParent:(SKNode *)parent
 {

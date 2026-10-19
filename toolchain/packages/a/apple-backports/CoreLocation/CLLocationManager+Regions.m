@@ -3,7 +3,7 @@
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 #pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
 
-@implementation CLLocationManager (CharonRegions)
+@implementation CLLocationManager (RevenantRegions)
 
 + (BOOL)isMonitoringAvailableForClass:(Class)regionClass
 {

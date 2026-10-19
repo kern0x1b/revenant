@@ -125,12 +125,12 @@ int main(int argc, char **argv)
 {
     @autoreleasepool {
         if (argc > 1)
-            charon_log_to(@(argv[1]));
+            revenant_log_to(@(argv[1]));
         proposals();
         items();
         interactions();
         scroll_views();
-        printf("checks=%d failures=%d\n", charon_checks, charon_failures);
+        printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
     }
-    return charon_failures ? 1 : 0;
+    return revenant_failures ? 1 : 0;
 }

@@ -1,18 +1,18 @@
-#import "CharonLists.h"
-#import "CharonSwipeViews.h"
+#import "RevenantLists.h"
+#import "RevenantSwipeViews.h"
 #import <objc/message.h>
 #import <objc/runtime.h>
 
-static const char CharonListSwipeKey;
+static const char RevenantListSwipeKey;
 
-@interface CharonListSwipeController : NSObject <UIGestureRecognizerDelegate>
+@interface RevenantListSwipeController : NSObject <UIGestureRecognizerDelegate>
 @property (nonatomic, weak) UICollectionView *view;
 @property (nonatomic, strong) UIPanGestureRecognizer *pan;
 @property (nonatomic, strong) UITapGestureRecognizer *closeTap;
 @property (nonatomic, strong) NSIndexPath *path;
 @property (nonatomic, weak) UICollectionViewCell *cell;
-@property (nonatomic, strong) NSArray<CharonSwipeItem *> *items;
-@property (nonatomic, strong) CharonSwipeContainer *container;
+@property (nonatomic, strong) NSArray<RevenantSwipeItem *> *items;
+@property (nonatomic, strong) RevenantSwipeContainer *container;
 @property (nonatomic, strong) NSArray<UIView *> *movers;
 @property (nonatomic) NSInteger side;
 @property (nonatomic) CGFloat total;
@@ -21,7 +21,7 @@ static const char CharonListSwipeKey;
 @property (nonatomic) BOOL resting;
 @property (nonatomic) CGFloat cellWidth;
 @property (nonatomic, strong) NSIndexPath *pendingPath;
-@property (nonatomic, strong) NSArray<CharonSwipeItem *> *pendingItems;
+@property (nonatomic, strong) NSArray<RevenantSwipeItem *> *pendingItems;
 @property (nonatomic) NSInteger pendingSide;
 @property (nonatomic) BOOL pendingFullSwipe;
 - (BOOL)isOpen;
@@ -29,7 +29,7 @@ static const char CharonListSwipeKey;
 - (void)validate;
 @end
 
-@implementation CharonListSwipeController
+@implementation RevenantListSwipeController
 @synthesize view = _view;
 @synthesize pan = _pan;
 @synthesize closeTap = _closeTap;
@@ -71,22 +71,22 @@ static const char CharonListSwipeKey;
     return _container != nil;
 }
 
-- (NSArray<CharonSwipeItem *> *)itemsForSide:(NSInteger)side cell:(UICollectionViewCell *)cell path:(NSIndexPath *)path fullSwipe:(BOOL *)fullSwipe
+- (NSArray<RevenantSwipeItem *> *)itemsForSide:(NSInteger)side cell:(UICollectionViewCell *)cell path:(NSIndexPath *)path fullSwipe:(BOOL *)fullSwipe
 {
     *fullSwipe = NO;
-    UICollectionLayoutListConfiguration *configuration = [cell charon_layoutListConfiguration];
+    UICollectionLayoutListConfiguration *configuration = [cell revenant_layoutListConfiguration];
     UICollectionLayoutListSwipeActionsConfigurationProvider provider = side < 0 ? configuration.trailingSwipeActionsConfigurationProvider : configuration.leadingSwipeActionsConfigurationProvider;
     if (!provider)
         return @[];
     UISwipeActionsConfiguration *result = provider(path);
     NSMutableArray *items = [NSMutableArray array];
     for (UIContextualAction *action in result.actions) {
-        CharonSwipeItem *item = [[CharonSwipeItem alloc] init];
+        RevenantSwipeItem *item = [[RevenantSwipeItem alloc] init];
         item.title = action.title;
         item.image = action.image;
         item.color = action.backgroundColor;
         item.action = action;
-        item.width = charon_swipe_width(action.title);
+        item.width = revenant_swipe_width(action.title);
         [items addObject:item];
     }
     *fullSwipe = result.performsFirstActionWithFullSwipe && items.count > 0;
@@ -99,7 +99,7 @@ static const char CharonListSwipeKey;
         return [self isOpen];
     _pendingItems = nil;
     UICollectionView *view = _view;
-    if ([view charon_editing])
+    if ([view revenant_editing])
         return NO;
     CGPoint velocity = [_pan velocityInView:view];
     if (fabs(velocity.x) <= fabs(velocity.y))
@@ -166,7 +166,7 @@ static const char CharonListSwipeKey;
     [_container setOffset:offset inCellWidth:cell.bounds.size.width height:cell.bounds.size.height];
 }
 
-- (void)beginOnPath:(NSIndexPath *)path side:(NSInteger)side items:(NSArray<CharonSwipeItem *> *)items fullSwipe:(BOOL)fullSwipe
+- (void)beginOnPath:(NSIndexPath *)path side:(NSInteger)side items:(NSArray<RevenantSwipeItem *> *)items fullSwipe:(BOOL)fullSwipe
 {
     UICollectionViewCell *cell = [_view cellForItemAtIndexPath:path];
     _path = path;
@@ -177,14 +177,14 @@ static const char CharonListSwipeKey;
     _fullSwipe = fullSwipe;
     CGFloat total = 0;
     NSMutableArray *buttons = [NSMutableArray array];
-    for (CharonSwipeItem *item in items) {
+    for (RevenantSwipeItem *item in items) {
         total += item.width;
-        CharonSwipeButton *button = [[CharonSwipeButton alloc] initWithItem:item];
+        RevenantSwipeButton *button = [[RevenantSwipeButton alloc] initWithItem:item];
         [button addTarget:self action:@selector(buttonTapped:) forControlEvents:UIControlEventTouchUpInside];
         [buttons addObject:button];
     }
     _total = total;
-    _container = [[CharonSwipeContainer alloc] initWithFrame:CGRectZero];
+    _container = [[RevenantSwipeContainer alloc] initWithFrame:CGRectZero];
     _container.side = side;
     _container.totalWidth = total;
     _container.buttons = buttons;
@@ -228,7 +228,7 @@ static const char CharonListSwipeKey;
             completion();
     };
     if (animated)
-        [UIView animateWithDuration:CharonSwipeDuration delay:0 options:UIViewAnimationOptionCurveEaseOut | UIViewAnimationOptionBeginFromCurrentState | UIViewAnimationOptionAllowUserInteraction animations:apply completion:done];
+        [UIView animateWithDuration:RevenantSwipeDuration delay:0 options:UIViewAnimationOptionCurveEaseOut | UIViewAnimationOptionBeginFromCurrentState | UIViewAnimationOptionAllowUserInteraction animations:apply completion:done];
     else {
         apply();
         done(YES);
@@ -252,14 +252,14 @@ static const char CharonListSwipeKey;
     [self settleAt:_side * _total animated:animated completion:nil];
 }
 
-- (void)perform:(CharonSwipeItem *)item
+- (void)perform:(RevenantSwipeItem *)item
 {
     UIContextualAction *contextual = item.action;
     UIView *source = nil;
-    for (CharonSwipeButton *button in _container.buttons)
+    for (RevenantSwipeButton *button in _container.buttons)
         if (button.item == item)
             source = button;
-    __weak CharonListSwipeController *weakSelf = self;
+    __weak RevenantListSwipeController *weakSelf = self;
     if (contextual.handler)
         contextual.handler(contextual, source, ^(BOOL performed) {
             [weakSelf closeAnimated:YES];
@@ -268,7 +268,7 @@ static const char CharonListSwipeKey;
         [self closeAnimated:YES];
 }
 
-- (void)buttonTapped:(CharonSwipeButton *)button
+- (void)buttonTapped:(RevenantSwipeButton *)button
 {
     [self perform:button.item];
 }
@@ -306,9 +306,9 @@ static const char CharonListSwipeKey;
         CGFloat velocity = [recognizer velocityInView:view].x;
         CGFloat shown = fabs(_offset);
         BOOL towardsOpen = velocity * _side > 0;
-        if (_fullSwipe && shown > CharonSwipeFullSwipeFraction * view.bounds.size.width) {
-            CharonSwipeItem *first = _items[0];
-            __weak CharonListSwipeController *weakSelf = self;
+        if (_fullSwipe && shown > RevenantSwipeFullSwipeFraction * view.bounds.size.width) {
+            RevenantSwipeItem *first = _items[0];
+            __weak RevenantListSwipeController *weakSelf = self;
             [self settleAt:_side * view.bounds.size.width animated:YES completion:^{
                 [weakSelf perform:first];
             }];
@@ -331,27 +331,27 @@ static const char CharonListSwipeKey;
 
 @end
 
-static CharonListSwipeController *charon_list_swipe(UICollectionView *view)
+static RevenantListSwipeController *revenant_list_swipe(UICollectionView *view)
 {
-    return objc_getAssociatedObject(view, &CharonListSwipeKey);
+    return objc_getAssociatedObject(view, &RevenantListSwipeKey);
 }
 
-void charon_install_list_swipe(UICollectionView *view)
+void revenant_install_list_swipe(UICollectionView *view)
 {
-    if (charon_list_swipe(view))
+    if (revenant_list_swipe(view))
         return;
-    objc_setAssociatedObject(view, &CharonListSwipeKey, [[CharonListSwipeController alloc] initWithView:view], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(view, &RevenantListSwipeKey, [[RevenantListSwipeController alloc] initWithView:view], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
-void charon_close_list_swipe(UICollectionView *view, BOOL animated)
+void revenant_close_list_swipe(UICollectionView *view, BOOL animated)
 {
-    [charon_list_swipe(view) closeAnimated:animated];
+    [revenant_list_swipe(view) closeAnimated:animated];
 }
 
-@interface CharonListSwipeHooks : NSObject
+@interface RevenantListSwipeHooks : NSObject
 @end
 
-@implementation CharonListSwipeHooks
+@implementation RevenantListSwipeHooks
 
 + (void)load
 {
@@ -364,7 +364,7 @@ void charon_close_list_swipe(UICollectionView *view, BOOL animated)
             continue;
         IMP original = method_getImplementation(method);
         IMP replacement = imp_implementationWithBlock(^(UICollectionView *view, void *first, void *second) {
-            charon_close_list_swipe(view, NO);
+            revenant_close_list_swipe(view, NO);
             ((void (*)(id, SEL, void *, void *))original)(view, selector, first, second);
         });
         class_replaceMethod(cls, selector, replacement, method_getTypeEncoding(method));
@@ -373,7 +373,7 @@ void charon_close_list_swipe(UICollectionView *view, BOOL animated)
     IMP original = class_getMethodImplementation(cls, layout);
     class_replaceMethod(cls, layout, imp_implementationWithBlock(^(UICollectionView *view) {
         ((void (*)(id, SEL))original)(view, layout);
-        [charon_list_swipe(view) validate];
+        [revenant_list_swipe(view) validate];
     }), method_getTypeEncoding(class_getInstanceMethod(cls, layout)));
 }
 

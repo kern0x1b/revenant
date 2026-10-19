@@ -2,7 +2,7 @@
 
 static NSTimeInterval gLastDuration = 0;
 
-void CharonAnimate(NSTimeInterval duration, void (^animations)(void), void (^completion)(BOOL))
+void RevenantAnimate(NSTimeInterval duration, void (^animations)(void), void (^completion)(BOOL))
 {
     gLastDuration = duration;
     if (animations)
@@ -11,7 +11,7 @@ void CharonAnimate(NSTimeInterval duration, void (^animations)(void), void (^com
         completion(YES);
 }
 
-NSTimeInterval CharonLastAnimationDuration(void)
+NSTimeInterval RevenantLastAnimationDuration(void)
 {
     return gLastDuration;
 }

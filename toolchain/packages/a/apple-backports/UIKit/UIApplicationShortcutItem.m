@@ -143,18 +143,18 @@ NSString *const UIApplicationLaunchOptionsShortcutItemKey = @"UIApplicationLaunc
 
 @end
 
-static const void *CharonShortcutItemsKey = &CharonShortcutItemsKey;
+static const void *RevenantShortcutItemsKey = &RevenantShortcutItemsKey;
 
-@implementation UIApplication (CharonShortcutItems)
+@implementation UIApplication (RevenantShortcutItems)
 
 - (NSArray<UIApplicationShortcutItem *> *)shortcutItems
 {
-    return objc_getAssociatedObject(self, CharonShortcutItemsKey);
+    return objc_getAssociatedObject(self, RevenantShortcutItemsKey);
 }
 
 - (void)setShortcutItems:(NSArray<UIApplicationShortcutItem *> *)items
 {
-    objc_setAssociatedObject(self, CharonShortcutItemsKey, [items copy], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, RevenantShortcutItemsKey, [items copy], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
 @end

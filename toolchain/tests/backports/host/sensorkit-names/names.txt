@@ -14,7 +14,7 @@
 //
 // The eighteen after the thirty-nine are the string constants of 15.0, 15.4, 16.0, 16.4, 17.4, 18.0 and
 // 26.0. They live in the port's seven release objects and their VALUES live in one place -
-// CharonSensorKitNames.h - which the harness's own port-side source imports with all seven guards
+// RevenantSensorKitNames.h - which the harness's own port-side source imports with all seven guards
 // defined, so the eighteen values the comparison walks are the eighteen the objects carry and not a
 // second copy of them.
 static const char *const CHaronNames[] = {

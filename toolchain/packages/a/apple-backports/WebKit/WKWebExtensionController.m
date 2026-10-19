@@ -1,5 +1,5 @@
 #pragma clang diagnostic ignored "-Wnullability-completeness"
-#import "CharonWebExtensionController.h"
+#import "RevenantWebExtensionController.h"
 
 NSString *const WKWebExtensionDataRecordErrorDomain = @"WKWebExtensionDataRecordErrorDomain";
 NSString *const WKWebExtensionDataTypeLocal = @"local";
@@ -15,22 +15,22 @@ NSString *const WKWebExtensionDataTypeSynchronized = @"synchronized";
 
 + (instancetype)nonPersistentConfiguration
 {
-    return [[self alloc] charon_initWithIdentifier:nil persistent:NO webViewConfiguration:nil store:nil];
+    return [[self alloc] revenant_initWithIdentifier:nil persistent:NO webViewConfiguration:nil store:nil];
 }
 
 + (instancetype)defaultConfiguration
 {
-    return [[self alloc] charon_initWithIdentifier:nil persistent:YES webViewConfiguration:nil store:nil];
+    return [[self alloc] revenant_initWithIdentifier:nil persistent:YES webViewConfiguration:nil store:nil];
 }
 
 + (instancetype)configurationWithIdentifier:(NSUUID *)identifier
 {
     if (identifier != nil && ![identifier isKindOfClass:[NSUUID class]])
         return nil;
-    return [[self alloc] charon_initWithIdentifier:identifier persistent:YES webViewConfiguration:nil store:nil];
+    return [[self alloc] revenant_initWithIdentifier:identifier persistent:YES webViewConfiguration:nil store:nil];
 }
 
-- (instancetype)charon_initWithIdentifier:(NSUUID *)identifier
+- (instancetype)revenant_initWithIdentifier:(NSUUID *)identifier
                                 persistent:(BOOL)persistent
                      webViewConfiguration:(WKWebViewConfiguration *)webViewConfiguration
                                    store:(WKWebsiteDataStore *)store
@@ -46,7 +46,7 @@ NSString *const WKWebExtensionDataTypeSynchronized = @"synchronized";
 
 - (id)copyWithZone:(NSZone *)zone
 {
-    return [[WKWebExtensionControllerConfiguration alloc] charon_initWithIdentifier:_identifier
+    return [[WKWebExtensionControllerConfiguration alloc] revenant_initWithIdentifier:_identifier
                                                                        persistent:_persistent
                                                             webViewConfiguration:_webViewConfiguration
                                                                           store:_websiteDataStore];
@@ -198,7 +198,7 @@ NSString *const WKWebExtensionDataTypeSynchronized = @"synchronized";
     NSUInteger _totalSizeInBytes;
 }
 
-- (instancetype)charon_initWithIdentifier:(NSString *)identifier
+- (instancetype)revenant_initWithIdentifier:(NSString *)identifier
                               displayName:(NSString *)displayName
                        containedDataTypes:(NSSet<WKWebExtensionDataType> *)containedDataTypes
                                     errors:(NSArray<NSError *> *)errors

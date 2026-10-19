@@ -1,6 +1,6 @@
-#import "CharonCloudKit.h"
-#import "CharonCKConstants.h"
-#import "CharonCKSubscription.h"
+#import "RevenantCloudKit.h"
+#import "RevenantCKConstants.h"
+#import "RevenantCKSubscription.h"
 
 #pragma mark - CKDiscoverUserIdentitiesOperation
 
@@ -10,7 +10,7 @@
 {
     self = [super init];
     if (self) {
-        [self charon_setUp];
+        [self revenant_setUp];
         _userIdentityLookupInfos = @[];
     }
     return self;
@@ -30,7 +30,7 @@
     return [[self alloc] init];
 }
 
-static NSDictionary *CharonCKLookupDocument(CKUserIdentityLookupInfo *lookupInfo)
+static NSDictionary *RevenantCKLookupDocument(CKUserIdentityLookupInfo *lookupInfo)
 {
     if (lookupInfo.emailAddress) {
         return @{@"email": lookupInfo.emailAddress};
@@ -39,7 +39,7 @@ static NSDictionary *CharonCKLookupDocument(CKUserIdentityLookupInfo *lookupInfo
         return @{@"phoneNumber": lookupInfo.phoneNumber};
     }
     if (lookupInfo.userRecordID) {
-        return @{@"userRecordID": CharonCKRecordIDDocument(lookupInfo.userRecordID)};
+        return @{@"userRecordID": RevenantCKRecordIDDocument(lookupInfo.userRecordID)};
     }
     return nil;
 }
@@ -48,14 +48,14 @@ static NSDictionary *CharonCKLookupDocument(CKUserIdentityLookupInfo *lookupInfo
 {
     if (!self.userIdentityLookupInfos.count) {
         if (self.discoverUserIdentitiesCompletionBlock) {
-            self.discoverUserIdentitiesCompletionBlock(CharonCKError(CKErrorInvalidArguments, @"Nothing to look up", nil));
+            self.discoverUserIdentitiesCompletionBlock(RevenantCKError(CKErrorInvalidArguments, @"Nothing to look up", nil));
         }
-        [self charon_finish];
+        [self revenant_finish];
         return;
     }
     NSMutableArray *lookups = [NSMutableArray array];
     for (CKUserIdentityLookupInfo *lookupInfo in self.userIdentityLookupInfos) {
-        NSDictionary *document = CharonCKLookupDocument(lookupInfo);
+        NSDictionary *document = RevenantCKLookupDocument(lookupInfo);
         if (document) {
             [lookups addObject:document];
         }
@@ -75,14 +75,14 @@ static NSDictionary *CharonCKLookupDocument(CKUserIdentityLookupInfo *lookupInfo
         NSMutableDictionary *failures = [NSMutableDictionary dictionary];
         for (NSDictionary *document in answer[@"users"]) {
             NSError *itemError = [document[@"serverError"] isKindOfClass:[NSDictionary class]]
-                ? CharonCKErrorFromPayload(document[@"serverError"], nil) : nil;
-            CKUserIdentity *identity = CharonCKUserIdentityWithDocument(document);
+                ? RevenantCKErrorFromPayload(document[@"serverError"], nil) : nil;
+            CKUserIdentity *identity = RevenantCKUserIdentityWithDocument(document);
             if (itemError) {
                 failures[document[@"email"] ?: document[@"phoneNumber"] ?: @"?"] = itemError;
                 continue;
             }
             if (identity && strongSelf.userIdentityDiscoveredBlock) {
-                strongSelf.userIdentityDiscoveredBlock(identity, CharonCKLookupInfoWithDocument(document));
+                strongSelf.userIdentityDiscoveredBlock(identity, RevenantCKLookupInfoWithDocument(document));
             }
         }
         NSError *overall = [strongSelf partialFailureWithItems:failures];
@@ -102,7 +102,7 @@ static NSDictionary *CharonCKLookupDocument(CKUserIdentityLookupInfo *lookupInfo
 {
     self = [super init];
     if (self) {
-        [self charon_setUp];
+        [self revenant_setUp];
     }
     return self;
 }
@@ -127,7 +127,7 @@ static NSDictionary *CharonCKLookupDocument(CKUserIdentityLookupInfo *lookupInfo
             return;
         }
         for (NSDictionary *document in answer[@"users"]) {
-            CKUserIdentity *identity = CharonCKUserIdentityWithDocument(document);
+            CKUserIdentity *identity = RevenantCKUserIdentityWithDocument(document);
             if (identity && strongSelf.userIdentityDiscoveredBlock) {
                 strongSelf.userIdentityDiscoveredBlock(identity);
             }
@@ -148,7 +148,7 @@ static NSDictionary *CharonCKLookupDocument(CKUserIdentityLookupInfo *lookupInfo
 {
     self = [super init];
     if (self) {
-        [self charon_setUp];
+        [self revenant_setUp];
         _shareURLs = @[];
     }
     return self;
@@ -172,9 +172,9 @@ static NSDictionary *CharonCKLookupDocument(CKUserIdentityLookupInfo *lookupInfo
 {
     if (!self.shareURLs.count) {
         if (self.fetchShareMetadataCompletionBlock) {
-            self.fetchShareMetadataCompletionBlock(CharonCKError(CKErrorInvalidArguments, @"No share URL", nil));
+            self.fetchShareMetadataCompletionBlock(RevenantCKError(CKErrorInvalidArguments, @"No share URL", nil));
         }
-        [self charon_finish];
+        [self revenant_finish];
         return;
     }
     NSMutableArray *urls = [NSMutableArray array];
@@ -205,8 +205,8 @@ static NSDictionary *CharonCKLookupDocument(CKUserIdentityLookupInfo *lookupInfo
         for (NSDictionary *document in answer[@"shares"]) {
             NSString *url = document[@"shareURL"];
             NSError *itemError = [document[@"serverError"] isKindOfClass:[NSDictionary class]]
-                ? CharonCKErrorFromPayload(document[@"serverError"], nil) : nil;
-            CKShareMetadata *metadata = itemError ? nil : CharonCKShareMetadataWithDocument(document, self.container);
+                ? RevenantCKErrorFromPayload(document[@"serverError"], nil) : nil;
+            CKShareMetadata *metadata = itemError ? nil : RevenantCKShareMetadataWithDocument(document, self.container);
             if (itemError) {
                 failures[url ?: @"?"] = itemError;
                 if (strongSelf.perShareMetadataBlock) {
@@ -235,7 +235,7 @@ static NSDictionary *CharonCKLookupDocument(CKUserIdentityLookupInfo *lookupInfo
 {
     self = [super init];
     if (self) {
-        [self charon_setUp];
+        [self revenant_setUp];
         _userIdentityLookupInfos = @[];
     }
     return self;
@@ -259,14 +259,14 @@ static NSDictionary *CharonCKLookupDocument(CKUserIdentityLookupInfo *lookupInfo
 {
     if (!self.userIdentityLookupInfos.count) {
         if (self.fetchShareParticipantsCompletionBlock) {
-            self.fetchShareParticipantsCompletionBlock(CharonCKError(CKErrorInvalidArguments, @"Nothing to look up", nil));
+            self.fetchShareParticipantsCompletionBlock(RevenantCKError(CKErrorInvalidArguments, @"Nothing to look up", nil));
         }
-        [self charon_finish];
+        [self revenant_finish];
         return;
     }
     NSMutableArray *lookups = [NSMutableArray array];
     for (CKUserIdentityLookupInfo *lookupInfo in self.userIdentityLookupInfos) {
-        NSDictionary *document = CharonCKLookupDocument(lookupInfo);
+        NSDictionary *document = RevenantCKLookupDocument(lookupInfo);
         if (document) {
             [lookups addObject:document];
         }
@@ -286,9 +286,9 @@ static NSDictionary *CharonCKLookupDocument(CKUserIdentityLookupInfo *lookupInfo
         NSMutableDictionary *failures = [NSMutableDictionary dictionary];
         for (NSDictionary *document in answer[@"users"]) {
             NSError *itemError = [document[@"serverError"] isKindOfClass:[NSDictionary class]]
-                ? CharonCKErrorFromPayload(document[@"serverError"], nil) : nil;
-            CKShareParticipant *participant = itemError ? nil : CharonCKShareParticipantWithDocument(document);
-            CKUserIdentityLookupInfo *lookupInfo = CharonCKLookupInfoWithDocument(document);
+                ? RevenantCKErrorFromPayload(document[@"serverError"], nil) : nil;
+            CKShareParticipant *participant = itemError ? nil : RevenantCKShareParticipantWithDocument(document);
+            CKUserIdentityLookupInfo *lookupInfo = RevenantCKLookupInfoWithDocument(document);
             if (itemError) {
                 failures[document[@"email"] ?: document[@"phoneNumber"] ?: @"?"] = itemError;
             }

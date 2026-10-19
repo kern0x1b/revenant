@@ -1,4 +1,4 @@
-#import "CharonPhotos.h"
+#import "RevenantPhotos.h"
 
 #pragma clang diagnostic ignored "-Wobjc-missing-property-synthesis"
 
@@ -27,7 +27,7 @@
     return copy;
 }
 
-- (NSArray *)charon_apply:(NSArray *)objects
+- (NSArray *)revenant_apply:(NSArray *)objects
 {
     NSArray *chosen = self.predicate ? [objects filteredArrayUsingPredicate:self.predicate] : objects;
     if (self.sortDescriptors.count)

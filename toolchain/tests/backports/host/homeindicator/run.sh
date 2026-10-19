@@ -7,7 +7,7 @@ here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 device=${DEVICE:-$here/../../device}
 uikit=${UIKIT:-$here/../../../../packages/a/apple-backports/UIKit}
-build=${BUILD:-$(runs_fresh charon-homeindicator)}
+build=${BUILD:-$(runs_fresh revenant-homeindicator)}
 sdk=$(xcrun --show-sdk-path)
 compile() {
     output=$1; shift
@@ -58,8 +58,8 @@ mutant UIViewController+HomeIndicator.m "childViewControllerForHomeIndicatorAuto
 {
     return self.viewControllers.firstObject;"
 mutant UINavigationBar+LargeTitles.m "[attributes copy]" "attributes"
-mutant UINavigationBar+LargeTitles.m "return [objc_getAssociatedObject(self, CharonPrefersLargeTitlesKey) boolValue];" "return YES;"
-mutant UINavigationBar+LargeTitles.m "static const void *CharonLargeTitleAttributesKey = &CharonLargeTitleAttributesKey;" "static const void *CharonLargeTitleAttributesKey = &CharonPrefersLargeTitlesKey;"
-mutant UINavigationBar+LargeTitles.m "return (UINavigationItemLargeTitleDisplayMode)[objc_getAssociatedObject(self, CharonLargeTitleModeKey) integerValue];" "return UINavigationItemLargeTitleDisplayModeAutomatic;"
+mutant UINavigationBar+LargeTitles.m "return [objc_getAssociatedObject(self, RevenantPrefersLargeTitlesKey) boolValue];" "return YES;"
+mutant UINavigationBar+LargeTitles.m "static const void *RevenantLargeTitleAttributesKey = &RevenantLargeTitleAttributesKey;" "static const void *RevenantLargeTitleAttributesKey = &RevenantPrefersLargeTitlesKey;"
+mutant UINavigationBar+LargeTitles.m "return (UINavigationItemLargeTitleDisplayMode)[objc_getAssociatedObject(self, RevenantLargeTitleModeKey) integerValue];" "return UINavigationItemLargeTitleDisplayModeAutomatic;"
 echo "mutants surviving: $survived"
 [ "$survived" -eq 0 ]

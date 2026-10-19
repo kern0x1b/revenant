@@ -45,7 +45,7 @@
 
 #include "support.hpp"
 
-namespace shade {
+namespace emulator {
 namespace {
 
     constexpr std::uint32_t maximum_baseband_io_traces = 64;

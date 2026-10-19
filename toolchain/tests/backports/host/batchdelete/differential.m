@@ -16,8 +16,8 @@ static const char *label(NSString *format, ...)
     return string.UTF8String;
 }
 
-@interface NSManagedObjectContext (CharonHost)
-- (id)charonHostexecuteRequest:(NSPersistentStoreRequest *)request error:(NSError **)error;
+@interface NSManagedObjectContext (RevenantHost)
+- (id)revenantHostexecuteRequest:(NSPersistentStoreRequest *)request error:(NSError **)error;
 @end
 
 static NSManagedObjectModel *model(void)
@@ -106,7 +106,7 @@ static NSFetchRequest *fetch(NSString *entity, NSString *predicate, NSUInteger l
 
 static id make_request(Stack *stack, NSFetchRequest *fetchRequest, NSUInteger resultType)
 {
-    Class cls = NSClassFromString(stack.ours ? @"CharonHostNSBatchDeleteRequest" : @"NSBatchDeleteRequest");
+    Class cls = NSClassFromString(stack.ours ? @"RevenantHostNSBatchDeleteRequest" : @"NSBatchDeleteRequest");
     id request = ((id (*)(id, SEL, id))objc_msgSend)([cls alloc], @selector(initWithFetchRequest:), fetchRequest);
     ((void (*)(id, SEL, NSUInteger))objc_msgSend)(request, @selector(setResultType:), resultType);
     return request;
@@ -114,7 +114,7 @@ static id make_request(Stack *stack, NSFetchRequest *fetchRequest, NSUInteger re
 
 static id execute(Stack *stack, id request, NSError **error)
 {
-    return stack.ours ? [stack.context charonHostexecuteRequest:request error:error] : [stack.context executeRequest:request error:error];
+    return stack.ours ? [stack.context revenantHostexecuteRequest:request error:error] : [stack.context executeRequest:request error:error];
 }
 
 static NSMutableDictionary *id_names(Stack *stack)
@@ -132,7 +132,7 @@ static NSString *describe_result(id result, NSError *error, NSDictionary *idName
 {
     if (!result)
         return [NSString stringWithFormat:@"nil %@", error ? @(error.code).description : @"noerror"];
-    NSString *cls = [NSStringFromClass([result class]) stringByReplacingOccurrencesOfString:@"CharonHost" withString:@""];
+    NSString *cls = [NSStringFromClass([result class]) stringByReplacingOccurrencesOfString:@"RevenantHost" withString:@""];
     id value = [result result];
     NSString *text;
     if ([value isKindOfClass:[NSArray class]]) {
@@ -184,14 +184,14 @@ static void object_ids(void)
     NSDictionary *systemNames = id_names(system), *ourNames = id_names(ours);
     NSArray *systemPick = @[systemIDs[1], systemIDs[4]], *ourPick = @[ourIDs[1], ourIDs[4]];
     id systemRequest = ((id (*)(id, SEL, id))objc_msgSend)([NSBatchDeleteRequest alloc], @selector(initWithObjectIDs:), systemPick);
-    id ourRequest = ((id (*)(id, SEL, id))objc_msgSend)([NSClassFromString(@"CharonHostNSBatchDeleteRequest") alloc], @selector(charonHostinitWithObjectIDs:), ourPick);
+    id ourRequest = ((id (*)(id, SEL, id))objc_msgSend)([NSClassFromString(@"RevenantHostNSBatchDeleteRequest") alloc], @selector(revenantHostinitWithObjectIDs:), ourPick);
     CHECK_EQUAL([[[ourRequest fetchRequest] entityName] description], [[[systemRequest fetchRequest] entityName] description], "object IDs request entity");
-    CHECK_EQUAL([[[ourRequest fetchRequest] predicate].predicateFormat stringByReplacingOccurrencesOfString:@"CharonHost" withString:@""].length > 0 ? @"predicate" : @"none", @"predicate", "object IDs request predicate");
+    CHECK_EQUAL([[[ourRequest fetchRequest] predicate].predicateFormat stringByReplacingOccurrencesOfString:@"RevenantHost" withString:@""].length > 0 ? @"predicate" : @"none", @"predicate", "object IDs request predicate");
     [systemRequest setResultType:NSBatchDeleteResultTypeObjectIDs];
     [ourRequest setResultType:NSBatchDeleteResultTypeObjectIDs];
     NSError *systemError = nil, *ourError = nil;
     id systemResult = [system.context executeRequest:systemRequest error:&systemError];
-    id ourResult = [ours.context charonHostexecuteRequest:ourRequest error:&ourError];
+    id ourResult = [ours.context revenantHostexecuteRequest:ourRequest error:&ourError];
     CHECK_EQUAL(describe_result(ourResult, ourError, ourNames), describe_result(systemResult, systemError, systemNames), "object IDs result");
     CHECK_EQUAL(names(ours, @"Item"), names(system, @"Item"), "object IDs items left");
     CHECK_EQUAL(names(ours, @"Item"), (@[@"a0", @"a2", @"b3", @"b5"]), "the right two were removed");
@@ -209,21 +209,21 @@ static NSString *exception_text(void (^block)(void))
 
 static void errors(void)
 {
-    Class ours = NSClassFromString(@"CharonHostNSBatchDeleteRequest");
+    Class ours = NSClassFromString(@"RevenantHostNSBatchDeleteRequest");
     CHECK_EQUAL(exception_text(^{ ((id (*)(id, SEL, id))objc_msgSend)([ours alloc], @selector(initWithFetchRequest:), nil); }),
                 exception_text(^{ ((id (*)(id, SEL, id))objc_msgSend)([NSBatchDeleteRequest alloc], @selector(initWithFetchRequest:), nil); }), "nil fetch request");
     CHECK_EQUAL(exception_text(^{ ((id (*)(id, SEL, id))objc_msgSend)([ours alloc], @selector(initWithFetchRequest:), [[NSFetchRequest alloc] init]); }),
                 exception_text(^{ ((id (*)(id, SEL, id))objc_msgSend)([NSBatchDeleteRequest alloc], @selector(initWithFetchRequest:), [[NSFetchRequest alloc] init]); }), "a fetch with no entity");
-    CHECK_EQUAL(exception_text(^{ ((id (*)(id, SEL, id))objc_msgSend)([ours alloc], @selector(charonHostinitWithObjectIDs:), @[]); }),
+    CHECK_EQUAL(exception_text(^{ ((id (*)(id, SEL, id))objc_msgSend)([ours alloc], @selector(revenantHostinitWithObjectIDs:), @[]); }),
                 exception_text(^{ ((id (*)(id, SEL, id))objc_msgSend)([NSBatchDeleteRequest alloc], @selector(initWithObjectIDs:), @[]); }), "no object IDs");
-    CHECK_EQUAL(exception_text(^{ ((id (*)(id, SEL, id))objc_msgSend)([ours alloc], @selector(charonHostinitWithObjectIDs:), nil); }),
+    CHECK_EQUAL(exception_text(^{ ((id (*)(id, SEL, id))objc_msgSend)([ours alloc], @selector(revenantHostinitWithObjectIDs:), nil); }),
                 exception_text(^{ ((id (*)(id, SEL, id))objc_msgSend)([NSBatchDeleteRequest alloc], @selector(initWithObjectIDs:), nil); }), "nil object IDs");
     Stack *system = make_stack(NO), *port = make_stack(YES);
     NSManagedObject *item = [NSEntityDescription insertNewObjectForEntityForName:@"Item" inManagedObjectContext:system.context], *other = [NSEntityDescription insertNewObjectForEntityForName:@"Other" inManagedObjectContext:system.context];
     [system.context save:NULL];
     NSManagedObject *portItem = [NSEntityDescription insertNewObjectForEntityForName:@"Item" inManagedObjectContext:port.context], *portOther = [NSEntityDescription insertNewObjectForEntityForName:@"Other" inManagedObjectContext:port.context];
     [port.context save:NULL];
-    CHECK_EQUAL(exception_text(^{ ((id (*)(id, SEL, id))objc_msgSend)([ours alloc], @selector(charonHostinitWithObjectIDs:), @[portItem.objectID, portOther.objectID]); }),
+    CHECK_EQUAL(exception_text(^{ ((id (*)(id, SEL, id))objc_msgSend)([ours alloc], @selector(revenantHostinitWithObjectIDs:), @[portItem.objectID, portOther.objectID]); }),
                 exception_text(^{ ((id (*)(id, SEL, id))objc_msgSend)([NSBatchDeleteRequest alloc], @selector(initWithObjectIDs:), @[item.objectID, other.objectID]); }), "mixed entities");
 }
 
@@ -249,10 +249,10 @@ static void requests_shape(void)
     CHECK([ourText hasPrefix:@"<NSBatchDeleteRequest : resultType : 5, fetch :<NSFetchRequest: "] && [systemText hasPrefix:@"<NSBatchDeleteRequest : resultType : 5, fetch :<NSFetchRequest: "], "description starts alike");
     NSString *ourTail = [ourText substringFromIndex:[ourText rangeOfString:@"(entity:"].location], *systemTail = [systemText substringFromIndex:[systemText rangeOfString:@"(entity:"].location];
     CHECK_EQUAL(ourTail, systemTail, "description tail");
-    id ourResult = [[NSClassFromString(@"CharonHostNSBatchDeleteResult") alloc] init], systemResult = [[NSBatchDeleteResult alloc] init];
+    id ourResult = [[NSClassFromString(@"RevenantHostNSBatchDeleteResult") alloc] init], systemResult = [[NSBatchDeleteResult alloc] init];
     CHECK([ourResult resultType] == [systemResult resultType] && [ourResult result] == [systemResult result], "a result made with init");
-    CHECK([NSClassFromString(@"CharonHostNSBatchDeleteResult") superclass] == NSClassFromString(@"CharonHostNSPersistentStoreResult"), "the result is a persistent store result");
-    CHECK([NSClassFromString(@"CharonHostNSBatchDeleteRequest") superclass] == [NSPersistentStoreRequest class], "the request is a persistent store request");
+    CHECK([NSClassFromString(@"RevenantHostNSBatchDeleteResult") superclass] == NSClassFromString(@"RevenantHostNSPersistentStoreResult"), "the result is a persistent store result");
+    CHECK([NSClassFromString(@"RevenantHostNSBatchDeleteRequest") superclass] == [NSPersistentStoreRequest class], "the request is a persistent store request");
 }
 
 static void caller_context(void)
@@ -283,7 +283,7 @@ int main(void)
         errors();
         requests_shape();
         caller_context();
-        printf("checks=%d failures=%d\n", charon_checks, charon_failures);
+        printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
     }
-    return charon_failures ? 1 : 0;
+    return revenant_failures ? 1 : 0;
 }

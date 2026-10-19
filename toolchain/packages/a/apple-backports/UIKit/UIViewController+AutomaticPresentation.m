@@ -1,46 +1,46 @@
 #import <UIKit/UIKit.h>
 #import <objc/runtime.h>
-#import "../CharonProgramSDK.h"
+#import "../RevenantProgramSDK.h"
 
-@interface UIViewController (CharonAutomaticPresentation)
-- (UIModalPresentationStyle)charon_preferredModalPresentationStyle;
+@interface UIViewController (RevenantAutomaticPresentation)
+- (UIModalPresentationStyle)revenant_preferredModalPresentationStyle;
 @end
 
-@implementation UIViewController (CharonAutomaticPresentation)
-- (UIModalPresentationStyle)charon_preferredModalPresentationStyle
+@implementation UIViewController (RevenantAutomaticPresentation)
+- (UIModalPresentationStyle)revenant_preferredModalPresentationStyle
 {
     return UIModalPresentationAutomatic;
 }
 @end
 
-@implementation UIImagePickerController (CharonAutomaticPresentation)
-- (UIModalPresentationStyle)charon_preferredModalPresentationStyle
+@implementation UIImagePickerController (RevenantAutomaticPresentation)
+- (UIModalPresentationStyle)revenant_preferredModalPresentationStyle
 {
-    return self.sourceType == UIImagePickerControllerSourceTypeCamera ? UIModalPresentationFullScreen : [super charon_preferredModalPresentationStyle];
+    return self.sourceType == UIImagePickerControllerSourceTypeCamera ? UIModalPresentationFullScreen : [super revenant_preferredModalPresentationStyle];
 }
 @end
 
-@implementation UISplitViewController (CharonAutomaticPresentation)
-- (UIModalPresentationStyle)charon_preferredModalPresentationStyle
+@implementation UISplitViewController (RevenantAutomaticPresentation)
+- (UIModalPresentationStyle)revenant_preferredModalPresentationStyle
 {
     return UIModalPresentationCustom;
 }
 @end
 
-static UIModalPresentationStyle charon_automatic_style(UIViewController *controller)
+static UIModalPresentationStyle revenant_automatic_style(UIViewController *controller)
 {
-    UIModalPresentationStyle preferred = [controller charon_preferredModalPresentationStyle];
+    UIModalPresentationStyle preferred = [controller revenant_preferredModalPresentationStyle];
     return preferred == UIModalPresentationAutomatic ? UIModalPresentationPageSheet : preferred;
 }
 
-@interface CharonAutomaticPresentationInstaller : NSObject
+@interface RevenantAutomaticPresentationInstaller : NSObject
 @end
 
-@implementation CharonAutomaticPresentationInstaller
+@implementation RevenantAutomaticPresentationInstaller
 
 + (void)load
 {
-    if ([UIViewController instancesRespondToSelector:@selector(isModalInPresentation)] || charon_program_sdk() < 0x000d0000)
+    if ([UIViewController instancesRespondToSelector:@selector(isModalInPresentation)] || revenant_program_sdk() < 0x000d0000)
         return;
     Class controller = [UIViewController class];
     SEL setter = @selector(setModalPresentationStyle:);
@@ -50,7 +50,7 @@ static UIModalPresentationStyle charon_automatic_style(UIViewController *control
     UIModalPresentationStyle (*stored)(id, SEL) = (UIModalPresentationStyle (*)(id, SEL))class_getMethodImplementation(controller, getter);
     class_replaceMethod(controller, getter, imp_implementationWithBlock(^UIModalPresentationStyle (UIViewController *self_) {
         UIModalPresentationStyle style = stored(self_, getter);
-        return style == UIModalPresentationAutomatic ? charon_automatic_style(self_) : style;
+        return style == UIModalPresentationAutomatic ? revenant_automatic_style(self_) : style;
     }), method_getTypeEncoding(class_getInstanceMethod(controller, getter)));
 
     SEL nib = @selector(initWithNibName:bundle:);

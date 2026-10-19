@@ -1,30 +1,30 @@
-#import "CharonMetal.h"
+#import "RevenantMetal.h"
 
 #pragma clang diagnostic ignored "-Wprotocol"
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
 
 
-@interface MTLVertexAttribute (CharonMetalInternal)
+@interface MTLVertexAttribute (RevenantMetalInternal)
 - (instancetype)initWithNode:(NSDictionary *)node;
 @end
 
-@interface CharonMetalFunction (CharonMetalInternal)
-- (NSDictionary *)charonArgumentNode;
+@interface RevenantMetalFunction (RevenantMetalInternal)
+- (NSDictionary *)revenantArgumentNode;
 @end
 
-static NSArray *CharonAttributesFromFunction(CharonMetalFunction *function)
+static NSArray *RevenantAttributesFromFunction(RevenantMetalFunction *function)
 {
-    NSDictionary *node = [function charonArgumentNode];
+    NSDictionary *node = [function revenantArgumentNode];
     return node ? @[[[MTLVertexAttribute alloc] initWithNode:node]] : @[];
 }
 
-@implementation CharonMetalFunction {
+@implementation RevenantMetalFunction {
     NSString *_name, *_stage, *_source;
     NSDictionary *_reflection;
     MTLFunctionOptions _options;
 }
 
-- (NSDictionary *)charonArgumentNode
+- (NSDictionary *)revenantArgumentNode
 {
     return _reflection;
 }
@@ -72,12 +72,12 @@ static NSString *literal(NSDictionary *entry, NSString *type)
     return [NSString stringWithFormat:@"%d", value.intValue];
 }
 
-- (CharonMetalFunction *)specializedWith:(MTLFunctionConstantValues *)values error:(NSError **)error
+- (RevenantMetalFunction *)specializedWith:(MTLFunctionConstantValues *)values error:(NSError **)error
 {
     return [self specializedWith:values name:_name options:_options error:error];
 }
 
-- (CharonMetalFunction *)specializedWith:(MTLFunctionConstantValues *)values name:(NSString *)name options:(MTLFunctionOptions)options error:(NSError **)error
+- (RevenantMetalFunction *)specializedWith:(MTLFunctionConstantValues *)values name:(NSString *)name options:(MTLFunctionOptions)options error:(NSError **)error
 {
     NSMutableString *defines = [NSMutableString string];
     for (NSDictionary *constant in _reflection[@"constants"]) {
@@ -90,16 +90,16 @@ static NSString *literal(NSDictionary *entry, NSString *type)
             BOOL integer = expected == MTLDataTypeInt && (data == MTLDataTypeInt || data == MTLDataTypeUInt);
             if (data != expected && !integer) {
                 if (error)
-                    *error = CharonMetalError(12, [NSString stringWithFormat:@"the function constant %@ is given a value of another type", constant[@"name"]]);
+                    *error = RevenantMetalError(12, [NSString stringWithFormat:@"the function constant %@ is given a value of another type", constant[@"name"]]);
                 return nil;
             }
         }
         NSString *value = given ? literal(given, type) : ([type isEqualToString:@"float"] ? @"0.0" : @"0");
-        [defines appendFormat:@"#define charon_fc%lu %@\n#define charon_fc%lu_defined %d\n", (unsigned long)index, value, (unsigned long)index, given ? 1 : 0];
+        [defines appendFormat:@"#define revenant_fc%lu %@\n#define revenant_fc%lu_defined %d\n", (unsigned long)index, value, (unsigned long)index, given ? 1 : 0];
     }
     NSRange line = [_source rangeOfString:@"\n"];
     NSString *source = defines.length && line.location != NSNotFound ? [_source stringByReplacingCharactersInRange:NSMakeRange(line.location + 1, 0) withString:defines] : _source;
-    CharonMetalFunction *function = [[CharonMetalFunction alloc] initWithName:name stage:_stage source:source reflection:_reflection];
+    RevenantMetalFunction *function = [[RevenantMetalFunction alloc] initWithName:name stage:_stage source:source reflection:_reflection];
     function->_options = options;
     return function;
 }
@@ -111,7 +111,7 @@ static NSString *literal(NSDictionary *entry, NSString *type)
 
 - (id<MTLDevice>)device
 {
-    return [CharonMetalDevice shared];
+    return [RevenantMetalDevice shared];
 }
 
 
@@ -120,7 +120,7 @@ static NSString *literal(NSDictionary *entry, NSString *type)
     return nil;
 }
 
-- (id)newArgumentEncoderWithBufferIndex:(NSUInteger)index reflection:(CharonMetalFunction *)reflection
+- (id)newArgumentEncoderWithBufferIndex:(NSUInteger)index reflection:(RevenantMetalFunction *)reflection
 {
     return nil;
 }
@@ -147,12 +147,12 @@ static NSString *literal(NSDictionary *entry, NSString *type)
 
 - (NSArray<MTLVertexAttribute *> *)vertexAttributes
 {
-    return CharonAttributesFromFunction(self);
+    return RevenantAttributesFromFunction(self);
 }
 
 - (NSArray<MTLAttribute *> *)stageInputAttributes
 {
-    return CharonAttributesFromFunction(self);
+    return RevenantAttributesFromFunction(self);
 }
 
 
@@ -160,14 +160,14 @@ static NSString *literal(NSDictionary *entry, NSString *type)
 
 
 
-#import "CharonMetal.h"
+#import "RevenantMetal.h"
 
 #pragma clang diagnostic ignored "-Wprotocol"
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
 
 
 
-@implementation CharonMetalLibrary {
+@implementation RevenantMetalLibrary {
     NSMutableDictionary *_functions;
     NSString *_installName;
 }
@@ -180,7 +180,7 @@ static NSString *literal(NSDictionary *entry, NSString *type)
     NSDictionary *root = manifest ? [NSJSONSerialization JSONObjectWithData:manifest options:0 error:NULL] : nil;
     if (![root isKindOfClass:[NSDictionary class]]) {
         if (error)
-            *error = CharonMetalError(4, [NSString stringWithFormat:@"%@ holds no translated library", folder]);
+            *error = RevenantMetalError(4, [NSString stringWithFormat:@"%@ holds no translated library", folder]);
         return nil;
     }
     if ((self = [super init])) {
@@ -193,20 +193,20 @@ static NSString *literal(NSDictionary *entry, NSString *type)
             NSDictionary *reflection = reflectionData ? [NSJSONSerialization JSONObjectWithData:reflectionData options:0 error:NULL] : nil;
             if (!source || !reflection)
                 continue;
-            _functions[entry[@"name"]] = [[CharonMetalFunction alloc] initWithName:entry[@"name"] stage:entry[@"stage"] source:source reflection:reflection];
+            _functions[entry[@"name"]] = [[RevenantMetalFunction alloc] initWithName:entry[@"name"] stage:entry[@"stage"] source:source reflection:reflection];
         }
     }
     return self;
 }
 
-- (NSString *)charonInstallName
+- (NSString *)revenantInstallName
 {
     return _installName;
 }
 
 - (id<MTLDevice>)device
 {
-    return [CharonMetalDevice shared];
+    return [RevenantMetalDevice shared];
 }
 
 - (NSArray *)functionNames
@@ -216,27 +216,27 @@ static NSString *literal(NSDictionary *entry, NSString *type)
 
 - (id<MTLFunction>)newFunctionWithName:(NSString *)functionName
 {
-    CharonMetalFunction *function = _functions[functionName];
+    RevenantMetalFunction *function = _functions[functionName];
     return (id<MTLFunction>)[function specializedWith:nil error:NULL];
 }
 
 - (id<MTLFunction>)newFunctionWithName:(NSString *)name constantValues:(MTLFunctionConstantValues *)constantValues error:(NSError **)error
 {
-    CharonMetalFunction *function = _functions[name];
+    RevenantMetalFunction *function = _functions[name];
     if (!function) {
         if (error)
-            *error = CharonMetalError(13, [NSString stringWithFormat:@"the library holds no function named %@", name]);
+            *error = RevenantMetalError(13, [NSString stringWithFormat:@"the library holds no function named %@", name]);
         return nil;
     }
     return (id<MTLFunction>)[function specializedWith:constantValues error:error];
 }
 
-- (id<MTLFunction>)charonFunctionNamed:(NSString *)name specializedName:(NSString *)specializedName options:(MTLFunctionOptions)options constantValues:(MTLFunctionConstantValues *)constantValues error:(NSError **)error
+- (id<MTLFunction>)revenantFunctionNamed:(NSString *)name specializedName:(NSString *)specializedName options:(MTLFunctionOptions)options constantValues:(MTLFunctionConstantValues *)constantValues error:(NSError **)error
 {
-    CharonMetalFunction *function = name ? _functions[name] : nil;
+    RevenantMetalFunction *function = name ? _functions[name] : nil;
     if (!function) {
         if (error)
-            *error = CharonMetalError(13, [NSString stringWithFormat:@"the library holds no function named %@", name]);
+            *error = RevenantMetalError(13, [NSString stringWithFormat:@"the library holds no function named %@", name]);
         return nil;
     }
     return (id<MTLFunction>)[function specializedWith:constantValues name:specializedName ?: name options:options error:error];

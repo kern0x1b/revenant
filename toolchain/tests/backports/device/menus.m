@@ -218,7 +218,7 @@ int main(void)
                   && ![UIContextMenuConfiguration instancesRespondToSelector:@selector(badgeCount)],
               "and the members of later releases are not");
 
-        printf("%d checks, %d failures\n", charon_checks, charon_failures);
-        return charon_failures;
+        printf("%d checks, %d failures\n", revenant_checks, revenant_failures);
+        return revenant_failures;
     }
 }

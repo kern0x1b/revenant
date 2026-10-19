@@ -22,18 +22,18 @@ static void printClassImages(void)
         Class cls = NSClassFromString(names[i]);
         const char *image = cls ? (class_getImageName(cls) ?: "(none)") : "(absent)";
         printf("image %-38s %s\n", names[i].UTF8String, image);
-        NSString *charon = [@"Charon" stringByAppendingString:names[i]];
-        Class mine = NSClassFromString(charon);
+        NSString *revenant = [@"Revenant" stringByAppendingString:names[i]];
+        Class mine = NSClassFromString(revenant);
         const char *where = mine ? (class_getImageName(mine) ?: "(none)") : "(absent)";
-        printf("image %-38s %s\n", charon.UTF8String, where);
+        printf("image %-38s %s\n", revenant.UTF8String, where);
     }
 }
 
 static BOOL portHas(const char *name)
 {
-#ifdef CHARON_PORT_BUILD
-    NSString *charon = [@"Charon" stringByAppendingString:[NSString stringWithUTF8String:name]];
-    return NSClassFromString(charon) != Nil;
+#ifdef REVENANT_PORT_BUILD
+    NSString *revenant = [@"Revenant" stringByAppendingString:[NSString stringWithUTF8String:name]];
+    return NSClassFromString(revenant) != Nil;
 #else
     (void)name;
     return YES;

@@ -18,13 +18,13 @@ static void compare(NSString *name, NSString *system, NSString *ours)
 
 static NSString *ours_name(UIGestureRecognizer *recognizer)
 {
-    NSString *name = ((id (*)(id, SEL))objc_msgSend)(recognizer, NSSelectorFromString(@"charonHost_name"));
+    NSString *name = ((id (*)(id, SEL))objc_msgSend)(recognizer, NSSelectorFromString(@"revenantHost_name"));
     return name ?: @"(nil)";
 }
 
 static void set_ours_name(UIGestureRecognizer *recognizer, NSString *name)
 {
-    ((void (*)(id, SEL, id))objc_msgSend)(recognizer, NSSelectorFromString(@"charonHost_setName:"), name);
+    ((void (*)(id, SEL, id))objc_msgSend)(recognizer, NSSelectorFromString(@"revenantHost_setName:"), name);
 }
 
 int main(void)

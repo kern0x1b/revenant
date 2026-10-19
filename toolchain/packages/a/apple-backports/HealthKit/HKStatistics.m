@@ -1,6 +1,6 @@
 #import <HealthKit/HealthKit.h>
 
-#import "CharonHKStore.h"
+#import "RevenantHKStore.h"
 
 #pragma mark - HKStatistics
 
@@ -17,9 +17,9 @@
     NSDateInterval *_mostRecentInterval;
     NSMutableDictionary<NSString *, NSArray *> *_mostRecentBySource;
 }
-CHARON_HEALTHKIT_UNCREATABLE_INIT
+REVENANT_HEALTHKIT_UNCREATABLE_INIT
 
-- (instancetype)charon_init
+- (instancetype)revenant_init
 {
     return [super init];
 }
@@ -29,9 +29,9 @@ CHARON_HEALTHKIT_UNCREATABLE_INIT
     return YES;
 }
 
-+ (instancetype)charon_statisticsForSamples:(NSArray *)samples options:(HKStatisticsOptions)options
++ (instancetype)revenant_statisticsForSamples:(NSArray *)samples options:(HKStatisticsOptions)options
 {
-    HKStatistics *statistics = [[HKStatistics alloc] charon_init];
+    HKStatistics *statistics = [[HKStatistics alloc] revenant_init];
     statistics->_bySource = [NSMutableDictionary dictionary];
     statistics->_sourcesByIdentifier = [NSMutableDictionary dictionary];
     statistics->_mostRecentBySource = [NSMutableDictionary dictionary];
@@ -42,7 +42,7 @@ CHARON_HEALTHKIT_UNCREATABLE_INIT
         statistics->_dataCount = 0;
         return statistics;
     }
-    HKUnit *unit = [HKUnit charon_canonicalUnitForType:statistics->_quantityType];
+    HKUnit *unit = [HKUnit revenant_canonicalUnitForType:statistics->_quantityType];
     if (!unit)
         return statistics;
 
@@ -77,36 +77,36 @@ CHARON_HEALTHKIT_UNCREATABLE_INIT
     statistics->_dataCount = all.count;
     if (all.count) {
         if (options & HKStatisticsOptionCumulativeSum)
-            statistics->_sumQuantity = [HKStatistics charon_sumOf:all unit:unit];
+            statistics->_sumQuantity = [HKStatistics revenant_sumOf:all unit:unit];
         if (options & HKStatisticsOptionDiscreteMin)
-            statistics->_minimumQuantity = [HKStatistics charon_extremeOf:all unit:unit wantMinimum:YES];
+            statistics->_minimumQuantity = [HKStatistics revenant_extremeOf:all unit:unit wantMinimum:YES];
         if (options & HKStatisticsOptionDiscreteMax)
-            statistics->_maximumQuantity = [HKStatistics charon_extremeOf:all unit:unit wantMinimum:NO];
+            statistics->_maximumQuantity = [HKStatistics revenant_extremeOf:all unit:unit wantMinimum:NO];
         if (options & HKStatisticsOptionDiscreteAverage)
-            statistics->_averageQuantity = [HKStatistics charon_averageOf:all unit:unit];
+            statistics->_averageQuantity = [HKStatistics revenant_averageOf:all unit:unit];
     }
     if (options & HKStatisticsOptionSeparateBySource) {
         for (NSString *key in perSource)
-            statistics->_bySource[key] = [HKStatistics charon_fourOf:perSource[key] unit:unit options:options];
+            statistics->_bySource[key] = [HKStatistics revenant_fourOf:perSource[key] unit:unit options:options];
     }
     return statistics;
 }
 
-+ (NSDictionary *)charon_fourOf:(NSArray<HKQuantity *> *)samples unit:(HKUnit *)unit options:(HKStatisticsOptions)options
++ (NSDictionary *)revenant_fourOf:(NSArray<HKQuantity *> *)samples unit:(HKUnit *)unit options:(HKStatisticsOptions)options
 {
     NSMutableDictionary *four = [NSMutableDictionary dictionary];
     if (options & HKStatisticsOptionCumulativeSum)
-        four[@"sum"] = [HKStatistics charon_sumOf:samples unit:unit];
+        four[@"sum"] = [HKStatistics revenant_sumOf:samples unit:unit];
     if (options & HKStatisticsOptionDiscreteMin)
-        four[@"min"] = [HKStatistics charon_extremeOf:samples unit:unit wantMinimum:YES];
+        four[@"min"] = [HKStatistics revenant_extremeOf:samples unit:unit wantMinimum:YES];
     if (options & HKStatisticsOptionDiscreteMax)
-        four[@"max"] = [HKStatistics charon_extremeOf:samples unit:unit wantMinimum:NO];
+        four[@"max"] = [HKStatistics revenant_extremeOf:samples unit:unit wantMinimum:NO];
     if (options & HKStatisticsOptionDiscreteAverage)
-        four[@"average"] = [HKStatistics charon_averageOf:samples unit:unit];
+        four[@"average"] = [HKStatistics revenant_averageOf:samples unit:unit];
     return four;
 }
 
-+ (HKQuantity *)charon_sumOf:(NSArray<HKQuantity *> *)samples unit:(HKUnit *)unit
++ (HKQuantity *)revenant_sumOf:(NSArray<HKQuantity *> *)samples unit:(HKUnit *)unit
 {
     double total = 0.0;
     for (HKQuantity *quantity in samples)
@@ -114,7 +114,7 @@ CHARON_HEALTHKIT_UNCREATABLE_INIT
     return [HKQuantity quantityWithUnit:unit doubleValue:total];
 }
 
-+ (HKQuantity *)charon_extremeOf:(NSArray<HKQuantity *> *)samples unit:(HKUnit *)unit wantMinimum:(BOOL)minimum
++ (HKQuantity *)revenant_extremeOf:(NSArray<HKQuantity *> *)samples unit:(HKUnit *)unit wantMinimum:(BOOL)minimum
 {
     double best = 0.0;
     BOOL first = YES;
@@ -131,7 +131,7 @@ CHARON_HEALTHKIT_UNCREATABLE_INIT
     return first ? nil : [HKQuantity quantityWithUnit:unit doubleValue:best];
 }
 
-+ (HKQuantity *)charon_averageOf:(NSArray<HKQuantity *> *)samples unit:(HKUnit *)unit
++ (HKQuantity *)revenant_averageOf:(NSArray<HKQuantity *> *)samples unit:(HKUnit *)unit
 {
     if (!samples.count)
         return nil;
@@ -178,7 +178,7 @@ CHARON_HEALTHKIT_UNCREATABLE_INIT
 
 - (id)copyWithZone:(NSZone *)zone
 {
-    HKStatistics *copy = [[HKStatistics alloc] charon_init];
+    HKStatistics *copy = [[HKStatistics alloc] revenant_init];
     copy->_quantityType = [_quantityType copy];
     copy->_dataCount = _dataCount;
     copy->_sumQuantity = [_sumQuantity copy];
@@ -195,7 +195,7 @@ CHARON_HEALTHKIT_UNCREATABLE_INIT
     return _quantityType;
 }
 
-- (NSUInteger)charon_count
+- (NSUInteger)revenant_count
 {
     return _dataCount;
 }
@@ -245,7 +245,7 @@ CHARON_HEALTHKIT_UNCREATABLE_INIT
     return _bySource[source.bundleIdentifier ?: @""][@"average"];
 }
 
-- (nullable NSArray<HKQuantity *> *)charon_valuesForKey:(NSString *)key
+- (nullable NSArray<HKQuantity *> *)revenant_valuesForKey:(NSString *)key
 {
     NSMutableArray *values = [NSMutableArray array];
     for (NSDictionary *four in _bySource.allValues) {
@@ -293,9 +293,9 @@ CHARON_HEALTHKIT_UNCREATABLE_INIT
     NSArray<NSDate *> *_boundaries;
     NSMutableArray<NSMutableArray *> *_groups;
 }
-CHARON_HEALTHKIT_UNCREATABLE_INIT
+REVENANT_HEALTHKIT_UNCREATABLE_INIT
 
-- (instancetype)charon_init
+- (instancetype)revenant_init
 {
     return [super init];
 }
@@ -305,13 +305,13 @@ CHARON_HEALTHKIT_UNCREATABLE_INIT
     return YES;
 }
 
-+ (instancetype)charon_collectionWithAnchorDate:(NSDate *)anchorDate
++ (instancetype)revenant_collectionWithAnchorDate:(NSDate *)anchorDate
                                        options:(HKStatisticsOptions)options
                             intervalComponents:(NSDateComponents *)intervalComponents
                                       samples:(NSArray *)samples
                                       calendar:(NSCalendar *)calendar
 {
-    HKStatisticsCollection *collection = [[HKStatisticsCollection alloc] charon_init];
+    HKStatisticsCollection *collection = [[HKStatisticsCollection alloc] revenant_init];
     collection->_anchorDate = [anchorDate copy];
     collection->_intervalComponents = [intervalComponents copy];
     collection->_options = options;
@@ -334,14 +334,14 @@ CHARON_HEALTHKIT_UNCREATABLE_INIT
     for (NSUInteger index = 0; index + 1 < boundaries.count; index++)
         [collection->_groups addObject:[NSMutableArray array]];
     for (id sample in samples) {
-        NSUInteger index = [collection charon_intervalForDate:[(HKSample *)sample startDate]];
+        NSUInteger index = [collection revenant_intervalForDate:[(HKSample *)sample startDate]];
         if (index < collection->_groups.count)
             [collection->_groups[index] addObject:sample];
     }
     return collection;
 }
 
-- (NSUInteger)charon_intervalForDate:(NSDate *)date
+- (NSUInteger)revenant_intervalForDate:(NSDate *)date
 {
     for (NSUInteger index = 0; index + 1 < _boundaries.count; index++) {
         if ([date compare:_boundaries[index + 1]] == NSOrderedAscending)
@@ -380,7 +380,7 @@ CHARON_HEALTHKIT_UNCREATABLE_INIT
 
 - (id)copyWithZone:(NSZone *)zone
 {
-    HKStatisticsCollection *copy = [[HKStatisticsCollection alloc] charon_init];
+    HKStatisticsCollection *copy = [[HKStatisticsCollection alloc] revenant_init];
     copy->_anchorDate = [_anchorDate copy];
     copy->_intervalComponents = [_intervalComponents copy];
     copy->_options = _options;
@@ -402,17 +402,17 @@ CHARON_HEALTHKIT_UNCREATABLE_INIT
 
 - (nullable HKStatistics *)statisticsForDate:(NSDate *)date
 {
-    NSUInteger index = [self charon_intervalForDate:date];
+    NSUInteger index = [self revenant_intervalForDate:date];
     if (index >= _groups.count)
         return nil;
-    return [HKStatistics charon_statisticsForSamples:_groups[index] options:_options];
+    return [HKStatistics revenant_statisticsForSamples:_groups[index] options:_options];
 }
 
 - (NSArray<HKStatistics *> *)statistics
 {
     NSMutableArray *all = [NSMutableArray arrayWithCapacity:_groups.count];
     for (NSArray *group in _groups)
-        [all addObject:[HKStatistics charon_statisticsForSamples:group options:_options]];
+        [all addObject:[HKStatistics revenant_statisticsForSamples:group options:_options]];
     return all;
 }
 
@@ -425,7 +425,7 @@ CHARON_HEALTHKIT_UNCREATABLE_INIT
     return found;
 }
 
-+ (NSDateComponents *)charon_normalizedIntervalComponents:(nullable NSDateComponents *)components
++ (NSDateComponents *)revenant_normalizedIntervalComponents:(nullable NSDateComponents *)components
 {
     if (!components)
         return nil;
@@ -470,7 +470,7 @@ CHARON_HEALTHKIT_UNCREATABLE_INIT
         if (endDate && [from compare:endDate] == NSOrderedDescending)
             break;
         BOOL stop = NO;
-        block([HKStatistics charon_statisticsForSamples:_groups[index] options:_options], &stop);
+        block([HKStatistics revenant_statisticsForSamples:_groups[index] options:_options], &stop);
         if (stop)
             return;
     }

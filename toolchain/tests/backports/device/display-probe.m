@@ -101,7 +101,7 @@ int main(int argc, char **argv)
         g_screen = argc > 1 && strcmp(argv[1], "screen") == 0;
         const char *prepare = argc > 2 ? argv[2] : "";
         printf("display probe: running on %s, built with apple_minimum %s, %s, mode %s %s\n", [[[UIDevice currentDevice] systemVersion] UTF8String],
-               PROBE_MINIMUM, PROBE_PACKAGE ? "charon@apple-backports linked" : "no backports library", argc > 1 ? argv[1] : "(none)",
+               PROBE_MINIMUM, PROBE_PACKAGE ? "revenant@apple-backports linked" : "no backports library", argc > 1 ? argv[1] : "(none)",
                argc > 2 ? argv[2] : "(none)");
         BOOL polling = strcmp(prepare, "wait") == 0;
         BOOL view = strcmp(prepare, "view") == 0 || polling || strcmp(prepare, "window") == 0 || strcmp(prepare, "turn") == 0;

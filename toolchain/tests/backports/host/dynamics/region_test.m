@@ -92,7 +92,7 @@ static void test_truth_table(void)
         for (NSValue *value in probes) {
             CGPoint point = value.CGPointValue;
             BOOL expected = [oracle containsPoint:point], actual = [ours containsPoint:point];
-            charon_check(actual == expected, "F2 a region contains what the oracle's contains",
+            revenant_check(actual == expected, "F2 a region contains what the oracle's contains",
                          [NSString stringWithFormat:@"%@ at (%g, %g): ours %d oracle %d", name, point.x, point.y, actual, expected]);
         }
     }
@@ -125,7 +125,7 @@ static void test_identities(void)
                           "equal circles are not equal", "a copy has the class", "an inverse has the class", "NSCopying", "NSCoding",
                           "no secure coding"};
     for (NSUInteger index = 0; index < oracle.count; index++) {
-        charon_check([ours[index] isEqual:oracle[index]], "F2 region identity is the oracle's",
+        revenant_check([ours[index] isEqual:oracle[index]], "F2 region identity is the oracle's",
                      [NSString stringWithFormat:@"%s: ours %@ oracle %@", rows[index], ours[index], oracle[index]]);
     }
 }

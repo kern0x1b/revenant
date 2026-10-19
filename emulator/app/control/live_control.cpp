@@ -20,7 +20,7 @@
 #include <poll.h>
 #include <unistd.h>
 
-namespace shade {
+namespace emulator {
 namespace {
 
     constexpr std::size_t read_buffer_size = 4096;

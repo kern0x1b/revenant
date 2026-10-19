@@ -1,15 +1,15 @@
-#import "CharonSafari.h"
+#import "RevenantSafari.h"
 
 enum {
-    CharonNavigationLinkClicked = 0,
-    CharonNavigationFormSubmitted = 1,
-    CharonNavigationBackForward = 2,
-    CharonNavigationReload = 3,
+    RevenantNavigationLinkClicked = 0,
+    RevenantNavigationFormSubmitted = 1,
+    RevenantNavigationBackForward = 2,
+    RevenantNavigationReload = 3,
 };
 
-@implementation CharonSafariPage {
+@implementation RevenantSafariPage {
     NSURL *_initialURL;
-    id<CharonWebView> _webView;
+    id<RevenantWebView> _webView;
     UINavigationBar *_navigationBar;
     UINavigationItem *_barItem;
     UILabel *_addressLabel;
@@ -53,7 +53,7 @@ enum {
     return _initialURL;
 }
 
-- (SFSafariViewController *)charon_sender
+- (SFSafariViewController *)revenant_sender
 {
     return (SFSafariViewController *)(_owner ?: self);
 }
@@ -69,24 +69,24 @@ enum {
 {
     _preferredBarTintColor = color;
     if (self.isViewLoaded)
-        [self charon_applyColors];
+        [self revenant_applyColors];
 }
 
 - (void)setPreferredControlTintColor:(UIColor *)color
 {
     _preferredControlTintColor = color;
     if (self.isViewLoaded)
-        [self charon_applyColors];
+        [self revenant_applyColors];
 }
 
 - (void)setDismissButtonStyle:(SFSafariViewControllerDismissButtonStyle)style
 {
     _dismissButtonStyle = style;
     if (self.isViewLoaded)
-        [self charon_applyDismissButton];
+        [self revenant_applyDismissButton];
 }
 
-- (void)charon_applyColors
+- (void)revenant_applyColors
 {
     UIColor *bar = _preferredBarTintColor;
     _navigationBar.tintColor = bar;
@@ -97,19 +97,19 @@ enum {
             item.tintColor = _preferredControlTintColor;
 }
 
-- (void)charon_applyDismissButton
+- (void)revenant_applyDismissButton
 {
     UIBarButtonItem *button;
     switch (_dismissButtonStyle) {
     case SFSafariViewControllerDismissButtonStyleCancel:
-        button = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCancel target:self action:@selector(charon_done)];
+        button = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCancel target:self action:@selector(revenant_done)];
         break;
     case SFSafariViewControllerDismissButtonStyleClose:
         button = [[UIBarButtonItem alloc] initWithTitle:[[NSBundle bundleForClass:[UIView class]] localizedStringForKey:@"Close" value:@"Close" table:nil]
-                                                  style:UIBarButtonItemStyleBordered target:self action:@selector(charon_done)];
+                                                  style:UIBarButtonItemStyleBordered target:self action:@selector(revenant_done)];
         break;
     default:
-        button = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:self action:@selector(charon_done)];
+        button = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:self action:@selector(revenant_done)];
         break;
     }
     button.tintColor = _preferredControlTintColor;
@@ -141,17 +141,17 @@ enum {
 
     _toolbar = [[UIToolbar alloc] initWithFrame:CGRectMake(0, bounds.size.height - 44, bounds.size.width, 44)];
     _toolbar.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin;
-    _backItem = [[UIBarButtonItem alloc] initWithTitle:@"◀" style:UIBarButtonItemStyleBordered target:self action:@selector(charon_back)];
-    _forwardItem = [[UIBarButtonItem alloc] initWithTitle:@"▶" style:UIBarButtonItemStyleBordered target:self action:@selector(charon_forward)];
-    _actionItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAction target:self action:@selector(charon_action:)];
-    _reloadItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemRefresh target:self action:@selector(charon_reload)];
-    _stopItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemStop target:self action:@selector(charon_stop)];
-    UIBarButtonItem *safari = [[UIBarButtonItem alloc] initWithTitle:@"Safari" style:UIBarButtonItemStyleBordered target:self action:@selector(charon_openInBrowser)];
+    _backItem = [[UIBarButtonItem alloc] initWithTitle:@"◀" style:UIBarButtonItemStyleBordered target:self action:@selector(revenant_back)];
+    _forwardItem = [[UIBarButtonItem alloc] initWithTitle:@"▶" style:UIBarButtonItemStyleBordered target:self action:@selector(revenant_forward)];
+    _actionItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAction target:self action:@selector(revenant_action:)];
+    _reloadItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemRefresh target:self action:@selector(revenant_reload)];
+    _stopItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemStop target:self action:@selector(revenant_stop)];
+    UIBarButtonItem *safari = [[UIBarButtonItem alloc] initWithTitle:@"Safari" style:UIBarButtonItemStyleBordered target:self action:@selector(revenant_openInBrowser)];
     UIBarButtonItem *space = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil];
     _toolbar.items = @[_backItem, space, _forwardItem, space, _actionItem, space, safari, space, _reloadItem];
     [root addSubview:_toolbar];
 
-    _webView = (id<CharonWebView>)[[NSClassFromString(@"UIWebView") alloc] initWithFrame:CGRectMake(0, 44, bounds.size.width, bounds.size.height - 88)];
+    _webView = (id<RevenantWebView>)[[NSClassFromString(@"UIWebView") alloc] initWithFrame:CGRectMake(0, 44, bounds.size.width, bounds.size.height - 88)];
     [(UIView *)_webView setAutoresizingMask:UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight];
     _webView.scalesPageToFit = YES;
     _webView.delegate = self;
@@ -164,9 +164,9 @@ enum {
     [root addSubview:_progressView];
 
     self.view = root;
-    [self charon_applyColors];
-    [self charon_applyDismissButton];
-    [self charon_updateButtons];
+    [self revenant_applyColors];
+    [self revenant_applyDismissButton];
+    [self revenant_updateButtons];
 }
 
 - (void)viewDidLayoutSubviews
@@ -187,7 +187,7 @@ enum {
     [_webView loadRequest:[NSURLRequest requestWithURL:_initialURL]];
 }
 
-- (void)charon_updateButtons
+- (void)revenant_updateButtons
 {
     _backItem.enabled = _webView.canGoBack;
     _forwardItem.enabled = _webView.canGoForward;
@@ -201,17 +201,17 @@ enum {
     }
 }
 
-- (void)charon_back
+- (void)revenant_back
 {
     [_webView goBack];
 }
 
-- (void)charon_forward
+- (void)revenant_forward
 {
     [_webView goForward];
 }
 
-- (void)charon_reload
+- (void)revenant_reload
 {
     if (_showingError) {
         _showingError = NO;
@@ -220,14 +220,14 @@ enum {
         [_webView reload];
 }
 
-- (void)charon_stop
+- (void)revenant_stop
 {
     [_webView stopLoading];
-    [self charon_finishProgress];
-    [self charon_updateButtons];
+    [self revenant_finishProgress];
+    [self revenant_updateButtons];
 }
 
-- (void)charon_done
+- (void)revenant_done
 {
     if (_dismissing)
         return;
@@ -236,7 +236,7 @@ enum {
         self->_dismissing = NO;
         id<SFSafariViewControllerDelegate> delegate = self.delegate;
         if ([delegate respondsToSelector:@selector(safariViewControllerDidFinish:)])
-            [delegate safariViewControllerDidFinish:[self charon_sender]];
+            [delegate safariViewControllerDidFinish:[self revenant_sender]];
     };
     UIViewController *target = _owner ?: self;
     if (target.presentingViewController)
@@ -248,16 +248,16 @@ enum {
         finished();
 }
 
-- (void)charon_openInBrowser
+- (void)revenant_openInBrowser
 {
     id<SFSafariViewControllerDelegate> delegate = self.delegate;
     if ([delegate respondsToSelector:@selector(safariViewControllerWillOpenInBrowser:)])
-        [delegate safariViewControllerWillOpenInBrowser:[self charon_sender]];
+        [delegate safariViewControllerWillOpenInBrowser:[self revenant_sender]];
     if (_currentURL)
         [[UIApplication sharedApplication] openURL:_currentURL];
 }
 
-- (void)charon_action:(UIBarButtonItem *)sender
+- (void)revenant_action:(UIBarButtonItem *)sender
 {
     if (!_currentURL)
         return;
@@ -265,9 +265,9 @@ enum {
     NSArray *activities = nil, *excluded = nil;
     NSString *title = _pageTitle.length ? _pageTitle : nil;
     if ([delegate respondsToSelector:@selector(safariViewController:activityItemsForURL:title:)])
-        activities = [delegate safariViewController:[self charon_sender] activityItemsForURL:_currentURL title:title];
+        activities = [delegate safariViewController:[self revenant_sender] activityItemsForURL:_currentURL title:title];
     if ([delegate respondsToSelector:@selector(safariViewController:excludedActivityTypesForURL:title:)])
-        excluded = [delegate safariViewController:[self charon_sender] excludedActivityTypesForURL:_currentURL title:title];
+        excluded = [delegate safariViewController:[self revenant_sender] excludedActivityTypesForURL:_currentURL title:title];
     Class activityViewController = NSClassFromString(@"UIActivityViewController");
     if (!activityViewController) {
         static dispatch_once_t once;
@@ -289,21 +289,21 @@ enum {
         [_owner ?: self presentViewController:sheet animated:YES completion:nil];
 }
 
-- (void)charon_startProgress
+- (void)revenant_startProgress
 {
     [_progressTimer invalidate];
     _progressView.hidden = NO;
     _progressView.progress = 0.1;
-    _progressTimer = [NSTimer scheduledTimerWithTimeInterval:0.15 target:self selector:@selector(charon_tickProgress) userInfo:nil repeats:YES];
+    _progressTimer = [NSTimer scheduledTimerWithTimeInterval:0.15 target:self selector:@selector(revenant_tickProgress) userInfo:nil repeats:YES];
 }
 
-- (void)charon_tickProgress
+- (void)revenant_tickProgress
 {
     float progress = _progressView.progress;
     _progressView.progress = progress + (0.9f - progress) * 0.08f;
 }
 
-- (void)charon_finishProgress
+- (void)revenant_finishProgress
 {
     [_progressTimer invalidate];
     _progressTimer = nil;
@@ -311,17 +311,17 @@ enum {
     _progressView.hidden = YES;
 }
 
-- (void)charon_completeInitialLoad:(BOOL)success
+- (void)revenant_completeInitialLoad:(BOOL)success
 {
     if (!_initialLoadPending)
         return;
     _initialLoadPending = NO;
     id<SFSafariViewControllerDelegate> delegate = self.delegate;
     if ([delegate respondsToSelector:@selector(safariViewController:didCompleteInitialLoad:)])
-        [delegate safariViewController:[self charon_sender] didCompleteInitialLoad:success];
+        [delegate safariViewController:[self revenant_sender] didCompleteInitialLoad:success];
 }
 
-- (BOOL)webView:(id<CharonWebView>)webView shouldStartLoadWithRequest:(NSURLRequest *)request navigationType:(NSInteger)type
+- (BOOL)webView:(id<RevenantWebView>)webView shouldStartLoadWithRequest:(NSURLRequest *)request navigationType:(NSInteger)type
 {
     NSURL *URL = request.URL;
     BOOL mainFrame = [request.mainDocumentURL isEqual:URL];
@@ -332,35 +332,35 @@ enum {
     }
     NSString *scheme = URL.scheme.lowercaseString;
     if (![scheme isEqualToString:@"http"] && ![scheme isEqualToString:@"https"] && ![scheme isEqualToString:@"about"] && ![scheme isEqualToString:@"data"] && ![scheme isEqualToString:@"file"]) {
-        if (mainFrame && (type == CharonNavigationLinkClicked || type == CharonNavigationFormSubmitted) && [[UIApplication sharedApplication] canOpenURL:URL])
+        if (mainFrame && (type == RevenantNavigationLinkClicked || type == RevenantNavigationFormSubmitted) && [[UIApplication sharedApplication] canOpenURL:URL])
             [[UIApplication sharedApplication] openURL:URL];
         return NO;
     }
     if (mainFrame && !_showingError && ![URL isEqual:_currentURL] && ![scheme isEqualToString:@"about"]) {
-        BOOL userInitiated = type == CharonNavigationLinkClicked || type == CharonNavigationFormSubmitted || type == CharonNavigationBackForward || type == CharonNavigationReload;
+        BOOL userInitiated = type == RevenantNavigationLinkClicked || type == RevenantNavigationFormSubmitted || type == RevenantNavigationBackForward || type == RevenantNavigationReload;
         BOOL onlyFragment = URL.fragment && [[URL absoluteString] hasPrefix:[[_currentURL absoluteString] componentsSeparatedByString:@"#"][0]];
         if (!userInitiated && !onlyFragment) {
             id<SFSafariViewControllerDelegate> delegate = self.delegate;
             if ([delegate respondsToSelector:@selector(safariViewController:initialLoadDidRedirectToURL:)])
-                [delegate safariViewController:[self charon_sender] initialLoadDidRedirectToURL:URL];
+                [delegate safariViewController:[self revenant_sender] initialLoadDidRedirectToURL:URL];
         }
         _currentURL = URL;
     }
     return YES;
 }
 
-- (void)webViewDidStartLoad:(id<CharonWebView>)webView
+- (void)webViewDidStartLoad:(id<RevenantWebView>)webView
 {
     if (!_showingError)
-        [self charon_startProgress];
-    [self charon_updateButtons];
+        [self revenant_startProgress];
+    [self revenant_updateButtons];
 }
 
-- (void)webViewDidFinishLoad:(id<CharonWebView>)webView
+- (void)webViewDidFinishLoad:(id<RevenantWebView>)webView
 {
     if (webView.loading)
         return;
-    [self charon_finishProgress];
+    [self revenant_finishProgress];
     if (!_showingError) {
         NSString *location = [webView stringByEvaluatingJavaScriptFromString:@"document.location.href"];
         NSURL *URL = location.length ? [NSURL URLWithString:location] : nil;
@@ -368,12 +368,12 @@ enum {
             _currentURL = URL;
         _pageTitle = [webView stringByEvaluatingJavaScriptFromString:@"document.title"];
         _addressLabel.text = _currentURL.host ?: _initialURL.host;
-        [self charon_completeInitialLoad:YES];
+        [self revenant_completeInitialLoad:YES];
     }
-    [self charon_updateButtons];
+    [self revenant_updateButtons];
 }
 
-- (void)webView:(id<CharonWebView>)webView didFailLoadWithError:(NSError *)error
+- (void)webView:(id<RevenantWebView>)webView didFailLoadWithError:(NSError *)error
 {
     if ([error.domain isEqualToString:NSURLErrorDomain] && error.code == NSURLErrorCancelled)
         return;
@@ -387,7 +387,7 @@ enum {
         return;
     if (webView.loading)
         return;
-    [self charon_finishProgress];
+    [self revenant_finishProgress];
     BOOL first = _initialLoadPending;
     if (!_showingError) {
         _showingError = YES;
@@ -397,8 +397,8 @@ enum {
         [webView loadHTMLString:html baseURL:nil];
     }
     if (first)
-        [self charon_completeInitialLoad:NO];
-    [self charon_updateButtons];
+        [self revenant_completeInitialLoad:NO];
+    [self revenant_updateButtons];
 }
 
 @end

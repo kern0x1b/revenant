@@ -1,11 +1,11 @@
-#import "CharonMPSGraph.h"
+#import "RevenantMPSGraph.h"
 
-@implementation MPSGraph (CharonMPSGraphNonZero17)
+@implementation MPSGraph (RevenantMPSGraphNonZero17)
 
 - (MPSGraphTensor *)nonZeroIndicesOfTensor:(MPSGraphTensor *)tensor name:(NSString *)name
 {
     NSUInteger rank = tensor.shape.count;
-    return [self charon_mps_operation:CharonMPSGraphOperationKindNonZero
+    return [self revenant_mps_operation:RevenantMPSGraphOperationKindNonZero
                               inputs:@[tensor]
                           parameters:@{@"shape": @[@(-1), @(rank)],
                                        @"dataType": @(MPSDataTypeInt32),

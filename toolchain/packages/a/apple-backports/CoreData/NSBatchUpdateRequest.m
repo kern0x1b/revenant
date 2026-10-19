@@ -1,5 +1,5 @@
 #import <CoreData/CoreData.h>
-#import "CharonStoreCoordinator.h"
+#import "RevenantStoreCoordinator.h"
 
 @implementation NSBatchUpdateResult {
     id _result;
@@ -28,12 +28,12 @@
 
 @end
 
-static void charon_reject(NSString *format, id argument)
+static void revenant_reject(NSString *format, id argument)
 {
     [NSException raise:NSInvalidArgumentException format:format, argument];
 }
 
-static NSDictionary *charon_validated_properties(NSDictionary *properties, NSEntityDescription *entity)
+static NSDictionary *revenant_validated_properties(NSDictionary *properties, NSEntityDescription *entity)
 {
     NSMutableDictionary *validated = [[NSMutableDictionary alloc] init];
     for (id key in [properties allKeys]) {
@@ -41,27 +41,27 @@ static NSDictionary *charon_validated_properties(NSDictionary *properties, NSEnt
         NSPropertyDescription *property = nil;
         if ([key isKindOfClass:[NSString class]]) {
             if ([(NSString *)key rangeOfString:@"."].location != NSNotFound)
-                charon_reject(@"Invalid string keypath %@ passed to propertiesToUpdate:", key);
+                revenant_reject(@"Invalid string keypath %@ passed to propertiesToUpdate:", key);
             property = entity.propertiesByName[key];
             if (!property)
-                charon_reject(@"Invalid string key %@ passed to propertiesToUpdate:", property);
+                revenant_reject(@"Invalid string key %@ passed to propertiesToUpdate:", property);
         } else {
             property = entity.propertiesByName[[key name]];
             if (!property)
-                charon_reject(@"Attribute/relationship description names passed to propertiesToUpdate must match name on fetch entity (%@)", property);
+                revenant_reject(@"Attribute/relationship description names passed to propertiesToUpdate must match name on fetch entity (%@)", property);
             if ([key isKindOfClass:[NSExpressionDescription class]])
-                charon_reject(@"Invalid expressionDescription %@ passed as key to propertiesToUpdate:", key);
+                revenant_reject(@"Invalid expressionDescription %@ passed as key to propertiesToUpdate:", key);
         }
         if ([property isKindOfClass:[NSRelationshipDescription class]])
-            charon_reject(@"Invalid relationship (%@) passed to propertiesToUpdate:", property);
+            revenant_reject(@"Invalid relationship (%@) passed to propertiesToUpdate:", property);
         if (![property isKindOfClass:[NSAttributeDescription class]])
-            charon_reject(@"Invalid property %@ passed as key to propertiesToUpdate:", property);
+            revenant_reject(@"Invalid property %@ passed as key to propertiesToUpdate:", property);
         validated[property] = [value isKindOfClass:[NSExpression class]] ? value : [NSExpression expressionForConstantValue:value];
     }
     return validated;
 }
 
-static void charon_check_expression(NSExpression *expression, NSAttributeDescription *attribute, NSEntityDescription *entity)
+static void revenant_check_expression(NSExpression *expression, NSAttributeDescription *attribute, NSEntityDescription *entity)
 {
     switch (expression.expressionType) {
     case NSConstantValueExpressionType: {
@@ -74,21 +74,21 @@ static void charon_check_expression(NSExpression *expression, NSAttributeDescrip
     }
     case NSFunctionExpressionType:
         for (NSExpression *argument in expression.arguments)
-            charon_check_expression(argument, nil, entity);
+            revenant_check_expression(argument, nil, entity);
         return;
     case NSKeyPathExpressionType:
         if ([expression.keyPath rangeOfString:@"."].location != NSNotFound || ![entity.propertiesByName[expression.keyPath] isKindOfClass:[NSAttributeDescription class]])
-            charon_reject(@"Can't generate SQL for keypath %@ : invalid keypath", expression.keyPath);
+            revenant_reject(@"Can't generate SQL for keypath %@ : invalid keypath", expression.keyPath);
         return;
     case NSSubqueryExpressionType:
-        charon_reject(@"Unsupported subquery (non-aggregate not allowed in select or update column): %@", expression);
+        revenant_reject(@"Unsupported subquery (non-aggregate not allowed in select or update column): %@", expression);
         return;
     default:
-        charon_reject(@"Invalid expression (%@) in propertiesToUpdate", expression);
+        revenant_reject(@"Invalid expression (%@) in propertiesToUpdate", expression);
     }
 }
 
-static id charon_execute_batch_update(NSManagedObjectContext *context, NSBatchUpdateRequest *request, NSError **error);
+static id revenant_execute_batch_update(NSManagedObjectContext *context, NSBatchUpdateRequest *request, NSError **error);
 
 @implementation NSBatchUpdateRequest {
 @public
@@ -186,7 +186,7 @@ static id charon_execute_batch_update(NSManagedObjectContext *context, NSBatchUp
 {
     if (_columnsToUpdate == propertiesToUpdate)
         return;
-    _columnsToUpdate = _entityIsName ? [propertiesToUpdate copy] : charon_validated_properties(propertiesToUpdate, _entity);
+    _columnsToUpdate = _entityIsName ? [propertiesToUpdate copy] : revenant_validated_properties(propertiesToUpdate, _entity);
 }
 
 - (NSPersistentStoreRequestType)requestType
@@ -194,9 +194,9 @@ static id charon_execute_batch_update(NSManagedObjectContext *context, NSBatchUp
     return (NSPersistentStoreRequestType)6;
 }
 
-- (id)charonExecuteInContext:(NSManagedObjectContext *)context error:(NSError **)error
+- (id)revenantExecuteInContext:(NSManagedObjectContext *)context error:(NSError **)error
 {
-    return charon_execute_batch_update(context, self, error);
+    return revenant_execute_batch_update(context, self, error);
 }
 
 - (NSString *)description
@@ -206,22 +206,22 @@ static id charon_execute_batch_update(NSManagedObjectContext *context, NSBatchUp
 
 @end
 
-static id charon_execute_batch_update(NSManagedObjectContext *context, NSBatchUpdateRequest *request, NSError **error)
+static id revenant_execute_batch_update(NSManagedObjectContext *context, NSBatchUpdateRequest *request, NSError **error)
 {
-    NSPersistentStoreCoordinator *coordinator = charon_store_coordinator(context);
+    NSPersistentStoreCoordinator *coordinator = revenant_store_coordinator(context);
     NSEntityDescription *entity = request->_entityIsName ? coordinator.managedObjectModel.entitiesByName[request->_entity] : request->_entity;
     if (!entity)
         [NSException raise:NSInternalInconsistencyException format:@"Can't find entity for batch update (%@)", request.entityName];
     NSDictionary *properties = request->_columnsToUpdate;
     if (request->_entityIsName && properties.count)
-        properties = charon_validated_properties(properties, entity);
+        properties = revenant_validated_properties(properties, entity);
     if (!properties.count) {
         if (error)
             *error = [NSError errorWithDomain:NSCocoaErrorDomain code:134030 userInfo:@{@"Reason": @"Empty or Null Dictionary passed to propertiesToUpdate:"}];
         return nil;
     }
     for (NSAttributeDescription *attribute in properties)
-        charon_check_expression(properties[attribute], attribute, entity);
+        revenant_check_expression(properties[attribute], attribute, entity);
     NSFetchRequest *fetch = [[NSFetchRequest alloc] init];
     fetch.entity = entity;
     fetch.predicate = request.predicate;

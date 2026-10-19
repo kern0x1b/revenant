@@ -17,8 +17,8 @@ public struct OpenURLIntent: SystemIntent, URLRepresentableIntent {
 
     public init() {
         self._url = OpenURLIntent.makeURLParameter()
-        self.url = CharonURL.placeholder
-        self.urlRepresentation = IntentURLRepresentation(CharonURL.placeholder)
+        self.url = RevenantURL.placeholder
+        self.urlRepresentation = IntentURLRepresentation(RevenantURL.placeholder)
     }
 
     public init(_ url: URL) {
@@ -28,15 +28,15 @@ public struct OpenURLIntent: SystemIntent, URLRepresentableIntent {
     }
 
     public init(urlRepresentable: URLRepresentableEntity) {
-        self.init(CharonURL.placeholder.appendingPathComponent(urlRepresentable.urlRepresentationParameter))
+        self.init(RevenantURL.placeholder.appendingPathComponent(urlRepresentable.urlRepresentationParameter))
     }
 
     public init(urlRepresentable: URLRepresentableEnum) {
-        self.init(CharonURL.placeholder.appendingPathComponent(urlRepresentable.urlRepresentationParameter))
+        self.init(RevenantURL.placeholder.appendingPathComponent(urlRepresentable.urlRepresentationParameter))
     }
 
     public init(urlRepresentable: some URLRepresentableIntent) {
-        self.init(CharonURL.placeholder.appendingPathComponent(
+        self.init(RevenantURL.placeholder.appendingPathComponent(
             String(describing: type(of: urlRepresentable))))
     }
 
@@ -46,7 +46,7 @@ public struct OpenURLIntent: SystemIntent, URLRepresentableIntent {
     public static var parameterSummary: SummaryContent { return SummaryContent("Open the URL") }
 
     public func perform() async throws -> PerformResult {
-        CharonURL.open(url)
+        RevenantURL.open(url)
         return IntentResultContainer()
     }
 
@@ -161,10 +161,10 @@ public protocol AppEntityAnnotatable {
 }
 
 public protocol AppIntentsExtension {
-    var configuration: CharonExtensionConfiguration { get }
+    var configuration: RevenantExtensionConfiguration { get }
 }
 
-public struct CharonExtensionConfiguration: Sendable {
+public struct RevenantExtensionConfiguration: Sendable {
     public let identifier: String
     public let kind: String
 

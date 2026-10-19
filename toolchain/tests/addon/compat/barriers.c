@@ -6,9 +6,9 @@
 #include <string.h>
 #include <unistd.h>
 
-dispatch_queue_t charon_dispatch_queue_create(const char *, dispatch_queue_attr_t);
-void charon_dispatch_resume(dispatch_object_t);
-void charon_dispatch_source_set_event_handler(dispatch_source_t, dispatch_block_t);
+dispatch_queue_t revenant_dispatch_queue_create(const char *, dispatch_queue_attr_t);
+void revenant_dispatch_resume(dispatch_object_t);
+void revenant_dispatch_source_set_event_handler(dispatch_source_t, dispatch_block_t);
 dispatch_block_t dispatch_block_create(dispatch_block_flags_t, dispatch_block_t);
 
 typedef dispatch_queue_t (*create_f)(const char *, dispatch_queue_attr_t);
@@ -27,7 +27,7 @@ static struct api ours, darwins, control;
 static int fails;
 
 struct seen { char order[16]; int inside; int otherAtEntry; };
-static struct seen *charon_next_seen(void)
+static struct seen *revenant_next_seen(void)
 {
     static struct seen slots[16];
     static unsigned used;
@@ -63,7 +63,7 @@ static void scenario(const struct api *api, int concurrent, int late, char *answ
     }
     dispatch_source_t source = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, queue);
     dispatch_source_set_timer(source, dispatch_time(DISPATCH_TIME_NOW, 100 * NSEC_PER_MSEC), DISPATCH_TIME_FOREVER, 0);
-    struct seen *s = charon_next_seen();
+    struct seen *s = revenant_next_seen();
     dispatch_semaphore_t started = dispatch_semaphore_create(0);
     dispatch_semaphore_t release = dispatch_semaphore_create(0);
     dispatch_semaphore_t entered = dispatch_semaphore_create(0);
@@ -113,8 +113,8 @@ static void scenario(const struct api *api, int concurrent, int late, char *answ
 int main(void)
 {
     setvbuf(stdout, NULL, _IONBF, 0);
-    ours = (struct api){charon_dispatch_queue_create, dispatch_block_create, charon_dispatch_resume,
-                        charon_dispatch_source_set_event_handler};
+    ours = (struct api){revenant_dispatch_queue_create, dispatch_block_create, revenant_dispatch_resume,
+                        revenant_dispatch_source_set_event_handler};
     void *libdispatch = dlopen("/usr/lib/system/libdispatch.dylib", RTLD_LAZY | RTLD_LOCAL);
     darwins = (struct api){dlsym(libdispatch, "dispatch_queue_create"), dlsym(libdispatch, "dispatch_block_create"),
                            dlsym(libdispatch, "dispatch_resume"), dlsym(libdispatch, "dispatch_source_set_event_handler")};
@@ -140,7 +140,7 @@ int main(void)
                      cases[index].label, mine, theirs);
             expect(strcmp(mine, theirs) == 0, what);
         }
-#ifdef CHARON_COMPAT_NO_STATE
+#ifdef REVENANT_COMPAT_NO_STATE
         if (cases[index].late) {
             snprintf(what, sizeof what, "late: the shims without the records are what they were, which is not Darwin (%s against %s)",
                      alone_of(before), alone_of(theirs));

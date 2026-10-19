@@ -1,7 +1,7 @@
 #import <UIKit/UIKit.h>
 #import <QuartzCore/QuartzCore.h>
 
-@implementation UITableView (CharonBatchUpdates)
+@implementation UITableView (RevenantBatchUpdates)
 
 - (void)performBatchUpdates:(void (NS_NOESCAPE ^)(void))updates completion:(void (^)(BOOL finished))completion
 {

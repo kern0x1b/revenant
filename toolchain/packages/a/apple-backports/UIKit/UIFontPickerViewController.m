@@ -1,4 +1,4 @@
-#import "CharonMenus.h"
+#import "RevenantMenus.h"
 
 #pragma clang diagnostic ignored "-Wobjc-designated-initializers"
 
@@ -141,7 +141,7 @@
     close.center = CGPointMake(CGRectGetMidX(view.bounds), CGRectGetMaxY(label.frame) + 10);
     close.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleTopMargin;
     [close setTitle:[[NSBundle bundleForClass:[UIApplication class]] localizedStringForKey:@"Cancel" value:@"Cancel" table:nil] forState:UIControlStateNormal];
-    [close addTarget:self action:@selector(charon_close) forControlEvents:UIControlEventTouchUpInside];
+    [close addTarget:self action:@selector(revenant_close) forControlEvents:UIControlEventTouchUpInside];
     [view addSubview:close];
     self.view = view;
 }
@@ -149,10 +149,10 @@
 - (void)viewDidAppear:(BOOL)animated
 {
     [super viewDidAppear:animated];
-    charon_menus_say_once(@"font-picker", @"UIFontPickerViewController: iOS 6 has no UIFontDescriptor to hand back, so the picker lists no fonts and offers only Cancel, which tells the delegate it was cancelled");
+    revenant_menus_say_once(@"font-picker", @"UIFontPickerViewController: iOS 6 has no UIFontDescriptor to hand back, so the picker lists no fonts and offers only Cancel, which tells the delegate it was cancelled");
 }
 
-- (void)charon_close
+- (void)revenant_close
 {
     id<UIFontPickerViewControllerDelegate> delegate = _delegate;
     if ([delegate respondsToSelector:@selector(fontPickerViewControllerDidCancel:)])

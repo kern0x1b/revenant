@@ -17,7 +17,7 @@
 #include <string>
 #include <vector>
 
-namespace shade {
+namespace emulator {
 
 bool CompatibilityKernel::dispatch_bsd_process_information(
     Cpu& cpu, std::uint32_t number)

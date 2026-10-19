@@ -14,7 +14,7 @@
 #include "device_state/darwin_kernel_configuration.hpp"
 #include "foundation/output.hpp"
 
-namespace shade {
+namespace emulator {
 namespace {
 
     template <class Enum>

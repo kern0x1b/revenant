@@ -9,7 +9,7 @@
 
 #include <cstdint>
 
-namespace shade::core_surface_abi {
+namespace emulator::core_surface_abi {
 
 inline constexpr std::uint32_t public_client_buffer_offset = 8;
 

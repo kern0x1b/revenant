@@ -23,14 +23,14 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-charon=${CHARON:-$here/../../../..}
-registry="$charon/packages/a/apple-backports/registry"
-build=${BUILD:-$(runs_fresh charon-constants)}
+revenant=${REVENANT:-$here/../../../..}
+registry="$revenant/packages/a/apple-backports/registry"
+build=${BUILD:-$(runs_fresh revenant-constants)}
 mkdir -p "$build"
 ledger=${LEDGER:-$HOME/Git/projects/ios/coordination/corpus/ledger}
 
-cc -O2 -Wno-unused-parameter -framework CoreFoundation -o "$build/host-probe" "$charon/tools/corpus/host-probe.c"
-cc -O2 -o "$build/object-constant" "$charon/tools/corpus/object-constant.c"
+cc -O2 -Wno-unused-parameter -framework CoreFoundation -o "$build/host-probe" "$revenant/tools/corpus/host-probe.c"
+cc -O2 -o "$build/object-constant" "$revenant/tools/corpus/object-constant.c"
 
 failed=0
 # The built library, when the caller names one. OBJECTS may be a dylib or a directory of objects; a
@@ -204,15 +204,15 @@ if [ -n "${HOMEKIT_SOURCES:-}" ] && [ -d "${MUTANT_SDK:-/nonexistent}" ] && [ -x
     mkdir -p "$mutant/clean" "$mutant/changed"
     # The mutated source is written before the loop that compiles it: the change is one constant's value
     # in the code, with its registry row left correct, which is the shape a text comparison cannot see.
-    sed 's/@"array"/@"arrayX"/' "$charon/$HOMEKIT_SOURCES" > "$mutant/changed.m" 2>/dev/null || true
+    sed 's/@"array"/@"arrayX"/' "$revenant/$HOMEKIT_SOURCES" > "$mutant/changed.m" 2>/dev/null || true
 
     for side in clean changed; do
-        source="$charon/$HOMEKIT_SOURCES"
+        source="$revenant/$HOMEKIT_SOURCES"
         [ "$side" = changed ] && source="$mutant/changed.m"
         # The port's deployment: the same target the objects in the tree are built for, which is why
         # the tool has to read a file rather than load it -- an armv7 binary is not this host's.
         "$MUTANT_CLANG" -target armv7-apple-ios6.1.3 -isysroot "$MUTANT_SDK" -fobjc-arc -Os -g0 -fPIC \
-              -I"$charon/packages/a/apple-backports/HomeKit" \
+              -I"$revenant/packages/a/apple-backports/HomeKit" \
               -c "$source" -o "$mutant/$side/c.o" 2>/dev/null || true
         [ -f "$mutant/$side/c.o" ] || continue
         "$MUTANT_CLANG" -target armv7-apple-ios6.1.3 -isysroot "$MUTANT_SDK" -dynamiclib -Wl,-undefined,dynamic_lookup \

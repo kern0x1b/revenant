@@ -22,7 +22,7 @@
 #include <string>
 #include <string_view>
 
-namespace shade::darwin::network {
+namespace emulator::darwin::network {
 namespace {
 
     constexpr std::size_t interface_message_header_size = 112;

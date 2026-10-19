@@ -3,7 +3,7 @@ local workspace = import("workspace", {rootdir = path.join(os.scriptdir(), "..",
 local SKIPPED = {"*.png", "*.plist", "*.nib", "*.car", "*.json", "*.strings"}
 
 local function checkout()
-    local named = os.getenv("CHARON_ROOT_DIR")
+    local named = os.getenv("REVENANT_ROOT_DIR")
     if named and named ~= "" and os.isdir(path.join(named, "modules")) then
         return named
     end
@@ -42,7 +42,7 @@ function main(name, app)
     print(string.format("[%s] %d Mach-O binaries under bundle", name, #bins))
     local argv = {"l", path.join(os.scriptdir(), "corpus-scan.lua"), "6.0"}
     table.join2(argv, bins)
-    local status = os.execv(os.programfile(), argv, {stdout = out, stderr = errors, envs = {CHARON_ROOT = root}, try = true})
+    local status = os.execv(os.programfile(), argv, {stdout = out, stderr = errors, envs = {REVENANT_ROOT = root}, try = true})
     if status ~= 0 then
         print("scan failed; see " .. errors)
         local lines = {}

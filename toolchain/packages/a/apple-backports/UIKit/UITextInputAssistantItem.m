@@ -1,10 +1,10 @@
-#import "CharonMenus.h"
+#import "RevenantMenus.h"
 #import <objc/runtime.h>
 
-static void charon_say_shortcuts(NSArray *groups)
+static void revenant_say_shortcuts(NSArray *groups)
 {
     if (groups.count)
-        charon_menus_say_once(@"input-assistant-groups", @"UITextInputAssistantItem.leadingBarButtonGroups and .trailingBarButtonGroups: iOS 6 draws no shortcuts bar over the keyboard, so the groups are kept and read back and nothing is shown");
+        revenant_menus_say_once(@"input-assistant-groups", @"UITextInputAssistantItem.leadingBarButtonGroups and .trailingBarButtonGroups: iOS 6 draws no shortcuts bar over the keyboard, so the groups are kept and read back and nothing is shown");
 }
 
 @implementation UITextInputAssistantItem {
@@ -41,7 +41,7 @@ static void charon_say_shortcuts(NSArray *groups)
 
 - (void)setLeadingBarButtonGroups:(NSArray<UIBarButtonItemGroup *> *)groups
 {
-    charon_say_shortcuts(groups);
+    revenant_say_shortcuts(groups);
     _leadingBarButtonGroups = [groups copy];
 }
 
@@ -52,22 +52,22 @@ static void charon_say_shortcuts(NSArray *groups)
 
 - (void)setTrailingBarButtonGroups:(NSArray<UIBarButtonItemGroup *> *)groups
 {
-    charon_say_shortcuts(groups);
+    revenant_say_shortcuts(groups);
     _trailingBarButtonGroups = [groups copy];
 }
 
 @end
 
-static const void *CharonAssistantItemKey = &CharonAssistantItemKey;
+static const void *RevenantAssistantItemKey = &RevenantAssistantItemKey;
 
-@implementation UIResponder (CharonInputAssistantItem)
+@implementation UIResponder (RevenantInputAssistantItem)
 
 - (UITextInputAssistantItem *)inputAssistantItem
 {
-    UITextInputAssistantItem *item = objc_getAssociatedObject(self, CharonAssistantItemKey);
+    UITextInputAssistantItem *item = objc_getAssociatedObject(self, RevenantAssistantItemKey);
     if (!item) {
         item = [[UITextInputAssistantItem alloc] init];
-        objc_setAssociatedObject(self, CharonAssistantItemKey, item, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+        objc_setAssociatedObject(self, RevenantAssistantItemKey, item, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     }
     return item;
 }

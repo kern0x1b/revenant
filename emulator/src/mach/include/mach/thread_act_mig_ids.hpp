@@ -18,7 +18,7 @@
 
 #include "mach/xnu_mig_adapter.hpp"
 
-namespace shade::xnu::mig::thread_act {
+namespace emulator::xnu::mig::thread_act {
 
 inline constexpr std::string_view subsystem_name{"thread_act"};
 inline constexpr std::uint32_t subsystem_base = 3600U;

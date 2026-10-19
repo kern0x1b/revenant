@@ -1,6 +1,6 @@
-#import "CharonCloudKit.h"
-#import "CharonCKConstants.h"
-#import "CharonCKSubscription.h"
+#import "RevenantCloudKit.h"
+#import "RevenantCKConstants.h"
+#import "RevenantCKSubscription.h"
 
 #pragma mark - CKAcceptSharesOperation
 
@@ -10,7 +10,7 @@
 {
     self = [super init];
     if (self) {
-        [self charon_setUp];
+        [self revenant_setUp];
         _shareMetadatas = @[];
     }
     return self;
@@ -34,9 +34,9 @@
 {
     if (!self.shareMetadatas.count) {
         if (self.acceptSharesCompletionBlock) {
-            self.acceptSharesCompletionBlock(CharonCKError(CKErrorInvalidArguments, @"No share to accept", nil));
+            self.acceptSharesCompletionBlock(RevenantCKError(CKErrorInvalidArguments, @"No share to accept", nil));
         }
-        [self charon_finish];
+        [self revenant_finish];
         return;
     }
     NSMutableArray *metadatas = [NSMutableArray array];
@@ -63,7 +63,7 @@
         for (NSDictionary *document in answer[@"shares"]) {
             NSString *url = document[@"shareURL"];
             NSError *itemError = [document[@"serverError"] isKindOfClass:[NSDictionary class]]
-                ? CharonCKErrorFromPayload(document[@"serverError"], nil) : nil;
+                ? RevenantCKErrorFromPayload(document[@"serverError"], nil) : nil;
             CKShareMetadata *metadata = nil;
             if (!itemError) {
                 for (CKShareMetadata *candidate in byURL) {

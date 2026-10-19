@@ -1,6 +1,6 @@
 #import <Foundation/Foundation.h>
 
-@implementation NSLocale (CharonComponents)
+@implementation NSLocale (RevenantComponents)
 
 - (NSString *)languageCode
 {

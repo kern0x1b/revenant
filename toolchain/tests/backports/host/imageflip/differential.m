@@ -19,7 +19,7 @@ static void compare(NSString *name, NSString *system, NSString *ours)
 
 static UIImage *flipped(UIImage *image, BOOL ours)
 {
-    SEL flip = ours ? NSSelectorFromString(@"charonHost_imageWithHorizontallyFlippedOrientation") : @selector(imageWithHorizontallyFlippedOrientation);
+    SEL flip = ours ? NSSelectorFromString(@"revenantHost_imageWithHorizontallyFlippedOrientation") : @selector(imageWithHorizontallyFlippedOrientation);
     return ((UIImage * (*)(id, SEL))objc_msgSend)(image, flip);
 }
 

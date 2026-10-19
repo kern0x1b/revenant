@@ -9,12 +9,12 @@
 
 #pragma clang diagnostic ignored "-Wobjc-missing-property-synthesis"
 
-@interface CharonMDLLoadedScene : NSObject
+@interface RevenantMDLLoadedScene : NSObject
 @property (nonatomic, retain) NSMutableArray<MDLObject *> *objects;
 @property (nonatomic, retain) id<MDLAssetResolver> resolver;
 @end
 
-static void CharonMDLBounds(MDLAxisAlignedBoundingBox *box, vector_float3 point)
+static void RevenantMDLBounds(MDLAxisAlignedBoundingBox *box, vector_float3 point)
 {
     float low[3], high[3], p[3];
     low[0] = box->minBounds.x, low[1] = box->minBounds.y, low[2] = box->minBounds.z;
@@ -26,7 +26,7 @@ static void CharonMDLBounds(MDLAxisAlignedBoundingBox *box, vector_float3 point)
                                     high[2] > p[2] ? high[2] : p[2]};
 }
 
-@implementation CharonMDLLoadedScene
+@implementation RevenantMDLLoadedScene
 
 - (instancetype)init
 {
@@ -41,8 +41,8 @@ static void CharonMDLBounds(MDLAxisAlignedBoundingBox *box, vector_float3 point)
 
 @end
 
-@interface MDLAsset (CharonReaders)
-- (void)charon_read;
+@interface MDLAsset (RevenantReaders)
+- (void)revenant_read;
 @end
 
 @implementation MDLAsset {
@@ -74,7 +74,7 @@ static void CharonMDLBounds(MDLAxisAlignedBoundingBox *box, vector_float3 point)
         _descriptor = [vertexDescriptor copy];
         if (URL) {
             _URL = URL;
-            [self charon_read];
+            [self revenant_read];
         }
     }
     return self;
@@ -166,8 +166,8 @@ static void CharonMDLBounds(MDLAxisAlignedBoundingBox *box, vector_float3 point)
     MDLAxisAlignedBoundingBox box = {{-INFINITY, -INFINITY, -INFINITY}, {INFINITY, INFINITY, INFINITY}};
     for (MDLObject *object in _objects) {
         MDLAxisAlignedBoundingBox own = [object boundingBoxAtTime:time];
-        CharonMDLBounds(&box, own.minBounds);
-        CharonMDLBounds(&box, own.maxBounds);
+        RevenantMDLBounds(&box, own.minBounds);
+        RevenantMDLBounds(&box, own.maxBounds);
     }
     if (box.minBounds[0] > box.maxBounds[0]) {
         box.minBounds = (vector_float3){0, 0, 0};
@@ -214,25 +214,25 @@ typedef struct {
     vector_float2 uv;
     BOOL hasNormal;
     BOOL hasUV;
-} CharonMDLSourceVertex;
+} RevenantMDLSourceVertex;
 
 typedef struct {
-    CharonMDLSourceVertex *vertex;
+    RevenantMDLSourceVertex *vertex;
     NSUInteger vertexCount, vertexCapacity;
     uint32_t *index;
     NSUInteger indexCount, indexCapacity;
     int group;
     int material;
-} CharonMDLSourceMesh;
+} RevenantMDLSourceMesh;
 
-static void CharonMDLSourceVertexAdd(CharonMDLSourceMesh *mesh, vector_float3 position, vector_float3 normal, vector_float2 uv,
+static void RevenantMDLSourceVertexAdd(RevenantMDLSourceMesh *mesh, vector_float3 position, vector_float3 normal, vector_float2 uv,
                                      BOOL hasNormal, BOOL hasUV)
 {
     if (mesh->vertexCount == mesh->vertexCapacity) {
         mesh->vertexCapacity = mesh->vertexCapacity ? mesh->vertexCapacity * 2 : 256;
-        mesh->vertex = realloc(mesh->vertex, mesh->vertexCapacity * sizeof(CharonMDLSourceVertex));
+        mesh->vertex = realloc(mesh->vertex, mesh->vertexCapacity * sizeof(RevenantMDLSourceVertex));
     }
-    CharonMDLSourceVertex *at = mesh->vertex + mesh->vertexCount++;
+    RevenantMDLSourceVertex *at = mesh->vertex + mesh->vertexCount++;
     at->position = position;
     at->normal = normal;
     at->uv = uv;
@@ -240,7 +240,7 @@ static void CharonMDLSourceVertexAdd(CharonMDLSourceMesh *mesh, vector_float3 po
     at->hasUV = hasUV;
 }
 
-static void CharonMDLSourceIndexAdd(CharonMDLSourceMesh *mesh, uint32_t value)
+static void RevenantMDLSourceIndexAdd(RevenantMDLSourceMesh *mesh, uint32_t value)
 {
     if (mesh->indexCount == mesh->indexCapacity) {
         mesh->indexCapacity = mesh->indexCapacity ? mesh->indexCapacity * 2 : 512;
@@ -249,13 +249,13 @@ static void CharonMDLSourceIndexAdd(CharonMDLSourceMesh *mesh, uint32_t value)
     mesh->index[mesh->indexCount++] = value;
 }
 
-static void CharonMDLSourceMeshFree(CharonMDLSourceMesh *mesh)
+static void RevenantMDLSourceMeshFree(RevenantMDLSourceMesh *mesh)
 {
     free(mesh->vertex);
     free(mesh->index);
 }
 
-static BOOL CharonMDLFaceIndex(NSInteger named, NSUInteger count, NSUInteger *out)
+static BOOL RevenantMDLFaceIndex(NSInteger named, NSUInteger count, NSUInteger *out)
 {
     NSInteger index = named > 0 ? named - 1 : (NSInteger)count + named;
     if (index < 0 || (NSUInteger)index >= count)
@@ -264,7 +264,7 @@ static BOOL CharonMDLFaceIndex(NSInteger named, NSUInteger count, NSUInteger *ou
     return YES;
 }
 
-static MDLMesh *CharonMDLBuildMesh(CharonMDLSourceMesh *mesh, id<MDLMeshBufferAllocator> allocator, NSString *name, NSString *materialName)
+static MDLMesh *RevenantMDLBuildMesh(RevenantMDLSourceMesh *mesh, id<MDLMeshBufferAllocator> allocator, NSString *name, NSString *materialName)
 {
     if (!mesh->vertexCount || !mesh->indexCount)
         return nil;
@@ -272,7 +272,7 @@ static MDLMesh *CharonMDLBuildMesh(CharonMDLSourceMesh *mesh, id<MDLMeshBufferAl
     NSMutableData *vertices = [NSMutableData dataWithLength:mesh->vertexCount * stride];
     uint8_t *bytes = vertices.mutableBytes;
     for (NSUInteger k = 0; k < mesh->vertexCount; k++) {
-        CharonMDLSourceVertex *vertex = mesh->vertex + k;
+        RevenantMDLSourceVertex *vertex = mesh->vertex + k;
         *(vector_float3 *)(bytes + k * stride) = vertex->position;
         vector_float3 normal = vertex->normal;
         if (!vertex->hasNormal) {
@@ -317,7 +317,7 @@ static MDLMesh *CharonMDLBuildMesh(CharonMDLSourceMesh *mesh, id<MDLMeshBufferAl
                                          submeshes:@[submesh]];
 }
 
-static void CharonMDLReadOBJ(NSData *data, NSMutableArray<MDLObject *> *objects, id<MDLMeshBufferAllocator> allocator)
+static void RevenantMDLReadOBJ(NSData *data, NSMutableArray<MDLObject *> *objects, id<MDLMeshBufferAllocator> allocator)
 {
     NSString *text = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
     if (!text)
@@ -325,7 +325,7 @@ static void CharonMDLReadOBJ(NSData *data, NSMutableArray<MDLObject *> *objects,
     vector_float3 *positions = NULL, *normals = NULL;
     vector_float2 *uvs = NULL;
     NSUInteger positionCount = 0, normalCount = 0, uvCount = 0, capacity = 0;
-    CharonMDLSourceMesh mesh;
+    RevenantMDLSourceMesh mesh;
     memset(&mesh, 0, sizeof mesh);
     NSMutableArray<NSArray<NSNumber *> *> *corners = [NSMutableArray array];
     NSMutableArray<NSString *> *submeshNames = [NSMutableArray array];
@@ -379,29 +379,29 @@ static void CharonMDLReadOBJ(NSData *data, NSMutableArray<MDLObject *> *objects,
                     NSString *token = words[1 + (part == 0 ? 0 : (part == 1 ? cornerIndex - 1 : cornerIndex))];
                     NSArray<NSString *> *parts = [token componentsSeparatedByString:@"/"];
                     NSUInteger positionAt = 0, normalAt = 0, uvAt = 0;
-                    BOOL named = parts.count > 0 && CharonMDLFaceIndex(parts[0].integerValue, positionCount, &positionAt);
+                    BOOL named = parts.count > 0 && RevenantMDLFaceIndex(parts[0].integerValue, positionCount, &positionAt);
                     BOOL hasUV = named && parts.count > 1 && parts[1].length &&
-                                 CharonMDLFaceIndex(parts[1].integerValue, uvCount, &uvAt);
+                                 RevenantMDLFaceIndex(parts[1].integerValue, uvCount, &uvAt);
                     BOOL hasNormal = named && parts.count > 2 && parts[2].length &&
-                                     CharonMDLFaceIndex(parts[2].integerValue, normalCount, &normalAt);
+                                     RevenantMDLFaceIndex(parts[2].integerValue, normalCount, &normalAt);
                     if (!named)
                         continue;
                     NSArray<NSNumber *> *corner = @[@(positionAt), @(hasNormal ? normalAt + 1 : 0), @(hasUV ? uvAt + 1 : 0)];
                     NSUInteger found = [corners indexOfObject:corner];
                     if (found == NSNotFound) {
                         [corners addObject:corner];
-                        CharonMDLSourceVertexAdd(&mesh, positions[positionAt],
+                        RevenantMDLSourceVertexAdd(&mesh, positions[positionAt],
                                                  hasNormal ? normals[normalAt] : (vector_float3){0, 0, 0},
                                                  hasUV ? uvs[uvAt] : (vector_float2){0, 0}, hasNormal, hasUV);
                         found = mesh.vertexCount - 1;
                     }
-                    CharonMDLSourceIndexAdd(&mesh, (uint32_t)found);
+                    RevenantMDLSourceIndexAdd(&mesh, (uint32_t)found);
                 }
             submeshCount[at] = @(mesh.indexCount - before);
         }
     }
     if (mesh.vertexCount && mesh.indexCount) {
-        MDLMesh *built = CharonMDLBuildMesh(&mesh, allocator, submeshNames.firstObject, submeshMaterials.firstObject);
+        MDLMesh *built = RevenantMDLBuildMesh(&mesh, allocator, submeshNames.firstObject, submeshMaterials.firstObject);
         if (built) {
             NSString *first = submeshNames.firstObject, *firstMaterial = submeshMaterials.firstObject;
             built.name = firstMaterial.length ? [NSString stringWithFormat:@"%@_%@", first, firstMaterial] : first;
@@ -429,7 +429,7 @@ static void CharonMDLReadOBJ(NSData *data, NSMutableArray<MDLObject *> *objects,
             [objects addObject:built];
         }
     }
-    CharonMDLSourceMeshFree(&mesh);
+    RevenantMDLSourceMeshFree(&mesh);
     free(positions);
     free(normals);
     free(uvs);
@@ -440,9 +440,9 @@ typedef struct {
     char name[32];
     int countKind;
     int valueKind;
-} CharonMDLPLYProperty;
+} RevenantMDLPLYProperty;
 
-static int CharonMDLPLYSize(int kind)
+static int RevenantMDLPLYSize(int kind)
 {
     switch (kind) {
         case 0:
@@ -460,9 +460,9 @@ static int CharonMDLPLYSize(int kind)
     }
 }
 
-static double CharonMDLPLYReadBinary(const uint8_t **at, int kind, BOOL swap)
+static double RevenantMDLPLYReadBinary(const uint8_t **at, int kind, BOOL swap)
 {
-    int size = CharonMDLPLYSize(kind);
+    int size = RevenantMDLPLYSize(kind);
     uint8_t bytes[8];
     memcpy(bytes, *at, size);
     *at += size;
@@ -511,7 +511,7 @@ static double CharonMDLPLYReadBinary(const uint8_t **at, int kind, BOOL swap)
     }
 }
 
-static int CharonMDLPLYKind(NSString *type, NSString *name)
+static int RevenantMDLPLYKind(NSString *type, NSString *name)
 {
     if ([type isEqualToString:@"char"] || [type isEqualToString:@"int8"])
         return 0;
@@ -536,7 +536,7 @@ static int CharonMDLPLYKind(NSString *type, NSString *name)
     return 6;
 }
 
-static void CharonMDLReadPLY(NSData *data, NSMutableArray<MDLObject *> *objects, id<MDLMeshBufferAllocator> allocator)
+static void RevenantMDLReadPLY(NSData *data, NSMutableArray<MDLObject *> *objects, id<MDLMeshBufferAllocator> allocator)
 {
     const uint8_t *bytes = data.bytes;
     static const char marker[] = "end_header";
@@ -573,26 +573,26 @@ static void CharonMDLReadPLY(NSData *data, NSMutableArray<MDLObject *> *objects,
             [elementTypes addObject:words[1]];
             [elementProperties addObject:[NSMutableArray array]];
         } else if ([key isEqualToString:@"property"] && elements.count) {
-            CharonMDLPLYProperty property;
+            RevenantMDLPLYProperty property;
             memset(&property, 0, sizeof property);
             if (words.count > 2 && [words[1] isEqualToString:@"list"]) {
                 property.kind = 1;
-                property.countKind = CharonMDLPLYKind(words[2], @"count");
-                property.valueKind = words.count > 4 ? CharonMDLPLYKind(words[3], words[4]) : 6;
+                property.countKind = RevenantMDLPLYKind(words[2], @"count");
+                property.valueKind = words.count > 4 ? RevenantMDLPLYKind(words[3], words[4]) : 6;
                 strncpy(property.name, words[4].UTF8String ?: "list", sizeof property.name - 1);
             } else if (words.count > 2) {
                 property.kind = 0;
-                property.valueKind = CharonMDLPLYKind(words[1], words[2]);
+                property.valueKind = RevenantMDLPLYKind(words[1], words[2]);
                 strncpy(property.name, words[2].UTF8String ?: "", sizeof property.name - 1);
             }
             NSMutableArray *properties = [(NSMutableArray *)elementProperties[elements.count - 1] mutableCopy];
-            [properties addObject:[NSValue valueWithBytes:&property objCType:@encode(CharonMDLPLYProperty)]];
+            [properties addObject:[NSValue valueWithBytes:&property objCType:@encode(RevenantMDLPLYProperty)]];
             [elementProperties replaceObjectAtIndex:elements.count - 1 withObject:properties];
         }
     }
     BOOL ascii = [format isEqualToString:@"ascii"];
     BOOL swap = [format isEqualToString:@"binary_big_endian"];
-    CharonMDLSourceMesh mesh;
+    RevenantMDLSourceMesh mesh;
     memset(&mesh, 0, sizeof mesh);
     NSUInteger bodyStart = headerEnd + sizeof marker - 1;
     while (bodyStart < data.length && (bytes[bodyStart] == '\n' || bytes[bodyStart] == '\r'))
@@ -614,9 +614,9 @@ static void CharonMDLReadPLY(NSData *data, NSMutableArray<MDLObject *> *objects,
             BOOL vertices = [elements[e] isEqualToString:@"vertex"];
             for (NSUInteger k = 0; k < count; k++) {
                 if (vertices) {
-                    CharonMDLSourceVertex vertex = {{0, 0, 0}, {0, 0, 0}, {0, 0}, NO, NO};
+                    RevenantMDLSourceVertex vertex = {{0, 0, 0}, {0, 0, 0}, {0, 0}, NO, NO};
                     for (NSValue *held in properties) {
-                        CharonMDLPLYProperty property;
+                        RevenantMDLPLYProperty property;
                         [held getValue:&property];
                         if (at >= body.count)
                             break;
@@ -640,13 +640,13 @@ static void CharonMDLReadPLY(NSData *data, NSMutableArray<MDLObject *> *objects,
                     }
                     if (mesh.vertexCount == mesh.vertexCapacity) {
                         mesh.vertexCapacity = mesh.vertexCapacity ? mesh.vertexCapacity * 2 : 256;
-                        mesh.vertex = realloc(mesh.vertex, mesh.vertexCapacity * sizeof(CharonMDLSourceVertex));
+                        mesh.vertex = realloc(mesh.vertex, mesh.vertexCapacity * sizeof(RevenantMDLSourceVertex));
                     }
                     mesh.vertex[mesh.vertexCount++] = vertex;
                 } else if ([elements[e] isEqualToString:@"face"]) {
                     NSMutableArray<NSNumber *> *corners = [NSMutableArray array];
                     for (NSValue *held in properties) {
-                        CharonMDLPLYProperty property;
+                        RevenantMDLPLYProperty property;
                         [held getValue:&property];
                         NSUInteger length = at < body.count ? (NSUInteger)[body[at++] doubleValue] : 0;
                         for (NSUInteger c = 0; c < length && at < body.count; c++)
@@ -658,9 +658,9 @@ static void CharonMDLReadPLY(NSData *data, NSMutableArray<MDLObject *> *objects,
                         NSUInteger second = [corners[c - 1] unsignedIntegerValue], third = [corners[c] unsignedIntegerValue];
                         if (first >= mesh.vertexCount || second >= mesh.vertexCount || third >= mesh.vertexCount)
                             continue;
-                        CharonMDLSourceIndexAdd(&mesh, (uint32_t)first);
-                        CharonMDLSourceIndexAdd(&mesh, (uint32_t)second);
-                        CharonMDLSourceIndexAdd(&mesh, (uint32_t)third);
+                        RevenantMDLSourceIndexAdd(&mesh, (uint32_t)first);
+                        RevenantMDLSourceIndexAdd(&mesh, (uint32_t)second);
+                        RevenantMDLSourceIndexAdd(&mesh, (uint32_t)third);
                     }
                 }
             }
@@ -674,11 +674,11 @@ static void CharonMDLReadPLY(NSData *data, NSMutableArray<MDLObject *> *objects,
             for (NSUInteger k = 0; k < count; k++) {
                 const uint8_t *at = bytes + offset;
                 if (vertices) {
-                    CharonMDLSourceVertex vertex = {{0, 0, 0}, {0, 0, 0}, {0, 0}, NO, NO};
+                    RevenantMDLSourceVertex vertex = {{0, 0, 0}, {0, 0, 0}, {0, 0}, NO, NO};
                     for (NSValue *held in properties) {
-                        CharonMDLPLYProperty property;
+                        RevenantMDLPLYProperty property;
                         [held getValue:&property];
-                        double value = CharonMDLPLYReadBinary(&at, property.valueKind, swap);
+                        double value = RevenantMDLPLYReadBinary(&at, property.valueKind, swap);
                         if (!strcmp(property.name, "x"))
                             vertex.position.x = (float)value;
                         else if (!strcmp(property.name, "y"))
@@ -699,26 +699,26 @@ static void CharonMDLReadPLY(NSData *data, NSMutableArray<MDLObject *> *objects,
                     offset = (NSUInteger)(at - bytes);
                     if (mesh.vertexCount == mesh.vertexCapacity) {
                         mesh.vertexCapacity = mesh.vertexCapacity ? mesh.vertexCapacity * 2 : 256;
-                        mesh.vertex = realloc(mesh.vertex, mesh.vertexCapacity * sizeof(CharonMDLSourceVertex));
+                        mesh.vertex = realloc(mesh.vertex, mesh.vertexCapacity * sizeof(RevenantMDLSourceVertex));
                     }
                     mesh.vertex[mesh.vertexCount++] = vertex;
                 } else if ([elements[e] isEqualToString:@"face"]) {
                     for (NSValue *held in properties) {
-                        CharonMDLPLYProperty property;
+                        RevenantMDLPLYProperty property;
                         [held getValue:&property];
-                        NSUInteger length = property.kind == 1 ? (NSUInteger)CharonMDLPLYReadBinary(&at, property.countKind, swap) : 0;
+                        NSUInteger length = property.kind == 1 ? (NSUInteger)RevenantMDLPLYReadBinary(&at, property.countKind, swap) : 0;
                         NSMutableArray<NSNumber *> *corners = [NSMutableArray array];
                         for (NSUInteger c = 0; c < length; c++)
-                            [corners addObject:@((NSUInteger)CharonMDLPLYReadBinary(&at, property.valueKind, swap))];
+                            [corners addObject:@((NSUInteger)RevenantMDLPLYReadBinary(&at, property.valueKind, swap))];
                         offset = (NSUInteger)(at - bytes);
                         for (NSUInteger c = 2; c < corners.count; c++) {
                             NSUInteger first = [corners[0] unsignedIntegerValue], second = [corners[c - 1] unsignedIntegerValue],
                                       third = [corners[c] unsignedIntegerValue];
                             if (first >= mesh.vertexCount || second >= mesh.vertexCount || third >= mesh.vertexCount)
                                 continue;
-                            CharonMDLSourceIndexAdd(&mesh, (uint32_t)first);
-                            CharonMDLSourceIndexAdd(&mesh, (uint32_t)second);
-                            CharonMDLSourceIndexAdd(&mesh, (uint32_t)third);
+                            RevenantMDLSourceIndexAdd(&mesh, (uint32_t)first);
+                            RevenantMDLSourceIndexAdd(&mesh, (uint32_t)second);
+                            RevenantMDLSourceIndexAdd(&mesh, (uint32_t)third);
                         }
                     }
                 }
@@ -728,15 +728,15 @@ static void CharonMDLReadPLY(NSData *data, NSMutableArray<MDLObject *> *objects,
     NSString *meshName = data.length ? @"" : @"";
     NSString *submeshName = data.length ? @"" : @"";
     NSString *materialName = data.length ? @"PLY Material" : @"";
-    MDLMesh *built = CharonMDLBuildMesh(&mesh, allocator, submeshName, materialName);
+    MDLMesh *built = RevenantMDLBuildMesh(&mesh, allocator, submeshName, materialName);
     if (built) {
         built.name = meshName;
         [objects addObject:built];
     }
-    CharonMDLSourceMeshFree(&mesh);
+    RevenantMDLSourceMeshFree(&mesh);
 }
 
-static NSString *CharonMDLUSDAArray(NSString *text, NSString *after, NSString **rest)
+static NSString *RevenantMDLUSDAArray(NSString *text, NSString *after, NSString **rest)
 {
     NSRange start = [text rangeOfString:after];
     if (start.location == NSNotFound)
@@ -760,7 +760,7 @@ static NSString *CharonMDLUSDAArray(NSString *text, NSString *after, NSString **
     return [text substringWithRange:NSMakeRange(open + 1, close > open ? close - open - 1 : 0)];
 }
 
-static void CharonMDLReadUSDA(NSData *data, NSMutableArray<MDLObject *> *objects,
+static void RevenantMDLReadUSDA(NSData *data, NSMutableArray<MDLObject *> *objects,
                               id<MDLMeshBufferAllocator> allocator, NSString *name)
 {
     NSString *text = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
@@ -796,9 +796,9 @@ static void CharonMDLReadUSDA(NSData *data, NSMutableArray<MDLObject *> *objects
         for (NSString *line in points)
             if ([line rangeOfString:@"point3f[] points"].location != NSNotFound)
                 pointsText = line;
-        NSString *pointArray = CharonMDLUSDAArray(pointsText ?: body, @"points", NULL);
-        NSString *countArray = CharonMDLUSDAArray(body, @"faceVertexCounts", NULL);
-        NSString *indexArray = CharonMDLUSDAArray(body, @"faceVertexIndices", NULL);
+        NSString *pointArray = RevenantMDLUSDAArray(pointsText ?: body, @"points", NULL);
+        NSString *countArray = RevenantMDLUSDAArray(body, @"faceVertexCounts", NULL);
+        NSString *indexArray = RevenantMDLUSDAArray(body, @"faceVertexIndices", NULL);
         if (!pointArray || !countArray || !indexArray)
             continue;
         NSMutableArray<NSNumber *> *pointNumbers = [NSMutableArray array];
@@ -808,9 +808,9 @@ static void CharonMDLReadUSDA(NSData *data, NSMutableArray<MDLObject *> *objects
                 [pointNumbers addObject:@(number.doubleValue)];
         }
         NSUInteger vertexCount = pointNumbers.count / 3;
-        CharonMDLSourceMesh mesh;
+        RevenantMDLSourceMesh mesh;
         memset(&mesh, 0, sizeof mesh);
-        CharonMDLSourceVertex *vertex = calloc(vertexCount ? vertexCount : 1, sizeof(CharonMDLSourceVertex));
+        RevenantMDLSourceVertex *vertex = calloc(vertexCount ? vertexCount : 1, sizeof(RevenantMDLSourceVertex));
         for (NSUInteger k = 0; k < vertexCount; k++)
             vertex[k].position = (vector_float3){pointNumbers[k * 3].floatValue, pointNumbers[k * 3 + 1].floatValue,
                                                 pointNumbers[k * 3 + 2].floatValue};
@@ -830,7 +830,7 @@ static void CharonMDLReadUSDA(NSData *data, NSMutableArray<MDLObject *> *objects
             if (length < 3)
                 continue;
             if (corner + length > indices.count) {
-                fprintf(stderr, "charon-usda-malformed file faces run past faceVertexIndices "
+                fprintf(stderr, "revenant-usda-malformed file faces run past faceVertexIndices "
                         "face=%lu corners=%lu available=%lu\n",
                         (unsigned long)faceIndex, (unsigned long)length, (unsigned long)indices.count);
                 return;
@@ -847,24 +847,24 @@ static void CharonMDLReadUSDA(NSData *data, NSMutableArray<MDLObject *> *objects
                                 name.lastPathComponent.UTF8String);
                         return;
                     }
-                    CharonMDLSourceIndexAdd(&mesh, (uint32_t)triangle[part]);
+                    RevenantMDLSourceIndexAdd(&mesh, (uint32_t)triangle[part]);
                 }
             }
             corner += length;
             faceIndex++;
         }
-        MDLMesh *built = CharonMDLBuildMesh(&mesh, allocator, @"submesh", @"material");
+        MDLMesh *built = RevenantMDLBuildMesh(&mesh, allocator, @"submesh", @"material");
         if (built) {
             built.name = name;
             [objects addObject:built];
         }
-        CharonMDLSourceMeshFree(&mesh);
+        RevenantMDLSourceMeshFree(&mesh);
     }
 }
 
-@implementation MDLAsset (CharonReaders)
+@implementation MDLAsset (RevenantReaders)
 
-- (void)charon_read
+- (void)revenant_read
 {
     NSData *data = [NSData dataWithContentsOfURL:_URL];
     if (!data.length)
@@ -874,11 +874,11 @@ static void CharonMDLReadUSDA(NSData *data, NSMutableArray<MDLObject *> *objects
     id<MDLMeshBufferAllocator> allocator = _allocator;
     NSString *extension = _URL.pathExtension.lowercaseString;
     if ([extension isEqualToString:@"obj"])
-        CharonMDLReadOBJ(data, _objects, allocator);
+        RevenantMDLReadOBJ(data, _objects, allocator);
     else if ([extension isEqualToString:@"ply"])
-        CharonMDLReadPLY(data, _objects, allocator);
+        RevenantMDLReadPLY(data, _objects, allocator);
     else if ([extension isEqualToString:@"usda"])
-        CharonMDLReadUSDA(data, _objects, allocator, _URL.path);
+        RevenantMDLReadUSDA(data, _objects, allocator, _URL.path);
 }
 
 @end

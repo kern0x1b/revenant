@@ -3,7 +3,7 @@
 #import <UIKit/UIKit.h>
 #import <objc/runtime.h>
 
-@interface CharonIntentsUIHostedViewController : UIViewController <INUIHostedViewControlling>
+@interface RevenantIntentsUIHostedViewController : UIViewController <INUIHostedViewControlling>
 
 - (instancetype)initWithInteraction:(INInteraction *)interaction;
 
@@ -13,7 +13,7 @@
 
 @end
 
-@implementation CharonIntentsUIHostedViewController {
+@implementation RevenantIntentsUIHostedViewController {
     NSMutableDictionary *_labelsByParameter;
     UIButton *_behaviorButton;
     NSMutableSet *_configured;
@@ -42,12 +42,12 @@
 {
     _interaction = interaction;
     _hostedViewContext = context;
-    NSArray<INParameter *> *parameters = [self charon_parametersOfInteraction:interaction];
+    NSArray<INParameter *> *parameters = [self revenant_parametersOfInteraction:interaction];
     NSSet *wanted = [NSSet setWithArray:parameters];
-    [self charon_applyParameters:wanted];
-    [self charon_applyContext:context];
+    [self revenant_applyParameters:wanted];
+    [self revenant_applyContext:context];
     if (completion) {
-        completion([self charon_desiredSize]);
+        completion([self revenant_desiredSize]);
     }
 }
 
@@ -61,24 +61,24 @@
     _interaction = interaction;
     _hostedViewContext = context;
     _interactiveBehavior = interactiveBehavior;
-    NSSet *carried = [NSSet setWithArray:[self charon_parametersOfInteraction:interaction]];
+    NSSet *carried = [NSSet setWithArray:[self revenant_parametersOfInteraction:interaction]];
     NSMutableSet *applicable = [NSMutableSet set];
     for (INParameter *parameter in parameters) {
         if ([carried containsObject:parameter]) {
             [applicable addObject:parameter];
         }
     }
-    [self charon_applyParameters:applicable];
-    [self charon_applyBehavior:interactiveBehavior];
-    [self charon_applyContext:context];
+    [self revenant_applyParameters:applicable];
+    [self revenant_applyBehavior:interactiveBehavior];
+    [self revenant_applyContext:context];
     if (completion) {
-        completion(YES, [NSSet setWithSet:_configured], [self charon_desiredSize]);
+        completion(YES, [NSSet setWithSet:_configured], [self revenant_desiredSize]);
     }
 }
 
 #pragma mark - What the view does with them
 
-- (NSArray<INParameter *> *)charon_parametersOfInteraction:(INInteraction *)interaction
+- (NSArray<INParameter *> *)revenant_parametersOfInteraction:(INInteraction *)interaction
 {
     INIntent *intent = interaction.intent;
     if (!intent) {
@@ -99,7 +99,7 @@
     return parameters;
 }
 
-- (void)charon_applyParameters:(NSSet *)parameters
+- (void)revenant_applyParameters:(NSSet *)parameters
 {
     for (INParameter *parameter in parameters) {
         NSString *key = parameter.parameterKeyPath;
@@ -123,26 +123,26 @@
     }
 }
 
-- (void)charon_applyContext:(INUIHostedViewContext)context
+- (void)revenant_applyContext:(INUIHostedViewContext)context
 {
     self.view.hidden = context == INUIHostedViewContextSiriSnippet && _labelsByParameter.count == 0;
 }
 
-- (void)charon_applyBehavior:(INUIInteractiveBehavior)behavior
+- (void)revenant_applyBehavior:(INUIInteractiveBehavior)behavior
 {
     [_behaviorButton removeFromSuperview];
     _behaviorButton = nil;
     switch (behavior) {
         case INUIInteractiveBehaviorNextView: {
-            _behaviorButton = [self charon_buttonWithTitle:@"›" action:@selector(charon_next:)];
+            _behaviorButton = [self revenant_buttonWithTitle:@"›" action:@selector(revenant_next:)];
             break;
         }
         case INUIInteractiveBehaviorLaunch: {
-            _behaviorButton = [self charon_buttonWithTitle:@"Open" action:@selector(charon_launch:)];
+            _behaviorButton = [self revenant_buttonWithTitle:@"Open" action:@selector(revenant_launch:)];
             break;
         }
         case INUIInteractiveBehaviorGenericAction: {
-            _behaviorButton = [self charon_buttonWithTitle:@"Do it" action:@selector(charon_act:)];
+            _behaviorButton = [self revenant_buttonWithTitle:@"Do it" action:@selector(revenant_act:)];
             _behaviorButton.titleLabel.font = [UIFont boldSystemFontOfSize:22.0f];
             break;
         }
@@ -156,7 +156,7 @@
     [self.view setNeedsLayout];
 }
 
-- (UIButton *)charon_buttonWithTitle:(NSString *)title action:(SEL)action
+- (UIButton *)revenant_buttonWithTitle:(NSString *)title action:(SEL)action
 {
     UIButton *button = [UIButton buttonWithType:UIButtonTypeSystem];
     [button setTitle:title forState:UIControlStateNormal];
@@ -164,9 +164,9 @@
     return button;
 }
 
-- (void)charon_next:(id)sender { }
-- (void)charon_launch:(id)sender { }
-- (void)charon_act:(id)sender { }
+- (void)revenant_next:(id)sender { }
+- (void)revenant_launch:(id)sender { }
+- (void)revenant_act:(id)sender { }
 
 - (void)viewDidLayoutSubviews
 {
@@ -185,7 +185,7 @@
     }
 }
 
-- (CGSize)charon_desiredSize
+- (CGSize)revenant_desiredSize
 {
     CGSize fitted = [self.view sizeThatFits:CGSizeMake(CGRectGetWidth(self.view.bounds), CGFLOAT_MAX)];
     return CGSizeMake(CGRectGetWidth(self.view.bounds) > 0 ? CGRectGetWidth(self.view.bounds) : 320.0f,

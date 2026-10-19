@@ -1,6 +1,6 @@
-#import "CharonStandInPlayerItem.h"
+#import "RevenantStandInPlayerItem.h"
 
-@implementation CharonStandInPlayerItem
+@implementation RevenantStandInPlayerItem
 
 - (instancetype)initWithAsset:(AVAsset *)asset
 {

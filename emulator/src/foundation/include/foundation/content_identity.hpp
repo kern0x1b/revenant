@@ -17,7 +17,7 @@
 #include <span>
 #include <string>
 
-namespace shade {
+namespace emulator {
 
 struct ContentIdentity {
     std::array<std::byte, 32> digest { };

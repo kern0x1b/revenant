@@ -128,7 +128,7 @@ static void test_exceptions(void)
     NSArray *oracle = exceptions(Oracle), *ours = exceptions(Ours);
     const char *rows[] = {"a group among the items", "an empty group in an animator"};
     for (NSUInteger index = 0; index < oracle.count; index++) {
-        charon_check([ours[index] isEqualToString:oracle[index]], "G2 group exception name and text are the oracle's",
+        revenant_check([ours[index] isEqualToString:oracle[index]], "G2 group exception name and text are the oracle's",
                      [NSString stringWithFormat:@"%s: ours \"%@\" oracle \"%@\"", rows[index], ours[index], oracle[index]]);
     }
     CHECK_EQUAL(oracle[0], @"Invalid Argument: UIDynamicItemGroup cannot be initialized with items containing UIDynamicItemGroup",
@@ -173,7 +173,7 @@ static void test_animator(void)
     check_point(proxy[frames - 1], CGPointMake(220, 183.5551), 5e-5, "oracle group falls as s_grp measured", @"box proxy B frame 20");
     NSArray *expected = transform_values(oracleFirst), *actual = transform_values(oursFirst);
     CHECK([expected isEqual:transform_values(CGAffineTransformIdentity)], "oracle group's first step writes identity to the members");
-    charon_check([actual isEqual:expected], "G3 the first step writes the members' transform as the oracle",
+    revenant_check([actual isEqual:expected], "G3 the first step writes the members' transform as the oracle",
                  [NSString stringWithFormat:@"ours %@ oracle %@", actual, expected]);
 }
 

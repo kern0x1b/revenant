@@ -35,7 +35,7 @@ target="-target arm64-apple-ios17.0-macabi -isysroot $sdk -iframework $sdk/Syste
 common="$target -fobjc-arc"
 frameworks="-framework Foundation -framework UIKit -framework CoreGraphics -framework Metal -framework MetalKit"
 
-renames="-DMTKTextureLoaderOptionLoadAsArray=charonHost_MTKTextureLoaderOptionLoadAsArray"
+renames="-DMTKTextureLoaderOptionLoadAsArray=revenantHost_MTKTextureLoaderOptionLoadAsArray"
 
 # ALWAYS REBUILDS, and removes the binary first: a link that fails must not leave the previous run's
 # binary behind to be read as this run's answer. That is the same defect descriptors16.sh guards.
@@ -67,18 +67,18 @@ build real "$S/MetalKit/MTKTextureLoaderOptionLoadAsArray17.m"
 
 # THE PORT'S OBJECT MUST CARRY ITS SYMBOL UNDER THE RENAMED NAME, or the case is reading Apple's
 # framework for the port's answer and would agree with itself.
-if ! nm -g "$work/real" 2>/dev/null | grep -q "_charonHost_MTKTextureLoaderOptionLoadAsArray"; then
-    echo "FAIL: the binary does not define _charonHost_MTKTextureLoaderOptionLoadAsArray" >&2
+if ! nm -g "$work/real" 2>/dev/null | grep -q "_revenantHost_MTKTextureLoaderOptionLoadAsArray"; then
+    echo "FAIL: the binary does not define _revenantHost_MTKTextureLoaderOptionLoadAsArray" >&2
     echo "  the case would then be reading Apple's own framework and calling it the port's" >&2
     exit 1
 fi
-echo "  the port's key is DEFINED in the binary: _charonHost_MTKTextureLoaderOptionLoadAsArray"
+echo "  the port's key is DEFINED in the binary: _revenantHost_MTKTextureLoaderOptionLoadAsArray"
 timeout 120 "$work/real" || { echo "FAIL: the option-key differential failed" >&2; exit 1; }
 
 # THE MUTATION the case has to notice: a key whose value is not its own name. If the case could not
 # see this, it would agree with any value and its green would be worth nothing.
 echo "the mutation: the port's key with a value that is not its own name"
-sed 's|@"MTKTextureLoaderOptionLoadAsArray"|@"MTKTextureLoaderOptionLoadAsArraysCharonMutant"|' \
+sed 's|@"MTKTextureLoaderOptionLoadAsArray"|@"MTKTextureLoaderOptionLoadAsArraysRevenantMutant"|' \
     "$S/MetalKit/MTKTextureLoaderOptionLoadAsArray17.m" > "$work/mutant.m"
 build mutant "$work/mutant.m"
 if timeout 120 "$work/mutant" > "$work/mutant.out" 2>&1; then

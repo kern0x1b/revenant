@@ -1,23 +1,23 @@
-#import "CharonPhotos.h"
+#import "RevenantPhotos.h"
 
 #pragma clang diagnostic ignored "-Wobjc-missing-property-synthesis"
 
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 
-@interface PHObjectChangeDetails (Charon)
-- (instancetype)initWithCharonBefore:(PHObject *)before after:(PHObject *)after contentChanged:(BOOL)contentChanged;
+@interface PHObjectChangeDetails (Revenant)
+- (instancetype)initWithRevenantBefore:(PHObject *)before after:(PHObject *)after contentChanged:(BOOL)contentChanged;
 @end
 
-@interface PHFetchResultChangeDetails (Charon)
-- (instancetype)initWithCharonBefore:(PHFetchResult *)before after:(PHFetchResult *)after changed:(NSArray *)changed incremental:(BOOL)incremental;
+@interface PHFetchResultChangeDetails (Revenant)
+- (instancetype)initWithRevenantBefore:(PHFetchResult *)before after:(PHFetchResult *)after changed:(NSArray *)changed incremental:(BOOL)incremental;
 @end
 
 @implementation PHChange {
     NSSet *_updated;
 }
 
-- (instancetype)initWithCharonUserInfo:(NSDictionary *)userInfo
+- (instancetype)initWithRevenantUserInfo:(NSDictionary *)userInfo
 {
     self = [super init];
     if (self) {
@@ -31,21 +31,21 @@
     return self;
 }
 
-- (BOOL)charon_updated:(PHObject *)object
+- (BOOL)revenant_updated:(PHObject *)object
 {
-    return [_updated containsObject:[CharonPhotosStore resolvedIdentifier:object.localIdentifier]];
+    return [_updated containsObject:[RevenantPhotosStore resolvedIdentifier:object.localIdentifier]];
 }
 
 - (PHObjectChangeDetails *)changeDetailsForObject:(PHObject *)object
 {
-    PHObject *after = [object charon_refetched];
-    BOOL updated = [self charon_updated:object];
-    if (after && !updated && [object charon_sameStateAs:after])
+    PHObject *after = [object revenant_refetched];
+    BOOL updated = [self revenant_updated:object];
+    if (after && !updated && [object revenant_sameStateAs:after])
         return nil;
-    return [[PHObjectChangeDetails alloc] initWithCharonBefore:object after:after contentChanged:updated && [object isKindOfClass:[PHAsset class]]];
+    return [[PHObjectChangeDetails alloc] initWithRevenantBefore:object after:after contentChanged:updated && [object isKindOfClass:[PHAsset class]]];
 }
 
-static NSDictionary *charon_positions(PHFetchResult *result)
+static NSDictionary *revenant_positions(PHFetchResult *result)
 {
     NSMutableDictionary *positions = [NSMutableDictionary dictionaryWithCapacity:result.count];
     for (NSUInteger index = 0; index < result.count; index++)
@@ -55,8 +55,8 @@ static NSDictionary *charon_positions(PHFetchResult *result)
 
 - (PHFetchResultChangeDetails *)changeDetailsForFetchResult:(PHFetchResult *)object
 {
-    PHFetchResult *after = [object charon_refetched];
-    NSDictionary *before = charon_positions(object);
+    PHFetchResult *after = [object revenant_refetched];
+    NSDictionary *before = revenant_positions(object);
     NSMutableArray *changed = [NSMutableArray array];
     BOOL differs = after.count != object.count;
     for (NSUInteger index = 0; index < after.count; index++) {
@@ -68,12 +68,12 @@ static NSDictionary *charon_positions(PHFetchResult *result)
         }
         NSUInteger was = position.unsignedIntegerValue;
         differs = differs || was != index;
-        if ([self charon_updated:now] || ![object[was] charon_sameStateAs:now])
+        if ([self revenant_updated:now] || ![object[was] revenant_sameStateAs:now])
             [changed addObject:now];
     }
     if (!differs && changed.count == 0)
         return nil;
-    return [[PHFetchResultChangeDetails alloc] initWithCharonBefore:object after:after changed:changed incremental:[object charon_wantsIncrementalChangeDetails]];
+    return [[PHFetchResultChangeDetails alloc] initWithRevenantBefore:object after:after changed:changed incremental:[object revenant_wantsIncrementalChangeDetails]];
 }
 
 @end
@@ -84,7 +84,7 @@ static NSDictionary *charon_positions(PHFetchResult *result)
     BOOL _contentChanged;
 }
 
-- (instancetype)initWithCharonBefore:(PHObject *)before after:(PHObject *)after contentChanged:(BOOL)contentChanged
+- (instancetype)initWithRevenantBefore:(PHObject *)before after:(PHObject *)after contentChanged:(BOOL)contentChanged
 {
     self = [super init];
     if (self) {
@@ -126,14 +126,14 @@ static NSDictionary *charon_positions(PHFetchResult *result)
     NSIndexSet *_changed;
 }
 
-- (instancetype)initWithCharonBefore:(PHFetchResult *)before after:(PHFetchResult *)after changed:(NSArray *)changed incremental:(BOOL)incremental
+- (instancetype)initWithRevenantBefore:(PHFetchResult *)before after:(PHFetchResult *)after changed:(NSArray *)changed incremental:(BOOL)incremental
 {
     self = [super init];
     if (!self)
         return nil;
     _before = before;
     _after = after;
-    NSDictionary *beforePositions = charon_positions(before), *afterPositions = charon_positions(after);
+    NSDictionary *beforePositions = revenant_positions(before), *afterPositions = revenant_positions(after);
     NSMutableSet *changedIdentifiers = [NSMutableSet setWithCapacity:changed.count];
     for (PHObject *object in changed)
         [changedIdentifiers addObject:object.localIdentifier];
@@ -171,7 +171,7 @@ static NSDictionary *charon_positions(PHFetchResult *result)
 
 + (instancetype)changeDetailsFromFetchResult:(PHFetchResult *)fromResult toFetchResult:(PHFetchResult *)toResult changedObjects:(NSArray *)changedObjects
 {
-    return [[self alloc] initWithCharonBefore:fromResult after:toResult changed:changedObjects incremental:YES];
+    return [[self alloc] initWithRevenantBefore:fromResult after:toResult changed:changedObjects incremental:YES];
 }
 
 - (PHFetchResult *)fetchResultBeforeChanges

@@ -16,31 +16,31 @@
 
 // MARK: - the two opaque types
 
-static NSString *const charonMetadataMarker = @"charon.metadata";
-static NSString *const charonTagMarker = @"charon.tag";
+static NSString *const revenantMetadataMarker = @"revenant.metadata";
+static NSString *const revenantTagMarker = @"revenant.tag";
 
-static BOOL charon_is_metadata(CFTypeRef object)
+static BOOL revenant_is_metadata(CFTypeRef object)
 {
     if (!object || CFGetTypeID(object) != CFDictionaryGetTypeID())
         return NO;
-    return [(__bridge NSDictionary *)object objectForKey:charonMetadataMarker] != nil;
+    return [(__bridge NSDictionary *)object objectForKey:revenantMetadataMarker] != nil;
 }
 
-static BOOL charon_is_tag(CFTypeRef object)
+static BOOL revenant_is_tag(CFTypeRef object)
 {
     if (!object || CFGetTypeID(object) != CFDictionaryGetTypeID())
         return NO;
-    return [(__bridge NSDictionary *)object objectForKey:charonTagMarker] != nil;
+    return [(__bridge NSDictionary *)object objectForKey:revenantTagMarker] != nil;
 }
 
-static NSDictionary *charon_metadata(CFTypeRef object)
+static NSDictionary *revenant_metadata(CFTypeRef object)
 {
-    return charon_is_metadata(object) ? (__bridge NSDictionary *)object : nil;
+    return revenant_is_metadata(object) ? (__bridge NSDictionary *)object : nil;
 }
 
-static NSDictionary *charon_tag(CFTypeRef object)
+static NSDictionary *revenant_tag(CFTypeRef object)
 {
-    return charon_is_tag(object) ? (__bridge NSDictionary *)object : nil;
+    return revenant_is_tag(object) ? (__bridge NSDictionary *)object : nil;
 }
 
 // True of a value that is one of this library's tags. A structure's value is a dictionary and a tag is a
@@ -49,7 +49,7 @@ static BOOL isTag(id value)
 {
     if (!value || ![value isKindOfClass:[NSDictionary class]])
         return NO;
-    return [(NSDictionary *)value objectForKey:charonTagMarker] != nil;
+    return [(NSDictionary *)value objectForKey:revenantTagMarker] != nil;
 }
 
 // MARK: - the default prefix of a namespace
@@ -65,13 +65,13 @@ static BOOL isTag(id value)
 typedef struct {
     CFStringRef xmlns;
     CFStringRef prefix;
-} charon_public;
+} revenant_public;
 
 // The table is filled into the caller's own array rather than kept in a file-scope one: the constants are
 // not compile-time constants for a static initializer (CFSTR is a builtin call), and a table written once
 // and read from every thread would need a lock this library has no reason to carry.
-#define CHARON_PUBLIC_NAMESPACES 10
-static size_t charon_public_namespaces(charon_public *table)
+#define REVENANT_PUBLIC_NAMESPACES 10
+static size_t revenant_public_namespaces(revenant_public *table)
 {
     table[0].xmlns = kCGImageMetadataNamespaceExif;
     table[0].prefix = kCGImageMetadataPrefixExif;
@@ -93,14 +93,14 @@ static size_t charon_public_namespaces(charon_public *table)
     table[8].prefix = kCGImageMetadataPrefixXMPBasic;
     table[9].xmlns = kCGImageMetadataNamespaceXMPRights;
     table[9].prefix = kCGImageMetadataPrefixXMPRights;
-    return CHARON_PUBLIC_NAMESPACES;
+    return REVENANT_PUBLIC_NAMESPACES;
 }
 
 
-static CFStringRef charon_default_prefix(CFStringRef xmlns)
+static CFStringRef revenant_default_prefix(CFStringRef xmlns)
 {
-    charon_public table[CHARON_PUBLIC_NAMESPACES];
-    size_t count = charon_public_namespaces(table);
+    revenant_public table[REVENANT_PUBLIC_NAMESPACES];
+    size_t count = revenant_public_namespaces(table);
     for (size_t i = 0; i < count; i++)
         if (xmlns == table[i].xmlns)
             return table[i].prefix;
@@ -117,7 +117,7 @@ static CFStringRef charon_default_prefix(CFStringRef xmlns)
 // an ArrayUnordered tag created from @[@"a", @@"b"] describes as two CGImageMetadataTags, not two
 // CFStrings - facts/ImageIO/Metadata.md, "an array value holds tags").
 
-static CGImageMetadataType charon_type_of_value(id value)
+static CGImageMetadataType revenant_type_of_value(id value)
 {
     if ([value isKindOfClass:[NSString class]])
         return kCGImageMetadataTypeString;
@@ -140,10 +140,10 @@ static CGImageMetadataType charon_type_of_value(id value)
 // ONLY THE TAG'S OWN VALUE IS CONVERTED. A number inside an array or inside a structure's fields stays a
 // number: measured, a tag made from @[@1, @"two", @2.5] holds a CFNumber, a tag and a CFNumber, and the
 // packet writes <rdf:li>1</rdf:li> and <rdf:li>2.5</rdf:li> out of them. So the conversion is here, where the
-// tag's value is set, and not in charon_wrap, which builds the elements.
+// tag's value is set, and not in revenant_wrap, which builds the elements.
 //
 // The caller holds the text in `owned` for as long as it uses it, which is the length of its own call.
-static id charon_xmp_number(id value, NSString **owned)
+static id revenant_xmp_number(id value, NSString **owned)
 {
     CFTypeRef ref = (__bridge CFTypeRef)value;
     CFTypeID type = CFGetTypeID(ref);
@@ -180,7 +180,7 @@ static id charon_xmp_number(id value, NSString **owned)
 // else is stored as it is. The wrapping is also ONE LEVEL DEEP: the string inside the nested array stays a
 // string, and the host's own packet for the array above writes three <rdf:li> elements and leaves out both the
 // boolean and the two containers.
-static id charon_wrap(id value, NSString *ns, NSString *prefix)
+static id revenant_wrap(id value, NSString *ns, NSString *prefix)
 {
     if ([value isKindOfClass:[NSArray class]]) {
         NSMutableArray *wrapped = [NSMutableArray arrayWithCapacity:[value count]];
@@ -237,13 +237,13 @@ CGImageMetadataTagRef CGImageMetadataTagCreate(CFStringRef xmlns, CFStringRef pr
         return NULL;
     NSString *given = prefix ? (__bridge NSString *)prefix : nil;
     if (!given) {
-        CFStringRef known = charon_default_prefix(xmlns);
+        CFStringRef known = revenant_default_prefix(xmlns);
         if (!known)
             return NULL; // the header: a custom namespace needs a custom prefix
         given = (__bridge NSString *)known;
     }
     id object = (__bridge id)value;
-    CGImageMetadataType resolved = type == kCGImageMetadataTypeDefault ? charon_type_of_value(object) : type;
+    CGImageMetadataType resolved = type == kCGImageMetadataTypeDefault ? revenant_type_of_value(object) : type;
     if (resolved == kCGImageMetadataTypeInvalid)
         return NULL;
     if (resolved != kCGImageMetadataTypeString && resolved != kCGImageMetadataTypeArrayUnordered &&
@@ -255,12 +255,12 @@ CGImageMetadataTagRef CGImageMetadataTagCreate(CFStringRef xmlns, CFStringRef pr
     // so all three agree without a second copy of the spelling
     NSString *spelled = nil;
     if (resolved == kCGImageMetadataTypeString)
-        object = charon_xmp_number(object, &spelled);
-    id wrapped = charon_wrap(object, (__bridge NSString *)xmlns, given);
+        object = revenant_xmp_number(object, &spelled);
+    id wrapped = revenant_wrap(object, (__bridge NSString *)xmlns, given);
     if (!wrapped)
         return NULL;
     NSMutableDictionary *tag = [NSMutableDictionary dictionaryWithCapacity:6];
-        [tag setObject:@YES forKey:charonTagMarker];
+        [tag setObject:@YES forKey:revenantTagMarker];
         [tag setObject:(__bridge id)xmlns forKey:@"namespace"];
         [tag setObject:given forKey:@"prefix"];
         [tag setObject:(__bridge id)name forKey:@"name"];
@@ -271,7 +271,7 @@ CGImageMetadataTagRef CGImageMetadataTagCreate(CFStringRef xmlns, CFStringRef pr
 
 CFStringRef CGImageMetadataTagCopyNamespace(CGImageMetadataTagRef tag)
 {
-    NSDictionary *held = charon_tag(tag);
+    NSDictionary *held = revenant_tag(tag);
     if (!held)
         return NULL;
     return CFRetain((__bridge CFStringRef)[held objectForKey:@"namespace"]);
@@ -279,7 +279,7 @@ CFStringRef CGImageMetadataTagCopyNamespace(CGImageMetadataTagRef tag)
 
 CFStringRef CGImageMetadataTagCopyPrefix(CGImageMetadataTagRef tag)
 {
-    NSDictionary *held = charon_tag(tag);
+    NSDictionary *held = revenant_tag(tag);
     if (!held)
         return NULL;
     return CFRetain((__bridge CFStringRef)[held objectForKey:@"prefix"]);
@@ -287,7 +287,7 @@ CFStringRef CGImageMetadataTagCopyPrefix(CGImageMetadataTagRef tag)
 
 CFStringRef CGImageMetadataTagCopyName(CGImageMetadataTagRef tag)
 {
-    NSDictionary *held = charon_tag(tag);
+    NSDictionary *held = revenant_tag(tag);
     if (!held)
         return NULL;
     return CFRetain((__bridge CFStringRef)[held objectForKey:@"name"]);
@@ -295,7 +295,7 @@ CFStringRef CGImageMetadataTagCopyName(CGImageMetadataTagRef tag)
 
 CFTypeRef CGImageMetadataTagCopyValue(CGImageMetadataTagRef tag)
 {
-    NSDictionary *held = charon_tag(tag);
+    NSDictionary *held = revenant_tag(tag);
     if (!held)
         return NULL;
     return CFRetain((__bridge CFTypeRef)[held objectForKey:@"value"]);
@@ -303,7 +303,7 @@ CFTypeRef CGImageMetadataTagCopyValue(CGImageMetadataTagRef tag)
 
 CGImageMetadataType CGImageMetadataTagGetType(CGImageMetadataTagRef tag)
 {
-    NSDictionary *held = charon_tag(tag);
+    NSDictionary *held = revenant_tag(tag);
     if (!held)
         return kCGImageMetadataTypeInvalid;
     return (CGImageMetadataType)[[held objectForKey:@"type"] intValue];
@@ -311,7 +311,7 @@ CGImageMetadataType CGImageMetadataTagGetType(CGImageMetadataTagRef tag)
 
 CFArrayRef CGImageMetadataTagCopyQualifiers(CGImageMetadataTagRef tag)
 {
-    NSDictionary *held = charon_tag(tag);
+    NSDictionary *held = revenant_tag(tag);
     if (!held)
         return NULL;
     id qualifiers = [held objectForKey:@"qualifiers"];
@@ -328,14 +328,14 @@ CFTypeID CGImageMetadataTagGetTypeID(void)
 
 // Forward: the copy a container hands out, defined with the paths below because that is where a tag's
 // value is walked.
-static NSDictionary *charon_tag_copy(NSDictionary *tag);
+static NSDictionary *revenant_tag_copy(NSDictionary *tag);
 
 // MARK: - CGImageMetadata, the container
 
 CGMutableImageMetadataRef CGImageMetadataCreateMutable(void)
 {
     NSMutableDictionary *metadata = [NSMutableDictionary dictionaryWithCapacity:3];
-        [metadata setObject:@YES forKey:charonMetadataMarker];
+        [metadata setObject:@YES forKey:revenantMetadataMarker];
         [metadata setObject:[NSMutableArray array] forKey:@"tags"];
         [metadata setObject:[NSMutableDictionary dictionary] forKey:@"prefixes"];
     return (__bridge_retained CGMutableImageMetadataRef)metadata;
@@ -343,12 +343,12 @@ CGMutableImageMetadataRef CGImageMetadataCreateMutable(void)
 
 CGMutableImageMetadataRef CGImageMetadataCreateMutableCopy(CGImageMetadataRef metadata)
 {
-    NSDictionary *held = charon_metadata(metadata);
+    NSDictionary *held = revenant_metadata(metadata);
     if (!held)
         return NULL;
     NSArray *tags = [held objectForKey:@"tags"];
     NSMutableDictionary *copy = [NSMutableDictionary dictionaryWithCapacity:3];
-        [copy setObject:@YES forKey:charonMetadataMarker];
+        [copy setObject:@YES forKey:revenantMetadataMarker];
     // "a deep mutable copy": the tags are copied, the values they hold are shared, as a copy of a tag is
     NSMutableArray *copiedTags = [NSMutableArray arrayWithCapacity:[tags count]];
     for (id tag in tags) {
@@ -364,13 +364,13 @@ CGMutableImageMetadataRef CGImageMetadataCreateMutableCopy(CGImageMetadataRef me
 
 CFArrayRef CGImageMetadataCopyTags(CGImageMetadataRef metadata)
 {
-    NSDictionary *held = charon_metadata(metadata);
+    NSDictionary *held = revenant_metadata(metadata);
     if (!held)
         return NULL;
     NSArray *tags = [held objectForKey:@"tags"];
     NSMutableArray *copies = [NSMutableArray arrayWithCapacity:tags.count];
     for (id tag in tags)
-        [copies addObject:charon_tag_copy((NSDictionary *)tag)];
+        [copies addObject:revenant_tag_copy((NSDictionary *)tag)];
     // and in the order the host hands them over: by name, then by prefix (measured: a tag named "Made"
     // added to a container holding Flash, Orientation and subject answers second, not last)
     [copies sortUsingComparator:^NSComparisonResult(id a, id b) {
@@ -401,7 +401,7 @@ CFArrayRef CGImageMetadataCopyTags(CGImageMetadataRef metadata)
 // reads as an API symbol (measured: three such helpers in the object's nm -gU, which its exclusion list
 // does not cover because it lists the ___copy_helper_block_* family, not these).
 
-static NSDictionary *charon_step_parse(NSString *text)
+static NSDictionary *revenant_step_parse(NSString *text)
 {
     NSMutableDictionary *step = [NSMutableDictionary dictionaryWithCapacity:6];
     NSMutableString *rest = [NSMutableString stringWithString:text];
@@ -443,24 +443,24 @@ static NSDictionary *charon_step_parse(NSString *text)
     return step;
 }
 
-static NSArray *charon_steps(NSString *path)
+static NSArray *revenant_steps(NSString *path)
 {
     NSMutableArray *steps = [NSMutableArray array];
     for (NSString *part in [path componentsSeparatedByString:@"/"])
         if ([part length])
-            [steps addObject:charon_step_parse(part)];
+            [steps addObject:revenant_step_parse(part)];
     return steps;
 }
 
 // The namespace a prefix names: the public one, or one CGImageMetadataRegisterNamespaceForPrefix added to
 // this container. NULL means the prefix is not registered here, and every path function fails on it.
-static NSString *charon_namespace_for_prefix(NSDictionary *metadata, NSString *prefix)
+static NSString *revenant_namespace_for_prefix(NSDictionary *metadata, NSString *prefix)
 {
     NSString *registered = [[metadata objectForKey:@"prefixes"] objectForKey:prefix];
     if (registered)
         return registered;
-    charon_public table[CHARON_PUBLIC_NAMESPACES];
-    size_t count = charon_public_namespaces(table);
+    revenant_public table[REVENANT_PUBLIC_NAMESPACES];
+    size_t count = revenant_public_namespaces(table);
     // by text, not by pointer: the prefix of a path is spelled out in the path and is a string this
     // library made, while the public prefixes are constants (the release's own, or Graphics/ImageIONames70.m's).
     for (size_t i = 0; i < count; i++)
@@ -472,7 +472,7 @@ static NSString *charon_namespace_for_prefix(NSDictionary *metadata, NSString *p
 
 // The tag of a container carrying this prefix and name, or nil. A step that names no prefix of its own
 // inherits, so a nil prefix matches on the name alone.
-static NSMutableDictionary *charon_find_tag(NSArray *tags, NSString *prefix, NSString *name)
+static NSMutableDictionary *revenant_find_tag(NSArray *tags, NSString *prefix, NSString *name)
 {
     for (id held in tags) {
         NSMutableDictionary *tag = (NSMutableDictionary *)held;
@@ -488,10 +488,10 @@ static NSMutableDictionary *charon_find_tag(NSArray *tags, NSString *prefix, NSS
 // A tag made to hold a value the path has not resolved to yet. "Tags will be created with default types
 // (ordered arrays)", so a step that indexes into a tag's value gets an ordered array and a step that names
 // a field of it gets a structure.
-static NSMutableDictionary *charon_intermediate(NSString *ns, NSString *prefix, NSString *name, BOOL asArray)
+static NSMutableDictionary *revenant_intermediate(NSString *ns, NSString *prefix, NSString *name, BOOL asArray)
 {
     NSMutableDictionary *tag = [NSMutableDictionary dictionaryWithCapacity:6];
-    [tag setObject:@YES forKey:charonTagMarker];
+    [tag setObject:@YES forKey:revenantTagMarker];
     [tag setObject:ns forKey:@"namespace"];
     [tag setObject:prefix forKey:@"prefix"];
     [tag setObject:name forKey:@"name"];
@@ -505,20 +505,20 @@ static NSMutableDictionary *charon_intermediate(NSString *ns, NSString *prefix, 
 // CGImageMetadataSetTagWithPath, which commits it to the metadata container.
 // Without the copy of the value, changing a tag a path returned would change the container behind the
 // caller's back and that warning would be a lie for this library.
-static NSDictionary *charon_tag_copy(NSDictionary *tag)
+static NSDictionary *revenant_tag_copy(NSDictionary *tag)
 {
     NSMutableDictionary *copy = [tag mutableCopy];
     id value = [tag objectForKey:@"value"];
     if ([value isKindOfClass:[NSArray class]]) {
         NSMutableArray *elements = [NSMutableArray arrayWithCapacity:[(NSArray *)value count]];
         for (id element in (NSArray *)value)
-            [elements addObject:isTag(element) ? charon_tag_copy((NSDictionary *)element) : element];
+            [elements addObject:isTag(element) ? revenant_tag_copy((NSDictionary *)element) : element];
         [copy setObject:elements forKey:@"value"];
     } else if ([value isKindOfClass:[NSDictionary class]]) {
         NSMutableDictionary *fields = [NSMutableDictionary dictionaryWithCapacity:[(NSDictionary *)value count]];
         for (id key in (NSDictionary *)value) {
             id element = [(NSDictionary *)value objectForKey:key];
-            [fields setObject:isTag(element) ? charon_tag_copy((NSDictionary *)element) : element forKey:key];
+            [fields setObject:isTag(element) ? revenant_tag_copy((NSDictionary *)element) : element forKey:key];
         }
         [copy setObject:fields forKey:@"value"];
     }
@@ -527,9 +527,9 @@ static NSDictionary *charon_tag_copy(NSDictionary *tag)
 
 // The container a '[key]' or '.field' step addresses and the key it addresses inside it: an array with an
 // index, or a structure with a name. Missing containers are made when `create` is set. It is the write
-// side's view of the walk charon_step_into reads through, and it answers a container and a key rather than
+// side's view of the walk revenant_step_into reads through, and it answers a container and a key rather than
 // the element itself, because the caller is going to put something AT the key, not read what is there.
-static BOOL charon_slot_for(id value, NSDictionary *step, BOOL create, id *outContainer, id *outKey)
+static BOOL revenant_slot_for(id value, NSDictionary *step, BOOL create, id *outContainer, id *outKey)
 {
     NSArray *fields = step[@"fields"];
     for (NSUInteger i = 0; fields && i < fields.count; i++) {
@@ -540,7 +540,7 @@ static BOOL charon_slot_for(id value, NSDictionary *step, BOOL create, id *outCo
         if (!field) {
             if (!create)
                 return NO;
-            field = charon_intermediate(@"", @"", fields[i], NO);
+            field = revenant_intermediate(@"", @"", fields[i], NO);
             [structure setObject:field forKey:fields[i]];
         }
         if (i + 1 == fields.count && !step[@"key"]) {
@@ -566,7 +566,7 @@ static BOOL charon_slot_for(id value, NSDictionary *step, BOOL create, id *outCo
         while ((NSInteger)array.count <= index) {
             if (!create)
                 return NO;
-            [array addObject:charon_intermediate(@"", @"", [NSString stringWithFormat:@"[%lu]", (unsigned long)array.count],
+            [array addObject:revenant_intermediate(@"", @"", [NSString stringWithFormat:@"[%lu]", (unsigned long)array.count],
                                                     YES)];
         }
         *outContainer = array;
@@ -578,7 +578,7 @@ static BOOL charon_slot_for(id value, NSDictionary *step, BOOL create, id *outCo
         if (![structure objectForKey:key]) {
             if (!create)
                 return NO;
-            [structure setObject:charon_intermediate(@"", @"", key, YES) forKey:key];
+            [structure setObject:revenant_intermediate(@"", @"", key, YES) forKey:key];
         }
         *outContainer = structure;
         *outKey = key;
@@ -592,7 +592,7 @@ static BOOL charon_slot_for(id value, NSDictionary *step, BOOL create, id *outCo
 // A value walked through the '[key]' and '.field' steps that follow a tag's name. With `create` the missing
 // containers are made - a structure for a field, an ordered array for an index - and the value is returned
 // for the caller to write the change into the tag that holds it.
-static id charon_step_into(id value, NSDictionary *step, BOOL create)
+static id revenant_step_into(id value, NSDictionary *step, BOOL create)
 {
     NSArray *fields = step[@"fields"];
     for (NSUInteger i = 0; fields && i < fields.count; i++) {
@@ -603,7 +603,7 @@ static id charon_step_into(id value, NSDictionary *step, BOOL create)
         if (!field) {
             if (!create)
                 return nil;
-            field = charon_intermediate(@"", @"", fields[i], NO);
+            field = revenant_intermediate(@"", @"", fields[i], NO);
         }
         [structure setObject:field forKey:fields[i]];
         value = structure;
@@ -616,7 +616,7 @@ static id charon_step_into(id value, NSDictionary *step, BOOL create)
             if (index < 0 || index >= (NSInteger)array.count) {
                 if (!create || ![key isKindOfClass:[NSNumber class]])
                     return nil;
-                [array addObject:charon_intermediate(@"", @"", [NSString stringWithFormat:@"[%ld]", (long)index], YES)];
+                [array addObject:revenant_intermediate(@"", @"", [NSString stringWithFormat:@"[%ld]", (long)index], YES)];
                 return [array objectAtIndex:(NSUInteger)index];
             }
             return [array objectAtIndex:(NSUInteger)index];
@@ -627,7 +627,7 @@ static id charon_step_into(id value, NSDictionary *step, BOOL create)
             if (!field) {
                 if (!create)
                     return nil;
-                field = charon_intermediate(@"", @"", key, YES);
+                field = revenant_intermediate(@"", @"", key, YES);
                 [structure setObject:field forKey:key];
             }
             return field;
@@ -640,24 +640,24 @@ static id charon_step_into(id value, NSDictionary *step, BOOL create)
 
 
 // The tag a path names, read only. Nothing is created and a path that cannot be reached is not found.
-static NSDictionary *charon_resolve(NSDictionary *metadata, NSDictionary *parent, NSArray *steps)
+static NSDictionary *revenant_resolve(NSDictionary *metadata, NSDictionary *parent, NSArray *steps)
 {
     id container = parent ? [parent objectForKey:@"value"] : [metadata objectForKey:@"tags"];
     NSString *inherited = parent ? parent[@"prefix"] : nil;
     for (NSUInteger i = 0; i < steps.count; i++) {
         NSDictionary *step = steps[i];
         NSString *prefix = step[@"prefix"] ? step[@"prefix"] : inherited;
-        if (!prefix || !charon_namespace_for_prefix(metadata, prefix))
+        if (!prefix || !revenant_namespace_for_prefix(metadata, prefix))
             return nil;
         if (!step[@"name"]) {
-            container = charon_step_into(container, step, NO);
+            container = revenant_step_into(container, step, NO);
             if (!container)
                 return nil;
             continue;
         }
         NSMutableDictionary *tag = nil;
         if ([container isKindOfClass:[NSArray class]]) {
-            tag = charon_find_tag((NSArray *)container, prefix, step[@"name"]);
+            tag = revenant_find_tag((NSArray *)container, prefix, step[@"name"]);
         } else if ([container isKindOfClass:[NSDictionary class]]) {
             // a structure's fields are keyed by name and carry a prefix of their own
             id field = [container objectForKey:step[@"name"]];
@@ -672,7 +672,7 @@ static NSDictionary *charon_resolve(NSDictionary *metadata, NSDictionary *parent
             container = tag; // a path that only names a tag answers the tag, not the tag's value
             break;
         }
-        container = charon_step_into([tag objectForKey:@"value"], step, NO);
+        container = revenant_step_into([tag objectForKey:@"value"], step, NO);
         if (!container)
             return nil;
     }
@@ -683,7 +683,7 @@ static NSDictionary *charon_resolve(NSDictionary *metadata, NSDictionary *parent
 // in; when the parent holds a scalar the call is what turns it into a structure, and since a parent is
 // always a copy here (CGImageMetadataCopyTagWithPath and CGImageMetadataCopyTags both copy), the container
 // behind it is untouched - which is what CGImageMetadata.h says happens.
-static id charon_children_of(NSDictionary *parentTag)
+static id revenant_children_of(NSDictionary *parentTag)
 {
     id value = [parentTag objectForKey:@"value"];
     if ([value isKindOfClass:[NSArray class]] || [value isKindOfClass:[NSDictionary class]])
@@ -699,12 +699,12 @@ static id charon_children_of(NSDictionary *parentTag)
 // an array's elements) or in a structure's fields (an NSMutableDictionary, which is what a parent tag's
 // scalar value becomes), and both shapes are handled here rather than by asking the caller to know which
 // one it has. Whatever the walk builds is written back into the tag that holds it.
-static BOOL charon_apply(NSDictionary *metadata, id container, NSArray *steps, NSUInteger i, NSString *inherited,
+static BOOL revenant_apply(NSDictionary *metadata, id container, NSArray *steps, NSUInteger i, NSString *inherited,
                          NSDictionary *leaf, BOOL remove)
 {
     NSDictionary *step = steps[i];
     NSString *prefix = step[@"prefix"] ? step[@"prefix"] : inherited;
-    if (!prefix || !charon_namespace_for_prefix(metadata, prefix))
+    if (!prefix || !revenant_namespace_for_prefix(metadata, prefix))
         return NO;
     BOOL fields = [container isKindOfClass:[NSDictionary class]];
     NSMutableArray *list = fields ? nil : (NSMutableArray *)container;
@@ -714,7 +714,7 @@ static BOOL charon_apply(NSDictionary *metadata, id container, NSArray *steps, N
     NSMutableDictionary *found = nil;
     if (name) {
         found = fields ? (isTag([container objectForKey:name]) ? (NSMutableDictionary *)[container objectForKey:name] : nil)
-                       : charon_find_tag(list, prefix, name);
+                       : revenant_find_tag(list, prefix, name);
     } else if (!fields) {
         return NO; // a bare [n] step names a value inside a tag, not a tag of this container
     }
@@ -745,7 +745,7 @@ static BOOL charon_apply(NSDictionary *metadata, id container, NSArray *steps, N
         // handed over would throw away the array or structure already standing at the path.
         NSMutableDictionary *holder = found;
         if (!holder) {
-            holder = charon_intermediate(charon_namespace_for_prefix(metadata, prefix), prefix, name,
+            holder = revenant_intermediate(revenant_namespace_for_prefix(metadata, prefix), prefix, name,
                                          [step[@"key"] isKindOfClass:[NSString class]]);
             if (fields)
                 [(NSMutableDictionary *)container setObject:holder forKey:name];
@@ -753,7 +753,7 @@ static BOOL charon_apply(NSDictionary *metadata, id container, NSArray *steps, N
                 [list addObject:holder];
         }
         id inner = nil, key = nil;
-        if (!charon_slot_for([holder objectForKey:@"value"], step, YES, &inner, &key))
+        if (!revenant_slot_for([holder objectForKey:@"value"], step, YES, &inner, &key))
             return NO;
         NSMutableDictionary *written = [leaf mutableCopy];
         if ([inner isKindOfClass:[NSArray class]]) {
@@ -774,15 +774,15 @@ static BOOL charon_apply(NSDictionary *metadata, id container, NSArray *steps, N
     if (!found) {
         if (!name)
             return NO;
-        found = charon_intermediate(charon_namespace_for_prefix(metadata, prefix), prefix, name, NO);
+        found = revenant_intermediate(revenant_namespace_for_prefix(metadata, prefix), prefix, name, NO);
         if (fields)
             [(NSMutableDictionary *)container setObject:found forKey:name];
         else
             [list addObject:found];
     }
     id value = nil, key = nil;
-    if (!charon_slot_for([found objectForKey:@"value"], step, YES, &value, &key))
-    if (!value || !charon_apply(metadata, value, steps, i + 1, found[@"prefix"], leaf, remove))
+    if (!revenant_slot_for([found objectForKey:@"value"], step, YES, &value, &key))
+    if (!value || !revenant_apply(metadata, value, steps, i + 1, found[@"prefix"], leaf, remove))
         return NO;
     return YES;
 }
@@ -790,14 +790,14 @@ static BOOL charon_apply(NSDictionary *metadata, id container, NSArray *steps, N
 CGImageMetadataTagRef CGImageMetadataCopyTagWithPath(CGImageMetadataRef metadata, CGImageMetadataTagRef parent,
                                                      CFStringRef path)
 {
-    NSDictionary *held = charon_metadata(metadata);
-    NSDictionary *parentTag = parent ? charon_tag(parent) : nil;
+    NSDictionary *held = revenant_metadata(metadata);
+    NSDictionary *parentTag = parent ? revenant_tag(parent) : nil;
     if (!held || (parent && !parentTag) || !path)
         return NULL;
-    NSDictionary *found = charon_resolve(held, parentTag, charon_steps((__bridge NSString *)path));
+    NSDictionary *found = revenant_resolve(held, parentTag, revenant_steps((__bridge NSString *)path));
     if (!found)
         return NULL;
-    return (__bridge_retained CGImageMetadataTagRef)charon_tag_copy(found);
+    return (__bridge_retained CGImageMetadataTagRef)revenant_tag_copy(found);
 }
 
 CFStringRef CGImageMetadataCopyStringValueWithPath(CGImageMetadataRef metadata, CGImageMetadataTagRef parent,
@@ -816,7 +816,7 @@ CFStringRef CGImageMetadataCopyStringValueWithPath(CGImageMetadataRef metadata, 
 bool CGImageMetadataRegisterNamespaceForPrefix(CGMutableImageMetadataRef metadata, CFStringRef xmlns, CFStringRef prefix,
                                                CFErrorRef *err)
 {
-    NSMutableDictionary *held = charon_is_metadata(metadata) ? (NSMutableDictionary *)charon_metadata(metadata) : nil;
+    NSMutableDictionary *held = revenant_is_metadata(metadata) ? (NSMutableDictionary *)revenant_metadata(metadata) : nil;
     if (!held || !xmlns || !prefix)
         return false;
     NSMutableDictionary *registered = [held objectForKey:@"prefixes"];
@@ -832,26 +832,26 @@ bool CGImageMetadataRegisterNamespaceForPrefix(CGMutableImageMetadataRef metadat
 bool CGImageMetadataSetTagWithPath(CGMutableImageMetadataRef metadata, CGImageMetadataTagRef parent, CFStringRef path,
                                    CGImageMetadataTagRef tag)
 {
-    NSDictionary *held = charon_is_metadata(metadata) ? charon_metadata(metadata) : nil;
-    NSDictionary *parentTag = parent ? charon_tag(parent) : nil;
-    NSDictionary *heldTag = tag ? charon_tag(tag) : nil;
+    NSDictionary *held = revenant_is_metadata(metadata) ? revenant_metadata(metadata) : nil;
+    NSDictionary *parentTag = parent ? revenant_tag(parent) : nil;
+    NSDictionary *heldTag = tag ? revenant_tag(tag) : nil;
     if (!held || !path || !heldTag || (parent && !parentTag))
         return false;
-    id container = parentTag ? charon_children_of(parentTag) : [held objectForKey:@"tags"];
-    return charon_apply(held, container, charon_steps((__bridge NSString *)path), 0,
+    id container = parentTag ? revenant_children_of(parentTag) : [held objectForKey:@"tags"];
+    return revenant_apply(held, container, revenant_steps((__bridge NSString *)path), 0,
                         parentTag ? parentTag[@"prefix"] : nil, heldTag, NO);
 }
 
 bool CGImageMetadataSetValueWithPath(CGMutableImageMetadataRef metadata, CGImageMetadataTagRef parent, CFStringRef path,
                                      CFTypeRef value)
 {
-    NSDictionary *held = charon_is_metadata(metadata) ? charon_metadata(metadata) : nil;
-    NSDictionary *parentTag = parent ? charon_tag(parent) : nil;
+    NSDictionary *held = revenant_is_metadata(metadata) ? revenant_metadata(metadata) : nil;
+    NSDictionary *parentTag = parent ? revenant_tag(parent) : nil;
     if (!held || (parent && !parentTag) || !path || !value)
         return false;
     // "The same value restrictions apply as in CGImageMetadataTagCreate", and a path carries a value and not
     // a type, so the type is read off the CFType of the value as kCGImageMetadataTypeDefault does.
-    NSArray *steps = charon_steps((__bridge NSString *)path);
+    NSArray *steps = revenant_steps((__bridge NSString *)path);
     NSDictionary *last = steps.lastObject;
     NSDictionary *first = steps.firstObject;
     if (!last[@"name"])
@@ -859,7 +859,7 @@ bool CGImageMetadataSetValueWithPath(CGMutableImageMetadataRef metadata, CGImage
     NSString *prefix = last[@"prefix"] ? last[@"prefix"] : first[@"prefix"];
     if (!prefix && steps.count == 1)
         prefix = parentTag ? parentTag[@"prefix"] : nil; // "inherited from the nearest parent tag"
-    NSString *ns = prefix ? charon_namespace_for_prefix(held, prefix) : nil;
+    NSString *ns = prefix ? revenant_namespace_for_prefix(held, prefix) : nil;
     if (!ns)
         return false;
     CGImageMetadataTagRef made = CGImageMetadataTagCreate((__bridge CFStringRef)ns, (__bridge CFStringRef)prefix,
@@ -867,33 +867,33 @@ bool CGImageMetadataSetValueWithPath(CGMutableImageMetadataRef metadata, CGImage
                                                           value);
     if (!made)
         return false;
-    id container = parentTag ? charon_children_of(parentTag) : [held objectForKey:@"tags"];
-    BOOL ok = charon_apply(held, container, steps, 0, parentTag ? parentTag[@"prefix"] : nil, charon_tag(made), NO);
+    id container = parentTag ? revenant_children_of(parentTag) : [held objectForKey:@"tags"];
+    BOOL ok = revenant_apply(held, container, steps, 0, parentTag ? parentTag[@"prefix"] : nil, revenant_tag(made), NO);
     CFRelease(made);
     return ok;
 }
 
 bool CGImageMetadataRemoveTagWithPath(CGMutableImageMetadataRef metadata, CGImageMetadataTagRef parent, CFStringRef path)
 {
-    NSDictionary *held = charon_is_metadata(metadata) ? charon_metadata(metadata) : nil;
-    NSDictionary *parentTag = parent ? charon_tag(parent) : nil;
+    NSDictionary *held = revenant_is_metadata(metadata) ? revenant_metadata(metadata) : nil;
+    NSDictionary *parentTag = parent ? revenant_tag(parent) : nil;
     if (!held || (parent && !parentTag) || !path)
         return false;
-    id container = parentTag ? charon_children_of(parentTag) : [held objectForKey:@"tags"];
-    return charon_apply(held, container, charon_steps((__bridge NSString *)path), 0,
+    id container = parentTag ? revenant_children_of(parentTag) : [held objectForKey:@"tags"];
+    return revenant_apply(held, container, revenant_steps((__bridge NSString *)path), 0,
                         parentTag ? parentTag[@"prefix"] : nil, nil, YES);
 }
 
 void CGImageMetadataEnumerateTagsUsingBlock(CGImageMetadataRef metadata, CFStringRef rootPath, CFDictionaryRef options,
                                             CGImageMetadataTagBlock block)
 {
-    NSDictionary *held = charon_metadata(metadata);
+    NSDictionary *held = revenant_metadata(metadata);
     if (!held || !block)
         return;
-    NSArray *steps = rootPath ? charon_steps((__bridge NSString *)rootPath) : nil;
+    NSArray *steps = rootPath ? revenant_steps((__bridge NSString *)rootPath) : nil;
     NSArray *tags = (NSArray *)[held objectForKey:@"tags"];
     if (steps.count) {
-        NSDictionary *root = charon_resolve(held, nil, steps);
+        NSDictionary *root = revenant_resolve(held, nil, steps);
         if (!root)
             return;
         tags = [root objectForKey:@"value"];
@@ -910,7 +910,7 @@ void CGImageMetadataEnumerateTagsUsingBlock(CGImageMetadataRef metadata, CFStrin
             continue;
         NSDictionary *tag = (NSDictionary *)heldTag;
         NSString *path = [NSString stringWithFormat:@"%@:%@", tag[@"prefix"], tag[@"name"]];
-        if (!block((__bridge CFStringRef)path, (__bridge CGImageMetadataTagRef)charon_tag_copy(tag)))
+        if (!block((__bridge CFStringRef)path, (__bridge CGImageMetadataTagRef)revenant_tag_copy(tag)))
             return;
         if (!recursive)
             continue;
@@ -932,7 +932,7 @@ void CGImageMetadataEnumerateTagsUsingBlock(CGImageMetadataRef metadata, CFStrin
             NSString *childPath =
                 isStructure ? [NSString stringWithFormat:@"%@:%@.%@", tag[@"prefix"], tag[@"name"], element[@"name"]]
                             : [NSString stringWithFormat:@"%@:%@%@", tag[@"prefix"], tag[@"name"], element[@"name"]];
-            if (!block((__bridge CFStringRef)childPath, (__bridge CGImageMetadataTagRef)charon_tag_copy(element)))
+            if (!block((__bridge CFStringRef)childPath, (__bridge CGImageMetadataTagRef)revenant_tag_copy(element)))
                 return;
         }
     }
@@ -970,8 +970,8 @@ void CGImageMetadataEnumerateTagsUsingBlock(CGImageMetadataRef metadata, CFStrin
 // 357 rows, in the header's order: the pairs as they are declared, with the pairs the host does not map
 // left out. The block is written by tools/gen/property_map.lua from that table, at build time;
 // the harness below compares all 518 answers, so a row that drifts shows there and not only here.
-#define CHARON_PROPERTY_ROWS @PROPERTY_COUNT@
-static const char *const charon_property_rows[CHARON_PROPERTY_ROWS][5] = {
+#define REVENANT_PROPERTY_ROWS @PROPERTY_COUNT@
+static const char *const revenant_property_rows[REVENANT_PROPERTY_ROWS][5] = {
 @PROPERTY_ROWS@
 };
 
@@ -979,10 +979,10 @@ static const char *const charon_property_rows[CHARON_PROPERTY_ROWS][5] = {
 // question, and NULL is the header's own: a property the table does not carry is one "not supported at
 // this time", so the lookup answers NULL and the set answers false and writes nothing (measured, and
 // both are in the harness: a dictionary and a property no header declares behave the same way).
-static const char *const *charon_property_row(const char *dictionary, const char *property)
+static const char *const *revenant_property_row(const char *dictionary, const char *property)
 {
-    for (size_t i = 0; i < CHARON_PROPERTY_ROWS; i++) {
-        const char *const *row = charon_property_rows[i];
+    for (size_t i = 0; i < REVENANT_PROPERTY_ROWS; i++) {
+        const char *const *row = revenant_property_rows[i];
         if (strcmp(row[0], dictionary) == 0 && strcmp(row[1], property) == 0)
             return row;
     }
@@ -992,7 +992,7 @@ static const char *const *charon_property_row(const char *dictionary, const char
 // A CFString as a C string in the caller's buffer. CFStringGetCStringPtr would answer NULL for a string
 // it cannot hand back in place, which is most of ImageIO's own (measured: 89 of the 357 names in the
 // table), so the copy is made instead and a string that does not fit is reported as no string at all.
-static BOOL charon_string(CFStringRef string, char *buffer, size_t size)
+static BOOL revenant_string(CFStringRef string, char *buffer, size_t size)
 {
     return string && CFStringGetCString(string, buffer, (CFIndex)size, kCFStringEncodingUTF8);
 }
@@ -1000,14 +1000,14 @@ static BOOL charon_string(CFStringRef string, char *buffer, size_t size)
 CGImageMetadataTagRef CGImageMetadataCopyTagMatchingImageProperty(CGImageMetadataRef metadata, CFStringRef dictionaryName,
                                                                  CFStringRef propertyName)
 {
-    NSDictionary *held = charon_metadata(metadata);
+    NSDictionary *held = revenant_metadata(metadata);
     if (!held || !dictionaryName || !propertyName)
         return NULL;
     char dictionary[64], property[64];
-    if (!charon_string(dictionaryName, dictionary, sizeof dictionary) ||
-        !charon_string(propertyName, property, sizeof property))
+    if (!revenant_string(dictionaryName, dictionary, sizeof dictionary) ||
+        !revenant_string(propertyName, property, sizeof property))
         return NULL;
-    const char *const *row = charon_property_row(dictionary, property);
+    const char *const *row = revenant_property_row(dictionary, property);
     if (!row)
         return NULL;
     char xmlns[64], name[64];
@@ -1015,13 +1015,13 @@ CGImageMetadataTagRef CGImageMetadataCopyTagMatchingImageProperty(CGImageMetadat
     // tree holding exif:Sub{exif:DateTimeOriginal} answers NULL for (Exif, DateTimeOriginal)
     for (id heldTag in (NSArray *)[held objectForKey:@"tags"]) {
         NSDictionary *tag = (NSDictionary *)heldTag;
-        if (!charon_string((__bridge CFStringRef)[tag objectForKey:@"namespace"], xmlns, sizeof xmlns) ||
-            !charon_string((__bridge CFStringRef)[tag objectForKey:@"name"], name, sizeof name))
+        if (!revenant_string((__bridge CFStringRef)[tag objectForKey:@"namespace"], xmlns, sizeof xmlns) ||
+            !revenant_string((__bridge CFStringRef)[tag objectForKey:@"name"], name, sizeof name))
             continue;
         // the prefix is not part of the match: measured, a tag whose prefix is one a caller registered
         // for the same namespace is answered, and the harness prints that case too
         if (strcmp(xmlns, row[2]) == 0 && strcmp(name, row[4]) == 0)
-            return (__bridge_retained CGImageMetadataTagRef)charon_tag_copy(tag);
+            return (__bridge_retained CGImageMetadataTagRef)revenant_tag_copy(tag);
     }
     return NULL;
 }
@@ -1029,14 +1029,14 @@ CGImageMetadataTagRef CGImageMetadataCopyTagMatchingImageProperty(CGImageMetadat
 bool CGImageMetadataSetValueMatchingImageProperty(CGMutableImageMetadataRef metadata, CFStringRef dictionaryName,
                                                  CFStringRef propertyName, CFTypeRef value)
 {
-    NSDictionary *held = charon_is_metadata(metadata) ? charon_metadata(metadata) : nil;
+    NSDictionary *held = revenant_is_metadata(metadata) ? revenant_metadata(metadata) : nil;
     if (!held || !dictionaryName || !propertyName || !value)
         return false;
     char dictionary[64], property[64];
-    if (!charon_string(dictionaryName, dictionary, sizeof dictionary) ||
-        !charon_string(propertyName, property, sizeof property))
+    if (!revenant_string(dictionaryName, dictionary, sizeof dictionary) ||
+        !revenant_string(propertyName, property, sizeof property))
         return false;
-    const char *const *row = charon_property_row(dictionary, property);
+    const char *const *row = revenant_property_row(dictionary, property);
     if (!row)
         return false; // measured: false, and no tag is written
     // the write is this file's own path write, so the tag's type is read off the CFType of the value the

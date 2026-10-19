@@ -3,30 +3,30 @@
 
 #define NAMED(...) ([NSString stringWithFormat:__VA_ARGS__].UTF8String)
 
-@interface UINavigationBar (CharonHostBarAppearance)
-- (UIColor *)charonHostBarTintColor;
-- (void)charonHostSetBarTintColor:(UIColor *)color;
-- (UIImage *)charonHostBackIndicatorImage;
-- (void)charonHostSetBackIndicatorImage:(UIImage *)image;
-- (UIImage *)charonHostBackIndicatorTransitionMaskImage;
-- (void)charonHostSetBackIndicatorTransitionMaskImage:(UIImage *)image;
+@interface UINavigationBar (RevenantHostBarAppearance)
+- (UIColor *)revenantHostBarTintColor;
+- (void)revenantHostSetBarTintColor:(UIColor *)color;
+- (UIImage *)revenantHostBackIndicatorImage;
+- (void)revenantHostSetBackIndicatorImage:(UIImage *)image;
+- (UIImage *)revenantHostBackIndicatorTransitionMaskImage;
+- (void)revenantHostSetBackIndicatorTransitionMaskImage:(UIImage *)image;
 @end
 
-@interface UIToolbar (CharonHostBarTintColor)
-- (UIColor *)charonHostBarTintColor;
-- (void)charonHostSetBarTintColor:(UIColor *)color;
+@interface UIToolbar (RevenantHostBarTintColor)
+- (UIColor *)revenantHostBarTintColor;
+- (void)revenantHostSetBarTintColor:(UIColor *)color;
 @end
 
-@interface UITabBar (CharonHostBarTintColor)
-- (UIColor *)charonHostBarTintColor;
-- (void)charonHostSetBarTintColor:(UIColor *)color;
+@interface UITabBar (RevenantHostBarTintColor)
+- (UIColor *)revenantHostBarTintColor;
+- (void)revenantHostSetBarTintColor:(UIColor *)color;
 @end
 
-@interface UISearchBar (CharonHostBarStyle)
-- (UISearchBarStyle)charonHostSearchBarStyle;
-- (void)charonHostSetSearchBarStyle:(UISearchBarStyle)style;
-- (UIColor *)charonHostBarTintColor;
-- (void)charonHostSetBarTintColor:(UIColor *)color;
+@interface UISearchBar (RevenantHostBarStyle)
+- (UISearchBarStyle)revenantHostSearchBarStyle;
+- (void)revenantHostSetSearchBarStyle:(UISearchBarStyle)style;
+- (UIColor *)revenantHostBarTintColor;
+- (void)revenantHostSetBarTintColor:(UIColor *)color;
 @end
 
 static UIImage *drawn_image(void)
@@ -44,49 +44,49 @@ int main(void)
     @autoreleasepool {
         UIColor *colour = [UIColor orangeColor];
         UINavigationBar *navigation = [[UINavigationBar alloc] init];
-        [navigation charonHostSetBarTintColor:colour];
-        charon_check([navigation charonHostBarTintColor] == colour, "the navigation bar keeps its bar tint colour", @"the colour differs");
-        charon_check([navigation.tintColor isEqual:colour], "the navigation bar tints itself with it", [NSString stringWithFormat:@"%@", navigation.tintColor]);
-        [navigation charonHostSetBarTintColor:nil];
-        charon_check([navigation charonHostBarTintColor] == nil, "clearing the bar tint colour", [NSString stringWithFormat:@"%@", [navigation charonHostBarTintColor]]);
+        [navigation revenantHostSetBarTintColor:colour];
+        revenant_check([navigation revenantHostBarTintColor] == colour, "the navigation bar keeps its bar tint colour", @"the colour differs");
+        revenant_check([navigation.tintColor isEqual:colour], "the navigation bar tints itself with it", [NSString stringWithFormat:@"%@", navigation.tintColor]);
+        [navigation revenantHostSetBarTintColor:nil];
+        revenant_check([navigation revenantHostBarTintColor] == nil, "clearing the bar tint colour", [NSString stringWithFormat:@"%@", [navigation revenantHostBarTintColor]]);
 
         UIImage *image = drawn_image(), *mask = drawn_image();
-        [navigation charonHostSetBackIndicatorImage:image];
-        [navigation charonHostSetBackIndicatorTransitionMaskImage:mask];
-        charon_check([navigation charonHostBackIndicatorImage] == image, "the back indicator image is kept", @"the image differs");
-        charon_check([navigation charonHostBackIndicatorTransitionMaskImage] == mask, "the back indicator mask is kept", @"the mask differs");
+        [navigation revenantHostSetBackIndicatorImage:image];
+        [navigation revenantHostSetBackIndicatorTransitionMaskImage:mask];
+        revenant_check([navigation revenantHostBackIndicatorImage] == image, "the back indicator image is kept", @"the image differs");
+        revenant_check([navigation revenantHostBackIndicatorTransitionMaskImage] == mask, "the back indicator mask is kept", @"the mask differs");
 
         UIToolbar *toolbar = [[UIToolbar alloc] init];
-        [toolbar charonHostSetBarTintColor:colour];
-        charon_check([toolbar charonHostBarTintColor] == colour && [toolbar.tintColor isEqual:colour], "the toolbar bar tint colour", @"the colour differs");
+        [toolbar revenantHostSetBarTintColor:colour];
+        revenant_check([toolbar revenantHostBarTintColor] == colour && [toolbar.tintColor isEqual:colour], "the toolbar bar tint colour", @"the colour differs");
         UITabBar *tabs = [[UITabBar alloc] init];
-        [tabs charonHostSetBarTintColor:colour];
-        charon_check([tabs charonHostBarTintColor] == colour && [tabs.tintColor isEqual:colour], "the tab bar bar tint colour", @"the colour differs");
+        [tabs revenantHostSetBarTintColor:colour];
+        revenant_check([tabs revenantHostBarTintColor] == colour && [tabs.tintColor isEqual:colour], "the tab bar bar tint colour", @"the colour differs");
 
         UISearchBar *search = [[UISearchBar alloc] init];
-        [search charonHostSetBarTintColor:colour];
-        charon_check([search charonHostBarTintColor] == colour && [search.tintColor isEqual:colour], "the search bar bar tint colour", @"the colour differs");
-        charon_check([search charonHostSearchBarStyle] == UISearchBarStyleDefault, "the default search bar style", @"the default style differs");
-        [search charonHostSetSearchBarStyle:UISearchBarStyleMinimal];
-        charon_check([search charonHostSearchBarStyle] == UISearchBarStyleMinimal, "the search bar style is kept", @"the style differs");
-        charon_check(search.backgroundImage != nil, "the minimal style clears the iOS 6 bar background", @"the background image is still missing");
-        [search charonHostSetSearchBarStyle:UISearchBarStyleProminent];
-        charon_check(search.backgroundImage == nil, "leaving the minimal style brings the background back", @"the background image was kept");
+        [search revenantHostSetBarTintColor:colour];
+        revenant_check([search revenantHostBarTintColor] == colour && [search.tintColor isEqual:colour], "the search bar bar tint colour", @"the colour differs");
+        revenant_check([search revenantHostSearchBarStyle] == UISearchBarStyleDefault, "the default search bar style", @"the default style differs");
+        [search revenantHostSetSearchBarStyle:UISearchBarStyleMinimal];
+        revenant_check([search revenantHostSearchBarStyle] == UISearchBarStyleMinimal, "the search bar style is kept", @"the style differs");
+        revenant_check(search.backgroundImage != nil, "the minimal style clears the iOS 6 bar background", @"the background image is still missing");
+        [search revenantHostSetSearchBarStyle:UISearchBarStyleProminent];
+        revenant_check(search.backgroundImage == nil, "leaving the minimal style brings the background back", @"the background image was kept");
         search.backgroundImage = image;
-        [search charonHostSetSearchBarStyle:UISearchBarStyleMinimal];
-        charon_check(CGSizeEqualToSize(search.backgroundImage.size, image.size), "the minimal style leaves an application background alone",
+        [search revenantHostSetSearchBarStyle:UISearchBarStyleMinimal];
+        revenant_check(CGSizeEqualToSize(search.backgroundImage.size, image.size), "the minimal style leaves an application background alone",
                      [NSString stringWithFormat:@"%@", NSStringFromCGSize(search.backgroundImage.size)]);
-        [search charonHostSetSearchBarStyle:UISearchBarStyleDefault];
-        charon_check(CGSizeEqualToSize(search.backgroundImage.size, image.size), "leaving the minimal style leaves an application background alone",
+        [search revenantHostSetSearchBarStyle:UISearchBarStyleDefault];
+        revenant_check(CGSizeEqualToSize(search.backgroundImage.size, image.size), "leaving the minimal style leaves an application background alone",
                      [NSString stringWithFormat:@"%@", NSStringFromCGSize(search.backgroundImage.size)]);
 
         NSInteger styles[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 15, 16, 255, 256, -1, -2, NSIntegerMin, NSIntegerMax};
         for (size_t index = 0; index < sizeof styles / sizeof *styles; index++) {
             UISearchBar *ours = [[UISearchBar alloc] init], *system = [[UISearchBar alloc] init];
-            [ours charonHostSetSearchBarStyle:(UISearchBarStyle)styles[index]];
+            [ours revenantHostSetSearchBarStyle:(UISearchBarStyle)styles[index]];
             system.searchBarStyle = (UISearchBarStyle)styles[index];
-            charon_check((NSInteger)[ours charonHostSearchBarStyle] == (NSInteger)system.searchBarStyle, NAMED(@"search bar style %ld reads as the system's", (long)styles[index]),
-                         [NSString stringWithFormat:@"%ld != %ld", (long)[ours charonHostSearchBarStyle], (long)system.searchBarStyle]);
+            revenant_check((NSInteger)[ours revenantHostSearchBarStyle] == (NSInteger)system.searchBarStyle, NAMED(@"search bar style %ld reads as the system's", (long)styles[index]),
+                         [NSString stringWithFormat:@"%ld != %ld", (long)[ours revenantHostSearchBarStyle], (long)system.searchBarStyle]);
         }
 
         for (unsigned steps = 0; steps < 4096; steps++) {
@@ -101,23 +101,23 @@ int main(void)
                 UIImage *given = clear ? nil : (move % 2 ? other[which] : pair[which]);
                 [trace appendFormat:@"%s%s ", which ? "mask" : "image", clear ? "=nil" : (move % 2 ? "'" : "")];
                 if (which) {
-                    [ours charonHostSetBackIndicatorTransitionMaskImage:given];
+                    [ours revenantHostSetBackIndicatorTransitionMaskImage:given];
                     system.backIndicatorTransitionMaskImage = given;
                 } else {
-                    [ours charonHostSetBackIndicatorImage:given];
+                    [ours revenantHostSetBackIndicatorImage:given];
                     system.backIndicatorImage = given;
                 }
-                same = [ours charonHostBackIndicatorImage] == system.backIndicatorImage && [ours charonHostBackIndicatorTransitionMaskImage] == system.backIndicatorTransitionMaskImage;
+                same = [ours revenantHostBackIndicatorImage] == system.backIndicatorImage && [ours revenantHostBackIndicatorTransitionMaskImage] == system.backIndicatorTransitionMaskImage;
             }
             if (!same) {
-                charon_check(NO, NAMED(@"the back indicator pair after %@", trace), @"the images differ from the system's");
+                revenant_check(NO, NAMED(@"the back indicator pair after %@", trace), @"the images differ from the system's");
                 break;
             }
             if (steps == 4095)
-                charon_check(YES, "the back indicator pair answers as the system's over every order of six changes", @"");
+                revenant_check(YES, "the back indicator pair answers as the system's over every order of six changes", @"");
         }
 
-        printf("checks=%d failures=%d\n", charon_checks, charon_failures);
-        return charon_failures;
+        printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
+        return revenant_failures;
     }
 }

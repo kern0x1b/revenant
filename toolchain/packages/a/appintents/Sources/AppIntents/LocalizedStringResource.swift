@@ -60,7 +60,7 @@ public struct LocalizedStringResource: Hashable, Codable, CustomLocalizedStringR
     public var localizedStringResource: LocalizedStringResource { return self }
 
     public func localizedString() -> String {
-        if let found = CharonLookup.localizedString(key: key, table: table, locale: locale, bundle: bundle) {
+        if let found = RevenantLookup.localizedString(key: key, table: table, locale: locale, bundle: bundle) {
             return found
         }
         return defaultValue ?? key
@@ -163,7 +163,7 @@ extension String: CustomLocalizedStringResourceConvertible {
     public var localizedStringResource: LocalizedStringResource { return LocalizedStringResource(self) }
 }
 
-enum CharonLookup {
+enum RevenantLookup {
     static func localizedString(key: String, table: String?, locale: Locale?,
                                 bundle: LocalizedStringResource.BundleDescription?) -> String? {
         guard let description = bundle else { return nil }

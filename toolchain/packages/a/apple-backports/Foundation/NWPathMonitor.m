@@ -6,17 +6,17 @@
 #import <net/if.h>
 #include <sys/ioctl.h>
 #include <string.h>
-#import "CharonNWPathMonitor.h"
+#import "RevenantNWPathMonitor.h"
 #import <dlfcn.h>
 #import <netinet/in.h>
 #import <resolv.h>
 #import <sys/socket.h>
 
-@interface CharonNWInterface : CHARON_NW_OBJECT(OS_nw_interface)
+@interface RevenantNWInterface : REVENANT_NW_OBJECT(OS_nw_interface)
 @end
 
 
-@implementation CharonNWInterface {
+@implementation RevenantNWInterface {
 @public
     NSString *_name;
     uint32_t _index;
@@ -24,23 +24,23 @@
 }
 @end
 
-@implementation CharonNWPath {
+@implementation RevenantNWPath {
 @public
     nw_path_status_t _status;
     BOOL _expensive, _ipv4, _ipv6, _dns;
-    NSArray<CharonNWInterface *> *_interfaces;
+    NSArray<RevenantNWInterface *> *_interfaces;
 }
 @end
 
-@implementation CharonNWPathMonitor
+@implementation RevenantNWPathMonitor
 @end
 
-#define CHARON_IFI_TYPE_OTHER       1
-#define CHARON_IFI_TYPE_ETHERNET    6
-#define CHARON_IFI_TYPE_SOFT_LOOPBACK 24
-#define CHARON_IFI_TYPE_CELLULAR    0xff
+#define REVENANT_IFI_TYPE_OTHER       1
+#define REVENANT_IFI_TYPE_ETHERNET    6
+#define REVENANT_IFI_TYPE_SOFT_LOOPBACK 24
+#define REVENANT_IFI_TYPE_CELLULAR    0xff
 
-static BOOL charon_path_wants(nw_interface_type_t required, nw_interface_type_t type, BOOL reachable, BOOL cellular,
+static BOOL revenant_path_wants(nw_interface_type_t required, nw_interface_type_t type, BOOL reachable, BOOL cellular,
                               BOOL hasAddress)
 {
     if (required != nw_interface_type_other)
@@ -54,18 +54,18 @@ static BOOL charon_path_wants(nw_interface_type_t required, nw_interface_type_t 
     return (type == nw_interface_type_cellular) == cellular;
 }
 
-static nw_interface_type_t charon_type_of(const struct ifaddrs *item)
+static nw_interface_type_t revenant_type_of(const struct ifaddrs *item)
 {
     for (const struct ifaddrs *link = item; link; link = link->ifa_next) {
         if (!link->ifa_addr || link->ifa_addr->sa_family != AF_LINK || !link->ifa_data || strcmp(link->ifa_name, item->ifa_name) != 0)
             continue;
         const struct if_data *data = (const struct if_data *)link->ifa_data;
         switch (data->ifi_type) {
-        case CHARON_IFI_TYPE_SOFT_LOOPBACK:
+        case REVENANT_IFI_TYPE_SOFT_LOOPBACK:
             return nw_interface_type_loopback;
-        case CHARON_IFI_TYPE_CELLULAR:
+        case REVENANT_IFI_TYPE_CELLULAR:
             return nw_interface_type_cellular;
-        case CHARON_IFI_TYPE_ETHERNET:
+        case REVENANT_IFI_TYPE_ETHERNET:
             return nw_interface_type_wifi;
         default:
             return nw_interface_type_other;
@@ -88,22 +88,22 @@ static nw_interface_type_t charon_type_of(const struct ifaddrs *item)
     return nw_interface_type_wifi;
 }
 
-nw_interface_type_t charon_path_interface_type(const struct ifaddrs *item);
+nw_interface_type_t revenant_path_interface_type(const struct ifaddrs *item);
 
-static BOOL charon_usable_v4(const struct sockaddr *address)
+static BOOL revenant_usable_v4(const struct sockaddr *address)
 {
     const struct sockaddr_in *v4 = (const struct sockaddr_in *)address;
     uint32_t host = ntohl(v4->sin_addr.s_addr);
     return (host >> 16) != 0xA9FE && host != 0;
 }
 
-static BOOL charon_usable_v6(const struct sockaddr *address)
+static BOOL revenant_usable_v6(const struct sockaddr *address)
 {
     const struct sockaddr_in6 *v6 = (const struct sockaddr_in6 *)address;
     return !IN6_IS_ADDR_LINKLOCAL(&v6->sin6_addr) && !IN6_IS_ADDR_UNSPECIFIED(&v6->sin6_addr) && !IN6_IS_ADDR_LOOPBACK(&v6->sin6_addr);
 }
 
-static BOOL charon_has_nameserver(void)
+static BOOL revenant_has_nameserver(void)
 {
     static int (*initialise)(struct __res_state *);
     static void (*destroy)(struct __res_state *);
@@ -124,16 +124,16 @@ static BOOL charon_has_nameserver(void)
     return has;
 }
 
-static CharonNWInterface *charon_interface(const char *name, nw_interface_type_t type)
+static RevenantNWInterface *revenant_interface(const char *name, nw_interface_type_t type)
 {
-    CharonNWInterface *interface = [[CharonNWInterface alloc] init];
+    RevenantNWInterface *interface = [[RevenantNWInterface alloc] init];
     interface->_name = @(name);
     interface->_index = if_nametoindex(name);
     interface->_type = type;
     return interface;
 }
 
-CHARON_SEAM nw_interface_t charon_interface_named(const char *name)
+REVENANT_SEAM nw_interface_t revenant_interface_named(const char *name)
 {
     if (if_nametoindex(name) == 0)
         return nil;
@@ -142,18 +142,18 @@ CHARON_SEAM nw_interface_t charon_interface_named(const char *name)
     if (getifaddrs(&list) == 0) {
         for (const struct ifaddrs *item = list; item; item = item->ifa_next) {
             if (strcmp(item->ifa_name, name) == 0) {
-                type = charon_type_of(item);
+                type = revenant_type_of(item);
                 break;
             }
         }
         freeifaddrs(list);
     }
-    return (nw_interface_t)charon_interface(name, type);
+    return (nw_interface_t)revenant_interface(name, type);
 }
 
-static CharonNWPath *charon_path(SCNetworkReachabilityRef reachability, CharonNWPathMonitor *monitor)
+static RevenantNWPath *revenant_path(SCNetworkReachabilityRef reachability, RevenantNWPathMonitor *monitor)
 {
-    CharonNWPath *path = [[CharonNWPath alloc] init];
+    RevenantNWPath *path = [[RevenantNWPath alloc] init];
     SCNetworkReachabilityFlags flags = 0;
     SCNetworkReachabilityGetFlags(reachability, &flags);
     BOOL reachable = (flags & kSCNetworkReachabilityFlagsReachable) != 0;
@@ -170,14 +170,14 @@ static CharonNWPath *charon_path(SCNetworkReachabilityRef reachability, CharonNW
         for (struct ifaddrs *item = list; item; item = item->ifa_next) {
             if (!item->ifa_addr || !(item->ifa_flags & IFF_UP) || !(item->ifa_flags & IFF_RUNNING))
                 continue;
-            nw_interface_type_t type = charon_type_of(item);
+            nw_interface_type_t type = revenant_type_of(item);
             for (NSNumber *prohibited in monitor->_prohibitedTypes) {
                 if ((nw_interface_type_t)prohibited.unsignedIntegerValue == type)
                     goto next;
             }
-            BOOL address4 = item->ifa_addr->sa_family == AF_INET && charon_usable_v4(item->ifa_addr);
-            BOOL address6 = item->ifa_addr->sa_family == AF_INET6 && charon_usable_v6(item->ifa_addr);
-            if (!charon_path_wants(monitor->_required, type, reachable, cellular, address4 || address6))
+            BOOL address4 = item->ifa_addr->sa_family == AF_INET && revenant_usable_v4(item->ifa_addr);
+            BOOL address6 = item->ifa_addr->sa_family == AF_INET6 && revenant_usable_v6(item->ifa_addr);
+            if (!revenant_path_wants(monitor->_required, type, reachable, cellular, address4 || address6))
                 continue;
             if (!address4 && !address6)
                 continue;
@@ -187,7 +187,7 @@ static CharonNWPath *charon_path(SCNetworkReachabilityRef reachability, CharonNW
             }
             if (![seen containsObject:@(item->ifa_name)]) {
                 [seen addObject:@(item->ifa_name)];
-                [interfaces addObject:charon_interface(item->ifa_name, type)];
+                [interfaces addObject:revenant_interface(item->ifa_name, type)];
             }
         next:;
         }
@@ -196,7 +196,7 @@ static CharonNWPath *charon_path(SCNetworkReachabilityRef reachability, CharonNW
     path->_interfaces = interfaces;
     path->_ipv4 = v4;
     path->_ipv6 = v6;
-    path->_dns = interfaces.count && monitor->_required != nw_interface_type_loopback && charon_has_nameserver();
+    path->_dns = interfaces.count && monitor->_required != nw_interface_type_loopback && revenant_has_nameserver();
     path->_expensive = interfaces.count && cellular;
     if (!interfaces.count)
         path->_status = reachable && required ? nw_path_status_satisfiable : nw_path_status_unsatisfied;
@@ -207,7 +207,7 @@ static CharonNWPath *charon_path(SCNetworkReachabilityRef reachability, CharonNW
 
 nw_path_monitor_t nw_path_monitor_create(void)
 {
-    CharonNWPathMonitor *monitor = [[CharonNWPathMonitor alloc] init];
+    RevenantNWPathMonitor *monitor = [[RevenantNWPathMonitor alloc] init];
     monitor->_required = nw_interface_type_other;
     monitor->_prohibitedTypes = [NSMutableArray array];
     return monitor;
@@ -215,31 +215,31 @@ nw_path_monitor_t nw_path_monitor_create(void)
 
 nw_path_monitor_t nw_path_monitor_create_with_type(nw_interface_type_t required_interface_type)
 {
-    CharonNWPathMonitor *monitor = (CharonNWPathMonitor *)nw_path_monitor_create();
+    RevenantNWPathMonitor *monitor = (RevenantNWPathMonitor *)nw_path_monitor_create();
     monitor->_required = required_interface_type;
     return monitor;
 }
 
 void nw_path_monitor_set_cancel_handler(nw_path_monitor_t monitor, nw_path_monitor_cancel_handler_t cancel_handler)
 {
-    ((CharonNWPathMonitor *)monitor)->_cancel = [cancel_handler copy];
+    ((RevenantNWPathMonitor *)monitor)->_cancel = [cancel_handler copy];
 }
 
 void nw_path_monitor_set_update_handler(nw_path_monitor_t monitor, nw_path_monitor_update_handler_t update_handler)
 {
-    ((CharonNWPathMonitor *)monitor)->_update = [update_handler copy];
+    ((RevenantNWPathMonitor *)monitor)->_update = [update_handler copy];
 }
 
 void nw_path_monitor_set_queue(nw_path_monitor_t monitor, dispatch_queue_t queue)
 {
-    ((CharonNWPathMonitor *)monitor)->_queue = queue;
+    ((RevenantNWPathMonitor *)monitor)->_queue = queue;
 }
 
-static void charon_deliver(CharonNWPathMonitor *monitor, int generation, BOOL always)
+static void revenant_deliver(RevenantNWPathMonitor *monitor, int generation, BOOL always)
 {
     if (monitor->_cancelled || generation != monitor->_generation || !monitor->_reachability)
         return;
-    CharonNWPath *path = charon_path(monitor->_reachability, monitor);
+    RevenantNWPath *path = revenant_path(monitor->_reachability, monitor);
     if (!always && monitor->_last && nw_path_is_equal(monitor->_last, path))
         return;
     monitor->_last = path;
@@ -247,15 +247,15 @@ static void charon_deliver(CharonNWPathMonitor *monitor, int generation, BOOL al
         monitor->_update(path);
 }
 
-static void charon_reachability_callback(SCNetworkReachabilityRef target, SCNetworkReachabilityFlags flags, void *info)
+static void revenant_reachability_callback(SCNetworkReachabilityRef target, SCNetworkReachabilityFlags flags, void *info)
 {
-    CharonNWPathMonitor *monitor = (__bridge CharonNWPathMonitor *)info;
-    charon_deliver(monitor, monitor->_generation, NO);
+    RevenantNWPathMonitor *monitor = (__bridge RevenantNWPathMonitor *)info;
+    revenant_deliver(monitor, monitor->_generation, NO);
 }
 
 void nw_path_monitor_start(nw_path_monitor_t handle)
 {
-    CharonNWPathMonitor *monitor = (CharonNWPathMonitor *)handle;
+    RevenantNWPathMonitor *monitor = (RevenantNWPathMonitor *)handle;
     @synchronized (monitor) {
         if (monitor->_cancelled || !monitor->_queue)
             return;
@@ -267,11 +267,11 @@ void nw_path_monitor_start(nw_path_monitor_t handle)
             zero.sin_family = AF_INET;
             monitor->_reachability = SCNetworkReachabilityCreateWithAddress(kCFAllocatorDefault, (const struct sockaddr *)&zero);
             SCNetworkReachabilityContext context = {0, (__bridge void *)monitor, CFRetain, CFRelease, NULL};
-            SCNetworkReachabilitySetCallback(monitor->_reachability, charon_reachability_callback, &context);
+            SCNetworkReachabilitySetCallback(monitor->_reachability, revenant_reachability_callback, &context);
             SCNetworkReachabilitySetDispatchQueue(monitor->_reachability, monitor->_queue);
         }
         monitor->_started = YES;
-        CharonNWPath *initial = charon_path(monitor->_reachability, monitor);
+        RevenantNWPath *initial = revenant_path(monitor->_reachability, monitor);
         dispatch_async(monitor->_queue, ^{
             if (generation != monitor->_generation)
                 return;
@@ -284,7 +284,7 @@ void nw_path_monitor_start(nw_path_monitor_t handle)
 
 void nw_path_monitor_cancel(nw_path_monitor_t handle)
 {
-    CharonNWPathMonitor *monitor = (CharonNWPathMonitor *)handle;
+    RevenantNWPathMonitor *monitor = (RevenantNWPathMonitor *)handle;
     dispatch_queue_t queue;
     nw_path_monitor_cancel_handler_t cancel;
     @synchronized (monitor) {
@@ -306,12 +306,12 @@ void nw_path_monitor_cancel(nw_path_monitor_t handle)
 
 nw_path_status_t nw_path_get_status(nw_path_t path)
 {
-    return ((CharonNWPath *)path)->_status;
+    return ((RevenantNWPath *)path)->_status;
 }
 
 void nw_path_enumerate_interfaces(nw_path_t path, nw_path_enumerate_interfaces_block_t enumerate_block)
 {
-    for (CharonNWInterface *interface in ((CharonNWPath *)path)->_interfaces) {
+    for (RevenantNWInterface *interface in ((RevenantNWPath *)path)->_interfaces) {
         if (!enumerate_block(interface))
             break;
     }
@@ -319,7 +319,7 @@ void nw_path_enumerate_interfaces(nw_path_t path, nw_path_enumerate_interfaces_b
 
 bool nw_path_is_equal(nw_path_t first, nw_path_t second)
 {
-    CharonNWPath *a = (CharonNWPath *)first, *b = (CharonNWPath *)second;
+    RevenantNWPath *a = (RevenantNWPath *)first, *b = (RevenantNWPath *)second;
     if (a == b)
         return true;
     if (!a || !b || a->_status != b->_status || a->_expensive != b->_expensive || a->_ipv4 != b->_ipv4 || a->_ipv6 != b->_ipv6 || a->_dns != b->_dns || a->_interfaces.count != b->_interfaces.count)
@@ -333,27 +333,27 @@ bool nw_path_is_equal(nw_path_t first, nw_path_t second)
 
 bool nw_path_is_expensive(nw_path_t path)
 {
-    return ((CharonNWPath *)path)->_expensive;
+    return ((RevenantNWPath *)path)->_expensive;
 }
 
 bool nw_path_has_ipv4(nw_path_t path)
 {
-    return ((CharonNWPath *)path)->_ipv4;
+    return ((RevenantNWPath *)path)->_ipv4;
 }
 
 bool nw_path_has_ipv6(nw_path_t path)
 {
-    return ((CharonNWPath *)path)->_ipv6;
+    return ((RevenantNWPath *)path)->_ipv6;
 }
 
 bool nw_path_has_dns(nw_path_t path)
 {
-    return ((CharonNWPath *)path)->_dns;
+    return ((RevenantNWPath *)path)->_dns;
 }
 
 bool nw_path_uses_interface_type(nw_path_t path, nw_interface_type_t interface_type)
 {
-    for (CharonNWInterface *interface in ((CharonNWPath *)path)->_interfaces) {
+    for (RevenantNWInterface *interface in ((RevenantNWPath *)path)->_interfaces) {
         if (interface->_type == interface_type)
             return true;
     }
@@ -372,26 +372,26 @@ nw_endpoint_t nw_path_copy_effective_remote_endpoint(nw_path_t path)
 
 nw_interface_type_t nw_interface_get_type(nw_interface_t interface)
 {
-    return ((CharonNWInterface *)interface)->_type;
+    return ((RevenantNWInterface *)interface)->_type;
 }
 
 const char *nw_interface_get_name(nw_interface_t interface)
 {
-    return ((CharonNWInterface *)interface)->_name.UTF8String;
+    return ((RevenantNWInterface *)interface)->_name.UTF8String;
 }
 
 uint32_t nw_interface_get_index(nw_interface_t interface)
 {
-    return ((CharonNWInterface *)interface)->_index;
+    return ((RevenantNWInterface *)interface)->_index;
 }
 
-nw_interface_type_t charon_path_interface_type(const struct ifaddrs *item)
+nw_interface_type_t revenant_path_interface_type(const struct ifaddrs *item)
 {
-    return charon_type_of(item);
+    return revenant_type_of(item);
 }
 
-BOOL charon_path_wants_interface(nw_interface_type_t required, nw_interface_type_t type, BOOL reachable, BOOL cellular,
+BOOL revenant_path_wants_interface(nw_interface_type_t required, nw_interface_type_t type, BOOL reachable, BOOL cellular,
                                  BOOL hasAddress)
 {
-    return charon_path_wants(required, type, reachable, cellular, hasAddress);
+    return revenant_path_wants(required, type, reachable, cellular, hasAddress);
 }

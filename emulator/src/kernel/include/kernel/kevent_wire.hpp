@@ -8,7 +8,7 @@
 #include <cstdint>
 #include <optional>
 
-namespace shade {
+namespace emulator {
 
 struct KeventValue {
     std::uint64_t ident { };

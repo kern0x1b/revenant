@@ -17,7 +17,7 @@
 #include <bit>
 #include <utility>
 
-namespace shade::darwin::route {
+namespace emulator::darwin::route {
 namespace {
 
     std::uint16_t read16(std::span<const std::byte> bytes, std::size_t offset)

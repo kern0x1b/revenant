@@ -1,5 +1,5 @@
 #!/bin/sh
-# run.sh - the port's P-256 signature and ECDH (charon@micro-ecc's arithmetic and this repository's
+# run.sh - the port's P-256 signature and ECDH (revenant@micro-ecc's arithmetic and this repository's
 # JOSE around it) against the host's own Security.framework, in both directions: a signature the port
 # makes must verify under the host's key, a signature the host makes must verify under the port's, and
 # both sides must reach the same shared secret.
@@ -7,7 +7,7 @@ set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 package=${PACKAGE:-$here/../../../../packages/m/micro-ecc}
-build=${SECKEYCURVE_BUILD:-$(runs_fresh charon-seckeycurve)}
+build=${SECKEYCURVE_BUILD:-$(runs_fresh revenant-seckeycurve)}
 rm -rf "$build"
 mkdir -p "$build"
 clone="$build/micro-ecc"
@@ -16,7 +16,7 @@ git clone --quiet --depth 1 https://github.com/kmackay/micro-ecc.git "$clone" > 
 xcrun clang -std=c11 -Os -w -fno-strict-aliasing -I"$clone" -I"$package/files" \
     -c "$clone/uECC.c" -o "$build/uECC.o"
 xcrun clang -std=c11 -Os -w -fno-strict-aliasing -I"$clone" -I"$package/files" \
-    -c "$package/files/CharonCKWebAuth.c" -o "$build/wrapper.o"
+    -c "$package/files/RevenantCKWebAuth.c" -o "$build/wrapper.o"
 # OpenSSL is the oracle for the exchange: the host's own SecKeyCopyKeyExchangeResult reads through
 # an in-memory key and dies (measured, a SIGSEGV inside Security.framework), so the two P-256 pairs
 # and the secret OpenSSL derives from them are made here and the differential compares that file
@@ -84,13 +84,13 @@ done
 # for every one of them (measured, attrs.m in the evidence of this suite's design). port-shims.h answers
 # both shapes from the host's own Security, and the differential says which key is of which kind.
 port=${PORT:-$here/../../../../packages/a/apple-backports/Security}
-renames="-DCharonCKPublicPoint=charonHostCharonCKPublicPoint
-    -DSecKeyCreateSignature=charonHost_SecKeyCreateSignature
-    -DSecKeyVerifySignature=charonHost_SecKeyVerifySignature
-    -DSecKeyCopyKeyExchangeResult=charonHost_SecKeyCopyKeyExchangeResult
-    -DSecKeyIsAlgorithmSupported=charonHost_SecKeyIsAlgorithmSupported
-    -DSecItemCopyMatching=charonHost_SecItemCopyMatching
-    -DSecKeyCopyAttributeDictionary=charonHost_SecKeyCopyAttributeDictionary"
+renames="-DRevenantCKPublicPoint=revenantHostRevenantCKPublicPoint
+    -DSecKeyCreateSignature=revenantHost_SecKeyCreateSignature
+    -DSecKeyVerifySignature=revenantHost_SecKeyVerifySignature
+    -DSecKeyCopyKeyExchangeResult=revenantHost_SecKeyCopyKeyExchangeResult
+    -DSecKeyIsAlgorithmSupported=revenantHost_SecKeyIsAlgorithmSupported
+    -DSecItemCopyMatching=revenantHost_SecItemCopyMatching
+    -DSecKeyCopyAttributeDictionary=revenantHost_SecKeyCopyAttributeDictionary"
 # shellcheck disable=SC2086
 xcrun clang -fobjc-arc -w -include "$here/port-shims.h" $renames \
     -c "$port/SecurityFunctions10_0_1.m" -o "$build/functions.o"
@@ -107,6 +107,6 @@ xcrun clang -fobjc-arc -Wall -Wno-deprecated-declarations -I"$here/../../device"
 # runs this script once per mutant with SECKEYCURVE_MUTANT set, and that guard keeps a mutant's run from running
 # the matrix again.
 if [ -z "${SECKEYCURVE_MUTANT:-}" ]; then
-    scratch=$(runs_fresh charon-seckeycurve-cells)
+    scratch=$(runs_fresh revenant-seckeycurve-cells)
     xmake l "$here/mutate-cells.lua" "$port" "$here" "$scratch"
 fi

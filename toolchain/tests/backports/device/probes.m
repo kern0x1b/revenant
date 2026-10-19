@@ -126,11 +126,11 @@ int main(int argc, char **argv)
 {
     @autoreleasepool {
         if (argc > 1)
-            charon_log_to(@(argv[1]));
+            revenant_log_to(@(argv[1]));
         device_check();
         augmented_reality();
         tag_reading();
-        printf("%d of %d checks failed\n", charon_failures, charon_checks);
-        return charon_failures;
+        printf("%d of %d checks failed\n", revenant_failures, revenant_checks);
+        return revenant_failures;
     }
 }

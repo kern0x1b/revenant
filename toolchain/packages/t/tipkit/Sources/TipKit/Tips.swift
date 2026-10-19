@@ -1,5 +1,5 @@
 import Foundation
-#if CHARON_CARRIES_LOCALIZED_STRING
+#if REVENANT_CARRIES_LOCALIZED_STRING
 import AppIntents
 #endif
 
@@ -188,7 +188,7 @@ public enum Tips {
         }
 
         public init(_ conditions: [any EventPredicateExpression], _ operation: CompoundOperation) {
-            self.condition = CharonAnyPredicate(conditions: conditions, operation: operation)
+            self.condition = RevenantAnyPredicate(conditions: conditions, operation: operation)
             self.operation = operation
         }
     }
@@ -214,7 +214,7 @@ public enum Tips {
         public static func buildEither(second: any EventPredicateExpression) -> any EventPredicateExpression { return second }
     }
 
-    struct CharonAnyPredicate: EventPredicateExpression {
+    struct RevenantAnyPredicate: EventPredicateExpression {
         typealias Output = Bool
 
         let conditions: [any EventPredicateExpression]
@@ -343,7 +343,7 @@ public enum Tips {
             }
 
             public subscript<Output>(dynamicMember keyPath: KeyPath<[String: String], Output>) -> Output? {
-                for name in CharonDonationKeys.of(keyPath) {
+                for name in RevenantDonationKeys.of(keyPath) {
                     if let found: Output = self.value[name] as? Output { return found }
                 }
                 return nil

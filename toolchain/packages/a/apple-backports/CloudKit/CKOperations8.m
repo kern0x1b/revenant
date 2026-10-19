@@ -1,11 +1,11 @@
-#import "CharonCloudKit.h"
-#import "CharonCKConstants.h"
-#import "CharonCKSubscription.h"
+#import "RevenantCloudKit.h"
+#import "RevenantCKConstants.h"
+#import "RevenantCKSubscription.h"
 
 #import <objc/runtime.h>
 
-@interface CKOperation (CharonCKShared)
-- (void)charon_finish;
+@interface CKOperation (RevenantCKShared)
+- (void)revenant_finish;
 @end
 
 #pragma mark - CKOperation
@@ -28,12 +28,12 @@
     }
     self = [super init];
     if (self) {
-        [self charon_setUp];
+        [self revenant_setUp];
     }
     return self;
 }
 
-- (void)charon_setUp
+- (void)revenant_setUp
 {
     _operationID = (CKOperationID)[[NSUUID UUID] UUIDString];
     _longLived = NO;
@@ -44,30 +44,30 @@
 
 - (void)main
 {
-    [self charon_finish];
+    [self revenant_finish];
 }
 
-- (void)charon_finish
+- (void)revenant_finish
 {
-    [CharonCKOPScheduler complete:self];
+    [RevenantCKOPScheduler complete:self];
 }
 
 - (void)runMethod:(NSString *)method path:(NSString *)path body:(NSDictionary *)body
       completion:(void (^)(id body, NSError *error))completion
 {
     if (self.isCancelled) {
-        [self charon_finish];
+        [self revenant_finish];
         return;
     }
     CKContainer *container = self.container;
     if (!container) {
-        [self charon_finish];
+        [self revenant_finish];
         return;
     }
     __unsafe_unretained CKOperation *weakSelf = self;
-    [[CharonCKTransport shared] performContainer:container
+    [[RevenantCKTransport shared] performContainer:container
                                         database:nil
-                                     environment:[[CharonCKTransport shared] environmentForContainer:container]
+                                     environment:[[RevenantCKTransport shared] environmentForContainer:container]
                                           method:method
                                             path:path
                                             body:body
@@ -78,11 +78,11 @@
         }
         if (error) {
             completion(nil, error);
-            [strongSelf charon_finish];
+            [strongSelf revenant_finish];
             return;
         }
         completion(answer, nil);
-        [strongSelf charon_finish];
+        [strongSelf revenant_finish];
     }];
 }
 
@@ -91,7 +91,7 @@
     if (!items.count) {
         return nil;
     }
-    return CharonCKError(CKErrorPartialFailure, @"Some items failed", @{CKPartialErrorsByItemIDKey: items});
+    return RevenantCKError(CKErrorPartialFailure, @"Some items failed", @{CKPartialErrorsByItemIDKey: items});
 }
 
 @end
@@ -157,8 +157,8 @@
         NSMutableDictionary *document = [NSMutableDictionary dictionary];
         document[@"recordName"] = record.recordID.recordName;
         document[@"recordType"] = record.recordType;
-        document[@"zoneID"] = CharonCKZoneIDDocument(record.recordID.zoneID);
-        document[@"fields"] = CharonCKFieldsToJSON(CharonCKFieldsSnapshot(record));
+        document[@"zoneID"] = RevenantCKZoneIDDocument(record.recordID.zoneID);
+        document[@"fields"] = RevenantCKFieldsToJSON(RevenantCKFieldsSnapshot(record));
         if (self.savePolicy == CKRecordSaveAllKeys) {
             document[@"fields"] = document[@"fields"];
         } else if (self.savePolicy == CKRecordSaveIfServerRecordUnchanged && record.recordChangeTag) {
@@ -169,13 +169,13 @@
     }
     NSMutableArray *deletes = [NSMutableArray array];
     for (CKRecordID *recordID in self.recordIDsToDelete) {
-        [deletes addObject:@{@"operationType": @"forceDelete", @"recordID": CharonCKRecordIDDocument(recordID)}];
+        [deletes addObject:@{@"operationType": @"forceDelete", @"recordID": RevenantCKRecordIDDocument(recordID)}];
     }
     if (!saves.count && !deletes.count) {
         if (self.modifyRecordsCompletionBlock) {
             self.modifyRecordsCompletionBlock(@[], @[], nil);
         }
-        [self charon_finish];
+        [self revenant_finish];
         return;
     }
     NSMutableDictionary *body = [NSMutableDictionary dictionary];
@@ -210,10 +210,10 @@
         for (NSDictionary *document in answer[@"records"]) {
             NSDictionary *fields = [document[@"fields"] isKindOfClass:[NSDictionary class]] ? document[@"fields"] : @{};
             NSDictionary *serverError = [document[@"serverError"] isKindOfClass:[NSDictionary class]] ? document[@"serverError"] : nil;
-            CKRecord *record = CharonCKRecordFromResult(document, nil);
-            CKRecordID *recordID = CharonCKRecordIDFromDocument(document);
+            CKRecord *record = RevenantCKRecordFromResult(document, nil);
+            CKRecordID *recordID = RevenantCKRecordIDFromDocument(document);
             if (serverError) {
-                NSError *itemError = CharonCKErrorFromPayload(serverError, nil);
+                NSError *itemError = RevenantCKErrorFromPayload(serverError, nil);
                 if (recordID) {
                     failures[recordID.recordName] = itemError;
                 }
@@ -286,7 +286,7 @@
     if (self.recordZonesToSave.count) {
         NSMutableArray *zones = [NSMutableArray array];
         for (CKRecordZone *zone in self.recordZonesToSave) {
-            [zones addObject:@{@"zoneID": CharonCKZoneIDDocument(zone.zoneID),
+            [zones addObject:@{@"zoneID": RevenantCKZoneIDDocument(zone.zoneID),
                                @"atomic": @((int)((zone.capabilities & CKRecordZoneCapabilityAtomic) ? 1 : 0)),
                                @"rbac": @[]}];
         }
@@ -295,7 +295,7 @@
     if (self.recordZoneIDsToDelete.count) {
         NSMutableArray *ids = [NSMutableArray array];
         for (CKRecordZoneID *zoneID in self.recordZoneIDsToDelete) {
-            [ids addObject:CharonCKZoneIDDocument(zoneID)];
+            [ids addObject:RevenantCKZoneIDDocument(zoneID)];
         }
         body[@"zoneIDs"] = ids;
     }
@@ -303,7 +303,7 @@
         if (self.modifyRecordZonesCompletionBlock) {
             self.modifyRecordZonesCompletionBlock(nil, nil, nil);
         }
-        [self charon_finish];
+        [self revenant_finish];
         return;
     }
     __unsafe_unretained CKModifyRecordZonesOperation *weakSelf = self;
@@ -322,11 +322,11 @@
         NSMutableArray *saved = [NSMutableArray array];
         NSMutableArray *deleted = [NSMutableArray array];
         for (NSDictionary *document in answer[@"zones"]) {
-            CKRecordZone *zone = CharonCKZoneWithDocument(document);
+            CKRecordZone *zone = RevenantCKZoneWithDocument(document);
             NSDictionary *serverError = [document[@"serverError"] isKindOfClass:[NSDictionary class]]
                 ? document[@"serverError"] : nil;
             if (serverError) {
-                failures[document[@"zoneID"][@"zoneName"] ?: @"?"] = CharonCKErrorFromPayload(serverError, nil);
+                failures[document[@"zoneID"][@"zoneName"] ?: @"?"] = RevenantCKErrorFromPayload(serverError, nil);
                 continue;
             }
             if (zone) {
@@ -386,14 +386,14 @@
     if (self.subscriptionsToSave.count) {
         NSMutableArray *subscriptions = [NSMutableArray array];
         for (CKSubscription *subscription in self.subscriptionsToSave) {
-            NSDictionary *document = CharonCKSubscriptionDocument(subscription);
+            NSDictionary *document = RevenantCKSubscriptionDocument(subscription);
             if (!document) {
                 if (self.modifySubscriptionsCompletionBlock) {
                     self.modifySubscriptionsCompletionBlock(nil, nil,
-                        CharonCKError(CKErrorInvalidArguments,
+                        RevenantCKError(CKErrorInvalidArguments,
                                       @"This predicate has no form in a CloudKit query", nil));
                 }
-                [self charon_finish];
+                [self revenant_finish];
                 return;
             }
             [subscriptions addObject:document];
@@ -407,7 +407,7 @@
         if (self.modifySubscriptionsCompletionBlock) {
             self.modifySubscriptionsCompletionBlock(nil, nil, nil);
         }
-        [self charon_finish];
+        [self revenant_finish];
         return;
     }
     __unsafe_unretained CKModifySubscriptionsOperation *weakSelf = self;
@@ -427,9 +427,9 @@
         for (NSDictionary *document in answer[@"subscriptions"]) {
             NSDictionary *serverError = [document[@"serverError"] isKindOfClass:[NSDictionary class]]
                 ? document[@"serverError"] : nil;
-            CKSubscription *subscription = CharonCKSubscriptionWithDocument(document);
+            CKSubscription *subscription = RevenantCKSubscriptionWithDocument(document);
             if (serverError) {
-                failures[document[@"subscriptionID"] ?: @"?"] = CharonCKErrorFromPayload(serverError, nil);
+                failures[document[@"subscriptionID"] ?: @"?"] = RevenantCKErrorFromPayload(serverError, nil);
                 continue;
             }
             if (subscription) {
@@ -494,9 +494,9 @@
         CKRecordID *current = [container currentUserRecordID];
         if (!current) {
             if (self.fetchRecordsCompletionBlock) {
-                self.fetchRecordsCompletionBlock(nil, CharonCKNotAuthenticated());
+                self.fetchRecordsCompletionBlock(nil, RevenantCKNotAuthenticated());
             }
-            [self charon_finish];
+            [self revenant_finish];
             return;
         }
         ids = @[current];
@@ -505,7 +505,7 @@
     body[@"recordIDs"] = [ids valueForKey:@"description"] ? ids : ids;
     NSMutableArray *documents = [NSMutableArray array];
     for (CKRecordID *recordID in ids) {
-        [documents addObject:CharonCKRecordIDDocument(recordID)];
+        [documents addObject:RevenantCKRecordIDDocument(recordID)];
     }
     body[@"recordIDs"] = documents;
     if (self.desiredKeys) {
@@ -526,7 +526,7 @@
         NSSet *desired = strongSelf.desiredKeys ? [NSSet setWithArray:strongSelf.desiredKeys] : nil;
         NSMutableDictionary *found = [NSMutableDictionary dictionary];
         for (NSDictionary *document in answer[@"records"]) {
-            CKRecord *record = CharonCKRecordFromResult(document, desired);
+            CKRecord *record = RevenantCKRecordFromResult(document, desired);
             if (record) {
                 found[record.recordID] = record;
             }
@@ -543,7 +543,7 @@
                 }
                 continue;
             }
-            NSError *missing = CharonCKError(CKErrorUnknownItem, @"The record does not exist", nil);
+            NSError *missing = RevenantCKError(CKErrorUnknownItem, @"The record does not exist", nil);
             failures[recordID.recordName] = missing;
             if (strongSelf.perRecordCompletionBlock) {
                 strongSelf.perRecordCompletionBlock(nil, recordID, missing);
@@ -596,7 +596,7 @@
     if (!all) {
         NSMutableArray *documents = [NSMutableArray array];
         for (CKRecordZoneID *zoneID in self.recordZoneIDs) {
-            [documents addObject:CharonCKZoneIDDocument(zoneID)];
+            [documents addObject:RevenantCKZoneIDDocument(zoneID)];
         }
         body[@"zoneIDs"] = documents;
     }
@@ -615,7 +615,7 @@
         }
         NSMutableDictionary *zones = [NSMutableDictionary dictionary];
         for (NSDictionary *document in answer[@"zones"]) {
-            CKRecordZone *zone = CharonCKZoneWithDocument(document);
+            CKRecordZone *zone = RevenantCKZoneWithDocument(document);
             if (zone) {
                 zones[zone.zoneID] = zone;
                 if (strongSelf.perRecordZoneCompletionBlock) {
@@ -685,7 +685,7 @@
         }
         NSMutableDictionary *subscriptions = [NSMutableDictionary dictionary];
         for (NSDictionary *document in answer[@"subscriptions"]) {
-            CKSubscription *subscription = CharonCKSubscriptionWithDocument(document);
+            CKSubscription *subscription = RevenantCKSubscriptionWithDocument(document);
             if (subscription) {
                 subscriptions[subscription.subscriptionID] = subscription;
                 if (strongSelf.perSubscriptionCompletionBlock) {
@@ -743,25 +743,25 @@
     CKQueryCursor *cursor = self.cursor;
     if (!query && !cursor) {
         if (self.queryCompletionBlock) {
-            self.queryCompletionBlock(nil, CharonCKError(CKErrorInvalidArguments, @"No query and no cursor", nil));
+            self.queryCompletionBlock(nil, RevenantCKError(CKErrorInvalidArguments, @"No query and no cursor", nil));
         }
-        [self charon_finish];
+        [self revenant_finish];
         return;
     }
     NSError *refused = nil;
     NSDictionary *document = nil;
     if (query) {
-        document = CharonCKQueryDocument(query, self.zoneID.zoneName, self.desiredKeys, self.resultsLimit, &refused);
+        document = RevenantCKQueryDocument(query, self.zoneID.zoneName, self.desiredKeys, self.resultsLimit, &refused);
         if (!document) {
             if (self.queryCompletionBlock) {
                 self.queryCompletionBlock(nil, refused);
             }
-            [self charon_finish];
+            [self revenant_finish];
             return;
         }
     } else {
         NSMutableDictionary *continuing = [NSMutableDictionary dictionary];
-        continuing[@"zoneID"] = CharonCKZoneIDDocument(self.zoneID);
+        continuing[@"zoneID"] = RevenantCKZoneIDDocument(self.zoneID);
         if (self.desiredKeys) {
             continuing[@"desiredKeys"] = self.desiredKeys;
         }
@@ -771,7 +771,7 @@
         document = continuing;
     }
     if (cursor && [document isKindOfClass:[NSMutableDictionary class]]) {
-        [(NSMutableDictionary *)document setObject:[CharonCKTokenFromCursor(cursor) base64EncodedStringWithOptions:0]
+        [(NSMutableDictionary *)document setObject:[RevenantCKTokenFromCursor(cursor) base64EncodedStringWithOptions:0]
                                           forKey:@"continuationMarker"];
     }
     __unsafe_unretained CKQueryOperation *weakSelf = self;
@@ -791,10 +791,10 @@
         for (NSDictionary *document in answer[@"records"]) {
             NSDictionary *serverError = [document[@"serverError"] isKindOfClass:[NSDictionary class]]
                 ? document[@"serverError"] : nil;
-            CKRecord *record = CharonCKRecordFromResult(document, desired);
-            CKRecordID *recordID = CharonCKRecordIDFromDocument(document);
+            CKRecord *record = RevenantCKRecordFromResult(document, desired);
+            CKRecordID *recordID = RevenantCKRecordIDFromDocument(document);
             if (serverError) {
-                NSError *itemError = CharonCKErrorFromPayload(serverError, nil);
+                NSError *itemError = RevenantCKErrorFromPayload(serverError, nil);
                 if (recordID) {
                     failures[recordID.recordName] = itemError;
                 }
@@ -820,7 +820,7 @@
             ? answer[@"continuationMarker"] : nil;
         NSData *token = marker.length ? [[NSData alloc] initWithBase64EncodedString:marker
                                                                               options:NSDataBase64DecodingIgnoreUnknownCharacters] : nil;
-        CKQueryCursor *next = CharonCKCursorFromToken(token);
+        CKQueryCursor *next = RevenantCKCursorFromToken(token);
         if (strongSelf.queryCompletionBlock) {
             strongSelf.queryCompletionBlock(next, [strongSelf partialFailureWithItems:failures]);
         }
@@ -875,15 +875,15 @@
 {
     if (!self.recordZoneID) {
         if (self.fetchRecordChangesCompletionBlock) {
-            self.fetchRecordChangesCompletionBlock(nil, nil, CharonCKError(CKErrorInvalidArguments, @"No zone", nil));
+            self.fetchRecordChangesCompletionBlock(nil, nil, RevenantCKError(CKErrorInvalidArguments, @"No zone", nil));
         }
-        [self charon_finish];
+        [self revenant_finish];
         return;
     }
     NSMutableDictionary *body = [NSMutableDictionary dictionary];
     if (self.previousServerChangeToken) {
         body[@"resultsLimit"] = @(self.resultsLimit ?: 0);
-        NSData *previous = CharonCKSystemFieldsSnapshotToken(self.previousServerChangeToken);
+        NSData *previous = RevenantCKSystemFieldsSnapshotToken(self.previousServerChangeToken);
         if (previous.length) {
             body[@"continuationMarker"] = [previous base64EncodedStringWithOptions:0];
         }
@@ -893,7 +893,7 @@
     }
     __unsafe_unretained CKFetchRecordChangesOperation *weakSelf = self;
     [self runMethod:@"POST"
-               path:[NSString stringWithFormat:@"%@/changes", CharonCKZonePath(self.recordZoneID)]
+               path:[NSString stringWithFormat:@"%@/changes", RevenantCKZonePath(self.recordZoneID)]
                body:body
         completion:^(id answer, NSError *error) {
         CKFetchRecordChangesOperation *strongSelf = weakSelf;
@@ -908,13 +908,13 @@
         }
         NSSet *desired = strongSelf.desiredKeys ? [NSSet setWithArray:strongSelf.desiredKeys] : nil;
         for (NSDictionary *document in answer[@"records"]) {
-            CKRecord *record = CharonCKRecordFromResult(document, desired);
+            CKRecord *record = RevenantCKRecordFromResult(document, desired);
             if (record && strongSelf.recordChangedBlock) {
                 strongSelf.recordChangedBlock(record);
             }
         }
         for (NSDictionary *document in answer[@"deletedRecordIDs"]) {
-            CKRecordID *recordID = CharonCKRecordIDFromDocument(document);
+            CKRecordID *recordID = RevenantCKRecordIDFromDocument(document);
             if (recordID && strongSelf.recordWithIDWasDeletedBlock) {
                 strongSelf.recordWithIDWasDeletedBlock(recordID);
             }
@@ -925,7 +925,7 @@
                                                                               options:NSDataBase64DecodingIgnoreUnknownCharacters] : nil;
         [strongSelf takeMoreComing:[answer[@"moreComing"] boolValue]];
         if (strongSelf.fetchRecordChangesCompletionBlock) {
-            strongSelf.fetchRecordChangesCompletionBlock(token ? CharonCKServerTokenFromData(token) : nil,
+            strongSelf.fetchRecordChangesCompletionBlock(token ? RevenantCKServerTokenFromData(token) : nil,
                                                           answer[@"clientChangeToken"],
                                                           nil);
         }

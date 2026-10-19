@@ -52,10 +52,10 @@ static NSString *tail(NSURL *url)
 static void run_property_lists(Foundation11Recorder *recorder)
 {
     NSURL *folder = [NSURL fileURLWithPath:NSTemporaryDirectory()];
-    NSURL *arrayURL = [folder URLByAppendingPathComponent:@"charon11-array.plist"];
-    NSURL *dictURL = [folder URLByAppendingPathComponent:@"charon11-dict.plist"];
-    NSURL *emptyURL = [folder URLByAppendingPathComponent:@"charon11-empty.plist"];
-    NSURL *missingURL = [folder URLByAppendingPathComponent:@"charon11-missing.plist"];
+    NSURL *arrayURL = [folder URLByAppendingPathComponent:@"revenant11-array.plist"];
+    NSURL *dictURL = [folder URLByAppendingPathComponent:@"revenant11-dict.plist"];
+    NSURL *emptyURL = [folder URLByAppendingPathComponent:@"revenant11-empty.plist"];
+    NSURL *missingURL = [folder URLByAppendingPathComponent:@"revenant11-missing.plist"];
     [[NSFileManager defaultManager] removeItemAtURL:missingURL error:NULL];
 
     NSError *error = nil;

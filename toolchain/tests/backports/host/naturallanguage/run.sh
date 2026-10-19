@@ -4,12 +4,12 @@ here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 FOUNDATION=${FOUNDATION:-$here/../../../../packages/a/apple-backports/Foundation}
 harness=${NATURALLANGUAGE_HARNESS:-$here/../../device}
-build=${NATURALLANGUAGE_BUILD:-$(runs_folder charon-naturallanguage-host)}
+build=${NATURALLANGUAGE_BUILD:-$(runs_folder revenant-naturallanguage-host)}
 rm -rf "$build"
 mkdir -p "$build"
-renames="-DNLTokenizer=CharonHostNLTokenizer -DNLLanguageRecognizer=CharonHostNLLanguageRecognizer"
+renames="-DNLTokenizer=RevenantHostNLTokenizer -DNLLanguageRecognizer=RevenantHostNLLanguageRecognizer"
 for name in $(sed -n 's/^NSString \*const \(NLLanguage[A-Za-z]*\) .*/\1/p' "$FOUNDATION/NLLanguage.m"); do
-    renames="$renames -D$name=CharonHost$name"
+    renames="$renames -D$name=RevenantHost$name"
 done
 objects=""
 for source in NLLanguage.m NLTokenizer.m NLLanguageRecognizer.m; do

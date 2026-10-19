@@ -53,7 +53,7 @@ int main(int argc, char **argv)
 {
     @autoreleasepool {
         if (argc > 1)
-            charon_log_to(@(argv[1]));
+            revenant_log_to(@(argv[1]));
         CHECK_EQUAL(image_of((void *)[NSLinguisticTagger instanceMethodForSelector:@selector(tokenRangeAtIndex:unit:)]), @"libFoundationBackports.dylib", "the unit methods come from the backports");
         NSString *english = @"Hello, world! It's 3 o'clock.\nSecond paragraph here. Tim Cook visited Paris.";
         NSArray *schemes = @[NSLinguisticTagSchemeTokenType, NSLinguisticTagSchemeLexicalClass, NSLinguisticTagSchemeLemma, NSLinguisticTagSchemeLanguage, NSLinguisticTagSchemeScript];
@@ -115,7 +115,7 @@ int main(int argc, char **argv)
         CHECK_EQUAL(raised(^{ [tagger tagAtIndex:english.length + 3 unit:NSLinguisticTaggerUnitWord scheme:NSLinguisticTagSchemeTokenType tokenRange:NULL]; }), @"NSRangeException: *** -[NSLinguisticTagger tagAtIndex:unit:scheme:tokenRange:]: Range or index out of bounds", "and an index");
         NSLinguisticTagger *bare = [[NSLinguisticTagger alloc] initWithTagSchemes:@[NSLinguisticTagSchemeTokenType] options:0];
         CHECK_EQUAL(raised(^{ [bare tokenRangeAtIndex:0 unit:NSLinguisticTaggerUnitWord]; }), @"NSRangeException: *** -[NSLinguisticTagger tokenRangeAtIndex:unit:]: Range or index out of bounds", "a tagger with no string has none of them");
-        printf("checks=%d failures=%d\n", charon_checks, charon_failures);
+        printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
     }
-    return charon_failures ? 1 : 0;
+    return revenant_failures ? 1 : 0;
 }

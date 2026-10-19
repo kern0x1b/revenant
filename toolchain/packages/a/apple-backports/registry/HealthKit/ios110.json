@@ -7,8 +7,8 @@
       "introduced": "11.0",
       "minimum": "6.0",
       "status": "implemented",
-      "reason": "iOS 11.0 brought the CDA document itself, a release after the 10.0 document sample that holds it; the corpus dates the sample and the document's members to 10.0 by the sample's version and the document and its members to 11.0, and that is what each group carries, and a CDA document is the data, the title and the three names it is about. The release carries the class itself from 10.0.1 with fifteen methods of its own and exports no symbol for it until 11.0, so the name is an ALIAS through charon_alias.h and a band keeps one class of that name",
-      "effect": "each member kept as it was given and read back as it was, a nil stays a nil, and two documents are equal when their data and their four names are. NSSecureCoding and NSCopying carry the data and the four names. On a band below 10.0.1, where the release has no class of this name, the alias's own class is the class and the category on it answers out of the state beside it; on 10.0.1 to 10.3.4 the release's own class answers, because it carries these fifteen methods and the category is attached only where the class does not answer the selector; from 11.0 the band reexports the name and links neither. NSClassFromString answers nil on a release with no class of the name, which is what charon_alias.h records for every alias it makes",
+      "reason": "iOS 11.0 brought the CDA document itself, a release after the 10.0 document sample that holds it; the corpus dates the sample and the document's members to 10.0 by the sample's version and the document and its members to 11.0, and that is what each group carries, and a CDA document is the data, the title and the three names it is about. The release carries the class itself from 10.0.1 with fifteen methods of its own and exports no symbol for it until 11.0, so the name is an ALIAS through revenant_alias.h and a band keeps one class of that name",
+      "effect": "each member kept as it was given and read back as it was, a nil stays a nil, and two documents are equal when their data and their four names are. NSSecureCoding and NSCopying carry the data and the four names. On a band below 10.0.1, where the release has no class of this name, the alias's own class is the class and the category on it answers out of the state beside it; on 10.0.1 to 10.3.4 the release's own class answers, because it carries these fifteen methods and the category is attached only where the class does not answer the selector; from 11.0 the band reexports the name and links neither. NSClassFromString answers nil on a release with no class of the name, which is what revenant_alias.h records for every alias it makes",
       "facts": "facts/HealthKit/HealthKit.md",
       "source": "the header of iOS 26.2 for the contract"
     },
@@ -415,7 +415,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "reason": "iOS 11.0 brought the CDA document itself, a release after the 10.0 document sample that holds it; the corpus dates the sample and the document's members to 10.0 by the sample's version and the document and its members to 11.0, and that is what each group carries",
-      "effect": "the author's name, nil where the document names none, read out of the state the category on Charon's own name keeps beside the class on the bands where the release has no class of that name; HealthKit's own class answers it from 10.0.1 on, where the release carries it",
+      "effect": "the author's name, nil where the document names none, read out of the state the category on Revenant's own name keeps beside the class on the bands where the release has no class of that name; HealthKit's own class answers it from 10.0.1 on, where the release carries it",
       "facts": "facts/HealthKit/HealthKit.md",
       "source": "the header of iOS 26.2 for the contract"
     },
@@ -426,7 +426,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "reason": "iOS 11.0 brought the CDA document itself, a release after the 10.0 document sample that holds it; the corpus dates the sample and the document's members to 10.0 by the sample's version and the document and its members to 11.0, and that is what each group carries",
-      "effect": "the custodian's name, nil where the document names none, read out of the state the category on Charon's own name keeps beside the class on the bands where the release has no class of that name; HealthKit's own class answers it from 10.0.1 on, where the release carries it",
+      "effect": "the custodian's name, nil where the document names none, read out of the state the category on Revenant's own name keeps beside the class on the bands where the release has no class of that name; HealthKit's own class answers it from 10.0.1 on, where the release carries it",
       "facts": "facts/HealthKit/HealthKit.md",
       "source": "the header of iOS 26.2 for the contract"
     },
@@ -437,7 +437,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "reason": "iOS 11.0 brought the CDA document itself, a release after the 10.0 document sample that holds it; the corpus dates the sample and the document's members to 10.0 by the sample's version and the document and its members to 11.0, and that is what each group carries",
-      "effect": "the data the document was made with, the XML a CDA document is, read out of the state the category on Charon's own name keeps beside the class on the bands where the release has no class of that name; HealthKit's own class answers it from 10.0.1 on, where the release carries it",
+      "effect": "the data the document was made with, the XML a CDA document is, read out of the state the category on Revenant's own name keeps beside the class on the bands where the release has no class of that name; HealthKit's own class answers it from 10.0.1 on, where the release carries it",
       "facts": "facts/HealthKit/HealthKit.md",
       "source": "the header of iOS 26.2 for the contract"
     },
@@ -448,7 +448,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "reason": "iOS 11.0 brought the CDA document itself, a release after the 10.0 document sample that holds it; the corpus dates the sample and the document's members to 10.0 by the sample's version and the document and its members to 11.0, and that is what each group carries",
-      "effect": "the patient's name, nil where the document names none, read out of the state the category on Charon's own name keeps beside the class on the bands where the release has no class of that name; HealthKit's own class answers it from 10.0.1 on, where the release carries it",
+      "effect": "the patient's name, nil where the document names none, read out of the state the category on Revenant's own name keeps beside the class on the bands where the release has no class of that name; HealthKit's own class answers it from 10.0.1 on, where the release carries it",
       "facts": "facts/HealthKit/HealthKit.md",
       "source": "the header of iOS 26.2 for the contract"
     },
@@ -459,7 +459,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "reason": "iOS 11.0 brought the CDA document itself, a release after the 10.0 document sample that holds it; the corpus dates the sample and the document's members to 10.0 by the sample's version and the document and its members to 11.0, and that is what each group carries",
-      "effect": "the title it was made with, nil where the document names none, read out of the state the category on Charon's own name keeps beside the class on the bands where the release has no class of that name; HealthKit's own class answers it from 10.0.1 on, where the release carries it",
+      "effect": "the title it was made with, nil where the document names none, read out of the state the category on Revenant's own name keeps beside the class on the bands where the release has no class of that name; HealthKit's own class answers it from 10.0.1 on, where the release carries it",
       "facts": "facts/HealthKit/HealthKit.md",
       "source": "the header of iOS 26.2 for the contract"
     },

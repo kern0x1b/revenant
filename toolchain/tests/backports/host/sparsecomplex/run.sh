@@ -11,7 +11,7 @@ here=$(cd "$(dirname "$0")" && pwd)
 root=$(cd "$here/../../../../" && pwd)
 ACCELERATE=${ACCELERATE:-$root/packages/a/apple-backports/Accelerate}
 COMPLEX=${COMPLEX:-$here}
-build=${SPARSECOMPLEX_BUILD:-$(runs_folder charon-sparsecomplex-host)}
+build=${SPARSECOMPLEX_BUILD:-$(runs_folder revenant-sparsecomplex-host)}
 rm -rf "$build"
 mkdir -p "$build"
 

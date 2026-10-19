@@ -1,6 +1,6 @@
-#import "CharonMPSPyramid.h"
+#import "RevenantMPSPyramid.h"
 
-static double CharonMPSPyramidFiltered(const float *source, NSUInteger width, NSUInteger height,
+static double RevenantMPSPyramidFiltered(const float *source, NSUInteger width, NSUInteger height,
                                        NSUInteger channel, NSUInteger channels,
                                        NSUInteger x, NSUInteger y,
                                        const float *kernel, NSUInteger kernelWidth, NSUInteger kernelHeight)
@@ -23,13 +23,13 @@ static double CharonMPSPyramidFiltered(const float *source, NSUInteger width, NS
 @implementation MPSImageGaussianPyramid
 @end
 
-@interface MPSImageGaussianPyramid (CharonMPSGaussianPyramid)
+@interface MPSImageGaussianPyramid (RevenantMPSGaussianPyramid)
 - (BOOL)encodeToCommandBuffer:(id<MTLCommandBuffer>)commandBuffer
                   inPlaceTexture:(id<MTLTexture>)texture
        fallbackCopyAllocator:(MPSCopyAllocator)copyAllocator;
 @end
 
-@implementation MPSImageGaussianPyramid (CharonMPSGaussianPyramid)
+@implementation MPSImageGaussianPyramid (RevenantMPSGaussianPyramid)
 
 - (BOOL)encodeToCommandBuffer:(id<MTLCommandBuffer>)commandBuffer
                  inPlaceTexture:(id<MTLTexture>)texture
@@ -38,37 +38,37 @@ static double CharonMPSPyramidFiltered(const float *source, NSUInteger width, NS
     (void)copyAllocator;
     NSString *what = @"MPSImageGaussianPyramid";
     if (!commandBuffer) {
-        CharonMPSRefuse(@"%@: no command buffer, so no level was written", what);
+        RevenantMPSRefuse(@"%@: no command buffer, so no level was written", what);
         return NO;
     }
-    if (!CharonMPSCommandBufferPermits(commandBuffer))
+    if (!RevenantMPSCommandBufferPermits(commandBuffer))
         return NO;
     if (!texture) {
-        CharonMPSRefuse(@"%@: no texture, so no level was written", what);
+        RevenantMPSRefuse(@"%@: no texture, so no level was written", what);
         return NO;
     }
     NSUInteger channels = 0;
     size_t elementSize = 0;
-    if (!CharonMPSPyramidPixelShape(texture.pixelFormat, &channels, &elementSize) || !channels || !elementSize) {
-        CharonMPSRefuse(@"%@: a texture of pixel format %d names no element width this port carries, so no"
+    if (!RevenantMPSPyramidPixelShape(texture.pixelFormat, &channels, &elementSize) || !channels || !elementSize) {
+        RevenantMPSRefuse(@"%@: a texture of pixel format %d names no element width this port carries, so no"
                         @" level was written", what, (int)texture.pixelFormat);
         return NO;
     }
-    const float *kernel = [self charon_mps_filter];
-    NSUInteger kernelWidth = [self charon_mps_filterWidth];
-    NSUInteger kernelHeight = [self charon_mps_filterHeight];
+    const float *kernel = [self revenant_mps_filter];
+    NSUInteger kernelWidth = [self revenant_mps_filterWidth];
+    NSUInteger kernelHeight = [self revenant_mps_filterHeight];
     NSUInteger levels = texture.mipmapLevelCount;
     if (levels < 2) {
-        CharonMPSRefuse(@"%@: the texture has %lu mip level(s) and a pyramid writes every level after the"
+        RevenantMPSRefuse(@"%@: the texture has %lu mip level(s) and a pyramid writes every level after the"
                         @" first, so there was nothing to do", what, (unsigned long)levels);
         return NO;
     }
     NSUInteger baseWidth = texture.width, baseHeight = texture.height;
     for (NSUInteger level = 1; level < levels; level++) {
-        NSUInteger sourceWidth = CharonMPSPyramidExtent(baseWidth, level - 1);
-        NSUInteger sourceHeight = CharonMPSPyramidExtent(baseHeight, level - 1);
-        NSUInteger width = CharonMPSPyramidExtent(baseWidth, level);
-        NSUInteger height = CharonMPSPyramidExtent(baseHeight, level);
+        NSUInteger sourceWidth = RevenantMPSPyramidExtent(baseWidth, level - 1);
+        NSUInteger sourceHeight = RevenantMPSPyramidExtent(baseHeight, level - 1);
+        NSUInteger width = RevenantMPSPyramidExtent(baseWidth, level);
+        NSUInteger height = RevenantMPSPyramidExtent(baseHeight, level);
         size_t sourceBytes = (size_t)sourceWidth * sourceHeight * channels * elementSize;
         size_t bytes = (size_t)width * height * channels * elementSize;
         float *source = (float *)calloc(sourceBytes ? sourceBytes : 1, 1);
@@ -76,13 +76,13 @@ static double CharonMPSPyramidFiltered(const float *source, NSUInteger width, NS
         if (!source || !answer) {
             free(source);
             free(answer);
-            CharonMPSRefuse(@"%@: no memory for level %lu, so no level was written", what, (unsigned long)level);
+            RevenantMPSRefuse(@"%@: no memory for level %lu, so no level was written", what, (unsigned long)level);
             return NO;
         }
-        if (!CharonMPSPyramidRead(texture, level - 1, sourceWidth, sourceHeight, channels, elementSize, source)) {
+        if (!RevenantMPSPyramidRead(texture, level - 1, sourceWidth, sourceHeight, channels, elementSize, source)) {
             free(source);
             free(answer);
-            CharonMPSRefuse(@"%@: level %lu could not be read, so the pyramid stopped there", what,
+            RevenantMPSRefuse(@"%@: level %lu could not be read, so the pyramid stopped there", what,
                             (unsigned long)(level - 1));
             return NO;
         }
@@ -94,17 +94,17 @@ static double CharonMPSPyramidFiltered(const float *source, NSUInteger width, NS
                 if (over >= sourceHeight)
                     over = sourceHeight ? sourceHeight - 1 : 0;
                 for (NSUInteger channel = 0; channel < channels; channel++) {
-                    double value = CharonMPSPyramidFiltered(source, sourceWidth, sourceHeight, channel, channels,
+                    double value = RevenantMPSPyramidFiltered(source, sourceWidth, sourceHeight, channel, channels,
                                                             at, over, kernel, kernelWidth, kernelHeight);
                     answer[(y * width + x) * channels + channel] = (float)value;
                 }
             }
         }
-        BOOL written = CharonMPSPyramidWrite(texture, level, width, height, channels, elementSize, answer);
+        BOOL written = RevenantMPSPyramidWrite(texture, level, width, height, channels, elementSize, answer);
         free(source);
         free(answer);
         if (!written) {
-            CharonMPSRefuse(@"%@: level %lu could not be written, so the pyramid stopped there", what,
+            RevenantMPSRefuse(@"%@: level %lu could not be written, so the pyramid stopped there", what,
                             (unsigned long)level);
             return NO;
         }

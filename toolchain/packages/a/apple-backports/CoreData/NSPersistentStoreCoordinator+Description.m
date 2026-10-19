@@ -1,6 +1,6 @@
-#import "CharonCoreData.h"
+#import "RevenantCoreData.h"
 
-@implementation NSPersistentStoreCoordinator (CharonDescription)
+@implementation NSPersistentStoreCoordinator (RevenantDescription)
 
 - (void)addPersistentStoreWithDescription:(NSPersistentStoreDescription *)storeDescription
                         completionHandler:(void (^)(NSPersistentStoreDescription *, NSError *))block

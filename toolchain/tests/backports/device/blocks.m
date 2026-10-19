@@ -145,15 +145,15 @@ int main(void)
         CHECK(loopBefore == 0 && loopRuns == 1 && loopOnMain, "a block for the run loop waits until the loop runs, then runs once on it");
 
         __block int inModes = 0;
-        [loop performInModes:@[@"CharonProbeMode"] block:^{
+        [loop performInModes:@[@"RevenantProbeMode"] block:^{
             inModes++;
         }];
         spin(0.2);
         int inDefault = inModes;
-        [loop addPort:[NSMachPort port] forMode:@"CharonProbeMode"];
-        [loop runMode:@"CharonProbeMode" beforeDate:[NSDate dateWithTimeIntervalSinceNow:0.3]];
+        [loop addPort:[NSMachPort port] forMode:@"RevenantProbeMode"];
+        [loop runMode:@"RevenantProbeMode" beforeDate:[NSDate dateWithTimeIntervalSinceNow:0.3]];
         int inOwnMode = inModes;
-        [loop performInModes:@[NSDefaultRunLoopMode, @"CharonProbeMode"] block:^{
+        [loop performInModes:@[NSDefaultRunLoopMode, @"RevenantProbeMode"] block:^{
             inModes++;
         }];
         spin(0.2);
@@ -195,7 +195,7 @@ int main(void)
         CHECK(temporary.isFileURL && [temporary.path isEqual:expected] && [temporary.absoluteString hasSuffix:@"/"],
               "the temporary directory is a file URL of NSTemporaryDirectory(), with a slash at its end");
 
-        printf("%d checks, %d failures\n", charon_checks, charon_failures);
-        return charon_failures;
+        printf("%d checks, %d failures\n", revenant_checks, revenant_failures);
+        return revenant_failures;
     }
 }

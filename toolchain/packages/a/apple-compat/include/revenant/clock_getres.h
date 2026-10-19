@@ -1,5 +1,5 @@
-#ifndef CHARON_CLOCK_GETRES_H
-#define CHARON_CLOCK_GETRES_H
+#ifndef REVENANT_CLOCK_GETRES_H
+#define REVENANT_CLOCK_GETRES_H
 
 #include <time.h>
 
@@ -7,12 +7,12 @@
 extern "C" {
 #endif
 
-int charon_clock_getres(clockid_t which, struct timespec *resolution);
+int revenant_clock_getres(clockid_t which, struct timespec *resolution);
 
 #ifdef __cplusplus
 }
 #endif
 
-#define clock_getres charon_clock_getres
+#define clock_getres revenant_clock_getres
 
 #endif

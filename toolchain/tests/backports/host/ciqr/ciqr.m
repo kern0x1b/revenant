@@ -1,6 +1,6 @@
 #import <Foundation/Foundation.h>
 #import <CoreImage/CoreImage.h>
-#include "CharonQRDecode.h"
+#include "RevenantQRDecode.h"
 #include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -8,8 +8,8 @@
 
 enum { kNumeric, kAlphanumeric, kAsciiByte, kUTF8Byte, kLatin1Byte, kKinds };
 static const char *kKindName[kKinds] = {"numeric", "alnum", "byte", "utf8", "latin1"};
-static const int kKindMode[kKinds] = {CharonQRModeNumeric, CharonQRModeAlphanumeric, CharonQRModeByte, CharonQRModeByte,
-                                      CharonQRModeByte};
+static const int kKindMode[kKinds] = {RevenantQRModeNumeric, RevenantQRModeAlphanumeric, RevenantQRModeByte, RevenantQRModeByte,
+                                      RevenantQRModeByte};
 static const NSUInteger kLimit[kKinds] = {7100, 4300, 3000, 3000, 3000};
 static const int kVersions[6] = {1, 2, 7, 10, 25, 40};
 static const char kLevels[4] = {'L', 'M', 'Q', 'H'};
@@ -155,8 +155,8 @@ static int decode(const uint8_t *grid, int size, NSString **text, int *mode)
 {
     uint8_t out[8192];
     size_t length = 0;
-    int status = CharonQRDecode(grid, size, out, sizeof out, &length, mode);
-    *text = status == CharonQRDecodeOK ? text_of(out, length) : nil;
+    int status = RevenantQRDecode(grid, size, out, sizeof out, &length, mode);
+    *text = status == RevenantQRDecodeOK ? text_of(out, length) : nil;
     return status;
 }
 
@@ -190,8 +190,8 @@ static void run_case(int kind, int version, int levelIndex, int withDamage)
 
     NSString *decoded = nil;
     int mode = 0;
-    int status = grid ? decode(grid, size, &decoded, &mode) : CharonQRDecodeBadArgument;
-    int pass = grid && size == target && hostCount == 1 && same(host, input) && status == CharonQRDecodeOK &&
+    int status = grid ? decode(grid, size, &decoded, &mode) : RevenantQRDecodeBadArgument;
+    int pass = grid && size == target && hostCount == 1 && same(host, input) && status == RevenantQRDecodeOK &&
                same(decoded, host) && mode == kKindMode[kind];
 
     int safeFlips = ec_of(version, levelIndex) / 2, safeOK = 0, safeTrials = 4, overFailed = 0, overTrials = 2;
@@ -202,7 +202,7 @@ static void run_case(int kind, int version, int levelIndex, int withDamage)
             flip_region(damaged, size, safeFlips);
             NSString *text = nil;
             int m = 0;
-            if (decode(damaged, size, &text, &m) == CharonQRDecodeOK && same(text, host)) safeOK++;
+            if (decode(damaged, size, &text, &m) == RevenantQRDecodeOK && same(text, host)) safeOK++;
             free(damaged);
         }
         for (int t = 0; t < overTrials; t++) {
@@ -211,7 +211,7 @@ static void run_case(int kind, int version, int levelIndex, int withDamage)
             flip_region(damaged, size, size * size / 4);
             NSString *text = nil;
             int m = 0;
-            if (decode(damaged, size, &text, &m) != CharonQRDecodeOK) overFailed++;
+            if (decode(damaged, size, &text, &m) != RevenantQRDecodeOK) overFailed++;
             free(damaged);
         }
     }

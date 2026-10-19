@@ -9,7 +9,7 @@ local function swift_toolchain()
             return install, layouts
         end
     end
-    raise("no charon@swift install under %s carries its own legacy_layouts source cache (docs/corpus.md says why it is needed)", path.join(package.installdir(), "s", "swift"))
+    raise("no revenant@swift install under %s carries its own legacy_layouts source cache (docs/corpus.md says why it is needed)", path.join(package.installdir(), "s", "swift"))
 end
 
 function main(out)
@@ -28,7 +28,7 @@ function main(out)
     local swift, layouts = swift_toolchain()
     os.execv(path.join(swift, "bin", "swiftc"), {"-target", "arm64-apple-ios12.0", "-sdk", e.sdk, "-Xfrontend", "-read-legacy-type-info-path=" .. layouts,
                                                  "-runtime-compatibility-version", "none", "-o", o("fixture-arm64"), path.join(os.scriptdir(), "fixture.swift")})
-    local includes = path.join(e.katabasis, "targets", "swiftdemo-includes.h")
+    local includes = path.join(e.recompiler, "targets", "swiftdemo-includes.h")
     local images = {path.join(libs, "libswiftCore.dylib"), path.join(libs, "libc++.1.dylib"), path.join(libs, "libc++abi.1.dylib")}
     local function run(input, folder, flags)
         translate.translate(input, includes, folder, images, {XL_REPLACES = "/usr/lib/libc++.1.dylib=" .. path.join(libs, "libc++.1.dylib"), XL_EXTRA_CFLAGS = flags})

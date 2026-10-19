@@ -2,10 +2,10 @@
 #import <CoreGraphics/CoreGraphics.h>
 #import <objc/runtime.h>
 
-static NSMutableArray *charon_images;
-static BOOL charon_font_names;
+static NSMutableArray *revenant_images;
+static BOOL revenant_font_names;
 
-static UIImage *charon_test_image(int side)
+static UIImage *revenant_test_image(int side)
 {
     CGColorSpaceRef space = CGColorSpaceCreateDeviceRGB();
     CGContextRef context = CGBitmapContextCreate(NULL, side, side, 8, 0, space, (CGBitmapInfo)kCGImageAlphaPremultipliedLast);
@@ -19,14 +19,14 @@ static UIImage *charon_test_image(int side)
     return image;
 }
 
-static void charon_prepare_images(void)
+static void revenant_prepare_images(void)
 {
-    charon_images = [NSMutableArray arrayWithObjects:charon_test_image(4), charon_test_image(6), nil];
+    revenant_images = [NSMutableArray arrayWithObjects:revenant_test_image(4), revenant_test_image(6), nil];
 }
 
-static NSString *charon_token(id value);
+static NSString *revenant_token(id value);
 
-static NSString *charon_rgba(UIColor *colour)
+static NSString *revenant_rgba(UIColor *colour)
 {
     UIColor *resolved = colour;
     if ([colour respondsToSelector:@selector(resolvedColorWithTraitCollection:)])
@@ -39,28 +39,28 @@ static NSString *charon_rgba(UIColor *colour)
     return [NSString stringWithFormat:@"rgba(%.2f %.2f %.2f %.2f)", red, green, blue, alpha];
 }
 
-static NSString *charon_attributes_token(NSDictionary *attributes)
+static NSString *revenant_attributes_token(NSDictionary *attributes)
 {
     NSMutableArray *items = [NSMutableArray array];
     for (NSString *key in [attributes.allKeys sortedArrayUsingSelector:@selector(compare:)])
-        [items addObject:[NSString stringWithFormat:@"%@=%@", key, charon_token(attributes[key])]];
+        [items addObject:[NSString stringWithFormat:@"%@=%@", key, revenant_token(attributes[key])]];
     return [NSString stringWithFormat:@"{%@}", [items componentsJoinedByString:@","]];
 }
 
-static NSString *charon_token(id value)
+static NSString *revenant_token(id value)
 {
     if (!value)
         return @"nil";
     if ([value isKindOfClass:[UIColor class]])
-        return charon_rgba(value);
+        return revenant_rgba(value);
     if ([value isKindOfClass:[UIFont class]])
-        return charon_font_names ? [NSString stringWithFormat:@"font(%.0f %@)", [value pointSize], [value fontName]] : [NSString stringWithFormat:@"font(%.0f)", [value pointSize]];
+        return revenant_font_names ? [NSString stringWithFormat:@"font(%.0f %@)", [value pointSize], [value fontName]] : [NSString stringWithFormat:@"font(%.0f)", [value pointSize]];
     if ([value isKindOfClass:[UIImage class]]) {
-        NSUInteger index = [charon_images indexOfObjectIdenticalTo:value];
+        NSUInteger index = [revenant_images indexOfObjectIdenticalTo:value];
         return index == NSNotFound ? @"img?" : [NSString stringWithFormat:@"img%lu", (unsigned long)index];
     }
     if ([value isKindOfClass:[NSDictionary class]])
-        return charon_attributes_token(value);
+        return revenant_attributes_token(value);
     if ([value isKindOfClass:[UIBlurEffect class]]) {
         for (NSInteger style = 0; style < 40; style++) {
             UIBlurEffect *candidate = [UIBlurEffect effectWithStyle:(UIBlurEffectStyle)style];
@@ -72,7 +72,7 @@ static NSString *charon_token(id value)
     return [value description];
 }
 
-static BOOL charon_is_kind(id object, NSString *name)
+static BOOL revenant_is_kind(id object, NSString *name)
 {
     for (Class kind = [object class]; kind; kind = class_getSuperclass(kind))
         if ([NSStringFromClass(kind) hasSuffix:name])
@@ -80,86 +80,86 @@ static BOOL charon_is_kind(id object, NSString *name)
     return NO;
 }
 
-static NSString *charon_button_state_token(id state)
+static NSString *revenant_button_state_token(id state)
 {
-    return [NSString stringWithFormat:@"[%@ %@ %@ %@]", charon_token([state titleTextAttributes]), NSStringFromUIOffset([state titlePositionAdjustment]), charon_token([state backgroundImage]),
+    return [NSString stringWithFormat:@"[%@ %@ %@ %@]", revenant_token([state titleTextAttributes]), NSStringFromUIOffset([state titlePositionAdjustment]), revenant_token([state backgroundImage]),
             NSStringFromUIOffset([state backgroundImagePositionAdjustment])];
 }
 
-static NSString *charon_button_token(id appearance)
+static NSString *revenant_button_token(id appearance)
 {
-    return [NSString stringWithFormat:@"%@%@%@%@", charon_button_state_token([appearance normal]), charon_button_state_token([appearance highlighted]), charon_button_state_token([appearance disabled]),
-            charon_button_state_token([appearance focused])];
+    return [NSString stringWithFormat:@"%@%@%@%@", revenant_button_state_token([appearance normal]), revenant_button_state_token([appearance highlighted]), revenant_button_state_token([appearance disabled]),
+            revenant_button_state_token([appearance focused])];
 }
 
-static NSString *charon_item_state_token(id state)
+static NSString *revenant_item_state_token(id state)
 {
-    return [NSString stringWithFormat:@"[%@ %@ %@ %@ %@ %@ %@]", charon_token([state titleTextAttributes]), NSStringFromUIOffset([state titlePositionAdjustment]), charon_token([state iconColor]),
-            NSStringFromUIOffset([state badgePositionAdjustment]), charon_token([state badgeBackgroundColor]), charon_token([state badgeTextAttributes]), NSStringFromUIOffset([state badgeTitlePositionAdjustment])];
+    return [NSString stringWithFormat:@"[%@ %@ %@ %@ %@ %@ %@]", revenant_token([state titleTextAttributes]), NSStringFromUIOffset([state titlePositionAdjustment]), revenant_token([state iconColor]),
+            NSStringFromUIOffset([state badgePositionAdjustment]), revenant_token([state badgeBackgroundColor]), revenant_token([state badgeTextAttributes]), NSStringFromUIOffset([state badgeTitlePositionAdjustment])];
 }
 
-static NSString *charon_item_token(id appearance)
+static NSString *revenant_item_token(id appearance)
 {
-    return [NSString stringWithFormat:@"%@%@%@%@", charon_item_state_token([appearance normal]), charon_item_state_token([appearance selected]), charon_item_state_token([appearance disabled]),
-            charon_item_state_token([appearance focused])];
+    return [NSString stringWithFormat:@"%@%@%@%@", revenant_item_state_token([appearance normal]), revenant_item_state_token([appearance selected]), revenant_item_state_token([appearance disabled]),
+            revenant_item_state_token([appearance focused])];
 }
 
-static NSString *charon_indicator_token(UIImage *image)
+static NSString *revenant_indicator_token(UIImage *image)
 {
-    NSString *text = charon_token(image);
+    NSString *text = revenant_token(image);
     return [text isEqual:@"nil"] || [text isEqual:@"img?"] ? @"default" : text;
 }
 
-static NSString *charon_snapshot(id object)
+static NSString *revenant_snapshot(id object)
 {
-    if (charon_is_kind(object, @"UIBarButtonItemAppearance"))
-        return charon_button_token(object);
-    if (charon_is_kind(object, @"UITabBarItemAppearance"))
-        return charon_item_token(object);
+    if (revenant_is_kind(object, @"UIBarButtonItemAppearance"))
+        return revenant_button_token(object);
+    if (revenant_is_kind(object, @"UITabBarItemAppearance"))
+        return revenant_item_token(object);
     UIBarAppearance *base = object;
     NSInteger idiom = [base idiom];
-    NSMutableString *text = [NSMutableString stringWithFormat:@"idiom%@ %@ %@ %@ %ld %@ %@", idiom == (NSInteger)[UIDevice currentDevice].userInterfaceIdiom ? @"D" : [NSString stringWithFormat:@"%ld", (long)idiom], charon_token([base backgroundEffect]), charon_token([base backgroundColor]),
-                             charon_token([base backgroundImage]), (long)[base backgroundImageContentMode], charon_token([base shadowColor]), charon_token([base shadowImage])];
-    if (charon_is_kind(object, @"UINavigationBarAppearance"))
-        [text appendFormat:@" %@ %@ %@ %@ %@ %@ %@ %@ %@", charon_token([object titleTextAttributes]), NSStringFromUIOffset([object titlePositionAdjustment]), charon_token([object largeTitleTextAttributes]),
-         charon_button_token([object buttonAppearance]), charon_button_token([object doneButtonAppearance]), charon_button_token([object backButtonAppearance]),
-         charon_indicator_token([object backIndicatorImage]), charon_indicator_token([object backIndicatorTransitionMaskImage]),
+    NSMutableString *text = [NSMutableString stringWithFormat:@"idiom%@ %@ %@ %@ %ld %@ %@", idiom == (NSInteger)[UIDevice currentDevice].userInterfaceIdiom ? @"D" : [NSString stringWithFormat:@"%ld", (long)idiom], revenant_token([base backgroundEffect]), revenant_token([base backgroundColor]),
+                             revenant_token([base backgroundImage]), (long)[base backgroundImageContentMode], revenant_token([base shadowColor]), revenant_token([base shadowImage])];
+    if (revenant_is_kind(object, @"UINavigationBarAppearance"))
+        [text appendFormat:@" %@ %@ %@ %@ %@ %@ %@ %@ %@", revenant_token([object titleTextAttributes]), NSStringFromUIOffset([object titlePositionAdjustment]), revenant_token([object largeTitleTextAttributes]),
+         revenant_button_token([object buttonAppearance]), revenant_button_token([object doneButtonAppearance]), revenant_button_token([object backButtonAppearance]),
+         revenant_indicator_token([object backIndicatorImage]), revenant_indicator_token([object backIndicatorTransitionMaskImage]),
          [object respondsToSelector:NSSelectorFromString(@"prominentButtonAppearance")] ? ([object valueForKey:@"prominentButtonAppearance"] == [object doneButtonAppearance] ? @"same" : @"apart") : @"same"];
-    if (charon_is_kind(object, @"UIToolbarAppearance"))
-        [text appendFormat:@" %@ %@", charon_button_token([object buttonAppearance]), charon_button_token([object doneButtonAppearance])];
-    if (charon_is_kind(object, @"UITabBarAppearance"))
-        [text appendFormat:@" %@ %@ %@ %@ %@ %ld %g %g", charon_item_token([object stackedLayoutAppearance]), charon_item_token([object inlineLayoutAppearance]),
-         charon_item_token([object compactInlineLayoutAppearance]), charon_token([object selectionIndicatorTintColor]), charon_token([object selectionIndicatorImage]),
+    if (revenant_is_kind(object, @"UIToolbarAppearance"))
+        [text appendFormat:@" %@ %@", revenant_button_token([object buttonAppearance]), revenant_button_token([object doneButtonAppearance])];
+    if (revenant_is_kind(object, @"UITabBarAppearance"))
+        [text appendFormat:@" %@ %@ %@ %@ %@ %ld %g %g", revenant_item_token([object stackedLayoutAppearance]), revenant_item_token([object inlineLayoutAppearance]),
+         revenant_item_token([object compactInlineLayoutAppearance]), revenant_token([object selectionIndicatorTintColor]), revenant_token([object selectionIndicatorImage]),
          (long)[object stackedItemPositioning], (double)[object stackedItemWidth], (double)[object stackedItemSpacing]];
     return text;
 }
 
-static id charon_state(id appearance, NSString *name)
+static id revenant_state(id appearance, NSString *name)
 {
     return [appearance valueForKey:name];
 }
 
-typedef id (^CharonAppearanceMaker)(NSString *kind);
-typedef id (^CharonAppearanceCase)(CharonAppearanceMaker make);
+typedef id (^RevenantAppearanceMaker)(NSString *kind);
+typedef id (^RevenantAppearanceCase)(RevenantAppearanceMaker make);
 
-static NSDictionary *charon_case(NSString *name, CharonAppearanceCase body)
+static NSDictionary *revenant_case(NSString *name, RevenantAppearanceCase body)
 {
     return @{@"name": name, @"body": [body copy]};
 }
 
-static NSArray *charon_appearance_cases(void)
+static NSArray *revenant_appearance_cases(void)
 {
     UIColor *red = [UIColor colorWithRed:1 green:0 blue:0 alpha:1], *blue = [UIColor colorWithRed:0 green:0 blue:1 alpha:1], *green = [UIColor colorWithRed:0 green:1 blue:0 alpha:1];
     UIColor *tint = [UIColor colorWithRed:0.2 green:0.4 blue:0.6 alpha:0.8];
-    UIImage *first = charon_images[0], *second = charon_images[1];
+    UIImage *first = revenant_images[0], *second = revenant_images[1];
     NSMutableArray *cases = [NSMutableArray array];
     for (NSString *kind in @[@"UIBarAppearance", @"UINavigationBarAppearance", @"UIToolbarAppearance", @"UITabBarAppearance", @"UIBarButtonItemAppearance", @"UITabBarItemAppearance"])
-        [cases addObject:charon_case([@"a new " stringByAppendingString:kind], ^id(CharonAppearanceMaker make) { return make(kind); })];
+        [cases addObject:revenant_case([@"a new " stringByAppendingString:kind], ^id(RevenantAppearanceMaker make) { return make(kind); })];
     for (NSString *kind in @[@"UIBarAppearance", @"UINavigationBarAppearance", @"UIToolbarAppearance", @"UITabBarAppearance"]) {
-        [cases addObject:charon_case([kind stringByAppendingString:@" opaque"], ^id(CharonAppearanceMaker make) { id a = make(kind); [a configureWithOpaqueBackground]; return a; })];
-        [cases addObject:charon_case([kind stringByAppendingString:@" transparent"], ^id(CharonAppearanceMaker make) { id a = make(kind); [a configureWithTransparentBackground]; return a; })];
-        [cases addObject:charon_case([kind stringByAppendingString:@" default"], ^id(CharonAppearanceMaker make) { id a = make(kind); [a configureWithDefaultBackground]; return a; })];
-        [cases addObject:charon_case([kind stringByAppendingString:@" with every background value"], ^id(CharonAppearanceMaker make) {
+        [cases addObject:revenant_case([kind stringByAppendingString:@" opaque"], ^id(RevenantAppearanceMaker make) { id a = make(kind); [a configureWithOpaqueBackground]; return a; })];
+        [cases addObject:revenant_case([kind stringByAppendingString:@" transparent"], ^id(RevenantAppearanceMaker make) { id a = make(kind); [a configureWithTransparentBackground]; return a; })];
+        [cases addObject:revenant_case([kind stringByAppendingString:@" default"], ^id(RevenantAppearanceMaker make) { id a = make(kind); [a configureWithDefaultBackground]; return a; })];
+        [cases addObject:revenant_case([kind stringByAppendingString:@" with every background value"], ^id(RevenantAppearanceMaker make) {
             id a = make(kind);
             [a setBackgroundEffect:[UIBlurEffect effectWithStyle:UIBlurEffectStyleLight]];
             [a setBackgroundColor:tint];
@@ -169,125 +169,125 @@ static NSArray *charon_appearance_cases(void)
             [a setShadowImage:second];
             return a;
         })];
-        [cases addObject:charon_case([kind stringByAppendingString:@" with no effect and no shadow"], ^id(CharonAppearanceMaker make) {
+        [cases addObject:revenant_case([kind stringByAppendingString:@" with no effect and no shadow"], ^id(RevenantAppearanceMaker make) {
             id a = make(kind);
             [a setBackgroundEffect:nil];
             [a setShadowColor:nil];
             return a;
         })];
-        [cases addObject:charon_case([kind stringByAppendingString:@" copied"], ^id(CharonAppearanceMaker make) { id a = make(kind); [a setBackgroundColor:blue]; return [a copy]; })];
-        [cases addObject:charon_case([kind stringByAppendingString:@" made from another"], ^id(CharonAppearanceMaker make) {
+        [cases addObject:revenant_case([kind stringByAppendingString:@" copied"], ^id(RevenantAppearanceMaker make) { id a = make(kind); [a setBackgroundColor:blue]; return [a copy]; })];
+        [cases addObject:revenant_case([kind stringByAppendingString:@" made from another"], ^id(RevenantAppearanceMaker make) {
             id source = make(@"UIBarAppearance");
             [source configureWithOpaqueBackground];
             [source setBackgroundColor:green];
             return [(UIBarAppearance *)[[make(kind) class] alloc] initWithBarAppearance:source];
         })];
     }
-    [cases addObject:charon_case(@"navigation titles", ^id(CharonAppearanceMaker make) {
+    [cases addObject:revenant_case(@"navigation titles", ^id(RevenantAppearanceMaker make) {
         id a = make(@"UINavigationBarAppearance");
         [a setTitleTextAttributes:@{NSForegroundColorAttributeName: red}];
         [a setLargeTitleTextAttributes:@{NSFontAttributeName: [UIFont systemFontOfSize:30], NSKernAttributeName: @2}];
         [a setTitlePositionAdjustment:UIOffsetMake(2, 3)];
         return a;
     })];
-    [cases addObject:charon_case(@"navigation titles set to empty and to nothing", ^id(CharonAppearanceMaker make) {
+    [cases addObject:revenant_case(@"navigation titles set to empty and to nothing", ^id(RevenantAppearanceMaker make) {
         id a = make(@"UINavigationBarAppearance");
         [a setTitleTextAttributes:@{}];
         [a setLargeTitleTextAttributes:@{NSKernAttributeName: @2}];
         [a setLargeTitleTextAttributes:nil];
         return a;
     })];
-    [cases addObject:charon_case(@"the back button follows the plain button", ^id(CharonAppearanceMaker make) {
+    [cases addObject:revenant_case(@"the back button follows the plain button", ^id(RevenantAppearanceMaker make) {
         id a = make(@"UINavigationBarAppearance");
-        [charon_state([a buttonAppearance], @"normal") setTitleTextAttributes:@{NSForegroundColorAttributeName: red, NSFontAttributeName: [UIFont systemFontOfSize:22], NSKernAttributeName: @1}];
-        [charon_state([a buttonAppearance], @"normal") setTitlePositionAdjustment:UIOffsetMake(4, 4)];
-        [charon_state([a buttonAppearance], @"normal") setBackgroundImage:first];
-        [charon_state([a buttonAppearance], @"highlighted") setTitleTextAttributes:@{NSForegroundColorAttributeName: blue}];
+        [revenant_state([a buttonAppearance], @"normal") setTitleTextAttributes:@{NSForegroundColorAttributeName: red, NSFontAttributeName: [UIFont systemFontOfSize:22], NSKernAttributeName: @1}];
+        [revenant_state([a buttonAppearance], @"normal") setTitlePositionAdjustment:UIOffsetMake(4, 4)];
+        [revenant_state([a buttonAppearance], @"normal") setBackgroundImage:first];
+        [revenant_state([a buttonAppearance], @"highlighted") setTitleTextAttributes:@{NSForegroundColorAttributeName: blue}];
         return a;
     })];
-    [cases addObject:charon_case(@"the back button set on its own", ^id(CharonAppearanceMaker make) {
+    [cases addObject:revenant_case(@"the back button set on its own", ^id(RevenantAppearanceMaker make) {
         id a = make(@"UINavigationBarAppearance");
         id back = [[[a buttonAppearance] class] new];
-        [charon_state(back, @"normal") setTitlePositionAdjustment:UIOffsetMake(8, 8)];
-        [charon_state(back, @"disabled") setBackgroundImage:second];
+        [revenant_state(back, @"normal") setTitlePositionAdjustment:UIOffsetMake(8, 8)];
+        [revenant_state(back, @"disabled") setBackgroundImage:second];
         [a setBackButtonAppearance:back];
-        [charon_state([a buttonAppearance], @"normal") setTitlePositionAdjustment:UIOffsetMake(1, 2)];
+        [revenant_state([a buttonAppearance], @"normal") setTitlePositionAdjustment:UIOffsetMake(1, 2)];
         return a;
     })];
-    [cases addObject:charon_case(@"the done button is the prominent button", ^id(CharonAppearanceMaker make) {
+    [cases addObject:revenant_case(@"the done button is the prominent button", ^id(RevenantAppearanceMaker make) {
         id a = make(@"UINavigationBarAppearance");
         id done = [[[a buttonAppearance] class] new];
         [done configureWithDefaultForStyle:UIBarButtonItemStyleDone];
-        [charon_state(done, @"highlighted") setBackgroundImage:first];
+        [revenant_state(done, @"highlighted") setBackgroundImage:first];
         [a setValue:done forKey:@"prominentButtonAppearance"];
         return a;
     })];
-    [cases addObject:charon_case(@"the back indicator is a pair", ^id(CharonAppearanceMaker make) {
+    [cases addObject:revenant_case(@"the back indicator is a pair", ^id(RevenantAppearanceMaker make) {
         id a = make(@"UINavigationBarAppearance");
         [a setBackIndicatorImage:first transitionMaskImage:nil];
         return a;
     })];
-    [cases addObject:charon_case(@"the back indicator pair set", ^id(CharonAppearanceMaker make) {
+    [cases addObject:revenant_case(@"the back indicator pair set", ^id(RevenantAppearanceMaker make) {
         id a = make(@"UINavigationBarAppearance");
         [a setBackIndicatorImage:first transitionMaskImage:second];
         return [a copy];
     })];
-    [cases addObject:charon_case(@"a plain button appearance with every state set", ^id(CharonAppearanceMaker make) {
+    [cases addObject:revenant_case(@"a plain button appearance with every state set", ^id(RevenantAppearanceMaker make) {
         id a = make(@"UIBarButtonItemAppearance");
-        [charon_state(a, @"normal") setTitleTextAttributes:@{NSForegroundColorAttributeName: red, NSKernAttributeName: @2}];
-        [charon_state(a, @"normal") setTitlePositionAdjustment:UIOffsetMake(1, 2)];
-        [charon_state(a, @"highlighted") setBackgroundImage:first];
-        [charon_state(a, @"highlighted") setBackgroundImagePositionAdjustment:UIOffsetMake(3, 4)];
-        [charon_state(a, @"disabled") setTitleTextAttributes:@{NSForegroundColorAttributeName: blue}];
-        [charon_state(a, @"focused") setTitlePositionAdjustment:UIOffsetMake(5, 6)];
+        [revenant_state(a, @"normal") setTitleTextAttributes:@{NSForegroundColorAttributeName: red, NSKernAttributeName: @2}];
+        [revenant_state(a, @"normal") setTitlePositionAdjustment:UIOffsetMake(1, 2)];
+        [revenant_state(a, @"highlighted") setBackgroundImage:first];
+        [revenant_state(a, @"highlighted") setBackgroundImagePositionAdjustment:UIOffsetMake(3, 4)];
+        [revenant_state(a, @"disabled") setTitleTextAttributes:@{NSForegroundColorAttributeName: blue}];
+        [revenant_state(a, @"focused") setTitlePositionAdjustment:UIOffsetMake(5, 6)];
         return a;
     })];
-    [cases addObject:charon_case(@"the disabled button colour is derived", ^id(CharonAppearanceMaker make) {
+    [cases addObject:revenant_case(@"the disabled button colour is derived", ^id(RevenantAppearanceMaker make) {
         id a = make(@"UIBarButtonItemAppearance");
-        [charon_state(a, @"normal") setTitleTextAttributes:@{NSForegroundColorAttributeName: tint, NSFontAttributeName: [UIFont boldSystemFontOfSize:14]}];
+        [revenant_state(a, @"normal") setTitleTextAttributes:@{NSForegroundColorAttributeName: tint, NSFontAttributeName: [UIFont boldSystemFontOfSize:14]}];
         return a;
     })];
-    [cases addObject:charon_case(@"a done button appearance", ^id(CharonAppearanceMaker make) {
+    [cases addObject:revenant_case(@"a done button appearance", ^id(RevenantAppearanceMaker make) {
         id a = [(UIBarButtonItemAppearance *)[[make(@"UIBarButtonItemAppearance") class] alloc] initWithStyle:UIBarButtonItemStyleDone];
-        [charon_state(a, @"normal") setTitleTextAttributes:@{NSKernAttributeName: @3}];
+        [revenant_state(a, @"normal") setTitleTextAttributes:@{NSKernAttributeName: @3}];
         return a;
     })];
-    [cases addObject:charon_case(@"a button appearance configured for a style", ^id(CharonAppearanceMaker make) {
+    [cases addObject:revenant_case(@"a button appearance configured for a style", ^id(RevenantAppearanceMaker make) {
         id a = make(@"UIBarButtonItemAppearance");
-        [charon_state(a, @"normal") setTitlePositionAdjustment:UIOffsetMake(1, 1)];
+        [revenant_state(a, @"normal") setTitlePositionAdjustment:UIOffsetMake(1, 1)];
         [a configureWithDefaultForStyle:UIBarButtonItemStyleDone];
         return a;
     })];
-    [cases addObject:charon_case(@"a button appearance copied", ^id(CharonAppearanceMaker make) {
+    [cases addObject:revenant_case(@"a button appearance copied", ^id(RevenantAppearanceMaker make) {
         id a = make(@"UIBarButtonItemAppearance");
-        [charon_state(a, @"disabled") setBackgroundImage:second];
+        [revenant_state(a, @"disabled") setBackgroundImage:second];
         return [a copy];
     })];
-    [cases addObject:charon_case(@"a toolbar appearance with buttons", ^id(CharonAppearanceMaker make) {
+    [cases addObject:revenant_case(@"a toolbar appearance with buttons", ^id(RevenantAppearanceMaker make) {
         id a = make(@"UIToolbarAppearance");
-        [charon_state([a buttonAppearance], @"normal") setTitleTextAttributes:@{NSForegroundColorAttributeName: green}];
-        [charon_state([a doneButtonAppearance], @"normal") setBackgroundImage:first];
+        [revenant_state([a buttonAppearance], @"normal") setTitleTextAttributes:@{NSForegroundColorAttributeName: green}];
+        [revenant_state([a doneButtonAppearance], @"normal") setBackgroundImage:first];
         return [a copy];
     })];
-    [cases addObject:charon_case(@"a tab item appearance with every state set", ^id(CharonAppearanceMaker make) {
+    [cases addObject:revenant_case(@"a tab item appearance with every state set", ^id(RevenantAppearanceMaker make) {
         id a = make(@"UITabBarItemAppearance");
-        [charon_state(a, @"normal") setTitleTextAttributes:@{NSForegroundColorAttributeName: red, NSFontAttributeName: [UIFont systemFontOfSize:22], NSKernAttributeName: @2}];
-        [charon_state(a, @"normal") setTitlePositionAdjustment:UIOffsetMake(1, 1)];
-        [charon_state(a, @"normal") setIconColor:red];
-        [charon_state(a, @"normal") setBadgePositionAdjustment:UIOffsetMake(2, 2)];
-        [charon_state(a, @"normal") setBadgeBackgroundColor:green];
-        [charon_state(a, @"normal") setBadgeTextAttributes:@{NSKernAttributeName: @1}];
-        [charon_state(a, @"normal") setBadgeTitlePositionAdjustment:UIOffsetMake(3, 3)];
-        [charon_state(a, @"selected") setIconColor:blue];
-        [charon_state(a, @"selected") setTitleTextAttributes:@{NSForegroundColorAttributeName: blue}];
-        [charon_state(a, @"disabled") setBadgeBackgroundColor:tint];
+        [revenant_state(a, @"normal") setTitleTextAttributes:@{NSForegroundColorAttributeName: red, NSFontAttributeName: [UIFont systemFontOfSize:22], NSKernAttributeName: @2}];
+        [revenant_state(a, @"normal") setTitlePositionAdjustment:UIOffsetMake(1, 1)];
+        [revenant_state(a, @"normal") setIconColor:red];
+        [revenant_state(a, @"normal") setBadgePositionAdjustment:UIOffsetMake(2, 2)];
+        [revenant_state(a, @"normal") setBadgeBackgroundColor:green];
+        [revenant_state(a, @"normal") setBadgeTextAttributes:@{NSKernAttributeName: @1}];
+        [revenant_state(a, @"normal") setBadgeTitlePositionAdjustment:UIOffsetMake(3, 3)];
+        [revenant_state(a, @"selected") setIconColor:blue];
+        [revenant_state(a, @"selected") setTitleTextAttributes:@{NSForegroundColorAttributeName: blue}];
+        [revenant_state(a, @"disabled") setBadgeBackgroundColor:tint];
         return a;
     })];
     for (NSInteger style = 0; style < 5; style++)
-        [cases addObject:charon_case([NSString stringWithFormat:@"a tab item appearance of style %ld", (long)style], ^id(CharonAppearanceMaker make) {
+        [cases addObject:revenant_case([NSString stringWithFormat:@"a tab item appearance of style %ld", (long)style], ^id(RevenantAppearanceMaker make) {
             return [(UITabBarItemAppearance *)[[make(@"UITabBarItemAppearance") class] alloc] initWithStyle:(UITabBarItemAppearanceStyle)style];
         })];
-    [cases addObject:charon_case(@"a tab bar appearance with layout values", ^id(CharonAppearanceMaker make) {
+    [cases addObject:revenant_case(@"a tab bar appearance with layout values", ^id(RevenantAppearanceMaker make) {
         id a = make(@"UITabBarAppearance");
         [a setSelectionIndicatorTintColor:red];
         [a setSelectionIndicatorImage:first];
@@ -296,23 +296,23 @@ static NSArray *charon_appearance_cases(void)
         [a setStackedItemSpacing:4];
         return [a copy];
     })];
-    [cases addObject:charon_case(@"a tab bar appearance with item appearances", ^id(CharonAppearanceMaker make) {
+    [cases addObject:revenant_case(@"a tab bar appearance with item appearances", ^id(RevenantAppearanceMaker make) {
         id a = make(@"UITabBarAppearance");
-        [charon_state([a stackedLayoutAppearance], @"normal") setIconColor:red];
-        [charon_state([a inlineLayoutAppearance], @"selected") setTitlePositionAdjustment:UIOffsetMake(1, 2)];
+        [revenant_state([a stackedLayoutAppearance], @"normal") setIconColor:red];
+        [revenant_state([a inlineLayoutAppearance], @"selected") setTitlePositionAdjustment:UIOffsetMake(1, 2)];
         id compact = [(UITabBarItemAppearance *)[[[a compactInlineLayoutAppearance] class] alloc] initWithStyle:UITabBarItemAppearanceStyleStacked];
-        [charon_state(compact, @"disabled") setBadgeBackgroundColor:blue];
+        [revenant_state(compact, @"disabled") setBadgeBackgroundColor:blue];
         [a setCompactInlineLayoutAppearance:compact];
         return a;
     })];
-    [cases addObject:charon_case(@"an appearance read back from a secure archive", ^id(CharonAppearanceMaker make) {
+    [cases addObject:revenant_case(@"an appearance read back from a secure archive", ^id(RevenantAppearanceMaker make) {
         id a = make(@"UINavigationBarAppearance");
         [a configureWithOpaqueBackground];
         [a setBackgroundColor:tint];
         [a setShadowColor:nil];
         [a setTitleTextAttributes:@{NSForegroundColorAttributeName: red, NSKernAttributeName: @2}];
         [a setTitlePositionAdjustment:UIOffsetMake(2, 3)];
-        [charon_state([a buttonAppearance], @"normal") setTitleTextAttributes:@{NSForegroundColorAttributeName: blue}];
+        [revenant_state([a buttonAppearance], @"normal") setTitleTextAttributes:@{NSForegroundColorAttributeName: blue}];
         [a setBackIndicatorImage:first transitionMaskImage:second];
         NSData *data = [NSKeyedArchiver archivedDataWithRootObject:a requiringSecureCoding:YES error:NULL];
         return [NSKeyedUnarchiver unarchivedObjectOfClass:[a class] fromData:data error:NULL];

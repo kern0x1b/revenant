@@ -1,6 +1,6 @@
 #import <UIKit/UIKit.h>
 
-@implementation UITextField (CharonEditMenu16)
+@implementation UITextField (RevenantEditMenu16)
 
 - (UIMenu *)editMenuForTextRange:(UITextRange *)textRange suggestedActions:(NSArray<UIMenuElement *> *)suggestedActions
 {

@@ -1,14 +1,14 @@
-#import "CharonMetal.h"
+#import "RevenantMetal.h"
 
 
-@interface CharonMetalSharedEvent (Wait)
+@interface RevenantMetalSharedEvent (Wait)
 @end
 
-@implementation CharonMetalSharedEvent (Wait)
+@implementation RevenantMetalSharedEvent (Wait)
 
 - (BOOL)waitUntilSignaledValue:(uint64_t)value timeoutMS:(uint64_t)milliseconds
 {
-    return [self charonWaitForValue:value timeout:(double)milliseconds / 1000.0];
+    return [self revenantWaitForValue:value timeout:(double)milliseconds / 1000.0];
 }
 
 @end

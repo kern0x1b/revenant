@@ -22,7 +22,7 @@
 
 #include "../../support.hpp"
 
-namespace shade {
+namespace emulator {
 
 bool CompatibilityKernel::create_kernel_control_socket(Cpu& cpu)
 {

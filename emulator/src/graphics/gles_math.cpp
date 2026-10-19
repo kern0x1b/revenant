@@ -11,7 +11,7 @@
 #include <cstddef>
 #include <utility>
 
-namespace shade {
+namespace emulator {
 
 GlesMatrix::GlesMatrix()
     : values_ { 1.0F, 0.0F, 0.0F, 0.0F, 0.0F, 1.0F, 0.0F, 0.0F, 0.0F, 0.0F,

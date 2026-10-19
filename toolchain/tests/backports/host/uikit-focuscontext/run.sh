@@ -3,7 +3,7 @@
 # Catalyst's own classes, one source for both sides.
 #
 # matrix.m is built twice: plain, against the host's UIKit, and with the port's three classes compiled beside it under
-# CharonHost names (the renames of uikit2/renames.sh), so both live in one process. Each build prints one line per
+# RevenantHost names (the renames of uikit2/renames.sh), so both live in one process. Each build prints one line per
 # measurement, and the two outputs must be equal line for line.
 #
 # The planted control: the port's init asserts on a non-nil focus system, in a scratch copy of UIFocusUpdateContext.m.

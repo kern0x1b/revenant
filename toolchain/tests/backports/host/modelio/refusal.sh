@@ -34,8 +34,8 @@ def Mesh "Bad"
     point3f[] points = [(0, 0, 0), (1, 0, 0), (1, 1, 0)]
 }
 EOF
-SDK=${CHARON_SDK_DIR:-$(ls -d "$HOME"/.xmake/packages/i/iphoneos-sdk/16.4/*/Developer.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS16.4.sdk 2>/dev/null | head -1)}
-[ -d "$SDK" ] || { echo "FAIL  no iPhoneOS 16.4 SDK; set CHARON_SDK_DIR"; exit 1; }
+SDK=${REVENANT_SDK_DIR:-$(ls -d "$HOME"/.xmake/packages/i/iphoneos-sdk/16.4/*/Developer.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS16.4.sdk 2>/dev/null | head -1)}
+[ -d "$SDK" ] || { echo "FAIL  no iPhoneOS 16.4 SDK; set REVENANT_SDK_DIR"; exit 1; }
 
 # THE SAME NAMED LIST the differential builds, not a glob over the package. A glob also compiles
 # MDLVertexAttributes9.m, which defines MDLVertexAttributeShadingBasisU - the same symbol the MetalKit file

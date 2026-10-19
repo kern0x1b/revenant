@@ -12,7 +12,7 @@
 #include <memory>
 #include <utility>
 
-namespace shade {
+namespace emulator {
 namespace {
 
     constexpr std::uint32_t keyboard_event = 3U;

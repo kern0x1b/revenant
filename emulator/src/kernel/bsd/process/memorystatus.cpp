@@ -16,7 +16,7 @@
 #include <mutex>
 #include <vector>
 
-namespace shade {
+namespace emulator {
 
 bool CompatibilityKernel::dispatch_bsd_memorystatus(
     Cpu& cpu, std::uint32_t number)

@@ -3,7 +3,7 @@
 #import <CoreFoundation/CoreFoundation.h>
 #import <stdio.h>
 
-CFDictionaryRef CharonSecurityAttributesFromItemResult(CFTypeRef result);
+CFDictionaryRef RevenantSecurityAttributesFromItemResult(CFTypeRef result);
 
 static void report(const char *name, const char *value)
 {
@@ -12,7 +12,7 @@ static void report(const char *name, const char *value)
 
 static const char *shape(CFTypeRef result)
 {
-    CFDictionaryRef attributes = CharonSecurityAttributesFromItemResult(result);
+    CFDictionaryRef attributes = RevenantSecurityAttributesFromItemResult(result);
     if (!attributes)
         return "NULL";
     CFTypeRef type = CFDictionaryGetValue(attributes, kSecAttrKeyType);

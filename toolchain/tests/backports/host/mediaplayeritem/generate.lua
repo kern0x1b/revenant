@@ -65,7 +65,7 @@ local HEADER = [==[// MPMediaItem's %(count)d %(release)s members, the ones this
 // declares MP_API(ios(%(release)s)).
 
 #import <Foundation/Foundation.h>
-#if defined(CHARON_MEDIAPLAYER_STANDIN)
+#if defined(REVENANT_MEDIAPLAYER_STANDIN)
 // The host contract check compiles this file with the stand-in in place of the framework, so it measures
 // this code and not the Mac's own MediaPlayer.
 #import "MPMediaItemStandin.h"
@@ -73,11 +73,11 @@ local HEADER = [==[// MPMediaItem's %(count)d %(release)s members, the ones this
 #import <MediaPlayer/MediaPlayer.h>
 #endif
 
-@interface MPMediaItem (Charon%(name)s)
+@interface MPMediaItem (Revenant%(name)s)
 %(declarations)s@end
 
 %(constants_decl)s
-@implementation MPMediaItem (Charon%(name)s)
+@implementation MPMediaItem (Revenant%(name)s)
 
 %(bodies)s@end
 

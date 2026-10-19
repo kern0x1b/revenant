@@ -15,7 +15,7 @@
 #include <cstddef>
 #include <cstdint>
 
-namespace shade::darwin::resource {
+namespace emulator::darwin::resource {
 
 inline constexpr std::uint32_t priority_process = 0;
 inline constexpr std::uint32_t priority_process_group = 1;

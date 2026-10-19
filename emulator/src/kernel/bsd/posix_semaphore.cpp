@@ -18,7 +18,7 @@
 
 #include "support.hpp"
 
-namespace shade {
+namespace emulator {
 namespace {
 
     constexpr std::size_t maximum_name_bytes = 31;

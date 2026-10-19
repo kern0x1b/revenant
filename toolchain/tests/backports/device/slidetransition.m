@@ -133,7 +133,7 @@ static NSString *color_at(Screen screen, double fx, double fy)
 {
     [[NSFileManager defaultManager] createDirectoryAtPath:results_folder withIntermediateDirectories:YES attributes:nil error:NULL];
     [[NSFileManager defaultManager] removeItemAtPath:[results_folder stringByAppendingPathComponent:@"slidetransition.done"] error:NULL];
-    charon_log_to([results_folder stringByAppendingPathComponent:@"slidetransition.log"]);
+    revenant_log_to([results_folder stringByAppendingPathComponent:@"slidetransition.log"]);
     self.slide = [[SlideDelegate alloc] init];
     SolidController *base = [[SolidController alloc] init];
     base.color = [UIColor redColor];
@@ -149,8 +149,8 @@ static NSString *color_at(Screen screen, double fx, double fy)
     SolidController *second = [[SolidController alloc] init];
     second.color = [UIColor greenColor];
     void (^finish)(void) = ^{
-        printf("checks=%d failures=%d\n", charon_checks, charon_failures);
-        NSString *summary = [NSString stringWithFormat:@"%@ checks=%d failures=%d\n", charon_failures ? @"FAIL" : @"ok", charon_checks, charon_failures];
+        printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
+        NSString *summary = [NSString stringWithFormat:@"%@ checks=%d failures=%d\n", revenant_failures ? @"FAIL" : @"ok", revenant_checks, revenant_failures];
         [summary writeToFile:[results_folder stringByAppendingPathComponent:@"slidetransition.done"] atomically:YES encoding:NSUTF8StringEncoding error:NULL];
     };
     void (^popPhase)(void) = ^{

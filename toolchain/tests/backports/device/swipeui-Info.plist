@@ -9,7 +9,7 @@
 	<key>CFBundleExecutable</key>
 	<string>swipeui</string>
 	<key>CFBundleIdentifier</key>
-	<string>local.charon.backports.swipeui</string>
+	<string>local.revenant.backports.swipeui</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>

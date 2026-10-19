@@ -3,10 +3,10 @@
 #import <objc/message.h>
 #include <dlfcn.h>
 
-@interface charonHost_MTL4CommandQueueDescriptor : NSObject <NSCopying>
+@interface revenantHost_MTL4CommandQueueDescriptor : NSObject <NSCopying>
 @property (nonatomic, copy) id label;
 @end
-@interface charonHost_MTL4CommandBufferOptions : NSObject <NSCopying>
+@interface revenantHost_MTL4CommandBufferOptions : NSObject <NSCopying>
 @property (nonatomic, retain) id logState;
 @end
 
@@ -36,19 +36,19 @@ int main(void)
     setvbuf(stdout, NULL, _IONBF, 0);
     @autoreleasepool {
         checks++;
-        if (NSClassFromString(@"ZZZNoSuchNameCharonR16") == nil)
-            printf("  ok   the control: ZZZNoSuchNameCharonR16 is not a class of this framework\n");
+        if (NSClassFromString(@"ZZZNoSuchNameRevenantR16") == nil)
+            printf("  ok   the control: ZZZNoSuchNameRevenantR16 is not a class of this framework\n");
         else {
-            printf("  FAIL the control: ZZZNoSuchNameCharonR16 exists, so this harness's answers mean nothing\n");
+            printf("  FAIL the control: ZZZNoSuchNameRevenantR16 exists, so this harness's answers mean nothing\n");
             failures++;
         }
 
         extern NSString *const MTL4CommandQueueErrorDomain __asm__("_MTL4CommandQueueErrorDomain");
         checks++;
-        if (dlsym(RTLD_DEFAULT, "ZZZNoSuchNameCharonR16") == NULL)
-            printf("  ok   the control: ZZZNoSuchNameCharonR16 is not a symbol of anything loaded\n");
+        if (dlsym(RTLD_DEFAULT, "ZZZNoSuchNameRevenantR16") == NULL)
+            printf("  ok   the control: ZZZNoSuchNameRevenantR16 is not a symbol of anything loaded\n");
         else {
-            printf("  FAIL the control: ZZZNoSuchNameCharonR16 was found\n");
+            printf("  FAIL the control: ZZZNoSuchNameRevenantR16 was found\n");
             failures++;
         }
         check([MTL4CommandQueueErrorDomain isKindOfClass:[NSString class]],
@@ -59,7 +59,7 @@ int main(void)
         printf("the two descriptors, fresh, on both sides\n");
         {
             MTL4CommandQueueDescriptor *host = [[MTL4CommandQueueDescriptor alloc] init];
-            charonHost_MTL4CommandQueueDescriptor *port = [[charonHost_MTL4CommandQueueDescriptor alloc] init];
+            revenantHost_MTL4CommandQueueDescriptor *port = [[revenantHost_MTL4CommandQueueDescriptor alloc] init];
             check(host.label == nil && port.label == nil, @"queue descriptor: label is nil on both sides");
             check([host respondsToSelector:@selector(feedbackQueue)] &&
                   [port respondsToSelector:@selector(feedbackQueue)],
@@ -74,7 +74,7 @@ int main(void)
             check(![host.label isEqualToString:@"first-changed"] && ![port.label isEqualToString:@"first-changed"],
                   @"queue descriptor: the label is a copy, so changing the caller's string changes neither");
             MTL4CommandQueueDescriptor *hostCopy = [host copy];
-            charonHost_MTL4CommandQueueDescriptor *portCopy = [port copy];
+            revenantHost_MTL4CommandQueueDescriptor *portCopy = [port copy];
             id hostCopied = [hostCopy valueForKey:@"label"];
             id portCopied = [portCopy valueForKey:@"label"];
             check([hostCopied isEqual:[host valueForKey:@"label"]] &&
@@ -83,7 +83,7 @@ int main(void)
         }
         {
             MTL4CommandBufferOptions *host = [[MTL4CommandBufferOptions alloc] init];
-            charonHost_MTL4CommandBufferOptions *port = [[charonHost_MTL4CommandBufferOptions alloc] init];
+            revenantHost_MTL4CommandBufferOptions *port = [[revenantHost_MTL4CommandBufferOptions alloc] init];
             check([host valueForKey:@"logState"] == nil && [port valueForKey:@"logState"] == nil,
                   @"buffer options: logState is nil on both sides");
             check([[host copy] valueForKey:@"logState"] == nil,

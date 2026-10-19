@@ -1,8 +1,8 @@
 #import <Foundation/Foundation.h>
-#import "CharonDimension.h"
+#import "RevenantDimension.h"
 #import <objc/runtime.h>
 
-@implementation CharonUnitConverterReciprocal {
+@implementation RevenantUnitConverterReciprocal {
 @private
     double _reciprocalValue;
 }
@@ -61,7 +61,7 @@
 {
     if (object == self)
         return YES;
-    if (![object isKindOfClass:[CharonUnitConverterReciprocal class]])
+    if (![object isKindOfClass:[RevenantUnitConverterReciprocal class]])
         return NO;
     return _reciprocalValue == [object reciprocalValue];
 }
@@ -73,25 +73,25 @@
 
 @end
 
-static Class charon_registered;
+static Class revenant_registered;
 
-__attribute__((constructor)) static void charon_register_nsunitconver(void)
+__attribute__((constructor)) static void revenant_register_nsunitconver(void)
 {
-    charon_registered = objc_getClass("NSUnitConverterReciprocal");
-    if (charon_registered)
+    revenant_registered = objc_getClass("NSUnitConverterReciprocal");
+    if (revenant_registered)
         return;
-    Class made = objc_allocateClassPair([CharonUnitConverterReciprocal class], "NSUnitConverterReciprocal", 0);
+    Class made = objc_allocateClassPair([RevenantUnitConverterReciprocal class], "NSUnitConverterReciprocal", 0);
     if (made)
         objc_registerClassPair(made);
-    charon_registered = made ? made : [CharonUnitConverterReciprocal class];
+    revenant_registered = made ? made : [RevenantUnitConverterReciprocal class];
 }
 
-Class charon_reciprocal_converter_class(void)
+Class revenant_reciprocal_converter_class(void)
 {
-    return charon_registered ? charon_registered : [CharonUnitConverterReciprocal class];
+    return revenant_registered ? revenant_registered : [RevenantUnitConverterReciprocal class];
 }
 
-NSUnitConverter *charon_reciprocal_converter(double reciprocal)
+NSUnitConverter *revenant_reciprocal_converter(double reciprocal)
 {
-    return [[charon_reciprocal_converter_class() alloc] initWithReciprocalValue:reciprocal];
+    return [[revenant_reciprocal_converter_class() alloc] initWithReciprocalValue:reciprocal];
 }

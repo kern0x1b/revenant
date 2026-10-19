@@ -45,12 +45,12 @@
     return self;
 }
 
-static BOOL charon_event_objects_equal(id ours, id theirs)
+static BOOL revenant_event_objects_equal(id ours, id theirs)
 {
     return ours == theirs || [ours isEqual:theirs];
 }
 
-static BOOL charon_event_strings_equal(NSString *ours, NSString *theirs)
+static BOOL revenant_event_strings_equal(NSString *ours, NSString *theirs)
 {
     return ours == theirs || [ours isEqualToString:theirs];
 }
@@ -63,10 +63,10 @@ static BOOL charon_event_strings_equal(NSString *ours, NSString *theirs)
         return NO;
     UIEventAttribution *that = other;
     return _sourceIdentifier == that->_sourceIdentifier
-        && charon_event_objects_equal(_destinationURL, that->_destinationURL)
-        && charon_event_objects_equal(_reportEndpoint, that->_reportEndpoint)
-        && charon_event_strings_equal(_sourceDescription, that->_sourceDescription)
-        && charon_event_strings_equal(_purchaser, that->_purchaser);
+        && revenant_event_objects_equal(_destinationURL, that->_destinationURL)
+        && revenant_event_objects_equal(_reportEndpoint, that->_reportEndpoint)
+        && revenant_event_strings_equal(_sourceDescription, that->_sourceDescription)
+        && revenant_event_strings_equal(_purchaser, that->_purchaser);
 }
 
 - (NSUInteger)hash

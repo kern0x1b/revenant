@@ -7,7 +7,7 @@ package("swift")
     add_urls("https://github.com/swiftlang/swift.git")
     add_versions("6.4.0", "b8189d766d86ad7fc8106787d6ce9e402f38dd72")
 
-    add_deps("charon@swift-bootstrap 6.4.0", {host = true, private = true, system = false})
+    add_deps("revenant@swift-bootstrap 6.4.0", {host = true, private = true, system = false})
     add_deps("cmake", "ninja", {kind = "binary", host = true})
 
     local sources = {
@@ -52,7 +52,7 @@ package("swift")
 
     on_install("@macosx", function (package)
         local swift = import("apple.swift", {rootdir = path.join(package:scriptdir(), "..", "..", "..", "modules"), anonymous = true})
-        local bootstrap = assert(package:dep("swift-bootstrap"), "charon@swift is built with the swift.org toolchain of the same release")
+        local bootstrap = assert(package:dep("swift-bootstrap"), "revenant@swift is built with the swift.org toolchain of the same release")
         local build = path.absolute("build")
         local prefix = package:installdir()
         local jobs = math.min(import("core.base.option").get("jobs") or 8, 8)

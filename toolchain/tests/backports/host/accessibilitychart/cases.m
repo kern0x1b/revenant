@@ -4,7 +4,7 @@
 
 static NSString *name(NSString *spelling);
 
-@interface CharonCaseAdopter : NSObject <AXChart, AXDataAxisDescriptor> {
+@interface RevenantCaseAdopter : NSObject <AXChart, AXDataAxisDescriptor> {
     AXChartDescriptor *_chartDescriptor;
     NSString *_title;
     NSAttributedString *_attributedTitle;
@@ -14,7 +14,7 @@ static NSString *name(NSString *spelling);
 @property (nonatomic, copy) NSAttributedString *attributedTitle;
 @end
 
-@implementation CharonCaseAdopter
+@implementation RevenantCaseAdopter
 
 @synthesize accessibilityChartDescriptor = _chartDescriptor;
 @synthesize title = _title;
@@ -22,7 +22,7 @@ static NSString *name(NSString *spelling);
 
 - (NSString *)description
 {
-    return [NSString stringWithFormat:@"<CharonCaseAdopter title %@ attributed %@ chart %@ series %lu>",
+    return [NSString stringWithFormat:@"<RevenantCaseAdopter title %@ attributed %@ chart %@ series %lu>",
             _title ?: @"(none)",
             _attributedTitle ?: @"(none)",
             _chartDescriptor ? name(NSStringFromClass([_chartDescriptor class])) : @"(none)",
@@ -40,9 +40,9 @@ static NSString *name(NSString *spelling);
 
 static NSString *name(NSString *spelling)
 {
-    if (spelling.length > [@"CharonPort" length] &&
-        [[spelling substringToIndex:[@"CharonPort" length]] isEqualToString:@"CharonPort"]) {
-        return [spelling substringFromIndex:[@"CharonPort" length]];
+    if (spelling.length > [@"RevenantPort" length] &&
+        [[spelling substringToIndex:[@"RevenantPort" length]] isEqualToString:@"RevenantPort"]) {
+        return [spelling substringFromIndex:[@"RevenantPort" length]];
     }
     return spelling;
 }
@@ -393,7 +393,7 @@ int main(void)
         say(@"setter.chart.additionalAxes.count", @(setterChart.additionalAxes.count));
         same(@"setter.chart.additionalAxes", setterChart.additionalAxes.firstObject, ordered);
 
-        CharonCaseAdopter *adopter = [[CharonCaseAdopter alloc] init];
+        RevenantCaseAdopter *adopter = [[RevenantCaseAdopter alloc] init];
         adopter.title = @"AT";
         adopter.attributedTitle = attributed(@"AA");
         adopter.accessibilityChartDescriptor = chart;

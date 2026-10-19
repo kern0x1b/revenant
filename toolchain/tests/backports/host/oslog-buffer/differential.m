@@ -7,8 +7,8 @@
 #include <time.h>
 #include "battery.h"
 
-#ifdef CHARON_PORT
-#include "CharonOSLog.h"
+#ifdef REVENANT_PORT
+#include "RevenantOSLog.h"
 
 static FILE *ours_file;
 static int current_index;
@@ -38,20 +38,20 @@ static void emit_record(int index, const char *text)
 
 bool os_log_type_enabled(os_log_t log, os_log_type_t type)
 {
-    return charon_os_log_type_enabled(log, type);
+    return revenant_os_log_type_enabled(log, type);
 }
 
 void _os_log_impl(void *dso, os_log_t log, os_log_type_t type, const char *format, uint8_t *buffer, uint32_t size)
 {
     int error = errno;
-    if (!charon_os_log_type_enabled(log, type))
+    if (!revenant_os_log_type_enabled(log, type))
         return;
-    char *text = charon_os_log_format_buffer(format, buffer, size, error);
+    char *text = revenant_os_log_format_buffer(format, buffer, size, error);
     emit_record(current_index, text);
     free(text);
 }
 
-#define LOG_FOR(category) charon_os_log_named("probe", category)
+#define LOG_FOR(category) revenant_os_log_named("probe", category)
 #else
 #define LOG_FOR(category) os_log_create("probe", category)
 #endif
@@ -107,7 +107,7 @@ static void craft_claim(uint8_t count)
 int main(int argc, char **argv)
 {
     @autoreleasepool {
-#ifdef CHARON_PORT
+#ifdef REVENANT_PORT
         setenv("TZ", "UTC", 1);
         tzset();
         hex_output = strcmp(argv[1], "-") == 0;
@@ -137,13 +137,13 @@ int main(int argc, char **argv)
             snprintf(category, sizeof category, "c%d", ++index); \
             os_log_t log = LOG_FOR(category); \
             errno = 0; \
-            CHARON_CURRENT(index) \
+            REVENANT_CURRENT(index) \
             os_log(log, format, ##__VA_ARGS__); \
         } while (0);
-#ifdef CHARON_PORT
-#define CHARON_CURRENT(n) current_index = (n);
+#ifdef REVENANT_PORT
+#define REVENANT_CURRENT(n) current_index = (n);
 #else
-#define CHARON_CURRENT(n)
+#define REVENANT_CURRENT(n)
 #endif
 #define CRAFT(format) \
         do { \
@@ -151,7 +151,7 @@ int main(int argc, char **argv)
             snprintf(category, sizeof category, "c%d", ++index); \
             os_log_t log = LOG_FOR(category); \
             static const uint8_t empty[2] = {0x00, 0x00}; \
-            CHARON_CURRENT(index) \
+            REVENANT_CURRENT(index) \
             _os_log_impl(&__dso_handle, log, OS_LOG_TYPE_DEFAULT, format, (uint8_t *)empty, sizeof empty); \
         } while (0);
         OSLOG_BATTERY(CASE)
@@ -165,7 +165,7 @@ int main(int argc, char **argv)
             errno = 0; \
             craft_begin(); \
             __VA_ARGS__; \
-            CHARON_CURRENT(index) \
+            REVENANT_CURRENT(index) \
             _os_log_impl(&__dso_handle, log, OS_LOG_TYPE_DEFAULT, format, crafted, crafted_size); \
         } while (0);
         char writable[] = "dyn";
@@ -233,7 +233,7 @@ int main(int argc, char **argv)
         CRAFT_CASE("v %d w", craft_pointer(5, 0, w5_abc_nul))
         CRAFT_CASE("v %d w", craft_pointer(5, 0, NULL))
         CRAFT_CASE("v %d w %d x", craft_pointer(5, 0, w5_ab), craft_value(0, 0, 7, 4))
-#ifdef CHARON_PORT
+#ifdef REVENANT_PORT
         if (hex_output)
             fflush(stdout);
         else

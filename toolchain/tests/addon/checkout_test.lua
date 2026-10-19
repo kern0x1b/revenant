@@ -10,7 +10,7 @@ local function origin(folder)
     git({"init", "-q"})
     git({"config", "uploadpack.allowFilter", "true"})
     git({"add", "-A"})
-    git({"-c", "user.name=charon", "-c", "user.email=charon@example.invalid", "commit", "-q", "-m", "release"})
+    git({"-c", "user.name=revenant", "-c", "user.email=revenant@example.invalid", "commit", "-q", "-m", "release"})
     git({"tag", "release-1"})
     return "file://" .. repository, os.iorunv("git", {"-C", repository, "rev-parse", "HEAD"}):trim()
 end

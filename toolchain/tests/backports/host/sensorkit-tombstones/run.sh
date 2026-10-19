@@ -19,7 +19,7 @@ here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 appledir=${APPLEDIR:-$here/../../../../packages/a/apple-backports}
 port=$appledir/SensorKit/NSString+SensorKit14.m
-build=${BUILD:-$(runs_fresh charon-sensorkit-tombstones)}
+build=${BUILD:-$(runs_fresh revenant-sensorkit-tombstones)}
 mkdir -p "$build"
 
 xcrun clang -fobjc-arc -w -c "$port" -o "$build/port.o"
@@ -69,19 +69,19 @@ plant() {
 echo "--- the plants"
 
 plant "the nil half removed: a record's own name is suffixed again" \
-    "    if ([self hasSuffix:CharonSensorKitTombstoneSuffix])
+    "    if ([self hasSuffix:RevenantSensorKitTombstoneSuffix])
         return nil;
 " \
     ""
 
 plant "the suffix appended twice: no input is ever nil" \
-    "return [self stringByAppendingString:CharonSensorKitTombstoneSuffix];" \
-    "return [[self stringByAppendingString:CharonSensorKitTombstoneSuffix]
-            stringByAppendingString:CharonSensorKitTombstoneSuffix];"
+    "return [self stringByAppendingString:RevenantSensorKitTombstoneSuffix];" \
+    "return [[self stringByAppendingString:RevenantSensorKitTombstoneSuffix]
+            stringByAppendingString:RevenantSensorKitTombstoneSuffix];"
 
 plant "the receiver ignored: every answer is the same string" \
-    "return [self stringByAppendingString:CharonSensorKitTombstoneSuffix];" \
-    "return [NSString stringWithFormat:@\"%@%@\", CharonSensorKitTombstoneSuffix, self];"
+    "return [self stringByAppendingString:RevenantSensorKitTombstoneSuffix];" \
+    "return [NSString stringWithFormat:@\"%@%@\", RevenantSensorKitTombstoneSuffix, self];"
 
 echo "--- the comparator's own control: a HOST file with no rows must be red"
 : > "$build/host-empty.out"

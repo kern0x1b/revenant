@@ -1,7 +1,7 @@
-#import "CharonTimingParameters.h"
+#import "RevenantTimingParameters.h"
 #import <objc/runtime.h>
 
-@implementation CharonViewCubicTimingFunction {
+@implementation RevenantViewCubicTimingFunction {
 @private
     CGPoint _point1;
     CGPoint _point2;
@@ -66,25 +66,25 @@
 
 @end
 
-static Class charon_registered;
+static Class revenant_registered;
 
-__attribute__((constructor)) static void charon_register_uiviewcubict(void)
+__attribute__((constructor)) static void revenant_register_uiviewcubict(void)
 {
-    charon_registered = objc_getClass("_UIViewCubicTimingFunction");
-    if (charon_registered)
+    revenant_registered = objc_getClass("_UIViewCubicTimingFunction");
+    if (revenant_registered)
         return;
-    Class made = objc_allocateClassPair([CharonViewCubicTimingFunction class], "_UIViewCubicTimingFunction", 0);
+    Class made = objc_allocateClassPair([RevenantViewCubicTimingFunction class], "_UIViewCubicTimingFunction", 0);
     if (made)
         objc_registerClassPair(made);
-    charon_registered = made ? made : [CharonViewCubicTimingFunction class];
+    revenant_registered = made ? made : [RevenantViewCubicTimingFunction class];
 }
 
-Class charon_cubic_timing_function_class(void)
+Class revenant_cubic_timing_function_class(void)
 {
-    return charon_registered ? charon_registered : [CharonViewCubicTimingFunction class];
+    return revenant_registered ? revenant_registered : [RevenantViewCubicTimingFunction class];
 }
 
-id charon_cubic_timing_function(CGPoint point1, CGPoint point2)
+id revenant_cubic_timing_function(CGPoint point1, CGPoint point2)
 {
-    return [[charon_cubic_timing_function_class() alloc] initWithControlPoint1:point1 controlPoint2:point2];
+    return [[revenant_cubic_timing_function_class() alloc] initWithControlPoint1:point1 controlPoint2:point2];
 }

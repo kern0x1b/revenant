@@ -10,14 +10,14 @@ set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 MODELIO=${MODELIO:-$here/../../../../packages/a/apple-backports/ModelIO}
 BUILD=${BUILD:-$here/../../../../.agent-work/runs/modelio-diff}
-# CHARON_HOST_BUILD: this is a host differential - the port's process links no framework of the name it
-# measures, so there is no release class for a charon_alias.h proxy to stand in for, nothing for the
+# REVENANT_HOST_BUILD: this is a host differential - the port's process links no framework of the name it
+# measures, so there is no release class for a revenant_alias.h proxy to stand in for, nothing for the
 # library's loader to re-parent and no name to export. The header's own comment gives the two
 # measurements: the macOS linker refuses the metaclass alias ("ld: null objc class data for
-# '_OBJC_METACLASS_$_Charon<Name>'", from the smallest file that carries nothing but CHARON_ALIAS), and
+# '_OBJC_METACLASS_$_Revenant<Name>'", from the smallest file that carries nothing but REVENANT_ALIAS), and
 # a name built by ## cannot be renamed the way this harness renames classes. What the alias is FOR is a
 # device band; here the class of the release's name is the class and every member of it is measured.
-quiet="-DCHARON_HOST_BUILD -Wno-unknown-pragmas -Wno-unused-value -Wno-nonnull -Wno-deprecated-declarations -Wno-unguarded-availability-new -Wno-objc-protocol-method-implementation -Wno-nullability-completeness -Wno-availability -Wno-objc-missing-property-synthesis -Wno-incomplete-implementation"
+quiet="-DREVENANT_HOST_BUILD -Wno-unknown-pragmas -Wno-unused-value -Wno-nonnull -Wno-deprecated-declarations -Wno-unguarded-availability-new -Wno-objc-protocol-method-implementation -Wno-nullability-completeness -Wno-availability -Wno-objc-missing-property-synthesis -Wno-incomplete-implementation"
 VERTICES=${VERTICES:-$here/../../../../packages/a/apple-backports/MetalKit/MDLVertexDescriptor9.m}
 carried="MDLAnimatedValue11.m MDLAnimatedValue16.m MDLAssetResolver11.m MDLMaterial101.m MDLMeshBuffer11.m MDLTransformStack11.m MDLTransformStack16.m MDLTransform9.m MDLObject9.m MDLMeshBuffer9.m MDLSubmesh9.m MDLMesh9.m MDLMeshGenerators9.m MDLMaterial9.m MDLTexture9.m MDLVoxelArray9.m MDLAsset9.m"
 rm -rf "$BUILD/host" "$BUILD/port"

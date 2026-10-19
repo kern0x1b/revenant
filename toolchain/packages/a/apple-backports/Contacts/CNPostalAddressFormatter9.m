@@ -1,4 +1,4 @@
-#import "CharonContacts.h"
+#import "RevenantContacts.h"
 
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
 
@@ -6,15 +6,15 @@ NSString * const CNPostalAddressPropertyAttribute = @"CNPostalAddressProperty";
 NSString * const CNPostalAddressLocalizedPropertyNameAttribute = @"CNPostalAddressLocalizedPropertyName";
 
 @implementation CNPostalAddressFormatter {
-    CNPostalAddressFormatterStyle _charonStyle;
+    CNPostalAddressFormatterStyle _revenantStyle;
 }
 
 @dynamic style;
 
-- (CNPostalAddressFormatterStyle)style { return _charonStyle; }
-- (void)setStyle:(CNPostalAddressFormatterStyle)style { _charonStyle = style; }
+- (CNPostalAddressFormatterStyle)style { return _revenantStyle; }
+- (void)setStyle:(CNPostalAddressFormatterStyle)style { _revenantStyle = style; }
 
-+ (NSArray<NSArray *> *)charon_linesForAddress:(CNPostalAddress *)address
++ (NSArray<NSArray *> *)revenant_linesForAddress:(CNPostalAddress *)address
 {
     NSMutableArray *lines = [NSMutableArray array];
     if (address.street.length > 0)
@@ -45,7 +45,7 @@ NSString * const CNPostalAddressLocalizedPropertyNameAttribute = @"CNPostalAddre
 + (NSString *)stringFromPostalAddress:(CNPostalAddress *)postalAddress style:(CNPostalAddressFormatterStyle)style
 {
     NSMutableArray *texts = [NSMutableArray array];
-    for (NSArray *line in [self charon_linesForAddress:postalAddress])
+    for (NSArray *line in [self revenant_linesForAddress:postalAddress])
         [texts addObject:line[1]];
     return [texts componentsJoinedByString:@"\n"];
 }
@@ -54,7 +54,7 @@ NSString * const CNPostalAddressLocalizedPropertyNameAttribute = @"CNPostalAddre
                                      withDefaultAttributes:(NSDictionary *)attributes
 {
     NSMutableAttributedString *built = [[NSMutableAttributedString alloc] init];
-    NSArray *lines = [self charon_linesForAddress:postalAddress];
+    NSArray *lines = [self revenant_linesForAddress:postalAddress];
     for (NSUInteger index = 0; index < lines.count; index++) {
         NSArray *line = lines[index];
         NSString *property = line[0];
@@ -71,12 +71,12 @@ NSString * const CNPostalAddressLocalizedPropertyNameAttribute = @"CNPostalAddre
 
 - (NSString *)stringFromPostalAddress:(CNPostalAddress *)postalAddress
 {
-    return [[self class] stringFromPostalAddress:postalAddress style:_charonStyle];
+    return [[self class] stringFromPostalAddress:postalAddress style:_revenantStyle];
 }
 
 - (NSAttributedString *)attributedStringFromPostalAddress:(CNPostalAddress *)postalAddress withDefaultAttributes:(NSDictionary *)attributes
 {
-    return [[self class] attributedStringFromPostalAddress:postalAddress style:_charonStyle withDefaultAttributes:attributes];
+    return [[self class] attributedStringFromPostalAddress:postalAddress style:_revenantStyle withDefaultAttributes:attributes];
 }
 
 - (NSString *)stringForObjectValue:(id)object

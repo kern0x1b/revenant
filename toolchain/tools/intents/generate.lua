@@ -6,7 +6,7 @@ local LATER = "a class of a later group of this same delivery"
 
 local REGISTRY_RUNS = {
     {groups = {"10_0_1", "10_3"}, release = "10.0.1", file = "ios10.json", protocols = true},
-    {groups = {"11_0"}, release = "11.0", file = "ios11.json", hand_written = "CharonIntents110.m"},
+    {groups = {"11_0"}, release = "11.0", file = "ios11.json", hand_written = "RevenantIntents110.m"},
     {groups = {"12_0"}, release = "12.0", file = "ios12.json"},
     {groups = {"13_4", "16_0"}, release = "16.0", file = "ios16.json"},
     {groups = {"18_0"}, release = "18.0", file = "ios18.json"},

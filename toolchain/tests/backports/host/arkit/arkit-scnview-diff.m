@@ -2,12 +2,12 @@
 #import <SceneKit/SceneKit.h>
 #import "ARKitShim.h"
 
-@interface CharonRecordingDelegate : NSObject <ARSCNViewDelegate>
+@interface RevenantRecordingDelegate : NSObject <ARSCNViewDelegate>
 @property (nonatomic, strong) NSMutableArray<NSString *> *calls;
 @property (nonatomic, strong, nullable) SCNNode *nodeToOffer;
 @end
 
-@implementation CharonRecordingDelegate
+@implementation RevenantRecordingDelegate
 - (instancetype)init
 {
     self = [super init];
@@ -118,18 +118,18 @@ int main(void)
         Check([view nodeForAnchor:moved] == nil, @"a removed anchor has no node");
         Check([view anchorForNode:node] == anchor, @"and the node's own pairing is untouched by that");
 
-        CharonRecordingDelegate *delegate = [[CharonRecordingDelegate alloc] init];
+        RevenantRecordingDelegate *delegate = [[RevenantRecordingDelegate alloc] init];
         view.delegate = delegate;
         ARAnchor *second = [[ARAnchor alloc] init];
 
-        [view charon_placeAnchor:second atNode:node];
+        [view revenant_placeAnchor:second atNode:node];
         Check([delegate.calls isEqualTo:(@[ @"didAddNode" ])], @"placing a pairing says didAddNode");
 
-        [view charon_moveAnchor:second toNode:child];
+        [view revenant_moveAnchor:second toNode:child];
         Check([delegate.calls isEqualTo:(@[ @"didAddNode", @"willUpdateNode", @"didUpdateNode" ])],
               @"moving a pairing says willUpdateNode then didUpdateNode, after the add");
 
-        [view charon_removeAnchor:second];
+        [view revenant_removeAnchor:second];
         Check([delegate.calls isEqualTo:(@[ @"didAddNode", @"willUpdateNode", @"didUpdateNode",
                                              @"didRemoveNode" ])],
               @"breaking a pairing says didRemoveNode, and it is last");

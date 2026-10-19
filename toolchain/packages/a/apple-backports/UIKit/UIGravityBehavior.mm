@@ -1,4 +1,4 @@
-#import "CharonDynamics.h"
+#import "RevenantDynamics.h"
 
 @implementation UIGravityBehavior {
     CGVector _gravity;
@@ -11,9 +11,9 @@
 
 - (instancetype)initWithItems:(NSArray *)items
 {
-    if (!(self = [super charon_initPrimitive:YES]))
+    if (!(self = [super revenant_initPrimitive:YES]))
         return nil;
-    [[self charon_items] addObjectsFromArray:items ?: @[]];
+    [[self revenant_items] addObjectsFromArray:items ?: @[]];
     _gravity = CGVectorMake(0, 1);
     return self;
 }
@@ -25,12 +25,12 @@
 
 - (NSArray *)items
 {
-    return [NSArray arrayWithArray:[self charon_items]];
+    return [NSArray arrayWithArray:[self revenant_items]];
 }
 
-- (void)charon_addItem:(id<UIDynamicItem>)item
+- (void)revenant_addItem:(id<UIDynamicItem>)item
 {
-    CharonDynamicsBody *body = [[self charon_context] charon_registerBodyForItem:item shape:CharonDynamicsShapeBox];
+    RevenantDynamicsBody *body = [[self revenant_context] revenant_registerBodyForItem:item shape:RevenantDynamicsShapeBox];
     body.usesPreciseCollisionDetection = YES;
     body.affectedByGravity = YES;
     body.resting = NO;
@@ -38,43 +38,43 @@
 
 - (void)addItem:(id<UIDynamicItem>)item
 {
-    if ([[self charon_items] containsObject:item])
+    if ([[self revenant_items] containsObject:item])
         return;
-    [[self charon_items] addObject:item];
-    if ([self charon_isAssociated]) {
-        [self charon_addItem:item];
-        [[self charon_context] charon_tickle];
+    [[self revenant_items] addObject:item];
+    if ([self revenant_isAssociated]) {
+        [self revenant_addItem:item];
+        [[self revenant_context] revenant_tickle];
     }
 }
 
 - (void)removeItem:(id<UIDynamicItem>)item
 {
-    if (![[self charon_items] containsObject:item])
+    if (![[self revenant_items] containsObject:item])
         return;
-    [[self charon_context] charon_unregisterBodyForItem:item action:^(CharonDynamicsBody *body) {
+    [[self revenant_context] revenant_unregisterBodyForItem:item action:^(RevenantDynamicsBody *body) {
         body.affectedByGravity = NO;
     }];
-    [[self charon_items] removeObject:item];
+    [[self revenant_items] removeObject:item];
 }
 
-- (void)charon_associate
+- (void)revenant_associate
 {
-    [super charon_associate];
-    [[self charon_context] charon_setWorldGravity:_gravity];
-    for (id<UIDynamicItem> item in [self charon_items])
-        [self charon_addItem:item];
+    [super revenant_associate];
+    [[self revenant_context] revenant_setWorldGravity:_gravity];
+    for (id<UIDynamicItem> item in [self revenant_items])
+        [self revenant_addItem:item];
 }
 
-- (void)charon_dissociate
+- (void)revenant_dissociate
 {
-    UIDynamicAnimator *context = [self charon_context];
-    for (id<UIDynamicItem> item in [self charon_items]) {
-        [context charon_unregisterBodyForItem:item action:^(CharonDynamicsBody *body) {
+    UIDynamicAnimator *context = [self revenant_context];
+    for (id<UIDynamicItem> item in [self revenant_items]) {
+        [context revenant_unregisterBodyForItem:item action:^(RevenantDynamicsBody *body) {
             body.affectedByGravity = NO;
         }];
     }
-    [context charon_setWorldGravity:CGVectorMake(0, 0)];
-    [super charon_dissociate];
+    [context revenant_setWorldGravity:CGVectorMake(0, 0)];
+    [super revenant_dissociate];
 }
 
 - (CGVector)gravityDirection
@@ -84,7 +84,7 @@
 
 - (void)setGravityDirection:(CGVector)direction
 {
-    [self charon_setGravity:direction];
+    [self revenant_setGravity:direction];
 }
 
 - (CGFloat)angle
@@ -110,17 +110,17 @@
 - (void)setAngle:(CGFloat)angle magnitude:(CGFloat)magnitude
 {
     float sine = sinf((float)angle), cosine = cosf((float)angle);
-    [self charon_setGravity:CGVectorMake((double)cosine * magnitude, (double)sine * magnitude)];
+    [self revenant_setGravity:CGVectorMake((double)cosine * magnitude, (double)sine * magnitude)];
 }
 
-- (void)charon_setGravity:(CGVector)gravity
+- (void)revenant_setGravity:(CGVector)gravity
 {
     if (gravity.dx == _gravity.dx && gravity.dy == _gravity.dy)
         return;
     _gravity = gravity;
-    if ([self charon_isAssociated])
-        [[self charon_context] charon_setWorldGravity:gravity];
-    [self charon_changedParameterForBody:nil];
+    if ([self revenant_isAssociated])
+        [[self revenant_context] revenant_setWorldGravity:gravity];
+    [self revenant_changedParameterForBody:nil];
 }
 
 @end

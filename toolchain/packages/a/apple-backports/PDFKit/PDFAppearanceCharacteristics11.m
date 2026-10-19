@@ -1,4 +1,4 @@
-#import "CharonPDFKit.h"
+#import "RevenantPDFKit.h"
 
 @implementation PDFAppearanceCharacteristics {
     NSMutableDictionary *_values;
@@ -25,12 +25,12 @@
 @dynamic downCaption;
 @dynamic appearanceCharacteristicsKeyValues;
 
-- (id)charon_objectForKey:(NSString *)key
+- (id)revenant_objectForKey:(NSString *)key
 {
     return _values[key];
 }
 
-- (void)charon_setObject:(id)value forKey:(NSString *)key
+- (void)revenant_setObject:(id)value forKey:(NSString *)key
 {
     if (value == nil)
         [_values removeObjectForKey:key];
@@ -50,22 +50,22 @@
 
 - (UIColor *)backgroundColor
 {
-    return [self charon_objectForKey:PDFAppearanceCharacteristicsKeyBackgroundColor];
+    return [self revenant_objectForKey:PDFAppearanceCharacteristicsKeyBackgroundColor];
 }
 
 - (void)setBackgroundColor:(UIColor *)backgroundColor
 {
-    [self charon_setObject:backgroundColor forKey:PDFAppearanceCharacteristicsKeyBackgroundColor];
+    [self revenant_setObject:backgroundColor forKey:PDFAppearanceCharacteristicsKeyBackgroundColor];
 }
 
 - (UIColor *)borderColor
 {
-    return [self charon_objectForKey:PDFAppearanceCharacteristicsKeyBorderColor];
+    return [self revenant_objectForKey:PDFAppearanceCharacteristicsKeyBorderColor];
 }
 
 - (void)setBorderColor:(UIColor *)borderColor
 {
-    [self charon_setObject:borderColor forKey:PDFAppearanceCharacteristicsKeyBorderColor];
+    [self revenant_setObject:borderColor forKey:PDFAppearanceCharacteristicsKeyBorderColor];
 }
 
 - (NSInteger)rotation
@@ -81,32 +81,32 @@
 
 - (NSString *)caption
 {
-    return [self charon_objectForKey:PDFAppearanceCharacteristicsKeyCaption];
+    return [self revenant_objectForKey:PDFAppearanceCharacteristicsKeyCaption];
 }
 
 - (void)setCaption:(NSString *)caption
 {
-    [self charon_setObject:caption forKey:PDFAppearanceCharacteristicsKeyCaption];
+    [self revenant_setObject:caption forKey:PDFAppearanceCharacteristicsKeyCaption];
 }
 
 - (NSString *)rolloverCaption
 {
-    return [self charon_objectForKey:PDFAppearanceCharacteristicsKeyRolloverCaption];
+    return [self revenant_objectForKey:PDFAppearanceCharacteristicsKeyRolloverCaption];
 }
 
 - (void)setRolloverCaption:(NSString *)rolloverCaption
 {
-    [self charon_setObject:rolloverCaption forKey:PDFAppearanceCharacteristicsKeyRolloverCaption];
+    [self revenant_setObject:rolloverCaption forKey:PDFAppearanceCharacteristicsKeyRolloverCaption];
 }
 
 - (NSString *)downCaption
 {
-    return [self charon_objectForKey:PDFAppearanceCharacteristicsKeyDownCaption];
+    return [self revenant_objectForKey:PDFAppearanceCharacteristicsKeyDownCaption];
 }
 
 - (void)setDownCaption:(NSString *)downCaption
 {
-    [self charon_setObject:downCaption forKey:PDFAppearanceCharacteristicsKeyDownCaption];
+    [self revenant_setObject:downCaption forKey:PDFAppearanceCharacteristicsKeyDownCaption];
 }
 
 - (NSDictionary *)appearanceCharacteristicsKeyValues

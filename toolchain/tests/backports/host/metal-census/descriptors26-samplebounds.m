@@ -11,7 +11,7 @@ int main(int argc, const char **argv)
         const char *side = port ? "port" : "apple";
         printf("%s: bound %s\n", side, bound);
 
-        Class klass = NSClassFromString(port ? @"charonHost_MTL4RenderPassDescriptor" : @"MTL4RenderPassDescriptor");
+        Class klass = NSClassFromString(port ? @"revenantHost_MTL4RenderPassDescriptor" : @"MTL4RenderPassDescriptor");
         if (!klass) {
             printf("%s: no class of that name\n", side);
             return 2;

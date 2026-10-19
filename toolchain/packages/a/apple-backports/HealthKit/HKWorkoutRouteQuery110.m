@@ -2,17 +2,17 @@
 
 #import <HealthKit/HealthKit.h>
 
-#import "CharonHKStore.h"
+#import "RevenantHKStore.h"
 
-static id CharonHKAllocateBuilder(Class cls)
+static id RevenantHKAllocateBuilder(Class cls)
 {
     return class_createInstance(cls, 0);
 }
 
 #pragma mark - HKWorkoutRoute
 
-@interface HKWorkoutRoute (CharonIOS110Internal)
-+ (instancetype)charon_routeWithData:(NSData *)routeData;
+@interface HKWorkoutRoute (RevenantIOS110Internal)
++ (instancetype)revenant_routeWithData:(NSData *)routeData;
 @end
 
 @implementation HKWorkoutRoute {
@@ -24,7 +24,7 @@ static id CharonHKAllocateBuilder(Class cls)
     return YES;
 }
 
-+ (instancetype)charon_routeWithData:(NSData *)routeData
++ (instancetype)revenant_routeWithData:(NSData *)routeData
 {
     NSData *data = [routeData isKindOfClass:[NSData class]] ? routeData : [NSData data];
     NSMutableData *archive = [NSMutableData data];
@@ -54,15 +54,15 @@ static id CharonHKAllocateBuilder(Class cls)
 
 - (id)copyWithZone:(NSZone *)zone
 {
-    return [HKWorkoutRoute charon_routeWithData:_routeData];
+    return [HKWorkoutRoute revenant_routeWithData:_routeData];
 }
 
 @end
 
 #pragma mark - HKWorkoutRouteBuilder
 
-@interface HKWorkoutRouteBuilder (CharonIOS110Internal)
-+ (instancetype)charon_builderWithHealthStore:(HKHealthStore *)store device:(nullable HKDevice *)device;
+@interface HKWorkoutRouteBuilder (RevenantIOS110Internal)
++ (instancetype)revenant_builderWithHealthStore:(HKHealthStore *)store device:(nullable HKDevice *)device;
 @end
 
 @implementation HKWorkoutRouteBuilder {
@@ -77,14 +77,14 @@ static id CharonHKAllocateBuilder(Class cls)
     return YES;
 }
 
-- (instancetype)charon_init
+- (instancetype)revenant_init
 {
-    return (HKWorkoutRouteBuilder *)CharonHKAllocateBuilder([self class]);
+    return (HKWorkoutRouteBuilder *)RevenantHKAllocateBuilder([self class]);
 }
 
 - (instancetype)initWithHealthStore:(HKHealthStore *)healthStore device:(nullable HKDevice *)device
 {
-    HKWorkoutRouteBuilder *builder = [self charon_init];
+    HKWorkoutRouteBuilder *builder = [self revenant_init];
     if (builder) {
         builder->_inserted = [NSMutableArray array];
         builder->_metadata = [NSMutableDictionary dictionary];
@@ -108,7 +108,7 @@ static id CharonHKAllocateBuilder(Class cls)
 
 - (instancetype)initWithCoder:(NSCoder *)coder
 {
-    HKWorkoutRouteBuilder *builder = [self charon_init];
+    HKWorkoutRouteBuilder *builder = [self revenant_init];
     if (builder) {
         builder->_inserted = [[coder decodeObjectOfClasses:[NSSet setWithObjects:[NSArray class], [NSData class], nil]
                                                  forKey:@"inserted"] mutableCopy] ?: [NSMutableArray array];
@@ -123,7 +123,7 @@ static id CharonHKAllocateBuilder(Class cls)
 {
     if (![routeData isKindOfClass:[NSData class]] || !routeData.length) {
         if (completion)
-            completion(NO, CharonHKError(HKErrorInvalidArgument,
+            completion(NO, RevenantHKError(HKErrorInvalidArgument,
                                           @"Route data must be at least one byte of Apple's own encoded path.", nil));
         return;
     }
@@ -136,7 +136,7 @@ static id CharonHKAllocateBuilder(Class cls)
 {
     if (![metadata isKindOfClass:[NSDictionary class]]) {
         if (completion)
-            completion(NO, CharonHKError(HKErrorInvalidArgument, @"Route metadata must be a dictionary.", nil));
+            completion(NO, RevenantHKError(HKErrorInvalidArgument, @"Route metadata must be a dictionary.", nil));
         return;
     }
     [_metadata addEntriesFromDictionary:metadata];
@@ -150,7 +150,7 @@ static id CharonHKAllocateBuilder(Class cls)
 {
     if (![workout isKindOfClass:[HKWorkout class]] || !_inserted.count) {
         if (completion)
-            completion(nil, CharonHKError(HKErrorInvalidArgument,
+            completion(nil, RevenantHKError(HKErrorInvalidArgument,
                                           @"A finished route needs a workout and at least one insertion of route data.", nil));
         return;
     }
@@ -160,8 +160,8 @@ static id CharonHKAllocateBuilder(Class cls)
     NSMutableDictionary *all = [NSMutableDictionary dictionaryWithDictionary:_metadata];
     if (metadata)
         [all addEntriesFromDictionary:metadata];
-    HKWorkoutRoute *route = [HKWorkoutRoute charon_routeWithData:joined];
-    [[CharonHKStore sharedStore] setWorkoutRoute:route
+    HKWorkoutRoute *route = [HKWorkoutRoute revenant_routeWithData:joined];
+    [[RevenantHKStore sharedStore] setWorkoutRoute:route
                                       forWorkout:workout
                                           device:_device
                                         metadata:all
@@ -188,7 +188,7 @@ static id CharonHKAllocateBuilder(Class cls)
 - (instancetype)initWithRoute:(HKWorkoutRoute *)workoutRoute
                   dataHandler:(void (^)(NSData *_Nullable routeData, NSError *_Nullable error))dataHandler
 {
-    HKWorkoutRouteQuery *query = [super initWithCharonObjectType:[HKObjectType workoutType]];
+    HKWorkoutRouteQuery *query = [super initWithRevenantObjectType:[HKObjectType workoutType]];
     if (query) {
         query->_route = (HKWorkoutRoute *)[workoutRoute copy];
         query->_dataHandler = [dataHandler copy];
@@ -201,17 +201,17 @@ static id CharonHKAllocateBuilder(Class cls)
     return _route;
 }
 
-- (void)charon_run
+- (void)revenant_run
 {
-    NSData *data = _route ? [[CharonHKStore sharedStore] routeDataOf:_route] : nil;
-    NSError *error = data ? nil : CharonHKError(HKErrorNoData, @"The route has no data.", nil);
-    [self charon_perform:^{
+    NSData *data = _route ? [[RevenantHKStore sharedStore] routeDataOf:_route] : nil;
+    NSError *error = data ? nil : RevenantHKError(HKErrorNoData, @"The route has no data.", nil);
+    [self revenant_perform:^{
         if (self->_dataHandler)
             self->_dataHandler(data, error);
     }];
 }
 
-- (void)charon_stop
+- (void)revenant_stop
 {
     _dataHandler = nil;
 }

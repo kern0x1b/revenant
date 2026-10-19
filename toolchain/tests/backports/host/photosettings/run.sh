@@ -7,14 +7,14 @@ here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
 AV=${AV:-$root/packages/a/apple-backports/AVFoundation}
-BUILD=${BUILD:-$(runs_fresh charon-photosettings)}
+BUILD=${BUILD:-$(runs_fresh revenant-photosettings)}
 sdk=$(xcrun --show-sdk-path)
 target="-target arm64-apple-ios15.0-macabi -isysroot $sdk -iframework $sdk/System/iOSSupport/System/Library/Frameworks"
 quiet="-Wno-deprecated-declarations -Wno-unguarded-availability-new -Wno-availability -Wno-incomplete-implementation -Wno-objc-property-synthesis"
 # The port's classes under names of their own, so that the host's classes stay the host's: the header's class names by
 # macro, and the output's runtime name (it is a subclass of the still image output named AVCapturePhotoOutput at run time).
-rename="-DAVCapturePhotoSettings=CharonHostAVCapturePhotoSettings -DAVCapturePhotoOutput=CharonHostAVCapturePhotoOutput
-        -DAVCaptureResolvedPhotoSettings=CharonHostAVCaptureResolvedPhotoSettings"
+rename="-DAVCapturePhotoSettings=RevenantHostAVCapturePhotoSettings -DAVCapturePhotoOutput=RevenantHostAVCapturePhotoOutput
+        -DAVCaptureResolvedPhotoSettings=RevenantHostAVCaptureResolvedPhotoSettings"
 # The SDK the package builds with, whose header says which members the classes have.
 SDK16=${SDK16:-$(ls -d "$HOME"/.xmake/packages/i/iphoneos-sdk/16.4/*/Developer.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS16.4.sdk 2>/dev/null | head -1)}
 [ -d "$SDK16" ] || { echo "FAIL no iPhoneOS16.4.sdk under ~/.xmake/packages/i/iphoneos-sdk: set SDK16"; exit 1; }
@@ -36,7 +36,7 @@ oracle() { # oracle NAME SOURCE...: the oracle over port classes built from SOUR
     objects=
     for source in "$@"; do
         object=$B/$name-$(basename "$source" .m).o
-        xcrun clang -fobjc-arc $target $quiet $rename -D'objc_runtime_name(x)=objc_runtime_name("CharonHostAVCapturePhotoOutput")' \
+        xcrun clang -fobjc-arc $target $quiet $rename -D'objc_runtime_name(x)=objc_runtime_name("RevenantHostAVCapturePhotoOutput")' \
             -I"$AV" -c "$source" -o "$object"
         objects="$objects $object"
     done

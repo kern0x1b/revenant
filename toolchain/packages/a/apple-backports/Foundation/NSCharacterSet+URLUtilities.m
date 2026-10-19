@@ -1,19 +1,19 @@
 #import <Foundation/Foundation.h>
 
-static NSCharacterSet *charon_url_set(NSString *delimiters)
+static NSCharacterSet *revenant_url_set(NSString *delimiters)
 {
     NSString *unreserved = @"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~";
     return [NSCharacterSet characterSetWithCharactersInString:[unreserved stringByAppendingString:delimiters]];
 }
 
-@implementation NSCharacterSet (CharonURLUtilities)
+@implementation NSCharacterSet (RevenantURLUtilities)
 
 + (NSCharacterSet *)URLUserAllowedCharacterSet
 {
     static NSCharacterSet *set;
     static dispatch_once_t once;
     dispatch_once(&once, ^{
-        set = charon_url_set(@"!$&'()*+,;=");
+        set = revenant_url_set(@"!$&'()*+,;=");
     });
     return set;
 }
@@ -23,7 +23,7 @@ static NSCharacterSet *charon_url_set(NSString *delimiters)
     static NSCharacterSet *set;
     static dispatch_once_t once;
     dispatch_once(&once, ^{
-        set = charon_url_set(@"!$&'()*+,;=");
+        set = revenant_url_set(@"!$&'()*+,;=");
     });
     return set;
 }
@@ -33,7 +33,7 @@ static NSCharacterSet *charon_url_set(NSString *delimiters)
     static NSCharacterSet *set;
     static dispatch_once_t once;
     dispatch_once(&once, ^{
-        set = charon_url_set(@"!$&'()*+,;=:[]");
+        set = revenant_url_set(@"!$&'()*+,;=:[]");
     });
     return set;
 }
@@ -43,7 +43,7 @@ static NSCharacterSet *charon_url_set(NSString *delimiters)
     static NSCharacterSet *set;
     static dispatch_once_t once;
     dispatch_once(&once, ^{
-        set = charon_url_set(@"!$&'()*+,;=:@/");
+        set = revenant_url_set(@"!$&'()*+,;=:@/");
     });
     return set;
 }
@@ -53,7 +53,7 @@ static NSCharacterSet *charon_url_set(NSString *delimiters)
     static NSCharacterSet *set;
     static dispatch_once_t once;
     dispatch_once(&once, ^{
-        set = charon_url_set(@"!$&'()*+,;=:@/?");
+        set = revenant_url_set(@"!$&'()*+,;=:@/?");
     });
     return set;
 }
@@ -63,7 +63,7 @@ static NSCharacterSet *charon_url_set(NSString *delimiters)
     static NSCharacterSet *set;
     static dispatch_once_t once;
     dispatch_once(&once, ^{
-        set = charon_url_set(@"!$&'()*+,;=:@/?");
+        set = revenant_url_set(@"!$&'()*+,;=:@/?");
     });
     return set;
 }

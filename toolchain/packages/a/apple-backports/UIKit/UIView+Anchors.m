@@ -1,80 +1,80 @@
 #import <UIKit/UIKit.h>
 #import <objc/runtime.h>
 
-@interface NSLayoutAnchor (CharonAnchors)
-+ (instancetype)charon_anchorWithItem:(id)item attribute:(NSLayoutAttribute)attribute;
+@interface NSLayoutAnchor (RevenantAnchors)
++ (instancetype)revenant_anchorWithItem:(id)item attribute:(NSLayoutAttribute)attribute;
 @end
 
-static id charon_anchor(UIView *view, SEL name, Class type, NSLayoutAttribute attribute)
+static id revenant_anchor(UIView *view, SEL name, Class type, NSLayoutAttribute attribute)
 {
     id anchor = objc_getAssociatedObject(view, name);
     if (!anchor) {
-        anchor = [type charon_anchorWithItem:view attribute:attribute];
+        anchor = [type revenant_anchorWithItem:view attribute:attribute];
         objc_setAssociatedObject(view, name, anchor, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     }
     return anchor;
 }
 
-@implementation UIView (CharonAnchors)
+@implementation UIView (RevenantAnchors)
 
 - (NSLayoutXAxisAnchor *)leadingAnchor
 {
-    return charon_anchor(self, _cmd, [NSLayoutXAxisAnchor class], NSLayoutAttributeLeading);
+    return revenant_anchor(self, _cmd, [NSLayoutXAxisAnchor class], NSLayoutAttributeLeading);
 }
 
 - (NSLayoutXAxisAnchor *)trailingAnchor
 {
-    return charon_anchor(self, _cmd, [NSLayoutXAxisAnchor class], NSLayoutAttributeTrailing);
+    return revenant_anchor(self, _cmd, [NSLayoutXAxisAnchor class], NSLayoutAttributeTrailing);
 }
 
 - (NSLayoutXAxisAnchor *)leftAnchor
 {
-    return charon_anchor(self, _cmd, [NSLayoutXAxisAnchor class], NSLayoutAttributeLeft);
+    return revenant_anchor(self, _cmd, [NSLayoutXAxisAnchor class], NSLayoutAttributeLeft);
 }
 
 - (NSLayoutXAxisAnchor *)rightAnchor
 {
-    return charon_anchor(self, _cmd, [NSLayoutXAxisAnchor class], NSLayoutAttributeRight);
+    return revenant_anchor(self, _cmd, [NSLayoutXAxisAnchor class], NSLayoutAttributeRight);
 }
 
 - (NSLayoutYAxisAnchor *)topAnchor
 {
-    return charon_anchor(self, _cmd, [NSLayoutYAxisAnchor class], NSLayoutAttributeTop);
+    return revenant_anchor(self, _cmd, [NSLayoutYAxisAnchor class], NSLayoutAttributeTop);
 }
 
 - (NSLayoutYAxisAnchor *)bottomAnchor
 {
-    return charon_anchor(self, _cmd, [NSLayoutYAxisAnchor class], NSLayoutAttributeBottom);
+    return revenant_anchor(self, _cmd, [NSLayoutYAxisAnchor class], NSLayoutAttributeBottom);
 }
 
 - (NSLayoutDimension *)widthAnchor
 {
-    return charon_anchor(self, _cmd, [NSLayoutDimension class], NSLayoutAttributeWidth);
+    return revenant_anchor(self, _cmd, [NSLayoutDimension class], NSLayoutAttributeWidth);
 }
 
 - (NSLayoutDimension *)heightAnchor
 {
-    return charon_anchor(self, _cmd, [NSLayoutDimension class], NSLayoutAttributeHeight);
+    return revenant_anchor(self, _cmd, [NSLayoutDimension class], NSLayoutAttributeHeight);
 }
 
 - (NSLayoutXAxisAnchor *)centerXAnchor
 {
-    return charon_anchor(self, _cmd, [NSLayoutXAxisAnchor class], NSLayoutAttributeCenterX);
+    return revenant_anchor(self, _cmd, [NSLayoutXAxisAnchor class], NSLayoutAttributeCenterX);
 }
 
 - (NSLayoutYAxisAnchor *)centerYAnchor
 {
-    return charon_anchor(self, _cmd, [NSLayoutYAxisAnchor class], NSLayoutAttributeCenterY);
+    return revenant_anchor(self, _cmd, [NSLayoutYAxisAnchor class], NSLayoutAttributeCenterY);
 }
 
 - (NSLayoutYAxisAnchor *)firstBaselineAnchor
 {
-    return charon_anchor(self, _cmd, [NSLayoutYAxisAnchor class], NSLayoutAttributeFirstBaseline);
+    return revenant_anchor(self, _cmd, [NSLayoutYAxisAnchor class], NSLayoutAttributeFirstBaseline);
 }
 
 - (NSLayoutYAxisAnchor *)lastBaselineAnchor
 {
-    return charon_anchor(self, _cmd, [NSLayoutYAxisAnchor class], NSLayoutAttributeLastBaseline);
+    return revenant_anchor(self, _cmd, [NSLayoutYAxisAnchor class], NSLayoutAttributeLastBaseline);
 }
 
 @end

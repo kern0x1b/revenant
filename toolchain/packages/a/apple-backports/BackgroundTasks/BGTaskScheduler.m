@@ -1,14 +1,14 @@
 #import <UIKit/UIKit.h>
 #import <BackgroundTasks/BackgroundTasks.h>
 
-@interface BGTaskScheduler (CharonScheduler)
-- (instancetype)initCharon;
+@interface BGTaskScheduler (RevenantScheduler)
+- (instancetype)initRevenant;
 @end
 
 NSErrorDomain const BGTaskSchedulerErrorDomain = @"BGTaskSchedulerErrorDomain";
 
-static BOOL charon_launched;
-static BGTaskScheduler *charon_scheduler;
+static BOOL revenant_launched;
+static BGTaskScheduler *revenant_scheduler;
 
 @implementation BGTaskScheduler {
     NSMutableDictionary *_handlers;
@@ -17,7 +17,7 @@ static BGTaskScheduler *charon_scheduler;
 + (void)load
 {
     [[NSNotificationCenter defaultCenter] addObserverForName:UIApplicationDidFinishLaunchingNotification object:nil queue:nil usingBlock:^(NSNotification *note) {
-        charon_launched = YES;
+        revenant_launched = YES;
     }];
 }
 
@@ -25,25 +25,25 @@ static BGTaskScheduler *charon_scheduler;
 {
     static dispatch_once_t once;
     dispatch_once(&once, ^{
-        charon_scheduler = [[self alloc] initCharon];
+        revenant_scheduler = [[self alloc] initRevenant];
     });
-    return charon_scheduler;
+    return revenant_scheduler;
 }
 
-- (instancetype)initCharon
+- (instancetype)initRevenant
 {
     if ((self = [super init]))
         _handlers = [NSMutableDictionary dictionary];
     return self;
 }
 
-static BOOL charon_permitted(NSString *identifier)
+static BOOL revenant_permitted(NSString *identifier)
 {
     NSArray *permitted = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"BGTaskSchedulerPermittedIdentifiers"];
     return [permitted isKindOfClass:[NSArray class]] && [permitted containsObject:identifier];
 }
 
-static BOOL charon_background_mode(NSString *mode)
+static BOOL revenant_background_mode(NSString *mode)
 {
     NSArray *modes = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"UIBackgroundModes"];
     return [modes isKindOfClass:[NSArray class]] && [modes containsObject:mode];
@@ -51,9 +51,9 @@ static BOOL charon_background_mode(NSString *mode)
 
 - (BOOL)registerForTaskWithIdentifier:(NSString *)identifier usingQueue:(dispatch_queue_t)queue launchHandler:(void (^)(__kindof BGTask *))launchHandler
 {
-    if (charon_launched)
+    if (revenant_launched)
         [NSException raise:NSInternalInconsistencyException format:@"All launch handlers must be registered before application finishes launching"];
-    if (!charon_permitted(identifier))
+    if (!revenant_permitted(identifier))
         return NO;
     @synchronized (self) {
         if (_handlers[identifier])
@@ -66,7 +66,7 @@ static BOOL charon_background_mode(NSString *mode)
 - (BOOL)submitTaskRequest:(BGTaskRequest *)taskRequest error:(NSError **)error
 {
     NSString *mode = [taskRequest isKindOfClass:[BGProcessingTaskRequest class]] ? @"processing" : @"fetch";
-    NSInteger code = charon_permitted(taskRequest.identifier) && charon_background_mode(mode) ? BGTaskSchedulerErrorCodeUnavailable : BGTaskSchedulerErrorCodeNotPermitted;
+    NSInteger code = revenant_permitted(taskRequest.identifier) && revenant_background_mode(mode) ? BGTaskSchedulerErrorCodeUnavailable : BGTaskSchedulerErrorCodeNotPermitted;
     if (error)
         *error = [NSError errorWithDomain:BGTaskSchedulerErrorDomain code:code userInfo:nil];
     return NO;

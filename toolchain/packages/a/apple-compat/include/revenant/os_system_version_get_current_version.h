@@ -1,5 +1,5 @@
-#ifndef CHARON_OS_SYSTEM_VERSION_GET_CURRENT_VERSION_H
-#define CHARON_OS_SYSTEM_VERSION_GET_CURRENT_VERSION_H
+#ifndef REVENANT_OS_SYSTEM_VERSION_GET_CURRENT_VERSION_H
+#define REVENANT_OS_SYSTEM_VERSION_GET_CURRENT_VERSION_H
 
 struct os_system_version_s;
 
@@ -7,12 +7,12 @@ struct os_system_version_s;
 extern "C" {
 #endif
 
-int charon_os_system_version_get_current_version(struct os_system_version_s *version);
+int revenant_os_system_version_get_current_version(struct os_system_version_s *version);
 
 #ifdef __cplusplus
 }
 #endif
 
-#define os_system_version_get_current_version charon_os_system_version_get_current_version
+#define os_system_version_get_current_version revenant_os_system_version_get_current_version
 
 #endif

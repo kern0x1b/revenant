@@ -1,4 +1,4 @@
-#import "CharonPointer.h"
+#import "RevenantPointer.h"
 
 @implementation UIPointerInteraction {
 @private
@@ -53,7 +53,7 @@
 {
     _view = view;
     if (view)
-        charon_menus_say_once(@"pointer-interaction", @"UIPointerInteraction: this release has no pointing device, so the interaction is attached and its delegate is never called");
+        revenant_menus_say_once(@"pointer-interaction", @"UIPointerInteraction: this release has no pointing device, so the interaction is attached and its delegate is never called");
 }
 
 @end

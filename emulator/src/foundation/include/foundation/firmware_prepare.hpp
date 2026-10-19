@@ -19,7 +19,7 @@
 #include "foundation/jit_artifact.hpp"
 #include "foundation/macho.hpp"
 
-namespace shade {
+namespace emulator {
 
 enum class FirmwareArtifactSeedMode : std::uint8_t {
     CatalogOnly,

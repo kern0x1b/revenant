@@ -2,11 +2,11 @@
 #import "check.h"
 #import "compositional-cases.m"
 
-void charon_windowed_run(UIWindow *window);
+void revenant_windowed_run(UIWindow *window);
 
 static void record_sized(NSArray *answers)
 {
-    const char *path = getenv("CHARON_SIZED_EXPECTATIONS");
+    const char *path = getenv("REVENANT_SIZED_EXPECTATIONS");
     if (!path)
         return;
     NSMutableString *out = [NSMutableString stringWithString:@"static const char *const compositional_sized_expectations[] = {\n"];
@@ -20,9 +20,9 @@ static void record_sized(NSArray *answers)
     [out writeToFile:@(path) atomically:YES encoding:NSUTF8StringEncoding error:NULL];
 }
 
-void charon_windowed_run(UIWindow *window)
+void revenant_windowed_run(UIWindow *window)
 {
-    CompositionalKit system = compositional_kit(@""), port = compositional_kit(@"CharonHost");
+    CompositionalKit system = compositional_kit(@""), port = compositional_kit(@"RevenantHost");
     NSMutableArray *answers = [NSMutableArray array];
     BOOL all = YES;
     for (NSUInteger index = 0; index < compositional_sized_count(); index++) {
@@ -32,9 +32,9 @@ void charon_windowed_run(UIWindow *window)
         BOOL same = [actual isEqual:expected];
         all = all && same;
         NSString *name = [NSString stringWithFormat:@"sized %@", compositional_sized_name(index)];
-        charon_check(same, name.UTF8String, same ? @"" : [NSString stringWithFormat:@"\n  port\n%@\n  system\n%@", actual, expected]);
+        revenant_check(same, name.UTF8String, same ? @"" : [NSString stringWithFormat:@"\n  port\n%@\n  system\n%@", actual, expected]);
     }
-    charon_check(compositional_release_while_pending(port, window), "a layout and a data source released while a measurement is waiting are not touched", @"");
+    revenant_check(compositional_release_while_pending(port, window), "a layout and a data source released while a measurement is waiting are not touched", @"");
     if (all)
         record_sized(answers);
 }

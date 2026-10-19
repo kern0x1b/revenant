@@ -1,17 +1,17 @@
 #import <CarPlay/CarPlay.h>
 #import <UIKit/UIKit.h>
-#import "CharonCarPlayTemplate.h"
+#import "RevenantCarPlayTemplate.h"
 
-@implementation CPListTemplate (CharonListTemplate184)
+@implementation CPListTemplate (RevenantListTemplate184)
 
 - (BOOL)showsSpinnerWhileEmpty
 {
-    return [self charon_showsSpinnerWhileEmpty];
+    return [self revenant_showsSpinnerWhileEmpty];
 }
 
 - (void)setShowsSpinnerWhileEmpty:(BOOL)showsSpinnerWhileEmpty
 {
-    [self charon_setShowsSpinnerWhileEmpty:showsSpinnerWhileEmpty];
+    [self revenant_setShowsSpinnerWhileEmpty:showsSpinnerWhileEmpty];
 }
 
 @end

@@ -27,7 +27,7 @@ local function internal(name)
         end
     end
     local bare = name:match("^_OBJC_%u*CLASS_%$_(.+)$") or name:match("^_(.+)$") or name
-    return bare:startswith("charon_") or bare:startswith("Charon")
+    return bare:startswith("revenant_") or bare:startswith("Revenant")
 end
 
 local function symbols_of(object)

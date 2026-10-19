@@ -31,7 +31,7 @@ function main(out)
         print("writing the containers...")
     end
     local dump = import("check-predict", {rootdir = os.scriptdir(), anonymous = true}).prepare(out, {name = "ml-dump",
-        sources = {{"tools", "ml-dump.c"}, {"core", "CharonMLProto.c"}, {"core", "CharonMLSchema.c"}}})
+        sources = {{"tools", "ml-dump.c"}, {"core", "RevenantMLProto.c"}, {"core", "RevenantMLSchema.c"}}})
     local failures = 0
     local models = os.files(path.join(out, "models", "*.mlmodel"))
     local byteorder = import("byteorder", {rootdir = path.join(os.scriptdir(), "..", "..", "modules"), anonymous = true})

@@ -42,7 +42,7 @@ int main(void)
         CHECK(CMVideoFormatDescriptionGetH264ParameterSetAtIndex(wrong, 0, &pointer, &size, &count, &header) == -12712 && header == 0 && count == 0,
               "a record of another version answers -12712 with the outputs zeroed");
 
-        printf("%d checks, %d failures\n", charon_checks, charon_failures);
-        return charon_failures;
+        printf("%d checks, %d failures\n", revenant_checks, revenant_failures);
+        return revenant_failures;
     }
 }

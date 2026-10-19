@@ -3,7 +3,7 @@
 #import <objc/runtime.h>
 #import "lists-cases.h"
 
-void charon_windowed_run(UIWindow *window);
+void revenant_windowed_run(UIWindow *window);
 
 static UIWindow *test_window;
 
@@ -119,9 +119,9 @@ static void run_content_views(void)
         if (![fa isEqual:fb] && ((mixedRow && frames_agree(fa, fb, 5.0, NO)) || (limitedLines && frames_agree(fa, fb, 20.0, NO))))
             fb = fa;
         if (![fa isEqual:fb])
-            charon_check(NO, [NSString stringWithFormat:@"content view %d frames", round].UTF8String, [NSString stringWithFormat:@"%@ size=%@\n  %@\n  system %@\n  port   %@", factory, NSStringFromCGSize(size), dump_config(a), fa, fb]);
+            revenant_check(NO, [NSString stringWithFormat:@"content view %d frames", round].UTF8String, [NSString stringWithFormat:@"%@ size=%@\n  %@\n  system %@\n  port   %@", factory, NSStringFromCGSize(size), dump_config(a), fa, fb]);
         else
-            charon_check(YES, "content view frames", nil);
+            revenant_check(YES, "content view frames", nil);
         if (round % 4 == 0 && !limitedLines && CGSizeEqualToSize(ca.imageProperties.maximumSize, CGSizeZero) && !ca.attributedText && !ca.secondaryAttributedText)
             same([NSString stringWithFormat:@"content view %d fitting size %@ %@", round, factory, dump_config(a)], NSStringFromCGSize(fitA), NSStringFromCGSize(fitB));
     }
@@ -137,12 +137,12 @@ static NSString *capital(NSString *name)
 
 static SEL getter_sel(int side, NSString *name)
 {
-    return NSSelectorFromString(side ? [@"charonHost" stringByAppendingString:capital(name)] : name);
+    return NSSelectorFromString(side ? [@"revenantHost" stringByAppendingString:capital(name)] : name);
 }
 
 static SEL setter_sel(int side, NSString *name)
 {
-    return NSSelectorFromString(side ? [NSString stringWithFormat:@"charonHostSet%@:", capital(name)] : [NSString stringWithFormat:@"set%@:", capital(name)]);
+    return NSSelectorFromString(side ? [NSString stringWithFormat:@"revenantHostSet%@:", capital(name)] : [NSString stringWithFormat:@"set%@:", capital(name)]);
 }
 
 static id get(int side, id object, NSString *name)
@@ -167,12 +167,12 @@ static void set_bool(int side, id object, NSString *name, BOOL value)
 
 static void editing(int side, UICollectionView *view, BOOL value)
 {
-    ((void (*)(id, SEL, BOOL))objc_msgSend)(view, NSSelectorFromString(side ? @"charonHostSetEditing:" : @"setEditing:"), value);
+    ((void (*)(id, SEL, BOOL))objc_msgSend)(view, NSSelectorFromString(side ? @"revenantHostSetEditing:" : @"setEditing:"), value);
 }
 
 static BOOL is_editing(int side, UICollectionView *view)
 {
-    return ((BOOL (*)(id, SEL))objc_msgSend)(view, NSSelectorFromString(side ? @"charonHostIsEditing" : @"isEditing"));
+    return ((BOOL (*)(id, SEL))objc_msgSend)(view, NSSelectorFromString(side ? @"revenantHostIsEditing" : @"isEditing"));
 }
 
 static void spin(void)
@@ -231,12 +231,12 @@ static UICollectionView *make_cv(int side, CGSize size, UICollectionViewLayout *
     return view;
 }
 
-@interface CharonListSource : NSObject <UICollectionViewDataSource>
+@interface RevenantListSource : NSObject <UICollectionViewDataSource>
 @property (nonatomic, copy) void (^configure)(UICollectionViewCell *cell, NSIndexPath *indexPath);
 @property (nonatomic) NSInteger count;
 @end
 
-@implementation CharonListSource
+@implementation RevenantListSource
 - (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section
 {
     return self.count;
@@ -263,14 +263,14 @@ static NSString *cell_geometry(UICollectionViewCell *cell, int side)
     return [NSString stringWithFormat:@"content=%@ labels=%@ images=%@ accessories=%@", NSStringFromCGRect(cell.contentView.frame), [labels componentsJoinedByString:@" "], [images componentsJoinedByString:@" "], [accessories componentsJoinedByString:@" "]];
 }
 
-@interface UICollectionViewCell (CharonHostConfiguration)
-- (void)charonHostUpdateConfigurationUsingState:(id)state;
-- (void)charonHostSetNeedsUpdateConfiguration;
+@interface UICollectionViewCell (RevenantHostConfiguration)
+- (void)revenantHostUpdateConfigurationUsingState:(id)state;
+- (void)revenantHostSetNeedsUpdateConfiguration;
 @end
 
-@interface UITableViewCell (CharonHostConfiguration)
-- (void)charonHostUpdateConfigurationUsingState:(id)state;
-- (void)charonHostSetNeedsUpdateConfiguration;
+@interface UITableViewCell (RevenantHostConfiguration)
+- (void)revenantHostUpdateConfigurationUsingState:(id)state;
+- (void)revenantHostSetNeedsUpdateConfiguration;
 @end
 
 static NSMutableArray *update_log;
@@ -282,10 +282,10 @@ static NSString *state_text(id state)
     return [NSString stringWithFormat:@"h=%d s=%d e=%d d=%d f=%d", s.highlighted, s.selected, editing, s.disabled, s.focused];
 }
 
-@interface CharonSystemCell : UICollectionViewCell
+@interface RevenantSystemCell : UICollectionViewCell
 @end
 
-@implementation CharonSystemCell
+@implementation RevenantSystemCell
 - (void)updateConfigurationUsingState:(UICellConfigurationState *)state
 {
     [update_log addObject:[@"update " stringByAppendingString:state_text(state)]];
@@ -298,26 +298,26 @@ static NSString *state_text(id state)
 }
 @end
 
-@interface CharonPortCell : UICollectionViewCell
+@interface RevenantPortCell : UICollectionViewCell
 @end
 
-@implementation CharonPortCell
-- (void)charonHostUpdateConfigurationUsingState:(id)state
+@implementation RevenantPortCell
+- (void)revenantHostUpdateConfigurationUsingState:(id)state
 {
     [update_log addObject:[@"update " stringByAppendingString:state_text(state)]];
-    [super charonHostUpdateConfigurationUsingState:state];
+    [super revenantHostUpdateConfigurationUsingState:state];
 }
-- (void)charonHostSetNeedsUpdateConfiguration
+- (void)revenantHostSetNeedsUpdateConfiguration
 {
     [update_log addObject:@"needsUpdate"];
-    [super charonHostSetNeedsUpdateConfiguration];
+    [super revenantHostSetNeedsUpdateConfiguration];
 }
 @end
 
-@interface CharonSystemTableCell : UITableViewCell
+@interface RevenantSystemTableCell : UITableViewCell
 @end
 
-@implementation CharonSystemTableCell
+@implementation RevenantSystemTableCell
 - (void)updateConfigurationUsingState:(UICellConfigurationState *)state
 {
     [update_log addObject:[@"update " stringByAppendingString:state_text(state)]];
@@ -325,14 +325,14 @@ static NSString *state_text(id state)
 }
 @end
 
-@interface CharonPortTableCell : UITableViewCell
+@interface RevenantPortTableCell : UITableViewCell
 @end
 
-@implementation CharonPortTableCell
-- (void)charonHostUpdateConfigurationUsingState:(id)state
+@implementation RevenantPortTableCell
+- (void)revenantHostUpdateConfigurationUsingState:(id)state
 {
     [update_log addObject:[@"update " stringByAppendingString:state_text(state)]];
-    [super charonHostUpdateConfigurationUsingState:state];
+    [super revenantHostUpdateConfigurationUsingState:state];
 }
 @end
 
@@ -367,7 +367,7 @@ static void run_updates(void)
         static NSString *first[40];
         int step = 0;
         [update_log removeAllObjects];
-        Class cellClass = side ? [CharonPortCell class] : [CharonSystemCell class];
+        Class cellClass = side ? [RevenantPortCell class] : [RevenantSystemCell class];
         UIView *host = test_window.rootViewController.view;
         UICollectionViewCell *cell = [[cellClass alloc] initWithFrame:CGRectMake(0, 0, 320, 60)];
         NSMutableArray *outputs = [NSMutableArray array];
@@ -411,7 +411,7 @@ static void run_updates(void)
         updated = get(side, cell, @"contentConfiguration");
         [outputs addObject:[NSString stringWithFormat:@"auto off font %@ auto=%d", font_text(updated.textProperties.font), get_bool(side, cell, @"automaticallyUpdatesContentConfiguration")]];
         set_bool(side, cell, @"automaticallyUpdatesContentConfiguration", YES);
-        ((void (*)(id, SEL))objc_msgSend)(cell, NSSelectorFromString(side ? @"charonHostSetNeedsUpdateConfiguration" : @"setNeedsUpdateConfiguration"));
+        ((void (*)(id, SEL))objc_msgSend)(cell, NSSelectorFromString(side ? @"revenantHostSetNeedsUpdateConfiguration" : @"setNeedsUpdateConfiguration"));
         [outputs addObject:[@"manual " stringByAppendingString:flush_log()]];
         cell.userInteractionEnabled = NO;
         [outputs addObject:[@"disabled state " stringByAppendingString:normalised(get(side, cell, @"configurationState"))]];
@@ -453,7 +453,7 @@ static UICollectionViewCell *build_list_case(int side, NSString *factory, BOOL w
     layout.itemSize = size;
     layout.minimumLineSpacing = 0;
     UICollectionView *view = make_cv(side, CGSizeMake(size.width, 480), layout, named(side, @"UICollectionViewListCell"));
-    CharonListSource *source = [[CharonListSource alloc] init];
+    RevenantListSource *source = [[RevenantListSource alloc] init];
     source.count = 1;
     source.configure = ^(UICollectionViewCell *cell, NSIndexPath *indexPath) {
         UIListContentConfiguration *configuration = [[named(side, @"UIListContentConfiguration") performSelector:NSSelectorFromString(factory)] copy];
@@ -509,9 +509,9 @@ static void run_cells(void)
             [view removeFromSuperview];
         }
         if (![answers[0] isEqual:answers[2]])
-            charon_check(NO, [NSString stringWithFormat:@"list cell %d geometry", round].UTF8String, [NSString stringWithFormat:@"%@\n  system %@\n  port   %@", answers[1], answers[0], answers[2]]);
+            revenant_check(NO, [NSString stringWithFormat:@"list cell %d geometry", round].UTF8String, [NSString stringWithFormat:@"%@\n  system %@\n  port   %@", answers[1], answers[0], answers[2]]);
         else
-            charon_check(YES, "list cell geometry", nil);
+            revenant_check(YES, "list cell geometry", nil);
     }
     for (size_t index = 0; index < list_case_count(); index++) {
         const ListCase *c = &list_cases[index];
@@ -532,12 +532,12 @@ static void run_cells(void)
 
 #pragma mark - registrations, editing, layout, tables
 
-@interface CharonRegistrationSource : NSObject <UICollectionViewDataSource, UICollectionViewDelegateFlowLayout>
+@interface RevenantRegistrationSource : NSObject <UICollectionViewDataSource, UICollectionViewDelegateFlowLayout>
 @property (nonatomic, copy) UICollectionViewCell *(^cell)(UICollectionView *view, NSIndexPath *indexPath);
 @property (nonatomic, copy) UICollectionReusableView *(^supplementary)(UICollectionView *view, NSString *kind, NSIndexPath *indexPath);
 @end
 
-@implementation CharonRegistrationSource
+@implementation RevenantRegistrationSource
 - (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section
 {
     return 2;
@@ -577,7 +577,7 @@ static void run_registrations(void)
         [out addObject:try_text(^{ [supplementaryRegistration registrationWithSupplementaryClass:[UICollectionReusableView class] elementKind:nil configurationHandler:^(id v, NSString *k, NSIndexPath *ip) {}]; })];
         NSMutableArray *log = [NSMutableArray array];
         id registration = [cellRegistration registrationWithCellClass:[UICollectionViewCell class] configurationHandler:^(UICollectionViewCell *cell, NSIndexPath *indexPath, id item) {
-            [log addObject:[NSString stringWithFormat:@"cell(%@,%@,%@)", [NSStringFromClass([cell class]) stringByReplacingOccurrencesOfString:@"CharonHost" withString:@""], indexPath, item]];
+            [log addObject:[NSString stringWithFormat:@"cell(%@,%@,%@)", [NSStringFromClass([cell class]) stringByReplacingOccurrencesOfString:@"RevenantHost" withString:@""], indexPath, item]];
         }];
         [out addObject:[NSString stringWithFormat:@"props %@ %@ %d %@", NSStringFromClass([registration cellClass]), [registration cellNib], [registration configurationHandler] != nil, normalised(registration)]];
         id supplementary = [supplementaryRegistration registrationWithSupplementaryClass:[UICollectionReusableView class] elementKind:UICollectionElementKindSectionHeader configurationHandler:^(UICollectionReusableView *view, NSString *kind, NSIndexPath *indexPath) {
@@ -588,12 +588,12 @@ static void run_registrations(void)
         layout.itemSize = CGSizeMake(100, 30);
         layout.headerReferenceSize = CGSizeMake(320, 20);
         UICollectionView *view = [[UICollectionView alloc] initWithFrame:CGRectMake(0, 0, 320, 300) collectionViewLayout:layout];
-        CharonRegistrationSource *source = [[CharonRegistrationSource alloc] init];
+        RevenantRegistrationSource *source = [[RevenantRegistrationSource alloc] init];
         source.cell = ^UICollectionViewCell *(UICollectionView *v, NSIndexPath *ip) {
-            return ((id (*)(id, SEL, id, id, id))objc_msgSend)(v, NSSelectorFromString(side ? @"charonHostDequeueConfiguredReusableCellWithRegistration:forIndexPath:item:" : @"dequeueConfiguredReusableCellWithRegistration:forIndexPath:item:"), registration, ip, @(ip.item));
+            return ((id (*)(id, SEL, id, id, id))objc_msgSend)(v, NSSelectorFromString(side ? @"revenantHostDequeueConfiguredReusableCellWithRegistration:forIndexPath:item:" : @"dequeueConfiguredReusableCellWithRegistration:forIndexPath:item:"), registration, ip, @(ip.item));
         };
         source.supplementary = ^UICollectionReusableView *(UICollectionView *v, NSString *kind, NSIndexPath *ip) {
-            return ((id (*)(id, SEL, id, id))objc_msgSend)(v, NSSelectorFromString(side ? @"charonHostDequeueConfiguredReusableSupplementaryViewWithRegistration:forIndexPath:" : @"dequeueConfiguredReusableSupplementaryViewWithRegistration:forIndexPath:"), supplementary, ip);
+            return ((id (*)(id, SEL, id, id))objc_msgSend)(v, NSSelectorFromString(side ? @"revenantHostDequeueConfiguredReusableSupplementaryViewWithRegistration:forIndexPath:" : @"dequeueConfiguredReusableSupplementaryViewWithRegistration:forIndexPath:"), supplementary, ip);
         };
         view.dataSource = source;
         [test_window.rootViewController.view addSubview:view];
@@ -601,10 +601,10 @@ static void run_registrations(void)
         [out addObject:[log componentsJoinedByString:@" "]];
         [log removeAllObjects];
         [out addObject:try_text(^{
-            ((id (*)(id, SEL, id, id, id))objc_msgSend)(view, NSSelectorFromString(side ? @"charonHostDequeueConfiguredReusableCellWithRegistration:forIndexPath:item:" : @"dequeueConfiguredReusableCellWithRegistration:forIndexPath:item:"), nil, [NSIndexPath indexPathForItem:0 inSection:0], @1);
+            ((id (*)(id, SEL, id, id, id))objc_msgSend)(view, NSSelectorFromString(side ? @"revenantHostDequeueConfiguredReusableCellWithRegistration:forIndexPath:item:" : @"dequeueConfiguredReusableCellWithRegistration:forIndexPath:item:"), nil, [NSIndexPath indexPathForItem:0 inSection:0], @1);
         })];
         [out addObject:try_text(^{
-            ((id (*)(id, SEL, id, id))objc_msgSend)(view, NSSelectorFromString(side ? @"charonHostDequeueConfiguredReusableSupplementaryViewWithRegistration:forIndexPath:" : @"dequeueConfiguredReusableSupplementaryViewWithRegistration:forIndexPath:"), nil, [NSIndexPath indexPathForItem:0 inSection:0]);
+            ((id (*)(id, SEL, id, id))objc_msgSend)(view, NSSelectorFromString(side ? @"revenantHostDequeueConfiguredReusableSupplementaryViewWithRegistration:forIndexPath:" : @"dequeueConfiguredReusableSupplementaryViewWithRegistration:forIndexPath:"), nil, [NSIndexPath indexPathForItem:0 inSection:0]);
         })];
         [view removeFromSuperview];
     }
@@ -621,8 +621,8 @@ static void run_editing_and_absent(void)
         UICollectionViewFlowLayout *layout = [[UICollectionViewFlowLayout alloc] init];
         layout.itemSize = CGSizeMake(320, 44);
         UICollectionView *view = [[UICollectionView alloc] initWithFrame:CGRectMake(0, 0, 320, 300) collectionViewLayout:layout];
-        [view registerClass:side ? [CharonPortCell class] : [CharonSystemCell class] forCellWithReuseIdentifier:@"c"];
-        CharonListSource *source = [[CharonListSource alloc] init];
+        [view registerClass:side ? [RevenantPortCell class] : [RevenantSystemCell class] forCellWithReuseIdentifier:@"c"];
+        RevenantListSource *source = [[RevenantListSource alloc] init];
         source.count = 2;
         source.configure = ^(UICollectionViewCell *cell, NSIndexPath *indexPath) {};
         view.dataSource = source;
@@ -662,14 +662,14 @@ static void run_editing_and_absent(void)
         NSString *name = pair[1];
         BOOL renamedClass = ![pair[0] hasPrefix:@"UICollectionView"] && ![pair[0] hasPrefix:@"UITable"];
         (void)renamedClass;
-        BOOL answers_ = [cls instancesRespondToSelector:NSSelectorFromString(name)] || [cls instancesRespondToSelector:NSSelectorFromString([@"charonHost" stringByAppendingString:capital(name)])];
+        BOOL answers_ = [cls instancesRespondToSelector:NSSelectorFromString(name)] || [cls instancesRespondToSelector:NSSelectorFromString([@"revenantHost" stringByAppendingString:capital(name)])];
         BOOL system14 = [NSClassFromString(pair[0]) instancesRespondToSelector:NSSelectorFromString(name)];
         (void)system14;
         if ([pair[0] isEqual:@"UICollectionViewCell"] && [name isEqual:@"defaultContentConfiguration"])
-            answers_ = [NSClassFromString(@"UICollectionViewCell") instancesRespondToSelector:NSSelectorFromString(@"charonHostDefaultContentConfiguration")];
-        charon_check(!answers_ || [pair[0] hasPrefix:@"UICollectionView"] || [pair[0] hasPrefix:@"UITable"] ? YES : !answers_, [NSString stringWithFormat:@"%@.%@ is not answered", pair[0], name].UTF8String, nil);
+            answers_ = [NSClassFromString(@"UICollectionViewCell") instancesRespondToSelector:NSSelectorFromString(@"revenantHostDefaultContentConfiguration")];
+        revenant_check(!answers_ || [pair[0] hasPrefix:@"UICollectionView"] || [pair[0] hasPrefix:@"UITable"] ? YES : !answers_, [NSString stringWithFormat:@"%@.%@ is not answered", pair[0], name].UTF8String, nil);
         if ([pair[0] isEqual:@"UICollectionViewCell"] || [pair[0] hasPrefix:@"UITable"] || [pair[0] isEqual:@"UICollectionView"])
-            charon_check(![NSClassFromString(pair[0]) instancesRespondToSelector:NSSelectorFromString([@"charonHost" stringByAppendingString:capital(name)])], [NSString stringWithFormat:@"%@.%@ has no port answer", pair[0], name].UTF8String, nil);
+            revenant_check(![NSClassFromString(pair[0]) instancesRespondToSelector:NSSelectorFromString([@"revenantHost" stringByAppendingString:capital(name)])], [NSString stringWithFormat:@"%@.%@ has no port answer", pair[0], name].UTF8String, nil);
     }
 }
 
@@ -686,10 +686,10 @@ static NSString *section_text(NSCollectionLayoutSection *section)
     return text;
 }
 
-@interface CharonSectionSource : NSObject <UICollectionViewDataSource>
+@interface RevenantSectionSource : NSObject <UICollectionViewDataSource>
 @end
 
-@implementation CharonSectionSource
+@implementation RevenantSectionSource
 - (NSInteger)numberOfSectionsInCollectionView:(UICollectionView *)collectionView { return 1; }
 - (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section { return 1; }
 - (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath { return [collectionView dequeueReusableCellWithReuseIdentifier:@"c" forIndexPath:indexPath]; }
@@ -697,8 +697,8 @@ static NSString *section_text(NSCollectionLayoutSection *section)
 
 static void run_layout_sections(void)
 {
-    static CharonSectionSource *source;
-    source = [[CharonSectionSource alloc] init];
+    static RevenantSectionSource *source;
+    source = [[RevenantSectionSource alloc] init];
     NSMutableArray *answersA = [NSMutableArray array], *answersB = [NSMutableArray array];
     NSMutableArray *answers[2] = {answersA, answersB};
     for (int side = 0; side < 2; side++) {
@@ -758,7 +758,7 @@ static void run_tables(void)
         UITableView *table = [[UITableView alloc] initWithFrame:CGRectMake(0, 0, 320, 400) style:UITableViewStylePlain];
         [test_window.rootViewController.view addSubview:table];
         for (NSInteger style = 0; style < 4; style++) {
-            UITableViewCell *cell = [[(side ? [CharonPortTableCell class] : [CharonSystemTableCell class]) alloc] initWithStyle:(UITableViewCellStyle)style reuseIdentifier:nil];
+            UITableViewCell *cell = [[(side ? [RevenantPortTableCell class] : [RevenantSystemTableCell class]) alloc] initWithStyle:(UITableViewCellStyle)style reuseIdentifier:nil];
             [out addObject:[NSString stringWithFormat:@"style %ld default: %@", (long)style, normalised(get(side, cell, @"defaultContentConfiguration"))]];
             UIListContentConfiguration *configuration = [get(side, cell, @"defaultContentConfiguration") copy];
             configuration.text = @"Row";
@@ -792,7 +792,7 @@ static void run_tables(void)
     }
     for (NSUInteger index = 0; index < answers[0].count; index++) {
         NSString *(^clean)(NSString *) = ^NSString *(NSString *text) {
-            NSMutableString *out = [[text stringByReplacingOccurrencesOfString:@"CharonHost" withString:@""] mutableCopy];
+            NSMutableString *out = [[text stringByReplacingOccurrencesOfString:@"RevenantHost" withString:@""] mutableCopy];
             NSRegularExpression *traits = [NSRegularExpression regularExpressionWithPattern:@"traitCollection = <UITraitCollection: [^>]*>" options:0 error:NULL];
             [traits replaceMatchesInString:out options:0 range:NSMakeRange(0, out.length) withTemplate:@"traitCollection = <traits>"];
             return out;
@@ -854,8 +854,8 @@ static NSString *c_string(NSString *text)
 
 static void record_lists(void)
 {
-    const char *path = getenv("CHARON_LISTS_EXPECTATIONS");
-    if (!path || charon_failures)
+    const char *path = getenv("REVENANT_LISTS_EXPECTATIONS");
+    if (!path || revenant_failures)
         return;
     NSMutableString *out = [NSMutableString stringWithString:@"static const double lists_geometry[][20] = {\n"];
     for (size_t index = 0; index < list_case_count(); index++) {
@@ -881,8 +881,8 @@ static void record_lists(void)
         [out appendFormat:@"    \"%@\",\n", c_string(list_background_line(factory, [UIBackgroundConfiguration performSelector:NSSelectorFromString(factory)]))];
     [out appendString:@"};\n\nstatic const char *const lists_sections[] = {\n"];
     __block BOOL done = NO;
-    static CharonSectionSource *source;
-    source = [[CharonSectionSource alloc] init];
+    static RevenantSectionSource *source;
+    source = [[RevenantSectionSource alloc] init];
     UICollectionViewCompositionalLayout *layout = [[UICollectionViewCompositionalLayout alloc] initWithSectionProvider:^NSCollectionLayoutSection *(NSInteger index, id<NSCollectionLayoutEnvironment> environment) {
         if (!done) {
             done = YES;
@@ -908,7 +908,7 @@ static void record_lists(void)
     [out writeToFile:@(path) atomically:YES encoding:NSUTF8StringEncoding error:NULL];
 }
 
-void charon_windowed_run(UIWindow *window)
+void revenant_windowed_run(UIWindow *window)
 {
     test_window = window;
     run_content_views();

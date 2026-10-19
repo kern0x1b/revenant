@@ -3,7 +3,7 @@
 static int failures = 0;
 static int checks = 0;
 
-static void charon_check(int passed, const char *name, NSString *detail)
+static void revenant_check(int passed, const char *name, NSString *detail)
 {
     checks++;
     if (!passed) {
@@ -12,18 +12,18 @@ static void charon_check(int passed, const char *name, NSString *detail)
     }
 }
 
-@interface CharonBareDelegate : NSObject <NSURLSessionTaskDelegate>
+@interface RevenantBareDelegate : NSObject <NSURLSessionTaskDelegate>
 @end
-@implementation CharonBareDelegate
+@implementation RevenantBareDelegate
 @end
 
-@interface CharonOneDelegate : NSObject <NSURLSessionTaskDelegate>
+@interface RevenantOneDelegate : NSObject <NSURLSessionTaskDelegate>
 @property (atomic, assign) NSUInteger completions;
 @property (atomic, assign) NSUInteger bareCompletions;
 @property (atomic, assign) NSUInteger events;
 @end
 
-@implementation CharonOneDelegate
+@implementation RevenantOneDelegate
 
 - (void)URLSession:(NSURLSession *)session task:(NSURLSessionTask *)task
     didCompleteWithError:(NSError *)error
@@ -40,12 +40,12 @@ static void charon_check(int passed, const char *name, NSString *detail)
 
 @end
 
-@interface CharonSessionDelegate : NSObject <NSURLSessionDelegate, NSURLSessionTaskDelegate>
+@interface RevenantSessionDelegate : NSObject <NSURLSessionDelegate, NSURLSessionTaskDelegate>
 @property (atomic, assign) NSUInteger completions;
 @property (atomic, assign) NSUInteger metrics;
 @end
 
-@implementation CharonSessionDelegate
+@implementation RevenantSessionDelegate
 
 - (void)URLSession:(NSURLSession *)session task:(NSURLSessionTask *)task
     didCompleteWithError:(NSError *)error
@@ -61,13 +61,13 @@ static void charon_check(int passed, const char *name, NSString *detail)
 
 @end
 
-static NSURL *CharonUnreachable(void)
+static NSURL *RevenantUnreachable(void)
 {
     return [NSURL URLWithString:@"http://127.0.0.1:1/"];
 }
 
-static void CharonRun(id<NSURLSessionTaskDelegate> taskDelegate, CharonSessionDelegate *sessionDelegate,
-                      CharonOneDelegate *oneDelegate, BOOL setDelegate, BOOL *refused,
+static void RevenantRun(id<NSURLSessionTaskDelegate> taskDelegate, RevenantSessionDelegate *sessionDelegate,
+                      RevenantOneDelegate *oneDelegate, BOOL setDelegate, BOOL *refused,
                       NSString **refusal, NSString **afterCompletion, BOOL *wasSet)
 {
     NSOperationQueue *queue = [[NSOperationQueue alloc] init];
@@ -76,7 +76,7 @@ static void CharonRun(id<NSURLSessionTaskDelegate> taskDelegate, CharonSessionDe
                              [NSURLSessionConfiguration ephemeralSessionConfiguration]
                                                             delegate:sessionDelegate
                                                        delegateQueue:queue];
-    NSURLSessionDataTask *task = [session dataTaskWithURL:CharonUnreachable()];
+    NSURLSessionDataTask *task = [session dataTaskWithURL:RevenantUnreachable()];
     if (setDelegate)
         [task setDelegate:taskDelegate];
     *wasSet = task.delegate == taskDelegate;
@@ -111,32 +111,32 @@ int main(void)
         {
             NSURLSession *plain = [NSURLSession sessionWithConfiguration:
                                   [NSURLSessionConfiguration ephemeralSessionConfiguration]];
-            NSURLSessionDataTask *task = [plain dataTaskWithURL:CharonUnreachable()];
-            charon_check(task != nil, "control: a task is made",
+            NSURLSessionDataTask *task = [plain dataTaskWithURL:RevenantUnreachable()];
+            revenant_check(task != nil, "control: a task is made",
                          @"dataTaskWithURL: answered nil");
-            charon_check([task respondsToSelector:@selector(delegate)],
+            revenant_check([task respondsToSelector:@selector(delegate)],
                          "control: the task answers -delegate", @"doesNotRecognizeSelector:");
-            charon_check([task respondsToSelector:@selector(setDelegate:)],
+            revenant_check([task respondsToSelector:@selector(setDelegate:)],
                          "control: the task answers -setDelegate:", @"doesNotRecognizeSelector:");
             SEL completion = @selector(URLSession:task:didCompleteWithError:);
-            charon_check([NSURLSessionTask class] != Nil, "control: NSURLSessionTask is present",
+            revenant_check([NSURLSessionTask class] != Nil, "control: NSURLSessionTask is present",
                          @"the class is nil");
-            charon_check([(id<NSURLSessionTaskDelegate>)[[CharonOneDelegate alloc] init]
+            revenant_check([(id<NSURLSessionTaskDelegate>)[[RevenantOneDelegate alloc] init]
                           respondsToSelector:completion],
                          "control: the protocol selector is the one the header declares",
                          @"a delegate implementing it does not answer it");
-            charon_check(task.delegate == nil, "control: a fresh task has no delegate of its own",
+            revenant_check(task.delegate == nil, "control: a fresh task has no delegate of its own",
                          [NSString stringWithFormat:@"reads %@", task.delegate]);
             [plain finishTasksAndInvalidate];
         }
 
         {
-            CharonBareDelegate *bare = [[CharonBareDelegate alloc] init];
-            CharonOneDelegate *one = [[CharonOneDelegate alloc] init];
-            CharonSessionDelegate *sessionDelegate = [[CharonSessionDelegate alloc] init];
+            RevenantBareDelegate *bare = [[RevenantBareDelegate alloc] init];
+            RevenantOneDelegate *one = [[RevenantOneDelegate alloc] init];
+            RevenantSessionDelegate *sessionDelegate = [[RevenantSessionDelegate alloc] init];
             BOOL refused = NO, wasSet = NO;
             NSString *refusal = nil, *after = nil;
-            CharonRun(bare, sessionDelegate, one, YES, &refused, &refusal, &after, &wasSet);
+            RevenantRun(bare, sessionDelegate, one, YES, &refused, &refusal, &after, &wasSet);
             printf("forwarding: the task's delegate implements nothing\n");
             printf("  the task's delegate was set and reads back: %s\n", wasSet ? "yes" : "no");
             printf("  setDelegate: after resume: %s\n", refusal.UTF8String);
@@ -144,22 +144,22 @@ int main(void)
                    (unsigned long)sessionDelegate.completions);
             printf("  delegate after completion: %s\n", after.UTF8String);
             fflush(stdout);
-            charon_check(sessionDelegate.completions == 1,
+            revenant_check(sessionDelegate.completions == 1,
                          "forwarding: a delegate implementing nothing still has the completion "
                          "forwarded to the session delegate",
                          [NSString stringWithFormat:@"the session delegate heard %lu",
                           (unsigned long)sessionDelegate.completions]);
-            charon_check([after isEqualToString:@"(nil)"],
+            revenant_check([after isEqualToString:@"(nil)"],
                          "lifetime: the delegate is reset to nil once the task has completed",
                          [NSString stringWithFormat:@"reads %@", after]);
         }
 
         {
-            CharonOneDelegate *one = [[CharonOneDelegate alloc] init];
-            CharonSessionDelegate *sessionDelegate = [[CharonSessionDelegate alloc] init];
+            RevenantOneDelegate *one = [[RevenantOneDelegate alloc] init];
+            RevenantSessionDelegate *sessionDelegate = [[RevenantSessionDelegate alloc] init];
             BOOL refused = NO, wasSet = NO;
             NSString *refusal = nil, *after = nil;
-            CharonRun(one, sessionDelegate, one, YES, &refused, &refusal, &after, &wasSet);
+            RevenantRun(one, sessionDelegate, one, YES, &refused, &refusal, &after, &wasSet);
             printf("partial: the task's delegate implements didCompleteWithError:\n");
             printf("  the task's delegate heard it: %lu time(s)\n", (unsigned long)one.completions);
             printf("  the session delegate heard it: %lu time(s)\n",
@@ -167,10 +167,10 @@ int main(void)
             printf("  setDelegate: after resume: %s\n", refusal.UTF8String);
             printf("  delegate after completion: %s\n", after.UTF8String);
             fflush(stdout);
-            charon_check(one.completions == 1,
+            revenant_check(one.completions == 1,
                          "partial: the delegate that implements the selector is the one asked",
                          [NSString stringWithFormat:@"it heard %lu", (unsigned long)one.completions]);
-            charon_check(sessionDelegate.completions == 0,
+            revenant_check(sessionDelegate.completions == 0,
                          "partial: the session delegate is NOT asked when the task's delegate "
                          "implements the selector",
                          [NSString stringWithFormat:@"the session delegate heard %lu",

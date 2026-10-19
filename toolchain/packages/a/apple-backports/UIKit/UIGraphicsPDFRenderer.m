@@ -1,20 +1,20 @@
-#import "CharonGraphicsRenderer.h"
+#import "RevenantGraphicsRenderer.h"
 
 CG_EXTERN void CGContextSetBaseCTM(CGContextRef c, CGAffineTransform transform);
 
-static const CGRect charon_pdf_default_document_bounds = { { 0, 0 }, { 612, 792 } };
+static const CGRect revenant_pdf_default_document_bounds = { { 0, 0 }, { 612, 792 } };
 
-static NSData *charon_pdf_media_box(CGRect box)
+static NSData *revenant_pdf_media_box(CGRect box)
 {
     return [NSData dataWithBytes:&box length:sizeof(CGRect)];
 }
 
-@interface UIGraphicsPDFRendererFormat (CharonPDF)
+@interface UIGraphicsPDFRendererFormat (RevenantPDF)
 @property (nonatomic, copy) NSURL *outputURL;
 @property (nonatomic, retain) NSMutableData *pdfData;
 @end
 
-@interface UIGraphicsPDFRendererContext (CharonPDF)
+@interface UIGraphicsPDFRendererContext (RevenantPDF)
 @property (nonatomic) CGRect documentBounds;
 @property (nonatomic) CGRect pageBounds;
 @property (nonatomic) BOOL inPage;
@@ -135,9 +135,9 @@ static NSData *charon_pdf_media_box(CGRect box)
 
     if (![pageInfo objectForKey:(id)kCGPDFContextMediaBox] &&
         !CGRectEqualToRect(box, _documentBounds) &&
-        !CGRectEqualToRect(box, charon_pdf_default_document_bounds)) {
+        !CGRectEqualToRect(box, revenant_pdf_default_document_bounds)) {
         NSMutableDictionary *withBox = [pageInfo mutableCopy];
-        [withBox setObject:charon_pdf_media_box(box) forKey:(id)kCGPDFContextMediaBox];
+        [withBox setObject:revenant_pdf_media_box(box) forKey:(id)kCGPDFContextMediaBox];
         pageInfo = withBox;
     }
 
@@ -201,7 +201,7 @@ static NSData *charon_pdf_media_box(CGRect box)
     if (documentBox)
         [documentBox getBytes:&bounds length:sizeof(CGRect)];
     if (CGRectIsEmpty(bounds))
-        bounds = charon_pdf_default_document_bounds;
+        bounds = revenant_pdf_default_document_bounds;
     rendererContext.documentBounds = bounds;
     rendererContext.pageBounds = CGRectZero;
     rendererContext.inPage = NO;

@@ -1,6 +1,6 @@
-#import "CharonFetchIndex.h"
+#import "RevenantFetchIndex.h"
 
-static void charon_validate_collation(NSFetchIndexElementType collation, NSPropertyDescription *property)
+static void revenant_validate_collation(NSFetchIndexElementType collation, NSPropertyDescription *property)
 {
     if (collation != NSFetchIndexElementTypeRTree)
         return;
@@ -25,9 +25,9 @@ static void charon_validate_collation(NSFetchIndexElementType collation, NSPrope
         [NSException raise:NSInvalidArgumentException format:@"Can't create an index element without a property"];
     if (!property.name)
         [NSException raise:NSInvalidArgumentException format:@"Can't create an index element with an unnamed property"];
-    if (!charon_index_property_allowed(property))
+    if (!revenant_index_property_allowed(property))
         [NSException raise:NSInvalidArgumentException format:@"Can't create an index element with non-attribute property"];
-    charon_validate_collation(collationType, property);
+    revenant_validate_collation(collationType, property);
     self = [super init];
     if (self) {
         _property = property;
@@ -55,10 +55,10 @@ static void charon_validate_collation(NSFetchIndexElementType collation, NSPrope
 
 - (void)setCollationType:(NSFetchIndexElementType)collationType
 {
-    [_indexDescription _charon_throwIfNotEditable];
+    [_indexDescription _revenant_throwIfNotEditable];
     if (_collationType != collationType) {
-        charon_validate_collation(collationType, _property);
-        [_indexDescription _charon_validateCollationTypeChangeFrom:_collationType to:collationType];
+        revenant_validate_collation(collationType, _property);
+        [_indexDescription _revenant_validateCollationTypeChangeFrom:_collationType to:collationType];
         _collationType = collationType;
     }
 }
@@ -70,7 +70,7 @@ static void charon_validate_collation(NSFetchIndexElementType collation, NSPrope
 
 - (void)setAscending:(BOOL)ascending
 {
-    [_indexDescription _charon_throwIfNotEditable];
+    [_indexDescription _revenant_throwIfNotEditable];
     _ascending = ascending;
 }
 
@@ -79,7 +79,7 @@ static void charon_validate_collation(NSFetchIndexElementType collation, NSPrope
     return _indexDescription;
 }
 
-- (void)_charon_setIndexDescription:(NSFetchIndexDescription *)index
+- (void)_revenant_setIndexDescription:(NSFetchIndexDescription *)index
 {
     _indexDescription = index;
 }

@@ -2,7 +2,7 @@
 #import <CoreLocation/CoreLocation.h>
 #import <CloudKit/CloudKit.h>
 
-#import "CharonCKValue.h"
+#import "RevenantCKValue.h"
 
 @implementation CKQuery
 

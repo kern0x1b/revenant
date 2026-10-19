@@ -32,7 +32,7 @@ static void same_rect(CGRect ours, CGRect theirs, NSString *what)
 
 static Class ours_of(NSString *name)
 {
-    Class mine = NSClassFromString([@"CharonHost" stringByAppendingString:name]);
+    Class mine = NSClassFromString([@"RevenantHost" stringByAppendingString:name]);
     if (!mine)
         fail(@"the backport defines no %@", name);
     return mine;

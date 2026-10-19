@@ -1,10 +1,10 @@
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
 
-@interface charonHost_CPTemplate : NSObject
+@interface revenantHost_CPTemplate : NSObject
 @end
 
-@implementation charonHost_CPTemplate
+@implementation revenantHost_CPTemplate
 
 - (void)encodeWithCoder:(NSCoder *)coder
 {
@@ -17,72 +17,72 @@
 
 @end
 
-@interface charonHost_CPTrip : NSObject
-- (instancetype)initCharonTrip;
+@interface revenantHost_CPTrip : NSObject
+- (instancetype)initRevenantTrip;
 @end
 
-@implementation charonHost_CPTrip
+@implementation revenantHost_CPTrip
 
-- (instancetype)initCharonTrip
+- (instancetype)initRevenantTrip
 {
     return [super init];
 }
 
 @end
 
-@interface charonHost_CPManeuver : NSObject
-- (instancetype)initCharonManeuver;
+@interface revenantHost_CPManeuver : NSObject
+- (instancetype)initRevenantManeuver;
 @end
 
-@implementation charonHost_CPManeuver
+@implementation revenantHost_CPManeuver
 
-- (instancetype)initCharonManeuver
+- (instancetype)initRevenantManeuver
 {
     return [super init];
 }
 
 @end
 
-@interface charonHost_CPTravelEstimates : NSObject
-- (instancetype)initCharonWithTimeRemaining:(NSTimeInterval)time;
+@interface revenantHost_CPTravelEstimates : NSObject
+- (instancetype)initRevenantWithTimeRemaining:(NSTimeInterval)time;
 @property (nonatomic, readonly) NSTimeInterval timeRemaining;
 @end
 
-@implementation charonHost_CPTravelEstimates {
-    NSTimeInterval _charon_time;
+@implementation revenantHost_CPTravelEstimates {
+    NSTimeInterval _revenant_time;
 }
 
-@synthesize timeRemaining = _charon_time;
+@synthesize timeRemaining = _revenant_time;
 
-- (instancetype)initCharonWithTimeRemaining:(NSTimeInterval)time
+- (instancetype)initRevenantWithTimeRemaining:(NSTimeInterval)time
 {
     self = [super init];
     if (self) {
-        _charon_time = time;
+        _revenant_time = time;
     }
     return self;
 }
 
 @end
 
-@interface charonHost_CPMapTemplate : NSObject
+@interface revenantHost_CPMapTemplate : NSObject
 @property (nonatomic, strong) UIColor *guidanceBackgroundColor;
-- (id)charon_navigationSession;
-- (void)charon_setNavigationSession:(id)session;
-- (UIView *)charon_mapView;
-- (void)charon_setMapView:(UIView *)view;
+- (id)revenant_navigationSession;
+- (void)revenant_setNavigationSession:(id)session;
+- (UIView *)revenant_mapView;
+- (void)revenant_setMapView:(UIView *)view;
 @end
 
-@implementation charonHost_CPMapTemplate {
-    id _charon_session;
-    UIView *_charon_view;
+@implementation revenantHost_CPMapTemplate {
+    id _revenant_session;
+    UIView *_revenant_view;
 }
 
 @synthesize guidanceBackgroundColor = _guidanceBackgroundColor;
 
-- (id)charon_navigationSession { return _charon_session; }
-- (void)charon_setNavigationSession:(id)session { _charon_session = session; }
-- (UIView *)charon_mapView { return _charon_view; }
-- (void)charon_setMapView:(UIView *)view { _charon_view = view; }
+- (id)revenant_navigationSession { return _revenant_session; }
+- (void)revenant_setNavigationSession:(id)session { _revenant_session = session; }
+- (UIView *)revenant_mapView { return _revenant_view; }
+- (void)revenant_setMapView:(UIView *)view { _revenant_view = view; }
 
 @end

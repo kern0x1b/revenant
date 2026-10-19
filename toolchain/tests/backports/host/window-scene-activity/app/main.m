@@ -13,10 +13,10 @@ static NSString *yes_no(BOOL answer)
     return answer ? @"yes" : @"no";
 }
 
-@interface CharonActivityProvider : NSObject <UIActivityItemsConfigurationProviding>
+@interface RevenantActivityProvider : NSObject <UIActivityItemsConfigurationProviding>
 @end
 
-@implementation CharonActivityProvider
+@implementation RevenantActivityProvider
 
 - (UIActivityItemsConfiguration *)activityItemsConfiguration
 {
@@ -32,14 +32,14 @@ static void checks(const char *side, UIWindowScene *scene)
     report(side, "source-default", scene.activityItemsConfigurationSource ? @"set" : @"nil");
 
     @autoreleasepool {
-        CharonActivityProvider *provider = [[CharonActivityProvider alloc] init];
+        RevenantActivityProvider *provider = [[RevenantActivityProvider alloc] init];
         scene.activityItemsConfigurationSource = provider;
         report(side, "source-set-same-object", yes_no(scene.activityItemsConfigurationSource == provider));
         report(side, "source-set-is-provider", yes_no(scene.activityItemsConfigurationSource == provider));
     }
     report(side, "source-after-provider-gone", scene.activityItemsConfigurationSource ? @"set" : @"nil");
 
-    CharonActivityProvider *kept = [[CharonActivityProvider alloc] init];
+    RevenantActivityProvider *kept = [[RevenantActivityProvider alloc] init];
     scene.activityItemsConfigurationSource = kept;
     report(side, "source-kept-while-held", yes_no(scene.activityItemsConfigurationSource == kept));
     scene.activityItemsConfigurationSource = nil;
@@ -47,10 +47,10 @@ static void checks(const char *side, UIWindowScene *scene)
     report(side, "kept-after-clear", yes_no(kept != nil));
 }
 
-@interface CharonAppDelegate : UIResponder <UIApplicationDelegate>
+@interface RevenantAppDelegate : UIResponder <UIApplicationDelegate>
 @end
 
-@implementation CharonAppDelegate
+@implementation RevenantAppDelegate
 
 - (UISceneConfiguration *)application:(UIApplication *)application configurationForConnectingSceneSession:(UISceneSession *)session options:(UISceneConnectionOptions *)options
 {
@@ -59,16 +59,16 @@ static void checks(const char *side, UIWindowScene *scene)
 
 @end
 
-@interface CharonSceneDelegate : UIResponder <UIWindowSceneDelegate>
+@interface RevenantSceneDelegate : UIResponder <UIWindowSceneDelegate>
 @end
 
-@implementation CharonSceneDelegate
+@implementation RevenantSceneDelegate
 
 - (void)scene:(UIScene *)scene willConnectToSession:(UISceneSession *)session options:(UISceneConnectionOptions *)connectionOptions
 {
-    const char *path = getenv("CHARON_SCENE_OUT");
+    const char *path = getenv("REVENANT_SCENE_OUT");
     out = fopen(path ? path : "/dev/stdout", "w");
-#ifdef CHARON_PORT_SIDE
+#ifdef REVENANT_PORT_SIDE
     checks("port", [[UIWindowScene alloc] initWithSession:nil connectionOptions:nil]);
 #else
     checks("host", (UIWindowScene *)scene);
@@ -82,6 +82,6 @@ static void checks(const char *side, UIWindowScene *scene)
 int main(int argc, char *argv[])
 {
     @autoreleasepool {
-        return UIApplicationMain(argc, argv, nil, NSStringFromClass([CharonAppDelegate class]));
+        return UIApplicationMain(argc, argv, nil, NSStringFromClass([RevenantAppDelegate class]));
     }
 }

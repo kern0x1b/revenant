@@ -1,62 +1,62 @@
 #import <UIKit/UIKit.h>
 #import <QuartzCore/QuartzCore.h>
 
-BOOL charon_layout_has_baseline(UIView *view);
+BOOL revenant_layout_has_baseline(UIView *view);
 
-@interface UILayoutGuide (CharonStackView)
-- (UIView *)charon_view;
+@interface UILayoutGuide (RevenantStackView)
+- (UIView *)revenant_view;
 - (void)setOwningView:(UIView *)owningView;
 @end
 
-static void *charon_hidden_context = &charon_hidden_context;
+static void *revenant_hidden_context = &revenant_hidden_context;
 
-static BOOL charon_engine_knows_margins(void)
+static BOOL revenant_engine_knows_margins(void)
 {
     return NSFoundationVersionNumber >= NSFoundationVersionNumber_iOS_8_0;
 }
 
-static id charon_start(id item, UILayoutConstraintAxis axis)
+static id revenant_start(id item, UILayoutConstraintAxis axis)
 {
     if (axis == UILayoutConstraintAxisHorizontal)
         return [item leadingAnchor];
     return [item topAnchor];
 }
 
-static id charon_end(id item, UILayoutConstraintAxis axis)
+static id revenant_end(id item, UILayoutConstraintAxis axis)
 {
     if (axis == UILayoutConstraintAxisHorizontal)
         return [item trailingAnchor];
     return [item bottomAnchor];
 }
 
-static id charon_center(id item, UILayoutConstraintAxis axis)
+static id revenant_center(id item, UILayoutConstraintAxis axis)
 {
     if (axis == UILayoutConstraintAxisHorizontal)
         return [item centerXAnchor];
     return [item centerYAnchor];
 }
 
-static id charon_size(id item, UILayoutConstraintAxis axis)
+static id revenant_size(id item, UILayoutConstraintAxis axis)
 {
     return axis == UILayoutConstraintAxisHorizontal ? [item widthAnchor] : [item heightAnchor];
 }
 
-static CGFloat charon_intrinsic(UIView *view, UILayoutConstraintAxis axis)
+static CGFloat revenant_intrinsic(UIView *view, UILayoutConstraintAxis axis)
 {
     CGSize size = [view intrinsicContentSize];
     return axis == UILayoutConstraintAxisHorizontal ? size.width : size.height;
 }
 
-static CGFloat charon_natural(UIView *view, UILayoutConstraintAxis axis)
+static CGFloat revenant_natural(UIView *view, UILayoutConstraintAxis axis)
 {
-    CGFloat size = charon_intrinsic(view, axis);
+    CGFloat size = revenant_intrinsic(view, axis);
     if (size != UIViewNoIntrinsicMetric)
         return size;
     CGSize fitting = [view systemLayoutSizeFittingSize:UILayoutFittingCompressedSize];
     return axis == UILayoutConstraintAxisHorizontal ? fitting.width : fitting.height;
 }
 
-static NSLayoutConstraint *charon_relate(NSLayoutAnchor *anchor, NSLayoutRelation relation, NSLayoutAnchor *other, CGFloat constant)
+static NSLayoutConstraint *revenant_relate(NSLayoutAnchor *anchor, NSLayoutRelation relation, NSLayoutAnchor *other, CGFloat constant)
 {
     switch (relation) {
     case NSLayoutRelationLessThanOrEqual:
@@ -68,7 +68,7 @@ static NSLayoutConstraint *charon_relate(NSLayoutAnchor *anchor, NSLayoutRelatio
     }
 }
 
-static NSLayoutConstraint *charon_system_spacing(NSLayoutAnchor *anchor, NSLayoutRelation relation, NSLayoutAnchor *other,
+static NSLayoutConstraint *revenant_system_spacing(NSLayoutAnchor *anchor, NSLayoutRelation relation, NSLayoutAnchor *other,
                                                  UILayoutConstraintAxis axis, CGFloat multiplier)
 {
     if (axis == UILayoutConstraintAxisHorizontal) {
@@ -93,7 +93,7 @@ static NSLayoutConstraint *charon_system_spacing(NSLayoutAnchor *anchor, NSLayou
     }
 }
 
-static void charon_add(NSMutableArray *list, NSLayoutConstraint *constraint, UILayoutPriority priority, NSString *identifier)
+static void revenant_add(NSMutableArray *list, NSLayoutConstraint *constraint, UILayoutPriority priority, NSString *identifier)
 {
     constraint.priority = priority;
     if ([constraint respondsToSelector:@selector(setIdentifier:)])
@@ -129,7 +129,7 @@ static void charon_add(NSMutableArray *list, NSLayoutConstraint *constraint, UIL
     return YES;
 }
 
-static void charon_setup(UIStackView *self)
+static void revenant_setup(UIStackView *self)
 {
     self->_arrangedSubviews = [NSMutableArray array];
     self->_stackConstraints = [NSMutableArray array];
@@ -141,14 +141,14 @@ static void charon_setup(UIStackView *self)
 - (instancetype)initWithFrame:(CGRect)frame
 {
     if ((self = [super initWithFrame:frame]))
-        charon_setup(self);
+        revenant_setup(self);
     return self;
 }
 
 - (instancetype)initWithCoder:(NSCoder *)coder
 {
     if ((self = [super initWithCoder:coder])) {
-        charon_setup(self);
+        revenant_setup(self);
         _axis = [coder decodeIntegerForKey:@"UIStackViewAxis"];
         _distribution = [coder decodeIntegerForKey:@"UIStackViewDistribution"];
         _alignment = [coder decodeIntegerForKey:@"UIStackViewAlignment"];
@@ -160,7 +160,7 @@ static void charon_setup(UIStackView *self)
             [self setLayoutMargins:UIEdgeInsetsFromString(margins)];
         for (UIView *view in [coder decodeObjectForKey:@"UIStackViewArrangedSubviews"])
             [self addArrangedSubview:view];
-        [self charon_setNeedsRebuild];
+        [self revenant_setNeedsRebuild];
     }
     return self;
 }
@@ -184,14 +184,14 @@ static void charon_setup(UIStackView *self)
     [coder encodeBool:_baselineRelativeArrangement forKey:@"UIStackViewBaselineRelative"];
     [coder encodeBool:_layoutMarginsRelativeArrangement forKey:@"UIStackViewLayoutMarginsRelative"];
     [coder encodeObject:[_arrangedSubviews copy] forKey:@"UIStackViewArrangedSubviews"];
-    if (!charon_engine_knows_margins())
+    if (!revenant_engine_knows_margins())
         [coder encodeObject:NSStringFromUIEdgeInsets([self layoutMargins]) forKey:@"UIViewLayoutMargins"];
 }
 
 - (void)dealloc
 {
     for (UIView *view in _arrangedSubviews)
-        [view removeObserver:self forKeyPath:@"hidden" context:charon_hidden_context];
+        [view removeObserver:self forKeyPath:@"hidden" context:revenant_hidden_context];
     [_arrangedSubviews removeAllObjects];
 }
 
@@ -220,9 +220,9 @@ static void charon_setup(UIStackView *self)
             [self addSubview:view];
         view.translatesAutoresizingMaskIntoConstraints = NO;
         [_arrangedSubviews insertObject:view atIndex:stackIndex];
-        [view addObserver:self forKeyPath:@"hidden" options:NSKeyValueObservingOptionOld | NSKeyValueObservingOptionNew context:charon_hidden_context];
+        [view addObserver:self forKeyPath:@"hidden" options:NSKeyValueObservingOptionOld | NSKeyValueObservingOptionNew context:revenant_hidden_context];
     }
-    [self charon_setNeedsRebuild];
+    [self revenant_setNeedsRebuild];
 }
 
 - (void)removeArrangedSubview:(UIView *)view
@@ -230,10 +230,10 @@ static void charon_setup(UIStackView *self)
     NSUInteger index = [_arrangedSubviews indexOfObjectIdenticalTo:view];
     if (index == NSNotFound)
         return;
-    [view removeObserver:self forKeyPath:@"hidden" context:charon_hidden_context];
+    [view removeObserver:self forKeyPath:@"hidden" context:revenant_hidden_context];
     [_arrangedSubviews removeObjectAtIndex:index];
     [_customSpacing removeObjectForKey:view];
-    [self charon_setNeedsRebuild];
+    [self revenant_setNeedsRebuild];
 }
 
 - (void)setCustomSpacing:(CGFloat)customSpacing afterView:(UIView *)arrangedSubview
@@ -247,7 +247,7 @@ static void charon_setup(UIStackView *self)
     if (held && held.doubleValue == customSpacing)
         return;
     [_customSpacing setObject:@(customSpacing) forKey:arrangedSubview];
-    [self charon_setNeedsRebuild];
+    [self revenant_setNeedsRebuild];
 }
 
 - (CGFloat)customSpacingAfterView:(UIView *)arrangedSubview
@@ -256,7 +256,7 @@ static void charon_setup(UIStackView *self)
     return held ? (CGFloat)held.doubleValue : UIStackViewSpacingUseDefault;
 }
 
-- (CGFloat)charon_spacingAfterView:(UIView *)view
+- (CGFloat)revenant_spacingAfterView:(UIView *)view
 {
     CGFloat spacing = [self customSpacingAfterView:view];
     if (spacing == UIStackViewSpacingUseDefault)
@@ -277,12 +277,12 @@ static void charon_setup(UIStackView *self)
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
 {
-    if (context != charon_hidden_context) {
+    if (context != revenant_hidden_context) {
         [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
         return;
     }
     if (![[change objectForKey:NSKeyValueChangeOldKey] isEqual:[change objectForKey:NSKeyValueChangeNewKey]])
-        [self charon_setNeedsRebuild];
+        [self revenant_setNeedsRebuild];
 }
 
 - (UILayoutConstraintAxis)axis
@@ -295,7 +295,7 @@ static void charon_setup(UIStackView *self)
     if (_axis == axis)
         return;
     _axis = axis;
-    [self charon_setNeedsRebuild];
+    [self revenant_setNeedsRebuild];
 }
 
 - (UIStackViewDistribution)distribution
@@ -308,7 +308,7 @@ static void charon_setup(UIStackView *self)
     if (_distribution == distribution)
         return;
     _distribution = distribution;
-    [self charon_setNeedsRebuild];
+    [self revenant_setNeedsRebuild];
 }
 
 - (UIStackViewAlignment)alignment
@@ -321,7 +321,7 @@ static void charon_setup(UIStackView *self)
     if (_alignment == alignment)
         return;
     _alignment = alignment;
-    [self charon_setNeedsRebuild];
+    [self revenant_setNeedsRebuild];
 }
 
 - (CGFloat)spacing
@@ -334,7 +334,7 @@ static void charon_setup(UIStackView *self)
     if (_spacing == spacing)
         return;
     _spacing = spacing;
-    [self charon_setNeedsRebuild];
+    [self revenant_setNeedsRebuild];
 }
 
 - (BOOL)isBaselineRelativeArrangement
@@ -347,7 +347,7 @@ static void charon_setup(UIStackView *self)
     if (_baselineRelativeArrangement == baselineRelativeArrangement)
         return;
     _baselineRelativeArrangement = baselineRelativeArrangement;
-    [self charon_setNeedsRebuild];
+    [self revenant_setNeedsRebuild];
 }
 
 - (BOOL)isLayoutMarginsRelativeArrangement
@@ -360,10 +360,10 @@ static void charon_setup(UIStackView *self)
     if (_layoutMarginsRelativeArrangement == layoutMarginsRelativeArrangement)
         return;
     _layoutMarginsRelativeArrangement = layoutMarginsRelativeArrangement;
-    [self charon_setNeedsRebuild];
+    [self revenant_setNeedsRebuild];
 }
 
-static NSArray *charon_visible(NSArray *views)
+static NSArray *revenant_visible(NSArray *views)
 {
     NSMutableArray *visible = [NSMutableArray array];
     for (UIView *view in views) {
@@ -373,9 +373,9 @@ static NSArray *charon_visible(NSArray *views)
     return visible;
 }
 
-static UIView *charon_baseline_view(UIStackView *self, BOOL first)
+static UIView *revenant_baseline_view(UIStackView *self, BOOL first)
 {
-    NSArray *visible = charon_visible(self->_arrangedSubviews);
+    NSArray *visible = revenant_visible(self->_arrangedSubviews);
     UIView *found = nil;
     UIStackViewAlignment alignment = self->_alignment;
     if (self->_axis == UILayoutConstraintAxisVertical || alignment == UIStackViewAlignmentFill) {
@@ -393,7 +393,7 @@ static UIView *charon_baseline_view(UIStackView *self, BOOL first)
             }
         }
         for (UIView *view in found ? @[] : visible) {
-            CGFloat height = charon_natural(view, UILayoutConstraintAxisVertical);
+            CGFloat height = revenant_natural(view, UILayoutConstraintAxisVertical);
             if (height > tallest) {
                 tallest = height;
                 found = view;
@@ -409,29 +409,29 @@ static UIView *charon_baseline_view(UIStackView *self, BOOL first)
 
 - (UIView *)viewForFirstBaselineLayout
 {
-    return charon_baseline_view(self, YES);
+    return revenant_baseline_view(self, YES);
 }
 
 - (UIView *)viewForLastBaselineLayout
 {
-    return charon_baseline_view(self, NO);
+    return revenant_baseline_view(self, NO);
 }
 
 - (UIView *)viewForBaselineLayout
 {
-    return charon_baseline_view(self, NO);
+    return revenant_baseline_view(self, NO);
 }
 
-static NSArray *charon_intrinsic_sizes(UIStackView *self)
+static NSArray *revenant_intrinsic_sizes(UIStackView *self)
 {
     NSMutableArray *sizes = [NSMutableArray array];
     BOOL proportional = self->_distribution == UIStackViewDistributionFillProportionally;
-    for (UIView *view in charon_visible(self->_arrangedSubviews))
-        [sizes addObject:@(proportional ? charon_natural(view, self->_axis) : charon_intrinsic(view, self->_axis))];
+    for (UIView *view in revenant_visible(self->_arrangedSubviews))
+        [sizes addObject:@(proportional ? revenant_natural(view, self->_axis) : revenant_intrinsic(view, self->_axis))];
     return sizes;
 }
 
-static UILayoutGuide *charon_guide(UIStackView *self, UILayoutGuide *guide, NSString *identifier)
+static UILayoutGuide *revenant_guide(UIStackView *self, UILayoutGuide *guide, NSString *identifier)
 {
     if (!guide) {
         guide = [[UILayoutGuide alloc] init];
@@ -439,12 +439,12 @@ static UILayoutGuide *charon_guide(UIStackView *self, UILayoutGuide *guide, NSSt
     }
     if (guide.owningView != self)
         [self addLayoutGuide:guide];
-    else if ([guide charon_view].superview != self)
+    else if ([guide revenant_view].superview != self)
         [guide setOwningView:self];
     return guide;
 }
 
-- (void)charon_setNeedsRebuild
+- (void)revenant_setNeedsRebuild
 {
     if (!_arrangedSubviews)
         return;
@@ -454,7 +454,7 @@ static UILayoutGuide *charon_guide(UIStackView *self, UILayoutGuide *guide, NSSt
     [self.superview setNeedsLayout];
 }
 
-- (void)charon_rebuild
+- (void)revenant_rebuild
 {
     if (!_arrangedSubviews)
         return;
@@ -464,10 +464,10 @@ static UILayoutGuide *charon_guide(UIStackView *self, UILayoutGuide *guide, NSSt
         [constraint.firstItem removeConstraint:constraint];
     [_stackConstraints removeAllObjects];
     [_itemConstraints removeAllObjects];
-    _intrinsicSizes = charon_intrinsic_sizes(self);
+    _intrinsicSizes = revenant_intrinsic_sizes(self);
 
     NSArray *all = _arrangedSubviews;
-    NSArray *visible = charon_visible(all);
+    NSArray *visible = revenant_visible(all);
     UILayoutConstraintAxis axis = _axis;
     UILayoutConstraintAxis across = axis == UILayoutConstraintAxisHorizontal ? UILayoutConstraintAxisVertical : UILayoutConstraintAxisHorizontal;
     NSMutableArray *stack = _stackConstraints, *items = _itemConstraints;
@@ -481,23 +481,23 @@ static UILayoutGuide *charon_guide(UIStackView *self, UILayoutGuide *guide, NSSt
     if (all.count) {
         for (UIView *view in all) {
             if (view.hidden)
-                charon_add(items, [charon_size(view, axis) constraintEqualToConstant:0], 999.999f, @"UISV-hiding");
+                revenant_add(items, [revenant_size(view, axis) constraintEqualToConstant:0], 999.999f, @"UISV-hiding");
         }
         if (visible.count) {
-            charon_add(stack, [charon_start(canvas, axis) constraintEqualToAnchor:charon_start(visible[0], axis)], UILayoutPriorityRequired, @"UISV-canvas-connection");
-            charon_add(stack, [charon_end(canvas, axis) constraintEqualToAnchor:charon_end([visible lastObject], axis)], UILayoutPriorityRequired, @"UISV-canvas-connection");
+            revenant_add(stack, [revenant_start(canvas, axis) constraintEqualToAnchor:revenant_start(visible[0], axis)], UILayoutPriorityRequired, @"UISV-canvas-connection");
+            revenant_add(stack, [revenant_end(canvas, axis) constraintEqualToAnchor:revenant_end([visible lastObject], axis)], UILayoutPriorityRequired, @"UISV-canvas-connection");
             for (NSUInteger index = 1; index < visible.count; index++) {
                 UIView *previous = visible[index - 1], *next = visible[index];
-                NSLayoutAnchor *leading = charon_start(next, axis), *trailing = charon_end(previous, axis);
+                NSLayoutAnchor *leading = revenant_start(next, axis), *trailing = revenant_end(previous, axis);
                 if (baselines) {
                     leading = next.firstBaselineAnchor;
                     trailing = previous.lastBaselineAnchor;
                 }
-                CGFloat gap = [self charon_spacingAfterView:previous];
+                CGFloat gap = [self revenant_spacingAfterView:previous];
                 NSLayoutConstraint *constraint = gap == UIStackViewSpacingUseSystem
-                    ? charon_system_spacing(leading, relation, trailing, axis, 1)
-                    : charon_relate(leading, relation, trailing, gap);
-                charon_add(stack, constraint, UILayoutPriorityRequired, @"UISV-spacing");
+                    ? revenant_system_spacing(leading, relation, trailing, axis, 1)
+                    : revenant_relate(leading, relation, trailing, gap);
+                revenant_add(stack, constraint, UILayoutPriorityRequired, @"UISV-spacing");
             }
             for (NSUInteger index = 0; index < all.count; index++) {
                 UIView *view = all[index];
@@ -513,82 +513,82 @@ static UILayoutGuide *charon_guide(UIStackView *self, UILayoutGuide *guide, NSSt
                         next = all[other];
                 }
                 UIView *leadingView = previous ? view : next, *trailingView = previous ? previous : view;
-                NSLayoutAnchor *leading = charon_start(leadingView, axis), *trailing = charon_end(trailingView, axis);
+                NSLayoutAnchor *leading = revenant_start(leadingView, axis), *trailing = revenant_end(trailingView, axis);
                 if (baselines && !leadingView.hidden)
                     leading = leadingView.firstBaselineAnchor;
                 if (baselines && !trailingView.hidden)
                     trailing = trailingView.lastBaselineAnchor;
-                CGFloat gap = previous && next ? [self charon_spacingAfterView:previous] : 0;
+                CGFloat gap = previous && next ? [self revenant_spacingAfterView:previous] : 0;
                 NSLayoutConstraint *constraint = gap == UIStackViewSpacingUseSystem
-                    ? charon_system_spacing(leading, relation, trailing, axis, 0.5)
-                    : charon_relate(leading, relation, trailing, gap / 2);
-                charon_add(stack, constraint, 50, @"UISV-spacing-hidden");
+                    ? revenant_system_spacing(leading, relation, trailing, axis, 0.5)
+                    : revenant_relate(leading, relation, trailing, gap / 2);
+                revenant_add(stack, constraint, 50, @"UISV-spacing-hidden");
             }
         } else {
-            orderingSpanner = charon_guide(self, _orderingSpanner, @"UISV-ordering-spanner");
-            charon_add(stack, [charon_start(canvas, axis) constraintEqualToAnchor:charon_start(orderingSpanner, axis)], UILayoutPriorityRequired, @"UISV-canvas-connection");
-            charon_add(stack, [charon_end(canvas, axis) constraintEqualToAnchor:charon_end(orderingSpanner, axis)], UILayoutPriorityRequired, @"UISV-canvas-connection");
-            charon_add(stack, [charon_size(orderingSpanner, axis) constraintEqualToConstant:0], 0.001f, @"UISV-spanning-fit");
+            orderingSpanner = revenant_guide(self, _orderingSpanner, @"UISV-ordering-spanner");
+            revenant_add(stack, [revenant_start(canvas, axis) constraintEqualToAnchor:revenant_start(orderingSpanner, axis)], UILayoutPriorityRequired, @"UISV-canvas-connection");
+            revenant_add(stack, [revenant_end(canvas, axis) constraintEqualToAnchor:revenant_end(orderingSpanner, axis)], UILayoutPriorityRequired, @"UISV-canvas-connection");
+            revenant_add(stack, [revenant_size(orderingSpanner, axis) constraintEqualToConstant:0], 0.001f, @"UISV-spanning-fit");
             for (UIView *view in all)
-                charon_add(stack, charon_relate(charon_start(view, axis), relation, charon_end(orderingSpanner, axis), 0), 50, @"UISV-spacing-hidden");
+                revenant_add(stack, revenant_relate(revenant_start(view, axis), relation, revenant_end(orderingSpanner, axis), 0), 50, @"UISV-spacing-hidden");
         }
 
         if (_distribution != UIStackViewDistributionEqualCentering && _distribution != UIStackViewDistributionFillProportionally) {
             for (NSUInteger index = 1; index < visible.count; index++) {
                 UIView *view = visible[index];
-                CGFloat size = charon_intrinsic(view, axis);
+                CGFloat size = revenant_intrinsic(view, axis);
                 if (size <= 0)
                     continue;
                 UILayoutPriority hugging = [view contentHuggingPriorityForAxis:axis], resistance = [view contentCompressionResistancePriorityForAxis:axis];
                 if (hugging < UILayoutPriorityRequired - 1)
-                    charon_add(items, [charon_size(view, axis) constraintLessThanOrEqualToConstant:size], hugging + 0.001f * index, @"charon-arrangement-order");
+                    revenant_add(items, [revenant_size(view, axis) constraintLessThanOrEqualToConstant:size], hugging + 0.001f * index, @"revenant-arrangement-order");
                 if (resistance < UILayoutPriorityRequired - 1)
-                    charon_add(items, [charon_size(view, axis) constraintGreaterThanOrEqualToConstant:size], resistance + 0.001f * index, @"charon-arrangement-order");
+                    revenant_add(items, [revenant_size(view, axis) constraintGreaterThanOrEqualToConstant:size], resistance + 0.001f * index, @"revenant-arrangement-order");
             }
         }
 
         if (_distribution == UIStackViewDistributionFillEqually) {
             for (NSUInteger index = 1; index < visible.count; index++)
-                charon_add(stack, [charon_size(visible[index], axis) constraintEqualToAnchor:charon_size(visible[0], axis)], UILayoutPriorityRequired, @"UISV-fill-equally");
+                revenant_add(stack, [revenant_size(visible[index], axis) constraintEqualToAnchor:revenant_size(visible[0], axis)], UILayoutPriorityRequired, @"UISV-fill-equally");
         } else if (_distribution == UIStackViewDistributionFillProportionally && visible.count) {
             CGFloat total = _spacing * (visible.count - 1);
             NSUInteger proportional = 0;
             for (UIView *view in visible) {
-                CGFloat size = charon_natural(view, axis);
+                CGFloat size = revenant_natural(view, axis);
                 if (size > 0) {
                     total += size;
                     proportional++;
                 }
             }
             for (UIView *view in visible) {
-                CGFloat size = charon_natural(view, axis);
+                CGFloat size = revenant_natural(view, axis);
                 if (size <= 0 || total <= 0) {
-                    charon_add(items, [charon_size(view, axis) constraintEqualToConstant:0], UILayoutPriorityRequired, @"UISV-fill-proportionally");
+                    revenant_add(items, [revenant_size(view, axis) constraintEqualToConstant:0], UILayoutPriorityRequired, @"UISV-fill-proportionally");
                     continue;
                 }
                 UILayoutPriority priority = proportional == 1 ? UILayoutPriorityRequired : UILayoutPriorityRequired - 1 - [all indexOfObjectIdenticalTo:view];
-                charon_add(stack, [charon_size(view, axis) constraintEqualToAnchor:charon_size(canvas, axis) multiplier:size / total], priority, @"UISV-fill-proportionally");
+                revenant_add(stack, [revenant_size(view, axis) constraintEqualToAnchor:revenant_size(canvas, axis) multiplier:size / total], priority, @"UISV-fill-proportionally");
             }
         } else if (spreading && visible.count > 1) {
             BOOL centering = _distribution == UIStackViewDistributionEqualCentering;
             for (NSUInteger index = 1; index < visible.count; index++) {
-                UILayoutGuide *gap = charon_guide(self, index - 1 < _distributingGuides.count ? _distributingGuides[index - 1] : nil, @"UISV-distributing");
+                UILayoutGuide *gap = revenant_guide(self, index - 1 < _distributingGuides.count ? _distributingGuides[index - 1] : nil, @"UISV-distributing");
                 [gaps addObject:gap];
                 UIView *previous = visible[index - 1], *next = visible[index];
-                NSLayoutAnchor *previousEdge = centering ? charon_center(previous, axis) : charon_end(previous, axis);
-                NSLayoutAnchor *nextEdge = centering ? charon_center(next, axis) : charon_start(next, axis);
+                NSLayoutAnchor *previousEdge = centering ? revenant_center(previous, axis) : revenant_end(previous, axis);
+                NSLayoutAnchor *nextEdge = centering ? revenant_center(next, axis) : revenant_start(next, axis);
                 if (!centering && baselines) {
                     previousEdge = previous.lastBaselineAnchor;
                     nextEdge = next.firstBaselineAnchor;
                 }
-                charon_add(stack, [charon_start(gap, axis) constraintEqualToAnchor:previousEdge], UILayoutPriorityRequired, @"UISV-distributing-edge");
-                charon_add(stack, [charon_end(gap, axis) constraintEqualToAnchor:nextEdge], UILayoutPriorityRequired, @"UISV-distributing-edge");
+                revenant_add(stack, [revenant_start(gap, axis) constraintEqualToAnchor:previousEdge], UILayoutPriorityRequired, @"UISV-distributing-edge");
+                revenant_add(stack, [revenant_end(gap, axis) constraintEqualToAnchor:nextEdge], UILayoutPriorityRequired, @"UISV-distributing-edge");
                 if (index > 1) {
                     UILayoutPriority priority = centering ? 150 - [all indexOfObjectIdenticalTo:previous] : UILayoutPriorityRequired;
-                    charon_add(stack, [charon_size(gap, axis) constraintEqualToAnchor:charon_size(gaps[0], axis)], priority, @"UISV-fill-equally");
+                    revenant_add(stack, [revenant_size(gap, axis) constraintEqualToAnchor:revenant_size(gaps[0], axis)], priority, @"UISV-fill-equally");
                 }
             }
-            charon_add(stack, [charon_size(self, axis) constraintEqualToConstant:0], 49, @"UISV-canvas-fit");
+            revenant_add(stack, [revenant_size(self, axis) constraintEqualToConstant:0], 49, @"UISV-canvas-fit");
         }
 
         UIView *first = all[0];
@@ -600,73 +600,73 @@ static UILayoutGuide *charon_guide(UIStackView *self, UILayoutGuide *guide, NSSt
                 UIView *view = all[index];
                 switch (alignment) {
                 case UIStackViewAlignmentFill:
-                    charon_add(stack, [charon_start(first, across) constraintEqualToAnchor:charon_start(view, across)], UILayoutPriorityRequired, @"UISV-alignment");
-                    charon_add(stack, [charon_end(first, across) constraintEqualToAnchor:charon_end(view, across)], UILayoutPriorityRequired, @"UISV-alignment");
+                    revenant_add(stack, [revenant_start(first, across) constraintEqualToAnchor:revenant_start(view, across)], UILayoutPriorityRequired, @"UISV-alignment");
+                    revenant_add(stack, [revenant_end(first, across) constraintEqualToAnchor:revenant_end(view, across)], UILayoutPriorityRequired, @"UISV-alignment");
                     break;
                 case UIStackViewAlignmentLeading:
-                    charon_add(stack, [charon_start(first, across) constraintEqualToAnchor:charon_start(view, across)], UILayoutPriorityRequired, @"UISV-alignment");
+                    revenant_add(stack, [revenant_start(first, across) constraintEqualToAnchor:revenant_start(view, across)], UILayoutPriorityRequired, @"UISV-alignment");
                     break;
                 case UIStackViewAlignmentTrailing:
-                    charon_add(stack, [charon_end(first, across) constraintEqualToAnchor:charon_end(view, across)], UILayoutPriorityRequired, @"UISV-alignment");
+                    revenant_add(stack, [revenant_end(first, across) constraintEqualToAnchor:revenant_end(view, across)], UILayoutPriorityRequired, @"UISV-alignment");
                     break;
                 case UIStackViewAlignmentCenter:
-                    charon_add(stack, [charon_center(first, across) constraintEqualToAnchor:charon_center(view, across)], UILayoutPriorityRequired, @"UISV-alignment");
+                    revenant_add(stack, [revenant_center(first, across) constraintEqualToAnchor:revenant_center(view, across)], UILayoutPriorityRequired, @"UISV-alignment");
                     break;
                 case UIStackViewAlignmentFirstBaseline:
-                    if (charon_layout_has_baseline(first) && charon_layout_has_baseline(view))
-                        charon_add(stack, [first.firstBaselineAnchor constraintEqualToAnchor:view.firstBaselineAnchor], UILayoutPriorityRequired, @"UISV-alignment");
+                    if (revenant_layout_has_baseline(first) && revenant_layout_has_baseline(view))
+                        revenant_add(stack, [first.firstBaselineAnchor constraintEqualToAnchor:view.firstBaselineAnchor], UILayoutPriorityRequired, @"UISV-alignment");
                     else
-                        charon_add(stack, [first.topAnchor constraintEqualToAnchor:view.topAnchor], UILayoutPriorityRequired, @"UISV-alignment");
+                        revenant_add(stack, [first.topAnchor constraintEqualToAnchor:view.topAnchor], UILayoutPriorityRequired, @"UISV-alignment");
                     break;
                 case UIStackViewAlignmentLastBaseline:
-                    if (charon_layout_has_baseline(first) && charon_layout_has_baseline(view))
-                        charon_add(stack, [first.lastBaselineAnchor constraintEqualToAnchor:view.lastBaselineAnchor], UILayoutPriorityRequired, @"UISV-alignment");
+                    if (revenant_layout_has_baseline(first) && revenant_layout_has_baseline(view))
+                        revenant_add(stack, [first.lastBaselineAnchor constraintEqualToAnchor:view.lastBaselineAnchor], UILayoutPriorityRequired, @"UISV-alignment");
                     else
-                        charon_add(stack, [first.bottomAnchor constraintEqualToAnchor:view.bottomAnchor], UILayoutPriorityRequired, @"UISV-alignment");
+                        revenant_add(stack, [first.bottomAnchor constraintEqualToAnchor:view.bottomAnchor], UILayoutPriorityRequired, @"UISV-alignment");
                     break;
                 }
             }
         }
         if (alignment == UIStackViewAlignmentFill && visible.count) {
-            charon_add(stack, [charon_start(canvas, across) constraintEqualToAnchor:charon_start(first, across)], UILayoutPriorityRequired, @"UISV-canvas-connection");
-            charon_add(stack, [charon_end(canvas, across) constraintEqualToAnchor:charon_end(first, across)], UILayoutPriorityRequired, @"UISV-canvas-connection");
+            revenant_add(stack, [revenant_start(canvas, across) constraintEqualToAnchor:revenant_start(first, across)], UILayoutPriorityRequired, @"UISV-canvas-connection");
+            revenant_add(stack, [revenant_end(canvas, across) constraintEqualToAnchor:revenant_end(first, across)], UILayoutPriorityRequired, @"UISV-canvas-connection");
         } else {
-            alignmentSpanner = charon_guide(self, _alignmentSpanner, @"UISV-alignment-spanner");
-            NSLayoutAnchor *spannerStart = charon_start(alignmentSpanner, across), *spannerEnd = charon_end(alignmentSpanner, across);
+            alignmentSpanner = revenant_guide(self, _alignmentSpanner, @"UISV-alignment-spanner");
+            NSLayoutAnchor *spannerStart = revenant_start(alignmentSpanner, across), *spannerEnd = revenant_end(alignmentSpanner, across);
             if (!visible.count || ignored) {
-                charon_add(stack, [charon_start(canvas, across) constraintEqualToAnchor:spannerStart], UILayoutPriorityRequired, @"UISV-canvas-connection");
-                charon_add(stack, [charon_end(canvas, across) constraintEqualToAnchor:spannerEnd], UILayoutPriorityRequired, @"UISV-canvas-connection");
+                revenant_add(stack, [revenant_start(canvas, across) constraintEqualToAnchor:spannerStart], UILayoutPriorityRequired, @"UISV-canvas-connection");
+                revenant_add(stack, [revenant_end(canvas, across) constraintEqualToAnchor:spannerEnd], UILayoutPriorityRequired, @"UISV-canvas-connection");
             } else if (alignment == UIStackViewAlignmentLeading) {
-                charon_add(stack, [charon_start(canvas, across) constraintEqualToAnchor:charon_start(first, across)], UILayoutPriorityRequired, @"UISV-canvas-connection");
-                charon_add(stack, [charon_end(canvas, across) constraintEqualToAnchor:spannerEnd], UILayoutPriorityRequired, @"UISV-canvas-connection");
+                revenant_add(stack, [revenant_start(canvas, across) constraintEqualToAnchor:revenant_start(first, across)], UILayoutPriorityRequired, @"UISV-canvas-connection");
+                revenant_add(stack, [revenant_end(canvas, across) constraintEqualToAnchor:spannerEnd], UILayoutPriorityRequired, @"UISV-canvas-connection");
             } else if (alignment == UIStackViewAlignmentTrailing) {
-                charon_add(stack, [charon_start(canvas, across) constraintEqualToAnchor:spannerStart], UILayoutPriorityRequired, @"UISV-canvas-connection");
-                charon_add(stack, [charon_end(canvas, across) constraintEqualToAnchor:charon_end(first, across)], UILayoutPriorityRequired, @"UISV-canvas-connection");
+                revenant_add(stack, [revenant_start(canvas, across) constraintEqualToAnchor:spannerStart], UILayoutPriorityRequired, @"UISV-canvas-connection");
+                revenant_add(stack, [revenant_end(canvas, across) constraintEqualToAnchor:revenant_end(first, across)], UILayoutPriorityRequired, @"UISV-canvas-connection");
             } else if (alignment == UIStackViewAlignmentCenter) {
-                charon_add(stack, [charon_start(canvas, across) constraintEqualToAnchor:spannerStart], UILayoutPriorityRequired, @"UISV-canvas-connection");
-                charon_add(stack, [charon_end(canvas, across) constraintEqualToAnchor:spannerEnd], UILayoutPriorityRequired, @"UISV-canvas-connection");
-                charon_add(stack, [charon_center(canvas, across) constraintEqualToAnchor:charon_center(first, across)], UILayoutPriorityRequired, @"UISV-canvas-connection");
+                revenant_add(stack, [revenant_start(canvas, across) constraintEqualToAnchor:spannerStart], UILayoutPriorityRequired, @"UISV-canvas-connection");
+                revenant_add(stack, [revenant_end(canvas, across) constraintEqualToAnchor:spannerEnd], UILayoutPriorityRequired, @"UISV-canvas-connection");
+                revenant_add(stack, [revenant_center(canvas, across) constraintEqualToAnchor:revenant_center(first, across)], UILayoutPriorityRequired, @"UISV-canvas-connection");
             } else if (alignment == UIStackViewAlignmentFirstBaseline) {
-                charon_add(stack, [charon_start(canvas, across) constraintLessThanOrEqualToAnchor:charon_start(first, across)], UILayoutPriorityRequired, @"UISV-canvas-connection");
-                charon_add(stack, [charon_end(canvas, across) constraintEqualToAnchor:spannerEnd], UILayoutPriorityRequired, @"UISV-canvas-connection");
-                charon_add(stack, [charon_size(self, across) constraintEqualToConstant:0], 49, @"UISV-canvas-fit");
+                revenant_add(stack, [revenant_start(canvas, across) constraintLessThanOrEqualToAnchor:revenant_start(first, across)], UILayoutPriorityRequired, @"UISV-canvas-connection");
+                revenant_add(stack, [revenant_end(canvas, across) constraintEqualToAnchor:spannerEnd], UILayoutPriorityRequired, @"UISV-canvas-connection");
+                revenant_add(stack, [revenant_size(self, across) constraintEqualToConstant:0], 49, @"UISV-canvas-fit");
             } else {
-                charon_add(stack, [charon_start(canvas, across) constraintEqualToAnchor:spannerStart], UILayoutPriorityRequired, @"UISV-canvas-connection");
-                charon_add(stack, [charon_end(canvas, across) constraintGreaterThanOrEqualToAnchor:charon_end(first, across)], UILayoutPriorityRequired, @"UISV-canvas-connection");
-                charon_add(stack, [charon_size(self, across) constraintEqualToConstant:0], 49, @"UISV-canvas-fit");
+                revenant_add(stack, [revenant_start(canvas, across) constraintEqualToAnchor:spannerStart], UILayoutPriorityRequired, @"UISV-canvas-connection");
+                revenant_add(stack, [revenant_end(canvas, across) constraintGreaterThanOrEqualToAnchor:revenant_end(first, across)], UILayoutPriorityRequired, @"UISV-canvas-connection");
+                revenant_add(stack, [revenant_size(self, across) constraintEqualToConstant:0], 49, @"UISV-canvas-fit");
             }
             for (UIView *view in visible) {
                 UILayoutPriority startPriority = alignment == UIStackViewAlignmentLeading && !ignored ? 999.5f : UILayoutPriorityRequired;
                 UILayoutPriority endPriority = alignment == UIStackViewAlignmentTrailing && !ignored ? 999.5f : UILayoutPriorityRequired;
                 NSLayoutRelation startRelation = startPriority < UILayoutPriorityRequired ? NSLayoutRelationEqual : NSLayoutRelationLessThanOrEqual;
                 NSLayoutRelation endRelation = endPriority < UILayoutPriorityRequired ? NSLayoutRelationEqual : NSLayoutRelationGreaterThanOrEqual;
-                charon_add(stack, charon_relate(spannerStart, startRelation, charon_start(view, across), 0), startPriority, @"UISV-spanning-boundary");
-                charon_add(stack, charon_relate(spannerEnd, endRelation, charon_end(view, across), 0), endPriority, @"UISV-spanning-boundary");
+                revenant_add(stack, revenant_relate(spannerStart, startRelation, revenant_start(view, across), 0), startPriority, @"UISV-spanning-boundary");
+                revenant_add(stack, revenant_relate(spannerEnd, endRelation, revenant_end(view, across), 0), endPriority, @"UISV-spanning-boundary");
             }
-            charon_add(stack, [charon_size(alignmentSpanner, across) constraintEqualToConstant:0], visible.count ? 51 : 0.001f, @"UISV-spanning-fit");
+            revenant_add(stack, [revenant_size(alignmentSpanner, across) constraintEqualToConstant:0], visible.count ? 51 : 0.001f, @"UISV-spanning-fit");
             if (alignment != UIStackViewAlignmentFill) {
                 for (UIView *view in all)
-                    charon_add(items, [charon_size(view, across) constraintEqualToConstant:0], 25, @"UISV-ambiguity-suppression");
+                    revenant_add(items, [revenant_size(view, across) constraintEqualToConstant:0], 25, @"UISV-ambiguity-suppression");
             }
         }
     }
@@ -686,21 +686,21 @@ static UILayoutGuide *charon_guide(UIStackView *self, UILayoutGuide *guide, NSSt
         [constraint.firstItem addConstraint:constraint];
 }
 
-- (void)charon_rebuildIfNeeded
+- (void)revenant_rebuildIfNeeded
 {
-    if (_arrangedSubviews && (_needsRebuild || ![charon_intrinsic_sizes(self) isEqualToArray:_intrinsicSizes]))
-        [self charon_rebuild];
+    if (_arrangedSubviews && (_needsRebuild || ![revenant_intrinsic_sizes(self) isEqualToArray:_intrinsicSizes]))
+        [self revenant_rebuild];
 }
 
 - (void)updateConstraints
 {
-    [self charon_rebuildIfNeeded];
+    [self revenant_rebuildIfNeeded];
     [super updateConstraints];
 }
 
 - (void)layoutSubviews
 {
-    [self charon_rebuildIfNeeded];
+    [self revenant_rebuildIfNeeded];
     [super layoutSubviews];
 }
 

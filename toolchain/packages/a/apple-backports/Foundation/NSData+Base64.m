@@ -1,13 +1,13 @@
 #import <Foundation/Foundation.h>
 
-static const char charon_base64_alphabet[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+static const char revenant_base64_alphabet[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
 enum {
-    CharonBase64Unknown = 0xFF,
-    CharonBase64Padding = 0xFE
+    RevenantBase64Unknown = 0xFF,
+    RevenantBase64Padding = 0xFE
 };
 
-static NSUInteger charon_base64_line_length(NSDataBase64EncodingOptions options)
+static NSUInteger revenant_base64_line_length(NSDataBase64EncodingOptions options)
 {
     BOOL short64 = (options & NSDataBase64Encoding64CharacterLineLength) != 0;
     BOOL long76 = (options & NSDataBase64Encoding76CharacterLineLength) != 0;
@@ -16,32 +16,32 @@ static NSUInteger charon_base64_line_length(NSDataBase64EncodingOptions options)
     return short64 ? 64 : 76;
 }
 
-static void charon_base64_fail_allocation(id data, SEL selector, NSUInteger length)
+static void revenant_base64_fail_allocation(id data, SEL selector, NSUInteger length)
 {
     [NSException raise:NSMallocException format:@"*** -[%@ %@]: unable to allocate memory for length (%lu)", [data class], NSStringFromSelector(selector), (unsigned long)length];
 }
 
-static char *charon_base64_encode(NSData *data, NSDataBase64EncodingOptions options, SEL selector, NSUInteger *encodedLength)
+static char *revenant_base64_encode(NSData *data, NSDataBase64EncodingOptions options, SEL selector, NSUInteger *encodedLength)
 {
     NSUInteger length = data.length;
     const unsigned char *bytes = data.bytes;
     NSUInteger groups = length / 3 + (length % 3 ? 1 : 0);
-    NSUInteger lineLength = charon_base64_line_length(options);
+    NSUInteger lineLength = revenant_base64_line_length(options);
     BOOL carriageReturn = (options & NSDataBase64EncodingEndLineWithCarriageReturn) != 0;
     BOOL lineFeed = (options & NSDataBase64EncodingEndLineWithLineFeed) != 0;
     if (!carriageReturn && !lineFeed)
         carriageReturn = lineFeed = YES;
     NSUInteger endingLength = (carriageReturn ? 1 : 0) + (lineFeed ? 1 : 0);
     if (groups > (NSUIntegerMax - 1) / 4)
-        charon_base64_fail_allocation(data, selector, length);
+        revenant_base64_fail_allocation(data, selector, length);
     NSUInteger characters = groups * 4;
     NSUInteger breaks = lineLength && characters ? (characters - 1) / lineLength : 0;
     if (breaks > (NSUIntegerMax - 1 - characters) / endingLength)
-        charon_base64_fail_allocation(data, selector, length);
+        revenant_base64_fail_allocation(data, selector, length);
     NSUInteger total = characters + breaks * endingLength;
     char *output = malloc(total ? total : 1);
     if (!output)
-        charon_base64_fail_allocation(data, selector, total);
+        revenant_base64_fail_allocation(data, selector, total);
     NSUInteger written = 0, line = 0;
     for (NSUInteger index = 0; index < length; index += 3) {
         NSUInteger remaining = length - index;
@@ -51,10 +51,10 @@ static char *charon_base64_encode(NSData *data, NSDataBase64EncodingOptions opti
         if (remaining > 2)
             value |= bytes[index + 2];
         char group[4] = {
-            charon_base64_alphabet[(value >> 18) & 0x3F],
-            charon_base64_alphabet[(value >> 12) & 0x3F],
-            remaining > 1 ? charon_base64_alphabet[(value >> 6) & 0x3F] : '=',
-            remaining > 2 ? charon_base64_alphabet[value & 0x3F] : '='
+            revenant_base64_alphabet[(value >> 18) & 0x3F],
+            revenant_base64_alphabet[(value >> 12) & 0x3F],
+            remaining > 1 ? revenant_base64_alphabet[(value >> 6) & 0x3F] : '=',
+            remaining > 2 ? revenant_base64_alphabet[value & 0x3F] : '='
         };
         for (int position = 0; position < 4; position++) {
             if (lineLength && line == lineLength) {
@@ -72,15 +72,15 @@ static char *charon_base64_encode(NSData *data, NSDataBase64EncodingOptions opti
     return output;
 }
 
-static unsigned char *charon_base64_decode(const unsigned char *input, NSUInteger length, NSDataBase64DecodingOptions options, NSUInteger *decodedLength)
+static unsigned char *revenant_base64_decode(const unsigned char *input, NSUInteger length, NSDataBase64DecodingOptions options, NSUInteger *decodedLength)
 {
     static unsigned char table[256];
     static dispatch_once_t once;
     dispatch_once(&once, ^{
-        memset(table, CharonBase64Unknown, sizeof table);
+        memset(table, RevenantBase64Unknown, sizeof table);
         for (unsigned char value = 0; value < 64; value++)
-            table[(unsigned char)charon_base64_alphabet[value]] = value;
-        table['='] = CharonBase64Padding;
+            table[(unsigned char)revenant_base64_alphabet[value]] = value;
+        table['='] = RevenantBase64Padding;
     });
     BOOL ignoreUnknown = (options & NSDataBase64DecodingIgnoreUnknownCharacters) != 0;
     unsigned char *output = malloc(length / 4 * 3 + 3);
@@ -90,13 +90,13 @@ static unsigned char *charon_base64_decode(const unsigned char *input, NSUIntege
     uint32_t accumulated = 0;
     for (; index < length; index++) {
         unsigned char value = table[input[index]];
-        if (value == CharonBase64Unknown) {
+        if (value == RevenantBase64Unknown) {
             if (ignoreUnknown)
                 continue;
             free(output);
             return NULL;
         }
-        if (value == CharonBase64Padding) {
+        if (value == RevenantBase64Padding) {
             padding++;
             value = 0;
         } else if (padding && !ignoreUnknown) {
@@ -113,7 +113,7 @@ static unsigned char *charon_base64_decode(const unsigned char *input, NSUIntege
         BOOL last = YES;
         for (NSUInteger ahead = index + 1; padding && ahead < length && last; ahead++) {
             unsigned char next = table[input[ahead]];
-            last = next == CharonBase64Padding || (ignoreUnknown && next == CharonBase64Unknown);
+            last = next == RevenantBase64Padding || (ignoreUnknown && next == RevenantBase64Unknown);
         }
         NSUInteger bytes = !last || !padding ? 3 : padding == 1 ? 2 : 1;
         output[written++] = (accumulated >> 16) & 0xFF;
@@ -127,7 +127,7 @@ static unsigned char *charon_base64_decode(const unsigned char *input, NSUIntege
         padding = 0;
     }
     for (index++; index < length && !ignoreUnknown; index++) {
-        if (table[input[index]] != CharonBase64Padding) {
+        if (table[input[index]] != RevenantBase64Padding) {
             free(output);
             return NULL;
         }
@@ -140,7 +140,7 @@ static unsigned char *charon_base64_decode(const unsigned char *input, NSUIntege
     return output;
 }
 
-static unsigned char *charon_base64_decode_string(NSString *string, NSDataBase64DecodingOptions options, NSUInteger *decodedLength)
+static unsigned char *revenant_base64_decode_string(NSString *string, NSDataBase64DecodingOptions options, NSUInteger *decodedLength)
 {
     NSUInteger length = string.length;
     unsigned char *narrow = malloc(length ? length : 1);
@@ -152,26 +152,26 @@ static unsigned char *charon_base64_decode_string(NSString *string, NSDataBase64
     }
     [string getCharacters:wide range:NSMakeRange(0, length)];
     for (NSUInteger index = 0; index < length; index++)
-        narrow[index] = wide[index] < 0x80 ? (unsigned char)wide[index] : CharonBase64Unknown;
+        narrow[index] = wide[index] < 0x80 ? (unsigned char)wide[index] : RevenantBase64Unknown;
     free(wide);
-    unsigned char *decoded = charon_base64_decode(narrow, length, options, decodedLength);
+    unsigned char *decoded = revenant_base64_decode(narrow, length, options, decodedLength);
     free(narrow);
     return decoded;
 }
 
-static void charon_base64_require(id argument, id data, SEL selector, NSString *what)
+static void revenant_base64_require(id argument, id data, SEL selector, NSString *what)
 {
     if (!argument)
         [NSException raise:NSInvalidArgumentException format:@"*** -[%@ %@]: nil %@ argument", [data class], NSStringFromSelector(selector), what];
 }
 
-@implementation NSData (CharonBase64)
+@implementation NSData (RevenantBase64)
 
 - (instancetype)initWithBase64EncodedString:(NSString *)base64String options:(NSDataBase64DecodingOptions)options
 {
-    charon_base64_require(base64String, self, _cmd, @"string");
+    revenant_base64_require(base64String, self, _cmd, @"string");
     NSUInteger length = 0;
-    unsigned char *decoded = charon_base64_decode_string(base64String, options, &length);
+    unsigned char *decoded = revenant_base64_decode_string(base64String, options, &length);
     if (!decoded)
         return nil;
     if (!length) {
@@ -184,7 +184,7 @@ static void charon_base64_require(id argument, id data, SEL selector, NSString *
 - (NSString *)base64EncodedStringWithOptions:(NSDataBase64EncodingOptions)options
 {
     NSUInteger length = 0;
-    char *encoded = charon_base64_encode(self, options, _cmd, &length);
+    char *encoded = revenant_base64_encode(self, options, _cmd, &length);
     if (!length) {
         free(encoded);
         return @"";
@@ -194,9 +194,9 @@ static void charon_base64_require(id argument, id data, SEL selector, NSString *
 
 - (instancetype)initWithBase64EncodedData:(NSData *)base64Data options:(NSDataBase64DecodingOptions)options
 {
-    charon_base64_require(base64Data, self, _cmd, @"data");
+    revenant_base64_require(base64Data, self, _cmd, @"data");
     NSUInteger length = 0;
-    unsigned char *decoded = charon_base64_decode(base64Data.bytes, base64Data.length, options, &length);
+    unsigned char *decoded = revenant_base64_decode(base64Data.bytes, base64Data.length, options, &length);
     if (!decoded)
         return nil;
     if (!length) {
@@ -209,7 +209,7 @@ static void charon_base64_require(id argument, id data, SEL selector, NSString *
 - (NSData *)base64EncodedDataWithOptions:(NSDataBase64EncodingOptions)options
 {
     NSUInteger length = 0;
-    char *encoded = charon_base64_encode(self, options, _cmd, &length);
+    char *encoded = revenant_base64_encode(self, options, _cmd, &length);
     if (!length) {
         free(encoded);
         return [NSData data];

@@ -30,8 +30,8 @@ package("swift-syntax")
     }
 
     on_load("@macosx", function (package)
-        package:add("envs", {CHARON_SWIFT_SYNTAX = package:installdir("lib"),
-                             CHARON_HOST_SWIFTC = os.getenv("SWIFT_EXEC") or "/usr/bin/swiftc"})
+        package:add("envs", {REVENANT_SWIFT_SYNTAX = package:installdir("lib"),
+                             REVENANT_HOST_SWIFTC = os.getenv("SWIFT_EXEC") or "/usr/bin/swiftc"})
     end)
 
     on_install("@macosx", function (package)

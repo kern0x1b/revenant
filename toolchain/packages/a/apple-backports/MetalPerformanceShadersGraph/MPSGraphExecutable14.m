@@ -1,4 +1,4 @@
-#import "CharonMPSGraph.h"
+#import "RevenantMPSGraph.h"
 
 @implementation MPSGraphExecutable {
     MPSGraph *_graph;
@@ -75,10 +75,10 @@
                                     executionDescriptor:(MPSGraphExecutableExecutionDescriptor *)executionDescriptor
 {
     (void)commandQueue;
-    return [self charon_mps_walkInputs:inputsArray results:resultsArray executionDescriptor:executionDescriptor];
+    return [self revenant_mps_walkInputs:inputsArray results:resultsArray executionDescriptor:executionDescriptor];
 }
 
-- (NSArray<MPSGraphTensorData *> *)charon_mps_walkInputs:(NSArray<MPSGraphTensorData *> *)inputsArray
+- (NSArray<MPSGraphTensorData *> *)revenant_mps_walkInputs:(NSArray<MPSGraphTensorData *> *)inputsArray
                                                   results:(NSArray<MPSGraphTensorData *> *)resultsArray
                                        executionDescriptor:(MPSGraphExecutableExecutionDescriptor *)executionDescriptor
 {
@@ -100,12 +100,12 @@
         MPSGraphTensorData *computed = results[_targetTensors[i]];
         MPSGraphTensorData *destination = i < resultsArray.count ? resultsArray[i] : computed;
         if (computed && destination && computed != destination)
-            CharonMPSGraphWriteInto(_targetTensors[i], computed, destination);
+            RevenantMPSGraphWriteInto(_targetTensors[i], computed, destination);
         if (destination)
             [returned addObject:destination];
     }
     if (executionDescriptor != nil) {
-        [executionDescriptor charon_mps_applyEventsAtStage:MPSGraphExecutionStageCompleted
+        [executionDescriptor revenant_mps_applyEventsAtStage:MPSGraphExecutionStageCompleted
                                                         named:@"an executable execution descriptor"];
         if (executionDescriptor.scheduledHandler)
             executionDescriptor.scheduledHandler(returned, nil);
@@ -155,7 +155,7 @@
                                      executionDescriptor:(MPSGraphExecutableExecutionDescriptor *)executionDescriptor
 {
     (void)commandBuffer;
-    return [self charon_mps_walkInputs:inputsArray results:resultsArray executionDescriptor:executionDescriptor];
+    return [self revenant_mps_walkInputs:inputsArray results:resultsArray executionDescriptor:executionDescriptor];
 }
 
 @end

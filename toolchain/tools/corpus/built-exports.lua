@@ -1,13 +1,13 @@
 import("byteorder", {rootdir = path.join(os.scriptdir(), "..", "..", "modules")})
 import("aggregate", {rootdir = os.scriptdir()})
 
-local BAND = path.join("build", "stage", "usr", "lib", "charon", "org.charon.apple-backports", "bands", "6.1.3")
+local BAND = path.join("build", "stage", "usr", "lib", "revenant", "org.revenant.apple-backports", "bands", "6.1.3")
 
 function main(run)
     if not run then
         raise("usage: built-exports.lua <canon-run>")
     end
-    local debs = os.files(path.join(run, "org.charon.apple-backports_*.deb"))
+    local debs = os.files(path.join(run, "org.revenant.apple-backports_*.deb"))
     if #debs ~= 1 then
         raise("built-exports.lua: %s holds %d canon packages, not one", run, #debs)
     end

@@ -35,7 +35,7 @@
 #include <sys/socket.h>
 #include <unistd.h>
 
-namespace shade {
+namespace emulator {
 namespace {
 
     constexpr std::uint32_t darwin_socket_stream = 1;

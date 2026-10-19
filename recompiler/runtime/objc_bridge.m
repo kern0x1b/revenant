@@ -41,7 +41,7 @@ static void xl_load_rules(void);
 
 static void xl_uncaught(NSException *exception)
 {
-    FILE *log = fopen("/private/var/charon/xlate-exception.log", "a");
+    FILE *log = fopen("/private/var/revenant/xlate-exception.log", "a");
     if (log) {
         fprintf(log, "uncaught %s: %s\n", [[exception name] UTF8String] ?: "?", [[exception reason] UTF8String] ?: "?");
         for (NSString *frame in [exception callStackSymbols]) {
@@ -88,7 +88,7 @@ static id xl_null_missing(id self_, SEL forwarding_sel, SEL missing)
     @synchronized (seen) {
         if (![seen containsObject:key]) {
             [seen addObject:key];
-            int fd = open("/private/var/charon/xl-missing.log", O_WRONLY | O_CREAT | O_APPEND, 0666);
+            int fd = open("/private/var/revenant/xl-missing.log", O_WRONLY | O_CREAT | O_APPEND, 0666);
             if (fd >= 0) { dprintf(fd, "%s\n", [key UTF8String]); close(fd); }
         }
     }
@@ -98,7 +98,7 @@ static id xl_null_missing(id self_, SEL forwarding_sel, SEL missing)
 static void *xl_memlog_thread(void *arg)
 {
     (void)arg;
-    int fd = open("/private/var/charon/xl-mem.log", O_WRONLY | O_CREAT | O_TRUNC, 0666);
+    int fd = open("/private/var/revenant/xl-mem.log", O_WRONLY | O_CREAT | O_TRUNC, 0666);
     if (fd < 0)
         return NULL;
     for (unsigned tick = 0;; tick++) {
@@ -114,7 +114,7 @@ static void *xl_memlog_thread(void *arg)
 
 static void xl_wrap_layout_subviews(void)
 {
-    if (access("/private/var/charon/xl-no-layout-super", F_OK) == 0)
+    if (access("/private/var/revenant/xl-no-layout-super", F_OK) == 0)
         return;
     const char *main_image = _dyld_get_image_name(0);
     Class view_class = [UIView class];
@@ -152,9 +152,9 @@ static void xl_wrap_layout_subviews(void)
 static void xl_setup(void)
 {
     NSSetUncaughtExceptionHandler(xl_uncaught);
-    { FILE *f = fopen("/private/var/charon/xlate-trace.log", "a"); if (f) { fprintf(f, "fix start\n"); fclose(f); } }
+    { FILE *f = fopen("/private/var/revenant/xlate-trace.log", "a"); if (f) { fprintf(f, "fix start\n"); fclose(f); } }
     xl_fix_layouts();
-    { FILE *f = fopen("/private/var/charon/xlate-trace.log", "a"); if (f) { fprintf(f, "fix done\n"); fclose(f); } }
+    { FILE *f = fopen("/private/var/revenant/xlate-trace.log", "a"); if (f) { fprintf(f, "fix done\n"); fclose(f); } }
     xl_shadow_init();
     xl_load_rules();
     pthread_key_create(&xl_super_key, NULL);
@@ -167,16 +167,16 @@ static void xl_setup(void)
     xl_selector_variant_table = CFDictionaryCreateMutable(NULL, 0, NULL, NULL);
     xl_variant_cache = CFDictionaryCreateMutable(NULL, 0, NULL, NULL);
     xl_wrap_layout_subviews();
-    if (access("/private/var/charon/xl-memlog", F_OK) == 0) {
+    if (access("/private/var/revenant/xl-memlog", F_OK) == 0) {
         pthread_t thread;
         pthread_create(&thread, NULL, xl_memlog_thread, NULL);
     }
-    if (access("/private/var/charon/xl-exp-null-missing", F_OK) == 0) {
+    if (access("/private/var/revenant/xl-exp-null-missing", F_OK) == 0) {
         IMP imp = imp_implementationWithBlock(^id(id self_, SEL missing) { return xl_null_missing(self_, 0, missing); });
         class_replaceMethod([NSObject class], @selector(forwardingTargetForSelector:), imp, "@@::");
         class_replaceMethod(object_getClass([NSObject class]), @selector(forwardingTargetForSelector:), imp, "@@::");
     }
-    FILE *stubs = fopen("/private/var/charon/xl-stubs.txt", "r");
+    FILE *stubs = fopen("/private/var/revenant/xl-stubs.txt", "r");
     if (stubs) {
         char line[256];
         while (fgets(line, sizeof line, stubs)) {
@@ -192,12 +192,12 @@ static void xl_setup(void)
                 continue;
             IMP nothing = imp_implementationWithBlock(^id(id self_) { return nil; });
             class_replaceMethod(target, selector, nothing, "@@:");
-            int fd = open("/private/var/charon/xl-hooks.log", O_WRONLY | O_CREAT | O_APPEND, 0666);
+            int fd = open("/private/var/revenant/xl-hooks.log", O_WRONLY | O_CREAT | O_APPEND, 0666);
             if (fd >= 0) { dprintf(fd, "stub %c%s %s\n", kind, cls, sel); close(fd); }
         }
         fclose(stubs);
     }
-    if (access("/private/var/charon/xl-exp-guide-superview", F_OK) == 0) {
+    if (access("/private/var/revenant/xl-exp-guide-superview", F_OK) == 0) {
         Class guide = NSClassFromString(@"UILayoutGuide");
         if (guide && !class_getInstanceMethod(guide, @selector(superview))) {
             IMP imp = imp_implementationWithBlock(^id(id self_) { return [self_ performSelector:@selector(owningView)]; });
@@ -211,7 +211,7 @@ static void xl_setup(void)
             IMP fwd = imp_implementationWithBlock(^id(id self_, SEL sel) {
                 id owner = [self_ performSelector:@selector(owningView)];
                 if (owner && [owner respondsToSelector:sel]) {
-                    int fd = open("/private/var/charon/xl-exp.log", O_WRONLY | O_CREAT | O_APPEND, 0666);
+                    int fd = open("/private/var/revenant/xl-exp.log", O_WRONLY | O_CREAT | O_APPEND, 0666);
                     if (fd >= 0) { dprintf(fd, "UILayoutGuide forwarded -%s to owningView\n", sel_getName(sel)); close(fd); }
                     return owner;
                 }
@@ -260,7 +260,7 @@ void xl_run_initializers(void)
 {
     xl_bridge_init();
     xl_register_storyboard_segues();
-    int trace = getenv("XL_INIT_TRACE") ? open("/private/var/charon/init-trace.log",
+    int trace = getenv("XL_INIT_TRACE") ? open("/private/var/revenant/init-trace.log",
                                                O_WRONLY | O_CREAT | O_TRUNC, 0666) : -1;
     for (uint32_t i = 0; i < xl_initializer_count; i++) {
         if (trace >= 0)
@@ -417,7 +417,7 @@ static uint64_t xl_route(State *state, Class lookup, SEL selector, id receiver, 
                     CFDictionarySetValue(xl_variant_cache, imp, (void *)variant);
                 return variant;
             }
-            FILE *f = fopen("/private/var/charon/xlate-variant-miss.log", "a");
+            FILE *f = fopen("/private/var/revenant/xlate-variant-miss.log", "a");
             if (f) {
                 fprintf(f, "-[%s %s] enc=%s: no variant match, using default\n",
                         class_getName(lookup), sel_getName(selector), stripped);
@@ -428,7 +428,7 @@ static uint64_t xl_route(State *state, Class lookup, SEL selector, id receiver, 
     guest = (uintptr_t)CFDictionaryGetValue(xl_selector_table, selector);
     if (!guest) {
         fprintf(stderr, "xlate: no bridge for -[%s %s]\n", class_getName(lookup), sel_getName(selector));
-        FILE *nb = fopen("/private/var/charon/xlate-nobridge.log", "a");
+        FILE *nb = fopen("/private/var/revenant/xlate-nobridge.log", "a");
         if (nb) {
             fprintf(nb, "%c[%s %s]\n", class_isMetaClass(lookup) ? '+' : '-', class_getName(lookup), sel_getName(selector));
             fclose(nb);
@@ -437,8 +437,8 @@ static uint64_t xl_route(State *state, Class lookup, SEL selector, id receiver, 
                 (void *)receiver, receiver ? *(uint32_t *)receiver : 0, (void *)lookup, class_getName(lookup),
                 class_isMetaClass(lookup), (void *)imp);
         xl_report_guest_frame();
-        if (getenv("XL_COLLECT") || access("/private/var/charon/xl-collect", F_OK) == 0) {
-            FILE *log = fopen("/private/var/charon/xlate-missing.log", "a");
+        if (getenv("XL_COLLECT") || access("/private/var/revenant/xl-collect", F_OK) == 0) {
+            FILE *log = fopen("/private/var/revenant/xlate-missing.log", "a");
             if (log) { fprintf(log, "-[%s %s]\n", class_getName(lookup), sel_getName(selector)); fclose(log); }
             return 0;
         }
@@ -559,10 +559,10 @@ void xl_h_objc_msgSend(State *state)
     }
     id receiver = (id)xl_narrow_pointer(self, "objc_msgSend", 0);
     SEL selector = (SEL)(uintptr_t)XL_REG(state, X1);
-    if (access("/private/var/charon/xl-trace", F_OK) == 0) {
+    if (access("/private/var/revenant/xl-trace", F_OK) == 0) {
         static int xl_tfd = -1;
         if (xl_tfd < 0)
-            xl_tfd = open("/private/var/charon/xlate-msgtrace.log", O_WRONLY | O_CREAT | O_APPEND, 0666);
+            xl_tfd = open("/private/var/revenant/xlate-msgtrace.log", O_WRONLY | O_CREAT | O_APPEND, 0666);
         if (xl_tfd >= 0) {
             const char *sn = sel_getName(selector);
             static int xl_nf = -1;
@@ -701,8 +701,8 @@ void xl_h_objc_msgSendSuper2(State *state)
 void xl_h_xl_unsupported(State *state)
 {
     const char *message = (const char *)xl_narrow_pointer(XL_REG(state, X0), "xl_unsupported", 0);
-    if (access("/private/var/charon/xl-collect", F_OK) == 0) {
-        FILE *log = fopen("/private/var/charon/xlate-missing.log", "a");
+    if (access("/private/var/revenant/xl-collect", F_OK) == 0) {
+        FILE *log = fopen("/private/var/revenant/xlate-missing.log", "a");
         if (log) { fprintf(log, "C %s\n", message); fclose(log); }
         xl_zero_result(state);
         xl_return(state);
@@ -1281,10 +1281,10 @@ void xl_manual_objc_retainBlock(struct xl_arc_pack *p)
 
 static void xl_arc_trace(uint64_t obj, const char *op)
 {
-    if (access("/private/var/charon/xl-trace", F_OK) != 0)
+    if (access("/private/var/revenant/xl-trace", F_OK) != 0)
         return;
     static int fd = -1, nf = -1;
-    if (fd < 0) fd = open("/private/var/charon/xlate-msgtrace.log", O_WRONLY | O_CREAT | O_APPEND, 0666);
+    if (fd < 0) fd = open("/private/var/revenant/xlate-msgtrace.log", O_WRONLY | O_CREAT | O_APPEND, 0666);
     if (nf < 0) nf = open("/dev/null", O_WRONLY);
     if (fd < 0) return;
     const char *st = "UNMAPPED";

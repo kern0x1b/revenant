@@ -11,7 +11,7 @@
 #include <stdexcept>
 #include <utility>
 
-namespace shade {
+namespace emulator {
 namespace {
 
     [[nodiscard]] unsigned work_priority(HostWorkKind kind)

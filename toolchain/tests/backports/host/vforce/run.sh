@@ -5,7 +5,7 @@ set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 ACCELERATE=${ACCELERATE:-$here/../../../../packages/a/apple-backports/Accelerate}
-build=${VFORCE_BUILD:-$(runs_folder charon-vforce-host)}
+build=${VFORCE_BUILD:-$(runs_folder revenant-vforce-host)}
 rm -rf "$build"
 mkdir -p "$build"
 
@@ -25,7 +25,7 @@ for part in ("ios8vforce.json",):
             print(entry["api"].rstrip("()"))
 PY
 ); do
-    renames="$renames -D$name=charon_host_$name"
+    renames="$renames -D$name=revenant_host_$name"
 done
 
 xcrun clang -fobjc-arc -w $renames -I"$ACCELERATE" -c "$ACCELERATE/vForce8.m" -o "$build/vForce8.o"

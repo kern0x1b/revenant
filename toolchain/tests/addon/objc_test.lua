@@ -81,8 +81,8 @@ local function armv7_cache(file, opt)
     put(text + 0x100, string.pack("<I8I8I8I4I4", text + 0x1000, 0, 0, 0x140, 0))
     put(text + 0x140, "/System/Library/Frameworks/Probe.framework/Probe\0")
     local sections = {{"__objc_classlist", data, 4}}
-    if opt.charon then
-        table.insert(sections, {"__charon_catlist", data + 0x100, 4})
+    if opt.revenant then
+        table.insert(sections, {"__revenant_catlist", data + 0x100, 4})
     end
     local commands = {}
     for _, segment in ipairs({{"__TEXT", text + 0x1000, 5}, {"__DATA", data, 3, sections}, {"__LINKEDIT", linkedit, 1}}) do
@@ -94,7 +94,7 @@ local function armv7_cache(file, opt)
                                            segment[3], segment[3], #(segment[4] or {}), 0) .. section)
     end
     put(text + 0x1000, string.pack("<I4i4i4I4I4I4I4", 0xFEEDFACE, 12, 9, 6, #commands, #table.concat(commands), 0) .. table.concat(commands))
-    put(text + 0x1800, "Probe\0probe\0v8@0:4\0" .. (opt.charon and "ported\0" or ""))
+    put(text + 0x1800, "Probe\0probe\0v8@0:4\0" .. (opt.revenant and "ported\0" or ""))
     words(text + 0x1900, 8, 0x7FFFFFFF)
     local class = data + 0x10
     pointers(data, class + (opt.slide or 0))
@@ -106,7 +106,7 @@ local function armv7_cache(file, opt)
     pointers(data + 0x80, text + 0x1800, 0, 0)
     words(data + 0x90, 12, 1)
     pointers(data + 0x98, text + 0x1806, text + 0x180c, text + 0x1001)
-    if opt.charon then
+    if opt.revenant then
         words(data + 0xB0, 12, 1)
         pointers(data + 0xB8, text + 0x1813, text + 0x180c, text + 0x1001)
         pointers(data + 0xC0, text + 0x1800, class, 0, 0)
@@ -136,7 +136,7 @@ local function inventory_failures(folder, opt)
     for index, case in ipairs({{"a cache read from firmware", {}, "Probe -probe"},
                            {"a class whose method list address has its low bit set, as garbage from a device copy does", {methods = 0x30001901}, "Probe "},
                            {"an image carrying the category list a built library's link renames, which a release's image never does",
-                            {charon = true}, nil, "holds 1 image this repository built, whose category section is renamed to __charon_catlist"},
+                            {revenant = true}, nil, "holds 1 image this repository built, whose category section is renamed to __revenant_catlist"},
                            {"a cache copied from a running device, its pages slid", {slide = 0x10000000}, nil, "copied from a running device: 1 of its pages hold pointers the device slid"}}) do
         local cachefile = armv7_cache(path.join(folder, "dyld_shared_cache_armv7_" .. index), case[2])
         local output, log = cachefile .. ".txt", cachefile .. ".log"
@@ -204,18 +204,18 @@ local function kept_failures(folder, opt)
                                                         "-mlinker-version=" .. fixtures.linker_version(opt.ld64), "-fuse-ld=" .. opt.ld64, "-dynamiclib",
                                                         "-framework", "Foundation", "-install_name", "/usr/lib/libheld.dylib",
                                                         "held.m", "-o", path.join(libraries, "usr", "lib", "libheld.dylib")})
-    io.writefile(path.join(folder, "kept", "selectors_armv7.txt"), "charonNoSuchSelectorAnywhere\n")
+    io.writefile(path.join(folder, "kept", "selectors_armv7.txt"), "revenantNoSuchSelectorAnywhere\n")
     local known = objc.known_selectors(libraries)
-    if known["-charonNoSuchSelectorAnywhere"] then
-        table.insert(found, "a selector list beside the release that this reader did not write must not answer it, and it answered -charonNoSuchSelectorAnywhere")
+    if known["-revenantNoSuchSelectorAnywhere"] then
+        table.insert(found, "a selector list beside the release that this reader did not write must not answer it, and it answered -revenantNoSuchSelectorAnywhere")
     end
     if not known["-heldMethod"] then
         table.insert(found, "the reading is kept beside the release and read back: -heldMethod must be in the answer, and the answer names " ..
                     table.concat(table.slice(table.orderkeys(known), 1, 8), " "))
     end
     local list = path.join(folder, "kept", "selectors_armv7.txt")
-    io.writefile(list, io.readfile(list) .. "charonMarkerInTheKeptList\n")
-    if not objc.known_selectors(libraries)["-charonMarkerInTheKeptList"] then
+    io.writefile(list, io.readfile(list) .. "revenantMarkerInTheKeptList\n")
+    if not objc.known_selectors(libraries)["-revenantMarkerInTheKeptList"] then
         table.insert(found, "a second reading must answer from the file beside the release, and it read the library again")
     end
     local keyed = os.files(path.join(folder, "kept", "selectors_armv7.txt.reader"))
@@ -253,7 +253,7 @@ local function selector_failures(folder, opt)
     local objc = import("apple.objc", {rootdir = opt.modules, anonymous = true})
     io.writefile(path.join(folder, "selectors.m"), SELECTORS)
     for _, case in ipairs({{"armv7", "armv7-apple-ios6.0", "plain"}, {"arm64", "arm64-apple-ios7.0", "plain"},
-                           {"armv7", "armv7-apple-ios6.0", "charon_catlist", {"-Wl,-rename_section,__DATA,__objc_catlist,__DATA,__charon_catlist"}}}) do
+                           {"armv7", "armv7-apple-ios6.0", "revenant_catlist", {"-Wl,-rename_section,__DATA,__objc_catlist,__DATA,__revenant_catlist"}}}) do
         local library = "libselectors_" .. case[1] .. "_" .. case[3] .. ".dylib"
         fixtures.run(folder, opt.clang, table.join({"-target", case[2], "-isysroot", opt.sdk, "-Wno-incompatible-sysroot", "-w", "-fobjc-arc",
                                                     "-mlinker-version=" .. fixtures.linker_version(opt.ld64), "-fuse-ld=" .. opt.ld64, "-dynamiclib", "-framework", "Foundation",

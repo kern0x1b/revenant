@@ -1,6 +1,6 @@
 #import <HealthKit/HealthKit.h>
 
-#import "CharonHKStore.h"
+#import "RevenantHKStore.h"
 
 @implementation HKBiologicalSexObject {
     HKBiologicalSex _biologicalSex;
@@ -11,13 +11,13 @@
     return YES;
 }
 
-+ (instancetype)charon_biologicalSexObject:(HKBiologicalSex)biologicalSex
++ (instancetype)revenant_biologicalSexObject:(HKBiologicalSex)biologicalSex
 {
-    HKBiologicalSexObject *object = [[HKBiologicalSexObject alloc] charon_initWithBiologicalSex:biologicalSex];
+    HKBiologicalSexObject *object = [[HKBiologicalSexObject alloc] revenant_initWithBiologicalSex:biologicalSex];
     return object;
 }
 
-- (instancetype)charon_initWithBiologicalSex:(HKBiologicalSex)biologicalSex
+- (instancetype)revenant_initWithBiologicalSex:(HKBiologicalSex)biologicalSex
 {
     HKBiologicalSexObject *fresh = [super init];
     if (fresh)
@@ -40,7 +40,7 @@
 
 - (id)copyWithZone:(NSZone *)zone
 {
-    return [HKBiologicalSexObject charon_biologicalSexObject:_biologicalSex];
+    return [HKBiologicalSexObject revenant_biologicalSexObject:_biologicalSex];
 }
 
 - (HKBiologicalSex)biologicalSex
@@ -66,13 +66,13 @@
     return YES;
 }
 
-+ (instancetype)charon_bloodTypeObject:(HKBloodType)bloodType
++ (instancetype)revenant_bloodTypeObject:(HKBloodType)bloodType
 {
-    HKBloodTypeObject *object = [[HKBloodTypeObject alloc] charon_initWithBloodType:bloodType];
+    HKBloodTypeObject *object = [[HKBloodTypeObject alloc] revenant_initWithBloodType:bloodType];
     return object;
 }
 
-- (instancetype)charon_initWithBloodType:(HKBloodType)bloodType
+- (instancetype)revenant_initWithBloodType:(HKBloodType)bloodType
 {
     HKBloodTypeObject *fresh = [super init];
     if (fresh)
@@ -95,7 +95,7 @@
 
 - (id)copyWithZone:(NSZone *)zone
 {
-    return [HKBloodTypeObject charon_bloodTypeObject:_bloodType];
+    return [HKBloodTypeObject revenant_bloodTypeObject:_bloodType];
 }
 
 - (HKBloodType)bloodType

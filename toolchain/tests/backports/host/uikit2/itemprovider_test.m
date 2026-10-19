@@ -9,12 +9,12 @@
 
 + (NSArray<NSString *> *)writableTypeIdentifiersForItemProvider
 {
-    return @[@"public.utf8-plain-text", @"com.charon.note"];
+    return @[@"public.utf8-plain-text", @"com.revenant.note"];
 }
 
 + (NSArray<NSString *> *)readableTypeIdentifiersForItemProvider
 {
-    return @[@"com.charon.note"];
+    return @[@"com.revenant.note"];
 }
 
 - (NSArray<NSString *> *)writableTypeIdentifiersForItemProvider
@@ -37,7 +37,7 @@
 
 @end
 
-@interface CharonHostNSItemProvider : NSObject <NSCopying>
+@interface RevenantHostNSItemProvider : NSObject <NSCopying>
 - (void)registerDataRepresentationForTypeIdentifier:(NSString *)type visibility:(NSItemProviderRepresentationVisibility)visibility loadHandler:(NSProgress *(^)(void (^)(NSData *, NSError *)))handler;
 - (void)registerFileRepresentationForTypeIdentifier:(NSString *)type fileOptions:(NSItemProviderFileOptions)options visibility:(NSItemProviderRepresentationVisibility)visibility loadHandler:(NSProgress *(^)(void (^)(NSURL *, BOOL, NSError *)))handler;
 - (NSProgress *)loadDataRepresentationForTypeIdentifier:(NSString *)type completionHandler:(void (^)(NSData *, NSError *))handler;
@@ -144,13 +144,13 @@ int main(void)
                 skip = [skip stringByAppendingString:@"A"];
             if ([entry[0] isEqualToString:@"a file URL"])
                 skip = [skip stringByAppendingString:@"S"];
-            CharonHostNSItemProvider *ours = [[CharonHostNSItemProvider alloc] initWithItem:entry[1] typeIdentifier:entry[2]];
+            RevenantHostNSItemProvider *ours = [[RevenantHostNSItemProvider alloc] initWithItem:entry[1] typeIdentifier:entry[2]];
             NSItemProvider *system = [[NSItemProvider alloc] initWithItem:entry[1] typeIdentifier:entry[2]];
             NSString *one = matrix_row(ours, entry[2], skip), *two = matrix_row(system, entry[2], skip);
-            charon_check([one isEqualToString:two], [[@"loading " stringByAppendingString:entry[0]] UTF8String], ([NSString stringWithFormat:@"\n  port %@\n  system %@", one, two]));
+            revenant_check([one isEqualToString:two], [[@"loading " stringByAppendingString:entry[0]] UTF8String], ([NSString stringWithFormat:@"\n  port %@\n  system %@", one, two]));
         }
 
-        CharonHostNSItemProvider *ours = [[CharonHostNSItemProvider alloc] initWithItem:@"hello" typeIdentifier:@"public.plain-text"];
+        RevenantHostNSItemProvider *ours = [[RevenantHostNSItemProvider alloc] initWithItem:@"hello" typeIdentifier:@"public.plain-text"];
         NSItemProvider *system = [[NSItemProvider alloc] initWithItem:@"hello" typeIdentifier:@"public.plain-text"];
         NSMutableArray *conformances = [NSMutableArray array];
         for (NSString *type in @[@"public.plain-text", @"public.text", @"public.utf8-plain-text", @"public.image", @"public.data", @"com.bogus", @"public.content"])
@@ -160,23 +160,23 @@ int main(void)
             NSArray *parts = [entry componentsSeparatedByString:@":"];
             same = same && [parts[1] isEqual:parts[2]];
         }
-        charon_check(same && [ours.registeredTypeIdentifiers isEqual:system.registeredTypeIdentifiers], "the types a provider has and conforms to", [conformances componentsJoinedByString:@" "]);
-        charon_check([[[CharonHostNSItemProvider alloc] init].registeredTypeIdentifiers isEqual:[[NSItemProvider alloc] init].registeredTypeIdentifiers], "an empty provider has no types", @"it has");
+        revenant_check(same && [ours.registeredTypeIdentifiers isEqual:system.registeredTypeIdentifiers], "the types a provider has and conforms to", [conformances componentsJoinedByString:@" "]);
+        revenant_check([[[RevenantHostNSItemProvider alloc] init].registeredTypeIdentifiers isEqual:[[NSItemProvider alloc] init].registeredTypeIdentifiers], "an empty provider has no types", @"it has");
         NSString *raisedOne = @"none", *raisedTwo = @"none";
-        @try { (void)[[CharonHostNSItemProvider alloc] initWithItem:@"x" typeIdentifier:nil]; } @catch (NSException *exception) { raisedOne = exception.name; }
+        @try { (void)[[RevenantHostNSItemProvider alloc] initWithItem:@"x" typeIdentifier:nil]; } @catch (NSException *exception) { raisedOne = exception.name; }
         @try { (void)[[NSItemProvider alloc] initWithItem:@"x" typeIdentifier:nil]; } @catch (NSException *exception) { raisedTwo = exception.name; }
-        charon_check([raisedOne isEqualToString:raisedTwo] && ![raisedOne isEqualToString:@"none"], "an item with no type is refused", raisedOne);
+        revenant_check([raisedOne isEqualToString:raisedTwo] && ![raisedOne isEqualToString:@"none"], "an item with no type is refused", raisedOne);
 
         for (NSString *type in @[@"com.bogus", @"public.image"]) {
             __block NSString *one = @"none", *two = @"none";
             [ours loadItemForTypeIdentifier:type options:nil completionHandler:^(id item, NSError *error) { one = describe(item, error); }];
             [system loadItemForTypeIdentifier:type options:nil completionHandler:^(id item, NSError *error) { two = describe(item, error); }];
             spin(0.3);
-            charon_check([one isEqualToString:two], [[@"a type the provider does not have: " stringByAppendingString:type] UTF8String], ([NSString stringWithFormat:@"%@ != %@", one, two]));
+            revenant_check([one isEqualToString:two], [[@"a type the provider does not have: " stringByAppendingString:type] UTF8String], ([NSString stringWithFormat:@"%@ != %@", one, two]));
         }
 
         for (NSNumber *withNothing in @[@NO, @YES]) {
-            CharonHostNSItemProvider *handlerOurs = [[CharonHostNSItemProvider alloc] init];
+            RevenantHostNSItemProvider *handlerOurs = [[RevenantHostNSItemProvider alloc] init];
             NSItemProvider *handlerSystem = [[NSItemProvider alloc] init];
             NSMutableArray *seen = [NSMutableArray array];
             NSItemProviderLoadHandler make = ^(NSItemProviderCompletionHandler completion, Class expected, NSDictionary *options) {
@@ -198,11 +198,11 @@ int main(void)
             BOOL equalPairs = seen.count == 6;
             for (NSUInteger index = 0; equalPairs && index < 3; index++)
                 equalPairs = [seen[index * 2] isEqualToString:seen[index * 2 + 1]];
-            charon_check([one isEqualToString:two] && equalPairs, withNothing.boolValue ? "a load handler is told the class asked for and empty options" : "a load handler is told the class asked for and the options", ([NSString stringWithFormat:@"%@ / %@ / %@", one, two, seen]));
+            revenant_check([one isEqualToString:two] && equalPairs, withNothing.boolValue ? "a load handler is told the class asked for and empty options" : "a load handler is told the class asked for and the options", ([NSString stringWithFormat:@"%@ / %@ / %@", one, two, seen]));
         }
 
         for (NSString *kind in @[@"error", @"nil"]) {
-            CharonHostNSItemProvider *badOurs = [[CharonHostNSItemProvider alloc] init];
+            RevenantHostNSItemProvider *badOurs = [[RevenantHostNSItemProvider alloc] init];
             NSItemProvider *badSystem = [[NSItemProvider alloc] init];
             NSItemProviderLoadHandler fail = ^(NSItemProviderCompletionHandler completion, Class expected, NSDictionary *options) {
                 completion(nil, [kind isEqualToString:@"error"] ? [NSError errorWithDomain:@"mine" code:5 userInfo:nil] : nil);
@@ -213,36 +213,36 @@ int main(void)
             [badOurs loadItemForTypeIdentifier:@"public.plain-text" options:nil completionHandler:^(NSString *item, NSError *error) { one = describe(item, error); }];
             [badSystem loadItemForTypeIdentifier:@"public.plain-text" options:nil completionHandler:^(NSString *item, NSError *error) { two = describe(item, error); }];
             spin(0.3);
-            charon_check([one isEqualToString:two], [[@"a handler that answers " stringByAppendingString:kind] UTF8String], ([NSString stringWithFormat:@"%@ != %@", one, two]));
+            revenant_check([one isEqualToString:two], [[@"a handler that answers " stringByAppendingString:kind] UTF8String], ([NSString stringWithFormat:@"%@ != %@", one, two]));
         }
 
-        CharonHostNSItemProvider *orderOurs = [[CharonHostNSItemProvider alloc] init];
+        RevenantHostNSItemProvider *orderOurs = [[RevenantHostNSItemProvider alloc] init];
         NSItemProvider *orderSystem = [[NSItemProvider alloc] init];
         for (NSString *type in @[@"public.plain-text", @"public.utf8-plain-text", @"public.plain-text"]) {
             NSItemProviderLoadHandler handler = ^(NSItemProviderCompletionHandler completion, Class expected, NSDictionary *options) { completion(type, nil); };
             [orderOurs registerItemForTypeIdentifier:type loadHandler:handler];
             [orderSystem registerItemForTypeIdentifier:type loadHandler:handler];
         }
-        charon_check([orderOurs.registeredTypeIdentifiers isEqual:orderSystem.registeredTypeIdentifiers], "registering a type again keeps its place", ([NSString stringWithFormat:@"%@ != %@", orderOurs.registeredTypeIdentifiers, orderSystem.registeredTypeIdentifiers]));
+        revenant_check([orderOurs.registeredTypeIdentifiers isEqual:orderSystem.registeredTypeIdentifiers], "registering a type again keeps its place", ([NSString stringWithFormat:@"%@ != %@", orderOurs.registeredTypeIdentifiers, orderSystem.registeredTypeIdentifiers]));
         __block NSString *first = @"none", *second = @"none";
         [orderOurs loadItemForTypeIdentifier:@"public.text" options:nil completionHandler:^(NSString *item, NSError *error) { first = describe(item, error); }];
         [orderSystem loadItemForTypeIdentifier:@"public.text" options:nil completionHandler:^(NSString *item, NSError *error) { second = describe(item, error); }];
         spin(0.3);
-        charon_check([first isEqualToString:second], "the first type that conforms answers", ([NSString stringWithFormat:@"%@ != %@", first, second]));
+        revenant_check([first isEqualToString:second], "the first type that conforms answers", ([NSString stringWithFormat:@"%@ != %@", first, second]));
 
-        CharonHostNSItemProvider *fileOurs = [[CharonHostNSItemProvider alloc] initWithContentsOfURL:[NSURL fileURLWithPath:text]];
+        RevenantHostNSItemProvider *fileOurs = [[RevenantHostNSItemProvider alloc] initWithContentsOfURL:[NSURL fileURLWithPath:text]];
         NSItemProvider *fileSystem = [[NSItemProvider alloc] initWithContentsOfURL:[NSURL fileURLWithPath:text]];
-        charon_check([fileOurs.registeredTypeIdentifiers isEqual:fileSystem.registeredTypeIdentifiers], "a provider of a file has the type of the file, the file URL and the URL", ([NSString stringWithFormat:@"%@ != %@", fileOurs.registeredTypeIdentifiers, fileSystem.registeredTypeIdentifiers]));
+        revenant_check([fileOurs.registeredTypeIdentifiers isEqual:fileSystem.registeredTypeIdentifiers], "a provider of a file has the type of the file, the file URL and the URL", ([NSString stringWithFormat:@"%@ != %@", fileOurs.registeredTypeIdentifiers, fileSystem.registeredTypeIdentifiers]));
         NSString *one = matrix_row(fileOurs, [fileOurs.registeredTypeIdentifiers firstObject], @"");
         NSString *two = matrix_row(fileSystem, [fileSystem.registeredTypeIdentifiers firstObject], @"");
-        charon_check([one isEqualToString:two], "the contents of a file as each class", ([NSString stringWithFormat:@"\n  port %@\n  system %@", one, two]));
+        revenant_check([one isEqualToString:two], "the contents of a file as each class", ([NSString stringWithFormat:@"\n  port %@\n  system %@", one, two]));
         one = matrix_row(fileOurs, @"public.file-url", @"A");
         two = matrix_row(fileSystem, @"public.file-url", @"A");
-        charon_check([one isEqualToString:two], "the URL of a file as each class", ([NSString stringWithFormat:@"\n  port %@\n  system %@", one, two]));
+        revenant_check([one isEqualToString:two], "the URL of a file as each class", ([NSString stringWithFormat:@"\n  port %@\n  system %@", one, two]));
 
-        CharonHostNSItemProvider *copyOurs = [ours copy];
+        RevenantHostNSItemProvider *copyOurs = [ours copy];
         NSItemProvider *copySystem = [system copy];
-        charon_check(copyOurs != ours && copySystem != system && [copyOurs.registeredTypeIdentifiers isEqual:copySystem.registeredTypeIdentifiers], "a copy is another provider with the same types", @"it is not");
+        revenant_check(copyOurs != ours && copySystem != system && [copyOurs.registeredTypeIdentifiers isEqual:copySystem.registeredTypeIdentifiers], "a copy is another provider with the same types", @"it is not");
 
         NSItemProviderLoadHandler preview = ^(NSItemProviderCompletionHandler completion, Class expected, NSDictionary *options) { completion(image, nil); };
         ours.previewImageHandler = preview;
@@ -250,12 +250,12 @@ int main(void)
         __block NSString *previewOne = @"none", *previewTwo = @"none", *noneOne = @"none", *noneTwo = @"none";
         [ours loadPreviewImageWithOptions:nil completionHandler:^(UIImage *item, NSError *error) { previewOne = describe(item, error); }];
         [system loadPreviewImageWithOptions:nil completionHandler:^(UIImage *item, NSError *error) { previewTwo = describe(item, error); }];
-        [[[CharonHostNSItemProvider alloc] init] loadPreviewImageWithOptions:nil completionHandler:^(UIImage *item, NSError *error) { noneOne = describe(item, error); }];
+        [[[RevenantHostNSItemProvider alloc] init] loadPreviewImageWithOptions:nil completionHandler:^(UIImage *item, NSError *error) { noneOne = describe(item, error); }];
         [[[NSItemProvider alloc] init] loadPreviewImageWithOptions:nil completionHandler:^(UIImage *item, NSError *error) { noneTwo = describe(item, error); }];
         spin(0.3);
-        charon_check([previewOne isEqualToString:previewTwo] && [noneOne isEqualToString:noneTwo], "the preview image", ([NSString stringWithFormat:@"%@ %@ / %@ %@", previewOne, previewTwo, noneOne, noneTwo]));
+        revenant_check([previewOne isEqualToString:previewTwo] && [noneOne isEqualToString:noneTwo], "the preview image", ([NSString stringWithFormat:@"%@ %@ / %@ %@", previewOne, previewTwo, noneOne, noneTwo]));
         {
-            CharonHostNSItemProvider *o = [[CharonHostNSItemProvider alloc] init];
+            RevenantHostNSItemProvider *o = [[RevenantHostNSItemProvider alloc] init];
             NSItemProvider *sy = [[NSItemProvider alloc] init];
             NSString *folder = [NSTemporaryDirectory() stringByAppendingPathComponent:@"provider-files"];
             [[NSFileManager defaultManager] createDirectoryAtPath:folder withIntermediateDirectories:YES attributes:nil error:NULL];
@@ -275,8 +275,8 @@ int main(void)
                     return nil;
                 }];
             }
-            charon_check([o.registeredTypeIdentifiers isEqual:sy.registeredTypeIdentifiers] && [[o registeredTypeIdentifiersWithFileOptions:0] isEqual:[sy registeredTypeIdentifiersWithFileOptions:0]] && [[o registeredTypeIdentifiersWithFileOptions:NSItemProviderFileOptionOpenInPlace] isEqual:[sy registeredTypeIdentifiersWithFileOptions:NSItemProviderFileOptionOpenInPlace]], "the types of data and file representations, with and without opening in place", ([NSString stringWithFormat:@"%@ %@ / %@ %@", [o registeredTypeIdentifiersWithFileOptions:0], [o registeredTypeIdentifiersWithFileOptions:1], [sy registeredTypeIdentifiersWithFileOptions:0], [sy registeredTypeIdentifiersWithFileOptions:1]]));
-            charon_check([o hasRepresentationConformingToTypeIdentifier:@"public.text" fileOptions:0] == [sy hasRepresentationConformingToTypeIdentifier:@"public.text" fileOptions:0] && [o hasRepresentationConformingToTypeIdentifier:@"public.png" fileOptions:NSItemProviderFileOptionOpenInPlace] == [sy hasRepresentationConformingToTypeIdentifier:@"public.png" fileOptions:NSItemProviderFileOptionOpenInPlace] && [o hasRepresentationConformingToTypeIdentifier:@"public.png" fileOptions:0] == [sy hasRepresentationConformingToTypeIdentifier:@"public.png" fileOptions:0], "a representation conforming to a type, with the file options", @"they differ");
+            revenant_check([o.registeredTypeIdentifiers isEqual:sy.registeredTypeIdentifiers] && [[o registeredTypeIdentifiersWithFileOptions:0] isEqual:[sy registeredTypeIdentifiersWithFileOptions:0]] && [[o registeredTypeIdentifiersWithFileOptions:NSItemProviderFileOptionOpenInPlace] isEqual:[sy registeredTypeIdentifiersWithFileOptions:NSItemProviderFileOptionOpenInPlace]], "the types of data and file representations, with and without opening in place", ([NSString stringWithFormat:@"%@ %@ / %@ %@", [o registeredTypeIdentifiersWithFileOptions:0], [o registeredTypeIdentifiersWithFileOptions:1], [sy registeredTypeIdentifiersWithFileOptions:0], [sy registeredTypeIdentifiersWithFileOptions:1]]));
+            revenant_check([o hasRepresentationConformingToTypeIdentifier:@"public.text" fileOptions:0] == [sy hasRepresentationConformingToTypeIdentifier:@"public.text" fileOptions:0] && [o hasRepresentationConformingToTypeIdentifier:@"public.png" fileOptions:NSItemProviderFileOptionOpenInPlace] == [sy hasRepresentationConformingToTypeIdentifier:@"public.png" fileOptions:NSItemProviderFileOptionOpenInPlace] && [o hasRepresentationConformingToTypeIdentifier:@"public.png" fileOptions:0] == [sy hasRepresentationConformingToTypeIdentifier:@"public.png" fileOptions:0], "a representation conforming to a type, with the file options", @"they differ");
             NSMutableArray *records = [NSMutableArray array];
             for (id p in @[o, sy]) {
                 NSMutableString *record = [NSMutableString string];
@@ -295,24 +295,24 @@ int main(void)
                 NSArray *parts = [[record componentsSeparatedByString:@" "] sortedArrayUsingSelector:@selector(compare:)];
                 [records addObject:[parts componentsJoinedByString:@" "]];
             }
-            charon_check([records[0] isEqualToString:records[1]], "loading data and files from representations", ([NSString stringWithFormat:@"\n  port %@\n  system %@", records[0], records[1]]));
+            revenant_check([records[0] isEqualToString:records[1]], "loading data and files from representations", ([NSString stringWithFormat:@"\n  port %@\n  system %@", records[0], records[1]]));
 
             Note *note = [[Note alloc] init];
             note.text = @"body";
-            CharonHostNSItemProvider *objectOurs = [[CharonHostNSItemProvider alloc] initWithObject:note];
+            RevenantHostNSItemProvider *objectOurs = [[RevenantHostNSItemProvider alloc] initWithObject:note];
             NSItemProvider *objectSystem = [[NSItemProvider alloc] initWithObject:note];
-            charon_check([objectOurs.registeredTypeIdentifiers isEqual:objectSystem.registeredTypeIdentifiers] && [objectOurs canLoadObjectOfClass:[Note class]] == [objectSystem canLoadObjectOfClass:[Note class]] && [objectOurs canLoadObjectOfClass:[NSString class]] == [objectSystem canLoadObjectOfClass:[NSString class]], "a provider of an object has its types and can load its class", ([NSString stringWithFormat:@"%@ / %@", objectOurs.registeredTypeIdentifiers, objectSystem.registeredTypeIdentifiers]));
+            revenant_check([objectOurs.registeredTypeIdentifiers isEqual:objectSystem.registeredTypeIdentifiers] && [objectOurs canLoadObjectOfClass:[Note class]] == [objectSystem canLoadObjectOfClass:[Note class]] && [objectOurs canLoadObjectOfClass:[NSString class]] == [objectSystem canLoadObjectOfClass:[NSString class]], "a provider of an object has its types and can load its class", ([NSString stringWithFormat:@"%@ / %@", objectOurs.registeredTypeIdentifiers, objectSystem.registeredTypeIdentifiers]));
             __block NSString *loadedOurs = @"none", *loadedSystem = @"none";
             [objectOurs loadObjectOfClass:[Note class] completionHandler:^(id object, NSError *error) { loadedOurs = object ? [object text] : describe(nil, error); }];
             [objectSystem loadObjectOfClass:[Note class] completionHandler:^(id object, NSError *error) { loadedSystem = object ? [object text] : describe(nil, error); }];
             spin(0.5);
-            charon_check([loadedOurs isEqualToString:loadedSystem], "loading an object back", ([NSString stringWithFormat:@"%@ != %@", loadedOurs, loadedSystem]));
+            revenant_check([loadedOurs isEqualToString:loadedSystem], "loading an object back", ([NSString stringWithFormat:@"%@ != %@", loadedOurs, loadedSystem]));
             o.suggestedName = @"name";
             sy.suggestedName = @"name";
-            charon_check([o.suggestedName isEqual:sy.suggestedName], "the suggested name is kept", @"it is not");
+            revenant_check([o.suggestedName isEqual:sy.suggestedName], "the suggested name is kept", @"it is not");
         }
-        charon_check([NSItemProviderErrorDomain isEqualToString:@"NSItemProviderErrorDomain"] && NSItemProviderUnknownError == -1 && NSItemProviderItemUnavailableError == -1000 && NSItemProviderUnexpectedValueClassError == -1100 && NSItemProviderUnavailableCoercionError == -1200, "the error domain and the codes", @"they differ");
+        revenant_check([NSItemProviderErrorDomain isEqualToString:@"NSItemProviderErrorDomain"] && NSItemProviderUnknownError == -1 && NSItemProviderItemUnavailableError == -1000 && NSItemProviderUnexpectedValueClassError == -1100 && NSItemProviderUnavailableCoercionError == -1200, "the error domain and the codes", @"they differ");
     }
-    printf("checks=%d failures=%d\n", charon_checks, charon_failures);
-    return charon_failures;
+    printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
+    return revenant_failures;
 }

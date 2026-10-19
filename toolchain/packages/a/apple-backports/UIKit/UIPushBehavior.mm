@@ -1,4 +1,4 @@
-#import "CharonDynamics.h"
+#import "RevenantDynamics.h"
 
 @implementation UIPushBehavior {
     UIPushBehaviorMode _mode;
@@ -16,11 +16,11 @@
 
 - (instancetype)initWithItems:(NSArray *)items mode:(UIPushBehaviorMode)mode
 {
-    if (!(self = [super charon_initPrimitive:YES]))
+    if (!(self = [super revenant_initPrimitive:YES]))
         return nil;
     _mode = mode;
     _active = YES;
-    [[self charon_items] addObjectsFromArray:items ?: @[]];
+    [[self revenant_items] addObjectsFromArray:items ?: @[]];
     return self;
 }
 
@@ -28,14 +28,14 @@
 {
     NSMutableString *description = [NSMutableString stringWithString:[super description]];
     [description appendFormat:@" {%f, %f} - <%f,%f> ", _forceVector.dx, _forceVector.dy, _magnitude, _angle];
-    for (id item in [self charon_items])
-        [description appendFormat:@"(%@ -> %@)", item, NSStringFromCGPoint([self charon_offsetForItem:item])];
+    for (id item in [self revenant_items])
+        [description appendFormat:@"(%@ -> %@)", item, NSStringFromCGPoint([self revenant_offsetForItem:item])];
     return description;
 }
 
 - (NSArray *)items
 {
-    return [NSArray arrayWithArray:[self charon_items]];
+    return [NSArray arrayWithArray:[self revenant_items]];
 }
 
 - (UIPushBehaviorMode)mode
@@ -53,7 +53,7 @@
     if (active == _active)
         return;
     _active = active;
-    [[self charon_context] charon_tickle];
+    [[self revenant_context] revenant_tickle];
 }
 
 - (CGFloat)angle
@@ -78,7 +78,7 @@
     _forceVector = direction;
     _angle = atan2(direction.dy, direction.dx);
     _magnitude = sqrt(direction.dx * direction.dx + direction.dy * direction.dy);
-    [self charon_changedParameterForBody:nil];
+    [self revenant_changedParameterForBody:nil];
 }
 
 - (void)setAngle:(CGFloat)angle
@@ -99,10 +99,10 @@
     _magnitude = magnitude;
     float sine = sinf((float)angle), cosine = cosf((float)angle);
     _forceVector = CGVectorMake(magnitude * (double)cosine, magnitude * (double)sine);
-    [self charon_changedParameterForBody:nil];
+    [self revenant_changedParameterForBody:nil];
 }
 
-- (CGPoint)charon_offsetForItem:(id<UIDynamicItem>)item
+- (CGPoint)revenant_offsetForItem:(id<UIDynamicItem>)item
 {
     NSValue *offset = _targetPoints[[NSValue valueWithPointer:(__bridge const void *)item]];
     return offset ? [offset CGPointValue] : CGPointZero;
@@ -110,7 +110,7 @@
 
 - (UIOffset)targetOffsetFromCenterForItem:(id<UIDynamicItem>)item
 {
-    CGPoint offset = [self charon_offsetForItem:item];
+    CGPoint offset = [self revenant_offsetForItem:item];
     return UIOffsetMake(offset.x, offset.y);
 }
 
@@ -118,7 +118,7 @@
 {
     if (!item)
         return;
-    CGPoint current = [self charon_offsetForItem:item];
+    CGPoint current = [self revenant_offsetForItem:item];
     if (current.x == offset.horizontal && current.y == offset.vertical)
         return;
     id key = [NSValue valueWithPointer:(__bridge const void *)item];
@@ -130,50 +130,50 @@
         _targetPoints = _targetPoints ?: [NSMutableDictionary new];
         _targetPoints[key] = [NSValue valueWithCGPoint:CGPointMake(offset.horizontal, offset.vertical)];
     }
-    [self charon_changedParameterForBody:nil];
+    [self revenant_changedParameterForBody:nil];
 }
 
 - (void)addItem:(id<UIDynamicItem>)item
 {
-    if ([[self charon_items] containsObject:item])
+    if ([[self revenant_items] containsObject:item])
         return;
-    if ([self charon_isAssociated])
-        [[self charon_context] charon_registerBodyForItem:item shape:CharonDynamicsShapeBox].usesPreciseCollisionDetection = YES;
-    [[self charon_items] addObject:item];
+    if ([self revenant_isAssociated])
+        [[self revenant_context] revenant_registerBodyForItem:item shape:RevenantDynamicsShapeBox].usesPreciseCollisionDetection = YES;
+    [[self revenant_items] addObject:item];
 }
 
 - (void)removeItem:(id<UIDynamicItem>)item
 {
-    if (![[self charon_items] containsObject:item])
+    if (![[self revenant_items] containsObject:item])
         return;
-    [[self charon_context] charon_unregisterBodyForItem:item action:nil];
+    [[self revenant_context] revenant_unregisterBodyForItem:item action:nil];
     [_targetPoints removeObjectForKey:[NSValue valueWithPointer:(__bridge const void *)item]];
     if (_targetPoints.count == 0)
         _targetPoints = nil;
-    [[self charon_items] removeObject:item];
+    [[self revenant_items] removeObject:item];
 }
 
-- (void)charon_associate
+- (void)revenant_associate
 {
-    [super charon_associate];
-    for (id<UIDynamicItem> item in [self charon_items])
-        [[self charon_context] charon_registerBodyForItem:item shape:CharonDynamicsShapeBox].usesPreciseCollisionDetection = YES;
+    [super revenant_associate];
+    for (id<UIDynamicItem> item in [self revenant_items])
+        [[self revenant_context] revenant_registerBodyForItem:item shape:RevenantDynamicsShapeBox].usesPreciseCollisionDetection = YES;
 }
 
-- (void)charon_dissociate
+- (void)revenant_dissociate
 {
-    for (id<UIDynamicItem> item in [self charon_items])
-        [[self charon_context] charon_unregisterBodyForItem:item action:nil];
-    [super charon_dissociate];
+    for (id<UIDynamicItem> item in [self revenant_items])
+        [[self revenant_context] revenant_unregisterBodyForItem:item action:nil];
+    [super revenant_dissociate];
 }
 
-- (void)charon_step
+- (void)revenant_step
 {
     if (!_active)
         return;
-    UIDynamicAnimator *context = [self charon_context];
-    for (id<UIDynamicItem> item in [self charon_items]) {
-        CharonDynamicsBody *body = [context charon_bodyForItem:item];
+    UIDynamicAnimator *context = [self revenant_context];
+    for (id<UIDynamicItem> item in [self revenant_items]) {
+        RevenantDynamicsBody *body = [context revenant_bodyForItem:item];
         NSValue *offset = _targetPoints[[NSValue valueWithPointer:(__bridge const void *)item]];
         if (offset) {
             CGPoint center = item.center, shift = [offset CGPointValue];

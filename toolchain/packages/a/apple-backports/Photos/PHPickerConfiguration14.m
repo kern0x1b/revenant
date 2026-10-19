@@ -1,4 +1,4 @@
-#import "CharonPhotosPicker.h"
+#import "RevenantPhotosPicker.h"
 
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
 #pragma clang diagnostic ignored "-Wobjc-designated-initializers"

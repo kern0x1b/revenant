@@ -20,7 +20,7 @@ NSString * const NSStringTransformStripDiacritics = @")kCFStringTransformStripDi
 static const struct {
     const CFStringRef *identifier;
     __unsafe_unretained NSString *inverse;
-} charon_transforms[] = {
+} revenant_transforms[] = {
     {&kCFStringTransformLatinKatakana, @"Katakana-Latin"},
     {&kCFStringTransformLatinHiragana, @"Hiragana-Latin"},
     {&kCFStringTransformLatinHangul, @"Hangul-Latin"},
@@ -39,7 +39,7 @@ static const struct {
     {&kCFStringTransformStripDiacritics, nil}
 };
 
-static NSString *charon_transform_swapped(NSString *step)
+static NSString *revenant_transform_swapped(NSString *step)
 {
     NSRange separator = [step rangeOfString:@"-"];
     if (separator.location == NSNotFound)
@@ -47,16 +47,16 @@ static NSString *charon_transform_swapped(NSString *step)
     return [NSString stringWithFormat:@"%@-%@", [step substringFromIndex:NSMaxRange(separator)], [step substringToIndex:separator.location]];
 }
 
-static NSString *charon_transform_inverse(NSString *transform)
+static NSString *revenant_transform_inverse(NSString *transform)
 {
-    for (size_t index = 0; index < sizeof charon_transforms / sizeof *charon_transforms; index++) {
-        if ([transform isEqualToString:(__bridge NSString *)*charon_transforms[index].identifier])
-            return charon_transforms[index].inverse;
+    for (size_t index = 0; index < sizeof revenant_transforms / sizeof *revenant_transforms; index++) {
+        if ([transform isEqualToString:(__bridge NSString *)*revenant_transforms[index].identifier])
+            return revenant_transforms[index].inverse;
     }
     NSArray *steps = [transform componentsSeparatedByString:@";"];
     NSMutableArray *inverted = [NSMutableArray arrayWithCapacity:steps.count];
     for (NSString *step in steps) {
-        NSString *swapped = charon_transform_swapped([step stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]]);
+        NSString *swapped = revenant_transform_swapped([step stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]]);
         if (!swapped)
             return nil;
         [inverted insertObject:swapped atIndex:0];
@@ -64,7 +64,7 @@ static NSString *charon_transform_inverse(NSString *transform)
     return [inverted componentsJoinedByString:@"; "];
 }
 
-static BOOL charon_transform_reverses(void)
+static BOOL revenant_transform_reverses(void)
 {
     static BOOL honoured;
     static dispatch_once_t once;
@@ -75,25 +75,25 @@ static BOOL charon_transform_reverses(void)
     return honoured;
 }
 
-static CFStringRef charon_transform_identifier(NSString *transform, BOOL *reverse)
+static CFStringRef revenant_transform_identifier(NSString *transform, BOOL *reverse)
 {
-    if (*reverse && !charon_transform_reverses()) {
+    if (*reverse && !revenant_transform_reverses()) {
         *reverse = NO;
-        return (__bridge CFStringRef)charon_transform_inverse(transform);
+        return (__bridge CFStringRef)revenant_transform_inverse(transform);
     }
-    for (size_t index = 0; index < sizeof charon_transforms / sizeof *charon_transforms; index++) {
-        if ([transform isEqualToString:(__bridge NSString *)*charon_transforms[index].identifier])
-            return *charon_transforms[index].identifier;
+    for (size_t index = 0; index < sizeof revenant_transforms / sizeof *revenant_transforms; index++) {
+        if ([transform isEqualToString:(__bridge NSString *)*revenant_transforms[index].identifier])
+            return *revenant_transforms[index].identifier;
     }
     return (__bridge CFStringRef)transform;
 }
 
-@implementation NSString (CharonTransform)
+@implementation NSString (RevenantTransform)
 
 - (NSString *)stringByApplyingTransform:(NSString *)transform reverse:(BOOL)reverse
 {
     BOOL reversed = reverse;
-    CFStringRef identifier = charon_transform_identifier(transform, &reversed);
+    CFStringRef identifier = revenant_transform_identifier(transform, &reversed);
     if (!identifier)
         return nil;
     NSMutableString *transformed = [self mutableCopy];
@@ -104,12 +104,12 @@ static CFStringRef charon_transform_identifier(NSString *transform, BOOL *revers
 
 @end
 
-@implementation NSMutableString (CharonTransform)
+@implementation NSMutableString (RevenantTransform)
 
 - (BOOL)applyTransform:(NSString *)transform reverse:(BOOL)reverse range:(NSRange)range updatedRange:(NSRangePointer)resultingRange
 {
     BOOL reversed = reverse;
-    CFStringRef identifier = charon_transform_identifier(transform, &reversed);
+    CFStringRef identifier = revenant_transform_identifier(transform, &reversed);
     if (!identifier)
         return NO;
     CFRange updated = CFRangeMake((CFIndex)range.location, (CFIndex)range.length);

@@ -5,15 +5,15 @@
 
 #pragma clang diagnostic ignored "-Warc-performSelector-leaks"
 
-extern NSInteger CharonHostUIEventButtonMaskForButtonNumber(NSInteger buttonNumber);
-extern NSInteger CharonHostUIEventButtonMaskForButtonNumber(NSInteger buttonNumber);
+extern NSInteger RevenantHostUIEventButtonMaskForButtonNumber(NSInteger buttonNumber);
+extern NSInteger RevenantHostUIEventButtonMaskForButtonNumber(NSInteger buttonNumber);
 
-void charon_windowed_run(UIWindow *window);
+void revenant_windowed_run(UIWindow *window);
 
 static NSString *norm(id object)
 {
     NSString *text = [NSString stringWithFormat:@"%@", object];
-    text = [text stringByReplacingOccurrencesOfString:@"CharonHost" withString:@""];
+    text = [text stringByReplacingOccurrencesOfString:@"RevenantHost" withString:@""];
     NSRegularExpression *pointer = [NSRegularExpression regularExpressionWithPattern:@"0x[0-9a-f]+" options:0 error:nil];
     return [pointer stringByReplacingMatchesInString:text options:0 range:NSMakeRange(0, text.length) withTemplate:@"PTR"];
 }
@@ -35,7 +35,7 @@ static void agree(NSString *name, NSArray *ours, NSArray *system)
         if (![a isEqual:b])
             [detail appendFormat:@"\n    port   %@\n    system %@", a, b];
     }
-    charon_check(detail.length == 0, name.UTF8String, detail);
+    revenant_check(detail.length == 0, name.UTF8String, detail);
 }
 
 static NSString *line(NSString *label, id value)
@@ -51,8 +51,8 @@ static NSString *yes(BOOL value)
 static NSArray *button_lines(UIView *window)
 {
     NSMutableArray *lines = [NSMutableArray array];
-    SEL enabled = NSSelectorFromString(@"charonHostIsPointerInteractionEnabled"), set_enabled = NSSelectorFromString(@"charonHostSetPointerInteractionEnabled:"),
-        get_selector = NSSelectorFromString(@"charonHostPointerStyleProvider"), set_selector = NSSelectorFromString(@"charonHostSetPointerStyleProvider:");
+    SEL enabled = NSSelectorFromString(@"revenantHostIsPointerInteractionEnabled"), set_enabled = NSSelectorFromString(@"revenantHostSetPointerInteractionEnabled:"),
+        get_selector = NSSelectorFromString(@"revenantHostPointerStyleProvider"), set_selector = NSSelectorFromString(@"revenantHostSetPointerStyleProvider:");
     for (int ours = 0; ours < 2; ours++) {
         NSMutableArray *rows = [NSMutableArray array];
         UIButton *button = [UIButton buttonWithType:UIButtonTypeSystem];
@@ -84,8 +84,8 @@ static NSArray *button_lines(UIView *window)
 static NSArray *gesture_lines(BOOL ours)
 {
     NSMutableArray *lines = [NSMutableArray array];
-    SEL modifiers = NSSelectorFromString(@"charonHostModifierFlags"), mask = NSSelectorFromString(@"charonHostButtonMask"), receive = NSSelectorFromString(@"charonHostShouldReceiveEvent:"),
-        required = NSSelectorFromString(@"charonHostButtonMaskRequired"), set_required = NSSelectorFromString(@"charonHostSetButtonMaskRequired:");
+    SEL modifiers = NSSelectorFromString(@"revenantHostModifierFlags"), mask = NSSelectorFromString(@"revenantHostButtonMask"), receive = NSSelectorFromString(@"revenantHostShouldReceiveEvent:"),
+        required = NSSelectorFromString(@"revenantHostButtonMaskRequired"), set_required = NSSelectorFromString(@"revenantHostSetButtonMaskRequired:");
     UIPanGestureRecognizer *pan = [[UIPanGestureRecognizer alloc] init];
     UIEvent *event = [[UIEvent alloc] init];
     [lines addObject:line(@"recognizer", @[@(ours ? ((NSInteger (*)(id, SEL))objc_msgSend)(pan, modifiers) : pan.modifierFlags), @(ours ? ((NSInteger (*)(id, SEL))objc_msgSend)(pan, mask) : pan.buttonMask),
@@ -105,20 +105,20 @@ static NSArray *gesture_lines(BOOL ours)
     return lines;
 }
 
-void charon_windowed_run(UIWindow *window)
+void revenant_windowed_run(UIWindow *window)
 {
     BOOL masks = YES;
     NSMutableString *bad = [NSMutableString string];
     for (NSInteger number = -70; number < 200; number++) {
-        NSInteger ours = CharonHostUIEventButtonMaskForButtonNumber(number), system = UIEventButtonMaskForButtonNumber(number);
+        NSInteger ours = RevenantHostUIEventButtonMaskForButtonNumber(number), system = UIEventButtonMaskForButtonNumber(number);
         if (ours != system) {
             masks = NO;
             [bad appendFormat:@" %ld:%ld/%ld", (long)number, (long)ours, (long)system];
         }
     }
-    charon_check(masks, "UIEventButtonMaskForButtonNumber answers as the system's does", bad);
+    revenant_check(masks, "UIEventButtonMaskForButtonNumber answers as the system's does", bad);
 
     NSArray *buttons = button_lines(window);
-    charon_check([buttons[0] isEqual:buttons[1]], "a button's pointer interaction and style provider", ([NSString stringWithFormat:@"\n    port   %@\n    system %@", buttons[1], buttons[0]]));
+    revenant_check([buttons[0] isEqual:buttons[1]], "a button's pointer interaction and style provider", ([NSString stringWithFormat:@"\n    port   %@\n    system %@", buttons[1], buttons[0]]));
     agree(@"gesture recognizer and event members", gesture_lines(YES), gesture_lines(NO));
 }

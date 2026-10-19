@@ -1,4 +1,4 @@
-#import "CharonHomeKitInternal.h"
+#import "RevenantHomeKitInternal.h"
 
 @implementation HMAccessorySetupRequest
 

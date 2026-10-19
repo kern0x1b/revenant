@@ -4,7 +4,7 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-build=${MOTION_BUILD:-$(runs_folder charon-vision-motion-host)}
+build=${MOTION_BUILD:-$(runs_folder revenant-vision-motion-host)}
 rm -rf "$build"
 mkdir -p "$build"
 xcrun clang -fobjc-arc -Wall -Wno-deprecated-declarations "$here/motion.m" \

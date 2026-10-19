@@ -49,50 +49,50 @@ typedef OSStatus (*PublishFn)(const AudioComponentDescription *, CFStringRef, UI
 typedef OSStatus (*BankNameFn)(CFURLRef, CFStringRef *);
 typedef OSStatus (*BankInfoFn)(CFURLRef, CFArrayRef *);
 
-CFAbsoluteTime CharonTestAudioComponentGetLastActiveTime(AudioComponent comp);
-CFArrayRef CharonTestAudioUnitExtensionCopyComponentList(CFStringRef extensionIdentifier);
-OSStatus CharonTestAudioUnitExtensionSetComponentList(CFStringRef extensionIdentifier, CFArrayRef audioComponentInfo);
-void CharonTestAudioComponentInstantiate(AudioComponent inComponent, AudioComponentInstantiationOptions inOptions,
+CFAbsoluteTime RevenantTestAudioComponentGetLastActiveTime(AudioComponent comp);
+CFArrayRef RevenantTestAudioUnitExtensionCopyComponentList(CFStringRef extensionIdentifier);
+OSStatus RevenantTestAudioUnitExtensionSetComponentList(CFStringRef extensionIdentifier, CFArrayRef audioComponentInfo);
+void RevenantTestAudioComponentInstantiate(AudioComponent inComponent, AudioComponentInstantiationOptions inOptions,
                                          void (^inCompletionHandler)(AudioComponentInstance _Nullable, OSStatus));
-void CharonTestAudioServicesPlaySystemSoundWithCompletion(SystemSoundID inSystemSoundID, void (^inCompletionBlock)(void));
-void CharonTestAudioServicesPlayAlertSoundWithCompletion(SystemSoundID inSystemSoundID, void (^inCompletionBlock)(void));
-OSStatus CharonTestMusicDeviceMIDIEventList(MusicDeviceComponent inUnit, UInt32 inOffsetSampleFrame, const MIDIEventList *evtList);
-OSStatus CharonTestAudioFileGetUserDataSize64(AudioFileID inAudioFile, UInt32 inUserDataID, UInt32 inIndex, UInt64 *outUserDataSize);
-OSStatus CharonTestAudioFileGetUserDataAtOffset(AudioFileID inAudioFile, UInt32 inUserDataID, UInt32 inIndex, SInt64 inOffset,
+void RevenantTestAudioServicesPlaySystemSoundWithCompletion(SystemSoundID inSystemSoundID, void (^inCompletionBlock)(void));
+void RevenantTestAudioServicesPlayAlertSoundWithCompletion(SystemSoundID inSystemSoundID, void (^inCompletionBlock)(void));
+OSStatus RevenantTestMusicDeviceMIDIEventList(MusicDeviceComponent inUnit, UInt32 inOffsetSampleFrame, const MIDIEventList *evtList);
+OSStatus RevenantTestAudioFileGetUserDataSize64(AudioFileID inAudioFile, UInt32 inUserDataID, UInt32 inIndex, UInt64 *outUserDataSize);
+OSStatus RevenantTestAudioFileGetUserDataAtOffset(AudioFileID inAudioFile, UInt32 inUserDataID, UInt32 inIndex, SInt64 inOffset,
                                                 UInt32 *ioUserDataSize, void *outUserData);
-OSStatus CharonTestAudioComponentValidate(AudioComponent inComponent, CFDictionaryRef inValidationParameters,
+OSStatus RevenantTestAudioComponentValidate(AudioComponent inComponent, CFDictionaryRef inValidationParameters,
                                           AudioComponentValidationResult *outValidationResult);
-OSStatus CharonTestAudioComponentValidateWithResults(AudioComponent inComponent, CFDictionaryRef inValidationParameters,
+OSStatus RevenantTestAudioComponentValidateWithResults(AudioComponent inComponent, CFDictionaryRef inValidationParameters,
                                                      void (^inCompletionBlock)(AudioComponentValidationResult, CFDictionaryRef _Nonnull));
-OSStatus CharonTestAudioConverterNewWithOptions(const AudioStreamBasicDescription *inSourceFormat,
+OSStatus RevenantTestAudioConverterNewWithOptions(const AudioStreamBasicDescription *inSourceFormat,
                                                 const AudioStreamBasicDescription *inDestinationFormat,
                                                 AudioConverterOptions inOptions, AudioConverterRef *outAudioConverter);
-void CharonTestAudioConverterPrepare(UInt32 inFlags, void *ioReserved, void (^inCompletionBlock)(OSStatus));
-OSStatus CharonTestAudioConverterFillComplexBufferRealtimeSafe(AudioConverterRef inAudioConverter,
+void RevenantTestAudioConverterPrepare(UInt32 inFlags, void *ioReserved, void (^inCompletionBlock)(OSStatus));
+OSStatus RevenantTestAudioConverterFillComplexBufferRealtimeSafe(AudioConverterRef inAudioConverter,
                                                                AudioConverterComplexInputDataProcRealtimeSafe inInputDataProc,
                                                                void *inInputDataProcUserData, UInt32 *ioOutputDataPacketSize,
                                                                AudioBufferList *outOutputData,
                                                                AudioStreamPacketDescription *outPacketDescription);
-OSStatus CharonTestAudioConverterFillComplexBufferWithPacketDependencies(AudioConverterRef inAudioConverter,
+OSStatus RevenantTestAudioConverterFillComplexBufferWithPacketDependencies(AudioConverterRef inAudioConverter,
                                                                          AudioConverterComplexInputDataProc inInputDataProc,
                                                                          void *inInputDataProcUserData, UInt32 *ioOutputDataPacketSize,
                                                                          AudioBufferList *outOutputData,
                                                                          AudioStreamPacketDescription *outPacketDescriptions,
                                                                          AudioStreamPacketDependencyDescription *outPacketDependencies);
-OSStatus CharonTestAudioFileWritePacketsWithDependencies(AudioFileID inAudioFile, Boolean inUseCache, UInt32 inNumBytes,
+OSStatus RevenantTestAudioFileWritePacketsWithDependencies(AudioFileID inAudioFile, Boolean inUseCache, UInt32 inNumBytes,
                                                          const AudioStreamPacketDescription *inPacketDescriptions,
                                                          const AudioStreamPacketDependencyDescription *inPacketDependencies,
                                                          SInt64 inStartingPacket, UInt32 *ioNumPackets, const void *inBuffer);
-OSStatus CharonTestAudioQueueNewOutputWithDispatchQueue(AudioQueueRef *outAQ, const AudioStreamBasicDescription *inFormat,
+OSStatus RevenantTestAudioQueueNewOutputWithDispatchQueue(AudioQueueRef *outAQ, const AudioStreamBasicDescription *inFormat,
                                                         UInt32 inFlags, dispatch_queue_t inCallbackDispatchQueue,
                                                         AudioQueueOutputCallbackBlock inCallbackBlock);
-OSStatus CharonTestAudioQueueNewInputWithDispatchQueue(AudioQueueRef *outAQ, const AudioStreamBasicDescription *inFormat,
+OSStatus RevenantTestAudioQueueNewInputWithDispatchQueue(AudioQueueRef *outAQ, const AudioStreamBasicDescription *inFormat,
                                                        UInt32 inFlags, dispatch_queue_t inCallbackDispatchQueue,
                                                        AudioQueueInputCallbackBlock inCallbackBlock);
-OSStatus CharonTestAudioOutputUnitPublish(const AudioComponentDescription *inDesc, CFStringRef inName, UInt32 inVersion,
+OSStatus RevenantTestAudioOutputUnitPublish(const AudioComponentDescription *inDesc, CFStringRef inName, UInt32 inVersion,
                                           AudioUnit inOutputUnit);
-OSStatus CharonTestCopyNameFromSoundBank(CFURLRef inURL, CFStringRef __nullable *outName);
-OSStatus CharonTestCopyInstrumentInfoFromSoundBank(CFURLRef inURL, CFArrayRef __nullable *outInstrumentInfo);
+OSStatus RevenantTestCopyNameFromSoundBank(CFURLRef inURL, CFStringRef __nullable *outName);
+OSStatus RevenantTestCopyInstrumentInfoFromSoundBank(CFURLRef inURL, CFArrayRef __nullable *outInstrumentInfo);
 
 static AudioComponent genericOutput(void)
 {
@@ -107,13 +107,13 @@ static void checkLastActive(void)
 {
     LastActiveFn hostLastActive = hostSymbol("AudioComponentGetLastActiveTime");
     AudioComponent component = genericOutput();
-    check(CharonTestAudioComponentGetLastActiveTime(component) == hostLastActive(component),
+    check(RevenantTestAudioComponentGetLastActiveTime(component) == hostLastActive(component),
           "AudioComponentGetLastActiveTime: the port's answer is the host's before any use");
 
     AudioComponentInstance instance = NULL;
     AudioComponentInstanceNew(component, &instance);
     AudioUnitInitialize(instance);
-    check(CharonTestAudioComponentGetLastActiveTime(component) == hostLastActive(component),
+    check(RevenantTestAudioComponentGetLastActiveTime(component) == hostLastActive(component),
           "AudioComponentGetLastActiveTime: the port's answer is the host's after instantiation and initialization");
     AudioComponentInstanceDispose(instance);
 }
@@ -135,17 +135,17 @@ static void checkExtensionLists(void)
     NSDictionary *info = @{ @"type": @"aumu", @"subtype": @"Test", @"manufacturer": @"Test", @"name": @"x" };
     CFStringRef unknown = CFSTR("no.such.extension");
 
-    check(CharonTestAudioUnitExtensionCopyComponentList(unknown) == hostCopy(unknown),
+    check(RevenantTestAudioUnitExtensionCopyComponentList(unknown) == hostCopy(unknown),
           "AudioUnitExtensionCopyComponentList: an unknown identifier answers what the host answers");
-    check(CharonTestAudioUnitExtensionSetComponentList(unknown, (__bridge CFArrayRef)@[]) == hostSet(unknown, (__bridge CFArrayRef)@[]),
+    check(RevenantTestAudioUnitExtensionSetComponentList(unknown, (__bridge CFArrayRef)@[]) == hostSet(unknown, (__bridge CFArrayRef)@[]),
           "AudioUnitExtensionSetComponentList: an unknown identifier and an empty list answer what the host answers");
-    check(CharonTestAudioUnitExtensionSetComponentList(unknown, (__bridge CFArrayRef)@[info]) == hostSet(unknown, (__bridge CFArrayRef)@[info]),
+    check(RevenantTestAudioUnitExtensionSetComponentList(unknown, (__bridge CFArrayRef)@[info]) == hostSet(unknown, (__bridge CFArrayRef)@[info]),
           "AudioUnitExtensionSetComponentList: an unknown identifier and one description answer what the host answers");
-    check(CharonTestAudioUnitExtensionCopyComponentList(unknown) == NULL && hostCopy(unknown) == NULL,
+    check(RevenantTestAudioUnitExtensionCopyComponentList(unknown) == NULL && hostCopy(unknown) == NULL,
           "AudioUnitExtensionCopyComponentList: nothing is listed for an identifier nobody set");
-    check(CharonTestAudioUnitExtensionSetComponentList(NULL, (__bridge CFArrayRef)@[]) == hostSet(NULL, (__bridge CFArrayRef)@[]),
+    check(RevenantTestAudioUnitExtensionSetComponentList(NULL, (__bridge CFArrayRef)@[]) == hostSet(NULL, (__bridge CFArrayRef)@[]),
           "AudioUnitExtensionSetComponentList: a NULL identifier answers what the host answers");
-    check(CharonTestAudioUnitExtensionCopyComponentList(NULL) == hostCopy(NULL),
+    check(RevenantTestAudioUnitExtensionCopyComponentList(NULL) == hostCopy(NULL),
           "AudioUnitExtensionCopyComponentList: a NULL identifier answers what the host answers");
 }
 
@@ -165,7 +165,7 @@ static void checkInstantiate(void)
             instance = made;
         };
         if (side == 0) {
-            CharonTestAudioComponentInstantiate(genericOutput(), 0, handler);
+            RevenantTestAudioComponentInstantiate(genericOutput(), 0, handler);
         } else {
             hostInstantiate(genericOutput(), 0, handler);
         }
@@ -185,7 +185,7 @@ static void checkInstantiate(void)
     __block OSStatus hostStatus = 0;
     __block AudioComponentInstance portInstance = (AudioComponentInstance)1;
     __block AudioComponentInstance hostInstance = (AudioComponentInstance)1;
-    CharonTestAudioComponentInstantiate(NULL, 0, ^(AudioComponentInstance made, OSStatus result) {
+    RevenantTestAudioComponentInstantiate(NULL, 0, ^(AudioComponentInstance made, OSStatus result) {
         portInstance = made;
         portStatus = result;
     });
@@ -217,9 +217,9 @@ static void checkSoundCompletions(void)
             };
             if (side == 0) {
                 if (i == 0 || i == 1) {
-                    CharonTestAudioServicesPlaySystemSoundWithCompletion(cases[i].sound, completion);
+                    RevenantTestAudioServicesPlaySystemSoundWithCompletion(cases[i].sound, completion);
                 } else {
-                    CharonTestAudioServicesPlayAlertSoundWithCompletion(cases[i].sound, completion);
+                    RevenantTestAudioServicesPlayAlertSoundWithCompletion(cases[i].sound, completion);
                 }
             } else {
                 cases[i].host(cases[i].sound, completion);
@@ -233,8 +233,8 @@ static void checkSoundCompletions(void)
         }
     }
 
-    CharonTestAudioServicesPlaySystemSoundWithCompletion(1104, NULL);
-    CharonTestAudioServicesPlayAlertSoundWithCompletion(1104, NULL);
+    RevenantTestAudioServicesPlaySystemSoundWithCompletion(1104, NULL);
+    RevenantTestAudioServicesPlayAlertSoundWithCompletion(1104, NULL);
     check(1, "AudioServices*WithCompletion: a NULL block plays and returns");
 }
 
@@ -314,7 +314,7 @@ static void checkMIDIList(void)
     for (size_t i = 0; i < sizeof cases / sizeof cases[0]; i++) {
         OSStatus portStatus = 0;
         OSStatus hostStatus = 0;
-        NSData *portRender = renderAfterList(CharonTestMusicDeviceMIDIEventList, cases[i].words, cases[i].count, &portStatus);
+        NSData *portRender = renderAfterList(RevenantTestMusicDeviceMIDIEventList, cases[i].words, cases[i].count, &portStatus);
         NSData *hostRender = renderAfterList(hostList, cases[i].words, cases[i].count, &hostStatus);
         char label[200];
         snprintf(label, sizeof label, "MusicDeviceMIDIEventList, %s: the status is the host's", cases[i].name);
@@ -366,7 +366,7 @@ static void checkUserData(const char *folder)
     struct { UInt32 chunk; UInt32 index; } sizeCases[] = { { 'Chrn', 0 }, { 'Chrn', 3 }, { 'none', 0 } };
     for (size_t i = 0; i < sizeof sizeCases / sizeof sizeCases[0]; i++) {
         UInt64 portSize = 777, hostSize = 777;
-        OSStatus portStatus = CharonTestAudioFileGetUserDataSize64(file, sizeCases[i].chunk, sizeCases[i].index, &portSize);
+        OSStatus portStatus = RevenantTestAudioFileGetUserDataSize64(file, sizeCases[i].chunk, sizeCases[i].index, &portSize);
         OSStatus hostStatus = hostSize64(file, sizeCases[i].chunk, sizeCases[i].index, &hostSize);
         char label[160];
         snprintf(label, sizeof label, "AudioFileGetUserDataSize64, chunk %u index %u: the status is the host's", sizeCases[i].chunk, sizeCases[i].index);
@@ -383,7 +383,7 @@ static void checkUserData(const char *folder)
             memset(portBytes, '.', sizeof portBytes);
             memset(hostBytes, '.', sizeof hostBytes);
             UInt32 portIO = sizes[s], hostIO = sizes[s];
-            OSStatus portStatus = CharonTestAudioFileGetUserDataAtOffset(file, 'Chrn', 0, offsets[o], &portIO, portBytes);
+            OSStatus portStatus = RevenantTestAudioFileGetUserDataAtOffset(file, 'Chrn', 0, offsets[o], &portIO, portBytes);
             OSStatus hostStatus = hostAtOffset(file, 'Chrn', 0, offsets[o], &hostIO, hostBytes);
             char label[200];
             snprintf(label, sizeof label, "AudioFileGetUserDataAtOffset, offset %lld size %u: the status is the host's",
@@ -399,7 +399,7 @@ static void checkUserData(const char *folder)
     }
     uint8_t portBytes[4], hostBytes[4];
     UInt32 portIO = 4, hostIO = 4;
-    OSStatus portStatus = CharonTestAudioFileGetUserDataAtOffset(file, 'none', 0, 0, &portIO, portBytes);
+    OSStatus portStatus = RevenantTestAudioFileGetUserDataAtOffset(file, 'none', 0, 0, &portIO, portBytes);
     OSStatus hostStatus = hostAtOffset(file, 'none', 0, 0, &hostIO, hostBytes);
     check(portStatus == hostStatus && portIO == hostIO,
           "AudioFileGetUserDataAtOffset, a missing chunk: the status and the size are the host's");
@@ -425,14 +425,14 @@ static void checkValidate(void)
     ValidateFn hostValidate = hostSymbol("AudioComponentValidate");
     ValidateResultsFn hostValidateResults = hostSymbol("AudioComponentValidateWithResults");
     AudioComponentValidationResult portResult = 0, hostResult = 0;
-    OSStatus portStatus = CharonTestAudioComponentValidate(genericOutput(), NULL, &portResult);
+    OSStatus portStatus = RevenantTestAudioComponentValidate(genericOutput(), NULL, &portResult);
     OSStatus hostStatus = hostValidate(genericOutput(), NULL, &hostResult);
     check(portStatus == hostStatus && portResult == hostResult,
           "AudioComponentValidate, the generic output: the status and the result are the host's");
     check(hostResult == kAudioComponentValidationResult_Passed, "AudioComponentValidate, the generic output: the host passes it");
 
     AudioComponentValidationResult unusedPort = 0, unusedHost = 0;
-    check(CharonTestAudioComponentValidate(NULL, NULL, &unusedPort) == hostValidate(NULL, NULL, &unusedHost),
+    check(RevenantTestAudioComponentValidate(NULL, NULL, &unusedPort) == hostValidate(NULL, NULL, &unusedHost),
           "AudioComponentValidate, a NULL component: the status is the host's");
 
     for (int side = 0; side < 2; side++) {
@@ -446,7 +446,7 @@ static void checkValidate(void)
             dictionaryResult = ((__bridge NSDictionary *)dict)[@"Result"];
             dispatch_semaphore_signal(done);
         };
-        OSStatus status = side == 0 ? CharonTestAudioComponentValidateWithResults(genericOutput(), NULL, completion)
+        OSStatus status = side == 0 ? RevenantTestAudioComponentValidateWithResults(genericOutput(), NULL, completion)
                                     : hostValidateResults(genericOutput(), NULL, completion);
         BOOL fired = dispatch_semaphore_wait(done, dispatch_time(DISPATCH_TIME_NOW, 5 * NSEC_PER_SEC)) == 0;
         char label[160];
@@ -526,7 +526,7 @@ static void checkConverters(void)
     alac.mFramesPerPacket = 4096;
 
     AudioConverterRef portConverter = NULL, hostConverter = NULL;
-    OSStatus portNew = CharonTestAudioConverterNewWithOptions(&source, &destination, 0, &portConverter);
+    OSStatus portNew = RevenantTestAudioConverterNewWithOptions(&source, &destination, 0, &portConverter);
     OSStatus hostNewStatus = hostNew(&source, &destination, 0, &hostConverter);
     check(portNew == hostNewStatus && portConverter != NULL && hostConverter != NULL,
           "AudioConverterNewWithOptions, no options: the status is the host's and a converter is made");
@@ -546,7 +546,7 @@ static void checkConverters(void)
           "the port's converter converts as the host's does, bit for bit");
 
     AudioConverterRef unbufferedPort = NULL, unbufferedHost = NULL;
-    OSStatus unbufferedPortStatus = CharonTestAudioConverterNewWithOptions(&source, &destination, kAudioConverterOption_Unbuffered, &unbufferedPort);
+    OSStatus unbufferedPortStatus = RevenantTestAudioConverterNewWithOptions(&source, &destination, kAudioConverterOption_Unbuffered, &unbufferedPort);
     OSStatus unbufferedHostStatus = hostNew(&source, &destination, kAudioConverterOption_Unbuffered, &unbufferedHost);
     check(unbufferedPortStatus == unbufferedHostStatus, "AudioConverterNewWithOptions, the unbuffered option: the status is the host's");
     ConverterInput unbufferedInput;
@@ -565,7 +565,7 @@ static void checkConverters(void)
             dispatch_semaphore_signal(done);
         };
         if (side == 0) {
-            CharonTestAudioConverterPrepare(0, NULL, completion);
+            RevenantTestAudioConverterPrepare(0, NULL, completion);
         } else {
             hostPrepare(0, NULL, completion);
         }
@@ -585,14 +585,14 @@ static void checkConverters(void)
     hostPackets = 8;
     AudioBufferList portRealtimeList = { 1, { { 1, sizeof portOut, portOut } } };
     AudioBufferList hostRealtimeList = { 1, { { 1, sizeof hostOut, hostOut } } };
-    OSStatus portRealtime = CharonTestAudioConverterFillComplexBufferRealtimeSafe(portConverter, supplyConverterInputRealtime, &portRealtimeInput,
+    OSStatus portRealtime = RevenantTestAudioConverterFillComplexBufferRealtimeSafe(portConverter, supplyConverterInputRealtime, &portRealtimeInput,
                                                                                   &portPackets, &portRealtimeList, NULL);
     OSStatus hostRealtimeStatus = hostRealtime(hostConverter, supplyConverterInputRealtime, &hostRealtimeInput, &hostPackets, &hostRealtimeList, NULL);
     check(portRealtime == hostRealtimeStatus && portRealtime == noErr && memcmp(portOut, hostOut, sizeof portOut) == 0,
           "AudioConverterFillComplexBufferRealtimeSafe, PCM to PCM: the status and the output are the host's, bit for bit");
 
     AudioConverterRef portEncoder = NULL, hostEncoder = NULL;
-    OSStatus portEncoderStatus = CharonTestAudioConverterNewWithOptions(&source, &alac, 0, &portEncoder);
+    OSStatus portEncoderStatus = RevenantTestAudioConverterNewWithOptions(&source, &alac, 0, &portEncoder);
     OSStatus hostEncoderStatus = hostNew(&source, &alac, 0, &hostEncoder);
     check(portEncoderStatus == hostEncoderStatus, "AudioConverterNewWithOptions, PCM to ALAC: the status is the host's");
     UInt8 portBytes[65536], hostBytes[65536];
@@ -603,7 +603,7 @@ static void checkConverters(void)
     resetInput(&portEncodeInput, 8);
     resetInput(&hostEncodeInput, 8);
     UInt32 portEncodedPackets = 1, hostEncodedPackets = 1;
-    OSStatus portEncode = CharonTestAudioConverterFillComplexBufferRealtimeSafe(portEncoder, supplyConverterInputRealtime, &portEncodeInput,
+    OSStatus portEncode = RevenantTestAudioConverterFillComplexBufferRealtimeSafe(portEncoder, supplyConverterInputRealtime, &portEncodeInput,
                                                                                 &portEncodedPackets, &portEncoded, portDescriptions);
     OSStatus hostEncode = hostRealtime(hostEncoder, supplyConverterInputRealtime, &hostEncodeInput, &hostEncodedPackets, &hostEncoded, hostDescriptions);
     check(portEncode == hostEncode && portEncode == kAudioConverterErr_OperationNotSupported,
@@ -622,7 +622,7 @@ static void checkConverters(void)
     AudioStreamPacketDescription descriptions[8];
     memset(portDeps, 0x5A, sizeof portDeps);
     memset(hostDeps, 0x5A, sizeof hostDeps);
-    OSStatus portDependencies = CharonTestAudioConverterFillComplexBufferWithPacketDependencies(portConverter, supplyConverterInput, &portDependencyInput,
+    OSStatus portDependencies = RevenantTestAudioConverterFillComplexBufferWithPacketDependencies(portConverter, supplyConverterInput, &portDependencyInput,
                                                                                                 &portPackets, &portDependencyList, descriptions, portDeps);
     OSStatus hostDependenciesStatus = hostDependencies(hostConverter, supplyConverterInput, &hostDependencyInput, &hostPackets, &hostDependencyList,
                                                        descriptions, hostDeps);
@@ -634,7 +634,7 @@ static void checkConverters(void)
     resetInput(&portNullInput, 8);
     resetInput(&hostNullInput, 8);
     UInt32 portNullPackets = 8, hostNullPackets = 8;
-    OSStatus portNull = CharonTestAudioConverterFillComplexBufferWithPacketDependencies(portConverter, supplyConverterInput, &portNullInput,
+    OSStatus portNull = RevenantTestAudioConverterFillComplexBufferWithPacketDependencies(portConverter, supplyConverterInput, &portNullInput,
                                                                                         &portNullPackets, &portDependencyList, NULL, portDeps);
     OSStatus hostNull = hostDependencies(hostConverter, supplyConverterInput, &hostNullInput, &hostNullPackets, &hostDependencyList, NULL, hostDeps);
     check(portNull == hostNull && portNull == kAudio_ParamError,
@@ -672,7 +672,7 @@ static void checkFileDependencies(const char *folder)
             }
             UInt32 packets = 4;
             const AudioStreamPacketDependencyDescription *deps = withDependencies ? dependencies : NULL;
-            OSStatus status = side == 0 ? CharonTestAudioFileWritePacketsWithDependencies(file, false, 8, NULL, deps, 0, &packets, samples)
+            OSStatus status = side == 0 ? RevenantTestAudioFileWritePacketsWithDependencies(file, false, 8, NULL, deps, 0, &packets, samples)
                                         : hostWrite(file, false, 8, NULL, deps, 0, &packets, samples);
             AudioFileClose(file);
             char label[200];
@@ -696,12 +696,12 @@ static void checkQueueDispatch(void)
     format.mBytesPerPacket = 2;
     format.mFramesPerPacket = 1;
     AudioQueueRef nullPort = NULL, nullHost = NULL;
-    check(CharonTestAudioQueueNewOutputWithDispatchQueue(&nullPort, &format, 0, NULL, ^(AudioQueueRef q, AudioQueueBufferRef b) {})
+    check(RevenantTestAudioQueueNewOutputWithDispatchQueue(&nullPort, &format, 0, NULL, ^(AudioQueueRef q, AudioQueueBufferRef b) {})
           == hostOutput(&nullHost, &format, 0, NULL, ^(AudioQueueRef q, AudioQueueBufferRef b) {}),
           "AudioQueueNewOutputWithDispatchQueue, a NULL queue: the status is the host's");
 
     for (int side = 0; side < 2; side++) {
-        dispatch_queue_t queue = dispatch_queue_create("charon.functions.queue", DISPATCH_QUEUE_SERIAL);
+        dispatch_queue_t queue = dispatch_queue_create("revenant.functions.queue", DISPATCH_QUEUE_SERIAL);
         dispatch_queue_set_specific(queue, (__bridge const void *)queue, (void *)1, NULL);
         dispatch_semaphore_t played = dispatch_semaphore_create(0);
         __block BOOL onQueue = NO;
@@ -712,7 +712,7 @@ static void checkQueueDispatch(void)
             dispatch_semaphore_signal(played);
         };
         AudioQueueRef aq = NULL;
-        OSStatus status = side == 0 ? CharonTestAudioQueueNewOutputWithDispatchQueue(&aq, &format, 0, queue, block)
+        OSStatus status = side == 0 ? RevenantTestAudioQueueNewOutputWithDispatchQueue(&aq, &format, 0, queue, block)
                                     : hostOutput(&aq, &format, 0, queue, block);
         check(status == noErr, side == 0 ? "port AudioQueueNewOutputWithDispatchQueue: noErr" : "host AudioQueueNewOutputWithDispatchQueue: noErr (oracle)");
         if (status == noErr) {
@@ -771,17 +771,17 @@ static void checkPublish(void)
     AudioComponentInstance instance = NULL;
     AudioComponentInstanceNew(genericOutput(), &instance);
     AudioUnit unit = (AudioUnit)instance;
-    CFStringRef name = CFSTR("Charon test publication");
+    CFStringRef name = CFSTR("Revenant test publication");
 
-    check(CharonTestAudioOutputUnitPublish(&description, name, 1, unit) == hostPublish(&description, name, 1, unit),
+    check(RevenantTestAudioOutputUnitPublish(&description, name, 1, unit) == hostPublish(&description, name, 1, unit),
           "AudioOutputUnitPublish: the port's answer is the host's for a description and a unit");
-    check(CharonTestAudioOutputUnitPublish(&description, name, 1, NULL) == hostPublish(&description, name, 1, NULL),
+    check(RevenantTestAudioOutputUnitPublish(&description, name, 1, NULL) == hostPublish(&description, name, 1, NULL),
           "AudioOutputUnitPublish: the port's answer is the host's for a NULL unit");
-    check(CharonTestAudioOutputUnitPublish(&description, NULL, 1, unit) == hostPublish(&description, NULL, 1, unit),
+    check(RevenantTestAudioOutputUnitPublish(&description, NULL, 1, unit) == hostPublish(&description, NULL, 1, unit),
           "AudioOutputUnitPublish: the port's answer is the host's for a NULL name");
-    check(CharonTestAudioOutputUnitPublish(&description, name, 0, unit) == hostPublish(&description, name, 0, unit),
+    check(RevenantTestAudioOutputUnitPublish(&description, name, 0, unit) == hostPublish(&description, name, 0, unit),
           "AudioOutputUnitPublish: the port's answer is the host's for version 0");
-    check(CharonTestAudioOutputUnitPublish(NULL, name, 1, unit) == hostPublish(NULL, name, 1, unit),
+    check(RevenantTestAudioOutputUnitPublish(NULL, name, 1, unit) == hostPublish(NULL, name, 1, unit),
           "AudioOutputUnitPublish: the port's answer is the host's for a NULL description");
     printf("host: AudioComponentFindNext for the published description is %s\n",
            AudioComponentFindNext(NULL, &description) == NULL ? "NULL" : "a component");
@@ -805,7 +805,7 @@ static void checkSoundBanks(const char *folder)
     CFStringRef hostNameValue = NULL;
     CFStringRef portNameValue = NULL;
     OSStatus hostNameStatus = hostName(bank, &hostNameValue);
-    OSStatus portNameStatus = CharonTestCopyNameFromSoundBank(bank, &portNameValue);
+    OSStatus portNameStatus = RevenantTestCopyNameFromSoundBank(bank, &portNameValue);
     check(hostNameStatus == 0 && portNameStatus == hostNameStatus,
           "CopyNameFromSoundBank: the port's status is the host's for gs_instruments.dls");
     check(hostNameValue != NULL && portNameValue != NULL &&
@@ -818,7 +818,7 @@ static void checkSoundBanks(const char *folder)
     CFArrayRef hostList = NULL;
     CFArrayRef portList = NULL;
     OSStatus hostListStatus = hostInfo(bank, &hostList);
-    OSStatus portListStatus = CharonTestCopyInstrumentInfoFromSoundBank(bank, &portList);
+    OSStatus portListStatus = RevenantTestCopyInstrumentInfoFromSoundBank(bank, &portList);
     NSArray *hostArray = (__bridge NSArray *)hostList;
     NSArray *portArray = (__bridge NSArray *)portList;
     check(hostListStatus == 0 && portListStatus == hostListStatus,
@@ -836,7 +836,7 @@ static void checkSoundBanks(const char *folder)
     CFArrayRef hostSf2List = NULL;
     CFArrayRef portSf2List = NULL;
     OSStatus hostSf2Status = hostInfo(sf2, &hostSf2List);
-    OSStatus portSf2Status = CharonTestCopyInstrumentInfoFromSoundBank(sf2, &portSf2List);
+    OSStatus portSf2Status = RevenantTestCopyInstrumentInfoFromSoundBank(sf2, &portSf2List);
     check(hostSf2Status == 0 && portSf2Status == hostSf2Status &&
           [(__bridge NSArray *)portSf2List isEqualToArray:(__bridge NSArray *)hostSf2List],
           "CopyInstrumentInfoFromSoundBank: the port reads a DLS bank named .sf2 as the host does");
@@ -847,7 +847,7 @@ static void checkSoundBanks(const char *folder)
     CFStringRef hostMissingName = NULL;
     CFStringRef portMissingName = NULL;
     OSStatus hostMissingStatus = hostName(missing, &hostMissingName);
-    OSStatus portMissingStatus = CharonTestCopyNameFromSoundBank(missing, &portMissingName);
+    OSStatus portMissingStatus = RevenantTestCopyNameFromSoundBank(missing, &portMissingName);
     check(hostMissingStatus == -10871 && portMissingStatus == hostMissingStatus,
           "CopyNameFromSoundBank: a missing file's status is the host's");
     check(hostMissingName != NULL && portMissingName != NULL &&
@@ -858,7 +858,7 @@ static void checkSoundBanks(const char *folder)
     CFArrayRef hostMissingList = NULL;
     CFArrayRef portMissingList = NULL;
     OSStatus hostMissingListStatus = hostInfo(missing, &hostMissingList);
-    OSStatus portMissingListStatus = CharonTestCopyInstrumentInfoFromSoundBank(missing, &portMissingList);
+    OSStatus portMissingListStatus = RevenantTestCopyInstrumentInfoFromSoundBank(missing, &portMissingList);
     check(hostMissingListStatus == -43 && portMissingListStatus == hostMissingListStatus,
           "CopyInstrumentInfoFromSoundBank: a missing file's status is the host's (fnfErr)");
 
@@ -868,7 +868,7 @@ static void checkSoundBanks(const char *folder)
     CFStringRef hostDirName = NULL;
     CFStringRef portDirName = NULL;
     OSStatus hostDirStatus = hostName(dirURL, &hostDirName);
-    OSStatus portDirStatus = CharonTestCopyNameFromSoundBank(dirURL, &portDirName);
+    OSStatus portDirStatus = RevenantTestCopyNameFromSoundBank(dirURL, &portDirName);
     check(hostDirStatus == -10871 && portDirStatus == hostDirStatus,
           "CopyNameFromSoundBank: a directory's status is the host's");
     releaseCF(hostDirName);
@@ -876,7 +876,7 @@ static void checkSoundBanks(const char *folder)
     CFArrayRef hostDirList = NULL;
     CFArrayRef portDirList = NULL;
     OSStatus hostDirListStatus = hostInfo(dirURL, &hostDirList);
-    OSStatus portDirListStatus = CharonTestCopyInstrumentInfoFromSoundBank(dirURL, &portDirList);
+    OSStatus portDirListStatus = RevenantTestCopyInstrumentInfoFromSoundBank(dirURL, &portDirList);
     check(hostDirListStatus == -10871 && portDirListStatus == hostDirListStatus,
           "CopyInstrumentInfoFromSoundBank: a directory's status is the host's");
 
@@ -884,7 +884,7 @@ static void checkSoundBanks(const char *folder)
     [[@"not a bank\n" dataUsingEncoding:NSUTF8StringEncoding] writeToFile:textPath atomically:NO];
     CFURLRef text = (__bridge CFURLRef)[NSURL fileURLWithPath:textPath];
     CFArrayRef portTextList = NULL;
-    OSStatus portTextStatus = CharonTestCopyInstrumentInfoFromSoundBank(text, &portTextList);
+    OSStatus portTextStatus = RevenantTestCopyInstrumentInfoFromSoundBank(text, &portTextList);
     check(portTextStatus == -10871, "CopyInstrumentInfoFromSoundBank: a text file is kAudioUnitErr_InvalidFile, as the host answers");
 
     NSString *truncatedPath = [dir stringByAppendingPathComponent:@"truncated.dls"];
@@ -893,7 +893,7 @@ static void checkSoundBanks(const char *folder)
     CFArrayRef hostTruncatedList = NULL;
     CFArrayRef portTruncatedList = NULL;
     OSStatus hostTruncatedStatus = hostInfo(truncated, &hostTruncatedList);
-    OSStatus portTruncatedStatus = CharonTestCopyInstrumentInfoFromSoundBank(truncated, &portTruncatedList);
+    OSStatus portTruncatedStatus = RevenantTestCopyInstrumentInfoFromSoundBank(truncated, &portTruncatedList);
     printf("host: CopyInstrumentInfoFromSoundBank(first 100 bytes) status %d, %lu entries; port status %d, %lu entries (not counted)\n",
            (int)hostTruncatedStatus, (unsigned long)[(__bridge NSArray *)hostTruncatedList count], (int)portTruncatedStatus,
            (unsigned long)[(__bridge NSArray *)portTruncatedList count]);

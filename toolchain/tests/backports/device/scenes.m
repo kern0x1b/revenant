@@ -25,10 +25,10 @@ static NSUserActivity *activity_restored;
 static BOOL give_no_activity;
 static NSString *const restoration_marker = @"space.kern0x1b.test.restoration.marker";
 
-@interface CharonWrongSceneDelegate : UIResponder <UIWindowSceneDelegate>
+@interface RevenantWrongSceneDelegate : UIResponder <UIWindowSceneDelegate>
 @end
 
-@implementation CharonWrongSceneDelegate
+@implementation RevenantWrongSceneDelegate
 
 - (void)scene:(UIScene *)scene willConnectToSession:(UISceneSession *)session options:(UISceneConnectionOptions *)options
 {
@@ -37,11 +37,11 @@ static NSString *const restoration_marker = @"space.kern0x1b.test.restoration.ma
 
 @end
 
-@interface CharonSceneDelegate : UIResponder <UIWindowSceneDelegate>
+@interface RevenantSceneDelegate : UIResponder <UIWindowSceneDelegate>
 @property (nonatomic, strong) UIWindow *window;
 @end
 
-@implementation CharonSceneDelegate
+@implementation RevenantSceneDelegate
 
 - (void)scene:(UIScene *)scene willConnectToSession:(UISceneSession *)session options:(UISceneConnectionOptions *)options
 {
@@ -91,10 +91,10 @@ static NSString *const restoration_marker = @"space.kern0x1b.test.restoration.ma
 
 @end
 
-@interface CharonScenesDelegate : UIResponder <UIApplicationDelegate>
+@interface RevenantScenesDelegate : UIResponder <UIApplicationDelegate>
 @end
 
-@implementation CharonScenesDelegate
+@implementation RevenantScenesDelegate
 
 - (UISceneConfiguration *)application:(UIApplication *)application configurationForConnectingSceneSession:(UISceneSession *)session options:(UISceneConnectionOptions *)options
 {
@@ -105,7 +105,7 @@ static NSString *const restoration_marker = @"space.kern0x1b.test.restoration.ma
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)options
 {
-    charon_log_to([results_folder stringByAppendingPathComponent:@"scenes.log"]);
+    revenant_log_to([results_folder stringByAppendingPathComponent:@"scenes.log"]);
     scenes_seen_at_launch = [UIApplication sharedApplication].connectedScenes.count;
     [self performSelector:@selector(runAndReport) withObject:nil afterDelay:0];
     return YES;
@@ -116,9 +116,9 @@ static NSString *const restoration_marker = @"space.kern0x1b.test.restoration.ma
     @try {
         [self run];
     } @catch (NSException *exception) {
-        charon_check(NO, "the checks raise no exception", [NSString stringWithFormat:@"%@: %@", exception.name, exception.reason]);
+        revenant_check(NO, "the checks raise no exception", [NSString stringWithFormat:@"%@: %@", exception.name, exception.reason]);
     }
-    NSString *summary = [NSString stringWithFormat:@"%@ checks=%d failures=%d\n", charon_failures ? @"FAIL" : @"ok", charon_checks, charon_failures];
+    NSString *summary = [NSString stringWithFormat:@"%@ checks=%d failures=%d\n", revenant_failures ? @"FAIL" : @"ok", revenant_checks, revenant_failures];
     [summary writeToFile:[results_folder stringByAppendingPathComponent:@"scenes.done"] atomically:YES encoding:NSUTF8StringEncoding error:NULL];
 }
 
@@ -137,14 +137,14 @@ static NSString *const restoration_marker = @"space.kern0x1b.test.restoration.ma
     CHECK(!application.supportsMultipleScenes, "the application does not support multiple scenes");
     UISceneSession *session = connected_scene.session;
     CHECK(session.scene == connected_scene && [session.role isEqual:UIWindowSceneSessionRoleApplication] && session.persistentIdentifier.length > 0, "the session knows its scene, role and identifier");
-    CHECK([session.configuration.name isEqual:@"Default"] && session.configuration.delegateClass == [CharonSceneDelegate class], "and its configuration is the named one with its delegate class");
-    CHECK([connected_scene.delegate isKindOfClass:[CharonSceneDelegate class]], "the scene keeps its delegate");
+    CHECK([session.configuration.name isEqual:@"Default"] && session.configuration.delegateClass == [RevenantSceneDelegate class], "and its configuration is the named one with its delegate class");
+    CHECK([connected_scene.delegate isKindOfClass:[RevenantSceneDelegate class]], "the scene keeps its delegate");
     CHECK(connection_options.URLContexts.count == 0 && connection_options.userActivities.count == 0 && connection_options.shortcutItem == nil, "a plain launch has no URL, activity or shortcut");
     CHECK(wait_until(^{ return (BOOL)(connected_scene.activationState == UISceneActivationStateForegroundActive); }, 10), "the scene becomes active");
     NSArray *expected = @[@"willConnect", @"willEnterForeground:1", @"didBecomeActive:0"];
     CHECK_EQUAL(events, expected, "the delegate hears of it in the order willConnect, willEnterForeground, didBecomeActive");
     UIWindowScene *scene = (UIWindowScene *)connected_scene;
-    UIWindow *window = ((CharonSceneDelegate *)scene.delegate).window;
+    UIWindow *window = ((RevenantSceneDelegate *)scene.delegate).window;
     CHECK(window.windowScene == scene && window.isKeyWindow, "a window made with the scene belongs to it and is the key window");
     CHECK(scene.screen == [UIScreen mainScreen] && [scene.windows containsObject:window] && scene.sizeRestrictions == nil && scene.fullScreen, "the scene has the screen, the windows, no size restrictions and is full screen");
     CHECK(scene.statusBarManager != nil && scene.statusBarManager.statusBarHidden == application.statusBarHidden && scene.statusBarManager.statusBarStyle == application.statusBarStyle, "its status bar manager reads the application's");
@@ -201,7 +201,7 @@ static NSString *const restoration_marker = @"space.kern0x1b.test.restoration.ma
     BOOL secondLaunch = [defaults boolForKey:restoration_marker];
     NSString *keptKey = nil;
     for (NSString *key in [[defaults dictionaryRepresentation] allKeys])
-        if ([key hasPrefix:@"space.kern0x1b.charon.UISceneStateRestoration."])
+        if ([key hasPrefix:@"space.kern0x1b.revenant.UISceneStateRestoration."])
             keptKey = key;
     if (!secondLaunch) {
         CHECK(activity_at_connect == nil && activity_restored == nil, "a first launch has nothing to restore");
@@ -219,7 +219,7 @@ static NSString *const restoration_marker = @"space.kern0x1b.test.restoration.ma
         [center postNotificationName:UIApplicationDidEnterBackgroundNotification object:application];
         keptKey = nil;
         for (NSString *key in [[defaults dictionaryRepresentation] allKeys])
-            if ([key hasPrefix:@"space.kern0x1b.charon.UISceneStateRestoration."])
+            if ([key hasPrefix:@"space.kern0x1b.revenant.UISceneStateRestoration."])
                 keptKey = key;
         CHECK(keptKey == nil, "an answer of nil removes what was kept");
         [defaults removeObjectForKey:restoration_marker];
@@ -239,6 +239,6 @@ int main(int argc, char *argv[])
             [[NSNotificationCenter defaultCenter] addObserverForName:name object:nil queue:nil usingBlock:^(NSNotification *note) {
                 [notifications addObject:@{@"name": note.name, @"object": note.object ?: [NSNull null]}];
             }];
-        return UIApplicationMain(argc, argv, nil, @"CharonScenesDelegate");
+        return UIApplicationMain(argc, argv, nil, @"RevenantScenesDelegate");
     }
 }

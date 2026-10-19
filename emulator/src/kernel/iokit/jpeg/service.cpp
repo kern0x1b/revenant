@@ -19,7 +19,7 @@
 #include "kernel/kernel_shared_state.hpp"
 #include "graphics/surface_store.hpp"
 
-namespace shade::kernel_iokit::jpeg {
+namespace emulator::kernel_iokit::jpeg {
 namespace {
 
     constexpr std::size_t request_size = 0x28U;

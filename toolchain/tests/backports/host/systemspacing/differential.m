@@ -54,24 +54,24 @@ int main(void)
             CGFloat value = multiplier.doubleValue;
             compare([NSString stringWithFormat:@"leading after trailing, multiplier %@", multiplier],
                     shape([plain.leadingAnchor constraintEqualToSystemSpacingAfterAnchor:another.trailingAnchor multiplier:value]),
-                    shape(ours_x(plain.leadingAnchor, NSSelectorFromString(@"charonHost_constraintEqualToSystemSpacingAfterAnchor:multiplier:"), another.trailingAnchor, value)));
+                    shape(ours_x(plain.leadingAnchor, NSSelectorFromString(@"revenantHost_constraintEqualToSystemSpacingAfterAnchor:multiplier:"), another.trailingAnchor, value)));
             compare([NSString stringWithFormat:@"top below bottom, multiplier %@", multiplier],
                     shape([plain.topAnchor constraintEqualToSystemSpacingBelowAnchor:another.bottomAnchor multiplier:value]),
-                    shape(ours_y(plain.topAnchor, NSSelectorFromString(@"charonHost_constraintEqualToSystemSpacingBelowAnchor:multiplier:"), another.bottomAnchor, value)));
+                    shape(ours_y(plain.topAnchor, NSSelectorFromString(@"revenantHost_constraintEqualToSystemSpacingBelowAnchor:multiplier:"), another.bottomAnchor, value)));
         }
 
         compare(@"at least the system spacing",
                 shape([plain.leadingAnchor constraintGreaterThanOrEqualToSystemSpacingAfterAnchor:another.trailingAnchor multiplier:1]),
-                shape(ours_x(plain.leadingAnchor, NSSelectorFromString(@"charonHost_constraintGreaterThanOrEqualToSystemSpacingAfterAnchor:multiplier:"), another.trailingAnchor, 1)));
+                shape(ours_x(plain.leadingAnchor, NSSelectorFromString(@"revenantHost_constraintGreaterThanOrEqualToSystemSpacingAfterAnchor:multiplier:"), another.trailingAnchor, 1)));
         compare(@"at most the system spacing",
                 shape([plain.leadingAnchor constraintLessThanOrEqualToSystemSpacingAfterAnchor:another.trailingAnchor multiplier:1]),
-                shape(ours_x(plain.leadingAnchor, NSSelectorFromString(@"charonHost_constraintLessThanOrEqualToSystemSpacingAfterAnchor:multiplier:"), another.trailingAnchor, 1)));
+                shape(ours_x(plain.leadingAnchor, NSSelectorFromString(@"revenantHost_constraintLessThanOrEqualToSystemSpacingAfterAnchor:multiplier:"), another.trailingAnchor, 1)));
         compare(@"at least, below",
                 shape([plain.topAnchor constraintGreaterThanOrEqualToSystemSpacingBelowAnchor:another.bottomAnchor multiplier:1]),
-                shape(ours_y(plain.topAnchor, NSSelectorFromString(@"charonHost_constraintGreaterThanOrEqualToSystemSpacingBelowAnchor:multiplier:"), another.bottomAnchor, 1)));
+                shape(ours_y(plain.topAnchor, NSSelectorFromString(@"revenantHost_constraintGreaterThanOrEqualToSystemSpacingBelowAnchor:multiplier:"), another.bottomAnchor, 1)));
         compare(@"at most, below",
                 shape([plain.topAnchor constraintLessThanOrEqualToSystemSpacingBelowAnchor:another.bottomAnchor multiplier:1]),
-                shape(ours_y(plain.topAnchor, NSSelectorFromString(@"charonHost_constraintLessThanOrEqualToSystemSpacingBelowAnchor:multiplier:"), another.bottomAnchor, 1)));
+                shape(ours_y(plain.topAnchor, NSSelectorFromString(@"revenantHost_constraintLessThanOrEqualToSystemSpacingBelowAnchor:multiplier:"), another.bottomAnchor, 1)));
 
         NSArray *pairs = @[@[body, body], @[tiny, big], @[big, tiny], @[body, big], @[big, body]];
         for (NSArray *pair in pairs) {
@@ -79,35 +79,35 @@ int main(void)
             NSString *name = [NSString stringWithFormat:@"%g point baseline below %g point baseline", below.font.pointSize, above.font.pointSize];
             compare(name,
                     shape([below.firstBaselineAnchor constraintEqualToSystemSpacingBelowAnchor:above.lastBaselineAnchor multiplier:1]),
-                    shape(ours_y(below.firstBaselineAnchor, NSSelectorFromString(@"charonHost_constraintEqualToSystemSpacingBelowAnchor:multiplier:"), above.lastBaselineAnchor, 1)));
+                    shape(ours_y(below.firstBaselineAnchor, NSSelectorFromString(@"revenantHost_constraintEqualToSystemSpacingBelowAnchor:multiplier:"), above.lastBaselineAnchor, 1)));
         }
 
         compare(@"a baseline below an edge",
                 shape([body.firstBaselineAnchor constraintEqualToSystemSpacingBelowAnchor:big.bottomAnchor multiplier:1]),
-                shape(ours_y(body.firstBaselineAnchor, NSSelectorFromString(@"charonHost_constraintEqualToSystemSpacingBelowAnchor:multiplier:"), big.bottomAnchor, 1)));
+                shape(ours_y(body.firstBaselineAnchor, NSSelectorFromString(@"revenantHost_constraintEqualToSystemSpacingBelowAnchor:multiplier:"), big.bottomAnchor, 1)));
         compare(@"an edge below a baseline",
                 shape([body.topAnchor constraintEqualToSystemSpacingBelowAnchor:big.lastBaselineAnchor multiplier:1]),
-                shape(ours_y(body.topAnchor, NSSelectorFromString(@"charonHost_constraintEqualToSystemSpacingBelowAnchor:multiplier:"), big.lastBaselineAnchor, 1)));
+                shape(ours_y(body.topAnchor, NSSelectorFromString(@"revenantHost_constraintEqualToSystemSpacingBelowAnchor:multiplier:"), big.lastBaselineAnchor, 1)));
         compare(@"baselines of views with no text",
                 shape([plain.firstBaselineAnchor constraintEqualToSystemSpacingBelowAnchor:another.lastBaselineAnchor multiplier:1]),
-                shape(ours_y(plain.firstBaselineAnchor, NSSelectorFromString(@"charonHost_constraintEqualToSystemSpacingBelowAnchor:multiplier:"), another.lastBaselineAnchor, 1)));
+                shape(ours_y(plain.firstBaselineAnchor, NSSelectorFromString(@"revenantHost_constraintEqualToSystemSpacingBelowAnchor:multiplier:"), another.lastBaselineAnchor, 1)));
         compare(@"against the container's own edge",
                 shape([plain.leadingAnchor constraintEqualToSystemSpacingAfterAnchor:box.leadingAnchor multiplier:1]),
-                shape(ours_x(plain.leadingAnchor, NSSelectorFromString(@"charonHost_constraintEqualToSystemSpacingAfterAnchor:multiplier:"), box.leadingAnchor, 1)));
+                shape(ours_x(plain.leadingAnchor, NSSelectorFromString(@"revenantHost_constraintEqualToSystemSpacingAfterAnchor:multiplier:"), box.leadingAnchor, 1)));
 
         for (NSUInteger index = 0; index < 4; index++) {
             static const CGFloat multipliers[] = {0, 0.25, -0.5, -2};
             CGFloat multiplier = multipliers[index];
             compare([NSString stringWithFormat:@"a multiplier of %g", (double)multiplier],
                     shape([plain.leadingAnchor constraintEqualToSystemSpacingAfterAnchor:another.trailingAnchor multiplier:multiplier]),
-                    shape(ours_x(plain.leadingAnchor, NSSelectorFromString(@"charonHost_constraintEqualToSystemSpacingAfterAnchor:multiplier:"), another.trailingAnchor, multiplier)));
+                    shape(ours_x(plain.leadingAnchor, NSSelectorFromString(@"revenantHost_constraintEqualToSystemSpacingAfterAnchor:multiplier:"), another.trailingAnchor, multiplier)));
             compare([NSString stringWithFormat:@"a multiplier of %g, downwards", (double)multiplier],
                     shape([plain.topAnchor constraintEqualToSystemSpacingBelowAnchor:another.bottomAnchor multiplier:multiplier]),
-                    shape(ours_y(plain.topAnchor, NSSelectorFromString(@"charonHost_constraintEqualToSystemSpacingBelowAnchor:multiplier:"), another.bottomAnchor, multiplier)));
+                    shape(ours_y(plain.topAnchor, NSSelectorFromString(@"revenantHost_constraintEqualToSystemSpacingBelowAnchor:multiplier:"), another.bottomAnchor, multiplier)));
         }
 
         NSLayoutConstraint *systemMixed = [body.firstBaselineAnchor constraintEqualToSystemSpacingBelowAnchor:plain.lastBaselineAnchor multiplier:1];
-        NSLayoutConstraint *ourMixed = ours_y(body.firstBaselineAnchor, NSSelectorFromString(@"charonHost_constraintEqualToSystemSpacingBelowAnchor:multiplier:"), plain.lastBaselineAnchor, 1);
+        NSLayoutConstraint *ourMixed = ours_y(body.firstBaselineAnchor, NSSelectorFromString(@"revenantHost_constraintEqualToSystemSpacingBelowAnchor:multiplier:"), plain.lastBaselineAnchor, 1);
         printf("note a baseline of a text view under the baseline of a view with no text: the system answers %g,\n"
                "     the backport answers %g; UIKit measures something the port cannot read from a view that\n"
                "     carries no font, so the port falls back to the plain system spacing there.\n",

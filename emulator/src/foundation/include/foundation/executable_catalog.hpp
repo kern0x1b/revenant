@@ -22,7 +22,7 @@
 #include "foundation/dyld_shared_cache.hpp"
 #include "foundation/macho.hpp"
 
-namespace shade {
+namespace emulator {
 
 enum class ExecutableCatalogKind : std::uint8_t {
     MachO,

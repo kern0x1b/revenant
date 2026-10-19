@@ -47,7 +47,7 @@
     _enabled = enabled;
 }
 
-- (void (^)(UIAlertAction *action))charon_handler
+- (void (^)(UIAlertAction *action))revenant_handler
 {
     return _handler;
 }

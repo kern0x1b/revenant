@@ -1,18 +1,18 @@
-#import "CharonCloudKit.h"
-#import "CharonCKConstants.h"
+#import "RevenantCloudKit.h"
+#import "RevenantCKConstants.h"
 
 #import <objc/runtime.h>
 
-@interface CharonCKRequest : NSObject <NSURLConnectionDataDelegate>
+@interface RevenantCKRequest : NSObject <NSURLConnectionDataDelegate>
 @property (nonatomic, strong) NSMutableURLRequest *request;
-@property (nonatomic, copy) CharonCKCompletion completion;
+@property (nonatomic, copy) RevenantCKCompletion completion;
 @property (nonatomic, assign) BOOL finished;
 @property (nonatomic, strong) NSMutableData *body;
 @property (nonatomic, assign) NSInteger status;
 - (void)finishBody:(id)body error:(NSError *)error;
 @end
 
-@implementation CharonCKRequest
+@implementation RevenantCKRequest
 
 @synthesize request = _request;
 @synthesize completion = _completion;
@@ -22,14 +22,14 @@
 
 @end
 
-@implementation CharonCKTransport
+@implementation RevenantCKTransport
 
 @synthesize containers = _containers;
 @synthesize environments = _environments;
 
 + (instancetype)shared
 {
-    static CharonCKTransport *shared;
+    static RevenantCKTransport *shared;
     static dispatch_once_t once;
     dispatch_once(&once, ^{
         shared = [[self alloc] init];
@@ -63,9 +63,9 @@
     if ([declared isKindOfClass:[NSString class]] &&
         ([declared caseInsensitiveCompare:@"Production"] == NSOrderedSame ||
          [declared caseInsensitiveCompare:@"production"] == NSOrderedSame)) {
-        return CharonCKProductionEnvironment;
+        return RevenantCKProductionEnvironment;
     }
-    return CharonCKDevelopmentEnvironment;
+    return RevenantCKDevelopmentEnvironment;
 }
 
 - (void)performContainer:(CKContainer *)container
@@ -74,7 +74,7 @@
                   method:(NSString *)method
                     path:(NSString *)path
                     body:(NSDictionary *)body
-              completion:(CharonCKCompletion)completion
+              completion:(RevenantCKCompletion)completion
 {
     if (!completion) {
         return;
@@ -82,24 +82,24 @@
     NSString *identifier = container.containerIdentifier;
     if (!identifier.length) {
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-            completion(nil, CharonCKBadContainer(nil));
+            completion(nil, RevenantCKBadContainer(nil));
         });
         return;
     }
     NSError *error = nil;
-    NSString *token = [[CharonCKCredentials shared] tokenForContainer:identifier error:&error];
+    NSString *token = [[RevenantCKCredentials shared] tokenForContainer:identifier error:&error];
     if (!token) {
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-            completion(nil, error ?: CharonCKNotAuthenticated());
+            completion(nil, error ?: RevenantCKNotAuthenticated());
         });
         return;
     }
     NSString *root = database ? [self databaseRootForContainer:identifier database:database environment:environment]
                               : [NSString stringWithFormat:@"%@/%@", containerEnvironmentRoot(identifier, environment), path];
-    NSURL *url = [NSURL URLWithString:[CharonCKHost stringByAppendingFormat:@"/%@", root]];
+    NSURL *url = [NSURL URLWithString:[RevenantCKHost stringByAppendingFormat:@"/%@", root]];
     if (!url) {
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-            completion(nil, CharonCKError(CKErrorInvalidArguments, @"The path is not a URL", nil));
+            completion(nil, RevenantCKError(CKErrorInvalidArguments, @"The path is not a URL", nil));
         });
         return;
     }
@@ -113,7 +113,7 @@
         NSData *json = [NSJSONSerialization dataWithJSONObject:body options:0 error:&encoded];
         if (!json) {
             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-                completion(nil, CharonCKError(CKErrorInvalidArguments, @"The request is not JSON", nil));
+                completion(nil, RevenantCKError(CKErrorInvalidArguments, @"The request is not JSON", nil));
             });
             return;
         }
@@ -135,15 +135,15 @@ static NSString *containerEnvironmentRoot(NSString *identifier, NSString *enviro
     return [NSString stringWithFormat:@"%@/%@", containerEnvironmentRoot(identifier, environment), root];
 }
 
-- (void)send:(NSURLRequest *)request completion:(CharonCKCompletion)completion
+- (void)send:(NSURLRequest *)request completion:(RevenantCKCompletion)completion
 {
-    CharonCKRequest *pending = [[CharonCKRequest alloc] init];
+    RevenantCKRequest *pending = [[RevenantCKRequest alloc] init];
     pending.request = [request mutableCopy];
     pending.completion = completion;
     NSURLConnection *connection = [[NSURLConnection alloc] initWithRequest:request delegate:pending startImmediately:NO];
     if (!connection) {
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-            completion(nil, CharonCKTransportError([NSError errorWithDomain:NSURLErrorDomain
+            completion(nil, RevenantCKTransportError([NSError errorWithDomain:NSURLErrorDomain
                                                                        code:NSURLErrorUnknown
                                                                    userInfo:nil]));
         });
@@ -156,7 +156,7 @@ static NSString *containerEnvironmentRoot(NSString *identifier, NSString *enviro
 
 @end
 
-@implementation CharonCKRequest (CharonCKOneShot)
+@implementation RevenantCKRequest (RevenantCKOneShot)
 
 - (void)finishBody:(id)body error:(NSError *)error
 {
@@ -164,7 +164,7 @@ static NSString *containerEnvironmentRoot(NSString *identifier, NSString *enviro
         return;
     }
     self.finished = YES;
-    CharonCKCompletion completion = self.completion;
+    RevenantCKCompletion completion = self.completion;
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         completion(body, error);
     });
@@ -175,7 +175,7 @@ static NSString *containerEnvironmentRoot(NSString *identifier, NSString *enviro
 {
     if ([response isKindOfClass:[NSHTTPURLResponse class]]) {
         NSInteger status = [(NSHTTPURLResponse *)response statusCode];
-        ((CharonCKRequest *)self).status = status;
+        ((RevenantCKRequest *)self).status = status;
     }
 }
 
@@ -187,7 +187,7 @@ static NSString *containerEnvironmentRoot(NSString *identifier, NSString *enviro
 
 - (void)connection:(NSURLConnection *)connection didReceiveData:(NSData *)data
 {
-    CharonCKRequest *pending = (CharonCKRequest *)self;
+    RevenantCKRequest *pending = (RevenantCKRequest *)self;
     if (!pending.body) {
         pending.body = [NSMutableData data];
     }
@@ -196,12 +196,12 @@ static NSString *containerEnvironmentRoot(NSString *identifier, NSString *enviro
 
 - (void)connectionDidFinishLoading:(NSURLConnection *)connection
 {
-    CharonCKRequest *pending = (CharonCKRequest *)self;
+    RevenantCKRequest *pending = (RevenantCKRequest *)self;
     NSInteger status = pending.status;
     NSData *data = pending.body;
     if (status >= 400) {
         id payload = data.length ? [NSJSONSerialization JSONObjectWithData:data options:0 error:NULL] : nil;
-        [pending finishBody:nil error:CharonCKErrorFromPayload([payload isKindOfClass:[NSDictionary class]] ? payload : nil, nil)];
+        [pending finishBody:nil error:RevenantCKErrorFromPayload([payload isKindOfClass:[NSDictionary class]] ? payload : nil, nil)];
         return;
     }
     if (!data.length) {
@@ -211,7 +211,7 @@ static NSString *containerEnvironmentRoot(NSString *identifier, NSString *enviro
     NSError *decoded = nil;
     id payload = [NSJSONSerialization JSONObjectWithData:data options:0 error:&decoded];
     if (!payload) {
-        [pending finishBody:nil error:CharonCKTransportError(decoded)];
+        [pending finishBody:nil error:RevenantCKTransportError(decoded)];
         return;
     }
     [pending finishBody:payload error:nil];
@@ -219,8 +219,8 @@ static NSString *containerEnvironmentRoot(NSString *identifier, NSString *enviro
 
 - (void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)error
 {
-    CharonCKRequest *pending = (CharonCKRequest *)self;
-    [pending finishBody:nil error:CharonCKTransportError(error)];
+    RevenantCKRequest *pending = (RevenantCKRequest *)self;
+    [pending finishBody:nil error:RevenantCKTransportError(error)];
 }
 
 @end

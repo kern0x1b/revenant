@@ -6,7 +6,7 @@ set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 ACCELERATE=${ACCELERATE:-$here/../../../../packages/a/apple-backports/Accelerate}
-build=${BLASTHREADING_BUILD:-$(runs_folder charon-blasthreading-host)}
+build=${BLASTHREADING_BUILD:-$(runs_folder revenant-blasthreading-host)}
 rm -rf "$build"
 mkdir -p "$build"
 
@@ -22,7 +22,7 @@ for entry in json.load(open(os.path.join(registry, "ios18blasthreading.json")))[
         print(entry["api"].rstrip("()"))
 PY
 ); do
-    renames="$renames -D$name=charon_host_$name"
+    renames="$renames -D$name=revenant_host_$name"
 done
 
 xcrun clang -fobjc-arc -w $renames -c "$ACCELERATE/BLASThreading18.m" -o "$build/BLASThreading18.o"

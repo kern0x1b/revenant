@@ -62,7 +62,7 @@
 #include "network/local_socket_credentials.hpp"
 #include "mach/xnu_scheduler.hpp"
 
-namespace shade {
+namespace emulator {
 
 class HostSocket;
 class KeyStore;

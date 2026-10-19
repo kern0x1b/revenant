@@ -50,10 +50,10 @@ end
 
 function run(opt)
     opt = opt or {}
-    local root = steps.charon()
+    local root = steps.revenant()
     local device = opt.device or steps.env("COLLECTION_DEVICE") or "iPhone3,1"
     local release = opt.release or steps.env("COLLECTION_RELEASE") or "6.1.3"
-    local work = opt.work or steps.env("COLLECTION_WORK") or steps.workspace().run("charon-calls", "collection")
+    local work = opt.work or steps.env("COLLECTION_WORK") or steps.workspace().run("revenant-calls", "collection")
     local intents = path.join(root, FACTORY)
     local real = path.join(work, "IN16_0.real.m")
     os.mkdir(work)
@@ -75,7 +75,7 @@ function run(opt)
     local function build(label)
         local build_log = path.join(work, "build-" .. label .. ".log")
         local install_log = path.join(work, "install-" .. label .. ".log")
-        local ok = steps.spawn({curdir = HERE, envs = envs, argv = {"build", "-y", "charoncollection"}, log = build_log}) == 0
+        local ok = steps.spawn({curdir = HERE, envs = envs, argv = {"build", "-y", "revenantcollection"}, log = build_log}) == 0
                    and steps.spawn({curdir = HERE, envs = envs, argv = table.join(emulate, {"install"}), log = install_log}) == 0
         if not ok then
             raise("%s: build or install failed; %s says why\n%s", label, path.join(work, "*-" .. label .. ".log"),
@@ -85,10 +85,10 @@ function run(opt)
 
     local function measure(label)
         local status = steps.spawn({curdir = HERE, envs = envs, log = path.join(work, label .. ".raw"),
-                                    argv = table.join(emulate, {"run", "/usr/libexec/charoncollection",
+                                    argv = table.join(emulate, {"run", "/usr/libexec/revenantcollection",
                                                       string.format("the port's own body (%s)", label)})})
         local counts_status = steps.spawn({curdir = HERE, envs = envs, log = path.join(work, label .. ".counts.raw"),
-                                           argv = table.join(emulate, {"run", "/usr/libexec/charoncollection", "counts"})})
+                                           argv = table.join(emulate, {"run", "/usr/libexec/revenantcollection", "counts"})})
         local transcript = path.join(work, label .. ".txt")
         local transcript_text = steps.plain(io.readfile(path.join(work, label .. ".raw")))
         local counts_text = steps.plain(io.readfile(path.join(work, label .. ".counts.raw")))

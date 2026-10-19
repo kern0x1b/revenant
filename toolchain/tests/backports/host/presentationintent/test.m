@@ -117,14 +117,14 @@ static NSString *answer(id intent)
 static void compare(NSString *label, id ourIntent, id systemIntent)
 {
     NSString *ours = answer(ourIntent), *system = answer(systemIntent);
-    charon_check([system isEqualToString:ours], label.UTF8String,
+    revenant_check([system isEqualToString:ours], label.UTF8String,
                   [NSString stringWithFormat:@"the system answers %@, the backport answers %@", system, ours]);
 }
 
 int main(void)
 {
     @autoreleasepool {
-        ourClass = NSClassFromString(@"CharonHostNSPresentationIntent");
+        ourClass = NSClassFromString(@"RevenantHostNSPresentationIntent");
         CHECK(ourClass != Nil, "the port defines NSPresentationIntent under its own name");
 
         for (NSInteger first = 0; first < 8; first++) {
@@ -182,7 +182,7 @@ int main(void)
                 } @catch (NSException *exception) {
                     ours = [NSString stringWithFormat:@"%@: %@", exception.name, exception.reason];
                 }
-                charon_check([system isEqualToString:ours],
+                revenant_check([system isEqualToString:ours],
                               ([NSString stringWithFormat:@"table %ld columns and %ld alignments", (long)columns, (long)given]).UTF8String,
                               [NSString stringWithFormat:@"the system answers %@, the backport answers %@", system, ours]);
             }
@@ -214,11 +214,11 @@ int main(void)
             id systemLeft = pairs[index].systems, systemRight = pairs[index].othersSystems;
             BOOL systemEqual = [systemLeft isEqual:systemRight];
             BOOL systemEquivalent = [systemLeft isEquivalentToPresentationIntent:systemRight];
-            charon_check(systemEqual == ((BOOL (*)(id, SEL, id))objc_msgSend)(ourLeft, @selector(isEqual:), ourRight),
+            revenant_check(systemEqual == ((BOOL (*)(id, SEL, id))objc_msgSend)(ourLeft, @selector(isEqual:), ourRight),
                           [[NSString stringWithFormat:@"isEqual: %s", pairs[index].label] UTF8String],
                           [NSString stringWithFormat:@"the system answers %d, the backport answers %d", systemEqual,
                            ((BOOL (*)(id, SEL, id))objc_msgSend)(ourLeft, @selector(isEqual:), ourRight)]);
-            charon_check(systemEquivalent == ((BOOL (*)(id, SEL, id))objc_msgSend)(ourLeft, @selector(isEquivalentToPresentationIntent:), ourRight),
+            revenant_check(systemEquivalent == ((BOOL (*)(id, SEL, id))objc_msgSend)(ourLeft, @selector(isEquivalentToPresentationIntent:), ourRight),
                           [[NSString stringWithFormat:@"isEquivalentToPresentationIntent: %s", pairs[index].label] UTF8String],
                           [NSString stringWithFormat:@"the system answers %d, the backport answers %d", systemEquivalent,
                            ((BOOL (*)(id, SEL, id))objc_msgSend)(ourLeft, @selector(isEquivalentToPresentationIntent:), ourRight)]);
@@ -226,7 +226,7 @@ int main(void)
                 NSUInteger systemHash = ((NSUInteger (*)(id, SEL))objc_msgSend)(systemLeft, @selector(hash));
                 NSUInteger ourHash = ((NSUInteger (*)(id, SEL))objc_msgSend)(ourLeft, @selector(hash));
                 NSUInteger ourOtherHash = ((NSUInteger (*)(id, SEL))objc_msgSend)(ourRight, @selector(hash));
-                charon_check(ourHash == ourOtherHash,
+                revenant_check(ourHash == ourOtherHash,
                              [[NSString stringWithFormat:@"equal intents hash alike: %s", pairs[index].label] UTF8String],
                              [NSString stringWithFormat:@"the backport answers %lu and %lu for two equal intents",
                               (unsigned long)ourHash, (unsigned long)ourOtherHash]);
@@ -234,17 +234,17 @@ int main(void)
                        (unsigned long)systemHash, (unsigned long)ourHash);
             }
         }
-        charon_check([systemList isEquivalentToPresentationIntent:nil] ==
+        revenant_check([systemList isEquivalentToPresentationIntent:nil] ==
                          ((BOOL (*)(id, SEL, id))objc_msgSend)(ourList, @selector(isEquivalentToPresentationIntent:), nil),
                      "isEquivalentToPresentationIntent: nil", @"the two answers differ");
-        charon_check(![[NSObject class] isKindOfClass:[systemList class]], "the system's class is its own",
+        revenant_check(![[NSObject class] isKindOfClass:[systemList class]], "the system's class is its own",
                      @"the system's class is not what the test thinks it is");
 
         id ourTable = build(YES, 8, build(YES, 0, nil, 90, 0), 91, 3);
         id systemTable = build(NO, 8, build(NO, 0, nil, 90, 0), 91, 3);
         NSArray *systemKeys = keysInArchive(systemTable);
         NSArray *ourKeys = keysInArchive(ourTable);
-        charon_check([systemKeys isEqualToArray:ourKeys], "the archive's keys",
+        revenant_check([systemKeys isEqualToArray:ourKeys], "the archive's keys",
                      [NSString stringWithFormat:@"the system writes %@, the backport writes %@", systemKeys, ourKeys]);
 
         id read = nil;
@@ -259,12 +259,12 @@ int main(void)
             read = nil;
             printf("FAIL the round trip raises %s: %s\n", exception.name.UTF8String, exception.reason.UTF8String);
         }
-        charon_check(read && [answer(read) isEqualToString:answer(ourTable)] && [read isKindOfClass:ourClass],
+        revenant_check(read && [answer(read) isEqualToString:answer(ourTable)] && [read isKindOfClass:ourClass],
                      "the round trip",
                      [NSString stringWithFormat:@"the intent in is %@, the intent out is %@", answer(ourTable), answer(read)]);
 
-        printf("checks=%d failures=%d\n", charon_checks, charon_failures);
+        printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
         fflush(stdout);
     }
-    return charon_failures;
+    return revenant_failures;
 }

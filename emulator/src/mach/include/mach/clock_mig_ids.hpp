@@ -18,7 +18,7 @@
 
 #include "mach/xnu_mig_adapter.hpp"
 
-namespace shade::xnu::mig::clock {
+namespace emulator::xnu::mig::clock {
 
 inline constexpr std::string_view subsystem_name{"clock"};
 inline constexpr std::uint32_t subsystem_base = 1000U;

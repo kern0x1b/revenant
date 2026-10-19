@@ -24,12 +24,12 @@ python3 "$here/mutant-init.py" "$FP/CoreData/NSBatchInsertRequest.m" "$scratch/p
 
 # The copy is for the HOST build, so the import the package's own header needs is gone and the
 # class is renamed with -D: nothing links two definitions of NSBatchInsertRequest.
-grep -v '#import "CharonCoreData.h"' "$scratch/port.m" > "$scratch/port.buildable.m"
+grep -v '#import "RevenantCoreData.h"' "$scratch/port.m" > "$scratch/port.buildable.m"
 mv "$scratch/port.buildable.m" "$scratch/port.m"
 
 echo
 echo "=== 2. the mutant BUILDS - a compile failure is not a red"
-if xcrun clang -fobjc-arc -w -DNSBatchInsertRequest=CharonBatchInsertRequest \
+if xcrun clang -fobjc-arc -w -DNSBatchInsertRequest=RevenantBatchInsertRequest \
        -I"$FP/CoreData" -c "$scratch/port.m" -o "$scratch/port.o"; then
     echo "BUILD OK  (the mutant compiles, so any red below is the behaviour and not the build)"
 else
@@ -39,7 +39,7 @@ else
     exit 4
 fi
 
-xcrun clang -fobjc-arc -w -DNSBatchInsertRequest=CharonBatchInsertRequest \
+xcrun clang -fobjc-arc -w -DNSBatchInsertRequest=RevenantBatchInsertRequest \
     "$here/per-initializer.m" "$scratch/port.o" \
     -framework Foundation -framework CoreData -o "$scratch/perinit"
 

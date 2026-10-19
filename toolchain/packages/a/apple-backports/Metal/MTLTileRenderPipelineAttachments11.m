@@ -1,7 +1,7 @@
 #import <Metal/Metal.h>
 #import <Foundation/Foundation.h>
 
-enum { CharonMetalTileColorAttachmentSlots = 8 };
+enum { RevenantMetalTileColorAttachmentSlots = 8 };
 
 @implementation MTLTileRenderPipelineColorAttachmentDescriptor {
     MTLPixelFormat _pixelFormat;
@@ -19,15 +19,15 @@ enum { CharonMetalTileColorAttachmentSlots = 8 };
 @end
 
 @implementation MTLTileRenderPipelineColorAttachmentDescriptorArray {
-    MTLTileRenderPipelineColorAttachmentDescriptor *_slots[CharonMetalTileColorAttachmentSlots];
+    MTLTileRenderPipelineColorAttachmentDescriptor *_slots[RevenantMetalTileColorAttachmentSlots];
 }
 
 - (MTLTileRenderPipelineColorAttachmentDescriptor *)objectAtIndexedSubscript:(NSUInteger)attachmentIndex
 {
-    if (attachmentIndex >= CharonMetalTileColorAttachmentSlots) {
+    if (attachmentIndex >= RevenantMetalTileColorAttachmentSlots) {
         [NSException raise:NSRangeException
                     format:@"colorAttachments[%lu]: this array has %lu slots",
-                           (unsigned long)attachmentIndex, (unsigned long)CharonMetalTileColorAttachmentSlots];
+                           (unsigned long)attachmentIndex, (unsigned long)RevenantMetalTileColorAttachmentSlots];
         return nil;
     }
     if (!_slots[attachmentIndex])
@@ -38,10 +38,10 @@ enum { CharonMetalTileColorAttachmentSlots = 8 };
 - (void)setObject:(MTLTileRenderPipelineColorAttachmentDescriptor *)attachment
     atIndexedSubscript:(NSUInteger)attachmentIndex
 {
-    if (attachmentIndex >= CharonMetalTileColorAttachmentSlots) {
+    if (attachmentIndex >= RevenantMetalTileColorAttachmentSlots) {
         [NSException raise:NSRangeException
                     format:@"setObject:atIndexedSubscript:%lu: this array has %lu slots",
-                           (unsigned long)attachmentIndex, (unsigned long)CharonMetalTileColorAttachmentSlots];
+                           (unsigned long)attachmentIndex, (unsigned long)RevenantMetalTileColorAttachmentSlots];
         return;
     }
     if (attachment)

@@ -1,4 +1,4 @@
-#import "CharonCallKit.h"
+#import "RevenantCallKit.h"
 
 #pragma clang diagnostic ignored "-Wobjc-designated-initializers"
 
@@ -11,16 +11,16 @@
 }
 
 @dynamic UUID, outgoing, onHold, hasConnected, hasEnded;
-@synthesize charon_provider = _charon_provider;
-@synthesize charon_update = _charon_update;
-@synthesize charon_dateStartedConnecting = _charon_dateStartedConnecting;
-@synthesize charon_dateConnected = _charon_dateConnected;
-@synthesize charon_dateEnded = _charon_dateEnded;
-@synthesize charon_endedReason = _charon_endedReason;
-@synthesize charon_muted = _charon_muted;
-@synthesize charon_groupedWith = _charon_groupedWith;
+@synthesize revenant_provider = _revenant_provider;
+@synthesize revenant_update = _revenant_update;
+@synthesize revenant_dateStartedConnecting = _revenant_dateStartedConnecting;
+@synthesize revenant_dateConnected = _revenant_dateConnected;
+@synthesize revenant_dateEnded = _revenant_dateEnded;
+@synthesize revenant_endedReason = _revenant_endedReason;
+@synthesize revenant_muted = _revenant_muted;
+@synthesize revenant_groupedWith = _revenant_groupedWith;
 
-- (instancetype)charon_initWithUUID:(NSUUID *)UUID outgoing:(BOOL)outgoing
+- (instancetype)revenant_initWithUUID:(NSUUID *)UUID outgoing:(BOOL)outgoing
 {
     if ((self = [super init])) {
         _UUID = [UUID copy];
@@ -54,35 +54,35 @@
     return _hasEnded;
 }
 
-- (void)charon_setOnHold:(BOOL)onHold
+- (void)revenant_setOnHold:(BOOL)onHold
 {
     _onHold = onHold;
 }
 
-- (void)charon_setHasConnected:(BOOL)hasConnected
+- (void)revenant_setHasConnected:(BOOL)hasConnected
 {
     _hasConnected = hasConnected;
 }
 
-- (void)charon_setHasEnded:(BOOL)hasEnded
+- (void)revenant_setHasEnded:(BOOL)hasEnded
 {
     _hasEnded = hasEnded;
 }
 
-- (CXCall *)charon_snapshot
+- (CXCall *)revenant_snapshot
 {
-    CXCall *copy = [[CXCall alloc] charon_initWithUUID:_UUID outgoing:_outgoing];
+    CXCall *copy = [[CXCall alloc] revenant_initWithUUID:_UUID outgoing:_outgoing];
     copy->_onHold = _onHold;
     copy->_hasConnected = _hasConnected;
     copy->_hasEnded = _hasEnded;
-    copy.charon_provider = _charon_provider;
-    copy.charon_update = _charon_update;
-    copy.charon_dateStartedConnecting = _charon_dateStartedConnecting;
-    copy.charon_dateConnected = _charon_dateConnected;
-    copy.charon_dateEnded = _charon_dateEnded;
-    copy.charon_endedReason = _charon_endedReason;
-    copy.charon_muted = _charon_muted;
-    copy.charon_groupedWith = _charon_groupedWith;
+    copy.revenant_provider = _revenant_provider;
+    copy.revenant_update = _revenant_update;
+    copy.revenant_dateStartedConnecting = _revenant_dateStartedConnecting;
+    copy.revenant_dateConnected = _revenant_dateConnected;
+    copy.revenant_dateEnded = _revenant_dateEnded;
+    copy.revenant_endedReason = _revenant_endedReason;
+    copy.revenant_muted = _revenant_muted;
+    copy.revenant_groupedWith = _revenant_groupedWith;
     return copy;
 }
 
@@ -120,20 +120,20 @@
 - (instancetype)init
 {
     if ((self = [super init])) {
-        [[CharonCallBroker shared] addObserver:self];
-        [[CharonCallTelephony shared] start];
+        [[RevenantCallBroker shared] addObserver:self];
+        [[RevenantCallTelephony shared] start];
     }
     return self;
 }
 
 - (void)dealloc
 {
-    [[CharonCallBroker shared] removeObserver:self];
+    [[RevenantCallBroker shared] removeObserver:self];
 }
 
 - (NSArray<CXCall *> *)calls
 {
-    return [[CharonCallBroker shared] calls];
+    return [[RevenantCallBroker shared] calls];
 }
 
 - (void)setDelegate:(id<CXCallObserverDelegate>)delegate queue:(dispatch_queue_t)queue
@@ -144,7 +144,7 @@
     }
 }
 
-- (void)charon_callChanged:(CXCall *)call
+- (void)revenant_callChanged:(CXCall *)call
 {
     id<CXCallObserverDelegate> delegate;
     dispatch_queue_t queue;

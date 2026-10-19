@@ -12,7 +12,7 @@
 #include <optional>
 #include <span>
 
-namespace shade {
+namespace emulator {
 
 class EaglContextFirstArm32Profile {
 public:

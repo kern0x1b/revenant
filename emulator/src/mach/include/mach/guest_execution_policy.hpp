@@ -14,7 +14,7 @@
 
 #include "mach/xnu_scheduler.hpp"
 
-namespace shade {
+namespace emulator {
 
 struct GuestExecutionBudgetRequest {
     XnuThreadId thread;

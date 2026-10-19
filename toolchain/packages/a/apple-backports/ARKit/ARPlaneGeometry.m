@@ -1,8 +1,8 @@
 #import <ARKit/ARKit.h>
 #import <string.h>
 
-#import "CharonARTracker.h"
-#import "CharonARKitPrivate.h"
+#import "RevenantARTracker.h"
+#import "RevenantARKitPrivate.h"
 
 @implementation ARPlaneGeometry
 {
@@ -23,12 +23,12 @@
 
 
 
-- (instancetype)initWithPlaneValue:(CharonARValue *)value
+- (instancetype)initWithPlaneValue:(RevenantARValue *)value
 {
     self = [super init];
     if (!self)
         return nil;
-    CharonARPlane plane;
+    RevenantARPlane plane;
     if (![value getValue:&plane])
         return nil;
 
@@ -89,10 +89,10 @@
 {
     [coder encodeInteger:(NSInteger)_vertexCount forKey:@"vertexCount"];
     [coder encodeInteger:(NSInteger)_triangleCount forKey:@"triangleCount"];
-    CharonEncodeStruct(coder, @"vertices", _vertices, _vertexCount * sizeof * _vertices);
-    CharonEncodeStruct(coder, @"textureCoordinates", _textureCoordinates,
+    RevenantEncodeStruct(coder, @"vertices", _vertices, _vertexCount * sizeof * _vertices);
+    RevenantEncodeStruct(coder, @"textureCoordinates", _textureCoordinates,
                        _vertexCount * sizeof * _textureCoordinates);
-    CharonEncodeStruct(coder, @"triangleIndices", _triangleIndices,
+    RevenantEncodeStruct(coder, @"triangleIndices", _triangleIndices,
                        _triangleCount * sizeof * _triangleIndices);
 }
 
@@ -117,10 +117,10 @@
         free(_boundaryVertices);
         return nil;
     }
-    if (!CharonDecodeStruct(coder, @"vertices", _vertices, _vertexCount * sizeof * _vertices) ||
-        !CharonDecodeStruct(coder, @"textureCoordinates", _textureCoordinates,
+    if (!RevenantDecodeStruct(coder, @"vertices", _vertices, _vertexCount * sizeof * _vertices) ||
+        !RevenantDecodeStruct(coder, @"textureCoordinates", _textureCoordinates,
                             _vertexCount * sizeof * _textureCoordinates) ||
-        !CharonDecodeStruct(coder, @"triangleIndices", _triangleIndices,
+        !RevenantDecodeStruct(coder, @"triangleIndices", _triangleIndices,
                             _triangleCount * sizeof * _triangleIndices)) {
         free(_vertices);
         free(_textureCoordinates);

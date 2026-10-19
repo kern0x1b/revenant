@@ -67,18 +67,18 @@ int main(int argc, char **argv)
 {
     @autoreleasepool {
         if (argc > 1)
-            charon_log_to(@(argv[1]));
+            revenant_log_to(@(argv[1]));
         NSMutableDictionary *expected = [NSMutableDictionary dictionary];
         for (size_t i = 0; i < sizeof(expectations) / sizeof(*expectations); i++)
             expected[@(expectations[i][0])] = @(expectations[i][1]);
         __block int compared = 0;
-        charon_cg7_cases(^(NSString *name, NSString *value) {
+        revenant_cg7_cases(^(NSString *name, NSString *value) {
             compared++;
-            charon_check(agrees(value, expected[name]), [name UTF8String], [NSString stringWithFormat:@"%@ != %@", value, expected[name]]);
+            revenant_check(agrees(value, expected[name]), [name UTF8String], [NSString stringWithFormat:@"%@ != %@", value, expected[name]]);
         });
         CHECK(compared == (int)expected.count, "every recorded answer was compared");
         check_spaces();
-        printf("%d checks, %d failed\n", charon_checks, charon_failures);
+        printf("%d checks, %d failed\n", revenant_checks, revenant_failures);
     }
-    return charon_failures;
+    return revenant_failures;
 }

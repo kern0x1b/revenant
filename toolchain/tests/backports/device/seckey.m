@@ -72,13 +72,13 @@ int main(void)
 
         CFErrorRef error = NULL;
         CFDictionaryRef nothing = NULL;
-        charon_check(SecKeyCreateRandomKey(nothing, &error) == NULL && error != NULL,
+        revenant_check(SecKeyCreateRandomKey(nothing, &error) == NULL && error != NULL,
                      "no parameters is an error, not a crash", described(error));
         if (error) { CFRelease(error); error = NULL; }
 
         SecKeyRef refused = SecKeyCreateRandomKey((__bridge CFDictionaryRef)@{
             (id)kSecAttrKeyType: @"not a key type", (id)kSecAttrKeySizeInBits: @2048}, &error);
-        charon_check(refused == NULL && error != NULL, "a key type the release cannot make is an error",
+        revenant_check(refused == NULL && error != NULL, "a key type the release cannot make is an error",
                      described(error));
         if (refused) CFRelease(refused);
         if (error) { CFRelease(error); error = NULL; }
@@ -88,11 +88,11 @@ int main(void)
             (id)kSecAttrKeySizeInBits: @1024,
             (id)kSecPrivateKeyAttrs: @{(id)kSecAttrIsPermanent: @NO},
             (id)kSecPublicKeyAttrs: @{(id)kSecAttrIsPermanent: @NO}}, &error);
-        charon_check(privateKey != NULL, "a 1024-bit RSA key is generated", described(error));
+        revenant_check(privateKey != NULL, "a 1024-bit RSA key is generated", described(error));
         if (error) { CFRelease(error); error = NULL; }
         if (!privateKey) {
-            printf("%d of %d checks failed\n", charon_failures, charon_checks);
-            return charon_failures;
+            printf("%d of %d checks failed\n", revenant_failures, revenant_checks);
+            return revenant_failures;
         }
 
         SecKeyRef publicKey = SecKeyCopyPublicKey(privateKey);
@@ -105,7 +105,7 @@ int main(void)
         if (publicKey) {
             CFDataRef external = SecKeyCopyExternalRepresentation(publicKey, &error);
             publicRepresentation = CFBridgingRelease(external);
-            charon_check(publicRepresentation != nil, "the public key has an external representation", described(error));
+            revenant_check(publicRepresentation != nil, "the public key has an external representation", described(error));
             if (error) { CFRelease(error); error = NULL; }
             NSArray *parts = publicRepresentation ? der_integers(publicRepresentation) : nil;
             CHECK(parts.count == 2, "the public representation is a PKCS#1 RSAPublicKey of two integers");
@@ -120,31 +120,31 @@ int main(void)
         CFDataRef privateExternal = SecKeyCopyExternalRepresentation(privateKey, &error);
         NSData *privateRepresentation = CFBridgingRelease(privateExternal);
         if (privateRepresentation) {
-            charon_check(![privateRepresentation isEqual:publicRepresentation],
+            revenant_check(![privateRepresentation isEqual:publicRepresentation],
                          "the private key is never exported as its public half",
                          @"the private representation is the public one");
             CHECK(der_integers(privateRepresentation).count == 9,
                   "a private representation that is answered is a PKCS#1 RSAPrivateKey");
         } else {
-            charon_check(error != NULL, "a private key the release cannot export is an error, not nothing",
+            revenant_check(error != NULL, "a private key the release cannot export is an error, not nothing",
                          described(error));
         }
         if (error) { CFRelease(error); error = NULL; }
 
-        NSData *message = [@"charon" dataUsingEncoding:NSUTF8StringEncoding];
+        NSData *message = [@"revenant" dataUsingEncoding:NSUTF8StringEncoding];
         if (publicKey) {
             for (NSString *name in @[@"PKCS1", @"OAEPSHA1"]) {
                 SecKeyAlgorithm algorithm = [name isEqual:@"PKCS1"] ? kSecKeyAlgorithmRSAEncryptionPKCS1
                                                                     : kSecKeyAlgorithmRSAEncryptionOAEPSHA1;
                 CFDataRef cipher = SecKeyCreateEncryptedData(publicKey, algorithm, (__bridge CFDataRef)message, &error);
-                charon_check(cipher != NULL, [name stringByAppendingString:@" encrypts"].UTF8String, described(error));
+                revenant_check(cipher != NULL, [name stringByAppendingString:@" encrypts"].UTF8String, described(error));
                 if (error) { CFRelease(error); error = NULL; }
                 if (!cipher)
                     continue;
                 CHECK(CFDataGetLength(cipher) == (CFIndex)SecKeyGetBlockSize(publicKey),
                       [name stringByAppendingString:@" fills one block"].UTF8String);
                 CFDataRef plain = SecKeyCreateDecryptedData(privateKey, algorithm, cipher, &error);
-                charon_check(plain != NULL && [(__bridge NSData *)plain isEqual:message],
+                revenant_check(plain != NULL && [(__bridge NSData *)plain isEqual:message],
                              [name stringByAppendingString:@" comes back the same"].UTF8String, described(error));
                 if (error) { CFRelease(error); error = NULL; }
                 if (plain) CFRelease(plain);
@@ -153,7 +153,7 @@ int main(void)
 
             CFDataRef unsupported = SecKeyCreateEncryptedData(publicKey, kSecKeyAlgorithmRSAEncryptionOAEPSHA256,
                                                               (__bridge CFDataRef)message, &error);
-            charon_check(unsupported == NULL && error != NULL,
+            revenant_check(unsupported == NULL && error != NULL,
                          "an algorithm the release cannot do is refused, not answered with another one", described(error));
             if (unsupported) CFRelease(unsupported);
             if (error) {
@@ -167,7 +167,7 @@ int main(void)
         }
         CFRelease(privateKey);
 
-        printf("%d of %d checks failed\n", charon_failures, charon_checks);
-        return charon_failures;
+        printf("%d of %d checks failed\n", revenant_failures, revenant_checks);
+        return revenant_failures;
     }
 }

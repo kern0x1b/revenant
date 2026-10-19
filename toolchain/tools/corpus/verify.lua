@@ -5,18 +5,18 @@ local aggregate = import("aggregate", {rootdir = os.scriptdir(), anonymous = tru
 
 local EXPORT = aggregate.registry_export()
 local CORPUS = aggregate.corpus_dir()
-local CHARON = path.directory(path.directory(os.scriptdir()))
+local REVENANT = path.directory(path.directory(os.scriptdir()))
 
 local TREE = nil
-for _, candidate in ipairs({os.getenv("CHARON_TREE_DIR") or false,
-                            path.join(CHARON, "packages", "a", "apple-backports")}) do
+for _, candidate in ipairs({os.getenv("REVENANT_TREE_DIR") or false,
+                            path.join(REVENANT, "packages", "a", "apple-backports")}) do
     if candidate and os.isdir(candidate) then
         TREE = candidate
         break
     end
 end
 if not TREE then
-    raise("verify.lua: no tree directory found. Set CHARON_TREE_DIR to the current worktree's "
+    raise("verify.lua: no tree directory found. Set REVENANT_TREE_DIR to the current worktree's "
         .. "packages/a/apple-backports -- without it every check reports false positives.")
 end
 
@@ -107,12 +107,12 @@ end
 local ADOPTERS = {}
 do
     local store_path = path.join(CORPUS, "store.json")
-    if os.getenv("CHARON_TOOLS_DIR") and os.isfile(path.join(os.getenv("CHARON_TOOLS_DIR"), "store.json")) then
-        store_path = path.join(os.getenv("CHARON_TOOLS_DIR"), "store.json")
+    if os.getenv("REVENANT_TOOLS_DIR") and os.isfile(path.join(os.getenv("REVENANT_TOOLS_DIR"), "store.json")) then
+        store_path = path.join(os.getenv("REVENANT_TOOLS_DIR"), "store.json")
     end
     if not os.isfile(store_path) then
         io.stderr:write(string.format("verify.lua: WARNING no store.json found (looked in %s) -- PROTOCOLS/ADOPTERS stay "
-            .. "empty, every protocol-member row falls back to the flat tree scan. Set CHARON_TOOLS_DIR.\n", store_path))
+            .. "empty, every protocol-member row falls back to the flat tree scan. Set REVENANT_TOOLS_DIR.\n", store_path))
     else
         local held = json.decode(io.readfile(store_path))
         if held == nil then

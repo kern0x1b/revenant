@@ -1,4 +1,4 @@
-#import "CharonVImageFixed.h"
+#import "RevenantVImageFixed.h"
 
 #pragma clang diagnostic ignored "-Wunguarded-availability-new"
 #pragma clang diagnostic ignored "-Wpointer-bool-conversion"
@@ -6,7 +6,7 @@
 
 vImage_Error vImageConvert_16Fto16Q12(const vImage_Buffer *src, const vImage_Buffer *dest, vImage_Flags flags)
 {
-    vImage_Error ready = charon_fixed_ready(src, dest, flags);
+    vImage_Error ready = revenant_fixed_ready(src, dest, flags);
     if (ready != kvImageNoError)
         return ready;
     for (vImagePixelCount row = 0; row < dest->height; row++) {
@@ -16,7 +16,7 @@ vImage_Error vImageConvert_16Fto16Q12(const vImage_Buffer *src, const vImage_Buf
             uint16_t half;
             int16_t answer;
             memcpy(&half, in + column * 2, sizeof half);
-            answer = (int16_t)charon_sat((double)charon_half_to_float(half) * 4096.0, -32768, 32767);
+            answer = (int16_t)revenant_sat((double)revenant_half_to_float(half) * 4096.0, -32768, 32767);
             memcpy(out + column * 2, &answer, sizeof answer);
         }
     }
@@ -25,7 +25,7 @@ vImage_Error vImageConvert_16Fto16Q12(const vImage_Buffer *src, const vImage_Buf
 
 vImage_Error vImageConvert_16Q12to16F(const vImage_Buffer *src, const vImage_Buffer *dest, vImage_Flags flags)
 {
-    vImage_Error ready = charon_fixed_ready(src, dest, flags);
+    vImage_Error ready = revenant_fixed_ready(src, dest, flags);
     if (ready != kvImageNoError)
         return ready;
     for (vImagePixelCount row = 0; row < dest->height; row++) {
@@ -35,7 +35,7 @@ vImage_Error vImageConvert_16Q12to16F(const vImage_Buffer *src, const vImage_Buf
             int16_t value;
             uint16_t answer;
             memcpy(&value, in + column * 2, sizeof value);
-            answer = charon_float_to_half((float)value / 4096.0f);
+            answer = revenant_float_to_half((float)value / 4096.0f);
             memcpy(out + column * 2, &answer, sizeof answer);
         }
     }

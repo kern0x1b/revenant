@@ -32,8 +32,8 @@
 @property (nonatomic, readonly) MPPlayableContentManagerContext *context;
 @property (nonatomic, copy) NSArray<NSString *> *nowPlayingIdentifiers;
 + (instancetype)sharedContentManager;
-- (NSUInteger)charonUpdateDepth;
-- (NSUInteger)charonReloadCount;
+- (NSUInteger)revenantUpdateDepth;
+- (NSUInteger)revenantReloadCount;
 - (void)reloadData;
 - (void)beginUpdates;
 - (void)endUpdates;
@@ -52,7 +52,7 @@
 
 @interface Source : NSObject <MPPlayableContentDataSource> @end
 @implementation Source
-+ (NSIndexPath *)charonTestIndexPath { static NSIndexPath *p; if (!p) { p = [[NSIndexPath alloc] init]; } return p; }
++ (NSIndexPath *)revenantTestIndexPath { static NSIndexPath *p; if (!p) { p = [[NSIndexPath alloc] init]; } return p; }
 - (NSInteger)numberOfChildItemsAtIndexPath:(NSIndexPath *)indexPath { return 3; }
 - (MPContentItem *)contentItemAtIndexPath:(NSIndexPath *)indexPath {
     return [[MPContentItem alloc] initWithIdentifier:@"song-1"];
@@ -97,15 +97,15 @@ int main(void) {
     check("the manager holds the data source it was given", shared.dataSource == source, "the source");
     check("the manager holds the delegate it was given", shared.delegate == delegate, "the delegate");
     check("the required data source members are reachable through the port's object",
-          [shared.dataSource numberOfChildItemsAtIndexPath:[Source charonTestIndexPath]] == 3,
+          [shared.dataSource numberOfChildItemsAtIndexPath:[Source revenantTestIndexPath]] == 3,
           "3");
-    MPContentItem *reached = [shared.dataSource contentItemAtIndexPath:[Source charonTestIndexPath]];
+    MPContentItem *reached = [shared.dataSource contentItemAtIndexPath:[Source revenantTestIndexPath]];
     check("the required contentItemAtIndexPath: is reachable and answers an MPContentItem",
           [reached isKindOfClass:[MPContentItem class]] && [reached.identifier isEqualToString:@"song-1"],
           "song-1");
     __block int asked = 0;
     [shared.delegate playableContentManager:shared
-          initiatePlaybackOfContentItemAtIndexPath:[Source charonTestIndexPath]
+          initiatePlaybackOfContentItemAtIndexPath:[Source revenantTestIndexPath]
                                 completionHandler:^(NSError *e) { asked++; }];
     check("the delegate's optional playback callback is reachable and its handler runs", asked == 1, "1");
 
@@ -116,18 +116,18 @@ int main(void) {
           shared.nowPlayingIdentifiers.count == 2, "2");
     shared.reloadData;
     [shared beginUpdates]; [shared beginUpdates];
-    check("two -beginUpdates put the depth at 2", [shared charonUpdateDepth] == 2, "2");
+    check("two -beginUpdates put the depth at 2", [shared revenantUpdateDepth] == 2, "2");
     [shared endUpdates];
-    check("one -endUpdates brings it back to 1", [shared charonUpdateDepth] == 1, "1");
+    check("one -endUpdates brings it back to 1", [shared revenantUpdateDepth] == 1, "1");
     [shared endUpdates]; [shared endUpdates];
     check("an unpaired -endUpdates is clamped at 0, not driven negative",
-          [shared charonUpdateDepth] == 0, "0");
+          [shared revenantUpdateDepth] == 0, "0");
     [shared beginUpdates];
     check("so a later balanced pair still reads 1, which a negative depth would have broken",
-          [shared charonUpdateDepth] == 1, "1");
+          [shared revenantUpdateDepth] == 1, "1");
     [shared endUpdates];
     check("and the reload count is visible rather than the call being a silent nothing",
-          [shared charonReloadCount] == 1, "1");
+          [shared revenantReloadCount] == 1, "1");
 
     MPPlayableContentManagerContext *context = [[MPPlayableContentManagerContext alloc] init];
     check("endpointAvailable is NO: there is no external media player on this release",

@@ -1,15 +1,15 @@
-#import "CharonMetal.h"
+#import "RevenantMetal.h"
 
 #pragma clang diagnostic ignored "-Wprotocol"
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
 
-@interface MTLSharedEventHandle (Charon)
-- (instancetype)initWithState:(CharonMetalEventState *)state label:(NSString *)label;
-- (CharonMetalEventState *)charonState;
+@interface MTLSharedEventHandle (Revenant)
+- (instancetype)initWithState:(RevenantMetalEventState *)state label:(NSString *)label;
+- (RevenantMetalEventState *)revenantState;
 @end
 
 
-@implementation CharonMetalEventState {
+@implementation RevenantMetalEventState {
     uint64_t _signaledValue;
     NSCondition *_condition;
     NSMutableArray *_pending;
@@ -82,8 +82,8 @@
 
 @end
 
-@implementation CharonMetalSharedEvent {
-    __strong CharonMetalEventState *_state;
+@implementation RevenantMetalSharedEvent {
+    __strong RevenantMetalEventState *_state;
 }
 
 @synthesize label;
@@ -91,19 +91,19 @@
 - (instancetype)init
 {
     if ((self = [super init])) {
-        _state = [[CharonMetalEventState alloc] init];
+        _state = [[RevenantMetalEventState alloc] init];
     }
     return self;
 }
 
-+ (instancetype)charonEventWithState:(CharonMetalEventState *)state
++ (instancetype)revenantEventWithState:(RevenantMetalEventState *)state
 {
-    CharonMetalSharedEvent *event = [[CharonMetalSharedEvent alloc] init];
+    RevenantMetalSharedEvent *event = [[RevenantMetalSharedEvent alloc] init];
     event->_state = state;
     return event;
 }
 
-- (CharonMetalEventState *)state
+- (RevenantMetalEventState *)state
 {
     return _state;
 }
@@ -123,12 +123,12 @@
     _state.signaledValue = value;
 }
 
-- (BOOL)charonWaitForValue:(uint64_t)value
+- (BOOL)revenantWaitForValue:(uint64_t)value
 {
-    return [self charonWaitForValue:value timeout:0.0];
+    return [self revenantWaitForValue:value timeout:0.0];
 }
 
-- (BOOL)charonWaitForValue:(uint64_t)value timeout:(NSTimeInterval)seconds
+- (BOOL)revenantWaitForValue:(uint64_t)value timeout:(NSTimeInterval)seconds
 {
     [_state waitForValue:value timeout:seconds];
     return _state.signaledValue >= value;
@@ -147,13 +147,13 @@
 @end
 
 @implementation MTLSharedEventHandle {
-    __strong CharonMetalEventState *_state;
+    __strong RevenantMetalEventState *_state;
     NSString *_label;
 }
 
 @synthesize label;
 
-- (instancetype)initWithState:(CharonMetalEventState *)state label:(NSString *)label
+- (instancetype)initWithState:(RevenantMetalEventState *)state label:(NSString *)label
 {
     if ((self = [super init])) {
         _state = state;
@@ -162,7 +162,7 @@
     return self;
 }
 
-- (CharonMetalEventState *)charonState
+- (RevenantMetalEventState *)revenantState
 {
     return _state;
 }
@@ -179,7 +179,7 @@
 
 - (void)encodeWithCoder:(NSCoder *)coder
 {
-    NSError *error = CharonMetalError(18, @"a shared event handle names a value and a wait that exist in this process, and there is nothing of them to write into an archive; it is passed to another process, not archived");
+    NSError *error = RevenantMetalError(18, @"a shared event handle names a value and a wait that exist in this process, and there is nothing of them to write into an archive; it is passed to another process, not archived");
     NSLog(@"Metal: %@", error.localizedDescription);
     [coder failWithError:error];
 }
@@ -210,14 +210,14 @@
 
 @end
 
-@interface CharonMetalDevice (SharedEvent)
+@interface RevenantMetalDevice (SharedEvent)
 @end
 
-@implementation CharonMetalDevice (SharedEvent)
+@implementation RevenantMetalDevice (SharedEvent)
 
 - (id<MTLSharedEvent>)newSharedEvent
 {
-    return [[CharonMetalSharedEvent alloc] init];
+    return [[RevenantMetalSharedEvent alloc] init];
 }
 
 - (id<MTLSharedEvent>)newSharedEventWithHandle:(MTLSharedEventHandle *)sharedEventHandle
@@ -227,7 +227,7 @@
               NSStringFromClass([sharedEventHandle class]));
         return nil;
     }
-    return [CharonMetalSharedEvent charonEventWithState:[(MTLSharedEventHandle *)sharedEventHandle charonState]];
+    return [RevenantMetalSharedEvent revenantEventWithState:[(MTLSharedEventHandle *)sharedEventHandle revenantState]];
 }
 
 @end

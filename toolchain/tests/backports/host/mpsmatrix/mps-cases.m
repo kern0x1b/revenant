@@ -10,8 +10,8 @@ typedef struct {
     id object;
     void *source;
     size_t bytes;
-} CharonMPSSource;
-static CharonMPSSource gSources[4096];
+} RevenantMPSSource;
+static RevenantMPSSource gSources[4096];
 static NSUInteger gSourceCount;
 
 static void remember(id object, void *source, size_t bytes)
@@ -45,9 +45,9 @@ static void printClassImages(void)
         printf("image %-40s %s\n", names[i].UTF8String,
                cls ? (class_getImageName(cls) ?: "(none)") : "(absent)");
         fflush(stdout);
-        NSString *charon = [@"Charon" stringByAppendingString:names[i]];
-        Class mine = NSClassFromString(charon);
-        printf("image %-40s %s\n", charon.UTF8String,
+        NSString *revenant = [@"Revenant" stringByAppendingString:names[i]];
+        Class mine = NSClassFromString(revenant);
+        printf("image %-40s %s\n", revenant.UTF8String,
                mine ? (class_getImageName(mine) ?: "(none)") : "(absent)");
     }
 }
@@ -55,7 +55,7 @@ static void printClassImages(void)
 static void pullResults(void)
 {
     for (NSUInteger i = 0; i < gSourceCount; i++) {
-        CharonMPSSource *entry = &gSources[i];
+        RevenantMPSSource *entry = &gSources[i];
         id<MTLBuffer> buffer = [(id)entry->object data];
         memcpy(entry->source, [buffer contents], entry->bytes);
     }
@@ -63,7 +63,7 @@ static void pullResults(void)
 
 static void mark(const char *name)
 {
-    const char *path = getenv("CHARON_CASE_MARKER");
+    const char *path = getenv("REVENANT_CASE_MARKER");
     if (!path) return;
     FILE *f = fopen(path, "w");
     if (!f) return;
@@ -101,12 +101,12 @@ static void referenceGradient(const float *source, const float *incoming, const 
             double term = (double)incoming[i * channels + c];
             g += term * xhat;
             b += term;
-#ifdef CHARON_REFERENCE_TRACE
+#ifdef REVENANT_REFERENCE_TRACE
             printf("  ref ch%d row%d src[%d][%d]=%g inc[%d][%d]=%g xhat=%g term=%g\n", c, i,
                    i, c, (double)source[i * channels + c], i, c, term, xhat, term);
 #endif
         }
-#ifdef CHARON_REFERENCE_TRACE
+#ifdef REVENANT_REFERENCE_TRACE
         printf("  ref ch%d gamma %g beta %g  (rows %d channels %d, stride %d floats, mean %g %g %g, var %g %g %g)\n",
                c, g, b, rows, channels, channels, mean[0], mean[1], mean[2],
                variance[0], variance[1], variance[2]);

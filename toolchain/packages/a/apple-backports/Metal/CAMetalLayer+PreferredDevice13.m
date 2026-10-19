@@ -1,6 +1,6 @@
 #import <QuartzCore/CAMetalLayer.h>
 
-@implementation CAMetalLayer (CharonPreferredDevice)
+@implementation CAMetalLayer (RevenantPreferredDevice)
 
 - (id<MTLDevice>)preferredDevice
 {

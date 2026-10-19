@@ -63,9 +63,9 @@ int main(int argc, char **argv)
             CHECK_EQUAL(transcript, expected[@(entry->name)], entry->name);
             CHECK(session_off_queue_count() == offQueue, "delegate callbacks run on the delegate queue");
         }
-        printf("checks=%d failures=%d\n", charon_checks, charon_failures);
+        printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
         fflush(stdout);
         [@"" writeToFile:[NSString stringWithFormat:@"/private/var/backports/%s.done", name] atomically:YES encoding:NSUTF8StringEncoding error:NULL];
     }
-    return charon_failures;
+    return revenant_failures;
 }

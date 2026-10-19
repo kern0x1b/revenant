@@ -1,7 +1,7 @@
 #import <Foundation/Foundation.h>
 #import <objc/message.h>
 #import <LocalAuthentication/LAContext.h>
-#import "CharonLocalAuthenticationProtocols.h"
+#import "RevenantLocalAuthenticationProtocols.h"
 
 #if __has_include(<LocalAuthentication/LACompanionType.h>)
 #import <LocalAuthentication/LACompanionType.h>
@@ -61,14 +61,14 @@ typedef NS_ENUM(NSInteger, LACompanionType) {
 #pragma mark - the one mechanism of a release with a lock screen and no sensor
 
 @interface LAEnvironmentMechanismUserPassword ()
-- (instancetype)initWithCharonLockScreenPasscode;
+- (instancetype)initWithRevenantLockScreenPasscode;
 @end
 
 @implementation LAEnvironmentMechanismUserPassword
 
 @synthesize isSet = _isSet;
 
-- (instancetype)initWithCharonLockScreenPasscode
+- (instancetype)initWithRevenantLockScreenPasscode
 {
     self = ((id (*)(id, SEL))objc_msgSend)(self, @selector(init));
     if (self) {
@@ -94,12 +94,12 @@ typedef NS_ENUM(NSInteger, LACompanionType) {
 
 @end
 
-static LAEnvironmentMechanismUserPassword *CharonLockScreenPasscode(void)
+static LAEnvironmentMechanismUserPassword *RevenantLockScreenPasscode(void)
 {
     static LAEnvironmentMechanismUserPassword *mechanism;
     static dispatch_once_t once;
     dispatch_once(&once, ^{
-        mechanism = [[LAEnvironmentMechanismUserPassword alloc] initWithCharonLockScreenPasscode];
+        mechanism = [[LAEnvironmentMechanismUserPassword alloc] initWithRevenantLockScreenPasscode];
     });
     return mechanism;
 }
@@ -171,7 +171,7 @@ static LAEnvironmentMechanismUserPassword *CharonLockScreenPasscode(void)
 #pragma mark - the state
 
 @interface LAEnvironmentState ()
-- (instancetype)initWithCharonMechanisms:(NSArray<LAEnvironmentMechanism *> *)mechanisms
+- (instancetype)initWithRevenantMechanisms:(NSArray<LAEnvironmentMechanism *> *)mechanisms
                                  biometry:(LAEnvironmentMechanismBiometry *)biometry
                               userPassword:(LAEnvironmentMechanismUserPassword *)userPassword
                                companions:(NSArray<LAEnvironmentMechanismCompanion *> *)companions;
@@ -181,7 +181,7 @@ static LAEnvironmentMechanismUserPassword *CharonLockScreenPasscode(void)
 
 @synthesize biometry = _biometry, userPassword = _userPassword, companions = _companions, allMechanisms = _allMechanisms;
 
-- (instancetype)initWithCharonMechanisms:(NSArray<LAEnvironmentMechanism *> *)mechanisms
+- (instancetype)initWithRevenantMechanisms:(NSArray<LAEnvironmentMechanism *> *)mechanisms
                                  biometry:(LAEnvironmentMechanismBiometry *)biometry
                               userPassword:(LAEnvironmentMechanismUserPassword *)userPassword
                                companions:(NSArray<LAEnvironmentMechanismCompanion *> *)companions
@@ -198,7 +198,7 @@ static LAEnvironmentMechanismUserPassword *CharonLockScreenPasscode(void)
 
 - (id)copyWithZone:(NSZone *)zone
 {
-    return [[[self class] alloc] initWithCharonMechanisms:_allMechanisms biometry:_biometry userPassword:_userPassword companions:_companions];
+    return [[[self class] alloc] initWithRevenantMechanisms:_allMechanisms biometry:_biometry userPassword:_userPassword companions:_companions];
 }
 
 - (BOOL)isEqual:(id)other
@@ -221,13 +221,13 @@ static LAEnvironmentMechanismUserPassword *CharonLockScreenPasscode(void)
 
 @end
 
-static LAEnvironmentState *CharonLockScreenState(void)
+static LAEnvironmentState *RevenantLockScreenState(void)
 {
     static LAEnvironmentState *state;
     static dispatch_once_t once;
     dispatch_once(&once, ^{
-        LAEnvironmentMechanismUserPassword *passcode = CharonLockScreenPasscode();
-        state = [[LAEnvironmentState alloc] initWithCharonMechanisms:@[passcode] biometry:nil userPassword:passcode companions:@[]];
+        LAEnvironmentMechanismUserPassword *passcode = RevenantLockScreenPasscode();
+        state = [[LAEnvironmentState alloc] initWithRevenantMechanisms:@[passcode] biometry:nil userPassword:passcode companions:@[]];
     });
     return state;
 }
@@ -235,7 +235,7 @@ static LAEnvironmentState *CharonLockScreenState(void)
 #pragma mark - the environment
 
 @interface LAEnvironment ()
-- (instancetype)initWithCharonEnvironment;
+- (instancetype)initWithRevenantEnvironment;
 @end
 
 @implementation LAEnvironment
@@ -245,19 +245,19 @@ static LAEnvironmentState *CharonLockScreenState(void)
     static LAEnvironment *environment;
     static dispatch_once_t once;
     dispatch_once(&once, ^{
-        environment = [[LAEnvironment alloc] initWithCharonEnvironment];
+        environment = [[LAEnvironment alloc] initWithRevenantEnvironment];
     });
     return environment;
 }
 
-- (instancetype)initWithCharonEnvironment
+- (instancetype)initWithRevenantEnvironment
 {
     return ((id (*)(id, SEL))objc_msgSend)(self, @selector(init));
 }
 
 - (LAEnvironmentState *)state
 {
-    return CharonLockScreenState();
+    return RevenantLockScreenState();
 }
 
 - (void)addObserver:(id<LAEnvironmentObserver>)observer

@@ -7,21 +7,21 @@
 #import <dlfcn.h>
 #import <string.h>
 
-extern void CharonShimMarkPortKey(SecKeyRef privateKey, const uint8_t *scalar, size_t length);
-extern void CharonShimMarkPortPublicKey(SecKeyRef publicKey);
-extern void CharonShimMarkReleaseKey(SecKeyRef key, CFStringRef type);
-extern OSStatus charonHost_SecItemCopyMatching(CFDictionaryRef query, CFTypeRef *result);
-extern CFDictionaryRef charonHost_SecKeyCopyAttributeDictionary(SecKeyRef key);
+extern void RevenantShimMarkPortKey(SecKeyRef privateKey, const uint8_t *scalar, size_t length);
+extern void RevenantShimMarkPortPublicKey(SecKeyRef publicKey);
+extern void RevenantShimMarkReleaseKey(SecKeyRef key, CFStringRef type);
+extern OSStatus revenantHost_SecItemCopyMatching(CFDictionaryRef query, CFTypeRef *result);
+extern CFDictionaryRef revenantHost_SecKeyCopyAttributeDictionary(SecKeyRef key);
 
 extern CFDictionaryRef SecKeyCopyAttributeDictionary(SecKeyRef key);
 
-#define CHARON_SHIM_SECKEY_MARKER "CharonSecKeyScalar"
+#define REVENANT_SHIM_SECKEY_MARKER "RevenantSecKeyScalar"
 
-static const uint8_t CharonShimSubjectPublicKeyInfo[] = {
+static const uint8_t RevenantShimSubjectPublicKeyInfo[] = {
     0x30, 0x59, 0x30, 0x13, 0x06, 0x07, 0x2a, 0x86, 0x48, 0xce, 0x3d, 0x02, 0x01, 0x06, 0x08,
     0x2a, 0x86, 0x48, 0xce, 0x3d, 0x03, 0x01, 0x07, 0x03, 0x42, 0x00};
 
-static SecKeyAlgorithm CharonShimAlgorithmForPadding(SecPadding padding)
+static SecKeyAlgorithm RevenantShimAlgorithmForPadding(SecPadding padding)
 {
     switch (padding) {
         case kSecPaddingPKCS1SHA1:
@@ -38,19 +38,19 @@ static SecKeyAlgorithm CharonShimAlgorithmForPadding(SecPadding padding)
             return kSecKeyAlgorithmECDSASignatureDigestX962SHA256;
     }
 }
-static OSStatus CharonShimRawSign(SecKeyRef key, const uint8_t *bytes, size_t length,
+static OSStatus RevenantShimRawSign(SecKeyRef key, const uint8_t *bytes, size_t length,
                                   uint8_t *signature, size_t *signatureLength, SecPadding padding)
 {
-    typedef CFDataRef (*CharonShimCreateSignature)(SecKeyRef, SecKeyAlgorithm, CFDataRef, CFErrorRef *);
-    static CharonShimCreateSignature host = NULL;
+    typedef CFDataRef (*RevenantShimCreateSignature)(SecKeyRef, SecKeyAlgorithm, CFDataRef, CFErrorRef *);
+    static RevenantShimCreateSignature host = NULL;
     if (!host) {
-        host = (CharonShimCreateSignature)dlsym(RTLD_DEFAULT, "SecKeyCreateSignature");
+        host = (RevenantShimCreateSignature)dlsym(RTLD_DEFAULT, "SecKeyCreateSignature");
     }
     if (!host) {
         return errSecUnimplemented;
     }
     CFErrorRef error = NULL;
-    SecKeyAlgorithm algorithm = CharonShimAlgorithmForPadding(padding);
+    SecKeyAlgorithm algorithm = RevenantShimAlgorithmForPadding(padding);
     CFDataRef digest = CFDataCreate(kCFAllocatorDefault, bytes, (CFIndex)length);
     CFDataRef made = host(key, algorithm, digest, &error);
     CFRelease(digest);
@@ -72,18 +72,18 @@ static OSStatus CharonShimRawSign(SecKeyRef key, const uint8_t *bytes, size_t le
     return errSecSuccess;
 }
 
-static OSStatus CharonShimRawVerify(SecKeyRef key, const uint8_t *bytes, size_t length,
+static OSStatus RevenantShimRawVerify(SecKeyRef key, const uint8_t *bytes, size_t length,
                                     const uint8_t *signature, size_t signatureLength, SecPadding padding)
 {
-    typedef Boolean (*CharonShimVerifySignature)(SecKeyRef, SecKeyAlgorithm, CFDataRef, CFDataRef, CFErrorRef *);
-    static CharonShimVerifySignature host = NULL;
+    typedef Boolean (*RevenantShimVerifySignature)(SecKeyRef, SecKeyAlgorithm, CFDataRef, CFDataRef, CFErrorRef *);
+    static RevenantShimVerifySignature host = NULL;
     if (!host) {
-        host = (CharonShimVerifySignature)dlsym(RTLD_DEFAULT, "SecKeyVerifySignature");
+        host = (RevenantShimVerifySignature)dlsym(RTLD_DEFAULT, "SecKeyVerifySignature");
     }
     if (!host) {
         return errSecUnimplemented;
     }
-    SecKeyAlgorithm algorithm = CharonShimAlgorithmForPadding(padding);
+    SecKeyAlgorithm algorithm = RevenantShimAlgorithmForPadding(padding);
     CFDataRef digest = CFDataCreate(kCFAllocatorDefault, bytes, (CFIndex)length);
     uint8_t der[72];
     const uint8_t *given = signature;
@@ -126,7 +126,7 @@ static OSStatus CharonShimRawVerify(SecKeyRef key, const uint8_t *bytes, size_t 
     return valid ? errSecSuccess : errSecVerifyFailed;
 }
 
-static CFDataRef CharonShimPublicBytes(SecKeyRef key)
+static CFDataRef RevenantShimPublicBytes(SecKeyRef key)
 {
     SecKeyRef publicKey = SecKeyCopyPublicKey(key);
     if (!publicKey) {
@@ -146,9 +146,9 @@ static CFDataRef CharonShimPublicBytes(SecKeyRef key)
         CFRelease(point);
         return NULL;
     }
-    uint8_t buffer[sizeof CharonShimSubjectPublicKeyInfo + 65];
-    memcpy(buffer, CharonShimSubjectPublicKeyInfo, sizeof CharonShimSubjectPublicKeyInfo);
-    memcpy(buffer + sizeof CharonShimSubjectPublicKeyInfo, CFDataGetBytePtr(point), 65);
+    uint8_t buffer[sizeof RevenantShimSubjectPublicKeyInfo + 65];
+    memcpy(buffer, RevenantShimSubjectPublicKeyInfo, sizeof RevenantShimSubjectPublicKeyInfo);
+    memcpy(buffer + sizeof RevenantShimSubjectPublicKeyInfo, CFDataGetBytePtr(point), 65);
     CFRelease(point);
     return CFDataCreate(kCFAllocatorDefault, buffer, (CFIndex)sizeof buffer);
 }
@@ -156,13 +156,13 @@ static CFDataRef CharonShimPublicBytes(SecKeyRef key)
 static OSStatus SecKeyRawSign(SecKeyRef key, SecPadding padding, const uint8_t *bytes, size_t length,
                               uint8_t *signature, size_t *signatureLength)
 {
-    return CharonShimRawSign(key, bytes, length, signature, signatureLength, padding);
+    return RevenantShimRawSign(key, bytes, length, signature, signatureLength, padding);
 }
 
 static OSStatus SecKeyRawVerify(SecKeyRef key, SecPadding padding, const uint8_t *bytes, size_t length,
                                 const uint8_t *signature, size_t signatureLength)
 {
-    return CharonShimRawVerify(key, bytes, length, signature, signatureLength, padding);
+    return RevenantShimRawVerify(key, bytes, length, signature, signatureLength, padding);
 }
 
 static CFIndex SecKeyGetAlgorithmID(SecKeyRef key)
@@ -173,7 +173,7 @@ static CFIndex SecKeyGetAlgorithmID(SecKeyRef key)
 
 static OSStatus SecKeyCopyPublicBytes(SecKeyRef key, CFDataRef *serialized)
 {
-    CFDataRef bytes = CharonShimPublicBytes(key);
+    CFDataRef bytes = RevenantShimPublicBytes(key);
     if (!bytes) {
         return errSecInternalError;
     }

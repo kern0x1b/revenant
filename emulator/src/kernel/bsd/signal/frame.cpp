@@ -25,7 +25,7 @@
 
 #include "../support.hpp"
 
-namespace shade {
+namespace emulator {
 namespace {
 
     constexpr std::uint32_t action_on_stack = 0x0001U;

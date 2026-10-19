@@ -1,5 +1,5 @@
-#ifndef CharonMIDIUMP18_h
-#define CharonMIDIUMP18_h
+#ifndef RevenantMIDIUMP18_h
+#define RevenantMIDIUMP18_h
 
 #import <Foundation/Foundation.h>
 #import <CoreMIDI/MIDIServices.h>

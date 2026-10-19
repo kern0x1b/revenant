@@ -8,7 +8,7 @@ NSString *const AVVideoCodecTypeH264 = @"avc1";
 NSString *const AVVideoWidthKey = @"AVVideoWidthKey";
 NSString *const AVVideoHeightKey = @"AVVideoHeightKey";
 
-@implementation NSValue (CharonStandinCMTime)
+@implementation NSValue (RevenantStandinCMTime)
 
 + (NSValue *)valueWithCMTimeRange:(CMTimeRange)timeRange
 {
@@ -34,34 +34,34 @@ NSString *const AVVideoHeightKey = @"AVVideoHeightKey";
 @end
 
 @implementation AVAssetWriterInput {
-    AVMediaType _charon_mediaType;
-    NSDictionary *_charon_outputSettings;
-    __weak AVAssetWriter *_charon_writer;
+    AVMediaType _revenant_mediaType;
+    NSDictionary *_revenant_outputSettings;
+    __weak AVAssetWriter *_revenant_writer;
 }
 
 - (instancetype)initWithMediaType:(AVMediaType)mediaType outputSettings:(NSDictionary *)outputSettings
 {
     self = [super init];
     if (self) {
-        _charon_mediaType = [mediaType copy];
-        _charon_outputSettings = [outputSettings copy];
+        _revenant_mediaType = [mediaType copy];
+        _revenant_outputSettings = [outputSettings copy];
     }
     return self;
 }
 
 - (AVMediaType)mediaType
 {
-    return _charon_mediaType;
+    return _revenant_mediaType;
 }
 
 - (NSDictionary *)outputSettings
 {
-    return _charon_outputSettings;
+    return _revenant_outputSettings;
 }
 
 - (BOOL)isReadyForMoreMediaData
 {
-    return _charon_writer != nil;
+    return _revenant_writer != nil;
 }
 
 - (BOOL)appendSampleBuffer:(id)sampleBuffer
@@ -77,40 +77,40 @@ NSString *const AVVideoHeightKey = @"AVVideoHeightKey";
 {
 }
 
-- (void)charonAttachToWriter:(AVAssetWriter *)writer
+- (void)revenantAttachToWriter:(AVAssetWriter *)writer
 {
-    _charon_writer = writer;
+    _revenant_writer = writer;
 }
 
 @end
 
 @implementation AVAssetWriter {
-    NSURL *_charon_outputURL;
-    AVFileType _charon_outputFileType;
-    NSMutableArray *_charon_inputs;
-    BOOL _charon_writing;
-    BOOL _charon_cancelled;
+    NSURL *_revenant_outputURL;
+    AVFileType _revenant_outputFileType;
+    NSMutableArray *_revenant_inputs;
+    BOOL _revenant_writing;
+    BOOL _revenant_cancelled;
 }
 
 - (instancetype)initWithURL:(NSURL *)outputURL fileType:(AVFileType)outputFileType error:(NSError **)outError
 {
     self = [super init];
     if (self) {
-        _charon_outputURL = [outputURL copy];
-        _charon_outputFileType = [outputFileType copy];
-        _charon_inputs = [NSMutableArray array];
+        _revenant_outputURL = [outputURL copy];
+        _revenant_outputFileType = [outputFileType copy];
+        _revenant_inputs = [NSMutableArray array];
     }
     return self;
 }
 
 - (NSURL *)outputURL
 {
-    return _charon_outputURL;
+    return _revenant_outputURL;
 }
 
 - (AVFileType)outputFileType
 {
-    return _charon_outputFileType;
+    return _revenant_outputFileType;
 }
 
 - (BOOL)canApplyOutputSettings:(NSDictionary *)outputSettings forMediaType:(AVMediaType)mediaType
@@ -120,25 +120,25 @@ NSString *const AVVideoHeightKey = @"AVVideoHeightKey";
 
 - (BOOL)canAddInput:(AVAssetWriterInput *)input
 {
-    return !_charon_writing;
+    return !_revenant_writing;
 }
 
 - (void)addInput:(AVAssetWriterInput *)input
 {
-    [_charon_inputs addObject:input];
-    [input charonAttachToWriter:self];
+    [_revenant_inputs addObject:input];
+    [input revenantAttachToWriter:self];
 }
 
 - (NSArray *)inputs
 {
-    return [_charon_inputs copy];
+    return [_revenant_inputs copy];
 }
 
 - (BOOL)startWriting
 {
-    if (_charon_writing || _charon_cancelled)
+    if (_revenant_writing || _revenant_cancelled)
         return NO;
-    _charon_writing = YES;
+    _revenant_writing = YES;
     return YES;
 }
 
@@ -152,56 +152,56 @@ NSString *const AVVideoHeightKey = @"AVVideoHeightKey";
 
 - (BOOL)finishWriting
 {
-    return _charon_writing;
+    return _revenant_writing;
 }
 
 - (void)cancelWriting
 {
-    _charon_cancelled = YES;
+    _revenant_cancelled = YES;
 }
 
 @end
 
 @implementation AVAssetExportSession {
-    NSURL *_charon_outputURL;
-    AVFileType _charon_outputFileType;
-    AVAssetExportPreset _charon_preset;
-    NSMutableArray *_charon_exports;
+    NSURL *_revenant_outputURL;
+    AVFileType _revenant_outputFileType;
+    AVAssetExportPreset _revenant_preset;
+    NSMutableArray *_revenant_exports;
 }
 
 - (instancetype)initWithAsset:(id)asset presetName:(AVAssetExportPreset)presetName
 {
     self = [super init];
     if (self) {
-        _charon_preset = [presetName copy];
-        _charon_exports = [NSMutableArray array];
+        _revenant_preset = [presetName copy];
+        _revenant_exports = [NSMutableArray array];
     }
     return self;
 }
 
 - (NSURL *)outputURL
 {
-    return _charon_outputURL;
+    return _revenant_outputURL;
 }
 
 - (void)setOutputURL:(NSURL *)outputURL
 {
-    _charon_outputURL = [outputURL copy];
+    _revenant_outputURL = [outputURL copy];
 }
 
 - (AVFileType)outputFileType
 {
-    return _charon_outputFileType;
+    return _revenant_outputFileType;
 }
 
 - (void)setOutputFileType:(AVFileType)outputFileType
 {
-    _charon_outputFileType = [outputFileType copy];
+    _revenant_outputFileType = [outputFileType copy];
 }
 
 - (void)exportAsynchronouslyWithCompletionHandler:(void (^)(void))handler
 {
-    [_charon_exports addObject:@"exportAsynchronouslyWithCompletionHandler:"];
+    [_revenant_exports addObject:@"exportAsynchronouslyWithCompletionHandler:"];
     if (handler)
         handler();
 }

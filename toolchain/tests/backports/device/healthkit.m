@@ -61,7 +61,7 @@ int main(int argc, char *argv[])
 {
     @autoreleasepool {
         NSString *log = [results_folder stringByAppendingPathComponent:@"healthkit.log"];
-        charon_log_to(log);
+        revenant_log_to(log);
         NSLog(@"health: starting");
         run_checks();
         fflush(stdout);
@@ -69,7 +69,7 @@ int main(int argc, char *argv[])
         for (NSString *line in [written componentsSeparatedByString:@"\n"])
             if (line.length)
                 NSLog(@"guest log: %@", line);
-        charon_log_to(nil);
-        return charon_failures == 0 ? 0 : 1;
+        revenant_log_to(nil);
+        return revenant_failures == 0 ? 0 : 1;
     }
 }

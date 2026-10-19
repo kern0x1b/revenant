@@ -14,7 +14,7 @@
 #include <unordered_map>
 #include <utility>
 
-namespace shade::glsl {
+namespace emulator::glsl {
 
 std::size_t component_count(TypeId type)
 {

@@ -1,4 +1,4 @@
-#import "CharonSCN.h"
+#import "RevenantSCN.h"
 
 @implementation SCNPhysicsField
 
@@ -51,9 +51,9 @@
         if ([coder containsValueForKey:@"minimumDistance"]) {
             _minimumDistance = [coder decodeDoubleForKey:@"minimumDistance"];
         }
-        _active = [CharonSCNCoding decodeBool:coder forKey:@"active" default:YES];
-        _exclusive = [CharonSCNCoding decodeBool:coder forKey:@"exclusive" default:NO];
-        _usesEllipsoidalExtent = [CharonSCNCoding decodeBool:coder forKey:@"usesEllipsoidalExtent" default:NO];
+        _active = [RevenantSCNCoding decodeBool:coder forKey:@"active" default:YES];
+        _exclusive = [RevenantSCNCoding decodeBool:coder forKey:@"exclusive" default:NO];
+        _usesEllipsoidalExtent = [RevenantSCNCoding decodeBool:coder forKey:@"usesEllipsoidalExtent" default:NO];
         if ([coder containsValueForKey:@"scope"]) {
             _scope = [coder decodeIntegerForKey:@"scope"];
         }

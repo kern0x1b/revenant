@@ -3,9 +3,9 @@
 #import <objc/runtime.h>
 #import "check.h"
 
-@interface CharonWeakProbe : UIView <UITextDraggable, UITextDroppable>
+@interface RevenantWeakProbe : UIView <UITextDraggable, UITextDroppable>
 @end
-@implementation CharonWeakProbe
+@implementation RevenantWeakProbe
 @synthesize textDragDelegate = _textDragDelegate;
 @synthesize textDropDelegate = _textDropDelegate;
 - (UITextDragOptions)textDragOptions { return UITextDragOptionsNone; }
@@ -16,10 +16,10 @@
 - (void)setTextDragDelegate:(id<UITextDragDelegate>)d { _textDragDelegate = d; }
 @end
 
-@interface CharonCountingDragDelegate : NSObject <UITextDraggable, UITextDroppable>
+@interface RevenantCountingDragDelegate : NSObject <UITextDraggable, UITextDroppable>
 @property (nonatomic, assign) int asked;
 @end
-@implementation CharonCountingDragDelegate
+@implementation RevenantCountingDragDelegate
 @synthesize textDragDelegate = _textDragDelegate;
 @synthesize textDropDelegate = _textDropDelegate;
 - (UITextDragOptions)textDragOptions { return UITextDragOptionsNone; }
@@ -33,45 +33,45 @@
 int main(int argc, char **argv)
 {
     @autoreleasepool {
-        CharonWeakProbe *control = [[CharonWeakProbe alloc] init];
+        RevenantWeakProbe *control = [[RevenantWeakProbe alloc] init];
 
         @autoreleasepool {
-            CharonCountingDragDelegate *live = [[CharonCountingDragDelegate alloc] init];
-            CharonSetTextDragDelegate(control, live);
-            CharonSetTextDropDelegate(control, live);
-            charon_check(CharonTextDragDelegateOf(control) == live,
+            RevenantCountingDragDelegate *live = [[RevenantCountingDragDelegate alloc] init];
+            RevenantSetTextDragDelegate(control, live);
+            RevenantSetTextDropDelegate(control, live);
+            revenant_check(RevenantTextDragDelegateOf(control) == live,
                          "a live drag delegate comes back as itself", nil);
-            charon_check(CharonTextDropDelegateOf(control) == live,
+            revenant_check(RevenantTextDropDelegateOf(control) == live,
                          "a live drop delegate comes back as itself", nil);
         }
 
-        charon_check(CharonTextDragDelegateOf(control) == nil,
+        revenant_check(RevenantTextDragDelegateOf(control) == nil,
                      "a deallocated drag delegate reads back nil, as the header's weak says", nil);
-        charon_check(CharonTextDropDelegateOf(control) == nil,
+        revenant_check(RevenantTextDropDelegateOf(control) == nil,
                      "a deallocated drop delegate reads back nil, as the header's weak says", nil);
 
-        CharonTextDragAdaptor *adaptor = [[CharonTextDragAdaptor alloc] initWithControl:control];
+        RevenantTextDragAdaptor *adaptor = [[RevenantTextDragAdaptor alloc] initWithControl:control];
         NSArray *items = nil;
         @try {
-            items = (NSArray *)[adaptor charon_itemsForDragSession:nil];
-            charon_check(YES, "starting a drag with a deallocated delegate does not crash", nil);
+            items = (NSArray *)[adaptor revenant_itemsForDragSession:nil];
+            revenant_check(YES, "starting a drag with a deallocated delegate does not crash", nil);
         } @catch (NSException *e) {
-            charon_check(NO, "starting a drag with a deallocated delegate does not crash",
+            revenant_check(NO, "starting a drag with a deallocated delegate does not crash",
                          [NSString stringWithFormat:@"%@: %@", e.name, e.reason]);
         }
-        charon_check(items == nil, "a deallocated delegate carries nothing", nil);
+        revenant_check(items == nil, "a deallocated delegate carries nothing", nil);
 
         @autoreleasepool {
-            CharonCountingDragDelegate *again = [[CharonCountingDragDelegate alloc] init];
-            CharonSetTextDragDelegate(control, again);
-            charon_check(CharonTextDragDelegateOf(control) == again,
+            RevenantCountingDragDelegate *again = [[RevenantCountingDragDelegate alloc] init];
+            RevenantSetTextDragDelegate(control, again);
+            revenant_check(RevenantTextDragDelegateOf(control) == again,
                          "a delegate set after one is gone is the one that comes back", nil);
         }
-        charon_check(CharonTextDragDelegateOf(control) == nil,
+        revenant_check(RevenantTextDragDelegateOf(control) == nil,
                      "the second delegate also reads back nil once it is gone", nil);
 
-        CharonSetTextDragDelegate(control, nil);
-        charon_check(CharonTextDragDelegateOf(control) == nil, "nil clears the drag delegate", nil);
+        RevenantSetTextDragDelegate(control, nil);
+        revenant_check(RevenantTextDragDelegateOf(control) == nil, "nil clears the drag delegate", nil);
     }
-    return charon_failures ? 1 : 0;
+    return revenant_failures ? 1 : 0;
 }

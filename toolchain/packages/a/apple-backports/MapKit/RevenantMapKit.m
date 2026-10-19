@@ -1,9 +1,9 @@
-#import "CharonMapKit.h"
+#import "RevenantMapKit.h"
 #import <math.h>
 
-@implementation CharonMapKit
+@implementation RevenantMapKit
 
-+ (MKMapSize)charon_mapSizeAtZoomScale:(MKZoomScale)zoomScale
++ (MKMapSize)revenant_mapSizeAtZoomScale:(MKZoomScale)zoomScale
 {
     double scale = pow(2.0, (double)zoomScale);
     MKMapSize size;
@@ -12,7 +12,7 @@
     return size;
 }
 
-+ (MKZoomScale)charon_zoomScaleForMapSize:(MKMapSize)mapSize
++ (MKZoomScale)revenant_zoomScaleForMapSize:(MKMapSize)mapSize
 {
     if (mapSize.width <= 0.0 || mapSize.height <= 0.0) {
         return 0.0;
@@ -20,20 +20,20 @@
     return (MKZoomScale)log2((double)MKMapSizeWorld.width / mapSize.width);
 }
 
-+ (CLLocationDistance)charon_metersPerMapPointAtZoomScale:(MKZoomScale)zoomScale forMapRect:(MKMapRect)mapRect
++ (CLLocationDistance)revenant_metersPerMapPointAtZoomScale:(MKZoomScale)zoomScale forMapRect:(MKMapRect)mapRect
 {
     CLLocationCoordinate2D centre = MKCoordinateForMapPoint(MKMapPointMake(MKMapRectGetMidX(mapRect), MKMapRectGetMidY(mapRect)));
     double perPoint = MKMetersPerMapPointAtLatitude(centre.latitude);
     return perPoint / pow(2.0, (double)zoomScale);
 }
 
-+ (CLLocationDistance)charon_metresPerMapPointAtZoomScale:(MKZoomScale)zoomScale forMapRect:(MKMapRect)mapRect
++ (CLLocationDistance)revenant_metresPerMapPointAtZoomScale:(MKZoomScale)zoomScale forMapRect:(MKMapRect)mapRect
 {
     CLLocationCoordinate2D centre = MKCoordinateForMapPoint(MKMapPointMake(MKMapRectGetMidX(mapRect), MKMapRectGetMidY(mapRect)));
     return MKMetersPerMapPointAtLatitude(centre.latitude) / pow(2.0, (double)zoomScale);
 }
 
-+ (CLLocationDirection)charon_bearingFromCoordinate:(CLLocationCoordinate2D)from toCoordinate:(CLLocationCoordinate2D)to
++ (CLLocationDirection)revenant_bearingFromCoordinate:(CLLocationCoordinate2D)from toCoordinate:(CLLocationCoordinate2D)to
 {
     static const double pi = 3.14159265358979323846;
     double lat1 = from.latitude * pi / 180.0;
@@ -45,13 +45,13 @@
     return (CLLocationDirection)fmod(fmod(degrees, 360.0) + 360.0, 360.0);
 }
 
-+ (CLLocationDirection)charon_arrivalBearingFromCoordinate:(CLLocationCoordinate2D)from toCoordinate:(CLLocationCoordinate2D)to
++ (CLLocationDirection)revenant_arrivalBearingFromCoordinate:(CLLocationCoordinate2D)from toCoordinate:(CLLocationCoordinate2D)to
 {
-    CLLocationDirection initial = [self charon_bearingFromCoordinate:to toCoordinate:from];
+    CLLocationDirection initial = [self revenant_bearingFromCoordinate:to toCoordinate:from];
     return (CLLocationDirection)fmod(fmod((double)initial, 360.0) + 360.0, 360.0);
 }
 
-+ (MKMapRect)charon_mapRectForRegion:(MKCoordinateRegion)region
++ (MKMapRect)revenant_mapRectForRegion:(MKCoordinateRegion)region
 {
     MKMapPoint centre = MKMapPointForCoordinate(region.center);
     double longitudeDelta = region.span.longitudeDelta;
@@ -84,7 +84,7 @@
 
 @end
 
-void charon_sayOnce(NSString *api, NSString *why)
+void revenant_sayOnce(NSString *api, NSString *why)
 {
     static NSMutableSet *told;
     static dispatch_once_t once;

@@ -3,16 +3,16 @@
 #import <CoreFoundation/CoreFoundation.h>
 #import <pthread.h>
 
-static pthread_mutex_t CharonSecurityNetworkFetchLock = PTHREAD_MUTEX_INITIALIZER;
-static CFMutableSetRef CharonSecurityNetworkFetchAllowed;
+static pthread_mutex_t RevenantSecurityNetworkFetchLock = PTHREAD_MUTEX_INITIALIZER;
+static CFMutableSetRef RevenantSecurityNetworkFetchAllowed;
 
-Boolean CharonSecurityNetworkFetchAllowedFor(SecTrustRef trust, bool fallback)
+Boolean RevenantSecurityNetworkFetchAllowedFor(SecTrustRef trust, bool fallback)
 {
     bool answer = fallback;
-    pthread_mutex_lock(&CharonSecurityNetworkFetchLock);
-    if (CharonSecurityNetworkFetchAllowed)
-        answer = CFSetContainsValue(CharonSecurityNetworkFetchAllowed, trust) ? true : false;
-    pthread_mutex_unlock(&CharonSecurityNetworkFetchLock);
+    pthread_mutex_lock(&RevenantSecurityNetworkFetchLock);
+    if (RevenantSecurityNetworkFetchAllowed)
+        answer = CFSetContainsValue(RevenantSecurityNetworkFetchAllowed, trust) ? true : false;
+    pthread_mutex_unlock(&RevenantSecurityNetworkFetchLock);
     return answer;
 }
 
@@ -20,16 +20,16 @@ OSStatus SecTrustSetNetworkFetchAllowed(SecTrustRef trust, Boolean allowFetch)
 {
     if (!trust)
         return errSecParam;
-    pthread_mutex_lock(&CharonSecurityNetworkFetchLock);
-    if (!CharonSecurityNetworkFetchAllowed) {
-        CharonSecurityNetworkFetchAllowed = CFSetCreateMutable(kCFAllocatorDefault, 0,
+    pthread_mutex_lock(&RevenantSecurityNetworkFetchLock);
+    if (!RevenantSecurityNetworkFetchAllowed) {
+        RevenantSecurityNetworkFetchAllowed = CFSetCreateMutable(kCFAllocatorDefault, 0,
                                                               &kCFTypeSetCallBacks);
     }
     if (allowFetch)
-        CFSetAddValue(CharonSecurityNetworkFetchAllowed, trust);
+        CFSetAddValue(RevenantSecurityNetworkFetchAllowed, trust);
     else
-        CFSetRemoveValue(CharonSecurityNetworkFetchAllowed, trust);
-    pthread_mutex_unlock(&CharonSecurityNetworkFetchLock);
+        CFSetRemoveValue(RevenantSecurityNetworkFetchAllowed, trust);
+    pthread_mutex_unlock(&RevenantSecurityNetworkFetchLock);
     return errSecSuccess;
 }
 
@@ -37,6 +37,6 @@ OSStatus SecTrustGetNetworkFetchAllowed(SecTrustRef trust, Boolean *allowFetch)
 {
     if (!trust || !allowFetch)
         return errSecParam;
-    *allowFetch = CharonSecurityNetworkFetchAllowedFor(trust, false) ? true : false;
+    *allowFetch = RevenantSecurityNetworkFetchAllowedFor(trust, false) ? true : false;
     return errSecSuccess;
 }

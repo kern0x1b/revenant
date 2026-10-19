@@ -96,7 +96,7 @@ typedef void (^Step)(void (^done)(void));
 {
     [[NSFileManager defaultManager] createDirectoryAtPath:results_folder withIntermediateDirectories:YES attributes:nil error:NULL];
     [[NSFileManager defaultManager] removeItemAtPath:[results_folder stringByAppendingPathComponent:@"aswebauth.done"] error:NULL];
-    charon_log_to([results_folder stringByAppendingPathComponent:@"aswebauth.log"]);
+    revenant_log_to([results_folder stringByAppendingPathComponent:@"aswebauth.log"]);
     start_server();
     self.root = [[UIViewController alloc] init];
     self.root.view.backgroundColor = [UIColor lightGrayColor];
@@ -113,9 +113,9 @@ typedef void (^Step)(void (^done)(void));
 - (void)run:(NSArray *)steps index:(NSUInteger)index
 {
     if (index == steps.count) {
-        printf("checks=%d failures=%d\n", charon_checks, charon_failures);
+        printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
         after(1, ^{
-            NSString *summary = [NSString stringWithFormat:@"%@ checks=%d failures=%d\n", charon_failures ? @"FAIL" : @"ok", charon_checks, charon_failures];
+            NSString *summary = [NSString stringWithFormat:@"%@ checks=%d failures=%d\n", revenant_failures ? @"FAIL" : @"ok", revenant_checks, revenant_failures];
             [summary writeToFile:[results_folder stringByAppendingPathComponent:@"aswebauth.done"] atomically:YES encoding:NSUTF8StringEncoding error:NULL];
         });
         return;
@@ -132,7 +132,7 @@ typedef void (^Step)(void (^done)(void));
     };
     after(40, ^{
         if (!finished) {
-            charon_check(NO, "step finishes in time", [NSString stringWithFormat:@"step %lu timed out", (unsigned long)index + 1]);
+            revenant_check(NO, "step finishes in time", [NSString stringWithFormat:@"step %lu timed out", (unsigned long)index + 1]);
             done();
         }
     });

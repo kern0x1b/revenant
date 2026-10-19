@@ -1,4 +1,4 @@
-#import "CharonMenus.h"
+#import "RevenantMenus.h"
 
 #pragma clang diagnostic ignored "-Wprotocol"
 
@@ -38,7 +38,7 @@
 
 + (void)toggleFontPanel:(id)sender
 {
-    charon_menus_say_once(@"font-panel", @"UITextFormattingCoordinator: the font panel belongs to Mac Catalyst, so iOS 6 shows none and the delegate is never asked to update attributes");
+    revenant_menus_say_once(@"font-panel", @"UITextFormattingCoordinator: the font panel belongs to Mac Catalyst, so iOS 6 shows none and the delegate is never asked to update attributes");
 }
 
 @end

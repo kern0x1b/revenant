@@ -1,42 +1,42 @@
 #import <UIKit/UIKit.h>
-#import "CharonCalendar.h"
+#import "RevenantCalendar.h"
 
 @implementation UICalendarSelection {
 @private
     __weak UICalendarView *_view;
 }
 
-- (instancetype)charon_init
+- (instancetype)revenant_init
 {
     return [super init];
 }
 
 - (void)updateSelectableDates
 {
-    [self charon_redraw];
+    [self revenant_redraw];
 }
 
-- (void)charon_attachToView:(UICalendarView *)view
+- (void)revenant_attachToView:(UICalendarView *)view
 {
     _view = view;
 }
 
-- (void)charon_redraw
+- (void)revenant_redraw
 {
     [_view setNeedsDisplay];
 }
 
-- (BOOL)charon_isSelected:(NSDateComponents *)day
+- (BOOL)revenant_isSelected:(NSDateComponents *)day
 {
     return NO;
 }
 
-- (BOOL)charon_canSelect:(NSDateComponents *)day
+- (BOOL)revenant_canSelect:(NSDateComponents *)day
 {
     return YES;
 }
 
-- (void)charon_didTapDay:(NSDateComponents *)day
+- (void)revenant_didTapDay:(NSDateComponents *)day
 {
 }
 

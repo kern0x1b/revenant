@@ -25,7 +25,7 @@
 #include <unordered_set>
 #include <vector>
 
-namespace shade {
+namespace emulator {
 
 namespace xnu::scheduler {
 

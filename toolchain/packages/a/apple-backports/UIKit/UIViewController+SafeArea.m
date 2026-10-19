@@ -1,11 +1,11 @@
 #import <UIKit/UIKit.h>
 #import <objc/runtime.h>
 
-UIEdgeInsets charon_content_overlay_insets(UIViewController *controller, UIView *view);
+UIEdgeInsets revenant_content_overlay_insets(UIViewController *controller, UIView *view);
 
-static char CharonAdditionalSafeAreaInsetsKey;
+static char RevenantAdditionalSafeAreaInsetsKey;
 
-static UIEdgeInsets charon_bar_overlap(UIView *bar, UIView *view, CGFloat statusBottom)
+static UIEdgeInsets revenant_bar_overlap(UIView *bar, UIView *view, CGFloat statusBottom)
 {
     UIWindow *window = [view isKindOfClass:[UIWindow class]] ? (UIWindow *)view : view.window;
     if (!bar || bar.hidden || bar.alpha <= 0 || !bar.window || bar.window != window)
@@ -21,9 +21,9 @@ static UIEdgeInsets charon_bar_overlap(UIView *bar, UIView *view, CGFloat status
     return UIEdgeInsetsZero;
 }
 
-UIEdgeInsets charon_status_bar_overlap(UIView *view);
+UIEdgeInsets revenant_status_bar_overlap(UIView *view);
 
-UIEdgeInsets charon_status_bar_overlap(UIView *view)
+UIEdgeInsets revenant_status_bar_overlap(UIView *view)
 {
     UIApplication *application = [UIApplication sharedApplication];
     UIWindow *window = [view isKindOfClass:[UIWindow class]] ? (UIWindow *)view : view.window;
@@ -36,15 +36,15 @@ UIEdgeInsets charon_status_bar_overlap(UIView *view)
     return UIEdgeInsetsMake(CGRectGetMaxY(covered) - CGRectGetMinY(view.bounds), 0, 0, 0);
 }
 
-UIEdgeInsets charon_content_overlay_insets(UIViewController *controller, UIView *view)
+UIEdgeInsets revenant_content_overlay_insets(UIViewController *controller, UIView *view)
 {
-    UIEdgeInsets insets = charon_status_bar_overlap(view);
+    UIEdgeInsets insets = revenant_status_bar_overlap(view);
     UINavigationController *navigation = controller.navigationController;
     UITabBarController *tabs = controller.tabBarController;
     UIToolbar *toolbar = navigation.toolbarHidden ? nil : navigation.toolbar;
-    UIEdgeInsets bars[] = {charon_bar_overlap(navigation.navigationBar, view, insets.top),
-                           charon_bar_overlap(toolbar, view, insets.top),
-                           charon_bar_overlap(tabs.tabBar, view, insets.top)};
+    UIEdgeInsets bars[] = {revenant_bar_overlap(navigation.navigationBar, view, insets.top),
+                           revenant_bar_overlap(toolbar, view, insets.top),
+                           revenant_bar_overlap(tabs.tabBar, view, insets.top)};
     for (NSUInteger index = 0; index < sizeof bars / sizeof *bars; index++) {
         insets.top = MAX(insets.top, bars[index].top);
         insets.bottom = MAX(insets.bottom, bars[index].bottom);
@@ -54,17 +54,17 @@ UIEdgeInsets charon_content_overlay_insets(UIViewController *controller, UIView 
                             insets.bottom + additional.bottom, insets.right + additional.right);
 }
 
-@implementation UIViewController (CharonSafeArea)
+@implementation UIViewController (RevenantSafeArea)
 
 - (UIEdgeInsets)additionalSafeAreaInsets
 {
-    NSValue *stored = objc_getAssociatedObject(self, &CharonAdditionalSafeAreaInsetsKey);
+    NSValue *stored = objc_getAssociatedObject(self, &RevenantAdditionalSafeAreaInsetsKey);
     return stored ? stored.UIEdgeInsetsValue : UIEdgeInsetsZero;
 }
 
 - (void)setAdditionalSafeAreaInsets:(UIEdgeInsets)additionalSafeAreaInsets
 {
-    objc_setAssociatedObject(self, &CharonAdditionalSafeAreaInsetsKey,
+    objc_setAssociatedObject(self, &RevenantAdditionalSafeAreaInsetsKey,
                              [NSValue valueWithUIEdgeInsets:additionalSafeAreaInsets], OBJC_ASSOCIATION_RETAIN);
     if (self.isViewLoaded)
         [self.view setNeedsLayout];

@@ -14,7 +14,7 @@
 #include <string_view>
 #include <vector>
 
-namespace shade {
+namespace emulator {
 
 struct KernelSharedState;
 struct ProcessContext;

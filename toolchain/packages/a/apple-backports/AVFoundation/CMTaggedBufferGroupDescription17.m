@@ -1,11 +1,11 @@
 #import <CoreMedia/CoreMedia.h>
 #import <CoreFoundation/CoreFoundation.h>
-#import "CharonCMTag26.h"
-#import "CharonCMTagSupport.h"
-#import "CharonCMTaggedBufferGroup26.h"
+#import "RevenantCMTag26.h"
+#import "RevenantCMTagSupport.h"
+#import "RevenantCMTaggedBufferGroup26.h"
 #import <Foundation/Foundation.h>
 
-#import "CharonCMTaggedBufferGroupEntries.h"
+#import "RevenantCMTaggedBufferGroupEntries.h"
 
 OSStatus CMTaggedBufferGroupFormatDescriptionCreateForTaggedBufferGroup(
     CFAllocatorRef CM_NULLABLE allocator, CMTaggedBufferGroupRef CM_NONNULL taggedBufferGroup,
@@ -25,26 +25,26 @@ Boolean CMTaggedBufferGroupFormatDescriptionMatchesTaggedBufferGroup(
     CFDictionaryRef extensions = CMFormatDescriptionGetExtensions(desc);
     if (!extensions)
         return false;
-    CFDataRef recorded = (CFDataRef)CFDictionaryGetValue(extensions, CharonEntriesKey);
+    CFDataRef recorded = (CFDataRef)CFDictionaryGetValue(extensions, RevenantEntriesKey);
     if (!recorded)
         return false;
 
-    CharonCMTaggedBufferGroup *group = (__bridge CharonCMTaggedBufferGroup *)taggedBufferGroup;
-    NSArray *collections = group.charon_collections;
-    if ((CFIndex)collections.count != CharonEntriesDataCount(recorded))
+    RevenantCMTaggedBufferGroup *group = (__bridge RevenantCMTaggedBufferGroup *)taggedBufferGroup;
+    NSArray *collections = group.revenant_collections;
+    if ((CFIndex)collections.count != RevenantEntriesDataCount(recorded))
         return false;
 
     for (CFIndex index = 0; index < (CFIndex)collections.count; index++) {
         CMItemCount theirCount = 0;
         const CMTag *theirTags = NULL;
-        if (!CharonEntriesDataAtIndex(recorded, index, &theirCount, &theirTags))
+        if (!RevenantEntriesDataAtIndex(recorded, index, &theirCount, &theirTags))
             return false;
-        CharonCMTagCollection *mine = (CharonCMTagCollection *)collections[index];
-        if ((CMItemCount)mine.charon_count != theirCount)
+        RevenantCMTagCollection *mine = (RevenantCMTagCollection *)collections[index];
+        if ((CMItemCount)mine.revenant_count != theirCount)
             return false;
-        const CMTag *myTags = mine.charon_tags;
-        for (NSUInteger tag = 0; tag < mine.charon_count; tag++) {
-            if (!charon_tag_equal(myTags[tag], theirTags[tag]))
+        const CMTag *myTags = mine.revenant_tags;
+        for (NSUInteger tag = 0; tag < mine.revenant_count; tag++) {
+            if (!revenant_tag_equal(myTags[tag], theirTags[tag]))
                 return false;
         }
     }
@@ -75,7 +75,7 @@ OSStatus CMSampleBufferCreateForTaggedBufferGroup(
     if (status)
         return status;
 
-    CMSetAttachment(sampleBuffer, CharonGroupKey, taggedBufferGroup, kCMAttachmentMode_ShouldNotPropagate);
+    CMSetAttachment(sampleBuffer, RevenantGroupKey, taggedBufferGroup, kCMAttachmentMode_ShouldNotPropagate);
     *sBufOut = sampleBuffer;
     return noErr;
 }
@@ -84,5 +84,5 @@ CMTaggedBufferGroupRef CM_NULLABLE CMSampleBufferGetTaggedBufferGroup(CMSampleBu
 {
     if (!sbuf)
         return NULL;
-    return (CMTaggedBufferGroupRef)CMGetAttachment(sbuf, CharonGroupKey, NULL);
+    return (CMTaggedBufferGroupRef)CMGetAttachment(sbuf, RevenantGroupKey, NULL);
 }

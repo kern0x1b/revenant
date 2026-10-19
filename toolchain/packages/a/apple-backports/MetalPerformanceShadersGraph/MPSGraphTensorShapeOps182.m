@@ -1,8 +1,8 @@
-#import "CharonMPSGraph.h"
+#import "RevenantMPSGraph.h"
 
-@implementation MPSGraph (CharonMPSGraphTensorShapeOps182)
+@implementation MPSGraph (RevenantMPSGraphTensorShapeOps182)
 
-- (void)charon_mps_refuseFloatingPointIndex:(MPSGraphTensor *)fed of:(NSString *)name
+- (void)revenant_mps_refuseFloatingPointIndex:(MPSGraphTensor *)fed of:(NSString *)name
 {
     MPSDataType type = fed.dataType;
     if (type == MPSDataTypeFloat32 || type == MPSDataTypeFloat16 || type == MPSDataTypeBool) {
@@ -24,8 +24,8 @@
                            name:(NSString *)name
 {
     for (MPSGraphTensor *fed in @[startTensor, endTensor, strideTensor])
-        [self charon_mps_refuseFloatingPointIndex:fed of:name];
-    return [self charon_mps_slice:CharonMPSGraphOperationKindSlice
+        [self revenant_mps_refuseFloatingPointIndex:fed of:name];
+    return [self revenant_mps_slice:RevenantMPSGraphOperationKindSlice
                           inputs:@[tensor, startTensor, endTensor, strideTensor]
                       parameters:@{@"gather": @"slice",
                                    @"sliceStartMask": @(startMask), @"sliceEndMask": @(endMask),
@@ -41,8 +41,8 @@
                            name:(NSString *)name
 {
     for (MPSGraphTensor *fed in @[startTensor, sizeTensor])
-        [self charon_mps_refuseFloatingPointIndex:fed of:name];
-    return [self charon_mps_slice:CharonMPSGraphOperationKindSlice
+        [self revenant_mps_refuseFloatingPointIndex:fed of:name];
+    return [self revenant_mps_slice:RevenantMPSGraphOperationKindSlice
                           inputs:@[tensor, startTensor, sizeTensor]
                       parameters:@{@"gather": @"slice", @"sliceSqueezeMask": @(squeezeMask),
                                    @"sliceSizes": @YES, @"sliceFedFrom": @1}
@@ -60,8 +60,8 @@
                                    name:(NSString *)name
 {
     for (MPSGraphTensor *fed in @[startTensor, endTensor, strideTensor])
-        [self charon_mps_refuseFloatingPointIndex:fed of:name];
-    return [self charon_mps_slice:CharonMPSGraphOperationKindSlice
+        [self revenant_mps_refuseFloatingPointIndex:fed of:name];
+    return [self revenant_mps_slice:RevenantMPSGraphOperationKindSlice
                           inputs:@[inputGradientTensor, fwdInShapeTensor, startTensor, endTensor, strideTensor]
                       parameters:@{@"gather": @"sliceGradient",
                                    @"sliceStartMask": @(startMask), @"sliceEndMask": @(endMask),
@@ -79,8 +79,8 @@
                                    name:(NSString *)name
 {
     for (MPSGraphTensor *fed in @[startTensor, sizeTensor])
-        [self charon_mps_refuseFloatingPointIndex:fed of:name];
-    return [self charon_mps_slice:CharonMPSGraphOperationKindSlice
+        [self revenant_mps_refuseFloatingPointIndex:fed of:name];
+    return [self revenant_mps_slice:RevenantMPSGraphOperationKindSlice
                           inputs:@[inputGradientTensor, fwdInShapeTensor, startTensor, sizeTensor]
                       parameters:@{@"gather": @"sliceGradient",
                                    @"sliceSqueezeMask": @(squeezeMask),

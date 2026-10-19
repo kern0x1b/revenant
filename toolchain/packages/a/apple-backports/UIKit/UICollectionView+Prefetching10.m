@@ -3,28 +3,28 @@
 
 #pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
 
-static const char CharonPrefetchDataSourceKey;
-static const char CharonPrefetchEnabledKey;
-static const char CharonPrefetchAskedKey;
-static const NSUInteger CharonPrefetchDistance = 1;
+static const char RevenantPrefetchDataSourceKey;
+static const char RevenantPrefetchEnabledKey;
+static const char RevenantPrefetchAskedKey;
+static const NSUInteger RevenantPrefetchDistance = 1;
 
-@interface UICollectionView (CharonPrefetching10)
-- (void)charon_prefetch;
+@interface UICollectionView (RevenantPrefetching10)
+- (void)revenant_prefetch;
 @end
 
-@interface CharonPrefetchInstaller : NSObject
+@interface RevenantPrefetchInstaller : NSObject
 @end
 
-@implementation CharonPrefetchInstaller
+@implementation RevenantPrefetchInstaller
 
 + (void)load
 {
     if ([UICollectionView instancesRespondToSelector:@selector(isPrefetchingEnabled)])
         return;
-    [CharonPrefetchInstaller charon_install];
+    [RevenantPrefetchInstaller revenant_install];
 }
 
-+ (void)charon_install
++ (void)revenant_install
 {
     Class view = [UICollectionView class];
     IMP original = class_getMethodImplementation(view, @selector(layoutSubviews));
@@ -32,35 +32,35 @@ static const NSUInteger CharonPrefetchDistance = 1;
         return;
     class_replaceMethod(view, @selector(layoutSubviews), imp_implementationWithBlock(^(UICollectionView *self_) {
         ((void (*)(id, SEL))original)(self_, @selector(layoutSubviews));
-        [self_ charon_prefetch];
-    }), "ccharon_layoutSubviews");
+        [self_ revenant_prefetch];
+    }), "crevenant_layoutSubviews");
 }
 
 @end
 
-@implementation UICollectionView (CharonPrefetching10)
+@implementation UICollectionView (RevenantPrefetching10)
 
 - (id<UICollectionViewDataSourcePrefetching>)prefetchDataSource
 {
-    return objc_getAssociatedObject(self, &CharonPrefetchDataSourceKey);
+    return objc_getAssociatedObject(self, &RevenantPrefetchDataSourceKey);
 }
 
 - (void)setPrefetchDataSource:(id<UICollectionViewDataSourcePrefetching>)prefetchDataSource
 {
-    objc_setAssociatedObject(self, &CharonPrefetchDataSourceKey, prefetchDataSource, OBJC_ASSOCIATION_ASSIGN);
+    objc_setAssociatedObject(self, &RevenantPrefetchDataSourceKey, prefetchDataSource, OBJC_ASSOCIATION_ASSIGN);
 }
 
 - (BOOL)isPrefetchingEnabled
 {
-    return [objc_getAssociatedObject(self, &CharonPrefetchEnabledKey) boolValue];
+    return [objc_getAssociatedObject(self, &RevenantPrefetchEnabledKey) boolValue];
 }
 
 - (void)setPrefetchingEnabled:(BOOL)prefetchingEnabled
 {
-    objc_setAssociatedObject(self, &CharonPrefetchEnabledKey, @(prefetchingEnabled), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, &RevenantPrefetchEnabledKey, @(prefetchingEnabled), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
-- (NSArray<NSIndexPath *> *)charon_prefetchCandidates
+- (NSArray<NSIndexPath *> *)revenant_prefetchCandidates
 {
     NSArray<NSIndexPath *> *visible = self.indexPathsForVisibleItems;
     if (!visible.count)
@@ -69,7 +69,7 @@ static const NSUInteger CharonPrefetchDistance = 1;
     NSMutableSet<NSNumber *> *seen = [NSMutableSet set];
     NSMutableDictionary<NSNumber *, NSNumber *> *distance = [NSMutableDictionary dictionary];
     for (NSIndexPath *path in visible) {
-        for (NSInteger step = 1; step <= (NSInteger)CharonPrefetchDistance; step++) {
+        for (NSInteger step = 1; step <= (NSInteger)RevenantPrefetchDistance; step++) {
             for (NSInteger direction = -1; direction <= 1; direction += 2) {
                 NSInteger item = path.item + direction * step;
                 if (item < 0 || item >= [self numberOfItemsInSection:path.section])
@@ -95,17 +95,17 @@ static const NSUInteger CharonPrefetchDistance = 1;
     }];
 }
 
-- (void)charon_prefetch
+- (void)revenant_prefetch
 {
     id<UICollectionViewDataSourcePrefetching> source = self.prefetchDataSource;
     if (!source || !self.isPrefetchingEnabled)
         return;
-    NSArray<NSIndexPath *> *candidates = [self charon_prefetchCandidates];
+    NSArray<NSIndexPath *> *candidates = [self revenant_prefetchCandidates];
     NSMutableSet<NSIndexPath *> *wants = [NSMutableSet setWithArray:candidates];
-    NSMutableSet<NSIndexPath *> *asked = objc_getAssociatedObject(self, &CharonPrefetchAskedKey);
+    NSMutableSet<NSIndexPath *> *asked = objc_getAssociatedObject(self, &RevenantPrefetchAskedKey);
     if (!asked) {
         asked = [NSMutableSet set];
-        objc_setAssociatedObject(self, &CharonPrefetchAskedKey, asked, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+        objc_setAssociatedObject(self, &RevenantPrefetchAskedKey, asked, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     }
     NSArray<NSIndexPath *> *cancelled = [asked.allObjects filteredArrayUsingPredicate:
                                          [NSPredicate predicateWithBlock:^BOOL(NSIndexPath *path, NSDictionary *bindings) {

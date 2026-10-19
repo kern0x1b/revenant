@@ -1,12 +1,12 @@
-#import "CharonBarAppearance.h"
+#import "RevenantBarAppearance.h"
 
-static NSString *const CharonTint = @"tint";
-static NSString *const CharonIndicator = @"indicator";
-static NSString *const CharonPositioning = @"positioning";
-static NSString *const CharonWidth = @"width";
-static NSString *const CharonSpacing = @"spacing";
+static NSString *const RevenantTint = @"tint";
+static NSString *const RevenantIndicator = @"indicator";
+static NSString *const RevenantPositioning = @"positioning";
+static NSString *const RevenantWidth = @"width";
+static NSString *const RevenantSpacing = @"spacing";
 
-static void charon_require_appearance(id appearance)
+static void revenant_require_appearance(id appearance)
 {
     if (!appearance)
         [NSException raise:NSInternalInconsistencyException format:@"Use -[UITabBarItemAppearance configureWithDefaultForStyle:] to reset"];
@@ -20,24 +20,24 @@ static void charon_require_appearance(id appearance)
     UITabBarItemAppearance *_compactInlineLayoutAppearance;
 }
 
-- (void)charon_setUp
+- (void)revenant_setUp
 {
-    [super charon_setUp];
+    [super revenant_setUp];
     _layout = [[NSMutableDictionary alloc] init];
-    _stackedLayoutAppearance = [[UITabBarItemAppearance alloc] initCharonWithStyle:0];
-    _inlineLayoutAppearance = [[UITabBarItemAppearance alloc] initCharonWithStyle:1];
-    _compactInlineLayoutAppearance = [[UITabBarItemAppearance alloc] initCharonWithStyle:2];
-    [self charon_adoptChildren];
+    _stackedLayoutAppearance = [[UITabBarItemAppearance alloc] initRevenantWithStyle:0];
+    _inlineLayoutAppearance = [[UITabBarItemAppearance alloc] initRevenantWithStyle:1];
+    _compactInlineLayoutAppearance = [[UITabBarItemAppearance alloc] initRevenantWithStyle:2];
+    [self revenant_adoptChildren];
 }
 
-- (void)charon_adoptChildren
+- (void)revenant_adoptChildren
 {
-    charon_adopt_child(self, _stackedLayoutAppearance);
-    charon_adopt_child(self, _inlineLayoutAppearance);
-    charon_adopt_child(self, _compactInlineLayoutAppearance);
+    revenant_adopt_child(self, _stackedLayoutAppearance);
+    revenant_adopt_child(self, _inlineLayoutAppearance);
+    revenant_adopt_child(self, _compactInlineLayoutAppearance);
 }
 
-- (void)charon_copyExtrasFrom:(UIBarAppearance *)source
+- (void)revenant_copyExtrasFrom:(UIBarAppearance *)source
 {
     if (![source isKindOfClass:[UITabBarAppearance class]])
         return;
@@ -46,25 +46,25 @@ static void charon_require_appearance(id appearance)
     _stackedLayoutAppearance = [other->_stackedLayoutAppearance copy];
     _inlineLayoutAppearance = [other->_inlineLayoutAppearance copy];
     _compactInlineLayoutAppearance = [other->_compactInlineLayoutAppearance copy];
-    [self charon_adoptChildren];
+    [self revenant_adoptChildren];
 }
 
-- (void)charon_encodeExtrasWithCoder:(NSCoder *)coder
+- (void)revenant_encodeExtrasWithCoder:(NSCoder *)coder
 {
-    [coder encodeObject:charon_plist_pack(_layout) forKey:@"layout"];
+    [coder encodeObject:revenant_plist_pack(_layout) forKey:@"layout"];
     [coder encodeObject:_stackedLayoutAppearance forKey:@"stacked"];
     [coder encodeObject:_inlineLayoutAppearance forKey:@"inline"];
     [coder encodeObject:_compactInlineLayoutAppearance forKey:@"compactInline"];
 }
 
-- (void)charon_decodeExtrasWithCoder:(NSCoder *)coder
+- (void)revenant_decodeExtrasWithCoder:(NSCoder *)coder
 {
-    NSDictionary *classes = @{CharonTint: [UIColor class], CharonIndicator: [UIImage class], CharonPositioning: [NSNumber class], CharonWidth: [NSNumber class], CharonSpacing: [NSNumber class]};
-    [_layout setDictionary:charon_sanitised(charon_plist_unpack([coder decodeObjectOfClasses:charon_plist_classes() forKey:@"layout"]), classes, nil)];
+    NSDictionary *classes = @{RevenantTint: [UIColor class], RevenantIndicator: [UIImage class], RevenantPositioning: [NSNumber class], RevenantWidth: [NSNumber class], RevenantSpacing: [NSNumber class]};
+    [_layout setDictionary:revenant_sanitised(revenant_plist_unpack([coder decodeObjectOfClasses:revenant_plist_classes() forKey:@"layout"]), classes, nil)];
     _stackedLayoutAppearance = [coder decodeObjectOfClass:[UITabBarItemAppearance class] forKey:@"stacked"] ?: _stackedLayoutAppearance;
     _inlineLayoutAppearance = [coder decodeObjectOfClass:[UITabBarItemAppearance class] forKey:@"inline"] ?: _inlineLayoutAppearance;
     _compactInlineLayoutAppearance = [coder decodeObjectOfClass:[UITabBarItemAppearance class] forKey:@"compactInline"] ?: _compactInlineLayoutAppearance;
-    [self charon_adoptChildren];
+    [self revenant_adoptChildren];
 }
 
 - (UITabBarItemAppearance *)stackedLayoutAppearance
@@ -74,10 +74,10 @@ static void charon_require_appearance(id appearance)
 
 - (void)setStackedLayoutAppearance:(UITabBarItemAppearance *)stackedLayoutAppearance
 {
-    charon_require_appearance(stackedLayoutAppearance);
+    revenant_require_appearance(stackedLayoutAppearance);
     _stackedLayoutAppearance = [stackedLayoutAppearance copy];
-    [self charon_adoptChildren];
-    [self charon_notify];
+    [self revenant_adoptChildren];
+    [self revenant_notify];
 }
 
 - (UITabBarItemAppearance *)inlineLayoutAppearance
@@ -87,10 +87,10 @@ static void charon_require_appearance(id appearance)
 
 - (void)setInlineLayoutAppearance:(UITabBarItemAppearance *)inlineLayoutAppearance
 {
-    charon_require_appearance(inlineLayoutAppearance);
+    revenant_require_appearance(inlineLayoutAppearance);
     _inlineLayoutAppearance = [inlineLayoutAppearance copy];
-    [self charon_adoptChildren];
-    [self charon_notify];
+    [self revenant_adoptChildren];
+    [self revenant_notify];
 }
 
 - (UITabBarItemAppearance *)compactInlineLayoutAppearance
@@ -100,102 +100,102 @@ static void charon_require_appearance(id appearance)
 
 - (void)setCompactInlineLayoutAppearance:(UITabBarItemAppearance *)compactInlineLayoutAppearance
 {
-    charon_require_appearance(compactInlineLayoutAppearance);
+    revenant_require_appearance(compactInlineLayoutAppearance);
     _compactInlineLayoutAppearance = [compactInlineLayoutAppearance copy];
-    [self charon_adoptChildren];
-    [self charon_notify];
+    [self revenant_adoptChildren];
+    [self revenant_notify];
 }
 
 - (UIColor *)selectionIndicatorTintColor
 {
-    return _layout[CharonTint];
+    return _layout[RevenantTint];
 }
 
 - (void)setSelectionIndicatorTintColor:(UIColor *)selectionIndicatorTintColor
 {
     if (selectionIndicatorTintColor)
-        _layout[CharonTint] = [selectionIndicatorTintColor copy];
+        _layout[RevenantTint] = [selectionIndicatorTintColor copy];
     else
-        [_layout removeObjectForKey:CharonTint];
-    [self charon_notify];
+        [_layout removeObjectForKey:RevenantTint];
+    [self revenant_notify];
 }
 
 - (UIImage *)selectionIndicatorImage
 {
-    return _layout[CharonIndicator];
+    return _layout[RevenantIndicator];
 }
 
 - (void)setSelectionIndicatorImage:(UIImage *)selectionIndicatorImage
 {
     if (selectionIndicatorImage)
-        _layout[CharonIndicator] = selectionIndicatorImage;
+        _layout[RevenantIndicator] = selectionIndicatorImage;
     else
-        [_layout removeObjectForKey:CharonIndicator];
-    [self charon_notify];
+        [_layout removeObjectForKey:RevenantIndicator];
+    [self revenant_notify];
 }
 
-- (void)charon_setNumber:(double)value key:(NSString *)key
+- (void)revenant_setNumber:(double)value key:(NSString *)key
 {
     if (value != 0)
         _layout[key] = @(value);
     else
         [_layout removeObjectForKey:key];
-    [self charon_notify];
+    [self revenant_notify];
 }
 
 - (UITabBarItemPositioning)stackedItemPositioning
 {
-    return (UITabBarItemPositioning)[_layout[CharonPositioning] integerValue];
+    return (UITabBarItemPositioning)[_layout[RevenantPositioning] integerValue];
 }
 
 - (void)setStackedItemPositioning:(UITabBarItemPositioning)stackedItemPositioning
 {
-    [self charon_setNumber:stackedItemPositioning key:CharonPositioning];
+    [self revenant_setNumber:stackedItemPositioning key:RevenantPositioning];
 }
 
 - (CGFloat)stackedItemWidth
 {
-    return [_layout[CharonWidth] doubleValue];
+    return [_layout[RevenantWidth] doubleValue];
 }
 
 - (void)setStackedItemWidth:(CGFloat)stackedItemWidth
 {
-    [self charon_setNumber:stackedItemWidth key:CharonWidth];
+    [self revenant_setNumber:stackedItemWidth key:RevenantWidth];
 }
 
 - (CGFloat)stackedItemSpacing
 {
-    return [_layout[CharonSpacing] doubleValue];
+    return [_layout[RevenantSpacing] doubleValue];
 }
 
 - (void)setStackedItemSpacing:(CGFloat)stackedItemSpacing
 {
-    [self charon_setNumber:stackedItemSpacing key:CharonSpacing];
+    [self revenant_setNumber:stackedItemSpacing key:RevenantSpacing];
 }
 
-- (NSArray *)charon_lines
+- (NSArray *)revenant_lines
 {
     NSArray *positioning = @[@"automatic", @"fill", @"centered"];
-    NSInteger mode = [_layout[CharonPositioning] integerValue];
+    NSInteger mode = [_layout[RevenantPositioning] integerValue];
     NSMutableString *layout = [NSMutableString stringWithFormat:@"ItemLayout(%p): positioning=%@", _layout, mode >= 0 && mode < 3 ? positioning[mode] : [NSString stringWithFormat:@"unknown(%ld)", (long)mode]];
-    if (_layout[CharonIndicator])
-        [layout appendFormat:@" selectionIndicatorImage=%@", _layout[CharonIndicator]];
-    if (_layout[CharonTint])
-        [layout appendFormat:@" selectionIndicatorTintColor=%@", _layout[CharonTint]];
-    if ([_layout[CharonWidth] doubleValue] > 0)
-        [layout appendFormat:@" itemWidth=%f", [_layout[CharonWidth] doubleValue]];
-    if ([_layout[CharonSpacing] doubleValue] > 0)
-        [layout appendFormat:@" itemSpacing=%f", [_layout[CharonSpacing] doubleValue]];
-    return [[super charon_lines] arrayByAddingObjectsFromArray:@[
-        [NSString stringWithFormat:@"StackedItemAppearance(%p): %@", _stackedLayoutAppearance, [_stackedLayoutAppearance charon_text]],
-        [NSString stringWithFormat:@"InlineItemAppearance(%p): %@", _inlineLayoutAppearance, [_inlineLayoutAppearance charon_text]],
-        [NSString stringWithFormat:@"CompactInlineItemAppearance(%p): %@", _compactInlineLayoutAppearance, [_compactInlineLayoutAppearance charon_text]], layout]];
+    if (_layout[RevenantIndicator])
+        [layout appendFormat:@" selectionIndicatorImage=%@", _layout[RevenantIndicator]];
+    if (_layout[RevenantTint])
+        [layout appendFormat:@" selectionIndicatorTintColor=%@", _layout[RevenantTint]];
+    if ([_layout[RevenantWidth] doubleValue] > 0)
+        [layout appendFormat:@" itemWidth=%f", [_layout[RevenantWidth] doubleValue]];
+    if ([_layout[RevenantSpacing] doubleValue] > 0)
+        [layout appendFormat:@" itemSpacing=%f", [_layout[RevenantSpacing] doubleValue]];
+    return [[super revenant_lines] arrayByAddingObjectsFromArray:@[
+        [NSString stringWithFormat:@"StackedItemAppearance(%p): %@", _stackedLayoutAppearance, [_stackedLayoutAppearance revenant_text]],
+        [NSString stringWithFormat:@"InlineItemAppearance(%p): %@", _inlineLayoutAppearance, [_inlineLayoutAppearance revenant_text]],
+        [NSString stringWithFormat:@"CompactInlineItemAppearance(%p): %@", _compactInlineLayoutAppearance, [_compactInlineLayoutAppearance revenant_text]], layout]];
 }
 
-- (NSArray *)charon_signature
+- (NSArray *)revenant_signature
 {
-    return [[super charon_signature] arrayByAddingObjectsFromArray:@[self.selectionIndicatorTintColor ?: [NSNull null], self.selectionIndicatorImage ?: [NSNull null], @(self.stackedItemPositioning), @(self.stackedItemWidth), @(self.stackedItemSpacing), [_stackedLayoutAppearance charon_signature], [_inlineLayoutAppearance charon_signature],
-                                                                     [_compactInlineLayoutAppearance charon_signature]]];
+    return [[super revenant_signature] arrayByAddingObjectsFromArray:@[self.selectionIndicatorTintColor ?: [NSNull null], self.selectionIndicatorImage ?: [NSNull null], @(self.stackedItemPositioning), @(self.stackedItemWidth), @(self.stackedItemSpacing), [_stackedLayoutAppearance revenant_signature], [_inlineLayoutAppearance revenant_signature],
+                                                                     [_compactInlineLayoutAppearance revenant_signature]]];
 }
 
 @end

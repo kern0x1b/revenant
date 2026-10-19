@@ -46,7 +46,7 @@ static id shown_native_view(UIAlertController *alert, Class kind)
 static id native_view(UIAlertController *alert, Class kind, const char *name)
 {
     id view = shown_native_view(alert, kind);
-    charon_check(view != nil, name, [NSString stringWithFormat:@"no %@ with the controller as delegate among the app windows", kind]);
+    revenant_check(view != nil, name, [NSString stringWithFormat:@"no %@ with the controller as delegate among the app windows", kind]);
     if (!view)
         view = [alert valueForKey:kind == [UIAlertView class] ? @"alertView" : @"actionSheet"];
     return view;
@@ -108,7 +108,7 @@ static NSString *exception_name(dispatch_block_t block)
 {
     [[NSFileManager defaultManager] createDirectoryAtPath:results_folder withIntermediateDirectories:YES attributes:nil error:NULL];
     [[NSFileManager defaultManager] removeItemAtPath:[results_folder stringByAppendingPathComponent:@"alert.done"] error:NULL];
-    charon_log_to([results_folder stringByAppendingPathComponent:@"alert.log"]);
+    revenant_log_to([results_folder stringByAppendingPathComponent:@"alert.log"]);
     printf("alert device test started\n");
     self.host = [[UIViewController alloc] init];
     self.host.title = @"UIAlertController";
@@ -149,7 +149,7 @@ static NSString *exception_name(dispatch_block_t block)
     };
     after(step_timeout_seconds, ^{
         if (!finished) {
-            charon_check(NO, "step finishes in time", [NSString stringWithFormat:@"step %lu timed out", (unsigned long)index + 1]);
+            revenant_check(NO, "step finishes in time", [NSString stringWithFormat:@"step %lu timed out", (unsigned long)index + 1]);
             done();
         }
     });
@@ -159,11 +159,11 @@ static NSString *exception_name(dispatch_block_t block)
 
 - (void)finish
 {
-    printf("checks=%d failures=%d\n", charon_checks, charon_failures);
-    self.status.text = [NSString stringWithFormat:@"%@\nchecks=%d failures=%d", charon_failures ? @"FAIL" : @"ok", charon_checks, charon_failures];
+    printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
+    self.status.text = [NSString stringWithFormat:@"%@\nchecks=%d failures=%d", revenant_failures ? @"FAIL" : @"ok", revenant_checks, revenant_failures];
     screenshot("result", "result label");
     after(1, ^{
-        NSString *summary = [NSString stringWithFormat:@"%@ checks=%d failures=%d\n", charon_failures ? @"FAIL" : @"ok", charon_checks, charon_failures];
+        NSString *summary = [NSString stringWithFormat:@"%@ checks=%d failures=%d\n", revenant_failures ? @"FAIL" : @"ok", revenant_checks, revenant_failures];
         [summary writeToFile:[results_folder stringByAppendingPathComponent:@"alert.done"] atomically:YES encoding:NSUTF8StringEncoding error:NULL];
     });
 }

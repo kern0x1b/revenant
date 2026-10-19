@@ -1,11 +1,11 @@
-#import "CharonMPS.h"
+#import "RevenantMPS.h"
 
 
 @implementation MPSTemporaryVector {
     NSUInteger _readCount;
 }
 
-- (instancetype)charon_mps_withReadCount:(NSUInteger)readCount
+- (instancetype)revenant_mps_withReadCount:(NSUInteger)readCount
 {
     _readCount = readCount;
     return self;
@@ -16,7 +16,7 @@
     id<MTLDevice> device = [commandBuffer respondsToSelector:@selector(device)] ? [commandBuffer device] : MTLCreateSystemDefaultDevice();
     if (!device)
         device = MTLCreateSystemDefaultDevice();
-    return [[[self alloc] initWithDevice:device descriptor:descriptor] charon_mps_withReadCount:1];
+    return [[[self alloc] initWithDevice:device descriptor:descriptor] revenant_mps_withReadCount:1];
 }
 
 + (void)prefetchStorageWithCommandBuffer:(id<MTLCommandBuffer>)commandBuffer descriptorList:(NSArray<MPSVectorDescriptor *> *)descriptorList

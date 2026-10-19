@@ -20,7 +20,7 @@ function probe_of(import_name, headers, statements)
     for _, header in ipairs(headers) do
         table.insert(lines, "#import <" .. import_name .. "/" .. header .. ">")
     end
-    table.insert(lines, "void charon_probe(void) {")
+    table.insert(lines, "void revenant_probe(void) {")
     local line_of = {}
     for i, statement in ipairs(statements) do
         table.insert(lines, statement)

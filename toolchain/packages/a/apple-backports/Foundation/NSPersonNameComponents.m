@@ -61,7 +61,7 @@
     return copy;
 }
 
-static BOOL charon_same(id left, id right)
+static BOOL revenant_same(id left, id right)
 {
     return left == right || [left isEqual:right];
 }
@@ -73,9 +73,9 @@ static BOOL charon_same(id left, id right)
     if (![other isKindOfClass:[NSPersonNameComponents class]])
         return NO;
     NSPersonNameComponents *components = other;
-    return charon_same(_namePrefix, components->_namePrefix) && charon_same(_givenName, components->_givenName) && charon_same(_middleName, components->_middleName) &&
-        charon_same(_familyName, components->_familyName) && charon_same(_nameSuffix, components->_nameSuffix) && charon_same(_nickname, components->_nickname) &&
-        charon_same(_phoneticRepresentation, components->_phoneticRepresentation);
+    return revenant_same(_namePrefix, components->_namePrefix) && revenant_same(_givenName, components->_givenName) && revenant_same(_middleName, components->_middleName) &&
+        revenant_same(_familyName, components->_familyName) && revenant_same(_nameSuffix, components->_nameSuffix) && revenant_same(_nickname, components->_nickname) &&
+        revenant_same(_phoneticRepresentation, components->_phoneticRepresentation);
 }
 
 - (NSUInteger)hash

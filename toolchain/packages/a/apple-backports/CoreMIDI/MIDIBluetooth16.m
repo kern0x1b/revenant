@@ -7,46 +7,46 @@
 #include <objc/runtime.h>
 #include <stdlib.h>
 
-#import "CharonCoreMIDI.h"
+#import "RevenantCoreMIDI.h"
 
-static Class charon_cb_class(const char *name)
+static Class revenant_cb_class(const char *name)
 {
     static dispatch_once_t once;
     dispatch_once(&once, ^{
         if (!dlopen("/System/Library/Frameworks/CoreBluetooth.framework/CoreBluetooth", RTLD_LAZY))
-            NSLog(@"charon: CoreBluetooth would not open (%s); the Bluetooth MIDI central has no framework", dlerror());
+            NSLog(@"revenant: CoreBluetooth would not open (%s); the Bluetooth MIDI central has no framework", dlerror());
     });
     return objc_getClass(name);
 }
 
-static CBUUID *charon_uuid(NSString *string)
+static CBUUID *revenant_uuid(NSString *string)
 {
-    return [(id)charon_cb_class("CBUUID") UUIDWithString:string];
+    return [(id)revenant_cb_class("CBUUID") UUIDWithString:string];
 }
 
-static NSString *const charon_service = @"03B80E5A-EDE8-4B33-A751-6CE34EC4C700";
-static NSString *const charon_characteristic = @"7772E5DB-3868-4112-A1A9-F2669D106BF3";
+static NSString *const revenant_service = @"03B80E5A-EDE8-4B33-A751-6CE34EC4C700";
+static NSString *const revenant_characteristic = @"7772E5DB-3868-4112-A1A9-F2669D106BF3";
 
-@interface CBPeripheral (CharonUUID)
+@interface CBPeripheral (RevenantUUID)
 - (CFUUIDRef)UUID;
 @end
 
-static NSString *charon_peripheral_key(CBPeripheral *peripheral)
+static NSString *revenant_peripheral_key(CBPeripheral *peripheral)
 {
     if ([peripheral respondsToSelector:@selector(identifier)])
         return peripheral.identifier.UUIDString;
     return (__bridge_transfer NSString *)CFUUIDCreateString(kCFAllocatorDefault, [peripheral UUID]);
 }
 
-@interface CharonBLEDevice : NSObject <CBPeripheralDelegate> {
-    CharonBLEParser _parser;
+@interface RevenantBLEDevice : NSObject <CBPeripheralDelegate> {
+    RevenantBLEParser _parser;
 }
 @property (nonatomic, strong) CBPeripheral *peripheral;
 @property (nonatomic, assign) MIDIEndpointRef source;
 @property (nonatomic, assign) BOOL refusedOnce;
 @end
 
-@implementation CharonBLEDevice
+@implementation RevenantBLEDevice
 
 @synthesize peripheral = _peripheral;
 @synthesize source = _source;
@@ -55,15 +55,15 @@ static NSString *charon_peripheral_key(CBPeripheral *peripheral)
 - (void)peripheral:(CBPeripheral *)peripheral didDiscoverServices:(NSError *)error
 {
     for (CBService *service in peripheral.services) {
-        if ([service.UUID isEqual:charon_uuid(charon_service)])
-            [peripheral discoverCharacteristics:@[charon_uuid(charon_characteristic)] forService:service];
+        if ([service.UUID isEqual:revenant_uuid(revenant_service)])
+            [peripheral discoverCharacteristics:@[revenant_uuid(revenant_characteristic)] forService:service];
     }
 }
 
 - (void)peripheral:(CBPeripheral *)peripheral didDiscoverCharacteristicsForService:(CBService *)service error:(NSError *)error
 {
     for (CBCharacteristic *characteristic in service.characteristics) {
-        if ([characteristic.UUID isEqual:charon_uuid(charon_characteristic)])
+        if ([characteristic.UUID isEqual:revenant_uuid(revenant_characteristic)])
             [peripheral setNotifyValue:YES forCharacteristic:characteristic];
     }
 }
@@ -78,11 +78,11 @@ static NSString *charon_peripheral_key(CBPeripheral *peripheral)
     if (2 * value.length > sizeof(stackMidi)) {
         midi = malloc(2 * value.length);
         if (!midi) {
-            NSLog(@"charon: a Bluetooth MIDI notification of %lu bytes could not be given memory and is dropped", (unsigned long)value.length);
+            NSLog(@"revenant: a Bluetooth MIDI notification of %lu bytes could not be given memory and is dropped", (unsigned long)value.length);
             return;
         }
     }
-    size_t count = CharonBLEMIDIParse(&_parser, value.bytes, value.length, midi);
+    size_t count = RevenantBLEMIDIParse(&_parser, value.bytes, value.length, midi);
     if (count > 0) {
         size_t listSize = sizeof(MIDIPacketList) + count + 4;
         Byte stackList[1024 + sizeof(MIDIPacketList) + 4] __attribute__((aligned(4)));
@@ -90,16 +90,16 @@ static NSString *charon_peripheral_key(CBPeripheral *peripheral)
         if (listSize > sizeof(stackList))
             buffer = malloc(listSize);
         if (!buffer) {
-            NSLog(@"charon: a Bluetooth MIDI notification of %lu bytes could not be given memory and is dropped", (unsigned long)count);
+            NSLog(@"revenant: a Bluetooth MIDI notification of %lu bytes could not be given memory and is dropped", (unsigned long)count);
         } else {
             MIDIPacketList *list = (MIDIPacketList *)buffer;
             if (MIDIPacketListAdd(list, listSize, MIDIPacketListInit(list), 0, count, midi) == NULL) {
-                NSLog(@"charon: a Bluetooth MIDI notification of %lu bytes did not fit its packet list and is dropped", (unsigned long)count);
+                NSLog(@"revenant: a Bluetooth MIDI notification of %lu bytes did not fit its packet list and is dropped", (unsigned long)count);
             } else {
                 OSStatus status = MIDIReceived(self.source, list);
                 if (status != noErr && !self.refusedOnce) {
                     self.refusedOnce = YES;
-                    NSLog(@"charon: a Bluetooth MIDI device's bytes were not received by the release (status %d); facts/CoreMIDI/CoreMIDI.md", (int)status);
+                    NSLog(@"revenant: a Bluetooth MIDI device's bytes were not received by the release (status %d); facts/CoreMIDI/CoreMIDI.md", (int)status);
                 }
             }
             if (buffer != stackList)
@@ -112,7 +112,7 @@ static NSString *charon_peripheral_key(CBPeripheral *peripheral)
 
 @end
 
-@interface CharonBLECentral : NSObject <CBCentralManagerDelegate>
+@interface RevenantBLECentral : NSObject <CBCentralManagerDelegate>
 @property (nonatomic, strong) CBCentralManager *manager;
 @property (nonatomic, strong) NSMutableDictionary *devices;
 @property (nonatomic, assign) BOOL activated;
@@ -120,7 +120,7 @@ static NSString *charon_peripheral_key(CBPeripheral *peripheral)
 - (void)forgetDevice:(NSString *)key;
 @end
 
-@implementation CharonBLECentral
+@implementation RevenantBLECentral
 
 @synthesize manager = _manager;
 @synthesize devices = _devices;
@@ -132,7 +132,7 @@ static NSString *charon_peripheral_key(CBPeripheral *peripheral)
     self = [super init];
     if (self) {
         _devices = [NSMutableDictionary dictionary];
-        _manager = [[(id)charon_cb_class("CBCentralManager") alloc] initWithDelegate:self queue:dispatch_get_main_queue()];
+        _manager = [[(id)revenant_cb_class("CBCentralManager") alloc] initWithDelegate:self queue:dispatch_get_main_queue()];
     }
     return self;
 }
@@ -140,16 +140,16 @@ static NSString *charon_peripheral_key(CBPeripheral *peripheral)
 - (void)centralManagerDidUpdateState:(CBCentralManager *)central
 {
     if (central.state == CBManagerStatePoweredOn && self.activated)
-        [central scanForPeripheralsWithServices:@[charon_uuid(charon_service)] options:nil];
+        [central scanForPeripheralsWithServices:@[revenant_uuid(revenant_service)] options:nil];
 }
 
 - (void)centralManager:(CBCentralManager *)central didDiscoverPeripheral:(CBPeripheral *)peripheral
      advertisementData:(NSDictionary *)advertisementData RSSI:(NSNumber *)RSSI
 {
-    NSString *key = charon_peripheral_key(peripheral);
+    NSString *key = revenant_peripheral_key(peripheral);
     if (self.devices[key])
         return;
-    CharonBLEDevice *device = [[CharonBLEDevice alloc] init];
+    RevenantBLEDevice *device = [[RevenantBLEDevice alloc] init];
     device.peripheral = peripheral;
     peripheral.delegate = device;
     self.devices[key] = device;
@@ -158,13 +158,13 @@ static NSString *charon_peripheral_key(CBPeripheral *peripheral)
 
 - (void)centralManager:(CBCentralManager *)central didConnectPeripheral:(CBPeripheral *)peripheral
 {
-    CharonBLEDevice *device = self.devices[charon_peripheral_key(peripheral)];
+    RevenantBLEDevice *device = self.devices[revenant_peripheral_key(peripheral)];
     if (!device)
         return;
     if (self.client == 0) {
-        if (MIDIClientCreate(CFSTR("charon-bluetooth"), NULL, NULL, &_client) != noErr) {
-            NSLog(@"charon: the release would not make a MIDI client for a Bluetooth device; its bytes are dropped");
-            [peripheral discoverServices:@[charon_uuid(charon_service)]];
+        if (MIDIClientCreate(CFSTR("revenant-bluetooth"), NULL, NULL, &_client) != noErr) {
+            NSLog(@"revenant: the release would not make a MIDI client for a Bluetooth device; its bytes are dropped");
+            [peripheral discoverServices:@[revenant_uuid(revenant_service)]];
             return;
         }
     }
@@ -172,31 +172,31 @@ static NSString *charon_peripheral_key(CBPeripheral *peripheral)
     MIDIEndpointRef source = 0;
     OSStatus status = MIDISourceCreate(self.client, (__bridge CFStringRef)name, &source);
     if (status == noErr) {
-        CharonMIDIForgetRoute(source);
+        RevenantMIDIForgetRoute(source);
         device.source = source;
     } else {
-        NSLog(@"charon: the release refused a virtual source for a Bluetooth MIDI device (status %d); its bytes are dropped (facts/CoreMIDI/CoreMIDI.md)", (int)status);
+        NSLog(@"revenant: the release refused a virtual source for a Bluetooth MIDI device (status %d); its bytes are dropped (facts/CoreMIDI/CoreMIDI.md)", (int)status);
     }
-    [peripheral discoverServices:@[charon_uuid(charon_service)]];
+    [peripheral discoverServices:@[revenant_uuid(revenant_service)]];
 }
 
 - (void)centralManager:(CBCentralManager *)central didFailToConnectPeripheral:(CBPeripheral *)peripheral error:(NSError *)error
 {
-    NSLog(@"charon: a Bluetooth MIDI device did not connect (%@)", error);
-    [self forgetDevice:charon_peripheral_key(peripheral)];
+    NSLog(@"revenant: a Bluetooth MIDI device did not connect (%@)", error);
+    [self forgetDevice:revenant_peripheral_key(peripheral)];
 }
 
 - (void)centralManager:(CBCentralManager *)central didDisconnectPeripheral:(CBPeripheral *)peripheral error:(NSError *)error
 {
-    [self forgetDevice:charon_peripheral_key(peripheral)];
+    [self forgetDevice:revenant_peripheral_key(peripheral)];
 }
 
 - (void)forgetDevice:(NSString *)key
 {
-    CharonBLEDevice *device = self.devices[key];
+    RevenantBLEDevice *device = self.devices[key];
     if (device.source != 0) {
         if (MIDIEndpointDispose(device.source) != noErr)
-            NSLog(@"charon: the virtual source of a Bluetooth MIDI device could not be disposed");
+            NSLog(@"revenant: the virtual source of a Bluetooth MIDI device could not be disposed");
         device.source = 0;
     }
     [self.devices removeObjectForKey:key];
@@ -204,33 +204,33 @@ static NSString *charon_peripheral_key(CBPeripheral *peripheral)
 
 @end
 
-static CharonBLECentral *charon_central(void)
+static RevenantBLECentral *revenant_central(void)
 {
-    static CharonBLECentral *central;
+    static RevenantBLECentral *central;
     static dispatch_once_t once;
     dispatch_once(&once, ^{
-        central = [[CharonBLECentral alloc] init];
+        central = [[RevenantBLECentral alloc] init];
     });
     return central;
 }
 
-OSStatus charon_bluetooth_activate_all_connections(void)
+OSStatus revenant_bluetooth_activate_all_connections(void)
 {
-    CharonBLECentral *central = charon_central();
+    RevenantBLECentral *central = revenant_central();
     dispatch_async(dispatch_get_main_queue(), ^{
         central.activated = YES;
         if (central.manager.state == CBManagerStatePoweredOn)
-            [central.manager scanForPeripheralsWithServices:@[charon_uuid(charon_service)] options:nil];
+            [central.manager scanForPeripheralsWithServices:@[revenant_uuid(revenant_service)] options:nil];
     });
     return noErr;
 }
 
-OSStatus charon_bluetooth_disconnect(CFStringRef uuid)
+OSStatus revenant_bluetooth_disconnect(CFStringRef uuid)
 {
-    CharonBLECentral *central = charon_central();
+    RevenantBLECentral *central = revenant_central();
     NSString *key = (__bridge NSString *)uuid;
     dispatch_async(dispatch_get_main_queue(), ^{
-        CharonBLEDevice *device = central.devices[key];
+        RevenantBLEDevice *device = central.devices[key];
         if (device) {
             [central.manager cancelPeripheralConnection:device.peripheral];
             [central forgetDevice:key];

@@ -13,7 +13,7 @@
 #include <span>
 #include <string>
 
-namespace shade::celestial_volume_protocol {
+namespace emulator::celestial_volume_protocol {
 
 struct CategoryVolume {
     std::string category;

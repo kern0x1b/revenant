@@ -25,7 +25,7 @@ static NSString *const results_folder = @"/private/var/backports";
 {
     [[NSFileManager defaultManager] createDirectoryAtPath:results_folder withIntermediateDirectories:YES attributes:nil error:NULL];
     [[NSFileManager defaultManager] removeItemAtPath:[results_folder stringByAppendingPathComponent:@"unblock.done"] error:NULL];
-    charon_log_to([results_folder stringByAppendingPathComponent:@"unblock.log"]);
+    revenant_log_to([results_folder stringByAppendingPathComponent:@"unblock.log"]);
     self.window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
     UIViewController *controller = [[UIViewController alloc] init];
     UnblockView *view = [[UnblockView alloc] initWithFrame:self.window.bounds];
@@ -52,8 +52,8 @@ static NSString *const results_folder = @"/private/var/backports";
                         gesture_tap(^{ return CGPointMake(CGRectGetMidX(view.bounds), CGRectGetHeight(view.bounds) * 0.25); }, 0.5);
                         gesture_run(^{
                             CHECK(view.touches == after + 1, "and the touches reach the application again");
-                            printf("checks=%d failures=%d\n", charon_checks, charon_failures);
-                            NSString *summary = [NSString stringWithFormat:@"%@ checks=%d failures=%d\n", charon_failures ? @"FAIL" : @"ok", charon_checks, charon_failures];
+                            printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
+                            NSString *summary = [NSString stringWithFormat:@"%@ checks=%d failures=%d\n", revenant_failures ? @"FAIL" : @"ok", revenant_checks, revenant_failures];
                             [summary writeToFile:[results_folder stringByAppendingPathComponent:@"unblock.done"] atomically:YES encoding:NSUTF8StringEncoding error:NULL];
                         });
                     });

@@ -1,8 +1,8 @@
 #import <HealthKit/HealthKit.h>
 
-#import "CharonHKStore.h"
+#import "RevenantHKStore.h"
 
-@implementation HKHealthStore (CharonIOS82)
+@implementation HKHealthStore (RevenantIOS82)
 
 - (void)preferredUnitsForQuantityTypes:(NSSet<HKQuantityType *> *)quantityTypes
                            completion:(void (^)(NSDictionary<HKQuantityType *, HKUnit *> *_Nullable preferredUnits,
@@ -12,7 +12,7 @@
         return;
     NSMutableDictionary<HKQuantityType *, HKUnit *> *units = [NSMutableDictionary dictionary];
     for (HKQuantityType *type in quantityTypes) {
-        HKUnit *unit = [HKUnit charon_canonicalUnitForType:type];
+        HKUnit *unit = [HKUnit revenant_canonicalUnitForType:type];
         if (unit)
             units[type] = unit;
     }

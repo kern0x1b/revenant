@@ -9,23 +9,23 @@ typedef struct {
     NSUInteger channelPointerCount;
     void **channelPointers;
     UInt32 bytesPerFramePerBuffer;
-} CharonAudioBufferImpl;
+} RevenantAudioBufferImpl;
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface CharonAudioBuffer : NSObject <NSCopying, NSMutableCopying>
+@interface RevenantAudioBuffer : NSObject <NSCopying, NSMutableCopying>
 @property (nonatomic, readonly, nullable) AVAudioFormat *format;
 @property (nonatomic, readonly) const AudioBufferList *audioBufferList;
 @property (nonatomic, readonly) AudioBufferList *mutableAudioBufferList;
 @end
 
-@interface CharonAudioBuffer (CharonImpl)
-- (CharonAudioBufferImpl *)charon_impl;
-- (CharonAudioBufferImpl *)charon_allocate;
-- (void)charon_setFormat:(AVAudioFormat *)format;
+@interface RevenantAudioBuffer (RevenantImpl)
+- (RevenantAudioBufferImpl *)revenant_impl;
+- (RevenantAudioBufferImpl *)revenant_allocate;
+- (void)revenant_setFormat:(AVAudioFormat *)format;
 @end
 
-@interface AVAudioPCMBuffer : CharonAudioBuffer
+@interface AVAudioPCMBuffer : RevenantAudioBuffer
 - (nullable instancetype)initWithPCMFormat:(AVAudioFormat *)format frameCapacity:(AVAudioFrameCount)frameCapacity NS_DESIGNATED_INITIALIZER;
 @property (nonatomic, readonly) AVAudioFrameCount frameCapacity;
 @property (nonatomic) AVAudioFrameCount frameLength;

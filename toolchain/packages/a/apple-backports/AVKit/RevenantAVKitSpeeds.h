@@ -1,5 +1,5 @@
 #import <AVKit/AVKit.h>
 
-@interface AVPlayerViewController (CharonSpeeds16)
-- (void)charon_applySelectedSpeed;
+@interface AVPlayerViewController (RevenantSpeeds16)
+- (void)revenant_applySelectedSpeed;
 @end

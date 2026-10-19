@@ -23,9 +23,9 @@ end
 function main(label)
     local tools = os.scriptdir()
     local corpus = workspace.corpus()
-    local export = os.getenv("CHARON_REGISTRY_TSV") or path.join(workspace.run("registry-export"), "carried-registry.tsv")
+    local export = os.getenv("REVENANT_REGISTRY_TSV") or path.join(workspace.run("registry-export"), "carried-registry.tsv")
     if not os.isfile(export) then
-        raise("regen.lua: no registry export at %s; write it with export-registry.lua or set CHARON_REGISTRY_TSV", export)
+        raise("regen.lua: no registry export at %s; write it with export-registry.lua or set REVENANT_REGISTRY_TSV", export)
     end
     print(string.format("registry export: %s  rows: %8d", stamp(export), line_count(export)))
     os.cp(path.join(corpus, "crash-demand-top.tsv"), path.join(corpus, "crash-demand-prev.tsv"))

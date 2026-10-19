@@ -1,5 +1,5 @@
-local charon = path.absolute(path.join(os.scriptdir(), "..", "..", ".."))
-local workspace = import("workspace", {rootdir = path.join(charon, "modules"), anonymous = true})
+local revenant = path.absolute(path.join(os.scriptdir(), "..", "..", ".."))
+local workspace = import("workspace", {rootdir = path.join(revenant, "modules"), anonymous = true})
 local generator = import("gen-calls", {rootdir = os.scriptdir(), anonymous = true})
 
 local function tail(file, count)
@@ -10,8 +10,8 @@ end
 function run(opt)
     opt = opt or {}
     local here = os.scriptdir()
-    local registry = opt.registry or path.join(charon, "packages", "a", "apple-backports", "registry", opt.framework or "Intents")
-    local build = opt.build or workspace.fresh("charon-callgen")
+    local registry = opt.registry or path.join(revenant, "packages", "a", "apple-backports", "registry", opt.framework or "Intents")
+    local build = opt.build or workspace.fresh("revenant-callgen")
     local out = opt.out or path.join(build, "calls.log")
     os.mkdir(build)
     local sdk = os.iorunv("xcrun", {"--show-sdk-path"}):trim()

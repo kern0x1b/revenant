@@ -1,15 +1,15 @@
-#import "CharonUserNotifications.h"
+#import "RevenantUserNotifications.h"
 
-static const NSCalendarUnit CharonDayUnits = NSEraCalendarUnit | NSYearCalendarUnit | NSMonthCalendarUnit | NSDayCalendarUnit
+static const NSCalendarUnit RevenantDayUnits = NSEraCalendarUnit | NSYearCalendarUnit | NSMonthCalendarUnit | NSDayCalendarUnit
                                            | NSWeekdayCalendarUnit | NSWeekdayOrdinalCalendarUnit | NSWeekOfMonthCalendarUnit
                                            | NSWeekOfYearCalendarUnit | NSYearForWeekOfYearCalendarUnit;
 
-static BOOL charon_given(NSInteger value)
+static BOOL revenant_given(NSInteger value)
 {
     return value != NSUndefinedDateComponent;
 }
 
-static BOOL charon_day_matches(NSDateComponents *wanted, NSDateComponents *day, NSInteger firstWeekday, NSInteger highest)
+static BOOL revenant_day_matches(NSDateComponents *wanted, NSDateComponents *day, NSInteger firstWeekday, NSInteger highest)
 {
     const struct { NSInteger want, have, rank, floor; } fields[] = {
         {wanted.era, day.era, 7, NSUndefinedDateComponent},
@@ -19,36 +19,36 @@ static BOOL charon_day_matches(NSDateComponents *wanted, NSDateComponents *day, 
         {wanted.weekOfYear, day.weekOfYear, 4, NSUndefinedDateComponent},
         {wanted.weekOfMonth, day.weekOfMonth, 4, NSUndefinedDateComponent},
         {wanted.weekdayOrdinal, day.weekdayOrdinal, 3, NSUndefinedDateComponent},
-        {wanted.day, day.day, 3, charon_given(wanted.weekday) || charon_given(wanted.weekdayOrdinal) ? NSUndefinedDateComponent : 1},
+        {wanted.day, day.day, 3, revenant_given(wanted.weekday) || revenant_given(wanted.weekdayOrdinal) ? NSUndefinedDateComponent : 1},
         {wanted.weekday, day.weekday, 3, NSUndefinedDateComponent},
     };
     for (unsigned index = 0; index < sizeof(fields) / sizeof(*fields); index++) {
-        if (charon_given(fields[index].want)) {
+        if (revenant_given(fields[index].want)) {
             if (fields[index].want != fields[index].have)
                 return NO;
-        } else if (fields[index].rank < highest && charon_given(fields[index].floor) && fields[index].have != fields[index].floor) {
+        } else if (fields[index].rank < highest && revenant_given(fields[index].floor) && fields[index].have != fields[index].floor) {
             return NO;
         }
     }
-    if ((charon_given(wanted.weekOfMonth) || charon_given(wanted.weekOfYear)) && !charon_given(wanted.weekday)
+    if ((revenant_given(wanted.weekOfMonth) || revenant_given(wanted.weekOfYear)) && !revenant_given(wanted.weekday)
         && day.weekday != firstWeekday)
         return NO;
     return YES;
 }
 
-static BOOL charon_skips_missing_day(NSCalendar *calendar, NSDateComponents *wanted, NSDateComponents *day, NSDate *dayStart)
+static BOOL revenant_skips_missing_day(NSCalendar *calendar, NSDateComponents *wanted, NSDateComponents *day, NSDate *dayStart)
 {
-    if (!charon_given(wanted.day) || charon_given(wanted.weekday) || charon_given(wanted.weekdayOrdinal)
-        || charon_given(wanted.weekOfMonth) || charon_given(wanted.weekOfYear))
+    if (!revenant_given(wanted.day) || revenant_given(wanted.weekday) || revenant_given(wanted.weekdayOrdinal)
+        || revenant_given(wanted.weekOfMonth) || revenant_given(wanted.weekOfYear))
         return NO;
     NSRange days = [calendar rangeOfUnit:NSDayCalendarUnit inUnit:NSMonthCalendarUnit forDate:dayStart];
     if (day.day != (NSInteger)NSMaxRange(days) - 1 || wanted.day < (NSInteger)NSMaxRange(days))
         return NO;
-    return (!charon_given(wanted.month) || wanted.month == day.month) && (!charon_given(wanted.year) || wanted.year == day.year)
-        && (!charon_given(wanted.era) || wanted.era == day.era);
+    return (!revenant_given(wanted.month) || wanted.month == day.month) && (!revenant_given(wanted.year) || wanted.year == day.year)
+        && (!revenant_given(wanted.era) || wanted.era == day.era);
 }
 
-NSDate *charon_next_date_matching(NSCalendar *calendar, NSDateComponents *wanted, NSDate *after)
+NSDate *revenant_next_date_matching(NSCalendar *calendar, NSDateComponents *wanted, NSDate *after)
 {
     if (!wanted || !after)
         return nil;
@@ -56,29 +56,29 @@ NSDate *charon_next_date_matching(NSCalendar *calendar, NSDateComponents *wanted
     if (wanted.timeZone)
         calendar.timeZone = wanted.timeZone;
     const NSInteger ranks[] = {
-        charon_given(wanted.second) ? 0 : NSIntegerMax, charon_given(wanted.minute) ? 1 : NSIntegerMax,
-        charon_given(wanted.hour) ? 2 : NSIntegerMax,
-        charon_given(wanted.day) || charon_given(wanted.weekday) || charon_given(wanted.weekdayOrdinal) ? 3 : NSIntegerMax,
-        charon_given(wanted.weekOfMonth) || charon_given(wanted.weekOfYear) ? 4 : NSIntegerMax,
-        charon_given(wanted.month) ? 5 : NSIntegerMax,
-        charon_given(wanted.year) || charon_given(wanted.yearForWeekOfYear) ? 6 : NSIntegerMax,
-        charon_given(wanted.era) ? 7 : NSIntegerMax };
+        revenant_given(wanted.second) ? 0 : NSIntegerMax, revenant_given(wanted.minute) ? 1 : NSIntegerMax,
+        revenant_given(wanted.hour) ? 2 : NSIntegerMax,
+        revenant_given(wanted.day) || revenant_given(wanted.weekday) || revenant_given(wanted.weekdayOrdinal) ? 3 : NSIntegerMax,
+        revenant_given(wanted.weekOfMonth) || revenant_given(wanted.weekOfYear) ? 4 : NSIntegerMax,
+        revenant_given(wanted.month) ? 5 : NSIntegerMax,
+        revenant_given(wanted.year) || revenant_given(wanted.yearForWeekOfYear) ? 6 : NSIntegerMax,
+        revenant_given(wanted.era) ? 7 : NSIntegerMax };
     NSInteger highest = -1;
     for (unsigned index = 0; index < sizeof(ranks) / sizeof(*ranks); index++)
         if (ranks[index] != NSIntegerMax)
             highest = MAX(highest, ranks[index]);
     if (highest < 0)
         return nil;
-    NSInteger hours[24], minutes[60], second = charon_given(wanted.second) ? wanted.second : 0;
+    NSInteger hours[24], minutes[60], second = revenant_given(wanted.second) ? wanted.second : 0;
     NSUInteger hourCount = 0, minuteCount = 0;
-    if (charon_given(wanted.hour))
+    if (revenant_given(wanted.hour))
         hours[hourCount++] = wanted.hour;
     else if (highest < 2)
         for (NSInteger hour = 0; hour < 24; hour++)
             hours[hourCount++] = hour;
     else
         hours[hourCount++] = 0;
-    if (charon_given(wanted.minute))
+    if (revenant_given(wanted.minute))
         minutes[minuteCount++] = wanted.minute;
     else if (highest < 1)
         for (NSInteger minute = 0; minute < 60; minute++)
@@ -88,7 +88,7 @@ NSDate *charon_next_date_matching(NSCalendar *calendar, NSDateComponents *wanted
 
     NSDateComponents *today = [calendar components:NSEraCalendarUnit | NSYearCalendarUnit | NSMonthCalendarUnit | NSDayCalendarUnit
                                           fromDate:after];
-    if (charon_given(wanted.year) && (!charon_given(wanted.era) || wanted.era == today.era)) {
+    if (revenant_given(wanted.year) && (!revenant_given(wanted.era) || wanted.era == today.era)) {
         if (wanted.year < today.year)
             return nil;
         if (wanted.year > today.year) {
@@ -103,20 +103,20 @@ NSDate *charon_next_date_matching(NSCalendar *calendar, NSDateComponents *wanted
     for (NSInteger offset = 0; offset < 366 * 9; offset++) {
         step.day = offset;
         NSDate *dayStart = [calendar dateByAddingComponents:step toDate:start options:0];
-        NSDateComponents *day = [calendar components:CharonDayUnits fromDate:dayStart];
-        if (!charon_day_matches(wanted, day, (NSInteger)calendar.firstWeekday, highest)) {
-            if (!charon_skips_missing_day(calendar, wanted, day, dayStart))
+        NSDateComponents *day = [calendar components:RevenantDayUnits fromDate:dayStart];
+        if (!revenant_day_matches(wanted, day, (NSInteger)calendar.firstWeekday, highest)) {
+            if (!revenant_skips_missing_day(calendar, wanted, day, dayStart))
                 continue;
             step.day = offset + 1;
-            NSDateComponents *next = [calendar components:CharonDayUnits fromDate:[calendar dateByAddingComponents:step toDate:start options:0]];
+            NSDateComponents *next = [calendar components:RevenantDayUnits fromDate:[calendar dateByAddingComponents:step toDate:start options:0]];
             NSDateComponents *moment = [[NSDateComponents alloc] init];
             moment.era = next.era;
             moment.year = next.year;
             moment.month = next.month;
             moment.day = next.day;
-            moment.hour = charon_given(wanted.hour) ? wanted.hour : clock.hour;
-            moment.minute = charon_given(wanted.minute) ? wanted.minute : clock.minute;
-            moment.second = charon_given(wanted.second) ? wanted.second : clock.second;
+            moment.hour = revenant_given(wanted.hour) ? wanted.hour : clock.hour;
+            moment.minute = revenant_given(wanted.minute) ? wanted.minute : clock.minute;
+            moment.second = revenant_given(wanted.second) ? wanted.second : clock.second;
             NSDate *candidate = [calendar dateFromComponents:moment];
             if (candidate && [candidate compare:after] == NSOrderedDescending)
                 return candidate;
@@ -155,7 +155,7 @@ NSDate *charon_next_date_matching(NSCalendar *calendar, NSDateComponents *wanted
     return YES;
 }
 
-- (instancetype)initCharonWithRepeats:(BOOL)repeats
+- (instancetype)initRevenantWithRepeats:(BOOL)repeats
 {
     if ((self = [super init]))
         _repeats = repeats;
@@ -164,7 +164,7 @@ NSDate *charon_next_date_matching(NSCalendar *calendar, NSDateComponents *wanted
 
 - (instancetype)initWithCoder:(NSCoder *)coder
 {
-    return [self initCharonWithRepeats:[coder decodeBoolForKey:@"repeats"]];
+    return [self initRevenantWithRepeats:[coder decodeBoolForKey:@"repeats"]];
 }
 
 - (void)encodeWithCoder:(NSCoder *)coder
@@ -203,14 +203,14 @@ NSDate *charon_next_date_matching(NSCalendar *calendar, NSDateComponents *wanted
 
 + (instancetype)triggerWithTimeInterval:(NSTimeInterval)timeInterval repeats:(BOOL)repeats
 {
-    return [[self alloc] initCharonWithTimeInterval:timeInterval repeats:repeats];
+    return [[self alloc] initRevenantWithTimeInterval:timeInterval repeats:repeats];
 }
 
-- (instancetype)initCharonWithTimeInterval:(NSTimeInterval)timeInterval repeats:(BOOL)repeats
+- (instancetype)initRevenantWithTimeInterval:(NSTimeInterval)timeInterval repeats:(BOOL)repeats
 {
     NSAssert(!repeats || timeInterval >= 60, @"time interval must be at least 60 if repeating");
     NSAssert(timeInterval > 0, @"time interval must be greater than 0");
-    if ((self = [super initCharonWithRepeats:repeats]))
+    if ((self = [super initRevenantWithRepeats:repeats]))
         _timeInterval = timeInterval;
     return self;
 }
@@ -278,12 +278,12 @@ NSDate *charon_next_date_matching(NSCalendar *calendar, NSDateComponents *wanted
 
 + (instancetype)triggerWithDateMatchingComponents:(NSDateComponents *)dateComponents repeats:(BOOL)repeats
 {
-    return [[self alloc] initCharonWithDateComponents:dateComponents repeats:repeats];
+    return [[self alloc] initRevenantWithDateComponents:dateComponents repeats:repeats];
 }
 
-- (instancetype)initCharonWithDateComponents:(NSDateComponents *)dateComponents repeats:(BOOL)repeats
+- (instancetype)initRevenantWithDateComponents:(NSDateComponents *)dateComponents repeats:(BOOL)repeats
 {
-    if ((self = [super initCharonWithRepeats:repeats]))
+    if ((self = [super initRevenantWithRepeats:repeats]))
         _dateComponents = [dateComponents copy];
     return self;
 }
@@ -317,8 +317,8 @@ NSDate *charon_next_date_matching(NSCalendar *calendar, NSDateComponents *wanted
     NSAssert(afterDate != nil, @"afterDate must not be nil");
     NSAssert(requestedDate != nil, @"requestedDate must not be nil");
     if (self.repeats)
-        return charon_next_date_matching(nil, _dateComponents, afterDate);
-    NSDate *once = charon_next_date_matching(nil, _dateComponents, requestedDate);
+        return revenant_next_date_matching(nil, _dateComponents, afterDate);
+    NSDate *once = revenant_next_date_matching(nil, _dateComponents, requestedDate);
     return [once compare:afterDate] == NSOrderedDescending ? once : nil;
 }
 

@@ -100,9 +100,9 @@ typedef NS_ENUM(NSInteger, UIInterfaceOrientation) {
 @property (nonatomic, strong, readonly) NSMapTable<SCNNode *, ARAnchor *> *anchorsByNode;
 @property (nonatomic, strong, readonly) NSMapTable<ARAnchor *, SCNNode *> *nodesByAnchor;
 
-- (void)charon_placeAnchor:(ARAnchor *)anchor atNode:(SCNNode *)node;
-- (void)charon_moveAnchor:(ARAnchor *)anchor toNode:(SCNNode *)node;
-- (void)charon_removeAnchor:(ARAnchor *)anchor;
+- (void)revenant_placeAnchor:(ARAnchor *)anchor atNode:(SCNNode *)node;
+- (void)revenant_moveAnchor:(ARAnchor *)anchor toNode:(SCNNode *)node;
+- (void)revenant_removeAnchor:(ARAnchor *)anchor;
 - (nullable ARAnchor *)anchorForNode:(SCNNode *)node;
 - (nullable SCNNode *)nodeForAnchor:(ARAnchor *)anchor;
 - (NSArray<ARHitTestResult *> *)hitTest:(CGPoint)point types:(ARHitTestResultType)types;
@@ -111,13 +111,13 @@ typedef NS_ENUM(NSInteger, UIInterfaceOrientation) {
                                           alignment:(ARRaycastTargetAlignment)alignment;
 @end
 
-@interface ARSCNView (Charon12)
+@interface ARSCNView (Revenant12)
 - (simd_float3)unprojectPoint:(CGPoint)point
          ontoPlaneWithTransform:(simd_float4x4)planeTransform;
 @end
 
-@interface SCNGeometry (CharonReplace)
-- (void)charon_replaceSources:(NSArray<SCNGeometrySource *> *)sources
+@interface SCNGeometry (RevenantReplace)
+- (void)revenant_replaceSources:(NSArray<SCNGeometrySource *> *)sources
                      elements:(NSArray<SCNGeometryElement *> *)elements;
 @end
 

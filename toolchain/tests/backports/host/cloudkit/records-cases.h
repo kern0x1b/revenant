@@ -67,7 +67,7 @@ typedef NS_ENUM(NSUInteger, CKReferenceAction) {
 - (void)setParentReferenceFromRecordID:(CKRecordID *)parentRecordID;
 @end
 
-static NSString *CharonProbeDescribe(id value)
+static NSString *RevenantProbeDescribe(id value)
 {
     if (!value) { return @"(nil)"; }
     if ([value isKindOfClass:[NSString class]]) { return [NSString stringWithFormat:@"\"%@\"", value]; }
@@ -85,14 +85,14 @@ static NSString *CharonProbeDescribe(id value)
     }
     if ([value isKindOfClass:[NSArray class]]) {
         NSMutableArray *parts = [NSMutableArray array];
-        for (id item in (NSArray *)value) { [parts addObject:CharonProbeDescribe(item)]; }
+        for (id item in (NSArray *)value) { [parts addObject:RevenantProbeDescribe(item)]; }
         return [NSString stringWithFormat:@"[%@]", [parts componentsJoinedByString:@", "]];
     }
     if ([value isKindOfClass:[NSURL class]]) { return [NSString stringWithFormat:@"<url %@>", [value absoluteString]]; }
     return [NSString stringWithFormat:@"<%@: %p>", [value class], value];
 }
 
-static void CharonProbeRoundTrip(Class cls, id object, NSMutableDictionary *out)
+static void RevenantProbeRoundTrip(Class cls, id object, NSMutableDictionary *out)
 {
     NSString *key = [NSString stringWithFormat:@"archive.%@", NSStringFromClass(cls)];
     NSError *error = nil;
@@ -109,7 +109,7 @@ static void CharonProbeRoundTrip(Class cls, id object, NSMutableDictionary *out)
     out[[key stringByAppendingString:@".bytes"]] = [NSString stringWithFormat:@"%lu", (unsigned long)data.length];
 }
 
-static id CharonProbeTry(NSMutableDictionary *out, NSString *key, id (^body)(void))
+static id RevenantProbeTry(NSMutableDictionary *out, NSString *key, id (^body)(void))
 {
     @try {
         return body();
@@ -119,7 +119,7 @@ static id CharonProbeTry(NSMutableDictionary *out, NSString *key, id (^body)(voi
     }
 }
 
-static void CharonProbeRefusals(NSMutableDictionary *out)
+static void RevenantProbeRefusals(NSMutableDictionary *out)
 {
     struct { NSString *name; id (^make)(void); } cases[] = {
         {@"CKRecordID.new", ^{ return [[NSClassFromString(@"CKRecordID") alloc] init]; }},
@@ -137,20 +137,20 @@ static void CharonProbeRefusals(NSMutableDictionary *out)
     for (NSUInteger at = 0; at < sizeof cases / sizeof cases[0]; at++) {
         @try {
             id made = cases[at].make();
-            out[cases[at].name] = [NSString stringWithFormat:@"made %@", CharonProbeDescribe(made)];
+            out[cases[at].name] = [NSString stringWithFormat:@"made %@", RevenantProbeDescribe(made)];
         } @catch (NSException *exception) {
             out[cases[at].name] = [NSString stringWithFormat:@"%@: %@", exception.name, exception.reason];
         }
     }
 }
 
-static void CharonRecordCases(NSMutableDictionary *out)
+static void RevenantRecordCases(NSMutableDictionary *out)
 {
     @autoreleasepool {
         CKRecordZoneID *zone = [[CKRecordZoneID alloc] initWithZoneName:@"widgets" ownerName:@"_defaultOwner"];
         out[@"zoneID.zoneName"] = zone.zoneName;
         out[@"zoneID.ownerName"] = zone.ownerName;
-        out[@"zoneID.describes"] = CharonProbeDescribe(zone);
+        out[@"zoneID.describes"] = RevenantProbeDescribe(zone);
 
         CKRecordZoneID *other = [[CKRecordZoneID alloc] initWithZoneName:@"widgets" ownerName:@"_defaultOwner"];
         out[@"zoneID.equal"] = [zone isEqual:other] ? @"equal" : @"different";
@@ -160,7 +160,7 @@ static void CharonRecordCases(NSMutableDictionary *out)
 
         CKRecordID *named = [[CKRecordID alloc] initWithRecordName:@"a-record"];
         out[@"recordID.recordName"] = named.recordName;
-        out[@"recordID.zoneID"] = CharonProbeDescribe(named.zoneID);
+        out[@"recordID.zoneID"] = RevenantProbeDescribe(named.zoneID);
         out[@"recordID.zoneID.zoneName"] = named.zoneID.zoneName;
         out[@"recordID.zoneID.ownerName"] = named.zoneID.ownerName;
 
@@ -180,7 +180,7 @@ static void CharonRecordCases(NSMutableDictionary *out)
         out[@"defaultRecordZone.capabilities"] = @(defaultZone.capabilities);
         out[@"defaultRecordZone.twice.equal"] =
             [[CKRecordZone defaultRecordZone] isEqual:defaultZone] ? @"equal" : @"different";
-        out[@"defaultRecordZone.id"] = CharonProbeDescribe(defaultZone.zoneID);
+        out[@"defaultRecordZone.id"] = RevenantProbeDescribe(defaultZone.zoneID);
 
         CKRecordZone *byName = [[CKRecordZone alloc] initWithZoneName:@"widgets"];
         out[@"zone.byName.zoneName"] = byName.zoneID.zoneName;
@@ -209,10 +209,10 @@ static void CharonRecordCases(NSMutableDictionary *out)
         out[@"reference.copy.equal"] = [[ref copy] isEqual:ref] ? @"equal" : @"different";
 
         NSURL *missing = [NSURL fileURLWithPath:@"/private/tmp/cloudkit-does-not-exist.bin"];
-        CKAsset *nilAsset = CharonProbeTry(out, @"asset.nilURL", ^{ return [[CKAsset alloc] initWithFileURL:nil]; });
-        out[@"asset.nilURL.fileURL"] = CharonProbeDescribe(nilAsset.fileURL);
+        CKAsset *nilAsset = RevenantProbeTry(out, @"asset.nilURL", ^{ return [[CKAsset alloc] initWithFileURL:nil]; });
+        out[@"asset.nilURL.fileURL"] = RevenantProbeDescribe(nilAsset.fileURL);
         CKAsset *missingAsset = [[CKAsset alloc] initWithFileURL:missing];
-        out[@"asset.missingURL.fileURL"] = CharonProbeDescribe(missingAsset.fileURL);
+        out[@"asset.missingURL.fileURL"] = RevenantProbeDescribe(missingAsset.fileURL);
         NSString *path = [NSTemporaryDirectory() stringByAppendingPathComponent:@"cloudkit-asset.bin"];
         [[NSData dataWithBytes:"asset-bytes" length:11] writeToFile:path atomically:YES];
         CKAsset *real = [[CKAsset alloc] initWithFileURL:[NSURL fileURLWithPath:path]];
@@ -220,9 +220,9 @@ static void CharonRecordCases(NSMutableDictionary *out)
         out[@"asset.realURL.name"] = [real.fileURL lastPathComponent];
         out[@"asset.realURL.exists"] = [[NSFileManager defaultManager] fileExistsAtPath:real.fileURL.path] ? @"yes" : @"no";
         out[@"asset.same.equal"] = [real isEqual:missingAsset] ? @"equal" : @"different";
-        CharonProbeTry(out, @"asset.copy", ^{
+        RevenantProbeTry(out, @"asset.copy", ^{
             id copied = [real copy];
-            return [NSString stringWithFormat:@"%@", CharonProbeDescribe(copied)];
+            return [NSString stringWithFormat:@"%@", RevenantProbeDescribe(copied)];
         });
 
         CKRecord *record = [[CKRecord alloc] initWithRecordType:@"Widget"];
@@ -230,17 +230,17 @@ static void CharonRecordCases(NSMutableDictionary *out)
         out[@"record.recordID.recordName"] = record.recordID.recordName;
         out[@"record.recordID.zoneName"] = record.recordID.zoneID.zoneName;
         out[@"record.recordID.ownerName"] = record.recordID.zoneID.ownerName;
-        out[@"record.recordChangeTag"] = CharonProbeDescribe(record.recordChangeTag);
-        out[@"record.creatorUserRecordID"] = CharonProbeDescribe(record.creatorUserRecordID);
-        out[@"record.creationDate"] = CharonProbeDescribe(record.creationDate);
-        out[@"record.lastModifiedUserRecordID"] = CharonProbeDescribe(record.lastModifiedUserRecordID);
-        out[@"record.modificationDate"] = CharonProbeDescribe(record.modificationDate);
-        out[@"record.share"] = CharonProbeDescribe(record.share);
-        out[@"record.parent"] = CharonProbeDescribe(record.parent);
+        out[@"record.recordChangeTag"] = RevenantProbeDescribe(record.recordChangeTag);
+        out[@"record.creatorUserRecordID"] = RevenantProbeDescribe(record.creatorUserRecordID);
+        out[@"record.creationDate"] = RevenantProbeDescribe(record.creationDate);
+        out[@"record.lastModifiedUserRecordID"] = RevenantProbeDescribe(record.lastModifiedUserRecordID);
+        out[@"record.modificationDate"] = RevenantProbeDescribe(record.modificationDate);
+        out[@"record.share"] = RevenantProbeDescribe(record.share);
+        out[@"record.parent"] = RevenantProbeDescribe(record.parent);
         out[@"record.allKeys.empty"] = [NSString stringWithFormat:@"%lu", (unsigned long)record.allKeys.count];
         out[@"record.changedKeys.empty"] = [NSString stringWithFormat:@"%lu", (unsigned long)record.changedKeys.count];
         out[@"record.allTokens.empty"] = [NSString stringWithFormat:@"%lu", (unsigned long)record.allTokens.count];
-        out[@"record.missingKey"] = CharonProbeDescribe([record objectForKey:@"nope"]);
+        out[@"record.missingKey"] = RevenantProbeDescribe([record objectForKey:@"nope"]);
 
         CKRecord *inZoneRecord = [[CKRecord alloc] initWithRecordType:@"Widget" recordID:inZone];
         out[@"record.givenID.recordName"] = inZoneRecord.recordID.recordName;
@@ -260,11 +260,11 @@ static void CharonRecordCases(NSMutableDictionary *out)
         [fields setObject:ref forKey:@"link"];
         out[@"fields.allKeys.count"] = [NSString stringWithFormat:@"%lu", (unsigned long)fields.allKeys.count];
         NSArray *keys = [fields.allKeys sortedArrayUsingSelector:@selector(compare:)];
-        out[@"fields.allKeys.sorted"] = CharonProbeDescribe(keys);
-        out[@"fields.name"] = CharonProbeDescribe([fields objectForKey:@"name"]);
-        out[@"fields.count"] = CharonProbeDescribe([fields objectForKey:@"count"]);
-        out[@"fields.when"] = CharonProbeDescribe([fields objectForKey:@"when"]);
-        out[@"fields.blob"] = CharonProbeDescribe([fields objectForKey:@"blob"]);
+        out[@"fields.allKeys.sorted"] = RevenantProbeDescribe(keys);
+        out[@"fields.name"] = RevenantProbeDescribe([fields objectForKey:@"name"]);
+        out[@"fields.count"] = RevenantProbeDescribe([fields objectForKey:@"count"]);
+        out[@"fields.when"] = RevenantProbeDescribe([fields objectForKey:@"when"]);
+        out[@"fields.blob"] = RevenantProbeDescribe([fields objectForKey:@"blob"]);
         out[@"fields.link.action"] = @([[fields objectForKey:@"link"] referenceAction]);
         out[@"fields.attachment"] = [fields objectForKey:@"attachment"] ? @"present" : @"(nil)";
         out[@"fields.name.class"] = NSStringFromClass([[fields objectForKey:@"name"] class]);
@@ -272,44 +272,44 @@ static void CharonRecordCases(NSMutableDictionary *out)
         out[@"fields.blob.class"] = NSStringFromClass([[fields objectForKey:@"blob"] class]);
 
         [fields setObject:@"another" forKey:@"name"];
-        out[@"fields.overwritten"] = CharonProbeDescribe([fields objectForKey:@"name"]);
+        out[@"fields.overwritten"] = RevenantProbeDescribe([fields objectForKey:@"name"]);
         out[@"fields.afterOverwrite.count"] = [NSString stringWithFormat:@"%lu", (unsigned long)fields.allKeys.count];
         [fields setObject:nil forKey:@"name"];
-        out[@"fields.removed"] = CharonProbeDescribe([fields objectForKey:@"name"]);
+        out[@"fields.removed"] = RevenantProbeDescribe([fields objectForKey:@"name"]);
         out[@"fields.afterRemoval.count"] = [NSString stringWithFormat:@"%lu", (unsigned long)fields.allKeys.count];
         out[@"fields.afterRemoval.sorted"] =
-            CharonProbeDescribe([fields.allKeys sortedArrayUsingSelector:@selector(compare:)]);
+            RevenantProbeDescribe([fields.allKeys sortedArrayUsingSelector:@selector(compare:)]);
 
         out[@"fields.changedKeys.afterRemoval"] =
-            CharonProbeDescribe([fields.changedKeys sortedArrayUsingSelector:@selector(compare:)]);
+            RevenantProbeDescribe([fields.changedKeys sortedArrayUsingSelector:@selector(compare:)]);
 
         CKRecord *sub = [[CKRecord alloc] initWithRecordType:@"Widget" recordID:inZone];
         sub[@"viaSubscript"] = @"set";
-        out[@"fields.subscriptRead"] = CharonProbeDescribe(sub[@"viaSubscript"]);
+        out[@"fields.subscriptRead"] = RevenantProbeDescribe(sub[@"viaSubscript"]);
         out[@"fields.subscriptMatches"] = [sub objectForKey:@"viaSubscript"] == sub[@"viaSubscript"] ? @"same" : @"different";
         sub[@"viaSubscript"] = nil;
-        out[@"fields.subscriptAfterNil"] = CharonProbeDescribe(sub[@"viaSubscript"]);
+        out[@"fields.subscriptAfterNil"] = RevenantProbeDescribe(sub[@"viaSubscript"]);
 
         for (NSString *bad in @[@"via-subscript", @"", @"with space", @"with.dot", @"1leading"]) {
             NSString *label = [NSString stringWithFormat:@"fields.badKey.%@", bad.length ? bad : @"empty"];
             CKRecord *probe = [[CKRecord alloc] initWithRecordType:@"Widget" recordID:inZone];
-            CharonProbeTry(out, label, ^{
+            RevenantProbeTry(out, label, ^{
                 [probe setObject:@"x" forKey:bad];
                 return [NSString stringWithFormat:@"accepted, allKeys=%lu", (unsigned long)probe.allKeys.count];
             });
         }
 
         out[@"fields.allTokens.count"] = [NSString stringWithFormat:@"%lu", (unsigned long)fields.allTokens.count];
-        out[@"fields.allTokens.sorted"] = CharonProbeDescribe([fields.allTokens sortedArrayUsingSelector:@selector(compare:)]);
+        out[@"fields.allTokens.sorted"] = RevenantProbeDescribe([fields.allTokens sortedArrayUsingSelector:@selector(compare:)]);
 
         CKRecord *copied = [fields copy];
         out[@"fields.copy.count"] = [NSString stringWithFormat:@"%lu", (unsigned long)copied.allKeys.count];
-        out[@"fields.copy.blob"] = CharonProbeDescribe([copied objectForKey:@"blob"]);
+        out[@"fields.copy.blob"] = RevenantProbeDescribe([copied objectForKey:@"blob"]);
         out[@"fields.copy.equal"] = [copied isEqual:fields] ? @"equal" : @"different";
 
         CKRecord *parented = [[CKRecord alloc] initWithRecordType:@"Widget" recordID:inZone];
         CKRecord *crossZone = [[CKRecord alloc] initWithRecordType:@"Widget" recordID:inZone];
-        CharonProbeTry(out, @"record.parent.crossZone", ^{
+        RevenantProbeTry(out, @"record.parent.crossZone", ^{
             [crossZone setParentReferenceFromRecordID:otherName];
             return [NSString stringWithFormat:@"taken, zone %@", crossZone.parent.recordID.zoneID.zoneName];
         });
@@ -318,32 +318,32 @@ static void CharonRecordCases(NSMutableDictionary *out)
         out[@"record.parent.action"] = @(crossZone.parent.referenceAction);
 
         CKRecord *sameZone = [[CKRecord alloc] initWithRecordType:@"Widget" recordID:inZone];
-        CharonProbeTry(out, @"record.parent.sameZone", ^{
+        RevenantProbeTry(out, @"record.parent.sameZone", ^{
             [sameZone setParentReferenceFromRecord:[[CKRecord alloc] initWithRecordType:@"P" recordID:sameElsewhere]];
             return [NSString stringWithFormat:@"taken, zone %@", sameZone.parent.recordID.zoneID.zoneName];
         });
         out[@"record.parent.fromRecord.name"] = sameZone.parent.recordID.recordName;
         out[@"record.parent.fromRecord.zoneName"] = sameZone.parent.recordID.zoneID.zoneName;
 
-        CharonProbeTry(out, @"record.parent.cleared", ^{
+        RevenantProbeTry(out, @"record.parent.cleared", ^{
             [sameZone setParentReferenceFromRecord:nil];
-            return CharonProbeDescribe(sameZone.parent);
+            return RevenantProbeDescribe(sameZone.parent);
         });
-        out[@"record.parent.cleared"] = CharonProbeDescribe(sameZone.parent);
+        out[@"record.parent.cleared"] = RevenantProbeDescribe(sameZone.parent);
 
         out[@"record.parent.isReadable"] = sameZone.parent ? @"yes" : @"no";
 
-        CharonProbeRefusals(out);
+        RevenantProbeRefusals(out);
         out[@"copy.zoneID"] = [[zone copy] isEqual:zone] ? @"equal" : @"different";
         out[@"copy.recordID"] = [[inZone copy] isEqual:inZone] ? @"equal" : @"different";
-        CharonProbeRoundTrip([CKRecordZoneID class], zone, out);
-        CharonProbeRoundTrip([CKRecordID class], inZone, out);
-        CharonProbeRoundTrip([CKRecordZone class], byID, out);
-        CharonProbeRoundTrip([CKReference class], ref, out);
-        CharonProbeRoundTrip([CKRecord class], fields, out);
+        RevenantProbeRoundTrip([CKRecordZoneID class], zone, out);
+        RevenantProbeRoundTrip([CKRecordID class], inZone, out);
+        RevenantProbeRoundTrip([CKRecordZone class], byID, out);
+        RevenantProbeRoundTrip([CKReference class], ref, out);
+        RevenantProbeRoundTrip([CKRecord class], fields, out);
 
-        out[@"token.conforms"] = CharonProbeDescribe([CKServerChangeToken class]);
-        out[@"token.new"] = CharonProbeDescribe(CharonProbeTry(out, @"token.newCall", ^{
+        out[@"token.conforms"] = RevenantProbeDescribe([CKServerChangeToken class]);
+        out[@"token.new"] = RevenantProbeDescribe(RevenantProbeTry(out, @"token.newCall", ^{
             return [[NSClassFromString(@"CKServerChangeToken") alloc] init];
         }));
         out[@"token.isSecureCoding"] =

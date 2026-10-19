@@ -540,29 +540,29 @@ static NSArray *builders(NSMutableArray *names)
     return list;
 }
 
-static NSArray *charon_builders;
-static NSArray *charon_names;
+static NSArray *revenant_builders;
+static NSArray *revenant_names;
 
 static void ensure(void)
 {
     static dispatch_once_t once;
     dispatch_once(&once, ^{
         NSMutableArray *names = [NSMutableArray array];
-        charon_builders = builders(names);
-        charon_names = names;
+        revenant_builders = builders(names);
+        revenant_names = names;
     });
 }
 
 NSUInteger compositional_case_count(void)
 {
     ensure();
-    return charon_builders.count;
+    return revenant_builders.count;
 }
 
 NSString *compositional_case_name(NSUInteger index)
 {
     ensure();
-    return charon_names[index];
+    return revenant_names[index];
 }
 
 static NSString *number(double value)
@@ -643,7 +643,7 @@ NSString *compositional_case_dump(CompositionalKit kit, NSUInteger index, UIWind
 {
     ensure();
     K = kit;
-    CompositionalBuilder builder = charon_builders[index];
+    CompositionalBuilder builder = revenant_builders[index];
     return compositional_dump(builder(), window);
 }
 
@@ -1081,7 +1081,7 @@ static NSArray *orthogonal_lines(UIWindow *window, BOOL system)
                         UIScrollView *scroller = scrollers[(NSUInteger)index];
                         [scroller setContentOffset:CGPointMake(scroller.frame.origin.x + rel, scroller.contentOffset.y) animated:NO];
                     } else {
-                        ((void (*)(id, SEL, NSInteger, CGFloat, BOOL))objc_msgSend)(layout, NSSelectorFromString(@"charon_scrollSection:toOffset:settle:"), index, rel, YES);
+                        ((void (*)(id, SEL, NSInteger, CGFloat, BOOL))objc_msgSend)(layout, NSSelectorFromString(@"revenant_scrollSection:toOffset:settle:"), index, rel, YES);
                     }
                     [view layoutIfNeeded];
                     [view layoutIfNeeded];
@@ -1135,7 +1135,7 @@ static NSArray *modified_lines(UIWindow *window, BOOL system)
         if (scroller)
             [scroller setContentOffset:CGPointMake(scroller.frame.origin.x + step.doubleValue, scroller.contentOffset.y) animated:NO];
         else
-            ((void (*)(id, SEL, NSInteger, CGFloat, BOOL))objc_msgSend)(layout, NSSelectorFromString(@"charon_scrollSection:toOffset:settle:"), 0, step.doubleValue, YES);
+            ((void (*)(id, SEL, NSInteger, CGFloat, BOOL))objc_msgSend)(layout, NSSelectorFromString(@"revenant_scrollSection:toOffset:settle:"), 0, step.doubleValue, YES);
         [view layoutIfNeeded];
         [view layoutIfNeeded];
         NSMutableArray *cellLines = [NSMutableArray array];

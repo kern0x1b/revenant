@@ -1,5 +1,5 @@
-#import "CharonSCN.h"
-#import "CharonSCNMath.h"
+#import "RevenantSCN.h"
+#import "RevenantSCNMath.h"
 
 @implementation SCNNode
 {
@@ -16,7 +16,7 @@
     BOOL _hasMatrix;
     SCNNode *_presentation;
     BOOL _isPresentation;
-    CharonSCNAnimations *_animations;
+    RevenantSCNAnimations *_animations;
 }
 
 - (instancetype)init
@@ -79,24 +79,24 @@
 
 - (SCNVector4)rotation
 {
-    return CharonSCNAxisAngleFromQuaternion(_orientation);
+    return RevenantSCNAxisAngleFromQuaternion(_orientation);
 }
 
 - (void)setRotation:(SCNVector4)rotation
 {
-    _orientation = CharonSCNQuaternionFromAxisAngle(rotation);
+    _orientation = RevenantSCNQuaternionFromAxisAngle(rotation);
     _hasEulerAngles = NO;
     _hasMatrix = NO;
 }
 
 - (SCNVector3)eulerAngles
 {
-    return _hasEulerAngles ? _eulerAngles : CharonSCNEulerFromQuaternion(_orientation);
+    return _hasEulerAngles ? _eulerAngles : RevenantSCNEulerFromQuaternion(_orientation);
 }
 
 - (void)setEulerAngles:(SCNVector3)eulerAngles
 {
-    _orientation = CharonSCNQuaternionFromEuler(eulerAngles);
+    _orientation = RevenantSCNQuaternionFromEuler(eulerAngles);
     _eulerAngles = eulerAngles;
     _hasEulerAngles = YES;
     _hasMatrix = NO;
@@ -104,12 +104,12 @@
 
 - (SCNMatrix4)transform
 {
-    return _hasMatrix ? _matrix : CharonSCNMatrixCompose(_position, _orientation, _scale);
+    return _hasMatrix ? _matrix : RevenantSCNMatrixCompose(_position, _orientation, _scale);
 }
 
 - (void)setTransform:(SCNMatrix4)transform
 {
-    CharonSCNMatrixDecompose(transform, &_position, &_orientation, &_scale);
+    RevenantSCNMatrixDecompose(transform, &_position, &_orientation, &_scale);
     _hasEulerAngles = NO;
     _matrix = transform;
     _hasMatrix = YES;
@@ -119,12 +119,12 @@
 {
     SCNMatrix4 local = self.transform;
     SCNNode *parent = _parentNode;
-    return parent ? CharonSCNMatrixMultiply(local, parent.worldTransform) : local;
+    return parent ? RevenantSCNMatrixMultiply(local, parent.worldTransform) : local;
 }
 
 #pragma mark SCNAnimatable
 
-- (CharonSCNAnimations *)charonAnimations
+- (RevenantSCNAnimations *)revenantAnimations
 {
     return _animations;
 }
@@ -132,7 +132,7 @@
 - (void)addAnimation:(id<SCNAnimation>)animation forKey:(NSString *)key
 {
     if (_animations == nil) {
-        _animations = [CharonSCNAnimations new];
+        _animations = [RevenantSCNAnimations new];
     }
     [_animations addAnimation:animation forKey:key];
 }
@@ -172,7 +172,7 @@
     return [_animations isAnimationForKeyPaused:key];
 }
 
-- (NSValue *)charonModelValueForKeyPath:(NSString *)keyPath
+- (NSValue *)revenantModelValueForKeyPath:(NSString *)keyPath
 {
     if ([keyPath isEqualToString:@"eulerAngles"]) return [NSValue valueWithSCNVector3:self.eulerAngles];
     if ([keyPath isEqualToString:@"scale"]) return [NSValue valueWithSCNVector3:_scale];
@@ -181,28 +181,28 @@
     return nil;
 }
 
-- (SCNMatrix4)charonPresentedTransform
+- (SCNMatrix4)revenantPresentedTransform
 {
     NSDictionary<NSString *, NSValue *> *presented = [_animations presented];
     if (presented.count == 0) {
         return self.transform;
     }
     NSValue *position = presented[@"position"], *scale = presented[@"scale"], *euler = presented[@"eulerAngles"];
-    SCNQuaternion orientation = euler ? CharonSCNQuaternionFromEuler([euler SCNVector3Value]) : _orientation;
-    return CharonSCNMatrixCompose(position ? [position SCNVector3Value] : _position, orientation, scale ? [scale SCNVector3Value] : _scale);
+    SCNQuaternion orientation = euler ? RevenantSCNQuaternionFromEuler([euler SCNVector3Value]) : _orientation;
+    return RevenantSCNMatrixCompose(position ? [position SCNVector3Value] : _position, orientation, scale ? [scale SCNVector3Value] : _scale);
 }
 
-- (CGFloat)charonPresentedOpacity
+- (CGFloat)revenantPresentedOpacity
 {
     NSNumber *opacity = (NSNumber *)[_animations presented][@"opacity"];
     return opacity ? [opacity doubleValue] : _opacity;
 }
 
-- (SCNMatrix4)charonPresentedWorldTransform
+- (SCNMatrix4)revenantPresentedWorldTransform
 {
-    SCNMatrix4 local = [self charonPresentedTransform];
+    SCNMatrix4 local = [self revenantPresentedTransform];
     SCNNode *parent = _parentNode;
-    return parent ? CharonSCNMatrixMultiply(local, [parent charonPresentedWorldTransform]) : local;
+    return parent ? RevenantSCNMatrixMultiply(local, [parent revenantPresentedWorldTransform]) : local;
 }
 
 - (SCNNode *)presentationNode
@@ -366,24 +366,24 @@
         _camera = [coder decodeObjectOfClass:[SCNCamera class] forKey:@"camera"];
         _geometry = [coder decodeObjectOfClass:[SCNGeometry class] forKey:@"geometry"];
         _physicsField = [coder decodeObjectOfClass:[SCNPhysicsField class] forKey:@"physicsField"];
-        _position = [coder containsValueForKey:@"position"] ? [CharonSCNCoding decodeVector3:coder forKey:@"position"] : SCNVector3Make(0, 0, 0);
+        _position = [coder containsValueForKey:@"position"] ? [RevenantSCNCoding decodeVector3:coder forKey:@"position"] : SCNVector3Make(0, 0, 0);
         if ([coder containsValueForKey:@"orientation"]) {
-            _orientation = [CharonSCNCoding decodeVector4:coder forKey:@"orientation"];
+            _orientation = [RevenantSCNCoding decodeVector4:coder forKey:@"orientation"];
         } else if ([coder containsValueForKey:@"rotation"]) {
-            _orientation = CharonSCNQuaternionFromAxisAngle([CharonSCNCoding decodeVector4:coder forKey:@"rotation"]);
+            _orientation = RevenantSCNQuaternionFromAxisAngle([RevenantSCNCoding decodeVector4:coder forKey:@"rotation"]);
         }
-        _scale = [coder containsValueForKey:@"scale"] ? [CharonSCNCoding decodeVector3:coder forKey:@"scale"] : SCNVector3Make(1, 1, 1);
-        _hidden = [CharonSCNCoding decodeBool:coder forKey:@"hidden" default:NO];
+        _scale = [coder containsValueForKey:@"scale"] ? [RevenantSCNCoding decodeVector3:coder forKey:@"scale"] : SCNVector3Make(1, 1, 1);
+        _hidden = [RevenantSCNCoding decodeBool:coder forKey:@"hidden" default:NO];
         _opacity = [coder containsValueForKey:@"opacity"] ? [coder decodeDoubleForKey:@"opacity"] : 1;
         _renderingOrder = [coder decodeIntegerForKey:@"renderingOrder"];
-        _castsShadow = [CharonSCNCoding decodeBool:coder forKey:@"castsShadow" default:YES];
+        _castsShadow = [RevenantSCNCoding decodeBool:coder forKey:@"castsShadow" default:YES];
         _categoryBitMask = [coder containsValueForKey:@"categoryBitMask"] ? [coder decodeIntegerForKey:@"categoryBitMask"] : 1;
         _movabilityHint = [coder decodeIntegerForKey:@"movabilityHint"];
 
-        [_particleSystems addObjectsFromArray:[CharonSCNCoding decodeArrayOfClass:[SCNParticleSystem class] coder:coder forKey:@"particleSystem"]];
-        [_particleSystems addObjectsFromArray:[CharonSCNCoding decodeArrayOfClass:[SCNParticleSystem class] coder:coder forKey:@"particleSystems"]];
+        [_particleSystems addObjectsFromArray:[RevenantSCNCoding decodeArrayOfClass:[SCNParticleSystem class] coder:coder forKey:@"particleSystem"]];
+        [_particleSystems addObjectsFromArray:[RevenantSCNCoding decodeArrayOfClass:[SCNParticleSystem class] coder:coder forKey:@"particleSystems"]];
 
-        NSArray<SCNNode *> *children = [CharonSCNCoding decodeArrayOfClass:[SCNNode class] coder:coder forKey:@"childNodes"];
+        NSArray<SCNNode *> *children = [RevenantSCNCoding decodeArrayOfClass:[SCNNode class] coder:coder forKey:@"childNodes"];
         for (SCNNode *child in children) {
             [self addChildNode:child];
         }
@@ -398,10 +398,10 @@
     [coder encodeObject:_camera forKey:@"camera"];
     [coder encodeObject:_geometry forKey:@"geometry"];
     [coder encodeObject:_physicsField forKey:@"physicsField"];
-    [CharonSCNCoding encodeVector3:_position coder:coder forKey:@"position"];
-    [CharonSCNCoding encodeVector4:self.rotation coder:coder forKey:@"rotation"];
-    [CharonSCNCoding encodeVector4:_orientation coder:coder forKey:@"orientation"];
-    [CharonSCNCoding encodeVector3:_scale coder:coder forKey:@"scale"];
+    [RevenantSCNCoding encodeVector3:_position coder:coder forKey:@"position"];
+    [RevenantSCNCoding encodeVector4:self.rotation coder:coder forKey:@"rotation"];
+    [RevenantSCNCoding encodeVector4:_orientation coder:coder forKey:@"orientation"];
+    [RevenantSCNCoding encodeVector3:_scale coder:coder forKey:@"scale"];
     [coder encodeBool:_hidden forKey:@"hidden"];
     [coder encodeDouble:_opacity forKey:@"opacity"];
     [coder encodeInteger:_renderingOrder forKey:@"renderingOrder"];
@@ -439,7 +439,7 @@
     for (SCNParticleSystem *system in _particleSystems) {
         [copy->_particleSystems addObject:system];
     }
-    copy->_animations = [_animations charonCopy];
+    copy->_animations = [_animations revenantCopy];
     return copy;
 }
 

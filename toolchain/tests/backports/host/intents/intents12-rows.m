@@ -208,15 +208,15 @@ int main(int argc, char **argv)
     if (!strcmp(section, "classes")) {
         printf("intents12 classes INShortcut=%d INVoiceShortcut=%d INVoiceShortcutCenter=%d "
                "INRelevantShortcutStore=%d INUpcomingMediaManager=%d INObject=%d "
-               "INCharonNoSuchClassForThisHarness=%d\n",
+               "INRevenantNoSuchClassForThisHarness=%d\n",
                named("INShortcut") != NULL, named("INVoiceShortcut") != NULL,
                named("INVoiceShortcutCenter") != NULL, named("INRelevantShortcutStore") != NULL,
                named("INUpcomingMediaManager") != NULL, named("INObject") != NULL,
-               named("INCharonNoSuchClassForThisHarness") != NULL);
+               named("INRevenantNoSuchClassForThisHarness") != NULL);
         return 0;
     }
     if (!strcmp(section, "absent-control")) {
-        measureFactory("+[INCharonNoSuchClassForThisHarness sharedCenter]", "INCharonNoSuchClassForThisHarness",
+        measureFactory("+[INRevenantNoSuchClassForThisHarness sharedCenter]", "INRevenantNoSuchClassForThisHarness",
                        NSSelectorFromString(@"sharedCenter"), NO);
         return 0;
     }

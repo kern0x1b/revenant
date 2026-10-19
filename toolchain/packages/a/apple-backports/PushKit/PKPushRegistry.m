@@ -2,18 +2,18 @@
 #import <UIKit/UIKit.h>
 #import <objc/runtime.h>
 
-@interface PKPushCredentials (CharonPushKit)
-- (instancetype)initWithCharonType:(PKPushType)type token:(NSData *)token;
+@interface PKPushCredentials (RevenantPushKit)
+- (instancetype)initWithRevenantType:(PKPushType)type token:(NSData *)token;
 @end
 
-static NSString *const CharonPushTokenDefaultsKeyPrefix = @"org.charon.apple-backports.PKPushToken.";
-static NSString *const CharonRegisteredTypesKey = @"org.charon.apple-backports.UIUserNotificationTypes";
+static NSString *const RevenantPushTokenDefaultsKeyPrefix = @"org.revenant.apple-backports.PKPushToken.";
+static NSString *const RevenantRegisteredTypesKey = @"org.revenant.apple-backports.UIUserNotificationTypes";
 
-@interface PKPushRegistry (CharonPushKit)
-- (void)charon_deliverToken:(NSData *)token forType:(PKPushType)type;
+@interface PKPushRegistry (RevenantPushKit)
+- (void)revenant_deliverToken:(NSData *)token forType:(PKPushType)type;
 @end
 
-static NSHashTable<PKPushRegistry *> *CharonActivePushRegistries(void)
+static NSHashTable<PKPushRegistry *> *RevenantActivePushRegistries(void)
 {
     static NSHashTable<PKPushRegistry *> *table;
     static dispatch_once_t once;
@@ -23,25 +23,25 @@ static NSHashTable<PKPushRegistry *> *CharonActivePushRegistries(void)
     return table;
 }
 
-static void CharonPushDeliverToken(NSData *token, PKPushType type)
+static void RevenantPushDeliverToken(NSData *token, PKPushType type)
 {
     if (!token || !type)
         return;
-    [[NSUserDefaults standardUserDefaults] setObject:token forKey:[CharonPushTokenDefaultsKeyPrefix stringByAppendingString:type]];
+    [[NSUserDefaults standardUserDefaults] setObject:token forKey:[RevenantPushTokenDefaultsKeyPrefix stringByAppendingString:type]];
     [[NSUserDefaults standardUserDefaults] synchronize];
-    NSHashTable *registries = CharonActivePushRegistries();
+    NSHashTable *registries = RevenantActivePushRegistries();
     NSArray<PKPushRegistry *> *snapshot;
     @synchronized (registries) {
         snapshot = registries.allObjects;
     }
     for (PKPushRegistry *registry in snapshot)
-        [registry charon_deliverToken:token forType:type];
+        [registry revenant_deliverToken:token forType:type];
 }
 
-@interface CharonPushBridge : NSObject
+@interface RevenantPushBridge : NSObject
 @end
 
-@implementation CharonPushBridge
+@implementation RevenantPushBridge
 
 + (void)load
 {
@@ -83,7 +83,7 @@ static void CharonPushDeliverToken(NSData *token, PKPushType type)
     class_replaceMethod(delegateClass, selector, imp_implementationWithBlock(^(id self_, UIApplication *application, NSData *token) {
         if (original)
             original(self_, selector, application, token);
-        CharonPushDeliverToken(token, PKPushTypeVoIP);
+        RevenantPushDeliverToken(token, PKPushTypeVoIP);
     }), encoding);
 }
 
@@ -103,8 +103,8 @@ static void CharonPushDeliverToken(NSData *token, PKPushType type)
 
 @interface PKPushRegistry ()
 {
-    dispatch_queue_t _charonQueue;
-    NSMutableDictionary<PKPushType, NSData *> *_charonTokens;
+    dispatch_queue_t _revenantQueue;
+    NSMutableDictionary<PKPushType, NSData *> *_revenantTokens;
 }
 @end
 
@@ -121,9 +121,9 @@ static void CharonPushDeliverToken(NSData *token, PKPushType type)
 - (instancetype)initWithQueue:(dispatch_queue_t)queue
 {
     if ((self = [super init])) {
-        _charonQueue = queue ?: dispatch_get_main_queue();
-        _charonTokens = [NSMutableDictionary dictionary];
-        NSHashTable *registries = CharonActivePushRegistries();
+        _revenantQueue = queue ?: dispatch_get_main_queue();
+        _revenantTokens = [NSMutableDictionary dictionary];
+        NSHashTable *registries = RevenantActivePushRegistries();
         @synchronized (registries) {
             [registries addObject:self];
         }
@@ -133,7 +133,7 @@ static void CharonPushDeliverToken(NSData *token, PKPushType type)
 
 - (void)dealloc
 {
-    NSHashTable *registries = CharonActivePushRegistries();
+    NSHashTable *registries = RevenantActivePushRegistries();
     @synchronized (registries) {
         [registries removeObject:self];
     }
@@ -149,33 +149,33 @@ static void CharonPushDeliverToken(NSData *token, PKPushType type)
     _desiredPushTypes = [desiredPushTypes copy];
     if (![desiredPushTypes containsObject:PKPushTypeVoIP])
         return;
-    NSData *cached = [[NSUserDefaults standardUserDefaults] objectForKey:[CharonPushTokenDefaultsKeyPrefix stringByAppendingString:PKPushTypeVoIP]];
+    NSData *cached = [[NSUserDefaults standardUserDefaults] objectForKey:[RevenantPushTokenDefaultsKeyPrefix stringByAppendingString:PKPushTypeVoIP]];
     if ([cached isKindOfClass:[NSData class]])
-        [self charon_deliverToken:cached forType:PKPushTypeVoIP];
-    NSUInteger types = [[[NSUserDefaults standardUserDefaults] objectForKey:CharonRegisteredTypesKey] unsignedIntegerValue];
+        [self revenant_deliverToken:cached forType:PKPushTypeVoIP];
+    NSUInteger types = [[[NSUserDefaults standardUserDefaults] objectForKey:RevenantRegisteredTypesKey] unsignedIntegerValue];
     if (types != 0)
         [[UIApplication sharedApplication] registerForRemoteNotificationTypes:(UIRemoteNotificationType)types];
 }
 
 - (NSData *)pushTokenForType:(PKPushType)type
 {
-    @synchronized (_charonTokens) {
-        return _charonTokens[type];
+    @synchronized (_revenantTokens) {
+        return _revenantTokens[type];
     }
 }
 
-- (void)charon_deliverToken:(NSData *)token forType:(PKPushType)type
+- (void)revenant_deliverToken:(NSData *)token forType:(PKPushType)type
 {
     if (![self.desiredPushTypes containsObject:type])
         return;
-    @synchronized (_charonTokens) {
-        if ([_charonTokens[type] isEqualToData:token])
+    @synchronized (_revenantTokens) {
+        if ([_revenantTokens[type] isEqualToData:token])
             return;
-        _charonTokens[type] = token;
+        _revenantTokens[type] = token;
     }
-    PKPushCredentials *credentials = [[PKPushCredentials alloc] initWithCharonType:type token:token];
+    PKPushCredentials *credentials = [[PKPushCredentials alloc] initWithRevenantType:type token:token];
     id<PKPushRegistryDelegate> delegate = self.delegate;
-    dispatch_async(_charonQueue, ^{
+    dispatch_async(_revenantQueue, ^{
         if ([delegate respondsToSelector:@selector(pushRegistry:didUpdatePushCredentials:forType:)])
             [delegate pushRegistry:self didUpdatePushCredentials:credentials forType:type];
     });

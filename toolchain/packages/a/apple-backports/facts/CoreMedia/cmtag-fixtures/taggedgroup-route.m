@@ -3,11 +3,11 @@
 #import <CoreFoundation/CoreFoundation.h>
 #include <stdio.h>
 
-#import "CharonCMTaggedBufferGroup26.h"
+#import "RevenantCMTaggedBufferGroup26.h"
 
 int main(void)
 {
-    const void *keys[] = { CFSTR("charon.entries") };
+    const void *keys[] = { CFSTR("revenant.entries") };
     CFMutableArrayRef entries = CFArrayCreateMutable(NULL, 0, &kCFTypeArrayCallBacks);
     const void *vals[] = { entries };
     CFDictionaryRef payload = CFDictionaryCreate(NULL, keys, vals, 1, &kCFTypeDictionaryKeyCallBacks,
@@ -30,11 +30,11 @@ int main(void)
         sbuf ? (int)CMSampleBufferDataIsReady(sbuf) : -1);
     if (sbuf) {
         CMTaggedBufferGroupRef group = NULL;
-        CMSetAttachment(sbuf, CFSTR("charon.group"), group, kCMAttachmentMode_ShouldNotPropagate);
-        CMTaggedBufferGroupRef back = (CMTaggedBufferGroupRef)CMGetAttachment(sbuf, CFSTR("charon.group"), NULL);
+        CMSetAttachment(sbuf, CFSTR("revenant.group"), group, kCMAttachmentMode_ShouldNotPropagate);
+        CMTaggedBufferGroupRef back = (CMTaggedBufferGroupRef)CMGetAttachment(sbuf, CFSTR("revenant.group"), NULL);
         printf("attachment round trip %s\n", back == group ? "same" : "differs");
         printf("a buffer with no attachment: %s\n",
-            CMGetAttachment(sbuf, CFSTR("charon.absent"), NULL) ? "non-null" : "NULL");
+            CMGetAttachment(sbuf, CFSTR("revenant.absent"), NULL) ? "non-null" : "NULL");
     }
     return 0;
 }

@@ -52,29 +52,29 @@
 
 #pragma mark - the document
 
-typedef NS_ENUM(NSInteger, CharonMarkdownKind) {
-    CharonMarkdownParagraph,
-    CharonMarkdownHeader,
-    CharonMarkdownCodeBlock,
-    CharonMarkdownThematicBreak,
-    CharonMarkdownBlockQuote,
-    CharonMarkdownList,
-    CharonMarkdownTable,
+typedef NS_ENUM(NSInteger, RevenantMarkdownKind) {
+    RevenantMarkdownParagraph,
+    RevenantMarkdownHeader,
+    RevenantMarkdownCodeBlock,
+    RevenantMarkdownThematicBreak,
+    RevenantMarkdownBlockQuote,
+    RevenantMarkdownList,
+    RevenantMarkdownTable,
 };
 
 typedef struct {
     NSUInteger start;
     NSUInteger end;
     NSUInteger indent;
-    CharonMarkdownKind kind;
+    RevenantMarkdownKind kind;
     NSInteger level;
     BOOL ordered;
     NSString *language;
     NSPresentationIntent *intent;
     NSMutableArray *children;
-} CharonMarkdownBlock;
+} RevenantMarkdownBlock;
 
-static BOOL CharonMarkdownBlank(NSString *line)
+static BOOL RevenantMarkdownBlank(NSString *line)
 {
     for (NSUInteger i = 0; i < line.length; i++)
         if (![[NSCharacterSet whitespaceAndNewlineCharacterSet] characterIsMember:[line characterAtIndex:i]])
@@ -82,7 +82,7 @@ static BOOL CharonMarkdownBlank(NSString *line)
     return YES;
 }
 
-static NSUInteger CharonMarkdownIndent(NSString *line)
+static NSUInteger RevenantMarkdownIndent(NSString *line)
 {
     NSUInteger columns = 0, limit = line.length;
     for (NSUInteger i = 0; i < limit; i++) {
@@ -97,12 +97,12 @@ static NSUInteger CharonMarkdownIndent(NSString *line)
     return columns;
 }
 
-static NSString *CharonMarkdownTrimmed(NSString *line)
+static NSString *RevenantMarkdownTrimmed(NSString *line)
 {
     return [line stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
 }
 
-static BOOL CharonMarkdownThematic(NSString *trimmed)
+static BOOL RevenantMarkdownThematic(NSString *trimmed)
 {
     if (trimmed.length < 3)
         return NO;
@@ -117,7 +117,7 @@ static BOOL CharonMarkdownThematic(NSString *trimmed)
     return YES;
 }
 
-static BOOL CharonMarkdownFence(NSString *trimmed, unichar *fence, NSUInteger *count, NSString **info)
+static BOOL RevenantMarkdownFence(NSString *trimmed, unichar *fence, NSUInteger *count, NSString **info)
 {
     NSUInteger length = trimmed.length, run = 0;
     unichar first = length ? [trimmed characterAtIndex:0] : 0;
@@ -136,7 +136,7 @@ static BOOL CharonMarkdownFence(NSString *trimmed, unichar *fence, NSUInteger *c
     return YES;
 }
 
-static NSInteger CharonMarkdownHeading(NSString *trimmed, NSString **text)
+static NSInteger RevenantMarkdownHeading(NSString *trimmed, NSString **text)
 {
     NSUInteger level = 0, length = trimmed.length, start;
     while (level < length && level < 6 && [trimmed characterAtIndex:level] == '#')
@@ -157,7 +157,7 @@ static NSInteger CharonMarkdownHeading(NSString *trimmed, NSString **text)
     return (NSInteger)level;
 }
 
-static BOOL CharonMarkdownBullet(NSString *trimmed, BOOL *ordered, NSUInteger *width)
+static BOOL RevenantMarkdownBullet(NSString *trimmed, BOOL *ordered, NSUInteger *width)
 {
     unichar first = trimmed.length ? [trimmed characterAtIndex:0] : 0;
     if ((first == '-' || first == '*' || first == '+') && trimmed.length > 1
@@ -178,7 +178,7 @@ static BOOL CharonMarkdownBullet(NSString *trimmed, BOOL *ordered, NSUInteger *w
     return NO;
 }
 
-static BOOL CharonMarkdownDivider(NSString *trimmed)
+static BOOL RevenantMarkdownDivider(NSString *trimmed)
 {
     if (trimmed.length < 1 || [trimmed characterAtIndex:0] != '|')
         return NO;
@@ -193,7 +193,7 @@ static BOOL CharonMarkdownDivider(NSString *trimmed)
     return pipes >= 2;
 }
 
-static NSArray *CharonMarkdownCells(NSString *line, NSArray **alignments)
+static NSArray *RevenantMarkdownCells(NSString *line, NSArray **alignments)
 {
     NSString *trimmed = [line stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
     NSMutableArray *cells = [NSMutableArray array];
@@ -211,7 +211,7 @@ static NSArray *CharonMarkdownCells(NSString *line, NSArray **alignments)
             continue;
         }
         if (c == '|') {
-            NSString *finished = CharonMarkdownTrimmed(cell);
+            NSString *finished = RevenantMarkdownTrimmed(cell);
             [cells addObject:finished];
             [cell setString:@""];
             continue;
@@ -219,7 +219,7 @@ static NSArray *CharonMarkdownCells(NSString *line, NSArray **alignments)
         [cell appendFormat:@"%C", c];
     }
     {
-        NSString *last = CharonMarkdownTrimmed(cell);
+        NSString *last = RevenantMarkdownTrimmed(cell);
         [cells addObject:last];
     }
     if (alignments) {
@@ -234,7 +234,7 @@ static NSArray *CharonMarkdownCells(NSString *line, NSArray **alignments)
 
 #pragma mark - the parser
 
-@interface CharonMarkdownParser : NSObject {
+@interface RevenantMarkdownParser : NSObject {
     NSAttributedStringMarkdownParsingOptions *_options;
     NSURL *_baseURL;
     NSInteger _identity;
@@ -245,7 +245,7 @@ static NSArray *CharonMarkdownCells(NSString *line, NSArray **alignments)
 - (NSAttributedString *)parse:(NSString *)markdown;
 @end
 
-@implementation CharonMarkdownParser
+@implementation RevenantMarkdownParser
 
 - (id)initWithOptions:(NSAttributedStringMarkdownParsingOptions *)options baseURL:(NSURL *)baseURL
 {
@@ -289,7 +289,7 @@ static NSArray *CharonMarkdownCells(NSString *line, NSArray **alignments)
 
 #pragma mark the span spans
 
-static NSString *const CharonMarkdownLinkKey = @"NSLink";
+static NSString *const RevenantMarkdownLinkKey = @"NSLink";
 
 - (NSURL *)urlFor:(NSString *)text
 {
@@ -306,7 +306,7 @@ static NSString *const CharonMarkdownLinkKey = @"NSLink";
     NSRange quote = [trimmed rangeOfString:@" \""];
     if (quote.location != NSNotFound)
         trimmed = [trimmed substringToIndex:quote.location];
-    return CharonMarkdownTrimmed(trimmed);
+    return RevenantMarkdownTrimmed(trimmed);
 }
 
 - (void)appendInline:(NSString *)text
@@ -325,7 +325,7 @@ static NSString *const CharonMarkdownLinkKey = @"NSLink";
                                                                                              extra:extra]]];
 }
 
-static NSUInteger CharonMarkdownBracketEnd(NSString *text, NSUInteger start, unichar open, unichar close, NSUInteger limit)
+static NSUInteger RevenantMarkdownBracketEnd(NSString *text, NSUInteger start, unichar open, unichar close, NSUInteger limit)
 {
     NSUInteger depth = 0, index = start;
     while (index < limit) {
@@ -343,7 +343,7 @@ static NSUInteger CharonMarkdownBracketEnd(NSString *text, NSUInteger start, uni
     return NSNotFound;
 }
 
-static NSUInteger CharonMarkdownMarkerEnd(NSString *text, NSUInteger start, unichar mark, NSUInteger runLength, NSUInteger limit)
+static NSUInteger RevenantMarkdownMarkerEnd(NSString *text, NSUInteger start, unichar mark, NSUInteger runLength, NSUInteger limit)
 {
     NSUInteger index = start;
     while (index < limit) {
@@ -366,7 +366,7 @@ static NSUInteger CharonMarkdownMarkerEnd(NSString *text, NSUInteger start, unic
     return NSNotFound;
 }
 
-static BOOL CharonMarkdownParenEnd(NSString *text, NSUInteger body, NSUInteger limit, NSUInteger *at)
+static BOOL RevenantMarkdownParenEnd(NSString *text, NSUInteger body, NSUInteger limit, NSUInteger *at)
 {
     NSUInteger depth = 1, index = body;
     while (index < limit) {
@@ -406,7 +406,7 @@ static BOOL CharonMarkdownParenEnd(NSString *text, NSUInteger body, NSUInteger l
     value = c == '~' ? NSInlinePresentationIntentStrikethrough
           : runLength == 2 ? NSInlinePresentationIntentStronglyEmphasized
                            : NSInlinePresentationIntentEmphasized;
-    close = CharonMarkdownMarkerEnd(text, *index + runLength, c, runLength, limit);
+    close = RevenantMarkdownMarkerEnd(text, *index + runLength, c, runLength, limit);
     if (close == NSNotFound || close == *index + runLength)
         return NO;
     inner = *index + runLength;
@@ -504,9 +504,9 @@ static BOOL CharonMarkdownParenEnd(NSString *text, NSUInteger body, NSUInteger l
                 continue;
         }
         if (c == '!' && index + 1 < limit && [text characterAtIndex:index + 1] == '[') {
-            NSUInteger close = CharonMarkdownBracketEnd(text, index + 1, '[', ']', limit), at;
+            NSUInteger close = RevenantMarkdownBracketEnd(text, index + 1, '[', ']', limit), at;
             if (close != NSNotFound && close + 1 < limit && [text characterAtIndex:close + 1] == '('
-                && CharonMarkdownParenEnd(text, close + 2, limit, &at)) {
+                && RevenantMarkdownParenEnd(text, close + 2, limit, &at)) {
                 NSURL *url = [self urlFor:[self targetIn:[text substringWithRange:NSMakeRange(close + 2, at - close - 2)]]];
                 if (url) {
                     [self appendInline:text from:plain to:index intent:intent span:0 extra:nil];
@@ -523,14 +523,14 @@ static BOOL CharonMarkdownParenEnd(NSString *text, NSUInteger body, NSUInteger l
             continue;
         }
         if (c == '[') {
-            NSUInteger close = CharonMarkdownBracketEnd(text, index, '[', ']', limit), at;
+            NSUInteger close = RevenantMarkdownBracketEnd(text, index, '[', ']', limit), at;
             if (close != NSNotFound && close + 1 < limit && [text characterAtIndex:close + 1] == '('
-                && CharonMarkdownParenEnd(text, close + 2, limit, &at)) {
+                && RevenantMarkdownParenEnd(text, close + 2, limit, &at)) {
                 NSURL *url = [self urlFor:[self targetIn:[text substringWithRange:NSMakeRange(close + 2, at - close - 2)]]];
                 if (url) {
                     [self appendInline:text from:plain to:index intent:intent span:0 extra:nil];
                     [self parseInlines:text from:index + 1 to:close intent:intent];
-                    [_result addAttribute:CharonMarkdownLinkKey
+                    [_result addAttribute:RevenantMarkdownLinkKey
                                    value:url
                                    range:NSMakeRange(_result.length - (close - index - 1), close - index - 1)];
                     index = at + 1;
@@ -559,7 +559,7 @@ static BOOL CharonMarkdownParenEnd(NSString *text, NSUInteger body, NSUInteger l
                     [[NSAttributedString alloc] initWithString:inside
                                                    attributes:[self blockAttributes:intent
                                                                       span:0
-                                                                       extra:@{CharonMarkdownLinkKey: url}]]];
+                                                                       extra:@{RevenantMarkdownLinkKey: url}]]];
                 index = close + 1;
                 plain = index;
                 continue;
@@ -601,7 +601,7 @@ static BOOL CharonMarkdownParenEnd(NSString *text, NSUInteger body, NSUInteger l
 {
     NSUInteger at = start;
     NSMutableString *paragraph = [NSMutableString string];
-    #define CharonFlushParagraph() do { \
+    #define RevenantFlushParagraph() do { \
         if (paragraph.length) { \
             NSPresentationIntent *intent = [NSPresentationIntent paragraphIntentWithIdentity:[self nextIdentity] nestedInsideIntent:item ?: parent]; \
             [self parseInlines:paragraph from:0 to:paragraph.length intent:intent]; \
@@ -610,8 +610,8 @@ static BOOL CharonMarkdownParenEnd(NSString *text, NSUInteger body, NSUInteger l
     } while (0)
     while (at < end) {
         NSString *line = [lines objectAtIndex:at];
-        NSString *trimmed = CharonMarkdownTrimmed(line);
-        NSUInteger indent = CharonMarkdownIndent(line);
+        NSString *trimmed = RevenantMarkdownTrimmed(line);
+        NSUInteger indent = RevenantMarkdownIndent(line);
         unichar fence;
         NSUInteger fenceCount;
         NSString *info;
@@ -620,12 +620,12 @@ static BOOL CharonMarkdownParenEnd(NSString *text, NSUInteger body, NSUInteger l
         BOOL ordered, bullet;
         NSUInteger bulletWidth;
         if (!trimmed.length) {
-            CharonFlushParagraph();
+            RevenantFlushParagraph();
             at++;
             continue;
         }
-        if (CharonMarkdownThematic(trimmed)) {
-            CharonFlushParagraph();
+        if (RevenantMarkdownThematic(trimmed)) {
+            RevenantFlushParagraph();
             NSPresentationIntent *intent = [NSPresentationIntent thematicBreakIntentWithIdentity:[self nextIdentity]
                                                                             nestedInsideIntent:parent];
             [_result appendAttributedString:[[NSAttributedString alloc] initWithString:@"\u2E3B"
@@ -635,9 +635,9 @@ static BOOL CharonMarkdownParenEnd(NSString *text, NSUInteger body, NSUInteger l
             at++;
             continue;
         }
-        level = CharonMarkdownHeading(trimmed, &headerText);
+        level = RevenantMarkdownHeading(trimmed, &headerText);
         if (level) {
-            CharonFlushParagraph();
+            RevenantFlushParagraph();
             NSPresentationIntent *intent = [NSPresentationIntent headerIntentWithIdentity:[self nextIdentity]
                                                                                      level:level
                                                                         nestedInsideIntent:parent];
@@ -645,19 +645,19 @@ static BOOL CharonMarkdownParenEnd(NSString *text, NSUInteger body, NSUInteger l
             at++;
             continue;
         }
-        if (CharonMarkdownFence(trimmed, &fence, &fenceCount, &info)) {
-            CharonFlushParagraph();
+        if (RevenantMarkdownFence(trimmed, &fence, &fenceCount, &info)) {
+            RevenantFlushParagraph();
             NSPresentationIntent *intent = [NSPresentationIntent codeBlockIntentWithIdentity:[self nextIdentity]
                                                                              languageHint:info.length ? info : nil
                                                                           nestedInsideIntent:parent];
             NSMutableString *code = [NSMutableString string];
             NSUInteger body = at + 1, closing = end;
             while (body < end) {
-                NSString *candidate = CharonMarkdownTrimmed([lines objectAtIndex:body]);
+                NSString *candidate = RevenantMarkdownTrimmed([lines objectAtIndex:body]);
                 NSUInteger run = 0;
                 while (run < candidate.length && [candidate characterAtIndex:run] == fence)
                     run++;
-                if (run >= fenceCount && CharonMarkdownTrimmed([candidate substringFromIndex:run]).length == 0) {
+                if (run >= fenceCount && RevenantMarkdownTrimmed([candidate substringFromIndex:run]).length == 0) {
                     closing = body;
                     break;
                 }
@@ -672,16 +672,16 @@ static BOOL CharonMarkdownParenEnd(NSString *text, NSUInteger body, NSUInteger l
             continue;
         }
         if (indent >= 4) {
-            CharonFlushParagraph();
+            RevenantFlushParagraph();
             NSPresentationIntent *intent = [NSPresentationIntent codeBlockIntentWithIdentity:[self nextIdentity]
                                                                              languageHint:nil
                                                                           nestedInsideIntent:parent];
             NSMutableString *code = [NSMutableString string];
             while (at < end) {
                 NSString *candidate = [lines objectAtIndex:at];
-                if (CharonMarkdownBlank(candidate))
+                if (RevenantMarkdownBlank(candidate))
                     break;
-                if (CharonMarkdownIndent(candidate) < 4)
+                if (RevenantMarkdownIndent(candidate) < 4)
                     break;
                 [code appendFormat:@"%@\n", [candidate substringFromIndex:4]];
                 at++;
@@ -693,13 +693,13 @@ static BOOL CharonMarkdownParenEnd(NSString *text, NSUInteger body, NSUInteger l
             continue;
         }
         if ([trimmed characterAtIndex:0] == '>') {
-            CharonFlushParagraph();
+            RevenantFlushParagraph();
             NSPresentationIntent *intent = [NSPresentationIntent blockQuoteIntentWithIdentity:[self nextIdentity]
                                                                            nestedInsideIntent:parent];
             NSMutableArray *inner = [NSMutableArray array];
             NSUInteger body = at, last = at;
             while (body < end) {
-                NSString *candidate = CharonMarkdownTrimmed([lines objectAtIndex:body]);
+                NSString *candidate = RevenantMarkdownTrimmed([lines objectAtIndex:body]);
                 if (!candidate.length || [candidate characterAtIndex:0] != '>')
                     break;
                 [inner addObject:[[candidate substringFromIndex:1] stringByTrimmingCharactersInSet:
@@ -711,10 +711,10 @@ static BOOL CharonMarkdownParenEnd(NSString *text, NSUInteger body, NSUInteger l
             at = last + 1;
             continue;
         }
-        if ([trimmed hasPrefix:@"|"] && at + 1 < end && CharonMarkdownDivider(CharonMarkdownTrimmed([lines objectAtIndex:at + 1]))) {
-            CharonFlushParagraph();
+        if ([trimmed hasPrefix:@"|"] && at + 1 < end && RevenantMarkdownDivider(RevenantMarkdownTrimmed([lines objectAtIndex:at + 1]))) {
+            RevenantFlushParagraph();
             NSArray<NSNumber *> *alignments = nil;
-            NSArray *header = CharonMarkdownCells(line, &alignments);
+            NSArray *header = RevenantMarkdownCells(line, &alignments);
             NSMutableArray *rows = [NSMutableArray array];
             NSUInteger body = at + 2;
             NSPresentationIntent *table = [NSPresentationIntent tableIntentWithIdentity:[self nextIdentity]
@@ -731,10 +731,10 @@ static BOOL CharonMarkdownParenEnd(NSString *text, NSUInteger body, NSUInteger l
                 [self parseInlines:[header objectAtIndex:column] from:0 to:[[header objectAtIndex:column] length] intent:cell];
             }
             while (body < end) {
-                NSString *candidate = CharonMarkdownTrimmed([lines objectAtIndex:body]);
+                NSString *candidate = RevenantMarkdownTrimmed([lines objectAtIndex:body]);
                 if (![candidate hasPrefix:@"|"])
                     break;
-                [rows addObject:CharonMarkdownCells([lines objectAtIndex:body], NULL)];
+                [rows addObject:RevenantMarkdownCells([lines objectAtIndex:body], NULL)];
                 body++;
             }
             for (NSUInteger row = 0; row < rows.count; row++) {
@@ -753,9 +753,9 @@ static BOOL CharonMarkdownParenEnd(NSString *text, NSUInteger body, NSUInteger l
             at = body;
             continue;
         }
-        bullet = CharonMarkdownBullet(trimmed, &ordered, &bulletWidth);
+        bullet = RevenantMarkdownBullet(trimmed, &ordered, &bulletWidth);
         if (bullet) {
-            CharonFlushParagraph();
+            RevenantFlushParagraph();
             NSPresentationIntent *list = ordered
                 ? [NSPresentationIntent orderedListIntentWithIdentity:[self nextIdentity] nestedInsideIntent:parent]
                 : [NSPresentationIntent unorderedListIntentWithIdentity:[self nextIdentity] nestedInsideIntent:parent];
@@ -763,23 +763,23 @@ static BOOL CharonMarkdownParenEnd(NSString *text, NSUInteger body, NSUInteger l
                 NSUInteger item = 0, body = at;
                 while (body < end) {
                     NSString *candidate = [lines objectAtIndex:body];
-                    NSString *candidateTrimmed = CharonMarkdownTrimmed(candidate);
+                    NSString *candidateTrimmed = RevenantMarkdownTrimmed(candidate);
                     BOOL candidateOrdered, isItem;
-                    NSUInteger candidateWidth, candidateIndent = CharonMarkdownIndent(candidate);
+                    NSUInteger candidateWidth, candidateIndent = RevenantMarkdownIndent(candidate);
                     NSPresentationIntent *itemIntent;
                     NSMutableArray *inner = [NSMutableArray array];
                     if (!candidateTrimmed.length) {
                         NSUInteger look = body + 1;
                         if (look >= end)
                             break;
-                        isItem = CharonMarkdownBullet(CharonMarkdownTrimmed([lines objectAtIndex:look]), &candidateOrdered, &candidateWidth)
-                                 && candidateOrdered == ordered && CharonMarkdownIndent([lines objectAtIndex:look]) == candidateIndent;
+                        isItem = RevenantMarkdownBullet(RevenantMarkdownTrimmed([lines objectAtIndex:look]), &candidateOrdered, &candidateWidth)
+                                 && candidateOrdered == ordered && RevenantMarkdownIndent([lines objectAtIndex:look]) == candidateIndent;
                         if (!isItem)
                             break;
                         body++;
                         continue;
                     }
-                    isItem = CharonMarkdownBullet(candidateTrimmed, &candidateOrdered, &candidateWidth)
+                    isItem = RevenantMarkdownBullet(candidateTrimmed, &candidateOrdered, &candidateWidth)
                              && candidateOrdered == ordered && candidateIndent == indent;
                     if (!isItem && item)
                         break;
@@ -792,22 +792,22 @@ static BOOL CharonMarkdownParenEnd(NSString *text, NSUInteger body, NSUInteger l
                     body++;
                     while (body < end) {
                         NSString *next = [lines objectAtIndex:body];
-                        NSString *nextTrimmed = CharonMarkdownTrimmed(next);
+                        NSString *nextTrimmed = RevenantMarkdownTrimmed(next);
                         BOOL nextOrdered, nextIsItem;
                         NSUInteger nextWidth;
-                        nextIsItem = CharonMarkdownBullet(nextTrimmed, &nextOrdered, &nextWidth)
-                                     && nextOrdered == ordered && CharonMarkdownIndent(next) == indent;
+                        nextIsItem = RevenantMarkdownBullet(nextTrimmed, &nextOrdered, &nextWidth)
+                                     && nextOrdered == ordered && RevenantMarkdownIndent(next) == indent;
                         if (nextIsItem)
                             break;
                         if (!nextTrimmed.length)
                             break;
-                        if (CharonMarkdownIndent(next) > indent) {
+                        if (RevenantMarkdownIndent(next) > indent) {
                             [inner addObject:[next substringFromIndex:MIN(indent + candidateWidth, next.length)]];
                             body++;
                             continue;
                         }
-                        if (CharonMarkdownThematic(nextTrimmed) || CharonMarkdownHeading(nextTrimmed, NULL)
-                            || [nextTrimmed characterAtIndex:0] == '>' || CharonMarkdownFence(nextTrimmed, NULL, NULL, NULL))
+                        if (RevenantMarkdownThematic(nextTrimmed) || RevenantMarkdownHeading(nextTrimmed, NULL)
+                            || [nextTrimmed characterAtIndex:0] == '>' || RevenantMarkdownFence(nextTrimmed, NULL, NULL, NULL))
                             break;
                         [inner addObject:nextTrimmed];
                         body++;
@@ -823,8 +823,8 @@ static BOOL CharonMarkdownParenEnd(NSString *text, NSUInteger body, NSUInteger l
         [paragraph appendString:trimmed];
         at++;
     }
-    CharonFlushParagraph();
-    #undef CharonFlushParagraph
+    RevenantFlushParagraph();
+    #undef RevenantFlushParagraph
 }
 
 - (NSAttributedString *)parse:(NSString *)markdown
@@ -842,14 +842,14 @@ static BOOL CharonMarkdownParenEnd(NSString *text, NSUInteger body, NSUInteger l
 
 #pragma mark - the three initialisers
 
-static NSError *CharonMarkdownError(NSInteger code, NSString *reason)
+static NSError *RevenantMarkdownError(NSInteger code, NSString *reason)
 {
     return [NSError errorWithDomain:NSCocoaErrorDomain
                                code:code
                            userInfo:@{NSLocalizedDescriptionKey: reason ?: @"The data could not be read."}];
 }
 
-@implementation NSAttributedString (CharonMarkdown15)
+@implementation NSAttributedString (RevenantMarkdown15)
 
 - (instancetype)initWithMarkdown:(NSData *)markdown
                         options:(NSAttributedStringMarkdownParsingOptions *)options
@@ -861,7 +861,7 @@ static NSError *CharonMarkdownError(NSInteger code, NSString *reason)
         text = [[NSString alloc] initWithData:markdown encoding:NSUTF8StringEncoding];
     if (!text) {
         if (error)
-            *error = CharonMarkdownError(NSFileReadUnknownError, @"The data is not text in UTF-8.");
+            *error = RevenantMarkdownError(NSFileReadUnknownError, @"The data is not text in UTF-8.");
         return nil;
     }
     return [self initWithMarkdownString:text options:options baseURL:baseURL error:error];
@@ -874,10 +874,10 @@ static NSError *CharonMarkdownError(NSInteger code, NSString *reason)
 {
     if (!markdownString) {
         if (error)
-            *error = CharonMarkdownError(NSFileReadUnknownError, @"The Markdown string is nil.");
+            *error = RevenantMarkdownError(NSFileReadUnknownError, @"The Markdown string is nil.");
         return nil;
     }
-    CharonMarkdownParser *parser = [[CharonMarkdownParser alloc] initWithOptions:options baseURL:baseURL];
+    RevenantMarkdownParser *parser = [[RevenantMarkdownParser alloc] initWithOptions:options baseURL:baseURL];
     return [self initWithAttributedString:[parser parse:markdownString]];
 }
 
@@ -892,7 +892,7 @@ static NSError *CharonMarkdownError(NSInteger code, NSString *reason)
         text = [NSString stringWithContentsOfURL:markdownFile encoding:NSUTF8StringEncoding error:&read];
     if (!text) {
         if (error)
-            *error = read ?: CharonMarkdownError(NSFileReadNoSuchFileError, @"The Markdown file could not be read.");
+            *error = read ?: RevenantMarkdownError(NSFileReadNoSuchFileError, @"The Markdown file could not be read.");
         return nil;
     }
     return [self initWithMarkdownString:text options:options baseURL:baseURL error:error];

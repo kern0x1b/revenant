@@ -1,5 +1,5 @@
 #import <Foundation/Foundation.h>
-#ifndef CHARON_BRAILLE_ONLY
+#ifndef REVENANT_BRAILLE_ONLY
 #import <Accessibility/Accessibility.h>
 #endif
 
@@ -42,9 +42,9 @@ API_AVAILABLE(ios(18.0), macos(15.0), tvos(18.0), watchos(11.0))
 @property (nullable, class, nonatomic, readonly) AXRequest *currentRequest;
 @property (nonatomic, readonly) AXTechnology technology;
 
-- (instancetype)charon_withTechnology:(AXTechnology)technology;
+- (instancetype)revenant_withTechnology:(AXTechnology)technology;
 
-- (void)charon_setTechnology:(AXTechnology)technology;
+- (void)revenant_setTechnology:(AXTechnology)technology;
 
 @end
 
@@ -124,7 +124,7 @@ API_AVAILABLE(ios(26.0))
 @property (nonatomic, readonly) NSString *resultString;
 @property (nonatomic, readonly) NSArray<NSNumber *> *locationMap;
 
-- (instancetype)charon_withResultString:(NSString *)resultString
+- (instancetype)revenant_withResultString:(NSString *)resultString
                                 locations:(NSArray<NSNumber *> *)locations;
 
 - (instancetype)init NS_UNAVAILABLE;

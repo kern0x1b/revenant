@@ -12,7 +12,7 @@
 
 #include <cstdint>
 
-namespace shade::darwin::socket {
+namespace emulator::darwin::socket {
     inline constexpr std::uint32_t local = 1;
     inline constexpr std::uint32_t stream = 1;
     inline constexpr std::uint32_t datagram = 2;

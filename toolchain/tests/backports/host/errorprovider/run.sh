@@ -5,7 +5,7 @@ set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 device=${DEVICE:-$here/../../device}
-build=${BUILD:-$(runs_fresh charon-errorprovider)}
+build=${BUILD:-$(runs_fresh revenant-errorprovider)}
 xcrun clang -fobjc-arc -w -I"$device" "$here/record.m" "$device/errorprovider-cases.m" -framework Foundation -o "$build/record"
 ERRORPROVIDER_RECORDS="$build/errorprovider.json" "$build/record" > "$build/errorprovider.log"
 xmake l "$here/../../common/embed.lua" "$build/errorprovider.json" "$device/errorprovider-expectations.h" foundation2_expectations

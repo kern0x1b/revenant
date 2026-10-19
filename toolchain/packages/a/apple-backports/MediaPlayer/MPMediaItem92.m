@@ -1,17 +1,17 @@
 #import <Foundation/Foundation.h>
-#if defined(CHARON_MEDIAPLAYER_STANDIN)
+#if defined(REVENANT_MEDIAPLAYER_STANDIN)
 #import "MPMediaItemStandin.h"
 #else
 #import <MediaPlayer/MediaPlayer.h>
 #endif
 
-@interface MPMediaItem (Charon92)
+@interface MPMediaItem (Revenant92)
 @property (nonatomic, readonly) BOOL protectedAsset;
 @end
 
 extern NSString * const MPMediaItemPropertyHasProtectedAsset;
 
-@implementation MPMediaItem (Charon92)
+@implementation MPMediaItem (Revenant92)
 
 - (BOOL)hasProtectedAsset {
     return [[self valueForProperty:@"hasProtectedAsset"] boolValue];

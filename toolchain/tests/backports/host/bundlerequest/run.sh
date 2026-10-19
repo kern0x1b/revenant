@@ -95,9 +95,9 @@ done
 # The class and the two keys are the port's API and the host's are the real ones, so the port's are
 # renamed. The category on NSBundle is not: NSBundle is the release's own class and both the host's
 # additions and the port's attach to it, which is what lets the test ask each of them.
-renames="-DNSBundleResourceRequest=CharonHostNSBundleResourceRequest"
+renames="-DNSBundleResourceRequest=RevenantHostNSBundleResourceRequest"
 for name in NSBundleResourceRequestLoadingPriorityUrgent NSBundleResourceRequestLowDiskSpaceNotification; do
-    renames="$renames -D$name=CharonHost$name"
+    renames="$renames -D$name=RevenantHost$name"
 done
 echo "renamed:$renames"
 for source in $sources; do

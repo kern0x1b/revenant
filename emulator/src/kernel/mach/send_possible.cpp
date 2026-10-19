@@ -8,7 +8,7 @@
 #include "kernel/kernel_shared_state.hpp"
 #include "support.hpp"
 
-namespace shade {
+namespace emulator {
 
 void KernelSharedState::notify_send_possible_locked(std::uint32_t destination)
 {

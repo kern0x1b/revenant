@@ -20,10 +20,10 @@
 #   sh values.sh --mutate      change the port's default operation and require a difference
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
-charon=${CHARON:-$here/../../../..}
-package="$charon/packages/a/apple-backports/AuthenticationServices"
+revenant=${REVENANT:-$here/../../../..}
+package="$revenant/packages/a/apple-backports/AuthenticationServices"
 framework=/System/Library/Frameworks/AuthenticationServices.framework/AuthenticationServices
-build=${BUILD:-$charon/.agent-work/runs/authservices-values}
+build=${BUILD:-$revenant/.agent-work/runs/authservices-values}
 mutate=${1:-}
 mkdir -p "$build"
 
@@ -58,7 +58,7 @@ renames="-DASAuthorizationRequest=PortASAuthorizationRequest \
 -DASAuthorizationOpenIDRequest=PortASAuthorizationOpenIDRequest \
 -DASAuthorizationAppleIDRequest=PortASAuthorizationAppleIDRequest \
 -DASAuthorizationAppleIDProvider=PortASAuthorizationAppleIDProvider \
--DASCharonProviderCodingKey=PortASCharonProviderCodingKey \
+-DASRevenantProviderCodingKey=PortASRevenantProviderCodingKey \
 -DASCredentialServiceIdentifier=PortASCredentialServiceIdentifier \
 -DASCredentialServiceIdentifierType=PortASCredentialServiceIdentifierType \
 -DASPasswordCredentialIdentity=PortASPasswordCredentialIdentity \
@@ -175,8 +175,8 @@ echo "== mutants: each one has to be red, and neither is the other's"
 #
 # Both forms apply to the ONE named target file, through apply-anchor.py, which asserts the anchor
 # occurs exactly once there before it writes. The first version ran its pattern over every .m in the copy
-# and at every occurrence in each; the line it changed is also the first line of -charon_records, so the
-# mutant's -charon_records began by calling -charon_records and the store's reads recursed until the stack
+# and at every occurrence in each; the line it changed is also the first line of -revenant_records, so the
+# mutant's -revenant_records began by calling -revenant_records and the store's reads recursed until the stack
 # went. That is the SIGSEGV the replace mutant was reported as, and the reason a mutation has to name a
 # PLACE rather than a line: the same line is two different places depending on the method it is in.
 run_mutant() {

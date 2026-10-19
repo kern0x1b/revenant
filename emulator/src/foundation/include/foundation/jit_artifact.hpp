@@ -36,7 +36,7 @@ namespace Dynarmic::IR {
 class Block;
 }
 
-namespace shade {
+namespace emulator {
 
 enum class JitHostIsa : std::uint8_t {
     Unknown,

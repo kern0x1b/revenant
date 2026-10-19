@@ -1,5 +1,5 @@
 #!/bin/sh
-# factory-probe.sh - build and run the port's own +charon_mapWithDimensions: check.
+# factory-probe.sh - build and run the port's own +revenant_mapWithDimensions: check.
 #
 # The system's AXBrailleMap has no public initialiser, so there is no counterpart to compare a sized map
 # against. This builds the port's class alone, with no Accessibility framework linked, and asks it the
@@ -14,13 +14,13 @@ here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
 sources=${ACCESSIBILITY_SRC:-$root/packages/a/apple-backports/Accessibility}
-build=${FACTORY_BUILD:-$(runs_folder charon-accessibilitymap-factory)}
+build=${FACTORY_BUILD:-$(runs_folder revenant-accessibilitymap-factory)}
 rm -rf "$build"
 mkdir -p "$build"
 sdk=$(xcrun --show-sdk-path)
 xcrun clang -target arm64-apple-macos26.0 -isysroot "$sdk" -fobjc-arc -O0 -Wall -Wno-nonnull \
-    -DAXBrailleMap=CharonPortAXBrailleMap -DAXBrailleMapRenderer=CharonPortAXBrailleMapRenderer \
-    "$here/factory-probe.m" "$sources/CharonBrailleMap.m" \
+    -DAXBrailleMap=RevenantPortAXBrailleMap -DAXBrailleMapRenderer=RevenantPortAXBrailleMapRenderer \
+    "$here/factory-probe.m" "$sources/RevenantBrailleMap.m" \
     -I"$root/packages/a/apple-backports" -I"$root/packages/a/apple-backports/Accessibility" \
     -framework Foundation -framework CoreGraphics \
     -o "$build/factory" 2> "$build/build.log" || {

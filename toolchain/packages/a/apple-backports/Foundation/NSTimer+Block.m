@@ -1,11 +1,11 @@
 #import <Foundation/Foundation.h>
 
-@interface CharonTimerBlockTarget : NSObject
+@interface RevenantTimerBlockTarget : NSObject
 - (instancetype)initWithBlock:(void (^)(NSTimer *timer))block;
 - (void)fire:(NSTimer *)timer;
 @end
 
-@implementation CharonTimerBlockTarget {
+@implementation RevenantTimerBlockTarget {
 @private
     void (^_block)(NSTimer *timer);
 }
@@ -24,7 +24,7 @@
 
 @end
 
-@implementation NSTimer (CharonBlocks)
+@implementation NSTimer (RevenantBlocks)
 
 + (NSTimer *)timerWithTimeInterval:(NSTimeInterval)interval repeats:(BOOL)repeats block:(void (^)(NSTimer *timer))block
 {
@@ -46,7 +46,7 @@
 
 - (instancetype)initWithFireDate:(NSDate *)date interval:(NSTimeInterval)interval repeats:(BOOL)repeats block:(void (^)(NSTimer *timer))block
 {
-    CharonTimerBlockTarget *target = [[CharonTimerBlockTarget alloc] initWithBlock:block];
+    RevenantTimerBlockTarget *target = [[RevenantTimerBlockTarget alloc] initWithBlock:block];
     return [self initWithFireDate:date interval:interval target:target selector:@selector(fire:) userInfo:nil repeats:repeats];
 }
 

@@ -68,13 +68,13 @@ static UNNotificationRequest *request_named(NSString *identifier, NSString *body
     return [UNNotificationRequest requestWithIdentifier:identifier content:content trigger:trigger];
 }
 
-@interface CharonNotificationsDelegate : UIResponder <UIApplicationDelegate, UNUserNotificationCenterDelegate>
+@interface RevenantNotificationsDelegate : UIResponder <UIApplicationDelegate, UNUserNotificationCenterDelegate>
 @property (nonatomic, strong) UIWindow *window;
 @property (nonatomic, strong) NSMutableArray *presented;
 @property (nonatomic) BOOL presentedOnMain;
 @end
 
-@implementation CharonNotificationsDelegate
+@implementation RevenantNotificationsDelegate
 
 - (void)userNotificationCenter:(UNUserNotificationCenter *)center willPresentNotification:(UNNotification *)notification
          withCompletionHandler:(void (^)(UNNotificationPresentationOptions))completionHandler
@@ -93,12 +93,12 @@ static UNNotificationRequest *request_named(NSString *identifier, NSString *body
     CHECK(!center.supportsContentExtensions, "it supports no content extensions, which iOS 6 has not got");
     for (NSString *later in @[@"getDeliveredNotificationsWithCompletionHandler:", @"removeAllDeliveredNotifications",
                               @"setBadgeCount:withCompletionHandler:"])
-        charon_check(![center respondsToSelector:NSSelectorFromString(later)],
+        revenant_check(![center respondsToSelector:NSSelectorFromString(later)],
                      [later stringByAppendingString:@" is not there, since iOS 6 cannot do it"].UTF8String, @"it is");
     CHECK(NSClassFromString(@"UNNotificationAttachment") == Nil,
           "the class iOS 6 cannot carry is not there, since a notification of this release shows no image or film");
     CLRegion *region = [[CLRegion alloc] initCircularRegionWithCenter:CLLocationCoordinate2DMake(0, 0) radius:100000
-                                                           identifier:@"charon-notifications"];
+                                                           identifier:@"revenant-notifications"];
     UNLocationNotificationTrigger *arriving = [UNLocationNotificationTrigger triggerWithRegion:region repeats:NO];
     CHECK([arriving isKindOfClass:[UNNotificationTrigger class]] && arriving.region == region && !arriving.repeats,
           "a location trigger is there and keeps the region and the repeats it was given");
@@ -106,7 +106,7 @@ static UNNotificationRequest *request_named(NSString *identifier, NSString *body
     CHECK(pushed && [pushed isSubclassOfClass:[UNNotificationTrigger class]],
           "and a push trigger is there, as the marker a pushed notification is delivered with");
 
-    [[NSUserDefaults standardUserDefaults] removeObjectForKey:@"org.charon.apple-backports.UIUserNotificationTypes"];
+    [[NSUserDefaults standardUserDefaults] removeObjectForKey:@"org.revenant.apple-backports.UIUserNotificationTypes"];
     CHECK(settings().authorizationStatus == UNAuthorizationStatusNotDetermined, "before asking, nothing is determined");
     __block BOOL answered = NO, granted = NO, onMain = YES;
     [center requestAuthorizationWithOptions:UNAuthorizationOptionBadge | UNAuthorizationOptionSound | UNAuthorizationOptionAlert
@@ -181,7 +181,7 @@ static UNNotificationRequest *request_named(NSString *identifier, NSString *body
         if ([request.identifier isEqual:@"where"])
             under = request;
     CHECK(under && [under.trigger isKindOfClass:[UNLocationNotificationTrigger class]]
-          && [((UNLocationNotificationTrigger *)under.trigger).region.identifier isEqual:@"charon-notifications"]
+          && [((UNLocationNotificationTrigger *)under.trigger).region.identifier isEqual:@"revenant-notifications"]
           && [under.content.body isEqual:@"on arriving"],
           "and comes back pending, with the region and the content it was added with");
     CHECK(![UIApplication sharedApplication].scheduledLocalNotifications
@@ -219,7 +219,7 @@ static UNNotificationRequest *request_named(NSString *identifier, NSString *body
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)options
 {
-    charon_log_to([results_folder stringByAppendingPathComponent:@"notifications.log"]);
+    revenant_log_to([results_folder stringByAppendingPathComponent:@"notifications.log"]);
     self.window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
     self.window.rootViewController = [[UIViewController alloc] init];
     [self.window makeKeyAndVisible];
@@ -227,10 +227,10 @@ static UNNotificationRequest *request_named(NSString *identifier, NSString *body
         @try {
             [self run];
         } @catch (NSException *exception) {
-            charon_check(NO, "the checks raise no exception", [NSString stringWithFormat:@"%@: %@", exception.name, exception.reason]);
+            revenant_check(NO, "the checks raise no exception", [NSString stringWithFormat:@"%@: %@", exception.name, exception.reason]);
         }
-        NSString *summary = [NSString stringWithFormat:@"%@ checks=%d failures=%d\n", charon_failures ? @"FAIL" : @"ok",
-                                                       charon_checks, charon_failures];
+        NSString *summary = [NSString stringWithFormat:@"%@ checks=%d failures=%d\n", revenant_failures ? @"FAIL" : @"ok",
+                                                       revenant_checks, revenant_failures];
         [summary writeToFile:[results_folder stringByAppendingPathComponent:@"notifications.done"] atomically:YES
                     encoding:NSUTF8StringEncoding error:NULL];
     });
@@ -243,6 +243,6 @@ int main(int argc, char *argv[])
 {
     @autoreleasepool {
         [[NSFileManager defaultManager] createDirectoryAtPath:results_folder withIntermediateDirectories:YES attributes:nil error:NULL];
-        return UIApplicationMain(argc, argv, nil, @"CharonNotificationsDelegate");
+        return UIApplicationMain(argc, argv, nil, @"RevenantNotificationsDelegate");
     }
 }

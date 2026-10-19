@@ -1,5 +1,5 @@
-#ifndef CHARON_SECURITYUI_H
-#define CHARON_SECURITYUI_H
+#ifndef REVENANT_SECURITYUI_H
+#define REVENANT_SECURITYUI_H
 
 #import <Foundation/Foundation.h>
 #import <Security/Security.h>

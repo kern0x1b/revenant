@@ -2,7 +2,7 @@
 -- License, v. 2.0. If a copy of the MPL was not distributed with this
 -- file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-target("shade_bluetooth")
+target("emulator_bluetooth")
     set_kind("static")
     add_files("bluetooth_manager_hle.cpp")
-    add_deps("shade_foundation", {public = true})
+    add_deps("emulator_foundation", {public = true})

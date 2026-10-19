@@ -1,24 +1,24 @@
 #import <HomeKit/HomeKit.h>
 
-#import "CharonHomeKitInternal.h"
-#import "CharonHomeKitConstruction.h"
-#import "CharonHomeKitStore.h"
+#import "RevenantHomeKitInternal.h"
+#import "RevenantHomeKitConstruction.h"
+#import "RevenantHomeKitStore.h"
 
-@interface HMCameraProfile (CharonHomeKit10Internal)
+@interface HMCameraProfile (RevenantHomeKit10Internal)
 @property (nullable, nonatomic, readonly, strong) HMCameraStreamControl *streamControl;
 @property (nullable, nonatomic, readonly, strong) HMCameraSnapshotControl *snapshotControl;
 @property (nullable, nonatomic, readonly, strong) HMCameraSettingsControl *settingsControl;
 @property (nullable, nonatomic, readonly, strong) HMCameraAudioControl *speakerControl;
 @end
 
-@interface HMAccessoryProfile (CharonHomeKit10Internal)
-+ (instancetype)charon_profileInStore:(CharonHomeKitStore *)store
+@interface HMAccessoryProfile (RevenantHomeKit10Internal)
++ (instancetype)revenant_profileInStore:(RevenantHomeKitStore *)store
                             identifier:(NSUUID *)identifier
                              accessory:(nullable HMAccessory *)accessory;
 @end
 
-@interface HMAccessoryProfile (CharonHKConstruction)
-- (instancetype)charon_initWithStore:(CharonHomeKitStore *)store
+@interface HMAccessoryProfile (RevenantHKConstruction)
+- (instancetype)revenant_initWithStore:(RevenantHomeKitStore *)store
                           identifier:(NSUUID *_Nullable)identifier
                                accessory:(nullable HMAccessory *)accessory
                                 services:(nullable NSArray<HMService *> *)services
@@ -31,26 +31,26 @@
     NSArray<HMService *> *_services;
 }
 
-- (instancetype)charon_initWithStore:(CharonHomeKitStore *)store
+- (instancetype)revenant_initWithStore:(RevenantHomeKitStore *)store
                           identifier:(NSUUID *)identifier
                             accessory:(HMAccessory *)accessory
                              services:(NSArray<HMService *> *)services
 {
     HMAccessoryProfile *profile = [super init];
     if (profile) {
-        profile->_profileIdentifier = [CharonHomeKitNewIdentifier() copy];
-        CharonHomeKitRecord(@"profiles", profile->_profileIdentifier);
+        profile->_profileIdentifier = [RevenantHomeKitNewIdentifier() copy];
+        RevenantHomeKitRecord(@"profiles", profile->_profileIdentifier);
         profile->_profileAccessory = accessory;
         profile->_services = [services copy] ?: @[];
     }
     return profile;
 }
 
-+ (instancetype)charon_profileInStore:(CharonHomeKitStore *)store
++ (instancetype)revenant_profileInStore:(RevenantHomeKitStore *)store
                             identifier:(NSUUID *)identifier
                              accessory:(HMAccessory *)accessory
 {
-    return [[self alloc] charon_initWithStore:store
+    return [[self alloc] revenant_initWithStore:store
                                    identifier:identifier
                                     accessory:accessory
                                      services:nil];
@@ -58,7 +58,7 @@
 
 - (NSUUID *)uniqueIdentifier
 {
-    return CharonHomeKitUUID(_profileIdentifier);
+    return RevenantHomeKitUUID(_profileIdentifier);
 }
 
 - (NSArray<HMService *> *)services

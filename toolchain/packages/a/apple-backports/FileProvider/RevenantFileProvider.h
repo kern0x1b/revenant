@@ -14,7 +14,7 @@ typedef NS_OPTIONS(NSUInteger, NSFileProviderKnownFolders) {
 @interface NSFileProviderKnownFolderLocations : NSObject
 @end
 
-@interface NSFileProviderManager (CharonKnownFolders)
+@interface NSFileProviderManager (RevenantKnownFolders)
 - (void)claimKnownFolders:(NSFileProviderKnownFolderLocations *)knownFolders
           localizedReason:(NSString *)localizedReason
         completionHandler:(void (^)(NSError * _Nullable))completionHandler
@@ -29,13 +29,13 @@ typedef NS_OPTIONS(NSUInteger, NSFileProviderKnownFolders) {
 
 #endif
 
-@interface NSFileProviderDomain (Charon16Storage)
-- (void)charon_setUserEnabled:(BOOL)userEnabled replicated:(BOOL)replicated
+@interface NSFileProviderDomain (Revenant16Storage)
+- (void)revenant_setUserEnabled:(BOOL)userEnabled replicated:(BOOL)replicated
                      hidden:(BOOL)hidden supportsSyncingTrash:(BOOL)supportsSyncingTrash;
-- (BOOL)charon_userEnabled;
-- (BOOL)charon_replicated;
-- (BOOL)charon_hidden;
-- (BOOL)charon_supportsSyncingTrash;
+- (BOOL)revenant_userEnabled;
+- (BOOL)revenant_replicated;
+- (BOOL)revenant_hidden;
+- (BOOL)revenant_supportsSyncingTrash;
 @end
 
 typedef NS_ENUM(NSInteger, NSFileProviderDisconnectReason) {

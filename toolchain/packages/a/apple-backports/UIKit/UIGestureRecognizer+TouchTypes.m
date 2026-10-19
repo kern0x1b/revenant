@@ -1,52 +1,52 @@
 #import <UIKit/UIKit.h>
 #import <objc/runtime.h>
 
-static char charon_touch_types_key;
-static char charon_exclusive_key;
-static char charon_press_types_key;
+static char revenant_touch_types_key;
+static char revenant_exclusive_key;
+static char revenant_press_types_key;
 
-static NSArray *charon_unique(NSArray *types)
+static NSArray *revenant_unique(NSArray *types)
 {
     return [[NSOrderedSet orderedSetWithArray:types ?: @[]] array];
 }
 
-@implementation UIGestureRecognizer (CharonTouchTypes)
+@implementation UIGestureRecognizer (RevenantTouchTypes)
 
 - (NSArray<NSNumber *> *)allowedTouchTypes
 {
-    NSArray *types = objc_getAssociatedObject(self, &charon_touch_types_key);
+    NSArray *types = objc_getAssociatedObject(self, &revenant_touch_types_key);
     return types ?: @[@(UITouchTypeDirect), @(UITouchTypeIndirect), @(UITouchTypePencil)];
 }
 
 - (void)setAllowedTouchTypes:(NSArray<NSNumber *> *)types
 {
-    objc_setAssociatedObject(self, &charon_touch_types_key, charon_unique(types), OBJC_ASSOCIATION_COPY_NONATOMIC);
+    objc_setAssociatedObject(self, &revenant_touch_types_key, revenant_unique(types), OBJC_ASSOCIATION_COPY_NONATOMIC);
 }
 
 - (BOOL)requiresExclusiveTouchType
 {
-    NSNumber *value = objc_getAssociatedObject(self, &charon_exclusive_key);
+    NSNumber *value = objc_getAssociatedObject(self, &revenant_exclusive_key);
     return value ? value.boolValue : YES;
 }
 
 - (void)setRequiresExclusiveTouchType:(BOOL)requires
 {
-    objc_setAssociatedObject(self, &charon_exclusive_key, @(requires), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, &revenant_exclusive_key, @(requires), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
 - (NSArray<NSNumber *> *)allowedPressTypes
 {
-    return objc_getAssociatedObject(self, &charon_press_types_key) ?: @[];
+    return objc_getAssociatedObject(self, &revenant_press_types_key) ?: @[];
 }
 
 - (void)setAllowedPressTypes:(NSArray<NSNumber *> *)types
 {
-    objc_setAssociatedObject(self, &charon_press_types_key, charon_unique(types), OBJC_ASSOCIATION_COPY_NONATOMIC);
+    objc_setAssociatedObject(self, &revenant_press_types_key, revenant_unique(types), OBJC_ASSOCIATION_COPY_NONATOMIC);
 }
 
 @end
 
-@implementation UITouch (CharonTouchType)
+@implementation UITouch (RevenantTouchType)
 
 - (UITouchType)type
 {
@@ -55,10 +55,10 @@ static NSArray *charon_unique(NSArray *types)
 
 @end
 
-@interface CharonTouchTypeInstaller : NSObject
+@interface RevenantTouchTypeInstaller : NSObject
 @end
 
-@implementation CharonTouchTypeInstaller
+@implementation RevenantTouchTypeInstaller
 
 + (void)load
 {
@@ -68,7 +68,7 @@ static NSArray *charon_unique(NSArray *types)
         return;
     BOOL (*original)(id, SEL, id) = (BOOL (*)(id, SEL, id))method_getImplementation(method);
     class_replaceMethod([UIGestureRecognizer class], selector, imp_implementationWithBlock(^BOOL(UIGestureRecognizer *self, UITouch *touch) {
-        NSArray *types = objc_getAssociatedObject(self, &charon_touch_types_key);
+        NSArray *types = objc_getAssociatedObject(self, &revenant_touch_types_key);
         if (types && ![types containsObject:@(UITouchTypeDirect)])
             return NO;
         return original(self, selector, touch);

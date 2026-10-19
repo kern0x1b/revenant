@@ -336,12 +336,12 @@ struct ElementResolver<Element: _IntentValue>: Resolver {
         return input.components(separatedBy: CharacterSet(charactersIn: ",\n"))
             .map { $0.trimmingCharacters(in: .whitespaces) }
             .filter { !$0.isEmpty }
-            .compactMap { CharonIntentValueParser.parse($0, as: Element.UnwrappedType.self) }
+            .compactMap { RevenantIntentValueParser.parse($0, as: Element.UnwrappedType.self) }
     }
 
 }
 
-public enum CharonIntentValueParser {
+public enum RevenantIntentValueParser {
     public static func parse<T>(_ text: String, as type: T.Type) -> T? {
         switch type {
         case is String.Type: return text as? T
@@ -349,13 +349,13 @@ public enum CharonIntentValueParser {
         case is Double.Type: return Double(text) as? T
         case is Float.Type: return Float(text) as? T
         case is Bool.Type:
-            return CharonRun.await { try await BoolFromStringResolver().resolve(from: text,
-                context: IntentParameterContext(title: CharonLocalized.resource(""))) } as? T
+            return RevenantRun.await { try await BoolFromStringResolver().resolve(from: text,
+                context: IntentParameterContext(title: RevenantLocalized.resource(""))) } as? T
         case is URL.Type: return URL(string: text) as? T
         case is UUID.Type: return UUID(uuidString: text) as? T
         case is Date.Type:
-            return CharonRun.await { try await DateResolver().resolve(from: text,
-                                                                        context: IntentParameterContext(title: CharonLocalized.resource(""))) } as? T
+            return RevenantRun.await { try await DateResolver().resolve(from: text,
+                                                                        context: IntentParameterContext(title: RevenantLocalized.resource(""))) } as? T
         case is Bool.Type: return nil
         default: return nil
         }

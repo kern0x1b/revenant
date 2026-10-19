@@ -14,7 +14,7 @@
 #include <ostream>
 #include <string_view>
 
-namespace shade {
+namespace emulator {
 
 class Output {
 public:

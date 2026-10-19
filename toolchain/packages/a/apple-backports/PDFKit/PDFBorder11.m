@@ -1,6 +1,6 @@
-#import "CharonPDFKit.h"
+#import "RevenantPDFKit.h"
 
-static PDFBorderStyle charonBorderStyleForName(const char *name)
+static PDFBorderStyle revenantBorderStyleForName(const char *name)
 {
     if (name == NULL)
         return kPDFBorderStyleSolid;
@@ -17,7 +17,7 @@ static PDFBorderStyle charonBorderStyleForName(const char *name)
     return kPDFBorderStyleSolid;
 }
 
-static NSArray *charonDefaultDashPattern(void)
+static NSArray *revenantDefaultDashPattern(void)
 {
     return [NSArray arrayWithObjects:[NSNumber numberWithDouble:3.0], [NSNumber numberWithDouble:2.0], nil];
 }
@@ -37,7 +37,7 @@ static NSArray *charonDefaultDashPattern(void)
     return self;
 }
 
-- (instancetype)initWithCharonAnnotationDictionary:(CGPDFDictionaryRef)annotation
+- (instancetype)initWithRevenantAnnotationDictionary:(CGPDFDictionaryRef)annotation
 {
     self = [self init];
     if (self == nil)
@@ -49,7 +49,7 @@ static NSArray *charonDefaultDashPattern(void)
         const char *name = NULL;
         PDFBorderStyle resolved = kPDFBorderStyleSolid;
         if (CGPDFDictionaryGetName(style, "S", &name))
-            resolved = charonBorderStyleForName(name);
+            resolved = revenantBorderStyleForName(name);
         [self setStyle:resolved];
         CGPDFReal width = 0;
         if (CGPDFDictionaryGetNumber(style, "W", &width))
@@ -66,7 +66,7 @@ static NSArray *charonDefaultDashPattern(void)
                     [pattern addObject:[NSNumber numberWithDouble:(double)number]];
                 }
             }
-            [self setDashPattern:pattern.count ? pattern : charonDefaultDashPattern()];
+            [self setDashPattern:pattern.count ? pattern : revenantDefaultDashPattern()];
         }
         return self;
     }

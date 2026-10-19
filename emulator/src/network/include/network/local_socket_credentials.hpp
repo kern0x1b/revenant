@@ -8,7 +8,7 @@
 #include <cstddef>
 #include <cstdint>
 
-namespace shade::bsd {
+namespace emulator::bsd {
 
 class LocalSocketCredentials {
 public:

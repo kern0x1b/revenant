@@ -12,12 +12,12 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-charon=${CHARON:-$here/../../../..}
-crypto="$charon/packages/a/apple-backports/HomeKit/CharonHAPBignum.m"
-build=${BUILD:-$(runs_fresh charon-hapcrypto)}
+revenant=${REVENANT:-$here/../../../..}
+crypto="$revenant/packages/a/apple-backports/HomeKit/RevenantHAPBignum.m"
+build=${BUILD:-$(runs_fresh revenant-hapcrypto)}
 mkdir -p "$build"
 
-cc -O2 -I"$charon/packages/a/apple-backports/HomeKit" -o "$build/bignum" "$here/bignum.c" "$crypto"
+cc -O2 -I"$revenant/packages/a/apple-backports/HomeKit" -o "$build/bignum" "$here/bignum.c" "$crypto"
 
 cases=$build/cases.txt
 answers=$build/answers.txt
@@ -61,7 +61,7 @@ def prime(bits):
 # RFC 5054's own 1024-bit and 3072-bit groups, read from the RFC's text. The 1024-bit one is the group
 # the RFC's own test vector is built at, and the values below are that vector's k and v.
 # RFC 5054's groups, as the numbers themselves. The same two values are read out of a real
-# HomeKit and out of OpenSSL's own table, in facts/HomeKit/CharonHapCrypto.md; a literal here is
+# HomeKit and out of OpenSSL's own table, in facts/HomeKit/RevenantHapCrypto.md; a literal here is
 # what the check needs, and it is not a place to put a value read from somewhere that could move.
 N1024 = int(
     "EEAF0AB9ADB38DD69C33F80AFA8FC5E86072618775FF3C0B9EA2314C9C256576D674DF7496EA81D3383B4813D692C6E0E0D5D8E250B98BE48E495C1D6089DAD1"

@@ -2,12 +2,12 @@
 # run.sh - MTLComputePipelineDescriptor (iOS 9.0) against Apple's own object, property by property.
 #
 # The port's compute descriptor is built for Catalyst beside Apple's Metal in one process, with every class
-# the three source files define renamed CharonHost<Name>, the way metalkit-init and metal-census/descriptors
+# the three source files define renamed RevenantHost<Name>, the way metalkit-init and metal-census/descriptors
 # do it. The sources are: the descriptor itself, its stage input descriptor (10.0) and the pipeline buffer
 # descriptor array (11.0), which the descriptor's defaults are made of.
 #
 # MTLLinkedFunctions (14.0) stays Apple's class in this case. Its port file, MTLDescriptors14.m, does not
-# compile against the SDK of macOS 26 that the host builds with: CharonMetalProtocols.h forward-declares the
+# compile against the SDK of macOS 26 that the host builds with: RevenantMetalProtocols.h forward-declares the
 # MTL4*Sparse* classes, which that SDK declares as typedefs. So the case measures the descriptor's own
 # members, and the linked functions it holds are the host's object on both sides.
 #
@@ -17,7 +17,7 @@ set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 METAL=${METAL:-$here/../../../../packages/a/apple-backports/Metal}
-BUILD=${BUILD:-$(runs_fresh charon-compute-pipeline-descriptor)}
+BUILD=${BUILD:-$(runs_fresh revenant-compute-pipeline-descriptor)}
 sdk=$(xcrun --show-sdk-path)
 target="-target arm64-apple-ios16.0-macabi -isysroot $sdk -iframework $sdk/System/iOSSupport/System/Library/Frameworks"
 quiet="-Wno-deprecated-declarations -Wno-unguarded-availability-new -Wno-objc-designated-initializers -Wno-incomplete-implementation -Wno-objc-protocol-method-implementation"
@@ -31,7 +31,7 @@ for source in $sources; do
 done
 renames=""
 for name in $(xcrun nm -gU "$BUILD"/plain/*.o | awk 'NF == 3 {print $3}' | grep -E '^_OBJC_CLASS_\$_' | sed -e 's/^_OBJC_CLASS_\$_//' | sort -u); do
-    renames="$renames -D$name=CharonHost$name"
+    renames="$renames -D$name=RevenantHost$name"
 done
 for source in $sources; do
     xcrun clang $target -fobjc-arc -fvisibility=hidden $quiet $gl $renames -I"$METAL" -c "$METAL/$source" -o "$BUILD/renamed/$source.o"

@@ -1,6 +1,6 @@
-#import "CharonPDFKit.h"
+#import "RevenantPDFKit.h"
 
-static BOOL charonDestinationNameIsKnown(const char *name)
+static BOOL revenantDestinationNameIsKnown(const char *name)
 {
     if (name == NULL)
         return NO;
@@ -9,7 +9,7 @@ static BOOL charonDestinationNameIsKnown(const char *name)
            || strcmp(name, "FitBV") == 0;
 }
 
-static CGFloat charonDestinationNumber(CGPDFArrayRef destination, size_t index)
+static CGFloat revenantDestinationNumber(CGPDFArrayRef destination, size_t index)
 {
     CGPDFReal number = 0;
     if (!CGPDFArrayGetNumber(destination, index, &number))
@@ -61,14 +61,14 @@ static CGFloat charonDestinationNumber(CGPDFArrayRef destination, size_t index)
     return copy;
 }
 
-- (instancetype)initWithCharonDestinationArray:(CGPDFArrayRef)destination
+- (instancetype)initWithRevenantDestinationArray:(CGPDFArrayRef)destination
                                     inDocument:(PDFDocument *)document
 {
     if (destination == NULL)
         return [self init];
 
     const char *name = NULL;
-    if (!CGPDFArrayGetName(destination, 1, &name) || !charonDestinationNameIsKnown(name))
+    if (!CGPDFArrayGetName(destination, 1, &name) || !revenantDestinationNameIsKnown(name))
         return nil;
     const char *firstName = NULL;
     if (CGPDFArrayGetName(destination, 0, &firstName))
@@ -80,25 +80,25 @@ static CGFloat charonDestinationNumber(CGPDFArrayRef destination, size_t index)
 
     CGPDFDictionaryRef referenced = NULL;
     if (CGPDFArrayGetDictionary(destination, 0, &referenced) && referenced != NULL)
-        _page = [self charon_pageForDictionary:referenced inDocument:document];
+        _page = [self revenant_pageForDictionary:referenced inDocument:document];
 
     if (strcmp(name, "XYZ") != 0)
         return self;
-    _point = CGPointMake(charonDestinationNumber(destination, 2),
-                         charonDestinationNumber(destination, 3));
-    CGFloat zoom = charonDestinationNumber(destination, 4);
+    _point = CGPointMake(revenantDestinationNumber(destination, 2),
+                         revenantDestinationNumber(destination, 3));
+    CGFloat zoom = revenantDestinationNumber(destination, 4);
     _zoom = zoom != 0 ? zoom : kPDFDestinationUnspecifiedValue;
     return self;
 }
 
-- (PDFPage *)charon_pageForDictionary:(CGPDFDictionaryRef)dictionary inDocument:(PDFDocument *)document
+- (PDFPage *)revenant_pageForDictionary:(CGPDFDictionaryRef)dictionary inDocument:(PDFDocument *)document
 {
     if (document == nil)
         return nil;
     NSUInteger count = [document pageCount];
     for (NSUInteger index = 0; index < count; index++) {
         PDFPage *page = [document pageAtIndex:index];
-        CGPDFPageRef cgPage = [page charon_CGPDFPage];
+        CGPDFPageRef cgPage = [page revenant_CGPDFPage];
         if (cgPage == NULL)
             continue;
         if (CGPDFPageGetDictionary(cgPage) == dictionary)

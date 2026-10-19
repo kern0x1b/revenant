@@ -1,13 +1,13 @@
 #import <HealthKit/HealthKit.h>
 
-#import "CharonHKStore.h"
+#import "RevenantHKStore.h"
 
 #pragma mark - HKDocumentType
 
 @implementation HKDocumentType
 @end
 
-@implementation HKObjectType (CharonIOS100)
+@implementation HKObjectType (RevenantIOS100)
 
 + (nullable HKDocumentType *)documentTypeForIdentifier:(HKDocumentTypeIdentifier)identifier
 {
@@ -16,7 +16,7 @@
     static HKDocumentType *type;
     static dispatch_once_t once;
     dispatch_once(&once, ^{
-        type = [HKDocumentType charon_typeWithIdentifier:HKDocumentTypeIdentifierCDA];
+        type = [HKDocumentType revenant_typeWithIdentifier:HKDocumentTypeIdentifierCDA];
     });
     return type;
 }
@@ -27,7 +27,7 @@
 
 @implementation HKDocumentSample {
     HKDocumentType *_documentType;
-    NSDictionary *_charonDocument;
+    NSDictionary *_revenantDocument;
 }
 
 + (BOOL)supportsSecureCoding
@@ -35,24 +35,24 @@
     return YES;
 }
 
-- (void)charon_setMetadata:(nullable NSDictionary *)metadata
+- (void)revenant_setMetadata:(nullable NSDictionary *)metadata
 {
-    [super charon_setMetadata:metadata];
+    [super revenant_setMetadata:metadata];
 }
 
-- (instancetype)charon_initWithType:(HKDocumentType *)documentType
+- (instancetype)revenant_initWithType:(HKDocumentType *)documentType
                             metadata:(nullable NSDictionary *)metadata
                            startDate:(NSDate *)startDate
                              endDate:(NSDate *)endDate
                             document:(nullable NSDictionary *)document
 {
-    HKDocumentSample *sample = [super charon_initWithType:(HKSampleType *)documentType
+    HKDocumentSample *sample = [super revenant_initWithType:(HKSampleType *)documentType
                                                  metadata:metadata
                                                 startDate:startDate
                                                   endDate:endDate];
     if (sample) {
         sample->_documentType = documentType;
-        sample->_charonDocument = [document copy];
+        sample->_revenantDocument = [document copy];
     }
     return sample;
 }
@@ -65,7 +65,7 @@
         NSDictionary *document = [coder decodeObjectOfClasses:[NSSet setWithObjects:[NSDictionary class], [NSString class],
                                                                           [NSData class], [NSDate class], [NSNumber class], nil]
                                                  forKey:@"document"];
-        sample->_charonDocument = [document copy];
+        sample->_revenantDocument = [document copy];
     }
     return sample;
 }
@@ -74,15 +74,15 @@
 {
     [super encodeWithCoder:coder];
     [coder encodeObject:_documentType forKey:@"documentType"];
-    [coder encodeObject:_charonDocument forKey:@"document"];
+    [coder encodeObject:_revenantDocument forKey:@"document"];
 }
 
-- (instancetype)charon_copyForStore
+- (instancetype)revenant_copyForStore
 {
-    HKDocumentSample *copy = [super charon_copyForStore];
+    HKDocumentSample *copy = [super revenant_copyForStore];
     if (copy) {
         copy->_documentType = [_documentType copy];
-        copy->_charonDocument = [_charonDocument copy];
+        copy->_revenantDocument = [_revenantDocument copy];
     }
     return copy;
 }
@@ -92,11 +92,11 @@
     return _documentType;
 }
 
-- (instancetype)charon_copyWithoutDocument:(nullable NSDictionary *)metadata
+- (instancetype)revenant_copyWithoutDocument:(nullable NSDictionary *)metadata
 {
-    HKDocumentSample *copy = [self charon_copyForStore];
+    HKDocumentSample *copy = [self revenant_copyForStore];
     if (copy)
-        [copy charon_setMetadata:metadata];
+        [copy revenant_setMetadata:metadata];
     return copy;
 }
 
@@ -104,12 +104,12 @@
 
 #pragma mark - HKCDADocumentSample
 
-@interface HKCDADocumentSample (CharonIOS100)
-- (NSDictionary *)charon_document;
+@interface HKCDADocumentSample (RevenantIOS100)
+- (NSDictionary *)revenant_document;
 @end
 
-@interface HKCDADocument (CharonIOS100)
-- (instancetype)charon_initWithDocumentData:(NSData *)documentData
+@interface HKCDADocument (RevenantIOS100)
+- (instancetype)revenant_initWithDocumentData:(NSData *)documentData
                                       title:(nullable NSString *)title
                                  patientName:(nullable NSString *)patientName
                                   authorName:(nullable NSString *)authorName
@@ -136,7 +136,7 @@
     if (validationError)
         facts[HKDetailedCDAValidationErrorKey] = validationError;
     NSMutableDictionary *all = metadata ? [metadata mutableCopy] : [NSMutableDictionary dictionary];
-    all[@"_charon_document"] = facts;
+    all[@"_revenant_document"] = facts;
     return [self CDADocumentSampleWithData:data startDate:startDate endDate:endDate metadata:all];
 }
 
@@ -147,27 +147,27 @@
 {
     if (![data isKindOfClass:[NSData class]])
         data = [NSData data];
-    NSDictionary *stored = metadata[@"_charon_document"];
+    NSDictionary *stored = metadata[@"_revenant_document"];
     NSMutableDictionary *facts = [stored mutableCopy] ?: [NSMutableDictionary dictionary];
     facts[@"data"] = [data copy];
     NSMutableDictionary *all = [metadata mutableCopy] ?: [NSMutableDictionary dictionary];
-    all[@"_charon_document"] = facts;
+    all[@"_revenant_document"] = facts;
     HKDocumentType *type = [HKObjectType documentTypeForIdentifier:HKDocumentTypeIdentifierCDA];
-    return [[self alloc] charon_initWithType:type metadata:all startDate:startDate endDate:endDate document:facts];
+    return [[self alloc] revenant_initWithType:type metadata:all startDate:startDate endDate:endDate document:facts];
 }
 
-- (void)charon_setMetadata:(nullable NSDictionary *)metadata
+- (void)revenant_setMetadata:(nullable NSDictionary *)metadata
 {
-    [super charon_setMetadata:metadata];
+    [super revenant_setMetadata:metadata];
 }
 
-- (instancetype)charon_initWithType:(HKDocumentType *)documentType
+- (instancetype)revenant_initWithType:(HKDocumentType *)documentType
                             metadata:(nullable NSDictionary *)metadata
                            startDate:(NSDate *)startDate
                              endDate:(NSDate *)endDate
                             document:(nullable NSDictionary *)document
 {
-    HKCDADocumentSample *sample = [super charon_initWithType:documentType
+    HKCDADocumentSample *sample = [super revenant_initWithType:documentType
                                                   metadata:metadata
                                                  startDate:startDate
                                                    endDate:endDate
@@ -179,20 +179,20 @@
 
 - (nullable HKCDADocument *)document
 {
-    NSDictionary *facts = [self charon_document];
+    NSDictionary *facts = [self revenant_document];
     NSData *data = facts[@"data"];
     if (![data isKindOfClass:[NSData class]])
         return nil;
-    return [[HKCDADocument alloc] charon_initWithDocumentData:data
+    return [[HKCDADocument alloc] revenant_initWithDocumentData:data
                                                         title:facts[@"title"]
                                                    patientName:facts[@"patientName"]
                                                     authorName:facts[@"authorName"]
                                                  custodianName:facts[@"custodianName"]];
 }
 
-- (NSDictionary *)charon_document
+- (NSDictionary *)revenant_document
 {
-    return [[self metadata][@"_charon_document"] copy] ?: @{};
+    return [[self metadata][@"_revenant_document"] copy] ?: @{};
 }
 
 @end
@@ -208,13 +208,13 @@
     return YES;
 }
 
-+ (instancetype)charon_wheelchairUseObject:(HKWheelchairUse)wheelchairUse
++ (instancetype)revenant_wheelchairUseObject:(HKWheelchairUse)wheelchairUse
 {
-    HKWheelchairUseObject *object = [[HKWheelchairUseObject alloc] charon_initWithWheelchairUse:wheelchairUse];
+    HKWheelchairUseObject *object = [[HKWheelchairUseObject alloc] revenant_initWithWheelchairUse:wheelchairUse];
     return object;
 }
 
-- (instancetype)charon_initWithWheelchairUse:(HKWheelchairUse)wheelchairUse
+- (instancetype)revenant_initWithWheelchairUse:(HKWheelchairUse)wheelchairUse
 {
     HKWheelchairUseObject *fresh = [super init];
     if (fresh)
@@ -237,7 +237,7 @@
 
 - (id)copyWithZone:(NSZone *)zone
 {
-    return [HKWheelchairUseObject charon_wheelchairUseObject:_wheelchairUse];
+    return [HKWheelchairUseObject revenant_wheelchairUseObject:_wheelchairUse];
 }
 
 - (HKWheelchairUse)wheelchairUse
@@ -266,7 +266,7 @@
     return YES;
 }
 
-- (instancetype)charon_initWithActivityType:(HKWorkoutActivityType)activityType
+- (instancetype)revenant_initWithActivityType:(HKWorkoutActivityType)activityType
                                locationType:(HKWorkoutSessionLocationType)locationType
                                  lapLength:(nullable HKQuantity *)lapLength
                        swimmingLocationType:(HKWorkoutSwimmingLocationType)swimmingLocationType
@@ -303,7 +303,7 @@
 
 - (id)copyWithZone:(NSZone *)zone
 {
-    return [[HKWorkoutConfiguration alloc] charon_initWithActivityType:_activityType
+    return [[HKWorkoutConfiguration alloc] revenant_initWithActivityType:_activityType
                                                         locationType:_locationType
                                                           lapLength:_lapLength
                                                 swimmingLocationType:_swimmingLocationType];

@@ -14,9 +14,9 @@ local ledger_output = import("ledger_output", {rootdir = HERE, anonymous = true}
 local USAGE = [[usage: xmake l tools/corpus/api-ledger.lua build --gate <gate dir with lib*Backports.dylib>
     --release-cache <path to dyld_shared_cache_armv7> --vfs <lift vfs.yaml> --out <output dir>
     [--surface <tsv>] [--sdk <iPhoneOS 26.2 SDK>] [--release 6.1.3] [--cache-dir <dir>] [--jobs N]
-    [--refresh] [--frameworks F1,F2,...] [--registries <charon checkout>] [--swift-modules <swift-modules.json>]
+    [--refresh] [--frameworks F1,F2,...] [--registries <revenant checkout>] [--swift-modules <swift-modules.json>]
 --surface defaults to the corpus's sdk-26.2-surface.tsv, --sdk to the workspace's iPhoneOS 26.2 SDK,
---cache-dir to $HOME/.cache/hades/<task>/api-ledger/index.]]
+--cache-dir to $HOME/.revenant/cache/<task>/api-ledger/index.]]
 
 local VALUED = {surface = true, gate = true, release = true, ["release-cache"] = true, sdk = true, vfs = true, ["cache-dir"] = true,
                 out = true, jobs = true, frameworks = true, registries = true, ["swift-modules"] = true}

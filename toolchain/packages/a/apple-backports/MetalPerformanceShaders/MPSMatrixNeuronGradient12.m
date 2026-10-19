@@ -1,12 +1,12 @@
-#define CHARON_MPS_NEURON_IVARS \
+#define REVENANT_MPS_NEURON_IVARS \
     MPSCNNNeuronType _neuronType; \
     float _neuronParameterA, _neuronParameterB, _neuronParameterC; \
     NSData *_neuronPrelu;
 
-#define CHARON_MPS_NEURON_COMMON \
-    - (CharonMPSNeuron)charon_mps_neuron \
+#define REVENANT_MPS_NEURON_COMMON \
+    - (RevenantMPSNeuron)revenant_mps_neuron \
     { \
-        CharonMPSNeuron neuron; \
+        RevenantMPSNeuron neuron; \
         neuron.type = _neuronType; \
         neuron.a = _neuronParameterA; \
         neuron.b = _neuronParameterB; \
@@ -45,18 +45,18 @@
     }
 
 
-#import "CharonMPS.h"
+#import "RevenantMPS.h"
 
 
 @implementation MPSMatrixNeuronGradient {
-    CHARON_MPS_NEURON_IVARS
+    REVENANT_MPS_NEURON_IVARS
     NSUInteger _sourceNumberOfFeatureVectors, _sourceInputFeatureChannels;
     double _alpha;
     MTLOrigin _primarySourceMatrixOrigin, _secondarySourceMatrixOrigin, _resultMatrixOrigin;
     NSUInteger _batchStart, _batchSize;
 }
 
-CHARON_MPS_NEURON_COMMON
+REVENANT_MPS_NEURON_COMMON
 
 - (instancetype)initWithDevice:(id<MTLDevice>)device
 {
@@ -106,64 +106,64 @@ CHARON_MPS_NEURON_COMMON
   resultGradientForDataMatrix:(MPSMatrix *)resultGradientForDataMatrix
   resultGradientForBiasVector:(MPSVector *)resultGradientForBiasVector
 {
-    if (!CharonMPSCommandBufferPermits(commandBuffer))
+    if (!RevenantMPSCommandBufferPermits(commandBuffer))
         return;
-    CharonMPSMatrixView gradient = CharonMPSMatrixViewOf(gradientMatrix), in = CharonMPSMatrixViewOf(inputMatrix), out = CharonMPSMatrixViewOf(resultGradientForDataMatrix);
-    if (!CharonMPSDataTypeIsElement(gradient.dataType) || !CharonMPSDataTypeIsElement(in.dataType) || !CharonMPSDataTypeIsElement(out.dataType)) {
-        CharonMPSRefuse(@"MPSMatrixNeuronGradient: a matrix of a data type that is not one of the eight element types was given");
+    RevenantMPSMatrixView gradient = RevenantMPSMatrixViewOf(gradientMatrix), in = RevenantMPSMatrixViewOf(inputMatrix), out = RevenantMPSMatrixViewOf(resultGradientForDataMatrix);
+    if (!RevenantMPSDataTypeIsElement(gradient.dataType) || !RevenantMPSDataTypeIsElement(in.dataType) || !RevenantMPSDataTypeIsElement(out.dataType)) {
+        RevenantMPSRefuse(@"MPSMatrixNeuronGradient: a matrix of a data type that is not one of the eight element types was given");
         return;
     }
     NSUInteger available = in.rows - _secondarySourceMatrixOrigin.x;
     NSUInteger vectors = _sourceNumberOfFeatureVectors < available ? _sourceNumberOfFeatureVectors : available;
     NSUInteger columns = in.columns - _secondarySourceMatrixOrigin.y;
     NSUInteger channels = _sourceInputFeatureChannels < columns ? _sourceInputFeatureChannels : columns;
-    CharonMPSVectorView bias = {0, 0, 0, 0, 0, 0}, biasGradient = {0, 0, 0, 0, 0, 0};
+    RevenantMPSVectorView bias = {0, 0, 0, 0, 0, 0}, biasGradient = {0, 0, 0, 0, 0, 0};
     if (biasVector)
-        bias = CharonMPSVectorViewOf(biasVector);
+        bias = RevenantMPSVectorViewOf(biasVector);
     if (resultGradientForBiasVector)
-        biasGradient = CharonMPSVectorViewOf(resultGradientForBiasVector);
+        biasGradient = RevenantMPSVectorViewOf(resultGradientForBiasVector);
     NSUInteger start, count;
-    CharonMPSBatch(_batchStart, _batchSize, in.matrices, &start, &count);
+    RevenantMPSBatch(_batchStart, _batchSize, in.matrices, &start, &count);
     count = count < gradient.matrices ? count : gradient.matrices;
     count = count < out.matrices ? count : out.matrices;
     for (NSUInteger b = start; b < start + count; b++) {
-        if (!CharonMPSMatrixHolds(&gradient, b, _primarySourceMatrixOrigin.x, _primarySourceMatrixOrigin.y, vectors, channels) ||
-            !CharonMPSMatrixHolds(&in, b, _secondarySourceMatrixOrigin.x, _secondarySourceMatrixOrigin.y, vectors, channels) ||
-            !CharonMPSMatrixHolds(&out, b, _resultMatrixOrigin.x, _resultMatrixOrigin.y, vectors, channels)) {
-            CharonMPSRefuse(@"MPSMatrixNeuronGradient: a matrix of the batch [%lu, %lu) does not hold the %lux%lu region its origin names", (unsigned long)start, (unsigned long)(start + count), (unsigned long)vectors, (unsigned long)channels);
+        if (!RevenantMPSMatrixHolds(&gradient, b, _primarySourceMatrixOrigin.x, _primarySourceMatrixOrigin.y, vectors, channels) ||
+            !RevenantMPSMatrixHolds(&in, b, _secondarySourceMatrixOrigin.x, _secondarySourceMatrixOrigin.y, vectors, channels) ||
+            !RevenantMPSMatrixHolds(&out, b, _resultMatrixOrigin.x, _resultMatrixOrigin.y, vectors, channels)) {
+            RevenantMPSRefuse(@"MPSMatrixNeuronGradient: a matrix of the batch [%lu, %lu) does not hold the %lux%lu region its origin names", (unsigned long)start, (unsigned long)(start + count), (unsigned long)vectors, (unsigned long)channels);
             return;
         }
     }
-    CharonMPSNeuron neuron = [self charon_mps_neuron];
+    RevenantMPSNeuron neuron = [self revenant_mps_neuron];
     for (NSUInteger b = start; b < start + count; b++) {
         for (NSUInteger column = 0; column < channels; column++) {
             double total = 0.0;
             for (NSUInteger row = 0; row < vectors; row++) {
-                double g = CharonMPSLoad(CharonMPSMatrixElement(&gradient, b, _primarySourceMatrixOrigin.x + row, _primarySourceMatrixOrigin.y + column), gradient.dataType, 0);
-                double x = CharonMPSLoad(CharonMPSMatrixElement(&in, b, _secondarySourceMatrixOrigin.x + row, _secondarySourceMatrixOrigin.y + column), in.dataType, 0);
-                double b0 = bias.length > column ? CharonMPSLoad(CharonMPSVectorElement(&bias, 0, column), bias.dataType, 0) : 0.0;
+                double g = RevenantMPSLoad(RevenantMPSMatrixElement(&gradient, b, _primarySourceMatrixOrigin.x + row, _primarySourceMatrixOrigin.y + column), gradient.dataType, 0);
+                double x = RevenantMPSLoad(RevenantMPSMatrixElement(&in, b, _secondarySourceMatrixOrigin.x + row, _secondarySourceMatrixOrigin.y + column), in.dataType, 0);
+                double b0 = bias.length > column ? RevenantMPSLoad(RevenantMPSVectorElement(&bias, 0, column), bias.dataType, 0) : 0.0;
                 double intermediate = _alpha * x + b0;
-                double y = CharonMPSApplyNeuron(neuron.type, intermediate, neuron.a, neuron.b, neuron.c, CharonMPSNeuronA(&neuron, column));
-                double d = CharonMPSApplyNeuronGradient(neuron.type, intermediate, y, neuron.a, neuron.b, neuron.c, CharonMPSNeuronA(&neuron, column));
+                double y = RevenantMPSApplyNeuron(neuron.type, intermediate, neuron.a, neuron.b, neuron.c, RevenantMPSNeuronA(&neuron, column));
+                double d = RevenantMPSApplyNeuronGradient(neuron.type, intermediate, y, neuron.a, neuron.b, neuron.c, RevenantMPSNeuronA(&neuron, column));
                 total += g * d;
             }
             if (biasGradient.length > column)
-                CharonMPSStore(CharonMPSVectorElement(&biasGradient, 0, column), biasGradient.dataType, 0, total);
+                RevenantMPSStore(RevenantMPSVectorElement(&biasGradient, 0, column), biasGradient.dataType, 0, total);
         }
         for (NSUInteger row = 0; row < vectors; row++) {
             for (NSUInteger column = 0; column < channels; column++) {
-                double g = CharonMPSLoad(CharonMPSMatrixElement(&gradient, b, _primarySourceMatrixOrigin.x + row, _primarySourceMatrixOrigin.y + column), gradient.dataType, 0);
-                double x = CharonMPSLoad(CharonMPSMatrixElement(&in, b, _secondarySourceMatrixOrigin.x + row, _secondarySourceMatrixOrigin.y + column), in.dataType, 0);
-                double b0 = bias.length > column ? CharonMPSLoad(CharonMPSVectorElement(&bias, 0, column), bias.dataType, 0) : 0.0;
+                double g = RevenantMPSLoad(RevenantMPSMatrixElement(&gradient, b, _primarySourceMatrixOrigin.x + row, _primarySourceMatrixOrigin.y + column), gradient.dataType, 0);
+                double x = RevenantMPSLoad(RevenantMPSMatrixElement(&in, b, _secondarySourceMatrixOrigin.x + row, _secondarySourceMatrixOrigin.y + column), in.dataType, 0);
+                double b0 = bias.length > column ? RevenantMPSLoad(RevenantMPSVectorElement(&bias, 0, column), bias.dataType, 0) : 0.0;
                 double intermediate = _alpha * x + b0;
-                double y = CharonMPSApplyNeuron(neuron.type, intermediate, neuron.a, neuron.b, neuron.c, CharonMPSNeuronA(&neuron, column));
-                double d = CharonMPSApplyNeuronGradient(neuron.type, intermediate, y, neuron.a, neuron.b, neuron.c, CharonMPSNeuronA(&neuron, column));
-                CharonMPSStore(CharonMPSMatrixElement(&out, b, _resultMatrixOrigin.x + row, _resultMatrixOrigin.y + column), out.dataType, 0, g * d * _alpha);
+                double y = RevenantMPSApplyNeuron(neuron.type, intermediate, neuron.a, neuron.b, neuron.c, RevenantMPSNeuronA(&neuron, column));
+                double d = RevenantMPSApplyNeuronGradient(neuron.type, intermediate, y, neuron.a, neuron.b, neuron.c, RevenantMPSNeuronA(&neuron, column));
+                RevenantMPSStore(RevenantMPSMatrixElement(&out, b, _resultMatrixOrigin.x + row, _resultMatrixOrigin.y + column), out.dataType, 0, g * d * _alpha);
             }
         }
     }
-    CharonMPSConsumeReadCount(gradientMatrix);
-    CharonMPSConsumeReadCount(inputMatrix);
+    RevenantMPSConsumeReadCount(gradientMatrix);
+    RevenantMPSConsumeReadCount(inputMatrix);
 }
 
 - (instancetype)initWithCoder:(NSCoder *)aDecoder device:(id<MTLDevice>)device

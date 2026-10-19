@@ -15,11 +15,11 @@
 *.lock linguist-generated
 **/GENERATED-* linguist-generated=true
 *.swift.gyb linguist-language=Swift
-charon/docs/** linguist-documentation
-shade/docs/** linguist-documentation
-katabasis/docs/** linguist-documentation
-revenant-webkit/docs/** linguist-documentation
-frameworks/styx/docs/** linguist-documentation
-frameworks/eidolon/docs/** linguist-documentation
+toolchain/docs/** linguist-documentation
+emulator/docs/** linguist-documentation
+recompiler/docs/** linguist-documentation
+frameworks/WebKit/docs/** linguist-documentation
+frameworks/Combine/docs/** linguist-documentation
+frameworks/SwiftUI/docs/** linguist-documentation
 
-charon/tests/addon/sdk-verbatim/** comments=fixture
+toolchain/tests/addon/sdk-verbatim/** comments=fixture

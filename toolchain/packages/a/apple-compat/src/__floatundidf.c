@@ -2,5 +2,5 @@
 
 double __floatundidf(unsigned long long value)
 {
-    return charon_double(value);
+    return revenant_double(value);
 }

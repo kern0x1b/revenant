@@ -15,8 +15,8 @@ function universal(target, architectures, stage)
         if architecture == config.arch() then
             built = path.join(target:targetdir(), target:basename() .. ".app")
         else
-            local builddir = path.join(config.builddir(), ".charon", "slices", architecture)
-            local envs = {XMAKE_CONFIGDIR = path.join(builddir, "config"), CHARON_SLICE = architecture, CHARON_SLICES = table.concat(architectures, ",")}
+            local builddir = path.join(config.builddir(), ".revenant", "slices", architecture)
+            local envs = {XMAKE_CONFIGDIR = path.join(builddir, "config"), REVENANT_SLICE = architecture, REVENANT_SLICES = table.concat(architectures, ",")}
             os.vexecv(os.programfile(), {"f", "-P", os.projectdir(), "-p", config.plat(), "-a", architecture, "-m", config.mode() or "release", "-o", builddir, "-y"}, {envs = envs})
             os.vexecv(os.programfile(), {"build", "-P", os.projectdir(), "-y", target:name()}, {envs = envs})
             built = path.join(builddir, config.plat(), architecture, config.mode() or "release", target:basename() .. ".app")
@@ -37,7 +37,7 @@ function universal(target, architectures, stage)
     end
     table.sort(merged, function (a, b) return a ~= executable and b == executable end)
     for _, binary in ipairs(merged) do
-        platform.sign(target, binary, binary == executable and target:values("charon.entitlements") or nil)
+        platform.sign(target, binary, binary == executable and target:values("revenant.entitlements") or nil)
     end
     for _, architecture in ipairs(architectures) do
         local source = platform.imports_source(target, architecture)
@@ -50,11 +50,11 @@ end
 function packages()
     local grouped = {}
     for _, target in ipairs(project.ordertargets()) do
-        local control = target:values("charon.control")
+        local control = target:values("revenant.control")
         if control then
             control = path.absolute(control, target:scriptdir())
             grouped[control] = grouped[control] or {targets = {}, scripts = nil, licenses = {}}
-            local declared = target:values("charon.version")
+            local declared = target:values("revenant.version")
             if declared then
                 if grouped[control].version and grouped[control].version ~= declared then
                     raise("%s is packaged at versions %s and %s by different targets", control, grouped[control].version, declared)
@@ -62,10 +62,10 @@ function packages()
                 grouped[control].version = declared
             end
             table.insert(grouped[control].targets, target)
-            for _, license in ipairs(table.wrap(target:values("charon.licenses"))) do
+            for _, license in ipairs(table.wrap(target:values("revenant.licenses"))) do
                 table.insert(grouped[control].licenses, path.absolute(license, target:scriptdir()))
             end
-            local scripts = target:values("charon.maintainer-scripts")
+            local scripts = target:values("revenant.maintainer-scripts")
             if scripts then
                 grouped[control].scripts = path.absolute(scripts, target:scriptdir())
             end
@@ -87,12 +87,12 @@ function write(opt)
         end
         local version = described.version or project.version()
         if wanted and not version then
-            raise("%s has no charon.version on its targets and the project no set_version(), and a Debian package cannot be written without one", control)
+            raise("%s has no revenant.version on its targets and the project no set_version(), and a Debian package cannot be written without one", control)
         end
         if wanted then
             import("apple.platform")
-            os.setenv("CHARON_RELEASE", "1")
-            local stage = path.join(config.builddir(), ".charon", "stage", path.basename(control))
+            os.setenv("REVENANT_RELEASE", "1")
+            local stage = path.join(config.builddir(), ".revenant", "stage", path.basename(control))
             os.tryrm(stage)
             local depends = {}
             for _, target in ipairs(described.targets) do
@@ -111,7 +111,7 @@ function write(opt)
                         local copied
                         if dependency.meta then
                             copied = import("apple.shared_runtime").deb(dependency.meta, dependency.root, platform.ldid(target),
-                                                                        path.join(config.builddir(), ".charon", "shared", dependency.name), outputdir)
+                                                                        path.join(config.builddir(), ".revenant", "shared", dependency.name), outputdir)
                         else
                             copied = platform.copy_program(dependency.deb, path.join(outputdir, path.filename(dependency.deb)), dependency.name)
                         end
@@ -144,7 +144,7 @@ function write(opt)
         end
     end
     if #written == 0 then
-        raise("no target names a control file with set_values(\"charon.control\", ...), so there is no package to write")
+        raise("no target names a control file with set_values(\"revenant.control\", ...), so there is no package to write")
     end
     return written
 end

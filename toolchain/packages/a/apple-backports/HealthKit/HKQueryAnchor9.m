@@ -1,6 +1,6 @@
 #import <HealthKit/HealthKit.h>
 
-#import "CharonHKStore.h"
+#import "RevenantHKStore.h"
 
 @implementation HKQueryAnchor {
     NSInteger _sequence;
@@ -11,7 +11,7 @@
     return YES;
 }
 
-+ (instancetype)charon_anchorWithSequence:(NSInteger)sequence
++ (instancetype)revenant_anchorWithSequence:(NSInteger)sequence
 {
     HKQueryAnchor *anchor = [[HKQueryAnchor alloc] init];
     anchor->_sequence = sequence;
@@ -38,17 +38,17 @@
 
 - (id)copyWithZone:(NSZone *)zone
 {
-    return [HKQueryAnchor charon_anchorWithSequence:_sequence];
+    return [HKQueryAnchor revenant_anchorWithSequence:_sequence];
 }
 
-- (NSInteger)charon_sequence
+- (NSInteger)revenant_sequence
 {
     return _sequence;
 }
 
 + (instancetype)anchorFromValue:(NSUInteger)value
 {
-    return [self charon_anchorWithSequence:(NSInteger)value];
+    return [self revenant_anchorWithSequence:(NSInteger)value];
 }
 
 - (BOOL)isEqual:(id)other
@@ -57,7 +57,7 @@
         return YES;
     if (![other isKindOfClass:[HKQueryAnchor class]])
         return NO;
-    return _sequence == ((HKQueryAnchor *)other).charon_sequence;
+    return _sequence == ((HKQueryAnchor *)other).revenant_sequence;
 }
 
 - (NSUInteger)hash

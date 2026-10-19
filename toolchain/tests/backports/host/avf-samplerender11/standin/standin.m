@@ -2,7 +2,7 @@
 
 NSString *const AVFoundationErrorDomain = @"AVFoundationErrorDomain";
 
-@implementation NSValue (CharonStandinCMTime)
+@implementation NSValue (RevenantStandinCMTime)
 
 + (NSValue *)valueWithCMTime:(CMTime)time
 {

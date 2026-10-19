@@ -20,11 +20,11 @@ static void configure(NSString *name)
     currentConfiguration = [name stringByAppendingString:@": "];
 }
 
-@interface CharonSpyInput : AVAssetWriterInput
+@interface RevenantSpyInput : AVAssetWriterInput
 @property (nonatomic, strong) NSMutableArray<NSString *> *invoked;
 @end
 
-@implementation CharonSpyInput
+@implementation RevenantSpyInput
 
 - (instancetype)initWithProbeMediaType:(AVMediaType)mediaType outputSettings:(NSDictionary *)settings
 {
@@ -43,18 +43,18 @@ static void configure(NSString *name)
 
 @end
 
-static NSURL *charon_scratchURL(NSString *name)
+static NSURL *revenant_scratchURL(NSString *name)
 {
     return [NSURL fileURLWithPath:[NSTemporaryDirectory() stringByAppendingPathComponent:
-                                   [NSString stringWithFormat:@"charon-avf-%@-%@-%u.mov", name,
+                                   [NSString stringWithFormat:@"revenant-avf-%@-%@-%u.mov", name,
                                        [[NSUUID UUID] UUIDString], getpid()]]];
 }
 
-static NSDictionary *charon_encodableSettings(void)
+static NSDictionary *revenant_encodableSettings(void)
 {
     NSDictionary *settings = @{AVVideoCodecKey: AVVideoCodecTypeH264,
                                AVVideoWidthKey: @16, AVVideoHeightKey: @16};
-    AVAssetWriter *writer = [[AVAssetWriter alloc] initWithURL:charon_scratchURL(@"ask")
+    AVAssetWriter *writer = [[AVAssetWriter alloc] initWithURL:revenant_scratchURL(@"ask")
                                                      fileType:AVFileTypeQuickTimeMovie
                                                         error:NULL];
     if (![writer canApplyOutputSettings:settings forMediaType:AVMediaTypeVideo])
@@ -76,31 +76,31 @@ static NSString *describeRanges(AVAssetWriterInputPassDescription *description)
     return parts.count ? [parts componentsJoinedByString:@" "] : @"[]";
 }
 
-static const double kCharonPassBoundSeconds = 2.0;
-static const double kCharonPassQuietSeconds = 0.25;
+static const double kRevenantPassBoundSeconds = 2.0;
+static const double kRevenantPassQuietSeconds = 0.25;
 
-static NSString *charon_timedOutMarker(void)
+static NSString *revenant_timedOutMarker(void)
 {
-    return [NSString stringWithFormat:@"TIMED-OUT-%gs", kCharonPassBoundSeconds];
+    return [NSString stringWithFormat:@"TIMED-OUT-%gs", kRevenantPassBoundSeconds];
 }
 
-static NSString *charon_count_value(BOOL settled, NSInteger count)
+static NSString *revenant_count_value(BOOL settled, NSInteger count)
 {
-    return settled ? [NSString stringWithFormat:@"%ld", (long)count] : charon_timedOutMarker();
+    return settled ? [NSString stringWithFormat:@"%ld", (long)count] : revenant_timedOutMarker();
 }
 
-static dispatch_time_t charon_deadline(double seconds)
+static dispatch_time_t revenant_deadline(double seconds)
 {
     return dispatch_time(DISPATCH_TIME_NOW, (int64_t)(seconds * (double)NSEC_PER_SEC));
 }
 
-static BOOL charon_settle(dispatch_semaphore_t semaphore, NSInteger atLeast)
+static BOOL revenant_settle(dispatch_semaphore_t semaphore, NSInteger atLeast)
 {
     for (NSInteger index = 0; index < atLeast; index++) {
-        if (dispatch_semaphore_wait(semaphore, charon_deadline(kCharonPassBoundSeconds)) != 0)
+        if (dispatch_semaphore_wait(semaphore, revenant_deadline(kRevenantPassBoundSeconds)) != 0)
             return NO;
     }
-    while (dispatch_semaphore_wait(semaphore, charon_deadline(kCharonPassQuietSeconds)) == 0)
+    while (dispatch_semaphore_wait(semaphore, revenant_deadline(kRevenantPassQuietSeconds)) == 0)
         ;
     return YES;
 }
@@ -141,8 +141,8 @@ static void askControls(void)
     };
     row("SELECTOR markAsFinished",
         class_getInstanceMethod(inputClass, @selector(markAsFinished)) ? @"PRESENT" : @"ABSENT");
-    row("SELECTOR charonProbeNoSuchSelector",
-        class_getInstanceMethod(inputClass, member("charonProbeNoSuchSelector")) ? @"PRESENT" : @"ABSENT");
+    row("SELECTOR revenantProbeNoSuchSelector",
+        class_getInstanceMethod(inputClass, member("revenantProbeNoSuchSelector")) ? @"PRESENT" : @"ABSENT");
     row("SELECTOR performsMultiPassEncodingIfSupported",
         class_getInstanceMethod(inputClass, member("performsMultiPassEncodingIfSupported")) ? @"PRESENT" : @"ABSENT");
     row("SELECTOR setPerformsMultiPassEncodingIfSupported:",
@@ -162,7 +162,7 @@ static void askControls(void)
 static void askUnattachedStates(NSDictionary *settings, BOOL requestMultiplePasses)
 {
     configure(requestMultiplePasses ? @"switch-on unattached" : @"switch-off unattached");
-    CharonSpyInput *lonely = [[CharonSpyInput alloc] initWithProbeMediaType:AVMediaTypeVideo
+    RevenantSpyInput *lonely = [[RevenantSpyInput alloc] initWithProbeMediaType:AVMediaTypeVideo
                                                              outputSettings:settings];
     askInputState(@"unattached", lonely);
     if (!requestMultiplePasses)
@@ -179,10 +179,10 @@ static void askUnattachedStates(NSDictionary *settings, BOOL requestMultiplePass
 static void askBeforeStartWriting(NSDictionary *settings, BOOL requestMultiplePasses)
 {
     configure(requestMultiplePasses ? @"switch-on before startWriting" : @"switch-off before startWriting");
-    NSURL *url = charon_scratchURL(@"early");
+    NSURL *url = revenant_scratchURL(@"early");
     AVAssetWriter *writer = [[AVAssetWriter alloc] initWithURL:url fileType:AVFileTypeQuickTimeMovie
                                                          error:NULL];
-    CharonSpyInput *input = [[CharonSpyInput alloc] initWithProbeMediaType:AVMediaTypeVideo
+    RevenantSpyInput *input = [[RevenantSpyInput alloc] initWithProbeMediaType:AVMediaTypeVideo
                                                             outputSettings:settings];
     if (requestMultiplePasses)
         input.performsMultiPassEncodingIfSupported = YES;
@@ -190,7 +190,7 @@ static void askBeforeStartWriting(NSDictionary *settings, BOOL requestMultiplePa
     [writer addInput:input];
     askInputState(@"attached before startWriting", input);
 
-    dispatch_queue_t queue = dispatch_queue_create("charon.avf.writerinput8", DISPATCH_QUEUE_SERIAL);
+    dispatch_queue_t queue = dispatch_queue_create("revenant.avf.writerinput8", DISPATCH_QUEUE_SERIAL);
     static const char key = 'c';
     dispatch_queue_set_specific(queue, &key, (void *)1, NULL);
 
@@ -211,9 +211,9 @@ static void askBeforeStartWriting(NSDictionary *settings, BOOL requestMultiplePa
     reportCall(@"respondToEachPassDescription a second time", ^{
         [input respondToEachPassDescriptionOnQueue:queue usingBlock:record];
     });
-    BOOL quiet = charon_settle(arrived, 0);
-    row(@"block calls before startWriting".UTF8String, charon_count_value(quiet, calls));
-    row(@"block on the given queue before startWriting".UTF8String, charon_count_value(quiet, onTheGivenQueue));
+    BOOL quiet = revenant_settle(arrived, 0);
+    row(@"block calls before startWriting".UTF8String, revenant_count_value(quiet, calls));
+    row(@"block on the given queue before startWriting".UTF8String, revenant_count_value(quiet, onTheGivenQueue));
 
     reportCall(@"markCurrentPassAsFinished before startWriting", ^{
         [input markCurrentPassAsFinished];
@@ -229,14 +229,14 @@ static void askBeforeStartWriting(NSDictionary *settings, BOOL requestMultiplePa
 static void askFullSequence(NSDictionary *settings, BOOL requestMultiplePasses)
 {
     configure(requestMultiplePasses ? @"switch-on" : @"switch-off");
-    NSURL *url = charon_scratchURL(@"run");
+    NSURL *url = revenant_scratchURL(@"run");
     AVAssetWriter *writer = [[AVAssetWriter alloc] initWithURL:url fileType:AVFileTypeQuickTimeMovie
                                                          error:NULL];
-    CharonSpyInput *input = [[CharonSpyInput alloc] initWithProbeMediaType:AVMediaTypeVideo
+    RevenantSpyInput *input = [[RevenantSpyInput alloc] initWithProbeMediaType:AVMediaTypeVideo
                                                             outputSettings:settings];
     [writer addInput:input];
 
-    dispatch_queue_t queue = dispatch_queue_create("charon.avf.writerinput8", DISPATCH_QUEUE_SERIAL);
+    dispatch_queue_t queue = dispatch_queue_create("revenant.avf.writerinput8", DISPATCH_QUEUE_SERIAL);
     static const char key = 'c';
     dispatch_queue_set_specific(queue, &key, (void *)1, NULL);
     __block NSInteger calls = 0;
@@ -269,9 +269,9 @@ static void askFullSequence(NSDictionary *settings, BOOL requestMultiplePasses)
             dispatch_semaphore_signal(arrived);
         }];
     });
-    BOOL registrationSettled = charon_settle(arrived, 0);
-    row(@"block calls on registration".UTF8String, charon_count_value(registrationSettled, calls));
-    row(@"block on the given queue on registration".UTF8String, charon_count_value(registrationSettled, onTheGivenQueue));
+    BOOL registrationSettled = revenant_settle(arrived, 0);
+    row(@"block calls on registration".UTF8String, revenant_count_value(registrationSettled, calls));
+    row(@"block on the given queue on registration".UTF8String, revenant_count_value(registrationSettled, onTheGivenQueue));
 
     reportCall(@"respondToEachPassDescription a second time after startWriting", ^{
         [input respondToEachPassDescriptionOnQueue:queue usingBlock:^{
@@ -284,26 +284,26 @@ static void askFullSequence(NSDictionary *settings, BOOL requestMultiplePasses)
     reportCall(@"markCurrentPassAsFinished after startWriting", ^{
         [input markCurrentPassAsFinished];
     });
-    BOOL analysisSettled = charon_settle(arrived, 1);
+    BOOL analysisSettled = revenant_settle(arrived, 1);
     askInputState(@"after markCurrentPassAsFinished", input);
     row(@"markCurrentPassAsFinished called markAsFinished itself".UTF8String,
         input.invoked.count ? [input.invoked componentsJoinedByString:@","] : @"NO");
-    row(@"block calls after markCurrentPassAsFinished".UTF8String, charon_count_value(analysisSettled, calls));
+    row(@"block calls after markCurrentPassAsFinished".UTF8String, revenant_count_value(analysisSettled, calls));
     row(@"block on the given queue after markCurrentPassAsFinished".UTF8String,
-        charon_count_value(analysisSettled, onTheGivenQueue));
+        revenant_count_value(analysisSettled, onTheGivenQueue));
     row(@"block saw".UTF8String, analysisSettled ? (seen.count ? [seen componentsJoinedByString:@" then "] : @"NONE")
-                                                 : charon_timedOutMarker());
+                                                 : revenant_timedOutMarker());
 
     reportCall(@"markCurrentPassAsFinished a second time", ^{
         [input markCurrentPassAsFinished];
     });
-    analysisSettled = charon_settle(arrived, 0);
-    row(@"block calls after a second markCurrentPassAsFinished".UTF8String, charon_count_value(analysisSettled, calls));
+    analysisSettled = revenant_settle(arrived, 0);
+    row(@"block calls after a second markCurrentPassAsFinished".UTF8String, revenant_count_value(analysisSettled, calls));
 
     reportCall(@"markAsFinished after the final pass invocation", ^{
         [input markAsFinished];
     });
-    analysisSettled = charon_settle(arrived, 0);
+    analysisSettled = revenant_settle(arrived, 0);
     askInputState(@"after markAsFinished", input);
     row(@"finishWriting".UTF8String, [writer finishWriting] ? @"YES" : @"NO");
     askInputState(@"after finishWriting", input);
@@ -327,7 +327,7 @@ AVURLAsset *written = [AVURLAsset URLAssetWithURL:url options:nil];
         row(@"AVAssetExportSession canPerformMultiplePassesOverSourceMediaData reads back".UTF8String,
             session.canPerformMultiplePassesOverSourceMediaData ? @"YES" : @"NO");
         dispatch_semaphore_t exported = dispatch_semaphore_create(0);
-        session.outputURL = charon_scratchURL(@"export");
+        session.outputURL = revenant_scratchURL(@"export");
         session.outputFileType = AVFileTypeQuickTimeMovie;
         [session exportAsynchronouslyWithCompletionHandler:^{
             dispatch_semaphore_signal(exported);
@@ -345,10 +345,10 @@ AVURLAsset *written = [AVURLAsset URLAssetWithURL:url options:nil];
 static void askMarkAsFinishedOnly(NSDictionary *settings)
 {
     configure(@"markAsFinished only");
-    NSURL *url = charon_scratchURL(@"only");
+    NSURL *url = revenant_scratchURL(@"only");
     AVAssetWriter *writer = [[AVAssetWriter alloc] initWithURL:url fileType:AVFileTypeQuickTimeMovie
                                                          error:NULL];
-    CharonSpyInput *input = [[CharonSpyInput alloc] initWithProbeMediaType:AVMediaTypeVideo
+    RevenantSpyInput *input = [[RevenantSpyInput alloc] initWithProbeMediaType:AVMediaTypeVideo
                                                             outputSettings:settings];
     [writer addInput:input];
     row(@"startWriting".UTF8String, [writer startWriting] ? @"YES" : @"NO");
@@ -363,7 +363,7 @@ int main(void)
 {
     @autoreleasepool {
         askControls();
-        NSDictionary *settings = charon_encodableSettings();
+        NSDictionary *settings = revenant_encodableSettings();
         if (!settings) {
             configure(@"CONFIGURATION");
             row(@"h264 16x16, no bitrate".UTF8String, @"THIS-MACHINE-ENCODES-NO-H264 so nothing below ran");

@@ -4,26 +4,26 @@
 #include "mps-reference.h"
 #import <objc/runtime.h>
 
-@protocol CharonImageUnaryEncode
+@protocol RevenantImageUnaryEncode
 - (void)encodeToCommandBuffer:(id<MTLCommandBuffer>)commandBuffer
                  sourceImage:(MPSImage *)sourceImage
             destinationImage:(MPSImage *)destinationImage;
 @end
 
-@protocol CharonImageBinaryEncode
+@protocol RevenantImageBinaryEncode
 - (void)encodeToCommandBuffer:(id<MTLCommandBuffer>)commandBuffer
                   primaryImage:(MPSImage *)primaryImage
                 secondaryImage:(MPSImage *)secondaryImage
                destinationImage:(MPSImage *)destinationImage;
 @end
 
-@protocol CharonHistogramEncode
+@protocol RevenantHistogramEncode
 - (void)encodeToCommandBuffer:(id<MTLCommandBuffer>)commandBuffer
                 sourceTexture:(id<MTLTexture>)source
                      histogram:(id<MTLBuffer>)histogram
                 histogramOffset:(NSUInteger)histogramOffset;
 @end
-@protocol CharonNormalizedHistogramEncode
+@protocol RevenantNormalizedHistogramEncode
 - (void)encodeToCommandBuffer:(id<MTLCommandBuffer>)commandBuffer
                 sourceTexture:(id<MTLTexture>)source
               minmaxTexture:(id<MTLTexture>)minmax
@@ -31,26 +31,26 @@
                 histogramOffset:(NSUInteger)histogramOffset;
 @end
 
-@protocol CharonMorphologyAreaInit
+@protocol RevenantMorphologyAreaInit
 - (instancetype)initWithDevice:(id<MTLDevice>)device
                   kernelHeight:(NSUInteger)kernelHeight
                    kernelWidth:(NSUInteger)kernelWidth;
 @end
-@protocol CharonMorphologyDilateInit
+@protocol RevenantMorphologyDilateInit
 - (instancetype)initWithDevice:(id<MTLDevice>)device
                   kernelHeight:(NSUInteger)kernelHeight
                    kernelWidth:(NSUInteger)kernelWidth
                        values:(const float *)values;
 @end
 
-@protocol CharonImageConvolutionEncode
+@protocol RevenantImageConvolutionEncode
 @property (readwrite, nonatomic) float bias;
 - (void)encodeToCommandBuffer:(id<MTLCommandBuffer>)commandBuffer
                    sourceImage:(MPSImage *)sourceImage
              destinationImage:(MPSImage *)destinationImage;
 @end
 
-@protocol CharonImageBoxEncode
+@protocol RevenantImageBoxEncode
 - (instancetype)initWithDevice:(id<MTLDevice>)device
                   kernelHeight:(NSUInteger)kernelHeight
                    kernelWidth:(NSUInteger)kernelWidth;
@@ -59,14 +59,14 @@
              destinationImage:(MPSImage *)destinationImage;
 @end
 
-@protocol CharonImageConvolutionInit
+@protocol RevenantImageConvolutionInit
 - (instancetype)initWithDevice:(id<MTLDevice>)device
                     kernelWidth:(NSUInteger)kernelWidth
                    kernelHeight:(NSUInteger)kernelHeight
                         weights:(const float *)kernelWeights;
 @end
 
-@protocol CharonImageReduceEncode
+@protocol RevenantImageReduceEncode
 @property (readwrite, nonatomic) MTLRegion clipRectSource;
 - (instancetype)initWithDevice:(id<MTLDevice>)device;
 - (void)encodeToCommandBuffer:(id<MTLCommandBuffer>)commandBuffer
@@ -76,9 +76,9 @@
 
 static id<MTLDevice> gDevice = nil;
 
-static void runUnary(const char *name, id<CharonImageUnaryEncode> kernel, MPSImage *destination,
+static void runUnary(const char *name, id<RevenantImageUnaryEncode> kernel, MPSImage *destination,
                      MPSImage *source, NSUInteger rows, NSUInteger cols, NSUInteger values,
-                     const float *input, CharonRefThreshold which, double threshold, double maximum)
+                     const float *input, RevenantRefThreshold which, double threshold, double maximum)
 {
     @autoreleasepool {
         float out[256] = {0};
@@ -101,13 +101,13 @@ static void runUnary(const char *name, id<CharonImageUnaryEncode> kernel, MPSIma
         for (NSUInteger i = 0; i < values; i++)
             printf(" %.9g", (double)answer[i]);
         printf("\n");
-        CharonCompareUnary(name, input, values, answer, which, threshold, maximum);
+        RevenantCompareUnary(name, input, values, answer, which, threshold, maximum);
     }
 }
 
-static void runBinary(const char *name, id<CharonImageBinaryEncode> kernel, MPSImage *destination,
+static void runBinary(const char *name, id<RevenantImageBinaryEncode> kernel, MPSImage *destination,
                       MPSImage *primary, MPSImage *secondary, NSUInteger rows, NSUInteger cols,
-                      NSUInteger values, const float *input, const float *other, CharonRefOperation op)
+                      NSUInteger values, const float *input, const float *other, RevenantRefOperation op)
 {
     @autoreleasepool {
         NSUInteger perRow = cols * sizeof(float);
@@ -132,7 +132,7 @@ static void runBinary(const char *name, id<CharonImageBinaryEncode> kernel, MPSI
         for (NSUInteger i = 0; i < values; i++)
             printf(" %.9g", (double)answer[i]);
         printf("\n");
-        CharonCompareBinary(name, input, other, values, answer, op);
+        RevenantCompareBinary(name, input, other, values, answer, op);
     }
 }
 
@@ -194,18 +194,18 @@ int main(int argc, const char **argv)
             id kernel = [[thresholds[i] alloc] initWithDevice:gDevice
                                                  thresholdValue:0.5f
                                         linearGrayColorTransform:NULL];
-            static const CharonRefThreshold kinds[5] = {CharonRefToZero, CharonRefToZeroInverse,
-                                                        CharonRefBinary, CharonRefBinaryInverse,
-                                                        CharonRefTruncate};
-            runUnary(thresholdNames[i], (id<CharonImageUnaryEncode>)kernel, left, source,
+            static const RevenantRefThreshold kinds[5] = {RevenantRefToZero, RevenantRefToZeroInverse,
+                                                        RevenantRefBinary, RevenantRefBinaryInverse,
+                                                        RevenantRefTruncate};
+            runUnary(thresholdNames[i], (id<RevenantImageUnaryEncode>)kernel, left, source,
                      rows, cols, values, input, kinds[i], 0.5, 1.0);
         }
 
         for (int i = 0; i < 4; i++) {
             if (!arithmetic[i]) continue;
-            static const CharonRefOperation ops[4] = {CharonRefAdd, CharonRefSubtract,
-                                                        CharonRefMultiply, CharonRefDivide};
-            runBinary(arithNames[i], (id<CharonImageBinaryEncode>)arithmetic[i], right, source, left,
+            static const RevenantRefOperation ops[4] = {RevenantRefAdd, RevenantRefSubtract,
+                                                        RevenantRefMultiply, RevenantRefDivide};
+            runBinary(arithNames[i], (id<RevenantImageBinaryEncode>)arithmetic[i], right, source, left,
                       rows, cols, values, input, second, ops[i]);
         }
 
@@ -225,7 +225,7 @@ int main(int argc, const char **argv)
                     fed[i] = input[i];
                 [[narrow texture] replaceRegion:MTLRegionMake2D(0, 0, cols, rows) mipmapLevel:0
                                         withBytes:fed bytesPerRow:cols * sizeof(float)];
-                [(id<CharonImageUnaryEncode>)kernel encodeToCommandBuffer:[gDevice newCommandBuffer]
+                [(id<RevenantImageUnaryEncode>)kernel encodeToCommandBuffer:[gDevice newCommandBuffer]
                                                               sourceImage:narrow
                                                          destinationImage:transposed];
                 float got[12] = {0};
@@ -235,7 +235,7 @@ int main(int argc, const char **argv)
                 for (NSUInteger i = 0; i < dstCols * dstRows; i++)
                     printf(" %.9g", (double)got[i]);
                 printf("\n");
-                CharonReferenceTranspose("transpose", fed, cols, rows, got, dstCols, dstRows);
+                RevenantReferenceTranspose("transpose", fed, cols, rows, got, dstCols, dstRows);
             }
         }
 
@@ -307,7 +307,7 @@ int main(int argc, const char **argv)
                         for (NSUInteger i = 0; i < perImage * images; i++)
                             printf(" %.9g", (double)got[originColumn + i]);
                         printf("\n");
-                        CharonReferenceImageCopyToMatrix(layoutNames[l], fed, cols, rows, channels, images,
+                        RevenantReferenceImageCopyToMatrix(layoutNames[l], fed, cols, rows, channels, images,
                                                          layouts[l], originRow, originColumn,
                                                          got, rowElements);
                     }
@@ -323,18 +323,18 @@ int main(int argc, const char **argv)
                                                  "reduce-row-max", "reduce-column-max",
                                                  "reduce-row-mean", "reduce-column-mean",
                                                  "reduce-row-sum", "reduce-column-sum"};
-            static const char *renamed[8] = {"CharonMPSImageReduceRowMin", "CharonMPSImageReduceColumnMin",
-                                             "CharonMPSImageReduceRowMax", "CharonMPSImageReduceColumnMax",
-                                             "CharonMPSImageReduceRowMean", "CharonMPSImageReduceColumnMean",
-                                             "CharonMPSImageReduceRowSum", "CharonMPSImageReduceColumnSum"};
+            static const char *renamed[8] = {"RevenantMPSImageReduceRowMin", "RevenantMPSImageReduceColumnMin",
+                                             "RevenantMPSImageReduceRowMax", "RevenantMPSImageReduceColumnMax",
+                                             "RevenantMPSImageReduceRowMean", "RevenantMPSImageReduceColumnMean",
+                                             "RevenantMPSImageReduceRowSum", "RevenantMPSImageReduceColumnSum"};
             Class reduceClasses[8] = {[MPSImageReduceRowMin class], [MPSImageReduceColumnMin class],
                                       [MPSImageReduceRowMax class], [MPSImageReduceColumnMax class],
                                       [MPSImageReduceRowMean class], [MPSImageReduceColumnMean class],
                                       [MPSImageReduceRowSum class], [MPSImageReduceColumnSum class]};
-            static const CharonRefReduce kinds[8] = {CharonRefReduceMin, CharonRefReduceMin,
-                                                      CharonRefReduceMax, CharonRefReduceMax,
-                                                      CharonRefReduceMean, CharonRefReduceMean,
-                                                      CharonRefReduceSum, CharonRefReduceSum};
+            static const RevenantRefReduce kinds[8] = {RevenantRefReduceMin, RevenantRefReduceMin,
+                                                      RevenantRefReduceMax, RevenantRefReduceMax,
+                                                      RevenantRefReduceMean, RevenantRefReduceMean,
+                                                      RevenantRefReduceSum, RevenantRefReduceSum};
             for (int i = 0; i < 8; i++) {
                 int byColumn = (i % 2) == 1;
                 NSUInteger dstCols = byColumn ? cols : 1;
@@ -352,7 +352,7 @@ int main(int argc, const char **argv)
                                                                     width:dstCols height:dstRows
                                                           featureChannels:1];
                 MPSImage *out = [[MPSImage alloc] initWithDevice:gDevice imageDescriptor:rd];
-                id<CharonImageReduceEncode> kernel = [[reduceClasses[i] alloc] initWithDevice:gDevice];
+                id<RevenantImageReduceEncode> kernel = [[reduceClasses[i] alloc] initWithDevice:gDevice];
                 if (!kernel) {
                     gMismatches++;
                     printf("\n  MISMATCH %s: %s exists but would not instantiate\n", reduceNames[i],
@@ -371,15 +371,15 @@ int main(int argc, const char **argv)
                 for (NSUInteger v = 0; v < want; v++)
                     printf(" %.9g", (double)got[v]);
                 printf("\n");
-                CharonReferenceImageReduce(reduceNames[i], input, rows, cols, 0, 0, byColumn,
+                RevenantReferenceImageReduce(reduceNames[i], input, rows, cols, 0, 0, byColumn,
                                            kinds[i], got, want);
             }
         }
 
         {
             static const char *convNames[4] = {"convolution", "box", "tent", "gaussian-blur"};
-            static const char *convRenamed[4] = {"CharonMPSImageConvolution", "CharonMPSImageBox",
-                                                 "CharonMPSImageTent", "CharonMPSImageGaussianBlur"};
+            static const char *convRenamed[4] = {"RevenantMPSImageConvolution", "RevenantMPSImageBox",
+                                                 "RevenantMPSImageTent", "RevenantMPSImageGaussianBlur"};
             Class convClasses[4] = {[MPSImageConvolution class], [MPSImageBox class],
                                     [MPSImageTent class], [MPSImageGaussianBlur class]};
             NSUInteger kw = 5, kh = 5;
@@ -416,10 +416,10 @@ int main(int argc, const char **argv)
                 MPSImage *out = [[MPSImage alloc] initWithDevice:gDevice imageDescriptor:descriptor];
                 id kernel = nil;
                 if (i == 0) {
-                    id<CharonImageConvolutionInit> made =
+                    id<RevenantImageConvolutionInit> made =
                         [[convClasses[i] alloc] initWithDevice:gDevice kernelWidth:kw
                                                  kernelHeight:kh weights:each[i]];
-                    ((id<CharonImageConvolutionEncode>)made).bias = 0.125f;
+                    ((id<RevenantImageConvolutionEncode>)made).bias = 0.125f;
                     kernel = made;
                 } else if (i == 1 || i == 2) {
                     Class box = convClasses[i];
@@ -452,15 +452,15 @@ int main(int argc, const char **argv)
                 for (NSUInteger v = 0; v < values; v++)
                     printf(" %.9g", (double)got[v]);
                 printf("\n");
-                CharonReferenceImageConvolution(convNames[i], input, rows, cols, kw, kh, each[i],
+                RevenantReferenceImageConvolution(convNames[i], input, rows, cols, kw, kh, each[i],
                                                 i == 0 ? 0.125 : 0.0, 0, 0, got, values);
             }
         }
 
         {
             static const char *morphNames[4] = {"area-max", "area-min", "dilate", "erode"};
-            static const char *morphRenamed[4] = {"CharonMPSImageAreaMax", "CharonMPSImageAreaMin",
-                                                   "CharonMPSImageDilate", "CharonMPSImageErode"};
+            static const char *morphRenamed[4] = {"RevenantMPSImageAreaMax", "RevenantMPSImageAreaMin",
+                                                   "RevenantMPSImageDilate", "RevenantMPSImageErode"};
             Class morphClasses[4] = {[MPSImageAreaMax class], [MPSImageAreaMin class],
                                      [MPSImageDilate class], [MPSImageErode class]};
             NSUInteger mw = 5, mh = 5;
@@ -498,14 +498,14 @@ int main(int argc, const char **argv)
                 for (NSUInteger v = 0; v < values; v++)
                     printf(" %.9g", (double)got[v]);
                 printf("\n");
-                CharonReferenceImageMorphology(morphNames[i], input, rows, cols, 1, mw, mh,
+                RevenantReferenceImageMorphology(morphNames[i], input, rows, cols, 1, mw, mh,
                                               i < 2 ? NULL : probe, (i == 0 || i == 2), 0, 0, got, values);
             }
         }
 
         {
             static const char *histNames[2] = {"histogram", "normalized-histogram"};
-            static const char *histRenamed[2] = {"CharonMPSImageHistogram", "CharonMPSImageNormalizedHistogram"};
+            static const char *histRenamed[2] = {"RevenantMPSImageHistogram", "RevenantMPSImageNormalizedHistogram"};
             Class histClasses[2] = {[MPSImageHistogram class], [MPSImageNormalizedHistogram class]};
             NSUInteger bins = 8;
             double lo = 0.0, hi = 1.0;
@@ -560,11 +560,11 @@ int main(int argc, const char **argv)
                     continue;
                 }
                 if (i)
-                    [(id<CharonNormalizedHistogramEncode>)kernel
+                    [(id<RevenantNormalizedHistogramEncode>)kernel
                         encodeToCommandBuffer:[gDevice newCommandBuffer] sourceTexture:[src8 texture]
                       minmaxTexture:minmax histogram:out histogramOffset:0];
                 else
-                    [(id<CharonHistogramEncode>)kernel encodeToCommandBuffer:[gDevice newCommandBuffer]
+                    [(id<RevenantHistogramEncode>)kernel encodeToCommandBuffer:[gDevice newCommandBuffer]
                                                              sourceTexture:[src8 texture]
                                                                     histogram:out
                                                               histogramOffset:0];
@@ -580,7 +580,7 @@ int main(int argc, const char **argv)
                 for (NSUInteger b = 0; b < (want / sizeof(uint32_t)); b++)
                     printf(" %lu", (unsigned long)binsOut[b]);
                 printf("\n");
-                CharonReferenceImageHistogram(histNames[i], pixels, rows, cols, bins, rangeLo, rangeHi,
+                RevenantReferenceImageHistogram(histNames[i], pixels, rows, cols, bins, rangeLo, rangeHi,
                                               NO, binsOut, 4);
             }
         }

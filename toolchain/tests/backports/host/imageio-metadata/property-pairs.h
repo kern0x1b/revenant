@@ -1,4 +1,4 @@
-static size_t charon_probe_pairs(charon_probe_pair *out)
+static size_t revenant_probe_pairs(revenant_probe_pair *out)
 {
     out[0].dictionary = kCGImagePropertyExifDictionary; out[0].property = kCGImagePropertyExifApertureValue;
     out[1].dictionary = kCGImagePropertyExifDictionary; out[1].property = kCGImagePropertyExifBodySerialNumber;

@@ -1,6 +1,6 @@
 #import <Foundation/Foundation.h>
 
-@implementation NSString (CharonContainment)
+@implementation NSString (RevenantContainment)
 
 - (BOOL)containsString:(NSString *)string
 {

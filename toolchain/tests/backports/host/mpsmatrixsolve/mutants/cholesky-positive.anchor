@@ -1,5 +1,5 @@
                 if (sum <= 0.0) {
-                    CharonMatrixSolveStatus(commandBuffer, status, MPSMatrixDecompositionStatusNonPositiveDefinite);
+                    RevenantMatrixSolveStatus(commandBuffer, status, MPSMatrixDecompositionStatusNonPositiveDefinite);
                     return;
                 }
-                CharonMatrixSolvePut(&to, 0, row, column, sqrt(sum));
+                RevenantMatrixSolvePut(&to, 0, row, column, sqrt(sum));

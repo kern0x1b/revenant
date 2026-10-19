@@ -1,13 +1,13 @@
 #import <UIKit/UIKit.h>
-#import "CharonCalendar.h"
+#import "RevenantCalendar.h"
 
-static Protocol *charon_singleDateSelectionDelegateProtocol(void) __attribute__((used));
-static Protocol *charon_singleDateSelectionDelegateProtocol(void)
+static Protocol *revenant_singleDateSelectionDelegateProtocol(void) __attribute__((used));
+static Protocol *revenant_singleDateSelectionDelegateProtocol(void)
 {
     return @protocol(UICalendarSelectionSingleDateDelegate);
 }
 
-static BOOL charon_sameDay(NSDateComponents *first, NSDateComponents *second)
+static BOOL revenant_sameDay(NSDateComponents *first, NSDateComponents *second)
 {
     return first && second && first.year == second.year && first.month == second.month && first.day == second.day;
 }
@@ -20,7 +20,7 @@ static BOOL charon_sameDay(NSDateComponents *first, NSDateComponents *second)
 
 - (instancetype)initWithDelegate:(id<UICalendarSelectionSingleDateDelegate>)delegate
 {
-    if ((self = [self charon_init])) {
+    if ((self = [self revenant_init])) {
         _delegate = delegate;
     }
     return self;
@@ -39,7 +39,7 @@ static BOOL charon_sameDay(NSDateComponents *first, NSDateComponents *second)
 - (void)setSelectedDate:(NSDateComponents *)selectedDate
 {
     _selectedDate = [selectedDate copy];
-    [self charon_redraw];
+    [self revenant_redraw];
 }
 
 - (void)setSelectedDate:(NSDateComponents *)selectedDate animated:(BOOL)animated
@@ -47,12 +47,12 @@ static BOOL charon_sameDay(NSDateComponents *first, NSDateComponents *second)
     [self setSelectedDate:selectedDate];
 }
 
-- (BOOL)charon_isSelected:(NSDateComponents *)day
+- (BOOL)revenant_isSelected:(NSDateComponents *)day
 {
-    return charon_sameDay(_selectedDate, day);
+    return revenant_sameDay(_selectedDate, day);
 }
 
-- (BOOL)charon_canSelect:(NSDateComponents *)day
+- (BOOL)revenant_canSelect:(NSDateComponents *)day
 {
     SEL canSelect = @selector(dateSelection:canSelectDate:);
     if (![_delegate respondsToSelector:canSelect])
@@ -61,12 +61,12 @@ static BOOL charon_sameDay(NSDateComponents *first, NSDateComponents *second)
     return answer(_delegate, canSelect, self, day);
 }
 
-- (void)charon_didTapDay:(NSDateComponents *)day
+- (void)revenant_didTapDay:(NSDateComponents *)day
 {
-    if (charon_sameDay(_selectedDate, day) || ![self charon_canSelect:day])
+    if (revenant_sameDay(_selectedDate, day) || ![self revenant_canSelect:day])
         return;
     _selectedDate = [day copy];
-    [self charon_redraw];
+    [self revenant_redraw];
     [_delegate dateSelection:self didSelectDate:day];
 }
 

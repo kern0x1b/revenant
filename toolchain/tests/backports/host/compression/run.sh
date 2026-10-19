@@ -3,7 +3,7 @@
 # The codecs are the pinned upstreams of packages/l/lzfse, packages/z/zlib and packages/l/lz4, fetched into a fresh
 # directory under the run area at the same commits the recipes pin (never built inside a shared clone). The port's
 # layer is packages/a/apple-backports/Compression/CompressionBuffer.c, built with its entry points renamed to
-# charon_host_* so the host's and the port's are callable in the same process. Usage: run.sh [seed]
+# revenant_host_* so the host's and the port's are callable in the same process. Usage: run.sh [seed]
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 root=$(cd "$here/../../../.." && pwd)
@@ -42,7 +42,7 @@ cp "$src/lzfse/src/lzfse.h" "$src/lzfse/src/lzfse_internal.h" "$src/lzfse/src/lz
 cp "$src/zlib/zlib.h" "$src/zlib/zconf.h" "$build/include/zlib/"
 cp "$xz/api/lzma.h" "$build/include/lzma/"
 cp -R "$xz/api/lzma" "$build/include/lzma/"
-renames="-Dcompression_encode_buffer=charon_host_compression_encode_buffer -Dcompression_decode_buffer=charon_host_compression_decode_buffer -Dcompression_encode_scratch_buffer_size=charon_host_compression_encode_scratch_buffer_size -Dcompression_decode_scratch_buffer_size=charon_host_compression_decode_scratch_buffer_size -Dcompression_stream_init=charon_host_compression_stream_init -Dcompression_stream_process=charon_host_compression_stream_process -Dcompression_stream_destroy=charon_host_compression_stream_destroy"
+renames="-Dcompression_encode_buffer=revenant_host_compression_encode_buffer -Dcompression_decode_buffer=revenant_host_compression_decode_buffer -Dcompression_encode_scratch_buffer_size=revenant_host_compression_encode_scratch_buffer_size -Dcompression_decode_scratch_buffer_size=revenant_host_compression_decode_scratch_buffer_size -Dcompression_stream_init=revenant_host_compression_stream_init -Dcompression_stream_process=revenant_host_compression_stream_process -Dcompression_stream_destroy=revenant_host_compression_stream_destroy"
 xcrun clang -O2 -w $renames -I"$build/include" -c "$root/packages/a/apple-backports/Compression/CompressionBuffer.c" -o "$build/port.o"
 xcrun clang -O2 -w "$here/differential.c" "$build"/*.o -lcompression -o "$build/differential"
 status=0

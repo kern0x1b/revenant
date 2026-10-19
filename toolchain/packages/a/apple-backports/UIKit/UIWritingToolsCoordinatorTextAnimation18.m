@@ -1,6 +1,6 @@
 #import <UIKit/UIKit.h>
 
-static NSString *CharonAnimationDescription(NSInteger animationType)
+static NSString *RevenantAnimationDescription(NSInteger animationType)
 {
     switch (animationType) {
     case 0: return @"Awaiting-new-text animation";
@@ -13,11 +13,11 @@ static NSString *CharonAnimationDescription(NSInteger animationType)
 #if __IPHONE_OS_VERSION_MAX_ALLOWED >= 180200
 NSString *UIWritingToolsCoordinatorTextAnimationDebugDescription(UIWritingToolsCoordinatorTextAnimation animationType)
 {
-    return CharonAnimationDescription(animationType);
+    return RevenantAnimationDescription(animationType);
 }
 #else
 NSString *UIWritingToolsCoordinatorTextAnimationDebugDescription(NSInteger animationType)
 {
-    return CharonAnimationDescription(animationType);
+    return RevenantAnimationDescription(animationType);
 }
 #endif

@@ -6,7 +6,7 @@
 #include <sys/time.h>
 #include <time.h>
 
-static int charon_since_boot(struct timespec *now)
+static int revenant_since_boot(struct timespec *now)
 {
     int name[] = { CTL_KERN, KERN_BOOTTIME };
     struct timeval before, after, calendar;
@@ -23,7 +23,7 @@ static int charon_since_boot(struct timespec *now)
     return 0;
 }
 
-static int charon_uptime(struct timespec *now)
+static int revenant_uptime(struct timespec *now)
 {
     static mach_timebase_info_data_t timebase;
     if (timebase.denom == 0 && mach_timebase_info(&timebase) != KERN_SUCCESS)
@@ -35,7 +35,7 @@ static int charon_uptime(struct timespec *now)
     return 0;
 }
 
-static int charon_process_time(struct timespec *now)
+static int revenant_process_time(struct timespec *now)
 {
     struct rusage usage;
     if (getrusage(RUSAGE_SELF, &usage) != 0)
@@ -47,7 +47,7 @@ static int charon_process_time(struct timespec *now)
     return 0;
 }
 
-static int charon_thread_time(struct timespec *now)
+static int revenant_thread_time(struct timespec *now)
 {
     thread_basic_info_data_t info;
     mach_msg_type_number_t count = THREAD_BASIC_INFO_COUNT;
@@ -64,7 +64,7 @@ static int charon_thread_time(struct timespec *now)
 }
 
 __attribute__((visibility("hidden")))
-int charon_clock_gettime(clockid_t which, struct timespec *now)
+int revenant_clock_gettime(clockid_t which, struct timespec *now)
 {
     int answered;
     if (which == CLOCK_REALTIME) {
@@ -73,13 +73,13 @@ int charon_clock_gettime(clockid_t which, struct timespec *now)
         now->tv_sec = calendar.tv_sec;
         now->tv_nsec = calendar.tv_usec * 1000;
     } else if (which == CLOCK_MONOTONIC || which == CLOCK_MONOTONIC_RAW || which == CLOCK_MONOTONIC_RAW_APPROX) {
-        answered = charon_since_boot(now);
+        answered = revenant_since_boot(now);
     } else if (which == CLOCK_UPTIME_RAW || which == CLOCK_UPTIME_RAW_APPROX) {
-        answered = charon_uptime(now);
+        answered = revenant_uptime(now);
     } else if (which == CLOCK_PROCESS_CPUTIME_ID) {
-        answered = charon_process_time(now);
+        answered = revenant_process_time(now);
     } else if (which == CLOCK_THREAD_CPUTIME_ID) {
-        answered = charon_thread_time(now);
+        answered = revenant_thread_time(now);
     } else {
         errno = EINVAL;
         return -1;

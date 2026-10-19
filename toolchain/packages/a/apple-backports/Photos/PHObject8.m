@@ -1,4 +1,4 @@
-#import "CharonPhotos.h"
+#import "RevenantPhotos.h"
 
 #pragma clang diagnostic ignored "-Wobjc-missing-property-synthesis"
 
@@ -9,7 +9,7 @@
     NSString *_localIdentifier;
 }
 
-- (instancetype)initWithCharonLocalIdentifier:(NSString *)identifier
+- (instancetype)initWithRevenantLocalIdentifier:(NSString *)identifier
 {
     self = [super init];
     if (self)
@@ -27,12 +27,12 @@
     return self;
 }
 
-- (PHObject *)charon_refetched
+- (PHObject *)revenant_refetched
 {
     return self;
 }
 
-- (BOOL)charon_sameStateAs:(PHObject *)other
+- (BOOL)revenant_sameStateAs:(PHObject *)other
 {
     return [self isEqual:other];
 }
@@ -53,7 +53,7 @@
 
 - (NSString *)localIdentifier
 {
-    return [CharonPhotosStore resolvedIdentifier:[super localIdentifier]];
+    return [RevenantPhotosStore resolvedIdentifier:[super localIdentifier]];
 }
 
 @end

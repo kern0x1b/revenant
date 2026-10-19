@@ -1,6 +1,6 @@
 #include <math.h>
 
-static inline double charon_spring_value(double omega, double zeta, double velocity, double time)
+static inline double revenant_spring_value(double omega, double zeta, double velocity, double time)
 {
     if (zeta < 1) {
         double damped = omega * sqrt(1 - zeta * zeta);

@@ -11,11 +11,11 @@ fi
 suite=${1:?$usage}
 shift
 FOUNDATION=${FOUNDATION:-$here/../../../../packages/a/apple-backports/Foundation}
-build=${FUZZ_BUILD:-$(runs_folder charon-fuzz-host)}/$suite
+build=${FUZZ_BUILD:-$(runs_folder revenant-fuzz-host)}/$suite
 case $suite in
     percentencoding) sources="NSString+URLUtilities.m NSCharacterSet+URLUtilities.m NSData+Base64.m"; locales= ;;
     stringcase) sources="NSString+LocalizedCase.m NSString+Containment.m NSString+Transform.m"; locales="en_US tr_TR" ;;
-    calendar) sources="NSCalendar+Components.m NSCalendar+Weekend.m NSDateComponents+Validation.m CharonCalendarUnits.m"; locales= ;;
+    calendar) sources="NSCalendar+Components.m NSCalendar+Weekend.m NSDateComponents+Validation.m RevenantCalendarUnits.m"; locales= ;;
     *) echo "no fuzzer $suite" >&2; exit 2 ;;
 esac
 if [ $mutants = yes ]; then
@@ -59,7 +59,7 @@ for s in $sources; do
 done
 for s in $sources; do
     xcrun clang -fobjc-arc -fvisibility=hidden $quiet -I"$FOUNDATION" -include "$build/prefixed/declarations.h" -c "$build/prefixed/$s" -o "$build/renamed/$s.o"
-    perl -0777 -pi -e 's/__objc_catlist\0\0/__charon_catlist/g' "$build/renamed/$s.o"
+    perl -0777 -pi -e 's/__objc_catlist\0\0/__revenant_catlist/g' "$build/renamed/$s.o"
 done
 xcrun clang -fobjc-arc -w -I"$here" "$here/$suite.m" "$here/fuzz.m" "$here/../foundation2/host-attach.c" "$build"/renamed/*.o -framework Foundation -o "$build/fuzz"
 if [ -z "$locales" ]; then

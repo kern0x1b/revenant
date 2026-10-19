@@ -15,7 +15,7 @@ typedef NS_ENUM(NSInteger, AVCaptureCameraLensSmudgeDetectionStatus) {
     AVCaptureCameraLensSmudgeDetectionStatusUnknown           = 3,
 } API_AVAILABLE(ios(26.0));
 
-@interface AVCaptureDevice (CharonCaptureDeviceDynamic26)
+@interface AVCaptureDevice (RevenantCaptureDeviceDynamic26)
 
 @property(nonatomic, readonly, nullable) AVCaptureAspectRatio dynamicAspectRatio API_AVAILABLE(ios(26.0));
 @property(nonatomic, readonly) CMVideoDimensions dynamicDimensions API_AVAILABLE(ios(26.0));
@@ -27,7 +27,7 @@ typedef NS_ENUM(NSInteger, AVCaptureCameraLensSmudgeDetectionStatus) {
 
 @end
 
-@interface AVCaptureDeviceFormat (CharonCaptureDeviceFormatDynamic26)
+@interface AVCaptureDeviceFormat (RevenantCaptureDeviceFormatDynamic26)
 
 @property(nonatomic, readonly, getter=isCameraLensSmudgeDetectionSupported) BOOL cameraLensSmudgeDetectionSupported API_AVAILABLE(ios(26.0));
 @property(nonatomic, readonly) float defaultSimulatedAperture API_AVAILABLE(ios(26.0));
@@ -37,7 +37,7 @@ typedef NS_ENUM(NSInteger, AVCaptureCameraLensSmudgeDetectionStatus) {
 
 @end
 
-@interface AVCaptureDeviceInput (CharonCaptureDeviceInputDynamic26)
+@interface AVCaptureDeviceInput (RevenantCaptureDeviceInputDynamic26)
 
 @property(nonatomic) float simulatedAperture API_AVAILABLE(ios(26.0));
 

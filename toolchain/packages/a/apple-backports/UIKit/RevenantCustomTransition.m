@@ -1,9 +1,9 @@
-#import "CharonCustomTransition.h"
-#import "CharonTransitionCoordinator.h"
+#import "RevenantCustomTransition.h"
+#import "RevenantTransitionCoordinator.h"
 #import <objc/message.h>
 #import <objc/runtime.h>
 
-@interface CharonViewState : NSObject
+@interface RevenantViewState : NSObject
 @property (nonatomic, weak) UIView *superview;
 @property (nonatomic) NSUInteger index;
 @property (nonatomic) CGRect frame;
@@ -11,7 +11,7 @@
 @property (nonatomic) BOOL hidden;
 @end
 
-@implementation CharonViewState
+@implementation RevenantViewState
 @synthesize superview = _superview;
 @synthesize index = _index;
 @synthesize frame = _frame;
@@ -20,7 +20,7 @@
 
 + (instancetype)captureView:(UIView *)view
 {
-    CharonViewState *state = [[CharonViewState alloc] init];
+    RevenantViewState *state = [[RevenantViewState alloc] init];
     state.superview = view.superview;
     state.index = view.superview ? [view.superview.subviews indexOfObject:view] : 0;
     state.frame = view.frame;
@@ -50,35 +50,35 @@
 
 @end
 
-static const char charon_deferral_key;
+static const char revenant_deferral_key;
 
-typedef NS_ENUM(NSInteger, CharonDeferralMode) {
-    CharonDeferralPass,
-    CharonDeferralNative,
-    CharonDeferralSwallow,
-    CharonDeferralDidOnly
+typedef NS_ENUM(NSInteger, RevenantDeferralMode) {
+    RevenantDeferralPass,
+    RevenantDeferralNative,
+    RevenantDeferralSwallow,
+    RevenantDeferralDidOnly
 };
 
-@interface CharonDeferral : NSObject
-@property (nonatomic) CharonDeferralMode mode;
+@interface RevenantDeferral : NSObject
+@property (nonatomic) RevenantDeferralMode mode;
 @property (nonatomic, strong) NSMutableArray *pending;
 @property (nonatomic) Class original;
 @property (nonatomic) NSInteger owners;
 @end
 
-@implementation CharonDeferral
+@implementation RevenantDeferral
 @synthesize mode = _mode;
 @synthesize pending = _pending;
 @synthesize original = _original;
 @synthesize owners = _owners;
 @end
 
-static Class charon_deferring_class(Class cls)
+static Class revenant_deferring_class(Class cls)
 {
     static NSMutableDictionary *cache;
     static dispatch_once_t once;
     dispatch_once(&once, ^{ cache = [NSMutableDictionary dictionary]; });
-    NSString *name = [@"CharonDeferring_" stringByAppendingString:NSStringFromClass(cls)];
+    NSString *name = [@"RevenantDeferring_" stringByAppendingString:NSStringFromClass(cls)];
     @synchronized (cache) {
         Class existing = cache[name];
         if (existing)
@@ -90,10 +90,10 @@ static Class charon_deferring_class(Class cls)
             SEL selector = NSSelectorFromString(selectorName);
             BOOL did = [selectorName hasPrefix:@"viewDid"];
             class_addMethod(created, selector, imp_implementationWithBlock(^(UIViewController *self, BOOL animated) {
-                CharonDeferral *deferral = objc_getAssociatedObject(self, &charon_deferral_key);
-                if (deferral.mode == CharonDeferralSwallow || (deferral.mode == CharonDeferralDidOnly && !did))
+                RevenantDeferral *deferral = objc_getAssociatedObject(self, &revenant_deferral_key);
+                if (deferral.mode == RevenantDeferralSwallow || (deferral.mode == RevenantDeferralDidOnly && !did))
                     return;
-                if ((deferral.mode == CharonDeferralNative || deferral.mode == CharonDeferralDidOnly) && did) {
+                if ((deferral.mode == RevenantDeferralNative || deferral.mode == RevenantDeferralDidOnly) && did) {
                     [deferral.pending addObject:@[self, selectorName]];
                     return;
                 }
@@ -108,77 +108,77 @@ static Class charon_deferring_class(Class cls)
     }
 }
 
-static void charon_collect(UIViewController *controller, NSMutableArray *into)
+static void revenant_collect(UIViewController *controller, NSMutableArray *into)
 {
     if (!controller || [into containsObject:controller])
         return;
     [into addObject:controller];
     for (UIViewController *child in controller.childViewControllers)
-        charon_collect(child, into);
+        revenant_collect(child, into);
 }
 
-static NSArray *charon_begin_deferral(NSArray *controllers)
+static NSArray *revenant_begin_deferral(NSArray *controllers)
 {
     NSMutableArray *begun = [NSMutableArray array];
     for (UIViewController *controller in controllers) {
         Class current = object_getClass(controller);
-        if (strncmp(class_getName(current), "CharonDeferring_", 16) == 0) {
-            CharonDeferral *shared = objc_getAssociatedObject(controller, &charon_deferral_key);
+        if (strncmp(class_getName(current), "RevenantDeferring_", 18) == 0) {
+            RevenantDeferral *shared = objc_getAssociatedObject(controller, &revenant_deferral_key);
             if (shared) {
                 shared.owners++;
-                shared.mode = CharonDeferralNative;
+                shared.mode = RevenantDeferralNative;
                 [begun addObject:@[controller, shared]];
             }
             continue;
         }
         if (strncmp(class_getName(current), "NSKVONotifying", 14) == 0)
             continue;
-        Class replacement = charon_deferring_class(current);
+        Class replacement = revenant_deferring_class(current);
         if (!replacement)
             continue;
-        CharonDeferral *deferral = [[CharonDeferral alloc] init];
-        deferral.mode = CharonDeferralNative;
+        RevenantDeferral *deferral = [[RevenantDeferral alloc] init];
+        deferral.mode = RevenantDeferralNative;
         deferral.pending = [NSMutableArray array];
         deferral.original = current;
         deferral.owners = 1;
-        objc_setAssociatedObject(controller, &charon_deferral_key, deferral, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+        objc_setAssociatedObject(controller, &revenant_deferral_key, deferral, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
         object_setClass(controller, replacement);
         [begun addObject:@[controller, deferral]];
     }
     return begun;
 }
 
-static void charon_set_mode(NSArray *begun, CharonDeferralMode mode)
+static void revenant_set_mode(NSArray *begun, RevenantDeferralMode mode)
 {
     for (NSArray *entry in begun)
         [entry[1] setMode:mode];
 }
 
-static NSArray *charon_take_pending(NSArray *begun)
+static NSArray *revenant_take_pending(NSArray *begun)
 {
     NSMutableArray *pending = [NSMutableArray array];
     for (NSArray *entry in begun) {
-        CharonDeferral *deferral = entry[1];
+        RevenantDeferral *deferral = entry[1];
         [pending addObjectsFromArray:deferral.pending];
         [deferral.pending removeAllObjects];
     }
     return pending;
 }
 
-static void charon_release_deferral(NSArray *begun)
+static void revenant_release_deferral(NSArray *begun)
 {
     for (NSArray *entry in begun) {
         UIViewController *controller = entry[0];
-        CharonDeferral *deferral = entry[1];
+        RevenantDeferral *deferral = entry[1];
         if (--deferral.owners > 0)
             continue;
-        deferral.mode = CharonDeferralPass;
+        deferral.mode = RevenantDeferralPass;
         object_setClass(controller, deferral.original);
-        objc_setAssociatedObject(controller, &charon_deferral_key, nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+        objc_setAssociatedObject(controller, &revenant_deferral_key, nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     }
 }
 
-@implementation CharonTransitionContext {
+@implementation RevenantTransitionContext {
 @public
     UIView *_container;
     UIViewController *_from;
@@ -194,10 +194,10 @@ static void charon_release_deferral(NSArray *begun)
     void (^_finish)(BOOL didComplete);
     id<UIViewControllerAnimatedTransitioning> _animator;
     id<UIViewControllerInteractiveTransitioning> _interactor;
-    __weak CharonTransitionCoordinator *_coordinator;
+    __weak RevenantTransitionCoordinator *_coordinator;
 }
 
-- (id<UIViewControllerAnimatedTransitioning>)charon_animator
+- (id<UIViewControllerAnimatedTransitioning>)revenant_animator
 {
     return _animator;
 }
@@ -211,18 +211,18 @@ static void charon_release_deferral(NSArray *begun)
 
 - (void)updateInteractiveTransition:(CGFloat)percentComplete
 {
-    [_coordinator charon_setPercent:percentComplete];
+    [_coordinator revenant_setPercent:percentComplete];
 }
 
 - (void)finishInteractiveTransition
 {
-    [_coordinator charon_interactionEndedCancelled:NO];
+    [_coordinator revenant_interactionEndedCancelled:NO];
 }
 
 - (void)cancelInteractiveTransition
 {
     _cancelled = YES;
-    [_coordinator charon_interactionEndedCancelled:YES];
+    [_coordinator revenant_interactionEndedCancelled:YES];
 }
 
 - (void)pauseInteractiveTransition
@@ -268,31 +268,31 @@ static void charon_release_deferral(NSArray *begun)
 
 @end
 
-static void charon_interactive_transition(CharonTransitionKind kind, UIViewController *from, UIViewController *to, id<UIViewControllerAnimatedTransitioning> animator, id<UIViewControllerInteractiveTransitioning> interactor, UIModalPresentationStyle style, void (^native)(void), void (^completion)(BOOL finished))
+static void revenant_interactive_transition(RevenantTransitionKind kind, UIViewController *from, UIViewController *to, id<UIViewControllerAnimatedTransitioning> animator, id<UIViewControllerInteractiveTransitioning> interactor, UIModalPresentationStyle style, void (^native)(void), void (^completion)(BOOL finished))
 {
     UIView *fromView = from.view;
     UIView *toView = to.view;
     UIWindow *window = fromView.window ?: [UIApplication sharedApplication].keyWindow;
-    BOOL modal = kind == CharonTransitionPresent || kind == CharonTransitionDismiss;
-    BOOL keepsPresenter = kind == CharonTransitionPresent && (style == 4 || style == 5 || style == 6);
+    BOOL modal = kind == RevenantTransitionPresent || kind == RevenantTransitionDismiss;
+    BOOL keepsPresenter = kind == RevenantTransitionPresent && (style == 4 || style == 5 || style == 6);
     UIView *fromParent = fromView.superview;
     UIView *host = modal ? window : (fromParent.superview ?: fromParent);
-    CharonViewState *fromPre = [CharonViewState captureView:fromView];
+    RevenantViewState *fromPre = [RevenantViewState captureView:fromView];
     CGRect initialFrom = fromParent ? [fromParent convertRect:fromView.frame toView:host] : window.bounds;
     CGRect finalTo = initialFrom;
-    if (kind == CharonTransitionPresent)
+    if (kind == RevenantTransitionPresent)
         finalTo = [window convertRect:window.screen.applicationFrame fromWindow:nil];
-    else if (kind == CharonTransitionDismiss)
+    else if (kind == RevenantTransitionDismiss)
         finalTo = toView.superview ? [toView.superview convertRect:toView.frame toView:host] : toView.frame;
 
     NSMutableArray *controllers = [NSMutableArray array];
-    charon_collect(from, controllers);
-    charon_collect(to, controllers);
-    NSArray *begun = charon_begin_deferral(controllers);
-    charon_set_mode(begun, CharonDeferralNative);
+    revenant_collect(from, controllers);
+    revenant_collect(to, controllers);
+    NSArray *begun = revenant_begin_deferral(controllers);
+    revenant_set_mode(begun, RevenantDeferralNative);
     [from viewWillDisappear:YES];
     [to viewWillAppear:YES];
-    charon_set_mode(begun, CharonDeferralSwallow);
+    revenant_set_mode(begun, RevenantDeferralSwallow);
 
     UIView *container = [[UIView alloc] initWithFrame:host.bounds];
     container.backgroundColor = [UIColor clearColor];
@@ -302,14 +302,14 @@ static void charon_interactive_transition(CharonTransitionKind kind, UIViewContr
     fromView.frame = initialFrom;
     toView.frame = finalTo;
 
-    CharonTransitionContext *context = [[CharonTransitionContext alloc] init];
+    RevenantTransitionContext *context = [[RevenantTransitionContext alloc] init];
     context->_container = container;
     context->_from = from;
     context->_to = to;
     context->_animated = YES;
-    context->_style = modal ? (kind == CharonTransitionPresent ? to.modalPresentationStyle : from.modalPresentationStyle) : (UIModalPresentationStyle)-1;
+    context->_style = modal ? (kind == RevenantTransitionPresent ? to.modalPresentationStyle : from.modalPresentationStyle) : (UIModalPresentationStyle)-1;
     context->_initialFrom = initialFrom;
-    context->_finalFrom = kind == CharonTransitionDismiss ? initialFrom : CGRectZero;
+    context->_finalFrom = kind == RevenantTransitionDismiss ? initialFrom : CGRectZero;
     context->_initialTo = CGRectZero;
     context->_finalTo = finalTo;
     context->_interactive = YES;
@@ -317,16 +317,16 @@ static void charon_interactive_transition(CharonTransitionKind kind, UIViewContr
     context->_interactor = interactor;
     NSTimeInterval duration = [animator transitionDuration:context];
     id<UIViewControllerTransitionCoordinator> coordinator = to.transitionCoordinator ?: from.transitionCoordinator;
-    if ([coordinator isKindOfClass:[CharonTransitionCoordinator class]]) {
-        [(CharonTransitionCoordinator *)coordinator setContainer:container duration:duration];
-        [(CharonTransitionCoordinator *)coordinator charon_setInteractive:YES];
-        context->_coordinator = (CharonTransitionCoordinator *)coordinator;
+    if ([coordinator isKindOfClass:[RevenantTransitionCoordinator class]]) {
+        [(RevenantTransitionCoordinator *)coordinator setContainer:container duration:duration];
+        [(RevenantTransitionCoordinator *)coordinator revenant_setInteractive:YES];
+        context->_coordinator = (RevenantTransitionCoordinator *)coordinator;
     }
 
     void (^finalize)(BOOL) = ^(BOOL didComplete) {
         [container removeFromSuperview];
-        NSArray *pending = charon_take_pending(begun);
-        charon_set_mode(begun, CharonDeferralPass);
+        NSArray *pending = revenant_take_pending(begun);
+        revenant_set_mode(begun, RevenantDeferralPass);
         if (!didComplete) {
             [to viewWillDisappear:YES];
             [to viewDidDisappear:YES];
@@ -342,18 +342,18 @@ static void charon_interactive_transition(CharonTransitionKind kind, UIViewContr
         NSArray *ordered = modal ? [appear arrayByAddingObjectsFromArray:disappear] : [disappear arrayByAddingObjectsFromArray:appear];
         for (NSArray *entry in ordered)
             ((void (*)(id, SEL, BOOL))objc_msgSend)(entry[0], NSSelectorFromString(entry[1]), YES);
-        charon_set_mode(begun, CharonDeferralSwallow);
+        revenant_set_mode(begun, RevenantDeferralSwallow);
         dispatch_async(dispatch_get_main_queue(), ^{
             dispatch_async(dispatch_get_main_queue(), ^{
                 for (NSArray *entry in begun)
                     if ([entry[1] owners] == 1)
-                        [entry[1] setMode:CharonDeferralPass];
-                charon_release_deferral(begun);
+                        [entry[1] setMode:RevenantDeferralPass];
+                revenant_release_deferral(begun);
             });
         });
-        if ([coordinator isKindOfClass:[CharonTransitionCoordinator class]]) {
-            [(CharonTransitionCoordinator *)coordinator charon_setCancelled:!didComplete];
-            [(CharonTransitionCoordinator *)coordinator finish];
+        if ([coordinator isKindOfClass:[RevenantTransitionCoordinator class]]) {
+            [(RevenantTransitionCoordinator *)coordinator revenant_setCancelled:!didComplete];
+            [(RevenantTransitionCoordinator *)coordinator finish];
         }
         if (completion)
             completion(didComplete);
@@ -368,7 +368,7 @@ static void charon_interactive_transition(CharonTransitionKind kind, UIViewContr
             finalize(NO);
             return;
         }
-        charon_set_mode(begun, CharonDeferralDidOnly);
+        revenant_set_mode(begun, RevenantDeferralDidOnly);
         UIView *nativeParent = modal ? nil : toView.superview;
         (void)nativeParent;
         native();
@@ -376,9 +376,9 @@ static void charon_interactive_transition(CharonTransitionKind kind, UIViewContr
             [fromView removeFromSuperview];
         void (^settle)(void) = ^{
             if (toView.superview == container) {
-                CGRect frame = kind == CharonTransitionDismiss ? [container convertRect:toView.frame toView:window] : finalTo;
+                CGRect frame = kind == RevenantTransitionDismiss ? [container convertRect:toView.frame toView:window] : finalTo;
                 [toView removeFromSuperview];
-                if (kind == CharonTransitionDismiss)
+                if (kind == RevenantTransitionDismiss)
                     [window insertSubview:toView atIndex:0];
                 else
                     [host addSubview:toView];
@@ -397,52 +397,52 @@ static void charon_interactive_transition(CharonTransitionKind kind, UIViewContr
     [interactor startInteractiveTransition:context];
 }
 
-static NSArray *charon_group(UIViewController *controller)
+static NSArray *revenant_group(UIViewController *controller)
 {
     NSMutableArray *group = [NSMutableArray array];
-    charon_collect(controller, group);
+    revenant_collect(controller, group);
     return group;
 }
 
-BOOL charon_custom_transition(CharonTransitionKind kind, UIViewController *from, UIViewController *to, UIViewController *source, id<UIViewControllerAnimatedTransitioning> animator, id<UIViewControllerInteractiveTransitioning> interactor, UIModalPresentationStyle style, void (^native)(void), void (^undo)(void), void (^completion)(BOOL finished))
+BOOL revenant_custom_transition(RevenantTransitionKind kind, UIViewController *from, UIViewController *to, UIViewController *source, id<UIViewControllerAnimatedTransitioning> animator, id<UIViewControllerInteractiveTransitioning> interactor, UIModalPresentationStyle style, void (^native)(void), void (^undo)(void), void (^completion)(BOOL finished))
 {
     UIView *fromView = from.view;
     UIView *toView = to.view;
     UIWindow *window = fromView.window ?: [UIApplication sharedApplication].keyWindow;
     if (!fromView || !toView || !window || !animator)
         return NO;
-    BOOL modal = kind == CharonTransitionPresent || kind == CharonTransitionDismiss;
-    BOOL keepsPresenter = kind == CharonTransitionPresent && (style == 4 || style == 5 || style == 6);
+    BOOL modal = kind == RevenantTransitionPresent || kind == RevenantTransitionDismiss;
+    BOOL keepsPresenter = kind == RevenantTransitionPresent && (style == 4 || style == 5 || style == 6);
 
     if (interactor && !([interactor respondsToSelector:@selector(wantsInteractiveStart)] && ![interactor wantsInteractiveStart])) {
-        charon_interactive_transition(kind, from, to, animator, interactor, style, native, completion);
+        revenant_interactive_transition(kind, from, to, animator, interactor, style, native, completion);
         return YES;
     }
-    CharonViewState *fromPre = [CharonViewState captureView:fromView];
+    RevenantViewState *fromPre = [RevenantViewState captureView:fromView];
     UIView *fromParent = fromView.superview;
     CGRect initialFrom = fromParent ? [fromParent convertRect:fromView.frame toView:modal ? window : (fromParent.superview ?: fromParent)] : fromView.frame;
     UIView *navigationHost = modal ? nil : (fromParent.superview ?: fromParent);
 
     NSMutableArray *controllers = [NSMutableArray array];
-    charon_collect(from, controllers);
-    charon_collect(to, controllers);
-    NSArray *begun = charon_begin_deferral(controllers);
+    revenant_collect(from, controllers);
+    revenant_collect(to, controllers);
+    NSArray *begun = revenant_begin_deferral(controllers);
     native();
 
     void (^run)(void) = ^{
         UIView *host = modal ? window : navigationHost;
         UIView *toParent = toView.superview;
         if (!host || (!modal && !toParent)) {
-            charon_set_mode(begun, CharonDeferralPass);
-            for (NSArray *entry in charon_take_pending(begun))
+            revenant_set_mode(begun, RevenantDeferralPass);
+            for (NSArray *entry in revenant_take_pending(begun))
                 ((void (*)(id, SEL, BOOL))objc_msgSend)(entry[0], NSSelectorFromString(entry[1]), NO);
-            charon_release_deferral(begun);
+            revenant_release_deferral(begun);
             if (completion)
                 completion(YES);
             return;
         }
-        charon_set_mode(begun, CharonDeferralSwallow);
-        CharonViewState *toPost = [CharonViewState captureView:toView];
+        revenant_set_mode(begun, RevenantDeferralSwallow);
+        RevenantViewState *toPost = [RevenantViewState captureView:toView];
         CGRect finalTo = toParent ? [toParent convertRect:toView.frame toView:modal ? window : host] : toView.frame;
 
         UIView *container = [[UIView alloc] initWithFrame:modal ? window.bounds : host.bounds];
@@ -456,14 +456,14 @@ BOOL charon_custom_transition(CharonTransitionKind kind, UIViewController *from,
         [toView removeFromSuperview];
         toView.frame = finalTo;
 
-        CharonTransitionContext *context = [[CharonTransitionContext alloc] init];
+        RevenantTransitionContext *context = [[RevenantTransitionContext alloc] init];
         context->_container = container;
         context->_from = from;
         context->_to = to;
         context->_animated = YES;
-        context->_style = modal ? (kind == CharonTransitionPresent ? to.modalPresentationStyle : from.modalPresentationStyle) : (UIModalPresentationStyle)-1;
+        context->_style = modal ? (kind == RevenantTransitionPresent ? to.modalPresentationStyle : from.modalPresentationStyle) : (UIModalPresentationStyle)-1;
         context->_initialFrom = initialFrom;
-        context->_finalFrom = kind == CharonTransitionDismiss ? initialFrom : CGRectZero;
+        context->_finalFrom = kind == RevenantTransitionDismiss ? initialFrom : CGRectZero;
         context->_initialTo = CGRectZero;
         context->_finalTo = finalTo;
         BOOL interactive = interactor != nil && !([interactor respondsToSelector:@selector(wantsInteractiveStart)] && ![interactor wantsInteractiveStart]);
@@ -473,17 +473,17 @@ BOOL charon_custom_transition(CharonTransitionKind kind, UIViewController *from,
 
         NSTimeInterval duration = [animator transitionDuration:context];
         id<UIViewControllerTransitionCoordinator> coordinator = to.transitionCoordinator ?: from.transitionCoordinator;
-        if ([coordinator isKindOfClass:[CharonTransitionCoordinator class]]) {
-            [(CharonTransitionCoordinator *)coordinator setContainer:container duration:duration];
-            [(CharonTransitionCoordinator *)coordinator charon_setInteractive:interactive];
-            context->_coordinator = (CharonTransitionCoordinator *)coordinator;
+        if ([coordinator isKindOfClass:[RevenantTransitionCoordinator class]]) {
+            [(RevenantTransitionCoordinator *)coordinator setContainer:container duration:duration];
+            [(RevenantTransitionCoordinator *)coordinator revenant_setInteractive:interactive];
+            context->_coordinator = (RevenantTransitionCoordinator *)coordinator;
         }
 
         context->_finish = ^(BOOL didComplete) {
             void (^finalize)(void) = ^{
                 [container removeFromSuperview];
-                NSArray *pending = charon_take_pending(begun);
-                charon_set_mode(begun, CharonDeferralPass);
+                NSArray *pending = revenant_take_pending(begun);
+                revenant_set_mode(begun, RevenantDeferralPass);
                 if (!didComplete) {
                     [to viewWillDisappear:YES];
                     [to viewDidDisappear:YES];
@@ -499,18 +499,18 @@ BOOL charon_custom_transition(CharonTransitionKind kind, UIViewController *from,
                 NSArray *ordered = modal ? [appear arrayByAddingObjectsFromArray:disappear] : [disappear arrayByAddingObjectsFromArray:appear];
                 for (NSArray *entry in ordered)
                     ((void (*)(id, SEL, BOOL))objc_msgSend)(entry[0], NSSelectorFromString(entry[1]), YES);
-                charon_set_mode(begun, CharonDeferralSwallow);
+                revenant_set_mode(begun, RevenantDeferralSwallow);
                 dispatch_async(dispatch_get_main_queue(), ^{
                     dispatch_async(dispatch_get_main_queue(), ^{
                         for (NSArray *entry in begun)
                             if ([entry[1] owners] == 1)
-                                [entry[1] setMode:CharonDeferralPass];
-                        charon_release_deferral(begun);
+                                [entry[1] setMode:RevenantDeferralPass];
+                        revenant_release_deferral(begun);
                     });
                 });
-                if ([coordinator isKindOfClass:[CharonTransitionCoordinator class]]) {
-                    [(CharonTransitionCoordinator *)coordinator charon_setCancelled:!didComplete];
-                    [(CharonTransitionCoordinator *)coordinator finish];
+                if ([coordinator isKindOfClass:[RevenantTransitionCoordinator class]]) {
+                    [(RevenantTransitionCoordinator *)coordinator revenant_setCancelled:!didComplete];
+                    [(RevenantTransitionCoordinator *)coordinator finish];
                 }
                 if (completion)
                     completion(didComplete);
@@ -551,25 +551,25 @@ BOOL charon_custom_transition(CharonTransitionKind kind, UIViewController *from,
     return YES;
 }
 
-static const char charon_presentation_key;
+static const char revenant_presentation_key;
 
-UIPresentationController *charon_presentation_controller_of(UIViewController *controller)
+UIPresentationController *revenant_presentation_controller_of(UIViewController *controller)
 {
-    return objc_getAssociatedObject(controller, &charon_presentation_key);
+    return objc_getAssociatedObject(controller, &revenant_presentation_key);
 }
 
-void charon_set_presentation_controller(UIViewController *controller, UIPresentationController *presentation)
+void revenant_set_presentation_controller(UIViewController *controller, UIPresentationController *presentation)
 {
-    objc_setAssociatedObject(controller, &charon_presentation_key, presentation, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-    if (presentation.presentedViewController == controller && [presentation respondsToSelector:@selector(charon_ownedByPresentedViewController)])
-        [presentation charon_ownedByPresentedViewController];
+    objc_setAssociatedObject(controller, &revenant_presentation_key, presentation, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    if (presentation.presentedViewController == controller && [presentation respondsToSelector:@selector(revenant_ownedByPresentedViewController)])
+        [presentation revenant_ownedByPresentedViewController];
 }
 
-@interface CharonPresentationContainer : UIView
+@interface RevenantPresentationContainer : UIView
 @property (nonatomic, weak) UIPresentationController *presentation;
 @end
 
-@implementation CharonPresentationContainer
+@implementation RevenantPresentationContainer
 @synthesize presentation = _presentation;
 
 - (void)layoutSubviews
@@ -582,15 +582,15 @@ void charon_set_presentation_controller(UIViewController *controller, UIPresenta
 - (UIView *)hitTest:(CGPoint)point withEvent:(UIEvent *)event
 {
     UIView *hit = [super hitTest:point withEvent:event];
-    return hit == self && [_presentation charon_containerIgnoresDirectTouches] ? nil : hit;
+    return hit == self && [_presentation revenant_containerIgnoresDirectTouches] ? nil : hit;
 }
 
 @end
 
-@interface CharonImmediateAnimator : NSObject <UIViewControllerAnimatedTransitioning>
+@interface RevenantImmediateAnimator : NSObject <UIViewControllerAnimatedTransitioning>
 @end
 
-@implementation CharonImmediateAnimator
+@implementation RevenantImmediateAnimator
 - (NSTimeInterval)transitionDuration:(id<UIViewControllerContextTransitioning>)context { return 0; }
 - (void)animateTransition:(id<UIViewControllerContextTransitioning>)context
 {
@@ -604,7 +604,7 @@ void charon_set_presentation_controller(UIViewController *controller, UIPresenta
 }
 @end
 
-static void charon_presentation_run(BOOL presenting, UIViewController *from, UIViewController *to, UIPresentationController *presentation, id<UIViewControllerAnimatedTransitioning> animator, void (^native)(void), void (^completion)(BOOL finished))
+static void revenant_presentation_run(BOOL presenting, UIViewController *from, UIViewController *to, UIPresentationController *presentation, id<UIViewControllerAnimatedTransitioning> animator, void (^native)(void), void (^completion)(BOOL finished))
 {
     UIWindow *window = (presenting ? from.view.window : from.view.window) ?: [UIApplication sharedApplication].keyWindow;
     BOOL removes = [presentation shouldRemovePresentersView];
@@ -612,32 +612,32 @@ static void charon_presentation_run(BOOL presenting, UIViewController *from, UIV
     UIView *presentedView = presenting ? to.view : from.view;
     BOOL immediate = animator == nil;
     if (immediate)
-        animator = [[CharonImmediateAnimator alloc] init];
+        animator = [[RevenantImmediateAnimator alloc] init];
 
-    CharonPresentationContainer *container = presenting ? nil : (CharonPresentationContainer *)presentation.containerView;
-    CharonViewState *presenterPre = [CharonViewState captureView:presenterView];
+    RevenantPresentationContainer *container = presenting ? nil : (RevenantPresentationContainer *)presentation.containerView;
+    RevenantViewState *presenterPre = [RevenantViewState captureView:presenterView];
     NSMutableArray *controllers = [NSMutableArray array];
-    charon_collect(from, controllers);
-    charon_collect(to, controllers);
-    NSArray *begun = charon_begin_deferral(controllers);
-    charon_set_mode(begun, CharonDeferralSwallow);
+    revenant_collect(from, controllers);
+    revenant_collect(to, controllers);
+    NSArray *begun = revenant_begin_deferral(controllers);
+    revenant_set_mode(begun, RevenantDeferralSwallow);
 
     if (presenting) {
-        container = [[CharonPresentationContainer alloc] initWithFrame:window.bounds];
+        container = [[RevenantPresentationContainer alloc] initWithFrame:window.bounds];
         container.presentation = presentation;
         container.backgroundColor = [UIColor clearColor];
         container.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
         [window addSubview:container];
-        [presentation charon_setContainerView:container];
+        [presentation revenant_setContainerView:container];
         CGRect presenterFrame = [container convertRect:presenterView.frame fromView:presenterView.superview];
         if (removes) {
             [presenterView removeFromSuperview];
             presenterView.frame = presenterFrame;
             [container addSubview:presenterView];
         }
-        charon_set_mode(begun, CharonDeferralPass);
+        revenant_set_mode(begun, RevenantDeferralPass);
         [presentation presentationTransitionWillBegin];
-        charon_set_mode(begun, CharonDeferralSwallow);
+        revenant_set_mode(begun, RevenantDeferralSwallow);
         native();
         [presentedView removeFromSuperview];
         if (removes) {
@@ -647,22 +647,22 @@ static void charon_presentation_run(BOOL presenting, UIViewController *from, UIV
         } else {
             [presenterPre restoreView:presenterView];
         }
-        charon_set_mode(begun, CharonDeferralPass);
+        revenant_set_mode(begun, RevenantDeferralPass);
         if (removes)
             [from viewWillDisappear:YES];
         [to viewWillAppear:YES];
-        charon_set_mode(begun, CharonDeferralSwallow);
+        revenant_set_mode(begun, RevenantDeferralSwallow);
     } else {
-        charon_set_mode(begun, CharonDeferralPass);
+        revenant_set_mode(begun, RevenantDeferralPass);
         [presentation dismissalTransitionWillBegin];
         [from viewWillDisappear:YES];
         if (removes)
             [to viewWillAppear:YES];
-        charon_set_mode(begun, CharonDeferralSwallow);
+        revenant_set_mode(begun, RevenantDeferralSwallow);
     }
 
     CGRect presentedFrame = [presentation frameOfPresentedViewInContainerView];
-    CharonTransitionContext *context = [[CharonTransitionContext alloc] init];
+    RevenantTransitionContext *context = [[RevenantTransitionContext alloc] init];
     context->_container = container;
     context->_from = from;
     context->_to = to;
@@ -677,8 +677,8 @@ static void charon_presentation_run(BOOL presenting, UIViewController *from, UIV
     context->_toViewKeyHidden = presenting ? NO : !removes;
     NSTimeInterval duration = [animator transitionDuration:context];
     id<UIViewControllerTransitionCoordinator> coordinator = to.transitionCoordinator ?: from.transitionCoordinator;
-    if ([coordinator isKindOfClass:[CharonTransitionCoordinator class]])
-        [(CharonTransitionCoordinator *)coordinator setContainer:container duration:duration];
+    if ([coordinator isKindOfClass:[RevenantTransitionCoordinator class]])
+        [(RevenantTransitionCoordinator *)coordinator setContainer:container duration:duration];
 
     __block UIViewController *(^unused)(void) = nil;
     (void)unused;
@@ -702,12 +702,12 @@ static void charon_presentation_run(BOOL presenting, UIViewController *from, UIV
                     [window insertSubview:presenterView belowSubview:container];
                 }
                 [container removeFromSuperview];
-                [presentation charon_setContainerView:nil];
+                [presentation revenant_setContainerView:nil];
                 if (!presenterView.window && window)
                     [window insertSubview:presenterView atIndex:0];
             }
         }
-        charon_set_mode(begun, CharonDeferralPass);
+        revenant_set_mode(begun, RevenantDeferralPass);
         if (presenting) {
             [to viewDidAppear:YES];
             if (removes)
@@ -724,17 +724,17 @@ static void charon_presentation_run(BOOL presenting, UIViewController *from, UIV
             [from viewWillAppear:YES];
             [from viewDidAppear:YES];
         }
-        charon_set_mode(begun, CharonDeferralSwallow);
+        revenant_set_mode(begun, RevenantDeferralSwallow);
         dispatch_async(dispatch_get_main_queue(), ^{
             dispatch_async(dispatch_get_main_queue(), ^{
                 for (NSArray *entry in begun)
                     if ([entry[1] owners] == 1)
-                        [entry[1] setMode:CharonDeferralPass];
-                charon_release_deferral(begun);
+                        [entry[1] setMode:RevenantDeferralPass];
+                revenant_release_deferral(begun);
             });
         });
-        if ([coordinator isKindOfClass:[CharonTransitionCoordinator class]])
-            [(CharonTransitionCoordinator *)coordinator finish];
+        if ([coordinator isKindOfClass:[RevenantTransitionCoordinator class]])
+            [(RevenantTransitionCoordinator *)coordinator finish];
         if (completion)
             completion(didComplete);
         if (!immediate && [animator respondsToSelector:@selector(animationEnded:)])
@@ -743,13 +743,13 @@ static void charon_presentation_run(BOOL presenting, UIViewController *from, UIV
     [animator animateTransition:context];
 }
 
-void charon_presentation_present(UIViewController *presenting, UIViewController *presented, UIPresentationController *presentation, id<UIViewControllerAnimatedTransitioning> animator, void (^native)(void), void (^completion)(BOOL finished))
+void revenant_presentation_present(UIViewController *presenting, UIViewController *presented, UIPresentationController *presentation, id<UIViewControllerAnimatedTransitioning> animator, void (^native)(void), void (^completion)(BOOL finished))
 {
-    charon_set_presentation_controller(presented, presentation);
-    charon_presentation_run(YES, presenting, presented, presentation, animator, native, completion);
+    revenant_set_presentation_controller(presented, presentation);
+    revenant_presentation_run(YES, presenting, presented, presentation, animator, native, completion);
 }
 
-void charon_presentation_dismiss(UIViewController *presented, UIViewController *presenting, UIPresentationController *presentation, id<UIViewControllerAnimatedTransitioning> animator, void (^native)(void), void (^completion)(BOOL finished))
+void revenant_presentation_dismiss(UIViewController *presented, UIViewController *presenting, UIPresentationController *presentation, id<UIViewControllerAnimatedTransitioning> animator, void (^native)(void), void (^completion)(BOOL finished))
 {
-    charon_presentation_run(NO, presented, presenting, presentation, animator, native, completion);
+    revenant_presentation_run(NO, presented, presenting, presentation, animator, native, completion);
 }

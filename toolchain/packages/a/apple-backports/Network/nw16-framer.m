@@ -1,8 +1,8 @@
-#import "CharonNW.h"
+#import "RevenantNW.h"
 
 void nw_framer_options_set_object_value(nw_protocol_options_t options, const char *key, id value)
 {
-    CharonNWProtocolOptions *held = (CharonNWProtocolOptions *)options;
+    RevenantNWProtocolOptions *held = (RevenantNWProtocolOptions *)options;
     if (!held || !key)
         return;
     if (value)
@@ -13,7 +13,7 @@ void nw_framer_options_set_object_value(nw_protocol_options_t options, const cha
 
 id nw_framer_options_copy_object_value(nw_protocol_options_t options, const char *key)
 {
-    CharonNWProtocolOptions *held = (CharonNWProtocolOptions *)options;
+    RevenantNWProtocolOptions *held = (RevenantNWProtocolOptions *)options;
     if (!held || !key)
         return nil;
     return held->_objects[@(key)];

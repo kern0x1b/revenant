@@ -1,5 +1,5 @@
-#ifndef CHARON_SPARSE_COMPLEX_26_H
-#define CHARON_SPARSE_COMPLEX_26_H
+#ifndef REVENANT_SPARSE_COMPLEX_26_H
+#define REVENANT_SPARSE_COMPLEX_26_H
 
 #import <Accelerate/Accelerate.h>
 

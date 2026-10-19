@@ -10,7 +10,7 @@
 #include <sstream>
 #include <string>
 
-namespace shade::runtime_detail {
+namespace emulator::runtime_detail {
 
 struct InitialProcessFailure {
     enum class Kind : std::uint8_t {

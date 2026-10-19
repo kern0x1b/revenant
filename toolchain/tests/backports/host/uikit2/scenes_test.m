@@ -1,10 +1,10 @@
 #import <UIKit/UIKit.h>
 #import "check.h"
 
-extern NSString *const CharonHostUISceneWillConnectNotification, *const CharonHostUISceneDidDisconnectNotification, *const CharonHostUISceneDidActivateNotification,
-    *const CharonHostUISceneWillDeactivateNotification, *const CharonHostUISceneWillEnterForegroundNotification, *const CharonHostUISceneDidEnterBackgroundNotification,
-    *const CharonHostUIWindowSceneSessionRoleApplication, *const CharonHostUIWindowSceneSessionRoleExternalDisplay,
-    *const CharonHostUIWindowSceneSessionRoleExternalDisplayNonInteractive;
+extern NSString *const RevenantHostUISceneWillConnectNotification, *const RevenantHostUISceneDidDisconnectNotification, *const RevenantHostUISceneDidActivateNotification,
+    *const RevenantHostUISceneWillDeactivateNotification, *const RevenantHostUISceneWillEnterForegroundNotification, *const RevenantHostUISceneDidEnterBackgroundNotification,
+    *const RevenantHostUIWindowSceneSessionRoleApplication, *const RevenantHostUIWindowSceneSessionRoleExternalDisplay,
+    *const RevenantHostUIWindowSceneSessionRoleExternalDisplayNonInteractive;
 
 #define ROLE(object) [(UISceneConfiguration *)(object) role]
 
@@ -24,17 +24,17 @@ static NSString *coded(id object, Class cls, id *decoded)
 int main(void)
 {
     @autoreleasepool {
-        CHECK_EQUAL(CharonHostUISceneWillConnectNotification, UISceneWillConnectNotification, "the will connect notification");
-        CHECK_EQUAL(CharonHostUISceneDidDisconnectNotification, UISceneDidDisconnectNotification, "the did disconnect notification");
-        CHECK_EQUAL(CharonHostUISceneDidActivateNotification, UISceneDidActivateNotification, "the did activate notification");
-        CHECK_EQUAL(CharonHostUISceneWillDeactivateNotification, UISceneWillDeactivateNotification, "the will deactivate notification");
-        CHECK_EQUAL(CharonHostUISceneWillEnterForegroundNotification, UISceneWillEnterForegroundNotification, "the will enter foreground notification");
-        CHECK_EQUAL(CharonHostUISceneDidEnterBackgroundNotification, UISceneDidEnterBackgroundNotification, "the did enter background notification");
-        CHECK_EQUAL(CharonHostUIWindowSceneSessionRoleApplication, UIWindowSceneSessionRoleApplication, "the application role");
-        CHECK_EQUAL(CharonHostUIWindowSceneSessionRoleExternalDisplay, UIWindowSceneSessionRoleExternalDisplay, "the external display role");
-        CHECK_EQUAL(CharonHostUIWindowSceneSessionRoleExternalDisplayNonInteractive, UIWindowSceneSessionRoleExternalDisplayNonInteractive, "the non-interactive external display role");
+        CHECK_EQUAL(RevenantHostUISceneWillConnectNotification, UISceneWillConnectNotification, "the will connect notification");
+        CHECK_EQUAL(RevenantHostUISceneDidDisconnectNotification, UISceneDidDisconnectNotification, "the did disconnect notification");
+        CHECK_EQUAL(RevenantHostUISceneDidActivateNotification, UISceneDidActivateNotification, "the did activate notification");
+        CHECK_EQUAL(RevenantHostUISceneWillDeactivateNotification, UISceneWillDeactivateNotification, "the will deactivate notification");
+        CHECK_EQUAL(RevenantHostUISceneWillEnterForegroundNotification, UISceneWillEnterForegroundNotification, "the will enter foreground notification");
+        CHECK_EQUAL(RevenantHostUISceneDidEnterBackgroundNotification, UISceneDidEnterBackgroundNotification, "the did enter background notification");
+        CHECK_EQUAL(RevenantHostUIWindowSceneSessionRoleApplication, UIWindowSceneSessionRoleApplication, "the application role");
+        CHECK_EQUAL(RevenantHostUIWindowSceneSessionRoleExternalDisplay, UIWindowSceneSessionRoleExternalDisplay, "the external display role");
+        CHECK_EQUAL(RevenantHostUIWindowSceneSessionRoleExternalDisplayNonInteractive, UIWindowSceneSessionRoleExternalDisplayNonInteractive, "the non-interactive external display role");
 
-        Class ourConfiguration = NSClassFromString(@"CharonHostUISceneConfiguration");
+        Class ourConfiguration = NSClassFromString(@"RevenantHostUISceneConfiguration");
         CHECK(ourConfiguration != Nil, "the port defines the configuration");
         id ours = make(ourConfiguration);
         UISceneConfiguration *theirs = make([UISceneConfiguration class]);
@@ -59,7 +59,7 @@ int main(void)
         BOOL same = [ROLE(backOne) isEqual:backTwo.role] && [backOne sceneClass] == backTwo.sceneClass && [backOne delegateClass] == backTwo.delegateClass;
         CHECK(same, "and read back as the system's is");
 
-        Class ourConditions = NSClassFromString(@"CharonHostUISceneActivationConditions");
+        Class ourConditions = NSClassFromString(@"RevenantHostUISceneActivationConditions");
         id conditions = make(ourConditions);
         UISceneActivationConditions *systemConditions = make([UISceneActivationConditions class]);
         CHECK_EQUAL([[conditions canActivateForTargetContentIdentifierPredicate] predicateFormat], systemConditions.canActivateForTargetContentIdentifierPredicate.predicateFormat, "the default can activate predicate");
@@ -73,18 +73,18 @@ int main(void)
         CHECK_EQUAL([[backConditions canActivateForTargetContentIdentifierPredicate] predicateFormat], backSystem.canActivateForTargetContentIdentifierPredicate.predicateFormat, "and read back");
         CHECK_EQUAL(@([ourConditions supportsSecureCoding]), @([UISceneActivationConditions supportsSecureCoding]), "the conditions' secure coding");
 
-        id options = make(NSClassFromString(@"CharonHostUISceneOpenExternalURLOptions"));
+        id options = make(NSClassFromString(@"RevenantHostUISceneOpenExternalURLOptions"));
         UISceneOpenExternalURLOptions *systemOptions = make([UISceneOpenExternalURLOptions class]);
         CHECK_EQUAL(@([options universalLinksOnly]), @(systemOptions.universalLinksOnly), "universal links only starts off");
-        id destruction = make(NSClassFromString(@"CharonHostUIWindowSceneDestructionRequestOptions"));
+        id destruction = make(NSClassFromString(@"RevenantHostUIWindowSceneDestructionRequestOptions"));
         UIWindowSceneDestructionRequestOptions *systemDestruction = make([UIWindowSceneDestructionRequestOptions class]);
         CHECK_EQUAL(@([destruction windowDismissalAnimation]), @(systemDestruction.windowDismissalAnimation), "the dismissal animation starts as the system's");
-        id restrictions = make(NSClassFromString(@"CharonHostUISceneSizeRestrictions"));
+        id restrictions = make(NSClassFromString(@"RevenantHostUISceneSizeRestrictions"));
         CHECK(restrictions != nil, "size restrictions can be made");
-        id request = make(NSClassFromString(@"CharonHostUISceneActivationRequestOptions"));
+        id request = make(NSClassFromString(@"RevenantHostUISceneActivationRequestOptions"));
         UISceneActivationRequestOptions *systemRequest = make([UISceneActivationRequestOptions class]);
         CHECK([request requestingScene] == nil && systemRequest.requestingScene == nil, "an activation request names no scene");
     }
-    printf("checks=%d failures=%d\n", charon_checks, charon_failures);
-    return charon_failures;
+    printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
+    return revenant_failures;
 }

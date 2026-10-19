@@ -6,11 +6,11 @@ static NSString *yes_no(BOOL a) { return a ? @"yes" : @"no"; }
 static NSString *num(long long v) { return [NSString stringWithFormat:@"%lld", v]; }
 static NSString *cls(id o) { return o ? NSStringFromClass([o class]) : @"nil"; }
 
-@interface CharonCountingDelegate : NSObject <NSTextContentStorageDelegate, NSTextLayoutManagerDelegate>
+@interface RevenantCountingDelegate : NSObject <NSTextContentStorageDelegate, NSTextLayoutManagerDelegate>
 @property (nonatomic) int paragraphCalls;
 @property (nonatomic) int fragmentCalls;
 @end
-@implementation CharonCountingDelegate
+@implementation RevenantCountingDelegate
 - (NSTextParagraph *)textContentStorage:(NSTextContentStorage *)storage textParagraphWithRange:(NSRange)range
 {
     self.paragraphCalls++;
@@ -23,20 +23,20 @@ static NSString *cls(id o) { return o ? NSStringFromClass([o class]) : @"nil"; }
 }
 @end
 
-@interface CharonAppDelegate : UIResponder <UIApplicationDelegate>
+@interface RevenantAppDelegate : UIResponder <UIApplicationDelegate>
 @end
-@implementation CharonAppDelegate
+@implementation RevenantAppDelegate
 - (UISceneConfiguration *)application:(UIApplication *)application configurationForConnectingSceneSession:(UISceneSession *)session options:(UISceneConnectionOptions *)options
 { return [[UISceneConfiguration alloc] initWithName:@"Default" sessionRole:session.role]; }
 @end
 
-@interface CharonSceneDelegate : UIResponder <UIWindowSceneDelegate>
+@interface RevenantSceneDelegate : UIResponder <UIWindowSceneDelegate>
 @property (nonatomic, strong) UIWindow *window;
 @end
-@implementation CharonSceneDelegate
+@implementation RevenantSceneDelegate
 - (void)scene:(UIScene *)scene willConnectToSession:(UISceneSession *)session options:(UISceneConnectionOptions *)connectionOptions
 {
-    const char *path = getenv("CHARON_SCENE_OUT");
+    const char *path = getenv("REVENANT_SCENE_OUT");
     out = fopen(path ? path : "/dev/stdout", "w");
     UIViewController *root = [[UIViewController alloc] init];
     self.window = [[UIWindow alloc] initWithWindowScene:(UIWindowScene *)scene];
@@ -66,7 +66,7 @@ static NSString *cls(id o) { return o ? NSStringFromClass([o class]) : @"nil"; }
     report("storage-delegate-default", cls(storage.delegate));
     report("storage-includes-markers-default", yes_no(storage.includesTextListMarkers));
 
-    CharonCountingDelegate *counter = [[CharonCountingDelegate alloc] init];
+    RevenantCountingDelegate *counter = [[RevenantCountingDelegate alloc] init];
     storage.delegate = counter;
     lm.delegate = counter;
     NSMutableParagraphStyle *style = [[NSMutableParagraphStyle alloc] init];
@@ -110,6 +110,6 @@ static NSString *cls(id o) { return o ? NSStringFromClass([o class]) : @"nil"; }
 int main(int argc, char *argv[])
 {
     @autoreleasepool {
-        return UIApplicationMain(argc, argv, nil, NSStringFromClass([CharonAppDelegate class]));
+        return UIApplicationMain(argc, argv, nil, NSStringFromClass([RevenantAppDelegate class]));
     }
 }

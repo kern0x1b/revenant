@@ -1,11 +1,11 @@
-#import "CharonAVCapture.h"
+#import "RevenantAVCapture.h"
 #import <objc/runtime.h>
 
-NSArray *charon_capture_devices(NSArray *deviceTypes, NSString *mediaType, AVCaptureDevicePosition position)
+NSArray *revenant_capture_devices(NSArray *deviceTypes, NSString *mediaType, AVCaptureDevicePosition position)
 {
     NSMutableArray *found = [NSMutableArray array];
     if ([deviceTypes containsObject:AVCaptureDeviceTypeBuiltInWideAngleCamera] || [deviceTypes containsObject:AVCaptureDeviceTypeBuiltInTelephotoCamera]
-        || [deviceTypes containsObject:CHARON_DUAL_CAMERA_TYPE])
+        || [deviceTypes containsObject:REVENANT_DUAL_CAMERA_TYPE])
         [found addObjectsFromArray:[AVCaptureDevice devicesWithMediaType:AVMediaTypeVideo]];
     if ([deviceTypes containsObject:AVCaptureDeviceTypeBuiltInMicrophone])
         [found addObjectsFromArray:[AVCaptureDevice devicesWithMediaType:AVMediaTypeAudio]];
@@ -25,10 +25,10 @@ NSArray *charon_capture_devices(NSArray *deviceTypes, NSString *mediaType, AVCap
     }];
 }
 
-static const char charon_sessions_key;
-static const char charon_preview_layers_key;
+static const char revenant_sessions_key;
+static const char revenant_preview_layers_key;
 
-static NSHashTable *charon_weak_set(id owner, const void *key)
+static NSHashTable *revenant_weak_set(id owner, const void *key)
 {
     NSHashTable *set = objc_getAssociatedObject(owner, key);
     if (!set) {
@@ -38,17 +38,17 @@ static NSHashTable *charon_weak_set(id owner, const void *key)
     return set;
 }
 
-static void charon_session_changed(AVCaptureSession *session)
+static void revenant_session_changed(AVCaptureSession *session)
 {
     if (session)
-        [[NSNotificationCenter defaultCenter] postNotificationName:CHARON_CAPTURE_SESSION_CHANGED object:session];
+        [[NSNotificationCenter defaultCenter] postNotificationName:REVENANT_CAPTURE_SESSION_CHANGED object:session];
 }
 
-@implementation AVCaptureDevice (CharonCaptureSessions)
+@implementation AVCaptureDevice (RevenantCaptureSessions)
 
-- (NSArray<AVCaptureSession *> *)charon_captureSessions
+- (NSArray<AVCaptureSession *> *)revenant_captureSessions
 {
-    NSHashTable *sessions = charon_weak_set(self, &charon_sessions_key);
+    NSHashTable *sessions = revenant_weak_set(self, &revenant_sessions_key);
     @synchronized (sessions) {
         return sessions.allObjects;
     }
@@ -56,11 +56,11 @@ static void charon_session_changed(AVCaptureSession *session)
 
 @end
 
-@implementation AVCaptureSession (CharonCaptureSessions)
+@implementation AVCaptureSession (RevenantCaptureSessions)
 
-- (NSArray<AVCaptureVideoPreviewLayer *> *)charon_previewLayers
+- (NSArray<AVCaptureVideoPreviewLayer *> *)revenant_previewLayers
 {
-    NSHashTable *layers = charon_weak_set(self, &charon_preview_layers_key);
+    NSHashTable *layers = revenant_weak_set(self, &revenant_preview_layers_key);
     @synchronized (layers) {
         return layers.allObjects;
     }
@@ -68,34 +68,34 @@ static void charon_session_changed(AVCaptureSession *session)
 
 @end
 
-static void charon_wrap_session(SEL selector)
+static void revenant_wrap_session(SEL selector)
 {
     Method method = class_getInstanceMethod([AVCaptureSession class], selector);
     IMP original = method_getImplementation(method);
     method_setImplementation(method, imp_implementationWithBlock(^(AVCaptureSession *self) {
         ((void (*)(AVCaptureSession *, SEL))original)(self, selector);
-        charon_session_changed(self);
+        revenant_session_changed(self);
     }));
 }
 
-@interface CharonCaptureSessionsInstaller : NSObject
+@interface RevenantCaptureSessionsInstaller : NSObject
 @end
 
-@implementation CharonCaptureSessionsInstaller
+@implementation RevenantCaptureSessionsInstaller
 
 + (void)load
 {
     [[NSNotificationCenter defaultCenter] addObserverForName:AVCaptureSessionDidStartRunningNotification object:nil queue:nil usingBlock:^(NSNotification *note) {
-        charon_session_changed(note.object);
+        revenant_session_changed(note.object);
     }];
-    charon_wrap_session(@selector(commitConfiguration));
+    revenant_wrap_session(@selector(commitConfiguration));
 
     SEL addOutput = @selector(addOutput:);
     Method outputMethod = class_getInstanceMethod([AVCaptureSession class], addOutput);
     IMP originalAddOutput = method_getImplementation(outputMethod);
     method_setImplementation(outputMethod, imp_implementationWithBlock(^(AVCaptureSession *self, AVCaptureOutput *output) {
         ((void (*)(AVCaptureSession *, SEL, AVCaptureOutput *))originalAddOutput)(self, addOutput, output);
-        charon_session_changed(self);
+        revenant_session_changed(self);
     }));
 
     SEL addInput = @selector(addInput:);
@@ -104,12 +104,12 @@ static void charon_wrap_session(SEL selector)
     method_setImplementation(inputMethod, imp_implementationWithBlock(^(AVCaptureSession *self, AVCaptureInput *input) {
         ((void (*)(AVCaptureSession *, SEL, AVCaptureInput *))originalAddInput)(self, addInput, input);
         if ([input isKindOfClass:[AVCaptureDeviceInput class]]) {
-            NSHashTable *sessions = charon_weak_set(((AVCaptureDeviceInput *)input).device, &charon_sessions_key);
+            NSHashTable *sessions = revenant_weak_set(((AVCaptureDeviceInput *)input).device, &revenant_sessions_key);
             @synchronized (sessions) {
                 [sessions addObject:self];
             }
         }
-        charon_session_changed(self);
+        revenant_session_changed(self);
     }));
 
     SEL setSession = @selector(setSession:);
@@ -118,12 +118,12 @@ static void charon_wrap_session(SEL selector)
     method_setImplementation(layerMethod, imp_implementationWithBlock(^(AVCaptureVideoPreviewLayer *self, AVCaptureSession *session) {
         ((void (*)(AVCaptureVideoPreviewLayer *, SEL, AVCaptureSession *))originalSetSession)(self, setSession, session);
         if (session) {
-            NSHashTable *layers = charon_weak_set(session, &charon_preview_layers_key);
+            NSHashTable *layers = revenant_weak_set(session, &revenant_preview_layers_key);
             @synchronized (layers) {
                 [layers addObject:self];
             }
         }
-        charon_session_changed(session);
+        revenant_session_changed(session);
     }));
 }
 

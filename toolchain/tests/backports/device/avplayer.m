@@ -81,15 +81,15 @@ static NSURL *write_video(void)
     return writer.status == AVAssetWriterStatusCompleted ? url : nil;
 }
 
-@interface CharonPlayerDelegate : NSObject <AVPlayerViewControllerDelegate>
+@interface RevenantPlayerDelegate : NSObject <AVPlayerViewControllerDelegate>
 @property (nonatomic) int willStart, didStart, failed, willStop, didStop, restore, shouldDismiss;
 @property (nonatomic) int willBeginFull, willEndFull, fullCoordinators, fullCompletions, fullCancelled;
 @property (nonatomic, strong) UIViewController *presenter;
 @end
 
-@implementation CharonPlayerDelegate
+@implementation RevenantPlayerDelegate
 
-- (void)charon_fullScreenCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator
+- (void)revenant_fullScreenCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator
 {
     self.fullCoordinators += coordinator != nil;
     [coordinator animateAlongsideTransition:nil completion:^(id<UIViewControllerTransitionCoordinatorContext> context) {
@@ -101,13 +101,13 @@ static NSURL *write_video(void)
 - (void)playerViewController:(AVPlayerViewController *)controller willBeginFullScreenPresentationWithAnimationCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator
 {
     self.willBeginFull++;
-    [self charon_fullScreenCoordinator:coordinator];
+    [self revenant_fullScreenCoordinator:coordinator];
 }
 
 - (void)playerViewController:(AVPlayerViewController *)controller willEndFullScreenPresentationWithAnimationCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator
 {
     self.willEndFull++;
-    [self charon_fullScreenCoordinator:coordinator];
+    [self revenant_fullScreenCoordinator:coordinator];
 }
 
 - (void)playerViewControllerWillStartPictureInPicture:(AVPlayerViewController *)controller
@@ -151,11 +151,11 @@ static NSURL *write_video(void)
 
 @end
 
-@interface CharonReadyObserver : NSObject
+@interface RevenantReadyObserver : NSObject
 @property (nonatomic) int changes;
 @end
 
-@implementation CharonReadyObserver
+@implementation RevenantReadyObserver
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
 {
@@ -207,7 +207,7 @@ static void check_surface(void)
 static void check_presented(UIViewController *root, NSURL *url)
 {
     AVPlayerViewController *controller = [[AVPlayerViewController alloc] init];
-    CharonReadyObserver *observer = [[CharonReadyObserver alloc] init];
+    RevenantReadyObserver *observer = [[RevenantReadyObserver alloc] init];
     [controller addObserver:observer forKeyPath:@"readyForDisplay" options:0 context:NULL];
     controller.player = [AVPlayer playerWithURL:url];
     [root presentViewController:controller animated:NO completion:nil];
@@ -222,9 +222,9 @@ static void check_presented(UIViewController *root, NSURL *url)
           && near(video.size.height, expected.size.height), "presented: videoBounds is the aspect fit of 320x240 in the view");
     UIView *overlay = controller.contentOverlayView;
     CHECK([overlay isDescendantOfView:controller.view], "presented: contentOverlayView is in the controller's view");
-    UIToolbar *bar = [controller valueForKey:@"_charonTopBar"];
-    UIBarButtonItem *done = [controller valueForKey:@"_charonDoneItem"];
-    UIButton *full = [controller valueForKey:@"_charonFullScreenButton"];
+    UIToolbar *bar = [controller valueForKey:@"_revenantTopBar"];
+    UIBarButtonItem *done = [controller valueForKey:@"_revenantDoneItem"];
+    UIButton *full = [controller valueForKey:@"_revenantFullScreenButton"];
     printf("measure the Done item's title: %s\n", [done.title UTF8String] ?: "(system item)");
     CHECK(done && [bar.items containsObject:done] && !bar.hidden, "presented: Done is shown");
     CHECK(full && full.hidden, "presented: full screen is not shown");
@@ -238,12 +238,12 @@ static void check_presented(UIViewController *root, NSURL *url)
     checkpoint(@"presented-paused", 8);
 
     controller.requiresLinearPlayback = YES;
-    UISlider *scrubber = [controller valueForKey:@"_charonScrubber"];
+    UISlider *scrubber = [controller valueForKey:@"_revenantScrubber"];
     CHECK(!scrubber.enabled, "presented: requiresLinearPlayback disables the scrubber");
     controller.requiresLinearPlayback = NO;
     CHECK(scrubber.enabled, "presented: the scrubber comes back");
     controller.showsPlaybackControls = NO;
-    UIView *controls = [controller valueForKey:@"_charonControls"];
+    UIView *controls = [controller valueForKey:@"_revenantControls"];
     CHECK(controls.hidden, "presented: showsPlaybackControls NO hides the controls");
     controller.showsPlaybackControls = YES;
     CHECK(!controls.hidden, "presented: the controls come back");
@@ -263,7 +263,7 @@ static void check_presented(UIViewController *root, NSURL *url)
 
 static void check_picture(UIViewController *root, NSURL *url)
 {
-    CharonPlayerDelegate *delegate = [[CharonPlayerDelegate alloc] init];
+    RevenantPlayerDelegate *delegate = [[RevenantPlayerDelegate alloc] init];
     delegate.presenter = root;
     __weak AVPlayerViewController *weakController;
     AVPlayerLayer *layer;
@@ -275,12 +275,12 @@ static void check_picture(UIViewController *root, NSURL *url)
         [root presentViewController:controller animated:NO completion:nil];
         CHECK(wait_until(^BOOL { return controller.readyForDisplay; }, 10), "picture: ready");
         [controller.player play];
-        UIBarButtonItem *button = [controller valueForKey:@"_charonPictureItem"];
-        CHECK(button && [((UIToolbar *)[controller valueForKey:@"_charonTopBar"]).items containsObject:button], "picture: the button is shown");
+        UIBarButtonItem *button = [controller valueForKey:@"_revenantPictureItem"];
+        CHECK(button && [((UIToolbar *)[controller valueForKey:@"_revenantTopBar"]).items containsObject:button], "picture: the button is shown");
         [[UIApplication sharedApplication] sendAction:button.action to:button.target from:button forEvent:nil];
         CHECK(wait_until(^BOOL { return delegate.didStart == 1; }, 5), "picture: will and did start are sent");
         CHECK(delegate.willStart == 1 && delegate.shouldDismiss == 1 && delegate.failed == 0, "picture: once each, no failure");
-        layer = [[controller valueForKey:@"charonVideoView"] valueForKey:@"playerLayer"];
+        layer = [[controller valueForKey:@"revenantVideoView"] valueForKey:@"playerLayer"];
     }
     CHECK(wait_until(^BOOL { return root.presentedViewController == nil; }, 5), "picture: the controller dismisses itself");
     @autoreleasepool {
@@ -296,14 +296,14 @@ static void check_picture(UIViewController *root, NSURL *url)
     printf("measure floating window %s\n", NSStringFromCGRect(floating.frame).UTF8String);
     checkpoint(@"picture-floating", 8);
     @autoreleasepool {
-        AVPictureInPictureController *picture = [weakController valueForKey:@"_charonPicture"];
+        AVPictureInPictureController *picture = [weakController valueForKey:@"_revenantPicture"];
         [picture stopPictureInPicture];
     }
     CHECK(wait_until(^BOOL { return delegate.didStop == 1; }, 5), "picture: will and did stop are sent");
     CHECK(delegate.willStop == 1 && delegate.restore == 1, "picture: restore is asked once");
     @autoreleasepool {
         CHECK(root.presentedViewController == weakController, "picture: the delegate presented the controller again");
-        CHECK(layer.superlayer == ((UIView *)[weakController valueForKey:@"charonVideoView"]).layer, "picture: the layer is back in the controller");
+        CHECK(layer.superlayer == ((UIView *)[weakController valueForKey:@"revenantVideoView"]).layer, "picture: the layer is back in the controller");
         [weakController.player pause];
         [root dismissViewControllerAnimated:NO completion:nil];
         wait_until(^BOOL { return root.presentedViewController == nil; }, 5);
@@ -325,24 +325,24 @@ static void check_full_screen(UIViewController *root, NSURL *url)
     [controller didMoveToParentViewController:root];
     controller.entersFullScreenWhenPlaybackBegins = YES;
     controller.exitsFullScreenWhenPlaybackEnds = YES;
-    CharonPlayerDelegate *delegate = [[CharonPlayerDelegate alloc] init];
+    RevenantPlayerDelegate *delegate = [[RevenantPlayerDelegate alloc] init];
     controller.delegate = delegate;
     controller.player = [AVPlayer playerWithURL:url];
     CHECK(wait_until(^BOOL { return controller.readyForDisplay; }, 10), "inline: ready");
-    UIToolbar *bar = [controller valueForKey:@"_charonTopBar"];
-    UIBarButtonItem *done = [controller valueForKey:@"_charonDoneItem"];
-    UIButton *full = [controller valueForKey:@"_charonFullScreenButton"];
+    UIToolbar *bar = [controller valueForKey:@"_revenantTopBar"];
+    UIBarButtonItem *done = [controller valueForKey:@"_revenantDoneItem"];
+    UIButton *full = [controller valueForKey:@"_revenantFullScreenButton"];
     CHECK(![bar.items containsObject:done] && !full.hidden, "inline: full screen shown, Done not");
     checkpoint(@"inline", 5);
     [controller.player play];
-    CHECK(wait_until(^BOOL { return [NSStringFromClass([root.presentedViewController class]) isEqualToString:@"CharonAVPlayerFullScreenViewController"]; }, 5),
+    CHECK(wait_until(^BOOL { return [NSStringFromClass([root.presentedViewController class]) isEqualToString:@"RevenantAVPlayerFullScreenViewController"]; }, 5),
           "inline: playback begins in full screen");
     CHECK([bar.items containsObject:done], "full screen: Done is shown");
     CHECK(delegate.willBeginFull == 1 && delegate.willEndFull == 0, "full screen: the delegate is told it begins, once");
     CHECK(wait_until(^BOOL { return delegate.fullCompletions == 1; }, 3), "full screen: with a coordinator whose completion runs");
     checkpoint(@"full-screen", 1.5);
     CHECK(wait_until(^BOOL { return root.presentedViewController == nil; }, 8), "full screen: left when playback ends");
-    UIView *stage = [controller valueForKey:@"_charonStage"];
+    UIView *stage = [controller valueForKey:@"_revenantStage"];
     CHECK(stage.superview == controller.view, "inline: the content is back in the controller");
     CHECK(delegate.willEndFull == 1, "full screen: the delegate is told it ends, once");
     CHECK(wait_until(^BOOL { return delegate.fullCompletions == 2; }, 3) && delegate.fullCoordinators == 2 && delegate.fullCancelled == 0,
@@ -362,10 +362,10 @@ static void check_pixel_buffer(UIViewController *root, NSURL *url, OSType format
     controller.player = [AVPlayer playerWithURL:url];
     [root presentViewController:controller animated:NO completion:nil];
     CHECK(wait_until(^BOOL { return controller.readyForDisplay; }, 10), "pixel buffer: ready");
-    AVPlayerItemVideoOutput *output = [controller valueForKey:@"_charonVideoOutput"];
+    AVPlayerItemVideoOutput *output = [controller valueForKey:@"_revenantVideoOutput"];
     CHECK([controller.player.currentItem.outputs containsObject:output], "pixel buffer: a video output is on the item");
     [controller.player play];
-    CALayer *frame = [controller valueForKey:@"_charonFrameLayer"];
+    CALayer *frame = [controller valueForKey:@"_revenantFrameLayer"];
     BOOL drawn = wait_until(^BOOL { return frame.contents != nil; }, 3);
     printf("measure pixel buffer %s: drawn %d, frame %zux%zu\n", name, drawn, drawn ? CGImageGetWidth((__bridge CGImageRef)frame.contents) : 0,
            drawn ? CGImageGetHeight((__bridge CGImageRef)frame.contents) : 0);
@@ -392,7 +392,7 @@ static void check_failure(UIViewController *root)
     spin(1);
     printf("measure after the failure: player status %ld, current item %s, player error %s\n", (long)controller.player.status,
            controller.player.currentItem ? "kept" : "nil", controller.player.error.description.UTF8String ?: "none");
-    UILabel *label = [controller valueForKey:@"_charonFailureLabel"];
+    UILabel *label = [controller valueForKey:@"_revenantFailureLabel"];
     CHECK(!label.hidden, "failure: the controller says so, and keeps saying it");
     checkpoint(@"failure", 5);
     printf("measure failure text %s\n", label.text.UTF8String);
@@ -401,11 +401,11 @@ static void check_failure(UIViewController *root)
     controller.player = nil;
 }
 
-@interface CharonPlayerAppDelegate : UIResponder <UIApplicationDelegate>
+@interface RevenantPlayerAppDelegate : UIResponder <UIApplicationDelegate>
 @property (nonatomic, strong) UIWindow *window;
 @end
 
-@implementation CharonPlayerAppDelegate
+@implementation RevenantPlayerAppDelegate
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)options
 {
@@ -420,7 +420,7 @@ static void check_failure(UIViewController *root)
 
 - (void)run
 {
-    charon_log_to([results_folder stringByAppendingPathComponent:@"avplayer.log"]);
+    revenant_log_to([results_folder stringByAppendingPathComponent:@"avplayer.log"]);
     UIViewController *root = self.window.rootViewController;
     check_surface();
     NSURL *url = write_video();
@@ -435,7 +435,7 @@ static void check_failure(UIViewController *root)
         check_pixel_buffer(root, url, kCVPixelFormatType_420YpCbCr8BiPlanarFullRange, "420f");
     }
     check_failure(root);
-    NSString *summary = [NSString stringWithFormat:@"checks=%d failures=%d\n", charon_checks, charon_failures];
+    NSString *summary = [NSString stringWithFormat:@"checks=%d failures=%d\n", revenant_checks, revenant_failures];
     printf("%s", summary.UTF8String);
     [summary writeToFile:[results_folder stringByAppendingPathComponent:@"avplayer.done"] atomically:YES encoding:NSUTF8StringEncoding error:NULL];
 }
@@ -446,6 +446,6 @@ int main(int argc, char *argv[])
 {
     @autoreleasepool {
         [[NSFileManager defaultManager] createDirectoryAtPath:results_folder withIntermediateDirectories:YES attributes:nil error:NULL];
-        return UIApplicationMain(argc, argv, nil, @"CharonPlayerAppDelegate");
+        return UIApplicationMain(argc, argv, nil, @"RevenantPlayerAppDelegate");
     }
 }

@@ -1,7 +1,7 @@
 #import <Foundation/Foundation.h>
 #import <CoreServices/CoreServices.h>
 
-CFArrayRef CharonPortUTTypeCopyAllTagsWithClass(CFStringRef inUTI, CFStringRef inTagClass);
+CFArrayRef RevenantPortUTTypeCopyAllTagsWithClass(CFStringRef inUTI, CFStringRef inTagClass);
 
 static NSArray *classes(void)
 {
@@ -52,7 +52,7 @@ static NSUInteger cases = 0;
 static void compare(NSString *label, NSString *uti, NSString *tagClass)
 {
     CFArrayRef host = UTTypeCopyAllTagsWithClass((__bridge CFStringRef)uti, (__bridge CFStringRef)tagClass);
-    CFArrayRef port = CharonPortUTTypeCopyAllTagsWithClass((__bridge CFStringRef)uti, (__bridge CFStringRef)tagClass);
+    CFArrayRef port = RevenantPortUTTypeCopyAllTagsWithClass((__bridge CFStringRef)uti, (__bridge CFStringRef)tagClass);
     BOOL same = (host == NULL) == (port == NULL) && (host == NULL || CFEqual(host, port));
     cases++;
     if (!same) {

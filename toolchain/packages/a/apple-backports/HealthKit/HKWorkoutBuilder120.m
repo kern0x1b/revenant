@@ -1,8 +1,8 @@
 #import <HealthKit/HealthKit.h>
 
-#import "CharonHKStore.h"
+#import "RevenantHKStore.h"
 
-@interface HKHealthStore (CharonIOS120Internal)
+@interface HKHealthStore (RevenantIOS120Internal)
 - (void)saveObject:(HKObject *)object withCompletion:(void (^)(BOOL success, NSError *_Nullable error))completion;
 @end
 
@@ -18,7 +18,7 @@
     BOOL _collecting;
     BOOL _finished;
 }
-CHARON_HEALTHKIT_UNCREATABLE_INIT
+REVENANT_HEALTHKIT_UNCREATABLE_INIT
 @dynamic workoutActivities;
 @dynamic allStatistics;
 
@@ -76,12 +76,12 @@ CHARON_HEALTHKIT_UNCREATABLE_INIT
 {
     if (_finished) {
         if (completion)
-            completion(NO, [self charon_errorWithReason:@"workoutAlreadyFinished" code:0]);
+            completion(NO, [self revenant_errorWithReason:@"workoutAlreadyFinished" code:0]);
         return;
     }
     if (_collecting) {
         if (completion)
-            completion(NO, [self charon_errorWithReason:@"workoutCollectionAlreadyStarted" code:0]);
+            completion(NO, [self revenant_errorWithReason:@"workoutCollectionAlreadyStarted" code:0]);
         return;
     }
     _startDate = [startDate copy];
@@ -94,17 +94,17 @@ CHARON_HEALTHKIT_UNCREATABLE_INIT
 {
     if (_finished) {
         if (completion)
-            completion(NO, [self charon_errorWithReason:@"workoutAlreadyFinished" code:0]);
+            completion(NO, [self revenant_errorWithReason:@"workoutAlreadyFinished" code:0]);
         return;
     }
     if (!_collecting) {
         if (completion)
-            completion(NO, [self charon_errorWithReason:@"workoutCollectionNotStarted" code:0]);
+            completion(NO, [self revenant_errorWithReason:@"workoutCollectionNotStarted" code:0]);
         return;
     }
     if ([endDate compare:_startDate] == NSOrderedAscending) {
         if (completion)
-            completion(NO, [self charon_errorWithReason:@"workoutEndDatePrecedesStartDate" code:0]);
+            completion(NO, [self revenant_errorWithReason:@"workoutEndDatePrecedesStartDate" code:0]);
         return;
     }
     _endDate = [endDate copy];
@@ -126,10 +126,10 @@ CHARON_HEALTHKIT_UNCREATABLE_INIT
 {
     if (!samples.count) {
         if (completion)
-            completion(NO, [self charon_emptySamplesError]);
+            completion(NO, [self revenant_emptySamplesError]);
         return;
     }
-    if (![self charon_canAddWithReason:@"workoutCollectionNotStarted" code:0 completion:completion])
+    if (![self revenant_canAddWithReason:@"workoutCollectionNotStarted" code:0 completion:completion])
         return;
     for (HKSample *sample in samples)
         if (sample)
@@ -140,7 +140,7 @@ CHARON_HEALTHKIT_UNCREATABLE_INIT
 
 - (void)addWorkoutEvents:(NSArray<HKWorkoutEvent *> *)workoutEvents completion:(void (^)(BOOL, NSError *_Nullable))completion
 {
-    if (![self charon_canAddWithReason:@"workoutCollectionNotStarted" code:0 completion:completion])
+    if (![self revenant_canAddWithReason:@"workoutCollectionNotStarted" code:0 completion:completion])
         return;
     for (HKWorkoutEvent *event in workoutEvents)
         if (event)
@@ -151,7 +151,7 @@ CHARON_HEALTHKIT_UNCREATABLE_INIT
 
 - (void)addMetadata:(NSDictionary<NSString *, id> *)metadata completion:(void (^)(BOOL, NSError *_Nullable))completion
 {
-    if (![self charon_canAddWithReason:@"workoutCollectionNotStarted" code:0 completion:completion])
+    if (![self revenant_canAddWithReason:@"workoutCollectionNotStarted" code:0 completion:completion])
         return;
     [_metadata addEntriesFromDictionary:metadata ?: @{}];
     if (completion)
@@ -164,12 +164,12 @@ CHARON_HEALTHKIT_UNCREATABLE_INIT
 {
     if (_finished) {
         if (completion)
-            completion(nil, [self charon_errorWithReason:@"workoutAlreadyFinished" code:0]);
+            completion(nil, [self revenant_errorWithReason:@"workoutAlreadyFinished" code:0]);
         return;
     }
     if (!_endDate) {
         if (completion)
-            completion(nil, [self charon_errorWithReason:@"workoutCollectionNotStartedOrNotEnded" code:0]);
+            completion(nil, [self revenant_errorWithReason:@"workoutCollectionNotStartedOrNotEnded" code:0]);
         return;
     }
 
@@ -182,11 +182,11 @@ CHARON_HEALTHKIT_UNCREATABLE_INIT
                                          totalEnergyBurned:nil
                                            totalDistance:nil
                                                   metadata:[_metadata copy]];
-    [workout charon_setWorkoutActivityType:activityType];
-    [workout charon_setTotalEnergyBurned:[self charon_totalOfType:HKQuantityTypeIdentifierActiveEnergyBurned]
-                            totalDistance:[self charon_totalOfType:HKQuantityTypeIdentifierDistanceWalkingRunning]];
+    [workout revenant_setWorkoutActivityType:activityType];
+    [workout revenant_setTotalEnergyBurned:[self revenant_totalOfType:HKQuantityTypeIdentifierActiveEnergyBurned]
+                            totalDistance:[self revenant_totalOfType:HKQuantityTypeIdentifierDistanceWalkingRunning]];
     if (_device)
-        [workout charon_setDevice:_device];
+        [workout revenant_setDevice:_device];
 
     __weak HKWorkoutBuilder *weakSelf = self;
     [_healthStore saveObject:workout withCompletion:^(BOOL success, NSError *_Nullable error) {
@@ -194,7 +194,7 @@ CHARON_HEALTHKIT_UNCREATABLE_INIT
         if (strongSelf)
             strongSelf->_finished = YES;
         if (completion)
-            completion(success ? workout : nil, success ? nil : (error ?: [strongSelf charon_errorWithReason:@"workoutSaveFailed" code:0]));
+            completion(success ? workout : nil, success ? nil : (error ?: [strongSelf revenant_errorWithReason:@"workoutSaveFailed" code:0]));
     }];
 }
 
@@ -219,41 +219,41 @@ CHARON_HEALTHKIT_UNCREATABLE_INIT
             [ofType addObject:sample];
     if (!ofType.count)
         return nil;
-    return [HKStatistics charon_statisticsForSamples:ofType options:HKStatisticsOptionCumulativeSum];
+    return [HKStatistics revenant_statisticsForSamples:ofType options:HKStatisticsOptionCumulativeSum];
 }
 
 #pragma mark - what the refusals and the totals are
 
-- (BOOL)charon_canAddWithReason:(NSString *)reason code:(NSInteger)code completion:(void (^)(BOOL, NSError *_Nullable))completion
+- (BOOL)revenant_canAddWithReason:(NSString *)reason code:(NSInteger)code completion:(void (^)(BOOL, NSError *_Nullable))completion
 {
     if (_finished) {
         if (completion)
-            completion(NO, [self charon_errorWithReason:reason code:0]);
+            completion(NO, [self revenant_errorWithReason:reason code:0]);
         return NO;
     }
     if (!_collecting) {
         if (completion)
-            completion(NO, [self charon_errorWithReason:reason code:0]);
+            completion(NO, [self revenant_errorWithReason:reason code:0]);
         return NO;
     }
     return YES;
 }
 
-- (NSError *)charon_errorWithReason:(NSString *)reason code:(NSInteger)code
+- (NSError *)revenant_errorWithReason:(NSString *)reason code:(NSInteger)code
 {
     return [NSError errorWithDomain:HKErrorDomain code:code userInfo:@{
         NSLocalizedDescriptionKey: [NSString stringWithFormat:@"HKWorkout: %@", reason]
     }];
 }
 
-- (NSError *)charon_emptySamplesError
+- (NSError *)revenant_emptySamplesError
 {
     return [NSError errorWithDomain:HKErrorDomain code:3 userInfo:@{
         NSLocalizedDescriptionKey: @"HKWorkout: HKSample data cannot be nil or empty."
     }];
 }
 
-- (nullable HKQuantity *)charon_totalOfType:(HKQuantityTypeIdentifier)identifier
+- (nullable HKQuantity *)revenant_totalOfType:(HKQuantityTypeIdentifier)identifier
 {
     HKQuantityType *type = [HKObjectType quantityTypeForIdentifier:identifier];
     if (!type)
@@ -264,7 +264,7 @@ CHARON_HEALTHKIT_UNCREATABLE_INIT
             [ofType addObject:sample];
     if (!ofType.count)
         return nil;
-    HKStatistics *statistics = [HKStatistics charon_statisticsForSamples:ofType options:HKStatisticsOptionCumulativeSum];
+    HKStatistics *statistics = [HKStatistics revenant_statisticsForSamples:ofType options:HKStatisticsOptionCumulativeSum];
     return statistics.sumQuantity;
 }
 

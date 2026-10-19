@@ -5,24 +5,24 @@
 #import <dispatch/dispatch.h>
 #include <stdlib.h>
 
-@interface CharonSecProtocolOptions : NSObject <OS_sec_protocol_options>
+@interface RevenantSecProtocolOptions : NSObject <OS_sec_protocol_options>
 {
     tls_protocol_version_t _minTLS, _maxTLS, _minDTLS, _maxDTLS;
     BOOL _hasMinTLS, _hasMaxTLS;
 }
-- (void)charonSetMinTLS:(tls_protocol_version_t)version;
-- (void)charonSetMaxTLS:(tls_protocol_version_t)version;
-- (tls_protocol_version_t)charonMinTLS;
-- (tls_protocol_version_t)charonMaxTLS;
-- (BOOL)charonHasVersionSettings;
+- (void)revenantSetMinTLS:(tls_protocol_version_t)version;
+- (void)revenantSetMaxTLS:(tls_protocol_version_t)version;
+- (tls_protocol_version_t)revenantMinTLS;
+- (tls_protocol_version_t)revenantMaxTLS;
+- (BOOL)revenantHasVersionSettings;
 @end
 
-@implementation CharonSecProtocolOptions
-- (void)charonSetMinTLS:(tls_protocol_version_t)version { _minTLS = version; _hasMinTLS = YES; }
-- (void)charonSetMaxTLS:(tls_protocol_version_t)version { _maxTLS = version; _hasMaxTLS = YES; }
-- (tls_protocol_version_t)charonMinTLS { return _minTLS; }
-- (tls_protocol_version_t)charonMaxTLS { return _maxTLS; }
-- (BOOL)charonHasVersionSettings { return _hasMinTLS && _hasMaxTLS; }
+@implementation RevenantSecProtocolOptions
+- (void)revenantSetMinTLS:(tls_protocol_version_t)version { _minTLS = version; _hasMinTLS = YES; }
+- (void)revenantSetMaxTLS:(tls_protocol_version_t)version { _maxTLS = version; _hasMaxTLS = YES; }
+- (tls_protocol_version_t)revenantMinTLS { return _minTLS; }
+- (tls_protocol_version_t)revenantMaxTLS { return _maxTLS; }
+- (BOOL)revenantHasVersionSettings { return _hasMinTLS && _hasMaxTLS; }
 @end
 
 tls_protocol_version_t sec_protocol_options_get_default_min_tls_protocol_version(void)
@@ -54,16 +54,16 @@ bool sec_protocol_options_are_equal(sec_protocol_options_t optionsA, sec_protoco
     if (![optionsA conformsToProtocol:@protocol(OS_sec_protocol_options)]
         || ![optionsB conformsToProtocol:@protocol(OS_sec_protocol_options)])
         return false;
-    CharonSecProtocolOptions *a = (CharonSecProtocolOptions *)optionsA;
-    CharonSecProtocolOptions *b = (CharonSecProtocolOptions *)optionsB;
-    if (a.charonHasVersionSettings != b.charonHasVersionSettings)
+    RevenantSecProtocolOptions *a = (RevenantSecProtocolOptions *)optionsA;
+    RevenantSecProtocolOptions *b = (RevenantSecProtocolOptions *)optionsB;
+    if (a.revenantHasVersionSettings != b.revenantHasVersionSettings)
         return false;
-    if (!a.charonHasVersionSettings)
+    if (!a.revenantHasVersionSettings)
         return true;
-    return a.charonMinTLS == b.charonMinTLS && a.charonMaxTLS == b.charonMaxTLS;
+    return a.revenantMinTLS == b.revenantMinTLS && a.revenantMaxTLS == b.revenantMaxTLS;
 }
 
-@interface CharonSecProtocolOptionsHeld : CharonSecProtocolOptions
+@interface RevenantSecProtocolOptionsHeld : RevenantSecProtocolOptions
 {
     tls_ciphersuite_t *_ciphersuites;
     size_t _ciphersuiteCount, _ciphersuiteCapacity;
@@ -73,18 +73,18 @@ bool sec_protocol_options_are_equal(sec_protocol_options_t optionsA, sec_protoco
     __strong sec_protocol_pre_shared_key_selection_t _pskSelection;
     __strong dispatch_queue_t _pskQueue;
 }
-- (void)charonAppendCiphersuite:(tls_ciphersuite_t)ciphersuite;
-- (void)charonAppendCiphersuiteGroup:(tls_ciphersuite_group_t)group;
-- (size_t)charonCiphersuiteCount;
-- (size_t)charonGroupCount;
-- (void)charonSetPSKIdentityHint:(dispatch_data_t)hint;
-- (void)charonSetPSKSelection:(sec_protocol_pre_shared_key_selection_t)block
+- (void)revenantAppendCiphersuite:(tls_ciphersuite_t)ciphersuite;
+- (void)revenantAppendCiphersuiteGroup:(tls_ciphersuite_group_t)group;
+- (size_t)revenantCiphersuiteCount;
+- (size_t)revenantGroupCount;
+- (void)revenantSetPSKIdentityHint:(dispatch_data_t)hint;
+- (void)revenantSetPSKSelection:(sec_protocol_pre_shared_key_selection_t)block
                              queue:(dispatch_queue_t)queue;
-- (sec_protocol_pre_shared_key_selection_t)charonPSKSelection;
+- (sec_protocol_pre_shared_key_selection_t)revenantPSKSelection;
 @end
 
-@implementation CharonSecProtocolOptionsHeld
-- (void)charonAppendCiphersuite:(tls_ciphersuite_t)ciphersuite
+@implementation RevenantSecProtocolOptionsHeld
+- (void)revenantAppendCiphersuite:(tls_ciphersuite_t)ciphersuite
 {
     if (_ciphersuiteCount == _ciphersuiteCapacity) {
         size_t room = _ciphersuiteCapacity ? _ciphersuiteCapacity * 2 : 4;
@@ -96,7 +96,7 @@ bool sec_protocol_options_are_equal(sec_protocol_options_t optionsA, sec_protoco
     }
     _ciphersuites[_ciphersuiteCount++] = ciphersuite;
 }
-- (void)charonAppendCiphersuiteGroup:(tls_ciphersuite_group_t)group
+- (void)revenantAppendCiphersuiteGroup:(tls_ciphersuite_group_t)group
 {
     if (_groupCount == _groupCapacity) {
         size_t room = _groupCapacity ? _groupCapacity * 2 : 4;
@@ -108,19 +108,19 @@ bool sec_protocol_options_are_equal(sec_protocol_options_t optionsA, sec_protoco
     }
     _groups[_groupCount++] = group;
 }
-- (size_t)charonCiphersuiteCount { return _ciphersuiteCount; }
-- (size_t)charonGroupCount { return _groupCount; }
-- (void)charonSetPSKIdentityHint:(dispatch_data_t)hint
+- (size_t)revenantCiphersuiteCount { return _ciphersuiteCount; }
+- (size_t)revenantGroupCount { return _groupCount; }
+- (void)revenantSetPSKIdentityHint:(dispatch_data_t)hint
 {
     _pskIdentityHint = hint;
 }
-- (void)charonSetPSKSelection:(sec_protocol_pre_shared_key_selection_t)block
+- (void)revenantSetPSKSelection:(sec_protocol_pre_shared_key_selection_t)block
                         queue:(dispatch_queue_t)queue
 {
     _pskSelection = block;
     _pskQueue = queue;
 }
-- (sec_protocol_pre_shared_key_selection_t)charonPSKSelection { return _pskSelection; }
+- (sec_protocol_pre_shared_key_selection_t)revenantPSKSelection { return _pskSelection; }
 - (void)dealloc
 {
     free(_ciphersuites);
@@ -131,48 +131,48 @@ bool sec_protocol_options_are_equal(sec_protocol_options_t optionsA, sec_protoco
 void sec_protocol_options_append_tls_ciphersuite(sec_protocol_options_t options,
                                                 tls_ciphersuite_t ciphersuite)
 {
-    if (![options isKindOfClass:CharonSecProtocolOptionsHeld.class])
+    if (![options isKindOfClass:RevenantSecProtocolOptionsHeld.class])
         return;
-    [(CharonSecProtocolOptionsHeld *)options charonAppendCiphersuite:ciphersuite];
+    [(RevenantSecProtocolOptionsHeld *)options revenantAppendCiphersuite:ciphersuite];
 }
 
 void sec_protocol_options_append_tls_ciphersuite_group(sec_protocol_options_t options,
                                                       tls_ciphersuite_group_t group)
 {
-    if (![options isKindOfClass:CharonSecProtocolOptionsHeld.class])
+    if (![options isKindOfClass:RevenantSecProtocolOptionsHeld.class])
         return;
-    [(CharonSecProtocolOptionsHeld *)options charonAppendCiphersuiteGroup:group];
+    [(RevenantSecProtocolOptionsHeld *)options revenantAppendCiphersuiteGroup:group];
 }
 
 void sec_protocol_options_set_min_tls_protocol_version(sec_protocol_options_t options,
                                                        tls_protocol_version_t version)
 {
-    if (![options isKindOfClass:CharonSecProtocolOptions.class])
+    if (![options isKindOfClass:RevenantSecProtocolOptions.class])
         return;
-    [(CharonSecProtocolOptions *)options charonSetMinTLS:version];
+    [(RevenantSecProtocolOptions *)options revenantSetMinTLS:version];
 }
 
 void sec_protocol_options_set_max_tls_protocol_version(sec_protocol_options_t options,
                                                        tls_protocol_version_t version)
 {
-    if (![options isKindOfClass:CharonSecProtocolOptions.class])
+    if (![options isKindOfClass:RevenantSecProtocolOptions.class])
         return;
-    [(CharonSecProtocolOptions *)options charonSetMaxTLS:version];
+    [(RevenantSecProtocolOptions *)options revenantSetMaxTLS:version];
 }
 
 void sec_protocol_options_set_tls_pre_shared_key_identity_hint(sec_protocol_options_t options,
                                                                dispatch_data_t hint)
 {
-    if (![options isKindOfClass:CharonSecProtocolOptionsHeld.class])
+    if (![options isKindOfClass:RevenantSecProtocolOptionsHeld.class])
         return;
-    [(CharonSecProtocolOptionsHeld *)options charonSetPSKIdentityHint:hint];
+    [(RevenantSecProtocolOptionsHeld *)options revenantSetPSKIdentityHint:hint];
 }
 
 void sec_protocol_options_set_pre_shared_key_selection_block(
     sec_protocol_options_t options, sec_protocol_pre_shared_key_selection_t block,
     dispatch_queue_t queue)
 {
-    if (![options isKindOfClass:CharonSecProtocolOptionsHeld.class])
+    if (![options isKindOfClass:RevenantSecProtocolOptionsHeld.class])
         return;
-    [(CharonSecProtocolOptionsHeld *)options charonSetPSKSelection:block queue:queue];
+    [(RevenantSecProtocolOptionsHeld *)options revenantSetPSKSelection:block queue:queue];
 }

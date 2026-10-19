@@ -9,7 +9,7 @@
 	<key>CFBundleExecutable</key>
 	<string>unblock</string>
 	<key>CFBundleIdentifier</key>
-	<string>local.charon.backports.unblock</string>
+	<string>local.revenant.backports.unblock</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>

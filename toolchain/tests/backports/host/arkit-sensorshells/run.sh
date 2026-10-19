@@ -4,7 +4,7 @@
 # The host's ARKit.framework is the iOSSupport copy inside the macOS SDK: it has every class here, with
 # the superclass the port declares, so it is an oracle for the class shape and for the probe's two
 # constructors. Each class's file is compiled from the port's tree with that one class renamed to
-# CharonPort<name>, so the port's code and the host's both run in one process (check.m says what is
+# RevenantPort<name>, so the port's code and the host's both run in one process (check.m says what is
 # compared, and what is not: no session runs on either side).
 #
 # Nothing here is a mutant run: the mutants of the neighbouring harnesses are written in python, and this
@@ -27,7 +27,7 @@ classes="ARDepthData ARFaceAnchor AREnvironmentProbeAnchor ARMeshAnchor ARObject
 # of that class as well, which is the point: the port's @interface is the one compiled
 for cls in $classes; do
     xcrun clang -fobjc-arc -w -O1 $target -isysroot "$sdk" -iframework "$ios" \
-        -D"$cls=CharonPort$cls" -c "$ARKit/$cls.m" -o "$runs/$cls.o"
+        -D"$cls=RevenantPort$cls" -c "$ARKit/$cls.m" -o "$runs/$cls.o"
 done
 
 xcrun clang -fobjc-arc -w -O1 $target -isysroot "$sdk" -iframework "$ios" \

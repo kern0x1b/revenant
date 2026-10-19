@@ -1,58 +1,58 @@
-#import "CharonDiffable.h"
-#import "CharonLists.h"
+#import "RevenantDiffable.h"
+#import "RevenantLists.h"
 #import <objc/runtime.h>
 
 #pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
 
-static const char charon_reordering_key = 0, charon_snapshot_handlers_key = 0, charon_sections_key = 0, charon_applying_key = 0, charon_reorder_initial_key = 0;
+static const char revenant_reordering_key = 0, revenant_snapshot_handlers_key = 0, revenant_sections_key = 0, revenant_applying_key = 0, revenant_reorder_initial_key = 0;
 
-@implementation UICollectionViewDiffableDataSource (CharonFourteen)
+@implementation UICollectionViewDiffableDataSource (RevenantFourteen)
 
 - (UICollectionViewDiffableDataSourceReorderingHandlers *)reorderingHandlers
 {
-    id handlers = objc_getAssociatedObject(self, &charon_reordering_key);
+    id handlers = objc_getAssociatedObject(self, &revenant_reordering_key);
     if (!handlers) {
         handlers = [[UICollectionViewDiffableDataSourceReorderingHandlers alloc] init];
-        objc_setAssociatedObject(self, &charon_reordering_key, handlers, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+        objc_setAssociatedObject(self, &revenant_reordering_key, handlers, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     }
     return handlers;
 }
 
 - (void)setReorderingHandlers:(UICollectionViewDiffableDataSourceReorderingHandlers *)reorderingHandlers
 {
-    objc_setAssociatedObject(self, &charon_reordering_key, [reorderingHandlers copy], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, &revenant_reordering_key, [reorderingHandlers copy], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
 - (UICollectionViewDiffableDataSourceSectionSnapshotHandlers *)sectionSnapshotHandlers
 {
-    id handlers = objc_getAssociatedObject(self, &charon_snapshot_handlers_key);
+    id handlers = objc_getAssociatedObject(self, &revenant_snapshot_handlers_key);
     if (!handlers) {
         handlers = [[UICollectionViewDiffableDataSourceSectionSnapshotHandlers alloc] init];
-        objc_setAssociatedObject(self, &charon_snapshot_handlers_key, handlers, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+        objc_setAssociatedObject(self, &revenant_snapshot_handlers_key, handlers, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     }
     return handlers;
 }
 
 - (void)setSectionSnapshotHandlers:(UICollectionViewDiffableDataSourceSectionSnapshotHandlers *)sectionSnapshotHandlers
 {
-    objc_setAssociatedObject(self, &charon_snapshot_handlers_key, [sectionSnapshotHandlers copy], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, &revenant_snapshot_handlers_key, [sectionSnapshotHandlers copy], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
-- (NSMutableDictionary *)charon_sectionSnapshots
+- (NSMutableDictionary *)revenant_sectionSnapshots
 {
-    NSMutableDictionary *snapshots = objc_getAssociatedObject(self, &charon_sections_key);
+    NSMutableDictionary *snapshots = objc_getAssociatedObject(self, &revenant_sections_key);
     if (!snapshots) {
         snapshots = [NSMutableDictionary dictionary];
-        objc_setAssociatedObject(self, &charon_sections_key, snapshots, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+        objc_setAssociatedObject(self, &revenant_sections_key, snapshots, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     }
     return snapshots;
 }
 
-- (void)charon_rebaseSectionSnapshotsFrom:(NSDiffableDataSourceSnapshot *)previous onto:(NSDiffableDataSourceSnapshot *)snapshot
+- (void)revenant_rebaseSectionSnapshotsFrom:(NSDiffableDataSourceSnapshot *)previous onto:(NSDiffableDataSourceSnapshot *)snapshot
 {
-    if ([objc_getAssociatedObject(self, &charon_applying_key) boolValue])
+    if ([objc_getAssociatedObject(self, &revenant_applying_key) boolValue])
         return;
-    NSMutableDictionary *snapshots = [self charon_sectionSnapshots];
+    NSMutableDictionary *snapshots = [self revenant_sectionSnapshots];
     for (id section in snapshots.allKeys) {
         NSDiffableDataSourceSectionSnapshot *stored = snapshots[section];
         NSInteger index = [snapshot indexOfSectionIdentifier:section];
@@ -107,11 +107,11 @@ static const char charon_reordering_key = 0, charon_snapshot_handlers_key = 0, c
     NSDiffableDataSourceSnapshot *updated = [self snapshot];
     if ([updated indexOfSectionIdentifier:sectionIdentifier] == NSNotFound)
         [updated appendSectionsWithIdentifiers:@[sectionIdentifier]];
-    [updated charon_replaceItems:snapshot.visibleItems inSectionAtIndex:(NSUInteger)[updated indexOfSectionIdentifier:sectionIdentifier]];
-    NSMutableDictionary *stored = [self charon_sectionSnapshots];
+    [updated revenant_replaceItems:snapshot.visibleItems inSectionAtIndex:(NSUInteger)[updated indexOfSectionIdentifier:sectionIdentifier]];
+    NSMutableDictionary *stored = [self revenant_sectionSnapshots];
     id previous = stored[sectionIdentifier];
     stored[sectionIdentifier] = [snapshot copy];
-    objc_setAssociatedObject(self, &charon_applying_key, @YES, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, &revenant_applying_key, @YES, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     @try {
         [self applySnapshot:updated animatingDifferences:animatingDifferences completion:completion];
     } @catch (NSException *exception) {
@@ -121,76 +121,76 @@ static const char charon_reordering_key = 0, charon_snapshot_handlers_key = 0, c
             [stored removeObjectForKey:sectionIdentifier];
         @throw;
     } @finally {
-        objc_setAssociatedObject(self, &charon_applying_key, nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+        objc_setAssociatedObject(self, &revenant_applying_key, nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     }
-    UICollectionView *view = [self charon_collectionView];
+    UICollectionView *view = [self revenant_collectionView];
     for (UICollectionViewCell *cell in view.visibleCells) {
         NSIndexPath *path = [view indexPathForCell:cell];
         id item = path ? [self itemIdentifierForIndexPath:path] : nil;
         if (item)
-            [self charon_configureCell:cell item:item indexPath:path];
+            [self revenant_configureCell:cell item:item indexPath:path];
     }
 }
 
 - (NSDiffableDataSourceSectionSnapshot *)snapshotForSection:(id)section
 {
-    NSDiffableDataSourceSectionSnapshot *stored = section ? [self charon_sectionSnapshots][section] : nil;
+    NSDiffableDataSourceSectionSnapshot *stored = section ? [self revenant_sectionSnapshots][section] : nil;
     if (stored)
         return [stored copy];
     NSDiffableDataSourceSectionSnapshot *snapshot = [[NSDiffableDataSourceSectionSnapshot alloc] init];
-    NSDiffableDataSourceSnapshot *current = [self charon_current];
+    NSDiffableDataSourceSnapshot *current = [self revenant_current];
     if (section && [current indexOfSectionIdentifier:section] != NSNotFound)
         [snapshot appendItems:[current itemIdentifiersInSectionWithIdentifier:section]];
     return snapshot;
 }
 
 
-- (NSDiffableDataSourceSnapshot *)charon_reorderInitial
+- (NSDiffableDataSourceSnapshot *)revenant_reorderInitial
 {
-    return objc_getAssociatedObject(self, &charon_reorder_initial_key);
+    return objc_getAssociatedObject(self, &revenant_reorder_initial_key);
 }
 
-- (id)charon_sectionIdentifierAtIndex:(NSInteger)index
+- (id)revenant_sectionIdentifierAtIndex:(NSInteger)index
 {
-    NSArray *sections = [[self charon_current] sectionIdentifiers];
+    NSArray *sections = [[self revenant_current] sectionIdentifiers];
     return index >= 0 && (NSUInteger)index < sections.count ? sections[(NSUInteger)index] : nil;
 }
 
-- (void)charon_configureCell:(UICollectionViewCell *)cell item:(id)item indexPath:(NSIndexPath *)indexPath
+- (void)revenant_configureCell:(UICollectionViewCell *)cell item:(id)item indexPath:(NSIndexPath *)indexPath
 {
     if (![cell isKindOfClass:[UICollectionViewListCell class]])
         return;
-    id section = [self charon_sectionIdentifierAtIndex:indexPath.section];
-    NSDiffableDataSourceSectionSnapshot *stored = section ? [self charon_sectionSnapshots][section] : nil;
+    id section = [self revenant_sectionIdentifierAtIndex:indexPath.section];
+    NSDiffableDataSourceSectionSnapshot *stored = section ? [self revenant_sectionSnapshots][section] : nil;
     UICollectionViewListCell *list = (UICollectionViewListCell *)cell;
     if (!stored || ![stored containsItem:item]) {
-        [list charon_setExpansionHandler:nil];
+        [list revenant_setExpansionHandler:nil];
         return;
     }
     list.indentationLevel = [stored levelOfItem:item];
-    [list charon_setExpanded:[stored isExpanded:item] animated:NO];
+    [list revenant_setExpanded:[stored isExpanded:item] animated:NO];
     __weak UICollectionViewDiffableDataSource *weakSelf = self;
-    [list charon_setExpansionHandler:^{
-        [weakSelf charon_toggleItem:item inSection:section];
+    [list revenant_setExpansionHandler:^{
+        [weakSelf revenant_toggleItem:item inSection:section];
     }];
 }
 
-- (void)charon_refreshOutlineCellsAnimated:(BOOL)animated
+- (void)revenant_refreshOutlineCellsAnimated:(BOOL)animated
 {
-    UICollectionView *view = [self charon_collectionView];
+    UICollectionView *view = [self revenant_collectionView];
     for (UICollectionViewCell *cell in view.visibleCells) {
         NSIndexPath *path = [view indexPathForCell:cell];
         id item = path ? [self itemIdentifierForIndexPath:path] : nil;
-        id section = path ? [self charon_sectionIdentifierAtIndex:path.section] : nil;
-        NSDiffableDataSourceSectionSnapshot *stored = section ? [self charon_sectionSnapshots][section] : nil;
+        id section = path ? [self revenant_sectionIdentifierAtIndex:path.section] : nil;
+        NSDiffableDataSourceSectionSnapshot *stored = section ? [self revenant_sectionSnapshots][section] : nil;
         if ([cell isKindOfClass:[UICollectionViewListCell class]] && item && [stored containsItem:item])
-            [(UICollectionViewListCell *)cell charon_setExpanded:[stored isExpanded:item] animated:animated];
+            [(UICollectionViewListCell *)cell revenant_setExpanded:[stored isExpanded:item] animated:animated];
     }
 }
 
-- (void)charon_toggleItem:(id)item inSection:(id)section
+- (void)revenant_toggleItem:(id)item inSection:(id)section
 {
-    NSDiffableDataSourceSectionSnapshot *snapshot = [[self charon_sectionSnapshots][section] copy];
+    NSDiffableDataSourceSectionSnapshot *snapshot = [[self revenant_sectionSnapshots][section] copy];
     if (!snapshot || ![snapshot containsItem:item])
         return;
     UICollectionViewDiffableDataSourceSectionSnapshotHandlers *handlers = [self sectionSnapshotHandlers];
@@ -213,7 +213,7 @@ static const char charon_reordering_key = 0, charon_snapshot_handlers_key = 0, c
         [snapshot collapseItems:@[item]];
     }
     [self applySnapshot:snapshot toSection:section animatingDifferences:YES];
-    [self charon_refreshOutlineCellsAnimated:YES];
+    [self revenant_refreshOutlineCellsAnimated:YES];
 }
 
 - (BOOL)collectionView:(UICollectionView *)collectionView canMoveItemAtIndexPath:(NSIndexPath *)indexPath
@@ -225,8 +225,8 @@ static const char charon_reordering_key = 0, charon_snapshot_handlers_key = 0, c
 
 - (void)collectionView:(UICollectionView *)collectionView moveItemAtIndexPath:(NSIndexPath *)source toIndexPath:(NSIndexPath *)destination
 {
-    NSDiffableDataSourceSnapshot *snapshot = [self charon_current];
-    id item = [snapshot charon_itemAtIndexPath:source], target = [snapshot charon_itemAtIndexPath:destination];
+    NSDiffableDataSourceSnapshot *snapshot = [self revenant_current];
+    id item = [snapshot revenant_itemAtIndexPath:source], target = [snapshot revenant_itemAtIndexPath:destination];
     if (!item || !target || item == target)
         return;
     if (source.section == destination.section && source.item < destination.item)
@@ -235,32 +235,32 @@ static const char charon_reordering_key = 0, charon_snapshot_handlers_key = 0, c
         [snapshot moveItemWithIdentifier:item beforeItemWithIdentifier:target];
 }
 
-- (void)charon_reorderBegan
+- (void)revenant_reorderBegan
 {
-    objc_setAssociatedObject(self, &charon_reorder_initial_key, [self snapshot], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, &revenant_reorder_initial_key, [self snapshot], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
-- (void)charon_reorderCancelled
+- (void)revenant_reorderCancelled
 {
-    objc_setAssociatedObject(self, &charon_reorder_initial_key, nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, &revenant_reorder_initial_key, nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
-- (void)charon_reorderEnded
+- (void)revenant_reorderEnded
 {
-    NSDiffableDataSourceSnapshot *initial = objc_getAssociatedObject(self, &charon_reorder_initial_key);
-    objc_setAssociatedObject(self, &charon_reorder_initial_key, nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    NSDiffableDataSourceSnapshot *initial = objc_getAssociatedObject(self, &revenant_reorder_initial_key);
+    objc_setAssociatedObject(self, &revenant_reorder_initial_key, nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     NSDiffableDataSourceSnapshot *final = [self snapshot];
     if (!initial || [initial.itemIdentifiers isEqual:final.itemIdentifiers])
         return;
-    NSDiffableDataSourceTransaction *transaction = [[NSDiffableDataSourceTransaction alloc] initCharonWithInitial:initial final:final];
+    NSDiffableDataSourceTransaction *transaction = [[NSDiffableDataSourceTransaction alloc] initRevenantWithInitial:initial final:final];
     UICollectionViewDiffableDataSourceReorderingHandlers *handlers = [self reorderingHandlers];
-    NSDiffableDataSourceSnapshot *live = [self charon_current];
+    NSDiffableDataSourceSnapshot *live = [self revenant_current];
     if (handlers.willReorderHandler) {
-        [self charon_replaceCurrent:initial];
+        [self revenant_replaceCurrent:initial];
         handlers.willReorderHandler(transaction);
-        [self charon_replaceCurrent:live];
+        [self revenant_replaceCurrent:live];
     }
-    [self charon_rebaseSectionSnapshotsFrom:initial onto:live];
+    [self revenant_rebaseSectionSnapshotsFrom:initial onto:live];
     if (handlers.didReorderHandler)
         handlers.didReorderHandler(transaction);
 }

@@ -1,7 +1,7 @@
 #import <Foundation/Foundation.h>
 #import <CloudKit/CloudKit.h>
 
-#import "CharonCKValue.h"
+#import "RevenantCKValue.h"
 
 @interface CKAllowedSharingOptions ()
 @property (nonatomic, assign) BOOL allowsAccessRequests;

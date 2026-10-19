@@ -188,7 +188,7 @@
             "minimum": "6.1.3",
             "facts": "facts/SwiftData/Substrate.md",
             "status": "implemented",
-            "reason": "built for armv7 at iOS 6.1.3 over the release's Core Data; the expansion is not written: the declaration and its @attached roles are in packages/s/swift-data/files/SwiftData/Macros.swift, and a #externalMacro is resolved when a macro is USED, so the name is there and only the expansion is missing. It waits on charon@swift-syntax (6ae40d50), which publishes the host compiler and the swift-syntax build a plugin is compiled against, and on rules/macro (that series) to build it.",
+            "reason": "built for armv7 at iOS 6.1.3 over the release's Core Data; the expansion is not written: the declaration and its @attached roles are in packages/s/swift-data/files/SwiftData/Macros.swift, and a #externalMacro is resolved when a macro is USED, so the name is there and only the expansion is missing. It waits on revenant@swift-syntax (6ae40d50), which publishes the host compiler and the swift-syntax build a plugin is compiled against, and on rules/macro (that series) to build it.",
             "source": "macOS 27's own SwiftData measured beside the port, over Core Data of iOS 6.1.3 with the backports the port carries"
         },
         {
@@ -218,7 +218,7 @@
             "minimum": "6.1.3",
             "facts": "facts/SwiftData/Substrate.md",
             "status": "implemented",
-            "reason": "built for armv7 at iOS 6.1.3 over the release's Core Data; the expansion is not written: the declaration and its @attached roles are in packages/s/swift-data/files/SwiftData/Macros.swift, and a #externalMacro is resolved when a macro is USED, so the name is there and only the expansion is missing. It waits on charon@swift-syntax (6ae40d50), which publishes the host compiler and the swift-syntax build a plugin is compiled against, and on rules/macro (that series) to build it.",
+            "reason": "built for armv7 at iOS 6.1.3 over the release's Core Data; the expansion is not written: the declaration and its @attached roles are in packages/s/swift-data/files/SwiftData/Macros.swift, and a #externalMacro is resolved when a macro is USED, so the name is there and only the expansion is missing. It waits on revenant@swift-syntax (6ae40d50), which publishes the host compiler and the swift-syntax build a plugin is compiled against, and on rules/macro (that series) to build it.",
             "source": "macOS 27's own SwiftData measured beside the port, over Core Data of iOS 6.1.3 with the backports the port carries"
         },
         {
@@ -368,7 +368,7 @@
             "minimum": "6.1.3",
             "facts": "facts/SwiftData/Substrate.md",
             "status": "implemented",
-            "reason": "built for armv7 at iOS 6.1.3 over the release's Core Data; the expansion is not written: the declaration and its @attached roles are in packages/s/swift-data/files/SwiftData/Macros.swift, and a #externalMacro is resolved when a macro is USED, so the name is there and only the expansion is missing. It waits on charon@swift-syntax (6ae40d50), which publishes the host compiler and the swift-syntax build a plugin is compiled against, and on rules/macro (that series) to build it.",
+            "reason": "built for armv7 at iOS 6.1.3 over the release's Core Data; the expansion is not written: the declaration and its @attached roles are in packages/s/swift-data/files/SwiftData/Macros.swift, and a #externalMacro is resolved when a macro is USED, so the name is there and only the expansion is missing. It waits on revenant@swift-syntax (6ae40d50), which publishes the host compiler and the swift-syntax build a plugin is compiled against, and on rules/macro (that series) to build it.",
             "source": "macOS 27's own SwiftData measured beside the port, over Core Data of iOS 6.1.3 with the backports the port carries"
         },
         {
@@ -388,7 +388,7 @@
             "minimum": "6.1.3",
             "facts": "facts/SwiftData/Substrate.md",
             "status": "implemented",
-            "reason": "built for armv7 at iOS 6.1.3 over the release's Core Data; the expansion is not written: the declaration and its @attached roles are in packages/s/swift-data/files/SwiftData/Macros.swift, and a #externalMacro is resolved when a macro is USED, so the name is there and only the expansion is missing. It waits on charon@swift-syntax (6ae40d50), which publishes the host compiler and the swift-syntax build a plugin is compiled against, and on rules/macro (that series) to build it.",
+            "reason": "built for armv7 at iOS 6.1.3 over the release's Core Data; the expansion is not written: the declaration and its @attached roles are in packages/s/swift-data/files/SwiftData/Macros.swift, and a #externalMacro is resolved when a macro is USED, so the name is there and only the expansion is missing. It waits on revenant@swift-syntax (6ae40d50), which publishes the host compiler and the swift-syntax build a plugin is compiled against, and on rules/macro (that series) to build it.",
             "source": "macOS 27's own SwiftData measured beside the port, over Core Data of iOS 6.1.3 with the backports the port carries"
         },
         {
@@ -398,7 +398,7 @@
             "minimum": "6.1.3",
             "facts": "facts/SwiftData/Substrate.md",
             "status": "implemented",
-            "reason": "built for armv7 at iOS 6.1.3 over the release's Core Data; the expansion is not written: the declaration and its @attached roles are in packages/s/swift-data/files/SwiftData/Macros.swift, and a #externalMacro is resolved when a macro is USED, so the name is there and only the expansion is missing. It waits on charon@swift-syntax (6ae40d50), which publishes the host compiler and the swift-syntax build a plugin is compiled against, and on rules/macro (that series) to build it.",
+            "reason": "built for armv7 at iOS 6.1.3 over the release's Core Data; the expansion is not written: the declaration and its @attached roles are in packages/s/swift-data/files/SwiftData/Macros.swift, and a #externalMacro is resolved when a macro is USED, so the name is there and only the expansion is missing. It waits on revenant@swift-syntax (6ae40d50), which publishes the host compiler and the swift-syntax build a plugin is compiled against, and on rules/macro (that series) to build it.",
             "source": "macOS 27's own SwiftData measured beside the port, over Core Data of iOS 6.1.3 with the backports the port carries"
         },
         {
@@ -408,7 +408,7 @@
             "minimum": "6.1.3",
             "facts": "facts/SwiftData/Substrate.md",
             "status": "implemented",
-            "reason": "built for armv7 at iOS 6.1.3 over the release's Core Data; the expansion is not written: the declaration and its @attached roles are in packages/s/swift-data/files/SwiftData/Macros.swift, and a #externalMacro is resolved when a macro is USED, so the name is there and only the expansion is missing. It waits on charon@swift-syntax (6ae40d50), which publishes the host compiler and the swift-syntax build a plugin is compiled against, and on rules/macro (that series) to build it.",
+            "reason": "built for armv7 at iOS 6.1.3 over the release's Core Data; the expansion is not written: the declaration and its @attached roles are in packages/s/swift-data/files/SwiftData/Macros.swift, and a #externalMacro is resolved when a macro is USED, so the name is there and only the expansion is missing. It waits on revenant@swift-syntax (6ae40d50), which publishes the host compiler and the swift-syntax build a plugin is compiled against, and on rules/macro (that series) to build it.",
             "source": "macOS 27's own SwiftData measured beside the port, over Core Data of iOS 6.1.3 with the backports the port carries"
         },
         {
@@ -418,7 +418,7 @@
             "minimum": "6.1.3",
             "facts": "facts/SwiftData/Substrate.md",
             "status": "implemented",
-            "reason": "built for armv7 at iOS 6.1.3 over the release's Core Data; the expansion is not written: the declaration and its @attached roles are in packages/s/swift-data/files/SwiftData/Macros.swift, and a #externalMacro is resolved when a macro is USED, so the name is there and only the expansion is missing. It waits on charon@swift-syntax (6ae40d50), which publishes the host compiler and the swift-syntax build a plugin is compiled against, and on rules/macro (that series) to build it.",
+            "reason": "built for armv7 at iOS 6.1.3 over the release's Core Data; the expansion is not written: the declaration and its @attached roles are in packages/s/swift-data/files/SwiftData/Macros.swift, and a #externalMacro is resolved when a macro is USED, so the name is there and only the expansion is missing. It waits on revenant@swift-syntax (6ae40d50), which publishes the host compiler and the swift-syntax build a plugin is compiled against, and on rules/macro (that series) to build it.",
             "source": "macOS 27's own SwiftData measured beside the port, over Core Data of iOS 6.1.3 with the backports the port carries"
         },
         {
@@ -428,7 +428,7 @@
             "minimum": "6.1.3",
             "facts": "facts/SwiftData/Substrate.md",
             "status": "implemented",
-            "reason": "built for armv7 at iOS 6.1.3 over the release's Core Data; the expansion is not written: the declaration and its @attached roles are in packages/s/swift-data/files/SwiftData/Macros.swift, and a #externalMacro is resolved when a macro is USED, so the name is there and only the expansion is missing. It waits on charon@swift-syntax (6ae40d50), which publishes the host compiler and the swift-syntax build a plugin is compiled against, and on rules/macro (that series) to build it.",
+            "reason": "built for armv7 at iOS 6.1.3 over the release's Core Data; the expansion is not written: the declaration and its @attached roles are in packages/s/swift-data/files/SwiftData/Macros.swift, and a #externalMacro is resolved when a macro is USED, so the name is there and only the expansion is missing. It waits on revenant@swift-syntax (6ae40d50), which publishes the host compiler and the swift-syntax build a plugin is compiled against, and on rules/macro (that series) to build it.",
             "source": "macOS 27's own SwiftData measured beside the port, over Core Data of iOS 6.1.3 with the backports the port carries"
         },
         {
@@ -2968,7 +2968,7 @@
             "minimum": "6.1.3",
             "facts": "facts/SwiftData/Substrate.md",
             "status": "implemented",
-            "reason": "built for armv7 at iOS 6.1.3 over the release's Core Data; the expansion is not written: the declaration and its @attached roles are in packages/s/swift-data/files/SwiftData/Macros.swift, and a #externalMacro is resolved when a macro is USED, so the name is there and only the expansion is missing. It waits on charon@swift-syntax (6ae40d50), which publishes the host compiler and the swift-syntax build a plugin is compiled against, and on rules/macro (that series) to build it.",
+            "reason": "built for armv7 at iOS 6.1.3 over the release's Core Data; the expansion is not written: the declaration and its @attached roles are in packages/s/swift-data/files/SwiftData/Macros.swift, and a #externalMacro is resolved when a macro is USED, so the name is there and only the expansion is missing. It waits on revenant@swift-syntax (6ae40d50), which publishes the host compiler and the swift-syntax build a plugin is compiled against, and on rules/macro (that series) to build it.",
             "source": "macOS 27's own SwiftData measured beside the port, over Core Data of iOS 6.1.3 with the backports the port carries"
         },
         {

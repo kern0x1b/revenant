@@ -1,7 +1,7 @@
 #import <UIKit/UIKit.h>
 #import <objc/message.h>
 
-@implementation NSTextList (CharonOrdered16)
+@implementation NSTextList (RevenantOrdered16)
 
 - (BOOL)isOrdered
 {

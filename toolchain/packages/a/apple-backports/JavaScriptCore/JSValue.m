@@ -10,7 +10,7 @@
 
 @implementation JSValue
 
-+ (instancetype)charon_valueWithJSValueRef:(JSValueRef)value context:(JSContext *)context
++ (instancetype)revenant_valueWithJSValueRef:(JSValueRef)value context:(JSContext *)context
 {
     JSValue *result = [self alloc];
     result->_value = value;
@@ -21,7 +21,7 @@
 
 + (JSValue *)valueWithJSValueRef:(JSValueRef)value inContext:(JSContext *)context
 {
-    return [self charon_valueWithJSValueRef:value context:context];
+    return [self revenant_valueWithJSValueRef:value context:context];
 }
 
 - (void)dealloc
@@ -43,17 +43,17 @@
 {
     if ([value isKindOfClass:[JSValue class]])
         return value;
-    return [self charon_valueWithJSValueRef:charon_js_box(context.JSGlobalContextRef, value) context:context];
+    return [self revenant_valueWithJSValueRef:revenant_js_box(context.JSGlobalContextRef, value) context:context];
 }
 
 + (JSValue *)valueWithBool:(BOOL)value inContext:(JSContext *)context
 {
-    return [self charon_valueWithJSValueRef:JSValueMakeBoolean(context.JSGlobalContextRef, value) context:context];
+    return [self revenant_valueWithJSValueRef:JSValueMakeBoolean(context.JSGlobalContextRef, value) context:context];
 }
 
 + (JSValue *)valueWithDouble:(double)value inContext:(JSContext *)context
 {
-    return [self charon_valueWithJSValueRef:JSValueMakeNumber(context.JSGlobalContextRef, value) context:context];
+    return [self revenant_valueWithJSValueRef:JSValueMakeNumber(context.JSGlobalContextRef, value) context:context];
 }
 
 + (JSValue *)valueWithInt32:(int32_t)value inContext:(JSContext *)context
@@ -68,57 +68,57 @@
 
 + (JSValue *)valueWithNewObjectInContext:(JSContext *)context
 {
-    return [self charon_valueWithJSValueRef:JSObjectMake(context.JSGlobalContextRef, NULL, NULL) context:context];
+    return [self revenant_valueWithJSValueRef:JSObjectMake(context.JSGlobalContextRef, NULL, NULL) context:context];
 }
 
 + (JSValue *)valueWithNewArrayInContext:(JSContext *)context
 {
-    return [self charon_valueWithJSValueRef:JSObjectMakeArray(context.JSGlobalContextRef, 0, NULL, NULL) context:context];
+    return [self revenant_valueWithJSValueRef:JSObjectMakeArray(context.JSGlobalContextRef, 0, NULL, NULL) context:context];
 }
 
 + (JSValue *)valueWithNewRegularExpressionFromPattern:(NSString *)pattern flags:(NSString *)flags inContext:(JSContext *)context
 {
-    JSStringRef patternString = charon_js_string(pattern);
-    JSStringRef flagsString = charon_js_string(flags);
+    JSStringRef patternString = revenant_js_string(pattern);
+    JSStringRef flagsString = revenant_js_string(flags);
     JSValueRef arguments[2] = {JSValueMakeString(context.JSGlobalContextRef, patternString), JSValueMakeString(context.JSGlobalContextRef, flagsString)};
     JSValueRef exception = NULL;
     JSObjectRef result = JSObjectMakeRegExp(context.JSGlobalContextRef, 2, arguments, &exception);
     JSStringRelease(patternString);
     JSStringRelease(flagsString);
     if (exception)
-        [context charon_noteException:exception];
-    return [self charon_valueWithJSValueRef:result context:context];
+        [context revenant_noteException:exception];
+    return [self revenant_valueWithJSValueRef:result context:context];
 }
 
 + (JSValue *)valueWithNewErrorFromMessage:(NSString *)message inContext:(JSContext *)context
 {
-    JSStringRef text = charon_js_string(message);
+    JSStringRef text = revenant_js_string(message);
     JSValueRef argument = JSValueMakeString(context.JSGlobalContextRef, text);
     JSStringRelease(text);
     JSObjectRef result = JSObjectMakeError(context.JSGlobalContextRef, 1, &argument, NULL);
-    return [self charon_valueWithJSValueRef:result context:context];
+    return [self revenant_valueWithJSValueRef:result context:context];
 }
 
 + (JSValue *)valueWithNullInContext:(JSContext *)context
 {
-    return [self charon_valueWithJSValueRef:JSValueMakeNull(context.JSGlobalContextRef) context:context];
+    return [self revenant_valueWithJSValueRef:JSValueMakeNull(context.JSGlobalContextRef) context:context];
 }
 
 + (JSValue *)valueWithUndefinedInContext:(JSContext *)context
 {
-    return [self charon_valueWithJSValueRef:JSValueMakeUndefined(context.JSGlobalContextRef) context:context];
+    return [self revenant_valueWithJSValueRef:JSValueMakeUndefined(context.JSGlobalContextRef) context:context];
 }
 
 static id Reported(JSContext *context, id result, JSValueRef exception)
 {
     if (exception)
-        [context charon_noteException:exception];
+        [context revenant_noteException:exception];
     return result;
 }
 
 - (id)toObject
 {
-    return charon_js_unbox(_context.JSGlobalContextRef, _value);
+    return revenant_js_unbox(_context.JSGlobalContextRef, _value);
 }
 
 - (id)toObjectOfClass:(Class)expectedClass
@@ -138,7 +138,7 @@ static id Reported(JSContext *context, id result, JSValueRef exception)
     JSValueRef exception = NULL;
     double value = JSValueToNumber(_context.JSGlobalContextRef, _value, &exception);
     if (exception) {
-        [_context charon_noteException:exception];
+        [_context revenant_noteException:exception];
         return NAN;
     }
     return value;
@@ -146,7 +146,7 @@ static id Reported(JSContext *context, id result, JSValueRef exception)
 
 - (int32_t)toInt32
 {
-    return (int32_t)charon_js_uint32(self.toDouble);
+    return (int32_t)revenant_js_uint32(self.toDouble);
 }
 
 - (uint32_t)toUInt32
@@ -157,31 +157,31 @@ static id Reported(JSContext *context, id result, JSValueRef exception)
 - (NSNumber *)toNumber
 {
     JSValueRef exception = NULL;
-    return Reported(_context, charon_js_to_number(_context.JSGlobalContextRef, _value, &exception), exception);
+    return Reported(_context, revenant_js_to_number(_context.JSGlobalContextRef, _value, &exception), exception);
 }
 
 - (NSString *)toString
 {
     JSValueRef exception = NULL;
-    return Reported(_context, charon_js_to_string(_context.JSGlobalContextRef, _value, &exception), exception);
+    return Reported(_context, revenant_js_to_string(_context.JSGlobalContextRef, _value, &exception), exception);
 }
 
 - (NSDate *)toDate
 {
     JSValueRef exception = NULL;
-    return Reported(_context, charon_js_to_date(_context.JSGlobalContextRef, _value, &exception), exception);
+    return Reported(_context, revenant_js_to_date(_context.JSGlobalContextRef, _value, &exception), exception);
 }
 
 - (NSArray *)toArray
 {
     JSValueRef exception = NULL;
-    return Reported(_context, charon_js_to_array(_context.JSGlobalContextRef, _value, &exception), exception);
+    return Reported(_context, revenant_js_to_array(_context.JSGlobalContextRef, _value, &exception), exception);
 }
 
 - (NSDictionary *)toDictionary
 {
     JSValueRef exception = NULL;
-    return Reported(_context, charon_js_to_dictionary(_context.JSGlobalContextRef, _value, &exception), exception);
+    return Reported(_context, revenant_js_to_dictionary(_context.JSGlobalContextRef, _value, &exception), exception);
 }
 
 - (BOOL)isUndefined
@@ -216,12 +216,12 @@ static id Reported(JSContext *context, id result, JSValueRef exception)
 
 - (BOOL)isArray
 {
-    return charon_js_is_array(_context.JSGlobalContextRef, _value);
+    return revenant_js_is_array(_context.JSGlobalContextRef, _value);
 }
 
 - (BOOL)isDate
 {
-    return charon_js_is_date(_context.JSGlobalContextRef, _value);
+    return revenant_js_is_date(_context.JSGlobalContextRef, _value);
 }
 
 - (BOOL)isEqualToObject:(id)value
@@ -236,7 +236,7 @@ static id Reported(JSContext *context, id result, JSValueRef exception)
     JSValueRef exception = NULL;
     BOOL equal = JSValueIsEqual(_context.JSGlobalContextRef, _value, other.JSValueRef, &exception);
     if (exception)
-        [_context charon_noteException:exception];
+        [_context revenant_noteException:exception];
     return equal;
 }
 
@@ -248,46 +248,46 @@ static id Reported(JSContext *context, id result, JSValueRef exception)
     JSValueRef exception = NULL;
     BOOL result = JSValueIsInstanceOfConstructor(_context.JSGlobalContextRef, _value, JSValueToObject(_context.JSGlobalContextRef, constructor.JSValueRef, &exception), &exception);
     if (exception)
-        [_context charon_noteException:exception];
+        [_context revenant_noteException:exception];
     return result;
 }
 
 - (JSValue *)callWithArguments:(NSArray *)arguments
 {
-    return [self charon_callWithArguments:arguments thisValue:NULL asConstructor:NO];
+    return [self revenant_callWithArguments:arguments thisValue:NULL asConstructor:NO];
 }
 
 - (JSValue *)constructWithArguments:(NSArray *)arguments
 {
-    return [self charon_callWithArguments:arguments thisValue:NULL asConstructor:YES];
+    return [self revenant_callWithArguments:arguments thisValue:NULL asConstructor:YES];
 }
 
-- (JSValue *)charon_callWithArguments:(NSArray *)arguments thisValue:(JSObjectRef)thisObject asConstructor:(BOOL)asConstructor
+- (JSValue *)revenant_callWithArguments:(NSArray *)arguments thisValue:(JSObjectRef)thisObject asConstructor:(BOOL)asConstructor
 {
     JSContextRef ctx = _context.JSGlobalContextRef;
     JSValueRef exception = NULL;
     JSObjectRef function = JSValueToObject(ctx, _value, &exception);
     if (!function) {
         if (exception)
-            [_context charon_noteException:exception];
+            [_context revenant_noteException:exception];
         return [JSValue valueWithUndefinedInContext:_context];
     }
     NSUInteger count = arguments.count;
     JSValueRef *values = count ? malloc(sizeof(JSValueRef) * count) : NULL;
     for (NSUInteger index = 0; index < count; index++)
-        values[index] = charon_js_box(ctx, arguments[index]);
+        values[index] = revenant_js_box(ctx, arguments[index]);
     JSValueRef result;
-    charon_js_enter();
+    revenant_js_enter();
     if (asConstructor)
         result = JSObjectCallAsConstructor(ctx, function, count, values, &exception);
     else
         result = JSObjectCallAsFunction(ctx, function, thisObject, count, values, &exception);
     free(values);
-    JSValue *value = [JSValue charon_valueWithJSValueRef:(exception || !result) ? JSValueMakeUndefined(ctx) : result context:_context];
-    JSValue *thrown = exception ? [JSValue charon_valueWithJSValueRef:exception context:_context] : nil;
-    charon_js_leave();
+    JSValue *value = [JSValue revenant_valueWithJSValueRef:(exception || !result) ? JSValueMakeUndefined(ctx) : result context:_context];
+    JSValue *thrown = exception ? [JSValue revenant_valueWithJSValueRef:exception context:_context] : nil;
+    revenant_js_leave();
     if (thrown)
-        [_context charon_noteException:thrown.JSValueRef];
+        [_context revenant_noteException:thrown.JSValueRef];
     return value;
 }
 
@@ -298,8 +298,8 @@ static id Reported(JSContext *context, id result, JSValueRef exception)
     JSValueRef exception = NULL;
     JSObjectRef thisObject = JSValueToObject(ctx, _value, &exception);
     if (exception)
-        [_context charon_noteException:exception];
-    return [function charon_callWithArguments:arguments thisValue:thisObject asConstructor:NO];
+        [_context revenant_noteException:exception];
+    return [function revenant_callWithArguments:arguments thisValue:thisObject asConstructor:NO];
 }
 
 - (JSValue *)valueForProperty:(NSString *)property
@@ -309,15 +309,15 @@ static id Reported(JSContext *context, id result, JSValueRef exception)
     JSObjectRef object = JSValueToObject(ctx, _value, &exception);
     if (!object) {
         if (exception)
-            [_context charon_noteException:exception];
+            [_context revenant_noteException:exception];
         return [JSValue valueWithUndefinedInContext:_context];
     }
-    JSStringRef name = charon_js_string(property);
+    JSStringRef name = revenant_js_string(property);
     JSValueRef result = JSObjectGetProperty(ctx, object, name, &exception);
     JSStringRelease(name);
     if (exception)
-        [_context charon_noteException:exception];
-    return [JSValue charon_valueWithJSValueRef:result ?: JSValueMakeUndefined(ctx) context:_context];
+        [_context revenant_noteException:exception];
+    return [JSValue revenant_valueWithJSValueRef:result ?: JSValueMakeUndefined(ctx) context:_context];
 }
 
 - (void)setValue:(id)value forProperty:(NSString *)property
@@ -327,11 +327,11 @@ static id Reported(JSContext *context, id result, JSValueRef exception)
     JSObjectRef object = JSValueToObject(ctx, _value, &exception);
     if (!object)
         return;
-    JSStringRef name = charon_js_string(property);
-    JSObjectSetProperty(ctx, object, name, charon_js_box(ctx, value), kJSPropertyAttributeNone, &exception);
+    JSStringRef name = revenant_js_string(property);
+    JSObjectSetProperty(ctx, object, name, revenant_js_box(ctx, value), kJSPropertyAttributeNone, &exception);
     JSStringRelease(name);
     if (exception)
-        [_context charon_noteException:exception];
+        [_context revenant_noteException:exception];
 }
 
 - (BOOL)deleteProperty:(NSString *)property
@@ -341,11 +341,11 @@ static id Reported(JSContext *context, id result, JSValueRef exception)
     JSObjectRef object = JSValueToObject(ctx, _value, &exception);
     if (!object)
         return NO;
-    JSStringRef name = charon_js_string(property);
+    JSStringRef name = revenant_js_string(property);
     BOOL result = JSObjectDeleteProperty(ctx, object, name, &exception);
     JSStringRelease(name);
     if (exception)
-        [_context charon_noteException:exception];
+        [_context revenant_noteException:exception];
     return result;
 }
 
@@ -356,7 +356,7 @@ static id Reported(JSContext *context, id result, JSValueRef exception)
     JSObjectRef object = JSValueToObject(ctx, _value, &exception);
     if (!object)
         return NO;
-    JSStringRef name = charon_js_string(property);
+    JSStringRef name = revenant_js_string(property);
     BOOL result = JSObjectHasProperty(ctx, object, name);
     JSStringRelease(name);
     return result;
@@ -377,8 +377,8 @@ static id Reported(JSContext *context, id result, JSValueRef exception)
         return [JSValue valueWithUndefinedInContext:_context];
     JSValueRef result = JSObjectGetPropertyAtIndex(ctx, object, (unsigned)index, &exception);
     if (exception)
-        [_context charon_noteException:exception];
-    return [JSValue charon_valueWithJSValueRef:result ?: JSValueMakeUndefined(ctx) context:_context];
+        [_context revenant_noteException:exception];
+    return [JSValue revenant_valueWithJSValueRef:result ?: JSValueMakeUndefined(ctx) context:_context];
 }
 
 - (void)setValue:(id)value atIndex:(NSUInteger)index
@@ -388,9 +388,9 @@ static id Reported(JSContext *context, id result, JSValueRef exception)
     JSObjectRef object = JSValueToObject(ctx, _value, &exception);
     if (!object)
         return;
-    JSObjectSetPropertyAtIndex(ctx, object, (unsigned)index, charon_js_box(ctx, value), &exception);
+    JSObjectSetPropertyAtIndex(ctx, object, (unsigned)index, revenant_js_box(ctx, value), &exception);
     if (exception)
-        [_context charon_noteException:exception];
+        [_context revenant_noteException:exception];
 }
 
 - (JSValue *)objectForKeyedSubscript:(id)key
@@ -466,9 +466,9 @@ static JSValueRef NamedProperty(JSContextRef ctx, JSObjectRef object, const char
     return value;
 }
 
-+ (void)charon_installPromiseInContext:(JSContext *)context
++ (void)revenant_installPromiseInContext:(JSContext *)context
 {
-    JSObjectRef constructor = charon_js_promise_constructor(context);
+    JSObjectRef constructor = revenant_js_promise_constructor(context);
     if (!constructor)
         return;
     JSGlobalContextRef ctx = context.JSGlobalContextRef;
@@ -492,31 +492,31 @@ static JSValueRef NamedProperty(JSContextRef ctx, JSObjectRef object, const char
     JSValueRef exception = NULL;
     JSObjectCallAsFunction(ctx, define, NULL, 3, arguments, &exception);
     if (exception)
-        [context charon_noteException:exception];
+        [context revenant_noteException:exception];
 }
 
 + (JSValue *)valueWithNewPromiseInContext:(JSContext *)context fromExecutor:(void (^)(JSValue *resolve, JSValue *reject))callback
 {
     JSObjectRef resolve = NULL, reject = NULL;
     JSValueRef exception = NULL;
-    JSObjectRef promise = charon_js_deferred_promise(context, &resolve, &reject, &exception);
+    JSObjectRef promise = revenant_js_deferred_promise(context, &resolve, &reject, &exception);
     if (!promise) {
-        JSValue *thrown = exception ? [JSValue charon_valueWithJSValueRef:exception context:context] : nil;
-        [context charon_noteException:thrown.JSValueRef];
+        JSValue *thrown = exception ? [JSValue revenant_valueWithJSValueRef:exception context:context] : nil;
+        [context revenant_noteException:thrown.JSValueRef];
         return [JSValue valueWithUndefinedInContext:context];
     }
-    JSValue *result = [JSValue charon_valueWithJSValueRef:promise context:context];
+    JSValue *result = [JSValue revenant_valueWithJSValueRef:promise context:context];
     if (callback) {
-        JSValue *resolveFunction = [JSValue charon_valueWithJSValueRef:resolve context:context];
-        JSValue *rejectFunction = [JSValue charon_valueWithJSValueRef:reject context:context];
+        JSValue *resolveFunction = [JSValue revenant_valueWithJSValueRef:resolve context:context];
+        JSValue *rejectFunction = [JSValue revenant_valueWithJSValueRef:reject context:context];
         NSArray<JSValue *> *arguments = @[resolveFunction, rejectFunction];
-        charon_js_push_callback(context, result, nil, arguments);
+        revenant_js_push_callback(context, result, nil, arguments);
         callback(resolveFunction, rejectFunction);
-        JSValue *thrown = charon_js_pop_callback();
+        JSValue *thrown = revenant_js_pop_callback();
         if (thrown)
             [rejectFunction callWithArguments:@[thrown]];
     }
-    charon_js_leave();
+    revenant_js_leave();
     return result;
 }
 
@@ -542,7 +542,7 @@ static JSValueRef NamedProperty(JSContextRef ctx, JSObjectRef object, const char
 {
     (void)description;
     JSValue *error = [context[@"TypeError"] constructWithArguments:@[@"this release's JavaScript engine has no symbols"]];
-    [context charon_noteException:error.JSValueRef];
+    [context revenant_noteException:error.JSValueRef];
     return [JSValue valueWithUndefinedInContext:context];
 }
 

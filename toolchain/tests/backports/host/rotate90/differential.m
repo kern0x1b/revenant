@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define RENAME(x) charonHost_##x
+#define RENAME(x) revenantHost_##x
 extern vImage_Error RENAME(vImageRotate90_ARGB16U)(const vImage_Buffer *, const vImage_Buffer *, uint8_t,
                                                    const Pixel_ARGB_16U, vImage_Flags);
 extern vImage_Error RENAME(vImageRotate90_ARGB16S)(const vImage_Buffer *, const vImage_Buffer *, uint8_t,

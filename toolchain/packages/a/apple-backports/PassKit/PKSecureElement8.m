@@ -1,8 +1,8 @@
 #import <PassKit/PassKit.h>
 #import <UIKit/UIKit.h>
-#import "CharonPassKit.h"
+#import "RevenantPassKit.h"
 
-@implementation PKPassLibrary (CharonSecureElement)
+@implementation PKPassLibrary (RevenantSecureElement)
 
 - (BOOL)isPaymentPassActivationAvailable
 {
@@ -36,7 +36,7 @@
                 completion:(void (^)(BOOL success, NSError * _Nullable error))completion
 {
     if (completion) {
-        completion(NO, CharonPassKitNoHardwareError());
+        completion(NO, RevenantPassKitNoHardwareError());
     }
 }
 
@@ -47,7 +47,7 @@
     (void)paymentPass;
     (void)activationData;
     if (completion) {
-        completion(NO, CharonPassKitNoHardwareError());
+        completion(NO, RevenantPassKitNoHardwareError());
     }
 }
 
@@ -58,7 +58,7 @@
     (void)secureElementPass;
     (void)activationData;
     if (completion) {
-        completion(NO, CharonPassKitNoHardwareError());
+        completion(NO, RevenantPassKitNoHardwareError());
     }
 }
 
@@ -69,7 +69,7 @@
     (void)signatureData;
     (void)secureElementPass;
     if (completion) {
-        completion(nil, nil, CharonPassKitNoHardwareError());
+        completion(nil, nil, RevenantPassKitNoHardwareError());
     }
 }
 
@@ -78,7 +78,7 @@
 {
     (void)secureElementPass;
     if (completion) {
-        completion(nil, CharonPassKitNoHardwareError());
+        completion(nil, RevenantPassKitNoHardwareError());
     }
 }
 
@@ -87,7 +87,7 @@
 {
     (void)secureElementPass;
     if (completion) {
-        completion(nil, CharonPassKitNoHardwareError());
+        completion(nil, RevenantPassKitNoHardwareError());
     }
 }
 

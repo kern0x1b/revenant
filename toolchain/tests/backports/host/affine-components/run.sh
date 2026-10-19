@@ -8,9 +8,9 @@ here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 GRAPHICS=${GRAPHICS:-$here/../../../../packages/a/apple-backports/Graphics}
 COMPAT=${COMPAT:-$here/../../../../packages/a/apple-compat/src}
-BUILD=${BUILD:-$(runs_fresh charon-affine-components)}
+BUILD=${BUILD:-$(runs_fresh revenant-affine-components)}
 mkdir -p "$BUILD"
-renames="-DCGAffineTransformDecompose=CharonHostDecompose -DCGAffineTransformMakeWithComponents=CharonHostMakeWithComponents"
+renames="-DCGAffineTransformDecompose=RevenantHostDecompose -DCGAffineTransformMakeWithComponents=RevenantHostMakeWithComponents"
 xcrun clang -fobjc-arc -mmacosx-version-min=10.12 -w $renames -I"$GRAPHICS" -c "$GRAPHICS/CGAffineTransform16.m" \
     -o "$BUILD/port.o"
 # The shim as apple-compat builds it: -Os, -fno-builtin, hidden. It must call the library's sin and cos, not __sincos_stret.

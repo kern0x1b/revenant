@@ -1,14 +1,14 @@
-#import "CharonMPSNDArray.h"
+#import "RevenantMPSNDArray.h"
 
 #pragma clang diagnostic ignored "-Wprotocol"
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
 
-#if defined(CHARON_NDARRAY_PLANT)
+#if defined(REVENANT_NDARRAY_PLANT)
 static void MPSNDArray_plantedCopy(void *destination, const void *source, size_t bytes)
 {
     unsigned char *out = (unsigned char *)destination;
     memcpy(destination, source, bytes);
-    if (CHARON_NDARRAY_PLANT == 1)
+    if (REVENANT_NDARRAY_PLANT == 1)
         out[0] = (unsigned char)(out[0] + 0x40u);
     else
         out[bytes - 1] = (unsigned char)(out[bytes - 1] + 0x08u);
@@ -18,10 +18,10 @@ static void MPSNDArray_plantedCopy(void *destination, const void *source, size_t
 #define MPSNDArray_COPY(destination, source, bytes) memcpy(destination, source, bytes)
 #endif
 
-@interface CharonMPSNDArrayAllocator : NSObject <MPSNDArrayAllocator>
+@interface RevenantMPSNDArrayAllocator : NSObject <MPSNDArrayAllocator>
 @end
 
-@implementation CharonMPSNDArrayAllocator
+@implementation RevenantMPSNDArrayAllocator
 
 + (BOOL)supportsSecureCoding
 {
@@ -48,8 +48,8 @@ static void MPSNDArray_plantedCopy(void *destination, const void *source, size_t
 @implementation MPSNDArrayDescriptor {
     NSUInteger _numberOfDimensions;
     MPSDataType _dataType;
-    NSUInteger _lengths[CHARON_MPS_NDARRAY_MAX_DIMENSIONS];
-    MPSDimensionSlice _slices[CHARON_MPS_NDARRAY_MAX_DIMENSIONS];
+    NSUInteger _lengths[REVENANT_MPS_NDARRAY_MAX_DIMENSIONS];
+    MPSDimensionSlice _slices[REVENANT_MPS_NDARRAY_MAX_DIMENSIONS];
     vector_uchar16 _order;
 }
 
@@ -58,7 +58,7 @@ static void MPSNDArray_plantedCopy(void *destination, const void *source, size_t
     if ((self = [super init])) {
         _dataType = MPSDataTypeInvalid;
         _numberOfDimensions = 0;
-        for (NSUInteger i = 0; i < CHARON_MPS_NDARRAY_MAX_DIMENSIONS; i++) {
+        for (NSUInteger i = 0; i < REVENANT_MPS_NDARRAY_MAX_DIMENSIONS; i++) {
             _lengths[i] = 1;
             _slices[i].start = 0;
             _slices[i].length = 1;
@@ -75,10 +75,10 @@ static void MPSNDArray_plantedCopy(void *destination, const void *source, size_t
 
 - (void)setNumberOfDimensions:(NSUInteger)numberOfDimensions
 {
-    if (numberOfDimensions > CHARON_MPS_NDARRAY_MAX_DIMENSIONS)
-        numberOfDimensions = CHARON_MPS_NDARRAY_MAX_DIMENSIONS;
+    if (numberOfDimensions > REVENANT_MPS_NDARRAY_MAX_DIMENSIONS)
+        numberOfDimensions = REVENANT_MPS_NDARRAY_MAX_DIMENSIONS;
     _numberOfDimensions = numberOfDimensions;
-    for (NSUInteger i = 0; i < CHARON_MPS_NDARRAY_MAX_DIMENSIONS; i++) {
+    for (NSUInteger i = 0; i < REVENANT_MPS_NDARRAY_MAX_DIMENSIONS; i++) {
         if (i >= numberOfDimensions) {
             _slices[i].start = 0;
             _slices[i].length = 1;
@@ -117,7 +117,7 @@ static void MPSNDArray_plantedCopy(void *destination, const void *source, size_t
 
 - (void)transposeDimension:(NSUInteger)dimensionIndex withDimension:(NSUInteger)dimensionIndex2
 {
-    if (dimensionIndex >= CHARON_MPS_NDARRAY_MAX_DIMENSIONS || dimensionIndex2 >= CHARON_MPS_NDARRAY_MAX_DIMENSIONS)
+    if (dimensionIndex >= REVENANT_MPS_NDARRAY_MAX_DIMENSIONS || dimensionIndex2 >= REVENANT_MPS_NDARRAY_MAX_DIMENSIONS)
         return;
     unsigned char held = _order[dimensionIndex];
     _order[dimensionIndex] = _order[dimensionIndex2];
@@ -130,7 +130,7 @@ static void MPSNDArray_plantedCopy(void *destination, const void *source, size_t
                        dimensionCount:(NSUInteger)numberOfDimensions
                        dimensionSizes:(NSUInteger *)dimensionSizes
 {
-    if (numberOfDimensions == 0 || numberOfDimensions > CHARON_MPS_NDARRAY_MAX_DIMENSIONS)
+    if (numberOfDimensions == 0 || numberOfDimensions > REVENANT_MPS_NDARRAY_MAX_DIMENSIONS)
         return nil;
     MPSNDArrayDescriptor *descriptor = [[self alloc] init];
     descriptor.dataType = dataType;
@@ -146,11 +146,11 @@ static void MPSNDArray_plantedCopy(void *destination, const void *source, size_t
 
 + (instancetype)descriptorWithDataType:(MPSDataType)dataType dimensionSizes:(NSUInteger)dimension0, ...
 {
-    NSUInteger sizes[CHARON_MPS_NDARRAY_MAX_DIMENSIONS];
+    NSUInteger sizes[REVENANT_MPS_NDARRAY_MAX_DIMENSIONS];
     NSUInteger count = 0;
     va_list arguments;
     va_start(arguments, dimension0);
-    for (NSUInteger next = dimension0; next != 0 && count < CHARON_MPS_NDARRAY_MAX_DIMENSIONS;
+    for (NSUInteger next = dimension0; next != 0 && count < REVENANT_MPS_NDARRAY_MAX_DIMENSIONS;
          next = va_arg(arguments, NSUInteger))
         sizes[count++] = next;
     va_end(arguments);
@@ -161,9 +161,9 @@ static void MPSNDArray_plantedCopy(void *destination, const void *source, size_t
 
 + (instancetype)descriptorWithDataType:(MPSDataType)dataType shape:(NSArray<NSNumber *> *)shape
 {
-    if (shape.count == 0 || shape.count > CHARON_MPS_NDARRAY_MAX_DIMENSIONS)
+    if (shape.count == 0 || shape.count > REVENANT_MPS_NDARRAY_MAX_DIMENSIONS)
         return nil;
-    NSUInteger sizes[CHARON_MPS_NDARRAY_MAX_DIMENSIONS];
+    NSUInteger sizes[REVENANT_MPS_NDARRAY_MAX_DIMENSIONS];
     for (NSUInteger i = 0; i < shape.count; i++)
         sizes[shape.count - 1 - i] = [shape[i] unsignedIntegerValue];
     return [self descriptorWithDataType:dataType dimensionCount:shape.count dimensionSizes:sizes];
@@ -171,10 +171,10 @@ static void MPSNDArray_plantedCopy(void *destination, const void *source, size_t
 
 - (void)reshapeWithDimensionCount:(NSUInteger)numberOfDimensions dimensionSizes:(NSUInteger *)dimensionSizes
 {
-    if (numberOfDimensions == 0 || numberOfDimensions > CHARON_MPS_NDARRAY_MAX_DIMENSIONS)
+    if (numberOfDimensions == 0 || numberOfDimensions > REVENANT_MPS_NDARRAY_MAX_DIMENSIONS)
         return;
     _numberOfDimensions = numberOfDimensions;
-    for (NSUInteger i = 0; i < CHARON_MPS_NDARRAY_MAX_DIMENSIONS; i++) {
+    for (NSUInteger i = 0; i < REVENANT_MPS_NDARRAY_MAX_DIMENSIONS; i++) {
         if (i < numberOfDimensions) {
             _lengths[i] = dimensionSizes[i];
             _slices[i].start = 0;
@@ -189,9 +189,9 @@ static void MPSNDArray_plantedCopy(void *destination, const void *source, size_t
 
 - (void)reshapeWithShape:(NSArray<NSNumber *> *)shape
 {
-    if (shape.count == 0 || shape.count > CHARON_MPS_NDARRAY_MAX_DIMENSIONS)
+    if (shape.count == 0 || shape.count > REVENANT_MPS_NDARRAY_MAX_DIMENSIONS)
         return;
-    NSUInteger sizes[CHARON_MPS_NDARRAY_MAX_DIMENSIONS];
+    NSUInteger sizes[REVENANT_MPS_NDARRAY_MAX_DIMENSIONS];
     for (NSUInteger i = 0; i < shape.count; i++)
         sizes[i] = [shape[i] unsignedIntegerValue];
     [self reshapeWithDimensionCount:shape.count dimensionSizes:sizes];
@@ -219,7 +219,7 @@ static void MPSNDArray_plantedCopy(void *destination, const void *source, size_t
     if ((self = [super init])) {
         _device = device;
         _descriptor = descriptor;
-        _shape = [self charon_mps_wholeShapeOf:descriptor];
+        _shape = [self revenant_mps_wholeShapeOf:descriptor];
     }
     return self;
 }
@@ -246,9 +246,9 @@ static void MPSNDArray_plantedCopy(void *destination, const void *source, size_t
 
 + (id<MPSNDArrayAllocator>)defaultAllocator
 {
-    static CharonMPSNDArrayAllocator *allocator = nil;
+    static RevenantMPSNDArrayAllocator *allocator = nil;
     if (!allocator)
-        allocator = [[CharonMPSNDArrayAllocator alloc] init];
+        allocator = [[RevenantMPSNDArrayAllocator alloc] init];
     return allocator;
 }
 
@@ -263,22 +263,22 @@ static void MPSNDArray_plantedCopy(void *destination, const void *source, size_t
 
 - (MPSNDArrayDescriptor *)descriptor
 {
-    NSUInteger sizes[CHARON_MPS_NDARRAY_MAX_DIMENSIONS];
-    for (NSUInteger i = 0; i < CHARON_MPS_NDARRAY_MAX_DIMENSIONS; i++)
+    NSUInteger sizes[REVENANT_MPS_NDARRAY_MAX_DIMENSIONS];
+    for (NSUInteger i = 0; i < REVENANT_MPS_NDARRAY_MAX_DIMENSIONS; i++)
         sizes[i] = [_descriptor lengthOfDimension:i];
     MPSNDArrayDescriptor *descriptor = [MPSNDArrayDescriptor descriptorWithDataType:_descriptor.dataType
                                                                      dimensionCount:_descriptor.numberOfDimensions
                                                                      dimensionSizes:sizes];
     vector_uchar16 order = [_descriptor dimensionOrder];
-    for (NSUInteger i = 0; i < CHARON_MPS_NDARRAY_MAX_DIMENSIONS; i++)
+    for (NSUInteger i = 0; i < REVENANT_MPS_NDARRAY_MAX_DIMENSIONS; i++)
         [descriptor transposeDimension:i withDimension:order[i]];
     return descriptor;
 }
 
-- (MPSNDArrayDescriptor *)charon_mps_wholeShapeOf:(MPSNDArrayDescriptor *)descriptor
+- (MPSNDArrayDescriptor *)revenant_mps_wholeShapeOf:(MPSNDArrayDescriptor *)descriptor
 {
-    NSUInteger sizes[CHARON_MPS_NDARRAY_MAX_DIMENSIONS];
-    for (NSUInteger i = 0; i < CHARON_MPS_NDARRAY_MAX_DIMENSIONS; i++)
+    NSUInteger sizes[REVENANT_MPS_NDARRAY_MAX_DIMENSIONS];
+    for (NSUInteger i = 0; i < REVENANT_MPS_NDARRAY_MAX_DIMENSIONS; i++)
         sizes[i] = [descriptor sliceRangeForDimension:i].length;
     return [MPSNDArrayDescriptor descriptorWithDataType:descriptor.dataType
                                          dimensionCount:descriptor.numberOfDimensions
@@ -301,7 +301,7 @@ static void MPSNDArray_plantedCopy(void *destination, const void *source, size_t
     return (NSUInteger)(row * rows);
 }
 
-- (id<MTLBuffer>)charon_mps_makeBuffer
+- (id<MTLBuffer>)revenant_mps_makeBuffer
 {
     if (_buffer)
         return _buffer;
@@ -310,7 +310,7 @@ static void MPSNDArray_plantedCopy(void *destination, const void *source, size_t
         return nil;
     id<MTLBuffer> buffer = [_device newBufferWithLength:size options:MTLResourceStorageModeShared];
     if (!buffer) {
-        CharonMPSRefuse(@"MPSNDArray: the device made no %lu byte buffer for a shape of %lu dimensions",
+        RevenantMPSRefuse(@"MPSNDArray: the device made no %lu byte buffer for a shape of %lu dimensions",
                         (unsigned long)size, (unsigned long)_descriptor.numberOfDimensions);
         return nil;
     }
@@ -325,39 +325,39 @@ static void MPSNDArrayViewLayout(MPSNDArrayDescriptor *view, MPSNDArrayDescripto
     if (!elementSize)
         elementSize = 1;
     vector_uchar16 order = [view dimensionOrder];
-    size_t strideOf[CHARON_MPS_NDARRAY_MAX_DIMENSIONS];
+    size_t strideOf[REVENANT_MPS_NDARRAY_MAX_DIMENSIONS];
     strideOf[0] = 1;
-    for (NSUInteger d = 1; d < shape.numberOfDimensions && d < CHARON_MPS_NDARRAY_MAX_DIMENSIONS; d++)
+    for (NSUInteger d = 1; d < shape.numberOfDimensions && d < REVENANT_MPS_NDARRAY_MAX_DIMENSIONS; d++)
         strideOf[d] = strideOf[d - 1] * [shape lengthOfDimension:d - 1];
     NSUInteger at = 0;
-    for (NSUInteger i = 0; i < view.numberOfDimensions && i < CHARON_MPS_NDARRAY_MAX_DIMENSIONS; i++) {
+    for (NSUInteger i = 0; i < view.numberOfDimensions && i < REVENANT_MPS_NDARRAY_MAX_DIMENSIONS; i++) {
         NSUInteger dimension = order[i];
-        strides[i] = (NSUInteger)(dimension < CHARON_MPS_NDARRAY_MAX_DIMENSIONS ? strideOf[dimension] : 0);
+        strides[i] = (NSUInteger)(dimension < REVENANT_MPS_NDARRAY_MAX_DIMENSIONS ? strideOf[dimension] : 0);
         lengths[i] = [view sliceRangeForDimension:dimension].length;
         at += [view sliceRangeForDimension:dimension].start * strides[i];
     }
-    for (NSUInteger i = view.numberOfDimensions; i < CHARON_MPS_NDARRAY_MAX_DIMENSIONS; i++) {
+    for (NSUInteger i = view.numberOfDimensions; i < REVENANT_MPS_NDARRAY_MAX_DIMENSIONS; i++) {
         strides[i] = 0;
         lengths[i] = 1;
     }
     *offset = at;
 }
 
-- (NSUInteger)charon_mps_elementCount
+- (NSUInteger)revenant_mps_elementCount
 {
     NSUInteger count = 1;
-    for (NSUInteger i = 0; i < _descriptor.numberOfDimensions && i < CHARON_MPS_NDARRAY_MAX_DIMENSIONS; i++)
+    for (NSUInteger i = 0; i < _descriptor.numberOfDimensions && i < REVENANT_MPS_NDARRAY_MAX_DIMENSIONS; i++)
         count *= [_descriptor sliceRangeForDimension:i].length;
     return count;
 }
 
-- (void)charon_mps_bufferStrides:(NSUInteger *)strides
+- (void)revenant_mps_bufferStrides:(NSUInteger *)strides
                         lengths:(const NSUInteger *)lengths
                    strideBytes:(NSInteger *)strideBytesPerDimension
 {
     size_t elementSize = MPSSizeofMPSDataType(_descriptor.dataType);
     NSUInteger packed = 1;
-    for (NSUInteger i = 0; i < CHARON_MPS_NDARRAY_MAX_DIMENSIONS; i++) {
+    for (NSUInteger i = 0; i < REVENANT_MPS_NDARRAY_MAX_DIMENSIONS; i++) {
         strides[i] = strideBytesPerDimension ? (NSUInteger)strideBytesPerDimension[i] : packed * elementSize;
         packed *= lengths[i];
     }
@@ -368,7 +368,7 @@ static void MPSNDArrayViewLayout(MPSNDArrayDescriptor *view, MPSNDArrayDescripto
     id<MTLBuffer> storage = _buffer;
     if (!storage) {
         if (!strideBytesPerDimension && buffer) {
-            NSUInteger count = [self charon_mps_elementCount];
+            NSUInteger count = [self revenant_mps_elementCount];
             size_t elementSize = MPSSizeofMPSDataType(_descriptor.dataType);
             if (elementSize)
                 memset(buffer, 0, count * elementSize);
@@ -379,22 +379,22 @@ static void MPSNDArrayViewLayout(MPSNDArrayDescriptor *view, MPSNDArrayDescripto
     if (elementSize == 0)
         return;
     MPSNDArrayDescriptor *shape = _parent ? _parent->_shape : _shape;
-    NSUInteger strides[CHARON_MPS_NDARRAY_MAX_DIMENSIONS], lengths[CHARON_MPS_NDARRAY_MAX_DIMENSIONS];
+    NSUInteger strides[REVENANT_MPS_NDARRAY_MAX_DIMENSIONS], lengths[REVENANT_MPS_NDARRAY_MAX_DIMENSIONS];
     NSUInteger at = 0;
     MPSNDArrayViewLayout(_descriptor, shape, strides, lengths, &at);
-    NSUInteger destination[CHARON_MPS_NDARRAY_MAX_DIMENSIONS];
-    [self charon_mps_bufferStrides:destination lengths:lengths strideBytes:strideBytesPerDimension];
+    NSUInteger destination[REVENANT_MPS_NDARRAY_MAX_DIMENSIONS];
+    [self revenant_mps_bufferStrides:destination lengths:lengths strideBytes:strideBytesPerDimension];
     const char *base = (const char *)[storage contents] + _byteOffset;
-    NSUInteger index[CHARON_MPS_NDARRAY_MAX_DIMENSIONS];
-    for (NSUInteger i = 0; i < CHARON_MPS_NDARRAY_MAX_DIMENSIONS; i++)
+    NSUInteger index[REVENANT_MPS_NDARRAY_MAX_DIMENSIONS];
+    for (NSUInteger i = 0; i < REVENANT_MPS_NDARRAY_MAX_DIMENSIONS; i++)
         index[i] = 0;
-    NSUInteger total = [self charon_mps_elementCount];
+    NSUInteger total = [self revenant_mps_elementCount];
     if (buffer)
         memset(buffer, 0, total * elementSize);
     for (NSUInteger linear = 0; linear < total; linear++) {
         size_t source = at * elementSize;
         size_t target = 0;
-        for (NSUInteger i = 0; i < _descriptor.numberOfDimensions && i < CHARON_MPS_NDARRAY_MAX_DIMENSIONS; i++) {
+        for (NSUInteger i = 0; i < _descriptor.numberOfDimensions && i < REVENANT_MPS_NDARRAY_MAX_DIMENSIONS; i++) {
             source += index[i] * strides[i] * elementSize;
             target += index[i] * destination[i];
         }
@@ -409,27 +409,27 @@ static void MPSNDArrayViewLayout(MPSNDArrayDescriptor *view, MPSNDArrayDescripto
 
 - (void)writeBytes:(void *)buffer strideBytes:(NSInteger *)strideBytesPerDimension
 {
-    id<MTLBuffer> storage = [self charon_mps_makeBuffer];
+    id<MTLBuffer> storage = [self revenant_mps_makeBuffer];
     if (!storage)
         return;
     size_t elementSize = MPSSizeofMPSDataType(_descriptor.dataType);
     if (elementSize == 0)
         return;
     MPSNDArrayDescriptor *shape = _parent ? _parent->_shape : _shape;
-    NSUInteger strides[CHARON_MPS_NDARRAY_MAX_DIMENSIONS], lengths[CHARON_MPS_NDARRAY_MAX_DIMENSIONS];
+    NSUInteger strides[REVENANT_MPS_NDARRAY_MAX_DIMENSIONS], lengths[REVENANT_MPS_NDARRAY_MAX_DIMENSIONS];
     NSUInteger at = 0;
     MPSNDArrayViewLayout(_descriptor, shape, strides, lengths, &at);
-    NSUInteger source[CHARON_MPS_NDARRAY_MAX_DIMENSIONS];
-    [self charon_mps_bufferStrides:source lengths:lengths strideBytes:strideBytesPerDimension];
+    NSUInteger source[REVENANT_MPS_NDARRAY_MAX_DIMENSIONS];
+    [self revenant_mps_bufferStrides:source lengths:lengths strideBytes:strideBytesPerDimension];
     char *base = (char *)[storage contents] + _byteOffset;
-    NSUInteger index[CHARON_MPS_NDARRAY_MAX_DIMENSIONS];
-    for (NSUInteger i = 0; i < CHARON_MPS_NDARRAY_MAX_DIMENSIONS; i++)
+    NSUInteger index[REVENANT_MPS_NDARRAY_MAX_DIMENSIONS];
+    for (NSUInteger i = 0; i < REVENANT_MPS_NDARRAY_MAX_DIMENSIONS; i++)
         index[i] = 0;
-    NSUInteger total = [self charon_mps_elementCount];
+    NSUInteger total = [self revenant_mps_elementCount];
     for (NSUInteger linear = 0; linear < total; linear++) {
         size_t target = at * elementSize;
         size_t sourceAt = 0;
-        for (NSUInteger i = 0; i < _descriptor.numberOfDimensions && i < CHARON_MPS_NDARRAY_MAX_DIMENSIONS; i++) {
+        for (NSUInteger i = 0; i < _descriptor.numberOfDimensions && i < REVENANT_MPS_NDARRAY_MAX_DIMENSIONS; i++) {
             target += index[i] * strides[i] * elementSize;
             sourceAt += index[i] * source[i];
         }
@@ -462,7 +462,7 @@ static void MPSNDArrayViewLayout(MPSNDArrayDescriptor *view, MPSNDArrayDescripto
             count *= [descriptor lengthOfDimension:i];
         void *packed = calloc(count ? count : 1, width ? width : 1);
         if (!packed) {
-            CharonMPSRefuse(@"MPSNDArray: no memory to make the %lu element copy -arrayViewWithCommandBuffer:descriptor:aliasing: asked for",
+            RevenantMPSRefuse(@"MPSNDArray: no memory to make the %lu element copy -arrayViewWithCommandBuffer:descriptor:aliasing: asked for",
                             (unsigned long)count);
             return nil;
         }
@@ -491,25 +491,25 @@ static void MPSNDArrayViewLayout(MPSNDArrayDescriptor *view, MPSNDArrayDescripto
     size_t from = MPSSizeofMPSDataType(_descriptor.dataType);
     size_t to = MPSSizeofMPSDataType(destinationDataType);
     if (from == 0 || to == 0) {
-        CharonMPSRefuse(@"MPSNDArray: -exportDataWithCommandBuffer:toBuffer: was given a data type of %u or %u, which has no width",
+        RevenantMPSRefuse(@"MPSNDArray: -exportDataWithCommandBuffer:toBuffer: was given a data type of %u or %u, which has no width",
                         (unsigned)_descriptor.dataType, (unsigned)destinationDataType);
         return;
     }
-    NSUInteger total = [self charon_mps_elementCount];
+    NSUInteger total = [self revenant_mps_elementCount];
     void *source = malloc(total * from);
     if (!source)
         return;
     [self readBytes:source strideBytes:NULL];
     char *destination = (char *)[buffer contents] + offset;
     if (rowStrides) {
-        NSUInteger index[CHARON_MPS_NDARRAY_MAX_DIMENSIONS];
-        for (NSUInteger i = 0; i < CHARON_MPS_NDARRAY_MAX_DIMENSIONS; i++)
+        NSUInteger index[REVENANT_MPS_NDARRAY_MAX_DIMENSIONS];
+        for (NSUInteger i = 0; i < REVENANT_MPS_NDARRAY_MAX_DIMENSIONS; i++)
             index[i] = 0;
         for (NSUInteger linear = 0; linear < total; linear++) {
             size_t at = 0;
-            for (NSUInteger i = 0; i < _descriptor.numberOfDimensions && i < CHARON_MPS_NDARRAY_MAX_DIMENSIONS; i++)
+            for (NSUInteger i = 0; i < _descriptor.numberOfDimensions && i < REVENANT_MPS_NDARRAY_MAX_DIMENSIONS; i++)
                 at += (size_t)(rowStrides[i] * (NSInteger)index[i]);
-            CharonMPSStore(destination + at, destinationDataType, 0, CharonMPSLoad(source, _descriptor.dataType, linear));
+            RevenantMPSStore(destination + at, destinationDataType, 0, RevenantMPSLoad(source, _descriptor.dataType, linear));
             for (NSUInteger i = 0; i < _descriptor.numberOfDimensions; i++) {
                 if (++index[i] < [_descriptor sliceRangeForDimension:i].length)
                     break;
@@ -518,7 +518,7 @@ static void MPSNDArrayViewLayout(MPSNDArrayDescriptor *view, MPSNDArrayDescripto
         }
     } else {
         for (NSUInteger linear = 0; linear < total; linear++)
-            CharonMPSStore(destination, destinationDataType, linear, CharonMPSLoad(source, _descriptor.dataType, linear));
+            RevenantMPSStore(destination, destinationDataType, linear, RevenantMPSLoad(source, _descriptor.dataType, linear));
     }
     free(source);
 }
@@ -535,24 +535,24 @@ static void MPSNDArrayViewLayout(MPSNDArrayDescriptor *view, MPSNDArrayDescripto
     size_t from = MPSSizeofMPSDataType(sourceDataType);
     size_t to = MPSSizeofMPSDataType(_descriptor.dataType);
     if (from == 0 || to == 0) {
-        CharonMPSRefuse(@"MPSNDArray: -importDataWithCommandBuffer:fromBuffer: was given a data type of %u or %u, which has no width",
+        RevenantMPSRefuse(@"MPSNDArray: -importDataWithCommandBuffer:fromBuffer: was given a data type of %u or %u, which has no width",
                         (unsigned)sourceDataType, (unsigned)_descriptor.dataType);
         return;
     }
-    NSUInteger total = [self charon_mps_elementCount];
+    NSUInteger total = [self revenant_mps_elementCount];
     void *destination = malloc(total * to);
     if (!destination)
         return;
     const char *source = (const char *)[buffer contents] + offset;
     if (rowStrides) {
-        NSUInteger index[CHARON_MPS_NDARRAY_MAX_DIMENSIONS];
-        for (NSUInteger i = 0; i < CHARON_MPS_NDARRAY_MAX_DIMENSIONS; i++)
+        NSUInteger index[REVENANT_MPS_NDARRAY_MAX_DIMENSIONS];
+        for (NSUInteger i = 0; i < REVENANT_MPS_NDARRAY_MAX_DIMENSIONS; i++)
             index[i] = 0;
         for (NSUInteger linear = 0; linear < total; linear++) {
             size_t at = 0;
-            for (NSUInteger i = 0; i < _descriptor.numberOfDimensions && i < CHARON_MPS_NDARRAY_MAX_DIMENSIONS; i++)
+            for (NSUInteger i = 0; i < _descriptor.numberOfDimensions && i < REVENANT_MPS_NDARRAY_MAX_DIMENSIONS; i++)
                 at += (size_t)(rowStrides[i] * (NSInteger)index[i]);
-            CharonMPSStore(destination, _descriptor.dataType, linear, CharonMPSLoad(source + at, sourceDataType, 0));
+            RevenantMPSStore(destination, _descriptor.dataType, linear, RevenantMPSLoad(source + at, sourceDataType, 0));
             for (NSUInteger i = 0; i < _descriptor.numberOfDimensions; i++) {
                 if (++index[i] < [_descriptor sliceRangeForDimension:i].length)
                     break;
@@ -561,7 +561,7 @@ static void MPSNDArrayViewLayout(MPSNDArrayDescriptor *view, MPSNDArrayDescripto
         }
     } else {
         for (NSUInteger linear = 0; linear < total; linear++)
-            CharonMPSStore(destination, _descriptor.dataType, linear, CharonMPSLoad(source, sourceDataType, linear));
+            RevenantMPSStore(destination, _descriptor.dataType, linear, RevenantMPSLoad(source, sourceDataType, linear));
     }
     [self writeBytes:destination strideBytes:NULL];
     free(destination);
@@ -588,9 +588,9 @@ static void MPSNDArrayViewLayout(MPSNDArrayDescriptor *view, MPSNDArrayDescripto
 
 + (id<MPSNDArrayAllocator>)defaultAllocator
 {
-    static CharonMPSNDArrayAllocator *allocator = nil;
+    static RevenantMPSNDArrayAllocator *allocator = nil;
     if (!allocator)
-        allocator = [[CharonMPSNDArrayAllocator alloc] init];
+        allocator = [[RevenantMPSNDArrayAllocator alloc] init];
     return allocator;
 }
 
@@ -599,7 +599,7 @@ static void MPSNDArrayViewLayout(MPSNDArrayDescriptor *view, MPSNDArrayDescripto
 - (void)setReadCount:(NSUInteger)readCount
 {
     if (_readCount == 0) {
-        CharonMPSRefuse(@"MPSTemporaryNDArray: the read count is already 0 and it may not be changed back");
+        RevenantMPSRefuse(@"MPSTemporaryNDArray: the read count is already 0 and it may not be changed back");
         return;
     }
     _readCount = readCount;

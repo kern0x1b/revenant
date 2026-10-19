@@ -1,12 +1,12 @@
 #import <Foundation/Foundation.h>
-#import "CharonUTType.h"
+#import "RevenantUTType.h"
 
-static NSItemProviderFileOptions CharonItemProviderOpenInPlace(BOOL openInPlace)
+static NSItemProviderFileOptions RevenantItemProviderOpenInPlace(BOOL openInPlace)
 {
     return openInPlace ? NSItemProviderFileOptionOpenInPlace : (NSItemProviderFileOptions)0;
 }
 
-@implementation NSItemProvider (CharonUTType16)
+@implementation NSItemProvider (RevenantUTType16)
 
 - (instancetype)initWithContentsOfURL:(NSURL *)fileURL
                           contentType:(UTType *)contentType
@@ -25,7 +25,7 @@ static NSItemProviderFileOptions CharonItemProviderOpenInPlace(BOOL openInPlace)
                 completionHandler([NSData dataWithContentsOfURL:url], nil);
             }];
             [self registerFileRepresentationForTypeIdentifier:identifier
-                                                   fileOptions:CharonItemProviderOpenInPlace(openInPlace)
+                                                   fileOptions:RevenantItemProviderOpenInPlace(openInPlace)
                                                    visibility:visibility
                                                   loadHandler:^NSProgress *(void (^done)(NSURL *, BOOL, NSError *)) {
                 done(url, coordinated, nil);
@@ -55,7 +55,7 @@ static NSItemProviderFileOptions CharonItemProviderOpenInPlace(BOOL openInPlace)
                                      loadHandler:(NSProgress *(^)(void (^)(NSURL *, BOOL, NSError *)))loadHandler
 {
     [self registerFileRepresentationForTypeIdentifier:contentType.identifier
-                                           fileOptions:CharonItemProviderOpenInPlace(openInPlace)
+                                           fileOptions:RevenantItemProviderOpenInPlace(openInPlace)
                                            visibility:visibility
                                           loadHandler:loadHandler];
 }

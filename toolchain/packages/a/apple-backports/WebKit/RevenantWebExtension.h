@@ -2,7 +2,7 @@
 #import <UIKit/UIKit.h>
 #import <WebKit/WebKit.h>
 
-#ifndef CHARON_HOST_DIFFERENTIAL
+#ifndef REVENANT_HOST_DIFFERENTIAL
 
 typedef NSString *WKWebExtensionPermission NS_STRING_ENUM NS_SWIFT_NAME(WebExtension.Permission);
 
@@ -108,15 +108,15 @@ typedef NS_ENUM(NSInteger, WKWebExtensionMatchPatternError) {
 
 #endif
 
-@interface WKWebExtension (CharonInit)
-- (instancetype)charon_initWithManifest:(NSDictionary<NSString *, id> *)manifest
+@interface WKWebExtension (RevenantInit)
+- (instancetype)revenant_initWithManifest:(NSDictionary<NSString *, id> *)manifest
                            resourcePath:(NSString *)resourcePath
                                  errors:(NSArray<NSError *> *)errors __attribute__((objc_method_family(init)));
 @end
 
 @class WKWebExtensionContext;
 @class WKWebExtensionController;
-#ifndef CHARON_HOST_DIFFERENTIAL
+#ifndef REVENANT_HOST_DIFFERENTIAL
 
 @protocol WKWebExtensionWindow;
 @protocol WKWebExtensionTab;
@@ -208,9 +208,9 @@ typedef NS_ENUM(NSInteger, WKWebExtensionMessagePortError) {
 
 #endif
 
-@interface WKWebExtensionAction (CharonAction)
-- (instancetype)charon_initWithContext:(WKWebExtensionContext *)context __attribute__((objc_method_family(init)));
-- (void)charon_setLabel:(NSString *)label
+@interface WKWebExtensionAction (RevenantAction)
+- (instancetype)revenant_initWithContext:(WKWebExtensionContext *)context __attribute__((objc_method_family(init)));
+- (void)revenant_setLabel:(NSString *)label
               badgeText:(NSString *)badgeText
        inspectionName:(NSString *)inspectionName
              menuItems:(NSArray<UIMenuElement *> *)menuItems
@@ -218,14 +218,14 @@ typedef NS_ENUM(NSInteger, WKWebExtensionMessagePortError) {
         presentsPopup:(BOOL)presentsPopup
   popupViewController:(UIViewController *)popupViewController
                enabled:(BOOL)enabled;
-- (void)charon_setAssociatedTab:(id<WKWebExtensionTab>)tab;
+- (void)revenant_setAssociatedTab:(id<WKWebExtensionTab>)tab;
 @end
 
-@interface WKWebExtensionCommand (CharonCommand)
-- (instancetype)charon_initWithContext:(WKWebExtensionContext *)context
+@interface WKWebExtensionCommand (RevenantCommand)
+- (instancetype)revenant_initWithContext:(WKWebExtensionContext *)context
                              identifier:(NSString *)identifier
                                   title:(NSString *)title __attribute__((objc_method_family(init)));
-- (void)charon_setActivationKey:(NSString *)activationKey menuItem:(UIMenuElement *)menuItem;
+- (void)revenant_setActivationKey:(NSString *)activationKey menuItem:(UIMenuElement *)menuItem;
 @end
 
 extern NSString *const WKWebExtensionContextErrorDomain;
@@ -239,7 +239,7 @@ extern NSString *const WKWebExtensionContextErrorsDidUpdateNotification;
 extern NSString *const WKWebExtensionContextNotificationUserInfoKeyPermissions;
 extern NSString *const WKWebExtensionContextNotificationUserInfoKeyMatchPatterns;
 
-#ifndef CHARON_HOST_DIFFERENTIAL
+#ifndef REVENANT_HOST_DIFFERENTIAL
 
 typedef NS_ENUM(NSInteger, WKWebExtensionContextPermissionStatus) {
     WKWebExtensionContextPermissionStatusDeniedExplicitly = -3,
@@ -288,7 +288,7 @@ typedef NS_ENUM(NSInteger, WKWebExtensionContextPermissionStatus) {
 
 #endif
 
-@interface WKWebExtensionContext (CharonContext)
-- (instancetype)charon_initWithExtension:(WKWebExtension *)extension __attribute__((objc_method_family(init)));
-- (void)charon_buildFromManifest;
+@interface WKWebExtensionContext (RevenantContext)
+- (instancetype)revenant_initWithExtension:(WKWebExtension *)extension __attribute__((objc_method_family(init)));
+- (void)revenant_buildFromManifest;
 @end

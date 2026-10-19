@@ -25,7 +25,7 @@ function command(target)
     if #script > 0 then
         local interpreter = interpreters[path.extension(script[1])]
         if not interpreter then
-            raise("target(%s): check.script %s has no interpreter Charon knows by its extension; use check.command", target:name(), script[1])
+            raise("target(%s): check.script %s has no interpreter Revenant knows by its extension; use check.command", target:name(), script[1])
         end
         return table.join(interpreter, script)
     end

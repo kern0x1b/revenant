@@ -2,7 +2,7 @@
 # run.sh - the port's Metal 4 command chain on the emulated iPhone3,1 6.1.3 guest, through heavy.sh.
 # The log is the deliverable.
 #
-# WHY iPhone3,1 6.1.3 AND NOT A HOST: the port's Metal 4 queue wraps the port's CharonMetalQueue, which
+# WHY iPhone3,1 6.1.3 AND NOT A HOST: the port's Metal 4 queue wraps the port's RevenantMetalQueue, which
 # holds an EAGL context over OpenGL ES 2.0, and OpenGLES/EAGL.h is a DEVICE framework - a host binary
 # cannot compile the file at all. So Apple's side was measured on the host and written down in
 # tests/backports/device/metalchain-expectations.h, and this is where the port meets it.
@@ -35,7 +35,7 @@
 # METALCHAINPROBE_DEVICE and METALCHAINPROBE_RELEASE name the device and the release, and BOTH the install
 # and the run take them, so the program cannot be installed into one image and run in another. The
 # default device of `xmake emulate` is the first catalog device of the architecture, an iPhone2,1, whose
-# image installs; iPhone3,1 at 6.1.3 has a golden image in ~/.charon/emulator.
+# image installs; iPhone3,1 at 6.1.3 has a golden image in ~/.revenant/emulator.
 #
 # `xmake emulate run` is given a BARE PATH: with arguments it answers "fail(spawn error 2)" even for a
 # system binary (coordinator, measured on the v-crutch5 runs of 2026-10-04).
@@ -65,7 +65,7 @@ built=$(find "$here/build" -name "$program" -type f 2>/dev/null | head -1)
 # missing image rather than the reason, which is the failure mode this script exists to prevent.
 printf 'print("metalchainprobe-" .. hash.strhash32(os.projectdir()))\n' > "$out/owner.lua"
 owner=$(cd "$here" && "$xmake" lua "$out/owner.lua" | head -1)
-image=$(ls -d "$HOME"/.charon/emulator/images.noindex/"$owner" 2>/dev/null | head -1)
+image=$(ls -d "$HOME"/.revenant/emulator/images.noindex/"$owner" 2>/dev/null | head -1)
 installed=""
 if [ -n "$image" ]; then
   installed=$(ls "$image"/${device}_*/rootfs/usr/libexec/$program 2>/dev/null | head -1)

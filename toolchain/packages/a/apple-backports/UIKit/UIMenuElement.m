@@ -1,8 +1,8 @@
-#import "CharonMenus.h"
+#import "RevenantMenus.h"
 
 #pragma clang diagnostic ignored "-Wobjc-designated-initializers"
 
-NSString *charon_menu_attributes_text(NSUInteger attributes)
+NSString *revenant_menu_attributes_text(NSUInteger attributes)
 {
     NSMutableArray *names = [NSMutableArray array];
     if (attributes & 1)
@@ -28,7 +28,7 @@ NSString *charon_menu_attributes_text(NSUInteger attributes)
     return YES;
 }
 
-- (instancetype)initCharonWithTitle:(NSString *)title image:(UIImage *)image
+- (instancetype)initRevenantWithTitle:(NSString *)title image:(UIImage *)image
 {
     if ((self = [super init])) {
         _title = [title copy];
@@ -39,7 +39,7 @@ NSString *charon_menu_attributes_text(NSUInteger attributes)
 
 - (instancetype)initWithCoder:(NSCoder *)coder
 {
-    return [self initCharonWithTitle:[coder decodeObjectOfClass:[NSString class] forKey:@"title"]
+    return [self initRevenantWithTitle:[coder decodeObjectOfClass:[NSString class] forKey:@"title"]
                                 image:[coder decodeObjectOfClass:[UIImage class] forKey:@"image"]];
 }
 
@@ -77,12 +77,12 @@ NSString *charon_menu_attributes_text(NSUInteger attributes)
     _subtitle = [subtitle copy];
 }
 
-- (void)charon_setTitle:(NSString *)title
+- (void)revenant_setTitle:(NSString *)title
 {
     _title = [title copy];
 }
 
-- (void)charon_setImage:(UIImage *)image
+- (void)revenant_setImage:(UIImage *)image
 {
     _image = image;
 }

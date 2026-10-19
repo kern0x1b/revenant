@@ -1,4 +1,4 @@
-#import "CharonMenus.h"
+#import "RevenantMenus.h"
 #import <objc/runtime.h>
 
 #pragma clang diagnostic ignored "-Wprotocol"
@@ -25,12 +25,12 @@
 
 + (instancetype)actionWithTitle:(NSString *)title image:(UIImage *)image identifier:(NSString *)identifier handler:(UIActionHandler)handler
 {
-    return [[self alloc] initCharonWithTitle:title image:image identifier:identifier handler:handler];
+    return [[self alloc] initRevenantWithTitle:title image:image identifier:identifier handler:handler];
 }
 
-- (instancetype)initCharonWithTitle:(NSString *)title image:(UIImage *)image identifier:(NSString *)identifier handler:(UIActionHandler)handler
+- (instancetype)initRevenantWithTitle:(NSString *)title image:(UIImage *)image identifier:(NSString *)identifier handler:(UIActionHandler)handler
 {
-    if ((self = [super initCharonWithTitle:title image:image])) {
+    if ((self = [super initRevenantWithTitle:title image:image])) {
         _identifier = identifier ? [identifier copy] : [@"com.apple.action.dynamic." stringByAppendingString:[NSUUID UUID].UUIDString];
         _handler = [handler copy];
     }
@@ -63,7 +63,7 @@
 
 - (id)copyWithZone:(NSZone *)zone
 {
-    UIAction *copy = [[[self class] allocWithZone:zone] initCharonWithTitle:self.title image:self.image identifier:_identifier handler:_handler];
+    UIAction *copy = [[[self class] allocWithZone:zone] initRevenantWithTitle:self.title image:self.image identifier:_identifier handler:_handler];
     copy->_discoverabilityTitle = [_discoverabilityTitle copy];
     copy->_attributes = _attributes;
     copy->_state = _state;
@@ -77,7 +77,7 @@
 
 - (void)setTitle:(NSString *)title
 {
-    [self charon_setTitle:title];
+    [self revenant_setTitle:title];
 }
 
 - (UIImage *)image
@@ -87,7 +87,7 @@
 
 - (void)setImage:(UIImage *)image
 {
-    [self charon_setImage:image];
+    [self revenant_setImage:image];
 }
 
 - (NSString *)identifier
@@ -127,10 +127,10 @@
 
 - (void)performWithSender:(id)sender target:(id)target
 {
-    [self charon_performWithSender:sender];
+    [self revenant_performWithSender:sender];
 }
 
-- (void)charon_performWithSender:(id)sender
+- (void)revenant_performWithSender:(id)sender
 {
     objc_setAssociatedObject(self, @selector(sender), sender, OBJC_ASSOCIATION_ASSIGN);
     if (_handler)
@@ -159,9 +159,9 @@
     if (self.title.length)
         [text appendFormat:@"; title = %@", self.title];
     if (self.image)
-        [text appendFormat:@"; image = %@", charon_short_description(self.image)];
+        [text appendFormat:@"; image = %@", revenant_short_description(self.image)];
     if (_attributes)
-        [text appendFormat:@"; attributes = %@", charon_menu_attributes_text(_attributes)];
+        [text appendFormat:@"; attributes = %@", revenant_menu_attributes_text(_attributes)];
     [text appendString:@">"];
     return text;
 }

@@ -4,34 +4,34 @@
 #import <CoreVideo/CoreVideo.h>
 #import <Foundation/Foundation.h>
 
-static NSString *const CharonAuxInfoData = @"kCGImageAuxiliaryDataInfoData";
-static NSString *const CharonAuxInfoDataDescription = @"kCGImageAuxiliaryDataInfoDataDescription";
-static NSString *const CharonAuxInfoMetadata = @"kCGImageAuxiliaryDataInfoMetadata";
-static NSString *const CharonAuxTypeDisparity = @"kCGImageAuxiliaryDataTypeDisparity";
-static NSString *const CharonAuxTypeDepth = @"kCGImageAuxiliaryDataTypeDepth";
+static NSString *const RevenantAuxInfoData = @"kCGImageAuxiliaryDataInfoData";
+static NSString *const RevenantAuxInfoDataDescription = @"kCGImageAuxiliaryDataInfoDataDescription";
+static NSString *const RevenantAuxInfoMetadata = @"kCGImageAuxiliaryDataInfoMetadata";
+static NSString *const RevenantAuxTypeDisparity = @"kCGImageAuxiliaryDataTypeDisparity";
+static NSString *const RevenantAuxTypeDepth = @"kCGImageAuxiliaryDataTypeDepth";
 
-static const NSInteger CharonDepthFormatUnsupported = -11864;
-static const NSInteger CharonDepthMalformed = -11865;
+static const NSInteger RevenantDepthFormatUnsupported = -11864;
+static const NSInteger RevenantDepthMalformed = -11865;
 
-static BOOL CharonIsDepthFormat(OSType format)
+static BOOL RevenantIsDepthFormat(OSType format)
 {
     return format == kCVPixelFormatType_DisparityFloat16 || format == kCVPixelFormatType_DisparityFloat32 ||
            format == kCVPixelFormatType_DepthFloat16 || format == kCVPixelFormatType_DepthFloat32;
 }
 
-static BOOL CharonIsDisparityFormat(OSType format)
+static BOOL RevenantIsDisparityFormat(OSType format)
 {
     return format == kCVPixelFormatType_DisparityFloat16 || format == kCVPixelFormatType_DisparityFloat32;
 }
 
-static BOOL CharonIsHalfFormat(OSType format)
+static BOOL RevenantIsHalfFormat(OSType format)
 {
     return format == kCVPixelFormatType_DisparityFloat16 || format == kCVPixelFormatType_DepthFloat16;
 }
 
-static float CharonReadPixel(const unsigned char *pixel, OSType format)
+static float RevenantReadPixel(const unsigned char *pixel, OSType format)
 {
-    if (CharonIsHalfFormat(format)) {
+    if (RevenantIsHalfFormat(format)) {
         __fp16 value;
         memcpy(&value, pixel, sizeof value);
         return (float)value;
@@ -41,9 +41,9 @@ static float CharonReadPixel(const unsigned char *pixel, OSType format)
     return value;
 }
 
-static void CharonWritePixel(unsigned char *pixel, OSType format, float value)
+static void RevenantWritePixel(unsigned char *pixel, OSType format, float value)
 {
-    if (CharonIsHalfFormat(format)) {
+    if (RevenantIsHalfFormat(format)) {
         __fp16 half = (__fp16)value;
         memcpy(pixel, &half, sizeof half);
         return;
@@ -51,7 +51,7 @@ static void CharonWritePixel(unsigned char *pixel, OSType format, float value)
     memcpy(pixel, &value, sizeof value);
 }
 
-static float CharonReciprocal(float value)
+static float RevenantReciprocal(float value)
 {
     const float limit = 10000.0f;
     if (!(value > 0))
@@ -60,12 +60,12 @@ static float CharonReciprocal(float value)
     return reciprocal < limit ? reciprocal : limit;
 }
 
-static size_t CharonBytesPerPixel(OSType format)
+static size_t RevenantBytesPerPixel(OSType format)
 {
-    return CharonIsHalfFormat(format) ? 2 : 4;
+    return RevenantIsHalfFormat(format) ? 2 : 4;
 }
 
-static CVPixelBufferRef CharonCreateDepthBuffer(size_t width, size_t height, OSType format)
+static CVPixelBufferRef RevenantCreateDepthBuffer(size_t width, size_t height, OSType format)
 {
     CVPixelBufferRef buffer = NULL;
     if (CVPixelBufferCreate(kCFAllocatorDefault, width, height, format, NULL, &buffer) != kCVReturnSuccess)
@@ -73,7 +73,7 @@ static CVPixelBufferRef CharonCreateDepthBuffer(size_t width, size_t height, OST
     return buffer;
 }
 
-static void CharonReadMetadata(NSString *text, AVDepthDataQuality *quality, AVDepthDataAccuracy *accuracy, BOOL *filtered)
+static void RevenantReadMetadata(NSString *text, AVDepthDataQuality *quality, AVDepthDataAccuracy *accuracy, BOOL *filtered)
 {
     for (NSString *line in [text componentsSeparatedByCharactersInSet:[NSCharacterSet newlineCharacterSet]]) {
         NSRange equals = [line rangeOfString:@"="];
@@ -90,7 +90,7 @@ static void CharonReadMetadata(NSString *text, AVDepthDataQuality *quality, AVDe
     }
 }
 
-static NSString *CharonMetadataText(AVDepthDataQuality quality, AVDepthDataAccuracy accuracy, BOOL filtered)
+static NSString *RevenantMetadataText(AVDepthDataQuality quality, AVDepthDataAccuracy accuracy, BOOL filtered)
 {
     return [NSString stringWithFormat:@"depthData:Quality = %@\ndepthData:Filtered = %@\ndepthData:Accuracy = %@\n",
             quality == AVDepthDataQualityHigh ? @"high" : @"low",
@@ -172,11 +172,11 @@ static NSString *CharonMetadataText(AVDepthDataQuality quality, AVDepthDataAccur
 
 + (AVDepthData *)depthDataFromDictionaryRepresentation:(NSDictionary *)dictionary error:(NSError **)outError
 {
-    NSData *bytes = [dictionary isKindOfClass:[NSDictionary class]] ? dictionary[CharonAuxInfoData] : nil;
-    NSDictionary *description = [dictionary isKindOfClass:[NSDictionary class]] ? dictionary[CharonAuxInfoDataDescription] : nil;
+    NSData *bytes = [dictionary isKindOfClass:[NSDictionary class]] ? dictionary[RevenantAuxInfoData] : nil;
+    NSDictionary *description = [dictionary isKindOfClass:[NSDictionary class]] ? dictionary[RevenantAuxInfoDataDescription] : nil;
     if (![bytes isKindOfClass:[NSData class]] || ![description isKindOfClass:[NSDictionary class]]) {
         if (outError)
-            *outError = [NSError errorWithDomain:AVFoundationErrorDomain code:CharonDepthMalformed
+            *outError = [NSError errorWithDomain:AVFoundationErrorDomain code:RevenantDepthMalformed
                                         userInfo:@{ NSLocalizedDescriptionKey: @"Depth is malformed" }];
         return nil;
     }
@@ -185,29 +185,29 @@ static NSString *CharonMetadataText(AVDepthDataQuality quality, AVDepthDataAccur
     if (![width isKindOfClass:[NSNumber class]] || ![height isKindOfClass:[NSNumber class]] ||
         ![bytesPerRow isKindOfClass:[NSNumber class]] || ![pixelFormat isKindOfClass:[NSNumber class]]) {
         if (outError)
-            *outError = [NSError errorWithDomain:AVFoundationErrorDomain code:CharonDepthMalformed
+            *outError = [NSError errorWithDomain:AVFoundationErrorDomain code:RevenantDepthMalformed
                                         userInfo:@{ NSLocalizedDescriptionKey: @"Depth is malformed" }];
         return nil;
     }
     OSType format = (OSType)pixelFormat.unsignedIntValue;
-    if (!CharonIsDepthFormat(format)) {
+    if (!RevenantIsDepthFormat(format)) {
         if (outError)
-            *outError = [NSError errorWithDomain:AVFoundationErrorDomain code:CharonDepthFormatUnsupported
+            *outError = [NSError errorWithDomain:AVFoundationErrorDomain code:RevenantDepthFormatUnsupported
                                         userInfo:@{ NSLocalizedDescriptionKey: @"Format Unsupported" }];
         return nil;
     }
     size_t w = width.unsignedIntegerValue, h = height.unsignedIntegerValue, stride = bytesPerRow.unsignedIntegerValue;
-    size_t rowBytes = w * CharonBytesPerPixel(format);
+    size_t rowBytes = w * RevenantBytesPerPixel(format);
     if (w == 0 || h == 0 || stride < rowBytes || bytes.length < stride * (h - 1) + rowBytes) {
         if (outError)
-            *outError = [NSError errorWithDomain:AVFoundationErrorDomain code:CharonDepthMalformed
+            *outError = [NSError errorWithDomain:AVFoundationErrorDomain code:RevenantDepthMalformed
                                         userInfo:@{ NSLocalizedDescriptionKey: @"Depth is malformed" }];
         return nil;
     }
-    CVPixelBufferRef map = CharonCreateDepthBuffer(w, h, format);
+    CVPixelBufferRef map = RevenantCreateDepthBuffer(w, h, format);
     if (!map) {
         if (outError)
-            *outError = [NSError errorWithDomain:AVFoundationErrorDomain code:CharonDepthFormatUnsupported
+            *outError = [NSError errorWithDomain:AVFoundationErrorDomain code:RevenantDepthFormatUnsupported
                                         userInfo:@{ NSLocalizedDescriptionKey: @"Format Unsupported" }];
         return nil;
     }
@@ -222,9 +222,9 @@ static NSString *CharonMetadataText(AVDepthDataQuality quality, AVDepthDataAccur
     AVDepthDataQuality quality = AVDepthDataQualityLow;
     AVDepthDataAccuracy accuracy = AVDepthDataAccuracyRelative;
     BOOL filtered = NO;
-    id metadata = dictionary[CharonAuxInfoMetadata];
+    id metadata = dictionary[RevenantAuxInfoMetadata];
     if ([metadata isKindOfClass:[NSString class]])
-        CharonReadMetadata(metadata, &quality, &accuracy, &filtered);
+        RevenantReadMetadata(metadata, &quality, &accuracy, &filtered);
     AVDepthData *depth = [[AVDepthData alloc] initWithMap:map quality:quality accuracy:accuracy filtered:filtered calibration:nil];
     CVPixelBufferRelease(map);
     return depth;
@@ -238,26 +238,26 @@ static NSString *CharonMetadataText(AVDepthDataQuality quality, AVDepthDataAccur
 
 - (AVDepthData *)depthDataByConvertingToDepthDataType:(OSType)depthDataType
 {
-    if (!CharonIsDepthFormat(depthDataType))
+    if (!RevenantIsDepthFormat(depthDataType))
         [NSException raise:NSInvalidArgumentException
                     format:@"*** -[AVDepthData depthDataByConvertingToDepthDataType:] Unsupported depth data type"];
     size_t w = CVPixelBufferGetWidth(_depthDataMap), h = CVPixelBufferGetHeight(_depthDataMap);
-    CVPixelBufferRef converted = CharonCreateDepthBuffer(w, h, depthDataType);
+    CVPixelBufferRef converted = RevenantCreateDepthBuffer(w, h, depthDataType);
     if (!converted)
         return nil;
-    BOOL invert = CharonIsDisparityFormat(_depthDataType) != CharonIsDisparityFormat(depthDataType);
+    BOOL invert = RevenantIsDisparityFormat(_depthDataType) != RevenantIsDisparityFormat(depthDataType);
     CVPixelBufferLockBaseAddress(_depthDataMap, kCVPixelBufferLock_ReadOnly);
     CVPixelBufferLockBaseAddress(converted, 0);
     const unsigned char *source = CVPixelBufferGetBaseAddress(_depthDataMap);
     unsigned char *target = CVPixelBufferGetBaseAddress(converted);
     size_t sourceStride = CVPixelBufferGetBytesPerRow(_depthDataMap), targetStride = CVPixelBufferGetBytesPerRow(converted);
-    size_t sourceBytes = CharonBytesPerPixel(_depthDataType), targetBytes = CharonBytesPerPixel(depthDataType);
+    size_t sourceBytes = RevenantBytesPerPixel(_depthDataType), targetBytes = RevenantBytesPerPixel(depthDataType);
     for (size_t y = 0; y < h; y++)
         for (size_t x = 0; x < w; x++) {
-            float value = CharonReadPixel(source + y * sourceStride + x * sourceBytes, _depthDataType);
+            float value = RevenantReadPixel(source + y * sourceStride + x * sourceBytes, _depthDataType);
             if (invert)
-                value = CharonReciprocal(value);
-            CharonWritePixel(target + y * targetStride + x * targetBytes, depthDataType, value);
+                value = RevenantReciprocal(value);
+            RevenantWritePixel(target + y * targetStride + x * targetBytes, depthDataType, value);
         }
     CVPixelBufferUnlockBaseAddress(converted, 0);
     CVPixelBufferUnlockBaseAddress(_depthDataMap, kCVPixelBufferLock_ReadOnly);
@@ -272,7 +272,7 @@ static NSString *CharonMetadataText(AVDepthDataQuality quality, AVDepthDataAccur
     size_t w = CVPixelBufferGetWidth(_depthDataMap), h = CVPixelBufferGetHeight(_depthDataMap);
     BOOL swaps = orientation >= kCGImagePropertyOrientationLeftMirrored;
     size_t outW = swaps ? h : w, outH = swaps ? w : h;
-    CVPixelBufferRef rotated = CharonCreateDepthBuffer(outW, outH, _depthDataType);
+    CVPixelBufferRef rotated = RevenantCreateDepthBuffer(outW, outH, _depthDataType);
     if (!rotated)
         return nil;
     CVPixelBufferLockBaseAddress(_depthDataMap, kCVPixelBufferLock_ReadOnly);
@@ -280,7 +280,7 @@ static NSString *CharonMetadataText(AVDepthDataQuality quality, AVDepthDataAccur
     const unsigned char *source = CVPixelBufferGetBaseAddress(_depthDataMap);
     unsigned char *target = CVPixelBufferGetBaseAddress(rotated);
     size_t sourceStride = CVPixelBufferGetBytesPerRow(_depthDataMap), targetStride = CVPixelBufferGetBytesPerRow(rotated);
-    size_t pixel = CharonBytesPerPixel(_depthDataType);
+    size_t pixel = RevenantBytesPerPixel(_depthDataType);
     for (size_t r = 0; r < outH; r++)
         for (size_t c = 0; c < outW; c++) {
             size_t sr = r, sc = c;
@@ -308,7 +308,7 @@ static NSString *CharonMetadataText(AVDepthDataQuality quality, AVDepthDataAccur
 {
     if (CVPixelBufferGetPixelFormatType(depthDataMap) != _depthDataType) {
         if (outError)
-            *outError = [NSError errorWithDomain:AVFoundationErrorDomain code:CharonDepthFormatUnsupported
+            *outError = [NSError errorWithDomain:AVFoundationErrorDomain code:RevenantDepthFormatUnsupported
                                         userInfo:@{ NSLocalizedDescriptionKey: @"Format Unsupported" }];
         return nil;
     }
@@ -324,11 +324,11 @@ static NSString *CharonMetadataText(AVDepthDataQuality quality, AVDepthDataAccur
     NSData *bytes = [NSData dataWithBytes:CVPixelBufferGetBaseAddress(_depthDataMap) length:stride * h];
     CVPixelBufferUnlockBaseAddress(_depthDataMap, kCVPixelBufferLock_ReadOnly);
     if (outAuxDataType)
-        *outAuxDataType = CharonIsDisparityFormat(_depthDataType) ? CharonAuxTypeDisparity : CharonAuxTypeDepth;
+        *outAuxDataType = RevenantIsDisparityFormat(_depthDataType) ? RevenantAuxTypeDisparity : RevenantAuxTypeDepth;
     return @{
-        CharonAuxInfoData: bytes,
-        CharonAuxInfoDataDescription: @{ @"Width": @(w), @"Height": @(h), @"BytesPerRow": @(stride), @"PixelFormat": @(_depthDataType) },
-        CharonAuxInfoMetadata: CharonMetadataText(_depthDataQuality, _depthDataAccuracy, _depthDataFiltered),
+        RevenantAuxInfoData: bytes,
+        RevenantAuxInfoDataDescription: @{ @"Width": @(w), @"Height": @(h), @"BytesPerRow": @(stride), @"PixelFormat": @(_depthDataType) },
+        RevenantAuxInfoMetadata: RevenantMetadataText(_depthDataQuality, _depthDataAccuracy, _depthDataFiltered),
     };
 }
 

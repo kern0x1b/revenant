@@ -91,7 +91,7 @@ static CGImageRef backdrop_of(UIVisualEffectView *view)
     NSTimeInterval total = 0;
     for (int i = 0; i < 5; i++) {
         NSTimeInterval start = CACurrentMediaTime();
-        [light performSelector:@selector(charon_refresh)];
+        [light performSelector:@selector(revenant_refresh)];
         total += CACurrentMediaTime() - start;
     }
     printf("a refresh of a view of %.0f x %.0f points took %.1f ms\n", area.size.width, area.size.height, total / 5 * 1000);
@@ -118,9 +118,9 @@ static CGImageRef backdrop_of(UIVisualEffectView *view)
     @try {
         [self run];
     } @catch (NSException *exception) {
-        charon_check(NO, "the effect views run without an exception", [NSString stringWithFormat:@"%@: %@", exception.name, exception.reason]);
+        revenant_check(NO, "the effect views run without an exception", [NSString stringWithFormat:@"%@: %@", exception.name, exception.reason]);
     }
-    NSString *summary = [NSString stringWithFormat:@"%d checks, %d failed\n", charon_checks, charon_failures];
+    NSString *summary = [NSString stringWithFormat:@"%d checks, %d failed\n", revenant_checks, revenant_failures];
     [summary writeToFile:[results_folder stringByAppendingPathComponent:@"visualeffect.done"] atomically:YES encoding:NSUTF8StringEncoding error:NULL];
 }
 
@@ -128,7 +128,7 @@ static CGImageRef backdrop_of(UIVisualEffectView *view)
 {
     [[NSFileManager defaultManager] createDirectoryAtPath:results_folder withIntermediateDirectories:YES attributes:nil error:NULL];
     [[NSFileManager defaultManager] removeItemAtPath:[results_folder stringByAppendingPathComponent:@"visualeffect.done"] error:NULL];
-    charon_log_to([results_folder stringByAppendingPathComponent:@"visualeffect.log"]);
+    revenant_log_to([results_folder stringByAppendingPathComponent:@"visualeffect.log"]);
     self.window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
     self.window.rootViewController = [[UIViewController alloc] init];
     self.window.rootViewController.view.backgroundColor = [UIColor whiteColor];

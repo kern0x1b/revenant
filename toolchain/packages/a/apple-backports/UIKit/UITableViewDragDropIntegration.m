@@ -1,19 +1,19 @@
 #import <UIKit/UIKit.h>
 
-#import "CharonDragDrop.h"
-#import "CharonDragSession.h"
+#import "RevenantDragDrop.h"
+#import "RevenantDragSession.h"
 #import "UIDropCoordinators.h"
 
 #pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
 
-@interface UITableView (CharonDragDropIntegration11)
-- (NSArray<UIDragInteraction *> *)charon_dragInteractions;
-- (NSArray<id<UITableViewDropItem>> *)charon_dropItemsAtPoint:(CGPoint)point session:(id<UIDropSession>)session;
+@interface UITableView (RevenantDragDropIntegration11)
+- (NSArray<UIDragInteraction *> *)revenant_dragInteractions;
+- (NSArray<id<UITableViewDropItem>> *)revenant_dropItemsAtPoint:(CGPoint)point session:(id<UIDropSession>)session;
 @end
 
-@implementation UITableView (CharonDragDropIntegration11)
+@implementation UITableView (RevenantDragDropIntegration11)
 
-- (NSArray<UIDragInteraction *> *)charon_dragInteractions
+- (NSArray<UIDragInteraction *> *)revenant_dragInteractions
 {
     NSMutableArray *found = [NSMutableArray array];
     for (id<UIInteraction> interaction in self.interactions)
@@ -24,7 +24,7 @@
 
 - (BOOL)hasActiveDrag
 {
-    for (UIDragInteraction *drag in [self charon_dragInteractions])
+    for (UIDragInteraction *drag in [self revenant_dragInteractions])
         if (drag.session)
             return YES;
     return NO;
@@ -41,7 +41,7 @@
     return NO;
 }
 
-- (NSArray<id<UITableViewDropItem>> *)charon_dropItemsAtPoint:(CGPoint)point session:(id<UIDropSession>)session
+- (NSArray<id<UITableViewDropItem>> *)revenant_dropItemsAtPoint:(CGPoint)point session:(id<UIDropSession>)session
 {
     NSMutableArray *items = [NSMutableArray array];
     for (id<UIInteraction> interaction in self.interactions) {
@@ -54,7 +54,7 @@
         if (!destination)
             continue;
         for (UIDragItem *item in session.items) {
-            CharonTableDropItem *drop = [[CharonTableDropItem alloc] init];
+            RevenantTableDropItem *drop = [[RevenantTableDropItem alloc] init];
             drop.item = item;
             drop.source = [self indexPathForRowAtPoint:CGPointZero];
             drop.size = CGSizeMake(self.bounds.size.width, self.rowHeight);

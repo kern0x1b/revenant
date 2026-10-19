@@ -25,7 +25,7 @@
 #include "foundation/content_identity.hpp"
 #include "foundation/file_page_cache.hpp"
 
-namespace shade {
+namespace emulator {
 
 class MachOImage;
 class DyldSharedCache;

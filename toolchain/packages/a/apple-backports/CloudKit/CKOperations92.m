@@ -1,6 +1,6 @@
-#import "CharonCloudKit.h"
-#import "CharonCKConstants.h"
-#import "CharonCKSubscription.h"
+#import "RevenantCloudKit.h"
+#import "RevenantCKConstants.h"
+#import "RevenantCKSubscription.h"
 
 @implementation CKFetchWebAuthTokenOperation
 
@@ -27,9 +27,9 @@
 {
     if (!self.APIToken) {
         if (self.fetchWebAuthTokenCompletionBlock) {
-            self.fetchWebAuthTokenCompletionBlock(nil, CharonCKNotAuthenticated());
+            self.fetchWebAuthTokenCompletionBlock(nil, RevenantCKNotAuthenticated());
         }
-        [self charon_finish];
+        [self revenant_finish];
         return;
     }
     __unsafe_unretained CKFetchWebAuthTokenOperation *weakSelf = self;
@@ -53,7 +53,7 @@
         }
         if (strongSelf.fetchWebAuthTokenCompletionBlock) {
             strongSelf.fetchWebAuthTokenCompletionBlock(token,
-                token ? nil : CharonCKError(CKErrorInternalError, @"The exchange answered no token", nil));
+                token ? nil : RevenantCKError(CKErrorInternalError, @"The exchange answered no token", nil));
         }
     }];
 }

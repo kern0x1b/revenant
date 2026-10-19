@@ -8,7 +8,7 @@
 #include <cstdint>
 #include <string_view>
 
-namespace shade {
+namespace emulator {
 
 struct NormalizedDragGesture {
     float start_x_fraction { };

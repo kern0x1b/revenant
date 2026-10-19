@@ -2,7 +2,7 @@
 #import <objc/message.h>
 #import "check.h"
 
-@interface CharonHostUIListSeparatorConfiguration : NSObject <NSCopying, NSSecureCoding>
+@interface RevenantHostUIListSeparatorConfiguration : NSObject <NSCopying, NSSecureCoding>
 - (instancetype)initWithListAppearance:(UICollectionLayoutListAppearance)listAppearance;
 @property (nonatomic) UIListSeparatorVisibility topSeparatorVisibility;
 @property (nonatomic) UIListSeparatorVisibility bottomSeparatorVisibility;
@@ -18,7 +18,7 @@ typedef id (*sep_init)(id, SEL, UICollectionLayoutListAppearance);
 
 static void BOTH(NSString *what, NSString *ours, NSString *theirs)
 {
-    charon_check([ours isEqualToString:theirs], what.UTF8String,
+    revenant_check([ours isEqualToString:theirs], what.UTF8String,
                  [NSString stringWithFormat:@"port %@ != system %@", ours, theirs]);
 }
 
@@ -54,9 +54,9 @@ static void equality(NSString *what, void (^write)(id configuration), Class port
 
 static void check_one_appearance(NSInteger appearance, NSString *label)
 {
-    CharonHostUIListSeparatorConfiguration *ours = [[CharonHostUIListSeparatorConfiguration alloc] initWithListAppearance:(UICollectionLayoutListAppearance)appearance];
+    RevenantHostUIListSeparatorConfiguration *ours = [[RevenantHostUIListSeparatorConfiguration alloc] initWithListAppearance:(UICollectionLayoutListAppearance)appearance];
     UIListSeparatorConfiguration *theirs = [[UIListSeparatorConfiguration alloc] initWithListAppearance:(UICollectionLayoutListAppearance)appearance];
-    charon_check(ours != nil && theirs != nil, "both sides build a separator configuration", @"one side answered nothing");
+    revenant_check(ours != nil && theirs != nil, "both sides build a separator configuration", @"one side answered nothing");
 
     BOTH([NSString stringWithFormat:@"the %@ top visibility", label],
          [NSString stringWithFormat:@"%ld", (long)ours.topSeparatorVisibility],
@@ -101,7 +101,7 @@ static void check_one_appearance(NSInteger appearance, NSString *label)
          ours.multipleSelectionColor == [UIColor greenColor] ? @"same" : @"copied",
          theirs.multipleSelectionColor == [UIColor greenColor] ? @"same" : @"copied");
 
-    CharonHostUIListSeparatorConfiguration *ourCopy = [ours copy];
+    RevenantHostUIListSeparatorConfiguration *ourCopy = [ours copy];
     UIListSeparatorConfiguration *theirCopy = [theirs copy];
     BOTH([NSString stringWithFormat:@"a %@ copy is not its receiver", label], ourCopy == ours ? @"same" : @"other",
          theirCopy == theirs ? @"same" : @"other");
@@ -133,15 +133,15 @@ static void check_one_appearance(NSInteger appearance, NSString *label)
     NSError *ourError = nil, *theirError = nil, *ourReadError = nil, *theirReadError = nil;
     NSData *ourArchive = [NSKeyedArchiver archivedDataWithRootObject:ours requiringSecureCoding:YES error:&ourError];
     NSData *theirArchive = [NSKeyedArchiver archivedDataWithRootObject:theirs requiringSecureCoding:YES error:&theirError];
-    charon_check(ourArchive != nil && theirArchive != nil, [[NSString stringWithFormat:@"the %@ archives", label] UTF8String],
+    revenant_check(ourArchive != nil && theirArchive != nil, [[NSString stringWithFormat:@"the %@ archives", label] UTF8String],
                  [NSString stringWithFormat:@"port %@ (%lu bytes) system %@ (%lu bytes)", ourError,
                   (unsigned long)ourArchive.length, theirError, (unsigned long)theirArchive.length]);
     if (ourArchive && theirArchive) {
-        CharonHostUIListSeparatorConfiguration *ourBack =
-            [NSKeyedUnarchiver unarchivedObjectOfClass:[CharonHostUIListSeparatorConfiguration class] fromData:ourArchive error:&ourReadError];
+        RevenantHostUIListSeparatorConfiguration *ourBack =
+            [NSKeyedUnarchiver unarchivedObjectOfClass:[RevenantHostUIListSeparatorConfiguration class] fromData:ourArchive error:&ourReadError];
         UIListSeparatorConfiguration *theirBack =
             [NSKeyedUnarchiver unarchivedObjectOfClass:[UIListSeparatorConfiguration class] fromData:theirArchive error:&theirReadError];
-        charon_check(ourBack != nil && theirBack != nil, [[NSString stringWithFormat:@"the %@ archive reads back", label] UTF8String],
+        revenant_check(ourBack != nil && theirBack != nil, [[NSString stringWithFormat:@"the %@ archive reads back", label] UTF8String],
                      [NSString stringWithFormat:@"port %@ system %@", ourBack ? @"an object" : ourReadError,
                       theirBack ? @"an object" : theirReadError]);
         if (ourBack && theirBack) {
@@ -173,7 +173,7 @@ static void check_every_appearance(void)
 
 static void check_the_equality(void)
 {
-    Class port = [CharonHostUIListSeparatorConfiguration class], system = [UIListSeparatorConfiguration class];
+    Class port = [RevenantHostUIListSeparatorConfiguration class], system = [UIListSeparatorConfiguration class];
     equality(@"two fresh configurations are equal", ^(id c) {}, port, system);
     equality(@"the top visibility joins the equality and the hash", ^(id c) { [c setTopSeparatorVisibility:2]; }, port, system);
     equality(@"the bottom visibility joins the equality and the hash", ^(id c) { [c setBottomSeparatorVisibility:1]; }, port, system);
@@ -200,9 +200,9 @@ static void check_the_equality(void)
 
 static void check_the_unavailable_pair(void)
 {
-    CharonHostUIListSeparatorConfiguration *ours = ((zero_init)objc_msgSend)((id)((zero_init)objc_msgSend)((id)[CharonHostUIListSeparatorConfiguration class], @selector(alloc)), @selector(init));
+    RevenantHostUIListSeparatorConfiguration *ours = ((zero_init)objc_msgSend)((id)((zero_init)objc_msgSend)((id)[RevenantHostUIListSeparatorConfiguration class], @selector(alloc)), @selector(init));
     UIListSeparatorConfiguration *theirs = ((zero_init)objc_msgSend)((id)((zero_init)objc_msgSend)((id)[UIListSeparatorConfiguration class], @selector(alloc)), @selector(init));
-    charon_check(ours != nil && theirs != nil, "both sides answer an unavailable -init", @"one side raised");
+    revenant_check(ours != nil && theirs != nil, "both sides answer an unavailable -init", @"one side raised");
     BOTH(@"the unavailable -init gives zero top visibility",
          [NSString stringWithFormat:@"%ld", (long)ours.topSeparatorVisibility],
          [NSString stringWithFormat:@"%ld", (long)theirs.topSeparatorVisibility]);
@@ -212,15 +212,15 @@ static void check_the_unavailable_pair(void)
     BOTH(@"the unavailable -init gives no multiple-selection colour", colourRole(ours.multipleSelectionColor),
          colourRole(theirs.multipleSelectionColor));
 
-    CharonHostUIListSeparatorConfiguration *ourNew = ((zero_init)objc_msgSend)((id)[CharonHostUIListSeparatorConfiguration class], @selector(new));
+    RevenantHostUIListSeparatorConfiguration *ourNew = ((zero_init)objc_msgSend)((id)[RevenantHostUIListSeparatorConfiguration class], @selector(new));
     UIListSeparatorConfiguration *theirNew = ((zero_init)objc_msgSend)((id)[UIListSeparatorConfiguration class], @selector(new));
-    charon_check(ourNew != nil && theirNew != nil, "both sides answer an unavailable +new", @"one side raised");
+    revenant_check(ourNew != nil && theirNew != nil, "both sides answer an unavailable +new", @"one side raised");
     BOTH(@"the unavailable +new gives zero bottom visibility",
          [NSString stringWithFormat:@"%ld", (long)ourNew.bottomSeparatorVisibility],
          [NSString stringWithFormat:@"%ld", (long)theirNew.bottomSeparatorVisibility]);
     BOTH(@"the unavailable +new gives zero bottom insets", insets(ourNew.bottomSeparatorInsets), insets(theirNew.bottomSeparatorInsets));
     BOTH(@"the unavailable +new gives no colour", colourRole(ourNew.color), colourRole(theirNew.color));
-    BOTH(@"+supportsSecureCoding", [NSString stringWithFormat:@"%d", (int)[CharonHostUIListSeparatorConfiguration supportsSecureCoding]],
+    BOTH(@"+supportsSecureCoding", [NSString stringWithFormat:@"%d", (int)[RevenantHostUIListSeparatorConfiguration supportsSecureCoding]],
          [NSString stringWithFormat:@"%d", (int)[UIListSeparatorConfiguration supportsSecureCoding]]);
 }
 
@@ -230,7 +230,7 @@ int main(void)
         check_every_appearance();
         check_the_unavailable_pair();
         check_the_equality();
-        printf("checks=%d failures=%d\n", charon_checks, charon_failures);
+        printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
     }
-    return charon_failures;
+    return revenant_failures;
 }

@@ -1,30 +1,30 @@
-#import "CharonSpriteKit.h"
+#import "RevenantSpriteKit.h"
 #include <objc/runtime.h>
 
-@interface CharonSKWeakReference : NSObject
+@interface RevenantSKWeakReference : NSObject
 @property (nonatomic, weak) id object;
 @end
 
-@implementation CharonSKWeakReference
+@implementation RevenantSKWeakReference
 
 @synthesize object = _object;
 
 @end
 
-static const void *CharonSKDelegateKey = &CharonSKDelegateKey;
+static const void *RevenantSKDelegateKey = &RevenantSKDelegateKey;
 
-@implementation SKScene (CharonSpriteKitScene8)
+@implementation SKScene (RevenantSpriteKitScene8)
 
 - (id<SKSceneDelegate>)delegate
 {
-    return ((CharonSKWeakReference *)objc_getAssociatedObject(self, CharonSKDelegateKey)).object;
+    return ((RevenantSKWeakReference *)objc_getAssociatedObject(self, RevenantSKDelegateKey)).object;
 }
 
 - (void)setDelegate:(id<SKSceneDelegate>)delegate
 {
-    CharonSKWeakReference *reference = [[CharonSKWeakReference alloc] init];
+    RevenantSKWeakReference *reference = [[RevenantSKWeakReference alloc] init];
     reference.object = delegate;
-    objc_setAssociatedObject(self, CharonSKDelegateKey, reference, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, RevenantSKDelegateKey, reference, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
 - (void)didApplyConstraints

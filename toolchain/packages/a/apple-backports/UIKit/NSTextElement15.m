@@ -40,7 +40,7 @@
     return [self initWithAttributedString:nil];
 }
 
-- (NSUInteger)charon_content_length
+- (NSUInteger)revenant_content_length
 {
     NSUInteger length = _attributedString.length;
     if (!length)
@@ -54,7 +54,7 @@
     return content;
 }
 
-- (NSUInteger)charon_separator_offset
+- (NSUInteger)revenant_separator_offset
 {
     NSUInteger length = _attributedString.length;
     if (!length)
@@ -68,7 +68,7 @@
     return start;
 }
 
-- (id<NSTextLocation>)charon_paragraph_start
+- (id<NSTextLocation>)revenant_paragraph_start
 {
     NSTextContentManager *manager = self.textContentManager;
     NSTextRange *elementRange = self.elementRange;
@@ -84,11 +84,11 @@
 
 - (NSTextRange *)paragraphContentRange
 {
-    id<NSTextLocation> start = [self charon_paragraph_start];
+    id<NSTextLocation> start = [self revenant_paragraph_start];
     if (!start || !_attributedString.length)
         return nil;
     id<NSTextLocation> end = [self.textContentManager locationFromLocation:start
-                                                                withOffset:(NSInteger)[self charon_content_length]];
+                                                                withOffset:(NSInteger)[self revenant_content_length]];
     if (!end)
         return nil;
     return [[NSTextRange alloc] initWithLocation:start endLocation:end];
@@ -96,10 +96,10 @@
 
 - (NSTextRange *)paragraphSeparatorRange
 {
-    id<NSTextLocation> start = [self charon_paragraph_start];
+    id<NSTextLocation> start = [self revenant_paragraph_start];
     if (!start || !_attributedString.length)
         return nil;
-    NSUInteger offset = [self charon_separator_offset];
+    NSUInteger offset = [self revenant_separator_offset];
     if (!offset)
         return nil;
     id<NSTextLocation> separator = [self.textContentManager locationFromLocation:start withOffset:(NSInteger)offset];

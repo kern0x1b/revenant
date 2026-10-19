@@ -7,13 +7,13 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
-vDSP_biquad_Setup charon_host_vDSP_biquad_CreateSetup(const double *coeffs, vDSP_Length M);
-void charon_host_vDSP_biquad_DestroySetup(vDSP_biquad_Setup setup);
-void charon_host_vDSP_biquad(const struct vDSP_biquad_SetupStruct *setup, float *delay, const float *x, vDSP_Stride ix,
+vDSP_biquad_Setup revenant_host_vDSP_biquad_CreateSetup(const double *coeffs, vDSP_Length M);
+void revenant_host_vDSP_biquad_DestroySetup(vDSP_biquad_Setup setup);
+void revenant_host_vDSP_biquad(const struct vDSP_biquad_SetupStruct *setup, float *delay, const float *x, vDSP_Stride ix,
                              float *y, vDSP_Stride iy, vDSP_Length n);
-void charon_host_vDSP_biquad_SetCoefficientsDouble(vDSP_biquad_Setup setup, const double *coeffs, vDSP_Length start_sec,
+void revenant_host_vDSP_biquad_SetCoefficientsDouble(vDSP_biquad_Setup setup, const double *coeffs, vDSP_Length start_sec,
                                                    vDSP_Length nsec);
-void charon_host_vDSP_biquad_SetCoefficientsSingle(vDSP_biquad_Setup setup, const float *coeffs, vDSP_Length start_sec,
+void revenant_host_vDSP_biquad_SetCoefficientsSingle(vDSP_biquad_Setup setup, const float *coeffs, vDSP_Length start_sec,
                                                    vDSP_Length nsec);
 
 static int checks;
@@ -66,9 +66,9 @@ static void run_from_zero(Filter filter, vDSP_biquad_Setup setup, const float *x
     filter(setup, delay, x, 1, y, 1, SAMPLES);
 }
 
-#define run_mine(setup, saved, x, y) run_over(charon_host_vDSP_biquad, setup, saved, x, y)
+#define run_mine(setup, saved, x, y) run_over(revenant_host_vDSP_biquad, setup, saved, x, y)
 #define run_theirs(setup, saved, x, y) run_over(vDSP_biquad, setup, saved, x, y)
-#define zero_mine(setup, x, y) run_from_zero(charon_host_vDSP_biquad, setup, x, y)
+#define zero_mine(setup, x, y) run_from_zero(revenant_host_vDSP_biquad, setup, x, y)
 #define zero_theirs(setup, x, y) run_from_zero(vDSP_biquad, setup, x, y)
 
 static void fill_coeffs(double *coeffs, vDSP_Length sections)
@@ -145,9 +145,9 @@ static void one_window(int is_single, vDSP_Length sections, vDSP_Length start, v
     float x[SAMPLES];
     fill_input(x);
 
-    vDSP_biquad_Setup mine = charon_host_vDSP_biquad_CreateSetup(coeffs, sections);
+    vDSP_biquad_Setup mine = revenant_host_vDSP_biquad_CreateSetup(coeffs, sections);
     vDSP_biquad_Setup theirs = vDSP_biquad_CreateSetup(coeffs, sections);
-    vDSP_biquad_Setup mineFresh = charon_host_vDSP_biquad_CreateSetup(patched, sections);
+    vDSP_biquad_Setup mineFresh = revenant_host_vDSP_biquad_CreateSetup(patched, sections);
     vDSP_biquad_Setup theirsFresh = vDSP_biquad_CreateSetup(patched, sections);
     if (!mine || !theirs || !mineFresh || !theirsFresh) {
         snprintf(detail, sizeof detail, "a setup of %llu sections: port %s, host %s", (unsigned long long)sections,
@@ -160,7 +160,7 @@ static void one_window(int is_single, vDSP_Length sections, vDSP_Length start, v
     float zeroed[SAMPLES], zeroedHost[SAMPLES], ignored[SAMPLES];
     memset(myDelay, 0, sizeof myDelay);
     memset(theirDelay, 0, sizeof theirDelay);
-    run_warm(charon_host_vDSP_biquad, mine, myDelay, x, ignored);
+    run_warm(revenant_host_vDSP_biquad, mine, myDelay, x, ignored);
     run_warm(vDSP_biquad, theirs, theirDelay, x, ignored);
     memcpy(savedMine, myDelay, sizeof savedMine);
     memcpy(savedTheirs, theirDelay, sizeof savedTheirs);
@@ -184,10 +184,10 @@ static void one_window(int is_single, vDSP_Length sections, vDSP_Length start, v
     run_theirs(theirs, savedTheirs, x, oldHost);
 
     if (is_single) {
-        charon_host_vDSP_biquad_SetCoefficientsSingle(mine, windowF, start, nsec);
+        revenant_host_vDSP_biquad_SetCoefficientsSingle(mine, windowF, start, nsec);
         vDSP_biquad_SetCoefficientsSingle(theirs, windowF, start, nsec);
     } else {
-        charon_host_vDSP_biquad_SetCoefficientsDouble(mine, window, start, nsec);
+        revenant_host_vDSP_biquad_SetCoefficientsDouble(mine, window, start, nsec);
         vDSP_biquad_SetCoefficientsDouble(theirs, window, start, nsec);
     }
     run_mine(mine, savedMine, x, after);
@@ -221,9 +221,9 @@ static void one_window(int is_single, vDSP_Length sections, vDSP_Length start, v
              is_single ? "single" : "double", (unsigned long long)nsec, (unsigned long long)start,
              (unsigned long long)sections);
     report(ok, name, detail);
-        charon_host_vDSP_biquad_DestroySetup(mine);
+        revenant_host_vDSP_biquad_DestroySetup(mine);
     vDSP_biquad_DestroySetup(theirs);
-    charon_host_vDSP_biquad_DestroySetup(mineFresh);
+    revenant_host_vDSP_biquad_DestroySetup(mineFresh);
     vDSP_biquad_DestroySetup(theirsFresh);
 }
 
@@ -270,21 +270,21 @@ static void outside_the_setup(void)
                 patched[(size_t)section * 5 + i] = window[(size_t)at * 5 + i];
             }
         }
-        vDSP_biquad_Setup moved = charon_host_vDSP_biquad_CreateSetup(coeffs, cases[k].sections);
-        vDSP_biquad_Setup rule = charon_host_vDSP_biquad_CreateSetup(patched, cases[k].sections);
-        vDSP_biquad_Setup untouched = charon_host_vDSP_biquad_CreateSetup(coeffs, cases[k].sections);
+        vDSP_biquad_Setup moved = revenant_host_vDSP_biquad_CreateSetup(coeffs, cases[k].sections);
+        vDSP_biquad_Setup rule = revenant_host_vDSP_biquad_CreateSetup(patched, cases[k].sections);
+        vDSP_biquad_Setup untouched = revenant_host_vDSP_biquad_CreateSetup(coeffs, cases[k].sections);
         if (!moved || !rule || !untouched) {
             report(0, "a coefficient window that reaches past the setup", "the port's own CreateSetup answered NULL");
             return;
         }
         float delay[DELAY_SLOTS], saved[DELAY_SLOTS], y[SAMPLES], want[SAMPLES], other[SAMPLES], ignored[SAMPLES];
         memset(delay, 0, sizeof delay);
-        run_warm(charon_host_vDSP_biquad, moved, delay, x, ignored);
+        run_warm(revenant_host_vDSP_biquad, moved, delay, x, ignored);
         memcpy(saved, delay, sizeof saved);
-        charon_host_vDSP_biquad_SetCoefficientsDouble(moved, window, cases[k].start, cases[k].nsec);
-        run_over(charon_host_vDSP_biquad, moved, saved, x, y);
-        run_over(charon_host_vDSP_biquad, rule, saved, x, want);
-        run_over(charon_host_vDSP_biquad, untouched, saved, x, other);
+        revenant_host_vDSP_biquad_SetCoefficientsDouble(moved, window, cases[k].start, cases[k].nsec);
+        run_over(revenant_host_vDSP_biquad, moved, saved, x, y);
+        run_over(revenant_host_vDSP_biquad, rule, saved, x, want);
+        run_over(revenant_host_vDSP_biquad, untouched, saved, x, other);
         detail[0] = 0;
         int ok = same_run(y, want, "a window that reaches past the setup");
         if (!ok) {
@@ -297,9 +297,9 @@ static void outside_the_setup(void)
         report(ok, name, detail);
         detail[0] = 0;
         report(overlaps || same_run(y, other, "a window that names nothing"), name, detail);
-        charon_host_vDSP_biquad_DestroySetup(moved);
-        charon_host_vDSP_biquad_DestroySetup(rule);
-        charon_host_vDSP_biquad_DestroySetup(untouched);
+        revenant_host_vDSP_biquad_DestroySetup(moved);
+        revenant_host_vDSP_biquad_DestroySetup(rule);
+        revenant_host_vDSP_biquad_DestroySetup(untouched);
     }
 }
 
@@ -317,10 +317,10 @@ static void null_arguments(void)
         pid_t child = fork();
         if (child == 0) {
             if (which == 0) {
-                charon_host_vDSP_biquad_SetCoefficientsDouble(NULL, window, 0, 1);
+                revenant_host_vDSP_biquad_SetCoefficientsDouble(NULL, window, 0, 1);
             } else {
-                vDSP_biquad_Setup s = charon_host_vDSP_biquad_CreateSetup(coeffs, 1);
-                charon_host_vDSP_biquad_SetCoefficientsDouble(s, NULL, 0, 1);
+                vDSP_biquad_Setup s = revenant_host_vDSP_biquad_CreateSetup(coeffs, 1);
+                revenant_host_vDSP_biquad_SetCoefficientsDouble(s, NULL, 0, 1);
             }
             _exit(0);
         }
@@ -329,23 +329,23 @@ static void null_arguments(void)
         snprintf(detail, sizeof detail, "the child ended with %s", WIFSIGNALED(status) ? "a signal" : "a status");
         report(WIFEXITED(status) && WEXITSTATUS(status) == 0, name, detail);
     }
-    vDSP_biquad_Setup s = charon_host_vDSP_biquad_CreateSetup(coeffs, 1);
+    vDSP_biquad_Setup s = revenant_host_vDSP_biquad_CreateSetup(coeffs, 1);
     if (s) {
         float delay[DELAY_SLOTS], saved[DELAY_SLOTS], before[SAMPLES], after[SAMPLES], ignored[SAMPLES];
         memset(delay, 0, sizeof delay);
-        run_warm(charon_host_vDSP_biquad, s, delay, x, ignored);
+        run_warm(revenant_host_vDSP_biquad, s, delay, x, ignored);
         memcpy(saved, delay, sizeof saved);
-        charon_host_vDSP_biquad_SetCoefficientsDouble(s, NULL, 0, 1);
-        run_over(charon_host_vDSP_biquad, s, saved, x, before);
-        run_over(charon_host_vDSP_biquad, s, saved, x, after);
+        revenant_host_vDSP_biquad_SetCoefficientsDouble(s, NULL, 0, 1);
+        run_over(revenant_host_vDSP_biquad, s, saved, x, before);
+        run_over(revenant_host_vDSP_biquad, s, saved, x, after);
         detail[0] = 0;
         report(same_run(after, before, "a NULL array"), "a NULL array leaves the coefficients alone", detail);
-        run_over(charon_host_vDSP_biquad, s, saved, x, before);
-        charon_host_vDSP_biquad_SetCoefficientsSingle(s, NULL, 0, 1);
-        run_over(charon_host_vDSP_biquad, s, saved, x, after);
+        run_over(revenant_host_vDSP_biquad, s, saved, x, before);
+        revenant_host_vDSP_biquad_SetCoefficientsSingle(s, NULL, 0, 1);
+        run_over(revenant_host_vDSP_biquad, s, saved, x, after);
         detail[0] = 0;
         report(same_run(after, before, "a NULL array"), "a NULL array leaves the coefficients alone, single", detail);
-        charon_host_vDSP_biquad_DestroySetup(s);
+        revenant_host_vDSP_biquad_DestroySetup(s);
     }
 }
 
@@ -353,14 +353,14 @@ static void no_sections(void)
 {
     double coeffs[5];
     fill_coeffs(coeffs, 1);
-    vDSP_biquad_Setup mine = charon_host_vDSP_biquad_CreateSetup(coeffs, 0);
+    vDSP_biquad_Setup mine = revenant_host_vDSP_biquad_CreateSetup(coeffs, 0);
     report(1, "the setter on a setup of no sections",
            mine ? "unexpected: the port's own CreateSetup answered a setup for M = 0"
                 : "the port's own vDSP_biquad_CreateSetup answers NULL for M = 0, which is that row's answer and "
                   "not this one's, so there is no setup to ask the setter about; the host answers one and writes "
                   "no output for a cascade of no sections (measured)");
     if (mine) {
-        charon_host_vDSP_biquad_DestroySetup(mine);
+        revenant_host_vDSP_biquad_DestroySetup(mine);
     }
 }
 

@@ -3,15 +3,15 @@
 
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 
-static NSString *const CharonRegisteredTypesKey = @"org.charon.apple-backports.UIUserNotificationTypes";
-static char charon_remote_registered_key;
+static NSString *const RevenantRegisteredTypesKey = @"org.revenant.apple-backports.UIUserNotificationTypes";
+static char revenant_remote_registered_key;
 
-static UIUserNotificationType charon_registered_types(void)
+static UIUserNotificationType revenant_registered_types(void)
 {
-    return (UIUserNotificationType)[[[NSUserDefaults standardUserDefaults] objectForKey:CharonRegisteredTypesKey] unsignedIntegerValue];
+    return (UIUserNotificationType)[[[NSUserDefaults standardUserDefaults] objectForKey:RevenantRegisteredTypesKey] unsignedIntegerValue];
 }
 
-@implementation UIApplication (CharonUserNotificationSettings)
+@implementation UIApplication (RevenantUserNotificationSettings)
 
 - (void)registerUserNotificationSettings:(UIUserNotificationSettings *)notificationSettings
 {
@@ -19,9 +19,9 @@ static UIUserNotificationType charon_registered_types(void)
     if (notificationSettings.categories.count)
         NSLog(@"registerUserNotificationSettings: iOS %@ shows no actions on notifications, so the categories %@ are not registered and currentUserNotificationSettings reports none", [UIDevice currentDevice].systemVersion, [notificationSettings.categories valueForKey:@"identifier"]);
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-    [defaults setObject:@(types) forKey:CharonRegisteredTypesKey];
+    [defaults setObject:@(types) forKey:RevenantRegisteredTypesKey];
     [defaults synchronize];
-    if ([objc_getAssociatedObject(self, &charon_remote_registered_key) boolValue])
+    if ([objc_getAssociatedObject(self, &revenant_remote_registered_key) boolValue])
         [self registerForRemoteNotificationTypes:(UIRemoteNotificationType)types];
     dispatch_async(dispatch_get_main_queue(), ^{
         id<UIApplicationDelegate> delegate = self.delegate;
@@ -32,13 +32,13 @@ static UIUserNotificationType charon_registered_types(void)
 
 - (UIUserNotificationSettings *)currentUserNotificationSettings
 {
-    return [UIUserNotificationSettings settingsForTypes:charon_registered_types() categories:nil];
+    return [UIUserNotificationSettings settingsForTypes:revenant_registered_types() categories:nil];
 }
 
 - (void)registerForRemoteNotifications
 {
-    objc_setAssociatedObject(self, &charon_remote_registered_key, @YES, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-    UIUserNotificationType types = charon_registered_types();
+    objc_setAssociatedObject(self, &revenant_remote_registered_key, @YES, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    UIUserNotificationType types = revenant_registered_types();
     if (types == UIUserNotificationTypeNone) {
         NSError *error = [NSError errorWithDomain:NSCocoaErrorDomain code:NSFeatureUnsupportedError
                                          userInfo:@{NSLocalizedDescriptionKey: [NSString stringWithFormat:@"iOS %@ hands out a device token only for a set of notification types, and none were registered; call -registerUserNotificationSettings: first", [UIDevice currentDevice].systemVersion]}];

@@ -30,7 +30,7 @@ cd "$HERE/../../../.." || exit 1
 CL=packages/a/apple-backports/CloudKit
 INC="-I packages/a/apple-backports -I $CL"
 WARN="-Werror=objc-missing-property-synthesis"
-WORK=$(runs_folder charon-zone-check)
+WORK=$(runs_folder revenant-zone-check)
 HOST_SDK=$(xcrun --show-sdk-path --sdk macosx)
 fails=0
 
@@ -116,14 +116,14 @@ path = sys.argv[1]
 text = open(path).read()
 zone = text.index("@implementation CKRecordZone {")
 at = text.index("- (BOOL)isEqual:(id)other", zone)      # inside CKRecordZone, not CKRecordZoneID's
-text = text[:at] + "int CharonPlantMarker = 1;\n\n- (NSInteger)capabilities { return 7; }\n\n" + text[at:]
+text = text[:at] + "int RevenantPlantMarker = 1;\n\n- (NSInteger)capabilities { return 7; }\n\n" + text[at:]
 open(path, "w").write(text)
 PY
     xcrun clang -c -target arm64-apple-ios13.1-macabi -isysroot "$HOST_SDK" -fobjc-arc \
         $INC -o "$WORK/plant/CKRecords8.o" "$WORK/plant/CKRecords8.m" 2>"$WORK.plant.log" \
         || { echo "  FAIL the scratch copy did not compile"; fails=$((fails + 1)); }
     if link_port "$WORK/plant/CKRecords8.o" "$WORK/zone-planted" &&
-       nm "$WORK/zone-planted" 2>/dev/null | grep -q CharonPlantMarker; then
+       nm "$WORK/zone-planted" 2>/dev/null | grep -q RevenantPlantMarker; then
         CLOUDKIT_ZONE="$WORK/port-planted.json" "$WORK/zone-planted" >/dev/null 2>&1
         out=$(python3 tests/backports/host/cloudkit/compare.py "$WORK/host.json" "$WORK/port-planted.json" 2>&1)
         code=$?

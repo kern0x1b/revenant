@@ -1,4 +1,4 @@
-#import "CharonPhotos.h"
+#import "RevenantPhotos.h"
 #import <MobileCoreServices/MobileCoreServices.h>
 
 #include <errno.h>
@@ -8,7 +8,7 @@
 #pragma clang diagnostic ignored "-Wobjc-missing-property-synthesis"
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 
-static NSString *charon_movie_extension(NSData *data, PHAssetResourceCreationOptions *options)
+static NSString *revenant_movie_extension(NSData *data, PHAssetResourceCreationOptions *options)
 {
     if (options.uniformTypeIdentifier.length) {
         NSString *extension = CFBridgingRelease(UTTypeCopyPreferredTagWithClass((__bridge CFStringRef)options.uniformTypeIdentifier, kUTTagClassFilenameExtension));
@@ -23,9 +23,9 @@ static NSString *charon_movie_extension(NSData *data, PHAssetResourceCreationOpt
     return @"mov";
 }
 
-static CharonPhotosTransaction *charon_transaction(void)
+static RevenantPhotosTransaction *revenant_transaction(void)
 {
-    CharonPhotosTransaction *transaction = [CharonPhotosTransaction current];
+    RevenantPhotosTransaction *transaction = [RevenantPhotosTransaction current];
     if (!transaction)
         [NSException raise:NSInternalInconsistencyException format:@"This method can only be called from inside of -[PHPhotoLibrary performChanges:completionHandler:] or -[PHPhotoLibrary performChangesAndWait:error:]"];
     return transaction;
@@ -58,10 +58,10 @@ static CharonPhotosTransaction *charon_transaction(void)
 
 + (instancetype)creationRequestForAsset
 {
-    CharonPhotosTransaction *transaction = charon_transaction();
+    RevenantPhotosTransaction *transaction = revenant_transaction();
     PHAssetCreationRequest *request = [[self alloc] init];
     request->_token = [[NSUUID UUID].UUIDString stringByAppendingString:@"/L0/001"];
-    request->_placeholder = [[PHObjectPlaceholder alloc] initWithCharonLocalIdentifier:request->_token];
+    request->_placeholder = [[PHObjectPlaceholder alloc] initWithRevenantLocalIdentifier:request->_token];
     [transaction addChange:request];
     return request;
 }
@@ -76,14 +76,14 @@ static CharonPhotosTransaction *charon_transaction(void)
     return _placeholder;
 }
 
-- (void)charon_addResourceOfType:(PHAssetResourceType)type
+- (void)revenant_addResourceOfType:(PHAssetResourceType)type
 {
     if (type != PHAssetResourceTypePhoto && type != PHAssetResourceTypeVideo) {
-        [charon_transaction() refuseWithReason:@"iOS 6 can only add a primary photo or video resource, not adjustment data, an alternate photo, or a live photo pairing"];
+        [revenant_transaction() refuseWithReason:@"iOS 6 can only add a primary photo or video resource, not adjustment data, an alternate photo, or a live photo pairing"];
         return;
     }
     if (_hasResource) {
-        [charon_transaction() refuseWithReason:@"iOS 6 can save only a single resource for a new asset"];
+        [revenant_transaction() refuseWithReason:@"iOS 6 can save only a single resource for a new asset"];
         return;
     }
     _hasResource = YES;
@@ -92,28 +92,28 @@ static CharonPhotosTransaction *charon_transaction(void)
 
 - (void)addResourceWithType:(PHAssetResourceType)type fileURL:(NSURL *)fileURL options:(PHAssetResourceCreationOptions *)options
 {
-    [self charon_addResourceOfType:type];
+    [self revenant_addResourceOfType:type];
     _resourceFileURL = fileURL;
     _moveFile = options.shouldMoveFile;
 }
 
 - (void)addResourceWithType:(PHAssetResourceType)type data:(NSData *)data options:(PHAssetResourceCreationOptions *)options
 {
-    [self charon_addResourceOfType:type];
+    [self revenant_addResourceOfType:type];
     _resourceData = data;
     _resourceOptions = [options copy];
 }
 
-- (BOOL)charon_validate:(NSError **)error
+- (BOOL)revenant_validate:(NSError **)error
 {
     if (!_hasResource) {
         if (error)
-            *error = [CharonPhotosStore errorWithCode:PHPhotosErrorMissingResource reason:@"the creation request was never given a resource to save"];
+            *error = [RevenantPhotosStore errorWithCode:PHPhotosErrorMissingResource reason:@"the creation request was never given a resource to save"];
         return NO;
     }
     if (_resourceType == PHAssetResourceTypePhoto && _resourceData && ![UIImage imageWithData:_resourceData]) {
         if (error)
-            *error = [CharonPhotosStore errorWithCode:PHPhotosErrorInvalidResource reason:@"the resource data is not an image this release can decode"];
+            *error = [RevenantPhotosStore errorWithCode:PHPhotosErrorInvalidResource reason:@"the resource data is not an image this release can decode"];
         return NO;
     }
     if (_moveFile && _resourceFileURL) {
@@ -131,14 +131,14 @@ static CharonPhotosTransaction *charon_transaction(void)
             refusal = @"the file's folder does not let it be removed, so it cannot be moved into the photo library";
         if (refusal) {
             if (error)
-                *error = [CharonPhotosStore errorWithCode:PHPhotosErrorInvalidResource reason:refusal];
+                *error = [RevenantPhotosStore errorWithCode:PHPhotosErrorInvalidResource reason:refusal];
             return NO;
         }
     }
     return YES;
 }
 
-- (BOOL)charon_removeMovedFile:(NSError **)error
+- (BOOL)revenant_removeMovedFile:(NSError **)error
 {
     if (!_moveFile || !_resourceFileURL)
         return YES;
@@ -149,25 +149,25 @@ static CharonPhotosTransaction *charon_transaction(void)
     return NO;
 }
 
-- (BOOL)charon_commit:(NSError **)error
+- (BOOL)revenant_commit:(NSError **)error
 {
-    NSDictionary *metadata = [self charon_metadata];
+    NSDictionary *metadata = [self revenant_metadata];
     NSString *identifier = nil;
     NSURL *staged = nil;
     if (_resourceType == PHAssetResourceTypePhoto) {
         NSData *data = _resourceData ?: (_resourceFileURL ? [NSData dataWithContentsOfURL:_resourceFileURL] : nil);
-        identifier = [CharonPhotosStore writeImageData:data metadata:metadata error:error];
+        identifier = [RevenantPhotosStore writeImageData:data metadata:metadata error:error];
     } else if (_resourceFileURL) {
-        identifier = [CharonPhotosStore writeVideoAtURL:_resourceFileURL error:error];
+        identifier = [RevenantPhotosStore writeVideoAtURL:_resourceFileURL error:error];
     } else {
-        NSString *name = [[NSUUID UUID].UUIDString stringByAppendingPathExtension:charon_movie_extension(_resourceData, _resourceOptions)];
+        NSString *name = [[NSUUID UUID].UUIDString stringByAppendingPathExtension:revenant_movie_extension(_resourceData, _resourceOptions)];
         staged = [NSURL fileURLWithPath:[NSTemporaryDirectory() stringByAppendingPathComponent:name]];
         if (![_resourceData writeToURL:staged options:NSDataWritingAtomic error:error])
             return NO;
-        identifier = [CharonPhotosStore writeVideoAtURL:staged error:error];
+        identifier = [RevenantPhotosStore writeVideoAtURL:staged error:error];
     }
     if (identifier)
-        [CharonPhotosStore bindPlaceholderIdentifier:_token toIdentifier:identifier];
+        [RevenantPhotosStore bindPlaceholderIdentifier:_token toIdentifier:identifier];
     if (staged && unlink(staged.path.fileSystemRepresentation) != 0 && identifier) {
         if (error)
             *error = [NSError errorWithDomain:NSPOSIXErrorDomain code:errno userInfo:@{NSURLErrorKey: staged}];
@@ -175,7 +175,7 @@ static CharonPhotosTransaction *charon_transaction(void)
     }
     if (!identifier)
         return NO;
-    return [self charon_removeMovedFile:error];
+    return [self revenant_removeMovedFile:error];
 }
 
 @end

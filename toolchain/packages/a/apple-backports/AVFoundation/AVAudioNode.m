@@ -1,64 +1,64 @@
-#import "CharonAVAudioEngine.h"
+#import "RevenantAVAudioEngine.h"
 
-@implementation CharonScheduledBuffer
+@implementation RevenantScheduledBuffer
 @synthesize buffer = _buffer;
 @synthesize completionHandler = _completionHandler;
 @synthesize framesConsumed = _framesConsumed;
 @end
 
 @implementation AVAudioNode {
-    CharonAudioNodeImpl *_charon;
-    AVAudioEngine * __weak _charon_engine;
-    AVAudioFormat *_charon_format;
-    NSMutableArray<CharonScheduledBuffer *> *_charon_queue;
-    AVAudioNodeTapBlock _charon_tapBlock;
+    RevenantAudioNodeImpl *_revenant;
+    AVAudioEngine * __weak _revenant_engine;
+    AVAudioFormat *_revenant_format;
+    NSMutableArray<RevenantScheduledBuffer *> *_revenant_queue;
+    AVAudioNodeTapBlock _revenant_tapBlock;
 }
 
 - (instancetype)init
 {
     if ((self = [super init])) {
-        _charon = calloc(1, sizeof(CharonAudioNodeImpl));
-        _charon_queue = [NSMutableArray array];
+        _revenant = calloc(1, sizeof(RevenantAudioNodeImpl));
+        _revenant_queue = [NSMutableArray array];
     }
     return self;
 }
 
 - (void)dealloc
 {
-    free(_charon);
+    free(_revenant);
 }
 
-- (CharonAudioNodeImpl *)charon_impl
+- (RevenantAudioNodeImpl *)revenant_impl
 {
-    return _charon;
+    return _revenant;
 }
 
-- (void)charon_setEngine:(AVAudioEngine *)engine auNode:(AUNode)node audioUnit:(AudioUnit)unit
+- (void)revenant_setEngine:(AVAudioEngine *)engine auNode:(AUNode)node audioUnit:(AudioUnit)unit
 {
-    _charon_engine = engine;
-    _charon->auNode = node;
-    _charon->audioUnit = unit;
-    _charon->attached = engine != nil;
+    _revenant_engine = engine;
+    _revenant->auNode = node;
+    _revenant->audioUnit = unit;
+    _revenant->attached = engine != nil;
 }
 
-- (NSMutableArray<CharonScheduledBuffer *> *)charon_queue
+- (NSMutableArray<RevenantScheduledBuffer *> *)revenant_queue
 {
-    return _charon_queue;
+    return _revenant_queue;
 }
 
-- (AVAudioNodeTapBlock)charon_tapBlock
+- (AVAudioNodeTapBlock)revenant_tapBlock
 {
-    return _charon_tapBlock;
+    return _revenant_tapBlock;
 }
 
-- (void)charon_setFormat:(AVAudioFormat *)format
+- (void)revenant_setFormat:(AVAudioFormat *)format
 {
-    _charon_format = format;
+    _revenant_format = format;
 }
 
 - (AVAudioEngine *)engine
 {
-    return _charon_engine;
+    return _revenant_engine;
 }
 
 - (NSUInteger)numberOfInputs
@@ -77,12 +77,12 @@
 
 - (AVAudioFormat *)inputFormatForBus:(AVAudioNodeBus)bus
 {
-    return _charon_format;
+    return _revenant_format;
 }
 
 - (AVAudioFormat *)outputFormatForBus:(AVAudioNodeBus)bus
 {
-    return _charon_format;
+    return _revenant_format;
 }
 
 - (nullable NSString *)nameForInputBus:(AVAudioNodeBus)bus
@@ -97,15 +97,15 @@
 
 - (void)installTapOnBus:(AVAudioNodeBus)bus bufferSize:(AVAudioFrameCount)bufferSize format:(AVAudioFormat *)format block:(AVAudioNodeTapBlock)tapBlock
 {
-    _charon_tapBlock = [tapBlock copy];
-    _charon->tapBufferSize = bufferSize;
+    _revenant_tapBlock = [tapBlock copy];
+    _revenant->tapBufferSize = bufferSize;
     if (format)
-        _charon_format = format;
+        _revenant_format = format;
 }
 
 - (void)removeTapOnBus:(AVAudioNodeBus)bus
 {
-    _charon_tapBlock = nil;
+    _revenant_tapBlock = nil;
 }
 
 @end

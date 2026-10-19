@@ -18,7 +18,7 @@
 
 #include "graphics/gles_abi.hpp"
 
-namespace shade {
+namespace emulator {
 namespace {
 
     bool is_triangle_mode(std::uint32_t mode)

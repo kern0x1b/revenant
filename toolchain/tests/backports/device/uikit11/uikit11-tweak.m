@@ -5,36 +5,36 @@
 #include <dlfcn.h>
 #import "uikit11-expectations.h"
 
-int charon_main_interactions(void);
-int charon_main_systemspacing(void);
-int charon_main_gesturename(void);
-int charon_main_batchupdates(void);
-int charon_main_contentsize(void);
+int revenant_main_interactions(void);
+int revenant_main_systemspacing(void);
+int revenant_main_gesturename(void);
+int revenant_main_batchupdates(void);
+int revenant_main_contentsize(void);
 void host_attach_prefixed(const char *prefix);
 
 static NSString *const results_folder = @"/private/var/backports";
-static NSMutableString *charon_report;
-static NSMutableArray *charon_lines;
-static NSMutableString *charon_pending;
+static NSMutableString *revenant_report;
+static NSMutableArray *revenant_lines;
+static NSMutableString *revenant_pending;
 
 static void note(NSString *line)
 {
-    [charon_report appendFormat:@"%@\n", line];
-    [charon_report writeToFile:[results_folder stringByAppendingPathComponent:@"uikit11.log"] atomically:YES encoding:NSUTF8StringEncoding error:NULL];
+    [revenant_report appendFormat:@"%@\n", line];
+    [revenant_report writeToFile:[results_folder stringByAppendingPathComponent:@"uikit11.log"] atomically:YES encoding:NSUTF8StringEncoding error:NULL];
 }
 
-int charon_printf(const char *format, ...)
+int revenant_printf(const char *format, ...)
 {
     va_list arguments;
     va_start(arguments, format);
     NSString *text = [[NSString alloc] initWithFormat:@(format) arguments:arguments];
     va_end(arguments);
-    [charon_pending appendString:text];
+    [revenant_pending appendString:text];
     NSRange end;
-    while ((end = [charon_pending rangeOfString:@"\n"]).location != NSNotFound) {
-        NSString *line = [charon_pending substringToIndex:end.location];
-        [charon_pending deleteCharactersInRange:NSMakeRange(0, end.location + 1)];
-        [charon_lines addObject:line];
+    while ((end = [revenant_pending rangeOfString:@"\n"]).location != NSNotFound) {
+        NSString *line = [revenant_pending substringToIndex:end.location];
+        [revenant_pending deleteCharactersInRange:NSMakeRange(0, end.location + 1)];
+        [revenant_lines addObject:line];
         note([@"| " stringByAppendingString:line]);
     }
     return (int)text.length;
@@ -58,37 +58,37 @@ static NSDictionary *answers_of(NSArray *lines)
 static void run_test(NSString *test, int (*body)(void))
 {
     note([NSString stringWithFormat:@"== %@", test]);
-    charon_lines = [NSMutableArray array];
-    charon_pending = [NSMutableString string];
-    int before = charon_failures;
+    revenant_lines = [NSMutableArray array];
+    revenant_pending = [NSMutableString string];
+    int before = revenant_failures;
     int failed = -1;
     @try {
         body();
-        failed = charon_failures - before;
+        failed = revenant_failures - before;
     } @catch (NSException *exception) {
-        charon_check(NO, [[test stringByAppendingString:@" raises nothing"] UTF8String], exception.reason);
+        revenant_check(NO, [[test stringByAppendingString:@" raises nothing"] UTF8String], exception.reason);
         note([NSString stringWithFormat:@"FAIL %@ raised %@: %@", test, exception.name, exception.reason]);
     }
     NSUInteger ownFailures = 0;
-    for (NSString *line in charon_lines)
+    for (NSString *line in revenant_lines)
         if ([line hasPrefix:@"FAIL"])
             ownFailures++;
-    NSDictionary *answers = answers_of(charon_lines);
-    for (unsigned index = 0; index < charon_expected_count; index++) {
-        if (![@(charon_expected[index][0]) isEqualToString:test])
+    NSDictionary *answers = answers_of(revenant_lines);
+    for (unsigned index = 0; index < revenant_expected_count; index++) {
+        if (![@(revenant_expected[index][0]) isEqualToString:test])
             continue;
-        NSString *name = @(charon_expected[index][1]);
-        NSString *wanted = @(charon_expected[index][2]);
+        NSString *name = @(revenant_expected[index][1]);
+        NSString *wanted = @(revenant_expected[index][2]);
         NSString *found = answers[name] ?: @"<not answered>";
         BOOL passed = [found isEqualToString:wanted];
         NSString *label = [NSString stringWithFormat:@"%@: %@", test, name];
-        charon_check(passed, label.UTF8String, [NSString stringWithFormat:@"%@ != %@", found, wanted]);
+        revenant_check(passed, label.UTF8String, [NSString stringWithFormat:@"%@ != %@", found, wanted]);
         note([NSString stringWithFormat:@"%@ %@ = %@%@", passed ? @"ok  " : @"FAIL", label, found,
               passed ? @"" : [NSString stringWithFormat:@"  (host: %@)", wanted]]);
     }
     BOOL clean = failed == 0 && ownFailures == 0;
     NSString *label = [NSString stringWithFormat:@"%@ passes its own checks on this release", test];
-    charon_check(clean, label.UTF8String, [NSString stringWithFormat:@"returned %d, %lu FAIL lines", failed, (unsigned long)ownFailures]);
+    revenant_check(clean, label.UTF8String, [NSString stringWithFormat:@"returned %d, %lu FAIL lines", failed, (unsigned long)ownFailures]);
     note([NSString stringWithFormat:@"%@ %@ (returned %d, %lu FAIL lines)", clean ? @"ok  " : @"FAIL", label, failed, (unsigned long)ownFailures]);
 }
 
@@ -96,7 +96,7 @@ static void run_test(NSString *test, int (*body)(void))
 static void expect(NSString *found, NSString *wanted, NSString *name)
 {
     BOOL passed = [found isEqualToString:wanted];
-    charon_check(passed, name.UTF8String, [NSString stringWithFormat:@"%@ != %@", found, wanted]);
+    revenant_check(passed, name.UTF8String, [NSString stringWithFormat:@"%@ != %@", found, wanted]);
     note([NSString stringWithFormat:@"%@ %@ = %@%@", passed ? @"ok  " : @"FAIL", name, found, passed ? @"" : [NSString stringWithFormat:@"  (wanted %@)", wanted]]);
 }
 
@@ -238,33 +238,33 @@ static void release_batch_updates(void)
 
 static void run(void)
 {
-    host_attach_prefixed("charonHost_");
-    run_test(@"interactions", charon_main_interactions);
-    run_test(@"systemspacing", charon_main_systemspacing);
-    run_test(@"gesturename", charon_main_gesturename);
-    run_test(@"batchupdates", charon_main_batchupdates);
-    run_test(@"contentsize", charon_main_contentsize);
+    host_attach_prefixed("revenantHost_");
+    run_test(@"interactions", revenant_main_interactions);
+    run_test(@"systemspacing", revenant_main_systemspacing);
+    run_test(@"gesturename", revenant_main_gesturename);
+    run_test(@"batchupdates", revenant_main_batchupdates);
+    run_test(@"contentsize", revenant_main_contentsize);
     release_system_spacing();
     release_back_button();
     release_batch_updates();
 }
 
-__attribute__((constructor)) static void charon_uikit11_start(void)
+__attribute__((constructor)) static void revenant_uikit11_start(void)
 {
-    charon_report = [NSMutableString string];
+    revenant_report = [NSMutableString string];
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
         @autoreleasepool {
             note(@"start");
             @try {
                 run();
             } @catch (NSException *exception) {
-                charon_check(NO, "the run raises no exception", [NSString stringWithFormat:@"%@: %@", exception.name, exception.reason]);
+                revenant_check(NO, "the run raises no exception", [NSString stringWithFormat:@"%@: %@", exception.name, exception.reason]);
                 note([NSString stringWithFormat:@"FAIL the run raised %@: %@", exception.name, exception.reason]);
             }
             dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
                 expect([batch_order componentsJoinedByString:@" | "], @"before | inside | after the call | completion finished 1",
                        @"batch updates: the completion comes once, after the call, once the handler has returned");
-                note([NSString stringWithFormat:@"%@ checks=%d failures=%d", charon_failures ? @"FAIL" : @"PASS", charon_checks, charon_failures]);
+                note([NSString stringWithFormat:@"%@ checks=%d failures=%d", revenant_failures ? @"FAIL" : @"PASS", revenant_checks, revenant_failures]);
                 [@"done" writeToFile:[results_folder stringByAppendingPathComponent:@"uikit11.done"] atomically:YES encoding:NSUTF8StringEncoding error:NULL];
             });
         }

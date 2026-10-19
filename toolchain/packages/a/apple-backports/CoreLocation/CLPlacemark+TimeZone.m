@@ -1,6 +1,6 @@
 #import <CoreLocation/CoreLocation.h>
 
-@implementation CLPlacemark (CharonTimeZone)
+@implementation CLPlacemark (RevenantTimeZone)
 
 - (NSTimeZone *)timeZone
 {

@@ -2,7 +2,7 @@
 # run.sh - is this port's convolutional MPS the same arithmetic as the system's own?
 #
 # cases.m is compiled twice and run twice: once against the system's MPS, once against this port's
-# classes with the MPS names mapped to Charon names and their selectors prefixed, so the port's
+# classes with the MPS names mapped to Revenant names and their selectors prefixed, so the port's
 # implementations are reached under names of their own and cannot replace the system's. Every case
 # prints the result the kernel wrote, as text, and the two runs are compared against a written-down
 # float tolerance rather than bit for bit, because a normalisation accumulates in a different order on
@@ -38,7 +38,7 @@ import sys
 names = [line.strip() for line in open(sys.argv[1]) if line.strip()]
 with open(sys.argv[2], 'w') as out:
     for name in names:
-        out.write("#define %s Charon%s\n" % (name, name))
+        out.write("#define %s Revenant%s\n" % (name, name))
 print("classes the port defines: %d" % len(names))
 PY
 echo "renamed: $(grep -c define "$build/rename.h") classes"
@@ -61,7 +61,7 @@ if missing:
 print("the port's objects define all %d classes this harness compares" % len(wanted))
 PY
 
-printf '#import <MetalPerformanceShaders/MetalPerformanceShaders.h>\n#import "CharonMPSCnn.h"\n#import <objc/runtime.h>\n#include <stdio.h>\n' > "$build/declarations.h"
+printf '#import <MetalPerformanceShaders/MetalPerformanceShaders.h>\n#import "RevenantMPSCnn.h"\n#import <objc/runtime.h>\n#include <stdio.h>\n' > "$build/declarations.h"
 objects=""
 for source in "$mps"/*.m; do
     name=$(basename "$source" .m)
@@ -74,10 +74,10 @@ for source in "$mps"/*.m; do
 done
 echo "compiled: $(echo "$objects" | wc -w) objects"
 
-# -DCHARON_PORT_BUILD: this is the port's own build, and the guard below is a statement about it. The
+# -DREVENANT_PORT_BUILD: this is the port's own build, and the guard below is a statement about it. The
 # system build has no rename header and no port classes, and there is nothing for the guard to ask of
 # it.
-xcrun clang -fobjc-arc $target $quiet -DCHARON_PORT_BUILD=1 -include "$build/rename.h" "$here/cases.m" $objects \
+xcrun clang -fobjc-arc $target $quiet -DREVENANT_PORT_BUILD=1 -include "$build/rename.h" "$here/cases.m" $objects \
     -framework Foundation -framework Metal -framework MetalPerformanceShaders -o "$build/port"
 "$build/port" > "$build/port.txt" 2> "$build/port.err" || true
 

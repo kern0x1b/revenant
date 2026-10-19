@@ -75,7 +75,7 @@ public struct LinearRegressorModel<Scalar: LinearScalar>: Regressor {
             outputName: "prediction",
             weights: weights.dropFirst().map { Float($0) },
             bias: Float(weights[0]),
-            author: metadata?.author ?? "charon CreateML",
+            author: metadata?.author ?? "revenant CreateML",
             version: metadata?.version ?? "1.0",
             description: metadata?.shortDescription
                 ?? "a linear model fitted by charmon CreateML")

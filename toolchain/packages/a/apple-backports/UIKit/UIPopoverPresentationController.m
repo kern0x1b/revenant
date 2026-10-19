@@ -5,7 +5,7 @@
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
 
 @interface UIPopoverPresentationController ()
-- (void)charon_setPresenting:(UIViewController *)presenting arrowDirection:(UIPopoverArrowDirection)direction;
+- (void)revenant_setPresenting:(UIViewController *)presenting arrowDirection:(UIPopoverArrowDirection)direction;
 @end
 
 @implementation UIPopoverPresentationController {
@@ -39,7 +39,7 @@
     return _presenting ?: [super presentingViewController];
 }
 
-- (void)charon_setPresenting:(UIViewController *)presenting arrowDirection:(UIPopoverArrowDirection)direction
+- (void)revenant_setPresenting:(UIViewController *)presenting arrowDirection:(UIPopoverArrowDirection)direction
 {
     _presenting = presenting;
     _arrowDirection = direction;

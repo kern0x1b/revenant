@@ -4,37 +4,37 @@
 #import <UIKit/UIKit.h>
 #import <objc/runtime.h>
 #import <objc/message.h>
-#import "CharonMapKit.h"
+#import "RevenantMapKit.h"
 
-@interface MKMapView (CharonRenderers)
-- (CLLocationDirection)charon_heading;
-- (CGFloat)charon_pitch;
-- (void)charon_setHeading:(CLLocationDirection)heading pitch:(CGFloat)pitch;
-- (MKOverlayRenderer *)charon_defaultRendererForOverlay:(id <MKOverlay>)overlay;
-- (NSArray *)charon_overlaysInLevel:(MKOverlayLevel)level;
-- (void)charon_placeOverlays:(NSArray *)overlays atLevel:(MKOverlayLevel)level;
+@interface MKMapView (RevenantRenderers)
+- (CLLocationDirection)revenant_heading;
+- (CGFloat)revenant_pitch;
+- (void)revenant_setHeading:(CLLocationDirection)heading pitch:(CGFloat)pitch;
+- (MKOverlayRenderer *)revenant_defaultRendererForOverlay:(id <MKOverlay>)overlay;
+- (NSArray *)revenant_overlaysInLevel:(MKOverlayLevel)level;
+- (void)revenant_placeOverlays:(NSArray *)overlays atLevel:(MKOverlayLevel)level;
 @end
 
-@interface CharonMapKitDelegate : NSObject
-@property (nonatomic, weak) id charon_program;
+@interface RevenantMapKitDelegate : NSObject
+@property (nonatomic, weak) id revenant_program;
 @end
 
-@implementation CharonMapKitDelegate
+@implementation RevenantMapKitDelegate
 
-@synthesize charon_program = _charon_program;
+@synthesize revenant_program = _revenant_program;
 
 - (instancetype)initWithProgram:(id)program
 {
     self = [super init];
     if (self) {
-        _charon_program = program;
+        _revenant_program = program;
     }
     return self;
 }
 
 - (id)forwardingTargetForSelector:(SEL)selector
 {
-    id program = self.charon_program;
+    id program = self.revenant_program;
     if ([program respondsToSelector:selector]) {
         return program;
     }
@@ -43,12 +43,12 @@
 
 - (BOOL)respondsToSelector:(SEL)selector
 {
-    return [self.charon_program respondsToSelector:selector] || [super respondsToSelector:selector];
+    return [self.revenant_program respondsToSelector:selector] || [super respondsToSelector:selector];
 }
 
 - (id)mapView:(MKMapView *)mapView viewForOverlay:(id <MKOverlay>)overlay
 {
-    id program = self.charon_program;
+    id program = self.revenant_program;
     if ([program respondsToSelector:@selector(mapView:rendererForOverlay:)]) {
         id (*renderer)(id, SEL, MKMapView *, id) = (id (*)(id, SEL, MKMapView *, id))objc_msgSend;
         id given = renderer(program, @selector(mapView:rendererForOverlay:), mapView, overlay);
@@ -56,12 +56,12 @@
             return given;
         }
     }
-    return [mapView charon_defaultRendererForOverlay:overlay];
+    return [mapView revenant_defaultRendererForOverlay:overlay];
 }
 
 - (id)mapView:(MKMapView *)mapView viewForAnnotation:(id <MKAnnotation>)annotation
 {
-    id program = self.charon_program;
+    id program = self.revenant_program;
     if ([program respondsToSelector:@selector(mapView:dequeueReusableAnnotationViewWithIdentifier:forAnnotation:)]) {
         return nil;
     }
@@ -70,9 +70,9 @@
 
 @end
 
-@implementation MKMapView (CharonRenderers)
+@implementation MKMapView (RevenantRenderers)
 
-- (MKOverlayRenderer *)charon_defaultRendererForOverlay:(id <MKOverlay>)overlay
+- (MKOverlayRenderer *)revenant_defaultRendererForOverlay:(id <MKOverlay>)overlay
 {
     if ([overlay isKindOfClass:[MKTileOverlay class]]) {
         return [[MKTileOverlayRenderer alloc] initWithTileOverlay:(MKTileOverlay *)overlay];
@@ -95,7 +95,7 @@
     return [[MKOverlayRenderer alloc] initWithOverlay:overlay];
 }
 
-- (NSArray *)charon_overlaysInLevel:(MKOverlayLevel)level
+- (NSArray *)revenant_overlaysInLevel:(MKOverlayLevel)level
 {
     NSMutableArray *found = [NSMutableArray array];
     for (id overlay in self.overlays) {
@@ -106,7 +106,7 @@
     return found;
 }
 
-- (void)charon_placeOverlays:(NSArray *)overlays atLevel:(MKOverlayLevel)level
+- (void)revenant_placeOverlays:(NSArray *)overlays atLevel:(MKOverlayLevel)level
 {
     (void)level;
     [self addOverlays:overlays];
@@ -114,28 +114,28 @@
 
 - (NSArray *)overlaysInLevel:(MKOverlayLevel)level
 {
-    return [self charon_overlaysInLevel:level];
+    return [self revenant_overlaysInLevel:level];
 }
 
 - (void)addOverlay:(id <MKOverlay>)overlay level:(MKOverlayLevel)level
 {
-    [self charon_placeOverlays:@[overlay] atLevel:level];
+    [self revenant_placeOverlays:@[overlay] atLevel:level];
 }
 
 - (void)addOverlays:(NSArray<id <MKOverlay>> *)overlays level:(MKOverlayLevel)level
 {
-    [self charon_placeOverlays:overlays atLevel:level];
+    [self revenant_placeOverlays:overlays atLevel:level];
 }
 
 - (void)insertOverlay:(id <MKOverlay>)overlay atIndex:(NSUInteger)index level:(MKOverlayLevel)level
 {
-    NSArray *current = [self charon_overlaysInLevel:level];
+    NSArray *current = [self revenant_overlaysInLevel:level];
     if (index > current.count) {
         index = current.count;
     }
     NSMutableArray *wanted = [current mutableCopy];
     [wanted insertObject:overlay atIndex:index];
-    [self charon_placeOverlays:wanted atLevel:level];
+    [self revenant_placeOverlays:wanted atLevel:level];
 }
 
 - (void)exchangeOverlay:(id <MKOverlay>)overlay withOverlay:(id <MKOverlay>)otherOverlay
@@ -163,7 +163,7 @@
             return given;
         }
     }
-    return [self charon_defaultRendererForOverlay:overlay];
+    return [self revenant_defaultRendererForOverlay:overlay];
 }
 
 - (void)setCamera:(MKMapCamera *)camera animated:(BOOL)animated
@@ -171,18 +171,18 @@
     if (!camera) {
         return;
     }
-    [self charon_setHeading:camera.heading pitch:camera.pitch];
+    [self revenant_setHeading:camera.heading pitch:camera.pitch];
     if (animated) {
         [UIView beginAnimations:nil context:nil];
     }
-    MKCoordinateRegion region = [self charon_regionForCamera:camera];
+    MKCoordinateRegion region = [self revenant_regionForCamera:camera];
     [self setRegion:region animated:NO];
     if (animated) {
         [UIView commitAnimations];
     }
 }
 
-- (MKCoordinateRegion)charon_regionForCamera:(MKMapCamera *)camera
+- (MKCoordinateRegion)revenant_regionForCamera:(MKMapCamera *)camera
 {
     CLLocationDistance distance = camera.centerCoordinateDistance > 0.0 ? camera.centerCoordinateDistance : 10000.0;
     double metresPerMapPoint = MKMetersPerMapPointAtLatitude(camera.centerCoordinate.latitude);
@@ -207,9 +207,9 @@
 {
     MKMapCamera *camera = [MKMapCamera camera];
     camera.centerCoordinate = self.centerCoordinate;
-    camera.heading = [self charon_heading];
-    camera.pitch = [self charon_pitch];
-    MKMapRect rect = [CharonMapKit charon_mapRectForRegion:self.region];
+    camera.heading = [self revenant_heading];
+    camera.pitch = [self revenant_pitch];
+    MKMapRect rect = [RevenantMapKit revenant_mapRectForRegion:self.region];
     double metresPerMapPoint = MKMetersPerMapPointAtLatitude(self.centerCoordinate.latitude);
     camera.centerCoordinateDistance = (CLLocationDistance)(rect.size.width * metresPerMapPoint);
     return camera;
@@ -228,7 +228,7 @@
 
 #pragma mark - The delegate bridge
 
-static id CharonReleaseDelegate(id self, SEL selector)
+static id RevenantReleaseDelegate(id self, SEL selector)
 {
     static IMP original;
     if (!original) {
@@ -237,7 +237,7 @@ static id CharonReleaseDelegate(id self, SEL selector)
     return ((id (*)(id, SEL))original)(self, selector);
 }
 
-static void CharonReleaseSetDelegate(id self, SEL selector, id delegate)
+static void RevenantReleaseSetDelegate(id self, SEL selector, id delegate)
 {
     static IMP original;
     if (!original) {
@@ -249,22 +249,22 @@ static void CharonReleaseSetDelegate(id self, SEL selector, id delegate)
 - (void)setDelegate:(id<MKMapViewDelegate>)delegate
 {
     if (!delegate) {
-        CharonReleaseSetDelegate(self, _cmd, nil);
+        RevenantReleaseSetDelegate(self, _cmd, nil);
         return;
     }
-    if ([delegate isKindOfClass:[CharonMapKitDelegate class]]) {
-        ((CharonMapKitDelegate *)delegate).charon_program = nil;
-        CharonReleaseSetDelegate(self, _cmd, delegate);
+    if ([delegate isKindOfClass:[RevenantMapKitDelegate class]]) {
+        ((RevenantMapKitDelegate *)delegate).revenant_program = nil;
+        RevenantReleaseSetDelegate(self, _cmd, delegate);
         return;
     }
-    CharonReleaseSetDelegate(self, _cmd, [[CharonMapKitDelegate alloc] initWithProgram:delegate]);
+    RevenantReleaseSetDelegate(self, _cmd, [[RevenantMapKitDelegate alloc] initWithProgram:delegate]);
 }
 
 - (id<MKMapViewDelegate>)delegate
 {
-    id delegate = CharonReleaseDelegate(self, _cmd);
-    if ([delegate isKindOfClass:[CharonMapKitDelegate class]]) {
-        return ((CharonMapKitDelegate *)delegate).charon_program;
+    id delegate = RevenantReleaseDelegate(self, _cmd);
+    if ([delegate isKindOfClass:[RevenantMapKitDelegate class]]) {
+        return ((RevenantMapKitDelegate *)delegate).revenant_program;
     }
     return delegate;
 }

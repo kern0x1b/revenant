@@ -13,7 +13,7 @@
 #include <mutex>
 #include <utility>
 
-namespace shade::bsd::offline_serial_device {
+namespace emulator::bsd::offline_serial_device {
 namespace {
 
     constexpr std::byte h4_command_packet { 0x01 };

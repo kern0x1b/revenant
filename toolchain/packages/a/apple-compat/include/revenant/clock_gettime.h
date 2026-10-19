@@ -1,5 +1,5 @@
-#ifndef CHARON_CLOCK_GETTIME_H
-#define CHARON_CLOCK_GETTIME_H
+#ifndef REVENANT_CLOCK_GETTIME_H
+#define REVENANT_CLOCK_GETTIME_H
 
 #include <time.h>
 
@@ -7,12 +7,12 @@
 extern "C" {
 #endif
 
-int charon_clock_gettime(clockid_t which, struct timespec *now);
+int revenant_clock_gettime(clockid_t which, struct timespec *now);
 
 #ifdef __cplusplus
 }
 #endif
 
-#define clock_gettime charon_clock_gettime
+#define clock_gettime revenant_clock_gettime
 
 #endif

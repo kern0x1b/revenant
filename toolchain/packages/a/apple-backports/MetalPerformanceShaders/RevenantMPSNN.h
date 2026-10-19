@@ -1,65 +1,65 @@
-#import "CharonMPS.h"
-#import "CharonMPSImage.h"
+#import "RevenantMPS.h"
+#import "RevenantMPSImage.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface MPSNNImageNode (CharonMPSNN)
-- (MPSImage *)charon_mps_image;
-- (void)charon_mps_setImage:(MPSImage *)image;
+@interface MPSNNImageNode (RevenantMPSNN)
+- (MPSImage *)revenant_mps_image;
+- (void)revenant_mps_setImage:(MPSImage *)image;
 @end
 
-@interface MPSNNStateNode (CharonMPSNN)
-- (MPSState *)charon_mps_state;
-- (void)charon_mps_setState:(MPSState *)state;
+@interface MPSNNStateNode (RevenantMPSNN)
+- (MPSState *)revenant_mps_state;
+- (void)revenant_mps_setState:(MPSState *)state;
 @end
 
-@interface MPSImage (CharonMPSNN)
-- (MPSImageDescriptor *)charon_mps_descriptor;
+@interface MPSImage (RevenantMPSNN)
+- (MPSImageDescriptor *)revenant_mps_descriptor;
 @end
 
-@interface MPSNNFilterNode (CharonMPSNN)
+@interface MPSNNFilterNode (RevenantMPSNN)
 - (instancetype)initWithDevice:(nullable id<MTLDevice>)device;
 
-- (NSArray<MPSNNImageNode *> *)charon_mps_sourceNodes;
-- (void)charon_mps_setSourceNodes:(NSArray<MPSNNImageNode *> *)nodes;
-- (void)charon_mps_addSourceNode:(MPSNNImageNode *)node;
-- (MPSKernel *)charon_mps_kernel;
-- (MPSImage *)charon_mps_sourceImageAtIndex:(NSUInteger)index;
-- (void)charon_mps_setSourceImages:(NSArray<MPSImage *> *)images;
-- (MPSImage *)charon_mps_destinationImage;
-- (void)charon_mps_setDestinationImage:(MPSImage *)image;
-- (MPSImageDescriptor *)charon_mps_destinationDescriptorForSource:(MPSImageDescriptor *)source;
-- (void)charon_mps_setDevice:(id<MTLDevice>)device;
-- (id<MTLDevice>)charon_mps_device;
-+ (NSMapTable *)charon_mps_producers;
-- (void)charon_mps_encodeToCommandBuffer:(id<MTLCommandBuffer>)commandBuffer;
+- (NSArray<MPSNNImageNode *> *)revenant_mps_sourceNodes;
+- (void)revenant_mps_setSourceNodes:(NSArray<MPSNNImageNode *> *)nodes;
+- (void)revenant_mps_addSourceNode:(MPSNNImageNode *)node;
+- (MPSKernel *)revenant_mps_kernel;
+- (MPSImage *)revenant_mps_sourceImageAtIndex:(NSUInteger)index;
+- (void)revenant_mps_setSourceImages:(NSArray<MPSImage *> *)images;
+- (MPSImage *)revenant_mps_destinationImage;
+- (void)revenant_mps_setDestinationImage:(MPSImage *)image;
+- (MPSImageDescriptor *)revenant_mps_destinationDescriptorForSource:(MPSImageDescriptor *)source;
+- (void)revenant_mps_setDevice:(id<MTLDevice>)device;
+- (id<MTLDevice>)revenant_mps_device;
++ (NSMapTable *)revenant_mps_producers;
+- (void)revenant_mps_encodeToCommandBuffer:(id<MTLCommandBuffer>)commandBuffer;
 @end
 
-@interface MPSNNBinaryArithmeticNode (CharonMPSNN)
-+ (Class)charon_mps_kernelClass;
+@interface MPSNNBinaryArithmeticNode (RevenantMPSNN)
++ (Class)revenant_mps_kernelClass;
 @end
 
-@interface MPSCNNPoolingNode (CharonMPSNN)
-+ (Class)charon_mps_kernelClass;
+@interface MPSCNNPoolingNode (RevenantMPSNN)
++ (Class)revenant_mps_kernelClass;
 @end
 
-static inline long CharonMPSNNDestSize(long sourceSize, long stride, long filterWindowSize, MPSNNPaddingMethod method)
+static inline long RevenantMPSNNDestSize(long sourceSize, long stride, long filterWindowSize, MPSNNPaddingMethod method)
 {
     long style = (long)((method >> 4) & 0x3) - 1;
     long size = sourceSize + style * (filterWindowSize - 1);
     return (size + stride - 1) / stride;
 }
 
-static inline long CharonMPSNNReadSize(long destinationSize, long stride, long filterWindowSize)
+static inline long RevenantMPSNNReadSize(long destinationSize, long stride, long filterWindowSize)
 {
     return (destinationSize - 1) * stride + filterWindowSize;
 }
 
-static inline long CharonMPSNNOffset(long sourceSize, long stride, long filterWindowSize, MPSNNPaddingMethod method)
+static inline long RevenantMPSNNOffset(long sourceSize, long stride, long filterWindowSize, MPSNNPaddingMethod method)
 {
     long correction = filterWindowSize / 2;
-    long destinationSize = CharonMPSNNDestSize(sourceSize, stride, filterWindowSize, method);
-    long readSize = CharonMPSNNReadSize(destinationSize, stride, filterWindowSize);
+    long destinationSize = RevenantMPSNNDestSize(sourceSize, stride, filterWindowSize, method);
+    long readSize = RevenantMPSNNReadSize(destinationSize, stride, filterWindowSize);
     long extraSize = readSize - sourceSize;
     long leftExtraPixels = (extraSize + 0) / 2;
     return correction - leftExtraPixels;

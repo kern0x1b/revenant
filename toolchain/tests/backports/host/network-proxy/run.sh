@@ -1,19 +1,19 @@
 #!/bin/sh
 # The host differential for the objects of Network: the port's own files compiled with every nw_*
-# symbol they define renamed to charonhost_nw_*, linked into one program with differential.m, which
+# symbol they define renamed to revenanthost_nw_*, linked into one program with differential.m, which
 # asks the same questions of the port's implementation and of the host's own Network.framework and
 # compares the answers.
 #
 # The rename set is read out of the sources rather than written down, so a call the port adds is
 # renamed with it and one the port stops defining drops out of it: a name the program declares but no
-# file defines would be an undefined symbol, and the build here would say so. The Charon classes are
+# file defines would be an undefined symbol, and the build here would say so. The Revenant classes are
 # renamed the same way, so the port's objects are not the host's.
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 BACKPORTS=${BACKPORTS:-$here/../../../../packages/a/apple-backports}
 harness=${NETWORK_HARNESS:-$here/../../device}
-build=${NETWORK_BUILD:-$(runs_folder charon-network-proxy)}
+build=${NETWORK_BUILD:-$(runs_folder revenant-network-proxy)}
 # The port's path monitor lives in the Foundation library, so the objects under test are this
 # library's files and the two of the path monitor's - the same sources the real build compiles into
 # the two libraries.
@@ -27,17 +27,17 @@ mkdir -p "$build/plain"
 for source in $sources; do
     xcrun clang -fobjc-arc -w -c "$source" -o "$build/plain/$(basename "$source" .m).o"
 done
-xcrun clang -fobjc-arc -w -c "$BACKPORTS/Network/CharonNWSupport.c" -o "$build/plain/CharonNWSupport.o"
+xcrun clang -fobjc-arc -w -c "$BACKPORTS/Network/RevenantNWSupport.c" -o "$build/plain/RevenantNWSupport.o"
 # the path monitor's own files, with the Foundation library's own umbrella header in reach
 xcrun clang -fobjc-arc -w -I"$BACKPORTS/Foundation" -c "$BACKPORTS/Foundation/NWPathMonitor.m" -o "$build/plain/NWPathMonitor.o"
 xcrun clang -fobjc-arc -w -I"$BACKPORTS/Foundation" -c "$BACKPORTS/Foundation/NWPathMonitor14.m" -o "$build/plain/NWPathMonitor14.o"
 
 renames=""
 for name in $(nm -gU "$build/plain"/*.o | awk '$2=="T"||$2=="D"||$2=="S"{print $3}' | sed 's/^_//' | grep -E '^_?nw_' | sort -u); do
-    renames="$renames -D$name=charonhost_$name"
+    renames="$renames -D$name=revenanthost_$name"
 done
-for class in $(nm -gU "$build/plain"/*.o | awk '$2=="S"||$2=="D"{print $3}' | sed -n -e 's/^_OBJC_CLASS_\$_//p' -e 's/^_OBJC_METACLASS_\$_//p' | grep -E '^Charon' | sort -u); do
-    renames="$renames -D$class=CharonHost$class"
+for class in $(nm -gU "$build/plain"/*.o | awk '$2=="S"||$2=="D"{print $3}' | sed -n -e 's/^_OBJC_CLASS_\$_//p' -e 's/^_OBJC_METACLASS_\$_//p' | grep -E '^Revenant' | sort -u); do
+    renames="$renames -D$class=RevenantHost$class"
 done
 rm -rf "$build/plain"
 echo "renamed $(echo "$renames" | wc -w | tr -d ' ') names"
@@ -48,7 +48,7 @@ for source in $sources; do
     xcrun clang -fobjc-arc -w $renames -I"$BACKPORTS/Foundation" -c "$source" -o "$object"
 done
 # shellcheck disable=SC2086
-xcrun clang -fobjc-arc -fvisibility=hidden -w $renames -c "$BACKPORTS/Network/CharonNWSupport.c" -o "$build/CharonNWSupport.o"
+xcrun clang -fobjc-arc -fvisibility=hidden -w $renames -c "$BACKPORTS/Network/RevenantNWSupport.c" -o "$build/RevenantNWSupport.o"
 # The library's TLS calls SSLContextCreate, the name the 6.1.3 cache exports; the host's framework has
 # own file links against the host's framework unaltered.
 

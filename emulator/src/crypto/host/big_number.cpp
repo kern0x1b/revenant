@@ -11,7 +11,7 @@
 #include <memory>
 #include <openssl/bn.h>
 
-namespace shade {
+namespace emulator {
 
 bool BigNumberArithmetic::greatest_common_divisor(
     std::span<const std::byte> first, std::span<const std::byte> second,

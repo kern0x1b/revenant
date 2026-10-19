@@ -26,7 +26,7 @@
 #include "foundation/arm_cpu_model.hpp"
 #include "foundation/content_identity.hpp"
 
-namespace shade {
+namespace emulator {
 
 class AddressSpace;
 class Cpu;

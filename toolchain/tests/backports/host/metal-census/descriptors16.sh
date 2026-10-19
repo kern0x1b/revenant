@@ -56,14 +56,14 @@ class_list="MTLAccelerationStructurePassDescriptor MTLAccelerationStructurePassS
 
 prove_defined() {   # $1 nm output
     for name in $class_list; do
-        symbol="${prefix}charonHost_${name}"
+        symbol="${prefix}revenantHost_${name}"
         defined=$(printf '%s\n' "$1" | awk -v s="$symbol" 'index($0, s){n++} END{print n+0}')
         if [ "$defined" -eq 0 ]; then
             echo "MISSING $symbol - the case would measure the HOST's Metal, not the port's" >&2
             return 1
         fi
     done
-    count=$(printf '%s\n' "$1" | awk -v p="$prefix" 'index($0, p "charonHost_MTL"){n++} END{print n+0}')
+    count=$(printf '%s\n' "$1" | awk -v p="$prefix" 'index($0, p "revenantHost_MTL"){n++} END{print n+0}')
     expected=0
     for symbol in $class_list; do expected=$((expected + 1)); done
     if [ "$count" -ne "$expected" ]; then
@@ -80,7 +80,7 @@ if [ -n "${SELF_TEST:-}" ]; then
     fake="$selfdir/symbols"
     for name in $class_list; do
         if [ "$name" = "MTLIOCommandQueueDescriptor" ]; then continue; fi   # the one that is missing
-        printf '%s S %s%s%s\n' "0000000000000100" "$prefix" "charonHost_" "$name" >> "$fake"
+        printf '%s S %s%s%s\n' "0000000000000100" "$prefix" "revenantHost_" "$name" >> "$fake"
     done
     if prove_defined "$(cat "$fake")"; then
         echo "FAIL: the self-test passed with a class missing from the symbol table" >&2
@@ -88,7 +88,7 @@ if [ -n "${SELF_TEST:-}" ]; then
     fi
     echo "  ok   the self-test's NEGATIVE: the class that is not defined is named"
     : > "$fake"
-    for name in $class_list; do printf '%s S %s%s%s\n' "0000000000000100" "$prefix" "charonHost_" "$name" >> "$fake"; done
+    for name in $class_list; do printf '%s S %s%s%s\n' "0000000000000100" "$prefix" "revenantHost_" "$name" >> "$fake"; done
     if ! prove_defined "$(cat "$fake")"; then
         echo "FAIL: the self-test's full list was refused, so prove_defined is not usable" >&2
         rm -rf "$selfdir"; exit 1
@@ -159,7 +159,7 @@ expect_red() {   # $1 label, $2 output name
 
 # THE GATE'S OWN CHECK, in the harness that proves the rows: the 6.1.3 gate refused the 14.0 series once
 # because the registry listed its twenty classes as implemented while NOTHING defined those names - the
-# port called them CharonMetal<Name>. So the DEVICE object, where the names are NOT renamed, must define
+# port called them RevenantMetal<Name>. So the DEVICE object, where the names are NOT renamed, must define
 # all four under Apple's own names, and that is checked here rather than left to a gate.
 prove_named_on_device() {
     missing=""
@@ -196,7 +196,7 @@ if [ -n "$SDK16" ]; then
 fi
 
 renames=""
-for name in $class_list; do renames="$renames -D$name=charonHost_$name"; done
+for name in $class_list; do renames="$renames -D$name=revenantHost_$name"; done
 
 build real "$here/descriptors16.m" "$SRC"
 prove_defined "$(nm -g "$work/real" 2>/dev/null)" || exit 1

@@ -1,18 +1,18 @@
-#import "CharonCompositionalLayout.h"
+#import "RevenantCompositionalLayout.h"
 
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
 
-static BOOL charon_same(id a, id b)
+static BOOL revenant_same(id a, id b)
 {
     return a == b || (a && b && [a isEqual:b]);
 }
 
-static NSString *charon_insets_text(NSDirectionalEdgeInsets insets)
+static NSString *revenant_insets_text(NSDirectionalEdgeInsets insets)
 {
     return [NSString stringWithFormat:@"{%g,%g,%g,%g}", (double)insets.top, (double)insets.leading, (double)insets.bottom, (double)insets.trailing];
 }
 
-static NSCollectionLayoutEdgeSpacing *charon_zero_edge_spacing(void)
+static NSCollectionLayoutEdgeSpacing *revenant_zero_edge_spacing(void)
 {
     NSCollectionLayoutSpacing *(^zero)(void) = ^NSCollectionLayoutSpacing *(void) { return [NSCollectionLayoutSpacing fixedSpacing:0]; };
     return [NSCollectionLayoutEdgeSpacing spacingForLeading:zero() top:zero() trailing:zero() bottom:zero()];
@@ -27,11 +27,11 @@ static NSCollectionLayoutEdgeSpacing *charon_zero_edge_spacing(void)
     NSString *_identifier;
 }
 
-- (instancetype)initCharonWithSize:(NSCollectionLayoutSize *)size supplementaryItems:(NSArray *)supplementaryItems
+- (instancetype)initRevenantWithSize:(NSCollectionLayoutSize *)size supplementaryItems:(NSArray *)supplementaryItems
 {
     if ((self = [super init])) {
         _layoutSize = size;
-        _edgeSpacing = charon_zero_edge_spacing();
+        _edgeSpacing = revenant_zero_edge_spacing();
         _supplementaryItems = supplementaryItems ? [supplementaryItems copy] : @[];
         _identifier = [[NSUUID UUID] UUIDString];
     }
@@ -40,12 +40,12 @@ static NSCollectionLayoutEdgeSpacing *charon_zero_edge_spacing(void)
 
 + (instancetype)itemWithLayoutSize:(NSCollectionLayoutSize *)layoutSize
 {
-    return [[self alloc] initCharonWithSize:layoutSize supplementaryItems:nil];
+    return [[self alloc] initRevenantWithSize:layoutSize supplementaryItems:nil];
 }
 
 + (instancetype)itemWithLayoutSize:(NSCollectionLayoutSize *)layoutSize supplementaryItems:(NSArray<NSCollectionLayoutSupplementaryItem *> *)supplementaryItems
 {
-    return [[self alloc] initCharonWithSize:layoutSize supplementaryItems:supplementaryItems];
+    return [[self alloc] initRevenantWithSize:layoutSize supplementaryItems:supplementaryItems];
 }
 
 - (NSDirectionalEdgeInsets)contentInsets
@@ -78,12 +78,12 @@ static NSCollectionLayoutEdgeSpacing *charon_zero_edge_spacing(void)
     return _supplementaryItems;
 }
 
-- (void)charon_setSupplementaryItems:(NSArray *)items
+- (void)revenant_setSupplementaryItems:(NSArray *)items
 {
     _supplementaryItems = [items copy];
 }
 
-- (instancetype)charon_copyWithSize:(NSCollectionLayoutSize *)size
+- (instancetype)revenant_copyWithSize:(NSCollectionLayoutSize *)size
 {
     NSCollectionLayoutItem *copy = [self copy];
     copy->_layoutSize = size;
@@ -108,8 +108,8 @@ static NSCollectionLayoutEdgeSpacing *charon_zero_edge_spacing(void)
     if (!object || [object class] != [self class])
         return NO;
     NSCollectionLayoutItem *other = object;
-    return charon_same(other->_layoutSize, _layoutSize) && NSDirectionalEdgeInsetsEqualToDirectionalEdgeInsets(other->_contentInsets, _contentInsets)
-        && charon_same(other->_edgeSpacing, _edgeSpacing) && charon_same(other->_supplementaryItems, _supplementaryItems);
+    return revenant_same(other->_layoutSize, _layoutSize) && NSDirectionalEdgeInsetsEqualToDirectionalEdgeInsets(other->_contentInsets, _contentInsets)
+        && revenant_same(other->_edgeSpacing, _edgeSpacing) && revenant_same(other->_supplementaryItems, _supplementaryItems);
 }
 
 - (NSUInteger)hash
@@ -117,15 +117,15 @@ static NSCollectionLayoutEdgeSpacing *charon_zero_edge_spacing(void)
     return [_layoutSize hash] * 31 ^ [_edgeSpacing hash] ^ (NSUInteger)(_contentInsets.top + _contentInsets.leading * 3 + _contentInsets.bottom * 5 + _contentInsets.trailing * 7);
 }
 
-- (NSString *)charon_bodyDescription
+- (NSString *)revenant_bodyDescription
 {
     return [NSString stringWithFormat:@"<%@ %p; name=(null); size=%@;\n\t edgeSpacing=%@;\n\t identfier=%@;\n\t contentInsets=%@>", [self class], self, _layoutSize ?: (id)@"(null)",
-                                      _edgeSpacing ?: (id)@"(null)", _identifier ?: @"(null)", charon_insets_text(_contentInsets)];
+                                      _edgeSpacing ?: (id)@"(null)", _identifier ?: @"(null)", revenant_insets_text(_contentInsets)];
 }
 
 - (NSString *)description
 {
-    return [self charon_bodyDescription];
+    return [self revenant_bodyDescription];
 }
 
 @end
@@ -138,10 +138,10 @@ static NSCollectionLayoutEdgeSpacing *charon_zero_edge_spacing(void)
     NSCollectionLayoutAnchor *_itemAnchor;
 }
 
-- (instancetype)initCharonWithSize:(NSCollectionLayoutSize *)size elementKind:(NSString *)elementKind containerAnchor:(NSCollectionLayoutAnchor *)containerAnchor
+- (instancetype)initRevenantWithSize:(NSCollectionLayoutSize *)size elementKind:(NSString *)elementKind containerAnchor:(NSCollectionLayoutAnchor *)containerAnchor
                         itemAnchor:(NSCollectionLayoutAnchor *)itemAnchor
 {
-    if ((self = [self initCharonWithSize:size supplementaryItems:nil])) {
+    if ((self = [self initRevenantWithSize:size supplementaryItems:nil])) {
         _zIndex = 1;
         _elementKind = [elementKind copy];
         _containerAnchor = containerAnchor;
@@ -152,13 +152,13 @@ static NSCollectionLayoutEdgeSpacing *charon_zero_edge_spacing(void)
 
 + (instancetype)supplementaryItemWithLayoutSize:(NSCollectionLayoutSize *)layoutSize elementKind:(NSString *)elementKind containerAnchor:(NSCollectionLayoutAnchor *)containerAnchor
 {
-    return [[self alloc] initCharonWithSize:layoutSize elementKind:elementKind containerAnchor:containerAnchor itemAnchor:nil];
+    return [[self alloc] initRevenantWithSize:layoutSize elementKind:elementKind containerAnchor:containerAnchor itemAnchor:nil];
 }
 
 + (instancetype)supplementaryItemWithLayoutSize:(NSCollectionLayoutSize *)layoutSize elementKind:(NSString *)elementKind containerAnchor:(NSCollectionLayoutAnchor *)containerAnchor
                                      itemAnchor:(NSCollectionLayoutAnchor *)itemAnchor
 {
-    return [[self alloc] initCharonWithSize:layoutSize elementKind:elementKind containerAnchor:containerAnchor itemAnchor:itemAnchor];
+    return [[self alloc] initRevenantWithSize:layoutSize elementKind:elementKind containerAnchor:containerAnchor itemAnchor:itemAnchor];
 }
 
 - (NSInteger)zIndex
@@ -203,7 +203,7 @@ static NSCollectionLayoutEdgeSpacing *charon_zero_edge_spacing(void)
     if (object == self)
         return YES;
     NSCollectionLayoutSupplementaryItem *other = object;
-    return other->_zIndex == _zIndex && charon_same(other->_elementKind, _elementKind) && charon_same(other->_containerAnchor, _containerAnchor) && charon_same(other->_itemAnchor, _itemAnchor);
+    return other->_zIndex == _zIndex && revenant_same(other->_elementKind, _elementKind) && revenant_same(other->_containerAnchor, _containerAnchor) && revenant_same(other->_itemAnchor, _itemAnchor);
 }
 
 - (NSUInteger)hash
@@ -221,9 +221,9 @@ static NSCollectionLayoutEdgeSpacing *charon_zero_edge_spacing(void)
     CGPoint _offset;
 }
 
-- (instancetype)initCharonWithSize:(NSCollectionLayoutSize *)size elementKind:(NSString *)elementKind alignment:(NSRectAlignment)alignment offset:(CGPoint)offset
+- (instancetype)initRevenantWithSize:(NSCollectionLayoutSize *)size elementKind:(NSString *)elementKind alignment:(NSRectAlignment)alignment offset:(CGPoint)offset
 {
-    if ((self = [super initCharonWithSize:size elementKind:elementKind containerAnchor:nil itemAnchor:nil])) {
+    if ((self = [super initRevenantWithSize:size elementKind:elementKind containerAnchor:nil itemAnchor:nil])) {
         _extendsBoundary = YES;
         _alignment = alignment;
         _offset = offset;
@@ -233,13 +233,13 @@ static NSCollectionLayoutEdgeSpacing *charon_zero_edge_spacing(void)
 
 + (instancetype)boundarySupplementaryItemWithLayoutSize:(NSCollectionLayoutSize *)layoutSize elementKind:(NSString *)elementKind alignment:(NSRectAlignment)alignment
 {
-    return [[self alloc] initCharonWithSize:layoutSize elementKind:elementKind alignment:alignment offset:CGPointZero];
+    return [[self alloc] initRevenantWithSize:layoutSize elementKind:elementKind alignment:alignment offset:CGPointZero];
 }
 
 + (instancetype)boundarySupplementaryItemWithLayoutSize:(NSCollectionLayoutSize *)layoutSize elementKind:(NSString *)elementKind alignment:(NSRectAlignment)alignment
                                          absoluteOffset:(CGPoint)absoluteOffset
 {
-    return [[self alloc] initCharonWithSize:layoutSize elementKind:elementKind alignment:alignment offset:absoluteOffset];
+    return [[self alloc] initRevenantWithSize:layoutSize elementKind:elementKind alignment:alignment offset:absoluteOffset];
 }
 
 - (BOOL)extendsBoundary
@@ -300,12 +300,12 @@ static NSCollectionLayoutEdgeSpacing *charon_zero_edge_spacing(void)
     NSString *_elementKind;
 }
 
-- (instancetype)initCharonWithElementKind:(NSString *)elementKind
+- (instancetype)initRevenantWithElementKind:(NSString *)elementKind
 {
     NSCollectionLayoutDimension *(^whole)(BOOL) = ^NSCollectionLayoutDimension *(BOOL width) {
         return width ? [NSCollectionLayoutDimension fractionalWidthDimension:1] : [NSCollectionLayoutDimension fractionalHeightDimension:1];
     };
-    if ((self = [self initCharonWithSize:[NSCollectionLayoutSize sizeWithWidthDimension:whole(YES) heightDimension:whole(NO)] supplementaryItems:nil])) {
+    if ((self = [self initRevenantWithSize:[NSCollectionLayoutSize sizeWithWidthDimension:whole(YES) heightDimension:whole(NO)] supplementaryItems:nil])) {
         self.edgeSpacing = nil;
         _elementKind = [elementKind copy];
     }
@@ -314,7 +314,7 @@ static NSCollectionLayoutEdgeSpacing *charon_zero_edge_spacing(void)
 
 + (instancetype)backgroundDecorationItemWithElementKind:(NSString *)elementKind
 {
-    return [[self alloc] initCharonWithElementKind:elementKind];
+    return [[self alloc] initRevenantWithElementKind:elementKind];
 }
 
 - (NSInteger)zIndex
@@ -347,24 +347,24 @@ static NSCollectionLayoutEdgeSpacing *charon_zero_edge_spacing(void)
     if (object == self)
         return YES;
     NSCollectionLayoutDecorationItem *other = object;
-    return other->_zIndex == _zIndex && charon_same(other->_elementKind, _elementKind);
+    return other->_zIndex == _zIndex && revenant_same(other->_elementKind, _elementKind);
 }
 
 @end
 
 @implementation NSCollectionLayoutGroup {
 @private
-    CharonGroupDirection _direction;
+    RevenantGroupDirection _direction;
     NSArray *_subitems;
     NSCollectionLayoutSpacing *_interItemSpacing;
     NSInteger _repeatCount;
     NSCollectionLayoutGroupCustomItemProvider _provider;
 }
 
-- (instancetype)initCharonWithSize:(NSCollectionLayoutSize *)size direction:(CharonGroupDirection)direction subitems:(NSArray *)subitems count:(NSInteger)count
+- (instancetype)initRevenantWithSize:(NSCollectionLayoutSize *)size direction:(RevenantGroupDirection)direction subitems:(NSArray *)subitems count:(NSInteger)count
                           provider:(NSCollectionLayoutGroupCustomItemProvider)provider
 {
-    if ((self = [super initCharonWithSize:size supplementaryItems:nil])) {
+    if ((self = [super initRevenantWithSize:size supplementaryItems:nil])) {
         _direction = direction;
         _subitems = subitems ? [[NSArray alloc] initWithArray:subitems copyItems:YES] : @[];
         _interItemSpacing = [NSCollectionLayoutSpacing fixedSpacing:0];
@@ -374,18 +374,18 @@ static NSCollectionLayoutEdgeSpacing *charon_zero_edge_spacing(void)
     return self;
 }
 
-+ (instancetype)groupWithSize:(NSCollectionLayoutSize *)size direction:(CharonGroupDirection)direction subitems:(NSArray *)subitems
++ (instancetype)groupWithSize:(NSCollectionLayoutSize *)size direction:(RevenantGroupDirection)direction subitems:(NSArray *)subitems
 {
     if (!size)
         [NSException raise:NSInternalInconsistencyException format:@"A size is required."];
     if (subitems.count == 0)
         [NSException raise:NSInternalInconsistencyException format:@"At least 1 subitem is required for a group"];
-    return [[self alloc] initCharonWithSize:size direction:direction subitems:subitems count:0 provider:nil];
+    return [[self alloc] initRevenantWithSize:size direction:direction subitems:subitems count:0 provider:nil];
 }
 
-+ (instancetype)repeatingGroupWithSize:(NSCollectionLayoutSize *)size direction:(CharonGroupDirection)direction subitem:(NSCollectionLayoutItem *)subitem count:(NSInteger)count
++ (instancetype)repeatingGroupWithSize:(NSCollectionLayoutSize *)size direction:(RevenantGroupDirection)direction subitem:(NSCollectionLayoutItem *)subitem count:(NSInteger)count
 {
-    BOOL horizontal = direction == CharonGroupDirectionHorizontal;
+    BOOL horizontal = direction == RevenantGroupDirectionHorizontal;
     if (!size)
         [NSException raise:NSInternalInconsistencyException format:@"A size is required."];
     if (count < 1)
@@ -395,28 +395,28 @@ static NSCollectionLayoutEdgeSpacing *charon_zero_edge_spacing(void)
     NSCollectionLayoutDimension *share = horizontal ? [NSCollectionLayoutDimension fractionalWidthDimension:1.0 / count] : [NSCollectionLayoutDimension fractionalHeightDimension:1.0 / count];
     NSCollectionLayoutSize *resized = horizontal ? [NSCollectionLayoutSize sizeWithWidthDimension:share heightDimension:itemSize.heightDimension]
                                                  : [NSCollectionLayoutSize sizeWithWidthDimension:itemSize.widthDimension heightDimension:share];
-    NSCollectionLayoutItem *only = [held.firstObject charon_copyWithSize:resized];
-    return [[self alloc] initCharonWithSize:size direction:direction subitems:@[only] count:count provider:nil];
+    NSCollectionLayoutItem *only = [held.firstObject revenant_copyWithSize:resized];
+    return [[self alloc] initRevenantWithSize:size direction:direction subitems:@[only] count:count provider:nil];
 }
 
 + (instancetype)horizontalGroupWithLayoutSize:(NSCollectionLayoutSize *)layoutSize subitems:(NSArray<NSCollectionLayoutItem *> *)subitems
 {
-    return [self groupWithSize:layoutSize direction:CharonGroupDirectionHorizontal subitems:subitems];
+    return [self groupWithSize:layoutSize direction:RevenantGroupDirectionHorizontal subitems:subitems];
 }
 
 + (instancetype)verticalGroupWithLayoutSize:(NSCollectionLayoutSize *)layoutSize subitems:(NSArray<NSCollectionLayoutItem *> *)subitems
 {
-    return [self groupWithSize:layoutSize direction:CharonGroupDirectionVertical subitems:subitems];
+    return [self groupWithSize:layoutSize direction:RevenantGroupDirectionVertical subitems:subitems];
 }
 
 + (instancetype)horizontalGroupWithLayoutSize:(NSCollectionLayoutSize *)layoutSize subitem:(NSCollectionLayoutItem *)subitem count:(NSInteger)count
 {
-    return [self repeatingGroupWithSize:layoutSize direction:CharonGroupDirectionHorizontal subitem:subitem count:count];
+    return [self repeatingGroupWithSize:layoutSize direction:RevenantGroupDirectionHorizontal subitem:subitem count:count];
 }
 
 + (instancetype)verticalGroupWithLayoutSize:(NSCollectionLayoutSize *)layoutSize subitem:(NSCollectionLayoutItem *)subitem count:(NSInteger)count
 {
-    return [self repeatingGroupWithSize:layoutSize direction:CharonGroupDirectionVertical subitem:subitem count:count];
+    return [self repeatingGroupWithSize:layoutSize direction:RevenantGroupDirectionVertical subitem:subitem count:count];
 }
 
 + (instancetype)customGroupWithLayoutSize:(NSCollectionLayoutSize *)layoutSize itemProvider:(NSCollectionLayoutGroupCustomItemProvider)itemProvider
@@ -425,7 +425,7 @@ static NSCollectionLayoutEdgeSpacing *charon_zero_edge_spacing(void)
         [NSException raise:NSInternalInconsistencyException format:@"A size is required."];
     if (!itemProvider)
         [NSException raise:NSInternalInconsistencyException format:@"At least 1 subitem is required for a group"];
-    return [[self alloc] initCharonWithSize:layoutSize direction:CharonGroupDirectionCustom subitems:nil count:0 provider:itemProvider];
+    return [[self alloc] initRevenantWithSize:layoutSize direction:RevenantGroupDirectionCustom subitems:nil count:0 provider:itemProvider];
 }
 
 - (NSArray<NSCollectionLayoutSupplementaryItem *> *)supplementaryItems
@@ -435,7 +435,7 @@ static NSCollectionLayoutEdgeSpacing *charon_zero_edge_spacing(void)
 
 - (void)setSupplementaryItems:(NSArray<NSCollectionLayoutSupplementaryItem *> *)supplementaryItems
 {
-    [self charon_setSupplementaryItems:supplementaryItems];
+    [self revenant_setSupplementaryItems:supplementaryItems];
 }
 
 - (NSCollectionLayoutSpacing *)interItemSpacing
@@ -453,17 +453,17 @@ static NSCollectionLayoutEdgeSpacing *charon_zero_edge_spacing(void)
     return _subitems;
 }
 
-- (CharonGroupDirection)charon_direction
+- (RevenantGroupDirection)revenant_direction
 {
     return _direction;
 }
 
-- (NSInteger)charon_repeatCount
+- (NSInteger)revenant_repeatCount
 {
     return _repeatCount;
 }
 
-- (NSCollectionLayoutGroupCustomItemProvider)charon_itemProvider
+- (NSCollectionLayoutGroupCustomItemProvider)revenant_itemProvider
 {
     return _provider;
 }
@@ -486,7 +486,7 @@ static NSCollectionLayoutEdgeSpacing *charon_zero_edge_spacing(void)
     if (object == self)
         return YES;
     NSCollectionLayoutGroup *other = object;
-    return other->_direction == _direction && [other->_subitems isEqual:_subitems] && charon_same(other->_interItemSpacing, _interItemSpacing) && other->_repeatCount == _repeatCount;
+    return other->_direction == _direction && [other->_subitems isEqual:_subitems] && revenant_same(other->_interItemSpacing, _interItemSpacing) && other->_repeatCount == _repeatCount;
 }
 
 - (NSUInteger)hash
@@ -496,17 +496,17 @@ static NSCollectionLayoutEdgeSpacing *charon_zero_edge_spacing(void)
 
 - (NSString *)description
 {
-    NSMutableString *text = [NSMutableString stringWithString:[self charon_bodyDescription]];
+    NSMutableString *text = [NSMutableString stringWithString:[self revenant_bodyDescription]];
     [text appendString:@"\n\t group: subitems="];
     for (NSCollectionLayoutItem *subitem in _subitems)
         [text appendFormat:@"\n\t\t %@", [[subitem description] stringByReplacingOccurrencesOfString:@"\n" withString:@"\n\t"]];
-    [text appendFormat:@"\n\t interItemSpacing=%@;\n\t layoutDirection=.%@>", _interItemSpacing ?: (id)@"(null)", _direction == CharonGroupDirectionHorizontal ? @"horizontal" : @"vertical"];
+    [text appendFormat:@"\n\t interItemSpacing=%@;\n\t layoutDirection=.%@>", _interItemSpacing ?: (id)@"(null)", _direction == RevenantGroupDirectionHorizontal ? @"horizontal" : @"vertical"];
     return text;
 }
 
 @end
 
-static NSString *charon_orthogonal_text(NSInteger behavior)
+static NSString *revenant_orthogonal_text(NSInteger behavior)
 {
     switch (behavior) {
     case 0:
@@ -553,22 +553,22 @@ static NSString *charon_orthogonal_text(NSInteger behavior)
     return section;
 }
 
-- (NSCollectionLayoutGroup *)charon_group
+- (NSCollectionLayoutGroup *)revenant_group
 {
     return _group;
 }
 
-- (NSInteger)charon_contentInsetsReference
+- (NSInteger)revenant_contentInsetsReference
 {
     return _contentInsetsReference;
 }
 
-- (void)charon_setContentInsetsReference:(NSInteger)reference
+- (void)revenant_setContentInsetsReference:(NSInteger)reference
 {
     _contentInsetsReference = reference;
 }
 
-- (NSInteger)charon_supplementaryContentInsetsReference
+- (NSInteger)revenant_supplementaryContentInsetsReference
 {
     return _supplementaryContentInsetsReference;
 }
@@ -679,9 +679,9 @@ static NSString *charon_orthogonal_text(NSInteger behavior)
     if (!object || [object class] != [self class])
         return NO;
     NSCollectionLayoutSection *other = object;
-    return charon_same(other->_group, _group) && NSDirectionalEdgeInsetsEqualToDirectionalEdgeInsets(other->_contentInsets, _contentInsets) && other->_interGroupSpacing == _interGroupSpacing
-        && other->_orthogonalScrollingBehavior == _orthogonalScrollingBehavior && charon_same(other->_boundarySupplementaryItems, _boundarySupplementaryItems)
-        && charon_same(other->_decorationItems, _decorationItems) && other->_supplementariesFollowContentInsets == _supplementariesFollowContentInsets
+    return revenant_same(other->_group, _group) && NSDirectionalEdgeInsetsEqualToDirectionalEdgeInsets(other->_contentInsets, _contentInsets) && other->_interGroupSpacing == _interGroupSpacing
+        && other->_orthogonalScrollingBehavior == _orthogonalScrollingBehavior && revenant_same(other->_boundarySupplementaryItems, _boundarySupplementaryItems)
+        && revenant_same(other->_decorationItems, _decorationItems) && other->_supplementariesFollowContentInsets == _supplementariesFollowContentInsets
         && other->_supplementaryContentInsetsReference == _supplementaryContentInsetsReference;
 }
 
@@ -700,7 +700,7 @@ static NSString *charon_orthogonal_text(NSInteger behavior)
     if (_interGroupSpacing != 0)
         [text appendFormat:@"; interGroupSpacing = %g", (double)_interGroupSpacing];
     if (_orthogonalScrollingBehavior != 0)
-        [text appendFormat:@"; orthogonalScrollingBehavior = %@", charon_orthogonal_text(_orthogonalScrollingBehavior)];
+        [text appendFormat:@"; orthogonalScrollingBehavior = %@", revenant_orthogonal_text(_orthogonalScrollingBehavior)];
     if (_boundarySupplementaryItems.count > 0)
         [text appendFormat:@"; boundarySupplementaryItems = <%p>", _boundarySupplementaryItems];
     if (_decorationItems.count > 0)

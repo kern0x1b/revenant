@@ -1,11 +1,11 @@
-#import "CharonCoreData.h"
+#import "RevenantCoreData.h"
 #import <objc/runtime.h>
 
-@interface CharonContextMerger : NSObject
+@interface RevenantContextMerger : NSObject
 - (instancetype)initWithContext:(NSManagedObjectContext *)context;
 @end
 
-@implementation CharonContextMerger {
+@implementation RevenantContextMerger {
 @private
     __weak NSManagedObjectContext *_context;
 }
@@ -41,13 +41,13 @@
 
 @end
 
-static char charon_merger_key;
+static char revenant_merger_key;
 
-@implementation NSManagedObjectContext (CharonMerging)
+@implementation NSManagedObjectContext (RevenantMerging)
 
 - (BOOL)automaticallyMergesChangesFromParent
 {
-    return objc_getAssociatedObject(self, &charon_merger_key) != nil;
+    return objc_getAssociatedObject(self, &revenant_merger_key) != nil;
 }
 
 - (void)setAutomaticallyMergesChangesFromParent:(BOOL)merges
@@ -58,7 +58,7 @@ static char charon_merger_key;
                                      userInfo:nil];
     if (merges == self.automaticallyMergesChangesFromParent)
         return;
-    objc_setAssociatedObject(self, &charon_merger_key, merges ? [[CharonContextMerger alloc] initWithContext:self] : nil,
+    objc_setAssociatedObject(self, &revenant_merger_key, merges ? [[RevenantContextMerger alloc] initWithContext:self] : nil,
                              OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 

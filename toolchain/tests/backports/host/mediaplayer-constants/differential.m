@@ -8,7 +8,7 @@
 static void *g_handle;
 static int g_failures;
 
-static void charonCompareString(NSString *name, NSString *port, NSString *const *apple,
+static void revenantCompareString(NSString *name, NSString *port, NSString *const *apple,
                                 const char *oracle, const char *cacheValue) {
   const char *p = port ? [port UTF8String] : NULL;
   const char *a;
@@ -38,7 +38,7 @@ int main(void) {
     g_handle = dlopen("/System/Library/Frameworks/MediaPlayer.framework/MediaPlayer", RTLD_LAZY);
     if (!g_handle) { printf("NO-FRAMEWORK\t%s\n", dlerror()); return 2; }
 @@CALLS@@
-    charonCompareString(@"MPNoSuchConstantForTheControl", nil,
+    revenantCompareString(@"MPNoSuchConstantForTheControl", nil,
                          (NSString *const *)dlsym(g_handle, "MPNoSuchConstantForTheControl"), "host", NULL);
     printf("failures\t%d\n", g_failures);
   }

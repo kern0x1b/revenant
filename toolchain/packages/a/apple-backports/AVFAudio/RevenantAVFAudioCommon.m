@@ -1,12 +1,12 @@
-#import "CharonAVFAudio.h"
-#import "CharonAUAudioUnit.h"
+#import "RevenantAVFAudio.h"
+#import "RevenantAUAudioUnit.h"
 
 typedef struct {
     AudioChannelLayoutTag tag;
     AVAudioChannelCount channels;
-} CharonLayoutEntry;
+} RevenantLayoutEntry;
 
-static const CharonLayoutEntry CharonCanonicalLayouts[] = {
+static const RevenantLayoutEntry RevenantCanonicalLayouts[] = {
     {kAudioChannelLayoutTag_Mono, 1},
     {kAudioChannelLayoutTag_Stereo, 2},
     {kAudioChannelLayoutTag_MatrixStereo, 2},
@@ -29,9 +29,9 @@ static const CharonLayoutEntry CharonCanonicalLayouts[] = {
     {kAudioChannelLayoutTag_MPEG_5_0_B, 6},
 };
 
-static const NSUInteger CharonCanonicalLayoutCount = sizeof(CharonCanonicalLayouts) / sizeof(*CharonCanonicalLayouts);
+static const NSUInteger RevenantCanonicalLayoutCount = sizeof(RevenantCanonicalLayouts) / sizeof(*RevenantCanonicalLayouts);
 
-NSUInteger CharonChannelsForLayoutTag(AudioChannelLayoutTag tag)
+NSUInteger RevenantChannelsForLayoutTag(AudioChannelLayoutTag tag)
 {
     UInt32 size = 0;
     if (AudioFormatGetProperty(kAudioFormatProperty_ChannelLayoutForTag, sizeof(tag), &tag, &size, NULL) == noErr && size >= sizeof(AudioChannelLayout)) {
@@ -49,15 +49,15 @@ NSUInteger CharonChannelsForLayoutTag(AudioChannelLayoutTag tag)
             return channels;
         }
     }
-    for (NSUInteger index = 0; index < CharonCanonicalLayoutCount; index++) {
-        if (CharonCanonicalLayouts[index].tag == tag) {
-            return CharonCanonicalLayouts[index].channels;
+    for (NSUInteger index = 0; index < RevenantCanonicalLayoutCount; index++) {
+        if (RevenantCanonicalLayouts[index].tag == tag) {
+            return RevenantCanonicalLayouts[index].channels;
         }
     }
     return 0;
 }
 
-AudioChannelLayoutTag CharonTagForChannelCount(AVAudioChannelCount channels)
+AudioChannelLayoutTag RevenantTagForChannelCount(AVAudioChannelCount channels)
 {
     UInt32 count = (UInt32)channels;
     UInt32 size = 0;
@@ -74,15 +74,15 @@ AudioChannelLayoutTag CharonTagForChannelCount(AVAudioChannelCount channels)
             return chosen;
         }
     }
-    for (NSUInteger index = 0; index < CharonCanonicalLayoutCount; index++) {
-        if (CharonCanonicalLayouts[index].channels == channels) {
-            return CharonCanonicalLayouts[index].tag;
+    for (NSUInteger index = 0; index < RevenantCanonicalLayoutCount; index++) {
+        if (RevenantCanonicalLayouts[index].channels == channels) {
+            return RevenantCanonicalLayouts[index].tag;
         }
     }
     return kAudioChannelLayoutTag_UseChannelDescriptions;
 }
 
-@implementation CharonAUParameterImpl
+@implementation RevenantAUParameterImpl
 @synthesize name = _name;
 @synthesize identifier = _identifier;
 @synthesize scope = _scope;
@@ -98,7 +98,7 @@ AudioChannelLayoutTag CharonTagForChannelCount(AVAudioChannelCount channels)
 @end
 
 
-AudioChannelLayoutTag CharonTagFromName(NSString *name)
+AudioChannelLayoutTag RevenantTagFromName(NSString *name)
 {
     if (name.length < 4) {
         return kAudioChannelLayoutTag_UseChannelDescriptions;

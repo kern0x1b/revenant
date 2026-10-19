@@ -3,7 +3,7 @@
 # Accessibility.framework.
 #
 # The system builds these seven classes and the port builds the same seven in
-# Accessibility/CharonChartDescriptors.m. The check is: build the same tree in both and ask both the
+# Accessibility/RevenantChartDescriptors.m. The check is: build the same tree in both and ask both the
 # same questions, and the two answers must be the same.
 #
 # It runs on the host because the host has the framework - its SDK carries AXAudiograph.h, the very
@@ -33,7 +33,7 @@ here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
 sources=${ACCESSIBILITY_SRC:-$root/packages/a/apple-backports/Accessibility}
-build=${BUILD:-$(runs_folder charon-accessibilitychart)}
+build=${BUILD:-$(runs_folder revenant-accessibilitychart)}
 rm -rf "$build"
 mkdir -p "$build"
 sdk=$(xcrun --show-sdk-path)
@@ -46,17 +46,17 @@ common="-target $target -isysroot $sdk -fobjc-arc -O0 -Wall -Wno-nonnull -Wno-ob
 
 # The port's own spelling of every class this case names, and of the two protocol names it looks up as
 # strings. A -D renames the declaration as well, which is what keeps the two halves from colliding.
-renames="-DAXChartDescriptor=CharonPortAXChartDescriptor
--DAXDataSeriesDescriptor=CharonPortAXDataSeriesDescriptor
--DAXDataPoint=CharonPortAXDataPoint
--DAXDataPointValue=CharonPortAXDataPointValue
--DAXNumericDataAxisDescriptor=CharonPortAXNumericDataAxisDescriptor
--DAXCategoricalDataAxisDescriptor=CharonPortAXCategoricalDataAxisDescriptor
--DAXLiveAudioGraph=CharonPortAXLiveAudioGraph
--DAXChart=CharonPortAXChart
--DAXDataAxisDescriptor=CharonPortAXDataAxisDescriptor
--DAXCHART_PROTOCOL=@\"CharonPortAXChart\"
--DAXDATAAXISDESCRIPTOR_PROTOCOL=@\"CharonPortAXDataAxisDescriptor\""
+renames="-DAXChartDescriptor=RevenantPortAXChartDescriptor
+-DAXDataSeriesDescriptor=RevenantPortAXDataSeriesDescriptor
+-DAXDataPoint=RevenantPortAXDataPoint
+-DAXDataPointValue=RevenantPortAXDataPointValue
+-DAXNumericDataAxisDescriptor=RevenantPortAXNumericDataAxisDescriptor
+-DAXCategoricalDataAxisDescriptor=RevenantPortAXCategoricalDataAxisDescriptor
+-DAXLiveAudioGraph=RevenantPortAXLiveAudioGraph
+-DAXChart=RevenantPortAXChart
+-DAXDataAxisDescriptor=RevenantPortAXDataAxisDescriptor
+-DAXCHART_PROTOCOL=@\"RevenantPortAXChart\"
+-DAXDATAAXISDESCRIPTOR_PROTOCOL=@\"RevenantPortAXDataAxisDescriptor\""
 
 # The protocols' metadata is what lets a caller declare conformance, and in the port it comes from the
 # object modules/apple/backports.lua generates out of the registry's implemented protocol rows. Only the
@@ -67,8 +67,8 @@ renames="-DAXChartDescriptor=CharonPortAXChartDescriptor
 cat > "$build/protocols.m" <<'PROTOCOLS'
 #import <Foundation/Foundation.h>
 #import <Accessibility/Accessibility.h>
-static void charon_case_protocols(void) __attribute__((used));
-static void charon_case_protocols(void)
+static void revenant_case_protocols(void) __attribute__((used));
+static void revenant_case_protocols(void)
 {
     (void)@protocol(AXChart);
     (void)@protocol(AXDataAxisDescriptor);
@@ -82,7 +82,7 @@ host_build() {
 port_build() {
     # the renames are a list of -D flags and have to reach the shell unquoted
     # shellcheck disable=SC2086
-    xcrun clang $common $renames "$here/cases.m" "$sources/CharonChartDescriptors.m" "$build/protocols.m" \
+    xcrun clang $common $renames "$here/cases.m" "$sources/RevenantChartDescriptors.m" "$build/protocols.m" \
         -I"$root/packages/a/apple-backports" -framework Foundation -framework CoreGraphics \
         -o "$build/port" 2> "$build/port-build.log" || return 1
 }

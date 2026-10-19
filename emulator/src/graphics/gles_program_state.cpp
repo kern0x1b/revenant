@@ -13,7 +13,7 @@
 #include <limits>
 #include <utility>
 
-namespace shade {
+namespace emulator {
 
 void GlesProgramState::reset()
 {

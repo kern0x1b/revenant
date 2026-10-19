@@ -21,7 +21,7 @@ package("swift-crypto")
     table.insert(inputs, path.join(compat, "src", "memset_s.c"))
     table.insert(inputs, path.join(compat, "src", "objc_opt_self.c"))
     table.insert(inputs, path.join(compat, "src", "objc_allocWithZone.c"))
-    for _, file in ipairs(os.files(path.join(compat, "include", "charon", "*.h"))) do
+    for _, file in ipairs(os.files(path.join(compat, "include", "revenant", "*.h"))) do
         table.insert(inputs, file)
     end
     table.sort(inputs)
@@ -32,10 +32,10 @@ package("swift-crypto")
                             default = hash.strhash128(table.concat(digests, ";")), type = "string", readonly = true})
 
     on_load("iphoneos", function (package)
-        package:add("deps", "charon@swift-runtime", {alias = "swift-runtime", configs = {backports = true}})
-        package:add("deps", "charon@apple-compat", {alias = "apple-compat"})
-        package:add("deps", "charon@apple-backports", {alias = "apple-backports", configs = {commoncrypto = true}})
-        package:add("deps", "charon@ld64", {alias = "ld64"})
+        package:add("deps", "revenant@swift-runtime", {alias = "swift-runtime", configs = {backports = true}})
+        package:add("deps", "revenant@apple-compat", {alias = "apple-compat"})
+        package:add("deps", "revenant@apple-backports", {alias = "apple-backports", configs = {commoncrypto = true}})
+        package:add("deps", "revenant@ld64", {alias = "ld64"})
         package:add("links", "swiftCrypto")
         package:add("linkdirs", "lib")
     end)
@@ -45,7 +45,7 @@ package("swift-crypto")
         local swift = import("apple.swift", {rootdir = modules, anonymous = true})
         local toolchain = assert(package:toolchains(), "swift-crypto is built with the apple-ios toolchain")[1]
         toolchain:load()
-        local runtime = assert(package:dep("swift-runtime"), "swift-crypto is compiled against charon@swift-runtime")
+        local runtime = assert(package:dep("swift-runtime"), "swift-crypto is compiled against revenant@swift-runtime")
         local compat = package:dep("apple-compat")
         local backports = package:dep("apple-backports")
         local swiftc = assert(table.wrap((runtime:envs() or {}).SWIFT_EXEC)[1], "swift-runtime names no compiler; reinstall it")
@@ -93,7 +93,7 @@ package("swift-crypto")
                  path.join(package:scriptdir(), "..", "..", "..", "packages", "a", "apple-compat", "src", "objc_allocWithZone.c"),
                  "-o", path.join(objects, "objc_allocWithZone.o")}))
 
-        local port_headers = table.wrap((runtime:envs() or {}).CHARON_SWIFT_PORT_HEADERS)
+        local port_headers = table.wrap((runtime:envs() or {}).REVENANT_SWIFT_PORT_HEADERS)
         local overlay = #port_headers > 0 and {"-vfsoverlay", table.concat(port_headers, path.envsep())} or {}
 
         local swiftflags = {"-enable-experimental-feature", "Lifetimes", "-enable-experimental-feature", "SourceWarningControl",
@@ -182,7 +182,7 @@ package("swift-crypto")
             os.cp(path.join(swiftmods, name .. ".swiftmodule"), path.join(module, name .. ".swiftmodule"))
         end
         os.cp(path.join(objects, "Crypto.o"), path.join(package:installdir("lib"), "Crypto.o"))
-        package:setenv("CHARON_SWIFT_MODULES", module, path.join(compat:installdir("include"), "CharonCompat"), compat:installdir("include"))
+        package:setenv("REVENANT_SWIFT_MODULES", module, path.join(compat:installdir("include"), "RevenantCompat"), compat:installdir("include"))
 
         print("%s: %s installed; libswiftCrypto.dylib is in %s", package:name(), package:version_str(), package:installdir("lib"))
     end)

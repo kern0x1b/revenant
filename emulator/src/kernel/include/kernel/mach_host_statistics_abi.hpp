@@ -14,7 +14,7 @@
 #include <cstddef>
 #include <cstdint>
 
-namespace shade::darwin::mach::xnu {
+namespace emulator::darwin::mach::xnu {
 
 namespace routine {
     inline constexpr std::uint32_t host_info = 200;

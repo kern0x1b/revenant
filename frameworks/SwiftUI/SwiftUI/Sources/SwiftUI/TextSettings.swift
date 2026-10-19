@@ -1,6 +1,6 @@
 //
 //  TextSettings.swift
-//  Eidolon — the text settings SDK 26.2 added: what language a line is typeset in and what size a
+//  SwiftUI — the text settings SDK 26.2 added: what language a line is typeset in and what size a
 //  variant of a text is drawn at.
 //
 //  The two types are taken from OpenSwiftUIProject/OpenSwiftUI (MIT, Copyright (c) 2023-2025 Kyle-Ye):

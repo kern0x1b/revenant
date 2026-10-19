@@ -62,11 +62,11 @@ int main(int argc, char **argv)
         }
 
         probe(@"apple", [MTLPipelineBufferDescriptorArray class], [MTLPipelineBufferDescriptor class]);
-        probe(@"port", NSClassFromString(@"CharonHostMTLPipelineBufferDescriptorArray"),
-              NSClassFromString(@"CharonHostMTLPipelineBufferDescriptor"));
+        probe(@"port", NSClassFromString(@"RevenantHostMTLPipelineBufferDescriptorArray"),
+              NSClassFromString(@"RevenantHostMTLPipelineBufferDescriptor"));
 
         printf("the port's index 31, which Apple's array aborts on\n");
-        Class portArray = NSClassFromString(@"CharonHostMTLPipelineBufferDescriptorArray");
+        Class portArray = NSClassFromString(@"RevenantHostMTLPipelineBufferDescriptorArray");
         id port = [[portArray alloc] init];
         BOOL raised = NO;
         @try {

@@ -21,7 +21,7 @@
 
 #include "foundation/performance.hpp"
 
-namespace shade {
+namespace emulator {
 namespace {
 
     std::atomic<std::uint64_t> write_batch_calls { };

@@ -1,22 +1,22 @@
-#import "CharonCloudKit.h"
-#import "CharonCKConstants.h"
-#import "CharonCKSubscription.h"
+#import "RevenantCloudKit.h"
+#import "RevenantCKConstants.h"
+#import "RevenantCKSubscription.h"
 
 #import <CommonCrypto/CommonDigest.h>
 
-NSString *CharonCKDatabaseRoot(CKDatabase *database)
+NSString *RevenantCKDatabaseRoot(CKDatabase *database)
 {
     CKDatabaseScope scope = database.databaseScope;
     NSString *root = (scope == CKDatabaseScopePublic) ? @"public"
                      : (scope == CKDatabaseScopeShared) ? @"shared" : @"private";
-    CKContainer *container = [[CharonCKTransport shared].containerForDatabase
+    CKContainer *container = [[RevenantCKTransport shared].containerForDatabase
                              objectForKey:database];
     return [NSString stringWithFormat:@"database/1/%@/%@/%@", container.containerIdentifier,
-            [[CharonCKTransport shared].environmentForDatabase objectForKey:database]
-                ?: CharonCKDevelopmentEnvironment, root];
+            [[RevenantCKTransport shared].environmentForDatabase objectForKey:database]
+                ?: RevenantCKDevelopmentEnvironment, root];
 }
 
-NSString *CharonCKZonePath(CKRecordZoneID *zoneID)
+NSString *RevenantCKZonePath(CKRecordZoneID *zoneID)
 {
     if (!zoneID) {
         return @"zones";
@@ -24,20 +24,20 @@ NSString *CharonCKZonePath(CKRecordZoneID *zoneID)
     return [NSString stringWithFormat:@"zones/%@", [zoneID.zoneName stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
 }
 
-NSDictionary *CharonCKRecordIDDocument(CKRecordID *recordID)
+NSDictionary *RevenantCKRecordIDDocument(CKRecordID *recordID)
 {
     NSMutableDictionary *document = [NSMutableDictionary dictionary];
     document[@"recordName"] = recordID.recordName;
-    document[@"zoneID"] = CharonCKZoneIDDocument(recordID.zoneID);
+    document[@"zoneID"] = RevenantCKZoneIDDocument(recordID.zoneID);
     return document;
 }
 
-NSDictionary *CharonCKZoneIDDocument(CKRecordZoneID *zoneID)
+NSDictionary *RevenantCKZoneIDDocument(CKRecordZoneID *zoneID)
 {
     return @{@"zoneName": zoneID.zoneName, @"ownerName": zoneID.ownerName};
 }
 
-CKRecordZoneID *CharonCKZoneIDFromDocument(NSDictionary *json)
+CKRecordZoneID *RevenantCKZoneIDFromDocument(NSDictionary *json)
 {
     if (![json isKindOfClass:[NSDictionary class]]
         || ![json[@"zoneName"] isKindOfClass:[NSString class]]) {
@@ -48,7 +48,7 @@ CKRecordZoneID *CharonCKZoneIDFromDocument(NSDictionary *json)
                                          ownerName:[owner isKindOfClass:[NSString class]] ? owner : nil];
 }
 
-CKRecordID *CharonCKRecordIDFromDocument(NSDictionary *json)
+CKRecordID *RevenantCKRecordIDFromDocument(NSDictionary *json)
 {
     if (![json isKindOfClass:[NSDictionary class]] || ![json[@"recordName"] isKindOfClass:[NSString class]]) {
         return nil;
@@ -60,12 +60,12 @@ CKRecordID *CharonCKRecordIDFromDocument(NSDictionary *json)
     return [[CKRecordID alloc] initWithRecordName:json[@"recordName"] zoneID:zoneID];
 }
 
-double CharonCKMilliseconds(NSDate *date)
+double RevenantCKMilliseconds(NSDate *date)
 {
     return date ? date.timeIntervalSince1970 * 1000.0 : 0;
 }
 
-NSString *CharonCKMD5Hex(NSData *data)
+NSString *RevenantCKMD5Hex(NSData *data)
 {
     unsigned char digest[CC_MD5_DIGEST_LENGTH];
     CC_MD5(data.bytes, (CC_LONG)data.length, digest);
@@ -76,7 +76,7 @@ NSString *CharonCKMD5Hex(NSData *data)
     return hex;
 }
 
-static NSString *CharonCKDateString(NSDate *date)
+static NSString *RevenantCKDateString(NSDate *date)
 {
     static NSDateFormatter *written, *plain;
     if (!written) {
@@ -92,7 +92,7 @@ static NSString *CharonCKDateString(NSDate *date)
     return [written stringFromDate:date];
 }
 
-static NSDate *CharonCKDateFromString(NSString *text)
+static NSDate *RevenantCKDateFromString(NSString *text)
 {
     static NSDateFormatter *written, *plain;
     if (!written) {
@@ -108,13 +108,13 @@ static NSDate *CharonCKDateFromString(NSString *text)
     return [written dateFromString:text] ?: [plain dateFromString:text];
 }
 
-NSDate *CharonCKDateFromJSON(id json)
+NSDate *RevenantCKDateFromJSON(id json)
 {
     if ([json isKindOfClass:[NSDate class]]) {
         return json;
     }
     if ([json isKindOfClass:[NSString class]]) {
-        return CharonCKDateFromString(json);
+        return RevenantCKDateFromString(json);
     }
     if ([json isKindOfClass:[NSNumber class]]) {
         return [NSDate dateWithTimeIntervalSince1970:[json doubleValue] / 1000.0];
@@ -122,11 +122,11 @@ NSDate *CharonCKDateFromJSON(id json)
     return nil;
 }
 
-@interface CharonCKLocatedCoordinate : CLLocation
+@interface RevenantCKLocatedCoordinate : CLLocation
 - (instancetype)initWithLatitude:(CLLocationDegrees)latitude longitude:(CLLocationDegrees)longitude altitude:(CLLocationDistance)altitude;
 @end
 
-@implementation CharonCKLocatedCoordinate
+@implementation RevenantCKLocatedCoordinate
 {
     CLLocationDistance _altitude;
 }
@@ -147,7 +147,7 @@ NSDate *CharonCKDateFromJSON(id json)
 
 @end
 
-static CLLocation *CharonCKLocationFromJSON(NSDictionary *json)
+static CLLocation *RevenantCKLocationFromJSON(NSDictionary *json)
 {
     if (![json isKindOfClass:[NSDictionary class]] || !json[@"latitude"] || !json[@"longitude"]) {
         return nil;
@@ -160,12 +160,12 @@ static CLLocation *CharonCKLocationFromJSON(NSDictionary *json)
     if (altitude == 0) {
         return location;
     }
-    return [[CharonCKLocatedCoordinate alloc] initWithLatitude:coordinate.latitude
+    return [[RevenantCKLocatedCoordinate alloc] initWithLatitude:coordinate.latitude
                                                   longitude:coordinate.longitude
                                                      altitude:altitude];
 }
 
-id CharonCKValueFromJSON(id json, Class *kind)
+id RevenantCKValueFromJSON(id json, Class *kind)
 {
     if (!json || json == NSNull.null) {
         return nil;
@@ -179,7 +179,7 @@ id CharonCKValueFromJSON(id json, Class *kind)
     if ([json isKindOfClass:[NSArray class]]) {
         NSMutableArray *out = [NSMutableArray arrayWithCapacity:[json count]];
         for (id item in (NSArray *)json) {
-            [out addObject:CharonCKValueFromJSON(item, NULL) ?: NSNull.null];
+            [out addObject:RevenantCKValueFromJSON(item, NULL) ?: NSNull.null];
         }
         if (kind) {
             *kind = [NSArray class];
@@ -194,13 +194,13 @@ id CharonCKValueFromJSON(id json, Class *kind)
         if (kind) {
             *kind = [CLLocation class];
         }
-        return CharonCKLocationFromJSON(object);
+        return RevenantCKLocationFromJSON(object);
     }
     if (object[@"recordName"]) {
         if (kind) {
             *kind = [CKReference class];
         }
-        CKRecordID *recordID = CharonCKRecordIDFromDocument(object);
+        CKRecordID *recordID = RevenantCKRecordIDFromDocument(object);
         if (!recordID) {
             return nil;
         }
@@ -217,7 +217,7 @@ id CharonCKValueFromJSON(id json, Class *kind)
     }
     NSMutableDictionary *out = [NSMutableDictionary dictionaryWithCapacity:object.count];
     for (id key in object) {
-        id value = CharonCKValueFromJSON(object[key], NULL);
+        id value = RevenantCKValueFromJSON(object[key], NULL);
         if (value) {
             out[key] = value;
         }
@@ -228,7 +228,7 @@ id CharonCKValueFromJSON(id json, Class *kind)
     return out;
 }
 
-id CharonCKValueToJSON(id value)
+id RevenantCKValueToJSON(id value)
 {
     if (!value || value == NSNull.null) {
         return NSNull.null;
@@ -237,7 +237,7 @@ id CharonCKValueToJSON(id value)
         return value;
     }
     if ([value isKindOfClass:[NSDate class]]) {
-        return CharonCKDateString(value);
+        return RevenantCKDateString(value);
     }
     if ([value isKindOfClass:[NSData class]]) {
         return [value base64EncodedStringWithOptions:0];
@@ -249,7 +249,7 @@ id CharonCKValueToJSON(id value)
     }
     if ([value isKindOfClass:[CKReference class]]) {
         CKReference *reference = value;
-        NSMutableDictionary *document = [CharonCKRecordIDDocument(reference.recordID) mutableCopy];
+        NSMutableDictionary *document = [RevenantCKRecordIDDocument(reference.recordID) mutableCopy];
         document[@"action"] = reference.referenceAction == CKReferenceActionDeleteSelf ? @"DELETE_SELF" : @"NONE";
         return document;
     }
@@ -259,14 +259,14 @@ id CharonCKValueToJSON(id value)
         if (!file || !attributes) {
             return @{@"fileChecksum": @"", @"size": @0, @"wrappingKey": @""};
         }
-        return @{@"fileChecksum": CharonCKMD5Hex([NSData dataWithContentsOfFile:file.path]),
+        return @{@"fileChecksum": RevenantCKMD5Hex([NSData dataWithContentsOfFile:file.path]),
                  @"size": @([attributes fileSize]),
                  @"wrappingKey": @""};
     }
     if ([value isKindOfClass:[NSArray class]]) {
         NSMutableArray *out = [NSMutableArray array];
         for (id item in (NSArray *)value) {
-            [out addObject:CharonCKValueToJSON(item)];
+            [out addObject:RevenantCKValueToJSON(item)];
         }
         return out;
     }
@@ -274,30 +274,30 @@ id CharonCKValueToJSON(id value)
         NSDictionary *dictionary = value;
         NSMutableDictionary *out = [NSMutableDictionary dictionary];
         for (id key in dictionary) {
-            out[[key description]] = CharonCKValueToJSON(dictionary[key]);
+            out[[key description]] = RevenantCKValueToJSON(dictionary[key]);
         }
         return out;
     }
     return NSNull.null;
 }
 
-NSDictionary *CharonCKFieldsToJSON(NSDictionary *fields)
+NSDictionary *RevenantCKFieldsToJSON(NSDictionary *fields)
 {
     NSMutableDictionary *out = [NSMutableDictionary dictionaryWithCapacity:fields.count];
     for (id key in fields) {
-        out[key] = CharonCKValueToJSON(fields[key]);
+        out[key] = RevenantCKValueToJSON(fields[key]);
     }
     return out;
 }
 
-NSDictionary *CharonCKFieldsFromJSON(NSDictionary *json)
+NSDictionary *RevenantCKFieldsFromJSON(NSDictionary *json)
 {
     if (![json isKindOfClass:[NSDictionary class]]) {
         return @{};
     }
     NSMutableDictionary *out = [NSMutableDictionary dictionaryWithCapacity:json.count];
     for (id key in json) {
-        id value = CharonCKValueFromJSON(json[key], NULL);
+        id value = RevenantCKValueFromJSON(json[key], NULL);
         if (value) {
             out[key] = value;
         }
@@ -305,7 +305,7 @@ NSDictionary *CharonCKFieldsFromJSON(NSDictionary *json)
     return out;
 }
 
-CKRecordZone *CharonCKZoneWithDocument(NSDictionary *document)
+CKRecordZone *RevenantCKZoneWithDocument(NSDictionary *document)
 {
     NSDictionary *zone = [document[@"zoneID"] isKindOfClass:[NSDictionary class]] ? document[@"zoneID"] : nil;
     if (!zone || !zone[@"zoneName"]) {
@@ -315,7 +315,7 @@ CKRecordZone *CharonCKZoneWithDocument(NSDictionary *document)
                                                                                ownerName:zone[@"ownerName"] ?: CKOwnerDefaultName]];
 }
 
-static NSString *CharonCKOparatorForPredicateOperator(NSPredicateOperatorType op)
+static NSString *RevenantCKOparatorForPredicateOperator(NSPredicateOperatorType op)
 {
     switch (op) {
         case NSEqualToPredicateOperatorType: return @"equals";
@@ -332,7 +332,7 @@ static NSString *CharonCKOparatorForPredicateOperator(NSPredicateOperatorType op
     }
 }
 
-static BOOL CharonCKKeyChain(NSString *key, NSArray **chain)
+static BOOL RevenantCKKeyChain(NSString *key, NSArray **chain)
 {
     NSMutableArray *parts = [[key componentsSeparatedByString:@"."] mutableCopy];
     if (parts.count < 1 || [key hasPrefix:@"."] || [key hasSuffix:@"."]) {
@@ -349,10 +349,10 @@ static BOOL CharonCKKeyChain(NSString *key, NSArray **chain)
     return YES;
 }
 
-static id CharonCKQueryValue(id value)
+static id RevenantCKQueryValue(id value)
 {
     if ([value isKindOfClass:[NSDate class]]) {
-        return CharonCKDateString(value);
+        return RevenantCKDateString(value);
     }
     if ([value isKindOfClass:[CLLocation class]]) {
         return @{@"latitude": @([value coordinate].latitude), @"longitude": @([value coordinate].longitude)};
@@ -366,19 +366,19 @@ static id CharonCKQueryValue(id value)
     return nil;
 }
 
-static NSDictionary *CharonCKPredicateDocument(NSPredicate *predicate, NSError **error)
+static NSDictionary *RevenantCKPredicateDocument(NSPredicate *predicate, NSError **error)
 {
     if ([predicate isKindOfClass:[NSCompoundPredicate class]]) {
         NSCompoundPredicate *compound = (NSCompoundPredicate *)predicate;
         if (compound.compoundPredicateType != NSAndPredicateType && compound.compoundPredicateType != NSOrPredicateType) {
             if (error) {
-                *error = CharonCKError(CKErrorInvalidArguments, @"A negated predicate has no form in a CloudKit query", nil);
+                *error = RevenantCKError(CKErrorInvalidArguments, @"A negated predicate has no form in a CloudKit query", nil);
             }
             return nil;
         }
         NSMutableArray *subs = [NSMutableArray array];
         for (NSPredicate *sub in compound.subpredicates) {
-            NSDictionary *document = CharonCKPredicateDocument(sub, error);
+            NSDictionary *document = RevenantCKPredicateDocument(sub, error);
             if (!document) {
                 return nil;
             }
@@ -389,7 +389,7 @@ static NSDictionary *CharonCKPredicateDocument(NSPredicate *predicate, NSError *
     }
     if (![predicate isKindOfClass:[NSComparisonPredicate class]]) {
         if (error) {
-            *error = CharonCKError(CKErrorInvalidArguments,
+            *error = RevenantCKError(CKErrorInvalidArguments,
                                   [NSString stringWithFormat:@"A predicate of the kind %@ has no form in a CloudKit query",
                                    NSStringFromClass([predicate class])], nil);
         }
@@ -400,15 +400,15 @@ static NSDictionary *CharonCKPredicateDocument(NSPredicate *predicate, NSError *
         comparison.predicateOperatorType == NSInPredicateOperatorType ||
         comparison.predicateOperatorType == NSBetweenPredicateOperatorType) {
         if (error) {
-            *error = CharonCKError(CKErrorInvalidArguments,
+            *error = RevenantCKError(CKErrorInvalidArguments,
                                   @"This comparison has no form in a CloudKit query", nil);
         }
         return nil;
     }
-    NSString *op = CharonCKOparatorForPredicateOperator(comparison.predicateOperatorType);
+    NSString *op = RevenantCKOparatorForPredicateOperator(comparison.predicateOperatorType);
     if (!op) {
         if (error) {
-            *error = CharonCKError(CKErrorInvalidArguments,
+            *error = RevenantCKError(CKErrorInvalidArguments,
                                   @"This comparison has no form in a CloudKit query", nil);
         }
         return nil;
@@ -418,7 +418,7 @@ static NSDictionary *CharonCKPredicateDocument(NSPredicate *predicate, NSError *
         NSExpression *expression = (NSExpression *)key;
         if (expression.expressionType != NSKeyPathExpressionType) {
             if (error) {
-                *error = CharonCKError(CKErrorInvalidArguments, @"Only a field has a form in a CloudKit query", nil);
+                *error = RevenantCKError(CKErrorInvalidArguments, @"Only a field has a form in a CloudKit query", nil);
             }
             return nil;
         }
@@ -428,28 +428,28 @@ static NSDictionary *CharonCKPredicateDocument(NSPredicate *predicate, NSError *
         }
         key = path;
     }
-    if (![key isKindOfClass:[NSString class]] || !CharonCKKeyChain(key, NULL)) {
+    if (![key isKindOfClass:[NSString class]] || !RevenantCKKeyChain(key, NULL)) {
         if (error) {
-            *error = CharonCKError(CKErrorInvalidArguments, @"A CloudKit query names a field, and this names nothing", nil);
+            *error = RevenantCKError(CKErrorInvalidArguments, @"A CloudKit query names a field, and this names nothing", nil);
         }
         return nil;
     }
-    id comparator = CharonCKQueryValue(comparison.rightExpression);
+    id comparator = RevenantCKQueryValue(comparison.rightExpression);
     if (!comparator) {
         if (error) {
-            *error = CharonCKError(CKErrorInvalidArguments, @"A CloudKit query compares against a literal", nil);
+            *error = RevenantCKError(CKErrorInvalidArguments, @"A CloudKit query compares against a literal", nil);
         }
         return nil;
     }
     return @{@"operator": op, @"field": key, @"comparator": comparator, @"value": @1};
 }
 
-NSDictionary *CharonCKQueryDocument(CKQuery *query, NSString *zoneID, NSArray *desiredKeys,
+NSDictionary *RevenantCKQueryDocument(CKQuery *query, NSString *zoneID, NSArray *desiredKeys,
                                     NSUInteger resultsLimit, NSError **error)
 {
     if (!query) {
         if (error) {
-            *error = CharonCKError(CKErrorInvalidArguments, @"No query", nil);
+            *error = RevenantCKError(CKErrorInvalidArguments, @"No query", nil);
         }
         return nil;
     }
@@ -458,7 +458,7 @@ NSDictionary *CharonCKQueryDocument(CKQuery *query, NSString *zoneID, NSArray *d
     if (zoneID) {
         document[@"zoneID"] = @{@"zoneName": zoneID, @"ownerName": CKOwnerDefaultName};
     }
-    NSDictionary *filter = CharonCKPredicateDocument(query.predicate, error);
+    NSDictionary *filter = RevenantCKPredicateDocument(query.predicate, error);
     if (!filter) {
         return nil;
     }
@@ -472,7 +472,7 @@ NSDictionary *CharonCKQueryDocument(CKQuery *query, NSString *zoneID, NSArray *d
         for (NSSortDescriptor *descriptor in sortDescriptors) {
             [sorts addObject:@{@"field": descriptor.key,
                                @"ascending": @((int)descriptor.ascending),
-                               @"relativeLocation": CharonCKValueToJSON([descriptor isKindOfClass:[CKLocationSortDescriptor class]]
+                               @"relativeLocation": RevenantCKValueToJSON([descriptor isKindOfClass:[CKLocationSortDescriptor class]]
                                                                             ? ((CKLocationSortDescriptor *)descriptor).relativeLocation : nil)}];
         }
         document[@"sort"] = sorts;
@@ -483,12 +483,12 @@ NSDictionary *CharonCKQueryDocument(CKQuery *query, NSString *zoneID, NSArray *d
     return document;
 }
 
-CKQueryCursor *CharonCKCursorFromToken(NSData *token)
+CKQueryCursor *RevenantCKCursorFromToken(NSData *token)
 {
     return token.length ? [[CKQueryCursor alloc] initWithToken:token] : nil;
 }
 
-NSData *CharonCKTokenFromCursor(CKQueryCursor *cursor)
+NSData *RevenantCKTokenFromCursor(CKQueryCursor *cursor)
 {
     return cursor.serverChangeToken;
 }

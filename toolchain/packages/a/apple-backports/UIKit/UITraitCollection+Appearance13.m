@@ -1,17 +1,17 @@
-#import "CharonTraitStyle.h"
-#import "CharonTraits17.h"
-#import "CharonSymbols.h"
+#import "RevenantTraitStyle.h"
+#import "RevenantTraits17.h"
+#import "RevenantSymbols.h"
 #import <objc/runtime.h>
 
 #pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
 
-static NSString *const CharonContrast = @"AccessibilityContrast";
-static NSString *const CharonLevel = @"UserInterfaceLevel";
-static NSString *const CharonLegibility = @"LegibilityWeight";
+static NSString *const RevenantContrast = @"AccessibilityContrast";
+static NSString *const RevenantLevel = @"UserInterfaceLevel";
+static NSString *const RevenantLegibility = @"LegibilityWeight";
 
-static char charon_extras_key;
+static char revenant_extras_key;
 
-static NSMutableArray *charon_kinds(void)
+static NSMutableArray *revenant_kinds(void)
 {
     static NSMutableArray *kinds;
     static dispatch_once_t once;
@@ -21,104 +21,104 @@ static NSMutableArray *charon_kinds(void)
     return kinds;
 }
 
-void charon_register_trait_kind(CharonTraitKind kind)
+void revenant_register_trait_kind(RevenantTraitKind kind)
 {
-    NSMutableArray *kinds = charon_kinds();
+    NSMutableArray *kinds = revenant_kinds();
     @synchronized (kinds) {
         for (NSValue *held in kinds) {
-            CharonTraitKind other;
+            RevenantTraitKind other;
             [held getValue:&other];
             if ([other.name isEqualToString:kind.name])
                 return;
         }
-        [kinds addObject:[NSValue valueWithBytes:&kind objCType:@encode(CharonTraitKind)]];
+        [kinds addObject:[NSValue valueWithBytes:&kind objCType:@encode(RevenantTraitKind)]];
     }
 }
 
-static void charon_each_kind(void (^visit)(CharonTraitKind kind))
+static void revenant_each_kind(void (^visit)(RevenantTraitKind kind))
 {
-    NSMutableArray *kinds = charon_kinds();
+    NSMutableArray *kinds = revenant_kinds();
     NSArray *copy;
     @synchronized (kinds) {
         copy = [kinds copy];
     }
     for (NSValue *held in copy) {
-        CharonTraitKind kind;
+        RevenantTraitKind kind;
         [held getValue:&kind];
         visit(kind);
     }
 }
 
-NSDictionary *charon_trait_extras(UITraitCollection *collection)
+NSDictionary *revenant_trait_extras(UITraitCollection *collection)
 {
-    return objc_getAssociatedObject(collection, &charon_extras_key);
+    return objc_getAssociatedObject(collection, &revenant_extras_key);
 }
 
-NSInteger charon_trait_extra(UITraitCollection *collection, NSString *name)
+NSInteger revenant_trait_extra(UITraitCollection *collection, NSString *name)
 {
-    id held = charon_trait_extras(collection)[name];
+    id held = revenant_trait_extras(collection)[name];
     return [held isKindOfClass:[NSNumber class]] ? [held integerValue] : -1;
 }
 
-void charon_set_trait_extra(UITraitCollection *collection, NSString *name, NSInteger value)
+void revenant_set_trait_extra(UITraitCollection *collection, NSString *name, NSInteger value)
 {
-    charon_set_trait_extra_object(collection, name, value == -1 ? nil : @(value));
+    revenant_set_trait_extra_object(collection, name, value == -1 ? nil : @(value));
 }
 
-id charon_trait_extra_object(UITraitCollection *collection, NSString *name)
+id revenant_trait_extra_object(UITraitCollection *collection, NSString *name)
 {
-    return charon_trait_extras(collection)[name];
+    return revenant_trait_extras(collection)[name];
 }
 
-void charon_set_trait_extra_object(UITraitCollection *collection, NSString *name, id value)
+void revenant_set_trait_extra_object(UITraitCollection *collection, NSString *name, id value)
 {
-    NSMutableDictionary *extras = [charon_trait_extras(collection) mutableCopy] ?: [NSMutableDictionary dictionary];
+    NSMutableDictionary *extras = [revenant_trait_extras(collection) mutableCopy] ?: [NSMutableDictionary dictionary];
     if (!value)
         [extras removeObjectForKey:name];
     else
         extras[name] = value;
-    objc_setAssociatedObject(collection, &charon_extras_key, extras.count ? extras : nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(collection, &revenant_extras_key, extras.count ? extras : nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
-NSDictionary *charon_merge_trait_extras(NSArray *collections)
+NSDictionary *revenant_merge_trait_extras(NSArray *collections)
 {
     NSMutableDictionary *merged = [NSMutableDictionary dictionary];
     for (UITraitCollection *collection in collections)
-        [merged addEntriesFromDictionary:charon_trait_extras(collection) ?: @{}];
+        [merged addEntriesFromDictionary:revenant_trait_extras(collection) ?: @{}];
     return merged;
 }
 
-void charon_apply_trait_extras(UITraitCollection *collection, NSDictionary *extras)
+void revenant_apply_trait_extras(UITraitCollection *collection, NSDictionary *extras)
 {
-    objc_setAssociatedObject(collection, &charon_extras_key, extras.count ? [extras copy] : nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(collection, &revenant_extras_key, extras.count ? [extras copy] : nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
-void charon_apply_screen_trait_extras(UITraitCollection *collection)
+void revenant_apply_screen_trait_extras(UITraitCollection *collection)
 {
-    charon_each_kind(^(CharonTraitKind kind) {
-        charon_set_trait_extra(collection, kind.name, kind.screenDefault);
+    revenant_each_kind(^(RevenantTraitKind kind) {
+        revenant_set_trait_extra(collection, kind.name, kind.screenDefault);
     });
 }
 
-BOOL charon_trait_extras_contained(UITraitCollection *collection, UITraitCollection *wanted)
+BOOL revenant_trait_extras_contained(UITraitCollection *collection, UITraitCollection *wanted)
 {
-    for (NSString *name in charon_trait_extras(wanted)) {
-        if (charon_trait_extra(wanted, name) != charon_trait_extra(collection, name))
+    for (NSString *name in revenant_trait_extras(wanted)) {
+        if (revenant_trait_extra(wanted, name) != revenant_trait_extra(collection, name))
             return NO;
     }
     return YES;
 }
 
-BOOL charon_trait_extras_equal(UITraitCollection *a, UITraitCollection *b)
+BOOL revenant_trait_extras_equal(UITraitCollection *a, UITraitCollection *b)
 {
-    NSDictionary *first = charon_trait_extras(a), *second = charon_trait_extras(b);
+    NSDictionary *first = revenant_trait_extras(a), *second = revenant_trait_extras(b);
     return first == second || (!first.count && !second.count) || [first isEqualToDictionary:second];
 }
 
-NSUInteger charon_trait_extras_hash(UITraitCollection *collection)
+NSUInteger revenant_trait_extras_hash(UITraitCollection *collection)
 {
     NSUInteger hash = 0;
-    NSDictionary *extras = charon_trait_extras(collection);
+    NSDictionary *extras = revenant_trait_extras(collection);
     for (NSString *name in extras) {
         id value = extras[name];
         hash ^= name.hash + ([value isKindOfClass:[NSNumber class]] ? (NSUInteger)[value unsignedIntegerValue] * 2654435761u : [(NSObject *)value hash]);
@@ -126,12 +126,12 @@ NSUInteger charon_trait_extras_hash(UITraitCollection *collection)
     return hash;
 }
 
-static NSString *charon_trait_value_text_for_name(NSString *name, NSInteger number)
+static NSString *revenant_trait_value_text_for_name(NSString *name, NSInteger number)
 {
     if (!name)
         return nil;
     __block NSString *found = nil;
-    charon_each_kind(^(CharonTraitKind kind) {
+    revenant_each_kind(^(RevenantTraitKind kind) {
         if (found || ![kind.name isEqualToString:name])
             return;
         if (kind.described == 2 && kind.first) {
@@ -144,69 +144,69 @@ static NSString *charon_trait_value_text_for_name(NSString *name, NSInteger numb
     return found;
 }
 
-NSString *charon_trait_value_text(const CharonTraitDefinition *definition, id value)
+NSString *revenant_trait_value_text(const RevenantTraitDefinition *definition, id value)
 {
     if (!value)
         return nil;
-    if (definition && definition->kind == CharonTraitValueObject)
+    if (definition && definition->kind == RevenantTraitValueObject)
         return [value description];
     NSInteger number = [value integerValue];
-    NSString *name = charon_trait_value_text_for_name(definition ? definition->name : nil, number);
+    NSString *name = revenant_trait_value_text_for_name(definition ? definition->name : nil, number);
     return name.length ? name : [NSString stringWithFormat:@"%ld", (long)number];
 }
 
-static CharonTraitValueReader *charon_trait_value_readers;
-static NSUInteger charon_trait_value_reader_count;
+static RevenantTraitValueReader *revenant_trait_value_readers;
+static NSUInteger revenant_trait_value_reader_count;
 
-void charon_add_trait_value_reader(CharonTraitValueReader reader)
+void revenant_add_trait_value_reader(RevenantTraitValueReader reader)
 {
     if (!reader)
         return;
-    CharonTraitValueReader *grown =
-        realloc(charon_trait_value_readers, (charon_trait_value_reader_count + 1) * sizeof(*grown));
+    RevenantTraitValueReader *grown =
+        realloc(revenant_trait_value_readers, (revenant_trait_value_reader_count + 1) * sizeof(*grown));
     if (!grown)
         return;
-    charon_trait_value_readers = grown;
-    charon_trait_value_readers[charon_trait_value_reader_count++] = reader;
+    revenant_trait_value_readers = grown;
+    revenant_trait_value_readers[revenant_trait_value_reader_count++] = reader;
 }
 
-static void charon_add_trait(UITraitCollection *collection, NSMutableArray *traits, CharonTraitKind kind)
+static void revenant_add_trait(UITraitCollection *collection, NSMutableArray *traits, RevenantTraitKind kind)
 {
     if (!kind.described)
         return;
-    for (NSUInteger index = 0; index < charon_trait_value_reader_count; index++) {
+    for (NSUInteger index = 0; index < revenant_trait_value_reader_count; index++) {
         BOOL known = NO, isDefault = NO;
-        NSString *printed = charon_trait_value_readers[index](collection, kind.name, &known, &isDefault);
+        NSString *printed = revenant_trait_value_readers[index](collection, kind.name, &known, &isDefault);
         if (!known)
             continue;
         if (printed && !isDefault)
             [traits addObject:[NSString stringWithFormat:@"%@ = %@", kind.name, printed]];
         return;
     }
-    id stored = charon_trait_extras(collection)[kind.name];
+    id stored = revenant_trait_extras(collection)[kind.name];
     if (!stored)
         return;
     if (kind.described == 3) {
         [traits addObject:[NSString stringWithFormat:@"%@ = %@", kind.name, stored]];
         return;
     }
-    NSString *text = charon_trait_value_text_for_name(kind.name, [stored integerValue]);
+    NSString *text = revenant_trait_value_text_for_name(kind.name, [stored integerValue]);
     if (!text.length)
         text = [NSString stringWithFormat:@"%ld", (long)[stored integerValue]];
     if (text)
         [traits addObject:[NSString stringWithFormat:@"%@ = %@", kind.name, text]];
 }
 
-void charon_add_trait_extras_description(UITraitCollection *collection, NSMutableArray *traits)
+void revenant_add_trait_extras_description(UITraitCollection *collection, NSMutableArray *traits)
 {
-    charon_each_kind(^(CharonTraitKind kind) {
-        charon_add_trait(collection, traits, kind);
+    revenant_each_kind(^(RevenantTraitKind kind) {
+        revenant_add_trait(collection, traits, kind);
     });
 }
 
-void charon_encode_trait_extras(UITraitCollection *collection, NSCoder *coder)
+void revenant_encode_trait_extras(UITraitCollection *collection, NSCoder *coder)
 {
-    NSDictionary *extras = charon_trait_extras(collection);
+    NSDictionary *extras = revenant_trait_extras(collection);
     for (NSString *name in extras) {
         NSString *key = [@"UITraitCollectionBuiltinTrait-_UITraitName" stringByAppendingString:name];
         id value = extras[name];
@@ -217,126 +217,126 @@ void charon_encode_trait_extras(UITraitCollection *collection, NSCoder *coder)
     }
 }
 
-void charon_decode_trait_extras(UITraitCollection *collection, NSCoder *coder)
+void revenant_decode_trait_extras(UITraitCollection *collection, NSCoder *coder)
 {
-    charon_each_kind(^(CharonTraitKind kind) {
+    revenant_each_kind(^(RevenantTraitKind kind) {
         NSString *key = [@"UITraitCollectionBuiltinTrait-_UITraitName" stringByAppendingString:kind.name];
         if (![coder containsValueForKey:key])
             return;
         if (kind.described == 3) {
             id object = [coder decodeObjectForKey:key];
-            charon_set_trait_extra_object(collection, kind.name, object);
+            revenant_set_trait_extra_object(collection, kind.name, object);
         } else
-            charon_set_trait_extra(collection, kind.name, [coder decodeIntegerForKey:key]);
+            revenant_set_trait_extra(collection, kind.name, [coder decodeIntegerForKey:key]);
     });
 }
 
-static void charon_register_thirteen(void)
+static void revenant_register_thirteen(void)
 {
-    charon_register_trait_kind((CharonTraitKind){CharonContrast, 0, YES, @"Normal", @"High"});
-    charon_register_trait_kind((CharonTraitKind){CharonLevel, 0, YES, @"Base", @"Elevated"});
-    charon_register_trait_kind((CharonTraitKind){CharonLegibility, 0, NO, @"Default", @"Bold"});
+    revenant_register_trait_kind((RevenantTraitKind){RevenantContrast, 0, YES, @"Normal", @"High"});
+    revenant_register_trait_kind((RevenantTraitKind){RevenantLevel, 0, YES, @"Base", @"Elevated"});
+    revenant_register_trait_kind((RevenantTraitKind){RevenantLegibility, 0, NO, @"Default", @"Bold"});
 }
 
-static UITraitCollection *charon_with(NSString *name, NSInteger value)
+static UITraitCollection *revenant_with(NSString *name, NSInteger value)
 {
-    charon_register_thirteen();
+    revenant_register_thirteen();
     UITraitCollection *collection = [UITraitCollection traitCollectionWithTraitsFromCollections:@[]];
-    charon_set_trait_extra(collection, name, value);
+    revenant_set_trait_extra(collection, name, value);
     return collection;
 }
 
-static NSMutableArray *charon_current_stack(void)
+static NSMutableArray *revenant_current_stack(void)
 {
     NSMutableDictionary *dictionary = [NSThread currentThread].threadDictionary;
-    NSMutableArray *stack = dictionary[@"CharonCurrentTraits"];
+    NSMutableArray *stack = dictionary[@"RevenantCurrentTraits"];
     if (!stack) {
         stack = [NSMutableArray array];
-        dictionary[@"CharonCurrentTraits"] = stack;
+        dictionary[@"RevenantCurrentTraits"] = stack;
     }
     return stack;
 }
 
-static UITraitCollection *charon_current_base(void)
+static UITraitCollection *revenant_current_base(void)
 {
     UITraitCollection *screen = [UIScreen mainScreen].traitCollection;
     return screen ? screen : [UITraitCollection traitCollectionWithTraitsFromCollections:@[]];
 }
 
-@interface CharonTraitKinds13 : NSObject
+@interface RevenantTraitKinds13 : NSObject
 @end
 
-@implementation CharonTraitKinds13
+@implementation RevenantTraitKinds13
 
 + (void)load
 {
-    charon_register_thirteen();
+    revenant_register_thirteen();
 }
 
 @end
 
-@implementation UITraitCollection (CharonAppearance13)
+@implementation UITraitCollection (RevenantAppearance13)
 
 + (UITraitCollection *)traitCollectionWithAccessibilityContrast:(UIAccessibilityContrast)accessibilityContrast
 {
-    return charon_with(CharonContrast, accessibilityContrast);
+    return revenant_with(RevenantContrast, accessibilityContrast);
 }
 
 + (UITraitCollection *)traitCollectionWithLegibilityWeight:(UILegibilityWeight)legibilityWeight
 {
-    return charon_with(CharonLegibility, legibilityWeight);
+    return revenant_with(RevenantLegibility, legibilityWeight);
 }
 
 + (UITraitCollection *)traitCollectionWithUserInterfaceLevel:(UIUserInterfaceLevel)userInterfaceLevel
 {
-    return charon_with(CharonLevel, userInterfaceLevel);
+    return revenant_with(RevenantLevel, userInterfaceLevel);
 }
 
 - (UIAccessibilityContrast)accessibilityContrast
 {
-    return (UIAccessibilityContrast)charon_trait_extra(self, CharonContrast);
+    return (UIAccessibilityContrast)revenant_trait_extra(self, RevenantContrast);
 }
 
 - (UILegibilityWeight)legibilityWeight
 {
-    return (UILegibilityWeight)charon_trait_extra(self, CharonLegibility);
+    return (UILegibilityWeight)revenant_trait_extra(self, RevenantLegibility);
 }
 
 - (UIUserInterfaceLevel)userInterfaceLevel
 {
-    return (UIUserInterfaceLevel)charon_trait_extra(self, CharonLevel);
+    return (UIUserInterfaceLevel)revenant_trait_extra(self, RevenantLevel);
 }
 
 - (BOOL)hasDifferentColorAppearanceComparedToTraitCollection:(UITraitCollection *)traitCollection
 {
     return self.userInterfaceStyle != traitCollection.userInterfaceStyle || self.accessibilityContrast != traitCollection.accessibilityContrast ||
            self.userInterfaceLevel != traitCollection.userInterfaceLevel ||
-           charon_trait_extra(self, @"ActiveAppearance") != (traitCollection ? charon_trait_extra(traitCollection, @"ActiveAppearance") : 0);
+           revenant_trait_extra(self, @"ActiveAppearance") != (traitCollection ? revenant_trait_extra(traitCollection, @"ActiveAppearance") : 0);
 }
 
 - (UIImageConfiguration *)imageConfiguration
 {
-    return [[UIImageConfiguration alloc] initCharonWithTraitCollection:self];
+    return [[UIImageConfiguration alloc] initRevenantWithTraitCollection:self];
 }
 
 + (UITraitCollection *)currentTraitCollection
 {
-    UITraitCollection *held = [charon_current_stack() lastObject];
-    return held ? held : charon_current_base();
+    UITraitCollection *held = [revenant_current_stack() lastObject];
+    return held ? held : revenant_current_base();
 }
 
 + (void)setCurrentTraitCollection:(UITraitCollection *)currentTraitCollection
 {
-    NSMutableArray *stack = charon_current_stack();
+    NSMutableArray *stack = revenant_current_stack();
     [stack removeAllObjects];
     if (currentTraitCollection)
-        [stack addObject:[UITraitCollection traitCollectionWithTraitsFromCollections:@[charon_current_base(), currentTraitCollection]]];
+        [stack addObject:[UITraitCollection traitCollectionWithTraitsFromCollections:@[revenant_current_base(), currentTraitCollection]]];
 }
 
 - (void)performAsCurrentTraitCollection:(void (NS_NOESCAPE ^)(void))actions
 {
-    NSMutableArray *stack = charon_current_stack();
-    [stack addObject:[UITraitCollection traitCollectionWithTraitsFromCollections:@[charon_current_base(), self]]];
+    NSMutableArray *stack = revenant_current_stack();
+    [stack addObject:[UITraitCollection traitCollectionWithTraitsFromCollections:@[revenant_current_base(), self]]];
     @try {
         actions();
     } @finally {

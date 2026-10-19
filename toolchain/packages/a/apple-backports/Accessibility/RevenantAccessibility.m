@@ -1,6 +1,6 @@
-#import "CharonAccessibility.h"
+#import "RevenantAccessibility.h"
 
-#import "../../../c/charon-coding/files/CharonCoding.h"
+#import "../../../c/revenant-coding/files/RevenantCoding.h"
 
 #pragma mark - AXRequest
 
@@ -8,14 +8,14 @@
     NSString *_servingTechnology;
 }
 
-- (instancetype)charon_withTechnology:(AXTechnology)technology
+- (instancetype)revenant_withTechnology:(AXTechnology)technology
 {
     AXRequest *request = [[AXRequest alloc] init];
-    [request charon_setTechnology:technology];
+    [request revenant_setTechnology:technology];
     return request;
 }
 
-- (void)charon_setTechnology:(AXTechnology)technology
+- (void)revenant_setTechnology:(AXTechnology)technology
 {
     _servingTechnology = [technology copy];
 }
@@ -38,18 +38,18 @@
 - (instancetype)initWithCoder:(NSCoder *)coder
 {
     if ((self = [super init]))
-        charon_intents_decode(self, coder);
+        revenant_intents_decode(self, coder);
     return self;
 }
 
 - (void)encodeWithCoder:(NSCoder *)coder
 {
-    charon_intents_encode(self, coder);
+    revenant_intents_encode(self, coder);
 }
 
 - (id)copyWithZone:(NSZone *)zone
 {
-    AXRequest *copy = [[AXRequest allocWithZone:zone] charon_withTechnology:_servingTechnology];
+    AXRequest *copy = [[AXRequest allocWithZone:zone] revenant_withTechnology:_servingTechnology];
     return copy;
 }
 

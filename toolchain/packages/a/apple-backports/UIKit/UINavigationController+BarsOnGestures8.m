@@ -3,15 +3,15 @@
 
 #pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
 
-static const char CharonHidesOnSwipeKey;
-static const char CharonHidesOnTapKey;
-static const char CharonHidesOnKeyboardKey;
-static const char CharonHidesOnCompactKey;
-static const char CharonTapHideRecognizerKey;
-static const char CharonSwipeHideRecognizerKey;
-static const char CharonBarHiderKey;
+static const char RevenantHidesOnSwipeKey;
+static const char RevenantHidesOnTapKey;
+static const char RevenantHidesOnKeyboardKey;
+static const char RevenantHidesOnCompactKey;
+static const char RevenantTapHideRecognizerKey;
+static const char RevenantSwipeHideRecognizerKey;
+static const char RevenantBarHiderKey;
 
-@interface CharonNavigationBarHider : NSObject
+@interface RevenantNavigationBarHider : NSObject
 @property (nonatomic, weak) UINavigationController *navigation;
 - (void)swipe:(UIScreenEdgePanGestureRecognizer *)recognizer;
 - (void)tap:(UITapGestureRecognizer *)recognizer;
@@ -19,13 +19,13 @@ static const char CharonBarHiderKey;
 - (void)keyboardWillHide:(NSNotification *)note;
 @end
 
-@implementation CharonNavigationBarHider
+@implementation RevenantNavigationBarHider
 @synthesize navigation = _navigation;
 
 - (void)swipe:(UIScreenEdgePanGestureRecognizer *)recognizer
 {
     UINavigationController *navigation = self.navigation;
-    if (!navigation || ![objc_getAssociatedObject(navigation, &CharonHidesOnSwipeKey) boolValue])
+    if (!navigation || ![objc_getAssociatedObject(navigation, &RevenantHidesOnSwipeKey) boolValue])
         return;
     if (recognizer.state == UIGestureRecognizerStateBegan)
         [navigation setNavigationBarHidden:YES animated:YES];
@@ -36,7 +36,7 @@ static const char CharonBarHiderKey;
 - (void)tap:(UITapGestureRecognizer *)recognizer
 {
     UINavigationController *navigation = self.navigation;
-    if (!navigation || ![objc_getAssociatedObject(navigation, &CharonHidesOnTapKey) boolValue])
+    if (!navigation || ![objc_getAssociatedObject(navigation, &RevenantHidesOnTapKey) boolValue])
         return;
     if (recognizer.state == UIGestureRecognizerStateEnded)
         [navigation setNavigationBarHidden:YES animated:YES];
@@ -44,25 +44,25 @@ static const char CharonBarHiderKey;
 
 - (void)keyboardWillShow:(NSNotification *)note
 {
-    if ([objc_getAssociatedObject(self.navigation, &CharonHidesOnKeyboardKey) boolValue])
+    if ([objc_getAssociatedObject(self.navigation, &RevenantHidesOnKeyboardKey) boolValue])
         [self.navigation setNavigationBarHidden:YES animated:YES];
 }
 
 - (void)keyboardWillHide:(NSNotification *)note
 {
-    if ([objc_getAssociatedObject(self.navigation, &CharonHidesOnKeyboardKey) boolValue])
+    if ([objc_getAssociatedObject(self.navigation, &RevenantHidesOnKeyboardKey) boolValue])
         [self.navigation setNavigationBarHidden:NO animated:YES];
 }
 @end
 
-@interface UINavigationController (CharonVerticalCompactness)
-- (void)charon_applyVerticalCompactness;
+@interface UINavigationController (RevenantVerticalCompactness)
+- (void)revenant_applyVerticalCompactness;
 @end
 
-@interface CharonNavigationBarHiderInstaller : NSObject
+@interface RevenantNavigationBarHiderInstaller : NSObject
 @end
 
-@implementation CharonNavigationBarHiderInstaller
+@implementation RevenantNavigationBarHiderInstaller
 
 + (void)load
 {
@@ -73,84 +73,84 @@ static const char CharonBarHiderKey;
     void (*originalTraits)(id, SEL) = (void (*)(id, SEL))method_getImplementation(traits);
     class_replaceMethod(controller, @selector(traitCollectionDidChange:), imp_implementationWithBlock(^(UINavigationController *self_) {
         originalTraits(self_, @selector(traitCollectionDidChange:));
-        [self_ charon_applyVerticalCompactness];
+        [self_ revenant_applyVerticalCompactness];
     }), method_getTypeEncoding(traits));
 }
 @end
 
-@implementation UINavigationController (CharonBarsOnGestures8)
+@implementation UINavigationController (RevenantBarsOnGestures8)
 
-- (CharonNavigationBarHider *)charon_barHider
+- (RevenantNavigationBarHider *)revenant_barHider
 {
-    CharonNavigationBarHider *hider = objc_getAssociatedObject(self, &CharonBarHiderKey);
+    RevenantNavigationBarHider *hider = objc_getAssociatedObject(self, &RevenantBarHiderKey);
     if (hider)
         return hider;
-    hider = [[CharonNavigationBarHider alloc] init];
+    hider = [[RevenantNavigationBarHider alloc] init];
     hider.navigation = self;
-    objc_setAssociatedObject(self, &CharonBarHiderKey, hider, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, &RevenantBarHiderKey, hider, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     return hider;
 }
 
 - (UIGestureRecognizer *)barHideOnSwipeGestureRecognizer
 {
-    UIGestureRecognizer *recognizer = objc_getAssociatedObject(self, &CharonSwipeHideRecognizerKey);
+    UIGestureRecognizer *recognizer = objc_getAssociatedObject(self, &RevenantSwipeHideRecognizerKey);
     if (recognizer)
         return recognizer;
-    UIScreenEdgePanGestureRecognizer *swipe = [[UIScreenEdgePanGestureRecognizer alloc] initWithTarget:[self charon_barHider]
+    UIScreenEdgePanGestureRecognizer *swipe = [[UIScreenEdgePanGestureRecognizer alloc] initWithTarget:[self revenant_barHider]
                                                                                                 action:@selector(swipe:)];
     swipe.edges = UIRectEdgeLeft;
     if (self.isViewLoaded)
         [self.view addGestureRecognizer:swipe];
-    objc_setAssociatedObject(self, &CharonSwipeHideRecognizerKey, swipe, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, &RevenantSwipeHideRecognizerKey, swipe, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     return swipe;
 }
 
 - (UIGestureRecognizer *)barHideOnTapGestureRecognizer
 {
-    UIGestureRecognizer *recognizer = objc_getAssociatedObject(self, &CharonTapHideRecognizerKey);
+    UIGestureRecognizer *recognizer = objc_getAssociatedObject(self, &RevenantTapHideRecognizerKey);
     if (recognizer)
         return recognizer;
-    UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:[self charon_barHider]
+    UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:[self revenant_barHider]
                                                                           action:@selector(tap:)];
     if (self.isViewLoaded)
         [self.view addGestureRecognizer:tap];
-    objc_setAssociatedObject(self, &CharonTapHideRecognizerKey, tap, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, &RevenantTapHideRecognizerKey, tap, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     return tap;
 }
 
 - (BOOL)hidesBarsOnSwipe
 {
-    return [objc_getAssociatedObject(self, &CharonHidesOnSwipeKey) boolValue];
+    return [objc_getAssociatedObject(self, &RevenantHidesOnSwipeKey) boolValue];
 }
 
 - (void)setHidesBarsOnSwipe:(BOOL)hidesBarsOnSwipe
 {
-    objc_setAssociatedObject(self, &CharonHidesOnSwipeKey, @(hidesBarsOnSwipe), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, &RevenantHidesOnSwipeKey, @(hidesBarsOnSwipe), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     if (hidesBarsOnSwipe)
         [self barHideOnSwipeGestureRecognizer];
 }
 
 - (BOOL)hidesBarsOnTap
 {
-    return [objc_getAssociatedObject(self, &CharonHidesOnTapKey) boolValue];
+    return [objc_getAssociatedObject(self, &RevenantHidesOnTapKey) boolValue];
 }
 
 - (void)setHidesBarsOnTap:(BOOL)hidesBarsOnTap
 {
-    objc_setAssociatedObject(self, &CharonHidesOnTapKey, @(hidesBarsOnTap), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, &RevenantHidesOnTapKey, @(hidesBarsOnTap), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     if (hidesBarsOnTap)
         [self barHideOnTapGestureRecognizer];
 }
 
 - (BOOL)hidesBarsWhenKeyboardAppears
 {
-    return [objc_getAssociatedObject(self, &CharonHidesOnKeyboardKey) boolValue];
+    return [objc_getAssociatedObject(self, &RevenantHidesOnKeyboardKey) boolValue];
 }
 
 - (void)setHidesBarsWhenKeyboardAppears:(BOOL)hides
 {
-    objc_setAssociatedObject(self, &CharonHidesOnKeyboardKey, @(hides), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-    CharonNavigationBarHider *hider = [self charon_barHider];
+    objc_setAssociatedObject(self, &RevenantHidesOnKeyboardKey, @(hides), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    RevenantNavigationBarHider *hider = [self revenant_barHider];
     NSNotificationCenter *center = [NSNotificationCenter defaultCenter];
     [center removeObserver:hider name:UIKeyboardWillShowNotification object:nil];
     [center removeObserver:hider name:UIKeyboardWillHideNotification object:nil];
@@ -162,19 +162,19 @@ static const char CharonBarHiderKey;
 
 - (BOOL)hidesBarsWhenVerticallyCompact
 {
-    return [objc_getAssociatedObject(self, &CharonHidesOnCompactKey) boolValue];
+    return [objc_getAssociatedObject(self, &RevenantHidesOnCompactKey) boolValue];
 }
 
 - (void)setHidesBarsWhenVerticallyCompact:(BOOL)hides
 {
-    objc_setAssociatedObject(self, &CharonHidesOnCompactKey, @(hides), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, &RevenantHidesOnCompactKey, @(hides), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     if (hides)
-        [self charon_applyVerticalCompactness];
+        [self revenant_applyVerticalCompactness];
 }
 
-- (void)charon_applyVerticalCompactness
+- (void)revenant_applyVerticalCompactness
 {
-    if (![objc_getAssociatedObject(self, &CharonHidesOnCompactKey) boolValue])
+    if (![objc_getAssociatedObject(self, &RevenantHidesOnCompactKey) boolValue])
         return;
     [self setNavigationBarHidden:self.traitCollection.verticalSizeClass == UIUserInterfaceSizeClassCompact animated:NO];
 }

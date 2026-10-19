@@ -3,7 +3,7 @@
 int main(void)
 {
     @autoreleasepool {
-        charon_stamp_probe();
+        revenant_stamp_probe();
     }
     return 0;
 }

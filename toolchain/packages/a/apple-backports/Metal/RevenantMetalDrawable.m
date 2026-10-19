@@ -1,15 +1,15 @@
-#import "CharonMetal.h"
+#import "RevenantMetal.h"
 #import <objc/runtime.h>
 
 
-@implementation CharonMetalDrawable {
-    CharonMetalTexture *_texture;
+@implementation RevenantMetalDrawable {
+    RevenantMetalTexture *_texture;
     __weak CAMetalLayer *_layer;
     EAGLContext *_context;
     GLuint _renderbuffer;
 }
 
-- (instancetype)initWithTexture:(CharonMetalTexture *)texture layer:(CAMetalLayer *)layer context:(EAGLContext *)context
+- (instancetype)initWithTexture:(RevenantMetalTexture *)texture layer:(CAMetalLayer *)layer context:(EAGLContext *)context
 {
     if ((self = [super init])) {
         _texture = texture;
@@ -36,7 +36,7 @@
 
 - (void)present
 {
-    CharonMetalDevice *device = [CharonMetalDevice shared];
+    RevenantMetalDevice *device = [RevenantMetalDevice shared];
     [device acquire];
     GLint renderbuffer = 0;
     glBindFramebuffer(GL_FRAMEBUFFER, _texture.framebuffer);
@@ -67,22 +67,22 @@
 
 @end
 
-@interface CharonMetalLayerState : NSObject
+@interface RevenantMetalLayerState : NSObject
 @property (nonatomic, strong) CAEAGLLayer *layer;
 @property (nonatomic) GLuint framebuffer;
 @property (nonatomic) GLuint renderbuffer;
-@property (nonatomic, strong) CharonMetalTexture *texture;
+@property (nonatomic, strong) RevenantMetalTexture *texture;
 @property (nonatomic) CGSize size;
 @end
 
-@implementation CharonMetalLayerState
+@implementation RevenantMetalLayerState
 
 @synthesize layer = _layer, framebuffer = _framebuffer, renderbuffer = _renderbuffer, texture = _texture, size = _size;
 
 - (void)dealloc
 {
     if (_framebuffer) {
-        CharonMetalDevice *device = [CharonMetalDevice shared];
+        RevenantMetalDevice *device = [RevenantMetalDevice shared];
         [device acquire];
         glDeleteFramebuffers(1, &_framebuffer);
         glDeleteRenderbuffers(1, &_renderbuffer);
@@ -94,16 +94,16 @@
 
 static char stateKey;
 
-id<CAMetalDrawable> CharonMetalNextDrawable(CAMetalLayer *layer)
+id<CAMetalDrawable> RevenantMetalNextDrawable(CAMetalLayer *layer)
 {
-    CharonMetalDevice *device = [CharonMetalDevice shared];
+    RevenantMetalDevice *device = [RevenantMetalDevice shared];
     CGSize size = layer.drawableSize;
     CGSize bounds = layer.bounds.size;
     if (!device || size.width < 1 || size.height < 1 || bounds.width <= 0 || layer.device != (id)device)
         return nil;
-    CharonMetalLayerState *state = objc_getAssociatedObject(layer, &stateKey);
+    RevenantMetalLayerState *state = objc_getAssociatedObject(layer, &stateKey);
     if (!state) {
-        state = [[CharonMetalLayerState alloc] init];
+        state = [[RevenantMetalLayerState alloc] init];
         state.layer = [CAEAGLLayer layer];
         state.layer.opaque = YES;
         state.layer.drawableProperties = @{kEAGLDrawablePropertyRetainedBacking: @NO, kEAGLDrawablePropertyColorFormat: kEAGLColorFormatRGBA8};
@@ -129,9 +129,9 @@ id<CAMetalDrawable> CharonMetalNextDrawable(CAMetalLayer *layer)
         GLint w = 0, h = 0;
         glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_WIDTH, &w);
         glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_HEIGHT, &h);
-        state.texture = [[CharonMetalTexture alloc] initScreenWithFramebuffer:state.framebuffer width:w height:h pixelFormat:layer.pixelFormat];
+        state.texture = [[RevenantMetalTexture alloc] initScreenWithFramebuffer:state.framebuffer width:w height:h pixelFormat:layer.pixelFormat];
         state.size = size;
     }
     [device relinquish];
-    return (id<CAMetalDrawable>)[[CharonMetalDrawable alloc] initWithTexture:state.texture layer:layer context:device.context];
+    return (id<CAMetalDrawable>)[[RevenantMetalDrawable alloc] initWithTexture:state.texture layer:layer context:device.context];
 }

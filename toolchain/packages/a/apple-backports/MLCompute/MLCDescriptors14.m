@@ -1,15 +1,15 @@
-#import "CharonMLCompute.h"
+#import "RevenantMLCompute.h"
 
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
 #pragma clang diagnostic ignored "-Wobjc-designated-initializers"
 #pragma clang diagnostic ignored "-Wnullability-completeness"
 
-@interface MLCActivationDescriptor (CharonStorage)
-- (void)charon_setType:(MLCActivationType)type a:(float)a b:(float)b c:(float)c;
+@interface MLCActivationDescriptor (RevenantStorage)
+- (void)revenant_setType:(MLCActivationType)type a:(float)a b:(float)b c:(float)c;
 @end
 
-@interface MLCConvolutionDescriptor (CharonStorage)
-- (void)charon_setType:(MLCConvolutionType)type
+@interface MLCConvolutionDescriptor (RevenantStorage)
+- (void)revenant_setType:(MLCConvolutionType)type
              kernel:(NSUInteger)width
                 by:(NSUInteger)height
                 in:(NSUInteger)inputs
@@ -24,8 +24,8 @@
    paddingSizeY:(NSUInteger)paddingSizeY;
 @end
 
-@interface MLCPoolingDescriptor (CharonStorage)
-- (void)charon_setType:(MLCPoolingType)type
+@interface MLCPoolingDescriptor (RevenantStorage)
+- (void)revenant_setType:(MLCPoolingType)type
               kernelX:(NSUInteger)width
               kernelY:(NSUInteger)height
               strideX:(NSUInteger)strideX
@@ -38,8 +38,8 @@
      countsPadding:(BOOL)countsPadding;
 @end
 
-@interface MLCLossDescriptor (CharonStorage)
-- (void)charon_setType:(MLCLossType)type
+@interface MLCLossDescriptor (RevenantStorage)
+- (void)revenant_setType:(MLCLossType)type
            reduction:(MLCReductionType)reduction
                weight:(float)weight
         labelSmoothing:(float)labelSmoothing
@@ -48,8 +48,8 @@
                 delta:(float)delta;
 @end
 
-@interface MLCOptimizerDescriptor (CharonStorage)
-- (void)charon_setLearningRate:(float)learningRate
+@interface MLCOptimizerDescriptor (RevenantStorage)
+- (void)revenant_setLearningRate:(float)learningRate
                 gradientRescale:(float)rescale
         appliesGradientClipping:(BOOL)clipping
               gradientClippingType:(MLCGradientClippingType)clippingType
@@ -61,8 +61,8 @@
              regularizationScale:(float)regularizationScale;
 @end
 
-@interface MLCLSTMDescriptor (CharonStorage)
-- (void)charon_setInputSize:(NSUInteger)inputSize
+@interface MLCLSTMDescriptor (RevenantStorage)
+- (void)revenant_setInputSize:(NSUInteger)inputSize
                   hiddenSize:(NSUInteger)hiddenSize
                   layerCount:(NSUInteger)layerCount
                   usesBiases:(BOOL)usesBiases
@@ -73,8 +73,8 @@
                   resultMode:(MLCLSTMResultMode)resultMode;
 @end
 
-@interface MLCMultiheadAttentionDescriptor (CharonStorage)
-- (void)charon_setModelDimension:(NSUInteger)modelDimension
+@interface MLCMultiheadAttentionDescriptor (RevenantStorage)
+- (void)revenant_setModelDimension:(NSUInteger)modelDimension
                      keyDimension:(NSUInteger)keyDimension
                    valueDimension:(NSUInteger)valueDimension
                        headCount:(NSUInteger)headCount
@@ -84,8 +84,8 @@
               addsZeroAttention:(BOOL)addsZeroAttention;
 @end
 
-@interface MLCEmbeddingDescriptor (CharonStorage)
-- (void)charon_setCount:(NSNumber *)count
+@interface MLCEmbeddingDescriptor (RevenantStorage)
+- (void)revenant_setCount:(NSNumber *)count
             dimension:(NSNumber *)dimension
            paddingIndex:(NSNumber *)paddingIndex
            maximumNorm:(NSNumber *)maximumNorm
@@ -93,11 +93,11 @@
 scalesGradientByFrequency:(BOOL)scales;
 @end
 
-@interface MLCYOLOLossDescriptor (CharonStorage)
-- (void)charon_setAnchorBoxes:(NSData *)boxes count:(NSUInteger)count;
+@interface MLCYOLOLossDescriptor (RevenantStorage)
+- (void)revenant_setAnchorBoxes:(NSData *)boxes count:(NSUInteger)count;
 @end
 
-static void CharonMLCDefaultActivation(MLCActivationType type, float *a, float *b, float *c)
+static void RevenantMLCDefaultActivation(MLCActivationType type, float *a, float *b, float *c)
 {
     *a = 1.0f;
     *b = 1.0f;
@@ -148,38 +148,38 @@ static void CharonMLCDefaultActivation(MLCActivationType type, float *a, float *
 + (instancetype)descriptorWithType:(MLCActivationType)activationType
 {
     float a, b, c;
-    CharonMLCDefaultActivation(activationType, &a, &b, &c);
+    RevenantMLCDefaultActivation(activationType, &a, &b, &c);
     MLCActivationDescriptor *descriptor = [[MLCActivationDescriptor alloc] init];
-    [descriptor charon_setType:activationType a:a b:b c:c];
+    [descriptor revenant_setType:activationType a:a b:b c:c];
     return descriptor;
 }
 
 + (instancetype)descriptorWithType:(MLCActivationType)activationType a:(float)a
 {
     float ignored, b, c;
-    CharonMLCDefaultActivation(activationType, &ignored, &b, &c);
+    RevenantMLCDefaultActivation(activationType, &ignored, &b, &c);
     MLCActivationDescriptor *descriptor = [[MLCActivationDescriptor alloc] init];
-    [descriptor charon_setType:activationType a:a b:b c:c];
+    [descriptor revenant_setType:activationType a:a b:b c:c];
     return descriptor;
 }
 
 + (instancetype)descriptorWithType:(MLCActivationType)activationType a:(float)a b:(float)b
 {
     float ignored, ignored2, c;
-    CharonMLCDefaultActivation(activationType, &ignored, &ignored2, &c);
+    RevenantMLCDefaultActivation(activationType, &ignored, &ignored2, &c);
     MLCActivationDescriptor *descriptor = [[MLCActivationDescriptor alloc] init];
-    [descriptor charon_setType:activationType a:a b:b c:c];
+    [descriptor revenant_setType:activationType a:a b:b c:c];
     return descriptor;
 }
 
 + (instancetype)descriptorWithType:(MLCActivationType)activationType a:(float)a b:(float)b c:(float)c
 {
     MLCActivationDescriptor *descriptor = [[MLCActivationDescriptor alloc] init];
-    [descriptor charon_setType:activationType a:a b:b c:c];
+    [descriptor revenant_setType:activationType a:a b:b c:c];
     return descriptor;
 }
 
-- (void)charon_setType:(MLCActivationType)type a:(float)a b:(float)b c:(float)c
+- (void)revenant_setType:(MLCActivationType)type a:(float)a b:(float)b c:(float)c
 {
     _activationType = type;
     _a = a;
@@ -210,7 +210,7 @@ static void CharonMLCDefaultActivation(MLCActivationType type, float *a, float *
 - (id)copyWithZone:(NSZone *)zone
 {
     MLCActivationDescriptor *copy = [[[self class] allocWithZone:zone] init];
-    [copy charon_setType:_activationType a:_a b:_b c:_c];
+    [copy revenant_setType:_activationType a:_a b:_b c:_c];
     return copy;
 }
 
@@ -258,7 +258,7 @@ static void CharonMLCDefaultActivation(MLCActivationType type, float *a, float *
     return [[self alloc] init];
 }
 
-static void CharonMLCPair(NSArray<NSNumber *> *values, NSUInteger *x, NSUInteger *y)
+static void RevenantMLCPair(NSArray<NSNumber *> *values, NSUInteger *x, NSUInteger *y)
 {
     NSUInteger first = values.count > 0 ? values[0].unsignedIntegerValue : 1;
     NSUInteger second = values.count > 1 ? values[1].unsignedIntegerValue : first;
@@ -266,7 +266,7 @@ static void CharonMLCPair(NSArray<NSNumber *> *values, NSUInteger *x, NSUInteger
     *y = first;
 }
 
-static void CharonMLCPaddingPair(NSArray<NSNumber *> *values, NSUInteger *x, NSUInteger *y)
+static void RevenantMLCPaddingPair(NSArray<NSNumber *> *values, NSUInteger *x, NSUInteger *y)
 {
     NSUInteger first = values.count > 0 ? values[0].unsignedIntegerValue : 0;
     NSUInteger second = values.count > 1 ? values[1].unsignedIntegerValue : first;
@@ -285,12 +285,12 @@ static void CharonMLCPaddingPair(NSArray<NSNumber *> *values, NSUInteger *x, NSU
                         paddingSizes:(NSArray<NSNumber *> *)paddingSizes
 {
     NSUInteger width, height, strideX, strideY, dilationX, dilationY, paddingX = 0, paddingY = 0;
-    CharonMLCPair(kernelSizes, &width, &height);
-    CharonMLCPair(strides, &strideX, &strideY);
-    CharonMLCPair(dilationRates, &dilationX, &dilationY);
-    CharonMLCPaddingPair(paddingSizes, &paddingX, &paddingY);
+    RevenantMLCPair(kernelSizes, &width, &height);
+    RevenantMLCPair(strides, &strideX, &strideY);
+    RevenantMLCPair(dilationRates, &dilationX, &dilationY);
+    RevenantMLCPaddingPair(paddingSizes, &paddingX, &paddingY);
     MLCConvolutionDescriptor *descriptor = [[MLCConvolutionDescriptor alloc] init];
-    [descriptor charon_setType:convolutionType
+    [descriptor revenant_setType:convolutionType
                         kernel:width
                            by:height
                            in:inputFeatureChannelCount
@@ -312,7 +312,7 @@ static void CharonMLCPaddingPair(NSArray<NSNumber *> *values, NSUInteger *x, NSU
                 outputFeatureChannelCount:(NSUInteger)outputFeatureChannelCount
 {
     MLCConvolutionDescriptor *descriptor = [[MLCConvolutionDescriptor alloc] init];
-    [descriptor charon_setType:MLCConvolutionTypeStandard
+    [descriptor revenant_setType:MLCConvolutionTypeStandard
                         kernel:kernelWidth
                            by:kernelHeight
                            in:inputFeatureChannelCount
@@ -372,7 +372,7 @@ static void CharonMLCPaddingPair(NSArray<NSNumber *> *values, NSUInteger *x, NSU
                                 outputFeatureChannelCount:(NSUInteger)outputFeatureChannelCount
 {
     MLCConvolutionDescriptor *descriptor = [[MLCConvolutionDescriptor alloc] init];
-    [descriptor charon_setType:MLCConvolutionTypeTransposed
+    [descriptor revenant_setType:MLCConvolutionTypeTransposed
                         kernel:kernelWidth
                            by:kernelHeight
                            in:inputFeatureChannelCount
@@ -432,7 +432,7 @@ static void CharonMLCPaddingPair(NSArray<NSNumber *> *values, NSUInteger *x, NSU
                                               channelMultiplier:(NSUInteger)channelMultiplier
 {
     MLCConvolutionDescriptor *descriptor = [[MLCConvolutionDescriptor alloc] init];
-    [descriptor charon_setType:MLCConvolutionTypeDepthwise
+    [descriptor revenant_setType:MLCConvolutionTypeDepthwise
                         kernel:kernelWidth
                            by:kernelHeight
                            in:inputFeatureChannelCount
@@ -485,7 +485,7 @@ static void CharonMLCPaddingPair(NSArray<NSNumber *> *values, NSUInteger *x, NSU
                         paddingSizes:paddingSizes];
 }
 
-- (void)charon_setType:(MLCConvolutionType)type
+- (void)revenant_setType:(MLCConvolutionType)type
                 kernel:(NSUInteger)width
                    by:(NSUInteger)height
                    in:(NSUInteger)inputs
@@ -592,7 +592,7 @@ static void CharonMLCPaddingPair(NSArray<NSNumber *> *values, NSUInteger *x, NSU
 - (id)copyWithZone:(NSZone *)zone
 {
     MLCConvolutionDescriptor *copy = [[[self class] allocWithZone:zone] init];
-    [copy charon_setType:_convolutionType
+    [copy revenant_setType:_convolutionType
                    kernel:_kernelWidth
                       by:_kernelHeight
                       in:_inputFeatureChannelCount
@@ -643,7 +643,7 @@ static void CharonMLCPaddingPair(NSArray<NSNumber *> *values, NSUInteger *x, NSU
 + (instancetype)poolingDescriptorWithType:(MLCPoolingType)poolingType kernelSize:(NSUInteger)kernelSize stride:(NSUInteger)stride
 {
     MLCPoolingDescriptor *descriptor = [[MLCPoolingDescriptor alloc] init];
-    [descriptor charon_setType:poolingType
+    [descriptor revenant_setType:poolingType
                      kernelX:kernelSize
                      kernelY:kernelSize
                      strideX:stride
@@ -662,7 +662,7 @@ static void CharonMLCPaddingPair(NSArray<NSNumber *> *values, NSUInteger *x, NSU
                                       paddingPolicy:(MLCPaddingPolicy)paddingPolicy
                                        paddingSizes:(NSArray<NSNumber *> *)paddingSizes
 {
-    return [self charon_poolingDescriptorOfType:MLCPoolingTypeMax
+    return [self revenant_poolingDescriptorOfType:MLCPoolingTypeMax
                                     kernelSizes:kernelSizes
                                         strides:strides
                                    dilationRates:@[]
@@ -677,7 +677,7 @@ static void CharonMLCPaddingPair(NSArray<NSNumber *> *values, NSUInteger *x, NSU
                                      paddingPolicy:(MLCPaddingPolicy)paddingPolicy
                                       paddingSizes:(NSArray<NSNumber *> *)paddingSizes
 {
-    return [self charon_poolingDescriptorOfType:MLCPoolingTypeMax
+    return [self revenant_poolingDescriptorOfType:MLCPoolingTypeMax
                                     kernelSizes:kernelSizes
                                         strides:strides
                                    dilationRates:dilationRates
@@ -692,7 +692,7 @@ static void CharonMLCPaddingPair(NSArray<NSNumber *> *values, NSUInteger *x, NSU
                                             paddingSizes:(NSArray<NSNumber *> *)paddingSizes
                                         countIncludesPadding:(BOOL)countIncludesPadding
 {
-    return [self charon_poolingDescriptorOfType:MLCPoolingTypeAverage
+    return [self revenant_poolingDescriptorOfType:MLCPoolingTypeAverage
                                     kernelSizes:kernelSizes
                                         strides:strides
                                    dilationRates:@[]
@@ -708,7 +708,7 @@ static void CharonMLCPaddingPair(NSArray<NSNumber *> *values, NSUInteger *x, NSU
                                            paddingSizes:(NSArray<NSNumber *> *)paddingSizes
                                        countIncludesPadding:(BOOL)countIncludesPadding
 {
-    return [self charon_poolingDescriptorOfType:MLCPoolingTypeAverage
+    return [self revenant_poolingDescriptorOfType:MLCPoolingTypeAverage
                                     kernelSizes:kernelSizes
                                         strides:strides
                                    dilationRates:dilationRates
@@ -722,7 +722,7 @@ static void CharonMLCPaddingPair(NSArray<NSNumber *> *values, NSUInteger *x, NSU
                                          paddingPolicy:(MLCPaddingPolicy)paddingPolicy
                                           paddingSizes:(NSArray<NSNumber *> *)paddingSizes
 {
-    return [self charon_poolingDescriptorOfType:MLCPoolingTypeL2Norm
+    return [self revenant_poolingDescriptorOfType:MLCPoolingTypeL2Norm
                                     kernelSizes:kernelSizes
                                         strides:strides
                                    dilationRates:@[]
@@ -737,7 +737,7 @@ static void CharonMLCPaddingPair(NSArray<NSNumber *> *values, NSUInteger *x, NSU
                                         paddingPolicy:(MLCPaddingPolicy)paddingPolicy
                                          paddingSizes:(NSArray<NSNumber *> *)paddingSizes
 {
-    return [self charon_poolingDescriptorOfType:MLCPoolingTypeL2Norm
+    return [self revenant_poolingDescriptorOfType:MLCPoolingTypeL2Norm
                                     kernelSizes:kernelSizes
                                         strides:strides
                                    dilationRates:dilationRates
@@ -746,7 +746,7 @@ static void CharonMLCPaddingPair(NSArray<NSNumber *> *values, NSUInteger *x, NSU
                                countsPadding:NO];
 }
 
-+ (instancetype)charon_poolingDescriptorOfType:(MLCPoolingType)type
++ (instancetype)revenant_poolingDescriptorOfType:(MLCPoolingType)type
                                   kernelSizes:(NSArray<NSNumber *> *)kernelSizes
                                       strides:(NSArray<NSNumber *> *)strides
                                  dilationRates:(NSArray<NSNumber *> *)dilationRates
@@ -755,17 +755,17 @@ static void CharonMLCPaddingPair(NSArray<NSNumber *> *values, NSUInteger *x, NSU
                                  countsPadding:(BOOL)countsPadding
 {
     NSUInteger width, height, strideX = 0, strideY = 0, dilationX, dilationY, paddingX = 0, paddingY = 0;
-    CharonMLCPair(kernelSizes, &width, &height);
+    RevenantMLCPair(kernelSizes, &width, &height);
     if (strides) {
-        CharonMLCPair(strides, &strideX, &strideY);
+        RevenantMLCPair(strides, &strideX, &strideY);
     } else {
         strideX = width;
         strideY = height;
     }
-    CharonMLCPair(dilationRates, &dilationX, &dilationY);
-    CharonMLCPaddingPair(paddingSizes, &paddingX, &paddingY);
+    RevenantMLCPair(dilationRates, &dilationX, &dilationY);
+    RevenantMLCPaddingPair(paddingSizes, &paddingX, &paddingY);
     MLCPoolingDescriptor *descriptor = [[MLCPoolingDescriptor alloc] init];
-    [descriptor charon_setType:type
+    [descriptor revenant_setType:type
                      kernelX:width
                      kernelY:height
                      strideX:strideX
@@ -779,7 +779,7 @@ static void CharonMLCPaddingPair(NSArray<NSNumber *> *values, NSUInteger *x, NSU
     return descriptor;
 }
 
-- (void)charon_setType:(MLCPoolingType)type
+- (void)revenant_setType:(MLCPoolingType)type
               kernelX:(NSUInteger)width
               kernelY:(NSUInteger)height
               strideX:(NSUInteger)strideX
@@ -862,7 +862,7 @@ static void CharonMLCPaddingPair(NSArray<NSNumber *> *values, NSUInteger *x, NSU
 - (id)copyWithZone:(NSZone *)zone
 {
     MLCPoolingDescriptor *copy = [[[self class] allocWithZone:zone] init];
-    [copy charon_setType:_poolingType
+    [copy revenant_setType:_poolingType
                 kernelX:_kernelWidth
                 kernelY:_kernelHeight
                 strideX:_strideInX
@@ -953,7 +953,7 @@ static void CharonMLCPaddingPair(NSArray<NSNumber *> *values, NSUInteger *x, NSU
                             delta:(float)delta
 {
     MLCLossDescriptor *descriptor = [[MLCLossDescriptor alloc] init];
-    [descriptor charon_setType:lossType
+    [descriptor revenant_setType:lossType
                     reduction:reductionType
                         weight:weight
                 labelSmoothing:labelSmoothing
@@ -963,7 +963,7 @@ static void CharonMLCPaddingPair(NSArray<NSNumber *> *values, NSUInteger *x, NSU
     return descriptor;
 }
 
-- (void)charon_setType:(MLCLossType)type
+- (void)revenant_setType:(MLCLossType)type
              reduction:(MLCReductionType)reduction
                  weight:(float)weight
          labelSmoothing:(float)labelSmoothing
@@ -1018,7 +1018,7 @@ static void CharonMLCPaddingPair(NSArray<NSNumber *> *values, NSUInteger *x, NSU
 - (id)copyWithZone:(NSZone *)zone
 {
     MLCLossDescriptor *copy = [[[self class] allocWithZone:zone] init];
-    [copy charon_setType:_lossType
+    [copy revenant_setType:_lossType
                reduction:_reductionType
                    weight:_weight
            labelSmoothing:_labelSmoothing
@@ -1109,7 +1109,7 @@ static void CharonMLCPaddingPair(NSArray<NSNumber *> *values, NSUInteger *x, NSU
                       regularizationScale:(float)regularizationScale
 {
     MLCOptimizerDescriptor *descriptor = [[MLCOptimizerDescriptor alloc] init];
-    [descriptor charon_setLearningRate:learningRate
+    [descriptor revenant_setLearningRate:learningRate
                         gradientRescale:gradientRescale
                 appliesGradientClipping:appliesGradientClipping
                   gradientClippingType:gradientClippingType
@@ -1122,7 +1122,7 @@ static void CharonMLCPaddingPair(NSArray<NSNumber *> *values, NSUInteger *x, NSU
     return descriptor;
 }
 
-- (void)charon_setLearningRate:(float)learningRate
+- (void)revenant_setLearningRate:(float)learningRate
                 gradientRescale:(float)rescale
         appliesGradientClipping:(BOOL)clipping
               gradientClippingType:(MLCGradientClippingType)clippingType
@@ -1198,7 +1198,7 @@ static void CharonMLCPaddingPair(NSArray<NSNumber *> *values, NSUInteger *x, NSU
 - (id)copyWithZone:(NSZone *)zone
 {
     MLCOptimizerDescriptor *copy = [[[self class] allocWithZone:zone] init];
-    [copy charon_setLearningRate:_learningRate
+    [copy revenant_setLearningRate:_learningRate
                   gradientRescale:_gradientRescale
           appliesGradientClipping:_appliesGradientClipping
                 gradientClippingType:_gradientClippingType
@@ -1312,7 +1312,7 @@ static void CharonMLCPaddingPair(NSArray<NSNumber *> *values, NSUInteger *x, NSU
                    scalesGradientByFrequency:(BOOL)scalesGradientByFrequency
 {
     MLCEmbeddingDescriptor *descriptor = [[MLCEmbeddingDescriptor alloc] init];
-    [descriptor charon_setCount:embeddingCount
+    [descriptor revenant_setCount:embeddingCount
                     dimension:embeddingDimension
                    paddingIndex:paddingIndex
                    maximumNorm:maximumNorm
@@ -1321,7 +1321,7 @@ static void CharonMLCPaddingPair(NSArray<NSNumber *> *values, NSUInteger *x, NSU
     return descriptor;
 }
 
-- (void)charon_setCount:(NSNumber *)count
+- (void)revenant_setCount:(NSNumber *)count
               dimension:(NSNumber *)dimension
            paddingIndex:(NSNumber *)paddingIndex
            maximumNorm:(NSNumber *)maximumNorm
@@ -1369,7 +1369,7 @@ scalesGradientByFrequency:(BOOL)scales
 - (id)copyWithZone:(NSZone *)zone
 {
     MLCEmbeddingDescriptor *copy = [[[self class] allocWithZone:zone] init];
-    [copy charon_setCount:_embeddingCount
+    [copy revenant_setCount:_embeddingCount
                 dimension:_embeddingDimension
              paddingIndex:_paddingIndex
              maximumNorm:_maximumNorm
@@ -1489,7 +1489,7 @@ scalesGradientByFrequency:_scalesGradientByFrequency];
                             resultMode:(MLCLSTMResultMode)resultMode
 {
     MLCLSTMDescriptor *descriptor = [[MLCLSTMDescriptor alloc] init];
-    [descriptor charon_setInputSize:inputSize
+    [descriptor revenant_setInputSize:inputSize
                         hiddenSize:hiddenSize
                         layerCount:layerCount
                         usesBiases:usesBiases
@@ -1501,7 +1501,7 @@ scalesGradientByFrequency:_scalesGradientByFrequency];
     return descriptor;
 }
 
-- (void)charon_setInputSize:(NSUInteger)inputSize
+- (void)revenant_setInputSize:(NSUInteger)inputSize
                   hiddenSize:(NSUInteger)hiddenSize
                   layerCount:(NSUInteger)layerCount
                   usesBiases:(BOOL)usesBiases
@@ -1570,7 +1570,7 @@ scalesGradientByFrequency:_scalesGradientByFrequency];
 - (id)copyWithZone:(NSZone *)zone
 {
     MLCLSTMDescriptor *copy = [[[self class] allocWithZone:zone] init];
-    [copy charon_setInputSize:_inputSize
+    [copy revenant_setInputSize:_inputSize
                     hiddenSize:_hiddenSize
                     layerCount:_layerCount
                     usesBiases:_usesBiases
@@ -1630,7 +1630,7 @@ scalesGradientByFrequency:_scalesGradientByFrequency];
                           addsZeroAttention:(BOOL)addsZeroAttention
 {
     MLCMultiheadAttentionDescriptor *descriptor = [[MLCMultiheadAttentionDescriptor alloc] init];
-    [descriptor charon_setModelDimension:modelDimension
+    [descriptor revenant_setModelDimension:modelDimension
                              keyDimension:keyDimension
                            valueDimension:valueDimension
                                headCount:headCount
@@ -1641,7 +1641,7 @@ scalesGradientByFrequency:_scalesGradientByFrequency];
     return descriptor;
 }
 
-- (void)charon_setModelDimension:(NSUInteger)modelDimension
+- (void)revenant_setModelDimension:(NSUInteger)modelDimension
                      keyDimension:(NSUInteger)keyDimension
                    valueDimension:(NSUInteger)valueDimension
                        headCount:(NSUInteger)headCount
@@ -1703,7 +1703,7 @@ scalesGradientByFrequency:_scalesGradientByFrequency];
 - (id)copyWithZone:(NSZone *)zone
 {
     MLCMultiheadAttentionDescriptor *copy = [[[self class] allocWithZone:zone] init];
-    [copy charon_setModelDimension:_modelDimension
+    [copy revenant_setModelDimension:_modelDimension
                         keyDimension:_keyDimension
                       valueDimension:_valueDimension
                           headCount:_headCount
@@ -1748,7 +1748,7 @@ scalesGradientByFrequency:_scalesGradientByFrequency];
 + (instancetype)descriptorWithAnchorBoxes:(NSData *)anchorBoxes anchorBoxCount:(NSUInteger)anchorBoxCount
 {
     MLCYOLOLossDescriptor *descriptor = [[MLCYOLOLossDescriptor alloc] init];
-    [descriptor charon_setAnchorBoxes:anchorBoxes count:anchorBoxCount];
+    [descriptor revenant_setAnchorBoxes:anchorBoxes count:anchorBoxCount];
     descriptor->_shouldRescore = YES;
     descriptor->_scaleSpatialPositionLoss = 10.0f;
     descriptor->_scaleSpatialSizeLoss = 10.0f;
@@ -1760,7 +1760,7 @@ scalesGradientByFrequency:_scalesGradientByFrequency];
     return descriptor;
 }
 
-- (void)charon_setAnchorBoxes:(NSData *)boxes count:(NSUInteger)count
+- (void)revenant_setAnchorBoxes:(NSData *)boxes count:(NSUInteger)count
 {
     _anchorBoxes = [boxes copy] ?: [NSData data];
     _anchorBoxCount = count;

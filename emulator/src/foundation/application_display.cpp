@@ -16,11 +16,11 @@
 #include <string>
 #include <system_error>
 
-#if defined(SHADE_HAS_LIBPLIST)
+#if defined(REVENANT_EMULATOR_HAS_LIBPLIST)
 #include <plist/plist.h>
 #endif
 
-namespace shade {
+namespace emulator {
 namespace {
 
     std::optional<DisplayOrientation> parse_orientation(std::string_view value)
@@ -84,7 +84,7 @@ namespace {
         return std::nullopt;
     }
 
-#if defined(SHADE_HAS_LIBPLIST)
+#if defined(REVENANT_EMULATOR_HAS_LIBPLIST)
     class PlistOwner {
     public:
         explicit PlistOwner(plist_t node = nullptr)
@@ -157,7 +157,7 @@ ApplicationDisplay detect_application_display(
         return profile;
     }
 
-#if defined(SHADE_HAS_LIBPLIST)
+#if defined(REVENANT_EMULATOR_HAS_LIBPLIST)
     const auto path = info_plist_path(rootfs, executable_path);
     std::ifstream input { path, std::ios::binary };
     if (!input)
@@ -282,7 +282,7 @@ DisplayOrientation detect_application_display_orientation(
     if (!input)
         return portrait_fallback();
 
-#if defined(SHADE_HAS_LIBPLIST)
+#if defined(REVENANT_EMULATOR_HAS_LIBPLIST)
     const std::string bytes { std::istreambuf_iterator<char> { input },
         std::istreambuf_iterator<char> { } };
     plist_t parsed = nullptr;

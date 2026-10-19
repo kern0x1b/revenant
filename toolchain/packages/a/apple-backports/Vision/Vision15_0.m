@@ -1,4 +1,4 @@
-#import "CharonVision.h"
+#import "RevenantVision.h"
 
 VNBarcodeSymbology const VNBarcodeSymbologyCodabar = @"VNBarcodeSymbologyCodabar";
 VNBarcodeSymbology const VNBarcodeSymbologyGS1DataBar = @"VNBarcodeSymbologyGS1DataBar";
@@ -49,16 +49,16 @@ CGRect VNNormalizedRectForImageRectUsingRegionOfInterest(CGRect imageRect, size_
     return CGRectMake(minX / rw, minY / rh, maxX / rw - minX / rw, maxY / rh - minY / rh);
 }
 
-@implementation VNDetectContoursRequest (CharonVision15ContrastPivot)
+@implementation VNDetectContoursRequest (RevenantVision15ContrastPivot)
 
 - (NSNumber *)contrastPivot
 {
-    return [self charon_contrastPivotValue];
+    return [self revenant_contrastPivotValue];
 }
 
 - (void)setContrastPivot:(NSNumber *)contrastPivot
 {
-    [self charon_setContrastPivotValue:contrastPivot];
+    [self revenant_setContrastPivotValue:contrastPivot];
 }
 
 @end

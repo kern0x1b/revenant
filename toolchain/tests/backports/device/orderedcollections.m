@@ -19,7 +19,7 @@ int main(void)
             if (oc_hash(answer) != oc_expectations[index]) {
                 wrong++;
                 if (wrong <= 5) {
-                    charon_check(NO, [NSString stringWithFormat:@"case %zu answers as the system does", index].UTF8String, answer);
+                    revenant_check(NO, [NSString stringWithFormat:@"case %zu answers as the system does", index].UTF8String, answer);
                 }
             }
         }
@@ -38,7 +38,7 @@ int main(void)
         NSMutableOrderedSet *set = [NSMutableOrderedSet orderedSetWithArray:before];
         [set applyDifference:[[NSOrderedSet orderedSetWithArray:after] differenceFromOrderedSet:[NSOrderedSet orderedSetWithArray:before]]];
         CHECK_EQUAL([set array], after, "a mutable ordered set does as well");
-        printf("checks=%d failures=%d\n", charon_checks, charon_failures);
-        return charon_failures;
+        printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
+        return revenant_failures;
     }
 }

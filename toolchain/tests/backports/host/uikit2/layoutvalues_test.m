@@ -18,7 +18,7 @@ static CompositionalKit value_kit(NSString *prefix)
 static NSString *norm(id object)
 {
     NSString *text = [NSString stringWithFormat:@"%@", object];
-    text = [text stringByReplacingOccurrencesOfString:@"CharonHost" withString:@""];
+    text = [text stringByReplacingOccurrencesOfString:@"RevenantHost" withString:@""];
     NSRegularExpression *pointer = [NSRegularExpression regularExpressionWithPattern:@"0x[0-9a-f]+" options:0 error:nil];
     text = [pointer stringByReplacingMatchesInString:text options:0 range:NSMakeRange(0, text.length) withTemplate:@"PTR"];
     NSRegularExpression *uuid = [NSRegularExpression regularExpressionWithPattern:@"[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}" options:0 error:nil];
@@ -394,7 +394,7 @@ static NSArray *value_lines(CompositionalKit kit)
 int main(void)
 {
     @autoreleasepool {
-        NSArray *system = value_lines(value_kit(@"")), *port = value_lines(value_kit(@"CharonHost"));
+        NSArray *system = value_lines(value_kit(@"")), *port = value_lines(value_kit(@"RevenantHost"));
         CHECK(system.count > 100 && system.count == port.count, "the same statements ran against the port and the system");
         NSMutableString *detail = [NSMutableString string];
         NSUInteger differences = 0;
@@ -409,8 +409,8 @@ int main(void)
             NSUInteger from = at > 60 ? at - 60 : 0;
             [detail appendFormat:@"\n    port   ...%@\n    system ...%@", [a substringWithRange:NSMakeRange(from, MIN(160, a.length - from))], [b substringWithRange:NSMakeRange(from, MIN(160, b.length - from))]];
         }
-        charon_check(differences == 0, "the value classes answer as the system's do", detail);
-        printf("statements=%lu checks=%d failures=%d\n", (unsigned long)system.count, charon_checks, charon_failures);
-        return charon_failures ? 1 : 0;
+        revenant_check(differences == 0, "the value classes answer as the system's do", detail);
+        printf("statements=%lu checks=%d failures=%d\n", (unsigned long)system.count, revenant_checks, revenant_failures);
+        return revenant_failures ? 1 : 0;
     }
 }

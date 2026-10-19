@@ -11,7 +11,7 @@
     return YES;
 }
 
-- (instancetype)initWithCharonLevel:(NSInteger)level
+- (instancetype)initWithRevenantLevel:(NSInteger)level
 {
     if ((self = [super init]))
         _level = level;
@@ -20,7 +20,7 @@
 
 - (instancetype)initWithCoder:(NSCoder *)coder
 {
-    return [self initWithCharonLevel:[coder decodeIntegerForKey:@"level"]];
+    return [self initWithRevenantLevel:[coder decodeIntegerForKey:@"level"]];
 }
 
 - (void)encodeWithCoder:(NSCoder *)coder
@@ -30,7 +30,7 @@
 
 - (id)copyWithZone:(NSZone *)zone
 {
-    return [[[self class] allocWithZone:zone] initWithCharonLevel:_level];
+    return [[[self class] allocWithZone:zone] initWithRevenantLevel:_level];
 }
 
 - (NSInteger)level

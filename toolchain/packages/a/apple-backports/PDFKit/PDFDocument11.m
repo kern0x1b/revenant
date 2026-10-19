@@ -1,10 +1,10 @@
-#import "CharonPDFKit.h"
+#import "RevenantPDFKit.h"
 #import "PDFPageText11.h"
 
 #import <dlfcn.h>
 
 @interface PDFDocument ()
-- (NSDictionary *)charon_readAttributes;
+- (NSDictionary *)revenant_readAttributes;
 @end
 
 @implementation PDFDocument {
@@ -20,7 +20,7 @@
 @dynamic pageCount;
 @dynamic documentAttributes;
 
-- (instancetype)charon_setUpWithData:(NSData *)data
+- (instancetype)revenant_setUpWithData:(NSData *)data
 {
     if (data.length == 0)
         return nil;
@@ -34,7 +34,7 @@
     _pages = [NSMutableArray array];
     _lastFindResults = [NSMutableArray array];
     _data = [data copy];
-    _attributes = [self charon_readAttributes];
+    _attributes = [self revenant_readAttributes];
     return self;
 }
 
@@ -59,7 +59,7 @@
     if (data == nil)
         return nil;
     _url = [url copy];
-    return [self charon_setUpWithData:data];
+    return [self revenant_setUpWithData:data];
 }
 
 - (instancetype)initWithData:(NSData *)data
@@ -67,24 +67,24 @@
     self = [super init];
     if (self == nil)
         return nil;
-    return [self charon_setUpWithData:data];
+    return [self revenant_setUpWithData:data];
 }
 
-+ (instancetype)charon_documentWithCGPDFDocument:(CGPDFDocumentRef)document
++ (instancetype)revenant_documentWithCGPDFDocument:(CGPDFDocumentRef)document
 {
-    PDFDocument *made = [[self alloc] charon_setUpWithData:nil];
+    PDFDocument *made = [[self alloc] revenant_setUpWithData:nil];
     if (made == nil || document == NULL)
         return nil;
     CGPDFDocumentRetain(document);
     made->_document = document;
     if (made->_pages == nil)
         made->_pages = [NSMutableArray array];
-    made->_attributes = [made charon_readAttributes];
+    made->_attributes = [made revenant_readAttributes];
     return made;
 }
 
 
-- (NSDictionary *)charon_readAttributes
+- (NSDictionary *)revenant_readAttributes
 {
     if (_document == NULL)
         return @{};
@@ -188,10 +188,10 @@
     CGPDFDictionaryRef root = NULL;
     if (!CGPDFDictionaryGetDictionary(catalog, "Outlines", &root) || root == NULL)
         return nil;
-    return [[PDFOutline alloc] initWithCharonItem:root document:self parent:nil index:0];
+    return [[PDFOutline alloc] initWithRevenantItem:root document:self parent:nil index:0];
 }
 
-static NSRange charonRangeForMatch(NSRange match, NSString *text)
+static NSRange revenantRangeForMatch(NSRange match, NSString *text)
 {
     NSRange range = match;
     NSUInteger after = NSMaxRange(match);
@@ -200,22 +200,22 @@ static NSRange charonRangeForMatch(NSRange match, NSString *text)
     return range;
 }
 
-static PDFSelection *charonSelectionForMatch(PDFDocument *document, PDFPage *page, NSRange match,
+static PDFSelection *revenantSelectionForMatch(PDFDocument *document, PDFPage *page, NSRange match,
                                              NSString *text)
 {
     if (document == nil)
         return nil;
     PDFSelection *selection = [[PDFSelection alloc] initWithDocument:document];
-    [selection charon_addSpanOnPage:page range:charonRangeForMatch(match, text)];
+    [selection revenant_addSpanOnPage:page range:revenantRangeForMatch(match, text)];
     return selection;
 }
 
-static NSArray<PDFSelection *> *charonMatchesOnPage(PDFPage *page, NSString *needle,
+static NSArray<PDFSelection *> *revenantMatchesOnPage(PDFPage *page, NSString *needle,
                                                     NSStringCompareOptions options, NSUInteger from,
                                                     NSUInteger to)
 {
     NSMutableArray<PDFSelection *> *answer = [NSMutableArray array];
-    CharonPDFPageText *layout = [page charon_textLayout];
+    RevenantPDFPageText *layout = [page revenant_textLayout];
     NSString *text = layout.string;
     if (text == nil || needle == nil || needle.length == 0)
         return answer;
@@ -229,7 +229,7 @@ static NSArray<PDFSelection *> *charonMatchesOnPage(PDFPage *page, NSString *nee
     NSRange search = NSMakeRange(from, to - from);
     NSRange hit = [text rangeOfString:needle options:use range:search];
     while (hit.location != NSNotFound) {
-        PDFSelection *selection = charonSelectionForMatch(page.document, page, hit, text);
+        PDFSelection *selection = revenantSelectionForMatch(page.document, page, hit, text);
         if (selection == nil)
             break;
         [answer addObject:selection];
@@ -247,7 +247,7 @@ static NSArray<PDFSelection *> *charonMatchesOnPage(PDFPage *page, NSString *nee
     [_lastFindResults removeAllObjects];
     BOOL backwards = (options & NSBackwardsSearch) != 0;
     for (NSUInteger page = 0; page < self.pageCount; page++)
-        [_lastFindResults addObjectsFromArray:charonMatchesOnPage([self pageAtIndex:page], string, options,
+        [_lastFindResults addObjectsFromArray:revenantMatchesOnPage([self pageAtIndex:page], string, options,
                                                                  0, NSUIntegerMax)];
     if (backwards)
         [_lastFindResults setArray:[[_lastFindResults reverseObjectEnumerator] allObjects]];
@@ -275,7 +275,7 @@ static NSArray<PDFSelection *> *charonMatchesOnPage(PDFPage *page, NSString *nee
         PDFPage *first = [pages firstObject];
         PDFPage *last = [pages lastObject];
         startPage = backwards ? first : last;
-        CharonPDFPageText *layout = [startPage charon_textLayout];
+        RevenantPDFPageText *layout = [startPage revenant_textLayout];
         NSUInteger count = [selection numberOfTextRangesOnPage:startPage];
         NSRange range = [selection rangeAtIndex:backwards ? 0 : (count > 0 ? count - 1 : 0)
                                     onPage:startPage];
@@ -291,7 +291,7 @@ static NSArray<PDFSelection *> *charonMatchesOnPage(PDFPage *page, NSString *nee
     for (; first < self.pageCount;
          first = backwards ? (first == 0 ? self.pageCount : first - 1) : first + 1) {
         PDFPage *page = [self pageAtIndex:first];
-        NSArray<PDFSelection *> *matches = charonMatchesOnPage(page, string, options, from, to);
+        NSArray<PDFSelection *> *matches = revenantMatchesOnPage(page, string, options, from, to);
         if (matches.count > 0)
         {
             PDFSelection *found = backwards ? [matches lastObject] : [matches firstObject];
@@ -303,7 +303,7 @@ static NSArray<PDFSelection *> *charonMatchesOnPage(PDFPage *page, NSString *nee
     return nil;
 }
 
-- (CGPDFDocumentRef)charon_CGPDFDocument
+- (CGPDFDocumentRef)revenant_CGPDFDocument
 {
     return _document;
 }

@@ -2,53 +2,53 @@
 #import <CoreLocation/CoreLocation.h>
 #import <UserNotifications/UserNotifications.h>
 
-NSDate *charon_next_date_matching(NSCalendar *calendar, NSDateComponents *components, NSDate *after);
-void charon_on_main(void (^work)(void));
-NSError *charon_unsupported(NSString *reason);
+NSDate *revenant_next_date_matching(NSCalendar *calendar, NSDateComponents *components, NSDate *after);
+void revenant_on_main(void (^work)(void));
+NSError *revenant_unsupported(NSString *reason);
 
-@interface UNNotificationSound (CharonUserNotifications)
-- (NSString *)charon_fileName;
+@interface UNNotificationSound (RevenantUserNotifications)
+- (NSString *)revenant_fileName;
 @end
 
-@interface UNNotificationTrigger (CharonUserNotifications)
-- (instancetype)initCharonWithRepeats:(BOOL)repeats;
+@interface UNNotificationTrigger (RevenantUserNotifications)
+- (instancetype)initRevenantWithRepeats:(BOOL)repeats;
 @end
 
-@interface UNPushNotificationTrigger (CharonUserNotifications)
-+ (instancetype)charon_pushTrigger;
+@interface UNPushNotificationTrigger (RevenantUserNotifications)
++ (instancetype)revenant_pushTrigger;
 @end
 
-@interface UNNotification (CharonUserNotifications)
+@interface UNNotification (RevenantUserNotifications)
 + (instancetype)notificationWithRequest:(UNNotificationRequest *)request date:(NSDate *)date;
 @end
 
-@interface UNNotificationResponse (CharonUserNotifications)
+@interface UNNotificationResponse (RevenantUserNotifications)
 + (instancetype)responseWithNotification:(UNNotification *)notification actionIdentifier:(NSString *)actionIdentifier;
-- (instancetype)initCharonWithNotification:(UNNotification *)notification actionIdentifier:(NSString *)actionIdentifier;
+- (instancetype)initRevenantWithNotification:(UNNotification *)notification actionIdentifier:(NSString *)actionIdentifier;
 @end
 
-@interface UNNotificationAction (CharonUserNotifications)
-- (instancetype)initCharonWithIdentifier:(NSString *)identifier title:(NSString *)title options:(UNNotificationActionOptions)options;
-- (NSString *)charon_description;
+@interface UNNotificationAction (RevenantUserNotifications)
+- (instancetype)initRevenantWithIdentifier:(NSString *)identifier title:(NSString *)title options:(UNNotificationActionOptions)options;
+- (NSString *)revenant_description;
 @end
 
-@interface UNTextInputNotificationAction (CharonUserNotifications)
-- (instancetype)initCharonWithIdentifier:(NSString *)identifier title:(NSString *)title options:(UNNotificationActionOptions)options
+@interface UNTextInputNotificationAction (RevenantUserNotifications)
+- (instancetype)initRevenantWithIdentifier:(NSString *)identifier title:(NSString *)title options:(UNNotificationActionOptions)options
                     textInputButtonTitle:(NSString *)buttonTitle textInputPlaceholder:(NSString *)placeholder;
 @end
 
-@interface UNUserNotificationCenter (CharonUserNotifications)
-- (UILocalNotification *)charon_localNotificationForRequest:(UNNotificationRequest *)request;
-- (void)charon_deliverRequest:(UNNotificationRequest *)request state:(UIApplicationState)state;
+@interface UNUserNotificationCenter (RevenantUserNotifications)
+- (UILocalNotification *)revenant_localNotificationForRequest:(UNNotificationRequest *)request;
+- (void)revenant_deliverRequest:(UNNotificationRequest *)request state:(UIApplicationState)state;
 @end
 
-@interface CharonRegionMonitor : NSObject <CLLocationManagerDelegate> {
+@interface RevenantRegionMonitor : NSObject <CLLocationManagerDelegate> {
 @private
     CLLocationManager *_manager;
     NSMutableDictionary<NSString *, NSMutableArray *> *_byRegion;
 }
-+ (CharonRegionMonitor *)charon_sharedMonitor;
-- (NSError *)charon_monitorRequest:(UNNotificationRequest *)request;
-- (NSArray<UNNotificationRequest *> *)charon_requests;
-- (void)charon_removeRequestsWithIdentifiers:(NSSet<NSString *> *)identifiers;
++ (RevenantRegionMonitor *)revenant_sharedMonitor;
+- (NSError *)revenant_monitorRequest:(UNNotificationRequest *)request;
+- (NSArray<UNNotificationRequest *> *)revenant_requests;
+- (void)revenant_removeRequestsWithIdentifiers:(NSSet<NSString *> *)identifiers;
 @end

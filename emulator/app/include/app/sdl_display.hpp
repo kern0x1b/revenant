@@ -18,7 +18,7 @@
 #include "foundation/system_button_input.hpp"
 #include "foundation/touch_input.hpp"
 
-namespace shade {
+namespace emulator {
 
 struct DisplayFrame;
 

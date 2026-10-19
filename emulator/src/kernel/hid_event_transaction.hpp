@@ -11,7 +11,7 @@
 
 #include <functional>
 
-namespace shade {
+namespace emulator {
 
 class UserlandHleRegistry;
 enum class DarwinHidDigitizerAbi : std::uint8_t;

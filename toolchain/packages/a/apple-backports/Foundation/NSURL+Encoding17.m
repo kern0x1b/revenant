@@ -1,7 +1,7 @@
 #import <Foundation/Foundation.h>
 #import <objc/runtime.h>
 
-static BOOL charon_url_readable(NSString *text)
+static BOOL revenant_url_readable(NSString *text)
 {
     static NSCharacterSet *allowed;
     static dispatch_once_t once;
@@ -15,7 +15,7 @@ static BOOL charon_url_readable(NSString *text)
     return YES;
 }
 
-static NSString *charon_url_escaped(NSString *text)
+static NSString *revenant_url_escaped(NSString *text)
 {
     NSMutableString *out = [NSMutableString stringWithCapacity:text.length];
     for (NSUInteger index = 0; index < text.length; index++) {
@@ -35,7 +35,7 @@ static NSString *charon_url_escaped(NSString *text)
     return out;
 }
 
-static NSString *charon_url_percent_escaped(NSString *text)
+static NSString *revenant_url_percent_escaped(NSString *text)
 {
     NSData *bytes = [text dataUsingEncoding:NSUTF8StringEncoding];
     const unsigned char *raw = bytes.bytes;
@@ -45,12 +45,12 @@ static NSString *charon_url_percent_escaped(NSString *text)
     return out;
 }
 
-@implementation NSURL (CharonEncoding)
+@implementation NSURL (RevenantEncoding)
 
 + (NSURL *)URLWithString:(NSString *)string encodingInvalidCharacters:(BOOL)encoding
 {
     if (!encoding)
-        return charon_url_readable(string) ? [self URLWithString:string] : nil;
+        return revenant_url_readable(string) ? [self URLWithString:string] : nil;
     NSMutableString *escaped = [NSMutableString stringWithCapacity:string.length];
     for (NSUInteger index = 0; index < string.length; index++) {
         unichar character = [string characterAtIndex:index];
@@ -58,15 +58,15 @@ static NSString *charon_url_percent_escaped(NSString *text)
             [escaped appendFormat:@"%C", character];
             continue;
         }
-        [escaped appendString:charon_url_percent_escaped([NSString stringWithFormat:@"%C", character])];
+        [escaped appendString:revenant_url_percent_escaped([NSString stringWithFormat:@"%C", character])];
     }
-    return [self URLWithString:charon_url_escaped(escaped)];
+    return [self URLWithString:revenant_url_escaped(escaped)];
 }
 
 - (instancetype)initWithString:(NSString *)string encodingInvalidCharacters:(BOOL)encoding
 {
     if (!encoding)
-        return charon_url_readable(string) ? [self initWithString:string] : nil;
+        return revenant_url_readable(string) ? [self initWithString:string] : nil;
     NSMutableString *escaped = [NSMutableString stringWithCapacity:string.length];
     for (NSUInteger index = 0; index < string.length; index++) {
         unichar character = [string characterAtIndex:index];
@@ -74,9 +74,9 @@ static NSString *charon_url_percent_escaped(NSString *text)
             [escaped appendFormat:@"%C", character];
             continue;
         }
-        [escaped appendString:charon_url_percent_escaped([NSString stringWithFormat:@"%C", character])];
+        [escaped appendString:revenant_url_percent_escaped([NSString stringWithFormat:@"%C", character])];
     }
-    return [self initWithString:charon_url_escaped(escaped)];
+    return [self initWithString:revenant_url_escaped(escaped)];
 }
 
 @end

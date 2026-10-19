@@ -1,6 +1,6 @@
-#import "CharonUserNotifications.h"
+#import "RevenantUserNotifications.h"
 
-static NSString *charon_yes_no(BOOL value)
+static NSString *revenant_yes_no(BOOL value)
 {
     return value ? @"YES" : @"NO";
 }
@@ -19,10 +19,10 @@ static NSString *charon_yes_no(BOOL value)
 
 + (instancetype)actionWithIdentifier:(NSString *)identifier title:(NSString *)title options:(UNNotificationActionOptions)options
 {
-    return [[self alloc] initCharonWithIdentifier:identifier title:title options:options];
+    return [[self alloc] initRevenantWithIdentifier:identifier title:title options:options];
 }
 
-- (instancetype)initCharonWithIdentifier:(NSString *)identifier title:(NSString *)title options:(UNNotificationActionOptions)options
+- (instancetype)initRevenantWithIdentifier:(NSString *)identifier title:(NSString *)title options:(UNNotificationActionOptions)options
 {
     if ((self = [super init])) {
         _identifier = [identifier copy];
@@ -34,7 +34,7 @@ static NSString *charon_yes_no(BOOL value)
 
 - (instancetype)initWithCoder:(NSCoder *)coder
 {
-    return [self initCharonWithIdentifier:[coder decodeObjectOfClass:[NSString class] forKey:@"identifier"]
+    return [self initRevenantWithIdentifier:[coder decodeObjectOfClass:[NSString class] forKey:@"identifier"]
                                     title:[coder decodeObjectOfClass:[NSString class] forKey:@"title"]
                                   options:(UNNotificationActionOptions)[coder decodeIntegerForKey:@"options"]];
 }
@@ -82,16 +82,16 @@ static NSString *charon_yes_no(BOOL value)
     return _identifier.hash ^ _options ^ _title.hash;
 }
 
-- (NSString *)charon_description
+- (NSString *)revenant_description
 {
     return [NSString stringWithFormat:@"<%@: %p; identifier: %@, title: %@, isAuthenticationRequired: %@, isDestructive: %@, isForeground: %@",
-                                      [self class], self, _identifier, _title, charon_yes_no(_options & UNNotificationActionOptionAuthenticationRequired),
-                                      charon_yes_no(_options & UNNotificationActionOptionDestructive), charon_yes_no(_options & UNNotificationActionOptionForeground)];
+                                      [self class], self, _identifier, _title, revenant_yes_no(_options & UNNotificationActionOptionAuthenticationRequired),
+                                      revenant_yes_no(_options & UNNotificationActionOptionDestructive), revenant_yes_no(_options & UNNotificationActionOptionForeground)];
 }
 
 - (NSString *)description
 {
-    return [[self charon_description] stringByAppendingString:@">"];
+    return [[self revenant_description] stringByAppendingString:@">"];
 }
 
 @end
@@ -105,13 +105,13 @@ static NSString *charon_yes_no(BOOL value)
 + (instancetype)actionWithIdentifier:(NSString *)identifier title:(NSString *)title options:(UNNotificationActionOptions)options
                 textInputButtonTitle:(NSString *)buttonTitle textInputPlaceholder:(NSString *)placeholder
 {
-    return [[self alloc] initCharonWithIdentifier:identifier title:title options:options textInputButtonTitle:buttonTitle textInputPlaceholder:placeholder];
+    return [[self alloc] initRevenantWithIdentifier:identifier title:title options:options textInputButtonTitle:buttonTitle textInputPlaceholder:placeholder];
 }
 
-- (instancetype)initCharonWithIdentifier:(NSString *)identifier title:(NSString *)title options:(UNNotificationActionOptions)options
+- (instancetype)initRevenantWithIdentifier:(NSString *)identifier title:(NSString *)title options:(UNNotificationActionOptions)options
                     textInputButtonTitle:(NSString *)buttonTitle textInputPlaceholder:(NSString *)placeholder
 {
-    if ((self = [super initCharonWithIdentifier:identifier title:title options:options])) {
+    if ((self = [super initRevenantWithIdentifier:identifier title:title options:options])) {
         _textInputButtonTitle = [buttonTitle copy];
         _textInputPlaceholder = [placeholder copy];
     }
@@ -162,7 +162,7 @@ static NSString *charon_yes_no(BOOL value)
 
 - (NSString *)description
 {
-    return [NSString stringWithFormat:@"%@, textInputButtonTitle: %@, textInputPlaceholder: %@>", [self charon_description], _textInputButtonTitle,
+    return [NSString stringWithFormat:@"%@, textInputButtonTitle: %@, textInputPlaceholder: %@>", [self revenant_description], _textInputButtonTitle,
                                       _textInputPlaceholder];
 }
 

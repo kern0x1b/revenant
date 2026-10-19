@@ -8,7 +8,7 @@ int main(void) {
         OSStatus s = MIDIClientCreateWithBlock(CFSTR("newentity"), &client, ^(const MIDINotification *m) {});
         printf("client %d\n", (int)s);
         MIDIDeviceRef device = 0;
-        s = MIDIDeviceCreate(NULL, CFSTR("probe device"), CFSTR("charon"), CFSTR("probe"), &device);
+        s = MIDIDeviceCreate(NULL, CFSTR("probe device"), CFSTR("revenant"), CFSTR("probe"), &device);
         printf("MIDIDeviceCreate %d\n", (int)s);
         if (s != noErr) return 0;
         MIDIEntityRef entity = 0;

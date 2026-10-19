@@ -1,12 +1,12 @@
-#import "CharonMPSGraph.h"
+#import "RevenantMPSGraph.h"
 
-@implementation MPSGraph (CharonMPSGraphReduction153)
+@implementation MPSGraph (RevenantMPSGraphReduction153)
 
 - (MPSGraphTensor *)reductionAndWithTensor:(MPSGraphTensor *)tensor
                                       axis:(NSInteger)axis
                                       name:(NSString *)name
 {
-    return [self charon_mps_reduction:CharonMPSGraphOperationKindReductionAnd
+    return [self revenant_mps_reduction:RevenantMPSGraphOperationKindReductionAnd
                                  axes:@[@(axis)]
                                tensor:tensor
                           parameters:@{@"combination": @"and", @"propagateNaN": @NO}
@@ -17,7 +17,7 @@
                                       axes:(NSArray<NSNumber *> *)axes
                                       name:(NSString *)name
 {
-    return [self charon_mps_reduction:CharonMPSGraphOperationKindReductionAnd
+    return [self revenant_mps_reduction:RevenantMPSGraphOperationKindReductionAnd
                                  axes:axes
                                tensor:tensor
                           parameters:@{@"combination": @"and", @"propagateNaN": @NO}
@@ -28,7 +28,7 @@
                                      axis:(NSInteger)axis
                                      name:(NSString *)name
 {
-    return [self charon_mps_reduction:CharonMPSGraphOperationKindReductionOr
+    return [self revenant_mps_reduction:RevenantMPSGraphOperationKindReductionOr
                                  axes:@[@(axis)]
                                tensor:tensor
                           parameters:@{@"combination": @"or", @"propagateNaN": @NO}
@@ -39,7 +39,7 @@
                                      axes:(NSArray<NSNumber *> *)axes
                                      name:(NSString *)name
 {
-    return [self charon_mps_reduction:CharonMPSGraphOperationKindReductionOr
+    return [self revenant_mps_reduction:RevenantMPSGraphOperationKindReductionOr
                                  axes:axes
                                tensor:tensor
                           parameters:@{@"combination": @"or", @"propagateNaN": @NO}

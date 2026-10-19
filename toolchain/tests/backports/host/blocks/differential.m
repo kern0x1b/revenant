@@ -18,8 +18,8 @@ static void compare(NSString *name, NSString *system, NSString *ours)
 
 static NSString *unprefixed(NSString *text)
 {
-    text = [text stringByReplacingOccurrencesOfString:@"charonHost_" withString:@""];
-    return [text stringByReplacingOccurrencesOfString:@"CharonHost" withString:@""];
+    text = [text stringByReplacingOccurrencesOfString:@"revenantHost_" withString:@""];
+    return [text stringByReplacingOccurrencesOfString:@"RevenantHost" withString:@""];
 }
 
 static NSString *raised(void (^block)(void))
@@ -39,7 +39,7 @@ static void spin(NSTimeInterval seconds)
 
 static SEL selector(BOOL ours, NSString *plain)
 {
-    return NSSelectorFromString(ours ? [@"charonHost_" stringByAppendingString:plain] : plain);
+    return NSSelectorFromString(ours ? [@"revenantHost_" stringByAppendingString:plain] : plain);
 }
 
 typedef NSTimer *(*TimerFactory)(id, SEL, NSTimeInterval, BOOL, void (^)(NSTimer *));
@@ -55,7 +55,7 @@ static NSTimer *factory(BOOL ours, BOOL scheduled, NSTimeInterval interval, BOOL
 static NSTimer *initialized(BOOL ours, NSDate *date, NSTimeInterval interval, BOOL repeats, TimerBlock block)
 {
     id timer = [NSTimer alloc];
-    SEL init = ours ? NSSelectorFromString(@"initCharonHostWithFireDate:interval:repeats:block:")
+    SEL init = ours ? NSSelectorFromString(@"initRevenantHostWithFireDate:interval:repeats:block:")
                     : NSSelectorFromString(@"initWithFireDate:interval:repeats:block:");
     return ((TimerInit)objc_msgSend)(timer, init, date, interval, repeats, block);
 }
@@ -129,7 +129,7 @@ static NSString *thread_via_init(BOOL ours)
         onMain = [NSThread isMainThread];
         dispatch_semaphore_signal(done);
     };
-    thread = ours ? ((id (*)(id, SEL, id))objc_msgSend)(thread, NSSelectorFromString(@"initCharonHostWithBlock:"), block)
+    thread = ours ? ((id (*)(id, SEL, id))objc_msgSend)(thread, NSSelectorFromString(@"initRevenantHostWithBlock:"), block)
                   : ((id (*)(id, SEL, id))objc_msgSend)(thread, NSSelectorFromString(@"initWithBlock:"), block);
     BOOL before = ran;
     [thread start];
@@ -179,15 +179,15 @@ static NSString *run_loop_modes(BOOL ours)
 {
     __block int runs = 0;
     NSRunLoop *loop = [NSRunLoop currentRunLoop];
-    ((void (*)(id, SEL, id, id))objc_msgSend)(loop, selector(ours, @"performInModes:block:"), @[@"CharonProbeMode"], ^{
+    ((void (*)(id, SEL, id, id))objc_msgSend)(loop, selector(ours, @"performInModes:block:"), @[@"RevenantProbeMode"], ^{
         runs++;
     });
     spin(0.1);
     int inDefault = runs;
-    [loop addPort:[NSMachPort port] forMode:@"CharonProbeMode"];
-    [loop runMode:@"CharonProbeMode" beforeDate:[NSDate dateWithTimeIntervalSinceNow:0.2]];
+    [loop addPort:[NSMachPort port] forMode:@"RevenantProbeMode"];
+    [loop runMode:@"RevenantProbeMode" beforeDate:[NSDate dateWithTimeIntervalSinceNow:0.2]];
     int inMode = runs;
-    ((void (*)(id, SEL, id, id))objc_msgSend)(loop, selector(ours, @"performInModes:block:"), @[NSDefaultRunLoopMode, @"CharonProbeMode"], ^{
+    ((void (*)(id, SEL, id, id))objc_msgSend)(loop, selector(ours, @"performInModes:block:"), @[NSDefaultRunLoopMode, @"RevenantProbeMode"], ^{
         runs++;
     });
     spin(0.1);
@@ -235,25 +235,25 @@ int main(void)
         id (*send)(id, SEL, id) = (id (*)(id, SEL, id))objc_msgSend;
         void (^ignored)(void) = ^{};
         compare(@"a thread with no block", raised(^{ (void)send([NSThread alloc], NSSelectorFromString(@"initWithBlock:"), nil); }),
-                raised(^{ (void)send([NSThread alloc], NSSelectorFromString(@"initCharonHostWithBlock:"), nil); }));
+                raised(^{ (void)send([NSThread alloc], NSSelectorFromString(@"initRevenantHostWithBlock:"), nil); }));
         compare(@"a detached thread with no block", raised(^{ send([NSThread class], NSSelectorFromString(@"detachNewThreadWithBlock:"), nil); }),
-                raised(^{ send([NSThread class], NSSelectorFromString(@"charonHost_detachNewThreadWithBlock:"), nil); }));
+                raised(^{ send([NSThread class], NSSelectorFromString(@"revenantHost_detachNewThreadWithBlock:"), nil); }));
         NSRunLoop *loop = [NSRunLoop currentRunLoop];
         void (*perform)(id, SEL, id, id) = (void (*)(id, SEL, id, id))objc_msgSend;
         for (NSArray *modes in @[[NSNull null], @[], @[NSDefaultRunLoopMode]]) {
             NSArray *given = [modes isKindOfClass:[NSNull class]] ? nil : modes;
             compare([NSString stringWithFormat:@"modes %@, no block", modes],
                     raised(^{ perform(loop, NSSelectorFromString(@"performInModes:block:"), given, nil); }),
-                    raised(^{ perform(loop, NSSelectorFromString(@"charonHost_performInModes:block:"), given, nil); }));
+                    raised(^{ perform(loop, NSSelectorFromString(@"revenantHost_performInModes:block:"), given, nil); }));
         }
         for (NSArray *modes in @[[NSNull null], @[]]) {
             NSArray *given = [modes isKindOfClass:[NSNull class]] ? nil : modes;
             compare([NSString stringWithFormat:@"modes %@, with a block", modes],
                     raised(^{ perform(loop, NSSelectorFromString(@"performInModes:block:"), given, ignored); }),
-                    raised(^{ perform(loop, NSSelectorFromString(@"charonHost_performInModes:block:"), given, ignored); }));
+                    raised(^{ perform(loop, NSSelectorFromString(@"revenantHost_performInModes:block:"), given, ignored); }));
         }
         compare(@"a run loop block with no block", raised(^{ send(loop, NSSelectorFromString(@"performBlock:"), nil); }),
-                raised(^{ send(loop, NSSelectorFromString(@"charonHost_performBlock:"), nil); }));
+                raised(^{ send(loop, NSSelectorFromString(@"revenantHost_performBlock:"), nil); }));
         printf("%d checks, %d failures\n", checks, failures);
         return failures;
     }

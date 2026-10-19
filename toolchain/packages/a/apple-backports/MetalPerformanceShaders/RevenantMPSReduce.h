@@ -1,25 +1,25 @@
 #pragma once
-#import "CharonMPS.h"
-#import "CharonMPSImage.h"
+#import "RevenantMPS.h"
+#import "RevenantMPSImage.h"
 
-typedef NS_ENUM(NSInteger, CharonMPSReduceOperation) {
-    CharonMPSReduceMin = 0,
-    CharonMPSReduceMax,
-    CharonMPSReduceMean,
-    CharonMPSReduceSum,
+typedef NS_ENUM(NSInteger, RevenantMPSReduceOperation) {
+    RevenantMPSReduceMin = 0,
+    RevenantMPSReduceMax,
+    RevenantMPSReduceMean,
+    RevenantMPSReduceSum,
 };
 
 @interface MPSImageReduceUnary ()
-- (instancetype)charon_initWithDevice:(id<MTLDevice>)device
+- (instancetype)revenant_initWithDevice:(id<MTLDevice>)device
                             byColumn:(BOOL)byColumn
-                            operation:(CharonMPSReduceOperation)operation;
+                            operation:(RevenantMPSReduceOperation)operation;
 @end
 
-@interface MPSNNReduceUnary (CharonMPSNNReduce)
-- (instancetype)charon_nnReduceWithDevice:(id<MTLDevice>)device
+@interface MPSNNReduceUnary (RevenantMPSNNReduce)
+- (instancetype)revenant_nnReduceWithDevice:(id<MTLDevice>)device
                                    byColumn:(BOOL)byColumn
                            byFeatureChannel:(BOOL)byFeatureChannel
-                                 operation:(CharonMPSReduceOperation)operation;
-- (float)charon_nnReduceWeight;
-- (void)charon_setNnReduceWeight:(float)weight;
+                                 operation:(RevenantMPSReduceOperation)operation;
+- (float)revenant_nnReduceWeight;
+- (void)revenant_setNnReduceWeight:(float)weight;
 @end

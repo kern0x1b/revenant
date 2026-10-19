@@ -41,7 +41,7 @@ static NSString *shown(id value)
 
 static SEL named(NSString *selector, BOOL ours)
 {
-    return NSSelectorFromString(ours ? [@"charonHost_" stringByAppendingString:selector] : selector);
+    return NSSelectorFromString(ours ? [@"revenantHost_" stringByAppendingString:selector] : selector);
 }
 
 

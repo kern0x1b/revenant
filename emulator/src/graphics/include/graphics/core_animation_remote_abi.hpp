@@ -11,7 +11,7 @@
 #include <optional>
 #include <string_view>
 
-namespace shade {
+namespace emulator {
 
 class MachOImage;
 

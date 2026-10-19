@@ -30,7 +30,7 @@ int main(void)
         int keySize = 1024;
         CFNumberRef bits = CFNumberCreate(NULL, kCFNumberIntType, &keySize);
         CFStringRef tag = CFStringCreateWithFormat(kCFAllocatorDefault, NULL,
-                                                  CFSTR("charon-keyref-lifetime-%d"), (int)getpid());
+                                                  CFSTR("revenant-keyref-lifetime-%d"), (int)getpid());
 
         const void *keys[] = {kSecClass, kSecValueData, kSecAttrKeyType, kSecAttrKeySizeInBits,
                               kSecAttrApplicationTag, kSecReturnRef};

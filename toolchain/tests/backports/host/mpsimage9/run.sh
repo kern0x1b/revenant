@@ -44,7 +44,7 @@ for line in open(sys.argv[1]):
         defined.add(line[len("_OBJC_CLASS_$_"):])
 with open(sys.argv[2], "w") as out:
     for name in sorted(defined):
-        out.write("#define %s Charon%s\n" % (name, name))
+        out.write("#define %s Revenant%s\n" % (name, name))
 PY
 echo "renamed: $(grep -c define "$build/rename.h") classes of $(wc -l < "$build/port-defines.txt" | tr -d ' ')"
 
@@ -62,10 +62,10 @@ build_one() {
     for source in "$mps"/*.m; do
         _s=$(basename "$source" .m)
         xcrun clang -fobjc-arc -fvisibility=hidden $target $quiet -I"$mps" -include "$build/rename.h" \
-            -DCHARON_PLANT=$_plant -c "$source" -o "$_objdir/$_s.o" || return 1
+            -DREVENANT_PLANT=$_plant -c "$source" -o "$_objdir/$_s.o" || return 1
         _objects="$_objects $_objdir/$_s.o"
     done
-    xcrun clang -fobjc-arc $target $quiet -DCHARON_PORT_BUILD=1 -DCHARON_PLANT=$_plant \
+    xcrun clang -fobjc-arc $target $quiet -DREVENANT_PORT_BUILD=1 -DREVENANT_PLANT=$_plant \
         -include "$build/rename.h" "$here/mps9-cases.m" $_objects \
         -framework Metal -framework MetalPerformanceShaders -o "$build/$_name" 2>/dev/null || return 1
     "$build/$_name" > "$build/$_name.txt" 2> "$build/$_name.err"

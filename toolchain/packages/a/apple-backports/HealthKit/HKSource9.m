@@ -1,10 +1,10 @@
 #import <HealthKit/HealthKit.h>
 
-#import "CharonHKStore.h"
+#import "RevenantHKStore.h"
 
-@implementation HKSource (CharonIOS9)
+@implementation HKSource (RevenantIOS9)
 
-+ (nullable NSString *)charon_processVersion
++ (nullable NSString *)revenant_processVersion
 {
     static NSString *version;
     static dispatch_once_t once;

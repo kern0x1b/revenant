@@ -3,8 +3,8 @@ import Foundation
 import FoundationNetworking
 #endif
 
-@_cdecl("charonMintAndWrite")
-func charonMintAndWrite() {
+@_cdecl("revenantMintAndWrite")
+func revenantMintAndWrite() {
     let arguments = CommandLine.arguments
     guard arguments.count >= 5 else {
         print("usage: mint <key.pem> <key identifier> <team identifier> <output directory>")
@@ -26,4 +26,4 @@ func charonMintAndWrite() {
     print("minted \(parts.count) parts")
 }
 
-charonMintAndWrite()
+revenantMintAndWrite()

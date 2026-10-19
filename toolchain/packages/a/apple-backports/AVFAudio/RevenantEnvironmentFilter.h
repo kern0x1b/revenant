@@ -1,10 +1,10 @@
 #import <AVFAudio/AVAudioEnvironmentNode.h>
 
-#define CharonEnvironmentFilterDefaultFrequency 800.0f
-#define CharonEnvironmentFilterDefaultBandwidth 3.0f
-#define CharonEnvironmentFilterDefaultGain 0.0f
+#define RevenantEnvironmentFilterDefaultFrequency 800.0f
+#define RevenantEnvironmentFilterDefaultBandwidth 3.0f
+#define RevenantEnvironmentFilterDefaultGain 0.0f
 
-static inline float CharonEnvironmentFilterEnableValue(BOOL bypass)
+static inline float RevenantEnvironmentFilterEnableValue(BOOL bypass)
 {
     return bypass ? 0.0f : 1.0f;
 }

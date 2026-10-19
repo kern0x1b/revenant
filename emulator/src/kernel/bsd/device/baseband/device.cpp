@@ -19,7 +19,7 @@
 #include <utility>
 #include <vector>
 
-namespace shade::bsd::baseband_device {
+namespace emulator::bsd::baseband_device {
 
 namespace {
 

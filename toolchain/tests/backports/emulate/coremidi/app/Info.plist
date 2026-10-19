@@ -7,13 +7,13 @@
 	<key>CFBundleDisplayName</key>
 	<string>CoreMIDI Round Trip</string>
 	<key>CFBundleExecutable</key>
-	<string>charoncoremidiapp</string>
+	<string>revenantcoremidiapp</string>
 	<key>CFBundleIdentifier</key>
-	<string>local.charon.backports.coremidiapp</string>
+	<string>local.revenant.backports.coremidiapp</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>charoncoremidiapp</string>
+	<string>revenantcoremidiapp</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>

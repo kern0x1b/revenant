@@ -4,10 +4,10 @@ here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 CORE=${CORE:-$here/../../../../packages/a/apple-backports/CoreData}
 harness=${CONSTRAINT_HARNESS:-$here/../../device}
-build=${CONSTRAINT_BUILD:-$(runs_folder charon-constraint-host)}
+build=${CONSTRAINT_BUILD:-$(runs_folder revenant-constraint-host)}
 sources="NSQueryGenerationToken.m NSManagedObjectContext+QueryGeneration.m NSConstraintConflict.m"
-renames="-DNSQueryGenerationToken=CharonHostNSQueryGenerationToken -D_NSQueryGenerationToken=CharonHost_NSQueryGenerationToken -DNSConstraintConflict=CharonHostNSConstraintConflict"
-renames="$renames -DqueryGenerationToken=charonHostqueryGenerationToken -DsetQueryGenerationFromToken=charonHostsetQueryGenerationFromToken"
+renames="-DNSQueryGenerationToken=RevenantHostNSQueryGenerationToken -D_NSQueryGenerationToken=RevenantHost_NSQueryGenerationToken -DNSConstraintConflict=RevenantHostNSConstraintConflict"
+renames="$renames -DqueryGenerationToken=revenantHostqueryGenerationToken -DsetQueryGenerationFromToken=revenantHostsetQueryGenerationFromToken"
 rm -rf "$build"
 mkdir -p "$build"
 objects=""

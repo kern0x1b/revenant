@@ -18,7 +18,7 @@
 #include <string_view>
 #include <vector>
 
-namespace shade::xnu::mig {
+namespace emulator::xnu::mig {
 
 enum class Subsystem : std::uint8_t {
     MachPort,

@@ -25,10 +25,10 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-charon=${CHARON:-$here/../../../..}
+charon=${REVENANT:-$here/../../../..}
 charon=$(cd "$charon" && pwd)
 appledir="$charon/packages/a/apple-backports"
-build=${BUILD:-$(runs_fresh charon-unavailable-init)}
+build=${BUILD:-$(runs_fresh revenant-unavailable-init)}
 mkdir -p "$build"
 survived=0
 
@@ -108,7 +108,7 @@ plant() {
     mkdir -p "$build/mutant/$framework"
     # Every header of the package and of the framework's own folder, rather than a list of the ones one
     # framework happened to need: a plant that does not build because a header was left behind proves
-    # nothing, and the list is what left it behind (measured: CharonHomeKitConstants.h).
+    # nothing, and the list is what left it behind (measured: RevenantHomeKitConstants.h).
     for header in "$appledir"/*.h; do cp "$header" "$build/mutant/"; done
     for header in "$appledir/$framework"/*.h; do cp "$header" "$build/mutant/$framework/"; done
     for source in $(cat "$build/$framework.sources"); do cp "$appledir/$source" "$build/mutant/$framework/"; done

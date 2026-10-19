@@ -110,7 +110,7 @@
       "status": "implemented",
       "reason": "the protocol is declared by the header the generator writes from the snapshot and the CoreNFC rows of the declaration table",
       "effect": "required readerSessionDidBecomeActive: and readerSession:didInvalidateWithError:, optional readerSession:didDetectTags:, as the host's protocol has them (tests/backports/host/nfc-protocols)",
-      "source": "spec/CoreNFC/protocols.tsv (SDK 16.4 bodies), spec/protocol-headers.tsv (the CoreNFC rows); the header is CharonCoreNFCProtocols.h"
+      "source": "spec/CoreNFC/protocols.tsv (SDK 16.4 bodies), spec/protocol-headers.tsv (the CoreNFC rows); the header is RevenantCoreNFCProtocols.h"
     },
     {
       "api": "NFCNDEFReaderSessionDelegate",
@@ -120,7 +120,7 @@
       "status": "implemented",
       "reason": "the protocol is declared by the header the generator writes from the snapshot and the CoreNFC rows of the declaration table",
       "effect": "required readerSession:didInvalidateWithError: and readerSession:didDetectNDEFs:, optional readerSession:didDetectTags: and readerSessionDidBecomeActive:, as the host's protocol has them (tests/backports/host/nfc-protocols)",
-      "source": "spec/CoreNFC/protocols.tsv (SDK 16.4 bodies), spec/protocol-headers.tsv (the CoreNFC rows); the header is CharonCoreNFCProtocols.h"
+      "source": "spec/CoreNFC/protocols.tsv (SDK 16.4 bodies), spec/protocol-headers.tsv (the CoreNFC rows); the header is RevenantCoreNFCProtocols.h"
     },
     {
       "api": "NFCISO15693CustomCommandConfiguration",
@@ -173,7 +173,7 @@
       "status": "implemented",
       "reason": "the protocol object is declared by the generated header, with the SDK 16.4 members and its two bases; no port class is an ISO 15693 tag, so no class conforms to it yet",
       "effect": "the required selectors of the host's protocol, the identifier, icManufacturerCode, icSerialNumber and the request methods (tests/backports/host/nfc-protocols)",
-      "source": "spec/CoreNFC/protocols.tsv (SDK 16.4 body), spec/protocol-headers.tsv (the CoreNFC rows, with replace rows for the three members the snapshot keeps API_AVAILABLE in); the header is CharonCoreNFCProtocols.h"
+      "source": "spec/CoreNFC/protocols.tsv (SDK 16.4 body), spec/protocol-headers.tsv (the CoreNFC rows, with replace rows for the three members the snapshot keeps API_AVAILABLE in); the header is RevenantCoreNFCProtocols.h"
     },
     {
       "api": "NFCTag",
@@ -183,7 +183,7 @@
       "status": "implemented",
       "reason": "the protocol object is declared by the generated header, with the SDK 16.4 members; no port class is a tag, so no class conforms to it yet",
       "effect": "the required selectors type, session, isAvailable and the four asNFC accessors, as the host's protocol has them (tests/backports/host/nfc-protocols)",
-      "source": "spec/CoreNFC/protocols.tsv (SDK 16.4 body), spec/protocol-headers.tsv (the CoreNFC rows); the header is CharonCoreNFCProtocols.h"
+      "source": "spec/CoreNFC/protocols.tsv (SDK 16.4 body), spec/protocol-headers.tsv (the CoreNFC rows); the header is RevenantCoreNFCProtocols.h"
     },
     {
       "api": "NFCISO15693TagResponseErrorKey",

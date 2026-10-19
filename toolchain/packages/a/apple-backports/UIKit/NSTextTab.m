@@ -1,11 +1,11 @@
 #import <UIKit/UIKit.h>
-#import "../charon_alias.h"
+#import "../revenant_alias.h"
 
 #pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
 
-CHARON_ALIAS(NSTextTab)
+REVENANT_ALIAS(NSTextTab)
 
-@implementation NSTextTab (CharonColumns)
+@implementation NSTextTab (RevenantColumns)
 
 + (NSCharacterSet *)columnTerminatorsForLocale:(NSLocale *)locale
 {

@@ -6,7 +6,7 @@
 #      CarPlay loads: the fleet devices run 6.1.3, which has no CarPlay class of any name, and
 #      /System/Library/Frameworks has no CarPlay outside the SDK.
 #   2. THE PORT'S side. The port's own CarPlay sources are compiled here with their class names
-#      renamed onto `charonHost_…`, so the runner reaches them through the runtime and can never reach
+#      renamed onto `revenantHost_…`, so the runner reaches them through the runtime and can never reach
 #      Apple's CarPlay by accident, and it drives the same questions.
 #   3. THE DIFF. Both sides print `label<TAB>answer`, and every label they both carry has to answer
 #      the same on both, or the run is red. That is what makes the port's rows measured rather than
@@ -31,20 +31,20 @@ IOSSUPPORT="$MACOSX_SDK/System/iOSSupport"
 FRAMEWORKS="-F $IOSSUPPORT/System/Library/Frameworks -framework Foundation -framework UIKit -framework CoreGraphics"
 # The renames move the PORT's references; the headers they were read from still declare Apple's
 # names, which is why Apple's CarPlay has to be linked on the probe side and not on the port side.
-RENAME="-DCPTemplate=charonHost_CPTemplate \
-    -DCPNavigationSession=charonHost_CPNavigationSession \
-    -DCPMapTemplate=charonHost_CPMapTemplate \
-    -DCPTrip=charonHost_CPTrip \
-        -DCPSessionConfiguration=charonHost_CPSessionConfiguration \
-    -DCPSessionConfigurationDelegate=charonHost_CPSessionConfigurationDelegate \
-    -DCPLane=charonHost_CPLane \
-    -DCPLaneGuidance=charonHost_CPLaneGuidance \
-    -DCPRouteInformation=charonHost_CPRouteInformation \
-    -DCPVoiceControlTemplate=charonHost_CPVoiceControlTemplate \
-    -DCPVoiceControlState=charonHost_CPVoiceControlState \
-    -DCPManeuver=charonHost_CPManeuver \
-    -DCPTravelEstimates=charonHost_CPTravelEstimates \
-    -DCPInterfaceController=charonHost_CPInterfaceController"
+RENAME="-DCPTemplate=revenantHost_CPTemplate \
+    -DCPNavigationSession=revenantHost_CPNavigationSession \
+    -DCPMapTemplate=revenantHost_CPMapTemplate \
+    -DCPTrip=revenantHost_CPTrip \
+        -DCPSessionConfiguration=revenantHost_CPSessionConfiguration \
+    -DCPSessionConfigurationDelegate=revenantHost_CPSessionConfigurationDelegate \
+    -DCPLane=revenantHost_CPLane \
+    -DCPLaneGuidance=revenantHost_CPLaneGuidance \
+    -DCPRouteInformation=revenantHost_CPRouteInformation \
+    -DCPVoiceControlTemplate=revenantHost_CPVoiceControlTemplate \
+    -DCPVoiceControlState=revenantHost_CPVoiceControlState \
+    -DCPManeuver=revenantHost_CPManeuver \
+    -DCPTravelEstimates=revenantHost_CPTravelEstimates \
+    -DCPInterfaceController=revenantHost_CPInterfaceController"
 
 status=0
 
@@ -86,7 +86,7 @@ fi
 # ---------------------------------------------------------------- 2. the port's side
 echo
 echo "== the port's own voice control =="
-# The shim names charonHost_CPTemplate literally, so it is compiled WITHOUT the renames: the renames
+# The shim names revenantHost_CPTemplate literally, so it is compiled WITHOUT the renames: the renames
 # exist to move the port's references and the shim's whole job is to declare what they moved onto.
 xcrun clang -fobjc-arc -Wall -fPIC $TARGET $FRAMEWORKS -I"$port" \
     -c "$here/port-classes.m" -o "$build/port-classes.o" 2> "$build/cc.log" || {

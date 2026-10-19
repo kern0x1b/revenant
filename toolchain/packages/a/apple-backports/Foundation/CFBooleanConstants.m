@@ -12,19 +12,19 @@ typedef struct {
     CFStringRef (*copyDebugDesc)(CFTypeRef cf);
     void (*reclaim)(CFTypeRef cf);
     unsigned long (*refcount)(intptr_t op, CFTypeRef cf);
-} CharonCFRuntimeClass;
+} RevenantCFRuntimeClass;
 
-extern CFTypeID _CFRuntimeRegisterClass(const CharonCFRuntimeClass *const cls);
+extern CFTypeID _CFRuntimeRegisterClass(const RevenantCFRuntimeClass *const cls);
 extern CFTypeRef _CFRuntimeCreateInstance(CFAllocatorRef allocator, CFTypeID typeID, CFIndex extraBytes, unsigned char *category);
 
 __attribute__((visibility("default"))) const void *__kCFBooleanTrue;
 __attribute__((visibility("default"))) const void *__kCFBooleanFalse;
 
-__attribute__((constructor)) static void charon_cfboolean_constants(void)
+__attribute__((constructor)) static void revenant_cfboolean_constants(void)
 {
-    static const CharonCFRuntimeClass booleanClass = {
+    static const RevenantCFRuntimeClass booleanClass = {
         .version = 0,
-        .className = "CharonCFBoolean",
+        .className = "RevenantCFBoolean",
     };
     CFTypeID typeID = _CFRuntimeRegisterClass(&booleanClass);
     __kCFBooleanTrue = (const void *)CFRetain(_CFRuntimeCreateInstance(NULL, typeID, 0, NULL));

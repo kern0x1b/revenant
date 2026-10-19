@@ -1,6 +1,6 @@
-#import "CharonDiffable.h"
+#import "RevenantDiffable.h"
 
-static NSString *const charon_source_file = @"UIDiffableDataSource.m";
+static NSString *const revenant_source_file = @"UIDiffableDataSource.m";
 
 @implementation UITableViewDiffableDataSource {
 @private
@@ -42,7 +42,7 @@ static NSString *const charon_source_file = @"UIDiffableDataSource.m";
     _defaultRowAnimation = defaultRowAnimation;
 }
 
-- (NSDiffableDataSourceSnapshot *)charon_current
+- (NSDiffableDataSourceSnapshot *)revenant_current
 {
     if (!_snapshot)
         _snapshot = [[NSDiffableDataSourceSnapshot alloc] init];
@@ -51,17 +51,17 @@ static NSString *const charon_source_file = @"UIDiffableDataSource.m";
 
 - (NSDiffableDataSourceSnapshot *)snapshot
 {
-    return [[self charon_current] charon_copyWithoutReloads];
+    return [[self revenant_current] revenant_copyWithoutReloads];
 }
 
 - (id)itemIdentifierForIndexPath:(NSIndexPath *)indexPath
 {
-    return [[self charon_current] charon_itemAtIndexPath:indexPath];
+    return [[self revenant_current] revenant_itemAtIndexPath:indexPath];
 }
 
 - (NSIndexPath *)indexPathForItemIdentifier:(id)identifier
 {
-    return [[self charon_current] charon_indexPathForItem:identifier];
+    return [[self revenant_current] revenant_indexPathForItem:identifier];
 }
 
 - (void)applySnapshot:(NSDiffableDataSourceSnapshot *)snapshot animatingDifferences:(BOOL)animatingDifferences
@@ -73,9 +73,9 @@ static NSString *const charon_source_file = @"UIDiffableDataSource.m";
 {
     if (!snapshot)
         [NSException raise:NSInternalInconsistencyException format:@"Invalid parameter not satisfying: snapshot"];
-    NSDiffableDataSourceSnapshot *old = [self charon_current], *updated = [snapshot charon_copyWithoutReloads];
+    NSDiffableDataSourceSnapshot *old = [self revenant_current], *updated = [snapshot revenant_copyWithoutReloads];
     UITableView *view = _tableView;
-    NSDictionary *changes = charon_diffable_changes(old, snapshot, YES);
+    NSDictionary *changes = revenant_diffable_changes(old, snapshot, YES);
     BOOL visible = view.window != nil, initial = !_applied, structural = visible && !initial && old.numberOfSections && ![changes[@"fallback"] boolValue];
     _applied = YES;
     NSIndexSet *deleteSections = changes[@"deleteSections"], *insertSections = changes[@"insertSections"], *reloadSections = changes[@"reloadSections"];
@@ -93,7 +93,7 @@ static NSString *const charon_source_file = @"UIDiffableDataSource.m";
     BOOL reloads = visible && (initial ? animatingDifferences : ![changes[@"fallback"] boolValue]) && (reloadSections.count || reloadItems.count);
     void (^reload)(void) = ^{
         if (!reloads) {
-            charon_diffable_finish(finish);
+            revenant_diffable_finish(finish);
             return;
         }
         [CATransaction begin];
@@ -141,44 +141,44 @@ static NSString *const charon_source_file = @"UIDiffableDataSource.m";
         [UIView setAnimationsEnabled:animations];
 }
 
-- (void)charon_applyReloadingData:(NSDiffableDataSourceSnapshot *)snapshot completion:(void (^)(void))completion
+- (void)revenant_applyReloadingData:(NSDiffableDataSourceSnapshot *)snapshot completion:(void (^)(void))completion
 {
     if (!snapshot)
         [NSException raise:NSInternalInconsistencyException format:@"Invalid parameter not satisfying: snapshot"];
-    NSDiffableDataSourceSnapshot *updated = [snapshot charon_copyWithoutReloads];
+    NSDiffableDataSourceSnapshot *updated = [snapshot revenant_copyWithoutReloads];
     _applied = YES;
     _snapshot = updated;
     [_tableView reloadData];
     [_tableView layoutIfNeeded];
-    charon_diffable_finish(completion);
+    revenant_diffable_finish(completion);
 }
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
-    return [self charon_current].numberOfSections;
+    return [self revenant_current].numberOfSections;
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-    NSDiffableDataSourceSnapshot *snapshot = [self charon_current];
-    charon_diffable_require(section < snapshot.numberOfSections, charon_source_file, 392, @"section < _impl.numberOfSections");
-    return (NSInteger)[snapshot charon_countInSectionAtIndex:(NSUInteger)section];
+    NSDiffableDataSourceSnapshot *snapshot = [self revenant_current];
+    revenant_diffable_require(section < snapshot.numberOfSections, revenant_source_file, 392, @"section < _impl.numberOfSections");
+    return (NSInteger)[snapshot revenant_countInSectionAtIndex:(NSUInteger)section];
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    charon_diffable_require(indexPath != nil, charon_source_file, 397, @"indexPath");
-    id item = [[self charon_current] charon_itemAtIndexPath:indexPath];
-    charon_diffable_require(item != nil, @"_UIDiffableDataSourceImpl.m", 1658, @"itemIdentifier");
+    revenant_diffable_require(indexPath != nil, revenant_source_file, 397, @"indexPath");
+    id item = [[self revenant_current] revenant_itemAtIndexPath:indexPath];
+    revenant_diffable_require(item != nil, @"_UIDiffableDataSourceImpl.m", 1658, @"itemIdentifier");
     UITableViewCell *cell = _cellProvider ? _cellProvider(tableView, indexPath, item) : nil;
     if (!cell)
-        charon_diffable_raise(@"_UIDiffableDataSourceImpl.m", 1663, [NSString stringWithFormat:@"UITableViewDiffableDataSource cell provider returned nil for index path %@ with item identifier '%@', which is not allowed. You must always return a cell to the table view: %@", indexPath, item, tableView]);
+        revenant_diffable_raise(@"_UIDiffableDataSourceImpl.m", 1663, [NSString stringWithFormat:@"UITableViewDiffableDataSource cell provider returned nil for index path %@ with item identifier '%@', which is not allowed. You must always return a cell to the table view: %@", indexPath, item, tableView]);
     return cell;
 }
 
 - (NSString *)description
 {
-    return charon_diffable_source_description([self charon_current]);
+    return revenant_diffable_source_description([self revenant_current]);
 }
 
 @end

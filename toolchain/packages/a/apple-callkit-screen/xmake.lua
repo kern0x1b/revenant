@@ -1,6 +1,6 @@
 package("apple-callkit-screen")
-    set_homepage("https://github.com/kern0x1b/charon")
-    set_description("charon-callkit-screen, the MobileSubstrate tweak that raises the system call screen for the CallKit backport, filtered to com.apple.springboard, built by Charon's own tweak rule")
+    set_homepage("https://github.com/kern0x1b/revenant/tree/main/toolchain")
+    set_description("revenant-callkit-screen, the MobileSubstrate tweak that raises the system call screen for the CallKit backport, filtered to com.apple.springboard, built by Revenant's own tweak rule")
     set_license("MIT")
 
     local digests = {}
@@ -15,7 +15,7 @@ package("apple-callkit-screen")
         local toolchain = assert(package:toolchains(), "apple-callkit-screen is built with the apple-ios toolchain")[1]
         toolchain:load()
         import("core.package.addon")
-        local charon = addon.addons()[addon.dirname("charon")] or raise("apple-callkit-screen is built with the charon addon's rules, and no charon addon is installed")
+        local revenant = addon.addons()[addon.dirname("revenant")] or raise("apple-callkit-screen is built with the revenant addon's rules, and no revenant addon is installed")
         local project = path.absolute("tweak")
         os.mkdir(project)
         os.cp(path.join(package:scriptdir(), "src", "*"), project .. "/")
@@ -25,15 +25,15 @@ package("apple-callkit-screen")
             minimum = toolchain:config("deployment"),
             arch = package:arch()
         })))
-        io.save(path.join(project, "xmake-addons.lock"), {__meta__ = {version = "1.0"}, charon = {version = charon.version}})
+        io.save(path.join(project, "xmake-addons.lock"), {__meta__ = {version = "1.0"}, revenant = {version = revenant.version}})
         local argv = {"-P", project, "-y"}
         os.vrunv(os.programfile(), table.join({"f", "-p", "iphoneos", "-a", package:arch(), "-m", "release"}, argv))
-        os.vrunv(os.programfile(), table.join({"build"}, argv), {envs = {CHARON_RELEASE = "1"}})
+        os.vrunv(os.programfile(), table.join({"build"}, argv), {envs = {REVENANT_RELEASE = "1"}})
         os.vrunv(os.programfile(), table.join({"install", "-o", package:installdir()}, argv))
         os.vcp(path.join(package:scriptdir(), "..", "..", "..", "LICENSE"), package:installdir("licenses"))
     end)
 
     on_test(function (package)
-        assert(os.isfile(path.join(package:installdir(), "Library", "MobileSubstrate", "DynamicLibraries", "charon-callkit-screen.dylib")))
-        assert(os.isfile(path.join(package:installdir(), "Library", "MobileSubstrate", "DynamicLibraries", "charon-callkit-screen.plist")))
+        assert(os.isfile(path.join(package:installdir(), "Library", "MobileSubstrate", "DynamicLibraries", "revenant-callkit-screen.dylib")))
+        assert(os.isfile(path.join(package:installdir(), "Library", "MobileSubstrate", "DynamicLibraries", "revenant-callkit-screen.plist")))
     end)

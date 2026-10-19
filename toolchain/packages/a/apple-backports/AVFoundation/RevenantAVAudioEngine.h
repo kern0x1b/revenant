@@ -8,7 +8,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 typedef void (^AVAudioNodeTapBlock)(AVAudioPCMBuffer *buffer, AVAudioTime * __nullable when);
 
-@interface CharonScheduledBuffer : NSObject
+@interface RevenantScheduledBuffer : NSObject
 @property (nonatomic, strong) AVAudioPCMBuffer *buffer;
 @property (nonatomic, copy, nullable) void (^completionHandler)(void);
 @property (nonatomic) AVAudioFrameCount framesConsumed;
@@ -20,14 +20,14 @@ typedef struct {
     BOOL playing;
     AVAudioFrameCount tapBufferSize;
     BOOL attached;
-} CharonAudioNodeImpl;
+} RevenantAudioNodeImpl;
 
 @interface AVAudioNode : NSObject
-- (CharonAudioNodeImpl *)charon_impl;
-- (void)charon_setEngine:(nullable AVAudioEngine *)engine auNode:(AUNode)node audioUnit:(nullable AudioUnit)unit;
-- (NSMutableArray<CharonScheduledBuffer *> *)charon_queue;
-- (nullable AVAudioNodeTapBlock)charon_tapBlock;
-- (void)charon_setFormat:(nullable AVAudioFormat *)format;
+- (RevenantAudioNodeImpl *)revenant_impl;
+- (void)revenant_setEngine:(nullable AVAudioEngine *)engine auNode:(AUNode)node audioUnit:(nullable AudioUnit)unit;
+- (NSMutableArray<RevenantScheduledBuffer *> *)revenant_queue;
+- (nullable AVAudioNodeTapBlock)revenant_tapBlock;
+- (void)revenant_setFormat:(nullable AVAudioFormat *)format;
 @property (nonatomic, readonly, nullable) AVAudioEngine *engine;
 @property (nonatomic, readonly) NSUInteger numberOfInputs;
 @property (nonatomic, readonly) NSUInteger numberOfOutputs;
@@ -81,7 +81,7 @@ typedef struct {
 @property (nonatomic, getter=isAutoShutdownEnabled) BOOL autoShutdownEnabled;
 @end
 
-@interface CharonAudioEngineTestSupport : NSObject
+@interface RevenantAudioEngineTestSupport : NSObject
 + (void)setForcedOfflineOutput:(BOOL)offline;
 + (OSStatus)pullOutput:(AudioBufferList *)ioData frames:(AVAudioFrameCount)frames fromEngine:(AVAudioEngine *)engine;
 @end

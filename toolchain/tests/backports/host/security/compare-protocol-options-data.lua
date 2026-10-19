@@ -22,7 +22,7 @@ function main(...)
         bad[#bad + 1] = line
     end
     if tsv.first_field(rows, "port-class") ~= "found" then
-        bad[#bad + 1] = "port-class: the port's CharonSecProtocolData was not found"
+        bad[#bad + 1] = "port-class: the port's RevenantSecProtocolData was not found"
     end
     for _, pair in ipairs(BYTES) do
         local label, expect = pair[1], pair[2]

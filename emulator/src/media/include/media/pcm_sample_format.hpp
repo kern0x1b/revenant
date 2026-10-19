@@ -13,7 +13,7 @@
 #include <optional>
 #include <span>
 
-namespace shade {
+namespace emulator {
 
 class PcmSampleFormat {
 public:

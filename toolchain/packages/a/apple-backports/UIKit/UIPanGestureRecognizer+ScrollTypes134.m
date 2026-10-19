@@ -1,22 +1,22 @@
-#import "CharonMenus.h"
+#import "RevenantMenus.h"
 #import <objc/runtime.h>
 
 #pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
 
-static const char charon_mask_key;
+static const char revenant_mask_key;
 
-@implementation UIPanGestureRecognizer (CharonScrollTypes134)
+@implementation UIPanGestureRecognizer (RevenantScrollTypes134)
 
 - (UIScrollTypeMask)allowedScrollTypesMask
 {
-    return (UIScrollTypeMask)[objc_getAssociatedObject(self, &charon_mask_key) integerValue];
+    return (UIScrollTypeMask)[objc_getAssociatedObject(self, &revenant_mask_key) integerValue];
 }
 
 - (void)setAllowedScrollTypesMask:(UIScrollTypeMask)allowedScrollTypesMask
 {
     if (allowedScrollTypesMask)
-        charon_menus_say_once(@"scroll-types", @"UIPanGestureRecognizer.allowedScrollTypesMask: this release has no pointing device with a scroll wheel or trackpad, so the mask is kept and no scroll event ever reaches the recogniser");
-    objc_setAssociatedObject(self, &charon_mask_key, @(allowedScrollTypesMask), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+        revenant_menus_say_once(@"scroll-types", @"UIPanGestureRecognizer.allowedScrollTypesMask: this release has no pointing device with a scroll wheel or trackpad, so the mask is kept and no scroll event ever reaches the recogniser");
+    objc_setAssociatedObject(self, &revenant_mask_key, @(allowedScrollTypesMask), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
 @end

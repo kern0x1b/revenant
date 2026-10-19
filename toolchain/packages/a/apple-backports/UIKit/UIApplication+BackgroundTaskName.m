@@ -1,6 +1,6 @@
 #import <UIKit/UIKit.h>
 
-@implementation UIApplication (CharonBackgroundTaskName)
+@implementation UIApplication (RevenantBackgroundTaskName)
 
 - (UIBackgroundTaskIdentifier)beginBackgroundTaskWithName:(NSString *)taskName expirationHandler:(void (^)(void))handler
 {

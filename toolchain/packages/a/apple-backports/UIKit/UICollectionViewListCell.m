@@ -1,18 +1,18 @@
-#import "CharonLists.h"
-#import "CharonSwipeViews.h"
+#import "RevenantLists.h"
+#import "RevenantSwipeViews.h"
 
 #pragma clang diagnostic ignored "-Wobjc-designated-initializers"
 
-@interface CharonRowSeparatorView : UIView
+@interface RevenantRowSeparatorView : UIView
 @end
 
-@implementation CharonRowSeparatorView
+@implementation RevenantRowSeparatorView
 @end
 
-@interface CharonVerticalSeparatorView : UIView
+@interface RevenantVerticalSeparatorView : UIView
 @end
 
-@implementation CharonVerticalSeparatorView
+@implementation RevenantVerticalSeparatorView
 @end
 
 @implementation UICollectionViewListCell {
@@ -23,9 +23,9 @@
     NSArray *_accessories;
     NSMutableArray *_accessoryViews;
     UILayoutGuide *_separatorGuide;
-    CharonRowSeparatorView *_separator;
+    RevenantRowSeparatorView *_separator;
     CGRect _separatorFrame;
-    CharonVerticalSeparatorView *_reorderSeparator;
+    RevenantVerticalSeparatorView *_reorderSeparator;
     BOOL _expanded;
     void (^_expansionHandler)(void);
 }
@@ -37,7 +37,7 @@
         _indentsAccessories = YES;
         _accessories = @[];
         _accessoryViews = [[NSMutableArray alloc] init];
-        charon_host_set_background(self, [[UIBackgroundConfiguration alloc] initCharonWithStyle:CharonBackgroundStyleListCell]);
+        revenant_host_set_background(self, [[UIBackgroundConfiguration alloc] initRevenantWithStyle:RevenantBackgroundStyleListCell]);
     }
     return self;
 }
@@ -49,7 +49,7 @@
         _indentsAccessories = YES;
         _accessories = @[];
         _accessoryViews = [[NSMutableArray alloc] init];
-        charon_host_set_background(self, [[UIBackgroundConfiguration alloc] initCharonWithStyle:CharonBackgroundStyleListCell]);
+        revenant_host_set_background(self, [[UIBackgroundConfiguration alloc] initRevenantWithStyle:RevenantBackgroundStyleListCell]);
     }
     return self;
 }
@@ -59,28 +59,28 @@
     return [UIListContentConfiguration cellConfiguration];
 }
 
-- (BOOL)charon_isExpanded
+- (BOOL)revenant_isExpanded
 {
     return _expanded;
 }
 
-- (void)charon_setExpanded:(BOOL)expanded animated:(BOOL)animated
+- (void)revenant_setExpanded:(BOOL)expanded animated:(BOOL)animated
 {
     if (_expanded == expanded)
         return;
     _expanded = expanded;
     for (id view in _accessoryViews)
-        if ([view respondsToSelector:@selector(charon_setExpanded:animated:)])
-            [view charon_setExpanded:expanded animated:animated];
-    charon_request_update(self);
+        if ([view respondsToSelector:@selector(revenant_setExpanded:animated:)])
+            [view revenant_setExpanded:expanded animated:animated];
+    revenant_request_update(self);
 }
 
-- (void)charon_setExpansionHandler:(void (^)(void))handler
+- (void)revenant_setExpansionHandler:(void (^)(void))handler
 {
     _expansionHandler = [handler copy];
 }
 
-- (void)charon_toggleExpansion
+- (void)revenant_toggleExpansion
 {
     if (_expansionHandler)
         _expansionHandler();
@@ -91,7 +91,7 @@
     [super prepareForReuse];
     _expansionHandler = nil;
     if (_expanded)
-        [self charon_setExpanded:NO animated:NO];
+        [self revenant_setExpanded:NO animated:NO];
 }
 
 - (NSInteger)indentationLevel
@@ -151,12 +151,12 @@
     [_accessoryViews removeAllObjects];
     _accessories = [accessories copy] ?: @[];
     for (UICellAccessory *accessory in _accessories) {
-        UIView *view = [accessory charon_makeView];
+        UIView *view = [accessory revenant_makeView];
         [_accessoryViews addObject:view ?: (id)[NSNull null]];
         if (view)
             [self addSubview:view];
-        if (_expanded && [view respondsToSelector:@selector(charon_setExpanded:animated:)])
-            [(id)view charon_setExpanded:YES animated:NO];
+        if (_expanded && [view respondsToSelector:@selector(revenant_setExpanded:animated:)])
+            [(id)view revenant_setExpanded:YES animated:NO];
     }
     [self setNeedsLayout];
 }
@@ -173,7 +173,7 @@
     return _separatorGuide;
 }
 
-- (BOOL)charon_visible:(UICellAccessory *)accessory editing:(BOOL)editing
+- (BOOL)revenant_visible:(UICellAccessory *)accessory editing:(BOOL)editing
 {
     if (accessory.hidden)
         return NO;
@@ -187,16 +187,16 @@
     }
 }
 
-- (NSArray *)charon_ordered:(NSArray *)group
+- (NSArray *)revenant_ordered:(NSArray *)group
 {
     NSMutableArray *plain = [NSMutableArray array], *custom = [NSMutableArray array];
     for (UICellAccessory *accessory in group) {
         UICellAccessoryCustomView *view = (UICellAccessoryCustomView *)accessory;
-        BOOL placed = [accessory isKindOfClass:[UICellAccessoryCustomView class]] && ![view charon_hasDefaultPosition];
+        BOOL placed = [accessory isKindOfClass:[UICellAccessoryCustomView class]] && ![view revenant_hasDefaultPosition];
         [(placed ? custom : plain) addObject:accessory];
     }
     [plain sortWithOptions:NSSortStable usingComparator:^NSComparisonResult(UICellAccessory *a, UICellAccessory *b) {
-        return [a charon_order] < [b charon_order] ? NSOrderedAscending : [a charon_order] > [b charon_order] ? NSOrderedDescending : NSOrderedSame;
+        return [a revenant_order] < [b revenant_order] ? NSOrderedAscending : [a revenant_order] > [b revenant_order] ? NSOrderedDescending : NSOrderedSame;
     }];
     for (UICellAccessoryCustomView *accessory in custom) {
         NSMutableArray *others = [NSMutableArray array];
@@ -210,20 +210,20 @@
     return plain;
 }
 
-- (BOOL)charon_inList
+- (BOOL)revenant_inList
 {
-    return [self charon_layoutListConfiguration] != nil;
+    return [self revenant_layoutListConfiguration] != nil;
 }
 
 - (void)didMoveToSuperview
 {
     [super didMoveToSuperview];
     if (self.superview) {
-        charon_request_update(self);
+        revenant_request_update(self);
         [self setNeedsLayout];
-        UICollectionView *view = charon_owning_collection_view(self);
+        UICollectionView *view = revenant_owning_collection_view(self);
         if (view)
-            charon_install_list_swipe(view);
+            revenant_install_list_swipe(view);
     }
 }
 
@@ -231,30 +231,30 @@
 {
     [super layoutSubviews];
     CGRect bounds = self.bounds;
-    CGFloat scale = charon_screen_scale();
-    BOOL editing = [charon_owning_collection_view(self) charon_editing];
+    CGFloat scale = revenant_screen_scale();
+    BOOL editing = [revenant_owning_collection_view(self) revenant_editing];
     UIEdgeInsets margins = [self respondsToSelector:@selector(layoutMargins)] ? self.layoutMargins : UIEdgeInsetsMake(0, 8, 0, 8);
-    if ([self charon_inList])
+    if ([self revenant_inList])
         margins = UIEdgeInsetsMake(0, 16, 0, 16);
     NSMutableArray *leading = [NSMutableArray array], *trailing = [NSMutableArray array];
     for (NSUInteger index = 0; index < _accessories.count; index++) {
         UICellAccessory *accessory = _accessories[index];
         UIView *view = _accessoryViews[index];
-        BOOL shown = [self charon_visible:accessory editing:editing] && [view isKindOfClass:[UIView class]];
+        BOOL shown = [self revenant_visible:accessory editing:editing] && [view isKindOfClass:[UIView class]];
         if ([view isKindOfClass:[UIView class]])
             view.hidden = !shown;
         if (shown)
-            [([accessory charon_isLeading] ? leading : trailing) addObject:accessory];
+            [([accessory revenant_isLeading] ? leading : trailing) addObject:accessory];
     }
     CGFloat indent = _indentationLevel * _indentationWidth;
     CGFloat cursor = margins.left + (_indentsAccessories ? indent : 0), contentStart = indent;
-    NSArray *lead = [self charon_ordered:leading], *trail = [self charon_ordered:trailing];
+    NSArray *lead = [self revenant_ordered:leading], *trail = [self revenant_ordered:trailing];
     for (UICellAccessory *accessory in lead) {
         UIView *view = _accessoryViews[[_accessories indexOfObjectIdenticalTo:accessory]];
-        CGFloat width = [accessory charon_width];
+        CGFloat width = [accessory revenant_width];
         CGRect frame = view.frame;
         frame.origin.x = cursor + (width - frame.size.width) / 2;
-        frame.origin.y = charon_pixel_round((bounds.size.height - frame.size.height) / 2, scale);
+        frame.origin.y = revenant_pixel_round((bounds.size.height - frame.size.height) / 2, scale);
         view.frame = frame;
         contentStart = cursor + width;
         cursor += width + 16;
@@ -263,20 +263,20 @@
     BOOL separated = NO;
     for (UICellAccessory *accessory in [trail reverseObjectEnumerator]) {
         UIView *view = _accessoryViews[[_accessories indexOfObjectIdenticalTo:accessory]];
-        CGFloat width = [accessory charon_width];
+        CGFloat width = [accessory revenant_width];
         CGRect frame = view.frame;
         frame.origin.x = edge - width + (width - frame.size.width) / 2;
-        frame.origin.y = charon_pixel_round((bounds.size.height - frame.size.height) / 2, scale);
+        frame.origin.y = revenant_pixel_round((bounds.size.height - frame.size.height) / 2, scale);
         view.frame = frame;
         contentEnd = edge - width;
         BOOL divided = [accessory isKindOfClass:[UICellAccessoryReorder class]] && [(UICellAccessoryReorder *)accessory showsVerticalSeparator] && accessory != trail.firstObject;
         if (divided) {
             if (!_reorderSeparator) {
-                _reorderSeparator = [[CharonVerticalSeparatorView alloc] init];
+                _reorderSeparator = [[RevenantVerticalSeparatorView alloc] init];
                 _reorderSeparator.userInteractionEnabled = NO;
                 [self addSubview:_reorderSeparator];
             }
-            _reorderSeparator.backgroundColor = charon_semantic_color(CharonSemanticColorSeparator);
+            _reorderSeparator.backgroundColor = revenant_semantic_color(RevenantSemanticColorSeparator);
             _reorderSeparator.frame = CGRectMake(contentEnd - 9, 0, 1, bounds.size.height);
             separated = YES;
         }
@@ -290,22 +290,22 @@
     UIView *content = self.contentView.subviews.firstObject;
     if ([content isKindOfClass:[UIListContentView class]])
         content.frame = self.contentView.bounds;
-    CGFloat textLeading = [content isKindOfClass:[UIListContentView class]] ? contentStart + [(UIListContentView *)content charon_textLeading] : margins.left + indent;
+    CGFloat textLeading = [content isKindOfClass:[UIListContentView class]] ? contentStart + [(UIListContentView *)content revenant_textLeading] : margins.left + indent;
     _separatorFrame = CGRectMake(textLeading, bounds.size.height - 1 / scale, MAX(bounds.size.width - margins.right - textLeading, 0), 1 / scale);
-    UICollectionLayoutListConfiguration *configuration = [self charon_layoutListConfiguration];
-    if (configuration && [configuration charon_showsSeparators]) {
+    UICollectionLayoutListConfiguration *configuration = [self revenant_layoutListConfiguration];
+    if (configuration && [configuration revenant_showsSeparators]) {
         if (!_separator) {
-            _separator = [[CharonRowSeparatorView alloc] init];
+            _separator = [[RevenantRowSeparatorView alloc] init];
             _separator.userInteractionEnabled = NO;
             [self addSubview:_separator];
         }
-        _separator.backgroundColor = charon_semantic_color(CharonSemanticColorSeparator);
+        _separator.backgroundColor = revenant_semantic_color(RevenantSemanticColorSeparator);
         _separator.frame = _separatorFrame;
     } else {
         [_separator removeFromSuperview];
         _separator = nil;
     }
-    [_separatorGuide charon_pinFrame:_separatorFrame inView:self];
+    [_separatorGuide revenant_pinFrame:_separatorFrame inView:self];
 }
 
 @end

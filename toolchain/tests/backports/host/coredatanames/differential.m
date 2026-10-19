@@ -6,7 +6,7 @@
 
 static void check_named(BOOL passed, NSString *name, NSString *detail)
 {
-    charon_check(passed, [name UTF8String], detail);
+    revenant_check(passed, [name UTF8String], detail);
 }
 
 static NSString *plain(void *value)
@@ -35,7 +35,7 @@ int main(int argc, char **argv)
 
     NSUInteger agreed = 0, absent = 0, differed = 0, missingHere = 0;
     for (NSString *name in names) {
-        void *mine = dlsym(RTLD_DEFAULT, [@"charonHost_" stringByAppendingString:name].UTF8String);
+        void *mine = dlsym(RTLD_DEFAULT, [@"revenantHost_" stringByAppendingString:name].UTF8String);
         void *theirs = dlsym(RTLD_DEFAULT, name.UTF8String);
         if (!theirs) {
             absent++;
@@ -65,10 +65,10 @@ int main(int argc, char **argv)
                 [NSString stringWithFormat:@"%lu are not carried", (unsigned long)missingHere]);
     printf("agreed %lu, differed %lu, the host has no such name %lu\n", (unsigned long)agreed, (unsigned long)differed, (unsigned long)absent);
 
-    NSString *checksum = plain(dlsym(RTLD_DEFAULT, "charonHost_NSPersistentStoreModelVersionChecksumKey"));
+    NSString *checksum = plain(dlsym(RTLD_DEFAULT, "revenantHost_NSPersistentStoreModelVersionChecksumKey"));
     check_named([checksum isEqualToString:@"NSStoreModelVersionChecksumKey"], @"and a name read on its own is the store's own text, not a spelling of the symbol",
                 [NSString stringWithFormat:@"%@", checksum]);
 
-    printf("checks=%d failures=%d\n", charon_checks, charon_failures);
-    return charon_failures == 0 ? 0 : 1;
+    printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
+    return revenant_failures == 0 ? 0 : 1;
 }

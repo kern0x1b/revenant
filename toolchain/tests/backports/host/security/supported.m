@@ -3,11 +3,11 @@
 #import <CoreFoundation/CoreFoundation.h>
 #import <stdio.h>
 
-bool CharonSecurityCarries(SecKeyOperationType operation, SecKeyAlgorithm algorithm, bool rsa, bool ec);
+bool RevenantSecurityCarries(SecKeyOperationType operation, SecKeyAlgorithm algorithm, bool rsa, bool ec);
 
 static void answer(const char *label, SecKeyOperationType op, SecKeyAlgorithm alg, bool rsa, bool ec)
 {
-    printf("%s\t%s\n", label, CharonSecurityCarries(op, alg, rsa, ec) ? "YES" : "NO");
+    printf("%s\t%s\n", label, RevenantSecurityCarries(op, alg, rsa, ec) ? "YES" : "NO");
 }
 
 int main(void)

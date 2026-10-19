@@ -297,7 +297,7 @@ func propertyFields(_ type: Any.Type, sample: Any? = nil) -> [PropertyField] {
     } else if let sample {
         fields = FieldReflection.mirrorFields(sample, of: type)
     } else {
-        fatalError("Eidolon: the runtime's field reflection failed its self-check and there is no value to read the fields of \(type) from")
+        fatalError("SwiftUI: the runtime's field reflection failed its self-check and there is no value to read the fields of \(type) from")
     }
     propertyFieldCache[ObjectIdentifier(type)] = fields
     return fields
@@ -344,7 +344,7 @@ enum FieldReflection {
 
     static func mirrorFields(_ sample: Any, of type: Any.Type) -> [PropertyField] {
         guard let offsets = metadataOffsets(type), offsets.count == Mirror(reflecting: sample).children.count else {
-            fatalError("Eidolon: cannot find the fields of \(type) without the runtime's field reflection")
+            fatalError("SwiftUI: cannot find the fields of \(type) without the runtime's field reflection")
         }
         var fields: [PropertyField] = []
         for (child, offset) in zip(Mirror(reflecting: sample).children, offsets) {

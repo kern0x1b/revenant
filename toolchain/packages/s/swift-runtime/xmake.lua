@@ -7,8 +7,8 @@ package("swift-runtime")
     add_urls("https://github.com/swiftlang/swift.git")
     add_versions("6.4.0", "b8189d766d86ad7fc8106787d6ce9e402f38dd72")
 
-    add_deps("charon@swift 6.4.0", {alias = "swift", host = true, private = true, system = false})
-    add_deps("charon@apple-compat", {alias = "apple-compat"})
+    add_deps("revenant@swift 6.4.0", {alias = "swift", host = true, private = true, system = false})
+    add_deps("revenant@apple-compat", {alias = "apple-compat"})
 
     local reality_libraries = {"swiftRealityFoundation", "swiftRealityKit"}
     local function has_scenekit(minimum)
@@ -55,38 +55,38 @@ package("swift-runtime")
     end
     local folder = path.join(os.scriptdir(), "..", "..", "a", "apple-compat")
     for _, shim in ipairs(table.join(os.files(path.join(folder, "src", "*.c")), os.files(path.join(folder, "src", "*.h")),
-                                     os.files(path.join(folder, "include", "charon", "*.h")))) do
+                                     os.files(path.join(folder, "include", "revenant", "*.h")))) do
         table.insert(digests, "apple-compat/" .. path.filename(shim) .. "=" .. hash.sha256(shim))
     end
     table.sort(digests)
     add_configs("recipe", {description = "The digest of this recipe and the changes it makes to the runtime's sources, so a changed flag or patch is a different runtime.", default = hash.strhash128(table.concat(digests, ";")), type = "string", readonly = true})
 
-    add_configs("backports", {description = "Build the overlays for a port that carries charon@apple-backports: API the backports implement is available from the port's release, in the overlays and in the port's own Swift.", default = false, type = "boolean"})
+    add_configs("backports", {description = "Build the overlays for a port that carries revenant@apple-backports: API the backports implement is available from the port's release, in the overlays and in the port's own Swift.", default = false, type = "boolean"})
 
-    add_configs("backports_uikit", {description = "With backports: link the overlay of UIKit against libUIKitBackports, for an application that carries charon@apple-backports with its uikit config.", default = false, type = "boolean"})
+    add_configs("backports_uikit", {description = "With backports: link the overlay of UIKit against libUIKitBackports, for an application that carries revenant@apple-backports with its uikit config.", default = false, type = "boolean"})
 
     add_configs("library_evolution", {description = "Build the standard library, the runtime and concurrency with library evolution, for programs compiled by an SDK's Swift that bind to its resilient symbols. Writes no .swiftinterface, and an arm64 install stops after Darwin (the SDK has the other overlays); another build of its own, named by its own mark.", default = false, type = "boolean"})
 
     add_configs("shared", {description = "Install the libraries under absolute install names and leave what a Debian package holding them is written from, which the programs built against this runtime depend on instead of carrying the libraries: the program that depends on it writes and signs that package, so this package needs no host tool.", default = false, type = "boolean"})
 
     on_load("iphoneos", function (package)
-        package:add("deps", "charon@libcxx", {alias = "libcxx", configs = {packaged = package:config("shared") or nil}})
+        package:add("deps", "revenant@libcxx", {alias = "libcxx", configs = {packaged = package:config("shared") or nil}})
         if package:config("backports_uikit") and not package:config("backports") then
             raise("swift-runtime's backports_uikit config is the application half of the backports config; set backports too")
         end
         if package:config("backports") then
-            package:add("deps", "charon@apple-backports", {alias = "apple-backports", configs = {coredata = true, uikit = package:config("backports_uikit") or nil}})
+            package:add("deps", "revenant@apple-backports", {alias = "apple-backports", configs = {coredata = true, uikit = package:config("backports_uikit") or nil}})
         end
         package:add("links", "swiftCore")
         if package:config("shared") then
             local runtime = import("apple.shared_runtime", {rootdir = path.join(package:scriptdir(), "..", "..", "..", "modules"), anonymous = true})
             for _, kind in ipairs({"swift-runtime", "swift-runtime-ui"}) do
-                package:add("linkdirs", path.join("share", "root", "usr", "lib", "charon", runtime.package_name(kind, package:buildhash())))
+                package:add("linkdirs", path.join("share", "root", "usr", "lib", "revenant", runtime.package_name(kind, package:buildhash())))
             end
         else
             package:add("linkdirs", path.join("lib", "swift", "iphoneos"))
         end
-        package:data_set("mark", "charon_swift_runtime_" .. package:buildhash())
+        package:data_set("mark", "revenant_swift_runtime_" .. package:buildhash())
     end)
 
     on_install("iphoneos", function (package)
@@ -95,9 +95,9 @@ package("swift-runtime")
         local gyb = import("gyb.template", {rootdir = modules, anonymous = true})
         local cmake = import("apple.cmake", {rootdir = modules, anonymous = true})
         local compat = import("apple.compat", {rootdir = modules, anonymous = true})
-        local compiler = assert(package:dep("swift"), "the runtime is built with charon@swift")
-        local libcxx = assert(package:dep("libcxx"), "the runtime links the C++ runtime of charon@libcxx")
-        local shims = assert(package:dep("apple-compat"), "the runtime takes what the release lacks from charon@apple-compat")
+        local compiler = assert(package:dep("swift"), "the runtime is built with revenant@swift")
+        local libcxx = assert(package:dep("libcxx"), "the runtime links the C++ runtime of revenant@libcxx")
+        local shims = assert(package:dep("apple-compat"), "the runtime takes what the release lacks from revenant@apple-compat")
         local toolchain = cmake.toolchain(package)
         local minimum = toolchain:config("deployment")
         local triple = package:arch() .. "-apple-ios" .. minimum
@@ -105,7 +105,7 @@ package("swift-runtime")
 
         package:setenv("SWIFT_EXEC", swiftc)
         package:setenv("SWIFT_PLUGIN_PATH", path.join(compiler:installdir("lib"), "swift", "host", "plugins"))
-        package:setenv("CHARON_SWIFT_RUNTIME_MARK", package:data("mark"))
+        package:setenv("REVENANT_SWIFT_RUNTIME_MARK", package:data("mark"))
         local jobs = math.min(import("core.base.option").get("jobs") or os.cpuinfo("ncpu"), 8)
 
         local marked = os.getenv("SWIFTRT_PROFILE") and {} or nil
@@ -161,11 +161,11 @@ package("swift-runtime")
 
         if not stdlib_kept then
             local overlay_shims = path.join(source, "stdlib", "public", "SwiftShims", "swift", "shims", "LibcOverlayShims.h")
-            local renamed_shims, calls = io.readfile(overlay_shims):gsub("return openat%(", "return charon_openat(")
+            local renamed_shims, calls = io.readfile(overlay_shims):gsub("return openat%(", "return revenant_openat(")
             assert(calls == 1, "the shims of Swift " .. package:version_str() ..
                    " no longer call openat exactly once, and this runtime would ship a header that does not say what it does")
             local declared, declarations = renamed_shims:gsub("(int static inline _swift_stdlib_openat)",
-                                                              "extern int charon_openat(int directory, const char *path, int flags, ...);\n%1", 1)
+                                                              "extern int revenant_openat(int directory, const char *path, int flags, ...);\n%1", 1)
             assert(declarations == 1, "the shims of Swift " .. package:version_str() .. " no longer declare _swift_stdlib_openat as they did")
             io.writefile(overlay_shims, declared)
 
@@ -351,9 +351,9 @@ package("swift-runtime")
                 local work = path.join(package:installdir("share"), "port-ir")
                 os.mkdir(work)
                 local ir = path.join(work, "full.tsv")
-                local spec_sdk = os.getenv("CHARON_GEN_SDK")
+                local spec_sdk = os.getenv("REVENANT_GEN_SDK")
                 if not spec_sdk or spec_sdk == "" then
-                    raise("swift-runtime's port headers need CHARON_GEN_SDK: the iPhoneOS SDK whose release the spec snapshot is measured on")
+                    raise("swift-runtime's port headers need REVENANT_GEN_SDK: the iPhoneOS SDK whose release the spec snapshot is measured on")
                 end
                 os.execv("xmake", {"l", path.join(tree, "tools", "found", "ir.lua")}, {curdir = tree,
                          envs = {IR_SDK = spec_sdk, IR_MODE = "check", IR_FULL = ir}})
@@ -366,8 +366,8 @@ package("swift-runtime")
                 end
                 local overlay = path.join(staged, "port", minimum, "vfs.yaml")
                 port_headers = {"-vfsoverlay", overlay}
-                package:setenv("CHARON_SWIFT_PORT_HEADERS", overlay)
-                package:setenv("CHARON_SWIFT_RUNTIME_BACKPORTS", package:config("backports_uikit") and "coredata,uikit" or "coredata")
+                package:setenv("REVENANT_SWIFT_PORT_HEADERS", overlay)
+                package:setenv("REVENANT_SWIFT_RUNTIME_BACKPORTS", package:config("backports_uikit") and "coredata,uikit" or "coredata")
                 carried.FoundationBackports = path.join(backported:installdir("lib"), "libFoundationBackports.dylib")
                 carried.CoreDataBackports = path.join(backported:installdir("lib"), "libCoreDataBackports.dylib")
                 if package:config("backports_uikit") then
@@ -853,11 +853,11 @@ package("swift-runtime")
                 end
             end
             runtime.stage({packages = {{name = name, version = version, title = "Swift runtime " .. package:buildhash():sub(1, 8),
-                                        description = "The Swift runtime and the overlays of one build of Charon's charon@swift-runtime,",
+                                        description = "The Swift runtime and the overlays of one build of Revenant's revenant@swift-runtime,",
                                         depends = depends,
                                         libraries = libraries},
                                        {name = ui, version = version, title = "Swift runtime UI " .. package:buildhash():sub(1, 8),
-                                        description = "The overlays of QuartzCore and UIKit of one build of Charon's charon@swift-runtime,",
+                                        description = "The overlays of QuartzCore and UIKit of one build of Revenant's revenant@swift-runtime,",
                                         depends = ui_depends,
                                         libraries = ui_libraries}},
                            root = path.join(package:installdir("share"), "root"),
@@ -865,7 +865,7 @@ package("swift-runtime")
             for _, library in ipairs(table.join(libraries, ui_libraries)) do
                 os.rm(library)
             end
-            package:setenv("CHARON_SHARED_PACKAGE", name .. "=" .. cxx .. ";" .. ui .. "=" .. name)
+            package:setenv("REVENANT_SHARED_PACKAGE", name .. "=" .. cxx .. ";" .. ui .. "=" .. name)
             timed("package")
         end
         if marked then
@@ -966,7 +966,7 @@ package("swift-runtime")
         assert(exported:find("%s_" .. package:data("mark") .. "%s"),
                "libswiftCore.dylib does not carry the mark of the build it is, so a program could be linked against another")
 
-        local compiler = assert(package:dep("swift"), "the runtime is built with charon@swift")
+        local compiler = assert(package:dep("swift"), "the runtime is built with revenant@swift")
         local source = os.tmpfile() .. ".swift"
         io.writefile(source, "import Darwin\nimport Synchronization\npublic func held() -> Int32 { return Darwin.getpid() }\n")
         local _, loaded = os.iorunv(path.join(compiler:installdir("bin"), "swiftc"),
@@ -999,7 +999,7 @@ package("swift-runtime")
             end }
         end
         assert(links(package:data("mark")), "a port must link against the runtime it was built against, by its mark")
-        assert(not links("charon_swift_runtime_not_this_build"),
+        assert(not links("revenant_swift_runtime_not_this_build"),
                "a port must not link against a runtime whose mark it does not name; the mark is what keeps builds apart")
         os.tryrm(folder)
         os.tryrm(path.absolute("build"))

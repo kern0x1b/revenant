@@ -14,7 +14,7 @@ set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 appledir=${APPLEDIR:-$here/../../../../packages/a/apple-backports}
-build=${BUILD:-$(runs_fresh charon-sensorkit)}
+build=${BUILD:-$(runs_fresh revenant-sensorkit)}
 mkdir -p "$build"
 sdk=$(xcrun --show-sdk-path --sdk macosx)
 common="-target arm64-apple-ios15.0-macabi -isysroot $sdk -F $sdk/System/Library/Frameworks -iframework $sdk/System/iOSSupport/System/Library/Frameworks -fobjc-arc -w"
@@ -27,7 +27,7 @@ echo "records: $(xmake l "$here/records.lua" count "$build/system.json")"
 xmake l "$here/rename.lua" "$appledir/registry/SensorKit/ios14.json" "$build/rename.h"
 port() {
     dir=$1
-    xcrun clang $common -DCHARON_SENSORKIT_PORT=1 -include "$build/rename.h" -I"$here" -I"$appledir/SensorKit" \
+    xcrun clang $common -DREVENANT_SENSORKIT_PORT=1 -include "$build/rename.h" -I"$here" -I"$appledir/SensorKit" \
         "$here/record.m" "$here/cases.m" "$dir/SRAbsoluteTime.m" "$dir/NSDate+SensorKit14.m" $libs -o "$dir/run"
 }
 rm -rf "$build/port"; mkdir -p "$build/port"
@@ -63,6 +63,6 @@ mutant "the category's round trip gains a millisecond" \
     "    return SRAbsoluteTimeFromCFAbsoluteTime((CFAbsoluteTime)self.timeIntervalSinceReferenceDate);" \
     "    return SRAbsoluteTimeFromCFAbsoluteTime((CFAbsoluteTime)self.timeIntervalSinceReferenceDate) + 0.001;" \
     "NSDate+SensorKit14.m"
-mutant "the reading does not advance" "    NSTimeInterval elapsed = CharonSensorKitSecondsFromTicks(mach_absolute_time() - anchor->continuous);" "    NSTimeInterval elapsed = 0.0;"
+mutant "the reading does not advance" "    NSTimeInterval elapsed = RevenantSensorKitSecondsFromTicks(mach_absolute_time() - anchor->continuous);" "    NSTimeInterval elapsed = 0.0;"
 if [ "$survived" -ne 0 ]; then echo "$survived mutations survived; the differential is not holding"; exit 1; fi
 echo "mutations: all caught"

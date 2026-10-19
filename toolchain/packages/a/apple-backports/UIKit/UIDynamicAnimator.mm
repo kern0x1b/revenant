@@ -1,38 +1,38 @@
-#import "CharonDynamics.h"
+#import "RevenantDynamics.h"
 #import <QuartzCore/QuartzCore.h>
 #import <objc/runtime.h>
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
 
-#ifdef CHARON_HOST_DIFFERENTIAL
-static const BOOL charon_host_integrator = YES;
+#ifdef REVENANT_HOST_DIFFERENTIAL
+static const BOOL revenant_host_integrator = YES;
 #else
-static const BOOL charon_host_integrator = NO;
+static const BOOL revenant_host_integrator = NO;
 #endif
 
-static const float charon_shape_radius = charon_host_integrator ? 0.0f : 0.001f;
+static const float revenant_shape_radius = revenant_host_integrator ? 0.0f : 0.001f;
 
-static Class charon_layout_class(void)
+static Class revenant_layout_class(void)
 {
     return NSClassFromString(@"UICollectionViewLayout");
 }
 
-static Class charon_layout_attributes_class(void)
+static Class revenant_layout_attributes_class(void)
 {
     return NSClassFromString(@"UICollectionViewLayoutAttributes");
 }
 
-@interface CharonDynamicsBody ()
-- (instancetype)initWithShape:(CharonDynamicsShape)shape size:(CGSize)size vertices:(const b2Vec2 *)vertices count:(int32)count;
-- (void)charon_attachToWorld:(b2World *)world;
-- (void)charon_detachFromWorld;
+@interface RevenantDynamicsBody ()
+- (instancetype)initWithShape:(RevenantDynamicsShape)shape size:(CGSize)size vertices:(const b2Vec2 *)vertices count:(int32)count;
+- (void)revenant_attachToWorld:(b2World *)world;
+- (void)revenant_detachFromWorld;
 @end
 
-@implementation CharonDynamicsBody {
+@implementation RevenantDynamicsBody {
     b2Body *_b2Body;
     b2BodyDef _definition;
-    CharonDynamicsShape _shape;
+    RevenantDynamicsShape _shape;
     CGSize _size;
     b2Vec2 *_vertices;
     int32 _vertexCount;
@@ -44,7 +44,7 @@ static Class charon_layout_attributes_class(void)
 @synthesize representedObject = _representedObject, associations = _associations;
 @synthesize categoryBitMask = _categoryBitMask, collisionBitMask = _collisionBitMask, contactTestBitMask = _contactTestBitMask;
 
-- (instancetype)initWithShape:(CharonDynamicsShape)shape size:(CGSize)size vertices:(const b2Vec2 *)vertices count:(int32)count
+- (instancetype)initWithShape:(RevenantDynamicsShape)shape size:(CGSize)size vertices:(const b2Vec2 *)vertices count:(int32)count
 {
     if (!(self = [super init]))
         return nil;
@@ -65,8 +65,8 @@ static Class charon_layout_attributes_class(void)
     _fixtureFriction = 0.2f;
     _fixtureRestitution = 0.2f;
     _areaFactor = 1.0f;
-    if (shape == CharonDynamicsShapeBox && !charon_host_integrator) {
-        CGFloat inset = 0.02 / CHARON_DYNAMICS_INVERSE_PTM;
+    if (shape == RevenantDynamicsShapeBox && !revenant_host_integrator) {
+        CGFloat inset = 0.02 / REVENANT_DYNAMICS_INVERSE_PTM;
         CGFloat width = size.width > inset + 1 ? size.width - inset : MAX(size.width - inset, size.width / 2);
         CGFloat height = size.height > inset + 1 ? size.height - inset : MAX(size.height - inset, size.height / 2);
         _areaFactor = (float)((size.width * size.height) / (width * height));
@@ -86,7 +86,7 @@ static Class charon_layout_attributes_class(void)
     return _b2Body;
 }
 
-- (void)charon_attachToWorld:(b2World *)world
+- (void)revenant_attachToWorld:(b2World *)world
 {
     if (_b2Body)
         return;
@@ -101,23 +101,23 @@ static Class charon_layout_attributes_class(void)
     b2EdgeShape edge;
     b2ChainShape chain;
     switch (_shape) {
-    case CharonDynamicsShapeNone:
+    case RevenantDynamicsShapeNone:
         return;
-    case CharonDynamicsShapeBox:
-        box.SetAsBox(0.5f * (float)_size.width * CHARON_DYNAMICS_INVERSE_PTM, 0.5f * (float)_size.height * CHARON_DYNAMICS_INVERSE_PTM);
-        box.m_radius = charon_shape_radius;
+    case RevenantDynamicsShapeBox:
+        box.SetAsBox(0.5f * (float)_size.width * REVENANT_DYNAMICS_INVERSE_PTM, 0.5f * (float)_size.height * REVENANT_DYNAMICS_INVERSE_PTM);
+        box.m_radius = revenant_shape_radius;
         fixture.shape = &box;
         break;
-    case CharonDynamicsShapeCircle:
-        circle.m_radius = 0.5f * (float)_size.width * CHARON_DYNAMICS_INVERSE_PTM;
+    case RevenantDynamicsShapeCircle:
+        circle.m_radius = 0.5f * (float)_size.width * REVENANT_DYNAMICS_INVERSE_PTM;
         fixture.shape = &circle;
         break;
-    case CharonDynamicsShapeEdge:
+    case RevenantDynamicsShapeEdge:
         edge.Set(_vertices[0], _vertices[1]);
-        edge.m_radius = charon_shape_radius;
+        edge.m_radius = revenant_shape_radius;
         fixture.shape = &edge;
         break;
-    case CharonDynamicsShapeLoop:
+    case RevenantDynamicsShapeLoop:
         if (_vertexCount == 2) {
             b2Vec2 closed[3] = {_vertices[0], _vertices[1], _vertices[0]};
             chain.CreateChain(closed, 3);
@@ -126,14 +126,14 @@ static Class charon_layout_attributes_class(void)
         } else {
             chain.CreateLoop(_vertices, _vertexCount);
         }
-        chain.m_radius = charon_shape_radius;
+        chain.m_radius = revenant_shape_radius;
         fixture.shape = &chain;
         break;
     }
     _b2Body->CreateFixture(&fixture);
 }
 
-- (void)charon_detachFromWorld
+- (void)revenant_detachFromWorld
 {
     if (!_b2Body)
         return;
@@ -145,7 +145,7 @@ static Class charon_layout_attributes_class(void)
     _b2Body = NULL;
 }
 
-- (void)charon_refilter
+- (void)revenant_refilter
 {
     for (b2Fixture *fixture = _b2Body ? _b2Body->GetFixtureList() : NULL; fixture; fixture = fixture->GetNext())
         fixture->Refilter();
@@ -154,19 +154,19 @@ static Class charon_layout_attributes_class(void)
 - (void)setCategoryBitMask:(uint32_t)mask
 {
     _categoryBitMask = mask;
-    [self charon_refilter];
+    [self revenant_refilter];
 }
 
 - (void)setCollisionBitMask:(uint32_t)mask
 {
     _collisionBitMask = mask;
-    [self charon_refilter];
+    [self revenant_refilter];
 }
 
 - (void)setContactTestBitMask:(uint32_t)mask
 {
     _contactTestBitMask = mask;
-    [self charon_refilter];
+    [self revenant_refilter];
 }
 
 - (BOOL)affectedByGravity
@@ -220,12 +220,12 @@ static Class charon_layout_attributes_class(void)
 
 - (CGPoint)position
 {
-    return charon_points(_b2Body ? _b2Body->GetPosition() : _definition.position);
+    return revenant_points(_b2Body ? _b2Body->GetPosition() : _definition.position);
 }
 
 - (void)setPosition:(CGPoint)position
 {
-    _definition.position = charon_metres(position);
+    _definition.position = revenant_metres(position);
     if (_b2Body)
         _b2Body->SetTransform(_definition.position, _b2Body->GetAngle());
 }
@@ -244,12 +244,12 @@ static Class charon_layout_attributes_class(void)
 
 - (CGPoint)velocity
 {
-    return charon_points(_b2Body ? _b2Body->GetLinearVelocity() : _definition.linearVelocity);
+    return revenant_points(_b2Body ? _b2Body->GetLinearVelocity() : _definition.linearVelocity);
 }
 
 - (void)setVelocity:(CGPoint)velocity
 {
-    _definition.linearVelocity = charon_metres(velocity);
+    _definition.linearVelocity = revenant_metres(velocity);
     if (_b2Body)
         _b2Body->SetLinearVelocity(_definition.linearVelocity);
 }
@@ -266,7 +266,7 @@ static Class charon_layout_attributes_class(void)
         _b2Body->SetAngularVelocity((float)velocity);
 }
 
-- (b2Fixture *)charon_fixture
+- (b2Fixture *)revenant_fixture
 {
     return _b2Body ? _b2Body->GetFixtureList() : NULL;
 }
@@ -279,7 +279,7 @@ static Class charon_layout_attributes_class(void)
 - (void)setRestitution:(CGFloat)restitution
 {
     _fixtureRestitution = (float)restitution;
-    if (b2Fixture *fixture = [self charon_fixture])
+    if (b2Fixture *fixture = [self revenant_fixture])
         fixture->SetRestitution(_fixtureRestitution);
 }
 
@@ -291,7 +291,7 @@ static Class charon_layout_attributes_class(void)
 - (void)setFriction:(CGFloat)friction
 {
     _fixtureFriction = (float)friction;
-    if (b2Fixture *fixture = [self charon_fixture])
+    if (b2Fixture *fixture = [self revenant_fixture])
         fixture->SetFriction(_fixtureFriction);
 }
 
@@ -303,7 +303,7 @@ static Class charon_layout_attributes_class(void)
 - (void)setNormalizedDensity:(CGFloat)density
 {
     _density = (float)density * _areaFactor;
-    if (b2Fixture *fixture = [self charon_fixture]) {
+    if (b2Fixture *fixture = [self revenant_fixture]) {
         fixture->SetDensity(_density);
         _b2Body->ResetMassData();
     }
@@ -364,7 +364,7 @@ static Class charon_layout_attributes_class(void)
 - (void)applyForce:(CGVector)force atPoint:(CGPoint)point
 {
     if (_b2Body)
-        _b2Body->ApplyForce(b2Vec2((float)force.dx, (float)force.dy), charon_metres(point));
+        _b2Body->ApplyForce(b2Vec2((float)force.dx, (float)force.dy), revenant_metres(point));
 }
 
 - (void)applyImpulse:(CGVector)impulse
@@ -376,35 +376,35 @@ static Class charon_layout_attributes_class(void)
 - (void)applyImpulse:(CGVector)impulse atPoint:(CGPoint)point
 {
     if (_b2Body)
-        _b2Body->ApplyLinearImpulse(b2Vec2((float)impulse.dx, (float)impulse.dy), charon_metres(point));
+        _b2Body->ApplyLinearImpulse(b2Vec2((float)impulse.dx, (float)impulse.dy), revenant_metres(point));
 }
 
 @end
 
-@interface CharonDynamicsContact ()
-@property (nonatomic, readwrite) CharonDynamicsBody *bodyA;
-@property (nonatomic, readwrite) CharonDynamicsBody *bodyB;
+@interface RevenantDynamicsContact ()
+@property (nonatomic, readwrite) RevenantDynamicsBody *bodyA;
+@property (nonatomic, readwrite) RevenantDynamicsBody *bodyB;
 @property (nonatomic, readwrite) CGPoint contactPoint;
 @property (nonatomic) BOOL beganDelivered;
 @property (nonatomic) BOOL ended;
 @end
 
-@implementation CharonDynamicsContact
+@implementation RevenantDynamicsContact
 @synthesize bodyA = _bodyA, bodyB = _bodyB, contactPoint = _contactPoint, beganDelivered = _beganDelivered, ended = _ended;
 @end
 
 namespace {
 
-CharonDynamicsBody *body_of(b2Fixture *fixture)
+RevenantDynamicsBody *body_of(b2Fixture *fixture)
 {
-    return (__bridge CharonDynamicsBody *)fixture->GetBody()->GetUserData();
+    return (__bridge RevenantDynamicsBody *)fixture->GetBody()->GetUserData();
 }
 
 class ContactFilter : public b2ContactFilter {
 public:
     bool ShouldCollide(b2Fixture *fixtureA, b2Fixture *fixtureB)
     {
-        CharonDynamicsBody *a = body_of(fixtureA), *b = body_of(fixtureB);
+        RevenantDynamicsBody *a = body_of(fixtureA), *b = body_of(fixtureB);
         return (a.categoryBitMask & b.collisionBitMask) || (b.categoryBitMask & a.collisionBitMask);
     }
 };
@@ -417,7 +417,7 @@ public:
 
     void BeginContact(b2Contact *contact)
     {
-        CharonDynamicsContact *record = [CharonDynamicsContact new];
+        RevenantDynamicsContact *record = [RevenantDynamicsContact new];
         record.bodyA = body_of(contact->GetFixtureA());
         record.bodyB = body_of(contact->GetFixtureB());
         [records addObject:record];
@@ -426,14 +426,14 @@ public:
 
     void EndContact(b2Contact *contact)
     {
-        CharonDynamicsContact *record = [live objectForKey:(__bridge id)(void *)contact];
+        RevenantDynamicsContact *record = [live objectForKey:(__bridge id)(void *)contact];
         record.ended = YES;
         [live removeObjectForKey:(__bridge id)(void *)contact];
     }
 
     void PreSolve(b2Contact *contact, const b2Manifold *)
     {
-        CharonDynamicsBody *a = body_of(contact->GetFixtureA()), *b = body_of(contact->GetFixtureB());
+        RevenantDynamicsBody *a = body_of(contact->GetFixtureA()), *b = body_of(contact->GetFixtureB());
         bool respondsA = contact->GetFixtureA()->GetBody()->GetType() == b2_dynamicBody && (b.categoryBitMask & a.collisionBitMask);
         bool respondsB = contact->GetFixtureB()->GetBody()->GetType() == b2_dynamicBody && (a.categoryBitMask & b.collisionBitMask);
         if (!respondsA && !respondsB)
@@ -442,7 +442,7 @@ public:
 
     void PostSolve(b2Contact *contact, const b2ContactImpulse *impulse)
     {
-        CharonDynamicsContact *record = [live objectForKey:(__bridge id)(void *)contact];
+        RevenantDynamicsContact *record = [live objectForKey:(__bridge id)(void *)contact];
         int32 count = contact->GetManifold()->pointCount;
         if (!record || count == 0)
             return;
@@ -453,7 +453,7 @@ public:
             if (impulse->normalImpulses[index] > impulse->normalImpulses[strongest])
                 strongest = index;
         }
-        record.contactPoint = charon_points(manifold.points[strongest]);
+        record.contactPoint = revenant_points(manifold.points[strongest]);
     }
 };
 
@@ -464,7 +464,7 @@ public:
 
     bool ReportFixture(b2Fixture *fixture)
     {
-        CharonDynamicsBody *body = body_of(fixture);
+        RevenantDynamicsBody *body = body_of(fixture);
         if (![seen containsObject:body]) {
             [seen addObject:body];
             if (body.representedObject)
@@ -476,51 +476,51 @@ public:
 
 }
 
-typedef NS_ENUM(NSInteger, CharonReferenceSystem) {
-    CharonReferenceSystemNone,
-    CharonReferenceSystemView,
-    CharonReferenceSystemLayout,
+typedef NS_ENUM(NSInteger, RevenantReferenceSystem) {
+    RevenantReferenceSystemNone,
+    RevenantReferenceSystemView,
+    RevenantReferenceSystemLayout,
 };
 
-@interface CharonDynamicsTicker : NSObject
+@interface RevenantDynamicsTicker : NSObject
 @property (nonatomic, weak) UIDynamicAnimator *animator;
 @end
 
-@interface UIDynamicAnimator (CharonDynamicsTick)
-- (void)charon_displayLinkTick:(CADisplayLink *)link;
+@interface UIDynamicAnimator (RevenantDynamicsTick)
+- (void)revenant_displayLinkTick:(CADisplayLink *)link;
 @end
 
-@implementation CharonDynamicsTicker
+@implementation RevenantDynamicsTicker
 @synthesize animator = _animator;
 
 - (void)tick:(CADisplayLink *)link
 {
-    [self.animator charon_displayLinkTick:link];
+    [self.animator revenant_displayLinkTick:link];
 }
 
 @end
 
-@interface UIDynamicAnimator (CharonReferenceView)
-- (void)charon_tickle;
+@interface UIDynamicAnimator (RevenantReferenceView)
+- (void)revenant_tickle;
 @end
 
-static CFMutableArrayRef charon_animators;
-static char charon_watch_key;
+static CFMutableArrayRef revenant_animators;
+static char revenant_watch_key;
 
-static void charon_reference_view_size_changed(UIView *view)
+static void revenant_reference_view_size_changed(UIView *view)
 {
-    for (CFIndex index = 0; index < CFArrayGetCount(charon_animators); index++) {
-        UIDynamicAnimator *animator = (__bridge UIDynamicAnimator *)CFArrayGetValueAtIndex(charon_animators, index);
+    for (CFIndex index = 0; index < CFArrayGetCount(revenant_animators); index++) {
+        UIDynamicAnimator *animator = (__bridge UIDynamicAnimator *)CFArrayGetValueAtIndex(revenant_animators, index);
         if (animator.referenceView == view)
-            [animator charon_tickle];
+            [animator revenant_tickle];
     }
 }
 
-@interface CharonReferenceViewWatch : NSObject
+@interface RevenantReferenceViewWatch : NSObject
 - (instancetype)initWithView:(UIView *)view;
 @end
 
-@implementation CharonReferenceViewWatch {
+@implementation RevenantReferenceViewWatch {
     __unsafe_unretained UIView *_view;
     CGSize _sizeBefore;
 }
@@ -542,7 +542,7 @@ static void charon_reference_view_size_changed(UIView *view)
     if ([[change objectForKey:NSKeyValueChangeNotificationIsPriorKey] boolValue])
         _sizeBefore = size;
     else if (!CGSizeEqualToSize(size, _sizeBefore))
-        charon_reference_view_size_changed(_view);
+        revenant_reference_view_size_changed(_view);
 }
 
 - (void)dealloc
@@ -553,33 +553,33 @@ static void charon_reference_view_size_changed(UIView *view)
 
 @end
 
-static void charon_register_animator(UIDynamicAnimator *animator)
+static void revenant_register_animator(UIDynamicAnimator *animator)
 {
     static dispatch_once_t once;
     dispatch_once(&once, ^{
-        charon_animators = CFArrayCreateMutable(NULL, 0, NULL);
+        revenant_animators = CFArrayCreateMutable(NULL, 0, NULL);
     });
-    CFArrayAppendValue(charon_animators, (__bridge const void *)animator);
+    CFArrayAppendValue(revenant_animators, (__bridge const void *)animator);
     UIView *view = animator.referenceView;
-    if (view && !objc_getAssociatedObject(view, &charon_watch_key))
-        objc_setAssociatedObject(view, &charon_watch_key, [[CharonReferenceViewWatch alloc] initWithView:view], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    if (view && !objc_getAssociatedObject(view, &revenant_watch_key))
+        objc_setAssociatedObject(view, &revenant_watch_key, [[RevenantReferenceViewWatch alloc] initWithView:view], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
-static void charon_unregister_animator(UIDynamicAnimator *animator)
+static void revenant_unregister_animator(UIDynamicAnimator *animator)
 {
-    if (!charon_animators)
+    if (!revenant_animators)
         return;
-    CFIndex index = CFArrayGetFirstIndexOfValue(charon_animators, CFRangeMake(0, CFArrayGetCount(charon_animators)), (__bridge const void *)animator);
+    CFIndex index = CFArrayGetFirstIndexOfValue(revenant_animators, CFRangeMake(0, CFArrayGetCount(revenant_animators)), (__bridge const void *)animator);
     if (index == kCFNotFound)
         return;
-    CFArrayRemoveValueAtIndex(charon_animators, index);
+    CFArrayRemoveValueAtIndex(revenant_animators, index);
     UIView *view = animator.referenceView;
     if (!view)
         return;
-    for (index = 0; index < CFArrayGetCount(charon_animators); index++)
-        if (((__bridge UIDynamicAnimator *)CFArrayGetValueAtIndex(charon_animators, index)).referenceView == view)
+    for (index = 0; index < CFArrayGetCount(revenant_animators); index++)
+        if (((__bridge UIDynamicAnimator *)CFArrayGetValueAtIndex(revenant_animators, index)).referenceView == view)
             return;
-    objc_setAssociatedObject(view, &charon_watch_key, nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(view, &revenant_watch_key, nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
 @implementation UIDynamicAnimator {
@@ -590,7 +590,7 @@ static void charon_unregister_animator(UIDynamicAnimator *animator)
     double _accumulatedDt;
     float _speed;
     __weak id _referenceSystem;
-    CharonReferenceSystem _referenceSystemType;
+    RevenantReferenceSystem _referenceSystemType;
     CGRect _referenceSystemBounds;
     NSMutableArray *_topLevelBehaviors;
     NSMutableSet *_registeredBehaviors;
@@ -620,27 +620,27 @@ static void charon_unregister_animator(UIDynamicAnimator *animator)
 
 - (instancetype)init
 {
-    return [self charon_initWithReferenceSystem:nil];
+    return [self revenant_initWithReferenceSystem:nil];
 }
 
 - (instancetype)initWithReferenceView:(UIView *)view
 {
-    return [self charon_initWithReferenceSystem:view];
+    return [self revenant_initWithReferenceSystem:view];
 }
 
-- (instancetype)charon_initWithReferenceSystem:(id)system __attribute__((objc_method_family(init)))
+- (instancetype)revenant_initWithReferenceSystem:(id)system __attribute__((objc_method_family(init)))
 {
     if (!(self = [super init]))
         return nil;
     _referenceSystem = system;
     if ([system isKindOfClass:[UIView class]]) {
-        _referenceSystemType = CharonReferenceSystemView;
+        _referenceSystemType = RevenantReferenceSystemView;
         _referenceSystemBounds = [system bounds];
-    } else if ([system isKindOfClass:charon_layout_class()]) {
-        _referenceSystemType = CharonReferenceSystemLayout;
-        _referenceSystemBounds = [self charon_layoutBounds];
+    } else if ([system isKindOfClass:revenant_layout_class()]) {
+        _referenceSystemType = RevenantReferenceSystemLayout;
+        _referenceSystemBounds = [self revenant_layoutBounds];
     } else {
-        _referenceSystemType = CharonReferenceSystemNone;
+        _referenceSystemType = RevenantReferenceSystemNone;
         _referenceSystemBounds = CGRectNull;
     }
     _registeredBehaviors = [NSMutableSet new];
@@ -654,19 +654,19 @@ static void charon_unregister_animator(UIDynamicAnimator *animator)
     _speed = 1.0f;
     _integralization = [[[NSBundle mainBundle] bundleIdentifier] isEqualToString:@"com.apple.springboard"] ? 1 : 0;
     if ([NSThread isMainThread])
-        charon_register_animator(self);
+        revenant_register_animator(self);
     return self;
 }
 
 - (void)dealloc
 {
     _deallocating = YES;
-    charon_unregister_animator(self);
+    revenant_unregister_animator(self);
     [_displayLink invalidate];
     @autoreleasepool {
         for (UIDynamicBehavior *behavior in [_registeredBehaviors copy]) {
-            [behavior charon_dissociate];
-            [behavior charon_setContext:nil];
+            [behavior revenant_dissociate];
+            [behavior revenant_setContext:nil];
         }
     }
     delete _world;
@@ -674,7 +674,7 @@ static void charon_unregister_animator(UIDynamicAnimator *animator)
     delete _contactListener;
 }
 
-- (CGRect)charon_layoutBounds
+- (CGRect)revenant_layoutBounds
 {
     UICollectionViewLayout *layout = _referenceSystem;
     CGSize size = [layout collectionViewContentSize];
@@ -689,7 +689,7 @@ static void charon_unregister_animator(UIDynamicAnimator *animator)
 
 - (UIView *)referenceView
 {
-    return _referenceSystemType == CharonReferenceSystemView ? _referenceSystem : nil;
+    return _referenceSystemType == RevenantReferenceSystemView ? _referenceSystem : nil;
 }
 
 - (NSArray *)behaviors
@@ -721,12 +721,12 @@ static void charon_unregister_animator(UIDynamicAnimator *animator)
 
 #pragma mark World
 
-- (b2World *)charon_world
+- (b2World *)revenant_world
 {
     return _world;
 }
 
-- (void)charon_setupWorld
+- (void)revenant_setupWorld
 {
     _world = new b2World(b2Vec2(0.0f, -9.8f));
     _world->SetAllowSleeping(true);
@@ -739,36 +739,36 @@ static void charon_unregister_animator(UIDynamicAnimator *animator)
     _accumulatedDt = 0.0;
 }
 
-- (void)charon_setWorldGravity:(CGVector)gravity
+- (void)revenant_setWorldGravity:(CGVector)gravity
 {
     if (_world)
         _world->SetGravity(b2Vec2((float)(gravity.dx * 10.0), (float)(gravity.dy * 10.0)));
 }
 
-- (void)charon_addBody:(CharonDynamicsBody *)body
+- (void)revenant_addBody:(RevenantDynamicsBody *)body
 {
     if (!_world || body.b2Body)
         return;
-    [body charon_attachToWorld:_world];
+    [body revenant_attachToWorld:_world];
     [_worldBodies addObject:body];
 }
 
-- (void)charon_removeBody:(CharonDynamicsBody *)body
+- (void)revenant_removeBody:(RevenantDynamicsBody *)body
 {
     if (!body.b2Body)
         return;
-    [body charon_detachFromWorld];
+    [body revenant_detachFromWorld];
     [_worldBodies removeObjectIdenticalTo:body];
 }
 
-- (BOOL)charon_stepWorld:(double)dt
+- (BOOL)revenant_stepWorld:(double)dt
 {
     if (_world->GetBodyCount() == 0)
         return NO;
     float step = (float)dt;
     if (!(step > 0.0f) || fabsf(step) < 0x1p-63f)
         return YES;
-    if (charon_host_integrator) {
+    if (revenant_host_integrator) {
         const float substep = (float)(1.0 / 120.0);
         _accumulatedDt += dt * (double)_speed;
         while (_accumulatedDt >= (double)substep) {
@@ -786,22 +786,22 @@ static void charon_unregister_animator(UIDynamicAnimator *animator)
             } while (total > 0.004);
         }
     }
-    [self charon_flushContacts];
+    [self revenant_flushContacts];
     _world->ClearForces();
     BOOL resting = YES;
-    for (CharonDynamicsBody *body in [_worldBodies copy]) {
+    for (RevenantDynamicsBody *body in [_worldBodies copy]) {
         if (body.representedObject)
-            [self charon_writeBack:body];
+            [self revenant_writeBack:body];
         if (body.dynamic)
             resting = resting && body.resting;
     }
     return !resting;
 }
 
-- (void)charon_flushContacts
+- (void)revenant_flushContacts
 {
     NSMutableArray *records = _contactListener->records;
-    for (CharonDynamicsContact *record in [records copy]) {
+    for (RevenantDynamicsContact *record in [records copy]) {
         if (!record.beganDelivered) {
             record.beganDelivered = YES;
             [_beginContacts addObject:record];
@@ -815,74 +815,74 @@ static void charon_unregister_animator(UIDynamicAnimator *animator)
 
 #pragma mark Stepping
 
-- (void)charon_displayLinkTick:(CADisplayLink *)link
+- (void)revenant_displayLinkTick:(CADisplayLink *)link
 {
     CFTimeInterval dt = link.timestamp - _lastUpdateTime;
     if (dt > 0.5)
         dt = 1.0 / 60.0;
     _realElapsedTime += dt;
-    BOOL awake = [self charon_animatorStep:dt];
+    BOOL awake = [self revenant_animatorStep:dt];
     _lastUpdateTime = link.timestamp;
     if (!awake)
-        [self charon_stop];
+        [self revenant_stop];
 }
 
-- (CGRect)charon_currentReferenceBounds
+- (CGRect)revenant_currentReferenceBounds
 {
-    if (_referenceSystemType == CharonReferenceSystemLayout)
-        return [self charon_layoutBounds];
+    if (_referenceSystemType == RevenantReferenceSystemLayout)
+        return [self revenant_layoutBounds];
     return [_referenceSystem bounds];
 }
 
-- (BOOL)charon_animatorStep:(double)dt
+- (BOOL)revenant_animatorStep:(double)dt
 {
     _ticks += 1;
     _elapsedTime += dt;
-    [self charon_preSolverStep];
+    [self revenant_preSolverStep];
     _isInWorldStepMethod = YES;
-    BOOL awake = [self charon_stepWorld:dt];
+    BOOL awake = [self revenant_stepWorld:dt];
     _isInWorldStepMethod = NO;
-    [self charon_postSolverStep];
-    if (_referenceSystemType == CharonReferenceSystemLayout)
+    [self revenant_postSolverStep];
+    if (_referenceSystemType == RevenantReferenceSystemLayout)
         [(UICollectionViewLayout *)_referenceSystem invalidateLayout];
     return awake;
 }
 
-- (void)charon_preSolverStep
+- (void)revenant_preSolverStep
 {
     if (_needsLocalBehaviorReevaluation) {
         _needsLocalBehaviorReevaluation = NO;
-        [self charon_traverseBehaviorHierarchy:^(UIDynamicBehavior *behavior) {
-            [behavior charon_reevaluate:0];
+        [self revenant_traverseBehaviorHierarchy:^(UIDynamicBehavior *behavior) {
+            [behavior revenant_reevaluate:0];
         }];
     }
     id system = _referenceSystem;
-    if (_registeredImplicitBounds >= 1 && system && !CGRectEqualToRect(_referenceSystemBounds, [self charon_currentReferenceBounds])) {
-        if (_referenceSystemType == CharonReferenceSystemView)
+    if (_registeredImplicitBounds >= 1 && system && !CGRectEqualToRect(_referenceSystemBounds, [self revenant_currentReferenceBounds])) {
+        if (_referenceSystemType == RevenantReferenceSystemView)
             _referenceSystemBounds = [[(UIView *)system layer] presentationLayer].bounds;
         else
-            _referenceSystemBounds = [self charon_currentReferenceBounds];
-        [self charon_traverseBehaviorHierarchy:^(UIDynamicBehavior *behavior) {
-            if ([behavior isKindOfClass:[UICollisionBehavior class]] && [(UICollisionBehavior *)behavior charon_usesImplicitBounds])
-                [(UICollisionBehavior *)behavior charon_reevaluateImplicitBounds];
+            _referenceSystemBounds = [self revenant_currentReferenceBounds];
+        [self revenant_traverseBehaviorHierarchy:^(UIDynamicBehavior *behavior) {
+            if ([behavior isKindOfClass:[UICollisionBehavior class]] && [(UICollisionBehavior *)behavior revenant_usesImplicitBounds])
+                [(UICollisionBehavior *)behavior revenant_reevaluateImplicitBounds];
         }];
     }
     for (UIDynamicBehavior *behavior in [_registeredBehaviors copy])
-        [behavior charon_step];
+        [behavior revenant_step];
 }
 
-- (void)charon_postSolverStep
+- (void)revenant_postSolverStep
 {
     _isInWorldStepMethod = YES;
-    [self charon_reportContacts:_beginContacts began:YES];
-    [self charon_reportContacts:_endContacts began:NO];
+    [self revenant_reportContacts:_beginContacts began:YES];
+    [self revenant_reportContacts:_endContacts began:NO];
     for (UIDynamicBehavior *behavior in [_registeredBehaviors copy]) {
         if (behavior.action)
             behavior.action();
     }
     BOOL stoppable = YES;
     for (UIDynamicBehavior *behavior in _topLevelBehaviors) {
-        if (![behavior charon_allowsAnimatorToStop]) {
+        if (![behavior revenant_allowsAnimatorToStop]) {
             stoppable = NO;
             break;
         }
@@ -896,32 +896,32 @@ static void charon_unregister_animator(UIDynamicAnimator *animator)
     _behaviorsToRemove = nil;
     _behaviorsToAdd = nil;
     for (UIDynamicBehavior *behavior in removing)
-        [self charon_unregisterBehavior:behavior];
+        [self revenant_unregisterBehavior:behavior];
     for (UIDynamicBehavior *behavior in adding)
-        [self charon_registerBehavior:behavior];
+        [self revenant_registerBehavior:behavior];
     if (stoppable || _registeredBehaviors.count == 0)
-        [self charon_stop];
+        [self revenant_stop];
 }
 
-- (void)charon_reportContacts:(NSMutableArray *)contacts began:(BOOL)began
+- (void)revenant_reportContacts:(NSMutableArray *)contacts began:(BOOL)began
 {
     NSArray *delivered = [contacts copy];
     [contacts removeAllObjects];
     if (delivered.count == 0)
         return;
-    [self charon_traverseBehaviorHierarchy:^(UIDynamicBehavior *behavior) {
+    [self revenant_traverseBehaviorHierarchy:^(UIDynamicBehavior *behavior) {
         if (![behavior isKindOfClass:[UICollisionBehavior class]])
             return;
-        for (CharonDynamicsContact *contact in delivered) {
+        for (RevenantDynamicsContact *contact in delivered) {
             if (began)
-                [(UICollisionBehavior *)behavior charon_didBeginContact:contact];
+                [(UICollisionBehavior *)behavior revenant_didBeginContact:contact];
             else
-                [(UICollisionBehavior *)behavior charon_didEndContact:contact];
+                [(UICollisionBehavior *)behavior revenant_didEndContact:contact];
         }
     }];
 }
 
-- (void)charon_runBlockPostSolverIfNeeded:(dispatch_block_t)block
+- (void)revenant_runBlockPostSolverIfNeeded:(dispatch_block_t)block
 {
     if (_isInWorldStepMethod)
         [_postSolverActions addObject:[block copy]];
@@ -931,23 +931,23 @@ static void charon_unregister_animator(UIDynamicAnimator *animator)
 
 #pragma mark Running
 
-- (void)charon_tickle
+- (void)revenant_tickle
 {
     if (!self.running && _bodies.count != 0)
-        [self charon_start];
+        [self revenant_start];
 }
 
-- (void)charon_start
+- (void)revenant_start
 {
-    if ((_referenceSystemType == CharonReferenceSystemView && !_referenceSystem) || _displayLink || _disableDisplayLink || _deallocating)
+    if ((_referenceSystemType == RevenantReferenceSystemView && !_referenceSystem) || _displayLink || _disableDisplayLink || _deallocating)
         return;
     _lastUpdateTime = CACurrentMediaTime();
-    CharonDynamicsTicker *ticker = [CharonDynamicsTicker new];
+    RevenantDynamicsTicker *ticker = [RevenantDynamicsTicker new];
     ticker.animator = self;
     _displayLink = [CADisplayLink displayLinkWithTarget:ticker selector:@selector(tick:)];
     _displayLink.frameInterval = 1;
     [_displayLink addToRunLoop:[NSRunLoop currentRunLoop] forMode:NSRunLoopCommonModes];
-    if (_referenceSystemType == CharonReferenceSystemView) {
+    if (_referenceSystemType == RevenantReferenceSystemView) {
         _accuracy = [[(UIView *)_referenceSystem window] screen].scale;
         if (_accuracy == 0)
             _accuracy = 1.0;
@@ -960,10 +960,10 @@ static void charon_unregister_animator(UIDynamicAnimator *animator)
 {
     _disableDisplayLink = disable;
     if (disable)
-        [self charon_stop];
+        [self revenant_stop];
 }
 
-- (void)charon_stop
+- (void)revenant_stop
 {
     if (!_displayLink)
         return;
@@ -976,28 +976,28 @@ static void charon_unregister_animator(UIDynamicAnimator *animator)
 
 #pragma mark Bodies
 
-- (id)charon_keyForItem:(id<UIDynamicItem>)item
+- (id)revenant_keyForItem:(id<UIDynamicItem>)item
 {
     return [NSValue valueWithPointer:(__bridge const void *)item];
 }
 
-- (CharonDynamicsBody *)charon_bodyForItem:(id<UIDynamicItem>)item
+- (RevenantDynamicsBody *)revenant_bodyForItem:(id<UIDynamicItem>)item
 {
-    return item ? _bodies[[self charon_keyForItem:item]] : nil;
+    return item ? _bodies[[self revenant_keyForItem:item]] : nil;
 }
 
-- (CharonDynamicsBody *)charon_registerBodyForItem:(id<UIDynamicItem>)item shape:(CharonDynamicsShape)shape
+- (RevenantDynamicsBody *)revenant_registerBodyForItem:(id<UIDynamicItem>)item shape:(RevenantDynamicsShape)shape
 {
     BOOL view = [(id)item isKindOfClass:[UIView class]];
-    BOOL attributes = [(id)item isKindOfClass:charon_layout_attributes_class()];
-    if (attributes && _referenceSystemType == CharonReferenceSystemView)
+    BOOL attributes = [(id)item isKindOfClass:revenant_layout_attributes_class()];
+    if (attributes && _referenceSystemType == RevenantReferenceSystemView)
         [NSException raise:NSInvalidArgumentException format:@"Can't use layout attributes as item (%@) in an animator with view reference %@", item, self];
-    if (view && _referenceSystemType == CharonReferenceSystemLayout)
+    if (view && _referenceSystemType == RevenantReferenceSystemLayout)
         [NSException raise:NSInvalidArgumentException format:@"Can't use view as item (%@) in an animator with layout reference %@", item, self];
-    if (view && _referenceSystemType == CharonReferenceSystemView && ![(UIView *)item isDescendantOfView:_referenceSystem])
+    if (view && _referenceSystemType == RevenantReferenceSystemView && ![(UIView *)item isDescendantOfView:_referenceSystem])
         [NSException raise:NSInvalidArgumentException format:@"View item (%@) should be a descendant of reference view in %@", item, self];
-    id key = [self charon_keyForItem:item];
-    CharonDynamicsBody *body = _bodies[key];
+    id key = [self revenant_keyForItem:item];
+    RevenantDynamicsBody *body = _bodies[key];
     if (body) {
         if (body.representedObject != item)
             NSLog(@"%@: body %@ without representedObject for item %@", self, body, item);
@@ -1005,7 +1005,7 @@ static void charon_unregister_animator(UIDynamicAnimator *animator)
         return body;
     }
     CGPoint position = item.center;
-    if (view && _referenceSystemType == CharonReferenceSystemView)
+    if (view && _referenceSystemType == RevenantReferenceSystemView)
         position = [(UIView *)_referenceSystem convertPoint:position fromView:[(UIView *)item superview]];
     if (view && [item respondsToSelector:@selector(setTranslatesAutoresizingMaskIntoConstraints:)]) {
         UIView *itemView = (UIView *)item;
@@ -1021,7 +1021,7 @@ static void charon_unregister_animator(UIDynamicAnimator *animator)
     if (size.width == 0 || size.height == 0)
         [[NSAssertionHandler currentHandler] handleFailureInMethod:_cmd object:self file:@(__FILE__) lineNumber:__LINE__
                                                        description:@"Invalid size %@ for item %@ in Dynamics", NSStringFromCGSize(size), item];
-    body = [[CharonDynamicsBody alloc] initWithShape:(shape == CharonDynamicsShapeCircle ? CharonDynamicsShapeCircle : CharonDynamicsShapeBox)
+    body = [[RevenantDynamicsBody alloc] initWithShape:(shape == RevenantDynamicsShapeCircle ? RevenantDynamicsShapeCircle : RevenantDynamicsShapeBox)
                                                 size:size vertices:NULL count:0];
     body.associations = 1;
     body.representedObject = item;
@@ -1029,16 +1029,16 @@ static void charon_unregister_animator(UIDynamicAnimator *animator)
     body.rotation = atan2(transform.b, transform.a);
     body.position = position;
     body.affectedByGravity = NO;
-    [self charon_addBody:body];
+    [self revenant_addBody:body];
     _bodies[key] = body;
-    [self charon_tickle];
+    [self revenant_tickle];
     return body;
 }
 
-- (void)charon_unregisterBodyForItem:(id<UIDynamicItem>)item action:(void (^)(CharonDynamicsBody *body))action
+- (void)revenant_unregisterBodyForItem:(id<UIDynamicItem>)item action:(void (^)(RevenantDynamicsBody *body))action
 {
-    id key = [self charon_keyForItem:item];
-    CharonDynamicsBody *body = _bodies[key];
+    id key = [self revenant_keyForItem:item];
+    RevenantDynamicsBody *body = _bodies[key];
     if (!body)
         return;
     if (action)
@@ -1046,39 +1046,39 @@ static void charon_unregister_animator(UIDynamicAnimator *animator)
     body.associations -= 1;
     if (body.associations > 0)
         return;
-    [self charon_runBlockPostSolverIfNeeded:^{
+    [self revenant_runBlockPostSolverIfNeeded:^{
         if (body.associations > 0 || self->_bodies[key] != body)
             return;
-        [self charon_removeBody:body];
+        [self revenant_removeBody:body];
         [self->_bodies removeObjectForKey:key];
     }];
 }
 
-- (CharonDynamicsBody *)charon_anchorBodyAtPoint:(CGPoint)point
+- (RevenantDynamicsBody *)revenant_anchorBodyAtPoint:(CGPoint)point
 {
-    CharonDynamicsBody *body = [[CharonDynamicsBody alloc] initWithShape:CharonDynamicsShapeNone size:CGSizeZero vertices:NULL count:0];
+    RevenantDynamicsBody *body = [[RevenantDynamicsBody alloc] initWithShape:RevenantDynamicsShapeNone size:CGSizeZero vertices:NULL count:0];
     body.dynamic = NO;
     body.position = point;
-    [self charon_addBody:body];
+    [self revenant_addBody:body];
     return body;
 }
 
-- (CharonDynamicsBody *)charon_boundaryBodyFromPoint:(CGPoint)first toPoint:(CGPoint)second
+- (RevenantDynamicsBody *)revenant_boundaryBodyFromPoint:(CGPoint)first toPoint:(CGPoint)second
 {
-    b2Vec2 vertices[2] = {charon_metres(first), charon_metres(second)};
-    CharonDynamicsBody *body = [[CharonDynamicsBody alloc] initWithShape:CharonDynamicsShapeEdge size:CGSizeZero vertices:vertices count:2];
+    b2Vec2 vertices[2] = {revenant_metres(first), revenant_metres(second)};
+    RevenantDynamicsBody *body = [[RevenantDynamicsBody alloc] initWithShape:RevenantDynamicsShapeEdge size:CGSizeZero vertices:vertices count:2];
     body.dynamic = NO;
     return body;
 }
 
-- (CharonDynamicsBody *)charon_boundaryBodyWithLoop:(const b2Vec2 *)vertices count:(int32)count
+- (RevenantDynamicsBody *)revenant_boundaryBodyWithLoop:(const b2Vec2 *)vertices count:(int32)count
 {
-    CharonDynamicsBody *body = [[CharonDynamicsBody alloc] initWithShape:CharonDynamicsShapeLoop size:CGSizeZero vertices:vertices count:count];
+    RevenantDynamicsBody *body = [[RevenantDynamicsBody alloc] initWithShape:RevenantDynamicsShapeLoop size:CGSizeZero vertices:vertices count:count];
     body.dynamic = NO;
     return body;
 }
 
-static CGFloat charon_rounded(CGFloat value, CGFloat scale)
+static CGFloat revenant_rounded(CGFloat value, CGFloat scale)
 {
     if (scale == 1)
         return round(value);
@@ -1086,17 +1086,17 @@ static CGFloat charon_rounded(CGFloat value, CGFloat scale)
     return whole + round(scale * (value - whole)) / scale;
 }
 
-- (void)charon_writeBack:(CharonDynamicsBody *)body
+- (void)revenant_writeBack:(RevenantDynamicsBody *)body
 {
     id<UIDynamicItem> item = body.representedObject;
     CGPoint position = body.position;
     CGFloat angle = body.rotation;
     BOOL view = [(id)item isKindOfClass:[UIView class]];
-    NSInteger type = view ? 1 : [(id)item isKindOfClass:charon_layout_attributes_class()] ? 2 : 0;
-    if (view && _referenceSystemType == CharonReferenceSystemView)
+    NSInteger type = view ? 1 : [(id)item isKindOfClass:revenant_layout_attributes_class()] ? 2 : 0;
+    if (view && _referenceSystemType == RevenantReferenceSystemView)
         position = [(UIView *)_referenceSystem convertPoint:position toView:[(UIView *)item superview]];
     if (_integralization != 2 && !(_integralization == 0 && type == 0)) {
-        CGPoint center = CGPointMake(charon_rounded(position.x, _accuracy), charon_rounded(position.y, _accuracy));
+        CGPoint center = CGPointMake(revenant_rounded(position.x, _accuracy), revenant_rounded(position.y, _accuracy));
         if (!CGPointEqualToPoint(item.center, center))
             item.center = center;
         item.transform = CGAffineTransformMakeRotation(round(angle * 5000.0) / 5000.0);
@@ -1106,26 +1106,26 @@ static CGFloat charon_rounded(CGFloat value, CGFloat scale)
     }
 }
 
-- (BOOL)charon_isRounded:(id<UIDynamicItem>)item
+- (BOOL)revenant_isRounded:(id<UIDynamicItem>)item
 {
-    BOOL object = ![(id)item isKindOfClass:[UIView class]] && ![(id)item isKindOfClass:charon_layout_attributes_class()];
+    BOOL object = ![(id)item isKindOfClass:[UIView class]] && ![(id)item isKindOfClass:revenant_layout_attributes_class()];
     return _integralization != 2 && !(_integralization == 0 && object);
 }
 
 - (void)updateItemUsingCurrentState:(id<UIDynamicItem>)item
 {
-    CharonDynamicsBody *body = [self charon_bodyForItem:item];
+    RevenantDynamicsBody *body = [self revenant_bodyForItem:item];
     if (!body)
         return;
     CGPoint center = item.center;
-    if ([(id)item isKindOfClass:[UIView class]] && _referenceSystemType == CharonReferenceSystemView)
+    if ([(id)item isKindOfClass:[UIView class]] && _referenceSystemType == RevenantReferenceSystemView)
         center = [(UIView *)_referenceSystem convertPoint:center fromView:[(UIView *)item superview]];
     CGAffineTransform transform = item.transform;
     CGFloat angle = atan2(transform.b, transform.a);
-    if ([self charon_isRounded:item]) {
+    if ([self revenant_isRounded:item]) {
         CGPoint current = body.position;
-        BOOL samePosition = charon_rounded(current.x, _accuracy) == charon_rounded(center.x, _accuracy)
-            && charon_rounded(current.y, _accuracy) == charon_rounded(center.y, _accuracy);
+        BOOL samePosition = revenant_rounded(current.x, _accuracy) == revenant_rounded(center.x, _accuracy)
+            && revenant_rounded(current.y, _accuracy) == revenant_rounded(center.y, _accuracy);
         BOOL sameAngle = round(body.rotation * 5000.0) / 5000.0 == round(angle * 5000.0) / 5000.0;
         if (sameAngle)
             body.rotation = angle;
@@ -1138,7 +1138,7 @@ static CGFloat charon_rounded(CGFloat value, CGFloat scale)
         body.rotation = angle;
     }
     body.resting = NO;
-    [self charon_tickle];
+    [self revenant_tickle];
 }
 
 - (NSArray *)itemsInRect:(CGRect)rect
@@ -1146,8 +1146,8 @@ static CGFloat charon_rounded(CGFloat value, CGFloat scale)
     if (!_world)
         return [NSMutableArray array];
     b2AABB box;
-    box.lowerBound = b2Vec2((float)(CHARON_DYNAMICS_INVERSE_PTM * rect.origin.x), (float)(CHARON_DYNAMICS_INVERSE_PTM * rect.origin.y));
-    box.upperBound = box.lowerBound + b2Vec2((float)(rect.size.width * CHARON_DYNAMICS_INVERSE_PTM), (float)(rect.size.height * CHARON_DYNAMICS_INVERSE_PTM));
+    box.lowerBound = b2Vec2((float)(REVENANT_DYNAMICS_INVERSE_PTM * rect.origin.x), (float)(REVENANT_DYNAMICS_INVERSE_PTM * rect.origin.y));
+    box.upperBound = box.lowerBound + b2Vec2((float)(rect.size.width * REVENANT_DYNAMICS_INVERSE_PTM), (float)(rect.size.height * REVENANT_DYNAMICS_INVERSE_PTM));
     ItemQuery query;
     _world->QueryAABB(&query, box);
     return query.items;
@@ -1155,7 +1155,7 @@ static CGFloat charon_rounded(CGFloat value, CGFloat scale)
 
 #pragma mark Behaviors
 
-- (void)charon_checkBehavior:(UIDynamicBehavior *)behavior
+- (void)revenant_checkBehavior:(UIDynamicBehavior *)behavior
 {
     if ([_registeredBehaviors containsObject:behavior])
         [NSException raise:NSInvalidArgumentException format:@"Adding the same behavior twice to the same animator is not supported %@", behavior];
@@ -1165,9 +1165,9 @@ static CGFloat charon_rounded(CGFloat value, CGFloat scale)
 {
     if (!behavior || [_topLevelBehaviors containsObject:behavior])
         return;
-    [self charon_checkBehavior:behavior];
+    [self revenant_checkBehavior:behavior];
     [_topLevelBehaviors addObject:behavior];
-    [self charon_registerBehavior:behavior];
+    [self revenant_registerBehavior:behavior];
 }
 
 - (void)removeBehavior:(UIDynamicBehavior *)behavior
@@ -1175,10 +1175,10 @@ static CGFloat charon_rounded(CGFloat value, CGFloat scale)
     if (![_topLevelBehaviors containsObject:behavior])
         return;
     [_topLevelBehaviors removeObject:behavior];
-    [self charon_unregisterBehavior:behavior];
+    [self revenant_unregisterBehavior:behavior];
 }
 
-- (void)charon_registerBehavior:(UIDynamicBehavior *)behavior
+- (void)revenant_registerBehavior:(UIDynamicBehavior *)behavior
 {
     if (_isInWorldStepMethod) {
         if ([_behaviorsToRemove containsObject:behavior])
@@ -1188,26 +1188,26 @@ static CGFloat charon_rounded(CGFloat value, CGFloat scale)
         return;
     }
     if (!_world)
-        [self charon_setupWorld];
-    [behavior charon_setContext:self];
+        [self revenant_setupWorld];
+    [behavior revenant_setContext:self];
     [behavior willMoveToAnimator:self];
-    [behavior charon_associate];
+    [behavior revenant_associate];
     [_registeredBehaviors addObject:behavior];
     if ([behavior isKindOfClass:[UIDynamicItemBehavior class]])
-        [self charon_shouldReevaluateLocalBehaviors];
+        [self revenant_shouldReevaluateLocalBehaviors];
     if ([behavior isKindOfClass:[UIGravityBehavior class]]) {
         __block NSUInteger gravities = 0;
-        [self charon_traverseBehaviorHierarchy:^(UIDynamicBehavior *each) {
+        [self revenant_traverseBehaviorHierarchy:^(UIDynamicBehavior *each) {
             if ([each isKindOfClass:[UIGravityBehavior class]])
                 gravities += 1;
         }];
         if (gravities >= 2)
             NSLog(@"Multiple gravity behavior per animator is undefined and may assert in the future");
     }
-    [self charon_tickle];
+    [self revenant_tickle];
 }
 
-- (void)charon_unregisterBehavior:(UIDynamicBehavior *)behavior
+- (void)revenant_unregisterBehavior:(UIDynamicBehavior *)behavior
 {
     if (!behavior)
         return;
@@ -1217,13 +1217,13 @@ static CGFloat charon_rounded(CGFloat value, CGFloat scale)
             [(_behaviorsToRemove = _behaviorsToRemove ?: [NSMutableArray new]) addObject:behavior];
         return;
     }
-    [behavior charon_dissociate];
-    [behavior charon_setContext:nil];
+    [behavior revenant_dissociate];
+    [behavior revenant_setContext:nil];
     [behavior willMoveToAnimator:nil];
     [_registeredBehaviors removeObject:behavior];
     if ([behavior isKindOfClass:[UIDynamicItemBehavior class]])
-        [self charon_shouldReevaluateLocalBehaviors];
-    [self charon_tickle];
+        [self revenant_shouldReevaluateLocalBehaviors];
+    [self revenant_tickle];
 }
 
 - (void)removeAllBehaviors
@@ -1237,61 +1237,61 @@ static CGFloat charon_rounded(CGFloat value, CGFloat scale)
         return;
     }
     for (UIDynamicBehavior *behavior in [_registeredBehaviors copy]) {
-        [behavior charon_dissociate];
-        [behavior charon_setContext:nil];
+        [behavior revenant_dissociate];
+        [behavior revenant_setContext:nil];
     }
     [_topLevelBehaviors removeAllObjects];
     [_registeredBehaviors removeAllObjects];
 }
 
-- (void)charon_traverseBehaviorHierarchy:(void (^)(UIDynamicBehavior *behavior))block
+- (void)revenant_traverseBehaviorHierarchy:(void (^)(UIDynamicBehavior *behavior))block
 {
     for (UIDynamicBehavior *behavior in [_topLevelBehaviors copy])
-        [self charon_visitBehavior:behavior block:block];
+        [self revenant_visitBehavior:behavior block:block];
 }
 
-- (void)charon_visitBehavior:(UIDynamicBehavior *)behavior block:(void (^)(UIDynamicBehavior *behavior))block
+- (void)revenant_visitBehavior:(UIDynamicBehavior *)behavior block:(void (^)(UIDynamicBehavior *behavior))block
 {
     block(behavior);
     for (UIDynamicBehavior *child in behavior.childBehaviors)
-        [self charon_visitBehavior:child block:block];
+        [self revenant_visitBehavior:child block:block];
 }
 
-- (void)charon_shouldReevaluateLocalBehaviors
+- (void)revenant_shouldReevaluateLocalBehaviors
 {
     _needsLocalBehaviorReevaluation = YES;
-    [self charon_tickle];
+    [self revenant_tickle];
 }
 
-- (int)charon_registerCollisionGroup
+- (int)revenant_registerCollisionGroup
 {
     return ++_registeredCollisionGroups;
 }
 
-- (void)charon_unregisterCollisionGroup
+- (void)revenant_unregisterCollisionGroup
 {
     --_registeredCollisionGroups;
 }
 
-- (void)charon_registerImplicitBounds
+- (void)revenant_registerImplicitBounds
 {
     ++_registeredImplicitBounds;
 }
 
-- (void)charon_unregisterImplicitBounds
+- (void)revenant_unregisterImplicitBounds
 {
     --_registeredImplicitBounds;
 }
 
-- (CGRect)charon_referenceSystemBounds
+- (CGRect)revenant_referenceSystemBounds
 {
     return _referenceSystemBounds;
 }
 
 @end
 
-@interface UIView (CharonDynamicItem) <UIDynamicItem>
+@interface UIView (RevenantDynamicItem) <UIDynamicItem>
 @end
 
-@implementation UIView (CharonDynamicItem)
+@implementation UIView (RevenantDynamicItem)
 @end

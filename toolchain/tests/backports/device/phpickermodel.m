@@ -19,28 +19,28 @@ static void ask_four(void)
         PHPickerFilter *filter = [PHPickerFilter allFilterMatchingSubfilters:@[]];
         CHECK(filter != nil, "an empty conjunction makes a filter on the device");
     } @catch (NSException *exception) {
-        charon_check(NO, "an empty conjunction makes a filter on the device",
+        revenant_check(NO, "an empty conjunction makes a filter on the device",
                      [NSString stringWithFormat:@"raised %@: %@", exception.name, exception.reason]);
     }
     @try {
         PHPickerFilter *filter = [PHPickerFilter allFilterMatchingSubfilters:nil];
         CHECK(filter != nil, "a nil conjunction makes a filter on the device");
     } @catch (NSException *exception) {
-        charon_check(NO, "a nil conjunction makes a filter on the device",
+        revenant_check(NO, "a nil conjunction makes a filter on the device",
                      [NSString stringWithFormat:@"raised %@: %@", exception.name, exception.reason]);
     }
     @try {
         PHPickerFilter *filter = [PHPickerFilter notFilterOfSubfilter:nil];
         CHECK(filter != nil, "the negation of nil makes a filter on the device");
     } @catch (NSException *exception) {
-        charon_check(NO, "the negation of nil makes a filter on the device",
+        revenant_check(NO, "the negation of nil makes a filter on the device",
                      [NSString stringWithFormat:@"raised %@: %@", exception.name, exception.reason]);
     }
     @try {
         PHPickerFilter *filter = [PHPickerFilter playbackStyleFilter:PHAssetPlaybackStyleUnsupported];
         CHECK(filter != nil, "a filter of the unsupported playback style is made on the device");
     } @catch (NSException *exception) {
-        charon_check(NO, "a filter of the unsupported playback style is made on the device",
+        revenant_check(NO, "a filter of the unsupported playback style is made on the device",
                      [NSString stringWithFormat:@"raised %@: %@", exception.name, exception.reason]);
     }
 }
@@ -53,7 +53,7 @@ static void ask_the_rest(void)
         Dl_info info;
         BOOL ours = found != Nil && dladdr((__bridge void *)found, &info) != 0 &&
                      strcmp(info.dli_fname, mine) == 0;
-        charon_check(ours, "the class comes from this binary, which carries the port's objects",
+        revenant_check(ours, "the class comes from this binary, which carries the port's objects",
                      [NSString stringWithFormat:@"%@ is %@, this binary is %s", name,
                       found ? @(info.dli_fname) : @"absent", mine ? mine : "unknown"]);
     }
@@ -63,10 +63,10 @@ static void ask_the_rest(void)
                              @"depthEffectPhotosFilter": @"", @"burstsFilter": @"", @"cinematicVideosFilter": @""};
     for (NSString *kind in kinds) {
         SEL selector = NSSelectorFromString(kind);
-        charon_check([PHPickerFilter respondsToSelector:selector], "every filter the queue names is answered",
+        revenant_check([PHPickerFilter respondsToSelector:selector], "every filter the queue names is answered",
                      [NSString stringWithFormat:@"+%@ is not answered", kind]);
         id filter = [PHPickerFilter performSelector:selector];
-        charon_check(filter != nil && [filter isKindOfClass:[PHPickerFilter class]], "and each makes a filter",
+        revenant_check(filter != nil && [filter isKindOfClass:[PHPickerFilter class]], "and each makes a filter",
                      [NSString stringWithFormat:@"+%@ made %@", kind, filter]);
     }
     CHECK(([PHPickerFilter allFilterMatchingSubfilters:@[[PHPickerFilter imagesFilter], [PHPickerFilter videosFilter]]] != nil), "a conjunction of two filters is made");
@@ -106,15 +106,15 @@ static void ask_the_rest(void)
 int main(int argc, char **argv)
 {
     @autoreleasepool {
-        charon_log_to(@"/private/var/backports/phpickermodel.log");
+        revenant_log_to(@"/private/var/backports/phpickermodel.log");
         printf("device %s, iOS %s\n", [[UIDevice currentDevice] model].UTF8String,
                [[UIDevice currentDevice] systemVersion].UTF8String);
         ask_four();
         ask_the_rest();
-        NSString *summary = [NSString stringWithFormat:@"%d checks, %d failed\n", charon_checks, charon_failures];
+        NSString *summary = [NSString stringWithFormat:@"%d checks, %d failed\n", revenant_checks, revenant_failures];
         [summary writeToFile:@"/private/var/backports/phpickermodel.done" atomically:YES
                   encoding:NSUTF8StringEncoding error:NULL];
         printf("%s", summary.UTF8String);
     }
-    return charon_failures == 0 ? 0 : 1;
+    return revenant_failures == 0 ? 0 : 1;
 }

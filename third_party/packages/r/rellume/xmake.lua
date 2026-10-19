@@ -17,7 +17,7 @@ package("rellume")
 
     add_configs("llvm", {description = "The prefix of the LLVM 23 whose headers rellume is compiled against.", default = "", type = "string"})
 
-    add_deps("hades-third-party@farmdec 2022.02.08", {alias = "farmdec"})
+    add_deps("revenant-third-party@farmdec 2022.02.08", {alias = "farmdec"})
     add_configs("shared", {description = "Build rellume as a shared library, which its licence asks of a program that links it.", default = true, type = "boolean", readonly = true})
     add_links("rellume")
     add_includedirs("include", "include/rellume")

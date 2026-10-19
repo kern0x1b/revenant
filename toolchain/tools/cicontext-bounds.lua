@@ -2,7 +2,7 @@ import("apple.dyld", {rootdir = path.join(os.scriptdir(), "..", "modules")})
 
 local IMAGE = "/System/Library/Frameworks/CoreImage.framework/CoreImage"
 local SYMBOLS = {"_OBJC_CLASS_$_CIContext", "_OBJC_CLASS_$_CIImage", "_OBJC_CLASS_$_CIFilter", "_OBJC_CLASS_$_CIColor"}
-local root = os.getenv("HOME") .. "/.charon/dyld"
+local root = os.getenv("HOME") .. "/.revenant/dyld"
 
 for _, release in ipairs({"4.3", "4.3.5", "5.0", "5.1.1", "6.0", "6.1.3", "7.0"}) do
     local file = path.join(root, release, "dyld_shared_cache_armv7")

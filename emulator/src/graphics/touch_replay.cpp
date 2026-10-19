@@ -13,7 +13,7 @@
 #include <stdexcept>
 #include <string>
 
-namespace shade {
+namespace emulator {
 namespace {
 
     TouchPhase parse_phase(const std::string& value)

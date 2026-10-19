@@ -2,13 +2,13 @@
 #import "check.h"
 #import "flowauto-cases.h"
 
-void charon_windowed_run(UIWindow *window);
+void revenant_windowed_run(UIWindow *window);
 
-void charon_windowed_run(UIWindow *window)
+void revenant_windowed_run(UIWindow *window)
 {
     if (window.screen.scale != 2) {
         printf("FAIL: the window is on a display at scale %g, not 2; nothing recorded\n", window.screen.scale);
-        charon_failures++;
+        revenant_failures++;
         return;
     }
     NSMutableDictionary *records = [NSMutableDictionary dictionary];

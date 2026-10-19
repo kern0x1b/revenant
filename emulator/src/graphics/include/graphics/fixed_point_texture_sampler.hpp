@@ -9,7 +9,7 @@
 #include <cstdint>
 #include <span>
 
-namespace shade {
+namespace emulator {
 
 class FixedPointTextureSampler {
 public:

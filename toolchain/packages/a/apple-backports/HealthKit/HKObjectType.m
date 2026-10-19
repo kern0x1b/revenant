@@ -1,27 +1,27 @@
 #import <HealthKit/HealthKit.h>
 
-#import "CharonHKStore.h"
-#import "CharonHKTypes.h"
+#import "RevenantHKStore.h"
+#import "RevenantHKTypes.h"
 
 #pragma mark - HKObjectType
 
 @implementation HKObjectType {
     NSString *_identifier;
 }
-CHARON_HEALTHKIT_UNCREATABLE_INIT
+REVENANT_HEALTHKIT_UNCREATABLE_INIT
 
 + (BOOL)supportsSecureCoding
 {
     return YES;
 }
 
-+ (instancetype)charon_typeWithIdentifier:(NSString *)identifier
++ (instancetype)revenant_typeWithIdentifier:(NSString *)identifier
 {
-    HKObjectType *type = [[self alloc] charon_initWithIdentifier:identifier];
+    HKObjectType *type = [[self alloc] revenant_initWithIdentifier:identifier];
     return type;
 }
 
-- (instancetype)charon_initWithIdentifier:(NSString *)identifier
+- (instancetype)revenant_initWithIdentifier:(NSString *)identifier
 {
     HKObjectType *fresh = [super init];
     if (fresh)
@@ -31,7 +31,7 @@ CHARON_HEALTHKIT_UNCREATABLE_INIT
 
 - (instancetype)initWithCoder:(NSCoder *)coder
 {
-    return [self charon_initWithIdentifier:[coder decodeObjectOfClass:[NSString class] forKey:@"identifier"]];
+    return [self revenant_initWithIdentifier:[coder decodeObjectOfClass:[NSString class] forKey:@"identifier"]];
 }
 
 - (void)encodeWithCoder:(NSCoder *)coder
@@ -41,7 +41,7 @@ CHARON_HEALTHKIT_UNCREATABLE_INIT
 
 - (id)copyWithZone:(NSZone *)zone
 {
-    return [[self class] charon_typeWithIdentifier:_identifier];
+    return [[self class] revenant_typeWithIdentifier:_identifier];
 }
 
 - (NSString *)identifier
@@ -49,21 +49,21 @@ CHARON_HEALTHKIT_UNCREATABLE_INIT
     return _identifier;
 }
 
-- (NSInteger)charon_storeKind
+- (NSInteger)revenant_storeKind
 {
-    return CharonHKTypeKindCharacteristic;
+    return RevenantHKTypeKindCharacteristic;
 }
 
-- (void)charon_setCanonicalUnitString:(NSString *)unitString aggregationStyle:(NSInteger)aggregationStyle
+- (void)revenant_setCanonicalUnitString:(NSString *)unitString aggregationStyle:(NSInteger)aggregationStyle
 {
 }
 
-- (NSInteger)charon_aggregationStyleValue
+- (NSInteger)revenant_aggregationStyleValue
 {
-    return CharonHKAggregationDiscreteArithmetic;
+    return RevenantHKAggregationDiscreteArithmetic;
 }
 
-- (NSString *)charon_canonicalUnitString
+- (NSString *)revenant_canonicalUnitString
 {
     return nil;
 }
@@ -93,11 +93,11 @@ CHARON_HEALTHKIT_UNCREATABLE_INIT
 {
     if (![identifier isKindOfClass:[NSString class]] || !identifier.length)
         return nil;
-    if (!CharonHKHasTypeIdentifier(identifier, CharonHKTypeKindQuantity))
+    if (!RevenantHKHasTypeIdentifier(identifier, RevenantHKTypeKindQuantity))
         return nil;
-    HKQuantityType *type = [HKQuantityType charon_typeWithIdentifier:identifier];
-    const CharonHKTypeEntry *entry = CharonHKQuantityTypeEntry(identifier);
-    [type charon_setCanonicalUnitString:entry->unit aggregationStyle:entry->aggregation];
+    HKQuantityType *type = [HKQuantityType revenant_typeWithIdentifier:identifier];
+    const RevenantHKTypeEntry *entry = RevenantHKQuantityTypeEntry(identifier);
+    [type revenant_setCanonicalUnitString:entry->unit aggregationStyle:entry->aggregation];
     return type;
 }
 
@@ -105,27 +105,27 @@ CHARON_HEALTHKIT_UNCREATABLE_INIT
 {
     if (![identifier isKindOfClass:[NSString class]] || !identifier.length)
         return nil;
-    if (!CharonHKHasTypeIdentifier(identifier, CharonHKTypeKindCategory))
+    if (!RevenantHKHasTypeIdentifier(identifier, RevenantHKTypeKindCategory))
         return nil;
-    return [HKCategoryType charon_typeWithIdentifier:identifier];
+    return [HKCategoryType revenant_typeWithIdentifier:identifier];
 }
 
 + (nullable HKCharacteristicType *)characteristicTypeForIdentifier:(HKCharacteristicTypeIdentifier)identifier
 {
     if (![identifier isKindOfClass:[NSString class]] || !identifier.length)
         return nil;
-    if (!CharonHKHasTypeIdentifier(identifier, CharonHKTypeKindCharacteristic))
+    if (!RevenantHKHasTypeIdentifier(identifier, RevenantHKTypeKindCharacteristic))
         return nil;
-    return [HKCharacteristicType charon_typeWithIdentifier:identifier];
+    return [HKCharacteristicType revenant_typeWithIdentifier:identifier];
 }
 
 + (nullable HKCorrelationType *)correlationTypeForIdentifier:(HKCorrelationTypeIdentifier)identifier
 {
     if (![identifier isKindOfClass:[NSString class]] || !identifier.length)
         return nil;
-    if (!CharonHKHasTypeIdentifier(identifier, CharonHKTypeKindCorrelation))
+    if (!RevenantHKHasTypeIdentifier(identifier, RevenantHKTypeKindCorrelation))
         return nil;
-    return [HKCorrelationType charon_typeWithIdentifier:identifier];
+    return [HKCorrelationType revenant_typeWithIdentifier:identifier];
 }
 
 + (HKWorkoutType *)workoutType
@@ -133,7 +133,7 @@ CHARON_HEALTHKIT_UNCREATABLE_INIT
     static HKWorkoutType *type;
     static dispatch_once_t once;
     dispatch_once(&once, ^{
-        type = [HKWorkoutType charon_typeWithIdentifier:HKWorkoutTypeIdentifier];
+        type = [HKWorkoutType revenant_typeWithIdentifier:HKWorkoutTypeIdentifier];
     });
     return type;
 }
@@ -159,9 +159,9 @@ CHARON_HEALTHKIT_UNCREATABLE_INIT
 
 @implementation HKCategoryType
 
-- (NSInteger)charon_storeKind
+- (NSInteger)revenant_storeKind
 {
-    return CharonHKTypeKindCategory;
+    return RevenantHKTypeKindCategory;
 }
 
 @end
@@ -170,9 +170,9 @@ CHARON_HEALTHKIT_UNCREATABLE_INIT
 
 @implementation HKCorrelationType
 
-- (NSInteger)charon_storeKind
+- (NSInteger)revenant_storeKind
 {
-    return CharonHKTypeKindCorrelation;
+    return RevenantHKTypeKindCorrelation;
 }
 
 @end
@@ -181,9 +181,9 @@ CHARON_HEALTHKIT_UNCREATABLE_INIT
 
 @implementation HKWorkoutType
 
-- (NSInteger)charon_storeKind
+- (NSInteger)revenant_storeKind
 {
-    return CharonHKTypeKindWorkout;
+    return RevenantHKTypeKindWorkout;
 }
 
 @end

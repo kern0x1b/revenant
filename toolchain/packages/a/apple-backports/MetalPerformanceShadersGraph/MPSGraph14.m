@@ -1,10 +1,10 @@
-#import "CharonMPSGraph.h"
+#import "RevenantMPSGraph.h"
 
 typedef enum {
-    CharonMPSGraphArityUnary,
-    CharonMPSGraphArityBinary,
-    CharonMPSGraphArityClamp
-} CharonMPSGraphArity;
+    RevenantMPSGraphArityUnary,
+    RevenantMPSGraphArityBinary,
+    RevenantMPSGraphArityClamp
+} RevenantMPSGraphArity;
 
 @implementation MPSGraph {
     MPSGraphDevice *_device;
@@ -29,7 +29,7 @@ typedef enum {
     return self;
 }
 
-- (MPSGraphDevice *)charon_mps_device
+- (MPSGraphDevice *)revenant_mps_device
 {
     return _device;
 }
@@ -53,13 +53,13 @@ typedef enum {
 
 - (MPSGraphTensor *)placeholderWithShape:(NSArray<NSNumber *> *)shape dataType:(MPSDataType)dataType name:(NSString *)name
 {
-    MPSGraphOperation *operation = [self charon_mps_addOperationOfKind:CharonMPSGraphOperationKindPlaceholder
+    MPSGraphOperation *operation = [self revenant_mps_addOperationOfKind:RevenantMPSGraphOperationKindPlaceholder
                                                                  name:name
                                                                 inputs:@[]
                                                                outputs:@[]
                                                              parameters:nil];
     MPSGraphTensor *tensor = [[MPSGraphTensor alloc] initWithShape:shape dataType:dataType operation:operation index:0];
-    [operation charon_mps_setOutputTensors:@[tensor]];
+    [operation revenant_mps_setOutputTensors:@[tensor]];
     [_placeholders addObject:tensor];
     return tensor;
 }
@@ -69,13 +69,13 @@ typedef enum {
                               values:(NSData *)values
                                 name:(NSString *)name
 {
-    MPSGraphOperation *operation = [self charon_mps_addOperationOfKind:CharonMPSGraphOperationKindConstant
+    MPSGraphOperation *operation = [self revenant_mps_addOperationOfKind:RevenantMPSGraphOperationKindConstant
                                                                  name:name
                                                                 inputs:@[]
                                                                outputs:@[]
                                                              parameters:@{@"values": values}];
     MPSGraphTensor *tensor = [[MPSGraphTensor alloc] initWithShape:shape dataType:dataType operation:operation index:0];
-    [operation charon_mps_setOutputTensors:@[tensor]];
+    [operation revenant_mps_setOutputTensors:@[tensor]];
     return tensor;
 }
 
@@ -86,7 +86,7 @@ typedef enum {
     return [self constantWithShape:shape dataType:dataType values:data name:nil];
 }
 
-- (MPSGraphTensor *)charon_mps_operation:(CharonMPSGraphOperationKind)kind
+- (MPSGraphTensor *)revenant_mps_operation:(RevenantMPSGraphOperationKind)kind
                                 inputs:(NSArray<MPSGraphTensor *> *)inputs
                             parameters:(NSDictionary *)parameters
                                    name:(NSString *)name
@@ -98,38 +98,38 @@ typedef enum {
         shape = parameters[@"shape"];
     if ([parameters[@"dataType"] isKindOfClass:[NSNumber class]])
         dataType = (MPSDataType)[parameters[@"dataType"] unsignedIntValue];
-    MPSGraphOperation *operation = [self charon_mps_addOperationOfKind:kind name:name inputs:inputs outputs:@[] parameters:parameters];
+    MPSGraphOperation *operation = [self revenant_mps_addOperationOfKind:kind name:name inputs:inputs outputs:@[] parameters:parameters];
     MPSGraphTensor *tensor = [[MPSGraphTensor alloc] initWithShape:shape dataType:dataType operation:operation index:0];
-    [operation charon_mps_setOutputTensors:@[tensor]];
+    [operation revenant_mps_setOutputTensors:@[tensor]];
     return tensor;
 }
 
-- (MPSGraphOperation *)charon_mps_addOperationOfKind:(CharonMPSGraphOperationKind)kind
+- (MPSGraphOperation *)revenant_mps_addOperationOfKind:(RevenantMPSGraphOperationKind)kind
                                                 name:(NSString *)name
                                               inputs:(NSArray<MPSGraphTensor *> *)inputs
                                              outputs:(NSArray<MPSGraphTensor *> *)outputs
                                            parameters:(NSDictionary *)parameters
 {
     MPSGraphOperation *operation = [[MPSGraphOperation alloc] initWithGraph:self kind:kind name:name inputs:inputs outputs:outputs];
-    [operation charon_mps_setParameters:parameters];
+    [operation revenant_mps_setParameters:parameters];
     [_operations addObject:operation];
     return operation;
 }
 
 #pragma mark - the arithmetic family
 
-- (MPSGraphTensor *)charon_mps_arithmetic:(CharonMPSGraphOperationKind)kind
+- (MPSGraphTensor *)revenant_mps_arithmetic:(RevenantMPSGraphOperationKind)kind
                                  operands:(NSArray<MPSGraphTensor *> *)operands
                                       name:(NSString *)name
 {
-    return [self charon_mps_operation:kind inputs:operands parameters:nil name:name];
+    return [self revenant_mps_operation:kind inputs:operands parameters:nil name:name];
 }
 
-- (MPSGraphTensor *)charon_mps_predicate:(CharonMPSGraphOperationKind)kind
+- (MPSGraphTensor *)revenant_mps_predicate:(RevenantMPSGraphOperationKind)kind
                                 operands:(NSArray<MPSGraphTensor *> *)operands
                                      name:(NSString *)name
 {
-    return [self charon_mps_operation:kind
+    return [self revenant_mps_operation:kind
                               inputs:operands
                           parameters:@{@"dataType": @(MPSDataTypeBool)}
                                  name:name];
@@ -139,215 +139,215 @@ typedef enum {
                              secondaryTensor:(MPSGraphTensor *)secondary
                                         name:(NSString *)name
 {
-    return [self charon_mps_arithmetic:CharonMPSGraphOperationKindAdd operands:@[primary, secondary] name:name];
+    return [self revenant_mps_arithmetic:RevenantMPSGraphOperationKindAdd operands:@[primary, secondary] name:name];
 }
 
 - (MPSGraphTensor *)subtractionWithPrimaryTensor:(MPSGraphTensor *)primary
                                 secondaryTensor:(MPSGraphTensor *)secondary
                                            name:(NSString *)name
 {
-    return [self charon_mps_arithmetic:CharonMPSGraphOperationKindSubtract operands:@[primary, secondary] name:name];
+    return [self revenant_mps_arithmetic:RevenantMPSGraphOperationKindSubtract operands:@[primary, secondary] name:name];
 }
 
 - (MPSGraphTensor *)multiplicationWithPrimaryTensor:(MPSGraphTensor *)primary
                                   secondaryTensor:(MPSGraphTensor *)secondary
                                              name:(NSString *)name
 {
-    return [self charon_mps_arithmetic:CharonMPSGraphOperationKindMultiply operands:@[primary, secondary] name:name];
+    return [self revenant_mps_arithmetic:RevenantMPSGraphOperationKindMultiply operands:@[primary, secondary] name:name];
 }
 
 - (MPSGraphTensor *)divisionWithPrimaryTensor:(MPSGraphTensor *)primary
                               secondaryTensor:(MPSGraphTensor *)secondary
                                          name:(NSString *)name
 {
-    return [self charon_mps_arithmetic:CharonMPSGraphOperationKindDivide operands:@[primary, secondary] name:name];
+    return [self revenant_mps_arithmetic:RevenantMPSGraphOperationKindDivide operands:@[primary, secondary] name:name];
 }
 
 - (MPSGraphTensor *)negationWithTensor:(MPSGraphTensor *)tensor name:(NSString *)name
 {
-    return [self charon_mps_arithmetic:CharonMPSGraphOperationKindNegate operands:@[tensor] name:name];
+    return [self revenant_mps_arithmetic:RevenantMPSGraphOperationKindNegate operands:@[tensor] name:name];
 }
 
 - (MPSGraphTensor *)squareWithTensor:(MPSGraphTensor *)tensor name:(NSString *)name
 {
-    return [self charon_mps_arithmetic:CharonMPSGraphOperationKindSquare operands:@[tensor] name:name];
+    return [self revenant_mps_arithmetic:RevenantMPSGraphOperationKindSquare operands:@[tensor] name:name];
 }
 
 - (MPSGraphTensor *)reciprocalWithTensor:(MPSGraphTensor *)tensor name:(NSString *)name
 {
-    return [self charon_mps_arithmetic:CharonMPSGraphOperationKindReciprocal operands:@[tensor] name:name];
+    return [self revenant_mps_arithmetic:RevenantMPSGraphOperationKindReciprocal operands:@[tensor] name:name];
 }
 
 - (MPSGraphTensor *)squareRootWithTensor:(MPSGraphTensor *)tensor name:(NSString *)name
 {
-    return [self charon_mps_arithmetic:CharonMPSGraphOperationKindSqrt operands:@[tensor] name:name];
+    return [self revenant_mps_arithmetic:RevenantMPSGraphOperationKindSqrt operands:@[tensor] name:name];
 }
 
 - (MPSGraphTensor *)reverseSquareRootWithTensor:(MPSGraphTensor *)tensor name:(NSString *)name
 {
-    return [self charon_mps_arithmetic:CharonMPSGraphOperationKindRsqrt operands:@[tensor] name:name];
+    return [self revenant_mps_arithmetic:RevenantMPSGraphOperationKindRsqrt operands:@[tensor] name:name];
 }
 
 - (MPSGraphTensor *)exponentialWithTensor:(MPSGraphTensor *)tensor name:(NSString *)name
 {
-    return [self charon_mps_arithmetic:CharonMPSGraphOperationKindExp operands:@[tensor] name:name];
+    return [self revenant_mps_arithmetic:RevenantMPSGraphOperationKindExp operands:@[tensor] name:name];
 }
 
 - (MPSGraphTensor *)logarithmWithTensor:(MPSGraphTensor *)tensor name:(NSString *)name
 {
-    return [self charon_mps_arithmetic:CharonMPSGraphOperationKindLog operands:@[tensor] name:name];
+    return [self revenant_mps_arithmetic:RevenantMPSGraphOperationKindLog operands:@[tensor] name:name];
 }
 
 - (MPSGraphTensor *)absoluteWithTensor:(MPSGraphTensor *)tensor name:(NSString *)name
 {
-    return [self charon_mps_arithmetic:CharonMPSGraphOperationKindAbs operands:@[tensor] name:name];
+    return [self revenant_mps_arithmetic:RevenantMPSGraphOperationKindAbs operands:@[tensor] name:name];
 }
 
 - (MPSGraphTensor *)signWithTensor:(MPSGraphTensor *)tensor name:(NSString *)name
 {
-    return [self charon_mps_arithmetic:CharonMPSGraphOperationKindSign operands:@[tensor] name:name];
+    return [self revenant_mps_arithmetic:RevenantMPSGraphOperationKindSign operands:@[tensor] name:name];
 }
 
 - (MPSGraphTensor *)identityWithTensor:(MPSGraphTensor *)tensor name:(NSString *)name
 {
-    return [self charon_mps_arithmetic:CharonMPSGraphOperationKindIdentity operands:@[tensor] name:name];
+    return [self revenant_mps_arithmetic:RevenantMPSGraphOperationKindIdentity operands:@[tensor] name:name];
 }
 
 #pragma mark - the transcendentals and the rounding
 
 - (MPSGraphTensor *)exponentBase2WithTensor:(MPSGraphTensor *)tensor name:(NSString *)name
 {
-    return [self charon_mps_arithmetic:CharonMPSGraphOperationKindExpBase2 operands:@[tensor] name:name];
+    return [self revenant_mps_arithmetic:RevenantMPSGraphOperationKindExpBase2 operands:@[tensor] name:name];
 }
 
 - (MPSGraphTensor *)exponentBase10WithTensor:(MPSGraphTensor *)tensor name:(NSString *)name
 {
-    return [self charon_mps_arithmetic:CharonMPSGraphOperationKindExpBase10 operands:@[tensor] name:name];
+    return [self revenant_mps_arithmetic:RevenantMPSGraphOperationKindExpBase10 operands:@[tensor] name:name];
 }
 
 - (MPSGraphTensor *)logarithmBase2WithTensor:(MPSGraphTensor *)tensor name:(NSString *)name
 {
-    return [self charon_mps_arithmetic:CharonMPSGraphOperationKindLogBase2 operands:@[tensor] name:name];
+    return [self revenant_mps_arithmetic:RevenantMPSGraphOperationKindLogBase2 operands:@[tensor] name:name];
 }
 
 - (MPSGraphTensor *)logarithmBase10WithTensor:(MPSGraphTensor *)tensor name:(NSString *)name
 {
-    return [self charon_mps_arithmetic:CharonMPSGraphOperationKindLogBase10 operands:@[tensor] name:name];
+    return [self revenant_mps_arithmetic:RevenantMPSGraphOperationKindLogBase10 operands:@[tensor] name:name];
 }
 
 - (MPSGraphTensor *)negativeWithTensor:(MPSGraphTensor *)tensor name:(NSString *)name
 {
-    return [self charon_mps_arithmetic:CharonMPSGraphOperationKindNegate operands:@[tensor] name:name];
+    return [self revenant_mps_arithmetic:RevenantMPSGraphOperationKindNegate operands:@[tensor] name:name];
 }
 
 - (MPSGraphTensor *)signbitWithTensor:(MPSGraphTensor *)tensor name:(NSString *)name
 {
-    return [self charon_mps_arithmetic:CharonMPSGraphOperationKindSignBit operands:@[tensor] name:name];
+    return [self revenant_mps_arithmetic:RevenantMPSGraphOperationKindSignBit operands:@[tensor] name:name];
 }
 
 - (MPSGraphTensor *)ceilWithTensor:(MPSGraphTensor *)tensor name:(NSString *)name
 {
-    return [self charon_mps_arithmetic:CharonMPSGraphOperationKindCeil operands:@[tensor] name:name];
+    return [self revenant_mps_arithmetic:RevenantMPSGraphOperationKindCeil operands:@[tensor] name:name];
 }
 
 - (MPSGraphTensor *)floorWithTensor:(MPSGraphTensor *)tensor name:(NSString *)name
 {
-    return [self charon_mps_arithmetic:CharonMPSGraphOperationKindFloor operands:@[tensor] name:name];
+    return [self revenant_mps_arithmetic:RevenantMPSGraphOperationKindFloor operands:@[tensor] name:name];
 }
 
 - (MPSGraphTensor *)roundWithTensor:(MPSGraphTensor *)tensor name:(NSString *)name
 {
-    return [self charon_mps_arithmetic:CharonMPSGraphOperationKindRound operands:@[tensor] name:name];
+    return [self revenant_mps_arithmetic:RevenantMPSGraphOperationKindRound operands:@[tensor] name:name];
 }
 
 - (MPSGraphTensor *)rintWithTensor:(MPSGraphTensor *)tensor name:(NSString *)name
 {
-    return [self charon_mps_arithmetic:CharonMPSGraphOperationKindRint operands:@[tensor] name:name];
+    return [self revenant_mps_arithmetic:RevenantMPSGraphOperationKindRint operands:@[tensor] name:name];
 }
 
 - (MPSGraphTensor *)sinWithTensor:(MPSGraphTensor *)tensor name:(NSString *)name
 {
-    return [self charon_mps_arithmetic:CharonMPSGraphOperationKindSin operands:@[tensor] name:name];
+    return [self revenant_mps_arithmetic:RevenantMPSGraphOperationKindSin operands:@[tensor] name:name];
 }
 
 - (MPSGraphTensor *)cosWithTensor:(MPSGraphTensor *)tensor name:(NSString *)name
 {
-    return [self charon_mps_arithmetic:CharonMPSGraphOperationKindCos operands:@[tensor] name:name];
+    return [self revenant_mps_arithmetic:RevenantMPSGraphOperationKindCos operands:@[tensor] name:name];
 }
 
 - (MPSGraphTensor *)tanWithTensor:(MPSGraphTensor *)tensor name:(NSString *)name
 {
-    return [self charon_mps_arithmetic:CharonMPSGraphOperationKindTan operands:@[tensor] name:name];
+    return [self revenant_mps_arithmetic:RevenantMPSGraphOperationKindTan operands:@[tensor] name:name];
 }
 
 - (MPSGraphTensor *)sinhWithTensor:(MPSGraphTensor *)tensor name:(NSString *)name
 {
-    return [self charon_mps_arithmetic:CharonMPSGraphOperationKindSinh operands:@[tensor] name:name];
+    return [self revenant_mps_arithmetic:RevenantMPSGraphOperationKindSinh operands:@[tensor] name:name];
 }
 
 - (MPSGraphTensor *)coshWithTensor:(MPSGraphTensor *)tensor name:(NSString *)name
 {
-    return [self charon_mps_arithmetic:CharonMPSGraphOperationKindCosh operands:@[tensor] name:name];
+    return [self revenant_mps_arithmetic:RevenantMPSGraphOperationKindCosh operands:@[tensor] name:name];
 }
 
 - (MPSGraphTensor *)tanhWithTensor:(MPSGraphTensor *)tensor name:(NSString *)name
 {
-    return [self charon_mps_arithmetic:CharonMPSGraphOperationKindTanh operands:@[tensor] name:name];
+    return [self revenant_mps_arithmetic:RevenantMPSGraphOperationKindTanh operands:@[tensor] name:name];
 }
 
 - (MPSGraphTensor *)asinWithTensor:(MPSGraphTensor *)tensor name:(NSString *)name
 {
-    return [self charon_mps_arithmetic:CharonMPSGraphOperationKindAsin operands:@[tensor] name:name];
+    return [self revenant_mps_arithmetic:RevenantMPSGraphOperationKindAsin operands:@[tensor] name:name];
 }
 
 - (MPSGraphTensor *)acosWithTensor:(MPSGraphTensor *)tensor name:(NSString *)name
 {
-    return [self charon_mps_arithmetic:CharonMPSGraphOperationKindAcos operands:@[tensor] name:name];
+    return [self revenant_mps_arithmetic:RevenantMPSGraphOperationKindAcos operands:@[tensor] name:name];
 }
 
 - (MPSGraphTensor *)atanWithTensor:(MPSGraphTensor *)tensor name:(NSString *)name
 {
-    return [self charon_mps_arithmetic:CharonMPSGraphOperationKindAtan operands:@[tensor] name:name];
+    return [self revenant_mps_arithmetic:RevenantMPSGraphOperationKindAtan operands:@[tensor] name:name];
 }
 
 - (MPSGraphTensor *)asinhWithTensor:(MPSGraphTensor *)tensor name:(NSString *)name
 {
-    return [self charon_mps_arithmetic:CharonMPSGraphOperationKindAsinh operands:@[tensor] name:name];
+    return [self revenant_mps_arithmetic:RevenantMPSGraphOperationKindAsinh operands:@[tensor] name:name];
 }
 
 - (MPSGraphTensor *)acoshWithTensor:(MPSGraphTensor *)tensor name:(NSString *)name
 {
-    return [self charon_mps_arithmetic:CharonMPSGraphOperationKindAcosh operands:@[tensor] name:name];
+    return [self revenant_mps_arithmetic:RevenantMPSGraphOperationKindAcosh operands:@[tensor] name:name];
 }
 
 - (MPSGraphTensor *)atanhWithTensor:(MPSGraphTensor *)tensor name:(NSString *)name
 {
-    return [self charon_mps_arithmetic:CharonMPSGraphOperationKindAtanh operands:@[tensor] name:name];
+    return [self revenant_mps_arithmetic:RevenantMPSGraphOperationKindAtanh operands:@[tensor] name:name];
 }
 
 - (MPSGraphTensor *)erfWithTensor:(MPSGraphTensor *)tensor name:(NSString *)name
 {
-    return [self charon_mps_arithmetic:CharonMPSGraphOperationKindErf operands:@[tensor] name:name];
+    return [self revenant_mps_arithmetic:RevenantMPSGraphOperationKindErf operands:@[tensor] name:name];
 }
 
 - (MPSGraphTensor *)notWithTensor:(MPSGraphTensor *)tensor name:(NSString *)name
 {
-    return [self charon_mps_arithmetic:CharonMPSGraphOperationKindLogicalNot operands:@[tensor] name:name];
+    return [self revenant_mps_arithmetic:RevenantMPSGraphOperationKindLogicalNot operands:@[tensor] name:name];
 }
 
 - (MPSGraphTensor *)isInfiniteWithTensor:(MPSGraphTensor *)tensor name:(NSString *)name
 {
-    return [self charon_mps_predicate:CharonMPSGraphOperationKindIsInfinite operands:@[tensor] name:name];
+    return [self revenant_mps_predicate:RevenantMPSGraphOperationKindIsInfinite operands:@[tensor] name:name];
 }
 
 - (MPSGraphTensor *)isFiniteWithTensor:(MPSGraphTensor *)tensor name:(NSString *)name
 {
-    return [self charon_mps_predicate:CharonMPSGraphOperationKindIsFinite operands:@[tensor] name:name];
+    return [self revenant_mps_predicate:RevenantMPSGraphOperationKindIsFinite operands:@[tensor] name:name];
 }
 
 - (MPSGraphTensor *)isNaNWithTensor:(MPSGraphTensor *)tensor name:(NSString *)name
 {
-    return [self charon_mps_predicate:CharonMPSGraphOperationKindIsNaN operands:@[tensor] name:name];
+    return [self revenant_mps_predicate:RevenantMPSGraphOperationKindIsNaN operands:@[tensor] name:name];
 }
 
 #pragma mark - the arithmetic that is not IEEE
@@ -356,49 +356,49 @@ typedef enum {
                           secondaryTensor:(MPSGraphTensor *)secondary
                                      name:(NSString *)name
 {
-    return [self charon_mps_arithmetic:CharonMPSGraphOperationKindModulo operands:@[primary, secondary] name:name];
+    return [self revenant_mps_arithmetic:RevenantMPSGraphOperationKindModulo operands:@[primary, secondary] name:name];
 }
 
 - (MPSGraphTensor *)floorModuloWithPrimaryTensor:(MPSGraphTensor *)primary
                                  secondaryTensor:(MPSGraphTensor *)secondary
                                             name:(NSString *)name
 {
-    return [self charon_mps_arithmetic:CharonMPSGraphOperationKindFloorModulo operands:@[primary, secondary] name:name];
+    return [self revenant_mps_arithmetic:RevenantMPSGraphOperationKindFloorModulo operands:@[primary, secondary] name:name];
 }
 
 - (MPSGraphTensor *)powerWithPrimaryTensor:(MPSGraphTensor *)primary
                           secondaryTensor:(MPSGraphTensor *)secondary
                                      name:(NSString *)name
 {
-    return [self charon_mps_arithmetic:CharonMPSGraphOperationKindPower operands:@[primary, secondary] name:name];
+    return [self revenant_mps_arithmetic:RevenantMPSGraphOperationKindPower operands:@[primary, secondary] name:name];
 }
 
 - (MPSGraphTensor *)minimumWithPrimaryTensor:(MPSGraphTensor *)primary
                             secondaryTensor:(MPSGraphTensor *)secondary
                                        name:(NSString *)name
 {
-    return [self charon_mps_arithmetic:CharonMPSGraphOperationKindMinimum operands:@[primary, secondary] name:name];
+    return [self revenant_mps_arithmetic:RevenantMPSGraphOperationKindMinimum operands:@[primary, secondary] name:name];
 }
 
 - (MPSGraphTensor *)maximumWithPrimaryTensor:(MPSGraphTensor *)primary
                             secondaryTensor:(MPSGraphTensor *)secondary
                                        name:(NSString *)name
 {
-    return [self charon_mps_arithmetic:CharonMPSGraphOperationKindMaximum operands:@[primary, secondary] name:name];
+    return [self revenant_mps_arithmetic:RevenantMPSGraphOperationKindMaximum operands:@[primary, secondary] name:name];
 }
 
 - (MPSGraphTensor *)divisionNoNaNWithPrimaryTensor:(MPSGraphTensor *)primary
                                   secondaryTensor:(MPSGraphTensor *)secondary
                                              name:(NSString *)name
 {
-    return [self charon_mps_arithmetic:CharonMPSGraphOperationKindDivisionNoNaN operands:@[primary, secondary] name:name];
+    return [self revenant_mps_arithmetic:RevenantMPSGraphOperationKindDivisionNoNaN operands:@[primary, secondary] name:name];
 }
 
 - (MPSGraphTensor *)atan2WithPrimaryTensor:(MPSGraphTensor *)primary
                           secondaryTensor:(MPSGraphTensor *)secondary
                                      name:(NSString *)name
 {
-    return [self charon_mps_arithmetic:CharonMPSGraphOperationKindAtan2 operands:@[primary, secondary] name:name];
+    return [self revenant_mps_arithmetic:RevenantMPSGraphOperationKindAtan2 operands:@[primary, secondary] name:name];
 }
 
 #pragma mark - the predicates over two operands
@@ -407,42 +407,42 @@ typedef enum {
                           secondaryTensor:(MPSGraphTensor *)secondary
                                      name:(NSString *)name
 {
-    return [self charon_mps_predicate:CharonMPSGraphOperationKindEqual operands:@[primary, secondary] name:name];
+    return [self revenant_mps_predicate:RevenantMPSGraphOperationKindEqual operands:@[primary, secondary] name:name];
 }
 
 - (MPSGraphTensor *)notEqualWithPrimaryTensor:(MPSGraphTensor *)primary
                              secondaryTensor:(MPSGraphTensor *)secondary
                                         name:(NSString *)name
 {
-    return [self charon_mps_predicate:CharonMPSGraphOperationKindNotEqual operands:@[primary, secondary] name:name];
+    return [self revenant_mps_predicate:RevenantMPSGraphOperationKindNotEqual operands:@[primary, secondary] name:name];
 }
 
 - (MPSGraphTensor *)lessThanWithPrimaryTensor:(MPSGraphTensor *)primary
                             secondaryTensor:(MPSGraphTensor *)secondary
                                        name:(NSString *)name
 {
-    return [self charon_mps_predicate:CharonMPSGraphOperationKindLessThan operands:@[primary, secondary] name:name];
+    return [self revenant_mps_predicate:RevenantMPSGraphOperationKindLessThan operands:@[primary, secondary] name:name];
 }
 
 - (MPSGraphTensor *)lessThanOrEqualToWithPrimaryTensor:(MPSGraphTensor *)primary
                                      secondaryTensor:(MPSGraphTensor *)secondary
                                                 name:(NSString *)name
 {
-    return [self charon_mps_predicate:CharonMPSGraphOperationKindLessThanOrEqualTo operands:@[primary, secondary] name:name];
+    return [self revenant_mps_predicate:RevenantMPSGraphOperationKindLessThanOrEqualTo operands:@[primary, secondary] name:name];
 }
 
 - (MPSGraphTensor *)greaterThanWithPrimaryTensor:(MPSGraphTensor *)primary
                                secondaryTensor:(MPSGraphTensor *)secondary
                                           name:(NSString *)name
 {
-    return [self charon_mps_predicate:CharonMPSGraphOperationKindGreaterThan operands:@[primary, secondary] name:name];
+    return [self revenant_mps_predicate:RevenantMPSGraphOperationKindGreaterThan operands:@[primary, secondary] name:name];
 }
 
 - (MPSGraphTensor *)greaterThanOrEqualToWithPrimaryTensor:(MPSGraphTensor *)primary
                                         secondaryTensor:(MPSGraphTensor *)secondary
                                                    name:(NSString *)name
 {
-    return [self charon_mps_predicate:CharonMPSGraphOperationKindGreaterThanOrEqualTo operands:@[primary, secondary] name:name];
+    return [self revenant_mps_predicate:RevenantMPSGraphOperationKindGreaterThanOrEqualTo operands:@[primary, secondary] name:name];
 }
 
 #pragma mark - the logical family, which answers the operand's own type
@@ -451,42 +451,42 @@ typedef enum {
                                secondaryTensor:(MPSGraphTensor *)secondary
                                           name:(NSString *)name
 {
-    return [self charon_mps_arithmetic:CharonMPSGraphOperationKindLogicalAnd operands:@[primary, secondary] name:name];
+    return [self revenant_mps_arithmetic:RevenantMPSGraphOperationKindLogicalAnd operands:@[primary, secondary] name:name];
 }
 
 - (MPSGraphTensor *)logicalORWithPrimaryTensor:(MPSGraphTensor *)primary
                               secondaryTensor:(MPSGraphTensor *)secondary
                                          name:(NSString *)name
 {
-    return [self charon_mps_arithmetic:CharonMPSGraphOperationKindLogicalOr operands:@[primary, secondary] name:name];
+    return [self revenant_mps_arithmetic:RevenantMPSGraphOperationKindLogicalOr operands:@[primary, secondary] name:name];
 }
 
 - (MPSGraphTensor *)logicalNANDWithPrimaryTensor:(MPSGraphTensor *)primary
                                 secondaryTensor:(MPSGraphTensor *)secondary
                                            name:(NSString *)name
 {
-    return [self charon_mps_arithmetic:CharonMPSGraphOperationKindLogicalNand operands:@[primary, secondary] name:name];
+    return [self revenant_mps_arithmetic:RevenantMPSGraphOperationKindLogicalNand operands:@[primary, secondary] name:name];
 }
 
 - (MPSGraphTensor *)logicalNORWithPrimaryTensor:(MPSGraphTensor *)primary
                                secondaryTensor:(MPSGraphTensor *)secondary
                                           name:(NSString *)name
 {
-    return [self charon_mps_arithmetic:CharonMPSGraphOperationKindLogicalNor operands:@[primary, secondary] name:name];
+    return [self revenant_mps_arithmetic:RevenantMPSGraphOperationKindLogicalNor operands:@[primary, secondary] name:name];
 }
 
 - (MPSGraphTensor *)logicalXORWithPrimaryTensor:(MPSGraphTensor *)primary
                                secondaryTensor:(MPSGraphTensor *)secondary
                                           name:(NSString *)name
 {
-    return [self charon_mps_arithmetic:CharonMPSGraphOperationKindLogicalXor operands:@[primary, secondary] name:name];
+    return [self revenant_mps_arithmetic:RevenantMPSGraphOperationKindLogicalXor operands:@[primary, secondary] name:name];
 }
 
 - (MPSGraphTensor *)logicalXNORWithPrimaryTensor:(MPSGraphTensor *)primary
                                 secondaryTensor:(MPSGraphTensor *)secondary
                                            name:(NSString *)name
 {
-    return [self charon_mps_arithmetic:CharonMPSGraphOperationKindLogicalXnor operands:@[primary, secondary] name:name];
+    return [self revenant_mps_arithmetic:RevenantMPSGraphOperationKindLogicalXnor operands:@[primary, secondary] name:name];
 }
 
 #pragma mark - the operations with a third operand
@@ -496,7 +496,7 @@ typedef enum {
                           falsePredicateTensor:(MPSGraphTensor *)whenFalse
                                          name:(NSString *)name
 {
-    return [self charon_mps_arithmetic:CharonMPSGraphOperationKindSelect operands:@[predicate, whenTrue, whenFalse] name:name];
+    return [self revenant_mps_arithmetic:RevenantMPSGraphOperationKindSelect operands:@[predicate, whenTrue, whenFalse] name:name];
 }
 
 - (MPSGraphTensor *)clampWithTensor:(MPSGraphTensor *)tensor
@@ -504,38 +504,38 @@ typedef enum {
                      maxValueTensor:(MPSGraphTensor *)maximum
                                name:(NSString *)name
 {
-    return [self charon_mps_arithmetic:CharonMPSGraphOperationKindClamp3 operands:@[tensor, minimum, maximum] name:name];
+    return [self revenant_mps_arithmetic:RevenantMPSGraphOperationKindClamp3 operands:@[tensor, minimum, maximum] name:name];
 }
 
 #pragma mark - the activations and their gradients
 
 - (MPSGraphTensor *)reLUWithTensor:(MPSGraphTensor *)tensor name:(NSString *)name
 {
-    return [self charon_mps_arithmetic:CharonMPSGraphOperationKindReLU operands:@[tensor] name:name];
+    return [self revenant_mps_arithmetic:RevenantMPSGraphOperationKindReLU operands:@[tensor] name:name];
 }
 
 - (MPSGraphTensor *)reLUGradientWithIncomingGradient:(MPSGraphTensor *)gradient
                                          sourceTensor:(MPSGraphTensor *)source
                                                 name:(NSString *)name
 {
-    return [self charon_mps_arithmetic:CharonMPSGraphOperationKindReLUGradient operands:@[gradient, source] name:name];
+    return [self revenant_mps_arithmetic:RevenantMPSGraphOperationKindReLUGradient operands:@[gradient, source] name:name];
 }
 
 - (MPSGraphTensor *)sigmoidWithTensor:(MPSGraphTensor *)tensor name:(NSString *)name
 {
-    return [self charon_mps_arithmetic:CharonMPSGraphOperationKindSigmoid operands:@[tensor] name:name];
+    return [self revenant_mps_arithmetic:RevenantMPSGraphOperationKindSigmoid operands:@[tensor] name:name];
 }
 
 - (MPSGraphTensor *)sigmoidGradientWithIncomingGradient:(MPSGraphTensor *)gradient
                                             sourceTensor:(MPSGraphTensor *)source
                                                    name:(NSString *)name
 {
-    return [self charon_mps_arithmetic:CharonMPSGraphOperationKindSigmoidGradient operands:@[gradient, source] name:name];
+    return [self revenant_mps_arithmetic:RevenantMPSGraphOperationKindSigmoidGradient operands:@[gradient, source] name:name];
 }
 
 #pragma mark - the reduction family
 
-- (MPSGraphTensor *)charon_mps_reduction:(CharonMPSGraphOperationKind)kind
+- (MPSGraphTensor *)revenant_mps_reduction:(RevenantMPSGraphOperationKind)kind
                                     axes:(NSArray<NSNumber *> *)axes
                                   tensor:(MPSGraphTensor *)tensor
                              parameters:(NSDictionary *)parameters
@@ -575,17 +575,17 @@ typedef enum {
     all[@"shape"] = kept;
     if (parameters)
         [all addEntriesFromDictionary:parameters];
-    return [self charon_mps_operation:kind inputs:@[tensor] parameters:all name:name];
+    return [self revenant_mps_operation:kind inputs:@[tensor] parameters:all name:name];
 }
 
-- (MPSGraphTensor *)charon_mps_reductionOf:(NSArray<NSNumber *> *)axes
+- (MPSGraphTensor *)revenant_mps_reductionOf:(NSArray<NSNumber *> *)axes
                                     tensor:(MPSGraphTensor *)tensor
                              combination:(NSString *)combination
-                                     kind:(CharonMPSGraphOperationKind)kind
+                                     kind:(RevenantMPSGraphOperationKind)kind
                           propagatesNaN:(BOOL)propagatesNaN
                                      name:(NSString *)name
 {
-    return [self charon_mps_reduction:kind
+    return [self revenant_mps_reduction:kind
                                 axes:axes
                               tensor:tensor
                          parameters:@{@"combination": combination, @"propagateNaN": @(propagatesNaN)}
@@ -603,7 +603,7 @@ typedef enum {
     if (first < 0) first += (NSInteger)rank;
     if (second < 0) second += (NSInteger)rank;
     if ((NSUInteger)first >= rank || (NSUInteger)second >= rank) {
-        return [self charon_mps_gather:CharonMPSGraphOperationKindTranspose
+        return [self revenant_mps_gather:RevenantMPSGraphOperationKindTranspose
                                  tensor:tensor
                             parameters:@{@"gather": @"transpose",
                                          @"gatherPermutation": @[@(first), @(second)]}
@@ -613,7 +613,7 @@ typedef enum {
     for (NSUInteger axis = 0; axis < rank; axis++)
         [permutation addObject:@((NSInteger)axis)];
     [permutation exchangeObjectAtIndex:(NSUInteger)first withObjectAtIndex:(NSUInteger)second];
-    return [self charon_mps_gather:CharonMPSGraphOperationKindTranspose
+    return [self revenant_mps_gather:RevenantMPSGraphOperationKindTranspose
                              tensor:tensor
                         parameters:@{@"gather": @"transpose", @"gatherPermutation": permutation}
                                name:name];
@@ -623,7 +623,7 @@ typedef enum {
                         withShape:(NSArray<NSNumber *> *)shape
                              name:(NSString *)name
 {
-    return [self charon_mps_gather:CharonMPSGraphOperationKindReshape
+    return [self revenant_mps_gather:RevenantMPSGraphOperationKindReshape
                              tensor:tensor
                         parameters:@{@"gather": @"reshape", @"gatherShape": shape ?: @[]}
                                name:name];
@@ -644,7 +644,7 @@ typedef enum {
         [strides addObject:@1];
         [ends addObject:@(axis == dimensionIndex ? start + length : tensor.shape[axis].integerValue)];
     }
-    return [self charon_mps_gather:CharonMPSGraphOperationKindSlice
+    return [self revenant_mps_gather:RevenantMPSGraphOperationKindSlice
                              tensor:tensor
                         parameters:@{@"gather": @"slice",
                                      @"sliceStarts": starts, @"sliceEnds": ends, @"sliceStrides": strides,
@@ -658,7 +658,7 @@ typedef enum {
                         strides:(NSArray<NSNumber *> *)strides
                            name:(NSString *)name
 {
-    return [self charon_mps_gather:CharonMPSGraphOperationKindSlice
+    return [self revenant_mps_gather:RevenantMPSGraphOperationKindSlice
                              tensor:tensor
                         parameters:@{@"gather": @"slice",
                                      @"sliceStarts": starts ?: @[], @"sliceEnds": ends ?: @[],
@@ -675,7 +675,7 @@ typedef enum {
                     squeezeMask:(uint32_t)squeezeMask
                            name:(NSString *)name
 {
-    return [self charon_mps_slice:CharonMPSGraphOperationKindSlice
+    return [self revenant_mps_slice:RevenantMPSGraphOperationKindSlice
                           inputs:@[tensor]
                       parameters:@{@"gather": @"slice",
                                    @"sliceStarts": starts ?: @[], @"sliceEnds": ends ?: @[],
@@ -685,7 +685,7 @@ typedef enum {
                              name:name];
 }
 
-- (NSDictionary *)charon_mps_sliceGradientParameters:(MPSGraphTensor *)fwdInShapeTensor
+- (NSDictionary *)revenant_mps_sliceGradientParameters:(MPSGraphTensor *)fwdInShapeTensor
                                              starts:(NSArray<NSNumber *> *)starts
                                                ends:(NSArray<NSNumber *> *)ends
                                             strides:(NSArray<NSNumber *> *)strides
@@ -706,7 +706,7 @@ typedef enum {
         parameters[@"sliceEndMask"] = @(endMask);
     if (squeezeMask != 0)
         parameters[@"sliceSqueezeMask"] = @(squeezeMask);
-    NSArray<NSNumber *> *forward = [self charon_mps_constantShapeOfTensor:fwdInShapeTensor];
+    NSArray<NSNumber *> *forward = [self revenant_mps_constantShapeOfTensor:fwdInShapeTensor];
     if (forward != nil)
         parameters[@"sliceForwardShape"] = forward;
     return parameters;
@@ -719,9 +719,9 @@ typedef enum {
                                 strides:(NSArray<NSNumber *> *)strides
                                    name:(NSString *)name
 {
-    return [self charon_mps_slice:CharonMPSGraphOperationKindSlice
+    return [self revenant_mps_slice:RevenantMPSGraphOperationKindSlice
                           inputs:@[inputGradientTensor, fwdInShapeTensor]
-                      parameters:[self charon_mps_sliceGradientParameters:fwdInShapeTensor
+                      parameters:[self revenant_mps_sliceGradientParameters:fwdInShapeTensor
                                                                       starts:starts ends:ends strides:strides
                                                                       gradient:inputGradientTensor
                                                                     startMask:0 endMask:0 squeezeMask:0]
@@ -738,9 +738,9 @@ typedef enum {
                             squeezeMask:(uint32_t)squeezeMask
                                    name:(NSString *)name
 {
-    return [self charon_mps_slice:CharonMPSGraphOperationKindSlice
+    return [self revenant_mps_slice:RevenantMPSGraphOperationKindSlice
                           inputs:@[inputGradientTensor, fwdInShapeTensor]
-                      parameters:[self charon_mps_sliceGradientParameters:fwdInShapeTensor
+                      parameters:[self revenant_mps_sliceGradientParameters:fwdInShapeTensor
                                                                       starts:starts ends:ends strides:strides
                                                                       gradient:inputGradientTensor
                                                                     startMask:startMask endMask:endMask
@@ -755,7 +755,7 @@ typedef enum {
                        dimension:(NSInteger)dimensionIndex
                             name:(NSString *)name
 {
-    return [self charon_mps_concat:CharonMPSGraphOperationKindConcat
+    return [self revenant_mps_concat:RevenantMPSGraphOperationKindConcat
                             tensors:@[tensor, tensor2]
                                axis:dimensionIndex
                          interleave:NO
@@ -766,7 +766,7 @@ typedef enum {
                         dimension:(NSInteger)dimensionIndex
                              name:(NSString *)name
 {
-    return [self charon_mps_concat:CharonMPSGraphOperationKindConcat
+    return [self revenant_mps_concat:RevenantMPSGraphOperationKindConcat
                             tensors:tensors ?: @[]
                                axis:dimensionIndex
                          interleave:NO
@@ -778,35 +778,35 @@ typedef enum {
                        interleave:(BOOL)interleave
                              name:(NSString *)name
 {
-    return [self charon_mps_concat:CharonMPSGraphOperationKindConcat
+    return [self revenant_mps_concat:RevenantMPSGraphOperationKindConcat
                             tensors:tensors ?: @[]
                                axis:dimensionIndex
                          interleave:interleave
                               name:name];
 }
 
-- (MPSGraphTensor *)charon_mps_concat:(CharonMPSGraphOperationKind)kind
+- (MPSGraphTensor *)revenant_mps_concat:(RevenantMPSGraphOperationKind)kind
                                tensors:(NSArray<MPSGraphTensor *> *)tensors
                                   axis:(NSInteger)axis
                             interleave:(BOOL)interleave
                                  name:(NSString *)name
 {
-    BOOL stacked = kind == CharonMPSGraphOperationKindStack;
-    NSArray<NSNumber *> *shape = [self charon_mps_concatShapeOfTensors:tensors axis:axis interleave:interleave
+    BOOL stacked = kind == RevenantMPSGraphOperationKindStack;
+    NSArray<NSNumber *> *shape = [self revenant_mps_concatShapeOfTensors:tensors axis:axis interleave:interleave
                                                                 stacked:stacked named:name];
-    MPSGraphTensor *result = [self charon_mps_operation:kind inputs:tensors ?: @[]
+    MPSGraphTensor *result = [self revenant_mps_operation:kind inputs:tensors ?: @[]
                                             parameters:@{@"concatAxis": @(axis), @"concatInterleave": @(interleave),
                                                          @"concatStacked": @(stacked),
                                                          @"dataType": @(tensors.firstObject.dataType
                                                                         ?: MPSDataTypeFloat32)}
                                                    name:name];
     if (shape != nil)
-        [result charon_mps_setShape:shape];
+        [result revenant_mps_setShape:shape];
     return result;
 }
 
 #pragma mark - the split and the coordinate: the two seams of 15.4 whose result is not one operand's walk
-- (NSArray<MPSGraphTensor *> *)charon_mps_split:(MPSGraphTensor *)tensor
+- (NSArray<MPSGraphTensor *> *)revenant_mps_split:(MPSGraphTensor *)tensor
                                             axis:(NSInteger)axis
                                            sizes:(NSArray<NSNumber *> *)sizes
                                       numSplits:(NSUInteger)numSplits
@@ -816,9 +816,9 @@ typedef enum {
     NSInteger where = axis;
     if (where < 0)
         where += (NSInteger)operandShape.count;
-    NSArray<NSNumber *> *own = [self charon_mps_splitSizes:sizes numSplits:numSplits axis:where
+    NSArray<NSNumber *> *own = [self revenant_mps_splitSizes:sizes numSplits:numSplits axis:where
                                             ofShape:operandShape named:name];
-    MPSGraphOperation *operation = [self charon_mps_addOperationOfKind:CharonMPSGraphOperationKindSplit
+    MPSGraphOperation *operation = [self revenant_mps_addOperationOfKind:RevenantMPSGraphOperationKindSplit
                                                                  name:name
                                                                 inputs:@[tensor]
                                                                outputs:@[]
@@ -833,11 +833,11 @@ typedef enum {
                                                               operation:operation index:i];
         [results addObject:result];
     }
-    [operation charon_mps_setOutputTensors:results];
+    [operation revenant_mps_setOutputTensors:results];
     return results;
 }
 
-- (MPSGraphTensor *)charon_mps_coordinates:(NSInteger)axis
+- (MPSGraphTensor *)revenant_mps_coordinates:(NSInteger)axis
                                     fedAxis:(MPSGraphTensor *)fedAxis
                                       shape:(NSArray<NSNumber *> *)shape
                                    fedShape:(MPSGraphTensor *)fedShape
@@ -845,7 +845,7 @@ typedef enum {
 {
     NSArray<NSNumber *> *own = shape;
     if (fedShape != nil) {
-        own = [self charon_mps_constantShapeOfTensor:fedShape];
+        own = [self revenant_mps_constantShapeOfTensor:fedShape];
         if (own == nil) {
             [NSException raise:NSInvalidArgumentException
                         format:@"MPSGraph: %@ was given the shape of its result as a tensor the caller feeds, "
@@ -856,7 +856,7 @@ typedef enum {
     }
     NSInteger where = axis;
     if (fedAxis != nil) {
-        NSArray<NSNumber *> *one = [self charon_mps_constantShapeOfTensor:fedAxis];
+        NSArray<NSNumber *> *one = [self revenant_mps_constantShapeOfTensor:fedAxis];
         if (one == nil) {
             MPSDataType type = fedAxis.dataType;
             if (type == MPSDataTypeFloat32 || type == MPSDataTypeFloat16 || type == MPSDataTypeBool) {
@@ -904,7 +904,7 @@ typedef enum {
                            @"the process goes down",
                           name, (long)axis, (long)rank, (long)rank - 1, (long)axis];
     }
-    MPSGraphOperation *operation = [self charon_mps_addOperationOfKind:CharonMPSGraphOperationKindCoordinates
+    MPSGraphOperation *operation = [self revenant_mps_addOperationOfKind:RevenantMPSGraphOperationKindCoordinates
                                                                  name:name
                                                                 inputs:@[]
                                                                outputs:@[]
@@ -913,13 +913,13 @@ typedef enum {
                                                                           @"dataType": @(MPSDataTypeInt32)}];
     MPSGraphTensor *result = [[MPSGraphTensor alloc] initWithShape:own dataType:MPSDataTypeInt32
                                                           operation:operation index:0];
-    [operation charon_mps_setOutputTensors:@[result]];
+    [operation revenant_mps_setOutputTensors:@[result]];
     return result;
 }
 
 #pragma mark - the space-to-depth family: four operations of 15.0 and 16.1 that are ONE chain of walks
 
-- (MPSGraphTensor *)charon_mps_blockShuffle:(MPSGraphTensor *)tensor
+- (MPSGraphTensor *)revenant_mps_blockShuffle:(MPSGraphTensor *)tensor
                                      spatial:(NSArray<NSNumber *> *)spatial
                                        batch:(NSInteger)batch
                                        block:(NSArray<NSNumber *> *)block
@@ -927,7 +927,7 @@ typedef enum {
                                      shuffle:(BOOL)shuffle
                                          name:(NSString *)name
 {
-    NSDictionary *plan = [self charon_mps_blockShufflePlan:name
+    NSDictionary *plan = [self revenant_mps_blockShufflePlan:name
                                                    ofShape:tensor.shape
                                                    spatial:spatial
                                                      batch:batch
@@ -939,7 +939,7 @@ typedef enum {
     return [self reshapeTensor:moved withShape:plan[@"resultShape"] name:name];
 }
 
-- (MPSGraphTensor *)charon_mps_fedBlockShuffle:(MPSGraphTensor *)tensor
+- (MPSGraphTensor *)revenant_mps_fedBlockShuffle:(MPSGraphTensor *)tensor
                                        spatial:(MPSGraphTensor *)spatial
                                          batch:(MPSGraphTensor *)batch
                                          block:(MPSGraphTensor *)block
@@ -947,9 +947,9 @@ typedef enum {
                                        shuffle:(BOOL)shuffle
                                            name:(NSString *)name
 {
-    NSArray<NSNumber *> *axes = [self charon_mps_constantShapeOfTensor:spatial];
-    NSArray<NSNumber *> *where = [self charon_mps_constantShapeOfTensor:batch];
-    NSArray<NSNumber *> *sizes = [self charon_mps_constantShapeOfTensor:block];
+    NSArray<NSNumber *> *axes = [self revenant_mps_constantShapeOfTensor:spatial];
+    NSArray<NSNumber *> *where = [self revenant_mps_constantShapeOfTensor:batch];
+    NSArray<NSNumber *> *sizes = [self revenant_mps_constantShapeOfTensor:block];
     if (axes == nil || where == nil || sizes == nil) {
         MPSGraphTensor *fed = axes == nil ? spatial : (where == nil ? batch : block);
         MPSDataType type = fed.dataType;
@@ -961,7 +961,7 @@ typedef enum {
                                @"space_to_batch' op operand #%lu must be 0D tensor of mps index type values\"",
                               name, (unsigned)type, (unsigned long)(fed == spatial ? 1 : (fed == batch ? 2 : 3))];
         }
-        return [self charon_mps_operation:CharonMPSGraphOperationKindBlockShuffle
+        return [self revenant_mps_operation:RevenantMPSGraphOperationKindBlockShuffle
                                       inputs:@[tensor, spatial, batch, block]
                                   parameters:@{@"blockShuffle": @YES,
                                                @"blockShuffleGeneral": @YES,
@@ -976,7 +976,7 @@ typedef enum {
                            @"them: measured, the release takes it as a 0D tensor or one of shape [1]", name,
                   (unsigned long)where.count];
     }
-    return [self charon_mps_blockShuffle:tensor
+    return [self revenant_mps_blockShuffle:tensor
                                   spatial:axes
                                     batch:where.firstObject.integerValue
                                     block:sizes
@@ -986,21 +986,21 @@ typedef enum {
 }
 
 #pragma mark - the gather family: the one seam every release's shape factory goes through
-- (MPSGraphTensor *)charon_mps_gather:(CharonMPSGraphOperationKind)kind
+- (MPSGraphTensor *)revenant_mps_gather:(RevenantMPSGraphOperationKind)kind
                                 tensor:(MPSGraphTensor *)tensor
                            parameters:(NSDictionary *)parameters
                                   name:(NSString *)name
 {
-    MPSGraphTensor *result = [self charon_mps_operation:kind inputs:@[tensor] parameters:parameters name:name];
-    NSArray<NSNumber *> *shape = [self charon_mps_gatherShapeOfTensor:tensor
+    MPSGraphTensor *result = [self revenant_mps_operation:kind inputs:@[tensor] parameters:parameters name:name];
+    NSArray<NSNumber *> *shape = [self revenant_mps_gatherShapeOfTensor:tensor
                                                           parameters:parameters
                                                                  named:name];
     if (shape != nil)
-        [result charon_mps_setShape:shape];
+        [result revenant_mps_setShape:shape];
     return result;
 }
 
-static NSUInteger CharonMPSGraphFedAxisCount(NSArray<NSNumber *> *fedShape)
+static NSUInteger RevenantMPSGraphFedAxisCount(NSArray<NSNumber *> *fedShape)
 {
     if (fedShape.count != 1)
         return 0;
@@ -1008,12 +1008,12 @@ static NSUInteger CharonMPSGraphFedAxisCount(NSArray<NSNumber *> *fedShape)
     return named > 0 ? (NSUInteger)named : 0;
 }
 
-static NSArray<NSNumber *> *CharonMPSGraphFedGatherResultShape(NSString *gather, NSArray<NSNumber *> *operandShape,
+static NSArray<NSNumber *> *RevenantMPSGraphFedGatherResultShape(NSString *gather, NSArray<NSNumber *> *operandShape,
                                                                NSArray<NSNumber *> *fedShape)
 {
     if ([gather isEqualToString:@"flatten"])
         return @[@(-1), @(-1)];
-    NSUInteger named = CharonMPSGraphFedAxisCount(fedShape);
+    NSUInteger named = RevenantMPSGraphFedAxisCount(fedShape);
     if ([gather isEqualToString:@"squeeze"]) {
         if (named == 0)
             return nil;
@@ -1034,7 +1034,7 @@ static NSArray<NSNumber *> *CharonMPSGraphFedGatherResultShape(NSString *gather,
     return operandShape;
 }
 
-- (MPSGraphTensor *)charon_mps_gather:(CharonMPSGraphOperationKind)kind
+- (MPSGraphTensor *)revenant_mps_gather:(RevenantMPSGraphOperationKind)kind
                                 tensor:(MPSGraphTensor *)tensor
                          fedParameter:(MPSGraphTensor *)fedParameter
                            parameters:(NSDictionary *)parameters
@@ -1048,9 +1048,9 @@ static NSArray<NSNumber *> *CharonMPSGraphFedGatherResultShape(NSString *gather,
                            @"compiler refuses a floating point operand and the process goes down with it",
                             name, (unsigned)type];
     }
-    MPSGraphTensor *result = [self charon_mps_operation:kind inputs:@[tensor, fedParameter]
+    MPSGraphTensor *result = [self revenant_mps_operation:kind inputs:@[tensor, fedParameter]
                                              parameters:parameters name:name];
-    [result charon_mps_setShape:CharonMPSGraphFedGatherResultShape(parameters[@"gather"], tensor.shape,
+    [result revenant_mps_setShape:RevenantMPSGraphFedGatherResultShape(parameters[@"gather"], tensor.shape,
                                                                    fedParameter.shape)];
     return result;
 }
@@ -1061,7 +1061,7 @@ static NSArray<NSNumber *> *CharonMPSGraphFedGatherResultShape(NSString *gather,
                 withMultiplier:(NSArray<NSNumber *> *)multiplier
                           name:(NSString *)name
 {
-    return [self charon_mps_slice:CharonMPSGraphOperationKindSlice
+    return [self revenant_mps_slice:RevenantMPSGraphOperationKindSlice
                           inputs:@[tensor]
                       parameters:@{@"gather": @"tile", @"tileMultiplier": multiplier ?: @[]}
                              name:name];
@@ -1144,12 +1144,12 @@ static NSArray<NSNumber *> *CharonMPSGraphFedGatherResultShape(NSString *gather,
                 [padLeft addObject:onAxis ? @(shift) : @0];
                 [padRight addObject:@0];
             }
-            MPSGraphTensor *term = [self charon_mps_slice:CharonMPSGraphOperationKindSlice
+            MPSGraphTensor *term = [self revenant_mps_slice:RevenantMPSGraphOperationKindSlice
                                                    inputs:@[incomingGradientTensor]
                                                parameters:@{@"gather": @"slice", @"sliceStarts": starts,
                                                             @"sliceEnds": ends, @"sliceStrides": strides}
                                                       name:name];
-            term = [self charon_mps_slice:CharonMPSGraphOperationKindSlice
+            term = [self revenant_mps_slice:RevenantMPSGraphOperationKindSlice
                                   inputs:@[term]
                               parameters:@{@"gather": @"pad", @"padMode": @(MPSGraphPaddingModeZero),
                                            @"padLeft": padLeft, @"padRight": padRight, @"padConstant": @0}
@@ -1176,7 +1176,7 @@ static NSArray<NSNumber *> *CharonMPSGraphFedGatherResultShape(NSString *gather,
                            @"periodic modes with its own words, \"Unsupported paddingMode\", after it has "
                            @"built the result tensor", name, (long)paddingMode];
     }
-    return [self charon_mps_slice:CharonMPSGraphOperationKindSlice
+    return [self revenant_mps_slice:RevenantMPSGraphOperationKindSlice
                           inputs:@[tensor]
                       parameters:@{@"gather": @"pad", @"padMode": @(paddingMode),
                                    @"padLeft": leftPadding ?: @[], @"padRight": rightPadding ?: @[],
@@ -1199,7 +1199,7 @@ static NSArray<NSNumber *> *CharonMPSGraphFedGatherResultShape(NSString *gather,
     NSMutableArray<NSNumber *> *behind = [NSMutableArray arrayWithCapacity:leftPadding.count];
     for (NSNumber *before in leftPadding)
         [behind addObject:@(-before.integerValue)];
-    return [self charon_mps_slice:CharonMPSGraphOperationKindSlice
+    return [self revenant_mps_slice:RevenantMPSGraphOperationKindSlice
                           inputs:@[incomingGradientTensor, sourceTensor]
                       parameters:@{@"gather": @"scatter", @"shape": sourceTensor.shape,
                                    @"offsets": behind, @"strides": oneEach}
@@ -1208,29 +1208,29 @@ static NSArray<NSNumber *> *CharonMPSGraphFedGatherResultShape(NSString *gather,
 
 #pragma mark - the slice family: the one seam its three directions go through
 
-- (MPSGraphTensor *)charon_mps_slice:(CharonMPSGraphOperationKind)kind
+- (MPSGraphTensor *)revenant_mps_slice:(RevenantMPSGraphOperationKind)kind
                                inputs:(NSArray<MPSGraphTensor *> *)inputs
                            parameters:(NSDictionary *)parameters
                                   name:(NSString *)name
 {
-    MPSGraphTensor *result = [self charon_mps_operation:kind inputs:inputs parameters:parameters name:name];
-    NSArray<NSNumber *> *shape = [self charon_mps_gatherShapeOfTensor:inputs.firstObject
+    MPSGraphTensor *result = [self revenant_mps_operation:kind inputs:inputs parameters:parameters name:name];
+    NSArray<NSNumber *> *shape = [self revenant_mps_gatherShapeOfTensor:inputs.firstObject
                                                           parameters:parameters
                                                                  named:name];
     if (shape != nil) {
-        [result charon_mps_setShape:shape];
+        [result revenant_mps_setShape:shape];
     } else if ([parameters[@"gather"] isEqualToString:@"sliceGradient"] && parameters[@"sliceForwardShape"] == nil) {
-        [result charon_mps_setShape:nil];
+        [result revenant_mps_setShape:nil];
     }
     return result;
 }
 
-- (NSArray<NSNumber *> *)charon_mps_constantShapeOfTensor:(MPSGraphTensor *)tensor
+- (NSArray<NSNumber *> *)revenant_mps_constantShapeOfTensor:(MPSGraphTensor *)tensor
 {
     MPSGraphOperation *operation = tensor.operation;
-    if (operation == nil || [operation charon_mps_kind] != CharonMPSGraphOperationKindConstant)
+    if (operation == nil || [operation revenant_mps_kind] != RevenantMPSGraphOperationKindConstant)
         return nil;
-    NSData *bytes = [operation charon_mps_parameters][@"values"];
+    NSData *bytes = [operation revenant_mps_parameters][@"values"];
     if (bytes == nil)
         return nil;
     NSUInteger width = MPSSizeofMPSDataType(tensor.dataType);
@@ -1248,7 +1248,7 @@ static NSArray<NSNumber *> *CharonMPSGraphFedGatherResultShape(NSString *gather,
 
 #pragma mark - the cumulative family, whose seam every release's scan factory goes through
 
-- (NSInteger)charon_mps_scanAxis:(NSInteger)axis ofRank:(NSUInteger)rank named:(NSString *)name
+- (NSInteger)revenant_mps_scanAxis:(NSInteger)axis ofRank:(NSUInteger)rank named:(NSString *)name
 {
     NSInteger normalised = axis;
     if (normalised < 0)
@@ -1262,7 +1262,7 @@ static NSArray<NSNumber *> *CharonMPSGraphFedGatherResultShape(NSString *gather,
     return normalised;
 }
 
-- (MPSGraphTensor *)charon_mps_scan:(CharonMPSGraphOperationKind)kind
+- (MPSGraphTensor *)revenant_mps_scan:(RevenantMPSGraphOperationKind)kind
                                axis:(NSInteger)axis
                              tensor:(MPSGraphTensor *)tensor
                         combination:(NSString *)combination
@@ -1271,15 +1271,15 @@ static NSArray<NSNumber *> *CharonMPSGraphFedGatherResultShape(NSString *gather,
                                 name:(NSString *)name
 {
     NSUInteger rank = tensor.shape.count;
-    NSInteger normalised = [self charon_mps_scanAxis:axis ofRank:rank named:name];
-    return [self charon_mps_operation:kind
+    NSInteger normalised = [self revenant_mps_scanAxis:axis ofRank:rank named:name];
+    return [self revenant_mps_operation:kind
                                inputs:@[tensor]
                            parameters:@{@"scanCombination": combination, @"scanAxis": @(normalised),
                                         @"scanExclusive": @(exclusive), @"scanReverse": @(reverse)}
                                   name:name];
 }
 
-- (MPSGraphTensor *)charon_mps_scan:(CharonMPSGraphOperationKind)kind
+- (MPSGraphTensor *)revenant_mps_scan:(RevenantMPSGraphOperationKind)kind
                          axisTensor:(MPSGraphTensor *)axisTensor
                              tensor:(MPSGraphTensor *)tensor
                         combination:(NSString *)combination
@@ -1298,7 +1298,7 @@ static NSArray<NSNumber *> *CharonMPSGraphFedGatherResultShape(NSString *gather,
                            @"or ... shape equal to [1]) and the process goes down with it",
                             name, (unsigned)axisType];
     }
-    return [self charon_mps_operation:kind
+    return [self revenant_mps_operation:kind
                                inputs:@[tensor, axisTensor]
                            parameters:@{@"scanCombination": combination, @"scanAxisTensor": @YES,
                                         @"scanExclusive": @(exclusive), @"scanReverse": @(reverse)}
@@ -1309,112 +1309,112 @@ static NSArray<NSNumber *> *CharonMPSGraphFedGatherResultShape(NSString *gather,
                                        axis:(NSInteger)axis
                                        name:(NSString *)name
 {
-    return [self charon_mps_reductionOf:@[@(axis)] tensor:tensor combination:@"sum"
-                                    kind:CharonMPSGraphOperationKindReductionSum propagatesNaN:NO name:name];
+    return [self revenant_mps_reductionOf:@[@(axis)] tensor:tensor combination:@"sum"
+                                    kind:RevenantMPSGraphOperationKindReductionSum propagatesNaN:NO name:name];
 }
 
 - (MPSGraphTensor *)reductionSumWithTensor:(MPSGraphTensor *)tensor
                                        axes:(NSArray<NSNumber *> *)axes
                                        name:(NSString *)name
 {
-    return [self charon_mps_reductionOf:axes tensor:tensor combination:@"sum"
-                                    kind:CharonMPSGraphOperationKindReductionSum propagatesNaN:NO name:name];
+    return [self revenant_mps_reductionOf:axes tensor:tensor combination:@"sum"
+                                    kind:RevenantMPSGraphOperationKindReductionSum propagatesNaN:NO name:name];
 }
 
 - (MPSGraphTensor *)reductionProductWithTensor:(MPSGraphTensor *)tensor
                                           axis:(NSInteger)axis
                                           name:(NSString *)name
 {
-    return [self charon_mps_reductionOf:@[@(axis)] tensor:tensor combination:@"product"
-                                    kind:CharonMPSGraphOperationKindReductionProduct propagatesNaN:NO name:name];
+    return [self revenant_mps_reductionOf:@[@(axis)] tensor:tensor combination:@"product"
+                                    kind:RevenantMPSGraphOperationKindReductionProduct propagatesNaN:NO name:name];
 }
 
 - (MPSGraphTensor *)reductionProductWithTensor:(MPSGraphTensor *)tensor
                                           axes:(NSArray<NSNumber *> *)axes
                                           name:(NSString *)name
 {
-    return [self charon_mps_reductionOf:axes tensor:tensor combination:@"product"
-                                    kind:CharonMPSGraphOperationKindReductionProduct propagatesNaN:NO name:name];
+    return [self revenant_mps_reductionOf:axes tensor:tensor combination:@"product"
+                                    kind:RevenantMPSGraphOperationKindReductionProduct propagatesNaN:NO name:name];
 }
 
 - (MPSGraphTensor *)reductionMaximumWithTensor:(MPSGraphTensor *)tensor
                                           axis:(NSInteger)axis
                                           name:(NSString *)name
 {
-    return [self charon_mps_reductionOf:@[@(axis)] tensor:tensor combination:@"maximum"
-                                    kind:CharonMPSGraphOperationKindReductionMaximum propagatesNaN:NO name:name];
+    return [self revenant_mps_reductionOf:@[@(axis)] tensor:tensor combination:@"maximum"
+                                    kind:RevenantMPSGraphOperationKindReductionMaximum propagatesNaN:NO name:name];
 }
 
 - (MPSGraphTensor *)reductionMaximumWithTensor:(MPSGraphTensor *)tensor
                                           axes:(NSArray<NSNumber *> *)axes
                                           name:(NSString *)name
 {
-    return [self charon_mps_reductionOf:axes tensor:tensor combination:@"maximum"
-                                    kind:CharonMPSGraphOperationKindReductionMaximum propagatesNaN:NO name:name];
+    return [self revenant_mps_reductionOf:axes tensor:tensor combination:@"maximum"
+                                    kind:RevenantMPSGraphOperationKindReductionMaximum propagatesNaN:NO name:name];
 }
 
 - (MPSGraphTensor *)reductionMinimumWithTensor:(MPSGraphTensor *)tensor
                                           axis:(NSInteger)axis
                                           name:(NSString *)name
 {
-    return [self charon_mps_reductionOf:@[@(axis)] tensor:tensor combination:@"minimum"
-                                    kind:CharonMPSGraphOperationKindReductionMinimum propagatesNaN:NO name:name];
+    return [self revenant_mps_reductionOf:@[@(axis)] tensor:tensor combination:@"minimum"
+                                    kind:RevenantMPSGraphOperationKindReductionMinimum propagatesNaN:NO name:name];
 }
 
 - (MPSGraphTensor *)reductionMinimumWithTensor:(MPSGraphTensor *)tensor
                                           axes:(NSArray<NSNumber *> *)axes
                                           name:(NSString *)name
 {
-    return [self charon_mps_reductionOf:axes tensor:tensor combination:@"minimum"
-                                    kind:CharonMPSGraphOperationKindReductionMinimum propagatesNaN:NO name:name];
+    return [self revenant_mps_reductionOf:axes tensor:tensor combination:@"minimum"
+                                    kind:RevenantMPSGraphOperationKindReductionMinimum propagatesNaN:NO name:name];
 }
 
 - (MPSGraphTensor *)reductionMaximumPropagateNaNWithTensor:(MPSGraphTensor *)tensor
                                                      axis:(NSInteger)axis
                                                      name:(NSString *)name
 {
-    return [self charon_mps_reductionOf:@[@(axis)] tensor:tensor combination:@"maximum"
-                                    kind:CharonMPSGraphOperationKindReductionMaximumPropagateNaN propagatesNaN:YES name:name];
+    return [self revenant_mps_reductionOf:@[@(axis)] tensor:tensor combination:@"maximum"
+                                    kind:RevenantMPSGraphOperationKindReductionMaximumPropagateNaN propagatesNaN:YES name:name];
 }
 
 - (MPSGraphTensor *)reductionMaximumPropagateNaNWithTensor:(MPSGraphTensor *)tensor
                                                      axes:(NSArray<NSNumber *> *)axes
                                                      name:(NSString *)name
 {
-    return [self charon_mps_reductionOf:axes tensor:tensor combination:@"maximum"
-                                    kind:CharonMPSGraphOperationKindReductionMaximumPropagateNaN propagatesNaN:YES name:name];
+    return [self revenant_mps_reductionOf:axes tensor:tensor combination:@"maximum"
+                                    kind:RevenantMPSGraphOperationKindReductionMaximumPropagateNaN propagatesNaN:YES name:name];
 }
 
 - (MPSGraphTensor *)reductionMinimumPropagateNaNWithTensor:(MPSGraphTensor *)tensor
                                                      axis:(NSInteger)axis
                                                      name:(NSString *)name
 {
-    return [self charon_mps_reductionOf:@[@(axis)] tensor:tensor combination:@"minimum"
-                                    kind:CharonMPSGraphOperationKindReductionMinimumPropagateNaN propagatesNaN:YES name:name];
+    return [self revenant_mps_reductionOf:@[@(axis)] tensor:tensor combination:@"minimum"
+                                    kind:RevenantMPSGraphOperationKindReductionMinimumPropagateNaN propagatesNaN:YES name:name];
 }
 
 - (MPSGraphTensor *)reductionMinimumPropagateNaNWithTensor:(MPSGraphTensor *)tensor
                                                      axes:(NSArray<NSNumber *> *)axes
                                                      name:(NSString *)name
 {
-    return [self charon_mps_reductionOf:axes tensor:tensor combination:@"minimum"
-                                    kind:CharonMPSGraphOperationKindReductionMinimumPropagateNaN propagatesNaN:YES name:name];
+    return [self revenant_mps_reductionOf:axes tensor:tensor combination:@"minimum"
+                                    kind:RevenantMPSGraphOperationKindReductionMinimumPropagateNaN propagatesNaN:YES name:name];
 }
 
 - (MPSGraphTensor *)meanOfTensor:(MPSGraphTensor *)tensor
                             axes:(NSArray<NSNumber *> *)axes
                             name:(NSString *)name
 {
-    return [self charon_mps_reductionOf:axes tensor:tensor combination:@"mean"
-                                    kind:CharonMPSGraphOperationKindReductionMean propagatesNaN:NO name:name];
+    return [self revenant_mps_reductionOf:axes tensor:tensor combination:@"mean"
+                                    kind:RevenantMPSGraphOperationKindReductionMean propagatesNaN:NO name:name];
 }
 
 - (MPSGraphTensor *)varianceOfTensor:(MPSGraphTensor *)tensor
                                 axes:(NSArray<NSNumber *> *)axes
                                 name:(NSString *)name
 {
-    return [self charon_mps_reductionOf:axes tensor:tensor combination:@"variance"
-                                    kind:CharonMPSGraphOperationKindReductionVariance propagatesNaN:NO name:name];
+    return [self revenant_mps_reductionOf:axes tensor:tensor combination:@"variance"
+                                    kind:RevenantMPSGraphOperationKindReductionVariance propagatesNaN:NO name:name];
 }
 
 - (MPSGraphTensor *)varianceOfTensor:(MPSGraphTensor *)tensor
@@ -1422,7 +1422,7 @@ static NSArray<NSNumber *> *CharonMPSGraphFedGatherResultShape(NSString *gather,
                                 axes:(NSArray<NSNumber *> *)axes
                                 name:(NSString *)name
 {
-    return [self charon_mps_reduction:CharonMPSGraphOperationKindReductionVariance
+    return [self revenant_mps_reduction:RevenantMPSGraphOperationKindReductionVariance
                                  axes:axes
                                tensor:tensor
                           parameters:@{@"combination": @"variance", @"propagateNaN": @NO,
@@ -1432,25 +1432,25 @@ static NSArray<NSNumber *> *CharonMPSGraphFedGatherResultShape(NSString *gather,
 
 #pragma mark - the run, async and encode forms, which are all one walk
 
-static NSDictionary *CharonMPSGraphRunForm(MPSGraph *graph, NSDictionary *feeds,
+static NSDictionary *RevenantMPSGraphRunForm(MPSGraph *graph, NSDictionary *feeds,
                                            NSArray<MPSGraphTensor *> *targets,
                                            NSArray<MPSGraphOperation *> *operations, NSDictionary *results,
                                            MPSGraphExecutionDescriptor *descriptor)
 {
-    [descriptor charon_mps_applyEventsAtStage:MPSGraphExecutionStageCompleted named:@"a graph run"];
+    [descriptor revenant_mps_applyEventsAtStage:MPSGraphExecutionStageCompleted named:@"a graph run"];
     NSArray<MPSGraphTensor *> *wanted = targets.count ? targets : (results != nil ? results.allKeys : nil);
     NSDictionary *computed = [graph runWithFeeds:feeds targetTensors:wanted targetOperations:operations];
     for (MPSGraphTensor *tensor in results.allKeys) {
         MPSGraphTensorData *destination = results[tensor];
         MPSGraphTensorData *value = computed[tensor];
         if (value == nil) {
-            CharonMPSGraphRefuse(@"MPSGraph: the result named %@ was not computed, so the entry the caller gave "
+            RevenantMPSGraphRefuse(@"MPSGraph: the result named %@ was not computed, so the entry the caller gave "
                                  @"it in is left as it was", tensor.operation.name);
             continue;
         }
-        CharonMPSGraphWriteInto(tensor, value, destination);
+        RevenantMPSGraphWriteInto(tensor, value, destination);
     }
-    [descriptor charon_mps_applyEventsAtStage:MPSGraphExecutionStageCompleted named:@"a graph run"];
+    [descriptor revenant_mps_applyEventsAtStage:MPSGraphExecutionStageCompleted named:@"a graph run"];
     if (descriptor.scheduledHandler)
         descriptor.scheduledHandler(computed, nil);
     if (descriptor.completionHandler)
@@ -1464,7 +1464,7 @@ static NSDictionary *CharonMPSGraphRunForm(MPSGraph *graph, NSDictionary *feeds,
                                        targetOperations:(NSArray<MPSGraphOperation *> *)targetOperations
 {
     (void)commandQueue;
-    return CharonMPSGraphRunForm(self, feeds, targetTensors, targetOperations, nil, nil);
+    return RevenantMPSGraphRunForm(self, feeds, targetTensors, targetOperations, nil, nil);
 }
 
 - (void)runWithMTLCommandQueue:(id<MTLCommandQueue>)commandQueue
@@ -1473,7 +1473,7 @@ static NSDictionary *CharonMPSGraphRunForm(MPSGraph *graph, NSDictionary *feeds,
               resultsDictionary:(MPSGraphTensorDataDictionary *)resultsDictionary
 {
     (void)commandQueue;
-    CharonMPSGraphRunForm(self, feeds, nil, targetOperations, resultsDictionary, nil);
+    RevenantMPSGraphRunForm(self, feeds, nil, targetOperations, resultsDictionary, nil);
 }
 
 - (MPSGraphTensorDataDictionary *)runAsyncWithFeeds:(MPSGraphTensorDataDictionary *)feeds
@@ -1481,7 +1481,7 @@ static NSDictionary *CharonMPSGraphRunForm(MPSGraph *graph, NSDictionary *feeds,
                                   targetOperations:(NSArray<MPSGraphOperation *> *)targetOperations
                                  executionDescriptor:(MPSGraphExecutionDescriptor *)executionDescriptor
 {
-    return CharonMPSGraphRunForm(self, feeds, targetTensors, targetOperations, nil, executionDescriptor);
+    return RevenantMPSGraphRunForm(self, feeds, targetTensors, targetOperations, nil, executionDescriptor);
 }
 
 - (MPSGraphTensorDataDictionary *)runAsyncWithMTLCommandQueue:(id<MTLCommandQueue>)commandQueue
@@ -1491,7 +1491,7 @@ static NSDictionary *CharonMPSGraphRunForm(MPSGraph *graph, NSDictionary *feeds,
                                           executionDescriptor:(MPSGraphExecutionDescriptor *)executionDescriptor
 {
     (void)commandQueue;
-    return CharonMPSGraphRunForm(self, feeds, targetTensors, targetOperations, nil, executionDescriptor);
+    return RevenantMPSGraphRunForm(self, feeds, targetTensors, targetOperations, nil, executionDescriptor);
 }
 
 - (void)runAsyncWithMTLCommandQueue:(id<MTLCommandQueue>)commandQueue
@@ -1501,7 +1501,7 @@ static NSDictionary *CharonMPSGraphRunForm(MPSGraph *graph, NSDictionary *feeds,
                   executionDescriptor:(MPSGraphExecutionDescriptor *)executionDescriptor
 {
     (void)commandQueue;
-    CharonMPSGraphRunForm(self, feeds, nil, targetOperations, resultsDictionary, executionDescriptor);
+    RevenantMPSGraphRunForm(self, feeds, nil, targetOperations, resultsDictionary, executionDescriptor);
 }
 
 - (MPSGraphTensorDataDictionary *)encodeToCommandBuffer:(MPSCommandBuffer *)commandBuffer
@@ -1511,7 +1511,7 @@ static NSDictionary *CharonMPSGraphRunForm(MPSGraph *graph, NSDictionary *feeds,
                                     executionDescriptor:(MPSGraphExecutionDescriptor *)executionDescriptor
 {
     (void)commandBuffer;
-    return CharonMPSGraphRunForm(self, feeds, targetTensors, targetOperations, nil, executionDescriptor);
+    return RevenantMPSGraphRunForm(self, feeds, targetTensors, targetOperations, nil, executionDescriptor);
 }
 
 - (void)encodeToCommandBuffer:(MPSCommandBuffer *)commandBuffer
@@ -1521,7 +1521,7 @@ static NSDictionary *CharonMPSGraphRunForm(MPSGraph *graph, NSDictionary *feeds,
             executionDescriptor:(MPSGraphExecutionDescriptor *)executionDescriptor
 {
     (void)commandBuffer;
-    CharonMPSGraphRunForm(self, feeds, nil, targetOperations, resultsDictionary, executionDescriptor);
+    RevenantMPSGraphRunForm(self, feeds, nil, targetOperations, resultsDictionary, executionDescriptor);
 }
 
 #pragma mark - running it
@@ -1534,7 +1534,7 @@ static NSDictionary *CharonMPSGraphRunForm(MPSGraph *graph, NSDictionary *feeds,
     for (MPSGraphTensor *tensor in feeds)
         values[tensor] = feeds[tensor];
     for (MPSGraphOperation *operation in _operations) {
-        [self charon_mps_runOperation:operation values:values];
+        [self revenant_mps_runOperation:operation values:values];
     }
     (void)targetOperations;
     NSMutableDictionary *results = [NSMutableDictionary dictionary];

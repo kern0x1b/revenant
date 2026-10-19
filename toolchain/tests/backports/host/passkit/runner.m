@@ -36,7 +36,7 @@ static NSString *shape(NSError *error)
     return [NSString stringWithFormat:@"%@/%ld", [error domain], (long)[error code]];
 }
 
-#define PORT_CLASS(name) NSClassFromString([@"charonHost_" stringByAppendingString:(name)])
+#define PORT_CLASS(name) NSClassFromString([@"revenantHost_" stringByAppendingString:(name)])
 #define PORT_LIB_CLASS(name) PORT_CLASS(name)
 
 static id portLib(void)
@@ -64,7 +64,7 @@ int main(void)
 {
     @autoreleasepool {
         setbuf(stdout, NULL);
-        const char *dylib = getenv("CHARON_PORT_DYLIB");
+        const char *dylib = getenv("REVENANT_PORT_DYLIB");
         if (dylib) {
             dlopen(dylib, RTLD_LOCAL);
         }

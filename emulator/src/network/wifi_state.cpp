@@ -12,7 +12,7 @@
 #include <algorithm>
 #include <utility>
 
-namespace shade {
+namespace emulator {
 namespace {
 
     std::vector<VirtualAccessPoint> default_access_points()

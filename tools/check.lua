@@ -2,20 +2,20 @@ local root = path.absolute(path.directory(os.scriptdir()))
 
 local checks = {}
 
-function checks.charon()
-    os.execv(os.programfile(), {"l", path.join(root, "charon", "tests", "light.lua")}, {curdir = path.join(root, "charon")})
+function checks.toolchain()
+    os.execv(os.programfile(), {"l", path.join(root, "toolchain", "tests", "light.lua")}, {curdir = path.join(root, "toolchain")})
 end
 
-function checks.shade()
+function checks.emulator()
     os.execv(os.programfile(), {"f", "-P", root, "-y"}, {curdir = root})
-    os.execv(os.programfile(), {"build", "-P", root, "shade"}, {curdir = root})
-    os.execv(os.programfile(), {"test", "-P", root, "shade_*/*"}, {curdir = root})
+    os.execv(os.programfile(), {"build", "-P", root, "emulator"}, {curdir = root})
+    os.execv(os.programfile(), {"test", "-P", root, "emulator_*/*"}, {curdir = root})
 end
 
-function checks.katabasis()
+function checks.recompiler()
     os.execv(os.programfile(), {"f", "-P", root, "-y"}, {curdir = root})
     os.execv(os.programfile(), {"build", "-P", root, "xlate", "xlgen"}, {curdir = root})
-    os.execv(os.programfile(), {"test", "-P", root, "katabasis_corpus/*"}, {curdir = root})
+    os.execv(os.programfile(), {"test", "-P", root, "recompiler_corpus/*"}, {curdir = root})
 end
 
 function checks.comments()

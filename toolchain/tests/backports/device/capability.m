@@ -24,7 +24,7 @@ static BOOL survives(void (^block)(void))
 {
     [[NSFileManager defaultManager] createDirectoryAtPath:results_folder withIntermediateDirectories:YES attributes:nil error:NULL];
     [[NSFileManager defaultManager] removeItemAtPath:[results_folder stringByAppendingPathComponent:@"capability.done"] error:NULL];
-    charon_log_to([results_folder stringByAppendingPathComponent:@"capability.log"]);
+    revenant_log_to([results_folder stringByAppendingPathComponent:@"capability.log"]);
     self.window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
     self.window.rootViewController = [[UIViewController alloc] init];
     [self.window makeKeyAndVisible];
@@ -47,7 +47,7 @@ static BOOL survives(void (^block)(void))
     }), "the three feedback generators can be made, prepared and fired");
 
     CHECK(survives(^{
-        NSUserActivity *activity = [[NSUserActivity alloc] initWithActivityType:@"local.charon.test"];
+        NSUserActivity *activity = [[NSUserActivity alloc] initWithActivityType:@"local.revenant.test"];
         activity.title = @"title";
         activity.userInfo = @{@"a": @1};
         activity.eligibleForHandoff = YES;
@@ -55,7 +55,7 @@ static BOOL survives(void (^block)(void))
         [activity becomeCurrent];
         [activity resignCurrent];
         [activity invalidate];
-        CHECK_EQUAL(activity.activityType, @"local.charon.test", "a user activity keeps its type");
+        CHECK_EQUAL(activity.activityType, @"local.revenant.test", "a user activity keeps its type");
     }), "a user activity can be made, made current and ended");
 
     CHECK(survives(^{
@@ -96,8 +96,8 @@ static BOOL survives(void (^block)(void))
         (void)controller.presentationController;
     }), "a percent driven transition and the presentation controller of a view controller can be asked for");
 
-    printf("checks=%d failures=%d\n", charon_checks, charon_failures);
-    NSString *summary = [NSString stringWithFormat:@"%@ checks=%d failures=%d\n", charon_failures ? @"FAIL" : @"ok", charon_checks, charon_failures];
+    printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
+    NSString *summary = [NSString stringWithFormat:@"%@ checks=%d failures=%d\n", revenant_failures ? @"FAIL" : @"ok", revenant_checks, revenant_failures];
     [summary writeToFile:[results_folder stringByAppendingPathComponent:@"capability.done"] atomically:YES encoding:NSUTF8StringEncoding error:NULL];
 }
 

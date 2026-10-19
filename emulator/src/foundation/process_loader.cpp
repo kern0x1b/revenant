@@ -23,7 +23,7 @@
 #include <utility>
 #include <vector>
 
-namespace shade {
+namespace emulator {
 namespace {
 
     constexpr std::uint32_t stack_size = 0x00100000U;

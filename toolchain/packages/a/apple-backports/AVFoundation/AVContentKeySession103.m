@@ -1,37 +1,37 @@
-#import "CharonAVContentKey.h"
+#import "RevenantAVContentKey.h"
 #import <AVFoundation/AVContentKeySession.h>
 #import <Foundation/Foundation.h>
 #import <objc/message.h>
 
 @interface AVContentKeySession ()
-- (void)charon_failRequest:(AVContentKeyRequest *)request error:(NSError *)error;
-- (void)charon_acceptRequest:(AVContentKeyRequest *)request;
-- (void)charon_succeedRequest:(AVContentKeyRequest *)request keyData:(NSData *)keyData
+- (void)revenant_failRequest:(AVContentKeyRequest *)request error:(NSError *)error;
+- (void)revenant_acceptRequest:(AVContentKeyRequest *)request;
+- (void)revenant_succeedRequest:(AVContentKeyRequest *)request keyData:(NSData *)keyData
          initializationVector:(NSData *)initializationVector;
 @end
 
 @interface AVContentKeyRequest ()
 - (instancetype)initWithSession:(AVContentKeySession *)session identifier:(id)identifier
              initializationData:(NSData *)initializationData options:(NSDictionary<NSString *, id> *)options;
-- (void)charon_finishWithStatus:(AVContentKeyRequestStatus)status error:(NSError *)error;
+- (void)revenant_finishWithStatus:(AVContentKeyRequestStatus)status error:(NSError *)error;
 @end
 
-static BOOL CharonClearKeyVectorIsAccepted(NSUInteger length)
+static BOOL RevenantClearKeyVectorIsAccepted(NSUInteger length)
 {
     return length == 8 || length == 16;
 }
 
-static NSError *CharonClearKeyVectorError(void)
+static NSError *RevenantClearKeyVectorError(void)
 {
     return [NSError errorWithDomain:@"CoreMediaErrorDomain" code:-12160 userInfo:nil];
 }
 
-static NSError *CharonResponseRefusedError(void)
+static NSError *RevenantResponseRefusedError(void)
 {
     return [NSError errorWithDomain:@"CoreMediaErrorDomain" code:-12158 userInfo:nil];
 }
 
-static BOOL CharonIsSupportedKeySystem(NSString *keySystem)
+static BOOL RevenantIsSupportedKeySystem(NSString *keySystem)
 {
     return [keySystem isEqualToString:AVContentKeySystemClearKey] || [keySystem isEqualToString:AVContentKeySystemFairPlayStreaming]
         || [keySystem isEqualToString:AVContentKeySystemAuthorizationToken];
@@ -109,7 +109,7 @@ static BOOL CharonIsSupportedKeySystem(NSString *keySystem)
     return nil;
 }
 
-- (void)charon_finishWithStatus:(AVContentKeyRequestStatus)status error:(NSError *)error
+- (void)revenant_finishWithStatus:(AVContentKeyRequestStatus)status error:(NSError *)error
 {
     _status = status;
     _error = error;
@@ -120,34 +120,34 @@ static BOOL CharonIsSupportedKeySystem(NSString *keySystem)
     if (_status != AVContentKeyRequestStatusRequestingResponse) return;
     AVContentKeySession *session = _session;
     if ([_keySystem isEqualToString:AVContentKeySystemFairPlayStreaming]) {
-        [session charon_failRequest:self error:CharonResponseRefusedError()];
+        [session revenant_failRequest:self error:RevenantResponseRefusedError()];
         return;
     }
     if ([_keySystem isEqualToString:AVContentKeySystemClearKey]) {
-        if (response.charonKind != CharonContentKeyResponseKindClearKey) {
-            [session charon_failRequest:self error:CharonResponseRefusedError()];
+        if (response.revenantKind != RevenantContentKeyResponseKindClearKey) {
+            [session revenant_failRequest:self error:RevenantResponseRefusedError()];
             return;
         }
-        NSUInteger vectorLength = response.charonInitializationVector.length;
-        if (!CharonClearKeyVectorIsAccepted(vectorLength)) {
-            [session charon_failRequest:self error:CharonClearKeyVectorError()];
+        NSUInteger vectorLength = response.revenantInitializationVector.length;
+        if (!RevenantClearKeyVectorIsAccepted(vectorLength)) {
+            [session revenant_failRequest:self error:RevenantClearKeyVectorError()];
             return;
         }
-        [session charon_succeedRequest:self keyData:response.charonKeyData
-                  initializationVector:response.charonInitializationVector];
+        [session revenant_succeedRequest:self keyData:response.revenantKeyData
+                  initializationVector:response.revenantInitializationVector];
         return;
     }
-    if (response.charonKind != CharonContentKeyResponseKindAuthorizationToken) {
-        [session charon_failRequest:self error:CharonResponseRefusedError()];
+    if (response.revenantKind != RevenantContentKeyResponseKindAuthorizationToken) {
+        [session revenant_failRequest:self error:RevenantResponseRefusedError()];
         return;
     }
-    [session charon_acceptRequest:self];
+    [session revenant_acceptRequest:self];
 }
 
 - (void)processContentKeyResponseError:(NSError *)error
 {
     if (_status != AVContentKeyRequestStatusRequestingResponse) return;
-    [_session charon_failRequest:self error:error];
+    [_session revenant_failRequest:self error:error];
 }
 
 - (void)makeStreamingContentKeyRequestDataForApp:(NSData *)appIdentifier contentIdentifier:(NSData *)contentIdentifier
@@ -190,9 +190,9 @@ static BOOL CharonIsSupportedKeySystem(NSString *keySystem)
     NSData *_protectionSessionIdentifier;
 }
 
-+ (instancetype)charon_sessionWithKeySystem:(AVContentKeySystem)keySystem storageURL:(NSURL *)storageURL
++ (instancetype)revenant_sessionWithKeySystem:(AVContentKeySystem)keySystem storageURL:(NSURL *)storageURL
 {
-    if (!CharonIsSupportedKeySystem(keySystem)) {
+    if (!RevenantIsSupportedKeySystem(keySystem)) {
         [NSException raise:NSInvalidArgumentException format:@"*** -[AVContentKeySession initWithKeySystem:storageDirectoryAtURL:legacyWebKitCompatibilityMode:] input keySystem is not supported"];
     }
     if (storageURL && ![keySystem isEqualToString:AVContentKeySystemFairPlayStreaming]) {
@@ -210,12 +210,12 @@ static BOOL CharonIsSupportedKeySystem(NSString *keySystem)
 
 + (instancetype)contentKeySessionWithKeySystem:(AVContentKeySystem)keySystem
 {
-    return [self charon_sessionWithKeySystem:keySystem storageURL:nil];
+    return [self revenant_sessionWithKeySystem:keySystem storageURL:nil];
 }
 
 + (instancetype)contentKeySessionWithKeySystem:(AVContentKeySystem)keySystem storageDirectoryAtURL:(NSURL *)storageURL
 {
-    return [self charon_sessionWithKeySystem:keySystem storageURL:storageURL];
+    return [self revenant_sessionWithKeySystem:keySystem storageURL:storageURL];
 }
 
 - (AVContentKeySystem)keySystem
@@ -280,9 +280,9 @@ static BOOL CharonIsSupportedKeySystem(NSString *keySystem)
     });
 }
 
-- (void)charon_failRequest:(AVContentKeyRequest *)request error:(NSError *)error
+- (void)revenant_failRequest:(AVContentKeyRequest *)request error:(NSError *)error
 {
-    [request charon_finishWithStatus:AVContentKeyRequestStatusFailed error:error];
+    [request revenant_finishWithStatus:AVContentKeyRequestStatusFailed error:error];
     id<AVContentKeySessionDelegate> delegate = _delegate;
     dispatch_async(_delegateQueue ?: dispatch_get_main_queue(), ^{
         if ([delegate respondsToSelector:@selector(contentKeySession:contentKeyRequest:didFailWithError:)]) {
@@ -291,9 +291,9 @@ static BOOL CharonIsSupportedKeySystem(NSString *keySystem)
     });
 }
 
-- (void)charon_acceptRequest:(AVContentKeyRequest *)request
+- (void)revenant_acceptRequest:(AVContentKeyRequest *)request
 {
-    [request charon_finishWithStatus:AVContentKeyRequestStatusReceivedResponse error:nil];
+    [request revenant_finishWithStatus:AVContentKeyRequestStatusReceivedResponse error:nil];
     id<AVContentKeySessionDelegate> delegate = _delegate;
     dispatch_async(_delegateQueue ?: dispatch_get_main_queue(), ^{
         if ([delegate respondsToSelector:@selector(contentKeySession:contentKeyRequestDidSucceed:)]) {
@@ -302,11 +302,11 @@ static BOOL CharonIsSupportedKeySystem(NSString *keySystem)
     });
 }
 
-- (void)charon_succeedRequest:(AVContentKeyRequest *)request keyData:(NSData *)keyData
+- (void)revenant_succeedRequest:(AVContentKeyRequest *)request keyData:(NSData *)keyData
          initializationVector:(NSData *)initializationVector
 {
-    [request charon_finishWithStatus:AVContentKeyRequestStatusReceivedResponse error:nil];
-    AVContentKey *key = [AVContentKey charon_contentKeyWithSpecifier:request.contentKeySpecifier keyData:keyData
+    [request revenant_finishWithStatus:AVContentKeyRequestStatusReceivedResponse error:nil];
+    AVContentKey *key = [AVContentKey revenant_contentKeyWithSpecifier:request.contentKeySpecifier keyData:keyData
                                                 initializationVector:initializationVector];
     id<AVContentKeySessionDelegate> delegate = _delegate;
     NSArray *recipients = [_recipients copy];

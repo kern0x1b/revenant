@@ -1,14 +1,14 @@
-#import "CharonContacts.h"
+#import "RevenantContacts.h"
 
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 
-@implementation CharonContactsKeyDescriptor
+@implementation RevenantContactsKeyDescriptor
 
 @synthesize keys = _keys;
 
 + (instancetype)descriptorWithKeys:(NSArray<NSString *> *)keys
 {
-    CharonContactsKeyDescriptor *descriptor = [[CharonContactsKeyDescriptor alloc] init];
+    RevenantContactsKeyDescriptor *descriptor = [[RevenantContactsKeyDescriptor alloc] init];
     descriptor->_keys = [keys copy];
     return descriptor;
 }
@@ -38,7 +38,7 @@
 
 @end
 
-@implementation CharonContacts
+@implementation RevenantContacts
 
 + (NSDictionary<NSString *, NSNumber *> *)properties
 {

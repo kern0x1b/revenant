@@ -18,7 +18,7 @@
 #include <optional>
 #include <vector>
 
-namespace shade::mach_vm_support {
+namespace emulator::mach_vm_support {
 
 class MachVmWireFormat {
 public:

@@ -21,15 +21,15 @@ here=$(cd "$(dirname "$0")" && pwd)
 root=$(cd "$here/../../../.." && pwd)
 AVFAUDIO="$root/packages/a/apple-backports/AVFAudio"
 AVFOUNDATION=${AVFILE_FOUNDATION:-$root/packages/a/apple-backports/AVFoundation}
-build=${AVFILE_BUILD:-$(runs_folder charon-avfaudio-file)}
+build=${AVFILE_BUILD:-$(runs_folder revenant-avfaudio-file)}
 rm -rf "$build"
 mkdir -p "$build/host-scratch" "$build/port-scratch"
 
 # Every class the port's AVAudioFile and the formats and buffers it holds define, renamed.
-renames="-DAVAudioFile=charon_host_AVAudioFile
--DAVAudioFormat=charon_host_AVAudioFormat
--DAVAudioPCMBuffer=charon_host_AVAudioPCMBuffer
--DCharonAudioBuffer=charon_host_CharonAudioBuffer"
+renames="-DAVAudioFile=revenant_host_AVAudioFile
+-DAVAudioFormat=revenant_host_AVAudioFormat
+-DAVAudioPCMBuffer=revenant_host_AVAudioPCMBuffer
+-DRevenantAudioBuffer=revenant_host_RevenantAudioBuffer"
 
 # The host half: Apple's classes, no renames.
 xcrun clang -fobjc-arc -Wall -Wno-deprecated-declarations "$here/probe.m" \

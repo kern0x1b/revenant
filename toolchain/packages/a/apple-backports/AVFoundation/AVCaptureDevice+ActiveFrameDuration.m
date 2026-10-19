@@ -1,14 +1,14 @@
-#import "CharonAVCapture.h"
+#import "RevenantAVCapture.h"
 #import <objc/runtime.h>
 
-@interface AVCaptureDevice (CharonReleaseLock)
+@interface AVCaptureDevice (RevenantReleaseLock)
 - (BOOL)isLockedForConfiguration;
 @end
 
-static const char CharonActiveMinFrameDurationKey;
-static const char CharonActiveMaxFrameDurationKey;
+static const char RevenantActiveMinFrameDurationKey;
+static const char RevenantActiveMaxFrameDurationKey;
 
-static CMTime charon_default_min_frame_duration(AVCaptureDevice *device)
+static CMTime revenant_default_min_frame_duration(AVCaptureDevice *device)
 {
     CMTime shortest = kCMTimeInvalid;
     for (AVFrameRateRange *range in device.activeFormat.videoSupportedFrameRateRanges) {
@@ -18,7 +18,7 @@ static CMTime charon_default_min_frame_duration(AVCaptureDevice *device)
     return shortest;
 }
 
-static CMTime charon_default_max_frame_duration(AVCaptureDevice *device)
+static CMTime revenant_default_max_frame_duration(AVCaptureDevice *device)
 {
     CMTime longest = kCMTimeInvalid;
     for (AVFrameRateRange *range in device.activeFormat.videoSupportedFrameRateRanges) {
@@ -28,7 +28,7 @@ static CMTime charon_default_max_frame_duration(AVCaptureDevice *device)
     return longest;
 }
 
-static void charon_apply_frame_durations(AVCaptureSession *session)
+static void revenant_apply_frame_durations(AVCaptureSession *session)
 {
     for (AVCaptureOutput *output in session.outputs) {
         for (AVCaptureConnection *connection in output.connections) {
@@ -36,8 +36,8 @@ static void charon_apply_frame_durations(AVCaptureSession *session)
             if (![port.mediaType isEqualToString:AVMediaTypeVideo] || ![port.input isKindOfClass:[AVCaptureDeviceInput class]])
                 continue;
             AVCaptureDevice *device = ((AVCaptureDeviceInput *)port.input).device;
-            NSValue *min = objc_getAssociatedObject(device, &CharonActiveMinFrameDurationKey);
-            NSValue *max = objc_getAssociatedObject(device, &CharonActiveMaxFrameDurationKey);
+            NSValue *min = objc_getAssociatedObject(device, &RevenantActiveMinFrameDurationKey);
+            NSValue *max = objc_getAssociatedObject(device, &RevenantActiveMaxFrameDurationKey);
             if (min && connection.isVideoMinFrameDurationSupported)
                 connection.videoMinFrameDuration = min.CMTimeValue;
             if (max && connection.isVideoMaxFrameDurationSupported)
@@ -46,26 +46,26 @@ static void charon_apply_frame_durations(AVCaptureSession *session)
     }
 }
 
-@interface CharonActiveFrameDurationInstaller : NSObject
+@interface RevenantActiveFrameDurationInstaller : NSObject
 @end
 
-@implementation CharonActiveFrameDurationInstaller
+@implementation RevenantActiveFrameDurationInstaller
 
 + (void)load
 {
-    [[NSNotificationCenter defaultCenter] addObserverForName:CHARON_CAPTURE_SESSION_CHANGED object:nil queue:nil usingBlock:^(NSNotification *note) {
-        charon_apply_frame_durations(note.object);
+    [[NSNotificationCenter defaultCenter] addObserverForName:REVENANT_CAPTURE_SESSION_CHANGED object:nil queue:nil usingBlock:^(NSNotification *note) {
+        revenant_apply_frame_durations(note.object);
     }];
 }
 
 @end
 
-@implementation AVCaptureDevice (CharonActiveFrameDuration)
+@implementation AVCaptureDevice (RevenantActiveFrameDuration)
 
 - (CMTime)activeVideoMinFrameDuration
 {
-    NSValue *stored = objc_getAssociatedObject(self, &CharonActiveMinFrameDurationKey);
-    return stored ? stored.CMTimeValue : charon_default_min_frame_duration(self);
+    NSValue *stored = objc_getAssociatedObject(self, &RevenantActiveMinFrameDurationKey);
+    return stored ? stored.CMTimeValue : revenant_default_min_frame_duration(self);
 }
 
 - (void)setActiveVideoMinFrameDuration:(CMTime)activeVideoMinFrameDuration
@@ -74,15 +74,15 @@ static void charon_apply_frame_durations(AVCaptureSession *session)
         @throw [NSException exceptionWithName:NSGenericException
                                        reason:@"activeVideoMinFrameDuration cannot be set without first successfully gaining exclusive ownership of the device using -lockForConfiguration:"
                                      userInfo:nil];
-    objc_setAssociatedObject(self, &CharonActiveMinFrameDurationKey, CMTIME_IS_VALID(activeVideoMinFrameDuration) ? [NSValue valueWithCMTime:activeVideoMinFrameDuration] : nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-    for (AVCaptureSession *session in [self charon_captureSessions])
-        charon_apply_frame_durations(session);
+    objc_setAssociatedObject(self, &RevenantActiveMinFrameDurationKey, CMTIME_IS_VALID(activeVideoMinFrameDuration) ? [NSValue valueWithCMTime:activeVideoMinFrameDuration] : nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    for (AVCaptureSession *session in [self revenant_captureSessions])
+        revenant_apply_frame_durations(session);
 }
 
 - (CMTime)activeVideoMaxFrameDuration
 {
-    NSValue *stored = objc_getAssociatedObject(self, &CharonActiveMaxFrameDurationKey);
-    return stored ? stored.CMTimeValue : charon_default_max_frame_duration(self);
+    NSValue *stored = objc_getAssociatedObject(self, &RevenantActiveMaxFrameDurationKey);
+    return stored ? stored.CMTimeValue : revenant_default_max_frame_duration(self);
 }
 
 - (void)setActiveVideoMaxFrameDuration:(CMTime)activeVideoMaxFrameDuration
@@ -91,9 +91,9 @@ static void charon_apply_frame_durations(AVCaptureSession *session)
         @throw [NSException exceptionWithName:NSGenericException
                                        reason:@"activeVideoMaxFrameDuration cannot be set without first successfully gaining exclusive ownership of the device using -lockForConfiguration:"
                                      userInfo:nil];
-    objc_setAssociatedObject(self, &CharonActiveMaxFrameDurationKey, CMTIME_IS_VALID(activeVideoMaxFrameDuration) ? [NSValue valueWithCMTime:activeVideoMaxFrameDuration] : nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-    for (AVCaptureSession *session in [self charon_captureSessions])
-        charon_apply_frame_durations(session);
+    objc_setAssociatedObject(self, &RevenantActiveMaxFrameDurationKey, CMTIME_IS_VALID(activeVideoMaxFrameDuration) ? [NSValue valueWithCMTime:activeVideoMaxFrameDuration] : nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    for (AVCaptureSession *session in [self revenant_captureSessions])
+        revenant_apply_frame_durations(session);
 }
 
 @end

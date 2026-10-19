@@ -4,11 +4,11 @@
 {
     NSDictionary *properties;
 }
-- (void)charon_set_properties:(NSDictionary *)properties { self->properties = properties; }
+- (void)revenant_set_properties:(NSDictionary *)properties { self->properties = properties; }
 - (id)valueForProperty:(NSString *)property { return self->properties[property]; }
 @end
 
-#define CHARON_MEDIAPLAYER_STANDIN 1
+#define REVENANT_MEDIAPLAYER_STANDIN 1
 #include "MPMediaItem70.m"
 #include "MPMediaItem92.m"
 #include "MPMediaItem100.m"
@@ -26,7 +26,7 @@ int main(void) {
     NSDictionary *given = @{@"isExplicit": @YES, @"hasProtectedAsset": @YES, @"dateAdded": @1000,
                             @"playbackStoreID": @"store", @"isPreorder": @YES};
     MPMediaItem *item = [[MPMediaItem alloc] init];
-    [item charon_set_properties:given];
+    [item revenant_set_properties:given];
     check("MPMediaItemPropertyIsExplicit is the key the getter reads",
           [[item valueForProperty:MPMediaItemPropertyIsExplicit] boolValue] == item.isExplicitItem,
           MPMediaItemPropertyIsExplicit.UTF8String);

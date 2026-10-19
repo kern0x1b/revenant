@@ -1,8 +1,8 @@
 #import <AudioToolbox/AudioConverter.h>
 #import <AudioToolbox/AudioFile.h>
-#import "CharonAudioToolboxDeclarations.h"
+#import "RevenantAudioToolboxDeclarations.h"
 
-static BOOL CharonIsPCMConverter(AudioConverterRef converter)
+static BOOL RevenantIsPCMConverter(AudioConverterRef converter)
 {
     AudioStreamBasicDescription format = {0};
     UInt32 size = sizeof format;
@@ -22,7 +22,7 @@ OSStatus AudioConverterFillComplexBufferRealtimeSafe(AudioConverterRef inAudioCo
                                                      AudioBufferList *outOutputData,
                                                      AudioStreamPacketDescription *outPacketDescription)
 {
-    if (!CharonIsPCMConverter(inAudioConverter)) {
+    if (!RevenantIsPCMConverter(inAudioConverter)) {
         return kAudioConverterErr_OperationNotSupported;
     }
     return AudioConverterFillComplexBuffer(inAudioConverter, (AudioConverterComplexInputDataProc)inInputDataProc,

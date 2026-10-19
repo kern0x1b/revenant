@@ -1,14 +1,14 @@
 the default priority is 0.5	NSBundleResourceRequest.m	s/_loadingPriority = 0\.5;/_loadingPriority = 0.0;/
 the bundle is the main one when none is given	NSBundleResourceRequest.m	s/_bundle = bundle \?: \[NSBundle mainBundle\];/_bundle = bundle;/
 the tags are the caller's set	NSBundleResourceRequest.m	s/_tags = \[tags copy\];/_tags = tags;/
-a tag the manifest names is resolvable	NSBundleResourceRequest.m	s/return CharonManifestForBundle\(bundle\)\[tag\] != nil;/return NO;/
-an unresolvable tag completes with 4994	NSBundleResourceRequest.m	s/NSInteger const charon_invalid_tag = 4994;/NSInteger const charon_invalid_tag = 4992;/
+a tag the manifest names is resolvable	NSBundleResourceRequest.m	s/return RevenantManifestForBundle\(bundle\)\[tag\] != nil;/return NO;/
+an unresolvable tag completes with 4994	NSBundleResourceRequest.m	s/NSInteger const revenant_invalid_tag = 4994;/NSInteger const revenant_invalid_tag = 4992;/
 the error is in the cocoa domain	NSBundleResourceRequest.m	s/errorWithDomain:NSCocoaErrorDomain/errorWithDomain:@"Other"/
-conditionallyBeginAccessing answers yes	NSBundleResourceRequest.m	s/        handler\(YES\);/        handler([self charon_unresolvableTags] == nil);/
-a resolvable request completes with nothing	NSBundleResourceRequest.m	s/handler\(\[self charon_errorForUnresolvableTags:\[self charon_unresolvableTags\]\]\);/handler([NSError errorWithDomain:NSCocoaErrorDomain code:4994 userInfo:nil]);/
+conditionallyBeginAccessing answers yes	NSBundleResourceRequest.m	s/        handler\(YES\);/        handler([self revenant_unresolvableTags] == nil);/
+a resolvable request completes with nothing	NSBundleResourceRequest.m	s/handler\(\[self revenant_errorForUnresolvableTags:\[self revenant_unresolvableTags\]\]\);/handler([NSError errorWithDomain:NSCocoaErrorDomain code:4994 userInfo:nil]);/
 -init raises the host's refusal	NSBundleResourceRequest.m	s/\[NSException raise:NSInvalidArgumentException format:@"init is unavailable"\];//
-the manifest is read from the bundle	NSBundleResourceRequest.m	s/charon_manifest_resource = @"OnDemandResources";/charon_manifest_resource = @"OnDemandResourcesX";/
-the tag map is the manifest's tags key	NSBundleResourceRequest.m	s/charon_manifest_tags_key = @"NSBundleResourceRequestTags";/charon_manifest_tags_key = @"NSBundleResourceRequestTagsX";/
+the manifest is read from the bundle	NSBundleResourceRequest.m	s/revenant_manifest_resource = @"OnDemandResources";/revenant_manifest_resource = @"OnDemandResourcesX";/
+the tag map is the manifest's tags key	NSBundleResourceRequest.m	s/revenant_manifest_tags_key = @"NSBundleResourceRequestTags";/revenant_manifest_tags_key = @"NSBundleResourceRequestTagsX";/
 the urgent priority is 1.0	NSBundleResourceRequest.m	s/double const NSBundleResourceRequestLoadingPriorityUrgent = 1\.0;/double const NSBundleResourceRequestLoadingPriorityUrgent = 0.5;/
 the notification is its own name	NSBundleResourceRequest.m	s/@"NSBundleResourceRequestLowDiskSpaceNotification";/@"LowDiskSpace";/
 # device-only: brk #0xc472 in the optimized objc_opt_respondsToSelector stub, which a call test on 6.1.3

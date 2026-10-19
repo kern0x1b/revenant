@@ -83,11 +83,11 @@ echo "compared=$compared failed=$failed"
 # The two names Apple's class cannot answer, checked against the header the port compiles against,
 # which is the oracle the registry README names for a name no host carries. A rename in the header that
 # drops one of them goes red here rather than quietly leaving the row with no declaration.
-header=$S/NetworkExtension/CharonNetworkExtensionSettings.h
+header=$S/NetworkExtension/RevenantNetworkExtensionSettings.h
 for name in settingsWithAutomaticAddressing settingsWithLinkLocalAddressing; do
     compared=$((compared + 1))
     if grep -q "$name" "$header" && grep -q "$name" "$W/port.txt"; then
-        echo "ok    $name  declared in CharonNetworkExtensionSettings.h and answered by the port"
+        echo "ok    $name  declared in RevenantNetworkExtensionSettings.h and answered by the port"
     else
         echo "FAIL  $name  not declared in the header, or not answered by the port"
         failed=$((failed + 1))

@@ -13,7 +13,7 @@
 #include <optional>
 #include <utility>
 
-namespace shade {
+namespace emulator {
 
 struct SceneTransform {
     float xx { 1.0F };

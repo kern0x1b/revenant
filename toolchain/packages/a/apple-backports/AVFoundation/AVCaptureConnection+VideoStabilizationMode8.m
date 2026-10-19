@@ -4,9 +4,9 @@
 #pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 
-static const void *charon_preferred_mode = &charon_preferred_mode;
+static const void *revenant_preferred_mode = &revenant_preferred_mode;
 
-@implementation AVCaptureDeviceFormat (CharonVideoStabilizationMode)
+@implementation AVCaptureDeviceFormat (RevenantVideoStabilizationMode)
 
 - (BOOL)isVideoStabilizationModeSupported:(AVCaptureVideoStabilizationMode)videoStabilizationMode
 {
@@ -23,9 +23,9 @@ static const void *charon_preferred_mode = &charon_preferred_mode;
 
 @end
 
-@implementation AVCaptureConnection (CharonVideoStabilizationMode)
+@implementation AVCaptureConnection (RevenantVideoStabilizationMode)
 
-- (AVCaptureDeviceFormat *)charon_sourceFormat
+- (AVCaptureDeviceFormat *)revenant_sourceFormat
 {
     for (AVCaptureInputPort *port in self.inputPorts) {
         if ([port.input isKindOfClass:[AVCaptureDeviceInput class]])
@@ -34,11 +34,11 @@ static const void *charon_preferred_mode = &charon_preferred_mode;
     return nil;
 }
 
-- (AVCaptureVideoStabilizationMode)charon_resolvedStabilizationMode:(AVCaptureVideoStabilizationMode)mode
+- (AVCaptureVideoStabilizationMode)revenant_resolvedStabilizationMode:(AVCaptureVideoStabilizationMode)mode
 {
     if (![self.output isKindOfClass:[AVCaptureMovieFileOutput class]] && ![self.output isKindOfClass:[AVCaptureVideoDataOutput class]])
         return AVCaptureVideoStabilizationModeOff;
-    AVCaptureDeviceFormat *format = [self charon_sourceFormat];
+    AVCaptureDeviceFormat *format = [self revenant_sourceFormat];
     if (mode != AVCaptureVideoStabilizationModeAuto)
         return [format isVideoStabilizationModeSupported:mode] ? mode : AVCaptureVideoStabilizationModeOff;
     BOOL fast = [format.videoSupportedFrameRateRanges.lastObject maxFrameRate] > 60;
@@ -53,7 +53,7 @@ static const void *charon_preferred_mode = &charon_preferred_mode;
 
 - (AVCaptureVideoStabilizationMode)preferredVideoStabilizationMode
 {
-    NSArray *kept = objc_getAssociatedObject(self, charon_preferred_mode);
+    NSArray *kept = objc_getAssociatedObject(self, revenant_preferred_mode);
     BOOL enables = self.enablesVideoStabilizationWhenAvailable;
     if (kept && [kept[1] boolValue] == enables)
         return (AVCaptureVideoStabilizationMode)[kept[0] integerValue];
@@ -66,10 +66,10 @@ static const void *charon_preferred_mode = &charon_preferred_mode;
         @throw [NSException exceptionWithName:NSInvalidArgumentException
                                        reason:[NSString stringWithFormat:@"Supplied preferredVideoStabilizationMode (%ld) is outside of the range of AVCaptureVideoStabilizationMode.", (long)preferredVideoStabilizationMode]
                                      userInfo:nil];
-    BOOL wants = [self charon_resolvedStabilizationMode:preferredVideoStabilizationMode] == AVCaptureVideoStabilizationModeStandard;
+    BOOL wants = [self revenant_resolvedStabilizationMode:preferredVideoStabilizationMode] == AVCaptureVideoStabilizationModeStandard;
     if (self.supportsVideoStabilization)
         self.enablesVideoStabilizationWhenAvailable = wants;
-    objc_setAssociatedObject(self, charon_preferred_mode, @[@(preferredVideoStabilizationMode), @(self.enablesVideoStabilizationWhenAvailable)], OBJC_ASSOCIATION_RETAIN);
+    objc_setAssociatedObject(self, revenant_preferred_mode, @[@(preferredVideoStabilizationMode), @(self.enablesVideoStabilizationWhenAvailable)], OBJC_ASSOCIATION_RETAIN);
 }
 
 - (AVCaptureVideoStabilizationMode)activeVideoStabilizationMode

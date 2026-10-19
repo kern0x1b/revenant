@@ -1,7 +1,7 @@
 #import <Foundation/Foundation.h>
 #import <CoreMIDI/CoreMIDI.h>
 
-#import "CharonCoreMIDI.h"
+#import "RevenantCoreMIDI.h"
 
 #include <dispatch/dispatch.h>
 #include <mach/mach_time.h>
@@ -9,78 +9,78 @@
 #include <stdlib.h>
 #include <string.h>
 
-#ifndef CHARON_REFUSED_REASONS
-#define CHARON_REFUSED_REASONS 16
+#ifndef REVENANT_REFUSED_REASONS
+#define REVENANT_REFUSED_REASONS 16
 #endif
-static const char *charon_refused_seen[CHARON_REFUSED_REASONS];
-static size_t charon_refused_count;
-static int charon_refused_full;
-static pthread_mutex_t charon_refused_lock = PTHREAD_MUTEX_INITIALIZER;
+static const char *revenant_refused_seen[REVENANT_REFUSED_REASONS];
+static size_t revenant_refused_count;
+static int revenant_refused_full;
+static pthread_mutex_t revenant_refused_lock = PTHREAD_MUTEX_INITIALIZER;
 
-static void charon_refused_once(const char *reason)
+static void revenant_refused_once(const char *reason)
 {
     int write = 0;
     int full = 0;
-    pthread_mutex_lock(&charon_refused_lock);
+    pthread_mutex_lock(&revenant_refused_lock);
     int seen = 0;
-    for (size_t i = 0; i < charon_refused_count && !seen; i++)
-        seen = strcmp(charon_refused_seen[i], reason) == 0;
+    for (size_t i = 0; i < revenant_refused_count && !seen; i++)
+        seen = strcmp(revenant_refused_seen[i], reason) == 0;
     if (!seen) {
-        if (charon_refused_count < CHARON_REFUSED_REASONS) {
-            charon_refused_seen[charon_refused_count++] = reason;
+        if (revenant_refused_count < REVENANT_REFUSED_REASONS) {
+            revenant_refused_seen[revenant_refused_count++] = reason;
             write = 1;
-        } else if (!charon_refused_full) {
-            charon_refused_full = 1;
+        } else if (!revenant_refused_full) {
+            revenant_refused_full = 1;
             full = 1;
         }
     }
-    pthread_mutex_unlock(&charon_refused_lock);
+    pthread_mutex_unlock(&revenant_refused_lock);
     if (write)
-        NSLog(@"charon: CoreMIDI refused %s (written once for this reason; later refusals of it are not written)", reason);
+        NSLog(@"revenant: CoreMIDI refused %s (written once for this reason; later refusals of it are not written)", reason);
     if (full)
-        NSLog(@"charon: CoreMIDI refused more than %d different things; the refusals of the others are not written", CHARON_REFUSED_REASONS);
+        NSLog(@"revenant: CoreMIDI refused more than %d different things; the refusals of the others are not written", REVENANT_REFUSED_REASONS);
 }
-#define charon_refused(reason) charon_refused_once("" reason)
+#define revenant_refused(reason) revenant_refused_once("" reason)
 
-#define CHARON_STACK_LIST_WORDS 128
-#define CHARON_STACK_WORDS 32
-#define CHARON_STACK_BYTES 128
+#define REVENANT_STACK_LIST_WORDS 128
+#define REVENANT_STACK_WORDS 32
+#define REVENANT_STACK_BYTES 128
 
-typedef struct charon_source {
+typedef struct revenant_source {
     void *refCon;
-    CharonMIDIParser parser;
-} charon_source;
+    RevenantMIDIParser parser;
+} revenant_source;
 
-typedef struct charon_port {
+typedef struct revenant_port {
     void *block;
     int protocol;
     int references;
     pthread_mutex_t lock;
-    charon_source *sources;
+    revenant_source *sources;
     size_t sourceCount;
     size_t sourceCapacity;
-} charon_port;
+} revenant_port;
 
-static void charon_free_port(charon_port *port);
+static void revenant_free_port(revenant_port *port);
 
-static void charon_port_retain(charon_port *port)
+static void revenant_port_retain(revenant_port *port)
 {
     __atomic_add_fetch(&port->references, 1, __ATOMIC_RELAXED);
 }
 
-static void charon_port_release(charon_port *port)
+static void revenant_port_release(revenant_port *port)
 {
     if (__atomic_sub_fetch(&port->references, 1, __ATOMIC_ACQ_REL) == 0)
-        charon_free_port(port);
+        revenant_free_port(port);
 }
 
-static void charon_port_call(charon_port *port, const MIDIEventList *list, void *srcConnRefCon)
+static void revenant_port_call(revenant_port *port, const MIDIEventList *list, void *srcConnRefCon)
 {
     __unsafe_unretained MIDIReceiveBlock block = (__bridge MIDIReceiveBlock)port->block;
     block(list, srcConnRefCon);
 }
 
-static size_t charon_bound(const void *table, size_t count, size_t stride, MIDIObjectRef key, int after)
+static size_t revenant_bound(const void *table, size_t count, size_t stride, MIDIObjectRef key, int after)
 {
     const char *base = table;
     size_t low = 0;
@@ -96,55 +96,55 @@ static size_t charon_bound(const void *table, size_t count, size_t stride, MIDIO
     return low;
 }
 
-typedef struct charon_route {
+typedef struct revenant_route {
     int references;
     pthread_mutex_t lock;
-    CharonMIDIRPN rpn[16];
-} charon_route;
+    RevenantMIDIRPN rpn[16];
+} revenant_route;
 
-typedef struct charon_route_entry {
+typedef struct revenant_route_entry {
     MIDIEndpointRef endpoint;
-    charon_route *route;
-} charon_route_entry;
+    revenant_route *route;
+} revenant_route_entry;
 
-static charon_route_entry *charon_routes;
-static size_t charon_route_count;
-static size_t charon_route_capacity;
-static pthread_mutex_t charon_lock = PTHREAD_MUTEX_INITIALIZER;
+static revenant_route_entry *revenant_routes;
+static size_t revenant_route_count;
+static size_t revenant_route_capacity;
+static pthread_mutex_t revenant_lock = PTHREAD_MUTEX_INITIALIZER;
 
-typedef struct charon_owned {
+typedef struct revenant_owned {
     MIDIObjectRef object;
     int destination;
-    charon_port *port;
+    revenant_port *port;
     void *refCon;
     int stamped;
     SInt32 stamp;
-} charon_owned;
-static charon_owned *charon_owned_rows;
-static size_t charon_owned_count;
-static size_t charon_owned_capacity;
-static pthread_mutex_t charon_owned_lock = PTHREAD_MUTEX_INITIALIZER;
+} revenant_owned;
+static revenant_owned *revenant_owned_rows;
+static size_t revenant_owned_count;
+static size_t revenant_owned_capacity;
+static pthread_mutex_t revenant_owned_lock = PTHREAD_MUTEX_INITIALIZER;
 
-static CharonMIDIParser *charon_source_parser(charon_port *port, void *refCon)
+static RevenantMIDIParser *revenant_source_parser(revenant_port *port, void *refCon)
 {
     for (size_t i = 0; i < port->sourceCount; i++)
         if (port->sources[i].refCon == refCon)
             return &port->sources[i].parser;
     if (port->sourceCount == port->sourceCapacity) {
-        size_t capacity = port->sourceCapacity ? charon_grown_capacity(port->sourceCapacity, sizeof(charon_source)) : 4;
-        charon_source *grown = capacity ? realloc(port->sources, capacity * sizeof(charon_source)) : NULL;
+        size_t capacity = port->sourceCapacity ? revenant_grown_capacity(port->sourceCapacity, sizeof(revenant_source)) : 4;
+        revenant_source *grown = capacity ? realloc(port->sources, capacity * sizeof(revenant_source)) : NULL;
         if (!grown)
             return NULL;
         port->sources = grown;
         port->sourceCapacity = capacity;
     }
-    charon_source *source = &port->sources[port->sourceCount++];
+    revenant_source *source = &port->sources[port->sourceCount++];
     source->refCon = refCon;
     memset(&source->parser, 0, sizeof(source->parser));
     return &source->parser;
 }
 
-static void charon_read_held(charon_port *port, const MIDIPacketList *packets, void *srcConnRefCon)
+static void revenant_read_held(revenant_port *port, const MIDIPacketList *packets, void *srcConnRefCon)
 {
     if (!port->block)
         return;
@@ -152,19 +152,19 @@ static void charon_read_held(charon_port *port, const MIDIPacketList *packets, v
     const MIDIPacket *packet = &packets->packet[0];
     for (UInt32 i = 0; i < packets->numPackets; i++) {
         size_t piece = 0;
-        if (!charon_size_mul(&piece, 8, packet->length) || !charon_size_add(&piece, 12) || !charon_size_add(&capacity, piece)) {
-            charon_refused("a list whose events do not fit the address space");
+        if (!revenant_size_mul(&piece, 8, packet->length) || !revenant_size_add(&piece, 12) || !revenant_size_add(&capacity, piece)) {
+            revenant_refused("a list whose events do not fit the address space");
             return;
         }
         packet = MIDIPacketNext(packet);
     }
-    uint32_t stackList[CHARON_STACK_LIST_WORDS] __attribute__((aligned(8)));
+    uint32_t stackList[REVENANT_STACK_LIST_WORDS] __attribute__((aligned(8)));
     MIDIEventList *list = (MIDIEventList *)stackList;
     MIDIEventList *heapList = NULL;
     if (capacity > sizeof(stackList)) {
         heapList = malloc(capacity);
         if (!heapList) {
-            charon_refused("a list the allocator would not give");
+            revenant_refused("a list the allocator would not give");
             return;
         }
         list = heapList;
@@ -173,54 +173,54 @@ static void charon_read_held(charon_port *port, const MIDIPacketList *packets, v
     list->numPackets = 0;
     MIDIEventPacket *end = &list->packet[0];
     MIDIEventPacket *last = NULL;
-    UInt32 stackWords[CHARON_STACK_WORDS];
-    CharonMIDIWords words;
-    CharonMIDIWordsUseStorage(&words, stackWords, CHARON_STACK_WORDS);
+    UInt32 stackWords[REVENANT_STACK_WORDS];
+    RevenantMIDIWords words;
+    RevenantMIDIWordsUseStorage(&words, stackWords, REVENANT_STACK_WORDS);
     pthread_mutex_lock(&port->lock);
-    CharonMIDIParser *parser = charon_source_parser(port, srcConnRefCon);
+    RevenantMIDIParser *parser = revenant_source_parser(port, srcConnRefCon);
     if (!parser)
-        charon_refused("a source whose parser cannot be made");
+        revenant_refused("a source whose parser cannot be made");
     packet = &packets->packet[0];
     for (UInt32 i = 0; parser && i < packets->numPackets; i++) {
         words.count = 0;
-        CharonMIDIParseBytes(parser, packet->data, packet->length, port->protocol, 0, &words);
+        RevenantMIDIParseBytes(parser, packet->data, packet->length, port->protocol, 0, &words);
         if (i + 1 == packets->numPackets)
-            CharonMIDIParseFlush(parser, 0, &words);
+            RevenantMIDIParseFlush(parser, 0, &words);
         if (words.failed) {
-            charon_refused("the words of a packet, which could not be allocated");
+            revenant_refused("the words of a packet, which could not be allocated");
         } else if (words.count > 0) {
-            MIDIEventPacket *next = CharonMIDIEventListAppend(list, capacity, end, &last, packet->timeStamp, words.count, words.words);
+            MIDIEventPacket *next = RevenantMIDIEventListAppend(list, capacity, end, &last, packet->timeStamp, words.count, words.words);
             if (next)
                 end = next;
             else
-                charon_refused("an event that does not fit the list it was sized for");
+                revenant_refused("an event that does not fit the list it was sized for");
         }
         packet = MIDIPacketNext(packet);
     }
     pthread_mutex_unlock(&port->lock);
-    CharonMIDIWordsRelease(&words);
+    RevenantMIDIWordsRelease(&words);
     if (list->numPackets > 0) {
-        charon_port_call(port, list, srcConnRefCon);
+        revenant_port_call(port, list, srcConnRefCon);
     }
     free(heapList);
 }
 
-static void charon_protocol_read(const MIDIPacketList *packets, void *refCon, void *srcConnRefCon)
+static void revenant_protocol_read(const MIDIPacketList *packets, void *refCon, void *srcConnRefCon)
 {
-    charon_port *port = refCon;
-    charon_port_retain(port);
-    charon_read_held(port, packets, srcConnRefCon);
-    charon_port_release(port);
+    revenant_port *port = refCon;
+    revenant_port_retain(port);
+    revenant_read_held(port, packets, srcConnRefCon);
+    revenant_port_release(port);
 }
 
-static OSStatus charon_set_protocol(MIDIEndpointRef endpoint, MIDIProtocolID protocol)
+static OSStatus revenant_set_protocol(MIDIEndpointRef endpoint, MIDIProtocolID protocol)
 {
-    return MIDIObjectSetIntegerProperty(endpoint, CHARON_PROTOCOL_KEY, (SInt32)protocol);
+    return MIDIObjectSetIntegerProperty(endpoint, REVENANT_PROTOCOL_KEY, (SInt32)protocol);
 }
 
-static charon_port *charon_new_port(MIDIProtocolID protocol, MIDIReceiveBlock block)
+static revenant_port *revenant_new_port(MIDIProtocolID protocol, MIDIReceiveBlock block)
 {
-    charon_port *port = calloc(1, sizeof(charon_port));
+    revenant_port *port = calloc(1, sizeof(revenant_port));
     if (!port)
         return NULL;
     port->protocol = (int)protocol;
@@ -230,7 +230,7 @@ static charon_port *charon_new_port(MIDIProtocolID protocol, MIDIReceiveBlock bl
     return port;
 }
 
-static void charon_free_port(charon_port *port)
+static void revenant_free_port(revenant_port *port)
 {
     if (port->block)
         (void)(__bridge_transfer id)port->block;
@@ -239,103 +239,103 @@ static void charon_free_port(charon_port *port)
     free(port);
 }
 
-static int charon_gone(MIDIObjectRef object)
+static int revenant_gone(MIDIObjectRef object)
 {
     SInt32 uniqueID = 0;
-    return MIDIObjectGetIntegerProperty(object, kMIDIPropertyUniqueID, &uniqueID) == charon_paramErr;
+    return MIDIObjectGetIntegerProperty(object, kMIDIPropertyUniqueID, &uniqueID) == revenant_paramErr;
 }
 
 typedef enum {
-    charon_object_live,
-    charon_object_gone,
-    charon_object_replaced
-} charon_object_state;
+    revenant_object_live,
+    revenant_object_gone,
+    revenant_object_replaced
+} revenant_object_state;
 
-static charon_object_state charon_object_check(MIDIObjectRef object, int stamped, SInt32 stamp)
+static revenant_object_state revenant_object_check(MIDIObjectRef object, int stamped, SInt32 stamp)
 {
     SInt32 value = 0;
-    OSStatus status = MIDIObjectGetIntegerProperty(object, CHARON_OWNER_KEY, &value);
-    if (status == charon_paramErr)
-        return charon_object_gone;
+    OSStatus status = MIDIObjectGetIntegerProperty(object, REVENANT_OWNER_KEY, &value);
+    if (status == revenant_paramErr)
+        return revenant_object_gone;
     if (!stamped)
-        return charon_object_live;
+        return revenant_object_live;
     if (status == noErr)
-        return value == stamp ? charon_object_live : charon_object_replaced;
-    return status == kMIDIUnknownProperty ? charon_object_replaced : charon_object_live;
+        return value == stamp ? revenant_object_live : revenant_object_replaced;
+    return status == kMIDIUnknownProperty ? revenant_object_replaced : revenant_object_live;
 }
 
-static int charon_row_stale(const charon_owned *row)
+static int revenant_row_stale(const revenant_owned *row)
 {
-    return charon_object_check(row->object, row->stamped, row->stamp) != charon_object_live;
+    return revenant_object_check(row->object, row->stamped, row->stamp) != revenant_object_live;
 }
 
-static void charon_free_owned(charon_owned *row)
+static void revenant_free_owned(revenant_owned *row)
 {
     if (row->port)
-        charon_port_release(row->port);
+        revenant_port_release(row->port);
     if (row->refCon)
         (void)(__bridge_transfer id)row->refCon;
 }
 
-#define CHARON_SWEEP_ROWS 8
-static int charon_sweeping;
-static size_t charon_owned_cursor;
-static size_t charon_route_cursor;
+#define REVENANT_SWEEP_ROWS 8
+static int revenant_sweeping;
+static size_t revenant_owned_cursor;
+static size_t revenant_route_cursor;
 
-static void charon_sweep_owned_window(void)
+static void revenant_sweep_owned_window(void)
 {
-    struct charon_window {
-        charon_owned row;
+    struct revenant_window {
+        revenant_owned row;
         int stale;
-    } window[CHARON_SWEEP_ROWS];
+    } window[REVENANT_SWEEP_ROWS];
     size_t first = 0;
     size_t count = 0;
-    pthread_mutex_lock(&charon_owned_lock);
-    if (charon_owned_cursor >= charon_owned_count)
-        charon_owned_cursor = 0;
-    first = charon_owned_cursor;
-    if (charon_owned_count - first < CHARON_SWEEP_ROWS)
-        first = charon_owned_count > CHARON_SWEEP_ROWS ? charon_owned_count - CHARON_SWEEP_ROWS : 0;
-    while (count < CHARON_SWEEP_ROWS && first + count < charon_owned_count) {
-        window[count].row = charon_owned_rows[first + count];
+    pthread_mutex_lock(&revenant_owned_lock);
+    if (revenant_owned_cursor >= revenant_owned_count)
+        revenant_owned_cursor = 0;
+    first = revenant_owned_cursor;
+    if (revenant_owned_count - first < REVENANT_SWEEP_ROWS)
+        first = revenant_owned_count > REVENANT_SWEEP_ROWS ? revenant_owned_count - REVENANT_SWEEP_ROWS : 0;
+    while (count < REVENANT_SWEEP_ROWS && first + count < revenant_owned_count) {
+        window[count].row = revenant_owned_rows[first + count];
         window[count].stale = 0;
         count++;
     }
-    pthread_mutex_unlock(&charon_owned_lock);
+    pthread_mutex_unlock(&revenant_owned_lock);
     size_t stale = 0;
     for (size_t i = 0; i < count; i++) {
-        window[i].stale = charon_row_stale(&window[i].row);
+        window[i].stale = revenant_row_stale(&window[i].row);
         stale += window[i].stale ? 1 : 0;
     }
-    charon_owned freed[CHARON_SWEEP_ROWS];
+    revenant_owned freed[REVENANT_SWEEP_ROWS];
     size_t freedCount = 0;
-    pthread_mutex_lock(&charon_owned_lock);
+    pthread_mutex_lock(&revenant_owned_lock);
     if (stale) {
         size_t kept = 0;
         size_t i = 0;
-        for (; i < count && first + i < charon_owned_count; i++) {
-            const charon_owned *row = &charon_owned_rows[first + i];
+        for (; i < count && first + i < revenant_owned_count; i++) {
+            const revenant_owned *row = &revenant_owned_rows[first + i];
             if (window[i].stale && row->object == window[i].row.object && row->port == window[i].row.port &&
                 row->refCon == window[i].row.refCon)
                 freed[freedCount++] = *row;
             else
-                charon_owned_rows[first + kept++] = *row;
+                revenant_owned_rows[first + kept++] = *row;
         }
         if (freedCount) {
-            size_t tail = charon_owned_count - (first + i);
-            memmove(&charon_owned_rows[first + kept], &charon_owned_rows[first + i], tail * sizeof(charon_owned));
-            charon_owned_count -= freedCount;
+            size_t tail = revenant_owned_count - (first + i);
+            memmove(&revenant_owned_rows[first + kept], &revenant_owned_rows[first + i], tail * sizeof(revenant_owned));
+            revenant_owned_count -= freedCount;
         }
-        charon_owned_cursor = first + kept;
+        revenant_owned_cursor = first + kept;
     } else {
-        charon_owned_cursor = first + count;
+        revenant_owned_cursor = first + count;
     }
-    pthread_mutex_unlock(&charon_owned_lock);
+    pthread_mutex_unlock(&revenant_owned_lock);
     for (size_t i = 0; i < freedCount; i++)
-        charon_free_owned(&freed[i]);
+        revenant_free_owned(&freed[i]);
 }
 
-static void charon_route_release(charon_route *route)
+static void revenant_route_release(revenant_route *route)
 {
     if (__atomic_sub_fetch(&route->references, 1, __ATOMIC_ACQ_REL) == 0) {
         pthread_mutex_destroy(&route->lock);
@@ -343,168 +343,168 @@ static void charon_route_release(charon_route *route)
     }
 }
 
-static void charon_prune_routes_window(void)
+static void revenant_prune_routes_window(void)
 {
-    MIDIEndpointRef window[CHARON_SWEEP_ROWS];
-    charon_route *routes[CHARON_SWEEP_ROWS];
-    int gone[CHARON_SWEEP_ROWS];
+    MIDIEndpointRef window[REVENANT_SWEEP_ROWS];
+    revenant_route *routes[REVENANT_SWEEP_ROWS];
+    int gone[REVENANT_SWEEP_ROWS];
     size_t first = 0;
     size_t count = 0;
-    pthread_mutex_lock(&charon_lock);
-    if (charon_route_cursor >= charon_route_count)
-        charon_route_cursor = 0;
-    first = charon_route_cursor;
-    if (charon_route_count - first < CHARON_SWEEP_ROWS)
-        first = charon_route_count > CHARON_SWEEP_ROWS ? charon_route_count - CHARON_SWEEP_ROWS : 0;
-    while (count < CHARON_SWEEP_ROWS && first + count < charon_route_count) {
-        window[count] = charon_routes[first + count].endpoint;
-        routes[count] = charon_routes[first + count].route;
+    pthread_mutex_lock(&revenant_lock);
+    if (revenant_route_cursor >= revenant_route_count)
+        revenant_route_cursor = 0;
+    first = revenant_route_cursor;
+    if (revenant_route_count - first < REVENANT_SWEEP_ROWS)
+        first = revenant_route_count > REVENANT_SWEEP_ROWS ? revenant_route_count - REVENANT_SWEEP_ROWS : 0;
+    while (count < REVENANT_SWEEP_ROWS && first + count < revenant_route_count) {
+        window[count] = revenant_routes[first + count].endpoint;
+        routes[count] = revenant_routes[first + count].route;
         count++;
     }
-    pthread_mutex_unlock(&charon_lock);
+    pthread_mutex_unlock(&revenant_lock);
     size_t goneCount = 0;
     for (size_t i = 0; i < count; i++) {
-        gone[i] = charon_gone(window[i]);
+        gone[i] = revenant_gone(window[i]);
         goneCount += gone[i] ? 1 : 0;
     }
-    charon_route *freed[CHARON_SWEEP_ROWS];
+    revenant_route *freed[REVENANT_SWEEP_ROWS];
     size_t freedCount = 0;
-    pthread_mutex_lock(&charon_lock);
+    pthread_mutex_lock(&revenant_lock);
     if (goneCount) {
         size_t kept = 0;
         size_t i = 0;
-        for (; i < count && first + i < charon_route_count; i++) {
-            const charon_route_entry *entry = &charon_routes[first + i];
+        for (; i < count && first + i < revenant_route_count; i++) {
+            const revenant_route_entry *entry = &revenant_routes[first + i];
             if (gone[i] && entry->endpoint == window[i] && entry->route == routes[i]) {
                 freed[freedCount++] = entry->route;
                 continue;
             }
-            charon_routes[first + kept++] = *entry;
+            revenant_routes[first + kept++] = *entry;
         }
-        size_t tail = charon_route_count - (first + i);
-        memmove(&charon_routes[first + kept], &charon_routes[first + i], tail * sizeof(charon_route_entry));
-        charon_route_count -= i - kept;
-        charon_route_cursor = first + kept;
+        size_t tail = revenant_route_count - (first + i);
+        memmove(&revenant_routes[first + kept], &revenant_routes[first + i], tail * sizeof(revenant_route_entry));
+        revenant_route_count -= i - kept;
+        revenant_route_cursor = first + kept;
     } else {
-        charon_route_cursor = first + count;
+        revenant_route_cursor = first + count;
     }
-    pthread_mutex_unlock(&charon_lock);
+    pthread_mutex_unlock(&revenant_lock);
     for (size_t i = 0; i < freedCount; i++)
-        charon_route_release(freed[i]);
+        revenant_route_release(freed[i]);
 }
 
-static void charon_sweep(void)
+static void revenant_sweep(void)
 {
-    if (__atomic_exchange_n(&charon_sweeping, 1, __ATOMIC_ACQUIRE))
+    if (__atomic_exchange_n(&revenant_sweeping, 1, __ATOMIC_ACQUIRE))
         return;
-    charon_sweep_owned_window();
-    charon_prune_routes_window();
-    __atomic_store_n(&charon_sweeping, 0, __ATOMIC_RELEASE);
+    revenant_sweep_owned_window();
+    revenant_prune_routes_window();
+    __atomic_store_n(&revenant_sweeping, 0, __ATOMIC_RELEASE);
 }
 
-static void charon_route_forget(MIDIObjectRef object)
+static void revenant_route_forget(MIDIObjectRef object)
 {
-    charon_route *dropped = NULL;
-    pthread_mutex_lock(&charon_lock);
-    size_t i = charon_bound(charon_routes, charon_route_count, sizeof(charon_route_entry), object, 0);
-    if (i < charon_route_count && charon_routes[i].endpoint == object) {
-        dropped = charon_routes[i].route;
-        memmove(&charon_routes[i], &charon_routes[i + 1], (charon_route_count - i - 1) * sizeof(charon_route_entry));
-        charon_route_count--;
+    revenant_route *dropped = NULL;
+    pthread_mutex_lock(&revenant_lock);
+    size_t i = revenant_bound(revenant_routes, revenant_route_count, sizeof(revenant_route_entry), object, 0);
+    if (i < revenant_route_count && revenant_routes[i].endpoint == object) {
+        dropped = revenant_routes[i].route;
+        memmove(&revenant_routes[i], &revenant_routes[i + 1], (revenant_route_count - i - 1) * sizeof(revenant_route_entry));
+        revenant_route_count--;
     }
-    pthread_mutex_unlock(&charon_lock);
+    pthread_mutex_unlock(&revenant_lock);
     if (dropped)
-        charon_route_release(dropped);
+        revenant_route_release(dropped);
 }
 
-static void charon_own(MIDIObjectRef object, int destination, charon_port *port, void *refCon)
+static void revenant_own(MIDIObjectRef object, int destination, revenant_port *port, void *refCon)
 {
-    charon_owned row;
+    revenant_owned row;
     memset(&row, 0, sizeof(row));
     row.object = object;
     row.destination = destination;
     row.port = port;
     row.refCon = refCon;
     row.stamp = (SInt32)arc4random();
-    row.stamped = MIDIObjectSetIntegerProperty(object, CHARON_OWNER_KEY, row.stamp) == noErr;
-    charon_sweep();
-    charon_route_forget(object);
-    pthread_mutex_lock(&charon_owned_lock);
-    if (charon_owned_count == charon_owned_capacity) {
-        size_t capacity = charon_grown_capacity(charon_owned_capacity, sizeof(charon_owned));
-        charon_owned *grown = capacity ? realloc(charon_owned_rows, capacity * sizeof(charon_owned)) : NULL;
+    row.stamped = MIDIObjectSetIntegerProperty(object, REVENANT_OWNER_KEY, row.stamp) == noErr;
+    revenant_sweep();
+    revenant_route_forget(object);
+    pthread_mutex_lock(&revenant_owned_lock);
+    if (revenant_owned_count == revenant_owned_capacity) {
+        size_t capacity = revenant_grown_capacity(revenant_owned_capacity, sizeof(revenant_owned));
+        revenant_owned *grown = capacity ? realloc(revenant_owned_rows, capacity * sizeof(revenant_owned)) : NULL;
         if (grown) {
-            charon_owned_rows = grown;
-            charon_owned_capacity = capacity;
+            revenant_owned_rows = grown;
+            revenant_owned_capacity = capacity;
         }
     }
-    if (charon_owned_count < charon_owned_capacity) {
-        size_t i = charon_bound(charon_owned_rows, charon_owned_count, sizeof(charon_owned), object, 1);
-        memmove(&charon_owned_rows[i + 1], &charon_owned_rows[i], (charon_owned_count - i) * sizeof(charon_owned));
-        charon_owned_rows[i] = row;
-        charon_owned_count++;
+    if (revenant_owned_count < revenant_owned_capacity) {
+        size_t i = revenant_bound(revenant_owned_rows, revenant_owned_count, sizeof(revenant_owned), object, 1);
+        memmove(&revenant_owned_rows[i + 1], &revenant_owned_rows[i], (revenant_owned_count - i) * sizeof(revenant_owned));
+        revenant_owned_rows[i] = row;
+        revenant_owned_count++;
     }
-    pthread_mutex_unlock(&charon_owned_lock);
+    pthread_mutex_unlock(&revenant_owned_lock);
 }
 
-static charon_port *charon_destination_port(MIDIEndpointRef endpoint, int twoOnly, int *stamped, SInt32 *stamp)
+static revenant_port *revenant_destination_port(MIDIEndpointRef endpoint, int twoOnly, int *stamped, SInt32 *stamp)
 {
-    charon_port *port = NULL;
-    pthread_mutex_lock(&charon_owned_lock);
-    size_t i = charon_bound(charon_owned_rows, charon_owned_count, sizeof(charon_owned), endpoint, 1);
-    while (i > 0 && charon_owned_rows[i - 1].object == endpoint) {
-        const charon_owned *row = &charon_owned_rows[--i];
+    revenant_port *port = NULL;
+    pthread_mutex_lock(&revenant_owned_lock);
+    size_t i = revenant_bound(revenant_owned_rows, revenant_owned_count, sizeof(revenant_owned), endpoint, 1);
+    while (i > 0 && revenant_owned_rows[i - 1].object == endpoint) {
+        const revenant_owned *row = &revenant_owned_rows[--i];
         if (row->destination && row->port) {
             if (twoOnly && row->port->protocol != kMIDIProtocol_2_0)
                 break;
             port = row->port;
             *stamped = row->stamped;
             *stamp = row->stamp;
-            charon_port_retain(port);
+            revenant_port_retain(port);
             break;
         }
     }
-    pthread_mutex_unlock(&charon_owned_lock);
+    pthread_mutex_unlock(&revenant_owned_lock);
     return port;
 }
 
-static dispatch_queue_t charon_delivery_queue(void)
+static dispatch_queue_t revenant_delivery_queue(void)
 {
     static dispatch_queue_t queue;
     static dispatch_once_t once;
     dispatch_once(&once, ^{
-        queue = dispatch_queue_create("charon.in-process-delivery", DISPATCH_QUEUE_SERIAL);
+        queue = dispatch_queue_create("revenant.in-process-delivery", DISPATCH_QUEUE_SERIAL);
     });
     return queue;
 }
 
-typedef struct charon_delivery {
-    struct charon_delivery *next;
-    charon_port *port;
+typedef struct revenant_delivery {
+    struct revenant_delivery *next;
+    revenant_port *port;
     MIDIEndpointRef endpoint;
     int stamped;
     SInt32 stamp;
     MIDIPortRef out;
     int ump;
     MIDIEventList list;
-} charon_delivery;
+} revenant_delivery;
 
-static charon_delivery *charon_delivery_new(size_t bytes)
+static revenant_delivery *revenant_delivery_new(size_t bytes)
 {
-    size_t total = offsetof(charon_delivery, list);
-    if (!charon_size_add(&total, bytes))
+    size_t total = offsetof(revenant_delivery, list);
+    if (!revenant_size_add(&total, bytes))
         return NULL;
     return malloc(total);
 }
 
-static pthread_mutex_t charon_pending_lock = PTHREAD_MUTEX_INITIALIZER;
-static charon_delivery *charon_pending_head;
-static charon_delivery *charon_pending_tail;
-static int charon_pending_scheduled;
+static pthread_mutex_t revenant_pending_lock = PTHREAD_MUTEX_INITIALIZER;
+static revenant_delivery *revenant_pending_head;
+static revenant_delivery *revenant_pending_tail;
+static int revenant_pending_scheduled;
 
-#define CHARON_DRAIN_MESSAGES 16
+#define REVENANT_DRAIN_MESSAGES 16
 
-static uint64_t charon_drain_ticks(void)
+static uint64_t revenant_drain_ticks(void)
 {
     static uint64_t ticks;
     static dispatch_once_t once;
@@ -516,35 +516,35 @@ static uint64_t charon_drain_ticks(void)
     return ticks;
 }
 
-static void charon_drain(void *context);
+static void revenant_drain(void *context);
 
-static void charon_enqueue(charon_delivery *delivery)
+static void revenant_enqueue(revenant_delivery *delivery)
 {
     int schedule = 0;
     delivery->next = NULL;
-    pthread_mutex_lock(&charon_pending_lock);
-    if (charon_pending_tail)
-        charon_pending_tail->next = delivery;
+    pthread_mutex_lock(&revenant_pending_lock);
+    if (revenant_pending_tail)
+        revenant_pending_tail->next = delivery;
     else
-        charon_pending_head = delivery;
-    charon_pending_tail = delivery;
-    if (!charon_pending_scheduled) {
-        charon_pending_scheduled = 1;
+        revenant_pending_head = delivery;
+    revenant_pending_tail = delivery;
+    if (!revenant_pending_scheduled) {
+        revenant_pending_scheduled = 1;
         schedule = 1;
     }
-    pthread_mutex_unlock(&charon_pending_lock);
+    pthread_mutex_unlock(&revenant_pending_lock);
     if (schedule)
-        dispatch_async_f(charon_delivery_queue(), NULL, charon_drain);
+        dispatch_async_f(revenant_delivery_queue(), NULL, revenant_drain);
 }
 
-typedef struct charon_ump_send {
+typedef struct revenant_ump_send {
     MIDISysexSendRequest request;
     MIDISysexSendRequestUMP *umpRequest;
-} charon_ump_send;
+} revenant_ump_send;
 
-static void charon_ump_send_done(MIDISysexSendRequest *request)
+static void revenant_ump_send_done(MIDISysexSendRequest *request)
 {
-    charon_ump_send *send = request->completionRefCon;
+    revenant_ump_send *send = request->completionRefCon;
     MIDISysexSendRequestUMP *umpRequest = send->umpRequest;
     free(send);
     if (umpRequest) {
@@ -554,18 +554,18 @@ static void charon_ump_send_done(MIDISysexSendRequest *request)
     }
 }
 
-int CharonMIDIUMPReleaseSend(MIDISysexSendRequestUMP *umpRequest, MIDIEndpointRef dest, const UInt32 *words, UInt32 count)
+int RevenantMIDIUMPReleaseSend(MIDISysexSendRequestUMP *umpRequest, MIDIEndpointRef dest, const UInt32 *words, UInt32 count)
 {
-    CharonMIDIRPN rpn[16];
+    RevenantMIDIRPN rpn[16];
     memset(rpn, 0, sizeof(rpn));
-    uint8_t stackBytes[CHARON_STACK_BYTES];
-    CharonMIDIBytes bytes;
-    CharonMIDIBytesUseStorage(&bytes, stackBytes, CHARON_STACK_BYTES);
-    CharonMIDIUMPToBytes(words, count, rpn, &bytes);
+    uint8_t stackBytes[REVENANT_STACK_BYTES];
+    RevenantMIDIBytes bytes;
+    RevenantMIDIBytesUseStorage(&bytes, stackBytes, REVENANT_STACK_BYTES);
+    RevenantMIDIUMPToBytes(words, count, rpn, &bytes);
     int queued = 0;
     if (bytes.count > 0 && !bytes.failed) {
-        size_t total = sizeof(charon_ump_send);
-        charon_ump_send *send = charon_size_add(&total, bytes.count) ? calloc(1, total) : NULL;
+        size_t total = sizeof(revenant_ump_send);
+        revenant_ump_send *send = revenant_size_add(&total, bytes.count) ? calloc(1, total) : NULL;
         if (send) {
             UInt8 *data = (UInt8 *)(send + 1);
             memcpy(data, bytes.bytes, bytes.count);
@@ -573,120 +573,120 @@ int CharonMIDIUMPReleaseSend(MIDISysexSendRequestUMP *umpRequest, MIDIEndpointRe
             send->request.destination = dest;
             send->request.data = data;
             send->request.bytesToSend = (UInt32)bytes.count;
-            send->request.completionProc = charon_ump_send_done;
+            send->request.completionProc = revenant_ump_send_done;
             send->request.completionRefCon = send;
             if (MIDISendSysex(&send->request) == noErr) {
                 queued = 1;
             } else {
-                charon_refused("a UMP sysex the release refused");
+                revenant_refused("a UMP sysex the release refused");
                 free(send);
             }
         }
     }
-    CharonMIDIBytesRelease(&bytes);
+    RevenantMIDIBytesRelease(&bytes);
     return queued;
 }
 
-static OSStatus charon_send(MIDIPortRef port, MIDIEndpointRef endpoint, const MIDIEventList *list, int received);
+static OSStatus revenant_send(MIDIPortRef port, MIDIEndpointRef endpoint, const MIDIEventList *list, int received);
 
-static void charon_fallback(charon_delivery *delivery)
+static void revenant_fallback(revenant_delivery *delivery)
 {
     if (delivery->ump) {
         const MIDIEventPacket *packet = &delivery->list.packet[0];
-        (void)CharonMIDIUMPReleaseSend(NULL, delivery->endpoint, packet->words, packet->wordCount);
+        (void)RevenantMIDIUMPReleaseSend(NULL, delivery->endpoint, packet->words, packet->wordCount);
         return;
     }
-    if (charon_send(delivery->out, delivery->endpoint, &delivery->list, 0) != noErr)
-        charon_refused("a send to a reference given to another object, which the release refused");
+    if (revenant_send(delivery->out, delivery->endpoint, &delivery->list, 0) != noErr)
+        revenant_refused("a send to a reference given to another object, which the release refused");
 }
 
-static void charon_deliver_checked(charon_delivery *delivery, charon_object_state state)
+static void revenant_deliver_checked(revenant_delivery *delivery, revenant_object_state state)
 {
     switch (state) {
-    case charon_object_live:
-        charon_port_call(delivery->port, &delivery->list, NULL);
+    case revenant_object_live:
+        revenant_port_call(delivery->port, &delivery->list, NULL);
         break;
-    case charon_object_gone:
+    case revenant_object_gone:
         break;
-    case charon_object_replaced:
-        charon_fallback(delivery);
+    case revenant_object_replaced:
+        revenant_fallback(delivery);
         break;
     }
-    charon_port_release(delivery->port);
+    revenant_port_release(delivery->port);
     free(delivery);
 }
 
-static void charon_drain(void *context)
+static void revenant_drain(void *context)
 {
     (void)context;
     uint64_t start = mach_absolute_time();
-    uint64_t limit = charon_drain_ticks();
+    uint64_t limit = revenant_drain_ticks();
     size_t done = 0;
     for (;;) {
-        pthread_mutex_lock(&charon_pending_lock);
-        charon_delivery *delivery = charon_pending_head;
+        pthread_mutex_lock(&revenant_pending_lock);
+        revenant_delivery *delivery = revenant_pending_head;
         if (delivery) {
-            charon_pending_head = delivery->next;
-            if (!charon_pending_head)
-                charon_pending_tail = NULL;
+            revenant_pending_head = delivery->next;
+            if (!revenant_pending_head)
+                revenant_pending_tail = NULL;
         } else {
-            charon_pending_scheduled = 0;
+            revenant_pending_scheduled = 0;
         }
-        pthread_mutex_unlock(&charon_pending_lock);
+        pthread_mutex_unlock(&revenant_pending_lock);
         if (!delivery)
             return;
-        charon_object_state state = charon_object_check(delivery->endpoint, delivery->stamped, delivery->stamp);
-        charon_deliver_checked(delivery, state);
+        revenant_object_state state = revenant_object_check(delivery->endpoint, delivery->stamped, delivery->stamp);
+        revenant_deliver_checked(delivery, state);
         done++;
-        if (done == CHARON_DRAIN_MESSAGES || mach_absolute_time() - start >= limit) {
-            pthread_mutex_lock(&charon_pending_lock);
-            int more = charon_pending_head != NULL;
+        if (done == REVENANT_DRAIN_MESSAGES || mach_absolute_time() - start >= limit) {
+            pthread_mutex_lock(&revenant_pending_lock);
+            int more = revenant_pending_head != NULL;
             if (!more)
-                charon_pending_scheduled = 0;
-            pthread_mutex_unlock(&charon_pending_lock);
+                revenant_pending_scheduled = 0;
+            pthread_mutex_unlock(&revenant_pending_lock);
             if (more)
-                dispatch_async_f(charon_delivery_queue(), NULL, charon_drain);
+                dispatch_async_f(revenant_delivery_queue(), NULL, revenant_drain);
             return;
         }
     }
 }
 
-OSStatus CharonMIDIInputPort(MIDIClientRef client, CFStringRef portName, MIDIProtocolID protocol,
+OSStatus RevenantMIDIInputPort(MIDIClientRef client, CFStringRef portName, MIDIProtocolID protocol,
                                          MIDIPortRef *outPort, MIDIReceiveBlock receiveBlock)
 {
     if (protocol != kMIDIProtocol_1_0 && protocol != kMIDIProtocol_2_0)
-        return charon_paramErr;
-    charon_port *port = charon_new_port(protocol, receiveBlock);
+        return revenant_paramErr;
+    revenant_port *port = revenant_new_port(protocol, receiveBlock);
     if (!port)
-        return charon_memFullErr;
-    OSStatus status = MIDIInputPortCreate(client, portName, charon_protocol_read, port, outPort);
+        return revenant_memFullErr;
+    OSStatus status = MIDIInputPortCreate(client, portName, revenant_protocol_read, port, outPort);
     if (status != noErr)
-        charon_port_release(port);
+        revenant_port_release(port);
     else
-        charon_own(*outPort, 0, port, NULL);
+        revenant_own(*outPort, 0, port, NULL);
     return status;
 }
 
-Boolean CharonMIDIDeliverInProcess(MIDIEndpointRef endpoint, const UInt32 *words, UInt32 count)
+Boolean RevenantMIDIDeliverInProcess(MIDIEndpointRef endpoint, const UInt32 *words, UInt32 count)
 {
     int stamped = 0;
     SInt32 stamp = 0;
-    charon_port *port = charon_destination_port(endpoint, 0, &stamped, &stamp);
+    revenant_port *port = revenant_destination_port(endpoint, 0, &stamped, &stamp);
     if (!port)
         return false;
     if (!port->block) {
-        charon_port_release(port);
+        revenant_port_release(port);
         return true;
     }
     size_t bytes = 0;
-    if (!charon_size_mul(&bytes, 4, count) || !charon_size_add(&bytes, 8 + sizeof(MIDITimeStamp) + sizeof(UInt32))) {
-        charon_refused("a UMP send of this many words");
-        charon_port_release(port);
+    if (!revenant_size_mul(&bytes, 4, count) || !revenant_size_add(&bytes, 8 + sizeof(MIDITimeStamp) + sizeof(UInt32))) {
+        revenant_refused("a UMP send of this many words");
+        revenant_port_release(port);
         return true;
     }
-    charon_delivery *delivery = charon_delivery_new(bytes);
+    revenant_delivery *delivery = revenant_delivery_new(bytes);
     if (!delivery) {
-        charon_port_release(port);
+        revenant_port_release(port);
         return true;
     }
     delivery->port = port;
@@ -699,43 +699,43 @@ Boolean CharonMIDIDeliverInProcess(MIDIEndpointRef endpoint, const UInt32 *words
     list->protocol = (MIDIProtocolID)port->protocol;
     list->numPackets = 0;
     MIDIEventPacket *last = NULL;
-    if (CharonMIDIEventListAppend(list, bytes, &list->packet[0], &last, 0, count, words)) {
-        charon_enqueue(delivery);
+    if (RevenantMIDIEventListAppend(list, bytes, &list->packet[0], &last, 0, count, words)) {
+        revenant_enqueue(delivery);
     } else {
         free(delivery);
-        charon_port_release(port);
+        revenant_port_release(port);
     }
     return true;
 }
 
-static int charon_deliver_2_0(MIDIPortRef out, MIDIEndpointRef endpoint, const MIDIEventList *source, OSStatus *status)
+static int revenant_deliver_2_0(MIDIPortRef out, MIDIEndpointRef endpoint, const MIDIEventList *source, OSStatus *status)
 {
     int stamped = 0;
     SInt32 stamp = 0;
-    charon_port *port = charon_destination_port(endpoint, 1, &stamped, &stamp);
+    revenant_port *port = revenant_destination_port(endpoint, 1, &stamped, &stamp);
     if (!port)
         return 0;
     *status = noErr;
     if (!port->block) {
-        charon_port_release(port);
+        revenant_port_release(port);
         return 1;
     }
     size_t bytes = 16;
     const MIDIEventPacket *event = &source->packet[0];
     for (UInt32 i = 0; i < source->numPackets; i++) {
         size_t piece = 0;
-        if (!charon_size_mul(&piece, 4, event->wordCount) || !charon_size_add(&piece, 16) || !charon_size_add(&bytes, piece)) {
-            *status = charon_memFullErr;
-            charon_refused("a 2.0 list of this many words");
-            charon_port_release(port);
+        if (!revenant_size_mul(&piece, 4, event->wordCount) || !revenant_size_add(&piece, 16) || !revenant_size_add(&bytes, piece)) {
+            *status = revenant_memFullErr;
+            revenant_refused("a 2.0 list of this many words");
+            revenant_port_release(port);
             return 1;
         }
         event = MIDIEventPacketNext(event);
     }
-    charon_delivery *delivery = charon_delivery_new(bytes);
+    revenant_delivery *delivery = revenant_delivery_new(bytes);
     if (!delivery) {
-        *status = charon_memFullErr;
-        charon_port_release(port);
+        *status = revenant_memFullErr;
+        revenant_port_release(port);
         return 1;
     }
     delivery->port = port;
@@ -751,111 +751,111 @@ static int charon_deliver_2_0(MIDIPortRef out, MIDIEndpointRef endpoint, const M
     MIDIEventPacket *last = NULL;
     event = &source->packet[0];
     for (UInt32 i = 0; i < source->numPackets && end; i++) {
-        end = CharonMIDIEventListAppend(list, bytes, end, &last, event->timeStamp, event->wordCount, event->words);
+        end = RevenantMIDIEventListAppend(list, bytes, end, &last, event->timeStamp, event->wordCount, event->words);
         event = MIDIEventPacketNext(event);
     }
     if (end) {
-        charon_enqueue(delivery);
+        revenant_enqueue(delivery);
     } else {
-        *status = charon_memFullErr;
+        *status = revenant_memFullErr;
         free(delivery);
-        charon_port_release(port);
+        revenant_port_release(port);
     }
     return 1;
 }
 
-OSStatus CharonMIDIDestination(MIDIClientRef client, CFStringRef name, MIDIProtocolID protocol,
+OSStatus RevenantMIDIDestination(MIDIClientRef client, CFStringRef name, MIDIProtocolID protocol,
                                            MIDIEndpointRef *outDest, MIDIReceiveBlock readBlock)
 {
     if (protocol != kMIDIProtocol_1_0 && protocol != kMIDIProtocol_2_0)
-        return charon_paramErr;
-    charon_port *port = charon_new_port(protocol, readBlock);
+        return revenant_paramErr;
+    revenant_port *port = revenant_new_port(protocol, readBlock);
     if (!port)
-        return charon_memFullErr;
-    OSStatus status = MIDIDestinationCreate(client, name, charon_protocol_read, port, outDest);
+        return revenant_memFullErr;
+    OSStatus status = MIDIDestinationCreate(client, name, revenant_protocol_read, port, outDest);
     if (status != noErr) {
-        charon_port_release(port);
+        revenant_port_release(port);
         return status;
     }
-    status = charon_set_protocol(*outDest, protocol);
+    status = revenant_set_protocol(*outDest, protocol);
     if (status != noErr) {
         if (MIDIEndpointDispose(*outDest) != noErr)
-            charon_refused("the dispose of a destination whose protocol was refused");
-        charon_port_release(port);
+            revenant_refused("the dispose of a destination whose protocol was refused");
+        revenant_port_release(port);
         return status;
     }
-    charon_own(*outDest, 1, port, NULL);
+    revenant_own(*outDest, 1, port, NULL);
     return noErr;
 }
 
-void CharonMIDIOwnBlock(MIDIObjectRef object, void *retainedBlock)
+void RevenantMIDIOwnBlock(MIDIObjectRef object, void *retainedBlock)
 {
-    charon_own(object, 0, NULL, retainedBlock);
+    revenant_own(object, 0, NULL, retainedBlock);
 }
 
-void CharonMIDIForgetRoute(MIDIObjectRef object)
+void RevenantMIDIForgetRoute(MIDIObjectRef object)
 {
-    charon_route_forget(object);
+    revenant_route_forget(object);
 }
 
-OSStatus CharonMIDISource(MIDIClientRef client, CFStringRef name, MIDIProtocolID protocol, MIDIEndpointRef *outSrc)
+OSStatus RevenantMIDISource(MIDIClientRef client, CFStringRef name, MIDIProtocolID protocol, MIDIEndpointRef *outSrc)
 {
     if (protocol != kMIDIProtocol_1_0 && protocol != kMIDIProtocol_2_0)
-        return charon_paramErr;
+        return revenant_paramErr;
     OSStatus status = MIDISourceCreate(client, name, outSrc);
     if (status != noErr)
         return status;
-    status = charon_set_protocol(*outSrc, protocol);
+    status = revenant_set_protocol(*outSrc, protocol);
     if (status != noErr) {
         if (MIDIEndpointDispose(*outSrc) != noErr)
-            charon_refused("the dispose of a source whose protocol was refused");
+            revenant_refused("the dispose of a source whose protocol was refused");
         return status;
     }
-    charon_route_forget(*outSrc);
+    revenant_route_forget(*outSrc);
     return noErr;
 }
 
-static charon_route *charon_route_retain(MIDIEndpointRef endpoint)
+static revenant_route *revenant_route_retain(MIDIEndpointRef endpoint)
 {
-    pthread_mutex_lock(&charon_lock);
-    size_t i = charon_bound(charon_routes, charon_route_count, sizeof(charon_route_entry), endpoint, 0);
-    if (i < charon_route_count && charon_routes[i].endpoint == endpoint) {
-        charon_route *route = charon_routes[i].route;
+    pthread_mutex_lock(&revenant_lock);
+    size_t i = revenant_bound(revenant_routes, revenant_route_count, sizeof(revenant_route_entry), endpoint, 0);
+    if (i < revenant_route_count && revenant_routes[i].endpoint == endpoint) {
+        revenant_route *route = revenant_routes[i].route;
         __atomic_add_fetch(&route->references, 1, __ATOMIC_RELAXED);
-        pthread_mutex_unlock(&charon_lock);
+        pthread_mutex_unlock(&revenant_lock);
         return route;
     }
-    pthread_mutex_unlock(&charon_lock);
-    charon_route *made = calloc(1, sizeof(charon_route));
+    pthread_mutex_unlock(&revenant_lock);
+    revenant_route *made = calloc(1, sizeof(revenant_route));
     if (!made)
         return NULL;
     made->references = 1;
     pthread_mutex_init(&made->lock, NULL);
-    charon_route *route = NULL;
-    pthread_mutex_lock(&charon_lock);
-    i = charon_bound(charon_routes, charon_route_count, sizeof(charon_route_entry), endpoint, 0);
-    if (i < charon_route_count && charon_routes[i].endpoint == endpoint) {
-        route = charon_routes[i].route;
+    revenant_route *route = NULL;
+    pthread_mutex_lock(&revenant_lock);
+    i = revenant_bound(revenant_routes, revenant_route_count, sizeof(revenant_route_entry), endpoint, 0);
+    if (i < revenant_route_count && revenant_routes[i].endpoint == endpoint) {
+        route = revenant_routes[i].route;
         __atomic_add_fetch(&route->references, 1, __ATOMIC_RELAXED);
     } else {
-        if (charon_route_count == charon_route_capacity) {
-            size_t capacity = charon_route_capacity ? charon_grown_capacity(charon_route_capacity, sizeof(charon_route_entry)) : 16;
-            charon_route_entry *grown = capacity ? realloc(charon_routes, capacity * sizeof(charon_route_entry)) : NULL;
+        if (revenant_route_count == revenant_route_capacity) {
+            size_t capacity = revenant_route_capacity ? revenant_grown_capacity(revenant_route_capacity, sizeof(revenant_route_entry)) : 16;
+            revenant_route_entry *grown = capacity ? realloc(revenant_routes, capacity * sizeof(revenant_route_entry)) : NULL;
             if (grown) {
-                charon_routes = grown;
-                charon_route_capacity = capacity;
+                revenant_routes = grown;
+                revenant_route_capacity = capacity;
             }
         }
-        if (charon_route_count < charon_route_capacity) {
-            memmove(&charon_routes[i + 1], &charon_routes[i], (charon_route_count - i) * sizeof(charon_route_entry));
-            charon_routes[i].endpoint = endpoint;
-            charon_routes[i].route = made;
-            charon_route_count++;
+        if (revenant_route_count < revenant_route_capacity) {
+            memmove(&revenant_routes[i + 1], &revenant_routes[i], (revenant_route_count - i) * sizeof(revenant_route_entry));
+            revenant_routes[i].endpoint = endpoint;
+            revenant_routes[i].route = made;
+            revenant_route_count++;
             made->references++;
             route = made;
         }
     }
-    pthread_mutex_unlock(&charon_lock);
+    pthread_mutex_unlock(&revenant_lock);
     if (route != made) {
         pthread_mutex_destroy(&made->lock);
         free(made);
@@ -863,32 +863,32 @@ static charon_route *charon_route_retain(MIDIEndpointRef endpoint)
     return route;
 }
 
-static OSStatus charon_send(MIDIPortRef port, MIDIEndpointRef endpoint, const MIDIEventList *list, int received)
+static OSStatus revenant_send(MIDIPortRef port, MIDIEndpointRef endpoint, const MIDIEventList *list, int received)
 {
     size_t capacity = 16;
     const MIDIEventPacket *event = &list->packet[0];
     for (UInt32 i = 0; i < list->numPackets; i++) {
         size_t piece = 0;
-        if (!charon_size_mul(&piece, 8, event->wordCount) || !charon_size_add(&piece, 10) || !charon_size_add(&capacity, piece))
-            return charon_memFullErr;
+        if (!revenant_size_mul(&piece, 8, event->wordCount) || !revenant_size_add(&piece, 10) || !revenant_size_add(&capacity, piece))
+            return revenant_memFullErr;
         event = MIDIEventPacketNext(event);
     }
-    uint32_t stackPackets[CHARON_STACK_LIST_WORDS] __attribute__((aligned(8)));
+    uint32_t stackPackets[REVENANT_STACK_LIST_WORDS] __attribute__((aligned(8)));
     MIDIPacketList *packets = (MIDIPacketList *)stackPackets;
     MIDIPacketList *heapPackets = NULL;
     if (capacity > sizeof(stackPackets)) {
         heapPackets = malloc(capacity);
         if (!heapPackets)
-            return charon_memFullErr;
+            return revenant_memFullErr;
         packets = heapPackets;
     }
-    uint8_t stackBytes[CHARON_STACK_BYTES];
-    CharonMIDIBytes bytes;
-    CharonMIDIBytesUseStorage(&bytes, stackBytes, CHARON_STACK_BYTES);
+    uint8_t stackBytes[REVENANT_STACK_BYTES];
+    RevenantMIDIBytes bytes;
+    RevenantMIDIBytesUseStorage(&bytes, stackBytes, REVENANT_STACK_BYTES);
     OSStatus status = noErr;
-    charon_route *route = charon_route_retain(endpoint);
+    revenant_route *route = revenant_route_retain(endpoint);
     if (!route) {
-        status = charon_memFullErr;
+        status = revenant_memFullErr;
     } else {
         int failed = 0;
         pthread_mutex_lock(&route->lock);
@@ -896,7 +896,7 @@ static OSStatus charon_send(MIDIPortRef port, MIDIEndpointRef endpoint, const MI
         event = &list->packet[0];
         for (UInt32 i = 0; i < list->numPackets && !failed; i++) {
             bytes.count = 0;
-            CharonMIDIUMPToBytes(event->words, event->wordCount, route->rpn, &bytes);
+            RevenantMIDIUMPToBytes(event->words, event->wordCount, route->rpn, &bytes);
             if (bytes.failed) {
                 failed = 1;
             } else if (bytes.count > 0) {
@@ -909,26 +909,26 @@ static OSStatus charon_send(MIDIPortRef port, MIDIEndpointRef endpoint, const MI
             event = MIDIEventPacketNext(event);
         }
         pthread_mutex_unlock(&route->lock);
-        charon_route_release(route);
+        revenant_route_release(route);
         if (failed)
-            status = charon_memFullErr;
+            status = revenant_memFullErr;
     }
-    CharonMIDIBytesRelease(&bytes);
+    RevenantMIDIBytesRelease(&bytes);
     if (status == noErr && packets->numPackets > 0)
         status = received ? MIDIReceived(endpoint, packets) : MIDISend(port, endpoint, packets);
     free(heapPackets);
     return status;
 }
 
-OSStatus CharonMIDISend(MIDIPortRef port, MIDIEndpointRef dest, const MIDIEventList *evtlist)
+OSStatus RevenantMIDISend(MIDIPortRef port, MIDIEndpointRef dest, const MIDIEventList *evtlist)
 {
     OSStatus status = noErr;
-    if (charon_deliver_2_0(port, dest, evtlist, &status))
+    if (revenant_deliver_2_0(port, dest, evtlist, &status))
         return status;
-    return charon_send(port, dest, evtlist, 0);
+    return revenant_send(port, dest, evtlist, 0);
 }
 
-OSStatus CharonMIDIReceive(MIDIEndpointRef src, const MIDIEventList *evtlist)
+OSStatus RevenantMIDIReceive(MIDIEndpointRef src, const MIDIEventList *evtlist)
 {
-    return charon_send(0, src, evtlist, 1);
+    return revenant_send(0, src, evtlist, 1);
 }

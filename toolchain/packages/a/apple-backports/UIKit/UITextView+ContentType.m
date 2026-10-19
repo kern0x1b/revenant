@@ -1,15 +1,15 @@
-#import "CharonTextContentType.h"
+#import "RevenantTextContentType.h"
 
-@implementation UITextView (CharonContentType)
+@implementation UITextView (RevenantContentType)
 
 - (NSString *)textContentType
 {
-    return charon_text_content_type(self);
+    return revenant_text_content_type(self);
 }
 
 - (void)setTextContentType:(NSString *)textContentType
 {
-    charon_set_text_content_type(self, textContentType);
+    revenant_set_text_content_type(self, textContentType);
 }
 
 @end

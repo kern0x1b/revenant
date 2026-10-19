@@ -3,7 +3,7 @@
 static void *ur_symbol(const char *name)
 {
     char prefixed[256];
-    snprintf(prefixed, sizeof(prefixed), "CharonHost%s", name);
+    snprintf(prefixed, sizeof(prefixed), "RevenantHost%s", name);
     void *found = dlsym(RTLD_DEFAULT, prefixed);
     return found ? found : dlsym(RTLD_DEFAULT, name);
 }

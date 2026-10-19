@@ -3,7 +3,7 @@
 
 #pragma clang diagnostic ignored "-Wobjc-missing-property-synthesis"
 
-static BOOL CharonMDLVoxelIndex(MDLVoxelIndex index, MDLVoxelIndex minimum, MDLVoxelIndex maximum, NSUInteger *out)
+static BOOL RevenantMDLVoxelIndex(MDLVoxelIndex index, MDLVoxelIndex minimum, MDLVoxelIndex maximum, NSUInteger *out)
 {
     if (index.x < minimum.x || index.y < minimum.y || index.z < minimum.z)
         return NO;
@@ -14,14 +14,14 @@ static BOOL CharonMDLVoxelIndex(MDLVoxelIndex index, MDLVoxelIndex minimum, MDLV
     return YES;
 }
 
-static NSUInteger CharonMDLVoxelCount(MDLVoxelIndex minimum, MDLVoxelIndex maximum)
+static NSUInteger RevenantMDLVoxelCount(MDLVoxelIndex minimum, MDLVoxelIndex maximum)
 {
     return (NSUInteger)(maximum.x - minimum.x) * (NSUInteger)(maximum.y - minimum.y) * (NSUInteger)(maximum.z - minimum.z);
 }
 
 
-@interface MDLVoxelArray (CharonSet)
-- (MDLVoxelIndex)charon_indexOfLinear:(NSUInteger)k;
+@interface MDLVoxelArray (RevenantSet)
+- (MDLVoxelIndex)revenant_indexOfLinear:(NSUInteger)k;
 @end
 
 @implementation MDLVoxelArray {
@@ -53,7 +53,7 @@ static NSUInteger CharonMDLVoxelCount(MDLVoxelIndex minimum, MDLVoxelIndex maxim
         _shellFieldInteriorThickness = 0;
         _shellFieldExteriorThickness = 0;
         const int8_t *bytes = voxelData.bytes;
-        NSUInteger count = CharonMDLVoxelCount(_minimum, _maximum);
+        NSUInteger count = RevenantMDLVoxelCount(_minimum, _maximum);
         for (NSUInteger k = 0; k < count && (k + 1) * sizeof(int8_t) <= voxelData.length; k++)
             if (bytes[k] > 0)
                 [_filled addIndex:k];
@@ -121,7 +121,7 @@ static NSUInteger CharonMDLVoxelCount(MDLVoxelIndex minimum, MDLVoxelIndex maxim
              allowAnyShell:(BOOL)allowAnyShell
 {
     NSUInteger linear;
-    if (!CharonMDLVoxelIndex(index, _minimum, _maximum, &linear))
+    if (!RevenantMDLVoxelIndex(index, _minimum, _maximum, &linear))
         return NO;
     (void)allowAnyX;
     (void)allowAnyY;
@@ -133,13 +133,13 @@ static NSUInteger CharonMDLVoxelCount(MDLVoxelIndex minimum, MDLVoxelIndex maxim
 - (void)setVoxelAtIndex:(MDLVoxelIndex)index
 {
     NSUInteger linear;
-    if (CharonMDLVoxelIndex(index, _minimum, _maximum, &linear))
+    if (RevenantMDLVoxelIndex(index, _minimum, _maximum, &linear))
         [_filled addIndex:linear];
 }
 
 - (NSData *)voxelIndices
 {
-    NSUInteger count = CharonMDLVoxelCount(_minimum, _maximum);
+    NSUInteger count = RevenantMDLVoxelCount(_minimum, _maximum);
     NSMutableData *data = [NSMutableData dataWithLength:count * sizeof(int8_t)];
     int8_t *bytes = data.mutableBytes;
     for (NSUInteger k = 0; k < count; k++)
@@ -155,14 +155,14 @@ static NSUInteger CharonMDLVoxelCount(MDLVoxelIndex minimum, MDLVoxelIndex maxim
                           MIN(extent.maximumExtent.z, _maximum.z)};
     if (low.x >= high.x || low.y >= high.y || low.z >= high.z)
         return nil;
-    NSMutableData *data = [NSMutableData dataWithLength:CharonMDLVoxelCount(low, high) * sizeof(int8_t)];
+    NSMutableData *data = [NSMutableData dataWithLength:RevenantMDLVoxelCount(low, high) * sizeof(int8_t)];
     int8_t *bytes = data.mutableBytes;
     NSUInteger at = 0;
     for (int z = low.z; z < high.z; z++)
         for (int y = low.y; y < high.y; y++)
             for (int x = low.x; x < high.x; x++) {
                 NSUInteger linear;
-                bytes[at++] = CharonMDLVoxelIndex((MDLVoxelIndex){x, y, z}, _minimum, _maximum, &linear) &&
+                bytes[at++] = RevenantMDLVoxelIndex((MDLVoxelIndex){x, y, z}, _minimum, _maximum, &linear) &&
                                       [_filled containsIndex:linear]
                                   ? 1
                                   : 0;
@@ -170,17 +170,17 @@ static NSUInteger CharonMDLVoxelCount(MDLVoxelIndex minimum, MDLVoxelIndex maxim
     return data;
 }
 
-- (void)charon_combine:(MDLVoxelArray *)voxels keep:(BOOL)keep
+- (void)revenant_combine:(MDLVoxelArray *)voxels keep:(BOOL)keep
 {
     if (!voxels || voxels == self)
         return;
     MDLVoxelIndexExtent mine = self.voxelIndexExtent;
     for (NSUInteger k = 0; k < voxels.count; k++) {
-        MDLVoxelIndex theirs = [voxels charon_indexOfLinear:k];
+        MDLVoxelIndex theirs = [voxels revenant_indexOfLinear:k];
         vector_float3 point = [voxels spatialLocationOfIndex:theirs];
         MDLVoxelIndex at = [self indexOfSpatialLocation:point];
         NSUInteger linear;
-        if (!CharonMDLVoxelIndex(at, mine.minimumExtent, mine.maximumExtent, &linear))
+        if (!RevenantMDLVoxelIndex(at, mine.minimumExtent, mine.maximumExtent, &linear))
             continue;
         if (keep)
             [_filled addIndex:linear];
@@ -189,7 +189,7 @@ static NSUInteger CharonMDLVoxelCount(MDLVoxelIndex minimum, MDLVoxelIndex maxim
     }
 }
 
-- (MDLVoxelIndex)charon_indexOfLinear:(NSUInteger)k
+- (MDLVoxelIndex)revenant_indexOfLinear:(NSUInteger)k
 {
     NSUInteger x = _minimum.x, y = _minimum.y, z = _minimum.z;
     NSUInteger across = (NSUInteger)(_maximum.x - _minimum.x);
@@ -203,7 +203,7 @@ static NSUInteger CharonMDLVoxelCount(MDLVoxelIndex minimum, MDLVoxelIndex maxim
 
 - (void)unionWithVoxels:(MDLVoxelArray *)voxels
 {
-    [self charon_combine:voxels keep:YES];
+    [self revenant_combine:voxels keep:YES];
 }
 
 - (void)intersectWithVoxels:(MDLVoxelArray *)voxels
@@ -211,12 +211,12 @@ static NSUInteger CharonMDLVoxelCount(MDLVoxelIndex minimum, MDLVoxelIndex maxim
     NSMutableIndexSet *theirs = [[NSMutableIndexSet alloc] init];
     MDLVoxelIndexExtent mine = self.voxelIndexExtent;
     for (NSUInteger k = 0; k < voxels.count; k++) {
-        MDLVoxelIndex at = [self indexOfSpatialLocation:[voxels spatialLocationOfIndex:[voxels charon_indexOfLinear:k]]];
+        MDLVoxelIndex at = [self indexOfSpatialLocation:[voxels spatialLocationOfIndex:[voxels revenant_indexOfLinear:k]]];
         NSUInteger linear;
-        if (CharonMDLVoxelIndex(at, mine.minimumExtent, mine.maximumExtent, &linear))
+        if (RevenantMDLVoxelIndex(at, mine.minimumExtent, mine.maximumExtent, &linear))
             [theirs addIndex:linear];
     }
-    for (NSUInteger linear = 0; linear < CharonMDLVoxelCount(mine.minimumExtent, mine.maximumExtent); linear++)
+    for (NSUInteger linear = 0; linear < RevenantMDLVoxelCount(mine.minimumExtent, mine.maximumExtent); linear++)
         if ([_filled containsIndex:linear] && ![theirs containsIndex:linear])
             [_filled removeIndex:linear];
 }
@@ -225,9 +225,9 @@ static NSUInteger CharonMDLVoxelCount(MDLVoxelIndex minimum, MDLVoxelIndex maxim
 {
     MDLVoxelIndexExtent mine = self.voxelIndexExtent;
     for (NSUInteger k = 0; k < voxels.count; k++) {
-        MDLVoxelIndex at = [self indexOfSpatialLocation:[voxels spatialLocationOfIndex:[voxels charon_indexOfLinear:k]]];
+        MDLVoxelIndex at = [self indexOfSpatialLocation:[voxels spatialLocationOfIndex:[voxels revenant_indexOfLinear:k]]];
         NSUInteger linear;
-        if (CharonMDLVoxelIndex(at, mine.minimumExtent, mine.maximumExtent, &linear))
+        if (RevenantMDLVoxelIndex(at, mine.minimumExtent, mine.maximumExtent, &linear))
             [_filled removeIndex:linear];
     }
 }
@@ -271,16 +271,16 @@ static NSUInteger CharonMDLVoxelCount(MDLVoxelIndex minimum, MDLVoxelIndex maxim
 {
     NSMutableIndexSet *shell = [[NSMutableIndexSet alloc] init];
     MDLVoxelIndexExtent extent = self.voxelIndexExtent;
-    for (NSUInteger linear = 0; linear < CharonMDLVoxelCount(extent.minimumExtent, extent.maximumExtent); linear++) {
+    for (NSUInteger linear = 0; linear < RevenantMDLVoxelCount(extent.minimumExtent, extent.maximumExtent); linear++) {
         if (![_filled containsIndex:linear])
             continue;
-        MDLVoxelIndex at = [self charon_indexOfLinear:linear];
+        MDLVoxelIndex at = [self revenant_indexOfLinear:linear];
         BOOL touching = NO;
         for (int dz = -1; dz <= 1 && !touching; dz++)
             for (int dy = -1; dy <= 1 && !touching; dy++)
                 for (int dx = -1; dx <= 1; dx++) {
                     NSUInteger linear;
-                    if (CharonMDLVoxelIndex((MDLVoxelIndex){at.x + dx, at.y + dy, at.z + dz}, extent.minimumExtent,
+                    if (RevenantMDLVoxelIndex((MDLVoxelIndex){at.x + dx, at.y + dy, at.z + dz}, extent.minimumExtent,
                                             extent.maximumExtent, &linear) &&
                         [_filled containsIndex:linear]) {
                         touching = YES;
@@ -288,7 +288,7 @@ static NSUInteger CharonMDLVoxelCount(MDLVoxelIndex minimum, MDLVoxelIndex maxim
                     }
                 }
         NSUInteger linear;
-        if (touching && CharonMDLVoxelIndex(at, extent.minimumExtent, extent.maximumExtent, &linear))
+        if (touching && RevenantMDLVoxelIndex(at, extent.minimumExtent, extent.maximumExtent, &linear))
             [shell addIndex:linear];
     }
     [_filled removeAllIndexes];

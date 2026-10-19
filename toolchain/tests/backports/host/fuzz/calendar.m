@@ -6,7 +6,7 @@
 void host_attach_prefixed(const char *prefix);
 static uint32_t roll(uint32_t n) { return fuzz_roll(n); }
 static BOOL ours;
-static SEL named(NSString *selector) { return NSSelectorFromString(ours ? [@"charonHost_" stringByAppendingString:selector] : selector); }
+static SEL named(NSString *selector) { return NSSelectorFromString(ours ? [@"revenantHost_" stringByAppendingString:selector] : selector); }
 
 static NSString *date_text(NSDate *date) { return date ? [NSString stringWithFormat:@"%.3f", date.timeIntervalSinceReferenceDate] : @"nil"; }
 

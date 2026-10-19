@@ -29,7 +29,7 @@ static void set(id object, NSString *name, id value)
 
 static void run_configuration(const char *side, Class cls)
 {
-    NSUserActivity *activity = [[NSUserActivity alloc] initWithActivityType:@"com.example.charon.scene"];
+    NSUserActivity *activity = [[NSUserActivity alloc] initWithActivityType:@"com.example.revenant.scene"];
     SEL initWith = NSSelectorFromString(@"initWithUserActivity:");
     InitWithFn make = (InitWithFn)[cls instanceMethodForSelector:initWith];
     id kept = make([cls alloc], initWith, activity);
@@ -70,7 +70,7 @@ static void run_action(const char *side, Class cls)
 {
     SEL factory = NSSelectorFromString(@"actionWithIdentifier:alternateAction:configurationProvider:");
     FactoryFn make = (FactoryFn)[cls methodForSelector:factory];
-    id action = make(cls, factory, @"com.example.charon.open", nil, ^id(id sender) { return nil; });
+    id action = make(cls, factory, @"com.example.revenant.open", nil, ^id(id sender) { return nil; });
     report(side, "action-superclass", NSStringFromClass([cls superclass]));
     report(side, "action-identifier-kept", get(action, @"identifier"));
     report(side, "action-title-default", get(action, @"title"));

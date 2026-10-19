@@ -1,9 +1,9 @@
-#import "CharonMPS.h"
+#import "RevenantMPS.h"
 
 #pragma clang diagnostic ignored "-Wprotocol"
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
 
-NSUInteger CharonMPSImageElementSize(MPSImageFeatureChannelFormat format)
+NSUInteger RevenantMPSImageElementSize(MPSImageFeatureChannelFormat format)
 {
     switch (format) {
     case MPSImageFeatureChannelFormatUnorm8: return 1;
@@ -14,7 +14,7 @@ NSUInteger CharonMPSImageElementSize(MPSImageFeatureChannelFormat format)
     }
 }
 
-MTLPixelFormat CharonMPSImagePixelFormat(MPSImageFeatureChannelFormat format)
+MTLPixelFormat RevenantMPSImagePixelFormat(MPSImageFeatureChannelFormat format)
 {
     switch (format) {
     case MPSImageFeatureChannelFormatUnorm8: return MTLPixelFormatR8Unorm;
@@ -25,10 +25,10 @@ MTLPixelFormat CharonMPSImagePixelFormat(MPSImageFeatureChannelFormat format)
     }
 }
 
-MTLPixelFormat CharonMPSImagePixelFormatFor(MPSImageFeatureChannelFormat format, NSUInteger channels)
+MTLPixelFormat RevenantMPSImagePixelFormatFor(MPSImageFeatureChannelFormat format, NSUInteger channels)
 {
     if (channels == 1)
-        return CharonMPSImagePixelFormat(format);
+        return RevenantMPSImagePixelFormat(format);
     if (channels == 2) {
         switch (format) {
         case MPSImageFeatureChannelFormatUnorm8: return MTLPixelFormatRG8Unorm;
@@ -50,7 +50,7 @@ MTLPixelFormat CharonMPSImagePixelFormatFor(MPSImageFeatureChannelFormat format,
     return MTLPixelFormatInvalid;
 }
 
-MPSImageFeatureChannelFormat CharonMPSImageFormatOfPixelFormat(MTLPixelFormat pixel)
+MPSImageFeatureChannelFormat RevenantMPSImageFormatOfPixelFormat(MTLPixelFormat pixel)
 {
     switch (pixel) {
     case MTLPixelFormatR8Unorm: case MTLPixelFormatRG8Unorm: case MTLPixelFormatRGBA8Unorm:
@@ -100,7 +100,7 @@ MPSImageFeatureChannelFormat CharonMPSImageFormatOfPixelFormat(MTLPixelFormat pi
 - (MTLTextureUsage)usage { return _usage; }
 - (void)setUsage:(MTLTextureUsage)usage { _usage = usage; }
 
-- (MTLPixelFormat)pixelFormat { return CharonMPSImagePixelFormatFor(_channelFormat, _featureChannels); }
+- (MTLPixelFormat)pixelFormat { return RevenantMPSImagePixelFormatFor(_channelFormat, _featureChannels); }
 
 + (instancetype)imageDescriptorWithChannelFormat:(MPSImageFeatureChannelFormat)channelFormat
                                            width:(NSUInteger)width
@@ -191,7 +191,7 @@ MPSImageFeatureChannelFormat CharonMPSImageFormatOfPixelFormat(MTLPixelFormat pi
         _featureChannels = 1;
         _numberOfImages = 1;
         _channelFormat = MPSImageFeatureChannelFormatNone;
-        CharonMPSRefuse(@"MPSImage: -initWithDevice: names no shape. Build an MPSImageDescriptor and use "
+        RevenantMPSRefuse(@"MPSImage: -initWithDevice: names no shape. Build an MPSImageDescriptor and use "
                         @"-initWithDevice:imageDescriptor:, which is what this port implements");
     }
     return self;
@@ -205,9 +205,9 @@ MPSImageFeatureChannelFormat CharonMPSImageFormatOfPixelFormat(MTLPixelFormat pi
         _numberOfImages = descriptor.numberOfImages;
         _channelFormat = descriptor.channelFormat;
         _sliceRange = NSMakeRange(0, descriptor.numberOfImages);
-        NSUInteger element = CharonMPSImageElementSize(descriptor.channelFormat);
+        NSUInteger element = RevenantMPSImageElementSize(descriptor.channelFormat);
         if (!element || !descriptor.width || !descriptor.height || !descriptor.featureChannels) {
-            CharonMPSRefuse(@"MPSImage: a descriptor of channel format %lu with %lux%lu and %lu feature channels "
+            RevenantMPSRefuse(@"MPSImage: a descriptor of channel format %lu with %lux%lu and %lu feature channels "
                             "names no storage this port can hold",
                             (unsigned long)descriptor.channelFormat, (unsigned long)descriptor.width,
                             (unsigned long)descriptor.height, (unsigned long)descriptor.featureChannels);
@@ -215,7 +215,7 @@ MPSImageFeatureChannelFormat CharonMPSImageFormatOfPixelFormat(MTLPixelFormat pi
         }
         MTLPixelFormat pixel = descriptor.pixelFormat;
         if (pixel == MTLPixelFormatInvalid) {
-            CharonMPSRefuse(@"MPSImage: channel format %lu with %lu feature channels has no Metal pixel format, "
+            RevenantMPSRefuse(@"MPSImage: channel format %lu with %lu feature channels has no Metal pixel format, "
                             "so no texture was made",
                             (unsigned long)descriptor.channelFormat, (unsigned long)descriptor.featureChannels);
             return self;
@@ -229,7 +229,7 @@ MPSImageFeatureChannelFormat CharonMPSImageFormatOfPixelFormat(MTLPixelFormat pi
         td.cpuCacheMode = descriptor.cpuCacheMode;
         _texture = [device newTextureWithDescriptor:td];
         if (!_texture) {
-            CharonMPSRefuse(@"MPSImage: the carried Metal classes made no texture for %lux%lu of format %d, "
+            RevenantMPSRefuse(@"MPSImage: the carried Metal classes made no texture for %lux%lu of format %d, "
                             "so this image holds nothing",
                             (unsigned long)descriptor.width, (unsigned long)descriptor.height, (int)pixel);
             return self;
@@ -255,7 +255,7 @@ MPSImageFeatureChannelFormat CharonMPSImageFormatOfPixelFormat(MTLPixelFormat pi
         _texture = texture;
         _featureChannels = featureChannels ? featureChannels : 1;
         _numberOfImages = 1;
-        _channelFormat = CharonMPSImageFormatOfPixelFormat(texture.pixelFormat);
+        _channelFormat = RevenantMPSImageFormatOfPixelFormat(texture.pixelFormat);
         _sliceRange = NSMakeRange(0, 1);
     }
     return self;
@@ -293,9 +293,9 @@ MPSImageFeatureChannelFormat CharonMPSImageFormatOfPixelFormat(MTLPixelFormat pi
 - (MPSImageFeatureChannelFormat)featureChannelFormat { return _channelFormat; }
 - (size_t)pixelSize
 {
-    return (size_t)CharonMPSImageElementSize(_channelFormat) * _featureChannels;
+    return (size_t)RevenantMPSImageElementSize(_channelFormat) * _featureChannels;
 }
-- (NSUInteger)precision { return (NSUInteger)CharonMPSImageElementSize(_channelFormat) * 8; }
+- (NSUInteger)precision { return (NSUInteger)RevenantMPSImageElementSize(_channelFormat) * 8; }
 - (id<MTLTexture>)texture { return _texture; }
 - (NSString *)label { return _label; }
 - (void)setLabel:(NSString *)label { _label = [label copy]; }
@@ -309,11 +309,11 @@ featureChannelInfo:(MPSImageReadWriteParams)featureChannelInfo
         imageIndex:(NSUInteger)imageIndex
 {
     if (!dataBytes || !_texture) {
-        CharonMPSRefuse(@"MPSImage: -readBytes: was given no buffer or this image holds no texture, so nothing was read");
+        RevenantMPSRefuse(@"MPSImage: -readBytes: was given no buffer or this image holds no texture, so nothing was read");
         return;
     }
     if (imageIndex >= _numberOfImages) {
-        CharonMPSRefuse(@"MPSImage: -readBytes: was given image index %lu of %lu, so nothing was read",
+        RevenantMPSRefuse(@"MPSImage: -readBytes: was given image index %lu of %lu, so nothing was read",
                         (unsigned long)imageIndex, (unsigned long)_numberOfImages);
         return;
     }
@@ -328,11 +328,11 @@ featureChannelInfo:(MPSImageReadWriteParams)featureChannelInfo
          imageIndex:(NSUInteger)imageIndex
 {
     if (!dataBytes || !_texture) {
-        CharonMPSRefuse(@"MPSImage: -writeBytes: was given no buffer or this image holds no texture, so nothing was written");
+        RevenantMPSRefuse(@"MPSImage: -writeBytes: was given no buffer or this image holds no texture, so nothing was written");
         return;
     }
     if (imageIndex >= _numberOfImages) {
-        CharonMPSRefuse(@"MPSImage: -writeBytes: was given image index %lu of %lu, so nothing was written",
+        RevenantMPSRefuse(@"MPSImage: -writeBytes: was given image index %lu of %lu, so nothing was written",
                         (unsigned long)imageIndex, (unsigned long)_numberOfImages);
         return;
     }

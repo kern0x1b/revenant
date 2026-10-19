@@ -21,10 +21,10 @@ void documentmenu_run(UIWindow *window, DocumentMenuRecorder record)
     record(@"open mode", raised(^id{ return [[UIDocumentMenuViewController alloc] initWithDocumentTypes:@[@"public.data"] inMode:UIDocumentPickerModeOpen]; }));
     record(@"export mode for types", raised(^id{ return [[UIDocumentMenuViewController alloc] initWithDocumentTypes:@[@"public.data"] inMode:UIDocumentPickerModeExportToService]; }));
     record(@"move mode for types", raised(^id{ return [[UIDocumentMenuViewController alloc] initWithDocumentTypes:@[@"public.data"] inMode:UIDocumentPickerModeMoveToService]; }));
-    NSString *file = [NSTemporaryDirectory() stringByAppendingPathComponent:@"charon-menu.txt"];
+    NSString *file = [NSTemporaryDirectory() stringByAppendingPathComponent:@"revenant-menu.txt"];
     [@"menu" writeToFile:file atomically:YES encoding:NSUTF8StringEncoding error:NULL];
     NSURL *url = [NSURL fileURLWithPath:file];
-    record(@"export by a url that is not there", raised(^id{ return [[UIDocumentMenuViewController alloc] initWithURL:[NSURL fileURLWithPath:@"/tmp/charon-menu-missing"] inMode:UIDocumentPickerModeExportToService]; }));
+    record(@"export by a url that is not there", raised(^id{ return [[UIDocumentMenuViewController alloc] initWithURL:[NSURL fileURLWithPath:@"/tmp/revenant-menu-missing"] inMode:UIDocumentPickerModeExportToService]; }));
     record(@"export by url", raised(^id{ return [[UIDocumentMenuViewController alloc] initWithURL:url inMode:UIDocumentPickerModeExportToService]; }));
     record(@"move by url", raised(^id{ return [[UIDocumentMenuViewController alloc] initWithURL:url inMode:UIDocumentPickerModeMoveToService]; }));
     record(@"import by url", raised(^id{ return [[UIDocumentMenuViewController alloc] initWithURL:url inMode:UIDocumentPickerModeImport]; }));

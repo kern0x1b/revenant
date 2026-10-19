@@ -1,14 +1,14 @@
-#import "CharonFetchIndex.h"
+#import "RevenantFetchIndex.h"
 #import <objc/runtime.h>
 
-static const char CharonIndexesKey;
-static const char CharonSpotlightKey;
+static const char RevenantIndexesKey;
+static const char RevenantSpotlightKey;
 
-@implementation NSEntityDescription (CharonIndexes)
+@implementation NSEntityDescription (RevenantIndexes)
 
 - (NSArray<NSFetchIndexDescription *> *)indexes
 {
-    return objc_getAssociatedObject(self, &CharonIndexesKey) ?: @[];
+    return objc_getAssociatedObject(self, &RevenantIndexesKey) ?: @[];
 }
 
 - (void)setIndexes:(NSArray<NSFetchIndexDescription *> *)indexes
@@ -32,20 +32,20 @@ static const char CharonSpotlightKey;
     }
     NSArray *held = [indexes copy];
     for (NSFetchIndexDescription *index in held)
-        [index _charon_setEntity:self];
-    objc_setAssociatedObject(self, &CharonIndexesKey, held, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+        [index _revenant_setEntity:self];
+    objc_setAssociatedObject(self, &RevenantIndexesKey, held, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
 - (NSExpression *)coreSpotlightDisplayNameExpression
 {
-    return objc_getAssociatedObject(self, &CharonSpotlightKey);
+    return objc_getAssociatedObject(self, &RevenantSpotlightKey);
 }
 
 - (void)setCoreSpotlightDisplayNameExpression:(NSExpression *)expression
 {
     if ([self respondsToSelector:@selector(_throwIfNotEditable)])
         [self performSelector:@selector(_throwIfNotEditable)];
-    objc_setAssociatedObject(self, &CharonSpotlightKey, expression, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, &RevenantSpotlightKey, expression, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
 @end

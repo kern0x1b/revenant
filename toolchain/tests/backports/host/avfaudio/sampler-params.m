@@ -2,11 +2,11 @@
 #import <AVFAudio/AVFAudio.h>
 #import <AudioToolbox/AudioToolbox.h>
 
-@interface charon_host_AVAudioNode : NSObject
-- (void)charon_setEngine:(id)engine auNode:(AUNode)node audioUnit:(AudioUnit)unit;
+@interface revenant_host_AVAudioNode : NSObject
+- (void)revenant_setEngine:(id)engine auNode:(AUNode)node audioUnit:(AudioUnit)unit;
 @end
 
-@interface charon_host_AVAudioUnitSampler : NSObject
+@interface revenant_host_AVAudioUnitSampler : NSObject
 - (instancetype)initWithAudioComponentDescription:(AudioComponentDescription)description;
 - (float)masterGain;
 - (void)setMasterGain:(float)masterGain;
@@ -23,7 +23,7 @@ static void check(NSString *what, BOOL held) {
     if (held) { printf("ok %s\n", what.UTF8String); }
     else { failures++; printf("FAIL %s\n", what.UTF8String); }
 }
-static AudioUnitParameterValue CharonReadParameter(AudioUnit unit, AudioUnitParameterID id) {
+static AudioUnitParameterValue RevenantReadParameter(AudioUnit unit, AudioUnitParameterID id) {
     AudioUnitParameterValue value = 0;
     if (unit == NULL || AudioUnitGetParameter(unit, id, kAudioUnitScope_Global, 0, &value) != noErr) { return -12345; }
     return value;
@@ -36,7 +36,7 @@ int main(void) {
         description.componentSubType = kAudioUnitSubType_Sampler;
         description.componentManufacturer = kAudioUnitManufacturer_Apple;
         AVAudioUnitSampler *theirs = [[AVAudioUnitSampler alloc] initWithAudioComponentDescription:description];
-        charon_host_AVAudioUnitSampler *mine = [[charon_host_AVAudioUnitSampler alloc] initWithAudioComponentDescription:description];
+        revenant_host_AVAudioUnitSampler *mine = [[revenant_host_AVAudioUnitSampler alloc] initWithAudioComponentDescription:description];
         if (theirs == nil || mine == nil) { printf("FAIL a sampler would not instantiate\n"); return 1; }
         [theirs loadInstrumentAtURL:[NSURL URLWithString:@"file:///nonexistent"] error:nil];
 
@@ -46,7 +46,7 @@ int main(void) {
             AUNode node = 0;
             if (AUGraphAddNode(graph, &description, &node) == noErr) {
                 AUGraphNodeInfo(graph, node, NULL, &attached);
-                [(charon_host_AVAudioNode *)mine charon_setEngine:nil auNode:node audioUnit:attached];
+                [(revenant_host_AVAudioNode *)mine revenant_setEngine:nil auNode:node audioUnit:attached];
                 printf("stage the port's node is attached: node %d unit %p\n", (int)node, (void *)attached);
             }
         }
@@ -56,26 +56,26 @@ int main(void) {
 
         for (float value = -6.0f; value <= 6.0f; value += 6.0f) {
             theirs.masterGain = value; mine.masterGain = value;
-            AudioUnitParameterValue a = CharonReadParameter(theirUnit, kAUSamplerParam_Gain);
-            AudioUnitParameterValue b = CharonReadParameter(myUnit, kAUSamplerParam_Gain);
+            AudioUnitParameterValue a = RevenantReadParameter(theirUnit, kAUSamplerParam_Gain);
+            AudioUnitParameterValue b = RevenantReadParameter(myUnit, kAUSamplerParam_Gain);
             printf("stage masterGain = %g: host parameter %g, port parameter %g\n",
                    (double)value, (double)a, (double)b);
             check(@"masterGain tells the unit the same value on both", a == b);
         }
         for (float value = -1.0f; value <= 1.0f; value += 1.0f) {
             theirs.stereoPan = value; mine.stereoPan = value;
-            AudioUnitParameterValue a = CharonReadParameter(theirUnit, kAUSamplerParam_Pan);
-            AudioUnitParameterValue b = CharonReadParameter(myUnit, kAUSamplerParam_Pan);
+            AudioUnitParameterValue a = RevenantReadParameter(theirUnit, kAUSamplerParam_Pan);
+            AudioUnitParameterValue b = RevenantReadParameter(myUnit, kAUSamplerParam_Pan);
             printf("stage stereoPan = %g: host parameter %g, port parameter %g\n",
                    (double)value, (double)a, (double)b);
             check(@"stereoPan tells the unit the same value on both", a == b);
         }
         for (float value = -2400.0f; value <= 2400.0f; value += 1200.0f) {
             theirs.globalTuning = value; mine.globalTuning = value;
-            AudioUnitParameterValue theirCoarse = CharonReadParameter(theirUnit, kAUSamplerParam_CoarseTuning);
-            AudioUnitParameterValue theirFine = CharonReadParameter(theirUnit, kAUSamplerParam_FineTuning);
-            AudioUnitParameterValue myCoarse = CharonReadParameter(myUnit, kAUSamplerParam_CoarseTuning);
-            AudioUnitParameterValue myFine = CharonReadParameter(myUnit, kAUSamplerParam_FineTuning);
+            AudioUnitParameterValue theirCoarse = RevenantReadParameter(theirUnit, kAUSamplerParam_CoarseTuning);
+            AudioUnitParameterValue theirFine = RevenantReadParameter(theirUnit, kAUSamplerParam_FineTuning);
+            AudioUnitParameterValue myCoarse = RevenantReadParameter(myUnit, kAUSamplerParam_CoarseTuning);
+            AudioUnitParameterValue myFine = RevenantReadParameter(myUnit, kAUSamplerParam_FineTuning);
             printf("stage globalTuning = %g cents: host coarse %g fine %g, port coarse %g fine %g\n",
                    (double)value, (double)theirCoarse, (double)theirFine, (double)myCoarse, (double)myFine);
             check(@"globalTuning splits into the same coarse and fine on both",

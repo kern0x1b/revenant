@@ -7,8 +7,8 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
-NSUInteger CharonHostMPSImageBatchIncrementReadCount(MPSImageBatch *batch, NSInteger amount);
-void CharonHostMPSImageBatchSynchronize(MPSImageBatch *batch, id<MTLCommandBuffer> cmdBuf);
+NSUInteger RevenantHostMPSImageBatchIncrementReadCount(MPSImageBatch *batch, NSInteger amount);
+void RevenantHostMPSImageBatchSynchronize(MPSImageBatch *batch, id<MTLCommandBuffer> cmdBuf);
 
 static int checks;
 static int failures;
@@ -49,7 +49,7 @@ static int synchronise_status(int which, int port)
             MPSTemporaryImage *temp = [MPSTemporaryImage temporaryImageWithCommandBuffer:cb imageDescriptor:d];
             MPSImageBatch *batch = which == 0 ? @[plain] : which == 1 ? @[plain, temp] : @[temp];
             if (port)
-                CharonHostMPSImageBatchSynchronize(batch, cb);
+                RevenantHostMPSImageBatchSynchronize(batch, cb);
             else
                 MPSImageBatchSynchronize(batch, cb);
         }
@@ -114,7 +114,7 @@ int main(int argc, const char *argv[])
             MPSTemporaryImage *c = [MPSTemporaryImage temporaryImageWithCommandBuffer:cb imageDescriptor:d];
             MPSTemporaryImage *c2 = [MPSTemporaryImage temporaryImageWithCommandBuffer:cb imageDescriptor:d];
             MPSImageBatch *portBatch = @[c, c, c2];
-            NSUInteger port = CharonHostMPSImageBatchIncrementReadCount(portBatch, 2);
+            NSUInteger port = RevenantHostMPSImageBatchIncrementReadCount(portBatch, 2);
 
             checks++;
             if (metal != 2)
@@ -134,7 +134,7 @@ int main(int argc, const char *argv[])
             MPSImage *plain = [[MPSImage alloc] initWithDevice:device imageDescriptor:d];
             MPSImageBatch *plainOnly = @[plain, plain];
             NSUInteger metal = MPSImageBatchIncrementReadCount(plainOnly, 1);
-            NSUInteger port = CharonHostMPSImageBatchIncrementReadCount(plainOnly, 1);
+            NSUInteger port = RevenantHostMPSImageBatchIncrementReadCount(plainOnly, 1);
             checks++;
             if (metal != 0 || port != 0)
                 fail(@"plain images counted: Metal %lu, the port %lu, and the expectation is 0 for both",
@@ -147,7 +147,7 @@ int main(int argc, const char *argv[])
             NSUInteger metal = t.readCount;
 
             MPSTemporaryImage *u = [MPSTemporaryImage temporaryImageWithCommandBuffer:cb imageDescriptor:d];
-            CharonHostMPSImageBatchIncrementReadCount(@[u], -1);
+            RevenantHostMPSImageBatchIncrementReadCount(@[u], -1);
             checks++;
             if (u.readCount != metal)
                 fail(@"after -1 the port's count is %lu and Metal's is %lu", (unsigned long)u.readCount, (unsigned long)metal);

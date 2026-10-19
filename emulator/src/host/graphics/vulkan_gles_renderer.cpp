@@ -43,7 +43,7 @@
 #include "graphics/gles_resources.hpp"
 #include "graphics/gles_sampler_state.hpp"
 
-namespace shade {
+namespace emulator {
 namespace {
 
     constexpr VkFormat color_format = VK_FORMAT_B8G8R8A8_UNORM;
@@ -186,8 +186,8 @@ namespace {
     BundledVulkanDriver load_bundled_vulkan_driver()
     {
         BundledVulkanDriver driver;
-#if defined(SHADE_VULKAN_DRIVER_FILE)
-        const auto file = executable_directory() / SHADE_VULKAN_DRIVER_FILE;
+#if defined(REVENANT_EMULATOR_VULKAN_DRIVER_FILE)
+        const auto file = executable_directory() / REVENANT_EMULATOR_VULKAN_DRIVER_FILE;
         std::error_code missing;
         if (!std::filesystem::is_regular_file(file, missing)) {
             driver.problem = "no Vulkan driver at " + file.string();
@@ -904,9 +904,9 @@ std::vector<std::uint32_t> compile_shader(std::string_view source,
                 white);
             auto application = make_vulkan_structure<VkApplicationInfo>(
                 VK_STRUCTURE_TYPE_APPLICATION_INFO);
-            application.pApplicationName = "Shade";
+            application.pApplicationName = "Revenant";
             application.applicationVersion = VK_MAKE_VERSION(0, 1, 0);
-            application.pEngineName = "Shade GLES HLE";
+            application.pEngineName = "Revenant GLES HLE";
             application.engineVersion = VK_MAKE_VERSION(0, 1, 0);
             application.apiVersion = VK_API_VERSION_1_0;
 
@@ -1011,7 +1011,7 @@ std::vector<std::uint32_t> compile_shader(std::string_view source,
                     physical_device_ = candidate;
                     hardware_accelerated_ = !cpu_device;
                     queue_family_ = family;
-                    renderer_name_ = "Shade GLES 1.1 Vulkan (" +
+                    renderer_name_ = "Revenant GLES 1.1 Vulkan (" +
                                      std::string { properties.deviceName } +
                                      ")";
                     break;

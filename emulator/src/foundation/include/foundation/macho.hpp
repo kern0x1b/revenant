@@ -25,7 +25,7 @@
 #include "foundation/arm_cpu_model.hpp"
 #include "foundation/content_identity.hpp"
 
-namespace shade {
+namespace emulator {
 
 struct MachSection {
     std::string name;

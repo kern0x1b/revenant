@@ -1,6 +1,6 @@
 #!/bin/sh
 # run.sh — records what the host's CallKit answers for every case of device/callkit-cases.m in a Mac Catalyst binary, holds the port's
-# CallKit classes, compiled under names of their own (Charon<name>), to the same records, writes the answers where the device test reads
+# CallKit classes, compiled under names of their own (Revenant<name>), to the same records, writes the answers where the device test reads
 # them, and tells apart mutants of the port.
 #
 # The cases keep to what an application reads off the objects themselves. A tool has no VoIP entitlement, so anything that reaches
@@ -12,7 +12,7 @@ here=$(cd "$(dirname "$0")" && pwd)
 device=${DEVICE:-$here/../../device}
 callkit=${CALLKIT:-$here/../../../../packages/a/apple-backports/CallKit}
 registry=${REGISTRY:-$here/../../../../packages/a/apple-backports/registry/CallKit/ios10.json}
-build=${BUILD:-$(runs_fresh charon-callkit)}
+build=${BUILD:-$(runs_fresh revenant-callkit)}
 mkdir -p "$build"
 sdk=$(xcrun --show-sdk-path)
 frameworks="-iframework $sdk/System/iOSSupport/System/Library/Frameworks"
@@ -40,7 +40,7 @@ port() {
         "$dir"/*.m $libs -o "$dir/run"
 }
 rm -rf "$build/port"; mkdir -p "$build/port"
-cp "$callkit"/*.m "$callkit/CharonCallKit.h" "$build/port/"
+cp "$callkit"/*.m "$callkit/RevenantCallKit.h" "$build/port/"
 port "$build/port"
 CALLKIT_RECORDS="$build/port.json" "$build/port/run"
 python3 "$here/compare.py" "$build/system.json" "$build/port.json" "$divergent"
@@ -55,7 +55,7 @@ survived=0
 mutant() {
     file=$1; from=$2; to=$3
     rm -rf "$build/mutant"; mkdir -p "$build/mutant"
-    cp "$callkit"/*.m "$callkit/CharonCallKit.h" "$build/mutant/"
+    cp "$callkit"/*.m "$callkit/RevenantCallKit.h" "$build/mutant/"
     python3 "$here/mutate.py" "$build/mutant/$file" "$from" "$to"
     port "$build/mutant"
     rm -f "$build/mutant.json"
@@ -78,9 +78,9 @@ mutant CXProviderConfiguration10.m "_localizedName = [localizedName copy];" "_lo
 mutant CXActions10.m "    return 5.0;" "    return 6.0;"
 mutant CXActions10.m "    return 600.0;" "    return 60.0;"
 mutant CXActions10.m "    return 60.0;" "    return 600.0;"
-mutant CXActions10.m "if (_complete || !_charon_provider)" "if (_complete)"
+mutant CXActions10.m "if (_complete || !_revenant_provider)" "if (_complete)"
 mutant CXActions10.m "_callUUID = [callUUID copy];" "_callUUID = [[NSUUID UUID] copy];"
-mutant CXActions10.m "    CXAction *copy = [[[self class] allocWithZone:zone] charon_initWithUUID:_UUID];" "    CXAction *copy = [[[self class] allocWithZone:zone] charon_initWithUUID:[NSUUID UUID]];"
+mutant CXActions10.m "    CXAction *copy = [[[self class] allocWithZone:zone] revenant_initWithUUID:_UUID];" "    CXAction *copy = [[[self class] allocWithZone:zone] revenant_initWithUUID:[NSUUID UUID]];"
 mutant CXActions10.m "copy->_video = _video;" "copy->_video = NO;"
 mutant CXActions10.m "copy->_contactIdentifier = [_contactIdentifier copy];" "copy->_contactIdentifier = nil;"
 mutant CXActions10.m "    _onHold = onHold;" "    _onHold = !onHold;"
@@ -102,8 +102,8 @@ mutant CXCallUpdate10.m "    copy->_supportsHolding = _supportsHolding;" "    co
 mutant CXCallUpdate10.m "    _localizedCallerName = [localizedCallerName copy];" "    _localizedCallerName = @\"fixed\";"
 mutant CXCallController10.m "        _callObserver = [[CXCallObserver alloc] init];" "        _callObserver = nil;"
 mutant CXCallDirectoryManager10.m "    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-        completion(charon_no_extension());" "    dispatch_async(dispatch_get_main_queue(), ^{
-        completion(charon_no_extension());"
+        completion(revenant_no_extension());" "    dispatch_async(dispatch_get_main_queue(), ^{
+        completion(revenant_no_extension());"
 mutant CXCallDirectoryManager10.m "        shared = [[self alloc] init];" "        shared = nil;"
 mutant CXCallDirectoryManager+OpenSettings134.m "code:NSFeatureUnsupportedError" "code:NSFeatureUnsupportedError + 1"
 mutant CXCallDirectoryExtensionContext10.m "- (void)completeRequestWithCompletionHandler:(void (^)(BOOL expired))completion

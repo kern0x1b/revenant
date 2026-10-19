@@ -11,7 +11,7 @@ extern NSString *const MTKTextureLoaderOptionOrigin;
 
 extern NSString *const appleLoadAsArrayKey __asm__("_MTKTextureLoaderOptionLoadAsArray");
 
-extern NSString *const charonHost_MTKTextureLoaderOptionLoadAsArray;
+extern NSString *const revenantHost_MTKTextureLoaderOptionLoadAsArray;
 
 #include <dlfcn.h>
 
@@ -38,14 +38,14 @@ int main(void)
     @autoreleasepool {
         printf("MTKTextureLoaderOptionLoadAsArray, the port's object against Apple's framework\n");
         checks++;
-        if (dlsym(RTLD_DEFAULT, "ZZZNoSuchNameCharonR16") == NULL)
-            printf("  ok   the control: ZZZNoSuchNameCharonR16 is not a symbol of anything loaded\n");
+        if (dlsym(RTLD_DEFAULT, "ZZZNoSuchNameRevenantR16") == NULL)
+            printf("  ok   the control: ZZZNoSuchNameRevenantR16 is not a symbol of anything loaded\n");
         else {
-            printf("  FAIL the control: ZZZNoSuchNameCharonR16 was found, so this harness's answers mean nothing\n");
+            printf("  FAIL the control: ZZZNoSuchNameRevenantR16 was found, so this harness's answers mean nothing\n");
             failures++;
         }
 
-        same(charonHost_MTKTextureLoaderOptionLoadAsArray, appleLoadAsArrayKey,
+        same(revenantHost_MTKTextureLoaderOptionLoadAsArray, appleLoadAsArrayKey,
              @"MTKTextureLoaderOptionLoadAsArray");
 
         printf("the sibling keys, read out of Apple's own framework, so the port's spelling has an oracle\n");

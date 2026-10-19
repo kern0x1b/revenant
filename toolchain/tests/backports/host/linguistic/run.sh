@@ -4,10 +4,10 @@ here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 FOUNDATION=${FOUNDATION:-$here/../../../../packages/a/apple-backports/Foundation}
 harness=${LINGUISTIC_HARNESS:-$here/../../device}
-build=${LINGUISTIC_BUILD:-$(runs_folder charon-linguistic-host)}
+build=${LINGUISTIC_BUILD:-$(runs_folder revenant-linguistic-host)}
 rm -rf "$build"
 mkdir -p "$build"
-xcrun clang -fobjc-arc -fvisibility=hidden -w -DNSLinguisticTagger=CharonHostNSLinguisticTagger -I"$FOUNDATION" -c "$FOUNDATION/NSLinguisticTagger+Units.m" -o "$build/units.o"
+xcrun clang -fobjc-arc -fvisibility=hidden -w -DNSLinguisticTagger=RevenantHostNSLinguisticTagger -I"$FOUNDATION" -c "$FOUNDATION/NSLinguisticTagger+Units.m" -o "$build/units.o"
 xcrun clang -fobjc-arc -Wall -Wno-deprecated-declarations -I"$harness" \
     "$here/differential.m" "$harness/check.m" "$build/units.o" \
     -framework Foundation -o "$build/differential"

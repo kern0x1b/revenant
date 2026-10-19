@@ -3,30 +3,30 @@
 #import <stdlib.h>
 #import <string.h>
 
-@interface CharonAudioQueueDispatch : NSObject
+@interface RevenantAudioQueueDispatch : NSObject
 @property (nonatomic, strong) dispatch_queue_t queue;
 @property (nonatomic, copy) id callback;
 @end
 
-@implementation CharonAudioQueueDispatch
+@implementation RevenantAudioQueueDispatch
 @synthesize queue = _queue;
 @synthesize callback = _callback;
 @end
 
-static void CharonAudioQueueOutputCallback(void *inUserData, AudioQueueRef inAQ, AudioQueueBufferRef inBuffer)
+static void RevenantAudioQueueOutputCallback(void *inUserData, AudioQueueRef inAQ, AudioQueueBufferRef inBuffer)
 {
-    CharonAudioQueueDispatch *dispatch = (__bridge CharonAudioQueueDispatch *)inUserData;
+    RevenantAudioQueueDispatch *dispatch = (__bridge RevenantAudioQueueDispatch *)inUserData;
     AudioQueueOutputCallbackBlock block = (AudioQueueOutputCallbackBlock)dispatch.callback;
     dispatch_async(dispatch.queue, ^{
         block(inAQ, inBuffer);
     });
 }
 
-static void CharonAudioQueueInputCallback(void *inUserData, AudioQueueRef inAQ, AudioQueueBufferRef inBuffer,
+static void RevenantAudioQueueInputCallback(void *inUserData, AudioQueueRef inAQ, AudioQueueBufferRef inBuffer,
                                           const AudioTimeStamp *inStartTime, UInt32 inNumberPacketDescriptions,
                                           const AudioStreamPacketDescription *inPacketDescs)
 {
-    CharonAudioQueueDispatch *dispatch = (__bridge CharonAudioQueueDispatch *)inUserData;
+    RevenantAudioQueueDispatch *dispatch = (__bridge RevenantAudioQueueDispatch *)inUserData;
     AudioQueueInputCallbackBlock block = (AudioQueueInputCallbackBlock)dispatch.callback;
     AudioTimeStamp startTime = {0};
     if (inStartTime != NULL) {
@@ -52,13 +52,13 @@ OSStatus AudioQueueNewOutputWithDispatchQueue(AudioQueueRef *outAQ, const AudioS
     if (inCallbackDispatchQueue == NULL || inCallbackBlock == nil) {
         return kAudio_ParamError;
     }
-    CharonAudioQueueDispatch *dispatch = [[CharonAudioQueueDispatch alloc] init];
+    RevenantAudioQueueDispatch *dispatch = [[RevenantAudioQueueDispatch alloc] init];
     dispatch.queue = inCallbackDispatchQueue;
     dispatch.callback = inCallbackBlock;
     void *context = (__bridge_retained void *)dispatch;
-    OSStatus status = AudioQueueNewOutput(inFormat, CharonAudioQueueOutputCallback, context, NULL, NULL, inFlags, outAQ);
+    OSStatus status = AudioQueueNewOutput(inFormat, RevenantAudioQueueOutputCallback, context, NULL, NULL, inFlags, outAQ);
     if (status != noErr) {
-        (void)(__bridge_transfer CharonAudioQueueDispatch *)context;
+        (void)(__bridge_transfer RevenantAudioQueueDispatch *)context;
     }
     return status;
 }
@@ -69,13 +69,13 @@ OSStatus AudioQueueNewInputWithDispatchQueue(AudioQueueRef *outAQ, const AudioSt
     if (inCallbackDispatchQueue == NULL || inCallbackBlock == nil) {
         return kAudio_ParamError;
     }
-    CharonAudioQueueDispatch *dispatch = [[CharonAudioQueueDispatch alloc] init];
+    RevenantAudioQueueDispatch *dispatch = [[RevenantAudioQueueDispatch alloc] init];
     dispatch.queue = inCallbackDispatchQueue;
     dispatch.callback = inCallbackBlock;
     void *context = (__bridge_retained void *)dispatch;
-    OSStatus status = AudioQueueNewInput(inFormat, CharonAudioQueueInputCallback, context, NULL, NULL, inFlags, outAQ);
+    OSStatus status = AudioQueueNewInput(inFormat, RevenantAudioQueueInputCallback, context, NULL, NULL, inFlags, outAQ);
     if (status != noErr) {
-        (void)(__bridge_transfer CharonAudioQueueDispatch *)context;
+        (void)(__bridge_transfer RevenantAudioQueueDispatch *)context;
     }
     return status;
 }

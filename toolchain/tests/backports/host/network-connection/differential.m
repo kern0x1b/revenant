@@ -8,7 +8,7 @@
 #import <string.h>
 #import "check.h"
 
-#define P(name) charonhost_##name
+#define P(name) revenanthost_##name
 extern nw_connection_t P(nw_connection_create)(nw_endpoint_t, nw_parameters_t);
 extern nw_endpoint_t P(nw_connection_copy_endpoint)(nw_connection_t);
 extern nw_parameters_t P(nw_connection_copy_parameters)(nw_connection_t);
@@ -55,11 +55,11 @@ extern nw_endpoint_t P(nw_endpoint_create_host)(const char *, const char *);
 extern nw_protocol_definition_t P(nw_protocol_copy_tcp_definition)(void);
 extern bool P(nw_protocol_metadata_is_udp)(nw_protocol_metadata_t);
 
-extern const nw_parameters_configure_protocol_block_t charonhost__nw_parameters_configure_protocol_default_configuration;
-extern const nw_parameters_configure_protocol_block_t charonhost__nw_parameters_configure_protocol_disable;
-#define PORT_DISABLE ((nw_parameters_configure_protocol_block_t)charonhost__nw_parameters_configure_protocol_disable)
-#define PORT_DEFAULT ((nw_parameters_configure_protocol_block_t)charonhost__nw_parameters_configure_protocol_default_configuration)
-#define PORT_DISABLE ((nw_parameters_configure_protocol_block_t)charonhost__nw_parameters_configure_protocol_disable)
+extern const nw_parameters_configure_protocol_block_t revenanthost__nw_parameters_configure_protocol_default_configuration;
+extern const nw_parameters_configure_protocol_block_t revenanthost__nw_parameters_configure_protocol_disable;
+#define PORT_DISABLE ((nw_parameters_configure_protocol_block_t)revenanthost__nw_parameters_configure_protocol_disable)
+#define PORT_DEFAULT ((nw_parameters_configure_protocol_block_t)revenanthost__nw_parameters_configure_protocol_default_configuration)
+#define PORT_DISABLE ((nw_parameters_configure_protocol_block_t)revenanthost__nw_parameters_configure_protocol_disable)
 
 static NSString *states_of(NSMutableArray *states)
 {
@@ -154,7 +154,7 @@ int main(void)
         });
         P(nw_connection_set_queue)(mine, port_queue);
         P(nw_connection_set_state_changed_handler)(mine, ^(nw_connection_state_t state, nw_error_t error) {
-            if (getenv("CHARON_TRACE")) fprintf(stderr, "[port] state %d error %d/%d\n", state,
+            if (getenv("REVENANT_TRACE")) fprintf(stderr, "[port] state %d error %d/%d\n", state,
                                                   nw_error_get_error_domain(error), nw_error_get_error_code(error));
             if (state == nw_connection_state_ready)
                 port_ready = 1;
@@ -171,13 +171,13 @@ int main(void)
             struct pollfd waiting = {peer.listener, POLLIN, 0};
             if (poll(&waiting, 1, 5000) <= 0) {
                 CHECK(NO, @"the peer was given both connections");
-                printf("checks=%d failures=%d\n", charon_checks, charon_failures + 1);
+                printf("checks=%d failures=%d\n", revenant_checks, revenant_failures + 1);
                 return 1;
             }
             int handle = accept(peer.listener, NULL, NULL);
             if (handle < 0) {
                 CHECK(NO, @"the peer was given both connections");
-                printf("checks=%d failures=%d\n", charon_checks, charon_failures + 1);
+                printf("checks=%d failures=%d\n", revenant_checks, revenant_failures + 1);
                 return 1;
             }
             if (side == 0)
@@ -301,7 +301,7 @@ int main(void)
         close(second);
         close(peer.listener);
         usleep(300000);
-        printf("checks=%d failures=%d\n", charon_checks, charon_failures);
+        printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
     }
-    return charon_failures ? 1 : 0;
+    return revenant_failures ? 1 : 0;
 }

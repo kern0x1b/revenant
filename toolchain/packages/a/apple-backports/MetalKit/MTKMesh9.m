@@ -1,6 +1,6 @@
 #import <MetalKit/MetalKit.h>
 
-static NSError *CharonMTKMeshError(void)
+static NSError *RevenantMTKMeshError(void)
 {
     return [NSError errorWithDomain:MTKModelErrorDomain code:0
                             userInfo:@{NSLocalizedDescriptionKey: @"this port does not carry MDLMesh, so there is no Model I/O mesh to build an MTKMesh from"}];
@@ -8,55 +8,55 @@ static NSError *CharonMTKMeshError(void)
 
 @implementation MTKMesh
 {
-    NSArray<MTKMeshBuffer *> *_charonVertexBuffers;
-    MDLVertexDescriptor *_charonVertexDescriptor;
-    NSArray<MTKSubmesh *> *_charonSubmeshes;
-    NSUInteger _charonVertexCount;
-    NSString *_charonName;
+    NSArray<MTKMeshBuffer *> *_revenantVertexBuffers;
+    MDLVertexDescriptor *_revenantVertexDescriptor;
+    NSArray<MTKSubmesh *> *_revenantSubmeshes;
+    NSUInteger _revenantVertexCount;
+    NSString *_revenantName;
 }
 
 - (instancetype)initWithMesh:(MDLMesh *)mesh device:(id<MTLDevice>)device error:(NSError **)error
 {
     if (error)
-        *error = CharonMTKMeshError();
+        *error = RevenantMTKMeshError();
     return nil;
 }
 
 + (NSArray<MTKMesh *> *)newMeshesFromAsset:(MDLAsset *)asset device:(id<MTLDevice>)device sourceMeshes:(NSArray<MDLMesh *> **)sourceMeshes error:(NSError **)error
 {
     if (error)
-        *error = CharonMTKMeshError();
+        *error = RevenantMTKMeshError();
     return nil;
 }
 
 - (NSArray<MTKMeshBuffer *> *)vertexBuffers
 {
-    return _charonVertexBuffers ?: @[];
+    return _revenantVertexBuffers ?: @[];
 }
 
 - (MDLVertexDescriptor *)vertexDescriptor
 {
-    return _charonVertexDescriptor ?: [[MDLVertexDescriptor alloc] init];
+    return _revenantVertexDescriptor ?: [[MDLVertexDescriptor alloc] init];
 }
 
 - (NSArray<MTKSubmesh *> *)submeshes
 {
-    return _charonSubmeshes ?: @[];
+    return _revenantSubmeshes ?: @[];
 }
 
 - (NSUInteger)vertexCount
 {
-    return _charonVertexCount;
+    return _revenantVertexCount;
 }
 
 - (NSString *)name
 {
-    return _charonName ?: @"";
+    return _revenantName ?: @"";
 }
 
 - (void)setName:(NSString *)name
 {
-    _charonName = [name copy];
+    _revenantName = [name copy];
 }
 
 @end

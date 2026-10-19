@@ -48,7 +48,7 @@ for source in $sources; do
         [ "$source" = "AVCaptureCurrentSentinels8" ] || { echo "FAIL: $source.m defines no string constant"; exit 1; }
         names=""
     fi
-    for name in $names; do renames="$renames -D$name=charon_host_$name"; done
+    for name in $names; do renames="$renames -D$name=revenant_host_$name"; done
 done
 
 # The copies come FIRST and the perturbation second: a perturb that ran before its file existed
@@ -137,7 +137,7 @@ set +e; "$build/host" > "$build/host.table" 2> "$build/host.stderr"; host_status
 
 # 2. the same probe against the port's own definitions, in one binary with Apple's
 # shellcheck disable=SC2086
-xcrun clang -fobjc-arc -w -DCHARON_PORT_BUILD=1 -I"$build" $renames "$here/probe.m" $objects \
+xcrun clang -fobjc-arc -w -DREVENANT_PORT_BUILD=1 -I"$build" $renames "$here/probe.m" $objects \
     -framework Foundation -framework AVFoundation -o "$build/port" > "$build/port.log" 2>&1 || {
         echo "FAIL: the port probe did not link - a name the port does not define is a link error"
         head -10 "$build/port.log"

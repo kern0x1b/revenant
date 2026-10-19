@@ -17,7 +17,7 @@
 #include <optional>
 #include <vector>
 
-namespace shade {
+namespace emulator {
 
 struct DarwinPthreadRegistration {
     std::uint32_t thread_start { };

@@ -1,3 +1,3 @@
-#import "CharonMenus.h"
+#import "RevenantMenus.h"
 
-UIContextMenuInteraction *charon_list_menu_interaction(UIScrollView *view, BOOL create);
+UIContextMenuInteraction *revenant_list_menu_interaction(UIScrollView *view, BOOL create);

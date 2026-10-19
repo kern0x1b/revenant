@@ -1,11 +1,11 @@
 #import <Foundation/Foundation.h>
 #import <Metal/Metal.h>
 
-@interface charonHost_MTLAccelerationStructureDescriptor : NSObject
+@interface revenantHost_MTLAccelerationStructureDescriptor : NSObject
 @property (nonatomic) MTLAccelerationStructureUsage usage;
 @end
 
-@interface charonHost_MTLAccelerationStructureGeometryDescriptor : NSObject
+@interface revenantHost_MTLAccelerationStructureGeometryDescriptor : NSObject
 @property (nonatomic) NSUInteger intersectionFunctionTableOffset;
 @property (nonatomic) BOOL opaque;
 @property (nonatomic) BOOL allowDuplicateIntersectionFunctionInvocation;
@@ -16,16 +16,16 @@
 @property (nonatomic, copy) NSString *label;
 @end
 
-@interface charonHost_MTLAccelerationStructureBoundingBoxGeometryDescriptor
-    : charonHost_MTLAccelerationStructureGeometryDescriptor
+@interface revenantHost_MTLAccelerationStructureBoundingBoxGeometryDescriptor
+    : revenantHost_MTLAccelerationStructureGeometryDescriptor
 @property (nonatomic, retain) id <MTLBuffer> boundingBoxBuffer;
 @property (nonatomic) NSUInteger boundingBoxBufferOffset;
 @property (nonatomic) NSUInteger boundingBoxStride;
 @property (nonatomic) NSUInteger boundingBoxCount;
 @end
 
-@interface charonHost_MTLAccelerationStructureTriangleGeometryDescriptor
-    : charonHost_MTLAccelerationStructureGeometryDescriptor
+@interface revenantHost_MTLAccelerationStructureTriangleGeometryDescriptor
+    : revenantHost_MTLAccelerationStructureGeometryDescriptor
 @property (nonatomic, retain) id <MTLBuffer> vertexBuffer;
 @property (nonatomic, retain) id <MTLBuffer> indexBuffer;
 @property (nonatomic, retain) id <MTLBuffer> transformationMatrixBuffer;
@@ -38,7 +38,7 @@
 @property (nonatomic) NSUInteger transformationMatrixBufferOffset;
 @end
 
-@interface charonHost_MTLPrimitiveAccelerationStructureDescriptor : charonHost_MTLAccelerationStructureDescriptor
+@interface revenantHost_MTLPrimitiveAccelerationStructureDescriptor : revenantHost_MTLAccelerationStructureDescriptor
 @property (nonatomic, retain) NSArray *geometryDescriptors;
 @property (nonatomic) MTLMotionBorderMode motionStartBorderMode;
 @property (nonatomic) MTLMotionBorderMode motionEndBorderMode;
@@ -47,7 +47,7 @@
 @property (nonatomic) NSUInteger motionKeyframeCount;
 @end
 
-@interface charonHost_MTLInstanceAccelerationStructureDescriptor : charonHost_MTLAccelerationStructureDescriptor
+@interface revenantHost_MTLInstanceAccelerationStructureDescriptor : revenantHost_MTLAccelerationStructureDescriptor
 @property (nonatomic, retain) id <MTLBuffer> instanceDescriptorBuffer;
 @property (nonatomic, retain) id <MTLBuffer> motionTransformBuffer;
 @property (nonatomic, retain) NSArray *instancedAccelerationStructures;
@@ -59,34 +59,34 @@
 @property (nonatomic) NSUInteger motionTransformCount;
 @end
 
-@interface charonHost_MTLIntersectionFunctionTableDescriptor : NSObject
+@interface revenantHost_MTLIntersectionFunctionTableDescriptor : NSObject
 @property (nonatomic) NSUInteger functionCount;
 @end
 
-@interface charonHost_MTLVisibleFunctionTableDescriptor : NSObject
+@interface revenantHost_MTLVisibleFunctionTableDescriptor : NSObject
 @property (nonatomic) NSUInteger functionCount;
 @end
 
-@interface charonHost_MTLCounterSampleBufferDescriptor : NSObject
+@interface revenantHost_MTLCounterSampleBufferDescriptor : NSObject
 @property (nonatomic, retain) id counterSet;
 @property (nonatomic, copy) NSString *label;
 @property (nonatomic) MTLStorageMode storageMode;
 @property (nonatomic) NSUInteger sampleCount;
 @end
 
-@interface charonHost_MTLComputePassSampleBufferAttachmentDescriptor : NSObject
+@interface revenantHost_MTLComputePassSampleBufferAttachmentDescriptor : NSObject
 @property (nonatomic, retain) id sampleBuffer;
 @property (nonatomic) NSUInteger startOfEncoderSampleIndex;
 @property (nonatomic) NSUInteger endOfEncoderSampleIndex;
 @end
 
-@interface charonHost_MTLResourceStatePassSampleBufferAttachmentDescriptor : NSObject
+@interface revenantHost_MTLResourceStatePassSampleBufferAttachmentDescriptor : NSObject
 @property (nonatomic, retain) id sampleBuffer;
 @property (nonatomic) NSUInteger startOfEncoderSampleIndex;
 @property (nonatomic) NSUInteger endOfEncoderSampleIndex;
 @end
 
-@interface charonHost_MTLRenderPassSampleBufferAttachmentDescriptor : NSObject
+@interface revenantHost_MTLRenderPassSampleBufferAttachmentDescriptor : NSObject
 @property (nonatomic, retain) id sampleBuffer;
 @property (nonatomic) NSUInteger startOfVertexSampleIndex;
 @property (nonatomic) NSUInteger endOfVertexSampleIndex;
@@ -94,42 +94,42 @@
 @property (nonatomic) NSUInteger endOfFragmentSampleIndex;
 @end
 
-@interface charonHost_MTLComputePassDescriptor : NSObject
+@interface revenantHost_MTLComputePassDescriptor : NSObject
 @property (nonatomic, retain) id sampleBufferAttachments;
 @property (nonatomic) MTLDispatchType dispatchType;
 @end
 
-@interface charonHost_MTLResourceStatePassDescriptor : NSObject
+@interface revenantHost_MTLResourceStatePassDescriptor : NSObject
 @property (nonatomic, retain) id sampleBufferAttachments;
 @end
 
-@interface charonHost_MTLBinaryArchiveDescriptor : NSObject
+@interface revenantHost_MTLBinaryArchiveDescriptor : NSObject
 @property (nonatomic, copy) NSURL *url;
 @end
 
-@interface charonHost_MTLLinkedFunctions : NSObject
+@interface revenantHost_MTLLinkedFunctions : NSObject
 @property (nonatomic, copy) NSArray *functions;
 @property (nonatomic, copy) NSArray *binaryFunctions;
 @property (nonatomic, copy) NSDictionary *groups;
 @property (nonatomic, copy) NSArray *privateFunctions;
 @end
 
-@interface charonHost_MTLIntersectionFunctionDescriptor : NSObject
+@interface revenantHost_MTLIntersectionFunctionDescriptor : NSObject
 @end
 
-@interface charonHost_MTLComputePassSampleBufferAttachmentDescriptorArray : NSObject
+@interface revenantHost_MTLComputePassSampleBufferAttachmentDescriptorArray : NSObject
 - (MTLComputePassSampleBufferAttachmentDescriptor *)objectAtIndexedSubscript:(NSUInteger)index;
-- (void)setObject:(charonHost_MTLComputePassSampleBufferAttachmentDescriptor *)o atIndex:(NSUInteger)i;
+- (void)setObject:(revenantHost_MTLComputePassSampleBufferAttachmentDescriptor *)o atIndex:(NSUInteger)i;
 @end
 
-@interface charonHost_MTLRenderPassSampleBufferAttachmentDescriptorArray : NSObject
+@interface revenantHost_MTLRenderPassSampleBufferAttachmentDescriptorArray : NSObject
 - (MTLRenderPassSampleBufferAttachmentDescriptor *)objectAtIndexedSubscript:(NSUInteger)index;
-- (void)setObject:(charonHost_MTLRenderPassSampleBufferAttachmentDescriptor *)o atIndex:(NSUInteger)i;
+- (void)setObject:(revenantHost_MTLRenderPassSampleBufferAttachmentDescriptor *)o atIndex:(NSUInteger)i;
 @end
 
-@interface charonHost_MTLResourceStatePassSampleBufferAttachmentDescriptorArray : NSObject
+@interface revenantHost_MTLResourceStatePassSampleBufferAttachmentDescriptorArray : NSObject
 - (MTLResourceStatePassSampleBufferAttachmentDescriptor *)objectAtIndexedSubscript:(NSUInteger)index;
-- (void)setObject:(charonHost_MTLResourceStatePassSampleBufferAttachmentDescriptor *)o atIndex:(NSUInteger)i;
+- (void)setObject:(revenantHost_MTLResourceStatePassSampleBufferAttachmentDescriptor *)o atIndex:(NSUInteger)i;
 @end
 
 
@@ -159,18 +159,18 @@ int main(void)
 {
     @autoreleasepool {
         check([[MTLAccelerationStructureDescriptor new] usage]
-              == [[[charonHost_MTLAccelerationStructureDescriptor alloc] init] usage],
+              == [[[revenantHost_MTLAccelerationStructureDescriptor alloc] init] usage],
               @"MTLAccelerationStructureDescriptor: a fresh one answers Apple's own usage on both sides");
         check([[MTLCounterSampleBufferDescriptor new] storageMode]
-              == [[[charonHost_MTLCounterSampleBufferDescriptor alloc] init] storageMode],
+              == [[[revenantHost_MTLCounterSampleBufferDescriptor alloc] init] storageMode],
               @"MTLCounterSampleBufferDescriptor: a fresh one answers Apple's own storage mode on both sides");
         check([[MTLCounterSampleBufferDescriptor new] sampleCount]
-              == [[[charonHost_MTLCounterSampleBufferDescriptor alloc] init] sampleCount],
+              == [[[revenantHost_MTLCounterSampleBufferDescriptor alloc] init] sampleCount],
               @"MTLCounterSampleBufferDescriptor: a fresh one answers Apple's own sample count on both sides");
 
         {
             MTLAccelerationStructureDescriptor *h = [MTLAccelerationStructureDescriptor new];
-            charonHost_MTLAccelerationStructureDescriptor *p = [charonHost_MTLAccelerationStructureDescriptor new];
+            revenantHost_MTLAccelerationStructureDescriptor *p = [revenantHost_MTLAccelerationStructureDescriptor new];
             h.usage = MTLAccelerationStructureUsageRefit;
             p.usage = MTLAccelerationStructureUsageRefit;
             same_i((long)p.usage, (long)h.usage, @"MTLAccelerationStructureDescriptor.usage = Refit");
@@ -180,7 +180,7 @@ int main(void)
         }
         {
             MTLAccelerationStructureGeometryDescriptor *h = [MTLAccelerationStructureGeometryDescriptor new];
-            charonHost_MTLAccelerationStructureGeometryDescriptor *p = [charonHost_MTLAccelerationStructureGeometryDescriptor new];
+            revenantHost_MTLAccelerationStructureGeometryDescriptor *p = [revenantHost_MTLAccelerationStructureGeometryDescriptor new];
             h.intersectionFunctionTableOffset = 64; p.intersectionFunctionTableOffset = 64;
             h.opaque = YES; p.opaque = YES;
             h.allowDuplicateIntersectionFunctionInvocation = YES;
@@ -204,7 +204,7 @@ int main(void)
         }
         {
             MTLAccelerationStructureTriangleGeometryDescriptor *h = [MTLAccelerationStructureTriangleGeometryDescriptor new];
-            charonHost_MTLAccelerationStructureTriangleGeometryDescriptor *p = [charonHost_MTLAccelerationStructureTriangleGeometryDescriptor new];
+            revenantHost_MTLAccelerationStructureTriangleGeometryDescriptor *p = [revenantHost_MTLAccelerationStructureTriangleGeometryDescriptor new];
             h.vertexFormat = MTLAttributeFormatFloat2; p.vertexFormat = MTLAttributeFormatFloat2;
             h.indexType = MTLIndexTypeUInt16; p.indexType = MTLIndexTypeUInt16;
             h.vertexBufferOffset = 8; p.vertexBufferOffset = 8;
@@ -225,7 +225,7 @@ int main(void)
         }
         {
             MTLAccelerationStructureBoundingBoxGeometryDescriptor *h = [MTLAccelerationStructureBoundingBoxGeometryDescriptor new];
-            charonHost_MTLAccelerationStructureBoundingBoxGeometryDescriptor *p = [charonHost_MTLAccelerationStructureBoundingBoxGeometryDescriptor new];
+            revenantHost_MTLAccelerationStructureBoundingBoxGeometryDescriptor *p = [revenantHost_MTLAccelerationStructureBoundingBoxGeometryDescriptor new];
             h.boundingBoxBufferOffset = 32; p.boundingBoxBufferOffset = 32;
             h.boundingBoxStride = 48; p.boundingBoxStride = 48;
             h.boundingBoxCount = 3; p.boundingBoxCount = 3;
@@ -238,7 +238,7 @@ int main(void)
         }
         {
             MTLPrimitiveAccelerationStructureDescriptor *h = [MTLPrimitiveAccelerationStructureDescriptor new];
-            charonHost_MTLPrimitiveAccelerationStructureDescriptor *p = [charonHost_MTLPrimitiveAccelerationStructureDescriptor new];
+            revenantHost_MTLPrimitiveAccelerationStructureDescriptor *p = [revenantHost_MTLPrimitiveAccelerationStructureDescriptor new];
             h.motionStartBorderMode = MTLMotionBorderModeClamp; p.motionStartBorderMode = MTLMotionBorderModeClamp;
             h.motionEndBorderMode = MTLMotionBorderModeVanish; p.motionEndBorderMode = MTLMotionBorderModeVanish;
             h.motionStartTime = 0.5f; p.motionStartTime = 0.5f;
@@ -259,7 +259,7 @@ int main(void)
         }
         {
             MTLInstanceAccelerationStructureDescriptor *h = [MTLInstanceAccelerationStructureDescriptor new];
-            charonHost_MTLInstanceAccelerationStructureDescriptor *p = [charonHost_MTLInstanceAccelerationStructureDescriptor new];
+            revenantHost_MTLInstanceAccelerationStructureDescriptor *p = [revenantHost_MTLInstanceAccelerationStructureDescriptor new];
             h.instanceDescriptorBufferOffset = 16; p.instanceDescriptorBufferOffset = 16;
             h.instanceDescriptorStride = 64; p.instanceDescriptorStride = 64;
             h.instanceCount = 9; p.instanceCount = 9;
@@ -282,17 +282,17 @@ int main(void)
         }
         {
             MTLVisibleFunctionTableDescriptor *h = [MTLVisibleFunctionTableDescriptor new];
-            charonHost_MTLVisibleFunctionTableDescriptor *p = [charonHost_MTLVisibleFunctionTableDescriptor new];
+            revenantHost_MTLVisibleFunctionTableDescriptor *p = [revenantHost_MTLVisibleFunctionTableDescriptor new];
             h.functionCount = 5; p.functionCount = 5;
             same_u(p.functionCount, h.functionCount, @"MTLVisibleFunctionTableDescriptor.functionCount");
             MTLIntersectionFunctionTableDescriptor *ih = [MTLIntersectionFunctionTableDescriptor new];
-            charonHost_MTLIntersectionFunctionTableDescriptor *ip = [charonHost_MTLIntersectionFunctionTableDescriptor new];
+            revenantHost_MTLIntersectionFunctionTableDescriptor *ip = [revenantHost_MTLIntersectionFunctionTableDescriptor new];
             ih.functionCount = 7; ip.functionCount = 7;
             same_u(ip.functionCount, ih.functionCount, @"MTLIntersectionFunctionTableDescriptor.functionCount");
         }
         {
             MTLCounterSampleBufferDescriptor *h = [MTLCounterSampleBufferDescriptor new];
-            charonHost_MTLCounterSampleBufferDescriptor *p = [charonHost_MTLCounterSampleBufferDescriptor new];
+            revenantHost_MTLCounterSampleBufferDescriptor *p = [revenantHost_MTLCounterSampleBufferDescriptor new];
             h.label = @"host"; p.label = @"host";
             h.storageMode = MTLStorageModeManaged; p.storageMode = MTLStorageModeManaged;
             h.sampleCount = 12; p.sampleCount = 12;
@@ -304,7 +304,7 @@ int main(void)
         }
         {
             MTLComputePassSampleBufferAttachmentDescriptor *h = [MTLComputePassSampleBufferAttachmentDescriptor new];
-            charonHost_MTLComputePassSampleBufferAttachmentDescriptor *p = [charonHost_MTLComputePassSampleBufferAttachmentDescriptor new];
+            revenantHost_MTLComputePassSampleBufferAttachmentDescriptor *p = [revenantHost_MTLComputePassSampleBufferAttachmentDescriptor new];
             h.startOfEncoderSampleIndex = 1; p.startOfEncoderSampleIndex = 1;
             h.endOfEncoderSampleIndex = 8; p.endOfEncoderSampleIndex = 8;
             same_u(p.startOfEncoderSampleIndex, h.startOfEncoderSampleIndex,
@@ -313,7 +313,7 @@ int main(void)
                    @"MTLComputePassSampleBufferAttachmentDescriptor.endOfEncoderSampleIndex");
 
             MTLResourceStatePassSampleBufferAttachmentDescriptor *rh = [MTLResourceStatePassSampleBufferAttachmentDescriptor new];
-            charonHost_MTLResourceStatePassSampleBufferAttachmentDescriptor *rp = [charonHost_MTLResourceStatePassSampleBufferAttachmentDescriptor new];
+            revenantHost_MTLResourceStatePassSampleBufferAttachmentDescriptor *rp = [revenantHost_MTLResourceStatePassSampleBufferAttachmentDescriptor new];
             rh.startOfEncoderSampleIndex = 2; rp.startOfEncoderSampleIndex = 2;
             rh.endOfEncoderSampleIndex = 9; rp.endOfEncoderSampleIndex = 9;
             same_u(rp.startOfEncoderSampleIndex, rh.startOfEncoderSampleIndex,
@@ -322,7 +322,7 @@ int main(void)
                    @"MTLResourceStatePassSampleBufferAttachmentDescriptor.endOfEncoderSampleIndex");
 
             MTLRenderPassSampleBufferAttachmentDescriptor *vh = [MTLRenderPassSampleBufferAttachmentDescriptor new];
-            charonHost_MTLRenderPassSampleBufferAttachmentDescriptor *vp = [charonHost_MTLRenderPassSampleBufferAttachmentDescriptor new];
+            revenantHost_MTLRenderPassSampleBufferAttachmentDescriptor *vp = [revenantHost_MTLRenderPassSampleBufferAttachmentDescriptor new];
             vh.startOfVertexSampleIndex = 3; vp.startOfVertexSampleIndex = 3;
             vh.endOfVertexSampleIndex = 10; vp.endOfVertexSampleIndex = 10;
             vh.startOfFragmentSampleIndex = 4; vp.startOfFragmentSampleIndex = 4;
@@ -338,7 +338,7 @@ int main(void)
         }
         {
             MTLComputePassDescriptor *h = [MTLComputePassDescriptor new];
-            charonHost_MTLComputePassDescriptor *p = [charonHost_MTLComputePassDescriptor new];
+            revenantHost_MTLComputePassDescriptor *p = [revenantHost_MTLComputePassDescriptor new];
             h.dispatchType = MTLDispatchTypeSerial; p.dispatchType = MTLDispatchTypeSerial;
             same_i((long)p.dispatchType, (long)h.dispatchType, @"MTLComputePassDescriptor.dispatchType = Serial");
             h.dispatchType = MTLDispatchTypeConcurrent;
@@ -348,20 +348,20 @@ int main(void)
         }
         {
             MTLBinaryArchiveDescriptor *h = [MTLBinaryArchiveDescriptor new];
-            charonHost_MTLBinaryArchiveDescriptor *p = [charonHost_MTLBinaryArchiveDescriptor new];
-            NSURL *u = [NSURL fileURLWithPath:@"/charon/metal/archive.mtar"];
+            revenantHost_MTLBinaryArchiveDescriptor *p = [revenantHost_MTLBinaryArchiveDescriptor new];
+            NSURL *u = [NSURL fileURLWithPath:@"/revenant/metal/archive.mtar"];
             h.url = u; p.url = u;
             check([[p.url path] isEqualToString:[h.url path]], @"MTLBinaryArchiveDescriptor.url");
             check([MTLBinaryArchiveDescriptor new].url == nil
-                  && [charonHost_MTLBinaryArchiveDescriptor new].url == nil,
+                  && [revenantHost_MTLBinaryArchiveDescriptor new].url == nil,
                   @"MTLBinaryArchiveDescriptor: a fresh one's url is nil on both sides");
             check([MTLResourceStatePassDescriptor new] != nil
-                  && [charonHost_MTLResourceStatePassDescriptor new] != nil,
+                  && [revenantHost_MTLResourceStatePassDescriptor new] != nil,
                   @"MTLResourceStatePassDescriptor: both sides make one with no device");
         }
         {
             MTLLinkedFunctions *h = [MTLLinkedFunctions new];
-            charonHost_MTLLinkedFunctions *p = [charonHost_MTLLinkedFunctions new];
+            revenantHost_MTLLinkedFunctions *p = [revenantHost_MTLLinkedFunctions new];
             check([p.functions count] == [h.functions count],
                   @"MTLLinkedFunctions.functions: both are empty with no device to make a function");
             check([p.binaryFunctions count] == [h.binaryFunctions count],
@@ -371,7 +371,7 @@ int main(void)
             check([p.privateFunctions count] == [h.privateFunctions count],
                   @"MTLLinkedFunctions.privateFunctions: both are empty with no device");
             MTLIntersectionFunctionDescriptor *ih = [MTLIntersectionFunctionDescriptor new];
-            charonHost_MTLIntersectionFunctionDescriptor *ip = [charonHost_MTLIntersectionFunctionDescriptor new];
+            revenantHost_MTLIntersectionFunctionDescriptor *ip = [revenantHost_MTLIntersectionFunctionDescriptor new];
             check(ih != nil && ip != nil,
                   @"MTLIntersectionFunctionDescriptor: both sides make one with no device");
             check([NSStringFromClass([ip class]) hasSuffix:@"IntersectionFunctionDescriptor"],
@@ -380,26 +380,26 @@ int main(void)
         {
             MTLComputePassSampleBufferAttachmentDescriptor *one = [MTLComputePassSampleBufferAttachmentDescriptor new];
             one.startOfEncoderSampleIndex = 5;
-            charonHost_MTLComputePassSampleBufferAttachmentDescriptor *pone = [charonHost_MTLComputePassSampleBufferAttachmentDescriptor new];
+            revenantHost_MTLComputePassSampleBufferAttachmentDescriptor *pone = [revenantHost_MTLComputePassSampleBufferAttachmentDescriptor new];
             pone.startOfEncoderSampleIndex = 5;
-            charonHost_MTLComputePassSampleBufferAttachmentDescriptorArray *p =
-                [charonHost_MTLComputePassSampleBufferAttachmentDescriptorArray new];
+            revenantHost_MTLComputePassSampleBufferAttachmentDescriptorArray *p =
+                [revenantHost_MTLComputePassSampleBufferAttachmentDescriptorArray new];
             [p setObject:pone atIndex:0];
             same_u([p objectAtIndexedSubscript:0].startOfEncoderSampleIndex,
                    one.startOfEncoderSampleIndex,
                    @"MTLComputePassSampleBufferAttachmentDescriptorArray: index 0 reads back what was set");
             check([p objectAtIndexedSubscript:4] == nil,
                   @"MTLComputePassSampleBufferAttachmentDescriptorArray: an index past the end reads nil");
-            charonHost_MTLRenderPassSampleBufferAttachmentDescriptorArray *rp =
-                [charonHost_MTLRenderPassSampleBufferAttachmentDescriptorArray new];
-            charonHost_MTLRenderPassSampleBufferAttachmentDescriptor *r = [charonHost_MTLRenderPassSampleBufferAttachmentDescriptor new];
+            revenantHost_MTLRenderPassSampleBufferAttachmentDescriptorArray *rp =
+                [revenantHost_MTLRenderPassSampleBufferAttachmentDescriptorArray new];
+            revenantHost_MTLRenderPassSampleBufferAttachmentDescriptor *r = [revenantHost_MTLRenderPassSampleBufferAttachmentDescriptor new];
             r.startOfVertexSampleIndex = 6;
             [rp setObject:r atIndex:1];
             same_u([rp objectAtIndexedSubscript:1].startOfVertexSampleIndex, 6,
                    @"MTLRenderPassSampleBufferAttachmentDescriptorArray: index 1 reads back what was set");
-            charonHost_MTLResourceStatePassSampleBufferAttachmentDescriptorArray *sp =
-                [charonHost_MTLResourceStatePassSampleBufferAttachmentDescriptorArray new];
-            charonHost_MTLResourceStatePassSampleBufferAttachmentDescriptor *sp1 = [charonHost_MTLResourceStatePassSampleBufferAttachmentDescriptor new];
+            revenantHost_MTLResourceStatePassSampleBufferAttachmentDescriptorArray *sp =
+                [revenantHost_MTLResourceStatePassSampleBufferAttachmentDescriptorArray new];
+            revenantHost_MTLResourceStatePassSampleBufferAttachmentDescriptor *sp1 = [revenantHost_MTLResourceStatePassSampleBufferAttachmentDescriptor new];
             sp1.endOfEncoderSampleIndex = 7;
             [sp setObject:sp1 atIndex:2];
             same_u([sp objectAtIndexedSubscript:2].endOfEncoderSampleIndex, 7,
@@ -473,181 +473,181 @@ int main(void)
             for (unsigned i = 0; i < sizeof fresh / sizeof fresh[0]; i++) {
                 (void)fresh[i].port; (void)fresh[i].host;
             }
-            check([[MTLAccelerationStructureDescriptor new] usage] == [[[charonHost_MTLAccelerationStructureDescriptor alloc] init] usage],
+            check([[MTLAccelerationStructureDescriptor new] usage] == [[[revenantHost_MTLAccelerationStructureDescriptor alloc] init] usage],
                   @"fresh: MTLAccelerationStructureDescriptor.usage");
             check([[MTLAccelerationStructureGeometryDescriptor new] intersectionFunctionTableOffset]
-                  == [[[charonHost_MTLAccelerationStructureGeometryDescriptor alloc] init] intersectionFunctionTableOffset],
+                  == [[[revenantHost_MTLAccelerationStructureGeometryDescriptor alloc] init] intersectionFunctionTableOffset],
                   @"fresh: MTLAccelerationStructureGeometryDescriptor.intersectionFunctionTableOffset");
             check([[MTLAccelerationStructureGeometryDescriptor new] opaque]
-                  == [[[charonHost_MTLAccelerationStructureGeometryDescriptor alloc] init] opaque],
+                  == [[[revenantHost_MTLAccelerationStructureGeometryDescriptor alloc] init] opaque],
                   @"fresh: MTLAccelerationStructureGeometryDescriptor.opaque");
                         check([[MTLAccelerationStructureGeometryDescriptor new] primitiveDataBuffer] == nil
-                  && [[[charonHost_MTLAccelerationStructureGeometryDescriptor alloc] init] primitiveDataBuffer] == nil,
+                  && [[[revenantHost_MTLAccelerationStructureGeometryDescriptor alloc] init] primitiveDataBuffer] == nil,
                   @"fresh: MTLAccelerationStructureGeometryDescriptor.primitiveDataBuffer is nil on both sides");
             check([[MTLAccelerationStructureGeometryDescriptor new] primitiveDataBufferOffset]
-                  == [[[charonHost_MTLAccelerationStructureGeometryDescriptor alloc] init] primitiveDataBufferOffset],
+                  == [[[revenantHost_MTLAccelerationStructureGeometryDescriptor alloc] init] primitiveDataBufferOffset],
                   @"fresh: MTLAccelerationStructureGeometryDescriptor.primitiveDataBufferOffset");
             check([[MTLAccelerationStructureGeometryDescriptor new] primitiveDataStride]
-                  == [[[charonHost_MTLAccelerationStructureGeometryDescriptor alloc] init] primitiveDataStride],
+                  == [[[revenantHost_MTLAccelerationStructureGeometryDescriptor alloc] init] primitiveDataStride],
                   @"fresh: MTLAccelerationStructureGeometryDescriptor.primitiveDataStride");
             check([[MTLAccelerationStructureGeometryDescriptor new] primitiveDataElementSize]
-                  == [[[charonHost_MTLAccelerationStructureGeometryDescriptor alloc] init] primitiveDataElementSize],
+                  == [[[revenantHost_MTLAccelerationStructureGeometryDescriptor alloc] init] primitiveDataElementSize],
                   @"fresh: MTLAccelerationStructureGeometryDescriptor.primitiveDataElementSize");
             check([[MTLAccelerationStructureGeometryDescriptor new] label] == nil
-                  && [[[charonHost_MTLAccelerationStructureGeometryDescriptor alloc] init] label] == nil,
+                  && [[[revenantHost_MTLAccelerationStructureGeometryDescriptor alloc] init] label] == nil,
                   @"fresh: MTLAccelerationStructureGeometryDescriptor.label is nil on both sides");
             check([[MTLAccelerationStructureBoundingBoxGeometryDescriptor new] boundingBoxBuffer] == nil
-                  && [[[charonHost_MTLAccelerationStructureBoundingBoxGeometryDescriptor alloc] init] boundingBoxBuffer] == nil,
+                  && [[[revenantHost_MTLAccelerationStructureBoundingBoxGeometryDescriptor alloc] init] boundingBoxBuffer] == nil,
                   @"fresh: …BoundingBoxGeometryDescriptor.boundingBoxBuffer is nil on both sides");
             check([[MTLAccelerationStructureBoundingBoxGeometryDescriptor new] boundingBoxBufferOffset]
-                  == [[[charonHost_MTLAccelerationStructureBoundingBoxGeometryDescriptor alloc] init] boundingBoxBufferOffset],
+                  == [[[revenantHost_MTLAccelerationStructureBoundingBoxGeometryDescriptor alloc] init] boundingBoxBufferOffset],
                   @"fresh: …BoundingBoxGeometryDescriptor.boundingBoxBufferOffset");
                         check([[MTLAccelerationStructureBoundingBoxGeometryDescriptor new] boundingBoxCount]
-                  == [[[charonHost_MTLAccelerationStructureBoundingBoxGeometryDescriptor alloc] init] boundingBoxCount],
+                  == [[[revenantHost_MTLAccelerationStructureBoundingBoxGeometryDescriptor alloc] init] boundingBoxCount],
                   @"fresh: …BoundingBoxGeometryDescriptor.boundingBoxCount");
             check([[MTLAccelerationStructureTriangleGeometryDescriptor new] vertexBuffer] == nil
-                  && [[[charonHost_MTLAccelerationStructureTriangleGeometryDescriptor alloc] init] vertexBuffer] == nil,
+                  && [[[revenantHost_MTLAccelerationStructureTriangleGeometryDescriptor alloc] init] vertexBuffer] == nil,
                   @"fresh: …TriangleGeometryDescriptor.vertexBuffer is nil on both sides");
             check([[MTLAccelerationStructureTriangleGeometryDescriptor new] vertexBufferOffset]
-                  == [[[charonHost_MTLAccelerationStructureTriangleGeometryDescriptor alloc] init] vertexBufferOffset],
+                  == [[[revenantHost_MTLAccelerationStructureTriangleGeometryDescriptor alloc] init] vertexBufferOffset],
                   @"fresh: …TriangleGeometryDescriptor.vertexBufferOffset");
                         check([[MTLAccelerationStructureTriangleGeometryDescriptor new] vertexStride]
-                  == [[[charonHost_MTLAccelerationStructureTriangleGeometryDescriptor alloc] init] vertexStride],
+                  == [[[revenantHost_MTLAccelerationStructureTriangleGeometryDescriptor alloc] init] vertexStride],
                   @"fresh: …TriangleGeometryDescriptor.vertexStride");
             check([[MTLAccelerationStructureTriangleGeometryDescriptor new] indexBuffer] == nil
-                  && [[[charonHost_MTLAccelerationStructureTriangleGeometryDescriptor alloc] init] indexBuffer] == nil,
+                  && [[[revenantHost_MTLAccelerationStructureTriangleGeometryDescriptor alloc] init] indexBuffer] == nil,
                   @"fresh: …TriangleGeometryDescriptor.indexBuffer is nil on both sides");
             check([[MTLAccelerationStructureTriangleGeometryDescriptor new] indexBufferOffset]
-                  == [[[charonHost_MTLAccelerationStructureTriangleGeometryDescriptor alloc] init] indexBufferOffset],
+                  == [[[revenantHost_MTLAccelerationStructureTriangleGeometryDescriptor alloc] init] indexBufferOffset],
                   @"fresh: …TriangleGeometryDescriptor.indexBufferOffset");
                         check([[MTLAccelerationStructureTriangleGeometryDescriptor new] triangleCount]
-                  == [[[charonHost_MTLAccelerationStructureTriangleGeometryDescriptor alloc] init] triangleCount],
+                  == [[[revenantHost_MTLAccelerationStructureTriangleGeometryDescriptor alloc] init] triangleCount],
                   @"fresh: …TriangleGeometryDescriptor.triangleCount");
             check([[MTLAccelerationStructureTriangleGeometryDescriptor new] transformationMatrixBuffer] == nil
-                  && [[[charonHost_MTLAccelerationStructureTriangleGeometryDescriptor alloc] init] transformationMatrixBuffer] == nil,
+                  && [[[revenantHost_MTLAccelerationStructureTriangleGeometryDescriptor alloc] init] transformationMatrixBuffer] == nil,
                   @"fresh: …TriangleGeometryDescriptor.transformationMatrixBuffer is nil on both sides");
             check([[MTLAccelerationStructureTriangleGeometryDescriptor new] transformationMatrixBufferOffset]
-                  == [[[charonHost_MTLAccelerationStructureTriangleGeometryDescriptor alloc] init] transformationMatrixBufferOffset],
+                  == [[[revenantHost_MTLAccelerationStructureTriangleGeometryDescriptor alloc] init] transformationMatrixBufferOffset],
                   @"fresh: …TriangleGeometryDescriptor.transformationMatrixBufferOffset");
             check([[MTLPrimitiveAccelerationStructureDescriptor new] geometryDescriptors] == nil
-                  && [[[charonHost_MTLPrimitiveAccelerationStructureDescriptor alloc] init] geometryDescriptors] == nil,
+                  && [[[revenantHost_MTLPrimitiveAccelerationStructureDescriptor alloc] init] geometryDescriptors] == nil,
                   @"fresh: MTLPrimitiveAccelerationStructureDescriptor.geometryDescriptors is nil on both sides");
             check([[MTLPrimitiveAccelerationStructureDescriptor new] motionStartBorderMode]
-                  == [[[charonHost_MTLPrimitiveAccelerationStructureDescriptor alloc] init] motionStartBorderMode],
+                  == [[[revenantHost_MTLPrimitiveAccelerationStructureDescriptor alloc] init] motionStartBorderMode],
                   @"fresh: MTLPrimitiveAccelerationStructureDescriptor.motionStartBorderMode");
             check([[MTLPrimitiveAccelerationStructureDescriptor new] motionEndBorderMode]
-                  == [[[charonHost_MTLPrimitiveAccelerationStructureDescriptor alloc] init] motionEndBorderMode],
+                  == [[[revenantHost_MTLPrimitiveAccelerationStructureDescriptor alloc] init] motionEndBorderMode],
                   @"fresh: MTLPrimitiveAccelerationStructureDescriptor.motionEndBorderMode");
             check([[MTLPrimitiveAccelerationStructureDescriptor new] motionStartTime]
-                  == [[[charonHost_MTLPrimitiveAccelerationStructureDescriptor alloc] init] motionStartTime],
+                  == [[[revenantHost_MTLPrimitiveAccelerationStructureDescriptor alloc] init] motionStartTime],
                   @"fresh: MTLPrimitiveAccelerationStructureDescriptor.motionStartTime");
                                     check([[MTLInstanceAccelerationStructureDescriptor new] instanceDescriptorBuffer] == nil
-                  && [[[charonHost_MTLInstanceAccelerationStructureDescriptor alloc] init] instanceDescriptorBuffer] == nil,
+                  && [[[revenantHost_MTLInstanceAccelerationStructureDescriptor alloc] init] instanceDescriptorBuffer] == nil,
                   @"fresh: MTLInstanceAccelerationStructureDescriptor.instanceDescriptorBuffer is nil on both sides");
             check([[MTLInstanceAccelerationStructureDescriptor new] instanceDescriptorBufferOffset]
-                  == [[[charonHost_MTLInstanceAccelerationStructureDescriptor alloc] init] instanceDescriptorBufferOffset],
+                  == [[[revenantHost_MTLInstanceAccelerationStructureDescriptor alloc] init] instanceDescriptorBufferOffset],
                   @"fresh: MTLInstanceAccelerationStructureDescriptor.instanceDescriptorBufferOffset");
                         check([[MTLInstanceAccelerationStructureDescriptor new] instanceCount]
-                  == [[[charonHost_MTLInstanceAccelerationStructureDescriptor alloc] init] instanceCount],
+                  == [[[revenantHost_MTLInstanceAccelerationStructureDescriptor alloc] init] instanceCount],
                   @"fresh: MTLInstanceAccelerationStructureDescriptor.instanceCount");
             check([[MTLInstanceAccelerationStructureDescriptor new] instanceDescriptorType]
-                  == [[[charonHost_MTLInstanceAccelerationStructureDescriptor alloc] init] instanceDescriptorType],
+                  == [[[revenantHost_MTLInstanceAccelerationStructureDescriptor alloc] init] instanceDescriptorType],
                   @"fresh: MTLInstanceAccelerationStructureDescriptor.instanceDescriptorType");
             check([[MTLInstanceAccelerationStructureDescriptor new] instancedAccelerationStructures] == nil
-                  && [[[charonHost_MTLInstanceAccelerationStructureDescriptor alloc] init] instancedAccelerationStructures] == nil,
+                  && [[[revenantHost_MTLInstanceAccelerationStructureDescriptor alloc] init] instancedAccelerationStructures] == nil,
                   @"fresh: MTLInstanceAccelerationStructureDescriptor.instancedAccelerationStructures is nil on both sides");
             check([[MTLInstanceAccelerationStructureDescriptor new] motionTransformBuffer] == nil
-                  && [[[charonHost_MTLInstanceAccelerationStructureDescriptor alloc] init] motionTransformBuffer] == nil,
+                  && [[[revenantHost_MTLInstanceAccelerationStructureDescriptor alloc] init] motionTransformBuffer] == nil,
                   @"fresh: MTLInstanceAccelerationStructureDescriptor.motionTransformBuffer is nil on both sides");
             check([[MTLInstanceAccelerationStructureDescriptor new] motionTransformBufferOffset]
-                  == [[[charonHost_MTLInstanceAccelerationStructureDescriptor alloc] init] motionTransformBufferOffset],
+                  == [[[revenantHost_MTLInstanceAccelerationStructureDescriptor alloc] init] motionTransformBufferOffset],
                   @"fresh: MTLInstanceAccelerationStructureDescriptor.motionTransformBufferOffset");
             check([[MTLInstanceAccelerationStructureDescriptor new] motionTransformCount]
-                  == [[[charonHost_MTLInstanceAccelerationStructureDescriptor alloc] init] motionTransformCount],
+                  == [[[revenantHost_MTLInstanceAccelerationStructureDescriptor alloc] init] motionTransformCount],
                   @"fresh: MTLInstanceAccelerationStructureDescriptor.motionTransformCount");
             check([[MTLVisibleFunctionTableDescriptor new] functionCount]
-                  == [[[charonHost_MTLVisibleFunctionTableDescriptor alloc] init] functionCount],
+                  == [[[revenantHost_MTLVisibleFunctionTableDescriptor alloc] init] functionCount],
                   @"fresh: MTLVisibleFunctionTableDescriptor.functionCount");
             check([[MTLIntersectionFunctionTableDescriptor new] functionCount]
-                  == [[[charonHost_MTLIntersectionFunctionTableDescriptor alloc] init] functionCount],
+                  == [[[revenantHost_MTLIntersectionFunctionTableDescriptor alloc] init] functionCount],
                   @"fresh: MTLIntersectionFunctionTableDescriptor.functionCount");
             check([[MTLCounterSampleBufferDescriptor new] counterSet] == nil
-                  && [[[charonHost_MTLCounterSampleBufferDescriptor alloc] init] counterSet] == nil,
+                  && [[[revenantHost_MTLCounterSampleBufferDescriptor alloc] init] counterSet] == nil,
                   @"fresh: MTLCounterSampleBufferDescriptor.counterSet is nil on both sides");
             check([[MTLCounterSampleBufferDescriptor new] label] == nil
-                  && [[[charonHost_MTLCounterSampleBufferDescriptor alloc] init] label] == nil,
+                  && [[[revenantHost_MTLCounterSampleBufferDescriptor alloc] init] label] == nil,
                   @"fresh: MTLCounterSampleBufferDescriptor.label is nil on both sides");
             check([[MTLCounterSampleBufferDescriptor new] sampleCount]
-                  == [[[charonHost_MTLCounterSampleBufferDescriptor alloc] init] sampleCount],
+                  == [[[revenantHost_MTLCounterSampleBufferDescriptor alloc] init] sampleCount],
                   @"fresh: MTLCounterSampleBufferDescriptor.sampleCount");
             check([[MTLComputePassSampleBufferAttachmentDescriptor new] sampleBuffer] == nil
-                  && [[[charonHost_MTLComputePassSampleBufferAttachmentDescriptor alloc] init] sampleBuffer] == nil,
+                  && [[[revenantHost_MTLComputePassSampleBufferAttachmentDescriptor alloc] init] sampleBuffer] == nil,
                   @"fresh: MTLComputePassSampleBufferAttachmentDescriptor.sampleBuffer is nil on both sides");
             check([[MTLComputePassSampleBufferAttachmentDescriptor new] startOfEncoderSampleIndex]
-                  == [[[charonHost_MTLComputePassSampleBufferAttachmentDescriptor alloc] init] startOfEncoderSampleIndex],
+                  == [[[revenantHost_MTLComputePassSampleBufferAttachmentDescriptor alloc] init] startOfEncoderSampleIndex],
                   @"fresh: MTLComputePassSampleBufferAttachmentDescriptor.startOfEncoderSampleIndex");
             check([[MTLComputePassSampleBufferAttachmentDescriptor new] endOfEncoderSampleIndex]
-                  == [[[charonHost_MTLComputePassSampleBufferAttachmentDescriptor alloc] init] endOfEncoderSampleIndex],
+                  == [[[revenantHost_MTLComputePassSampleBufferAttachmentDescriptor alloc] init] endOfEncoderSampleIndex],
                   @"fresh: MTLComputePassSampleBufferAttachmentDescriptor.endOfEncoderSampleIndex");
             check([[MTLResourceStatePassSampleBufferAttachmentDescriptor new] sampleBuffer] == nil
-                  && [[[charonHost_MTLResourceStatePassSampleBufferAttachmentDescriptor alloc] init] sampleBuffer] == nil,
+                  && [[[revenantHost_MTLResourceStatePassSampleBufferAttachmentDescriptor alloc] init] sampleBuffer] == nil,
                   @"fresh: MTLResourceStatePassSampleBufferAttachmentDescriptor.sampleBuffer is nil on both sides");
             check([[MTLResourceStatePassSampleBufferAttachmentDescriptor new] startOfEncoderSampleIndex]
-                  == [[[charonHost_MTLResourceStatePassSampleBufferAttachmentDescriptor alloc] init] startOfEncoderSampleIndex],
+                  == [[[revenantHost_MTLResourceStatePassSampleBufferAttachmentDescriptor alloc] init] startOfEncoderSampleIndex],
                   @"fresh: MTLResourceStatePassSampleBufferAttachmentDescriptor.startOfEncoderSampleIndex");
             check([[MTLResourceStatePassSampleBufferAttachmentDescriptor new] endOfEncoderSampleIndex]
-                  == [[[charonHost_MTLResourceStatePassSampleBufferAttachmentDescriptor alloc] init] endOfEncoderSampleIndex],
+                  == [[[revenantHost_MTLResourceStatePassSampleBufferAttachmentDescriptor alloc] init] endOfEncoderSampleIndex],
                   @"fresh: MTLResourceStatePassSampleBufferAttachmentDescriptor.endOfEncoderSampleIndex");
             check([[MTLRenderPassSampleBufferAttachmentDescriptor new] sampleBuffer] == nil
-                  && [[[charonHost_MTLRenderPassSampleBufferAttachmentDescriptor alloc] init] sampleBuffer] == nil,
+                  && [[[revenantHost_MTLRenderPassSampleBufferAttachmentDescriptor alloc] init] sampleBuffer] == nil,
                   @"fresh: MTLRenderPassSampleBufferAttachmentDescriptor.sampleBuffer is nil on both sides");
             check([[MTLRenderPassSampleBufferAttachmentDescriptor new] startOfVertexSampleIndex]
-                  == [[[charonHost_MTLRenderPassSampleBufferAttachmentDescriptor alloc] init] startOfVertexSampleIndex],
+                  == [[[revenantHost_MTLRenderPassSampleBufferAttachmentDescriptor alloc] init] startOfVertexSampleIndex],
                   @"fresh: MTLRenderPassSampleBufferAttachmentDescriptor.startOfVertexSampleIndex");
             check([[MTLRenderPassSampleBufferAttachmentDescriptor new] endOfVertexSampleIndex]
-                  == [[[charonHost_MTLRenderPassSampleBufferAttachmentDescriptor alloc] init] endOfVertexSampleIndex],
+                  == [[[revenantHost_MTLRenderPassSampleBufferAttachmentDescriptor alloc] init] endOfVertexSampleIndex],
                   @"fresh: MTLRenderPassSampleBufferAttachmentDescriptor.endOfVertexSampleIndex");
             check([[MTLRenderPassSampleBufferAttachmentDescriptor new] startOfFragmentSampleIndex]
-                  == [[[charonHost_MTLRenderPassSampleBufferAttachmentDescriptor alloc] init] startOfFragmentSampleIndex],
+                  == [[[revenantHost_MTLRenderPassSampleBufferAttachmentDescriptor alloc] init] startOfFragmentSampleIndex],
                   @"fresh: MTLRenderPassSampleBufferAttachmentDescriptor.startOfFragmentSampleIndex");
             check([[MTLRenderPassSampleBufferAttachmentDescriptor new] endOfFragmentSampleIndex]
-                  == [[[charonHost_MTLRenderPassSampleBufferAttachmentDescriptor alloc] init] endOfFragmentSampleIndex],
+                  == [[[revenantHost_MTLRenderPassSampleBufferAttachmentDescriptor alloc] init] endOfFragmentSampleIndex],
                   @"fresh: MTLRenderPassSampleBufferAttachmentDescriptor.endOfFragmentSampleIndex");
             check([[MTLComputePassDescriptor new] dispatchType]
-                  == [[[charonHost_MTLComputePassDescriptor alloc] init] dispatchType],
+                  == [[[revenantHost_MTLComputePassDescriptor alloc] init] dispatchType],
                   @"fresh: MTLComputePassDescriptor.dispatchType");
             check([[MTLComputePassDescriptor new] sampleBufferAttachments] != nil
-                  && [[[charonHost_MTLComputePassDescriptor alloc] init] sampleBufferAttachments] != nil,
+                  && [[[revenantHost_MTLComputePassDescriptor alloc] init] sampleBufferAttachments] != nil,
                   @"fresh: MTLComputePassDescriptor.sampleBufferAttachments is a real array on both sides");
             check([MTLComputePassSampleBufferAttachmentDescriptorArray class] != nil
-                  && [charonHost_MTLComputePassSampleBufferAttachmentDescriptorArray class] != nil,
+                  && [revenantHost_MTLComputePassSampleBufferAttachmentDescriptorArray class] != nil,
                   @"fresh: the compute pass's array class exists on both sides");
             check([[MTLResourceStatePassDescriptor new] sampleBufferAttachments] != nil
-                  && [[[charonHost_MTLResourceStatePassDescriptor alloc] init] sampleBufferAttachments] != nil,
+                  && [[[revenantHost_MTLResourceStatePassDescriptor alloc] init] sampleBufferAttachments] != nil,
                   @"fresh: MTLResourceStatePassDescriptor.sampleBufferAttachments is a real array on both sides");
             check([[MTLBinaryArchiveDescriptor new] url] == nil
-                  && [[[charonHost_MTLBinaryArchiveDescriptor alloc] init] url] == nil,
+                  && [[[revenantHost_MTLBinaryArchiveDescriptor alloc] init] url] == nil,
                   @"fresh: MTLBinaryArchiveDescriptor.url is nil on both sides");
             check([[MTLLinkedFunctions new] functions] == nil
-                  && [[[charonHost_MTLLinkedFunctions alloc] init] functions] == nil,
+                  && [[[revenantHost_MTLLinkedFunctions alloc] init] functions] == nil,
                   @"fresh: MTLLinkedFunctions.functions is nil on both sides");
             check([[MTLLinkedFunctions new] binaryFunctions] == nil
-                  && [[[charonHost_MTLLinkedFunctions alloc] init] binaryFunctions] == nil,
+                  && [[[revenantHost_MTLLinkedFunctions alloc] init] binaryFunctions] == nil,
                   @"fresh: MTLLinkedFunctions.binaryFunctions is nil on both sides");
             check([[MTLLinkedFunctions new] groups] == nil
-                  && [[[charonHost_MTLLinkedFunctions alloc] init] groups] == nil,
+                  && [[[revenantHost_MTLLinkedFunctions alloc] init] groups] == nil,
                   @"fresh: MTLLinkedFunctions.groups is nil on both sides");
             check([[MTLLinkedFunctions new] privateFunctions] == nil
-                  && [[[charonHost_MTLLinkedFunctions alloc] init] privateFunctions] == nil,
+                  && [[[revenantHost_MTLLinkedFunctions alloc] init] privateFunctions] == nil,
                   @"fresh: MTLLinkedFunctions.privateFunctions is nil on both sides");
             check([MTLIntersectionFunctionDescriptor new] != nil
-                  && [charonHost_MTLIntersectionFunctionDescriptor new] != nil,
+                  && [revenantHost_MTLIntersectionFunctionDescriptor new] != nil,
                   @"fresh: MTLIntersectionFunctionDescriptor is made on both sides and declares no member");
         }
         {
             struct { const char *name; const char *port; const char *apple; } undocumented[] = {
                 {"indexType",
-                 [[[charonHost_MTLAccelerationStructureTriangleGeometryDescriptor alloc] init] indexType] == 0 ? "unset" : "set",
+                 [[[revenantHost_MTLAccelerationStructureTriangleGeometryDescriptor alloc] init] indexType] == 0 ? "unset" : "set",
                  [[[MTLAccelerationStructureTriangleGeometryDescriptor alloc] init] indexType] == 0 ? "unset" : "set"},
             };
             for (unsigned i = 0; i < sizeof undocumented / sizeof undocumented[0]; i++) {
@@ -658,55 +658,55 @@ int main(void)
         }
 
         check([[MTLAccelerationStructureGeometryDescriptor new] allowDuplicateIntersectionFunctionInvocation]
-                  == [[[charonHost_MTLAccelerationStructureGeometryDescriptor alloc] init] allowDuplicateIntersectionFunctionInvocation],
+                  == [[[revenantHost_MTLAccelerationStructureGeometryDescriptor alloc] init] allowDuplicateIntersectionFunctionInvocation],
               @"fresh: …GeometryDescriptor.allowDuplicateIntersectionFunctionInvocation, the header's YES");
         check([[MTLPrimitiveAccelerationStructureDescriptor new] motionEndTime]
-                  == [[[charonHost_MTLPrimitiveAccelerationStructureDescriptor alloc] init] motionEndTime],
+                  == [[[revenantHost_MTLPrimitiveAccelerationStructureDescriptor alloc] init] motionEndTime],
               @"fresh: MTLPrimitiveAccelerationStructureDescriptor.motionEndTime, the header's 1.0f");
         check([[MTLPrimitiveAccelerationStructureDescriptor new] motionKeyframeCount]
-                  == [[[charonHost_MTLPrimitiveAccelerationStructureDescriptor alloc] init] motionKeyframeCount],
+                  == [[[revenantHost_MTLPrimitiveAccelerationStructureDescriptor alloc] init] motionKeyframeCount],
               @"fresh: MTLPrimitiveAccelerationStructureDescriptor.motionKeyframeCount, the header's 1");
         check([[MTLAccelerationStructureTriangleGeometryDescriptor new] vertexFormat]
-                  == [[[charonHost_MTLAccelerationStructureTriangleGeometryDescriptor alloc] init] vertexFormat],
+                  == [[[revenantHost_MTLAccelerationStructureTriangleGeometryDescriptor alloc] init] vertexFormat],
               @"fresh: …TriangleGeometryDescriptor.vertexFormat, the header's Float3 packed");
                         check([[MTLComputePassSampleBufferAttachmentDescriptor new] startOfEncoderSampleIndex]
                   == MTLCounterDontSample
-              && [[[charonHost_MTLComputePassSampleBufferAttachmentDescriptor alloc] init] startOfEncoderSampleIndex]
+              && [[[revenantHost_MTLComputePassSampleBufferAttachmentDescriptor alloc] init] startOfEncoderSampleIndex]
                   == MTLCounterDontSample,
               @"fresh: MTLComputePassSampleBufferAttachmentDescriptor.startOfEncoderSampleIndex is MTLCounterDontSample");
         check([[MTLComputePassSampleBufferAttachmentDescriptor new] endOfEncoderSampleIndex]
                   == MTLCounterDontSample
-              && [[[charonHost_MTLComputePassSampleBufferAttachmentDescriptor alloc] init] endOfEncoderSampleIndex]
+              && [[[revenantHost_MTLComputePassSampleBufferAttachmentDescriptor alloc] init] endOfEncoderSampleIndex]
                   == MTLCounterDontSample,
               @"fresh: MTLComputePassSampleBufferAttachmentDescriptor.endOfEncoderSampleIndex is MTLCounterDontSample");
         check([[MTLResourceStatePassSampleBufferAttachmentDescriptor new] startOfEncoderSampleIndex]
                   == MTLCounterDontSample
-              && [[[charonHost_MTLResourceStatePassSampleBufferAttachmentDescriptor alloc] init] startOfEncoderSampleIndex]
+              && [[[revenantHost_MTLResourceStatePassSampleBufferAttachmentDescriptor alloc] init] startOfEncoderSampleIndex]
                   == MTLCounterDontSample,
               @"fresh: MTLResourceStatePassSampleBufferAttachmentDescriptor.startOfEncoderSampleIndex is MTLCounterDontSample");
         check([[MTLResourceStatePassSampleBufferAttachmentDescriptor new] endOfEncoderSampleIndex]
                   == MTLCounterDontSample
-              && [[[charonHost_MTLResourceStatePassSampleBufferAttachmentDescriptor alloc] init] endOfEncoderSampleIndex]
+              && [[[revenantHost_MTLResourceStatePassSampleBufferAttachmentDescriptor alloc] init] endOfEncoderSampleIndex]
                   == MTLCounterDontSample,
               @"fresh: MTLResourceStatePassSampleBufferAttachmentDescriptor.endOfEncoderSampleIndex is MTLCounterDontSample");
         check([[MTLRenderPassSampleBufferAttachmentDescriptor new] startOfVertexSampleIndex]
                   == MTLCounterDontSample
-              && [[[charonHost_MTLRenderPassSampleBufferAttachmentDescriptor alloc] init] startOfVertexSampleIndex]
+              && [[[revenantHost_MTLRenderPassSampleBufferAttachmentDescriptor alloc] init] startOfVertexSampleIndex]
                   == MTLCounterDontSample,
               @"fresh: MTLRenderPassSampleBufferAttachmentDescriptor.startOfVertexSampleIndex is MTLCounterDontSample");
         check([[MTLRenderPassSampleBufferAttachmentDescriptor new] endOfVertexSampleIndex]
                   == MTLCounterDontSample
-              && [[[charonHost_MTLRenderPassSampleBufferAttachmentDescriptor alloc] init] endOfVertexSampleIndex]
+              && [[[revenantHost_MTLRenderPassSampleBufferAttachmentDescriptor alloc] init] endOfVertexSampleIndex]
                   == MTLCounterDontSample,
               @"fresh: MTLRenderPassSampleBufferAttachmentDescriptor.endOfVertexSampleIndex is MTLCounterDontSample");
         check([[MTLRenderPassSampleBufferAttachmentDescriptor new] startOfFragmentSampleIndex]
                   == MTLCounterDontSample
-              && [[[charonHost_MTLRenderPassSampleBufferAttachmentDescriptor alloc] init] startOfFragmentSampleIndex]
+              && [[[revenantHost_MTLRenderPassSampleBufferAttachmentDescriptor alloc] init] startOfFragmentSampleIndex]
                   == MTLCounterDontSample,
               @"fresh: MTLRenderPassSampleBufferAttachmentDescriptor.startOfFragmentSampleIndex is MTLCounterDontSample");
         check([[MTLRenderPassSampleBufferAttachmentDescriptor new] endOfFragmentSampleIndex]
                   == MTLCounterDontSample
-              && [[[charonHost_MTLRenderPassSampleBufferAttachmentDescriptor alloc] init] endOfFragmentSampleIndex]
+              && [[[revenantHost_MTLRenderPassSampleBufferAttachmentDescriptor alloc] init] endOfFragmentSampleIndex]
                   == MTLCounterDontSample,
               @"fresh: MTLRenderPassSampleBufferAttachmentDescriptor.endOfFragmentSampleIndex is MTLCounterDontSample");
         printf("no device was created: %d checks, each one against Apple's own object\n", checks);

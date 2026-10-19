@@ -1,9 +1,9 @@
 #import <ARKit/ARKit.h>
 #import <CoreLocation/CoreLocation.h>
 
-#import "CharonARKitPrivate.h"
-#import "CharonARKitPrivate.h"
-#import "CharonARTracker.h"
+#import "RevenantARKitPrivate.h"
+#import "RevenantARKitPrivate.h"
+#import "RevenantARTracker.h"
 
 #pragma clang diagnostic ignored "-Wunguarded-availability-new"
 
@@ -21,7 +21,7 @@
     return [super init];
 }
 
-- (instancetype)initCharonCommon
+- (instancetype)initRevenantCommon
 {
     return [self init];
 }
@@ -49,7 +49,7 @@
 + (NSArray<ARVideoFormat *> *)supportedVideoFormats
 {
     NSArray<AVCaptureDeviceFormat *> *formats =
-            [CharonARTracker supportedCaptureFormatsForPosition:AVCaptureDevicePositionBack];
+            [RevenantARTracker supportedCaptureFormatsForPosition:AVCaptureDevicePositionBack];
     NSMutableArray<ARVideoFormat *> *result = [NSMutableArray arrayWithCapacity:formats.count];
     for (AVCaptureDeviceFormat *format in formats)
         [result addObject:[[ARVideoFormat alloc] initWithCaptureFormat:format]];
@@ -58,7 +58,7 @@
 
 + (AVCaptureDevice *)configurableCaptureDeviceForPrimaryCamera
 {
-    return [CharonARTracker captureDeviceForPosition:AVCaptureDevicePositionBack];
+    return [RevenantARTracker captureDeviceForPosition:AVCaptureDevicePositionBack];
 }
 
 + (ARVideoFormat *)recommendedVideoFormatFor4KResolution
@@ -100,7 +100,7 @@
 
 + (BOOL)isSupported
 {
-    return [CharonARTracker isSupported];
+    return [RevenantARTracker isSupported];
 }
 
 - (BOOL)isSupported

@@ -29,7 +29,7 @@ static NSString *rect_text(CGRect r)
 {
     [[NSFileManager defaultManager] createDirectoryAtPath:results_folder withIntermediateDirectories:YES attributes:nil error:NULL];
     [[NSFileManager defaultManager] removeItemAtPath:[results_folder stringByAppendingPathComponent:@"releasesheet.done"] error:NULL];
-    charon_log_to([results_folder stringByAppendingPathComponent:@"releasesheet.log"]);
+    revenant_log_to([results_folder stringByAppendingPathComponent:@"releasesheet.log"]);
     self.window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
     UIViewController *root = [[UIViewController alloc] init];
     root.view.backgroundColor = [UIColor whiteColor];
@@ -61,8 +61,8 @@ static NSString *rect_text(CGRect r)
 {
     UIViewController *root = self.window.rootViewController;
     if (!self.cases.count) {
-        printf("checks=%d failures=%d\n", charon_checks, charon_failures);
-        NSString *summary = [NSString stringWithFormat:@"%@ checks=%d failures=%d\n", charon_failures ? @"FAIL" : @"ok", charon_checks, charon_failures];
+        printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
+        NSString *summary = [NSString stringWithFormat:@"%@ checks=%d failures=%d\n", revenant_failures ? @"FAIL" : @"ok", revenant_checks, revenant_failures];
         [summary writeToFile:[results_folder stringByAppendingPathComponent:@"releasesheet.done"] atomically:YES encoding:NSUTF8StringEncoding error:NULL];
         return;
     }
@@ -80,7 +80,7 @@ static NSString *rect_text(CGRect r)
     BOOL ownStyle = entry[2] == [NSNull null];
     printf("record %s.style: %ld\n", name.UTF8String, (long)style);
     if (ownStyle)
-        charon_check(style != UIModalPresentationPageSheet, [[name stringByAppendingString:@".style"] UTF8String], @"the release's own style");
+        revenant_check(style != UIModalPresentationPageSheet, [[name stringByAppendingString:@".style"] UTF8String], @"the release's own style");
     else
         CHECK_EQUAL(@(style), entry[2], [[name stringByAppendingString:@".style"] UTF8String]);
     CGRect before = [root.view convertRect:root.view.bounds toView:nil];
@@ -90,19 +90,19 @@ static NSString *rect_text(CGRect r)
         CGRect frame = [view convertRect:view.bounds toView:nil];
         printf("record %s.presented: presented=%d window=%d frame=%s presentation=%s\n", name.UTF8String, root.presentedViewController == controller, view.window != nil,
                rect_text(frame).UTF8String, NSStringFromClass([controller.presentationController class]).UTF8String);
-        charon_check(root.presentedViewController == controller && view.window != nil, [[name stringByAppendingString:@".presented"] UTF8String], nil);
+        revenant_check(root.presentedViewController == controller && view.window != nil, [[name stringByAppendingString:@".presented"] UTF8String], nil);
         BOOL sheetFrame = frame.origin.x == 0 && frame.origin.y == 40 && frame.size.width == 320 && frame.size.height == 440;
         BOOL inSheet = [controller.presentationController isKindOfClass:[UISheetPresentationController class]];
         if (ownStyle)
-            charon_check(!inSheet, [[name stringByAppendingString:@".presentation"] UTF8String], NSStringFromClass([controller.presentationController class]));
+            revenant_check(!inSheet, [[name stringByAppendingString:@".presentation"] UTF8String], NSStringFromClass([controller.presentationController class]));
         else
-            charon_check(inSheet && sheetFrame, [[name stringByAppendingString:@".frame"] UTF8String], rect_text(frame));
+            revenant_check(inSheet && sheetFrame, [[name stringByAppendingString:@".frame"] UTF8String], rect_text(frame));
         [root dismissViewControllerAnimated:YES completion:nil];
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
             CGRect after = [root.view convertRect:root.view.bounds toView:nil];
             printf("record %s.dismissed: presented=%s root=%s transform=%s\n", name.UTF8String, root.presentedViewController ? NSStringFromClass([root.presentedViewController class]).UTF8String : "nil",
                    rect_text(after).UTF8String, NSStringFromCGAffineTransform(root.view.transform).UTF8String);
-            charon_check(root.presentedViewController == nil && CGRectEqualToRect(after, before) && CGAffineTransformIsIdentity(root.view.transform),
+            revenant_check(root.presentedViewController == nil && CGRectEqualToRect(after, before) && CGAffineTransformIsIdentity(root.view.transform),
                          [[name stringByAppendingString:@".dismissed"] UTF8String], rect_text(after));
             [self next];
         });

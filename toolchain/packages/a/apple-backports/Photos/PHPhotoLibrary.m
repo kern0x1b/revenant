@@ -1,12 +1,12 @@
 #import <AssetsLibrary/AssetsLibrary.h>
-#import "CharonPhotos.h"
+#import "RevenantPhotos.h"
 #import <objc/message.h>
 #import <objc/runtime.h>
 
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 
-static void charon_deliver_authorization(void (^handler)(PHAuthorizationStatus status))
+static void revenant_deliver_authorization(void (^handler)(PHAuthorizationStatus status))
 {
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         handler((PHAuthorizationStatus)[ALAssetsLibrary authorizationStatus]);
@@ -36,7 +36,7 @@ static void charon_deliver_authorization(void (^handler)(PHAuthorizationStatus s
 {
     void (^kept)(PHAuthorizationStatus) = [handler copy];
     if ([ALAssetsLibrary authorizationStatus] != ALAuthorizationStatusNotDetermined) {
-        charon_deliver_authorization(kept);
+        revenant_deliver_authorization(kept);
         return;
     }
     ALAssetsLibrary *library = [[ALAssetsLibrary alloc] init];
@@ -45,7 +45,7 @@ static void charon_deliver_authorization(void (^handler)(PHAuthorizationStatus s
         if (answered)
             return;
         answered = YES;
-        charon_deliver_authorization(kept);
+        revenant_deliver_authorization(kept);
     };
     [library enumerateGroupsWithTypes:ALAssetsGroupSavedPhotos usingBlock:^(ALAssetsGroup *group, BOOL *stop) {
         *stop = YES;
@@ -66,8 +66,8 @@ static void charon_deliver_authorization(void (^handler)(PHAuthorizationStatus s
         if (_listening)
             return;
         __weak PHPhotoLibrary *weakSelf = self;
-        _listening = [[NSNotificationCenter defaultCenter] addObserverForName:ALAssetsLibraryChangedNotification object:[CharonPhotosStore library] queue:nil usingBlock:^(NSNotification *note) {
-            [weakSelf charon_libraryChanged:note.userInfo];
+        _listening = [[NSNotificationCenter defaultCenter] addObserverForName:ALAssetsLibraryChangedNotification object:[RevenantPhotosStore library] queue:nil usingBlock:^(NSNotification *note) {
+            [weakSelf revenant_libraryChanged:note.userInfo];
         }];
     }
 }
@@ -79,7 +79,7 @@ static void charon_deliver_authorization(void (^handler)(PHAuthorizationStatus s
     }
 }
 
-- (void)charon_libraryChanged:(NSDictionary *)userInfo
+- (void)revenant_libraryChanged:(NSDictionary *)userInfo
 {
     NSArray *observers;
     @synchronized(self) {
@@ -87,7 +87,7 @@ static void charon_deliver_authorization(void (^handler)(PHAuthorizationStatus s
     }
     if (observers.count == 0)
         return;
-    PHChange *change = [[PHChange alloc] initWithCharonUserInfo:userInfo];
+    PHChange *change = [[PHChange alloc] initWithRevenantUserInfo:userInfo];
     dispatch_async(_delivery, ^{
         for (id<PHPhotoLibraryChangeObserver> observer in observers)
             [observer photoLibraryDidChange:change];
@@ -96,12 +96,12 @@ static void charon_deliver_authorization(void (^handler)(PHAuthorizationStatus s
 
 - (void)performChanges:(dispatch_block_t)changeBlock completionHandler:(void (^)(BOOL success, NSError *error))completionHandler
 {
-    [CharonPhotosTransaction run:changeBlock then:completionHandler];
+    [RevenantPhotosTransaction run:changeBlock then:completionHandler];
 }
 
 - (BOOL)performChangesAndWait:(dispatch_block_t)changeBlock error:(NSError **)error
 {
-    return [CharonPhotosTransaction runAndWait:changeBlock error:error];
+    return [RevenantPhotosTransaction runAndWait:changeBlock error:error];
 }
 
 + (PHAuthorizationStatus)authorizationStatusForAccessLevel:(PHAccessLevel)accessLevel

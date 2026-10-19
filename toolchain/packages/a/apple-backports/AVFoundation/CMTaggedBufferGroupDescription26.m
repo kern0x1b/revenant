@@ -1,4 +1,4 @@
-#import "CharonCMTaggedBufferGroupEntries.h"
+#import "RevenantCMTaggedBufferGroupEntries.h"
 
 OSStatus CMTaggedBufferGroupFormatDescriptionCreateForTaggedBufferGroupWithExtensions(
     CFAllocatorRef CM_NULLABLE allocator, CMTaggedBufferGroupRef CM_NONNULL taggedBufferGroup,
@@ -15,12 +15,12 @@ OSStatus CMTaggedBufferGroupFormatDescriptionCreateForTaggedBufferGroupWithExten
         payload = CFDictionaryCreateMutable(kCFAllocatorDefault, 0, &kCFTypeDictionaryKeyCallBacks,
                                             &kCFTypeDictionaryValueCallBacks);
 
-    CFDataRef entries = CharonCopyEntriesData(taggedBufferGroup);
-    CFDictionarySetValue(payload, CharonEntriesKey, entries);
+    CFDataRef entries = RevenantCopyEntriesData(taggedBufferGroup);
+    CFDictionarySetValue(payload, RevenantEntriesKey, entries);
     CFRelease(entries);
 
     CMFormatDescriptionRef description = NULL;
-    OSStatus status = CMFormatDescriptionCreate(allocator, kCMMediaType_Video, CharonTaggedBufferGroupSubtype,
+    OSStatus status = CMFormatDescriptionCreate(allocator, kCMMediaType_Video, RevenantTaggedBufferGroupSubtype,
                                                 payload, &description);
     CFRelease(payload);
     if (status)

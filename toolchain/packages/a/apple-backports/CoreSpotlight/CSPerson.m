@@ -1,6 +1,6 @@
 #import <CoreSpotlight/CoreSpotlight.h>
 
-static BOOL CharonSpotlightValuesEqual(id a, id b)
+static BOOL RevenantSpotlightValuesEqual(id a, id b)
 {
     return a == b || [a isEqual:b];
 }
@@ -54,10 +54,10 @@ static BOOL CharonSpotlightValuesEqual(id a, id b)
     if (![other isKindOfClass:[CSPerson class]])
         return NO;
     CSPerson *person = other;
-    return CharonSpotlightValuesEqual(self.displayName, person.displayName)
-        && CharonSpotlightValuesEqual(self.handles, person.handles)
-        && CharonSpotlightValuesEqual(self.handleIdentifier, person.handleIdentifier)
-        && CharonSpotlightValuesEqual(self.contactIdentifier, person.contactIdentifier);
+    return RevenantSpotlightValuesEqual(self.displayName, person.displayName)
+        && RevenantSpotlightValuesEqual(self.handles, person.handles)
+        && RevenantSpotlightValuesEqual(self.handleIdentifier, person.handleIdentifier)
+        && RevenantSpotlightValuesEqual(self.contactIdentifier, person.contactIdentifier);
 }
 
 - (NSUInteger)hash

@@ -6,7 +6,7 @@
       "introduced": "15.0",
       "kind": "method",
       "minimum": "6.0",
-      "source": "the port's own members beside the system's own, measured by tests/backports/host/attributed15/run.sh (checks=376 failures=0): the port's selectors are prefixed with charonHost_ and its Markdown class is renamed CharonHostNSAttributedStringMarkdownParsingOptions, so the two answer in one process and every case compares them in the eight format.positional cases, the ten format.star cases and format.classMethod",
+      "source": "the port's own members beside the system's own, measured by tests/backports/host/attributed15/run.sh (checks=376 failures=0): the port's selectors are prefixed with revenantHost_ and its Markdown class is renamed RevenantHostNSAttributedStringMarkdownParsingOptions, so the two answer in one process and every case compares them in the eight format.positional cases, the ten format.star cases and format.classMethod",
       "status": "implemented",
       "facts": "facts/Foundation/AttributedStrings15.md"
     },
@@ -16,7 +16,7 @@
       "introduced": "15.0",
       "kind": "method",
       "minimum": "6.0",
-      "source": "the port's own members beside the system's own, measured by tests/backports/host/attributed15/run.sh (checks=376 failures=0): the port's selectors are prefixed with charonHost_ and its Markdown class is renamed CharonHostNSAttributedStringMarkdownParsingOptions, so the two answer in one process and every case compares them in the cases format.classMethod.options1 and format.classMethod.options2 and in the two format.positional cases with the replacement index asked for",
+      "source": "the port's own members beside the system's own, measured by tests/backports/host/attributed15/run.sh (checks=376 failures=0): the port's selectors are prefixed with revenantHost_ and its Markdown class is renamed RevenantHostNSAttributedStringMarkdownParsingOptions, so the two answer in one process and every case compares them in the cases format.classMethod.options1 and format.classMethod.options2 and in the two format.positional cases with the replacement index asked for",
       "status": "implemented",
       "facts": "facts/Foundation/AttributedStrings15.md"
     },
@@ -26,7 +26,7 @@
       "introduced": "15.0",
       "kind": "method",
       "minimum": "6.0",
-      "source": "the port's own members beside the system's own, measured by tests/backports/host/attributed15/run.sh (checks=376 failures=0): the port's selectors are prefixed with charonHost_ and its Markdown class is renamed CharonHostNSAttributedStringMarkdownParsingOptions, so the two answer in one process and every case compares them in the 309 inflection cases: every word of every table both ways (inflect.plural.*, inflect.singular.*, inflect.singularOfPlural.*), all seven numbers (inflect.number.*), all fifteen parts of speech (inflect.partOfSpeech.*), ten language tags (inflect.language.*), four ranges that stop inside a word (inflect.partial.*), the alternative, the format specifier, two tagged runs and an untagged one",
+      "source": "the port's own members beside the system's own, measured by tests/backports/host/attributed15/run.sh (checks=376 failures=0): the port's selectors are prefixed with revenantHost_ and its Markdown class is renamed RevenantHostNSAttributedStringMarkdownParsingOptions, so the two answer in one process and every case compares them in the 309 inflection cases: every word of every table both ways (inflect.plural.*, inflect.singular.*, inflect.singularOfPlural.*), all seven numbers (inflect.number.*), all fifteen parts of speech (inflect.partOfSpeech.*), ten language tags (inflect.language.*), four ranges that stop inside a word (inflect.partial.*), the alternative, the format specifier, two tagged runs and an untagged one",
       "status": "implemented",
       "facts": "facts/Foundation/AttributedStrings15.md"
     },
@@ -37,7 +37,7 @@
       "kind": "method",
       "minimum": "6.0",
       "reason": "neither iOS 6 nor the backports give NSAttributedString a method like it: it arrived in iOS 15",
-      "source": "the port's own members beside the system's own, measured by tests/backports/host/attributed15/run.sh (checks=376 failures=0): the port's selectors are prefixed with charonHost_ and its Markdown class is renamed CharonHostNSAttributedStringMarkdownParsingOptions, so the two answer in one process and every case compares them in the case markdown.file",
+      "source": "the port's own members beside the system's own, measured by tests/backports/host/attributed15/run.sh (checks=376 failures=0): the port's selectors are prefixed with revenantHost_ and its Markdown class is renamed RevenantHostNSAttributedStringMarkdownParsingOptions, so the two answer in one process and every case compares them in the case markdown.file",
       "status": "implemented",
       "facts": "facts/Foundation/AttributedStrings15.md"
     },
@@ -47,7 +47,7 @@
       "introduced": "15.0",
       "kind": "method",
       "minimum": "6.0",
-      "source": "the port's own members beside the system's own, measured by tests/backports/host/attributed15/run.sh (checks=376 failures=0): the port's selectors are prefixed with charonHost_ and its Markdown class is renamed CharonHostNSAttributedStringMarkdownParsingOptions, so the two answer in one process and every case compares them in the case format.options0 and the three format.canonical cases",
+      "source": "the port's own members beside the system's own, measured by tests/backports/host/attributed15/run.sh (checks=376 failures=0): the port's selectors are prefixed with revenantHost_ and its Markdown class is renamed RevenantHostNSAttributedStringMarkdownParsingOptions, so the two answer in one process and every case compares them in the case format.options0 and the three format.canonical cases",
       "status": "implemented",
       "facts": "facts/Foundation/AttributedStrings15.md"
     },
@@ -57,7 +57,7 @@
       "introduced": "15.0",
       "kind": "method",
       "minimum": "6.0",
-      "source": "the port's own members beside the system's own, measured by tests/backports/host/attributed15/run.sh (checks=376 failures=0): the port's selectors are prefixed with charonHost_ and its Markdown class is renamed CharonHostNSAttributedStringMarkdownParsingOptions, so the two answer in one process and every case compares them in the case format.widths, which passes a double, a long, an int and a string, and the four format.argumentList cases, one per locale and one for nil, which is the family that tells the two spellings apart",
+      "source": "the port's own members beside the system's own, measured by tests/backports/host/attributed15/run.sh (checks=376 failures=0): the port's selectors are prefixed with revenantHost_ and its Markdown class is renamed RevenantHostNSAttributedStringMarkdownParsingOptions, so the two answer in one process and every case compares them in the case format.widths, which passes a double, a long, an int and a string, and the four format.argumentList cases, one per locale and one for nil, which is the family that tells the two spellings apart",
       "status": "implemented",
       "facts": "facts/Foundation/AttributedStrings15.md"
     },
@@ -68,7 +68,7 @@
       "kind": "method",
       "minimum": "6.0",
       "reason": "neither iOS 6 nor the backports give NSAttributedString a method like it: it arrived in iOS 15",
-      "source": "the port's own members beside the system's own, measured by tests/backports/host/attributed15/run.sh (checks=376 failures=0): the port's selectors are prefixed with charonHost_ and its Markdown class is renamed CharonHostNSAttributedStringMarkdownParsingOptions, so the two answer in one process and every case compares them in the cases markdown.data and markdown.notText",
+      "source": "the port's own members beside the system's own, measured by tests/backports/host/attributed15/run.sh (checks=376 failures=0): the port's selectors are prefixed with revenantHost_ and its Markdown class is renamed RevenantHostNSAttributedStringMarkdownParsingOptions, so the two answer in one process and every case compares them in the cases markdown.data and markdown.notText",
       "status": "implemented",
       "facts": "facts/Foundation/AttributedStrings15.md"
     },
@@ -79,7 +79,7 @@
       "kind": "method",
       "minimum": "6.0",
       "reason": "neither iOS 6 nor the backports give NSAttributedString a method like it: it arrived in iOS 15",
-      "source": "the port's own members beside the system's own, measured by tests/backports/host/attributed15/run.sh (checks=376 failures=0): the port's selectors are prefixed with charonHost_ and its Markdown class is renamed CharonHostNSAttributedStringMarkdownParsingOptions, so the two answer in one process and every case compares them in the three cases markdown.document.0, .1 and .2 and in markdown.languageCode",
+      "source": "the port's own members beside the system's own, measured by tests/backports/host/attributed15/run.sh (checks=376 failures=0): the port's selectors are prefixed with revenantHost_ and its Markdown class is renamed RevenantHostNSAttributedStringMarkdownParsingOptions, so the two answer in one process and every case compares them in the three cases markdown.document.0, .1 and .2 and in markdown.languageCode",
       "status": "implemented",
       "facts": "facts/Foundation/AttributedStrings15.md"
     },
@@ -89,7 +89,7 @@
       "introduced": "15.0",
       "kind": "method",
       "minimum": "6.0",
-      "source": "the port's own members beside the system's own, measured by tests/backports/host/attributed15/run.sh (checks=376 failures=0): the port's selectors are prefixed with charonHost_ and its Markdown class is renamed CharonHostNSAttributedStringMarkdownParsingOptions, so the two answer in one process and every case compares them in the case bundle.missingKey, which prints the attribute name the system itself used",
+      "source": "the port's own members beside the system's own, measured by tests/backports/host/attributed15/run.sh (checks=376 failures=0): the port's selectors are prefixed with revenantHost_ and its Markdown class is renamed RevenantHostNSAttributedStringMarkdownParsingOptions, so the two answer in one process and every case compares them in the case bundle.missingKey, which prints the attribute name the system itself used",
       "status": "implemented",
       "facts": "facts/Foundation/AttributedStrings15.md"
     },
@@ -99,7 +99,7 @@
       "introduced": "15.0",
       "kind": "method",
       "minimum": "6.0",
-      "source": "the port's own members beside the system's own, measured by tests/backports/host/attributed15/run.sh (checks=376 failures=0): the port's selectors are prefixed with charonHost_ and its Markdown class is renamed CharonHostNSAttributedStringMarkdownParsingOptions, so the two answer in one process and every case compares them in the case format.append",
+      "source": "the port's own members beside the system's own, measured by tests/backports/host/attributed15/run.sh (checks=376 failures=0): the port's selectors are prefixed with revenantHost_ and its Markdown class is renamed RevenantHostNSAttributedStringMarkdownParsingOptions, so the two answer in one process and every case compares them in the case format.append",
       "status": "implemented",
       "facts": "facts/Foundation/AttributedStrings15.md"
     },
@@ -110,7 +110,7 @@
       "kind": "constant",
       "minimum": "6.0",
       "reason": "the constant arrived in iOS 15, and nothing in iOS 6 has what it names",
-      "source": "the port's own members beside the system's own, measured by tests/backports/host/attributed15/run.sh (checks=376 failures=0): the port's selectors are prefixed with charonHost_ and its Markdown class is renamed CharonHostNSAttributedStringMarkdownParsingOptions, so the two answer in one process and every case compares them in the case constant.NSAlternateDescriptionAttributeName",
+      "source": "the port's own members beside the system's own, measured by tests/backports/host/attributed15/run.sh (checks=376 failures=0): the port's selectors are prefixed with revenantHost_ and its Markdown class is renamed RevenantHostNSAttributedStringMarkdownParsingOptions, so the two answer in one process and every case compares them in the case constant.NSAlternateDescriptionAttributeName",
       "status": "implemented",
       "facts": "facts/Foundation/AttributedStrings15.md"
     },
@@ -121,7 +121,7 @@
       "kind": "class",
       "minimum": "6.0",
       "reason": "the class arrived in iOS 15, and nothing in iOS 6 does its work or stands in for it",
-      "source": "the port's own members beside the system's own, measured by tests/backports/host/attributed15/run.sh (checks=376 failures=0): the port's selectors are prefixed with charonHost_ and its Markdown class is renamed CharonHostNSAttributedStringMarkdownParsingOptions, so the two answer in one process and every case compares them in the three cases markdown.optionsClass, markdown.options.defaults and markdown.options.copy",
+      "source": "the port's own members beside the system's own, measured by tests/backports/host/attributed15/run.sh (checks=376 failures=0): the port's selectors are prefixed with revenantHost_ and its Markdown class is renamed RevenantHostNSAttributedStringMarkdownParsingOptions, so the two answer in one process and every case compares them in the three cases markdown.optionsClass, markdown.options.defaults and markdown.options.copy",
       "status": "implemented",
       "facts": "facts/Foundation/AttributedStrings15.md"
     },
@@ -132,7 +132,7 @@
       "kind": "constant",
       "minimum": "6.0",
       "reason": "the constant arrived in iOS 15, and nothing in iOS 6 has what it names",
-      "source": "the port's own members beside the system's own, measured by tests/backports/host/attributed15/run.sh (checks=376 failures=0): the port's selectors are prefixed with charonHost_ and its Markdown class is renamed CharonHostNSAttributedStringMarkdownParsingOptions, so the two answer in one process and every case compares them in the case constant.NSImageURLAttributeName",
+      "source": "the port's own members beside the system's own, measured by tests/backports/host/attributed15/run.sh (checks=376 failures=0): the port's selectors are prefixed with revenantHost_ and its Markdown class is renamed RevenantHostNSAttributedStringMarkdownParsingOptions, so the two answer in one process and every case compares them in the case constant.NSImageURLAttributeName",
       "status": "implemented",
       "facts": "facts/Foundation/AttributedStrings15.md"
     },
@@ -182,7 +182,7 @@
       "kind": "constant",
       "minimum": "6.0",
       "reason": "the constant arrived in iOS 15, and nothing in iOS 6 has what it names",
-      "source": "the port's own members beside the system's own, measured by tests/backports/host/attributed15/run.sh (checks=376 failures=0): the port's selectors are prefixed with charonHost_ and its Markdown class is renamed CharonHostNSAttributedStringMarkdownParsingOptions, so the two answer in one process and every case compares them in the case constant.NSInlinePresentationIntentAttributeName and in the three markdown.document cases",
+      "source": "the port's own members beside the system's own, measured by tests/backports/host/attributed15/run.sh (checks=376 failures=0): the port's selectors are prefixed with revenantHost_ and its Markdown class is renamed RevenantHostNSAttributedStringMarkdownParsingOptions, so the two answer in one process and every case compares them in the case constant.NSInlinePresentationIntentAttributeName and in the three markdown.document cases",
       "status": "implemented",
       "facts": "facts/Foundation/AttributedStrings15.md"
     },
@@ -481,7 +481,7 @@
     },
     {
       "api": "NSURLSessionTask.delegate",
-      "effect": "the accessors are the port's own: a fresh task has no delegate of its own although its session has one, a delegate set on the task reads back, and it is refused after the task resumes with the system's own NSGenericException and reason. charon_task_delegate() in NSURLSession.m is the one place that decides, and it decides PER SELECTOR as the header says: a method the task's own delegate does not implement still goes to the session's delegate, so all seventeen task-scoped guards and sends read the delegate that answers the selector being sent. Once the task has completed the delegate reads nil",
+      "effect": "the accessors are the port's own: a fresh task has no delegate of its own although its session has one, a delegate set on the task reads back, and it is refused after the task resumes with the system's own NSGenericException and reason. revenant_task_delegate() in NSURLSession.m is the one place that decides, and it decides PER SELECTOR as the header says: a method the task's own delegate does not implement still goes to the session's delegate, so all seventeen task-scoped guards and sends read the delegate that answers the selector being sent. Once the task has completed the delegate reads nil",
       "introduced": "15.0",
       "kind": "property",
       "minimum": "6.0",
@@ -507,7 +507,7 @@
       "kind": "method",
       "minimum": "6.0",
       "reason": "build -[NSURLSessionTaskDelegate URLSession:didCreateTask:]",
-      "source": "SDK 16.4 Foundation/NSURLSession.h:918-919 for the declaration and its ios(16.0) availability, :912-913 for what the message is; the package's own 2,350 .m, .h and .c sources read for the selector (0 occurrences, control becomeCurrentWithPendingUnitCount: with 8 occurrences); tools/cache-index/first-rung.lua for the first held rung carrying either name (7.0), and its own _names_of() over ~/.charon/cache-index/4.3.names.gz and 6.1.3's, read for the selector, NSURLSession and NSURLSessionTaskDelegate (0 occurrences each of 317,453 and 568,965 names, controls UIView, NSObject and setObject:forKey: present in both); facts/Foundation/Foundation17ReleaseAbsences.md for the 4.3 and 6.0 class censuses",
+      "source": "SDK 16.4 Foundation/NSURLSession.h:918-919 for the declaration and its ios(16.0) availability, :912-913 for what the message is; the package's own 2,350 .m, .h and .c sources read for the selector (0 occurrences, control becomeCurrentWithPendingUnitCount: with 8 occurrences); tools/cache-index/first-rung.lua for the first held rung carrying either name (7.0), and its own _names_of() over ~/.revenant/cache-index/4.3.names.gz and 6.1.3's, read for the selector, NSURLSession and NSURLSessionTaskDelegate (0 occurrences each of 317,453 and 568,965 names, controls UIView, NSObject and setObject:forKey: present in both); facts/Foundation/Foundation17ReleaseAbsences.md for the 4.3 and 6.0 class censuses",
       "status": "owed",
       "facts": "facts/Foundation/NSURLSession.md"
     },

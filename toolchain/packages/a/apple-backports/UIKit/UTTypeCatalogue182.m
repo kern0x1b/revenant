@@ -1,10 +1,10 @@
-#import "CharonUTType.h"
+#import "RevenantUTType.h"
 
 UTType *UTTypeJPEGXL;
 
-__attribute__((constructor)) static void charon_uttype_catalog_182(void)
+__attribute__((constructor)) static void revenant_uttype_catalog_182(void)
 {
     UTTypeJPEGXL = [UTType typeWithIdentifier:@"public.jpeg-xl"];
 
-    charon_uttype_catalogue_add(@[UTTypeJPEGXL]);
+    revenant_uttype_catalogue_add(@[UTTypeJPEGXL]);
 }

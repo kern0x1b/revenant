@@ -1,4 +1,4 @@
-static NSString *const charon_appearance_expectations[] = {
+static NSString *const revenant_appearance_expectations[] = {
     @"idiomD effect10 nil nil 0 rgba(0.00 0.00 0.00 0.30) nil",
     @"idiomD nil nil nil 0 nil nil {NSColor=rgba(0.00 0.00 0.00 0.85),NSFont=font(17)} {0, 0} {NSColor=rgba(0.00 0.00 0.00 0.85),NSFont=font(34)} [{NSFont=font(17)} {0, 0} nil {0, 0}][{NSFont=font(17)} {0, 0} nil {0, 0}][{NSFont=font(17)} {0, 0} nil {0, 0}][{NSFont=font(17)} {0, 0} nil {0, 0}] [{NSFont=font(17)} {0, 0} nil {0, 0}][{NSFont=font(17)} {0, 0} nil {0, 0}][{NSFont=font(17)} {0, 0} nil {0, 0}][{NSFont=font(17)} {0, 0} nil {0, 0}] [{NSFont=font(17)} {0, 0} nil {0, 0}][{NSFont=font(17)} {0, 0} nil {0, 0}][{NSFont=font(17)} {0, 0} nil {0, 0}][{NSFont=font(17)} {0, 0} nil {0, 0}] default default same",
     @"idiomD effect10 nil nil 0 rgba(0.00 0.00 0.00 0.30) nil [{NSFont=font(17)} {0, 0} nil {0, 0}][{NSFont=font(17)} {0, 0} nil {0, 0}][{NSFont=font(17)} {0, 0} nil {0, 0}][{NSFont=font(17)} {0, 0} nil {0, 0}] [{NSFont=font(17)} {0, 0} nil {0, 0}][{NSFont=font(17)} {0, 0} nil {0, 0}][{NSFont=font(17)} {0, 0} nil {0, 0}][{NSFont=font(17)} {0, 0} nil {0, 0}]",

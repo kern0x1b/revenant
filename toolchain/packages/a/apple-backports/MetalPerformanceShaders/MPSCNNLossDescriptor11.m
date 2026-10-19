@@ -1,4 +1,4 @@
-#import "CharonMPS.h"
+#import "RevenantMPS.h"
 
 @implementation MPSCNNLossDescriptor {
     MPSCNNLossType _lossType;
@@ -14,12 +14,12 @@
 + (MPSCNNLossDescriptor *)cnnLossDescriptorWithType:(MPSCNNLossType)lossType reductionType:(MPSCNNReductionType)reductionType
 {
     if ((unsigned int)lossType >= MPSCNNLossTypeCount) {
-        CharonMPSRefuse(@"MPSCNNLossDescriptor: loss type %u is not an MPSCNNLossType, so no descriptor is made",
+        RevenantMPSRefuse(@"MPSCNNLossDescriptor: loss type %u is not an MPSCNNLossType, so no descriptor is made",
                         (unsigned int)lossType);
         return nil;
     }
     if (reductionType >= MPSCNNReductionTypeCount) {
-        CharonMPSRefuse(@"MPSCNNLossDescriptor: reduction type %d is not an MPSCNNReductionType, so no descriptor is made",
+        RevenantMPSRefuse(@"MPSCNNLossDescriptor: reduction type %d is not an MPSCNNReductionType, so no descriptor is made",
                         (int)reductionType);
         return nil;
     }
@@ -83,7 +83,7 @@
 - (void)setLabelSmoothing:(float)labelSmoothing
 {
     if (_lossType != MPSCNNLossTypeSoftMaxCrossEntropy && _lossType != MPSCNNLossTypeSigmoidCrossEntropy) {
-        CharonMPSRefuse(@"MPSCNNLossDescriptor: labelSmoothing is valid only for softmax and sigmoid cross entropy, so it is not set");
+        RevenantMPSRefuse(@"MPSCNNLossDescriptor: labelSmoothing is valid only for softmax and sigmoid cross entropy, so it is not set");
         return;
     }
     _labelSmoothing = labelSmoothing;
@@ -97,7 +97,7 @@
 - (void)setNumberOfClasses:(NSUInteger)numberOfClasses
 {
     if (_lossType != MPSCNNLossTypeSoftMaxCrossEntropy) {
-        CharonMPSRefuse(@"MPSCNNLossDescriptor: numberOfClasses is valid only for softmax cross entropy, so it is not set");
+        RevenantMPSRefuse(@"MPSCNNLossDescriptor: numberOfClasses is valid only for softmax cross entropy, so it is not set");
         return;
     }
     _numberOfClasses = numberOfClasses;
@@ -111,7 +111,7 @@
 - (void)setEpsilon:(float)epsilon
 {
     if (_lossType != MPSCNNLossTypeLog) {
-        CharonMPSRefuse(@"MPSCNNLossDescriptor: epsilon is valid only for the log loss, so it is not set");
+        RevenantMPSRefuse(@"MPSCNNLossDescriptor: epsilon is valid only for the log loss, so it is not set");
         return;
     }
     _epsilon = epsilon;
@@ -125,7 +125,7 @@
 - (void)setDelta:(float)delta
 {
     if (_lossType != MPSCNNLossTypeHuber) {
-        CharonMPSRefuse(@"MPSCNNLossDescriptor: delta is valid only for the Huber loss, so it is not set");
+        RevenantMPSRefuse(@"MPSCNNLossDescriptor: delta is valid only for the Huber loss, so it is not set");
         return;
     }
     _delta = delta;

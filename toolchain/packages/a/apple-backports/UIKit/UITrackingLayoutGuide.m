@@ -5,14 +5,14 @@
     NSMutableDictionary *_awayConstraints;
 }
 
-- (NSMutableDictionary *)charon_near
+- (NSMutableDictionary *)revenant_near
 {
     if (!_nearConstraints)
         _nearConstraints = [NSMutableDictionary dictionary];
     return _nearConstraints;
 }
 
-- (NSMutableDictionary *)charon_away
+- (NSMutableDictionary *)revenant_away
 {
     if (!_awayConstraints)
         _awayConstraints = [NSMutableDictionary dictionary];
@@ -21,22 +21,22 @@
 
 - (void)setConstraints:(NSArray<NSLayoutConstraint *> *)trackingConstraints activeWhenNearEdge:(NSDirectionalRectEdge)edge
 {
-    [[self charon_near] setObject:trackingConstraints forKey:@(edge)];
+    [[self revenant_near] setObject:trackingConstraints forKey:@(edge)];
 }
 
 - (NSArray<NSLayoutConstraint *> *)constraintsActiveWhenNearEdge:(NSDirectionalRectEdge)edge
 {
-    return [self charon_near][@(edge)] ?: @[];
+    return [self revenant_near][@(edge)] ?: @[];
 }
 
 - (void)setConstraints:(NSArray<NSLayoutConstraint *> *)trackingConstraints activeWhenAwayFromEdge:(NSDirectionalRectEdge)edge
 {
-    [[self charon_away] setObject:trackingConstraints forKey:@(edge)];
+    [[self revenant_away] setObject:trackingConstraints forKey:@(edge)];
 }
 
 - (NSArray<NSLayoutConstraint *> *)constraintsActiveWhenAwayFromEdge:(NSDirectionalRectEdge)edge
 {
-    return [self charon_away][@(edge)] ?: @[];
+    return [self revenant_away][@(edge)] ?: @[];
 }
 
 - (void)removeAllTrackedConstraints

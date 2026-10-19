@@ -1,10 +1,10 @@
-#import "CharonSCN.h"
+#import "RevenantSCN.h"
 
 @implementation SCNMaterialProperty
 {
     BOOL _colorNotRead;
     BOOL _holdsDefault;
-    CharonSCNAnimations *_animations;
+    RevenantSCNAnimations *_animations;
 }
 
 - (instancetype)init
@@ -29,7 +29,7 @@
     return property;
 }
 
-+ (instancetype)charonDefaultWithContents:(id)contents
++ (instancetype)revenantDefaultWithContents:(id)contents
 {
     SCNMaterialProperty *property = [self materialPropertyWithContents:contents];
     property->_holdsDefault = YES;
@@ -37,12 +37,12 @@
     return property;
 }
 
-- (BOOL)charonHoldsDefault
+- (BOOL)revenantHoldsDefault
 {
     return _holdsDefault;
 }
 
-- (void)charonKeepDefaultOf:(SCNMaterialProperty *)fallback
+- (void)revenantKeepDefaultOf:(SCNMaterialProperty *)fallback
 {
     _contents = fallback->_contents;
     _holdsDefault = fallback->_holdsDefault;
@@ -64,14 +64,14 @@
 @synthesize wrapT = _wrapT;
 @synthesize mappingChannel = _mappingChannel;
 
-- (BOOL)charonColorNotRead
+- (BOOL)revenantColorNotRead
 {
     return _colorNotRead;
 }
 
 #pragma mark SCNAnimatable
 
-- (CharonSCNAnimations *)charonAnimations
+- (RevenantSCNAnimations *)revenantAnimations
 {
     return _animations;
 }
@@ -79,7 +79,7 @@
 - (void)addAnimation:(id<SCNAnimation>)animation forKey:(NSString *)key
 {
     if (_animations == nil) {
-        _animations = [CharonSCNAnimations new];
+        _animations = [RevenantSCNAnimations new];
     }
     [_animations addAnimation:animation forKey:key];
 }
@@ -119,13 +119,13 @@
     return [_animations isAnimationForKeyPaused:key];
 }
 
-- (NSValue *)charonModelValueForKeyPath:(NSString *)keyPath
+- (NSValue *)revenantModelValueForKeyPath:(NSString *)keyPath
 {
     if ([keyPath isEqualToString:@"contentsTransform"]) return [NSValue valueWithSCNMatrix4:_contentsTransform];
     return nil;
 }
 
-- (SCNMatrix4)charonPresentedContentsTransform
+- (SCNMatrix4)revenantPresentedContentsTransform
 {
     NSValue *presented = [_animations presented][@"contentsTransform"];
     return presented ? [presented SCNMatrix4Value] : _contentsTransform;
@@ -139,11 +139,11 @@
 - (instancetype)initWithCoder:(NSCoder *)coder
 {
     if ((self = [self init])) {
-        NSString *image = [CharonSCNCoding decodeFileReferenceName:coder forKey:@"image"];
+        NSString *image = [RevenantSCNCoding decodeFileReferenceName:coder forKey:@"image"];
         if (image) {
             _contents = image;
         } else if ([coder containsValueForKey:@"color"]) {
-            _contents = [CharonSCNCoding decodeColor:coder forKey:@"color"];
+            _contents = [RevenantSCNCoding decodeColor:coder forKey:@"color"];
             _colorNotRead = _contents == nil;
         } else if ([coder containsValueForKey:@"float"]) {
             _contents = [NSNumber numberWithFloat:[coder decodeFloatForKey:@"float"]];
@@ -168,7 +168,7 @@
         }
         _mappingChannel = [coder decodeIntegerForKey:@"mappingChannel"];
         if ([coder containsValueForKey:@"contentsTransform"]) {
-            _contentsTransform = [CharonSCNCoding decodeMatrix4:coder forKey:@"contentsTransform"];
+            _contentsTransform = [RevenantSCNCoding decodeMatrix4:coder forKey:@"contentsTransform"];
         }
     }
     return self;
@@ -183,7 +183,7 @@
     [coder encodeInteger:_wrapS forKey:@"wrapS"];
     [coder encodeInteger:_wrapT forKey:@"wrapT"];
     [coder encodeInteger:_mappingChannel forKey:@"mappingChannel"];
-    [CharonSCNCoding encodeMatrix4:_contentsTransform coder:coder forKey:@"contentsTransform"];
+    [RevenantSCNCoding encodeMatrix4:_contentsTransform coder:coder forKey:@"contentsTransform"];
 }
 
 - (id)copyWithZone:(NSZone *)zone
@@ -199,7 +199,7 @@
     copy->_wrapT = _wrapT;
     copy->_mappingChannel = _mappingChannel;
     copy->_holdsDefault = _holdsDefault;
-    copy->_animations = [_animations charonCopy];
+    copy->_animations = [_animations revenantCopy];
     return copy;
 }
 

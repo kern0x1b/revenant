@@ -2,7 +2,7 @@
 #import <objc/message.h>
 #import "check.h"
 
-@interface CharonHostUIEventAttribution : NSObject <NSCopying>
+@interface RevenantHostUIEventAttribution : NSObject <NSCopying>
 - (instancetype)initWithSourceIdentifier:(uint8_t)sourceIdentifier
                          destinationURL:(NSURL *)destinationURL
                      sourceDescription:(NSString *)sourceDescription
@@ -14,7 +14,7 @@
 @property (nonatomic, copy, readonly) NSString *purchaser;
 @end
 
-@interface CharonHostUIEventAttributionView : UIView
+@interface RevenantHostUIEventAttributionView : UIView
 @end
 
 typedef id (*zero_init)(id, SEL);
@@ -31,15 +31,15 @@ static id call_new(Class c)
 
 static void BOTH(NSString *what, NSString *ours, NSString *theirs)
 {
-    charon_check([ours isEqualToString:theirs], what.UTF8String,
+    revenant_check([ours isEqualToString:theirs], what.UTF8String,
                  [NSString stringWithFormat:@"port %@ != system %@", ours, theirs]);
 }
 
 static void check_the_zeros(void)
 {
-    CharonHostUIEventAttribution *ours = call_init([CharonHostUIEventAttribution class]);
+    RevenantHostUIEventAttribution *ours = call_init([RevenantHostUIEventAttribution class]);
     UIEventAttribution *theirs = call_init([UIEventAttribution class]);
-    charon_check(ours != nil && theirs != nil, "both sides answer an unavailable -init", @"one side raised");
+    revenant_check(ours != nil && theirs != nil, "both sides answer an unavailable -init", @"one side raised");
     BOTH(@"the unavailable -init gives a zero source identifier",
          [NSString stringWithFormat:@"%u", (unsigned)ours.sourceIdentifier],
          [NSString stringWithFormat:@"%u", (unsigned)theirs.sourceIdentifier]);
@@ -52,9 +52,9 @@ static void check_the_zeros(void)
     BOTH(@"the unavailable -init gives no report endpoint", ours.reportEndpoint == nil ? @"nil" : @"set",
          theirs.reportEndpoint == nil ? @"nil" : @"set");
 
-    CharonHostUIEventAttribution *ourNew = call_new([CharonHostUIEventAttribution class]);
+    RevenantHostUIEventAttribution *ourNew = call_new([RevenantHostUIEventAttribution class]);
     UIEventAttribution *theirNew = call_new([UIEventAttribution class]);
-    charon_check(ourNew != nil && theirNew != nil, "both sides answer an unavailable +new", @"one side raised");
+    revenant_check(ourNew != nil && theirNew != nil, "both sides answer an unavailable +new", @"one side raised");
     BOTH(@"the unavailable +new gives the same zeros as -init",
          [NSString stringWithFormat:@"%u/%@/%@/%@", (unsigned)ourNew.sourceIdentifier,
           ourNew.destinationURL ? @"set" : @"nil", ourNew.sourceDescription ? @"set" : @"nil",
@@ -68,7 +68,7 @@ static void check_the_five_values(void)
 {
     NSURL *url = [NSURL URLWithString:@"https://example.invalid/a"];
     NSString *source = @"a source";
-    CharonHostUIEventAttribution *ours = [[CharonHostUIEventAttribution alloc] initWithSourceIdentifier:7
+    RevenantHostUIEventAttribution *ours = [[RevenantHostUIEventAttribution alloc] initWithSourceIdentifier:7
                                                                           destinationURL:url
                                                                       sourceDescription:source
                                                                                purchaser:@"a purchaser"];
@@ -76,7 +76,7 @@ static void check_the_five_values(void)
                                                                       destinationURL:url
                                                                   sourceDescription:source
                                                                            purchaser:@"a purchaser"];
-    charon_check(ours != nil && theirs != nil, "both sides build an attribution", @"one side answered nothing");
+    revenant_check(ours != nil && theirs != nil, "both sides build an attribution", @"one side answered nothing");
 
     BOTH(@"the source identifier reads back", [NSString stringWithFormat:@"%u", (unsigned)ours.sourceIdentifier],
          [NSString stringWithFormat:@"%u", (unsigned)theirs.sourceIdentifier]);
@@ -92,7 +92,7 @@ static void check_the_five_values(void)
          [ours.sourceDescription isEqual:@"a source"] && ours.sourceDescription == source ? @"same" : @"copied",
          [theirs.sourceDescription isEqual:@"a source"] && theirs.sourceDescription == source ? @"same" : @"copied");
 
-    CharonHostUIEventAttribution *ourCopy = [ours copy];
+    RevenantHostUIEventAttribution *ourCopy = [ours copy];
     UIEventAttribution *theirCopy = [theirs copy];
     BOTH(@"a copy is equal to its receiver", [ourCopy isEqual:ours] ? @"equal" : @"other",
          [theirCopy isEqual:theirs] ? @"equal" : @"other");
@@ -101,7 +101,7 @@ static void check_the_five_values(void)
          [NSString stringWithFormat:@"%u", (unsigned)theirCopy.sourceIdentifier]);
     BOTH(@"a copy keeps the destination URL", ourCopy.destinationURL.absoluteString, theirCopy.destinationURL.absoluteString);
     BOTH(@"a copy keeps the purchaser", ourCopy.purchaser, theirCopy.purchaser);
-    CharonHostUIEventAttribution *ourTwin = [[CharonHostUIEventAttribution alloc] initWithSourceIdentifier:7
+    RevenantHostUIEventAttribution *ourTwin = [[RevenantHostUIEventAttribution alloc] initWithSourceIdentifier:7
                                                                            destinationURL:url
                                                                        sourceDescription:source
                                                                                 purchaser:@"a purchaser"];
@@ -112,7 +112,7 @@ static void check_the_five_values(void)
     BOTH(@"two attributions with the same values are equal", [ours isEqual:ourTwin] ? @"equal" : @"other",
          [theirs isEqual:theirTwin] ? @"equal" : @"other");
 
-    CharonHostUIEventAttribution *other = [[CharonHostUIEventAttribution alloc] initWithSourceIdentifier:8
+    RevenantHostUIEventAttribution *other = [[RevenantHostUIEventAttribution alloc] initWithSourceIdentifier:8
                                                                          destinationURL:url
                                                                      sourceDescription:source
                                                                               purchaser:@"a purchaser"];
@@ -128,9 +128,9 @@ static void check_the_five_values(void)
 
 static void check_the_view(void)
 {
-    CharonHostUIEventAttributionView *ours = [[CharonHostUIEventAttributionView alloc] initWithFrame:CGRectMake(1, 2, 3, 4)];
+    RevenantHostUIEventAttributionView *ours = [[RevenantHostUIEventAttributionView alloc] initWithFrame:CGRectMake(1, 2, 3, 4)];
     UIEventAttributionView *theirs = [[UIEventAttributionView alloc] initWithFrame:CGRectMake(1, 2, 3, 4)];
-    charon_check(ours != nil && theirs != nil, "both sides make the view", @"one side answered nothing");
+    revenant_check(ours != nil && theirs != nil, "both sides make the view", @"one side answered nothing");
     BOTH(@"the view is opaque", [NSString stringWithFormat:@"%d", (int)ours.opaque],
          [NSString stringWithFormat:@"%d", (int)theirs.opaque]);
     BOTH(@"the view takes no user interaction", [NSString stringWithFormat:@"%d", (int)ours.isUserInteractionEnabled],
@@ -151,7 +151,7 @@ int main(void)
         check_the_zeros();
         check_the_five_values();
         check_the_view();
-        printf("checks=%d failures=%d\n", charon_checks, charon_failures);
+        printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
     }
-    return charon_failures;
+    return revenant_failures;
 }

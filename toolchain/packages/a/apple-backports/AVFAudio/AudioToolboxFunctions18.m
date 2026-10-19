@@ -1,6 +1,6 @@
 #import <AudioToolbox/AudioConverter.h>
 #import <dispatch/dispatch.h>
-#import "CharonAudioToolboxDeclarations.h"
+#import "RevenantAudioToolboxDeclarations.h"
 
 OSStatus AudioConverterNewWithOptions(const AudioStreamBasicDescription *inSourceFormat,
                                       const AudioStreamBasicDescription *inDestinationFormat,

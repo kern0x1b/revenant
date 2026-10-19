@@ -1,15 +1,15 @@
-#include "CharonMLWrite.h"
+#include "RevenantMLWrite.h"
 
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include "CharonMLSchema.h"
+#include "RevenantMLSchema.h"
 
-#define WRITE_WIRE_VARINT CHARON_ML_WIRE_VARINT
-#define WRITE_WIRE_64 CHARON_ML_WIRE_64
-#define WRITE_WIRE_STRING CHARON_ML_WIRE_STRING
-#define WRITE_WIRE_32 CHARON_ML_WIRE_32
+#define WRITE_WIRE_VARINT REVENANT_ML_WIRE_VARINT
+#define WRITE_WIRE_64 REVENANT_ML_WIRE_64
+#define WRITE_WIRE_STRING REVENANT_ML_WIRE_STRING
+#define WRITE_WIRE_32 REVENANT_ML_WIRE_32
 
 typedef struct {
     unsigned char *bytes;
@@ -81,7 +81,7 @@ static uint64_t zigzag(int64_t value)
     return ((uint64_t)value << 1) ^ (uint64_t)(value >> 63);
 }
 
-static void put_scalar(out_buffer *out, const charon_ml_node *node, int kind)
+static void put_scalar(out_buffer *out, const revenant_ml_node *node, int kind)
 {
     uint64_t bits;
     double number;
@@ -89,38 +89,38 @@ static void put_scalar(out_buffer *out, const charon_ml_node *node, int kind)
     uint32_t single_bits;
 
     switch (kind) {
-    case CHARON_ML_KIND_DOUBLE:
+    case REVENANT_ML_KIND_DOUBLE:
         number = node->value.number;
         memcpy(&bits, &number, sizeof bits);
         put_fixed(out, bits, 8);
         break;
-    case CHARON_ML_KIND_FLOAT:
+    case REVENANT_ML_KIND_FLOAT:
         single = (float)node->value.number;
         memcpy(&single_bits, &single, sizeof single_bits);
         put_fixed(out, single_bits, 4);
         break;
-    case CHARON_ML_KIND_FIXED64:
-    case CHARON_ML_KIND_SFIXED64:
+    case REVENANT_ML_KIND_FIXED64:
+    case REVENANT_ML_KIND_SFIXED64:
         put_fixed(out, (uint64_t)node->value.integer, 8);
         break;
-    case CHARON_ML_KIND_FIXED32:
-    case CHARON_ML_KIND_SFIXED32:
+    case REVENANT_ML_KIND_FIXED32:
+    case REVENANT_ML_KIND_SFIXED32:
         put_fixed(out, (uint32_t)node->value.integer, 4);
         break;
-    case CHARON_ML_KIND_INT32:
-    case CHARON_ML_KIND_ENUM:
-    case CHARON_ML_KIND_INT64:
+    case REVENANT_ML_KIND_INT32:
+    case REVENANT_ML_KIND_ENUM:
+    case REVENANT_ML_KIND_INT64:
         put_varint(out, (uint64_t)node->value.integer);
         break;
-    case CHARON_ML_KIND_UINT32:
-    case CHARON_ML_KIND_UINT64:
+    case REVENANT_ML_KIND_UINT32:
+    case REVENANT_ML_KIND_UINT64:
         put_varint(out, node->value.unsigned_integer);
         break;
-    case CHARON_ML_KIND_BOOL:
+    case REVENANT_ML_KIND_BOOL:
         put_varint(out, node->value.unsigned_integer ? 1 : 0);
         break;
-    case CHARON_ML_KIND_SINT32:
-    case CHARON_ML_KIND_SINT64:
+    case REVENANT_ML_KIND_SINT32:
+    case REVENANT_ML_KIND_SINT64:
         put_varint(out, zigzag(node->value.integer));
         break;
     default:
@@ -129,16 +129,16 @@ static void put_scalar(out_buffer *out, const charon_ml_node *node, int kind)
     }
 }
 
-static void put_entries(out_buffer *out, const charon_ml_node *message);
+static void put_entries(out_buffer *out, const revenant_ml_node *message);
 
-static void put_entry(out_buffer *out, const charon_ml_node *entry)
+static void put_entry(out_buffer *out, const revenant_ml_node *entry)
 {
-    const charon_ml_field *field = entry->field;
+    const revenant_ml_field *field = entry->field;
 
     if (field == NULL) {
         return;
     }
-    if (field->kind == CHARON_ML_KIND_MESSAGE) {
+    if (field->kind == REVENANT_ML_KIND_MESSAGE) {
         out_buffer sub = {NULL, 0, 0, 0};
         put_entries(&sub, entry);
         put_tag(out, field->number, WRITE_WIRE_STRING);
@@ -146,7 +146,7 @@ static void put_entry(out_buffer *out, const charon_ml_node *entry)
         put_bytes(out, sub.bytes, sub.length);
         out->failed = out->failed || sub.failed;
         free(sub.bytes);
-    } else if (field->kind == CHARON_ML_KIND_STRING || field->kind == CHARON_ML_KIND_BYTES) {
+    } else if (field->kind == REVENANT_ML_KIND_STRING || field->kind == REVENANT_ML_KIND_BYTES) {
         put_tag(out, field->number, WRITE_WIRE_STRING);
         put_varint(out, (uint64_t)entry->value.text.length);
         put_bytes(out, entry->value.text.bytes, entry->value.text.length);
@@ -156,14 +156,14 @@ static void put_entry(out_buffer *out, const charon_ml_node *entry)
     }
 }
 
-static void put_entries(out_buffer *out, const charon_ml_node *message)
+static void put_entries(out_buffer *out, const revenant_ml_node *message)
 {
     size_t index = 0;
     while (index < message->value.list.count && !out->failed) {
-        const charon_ml_node *entry = &message->value.list.nodes[index];
-        const charon_ml_field *field = entry->field;
+        const revenant_ml_node *entry = &message->value.list.nodes[index];
+        const revenant_ml_field *field = entry->field;
 
-        if (field != NULL && field->element != CHARON_ML_FIELD_NONE) {
+        if (field != NULL && field->element != REVENANT_ML_FIELD_NONE) {
             out_buffer run = {NULL, 0, 0, 0};
             while (index < message->value.list.count && message->value.list.nodes[index].field == field) {
                 put_scalar(&run, &message->value.list.nodes[index], field->kind);
@@ -181,7 +181,7 @@ static void put_entries(out_buffer *out, const charon_ml_node *message)
     }
 }
 
-int charon_ml_write(const charon_ml_node *document, unsigned char **bytes, size_t *length)
+int revenant_ml_write(const revenant_ml_node *document, unsigned char **bytes, size_t *length)
 {
     out_buffer out = {NULL, 0, 0, 0};
 

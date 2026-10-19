@@ -4,10 +4,10 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
-#define stringWithValidatedFormat charonHostStringWithValidatedFormat
-#define localizedStringWithValidatedFormat charonHostLocalizedStringWithValidatedFormat
-#define initWithValidatedFormat initWithCharonHostValidatedFormat
-#include CHARON_VALIDATED_FORMAT
+#define stringWithValidatedFormat revenantHostStringWithValidatedFormat
+#define localizedStringWithValidatedFormat revenantHostLocalizedStringWithValidatedFormat
+#define initWithValidatedFormat initWithRevenantHostValidatedFormat
+#include REVENANT_VALIDATED_FORMAT
 #undef stringWithValidatedFormat
 #undef localizedStringWithValidatedFormat
 #undef initWithValidatedFormat
@@ -104,17 +104,17 @@ static void arguments_for(NSString *allowed, uint64_t *words)
     memcpy(&floatingWord, &floating_value, sizeof floatingWord);
     for (int slot = 0; slot < 13; slot++)
         words[slot] = (uint64_t)(__bridge void *)@"object";
-    NSArray *slots = charon_format_slots(allowed, NO);
+    NSArray *slots = revenant_format_slots(allowed, NO);
     for (NSUInteger slot = 0; slot < slots.count && slot < 13; slot++) {
         if (![slots[slot] count])
             continue;
         switch ([slots[slot][0][0] unsignedIntegerValue]) {
-            case CharonFormatObject: break;
-            case CharonFormatCString: case CharonFormatPascalString: case CharonFormatPointer: case CharonFormatCount:
+            case RevenantFormatObject: break;
+            case RevenantFormatCString: case RevenantFormatPascalString: case RevenantFormatPointer: case RevenantFormatCount:
                 words[slot] = (uint64_t)(void *)c_string;
                 break;
-            case CharonFormatWideString: words[slot] = (uint64_t)(void *)wide_string; break;
-            case CharonFormatFloating: case CharonFormatLongFloating: words[slot] = floatingWord; break;
+            case RevenantFormatWideString: words[slot] = (uint64_t)(void *)wide_string; break;
+            case RevenantFormatFloating: case RevenantFormatLongFloating: words[slot] = floatingWord; break;
             default: words[slot] = integer_word; break;
         }
     }
@@ -122,7 +122,7 @@ static void arguments_for(NSString *allowed, uint64_t *words)
 
 static BOOL arguments_agree(NSString *wanted, NSString *allowed)
 {
-    NSArray *asked = charon_format_slots(wanted, NO), *offered = charon_format_slots(allowed, NO);
+    NSArray *asked = revenant_format_slots(wanted, NO), *offered = revenant_format_slots(allowed, NO);
     for (NSArray *kinds in offered)
         for (NSArray *kind in kinds)
             if (![kind isEqual:kinds[0]])
@@ -130,16 +130,16 @@ static BOOL arguments_agree(NSString *wanted, NSString *allowed)
     for (NSUInteger slot = 0; slot < asked.count; slot++) {
         if (slot >= offered.count || ![offered[slot] count])
             return NO;
-        CharonFormatKind given = [offered[slot][0][0] unsignedIntegerValue];
-        BOOL word = given == CharonFormatObject || given == CharonFormatCString || given == CharonFormatWideString
-                 || given == CharonFormatPascalString || given == CharonFormatPointer;
+        RevenantFormatKind given = [offered[slot][0][0] unsignedIntegerValue];
+        BOOL word = given == RevenantFormatObject || given == RevenantFormatCString || given == RevenantFormatWideString
+                 || given == RevenantFormatPascalString || given == RevenantFormatPointer;
         for (NSArray *kind in asked[slot]) {
-            CharonFormatKind taken = [kind[0] unsignedIntegerValue];
-            BOOL pointer = taken == CharonFormatCString || taken == CharonFormatWideString || taken == CharonFormatPascalString
-                        || taken == CharonFormatPointer;
-            if (taken == CharonFormatPointer && given == CharonFormatObject)
+            RevenantFormatKind taken = [kind[0] unsignedIntegerValue];
+            BOOL pointer = taken == RevenantFormatCString || taken == RevenantFormatWideString || taken == RevenantFormatPascalString
+                        || taken == RevenantFormatPointer;
+            if (taken == RevenantFormatPointer && given == RevenantFormatObject)
                 return NO;
-            if (taken != given && !(taken == CharonFormatWideCharacter && given == CharonFormatInteger) && !(word && pointer))
+            if (taken != given && !(taken == RevenantFormatWideCharacter && given == RevenantFormatInteger) && !(word && pointer))
                 return NO;
             if (![kind[1] isEqual:offered[slot][0][1]] && !pointer && !word)
                 return NO;
@@ -154,13 +154,13 @@ static NSString *answer(BOOL ours, NSString *wanted, NSString *allowed, uint64_t
     NSString *made;
     if (localized)
         made = ours
-            ? [NSString charonHostLocalizedStringWithValidatedFormat:wanted validFormatSpecifiers:allowed error:&error,
+            ? [NSString revenantHostLocalizedStringWithValidatedFormat:wanted validFormatSpecifiers:allowed error:&error,
                w[0], w[1], w[2], w[3], w[4], w[5], w[6], w[7], w[8], w[9], w[10], w[11], w[12]]
             : [NSString localizedStringWithValidatedFormat:wanted validFormatSpecifiers:allowed error:&error,
                w[0], w[1], w[2], w[3], w[4], w[5], w[6], w[7], w[8], w[9], w[10], w[11], w[12]];
     else
         made = ours
-            ? [NSString charonHostStringWithValidatedFormat:wanted validFormatSpecifiers:allowed error:&error,
+            ? [NSString revenantHostStringWithValidatedFormat:wanted validFormatSpecifiers:allowed error:&error,
                w[0], w[1], w[2], w[3], w[4], w[5], w[6], w[7], w[8], w[9], w[10], w[11], w[12]]
             : [NSString stringWithValidatedFormat:wanted validFormatSpecifiers:allowed error:&error,
                w[0], w[1], w[2], w[3], w[4], w[5], w[6], w[7], w[8], w[9], w[10], w[11], w[12]];

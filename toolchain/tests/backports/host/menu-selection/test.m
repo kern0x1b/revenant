@@ -1,6 +1,6 @@
 #import <UIKit/UIKit.h>
 #include <stdio.h>
-#import "CharonMenus.h"
+#import "RevenantMenus.h"
 
 typedef id (*PlainFn)(id, SEL);
 
@@ -27,17 +27,17 @@ static NSString *titles(NSArray *items)
     return [NSString stringWithFormat:@"[%@]", [parts componentsJoinedByString:@","]];
 }
 
-@interface CharonStateItem : UIMenuElement
+@interface RevenantStateItem : UIMenuElement
 @property (nonatomic) UIMenuElementState state;
 @end
 
-@implementation CharonStateItem
+@implementation RevenantStateItem
 @end
 
 static id make_item(BOOL portSide, NSString *title, UIMenuElementState state)
 {
     if (portSide) {
-        CharonStateItem *item = [[CharonStateItem alloc] initCharonWithTitle:title image:nil];
+        RevenantStateItem *item = [[RevenantStateItem alloc] initRevenantWithTitle:title image:nil];
         item.state = state;
         return item;
     }

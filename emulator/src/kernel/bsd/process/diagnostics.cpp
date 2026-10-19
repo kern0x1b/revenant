@@ -9,7 +9,7 @@
 #include <mutex>
 #include <vector>
 
-namespace shade {
+namespace emulator {
 
 std::vector<ProcessSnapshot> CompatibilityKernel::process_snapshots() const
 {

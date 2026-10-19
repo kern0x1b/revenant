@@ -12,7 +12,7 @@
 #include <cstddef>
 #include <cstdint>
 
-namespace shade::darwin::mach::thread_info {
+namespace emulator::darwin::mach::thread_info {
 
 constexpr std::uint32_t basic_flavor = 3;
 constexpr std::size_t basic_word_count = 10;

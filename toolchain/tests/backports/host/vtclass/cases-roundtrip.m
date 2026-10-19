@@ -2,8 +2,8 @@
 #import <objc/runtime.h>
 #import <objc/message.h>
 #import "vtclass-cases.h"
-#ifdef CHARON_HOST_DIFFERENTIAL
-#    import "CharonVideoToolbox.h"
+#ifdef REVENANT_HOST_DIFFERENTIAL
+#    import "RevenantVideoToolbox.h"
 #endif
 #include "roundtrip-cases.h"
 
@@ -43,8 +43,8 @@ void vtclass_roundtrip(CertificateRecorder record)
 
         NSString *methodTag = [NSString stringWithFormat:@"method.%@.%@", declared, @(entry->selector)];
         record([methodTag stringByAppendingString:@".selector"], NSStringFromSelector(selector));
-#ifdef CHARON_HOST_DIFFERENTIAL
-        NSString *lookup = [@"Charon" stringByAppendingString:declared];
+#ifdef REVENANT_HOST_DIFFERENTIAL
+        NSString *lookup = [@"Revenant" stringByAppendingString:declared];
         Class port = NSClassFromString(lookup);
         record([methodTag stringByAppendingString:@".isInstance"],
                [port instancesRespondToSelector:selector] ? @"1" : @"0");
@@ -76,13 +76,13 @@ void vtclass_roundtrip(CertificateRecorder record)
         }
 
 
-        Class kvcClass = NSClassFromString(@"CharonVTTemporalNoiseFilterConfiguration");
+        Class kvcClass = NSClassFromString(@"RevenantVTTemporalNoiseFilterConfiguration");
         if (!kvcClass)
             kvcClass = NSClassFromString(@"VTTemporalNoiseFilterConfiguration");
         OSType planted = (OSType)0x34323676;
         NSString *kvcTag = @"kvc.VTTemporalNoiseFilterConfiguration.sourcePixelFormat";
         id kvcTarget = nil;
-        if ([kvcClass isSubclassOfClass:NSClassFromString(@"CharonVTTemporalNoiseFilterConfiguration")]) {
+        if ([kvcClass isSubclassOfClass:NSClassFromString(@"RevenantVTTemporalNoiseFilterConfiguration")]) {
             kvcTarget = entry->construct(kvcClass, NSSelectorFromString(
                 @"initWithFrameWidth:frameHeight:sourcePixelFormat:"));
         } else {

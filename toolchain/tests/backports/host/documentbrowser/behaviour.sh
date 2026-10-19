@@ -27,7 +27,7 @@ build_and_run() {
     rm -rf "$work"
     mkdir -p "$work"
     # The stand-in for UIView's animation is compiled in, and the port's file is told to use it.
-    xcrun clang -fobjc-arc -DCHARON_TRANSITION_ANIMATION_STANDIN \
+    xcrun clang -fobjc-arc -DREVENANT_TRANSITION_ANIMATION_STANDIN \
         -I "$here/host-stub" -I "$root/packages/a/apple-backports/UIKit" \
         -framework Foundation \
         "$port" "$root/packages/a/apple-backports/UIKit/UIDocumentBrowserTransitionController.m" \

@@ -16,15 +16,15 @@ static const char *label(NSString *format, ...)
     return string.UTF8String;
 }
 
-@interface NSManagedObjectContext (CharonHost)
-- (id)charonHostqueryGenerationToken;
-- (BOOL)charonHostsetQueryGenerationFromToken:(id)token error:(NSError **)error;
+@interface NSManagedObjectContext (RevenantHost)
+- (id)revenantHostqueryGenerationToken;
+- (BOOL)revenantHostsetQueryGenerationFromToken:(id)token error:(NSError **)error;
 @end
 
 static NSString *plain(NSString *text)
 {
-    text = [text stringByReplacingOccurrencesOfString:@"CharonHost_" withString:@"_"];
-    return [text stringByReplacingOccurrencesOfString:@"CharonHost" withString:@""];
+    text = [text stringByReplacingOccurrencesOfString:@"RevenantHost_" withString:@"_"];
+    return [text stringByReplacingOccurrencesOfString:@"RevenantHost" withString:@""];
 }
 
 static NSString *raised(void (^block)(void))
@@ -32,7 +32,7 @@ static NSString *raised(void (^block)(void))
     @try {
         block();
     } @catch (NSException *exception) {
-        NSString *reason = [exception.reason stringByReplacingOccurrencesOfString:@"CharonHost" withString:@""];
+        NSString *reason = [exception.reason stringByReplacingOccurrencesOfString:@"RevenantHost" withString:@""];
         reason = [reason stringByReplacingOccurrencesOfString:@"0x" withString:@"0x"];
         return [NSString stringWithFormat:@"%@: %@", exception.name, reason];
     }
@@ -72,13 +72,13 @@ static NSPersistentStoreCoordinator *make_coordinator(void)
     return coordinator;
 }
 
-static Class token_class(BOOL ours) { return NSClassFromString(ours ? @"CharonHostNSQueryGenerationToken" : @"NSQueryGenerationToken"); }
+static Class token_class(BOOL ours) { return NSClassFromString(ours ? @"RevenantHostNSQueryGenerationToken" : @"NSQueryGenerationToken"); }
 
 static void tokens(void)
 {
     id ours = [token_class(YES) currentQueryGenerationToken], system = [token_class(NO) currentQueryGenerationToken];
     CHECK([token_class(YES) currentQueryGenerationToken] == ours && [token_class(NO) currentQueryGenerationToken] == system, "the current token is one object");
-    CHECK_EQUAL(NSStringFromClass([ours class]), @"CharonHostNSQueryGenerationToken", "the current token is of the class itself");
+    CHECK_EQUAL(NSStringFromClass([ours class]), @"RevenantHostNSQueryGenerationToken", "the current token is of the class itself");
     CHECK_EQUAL(NSStringFromClass([system class]), @"_NSQueryGenerationToken", "where iOS 12 makes it of a private subclass");
     CHECK_EQUAL([ours description], [system description], "the description");
     CHECK([ours copy] == ours && [system copy] == system && [ours isEqual:[token_class(YES) currentQueryGenerationToken]] && [ours hash] == [[token_class(YES) currentQueryGenerationToken] hash], "copy, equality and hash");
@@ -109,8 +109,8 @@ static NSString *unpin_row(BOOL ours, NSPersistentStoreCoordinator *coordinator,
     NSMutableArray *out = [NSMutableArray array];
     NSManagedObjectContext *a = make_context(coordinator), *b = make_context(other), *none = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSMainQueueConcurrencyType];
     id current = [token_class(ours) currentQueryGenerationToken];
-    id (^get)(NSManagedObjectContext *) = ^id(NSManagedObjectContext *c) { return ours ? [c charonHostqueryGenerationToken] : [c queryGenerationToken]; };
-    BOOL (^set)(NSManagedObjectContext *, id, NSError **) = ^BOOL(NSManagedObjectContext *c, id t, NSError **e) { return ours ? [c charonHostsetQueryGenerationFromToken:t error:e] : [c setQueryGenerationFromToken:t error:e]; };
+    id (^get)(NSManagedObjectContext *) = ^id(NSManagedObjectContext *c) { return ours ? [c revenantHostqueryGenerationToken] : [c queryGenerationToken]; };
+    BOOL (^set)(NSManagedObjectContext *, id, NSError **) = ^BOOL(NSManagedObjectContext *c, id t, NSError **e) { return ours ? [c revenantHostsetQueryGenerationFromToken:t error:e] : [c setQueryGenerationFromToken:t error:e]; };
     [out addObject:[NSString stringWithFormat:@"initial %d", get(a) == nil]];
     NSError *error = nil;
     [out addObject:[NSString stringWithFormat:@"nil %d %@", set(a, nil, &error), error]];
@@ -163,7 +163,7 @@ static void isolation(void)
 
 static id make_conflict(BOOL ours, NSArray *constraint, NSManagedObject *database, NSDictionary *snapshot, NSArray *conflicting, NSArray *snapshots)
 {
-    Class cls = NSClassFromString(ours ? @"CharonHostNSConstraintConflict" : @"NSConstraintConflict");
+    Class cls = NSClassFromString(ours ? @"RevenantHostNSConstraintConflict" : @"NSConstraintConflict");
     return ((id (*)(id, SEL, id, id, id, id, id))objc_msgSend)([cls alloc], @selector(initWithConstraint:databaseObject:databaseSnapshot:conflictingObjects:conflictingSnapshots:), constraint, database, snapshot, conflicting, snapshots);
 }
 
@@ -172,7 +172,7 @@ static NSString *conflict_row(id conflict)
     NSMutableString *description = [[conflict description] mutableCopy];
     [description replaceOccurrencesOfString:@"0x[0-9a-f]+" withString:@"0xADDR" options:NSRegularExpressionSearch range:NSMakeRange(0, description.length)];
     [description replaceOccurrencesOfString:@"/t[0-9A-F-]+[0-9]" withString:@"/tID" options:NSRegularExpressionSearch range:NSMakeRange(0, description.length)];
-    [description replaceOccurrencesOfString:@"CharonHost" withString:@"" options:0 range:NSMakeRange(0, description.length)];
+    [description replaceOccurrencesOfString:@"RevenantHost" withString:@"" options:0 range:NSMakeRange(0, description.length)];
     return [NSString stringWithFormat:@"%@ | %@ | %@ | %d | %@ | %lu %lu | %@", [conflict constraint], [conflict constraintValues], [conflict databaseSnapshot], [conflict databaseObject] != nil, [conflict conflictingSnapshots], (unsigned long)[[conflict conflictingObjects] count], (unsigned long)[[conflict conflictingSnapshots] count], description];
 }
 
@@ -206,7 +206,7 @@ static void conflicts(void)
     id ours = make_conflict(YES, @[@"name"], database, nil, held, nil);
     [held addObject:third];
     CHECK([[ours conflictingObjects] count] == 1, "the conflicting objects are copied");
-    CHECK([(id)[NSClassFromString(@"CharonHostNSConstraintConflict") class] supportsSecureCoding] == [(id)[NSConstraintConflict class] supportsSecureCoding], "secure coding");
+    CHECK([(id)[NSClassFromString(@"RevenantHostNSConstraintConflict") class] supportsSecureCoding] == [(id)[NSConstraintConflict class] supportsSecureCoding], "secure coding");
     CHECK([raised(^{ [ours encodeWithCoder:[[NSKeyedArchiver alloc] initRequiringSecureCoding:YES]]; }) hasPrefix:@"NSInvalidArgumentException: CoreData does not support encoding of conflict objects."], "a conflict cannot be encoded");
 }
 
@@ -217,7 +217,7 @@ int main(void)
         contexts();
         isolation();
         conflicts();
-        printf("checks=%d failures=%d\n", charon_checks, charon_failures);
+        printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
     }
-    return charon_failures ? 1 : 0;
+    return revenant_failures ? 1 : 0;
 }

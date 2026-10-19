@@ -1,23 +1,23 @@
-#import "CharonMPS.h"
-#import "CharonMPSImage.h"
+#import "RevenantMPS.h"
+#import "RevenantMPSImage.h"
 
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
 #pragma clang diagnostic ignored "-Wobjc-designated-initializers"
 
-static void CharonMPSConvolveRegion(MPSImage *source, MPSImage *destination, MTLRegion read,
+static void RevenantMPSConvolveRegion(MPSImage *source, MPSImage *destination, MTLRegion read,
                                     NSUInteger kernelWidth, NSUInteger kernelHeight, const float *weights,
                                     double bias, NSString *what)
 {
-    CharonMPSImageLayout in = CharonMPSImageLayoutOf(source);
-    CharonMPSImageLayout out = CharonMPSImageLayoutOf(destination);
+    RevenantMPSImageLayout in = RevenantMPSImageLayoutOf(source);
+    RevenantMPSImageLayout out = RevenantMPSImageLayoutOf(destination);
     if (!kernelWidth || !kernelHeight) {
-        CharonMPSRefuse(@"%@: a %lux%lu kernel has no weights to apply, so nothing was written", what,
+        RevenantMPSRefuse(@"%@: a %lux%lu kernel has no weights to apply, so nothing was written", what,
                         (unsigned long)kernelWidth, (unsigned long)kernelHeight);
         return;
     }
-    CharonMPSImageLayout slice = in;
+    RevenantMPSImageLayout slice = in;
     slice.count = read.size.width * read.size.height * in.channels;
-    void *from = CharonMPSImageReadRegion(source, &slice, read, what);
+    void *from = RevenantMPSImageReadRegion(source, &slice, read, what);
     if (slice.count && !from)
         return;
 
@@ -25,7 +25,7 @@ static void CharonMPSConvolveRegion(MPSImage *source, MPSImage *destination, MTL
     NSUInteger values = read.size.width * read.size.height;
     float *answer = calloc(values ? values : 1, sizeof(float));
     if (!answer) {
-        CharonMPSRefuse(@"%@: no memory for %lu convolved values, so nothing was written", what,
+        RevenantMPSRefuse(@"%@: no memory for %lu convolved values, so nothing was written", what,
                         (unsigned long)values);
         return;
     }
@@ -38,8 +38,8 @@ static void CharonMPSConvolveRegion(MPSImage *source, MPSImage *destination, MTL
                     long sx = (long)(read.origin.x + x + kx) - (long)halfW;
                     double sample = 0.0;
                     if (sy >= 0 && sy < (long)in.height && sx >= 0 && sx < (long)in.width)
-                        sample = CharonMPSImageLoad(from, &slice,
-                                                    CharonMPSImageIndex(&slice,
+                        sample = RevenantMPSImageLoad(from, &slice,
+                                                    RevenantMPSImageIndex(&slice,
                                         (NSUInteger)sy * read.size.width + (NSUInteger)sx, 0));
                     total += (double)weights[ky * kernelWidth + kx] * sample;
                 }
@@ -47,13 +47,13 @@ static void CharonMPSConvolveRegion(MPSImage *source, MPSImage *destination, MTL
             answer[y * read.size.width + x] = (float)(total + bias);
         }
     }
-    CharonMPSImageWriteRegion(destination, &out, read, answer, what);
+    RevenantMPSImageWriteRegion(destination, &out, read, answer, what);
     free(answer);
-    CharonMPSConsumeReadCount(source);
+    RevenantMPSConsumeReadCount(source);
 }
 
-@interface MPSUnaryImageKernel (CharonMPSConvolution)
-- (void)charon_mps_convolveRegionWithSource:(MPSImage *)source
+@interface MPSUnaryImageKernel (RevenantMPSConvolution)
+- (void)revenant_mps_convolveRegionWithSource:(MPSImage *)source
                                 destination:(MPSImage *)destination
                                  kernelWidth:(NSUInteger)kernelWidth
                                 kernelHeight:(NSUInteger)kernelHeight
@@ -62,9 +62,9 @@ static void CharonMPSConvolveRegion(MPSImage *source, MPSImage *destination, MTL
                                         what:(NSString *)what;
 @end
 
-@implementation MPSUnaryImageKernel (CharonMPSConvolution)
+@implementation MPSUnaryImageKernel (RevenantMPSConvolution)
 
-- (void)charon_mps_convolveRegionWithSource:(MPSImage *)source
+- (void)revenant_mps_convolveRegionWithSource:(MPSImage *)source
                                 destination:(MPSImage *)destination
                                  kernelWidth:(NSUInteger)kernelWidth
                                 kernelHeight:(NSUInteger)kernelHeight
@@ -73,13 +73,13 @@ static void CharonMPSConvolveRegion(MPSImage *source, MPSImage *destination, MTL
                                         what:(NSString *)what
 {
     if (self.edgeMode != MPSImageEdgeModeZero) {
-        CharonMPSRefuse(@"%@: edgeMode %lu is not MPSImageEdgeModeZero, the only mode this port implements"
+        RevenantMPSRefuse(@"%@: edgeMode %lu is not MPSImageEdgeModeZero, the only mode this port implements"
                         @" - a Clamp or Mirror answer would be a different kernel - so nothing was written",
                         what, (unsigned long)self.edgeMode);
         return;
     }
-    CharonMPSConvolveRegion(source, destination,
-                            CharonMPSImageResolvedRegion(destination, self.clipRect),
+    RevenantMPSConvolveRegion(source, destination,
+                            RevenantMPSImageResolvedRegion(destination, self.clipRect),
                             kernelWidth, kernelHeight, weights, bias, what);
 }
 
@@ -102,7 +102,7 @@ static void CharonMPSConvolveRegion(MPSImage *source, MPSImage *destination, MTL
 {
     if ((self = [super initWithDevice:device])) {
         if (!kernelWidth || !kernelHeight || !kernelWeights) {
-            CharonMPSRefuse(@"MPSImageConvolution: a %lux%lu kernel with weights %s is not a kernel",
+            RevenantMPSRefuse(@"MPSImageConvolution: a %lux%lu kernel with weights %s is not a kernel",
                             (unsigned long)kernelWidth, (unsigned long)kernelHeight,
                             kernelWeights ? "given" : "not given");
             return nil;
@@ -111,7 +111,7 @@ static void CharonMPSConvolveRegion(MPSImage *source, MPSImage *destination, MTL
         _kernelHeight = kernelHeight;
         _weights = [NSMutableData dataWithLength:kernelWidth * kernelHeight * sizeof(float)];
         if (!_weights) {
-            CharonMPSRefuse(@"MPSImageConvolution: no memory for a %lux%lu kernel, so no object was made",
+            RevenantMPSRefuse(@"MPSImageConvolution: no memory for a %lux%lu kernel, so no object was made",
                             (unsigned long)kernelWidth, (unsigned long)kernelHeight);
             return nil;
         }
@@ -124,7 +124,7 @@ static void CharonMPSConvolveRegion(MPSImage *source, MPSImage *destination, MTL
 
 - (instancetype)initWithCoder:(NSCoder *)aDecoder device:(id<MTLDevice>)device
 {
-    CharonMPSRefuse(@"MPSImageConvolution: -initWithCoder:device: is not carried - the release's keys for a"
+    RevenantMPSRefuse(@"MPSImageConvolution: -initWithCoder:device: is not carried - the release's keys for a"
                     @" kernel's weights are in no header, so a decoder cannot rebuild them honestly");
     return nil;
 }
@@ -135,27 +135,27 @@ static void CharonMPSConvolveRegion(MPSImage *source, MPSImage *destination, MTL
 {
     NSString *what = NSStringFromClass([self class]);
     if (!commandBuffer) {
-        CharonMPSRefuse(@"%@: no command buffer, so nothing was written", what);
+        RevenantMPSRefuse(@"%@: no command buffer, so nothing was written", what);
         return;
     }
-    if (!CharonMPSCommandBufferPermits(commandBuffer))
+    if (!RevenantMPSCommandBufferPermits(commandBuffer))
         return;
-    if (!CharonMPSImageUsable(sourceImage, what)) {
-        CharonMPSRefuse(@"%@: the source image cannot be walked", what);
+    if (!RevenantMPSImageUsable(sourceImage, what)) {
+        RevenantMPSRefuse(@"%@: the source image cannot be walked", what);
         return;
     }
     if (!destinationImage) {
-        CharonMPSRefuse(@"%@: no destination image, so nothing was written", what);
+        RevenantMPSRefuse(@"%@: no destination image, so nothing was written", what);
         return;
     }
     if (self.edgeMode != MPSImageEdgeModeZero) {
-        CharonMPSRefuse(@"%@: edgeMode %lu is not MPSImageEdgeModeZero, which is the only mode this port"
+        RevenantMPSRefuse(@"%@: edgeMode %lu is not MPSImageEdgeModeZero, which is the only mode this port"
                         @" implements - a Clamp or Mirror answer would be a different kernel - so nothing"
                         @" was written", what, (unsigned long)self.edgeMode);
         return;
     }
-    CharonMPSConvolveRegion(sourceImage, destinationImage,
-                            CharonMPSImageResolvedRegion(destinationImage, self.clipRect),
+    RevenantMPSConvolveRegion(sourceImage, destinationImage,
+                            RevenantMPSImageResolvedRegion(destinationImage, self.clipRect),
                             _kernelWidth, _kernelHeight, (const float *)_weights.bytes, (double)_bias, what);
 }
 
@@ -174,7 +174,7 @@ static void CharonMPSConvolveRegion(MPSImage *source, MPSImage *destination, MTL
 {
     if ((self = [super initWithDevice:device])) {
         if (!kernelWidth || !kernelHeight || !(kernelWidth % 2) || !(kernelHeight % 2)) {
-            CharonMPSRefuse(@"MPSImageBox: a %lux%lu window is refused - the width and the height have to be odd,"
+            RevenantMPSRefuse(@"MPSImageBox: a %lux%lu window is refused - the width and the height have to be odd,"
                             @" so no object was made", (unsigned long)kernelWidth,
                             (unsigned long)kernelHeight);
             return nil;
@@ -183,7 +183,7 @@ static void CharonMPSConvolveRegion(MPSImage *source, MPSImage *destination, MTL
         _kernelHeight = kernelHeight;
         _weights = [NSMutableData dataWithLength:kernelWidth * kernelHeight * sizeof(float)];
         if (!_weights) {
-            CharonMPSRefuse(@"MPSImageBox: no memory for a %lux%lu window, so no object was made",
+            RevenantMPSRefuse(@"MPSImageBox: no memory for a %lux%lu window, so no object was made",
                             (unsigned long)kernelWidth, (unsigned long)kernelHeight);
             return nil;
         }
@@ -197,7 +197,7 @@ static void CharonMPSConvolveRegion(MPSImage *source, MPSImage *destination, MTL
 
 - (instancetype)initWithDevice:(id<MTLDevice>)device
 {
-    CharonMPSRefuse(@"MPSImageBox: -initWithDevice: is NS_UNAVAILABLE - the"
+    RevenantMPSRefuse(@"MPSImageBox: -initWithDevice: is NS_UNAVAILABLE - the"
                     @" window size is what makes a box, so no object was made");
     return nil;
 }
@@ -208,19 +208,19 @@ static void CharonMPSConvolveRegion(MPSImage *source, MPSImage *destination, MTL
 {
     NSString *what = NSStringFromClass([self class]);
     if (self.edgeMode != MPSImageEdgeModeZero) {
-        CharonMPSRefuse(@"%@: edgeMode %lu is not MPSImageEdgeModeZero, the only mode this port implements,"
+        RevenantMPSRefuse(@"%@: edgeMode %lu is not MPSImageEdgeModeZero, the only mode this port implements,"
                         @" so nothing was written", what, (unsigned long)self.edgeMode);
         return;
     }
-    CharonMPSConvolveRegion(sourceImage, destinationImage,
-                            CharonMPSImageResolvedRegion(destinationImage, self.clipRect),
+    RevenantMPSConvolveRegion(sourceImage, destinationImage,
+                            RevenantMPSImageResolvedRegion(destinationImage, self.clipRect),
                             _kernelWidth, _kernelHeight, (const float *)_weights.bytes, 0.0, what);
 }
 
 @end
 
-@interface MPSImageBox (CharonTentWeights)
-- (void)charon_makeTentWeights;
+@interface MPSImageBox (RevenantTentWeights)
+- (void)revenant_makeTentWeights;
 @end
 
 @implementation MPSImageTent
@@ -229,7 +229,7 @@ static void CharonMPSConvolveRegion(MPSImage *source, MPSImage *destination, MTL
                     kernelWidth:(NSUInteger)kernelWidth
 {
     if ((self = [super initWithDevice:device kernelHeight:kernelHeight kernelWidth:kernelWidth]))
-        [self charon_makeTentWeights];
+        [self revenant_makeTentWeights];
     return self;
 }
 
@@ -246,7 +246,7 @@ static void CharonMPSConvolveRegion(MPSImage *source, MPSImage *destination, MTL
 - (instancetype)initWithDevice:(id<MTLDevice>)device sigma:(float)sigma
 {
     if ((self = [super initWithDevice:device])) {
-        CharonMPSRefuse(@"MPSImageGaussianBlur: -initWithDevice:sigma: needs the tap count MPSImage"
+        RevenantMPSRefuse(@"MPSImageGaussianBlur: -initWithDevice:sigma: needs the tap count MPSImage"
                         @"Convolution.h does not state for a sigma, and a blur of a different width is a"
                         @" different blur, so no object was made");
         return nil;
@@ -258,13 +258,13 @@ static void CharonMPSConvolveRegion(MPSImage *source, MPSImage *destination, MTL
                    sourceImage:(MPSImage *)sourceImage
              destinationImage:(MPSImage *)destinationImage
 {
-    CharonMPSRefuse(@"MPSImageGaussianBlur: no object can be built, so nothing was written");
+    RevenantMPSRefuse(@"MPSImageGaussianBlur: no object can be built, so nothing was written");
 }
 
 @end
 
-@implementation MPSImageBox (CharonTentWeights)
-- (void)charon_makeTentWeights
+@implementation MPSImageBox (RevenantTentWeights)
+- (void)revenant_makeTentWeights
 {
     NSUInteger w = self.kernelWidth, h = self.kernelHeight;
     if (!w || !h || !_weights)

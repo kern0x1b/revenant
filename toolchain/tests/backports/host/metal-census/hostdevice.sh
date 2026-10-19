@@ -43,8 +43,8 @@ cat > "$work/control.m" <<'EOF'
 #import <Metal/Metal.h>
 int main(void) {
     setvbuf(stdout, NULL, _IONBF, 0);
-    printf("%s\n", NSClassFromString(@"ZZZNoSuchNameCharonR16") ? "FOUND (wrong)" : "nil (right)");
-    return NSClassFromString(@"ZZZNoSuchNameCharonR16") ? 1 : 0;
+    printf("%s\n", NSClassFromString(@"ZZZNoSuchNameRevenantR16") ? "FOUND (wrong)" : "nil (right)");
+    return NSClassFromString(@"ZZZNoSuchNameRevenantR16") ? 1 : 0;
 }
 EOF
 xcrun clang -target arm64-apple-macos14.0 -isysroot "$sdk" -fobjc-arc -O0 \

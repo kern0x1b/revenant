@@ -4,7 +4,7 @@
 #include "mps9-reference.h"
 #import <objc/runtime.h>
 
-@protocol CharonMPS9UnaryEncode
+@protocol RevenantMPS9UnaryEncode
 - (void)encodeToCommandBuffer:(id<MTLCommandBuffer>)commandBuffer
                  sourceImage:(MPSImage *)sourceImage
             destinationImage:(MPSImage *)destinationImage;
@@ -12,7 +12,7 @@
 
 static id<MTLDevice> gDevice = nil;
 
-static MPSImage *CharonMPS9MakeImage(const void *pixels, NSUInteger cols, NSUInteger rows,
+static MPSImage *RevenantMPS9MakeImage(const void *pixels, NSUInteger cols, NSUInteger rows,
                                      id<MTLDevice> device)
 {
     MPSImageDescriptor *descriptor =
@@ -26,7 +26,7 @@ static MPSImage *CharonMPS9MakeImage(const void *pixels, NSUInteger cols, NSUInt
     return image;
 }
 
-static float *CharonMPS9ReadImage(MPSImage *image, NSUInteger cols, NSUInteger rows, NSUInteger elements)
+static float *RevenantMPS9ReadImage(MPSImage *image, NSUInteger cols, NSUInteger rows, NSUInteger elements)
 {
     NSUInteger floats = cols * rows * elements;
     float *out = calloc(floats ? floats : 1, sizeof(float));
@@ -62,41 +62,41 @@ int main(void)
 
         for (int squared = 0; squared < 2; squared++) {
             const char *name = squared ? "MPSImageIntegralOfSquares" : "MPSImageIntegral";
-            MPSImage *source = CharonMPS9MakeImage(pixels, cols, rows, gDevice);
+            MPSImage *source = RevenantMPS9MakeImage(pixels, cols, rows, gDevice);
             MPSImage *destination =
-                CharonMPS9MakeImage(NULL, cols, rows, gDevice);
+                RevenantMPS9MakeImage(NULL, cols, rows, gDevice);
             id kernel = squared ? [[MPSImageIntegralOfSquares alloc] initWithDevice:gDevice]
                                 : [[MPSImageIntegral alloc] initWithDevice:gDevice];
-            [(id<CharonMPS9UnaryEncode>)kernel encodeToCommandBuffer:[gDevice newCommandBuffer]
+            [(id<RevenantMPS9UnaryEncode>)kernel encodeToCommandBuffer:[gDevice newCommandBuffer]
                                                           sourceImage:source
                                                      destinationImage:destination];
-            float *got = CharonMPS9ReadImage(destination, cols, rows, 1);
+            float *got = RevenantMPS9ReadImage(destination, cols, rows, 1);
             printf("case %s %s %lu %lu %lu\n", name, label, (unsigned long)cols, (unsigned long)rows,
                    (unsigned long)1);
             for (NSUInteger i = 0; i < cols * rows; i++)
                 printf(" %g", (double)got[i]);
             printf("\n");
-            CharonMPS9CheckIntegral(name, values, cols, rows, got, squared ? YES : NO);
+            RevenantMPS9CheckIntegral(name, values, cols, rows, got, squared ? YES : NO);
             free(got);
         }
 
         {
             const char *name = "MPSImageSobel";
             float transform[3] = { 0.299f, 0.587f, 0.114f };
-            MPSImage *source = CharonMPS9MakeImage(pixels, cols, rows, gDevice);
+            MPSImage *source = RevenantMPS9MakeImage(pixels, cols, rows, gDevice);
             MPSImage *destination =
-                CharonMPS9MakeImage(NULL, cols, rows, gDevice);
+                RevenantMPS9MakeImage(NULL, cols, rows, gDevice);
             id kernel = [[MPSImageSobel alloc] initWithDevice:gDevice];
-            [(id<CharonMPS9UnaryEncode>)kernel encodeToCommandBuffer:[gDevice newCommandBuffer]
+            [(id<RevenantMPS9UnaryEncode>)kernel encodeToCommandBuffer:[gDevice newCommandBuffer]
                                                           sourceImage:source
                                                      destinationImage:destination];
-            float *got = CharonMPS9ReadImage(destination, cols, rows, 1);
+            float *got = RevenantMPS9ReadImage(destination, cols, rows, 1);
             printf("case %s %s %lu %lu %lu\n", name, label, (unsigned long)cols, (unsigned long)rows,
                    (unsigned long)1);
             for (NSUInteger i = 0; i < cols * rows; i++)
                 printf(" %g", (double)got[i]);
             printf("\n");
-            CharonMPS9CheckSobel(name, values, cols, rows, got, 1, transform);
+            RevenantMPS9CheckSobel(name, values, cols, rows, got, 1, transform);
             free(got);
         }
         free(pixels);

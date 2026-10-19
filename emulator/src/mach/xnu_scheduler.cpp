@@ -18,7 +18,7 @@
 #include <limits>
 #include <stdexcept>
 
-namespace shade {
+namespace emulator {
 
 namespace {
 

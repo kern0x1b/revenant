@@ -1,11 +1,11 @@
-#ifndef CHARON_CARPLAY_SESSION_CONFIGURATION_H
-#define CHARON_CARPLAY_SESSION_CONFIGURATION_H
+#ifndef REVENANT_CARPLAY_SESSION_CONFIGURATION_H
+#define REVENANT_CARPLAY_SESSION_CONFIGURATION_H
 
 #import <CarPlay/CarPlay.h>
 
-@interface CPSessionConfiguration (CharonContentStyle)
+@interface CPSessionConfiguration (RevenantContentStyle)
 
-- (CPContentStyle)charon_contentStyle;
+- (CPContentStyle)revenant_contentStyle;
 
 @end
 

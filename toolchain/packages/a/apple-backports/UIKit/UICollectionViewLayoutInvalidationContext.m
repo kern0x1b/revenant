@@ -3,7 +3,7 @@
 #pragma clang diagnostic ignored "-Wobjc-property-implementation"
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
 
-static NSArray *charon_unique_paths(NSArray *existing, NSArray *added)
+static NSArray *revenant_unique_paths(NSArray *existing, NSArray *added)
 {
     NSMutableArray *paths = [existing mutableCopy] ?: [NSMutableArray array];
     for (NSIndexPath *path in added)
@@ -12,10 +12,10 @@ static NSArray *charon_unique_paths(NSArray *existing, NSArray *added)
     return [paths sortedArrayUsingSelector:@selector(compare:)];
 }
 
-static NSDictionary *charon_add_kind(NSDictionary *existing, NSString *kind, NSArray *added)
+static NSDictionary *revenant_add_kind(NSDictionary *existing, NSString *kind, NSArray *added)
 {
     NSMutableDictionary *kinds = [existing mutableCopy] ?: [NSMutableDictionary dictionary];
-    NSArray *paths = charon_unique_paths(kinds[kind], added);
+    NSArray *paths = revenant_unique_paths(kinds[kind], added);
     if (kind)
         kinds[kind] = paths;
     return kinds;
@@ -60,17 +60,17 @@ static NSDictionary *charon_add_kind(NSDictionary *existing, NSString *kind, NSA
 
 - (void)invalidateItemsAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths
 {
-    _items = charon_unique_paths(_items, indexPaths);
+    _items = revenant_unique_paths(_items, indexPaths);
 }
 
 - (void)invalidateSupplementaryElementsOfKind:(NSString *)elementKind atIndexPaths:(NSArray<NSIndexPath *> *)indexPaths
 {
-    _supplementary = charon_add_kind(_supplementary, elementKind, indexPaths);
+    _supplementary = revenant_add_kind(_supplementary, elementKind, indexPaths);
 }
 
 - (void)invalidateDecorationElementsOfKind:(NSString *)elementKind atIndexPaths:(NSArray<NSIndexPath *> *)indexPaths
 {
-    _decoration = charon_add_kind(_decoration, elementKind, indexPaths);
+    _decoration = revenant_add_kind(_decoration, elementKind, indexPaths);
 }
 
 - (CGPoint)contentOffsetAdjustment
@@ -108,7 +108,7 @@ static NSDictionary *charon_add_kind(NSDictionary *existing, NSString *kind, NSA
     return _interactiveMovementTarget;
 }
 
-- (void)charon_setInteractivelyMovingPrevious:(NSArray<NSIndexPath *> *)previous
+- (void)revenant_setInteractivelyMovingPrevious:(NSArray<NSIndexPath *> *)previous
                                        target:(NSArray<NSIndexPath *> *)target
                                          atPoint:(CGPoint)position
 {

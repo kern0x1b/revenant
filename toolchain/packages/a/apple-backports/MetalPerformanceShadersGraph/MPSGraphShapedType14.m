@@ -1,4 +1,4 @@
-#import "CharonMPSGraph.h"
+#import "RevenantMPSGraph.h"
 
 @implementation MPSGraphShapedType {
     NSArray<NSNumber *> *_shape;
@@ -53,7 +53,7 @@
 
 - (NSUInteger)elementCount
 {
-    return CharonMPSGraphElementCount(_shape);
+    return RevenantMPSGraphElementCount(_shape);
 }
 
 - (NSUInteger)offset

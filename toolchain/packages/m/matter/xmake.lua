@@ -6,14 +6,14 @@ package("matter")
 
     add_urls("https://github.com/project-chip/connectedhomeip.git", {submodules = false})
     add_versions("v1.6.1.0", "3bcdd56ba54fb88b2afb4bfef575014671df7aa7")
-    add_patches("v1.6.1.0", "patches/clock-alignment.patch", "2f0b8e3e0672cd2ebe2a4e4343f11ac550c0aec89f97d85367ecb60da30e902a")
-    add_patches("v1.6.1.0", "patches/ble-connectable.patch", "2ca2a6a7b2e6aa493fe6151ebf3ce63c41954776bc4bea0dee3dbbdb633a3325")
+    add_patches("v1.6.1.0", "patches/clock-alignment.patch", "5b7f86ccd71bb364f27568245937d71464af8f77c42a0db58a52453d83fc4aee")
+    add_patches("v1.6.1.0", "patches/ble-connectable.patch", "67f3d5e8bac9fc8fe0e2a256db4efe93dcb5cfa72d95c809e384966220972b19")
 
-    add_deps("charon@apple-compat", {alias = "apple-compat"})
-    add_deps("charon@apple-backports", {alias = "backports", configs = {network = true, security = true, commoncrypto = true, corebluetooth = true}})
-    add_deps("charon@swift-runtime", {alias = "swift-runtime", configs = {backports = true}})
-    add_deps("charon@ld64", {alias = "ld64"})
-    add_deps("charon@libcxx", {alias = "libcxx", configs = {packaged = true}})
+    add_deps("revenant@apple-compat", {alias = "apple-compat"})
+    add_deps("revenant@apple-backports", {alias = "backports", configs = {network = true, security = true, commoncrypto = true, corebluetooth = true}})
+    add_deps("revenant@swift-runtime", {alias = "swift-runtime", configs = {backports = true}})
+    add_deps("revenant@ld64", {alias = "ld64"})
+    add_deps("revenant@libcxx", {alias = "libcxx", configs = {packaged = true}})
     add_deps("gn 20211117", {alias = "gn"})
 
     local submodules = {
@@ -31,9 +31,9 @@ package("matter")
         if not runtime then
             return {}
         end
-        local overlay = table.wrap((runtime:envs() or {}).CHARON_SWIFT_PORT_HEADERS)[1]
+        local overlay = table.wrap((runtime:envs() or {}).REVENANT_SWIFT_PORT_HEADERS)[1]
         if not overlay then
-            raise("charon@swift-runtime at %s names no port headers; it was built without the backports, reinstall it", runtime:installdir())
+            raise("revenant@swift-runtime at %s names no port headers; it was built without the backports, reinstall it", runtime:installdir())
         end
         return {"-ivfsoverlay", overlay}
     end
@@ -56,7 +56,7 @@ package("matter")
         end
 
         io.writefile(path.join(os.curdir(), "build_overrides", "pigweed_environment.gni"),
-                     "# Written by charon@matter's install step in place of the file pigweed's bootstrap step generates.\n" ..
+                     "# Written by revenant@matter's install step in place of the file pigweed's bootstrap step generates.\n" ..
                      "# This build has no pigweed environment: no CIPD toolchain, no pw_env_setup, and a compiler and\n" ..
                      "# an archiver of the port's own passed to GN as target_cc, target_cxx and target_ar. Every variable\n" ..
                      "# the pigweed gni files read out of this one is read through defined(), and a build that has none of\n" ..
@@ -232,7 +232,7 @@ package("matter")
         local output = path.join(package:installdir("lib"), "libMatterBackports.dylib")
         os.vrunv(assert(toolchain:tool("mxx"), "the apple-ios toolchain names no Objective-C++ compiler for %s", package:arch()),
                  table.join(flags, {"-fuse-ld=" .. path.join(package:dep("ld64"):installdir("bin"), "ld"),
-                                    "-dynamiclib", "-install_name", "/usr/lib/charon/org.charon.apple-backports/libMatterBackports.dylib",
+                                    "-dynamiclib", "-install_name", "/usr/lib/revenant/org.revenant.apple-backports/libMatterBackports.dylib",
                                     "-o", output, path.join(out, "lib", "libCHIP.a")}, objects,
                            {"-L" .. backports, "-lNetworkBackports", "-lFoundationBackports", "-lSecurityBackports", "-lCommonCryptoBackports", "-lCoreBluetoothBackports",
                             "-L" .. libcxx, "-lc++abi", "-lc++",

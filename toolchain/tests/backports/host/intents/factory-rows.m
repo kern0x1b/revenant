@@ -58,8 +58,8 @@ int main(int argc, char **argv)
     NSString *section = argc > 1 ? [NSString stringWithUTF8String:argv[1]] : @"all";
     @autoreleasepool {
         printf("section %s\n", section.UTF8String);
-        printf("control: INCharonNoSuchClassForThisHarness reads %s\n",
-               NSClassFromString(@"INCharonNoSuchClassForThisHarness") ? "PRESENT, which is wrong"
+        printf("control: INRevenantNoSuchClassForThisHarness reads %s\n",
+               NSClassFromString(@"INRevenantNoSuchClassForThisHarness") ? "PRESENT, which is wrong"
                                                                         : "absent, as it must");
         BOOL all = [section isEqualToString:@"all"];
 
@@ -71,13 +71,13 @@ int main(int argc, char **argv)
                    text([property_names(cls) componentsJoinedByString:@" "]));
             if (cls) {
                 id library = send_none((id)cls, @selector(libraryDestination));
-                id playlist = send_one((id)cls, @selector(playlistDestinationWithName:), @"Charon Probe");
+                id playlist = send_one((id)cls, @selector(playlistDestinationWithName:), @"Revenant Probe");
                 id again = send_none((id)cls, @selector(libraryDestination));
                 id empty = send_one((id)cls, @selector(playlistDestinationWithName:), nil);
                 printf("  libraryDestination                    -> mediaDestinationType %lld  playlistName %s\n",
                        enumeration(library, @"mediaDestinationType"),
                        text([library valueForKey:@"playlistName"]));
-                printf("  playlistDestinationWithName:CharonProbe -> mediaDestinationType %lld  playlistName %s\n",
+                printf("  playlistDestinationWithName:RevenantProbe -> mediaDestinationType %lld  playlistName %s\n",
                        enumeration(playlist, @"mediaDestinationType"),
                        text([playlist valueForKey:@"playlistName"]));
                 printf("  a second libraryDestination          -> mediaDestinationType %lld  playlistName %s  isEqual the first %d\n",
@@ -118,7 +118,7 @@ int main(int argc, char **argv)
             Class cls = NSClassFromString(@"INFile");
             printf("  the class reads %s\n", cls ? "present" : "ABSENT");
             if (cls) {
-                NSData *bytes = [@"charon" dataUsingEncoding:NSUTF8StringEncoding];
+                NSData *bytes = [@"revenant" dataUsingEncoding:NSUTF8StringEncoding];
                 NSURL *url = [NSURL fileURLWithPath:@"/etc/hosts"];
                 id memory = send_three((id)cls, @selector(fileWithData:filename:typeIdentifier:), bytes,
                                        @"probe.txt", @"public.plain-text");
@@ -129,15 +129,15 @@ int main(int argc, char **argv)
                 id namedOnDisk = send_three((id)cls, @selector(fileWithFileURL:filename:typeIdentifier:), url,
                                             @"given.txt", @"public.plain-text");
                 id absent = send_three((id)cls, @selector(fileWithFileURL:filename:typeIdentifier:),
-                                       [NSURL fileURLWithPath:@"/etc/hosts/charon-probe"], nil, nil);
-                printf("  fileWithData(\"charon\", \"probe.txt\", \"public.plain-text\")\n");
+                                       [NSURL fileURLWithPath:@"/etc/hosts/revenant-probe"], nil, nil);
+                printf("  fileWithData(\"revenant\", \"probe.txt\", \"public.plain-text\")\n");
                 printf("            data %s  filename %s  typeIdentifier %s  fileURL %s  removedOnCompletion %lld\n",
                        text([memory valueForKey:@"data"]), text([memory valueForKey:@"filename"]),
                        text([memory valueForKey:@"typeIdentifier"]), text([memory valueForKey:@"fileURL"]),
                        enumeration(memory, @"removedOnCompletion"));
                 printf("            data is the very NSData it was given %d\n",
                        (int)([memory valueForKey:@"data"] == bytes));
-                printf("  fileWithData(\"charon\", nil, nil)   -> filename %s  typeIdentifier %s\n",
+                printf("  fileWithData(\"revenant\", nil, nil)   -> filename %s  typeIdentifier %s\n",
                        text([unnamed valueForKey:@"filename"]), text([unnamed valueForKey:@"typeIdentifier"]));
                 printf("  fileWithFileURL(/etc/hosts, nil, nil)\n");
                 printf("            filename %s  fileURL %s  typeIdentifier %s  data %lu bytes  removedOnCompletion %lld\n",
@@ -150,7 +150,7 @@ int main(int argc, char **argv)
                        text([namedOnDisk valueForKey:@"filename"]),
                        text([namedOnDisk valueForKey:@"fileURL"]),
                        text([namedOnDisk valueForKey:@"typeIdentifier"]));
-                printf("  fileWithFileURL(/etc/hosts/charon-probe, nil, nil) - a path that does not exist\n");
+                printf("  fileWithFileURL(/etc/hosts/revenant-probe, nil, nil) - a path that does not exist\n");
                 printf("            filename %s  data %lu bytes\n",
                        text([absent valueForKey:@"filename"]),
                        (unsigned long)[[absent valueForKey:@"data"] length]);

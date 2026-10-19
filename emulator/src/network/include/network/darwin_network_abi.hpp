@@ -21,11 +21,11 @@
 #include <string_view>
 #include <vector>
 
-namespace shade {
+namespace emulator {
 struct VirtualAccessPoint;
 }
 
-namespace shade::darwin::network {
+namespace emulator::darwin::network {
 
 inline constexpr std::uint32_t address_family_unspecified = 0;
 inline constexpr std::uint32_t address_family_inet = 2;

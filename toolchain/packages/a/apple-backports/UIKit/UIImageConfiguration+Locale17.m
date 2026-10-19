@@ -1,83 +1,83 @@
 #import <UIKit/UIKit.h>
 #import <objc/runtime.h>
-#import "CharonSymbols.h"
+#import "RevenantSymbols.h"
 
 #if __IPHONE_OS_VERSION_MAX_ALLOWED < 170000
 
-@interface UIImageConfiguration (CharonLocale17)
+@interface UIImageConfiguration (RevenantLocale17)
 @property (nonatomic, copy, nullable) NSLocale *locale;
 - (instancetype)configurationWithLocale:(nullable NSLocale *)locale;
 @end
 
-@interface UIImageConfiguration (CharonLocale17Equality)
+@interface UIImageConfiguration (RevenantLocale17Equality)
 - (BOOL)isEqualToConfiguration:(UIImageConfiguration *)otherConfiguration;
 @end
 
 #endif
 
-static const char CharonImageConfigurationLocaleKey;
+static const char RevenantImageConfigurationLocaleKey;
 
-static NSLocale *charon_configuration_locale(UIImageConfiguration *configuration)
+static NSLocale *revenant_configuration_locale(UIImageConfiguration *configuration)
 {
-    return objc_getAssociatedObject(configuration, &CharonImageConfigurationLocaleKey);
+    return objc_getAssociatedObject(configuration, &RevenantImageConfigurationLocaleKey);
 }
 
-static void charon_set_configuration_locale(UIImageConfiguration *configuration, NSLocale *locale)
+static void revenant_set_configuration_locale(UIImageConfiguration *configuration, NSLocale *locale)
 {
-    objc_setAssociatedObject(configuration, &CharonImageConfigurationLocaleKey, locale, OBJC_ASSOCIATION_COPY_NONATOMIC);
+    objc_setAssociatedObject(configuration, &RevenantImageConfigurationLocaleKey, locale, OBJC_ASSOCIATION_COPY_NONATOMIC);
 }
 
-static UIImageConfiguration *charon_configuration_with_locale(UIImageConfiguration *configuration, NSLocale *locale)
+static UIImageConfiguration *revenant_configuration_with_locale(UIImageConfiguration *configuration, NSLocale *locale)
 {
-    NSLocale *held = charon_configuration_locale(configuration);
+    NSLocale *held = revenant_configuration_locale(configuration);
     if (locale == held || (locale && [locale isEqual:held]))
         return configuration;
     UIImageConfiguration *copy = [configuration copy];
-    charon_set_configuration_locale(copy, locale);
+    revenant_set_configuration_locale(copy, locale);
     return copy;
 }
 
-@interface CharonLocaleConfiguration : UIImageConfiguration
+@interface RevenantLocaleConfiguration : UIImageConfiguration
 @end
 
-@implementation CharonLocaleConfiguration
+@implementation RevenantLocaleConfiguration
 
 - (id)copyWithZone:(NSZone *)zone
 {
     UIImageConfiguration *copy = [super copyWithZone:zone];
-    charon_set_configuration_locale(copy, charon_configuration_locale(self));
+    revenant_set_configuration_locale(copy, revenant_configuration_locale(self));
     return copy;
 }
 
-- (BOOL)charon_isUnspecified
+- (BOOL)revenant_isUnspecified
 {
-    return [super charon_isUnspecified] && !charon_configuration_locale(self);
+    return [super revenant_isUnspecified] && !revenant_configuration_locale(self);
 }
 
-- (void)charon_applyFieldsOfConfiguration:(UIImageConfiguration *)other
+- (void)revenant_applyFieldsOfConfiguration:(UIImageConfiguration *)other
 {
-    [super charon_applyFieldsOfConfiguration:other];
-    NSLocale *locale = charon_configuration_locale(other);
+    [super revenant_applyFieldsOfConfiguration:other];
+    NSLocale *locale = revenant_configuration_locale(other);
     if (locale)
-        charon_set_configuration_locale(self, locale);
+        revenant_set_configuration_locale(self, locale);
 }
 
 - (BOOL)isEqualToConfiguration:(UIImageConfiguration *)otherConfiguration
 {
     if (![super isEqualToConfiguration:otherConfiguration])
         return NO;
-    return [charon_configuration_locale(self) isEqual:charon_configuration_locale(otherConfiguration)];
+    return [revenant_configuration_locale(self) isEqual:revenant_configuration_locale(otherConfiguration)];
 }
 
 - (NSUInteger)hash
 {
-    return [super hash] ^ charon_configuration_locale(self).hash;
+    return [super hash] ^ revenant_configuration_locale(self).hash;
 }
 
-- (NSMutableArray<NSString *> *)charon_fieldDescriptions
+- (NSMutableArray<NSString *> *)revenant_fieldDescriptions
 {
-    NSMutableArray *fields = [super charon_fieldDescriptions];
-    NSLocale *locale = charon_configuration_locale(self);
+    NSMutableArray *fields = [super revenant_fieldDescriptions];
+    NSLocale *locale = revenant_configuration_locale(self);
     if (locale)
         [fields addObject:[NSString stringWithFormat:@"locale=(%@)", locale]];
     return fields;
@@ -85,34 +85,34 @@ static UIImageConfiguration *charon_configuration_with_locale(UIImageConfigurati
 
 @end
 
-@implementation UIImageConfiguration (CharonLocale17)
+@implementation UIImageConfiguration (RevenantLocale17)
 
 - (NSLocale *)locale
 {
-    return charon_configuration_locale(self);
+    return revenant_configuration_locale(self);
 }
 
 - (void)setLocale:(NSLocale *)locale
 {
-    charon_set_configuration_locale(self, locale);
+    revenant_set_configuration_locale(self, locale);
 }
 
 - (instancetype)configurationWithLocale:(NSLocale *)locale
 {
-    return charon_configuration_with_locale(self, locale);
+    return revenant_configuration_with_locale(self, locale);
 }
 
 + (instancetype)configurationWithLocale:(NSLocale *)locale
 {
-    CharonLocaleConfiguration *result = [[CharonLocaleConfiguration alloc] initCharonWithTraitCollection:nil];
+    RevenantLocaleConfiguration *result = [[RevenantLocaleConfiguration alloc] initRevenantWithTraitCollection:nil];
     if (locale)
-        charon_set_configuration_locale(result, locale);
+        revenant_set_configuration_locale(result, locale);
     return result;
 }
 
 + (instancetype)configurationWithTraitCollection:(UITraitCollection *)traitCollection
 {
-    CharonLocaleConfiguration *result = [[CharonLocaleConfiguration alloc] initCharonWithTraitCollection:traitCollection];
+    RevenantLocaleConfiguration *result = [[RevenantLocaleConfiguration alloc] initRevenantWithTraitCollection:traitCollection];
     return result;
 }
 

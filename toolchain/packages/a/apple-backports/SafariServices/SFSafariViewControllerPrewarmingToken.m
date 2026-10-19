@@ -1,7 +1,7 @@
 #import <SafariServices/SafariServices.h>
 
 @interface SFSafariViewControllerPrewarmingToken ()
-- (instancetype)charon_init;
+- (instancetype)revenant_init;
 @end
 
 @implementation SFSafariViewControllerPrewarmingToken
@@ -12,7 +12,7 @@
     return nil;
 }
 
-- (instancetype)charon_init
+- (instancetype)revenant_init
 {
     return [super init];
 }
@@ -23,7 +23,7 @@
 
 @end
 
-SFSafariViewControllerPrewarmingToken *charon_prewarmingToken(void)
+SFSafariViewControllerPrewarmingToken *revenant_prewarmingToken(void)
 {
-    return [[SFSafariViewControllerPrewarmingToken alloc] charon_init];
+    return [[SFSafariViewControllerPrewarmingToken alloc] revenant_init];
 }

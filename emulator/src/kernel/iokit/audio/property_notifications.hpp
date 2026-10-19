@@ -5,7 +5,7 @@
 
 #include <cstdint>
 
-namespace shade {
+namespace emulator {
 struct KernelSharedState;
 namespace kernel_iokit::audio {
 

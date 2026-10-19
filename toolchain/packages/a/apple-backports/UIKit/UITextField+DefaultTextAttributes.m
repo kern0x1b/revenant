@@ -1,9 +1,9 @@
 #import <UIKit/UIKit.h>
 #import <objc/runtime.h>
 
-static char charon_default_attributes_key;
+static char revenant_default_attributes_key;
 
-static UITextField *charon_reference_field(void)
+static UITextField *revenant_reference_field(void)
 {
     static UITextField *field;
     static dispatch_once_t once;
@@ -13,11 +13,11 @@ static UITextField *charon_reference_field(void)
     return field;
 }
 
-@implementation UITextField (CharonDefaultTextAttributes)
+@implementation UITextField (RevenantDefaultTextAttributes)
 
 - (NSDictionary *)defaultTextAttributes
 {
-    NSMutableDictionary *attributes = [objc_getAssociatedObject(self, &charon_default_attributes_key) mutableCopy];
+    NSMutableDictionary *attributes = [objc_getAssociatedObject(self, &revenant_default_attributes_key) mutableCopy];
     if (!attributes)
         attributes = [NSMutableDictionary dictionary];
     NSMutableParagraphStyle *paragraph = [[attributes objectForKey:NSParagraphStyleAttributeName] mutableCopy];
@@ -42,7 +42,7 @@ static UITextField *charon_reference_field(void)
 
 - (void)setDefaultTextAttributes:(NSDictionary *)defaultTextAttributes
 {
-    UITextField *reference = charon_reference_field();
+    UITextField *reference = revenant_reference_field();
     NSMutableDictionary *kept = [defaultTextAttributes mutableCopy] ?: [NSMutableDictionary dictionary];
     UIFont *font = [kept objectForKey:NSFontAttributeName];
     UIColor *color = [kept objectForKey:NSForegroundColorAttributeName];
@@ -51,7 +51,7 @@ static UITextField *charon_reference_field(void)
     [kept removeObjectForKey:NSForegroundColorAttributeName];
     if (paragraph)
         [kept setObject:[paragraph copy] forKey:NSParagraphStyleAttributeName];
-    objc_setAssociatedObject(self, &charon_default_attributes_key, kept, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, &revenant_default_attributes_key, kept, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     self.font = font ?: reference.font;
     self.textColor = color ?: reference.textColor;
     self.textAlignment = paragraph ? paragraph.alignment : reference.textAlignment;

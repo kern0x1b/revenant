@@ -13,7 +13,7 @@
 #include <mutex>
 #include <optional>
 
-namespace shade {
+namespace emulator {
 
 enum class JitCodeCacheClass : std::uint8_t {
     BootCritical,

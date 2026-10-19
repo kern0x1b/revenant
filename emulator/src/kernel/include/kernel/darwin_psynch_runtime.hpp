@@ -18,7 +18,7 @@
 #include <optional>
 #include <vector>
 
-namespace shade {
+namespace emulator {
 
 struct DarwinPsynchThread {
     std::uint32_t process_id { };

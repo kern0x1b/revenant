@@ -100,7 +100,7 @@ int main(void)
                                                                                         mediaType:nil position:AVCaptureDevicePositionFront].description;
         CHECK([description hasSuffix:@" device types: [WideAngleCamera, Microphone], media type: Any, position: Front>"], "the description reads as the release's does");
 
-        printf("%d checks, %d failures\n", charon_checks, charon_failures);
-        return charon_failures;
+        printf("%d checks, %d failures\n", revenant_checks, revenant_failures);
+        return revenant_failures;
     }
 }

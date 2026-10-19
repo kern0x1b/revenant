@@ -20,7 +20,7 @@ set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 device=${DEVICE:-$here/../../device}
-build=${BUILD:-$(runs_fresh charon-webkit)}
+build=${BUILD:-$(runs_fresh revenant-webkit)}
 # BUILD may come from the environment, and an environment-supplied directory does not exist yet the way
 # mktemp's does; nothing here creates it, so the first link fails on a missing output path.
 mkdir -p "$build"
@@ -61,14 +61,14 @@ fi
 
 # ---------------------------------------------------------------- the controller family, port against system
 # The port is built in two passes, because renames.sh reads the classes out of the objects and the flags that
-# rename them are needed to compile them. Pass one is plain -- with -DCHARON_HOST_DIFFERENTIAL, so the port's
+# rename them are needed to compile them. Pass one is plain -- with -DREVENANT_HOST_DIFFERENTIAL, so the port's
 # own headers step aside and the host's declarations are used, which is what keeps the port's @implementation
 # and the SDK's @interface from being two declarations of one name. Pass two adds the renames, and the test is
 # compiled with the same flags, so the scenario's class names name the port's classes and not Apple's.
 . "$here/renames.sh"
 port_files="WKContentRuleList11.m WKWebExtension.m WKWebExtensionAction.m WKWebExtensionContext.m WKWebExtensionController.m WKWebExtensionMatchPattern.m"
-port_headers="CharonWebExtension.h CharonWebExtensionController.h"
-port_flags="-DCHARON_HOST_DIFFERENTIAL=1 -fobjc-arc -fvisibility=hidden -w"
+port_headers="RevenantWebExtension.h RevenantWebExtensionController.h"
+port_flags="-DREVENANT_HOST_DIFFERENTIAL=1 -fobjc-arc -fvisibility=hidden -w"
 mkdir -p "$build/plain" "$build/port"
 plain=""
 for f in $port_files; do
@@ -100,7 +100,7 @@ WEBEXT_MANIFEST="$manifest"
 export WEBEXT_MANIFEST
 # the system side first, and in a process with none of the port's code: this is what the port is held to
 xcrun clang $target -fobjc-arc -w -I"$harness" -I"$here" "$here/webextension-controller_system.m" "$harness/check.m" $frameworks -o "$build/controller-system"
-if CHARON_EXPECTED="$expected" "$build/controller-system" > "$build/controller-system.log" 2>&1; then
+if REVENANT_EXPECTED="$expected" "$build/controller-system" > "$build/controller-system.log" 2>&1; then
     # the recorder's own count, not wc -l: the file is N records joined by N-1 newlines
     note "controller-system: exit=0 answers=$(grep -c '^case ' "$expected" | tr -d ' ') log=$build/controller-system.log"
 else
@@ -108,9 +108,9 @@ else
     failed "controller-system: exit=$result log=$build/controller-system.log"
 fi
 # then the port, against those answers
-xcrun clang $target -fobjc-arc -w -I"$harness" -I"$here" -I"$sources" -DCHARON_HOST_DIFFERENTIAL=1 $(cat "$build/renames.flags") \
+xcrun clang $target -fobjc-arc -w -I"$harness" -I"$here" -I"$sources" -DREVENANT_HOST_DIFFERENTIAL=1 $(cat "$build/renames.flags") \
     "$here/webextension-controller_test.m" "$harness/check.m" $built $frameworks -o "$build/controller-port"
-if CHARON_EXPECTED="$expected" "$build/controller-port" > "$build/controller-port.log" 2>&1; then
+if REVENANT_EXPECTED="$expected" "$build/controller-port" > "$build/controller-port.log" 2>&1; then
     result=0
 else
     result=$?
@@ -125,15 +125,15 @@ note "controller-port: exit=$result log=$build/controller-port.log"
 # answers are recorded with no port code in the process, and the port is then asked the same questions.
 mkdir -p "$build/ext"
 xcrun clang $target -fobjc-arc -w -I"$harness" -I"$here" "$here/webextension-extension_system.m" "$harness/check.m" $frameworks -o "$build/ext/system"
-xcrun clang $target -fobjc-arc -w -I"$harness" -I"$here" -I"$sources" -DCHARON_HOST_DIFFERENTIAL=1 $(cat "$build/renames.flags") \
+xcrun clang $target -fobjc-arc -w -I"$harness" -I"$here" -I"$sources" -DREVENANT_HOST_DIFFERENTIAL=1 $(cat "$build/renames.flags") \
     "$here/webextension-extension_test.m" "$harness/check.m" $built $frameworks -o "$build/ext/port"
 ext_expected="$build/extension.expected"
-if CHARON_EXPECTED="$ext_expected" "$build/ext/system" > "$build/ext/system.log" 2>&1; then
+if REVENANT_EXPECTED="$ext_expected" "$build/ext/system" > "$build/ext/system.log" 2>&1; then
     note "extension-system: exit=0 answers=$(grep -c '^case ' "$ext_expected" | tr -d ' ') log=$build/ext/system.log"
 else
     failed "extension-system: exit=$? log=$build/ext/system.log"
 fi
-if CHARON_EXPECTED="$ext_expected" "$build/ext/port" > "$build/ext/port.log" 2>&1; then
+if REVENANT_EXPECTED="$ext_expected" "$build/ext/port" > "$build/ext/port.log" 2>&1; then
     result=0
 else
     result=$?
@@ -151,16 +151,16 @@ note "extension-port: exit=$result log=$build/ext/port.log"
 mkdir -p "$build/rules"
 rule_store="$build/rules/store"
 rule_expected="$build/rules/expected"
-export CHARON_RULE_STORE="$rule_store"
+export REVENANT_RULE_STORE="$rule_store"
 xcrun clang $target -fobjc-arc -w -I"$harness" -I"$here" "$here/contentrulelist_system.m" "$harness/check.m" $frameworks -o "$build/rules/system"
-if CHARON_EXPECTED="$rule_expected" "$build/rules/system" > "$build/rules/system.log" 2>&1; then
+if REVENANT_EXPECTED="$rule_expected" "$build/rules/system" > "$build/rules/system.log" 2>&1; then
     note "rules-system: exit=0 answers=$(grep -c '^case ' "$rule_expected" | tr -d ' ') log=$build/rules/system.log"
 else
     failed "rules-system: exit=$? log=$build/rules/system.log"
 fi
-xcrun clang $target -fobjc-arc -w -I"$harness" -I"$here" -I"$sources" -DCHARON_HOST_DIFFERENTIAL=1 $(cat "$build/renames.flags") \
+xcrun clang $target -fobjc-arc -w -I"$harness" -I"$here" -I"$sources" -DREVENANT_HOST_DIFFERENTIAL=1 $(cat "$build/renames.flags") \
     "$here/contentrulelist_test.m" "$harness/check.m" $built $frameworks -o "$build/rules/port"
-if CHARON_EXPECTED="$rule_expected" "$build/rules/port" > "$build/rules/port.log" 2>&1; then
+if REVENANT_EXPECTED="$rule_expected" "$build/rules/port" > "$build/rules/port.log" 2>&1; then
     result=0
 else
     result=$?
@@ -175,7 +175,7 @@ note "rules-port: exit=$result log=$build/rules/port.log"
 # needle is a silent no-op and a planted run over an unplanted file would report the mutant as applied.
 rule_mutant="$build/rules/mutant"
 mkdir -p "$rule_mutant"
-sed 's|NSError \*refusal = charon_rule_refusal(rule);|NSError *refusal = nil; /* PLANTED */|' \
+sed 's|NSError \*refusal = revenant_rule_refusal(rule);|NSError *refusal = nil; /* PLANTED */|' \
     "$sources/WKContentRuleList11.m" > "$rule_mutant/WKContentRuleList11.m"
 if grep -q PLANTED "$rule_mutant/WKContentRuleList11.m"; then
     xcrun clang $target $port_flags -I"$sources" $(cat "$build/renames.flags") -c "$rule_mutant/WKContentRuleList11.m" \
@@ -188,9 +188,9 @@ if grep -q PLANTED "$rule_mutant/WKContentRuleList11.m"; then
             rule_objects="$rule_objects $o"
         fi
     done
-    xcrun clang $target -fobjc-arc -w -I"$harness" -I"$here" -I"$sources" -DCHARON_HOST_DIFFERENTIAL=1 $(cat "$build/renames.flags") \
+    xcrun clang $target -fobjc-arc -w -I"$harness" -I"$here" -I"$sources" -DREVENANT_HOST_DIFFERENTIAL=1 $(cat "$build/renames.flags") \
         "$here/contentrulelist_test.m" "$harness/check.m" $rule_objects $frameworks -o "$build/rules/port-mutant"
-    if CHARON_EXPECTED="$rule_expected" "$build/rules/port-mutant" > "$build/rules/port-mutant.log" 2>&1; then
+    if REVENANT_EXPECTED="$rule_expected" "$build/rules/port-mutant" > "$build/rules/port-mutant.log" 2>&1; then
         failed "RED CONTROL: the rule list comparison is green with a planted refusal, so it is reading nothing"
     else
         note "rules red control: exit=$? with a planted refusal, and the cases that moved are:"
@@ -207,14 +207,14 @@ fi
 # initialised -- and the answers are the release's answers for that object.
 config_expected="$build/configuration.expected"
 xcrun clang $target -fobjc-arc -w -I"$harness" -I"$here" "$here/webextension-configuration_system.m" "$harness/check.m" $frameworks -o "$build/configuration-system"
-if CHARON_EXPECTED="$config_expected" "$build/configuration-system" > "$build/configuration-system.log" 2>&1; then
+if REVENANT_EXPECTED="$config_expected" "$build/configuration-system" > "$build/configuration-system.log" 2>&1; then
     note "configuration-system: exit=0 answers=$(grep -c '^case ' "$config_expected" | tr -d ' ') log=$build/configuration-system.log"
 else
     failed "configuration-system: exit=$? log=$build/configuration-system.log"
 fi
-xcrun clang $target -fobjc-arc -w -I"$harness" -I"$here" -I"$sources" -DCHARON_HOST_DIFFERENTIAL=1 $(cat "$build/renames.flags") \
+xcrun clang $target -fobjc-arc -w -I"$harness" -I"$here" -I"$sources" -DREVENANT_HOST_DIFFERENTIAL=1 $(cat "$build/renames.flags") \
     "$here/webextension-configuration_test.m" "$harness/check.m" $built $frameworks -o "$build/configuration-port"
-if CHARON_EXPECTED="$config_expected" "$build/configuration-port" > "$build/configuration-port.log" 2>&1; then
+if REVENANT_EXPECTED="$config_expected" "$build/configuration-port" > "$build/configuration-port.log" 2>&1; then
     result=0
 else
     result=$?
@@ -239,9 +239,9 @@ if grep -q PLANTED "$config_mutant/WKWebExtensionController.m"; then
             config_objects="$config_objects $o"
         fi
     done
-    xcrun clang $target -fobjc-arc -w -I"$harness" -I"$here" -I"$sources" -DCHARON_HOST_DIFFERENTIAL=1 $(cat "$build/renames.flags") \
+    xcrun clang $target -fobjc-arc -w -I"$harness" -I"$here" -I"$sources" -DREVENANT_HOST_DIFFERENTIAL=1 $(cat "$build/renames.flags") \
         "$here/webextension-configuration_test.m" "$harness/check.m" $config_objects $frameworks -o "$build/configuration-port-mutant"
-    if CHARON_EXPECTED="$config_expected" "$build/configuration-port-mutant" > "$build/configuration-port-mutant.log" 2>&1; then
+    if REVENANT_EXPECTED="$config_expected" "$build/configuration-port-mutant" > "$build/configuration-port-mutant.log" 2>&1; then
         failed "RED CONTROL: the configuration comparison is green with a planted index, so it is reading nothing"
     else
         note "configuration red control: exit=$? with a planted index, and the case that moved is:"
@@ -267,7 +267,7 @@ fi
 # in the wrong building.
 mutant="$build/mutant"
 mkdir -p "$mutant"
-sed 's|return \[self charon_manifestString:@"name"\];|return @"PLANTED_name";|' \
+sed 's|return \[self revenant_manifestString:@"name"\];|return @"PLANTED_name";|' \
     "$sources/WKWebExtension.m" > "$mutant/WKWebExtension.m"
 if grep -q PLANTED_name "$mutant/WKWebExtension.m"; then
     xcrun clang $target $port_flags -I"$sources" $(cat "$build/renames.flags") -c "$mutant/WKWebExtension.m" -o "$mutant/WKWebExtension.o" 2> "$mutant/compile.log"
@@ -279,9 +279,9 @@ if grep -q PLANTED_name "$mutant/WKWebExtension.m"; then
             mutant_objects="$mutant_objects $o"
         fi
     done
-    xcrun clang $target -fobjc-arc -w -I"$harness" -I"$here" -I"$sources" -DCHARON_HOST_DIFFERENTIAL=1 $(cat "$build/renames.flags") \
+    xcrun clang $target -fobjc-arc -w -I"$harness" -I"$here" -I"$sources" -DREVENANT_HOST_DIFFERENTIAL=1 $(cat "$build/renames.flags") \
         "$here/webextension-extension_test.m" "$harness/check.m" $mutant_objects $frameworks -o "$build/ext/port-mutant"
-    if CHARON_EXPECTED="$ext_expected" "$build/ext/port-mutant" > "$build/ext/port-mutant.log" 2>&1; then
+    if REVENANT_EXPECTED="$ext_expected" "$build/ext/port-mutant" > "$build/ext/port-mutant.log" 2>&1; then
         failed "RED CONTROL: the comparison is green with a planted displayName, so it is reading nothing"
     else
         note "red control: exit=$? with a planted displayName, and the case that moved is:"

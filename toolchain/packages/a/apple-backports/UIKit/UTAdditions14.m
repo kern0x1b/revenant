@@ -1,13 +1,13 @@
 #import <Foundation/Foundation.h>
-#import "CharonUTType.h"
+#import "RevenantUTType.h"
 
-@interface UTType (CharonExtensions)
-- (BOOL)charon_conformsToFilenameExtension:(NSString *)extension;
+@interface UTType (RevenantExtensions)
+- (BOOL)revenant_conformsToFilenameExtension:(NSString *)extension;
 @end
 
-@implementation UTType (CharonExtensions)
+@implementation UTType (RevenantExtensions)
 
-- (BOOL)charon_conformsToFilenameExtension:(NSString *)extension
+- (BOOL)revenant_conformsToFilenameExtension:(NSString *)extension
 {
     if (!extension.length)
         return NO;
@@ -17,10 +17,10 @@
 
 @end
 
-static NSString *CharonPathComponentForType(NSString *partialName, UTType *contentType, BOOL *appended)
+static NSString *RevenantPathComponentForType(NSString *partialName, UTType *contentType, BOOL *appended)
 {
     NSString *existing = partialName.pathExtension;
-    if (existing.length && [contentType charon_conformsToFilenameExtension:existing]) {
+    if (existing.length && [contentType revenant_conformsToFilenameExtension:existing]) {
         *appended = NO;
         return partialName;
     }
@@ -33,41 +33,41 @@ static NSString *CharonPathComponentForType(NSString *partialName, UTType *conte
     return [partialName stringByAppendingPathExtension:extension];
 }
 
-@implementation NSString (CharonUTAdditions14)
+@implementation NSString (RevenantUTAdditions14)
 
 - (NSString *)stringByAppendingPathComponent:(NSString *)partialName conformingToType:(UTType *)contentType
 {
     if (!partialName)
         return [self copy];
     BOOL appended = NO;
-    NSString *component = CharonPathComponentForType(partialName, contentType, &appended);
+    NSString *component = RevenantPathComponentForType(partialName, contentType, &appended);
     return [self stringByAppendingPathComponent:component];
 }
 
 - (NSString *)stringByAppendingPathExtensionForType:(UTType *)contentType
 {
     BOOL appended = NO;
-    NSString *extended = CharonPathComponentForType(self.lastPathComponent, contentType, &appended);
+    NSString *extended = RevenantPathComponentForType(self.lastPathComponent, contentType, &appended);
     return appended ? extended : [self copy];
 }
 
 @end
 
-@implementation NSURL (CharonUTAdditions14)
+@implementation NSURL (RevenantUTAdditions14)
 
 - (NSURL *)URLByAppendingPathComponent:(NSString *)partialName conformingToType:(UTType *)contentType
 {
     if (!partialName)
         return [self copy];
     BOOL appended = NO;
-    NSString *component = CharonPathComponentForType(partialName, contentType, &appended);
+    NSString *component = RevenantPathComponentForType(partialName, contentType, &appended);
     return [self URLByAppendingPathComponent:component isDirectory:[contentType conformsToType:UTTypeDirectory]];
 }
 
 - (NSURL *)URLByAppendingPathExtensionForType:(UTType *)contentType
 {
     BOOL appended = NO;
-    NSString *extended = CharonPathComponentForType(self.lastPathComponent, contentType, &appended);
+    NSString *extended = RevenantPathComponentForType(self.lastPathComponent, contentType, &appended);
     if (!appended)
         return [self copy];
     return [self URLByAppendingPathComponent:extended isDirectory:([self hasDirectoryPath] || [contentType conformsToType:UTTypeDirectory])];

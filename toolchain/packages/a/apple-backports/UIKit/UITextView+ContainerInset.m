@@ -3,13 +3,13 @@
 
 static const void *ContainerInsetKey = &ContainerInsetKey;
 
-static id charon_text_view_body(UITextView *textView)
+static id revenant_text_view_body(UITextView *textView)
 {
     Ivar ivar = class_getInstanceVariable([UITextView class], "m_body");
     return ivar ? object_getIvar(textView, ivar) : nil;
 }
 
-@implementation UITextView (CharonContainerInset)
+@implementation UITextView (RevenantContainerInset)
 
 - (UIEdgeInsets)textContainerInset
 {
@@ -21,7 +21,7 @@ static id charon_text_view_body(UITextView *textView)
 {
     objc_setAssociatedObject(self, ContainerInsetKey, [NSValue valueWithUIEdgeInsets:textContainerInset], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 
-    id body = charon_text_view_body(self);
+    id body = revenant_text_view_body(self);
     SEL styleSelector = @selector(style);
     id style = [body respondsToSelector:styleSelector] ? [body performSelector:styleSelector] : nil;
     SEL setPaddingSelector = @selector(setPadding:);

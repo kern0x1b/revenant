@@ -15,8 +15,8 @@ static void check(BOOL ok, NSString *line)
 static NSString *className(id object)
 {
     NSString *name = NSStringFromClass([object class]);
-    if ([name hasPrefix:@"CharonHost"])
-        name = [name substringFromIndex:[@"CharonHost" length]];
+    if ([name hasPrefix:@"RevenantHost"])
+        name = [name substringFromIndex:[@"RevenantHost" length]];
     return name;
 }
 
@@ -261,12 +261,12 @@ int main(int argc, char **argv)
 {
     setvbuf(stdout, NULL, _IONBF, 0);
     @autoreleasepool {
-        Class portDepthwise = NSClassFromString(@"CharonHostMPSCNNDepthWiseConvolutionDescriptor");
-        Class portSubpixel = NSClassFromString(@"CharonHostMPSCNNSubPixelConvolutionDescriptor");
-        Class portPadding = NSClassFromString(@"CharonHostMPSNNDefaultPadding");
+        Class portDepthwise = NSClassFromString(@"RevenantHostMPSCNNDepthWiseConvolutionDescriptor");
+        Class portSubpixel = NSClassFromString(@"RevenantHostMPSCNNSubPixelConvolutionDescriptor");
+        Class portPadding = NSClassFromString(@"RevenantHostMPSNNDefaultPadding");
         check(portDepthwise != nil, @"the port's depthwise class is built in this process");
         check(portSubpixel != nil, @"the port's sub-pixel class is built in this process");
-        Class portBase = NSClassFromString(@"CharonHostMPSCNNConvolutionDescriptor");
+        Class portBase = NSClassFromString(@"RevenantHostMPSCNNConvolutionDescriptor");
         check(portBase != nil, @"the port's base convolution class is built in this process");
         if (!portBase)
             return 1;

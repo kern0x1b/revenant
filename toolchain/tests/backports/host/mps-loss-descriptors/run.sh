@@ -3,7 +3,7 @@
 # MPSNNNeuronDescriptor (11.3) against Apple's own objects, member by member.
 #
 # The port's four classes are built for Catalyst beside Apple's MetalPerformanceShaders in one process, with every class
-# their sources define renamed CharonHost<Name>, so the port is reached under names of its own and cannot replace Apple's.
+# their sources define renamed RevenantHost<Name>, so the port is reached under names of its own and cannot replace Apple's.
 # The build and the scratch output are under .agent-work/runs/mps-loss/.
 #
 # A MUTANT runs last: the factory's default weight is 2.0, not Apple's 1.0 (measured), so the defaults comparison must turn
@@ -32,7 +32,7 @@ for source in $sources; do
 done
 renames=""
 for name in $(printf '%s\n' $names | sort -u); do
-    renames="$renames -D$name=CharonHost$name"
+    renames="$renames -D$name=RevenantHost$name"
 done
 echo "renamed:$renames"
 

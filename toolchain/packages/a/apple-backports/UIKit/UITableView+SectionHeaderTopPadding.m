@@ -1,13 +1,13 @@
 #import <UIKit/UIKit.h>
 #import <objc/runtime.h>
 
-static const char charon_section_header_top_padding_key;
+static const char revenant_section_header_top_padding_key;
 
-@implementation UITableView (CharonSectionHeaderTopPadding)
+@implementation UITableView (RevenantSectionHeaderTopPadding)
 
 - (CGFloat)sectionHeaderTopPadding
 {
-    NSNumber *kept = objc_getAssociatedObject(self, &charon_section_header_top_padding_key);
+    NSNumber *kept = objc_getAssociatedObject(self, &revenant_section_header_top_padding_key);
     return kept ? kept.doubleValue : UITableViewAutomaticDimension;
 }
 
@@ -21,7 +21,7 @@ static const char charon_section_header_top_padding_key;
             NSLog(@"UITableView.sectionHeaderTopPadding is kept and not applied on iOS 6: a section header has no padding above it");
         });
     }
-    objc_setAssociatedObject(self, &charon_section_header_top_padding_key, @(sectionHeaderTopPadding), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, &revenant_section_header_top_padding_key, @(sectionHeaderTopPadding), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
 @end

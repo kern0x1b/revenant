@@ -1,6 +1,6 @@
 #import <HealthKit/HealthKit.h>
 
-#import "CharonHKStore.h"
+#import "RevenantHKStore.h"
 
 @implementation HKSample {
     HKSampleType *_sampleType;
@@ -15,12 +15,12 @@
     return YES;
 }
 
-- (instancetype)charon_initWithType:(HKSampleType *)sampleType
+- (instancetype)revenant_initWithType:(HKSampleType *)sampleType
                            metadata:(NSDictionary *)metadata
                           startDate:(NSDate *)startDate
                             endDate:(NSDate *)endDate
 {
-    HKSample *fresh = [super charon_initWithUUID:[[NSUUID UUID] copy] source:[HKSource defaultSource] metadata:metadata];
+    HKSample *fresh = [super revenant_initWithUUID:[[NSUUID UUID] copy] source:[HKSource defaultSource] metadata:metadata];
     if (fresh) {
         fresh->_sampleType = (HKSampleType *)[sampleType copy];
         fresh->_startDate = [startDate copy];
@@ -48,9 +48,9 @@
     [coder encodeObject:_endDate forKey:@"endDate"];
 }
 
-- (instancetype)charon_copyForStore
+- (instancetype)revenant_copyForStore
 {
-    HKSample *copy = [super charon_copyForStore];
+    HKSample *copy = [super revenant_copyForStore];
     if (copy) {
         copy->_sampleType = [self->_sampleType copy];
         copy->_startDate = [self->_startDate copy];
@@ -74,12 +74,12 @@
     return _endDate;
 }
 
-- (NSString *)charon_storeTypeIdentifier
+- (NSString *)revenant_storeTypeIdentifier
 {
     return _sampleType.identifier ?: @"";
 }
 
-- (HKObjectType *)charon_typeForSaving
+- (HKObjectType *)revenant_typeForSaving
 {
     return _sampleType;
 }

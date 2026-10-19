@@ -12,7 +12,7 @@
 #include <span>
 #include <vector>
 
-namespace shade::bsd::baseband_device {
+namespace emulator::bsd::baseband_device {
 
 inline constexpr std::size_t maximum_replay_bytes = 64U * 1024U * 1024U;
 

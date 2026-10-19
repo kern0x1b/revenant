@@ -9,12 +9,12 @@
 
 + (NSArray<NSString *> *)writableTypeIdentifiersForItemProvider
 {
-    return @[@"public.utf8-plain-text", @"com.charon.note"];
+    return @[@"public.utf8-plain-text", @"com.revenant.note"];
 }
 
 + (NSArray<NSString *> *)readableTypeIdentifiersForItemProvider
 {
-    return @[@"com.charon.note"];
+    return @[@"com.revenant.note"];
 }
 
 - (NSArray<NSString *> *)writableTypeIdentifiersForItemProvider

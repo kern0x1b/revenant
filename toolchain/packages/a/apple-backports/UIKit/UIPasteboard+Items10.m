@@ -1,6 +1,6 @@
 #import <UIKit/UIKit.h>
 
-static NSMutableDictionary *charon_pasteboard_options(void)
+static NSMutableDictionary *revenant_pasteboard_options(void)
 {
     static NSMutableDictionary *recorded;
     if (recorded == nil)
@@ -8,17 +8,17 @@ static NSMutableDictionary *charon_pasteboard_options(void)
     return recorded;
 }
 
-static NSString *charon_pasteboard_key(UIPasteboard *pasteboard)
+static NSString *revenant_pasteboard_key(UIPasteboard *pasteboard)
 {
     return [NSString stringWithFormat:@"%p", (void *)pasteboard];
 }
 
-@implementation UIPasteboard (CharonItems10)
+@implementation UIPasteboard (RevenantItems10)
 
-- (void)charonRecordOptions:(NSDictionary *)options
+- (void)revenantRecordOptions:(NSDictionary *)options
 {
-    NSMutableDictionary *recorded = charon_pasteboard_options();
-    NSString *key = charon_pasteboard_key(self);
+    NSMutableDictionary *recorded = revenant_pasteboard_options();
+    NSString *key = revenant_pasteboard_key(self);
     if (options == nil) {
         [recorded removeObjectForKey:key];
         return;
@@ -29,13 +29,13 @@ static NSString *charon_pasteboard_key(UIPasteboard *pasteboard)
 
 - (void)setItems:(NSArray *)items options:(NSDictionary *)options
 {
-    [self charonRecordOptions:options];
+    [self revenantRecordOptions:options];
     [self setItems:items];
 }
 
-- (NSArray *)charonRecordedOptionsForTest
+- (NSArray *)revenantRecordedOptionsForTest
 {
-    return charon_pasteboard_options()[charon_pasteboard_key(self)];
+    return revenant_pasteboard_options()[revenant_pasteboard_key(self)];
 }
 
 @end

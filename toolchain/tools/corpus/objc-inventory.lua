@@ -2,7 +2,7 @@ import("byteorder", {rootdir = path.join(os.scriptdir(), "..", "..", "modules")}
 
 function main(source, architecture)
     assert(source, "usage: objc-inventory.lua <binary-or-cache> [architecture]")
-    local objc = import("apple.objc", {rootdir = path.join(os.getenv("CHARON_ROOT"), "modules"), anonymous = true})
+    local objc = import("apple.objc", {rootdir = path.join(os.getenv("REVENANT_ROOT"), "modules"), anonymous = true})
     local found = architecture and objc.binary_inventory(source, architecture) or objc.inventory(source)
     assert(found, source .. " holds no readable Objective-C metadata")
     local function joined(set)

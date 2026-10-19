@@ -4,6 +4,6 @@ set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 device=${DEVICE:-$here/../../device}
-build=${BUILD:-$(runs_fresh charon-imageio)}
-xcrun clang -DCHARON_HOST -fobjc-arc -w -I"$device" "$device/imageio.m" "$device/check.m" -framework ImageIO -framework CoreGraphics -framework Foundation -o "$build/imageio"
+build=${BUILD:-$(runs_fresh revenant-imageio)}
+xcrun clang -DREVENANT_HOST -fobjc-arc -w -I"$device" "$device/imageio.m" "$device/check.m" -framework ImageIO -framework CoreGraphics -framework Foundation -o "$build/imageio"
 "$build/imageio"

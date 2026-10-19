@@ -11,7 +11,7 @@
 #include <cstddef>
 #include <cstdint>
 
-namespace shade {
+namespace emulator {
 
 enum class DisplayOrientation : std::uint8_t {
     Portrait,

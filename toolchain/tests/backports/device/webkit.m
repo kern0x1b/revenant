@@ -26,7 +26,7 @@ static NSString *tolerance(NSString *name)
 {
     [[NSFileManager defaultManager] createDirectoryAtPath:results_folder withIntermediateDirectories:YES attributes:nil error:NULL];
     [[NSFileManager defaultManager] removeItemAtPath:[results_folder stringByAppendingPathComponent:@"webkit.done"] error:NULL];
-    charon_log_to([results_folder stringByAppendingPathComponent:@"webkit.log"]);
+    revenant_log_to([results_folder stringByAppendingPathComponent:@"webkit.log"]);
     printf("webkit device test started on iOS %s\n", [UIDevice currentDevice].systemVersion.UTF8String);
     self.window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
     UIViewController *controller = [[UIViewController alloc] init];
@@ -45,17 +45,17 @@ static NSString *tolerance(NSString *name)
             NSString *want = expected[name], *got = records[name];
             if ([want isEqualToString:got]) {
                 matched++;
-                charon_check(YES, name.UTF8String, nil);
+                revenant_check(YES, name.UTF8String, nil);
             } else if (tolerance(name)) {
                 tolerated++;
                 printf("tolerated %s: %s\n    device %s\n    host   %s\n", tolerance(name).UTF8String, name.UTF8String, got.UTF8String, want.UTF8String);
             } else {
-                charon_check(NO, name.UTF8String, [NSString stringWithFormat:@"\n    device %@\n    host   %@", got, want]);
+                revenant_check(NO, name.UTF8String, [NSString stringWithFormat:@"\n    device %@\n    host   %@", got, want]);
             }
         }
         printf("records matched=%ld tolerated=%ld\n", (long)matched, (long)tolerated);
-        printf("checks=%d failures=%d\n", charon_checks, charon_failures);
-        NSString *summary = [NSString stringWithFormat:@"%@ checks=%d failures=%d\n", charon_failures ? @"FAIL" : @"ok", charon_checks, charon_failures];
+        printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
+        NSString *summary = [NSString stringWithFormat:@"%@ checks=%d failures=%d\n", revenant_failures ? @"FAIL" : @"ok", revenant_checks, revenant_failures];
         [summary writeToFile:[results_folder stringByAppendingPathComponent:@"webkit.done"] atomically:YES encoding:NSUTF8StringEncoding error:NULL];
     }] selector:@selector(main) userInfo:nil repeats:NO];
     [[NSRunLoop mainRunLoop] addTimer:timer forMode:NSRunLoopCommonModes];

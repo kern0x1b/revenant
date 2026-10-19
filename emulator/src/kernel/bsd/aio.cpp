@@ -30,7 +30,7 @@
 
 #include "support.hpp"
 
-namespace shade {
+namespace emulator {
 namespace {
 
     enum class AioOperation {

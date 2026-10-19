@@ -1,20 +1,20 @@
-#import "CharonGKGraph.h"
+#import "RevenantGKGraph.h"
 
 #import <GameplayKit/GameplayKit.h>
 #import <objc/runtime.h>
 
-NSString *const CharonGKSearchClosedKey = @"CharonGKSearchClosed";
-NSString *const CharonGKSearchScoreKey = @"CharonGKSearchScore";
-NSString *const CharonGKSearchParentKey = @"CharonGKSearchParent";
-NSString *const CharonGKGraphNodesKey = @"CharonGKGraphNodes";
-NSString *const CharonGKGraphNodeClassKey = @"CharonGKGraphClass";
-NSString *const CharonGKGraphNodePositionKey = @"CharonGKGraphPosition";
-NSString *const CharonGKObstacleVerticesKey = @"CharonGKObstacleVertices";
-NSString *const CharonGKObstacleGraphObstaclesKey = @"CharonGKObstacleGraphObstacles";
-NSString *const CharonGKObstacleGraphBufferKey = @"CharonGKObstacleGraphBuffer";
-NSString *const CharonGKObstacleGraphLocksKey = @"CharonGKObstacleGraphLocks";
+NSString *const RevenantGKSearchClosedKey = @"RevenantGKSearchClosed";
+NSString *const RevenantGKSearchScoreKey = @"RevenantGKSearchScore";
+NSString *const RevenantGKSearchParentKey = @"RevenantGKSearchParent";
+NSString *const RevenantGKGraphNodesKey = @"RevenantGKGraphNodes";
+NSString *const RevenantGKGraphNodeClassKey = @"RevenantGKGraphClass";
+NSString *const RevenantGKGraphNodePositionKey = @"RevenantGKGraphPosition";
+NSString *const RevenantGKObstacleVerticesKey = @"RevenantGKObstacleVertices";
+NSString *const RevenantGKObstacleGraphObstaclesKey = @"RevenantGKObstacleGraphObstacles";
+NSString *const RevenantGKObstacleGraphBufferKey = @"RevenantGKObstacleGraphBuffer";
+NSString *const RevenantGKObstacleGraphLocksKey = @"RevenantGKObstacleGraphLocks";
 
-static BOOL CharonGKRayCrossesSide(vector_float2 point, vector_float2 a, vector_float2 b)
+static BOOL RevenantGKRayCrossesSide(vector_float2 point, vector_float2 a, vector_float2 b)
 {
     if ((a.y > point.y) == (b.y > point.y)) {
         return NO;
@@ -23,7 +23,7 @@ static BOOL CharonGKRayCrossesSide(vector_float2 point, vector_float2 a, vector_
     return point.x < crossing;
 }
 
-static float CharonGKDistanceToSide(vector_float2 point, vector_float2 a, vector_float2 b)
+static float RevenantGKDistanceToSide(vector_float2 point, vector_float2 a, vector_float2 b)
 {
     float ex = b.x - a.x;
     float ey = b.y - a.y;
@@ -42,34 +42,34 @@ static float CharonGKDistanceToSide(vector_float2 point, vector_float2 a, vector
     return (float)sqrt((double)(dx * dx + dy * dy));
 }
 
-BOOL CharonGKPointOnBoundary(vector_float2 point, const vector_float2 *vertices, NSUInteger count);
+BOOL RevenantGKPointOnBoundary(vector_float2 point, const vector_float2 *vertices, NSUInteger count);
 
-static const float CharonGKBoundarySlack = 1e-7f;
+static const float RevenantGKBoundarySlack = 1e-7f;
 
-BOOL CharonGKPointOnBoundary(vector_float2 point, const vector_float2 *vertices, NSUInteger count)
+BOOL RevenantGKPointOnBoundary(vector_float2 point, const vector_float2 *vertices, NSUInteger count)
 {
     if (count < 3 || vertices == NULL) {
         return NO;
     }
     for (NSUInteger index = 0; index < count; index++) {
-        if (CharonGKDistanceToSide(point, vertices[index], vertices[(index + 1) % count]) <=
-            CharonGKBoundarySlack) {
+        if (RevenantGKDistanceToSide(point, vertices[index], vertices[(index + 1) % count]) <=
+            RevenantGKBoundarySlack) {
             return YES;
         }
     }
     return NO;
 }
 
-BOOL CharonGKPointInPolygon(vector_float2 point, const vector_float2 *vertices, NSUInteger count,
+BOOL RevenantGKPointInPolygon(vector_float2 point, const vector_float2 *vertices, NSUInteger count,
                             float buffer)
 {
     if (count < 3 || vertices == NULL) {
         return NO;
     }
-    if (CharonGKRayCrossesSide(point, vertices[count - 1], vertices[0])) {
+    if (RevenantGKRayCrossesSide(point, vertices[count - 1], vertices[0])) {
         BOOL inside = NO;
         for (NSUInteger index = 0; index + 1 < count; index++) {
-            if (CharonGKRayCrossesSide(point, vertices[index], vertices[index + 1])) {
+            if (RevenantGKRayCrossesSide(point, vertices[index], vertices[index + 1])) {
                 inside = !inside;
             }
         }
@@ -79,7 +79,7 @@ BOOL CharonGKPointInPolygon(vector_float2 point, const vector_float2 *vertices, 
     }
     if (buffer > 0) {
         for (NSUInteger index = 0; index < count; index++) {
-            if (CharonGKDistanceToSide(point, vertices[index], vertices[(index + 1) % count]) <= buffer) {
+            if (RevenantGKDistanceToSide(point, vertices[index], vertices[(index + 1) % count]) <= buffer) {
                 return YES;
             }
         }
@@ -87,14 +87,14 @@ BOOL CharonGKPointInPolygon(vector_float2 point, const vector_float2 *vertices, 
     return NO;
 }
 
-BOOL CharonGKSegmentCrossesPolygon(vector_float2 from, vector_float2 to, const vector_float2 *vertices,
+BOOL RevenantGKSegmentCrossesPolygon(vector_float2 from, vector_float2 to, const vector_float2 *vertices,
                                    NSUInteger count, float buffer)
 {
     if (count < 3 || vertices == NULL) {
         return NO;
     }
-    if (CharonGKPointInPolygon(from, vertices, count, buffer) &&
-        CharonGKPointInPolygon(to, vertices, count, buffer)) {
+    if (RevenantGKPointInPolygon(from, vertices, count, buffer) &&
+        RevenantGKPointInPolygon(to, vertices, count, buffer)) {
         return NO;
     }
     for (NSUInteger index = 0; index < count; index++) {
@@ -109,43 +109,43 @@ BOOL CharonGKSegmentCrossesPolygon(vector_float2 from, vector_float2 to, const v
             return YES;
         }
     }
-    if (CharonGKPointOnBoundary(from, vertices, count) || CharonGKPointOnBoundary(to, vertices, count)) {
+    if (RevenantGKPointOnBoundary(from, vertices, count) || RevenantGKPointOnBoundary(to, vertices, count)) {
         return NO;
     }
-    return CharonGKPointInPolygon(from, vertices, count, buffer) ||
-           CharonGKPointInPolygon(to, vertices, count, buffer);
+    return RevenantGKPointInPolygon(from, vertices, count, buffer) ||
+           RevenantGKPointInPolygon(to, vertices, count, buffer);
 }
 
-@implementation CharonGKEntry
+@implementation RevenantGKEntry
 
-+ (instancetype)charon_entryWithElement:(id)element low:(vector_float3)low high:(vector_float3)high
++ (instancetype)revenant_entryWithElement:(id)element low:(vector_float3)low high:(vector_float3)high
                                isPoint:(BOOL)isPoint
 {
-    CharonGKEntry *entry = [[CharonGKEntry alloc] init];
-    entry->charon_element = element;
-    entry->charon_min = low;
-    entry->charon_max = high;
-    entry->charon_isPoint = isPoint;
+    RevenantGKEntry *entry = [[RevenantGKEntry alloc] init];
+    entry->revenant_element = element;
+    entry->revenant_min = low;
+    entry->revenant_max = high;
+    entry->revenant_isPoint = isPoint;
     return entry;
 }
 
-- (BOOL)charon_holdsPoint:(vector_float3)point
+- (BOOL)revenant_holdsPoint:(vector_float3)point
 {
-    return point.x >= charon_min.x && point.x <= charon_max.x && point.y >= charon_min.y &&
-           point.y <= charon_max.y && point.z >= charon_min.z && point.z <= charon_max.z;
+    return point.x >= revenant_min.x && point.x <= revenant_max.x && point.y >= revenant_min.y &&
+           point.y <= revenant_max.y && point.z >= revenant_min.z && point.z <= revenant_max.z;
 }
 
-- (BOOL)charon_meetsRange:(vector_float2)low high:(vector_float2)high
+- (BOOL)revenant_meetsRange:(vector_float2)low high:(vector_float2)high
 {
-    return charon_min.x <= high.x && charon_max.x >= low.x && charon_min.y <= high.y &&
-           charon_max.y >= low.y;
+    return revenant_min.x <= high.x && revenant_max.x >= low.x && revenant_min.y <= high.y &&
+           revenant_max.y >= low.y;
 }
 
-- (void)dealloc { charon_element = nil; }
+- (void)dealloc { revenant_element = nil; }
 
 @end
 
-NSArray *CharonGKConnected(id node)
+NSArray *RevenantGKConnected(id node)
 {
     SEL selector = NSSelectorFromString(@"connectedNodes");
     if (![node respondsToSelector:selector]) {
@@ -155,7 +155,7 @@ NSArray *CharonGKConnected(id node)
     return answer(node, selector);
 }
 
-float CharonGKCostTo(id from, id to)
+float RevenantGKCostTo(id from, id to)
 {
     SEL selector = NSSelectorFromString(@"costToNode:");
     if (![from respondsToSelector:selector]) {
@@ -165,15 +165,15 @@ float CharonGKCostTo(id from, id to)
     return answer(from, selector, to);
 }
 
-float CharonGKSearchScore(id node)
+float RevenantGKSearchScore(id node)
 {
-    NSNumber *held = objc_getAssociatedObject(node, (__bridge const void *)CharonGKSearchScoreKey);
+    NSNumber *held = objc_getAssociatedObject(node, (__bridge const void *)RevenantGKSearchScoreKey);
     return held == nil ? INFINITY : [held floatValue];
 }
 
-static CharonGKTriangle3 *CharonGKTriangleOf(vector_float2 a, vector_float2 b, vector_float2 c);
+static RevenantGKTriangle3 *RevenantGKTriangleOf(vector_float2 a, vector_float2 b, vector_float2 c);
 
-float CharonGKCellSize(float minimum, float extent)
+float RevenantGKCellSize(float minimum, float extent)
 {
     if (extent <= 0 || !(minimum > 0)) {
         return extent > 0 ? extent : 0;
@@ -190,7 +190,7 @@ float CharonGKCellSize(float minimum, float extent)
     return size > 0 ? size : extent;
 }
 
-float CharonGKCellFloor(float value, float size)
+float RevenantGKCellFloor(float value, float size)
 {
     if (!(size > 0)) {
         return value < 0 ? (float)floorf(value) : (float)floorf(value);
@@ -198,53 +198,53 @@ float CharonGKCellFloor(float value, float size)
     return (float)floorf(value / size) * size;
 }
 
-float CharonGKNodeSize(float cellSize)
+float RevenantGKNodeSize(float cellSize)
 {
     return cellSize * 2;
 }
 
-float CharonGKNodeCeiling(float edge, float limit)
+float RevenantGKNodeCeiling(float edge, float limit)
 {
     return edge > limit ? limit : edge;
 }
 
-float CharonGKCellCeiling(float value, float size, float limit)
+float RevenantGKCellCeiling(float value, float size, float limit)
 {
     if (!(size > 0)) {
         return limit;
     }
-    float edge = CharonGKCellFloor(value, size) + size;
+    float edge = RevenantGKCellFloor(value, size) + size;
     return edge > limit ? limit : edge;
 }
 
-@implementation CharonGKPoint2
+@implementation RevenantGKPoint2
 + (instancetype)pointWithX:(float)x y:(float)y
 {
-    CharonGKPoint2 *answer = [[CharonGKPoint2 alloc] init];
+    RevenantGKPoint2 *answer = [[RevenantGKPoint2 alloc] init];
     answer->point = (vector_float2){x, y};
     return answer;
 }
 - (vector_float2)vector { return point; }
 @end
 
-@implementation CharonGKTriangle3
+@implementation RevenantGKTriangle3
 + (instancetype)triangleAt:(vector_float2)a first:(vector_float2)b second:(vector_float2)c
 {
-    return CharonGKTriangleOf(a, b, c);
+    return RevenantGKTriangleOf(a, b, c);
 }
 @end
 
-@implementation CharonGKEdgePair
+@implementation RevenantGKEdgePair
 + (instancetype)pairWithFirst:(NSUInteger)first second:(NSUInteger)second
 {
-    CharonGKEdgePair *answer = [[CharonGKEdgePair alloc] init];
+    RevenantGKEdgePair *answer = [[RevenantGKEdgePair alloc] init];
     answer->first = first;
     answer->second = second;
     return answer;
 }
 @end
 
-id CharonGKPointNodeWithClass(Class nodeClass, vector_float2 point)
+id RevenantGKPointNodeWithClass(Class nodeClass, vector_float2 point)
 {
     if (nodeClass == Nil) {
         return nil;
@@ -263,7 +263,7 @@ id CharonGKPointNodeWithClass(Class nodeClass, vector_float2 point)
     return two(instance, initialiser, point);
 }
 
-NSArray *CharonGKVerticesOfObstacle(id obstacle)
+NSArray *RevenantGKVerticesOfObstacle(id obstacle)
 {
     SEL countSelector = NSSelectorFromString(@"vertexCount");
     if (![obstacle respondsToSelector:countSelector]) {
@@ -277,17 +277,17 @@ NSArray *CharonGKVerticesOfObstacle(id obstacle)
     NSMutableArray *vertices = [NSMutableArray arrayWithCapacity:count];
     for (NSUInteger index = 0; index < count; index++) {
         vector_float2 vertex = answerVertex(obstacle, vertexSelector, index);
-        [vertices addObject:[CharonGKPoint2 pointWithX:vertex.x y:vertex.y]];
+        [vertices addObject:[RevenantGKPoint2 pointWithX:vertex.x y:vertex.y]];
     }
     return vertices;
 }
 
-static vector_float2 CharonGKVertexAt(NSArray *vertices, NSUInteger index)
+static vector_float2 RevenantGKVertexAt(NSArray *vertices, NSUInteger index)
 {
-    return index < [vertices count] ? [(CharonGKPoint2 *)vertices[index] vector] : (vector_float2){0, 0};
+    return index < [vertices count] ? [(RevenantGKPoint2 *)vertices[index] vector] : (vector_float2){0, 0};
 }
 
-static vector_float2 CharonGKPushCorner(vector_float2 previous, vector_float2 here, vector_float2 next,
+static vector_float2 RevenantGKPushCorner(vector_float2 previous, vector_float2 here, vector_float2 next,
                                         float buffer)
 {
     float incomingX = here.x - previous.x;
@@ -323,21 +323,21 @@ static vector_float2 CharonGKPushCorner(vector_float2 previous, vector_float2 he
     return (vector_float2){here.x + bisectorX * buffer / sine, here.y + bisectorY * buffer / sine};
 }
 
-NSArray *CharonGKBufferedCorners(NSArray *obstacles, float buffer, NSMutableArray *perObstacle)
+NSArray *RevenantGKBufferedCorners(NSArray *obstacles, float buffer, NSMutableArray *perObstacle)
 {
     NSMutableArray *corners = [NSMutableArray array];
     for (id obstacle in obstacles) {
-        NSArray *vertices = CharonGKVerticesOfObstacle(obstacle);
+        NSArray *vertices = RevenantGKVerticesOfObstacle(obstacle);
         if (vertices == nil) {
             continue;
         }
         NSMutableArray *mine = [NSMutableArray array];
         NSUInteger count = [vertices count];
         for (NSUInteger index = 0; index < count; index++) {
-            vector_float2 pushed = CharonGKPushCorner(CharonGKVertexAt(vertices, (index + count - 1) % count),
-                                                     CharonGKVertexAt(vertices, index),
-                                                     CharonGKVertexAt(vertices, (index + 1) % count), buffer);
-            CharonGKPoint2 *box = [CharonGKPoint2 pointWithX:pushed.x y:pushed.y];
+            vector_float2 pushed = RevenantGKPushCorner(RevenantGKVertexAt(vertices, (index + count - 1) % count),
+                                                     RevenantGKVertexAt(vertices, index),
+                                                     RevenantGKVertexAt(vertices, (index + 1) % count), buffer);
+            RevenantGKPoint2 *box = [RevenantGKPoint2 pointWithX:pushed.x y:pushed.y];
             [mine addObject:box];
             [corners addObject:box];
         }
@@ -348,26 +348,26 @@ NSArray *CharonGKBufferedCorners(NSArray *obstacles, float buffer, NSMutableArra
     return corners;
 }
 
-static BOOL CharonGKTurnsLeft(vector_float2 a, vector_float2 b, vector_float2 c)
+static BOOL RevenantGKTurnsLeft(vector_float2 a, vector_float2 b, vector_float2 c)
 {
     return (b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x) > 0;
 }
 
-static BOOL CharonGKPointInsideTriangle(vector_float2 p, vector_float2 a, vector_float2 b, vector_float2 c)
+static BOOL RevenantGKPointInsideTriangle(vector_float2 p, vector_float2 a, vector_float2 b, vector_float2 c)
 {
-    return CharonGKTurnsLeft(a, b, p) && CharonGKTurnsLeft(b, c, p) && CharonGKTurnsLeft(c, a, p);
+    return RevenantGKTurnsLeft(a, b, p) && RevenantGKTurnsLeft(b, c, p) && RevenantGKTurnsLeft(c, a, p);
 }
 
-static CharonGKTriangle3 *CharonGKTriangleOf(vector_float2 a, vector_float2 b, vector_float2 c)
+static RevenantGKTriangle3 *RevenantGKTriangleOf(vector_float2 a, vector_float2 b, vector_float2 c)
 {
-    CharonGKTriangle3 *triangle = [[CharonGKTriangle3 alloc] init];
+    RevenantGKTriangle3 *triangle = [[RevenantGKTriangle3 alloc] init];
     triangle->points[0] = (vector_float3){a.x, a.y, 0};
     triangle->points[1] = (vector_float3){b.x, b.y, 0};
     triangle->points[2] = (vector_float3){c.x, c.y, 0};
     return triangle;
 }
 
-static NSArray *CharonGKEarClip(NSArray *outline)
+static NSArray *RevenantGKEarClip(NSArray *outline)
 {
     NSMutableArray *remaining = [outline mutableCopy];
     NSMutableArray *triangles = [NSMutableArray array];
@@ -376,10 +376,10 @@ static NSArray *CharonGKEarClip(NSArray *outline)
         BOOL clipped = NO;
         NSUInteger count = [remaining count];
         for (NSUInteger index = 0; index < count; index++) {
-            vector_float2 previous = CharonGKVertexAt(remaining, (index + count - 1) % count);
-            vector_float2 here = CharonGKVertexAt(remaining, index);
-            vector_float2 next = CharonGKVertexAt(remaining, (index + 1) % count);
-            if (!CharonGKTurnsLeft(previous, here, next)) {
+            vector_float2 previous = RevenantGKVertexAt(remaining, (index + count - 1) % count);
+            vector_float2 here = RevenantGKVertexAt(remaining, index);
+            vector_float2 next = RevenantGKVertexAt(remaining, (index + 1) % count);
+            if (!RevenantGKTurnsLeft(previous, here, next)) {
                 continue;
             }
             BOOL empty = YES;
@@ -387,14 +387,14 @@ static NSArray *CharonGKEarClip(NSArray *outline)
                 if (other == (index + count - 1) % count || other == index || other == (index + 1) % count) {
                     continue;
                 }
-                if (CharonGKPointInsideTriangle(CharonGKVertexAt(remaining, other), previous, here, next)) {
+                if (RevenantGKPointInsideTriangle(RevenantGKVertexAt(remaining, other), previous, here, next)) {
                     empty = NO;
                 }
             }
             if (!empty) {
                 continue;
             }
-            [triangles addObject:CharonGKTriangleOf(previous, here, next)];
+            [triangles addObject:RevenantGKTriangleOf(previous, here, next)];
             [remaining removeObjectAtIndex:index];
             clipped = YES;
             break;
@@ -402,9 +402,9 @@ static NSArray *CharonGKEarClip(NSArray *outline)
         if (!clipped) {
             NSUInteger last = [remaining count] - 1;
             for (NSUInteger index = 1; index + 1 <= last; index++) {
-                [triangles addObject:CharonGKTriangleOf(CharonGKVertexAt(remaining, 0),
-                                                        CharonGKVertexAt(remaining, index),
-                                                        CharonGKVertexAt(remaining, index + 1))];
+                [triangles addObject:RevenantGKTriangleOf(RevenantGKVertexAt(remaining, 0),
+                                                        RevenantGKVertexAt(remaining, index),
+                                                        RevenantGKVertexAt(remaining, index + 1))];
             }
             break;
         }
@@ -412,7 +412,7 @@ static NSArray *CharonGKEarClip(NSArray *outline)
     return triangles;
 }
 
-NSArray *CharonGKTriangulateRegion(NSArray *outline, NSArray *holes)
+NSArray *RevenantGKTriangulateRegion(NSArray *outline, NSArray *holes)
 {
     NSMutableArray *ring = [outline mutableCopy];
     for (NSArray *hole in holes) {
@@ -420,9 +420,9 @@ NSArray *CharonGKTriangulateRegion(NSArray *outline, NSArray *holes)
             continue;
         }
         NSUInteger best = 0;
-        vector_float2 bestCorner = CharonGKVertexAt(hole, 0);
+        vector_float2 bestCorner = RevenantGKVertexAt(hole, 0);
         for (NSUInteger index = 1; index < [hole count]; index++) {
-            vector_float2 corner = CharonGKVertexAt(hole, index);
+            vector_float2 corner = RevenantGKVertexAt(hole, index);
             if (corner.x > bestCorner.x) {
                 bestCorner = corner;
                 best = index;
@@ -431,11 +431,11 @@ NSArray *CharonGKTriangulateRegion(NSArray *outline, NSArray *holes)
         NSUInteger target = NSNotFound;
         float shortest = INFINITY;
         for (NSUInteger index = 0; index < [ring count]; index++) {
-            vector_float2 corner = CharonGKVertexAt(ring, index);
+            vector_float2 corner = RevenantGKVertexAt(ring, index);
             if (corner.x < bestCorner.x) {
                 continue;
             }
-            float distance = CharonGKLength2(corner, bestCorner);
+            float distance = RevenantGKLength2(corner, bestCorner);
             if (distance < shortest) {
                 shortest = distance;
                 target = index;
@@ -457,49 +457,49 @@ NSArray *CharonGKTriangulateRegion(NSArray *outline, NSArray *holes)
         }
         ring = spliced;
     }
-    return CharonGKEarClip(ring);
+    return RevenantGKEarClip(ring);
 }
 
-NSArray *CharonGKVisibilityEdges(NSArray *corners, NSArray *obstacles, float buffer)
+NSArray *RevenantGKVisibilityEdges(NSArray *corners, NSArray *obstacles, float buffer)
 {
     NSMutableArray *edges = [NSMutableArray array];
     NSUInteger count = [corners count];
     for (NSUInteger first = 0; first < count; first++) {
-        vector_float2 from = CharonGKVertexAt(corners, first);
+        vector_float2 from = RevenantGKVertexAt(corners, first);
         for (NSUInteger second = first + 1; second < count; second++) {
-            vector_float2 to = CharonGKVertexAt(corners, second);
+            vector_float2 to = RevenantGKVertexAt(corners, second);
             if (from.x == to.x && from.y == to.y) {
                 continue;
             }
             BOOL blocked = NO;
             for (id obstacle in obstacles) {
-                NSArray *vertices = CharonGKVerticesOfObstacle(obstacle);
+                NSArray *vertices = RevenantGKVerticesOfObstacle(obstacle);
                 if (vertices == nil || [vertices count] < 3) {
                     continue;
                 }
-                if (CharonGKSegmentCrossesPolygon(from, to, NULL, 0, buffer)) {
+                if (RevenantGKSegmentCrossesPolygon(from, to, NULL, 0, buffer)) {
                     blocked = YES;
                     break;
                 }
                 vector_float2 held[64];
                 NSUInteger vertexCount = [vertices count] < 64 ? [vertices count] : 64;
                 for (NSUInteger index = 0; index < vertexCount; index++) {
-                    held[index] = CharonGKVertexAt(vertices, index);
+                    held[index] = RevenantGKVertexAt(vertices, index);
                 }
-                if (CharonGKSegmentCrossesPolygon(from, to, held, vertexCount, buffer)) {
+                if (RevenantGKSegmentCrossesPolygon(from, to, held, vertexCount, buffer)) {
                     blocked = YES;
                     break;
                 }
             }
             if (!blocked) {
-                [edges addObject:[CharonGKEdgePair pairWithFirst:(NSUInteger)first second:(NSUInteger)second]];
+                [edges addObject:[RevenantGKEdgePair pairWithFirst:(NSUInteger)first second:(NSUInteger)second]];
             }
         }
     }
     return edges;
 }
 
-float CharonGKEstimateTo(id from, id goal)
+float RevenantGKEstimateTo(id from, id goal)
 {
     SEL selector = NSSelectorFromString(@"estimatedCostToNode:");
     if (![from respondsToSelector:selector]) {
@@ -509,12 +509,12 @@ float CharonGKEstimateTo(id from, id goal)
     return answer(from, selector, goal);
 }
 
-static float CharonGKSearchPriority(id node, id goal)
+static float RevenantGKSearchPriority(id node, id goal)
 {
-    return CharonGKSearchScore(node) + CharonGKEstimateTo(node, goal);
+    return RevenantGKSearchScore(node) + RevenantGKEstimateTo(node, goal);
 }
 
-NSArray *CharonGKFindPath(NSArray *nodes, id start, id goal)
+NSArray *RevenantGKFindPath(NSArray *nodes, id start, id goal)
 {
     if (start == nil || goal == nil) {
         return nil;
@@ -524,25 +524,25 @@ NSArray *CharonGKFindPath(NSArray *nodes, id start, id goal)
     }
 
     for (id node in nodes) {
-        objc_setAssociatedObject(node, (__bridge const void *)CharonGKSearchClosedKey, nil,
+        objc_setAssociatedObject(node, (__bridge const void *)RevenantGKSearchClosedKey, nil,
                                  OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-        objc_setAssociatedObject(node, (__bridge const void *)CharonGKSearchScoreKey, nil,
+        objc_setAssociatedObject(node, (__bridge const void *)RevenantGKSearchScoreKey, nil,
                                  OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-        objc_setAssociatedObject(node, (__bridge const void *)CharonGKSearchParentKey, nil,
+        objc_setAssociatedObject(node, (__bridge const void *)RevenantGKSearchParentKey, nil,
                                  OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     }
 
     NSMutableArray *open = [NSMutableArray array];
     NSMutableSet *closed = [NSMutableSet set];
-    objc_setAssociatedObject(start, (__bridge const void *)CharonGKSearchScoreKey,
+    objc_setAssociatedObject(start, (__bridge const void *)RevenantGKSearchScoreKey,
                              [NSNumber numberWithFloat:0], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     [open addObject:start];
 
     while ([open count] > 0) {
         NSUInteger best = 0;
-        float bestScore = CharonGKSearchPriority([open objectAtIndex:0], goal);
+        float bestScore = RevenantGKSearchPriority([open objectAtIndex:0], goal);
         for (NSUInteger index = 1; index < [open count]; index++) {
-            float score = CharonGKSearchPriority([open objectAtIndex:index], goal);
+            float score = RevenantGKSearchPriority([open objectAtIndex:index], goal);
             if (score <= bestScore) {
                 bestScore = score;
                 best = index;
@@ -554,7 +554,7 @@ NSArray *CharonGKFindPath(NSArray *nodes, id start, id goal)
             NSMutableArray *path = [NSMutableArray arrayWithObject:current];
             id step = current;
             while (step != start) {
-                step = objc_getAssociatedObject(step, (__bridge const void *)CharonGKSearchParentKey);
+                step = objc_getAssociatedObject(step, (__bridge const void *)RevenantGKSearchParentKey);
                 if (step == nil) {
                     break;
                 }
@@ -564,17 +564,17 @@ NSArray *CharonGKFindPath(NSArray *nodes, id start, id goal)
         }
         [closed addObject:current];
 
-        for (id next in CharonGKConnected(current)) {
+        for (id next in RevenantGKConnected(current)) {
             if ([closed containsObject:next]) {
                 continue;
             }
-            float reached = CharonGKSearchScore(current) + CharonGKCostTo(current, next);
-            float held = CharonGKSearchScore(next);
+            float reached = RevenantGKSearchScore(current) + RevenantGKCostTo(current, next);
+            float held = RevenantGKSearchScore(next);
             if (held == INFINITY || reached < held) {
-                objc_setAssociatedObject(next, (__bridge const void *)CharonGKSearchScoreKey,
+                objc_setAssociatedObject(next, (__bridge const void *)RevenantGKSearchScoreKey,
                                          [NSNumber numberWithFloat:reached],
                                          OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-                objc_setAssociatedObject(next, (__bridge const void *)CharonGKSearchParentKey, current,
+                objc_setAssociatedObject(next, (__bridge const void *)RevenantGKSearchParentKey, current,
                                          OBJC_ASSOCIATION_RETAIN_NONATOMIC);
                 if (![open containsObject:next]) {
                     [open addObject:next];

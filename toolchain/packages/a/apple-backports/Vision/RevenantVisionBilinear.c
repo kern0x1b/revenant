@@ -4,9 +4,9 @@
 #include <stdint.h>
 #include <string.h>
 
-#define CHARON_VISION_POSITION(value) ((long)(value))
+#define REVENANT_VISION_POSITION(value) ((long)(value))
 
-static double charon_vision_clamp(double at, double limit)
+static double revenant_vision_clamp(double at, double limit)
 {
     if (at < 0.0) {
         return 0.0;
@@ -14,7 +14,7 @@ static double charon_vision_clamp(double at, double limit)
     return at >= limit ? limit - 1.0 : at;
 }
 
-void charon_vision_bilinear(const uint8_t *source, size_t sourceStride,
+void revenant_vision_bilinear(const uint8_t *source, size_t sourceStride,
                             size_t sourceWide, size_t sourceHigh,
                             uint8_t *target, size_t targetStride,
                             long insetX, long insetY, long drawWide, long drawHigh,
@@ -24,14 +24,14 @@ void charon_vision_bilinear(const uint8_t *source, size_t sourceStride,
     double across = (double)sourceWide / (double)drawWide;
     double down = (double)sourceHigh / (double)drawHigh;
     for (y = 0; y < drawHigh && insetY + y < targetHigh && insetY + y >= 0; y++) {
-        double sy = charon_vision_clamp(((double)y + 0.5) * down - 0.5, (double)sourceHigh);
-        long y0 = CHARON_VISION_POSITION(sy);
+        double sy = revenant_vision_clamp(((double)y + 0.5) * down - 0.5, (double)sourceHigh);
+        long y0 = REVENANT_VISION_POSITION(sy);
         double fy = sy - (double)y0;
         long ya = y0 < 0 ? 0 : (y0 >= (long)sourceHigh ? (long)sourceHigh - 1 : y0);
         long yb = y0 + 1 < 0 ? 0 : (y0 + 1 >= (long)sourceHigh ? (long)sourceHigh - 1 : y0 + 1);
         for (x = 0; x < drawWide && insetX + x < targetWide && insetX + x >= 0; x++) {
-            double sx = charon_vision_clamp(((double)x + 0.5) * across - 0.5, (double)sourceWide);
-            long x0 = CHARON_VISION_POSITION(sx);
+            double sx = revenant_vision_clamp(((double)x + 0.5) * across - 0.5, (double)sourceWide);
+            long x0 = REVENANT_VISION_POSITION(sx);
             double fx = sx - (double)x0;
             long xa = x0 < 0 ? 0 : (x0 >= (long)sourceWide ? (long)sourceWide - 1 : x0);
             long xb = x0 + 1 < 0 ? 0 : (x0 + 1 >= (long)sourceWide ? (long)sourceWide - 1 : x0 + 1);

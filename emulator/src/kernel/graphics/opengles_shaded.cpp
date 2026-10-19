@@ -16,14 +16,14 @@
 #include <array>
 #include <string>
 
-namespace shade {
+namespace emulator {
 namespace {
 
     constexpr std::size_t maximum_shader_traces = 16U;
 
 }
 
-std::optional<OpenGlesHle::ShadedDraw> OpenGlesHle::shade_vertices(
+std::optional<OpenGlesHle::ShadedDraw> OpenGlesHle::emulator_vertices(
     UserlandHleCall& call, const ContextState& context,
     const GlesProgramState::Program& program,
     std::span<const std::uint32_t> indices, std::string& error) const

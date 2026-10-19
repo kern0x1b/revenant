@@ -1,6 +1,6 @@
 #import <UIKit/UIKit.h>
 
-@implementation UIViewController (CharonHomeIndicator)
+@implementation UIViewController (RevenantHomeIndicator)
 
 - (BOOL)prefersHomeIndicatorAutoHidden
 {
@@ -36,7 +36,7 @@
 
 @end
 
-@implementation UINavigationController (CharonHomeIndicator)
+@implementation UINavigationController (RevenantHomeIndicator)
 
 - (UIViewController *)childViewControllerForHomeIndicatorAutoHidden
 {
@@ -50,7 +50,7 @@
 
 @end
 
-@implementation UITabBarController (CharonHomeIndicator)
+@implementation UITabBarController (RevenantHomeIndicator)
 
 - (UIViewController *)childViewControllerForHomeIndicatorAutoHidden
 {

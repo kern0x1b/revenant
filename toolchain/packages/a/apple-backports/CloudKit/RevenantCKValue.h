@@ -1,19 +1,19 @@
-#ifndef CHARON_CK_VALUE_H
-#define CHARON_CK_VALUE_H
+#ifndef REVENANT_CK_VALUE_H
+#define REVENANT_CK_VALUE_H
 
 #import <Foundation/Foundation.h>
 
-static inline BOOL CharonCKSameObject(id left, id right)
+static inline BOOL RevenantCKSameObject(id left, id right)
 {
     return left == right || [left isEqual:right];
 }
 
-static inline BOOL CharonCKSameObjects(NSArray *left, NSArray *right)
+static inline BOOL RevenantCKSameObjects(NSArray *left, NSArray *right)
 {
     return left == right || [left isEqual:right];
 }
 
-static inline NSString *CharonCKNewSubscriptionID(void)
+static inline NSString *RevenantCKNewSubscriptionID(void)
 {
     return [[NSUUID UUID] UUIDString];
 }

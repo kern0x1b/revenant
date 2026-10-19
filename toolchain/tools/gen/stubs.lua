@@ -222,7 +222,7 @@ function functions(rows, env, skipped)
 end
 
 function stub_text(fw, m)
-    local log = 'static BOOL charon_logged = NO; if (!charon_logged) { charon_logged = YES; fprintf(stderr, "unimplemented: '
+    local log = 'static BOOL revenant_logged = NO; if (!revenant_logged) { revenant_logged = YES; fprintf(stderr, "unimplemented: '
         .. fw .. ' %s\\n", "' .. m.api .. '"); }'
     local error_code = ""
     if m.error_arg then

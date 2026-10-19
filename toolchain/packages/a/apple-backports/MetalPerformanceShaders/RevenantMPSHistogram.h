@@ -1,20 +1,20 @@
 #pragma once
-#import "CharonMPS.h"
-#import "CharonMPSImage.h"
+#import "RevenantMPS.h"
+#import "RevenantMPSImage.h"
 
-static inline void CharonMPSHistogramRegion(id<MTLTexture> source, MTLRegion read, MPSImageHistogramInfo info,
+static inline void RevenantMPSHistogramRegion(id<MTLTexture> source, MTLRegion read, MPSImageHistogramInfo info,
                                      vector_float4 threshold, uint32_t *out, NSUInteger channels,
                                      BOOL histogramForAlpha, NSString *what)
 {
     NSUInteger bins = info.numberOfHistogramEntries;
     if (!bins) {
-        CharonMPSRefuse(@"%@: %lu histogram entries is no histogram, so nothing was written", what,
+        RevenantMPSRefuse(@"%@: %lu histogram entries is no histogram, so nothing was written", what,
                         (unsigned long)bins);
         return;
     }
     double lo = info.minPixelValue.x, hi = info.maxPixelValue.x;
     if (!(hi > lo)) {
-        CharonMPSRefuse(@"%@: the range %g..%g is empty, so nothing was written", what, lo, hi);
+        RevenantMPSRefuse(@"%@: the range %g..%g is empty, so nothing was written", what, lo, hi);
         return;
     }
     MTLRegion inside = read;
@@ -23,14 +23,14 @@ static inline void CharonMPSHistogramRegion(id<MTLTexture> source, MTLRegion rea
     if (inside.origin.x + inside.size.width > source.width) inside.size.width = source.width - inside.origin.x;
     if (inside.origin.y + inside.size.height > source.height) inside.size.height = source.height - inside.origin.y;
     if (inside.size.width == 0 || inside.size.height == 0) {
-        CharonMPSRefuse(@"%@: the window intersects the %lux%lu source to nothing, so nothing was written",
+        RevenantMPSRefuse(@"%@: the window intersects the %lux%lu source to nothing, so nothing was written",
                         what, (unsigned long)source.width, (unsigned long)source.height);
         return;
     }
     size_t bytes = (size_t)inside.size.width * 4 * inside.size.height * 4;
     unsigned char *pixels = malloc(bytes);
     if (!pixels) {
-        CharonMPSRefuse(@"%@: no memory for a %lux%lu window, so nothing was written", what,
+        RevenantMPSRefuse(@"%@: no memory for a %lux%lu window, so nothing was written", what,
                         (unsigned long)inside.size.width, (unsigned long)inside.size.height);
         return;
     }

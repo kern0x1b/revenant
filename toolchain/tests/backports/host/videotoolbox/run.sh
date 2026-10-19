@@ -14,7 +14,7 @@ set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 appledir=${APPLEDIR:-$here/../../../../packages/a/apple-backports}
-build=${BUILD:-$(runs_fresh charon-videotoolbox)}
+build=${BUILD:-$(runs_fresh revenant-videotoolbox)}
 mkdir -p "$build"
 sdk=$(xcrun --show-sdk-path --sdk macosx)
 common="-target arm64-apple-ios15.0-macabi -isysroot $sdk -F $sdk/System/Library/Frameworks -iframework $sdk/System/iOSSupport/System/Library/Frameworks -fobjc-arc -w"
@@ -25,7 +25,7 @@ VIDEOTOOLBOX_RECORDS="$build/system.json" "$build/system"
 echo "the host answered: $(xmake l "$here/records.lua" count "$build/system.json")"
 
 xmake l "$here/rename.lua" "$build/rename.h" "$here/names.txt"
-xcrun clang $common -DCHARON_VIDEOTOOLBOX_PORT=1 -include "$build/rename.h" -I"$here" -I"$appledir/VideoToolbox" \
+xcrun clang $common -DREVENANT_VIDEOTOOLBOX_PORT=1 -include "$build/rename.h" -I"$here" -I"$appledir/VideoToolbox" \
     "$here/record.m" "$here/cases.m" "$appledir"/VideoToolbox/VideoToolboxConstants*.m $libs -o "$build/port"
 VIDEOTOOLBOX_RECORDS="$build/port.json" "$build/port"
 xmake l "$here/compare.lua" "$build/system.json" "$build/port.json"
@@ -64,7 +64,7 @@ mutant() {
     if [ -z "$holder" ] || ! xmake l "$here/mutate.lua" "$holder" "$from" "$to" >/dev/null; then
         echo "MUTATION DID NOT APPLY: $label"; survived=$((survived + 1)); return
     fi
-    xcrun clang $common -DCHARON_VIDEOTOOLBOX_PORT=1 -include "$build/rename.h" -I"$here" -I"$build/mutant" \
+    xcrun clang $common -DREVENANT_VIDEOTOOLBOX_PORT=1 -include "$build/rename.h" -I"$here" -I"$build/mutant" \
         "$here/record.m" "$here/cases.m" "$build"/mutant/VideoToolboxConstants*.m $libs -o "$build/mutant/run"
     rm -f "$build/mutant.json"
     VIDEOTOOLBOX_RECORDS="$build/mutant.json" timeout 90 "$build/mutant/run" >/dev/null 2>&1 || true

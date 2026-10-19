@@ -1,15 +1,15 @@
 #import <UIKit/UIKit.h>
 #import <objc/runtime.h>
 
-@interface CharonAspectFitLayoutGuide : UILayoutGuide {
+@interface RevenantAspectFitLayoutGuide : UILayoutGuide {
 @public
     CGFloat _aspectRatio;
     NSLayoutConstraint *_ratioConstraint;
 }
-- (void)charon_setRatioConstraint;
+- (void)revenant_setRatioConstraint;
 @end
 
-@implementation CharonAspectFitLayoutGuide
+@implementation RevenantAspectFitLayoutGuide
 
 - (instancetype)init
 {
@@ -27,10 +27,10 @@
 {
     _aspectRatio = aspectRatio;
     if (self.owningView)
-        [self charon_setRatioConstraint];
+        [self revenant_setRatioConstraint];
 }
 
-- (void)charon_setRatioConstraint
+- (void)revenant_setRatioConstraint
 {
     _ratioConstraint.active = NO;
     _ratioConstraint = [self.widthAnchor constraintEqualToAnchor:self.heightAnchor multiplier:_aspectRatio];
@@ -39,15 +39,15 @@
 
 @end
 
-static char charon_aspect_fit_guide_key;
+static char revenant_aspect_fit_guide_key;
 
-@implementation UIWindow (CharonAspectFitLayoutGuide)
+@implementation UIWindow (RevenantAspectFitLayoutGuide)
 
 - (UILayoutGuide *)safeAreaAspectFitLayoutGuide
 {
-    CharonAspectFitLayoutGuide *guide = objc_getAssociatedObject(self, &charon_aspect_fit_guide_key);
+    RevenantAspectFitLayoutGuide *guide = objc_getAssociatedObject(self, &revenant_aspect_fit_guide_key);
     if (!guide) {
-        guide = [[CharonAspectFitLayoutGuide alloc] init];
+        guide = [[RevenantAspectFitLayoutGuide alloc] init];
         [self addLayoutGuide:guide];
         UILayoutGuide *safe = self.safeAreaLayoutGuide;
         NSLayoutConstraint *fitWidth = [guide.widthAnchor constraintEqualToAnchor:safe.widthAnchor];
@@ -61,8 +61,8 @@ static char charon_aspect_fit_guide_key;
             [guide.heightAnchor constraintLessThanOrEqualToAnchor:safe.heightAnchor],
             fitWidth,
             fitHeight]];
-        [guide charon_setRatioConstraint];
-        objc_setAssociatedObject(self, &charon_aspect_fit_guide_key, guide, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+        [guide revenant_setRatioConstraint];
+        objc_setAssociatedObject(self, &revenant_aspect_fit_guide_key, guide, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     }
     return guide;
 }

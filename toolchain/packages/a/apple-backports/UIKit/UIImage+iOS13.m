@@ -1,12 +1,12 @@
-#import "CharonSymbols.h"
-#import "CharonImageBaseline.h"
+#import "RevenantSymbols.h"
+#import "RevenantImageBaseline.h"
 #import <objc/runtime.h>
 
 #pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
 
-static const char charon_configuration_key;
+static const char revenant_configuration_key;
 
-UIImage *charon_image_copy(UIImage *image)
+UIImage *revenant_image_copy(UIImage *image)
 {
     UIImage *copy = nil;
     if (image.images.count)
@@ -28,16 +28,16 @@ UIImage *charon_image_copy(UIImage *image)
     UIImageSymbolConfiguration *symbol = image.symbolConfiguration;
     if (symbol)
         copy = [copy imageByApplyingSymbolConfiguration:symbol];
-    id configuration = objc_getAssociatedObject(image, &charon_configuration_key);
+    id configuration = objc_getAssociatedObject(image, &revenant_configuration_key);
     if (configuration)
-        objc_setAssociatedObject(copy, &charon_configuration_key, configuration, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-    charon_set_image_baseline(copy, charon_image_baseline(image));
+        objc_setAssociatedObject(copy, &revenant_configuration_key, configuration, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    revenant_set_image_baseline(copy, revenant_image_baseline(image));
     return copy;
 }
 
-typedef void (^CharonGlyph)(CGContextRef context, CGRect bounds);
+typedef void (^RevenantGlyph)(CGContextRef context, CGRect bounds);
 
-static UIImage *charon_glyph(BOOL filled, CharonGlyph glyph)
+static UIImage *revenant_glyph(BOOL filled, RevenantGlyph glyph)
 {
     CGSize size = CGSizeMake(20, 20);
     UIGraphicsBeginImageContextWithOptions(size, NO, 0);
@@ -63,7 +63,7 @@ static UIImage *charon_glyph(BOOL filled, CharonGlyph glyph)
     return [image imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
 }
 
-static void charon_check(CGContextRef context, CGRect bounds)
+static void revenant_check(CGContextRef context, CGRect bounds)
 {
     CGContextMoveToPoint(context, 5.8, 10.4);
     CGContextAddLineToPoint(context, 8.8, 13.4);
@@ -71,7 +71,7 @@ static void charon_check(CGContextRef context, CGRect bounds)
     CGContextStrokePath(context);
 }
 
-@implementation UIImage (CharonThirteen)
+@implementation UIImage (RevenantThirteen)
 
 + (UIImage *)imageNamed:(NSString *)name inBundle:(NSBundle *)bundle withConfiguration:(UIImageConfiguration *)configuration
 {
@@ -95,20 +95,20 @@ static void charon_check(CGContextRef context, CGRect bounds)
 {
     UIImageConfiguration *held = self.symbolConfiguration;
     if (!held)
-        held = objc_getAssociatedObject(self, &charon_configuration_key);
+        held = objc_getAssociatedObject(self, &revenant_configuration_key);
     if (held)
         return held;
-    return [[UIImageConfiguration alloc] initCharonWithTraitCollection:[UITraitCollection traitCollectionWithDisplayScale:self.scale]];
+    return [[UIImageConfiguration alloc] initRevenantWithTraitCollection:[UITraitCollection traitCollectionWithDisplayScale:self.scale]];
 }
 
 - (UIImage *)imageWithConfiguration:(UIImageConfiguration *)configuration
 {
     if ([configuration isKindOfClass:[UIImageSymbolConfiguration class]])
         return [self imageByApplyingSymbolConfiguration:(UIImageSymbolConfiguration *)configuration];
-    UIImage *copy = charon_image_copy(self);
+    UIImage *copy = revenant_image_copy(self);
     if (copy == self)
         copy = [self imageWithRenderingMode:self.renderingMode];
-    objc_setAssociatedObject(copy, &charon_configuration_key, configuration, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(copy, &revenant_configuration_key, configuration, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     return copy;
 }
 
@@ -130,18 +130,18 @@ static void charon_check(CGContextRef context, CGRect bounds)
         if (!UIEdgeInsetsEqualToEdgeInsets(alignment, UIEdgeInsetsZero))
             tinted = [tinted imageWithAlignmentRectInsets:alignment];
         result = tinted;
-        charon_set_image_baseline(result, charon_image_baseline(self));
-        id configuration = objc_getAssociatedObject(self, &charon_configuration_key);
+        revenant_set_image_baseline(result, revenant_image_baseline(self));
+        id configuration = objc_getAssociatedObject(self, &revenant_configuration_key);
         if (configuration)
-            objc_setAssociatedObject(result, &charon_configuration_key, configuration, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+            objc_setAssociatedObject(result, &revenant_configuration_key, configuration, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
         if (self.symbolConfiguration)
             result = [result imageByApplyingSymbolConfiguration:self.symbolConfiguration];
     } else {
-        result = charon_image_copy(self);
+        result = revenant_image_copy(self);
     }
     UIImage *moded = [result imageWithRenderingMode:renderingMode];
     if (moded != result)
-        charon_set_image_baseline(moded, charon_image_baseline(result));
+        revenant_set_image_baseline(moded, revenant_image_baseline(result));
     return moded;
 }
 
@@ -155,8 +155,8 @@ static void charon_check(CGContextRef context, CGRect bounds)
     static UIImage *image;
     static dispatch_once_t once;
     dispatch_once(&once, ^{
-        image = charon_glyph(YES, ^(CGContextRef context, CGRect bounds) {
-            charon_check(context, bounds);
+        image = revenant_glyph(YES, ^(CGContextRef context, CGRect bounds) {
+            revenant_check(context, bounds);
         });
     });
     return image;
@@ -167,9 +167,9 @@ static void charon_check(CGContextRef context, CGRect bounds)
     static UIImage *image;
     static dispatch_once_t once;
     dispatch_once(&once, ^{
-        image = charon_glyph(NO, ^(CGContextRef context, CGRect bounds) {
+        image = revenant_glyph(NO, ^(CGContextRef context, CGRect bounds) {
             CGContextSetBlendMode(context, kCGBlendModeNormal);
-            charon_check(context, bounds);
+            revenant_check(context, bounds);
         });
     });
     return image;
@@ -180,7 +180,7 @@ static void charon_check(CGContextRef context, CGRect bounds)
     static UIImage *image;
     static dispatch_once_t once;
     dispatch_once(&once, ^{
-        image = charon_glyph(YES, ^(CGContextRef context, CGRect bounds) {
+        image = revenant_glyph(YES, ^(CGContextRef context, CGRect bounds) {
             CGContextMoveToPoint(context, 10, 5.8);
             CGContextAddLineToPoint(context, 10, 14.2);
             CGContextMoveToPoint(context, 5.8, 10);
@@ -196,7 +196,7 @@ static void charon_check(CGContextRef context, CGRect bounds)
     static UIImage *image;
     static dispatch_once_t once;
     dispatch_once(&once, ^{
-        image = charon_glyph(YES, ^(CGContextRef context, CGRect bounds) {
+        image = revenant_glyph(YES, ^(CGContextRef context, CGRect bounds) {
             CGContextMoveToPoint(context, 5.8, 10);
             CGContextAddLineToPoint(context, 14.2, 10);
             CGContextStrokePath(context);
@@ -210,7 +210,7 @@ static void charon_check(CGContextRef context, CGRect bounds)
     static UIImage *image;
     static dispatch_once_t once;
     dispatch_once(&once, ^{
-        image = charon_glyph(YES, ^(CGContextRef context, CGRect bounds) {
+        image = revenant_glyph(YES, ^(CGContextRef context, CGRect bounds) {
             for (CGFloat x = 6; x <= 14; x += 4)
                 CGContextFillEllipseInRect(context, CGRectMake(x - 1.1, 8.9, 2.2, 2.2));
         });

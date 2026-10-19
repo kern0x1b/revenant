@@ -1,63 +1,63 @@
 #import <NaturalLanguage/NaturalLanguage.h>
 #import "check.h"
 
-extern NSString *const CharonHostNLLanguageUndetermined;
-extern NSString *const CharonHostNLLanguageAmharic;
-extern NSString *const CharonHostNLLanguageArabic;
-extern NSString *const CharonHostNLLanguageArmenian;
-extern NSString *const CharonHostNLLanguageBengali;
-extern NSString *const CharonHostNLLanguageBulgarian;
-extern NSString *const CharonHostNLLanguageBurmese;
-extern NSString *const CharonHostNLLanguageCatalan;
-extern NSString *const CharonHostNLLanguageCherokee;
-extern NSString *const CharonHostNLLanguageCroatian;
-extern NSString *const CharonHostNLLanguageCzech;
-extern NSString *const CharonHostNLLanguageDanish;
-extern NSString *const CharonHostNLLanguageDutch;
-extern NSString *const CharonHostNLLanguageEnglish;
-extern NSString *const CharonHostNLLanguageFinnish;
-extern NSString *const CharonHostNLLanguageFrench;
-extern NSString *const CharonHostNLLanguageGeorgian;
-extern NSString *const CharonHostNLLanguageGerman;
-extern NSString *const CharonHostNLLanguageGreek;
-extern NSString *const CharonHostNLLanguageGujarati;
-extern NSString *const CharonHostNLLanguageHebrew;
-extern NSString *const CharonHostNLLanguageHindi;
-extern NSString *const CharonHostNLLanguageHungarian;
-extern NSString *const CharonHostNLLanguageIcelandic;
-extern NSString *const CharonHostNLLanguageIndonesian;
-extern NSString *const CharonHostNLLanguageItalian;
-extern NSString *const CharonHostNLLanguageJapanese;
-extern NSString *const CharonHostNLLanguageKannada;
-extern NSString *const CharonHostNLLanguageKhmer;
-extern NSString *const CharonHostNLLanguageKorean;
-extern NSString *const CharonHostNLLanguageLao;
-extern NSString *const CharonHostNLLanguageMalay;
-extern NSString *const CharonHostNLLanguageMalayalam;
-extern NSString *const CharonHostNLLanguageMarathi;
-extern NSString *const CharonHostNLLanguageMongolian;
-extern NSString *const CharonHostNLLanguageNorwegian;
-extern NSString *const CharonHostNLLanguageOriya;
-extern NSString *const CharonHostNLLanguagePersian;
-extern NSString *const CharonHostNLLanguagePolish;
-extern NSString *const CharonHostNLLanguagePortuguese;
-extern NSString *const CharonHostNLLanguagePunjabi;
-extern NSString *const CharonHostNLLanguageRomanian;
-extern NSString *const CharonHostNLLanguageRussian;
-extern NSString *const CharonHostNLLanguageSimplifiedChinese;
-extern NSString *const CharonHostNLLanguageSinhalese;
-extern NSString *const CharonHostNLLanguageSlovak;
-extern NSString *const CharonHostNLLanguageSpanish;
-extern NSString *const CharonHostNLLanguageSwedish;
-extern NSString *const CharonHostNLLanguageTamil;
-extern NSString *const CharonHostNLLanguageTelugu;
-extern NSString *const CharonHostNLLanguageThai;
-extern NSString *const CharonHostNLLanguageTibetan;
-extern NSString *const CharonHostNLLanguageTraditionalChinese;
-extern NSString *const CharonHostNLLanguageTurkish;
-extern NSString *const CharonHostNLLanguageUkrainian;
-extern NSString *const CharonHostNLLanguageUrdu;
-extern NSString *const CharonHostNLLanguageVietnamese;
+extern NSString *const RevenantHostNLLanguageUndetermined;
+extern NSString *const RevenantHostNLLanguageAmharic;
+extern NSString *const RevenantHostNLLanguageArabic;
+extern NSString *const RevenantHostNLLanguageArmenian;
+extern NSString *const RevenantHostNLLanguageBengali;
+extern NSString *const RevenantHostNLLanguageBulgarian;
+extern NSString *const RevenantHostNLLanguageBurmese;
+extern NSString *const RevenantHostNLLanguageCatalan;
+extern NSString *const RevenantHostNLLanguageCherokee;
+extern NSString *const RevenantHostNLLanguageCroatian;
+extern NSString *const RevenantHostNLLanguageCzech;
+extern NSString *const RevenantHostNLLanguageDanish;
+extern NSString *const RevenantHostNLLanguageDutch;
+extern NSString *const RevenantHostNLLanguageEnglish;
+extern NSString *const RevenantHostNLLanguageFinnish;
+extern NSString *const RevenantHostNLLanguageFrench;
+extern NSString *const RevenantHostNLLanguageGeorgian;
+extern NSString *const RevenantHostNLLanguageGerman;
+extern NSString *const RevenantHostNLLanguageGreek;
+extern NSString *const RevenantHostNLLanguageGujarati;
+extern NSString *const RevenantHostNLLanguageHebrew;
+extern NSString *const RevenantHostNLLanguageHindi;
+extern NSString *const RevenantHostNLLanguageHungarian;
+extern NSString *const RevenantHostNLLanguageIcelandic;
+extern NSString *const RevenantHostNLLanguageIndonesian;
+extern NSString *const RevenantHostNLLanguageItalian;
+extern NSString *const RevenantHostNLLanguageJapanese;
+extern NSString *const RevenantHostNLLanguageKannada;
+extern NSString *const RevenantHostNLLanguageKhmer;
+extern NSString *const RevenantHostNLLanguageKorean;
+extern NSString *const RevenantHostNLLanguageLao;
+extern NSString *const RevenantHostNLLanguageMalay;
+extern NSString *const RevenantHostNLLanguageMalayalam;
+extern NSString *const RevenantHostNLLanguageMarathi;
+extern NSString *const RevenantHostNLLanguageMongolian;
+extern NSString *const RevenantHostNLLanguageNorwegian;
+extern NSString *const RevenantHostNLLanguageOriya;
+extern NSString *const RevenantHostNLLanguagePersian;
+extern NSString *const RevenantHostNLLanguagePolish;
+extern NSString *const RevenantHostNLLanguagePortuguese;
+extern NSString *const RevenantHostNLLanguagePunjabi;
+extern NSString *const RevenantHostNLLanguageRomanian;
+extern NSString *const RevenantHostNLLanguageRussian;
+extern NSString *const RevenantHostNLLanguageSimplifiedChinese;
+extern NSString *const RevenantHostNLLanguageSinhalese;
+extern NSString *const RevenantHostNLLanguageSlovak;
+extern NSString *const RevenantHostNLLanguageSpanish;
+extern NSString *const RevenantHostNLLanguageSwedish;
+extern NSString *const RevenantHostNLLanguageTamil;
+extern NSString *const RevenantHostNLLanguageTelugu;
+extern NSString *const RevenantHostNLLanguageThai;
+extern NSString *const RevenantHostNLLanguageTibetan;
+extern NSString *const RevenantHostNLLanguageTraditionalChinese;
+extern NSString *const RevenantHostNLLanguageTurkish;
+extern NSString *const RevenantHostNLLanguageUkrainian;
+extern NSString *const RevenantHostNLLanguageUrdu;
+extern NSString *const RevenantHostNLLanguageVietnamese;
 
 static const char *label(NSString *format, ...)
 {
@@ -119,17 +119,17 @@ static void compare_probes(NSArray *ours, NSArray *system, const char *name)
     for (NSUInteger index = 0; index < count; index++) {
         NSString *a = index < ours.count ? ours[index] : @"(missing)", *b = index < system.count ? system[index] : @"(missing)";
         if (![a isEqual:b]) {
-            charon_check(NO, name, [NSString stringWithFormat:@"port %@ against system %@", a, b]);
+            revenant_check(NO, name, [NSString stringWithFormat:@"port %@ against system %@", a, b]);
             return;
         }
     }
-    charon_check(YES, name, @"the same");
+    revenant_check(YES, name, @"the same");
 }
 
 int main(void)
 {
     @autoreleasepool {
-        Class port = NSClassFromString(@"CharonHostNLTokenizer");
+        Class port = NSClassFromString(@"RevenantHostNLTokenizer");
         NSMutableArray *texts = [NSMutableArray arrayWithArray:@[
             @"Hello, world! It's 3.14 o'clock, 1,000 e-mail $5 #tag @user http://a.b/c?d=1 😀👍 x.",
             @"日本語のテキストです。これはテスト。", @"Der Hund läuft schnell. Das ist gut!\nNeuer Absatz hier.\n\nZweiter Absatz.",
@@ -194,65 +194,65 @@ int main(void)
         [ours enumerateTokensInRange:NSMakeRange(0, 11) usingBlock:^(NSRange r, NLTokenizerAttributes f, BOOL *stop) { if (++stopped == 3) *stop = YES; }];
         [system enumerateTokensInRange:NSMakeRange(0, 11) usingBlock:^(NSRange r, NLTokenizerAttributes f, BOOL *stop) { if (++stoppedSystem == 3) *stop = YES; }];
         CHECK(stopped == 3 && stoppedSystem == 3, "the stop flag ends the enumeration");
-        Class languages = NSClassFromString(@"CharonHostNLLanguageRecognizer");
+        Class languages = NSClassFromString(@"RevenantHostNLLanguageRecognizer");
         NSArray *constants = @[
-            @[@"NLLanguageUndetermined", CharonHostNLLanguageUndetermined, NLLanguageUndetermined],
-            @[@"NLLanguageAmharic", CharonHostNLLanguageAmharic, NLLanguageAmharic],
-            @[@"NLLanguageArabic", CharonHostNLLanguageArabic, NLLanguageArabic],
-            @[@"NLLanguageArmenian", CharonHostNLLanguageArmenian, NLLanguageArmenian],
-            @[@"NLLanguageBengali", CharonHostNLLanguageBengali, NLLanguageBengali],
-            @[@"NLLanguageBulgarian", CharonHostNLLanguageBulgarian, NLLanguageBulgarian],
-            @[@"NLLanguageBurmese", CharonHostNLLanguageBurmese, NLLanguageBurmese],
-            @[@"NLLanguageCatalan", CharonHostNLLanguageCatalan, NLLanguageCatalan],
-            @[@"NLLanguageCherokee", CharonHostNLLanguageCherokee, NLLanguageCherokee],
-            @[@"NLLanguageCroatian", CharonHostNLLanguageCroatian, NLLanguageCroatian],
-            @[@"NLLanguageCzech", CharonHostNLLanguageCzech, NLLanguageCzech],
-            @[@"NLLanguageDanish", CharonHostNLLanguageDanish, NLLanguageDanish],
-            @[@"NLLanguageDutch", CharonHostNLLanguageDutch, NLLanguageDutch],
-            @[@"NLLanguageEnglish", CharonHostNLLanguageEnglish, NLLanguageEnglish],
-            @[@"NLLanguageFinnish", CharonHostNLLanguageFinnish, NLLanguageFinnish],
-            @[@"NLLanguageFrench", CharonHostNLLanguageFrench, NLLanguageFrench],
-            @[@"NLLanguageGeorgian", CharonHostNLLanguageGeorgian, NLLanguageGeorgian],
-            @[@"NLLanguageGerman", CharonHostNLLanguageGerman, NLLanguageGerman],
-            @[@"NLLanguageGreek", CharonHostNLLanguageGreek, NLLanguageGreek],
-            @[@"NLLanguageGujarati", CharonHostNLLanguageGujarati, NLLanguageGujarati],
-            @[@"NLLanguageHebrew", CharonHostNLLanguageHebrew, NLLanguageHebrew],
-            @[@"NLLanguageHindi", CharonHostNLLanguageHindi, NLLanguageHindi],
-            @[@"NLLanguageHungarian", CharonHostNLLanguageHungarian, NLLanguageHungarian],
-            @[@"NLLanguageIcelandic", CharonHostNLLanguageIcelandic, NLLanguageIcelandic],
-            @[@"NLLanguageIndonesian", CharonHostNLLanguageIndonesian, NLLanguageIndonesian],
-            @[@"NLLanguageItalian", CharonHostNLLanguageItalian, NLLanguageItalian],
-            @[@"NLLanguageJapanese", CharonHostNLLanguageJapanese, NLLanguageJapanese],
-            @[@"NLLanguageKannada", CharonHostNLLanguageKannada, NLLanguageKannada],
-            @[@"NLLanguageKhmer", CharonHostNLLanguageKhmer, NLLanguageKhmer],
-            @[@"NLLanguageKorean", CharonHostNLLanguageKorean, NLLanguageKorean],
-            @[@"NLLanguageLao", CharonHostNLLanguageLao, NLLanguageLao],
-            @[@"NLLanguageMalay", CharonHostNLLanguageMalay, NLLanguageMalay],
-            @[@"NLLanguageMalayalam", CharonHostNLLanguageMalayalam, NLLanguageMalayalam],
-            @[@"NLLanguageMarathi", CharonHostNLLanguageMarathi, NLLanguageMarathi],
-            @[@"NLLanguageMongolian", CharonHostNLLanguageMongolian, NLLanguageMongolian],
-            @[@"NLLanguageNorwegian", CharonHostNLLanguageNorwegian, NLLanguageNorwegian],
-            @[@"NLLanguageOriya", CharonHostNLLanguageOriya, NLLanguageOriya],
-            @[@"NLLanguagePersian", CharonHostNLLanguagePersian, NLLanguagePersian],
-            @[@"NLLanguagePolish", CharonHostNLLanguagePolish, NLLanguagePolish],
-            @[@"NLLanguagePortuguese", CharonHostNLLanguagePortuguese, NLLanguagePortuguese],
-            @[@"NLLanguagePunjabi", CharonHostNLLanguagePunjabi, NLLanguagePunjabi],
-            @[@"NLLanguageRomanian", CharonHostNLLanguageRomanian, NLLanguageRomanian],
-            @[@"NLLanguageRussian", CharonHostNLLanguageRussian, NLLanguageRussian],
-            @[@"NLLanguageSimplifiedChinese", CharonHostNLLanguageSimplifiedChinese, NLLanguageSimplifiedChinese],
-            @[@"NLLanguageSinhalese", CharonHostNLLanguageSinhalese, NLLanguageSinhalese],
-            @[@"NLLanguageSlovak", CharonHostNLLanguageSlovak, NLLanguageSlovak],
-            @[@"NLLanguageSpanish", CharonHostNLLanguageSpanish, NLLanguageSpanish],
-            @[@"NLLanguageSwedish", CharonHostNLLanguageSwedish, NLLanguageSwedish],
-            @[@"NLLanguageTamil", CharonHostNLLanguageTamil, NLLanguageTamil],
-            @[@"NLLanguageTelugu", CharonHostNLLanguageTelugu, NLLanguageTelugu],
-            @[@"NLLanguageThai", CharonHostNLLanguageThai, NLLanguageThai],
-            @[@"NLLanguageTibetan", CharonHostNLLanguageTibetan, NLLanguageTibetan],
-            @[@"NLLanguageTraditionalChinese", CharonHostNLLanguageTraditionalChinese, NLLanguageTraditionalChinese],
-            @[@"NLLanguageTurkish", CharonHostNLLanguageTurkish, NLLanguageTurkish],
-            @[@"NLLanguageUkrainian", CharonHostNLLanguageUkrainian, NLLanguageUkrainian],
-            @[@"NLLanguageUrdu", CharonHostNLLanguageUrdu, NLLanguageUrdu],
-            @[@"NLLanguageVietnamese", CharonHostNLLanguageVietnamese, NLLanguageVietnamese]];
+            @[@"NLLanguageUndetermined", RevenantHostNLLanguageUndetermined, NLLanguageUndetermined],
+            @[@"NLLanguageAmharic", RevenantHostNLLanguageAmharic, NLLanguageAmharic],
+            @[@"NLLanguageArabic", RevenantHostNLLanguageArabic, NLLanguageArabic],
+            @[@"NLLanguageArmenian", RevenantHostNLLanguageArmenian, NLLanguageArmenian],
+            @[@"NLLanguageBengali", RevenantHostNLLanguageBengali, NLLanguageBengali],
+            @[@"NLLanguageBulgarian", RevenantHostNLLanguageBulgarian, NLLanguageBulgarian],
+            @[@"NLLanguageBurmese", RevenantHostNLLanguageBurmese, NLLanguageBurmese],
+            @[@"NLLanguageCatalan", RevenantHostNLLanguageCatalan, NLLanguageCatalan],
+            @[@"NLLanguageCherokee", RevenantHostNLLanguageCherokee, NLLanguageCherokee],
+            @[@"NLLanguageCroatian", RevenantHostNLLanguageCroatian, NLLanguageCroatian],
+            @[@"NLLanguageCzech", RevenantHostNLLanguageCzech, NLLanguageCzech],
+            @[@"NLLanguageDanish", RevenantHostNLLanguageDanish, NLLanguageDanish],
+            @[@"NLLanguageDutch", RevenantHostNLLanguageDutch, NLLanguageDutch],
+            @[@"NLLanguageEnglish", RevenantHostNLLanguageEnglish, NLLanguageEnglish],
+            @[@"NLLanguageFinnish", RevenantHostNLLanguageFinnish, NLLanguageFinnish],
+            @[@"NLLanguageFrench", RevenantHostNLLanguageFrench, NLLanguageFrench],
+            @[@"NLLanguageGeorgian", RevenantHostNLLanguageGeorgian, NLLanguageGeorgian],
+            @[@"NLLanguageGerman", RevenantHostNLLanguageGerman, NLLanguageGerman],
+            @[@"NLLanguageGreek", RevenantHostNLLanguageGreek, NLLanguageGreek],
+            @[@"NLLanguageGujarati", RevenantHostNLLanguageGujarati, NLLanguageGujarati],
+            @[@"NLLanguageHebrew", RevenantHostNLLanguageHebrew, NLLanguageHebrew],
+            @[@"NLLanguageHindi", RevenantHostNLLanguageHindi, NLLanguageHindi],
+            @[@"NLLanguageHungarian", RevenantHostNLLanguageHungarian, NLLanguageHungarian],
+            @[@"NLLanguageIcelandic", RevenantHostNLLanguageIcelandic, NLLanguageIcelandic],
+            @[@"NLLanguageIndonesian", RevenantHostNLLanguageIndonesian, NLLanguageIndonesian],
+            @[@"NLLanguageItalian", RevenantHostNLLanguageItalian, NLLanguageItalian],
+            @[@"NLLanguageJapanese", RevenantHostNLLanguageJapanese, NLLanguageJapanese],
+            @[@"NLLanguageKannada", RevenantHostNLLanguageKannada, NLLanguageKannada],
+            @[@"NLLanguageKhmer", RevenantHostNLLanguageKhmer, NLLanguageKhmer],
+            @[@"NLLanguageKorean", RevenantHostNLLanguageKorean, NLLanguageKorean],
+            @[@"NLLanguageLao", RevenantHostNLLanguageLao, NLLanguageLao],
+            @[@"NLLanguageMalay", RevenantHostNLLanguageMalay, NLLanguageMalay],
+            @[@"NLLanguageMalayalam", RevenantHostNLLanguageMalayalam, NLLanguageMalayalam],
+            @[@"NLLanguageMarathi", RevenantHostNLLanguageMarathi, NLLanguageMarathi],
+            @[@"NLLanguageMongolian", RevenantHostNLLanguageMongolian, NLLanguageMongolian],
+            @[@"NLLanguageNorwegian", RevenantHostNLLanguageNorwegian, NLLanguageNorwegian],
+            @[@"NLLanguageOriya", RevenantHostNLLanguageOriya, NLLanguageOriya],
+            @[@"NLLanguagePersian", RevenantHostNLLanguagePersian, NLLanguagePersian],
+            @[@"NLLanguagePolish", RevenantHostNLLanguagePolish, NLLanguagePolish],
+            @[@"NLLanguagePortuguese", RevenantHostNLLanguagePortuguese, NLLanguagePortuguese],
+            @[@"NLLanguagePunjabi", RevenantHostNLLanguagePunjabi, NLLanguagePunjabi],
+            @[@"NLLanguageRomanian", RevenantHostNLLanguageRomanian, NLLanguageRomanian],
+            @[@"NLLanguageRussian", RevenantHostNLLanguageRussian, NLLanguageRussian],
+            @[@"NLLanguageSimplifiedChinese", RevenantHostNLLanguageSimplifiedChinese, NLLanguageSimplifiedChinese],
+            @[@"NLLanguageSinhalese", RevenantHostNLLanguageSinhalese, NLLanguageSinhalese],
+            @[@"NLLanguageSlovak", RevenantHostNLLanguageSlovak, NLLanguageSlovak],
+            @[@"NLLanguageSpanish", RevenantHostNLLanguageSpanish, NLLanguageSpanish],
+            @[@"NLLanguageSwedish", RevenantHostNLLanguageSwedish, NLLanguageSwedish],
+            @[@"NLLanguageTamil", RevenantHostNLLanguageTamil, NLLanguageTamil],
+            @[@"NLLanguageTelugu", RevenantHostNLLanguageTelugu, NLLanguageTelugu],
+            @[@"NLLanguageThai", RevenantHostNLLanguageThai, NLLanguageThai],
+            @[@"NLLanguageTibetan", RevenantHostNLLanguageTibetan, NLLanguageTibetan],
+            @[@"NLLanguageTraditionalChinese", RevenantHostNLLanguageTraditionalChinese, NLLanguageTraditionalChinese],
+            @[@"NLLanguageTurkish", RevenantHostNLLanguageTurkish, NLLanguageTurkish],
+            @[@"NLLanguageUkrainian", RevenantHostNLLanguageUkrainian, NLLanguageUkrainian],
+            @[@"NLLanguageUrdu", RevenantHostNLLanguageUrdu, NLLanguageUrdu],
+            @[@"NLLanguageVietnamese", RevenantHostNLLanguageVietnamese, NLLanguageVietnamese]];
         for (NSArray *pair in constants)
             CHECK_EQUAL(pair[1], pair[2], label(@"constant %@", pair[0]));
         NSArray *clear = @[@"The quick brown fox jumps over the lazy dog and runs away.", @"Der schnelle braune Fuchs springt über den faulen Hund und läuft davon.", @"El rápido zorro marrón salta sobre el perro perezoso y se escapa.", @"Le renard brun rapide saute par-dessus le chien paresseux et s'enfuit.",
@@ -301,7 +301,7 @@ int main(void)
             [mixed setLanguageHints:@{NLLanguageFrench: @1.0}];
             CHECK([mixed dominantLanguage] != nil, "hints that name no language of the text are put aside");
         }
-        printf("checks=%d failures=%d\n", charon_checks, charon_failures);
+        printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
     }
-    return charon_failures ? 1 : 0;
+    return revenant_failures ? 1 : 0;
 }

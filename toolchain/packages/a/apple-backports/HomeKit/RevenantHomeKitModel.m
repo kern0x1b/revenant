@@ -1,11 +1,11 @@
-#import "CharonHomeKitModel.h"
-#import "CharonHomeKitInternal.h"
+#import "RevenantHomeKitModel.h"
+#import "RevenantHomeKitInternal.h"
 
-NSString *const CharonHomeKitHomeOrderKey = @"org.charon.homekit.order";
+NSString *const RevenantHomeKitHomeOrderKey = @"org.revenant.homekit.order";
 
-NSMutableDictionary *CharonHomeKitRecord(NSString *table, NSString *identifier)
+NSMutableDictionary *RevenantHomeKitRecord(NSString *table, NSString *identifier)
 {
-    CharonHomeKitStore *store = [CharonHomeKitStore shared];
+    RevenantHomeKitStore *store = [RevenantHomeKitStore shared];
     NSMutableDictionary *all = [store tableNamed:table];
     NSMutableDictionary *record = all[identifier];
     if (!record) {
@@ -15,7 +15,7 @@ NSMutableDictionary *CharonHomeKitRecord(NSString *table, NSString *identifier)
     return record;
 }
 
-id CharonHomeKitField(NSMutableDictionary *record, NSString *key, id fallback)
+id RevenantHomeKitField(NSMutableDictionary *record, NSString *key, id fallback)
 {
     id value = record[key];
     if (!value) {
@@ -25,19 +25,19 @@ id CharonHomeKitField(NSMutableDictionary *record, NSString *key, id fallback)
     return value;
 }
 
-NSString *CharonHomeKitStringField(NSMutableDictionary *record, NSString *key, NSString *fallback)
+NSString *RevenantHomeKitStringField(NSMutableDictionary *record, NSString *key, NSString *fallback)
 {
-    return [CharonHomeKitField(record, key, fallback) copy];
+    return [RevenantHomeKitField(record, key, fallback) copy];
 }
 
-BOOL CharonHomeKitBoolField(NSMutableDictionary *record, NSString *key, BOOL fallback)
+BOOL RevenantHomeKitBoolField(NSMutableDictionary *record, NSString *key, BOOL fallback)
 {
-    return [CharonHomeKitField(record, key, @(fallback)) boolValue];
+    return [RevenantHomeKitField(record, key, @(fallback)) boolValue];
 }
 
-NSArray<NSString *> *CharonHomeKitStringListField(NSMutableDictionary *record, NSString *key)
+NSArray<NSString *> *RevenantHomeKitStringListField(NSMutableDictionary *record, NSString *key)
 {
-    NSMutableArray *list = [CharonHomeKitField(record, key, @[]) mutableCopy];
+    NSMutableArray *list = [RevenantHomeKitField(record, key, @[]) mutableCopy];
     for (id entry in list) {
         if (![entry isKindOfClass:[NSString class]])
             return @[];
@@ -45,9 +45,9 @@ NSArray<NSString *> *CharonHomeKitStringListField(NSMutableDictionary *record, N
     return list;
 }
 
-void CharonHomeKitSetField(NSString *table, NSString *identifier, NSString *key, id value)
+void RevenantHomeKitSetField(NSString *table, NSString *identifier, NSString *key, id value)
 {
-    CharonHomeKitStore *store = [CharonHomeKitStore shared];
+    RevenantHomeKitStore *store = [RevenantHomeKitStore shared];
     NSMutableDictionary *record = [store tableNamed:table][identifier];
     if (!record)
         return;
@@ -58,7 +58,7 @@ void CharonHomeKitSetField(NSString *table, NSString *identifier, NSString *key,
     [store flushTableNamed:table];
 }
 
-void CharonHomeKitOnMainQueue(void (^work)(void))
+void RevenantHomeKitOnMainQueue(void (^work)(void))
 {
     if ([NSThread isMainThread])
         work();
@@ -66,7 +66,7 @@ void CharonHomeKitOnMainQueue(void (^work)(void))
         dispatch_async(dispatch_get_main_queue(), work);
 }
 
-NSError *CharonHomeKitError(HMErrorCode code, NSString *localizedDescription)
+NSError *RevenantHomeKitError(HMErrorCode code, NSString *localizedDescription)
 {
     NSMutableDictionary *userInfo = [NSMutableDictionary dictionary];
     if (localizedDescription)
@@ -74,7 +74,7 @@ NSError *CharonHomeKitError(HMErrorCode code, NSString *localizedDescription)
     return [NSError errorWithDomain:HMErrorDomain code:code userInfo:userInfo];
 }
 
-NSError *CharonHomeKitErrorForAccessory(HMErrorCode code, HMAccessory *accessory, NSString *localizedDescription)
+NSError *RevenantHomeKitErrorForAccessory(HMErrorCode code, HMAccessory *accessory, NSString *localizedDescription)
 {
     NSMutableDictionary *userInfo = [NSMutableDictionary dictionary];
     if (localizedDescription)
@@ -84,34 +84,34 @@ NSError *CharonHomeKitErrorForAccessory(HMErrorCode code, HMAccessory *accessory
     return [NSError errorWithDomain:HMErrorDomain code:code userInfo:userInfo];
 }
 
-void CharonHomeKitTell(id delegate, SEL selector, void (^work)(id target))
+void RevenantHomeKitTell(id delegate, SEL selector, void (^work)(id target))
 {
     if (!delegate || ![delegate respondsToSelector:selector])
         return;
-    CharonHomeKitOnMainQueue(^{
+    RevenantHomeKitOnMainQueue(^{
         if ([delegate respondsToSelector:selector])
             work(delegate);
     });
 }
 
-void CharonHomeKitFinish(void (^handler)(id, NSError *), id result, NSError *error)
+void RevenantHomeKitFinish(void (^handler)(id, NSError *), id result, NSError *error)
 {
     if (!handler)
         return;
-    CharonHomeKitOnMainQueue(^{
+    RevenantHomeKitOnMainQueue(^{
         handler(result, error);
     });
 }
 
-void CharonHomeKitFinishError(void (^handler)(NSError *), NSError *error)
+void RevenantHomeKitFinishError(void (^handler)(NSError *), NSError *error)
 {
-    CharonHomeKitFinish(^(id result, NSError *reported) {
+    RevenantHomeKitFinish(^(id result, NSError *reported) {
         (void)result;
         handler(reported);
     }, nil, error);
 }
 
-HMHome *CharonHomeKitHome(NSString *identifier)
+HMHome *RevenantHomeKitHome(NSString *identifier)
 {
-    return [[HMHome alloc] charon_initWithStore:[CharonHomeKitStore shared] identifier:nil];
+    return [[HMHome alloc] revenant_initWithStore:[RevenantHomeKitStore shared] identifier:nil];
 }

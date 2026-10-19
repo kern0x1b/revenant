@@ -1,17 +1,17 @@
 #import "JSInternal.h"
 
-static NSMapTable<id, JSContext *> *charon_context_registry;
-static NSLock *charon_context_registry_lock;
+static NSMapTable<id, JSContext *> *revenant_context_registry;
+static NSLock *revenant_context_registry_lock;
 
 static NSMapTable<id, JSContext *> *ContextRegistry(void)
 {
     static dispatch_once_t once;
     dispatch_once(&once, ^{
-        charon_context_registry = [NSMapTable mapTableWithKeyOptions:NSPointerFunctionsOpaqueMemory | NSPointerFunctionsOpaquePersonality
+        revenant_context_registry = [NSMapTable mapTableWithKeyOptions:NSPointerFunctionsOpaqueMemory | NSPointerFunctionsOpaquePersonality
                                                           valueOptions:NSPointerFunctionsWeakMemory | NSPointerFunctionsObjectPersonality];
-        charon_context_registry_lock = [NSLock new];
+        revenant_context_registry_lock = [NSLock new];
     });
-    return charon_context_registry;
+    return revenant_context_registry;
 }
 
 @interface JSContext ()
@@ -37,57 +37,57 @@ static NSMapTable<id, JSContext *> *ContextRegistry(void)
 {
     if ((self = [super init])) {
         _virtualMachine = virtualMachine;
-        _globalContext = JSGlobalContextCreateInGroup([virtualMachine charon_group], NULL);
-        [self charon_register];
+        _globalContext = JSGlobalContextCreateInGroup([virtualMachine revenant_group], NULL);
+        [self revenant_register];
         __weak JSContext *weakSelf = self;
         _exceptionHandler = [^(JSContext *context, JSValue *exception) {
             (void)context;
             weakSelf.exception = exception;
         } copy];
-        [JSValue charon_installPromiseInContext:self];
+        [JSValue revenant_installPromiseInContext:self];
     }
     return self;
 }
 
-- (void)charon_register
+- (void)revenant_register
 {
     NSMapTable<id, JSContext *> *registry = ContextRegistry();
-    [charon_context_registry_lock lock];
+    [revenant_context_registry_lock lock];
     [registry setObject:self forKey:(__bridge id)_globalContext];
-    [charon_context_registry_lock unlock];
+    [revenant_context_registry_lock unlock];
 }
 
 - (void)dealloc
 {
     NSMapTable<id, JSContext *> *registry = ContextRegistry();
-    [charon_context_registry_lock lock];
+    [revenant_context_registry_lock lock];
     if (![registry objectForKey:(__bridge id)_globalContext])
         [registry removeObjectForKey:(__bridge id)_globalContext];
-    [charon_context_registry_lock unlock];
+    [revenant_context_registry_lock unlock];
     JSGlobalContextRelease(_globalContext);
 }
 
-+ (nullable JSContext *)charon_wrapperForGlobalContext:(JSGlobalContextRef)context create:(BOOL)create
++ (nullable JSContext *)revenant_wrapperForGlobalContext:(JSGlobalContextRef)context create:(BOOL)create
 {
     if (!context)
         return nil;
     NSMapTable<id, JSContext *> *registry = ContextRegistry();
-    [charon_context_registry_lock lock];
+    [revenant_context_registry_lock lock];
     JSContext *found = [registry objectForKey:(__bridge id)context];
-    [charon_context_registry_lock unlock];
+    [revenant_context_registry_lock unlock];
     if (found || !create)
         return found;
     JSGlobalContextRetain(context);
-    JSVirtualMachine *vm = [JSVirtualMachine charon_machineForGroup:JSContextGetGroup(context)] ?: [[JSVirtualMachine alloc] initWithCharonGroup:JSContextGetGroup(context) retained:YES];
-    return [[JSContext alloc] initCharonWrapping:context virtualMachine:vm];
+    JSVirtualMachine *vm = [JSVirtualMachine revenant_machineForGroup:JSContextGetGroup(context)] ?: [[JSVirtualMachine alloc] initWithRevenantGroup:JSContextGetGroup(context) retained:YES];
+    return [[JSContext alloc] initRevenantWrapping:context virtualMachine:vm];
 }
 
-- (instancetype)initCharonWrapping:(JSGlobalContextRef)context virtualMachine:(JSVirtualMachine *)virtualMachine
+- (instancetype)initRevenantWrapping:(JSGlobalContextRef)context virtualMachine:(JSVirtualMachine *)virtualMachine
 {
     if ((self = [super init])) {
         _virtualMachine = virtualMachine;
         _globalContext = context;
-        [self charon_register];
+        [self revenant_register];
         __weak JSContext *weakSelf = self;
         _exceptionHandler = [^(JSContext *ctx, JSValue *exception) {
             (void)ctx;
@@ -104,7 +104,7 @@ static NSMapTable<id, JSContext *> *ContextRegistry(void)
 
 + (JSContext *)contextWithJSGlobalContextRef:(JSGlobalContextRef)jsGlobalContextRef
 {
-    return [self charon_wrapperForGlobalContext:jsGlobalContextRef create:YES];
+    return [self revenant_wrapperForGlobalContext:jsGlobalContextRef create:YES];
 }
 
 - (JSVirtualMachine *)virtualMachine
@@ -134,7 +134,7 @@ static NSMapTable<id, JSContext *> *ContextRegistry(void)
 
 - (JSValue *)globalObject
 {
-    return [JSValue charon_valueWithJSValueRef:JSContextGetGlobalObject(_globalContext) context:self];
+    return [JSValue revenant_valueWithJSValueRef:JSContextGetGlobalObject(_globalContext) context:self];
 }
 
 - (JSValue *)exception
@@ -147,11 +147,11 @@ static NSMapTable<id, JSContext *> *ContextRegistry(void)
     _exception = exception;
 }
 
-- (void)charon_noteException:(JSValueRef)exception
+- (void)revenant_noteException:(JSValueRef)exception
 {
     if (!exception)
         return;
-    JSValue *value = [JSValue charon_valueWithJSValueRef:exception context:self];
+    JSValue *value = [JSValue revenant_valueWithJSValueRef:exception context:self];
     if (_exceptionHandler)
         _exceptionHandler(self, value);
     else
@@ -166,43 +166,43 @@ static NSMapTable<id, JSContext *> *ContextRegistry(void)
 - (JSValue *)evaluateScript:(NSString *)script withSourceURL:(NSURL *)sourceURL
 {
     self.exception = nil;
-    JSStringRef body = charon_js_string(script ?: @"");
-    JSStringRef url = sourceURL ? charon_js_string(sourceURL.absoluteString) : NULL;
+    JSStringRef body = revenant_js_string(script ?: @"");
+    JSStringRef url = sourceURL ? revenant_js_string(sourceURL.absoluteString) : NULL;
     JSValueRef exception = NULL;
-    charon_js_enter();
+    revenant_js_enter();
     JSValueRef result = JSEvaluateScript(_globalContext, body, NULL, url, 1, &exception);
     JSStringRelease(body);
     if (url)
         JSStringRelease(url);
-    JSValue *value = [JSValue charon_valueWithJSValueRef:exception ? JSValueMakeUndefined(_globalContext) : result context:self];
-    JSValue *thrown = exception ? [JSValue charon_valueWithJSValueRef:exception context:self] : nil;
-    charon_js_leave();
+    JSValue *value = [JSValue revenant_valueWithJSValueRef:exception ? JSValueMakeUndefined(_globalContext) : result context:self];
+    JSValue *thrown = exception ? [JSValue revenant_valueWithJSValueRef:exception context:self] : nil;
+    revenant_js_leave();
     if (thrown)
-        [self charon_noteException:thrown.JSValueRef];
+        [self revenant_noteException:thrown.JSValueRef];
     return value;
 }
 
 + (JSContext *)currentContext
 {
-    CharonJSFrame *frame = CharonCurrentFrame();
+    RevenantJSFrame *frame = RevenantCurrentFrame();
     return frame ? (__bridge JSContext *)frame->context : nil;
 }
 
 + (JSValue *)currentThis
 {
-    CharonJSFrame *frame = CharonCurrentFrame();
+    RevenantJSFrame *frame = RevenantCurrentFrame();
     return frame ? (__bridge JSValue *)frame->thisValue : nil;
 }
 
 + (JSValue *)currentCallee
 {
-    CharonJSFrame *frame = CharonCurrentFrame();
+    RevenantJSFrame *frame = RevenantCurrentFrame();
     return frame ? (__bridge JSValue *)frame->callee : nil;
 }
 
 + (NSArray *)currentArguments
 {
-    CharonJSFrame *frame = CharonCurrentFrame();
+    RevenantJSFrame *frame = RevenantCurrentFrame();
     return frame ? (__bridge NSArray *)frame->arguments : nil;
 }
 

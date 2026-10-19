@@ -1,24 +1,24 @@
 #import <Foundation/Foundation.h>
 #include <math.h>
 
-extern const NSCalendarUnit CharonCalendarAllUnits;
-NSInteger charon_calendar_nanosecond_exactly(NSDate *date);
-NSInteger charon_calendar_quarter(NSCalendar *calendar, NSDate *date);
-NSDateComponents *charon_calendar_components(NSCalendar *calendar, NSCalendarUnit units, NSDate *date);
-NSInteger charon_calendar_value(NSDateComponents *components, NSCalendarUnit unit);
-BOOL charon_calendar_set_value(NSDateComponents *components, NSCalendarUnit unit, NSInteger value);
-NSCalendarUnit charon_calendar_given_units(NSDateComponents *components);
-NSCalendar *charon_calendar_for_components(NSCalendar *calendar, NSDateComponents *components);
+extern const NSCalendarUnit RevenantCalendarAllUnits;
+NSInteger revenant_calendar_nanosecond_exactly(NSDate *date);
+NSInteger revenant_calendar_quarter(NSCalendar *calendar, NSDate *date);
+NSDateComponents *revenant_calendar_components(NSCalendar *calendar, NSCalendarUnit units, NSDate *date);
+NSInteger revenant_calendar_value(NSDateComponents *components, NSCalendarUnit unit);
+BOOL revenant_calendar_set_value(NSDateComponents *components, NSCalendarUnit unit, NSInteger value);
+NSCalendarUnit revenant_calendar_given_units(NSDateComponents *components);
+NSCalendar *revenant_calendar_for_components(NSCalendar *calendar, NSDateComponents *components);
 
-static BOOL charon_single_unit(NSCalendarUnit unit)
+static BOOL revenant_single_unit(NSCalendarUnit unit)
 {
     return unit && !(unit & (unit - 1));
 }
 
-static NSDate *charon_start_of_quarter(NSCalendar *calendar, NSDate *date)
+static NSDate *revenant_start_of_quarter(NSCalendar *calendar, NSDate *date)
 {
     NSDateComponents *components = [calendar components:NSCalendarUnitEra | NSCalendarUnitYear | NSCalendarUnitMonth fromDate:date];
-    NSInteger quarter = charon_calendar_quarter(calendar, date);
+    NSInteger quarter = revenant_calendar_quarter(calendar, date);
     if (quarter == NSDateComponentUndefined)
         return nil;
     components.month = (quarter - 1) * 3 + 1;
@@ -29,12 +29,12 @@ static NSDate *charon_start_of_quarter(NSCalendar *calendar, NSDate *date)
     return [calendar dateFromComponents:components];
 }
 
-static NSDate *charon_start_of_unit(NSCalendar *calendar, NSCalendarUnit unit, NSDate *date, BOOL *supported)
+static NSDate *revenant_start_of_unit(NSCalendar *calendar, NSCalendarUnit unit, NSDate *date, BOOL *supported)
 {
     NSDate *start = nil;
     *supported = [calendar rangeOfUnit:unit startDate:&start interval:NULL forDate:date];
     if (!*supported && unit == NSCalendarUnitQuarter) {
-        start = charon_start_of_quarter(calendar, date);
+        start = revenant_start_of_quarter(calendar, date);
         *supported = start != nil;
     }
     if (!*supported && unit == NSCalendarUnitWeekdayOrdinal)
@@ -42,19 +42,19 @@ static NSDate *charon_start_of_unit(NSCalendar *calendar, NSCalendarUnit unit, N
     return start;
 }
 
-static NSComparisonResult charon_order(double first, double second)
+static NSComparisonResult revenant_order(double first, double second)
 {
     return first == second ? NSOrderedSame : first > second ? NSOrderedDescending : NSOrderedAscending;
 }
 
-static BOOL charon_repeats_months(NSCalendar *calendar)
+static BOOL revenant_repeats_months(NSCalendar *calendar)
 {
     return [@[@"chinese", @"dangi", @"gujarati", @"kannada", @"marathi", @"telugu", @"vietnamese", @"vikram"] containsObject:calendar.calendarIdentifier];
 }
 
-static NSComparisonResult charon_compare(NSCalendar *calendar, NSDate *first, NSDate *second, NSCalendarUnit unit)
+static NSComparisonResult revenant_compare(NSCalendar *calendar, NSDate *first, NSDate *second, NSCalendarUnit unit)
 {
-    if (!charon_single_unit(unit))
+    if (!revenant_single_unit(unit))
         return NSOrderedSame;
     NSComparisonResult fallback = [first compare:second];
     double one = first.timeIntervalSinceReferenceDate, two = second.timeIntervalSinceReferenceDate;
@@ -74,14 +74,14 @@ static NSComparisonResult charon_compare(NSCalendar *calendar, NSDate *first, NS
         return two < from ? NSOrderedDescending : NSOrderedAscending;
     }
     case NSCalendarUnitMinute:
-        return charon_order(floor(floor(one) / 60.0), floor(floor(two) / 60.0));
+        return revenant_order(floor(floor(one) / 60.0), floor(floor(two) / 60.0));
     case NSCalendarUnitSecond:
-        return charon_order(floor(one), floor(two));
+        return revenant_order(floor(one), floor(two));
     case NSCalendarUnitNanosecond: {
         double seconds1 = trunc(one), seconds2 = trunc(two);
         if (seconds1 != seconds2)
-            return charon_order(seconds1, seconds2);
-        return charon_order(trunc(1e9 * (one - seconds1)), trunc(1e9 * (two - seconds2)));
+            return revenant_order(seconds1, seconds2);
+        return revenant_order(trunc(1e9 * (one - seconds1)), trunc(1e9 * (two - seconds2)));
     }
     default:
         break;
@@ -109,9 +109,9 @@ static NSComparisonResult charon_compare(NSCalendar *calendar, NSDate *first, NS
     for (size_t index = 0; index < count; index++)
         all |= units[index];
     NSDateComponents *components1 = [calendar components:all fromDate:first], *components2 = [calendar components:all fromDate:second];
-    BOOL repeats = charon_repeats_months(calendar);
+    BOOL repeats = revenant_repeats_months(calendar);
     for (size_t index = 0; index < count; index++) {
-        NSInteger value1 = charon_calendar_value(components1, units[index]), value2 = charon_calendar_value(components2, units[index]);
+        NSInteger value1 = revenant_calendar_value(components1, units[index]), value2 = revenant_calendar_value(components2, units[index]);
         if (value1 == NSDateComponentUndefined || value2 == NSDateComponentUndefined)
             return fallback;
         if (value1 != value2)
@@ -124,12 +124,12 @@ static NSComparisonResult charon_compare(NSCalendar *calendar, NSDate *first, NS
     return NSOrderedSame;
 }
 
-static NSInteger charon_calendar_base_value(NSCalendarUnit unit)
+static NSInteger revenant_calendar_base_value(NSCalendarUnit unit)
 {
     return (unit == NSCalendarUnitMonth || unit == NSCalendarUnitDay) ? 1 : 0;
 }
 
-static NSCalendarUnit charon_calendar_period_unit(NSCalendarUnit unit)
+static NSCalendarUnit revenant_calendar_period_unit(NSCalendarUnit unit)
 {
     switch (unit) {
     case NSCalendarUnitYear:
@@ -149,7 +149,7 @@ static NSCalendarUnit charon_calendar_period_unit(NSCalendarUnit unit)
     }
 }
 
-static NSDate *charon_calendar_direct_construct(NSCalendar *calendar, NSDate *date, NSCalendarUnit stepUnit, NSInteger stepValue, NSDateComponents *finerGiven)
+static NSDate *revenant_calendar_direct_construct(NSCalendar *calendar, NSDate *date, NSCalendarUnit stepUnit, NSInteger stepValue, NSDateComponents *finerGiven)
 {
     static const NSCalendarUnit chain[] = {NSCalendarUnitEra, NSCalendarUnitYear, NSCalendarUnitMonth, NSCalendarUnitDay, NSCalendarUnitHour, NSCalendarUnitMinute, NSCalendarUnitSecond};
     NSDateComponents *components = [calendar components:NSCalendarUnitEra | NSCalendarUnitYear | NSCalendarUnitMonth | NSCalendarUnitDay | NSCalendarUnitHour | NSCalendarUnitMinute | NSCalendarUnitSecond fromDate:date];
@@ -157,33 +157,33 @@ static NSDate *charon_calendar_direct_construct(NSCalendar *calendar, NSDate *da
     for (size_t index = 0; index < sizeof chain / sizeof *chain; index++) {
         NSCalendarUnit unit = chain[index];
         if (unit == stepUnit) {
-            charon_calendar_set_value(components, unit, stepValue);
+            revenant_calendar_set_value(components, unit, stepValue);
             reachedStep = YES;
             continue;
         }
         if (!reachedStep)
             continue;
-        NSInteger given = finerGiven ? charon_calendar_value(finerGiven, unit) : NSDateComponentUndefined;
-        charon_calendar_set_value(components, unit, given != NSDateComponentUndefined ? given : charon_calendar_base_value(unit));
+        NSInteger given = finerGiven ? revenant_calendar_value(finerGiven, unit) : NSDateComponentUndefined;
+        revenant_calendar_set_value(components, unit, given != NSDateComponentUndefined ? given : revenant_calendar_base_value(unit));
     }
     return [calendar dateFromComponents:components];
 }
 
-static NSDate *charon_calendar_roll_by_period(NSCalendar *calendar, NSDate *date, NSCalendarUnit periodUnit, NSInteger delta)
+static NSDate *revenant_calendar_roll_by_period(NSCalendar *calendar, NSDate *date, NSCalendarUnit periodUnit, NSInteger delta)
 {
     if (!periodUnit)
         return nil;
     NSDateComponents *step = [[NSDateComponents alloc] init];
-    charon_calendar_set_value(step, periodUnit, delta);
+    revenant_calendar_set_value(step, periodUnit, delta);
     return [calendar dateByAddingComponents:step toDate:date options:0];
 }
 
-static NSDate *charon_calendar_day_candidate(NSCalendar *calendar, NSDate *date, NSInteger monthOffset, NSInteger targetDay, NSDateComponents *finerGiven)
+static NSDate *revenant_calendar_day_candidate(NSCalendar *calendar, NSDate *date, NSInteger monthOffset, NSInteger targetDay, NSDateComponents *finerGiven)
 {
     NSDateComponents *base = [calendar components:NSCalendarUnitEra | NSCalendarUnitYear | NSCalendarUnitMonth fromDate:date];
     NSDate *monthAnchor = [calendar dateFromComponents:base];
     if (monthOffset) {
-        monthAnchor = charon_calendar_roll_by_period(calendar, monthAnchor, NSCalendarUnitMonth, monthOffset);
+        monthAnchor = revenant_calendar_roll_by_period(calendar, monthAnchor, NSCalendarUnitMonth, monthOffset);
         if (!monthAnchor)
             return nil;
         base = [calendar components:NSCalendarUnitEra | NSCalendarUnitYear | NSCalendarUnitMonth fromDate:monthAnchor];
@@ -192,7 +192,7 @@ static NSDate *charon_calendar_day_candidate(NSCalendar *calendar, NSDate *date,
     if (days.location != NSNotFound && targetDay >= 1 && targetDay <= (NSInteger)days.length) {
         NSDateComponents *full = [base copy];
         full.day = targetDay;
-        NSInteger hour = finerGiven ? charon_calendar_value(finerGiven, NSCalendarUnitHour) : NSDateComponentUndefined;
+        NSInteger hour = finerGiven ? revenant_calendar_value(finerGiven, NSCalendarUnitHour) : NSDateComponentUndefined;
         full.hour = hour != NSDateComponentUndefined ? hour : 0;
         full.minute = 0;
         full.second = 0;
@@ -206,12 +206,12 @@ static NSDate *charon_calendar_day_candidate(NSCalendar *calendar, NSDate *date,
     NSDate *startOfMonth = [calendar dateFromComponents:first];
     if (!startOfMonth)
         return nil;
-    return charon_calendar_roll_by_period(calendar, startOfMonth, NSCalendarUnitMonth, 1);
+    return revenant_calendar_roll_by_period(calendar, startOfMonth, NSCalendarUnitMonth, 1);
 }
 
-static NSDate *charon_calendar_set_weekday(NSCalendar *calendar, NSDate *date, NSInteger value)
+static NSDate *revenant_calendar_set_weekday(NSCalendar *calendar, NSDate *date, NSInteger value)
 {
-    NSInteger current = charon_calendar_value(charon_calendar_components(calendar, NSCalendarUnitWeekday, date), NSCalendarUnitWeekday);
+    NSInteger current = revenant_calendar_value(revenant_calendar_components(calendar, NSCalendarUnitWeekday, date), NSCalendarUnitWeekday);
     if (current == value)
         return date;
     NSDate *startOfWeek = nil;
@@ -219,28 +219,28 @@ static NSDate *charon_calendar_set_weekday(NSCalendar *calendar, NSDate *date, N
         return nil;
     NSInteger firstWeekday = (NSInteger)calendar.firstWeekday;
     NSInteger offset = ((value - firstWeekday) % 7 + 7) % 7;
-    NSDate *direct = charon_calendar_roll_by_period(calendar, startOfWeek, NSCalendarUnitDay, offset);
+    NSDate *direct = revenant_calendar_roll_by_period(calendar, startOfWeek, NSCalendarUnitDay, offset);
     NSDate *reference = nil;
     if (!direct || ![calendar rangeOfUnit:NSCalendarUnitDay startDate:&reference interval:NULL forDate:date])
         return nil;
     if ([direct compare:reference] == NSOrderedAscending)
-        direct = charon_calendar_roll_by_period(calendar, direct, NSCalendarUnitDay, 7);
+        direct = revenant_calendar_roll_by_period(calendar, direct, NSCalendarUnitDay, 7);
     return direct;
 }
 
-static NSDate *charon_add_unit(NSCalendar *calendar, NSCalendarUnit unit, NSInteger value, NSDate *date, NSCalendarOptions options)
+static NSDate *revenant_add_unit(NSCalendar *calendar, NSCalendarUnit unit, NSInteger value, NSDate *date, NSCalendarOptions options)
 {
     if (unit == NSCalendarUnitCalendar || unit == NSCalendarUnitTimeZone || value == NSDateComponentUndefined)
         return date;
     if (unit == NSCalendarUnitNanosecond)
         return [date dateByAddingTimeInterval:value / 1000000000.0];
     NSDateComponents *components = [[NSDateComponents alloc] init];
-    if (!charon_calendar_set_value(components, unit, value))
+    if (!revenant_calendar_set_value(components, unit, value))
         return nil;
     return [calendar dateByAddingComponents:components toDate:date options:options];
 }
 
-@implementation NSCalendar (CharonComponents)
+@implementation NSCalendar (RevenantComponents)
 
 + (NSCalendar *)calendarWithIdentifier:(NSString *)calendarIdentifierConstant
 {
@@ -283,18 +283,18 @@ static NSDate *charon_add_unit(NSCalendar *calendar, NSCalendarUnit unit, NSInte
     if (secondValuePointer)
         *secondValuePointer = components.second;
     if (nanosecondValuePointer)
-        *nanosecondValuePointer = charon_calendar_nanosecond_exactly(date);
+        *nanosecondValuePointer = revenant_calendar_nanosecond_exactly(date);
 }
 
 - (NSInteger)component:(NSCalendarUnit)unit fromDate:(NSDate *)date
 {
-    if (!charon_single_unit(unit))
+    if (!revenant_single_unit(unit))
         return NSDateComponentUndefined;
     if (unit == NSCalendarUnitCalendar || unit == NSCalendarUnitTimeZone)
         return 0;
     if (unit == NSCalendarUnitNanosecond)
-        return charon_calendar_nanosecond_exactly(date);
-    return charon_calendar_value(charon_calendar_components(self, unit, date), unit);
+        return revenant_calendar_nanosecond_exactly(date);
+    return revenant_calendar_value(revenant_calendar_components(self, unit, date), unit);
 }
 
 - (NSDate *)dateWithEra:(NSInteger)eraValue year:(NSInteger)yearValue month:(NSInteger)monthValue day:(NSInteger)dayValue hour:(NSInteger)hourValue minute:(NSInteger)minuteValue second:(NSInteger)secondValue nanosecond:(NSInteger)nanosecondValue
@@ -328,7 +328,7 @@ static NSDate *charon_add_unit(NSCalendar *calendar, NSCalendarUnit unit, NSInte
 - (NSDate *)startOfDayForDate:(NSDate *)date
 {
     BOOL supported = NO;
-    return charon_start_of_unit(self, NSCalendarUnitDay, date, &supported);
+    return revenant_start_of_unit(self, NSCalendarUnitDay, date, &supported);
 }
 
 - (NSDateComponents *)componentsInTimeZone:(NSTimeZone *)timezone fromDate:(NSDate *)date
@@ -338,45 +338,45 @@ static NSDate *charon_add_unit(NSCalendar *calendar, NSCalendarUnit unit, NSInte
         calendar = [self copy];
         calendar.timeZone = timezone;
     }
-    return charon_calendar_components(calendar, CharonCalendarAllUnits, date);
+    return revenant_calendar_components(calendar, RevenantCalendarAllUnits, date);
 }
 
 - (NSComparisonResult)compareDate:(NSDate *)date1 toDate:(NSDate *)date2 toUnitGranularity:(NSCalendarUnit)unit
 {
-    return charon_compare(self, date1, date2, unit);
+    return revenant_compare(self, date1, date2, unit);
 }
 
 - (BOOL)isDate:(NSDate *)date1 equalToDate:(NSDate *)date2 toUnitGranularity:(NSCalendarUnit)unit
 {
-    return charon_single_unit(unit) && charon_compare(self, date1, date2, unit) == NSOrderedSame;
+    return revenant_single_unit(unit) && revenant_compare(self, date1, date2, unit) == NSOrderedSame;
 }
 
 - (BOOL)isDate:(NSDate *)date1 inSameDayAsDate:(NSDate *)date2
 {
-    return charon_compare(self, date1, date2, NSCalendarUnitDay) == NSOrderedSame;
+    return revenant_compare(self, date1, date2, NSCalendarUnitDay) == NSOrderedSame;
 }
 
 - (BOOL)isDateInToday:(NSDate *)date
 {
-    return charon_compare(self, date, [NSDate date], NSCalendarUnitDay) == NSOrderedSame;
+    return revenant_compare(self, date, [NSDate date], NSCalendarUnitDay) == NSOrderedSame;
 }
 
 - (BOOL)isDateInYesterday:(NSDate *)date
 {
-    NSDate *yesterday = charon_add_unit(self, NSCalendarUnitDay, -1, [NSDate date], 0);
-    return yesterday && charon_compare(self, date, yesterday, NSCalendarUnitDay) == NSOrderedSame;
+    NSDate *yesterday = revenant_add_unit(self, NSCalendarUnitDay, -1, [NSDate date], 0);
+    return yesterday && revenant_compare(self, date, yesterday, NSCalendarUnitDay) == NSOrderedSame;
 }
 
 - (BOOL)isDateInTomorrow:(NSDate *)date
 {
-    NSDate *tomorrow = charon_add_unit(self, NSCalendarUnitDay, 1, [NSDate date], 0);
-    return tomorrow && charon_compare(self, date, tomorrow, NSCalendarUnitDay) == NSOrderedSame;
+    NSDate *tomorrow = revenant_add_unit(self, NSCalendarUnitDay, 1, [NSDate date], 0);
+    return tomorrow && revenant_compare(self, date, tomorrow, NSCalendarUnitDay) == NSOrderedSame;
 }
 
 - (NSDateComponents *)components:(NSCalendarUnit)unitFlags fromDateComponents:(NSDateComponents *)startingDateComp toDateComponents:(NSDateComponents *)resultDateComp options:(NSCalendarOptions)options
 {
-    NSDate *start = [charon_calendar_for_components(self, startingDateComp) dateFromComponents:startingDateComp];
-    NSDate *finish = [charon_calendar_for_components(self, resultDateComp) dateFromComponents:resultDateComp];
+    NSDate *start = [revenant_calendar_for_components(self, startingDateComp) dateFromComponents:startingDateComp];
+    NSDate *finish = [revenant_calendar_for_components(self, resultDateComp) dateFromComponents:resultDateComp];
     if (!start || !finish)
         return nil;
     return [self components:unitFlags fromDate:start toDate:finish options:options];
@@ -384,7 +384,7 @@ static NSDate *charon_add_unit(NSCalendar *calendar, NSCalendarUnit unit, NSInte
 
 - (NSDate *)dateByAddingUnit:(NSCalendarUnit)unit value:(NSInteger)value toDate:(NSDate *)date options:(NSCalendarOptions)options
 {
-    return charon_add_unit(self, unit, value, date, options);
+    return revenant_add_unit(self, unit, value, date, options);
 }
 
 - (NSDate *)dateBySettingHour:(NSInteger)h minute:(NSInteger)m second:(NSInteger)s ofDate:(NSDate *)date options:(NSCalendarOptions)opts
@@ -429,15 +429,15 @@ static NSDate *charon_add_unit(NSCalendar *calendar, NSCalendarUnit unit, NSInte
 
 - (BOOL)date:(NSDate *)date matchesComponents:(NSDateComponents *)components
 {
-    NSCalendarUnit given = charon_calendar_given_units(components);
-    NSDateComponents *found = charon_calendar_components(self, given, date);
+    NSCalendarUnit given = revenant_calendar_given_units(components);
+    NSDateComponents *found = revenant_calendar_components(self, given, date);
     NSCalendarUnit candidates[] = {NSCalendarUnitEra, NSCalendarUnitYear, NSCalendarUnitMonth, NSCalendarUnitDay, NSCalendarUnitHour, NSCalendarUnitMinute, NSCalendarUnitSecond,
                                    NSCalendarUnitWeekday, NSCalendarUnitWeekdayOrdinal, NSCalendarUnitQuarter, NSCalendarUnitWeekOfMonth, NSCalendarUnitWeekOfYear,
                                    NSCalendarUnitYearForWeekOfYear, NSCalendarUnitNanosecond};
     for (size_t index = 0; index < sizeof candidates / sizeof *candidates; index++) {
         if (!(given & candidates[index]))
             continue;
-        if (charon_calendar_value(components, candidates[index]) != charon_calendar_value(found, candidates[index]))
+        if (revenant_calendar_value(components, candidates[index]) != revenant_calendar_value(found, candidates[index]))
             return NO;
     }
     return YES;
@@ -448,30 +448,30 @@ static NSDate *charon_add_unit(NSCalendar *calendar, NSCalendarUnit unit, NSInte
     if (!date)
         return nil;
     if (unit == NSCalendarUnitWeekday)
-        return charon_calendar_set_weekday(self, date, value);
+        return revenant_calendar_set_weekday(self, date, value);
     if (unit == NSCalendarUnitEra || unit == NSCalendarUnitYear || unit == NSCalendarUnitMonth || unit == NSCalendarUnitDay ||
         unit == NSCalendarUnitHour || unit == NSCalendarUnitMinute || unit == NSCalendarUnitSecond) {
         NSInteger current = [self component:unit fromDate:date];
         if (current == value)
             return date;
-        NSDate *direct = charon_calendar_direct_construct(self, date, unit, value, nil);
+        NSDate *direct = revenant_calendar_direct_construct(self, date, unit, value, nil);
         if (!direct)
             return nil;
         if (value < current)
-            direct = charon_calendar_roll_by_period(self, direct, charon_calendar_period_unit(unit), 1) ?: direct;
+            direct = revenant_calendar_roll_by_period(self, direct, revenant_calendar_period_unit(unit), 1) ?: direct;
         return direct;
     }
-    NSDateComponents *current = charon_calendar_components(self, unit, date);
-    if (charon_calendar_value(current, unit) == value)
+    NSDateComponents *current = revenant_calendar_components(self, unit, date);
+    if (revenant_calendar_value(current, unit) == value)
         return date;
     for (NSInteger distance = 1; distance <= 800; distance++) {
-        NSDate *forward = charon_add_unit(self, NSCalendarUnitDay, distance, date, 0);
-        NSDateComponents *forwardParts = forward ? charon_calendar_components(self, unit, forward) : nil;
-        if (forwardParts && charon_calendar_value(forwardParts, unit) == value)
+        NSDate *forward = revenant_add_unit(self, NSCalendarUnitDay, distance, date, 0);
+        NSDateComponents *forwardParts = forward ? revenant_calendar_components(self, unit, forward) : nil;
+        if (forwardParts && revenant_calendar_value(forwardParts, unit) == value)
             return forward;
-        NSDate *backward = charon_add_unit(self, NSCalendarUnitDay, -distance, date, 0);
-        NSDateComponents *backwardParts = backward ? charon_calendar_components(self, unit, backward) : nil;
-        if (backwardParts && charon_calendar_value(backwardParts, unit) == value)
+        NSDate *backward = revenant_add_unit(self, NSCalendarUnitDay, -distance, date, 0);
+        NSDateComponents *backwardParts = backward ? revenant_calendar_components(self, unit, backward) : nil;
+        if (backwardParts && revenant_calendar_value(backwardParts, unit) == value)
             return backward;
     }
     return nil;
@@ -481,7 +481,7 @@ static NSDate *charon_add_unit(NSCalendar *calendar, NSCalendarUnit unit, NSInte
 {
     if (!date || !comps)
         return nil;
-    NSCalendarUnit given = charon_calendar_given_units(comps);
+    NSCalendarUnit given = revenant_calendar_given_units(comps);
     if (!given)
         return nil;
     static const NSCalendarUnit chain[] = {NSCalendarUnitEra, NSCalendarUnitYear, NSCalendarUnitMonth, NSCalendarUnitDay, NSCalendarUnitHour, NSCalendarUnitMinute, NSCalendarUnitSecond};
@@ -505,23 +505,23 @@ static NSDate *charon_add_unit(NSCalendar *calendar, NSCalendarUnit unit, NSInte
         if (!stepUnit)
             return nil;
         NSInteger direction = forward ? 1 : -1;
-        NSDate *cursor = charon_add_unit(self, stepUnit, direction, date, 0);
+        NSDate *cursor = revenant_add_unit(self, stepUnit, direction, date, 0);
         if (!cursor)
             return nil;
         for (NSInteger iteration = 0; iteration < 2000000; iteration++) {
             if ([self date:cursor matchesComponents:comps])
                 return cursor;
-            NSDate *next = charon_add_unit(self, stepUnit, direction, cursor, 0);
+            NSDate *next = revenant_add_unit(self, stepUnit, direction, cursor, 0);
             if (!next)
                 return nil;
             cursor = next;
         }
         return nil;
     }
-    NSInteger target = charon_calendar_value(comps, stepUnit);
+    NSInteger target = revenant_calendar_value(comps, stepUnit);
     NSInteger current = [self component:stepUnit fromDate:date];
-    NSDate *direct = stepUnit == NSCalendarUnitDay ? charon_calendar_day_candidate(self, date, 0, target, comps)
-                                                    : charon_calendar_direct_construct(self, date, stepUnit, target, comps);
+    NSDate *direct = stepUnit == NSCalendarUnitDay ? revenant_calendar_day_candidate(self, date, 0, target, comps)
+                                                    : revenant_calendar_direct_construct(self, date, stepUnit, target, comps);
     if (!direct)
         return nil;
     BOOL roll;
@@ -531,9 +531,9 @@ static NSDate *charon_add_unit(NSCalendar *calendar, NSCalendarUnit unit, NSInte
         roll = forward ? !([direct compare:date] == NSOrderedDescending) : !([direct compare:date] == NSOrderedAscending);
     if (roll) {
         if (stepUnit == NSCalendarUnitDay)
-            direct = charon_calendar_day_candidate(self, date, forward ? 1 : -1, target, comps) ?: direct;
+            direct = revenant_calendar_day_candidate(self, date, forward ? 1 : -1, target, comps) ?: direct;
         else
-            direct = charon_calendar_roll_by_period(self, direct, charon_calendar_period_unit(stepUnit), forward ? 1 : -1) ?: direct;
+            direct = revenant_calendar_roll_by_period(self, direct, revenant_calendar_period_unit(stepUnit), forward ? 1 : -1) ?: direct;
     }
     return direct;
 }

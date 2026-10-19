@@ -14,7 +14,7 @@
 #include <thread>
 #include <vector>
 
-namespace shade {
+namespace emulator {
 
 struct GuestExecutionCoordinator::Impl {
     std::mutex mutex;

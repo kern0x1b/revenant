@@ -1,10 +1,10 @@
-#import "CharonHomeKitInternal.h"
+#import "RevenantHomeKitInternal.h"
 
 @implementation HMAccessControl
 
-CHARON_HOMEKIT_UNAVAILABLE_INIT
+REVENANT_HOMEKIT_UNAVAILABLE_INIT
 
-- (instancetype)charon_initWithStore:(CharonHomeKitStore *)store identifier:(NSUUID *)identifier __attribute__((objc_method_family(init)))
+- (instancetype)revenant_initWithStore:(RevenantHomeKitStore *)store identifier:(NSUUID *)identifier __attribute__((objc_method_family(init)))
 {
     (void)store;
     (void)identifier;

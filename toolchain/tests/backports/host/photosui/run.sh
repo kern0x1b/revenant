@@ -57,7 +57,7 @@ objects="$objects $build/stub.o"
 xcrun clang -fobjc-arc -w -I"$here" "$here/cases.m" $objects -framework Foundation -o "$build/port"
 # The host's side: the SDK's own header, the host's own framework, and no -I"$here".
 xcrun clang -fobjc-arc -w -Wno-unguarded-availability -Wno-unguarded-availability-new \
-    -DCHARON_HOST_REFERENCE "$here/cases.m" -framework Foundation -framework PhotosUI -o "$build/host"
+    -DREVENANT_HOST_REFERENCE "$here/cases.m" -framework Foundation -framework PhotosUI -o "$build/host"
 
 "$build/host" > "$build/host.answers"
 "$build/port" > "$build/port.answers"

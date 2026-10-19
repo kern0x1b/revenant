@@ -13,11 +13,11 @@
 #include <cstdint>
 #include <string_view>
 
-#if defined(SHADE_HAS_LIBPLIST)
+#if defined(REVENANT_EMULATOR_HAS_LIBPLIST)
 #include <plist/plist.h>
 #endif
 
-namespace shade {
+namespace emulator {
 namespace {
 
     std::string read_file(const std::filesystem::path& path)
@@ -58,7 +58,7 @@ namespace {
         const auto bytes = read_file(
             rootfs / "System/Library/CoreServices/SystemVersion.plist");
         SystemVersion result;
-#if defined(SHADE_HAS_LIBPLIST)
+#if defined(REVENANT_EMULATOR_HAS_LIBPLIST)
         plist_t parsed = nullptr;
         plist_format_t format = PLIST_FORMAT_NONE;
         if (!bytes.empty() &&

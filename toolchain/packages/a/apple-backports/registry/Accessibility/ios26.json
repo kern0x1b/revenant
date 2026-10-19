@@ -16,7 +16,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "source": "the header of iPhoneOS 26.4, transcribed where 16.4 has none",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/CharonAccessibility.m, and declared by CharonAccessibility.h where the port's own SDK has no header for it",
+      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAccessibility.m, and declared by RevenantAccessibility.h where the port's own SDK has no header for it",
       "effect": "every member its header declares has a body; what it answers where this release cannot reach the service behind it is in facts/Accessibility/Accessibility.md"
     },
     {
@@ -27,7 +27,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "source": "the header of iPhoneOS 26.4, transcribed where 16.4 has none",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/CharonAccessibility.m, and declared by CharonAccessibility.h where the port's own SDK has no header for it",
+      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAccessibility.m, and declared by RevenantAccessibility.h where the port's own SDK has no header for it",
       "effect": "every member its header declares has a body; what it answers where this release cannot reach the service behind it is in facts/Accessibility/Accessibility.md"
     },
     {
@@ -38,7 +38,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "source": "the header of iPhoneOS 26.4, transcribed where 16.4 has none",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/CharonAccessibility.m, and declared by CharonAccessibility.h where the port's own SDK has no header for it",
+      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAccessibility.m, and declared by RevenantAccessibility.h where the port's own SDK has no header for it",
       "effect": "every member its header declares has a body; what it answers where this release cannot reach the service behind it is in facts/Accessibility/Accessibility.md"
     },
     {
@@ -63,7 +63,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "source": "the header of iPhoneOS 16.4, which is the SDK this package compiles against, so the declaration is not transcribed",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/CharonAXCustomContent.m: one attributed string a side and the header's two factories, and the four properties are four spellings of the two values, which is what the host answers",
+      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAXCustomContent.m: one attributed string a side and the header's two factories, and the four properties are four spellings of the two values, which is what the host answers",
       "effect": "the two values the header's two factories were given, kept as one attributed string a side: customContentWithLabel:value: builds an attributed string from each plain string and customContentWithAttributedLabel:attributedValue: keeps the two it was given, and all four properties answer from that one pair. NSCopying shares the pair and carries importance, NSSecureCoding carries both strings and the number, and isEqual: compares the class, both strings and the number, so two contents that differ only in how urgently the user wants them are not equal - all measured on the host's own Accessibility.framework by tests/backports/host/accessibilitymath/expected-differences.tsv"
     },
     {
@@ -95,7 +95,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "source": "the header of iPhoneOS 26.4, transcribed where 16.4 has none",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/CharonAccessibility.m, and declared by CharonAccessibility.h where the port's own SDK has no header for it",
+      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAccessibility.m, and declared by RevenantAccessibility.h where the port's own SDK has no header for it",
       "effect": "every member its header declares has a body; what it answers where this release cannot reach the service behind it is in facts/Accessibility/Accessibility.md"
     },
     {
@@ -106,7 +106,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "source": "the header of iPhoneOS 26.4, transcribed where 16.4 has none",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/CharonAccessibility.m, and declared by CharonAccessibility.h where the port's own SDK has no header for it",
+      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAccessibility.m, and declared by RevenantAccessibility.h where the port's own SDK has no header for it",
       "effect": "every member its header declares has a body; what it answers where this release cannot reach the service behind it is in facts/Accessibility/Accessibility.md"
     },
     {
@@ -125,8 +125,8 @@
       "facts": "facts/Accessibility/Accessibility.md",
       "minimum": "6.0",
       "status": "implemented",
-      "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/CharonAXMathExpression.h",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/CharonAXMathExpression.m, and declared by CharonAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
+      "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/RevenantAXMathExpression.h",
+      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
       "effect": "an NSObject subclass with no member of its own, and the parent of the fourteen below: it carries no parsing and no evaluation, so the class an expression is a kind of is the only thing it is for"
     },
     {
@@ -136,8 +136,8 @@
       "facts": "facts/Accessibility/Accessibility.md",
       "minimum": "6.0",
       "status": "implemented",
-      "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/CharonAXMathExpression.h",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/CharonAXMathExpression.m, and declared by CharonAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
+      "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/RevenantAXMathExpression.h",
+      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
       "effect": "the very array the initialiser was given, identity preserved, and nil for one a caller passed nil. The property is readonly, so this is not a way to change a built expression; it is the sharing the host does, which a case with a mutable array is what can see"
     },
     {
@@ -147,8 +147,8 @@
       "facts": "facts/Accessibility/Accessibility.md",
       "minimum": "6.0",
       "status": "implemented",
-      "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/CharonAXMathExpression.h",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/CharonAXMathExpression.m, and declared by CharonAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
+      "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/RevenantAXMathExpression.h",
+      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
       "effect": "the two expressions the initialiser was given; the misspelled denimonator is Apple's own spelling in the initialiser and in the property, and it is the name the corpus row and every caller use, so it is the name this carries"
     },
     {
@@ -158,8 +158,8 @@
       "facts": "facts/Accessibility/Accessibility.md",
       "minimum": "6.0",
       "status": "implemented",
-      "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/CharonAXMathExpression.h",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/CharonAXMathExpression.m, and declared by CharonAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
+      "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/RevenantAXMathExpression.h",
+      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
       "effect": "the string the initialiser was given, and nil for one a caller passed nil in defiance of the header's promise. Nothing is parsed and nothing is evaluated: the header declares no method that takes a string and returns anything but it, and the tree an application builds is what an assistive technology would have been handed - a service this release has none of"
     },
     {
@@ -169,8 +169,8 @@
       "facts": "facts/Accessibility/Accessibility.md",
       "minimum": "6.0",
       "status": "implemented",
-      "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/CharonAXMathExpression.h",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/CharonAXMathExpression.m, and declared by CharonAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
+      "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/RevenantAXMathExpression.h",
+      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
       "effect": "the expression the initialiser was given, and nil for one a caller passed nil in defiance of the header's promise"
     },
     {
@@ -180,8 +180,8 @@
       "facts": "facts/Accessibility/Accessibility.md",
       "minimum": "6.0",
       "status": "implemented",
-      "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/CharonAXMathExpression.h",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/CharonAXMathExpression.m, and declared by CharonAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
+      "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/RevenantAXMathExpression.h",
+      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
       "effect": "the string the initialiser was given, and nil for one a caller passed nil in defiance of the header's promise. Nothing is parsed and nothing is evaluated: the header declares no method that takes a string and returns anything but it, and the tree an application builds is what an assistive technology would have been handed - a service this release has none of"
     },
     {
@@ -191,8 +191,8 @@
       "facts": "facts/Accessibility/Accessibility.md",
       "minimum": "6.0",
       "status": "implemented",
-      "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/CharonAXMathExpression.h",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/CharonAXMathExpression.m, and declared by CharonAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
+      "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/RevenantAXMathExpression.h",
+      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
       "effect": "the string the initialiser was given, and nil for one a caller passed nil in defiance of the header's promise. Nothing is parsed and nothing is evaluated: the header declares no method that takes a string and returns anything but it, and the tree an application builds is what an assistive technology would have been handed - a service this release has none of"
     },
     {
@@ -202,8 +202,8 @@
       "facts": "facts/Accessibility/Accessibility.md",
       "minimum": "6.0",
       "status": "implemented",
-      "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/CharonAXMathExpression.h",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/CharonAXMathExpression.m, and declared by CharonAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
+      "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/RevenantAXMathExpression.h",
+      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
       "effect": "the expression the initialiser was given, and nil for one a caller passed nil in defiance of the header's promise"
     },
     {
@@ -213,8 +213,8 @@
       "facts": "facts/Accessibility/Accessibility.md",
       "minimum": "6.0",
       "status": "implemented",
-      "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/CharonAXMathExpression.h",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/CharonAXMathExpression.m, and declared by CharonAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
+      "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/RevenantAXMathExpression.h",
+      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
       "effect": "the very array the initialiser was given, identity preserved, and nil for one a caller passed nil. This is one of the two classes the host answers nil for whatever array it was given, and the port answers the array instead: the header declares the property nonnull and the initialiser takes it, so the value is the caller's own and the host dropping it is a defect rather than a stated behaviour. Measured, and declared with the other six cases that follow from it in tests/backports/host/accessibilitymath/expected-differences.tsv"
     },
     {
@@ -224,8 +224,8 @@
       "facts": "facts/Accessibility/Accessibility.md",
       "minimum": "6.0",
       "status": "implemented",
-      "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/CharonAXMathExpression.h",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/CharonAXMathExpression.m, and declared by CharonAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
+      "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/RevenantAXMathExpression.h",
+      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
       "effect": "the three arrays the initialiser was given, each identity preserved and each nil only for one a caller passed nil. The base is the one member whose header disagrees with itself, and its own property's answer is written out below"
     },
     {
@@ -235,8 +235,8 @@
       "facts": "facts/Accessibility/Accessibility.md",
       "minimum": "6.0",
       "status": "implemented",
-      "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/CharonAXMathExpression.h",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/CharonAXMathExpression.m, and declared by CharonAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
+      "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/RevenantAXMathExpression.h",
+      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
       "effect": "the very array the initialiser was given, identity preserved, and nil for one a caller passed nil. This is one of the two classes the host answers nil for whatever array it was given, and the port answers the array instead: the header declares the property nonnull and the initialiser takes it, so the value is the caller's own and the host dropping it is a defect rather than a stated behaviour. Measured, and declared with the other six cases that follow from it in tests/backports/host/accessibilitymath/expected-differences.tsv"
     },
     {
@@ -246,8 +246,8 @@
       "facts": "facts/Accessibility/Accessibility.md",
       "minimum": "6.0",
       "status": "implemented",
-      "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/CharonAXMathExpression.h",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/CharonAXMathExpression.m, and declared by CharonAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
+      "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/RevenantAXMathExpression.h",
+      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
       "effect": "the very array the initialiser was given, identity preserved, and nil for one a caller passed nil. The property is readonly, so this is not a way to change a built expression; it is the sharing the host does, which a case with a mutable array is what can see"
     },
     {
@@ -257,8 +257,8 @@
       "facts": "facts/Accessibility/Accessibility.md",
       "minimum": "6.0",
       "status": "implemented",
-      "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/CharonAXMathExpression.h",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/CharonAXMathExpression.m, and declared by CharonAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
+      "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/RevenantAXMathExpression.h",
+      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
       "effect": "the very array the initialiser was given, identity preserved, and nil for one a caller passed nil. The property is readonly, so this is not a way to change a built expression; it is the sharing the host does, which a case with a mutable array is what can see"
     },
     {
@@ -268,8 +268,8 @@
       "facts": "facts/Accessibility/Accessibility.md",
       "minimum": "6.0",
       "status": "implemented",
-      "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/CharonAXMathExpression.h",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/CharonAXMathExpression.m, and declared by CharonAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
+      "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/RevenantAXMathExpression.h",
+      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
       "effect": "the string the initialiser was given, and nil for one a caller passed nil in defiance of the header's promise. Nothing is parsed and nothing is evaluated: the header declares no method that takes a string and returns anything but it, and the tree an application builds is what an assistive technology would have been handed - a service this release has none of"
     },
     {
@@ -279,8 +279,8 @@
       "facts": "facts/Accessibility/Accessibility.md",
       "minimum": "6.0",
       "status": "implemented",
-      "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/CharonAXMathExpression.h",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/CharonAXMathExpression.m, and declared by CharonAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
+      "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/RevenantAXMathExpression.h",
+      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
       "effect": "the expression the initialiser was given, and nil for one a caller passed nil in defiance of the header's promise"
     },
     {
@@ -298,7 +298,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "source": "the header of iPhoneOS 26.4, transcribed where 16.4 has none",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/CharonAccessibility.m, and declared by CharonAccessibility.h where the port's own SDK has no header for it",
+      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAccessibility.m, and declared by RevenantAccessibility.h where the port's own SDK has no header for it",
       "effect": "every member its header declares has a body; what it answers where this release cannot reach the service behind it is in facts/Accessibility/Accessibility.md"
     },
     {
@@ -332,7 +332,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "source": "the header of iPhoneOS 26.4, transcribed where 16.4 has none",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/CharonAccessibility.m, and declared by CharonAccessibility.h where the port's own SDK has no header for it",
+      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAccessibility.m, and declared by RevenantAccessibility.h where the port's own SDK has no header for it",
       "effect": "every member its header declares has a body; what it answers where this release cannot reach the service behind it is in facts/Accessibility/Accessibility.md"
     },
     {
@@ -343,7 +343,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "source": "the header of iPhoneOS 26.4, transcribed where 16.4 has none",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/CharonAccessibility.m, and declared by CharonAccessibility.h where the port's own SDK has no header for it",
+      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAccessibility.m, and declared by RevenantAccessibility.h where the port's own SDK has no header for it",
       "effect": "every member its header declares has a body; what it answers where this release cannot reach the service behind it is in facts/Accessibility/Accessibility.md"
     },
     {
@@ -354,7 +354,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "source": "the header of iPhoneOS 26.4, transcribed where 16.4 has none",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/CharonAccessibility.m, and declared by CharonAccessibility.h where the port's own SDK has no header for it",
+      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAccessibility.m, and declared by RevenantAccessibility.h where the port's own SDK has no header for it",
       "effect": "every member its header declares has a body; what it answers where this release cannot reach the service behind it is in facts/Accessibility/Accessibility.md"
     },
     {
@@ -365,7 +365,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "source": "the header of iPhoneOS 26.4, transcribed where 16.4 has none",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/CharonAccessibility.m, and declared by CharonAccessibility.h where the port's own SDK has no header for it",
+      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAccessibility.m, and declared by RevenantAccessibility.h where the port's own SDK has no header for it",
       "effect": "every member its header declares has a body; what it answers where this release cannot reach the service behind it is in facts/Accessibility/Accessibility.md"
     },
     {
@@ -376,7 +376,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "source": "the header of iPhoneOS 26.4, transcribed where 16.4 has none",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/CharonAccessibility.m, and declared by CharonAccessibility.h where the port's own SDK has no header for it",
+      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAccessibility.m, and declared by RevenantAccessibility.h where the port's own SDK has no header for it",
       "effect": "every member its header declares has a body; what it answers where this release cannot reach the service behind it is in facts/Accessibility/Accessibility.md"
     },
     {
@@ -387,7 +387,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "source": "the header of iPhoneOS 26.4, transcribed where 16.4 has none",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/CharonAccessibility.m, and declared by CharonAccessibility.h where the port's own SDK has no header for it",
+      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAccessibility.m, and declared by RevenantAccessibility.h where the port's own SDK has no header for it",
       "effect": "every member its header declares has a body; what it answers where this release cannot reach the service behind it is in facts/Accessibility/Accessibility.md"
     },
     {
@@ -398,7 +398,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "source": "the header of iPhoneOS 26.4, transcribed where 16.4 has none",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/CharonAccessibility.m, and declared by CharonAccessibility.h where the port's own SDK has no header for it",
+      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAccessibility.m, and declared by RevenantAccessibility.h where the port's own SDK has no header for it",
       "effect": "every member its header declares has a body; what it answers where this release cannot reach the service behind it is in facts/Accessibility/Accessibility.md"
     },
     {
@@ -409,7 +409,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "source": "the header of iPhoneOS 26.4, transcribed where 16.4 has none",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/CharonAccessibility.m, and declared by CharonAccessibility.h where the port's own SDK has no header for it",
+      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAccessibility.m, and declared by RevenantAccessibility.h where the port's own SDK has no header for it",
       "effect": "every member its header declares has a body; what it answers where this release cannot reach the service behind it is in facts/Accessibility/Accessibility.md"
     },
     {
@@ -420,7 +420,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "source": "the header of iPhoneOS 26.4, transcribed where 16.4 has none",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/CharonAccessibility.m, and declared by CharonAccessibility.h where the port's own SDK has no header for it",
+      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAccessibility.m, and declared by RevenantAccessibility.h where the port's own SDK has no header for it",
       "effect": "every member its header declares has a body; what it answers where this release cannot reach the service behind it is in facts/Accessibility/Accessibility.md"
     },
     {
@@ -508,7 +508,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "source": "the header of iPhoneOS 16.4, which is the SDK this package compiles against, so the declaration is not transcribed",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/CharonAXCustomContent.m: one attributed string a side and the header's two factories, and the four properties are four spellings of the two values, which is what the host answers",
+      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAXCustomContent.m: one attributed string a side and the header's two factories, and the four properties are four spellings of the two values, which is what the host answers",
       "effect": "the very attributed string the factory was given, kept as given"
     },
     {
@@ -519,7 +519,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "source": "the header of iPhoneOS 16.4, which is the SDK this package compiles against, so the declaration is not transcribed",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/CharonAXCustomContent.m: one attributed string a side and the header's two factories, and the four properties are four spellings of the two values, which is what the host answers",
+      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAXCustomContent.m: one attributed string a side and the header's two factories, and the four properties are four spellings of the two values, which is what the host answers",
       "effect": "the very attributed string the factory was given, kept as given"
     },
     {
@@ -530,7 +530,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "source": "the header of iPhoneOS 16.4, which is the SDK this package compiles against, so the declaration is not transcribed",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/CharonAXCustomContent.m: one attributed string a side and the header's two factories, and the four properties are four spellings of the two values, which is what the host answers",
+      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAXCustomContent.m: one attributed string a side and the header's two factories, and the four properties are four spellings of the two values, which is what the host answers",
       "effect": "the number that was set, and the header's named default AXCustomContentImportanceDefault - which is 0 because it is the first case of the NS_ENUM the header declares - for a content nothing set it on. The two numbers are 0 and 1 and both are in that header; no value here was invented"
     },
     {
@@ -541,7 +541,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "source": "the header of iPhoneOS 16.4, which is the SDK this package compiles against, so the declaration is not transcribed",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/CharonAXCustomContent.m: one attributed string a side and the header's two factories, and the four properties are four spellings of the two values, which is what the host answers",
+      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAXCustomContent.m: one attributed string a side and the header's two factories, and the four properties are four spellings of the two values, which is what the host answers",
       "effect": "the very string inside the attributed string that was given, and not a second copy of the text, so an attribute the application put on the label is still there when a caller reads the plain spelling - measured on the host, where label == attributedLabel.string"
     },
     {
@@ -552,7 +552,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "source": "the header of iPhoneOS 16.4, which is the SDK this package compiles against, so the declaration is not transcribed",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/CharonAXCustomContent.m: one attributed string a side and the header's two factories, and the four properties are four spellings of the two values, which is what the host answers",
+      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAXCustomContent.m: one attributed string a side and the header's two factories, and the four properties are four spellings of the two values, which is what the host answers",
       "effect": "the very string inside the attributed string that was given, and not a second copy of the text, so an attribute the application put on the label is still there when a caller reads the plain spelling - measured on the host, where label == attributedLabel.string"
     },
     {
@@ -682,8 +682,8 @@
       "facts": "facts/Accessibility/Accessibility.md",
       "minimum": "6.0",
       "status": "implemented",
-      "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/CharonAXMathExpression.h",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/CharonAXMathExpression.m, and declared by CharonAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
+      "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/RevenantAXMathExpression.h",
+      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
       "effect": "the expression the initialiser was given, and nil for one a caller passed nil in defiance of the header's promise"
     },
     {
@@ -693,8 +693,8 @@
       "facts": "facts/Accessibility/Accessibility.md",
       "minimum": "6.0",
       "status": "implemented",
-      "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/CharonAXMathExpression.h",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/CharonAXMathExpression.m, and declared by CharonAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
+      "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/RevenantAXMathExpression.h",
+      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
       "effect": "the very array the initialiser was given, identity preserved, and nil for one a caller passed nil. The property is readonly, so this is not a way to change a built expression; it is the sharing the host does, which a case with a mutable array is what can see"
     },
     {
@@ -704,8 +704,8 @@
       "facts": "facts/Accessibility/Accessibility.md",
       "minimum": "6.0",
       "status": "implemented",
-      "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/CharonAXMathExpression.h",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/CharonAXMathExpression.m, and declared by CharonAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
+      "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/RevenantAXMathExpression.h",
+      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
       "effect": "the expression the initialiser was given, and nil for one a caller passed nil in defiance of the header's promise"
     },
     {
@@ -715,8 +715,8 @@
       "facts": "facts/Accessibility/Accessibility.md",
       "minimum": "6.0",
       "status": "implemented",
-      "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/CharonAXMathExpression.h",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/CharonAXMathExpression.m, and declared by CharonAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
+      "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/RevenantAXMathExpression.h",
+      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
       "effect": "the two expressions the initialiser was given; the misspelled denimonator is Apple's own spelling in the initialiser and in the property, and it is the name the corpus row and every caller use, so it is the name this carries"
     },
     {
@@ -726,8 +726,8 @@
       "facts": "facts/Accessibility/Accessibility.md",
       "minimum": "6.0",
       "status": "implemented",
-      "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/CharonAXMathExpression.h",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/CharonAXMathExpression.m, and declared by CharonAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
+      "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/RevenantAXMathExpression.h",
+      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
       "effect": "the two expressions the initialiser was given; the misspelled denimonator is Apple's own spelling in the initialiser and in the property, and it is the name the corpus row and every caller use, so it is the name this carries"
     },
     {
@@ -737,8 +737,8 @@
       "facts": "facts/Accessibility/Accessibility.md",
       "minimum": "6.0",
       "status": "implemented",
-      "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/CharonAXMathExpression.h",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/CharonAXMathExpression.m, and declared by CharonAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
+      "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/RevenantAXMathExpression.h",
+      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
       "effect": "the string the initialiser was given, and nil for one a caller passed nil in defiance of the header's promise. Nothing is parsed and nothing is evaluated: the header declares no method that takes a string and returns anything but it, and the tree an application builds is what an assistive technology would have been handed - a service this release has none of"
     },
     {
@@ -748,8 +748,8 @@
       "facts": "facts/Accessibility/Accessibility.md",
       "minimum": "6.0",
       "status": "implemented",
-      "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/CharonAXMathExpression.h",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/CharonAXMathExpression.m, and declared by CharonAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
+      "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/RevenantAXMathExpression.h",
+      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
       "effect": "the expression the initialiser was given, and nil for one a caller passed nil in defiance of the header's promise"
     },
     {
@@ -759,8 +759,8 @@
       "facts": "facts/Accessibility/Accessibility.md",
       "minimum": "6.0",
       "status": "implemented",
-      "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/CharonAXMathExpression.h",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/CharonAXMathExpression.m, and declared by CharonAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
+      "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/RevenantAXMathExpression.h",
+      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
       "effect": "the very array the initialiser was given, identity preserved, and nil for one a caller passed nil; an empty array stays an empty array, which is what the host answers"
     },
     {
@@ -770,8 +770,8 @@
       "facts": "facts/Accessibility/Accessibility.md",
       "minimum": "6.0",
       "status": "implemented",
-      "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/CharonAXMathExpression.h",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/CharonAXMathExpression.m, and declared by CharonAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
+      "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/RevenantAXMathExpression.h",
+      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
       "effect": "the very array the initialiser was given, identity preserved, and nil for one a caller passed nil; an empty array stays an empty array, which is what the host answers"
     },
     {
@@ -781,8 +781,8 @@
       "facts": "facts/Accessibility/Accessibility.md",
       "minimum": "6.0",
       "status": "implemented",
-      "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/CharonAXMathExpression.h",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/CharonAXMathExpression.m, and declared by CharonAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
+      "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/RevenantAXMathExpression.h",
+      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
       "effect": "the string the initialiser was given, and nil for one a caller passed nil in defiance of the header's promise. Nothing is parsed and nothing is evaluated: the header declares no method that takes a string and returns anything but it, and the tree an application builds is what an assistive technology would have been handed - a service this release has none of"
     },
     {
@@ -792,8 +792,8 @@
       "facts": "facts/Accessibility/Accessibility.md",
       "minimum": "6.0",
       "status": "implemented",
-      "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/CharonAXMathExpression.h",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/CharonAXMathExpression.m, and declared by CharonAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
+      "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/RevenantAXMathExpression.h",
+      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
       "effect": "the string the initialiser was given, and nil for one a caller passed nil in defiance of the header's promise. Nothing is parsed and nothing is evaluated: the header declares no method that takes a string and returns anything but it, and the tree an application builds is what an assistive technology would have been handed - a service this release has none of"
     },
     {
@@ -803,8 +803,8 @@
       "facts": "facts/Accessibility/Accessibility.md",
       "minimum": "6.0",
       "status": "implemented",
-      "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/CharonAXMathExpression.h",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/CharonAXMathExpression.m, and declared by CharonAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
+      "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/RevenantAXMathExpression.h",
+      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
       "effect": "the very array the initialiser was given, identity preserved, and nil for one a caller passed nil; an empty array stays an empty array, which is what the host answers"
     },
     {
@@ -814,8 +814,8 @@
       "facts": "facts/Accessibility/Accessibility.md",
       "minimum": "6.0",
       "status": "implemented",
-      "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/CharonAXMathExpression.h",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/CharonAXMathExpression.m, and declared by CharonAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
+      "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/RevenantAXMathExpression.h",
+      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
       "effect": "the expression the initialiser was given, and nil for one a caller passed nil in defiance of the header's promise"
     },
     {
@@ -825,8 +825,8 @@
       "facts": "facts/Accessibility/Accessibility.md",
       "minimum": "6.0",
       "status": "implemented",
-      "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/CharonAXMathExpression.h",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/CharonAXMathExpression.m, and declared by CharonAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
+      "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/RevenantAXMathExpression.h",
+      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
       "effect": "the very array the initialiser was given, identity preserved, and nil for one a caller passed nil. This is one of the two classes the host answers nil for whatever array it was given, and the port answers the array instead: the header declares the property nonnull and the initialiser takes it, so the value is the caller's own and the host dropping it is a defect rather than a stated behaviour. Measured, and declared with the other six cases that follow from it in tests/backports/host/accessibilitymath/expected-differences.tsv"
     },
     {
@@ -836,8 +836,8 @@
       "facts": "facts/Accessibility/Accessibility.md",
       "minimum": "6.0",
       "status": "implemented",
-      "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/CharonAXMathExpression.h",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/CharonAXMathExpression.m, and declared by CharonAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
+      "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/RevenantAXMathExpression.h",
+      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
       "effect": "the very array the initialiser was given, unflattened and identity preserved, which is what the host answers - the header's own initialiser takes an array here and its own property is declared a single AXMathExpression, and the two cannot both be right. The port keeps the array because the initialiser is the only source of the value and the property the only way to read it back, and answering one of the elements would throw away what the caller put in with nothing in the header to say which element. The declaration is transcribed as Apple writes it and not corrected; a caller wanting one expression takes firstObject. Measured, and declared in tests/backports/host/accessibilitymath/expected-differences.tsv"
     },
     {
@@ -847,8 +847,8 @@
       "facts": "facts/Accessibility/Accessibility.md",
       "minimum": "6.0",
       "status": "implemented",
-      "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/CharonAXMathExpression.h",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/CharonAXMathExpression.m, and declared by CharonAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
+      "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/RevenantAXMathExpression.h",
+      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
       "effect": "the very array the initialiser was given, identity preserved, and nil for one a caller passed nil; an empty array stays an empty array, which is what the host answers"
     },
     {
@@ -858,8 +858,8 @@
       "facts": "facts/Accessibility/Accessibility.md",
       "minimum": "6.0",
       "status": "implemented",
-      "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/CharonAXMathExpression.h",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/CharonAXMathExpression.m, and declared by CharonAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
+      "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/RevenantAXMathExpression.h",
+      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
       "effect": "the very array the initialiser was given, identity preserved, and nil for one a caller passed nil; an empty array stays an empty array, which is what the host answers"
     },
     {
@@ -869,8 +869,8 @@
       "facts": "facts/Accessibility/Accessibility.md",
       "minimum": "6.0",
       "status": "implemented",
-      "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/CharonAXMathExpression.h",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/CharonAXMathExpression.m, and declared by CharonAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
+      "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/RevenantAXMathExpression.h",
+      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
       "effect": "the very array the initialiser was given, identity preserved, and nil for one a caller passed nil. This is one of the two classes the host answers nil for whatever array it was given, and the port answers the array instead: the header declares the property nonnull and the initialiser takes it, so the value is the caller's own and the host dropping it is a defect rather than a stated behaviour. Measured, and declared with the other six cases that follow from it in tests/backports/host/accessibilitymath/expected-differences.tsv"
     },
     {
@@ -880,8 +880,8 @@
       "facts": "facts/Accessibility/Accessibility.md",
       "minimum": "6.0",
       "status": "implemented",
-      "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/CharonAXMathExpression.h",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/CharonAXMathExpression.m, and declared by CharonAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
+      "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/RevenantAXMathExpression.h",
+      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
       "effect": "the very array the initialiser was given, identity preserved, and nil for one a caller passed nil. The property is readonly, so this is not a way to change a built expression; it is the sharing the host does, which a case with a mutable array is what can see"
     },
     {
@@ -891,8 +891,8 @@
       "facts": "facts/Accessibility/Accessibility.md",
       "minimum": "6.0",
       "status": "implemented",
-      "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/CharonAXMathExpression.h",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/CharonAXMathExpression.m, and declared by CharonAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
+      "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/RevenantAXMathExpression.h",
+      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
       "effect": "the very array the initialiser was given, identity preserved, and nil for one a caller passed nil. The property is readonly, so this is not a way to change a built expression; it is the sharing the host does, which a case with a mutable array is what can see"
     },
     {
@@ -902,8 +902,8 @@
       "facts": "facts/Accessibility/Accessibility.md",
       "minimum": "6.0",
       "status": "implemented",
-      "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/CharonAXMathExpression.h",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/CharonAXMathExpression.m, and declared by CharonAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
+      "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/RevenantAXMathExpression.h",
+      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
       "effect": "the string the initialiser was given, and nil for one a caller passed nil in defiance of the header's promise. Nothing is parsed and nothing is evaluated: the header declares no method that takes a string and returns anything but it, and the tree an application builds is what an assistive technology would have been handed - a service this release has none of"
     },
     {
@@ -913,8 +913,8 @@
       "facts": "facts/Accessibility/Accessibility.md",
       "minimum": "6.0",
       "status": "implemented",
-      "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/CharonAXMathExpression.h",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/CharonAXMathExpression.m, and declared by CharonAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
+      "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/RevenantAXMathExpression.h",
+      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
       "effect": "the expression the initialiser was given, and nil for one a caller passed nil in defiance of the header's promise"
     },
     {
@@ -924,8 +924,8 @@
       "facts": "facts/Accessibility/Accessibility.md",
       "minimum": "6.0",
       "status": "implemented",
-      "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/CharonAXMathExpression.h",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/CharonAXMathExpression.m, and declared by CharonAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
+      "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/RevenantAXMathExpression.h",
+      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
       "effect": "the expression the initialiser was given, and nil for one a caller passed nil in defiance of the header's promise"
     },
     {
@@ -935,8 +935,8 @@
       "facts": "facts/Accessibility/Accessibility.md",
       "minimum": "6.0",
       "status": "implemented",
-      "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/CharonAXMathExpression.h",
-      "reason": "hand written in packages/a/apple-backports/Accessibility/CharonAXMathExpression.m, and declared by CharonAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
+      "source": "the header of iPhoneOS 26.2, transcribed where 16.4 has none into Accessibility/RevenantAXMathExpression.h",
+      "reason": "hand written in packages/a/apple-backports/Accessibility/RevenantAXMathExpression.m, and declared by RevenantAXMathExpression.h where the port's own SDK has no header for it: an initialiser stores what it was given and a property answers it, which is the whole of every class in this header",
       "effect": "the expression the initialiser was given, and nil for one a caller passed nil in defiance of the header's promise"
     },
     {
@@ -1001,7 +1001,7 @@
       "introduced": "17.0",
       "facts": "facts/Accessibility/Accessibility.md",
       "status": "implemented",
-      "source": "the value is the release's and the release has no such preference: tests/backports/settings/axs-census.lua over 6.1.3 armv7, run and pasted: 543 AX-prefixed exports in the release's three Accessibility libraries, 339 of them its own AXS/kAXS preference names, and not one preference among them about motion, a blinking or insertion cursor, horizontal text layout, borders or a slider alternative; the four near-miss names are printed in that output and are an event flag, a VoiceOver rotor item, VoiceOver's cursor style and its image navigation. Control: __AXSInvertColorsEnabled resolves and __AXSCharonPlanted is nil, so the \"none\" is a measurement and not a walk that could not look. Carried by Accessibility/CharonAXSettings17.m and held by tests/backports/settings/check.m"
+      "source": "the value is the release's and the release has no such preference: tests/backports/settings/axs-census.lua over 6.1.3 armv7, run and pasted: 543 AX-prefixed exports in the release's three Accessibility libraries, 339 of them its own AXS/kAXS preference names, and not one preference among them about motion, a blinking or insertion cursor, horizontal text layout, borders or a slider alternative; the four near-miss names are printed in that output and are an event flag, a VoiceOver rotor item, VoiceOver's cursor style and its image navigation. Control: __AXSInvertColorsEnabled resolves and __AXSRevenantPlanted is nil, so the \"none\" is a measurement and not a walk that could not look. Carried by Accessibility/RevenantAXSettings17.m and held by tests/backports/settings/check.m"
     },
     {
       "api": "AXAnimatedImagesEnabledDidChangeNotification",
@@ -1009,7 +1009,7 @@
       "introduced": "17.0",
       "facts": "facts/Accessibility/Accessibility.md",
       "status": "implemented",
-      "source": "carried so a caller can name the change, and never posted because the value it announces cannot change: tests/backports/settings/axs-census.lua over 6.1.3 armv7, run and pasted: 543 AX-prefixed exports in the release's three Accessibility libraries, 339 of them its own AXS/kAXS preference names, and not one preference among them about motion, a blinking or insertion cursor, horizontal text layout, borders or a slider alternative; the four near-miss names are printed in that output and are an event flag, a VoiceOver rotor item, VoiceOver's cursor style and its image navigation. Control: __AXSInvertColorsEnabled resolves and __AXSCharonPlanted is nil, so the \"none\" is a measurement and not a walk that could not look. Held by tests/backports/settings/check.m"
+      "source": "carried so a caller can name the change, and never posted because the value it announces cannot change: tests/backports/settings/axs-census.lua over 6.1.3 armv7, run and pasted: 543 AX-prefixed exports in the release's three Accessibility libraries, 339 of them its own AXS/kAXS preference names, and not one preference among them about motion, a blinking or insertion cursor, horizontal text layout, borders or a slider alternative; the four near-miss names are printed in that output and are an event flag, a VoiceOver rotor item, VoiceOver's cursor style and its image navigation. Control: __AXSInvertColorsEnabled resolves and __AXSRevenantPlanted is nil, so the \"none\" is a measurement and not a walk that could not look. Held by tests/backports/settings/check.m"
     },
     {
       "api": "AXPrefersActionSliderAlternative()",
@@ -1017,7 +1017,7 @@
       "introduced": "26.1",
       "facts": "facts/Accessibility/Accessibility.md",
       "status": "implemented",
-      "source": "the value is the release's and the release has no such preference: tests/backports/settings/axs-census.lua over 6.1.3 armv7, run and pasted: 543 AX-prefixed exports in the release's three Accessibility libraries, 339 of them its own AXS/kAXS preference names, and not one preference among them about motion, a blinking or insertion cursor, horizontal text layout, borders or a slider alternative; the four near-miss names are printed in that output and are an event flag, a VoiceOver rotor item, VoiceOver's cursor style and its image navigation. Control: __AXSInvertColorsEnabled resolves and __AXSCharonPlanted is nil, so the \"none\" is a measurement and not a walk that could not look. Carried by Accessibility/CharonAXSettings26.m and held by tests/backports/settings/check.m"
+      "source": "the value is the release's and the release has no such preference: tests/backports/settings/axs-census.lua over 6.1.3 armv7, run and pasted: 543 AX-prefixed exports in the release's three Accessibility libraries, 339 of them its own AXS/kAXS preference names, and not one preference among them about motion, a blinking or insertion cursor, horizontal text layout, borders or a slider alternative; the four near-miss names are printed in that output and are an event flag, a VoiceOver rotor item, VoiceOver's cursor style and its image navigation. Control: __AXSInvertColorsEnabled resolves and __AXSRevenantPlanted is nil, so the \"none\" is a measurement and not a walk that could not look. Carried by Accessibility/RevenantAXSettings26.m and held by tests/backports/settings/check.m"
     },
     {
       "api": "AXPrefersHorizontalTextLayout()",
@@ -1025,7 +1025,7 @@
       "introduced": "17.0",
       "facts": "facts/Accessibility/Accessibility.md",
       "status": "implemented",
-      "source": "the value is the release's and the release has no such preference: tests/backports/settings/axs-census.lua over 6.1.3 armv7, run and pasted: 543 AX-prefixed exports in the release's three Accessibility libraries, 339 of them its own AXS/kAXS preference names, and not one preference among them about motion, a blinking or insertion cursor, horizontal text layout, borders or a slider alternative; the four near-miss names are printed in that output and are an event flag, a VoiceOver rotor item, VoiceOver's cursor style and its image navigation. Control: __AXSInvertColorsEnabled resolves and __AXSCharonPlanted is nil, so the \"none\" is a measurement and not a walk that could not look. Carried by Accessibility/CharonAXSettings17.m and held by tests/backports/settings/check.m"
+      "source": "the value is the release's and the release has no such preference: tests/backports/settings/axs-census.lua over 6.1.3 armv7, run and pasted: 543 AX-prefixed exports in the release's three Accessibility libraries, 339 of them its own AXS/kAXS preference names, and not one preference among them about motion, a blinking or insertion cursor, horizontal text layout, borders or a slider alternative; the four near-miss names are printed in that output and are an event flag, a VoiceOver rotor item, VoiceOver's cursor style and its image navigation. Control: __AXSInvertColorsEnabled resolves and __AXSRevenantPlanted is nil, so the \"none\" is a measurement and not a walk that could not look. Carried by Accessibility/RevenantAXSettings17.m and held by tests/backports/settings/check.m"
     },
     {
       "api": "AXPrefersHorizontalTextLayoutDidChangeNotification",
@@ -1033,7 +1033,7 @@
       "introduced": "17.0",
       "facts": "facts/Accessibility/Accessibility.md",
       "status": "implemented",
-      "source": "carried so a caller can name the change, and never posted because the value it announces cannot change: tests/backports/settings/axs-census.lua over 6.1.3 armv7, run and pasted: 543 AX-prefixed exports in the release's three Accessibility libraries, 339 of them its own AXS/kAXS preference names, and not one preference among them about motion, a blinking or insertion cursor, horizontal text layout, borders or a slider alternative; the four near-miss names are printed in that output and are an event flag, a VoiceOver rotor item, VoiceOver's cursor style and its image navigation. Control: __AXSInvertColorsEnabled resolves and __AXSCharonPlanted is nil, so the \"none\" is a measurement and not a walk that could not look. Held by tests/backports/settings/check.m"
+      "source": "carried so a caller can name the change, and never posted because the value it announces cannot change: tests/backports/settings/axs-census.lua over 6.1.3 armv7, run and pasted: 543 AX-prefixed exports in the release's three Accessibility libraries, 339 of them its own AXS/kAXS preference names, and not one preference among them about motion, a blinking or insertion cursor, horizontal text layout, borders or a slider alternative; the four near-miss names are printed in that output and are an event flag, a VoiceOver rotor item, VoiceOver's cursor style and its image navigation. Control: __AXSInvertColorsEnabled resolves and __AXSRevenantPlanted is nil, so the \"none\" is a measurement and not a walk that could not look. Held by tests/backports/settings/check.m"
     },
     {
       "api": "AXPrefersNonBlinkingTextInsertionIndicator()",
@@ -1041,7 +1041,7 @@
       "introduced": "18.0",
       "facts": "facts/Accessibility/Accessibility.md",
       "status": "implemented",
-      "source": "the value is the release's and the release has no such preference: tests/backports/settings/axs-census.lua over 6.1.3 armv7, run and pasted: 543 AX-prefixed exports in the release's three Accessibility libraries, 339 of them its own AXS/kAXS preference names, and not one preference among them about motion, a blinking or insertion cursor, horizontal text layout, borders or a slider alternative; the four near-miss names are printed in that output and are an event flag, a VoiceOver rotor item, VoiceOver's cursor style and its image navigation. Control: __AXSInvertColorsEnabled resolves and __AXSCharonPlanted is nil, so the \"none\" is a measurement and not a walk that could not look. Carried by Accessibility/CharonAXSettings18.m and held by tests/backports/settings/check.m"
+      "source": "the value is the release's and the release has no such preference: tests/backports/settings/axs-census.lua over 6.1.3 armv7, run and pasted: 543 AX-prefixed exports in the release's three Accessibility libraries, 339 of them its own AXS/kAXS preference names, and not one preference among them about motion, a blinking or insertion cursor, horizontal text layout, borders or a slider alternative; the four near-miss names are printed in that output and are an event flag, a VoiceOver rotor item, VoiceOver's cursor style and its image navigation. Control: __AXSInvertColorsEnabled resolves and __AXSRevenantPlanted is nil, so the \"none\" is a measurement and not a walk that could not look. Carried by Accessibility/RevenantAXSettings18.m and held by tests/backports/settings/check.m"
     },
     {
       "api": "AXShowBordersEnabled()",
@@ -1049,7 +1049,7 @@
       "introduced": "26.1",
       "facts": "facts/Accessibility/Accessibility.md",
       "status": "implemented",
-      "source": "the value is the release's and the release has no such preference: tests/backports/settings/axs-census.lua over 6.1.3 armv7, run and pasted: 543 AX-prefixed exports in the release's three Accessibility libraries, 339 of them its own AXS/kAXS preference names, and not one preference among them about motion, a blinking or insertion cursor, horizontal text layout, borders or a slider alternative; the four near-miss names are printed in that output and are an event flag, a VoiceOver rotor item, VoiceOver's cursor style and its image navigation. Control: __AXSInvertColorsEnabled resolves and __AXSCharonPlanted is nil, so the \"none\" is a measurement and not a walk that could not look. Carried by Accessibility/CharonAXSettings26.m and held by tests/backports/settings/check.m"
+      "source": "the value is the release's and the release has no such preference: tests/backports/settings/axs-census.lua over 6.1.3 armv7, run and pasted: 543 AX-prefixed exports in the release's three Accessibility libraries, 339 of them its own AXS/kAXS preference names, and not one preference among them about motion, a blinking or insertion cursor, horizontal text layout, borders or a slider alternative; the four near-miss names are printed in that output and are an event flag, a VoiceOver rotor item, VoiceOver's cursor style and its image navigation. Control: __AXSInvertColorsEnabled resolves and __AXSRevenantPlanted is nil, so the \"none\" is a measurement and not a walk that could not look. Carried by Accessibility/RevenantAXSettings26.m and held by tests/backports/settings/check.m"
     },
     {
       "api": "AXChart",
@@ -1117,7 +1117,7 @@
       "introduced": "18.0",
       "status": "implemented",
       "facts": "facts/Accessibility/Accessibility.md",
-      "source": "carried so a caller can name the change, and never posted because the value it announces cannot change: tests/backports/settings/axs-census.lua over 6.1.3 armv7, run and pasted: 543 AX-prefixed exports in the release's three Accessibility libraries, 339 of them its own AXS/kAXS preference names, and not one preference among them about motion, a blinking or insertion cursor, horizontal text layout, borders or a slider alternative; the four near-miss names are printed in that output and are an event flag, a VoiceOver rotor item, VoiceOver's cursor style and its image navigation. Control: __AXSInvertColorsEnabled resolves and __AXSCharonPlanted is nil, so the \"none\" is a measurement and not a walk that could not look. Held by tests/backports/settings/check.m"
+      "source": "carried so a caller can name the change, and never posted because the value it announces cannot change: tests/backports/settings/axs-census.lua over 6.1.3 armv7, run and pasted: 543 AX-prefixed exports in the release's three Accessibility libraries, 339 of them its own AXS/kAXS preference names, and not one preference among them about motion, a blinking or insertion cursor, horizontal text layout, borders or a slider alternative; the four near-miss names are printed in that output and are an event flag, a VoiceOver rotor item, VoiceOver's cursor style and its image navigation. Control: __AXSInvertColorsEnabled resolves and __AXSRevenantPlanted is nil, so the \"none\" is a measurement and not a walk that could not look. Held by tests/backports/settings/check.m"
     },
     {
       "api": "AXPrefersActionSliderAlternativeDidChangeNotification",
@@ -1125,7 +1125,7 @@
       "introduced": "26.1",
       "status": "implemented",
       "facts": "facts/Accessibility/Accessibility.md",
-      "source": "carried so a caller can name the change, and never posted because the value it announces cannot change: tests/backports/settings/axs-census.lua over 6.1.3 armv7, run and pasted: 543 AX-prefixed exports in the release's three Accessibility libraries, 339 of them its own AXS/kAXS preference names, and not one preference among them about motion, a blinking or insertion cursor, horizontal text layout, borders or a slider alternative; the four near-miss names are printed in that output and are an event flag, a VoiceOver rotor item, VoiceOver's cursor style and its image navigation. Control: __AXSInvertColorsEnabled resolves and __AXSCharonPlanted is nil, so the \"none\" is a measurement and not a walk that could not look. Held by tests/backports/settings/check.m"
+      "source": "carried so a caller can name the change, and never posted because the value it announces cannot change: tests/backports/settings/axs-census.lua over 6.1.3 armv7, run and pasted: 543 AX-prefixed exports in the release's three Accessibility libraries, 339 of them its own AXS/kAXS preference names, and not one preference among them about motion, a blinking or insertion cursor, horizontal text layout, borders or a slider alternative; the four near-miss names are printed in that output and are an event flag, a VoiceOver rotor item, VoiceOver's cursor style and its image navigation. Control: __AXSInvertColorsEnabled resolves and __AXSRevenantPlanted is nil, so the \"none\" is a measurement and not a walk that could not look. Held by tests/backports/settings/check.m"
     },
     {
       "api": "AXShowBordersEnabledStatusDidChangeNotification",
@@ -1133,7 +1133,7 @@
       "introduced": "26.1",
       "status": "implemented",
       "facts": "facts/Accessibility/Accessibility.md",
-      "source": "carried so a caller can name the change, and never posted because the value it announces cannot change: tests/backports/settings/axs-census.lua over 6.1.3 armv7, run and pasted: 543 AX-prefixed exports in the release's three Accessibility libraries, 339 of them its own AXS/kAXS preference names, and not one preference among them about motion, a blinking or insertion cursor, horizontal text layout, borders or a slider alternative; the four near-miss names are printed in that output and are an event flag, a VoiceOver rotor item, VoiceOver's cursor style and its image navigation. Control: __AXSInvertColorsEnabled resolves and __AXSCharonPlanted is nil, so the \"none\" is a measurement and not a walk that could not look. Held by tests/backports/settings/check.m"
+      "source": "carried so a caller can name the change, and never posted because the value it announces cannot change: tests/backports/settings/axs-census.lua over 6.1.3 armv7, run and pasted: 543 AX-prefixed exports in the release's three Accessibility libraries, 339 of them its own AXS/kAXS preference names, and not one preference among them about motion, a blinking or insertion cursor, horizontal text layout, borders or a slider alternative; the four near-miss names are printed in that output and are an event flag, a VoiceOver rotor item, VoiceOver's cursor style and its image navigation. Control: __AXSInvertColorsEnabled resolves and __AXSRevenantPlanted is nil, so the \"none\" is a measurement and not a walk that could not look. Held by tests/backports/settings/check.m"
     },
     {
       "api": "AXAssistiveAccessEnabled()",
@@ -1141,7 +1141,7 @@
       "introduced": "18.0",
       "status": "implemented",
       "facts": "facts/Accessibility/Accessibility.md",
-      "source": "the answer is the release's: tests/backports/settings/axs-census.lua over 6.1.3 armv7, run and pasted: 543 AX-prefixed exports in the release's three Accessibility libraries, 339 of them its own AXS/kAXS preference names, and not one preference among them about motion, a blinking or insertion cursor, horizontal text layout, borders or a slider alternative; the four near-miss names are printed in that output and are an event flag, a VoiceOver rotor item, VoiceOver's cursor style and its image navigation. Control: __AXSInvertColorsEnabled resolves and __AXSCharonPlanted is nil, so the \"none\" is a measurement and not a walk that could not look Carried by Accessibility/CharonAXSettings18.m and held by tests/backports/settings/check.m The value cannot change in the life of a process, which is its own header's contract and is what makes NO a reading of the release rather than a placeholder."
+      "source": "the answer is the release's: tests/backports/settings/axs-census.lua over 6.1.3 armv7, run and pasted: 543 AX-prefixed exports in the release's three Accessibility libraries, 339 of them its own AXS/kAXS preference names, and not one preference among them about motion, a blinking or insertion cursor, horizontal text layout, borders or a slider alternative; the four near-miss names are printed in that output and are an event flag, a VoiceOver rotor item, VoiceOver's cursor style and its image navigation. Control: __AXSInvertColorsEnabled resolves and __AXSRevenantPlanted is nil, so the \"none\" is a measurement and not a walk that could not look Carried by Accessibility/RevenantAXSettings18.m and held by tests/backports/settings/check.m The value cannot change in the life of a process, which is its own header's contract and is what makes NO a reading of the release rather than a placeholder."
     },
     {
       "api": "AXOpenSettingsFeature()",
@@ -1149,7 +1149,7 @@
       "introduced": "18.0",
       "status": "implemented",
       "facts": "facts/Accessibility/Accessibility.md",
-      "source": "the answer is the release's: tests/backports/settings/axs-census.lua over 6.1.3 armv7, run and pasted: 543 AX-prefixed exports in the release's three Accessibility libraries, 339 of them its own AXS/kAXS preference names, and not one preference among them about motion, a blinking or insertion cursor, horizontal text layout, borders or a slider alternative; the four near-miss names are printed in that output and are an event flag, a VoiceOver rotor item, VoiceOver's cursor style and its image navigation. Control: __AXSInvertColorsEnabled resolves and __AXSCharonPlanted is nil, so the \"none\" is a measurement and not a walk that could not look Carried by Accessibility/CharonAXSettings18.m and held by tests/backports/settings/check.m The release's Settings app has none of the sections the enumeration names - the first two arrived with 18.0 and 18.2 and the last three with 26.0 - so the call cannot begin; the completion is called once, synchronously, with an error in the port's own domain naming the section. THE HOST IS NEVER CALLED FOR THIS ROW: the call opens the Settings app."
+      "source": "the answer is the release's: tests/backports/settings/axs-census.lua over 6.1.3 armv7, run and pasted: 543 AX-prefixed exports in the release's three Accessibility libraries, 339 of them its own AXS/kAXS preference names, and not one preference among them about motion, a blinking or insertion cursor, horizontal text layout, borders or a slider alternative; the four near-miss names are printed in that output and are an event flag, a VoiceOver rotor item, VoiceOver's cursor style and its image navigation. Control: __AXSInvertColorsEnabled resolves and __AXSRevenantPlanted is nil, so the \"none\" is a measurement and not a walk that could not look Carried by Accessibility/RevenantAXSettings18.m and held by tests/backports/settings/check.m The release's Settings app has none of the sections the enumeration names - the first two arrived with 18.0 and 18.2 and the last three with 26.0 - so the call cannot begin; the completion is called once, synchronously, with an error in the port's own domain naming the section. THE HOST IS NEVER CALLED FOR THIS ROW: the call opens the Settings app."
     },
     {
       "api": "AXMFiHearingDevicePairedUUIDs()",

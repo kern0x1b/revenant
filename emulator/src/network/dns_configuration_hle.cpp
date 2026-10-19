@@ -20,7 +20,7 @@
 #include "foundation/address_space.hpp"
 #include "foundation/userland_hle.hpp"
 
-namespace shade {
+namespace emulator {
 namespace {
 
     constexpr std::string_view responder_image { "/usr/sbin/mDNSResponder" };

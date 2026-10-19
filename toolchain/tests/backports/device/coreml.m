@@ -7,7 +7,7 @@
 #import "check.h"
 #import "coreml-models.h"
 
-@interface MLModelAsset (CharonEighteen)
+@interface MLModelAsset (RevenantEighteen)
 + (instancetype)modelAssetWithSpecificationData:(NSData *)specificationData
                                     blobMapping:(NSDictionary<NSURL *, NSData *> *)blobMapping
                                           error:(NSError **)error;
@@ -17,7 +17,7 @@
                       completionHandler:(void (^)(MLModelDescription *, NSError *))handler;
 @end
 
-@interface MLModel (CharonSeventeen)
+@interface MLModel (RevenantSeventeen)
 - (void)predictionFromFeatures:(id<MLFeatureProvider>)input
              completionHandler:(void (^)(id<MLFeatureProvider>, NSError *))handler;
 - (void)predictionFromFeatures:(id<MLFeatureProvider>)input
@@ -27,7 +27,7 @@
 
 static void coreml_check(BOOL passed, const char *name, NSString *detail)
 {
-    charon_check(passed, name, detail);
+    revenant_check(passed, name, detail);
     if (!passed) {
         fprintf(stderr, "FAIL %s: %s\n", name, detail.UTF8String);
     }
@@ -37,15 +37,15 @@ static void coreml_check(BOOL passed, const char *name, NSString *detail)
 #undef CHECK_EQUAL
 #define CHECK(condition, name) coreml_check((condition) ? YES : NO, name, @#condition)
 #define CHECK_EQUAL(actual, expected, name) do { \
-        id charon_actual = (actual), charon_expected = (expected); \
-        coreml_check(charon_actual == charon_expected || [charon_actual isEqual:charon_expected], name, \
-                     [NSString stringWithFormat:@"%@ != %@", charon_actual, charon_expected]); \
+        id revenant_actual = (actual), revenant_expected = (expected); \
+        coreml_check(revenant_actual == revenant_expected || [revenant_actual isEqual:revenant_expected], name, \
+                     [NSString stringWithFormat:@"%@ != %@", revenant_actual, revenant_expected]); \
     } while (0)
 
 static MLModel *model_from(NSString *label, const unsigned char *bytes, unsigned long length, NSError **error)
 {
     NSString *path = [NSTemporaryDirectory() stringByAppendingPathComponent:
-                                                 [NSString stringWithFormat:@"charon-coreml-%@.mlmodel", label]];
+                                                 [NSString stringWithFormat:@"revenant-coreml-%@.mlmodel", label]];
     NSData *container = [NSData dataWithBytes:bytes length:length];
     if (![container writeToFile:path atomically:YES]) {
         *error = [NSError errorWithDomain:NSCocoaErrorDomain code:NSFileWriteUnknownError userInfo:nil];
@@ -54,7 +54,7 @@ static MLModel *model_from(NSString *label, const unsigned char *bytes, unsigned
     return [MLModel modelWithContentsOfURL:[NSURL fileURLWithPath:path] error:error];
 }
 
-static void charon_label(char *into, size_t size, NSString *format, ...)
+static void revenant_label(char *into, size_t size, NSString *format, ...)
 {
     va_list arguments;
     NSString *text;
@@ -260,7 +260,7 @@ static void check_keys(void)
     }
     {
     {
-        MLModel *model = model_from(@"copy", charon_ml_model_glm_classifier, sizeof(charon_ml_model_glm_classifier), NULL);
+        MLModel *model = model_from(@"copy", revenant_ml_model_glm_classifier, sizeof(revenant_ml_model_glm_classifier), NULL);
         MLModelDescription *described = model.modelDescription;
         NSDictionary *inputs = described.inputDescriptionsByName;
         NSEnumerator *each = [inputs keyEnumerator];
@@ -341,7 +341,7 @@ static void check_configuration(void)
     CHECK_EQUAL(@(1ul), @(options.outputBackings.count), "a backing object is kept");
 }
 
-static void check_model(const charon_ml_embedded_model *embedded, int index)
+static void check_model(const revenant_ml_embedded_model *embedded, int index)
 {
     NSError *failure = nil;
     MLModel *model = model_from(@(embedded->name), embedded->bytes, embedded->length, &failure);
@@ -352,13 +352,13 @@ static void check_model(const charon_ml_embedded_model *embedded, int index)
     char label[64];
 
     snprintf(label, sizeof label, "%s: loaded", embedded->name);
-    charon_check(model != nil, label, failure.localizedDescription ?: @"(no error)");
+    revenant_check(model != nil, label, failure.localizedDescription ?: @"(no error)");
     if (model == nil) {
         return;
     }
     description = model.modelDescription;
     snprintf(label, sizeof label, "%s: has a description", embedded->name);
-    charon_check(description != nil, label, @"(none)");
+    revenant_check(description != nil, label, @"(none)");
     CHECK(description.inputDescriptionsByName.count > 0, "the model names its inputs");
     CHECK(description.outputDescriptionsByName.count > 0, "and its outputs");
     CHECK(model.configuration != nil, "a model carries a configuration");
@@ -371,31 +371,31 @@ static void check_model(const charon_ml_embedded_model *embedded, int index)
         MLFeatureDescription *described = description.inputDescriptionsByName[name];
         MLFeatureValue *value = value_for(described);
         char constraint[80];
-        charon_label(constraint, sizeof constraint, @"%s: %@ is described", embedded->name, name);
-        charon_check(described.name != nil, constraint, @"(no name)");
-        charon_label(constraint, sizeof constraint, @"%s: %@ answers its type", embedded->name, name);
-        charon_check(described.type != MLFeatureTypeInvalid, constraint, @"the invalid type");
-        charon_label(constraint, sizeof constraint, @"%s: %@ optional is a flag", embedded->name, name);
-        charon_check(described.isOptional == NO || described.isOptional == YES, constraint, @"not a flag");
-        charon_label(constraint, sizeof constraint, @"%s: %@ copies", embedded->name, name);
-        charon_check([[described copy] isEqual:described], constraint, @"a copy differs");
-        charon_label(constraint, sizeof constraint, @"%s: %@ survives an archive", embedded->name, name);
+        revenant_label(constraint, sizeof constraint, @"%s: %@ is described", embedded->name, name);
+        revenant_check(described.name != nil, constraint, @"(no name)");
+        revenant_label(constraint, sizeof constraint, @"%s: %@ answers its type", embedded->name, name);
+        revenant_check(described.type != MLFeatureTypeInvalid, constraint, @"the invalid type");
+        revenant_label(constraint, sizeof constraint, @"%s: %@ optional is a flag", embedded->name, name);
+        revenant_check(described.isOptional == NO || described.isOptional == YES, constraint, @"not a flag");
+        revenant_label(constraint, sizeof constraint, @"%s: %@ copies", embedded->name, name);
+        revenant_check([[described copy] isEqual:described], constraint, @"a copy differs");
+        revenant_label(constraint, sizeof constraint, @"%s: %@ survives an archive", embedded->name, name);
         {
             NSData *archive = [NSKeyedArchiver archivedDataWithRootObject:described];
             MLFeatureDescription *back = [NSKeyedUnarchiver unarchiveObjectWithData:archive];
-            charon_check([back isEqual:described], constraint, @"an archived description differs");
+            revenant_check([back isEqual:described], constraint, @"an archived description differs");
         }
         if (described.type == MLFeatureTypeMultiArray) {
             MLMultiArrayConstraint *array = described.multiArrayConstraint;
-            charon_label(constraint, sizeof constraint, @"%s: %@ has a multi array constraint", embedded->name, name);
-            charon_check(array != nil, constraint, @"(none)");
-            charon_label(constraint, sizeof constraint, @"%s: %@ is allowed its own value", embedded->name, name);
-            charon_check(value == nil || [described isAllowedValue:value], constraint, @"refused its own value");
-            charon_label(constraint, sizeof constraint, @"%s: %@ is not allowed a string", embedded->name, name);
-            charon_check(![described isAllowedValue:[MLFeatureValue featureValueWithString:@"x"]], constraint,
+            revenant_label(constraint, sizeof constraint, @"%s: %@ has a multi array constraint", embedded->name, name);
+            revenant_check(array != nil, constraint, @"(none)");
+            revenant_label(constraint, sizeof constraint, @"%s: %@ is allowed its own value", embedded->name, name);
+            revenant_check(value == nil || [described isAllowedValue:value], constraint, @"refused its own value");
+            revenant_label(constraint, sizeof constraint, @"%s: %@ is not allowed a string", embedded->name, name);
+            revenant_check(![described isAllowedValue:[MLFeatureValue featureValueWithString:@"x"]], constraint,
                          @"allowed a string");
-            charon_label(constraint, sizeof constraint, @"%s: %@ is not allowed an undefined value", embedded->name, name);
-            charon_check(![described isAllowedValue:[MLFeatureValue undefinedFeatureValueWithType:described.type]],
+            revenant_label(constraint, sizeof constraint, @"%s: %@ is not allowed an undefined value", embedded->name, name);
+            revenant_check(![described isAllowedValue:[MLFeatureValue undefinedFeatureValueWithType:described.type]],
                          constraint, @"allowed an undefined value");
         }
         if (value != nil) {
@@ -409,31 +409,31 @@ static void check_model(const charon_ml_embedded_model *embedded, int index)
         id<MLFeatureProvider> answer = [model predictionFromFeatures:provider error:&failure];
         char prediction[80];
         snprintf(prediction, sizeof prediction, "%s: predicted", embedded->name);
-        charon_check(answer != nil, prediction, failure.localizedDescription ?: @"(no error)");
+        revenant_check(answer != nil, prediction, failure.localizedDescription ?: @"(no error)");
         if (answer != nil) {
             CHECK(answer.featureNames.count > 0, "the prediction answers at least one feature");
             names = [answer.featureNames objectEnumerator];
             while ((name = [names nextObject]) != nil) {
                 MLFeatureValue *value = [answer featureValueForName:name];
-                charon_label(prediction, sizeof prediction, @"%s: %@ is answered", embedded->name, name);
-                charon_check(value != nil, prediction, @"(nil)");
+                revenant_label(prediction, sizeof prediction, @"%s: %@ is answered", embedded->name, name);
+                revenant_check(value != nil, prediction, @"(nil)");
                 if (value == nil) {
                     continue;
                 }
-                charon_label(prediction, sizeof prediction, @"%s: %@ is not undefined", embedded->name, name);
-                charon_check(!value.isUndefined, prediction, @"undefined");
+                revenant_label(prediction, sizeof prediction, @"%s: %@ is not undefined", embedded->name, name);
+                revenant_check(!value.isUndefined, prediction, @"undefined");
                 if (value.multiArrayValue != nil) {
                     MLMultiArray *array = value.multiArrayValue;
-                    charon_label(prediction, sizeof prediction, @"%s: %@ has room", embedded->name, name);
-                    charon_check(array.count > 0, prediction, @"an empty array");
+                    revenant_label(prediction, sizeof prediction, @"%s: %@ has room", embedded->name, name);
+                    revenant_check(array.count > 0, prediction, @"an empty array");
                     {
                         NSNumber *first = [value.multiArrayValue objectAtIndexedSubscript:0];
                         [array setObject:first atIndexedSubscript:0];
                     }
                 }
                 if (value.dictionaryValue.count > 0) {
-                    charon_label(prediction, sizeof prediction, @"%s: %@ has scores", embedded->name, name);
-                    charon_check(value.dictionaryValue.count > 0, prediction, @"none");
+                    revenant_label(prediction, sizeof prediction, @"%s: %@ has scores", embedded->name, name);
+                    revenant_check(value.dictionaryValue.count > 0, prediction, @"none");
                 }
             }
             {
@@ -442,7 +442,7 @@ static void check_model(const charon_ml_embedded_model *embedded, int index)
                     initWithFeatureProviderArray:@[ provider, provider ]];
                 id<MLBatchProvider> answers = [model predictionsFromBatch:batch error:&batchFailure];
                 snprintf(prediction, sizeof prediction, "%s: a batch of two is answered", embedded->name);
-                charon_check(answers != nil, prediction, batchFailure.localizedDescription ?: @"(no error)");
+                revenant_check(answers != nil, prediction, batchFailure.localizedDescription ?: @"(no error)");
                 if (answers != nil) {
                     CHECK_EQUAL(@(2), @(answers.count), "a batch of two answers two");
                     CHECK([[answers featuresAtIndex:0] featureValueForName:
@@ -456,7 +456,7 @@ static void check_model(const charon_ml_embedded_model *embedded, int index)
                                                                           options:options
                                                                             error:&optionFailure];
                 snprintf(prediction, sizeof prediction, "%s: predicted with options", embedded->name);
-                charon_check(again != nil, prediction, optionFailure.localizedDescription ?: @"(no error)");
+                revenant_check(again != nil, prediction, optionFailure.localizedDescription ?: @"(no error)");
                 if (again != nil) {
                     CHECK([again featureValueForName:[answer.featureNames anyObject]] != nil,
                           "the options form answers the same features");
@@ -468,9 +468,9 @@ static void check_model(const charon_ml_embedded_model *embedded, int index)
             id value = [model parameterValueForKey:MLParameterKey.learningRate error:&parameterFailure];
             char refused[80];
             snprintf(refused, sizeof refused, "%s: a parameter it does not have is refused", embedded->name);
-            charon_check(value == nil, refused, @"answered a value");
+            revenant_check(value == nil, refused, @"answered a value");
             snprintf(refused, sizeof refused, "%s: and says so", embedded->name);
-            charon_check(parameterFailure != nil, refused, @"(no error)");
+            revenant_check(parameterFailure != nil, refused, @"(no error)");
         }
     }
     if (index == 0) {
@@ -483,13 +483,13 @@ static void check_model(const charon_ml_embedded_model *embedded, int index)
                     }];
         dispatch_semaphore_wait(done, dispatch_time(DISPATCH_TIME_NOW, 30ull * NSEC_PER_SEC));
         snprintf(label, sizeof label, "predictionFromFeatures:completionHandler: answers once");
-        charon_check(called == 1, label, @"answered a different number of times");
+        revenant_check(called == 1, label, @"answered a different number of times");
     }
 }
 
 static void check_assets(void)
 {
-    NSData *container = [NSData dataWithBytes:charon_ml_model_glm length:sizeof(charon_ml_model_glm)];
+    NSData *container = [NSData dataWithBytes:revenant_ml_model_glm length:sizeof(revenant_ml_model_glm)];
     MLModelAsset *asset = [MLModelAsset modelAssetWithSpecificationData:container error:NULL];
     CHECK(asset != nil, "an asset is made from a container's bytes");
     if (asset == nil) {
@@ -561,22 +561,22 @@ static void check_loading_failures(void)
           "the configured factory is there");
     CHECK_EQUAL(@"com.apple.CoreML", failure.domain, "in Core ML's own error domain");
     {
-        NSString *path = [NSTemporaryDirectory() stringByAppendingPathComponent:@"charon-not-a-model.mlmodel"];
+        NSString *path = [NSTemporaryDirectory() stringByAppendingPathComponent:@"revenant-not-a-model.mlmodel"];
         [@"this is not a model" writeToFile:path atomically:YES encoding:NSUTF8StringEncoding error:NULL];
         CHECK([MLModel modelWithContentsOfURL:[NSURL fileURLWithPath:path] error:&failure] == nil,
               "a file that is not a model is refused");
     }
     {
-        NSString *source = [NSTemporaryDirectory() stringByAppendingPathComponent:@"charon-compile-source.mlmodel"];
-        NSData *container = [NSData dataWithBytes:charon_ml_model_glm length:sizeof(charon_ml_model_glm)];
+        NSString *source = [NSTemporaryDirectory() stringByAppendingPathComponent:@"revenant-compile-source.mlmodel"];
+        NSData *container = [NSData dataWithBytes:revenant_ml_model_glm length:sizeof(revenant_ml_model_glm)];
         NSError *compileFailure = nil;
         NSURL *compiled;
         [container writeToFile:source atomically:YES];
         compiled = [MLModel compileModelAtURL:[NSURL fileURLWithPath:source] error:&compileFailure];
-        charon_check(compiled != nil, "a model compiles to a bundle", compileFailure.localizedDescription ?: @"(no error)");
+        revenant_check(compiled != nil, "a model compiles to a bundle", compileFailure.localizedDescription ?: @"(no error)");
         if (compiled != nil) {
             MLModel *back = [MLModel modelWithContentsOfURL:compiled error:&compileFailure];
-            charon_check(back != nil, "and a model is read back out of it",
+            revenant_check(back != nil, "and a model is read back out of it",
                          compileFailure.localizedDescription ?: @"(no error)");
             CHECK(back.modelDescription.inputDescriptionsByName.count > 0, "with its inputs");
         }
@@ -584,8 +584,8 @@ static void check_loading_failures(void)
     {
         dispatch_semaphore_t done = dispatch_semaphore_create(0);
         __block NSURL *compiled = nil;
-        NSString *source = [NSTemporaryDirectory() stringByAppendingPathComponent:@"charon-compile-async.mlmodel"];
-        [[NSData dataWithBytes:charon_ml_model_glm length:sizeof(charon_ml_model_glm)] writeToFile:source atomically:YES];
+        NSString *source = [NSTemporaryDirectory() stringByAppendingPathComponent:@"revenant-compile-async.mlmodel"];
+        [[NSData dataWithBytes:revenant_ml_model_glm length:sizeof(revenant_ml_model_glm)] writeToFile:source atomically:YES];
         [MLModel compileModelAtURL:[NSURL fileURLWithPath:source]
                   completionHandler:^(NSURL *url, NSError *error) {
                       compiled = url;
@@ -613,20 +613,20 @@ int main(int argc, const char *argv[])
 {
     @autoreleasepool {
         int index;
-        charon_log_to(@(argc > 1 ? argv[1] : "/tmp/charon-coreml.log"));
+        revenant_log_to(@(argc > 1 ? argv[1] : "/tmp/revenant-coreml.log"));
         printf("coreml: the Core ML surface on this device\n");
         check_value_types();
         check_arrays();
         check_providers();
         check_keys();
         check_configuration();
-        for (index = 0; charon_ml_embedded_models[index].name != NULL; index++) {
-            check_model(&charon_ml_embedded_models[index], index);
+        for (index = 0; revenant_ml_embedded_models[index].name != NULL; index++) {
+            check_model(&revenant_ml_embedded_models[index], index);
         }
         check_assets();
         check_loading_failures();
-        fprintf(stderr, "coreml: %d checks, %d failures\n", charon_checks, charon_failures);
-        printf("%d checks, %d failures\n", charon_checks, charon_failures);
+        fprintf(stderr, "coreml: %d checks, %d failures\n", revenant_checks, revenant_failures);
+        printf("%d checks, %d failures\n", revenant_checks, revenant_failures);
     }
-    return charon_failures == 0 ? 0 : 1;
+    return revenant_failures == 0 ? 0 : 1;
 }

@@ -92,7 +92,7 @@ int main(void)
         CHECK(copyChannels[1][20] == channels[1][20], "the copy's samples match the original's");
         CHECK(copyChannels[1] != channels[1], "the copy owns its own memory, not the original's");
 
-        printf("checks=%d failures=%d\n", charon_checks, charon_failures);
+        printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
     }
-    return charon_failures ? 1 : 0;
+    return revenant_failures ? 1 : 0;
 }

@@ -1,6 +1,6 @@
 #import <UIKit/UIKit.h>
 
-@implementation UIScreen (CharonNativeBounds)
+@implementation UIScreen (RevenantNativeBounds)
 
 - (CGRect)nativeBounds
 {

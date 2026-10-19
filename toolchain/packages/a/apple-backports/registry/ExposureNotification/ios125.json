@@ -99,7 +99,7 @@
      "status": "implemented",
      "effect": "the domain every NSError this framework answers with is in, so an error from ENManager can be told from any other by its domain alone",
      "facts": "facts/ExposureNotification/Manager.md",
-     "source": "measured out of a release that has it: the iOS 16.0 arm64e cache exports ENErrorDomain from ExposureNotification.framework at 0x20e5acab8 and the string there is ENErrorDomain, read with charon's own tools/corpus/cache-value.lua over modules/apple/dyld.lua's address space. ExposureNotification arrived in 12.5 and 16.0 is the oldest cache on this machine that has the framework"
+     "source": "measured out of a release that has it: the iOS 16.0 arm64e cache exports ENErrorDomain from ExposureNotification.framework at 0x20e5acab8 and the string there is ENErrorDomain, read with the toolchain's own tools/corpus/cache-value.lua over modules/apple/dyld.lua's address space. ExposureNotification arrived in 12.5 and 16.0 is the oldest cache on this machine that has the framework"
   },
   {
      "api": "-[ENManager activateWithCompletionHandler:]",

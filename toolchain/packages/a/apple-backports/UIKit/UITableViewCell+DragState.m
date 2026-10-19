@@ -1,18 +1,18 @@
 #import <UIKit/UIKit.h>
 #import <objc/runtime.h>
 
-static const char CharonWhileDraggingKey;
+static const char RevenantWhileDraggingKey;
 
-@implementation UITableViewCell (CharonDragState)
+@implementation UITableViewCell (RevenantDragState)
 
 - (BOOL)userInteractionEnabledWhileDragging
 {
-    return [objc_getAssociatedObject(self, &CharonWhileDraggingKey) boolValue];
+    return [objc_getAssociatedObject(self, &RevenantWhileDraggingKey) boolValue];
 }
 
 - (void)setUserInteractionEnabledWhileDragging:(BOOL)enabled
 {
-    objc_setAssociatedObject(self, &CharonWhileDraggingKey, @(enabled), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, &RevenantWhileDraggingKey, @(enabled), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
 - (void)dragStateDidChange:(UITableViewCellDragState)dragState

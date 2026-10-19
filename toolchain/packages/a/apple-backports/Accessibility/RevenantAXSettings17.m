@@ -1,9 +1,9 @@
-#import "CharonAXSettings.h"
-#import "CharonAXSettingsCommon.h"
+#import "RevenantAXSettings.h"
+#import "RevenantAXSettingsCommon.h"
 
 BOOL AXPrefersHorizontalTextLayout(void)
 {
-    return CharonAXSettingIsOffOnThisRelease();
+    return RevenantAXSettingIsOffOnThisRelease();
 }
 
 NSNotificationName const AXPrefersHorizontalTextLayoutDidChangeNotification =
@@ -11,7 +11,7 @@ NSNotificationName const AXPrefersHorizontalTextLayoutDidChangeNotification =
 
 BOOL AXAnimatedImagesEnabled(void)
 {
-    return CharonAXSettingIsOffOnThisRelease();
+    return RevenantAXSettingIsOffOnThisRelease();
 }
 
 NSNotificationName const AXAnimatedImagesEnabledDidChangeNotification =

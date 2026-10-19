@@ -19,7 +19,7 @@
 
 #include "../support.hpp"
 
-namespace shade {
+namespace emulator {
 
 bool CompatibilityKernel::dispatch_bsd_filesystem_persistence(
     Cpu& cpu, std::uint32_t number)

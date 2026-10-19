@@ -12,7 +12,7 @@
 
 #include "media/audio.hpp"
 
-namespace shade {
+namespace emulator {
 
 class SdlAudioSink final : public AudioSink {
 public:

@@ -5,7 +5,7 @@
 # Source it from a harness after `here` is set, passing `here`:
 #   here=$(cd "$(dirname "$0")" && pwd)
 #   . "$here/../../common/runs.sh" "$here"
-#   build=${ALERT_BUILD:-$(runs_folder charon-alert-host)}
+#   build=${ALERT_BUILD:-$(runs_folder revenant-alert-host)}
 #
 # runs_folder NAME   a folder NAME under the runs root, created, same folder on every call
 # runs_fresh NAME    a new, empty folder NAME.XXXXXX under the runs root, for each call

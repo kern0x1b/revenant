@@ -1,27 +1,27 @@
-#import "CharonMetal.h"
+#import "RevenantMetal.h"
 
 #pragma clang diagnostic ignored "-Wprotocol"
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
 
-NSString *const CharonMetalErrorDomain = @"CharonMetalErrorDomain";
+NSString *const RevenantMetalErrorDomain = @"RevenantMetalErrorDomain";
 
-NSError *CharonMetalError(NSInteger code, NSString *message)
+NSError *RevenantMetalError(NSInteger code, NSString *message)
 {
-    return [NSError errorWithDomain:CharonMetalErrorDomain code:code userInfo:@{NSLocalizedDescriptionKey: message}];
+    return [NSError errorWithDomain:RevenantMetalErrorDomain code:code userInfo:@{NSLocalizedDescriptionKey: message}];
 }
 
-@implementation CharonMetalDevice {
+@implementation RevenantMetalDevice {
     EAGLContext *_context;
     NSRecursiveLock *_lock;
     NSMutableDictionary *_pipelines;
 }
 
-+ (CharonMetalDevice *)shared
++ (RevenantMetalDevice *)shared
 {
-    static CharonMetalDevice *shared;
+    static RevenantMetalDevice *shared;
     static dispatch_once_t once;
     dispatch_once(&once, ^{
-        shared = [[CharonMetalDevice alloc] init];
+        shared = [[RevenantMetalDevice alloc] init];
     });
     return shared;
 }
@@ -57,7 +57,7 @@ NSError *CharonMetalError(NSInteger code, NSString *message)
 
 - (NSString *)name
 {
-    return @"Charon OpenGL ES 2.0";
+    return @"Revenant OpenGL ES 2.0";
 }
 
 - (uint64_t)registryID
@@ -107,7 +107,7 @@ NSError *CharonMetalError(NSInteger code, NSString *message)
 
 - (id<MTLCommandQueue>)newCommandQueue
 {
-    return (id<MTLCommandQueue>)[[CharonMetalQueue alloc] init];
+    return (id<MTLCommandQueue>)[[RevenantMetalQueue alloc] init];
 }
 
 - (id<MTLCommandQueue>)newCommandQueueWithMaxCommandBufferCount:(NSUInteger)maxCommandBufferCount
@@ -117,27 +117,27 @@ NSError *CharonMetalError(NSInteger code, NSString *message)
 
 - (id<MTLBuffer>)newBufferWithLength:(NSUInteger)length options:(MTLResourceOptions)options
 {
-    return (id<MTLBuffer>)[[CharonMetalBuffer alloc] initWithLength:length bytes:NULL];
+    return (id<MTLBuffer>)[[RevenantMetalBuffer alloc] initWithLength:length bytes:NULL];
 }
 
 - (id<MTLBuffer>)newBufferWithBytes:(const void *)pointer length:(NSUInteger)length options:(MTLResourceOptions)options
 {
-    return (id<MTLBuffer>)[[CharonMetalBuffer alloc] initWithLength:length bytes:pointer];
+    return (id<MTLBuffer>)[[RevenantMetalBuffer alloc] initWithLength:length bytes:pointer];
 }
 
 - (id<MTLTexture>)newTextureWithDescriptor:(MTLTextureDescriptor *)descriptor
 {
-    return (id<MTLTexture>)[[CharonMetalTexture alloc] initWithDescriptor:descriptor];
+    return (id<MTLTexture>)[[RevenantMetalTexture alloc] initWithDescriptor:descriptor];
 }
 
 - (id<MTLSamplerState>)newSamplerStateWithDescriptor:(MTLSamplerDescriptor *)descriptor
 {
-    return (id<MTLSamplerState>)[[CharonMetalSampler alloc] initWithDescriptor:descriptor];
+    return (id<MTLSamplerState>)[[RevenantMetalSampler alloc] initWithDescriptor:descriptor];
 }
 
 - (id<MTLComputePipelineState>)newComputePipelineStateWithFunction:(id<MTLFunction>)computeFunction error:(NSError **)error
 {
-    return (id<MTLComputePipelineState>)[[CharonMetalComputePipeline alloc] initWithFunction:computeFunction error:error];
+    return (id<MTLComputePipelineState>)[[RevenantMetalComputePipeline alloc] initWithFunction:computeFunction error:error];
 }
 
 - (id<MTLComputePipelineState>)newComputePipelineStateWithFunction:(id<MTLFunction>)computeFunction options:(MTLPipelineOption)options reflection:(MTLAutoreleasedComputePipelineReflection *)reflection error:(NSError **)error
@@ -154,7 +154,7 @@ NSError *CharonMetalError(NSInteger code, NSString *message)
 
 - (id<MTLDepthStencilState>)newDepthStencilStateWithDescriptor:(MTLDepthStencilDescriptor *)descriptor
 {
-    return (id<MTLDepthStencilState>)[[CharonMetalDepthStencil alloc] initWithDescriptor:descriptor];
+    return (id<MTLDepthStencilState>)[[RevenantMetalDepthStencil alloc] initWithDescriptor:descriptor];
 }
 
 - (id<MTLLibrary>)newDefaultLibrary
@@ -167,7 +167,7 @@ NSError *CharonMetalError(NSInteger code, NSString *message)
     NSString *path = [bundle pathForResource:@"default" ofType:@"metallib"];
     if (!path) {
         if (error)
-            *error = CharonMetalError(1, @"the bundle carries no default.metallib");
+            *error = RevenantMetalError(1, @"the bundle carries no default.metallib");
         return nil;
     }
     return [self newLibraryWithFile:path error:error];
@@ -175,7 +175,7 @@ NSError *CharonMetalError(NSInteger code, NSString *message)
 
 - (id<MTLLibrary>)newLibraryWithFile:(NSString *)filepath error:(NSError **)error
 {
-    return (id<MTLLibrary>)[[CharonMetalLibrary alloc] initWithFolder:[filepath stringByAppendingString:@".es2"] error:error];
+    return (id<MTLLibrary>)[[RevenantMetalLibrary alloc] initWithFolder:[filepath stringByAppendingString:@".es2"] error:error];
 }
 
 - (id<MTLLibrary>)newLibraryWithURL:(NSURL *)url error:(NSError **)error
@@ -186,20 +186,20 @@ NSError *CharonMetalError(NSInteger code, NSString *message)
 - (id<MTLLibrary>)newLibraryWithData:(id)data error:(NSError **)error
 {
     if (error)
-        *error = CharonMetalError(2, @"a library built from bytes in memory has no OpenGL ES form; the translated library sits beside its metallib file");
+        *error = RevenantMetalError(2, @"a library built from bytes in memory has no OpenGL ES form; the translated library sits beside its metallib file");
     return nil;
 }
 
 - (id<MTLLibrary>)newLibraryWithSource:(NSString *)source options:(MTLCompileOptions *)options error:(NSError **)error
 {
     if (error)
-        *error = CharonMetalError(3, @"Metal Shading Language source is not compiled on this system");
+        *error = RevenantMetalError(3, @"Metal Shading Language source is not compiled on this system");
     return nil;
 }
 
 - (id<MTLRenderPipelineState>)newRenderPipelineStateWithDescriptor:(MTLRenderPipelineDescriptor *)descriptor error:(NSError **)error
 {
-    return (id<MTLRenderPipelineState>)[[CharonMetalPipeline alloc] initWithDescriptor:descriptor error:error];
+    return (id<MTLRenderPipelineState>)[[RevenantMetalPipeline alloc] initWithDescriptor:descriptor error:error];
 }
 
 - (void)newRenderPipelineStateWithDescriptor:(MTLRenderPipelineDescriptor *)descriptor completionHandler:(MTLNewRenderPipelineStateCompletionHandler)completionHandler

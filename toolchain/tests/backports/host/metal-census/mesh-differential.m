@@ -5,7 +5,7 @@
 
 static int failures;
 
-static NSMutableData *CharonRows(size_t width, size_t height)
+static NSMutableData *RevenantRows(size_t width, size_t height)
 {
     NSMutableData *data = [NSMutableData dataWithLength:width * height * 4];
     uint8_t *bytes = (uint8_t *)data.mutableBytes;
@@ -15,11 +15,11 @@ static NSMutableData *CharonRows(size_t width, size_t height)
     return data;
 }
 
-static void CharonCheckFlip(size_t width, size_t height)
+static void RevenantCheckFlip(size_t width, size_t height)
 {
-    NSMutableData *got = CharonRows(width, height), *want = CharonRows(width, height);
-    CharonMTKFlipRows(got, width, height);
-    uint8_t *source = (uint8_t *)CharonRows(width, height).mutableBytes, *into = (uint8_t *)want.mutableBytes;
+    NSMutableData *got = RevenantRows(width, height), *want = RevenantRows(width, height);
+    RevenantMTKFlipRows(got, width, height);
+    uint8_t *source = (uint8_t *)RevenantRows(width, height).mutableBytes, *into = (uint8_t *)want.mutableBytes;
     size_t stride = width * 4;
     for (size_t row = 0; row < height; row++)
         for (size_t column = 0; column < stride; column++)
@@ -32,7 +32,7 @@ static void CharonCheckFlip(size_t width, size_t height)
     }
 }
 
-static void CharonCheckZone(size_t capacity, size_t const *sizes, size_t count)
+static void RevenantCheckZone(size_t capacity, size_t const *sizes, size_t count)
 {
     size_t used = 0;
     size_t previousEnd = 0;
@@ -64,28 +64,28 @@ static void CharonCheckZone(size_t capacity, size_t const *sizes, size_t count)
 int main(void)
 {
     printf("the flip, against a longhand reference\n");
-    CharonCheckFlip(4, 4);
-    CharonCheckFlip(1, 1);
-    CharonCheckFlip(1, 5);
-    CharonCheckFlip(3, 7);
-    CharonCheckFlip(8, 2);
+    RevenantCheckFlip(4, 4);
+    RevenantCheckFlip(1, 1);
+    RevenantCheckFlip(1, 5);
+    RevenantCheckFlip(3, 7);
+    RevenantCheckFlip(8, 2);
 
     printf("the zone arithmetic\n");
     {
         size_t sizes[] = {16, 16, 16};
-        CharonCheckZone(64, sizes, 3);
+        RevenantCheckZone(64, sizes, 3);
     }
     {
         size_t sizes[] = {16, 16, 16};
-        CharonCheckZone(40, sizes, 3);
+        RevenantCheckZone(40, sizes, 3);
     }
     {
         size_t sizes[] = {10, 0, 5};
-        CharonCheckZone(64, sizes, 3);
+        RevenantCheckZone(64, sizes, 3);
     }
     {
         size_t sizes[] = {64};
-        CharonCheckZone(64, sizes, 1);
+        RevenantCheckZone(64, sizes, 1);
     }
 
     if (failures) {

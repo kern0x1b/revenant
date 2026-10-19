@@ -33,13 +33,13 @@ static NSString *rgb(UIColor *color)
     return [NSString stringWithFormat:@"(%.3f,%.3f,%.3f,%.3f)", c[0], c[1], c[2], c[3]];
 }
 
-@interface CharonListsSource : NSObject <UICollectionViewDataSource>
+@interface RevenantListsSource : NSObject <UICollectionViewDataSource>
 @property (nonatomic, copy) void (^configure)(UICollectionViewCell *cell, NSIndexPath *indexPath);
 @property (nonatomic, copy) UICollectionReusableView *(^supplementary)(UICollectionView *view, NSString *kind, NSIndexPath *indexPath);
 @property (nonatomic) NSInteger count;
 @end
 
-@implementation CharonListsSource
+@implementation RevenantListsSource
 - (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section
 {
     return self.count;
@@ -56,12 +56,12 @@ static NSString *rgb(UIColor *color)
 }
 @end
 
-@interface CharonRegistrationsSource : NSObject <UICollectionViewDataSource>
+@interface RevenantRegistrationsSource : NSObject <UICollectionViewDataSource>
 @property (nonatomic, strong) UICollectionViewCellRegistration *registration;
 @property (nonatomic, strong) UICollectionViewSupplementaryRegistration *header;
 @end
 
-@implementation CharonRegistrationsSource
+@implementation RevenantRegistrationsSource
 - (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section
 {
     return 3;
@@ -76,12 +76,12 @@ static NSString *rgb(UIColor *color)
 }
 @end
 
-@interface CharonListsCell : UICollectionViewListCell
+@interface RevenantListsCell : UICollectionViewListCell
 @end
 
 static NSMutableArray *update_log;
 
-@implementation CharonListsCell
+@implementation RevenantListsCell
 - (void)updateConfigurationUsingState:(UICellConfigurationState *)state
 {
     [update_log addObject:[NSString stringWithFormat:@"update h=%d s=%d e=%d d=%d", state.highlighted, state.selected, state.editing, state.disabled]];
@@ -97,7 +97,7 @@ static NSMutableArray *update_log;
 
 static NSMutableArray *the_touches;
 
-@interface CharonListsTouchDelegate : NSObject <UICollectionViewDelegate>
+@interface RevenantListsTouchDelegate : NSObject <UICollectionViewDelegate>
 - (void)noteTouch:(UIControl *)sender;
 @end
 
@@ -105,10 +105,10 @@ static UIWindow *the_window;
 static UICollectionView *the_view;
 static UICollectionViewDiffableDataSource *the_source;
 static NSMutableArray *the_events;
-static CharonListsTouchDelegate *the_delegate;
+static RevenantListsTouchDelegate *the_delegate;
 static NSArray *(^the_accessories)(NSString *item);
 
-@implementation CharonListsTouchDelegate
+@implementation RevenantListsTouchDelegate
 - (void)noteTouch:(UIControl *)sender
 {
     [the_touches addObject:@"control event"];
@@ -148,7 +148,7 @@ static CGFloat shift(NSInteger item)
 static UIView *swipe_container(NSInteger item)
 {
     for (UIView *view in cell_at(item).subviews)
-        if (strstr(class_getName([view class]), "CharonSwipeContainer"))
+        if (strstr(class_getName([view class]), "RevenantSwipeContainer"))
             return view;
     return nil;
 }
@@ -164,7 +164,7 @@ static BOOL any_open(void)
 static UIControl *control_of(NSInteger item)
 {
     for (UIView *view in cell_at(item).subviews)
-        if ([view isKindOfClass:[UIControl class]] && !strstr(class_getName([view class]), "CharonSwipe"))
+        if ([view isKindOfClass:[UIControl class]] && !strstr(class_getName([view class]), "RevenantSwipe"))
             return (UIControl *)view;
     return nil;
 }
@@ -192,7 +192,7 @@ static void use_list(NSArray *items, NSArray *(^accessories)(NSString *item), vo
         if (configure)
             configure(configuration);
         the_view = [[UICollectionView alloc] initWithFrame:the_window.bounds collectionViewLayout:[UICollectionViewCompositionalLayout layoutWithListConfiguration:configuration]];
-        the_delegate = [[CharonListsTouchDelegate alloc] init];
+        the_delegate = [[RevenantListsTouchDelegate alloc] init];
         the_view.delegate = the_delegate;
         __block UICollectionViewDiffableDataSource *source = nil;
         UICollectionViewCellRegistration *registration = [UICollectionViewCellRegistration registrationWithCellClass:[UICollectionViewListCell class] configurationHandler:^(UICollectionViewListCell *cell, NSIndexPath *indexPath, id item) {
@@ -341,13 +341,13 @@ static void outline_scenario(void)
     gesture_tap(^{
         UIControl *control = control_of(0);
         CGPoint point = centre_of(control);
-        charon_check(YES, "the disclosure and the tap", [NSString stringWithFormat:@"disclosure %@ in the window, tap at %@, %@ userInteraction %d hidden %d", NSStringFromCGRect([control convertRect:control.bounds toView:nil]), NSStringFromCGPoint(point),
+        revenant_check(YES, "the disclosure and the tap", [NSString stringWithFormat:@"disclosure %@ in the window, tap at %@, %@ userInteraction %d hidden %d", NSStringFromCGRect([control convertRect:control.bounds toView:nil]), NSStringFromCGPoint(point),
                                                           NSStringFromClass([control class]), control.userInteractionEnabled, control.hidden]);
         [control addTarget:the_delegate action:@selector(noteTouch:) forControlEvents:UIControlEventTouchDown | UIControlEventTouchUpInside];
         return point;
     }, 0.8);
     gesture_step(0.1, ^{
-        charon_check(YES, "the touch on the disclosure", [NSString stringWithFormat:@"the accessory received: %@; events %@", the_touches, event_text()]);
+        revenant_check(YES, "the touch on the disclosure", [NSString stringWithFormat:@"the accessory received: %@; events %@", the_touches, event_text()]);
         CHECK([event_text() isEqualToString:@"should A,will A"], "a tap on the disclosure asks whether the item expands and tells that it will");
         CHECK([the_view numberOfItemsInSection:0] == 4 && [item_order() isEqualToString:@"A,a1,a2,B"], "and the rows of its children are inserted below it");
         UICollectionViewListCell *child = (UICollectionViewListCell *)cell_at(1);
@@ -429,15 +429,15 @@ static void run_gestures(void (^finished)(void))
     gesture_run(finished);
 }
 
-@interface CharonListsDelegate : UIResponder <UIApplicationDelegate>
+@interface RevenantListsDelegate : UIResponder <UIApplicationDelegate>
 @property (nonatomic, strong) UIWindow *window;
 @end
 
-@implementation CharonListsDelegate
+@implementation RevenantListsDelegate
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)options
 {
-    charon_log_to([results_folder stringByAppendingPathComponent:@"lists.log"]);
+    revenant_log_to([results_folder stringByAppendingPathComponent:@"lists.log"]);
     self.window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
     self.window.rootViewController = [[UIViewController alloc] init];
     [self.window makeKeyAndVisible];
@@ -450,7 +450,7 @@ static void run_gestures(void (^finished)(void))
     @try {
         [self run];
     } @catch (NSException *exception) {
-        charon_check(NO, "the checks raise no exception", [NSString stringWithFormat:@"%@: %@", exception.name, exception.reason]);
+        revenant_check(NO, "the checks raise no exception", [NSString stringWithFormat:@"%@: %@", exception.name, exception.reason]);
     }
     the_window = self.window;
     if (gesture_ready())
@@ -463,7 +463,7 @@ static void run_gestures(void (^finished)(void))
 
 - (void)report
 {
-    NSString *summary = [NSString stringWithFormat:@"%@ checks=%d failures=%d\n", charon_failures ? @"FAIL" : @"ok", charon_checks, charon_failures];
+    NSString *summary = [NSString stringWithFormat:@"%@ checks=%d failures=%d\n", revenant_failures ? @"FAIL" : @"ok", revenant_checks, revenant_failures];
     [summary writeToFile:[results_folder stringByAppendingPathComponent:@"lists.done"] atomically:YES encoding:NSUTF8StringEncoding error:NULL];
 }
 
@@ -475,7 +475,7 @@ static void run_gestures(void (^finished)(void))
     UICollectionView *view = [[UICollectionView alloc] initWithFrame:CGRectMake(0, 0, c->width, 480) collectionViewLayout:layout];
     [view registerClass:[UICollectionViewListCell class] forCellWithReuseIdentifier:@"c"];
     [self.window.rootViewController.view addSubview:view];
-    CharonListsSource *source = [[CharonListsSource alloc] init];
+    RevenantListsSource *source = [[RevenantListsSource alloc] init];
     source.count = 1;
     NSString *factory = @(c->factory);
     source.configure = ^(UICollectionViewCell *cell, NSIndexPath *indexPath) {
@@ -549,18 +549,18 @@ static void run_gestures(void (^finished)(void))
     CHECK(factories.count == sizeof lists_values / sizeof lists_values[0], "there is a recorded line for every content configuration style");
     for (NSUInteger index = 0; index < factories.count; index++) {
         NSString *actual = list_value_line(factories[index], [UIListContentConfiguration performSelector:NSSelectorFromString(factories[index])]);
-        charon_check(list_text_agrees(actual, @(lists_values[index]), 0.001), [NSString stringWithFormat:@"the %@ has the recorded values", factories[index]].UTF8String, [NSString stringWithFormat:@"\n  actual   %@\n  recorded %s", actual, lists_values[index]]);
+        revenant_check(list_text_agrees(actual, @(lists_values[index]), 0.001), [NSString stringWithFormat:@"the %@ has the recorded values", factories[index]].UTF8String, [NSString stringWithFormat:@"\n  actual   %@\n  recorded %s", actual, lists_values[index]]);
     }
     UIFont *header_font = [UIListContentConfiguration sidebarHeaderConfiguration].textProperties.font;
     UIFont *system_font = [UIFont systemFontOfSize:17];
-    charon_check([header_font.fontName isEqualToString:system_font.fontName] && header_font.pointSize == system_font.pointSize && header_font.lineHeight == system_font.lineHeight,
+    revenant_check([header_font.fontName isEqualToString:system_font.fontName] && header_font.pointSize == system_font.pointSize && header_font.lineHeight == system_font.lineHeight,
                  "on iOS 6 the sidebar header's text font is the release's 17-point system font: it has no medium face and no text style leading",
                  [NSString stringWithFormat:@"header %@ %g line %g, system %@ %g line %g", header_font.fontName, header_font.pointSize, header_font.lineHeight, system_font.fontName, system_font.pointSize, system_font.lineHeight]);
     NSArray *backgrounds = @[@"clearConfiguration", @"listPlainCellConfiguration", @"listPlainHeaderFooterConfiguration", @"listGroupedCellConfiguration", @"listGroupedHeaderFooterConfiguration", @"listSidebarHeaderConfiguration",
                              @"listSidebarCellConfiguration", @"listAccompaniedSidebarCellConfiguration"];
     for (NSUInteger index = 0; index < backgrounds.count; index++) {
         NSString *actual = list_background_line(backgrounds[index], [UIBackgroundConfiguration performSelector:NSSelectorFromString(backgrounds[index])]);
-        charon_check(list_text_agrees(actual, @(lists_backgrounds[index]), 0.001), [NSString stringWithFormat:@"the %@ has the recorded values", backgrounds[index]].UTF8String, [NSString stringWithFormat:@"\n  actual   %@\n  recorded %s", actual, lists_backgrounds[index]]);
+        revenant_check(list_text_agrees(actual, @(lists_backgrounds[index]), 0.001), [NSString stringWithFormat:@"the %@ has the recorded values", backgrounds[index]].UTF8String, [NSString stringWithFormat:@"\n  actual   %@\n  recorded %s", actual, lists_backgrounds[index]]);
     }
     UIListContentConfiguration *configuration = [UIListContentConfiguration cellConfiguration];
     configuration.text = @"Hello";
@@ -619,7 +619,7 @@ static void run_gestures(void (^finished)(void))
         }
         NSString *detail = [NSString stringWithFormat:@"editing %d superview %@ content %g %g image %@ text x %g accessories %lu\n  recorded %g %g image %g %g %g %g text x %g accessories %g", view.editing, NSStringFromClass([cell.superview class]), content.origin.x, content.size.width, NSStringFromCGRect(image), textX, (unsigned long)accessories.count, expected[0],
                                                      expected[1], expected[2], expected[3], expected[4], expected[5], expected[6], expected[7]];
-        charon_check(match, [NSString stringWithFormat:@"list case %zu (%s) is laid out as the recorded one", index, c->factory].UTF8String, detail);
+        revenant_check(match, [NSString stringWithFormat:@"list case %zu (%s) is laid out as the recorded one", index, c->factory].UTF8String, detail);
         [view removeFromSuperview];
     }
 }
@@ -631,8 +631,8 @@ static void run_gestures(void (^finished)(void))
     UICollectionViewCompositionalLayout *layout = [UICollectionViewCompositionalLayout layoutWithListConfiguration:configuration];
     UICollectionView *view = [[UICollectionView alloc] initWithFrame:CGRectMake(0, 0, 320, 480) collectionViewLayout:layout];
     [self.window.rootViewController.view addSubview:view];
-    CharonRegistrationsSource *source = [[CharonRegistrationsSource alloc] init];
-    source.registration = [UICollectionViewCellRegistration registrationWithCellClass:[CharonListsCell class] configurationHandler:^(UICollectionViewListCell *cell, NSIndexPath *indexPath, id item) {
+    RevenantRegistrationsSource *source = [[RevenantRegistrationsSource alloc] init];
+    source.registration = [UICollectionViewCellRegistration registrationWithCellClass:[RevenantListsCell class] configurationHandler:^(UICollectionViewListCell *cell, NSIndexPath *indexPath, id item) {
         UIListContentConfiguration *content = [cell defaultContentConfiguration];
         content.text = [NSString stringWithFormat:@"Row %@", item];
         cell.contentConfiguration = content;
@@ -652,7 +652,7 @@ static void run_gestures(void (^finished)(void))
     CHECK(size.width == 320 && fabs(size.height - (28 + 3 * 44)) < 0.51, "the list is the width of the view and a header and three rows of the estimated height tall");
     for (NSInteger row = 0; row < 3; row++) {
         UICollectionViewCell *cell = [view cellForItemAtIndexPath:[NSIndexPath indexPathForItem:row inSection:0]];
-        CHECK([cell isKindOfClass:[CharonListsCell class]], "the registration dequeues its own cell class");
+        CHECK([cell isKindOfClass:[RevenantListsCell class]], "the registration dequeues its own cell class");
         CGRect frame = cell.frame;
         CHECK(fabs(frame.origin.y - (28 + 44 * row)) < 0.51 && frame.size.width == 320 && fabs(frame.size.height - 44) < 0.51 && frame.origin.x == 0, "each row is a full width row of 44 points below the header");
         NSMutableArray *labels = [NSMutableArray array], *images = [NSMutableArray array];
@@ -679,7 +679,7 @@ static void run_gestures(void (^finished)(void))
     [view selectItemAtIndexPath:[NSIndexPath indexPathForItem:1 inSection:0] animated:NO scrollPosition:UICollectionViewScrollPositionNone];
     spin(0.1);
     [view layoutIfNeeded];
-    CharonListsCell *second = (CharonListsCell *)[view cellForItemAtIndexPath:[NSIndexPath indexPathForItem:1 inSection:0]];
+    RevenantListsCell *second = (RevenantListsCell *)[view cellForItemAtIndexPath:[NSIndexPath indexPathForItem:1 inSection:0]];
     CHECK([update_log containsObject:@"needsUpdate"] && [update_log containsObject:@"update h=0 s=1 e=0 d=0"], "selecting a row asks the cell for an update, then hands it the state it is in");
     CHECK([rgb(second.backgroundConfiguration.backgroundColor) isEqual:rgb([UIColor colorWithWhite:220.0 / 255 alpha:1])], "the default background configuration of a selected list cell takes the selected colour");
     [view deselectItemAtIndexPath:[NSIndexPath indexPathForItem:1 inSection:0] animated:NO];
@@ -691,7 +691,7 @@ static void run_gestures(void (^finished)(void))
     view.editing = YES;
     spin(0.1);
     [view layoutIfNeeded];
-    charon_check([update_log containsObject:@"update h=0 s=0 e=1 d=0"], "putting the collection view into editing puts its cells into the editing state",
+    revenant_check([update_log containsObject:@"update h=0 s=0 e=1 d=0"], "putting the collection view into editing puts its cells into the editing state",
                  [NSString stringWithFormat:@"editing %d cells %lu superview %@ log %@", view.editing, (unsigned long)view.visibleCells.count, NSStringFromClass([[view.visibleCells.firstObject superview] class]), update_log]);
     view.editing = NO;
     [view removeFromSuperview];
@@ -797,6 +797,6 @@ int main(int argc, char *argv[])
 {
     @autoreleasepool {
         [[NSFileManager defaultManager] createDirectoryAtPath:results_folder withIntermediateDirectories:YES attributes:nil error:NULL];
-        return UIApplicationMain(argc, argv, nil, @"CharonListsDelegate");
+        return UIApplicationMain(argc, argv, nil, @"RevenantListsDelegate");
     }
 }

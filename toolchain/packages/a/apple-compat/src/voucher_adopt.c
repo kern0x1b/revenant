@@ -2,18 +2,18 @@
 #include <stdlib.h>
 #include "system_function.h"
 
-static _Atomic(uintptr_t) charon_system_voucher_adopt;
+static _Atomic(uintptr_t) revenant_system_voucher_adopt;
 
 __attribute__((constructor))
-static void charon_resolve_voucher_adopt(void)
+static void revenant_resolve_voucher_adopt(void)
 {
-    charon_system_function(&charon_system_voucher_adopt, CHARON_LIBDISPATCH, "voucher_adopt");
+    revenant_system_function(&revenant_system_voucher_adopt, REVENANT_LIBDISPATCH, "voucher_adopt");
 }
 
 __attribute__((visibility("hidden")))
 void *voucher_adopt(void *voucher)
 {
-    void *(*system)(void *) = charon_system_function(&charon_system_voucher_adopt, CHARON_LIBDISPATCH, "voucher_adopt");
+    void *(*system)(void *) = revenant_system_function(&revenant_system_voucher_adopt, REVENANT_LIBDISPATCH, "voucher_adopt");
     if (system)
         return system(voucher);
     if (voucher) {

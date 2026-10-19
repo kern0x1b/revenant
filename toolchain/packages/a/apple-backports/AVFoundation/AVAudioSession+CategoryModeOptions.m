@@ -1,6 +1,6 @@
 #import <AVFoundation/AVFoundation.h>
 
-@implementation AVAudioSession (CharonCategoryModeOptions)
+@implementation AVAudioSession (RevenantCategoryModeOptions)
 
 - (BOOL)setCategory:(AVAudioSessionCategory)category mode:(AVAudioSessionMode)mode options:(AVAudioSessionCategoryOptions)options error:(NSError **)outError
 {

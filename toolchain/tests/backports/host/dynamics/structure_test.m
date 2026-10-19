@@ -79,7 +79,7 @@ static void test_masks(void)
     NSArray *oracle = masks(Oracle), *ours = masks(Ours);
     const char *names[] = {"a", "b", "c"};
     for (NSUInteger row = 0; row < oracle.count; row++) {
-        charon_check([ours[row] isEqual:oracle[row]], "T7 collision masks are the oracle's",
+        revenant_check([ours[row] isEqual:oracle[row]], "T7 collision masks are the oracle's",
                      [NSString stringWithFormat:@"%s%@: ours %@ oracle %@", names[row % 3], row < 3 ? @"" : @" after removing the second",
                                                 [ours[row] componentsJoinedByString:@","], [oracle[row] componentsJoinedByString:@","]]);
     }
@@ -174,10 +174,10 @@ static void test_exceptions(void)
     const char *cases[] = {"UISnapBehavior init", "UIAttachmentBehavior init", "a child added as a top-level behavior",
                            "a view outside the reference view", "one behavior added twice"};
     for (NSUInteger index = 0; index < oracle.count; index++) {
-        charon_check([ours[index] isEqualToString:oracle[index]], "T9 exception name and text are the oracle's",
+        revenant_check([ours[index] isEqualToString:oracle[index]], "T9 exception name and text are the oracle's",
                      [NSString stringWithFormat:@"%s: ours \"%@\" oracle \"%@\"", cases[index], ours[index], oracle[index]]);
     }
-    charon_check([oracle[0] hasPrefix:@"NSInvalidArgumentException: init is undefined for objects of type UISnapBehavior"],
+    revenant_check([oracle[0] hasPrefix:@"NSInvalidArgumentException: init is undefined for objects of type UISnapBehavior"],
                  "oracle refuses as s_anim measured", oracle[0]);
 }
 
@@ -259,9 +259,9 @@ static NSString *step_shape(NSArray *events)
 static void test_step_order(void)
 {
     NSString *oracle = step_shape(step_order(Oracle)), *ours = step_shape(step_order(Ours));
-    charon_check([ours isEqualToString:oracle], "T10 write-back, contacts and actions come in the oracle's order",
+    revenant_check([ours isEqualToString:oracle], "T10 write-back, contacts and actions come in the oracle's order",
                  [NSString stringWithFormat:@"ours %@ oracle %@", ours, oracle]);
-    charon_check([oracle hasPrefix:@"contacts before the action of their step: 1; kinds: begin boundary floor, end boundary floor;"],
+    revenant_check([oracle hasPrefix:@"contacts before the action of their step: 1; kinds: begin boundary floor, end boundary floor;"],
                  "oracle reports the floor contacts before its actions", oracle);
 }
 
@@ -375,9 +375,9 @@ static NSArray *in_rect(Side side)
 static void test_in_rect(void)
 {
     NSArray *oracle = in_rect(Oracle), *ours = in_rect(Ours);
-    charon_check([ours isEqualToArray:oracle], "T14 itemsInRect: takes the item at the oracle's gaps",
+    revenant_check([ours isEqualToArray:oracle], "T14 itemsInRect: takes the item at the oracle's gaps",
                  [NSString stringWithFormat:@"ours %@ oracle %@", [ours componentsJoinedByString:@","], [oracle componentsJoinedByString:@","]]);
-    charon_check([oracle isEqualToArray:@[@1, @0]], "oracle takes an item as s_anim measured", [oracle componentsJoinedByString:@","]);
+    revenant_check([oracle isEqualToArray:@[@1, @0]], "oracle takes an item as s_anim measured", [oracle componentsJoinedByString:@","]);
 }
 
 #pragma mark T17: several item behaviors on one item
@@ -444,7 +444,7 @@ static void test_release(void)
         [animator _setAlwaysDisableDisplayLink:NO];
         gone = animator;
     }
-    charon_check(gone == nil, "an animator released with its behaviors deallocates", @"ours");
+    revenant_check(gone == nil, "an animator released with its behaviors deallocates", @"ours");
 }
 
 int main(void)

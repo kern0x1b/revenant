@@ -3,12 +3,12 @@
 #import <Foundation/Foundation.h>
 #import <objc/runtime.h>
 
-#import "CharonAVKitSpeeds.h"
+#import "RevenantAVKitSpeeds.h"
 
 @implementation AVPlaybackSpeed
 {
-    float _charonRate;
-    NSString *_charonLocalizedName;
+    float _revenantRate;
+    NSString *_revenantLocalizedName;
 }
 
 + (NSArray<AVPlaybackSpeed *> *)systemDefaultSpeeds
@@ -28,20 +28,20 @@
 - (instancetype)initWithRate:(float)rate localizedName:(NSString *)localizedName
 {
     if ((self = [super init])) {
-        _charonRate = rate;
-        _charonLocalizedName = [localizedName copy] ?: @"";
+        _revenantRate = rate;
+        _revenantLocalizedName = [localizedName copy] ?: @"";
     }
     return self;
 }
 
 - (float)rate
 {
-    return _charonRate;
+    return _revenantRate;
 }
 
 - (NSString *)localizedName
 {
-    return _charonLocalizedName;
+    return _revenantLocalizedName;
 }
 
 - (NSString *)localizedNumericName
@@ -55,40 +55,40 @@
         formatter.minimumFractionDigits = 0;
         formatter.usesGroupingSeparator = NO;
     });
-    NSString *digits = [formatter stringFromNumber:@(_charonRate)] ?: [NSString stringWithFormat:@"%g", (double)_charonRate];
+    NSString *digits = [formatter stringFromNumber:@(_revenantRate)] ?: [NSString stringWithFormat:@"%g", (double)_revenantRate];
     return [NSString stringWithFormat:@"%@\u00D7", digits];
 }
 
 - (NSString *)description
 {
-    return [NSString stringWithFormat:@"<AVPlaybackSpeed %.6g %@>", (double)_charonRate, _charonLocalizedName];
+    return [NSString stringWithFormat:@"<AVPlaybackSpeed %.6g %@>", (double)_revenantRate, _revenantLocalizedName];
 }
 
 @end
 
-static const void *CharonSpeedsKey = &CharonSpeedsKey;
-static const void *CharonSelectedSpeedKey = &CharonSelectedSpeedKey;
+static const void *RevenantSpeedsKey = &RevenantSpeedsKey;
+static const void *RevenantSelectedSpeedKey = &RevenantSelectedSpeedKey;
 
-@implementation AVPlayerViewController (CharonSpeeds16)
+@implementation AVPlayerViewController (RevenantSpeeds16)
 
 - (NSArray<AVPlaybackSpeed *> *)speeds
 {
-    NSArray *speeds = objc_getAssociatedObject(self, CharonSpeedsKey);
+    NSArray *speeds = objc_getAssociatedObject(self, RevenantSpeedsKey);
     return speeds ?: [AVPlaybackSpeed systemDefaultSpeeds];
 }
 
 - (void)setSpeeds:(NSArray<AVPlaybackSpeed *> *)speeds
 {
-    objc_setAssociatedObject(self, CharonSpeedsKey, [speeds copy] ?: [AVPlaybackSpeed systemDefaultSpeeds],
+    objc_setAssociatedObject(self, RevenantSpeedsKey, [speeds copy] ?: [AVPlaybackSpeed systemDefaultSpeeds],
                              OBJC_ASSOCIATION_COPY_NONATOMIC);
-    AVPlaybackSpeed *selected = objc_getAssociatedObject(self, CharonSelectedSpeedKey);
+    AVPlaybackSpeed *selected = objc_getAssociatedObject(self, RevenantSelectedSpeedKey);
     if (selected && ![speeds containsObject:selected])
-        objc_setAssociatedObject(self, CharonSelectedSpeedKey, nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+        objc_setAssociatedObject(self, RevenantSelectedSpeedKey, nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
 - (AVPlaybackSpeed *)selectedSpeed
 {
-    AVPlaybackSpeed *selected = objc_getAssociatedObject(self, CharonSelectedSpeedKey);
+    AVPlaybackSpeed *selected = objc_getAssociatedObject(self, RevenantSelectedSpeedKey);
     if (selected && [self.speeds containsObject:selected])
         return selected;
     float rate = self.player.rate;
@@ -103,14 +103,14 @@ static const void *CharonSelectedSpeedKey = &CharonSelectedSpeedKey;
 {
     if (!speed || ![self.speeds containsObject:speed])
         return;
-    objc_setAssociatedObject(self, CharonSelectedSpeedKey, speed, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, RevenantSelectedSpeedKey, speed, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     if (self.player.rate != 0)
-        [self charon_applySelectedSpeed];
+        [self revenant_applySelectedSpeed];
 }
 
-- (void)charon_applySelectedSpeed
+- (void)revenant_applySelectedSpeed
 {
-    AVPlaybackSpeed *selected = objc_getAssociatedObject(self, CharonSelectedSpeedKey);
+    AVPlaybackSpeed *selected = objc_getAssociatedObject(self, RevenantSelectedSpeedKey);
     if (selected && self.player)
         self.player.rate = selected.rate;
 }

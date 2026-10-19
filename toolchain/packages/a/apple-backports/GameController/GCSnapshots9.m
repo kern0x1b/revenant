@@ -1,14 +1,14 @@
-#import "CharonGCSnapshot.h"
-#import "CharonGC.h"
+#import "RevenantGCSnapshot.h"
+#import "RevenantGC.h"
 
 NSData *NSDataFromGCMicroGamepadSnapShotDataV100(GCMicroGamepadSnapShotDataV100 *snapshotData)
 {
-    return charon_gc_snapshot_data(snapshotData, sizeof(GCMicroGamepadSnapShotDataV100), GCMicroGamepadSnapshotDataVersion1);
+    return revenant_gc_snapshot_data(snapshotData, sizeof(GCMicroGamepadSnapShotDataV100), GCMicroGamepadSnapshotDataVersion1);
 }
 
 BOOL GCMicroGamepadSnapShotDataV100FromNSData(GCMicroGamepadSnapShotDataV100 *snapshotData, NSData *data)
 {
-    return charon_gc_snapshot_read(snapshotData, data, sizeof(GCMicroGamepadSnapShotDataV100), charon_gc_accept_declared_size);
+    return revenant_gc_snapshot_read(snapshotData, data, sizeof(GCMicroGamepadSnapShotDataV100), revenant_gc_accept_declared_size);
 }
 
 @implementation GCMicroGamepadSnapshot {
@@ -21,13 +21,13 @@ BOOL GCMicroGamepadSnapShotDataV100FromNSData(GCMicroGamepadSnapShotDataV100 *sn
 {
     GCMicroGamepadSnapshotData fields;
     memset(&fields, 0, sizeof(fields));
-    if (!charon_gc_snapshot_read(&fields, data, sizeof(fields), charon_gc_accept_declared_size))
+    if (!revenant_gc_snapshot_read(&fields, data, sizeof(fields), revenant_gc_accept_declared_size))
         return nil;
     self = [super init];
     if (self == nil)
         return nil;
     _snapshotData = [data copy];
-    [self charon_applyMicro:&fields];
+    [self revenant_applyMicro:&fields];
     return self;
 }
 
@@ -36,36 +36,36 @@ BOOL GCMicroGamepadSnapShotDataV100FromNSData(GCMicroGamepadSnapShotDataV100 *sn
     self = [self initWithSnapshotData:data];
     if (self == nil)
         return nil;
-    [self charon_setController:controller];
+    [self revenant_setController:controller];
     return self;
 }
 
-- (void)charon_applyMicro:(GCMicroGamepadSnapshotData *)fields
+- (void)revenant_applyMicro:(GCMicroGamepadSnapshotData *)fields
 {
-    GCControllerDirectionPad *dpad = (GCControllerDirectionPad *)[self charon_elementNamed:@"Direction Pad"];
+    GCControllerDirectionPad *dpad = (GCControllerDirectionPad *)[self revenant_elementNamed:@"Direction Pad"];
     if (dpad != nil) {
-        [(GCControllerAxisInput *)dpad.xAxis charon_setValue:fields->dpadX];
-        [(GCControllerAxisInput *)dpad.yAxis charon_setValue:fields->dpadY];
+        [(GCControllerAxisInput *)dpad.xAxis revenant_setValue:fields->dpadX];
+        [(GCControllerAxisInput *)dpad.yAxis revenant_setValue:fields->dpadY];
     }
-    [(GCControllerButtonInput *)[self charon_elementNamed:@"Button A"] charon_update:fields->buttonA];
-    [(GCControllerButtonInput *)[self charon_elementNamed:@"Button X"] charon_update:fields->buttonX];
+    [(GCControllerButtonInput *)[self revenant_elementNamed:@"Button A"] revenant_update:fields->buttonA];
+    [(GCControllerButtonInput *)[self revenant_elementNamed:@"Button X"] revenant_update:fields->buttonX];
 }
 
 @end
 
-@implementation GCMicroGamepad (CharonGCSnapshot9)
+@implementation GCMicroGamepad (RevenantGCSnapshot9)
 
 - (GCMicroGamepadSnapshot *)saveSnapshot
 {
     GCMicroGamepadSnapshotData fields;
     memset(&fields, 0, sizeof(fields));
-    GCControllerDirectionPad *dpad = (GCControllerDirectionPad *)[self charon_elementNamed:@"Direction Pad"];
-    fields.dpadX = charon_gc_pad_axis(dpad, @selector(xAxis));
-    fields.dpadY = charon_gc_pad_axis(dpad, @selector(yAxis));
-    fields.buttonA = charon_gc_button_value([self charon_elementNamed:@"Button A"]);
-    fields.buttonX = charon_gc_button_value([self charon_elementNamed:@"Button X"]);
+    GCControllerDirectionPad *dpad = (GCControllerDirectionPad *)[self revenant_elementNamed:@"Direction Pad"];
+    fields.dpadX = revenant_gc_pad_axis(dpad, @selector(xAxis));
+    fields.dpadY = revenant_gc_pad_axis(dpad, @selector(yAxis));
+    fields.buttonA = revenant_gc_button_value([self revenant_elementNamed:@"Button A"]);
+    fields.buttonX = revenant_gc_button_value([self revenant_elementNamed:@"Button X"]);
     return [[GCMicroGamepadSnapshot alloc]
-               initWithSnapshotData:charon_gc_snapshot_data(&fields, sizeof(fields),
+               initWithSnapshotData:revenant_gc_snapshot_data(&fields, sizeof(fields),
                                                             GCMicroGamepadSnapshotDataVersion1)];
 }
 

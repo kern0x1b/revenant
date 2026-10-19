@@ -22,7 +22,7 @@
 #include <string_view>
 #include <vector>
 
-namespace shade {
+namespace emulator {
 namespace {
 
     constexpr std::string_view opengles_image {

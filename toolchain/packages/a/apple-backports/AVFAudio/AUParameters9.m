@@ -1,18 +1,18 @@
-#import "CharonAUAudioUnit.h"
+#import "RevenantAUAudioUnit.h"
 
 @implementation AUParameterNode {
 @protected
-    NSString *_charon_identifier;
-    NSString *_charon_keyPath;
-    NSString *_charon_displayName;
-    NSMutableArray<NSValue *> *_charon_valueObservers;
-    NSMutableArray<NSValue *> *_charon_recordingObservers;
-    NSMutableArray<NSValue *> *_charon_automationObservers;
-    NSMutableArray<NSValue *> *_charon_touchedTokens;
-    __weak AUParameterNode *_charon_parent;
+    NSString *_revenant_identifier;
+    NSString *_revenant_keyPath;
+    NSString *_revenant_displayName;
+    NSMutableArray<NSValue *> *_revenant_valueObservers;
+    NSMutableArray<NSValue *> *_revenant_recordingObservers;
+    NSMutableArray<NSValue *> *_revenant_automationObservers;
+    NSMutableArray<NSValue *> *_revenant_touchedTokens;
+    __weak AUParameterNode *_revenant_parent;
 }
 
-- (AUParameterObserverToken)charon_addObserver:(id)observer to:(NSMutableArray<NSValue *> *)table
+- (AUParameterObserverToken)revenant_addObserver:(id)observer to:(NSMutableArray<NSValue *> *)table
 {
     if (observer == nil) {
         return NULL;
@@ -22,141 +22,141 @@
     return (__bridge AUParameterObserverToken)token;
 }
 
-- (void)charon_removeObserver:(AUParameterObserverToken)token
+- (void)revenant_removeObserver:(AUParameterObserverToken)token
 {
     if (token == NULL) {
         return;
     }
     NSValue *key = [NSValue valueWithPointer:(const void *)token];
-    [_charon_valueObservers removeObject:key];
-    [_charon_recordingObservers removeObject:key];
-    [_charon_automationObservers removeObject:key];
-    [_charon_touchedTokens removeObject:key];
+    [_revenant_valueObservers removeObject:key];
+    [_revenant_recordingObservers removeObject:key];
+    [_revenant_automationObservers removeObject:key];
+    [_revenant_touchedTokens removeObject:key];
 }
 
-- (void)charon_notifyValue:(AUValue)value atAddress:(AUParameterAddress)address
+- (void)revenant_notifyValue:(AUValue)value atAddress:(AUParameterAddress)address
 {
-    for (NSValue *token in [_charon_valueObservers copy]) {
+    for (NSValue *token in [_revenant_valueObservers copy]) {
         AUParameterObserver observer = (AUParameterObserver)token.pointerValue;
         observer(address, value);
     }
-    [_charon_parent charon_notifyValue:value atAddress:address];
+    [_revenant_parent revenant_notifyValue:value atAddress:address];
 }
 
-- (void)charon_notifyRecording:(NSInteger)count events:(const AURecordedParameterEvent *)events
+- (void)revenant_notifyRecording:(NSInteger)count events:(const AURecordedParameterEvent *)events
 {
-    for (NSValue *token in [_charon_recordingObservers copy]) {
+    for (NSValue *token in [_revenant_recordingObservers copy]) {
         AUParameterRecordingObserver observer = (AUParameterRecordingObserver)token.pointerValue;
         observer(count, events);
     }
-    [_charon_parent charon_notifyRecording:count events:events];
+    [_revenant_parent revenant_notifyRecording:count events:events];
 }
 
-- (void)charon_notifyAutomation:(NSInteger)count events:(const AUParameterAutomationEvent *)events
+- (void)revenant_notifyAutomation:(NSInteger)count events:(const AUParameterAutomationEvent *)events
 {
-    for (NSValue *token in [_charon_automationObservers copy]) {
+    for (NSValue *token in [_revenant_automationObservers copy]) {
         AUParameterAutomationObserver observer = (AUParameterAutomationObserver)token.pointerValue;
         observer(count, events);
     }
-    [_charon_parent charon_notifyAutomation:count events:events];
+    [_revenant_parent revenant_notifyAutomation:count events:events];
 }
 
 - (instancetype)init
 {
     if ((self = [super init])) {
-        _charon_identifier = @"";
-        _charon_displayName = @"";
+        _revenant_identifier = @"";
+        _revenant_displayName = @"";
     }
     return self;
 }
 
-- (void)charon_setIdentifier:(NSString *)identifier
+- (void)revenant_setIdentifier:(NSString *)identifier
 {
-    _charon_identifier = [identifier copy];
+    _revenant_identifier = [identifier copy];
 }
 
 - (NSString *)identifier
 {
-    return _charon_identifier;
+    return _revenant_identifier;
 }
 
 - (NSString *)keyPath
 {
-    return _charon_keyPath;
+    return _revenant_keyPath;
 }
 
 - (NSString *)displayName
 {
-    return _charon_displayName;
+    return _revenant_displayName;
 }
 
 - (NSString *)displayNameWithLength:(NSInteger)maximumLength
 {
-    return _charon_displayName;
+    return _revenant_displayName;
 }
 
 - (AUParameterObserverToken)tokenByAddingParameterObserver:(AUParameterObserver)observer
 {
-    return [self charon_addObserver:observer to:_charon_valueObservers ?: (_charon_valueObservers = [NSMutableArray array])];
+    return [self revenant_addObserver:observer to:_revenant_valueObservers ?: (_revenant_valueObservers = [NSMutableArray array])];
 }
 
 - (AUParameterObserverToken)tokenByAddingParameterRecordingObserver:(AUParameterRecordingObserver)observer
 {
-    return [self charon_addObserver:observer to:_charon_recordingObservers ?: (_charon_recordingObservers = [NSMutableArray array])];
+    return [self revenant_addObserver:observer to:_revenant_recordingObservers ?: (_revenant_recordingObservers = [NSMutableArray array])];
 }
 
 - (void)removeParameterObserver:(AUParameterObserverToken)token
 {
-    [self charon_removeObserver:token];
+    [self revenant_removeObserver:token];
 }
 
-- (void)charon_setParent:(AUParameterNode *)parent keyPath:(NSString *)keyPath
+- (void)revenant_setParent:(AUParameterNode *)parent keyPath:(NSString *)keyPath
 {
-    _charon_parent = parent;
-    _charon_keyPath = [keyPath copy];
+    _revenant_parent = parent;
+    _revenant_keyPath = [keyPath copy];
 }
 
-- (NSArray<NSValue *> *)charon_observerTokens
+- (NSArray<NSValue *> *)revenant_observerTokens
 {
-    if (_charon_valueObservers == nil) {
+    if (_revenant_valueObservers == nil) {
         return @[];
     }
-    return _charon_valueObservers;
+    return _revenant_valueObservers;
 }
 
-- (void)charon_addAutomationObserver:(id)observer
+- (void)revenant_addAutomationObserver:(id)observer
 {
     if (observer == nil) {
         return;
     }
-    if (_charon_automationObservers == nil) {
-        _charon_automationObservers = [NSMutableArray array];
+    if (_revenant_automationObservers == nil) {
+        _revenant_automationObservers = [NSMutableArray array];
     }
-    [_charon_automationObservers addObject:[NSValue valueWithPointer:(__bridge const void *)observer]];
+    [_revenant_automationObservers addObject:[NSValue valueWithPointer:(__bridge const void *)observer]];
 }
 
 @end
 
 @implementation AUParameterGroup {
-    NSArray<AUParameterNode *> *_charon_children;
+    NSArray<AUParameterNode *> *_revenant_children;
 }
 
-- (instancetype)initWithCharonChildren:(NSArray<AUParameterNode *> *)children
+- (instancetype)initWithRevenantChildren:(NSArray<AUParameterNode *> *)children
 {
     if ((self = [super init])) {
-        _charon_children = [children copy];
+        _revenant_children = [children copy];
     }
     return self;
 }
 
 - (NSArray<AUParameterNode *> *)children
 {
-    return _charon_children;
+    return _revenant_children;
 }
 
 - (id)valueForKey:(NSString *)key
 {
-    for (AUParameterNode *child in _charon_children) {
+    for (AUParameterNode *child in _revenant_children) {
         if ([child.identifier isEqualToString:key]) {
             return child;
         }
@@ -166,7 +166,7 @@
 
 - (void)setValue:(id)value forKey:(NSString *)key
 {
-    for (AUParameterNode *child in _charon_children) {
+    for (AUParameterNode *child in _revenant_children) {
         if ([child.identifier isEqualToString:key]) {
             [child setValue:value forKey:key];
             return;
@@ -178,7 +178,7 @@
 - (NSArray<AUParameter *> *)allParameters
 {
     NSMutableArray<AUParameter *> *found = [NSMutableArray array];
-    for (AUParameterNode *child in _charon_children) {
+    for (AUParameterNode *child in _revenant_children) {
         if ([child isKindOfClass:[AUParameter class]]) {
             [found addObject:(AUParameter *)child];
         } else if ([child isKindOfClass:[AUParameterGroup class]]) {
@@ -197,9 +197,9 @@
 
 - (void)encodeWithCoder:(NSCoder *)coder
 {
-    [coder encodeInteger:(NSInteger)_charon_children.count forKey:@"children"];
-    for (NSUInteger index = 0; index < _charon_children.count; index++) {
-        [coder encodeObject:_charon_children[index] forKey:[NSString stringWithFormat:@"%lu", (unsigned long)index]];
+    [coder encodeInteger:(NSInteger)_revenant_children.count forKey:@"children"];
+    for (NSUInteger index = 0; index < _revenant_children.count; index++) {
+        [coder encodeObject:_revenant_children[index] forKey:[NSString stringWithFormat:@"%lu", (unsigned long)index]];
     }
 }
 
@@ -214,7 +214,7 @@
                 [children addObject:child];
             }
         }
-        _charon_children = children;
+        _revenant_children = children;
     }
     return self;
 }
@@ -236,7 +236,7 @@
 - (AUParameter *)parameterWithID:(AudioUnitParameterID)paramID scope:(AudioUnitScope)scope element:(AudioUnitElement)element
 {
     for (AUParameter *parameter in [self allParameters]) {
-        if ([parameter charon_identifier] == paramID && [parameter charon_scope] == scope && [parameter charon_element] == element) {
+        if ([parameter revenant_identifier] == paramID && [parameter revenant_scope] == scope && [parameter revenant_element] == element) {
             return parameter;
         }
     }

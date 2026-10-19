@@ -1,5 +1,5 @@
-Package: space.kern0x1b.eidolonrt
-Name: eidolonrt
+Package: space.kern0x1b.swiftuirt
+Name: swiftuirt
 Version: 0.0.1
 Architecture: iphoneos-arm
 Description: probe

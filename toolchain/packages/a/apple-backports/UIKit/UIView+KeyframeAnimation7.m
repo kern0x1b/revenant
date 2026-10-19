@@ -1,22 +1,22 @@
 #import <UIKit/UIKit.h>
 #import <objc/runtime.h>
 
-static const char CharonKeyframesKey;
-static const char CharonFocusedKey;
+static const char RevenantKeyframesKey;
+static const char RevenantFocusedKey;
 
-@interface CharonKeyframe : NSObject
+@interface RevenantKeyframe : NSObject
 @property (nonatomic, assign) double start;
 @property (nonatomic, assign) double duration;
 @property (nonatomic, copy) void (^animations)(void);
 @end
 
-@implementation CharonKeyframe
+@implementation RevenantKeyframe
 @synthesize start = _start;
 @synthesize duration = _duration;
 @synthesize animations = _animations;
 @end
 
-@implementation UIView (CharonKeyframeAnimation7)
+@implementation UIView (RevenantKeyframeAnimation7)
 
 + (void)addKeyframeWithRelativeStartTime:(double)frameStartTime
                         relativeDuration:(double)frameDuration
@@ -24,15 +24,15 @@ static const char CharonFocusedKey;
 {
     if (!animations)
         return;
-    NSMutableArray *keyframes = objc_getAssociatedObject(self, &CharonKeyframesKey);
+    NSMutableArray *keyframes = objc_getAssociatedObject(self, &RevenantKeyframesKey);
     if (!keyframes)
         keyframes = [NSMutableArray array];
-    CharonKeyframe *keyframe = [[CharonKeyframe alloc] init];
+    RevenantKeyframe *keyframe = [[RevenantKeyframe alloc] init];
     keyframe.start = MAX(0.0, MIN(frameStartTime, 1.0));
     keyframe.duration = MAX(0.0, MIN(frameDuration, 1.0 - keyframe.start));
     keyframe.animations = animations;
     [keyframes addObject:keyframe];
-    objc_setAssociatedObject(self, &CharonKeyframesKey, keyframes, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, &RevenantKeyframesKey, keyframes, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
 + (void)animateKeyframesWithDuration:(NSTimeInterval)duration
@@ -41,18 +41,18 @@ static const char CharonFocusedKey;
                            animations:(void (^)(void))animations
                            completion:(void (^)(BOOL finished))completion
 {
-    objc_setAssociatedObject(self, &CharonKeyframesKey, [NSMutableArray array], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, &RevenantKeyframesKey, [NSMutableArray array], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     if (animations)
         animations();
-    NSArray *keyframes = objc_getAssociatedObject(self, &CharonKeyframesKey);
-    objc_setAssociatedObject(self, &CharonKeyframesKey, nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    NSArray *keyframes = objc_getAssociatedObject(self, &RevenantKeyframesKey);
+    objc_setAssociatedObject(self, &RevenantKeyframesKey, nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     if (!keyframes.count) {
         if (completion)
             completion(YES);
         return;
     }
     __block NSUInteger running = 0;
-    for (CharonKeyframe *keyframe in keyframes) {
+    for (RevenantKeyframe *keyframe in keyframes) {
         NSTimeInterval keyframeDelay = delay + duration * keyframe.start;
         NSTimeInterval keyframeDuration = duration * keyframe.duration;
         UIViewAnimationOptions single = 0;
@@ -95,7 +95,7 @@ static const char CharonFocusedKey;
 
 @end
 
-@implementation UIView (CharonFocusAndSafeArea9)
+@implementation UIView (RevenantFocusAndSafeArea9)
 
 - (BOOL)canBecomeFocused
 {
@@ -104,12 +104,12 @@ static const char CharonFocusedKey;
 
 - (BOOL)isFocused
 {
-    return objc_getAssociatedObject(self, &CharonFocusedKey) != nil;
+    return objc_getAssociatedObject(self, &RevenantFocusedKey) != nil;
 }
 
 - (void)setFocused:(BOOL)focused
 {
-    objc_setAssociatedObject(self, &CharonFocusedKey, focused ? @YES : nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, &RevenantFocusedKey, focused ? @YES : nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
 - (void)safeAreaInsetsDidChange

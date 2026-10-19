@@ -10,7 +10,7 @@
 # -fvisibility=hidden so the engine is never API of an image that links it, and a program cannot bind to a
 # hidden symbol in a static archive. The dylib is built the way the gate builds the library - the port's
 # own translation units, every name renamed, the archive linked in, hidden visibility throughout - and this
-# one CharonMLC entry point is what crosses the boundary.
+# one RevenantMLC entry point is what crosses the boundary.
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
@@ -18,7 +18,7 @@ port=${MLCOMPUTE_PORT:-$here/../../../../packages/a/apple-backports/MLCompute}
 # The archive lives under a per-configuration hash, and the gate prints which one it used; take the
 # newest, which is the one the last 6.1.3 build linked.
 ggml=${MLCOMPUTE_GGML:-$(ls -td "$HOME"/.xmake/packages/g/ggml/0.25.3/*/ 2>/dev/null | head -1 | sed "s:/$::")}
-build=${MLCOMPUTE_BUILD:-$(runs_folder charon-mlcompute-engine)}
+build=${MLCOMPUTE_BUILD:-$(runs_folder revenant-mlcompute-engine)}
 rm -rf "$build"
 mkdir -p "$build"
 sdk=$(xcrun --show-sdk-path)
@@ -42,7 +42,7 @@ for entry in sorted(os.listdir(port)):
     names.update(re.findall(r"\b(MLCDataType\w+|MLCPoolingType\w+)\b", text))
 with open(out, "w") as handle:
     for name in sorted(names):
-        handle.write("#define %s Charon%s\n" % (name, name))
+        handle.write("#define %s Revenant%s\n" % (name, name))
 print("renamed %d names" % len(names))
 PY
 
@@ -59,12 +59,12 @@ dylib() {
         -dynamiclib -Wl,-all_load -o "$output" $sources "$ggmlhost" $dyliblibs
 }
 
-dylib "$build/libCharonMLCompute.dylib" "$port/MLCTypes14.m $port/MLCDevice15.m $port/MLCTensors14.m $port/MLCDescriptors14.m $port/MLCLayers14.m $port/CharonMLCGraph.mm"
+dylib "$build/libRevenantMLCompute.dylib" "$port/MLCTypes14.m $port/MLCDevice15.m $port/MLCTensors14.m $port/MLCDescriptors14.m $port/MLCLayers14.m $port/RevenantMLCGraph.mm"
 xcrun clang $common -I"$port" "$here/port.m" $libs -o "$build/port"
 xcrun clang $common "$here/system.m" $libs -framework MLCompute -o "$build/system"
 
 "$build/system" > "$build/system.log"
-"$build/port" "$build/libCharonMLCompute.dylib" > "$build/port.log"
+"$build/port" "$build/libRevenantMLCompute.dylib" > "$build/port.log"
 
 # The comparison, case by case, on the bits of each float. Bit-identical is the rule for nineteen of
 # the twenty-one cases, and the two exceptions are named with the size of their exception, measured:
@@ -141,9 +141,9 @@ text = text.replace("0.7978845608f * (x + 0.044715f * x * x * x)));",
 assert text != before, "the mutant changed nothing"
 open(path, "w").write(text)
 MUT
-    dylib "$build/mutant/libCharonMLCompute.dylib" "$build/mutant/MLCTypes14.m $build/mutant/MLCDevice15.m $build/mutant/MLCTensors14.m $build/mutant/MLCDescriptors14.m $build/mutant/MLCLayers14.m $build/mutant/CharonMLCGraph.mm"
+    dylib "$build/mutant/libRevenantMLCompute.dylib" "$build/mutant/MLCTypes14.m $build/mutant/MLCDevice15.m $build/mutant/MLCTensors14.m $build/mutant/MLCDescriptors14.m $build/mutant/MLCLayers14.m $build/mutant/RevenantMLCGraph.mm"
     xcrun clang $common -I"$build/mutant" "$here/port.m" $libs -o "$build/mutant/port"
-    "$build/mutant/port" "$build/mutant/libCharonMLCompute.dylib" > "$build/mutant.log" 2>&1 || true
+    "$build/mutant/port" "$build/mutant/libRevenantMLCompute.dylib" > "$build/mutant.log" 2>&1 || true
     # The two logs are produced by the same code path, so the ulps the rule allows are identical in both
     # and cannot stand in for a difference: what a diff finds here is the mutant's own doing.
     if diff -q "$build/port.log" "$build/mutant.log" > /dev/null; then

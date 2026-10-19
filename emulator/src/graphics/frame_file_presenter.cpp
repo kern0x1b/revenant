@@ -20,7 +20,7 @@
 #include "foundation/application_display.hpp"
 #include "graphics/display.hpp"
 
-namespace shade {
+namespace emulator {
 namespace {
 
     constexpr std::uint32_t bitmap_file_header_size = 14;

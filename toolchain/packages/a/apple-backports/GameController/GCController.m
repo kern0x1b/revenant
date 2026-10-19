@@ -1,4 +1,4 @@
-#import "CharonGC.h"
+#import "RevenantGC.h"
 
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
@@ -16,7 +16,7 @@
 
 @dynamic current, shouldMonitorBackgroundEvents;
 
-- (instancetype)initWithCharonProfile:(GCPhysicalInputProfile *)profile vendorName:(NSString *)vendorName productCategory:(NSString *)productCategory
+- (instancetype)initWithRevenantProfile:(GCPhysicalInputProfile *)profile vendorName:(NSString *)vendorName productCategory:(NSString *)productCategory
 {
     self = [super init];
     if (self) {
@@ -26,28 +26,28 @@
         _handlerQueue = dispatch_get_main_queue();
         _playerIndex = GCControllerPlayerIndex1;
         _snapshot = YES;
-        [profile charon_setDevice:self];
-        [(id)profile charon_setController:self];
-        _motion = [[GCMotion alloc] initWithCharonAttitudeAndRotationRate:[profile isKindOfClass:[GCMicroGamepad class]]];
-        [_motion charon_setController:self];
+        [profile revenant_setDevice:self];
+        [(id)profile revenant_setController:self];
+        _motion = [[GCMotion alloc] initWithRevenantAttitudeAndRotationRate:[profile isKindOfClass:[GCMicroGamepad class]]];
+        [_motion revenant_setController:self];
     }
     return self;
 }
 
 + (GCController *)controllerWithExtendedGamepad
 {
-    return [[self alloc] initWithCharonProfile:[[GCExtendedGamepad alloc] init] vendorName:@"ExtendedGamepad" productCategory:@"MFi"];
+    return [[self alloc] initWithRevenantProfile:[[GCExtendedGamepad alloc] init] vendorName:@"ExtendedGamepad" productCategory:@"MFi"];
 }
 
 + (GCController *)controllerWithMicroGamepad
 {
-    return [[self alloc] initWithCharonProfile:[[GCMicroGamepad alloc] init] vendorName:@"MicroGamepad" productCategory:@"Siri Remote"];
+    return [[self alloc] initWithRevenantProfile:[[GCMicroGamepad alloc] init] vendorName:@"MicroGamepad" productCategory:@"Siri Remote"];
 }
 
 - (GCController *)capture
 {
-    GCController *copy = [[[self class] alloc] initWithCharonProfile:[_profile capture] vendorName:_vendorName productCategory:_productCategory];
-    [copy.motion charon_setHasAttitudeAndRotationRate:YES];
+    GCController *copy = [[[self class] alloc] initWithRevenantProfile:[_profile capture] vendorName:_vendorName productCategory:_productCategory];
+    [copy.motion revenant_setHasAttitudeAndRotationRate:YES];
     [copy.motion setStateFromMotion:_motion];
     return copy;
 }

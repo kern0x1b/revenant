@@ -1,6 +1,6 @@
 #import <UIKit/UIKit.h>
 
-static UIColor *charon_default_background(UIContextualActionStyle style)
+static UIColor *revenant_default_background(UIContextualActionStyle style)
 {
     if (style == UIContextualActionStyleNormal)
         return [UIColor colorWithRed:0.78f green:0.78f blue:0.8f alpha:1];
@@ -23,7 +23,7 @@ static UIColor *charon_default_background(UIContextualActionStyle style)
     action->_style = style;
     action->_title = [title copy];
     action->_handler = [handler copy];
-    action->_backgroundColor = charon_default_background(style);
+    action->_backgroundColor = revenant_default_background(style);
     return action;
 }
 
@@ -54,7 +54,7 @@ static UIColor *charon_default_background(UIContextualActionStyle style)
 
 - (void)setBackgroundColor:(UIColor *)backgroundColor
 {
-    _backgroundColor = backgroundColor ? [backgroundColor copy] : charon_default_background(_style);
+    _backgroundColor = backgroundColor ? [backgroundColor copy] : revenant_default_background(_style);
 }
 
 - (UIImage *)image

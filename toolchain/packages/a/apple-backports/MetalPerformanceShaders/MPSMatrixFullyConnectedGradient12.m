@@ -1,12 +1,12 @@
-#define CHARON_MPS_NEURON_IVARS \
+#define REVENANT_MPS_NEURON_IVARS \
     MPSCNNNeuronType _neuronType; \
     float _neuronParameterA, _neuronParameterB, _neuronParameterC; \
     NSData *_neuronPrelu;
 
-#define CHARON_MPS_NEURON_COMMON \
-    - (CharonMPSNeuron)charon_mps_neuron \
+#define REVENANT_MPS_NEURON_COMMON \
+    - (RevenantMPSNeuron)revenant_mps_neuron \
     { \
-        CharonMPSNeuron neuron; \
+        RevenantMPSNeuron neuron; \
         neuron.type = _neuronType; \
         neuron.a = _neuronParameterA; \
         neuron.b = _neuronParameterB; \
@@ -45,18 +45,18 @@
     }
 
 
-#import "CharonMPS.h"
+#import "RevenantMPS.h"
 
 
 @implementation MPSMatrixFullyConnectedGradient {
-    CHARON_MPS_NEURON_IVARS
+    REVENANT_MPS_NEURON_IVARS
     NSUInteger _sourceNumberOfFeatureVectors, _sourceInputFeatureChannels, _sourceOutputFeatureChannels;
     double _alpha;
     MTLOrigin _primarySourceMatrixOrigin, _secondarySourceMatrixOrigin, _resultMatrixOrigin;
     NSUInteger _batchStart, _batchSize;
 }
 
-CHARON_MPS_NEURON_COMMON
+REVENANT_MPS_NEURON_COMMON
 
 - (instancetype)initWithDevice:(id<MTLDevice>)device
 {
@@ -84,24 +84,24 @@ CHARON_MPS_NEURON_COMMON
                                 weightMatrix:(MPSMatrix *)weightMatrix
                  resultGradientForDataMatrix:(MPSMatrix *)resultGradientForDataMatrix
 {
-    if (!CharonMPSCommandBufferPermits(commandBuffer))
+    if (!RevenantMPSCommandBufferPermits(commandBuffer))
         return;
-    CharonMPSMatrixView gradient = CharonMPSMatrixViewOf(gradientMatrix), weights = CharonMPSMatrixViewOf(weightMatrix), out = CharonMPSMatrixViewOf(resultGradientForDataMatrix);
-    if (!CharonMPSDataTypeIsElement(gradient.dataType) || !CharonMPSDataTypeIsElement(weights.dataType) || !CharonMPSDataTypeIsElement(out.dataType)) {
-        CharonMPSRefuse(@"MPSMatrixFullyConnectedGradient: a matrix of a data type that is not one of the eight element types was given");
+    RevenantMPSMatrixView gradient = RevenantMPSMatrixViewOf(gradientMatrix), weights = RevenantMPSMatrixViewOf(weightMatrix), out = RevenantMPSMatrixViewOf(resultGradientForDataMatrix);
+    if (!RevenantMPSDataTypeIsElement(gradient.dataType) || !RevenantMPSDataTypeIsElement(weights.dataType) || !RevenantMPSDataTypeIsElement(out.dataType)) {
+        RevenantMPSRefuse(@"MPSMatrixFullyConnectedGradient: a matrix of a data type that is not one of the eight element types was given");
         return;
     }
     NSUInteger vectors = _sourceNumberOfFeatureVectors < gradient.rows ? _sourceNumberOfFeatureVectors : gradient.rows;
     NSUInteger outputs = _sourceOutputFeatureChannels < gradient.columns ? _sourceOutputFeatureChannels : gradient.columns;
     NSUInteger inputs = _sourceInputFeatureChannels < weights.rows ? _sourceInputFeatureChannels : weights.rows;
     NSUInteger start, count;
-    CharonMPSBatch(_batchStart, _batchSize, gradient.matrices, &start, &count);
+    RevenantMPSBatch(_batchStart, _batchSize, gradient.matrices, &start, &count);
     count = count < out.matrices ? count : out.matrices;
     for (NSUInteger b = start; b < start + count; b++) {
-        if (!CharonMPSMatrixHolds(&gradient, b, _primarySourceMatrixOrigin.x, _primarySourceMatrixOrigin.y, vectors, outputs) ||
-            !CharonMPSMatrixHolds(&weights, b, _secondarySourceMatrixOrigin.x, _secondarySourceMatrixOrigin.y, inputs, outputs) ||
-            !CharonMPSMatrixHolds(&out, b, _resultMatrixOrigin.x, _resultMatrixOrigin.y, vectors, inputs)) {
-            CharonMPSRefuse(@"MPSMatrixFullyConnectedGradient: a matrix of the batch [%lu, %lu) does not hold the region its origin names", (unsigned long)start, (unsigned long)(start + count));
+        if (!RevenantMPSMatrixHolds(&gradient, b, _primarySourceMatrixOrigin.x, _primarySourceMatrixOrigin.y, vectors, outputs) ||
+            !RevenantMPSMatrixHolds(&weights, b, _secondarySourceMatrixOrigin.x, _secondarySourceMatrixOrigin.y, inputs, outputs) ||
+            !RevenantMPSMatrixHolds(&out, b, _resultMatrixOrigin.x, _resultMatrixOrigin.y, vectors, inputs)) {
+            RevenantMPSRefuse(@"MPSMatrixFullyConnectedGradient: a matrix of the batch [%lu, %lu) does not hold the region its origin names", (unsigned long)start, (unsigned long)(start + count));
             return;
         }
     }
@@ -110,16 +110,16 @@ CHARON_MPS_NEURON_COMMON
             for (NSUInteger k = 0; k < inputs; k++) {
                 double sum = 0.0;
                 for (NSUInteger column = 0; column < outputs; column++) {
-                    double g = CharonMPSLoad(CharonMPSMatrixElement(&gradient, b, _primarySourceMatrixOrigin.x + row, _primarySourceMatrixOrigin.y + column), gradient.dataType, 0);
-                    double w = CharonMPSLoad(CharonMPSMatrixElement(&weights, b, _secondarySourceMatrixOrigin.x + k, _secondarySourceMatrixOrigin.y + column), weights.dataType, 0);
+                    double g = RevenantMPSLoad(RevenantMPSMatrixElement(&gradient, b, _primarySourceMatrixOrigin.x + row, _primarySourceMatrixOrigin.y + column), gradient.dataType, 0);
+                    double w = RevenantMPSLoad(RevenantMPSMatrixElement(&weights, b, _secondarySourceMatrixOrigin.x + k, _secondarySourceMatrixOrigin.y + column), weights.dataType, 0);
                     sum += g * w;
                 }
-                CharonMPSStore(CharonMPSMatrixElement(&out, b, _resultMatrixOrigin.x + row, _resultMatrixOrigin.y + k), out.dataType, 0, _alpha * sum);
+                RevenantMPSStore(RevenantMPSMatrixElement(&out, b, _resultMatrixOrigin.x + row, _resultMatrixOrigin.y + k), out.dataType, 0, _alpha * sum);
             }
         }
     }
-    CharonMPSConsumeReadCount(gradientMatrix);
-    CharonMPSConsumeReadCount(weightMatrix);
+    RevenantMPSConsumeReadCount(gradientMatrix);
+    RevenantMPSConsumeReadCount(weightMatrix);
 }
 
 - (void)encodeGradientForWeightsAndBiasToCommandBuffer:(id<MTLCommandBuffer>)commandBuffer
@@ -128,27 +128,27 @@ CHARON_MPS_NEURON_COMMON
                          resultGradientForWeightMatrix:(MPSMatrix *)resultGradientForWeightMatrix
                            resultGradientForBiasVector:(MPSVector *)resultGradientForBiasVector
 {
-    if (!CharonMPSCommandBufferPermits(commandBuffer))
+    if (!RevenantMPSCommandBufferPermits(commandBuffer))
         return;
-    CharonMPSMatrixView gradient = CharonMPSMatrixViewOf(gradientMatrix), in = CharonMPSMatrixViewOf(inputMatrix), weights = CharonMPSMatrixViewOf(resultGradientForWeightMatrix);
-    if (!CharonMPSDataTypeIsElement(gradient.dataType) || !CharonMPSDataTypeIsElement(in.dataType) || !CharonMPSDataTypeIsElement(weights.dataType)) {
-        CharonMPSRefuse(@"MPSMatrixFullyConnectedGradient: a matrix of a data type that is not one of the eight element types was given");
+    RevenantMPSMatrixView gradient = RevenantMPSMatrixViewOf(gradientMatrix), in = RevenantMPSMatrixViewOf(inputMatrix), weights = RevenantMPSMatrixViewOf(resultGradientForWeightMatrix);
+    if (!RevenantMPSDataTypeIsElement(gradient.dataType) || !RevenantMPSDataTypeIsElement(in.dataType) || !RevenantMPSDataTypeIsElement(weights.dataType)) {
+        RevenantMPSRefuse(@"MPSMatrixFullyConnectedGradient: a matrix of a data type that is not one of the eight element types was given");
         return;
     }
     NSUInteger vectors = _sourceNumberOfFeatureVectors < gradient.rows ? _sourceNumberOfFeatureVectors : gradient.rows;
     NSUInteger outputs = _sourceOutputFeatureChannels < gradient.columns ? _sourceOutputFeatureChannels : gradient.columns;
     NSUInteger inputs = _sourceInputFeatureChannels < in.columns ? _sourceInputFeatureChannels : in.columns;
-    CharonMPSVectorView bias = {0, 0, 0, 0, 0, 0};
+    RevenantMPSVectorView bias = {0, 0, 0, 0, 0, 0};
     if (resultGradientForBiasVector)
-        bias = CharonMPSVectorViewOf(resultGradientForBiasVector);
+        bias = RevenantMPSVectorViewOf(resultGradientForBiasVector);
     NSUInteger start, count;
-    CharonMPSBatch(_batchStart, _batchSize, gradient.matrices, &start, &count);
+    RevenantMPSBatch(_batchStart, _batchSize, gradient.matrices, &start, &count);
     count = count < weights.matrices ? count : weights.matrices;
     for (NSUInteger b = start; b < start + count; b++) {
-        if (!CharonMPSMatrixHolds(&gradient, b, _primarySourceMatrixOrigin.x, _primarySourceMatrixOrigin.y, vectors, outputs) ||
-            !CharonMPSMatrixHolds(&in, b, _secondarySourceMatrixOrigin.x, _secondarySourceMatrixOrigin.y, vectors, inputs) ||
-            !CharonMPSMatrixHolds(&weights, b, _resultMatrixOrigin.x, _resultMatrixOrigin.y, inputs, outputs)) {
-            CharonMPSRefuse(@"MPSMatrixFullyConnectedGradient: a matrix of the batch [%lu, %lu) does not hold the region its origin names", (unsigned long)start, (unsigned long)(start + count));
+        if (!RevenantMPSMatrixHolds(&gradient, b, _primarySourceMatrixOrigin.x, _primarySourceMatrixOrigin.y, vectors, outputs) ||
+            !RevenantMPSMatrixHolds(&in, b, _secondarySourceMatrixOrigin.x, _secondarySourceMatrixOrigin.y, vectors, inputs) ||
+            !RevenantMPSMatrixHolds(&weights, b, _resultMatrixOrigin.x, _resultMatrixOrigin.y, inputs, outputs)) {
+            RevenantMPSRefuse(@"MPSMatrixFullyConnectedGradient: a matrix of the batch [%lu, %lu) does not hold the region its origin names", (unsigned long)start, (unsigned long)(start + count));
             return;
         }
     }
@@ -157,11 +157,11 @@ CHARON_MPS_NEURON_COMMON
             for (NSUInteger column = 0; column < outputs; column++) {
                 double sum = 0.0;
                 for (NSUInteger row = 0; row < vectors; row++) {
-                    double x = CharonMPSLoad(CharonMPSMatrixElement(&in, b, _secondarySourceMatrixOrigin.x + row, _secondarySourceMatrixOrigin.y + k), in.dataType, 0);
-                    double g = CharonMPSLoad(CharonMPSMatrixElement(&gradient, b, _primarySourceMatrixOrigin.x + row, _primarySourceMatrixOrigin.y + column), gradient.dataType, 0);
+                    double x = RevenantMPSLoad(RevenantMPSMatrixElement(&in, b, _secondarySourceMatrixOrigin.x + row, _secondarySourceMatrixOrigin.y + k), in.dataType, 0);
+                    double g = RevenantMPSLoad(RevenantMPSMatrixElement(&gradient, b, _primarySourceMatrixOrigin.x + row, _primarySourceMatrixOrigin.y + column), gradient.dataType, 0);
                     sum += x * g;
                 }
-                CharonMPSStore(CharonMPSMatrixElement(&weights, b, _resultMatrixOrigin.x + k, _resultMatrixOrigin.y + column), weights.dataType, 0, _alpha * sum);
+                RevenantMPSStore(RevenantMPSMatrixElement(&weights, b, _resultMatrixOrigin.x + k, _resultMatrixOrigin.y + column), weights.dataType, 0, _alpha * sum);
             }
         }
         for (NSUInteger column = 0; column < outputs; column++) {
@@ -169,12 +169,12 @@ CHARON_MPS_NEURON_COMMON
                 continue;
             double sum = 0.0;
             for (NSUInteger row = 0; row < vectors; row++)
-                sum += CharonMPSLoad(CharonMPSMatrixElement(&gradient, b, _primarySourceMatrixOrigin.x + row, _primarySourceMatrixOrigin.y + column), gradient.dataType, 0);
-            CharonMPSStore(CharonMPSVectorElement(&bias, 0, column), bias.dataType, 0, sum);
+                sum += RevenantMPSLoad(RevenantMPSMatrixElement(&gradient, b, _primarySourceMatrixOrigin.x + row, _primarySourceMatrixOrigin.y + column), gradient.dataType, 0);
+            RevenantMPSStore(RevenantMPSVectorElement(&bias, 0, column), bias.dataType, 0, sum);
         }
     }
-    CharonMPSConsumeReadCount(gradientMatrix);
-    CharonMPSConsumeReadCount(inputMatrix);
+    RevenantMPSConsumeReadCount(gradientMatrix);
+    RevenantMPSConsumeReadCount(inputMatrix);
 }
 
 - (instancetype)initWithCoder:(NSCoder *)aDecoder device:(id<MTLDevice>)device

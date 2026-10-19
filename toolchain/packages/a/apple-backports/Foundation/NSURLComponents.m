@@ -1,27 +1,27 @@
 #import <Foundation/Foundation.h>
 
-typedef NS_ENUM(NSUInteger, CharonURLPart) {
-    CharonURLScheme,
-    CharonURLUser,
-    CharonURLPassword,
-    CharonURLHost,
-    CharonURLPort,
-    CharonURLPath,
-    CharonURLQuery,
-    CharonURLFragment,
-    CharonURLPartCount
+typedef NS_ENUM(NSUInteger, RevenantURLPart) {
+    RevenantURLScheme,
+    RevenantURLUser,
+    RevenantURLPassword,
+    RevenantURLHost,
+    RevenantURLPort,
+    RevenantURLPath,
+    RevenantURLQuery,
+    RevenantURLFragment,
+    RevenantURLPartCount
 };
 
-BOOL charon_url_parse(NSString *string, NSRange *ranges);
-BOOL charon_url_valid(CharonURLPart part, NSString *string);
-NSString *charon_url_compose(NSURLComponents *components, NSRange *ranges);
+BOOL revenant_url_parse(NSString *string, NSRange *ranges);
+BOOL revenant_url_valid(RevenantURLPart part, NSString *string);
+NSString *revenant_url_compose(NSURLComponents *components, NSRange *ranges);
 
-static NSString *charon_url_substring(NSString *string, NSRange range)
+static NSString *revenant_url_substring(NSString *string, NSRange range)
 {
     return range.location == NSNotFound ? nil : [string substringWithRange:range];
 }
 
-static NSNumber *charon_url_port(NSString *digits)
+static NSNumber *revenant_url_port(NSString *digits)
 {
     if (!digits.length)
         return nil;
@@ -35,13 +35,13 @@ static NSNumber *charon_url_port(NSString *digits)
     return [NSNumber numberWithLongLong:(long long)value];
 }
 
-static void charon_url_require(BOOL valid, NSURLComponents *components, SEL selector, NSString *what)
+static void revenant_url_require(BOOL valid, NSURLComponents *components, SEL selector, NSString *what)
 {
     if (!valid)
         [NSException raise:NSInvalidArgumentException format:@"*** -[%@ %@]: invalid characters in %@", [components class], NSStringFromSelector(selector), what];
 }
 
-static BOOL charon_url_same(NSString *first, NSString *second)
+static BOOL revenant_url_same(NSString *first, NSString *second)
 {
     return first == second || [first isEqualToString:second];
 }
@@ -78,18 +78,18 @@ static BOOL charon_url_same(NSString *first, NSString *second)
 
 - (instancetype)initWithString:(NSString *)URLString
 {
-    NSRange ranges[CharonURLPartCount];
-    if (![URLString isKindOfClass:[NSString class]] || !charon_url_parse(URLString, ranges))
+    NSRange ranges[RevenantURLPartCount];
+    if (![URLString isKindOfClass:[NSString class]] || !revenant_url_parse(URLString, ranges))
         return nil;
     if ((self = [self init])) {
-        _scheme = charon_url_substring(URLString, ranges[CharonURLScheme]);
-        _percentEncodedUser = charon_url_substring(URLString, ranges[CharonURLUser]);
-        _percentEncodedPassword = charon_url_substring(URLString, ranges[CharonURLPassword]);
-        _percentEncodedHost = charon_url_substring(URLString, ranges[CharonURLHost]);
-        _port = charon_url_port(charon_url_substring(URLString, ranges[CharonURLPort]));
-        _percentEncodedPath = charon_url_substring(URLString, ranges[CharonURLPath]);
-        _percentEncodedQuery = charon_url_substring(URLString, ranges[CharonURLQuery]);
-        _percentEncodedFragment = charon_url_substring(URLString, ranges[CharonURLFragment]);
+        _scheme = revenant_url_substring(URLString, ranges[RevenantURLScheme]);
+        _percentEncodedUser = revenant_url_substring(URLString, ranges[RevenantURLUser]);
+        _percentEncodedPassword = revenant_url_substring(URLString, ranges[RevenantURLPassword]);
+        _percentEncodedHost = revenant_url_substring(URLString, ranges[RevenantURLHost]);
+        _port = revenant_url_port(revenant_url_substring(URLString, ranges[RevenantURLPort]));
+        _percentEncodedPath = revenant_url_substring(URLString, ranges[RevenantURLPath]);
+        _percentEncodedQuery = revenant_url_substring(URLString, ranges[RevenantURLQuery]);
+        _percentEncodedFragment = revenant_url_substring(URLString, ranges[RevenantURLFragment]);
     }
     return self;
 }
@@ -110,13 +110,13 @@ static BOOL charon_url_same(NSString *first, NSString *second)
 
 - (NSURL *)URL
 {
-    NSString *string = charon_url_compose(self, NULL);
+    NSString *string = revenant_url_compose(self, NULL);
     return string ? [NSURL URLWithString:string] : nil;
 }
 
 - (NSURL *)URLRelativeToURL:(NSURL *)baseURL
 {
-    NSString *string = charon_url_compose(self, NULL);
+    NSString *string = revenant_url_compose(self, NULL);
     return string ? [NSURL URLWithString:string relativeToURL:baseURL] : nil;
 }
 
@@ -128,7 +128,7 @@ static BOOL charon_url_same(NSString *first, NSString *second)
 - (void)setScheme:(NSString *)scheme
 {
     if (scheme)
-        charon_url_require(charon_url_valid(CharonURLScheme, scheme), self, _cmd, @"scheme");
+        revenant_url_require(revenant_url_valid(RevenantURLScheme, scheme), self, _cmd, @"scheme");
     _scheme = [scheme copy];
 }
 
@@ -212,7 +212,7 @@ static BOOL charon_url_same(NSString *first, NSString *second)
 - (void)setPercentEncodedUser:(NSString *)percentEncodedUser
 {
     if (percentEncodedUser)
-        charon_url_require(charon_url_valid(CharonURLUser, percentEncodedUser), self, _cmd, @"percentEncodedUser");
+        revenant_url_require(revenant_url_valid(RevenantURLUser, percentEncodedUser), self, _cmd, @"percentEncodedUser");
     _percentEncodedUser = [percentEncodedUser copy];
 }
 
@@ -224,7 +224,7 @@ static BOOL charon_url_same(NSString *first, NSString *second)
 - (void)setPercentEncodedPassword:(NSString *)percentEncodedPassword
 {
     if (percentEncodedPassword)
-        charon_url_require(charon_url_valid(CharonURLPassword, percentEncodedPassword), self, _cmd, @"percentEncodedPassword");
+        revenant_url_require(revenant_url_valid(RevenantURLPassword, percentEncodedPassword), self, _cmd, @"percentEncodedPassword");
     _percentEncodedPassword = [percentEncodedPassword copy];
 }
 
@@ -236,7 +236,7 @@ static BOOL charon_url_same(NSString *first, NSString *second)
 - (void)setPercentEncodedHost:(NSString *)percentEncodedHost
 {
     if (percentEncodedHost)
-        charon_url_require(charon_url_valid(CharonURLHost, percentEncodedHost), self, _cmd, @"percentEncodedHost");
+        revenant_url_require(revenant_url_valid(RevenantURLHost, percentEncodedHost), self, _cmd, @"percentEncodedHost");
     _percentEncodedHost = [percentEncodedHost copy];
 }
 
@@ -248,7 +248,7 @@ static BOOL charon_url_same(NSString *first, NSString *second)
 - (void)setPercentEncodedPath:(NSString *)percentEncodedPath
 {
     if (percentEncodedPath)
-        charon_url_require(charon_url_valid(CharonURLPath, percentEncodedPath), self, _cmd, @"percentEncodedPath");
+        revenant_url_require(revenant_url_valid(RevenantURLPath, percentEncodedPath), self, _cmd, @"percentEncodedPath");
     _percentEncodedPath = [percentEncodedPath copy];
 }
 
@@ -260,7 +260,7 @@ static BOOL charon_url_same(NSString *first, NSString *second)
 - (void)setPercentEncodedQuery:(NSString *)percentEncodedQuery
 {
     if (percentEncodedQuery)
-        charon_url_require(charon_url_valid(CharonURLQuery, percentEncodedQuery), self, _cmd, @"percentEncodedQuery");
+        revenant_url_require(revenant_url_valid(RevenantURLQuery, percentEncodedQuery), self, _cmd, @"percentEncodedQuery");
     _percentEncodedQuery = [percentEncodedQuery copy];
 }
 
@@ -272,7 +272,7 @@ static BOOL charon_url_same(NSString *first, NSString *second)
 - (void)setPercentEncodedFragment:(NSString *)percentEncodedFragment
 {
     if (percentEncodedFragment)
-        charon_url_require(charon_url_valid(CharonURLFragment, percentEncodedFragment), self, _cmd, @"percentEncodedFragment");
+        revenant_url_require(revenant_url_valid(RevenantURLFragment, percentEncodedFragment), self, _cmd, @"percentEncodedFragment");
     _percentEncodedFragment = [percentEncodedFragment copy];
 }
 
@@ -283,10 +283,10 @@ static BOOL charon_url_same(NSString *first, NSString *second)
     if (![object isKindOfClass:[NSURLComponents class]])
         return NO;
     NSURLComponents *other = object;
-    return charon_url_same(self.scheme, other.scheme) && charon_url_same(self.percentEncodedUser, other.percentEncodedUser) &&
-           charon_url_same(self.percentEncodedPassword, other.percentEncodedPassword) && charon_url_same(self.percentEncodedHost, other.percentEncodedHost) &&
-           (self.port == other.port || [self.port isEqual:other.port]) && charon_url_same(self.percentEncodedPath, other.percentEncodedPath) &&
-           charon_url_same(self.percentEncodedQuery, other.percentEncodedQuery) && charon_url_same(self.percentEncodedFragment, other.percentEncodedFragment);
+    return revenant_url_same(self.scheme, other.scheme) && revenant_url_same(self.percentEncodedUser, other.percentEncodedUser) &&
+           revenant_url_same(self.percentEncodedPassword, other.percentEncodedPassword) && revenant_url_same(self.percentEncodedHost, other.percentEncodedHost) &&
+           (self.port == other.port || [self.port isEqual:other.port]) && revenant_url_same(self.percentEncodedPath, other.percentEncodedPath) &&
+           revenant_url_same(self.percentEncodedQuery, other.percentEncodedQuery) && revenant_url_same(self.percentEncodedFragment, other.percentEncodedFragment);
 }
 
 - (NSUInteger)hash

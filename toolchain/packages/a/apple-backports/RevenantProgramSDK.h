@@ -1,11 +1,11 @@
-#ifndef CHARON_PROGRAM_SDK_H
-#define CHARON_PROGRAM_SDK_H
+#ifndef REVENANT_PROGRAM_SDK_H
+#define REVENANT_PROGRAM_SDK_H
 
 #import <crt_externs.h>
 #import <mach-o/dyld.h>
 #import <mach-o/loader.h>
 
-static inline uint32_t charon_program_sdk_on_platform(uint32_t platform)
+static inline uint32_t revenant_program_sdk_on_platform(uint32_t platform)
 {
     const struct mach_header *header = (const struct mach_header *)_NSGetMachExecuteHeader();
     if (!header)
@@ -26,14 +26,14 @@ static inline uint32_t charon_program_sdk_on_platform(uint32_t platform)
     return 0;
 }
 
-static inline uint32_t charon_program_sdk(void)
+static inline uint32_t revenant_program_sdk(void)
 {
-    return charon_program_sdk_on_platform(PLATFORM_IOS);
+    return revenant_program_sdk_on_platform(PLATFORM_IOS);
 }
 
-static inline BOOL charon_program_linked_on_or_after(double version, uint32_t platform)
+static inline BOOL revenant_program_linked_on_or_after(double version, uint32_t platform)
 {
-    uint32_t sdk = charon_program_sdk_on_platform(platform);
+    uint32_t sdk = revenant_program_sdk_on_platform(platform);
     if (sdk == 0)
         return NO;
     return sdk >= (uint32_t)version * 0x00010000;

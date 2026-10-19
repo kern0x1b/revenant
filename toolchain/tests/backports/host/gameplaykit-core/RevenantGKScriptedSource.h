@@ -1,10 +1,10 @@
-#ifndef CHARON_GK_SCRIPTED_SOURCE_H
-#define CHARON_GK_SCRIPTED_SOURCE_H
+#ifndef REVENANT_GK_SCRIPTED_SOURCE_H
+#define REVENANT_GK_SCRIPTED_SOURCE_H
 
 #import <Foundation/Foundation.h>
 #import <GameplayKit/GameplayKit.h>
 
-@interface CharonGKScriptedSource : NSObject <GKRandom>
+@interface RevenantGKScriptedSource : NSObject <GKRandom>
 - (instancetype)initWithScript:(NSArray<NSString *> *)script;
 @property (nonatomic, readonly) NSArray<NSString *> *trace;
 @property (nonatomic, readonly) NSString *log;
@@ -12,7 +12,7 @@
 @property (nonatomic, readonly) NSArray *shuffleAskedWith;
 @end
 
-@implementation CharonGKScriptedSource {
+@implementation RevenantGKScriptedSource {
     NSArray<NSString *> *_script;
     NSMutableArray<NSString *> *_trace;
     NSArray *_shuffleAskedWith;
@@ -39,7 +39,7 @@
     return [_trace componentsJoinedByString:@" "];
 }
 
-- (NSString *)charon_spend:(NSString *)kind
+- (NSString *)revenant_spend:(NSString *)kind
 {
     if (_next >= [_script count]) {
         [_trace addObject:[NSString stringWithFormat:@"starved(%@)", kind]];
@@ -57,23 +57,23 @@
 
 - (NSInteger)nextInt
 {
-    return (NSInteger)[[self charon_spend:@"int"] longLongValue];
+    return (NSInteger)[[self revenant_spend:@"int"] longLongValue];
 }
 
 - (NSUInteger)nextIntWithUpperBound:(NSUInteger)upperBound
 {
-    NSString *line = [self charon_spend:[NSString stringWithFormat:@"bounded:%lu", (unsigned long)upperBound]];
+    NSString *line = [self revenant_spend:[NSString stringWithFormat:@"bounded:%lu", (unsigned long)upperBound]];
     return line ? (NSUInteger)[line longLongValue] : 0;
 }
 
 - (float)nextUniform
 {
-    return (float)[[self charon_spend:@"uniform"] doubleValue];
+    return (float)[[self revenant_spend:@"uniform"] doubleValue];
 }
 
 - (BOOL)nextBool
 {
-    return [[self charon_spend:@"bool"] boolValue];
+    return [[self revenant_spend:@"bool"] boolValue];
 }
 
 - (NSArray *)arrayByShufflingObjectsInArray:(NSArray *)array

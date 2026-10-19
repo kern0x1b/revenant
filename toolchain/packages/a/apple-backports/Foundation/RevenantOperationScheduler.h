@@ -1,6 +1,6 @@
 #import <Foundation/Foundation.h>
 
-@interface CharonOperationScheduler : NSObject
+@interface RevenantOperationScheduler : NSObject
 - (instancetype)initWithDispatchQueue:(dispatch_queue_t)queue owner:(NSOperationQueue *)owner;
 @property (nonatomic, readonly) dispatch_queue_t dispatchQueue;
 @property (nonatomic) BOOL suspended;

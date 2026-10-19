@@ -6,7 +6,7 @@
 
 #include "kernel/iokit_abi.hpp"
 
-namespace shade::kernel_iokit::baseband {
+namespace emulator::kernel_iokit::baseband {
 namespace {
 
     enum class Selector : std::uint32_t {

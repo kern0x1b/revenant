@@ -2,7 +2,7 @@
 
 #pragma clang diagnostic ignored "-Wobjc-missing-property-synthesis"
 
-static NSUInteger CharonMDLIndexSize(MDLIndexBitDepth depth)
+static NSUInteger RevenantMDLIndexSize(MDLIndexBitDepth depth)
 {
     switch (depth) {
         case MDLIndexBitDepthUInt8:
@@ -83,7 +83,7 @@ static NSUInteger CharonMDLIndexSize(MDLIndexBitDepth depth)
 {
     if (indexType == _indexType)
         return _indexBuffer;
-    NSUInteger from = CharonMDLIndexSize(_indexType), to = CharonMDLIndexSize(indexType);
+    NSUInteger from = RevenantMDLIndexSize(_indexType), to = RevenantMDLIndexSize(indexType);
     if (!from || !to || !_indexBuffer)
         return nil;
     NSUInteger wanted = to * _indexCount;

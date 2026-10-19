@@ -27,14 +27,14 @@ int main(int argc, char **argv)
         system.base = base;
         system.tag = @"system";
         system.patience = 30;
-        SessionHarness *charon = [[SessionHarness alloc] init];
-        charon.sessionClass = NSClassFromString(@"CharonHostNSURLSession");
-        charon.configurationClass = NSClassFromString(@"CharonHostNSURLSessionConfiguration");
-        charon.base = base;
-        charon.tag = @"charon";
-        charon.prefix = @"CharonHost";
-        charon.patience = 30;
-        CHECK(charon.sessionClass && charon.configurationClass, "renamed classes are linked");
+        SessionHarness *revenant = [[SessionHarness alloc] init];
+        revenant.sessionClass = NSClassFromString(@"RevenantHostNSURLSession");
+        revenant.configurationClass = NSClassFromString(@"RevenantHostNSURLSessionConfiguration");
+        revenant.base = base;
+        revenant.tag = @"revenant";
+        revenant.prefix = @"RevenantHost";
+        revenant.patience = 30;
+        CHECK(revenant.sessionClass && revenant.configurationClass, "renamed classes are linked");
         NSDictionary *expected = session_expected_transcripts();
         for (size_t index = 0; index < session_scenario_count; index++) {
             const SessionScenarioEntry *entry = &session_scenarios[index];
@@ -42,18 +42,18 @@ int main(int argc, char **argv)
                 continue;
             NSString *name = @(entry->name);
             NSUInteger offQueue = session_off_queue_count();
-            NSArray *mine = entry->run(charon);
-            CHECK(session_off_queue_count() == offQueue, [[name stringByAppendingString:@": charon calls the delegate on its delegate queue"] UTF8String]);
+            NSArray *mine = entry->run(revenant);
+            CHECK(session_off_queue_count() == offQueue, [[name stringByAppendingString:@": revenant calls the delegate on its delegate queue"] UTF8String]);
             NSArray *reference = expected[name];
             if (!reference || ![mine isEqual:reference])
-                printf("charon %s:\n%s", entry->name, session_transcript_text(mine).UTF8String);
+                printf("revenant %s:\n%s", entry->name, session_transcript_text(mine).UTF8String);
             NSArray *theirs = session_normalize_host_system(entry->run(system));
             if (!reference || ![theirs isEqual:reference])
                 printf("system %s:\n%s", entry->name, session_transcript_text(theirs).UTF8String);
             CHECK_EQUAL(theirs, reference, [[name stringByAppendingString:@": system matches expected"] UTF8String]);
-            CHECK_EQUAL(mine, reference, [[name stringByAppendingString:@": charon matches expected"] UTF8String]);
+            CHECK_EQUAL(mine, reference, [[name stringByAppendingString:@": revenant matches expected"] UTF8String]);
         }
     }
-    printf("checks=%d failures=%d\n", charon_checks, charon_failures);
-    return charon_failures;
+    printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
+    return revenant_failures;
 }

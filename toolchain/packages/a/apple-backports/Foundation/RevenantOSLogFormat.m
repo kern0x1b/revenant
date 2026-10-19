@@ -1,4 +1,4 @@
-#import "CharonOSLog.h"
+#import "RevenantOSLog.h"
 #include <errno.h>
 #include <mach-o/dyld.h>
 #include <mach-o/loader.h>
@@ -11,7 +11,7 @@ typedef struct {
     char *bytes;
     size_t length;
     size_t capacity;
-} CharonText;
+} RevenantText;
 
 typedef struct {
     char flags[8];
@@ -19,7 +19,7 @@ typedef struct {
     int precision;
     char length[3];
     BOOL isBool, isBOOL, isErrno, isTime, isMode, isSignal, isUUID, isMask;
-} CharonSpec;
+} RevenantSpec;
 
 typedef struct {
     va_list *arguments;
@@ -28,18 +28,18 @@ typedef struct {
     uint32_t offset;
     unsigned remaining;
     int error;
-} CharonArgs;
+} RevenantArgs;
 
 typedef struct {
     unsigned type;
     unsigned privacy;
     const unsigned char *data;
     uint32_t length;
-} CharonItem;
+} RevenantItem;
 
-static const CharonSpec charon_plain_spec = {.width = 0, .precision = -1};
+static const RevenantSpec revenant_plain_spec = {.width = 0, .precision = -1};
 
-static void text_append(CharonText *text, const char *bytes, size_t length)
+static void text_append(RevenantText *text, const char *bytes, size_t length)
 {
     if (text->length + length + 1 > text->capacity) {
         text->capacity = (text->length + length + 1) * 2;
@@ -50,7 +50,7 @@ static void text_append(CharonText *text, const char *bytes, size_t length)
     text->bytes[text->length] = 0;
 }
 
-static void text_appendf(CharonText *text, const char *format, ...)
+static void text_appendf(RevenantText *text, const char *format, ...)
 {
     char buffer[256];
     va_list arguments, again;
@@ -69,12 +69,12 @@ static void text_appendf(CharonText *text, const char *format, ...)
     va_end(again);
 }
 
-static BOOL has_flag(const CharonSpec *spec, char flag)
+static BOOL has_flag(const RevenantSpec *spec, char flag)
 {
     return strchr(spec->flags, flag) != NULL;
 }
 
-static void text_padded(CharonText *text, const CharonSpec *spec, const char *bytes)
+static void text_padded(RevenantText *text, const RevenantSpec *spec, const char *bytes)
 {
     size_t length = strlen(bytes);
     if (spec->precision > 0 && (size_t)spec->precision < length)
@@ -88,7 +88,7 @@ static void text_padded(CharonText *text, const CharonSpec *spec, const char *by
         text_append(text, " ", 1);
 }
 
-static BOOL next_item(CharonArgs *arguments, CharonItem *item)
+static BOOL next_item(RevenantArgs *arguments, RevenantItem *item)
 {
     if (arguments->remaining == 0 || arguments->offset + 2 > arguments->size)
         return NO;
@@ -104,9 +104,9 @@ static BOOL next_item(CharonArgs *arguments, CharonItem *item)
     return YES;
 }
 
-static BOOL peek_item(const CharonArgs *arguments, CharonItem *item)
+static BOOL peek_item(const RevenantArgs *arguments, RevenantItem *item)
 {
-    CharonArgs copy = *arguments;
+    RevenantArgs copy = *arguments;
     return next_item(&copy, item);
 }
 
@@ -118,10 +118,10 @@ static unsigned long long read_little_endian(const unsigned char *data, uint32_t
     return value;
 }
 
-static long long fetch_signed(CharonArgs *arguments, const CharonSpec *spec)
+static long long fetch_signed(RevenantArgs *arguments, const RevenantSpec *spec)
 {
     if (!arguments->arguments) {
-        CharonItem item;
+        RevenantItem item;
         if (!next_item(arguments, &item))
             return 0;
         if (item.type == 6)
@@ -150,10 +150,10 @@ static long long fetch_signed(CharonArgs *arguments, const CharonSpec *spec)
     return va_arg(*ap, int);
 }
 
-static unsigned long long fetch_unsigned(CharonArgs *arguments, const CharonSpec *spec)
+static unsigned long long fetch_unsigned(RevenantArgs *arguments, const RevenantSpec *spec)
 {
     if (!arguments->arguments) {
-        CharonItem item;
+        RevenantItem item;
         if (!next_item(arguments, &item))
             return 0;
         if (item.type == 6)
@@ -177,11 +177,11 @@ static unsigned long long fetch_unsigned(CharonArgs *arguments, const CharonSpec
     return va_arg(*ap, unsigned int);
 }
 
-static double take_double(CharonArgs *arguments)
+static double take_double(RevenantArgs *arguments)
 {
     if (arguments->arguments)
         return va_arg(*arguments->arguments, double);
-    CharonItem item;
+    RevenantItem item;
     if (!next_item(arguments, &item))
         return 0;
     if (item.length == sizeof(double)) {
@@ -197,26 +197,26 @@ static double take_double(CharonArgs *arguments)
     return 0;
 }
 
-static const void *take_pointer(CharonArgs *arguments)
+static const void *take_pointer(RevenantArgs *arguments)
 {
     if (arguments->arguments)
         return va_arg(*arguments->arguments, const void *);
-    CharonItem item;
+    RevenantItem item;
     if (!next_item(arguments, &item))
         return NULL;
     return (const void *)(uintptr_t)read_little_endian(item.data, item.length);
 }
 
-static void skip_item(CharonArgs *arguments)
+static void skip_item(RevenantArgs *arguments)
 {
-    CharonItem item;
+    RevenantItem item;
     if (!arguments->arguments)
         next_item(arguments, &item);
 }
 
-static void skip_hash_items(CharonArgs *arguments)
+static void skip_hash_items(RevenantArgs *arguments)
 {
-    CharonItem item;
+    RevenantItem item;
     while (peek_item(arguments, &item) && item.type == 7)
         next_item(arguments, &item);
 }
@@ -252,7 +252,7 @@ static BOOL in_read_only_segment(const void *pointer)
     return NO;
 }
 
-static BOOL item_fits(const CharonSpec *spec, char conversion, const CharonItem *item)
+static BOOL item_fits(const RevenantSpec *spec, char conversion, const RevenantItem *item)
 {
     if (item->type == 7)
         return YES;
@@ -295,7 +295,7 @@ static unsigned long long wide_text_size(const void *pointer)
     return 1;
 }
 
-static void append_mismatch(CharonText *text, const char *label, size_t labelLength, const CharonItem *item)
+static void append_mismatch(RevenantText *text, const char *label, size_t labelLength, const RevenantItem *item)
 {
     const char *kind = "OBJECT";
     if (item->type == 0 || item->type == 6)
@@ -340,7 +340,7 @@ static void append_mismatch(CharonText *text, const char *label, size_t labelLen
     text_appendf(text, "] got [%s%s%s sz:%llu]>", kind, *privacy ? " " : "", privacy, size);
 }
 
-static void spec_string(const CharonSpec *spec, char conversion, char *out, size_t size, const char *length)
+static void spec_string(const RevenantSpec *spec, char conversion, char *out, size_t size, const char *length)
 {
     size_t used = (size_t)snprintf(out, size, "%%%s", spec->flags);
     if (spec->width > 0)
@@ -350,7 +350,7 @@ static void spec_string(const CharonSpec *spec, char conversion, char *out, size
     snprintf(out + used, size - used, "%s%c", length, conversion);
 }
 
-static void append_mode(CharonText *text, unsigned mode)
+static void append_mode(RevenantText *text, unsigned mode)
 {
     char string[11] = "----------";
     switch (mode & S_IFMT) {
@@ -376,14 +376,14 @@ static void append_mode(CharonText *text, unsigned mode)
     text_append(text, string, 10);
 }
 
-static void append_integer(CharonText *text, const CharonSpec *spec, char conversion, CharonArgs *arguments, int error)
+static void append_integer(RevenantText *text, const RevenantSpec *spec, char conversion, RevenantArgs *arguments, int error)
 {
     BOOL isSigned = conversion == 'd' || conversion == 'i';
     long long signedValue = isSigned ? fetch_signed(arguments, spec) : 0;
     unsigned long long unsignedValue = isSigned ? 0 : fetch_unsigned(arguments, spec);
     if (spec->isBool || spec->isBOOL) {
         BOOL truth = isSigned ? signedValue != 0 : unsignedValue != 0;
-        text_padded(text, &(CharonSpec){.width = spec->width, .precision = -1},
+        text_padded(text, &(RevenantSpec){.width = spec->width, .precision = -1},
                     spec->isBool ? (truth ? "true" : "false") : (truth ? "YES" : "NO"));
         return;
     }
@@ -421,7 +421,7 @@ static void append_integer(CharonText *text, const CharonSpec *spec, char conver
     (void)error;
 }
 
-static void append_bytes(CharonText *text, const CharonSpec *spec, const unsigned char *bytes, int length)
+static void append_bytes(RevenantText *text, const RevenantSpec *spec, const unsigned char *bytes, int length)
 {
     if (spec->isUUID && length == 16) {
         text_appendf(text, "%02X%02X%02X%02X-%02X%02X-%02X%02X-%02X%02X-%02X%02X%02X%02X%02X%02X", bytes[0], bytes[1], bytes[2], bytes[3], bytes[4],
@@ -443,7 +443,7 @@ static NSString *description_of(id object)
     }
 }
 
-static void parse_decorators(const char **cursor, CharonSpec *spec)
+static void parse_decorators(const char **cursor, RevenantSpec *spec)
 {
     const char *close = strchr(*cursor, '}');
     if (!close)
@@ -479,7 +479,7 @@ static void parse_decorators(const char **cursor, CharonSpec *spec)
     *cursor = close + 1;
 }
 
-static void escape_into(CharonText *out, const unsigned char *bytes, size_t length)
+static void escape_into(RevenantText *out, const unsigned char *bytes, size_t length)
 {
     size_t index = 0;
     while (index < length) {
@@ -523,9 +523,9 @@ static void escape_into(CharonText *out, const unsigned char *bytes, size_t leng
     }
 }
 
-static char *format_arguments(const char *format, CharonArgs *ap, int error)
+static char *format_arguments(const char *format, RevenantArgs *ap, int error)
 {
-    CharonText text = {NULL, 0, 0};
+    RevenantText text = {NULL, 0, 0};
     text_append(&text, "", 0);
     const char *cursor = format;
     while (*cursor) {
@@ -544,7 +544,7 @@ static char *format_arguments(const char *format, CharonArgs *ap, int error)
             cursor++;
             continue;
         }
-        CharonSpec spec = {.width = 0, .precision = -1};
+        RevenantSpec spec = {.width = 0, .precision = -1};
         BOOL literal_precision = NO;
         if (*cursor == '{') {
             parse_decorators(&cursor, &spec);
@@ -555,7 +555,7 @@ static char *format_arguments(const char *format, CharonArgs *ap, int error)
         while (*cursor && strchr("-+ #0'", *cursor) && flagCount < sizeof spec.flags - 1)
             spec.flags[flagCount++] = *cursor++;
         if (*cursor == '*') {
-            int width = (int)fetch_signed(ap, &charon_plain_spec);
+            int width = (int)fetch_signed(ap, &revenant_plain_spec);
             if (width < 0 && flagCount < sizeof spec.flags - 1) {
                 spec.flags[flagCount++] = '-';
                 width = -width;
@@ -570,7 +570,7 @@ static char *format_arguments(const char *format, CharonArgs *ap, int error)
             cursor++;
             spec.precision = 0;
             if (*cursor == '*') {
-                spec.precision = (int)fetch_signed(ap, &charon_plain_spec);
+                spec.precision = (int)fetch_signed(ap, &revenant_plain_spec);
                 cursor++;
             } else {
                 literal_precision = YES;
@@ -598,7 +598,7 @@ static char *format_arguments(const char *format, CharonArgs *ap, int error)
         }
         if (!ap->arguments)
             skip_hash_items(ap);
-        CharonItem pending;
+        RevenantItem pending;
         if (!ap->arguments && strchr("diouxXcsSeEfFgGaAp@mC", conversion) && !peek_item(ap, &pending)) {
             text_append(&text, "<decode: missing data>", strlen("<decode: missing data>"));
             continue;
@@ -606,7 +606,7 @@ static char *format_arguments(const char *format, CharonArgs *ap, int error)
         if (literal_precision && (conversion == 's' || conversion == 'S' || conversion == 'P'))
             skip_item(ap);
         if (!ap->arguments && strchr("diouxX", conversion)) {
-            CharonItem item;
+            RevenantItem item;
             if (peek_item(ap, &item) && item.type == 0 && item.length == 0) {
                 next_item(ap, &item);
                 text_append(&text, "<decode: missing data>", strlen("<decode: missing data>"));
@@ -614,7 +614,7 @@ static char *format_arguments(const char *format, CharonArgs *ap, int error)
             }
         }
         if (!ap->arguments) {
-            CharonItem item;
+            RevenantItem item;
             if (peek_item(ap, &item) && !item_fits(&spec, conversion, &item)) {
                 next_item(ap, &item);
                 append_mismatch(&text, specStart, labelLength, &item);
@@ -630,7 +630,7 @@ static char *format_arguments(const char *format, CharonArgs *ap, int error)
                 append_integer(&text, &spec, 'd', ap, error);
                 break;
             }
-            char string[2] = {(char)fetch_signed(ap, &charon_plain_spec), 0};
+            char string[2] = {(char)fetch_signed(ap, &revenant_plain_spec), 0};
             spec.precision = -1;
             if (string[0])
                 text_padded(&text, &spec, string);
@@ -638,7 +638,7 @@ static char *format_arguments(const char *format, CharonArgs *ap, int error)
         }
         case 'C': {
             char string[16];
-            wint_t value = (wint_t)fetch_unsigned(ap, &charon_plain_spec);
+            wint_t value = (wint_t)fetch_unsigned(ap, &revenant_plain_spec);
             snprintf(string, sizeof string, "%lc", value);
             text_append(&text, string, strlen(string));
             break;
@@ -673,7 +673,7 @@ static char *format_arguments(const char *format, CharonArgs *ap, int error)
             break;
         }
         case '@': {
-            CharonItem next;
+            RevenantItem next;
             if (!ap->arguments && peek_item(ap, &next) && next.type == 2) {
                 next_item(ap, &next);
                 const char *string = (const char *)(uintptr_t)read_little_endian(next.data, next.length);
@@ -703,26 +703,26 @@ static char *format_arguments(const char *format, CharonArgs *ap, int error)
     }
     while (text.length && strchr(" \t\n\r", text.bytes[text.length - 1]))
         text.bytes[--text.length] = 0;
-    CharonText escaped = {NULL, 0, 0};
+    RevenantText escaped = {NULL, 0, 0};
     text_append(&escaped, "", 0);
     escape_into(&escaped, (const unsigned char *)text.bytes, text.length);
     free(text.bytes);
     return escaped.bytes;
 }
 
-char *charon_os_log_format(const char *format, va_list arguments, int error)
+char *revenant_os_log_format(const char *format, va_list arguments, int error)
 {
     va_list list;
     va_copy(list, arguments);
-    CharonArgs args = {.arguments = &list};
+    RevenantArgs args = {.arguments = &list};
     char *text = format_arguments(format, &args, error);
     va_end(list);
     return text;
 }
 
-char *charon_os_log_format_buffer(const char *format, const uint8_t *buffer, uint32_t size, int error)
+char *revenant_os_log_format_buffer(const char *format, const uint8_t *buffer, uint32_t size, int error)
 {
-    CharonArgs args = {.buffer = buffer, .size = size, .error = error};
+    RevenantArgs args = {.buffer = buffer, .size = size, .error = error};
     if (buffer && size >= 2) {
         args.remaining = buffer[1];
         args.offset = 2;

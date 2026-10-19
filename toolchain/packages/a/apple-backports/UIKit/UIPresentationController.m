@@ -1,6 +1,6 @@
 #import <UIKit/UIKit.h>
 #import <objc/runtime.h>
-#import "CharonCustomTransition.h"
+#import "RevenantCustomTransition.h"
 
 #pragma clang diagnostic ignored "-Wobjc-designated-initializers"
 #pragma clang diagnostic ignored "-Wobjc-property-implementation"
@@ -66,22 +66,22 @@
     return _containerView;
 }
 
-- (void)charon_setContainerView:(UIView *)view
+- (void)revenant_setContainerView:(UIView *)view
 {
     _containerView = view;
 }
 
-- (void)charon_ownedByPresentedViewController
+- (void)revenant_ownedByPresentedViewController
 {
     _presentedOwner = nil;
 }
 
-- (id<UIViewControllerAnimatedTransitioning>)charon_transitionAnimator
+- (id<UIViewControllerAnimatedTransitioning>)revenant_transitionAnimator
 {
     return nil;
 }
 
-- (BOOL)charon_containerIgnoresDirectTouches
+- (BOOL)revenant_containerIgnoresDirectTouches
 {
     return NO;
 }
@@ -177,14 +177,14 @@
 
 @end
 
-@interface UIViewController (CharonPresentationController)
+@interface UIViewController (RevenantPresentationController)
 @end
 
-@implementation UIViewController (CharonPresentationController)
+@implementation UIViewController (RevenantPresentationController)
 
 - (UIPresentationController *)presentationController
 {
-    UIPresentationController *current = charon_presentation_controller_of(self);
+    UIPresentationController *current = revenant_presentation_controller_of(self);
     if (!current && [self respondsToSelector:@selector(sheetPresentationController)])
         current = [self performSelector:@selector(sheetPresentationController)];
     return current;

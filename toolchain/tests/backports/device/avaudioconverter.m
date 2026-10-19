@@ -43,10 +43,10 @@ int main(void)
         }
         printf("round-trip bound named in advance: %.8f\n", kRoundTripBound);
         printf("measured max |round-tripped - source|: %.8f\n", maxError);
-        charon_check(maxError > 0.0f, "the round trip actually quantized something (not an accidental no-op copy)", nil);
-        charon_check(maxError <= kRoundTripBound, "measured error stays within the quantization bound named before the run", nil);
+        revenant_check(maxError > 0.0f, "the round trip actually quantized something (not an accidental no-op copy)", nil);
+        revenant_check(maxError <= kRoundTripBound, "measured error stays within the quantization bound named before the run", nil);
 
-        printf("checks=%d failures=%d\n", charon_checks, charon_failures);
+        printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
     }
-    return charon_failures ? 1 : 0;
+    return revenant_failures ? 1 : 0;
 }

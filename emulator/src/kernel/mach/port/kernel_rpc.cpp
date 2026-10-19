@@ -17,7 +17,7 @@
 
 #include <mutex>
 
-namespace shade {
+namespace emulator {
 
 using namespace mach_support;
 

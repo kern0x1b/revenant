@@ -11,7 +11,7 @@
 #include <optional>
 #include <string>
 
-namespace shade {
+namespace emulator {
 
 class Output;
 

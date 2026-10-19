@@ -1,14 +1,14 @@
 #import <Foundation/Foundation.h>
 #import <FileProvider/FileProvider.h>
-#import "CharonFileProvider.h"
+#import "RevenantFileProvider.h"
 
 NSString *const NSFileProviderErrorDomain = @"NSFileProviderErrorDomain";
 
-static NSInteger const CharonFileProviderUnavailable = -2001;
+static NSInteger const RevenantFileProviderUnavailable = -2001;
 
-@interface NSFileProviderManager (CharonUnavailable)
-- (instancetype)initCharon;
-+ (NSError *)charon_unavailable;
+@interface NSFileProviderManager (RevenantUnavailable)
+- (instancetype)initRevenant;
++ (NSError *)revenant_unavailable;
 @end
 
 @implementation NSFileProviderManager {
@@ -17,10 +17,10 @@ static NSInteger const CharonFileProviderUnavailable = -2001;
 
 + (NSFileProviderManager *)defaultManager
 {
-    return [[NSFileProviderManager alloc] initCharon];
+    return [[NSFileProviderManager alloc] initRevenant];
 }
 
-- (instancetype)initCharon
+- (instancetype)initRevenant
 {
     self = [super init];
     if (self) {
@@ -36,7 +36,7 @@ static NSInteger const CharonFileProviderUnavailable = -2001;
 
 + (NSFileProviderManager *)managerForDomain:(NSFileProviderDomain *)domain
 {
-    NSFileProviderManager *manager = [[NSFileProviderManager alloc] initCharon];
+    NSFileProviderManager *manager = [[NSFileProviderManager alloc] initRevenant];
     manager->_domain = domain;
     return manager;
 }
@@ -45,7 +45,7 @@ static NSInteger const CharonFileProviderUnavailable = -2001;
 {
     if (completionHandler) {
         completionHandler(@[], [NSError errorWithDomain:NSFileProviderErrorDomain
-                                                    code:CharonFileProviderUnavailable
+                                                    code:RevenantFileProviderUnavailable
                                                 userInfo:@{NSLocalizedDescriptionKey: @"The application cannot be used right now."}]);
     }
 }
@@ -88,7 +88,7 @@ static NSInteger const CharonFileProviderUnavailable = -2001;
                         error:(NSError **)error
 {
     if (error) {
-        *error = [NSFileProviderManager charon_unavailable];
+        *error = [NSFileProviderManager revenant_unavailable];
     }
     return NO;
 }
@@ -98,28 +98,28 @@ static NSInteger const CharonFileProviderUnavailable = -2001;
 + (void)addDomain:(NSFileProviderDomain *)domain completionHandler:(void(^)(NSError *_Nullable error))completionHandler
 {
     if (completionHandler) {
-        completionHandler([self charon_unavailable]);
+        completionHandler([self revenant_unavailable]);
     }
 }
 
 + (void)removeDomain:(NSFileProviderDomain *)domain completionHandler:(void(^)(NSError *_Nullable error))completionHandler
 {
     if (completionHandler) {
-        completionHandler([NSFileProviderManager charon_unavailable]);
+        completionHandler([NSFileProviderManager revenant_unavailable]);
     }
 }
 
 + (void)removeAllDomainsWithCompletionHandler:(void(^)(NSError *_Nullable error))completionHandler
 {
     if (completionHandler) {
-        completionHandler([self charon_unavailable]);
+        completionHandler([self revenant_unavailable]);
     }
 }
 
-+ (NSError *)charon_unavailable
++ (NSError *)revenant_unavailable
 {
     return [NSError errorWithDomain:NSFileProviderErrorDomain
-                               code:CharonFileProviderUnavailable
+                               code:RevenantFileProviderUnavailable
                            userInfo:@{NSLocalizedDescriptionKey: @"The application cannot be used right now."}];
 }
 
@@ -128,7 +128,7 @@ static NSInteger const CharonFileProviderUnavailable = -2001;
 - (void)reconnectWithCompletionHandler:(void (^)(NSError *_Nullable error))completionHandler
 {
     if (completionHandler) {
-        completionHandler([NSFileProviderManager charon_unavailable]);
+        completionHandler([NSFileProviderManager revenant_unavailable]);
     }
 }
 
@@ -137,7 +137,7 @@ static NSInteger const CharonFileProviderUnavailable = -2001;
             completionHandler:(void (^)(NSError *_Nullable error))completionHandler
 {
     if (completionHandler) {
-        completionHandler([NSFileProviderManager charon_unavailable]);
+        completionHandler([NSFileProviderManager revenant_unavailable]);
     }
 }
 
@@ -146,7 +146,7 @@ static NSInteger const CharonFileProviderUnavailable = -2001;
         completionHandler:(void (^)(NSError *_Nullable))completionHandler
 {
     if (completionHandler) {
-        completionHandler([NSFileProviderManager charon_unavailable]);
+        completionHandler([NSFileProviderManager revenant_unavailable]);
     }
 }
 
@@ -155,7 +155,7 @@ static NSInteger const CharonFileProviderUnavailable = -2001;
              completionHandler:(void (^)(NSError *_Nullable))completionHandler
 {
     if (completionHandler) {
-        completionHandler([NSFileProviderManager charon_unavailable]);
+        completionHandler([NSFileProviderManager revenant_unavailable]);
     }
 }
 
@@ -164,7 +164,7 @@ static NSInteger const CharonFileProviderUnavailable = -2001;
              completionHandler:(void (^)(NSError *_Nullable error))completionHandler
 {
     if (completionHandler) {
-        completionHandler([NSFileProviderManager charon_unavailable]);
+        completionHandler([NSFileProviderManager revenant_unavailable]);
     }
 }
 
@@ -172,7 +172,7 @@ static NSInteger const CharonFileProviderUnavailable = -2001;
                                 completionHandler:(void (^)(NSError *_Nullable error))completion
 {
     if (completion) {
-        completion([NSFileProviderManager charon_unavailable]);
+        completion([NSFileProviderManager revenant_unavailable]);
     }
 }
 
@@ -181,7 +181,7 @@ static NSInteger const CharonFileProviderUnavailable = -2001;
                              completionHandler:(void (^)(NSURL *_Nullable locationURL, NSError *_Nullable error))completionHandler
 {
     if (completionHandler) {
-        completionHandler(nil, [NSFileProviderManager charon_unavailable]);
+        completionHandler(nil, [NSFileProviderManager revenant_unavailable]);
     }
 }
 
@@ -193,7 +193,7 @@ static NSInteger const CharonFileProviderUnavailable = -2001;
         errorReason(nil);
     }
     if (completionHandler) {
-        completionHandler(nil, [NSFileProviderManager charon_unavailable]);
+        completionHandler(nil, [NSFileProviderManager revenant_unavailable]);
     }
 }
 
@@ -203,7 +203,7 @@ static NSInteger const CharonFileProviderUnavailable = -2001;
                          completionHandler:(void (^)(NSURL *_Nullable url, NSError *_Nullable error))completionHandler
 {
     if (completionHandler) {
-        completionHandler(nil, [NSFileProviderManager charon_unavailable]);
+        completionHandler(nil, [NSFileProviderManager revenant_unavailable]);
     }
 }
 
@@ -211,14 +211,14 @@ static NSInteger const CharonFileProviderUnavailable = -2001;
                            completionHandler:(void (^)(NSFileProviderItemIdentifier _Nullable itemIdentifier, NSError *_Nullable error))completionHandler
 {
     if (completionHandler) {
-        completionHandler(nil, [NSFileProviderManager charon_unavailable]);
+        completionHandler(nil, [NSFileProviderManager revenant_unavailable]);
     }
 }
 
 - (NSURL *)temporaryDirectoryURLWithError:(NSError **)error
 {
     if (error) {
-        *error = [NSFileProviderManager charon_unavailable];
+        *error = [NSFileProviderManager revenant_unavailable];
     }
     return nil;
 }
@@ -232,7 +232,7 @@ static NSInteger const CharonFileProviderUnavailable = -2001;
            completionHandler:(void (^)(NSError *_Nullable error))completionHandler
 {
     if (completionHandler) {
-        completionHandler([NSFileProviderManager charon_unavailable]);
+        completionHandler([NSFileProviderManager revenant_unavailable]);
     }
 }
 
@@ -241,7 +241,7 @@ static NSInteger const CharonFileProviderUnavailable = -2001;
   completionHandler:(void (^)(NSURL *_Nullable preservedLocation, NSError *_Nullable error))completionHandler
 {
     if (completionHandler) {
-        completionHandler(nil, [NSFileProviderManager charon_unavailable]);
+        completionHandler(nil, [NSFileProviderManager revenant_unavailable]);
     }
 }
 

@@ -1,7 +1,7 @@
 #import <Foundation/Foundation.h>
 #import <Metal/Metal.h>
 #import <objc/runtime.h>
-#import "CharonMetal26Types.h"
+#import "RevenantMetal26Types.h"
 
 
 NSString *const MTL4CommandQueueErrorDomain = @"MTL4CommandQueueErrorDomain";

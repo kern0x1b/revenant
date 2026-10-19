@@ -1,5 +1,5 @@
 #import <ModelIO/ModelIO.h>
-#import "CharonMDLTransformMath.h"
+#import "RevenantMDLTransformMath.h"
 #import <simd/simd.h>
 #import <simd/simd.h>
 
@@ -8,9 +8,9 @@
 typedef struct {
     __unsafe_unretained NSString *name;
     BOOL inverse;
-} CharonMDLOpRecord;
+} RevenantMDLOpRecord;
 
-static matrix_double4x4 CharonMDLMatrixInverse(matrix_double4x4 m)
+static matrix_double4x4 RevenantMDLMatrixInverse(matrix_double4x4 m)
 {
     double a00 = m.columns[0][0], a01 = m.columns[1][0], a02 = m.columns[2][0], a03 = m.columns[3][0];
     double a10 = m.columns[0][1], a11 = m.columns[1][1], a12 = m.columns[2][1], a13 = m.columns[3][1];
@@ -44,34 +44,34 @@ static matrix_double4x4 CharonMDLMatrixInverse(matrix_double4x4 m)
     return inverse;
 }
 
-@protocol CharonMDLTransformOpRecord <NSObject>
-- (CharonMDLOpRecord *)charon_record;
-- (MDLAnimatedValue *)charon_value;
-- (void)charon_setAnimatedValue:(MDLAnimatedValue *)value;
-- (void)charon_takeOverFrom:(id<MDLTransformOp>)op;
+@protocol RevenantMDLTransformOpRecord <NSObject>
+- (RevenantMDLOpRecord *)revenant_record;
+- (MDLAnimatedValue *)revenant_value;
+- (void)revenant_setAnimatedValue:(MDLAnimatedValue *)value;
+- (void)revenant_takeOverFrom:(id<MDLTransformOp>)op;
 @end
 
-@interface MDLTransformRotateXOp () <CharonMDLTransformOpRecord>
+@interface MDLTransformRotateXOp () <RevenantMDLTransformOpRecord>
 @end
-@interface MDLTransformRotateYOp () <CharonMDLTransformOpRecord>
+@interface MDLTransformRotateYOp () <RevenantMDLTransformOpRecord>
 @end
-@interface MDLTransformRotateZOp () <CharonMDLTransformOpRecord>
+@interface MDLTransformRotateZOp () <RevenantMDLTransformOpRecord>
 @end
-@interface MDLTransformRotateOp () <CharonMDLTransformOpRecord>
-- (MDLTransformOpRotationOrder)charon_order;
-- (void)charon_setOrder:(MDLTransformOpRotationOrder)order;
+@interface MDLTransformRotateOp () <RevenantMDLTransformOpRecord>
+- (MDLTransformOpRotationOrder)revenant_order;
+- (void)revenant_setOrder:(MDLTransformOpRotationOrder)order;
 @end
-@interface MDLTransformTranslateOp () <CharonMDLTransformOpRecord>
+@interface MDLTransformTranslateOp () <RevenantMDLTransformOpRecord>
 @end
-@interface MDLTransformScaleOp () <CharonMDLTransformOpRecord>
+@interface MDLTransformScaleOp () <RevenantMDLTransformOpRecord>
 @end
-@interface MDLTransformMatrixOp () <CharonMDLTransformOpRecord>
+@interface MDLTransformMatrixOp () <RevenantMDLTransformOpRecord>
 @end
-@interface MDLTransformOrientOp () <CharonMDLTransformOpRecord>
+@interface MDLTransformOrientOp () <RevenantMDLTransformOpRecord>
 @end
 
 @implementation MDLTransformRotateXOp {
-    CharonMDLOpRecord _record;
+    RevenantMDLOpRecord _record;
     MDLAnimatedScalar *_value;
     int _axis;
 }
@@ -89,26 +89,26 @@ static matrix_double4x4 CharonMDLMatrixInverse(matrix_double4x4 m)
 {
 }
 
-- (CharonMDLOpRecord *)charon_record
+- (RevenantMDLOpRecord *)revenant_record
 {
     return &_record;
 }
 
-- (MDLAnimatedValue *)charon_value
+- (MDLAnimatedValue *)revenant_value
 {
     return _value;
 }
 
-- (void)charon_setAnimatedValue:(MDLAnimatedValue *)value
+- (void)revenant_setAnimatedValue:(MDLAnimatedValue *)value
 {
     if (_value != value) {
         _value = (id)value;
     }
 }
 
-- (void)charon_takeOverFrom:(id<MDLTransformOp>)op
+- (void)revenant_takeOverFrom:(id<MDLTransformOp>)op
 {
-    [self charon_setAnimatedValue:[(MDLAnimatedValue *)(MDLAnimatedValue *)[(id)op animatedValue] copy]];
+    [self revenant_setAnimatedValue:[(MDLAnimatedValue *)(MDLAnimatedValue *)[(id)op animatedValue] copy]];
     _record.name = [(id<MDLTransformOp>)op name];
     _record.inverse = [op IsInverseOp];
 }
@@ -126,12 +126,12 @@ static matrix_double4x4 CharonMDLMatrixInverse(matrix_double4x4 m)
 - (matrix_double4x4)double4x4AtTime:(NSTimeInterval)time
 {
     double angle = [_value doubleAtTime:time] * M_PI / 180.0;
-    return CharonMDLAxisRotation(_axis, _record.inverse ? -angle : angle);
+    return RevenantMDLAxisRotation(_axis, _record.inverse ? -angle : angle);
 }
 
 - (matrix_float4x4)float4x4AtTime:(NSTimeInterval)time
 {
-    return CharonMDLFloat4x4([self double4x4AtTime:time]);
+    return RevenantMDLFloat4x4([self double4x4AtTime:time]);
 }
 
 - (MDLAnimatedScalar *)animatedValue
@@ -141,7 +141,7 @@ static matrix_double4x4 CharonMDLMatrixInverse(matrix_double4x4 m)
 
 @end
 @implementation MDLTransformRotateYOp {
-    CharonMDLOpRecord _record;
+    RevenantMDLOpRecord _record;
     MDLAnimatedScalar *_value;
     int _axis;
 }
@@ -159,26 +159,26 @@ static matrix_double4x4 CharonMDLMatrixInverse(matrix_double4x4 m)
 {
 }
 
-- (CharonMDLOpRecord *)charon_record
+- (RevenantMDLOpRecord *)revenant_record
 {
     return &_record;
 }
 
-- (MDLAnimatedValue *)charon_value
+- (MDLAnimatedValue *)revenant_value
 {
     return _value;
 }
 
-- (void)charon_setAnimatedValue:(MDLAnimatedValue *)value
+- (void)revenant_setAnimatedValue:(MDLAnimatedValue *)value
 {
     if (_value != value) {
         _value = (id)value;
     }
 }
 
-- (void)charon_takeOverFrom:(id<MDLTransformOp>)op
+- (void)revenant_takeOverFrom:(id<MDLTransformOp>)op
 {
-    [self charon_setAnimatedValue:[(MDLAnimatedValue *)(MDLAnimatedValue *)[(id)op animatedValue] copy]];
+    [self revenant_setAnimatedValue:[(MDLAnimatedValue *)(MDLAnimatedValue *)[(id)op animatedValue] copy]];
     _record.name = [(id<MDLTransformOp>)op name];
     _record.inverse = [op IsInverseOp];
 }
@@ -196,12 +196,12 @@ static matrix_double4x4 CharonMDLMatrixInverse(matrix_double4x4 m)
 - (matrix_double4x4)double4x4AtTime:(NSTimeInterval)time
 {
     double angle = [_value doubleAtTime:time] * M_PI / 180.0;
-    return CharonMDLAxisRotation(_axis, _record.inverse ? -angle : angle);
+    return RevenantMDLAxisRotation(_axis, _record.inverse ? -angle : angle);
 }
 
 - (matrix_float4x4)float4x4AtTime:(NSTimeInterval)time
 {
-    return CharonMDLFloat4x4([self double4x4AtTime:time]);
+    return RevenantMDLFloat4x4([self double4x4AtTime:time]);
 }
 
 - (MDLAnimatedScalar *)animatedValue
@@ -211,7 +211,7 @@ static matrix_double4x4 CharonMDLMatrixInverse(matrix_double4x4 m)
 
 @end
 @implementation MDLTransformRotateZOp {
-    CharonMDLOpRecord _record;
+    RevenantMDLOpRecord _record;
     MDLAnimatedScalar *_value;
     int _axis;
 }
@@ -229,26 +229,26 @@ static matrix_double4x4 CharonMDLMatrixInverse(matrix_double4x4 m)
 {
 }
 
-- (CharonMDLOpRecord *)charon_record
+- (RevenantMDLOpRecord *)revenant_record
 {
     return &_record;
 }
 
-- (MDLAnimatedValue *)charon_value
+- (MDLAnimatedValue *)revenant_value
 {
     return _value;
 }
 
-- (void)charon_setAnimatedValue:(MDLAnimatedValue *)value
+- (void)revenant_setAnimatedValue:(MDLAnimatedValue *)value
 {
     if (_value != value) {
         _value = (id)value;
     }
 }
 
-- (void)charon_takeOverFrom:(id<MDLTransformOp>)op
+- (void)revenant_takeOverFrom:(id<MDLTransformOp>)op
 {
-    [self charon_setAnimatedValue:[(MDLAnimatedValue *)(MDLAnimatedValue *)[(id)op animatedValue] copy]];
+    [self revenant_setAnimatedValue:[(MDLAnimatedValue *)(MDLAnimatedValue *)[(id)op animatedValue] copy]];
     _record.name = [(id<MDLTransformOp>)op name];
     _record.inverse = [op IsInverseOp];
 }
@@ -266,12 +266,12 @@ static matrix_double4x4 CharonMDLMatrixInverse(matrix_double4x4 m)
 - (matrix_double4x4)double4x4AtTime:(NSTimeInterval)time
 {
     double angle = [_value doubleAtTime:time] * M_PI / 180.0;
-    return CharonMDLAxisRotation(_axis, _record.inverse ? -angle : angle);
+    return RevenantMDLAxisRotation(_axis, _record.inverse ? -angle : angle);
 }
 
 - (matrix_float4x4)float4x4AtTime:(NSTimeInterval)time
 {
-    return CharonMDLFloat4x4([self double4x4AtTime:time]);
+    return RevenantMDLFloat4x4([self double4x4AtTime:time]);
 }
 
 - (MDLAnimatedScalar *)animatedValue
@@ -281,7 +281,7 @@ static matrix_double4x4 CharonMDLMatrixInverse(matrix_double4x4 m)
 
 @end
 @implementation MDLTransformRotateOp {
-    CharonMDLOpRecord _record;
+    RevenantMDLOpRecord _record;
     MDLAnimatedVector3 *_value;
     MDLTransformOpRotationOrder _order;
 }
@@ -299,40 +299,40 @@ static matrix_double4x4 CharonMDLMatrixInverse(matrix_double4x4 m)
 {
 }
 
-- (CharonMDLOpRecord *)charon_record
+- (RevenantMDLOpRecord *)revenant_record
 {
     return &_record;
 }
 
-- (MDLAnimatedValue *)charon_value
+- (MDLAnimatedValue *)revenant_value
 {
     return _value;
 }
 
-- (void)charon_setAnimatedValue:(MDLAnimatedValue *)value
+- (void)revenant_setAnimatedValue:(MDLAnimatedValue *)value
 {
     if (_value != value) {
         _value = (id)value;
     }
 }
 
-- (MDLTransformOpRotationOrder)charon_order
+- (MDLTransformOpRotationOrder)revenant_order
 {
     return _order;
 }
 
-- (void)charon_setOrder:(MDLTransformOpRotationOrder)order
+- (void)revenant_setOrder:(MDLTransformOpRotationOrder)order
 {
     _order = order;
 }
 
-- (void)charon_takeOverFrom:(id<MDLTransformOp>)op
+- (void)revenant_takeOverFrom:(id<MDLTransformOp>)op
 {
-    [self charon_setAnimatedValue:[(MDLAnimatedValue *)(MDLAnimatedValue *)[(id)op animatedValue] copy]];
+    [self revenant_setAnimatedValue:[(MDLAnimatedValue *)(MDLAnimatedValue *)[(id)op animatedValue] copy]];
     _record.name = [op name];
     _record.inverse = [op IsInverseOp];
     if ([(id)op isKindOfClass:[MDLTransformRotateOp class]])
-        _order = [(MDLTransformRotateOp *)(id)op charon_order];
+        _order = [(MDLTransformRotateOp *)(id)op revenant_order];
 }
 
 - (NSString *)name
@@ -350,12 +350,12 @@ static matrix_double4x4 CharonMDLMatrixInverse(matrix_double4x4 m)
     vector_double3 angles = [_value double3AtTime:time] * M_PI / 180.0;
     if (_record.inverse)
         angles = (vector_double3){-angles.x, -angles.y, -angles.z};
-    return CharonMDLAngleRotation(angles, _order);
+    return RevenantMDLAngleRotation(angles, _order);
 }
 
 - (matrix_float4x4)float4x4AtTime:(NSTimeInterval)time
 {
-    return CharonMDLFloat4x4([self double4x4AtTime:time]);
+    return RevenantMDLFloat4x4([self double4x4AtTime:time]);
 }
 
 - (MDLAnimatedVector3 *)animatedValue
@@ -365,7 +365,7 @@ static matrix_double4x4 CharonMDLMatrixInverse(matrix_double4x4 m)
 
 @end
 @implementation MDLTransformTranslateOp {
-    CharonMDLOpRecord _record;
+    RevenantMDLOpRecord _record;
     MDLAnimatedVector3 *_value;
 }
 
@@ -380,26 +380,26 @@ static matrix_double4x4 CharonMDLMatrixInverse(matrix_double4x4 m)
 {
 }
 
-- (CharonMDLOpRecord *)charon_record
+- (RevenantMDLOpRecord *)revenant_record
 {
     return &_record;
 }
 
-- (MDLAnimatedValue *)charon_value
+- (MDLAnimatedValue *)revenant_value
 {
     return _value;
 }
 
-- (void)charon_setAnimatedValue:(MDLAnimatedValue *)value
+- (void)revenant_setAnimatedValue:(MDLAnimatedValue *)value
 {
     if (_value != value) {
         _value = (id)value;
     }
 }
 
-- (void)charon_takeOverFrom:(id<MDLTransformOp>)op
+- (void)revenant_takeOverFrom:(id<MDLTransformOp>)op
 {
-    [self charon_setAnimatedValue:[(MDLAnimatedValue *)(MDLAnimatedValue *)[(id)op animatedValue] copy]];
+    [self revenant_setAnimatedValue:[(MDLAnimatedValue *)(MDLAnimatedValue *)[(id)op animatedValue] copy]];
     _record.name = [(id<MDLTransformOp>)op name];
     _record.inverse = [op IsInverseOp];
 }
@@ -419,12 +419,12 @@ static matrix_double4x4 CharonMDLMatrixInverse(matrix_double4x4 m)
     vector_double3 translation = [_value double3AtTime:time];
     if (_record.inverse)
         translation = (vector_double3){-translation.x, -translation.y, -translation.z};
-    return CharonMDLTranslation(translation);
+    return RevenantMDLTranslation(translation);
 }
 
 - (matrix_float4x4)float4x4AtTime:(NSTimeInterval)time
 {
-    return CharonMDLFloat4x4([self double4x4AtTime:time]);
+    return RevenantMDLFloat4x4([self double4x4AtTime:time]);
 }
 
 - (MDLAnimatedVector3 *)animatedValue
@@ -434,7 +434,7 @@ static matrix_double4x4 CharonMDLMatrixInverse(matrix_double4x4 m)
 
 @end
 @implementation MDLTransformScaleOp {
-    CharonMDLOpRecord _record;
+    RevenantMDLOpRecord _record;
     MDLAnimatedVector3 *_value;
 }
 
@@ -449,26 +449,26 @@ static matrix_double4x4 CharonMDLMatrixInverse(matrix_double4x4 m)
 {
 }
 
-- (CharonMDLOpRecord *)charon_record
+- (RevenantMDLOpRecord *)revenant_record
 {
     return &_record;
 }
 
-- (MDLAnimatedValue *)charon_value
+- (MDLAnimatedValue *)revenant_value
 {
     return _value;
 }
 
-- (void)charon_setAnimatedValue:(MDLAnimatedValue *)value
+- (void)revenant_setAnimatedValue:(MDLAnimatedValue *)value
 {
     if (_value != value) {
         _value = (id)value;
     }
 }
 
-- (void)charon_takeOverFrom:(id<MDLTransformOp>)op
+- (void)revenant_takeOverFrom:(id<MDLTransformOp>)op
 {
-    [self charon_setAnimatedValue:[(MDLAnimatedValue *)(MDLAnimatedValue *)[(id)op animatedValue] copy]];
+    [self revenant_setAnimatedValue:[(MDLAnimatedValue *)(MDLAnimatedValue *)[(id)op animatedValue] copy]];
     _record.name = [(id<MDLTransformOp>)op name];
     _record.inverse = [op IsInverseOp];
 }
@@ -488,12 +488,12 @@ static matrix_double4x4 CharonMDLMatrixInverse(matrix_double4x4 m)
     vector_double3 scale = [_value double3AtTime:time];
     if (_record.inverse)
         scale = (vector_double3){scale.x ? 1 / scale.x : 0, scale.y ? 1 / scale.y : 0, scale.z ? 1 / scale.z : 0};
-    return CharonMDLScale(scale);
+    return RevenantMDLScale(scale);
 }
 
 - (matrix_float4x4)float4x4AtTime:(NSTimeInterval)time
 {
-    return CharonMDLFloat4x4([self double4x4AtTime:time]);
+    return RevenantMDLFloat4x4([self double4x4AtTime:time]);
 }
 
 - (MDLAnimatedVector3 *)animatedValue
@@ -503,7 +503,7 @@ static matrix_double4x4 CharonMDLMatrixInverse(matrix_double4x4 m)
 
 @end
 @implementation MDLTransformMatrixOp {
-    CharonMDLOpRecord _record;
+    RevenantMDLOpRecord _record;
     MDLAnimatedMatrix4x4 *_value;
 }
 
@@ -518,26 +518,26 @@ static matrix_double4x4 CharonMDLMatrixInverse(matrix_double4x4 m)
 {
 }
 
-- (CharonMDLOpRecord *)charon_record
+- (RevenantMDLOpRecord *)revenant_record
 {
     return &_record;
 }
 
-- (MDLAnimatedValue *)charon_value
+- (MDLAnimatedValue *)revenant_value
 {
     return _value;
 }
 
-- (void)charon_setAnimatedValue:(MDLAnimatedValue *)value
+- (void)revenant_setAnimatedValue:(MDLAnimatedValue *)value
 {
     if (_value != value) {
         _value = (id)value;
     }
 }
 
-- (void)charon_takeOverFrom:(id<MDLTransformOp>)op
+- (void)revenant_takeOverFrom:(id<MDLTransformOp>)op
 {
-    [self charon_setAnimatedValue:[(MDLAnimatedValue *)(MDLAnimatedValue *)[(id)op animatedValue] copy]];
+    [self revenant_setAnimatedValue:[(MDLAnimatedValue *)(MDLAnimatedValue *)[(id)op animatedValue] copy]];
     _record.name = [(id<MDLTransformOp>)op name];
     _record.inverse = [op IsInverseOp];
 }
@@ -557,12 +557,12 @@ static matrix_double4x4 CharonMDLMatrixInverse(matrix_double4x4 m)
     matrix_double4x4 value = [_value double4x4AtTime:time];
     if (!_record.inverse)
         return value;
-    return CharonMDLMatrixInverse(value);
+    return RevenantMDLMatrixInverse(value);
 }
 
 - (matrix_float4x4)float4x4AtTime:(NSTimeInterval)time
 {
-    return CharonMDLFloat4x4([self double4x4AtTime:time]);
+    return RevenantMDLFloat4x4([self double4x4AtTime:time]);
 }
 
 - (MDLAnimatedMatrix4x4 *)animatedValue
@@ -600,77 +600,77 @@ static matrix_double4x4 CharonMDLMatrixInverse(matrix_double4x4 m)
     MDLTransformStack *copy = [[[self class] allocWithZone:zone] init];
     for (id<MDLTransformOp> op in _ops) {
         Class kind = [(id)op class];
-        id<CharonMDLTransformOpRecord> duplicate = [[kind allocWithZone:zone] init];
-        [duplicate charon_takeOverFrom:op];
-        [copy charon_addOp:duplicate named:op.name inverse:[op IsInverseOp]];
+        id<RevenantMDLTransformOpRecord> duplicate = [[kind allocWithZone:zone] init];
+        [duplicate revenant_takeOverFrom:op];
+        [copy revenant_addOp:duplicate named:op.name inverse:[op IsInverseOp]];
     }
     return copy;
 }
 
-- (void)charon_addOp:(id<CharonMDLTransformOpRecord>)op named:(NSString *)name inverse:(bool)inverse
+- (void)revenant_addOp:(id<RevenantMDLTransformOpRecord>)op named:(NSString *)name inverse:(bool)inverse
 {
-    CharonMDLOpRecord *record = [op charon_record];
+    RevenantMDLOpRecord *record = [op revenant_record];
     [_names addObject:name];
     record->name = [_names lastObject];
     record->inverse = inverse;
     [_ops addObject:op];
-    [_values setObject:[op charon_value] forKey:name];
+    [_values setObject:[op revenant_value] forKey:name];
 }
 
 - (MDLTransformTranslateOp *)addTranslateOp:(NSString *)animatedValueName inverse:(bool)inverse
 {
     MDLTransformTranslateOp *op = [[MDLTransformTranslateOp alloc] init];
-    [self charon_addOp:op named:animatedValueName inverse:inverse];
+    [self revenant_addOp:op named:animatedValueName inverse:inverse];
     return op;
 }
 
 - (MDLTransformRotateXOp *)addRotateXOp:(NSString *)animatedValueName inverse:(bool)inverse
 {
     MDLTransformRotateXOp *op = [[MDLTransformRotateXOp alloc] init];
-    [self charon_addOp:op named:animatedValueName inverse:inverse];
+    [self revenant_addOp:op named:animatedValueName inverse:inverse];
     return op;
 }
 
 - (MDLTransformRotateYOp *)addRotateYOp:(NSString *)animatedValueName inverse:(bool)inverse
 {
     MDLTransformRotateYOp *op = [[MDLTransformRotateYOp alloc] init];
-    [self charon_addOp:op named:animatedValueName inverse:inverse];
+    [self revenant_addOp:op named:animatedValueName inverse:inverse];
     return op;
 }
 
 - (MDLTransformRotateZOp *)addRotateZOp:(NSString *)animatedValueName inverse:(bool)inverse
 {
     MDLTransformRotateZOp *op = [[MDLTransformRotateZOp alloc] init];
-    [self charon_addOp:op named:animatedValueName inverse:inverse];
+    [self revenant_addOp:op named:animatedValueName inverse:inverse];
     return op;
 }
 
 - (MDLTransformRotateOp *)addRotateOp:(NSString *)animatedValueName order:(MDLTransformOpRotationOrder)order inverse:(bool)inverse
 {
     MDLTransformRotateOp *op = [[MDLTransformRotateOp alloc] init];
-    [op charon_setOrder:order];
-    [self charon_addOp:op named:animatedValueName inverse:inverse];
+    [op revenant_setOrder:order];
+    [self revenant_addOp:op named:animatedValueName inverse:inverse];
     return op;
 }
 
 - (MDLTransformScaleOp *)addScaleOp:(NSString *)animatedValueName inverse:(bool)inverse
 {
     MDLTransformScaleOp *op = [[MDLTransformScaleOp alloc] init];
-    [self charon_addOp:op named:animatedValueName inverse:inverse];
+    [self revenant_addOp:op named:animatedValueName inverse:inverse];
     return op;
 }
 
 - (MDLTransformMatrixOp *)addMatrixOp:(NSString *)animatedValueName inverse:(bool)inverse
 {
     MDLTransformMatrixOp *op = [[MDLTransformMatrixOp alloc] init];
-    [self charon_addOp:op named:animatedValueName inverse:inverse];
+    [self revenant_addOp:op named:animatedValueName inverse:inverse];
     return op;
 }
 
 - (MDLTransformOrientOp *)addOrientOp:(NSString *)animatedValueName inverse:(bool)inverse
 {
     MDLTransformOrientOp *op = [[MDLTransformOrientOp alloc] init];
-    [self charon_addOp:op named:animatedValueName inverse:inverse];
+    [self revenant_addOp:op named:animatedValueName inverse:inverse];
     return op;
 }
 
@@ -691,7 +691,7 @@ static matrix_double4x4 CharonMDLMatrixInverse(matrix_double4x4 m)
 
 - (matrix_double4x4)double4x4AtTime:(NSTimeInterval)time
 {
-    matrix_double4x4 result = CharonMDLDouble4x4Identity();
+    matrix_double4x4 result = RevenantMDLDouble4x4Identity();
     for (id<MDLTransformOp> op in _ops)
         result = simd_mul(result, [op double4x4AtTime:time]);
     return result;
@@ -699,7 +699,7 @@ static matrix_double4x4 CharonMDLMatrixInverse(matrix_double4x4 m)
 
 - (matrix_float4x4)float4x4AtTime:(NSTimeInterval)time
 {
-    return CharonMDLFloat4x4([self double4x4AtTime:time]);
+    return RevenantMDLFloat4x4([self double4x4AtTime:time]);
 }
 
 - (matrix_float4x4)matrix
@@ -714,7 +714,7 @@ static matrix_double4x4 CharonMDLMatrixInverse(matrix_double4x4 m)
 
 - (void)setLocalTransform:(matrix_float4x4)transform forTime:(NSTimeInterval)time
 {
-    MDLTransformMatrixOp *op = [self addMatrixOp:@"charon_localTransform" inverse:NO];
+    MDLTransformMatrixOp *op = [self addMatrixOp:@"revenant_localTransform" inverse:NO];
     [(MDLAnimatedMatrix4x4 *)[(id)op animatedValue] setFloat4x4:transform atTime:time];
 }
 

@@ -1,5 +1,5 @@
-#import "CharonVision.h"
-#import "CharonVisionContours.h"
+#import "RevenantVision.h"
+#import "RevenantVisionContours.h"
 #import <simd/simd.h>
 #import <math.h>
 
@@ -8,7 +8,7 @@
 #pragma clang diagnostic ignored "-Wnullability-completeness"
 #pragma clang diagnostic ignored "-Wprotocol"
 
-static double charon_vision_squared_distance(double x1, double y1, double x2, double y2)
+static double revenant_vision_squared_distance(double x1, double y1, double x2, double y2)
 {
     double dx = x1 - x2, dy = y1 - y2;
     return dx * dx + dy * dy;
@@ -17,67 +17,67 @@ static double charon_vision_squared_distance(double x1, double y1, double x2, do
 typedef struct {
     double x;
     double y;
-} CharonVisionXY;
+} RevenantVisionXY;
 
 typedef struct {
-    CharonVisionXY center;
+    RevenantVisionXY center;
     double radius;
     int count;
-} CharonVisionCircle;
+} RevenantVisionCircle;
 
-static CharonVisionCircle charon_vision_circle_of_one(CharonVisionXY point)
+static RevenantVisionCircle revenant_vision_circle_of_one(RevenantVisionXY point)
 {
-    CharonVisionCircle circle = {{point.x, point.y}, 0.0, 1};
+    RevenantVisionCircle circle = {{point.x, point.y}, 0.0, 1};
     return circle;
 }
 
-static CharonVisionCircle charon_vision_circle_of_two(CharonVisionXY a, CharonVisionXY b)
+static RevenantVisionCircle revenant_vision_circle_of_two(RevenantVisionXY a, RevenantVisionXY b)
 {
-    CharonVisionCircle circle;
+    RevenantVisionCircle circle;
     circle.center.x = (a.x + b.x) / 2.0;
     circle.center.y = (a.y + b.y) / 2.0;
-    circle.radius = sqrt(charon_vision_squared_distance(a.x, a.y, b.x, b.y)) / 2.0;
+    circle.radius = sqrt(revenant_vision_squared_distance(a.x, a.y, b.x, b.y)) / 2.0;
     circle.count = 2;
     return circle;
 }
 
-static CharonVisionCircle charon_vision_circle_of_three(CharonVisionXY a, CharonVisionXY b, CharonVisionXY c)
+static RevenantVisionCircle revenant_vision_circle_of_three(RevenantVisionXY a, RevenantVisionXY b, RevenantVisionXY c)
 {
-    CharonVisionCircle circle;
+    RevenantVisionCircle circle;
     double d = 2.0 * (a.x * (b.y - c.y) + b.x * (c.y - a.y) + c.x * (a.y - b.y));
     if (fabs(d) < 1e-18) {
-        double ab = charon_vision_squared_distance(a.x, a.y, b.x, b.y);
-        double ac = charon_vision_squared_distance(a.x, a.y, c.x, c.y);
-        double bc = charon_vision_squared_distance(b.x, b.y, c.x, c.y);
+        double ab = revenant_vision_squared_distance(a.x, a.y, b.x, b.y);
+        double ac = revenant_vision_squared_distance(a.x, a.y, c.x, c.y);
+        double bc = revenant_vision_squared_distance(b.x, b.y, c.x, c.y);
         if (ab >= ac && ab >= bc)
-            return charon_vision_circle_of_two(a, b);
+            return revenant_vision_circle_of_two(a, b);
         if (ac >= bc)
-            return charon_vision_circle_of_two(a, c);
-        return charon_vision_circle_of_two(b, c);
+            return revenant_vision_circle_of_two(a, c);
+        return revenant_vision_circle_of_two(b, c);
     }
     double a2 = a.x * a.x + a.y * a.y;
     double b2 = b.x * b.x + b.y * b.y;
     double c2 = c.x * c.x + c.y * c.y;
     circle.center.x = (a2 * (b.y - c.y) + b2 * (c.y - a.y) + c2 * (a.y - b.y)) / d;
     circle.center.y = (a2 * (c.x - b.x) + b2 * (a.x - c.x) + c2 * (b.x - a.x)) / d;
-    circle.radius = sqrt(charon_vision_squared_distance(circle.center.x, circle.center.y, a.x, a.y));
+    circle.radius = sqrt(revenant_vision_squared_distance(circle.center.x, circle.center.y, a.x, a.y));
     circle.count = 3;
     return circle;
 }
 
-static BOOL charon_vision_circle_holds(CharonVisionCircle circle, CharonVisionXY point)
+static BOOL revenant_vision_circle_holds(RevenantVisionCircle circle, RevenantVisionXY point)
 {
     if (circle.count == 0)
         return NO;
-    return charon_vision_squared_distance(circle.center.x, circle.center.y, point.x, point.y)
+    return revenant_vision_squared_distance(circle.center.x, circle.center.y, point.x, point.y)
         <= circle.radius * circle.radius + 1e-12;
 }
 
-static void charon_vision_shuffle(CharonVisionXY *points, NSInteger count)
+static void revenant_vision_shuffle(RevenantVisionXY *points, NSInteger count)
 {
     uint32_t seed = 0x5f3759dfu;
     for (NSInteger index = count - 1; index > 0; index--) {
-        CharonVisionXY swap;
+        RevenantVisionXY swap;
         seed = seed * 1664525u + 1013904223u;
         NSInteger other = (NSInteger)(seed % (uint32_t)(index + 1));
         swap = points[index];
@@ -86,24 +86,24 @@ static void charon_vision_shuffle(CharonVisionXY *points, NSInteger count)
     }
 }
 
-static CharonVisionCircle charon_vision_bounding_circle(CharonVisionXY *points, NSInteger count)
+static RevenantVisionCircle revenant_vision_bounding_circle(RevenantVisionXY *points, NSInteger count)
 {
-    CharonVisionCircle circle = {{0.0, 0.0}, 0.0, 0};
+    RevenantVisionCircle circle = {{0.0, 0.0}, 0.0, 0};
     if (count <= 0)
         return circle;
-    charon_vision_shuffle(points, count);
+    revenant_vision_shuffle(points, count);
     for (NSInteger i = 0; i < count; i++) {
-        if (charon_vision_circle_holds(circle, points[i]))
+        if (revenant_vision_circle_holds(circle, points[i]))
             continue;
-        circle = charon_vision_circle_of_one(points[i]);
+        circle = revenant_vision_circle_of_one(points[i]);
         for (NSInteger j = 0; j < i; j++) {
-            if (charon_vision_circle_holds(circle, points[j]))
+            if (revenant_vision_circle_holds(circle, points[j]))
                 continue;
-            circle = charon_vision_circle_of_two(points[i], points[j]);
+            circle = revenant_vision_circle_of_two(points[i], points[j]);
             for (NSInteger k = 0; k < j; k++) {
-                if (charon_vision_circle_holds(circle, points[k]))
+                if (revenant_vision_circle_holds(circle, points[k]))
                     continue;
-                circle = charon_vision_circle_of_three(points[i], points[j], points[k]);
+                circle = revenant_vision_circle_of_three(points[i], points[j], points[k]);
             }
         }
     }
@@ -180,7 +180,7 @@ static CharonVisionCircle charon_vision_bounding_circle(CharonVisionXY *points, 
 
 - (id)copyWithZone:(NSZone *)zone
 {
-    VNPoint *copy = charon_vision_clone(self, zone);
+    VNPoint *copy = revenant_vision_clone(self, zone);
     return copy;
 }
 
@@ -202,19 +202,19 @@ static CharonVisionCircle charon_vision_bounding_circle(CharonVisionXY *points, 
 
 @end
 
-@interface VNDetectedPoint (CharonFactory)
-+ (instancetype)charon_pointWithX:(double)x y:(double)y confidence:(VNConfidence)confidence;
+@interface VNDetectedPoint (RevenantFactory)
++ (instancetype)revenant_pointWithX:(double)x y:(double)y confidence:(VNConfidence)confidence;
 @end
 
-@interface VNRecognizedPoint (CharonFactory)
-+ (instancetype)charon_pointWithX:(double)x y:(double)y confidence:(VNConfidence)confidence identifier:(VNRecognizedPointKey)identifier;
+@interface VNRecognizedPoint (RevenantFactory)
++ (instancetype)revenant_pointWithX:(double)x y:(double)y confidence:(VNConfidence)confidence identifier:(VNRecognizedPointKey)identifier;
 @end
 
 @implementation VNDetectedPoint {
     VNConfidence _confidence;
 }
 
-+ (instancetype)charon_pointWithX:(double)x y:(double)y confidence:(VNConfidence)confidence
++ (instancetype)revenant_pointWithX:(double)x y:(double)y confidence:(VNConfidence)confidence
 {
     VNDetectedPoint *point = [[self alloc] initWithX:x y:y];
     point->_confidence = confidence;
@@ -246,9 +246,9 @@ static CharonVisionCircle charon_vision_bounding_circle(CharonVisionXY *points, 
     VNRecognizedPointKey _identifier;
 }
 
-+ (instancetype)charon_pointWithX:(double)x y:(double)y confidence:(VNConfidence)confidence identifier:(VNRecognizedPointKey)identifier
++ (instancetype)revenant_pointWithX:(double)x y:(double)y confidence:(VNConfidence)confidence identifier:(VNRecognizedPointKey)identifier
 {
-    VNRecognizedPoint *point = [super charon_pointWithX:x y:y confidence:confidence];
+    VNRecognizedPoint *point = [super revenant_pointWithX:x y:y confidence:confidence];
     point->_identifier = [identifier copy];
     return point;
 }
@@ -391,7 +391,7 @@ static CharonVisionCircle charon_vision_bounding_circle(CharonVisionXY *points, 
 
 - (id)copyWithZone:(NSZone *)zone
 {
-    VNVector *copy = charon_vision_clone(self, zone);
+    VNVector *copy = revenant_vision_clone(self, zone);
     return copy;
 }
 
@@ -477,7 +477,7 @@ static CharonVisionCircle charon_vision_bounding_circle(CharonVisionXY *points, 
 
 - (id)copyWithZone:(NSZone *)zone
 {
-    VNCircle *copy = charon_vision_clone(self, zone);
+    VNCircle *copy = revenant_vision_clone(self, zone);
     return copy;
 }
 
@@ -508,19 +508,19 @@ static CharonVisionCircle charon_vision_bounding_circle(CharonVisionXY *points, 
 + (VNCircle *)boundingCircleForPoints:(NSArray<VNPoint *> *)points error:(NSError **)error
 {
     NSInteger count = (NSInteger)points.count;
-    CharonVisionXY *buffer;
-    CharonVisionCircle circle;
+    RevenantVisionXY *buffer;
+    RevenantVisionCircle circle;
     VNCircle *answer;
     if (count == 0) {
         if (error) {
-            *error = charon_vision_error(VNErrorInvalidArgument, @"there are no points to draw a circle around");
+            *error = revenant_vision_error(VNErrorInvalidArgument, @"there are no points to draw a circle around");
         }
         return nil;
     }
-    buffer = malloc(sizeof(CharonVisionXY) * (size_t)count);
+    buffer = malloc(sizeof(RevenantVisionXY) * (size_t)count);
     if (buffer == NULL) {
         if (error) {
-            *error = charon_vision_error(VNErrorOutOfMemory, @"the points would not fit in memory");
+            *error = revenant_vision_error(VNErrorOutOfMemory, @"the points would not fit in memory");
         }
         return nil;
     }
@@ -529,14 +529,14 @@ static CharonVisionCircle charon_vision_bounding_circle(CharonVisionXY *points, 
         if (point == nil) {
             free(buffer);
             if (error) {
-                *error = charon_vision_error(VNErrorInvalidArgument, @"one of the points is not a VNPoint");
+                *error = revenant_vision_error(VNErrorInvalidArgument, @"one of the points is not a VNPoint");
             }
             return nil;
         }
         buffer[index].x = point.x;
         buffer[index].y = point.y;
     }
-    circle = charon_vision_bounding_circle(buffer, count);
+    circle = revenant_vision_bounding_circle(buffer, count);
     free(buffer);
     answer = [[VNCircle alloc] initWithCenter:[[VNPoint alloc] initWithX:circle.center.x y:circle.center.y]
                                        radius:circle.radius];
@@ -547,19 +547,19 @@ static CharonVisionCircle charon_vision_bounding_circle(CharonVisionXY *points, 
                                pointCount:(NSInteger)pointCount
                                     error:(NSError **)error
 {
-    CharonVisionXY *buffer;
-    CharonVisionCircle circle;
+    RevenantVisionXY *buffer;
+    RevenantVisionCircle circle;
     VNCircle *answer;
     if (pointCount <= 0 || points == NULL) {
         if (error) {
-            *error = charon_vision_error(VNErrorInvalidArgument, @"there are no points to draw a circle around");
+            *error = revenant_vision_error(VNErrorInvalidArgument, @"there are no points to draw a circle around");
         }
         return nil;
     }
-    buffer = malloc(sizeof(CharonVisionXY) * (size_t)pointCount);
+    buffer = malloc(sizeof(RevenantVisionXY) * (size_t)pointCount);
     if (buffer == NULL) {
         if (error) {
-            *error = charon_vision_error(VNErrorOutOfMemory, @"the points would not fit in memory");
+            *error = revenant_vision_error(VNErrorOutOfMemory, @"the points would not fit in memory");
         }
         return nil;
     }
@@ -567,7 +567,7 @@ static CharonVisionCircle charon_vision_bounding_circle(CharonVisionXY *points, 
         buffer[index].x = (double)points[index].x;
         buffer[index].y = (double)points[index].y;
     }
-    circle = charon_vision_bounding_circle(buffer, pointCount);
+    circle = revenant_vision_bounding_circle(buffer, pointCount);
     free(buffer);
     answer = [[VNCircle alloc] initWithCenter:[[VNPoint alloc] initWithX:circle.center.x y:circle.center.y]
                                        radius:circle.radius];
@@ -610,7 +610,7 @@ static CharonVisionCircle charon_vision_bounding_circle(CharonVisionXY *points, 
 
 - (id)copyWithZone:(NSZone *)zone
 {
-    VNVideoProcessorCadence *copy = charon_vision_clone(self, zone);
+    VNVideoProcessorCadence *copy = revenant_vision_clone(self, zone);
     return copy;
 }
 
@@ -635,7 +635,7 @@ static CharonVisionCircle charon_vision_bounding_circle(CharonVisionXY *points, 
 
 - (id)copyWithZone:(NSZone *)zone
 {
-    VNVideoProcessorFrameRateCadence *copy = charon_vision_clone(self, zone);
+    VNVideoProcessorFrameRateCadence *copy = revenant_vision_clone(self, zone);
     return copy;
 }
 
@@ -660,7 +660,7 @@ static CharonVisionCircle charon_vision_bounding_circle(CharonVisionXY *points, 
 
 - (id)copyWithZone:(NSZone *)zone
 {
-    VNVideoProcessorTimeIntervalCadence *copy = charon_vision_clone(self, zone);
+    VNVideoProcessorTimeIntervalCadence *copy = revenant_vision_clone(self, zone);
     return copy;
 }
 
@@ -682,7 +682,7 @@ static CharonVisionCircle charon_vision_bounding_circle(CharonVisionXY *points, 
 
 - (id)copyWithZone:(NSZone *)zone
 {
-    VNVideoProcessorRequestProcessingOptions *copy = charon_vision_clone(self, zone);
+    VNVideoProcessorRequestProcessingOptions *copy = revenant_vision_clone(self, zone);
     return copy;
 }
 
@@ -696,12 +696,12 @@ CGPoint VNNormalizedPointForImagePoint(CGPoint imagePoint, size_t imageWidth, si
     return CGPointMake(imagePoint.x / (double)imageWidth, imagePoint.y / (double)imageHeight);
 }
 
-@interface CharonVisionPath : NSObject
+@interface RevenantVisionPath : NSObject
 - (instancetype)initWithPoints:(NSData *)points;
 - (CGPathRef)path;
 @end
 
-@implementation CharonVisionPath {
+@implementation RevenantVisionPath {
     CGMutablePathRef _path;
 }
 
@@ -740,23 +740,23 @@ CGPoint VNNormalizedPointForImagePoint(CGPoint imagePoint, size_t imageWidth, si
     NSIndexPath *_indexPath;
     NSArray<VNContour *> *_childContours;
     NSData *_points;
-    CharonVisionPath *_path;
+    RevenantVisionPath *_path;
     float _aspectRatio;
 }
 
-- (instancetype)initCharonWithIndexPath:(NSIndexPath *)indexPath points:(NSData *)points aspectRatio:(float)aspectRatio
+- (instancetype)initRevenantWithIndexPath:(NSIndexPath *)indexPath points:(NSData *)points aspectRatio:(float)aspectRatio
 {
     if ((self = [super init])) {
         _indexPath = indexPath;
         _childContours = @[];
         _points = [points copy];
-        _path = [[CharonVisionPath alloc] initWithPoints:_points];
+        _path = [[RevenantVisionPath alloc] initWithPoints:_points];
         _aspectRatio = aspectRatio;
     }
     return self;
 }
 
-- (void)charon_setChildContours:(NSArray<VNContour *> *)childContours
+- (void)revenant_setChildContours:(NSArray<VNContour *> *)childContours
 {
     _childContours = [childContours copy];
 }
@@ -800,7 +800,7 @@ CGPoint VNNormalizedPointForImagePoint(CGPoint imagePoint, size_t imageWidth, si
 {
     if (childContourIndex >= _childContours.count) {
         if (error)
-            *error = charon_vision_error(VNErrorInvalidArgument, @"the contour has no child at that index");
+            *error = revenant_vision_error(VNErrorInvalidArgument, @"the contour has no child at that index");
         return nil;
     }
     return _childContours[childContourIndex];
@@ -811,7 +811,7 @@ CGPoint VNNormalizedPointForImagePoint(CGPoint imagePoint, size_t imageWidth, si
     NSInteger count = self.pointCount;
     const simd_float2 *values = self.normalizedPoints;
     if (count < 3) {
-        return [[VNContour alloc] initCharonWithIndexPath:_indexPath points:_points aspectRatio:_aspectRatio];
+        return [[VNContour alloc] initRevenantWithIndexPath:_indexPath points:_points aspectRatio:_aspectRatio];
     }
     BOOL *keep = calloc((size_t)count, sizeof(BOOL));
     NSInteger *stack = malloc(sizeof(NSInteger) * (size_t)count * 2);
@@ -848,7 +848,7 @@ CGPoint VNNormalizedPointForImagePoint(CGPoint imagePoint, size_t imageWidth, si
     }
     free(keep);
     free(stack);
-    return [[VNContour alloc] initCharonWithIndexPath:_indexPath points:kept aspectRatio:_aspectRatio];
+    return [[VNContour alloc] initRevenantWithIndexPath:_indexPath points:kept aspectRatio:_aspectRatio];
 }
 
 @end
@@ -856,16 +856,16 @@ CGPoint VNNormalizedPointForImagePoint(CGPoint imagePoint, size_t imageWidth, si
 @implementation VNContoursObservation {
     NSArray<VNContour *> *_topLevelContours;
     NSArray<VNContour *> *_allContours;
-    CharonVisionPath *_path;
+    RevenantVisionPath *_path;
 }
 
-- (instancetype)initCharonWithTopLevelContours:(NSArray<VNContour *> *)topLevelContours allContours:(NSArray<VNContour *> *)allContours
+- (instancetype)initRevenantWithTopLevelContours:(NSArray<VNContour *> *)topLevelContours allContours:(NSArray<VNContour *> *)allContours
                                       normalizedPoints:(NSData *)points
 {
     if ((self = [super init])) {
         _topLevelContours = [topLevelContours copy];
         _allContours = [allContours copy];
-        _path = [[CharonVisionPath alloc] initWithPoints:points];
+        _path = [[RevenantVisionPath alloc] initWithPoints:points];
     }
     return self;
 }
@@ -894,7 +894,7 @@ CGPoint VNNormalizedPointForImagePoint(CGPoint imagePoint, size_t imageWidth, si
 {
     if (contourIndex < 0 || (NSUInteger)contourIndex >= _allContours.count) {
         if (error)
-            *error = charon_vision_error(VNErrorInvalidArgument, @"the observation has no contour at that index");
+            *error = revenant_vision_error(VNErrorInvalidArgument, @"the observation has no contour at that index");
         return nil;
     }
     return _allContours[(NSUInteger)contourIndex];
@@ -916,13 +916,13 @@ CGPoint VNNormalizedPointForImagePoint(CGPoint imagePoint, size_t imageWidth, si
         }
     }
     if (contour == nil && error)
-        *error = charon_vision_error(VNErrorInvalidArgument, @"the observation has no contour at that index path");
+        *error = revenant_vision_error(VNErrorInvalidArgument, @"the observation has no contour at that index path");
     return contour;
 }
 
 @end
 
-static uint8_t *charon_contours_grey(id image, size_t wide, size_t high)
+static uint8_t *revenant_contours_grey(id image, size_t wide, size_t high)
 {
     uint8_t *grey = malloc(wide * high);
     if (grey == NULL)
@@ -1021,17 +1021,17 @@ static uint8_t *charon_contours_grey(id image, size_t wide, size_t high)
     _maximumImageDimension = maximumImageDimension;
 }
 
-- (NSNumber *)charon_contrastPivotValue
+- (NSNumber *)revenant_contrastPivotValue
 {
     return _contrastPivotValue;
 }
 
-- (void)charon_setContrastPivotValue:(NSNumber *)value
+- (void)revenant_setContrastPivotValue:(NSNumber *)value
 {
     _contrastPivotValue = [value copy];
 }
 
-- (NSArray<VNContoursObservation *> *)charon_observationsOnImage:(id)image error:(NSError **)error
+- (NSArray<VNContoursObservation *> *)revenant_observationsOnImage:(id)image error:(NSError **)error
 {
     size_t wide = 0, high = 0;
     CFTypeID type = CFGetTypeID((__bridge CFTypeRef)image);
@@ -1044,7 +1044,7 @@ static uint8_t *charon_contours_grey(id image, size_t wide, size_t high)
     }
     if (wide == 0 || high == 0) {
         if (error)
-            *error = charon_vision_error(VNErrorInvalidImage, @"the image has no pixels");
+            *error = revenant_vision_error(VNErrorInvalidImage, @"the image has no pixels");
         return nil;
     }
     size_t largest = wide > high ? wide : high;
@@ -1054,10 +1054,10 @@ static uint8_t *charon_contours_grey(id image, size_t wide, size_t high)
         if (wide == 0) wide = 1;
         if (high == 0) high = 1;
     }
-    uint8_t *grey = charon_contours_grey(image, wide, high);
+    uint8_t *grey = revenant_contours_grey(image, wide, high);
     if (grey == NULL) {
         if (error)
-            *error = charon_vision_error(VNErrorInvalidImage, @"the image could not be read");
+            *error = revenant_vision_error(VNErrorInvalidImage, @"the image could not be read");
         return nil;
     }
     double pivot = _contrastPivotValue ? _contrastPivotValue.doubleValue : 0.5;
@@ -1068,7 +1068,7 @@ static uint8_t *charon_contours_grey(id image, size_t wide, size_t high)
     }
     free(grey);
     int count = 0;
-    charon_contour *curves = charon_contours_trace(foreground, (int)wide, (int)high, &count);
+    revenant_contour *curves = revenant_contours_trace(foreground, (int)wide, (int)high, &count);
     free(foreground);
 
     float aspect = (float)wide / (float)high;
@@ -1083,7 +1083,7 @@ static uint8_t *charon_contours_grey(id image, size_t wide, size_t high)
             [children[curves[i].parent] addObject:@(i)];
     }
     NSComparator byPixel = ^NSComparisonResult(NSNumber *a, NSNumber *b) {
-        const charon_contour *ca = &curves[a.intValue], *cb = &curves[b.intValue];
+        const revenant_contour *ca = &curves[a.intValue], *cb = &curves[b.intValue];
         if (ca->sampleY != cb->sampleY)
             return ca->sampleY < cb->sampleY ? NSOrderedAscending : NSOrderedDescending;
         return ca->sampleX < cb->sampleX ? NSOrderedAscending : (ca->sampleX > cb->sampleX ? NSOrderedDescending : NSOrderedSame);
@@ -1097,16 +1097,16 @@ static uint8_t *charon_contours_grey(id image, size_t wide, size_t high)
     NSMutableData *allPoints = [NSMutableData data];
     __block void (^build)(NSNumber *, NSIndexPath *, NSMutableArray<VNContour *> *);
     build = ^(NSNumber *index, NSIndexPath *path, NSMutableArray<VNContour *> *into) {
-        const charon_contour *c = &curves[index.intValue];
+        const revenant_contour *c = &curves[index.intValue];
         NSMutableData *points = [NSMutableData dataWithLength:sizeof(simd_float2) * (NSUInteger)c->count];
         simd_float2 *values = (simd_float2 *)points.mutableBytes;
         for (int i = 0; i < c->count; i++) {
             double mx, my;
-            charon_contour_midpoint(c, i, &mx, &my);
+            revenant_contour_midpoint(c, i, &mx, &my);
             values[i].x = (float)(mx / (double)wide);
             values[i].y = (float)((high - my) / (double)high);
         }
-        VNContour *contour = [[VNContour alloc] initCharonWithIndexPath:path points:points aspectRatio:aspect];
+        VNContour *contour = [[VNContour alloc] initRevenantWithIndexPath:path points:points aspectRatio:aspect];
         [into addObject:contour];
         [all addObject:contour];
         [allPoints appendData:points];
@@ -1115,13 +1115,13 @@ static uint8_t *charon_contours_grey(id image, size_t wide, size_t high)
         for (NSNumber *child in children[index.intValue]) {
             build(child, [path indexPathByAddingIndex:position++], kids);
         }
-        [contour charon_setChildContours:kids];
+        [contour revenant_setChildContours:kids];
     };
     NSUInteger root = 0;
     for (NSNumber *index in roots)
         build(index, [NSIndexPath indexPathWithIndex:root++], top);
     free(curves);
-    VNContoursObservation *observation = [[VNContoursObservation alloc] initCharonWithTopLevelContours:top allContours:all normalizedPoints:allPoints];
+    VNContoursObservation *observation = [[VNContoursObservation alloc] initRevenantWithTopLevelContours:top allContours:all normalizedPoints:allPoints];
     return @[observation];
 }
 

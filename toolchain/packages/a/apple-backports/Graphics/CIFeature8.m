@@ -1,11 +1,11 @@
 #import <CoreImage/CoreImage.h>
 
-static void CharonEncodeValue(NSCoder *coder, NSString *key, const void *value, size_t size)
+static void RevenantEncodeValue(NSCoder *coder, NSString *key, const void *value, size_t size)
 {
     [coder encodeObject:[NSData dataWithBytes:value length:size] forKey:key];
 }
 
-static BOOL CharonDecodeValue(NSCoder *coder, NSString *key, void *value, size_t size)
+static BOOL RevenantDecodeValue(NSCoder *coder, NSString *key, void *value, size_t size)
 {
     NSData *data = [coder decodeObjectOfClass:[NSData class] forKey:key];
     if (data.length != size) {
@@ -16,7 +16,7 @@ static BOOL CharonDecodeValue(NSCoder *coder, NSString *key, void *value, size_t
 }
 
 @interface CIRectangleFeature ()
-- (instancetype)initWithCharonBounds:(CGRect)boundsRect
+- (instancetype)initWithRevenantBounds:(CGRect)boundsRect
                               topLeft:(CGPoint)topLeftPoint
                              topRight:(CGPoint)topRightPoint
                            bottomLeft:(CGPoint)bottomLeftPoint
@@ -32,7 +32,7 @@ static BOOL CharonDecodeValue(NSCoder *coder, NSString *key, void *value, size_t
     CGPoint _bottomRight;
 }
 
-- (instancetype)initWithCharonBounds:(CGRect)boundsRect
+- (instancetype)initWithRevenantBounds:(CGRect)boundsRect
                               topLeft:(CGPoint)topLeftPoint
                              topRight:(CGPoint)topRightPoint
                            bottomLeft:(CGPoint)bottomLeftPoint
@@ -81,7 +81,7 @@ static BOOL CharonDecodeValue(NSCoder *coder, NSString *key, void *value, size_t
 @end
 
 @interface CIQRCodeFeature () <NSSecureCoding, NSCopying>
-- (instancetype)initWithCharonBounds:(CGRect)boundsRect
+- (instancetype)initWithRevenantBounds:(CGRect)boundsRect
                               topLeft:(CGPoint)topLeftPoint
                              topRight:(CGPoint)topRightPoint
                            bottomLeft:(CGPoint)bottomLeftPoint
@@ -101,7 +101,7 @@ static BOOL CharonDecodeValue(NSCoder *coder, NSString *key, void *value, size_t
 
 @dynamic symbolDescriptor;
 
-- (instancetype)initWithCharonBounds:(CGRect)boundsRect
+- (instancetype)initWithRevenantBounds:(CGRect)boundsRect
                               topLeft:(CGPoint)topLeftPoint
                              topRight:(CGPoint)topRightPoint
                            bottomLeft:(CGPoint)bottomLeftPoint
@@ -161,7 +161,7 @@ static BOOL CharonDecodeValue(NSCoder *coder, NSString *key, void *value, size_t
 
 - (id)copyWithZone:(NSZone *)zone
 {
-    return [[[self class] allocWithZone:zone] initWithCharonBounds:_bounds
+    return [[[self class] allocWithZone:zone] initWithRevenantBounds:_bounds
                                                            topLeft:_topLeft
                                                           topRight:_topRight
                                                         bottomLeft:_bottomLeft
@@ -172,26 +172,26 @@ static BOOL CharonDecodeValue(NSCoder *coder, NSString *key, void *value, size_t
 - (void)encodeWithCoder:(NSCoder *)coder
 {
     [coder encodeObject:_messageString forKey:@"messageString"];
-    CharonEncodeValue(coder, @"bounds", &_bounds, sizeof(_bounds));
-    CharonEncodeValue(coder, @"topLeft", &_topLeft, sizeof(_topLeft));
-    CharonEncodeValue(coder, @"topRight", &_topRight, sizeof(_topRight));
-    CharonEncodeValue(coder, @"bottomLeft", &_bottomLeft, sizeof(_bottomLeft));
-    CharonEncodeValue(coder, @"bottomRight", &_bottomRight, sizeof(_bottomRight));
+    RevenantEncodeValue(coder, @"bounds", &_bounds, sizeof(_bounds));
+    RevenantEncodeValue(coder, @"topLeft", &_topLeft, sizeof(_topLeft));
+    RevenantEncodeValue(coder, @"topRight", &_topRight, sizeof(_topRight));
+    RevenantEncodeValue(coder, @"bottomLeft", &_bottomLeft, sizeof(_bottomLeft));
+    RevenantEncodeValue(coder, @"bottomRight", &_bottomRight, sizeof(_bottomRight));
 }
 
 - (instancetype)initWithCoder:(NSCoder *)coder
 {
     CGRect boundsValue = CGRectZero;
     CGPoint topLeftValue = CGPointZero, topRightValue = CGPointZero, bottomLeftValue = CGPointZero, bottomRightValue = CGPointZero;
-    if (!CharonDecodeValue(coder, @"bounds", &boundsValue, sizeof(boundsValue))
-        || !CharonDecodeValue(coder, @"topLeft", &topLeftValue, sizeof(topLeftValue))
-        || !CharonDecodeValue(coder, @"topRight", &topRightValue, sizeof(topRightValue))
-        || !CharonDecodeValue(coder, @"bottomLeft", &bottomLeftValue, sizeof(bottomLeftValue))
-        || !CharonDecodeValue(coder, @"bottomRight", &bottomRightValue, sizeof(bottomRightValue))) {
+    if (!RevenantDecodeValue(coder, @"bounds", &boundsValue, sizeof(boundsValue))
+        || !RevenantDecodeValue(coder, @"topLeft", &topLeftValue, sizeof(topLeftValue))
+        || !RevenantDecodeValue(coder, @"topRight", &topRightValue, sizeof(topRightValue))
+        || !RevenantDecodeValue(coder, @"bottomLeft", &bottomLeftValue, sizeof(bottomLeftValue))
+        || !RevenantDecodeValue(coder, @"bottomRight", &bottomRightValue, sizeof(bottomRightValue))) {
         return nil;
     }
     NSString *message = [coder decodeObjectOfClass:[NSString class] forKey:@"messageString"];
-    return [self initWithCharonBounds:boundsValue
+    return [self initWithRevenantBounds:boundsValue
                               topLeft:topLeftValue
                              topRight:topRightValue
                            bottomLeft:bottomLeftValue

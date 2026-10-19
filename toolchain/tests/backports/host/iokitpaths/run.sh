@@ -1,18 +1,18 @@
 #!/bin/sh
 # run.sh - the port's IORegistryEntryCopyFromPath, IORegistryEntryCopyPath, IOMainPort and
-# kIOMainPortDefault (renamed charonHost_*) against the host's own IOKit, asked the same questions.
+# kIOMainPortDefault (renamed revenantHost_*) against the host's own IOKit, asked the same questions.
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 port=${PORT:-$here/../../../../packages/a/apple-backports/IOKit}
 harness=${IOKITPATHS_HARNESS:-$here/../../device}
-build=${IOKITPATHS_BUILD:-$(runs_fresh charon-iokitpaths)}
+build=${IOKITPATHS_BUILD:-$(runs_fresh revenant-iokitpaths)}
 rm -rf "$build"
 mkdir -p "$build"
-renames="-DIORegistryEntryCopyFromPath=charonHost_IORegistryEntryCopyFromPath
--DIORegistryEntryCopyPath=charonHost_IORegistryEntryCopyPath
--DIOMainPort=charonHost_IOMainPort
--DkIOMainPortDefault=charonHost_kIOMainPortDefault"
+renames="-DIORegistryEntryCopyFromPath=revenantHost_IORegistryEntryCopyFromPath
+-DIORegistryEntryCopyPath=revenantHost_IORegistryEntryCopyPath
+-DIOMainPort=revenantHost_IOMainPort
+-DkIOMainPortDefault=revenantHost_kIOMainPortDefault"
 # shellcheck disable=SC2086
 xcrun clang -fvisibility=hidden -w $renames -c "$port/IORegistryPaths9.c" -o "$build/port9.o"
 # shellcheck disable=SC2086

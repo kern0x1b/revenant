@@ -1,4 +1,4 @@
-#import "CharonPDFKit.h"
+#import "RevenantPDFKit.h"
 
 @implementation PDFView {
     PDFDocument *_document;

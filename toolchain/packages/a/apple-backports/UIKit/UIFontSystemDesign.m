@@ -7,7 +7,7 @@ NSString *const UIFontDescriptorSystemDesignRounded = @"NSCTFontUIFontDesignRoun
 NSString *const UIFontDescriptorSystemDesignSerif = @"NSCTFontUIFontDesignSerif";
 NSString *const UIFontDescriptorSystemDesignMonospaced = @"NSCTFontUIFontDesignMonospaced";
 
-@implementation UIFont (CharonSystemDesign)
+@implementation UIFont (RevenantSystemDesign)
 
 + (UIFont *)monospacedSystemFontOfSize:(CGFloat)fontSize weight:(UIFontWeight)weight
 {

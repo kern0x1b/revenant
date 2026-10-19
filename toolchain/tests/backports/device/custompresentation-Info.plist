@@ -9,7 +9,7 @@
 	<key>CFBundleExecutable</key>
 	<string>custompresentation</string>
 	<key>CFBundleIdentifier</key>
-	<string>local.charon.backports.custompresentation</string>
+	<string>local.revenant.backports.custompresentation</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>

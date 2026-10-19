@@ -1,41 +1,41 @@
 #import <AuthenticationServices/AuthenticationServices.h>
-#import "CharonASConstruction.h"
+#import "RevenantASConstruction.h"
 
 @interface ASCredentialIdentityStore ()
-@property (nonatomic, copy) NSString *charon_storePath;
+@property (nonatomic, copy) NSString *revenant_storePath;
 @end
 
 @implementation ASCredentialIdentityStore
 
-@synthesize charon_storePath = _charon_storePath;
+@synthesize revenant_storePath = _revenant_storePath;
 
-- (instancetype)charon_initWithStorePath:(NSString *)path
+- (instancetype)revenant_initWithStorePath:(NSString *)path
 {
     self = [super init];
     if (self)
-        _charon_storePath = [path copy];
+        _revenant_storePath = [path copy];
     return self;
 }
 
-- (NSError *)charon_storeError
+- (NSError *)revenant_storeError
 {
     return [NSError errorWithDomain:ASCredentialIdentityStoreErrorDomain
                                code:ASCredentialIdentityStoreErrorCodeInternalError
                            userInfo:@{NSLocalizedDescriptionKey: @"the credential identity store could not be written"}];
 }
 
-- (NSString *)charon_storePath
+- (NSString *)revenant_storePath
 {
-    if (!_charon_storePath) {
+    if (!_revenant_storePath) {
         NSString *base = NSProcessInfo.processInfo.environment[@"AS_CREDENTIAL_STORE_PATH"];
         if (!base) {
             base = [NSString stringWithFormat:@"%@/authservices-store",
                     NSProcessInfo.processInfo.environment[@"CHICON_RUNS"]
-                        ?: [NSTemporaryDirectory() stringByAppendingPathComponent:@"charon-runs"]];
+                        ?: [NSTemporaryDirectory() stringByAppendingPathComponent:@"revenant-runs"]];
         }
-        _charon_storePath = base;
+        _revenant_storePath = base;
     }
-    return _charon_storePath;
+    return _revenant_storePath;
 }
 
 #pragma mark - the shared store
@@ -45,38 +45,38 @@
     static ASCredentialIdentityStore *shared;
     static dispatch_once_t once;
     dispatch_once(&once, ^{
-        shared = [[ASCredentialIdentityStore alloc] charon_initWithStorePath:nil];
+        shared = [[ASCredentialIdentityStore alloc] revenant_initWithStorePath:nil];
     });
     return shared;
 }
 
 #pragma mark - the identities, as they are held
 
-- (NSMutableArray *)charon_records
+- (NSMutableArray *)revenant_records
 {
     NSMutableArray *records = [NSMutableArray array];
-    NSData *data = [NSData dataWithContentsOfFile:self.charon_storePath];
+    NSData *data = [NSData dataWithContentsOfFile:self.revenant_storePath];
     id held = data ? [NSPropertyListSerialization propertyListWithData:data options:0 format:NULL error:NULL] : nil;
     if ([held isKindOfClass:[NSArray class]])
         [records addObjectsFromArray:held];
     return records;
 }
 
-- (BOOL)charon_writeRecords:(NSArray *)records
+- (BOOL)revenant_writeRecords:(NSArray *)records
 {
-    [[NSFileManager defaultManager] createDirectoryAtPath:[self.charon_storePath stringByDeletingLastPathComponent]
+    [[NSFileManager defaultManager] createDirectoryAtPath:[self.revenant_storePath stringByDeletingLastPathComponent]
                               withIntermediateDirectories:YES attributes:nil error:NULL];
     NSData *data = [NSPropertyListSerialization dataWithPropertyList:records format:NSPropertyListBinaryFormat_v1_0
                                                               options:0 error:NULL];
     if (!data)
         return NO;
-    return [data writeToFile:self.charon_storePath atomically:YES];
+    return [data writeToFile:self.revenant_storePath atomically:YES];
 }
 
-- (NSDictionary *)charon_recordFor:(ASPasswordCredentialIdentity *)identity
+- (NSDictionary *)revenant_recordFor:(ASPasswordCredentialIdentity *)identity
 {
     ASCredentialServiceIdentifier *service = identity.serviceIdentifier;
-    for (NSDictionary *record in [self charon_records]) {
+    for (NSDictionary *record in [self revenant_records]) {
         if ([record[@"identifier"] isEqual:service.identifier] &&
             [record[@"type"] integerValue] == (NSInteger)service.type &&
             [record[@"user"] isEqual:identity.user] &&
@@ -87,7 +87,7 @@
     return nil;
 }
 
-- (ASPasswordCredentialIdentity *)charon_identityFor:(NSDictionary *)record
+- (ASPasswordCredentialIdentity *)revenant_identityFor:(NSDictionary *)record
 {
     NSString *identifier = record[@"identifier"];
     if (!identifier)
@@ -104,16 +104,16 @@
 - (void)getCredentialIdentityStoreStateWithCompletion:(void (^)(ASCredentialIdentityStoreState *state))completion
 {
     if (completion)
-        completion([[ASCredentialIdentityStoreState alloc] charon_initWithEnabled:YES
+        completion([[ASCredentialIdentityStoreState alloc] revenant_initWithEnabled:YES
                                                   supportsIncrementalUpdates:YES]);
 }
 
 - (void)saveCredentialIdentities:(NSArray<ASPasswordCredentialIdentity *> *)credentialIdentities
                       completion:(void (^)(BOOL success, NSError * _Nullable error))completion
 {
-    NSMutableArray *records = [self charon_records];
+    NSMutableArray *records = [self revenant_records];
     for (ASPasswordCredentialIdentity *identity in credentialIdentities) {
-        NSDictionary *existing = [self charon_recordFor:identity];
+        NSDictionary *existing = [self revenant_recordFor:identity];
         if (existing)
             [records removeObject:existing];
         NSMutableDictionary *record = [@{@"identifier": identity.serviceIdentifier.identifier ?: @"",
@@ -124,30 +124,30 @@
             record[@"recordIdentifier"] = identity.recordIdentifier;
         [records addObject:record];
     }
-    BOOL written = [self charon_writeRecords:records];
+    BOOL written = [self revenant_writeRecords:records];
     if (completion)
-        completion(written, written ? nil : [self charon_storeError]);
+        completion(written, written ? nil : [self revenant_storeError]);
 }
 
 - (void)removeCredentialIdentities:(NSArray<ASPasswordCredentialIdentity *> *)credentialIdentities
                        completion:(void (^)(BOOL success, NSError * _Nullable error))completion
 {
-    NSMutableArray *records = [self charon_records];
+    NSMutableArray *records = [self revenant_records];
     for (ASPasswordCredentialIdentity *identity in credentialIdentities) {
-        NSDictionary *existing = [self charon_recordFor:identity];
+        NSDictionary *existing = [self revenant_recordFor:identity];
         if (existing)
             [records removeObject:existing];
     }
-    BOOL written = [self charon_writeRecords:records];
+    BOOL written = [self revenant_writeRecords:records];
     if (completion)
-        completion(written, written ? nil : [self charon_storeError]);
+        completion(written, written ? nil : [self revenant_storeError]);
 }
 
 - (void)removeAllCredentialIdentitiesWithCompletion:(void (^)(BOOL success, NSError * _Nullable error))completion
 {
-    BOOL written = [self charon_writeRecords:@[]];
+    BOOL written = [self revenant_writeRecords:@[]];
     if (completion)
-        completion(written, written ? nil : [self charon_storeError]);
+        completion(written, written ? nil : [self revenant_storeError]);
 }
 
 - (void)replaceCredentialIdentitiesWithIdentities:(NSArray<ASPasswordCredentialIdentity *> *)newCredentialIdentities
@@ -163,9 +163,9 @@
             record[@"recordIdentifier"] = identity.recordIdentifier;
         [records addObject:record];
     }
-    BOOL written = [self charon_writeRecords:records];
+    BOOL written = [self revenant_writeRecords:records];
     if (completion)
-        completion(written, written ? nil : [self charon_storeError]);
+        completion(written, written ? nil : [self revenant_storeError]);
 }
 
 @end

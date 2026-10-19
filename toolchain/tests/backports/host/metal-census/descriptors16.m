@@ -1,23 +1,23 @@
 #import <Foundation/Foundation.h>
 #import <Metal/Metal.h>
 
-@interface charonHost_MTLAccelerationStructurePassSampleBufferAttachmentDescriptor : NSObject
+@interface revenantHost_MTLAccelerationStructurePassSampleBufferAttachmentDescriptor : NSObject
 @property (nonatomic, retain) id sampleBuffer;
 @property (nonatomic) NSUInteger startOfEncoderSampleIndex;
 @property (nonatomic) NSUInteger endOfEncoderSampleIndex;
 @end
 
-@interface charonHost_MTLAccelerationStructurePassSampleBufferAttachmentDescriptorArray : NSObject
-- (charonHost_MTLAccelerationStructurePassSampleBufferAttachmentDescriptor *)objectAtIndexedSubscript:(NSUInteger)index;
-- (void)setObject:(charonHost_MTLAccelerationStructurePassSampleBufferAttachmentDescriptor *)attachment
+@interface revenantHost_MTLAccelerationStructurePassSampleBufferAttachmentDescriptorArray : NSObject
+- (revenantHost_MTLAccelerationStructurePassSampleBufferAttachmentDescriptor *)objectAtIndexedSubscript:(NSUInteger)index;
+- (void)setObject:(revenantHost_MTLAccelerationStructurePassSampleBufferAttachmentDescriptor *)attachment
     atIndexedSubscript:(NSUInteger)index;
 @end
 
-@interface charonHost_MTLAccelerationStructurePassDescriptor : NSObject
+@interface revenantHost_MTLAccelerationStructurePassDescriptor : NSObject
 @property (nonatomic, retain) id sampleBufferAttachments;
 @end
 
-@interface charonHost_MTLIOCommandQueueDescriptor : NSObject
+@interface revenantHost_MTLIOCommandQueueDescriptor : NSObject
 @property (nonatomic) NSUInteger maxCommandBufferCount;
 @property (nonatomic) MTLIOPriority priority;
 @property (nonatomic) MTLIOCommandQueueType type;
@@ -61,7 +61,7 @@ static id hostSlot(id array, NSUInteger index)
 static id portSlot(id array, NSUInteger index)
 {
     @try {
-        return [(charonHost_MTLAccelerationStructurePassSampleBufferAttachmentDescriptorArray *)array
+        return [(revenantHost_MTLAccelerationStructurePassSampleBufferAttachmentDescriptorArray *)array
             objectAtIndexedSubscript:index];
     } @catch (NSException *why) {
         printf("       the port raised at %lu: %s\n", (unsigned long)index, [[why reason] UTF8String]);
@@ -76,8 +76,8 @@ int main(void)
         {
             MTLAccelerationStructurePassSampleBufferAttachmentDescriptor *host =
                 [[MTLAccelerationStructurePassSampleBufferAttachmentDescriptor alloc] init];
-            charonHost_MTLAccelerationStructurePassSampleBufferAttachmentDescriptor *port =
-                [[charonHost_MTLAccelerationStructurePassSampleBufferAttachmentDescriptor alloc] init];
+            revenantHost_MTLAccelerationStructurePassSampleBufferAttachmentDescriptor *port =
+                [[revenantHost_MTLAccelerationStructurePassSampleBufferAttachmentDescriptor alloc] init];
             check(host.sampleBuffer == nil && port.sampleBuffer == nil,
                   @"fresh: sampleBuffer is nil on both sides - the device-backed section below is what measures it");
             same_u(port.startOfEncoderSampleIndex, host.startOfEncoderSampleIndex,
@@ -96,7 +96,7 @@ int main(void)
             same_u(port.endOfEncoderSampleIndex, host.endOfEncoderSampleIndex,
                    @"after a set: endOfEncoderSampleIndex = 4");
             MTLAccelerationStructurePassSampleBufferAttachmentDescriptor *hostCopy = [host copy];
-            charonHost_MTLAccelerationStructurePassSampleBufferAttachmentDescriptor *portCopy = [port copy];
+            revenantHost_MTLAccelerationStructurePassSampleBufferAttachmentDescriptor *portCopy = [port copy];
             same_u(portCopy.startOfEncoderSampleIndex, hostCopy.startOfEncoderSampleIndex,
                    @"copy: startOfEncoderSampleIndex");
             same_u(portCopy.endOfEncoderSampleIndex, hostCopy.endOfEncoderSampleIndex,
@@ -108,8 +108,8 @@ int main(void)
             MTLAccelerationStructurePassSampleBufferAttachmentDescriptorArray *host =
                 [MTLAccelerationStructurePassDescriptor accelerationStructurePassDescriptor]
                     .sampleBufferAttachments;
-            charonHost_MTLAccelerationStructurePassSampleBufferAttachmentDescriptorArray *port =
-                [[charonHost_MTLAccelerationStructurePassDescriptor alloc] init].sampleBufferAttachments;
+            revenantHost_MTLAccelerationStructurePassSampleBufferAttachmentDescriptorArray *port =
+                [[revenantHost_MTLAccelerationStructurePassDescriptor alloc] init].sampleBufferAttachments;
             check(host != nil && port != nil,
                   @"a fresh pass descriptor's array is there on both sides, and the port's needs no device");
             id hostSlots[4], portSlots[4];
@@ -135,8 +135,8 @@ int main(void)
             [hostWritten setStartOfEncoderSampleIndex:11];
             [hostWritten setEndOfEncoderSampleIndex:12];
             [host setObject:hostWritten atIndexedSubscript:1];
-            charonHost_MTLAccelerationStructurePassSampleBufferAttachmentDescriptor *portWritten =
-                [[charonHost_MTLAccelerationStructurePassSampleBufferAttachmentDescriptor alloc] init];
+            revenantHost_MTLAccelerationStructurePassSampleBufferAttachmentDescriptor *portWritten =
+                [[revenantHost_MTLAccelerationStructurePassSampleBufferAttachmentDescriptor alloc] init];
             [portWritten setStartOfEncoderSampleIndex:11];
             [portWritten setEndOfEncoderSampleIndex:12];
             [port setObject:portWritten atIndexedSubscript:1];
@@ -177,15 +177,15 @@ int main(void)
         {
             MTLAccelerationStructurePassDescriptor *host =
                 [MTLAccelerationStructurePassDescriptor accelerationStructurePassDescriptor];
-            charonHost_MTLAccelerationStructurePassDescriptor *port =
-                [[charonHost_MTLAccelerationStructurePassDescriptor alloc] init];
+            revenantHost_MTLAccelerationStructurePassDescriptor *port =
+                [[revenantHost_MTLAccelerationStructurePassDescriptor alloc] init];
             check([host isKindOfClass:[MTLAccelerationStructurePassDescriptor class]]
-                      && [port isKindOfClass:[charonHost_MTLAccelerationStructurePassDescriptor class]],
+                      && [port isKindOfClass:[revenantHost_MTLAccelerationStructurePassDescriptor class]],
                   @"both sides are a kind of the class the case names; Apple's is a private subclass of it");
             check(host.sampleBufferAttachments != nil && port.sampleBufferAttachments != nil,
                   @"sampleBufferAttachments is there on a fresh descriptor on both sides");
             MTLAccelerationStructurePassDescriptor *hostCopy = nil;
-            charonHost_MTLAccelerationStructurePassDescriptor *portCopy = nil;
+            revenantHost_MTLAccelerationStructurePassDescriptor *portCopy = nil;
             @try { hostCopy = [host copy]; } @catch (NSException *why) {
                 printf("       Apple's side raised on -copy: %s\n", [[why reason] UTF8String]);
             }
@@ -198,7 +198,7 @@ int main(void)
                   @"a copy's array is a different object from the original's, on either side");
             MTLAccelerationStructurePassSampleBufferAttachmentDescriptor *hostCopySlot =
                 hostSlot(hostCopy.sampleBufferAttachments, 2);
-            charonHost_MTLAccelerationStructurePassSampleBufferAttachmentDescriptor *portCopySlot =
+            revenantHost_MTLAccelerationStructurePassSampleBufferAttachmentDescriptor *portCopySlot =
                 portSlot(portCopy.sampleBufferAttachments, 2);
             [hostCopySlot setStartOfEncoderSampleIndex:21];
             [portCopySlot setStartOfEncoderSampleIndex:21];
@@ -210,7 +210,7 @@ int main(void)
         printf("MTLIOCommandQueueDescriptor\n");
         {
             MTLIOCommandQueueDescriptor *host = [[MTLIOCommandQueueDescriptor alloc] init];
-            charonHost_MTLIOCommandQueueDescriptor *port = [[charonHost_MTLIOCommandQueueDescriptor alloc] init];
+            revenantHost_MTLIOCommandQueueDescriptor *port = [[revenantHost_MTLIOCommandQueueDescriptor alloc] init];
             same_u(port.maxCommandBufferCount, host.maxCommandBufferCount,
                    @"fresh: maxCommandBufferCount - Apple's own default, which the header does not state");
             check(host.maxCommandBufferCount == 64,
@@ -235,7 +235,7 @@ int main(void)
             same_i((long)port.type, (long)host.type, @"after a set: type = Serial");
             same_u(port.maxCommandsInFlight, host.maxCommandsInFlight, @"after a set: maxCommandsInFlight = 9");
             MTLIOCommandQueueDescriptor *hostCopy = [host copy];
-            charonHost_MTLIOCommandQueueDescriptor *portCopy = [port copy];
+            revenantHost_MTLIOCommandQueueDescriptor *portCopy = [port copy];
             same_u(portCopy.maxCommandBufferCount, hostCopy.maxCommandBufferCount, @"copy: maxCommandBufferCount");
             same_i((long)portCopy.priority, (long)hostCopy.priority, @"copy: priority");
             same_i((long)portCopy.type, (long)hostCopy.type, @"copy: type");
@@ -262,8 +262,8 @@ int main(void)
             if (buffer) {
                 MTLAccelerationStructurePassSampleBufferAttachmentDescriptor *hostAttachment =
                     [[MTLAccelerationStructurePassSampleBufferAttachmentDescriptor alloc] init];
-                charonHost_MTLAccelerationStructurePassSampleBufferAttachmentDescriptor *portAttachment =
-                    [[charonHost_MTLAccelerationStructurePassSampleBufferAttachmentDescriptor alloc] init];
+                revenantHost_MTLAccelerationStructurePassSampleBufferAttachmentDescriptor *portAttachment =
+                    [[revenantHost_MTLAccelerationStructurePassSampleBufferAttachmentDescriptor alloc] init];
                 check(hostAttachment.sampleBuffer == nil && portAttachment.sampleBuffer == nil,
                       @"fresh: sampleBuffer is nil on both sides");
                 [hostAttachment setSampleBuffer:buffer];
@@ -274,14 +274,14 @@ int main(void)
                       @"after a set: the PORT's attachment returns the very object it was given - identity within its own side");
 
                 MTLAccelerationStructurePassSampleBufferAttachmentDescriptor *hostAttachmentCopy = [hostAttachment copy];
-                charonHost_MTLAccelerationStructurePassSampleBufferAttachmentDescriptor *portAttachmentCopy = [portAttachment copy];
+                revenantHost_MTLAccelerationStructurePassSampleBufferAttachmentDescriptor *portAttachmentCopy = [portAttachment copy];
                 check(hostAttachmentCopy.sampleBuffer == buffer,
                       @"a copy: APPLE's own copy carries the sample buffer");
                 check(portAttachmentCopy.sampleBuffer == buffer,
                       @"a copy: the PORT's copy carries the sample buffer");
 
                 MTLAccelerationStructurePassDescriptor *hostPass = [[MTLAccelerationStructurePassDescriptor alloc] init];
-                charonHost_MTLAccelerationStructurePassDescriptor *portPass = [[charonHost_MTLAccelerationStructurePassDescriptor alloc] init];
+                revenantHost_MTLAccelerationStructurePassDescriptor *portPass = [[revenantHost_MTLAccelerationStructurePassDescriptor alloc] init];
                 [hostPass.sampleBufferAttachments setObject:hostAttachment atIndexedSubscript:0];
                 [portPass.sampleBufferAttachments setObject:portAttachment atIndexedSubscript:0];
                 check(hostSlot(hostPass.sampleBufferAttachments, 0) != nil,
@@ -291,20 +291,20 @@ int main(void)
                 check(((MTLAccelerationStructurePassSampleBufferAttachmentDescriptor *)
                           hostSlot(hostPass.sampleBufferAttachments, 0)).sampleBuffer == buffer,
                       @"through the array: APPLE's own attachment still holds the real sample buffer");
-                check(((charonHost_MTLAccelerationStructurePassSampleBufferAttachmentDescriptor *)
+                check(((revenantHost_MTLAccelerationStructurePassSampleBufferAttachmentDescriptor *)
                           portSlot(portPass.sampleBufferAttachments, 0)).sampleBuffer == buffer,
                       @"through the array: the PORT's attachment still holds the real sample buffer");
 
                 [hostPass.sampleBufferAttachments setObject:nil atIndexedSubscript:0];
                 [portPass.sampleBufferAttachments setObject:nil atIndexedSubscript:0];
-                same_u(((charonHost_MTLAccelerationStructurePassSampleBufferAttachmentDescriptor *)
+                same_u(((revenantHost_MTLAccelerationStructurePassSampleBufferAttachmentDescriptor *)
                          portSlot(portPass.sampleBufferAttachments, 0)).startOfEncoderSampleIndex,
                        ((MTLAccelerationStructurePassSampleBufferAttachmentDescriptor *)
                          hostSlot(hostPass.sampleBufferAttachments, 0)).startOfEncoderSampleIndex,
                        @"after a nil at index 0: startOfEncoderSampleIndex is back to the default on both sides");
                 check(((MTLAccelerationStructurePassSampleBufferAttachmentDescriptor *)
                           hostSlot(hostPass.sampleBufferAttachments, 0)).sampleBuffer == nil &&
-                      ((charonHost_MTLAccelerationStructurePassSampleBufferAttachmentDescriptor *)
+                      ((revenantHost_MTLAccelerationStructurePassSampleBufferAttachmentDescriptor *)
                           portSlot(portPass.sampleBufferAttachments, 0)).sampleBuffer == nil,
                       @"after a nil at index 0: both sides' attachment has no sample buffer again");
             }

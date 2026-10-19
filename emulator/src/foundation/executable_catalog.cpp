@@ -31,10 +31,10 @@
 
 namespace {
 
-using shade::ContentIdentity;
-using shade::DyldCacheImage;
-using shade::DyldCacheImageView;
-using shade::DyldSharedCache;
+using emulator::ContentIdentity;
+using emulator::DyldCacheImage;
+using emulator::DyldCacheImageView;
+using emulator::DyldSharedCache;
 
 constexpr std::array<char, 8> catalog_magic { 'i', 'L', 'E', 'M', 'C', 'A', 'T',
     '1' };
@@ -131,7 +131,7 @@ void write_string(std::ostream& stream, std::string_view value)
     return value;
 }
 
-[[nodiscard]] std::optional<shade::ExecutableCatalogFileGeneration>
+[[nodiscard]] std::optional<emulator::ExecutableCatalogFileGeneration>
 read_file_generation(const std::filesystem::path& path)
 {
     struct stat file_stat { };
@@ -139,7 +139,7 @@ read_file_generation(const std::filesystem::path& path)
         file_stat.st_size < 0) {
         return std::nullopt;
     }
-    return shade::ExecutableCatalogFileGeneration { static_cast<std::uint64_t>(
+    return emulator::ExecutableCatalogFileGeneration { static_cast<std::uint64_t>(
                                                         file_stat.st_dev),
         static_cast<std::uint64_t>(file_stat.st_ino),
         static_cast<std::uint64_t>(file_stat.st_size),
@@ -175,10 +175,10 @@ void write_identity(std::ostream& stream, const ContentIdentity& identity)
     return value;
 }
 
-[[nodiscard]] std::optional<shade::ExecutableCatalogEntry> read_manifest_entry(
+[[nodiscard]] std::optional<emulator::ExecutableCatalogEntry> read_manifest_entry(
     std::istream& stream, std::uint32_t schema)
 {
-    shade::ExecutableCatalogEntry entry;
+    emulator::ExecutableCatalogEntry entry;
     if (!read_identity(stream, entry.content_identity))
         return std::nullopt;
 
@@ -213,8 +213,8 @@ void write_identity(std::ostream& stream, const ContentIdentity& identity)
             return std::nullopt;
         }
         entry.file_generations.push_back(
-            shade::ExecutableCatalogPathGeneration { *path,
-                shade::ExecutableCatalogFileGeneration { *device, *inode,
+            emulator::ExecutableCatalogPathGeneration { *path,
+                emulator::ExecutableCatalogFileGeneration { *device, *inode,
                     *file_size, static_cast<std::int64_t>(*modified_seconds),
                     static_cast<std::int64_t>(*modified_nanoseconds),
                     static_cast<std::int64_t>(*changed_seconds),
@@ -229,10 +229,10 @@ void write_identity(std::ostream& stream, const ContentIdentity& identity)
         const auto kind = read_u8(stream);
         if (!kind ||
             *kind > static_cast<std::uint8_t>(
-                        shade::ExecutableCatalogKind::DynamicMapping)) {
+                        emulator::ExecutableCatalogKind::DynamicMapping)) {
             return std::nullopt;
         }
-        entry.kinds.insert(static_cast<shade::ExecutableCatalogKind>(*kind));
+        entry.kinds.insert(static_cast<emulator::ExecutableCatalogKind>(*kind));
     }
 
     const auto has_uuid = read_u8(stream);
@@ -297,7 +297,7 @@ void write_identity(std::ostream& stream, const ContentIdentity& identity)
             guest_address = *serialized_guest_address;
             guest_byte_count = *serialized_guest_byte_count;
         }
-        entry.mappings.push_back(shade::ExecutableMappingIdentity {
+        entry.mappings.push_back(emulator::ExecutableMappingIdentity {
             *file_offset, *byte_count, guest_address, guest_byte_count });
     }
     if (schema >= 5U) {
@@ -428,23 +428,23 @@ ContentIdentity shared_cache_image_identity(
         append_u32(key, range.initial_protection);
         append_u32(key, range.maximum_protection);
     }
-    return shade::sha256(key);
+    return emulator::sha256(key);
 }
 
-shade::ExecutableCatalogKind classify_shared_cache_image(std::string_view path)
+emulator::ExecutableCatalogKind classify_shared_cache_image(std::string_view path)
 {
     if (path.find(".framework/") != std::string_view::npos ||
         path.ends_with(".framework")) {
-        return shade::ExecutableCatalogKind::Framework;
+        return emulator::ExecutableCatalogKind::Framework;
     }
     if (path.find("/PlugIns/") != std::string_view::npos ||
         path.ends_with(".plugin") || path.ends_with(".appex")) {
-        return shade::ExecutableCatalogKind::PlugIn;
+        return emulator::ExecutableCatalogKind::PlugIn;
     }
-    return shade::ExecutableCatalogKind::Dylib;
+    return emulator::ExecutableCatalogKind::Dylib;
 }
 
-bool executable_address(const shade::MachOImage& image, std::uint32_t address)
+bool executable_address(const emulator::MachOImage& image, std::uint32_t address)
 {
     for (const auto& segment : image.segments()) {
         if ((segment.initial_protection & 4) == 0 ||
@@ -458,7 +458,7 @@ bool executable_address(const shade::MachOImage& image, std::uint32_t address)
 }
 
 bool executable_instruction_address(
-    const shade::MachOImage& image, std::uint32_t address)
+    const emulator::MachOImage& image, std::uint32_t address)
 {
     constexpr std::uint32_t pure_instructions = 0x80000000U;
     constexpr std::uint32_t some_instructions = 0x00000400U;
@@ -482,7 +482,7 @@ bool executable_instruction_address(
 }
 
 bool instruction_symbol(
-    const shade::MachOImage& image, const shade::MachSymbol& symbol)
+    const emulator::MachOImage& image, const emulator::MachSymbol& symbol)
 {
     constexpr std::uint32_t pure_instructions = 0x80000000U;
     constexpr std::uint32_t some_instructions = 0x00000400U;
@@ -506,7 +506,7 @@ bool instruction_symbol(
 }
 
 void collect_reliable_entry_points(
-    const shade::MachOImage& image, std::vector<std::uint64_t>& entry_points)
+    const emulator::MachOImage& image, std::vector<std::uint64_t>& entry_points)
 {
     constexpr std::uint64_t thumb_descriptor_bit = std::uint64_t { 1 } << 32U;
     constexpr std::size_t maximum_entry_points = 65'536U;
@@ -543,7 +543,7 @@ void collect_reliable_entry_points(
 
 }
 
-namespace shade {
+namespace emulator {
 
 const ExecutableCatalogEntry& ExecutableCatalog::register_image(
     const MachOImage& image)
@@ -1072,7 +1072,7 @@ bool ExecutableCatalog::load(const std::filesystem::path& path) noexcept
             expected_checksum.digest.size(), expected_checksum.digest.begin());
         const auto payload =
             std::span<const std::byte> { bytes.data(), payload_size };
-        if (shade::sha256(payload) != expected_checksum)
+        if (emulator::sha256(payload) != expected_checksum)
             return false;
         std::string serialized { reinterpret_cast<const char*>(bytes.data()),
             payload_size };
@@ -1231,7 +1231,7 @@ bool ExecutableCatalog::save(const std::filesystem::path& path) const noexcept
             std::istreambuf_iterator<char> { } };
         if (payload_stream.bad())
             return fail();
-        const auto checksum = shade::sha256(std::span<const std::byte> {
+        const auto checksum = emulator::sha256(std::span<const std::byte> {
             reinterpret_cast<const std::byte*>(payload.data()),
             payload.size() });
         std::ofstream checksum_stream { temporary,

@@ -1,7 +1,7 @@
 #import <Foundation/Foundation.h>
 
 
-@implementation NSURLComponents (CharonPercentEncodedQueryItems)
+@implementation NSURLComponents (RevenantPercentEncodedQueryItems)
 
 - (NSArray *)percentEncodedQueryItems
 {

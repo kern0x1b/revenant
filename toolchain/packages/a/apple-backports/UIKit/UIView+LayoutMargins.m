@@ -1,18 +1,18 @@
 #import <UIKit/UIKit.h>
 #import <objc/runtime.h>
 
-@interface UIView (CharonLayoutMarginsGuideUpdate)
-- (void)charon_updateLayoutMarginsGuide;
+@interface UIView (RevenantLayoutMarginsGuideUpdate)
+- (void)revenant_updateLayoutMarginsGuide;
 @end
 
-static char charon_margins_key;
-static char charon_preserves_key;
-static char charon_insets_from_safe_area_key;
+static char revenant_margins_key;
+static char revenant_preserves_key;
+static char revenant_insets_from_safe_area_key;
 
-static void charon_margins_changed(UIView *view)
+static void revenant_margins_changed(UIView *view)
 {
-    if ([view respondsToSelector:@selector(charon_updateLayoutMarginsGuide)])
-        [view charon_updateLayoutMarginsGuide];
+    if ([view respondsToSelector:@selector(revenant_updateLayoutMarginsGuide)])
+        [view revenant_updateLayoutMarginsGuide];
     [view layoutMarginsDidChange];
     UIViewController *controller = nil;
     for (UIResponder *next = view.nextResponder; next; next = next.nextResponder) {
@@ -24,19 +24,19 @@ static void charon_margins_changed(UIView *view)
     if ([controller respondsToSelector:@selector(viewLayoutMarginsDidChange)])
         [controller viewLayoutMarginsDidChange];
     for (UIView *subview in view.subviews) {
-        if ([objc_getAssociatedObject(subview, &charon_preserves_key) boolValue])
-            charon_margins_changed(subview);
+        if ([objc_getAssociatedObject(subview, &revenant_preserves_key) boolValue])
+            revenant_margins_changed(subview);
     }
 }
 
-@implementation UIView (CharonLayoutMargins)
+@implementation UIView (RevenantLayoutMargins)
 
 - (UIEdgeInsets)layoutMargins
 {
-    NSValue *stored = objc_getAssociatedObject(self, &charon_margins_key);
+    NSValue *stored = objc_getAssociatedObject(self, &revenant_margins_key);
     UIEdgeInsets margins = stored ? [stored UIEdgeInsetsValue] : UIEdgeInsetsMake(8, 8, 8, 8);
     UIView *superview = self.superview;
-    if (superview && [objc_getAssociatedObject(self, &charon_preserves_key) boolValue]) {
+    if (superview && [objc_getAssociatedObject(self, &revenant_preserves_key) boolValue]) {
         UIEdgeInsets inherited = [superview layoutMargins];
         CGRect bounds = superview.bounds;
         CGRect frame = self.frame;
@@ -57,24 +57,24 @@ static void charon_margins_changed(UIView *view)
 
 - (void)setLayoutMargins:(UIEdgeInsets)layoutMargins
 {
-    NSValue *stored = objc_getAssociatedObject(self, &charon_margins_key);
+    NSValue *stored = objc_getAssociatedObject(self, &revenant_margins_key);
     if (stored && UIEdgeInsetsEqualToEdgeInsets([stored UIEdgeInsetsValue], layoutMargins))
         return;
-    objc_setAssociatedObject(self, &charon_margins_key, [NSValue valueWithUIEdgeInsets:layoutMargins], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-    charon_margins_changed(self);
+    objc_setAssociatedObject(self, &revenant_margins_key, [NSValue valueWithUIEdgeInsets:layoutMargins], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    revenant_margins_changed(self);
 }
 
 - (BOOL)preservesSuperviewLayoutMargins
 {
-    return [objc_getAssociatedObject(self, &charon_preserves_key) boolValue];
+    return [objc_getAssociatedObject(self, &revenant_preserves_key) boolValue];
 }
 
 - (void)setPreservesSuperviewLayoutMargins:(BOOL)preservesSuperviewLayoutMargins
 {
     if ([self preservesSuperviewLayoutMargins] == preservesSuperviewLayoutMargins)
         return;
-    objc_setAssociatedObject(self, &charon_preserves_key, @(preservesSuperviewLayoutMargins), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-    charon_margins_changed(self);
+    objc_setAssociatedObject(self, &revenant_preserves_key, @(preservesSuperviewLayoutMargins), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    revenant_margins_changed(self);
 }
 
 - (void)layoutMarginsDidChange
@@ -83,7 +83,7 @@ static void charon_margins_changed(UIView *view)
 
 - (BOOL)insetsLayoutMarginsFromSafeArea
 {
-    NSNumber *stored = objc_getAssociatedObject(self, &charon_insets_from_safe_area_key);
+    NSNumber *stored = objc_getAssociatedObject(self, &revenant_insets_from_safe_area_key);
     return stored ? stored.boolValue : YES;
 }
 
@@ -91,8 +91,8 @@ static void charon_margins_changed(UIView *view)
 {
     if (self.insetsLayoutMarginsFromSafeArea == insetsLayoutMarginsFromSafeArea)
         return;
-    objc_setAssociatedObject(self, &charon_insets_from_safe_area_key, @(insetsLayoutMarginsFromSafeArea), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-    charon_margins_changed(self);
+    objc_setAssociatedObject(self, &revenant_insets_from_safe_area_key, @(insetsLayoutMarginsFromSafeArea), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    revenant_margins_changed(self);
 }
 
 @end

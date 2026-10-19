@@ -13,7 +13,7 @@
 #include <limits>
 #include <string_view>
 
-namespace shade::bsd_support {
+namespace emulator::bsd_support {
 namespace {
 
     constexpr std::uint64_t hfs_nanoseconds_per_second = 1'000'000'000ULL;

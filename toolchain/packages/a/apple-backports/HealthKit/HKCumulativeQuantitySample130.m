@@ -1,44 +1,44 @@
 #import <HealthKit/HealthKit.h>
 
-#import "CharonHKStore.h"
+#import "RevenantHKStore.h"
 
-@interface HKCumulativeQuantitySample (CharonIOS130Internal)
-- (instancetype)charon_initWithCumulativeType:(HKQuantityType *)quantityType
+@interface HKCumulativeQuantitySample (RevenantIOS130Internal)
+- (instancetype)revenant_initWithCumulativeType:(HKQuantityType *)quantityType
                                           sum:(HKQuantity *)sum
                                      startDate:(NSDate *)startDate
                                        endDate:(NSDate *)endDate;
 @end
 
-@interface HKSample (CharonIOS130Internal)
+@interface HKSample (RevenantIOS130Internal)
 @property (readonly, copy) HKSampleType *sampleType;
-- (instancetype)charon_initWithType:(HKSampleType *)sampleType
+- (instancetype)revenant_initWithType:(HKSampleType *)sampleType
                             metadata:(nullable NSDictionary *)metadata
                            startDate:(NSDate *)startDate
                              endDate:(NSDate *)endDate;
 @end
 
-@interface HKCumulativeQuantitySample (CharonHKStorable) <CharonHKStorable>
+@interface HKCumulativeQuantitySample (RevenantHKStorable) <RevenantHKStorable>
 @end
 
 @implementation HKCumulativeQuantitySample {
     HKQuantity *_sumQuantity;
 }
 
-+ (instancetype)charon_cumulativeWithType:(HKQuantityType *)quantityType
++ (instancetype)revenant_cumulativeWithType:(HKQuantityType *)quantityType
                                      sum:(HKQuantity *)sum
                                 startDate:(NSDate *)startDate
                                   endDate:(NSDate *)endDate
 {
-    return [[self alloc] charon_initWithCumulativeType:quantityType sum:sum startDate:startDate endDate:endDate];
+    return [[self alloc] revenant_initWithCumulativeType:quantityType sum:sum startDate:startDate endDate:endDate];
 }
 
-- (instancetype)charon_initWithCumulativeType:(HKQuantityType *)quantityType
+- (instancetype)revenant_initWithCumulativeType:(HKQuantityType *)quantityType
                                           sum:(HKQuantity *)sum
                                      startDate:(NSDate *)startDate
                                        endDate:(NSDate *)endDate
 {
     HKCumulativeQuantitySample *sample =
-        (HKCumulativeQuantitySample *)[self charon_initWithType:quantityType
+        (HKCumulativeQuantitySample *)[self revenant_initWithType:quantityType
                                                       metadata:nil
                                                      startDate:startDate
                                                        endDate:endDate];
@@ -52,17 +52,17 @@
     return _sumQuantity;
 }
 
-- (NSString *)charon_storeTypeIdentifier
+- (NSString *)revenant_storeTypeIdentifier
 {
     return [(HKSample *)self sampleType].identifier ?: @"";
 }
 
-- (NSInteger)charon_storeKind
+- (NSInteger)revenant_storeKind
 {
     return 1;
 }
 
 @end
 
-@implementation HKCumulativeQuantitySample (CharonHKStorable)
+@implementation HKCumulativeQuantitySample (RevenantHKStorable)
 @end

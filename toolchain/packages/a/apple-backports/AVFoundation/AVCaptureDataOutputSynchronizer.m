@@ -2,70 +2,70 @@
 #import <objc/runtime.h>
 
 @interface AVCaptureSynchronizedData ()
-- (instancetype)initWithCharonTimestamp:(CMTime)timestamp;
+- (instancetype)initWithRevenantTimestamp:(CMTime)timestamp;
 @end
 
 @implementation AVCaptureSynchronizedData
 {
-    CMTime _charonTimestamp;
+    CMTime _revenantTimestamp;
 }
 
-- (instancetype)initWithCharonTimestamp:(CMTime)timestamp
+- (instancetype)initWithRevenantTimestamp:(CMTime)timestamp
 {
     if ((self = [super init]))
-        _charonTimestamp = timestamp;
+        _revenantTimestamp = timestamp;
     return self;
 }
 
 - (CMTime)timestamp
 {
-    return _charonTimestamp;
+    return _revenantTimestamp;
 }
 
 @end
 
 @interface AVCaptureSynchronizedSampleBufferData ()
-- (instancetype)initWithCharonSampleBuffer:(CMSampleBufferRef)sampleBuffer dropped:(BOOL)dropped reason:(AVCaptureOutputDataDroppedReason)reason;
+- (instancetype)initWithRevenantSampleBuffer:(CMSampleBufferRef)sampleBuffer dropped:(BOOL)dropped reason:(AVCaptureOutputDataDroppedReason)reason;
 @end
 
 @implementation AVCaptureSynchronizedSampleBufferData
 {
-    CMSampleBufferRef _charonSampleBuffer;
-    BOOL _charonSampleBufferWasDropped;
-    AVCaptureOutputDataDroppedReason _charonDroppedReason;
+    CMSampleBufferRef _revenantSampleBuffer;
+    BOOL _revenantSampleBufferWasDropped;
+    AVCaptureOutputDataDroppedReason _revenantDroppedReason;
 }
 
-- (instancetype)initWithCharonSampleBuffer:(CMSampleBufferRef)sampleBuffer dropped:(BOOL)dropped reason:(AVCaptureOutputDataDroppedReason)reason
+- (instancetype)initWithRevenantSampleBuffer:(CMSampleBufferRef)sampleBuffer dropped:(BOOL)dropped reason:(AVCaptureOutputDataDroppedReason)reason
 {
     CMTime timestamp = CMSampleBufferGetPresentationTimeStamp(sampleBuffer);
-    if ((self = [super initWithCharonTimestamp:timestamp])) {
-        _charonSampleBuffer = sampleBuffer;
-        CFRetain(_charonSampleBuffer);
-        _charonSampleBufferWasDropped = dropped;
-        _charonDroppedReason = reason;
+    if ((self = [super initWithRevenantTimestamp:timestamp])) {
+        _revenantSampleBuffer = sampleBuffer;
+        CFRetain(_revenantSampleBuffer);
+        _revenantSampleBufferWasDropped = dropped;
+        _revenantDroppedReason = reason;
     }
     return self;
 }
 
 - (void)dealloc
 {
-    if (_charonSampleBuffer)
-        CFRelease(_charonSampleBuffer);
+    if (_revenantSampleBuffer)
+        CFRelease(_revenantSampleBuffer);
 }
 
 - (CMSampleBufferRef)sampleBuffer
 {
-    return _charonSampleBuffer;
+    return _revenantSampleBuffer;
 }
 
 - (BOOL)sampleBufferWasDropped
 {
-    return _charonSampleBufferWasDropped;
+    return _revenantSampleBufferWasDropped;
 }
 
 - (AVCaptureOutputDataDroppedReason)droppedReason
 {
-    return _charonDroppedReason;
+    return _revenantDroppedReason;
 }
 
 @end
@@ -99,24 +99,24 @@
 @end
 
 @interface AVCaptureSynchronizedDataCollection () <NSFastEnumeration>
-- (instancetype)initWithCharonEntries:(NSMapTable<AVCaptureOutput *, AVCaptureSynchronizedData *> *)entries;
+- (instancetype)initWithRevenantEntries:(NSMapTable<AVCaptureOutput *, AVCaptureSynchronizedData *> *)entries;
 @end
 
 @implementation AVCaptureSynchronizedDataCollection
 {
-    NSMapTable<AVCaptureOutput *, AVCaptureSynchronizedData *> *_charonEntries;
+    NSMapTable<AVCaptureOutput *, AVCaptureSynchronizedData *> *_revenantEntries;
 }
 
-- (instancetype)initWithCharonEntries:(NSMapTable<AVCaptureOutput *, AVCaptureSynchronizedData *> *)entries
+- (instancetype)initWithRevenantEntries:(NSMapTable<AVCaptureOutput *, AVCaptureSynchronizedData *> *)entries
 {
     if ((self = [super init]))
-        _charonEntries = entries;
+        _revenantEntries = entries;
     return self;
 }
 
 - (AVCaptureSynchronizedData *)synchronizedDataForCaptureOutput:(AVCaptureOutput *)captureOutput
 {
-    return [_charonEntries objectForKey:captureOutput];
+    return [_revenantEntries objectForKey:captureOutput];
 }
 
 - (AVCaptureSynchronizedData *)objectForKeyedSubscript:(AVCaptureOutput *)key
@@ -126,12 +126,12 @@
 
 - (NSUInteger)count
 {
-    return _charonEntries.count;
+    return _revenantEntries.count;
 }
 
 - (NSUInteger)countByEnumeratingWithState:(NSFastEnumerationState *)state objects:(id __unsafe_unretained [])buffer count:(NSUInteger)len
 {
-    return [[_charonEntries.keyEnumerator allObjects] countByEnumeratingWithState:state objects:buffer count:len];
+    return [[_revenantEntries.keyEnumerator allObjects] countByEnumeratingWithState:state objects:buffer count:len];
 }
 
 @end
@@ -141,41 +141,41 @@
 
 @implementation AVCaptureDataOutputSynchronizer
 {
-    NSArray<AVCaptureOutput *> *_charonDataOutputs;
-    __weak id<AVCaptureDataOutputSynchronizerDelegate> _charonDelegate;
-    dispatch_queue_t _charonQueue;
-    NSMapTable<AVCaptureOutput *, AVCaptureSynchronizedData *> *_charonLatest;
+    NSArray<AVCaptureOutput *> *_revenantDataOutputs;
+    __weak id<AVCaptureDataOutputSynchronizerDelegate> _revenantDelegate;
+    dispatch_queue_t _revenantQueue;
+    NSMapTable<AVCaptureOutput *, AVCaptureSynchronizedData *> *_revenantLatest;
 }
 
 - (instancetype)initWithDataOutputs:(NSArray<AVCaptureOutput *> *)dataOutputs
 {
     if ((self = [super init])) {
-        _charonDataOutputs = [dataOutputs copy];
-        _charonLatest = [NSMapTable weakToStrongObjectsMapTable];
+        _revenantDataOutputs = [dataOutputs copy];
+        _revenantLatest = [NSMapTable weakToStrongObjectsMapTable];
     }
     return self;
 }
 
 - (NSArray<AVCaptureOutput *> *)dataOutputs
 {
-    return _charonDataOutputs;
+    return _revenantDataOutputs;
 }
 
 - (id<AVCaptureDataOutputSynchronizerDelegate>)delegate
 {
-    return _charonDelegate;
+    return _revenantDelegate;
 }
 
 - (dispatch_queue_t)delegateCallbackQueue
 {
-    return _charonQueue;
+    return _revenantQueue;
 }
 
 - (void)setDelegate:(id<AVCaptureDataOutputSynchronizerDelegate>)delegate queue:(dispatch_queue_t)delegateCallbackQueue
 {
-    _charonDelegate = delegate;
-    _charonQueue = delegate ? delegateCallbackQueue : nil;
-    for (AVCaptureOutput *output in _charonDataOutputs) {
+    _revenantDelegate = delegate;
+    _revenantQueue = delegate ? delegateCallbackQueue : nil;
+    for (AVCaptureOutput *output in _revenantDataOutputs) {
         if ([output isKindOfClass:[AVCaptureVideoDataOutput class]])
             [(AVCaptureVideoDataOutput *)output setSampleBufferDelegate:delegate ? self : nil queue:delegate ? delegateCallbackQueue : nil];
         else if ([output isKindOfClass:[AVCaptureAudioDataOutput class]])
@@ -183,36 +183,36 @@
     }
 }
 
-- (void)charon_recordSampleBuffer:(CMSampleBufferRef)sampleBuffer forOutput:(AVCaptureOutput *)output dropped:(BOOL)dropped reason:(AVCaptureOutputDataDroppedReason)reason
+- (void)revenant_recordSampleBuffer:(CMSampleBufferRef)sampleBuffer forOutput:(AVCaptureOutput *)output dropped:(BOOL)dropped reason:(AVCaptureOutputDataDroppedReason)reason
 {
-    AVCaptureSynchronizedSampleBufferData *data = [[AVCaptureSynchronizedSampleBufferData alloc] initWithCharonSampleBuffer:sampleBuffer dropped:dropped reason:reason];
-    @synchronized (_charonLatest) {
-        [_charonLatest setObject:data forKey:output];
+    AVCaptureSynchronizedSampleBufferData *data = [[AVCaptureSynchronizedSampleBufferData alloc] initWithRevenantSampleBuffer:sampleBuffer dropped:dropped reason:reason];
+    @synchronized (_revenantLatest) {
+        [_revenantLatest setObject:data forKey:output];
     }
-    if (output != _charonDataOutputs.firstObject)
+    if (output != _revenantDataOutputs.firstObject)
         return;
     NSMapTable *snapshot = [NSMapTable strongToStrongObjectsMapTable];
-    @synchronized (_charonLatest) {
-        for (AVCaptureOutput *held in _charonDataOutputs) {
-            AVCaptureSynchronizedData *latest = [_charonLatest objectForKey:held];
+    @synchronized (_revenantLatest) {
+        for (AVCaptureOutput *held in _revenantDataOutputs) {
+            AVCaptureSynchronizedData *latest = [_revenantLatest objectForKey:held];
             if (latest)
                 [snapshot setObject:latest forKey:held];
         }
     }
-    AVCaptureSynchronizedDataCollection *collection = [[AVCaptureSynchronizedDataCollection alloc] initWithCharonEntries:snapshot];
-    id<AVCaptureDataOutputSynchronizerDelegate> delegate = _charonDelegate;
+    AVCaptureSynchronizedDataCollection *collection = [[AVCaptureSynchronizedDataCollection alloc] initWithRevenantEntries:snapshot];
+    id<AVCaptureDataOutputSynchronizerDelegate> delegate = _revenantDelegate;
     if ([delegate respondsToSelector:@selector(dataOutputSynchronizer:didOutputSynchronizedDataCollection:)])
         [delegate dataOutputSynchronizer:self didOutputSynchronizedDataCollection:collection];
 }
 
 - (void)captureOutput:(AVCaptureOutput *)output didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer fromConnection:(AVCaptureConnection *)connection
 {
-    [self charon_recordSampleBuffer:sampleBuffer forOutput:output dropped:NO reason:AVCaptureOutputDataDroppedReasonNone];
+    [self revenant_recordSampleBuffer:sampleBuffer forOutput:output dropped:NO reason:AVCaptureOutputDataDroppedReasonNone];
 }
 
 - (void)captureOutput:(AVCaptureOutput *)output didDropSampleBuffer:(CMSampleBufferRef)sampleBuffer fromConnection:(AVCaptureConnection *)connection
 {
-    [self charon_recordSampleBuffer:sampleBuffer forOutput:output dropped:YES reason:AVCaptureOutputDataDroppedReasonLateData];
+    [self revenant_recordSampleBuffer:sampleBuffer forOutput:output dropped:YES reason:AVCaptureOutputDataDroppedReasonLateData];
 }
 
 @end

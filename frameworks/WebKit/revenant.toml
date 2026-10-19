@@ -27,13 +27,13 @@ libxslt = "1.1.45@revenant/stable"
 libpsl = "0.23.3+5.ga629c83@revenant/stable"
 icu = "78.3@revenant/stable"
 woff2 = "1.0.2+13.gfb9c337@revenant/stable"
-libcxx = "23.1.1@charon/stable"
+libcxx = "23.1.1@revenant/stable"
 wasm3 = "0.9.1-beta.1+7.gdeeaca9@revenant/stable"
 
 [tools]
 cmake = "4.4.3"
 ninja = "1.13.2"
-ldid = "2.1.5-procursus7+23.gaf86971@charon/stable"
+ldid = "2.1.5-procursus7+23.gaf86971@revenant/stable"
 
 [integrate]
 before-build = ["task:carry-check", "task:port-delta"]
@@ -169,7 +169,7 @@ options = [
     "-Wno-builtin-requires-header",
     "-Wno-protocol",
     "-Wno-objc-designated-initializers",
-    '"$<$<COMPILE_LANGUAGE:OBJC,CXX>:SHELL:-include ${CHARON_PORT}/compat/stubs/ios6_dispatch_compat.h>"',
+    '"$<$<COMPILE_LANGUAGE:OBJC,CXX>:SHELL:-include ${REVENANT_PORT}/compat/stubs/ios6_dispatch_compat.h>"',
     '"$<$<COMPILE_LANGUAGE:CXX>:-nostdinc++>"',
 ]
 definitions = [

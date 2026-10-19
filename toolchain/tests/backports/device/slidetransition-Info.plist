@@ -9,7 +9,7 @@
 	<key>CFBundleExecutable</key>
 	<string>slidetransition</string>
 	<key>CFBundleIdentifier</key>
-	<string>local.charon.backports.slidetransition</string>
+	<string>local.revenant.backports.slidetransition</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>

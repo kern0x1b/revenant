@@ -8,17 +8,17 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-build=${COMBINE_DIFFERENTIAL_BUILD:-$(runs_folder charon-combine-differential)}
+build=${COMBINE_DIFFERENTIAL_BUILD:-$(runs_folder revenant-combine-differential)}
 sources=${COMBINE_SOURCES:-}
 swifc=${SWIFTC:-/usr/bin/swiftc}
 clangxx=${CLANGXX:-clang++}
 
 if [ -z "$sources" ]; then
-    sources=$(ls -d "$HOME"/.xmake/packages/s/styx/*/*/src 2>/dev/null | tail -1 || true)
+    sources=$(ls -d "$HOME"/.xmake/packages/c/combine/*/*/src 2>/dev/null | tail -1 || true)
 fi
 if [ -z "$sources" ] || [ ! -d "$sources/Combine" ]; then
-    echo "FAIL: styx sources not found - set COMBINE_SOURCES to the src/ directory of an installed"
-    echo "      charon@styx, the one holding Combine/ and CombineHelpers/, or install charon@styx once"
+    echo "FAIL: combine sources not found - set COMBINE_SOURCES to the src/ directory of an installed"
+    echo "      revenant@combine, the one holding Combine/ and CombineHelpers/, or install revenant@combine once"
     exit 1
 fi
 echo "sources: $sources"

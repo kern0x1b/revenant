@@ -1,12 +1,12 @@
 #import <AuthenticationServices/AuthenticationServices.h>
-#import "CharonASConstruction.h"
+#import "RevenantASConstruction.h"
 
 @implementation ASPasswordCredential
 
 @synthesize user = _user;
 @synthesize password = _password;
 
-- (instancetype)charon_initWithUser:(NSString *)user password:(NSString *)password
+- (instancetype)revenant_initWithUser:(NSString *)user password:(NSString *)password
 {
     self = [super init];
     if (self) {
@@ -18,12 +18,12 @@
 
 - (instancetype)initWithUser:(NSString *)user password:(NSString *)password
 {
-    return [self charon_initWithUser:user password:password];
+    return [self revenant_initWithUser:user password:password];
 }
 
 + (instancetype)credentialWithUser:(NSString *)user password:(NSString *)password
 {
-    return [[ASPasswordCredential alloc] charon_initWithUser:user password:password];
+    return [[ASPasswordCredential alloc] revenant_initWithUser:user password:password];
 }
 
 - (NSString *)user
@@ -43,7 +43,7 @@
 
 - (instancetype)initWithCoder:(NSCoder *)coder
 {
-    return [self charon_initWithUser:@"" password:@""];
+    return [self revenant_initWithUser:@"" password:@""];
 }
 
 - (void)encodeWithCoder:(NSCoder *)coder
@@ -52,7 +52,7 @@
 
 - (id)copyWithZone:(NSZone *)zone
 {
-    return [[[self class] allocWithZone:zone] charon_initWithUser:_user password:_password];
+    return [[[self class] allocWithZone:zone] revenant_initWithUser:_user password:_password];
 }
 
 @end

@@ -1,6 +1,6 @@
-#import "CharonMenus.h"
+#import "RevenantMenus.h"
 
-static inline NSUInteger charon_hash_part(double value)
+static inline NSUInteger revenant_hash_part(double value)
 {
     if (value != value)
         return 0;
@@ -8,7 +8,7 @@ static inline NSUInteger charon_hash_part(double value)
     return (NSUInteger)whole;
 }
 
-static inline NSString *charon_axes_text(UIAxis axes)
+static inline NSString *revenant_axes_text(UIAxis axes)
 {
     switch ((NSUInteger)axes) {
     case 1:

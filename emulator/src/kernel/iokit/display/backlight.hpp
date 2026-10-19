@@ -6,7 +6,7 @@
 
 #include "kernel/kernel_shared_state.hpp"
 
-namespace shade::kernel_iokit {
+namespace emulator::kernel_iokit {
 
 class BacklightControl {
 public:

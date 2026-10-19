@@ -3,11 +3,11 @@
 <plist version="1.0">
 <dict>
     <key>CFBundleExecutable</key>
-    <string>CharonNotificationSettings</string>
+    <string>RevenantNotificationSettings</string>
     <key>CFBundleIdentifier</key>
-    <string>org.charon.hostnotification-settings</string>
+    <string>org.revenant.hostnotification-settings</string>
     <key>CFBundleName</key>
-    <string>CharonNotificationSettings</string>
+    <string>RevenantNotificationSettings</string>
     <key>CFBundlePackageType</key>
     <string>APPL</string>
     <key>CFBundleVersion</key>
@@ -30,7 +30,7 @@
                     <key>UISceneConfigurationName</key>
                     <string>Default</string>
                     <key>UISceneDelegateClassName</key>
-                    <string>CharonSceneDelegate</string>
+                    <string>RevenantSceneDelegate</string>
                 </dict>
             </array>
         </dict>

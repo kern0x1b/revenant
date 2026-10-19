@@ -1,4 +1,4 @@
-#import "CharonAVFAudio.h"
+#import "RevenantAVFAudio.h"
 
 NSString * const AVAudioUnitTypeOutput = @"Output";
 NSString * const AVAudioUnitTypeMusicDevice = @"Music Device";
@@ -13,7 +13,7 @@ NSString * const AVAudioUnitTypeMIDIProcessor = @"MIDI Processor";
 NSString * const AVAudioUnitManufacturerNameApple = @"Apple";
 NSString * const AVAudioUnitComponentTagsDidChangeNotification = @"AVAudioUnitComponentTagsDidChangeNotification";
 
-static NSString *CharonTypeNameForType(OSType type)
+static NSString *RevenantTypeNameForType(OSType type)
 {
     switch (type) {
         case kAudioUnitType_Output: return AVAudioUnitTypeOutput;
@@ -31,32 +31,32 @@ static NSString *CharonTypeNameForType(OSType type)
 }
 
 @implementation AVAudioUnitComponent {
-    AudioComponent _charon_component;
-    AudioComponentDescription _charon_description;
-    NSString *_charon_name;
-    NSString *_charon_typeName;
-    NSString *_charon_manufacturerName;
+    AudioComponent _revenant_component;
+    AudioComponentDescription _revenant_description;
+    NSString *_revenant_name;
+    NSString *_revenant_typeName;
+    NSString *_revenant_manufacturerName;
 }
 
-- (instancetype)initWithCharonComponent:(AudioComponent)component
+- (instancetype)initWithRevenantComponent:(AudioComponent)component
 {
     if ((self = [super init])) {
-        _charon_component = component;
-        if (AudioComponentGetDescription(component, &_charon_description) != noErr) {
-            memset(&_charon_description, 0, sizeof(_charon_description));
+        _revenant_component = component;
+        if (AudioComponentGetDescription(component, &_revenant_description) != noErr) {
+            memset(&_revenant_description, 0, sizeof(_revenant_description));
         }
         CFStringRef copied = NULL;
         if (AudioComponentCopyName(component, &copied) == noErr && copied != NULL) {
-            _charon_name = (__bridge_transfer NSString *)copied;
+            _revenant_name = (__bridge_transfer NSString *)copied;
         }
-        _charon_typeName = CharonTypeNameForType(_charon_description.componentType);
-        OSType manufacturer = CFSwapInt32HostToBig(_charon_description.componentManufacturer);
+        _revenant_typeName = RevenantTypeNameForType(_revenant_description.componentType);
+        OSType manufacturer = CFSwapInt32HostToBig(_revenant_description.componentManufacturer);
         if (manufacturer == CFSwapInt32HostToBig(kAudioUnitManufacturer_Apple)) {
-            _charon_manufacturerName = AVAudioUnitManufacturerNameApple;
+            _revenant_manufacturerName = AVAudioUnitManufacturerNameApple;
         } else {
             char code[5] = {0};
             memcpy(code, &manufacturer, 4);
-            _charon_manufacturerName = [NSString stringWithUTF8String:code] ?: @"";
+            _revenant_manufacturerName = [NSString stringWithUTF8String:code] ?: @"";
         }
     }
     return self;
@@ -64,28 +64,28 @@ static NSString *CharonTypeNameForType(OSType type)
 
 - (NSString *)name
 {
-    return _charon_name;
+    return _revenant_name;
 }
 
 - (NSString *)typeName
 {
-    return _charon_typeName;
+    return _revenant_typeName;
 }
 
 - (NSString *)localizedTypeName
 {
-    return _charon_typeName;
+    return _revenant_typeName;
 }
 
 - (NSString *)manufacturerName
 {
-    return _charon_manufacturerName;
+    return _revenant_manufacturerName;
 }
 
 - (NSUInteger)version
 {
     UInt32 version = 0;
-    if (_charon_component == NULL || AudioComponentGetVersion(_charon_component, &version) != noErr) {
+    if (_revenant_component == NULL || AudioComponentGetVersion(_revenant_component, &version) != noErr) {
         return 0;
     }
     return (NSUInteger)version;
@@ -115,7 +115,7 @@ static NSString *CharonTypeNameForType(OSType type)
 - (BOOL)hasMIDIOutput
 {
     AudioUnit unit = NULL;
-    if (_charon_component == NULL || AudioComponentInstanceNew(_charon_component, &unit) != noErr || unit == NULL) {
+    if (_revenant_component == NULL || AudioComponentInstanceNew(_revenant_component, &unit) != noErr || unit == NULL) {
         return NO;
     }
     UInt32 size = 0;
@@ -127,7 +127,7 @@ static NSString *CharonTypeNameForType(OSType type)
 - (BOOL)hasMIDIInput
 {
     AudioUnit unit = NULL;
-    if (_charon_component == NULL || AudioComponentInstanceNew(_charon_component, &unit) != noErr || unit == NULL) {
+    if (_revenant_component == NULL || AudioComponentInstanceNew(_revenant_component, &unit) != noErr || unit == NULL) {
         return NO;
     }
     UInt32 size = 0;
@@ -138,7 +138,7 @@ static NSString *CharonTypeNameForType(OSType type)
 
 - (AudioComponent)audioComponent
 {
-    return _charon_component;
+    return _revenant_component;
 }
 
 #pragma clang diagnostic push
@@ -160,7 +160,7 @@ static NSString *CharonTypeNameForType(OSType type)
 
 - (AudioComponentDescription)audioComponentDescription
 {
-    return _charon_description;
+    return _revenant_description;
 }
 
 - (nullable NSURL *)iconURL
@@ -175,11 +175,11 @@ static NSString *CharonTypeNameForType(OSType type)
 
 - (BOOL)supportsNumberInputChannels:(NSInteger)numInputChannels outputChannels:(NSInteger)numOutputChannels
 {
-    if (numInputChannels < 0 || numOutputChannels < 0 || _charon_component == NULL) {
+    if (numInputChannels < 0 || numOutputChannels < 0 || _revenant_component == NULL) {
         return NO;
     }
     AudioUnit unit = NULL;
-    if (AudioComponentInstanceNew(_charon_component, &unit) != noErr || unit == NULL) {
+    if (AudioComponentInstanceNew(_revenant_component, &unit) != noErr || unit == NULL) {
         return NO;
     }
     BOOL supported = YES;
@@ -224,7 +224,7 @@ static NSString *CharonTypeNameForType(OSType type)
     return shared;
 }
 
-- (NSArray<AVAudioUnitComponent *> *)charon_allComponents
+- (NSArray<AVAudioUnitComponent *> *)revenant_allComponents
 {
     NSMutableArray *found = [NSMutableArray array];
     AudioComponentDescription any = {0, 0, 0};
@@ -235,7 +235,7 @@ static NSString *CharonTypeNameForType(OSType type)
         if (component == NULL) {
             break;
         }
-        [found addObject:[[AVAudioUnitComponent alloc] initWithCharonComponent:component]];
+        [found addObject:[[AVAudioUnitComponent alloc] initWithRevenantComponent:component]];
     }
     return found;
 }
@@ -252,7 +252,7 @@ static NSString *CharonTypeNameForType(OSType type)
 
 - (NSArray<AVAudioUnitComponent *> *)componentsMatchingPredicate:(NSPredicate *)predicate
 {
-    NSArray<AVAudioUnitComponent *> *all = [self charon_allComponents];
+    NSArray<AVAudioUnitComponent *> *all = [self revenant_allComponents];
     if (predicate == nil) {
         return all;
     }
@@ -290,7 +290,7 @@ static NSString *CharonTypeNameForType(OSType type)
     }
     NSMutableArray *matched = [NSMutableArray array];
     BOOL finished = NO;
-    for (AVAudioUnitComponent *component in [self charon_allComponents]) {
+    for (AVAudioUnitComponent *component in [self revenant_allComponents]) {
         if ((testHandler(component, &finished))) {
             [matched addObject:component];
         }
@@ -307,7 +307,7 @@ static NSString *CharonTypeNameForType(OSType type)
     AudioComponentDescription wanted = desc;
     AudioComponent component = AudioComponentFindNext(NULL, &wanted);
     while (component != NULL) {
-        [matched addObject:[[AVAudioUnitComponent alloc] initWithCharonComponent:component]];
+        [matched addObject:[[AVAudioUnitComponent alloc] initWithRevenantComponent:component]];
         component = AudioComponentFindNext(component, &wanted);
     }
     return matched;

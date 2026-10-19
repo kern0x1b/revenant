@@ -2,13 +2,13 @@
 
 NSString *const NSMarkdownSourcePositionAttributeName = @"NSMarkdownSourcePosition";
 
-static NSString *const charon_cached_offset_keys[] = {
+static NSString *const revenant_cached_offset_keys[] = {
     @"NSStartUTF8Offset", @"NSEndUTF8Offset", @"NSStartUTF16Offset", @"NSEndUTF16Offset",
     @"NSStartUTF8NextCodePoint", @"NSEndUTF8NextCodePoint",
     @"NSStartUTF16CurrentCodePointLength", @"NSEndUTF16CurrentCodePointLength",
 };
 
-static NSUInteger charon_marked_byte(NSData *source, NSInteger line, NSInteger column)
+static NSUInteger revenant_marked_byte(NSData *source, NSInteger line, NSInteger column)
 {
     if (line < 1 || column < 1)
         return NSNotFound;
@@ -29,7 +29,7 @@ static NSUInteger charon_marked_byte(NSData *source, NSInteger line, NSInteger c
     return offset + into;
 }
 
-static void charon_utf16_place(const char *bytes, NSUInteger length, NSUInteger byte, NSUInteger *offset, NSUInteger *units)
+static void revenant_utf16_place(const char *bytes, NSUInteger length, NSUInteger byte, NSUInteger *offset, NSUInteger *units)
 {
     NSUInteger at = 0, utf16 = 0;
     while (at < byte) {
@@ -124,8 +124,8 @@ static void charon_utf16_place(const char *bytes, NSUInteger length, NSUInteger 
     [coder encodeInteger:_startColumn forKey:@"NSStartColumn"];
     [coder encodeInteger:_endLine forKey:@"NSEndLine"];
     [coder encodeInteger:_endColumn forKey:@"NSEndColumn"];
-    for (unsigned index = 0; index < sizeof(charon_cached_offset_keys) / sizeof(*charon_cached_offset_keys); index++)
-        [coder encodeInteger:NSIntegerMax forKey:charon_cached_offset_keys[index]];
+    for (unsigned index = 0; index < sizeof(revenant_cached_offset_keys) / sizeof(*revenant_cached_offset_keys); index++)
+        [coder encodeInteger:NSIntegerMax forKey:revenant_cached_offset_keys[index]];
 }
 
 - (instancetype)initWithCoder:(NSCoder *)coder
@@ -140,22 +140,22 @@ static void charon_utf16_place(const char *bytes, NSUInteger length, NSUInteger 
     _startColumn = [coder decodeIntegerForKey:@"NSStartColumn"];
     _endLine = [coder decodeIntegerForKey:@"NSEndLine"];
     _endColumn = [coder decodeIntegerForKey:@"NSEndColumn"];
-    for (unsigned index = 0; index < sizeof(charon_cached_offset_keys) / sizeof(*charon_cached_offset_keys); index++)
-        (void)[coder decodeInt64ForKey:charon_cached_offset_keys[index]];
+    for (unsigned index = 0; index < sizeof(revenant_cached_offset_keys) / sizeof(*revenant_cached_offset_keys); index++)
+        (void)[coder decodeInt64ForKey:revenant_cached_offset_keys[index]];
     return self;
 }
 
 - (NSRange)rangeInString:(NSString *)string
 {
     NSData *source = [string dataUsingEncoding:NSUTF8StringEncoding];
-    NSUInteger startByte = charon_marked_byte(source, _startLine, _startColumn);
-    NSUInteger endByte = charon_marked_byte(source, _endLine, _endColumn);
+    NSUInteger startByte = revenant_marked_byte(source, _startLine, _startColumn);
+    NSUInteger endByte = revenant_marked_byte(source, _endLine, _endColumn);
     if (startByte == NSNotFound || endByte == NSNotFound || endByte < startByte)
         return NSMakeRange(NSNotFound, 0);
     const char *bytes = (const char *)source.bytes;
     NSUInteger length = source.length, start = 0, end = 0, startUnits = 0, endUnits = 0;
-    charon_utf16_place(bytes, length, startByte, &start, &startUnits);
-    charon_utf16_place(bytes, length, endByte, &end, &endUnits);
+    revenant_utf16_place(bytes, length, startByte, &start, &startUnits);
+    revenant_utf16_place(bytes, length, endByte, &end, &endUnits);
     return NSMakeRange(start, end + endUnits - start);
 }
 

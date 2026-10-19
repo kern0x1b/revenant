@@ -1,6 +1,6 @@
-#import "CharonMetal.h"
+#import "RevenantMetal.h"
 
-@implementation CharonMetalCommandBuffer (Dispatch12)
+@implementation RevenantMetalCommandBuffer (Dispatch12)
 
 - (id<MTLComputeCommandEncoder>)computeCommandEncoderWithDispatchType:(MTLDispatchType)dispatchType
 {

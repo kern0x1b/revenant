@@ -3,7 +3,7 @@
 #import <objc/message.h>
 #import "check.h"
 
-@interface CharonHostUITraitCollection : NSObject <NSCopying, NSSecureCoding>
+@interface RevenantHostUITraitCollection : NSObject <NSCopying, NSSecureCoding>
 + (instancetype)traitCollectionWithTraitsFromCollections:(NSArray *)traitCollections;
 + (instancetype)traitCollectionWithDisplayScale:(CGFloat)scale;
 + (instancetype)traitCollectionWithHorizontalSizeClass:(UIUserInterfaceSizeClass)horizontalSizeClass;
@@ -26,11 +26,11 @@
 @property (nonatomic, readonly) id imageConfiguration;
 @end
 
-@interface UIScreen (CharonHostTraits)
-- (id)charonHostTraitCollection;
+@interface UIScreen (RevenantHostTraits)
+- (id)revenantHostTraitCollection;
 @end
 
-void charon_windowed_run(UIWindow *window);
+void revenant_windowed_run(UIWindow *window);
 
 static NSString *appearance(id c)
 {
@@ -69,7 +69,7 @@ static NSArray *archive_keys(id object)
 
 static void agree(NSString *name, NSString *ours, NSString *system)
 {
-    charon_check([ours isEqualToString:system], name.UTF8String, [NSString stringWithFormat:@"port   %@\nsystem %@", ours, system]);
+    revenant_check([ours isEqualToString:system], name.UTF8String, [NSString stringWithFormat:@"port   %@\nsystem %@", ours, system]);
 }
 
 static unsigned long long state = 88172645463325252ULL;
@@ -81,10 +81,10 @@ static NSUInteger next(NSUInteger below)
     return (NSUInteger)(state % below);
 }
 
-void charon_windowed_run(UIWindow *window)
+void revenant_windowed_run(UIWindow *window)
 {
-    Class port = NSClassFromString(@"CharonHostUITraitCollection"), system = [UITraitCollection class];
-    charon_check(port != Nil, "the port's collection is linked under its host name", @"missing");
+    Class port = NSClassFromString(@"RevenantHostUITraitCollection"), system = [UITraitCollection class];
+    revenant_check(port != Nil, "the port's collection is linked under its host name", @"missing");
 
     NSInteger levels[] = {-1, 0, 1};
     for (int index = 0; index < 3; index++) {
@@ -142,18 +142,18 @@ void charon_windowed_run(UIWindow *window)
         agree([label stringByAppendingString:@" archive"], [archive_keys(a) componentsJoinedByString:@"|"], [archive_keys(b) componentsJoinedByString:@"|"]);
         id other = [port traitCollectionWithTraitsFromCollections:@[[port traitCollectionWithAccessibilityContrast:UIAccessibilityContrastHigh]]];
         id otherSystem = [system traitCollectionWithTraitsFromCollections:@[[system traitCollectionWithAccessibilityContrast:UIAccessibilityContrastHigh]]];
-        charon_check([a containsTraitsInCollection:other] == [b containsTraitsInCollection:otherSystem], [label stringByAppendingString:@" contains"].UTF8String, @"contains differs");
-        charon_check([a hasDifferentColorAppearanceComparedToTraitCollection:other] == [b hasDifferentColorAppearanceComparedToTraitCollection:otherSystem], [label stringByAppendingString:@" different color appearance"].UTF8String,
+        revenant_check([a containsTraitsInCollection:other] == [b containsTraitsInCollection:otherSystem], [label stringByAppendingString:@" contains"].UTF8String, @"contains differs");
+        revenant_check([a hasDifferentColorAppearanceComparedToTraitCollection:other] == [b hasDifferentColorAppearanceComparedToTraitCollection:otherSystem], [label stringByAppendingString:@" different color appearance"].UTF8String,
                      [NSString stringWithFormat:@"%@ against %@: port %d system %d", fields(a), fields(other), [a hasDifferentColorAppearanceComparedToTraitCollection:other], [b hasDifferentColorAppearanceComparedToTraitCollection:otherSystem]]);
         id a2 = [port traitCollectionWithTraitsFromCollections:ours];
-        charon_check([a isEqual:a2] && [a hash] == [a2 hash] && [b isEqual:[system traitCollectionWithTraitsFromCollections:theirs]], [label stringByAppendingString:@" equality"].UTF8String, @"equality differs");
+        revenant_check([a isEqual:a2] && [a hash] == [a2 hash] && [b isEqual:[system traitCollectionWithTraitsFromCollections:theirs]], [label stringByAppendingString:@" equality"].UTF8String, @"equality differs");
     }
 
     id darkPort = [port traitCollectionWithUserInterfaceStyle:UIUserInterfaceStyleDark], darkSystem = [system traitCollectionWithUserInterfaceStyle:UIUserInterfaceStyleDark];
     id highPort = [port traitCollectionWithTraitsFromCollections:@[[port traitCollectionWithUserInterfaceStyle:UIUserInterfaceStyleLight], [port traitCollectionWithAccessibilityContrast:UIAccessibilityContrastHigh]]],
        highSystem = [system traitCollectionWithTraitsFromCollections:@[[system traitCollectionWithUserInterfaceStyle:UIUserInterfaceStyleLight], [system traitCollectionWithAccessibilityContrast:UIAccessibilityContrastHigh]]];
     agree(@"current at first", appearance([port currentTraitCollection]), appearance([system currentTraitCollection]));
-    charon_check([[port currentTraitCollection] userInterfaceStyle] == UIUserInterfaceStyleLight, "the port's current collection is light, as the release's only appearance", @"it is not");
+    revenant_check([[port currentTraitCollection] userInterfaceStyle] == UIUserInterfaceStyleLight, "the port's current collection is light, as the release's only appearance", @"it is not");
     NSMutableArray *ours = [NSMutableArray array], *theirs = [NSMutableArray array];
     [darkPort performAsCurrentTraitCollection:^{
         [ours addObject:[NSString stringWithFormat:@"%ld %@", (long)[[port currentTraitCollection] userInterfaceStyle], appearance([port currentTraitCollection])]];
@@ -179,10 +179,10 @@ void charon_windowed_run(UIWindow *window)
     [system setCurrentTraitCollection:nil];
     agree(@"set current back", appearance([port currentTraitCollection]), appearance([system currentTraitCollection]));
 
-    id screen = [[UIScreen mainScreen] charonHostTraitCollection], systemScreen = [UIScreen mainScreen].traitCollection;
+    id screen = [[UIScreen mainScreen] revenantHostTraitCollection], systemScreen = [UIScreen mainScreen].traitCollection;
     agree(@"screen appearance traits", appearance(screen), appearance(systemScreen));
-    charon_check([screen userInterfaceStyle] == UIUserInterfaceStyleLight && [screen activeAppearance] == UIUserInterfaceActiveAppearanceActive, "the screen of the port is light and active", @"it is not");
+    revenant_check([screen userInterfaceStyle] == UIUserInterfaceStyleLight && [screen activeAppearance] == UIUserInterfaceActiveAppearanceActive, "the screen of the port is light and active", @"it is not");
     id config = [darkPort imageConfiguration], systemConfig = [darkSystem imageConfiguration];
     agree(@"image configuration of a collection", [config description], [systemConfig description]);
-    charon_check([[config performSelector:NSSelectorFromString(@"traitCollection")] isEqual:darkPort], "an image configuration holds the collection", @"it does not");
+    revenant_check([[config performSelector:NSSelectorFromString(@"traitCollection")] isEqual:darkPort], "an image configuration holds the collection", @"it does not");
 }

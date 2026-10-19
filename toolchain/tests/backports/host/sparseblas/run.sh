@@ -23,7 +23,7 @@ for part in sorted(os.listdir(registry)):
             print(name)
 PY
 ); do
-    renames="$renames -D$name=charon_host_$name"
+    renames="$renames -D$name=revenant_host_$name"
 done
 
 # All three object files. The release ladder puts the two sparse-times-sparse products of the real

@@ -8,9 +8,9 @@ diff -ruN a/swift-system-1.8.1/Sources/CSystem/csystem_port.c b/swift-system-1.8
 +#include <sys/stat.h>
 +#include <unistd.h>
 +#include <mach/mach.h>
-+#include <charon/fdopendir.h>
-+#include <charon/fstatat.h>
-+#include <charon/unlinkat.h>
++#include <toolchain/fdopendir.h>
++#include <toolchain/fstatat.h>
++#include <toolchain/unlinkat.h>
 +#include "CSystemDarwin.h"
 +
 +#pragma weak mach_port_guard

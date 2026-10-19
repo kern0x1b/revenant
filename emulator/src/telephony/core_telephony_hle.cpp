@@ -26,7 +26,7 @@
 #include "foundation/userland_hle.hpp"
 #include "network/wifi_state.hpp"
 
-namespace shade {
+namespace emulator {
 namespace {
 
     constexpr std::string_view core_telephony_image {

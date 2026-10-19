@@ -6,7 +6,7 @@ here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 work=$(cd "$here/../../../.." && pwd)
 obj="$work/packages/a/apple-backports/Security/SecurityConstants11_0.m"
-build=${BUILD:-$(runs_fresh charon-security)}
+build=${BUILD:-$(runs_fresh revenant-security)}
 mkdir -p "$build"
 sdk=$(xcrun --show-sdk-path --sdk macosx)
 common="-target arm64-apple-ios15.0-macabi -isysroot $sdk -F $sdk/System/Library/Frameworks -iframework $sdk/System/iOSSupport/System/Library/Frameworks -fobjc-arc -w"

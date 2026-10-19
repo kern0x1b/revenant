@@ -54,7 +54,7 @@ int main(int argc, char **argv)
 {
     @autoreleasepool {
         if (argc > 1)
-            charon_log_to(@(argv[1]));
+            revenant_log_to(@(argv[1]));
         check_sources();
         check_registration();
 
@@ -68,7 +68,7 @@ int main(int argc, char **argv)
             NSString *label = [NSString stringWithFormat:@"%@ answers what the host's Foundation answers", name];
             CHECK_EQUAL(recorder.records[name], expected[name], label.UTF8String);
         }
-        printf("%d of %d checks failed\n", charon_failures, charon_checks);
-        return charon_failures;
+        printf("%d of %d checks failed\n", revenant_failures, revenant_checks);
+        return revenant_failures;
     }
 }

@@ -14,11 +14,11 @@ static NSString *image_of(Class cls)
     return dladdr((__bridge const void *)cls, &info) ? @(info.dli_fname).lastPathComponent : @"?";
 }
 
-@interface CharonObserver : NSObject
+@interface RevenantObserver : NSObject
 @property (nonatomic, strong) NSMutableArray *seen;
 @end
 
-@implementation CharonObserver
+@implementation RevenantObserver
 
 - (instancetype)init
 {
@@ -87,7 +87,7 @@ static void run_checks(UIView *stage)
                 @"NSInvalidArgumentException|The delay should be greater than or equal to zero.",
                 "a negative delay raises");
 
-    CharonObserver *observer = [[CharonObserver alloc] init];
+    RevenantObserver *observer = [[RevenantObserver alloc] init];
     UIViewPropertyAnimator *animator = [[UIViewPropertyAnimator alloc] initWithDuration:2 curve:UIViewAnimationCurveLinear
                                                                             animations:^{ box.center = CGPointMake(200, 200); }];
     for (NSString *key in @[@"state", @"running", @"reversed", @"fractionComplete"])
@@ -242,22 +242,22 @@ static void measure_scrubbing(UIView *stage)
 
     printf("scrub %lu steps: loop %.1f us, freeze-the-layer %.1f us, rebuild-the-animation %.1f us (frame is %.1f us)\n",
            (unsigned long)steps, baseline, freeze, rebuild, frame_microseconds);
-    charon_check(rebuild < frame_microseconds,
+    revenant_check(rebuild < frame_microseconds,
                  "one scrub step fits in a display frame on this hardware",
                  [NSString stringWithFormat:@"%.1f us >= %.1f us", rebuild, frame_microseconds]);
     (void)sink;
 }
 
-@interface CharonAnimatorDelegate : UIResponder <UIApplicationDelegate>
+@interface RevenantAnimatorDelegate : UIResponder <UIApplicationDelegate>
 @end
 
-@implementation CharonAnimatorDelegate {
+@implementation RevenantAnimatorDelegate {
     UIWindow *_window;
 }
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)options
 {
-    charon_log_to([results_folder stringByAppendingPathComponent:@"animator.log"]);
+    revenant_log_to([results_folder stringByAppendingPathComponent:@"animator.log"]);
     _window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
     _window.backgroundColor = [UIColor whiteColor];
     _window.rootViewController = [[UIViewController alloc] init];
@@ -267,11 +267,11 @@ static void measure_scrubbing(UIView *stage)
         measure_scrubbing_curve(_window.rootViewController.view);
         measure_scrubbing(_window.rootViewController.view);
     } @catch (NSException *exception) {
-        charon_check(NO, "the checks raise no exception",
+        revenant_check(NO, "the checks raise no exception",
                      [NSString stringWithFormat:@"%@: %@", exception.name, exception.reason]);
     }
     NSString *summary = [NSString stringWithFormat:@"%@ checks=%d failures=%d\n",
-                                                   charon_failures ? @"FAIL" : @"ok", charon_checks, charon_failures];
+                                                   revenant_failures ? @"FAIL" : @"ok", revenant_checks, revenant_failures];
     [summary writeToFile:[results_folder stringByAppendingPathComponent:@"animator.done"]
               atomically:YES encoding:NSUTF8StringEncoding error:NULL];
     return YES;
@@ -284,6 +284,6 @@ int main(int argc, char *argv[])
     @autoreleasepool {
         [[NSFileManager defaultManager] createDirectoryAtPath:results_folder
                                   withIntermediateDirectories:YES attributes:nil error:NULL];
-        return UIApplicationMain(argc, argv, nil, @"CharonAnimatorDelegate");
+        return UIApplicationMain(argc, argv, nil, @"RevenantAnimatorDelegate");
     }
 }

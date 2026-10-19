@@ -1,7 +1,7 @@
 #import <UIKit/UIKit.h>
 
-static Protocol *charon_toolTipDelegateProtocol(void) __attribute__((used));
-static Protocol *charon_toolTipDelegateProtocol(void)
+static Protocol *revenant_toolTipDelegateProtocol(void) __attribute__((used));
+static Protocol *revenant_toolTipDelegateProtocol(void)
 {
     return @protocol(UIToolTipInteractionDelegate);
 }

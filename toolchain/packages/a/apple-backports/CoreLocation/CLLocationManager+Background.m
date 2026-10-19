@@ -1,14 +1,14 @@
 #import <CoreLocation/CoreLocation.h>
 #import <objc/runtime.h>
 
-static const char charon_background_updates_key;
-static const char charon_background_indicator_key;
+static const char revenant_background_updates_key;
+static const char revenant_background_indicator_key;
 
-@implementation CLLocationManager (CharonBackground)
+@implementation CLLocationManager (RevenantBackground)
 
 - (BOOL)allowsBackgroundLocationUpdates
 {
-    return [objc_getAssociatedObject(self, &charon_background_updates_key) boolValue];
+    return [objc_getAssociatedObject(self, &revenant_background_updates_key) boolValue];
 }
 
 - (void)setAllowsBackgroundLocationUpdates:(BOOL)allowsBackgroundLocationUpdates
@@ -19,12 +19,12 @@ static const char charon_background_indicator_key;
             NSLog(@"CLLocationManager.allowsBackgroundLocationUpdates is kept and not applied on iOS 6: location in the background follows the location entry of UIBackgroundModes in the application's property list");
         });
     }
-    objc_setAssociatedObject(self, &charon_background_updates_key, @(allowsBackgroundLocationUpdates), OBJC_ASSOCIATION_RETAIN);
+    objc_setAssociatedObject(self, &revenant_background_updates_key, @(allowsBackgroundLocationUpdates), OBJC_ASSOCIATION_RETAIN);
 }
 
 - (BOOL)showsBackgroundLocationIndicator
 {
-    return [objc_getAssociatedObject(self, &charon_background_indicator_key) boolValue];
+    return [objc_getAssociatedObject(self, &revenant_background_indicator_key) boolValue];
 }
 
 - (void)setShowsBackgroundLocationIndicator:(BOOL)showsBackgroundLocationIndicator
@@ -35,7 +35,7 @@ static const char charon_background_indicator_key;
             NSLog(@"CLLocationManager.showsBackgroundLocationIndicator is kept and not applied on iOS 6: the status bar shows the location arrow whenever location is in use, and has no bar of its own for the background");
         });
     }
-    objc_setAssociatedObject(self, &charon_background_indicator_key, @(showsBackgroundLocationIndicator), OBJC_ASSOCIATION_RETAIN);
+    objc_setAssociatedObject(self, &revenant_background_indicator_key, @(showsBackgroundLocationIndicator), OBJC_ASSOCIATION_RETAIN);
 }
 
 @end

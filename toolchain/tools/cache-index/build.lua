@@ -5,12 +5,12 @@ local NAMES_SCRIPT = path.join(os.scriptdir(), "names.lua")
 
 local BLOCK = 65536
 
-local HEADER = "# charon-cache-index 2 format=2 order=byte release=%s arch=%s source=%s mtime=%d size=%d names=%d\n"
+local HEADER = "# revenant-cache-index 2 format=2 order=byte release=%s arch=%s source=%s mtime=%d size=%d names=%d\n"
 
 local USAGE = "usage: xmake l tools/cache-index/build.lua [--only RELEASE]... [--force] [--no-merge]"
 
 local function index_dir()
-    return path.join(os.getenv("CHARON_HOME") or path.join(os.getenv("HOME"), ".charon"), "cache-index")
+    return path.join(os.getenv("REVENANT_HOME") or path.join(os.getenv("HOME"), ".revenant"), "cache-index")
 end
 
 local function index_file(release)

@@ -39,7 +39,7 @@ static BOOL close_enough(NSString *expected, NSString *actual, double tolerance)
 {
     [[NSFileManager defaultManager] createDirectoryAtPath:results_folder withIntermediateDirectories:YES attributes:nil error:NULL];
     [[NSFileManager defaultManager] removeItemAtPath:[results_folder stringByAppendingPathComponent:@"uikit12.done"] error:NULL];
-    charon_log_to([results_folder stringByAppendingPathComponent:@"uikit12.log"]);
+    revenant_log_to([results_folder stringByAppendingPathComponent:@"uikit12.log"]);
     self.window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
     self.window.rootViewController = [[UIViewController alloc] init];
     [self.window makeKeyAndVisible];
@@ -55,9 +55,9 @@ static BOOL close_enough(NSString *expected, NSString *actual, double tolerance)
                 }
                 NSString *check = [NSString stringWithFormat:@"%@ %@", label, name];
                 if (tolerance > 0 ? close_enough(expected[name], records[name], tolerance) : [expected[name] isEqualToString:records[name]])
-                    charon_check(YES, check.UTF8String, nil);
+                    revenant_check(YES, check.UTF8String, nil);
                 else
-                    charon_check(NO, check.UTF8String, [NSString stringWithFormat:@"\n    device %@\n    host   %@", records[name], expected[name]]);
+                    revenant_check(NO, check.UTF8String, [NSString stringWithFormat:@"\n    device %@\n    host   %@", records[name], expected[name]]);
             }
             CHECK(records.count == expected.count, [[label stringByAppendingString:@": the device answers every record the host did and no other"] UTF8String]);
         };
@@ -100,8 +100,8 @@ static BOOL close_enough(NSString *expected, NSString *actual, double tolerance)
         tabs.viewControllers = @[root, top];
         tabs.selectedIndex = 1;
         CHECK(tabs.childViewControllerForScreenEdgesDeferringSystemGestures == top, "and a tab bar controller to the selected one");
-        printf("checks=%d failures=%d\n", charon_checks, charon_failures);
-        NSString *summary = [NSString stringWithFormat:@"%@ checks=%d failures=%d\n", charon_failures ? @"FAIL" : @"ok", charon_checks, charon_failures];
+        printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
+        NSString *summary = [NSString stringWithFormat:@"%@ checks=%d failures=%d\n", revenant_failures ? @"FAIL" : @"ok", revenant_checks, revenant_failures];
         [summary writeToFile:[results_folder stringByAppendingPathComponent:@"uikit12.done"] atomically:YES encoding:NSUTF8StringEncoding error:NULL];
     });
     return YES;

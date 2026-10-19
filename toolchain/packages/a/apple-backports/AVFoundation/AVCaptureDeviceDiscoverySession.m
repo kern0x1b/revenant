@@ -1,4 +1,4 @@
-#import "CharonAVCapture.h"
+#import "RevenantAVCapture.h"
 
 @implementation AVCaptureDeviceDiscoverySession {
 @private
@@ -10,20 +10,20 @@
 
 @dynamic supportedMultiCamDeviceSets;
 
-CHARON_AVFOUNDATION_UNAVAILABLE_INIT
+REVENANT_AVFOUNDATION_UNAVAILABLE_INIT
 
 + (instancetype)discoverySessionWithDeviceTypes:(NSArray *)deviceTypes mediaType:(NSString *)mediaType position:(AVCaptureDevicePosition)position
 {
-    return [[self alloc] initCharonWithDeviceTypes:deviceTypes mediaType:mediaType position:position];
+    return [[self alloc] initRevenantWithDeviceTypes:deviceTypes mediaType:mediaType position:position];
 }
 
-- (instancetype)initCharonWithDeviceTypes:(NSArray *)deviceTypes mediaType:(NSString *)mediaType position:(AVCaptureDevicePosition)position
+- (instancetype)initRevenantWithDeviceTypes:(NSArray *)deviceTypes mediaType:(NSString *)mediaType position:(AVCaptureDevicePosition)position
 {
     if ((self = [super init])) {
         _deviceTypes = [deviceTypes copy];
         _mediaType = mediaType;
         _position = position;
-        _devices = charon_capture_devices(deviceTypes, mediaType, position);
+        _devices = revenant_capture_devices(deviceTypes, mediaType, position);
     }
     return self;
 }
@@ -39,7 +39,7 @@ CHARON_AVFOUNDATION_UNAVAILABLE_INIT
     for (NSString *type in _deviceTypes) {
         NSString *name = [type isEqualToString:AVCaptureDeviceTypeBuiltInWideAngleCamera] ? @"WideAngleCamera"
                        : [type isEqualToString:AVCaptureDeviceTypeBuiltInTelephotoCamera] ? @"TelephotoCamera"
-                       : [type isEqualToString:CHARON_DUAL_CAMERA_TYPE] ? @"DualCamera"
+                       : [type isEqualToString:REVENANT_DUAL_CAMERA_TYPE] ? @"DualCamera"
                        : [type isEqualToString:AVCaptureDeviceTypeBuiltInMicrophone] ? @"Microphone" : type;
         if (types.length)
             [types appendString:@", "];

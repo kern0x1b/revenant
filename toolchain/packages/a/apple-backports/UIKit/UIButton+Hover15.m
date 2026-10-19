@@ -1,6 +1,6 @@
 #import <UIKit/UIKit.h>
 
-@implementation UIButton (CharonHover15)
+@implementation UIButton (RevenantHover15)
 
 - (BOOL)isHovered
 {

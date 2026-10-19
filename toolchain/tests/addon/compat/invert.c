@@ -3,12 +3,12 @@
 #include <stdint.h>
 #include <stdio.h>
 
-simd_float2x2 charon_invert_f2(simd_float2x2);
-simd_float3x3 charon_invert_f3(simd_float3x3);
-simd_float4x4 charon_invert_f4(simd_float4x4);
-simd_double2x2 charon_invert_d2(simd_double2x2);
-simd_double3x3 charon_invert_d3(simd_double3x3);
-simd_double4x4 charon_invert_d4(simd_double4x4);
+simd_float2x2 revenant_invert_f2(simd_float2x2);
+simd_float3x3 revenant_invert_f3(simd_float3x3);
+simd_float4x4 revenant_invert_f4(simd_float4x4);
+simd_double2x2 revenant_invert_d2(simd_double2x2);
+simd_double3x3 revenant_invert_d3(simd_double3x3);
+simd_double4x4 revenant_invert_d4(simd_double4x4);
 
 static int fails;
 static uint64_t seed = 12345;
@@ -36,7 +36,7 @@ static void check_##TAG(void)                                                   
     for (int trial = 0; trial < 2000; trial++) {                                                                     \
         MATRIX x;                                                                                                    \
         for (int c = 0; c < N; c++) for (int r = 0; r < N; r++) x.columns[c][r] = (T)(next() + (c == r ? 5 * N : 0));\
-        MATRIX system = __invert_##TAG(x), ours = charon_invert_##TAG(x);                                            \
+        MATRIX system = __invert_##TAG(x), ours = revenant_invert_##TAG(x);                                            \
         double scale = 0;                                                                                            \
         for (int c = 0; c < N; c++) for (int r = 0; r < N; r++) scale = fmax(scale, fabs((double)system.columns[c][r]));\
         for (int c = 0; c < N; c++) for (int r = 0; r < N; r++) {                                                    \
@@ -56,7 +56,7 @@ static void check_##TAG(void)                                                   
     }                                                                                                                \
     MATRIX one[2] = {singular, none};                                                                                \
     for (int which = 0; which < 2; which++) {                                                                        \
-        MATRIX system = __invert_##TAG(one[which]), ours = charon_invert_##TAG(one[which]);                          \
+        MATRIX system = __invert_##TAG(one[which]), ours = revenant_invert_##TAG(one[which]);                          \
         for (int c = 0; c < N; c++) for (int r = 0; r < N; r++) {                                                    \
             if (!same(ours.columns[c][r], system.columns[c][r], 1, TOLERANCE)) {                                     \
                 printf("FAIL  __invert_" #TAG " answers %g where the system's answers %g at column %d row %d of "    \

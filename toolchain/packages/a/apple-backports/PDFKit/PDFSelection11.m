@@ -1,14 +1,14 @@
-#import "CharonPDFKit.h"
+#import "RevenantPDFKit.h"
 #import "PDFPageText11.h"
 #include <ctype.h>
 
-@interface CharonPDFSelectionSpan : NSObject
+@interface RevenantPDFSelectionSpan : NSObject
 @property (nonatomic, strong) PDFPage *page;
 @property (nonatomic) NSRange range;
 @property (nonatomic) NSRange textRange;
 @end
 
-@implementation CharonPDFSelectionSpan
+@implementation RevenantPDFSelectionSpan
 @synthesize page = _page;
 @synthesize range = _range;
 @synthesize textRange = _textRange;
@@ -16,21 +16,21 @@
 
 #if __has_include(<UIKit/UIKit.h>)
 #import <UIKit/UIKit.h>
-#define CHARON_SELECTION_HAS_UIFONT 1
+#define REVENANT_SELECTION_HAS_UIFONT 1
 #endif
 
 @interface PDFSelection ()
-- (void)charon_setUpWithSpans:(nullable NSArray<CharonPDFSelectionSpan *> *)spans
+- (void)revenant_setUpWithSpans:(nullable NSArray<RevenantPDFSelectionSpan *> *)spans
                       document:(nullable PDFDocument *)document;
 @end
 
 @implementation PDFSelection {
-    NSMutableArray<CharonPDFSelectionSpan *> *_spans;
+    NSMutableArray<RevenantPDFSelectionSpan *> *_spans;
     __weak PDFDocument *_document;
     UIColor *_color;
 }
 
-- (void)charon_setUpWithSpans:(NSArray<CharonPDFSelectionSpan *> *)spans
+- (void)revenant_setUpWithSpans:(NSArray<RevenantPDFSelectionSpan *> *)spans
                       document:(PDFDocument *)document
 {
     _spans = spans != nil ? [spans mutableCopy] : [NSMutableArray array];
@@ -42,7 +42,7 @@
     self = [super init];
     if (self == nil)
         return nil;
-    [self charon_setUpWithSpans:nil document:document];
+    [self revenant_setUpWithSpans:nil document:document];
     return self;
 }
 
@@ -51,42 +51,42 @@
     return [self initWithDocument:nil];
 }
 
-- (void)charon_addSpanOnPage:(PDFPage *)page range:(NSRange)range
+- (void)revenant_addSpanOnPage:(PDFPage *)page range:(NSRange)range
 {
     if (page == nil || range.location == NSNotFound || range.length == 0)
         return;
-    CharonPDFSelectionSpan *span = [[CharonPDFSelectionSpan alloc] init];
+    RevenantPDFSelectionSpan *span = [[RevenantPDFSelectionSpan alloc] init];
     span.page = page;
     span.range = range;
-    span.textRange = charonTextRangeForRange(page, range);
+    span.textRange = revenantTextRangeForRange(page, range);
     [_spans addObject:span];
 }
 
-- (NSArray<CharonPDFSelectionSpan *> *)charon_spansOnPage:(PDFPage *)page
+- (NSArray<RevenantPDFSelectionSpan *> *)revenant_spansOnPage:(PDFPage *)page
 {
-    NSMutableArray<CharonPDFSelectionSpan *> *answer = [NSMutableArray array];
+    NSMutableArray<RevenantPDFSelectionSpan *> *answer = [NSMutableArray array];
     if (page == nil)
         return answer;
-    for (CharonPDFSelectionSpan *span in _spans) {
+    for (RevenantPDFSelectionSpan *span in _spans) {
         if (span.page == page)
             [answer addObject:span];
     }
     return answer;
 }
 
-static NSRange charonTextRangeForRange(PDFPage *page, NSRange range)
+static NSRange revenantTextRangeForRange(PDFPage *page, NSRange range)
 {
     NSRange textRange = range;
     if (page == nil || textRange.length == 0)
         return textRange;
-    NSString *text = [page charon_textLayout].string;
+    NSString *text = [page revenant_textLayout].string;
     NSUInteger last = NSMaxRange(textRange);
     if (text != nil && last <= text.length && [text characterAtIndex:last - 1] == '\n')
         textRange.length -= 1;
     return textRange;
 }
 
-- (NSUInteger)charon_pageIndexOf:(PDFPage *)page
+- (NSUInteger)revenant_pageIndexOf:(PDFPage *)page
 {
     return page.pageIndex;
 }
@@ -95,7 +95,7 @@ static NSRange charonTextRangeForRange(PDFPage *page, NSRange range)
 {
     NSMutableArray<PDFPage *> *answer = [NSMutableArray array];
     PDFPage *last = nil;
-    for (CharonPDFSelectionSpan *span in _spans) {
+    for (RevenantPDFSelectionSpan *span in _spans) {
         if (span.page != last) {
             [answer addObject:span.page];
             last = span.page;
@@ -110,8 +110,8 @@ static NSRange charonTextRangeForRange(PDFPage *page, NSRange range)
         return nil;
     NSMutableString *answer = [NSMutableString string];
     PDFPage *page = nil;
-    for (CharonPDFSelectionSpan *span in _spans) {
-        CharonPDFPageText *layout = [span.page charon_textLayout];
+    for (RevenantPDFSelectionSpan *span in _spans) {
+        RevenantPDFPageText *layout = [span.page revenant_textLayout];
         if (span.page != page) {
             if (page != nil)
                 [answer appendString:@"\n"];
@@ -130,11 +130,11 @@ static NSRange charonTextRangeForRange(PDFPage *page, NSRange range)
     if (text == nil)
         return nil;
     NSMutableAttributedString *answer = [[NSMutableAttributedString alloc] initWithString:text];
-#ifdef CHARON_SELECTION_HAS_UIFONT
+#ifdef REVENANT_SELECTION_HAS_UIFONT
     NSUInteger at = 0;
-    for (CharonPDFSelectionSpan *span in _spans) {
-        CharonPDFPageText *layout = [span.page charon_textLayout];
-        CharonPDFTextRun *run = [layout runForOffset:span.textRange.location];
+    for (RevenantPDFSelectionSpan *span in _spans) {
+        RevenantPDFPageText *layout = [span.page revenant_textLayout];
+        RevenantPDFTextRun *run = [layout runForOffset:span.textRange.location];
         NSUInteger length = span.textRange.length;
         if (run == nil || length == 0)
             continue;
@@ -152,12 +152,12 @@ static NSRange charonTextRangeForRange(PDFPage *page, NSRange range)
 
 - (NSUInteger)numberOfTextRangesOnPage:(PDFPage *)page
 {
-    return [self charon_spansOnPage:page].count;
+    return [self revenant_spansOnPage:page].count;
 }
 
 - (NSRange)rangeAtIndex:(NSUInteger)index onPage:(PDFPage *)page
 {
-    NSArray<CharonPDFSelectionSpan *> *spans = [self charon_spansOnPage:page];
+    NSArray<RevenantPDFSelectionSpan *> *spans = [self revenant_spansOnPage:page];
     if (index >= spans.count)
         return NSMakeRange(NSNotFound, 0);
     return spans[index].range;
@@ -165,12 +165,12 @@ static NSRange charonTextRangeForRange(PDFPage *page, NSRange range)
 
 - (CGRect)boundsForPage:(PDFPage *)page
 {
-    NSArray<CharonPDFSelectionSpan *> *spans = [self charon_spansOnPage:page];
+    NSArray<RevenantPDFSelectionSpan *> *spans = [self revenant_spansOnPage:page];
     if (spans.count == 0)
         return CGRectNull;
     CGRect answer = CGRectNull;
-    for (CharonPDFSelectionSpan *span in spans) {
-        CGRect rect = [[span.page charon_textLayout] boundsForRange:span.range];
+    for (RevenantPDFSelectionSpan *span in spans) {
+        CGRect rect = [[span.page revenant_textLayout] boundsForRange:span.range];
         if (CGRectIsNull(rect))
             continue;
         answer = CGRectIsNull(answer) ? rect : CGRectUnion(answer, rect);
@@ -181,17 +181,17 @@ static NSRange charonTextRangeForRange(PDFPage *page, NSRange range)
 - (NSArray<PDFSelection *> *)selectionsByLine
 {
     NSMutableArray<PDFSelection *> *answer = [NSMutableArray array];
-    for (CharonPDFSelectionSpan *span in _spans) {
-        CharonPDFPageText *layout = [span.page charon_textLayout];
+    for (RevenantPDFSelectionSpan *span in _spans) {
+        RevenantPDFPageText *layout = [span.page revenant_textLayout];
         NSArray<NSValue *> *lines = [layout lineRangesForRange:span.range];
         for (NSValue *boxed in lines) {
             NSRange hit = [boxed rangeValue];
-            CharonPDFSelectionSpan *line = [[CharonPDFSelectionSpan alloc] init];
+            RevenantPDFSelectionSpan *line = [[RevenantPDFSelectionSpan alloc] init];
             line.page = span.page;
             line.range = hit;
-            line.textRange = charonTextRangeForRange(span.page, hit);
+            line.textRange = revenantTextRangeForRange(span.page, hit);
             PDFSelection *selection = [[PDFSelection alloc] initWithDocument:_document];
-            [selection charon_setUpWithSpans:@[ line ] document:_document];
+            [selection revenant_setUpWithSpans:@[ line ] document:_document];
             [answer addObject:selection];
         }
     }
@@ -210,15 +210,15 @@ static NSRange charonTextRangeForRange(PDFPage *page, NSRange range)
 
 #pragma mark - the mutators
 
-- (void)charon_unionWith:(NSArray<CharonPDFSelectionSpan *> *)other
+- (void)revenant_unionWith:(NSArray<RevenantPDFSelectionSpan *> *)other
 {
     if (other.count == 0)
         return;
-    NSMutableArray<CharonPDFSelectionSpan *> *merged = [NSMutableArray arrayWithArray:_spans];
+    NSMutableArray<RevenantPDFSelectionSpan *> *merged = [NSMutableArray arrayWithArray:_spans];
     [merged addObjectsFromArray:other];
-    [merged sortUsingComparator:^NSComparisonResult(CharonPDFSelectionSpan *a, CharonPDFSelectionSpan *b) {
-        NSUInteger left = [self charon_pageIndexOf:a.page];
-        NSUInteger right = [self charon_pageIndexOf:b.page];
+    [merged sortUsingComparator:^NSComparisonResult(RevenantPDFSelectionSpan *a, RevenantPDFSelectionSpan *b) {
+        NSUInteger left = [self revenant_pageIndexOf:a.page];
+        NSUInteger right = [self revenant_pageIndexOf:b.page];
         if (left != right)
             return left < right ? NSOrderedAscending : NSOrderedDescending;
         if (a.range.location < b.range.location)
@@ -227,9 +227,9 @@ static NSRange charonTextRangeForRange(PDFPage *page, NSRange range)
             return NSOrderedDescending;
         return NSOrderedSame;
     }];
-    NSMutableArray<CharonPDFSelectionSpan *> *answer = [NSMutableArray array];
-    for (CharonPDFSelectionSpan *span in merged) {
-        CharonPDFSelectionSpan *last = answer.lastObject;
+    NSMutableArray<RevenantPDFSelectionSpan *> *answer = [NSMutableArray array];
+    for (RevenantPDFSelectionSpan *span in merged) {
+        RevenantPDFSelectionSpan *last = answer.lastObject;
         if (last != nil && last.page == span.page && NSMaxRange(last.range) >= span.range.location &&
             span.range.location <= NSMaxRange(last.range)) {
             NSUInteger start = MIN(last.range.location, span.range.location);
@@ -250,12 +250,12 @@ static NSRange charonTextRangeForRange(PDFPage *page, NSRange range)
     if (selection->_document != nil && _document != nil && selection->_document != _document)
         [NSException raise:NSGenericException
                     format:@"addSelection: selection document mismatch"];
-    [self charon_unionWith:selection->_spans];
+    [self revenant_unionWith:selection->_spans];
 }
 
 - (void)addSelections:(NSArray<PDFSelection *> *)selections
 {
-    NSMutableArray<CharonPDFSelectionSpan *> *spans = [NSMutableArray array];
+    NSMutableArray<RevenantPDFSelectionSpan *> *spans = [NSMutableArray array];
     for (PDFSelection *selection in selections) {
         if (selection == nil)
             continue;
@@ -264,45 +264,45 @@ static NSRange charonTextRangeForRange(PDFPage *page, NSRange range)
                         format:@"addSelection: selection document mismatch"];
         [spans addObjectsFromArray:selection->_spans];
     }
-    [self charon_unionWith:spans];
+    [self revenant_unionWith:spans];
 }
 
-- (PDFPage *)charon_pageAfter:(PDFPage *)page
+- (PDFPage *)revenant_pageAfter:(PDFPage *)page
 {
     PDFDocument *document = page.document;
     if (document == nil)
         return nil;
-    NSUInteger at = [self charon_pageIndexOf:page];
+    NSUInteger at = [self revenant_pageIndexOf:page];
     if (at + 1 >= document.pageCount)
         return nil;
     return [document pageAtIndex:at + 1];
 }
 
-- (PDFPage *)charon_pageBefore:(PDFPage *)page
+- (PDFPage *)revenant_pageBefore:(PDFPage *)page
 {
     PDFDocument *document = page.document;
     if (document == nil)
         return nil;
-    NSUInteger at = [self charon_pageIndexOf:page];
+    NSUInteger at = [self revenant_pageIndexOf:page];
     if (at == 0)
         return nil;
     return [document pageAtIndex:at - 1];
 }
 
-- (CharonPDFSelectionSpan *)charon_lastSpan
+- (RevenantPDFSelectionSpan *)revenant_lastSpan
 {
     return _spans.lastObject;
 }
 
-- (void)charon_extendEndBy:(NSInteger)count
+- (void)revenant_extendEndBy:(NSInteger)count
 {
     if (_spans.count == 0 || count == 0)
         return;
     while (count != 0) {
-        CharonPDFSelectionSpan *last = [self charon_lastSpan];
+        RevenantPDFSelectionSpan *last = [self revenant_lastSpan];
         if (last == nil)
             return;
-        CharonPDFPageText *layout = [last.page charon_textLayout];
+        RevenantPDFPageText *layout = [last.page revenant_textLayout];
         NSUInteger length = layout.string.length;
         NSInteger room = (NSInteger)(length - NSMaxRange(last.range));
         if (count > 0) {
@@ -312,10 +312,10 @@ static NSRange charonTextRangeForRange(PDFPage *page, NSRange range)
             count -= take;
             if (count == 0)
                 return;
-            PDFPage *next = [self charon_pageAfter:last.page];
+            PDFPage *next = [self revenant_pageAfter:last.page];
             if (next == nil)
                 return;
-            CharonPDFSelectionSpan *span = [[CharonPDFSelectionSpan alloc] init];
+            RevenantPDFSelectionSpan *span = [[RevenantPDFSelectionSpan alloc] init];
             span.page = next;
             span.range = NSMakeRange(0, 0);
             span.textRange = NSMakeRange(0, 0);
@@ -336,12 +336,12 @@ static NSRange charonTextRangeForRange(PDFPage *page, NSRange range)
     }
 }
 
-- (void)charon_extendStartBy:(NSInteger)count
+- (void)revenant_extendStartBy:(NSInteger)count
 {
     if (_spans.count == 0 || count == 0)
         return;
     while (count != 0) {
-        CharonPDFSelectionSpan *first = _spans.firstObject;
+        RevenantPDFSelectionSpan *first = _spans.firstObject;
         if (first == nil)
             return;
         if (count > 0) {
@@ -352,11 +352,11 @@ static NSRange charonTextRangeForRange(PDFPage *page, NSRange range)
             count -= take;
             if (count == 0)
                 return;
-            PDFPage *previous = [self charon_pageBefore:first.page];
+            PDFPage *previous = [self revenant_pageBefore:first.page];
             if (previous == nil)
                 return;
-            CharonPDFPageText *layout = [previous charon_textLayout];
-            CharonPDFSelectionSpan *span = [[CharonPDFSelectionSpan alloc] init];
+            RevenantPDFPageText *layout = [previous revenant_textLayout];
+            RevenantPDFSelectionSpan *span = [[RevenantPDFSelectionSpan alloc] init];
             span.page = previous;
             NSUInteger end = layout.string.length;
             span.range = NSMakeRange(end, 0);
@@ -380,30 +380,30 @@ static NSRange charonTextRangeForRange(PDFPage *page, NSRange range)
 
 - (void)extendSelectionAtEnd:(NSInteger)succeed
 {
-    [self charon_extendEndBy:succeed];
+    [self revenant_extendEndBy:succeed];
 }
 
 - (void)extendSelectionAtStart:(NSInteger)precede
 {
-    [self charon_extendStartBy:precede];
+    [self revenant_extendStartBy:precede];
 }
 
 - (void)extendSelectionForLineBoundaries
 {
     if (_spans.count == 0)
         return;
-    CharonPDFSelectionSpan *first = _spans.firstObject;
-    CharonPDFPageText *firstLayout = [first.page charon_textLayout];
+    RevenantPDFSelectionSpan *first = _spans.firstObject;
+    RevenantPDFPageText *firstLayout = [first.page revenant_textLayout];
     NSArray<NSValue *> *firstLines = [firstLayout lineRangesForRange:first.range];
     if (firstLines.count > 0)
         first.range = [[firstLines firstObject] rangeValue];
-    CharonPDFSelectionSpan *last = [self charon_lastSpan];
-    CharonPDFPageText *lastLayout = [last.page charon_textLayout];
+    RevenantPDFSelectionSpan *last = [self revenant_lastSpan];
+    RevenantPDFPageText *lastLayout = [last.page revenant_textLayout];
     NSArray<NSValue *> *lastLines = [lastLayout lineRangesForRange:last.range];
     if (lastLines.count > 0)
         last.range = [[lastLines lastObject] rangeValue];
-    for (CharonPDFSelectionSpan *span in _spans) {
-        CharonPDFPageText *layout = [span.page charon_textLayout];
+    for (RevenantPDFSelectionSpan *span in _spans) {
+        RevenantPDFPageText *layout = [span.page revenant_textLayout];
         NSRange textRange = span.range;
         NSUInteger last2 = NSMaxRange(textRange);
         if (last2 > textRange.location && last2 <= layout.string.length &&
@@ -417,16 +417,16 @@ static NSRange charonTextRangeForRange(PDFPage *page, NSRange range)
 
 - (id)copyWithZone:(NSZone *)zone
 {
-    NSMutableArray<CharonPDFSelectionSpan *> *spans = [NSMutableArray arrayWithCapacity:_spans.count];
-    for (CharonPDFSelectionSpan *span in _spans) {
-        CharonPDFSelectionSpan *copy = [[CharonPDFSelectionSpan alloc] init];
+    NSMutableArray<RevenantPDFSelectionSpan *> *spans = [NSMutableArray arrayWithCapacity:_spans.count];
+    for (RevenantPDFSelectionSpan *span in _spans) {
+        RevenantPDFSelectionSpan *copy = [[RevenantPDFSelectionSpan alloc] init];
         copy.page = span.page;
         copy.range = span.range;
         copy.textRange = span.textRange;
         [spans addObject:copy];
     }
     PDFSelection *copy = [[PDFSelection alloc] initWithDocument:_document];
-    [copy charon_setUpWithSpans:spans document:_document];
+    [copy revenant_setUpWithSpans:spans document:_document];
     copy->_color = _color;
     return copy;
 }

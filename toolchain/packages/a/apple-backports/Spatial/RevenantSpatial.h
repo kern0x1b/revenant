@@ -1,5 +1,5 @@
-#ifndef CharonSpatial_h
-#define CharonSpatial_h
+#ifndef RevenantSpatial_h
+#define RevenantSpatial_h
 
 #include <stdbool.h>
 

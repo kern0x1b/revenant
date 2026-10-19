@@ -1,4 +1,4 @@
-Package: org.charon.ciqrdetector
+Package: org.revenant.ciqrdetector
 Name: CIDetector answers probe
 Architecture: iphoneos-arm
 Description: A program that asks the release's CIDetector for a detector of each type the CIFeatureType constants name,

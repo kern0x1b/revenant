@@ -9,7 +9,7 @@
       "status": "implemented",
       "reason": "the error domain -[SCNScene sceneWithURL:options:error:] uses when the archive names an unknown class or its top-level object is not a SCNScene; sdk-introduced.json has no ios() version for it (header silent, same as the rest of SceneKit's original surface), so the version here is not read from that index at all -- it is measured directly against the release cache ladder, which the port's own build gate (band()'s release-export split) caught: the symbol is absent from both the 8.0 and 8.4.1 armv7 dyld_shared_cache and present in the 9.0 one",
       "effect": "carries the literal domain string; the NSError this port raises always uses it",
-      "source": "release cache measurement: _SCNErrorDomain absent from the armv7 dyld_shared_cache of 8.0 and 8.4.1, present in the armv7 dyld_shared_cache of 9.0; found because charon's own band() split check refused to link SCNScene.o's real 8.0-era symbols (SCNScene, SCNSceneStartTimeAttributeKey and its three siblings) together with SCNErrorDomain in one object once it saw SCNErrorDomain missing from the release the band was checked against",
+      "source": "release cache measurement: _SCNErrorDomain absent from the armv7 dyld_shared_cache of 8.0 and 8.4.1, present in the armv7 dyld_shared_cache of 9.0; found because the toolchain's own band() split check refused to link SCNScene.o's real 8.0-era symbols (SCNScene, SCNSceneStartTimeAttributeKey and its three siblings) together with SCNErrorDomain in one object once it saw SCNErrorDomain missing from the release the band was checked against",
       "facts": "facts/SceneKit/SceneKit.md"
     },
     {

@@ -1,6 +1,6 @@
-#import "CharonSCN.h"
+#import "RevenantSCN.h"
 
-static NSArray<SCNGeometrySourceSemantic> *CharonSCNKnownSemantics(void)
+static NSArray<SCNGeometrySourceSemantic> *RevenantSCNKnownSemantics(void)
 {
     static NSArray<SCNGeometrySourceSemantic> *semantics;
     static dispatch_once_t once;
@@ -69,7 +69,7 @@ static NSArray<SCNGeometrySourceSemantic> *CharonSCNKnownSemantics(void)
 - (NSArray<SCNGeometrySource *> *)geometrySources
 {
     NSMutableArray<SCNGeometrySource *> *all = [NSMutableArray array];
-    for (SCNGeometrySourceSemantic semantic in CharonSCNKnownSemantics()) {
+    for (SCNGeometrySourceSemantic semantic in RevenantSCNKnownSemantics()) {
         [all addObjectsFromArray:_sourcesBySemantic[semantic]];
     }
     return all;
@@ -136,14 +136,14 @@ static NSArray<SCNGeometrySourceSemantic> *CharonSCNKnownSemantics(void)
 {
     if ((self = [self init])) {
         _name = [coder decodeObjectOfClass:[NSString class] forKey:@"name"];
-        _materials = [CharonSCNCoding decodeArrayOfClass:[SCNMaterial class] coder:coder forKey:@"materials"];
-        for (SCNGeometrySourceSemantic semantic in CharonSCNKnownSemantics()) {
-            NSArray<SCNGeometrySource *> *sources = [CharonSCNCoding decodeArrayOfClass:[SCNGeometrySource class] coder:coder forKey:semantic];
+        _materials = [RevenantSCNCoding decodeArrayOfClass:[SCNMaterial class] coder:coder forKey:@"materials"];
+        for (SCNGeometrySourceSemantic semantic in RevenantSCNKnownSemantics()) {
+            NSArray<SCNGeometrySource *> *sources = [RevenantSCNCoding decodeArrayOfClass:[SCNGeometrySource class] coder:coder forKey:semantic];
             if (sources.count) {
                 _sourcesBySemantic[semantic] = sources;
             }
         }
-        _elements = [CharonSCNCoding decodeArrayOfClass:[SCNGeometryElement class] coder:coder forKey:@"elements"];
+        _elements = [RevenantSCNCoding decodeArrayOfClass:[SCNGeometryElement class] coder:coder forKey:@"elements"];
         _subdivisionLevel = (NSUInteger)[coder decodeIntegerForKey:@"subdivisionLevel"];
     }
     return self;
@@ -153,7 +153,7 @@ static NSArray<SCNGeometrySourceSemantic> *CharonSCNKnownSemantics(void)
 {
     [coder encodeObject:_name forKey:@"name"];
     [coder encodeObject:_materials forKey:@"materials"];
-    for (SCNGeometrySourceSemantic semantic in CharonSCNKnownSemantics()) {
+    for (SCNGeometrySourceSemantic semantic in RevenantSCNKnownSemantics()) {
         [coder encodeObject:_sourcesBySemantic[semantic] forKey:semantic];
     }
     [coder encodeObject:_elements forKey:@"elements"];
@@ -176,9 +176,9 @@ static NSArray<SCNGeometrySourceSemantic> *CharonSCNKnownSemantics(void)
 
 @end
 
-@implementation SCNGeometry (CharonReplace)
+@implementation SCNGeometry (RevenantReplace)
 
-- (void)charon_replaceSources:(NSArray<SCNGeometrySource *> *)sources
+- (void)revenant_replaceSources:(NSArray<SCNGeometrySource *> *)sources
                      elements:(NSArray<SCNGeometryElement *> *)elements
 {
     NSMutableDictionary<SCNGeometrySourceSemantic, NSArray<SCNGeometrySource *> *> *bySemantic =

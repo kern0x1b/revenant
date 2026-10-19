@@ -23,7 +23,7 @@ func close(_ a: SIMD4<Float>, _ b: SIMD4<Float>, _ tolerance: Float = 1e-6) -> B
     [0, 1, 2, 3].allSatisfy { abs(a[$0] - b[$0]) <= tolerance }
 }
 
-var charonFailuresForMissingBundle = 0
+var revenantFailuresForMissingBundle = 0
 
 @MainActor
 func checkAll() -> Int {
@@ -832,7 +832,7 @@ check("a cancelled subscription hears nothing more", began, raisedBefore)
         }
     } else {
         print("FAIL the temporary bundle for the environment load could not be made")
-        charonFailuresForMissingBundle += 3
+        revenantFailuresForMissingBundle += 3
     }
 
     let sceneForFamily = Scene()
@@ -1203,7 +1203,7 @@ check("a cancelled subscription hears nothing more", began, raisedBefore)
     check("taking the component away leaves an entity that is not one", given.isAccessibilityElement, false)
 
     print(failures == 0 ? "ALL CHECKS PASSED" : "\(failures) CHECKS FAILED")
-    return failures + charonFailuresForMissingBundle
+    return failures + revenantFailuresForMissingBundle
 }
 
 MainActor.assumeIsolated { exit(checkAll() == 0 ? 0 : 1) }

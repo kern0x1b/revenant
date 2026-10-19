@@ -32,7 +32,7 @@
 # THE PORT'S CLASSES ARE RENAMED, and it is not optional: the host's framework defines every class this
 # object defines, so an unrenamed build holds two of each name and a message is answered by whichever
 # loaded first. The rename is the mechanism and the `class` lines in both transcripts are the receipt - the
-# system build prints `MPSNNAdditionNode`, the port build prints `CharonMPSNNAdditionNode`.
+# system build prints `MPSNNAdditionNode`, the port build prints `RevenantMPSNNAdditionNode`.
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 root=$(cd "$here/../../../.." && pwd)
@@ -71,7 +71,7 @@ for line in open(sys.argv[1]):
         defined.add(line[len("_OBJC_CLASS_$_"):])
 with open(sys.argv[2], "w") as out:
     for name in sorted(defined):
-        out.write("#define %s Charon%s\n" % (name, name))
+        out.write("#define %s Revenant%s\n" % (name, name))
 PY
 echo "renamed: $(grep -c define "$build/rename.h") classes of $(wc -l < "$build/port-defines.txt" | tr -d ' ')"
 
@@ -89,7 +89,7 @@ done
 echo "compiled: $(echo "$objects" | wc -w | tr -d ' ') objects"
 
 rm -f "$build/port"
-xcrun clang -fobjc-arc $target $quiet -DCHARON_PORT_BUILD=1 -include "$build/rename.h" \
+xcrun clang -fobjc-arc $target $quiet -DREVENANT_PORT_BUILD=1 -include "$build/rename.h" \
     "$here/graph-cases.m" $objects \
     -framework Foundation -framework Metal -framework MetalPerformanceShaders -o "$build/port"
 "$build/port" > "$build/port.txt" 2> "$build/port.err"

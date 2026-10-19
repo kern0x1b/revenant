@@ -11,7 +11,7 @@
 
 #include "graphics/layerkit_compatibility.hpp"
 
-namespace shade {
+namespace emulator {
 
 struct KernelSharedState;
 class Output;

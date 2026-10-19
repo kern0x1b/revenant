@@ -2,13 +2,13 @@
 # run.sh -- what the blur's shading costs, and so how much of a UIVisualEffectView refresh has to be
 # on the main thread at all.
 #
-# Compiles the port's own CharonBlur.m against a C shim for its Objective-C header
-# (blurcost/CharonBlur.h) and times charon_blur_pixels at the three sizes
+# Compiles the port's own RevenantBlur.m against a C shim for its Objective-C header
+# (blurcost/RevenantBlur.h) and times revenant_blur_pixels at the three sizes
 # packages/a/apple-backports/facts/UIKit/UIVisualEffect.md reports a whole refresh at. That is the
 # BEFORE figure for moving the shading off the main thread: the read stays there whatever happens, and
 # this is not it.
 #
-# The shim is a copy, not a -I path: CharonBlur.m includes its header with quotes, and a quoted include
+# The shim is a copy, not a -I path: RevenantBlur.m includes its header with quotes, and a quoted include
 # looks in the including file's own directory before any -I, so the package's Objective-C header wins
 # from wherever the compiler is run. The source is therefore copied beside the shim -- and `cmp` says
 # the copy is the package's file, so a measurement cannot be taken against a source that has drifted
@@ -18,20 +18,20 @@ here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
 sources=${BLURCOST_SOURCES:-$root/packages/a/apple-backports/UIKit}
-build=${BLURCOST_BUILD:-$(runs_folder charon-blurcost)}
+build=${BLURCOST_BUILD:-$(runs_folder revenant-blurcost)}
 rm -rf "$build"
 mkdir -p "$build"
 
-cp "$here/CharonBlur.h" "$build/CharonBlur.h"
-cp "$sources/CharonBlur.m" "$build/CharonBlur.m"
-if ! cmp -s "$sources/CharonBlur.m" "$build/CharonBlur.m"; then
-    echo "blurcost: the copy of CharonBlur.m differs from the package's; refusing to measure" >&2
+cp "$here/RevenantBlur.h" "$build/RevenantBlur.h"
+cp "$sources/RevenantBlur.m" "$build/RevenantBlur.m"
+if ! cmp -s "$sources/RevenantBlur.m" "$build/RevenantBlur.m"; then
+    echo "blurcost: the copy of RevenantBlur.m differs from the package's; refusing to measure" >&2
     exit 2
 fi
-printf '  source: %s\n' "$sources/CharonBlur.m" >&2
+printf '  source: %s\n' "$sources/RevenantBlur.m" >&2
 
-cc -O2 -Wall -Wno-unused-parameter -I"$build" -c "$build/CharonBlur.m" -o "$build/CharonBlur.o"
-cc -O2 -Wall -Wno-unused-parameter -I"$build" -o "$build/blurcost" "$here/blurcost.c" "$build/CharonBlur.m"
+cc -O2 -Wall -Wno-unused-parameter -I"$build" -c "$build/RevenantBlur.m" -o "$build/RevenantBlur.o"
+cc -O2 -Wall -Wno-unused-parameter -I"$build" -o "$build/blurcost" "$here/blurcost.c" "$build/RevenantBlur.m"
 "$build/blurcost"
 
 # The shading is run off the main thread, and the reason it may be is that it touches no framework:
@@ -42,22 +42,22 @@ cc -O2 -Wall -Wno-unused-parameter -I"$build" -o "$build/blurcost" "$here/blurco
 # nm's own failure has to be a failure here, and an empty list has to be too: both mean the check
 # did not run, and a check that passes when it did not is worse than no check. The first version read
 # nm through `2>/dev/null` and compared whatever came back, so a missing nm made it pass.
-if ! imports=$(nm -u "$build/CharonBlur.o" | sed 's/^ *//' | sort -u | tr '\n' ' '); then
-    echo "blurcost: nm could not read $build/CharonBlur.o, so the framework-freedom check did not" >&2
+if ! imports=$(nm -u "$build/RevenantBlur.o" | sed 's/^ *//' | sort -u | tr '\n' ' '); then
+    echo "blurcost: nm could not read $build/RevenantBlur.o, so the framework-freedom check did not" >&2
     echo "  run. Refusing to pass a check that did not happen." >&2
     exit 2
 fi
 if [ -z "$imports" ]; then
-    echo "blurcost: CharonBlur.o reports no undefined symbols at all, which no build of it does." >&2
+    echo "blurcost: RevenantBlur.o reports no undefined symbols at all, which no build of it does." >&2
     echo "  The check did not run; refusing to pass it." >&2
     exit 2
 fi
-printf '  undefined symbols in CharonBlur.o: %s\n' "$imports" >&2
+printf '  undefined symbols in RevenantBlur.o: %s\n' "$imports" >&2
 for symbol in $imports; do
     case "$symbol" in
         _malloc|_free) ;;
         *)
-            echo "blurcost: charon_blur_pixels now needs $symbol, so it is no longer free of the" >&2
+            echo "blurcost: revenant_blur_pixels now needs $symbol, so it is no longer free of the" >&2
             echo "  framework and may not be shaded off the main thread. Undo that, or move the call" >&2
             echo "  back onto the thread that owns the framework and say why here." >&2
             exit 2

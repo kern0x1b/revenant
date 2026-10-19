@@ -2,8 +2,8 @@
 
 @implementation NSURLQueryItem {
 @private
-    NSString *_charonName;
-    NSString *_charonValue;
+    NSString *_revenantName;
+    NSString *_revenantValue;
 }
 
 + (instancetype)queryItemWithName:(NSString *)name value:(NSString *)value
@@ -24,8 +24,8 @@
 - (instancetype)initWithName:(NSString *)name value:(NSString *)value
 {
     if ((self = [super init])) {
-        _charonName = [name copy] ?: @"";
-        _charonValue = [value copy];
+        _revenantName = [name copy] ?: @"";
+        _revenantValue = [value copy];
     }
     return self;
 }
@@ -39,23 +39,23 @@
 
 - (void)encodeWithCoder:(NSCoder *)coder
 {
-    [coder encodeObject:_charonName forKey:@"NS.name"];
-    [coder encodeObject:_charonValue forKey:@"NS.value"];
+    [coder encodeObject:_revenantName forKey:@"NS.name"];
+    [coder encodeObject:_revenantValue forKey:@"NS.value"];
 }
 
 - (id)copyWithZone:(NSZone *)zone
 {
-    return [[[self class] alloc] initWithName:_charonName value:_charonValue];
+    return [[[self class] alloc] initWithName:_revenantName value:_revenantValue];
 }
 
 - (NSString *)name
 {
-    return _charonName;
+    return _revenantName;
 }
 
 - (NSString *)value
 {
-    return _charonValue;
+    return _revenantValue;
 }
 
 - (BOOL)isEqual:(id)object
@@ -65,17 +65,17 @@
     if (![object isKindOfClass:[NSURLQueryItem class]])
         return NO;
     NSURLQueryItem *other = object;
-    return (_charonName == other.name || [_charonName isEqualToString:other.name]) && (_charonValue == other.value || [_charonValue isEqualToString:other.value]);
+    return (_revenantName == other.name || [_revenantName isEqualToString:other.name]) && (_revenantValue == other.value || [_revenantValue isEqualToString:other.value]);
 }
 
 - (NSUInteger)hash
 {
-    return _charonName.hash ^ _charonValue.hash;
+    return _revenantName.hash ^ _revenantValue.hash;
 }
 
 - (NSString *)description
 {
-    return [NSString stringWithFormat:@"<%@ %p> {name = %@, value = %@}", [self class], self, _charonName, _charonValue];
+    return [NSString stringWithFormat:@"<%@ %p> {name = %@, value = %@}", [self class], self, _revenantName, _revenantValue];
 }
 
 @end

@@ -6,7 +6,7 @@ set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../../common/runs.sh" "$here"
 DEVICE=${DEVICE:-$here/../../../device}
-BUILD=${BUILD:-$(runs_fresh charon-lighting)}
+BUILD=${BUILD:-$(runs_fresh revenant-lighting)}
 EXPECTATIONS=${EXPECTATIONS:-$DEVICE/scenekit-lighting-expectations.h}
 xcrun swiftc -O "$here/cases.swift" -o "$BUILD/cases"
 "$BUILD/cases" "$BUILD/cases.json"

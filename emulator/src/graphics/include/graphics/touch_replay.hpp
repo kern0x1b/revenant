@@ -14,7 +14,7 @@
 
 #include "foundation/touch_input.hpp"
 
-namespace shade {
+namespace emulator {
 
 class TouchReplay {
 public:

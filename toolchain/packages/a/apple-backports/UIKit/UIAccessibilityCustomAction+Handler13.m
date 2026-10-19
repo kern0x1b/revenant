@@ -4,9 +4,9 @@
 #pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
 #pragma clang diagnostic ignored "-Wnonnull"
 
-static const char charon_handler_key;
+static const char revenant_handler_key;
 
-@implementation UIAccessibilityCustomAction (CharonHandler13)
+@implementation UIAccessibilityCustomAction (RevenantHandler13)
 
 - (instancetype)initWithName:(NSString *)name actionHandler:(UIAccessibilityCustomActionHandler)actionHandler
 {
@@ -24,12 +24,12 @@ static const char charon_handler_key;
 
 - (UIAccessibilityCustomActionHandler)actionHandler
 {
-    return objc_getAssociatedObject(self, &charon_handler_key);
+    return objc_getAssociatedObject(self, &revenant_handler_key);
 }
 
 - (void)setActionHandler:(UIAccessibilityCustomActionHandler)actionHandler
 {
-    objc_setAssociatedObject(self, &charon_handler_key, actionHandler, OBJC_ASSOCIATION_COPY_NONATOMIC);
+    objc_setAssociatedObject(self, &revenant_handler_key, actionHandler, OBJC_ASSOCIATION_COPY_NONATOMIC);
 }
 
 @end

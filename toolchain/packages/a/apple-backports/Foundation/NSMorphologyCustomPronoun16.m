@@ -1,6 +1,6 @@
 #import <Foundation/Foundation.h>
 
-#import "CharonMorphology.h"
+#import "RevenantMorphology.h"
 
 NSAttributedStringKey const NSInflectionRuleAttributeName = @"NSInflect";
 NSAttributedStringKey const NSInflectionAlternativeAttributeName = @"NSInflectionAlternative";
@@ -12,12 +12,12 @@ NSAttributedStringKey const NSInflectionAlternativeAttributeName = @"NSInflectio
 
 + (BOOL)isSupportedForLanguage:(NSString *)language
 {
-    return CharonCustomPronounSupportedLanguage(language);
+    return RevenantCustomPronounSupportedLanguage(language);
 }
 
 + (NSArray<NSString *> *)requiredKeysForLanguage:(NSString *)language
 {
-    return CharonCustomPronounSupportedLanguage(language) ? CharonCustomPronounRequiredKeys() : @[];
+    return RevenantCustomPronounSupportedLanguage(language) ? RevenantCustomPronounRequiredKeys() : @[];
 }
 
 - (id)copyWithZone:(NSZone *)zone
@@ -53,11 +53,11 @@ NSAttributedStringKey const NSInflectionAlternativeAttributeName = @"NSInflectio
     return self;
 }
 
-- (NSString *)charon_firstMissingKey
+- (NSString *)revenant_firstMissingKey
 {
     NSArray *values = @[_subjectForm ?: @"", _objectForm ?: @"", _possessiveForm ?: @"",
                         _possessiveAdjectiveForm ?: @"", _reflexiveForm ?: @""];
-    NSArray *keys = CharonCustomPronounRequiredKeys();
+    NSArray *keys = RevenantCustomPronounRequiredKeys();
     for (NSUInteger index = 0; index < keys.count; index++)
         if (![values[index] length])
             return keys[index];

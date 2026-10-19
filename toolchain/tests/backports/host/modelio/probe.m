@@ -308,7 +308,7 @@ static void reportGenerators(void)
               id<MDLMeshBuffer> ibuf = sm.indexBuffer;
               const void *ibytes = [ibuf map].bytes;
               unsigned wide = (sm.indexType == MDLIndexBitDepthUInt32) ? 4 : 2;
-              #define CHARON_INDEX(i) ((wide == 4) ? ((const uint32_t *)ibytes)[i] : ((const uint16_t *)ibytes)[i])
+              #define REVENANT_INDEX(i) ((wide == 4) ? ((const uint32_t *)ibytes)[i] : ((const uint16_t *)ibytes)[i])
               unsigned wall = 0, cap = 0, degenerate = 0;
               for (NSUInteger t = 0; t * 3 + 2 < sm.indexCount; t++) {
                   float y0 = posf(t * 3), y1 = posf(t * 3 + 1),

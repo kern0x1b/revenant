@@ -1,26 +1,26 @@
-#import "CharonMenus.h"
+#import "RevenantMenus.h"
 #import <objc/runtime.h>
 
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
 
-static const CGFloat CharonTextInsetX = 14;
-static const CGFloat CharonTextInsetY = 10;
-static const CGFloat CharonTextCornerRadius = 13;
+static const CGFloat RevenantTextInsetX = 14;
+static const CGFloat RevenantTextInsetY = 10;
+static const CGFloat RevenantTextCornerRadius = 13;
 
-static UIColor *charon_default_background(void)
+static UIColor *revenant_default_background(void)
 {
     if ([UIColor respondsToSelector:@selector(systemBackgroundColor)])
         return [UIColor systemBackgroundColor];
     return [UIColor whiteColor];
 }
 
-static void charon_add_line_rect(UIBezierPath *path, CGRect rect)
+static void revenant_add_line_rect(UIBezierPath *path, CGRect rect)
 {
-    CGFloat r = MIN(CharonTextCornerRadius, MIN(CGRectGetWidth(rect) + 2 * CharonTextInsetX, CGRectGetHeight(rect) + 2 * CharonTextInsetY) / 2);
+    CGFloat r = MIN(RevenantTextCornerRadius, MIN(CGRectGetWidth(rect) + 2 * RevenantTextInsetX, CGRectGetHeight(rect) + 2 * RevenantTextInsetY) / 2);
     const CGFloat e = 1.528665f * r, a = 1.0884929576185292f * r, b = 0.8684069440630023f * r, c = 0.6314937928309926f * r;
     const CGFloat d = 0.07491138784701594f * r, f = 0.3728238266257468f * r, g = 0.16905955604436995f * r;
-    CGFloat x0 = CGRectGetMinX(rect) - CharonTextInsetX, x1 = CGRectGetMaxX(rect) + CharonTextInsetX;
-    CGFloat y0 = CGRectGetMinY(rect) - CharonTextInsetY, y1 = CGRectGetMaxY(rect) + CharonTextInsetY;
+    CGFloat x0 = CGRectGetMinX(rect) - RevenantTextInsetX, x1 = CGRectGetMaxX(rect) + RevenantTextInsetX;
+    CGFloat y0 = CGRectGetMinY(rect) - RevenantTextInsetY, y1 = CGRectGetMaxY(rect) + RevenantTextInsetY;
     [path moveToPoint:CGPointMake(x0 + e, y1)];
     [path addCurveToPoint:CGPointMake(x0 + c, y1 - d) controlPoint1:CGPointMake(x0 + a, y1) controlPoint2:CGPointMake(x0 + b, y1)];
     [path addLineToPoint:CGPointMake(x0 + c, y1 - d)];
@@ -66,7 +66,7 @@ static void charon_add_line_rect(UIBezierPath *path, CGRect rect)
                 continue;
             if (!path)
                 path = [UIBezierPath bezierPath];
-            charon_add_line_rect(path, CGRectIntegral([value CGRectValue]));
+            revenant_add_line_rect(path, CGRectIntegral([value CGRectValue]));
         }
         _visiblePath = path;
     }
@@ -75,7 +75,7 @@ static void charon_add_line_rect(UIBezierPath *path, CGRect rect)
 
 - (UIColor *)backgroundColor
 {
-    return _backgroundColor ?: charon_default_background();
+    return _backgroundColor ?: revenant_default_background();
 }
 
 - (void)setBackgroundColor:(UIColor *)backgroundColor

@@ -1,17 +1,17 @@
-#import "CharonHomeKitInternal.h"
+#import "RevenantHomeKitInternal.h"
 
 #pragma mark - HMNumberRange
 
-@interface HMNumberRange (CharonHomeKitStore)
-@property (nonatomic, strong, nullable) NSNumber *charon_minValue;
-@property (nonatomic, strong, nullable) NSNumber *charon_maxValue;
+@interface HMNumberRange (RevenantHomeKitStore)
+@property (nonatomic, strong, nullable) NSNumber *revenant_minValue;
+@property (nonatomic, strong, nullable) NSNumber *revenant_maxValue;
 @end
 
 @implementation HMNumberRange
 
-@synthesize charon_minValue = _charon_minValue, charon_maxValue = _charon_maxValue;
+@synthesize revenant_minValue = _revenant_minValue, revenant_maxValue = _revenant_maxValue;
 
-- (instancetype)charon_initWithStore:(CharonHomeKitStore *)store identifier:(NSUUID *)identifier __attribute__((objc_method_family(init)))
+- (instancetype)revenant_initWithStore:(RevenantHomeKitStore *)store identifier:(NSUUID *)identifier __attribute__((objc_method_family(init)))
 {
     (void)store;
     (void)identifier;
@@ -21,25 +21,25 @@
 
 + (instancetype)numberRangeWithMinValue:(NSNumber *)minValue maxValue:(NSNumber *)maxValue
 {
-    HMNumberRange *range = [[HMNumberRange alloc] charon_initWithStore:nil identifier:nil];
-    range.charon_minValue = minValue;
-    range.charon_maxValue = maxValue;
+    HMNumberRange *range = [[HMNumberRange alloc] revenant_initWithStore:nil identifier:nil];
+    range.revenant_minValue = minValue;
+    range.revenant_maxValue = maxValue;
     return range;
 }
 
 - (NSNumber *)minValue
 {
-    return [_charon_minValue copy];
+    return [_revenant_minValue copy];
 }
 
 - (NSNumber *)maxValue
 {
-    return [_charon_maxValue copy];
+    return [_revenant_maxValue copy];
 }
 
 @end
 
-HMNumberRange *CharonHomeKitNumberRange(NSNumber *minimum, NSNumber *maximum)
+HMNumberRange *RevenantHomeKitNumberRange(NSNumber *minimum, NSNumber *maximum)
 {
     return [HMNumberRange numberRangeWithMinValue:minimum maxValue:maximum];
 }

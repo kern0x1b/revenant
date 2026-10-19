@@ -7,9 +7,9 @@ typedef struct {
     const char *shortPlural;
     const char *fullSingular;
     const char *fullPlural;
-} CharonUnitNames;
+} RevenantUnitNames;
 
-static const CharonUnitNames charon_units[] = {
+static const RevenantUnitNames revenant_units[] = {
     {NSCalendarUnitYear, "y", "yr", "yrs", "year", "years"},
     {NSCalendarUnitMonth, "mo", "mth", "mths", "month", "months"},
     {NSCalendarUnitWeekOfMonth, "w", "wk", "wks", "week", "weeks"},
@@ -19,11 +19,11 @@ static const CharonUnitNames charon_units[] = {
     {NSCalendarUnitSecond, "s", "sec", "sec", "second", "seconds"},
 };
 
-static const NSUInteger charon_unit_count = sizeof(charon_units) / sizeof(charon_units[0]);
+static const NSUInteger revenant_unit_count = sizeof(revenant_units) / sizeof(revenant_units[0]);
 
-static const NSCalendarUnit charon_all_units = NSCalendarUnitYear | NSCalendarUnitMonth | NSCalendarUnitWeekOfMonth | NSCalendarUnitDay | NSCalendarUnitHour | NSCalendarUnitMinute | NSCalendarUnitSecond;
+static const NSCalendarUnit revenant_all_units = NSCalendarUnitYear | NSCalendarUnitMonth | NSCalendarUnitWeekOfMonth | NSCalendarUnitDay | NSCalendarUnitHour | NSCalendarUnitMinute | NSCalendarUnitSecond;
 
-static NSInteger charon_value(NSDateComponents *components, NSCalendarUnit unit)
+static NSInteger revenant_value(NSDateComponents *components, NSCalendarUnit unit)
 {
     switch (unit) {
     case NSCalendarUnitYear: return components.year;
@@ -36,7 +36,7 @@ static NSInteger charon_value(NSDateComponents *components, NSCalendarUnit unit)
     }
 }
 
-static NSDateComponents *charon_single(NSCalendarUnit unit, NSInteger value)
+static NSDateComponents *revenant_single(NSCalendarUnit unit, NSInteger value)
 {
     NSDateComponents *components = [[NSDateComponents alloc] init];
     switch (unit) {
@@ -105,7 +105,7 @@ static NSDateComponents *charon_single(NSCalendarUnit unit, NSInteger value)
 
 - (void)setAllowedUnits:(NSCalendarUnit)units
 {
-    if (units & ~charon_all_units)
+    if (units & ~revenant_all_units)
         [NSException raise:NSInternalInconsistencyException format:@"Invalid parameter not satisfying: allowedUnits == 0 || !(allowedUnits & ~(NSCalendarUnitYear | NSCalendarUnitMonth | NSCalendarUnitWeekOfMonth | NSCalendarUnitDay | NSCalendarUnitHour | NSCalendarUnitMinute | NSCalendarUnitSecond))"];
     _allowedUnits = units;
 }
@@ -235,9 +235,9 @@ static NSDateComponents *charon_single(NSCalendarUnit unit, NSInteger value)
     NSDate *start = _referenceDate ?: [NSDate dateWithTimeIntervalSinceReferenceDate:0];
     NSDate *end = [calendar dateByAddingComponents:components toDate:start options:0];
     BOOL any = NO;
-    for (NSUInteger index = 0; index < charon_unit_count && !any; index++)
-        any = charon_value(components, charon_units[index].unit) != NSDateComponentUndefined && charon_value(components, charon_units[index].unit) != 0;
-    if (!any && charon_value(components, NSCalendarUnitSecond) == NSDateComponentUndefined && charon_value(components, NSCalendarUnitMinute) == NSDateComponentUndefined && charon_value(components, NSCalendarUnitHour) == NSDateComponentUndefined && charon_value(components, NSCalendarUnitDay) == NSDateComponentUndefined && charon_value(components, NSCalendarUnitWeekOfMonth) == NSDateComponentUndefined && charon_value(components, NSCalendarUnitMonth) == NSDateComponentUndefined && charon_value(components, NSCalendarUnitYear) == NSDateComponentUndefined)
+    for (NSUInteger index = 0; index < revenant_unit_count && !any; index++)
+        any = revenant_value(components, revenant_units[index].unit) != NSDateComponentUndefined && revenant_value(components, revenant_units[index].unit) != 0;
+    if (!any && revenant_value(components, NSCalendarUnitSecond) == NSDateComponentUndefined && revenant_value(components, NSCalendarUnitMinute) == NSDateComponentUndefined && revenant_value(components, NSCalendarUnitHour) == NSDateComponentUndefined && revenant_value(components, NSCalendarUnitDay) == NSDateComponentUndefined && revenant_value(components, NSCalendarUnitWeekOfMonth) == NSDateComponentUndefined && revenant_value(components, NSCalendarUnitMonth) == NSDateComponentUndefined && revenant_value(components, NSCalendarUnitYear) == NSDateComponentUndefined)
         return nil;
     return [self stringFromDate:start toDate:end];
 }
@@ -246,8 +246,8 @@ static NSDateComponents *charon_single(NSCalendarUnit unit, NSInteger value)
 {
     NSCalendar *calendar = _calendar ?: [NSCalendar currentCalendar];
     BOOL negative = [endDate compare:startDate] == NSOrderedAscending;
-    NSCalendarUnit allowed = _allowedUnits ?: charon_all_units;
-    NSString *body = [self charon_format:startDate to:endDate calendar:calendar allowed:allowed negative:negative];
+    NSCalendarUnit allowed = _allowedUnits ?: revenant_all_units;
+    NSString *body = [self revenant_format:startDate to:endDate calendar:calendar allowed:allowed negative:negative];
     if (_includesApproximationPhrase)
         body = [NSString stringWithFormat:@"About %@", body];
     if (_includesTimeRemainingPhrase)
@@ -255,28 +255,28 @@ static NSDateComponents *charon_single(NSCalendarUnit unit, NSInteger value)
     return body;
 }
 
-- (NSArray<NSNumber *> *)charon_valuesFrom:(NSDate *)from to:(NSDate *)to calendar:(NSCalendar *)calendar allowed:(NSCalendarUnit)allowed
+- (NSArray<NSNumber *> *)revenant_valuesFrom:(NSDate *)from to:(NSDate *)to calendar:(NSCalendar *)calendar allowed:(NSCalendarUnit)allowed
 {
     NSDateComponents *components = [calendar components:allowed fromDate:from toDate:to options:0];
     NSMutableArray *values = [NSMutableArray array];
-    for (NSUInteger index = 0; index < charon_unit_count; index++) {
-        if (allowed & charon_units[index].unit)
-            [values addObject:@(llabs((long long)charon_value(components, charon_units[index].unit)))];
+    for (NSUInteger index = 0; index < revenant_unit_count; index++) {
+        if (allowed & revenant_units[index].unit)
+            [values addObject:@(llabs((long long)revenant_value(components, revenant_units[index].unit)))];
     }
     return values;
 }
 
-- (NSArray<NSNumber *> *)charon_unitsAllowed:(NSCalendarUnit)allowed
+- (NSArray<NSNumber *> *)revenant_unitsAllowed:(NSCalendarUnit)allowed
 {
     NSMutableArray *units = [NSMutableArray array];
-    for (NSUInteger index = 0; index < charon_unit_count; index++) {
-        if (allowed & charon_units[index].unit)
-            [units addObject:@(charon_units[index].unit)];
+    for (NSUInteger index = 0; index < revenant_unit_count; index++) {
+        if (allowed & revenant_units[index].unit)
+            [units addObject:@(revenant_units[index].unit)];
     }
     return units;
 }
 
-- (NSUInteger)charon_dropBits
+- (NSUInteger)revenant_dropBits
 {
     NSUInteger bits = _zeroFormattingBehavior & (NSDateComponentsFormatterZeroFormattingBehaviorDropAll);
     if (!bits && (_zeroFormattingBehavior & NSDateComponentsFormatterZeroFormattingBehaviorDefault) && !(_zeroFormattingBehavior & NSDateComponentsFormatterZeroFormattingBehaviorPad))
@@ -284,7 +284,7 @@ static NSDateComponents *charon_single(NSCalendarUnit unit, NSInteger value)
     return bits;
 }
 
-- (NSArray<NSNumber *> *)charon_displayedIndexes:(NSArray<NSNumber *> *)values before:(NSInteger)cut
+- (NSArray<NSNumber *> *)revenant_displayedIndexes:(NSArray<NSNumber *> *)values before:(NSInteger)cut
 {
     NSInteger first = -1, last = -1;
     for (NSInteger index = 0; index < cut; index++) {
@@ -294,7 +294,7 @@ static NSDateComponents *charon_single(NSCalendarUnit unit, NSInteger value)
             last = index;
         }
     }
-    NSUInteger bits = [self charon_dropBits];
+    NSUInteger bits = [self revenant_dropBits];
     NSUInteger anyDrop = NSDateComponentsFormatterZeroFormattingBehaviorDropLeading | NSDateComponentsFormatterZeroFormattingBehaviorDropMiddle | NSDateComponentsFormatterZeroFormattingBehaviorDropTrailing;
     NSMutableArray *shown = [NSMutableArray array];
     for (NSInteger index = 0; index < cut; index++) {
@@ -316,7 +316,7 @@ static NSDateComponents *charon_single(NSCalendarUnit unit, NSInteger value)
     return shown;
 }
 
-- (BOOL)charon_rounds:(NSInteger)value unit:(NSCalendarUnit)unit larger:(NSCalendarUnit)larger base:(NSDate *)base calendar:(NSCalendar *)calendar
+- (BOOL)revenant_rounds:(NSInteger)value unit:(NSCalendarUnit)unit larger:(NSCalendarUnit)larger base:(NSDate *)base calendar:(NSCalendar *)calendar
 {
     switch (unit) {
     case NSCalendarUnitSecond:
@@ -339,13 +339,13 @@ static NSDateComponents *charon_single(NSCalendarUnit unit, NSInteger value)
     }
 }
 
-- (NSString *)charon_format:(NSDate *)from to:(NSDate *)to calendar:(NSCalendar *)calendar allowed:(NSCalendarUnit)allowed negative:(BOOL)negative
+- (NSString *)revenant_format:(NSDate *)from to:(NSDate *)to calendar:(NSCalendar *)calendar allowed:(NSCalendarUnit)allowed negative:(BOOL)negative
 {
-    NSArray<NSNumber *> *units = [self charon_unitsAllowed:allowed];
+    NSArray<NSNumber *> *units = [self revenant_unitsAllowed:allowed];
     if (_unitsStyle == NSDateComponentsFormatterUnitsStylePositional) {
         BOOL started = NO, gap = NO, ended = NO;
-        for (NSUInteger index = 0; index < charon_unit_count; index++) {
-            BOOL present = (allowed & charon_units[index].unit) != 0;
+        for (NSUInteger index = 0; index < revenant_unit_count; index++) {
+            BOOL present = (allowed & revenant_units[index].unit) != 0;
             if (present && ended)
                 gap = YES;
             if (present)
@@ -356,7 +356,7 @@ static NSDateComponents *charon_single(NSCalendarUnit unit, NSInteger value)
         if (gap)
             [NSException raise:NSInvalidArgumentException format:@"Specifying positional units with gaps is ambiguous, and therefore unsupported"];
     }
-    NSMutableArray<NSNumber *> *values = [[self charon_valuesFrom:from to:to calendar:calendar allowed:allowed] mutableCopy];
+    NSMutableArray<NSNumber *> *values = [[self revenant_valuesFrom:from to:to calendar:calendar allowed:allowed] mutableCopy];
     NSInteger count = (NSInteger)values.count;
     NSInteger cut = count, modified = -1;
     if (_maximumUnitCount > 0) {
@@ -370,8 +370,8 @@ static NSDateComponents *charon_single(NSCalendarUnit unit, NSInteger value)
             NSInteger leading = [nonzero[_maximumUnitCount] integerValue];
             NSDateComponents *kept = [[NSDateComponents alloc] init];
             for (NSInteger index = 0; index < leading; index++)
-                [self charon_add:(negative ? -1 : 1) * [values[index] integerValue] unit:[units[index] unsignedIntegerValue] to:kept];
-            if (leading > 0 && [self charon_rounds:[values[leading] integerValue] unit:[units[leading] unsignedIntegerValue] larger:[units[leading - 1] unsignedIntegerValue] base:[calendar dateByAddingComponents:kept toDate:from options:0] calendar:calendar]) {
+                [self revenant_add:(negative ? -1 : 1) * [values[index] integerValue] unit:[units[index] unsignedIntegerValue] to:kept];
+            if (leading > 0 && [self revenant_rounds:[values[leading] integerValue] unit:[units[leading] unsignedIntegerValue] larger:[units[leading - 1] unsignedIntegerValue] base:[calendar dateByAddingComponents:kept toDate:from options:0] calendar:calendar]) {
                 for (NSInteger index = leading; index < count; index++)
                     values[index] = @0;
                 NSInteger target = leading - 1;
@@ -410,22 +410,22 @@ static NSDateComponents *charon_single(NSCalendarUnit unit, NSInteger value)
             if (collapsible) {
                 NSDateComponents *kept = [[NSDateComponents alloc] init];
                 for (NSInteger index = 0; index <= largest; index++)
-                    [self charon_add:(negative ? -1 : 1) * [values[index] integerValue] unit:[units[index] unsignedIntegerValue] to:kept];
+                    [self revenant_add:(negative ? -1 : 1) * [values[index] integerValue] unit:[units[index] unsignedIntegerValue] to:kept];
                 NSDate *base = [calendar dateByAddingComponents:kept toDate:from options:0];
-                NSDate *nextWhole = [calendar dateByAddingComponents:charon_single(unit, negative ? -1 : 1) toDate:base options:0];
-                NSDate *nextUnit = [calendar dateByAddingComponents:charon_single(following, negative ? -1 : 1) toDate:base options:0];
+                NSDate *nextWhole = [calendar dateByAddingComponents:revenant_single(unit, negative ? -1 : 1) toDate:base options:0];
+                NSDate *nextUnit = [calendar dateByAddingComponents:revenant_single(following, negative ? -1 : 1) toDate:base options:0];
                 NSTimeInterval ratio = fabs([nextWhole timeIntervalSinceDate:base]) / MAX(1, fabs([nextUnit timeIntervalSinceDate:base]));
                 double fraction = [values[largest + 1] integerValue] / ratio;
                 if (ratio > 0 && (fraction < 0.1 || fraction > 0.9))
-                    return [self charon_format:from to:to calendar:calendar allowed:allowed & ~unit negative:negative];
+                    return [self revenant_format:from to:to calendar:calendar allowed:allowed & ~unit negative:negative];
             }
         }
     }
-    NSArray<NSNumber *> *shown = [self charon_displayedIndexes:values before:end];
-    return [self charon_join:shown values:values units:units negative:negative];
+    NSArray<NSNumber *> *shown = [self revenant_displayedIndexes:values before:end];
+    return [self revenant_join:shown values:values units:units negative:negative];
 }
 
-- (void)charon_add:(NSInteger)value unit:(NSCalendarUnit)unit to:(NSDateComponents *)components
+- (void)revenant_add:(NSInteger)value unit:(NSCalendarUnit)unit to:(NSDateComponents *)components
 {
     switch (unit) {
     case NSCalendarUnitYear: components.year = value; break;
@@ -438,26 +438,26 @@ static NSDateComponents *charon_single(NSCalendarUnit unit, NSInteger value)
     }
 }
 
-- (NSString *)charon_number:(NSInteger)value
+- (NSString *)revenant_number:(NSInteger)value
 {
     NSNumberFormatter *formatter = [[NSNumberFormatter alloc] init];
     formatter.numberStyle = _unitsStyle == NSDateComponentsFormatterUnitsStyleSpellOut ? NSNumberFormatterSpellOutStyle : NSNumberFormatterDecimalStyle;
     return [formatter stringFromNumber:@(value)];
 }
 
-- (const CharonUnitNames *)charon_names:(NSCalendarUnit)unit
+- (const RevenantUnitNames *)revenant_names:(NSCalendarUnit)unit
 {
-    for (NSUInteger index = 0; index < charon_unit_count; index++) {
-        if (charon_units[index].unit == unit)
-            return &charon_units[index];
+    for (NSUInteger index = 0; index < revenant_unit_count; index++) {
+        if (revenant_units[index].unit == unit)
+            return &revenant_units[index];
     }
     return NULL;
 }
 
-- (NSString *)charon_named:(NSInteger)value unit:(NSCalendarUnit)unit
+- (NSString *)revenant_named:(NSInteger)value unit:(NSCalendarUnit)unit
 {
-    const CharonUnitNames *names = [self charon_names:unit];
-    NSString *number = [self charon_number:value];
+    const RevenantUnitNames *names = [self revenant_names:unit];
+    NSString *number = [self revenant_number:value];
     BOOL single = value == 1 || value == -1;
     switch (_unitsStyle) {
     case NSDateComponentsFormatterUnitsStylePositional:
@@ -472,7 +472,7 @@ static NSDateComponents *charon_single(NSCalendarUnit unit, NSInteger value)
     }
 }
 
-- (NSString *)charon_join:(NSArray<NSNumber *> *)shown values:(NSArray<NSNumber *> *)values units:(NSArray<NSNumber *> *)units negative:(BOOL)negative
+- (NSString *)revenant_join:(NSArray<NSNumber *> *)shown values:(NSArray<NSNumber *> *)values units:(NSArray<NSNumber *> *)units negative:(BOOL)negative
 {
     NSInteger signedIndex = negative && shown.count && [values[[shown[0] integerValue]] integerValue] != 0 ? [shown[0] integerValue] : -1;
     NSInteger (^signedValue)(NSInteger) = ^NSInteger(NSInteger index) {
@@ -488,7 +488,7 @@ static NSDateComponents *charon_single(NSCalendarUnit unit, NSInteger value)
             if (unit == NSCalendarUnitHour || unit == NSCalendarUnitMinute || unit == NSCalendarUnitSecond)
                 [time addObject:shownIndex];
             else
-                [parts addObject:[self charon_named:signedValue(index) unit:unit]];
+                [parts addObject:[self revenant_named:signedValue(index) unit:unit]];
         }
         BOOL contiguous = time.count > 1;
         for (NSUInteger index = 1; contiguous && index < time.count; index++)
@@ -501,25 +501,25 @@ static NSDateComponents *charon_single(NSCalendarUnit unit, NSInteger value)
                 if (index)
                     [clock appendString:@":"];
                 if (index == 0 && !pad)
-                    [clock appendString:[self charon_number:value]];
+                    [clock appendString:[self revenant_number:value]];
                 else
                     [clock appendFormat:@"%@%02ld", value < 0 ? @"-" : @"", (long)labs(value)];
             }
             [parts addObject:clock];
         } else if (time.count == 1 && !parts.count && shown.count == 1) {
             NSInteger value = signedValue([time[0] integerValue]);
-            [parts addObject:pad ? [NSString stringWithFormat:@"%@%02ld", value < 0 ? @"-" : @"", (long)labs(value)] : [self charon_number:value]];
+            [parts addObject:pad ? [NSString stringWithFormat:@"%@%02ld", value < 0 ? @"-" : @"", (long)labs(value)] : [self revenant_number:value]];
         } else {
             for (NSNumber *shownIndex in time) {
                 NSInteger index = shownIndex.integerValue;
-                [parts addObject:[self charon_named:signedValue(index) unit:[units[index] unsignedIntegerValue]]];
+                [parts addObject:[self revenant_named:signedValue(index) unit:[units[index] unsignedIntegerValue]]];
             }
         }
         return [parts componentsJoinedByString:@" "];
     }
     for (NSNumber *shownIndex in shown) {
         NSInteger index = shownIndex.integerValue;
-        [parts addObject:[self charon_named:signedValue(index) unit:[units[index] unsignedIntegerValue]]];
+        [parts addObject:[self revenant_named:signedValue(index) unit:[units[index] unsignedIntegerValue]]];
     }
     BOOL comma = _unitsStyle == NSDateComponentsFormatterUnitsStyleShort || _unitsStyle == NSDateComponentsFormatterUnitsStyleFull || _unitsStyle == NSDateComponentsFormatterUnitsStyleSpellOut;
     return [parts componentsJoinedByString:comma ? @", " : @" "];

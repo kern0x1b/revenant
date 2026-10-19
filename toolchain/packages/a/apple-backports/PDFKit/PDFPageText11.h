@@ -3,7 +3,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface CharonPDFTextRun : NSObject
+@interface RevenantPDFTextRun : NSObject
 @property (nonatomic, copy) NSString *text;
 @property (nonatomic) NSUInteger offset;
 @property (nonatomic) CGFloat x;
@@ -12,12 +12,12 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, copy, nullable) NSString *fontName;
 @end
 
-@interface CharonPDFTextRun (CharonGeometry)
-- (void)charon_setGlyphRects:(const CGRect *)rects count:(NSUInteger)count;
+@interface RevenantPDFTextRun (RevenantGeometry)
+- (void)revenant_setGlyphRects:(const CGRect *)rects count:(NSUInteger)count;
 - (CGRect)rectAtIndex:(NSUInteger)index;
 @end
 
-@interface CharonPDFFontMetrics : NSObject
+@interface RevenantPDFFontMetrics : NSObject
 
 + (nullable instancetype)metricsWithFontDictionary:(nullable CGPDFDictionaryRef)fontDictionary
                                               size:(CGFloat)size;
@@ -28,12 +28,12 @@ NS_ASSUME_NONNULL_BEGIN
 
 @end
 
-@interface CharonPDFPageText : NSObject
+@interface RevenantPDFPageText : NSObject
 
 @property (nonatomic, readonly, copy, nullable) NSString *string;
-@property (nonatomic, readonly, copy) NSArray<CharonPDFTextRun *> *runs;
+@property (nonatomic, readonly, copy) NSArray<RevenantPDFTextRun *> *runs;
 
-+ (nullable instancetype)layoutWithRuns:(NSArray<CharonPDFTextRun *> *)drawnRuns;
++ (nullable instancetype)layoutWithRuns:(NSArray<RevenantPDFTextRun *> *)drawnRuns;
 
 - (nullable NSString *)substringForRange:(NSRange)range;
 
@@ -42,7 +42,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (NSUInteger)numberOfLines;
 - (NSRange)lineRangeAtIndex:(NSUInteger)index;
 - (NSArray<NSValue *> *)lineRangesForRange:(NSRange)range;
-- (nullable CharonPDFTextRun *)runForOffset:(NSUInteger)offset;
+- (nullable RevenantPDFTextRun *)runForOffset:(NSUInteger)offset;
 
 @end
 

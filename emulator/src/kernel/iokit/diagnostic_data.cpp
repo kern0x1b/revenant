@@ -11,7 +11,7 @@
 #include <string>
 #include <vector>
 
-namespace shade::kernel_iokit {
+namespace emulator::kernel_iokit {
 
 std::uint32_t DiagnosticDataService::ensure_locked(KernelSharedState& state)
 {

@@ -1,7 +1,7 @@
-Package: org.charon.avfspeechspeak
+Package: org.revenant.avfspeechspeak
 Name: avfspeechspeak
 Architecture: iphoneos-arm
 Description: VSSpeechSynthesizer on the 6.1.3 image: its selectors, its delegate, and what it does when driven (measured in the guest)
-Maintainer: charon
-Author: charon
+Maintainer: revenant
+Author: revenant
 Section: Development

@@ -1,4 +1,4 @@
-#import "CharonPhotosPicker.h"
+#import "RevenantPhotosPicker.h"
 
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
 
@@ -6,7 +6,7 @@
     NSItemProvider *_itemProvider;
 }
 
-- (instancetype)initWithCharonItemProvider:(NSItemProvider *)itemProvider
+- (instancetype)initWithRevenantItemProvider:(NSItemProvider *)itemProvider
 {
     if ((self = [super init]))
         _itemProvider = itemProvider;

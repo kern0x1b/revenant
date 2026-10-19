@@ -3,10 +3,10 @@
 #import <Security/SecProtocolOptions.h>
 #import <stdio.h>
 
-@interface CharonSecProtocolSSLProtocol : NSObject <OS_sec_protocol_options>
-- (SSLProtocol)charonMin;
-- (SSLProtocol)charonMax;
-- (BOOL)charonHasRange;
+@interface RevenantSecProtocolSSLProtocol : NSObject <OS_sec_protocol_options>
+- (SSLProtocol)revenantMin;
+- (SSLProtocol)revenantMax;
+- (BOOL)revenantHasRange;
 @end
 
 static int failures = 0;
@@ -21,24 +21,24 @@ int main(void)
     setvbuf(stdout, NULL, _IONBF, 0);
     __weak id weakOptions = nil;
     @autoreleasepool {
-        Class cls = NSClassFromString(@"CharonSecProtocolSSLProtocol");
+        Class cls = NSClassFromString(@"RevenantSecProtocolSSLProtocol");
         printf("port-class\t%s\n", cls ? "found" : "MISSING");
         if (!cls) return 1;
         sec_protocol_options_t o = (sec_protocol_options_t)[[cls alloc] init];
 
         sec_protocol_options_set_tls_min_version(o, kTLSProtocol1);
         sec_protocol_options_set_tls_max_version(o, kTLSProtocol12);
-        want("min-as-given", (long)[(id)o charonMin], 4);
-        want("max-as-given", (long)[(id)o charonMax], 8);
-        printf("min-not-translated\t%d\n", [(id)o charonMin] == 0x0301 ? 0 : 1);
-        printf("max-not-translated\t%d\n", [(id)o charonMax] == 0x0303 ? 0 : 1);
-        want("has-range", [(id)o charonHasRange] ? 1 : 0, 1);
+        want("min-as-given", (long)[(id)o revenantMin], 4);
+        want("max-as-given", (long)[(id)o revenantMax], 8);
+        printf("min-not-translated\t%d\n", [(id)o revenantMin] == 0x0301 ? 0 : 1);
+        printf("max-not-translated\t%d\n", [(id)o revenantMax] == 0x0303 ? 0 : 1);
+        want("has-range", [(id)o revenantHasRange] ? 1 : 0, 1);
 
         sec_protocol_options_set_tls_max_version(o, kTLSProtocol11);
-        want("max-alone", (long)[(id)o charonMax], 7);
-        want("min-untouched", (long)[(id)o charonMin], 4);
+        want("max-alone", (long)[(id)o revenantMax], 7);
+        want("min-untouched", (long)[(id)o revenantMin], 4);
         sec_protocol_options_t empty = (sec_protocol_options_t)[[cls alloc] init];
-        want("empty-has-no-range", [(id)empty charonHasRange] ? 1 : 0, 0);
+        want("empty-has-no-range", [(id)empty revenantHasRange] ? 1 : 0, 0);
         sec_protocol_options_set_tls_min_version(NULL, kTLSProtocol1);
         printf("null-options\t1\n");
 

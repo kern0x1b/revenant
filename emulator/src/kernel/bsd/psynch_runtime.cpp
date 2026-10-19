@@ -16,7 +16,7 @@
 #include <limits>
 #include <utility>
 
-namespace shade {
+namespace emulator {
 namespace {
 
     constexpr std::uint32_t kernel_bit = 0x01U;

@@ -1,7 +1,7 @@
 #import <UIKit/UIKit.h>
-#import "CharonTextLocation.h"
+#import "RevenantTextLocation.h"
 
-static BOOL charon_is_paragraph_ending(NSString *string, NSUInteger index)
+static BOOL revenant_is_paragraph_ending(NSString *string, NSUInteger index)
 {
     if (index >= string.length)
         return NO;
@@ -58,7 +58,7 @@ static BOOL charon_is_paragraph_ending(NSString *string, NSUInteger index)
     _textStorage.textStorageObserver = nil;
     _textStorage = textStorage;
     _textStorage.textStorageObserver = self;
-    [self charon_rebuild_document_range];
+    [self revenant_rebuild_document_range];
 }
 
 - (void)processEditingForTextStorage:(NSTextStorage *)textStorage
@@ -72,7 +72,7 @@ static BOOL charon_is_paragraph_ending(NSString *string, NSUInteger index)
     _lastEditedRange = newCharRange;
     _lastChangeInLength = delta;
     _hasEdited = YES;
-    [self charon_rebuild_document_range];
+    [self revenant_rebuild_document_range];
 }
 
 - (void)performEditingTransactionForTextStorage:(NSTextStorage *)textStorage usingBlock:(void (NS_NOESCAPE ^)(void))transaction
@@ -95,22 +95,22 @@ static BOOL charon_is_paragraph_ending(NSString *string, NSUInteger index)
     if (_textStorage)
         return;
     _attributedString = [attributedString copy];
-    [self charon_rebuild_document_range];
+    [self revenant_rebuild_document_range];
 }
 
 - (NSTextRange *)documentRange
 {
     if (!_documentRange)
-        [self charon_rebuild_document_range];
+        [self revenant_rebuild_document_range];
     return _documentRange;
 }
 
-- (void)charon_rebuild_document_range
+- (void)revenant_rebuild_document_range
 {
     NSInteger length = (NSInteger)[self attributedString].length;
-    _documentRange = [[NSTextRange alloc] initWithLocation:[[CharonTextLocation alloc] initWithTextContentStorage:self
+    _documentRange = [[NSTextRange alloc] initWithLocation:[[RevenantTextLocation alloc] initWithTextContentStorage:self
                                                                                                              offset:0]
-                                               endLocation:[[CharonTextLocation alloc] initWithTextContentStorage:self
+                                               endLocation:[[RevenantTextLocation alloc] initWithTextContentStorage:self
                                                                                                                offset:length]];
 }
 
@@ -118,21 +118,21 @@ static BOOL charon_is_paragraph_ending(NSString *string, NSUInteger index)
 
 - (id<NSTextLocation>)locationFromLocation:(id<NSTextLocation>)location withOffset:(NSInteger)offset
 {
-    CharonTextLocation *from = (CharonTextLocation *)location;
-    if (![from isKindOfClass:[CharonTextLocation class]] || from.textContentStorage != self)
+    RevenantTextLocation *from = (RevenantTextLocation *)location;
+    if (![from isKindOfClass:[RevenantTextLocation class]] || from.textContentStorage != self)
         return nil;
     NSInteger where = from.offset + offset;
     NSInteger length = (NSInteger)[self attributedString].length;
     if (where < 0 || where > length)
         return nil;
-    return [[CharonTextLocation alloc] initWithTextContentStorage:self offset:where];
+    return [[RevenantTextLocation alloc] initWithTextContentStorage:self offset:where];
 }
 
 - (NSInteger)offsetFromLocation:(id<NSTextLocation>)from toLocation:(id<NSTextLocation>)to
 {
-    CharonTextLocation *a = (CharonTextLocation *)from;
-    CharonTextLocation *b = (CharonTextLocation *)to;
-    if (![a isKindOfClass:[CharonTextLocation class]] || ![b isKindOfClass:[CharonTextLocation class]] ||
+    RevenantTextLocation *a = (RevenantTextLocation *)from;
+    RevenantTextLocation *b = (RevenantTextLocation *)to;
+    if (![a isKindOfClass:[RevenantTextLocation class]] || ![b isKindOfClass:[RevenantTextLocation class]] ||
         a.textContentStorage != self || b.textContentStorage != self)
         return NSNotFound;
     return b.offset - a.offset;
@@ -151,27 +151,27 @@ static BOOL charon_is_paragraph_ending(NSString *string, NSUInteger index)
     NSTextContentManagerEnumerationOptions enumeration = options & NSTextContentManagerEnumerationOptionsReverse;
     NSInteger from = 0;
     if (textLocation) {
-        if (![textLocation isKindOfClass:[CharonTextLocation class]] || ((CharonTextLocation *)textLocation).textContentStorage != self)
+        if (![textLocation isKindOfClass:[RevenantTextLocation class]] || ((RevenantTextLocation *)textLocation).textContentStorage != self)
             return nil;
-        from = ((CharonTextLocation *)textLocation).offset;
+        from = ((RevenantTextLocation *)textLocation).offset;
     } else if (enumeration == NSTextContentManagerEnumerationOptionsReverse) {
         from = length;
     }
     if (enumeration == NSTextContentManagerEnumerationOptionsReverse)
-        from = textLocation ? [self charon_paragraph_start_before:from] : length;
-    CharonTextLocation *edge = nil;
+        from = textLocation ? [self revenant_paragraph_start_before:from] : length;
+    RevenantTextLocation *edge = nil;
     for (NSInteger start = from;;) {
-        NSInteger end = [self charon_paragraph_end_after:start limit:length];
+        NSInteger end = [self revenant_paragraph_end_after:start limit:length];
         if (enumeration != NSTextContentManagerEnumerationOptionsReverse) {
-            NSTextParagraph *paragraph = [self charon_paragraph_from:start to:end];
-            if (paragraph && ![self charon_should_enumerate:paragraph options:enumeration])
+            NSTextParagraph *paragraph = [self revenant_paragraph_from:start to:end];
+            if (paragraph && ![self revenant_should_enumerate:paragraph options:enumeration])
                 paragraph = nil;
             if (paragraph) {
-                edge = [[CharonTextLocation alloc] initWithTextContentStorage:self offset:end];
+                edge = [[RevenantTextLocation alloc] initWithTextContentStorage:self offset:end];
                 if (!block(paragraph))
                     break;
             } else {
-                edge = edge ?: [[CharonTextLocation alloc] initWithTextContentStorage:self offset:end];
+                edge = edge ?: [[RevenantTextLocation alloc] initWithTextContentStorage:self offset:end];
             }
             if (end >= length)
                 break;
@@ -179,16 +179,16 @@ static BOOL charon_is_paragraph_ending(NSString *string, NSUInteger index)
         } else {
             if (start <= 0)
                 break;
-            NSInteger paragraphStart = [self charon_paragraph_start_before:start - 1];
-            NSTextParagraph *paragraph = [self charon_paragraph_from:paragraphStart to:start];
-            if (paragraph && ![self charon_should_enumerate:paragraph options:enumeration])
+            NSInteger paragraphStart = [self revenant_paragraph_start_before:start - 1];
+            NSTextParagraph *paragraph = [self revenant_paragraph_from:paragraphStart to:start];
+            if (paragraph && ![self revenant_should_enumerate:paragraph options:enumeration])
                 paragraph = nil;
             if (paragraph) {
-                edge = [[CharonTextLocation alloc] initWithTextContentStorage:self offset:paragraphStart];
+                edge = [[RevenantTextLocation alloc] initWithTextContentStorage:self offset:paragraphStart];
                 if (!block(paragraph))
                     break;
             } else {
-                edge = edge ?: [[CharonTextLocation alloc] initWithTextContentStorage:self offset:paragraphStart];
+                edge = edge ?: [[RevenantTextLocation alloc] initWithTextContentStorage:self offset:paragraphStart];
             }
             start = paragraphStart;
         }
@@ -204,16 +204,16 @@ static BOOL charon_is_paragraph_ending(NSString *string, NSUInteger index)
     if ([self offsetFromLocation:range.location
                      toLocation:range.endLocation ?: [self locationFromLocation:nil withOffset:0]] == NSNotFound)
         return @[];
-    NSInteger start = ((CharonTextLocation *)range.location).offset;
+    NSInteger start = ((RevenantTextLocation *)range.location).offset;
     NSInteger length = (NSInteger)[[self attributedString] length];
-    NSInteger end = range.endLocation ? ((CharonTextLocation *)range.endLocation).offset : length;
+    NSInteger end = range.endLocation ? ((RevenantTextLocation *)range.endLocation).offset : length;
     [self enumerateTextElementsFromLocation:range.location
                                     options:NSTextContentManagerEnumerationOptionsNone
                                  usingBlock:^BOOL(NSTextElement *element) {
                                      if (!element.elementRange)
                                          return NO;
-                                     NSInteger from = ((CharonTextLocation *)element.elementRange.location).offset;
-                                     NSInteger to = ((CharonTextLocation *)element.elementRange.endLocation).offset;
+                                     NSInteger from = ((RevenantTextLocation *)element.elementRange.location).offset;
+                                     NSInteger to = ((RevenantTextLocation *)element.elementRange.endLocation).offset;
                                      if (from >= end || to <= start)
                                          return NO;
                                      [elements addObject:element];
@@ -222,7 +222,7 @@ static BOOL charon_is_paragraph_ending(NSString *string, NSUInteger index)
     return elements;
 }
 
-- (NSTextParagraph *)charon_paragraph_from:(NSInteger)start to:(NSInteger)end
+- (NSTextParagraph *)revenant_paragraph_from:(NSInteger)start to:(NSInteger)end
 {
     NSRange range = NSMakeRange((NSUInteger)start, (NSUInteger)MAX((NSInteger)0, end - start));
     id<NSTextContentStorageDelegate> delegate = self.delegate;
@@ -238,14 +238,14 @@ static BOOL charon_is_paragraph_ending(NSString *string, NSUInteger index)
         range.length = string.length - range.location;
     NSTextParagraph *paragraph = [[NSTextParagraph alloc] initWithAttributedString:[string attributedSubstringFromRange:range]];
     paragraph.textContentManager = self;
-    paragraph.elementRange = [[NSTextRange alloc] initWithLocation:[[CharonTextLocation alloc] initWithTextContentStorage:self
+    paragraph.elementRange = [[NSTextRange alloc] initWithLocation:[[RevenantTextLocation alloc] initWithTextContentStorage:self
                                                                                                                      offset:(NSInteger)range.location]
-                                                      endLocation:[[CharonTextLocation alloc] initWithTextContentStorage:self
+                                                      endLocation:[[RevenantTextLocation alloc] initWithTextContentStorage:self
                                                                                                                 offset:(NSInteger)NSMaxRange(range)]];
     return paragraph;
 }
 
-- (BOOL)charon_should_enumerate:(NSTextElement *)element
+- (BOOL)revenant_should_enumerate:(NSTextElement *)element
                        options:(NSTextContentManagerEnumerationOptions)options
 {
     id<NSTextContentManagerDelegate> delegate = self.delegate;
@@ -254,18 +254,18 @@ static BOOL charon_is_paragraph_ending(NSString *string, NSUInteger index)
     return [delegate textContentManager:self shouldEnumerateTextElement:element options:options];
 }
 
-- (NSInteger)charon_paragraph_end_after:(NSInteger)start limit:(NSInteger)length
+- (NSInteger)revenant_paragraph_end_after:(NSInteger)start limit:(NSInteger)length
 {
     NSString *string = [self attributedString].string;
     for (NSInteger index = start; index < length; index++) {
-        if (!charon_is_paragraph_ending(string, (NSUInteger)index))
+        if (!revenant_is_paragraph_ending(string, (NSUInteger)index))
             continue;
         return index + 1;
     }
     return length;
 }
 
-- (NSInteger)charon_paragraph_start_before:(NSInteger)offset
+- (NSInteger)revenant_paragraph_start_before:(NSInteger)offset
 {
     NSString *string = [self attributedString].string;
     NSInteger length = (NSInteger)string.length;
@@ -276,7 +276,7 @@ static BOOL charon_is_paragraph_ending(NSString *string, NSUInteger index)
     NSInteger start = 0;
     NSInteger index = 0;
     while (index < offset) {
-        if (!charon_is_paragraph_ending(string, (NSUInteger)index)) {
+        if (!revenant_is_paragraph_ending(string, (NSUInteger)index)) {
             index++;
             continue;
         }
@@ -317,7 +317,7 @@ static BOOL charon_is_paragraph_ending(NSString *string, NSUInteger index)
         [document replaceCharactersInRange:NSMakeRange((NSUInteger)from, 0) withString:replacement.string];
         _attributedString = document;
     }
-    [self charon_rebuild_document_range];
+    [self revenant_rebuild_document_range];
 }
 
 - (void)synchronizeToBackingStore:(void (^)(NSError *_Nullable error))completionHandler
@@ -349,8 +349,8 @@ static BOOL charon_is_paragraph_ending(NSString *string, NSUInteger index)
     } else if (end > edited.location) {
         newEnd = edited.location + MAX((NSInteger)0, edited.length + shift);
     }
-    return [[NSTextRange alloc] initWithLocation:[[CharonTextLocation alloc] initWithTextContentStorage:self offset:newStart]
-                                      endLocation:[[CharonTextLocation alloc] initWithTextContentStorage:self offset:newEnd]];
+    return [[NSTextRange alloc] initWithLocation:[[RevenantTextLocation alloc] initWithTextContentStorage:self offset:newStart]
+                                      endLocation:[[RevenantTextLocation alloc] initWithTextContentStorage:self offset:newEnd]];
 }
 
 #pragma mark - The two conversions the header puts on the concrete store
@@ -366,7 +366,7 @@ static BOOL charon_is_paragraph_ending(NSString *string, NSUInteger index)
 {
     if (!attributedString)
         return nil;
-    return [self charon_paragraph_from:0 to:(NSInteger)attributedString.length];
+    return [self revenant_paragraph_from:0 to:(NSInteger)attributedString.length];
 }
 
 - (NSString *)description

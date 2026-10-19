@@ -34,9 +34,9 @@ rm -rf "$plant"
 mkdir -p "$plant"
 cp "$vision/"*.m "$vision/"*.c "$vision/"*.h "$plant/"
 cat >> "$plant/VNHandlers.m" <<'PLANT'
-@interface VNCoreMLModel (CharonPlant)
+@interface VNCoreMLModel (RevenantPlant)
 @end
-@implementation VNCoreMLModel (CharonPlant)
+@implementation VNCoreMLModel (RevenantPlant)
 - (instancetype)init { return nil; }
 @end
 PLANT

@@ -9,7 +9,7 @@
 
 #include "foundation/display_geometry.hpp"
 
-namespace shade {
+namespace emulator {
 
 enum class GraphicsAcceleratorKind : std::uint8_t {
     MbxLite,

@@ -42,11 +42,11 @@ static BOOL method_from_backports(Class cls, SEL selector)
     return method && from_backports((const void *)method_getImplementation(method));
 }
 
-@interface CharonPickerReport : NSObject <UIColorPickerViewControllerDelegate>
+@interface RevenantPickerReport : NSObject <UIColorPickerViewControllerDelegate>
 @property (nonatomic, strong) NSMutableArray *log;
 @end
 
-@implementation CharonPickerReport
+@implementation RevenantPickerReport
 
 - (void)colorPickerViewController:(UIColorPickerViewController *)viewController didSelectColor:(UIColor *)color continuously:(BOOL)continuously
 {
@@ -60,12 +60,12 @@ static BOOL method_from_backports(Class cls, SEL selector)
 
 @end
 
-@interface CharonEventCounter : NSObject
+@interface RevenantEventCounter : NSObject
 @property (nonatomic) int hits;
 - (void)hit;
 @end
 
-@implementation CharonEventCounter
+@implementation RevenantEventCounter
 
 - (void)hit
 {
@@ -74,16 +74,16 @@ static BOOL method_from_backports(Class cls, SEL selector)
 
 @end
 
-@interface CharonPointerDelegate : UIResponder <UIApplicationDelegate>
+@interface RevenantPointerDelegate : UIResponder <UIApplicationDelegate>
 @property (nonatomic, strong) UIWindow *window;
 @property (nonatomic, strong) UIViewController *host;
 @end
 
-@implementation CharonPointerDelegate
+@implementation RevenantPointerDelegate
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)options
 {
-    charon_log_to([results_folder stringByAppendingPathComponent:@"pointer.log"]);
+    revenant_log_to([results_folder stringByAppendingPathComponent:@"pointer.log"]);
     self.window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
     self.host = [[UIViewController alloc] init];
     self.window.rootViewController = self.host;
@@ -97,9 +97,9 @@ static BOOL method_from_backports(Class cls, SEL selector)
     @try {
         [self run];
     } @catch (NSException *exception) {
-        charon_check(NO, "the checks raise no exception", [NSString stringWithFormat:@"%@: %@", exception.name, exception.reason]);
+        revenant_check(NO, "the checks raise no exception", [NSString stringWithFormat:@"%@: %@", exception.name, exception.reason]);
     }
-    NSString *summary = [NSString stringWithFormat:@"%@ checks=%d failures=%d\n", charon_failures ? @"FAIL" : @"ok", charon_checks, charon_failures];
+    NSString *summary = [NSString stringWithFormat:@"%@ checks=%d failures=%d\n", revenant_failures ? @"FAIL" : @"ok", revenant_checks, revenant_failures];
     [summary writeToFile:[results_folder stringByAppendingPathComponent:@"pointer.done"] atomically:YES encoding:NSUTF8StringEncoding error:NULL];
 }
 
@@ -215,7 +215,7 @@ static BOOL method_from_backports(Class cls, SEL selector)
 
 - (void)runKeys
 {
-    SEL maker = NSSelectorFromString(@"initCharonWithCharacters:unmodified:keyCode:modifierFlags:");
+    SEL maker = NSSelectorFromString(@"initRevenantWithCharacters:unmodified:keyCode:modifierFlags:");
     UIKey *key = ((id (*)(id, SEL, NSString *, NSString *, NSInteger, NSInteger))objc_msgSend)([UIKey alloc], maker, @"A", @"a", 4, UIKeyModifierShift);
     CHECK([key.characters isEqual:@"A"] && [key.charactersIgnoringModifiers isEqual:@"a"] && key.keyCode == 4 && key.modifierFlags == UIKeyModifierShift, "a key holds its characters, key code and modifiers");
     UIKey *other = ((id (*)(id, SEL, NSString *, NSString *, NSInteger, NSInteger))objc_msgSend)([UIKey alloc], maker, @"b", @"b", 4, UIKeyModifierShift);
@@ -306,7 +306,7 @@ static BOOL method_from_backports(Class cls, SEL selector)
     UIColorWell *well = [[UIColorWell alloc] initWithFrame:CGRectMake(10, 270, 44, 44)];
     [self.host.view addSubview:well];
     CHECK(well.supportsAlpha && well.title == nil && well.selectedColor == nil && well.enabled, "a color well supports alpha, has no title and no color");
-    CharonEventCounter *counter = [[CharonEventCounter alloc] init];
+    RevenantEventCounter *counter = [[RevenantEventCounter alloc] init];
     [well addTarget:counter action:@selector(hit) forControlEvents:UIControlEventValueChanged];
     well.selectedColor = [UIColor greenColor];
     well.title = @"Fill";
@@ -315,7 +315,7 @@ static BOOL method_from_backports(Class cls, SEL selector)
     [well layoutIfNeeded];
     CHECK(well.layer.sublayers.count == 2 && CGSizeEqualToSize([well sizeThatFits:CGSizeZero], CGSizeMake(44, 44)), "the well draws a ring and a swatch, 44 points square");
 
-    ((void (*)(id, SEL))objc_msgSend)(well, NSSelectorFromString(@"charon_present"));
+    ((void (*)(id, SEL))objc_msgSend)(well, NSSelectorFromString(@"revenant_present"));
     CHECK(wait_until(^BOOL { return self.host.presentedViewController != nil; }, 5), "tapping the well presents the color picker");
     UIColorPickerViewController *picker = (UIColorPickerViewController *)self.host.presentedViewController;
     CHECK([picker isKindOfClass:[UIColorPickerViewController class]] && [picker.title isEqual:@"Fill"] && !picker.supportsAlpha && picker.delegate == (id)well, "the picker gets the well's title, alpha setting and delegate");
@@ -335,13 +335,13 @@ static BOOL method_from_backports(Class cls, SEL selector)
     CGFloat red = 0, green = 0, blue = 0, alpha = 0;
     [well.selectedColor getRed:&red green:&green blue:&blue alpha:&alpha];
     CHECK(counter.hits == 1 && red > 0.99f && green < 0.01f && blue < 0.01f && alpha > 0.99f, "touching a swatch sets the well's color and sends value changed");
-    CharonPickerReport *report = [[CharonPickerReport alloc] init];
+    RevenantPickerReport *report = [[RevenantPickerReport alloc] init];
     report.log = [NSMutableArray array];
     picker.delegate = report;
     ((void (*)(id, SEL, CGPoint, BOOL))objc_msgSend)(grid, NSSelectorFromString(@"pickAt:continuously:"), CGPointMake(4.5f * cell_w, 5.5f * cell_h), YES);
     ((void (*)(id, SEL, CGPoint, BOOL))objc_msgSend)(grid, NSSelectorFromString(@"pickAt:continuously:"), CGPointMake(4.5f * cell_w, 5.5f * cell_h), NO);
     CHECK([report.log isEqual:(@[@"selecting", @"selected"])], "the delegate hears the selection, continuously while the finger moves");
-    ((void (*)(id, SEL))objc_msgSend)(picker, NSSelectorFromString(@"charon_done"));
+    ((void (*)(id, SEL))objc_msgSend)(picker, NSSelectorFromString(@"revenant_done"));
     CHECK(wait_until(^BOOL { return self.host.presentedViewController == nil; }, 5), "Done dismisses the picker");
     CHECK(wait_until(^BOOL { return [report.log containsObject:@"finish"]; }, 5), "and tells the delegate");
     [well removeFromSuperview];
@@ -353,6 +353,6 @@ int main(int argc, char *argv[])
 {
     @autoreleasepool {
         [[NSFileManager defaultManager] createDirectoryAtPath:results_folder withIntermediateDirectories:YES attributes:nil error:NULL];
-        return UIApplicationMain(argc, argv, nil, @"CharonPointerDelegate");
+        return UIApplicationMain(argc, argv, nil, @"RevenantPointerDelegate");
     }
 }

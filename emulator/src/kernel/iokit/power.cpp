@@ -28,7 +28,7 @@
 #include <utility>
 #include <vector>
 
-namespace shade::kernel_iokit {
+namespace emulator::kernel_iokit {
 namespace {
 
     namespace device_mig = xnu::mig::device;

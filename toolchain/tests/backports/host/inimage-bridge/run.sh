@@ -3,9 +3,9 @@
 # -fetchUIImageWithCompletion:) answered by the host's own Intents and by the port, one probe source.
 #
 # probe.m is built twice. The host build links the system's Intents and IntentsUI and nothing of the port.
-# The port build (-DPORT) links the port's objects for the four members: CharonIntents100.m with the store and
+# The port build (-DPORT) links the port's objects for the four members: RevenantIntents100.m with the store and
 # the coding it needs, and the two IntentsUI INImage files. Its classes are compiled under renamed symbols
-# (CharonHostINImage and so on), as tests/backports/host/usernotifications does: UIKit loads the system's
+# (RevenantHostINImage and so on), as tests/backports/host/usernotifications does: UIKit loads the system's
 # Intents at run time, and two INImage classes in one process answer for each other.
 #
 # Two guards keep the diff honest:
@@ -18,14 +18,14 @@ set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 P=${PORT_DIR:-$here/../../../../packages/a/apple-backports}
-CODING=$P/../../c/charon-coding/files
-build=${INIMAGE_BUILD:-$(runs_fresh charon-inimage)}
+CODING=$P/../../c/revenant-coding/files
+build=${INIMAGE_BUILD:-$(runs_fresh revenant-inimage)}
 sdk=$(xcrun --show-sdk-path)
 target="-target arm64-apple-ios15.0-macabi -isysroot $sdk -iframework $sdk/System/iOSSupport/System/Library/Frameworks"
-flags="-fobjc-arc -fvisibility=hidden -w -DCHARON_HOST_BUILD"
+flags="-fobjc-arc -fvisibility=hidden -w -DREVENANT_HOST_BUILD"
 frameworks="-framework Foundation -framework UIKit -framework CoreGraphics -framework EventKit -framework Intents"
 includes="-I$P/Intents -I$P/IntentsUI -I$CODING"
-sources="$CODING/CharonCoding.m $P/Intents/CharonIntentsStore.m $P/Intents/CharonIntents100.m $P/Intents/IN11_0.m $P/IntentsUI/INImage+IntentsUI100.m $P/IntentsUI/INImage+IntentsUI110.m"
+sources="$CODING/RevenantCoding.m $P/Intents/RevenantIntentsStore.m $P/Intents/RevenantIntents100.m $P/Intents/IN11_0.m $P/IntentsUI/INImage+IntentsUI100.m $P/IntentsUI/INImage+IntentsUI110.m"
 
 # The port's objects, under renamed class symbols. First compiled plain, to read which classes they define.
 mkdir -p "$build/plain" "$build/port"
@@ -34,7 +34,7 @@ for source in $sources; do
 done
 renames=""
 for name in $(xcrun nm -gU "$build"/plain/*.o | awk 'NF == 3 {print $3}' | grep -E '^_OBJC_CLASS_\$_' | sed -e 's/^_OBJC_CLASS_\$_//' | sort -u); do
-    renames="$renames -D$name=CharonHost$name"
+    renames="$renames -D$name=RevenantHost$name"
 done
 for source in $sources; do
     xcrun clang $target $flags $renames $includes -c "$source" -o "$build/port/$(basename "$source" .m).o"

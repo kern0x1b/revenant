@@ -1,13 +1,13 @@
-#import "CharonMPS.h"
+#import "RevenantMPS.h"
 
-static NSString *const CharonMPSNeuronKeyType = @"MPSNNNeuronDescriptor.neuronType";
-static NSString *const CharonMPSNeuronKeyA = @"MPSNNNeuronDescriptor.A";
-static NSString *const CharonMPSNeuronKeyB = @"MPSNNNeuronDescriptor.B";
-static NSString *const CharonMPSNeuronKeyC = @"MPSNNNeuronDescriptor.C";
-static NSString *const CharonMPSNeuronKeyPReLUCount = @"MPSNNNeuronDescriptor.PReLuCount";
-static NSString *const CharonMPSNeuronKeyPReLUData = @"MPSNNNeuronDescriptor.PReLuData";
+static NSString *const RevenantMPSNeuronKeyType = @"MPSNNNeuronDescriptor.neuronType";
+static NSString *const RevenantMPSNeuronKeyA = @"MPSNNNeuronDescriptor.A";
+static NSString *const RevenantMPSNeuronKeyB = @"MPSNNNeuronDescriptor.B";
+static NSString *const RevenantMPSNeuronKeyC = @"MPSNNNeuronDescriptor.C";
+static NSString *const RevenantMPSNeuronKeyPReLUCount = @"MPSNNNeuronDescriptor.PReLuCount";
+static NSString *const RevenantMPSNeuronKeyPReLUData = @"MPSNNNeuronDescriptor.PReLuData";
 
-static inline BOOL CharonMPSNeuronTypeTakesParameters(MPSCNNNeuronType neuronType)
+static inline BOOL RevenantMPSNeuronTypeTakesParameters(MPSCNNNeuronType neuronType)
 {
     return neuronType != MPSCNNNeuronTypePReLU && neuronType < MPSCNNNeuronTypeCount;
 }
@@ -37,8 +37,8 @@ static inline BOOL CharonMPSNeuronTypeTakesParameters(MPSCNNNeuronType neuronTyp
 
 + (MPSNNNeuronDescriptor *)cnnNeuronDescriptorWithType:(MPSCNNNeuronType)neuronType a:(float)a b:(float)b c:(float)c
 {
-    if (!CharonMPSNeuronTypeTakesParameters(neuronType)) {
-        CharonMPSRefuse(@"MPSNNNeuronDescriptor: neuron type %d takes no parameters from a parameter factory, so no descriptor is made",
+    if (!RevenantMPSNeuronTypeTakesParameters(neuronType)) {
+        RevenantMPSRefuse(@"MPSNNNeuronDescriptor: neuron type %d takes no parameters from a parameter factory, so no descriptor is made",
                         (int)neuronType);
         return nil;
     }
@@ -53,7 +53,7 @@ static inline BOOL CharonMPSNeuronTypeTakesParameters(MPSCNNNeuronType neuronTyp
 + (MPSNNNeuronDescriptor *)cnnNeuronPReLUDescriptorWithData:(NSData *)data noCopy:(bool)noCopy
 {
     if (data.length == 0 || data.length % sizeof(float) != 0) {
-        CharonMPSRefuse(@"MPSNNNeuronDescriptor: PReLU data of %lu bytes is not a positive whole number of floats, so no descriptor is made",
+        RevenantMPSRefuse(@"MPSNNNeuronDescriptor: PReLU data of %lu bytes is not a positive whole number of floats, so no descriptor is made",
                         (unsigned long)data.length);
         return nil;
     }
@@ -124,25 +124,25 @@ static inline BOOL CharonMPSNeuronTypeTakesParameters(MPSCNNNeuronType neuronTyp
 
 - (void)encodeWithCoder:(NSCoder *)aCoder
 {
-    [aCoder encodeInt32:(int32_t)_neuronType forKey:CharonMPSNeuronKeyType];
-    [aCoder encodeFloat:_a forKey:CharonMPSNeuronKeyA];
-    [aCoder encodeFloat:_b forKey:CharonMPSNeuronKeyB];
-    [aCoder encodeFloat:_c forKey:CharonMPSNeuronKeyC];
+    [aCoder encodeInt32:(int32_t)_neuronType forKey:RevenantMPSNeuronKeyType];
+    [aCoder encodeFloat:_a forKey:RevenantMPSNeuronKeyA];
+    [aCoder encodeFloat:_b forKey:RevenantMPSNeuronKeyB];
+    [aCoder encodeFloat:_c forKey:RevenantMPSNeuronKeyC];
     if (_neuronType == MPSCNNNeuronTypePReLU && _data) {
-        [aCoder encodeInt32:(int32_t)(_data.length / sizeof(float)) forKey:CharonMPSNeuronKeyPReLUCount];
-        [aCoder encodeObject:_data forKey:CharonMPSNeuronKeyPReLUData];
+        [aCoder encodeInt32:(int32_t)(_data.length / sizeof(float)) forKey:RevenantMPSNeuronKeyPReLUCount];
+        [aCoder encodeObject:_data forKey:RevenantMPSNeuronKeyPReLUData];
     }
 }
 
 - (instancetype)initWithCoder:(NSCoder *)aDecoder
 {
     if ((self = [super init])) {
-        _neuronType = (MPSCNNNeuronType)[aDecoder decodeInt32ForKey:CharonMPSNeuronKeyType];
-        _a = [aDecoder decodeFloatForKey:CharonMPSNeuronKeyA];
-        _b = [aDecoder decodeFloatForKey:CharonMPSNeuronKeyB];
-        _c = [aDecoder decodeFloatForKey:CharonMPSNeuronKeyC];
+        _neuronType = (MPSCNNNeuronType)[aDecoder decodeInt32ForKey:RevenantMPSNeuronKeyType];
+        _a = [aDecoder decodeFloatForKey:RevenantMPSNeuronKeyA];
+        _b = [aDecoder decodeFloatForKey:RevenantMPSNeuronKeyB];
+        _c = [aDecoder decodeFloatForKey:RevenantMPSNeuronKeyC];
         if (_neuronType == MPSCNNNeuronTypePReLU) {
-            NSUInteger count = (NSUInteger)[aDecoder decodeInt32ForKey:CharonMPSNeuronKeyPReLUCount];
+            NSUInteger count = (NSUInteger)[aDecoder decodeInt32ForKey:RevenantMPSNeuronKeyPReLUCount];
             NSMutableData *zeros = [NSMutableData dataWithLength:count * sizeof(float)];
             _data = [zeros copy];
         }

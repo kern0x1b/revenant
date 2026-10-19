@@ -7,8 +7,8 @@
 # rather than a quiet pass.
 #
 # A case is built WITH the port source that defines the symbols it calls, and that is the shim: the
-# system half on its own has no _CharonSecurityCarries, _CharonSecurityPaddingFor,
-# _CharonCertificateNameTLV or _CharonSecurityAttributesFromItemResult, and the reviewer's build line
+# system half on its own has no _RevenantSecurityCarries, _RevenantSecurityPaddingFor,
+# _RevenantCertificateNameTLV or _RevenantSecurityAttributesFromItemResult, and the reviewer's build line
 # linked without them. The host's own accessors are reached by dlsym off the SYSTEM framework handle, in
 # the cases themselves - see the header of each.
 #
@@ -68,8 +68,8 @@ run_case() {
     # THE GUARD, AND EXACTLY WHAT IT DOES NOT COVER. It matches \bsec_[a-z0-9_]+\( in the CASE and in
     # the port sources, so it covers a case that reaches the port through a sec_* name AND that source
     # being linked. IT COVERS FIVE CASES AND NOT THOSE: network-fetch, whose port functions are named as
-    # the HEADER names them (SecTrustSetNetworkFetchAllowed, ...) and match neither sec_* nor Charon*;
-    # supported, attributes and certificate-name, which reach the port through Charon* helpers; and
+    # the HEADER names them (SecTrustSetNetworkFetchAllowed, ...) and match neither sec_* nor Revenant*;
+    # supported, attributes and certificate-name, which reach the port through Revenant* helpers; and
     # trust-result, which resolves the port by dlsym(RTLD_DEFAULT, ...) and so has no link-time reference
     # to find. A SOURCE DROPPED FROM THE LINK LINE CAN THEREFORE HIDE: dropping $N leaves network-fetch
     # GREEN with exit 0 while the host answered. The README beside this file carries the control.
@@ -394,16 +394,16 @@ mutate "$D" "$build/mutant-certificate-name.m" \
 '        at = content;   // MUTANT: resume inside the versions integer' \
 'the walk resumes inside the version integer'
 mutate "$D" "$build/mutant-certificate-fields.m" \
-'static const uint8_t CharonOIDCommonName[] = {0x55, 0x04, 0x03};' \
-'static const uint8_t CharonOIDCommonName[] = {0x55, 0x04, 0x04};   // MUTANT: the SURNAME attribute' \
+'static const uint8_t RevenantOIDCommonName[] = {0x55, 0x04, 0x03};' \
+'static const uint8_t RevenantOIDCommonName[] = {0x55, 0x04, 0x04};   // MUTANT: the SURNAME attribute' \
 'the common name OID becomes the surname one'
 mutate "$N" "$build/mutant-network-fetch.m" \
-'        answer = CFSetContainsValue(CharonSecurityNetworkFetchAllowed, trust) ? true : false;' \
+'        answer = CFSetContainsValue(RevenantSecurityNetworkFetchAllowed, trust) ? true : false;' \
 '        answer = false;   // MUTANT: the set is consulted and the flag dropped' \
 'the network-fetch flag is dropped after being looked up'
 mutate "$O" "$build/mutant-sec-object-otherref.m" \
-'    SecCertificateRef held = [(CharonSecCertificate *)certificate charonCertificate];' \
-'    SecCertificateRef held = [(CharonSecCertificate *)certificate charonCertificate];
+'    SecCertificateRef held = [(RevenantSecCertificate *)certificate revenantCertificate];' \
+'    SecCertificateRef held = [(RevenantSecCertificate *)certificate revenantCertificate];
     // MUTANT: answer a NEW ref over the same DER. CFEqual says it is the same certificate and the
     // pointer says it is not, so ONLY the identity check can tell it apart from the caller\x27s
     return held ? (SecCertificateRef)SecCertificateCreateWithData(NULL, SecCertificateCopyData(held)) : NULL;' \
@@ -422,8 +422,8 @@ mutate "$G" "$build/mutant-trust-result.m" \
 # THE FOUR MUTATIONS BELOW PATCH SecurityFunctions10_0_1.m, AND THAT FILE DISPATCHES INTO
 # Security/SecKeyElliptic10.m: it holds the curve for the keys this package makes itself, so the four
 # public names live in one file and the code they call lives in the other. A driver that links the first
-# alone has six undefined CharonSecKeyEC*/CharonSecurity* symbols and reports INVALID MUTANT for the
-# control, which is the LINK's failure read as the suite's. The two files and charon@micro-ecc's wrapper
+# alone has six undefined RevenantSecKeyEC*/RevenantSecurity* symbols and reports INVALID MUTANT for the
+# control, which is the LINK's failure read as the suite's. The two files and revenant@micro-ecc's wrapper
 # go on the line together, the way tests/backports/host/seckeycurve/run.sh links them.
 #
 # BUILT WITH $common AND NOT WITH seckeycurve's OWN FLAGS, and that is the one detail that bites: this
@@ -435,13 +435,13 @@ clone="$build/micro-ecc"
 [ -f "$clone/uECC.h" ] || git clone --quiet --depth 1 https://github.com/kmackay/micro-ecc.git "$clone" > /dev/null 2>&1
 [ -f "$clone/uECC.h" ] || { echo "FAIL micro-ecc did not clone: no uECC.h in $clone"; exit 1; }
 xcrun clang $common -I"$clone" -I"$package/files" -c "$clone/uECC.c" -o "$build/uECC.o"
-xcrun clang $common -I"$clone" -I"$package/files" -c "$package/files/CharonCKWebAuth.c" -o "$build/wrapper.o"
+xcrun clang $common -I"$clone" -I"$package/files" -c "$package/files/RevenantCKWebAuth.c" -o "$build/wrapper.o"
 xcrun clang $common -I"$package/files" -I"$clone" -c "$S/SecKeyElliptic10.m" -o "$build/elliptic.o"
 curve="$build/elliptic.o $build/uECC.o $build/wrapper.o"
 
 # THE FOUR CASES NAME \$curve FOR THE SAME REASON THE FOUR MUTATIONS DO: they link
 # SecurityFunctions10_0_1.m, which dispatches into the curve. They were declared above the objects are
-# built, and so they linked that one file alone and failed with the same six undefined Charon names - four
+# built, and so they linked that one file alone and failed with the same six undefined Revenant names - four
 # BUILD lines in a run whose tail looked otherwise finished.
 run_case supported          compare-supported.lua          $H/supported.m $F $curve
 run_case padding           compare-padding.lua           $H/padding.m $F $curve
@@ -544,7 +544,7 @@ mutate "$TSCT" "$build/mutant-sct-refuses.m" \
 '    return errSecParam; // the release' \
 'the SCT setter refuses instead of accepting, likewise'
 mutate "$AC" "$build/mutant-ac-type-id-cfstring.m" \
-'    return (CFTypeID)[CharonSecAccessControl class];' \
+'    return (CFTypeID)[RevenantSecAccessControl class];' \
 '    return (CFTypeID)CFStringGetTypeID();' \
 'the access control type ID answers another type'"'"'s, the wrongness this row exists to avoid'
 

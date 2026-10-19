@@ -6,7 +6,7 @@
 
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 
-void charon_host_vDSP_vsmsma(const float *a, vDSP_Stride ia, const float *b, const float *c, vDSP_Stride ic,
+void revenant_host_vDSP_vsmsma(const float *a, vDSP_Stride ia, const float *b, const float *c, vDSP_Stride ic,
                             const float *d, float *e, vDSP_Stride ie, vDSP_Length n);
 
 #define CAP 32
@@ -28,7 +28,7 @@ static int control(void)
     const float want[4] = {32, 64, 96, 128};
     float e[CAP];
     for (int i = 0; i < CAP; i++) { uint32_t g = GAP; memcpy(&e[i], &g, sizeof g); }
-    charon_host_vDSP_vsmsma(a, 1, b, c, 1, d, e, 2, 4);
+    revenant_host_vDSP_vsmsma(a, 1, b, c, 1, d, e, 2, 4);
     int ok = 1;
     for (int i = 0; i < 4; i++) if (memcmp(&e[i * 2], &want[i], sizeof want[i]) != 0) ok = 0;
     report("CONTROL: E = A*2 + C*3 over 1..4 at stride 2", ok,
@@ -63,7 +63,7 @@ static void run(const char *label, vDSP_Stride ia, vDSP_Stride ic, vDSP_Stride i
         memcpy(&mine[i], &g, sizeof g);
         memcpy(&theirs[i], &g, sizeof g);
     }
-    charon_host_vDSP_vsmsma(a, ia, b, c, ic, d, mine, ie, n);
+    revenant_host_vDSP_vsmsma(a, ia, b, c, ic, d, mine, ie, n);
     vDSP_vsmsma(a, ia, b, c, ic, d, theirs, ie, n);
     char note[120];
     if (memcmp(mine, theirs, sizeof mine) == 0) {
@@ -92,7 +92,7 @@ static void precision_case(void)
     const float c[8] = {0x1.55555p-3f, 0x1.55555p-3f * 1.25f, 0x1.55555p-3f * 1.5f, 0x1.55555p-3f * 1.75f,
                         0x1.55555p-3f * 2.0f,   0x1.55555p-3f * 2.25f, 0x1.55555p-3f * 2.5f, 0x1.55555p-3f * 2.75f};
     float mine[8], theirs[8];
-    charon_host_vDSP_vsmsma(a, 1, b, c, 1, d, mine, 1, 8);
+    revenant_host_vDSP_vsmsma(a, 1, b, c, 1, d, mine, 1, 8);
     vDSP_vsmsma(a, 1, b, c, 1, d, theirs, 1, 8);
     report("the arithmetic's precision, on products that are not exact", memcmp(mine, theirs, sizeof mine) == 0,
            "B = 0.1f, D = 1/3f, A and C with full significands - the release and the port bit for bit");

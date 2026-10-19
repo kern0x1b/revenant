@@ -10,7 +10,7 @@ public struct IntentItem<Value> where Value: _IntentValue {
 
     public init(_ value: Value.ValueType) {
         self.value = value
-        self.title = CharonLocalized.resource(CharonIntentItemText.write(value))
+        self.title = RevenantLocalized.resource(RevenantIntentItemText.write(value))
         self.subtitle = nil
         self.image = nil
     }
@@ -23,7 +23,7 @@ public struct IntentItem<Value> where Value: _IntentValue {
         self.image = image
     }
 
-    public var description: String { return CharonLocalized.string(of: title) }
+    public var description: String { return RevenantLocalized.string(of: title) }
 }
 
 @resultBuilder
@@ -37,11 +37,11 @@ public enum IntentItemBuilder<Value> where Value: _IntentValue {
     public static func buildArray(_ items: [IntentItem<Value>]) -> [IntentItem<Value>] { return items }
 }
 
-enum CharonIntentItemText {
+enum RevenantIntentItemText {
     static func write(_ value: Any) -> String {
         if let describable = value as? CustomStringConvertible { return describable.description }
         if let localized = value as? any CustomLocalizedStringResourceConvertible {
-            return CharonLocalized.string(of: localized.localizedStringResource)
+            return RevenantLocalized.string(of: localized.localizedStringResource)
         }
         return String(describing: value)
     }
@@ -132,7 +132,7 @@ public struct IntentItemSection<Item> where Item: _IntentValue {
         self.items = items
     }
 
-    public var description: String { return title.map { CharonLocalized.string(of: $0) } ?? "" }
+    public var description: String { return title.map { RevenantLocalized.string(of: $0) } ?? "" }
 
 }
 
@@ -195,7 +195,7 @@ public struct IntentFile: Hashable, Sendable {
 
     public static func file(contentType: String, destinationDirectory: URL? = nil) -> IntentFile {
         let directory = destinationDirectory ?? URL(fileURLWithPath: NSTemporaryDirectory())
-        let url = directory.appendingPathComponent("charon-intent-file")
+        let url = directory.appendingPathComponent("revenant-intent-file")
         if !FileManager.default.fileExists(atPath: url.path) { FileManager.default.createFile(atPath: url.path, contents: Data()) }
         return IntentFile(fileURL: url, filename: url.lastPathComponent, type: contentType)
     }
@@ -203,7 +203,7 @@ public struct IntentFile: Hashable, Sendable {
     public static func file(contentType: String, destinationDirectory: URL? = nil,
                             fileHandler: (URL) throws -> Void) -> IntentFile {
         let directory = destinationDirectory ?? URL(fileURLWithPath: NSTemporaryDirectory())
-        let url = directory.appendingPathComponent("charon-intent-file")
+        let url = directory.appendingPathComponent("revenant-intent-file")
         try? fileHandler(url)
         return IntentFile(fileURL: url, filename: url.lastPathComponent, type: contentType)
     }
@@ -255,14 +255,14 @@ extension IntentFile: DisplayRepresentable, _IntentValue {
     public static var defaultResolverSpecification: Specification { return Specification() }
 
     public static var typeDisplayRepresentation: TypeDisplayRepresentation {
-        return TypeDisplayRepresentation(name: CharonLocalized.resource("File"))
+        return TypeDisplayRepresentation(name: RevenantLocalized.resource("File"))
     }
 
     public var displayRepresentation: DisplayRepresentation {
         return DisplayRepresentation(title: title)
     }
 
-    public var title: LocalizedStringResource { return CharonLocalized.resource(filename) }
+    public var title: LocalizedStringResource { return RevenantLocalized.resource(filename) }
 
     public var localizedStringResource: LocalizedStringResource { return title }
 }
@@ -421,7 +421,7 @@ public struct IntentPerson: Hashable, Sendable, DisplayRepresentable, _IntentVal
     }
 
     public static var typeDisplayRepresentation: TypeDisplayRepresentation {
-        return TypeDisplayRepresentation(name: CharonLocalized.resource("Person"))
+        return TypeDisplayRepresentation(name: RevenantLocalized.resource("Person"))
     }
 
     public var displayRepresentation: DisplayRepresentation {
@@ -429,7 +429,7 @@ public struct IntentPerson: Hashable, Sendable, DisplayRepresentable, _IntentVal
     }
 
     public var title: LocalizedStringResource {
-        return CharonLocalized.resource(handle?.applicationDefined ?? name.rawValue)
+        return RevenantLocalized.resource(handle?.applicationDefined ?? name.rawValue)
     }
 
     public var localizedStringResource: LocalizedStringResource { return title }
@@ -469,14 +469,14 @@ public struct IntentPaymentMethod: Sendable, DisplayRepresentable, _IntentValue 
     }
 
     public static var typeDisplayRepresentation: TypeDisplayRepresentation {
-        return TypeDisplayRepresentation(name: CharonLocalized.resource("Payment Method"))
+        return TypeDisplayRepresentation(name: RevenantLocalized.resource("Payment Method"))
     }
 
     public var displayRepresentation: DisplayRepresentation {
         return DisplayRepresentation(title: title, image: icon)
     }
 
-    public var title: LocalizedStringResource { return CharonLocalized.resource(name) }
+    public var title: LocalizedStringResource { return RevenantLocalized.resource(name) }
 
     public var localizedStringResource: LocalizedStringResource { return title }
 
@@ -506,14 +506,14 @@ public struct IntentCurrencyAmount: Equatable, Hashable, Sendable, DisplayRepres
     }
 
     public static var typeDisplayRepresentation: TypeDisplayRepresentation {
-        return TypeDisplayRepresentation(name: CharonLocalized.resource("Currency Amount"))
+        return TypeDisplayRepresentation(name: RevenantLocalized.resource("Currency Amount"))
     }
 
     public var displayRepresentation: DisplayRepresentation {
         return DisplayRepresentation(title: title)
     }
 
-    public var title: LocalizedStringResource { return CharonLocalized.resource(currencyCode) }
+    public var title: LocalizedStringResource { return RevenantLocalized.resource(currencyCode) }
 
     public var localizedStringResource: LocalizedStringResource { return title }
 

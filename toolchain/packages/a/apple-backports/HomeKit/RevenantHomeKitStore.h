@@ -1,12 +1,12 @@
 #import <Foundation/Foundation.h>
 
-#define CHARON_HOMEKIT_TABLES @[@"homes", @"rooms", @"zones", @"users", @"servicegroups", @"accessories", \
+#define REVENANT_HOMEKIT_TABLES @[@"homes", @"rooms", @"zones", @"users", @"servicegroups", @"accessories", \
                                @"services", @"characteristics", @"actionsets", @"actions", @"triggers", \
                                @"pairings", @"identities"]
 
-@interface CharonHomeKitStore : NSObject
+@interface RevenantHomeKitStore : NSObject
 
-+ (CharonHomeKitStore *)shared;
++ (RevenantHomeKitStore *)shared;
 
 - (NSMutableDictionary *)tableNamed:(NSString *)name;
 
@@ -16,6 +16,6 @@
 
 @end
 
-NSString *CharonHomeKitNewIdentifier(void);
+NSString *RevenantHomeKitNewIdentifier(void);
 
-void charon_homekit_once(NSString *message);
+void revenant_homekit_once(NSString *message);

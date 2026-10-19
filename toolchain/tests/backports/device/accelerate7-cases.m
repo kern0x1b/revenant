@@ -69,7 +69,7 @@ typedef struct {
     CGBitmapInfo info;
 } Format;
 
-void charon_vimage_cases(void (^emit)(NSString *name, NSString *value))
+void revenant_vimage_cases(void (^emit)(NSString *name, NSString *value))
 {
     Format formats[] = {
         {"ARGB premult first", 8, 32, NO, kCGImageAlphaPremultipliedFirst},

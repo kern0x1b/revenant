@@ -9,7 +9,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "facts": "facts/SpriteKit/SKUniform.md",
-      "source": "spec/SpriteKit/declarations.tsv (the enum, NSInteger, ios=8.0); the values are measured on the host in facts/SpriteKit/SKUniform.md and declared in SpriteKit/CharonSpriteKit.h",
+      "source": "spec/SpriteKit/declarations.tsv (the enum, NSInteger, ios=8.0); the values are measured on the host in facts/SpriteKit/SKUniform.md and declared in SpriteKit/RevenantSpriteKit.h",
       "effect": "the enumeration names the type of a uniform; the port's header declares it with the SDK's values"
     },
     {
@@ -460,7 +460,7 @@
       "status": "implemented",
       "facts": "facts/SpriteKit/SKNode.md",
       "source": "spec/SpriteKit/declarations.tsv, the SKNode member; spec/SpriteKit/declarations.tsv, (im)objectForKeyedSubscript:, ios=8.0",
-      "effect": "node[@\"path\"] answers every node the path picks out, as an array, in the host's order (measured in facts/SpriteKit/SKNode.md); built in SpriteKit8.m over the port's seam -[SKNode charon_nodesMatchingPath:]"
+      "effect": "node[@\"path\"] answers every node the path picks out, as an array, in the host's order (measured in facts/SpriteKit/SKNode.md); built in SpriteKit8.m over the port's seam -[SKNode revenant_nodesMatchingPath:]"
     },
     {
       "api": "SKSceneDelegate",
@@ -469,7 +469,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "facts": "facts/SpriteKit/SKScene.md",
-      "source": "spec/SpriteKit/declarations.tsv, the SKScene member, SKSceneDelegate (ios 8.0); SpriteKit/CharonSpriteKit.h",
+      "source": "spec/SpriteKit/declarations.tsv, the SKScene member, SKSceneDelegate (ios 8.0); SpriteKit/RevenantSpriteKit.h",
       "effect": "the protocol an application's scene delegate conforms to; the view calls its update, action, physics and constraint methods only where the delegate answers them"
     },
     {

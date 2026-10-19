@@ -9,6 +9,6 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-BUILD=${BUILD:-$(runs_fresh charon-gaussian-blur-width)}
+BUILD=${BUILD:-$(runs_fresh revenant-gaussian-blur-width)}
 xcrun clang -O -fobjc-arc "$here/sweep.m" -framework Foundation -framework Metal -framework MetalPerformanceShaders -o "$BUILD/sweep"
 "$BUILD/sweep"

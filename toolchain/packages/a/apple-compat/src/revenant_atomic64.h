@@ -1,9 +1,9 @@
-#ifndef CHARON_ATOMIC64_H
-#define CHARON_ATOMIC64_H
+#ifndef REVENANT_ATOMIC64_H
+#define REVENANT_ATOMIC64_H
 
 #include <stdint.h>
 
-static inline int64_t charon_atomic_add64(volatile int64_t *address, int64_t delta)
+static inline int64_t revenant_atomic_add64(volatile int64_t *address, int64_t delta)
 {
 #if defined(__arm__)
     int64_t before, after;

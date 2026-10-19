@@ -1,26 +1,26 @@
 #import <UIKit/UIKit.h>
-#import "CharonFeedbackGenerator.h"
+#import "RevenantFeedbackGenerator.h"
 #import <objc/runtime.h>
 
-static const char CharonBoundViewKey;
+static const char RevenantBoundViewKey;
 
-@interface UIImpactFeedbackGenerator (CharonLocation17Scaling)
-- (void)charon_impactScaledBy:(float)scale;
+@interface UIImpactFeedbackGenerator (RevenantLocation17Scaling)
+- (void)revenant_impactScaledBy:(float)scale;
 @end
 
-@implementation UIFeedbackGenerator (CharonLocation17)
+@implementation UIFeedbackGenerator (RevenantLocation17)
 
 - (instancetype)initWithBoundView:(UIView *)view
 {
     self = [self init];
     if (self)
-        objc_setAssociatedObject(self, &CharonBoundViewKey, view, OBJC_ASSOCIATION_ASSIGN);
+        objc_setAssociatedObject(self, &RevenantBoundViewKey, view, OBJC_ASSOCIATION_ASSIGN);
     return self;
 }
 
-- (UIView *)charon_boundView
+- (UIView *)revenant_boundView
 {
-    return objc_getAssociatedObject(self, &CharonBoundViewKey);
+    return objc_getAssociatedObject(self, &RevenantBoundViewKey);
 }
 
 + (instancetype)feedbackGeneratorForView:(UIView *)view
@@ -30,7 +30,7 @@ static const char CharonBoundViewKey;
 
 @end
 
-@implementation UIImpactFeedbackGenerator (CharonLocation17)
+@implementation UIImpactFeedbackGenerator (RevenantLocation17)
 
 + (instancetype)feedbackGeneratorWithStyle:(UIImpactFeedbackStyle)style forView:(UIView *)view
 {
@@ -51,7 +51,7 @@ static const char CharonBoundViewKey;
 
 @end
 
-@implementation UISelectionFeedbackGenerator (CharonLocation17)
+@implementation UISelectionFeedbackGenerator (RevenantLocation17)
 
 - (void)selectionChangedAtLocation:(CGPoint)location
 {
@@ -61,7 +61,7 @@ static const char CharonBoundViewKey;
 
 @end
 
-@implementation UINotificationFeedbackGenerator (CharonLocation17)
+@implementation UINotificationFeedbackGenerator (RevenantLocation17)
 
 - (void)notificationOccurred:(UINotificationFeedbackType)type atLocation:(CGPoint)location
 {

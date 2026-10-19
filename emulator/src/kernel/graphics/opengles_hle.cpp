@@ -35,7 +35,7 @@
 #include "foundation/userland_hle.hpp"
 #include "surface_transport_hle.hpp"
 
-namespace shade {
+namespace emulator {
 namespace {
 
     constexpr std::string_view opengles_image {
@@ -1244,7 +1244,7 @@ void OpenGlesHle::draw(UserlandHleCall& call, bool indexed)
         if (indices->size() < 3U)
             return;
         std::string error;
-        shaded = shade_vertices(call, *context, *active_program, *indices, error);
+        shaded = emulator_vertices(call, *context, *active_program, *indices, error);
         if (!shaded) {
             trace_shader_failure(call, "vertex shader failed: " + error);
             set_gl_error(call, gles_abi::invalid_operation);
@@ -2150,10 +2150,10 @@ void OpenGlesHle::register_egl(UserlandHleRegistry& registry)
         std::string_view value;
         switch (call.argument(1)) {
         case egl_vendor:
-            value = "Shade";
+            value = "Revenant";
             break;
         case egl_version:
-            value = "1.1 Shade userland HLE";
+            value = "1.1 Revenant userland HLE";
             break;
         case egl_extensions:
             value = "";

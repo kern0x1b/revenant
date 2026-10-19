@@ -3,15 +3,15 @@
 #include <float.h>
 #include <math.h>
 #include <string.h>
-#include "../CharonSpring.h"
+#include "../RevenantSpring.h"
 
-static const double charon_spring_settled = 0.001;
-static const NSUInteger charon_spring_iterations = 20;
-static const double charon_spring_frames_per_second = 60;
-static const NSUInteger charon_spring_maximum_samples = 600;
-static const double charon_spring_duration_tolerance = 1e-4;
+static const double revenant_spring_settled = 0.001;
+static const NSUInteger revenant_spring_iterations = 20;
+static const double revenant_spring_frames_per_second = 60;
+static const NSUInteger revenant_spring_maximum_samples = 600;
+static const double revenant_spring_duration_tolerance = 1e-4;
 
-static double charon_spring_amplitude(double omega, double zeta, double velocity, double duration, double *derivative)
+static double revenant_spring_amplitude(double omega, double zeta, double velocity, double duration, double *derivative)
 {
     if (zeta < 1) {
         double damped = omega * sqrt(1 - zeta * zeta);
@@ -29,20 +29,20 @@ static double charon_spring_amplitude(double omega, double zeta, double velocity
     return value;
 }
 
-double charon_spring_frequency(double duration, double dampingRatio, double velocity)
+double revenant_spring_frequency(double duration, double dampingRatio, double velocity)
 {
     double zeta = MIN(MAX(dampingRatio, FLT_EPSILON), 1.0);
     double omega = 2 * M_PI / duration;
-    for (NSUInteger step = 0; step < charon_spring_iterations; step++) {
+    for (NSUInteger step = 0; step < revenant_spring_iterations; step++) {
         double derivative = 0;
-        double value = charon_spring_amplitude(omega, zeta, velocity, duration, &derivative);
+        double value = revenant_spring_amplitude(omega, zeta, velocity, duration, &derivative);
         if (value < 0) {
             value = -value;
             derivative = -derivative;
         }
         if (derivative == 0)
             break;
-        double next = omega - (value - charon_spring_settled) / derivative;
+        double next = omega - (value - revenant_spring_settled) / derivative;
         if (!isfinite(next) || next <= 0)
             return NAN;
         if (fabs(next - omega) < 1e-9)
@@ -52,12 +52,12 @@ double charon_spring_frequency(double duration, double dampingRatio, double velo
     return isfinite(omega) && omega > 0 ? omega : NAN;
 }
 
-double charon_spring_progress(double omega, double dampingRatio, double velocity, double time)
+double revenant_spring_progress(double omega, double dampingRatio, double velocity, double time)
 {
-    return charon_spring_value(omega, MIN(MAX(dampingRatio, FLT_EPSILON), 1.0), velocity, time);
+    return revenant_spring_value(omega, MIN(MAX(dampingRatio, FLT_EPSILON), 1.0), velocity, time);
 }
 
-static BOOL charon_decompose(CATransform3D transform, double *components)
+static BOOL revenant_decompose(CATransform3D transform, double *components)
 {
     if (!CATransform3DIsAffine(transform))
         return NO;
@@ -80,13 +80,13 @@ static BOOL charon_decompose(CATransform3D transform, double *components)
     return YES;
 }
 
-static id charon_interpolate_transform(NSValue *from, NSValue *to, double progress)
+static id revenant_interpolate_transform(NSValue *from, NSValue *to, double progress)
 {
     CATransform3D start, finish;
     [from getValue:&start];
     [to getValue:&finish];
     double first[5], second[5];
-    if (charon_decompose(start, first) && charon_decompose(finish, second)) {
+    if (revenant_decompose(start, first) && revenant_decompose(finish, second)) {
         double turn = second[0] - first[0];
         while (turn > M_PI)
             turn -= 2 * M_PI;
@@ -109,7 +109,7 @@ static id charon_interpolate_transform(NSValue *from, NSValue *to, double progre
     return [NSValue valueWithCATransform3D:mixed];
 }
 
-id charon_spring_interpolate(id from, id to, double progress)
+id revenant_spring_interpolate(id from, id to, double progress)
 {
     if ([from isKindOfClass:[NSNumber class]] && [to isKindOfClass:[NSNumber class]]) {
         double start = [from doubleValue], finish = [to doubleValue];
@@ -121,7 +121,7 @@ id charon_spring_interpolate(id from, id to, double progress)
     if (strcmp(type, [to objCType]) != 0)
         return nil;
     if (strcmp(type, @encode(CATransform3D)) == 0)
-        return charon_interpolate_transform(from, to, progress);
+        return revenant_interpolate_transform(from, to, progress);
     static const char *const types[] = {@encode(CGPoint), @encode(CGSize), @encode(CGRect), @encode(UIEdgeInsets), @encode(CGVector)};
     static const NSUInteger counts[] = {2, 2, 4, 4, 2};
     for (NSUInteger index = 0; index < sizeof(types) / sizeof(*types); index++) {
@@ -137,13 +137,13 @@ id charon_spring_interpolate(id from, id to, double progress)
     return nil;
 }
 
-@interface CharonSpringCompletion : NSObject <CAAnimationDelegate>
+@interface RevenantSpringCompletion : NSObject <CAAnimationDelegate>
 @property (nonatomic, copy) void (^completion)(BOOL finished);
 @property (nonatomic) NSInteger running;
 @property (nonatomic) BOOL interrupted;
 @end
 
-@implementation CharonSpringCompletion
+@implementation RevenantSpringCompletion
 
 @synthesize completion = _completion, running = _running, interrupted = _interrupted;
 
@@ -166,22 +166,22 @@ id charon_spring_interpolate(id from, id to, double progress)
 
 @end
 
-static void charon_collect_layers(CALayer *layer, NSMutableArray *layers)
+static void revenant_collect_layers(CALayer *layer, NSMutableArray *layers)
 {
     [layers addObject:layer];
     for (CALayer *sublayer in layer.sublayers)
-        charon_collect_layers(sublayer, layers);
+        revenant_collect_layers(sublayer, layers);
 }
 
-static NSArray *charon_animated_layers(void)
+static NSArray *revenant_animated_layers(void)
 {
     NSMutableArray *layers = [NSMutableArray array];
     for (UIWindow *window in [UIApplication sharedApplication].windows)
-        charon_collect_layers(window.layer, layers);
+        revenant_collect_layers(window.layer, layers);
     return layers;
 }
 
-static NSSet *charon_animations_of_layers(NSArray *layers)
+static NSSet *revenant_animations_of_layers(NSArray *layers)
 {
     NSMutableSet *found = [NSMutableSet set];
     for (CALayer *layer in layers) {
@@ -194,7 +194,7 @@ static NSSet *charon_animations_of_layers(NSArray *layers)
     return found;
 }
 
-static CAKeyframeAnimation *charon_spring_keyframes(CABasicAnimation *animation, CALayer *layer, double omega, double dampingRatio, double velocity, NSTimeInterval delay)
+static CAKeyframeAnimation *revenant_spring_keyframes(CABasicAnimation *animation, CALayer *layer, double omega, double dampingRatio, double velocity, NSTimeInterval delay)
 {
     id from = animation.fromValue;
     id to = animation.toValue;
@@ -202,14 +202,14 @@ static CAKeyframeAnimation *charon_spring_keyframes(CABasicAnimation *animation,
         return nil;
     if (!to)
         to = [layer valueForKeyPath:animation.keyPath];
-    if (!to || !charon_spring_interpolate(from, to, 0.5))
+    if (!to || !revenant_spring_interpolate(from, to, 0.5))
         return nil;
-    NSUInteger samples = (NSUInteger)round(animation.duration * charon_spring_frames_per_second);
-    samples = MAX(2u, MIN(samples, charon_spring_maximum_samples));
+    NSUInteger samples = (NSUInteger)round(animation.duration * revenant_spring_frames_per_second);
+    samples = MAX(2u, MIN(samples, revenant_spring_maximum_samples));
     NSMutableArray *values = [NSMutableArray arrayWithCapacity:samples + 1];
     for (NSUInteger index = 0; index <= samples; index++) {
         double time = animation.duration * index / samples;
-        [values addObject:charon_spring_interpolate(from, to, charon_spring_progress(omega, dampingRatio, velocity, time))];
+        [values addObject:revenant_spring_interpolate(from, to, revenant_spring_progress(omega, dampingRatio, velocity, time))];
     }
     [values replaceObjectAtIndex:values.count - 1 withObject:to];
     CAKeyframeAnimation *keyframes = [CAKeyframeAnimation animationWithKeyPath:animation.keyPath];
@@ -227,15 +227,15 @@ static CAKeyframeAnimation *charon_spring_keyframes(CABasicAnimation *animation,
     return keyframes;
 }
 
-@implementation UIView (CharonSpringAnimation)
+@implementation UIView (RevenantSpringAnimation)
 
 + (void)animateWithDuration:(NSTimeInterval)duration delay:(NSTimeInterval)delay usingSpringWithDamping:(CGFloat)dampingRatio initialSpringVelocity:(CGFloat)velocity options:(UIViewAnimationOptions)options animations:(void (^)(void))animations completion:(void (^)(BOOL finished))completion
 {
-    double omega = duration > 0 ? charon_spring_frequency(duration, dampingRatio, velocity) : NAN;
+    double omega = duration > 0 ? revenant_spring_frequency(duration, dampingRatio, velocity) : NAN;
     UIViewAnimationOptions curves = UIViewAnimationOptionCurveEaseIn | UIViewAnimationOptionCurveEaseOut | UIViewAnimationOptionCurveEaseInOut | UIViewAnimationOptionCurveLinear;
     UIViewAnimationOptions timing = isnan(omega) ? (options & curves) : UIViewAnimationOptionCurveEaseOut;
-    NSSet *existing = isnan(omega) ? nil : charon_animations_of_layers(charon_animated_layers());
-    CharonSpringCompletion *shadow = [[CharonSpringCompletion alloc] init];
+    NSSet *existing = isnan(omega) ? nil : revenant_animations_of_layers(revenant_animated_layers());
+    RevenantSpringCompletion *shadow = [[RevenantSpringCompletion alloc] init];
     __block BOOL shadowed = NO;
     [UIView animateWithDuration:duration delay:delay options:(options & ~curves) | timing animations:animations completion:^(BOOL finished) {
         if (!shadowed && completion)
@@ -244,14 +244,14 @@ static CAKeyframeAnimation *charon_spring_keyframes(CABasicAnimation *animation,
     if (!existing)
         return;
     NSMutableArray *replacements = [NSMutableArray array];
-    for (CALayer *layer in charon_animated_layers()) {
+    for (CALayer *layer in revenant_animated_layers()) {
         for (NSString *key in layer.animationKeys) {
             CAAnimation *animation = [layer animationForKey:key];
             if (![animation isKindOfClass:[CABasicAnimation class]] || [existing containsObject:animation])
                 continue;
-            if (fabs(animation.duration - duration) > duration * charon_spring_duration_tolerance)
+            if (fabs(animation.duration - duration) > duration * revenant_spring_duration_tolerance)
                 continue;
-            CAKeyframeAnimation *keyframes = charon_spring_keyframes((CABasicAnimation *)animation, layer, omega, dampingRatio, velocity, delay);
+            CAKeyframeAnimation *keyframes = revenant_spring_keyframes((CABasicAnimation *)animation, layer, omega, dampingRatio, velocity, delay);
             if (keyframes)
                 [replacements addObject:[NSArray arrayWithObjects:layer, key, keyframes, nil]];
         }

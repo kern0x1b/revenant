@@ -1,4 +1,4 @@
-#import "CharonMPS.h"
+#import "RevenantMPS.h"
 
 
 @implementation MPSMatrixDescriptor {
@@ -41,12 +41,12 @@
 
 + (size_t)rowBytesFromColumns:(NSUInteger)columns dataType:(MPSDataType)dataType
 {
-    return CharonMPSRowBytesForColumns(columns, dataType);
+    return RevenantMPSRowBytesForColumns(columns, dataType);
 }
 
 + (size_t)rowBytesForColumns:(NSUInteger)columns dataType:(MPSDataType)dataType
 {
-    return CharonMPSRowBytesForColumns(columns, dataType);
+    return RevenantMPSRowBytesForColumns(columns, dataType);
 }
 
 - (NSUInteger)rows

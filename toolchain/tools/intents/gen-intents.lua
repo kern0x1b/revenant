@@ -569,8 +569,8 @@ local function initialiser(interface, method, states, spellings, interfaces)
         table.insert(lines, "    if ((self = [super " .. table.concat(pieces, " ") .. "])) {")
     elseif own_init_unavailable(interface, interfaces) then
         table.insert(lines, "    // The header marks this class's -init unavailable, so the superclass's own")
-        table.insert(lines, "    // -init is called through CharonCoding.h's one definition of it.")
-        table.insert(lines, "    if ((self = charon_intents_super_init(self, [" .. interface.superclass .. " class]))) {")
+        table.insert(lines, "    // -init is called through RevenantCoding.h's one definition of it.")
+        table.insert(lines, "    if ((self = revenant_intents_super_init(self, [" .. interface.superclass .. " class]))) {")
     else
         table.insert(lines, "    if ((self = [super init])) {")
     end
@@ -583,7 +583,7 @@ local function initialiser(interface, method, states, spellings, interfaces)
         end
     end
     for _, parameter in ipairs(adopt) do
-        table.insert(lines, "        [self charon_adoptResolutionOf:" .. parameter .. "];")
+        table.insert(lines, "        [self revenant_adoptResolutionOf:" .. parameter .. "];")
     end
     table.insert(lines, "    }")
     for _, entry in ipairs(after) do
@@ -676,24 +676,24 @@ local function factory(interface, method, resolution, interfaces)
                 "    // The host re-forms a success carrying the zero case of its type as a",
                 "    // notRequired - a success with nothing to say - and leaves any other value a",
                 "    // success (measured on the host's own Intents, 17 enumerations).",
-                "    return [self charon_resolutionWithStatus:" .. name .. " == 0 ? CharonIntentsResolutionNotRequired",
-                "                                                : CharonIntentsResolutionSuccess",
+                "    return [self revenant_resolutionWithStatus:" .. name .. " == 0 ? RevenantIntentsResolutionNotRequired",
+                "                                                : RevenantIntentsResolutionSuccess",
                 " resolvedValue:" .. value .. " valuesToDisambiguate:nil valueToConfirm:nil];", "}"}
     end
     if selector:match("^disambiguationWith(.*)ToDisambiguate:$") or selector == DISAMBIGUATION_VALUE then
         return {head, "{",
-                "    return [self charon_resolutionWithStatus:CharonIntentsResolutionDisambiguation"
+                "    return [self revenant_resolutionWithStatus:RevenantIntentsResolutionDisambiguation"
                     .. " resolvedValue:nil valuesToDisambiguate:" .. value .. " valueToConfirm:nil];", "}"}
     end
     if selector == "unsupportedForReason:" or selector == "unsupportedWithReason:" then
         return {head, "{",
-                "    return [self charon_resolutionWithStatus:CharonIntentsResolutionUnsupported"
+                "    return [self revenant_resolutionWithStatus:RevenantIntentsResolutionUnsupported"
                     .. " resolvedValue:nil valuesToDisambiguate:nil valueToConfirm:nil"
                     .. " unsupportedReason:" .. name .. "];", "}"}
     end
     if selector:match("^confirmationRequiredWith(.*)ToConfirm:$") or selector == CONFIRMATION_VALUE then
         return {head, "{",
-                "    return [self charon_resolutionWithStatus:CharonIntentsResolutionConfirmationRequired"
+                "    return [self revenant_resolutionWithStatus:RevenantIntentsResolutionConfirmationRequired"
                     .. " resolvedValue:nil valuesToDisambiguate:nil valueToConfirm:" .. value .. "];", "}"}
     end
     return {}
@@ -901,14 +901,14 @@ local function banner(name, classes, release, deferred)
 //  registry/Intents instead of with nil.
 //
 //  The classes whose behaviour is more than storage are hand written in
-//  CharonIntents{{release}}.m, and the generator leaves them out.
+//  RevenantIntents{{release}}.m, and the generator leaves them out.
 //
 
 #import <Intents/Intents.h>
 #import <objc/runtime.h>
-#import "../../../c/charon-coding/files/CharonCoding.h"
-#import "CharonIntentsResolution.h"
-#import "CharonIntents262.h"
+#import "../../../c/revenant-coding/files/RevenantCoding.h"
+#import "RevenantIntentsResolution.h"
+#import "RevenantIntents262.h"
 
 // The SDK marks each class's initialiser as the designated one, in a header this package does not
 // own and cannot add a marking to, so clang reads the -initWithCoder: and -copyWithZone: every
@@ -1234,8 +1234,8 @@ local function implementation(interface, protocols, carried, intents, interfaces
         if own_init ~= nil then
             start = {
                 "    // The header marks this class's -init unavailable, so the superclass's own",
-                "    // -init is called through CharonCoding.h's one definition of it.",
-                "    if ((self = charon_intents_super_init(self, [" .. interface.superclass .. " class])))",
+                "    // -init is called through RevenantCoding.h's one definition of it.",
+                "    if ((self = revenant_intents_super_init(self, [" .. interface.superclass .. " class])))",
             }
         else
             start = {"    if ((self = [super init]))"}
@@ -1247,9 +1247,9 @@ local function implementation(interface, protocols, carried, intents, interfaces
         for _, line in ipairs(start) do
             table.insert(out, line)
         end
-        for _, line in ipairs({"        charon_intents_decode(self, coder);", "    return self;", "}", "",
+        for _, line in ipairs({"        revenant_intents_decode(self, coder);", "    return self;", "}", "",
                                "- (void)encodeWithCoder:(NSCoder *)coder", "{",
-                               "    charon_intents_encode(self, coder);", "}"}) do
+                               "    revenant_intents_encode(self, coder);", "}"}) do
             table.insert(out, line)
         end
         table.insert(out, "")
@@ -1257,15 +1257,15 @@ local function implementation(interface, protocols, carried, intents, interfaces
     if conformed_has(conformed, "NSCopying") then
         for _, line in ipairs({"- (id)copyWithZone:(NSZone *)zone", "{",
                                "    " .. name .. " *copy = [[[self class] allocWithZone:zone] init];",
-                               "    charon_intents_copy(copy, self);", "    return copy;", "}"}) do
+                               "    revenant_intents_copy(copy, self);", "    return copy;", "}"}) do
             table.insert(out, line)
         end
         table.insert(out, "")
     end
 
-    for _, key in ipairs(sorted_keys(D.charon_readers)) do
+    for _, key in ipairs(sorted_keys(D.revenant_readers)) do
         if key:match("^(%S+) ") == name then
-            for _, line in ipairs(D.charon_readers[key]) do
+            for _, line in ipairs(D.revenant_readers[key]) do
                 table.insert(out, line)
             end
             table.insert(out, "")
@@ -1276,7 +1276,7 @@ local function implementation(interface, protocols, carried, intents, interfaces
 
     for _, category in ipairs(sorted_keys(by_category)) do
         local found = by_category[category]
-        table.insert(out, string.format("@implementation %s (Charon%s%s)", name, name, category))
+        table.insert(out, string.format("@implementation %s (Revenant%s%s)", name, name, category))
         for _, entry in ipairs(dynamic) do
             if entry[2] == category then
                 table.insert(out, "    @dynamic " .. entry[1] .. ";  // " .. (D.cause_labels[entry[3]] or entry[3])

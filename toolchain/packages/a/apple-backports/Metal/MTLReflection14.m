@@ -1,6 +1,6 @@
 #import "MTLFunctionLogInternal.h"
 
-@interface CharonMetalFunctionLogDebugLocation : NSObject <MTLFunctionLogDebugLocation>
+@interface RevenantMetalFunctionLogDebugLocation : NSObject <MTLFunctionLogDebugLocation>
 {
     NSString *_functionName;
     NSURL *_URL;
@@ -12,7 +12,7 @@
                              column:(NSUInteger)column;
 @end
 
-@interface CharonMetalFunctionLog : NSObject <MTLFunctionLog>
+@interface RevenantMetalFunctionLog : NSObject <MTLFunctionLog>
 {
     MTLFunctionLogType _type;
     NSString *_encoderLabel;
@@ -25,7 +25,7 @@
                debugLocation:(id<MTLFunctionLogDebugLocation>)debugLocation;
 @end
 
-@implementation CharonMetalFunctionLogDebugLocation
+@implementation RevenantMetalFunctionLogDebugLocation
 
 - (instancetype)initWithFunctionName:(NSString *)functionName
                                  URL:(NSURL *)URL
@@ -63,7 +63,7 @@
 
 @end
 
-@implementation CharonMetalFunctionLog
+@implementation RevenantMetalFunctionLog
 
 - (instancetype)initWithType:(MTLFunctionLogType)type
                encoderLabel:(NSString *)encoderLabel
@@ -101,7 +101,7 @@
 
 @end
 
-@implementation CharonMetalLogContainer
+@implementation RevenantMetalLogContainer
 
 - (instancetype)init
 {

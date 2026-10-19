@@ -43,8 +43,8 @@ extern NSString *const AVVideoHeightKey;
 - (NSArray *)sourceTimeRanges;
 @end
 
-@interface AVAssetWriterInput (CharonStandin)
-- (void)charonAttachToWriter:(AVAssetWriter *)writer;
+@interface AVAssetWriterInput (RevenantStandin)
+- (void)revenantAttachToWriter:(AVAssetWriter *)writer;
 @end
 
 @interface AVAssetWriter : NSObject
@@ -78,7 +78,7 @@ extern NSString *const AVVideoHeightKey;
 
 @end
 
-@interface NSValue (CharonStandinCMTime)
+@interface NSValue (RevenantStandinCMTime)
 + (NSValue *)valueWithCMTimeRange:(CMTimeRange)timeRange;
 - (CMTimeRange)CMTimeRangeValue;
 @end

@@ -1,8 +1,8 @@
 #import <MetalKit/MetalKit.h>
 #import <ModelIO/ModelIO.h>
 
-extern MDLVertexFormat CharonMDLFormatFromMetal(MTLVertexFormat format);
-extern MTLVertexFormat CharonMetalFormatFromMDL(MDLVertexFormat format);
+extern MDLVertexFormat RevenantMDLFormatFromMetal(MTLVertexFormat format);
+extern MTLVertexFormat RevenantMetalFormatFromMDL(MDLVertexFormat format);
 
 MDLVertexDescriptor *MTKModelIOVertexDescriptorFromMetal(MTLVertexDescriptor *metalDescriptor)
 {
@@ -16,12 +16,12 @@ MTLVertexDescriptor *MTKMetalVertexDescriptorFromModelIO(MDLVertexDescriptor *mo
 
 MDLVertexFormat MTKModelIOVertexFormatFromMetal(MTLVertexFormat vertexFormat)
 {
-    MDLVertexFormat format = CharonMDLFormatFromMetal(vertexFormat);
+    MDLVertexFormat format = RevenantMDLFormatFromMetal(vertexFormat);
     return format == MDLVertexFormatInvalid ? MDLVertexFormatInvalid : format;
 }
 
 MTLVertexFormat MTKMetalVertexFormatFromModelIO(MDLVertexFormat vertexFormat)
 {
-    MTLVertexFormat format = CharonMetalFormatFromMDL(vertexFormat);
+    MTLVertexFormat format = RevenantMetalFormatFromMDL(vertexFormat);
     return format == MTLVertexFormatInvalid ? MTLVertexFormatInvalid : format;
 }

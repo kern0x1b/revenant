@@ -3,9 +3,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define CHARON_EPMACH 2.2204460492503131e-16
-#define CHARON_UFLOW 2.2250738585072014e-308
-#define CHARON_OFLOW 1.7976931348623157e+308
+#define REVENANT_EPMACH 2.2204460492503131e-16
+#define REVENANT_UFLOW 2.2250738585072014e-308
+#define REVENANT_OFLOW 1.7976931348623157e+308
 
 static const double x1[5] = {
     9.73906528517171743430935748619959e-01, 8.65063366688984536345685683045303e-01, 6.79409568299024435589217318920419e-01,
@@ -218,30 +218,30 @@ static const double k61_xgk[31] = {
     0.00000000000000000000000000000000e+00,
 };
 
-typedef void (*CharonIntegrand)(void *arg, size_t n, const double *x, double *y);
+typedef void (*RevenantIntegrand)(void *arg, size_t n, const double *x, double *y);
 
-static void charon_call(CharonIntegrand fun, void *arg, const double *x, double *y, int n)
+static void revenant_call(RevenantIntegrand fun, void *arg, const double *x, double *y, int n)
 {
     fun(arg, (size_t)n, x, y);
 }
 
-typedef struct CharonRule {
+typedef struct RevenantRule {
     const double *wg;
     const double *wgk;
     const double *xgk;
     int n;
     int gauss_pairs;
     int gauss_centre;
-} CharonRule;
+} RevenantRule;
 
-static const CharonRule charon_k15 = {k15_wg, k15_wgk, k15_xgk, 15, 3, 1};
-static const CharonRule charon_k21 = {k21_wg, k21_wgk, k21_xgk, 21, 5, 0};
-static const CharonRule charon_k31 = {k31_wg, k31_wgk, k31_xgk, 31, 7, 1};
-static const CharonRule charon_k41 = {k41_wg, k41_wgk, k41_xgk, 41, 10, 0};
-static const CharonRule charon_k51 = {k51_wg, k51_wgk, k51_xgk, 51, 12, 1};
-static const CharonRule charon_k61 = {k61_wg, k61_wgk, k61_xgk, 61, 15, 0};
+static const RevenantRule revenant_k15 = {k15_wg, k15_wgk, k15_xgk, 15, 3, 1};
+static const RevenantRule revenant_k21 = {k21_wg, k21_wgk, k21_xgk, 21, 5, 0};
+static const RevenantRule revenant_k31 = {k31_wg, k31_wgk, k31_xgk, 31, 7, 1};
+static const RevenantRule revenant_k41 = {k41_wg, k41_wgk, k41_xgk, 41, 10, 0};
+static const RevenantRule revenant_k51 = {k51_wg, k51_wgk, k51_xgk, 51, 12, 1};
+static const RevenantRule revenant_k61 = {k61_wg, k61_wgk, k61_xgk, 61, 15, 0};
 
-static void charon_dqk(const CharonRule *rule, CharonIntegrand fun, void *arg, double a, double b, double *result,
+static void revenant_dqk(const RevenantRule *rule, RevenantIntegrand fun, void *arg, double a, double b, double *result,
                        double *abserr, double *resabs, double *defabs)
 {
     double hlgth = 0.5 * (b - a);
@@ -279,7 +279,7 @@ static void charon_dqk(const CharonRule *rule, CharonIntegrand fun, void *arg, d
         x[pairs + gp + k] = centr - absc;
     }
     x[n - 1] = centr;
-    charon_call(fun, arg, x, y, n);
+    revenant_call(fun, arg, x, y, n);
     resk = rule->wgk[pairs] * y[n - 1];
     resabs_value = fabs(resk);
     if (rule->gauss_centre) {
@@ -316,8 +316,8 @@ static void charon_dqk(const CharonRule *rule, CharonIntegrand fun, void *arg, d
     if (resasc != 0.0 && *abserr != 0.0) {
         *abserr = resasc * fmin(1.0, pow(200.0 * (*abserr) / resasc, 1.5));
     }
-    if (resabs_value > CHARON_UFLOW / (50.0 * CHARON_EPMACH)) {
-        *abserr = fmax((CHARON_EPMACH * 50.0) * resabs_value, *abserr);
+    if (resabs_value > REVENANT_UFLOW / (50.0 * REVENANT_EPMACH)) {
+        *abserr = fmax((REVENANT_EPMACH * 50.0) * resabs_value, *abserr);
     }
     if (resabs) {
         *resabs = resabs_value;
@@ -329,7 +329,7 @@ static void charon_dqk(const CharonRule *rule, CharonIntegrand fun, void *arg, d
     free(y);
 }
 
-static int charon_dqng(CharonIntegrand fun, void *arg, double a, double b, double epsabs, double epsrel,
+static int revenant_dqng(RevenantIntegrand fun, void *arg, double a, double b, double epsabs, double epsrel,
                        double *result, double *abserr, int *neval)
 {
     double savfun[87], fv1[5], fv2[5], fv3[5], fv4[5];
@@ -343,7 +343,7 @@ static int charon_dqng(CharonIntegrand fun, void *arg, double a, double b, doubl
     *result = 0.0;
     *abserr = 0.0;
     *neval = 0;
-    if (epsabs <= 0.0 && epsrel < fmax(50.0 * CHARON_EPMACH, 0.5e-28)) {
+    if (epsabs <= 0.0 && epsrel < fmax(50.0 * REVENANT_EPMACH, 0.5e-28)) {
         return 6;
     }
     *neval = 21;
@@ -361,7 +361,7 @@ static int charon_dqng(CharonIntegrand fun, void *arg, double a, double b, doubl
                 x[11 + 2 * k] = centr + absc;
                 x[12 + 2 * k] = centr - absc;
             }
-            charon_call(fun, arg, x, y, 21);
+            revenant_call(fun, arg, x, y, 21);
             fcentr = y[0];
             res21 = w21b[5] * fcentr;
             resabs = w21b[5] * fabs(fcentr);
@@ -407,7 +407,7 @@ static int charon_dqng(CharonIntegrand fun, void *arg, double a, double b, doubl
                 x[2 * k] = centr + hlgth * x3[k];
                 x[2 * k + 1] = centr - hlgth * x3[k];
             }
-            charon_call(fun, arg, x, y, 22);
+            revenant_call(fun, arg, x, y, 22);
             for (int k = 0; k < 11; k++) {
                 fval = y[2 * k] + y[2 * k + 1];
                 res43 += fval * w43b[k];
@@ -425,7 +425,7 @@ static int charon_dqng(CharonIntegrand fun, void *arg, double a, double b, doubl
                 x[2 * k] = centr + hlgth * x4[k];
                 x[2 * k + 1] = centr - hlgth * x4[k];
             }
-            charon_call(fun, arg, x, y, 44);
+            revenant_call(fun, arg, x, y, 44);
             for (int k = 0; k < 22; k++) {
                 res87 += w87b[k] * (y[2 * k] + y[2 * k + 1]);
             }
@@ -435,8 +435,8 @@ static int charon_dqng(CharonIntegrand fun, void *arg, double a, double b, doubl
         if (resasc != 0.0 && *abserr != 0.0) {
             *abserr = resasc * fmin(1.0, pow(200.0 * (*abserr) / resasc, 1.5));
         }
-        if (resabs > CHARON_UFLOW / (50.0 * CHARON_EPMACH)) {
-            *abserr = fmax((CHARON_EPMACH * 50.0) * resabs, *abserr);
+        if (resabs > REVENANT_UFLOW / (50.0 * REVENANT_EPMACH)) {
+            *abserr = fmax((REVENANT_EPMACH * 50.0) * resabs, *abserr);
         }
         if (*abserr <= fmax(epsabs, epsrel * fabs(*result))) {
             return 0;
@@ -445,7 +445,7 @@ static int charon_dqng(CharonIntegrand fun, void *arg, double a, double b, doubl
     return ier;
 }
 
-static void charon_dqpsrt(int limit, int last, int *maxerr, double *errmax, const double *elist, int *iord, int *nrmax)
+static void revenant_dqpsrt(int limit, int last, int *maxerr, double *errmax, const double *elist, int *iord, int *nrmax)
 {
     int ido, isucc, i, j, k, jupbn, jbnd, ibeg;
     double errmin;
@@ -507,20 +507,20 @@ insert_both_at_the_end:
     *errmax = elist[*maxerr - 1];
 }
 
-static void charon_dqelg(int n, double *epstab, double *result, double *abserr, double *res3la, int *nres)
+static void revenant_dqelg(int n, double *epstab, double *result, double *abserr, double *res3la, int *nres)
 {
     const int limexp = 50;
     int newelm, num, k1, i, k2, k3, ib, ie, indx, drop;
     double e0, e1, e2, e3, res, e1abs, delta2, delta3, err2, err3, tol2, tol3, delta1, err1, tol1, ss, epsinf, error;
     *nres += 1;
-    *abserr = CHARON_OFLOW;
+    *abserr = REVENANT_OFLOW;
     *result = epstab[n - 1];
     if (n < 3) {
         goto final;
     }
     epstab[n + 1] = epstab[n - 1];
     newelm = (n - 1) / 2;
-    epstab[n - 1] = CHARON_OFLOW;
+    epstab[n - 1] = REVENANT_OFLOW;
     num = n;
     k1 = n;
     drop = 0;
@@ -534,10 +534,10 @@ static void charon_dqelg(int n, double *epstab, double *result, double *abserr, 
         e1abs = fabs(e1);
         delta2 = e2 - e1;
         err2 = fabs(delta2);
-        tol2 = fmax(fabs(e2), e1abs) * CHARON_EPMACH;
+        tol2 = fmax(fabs(e2), e1abs) * REVENANT_EPMACH;
         delta3 = e1 - e0;
         err3 = fabs(delta3);
-        tol3 = fmax(e1abs, fabs(e0)) * CHARON_EPMACH;
+        tol3 = fmax(e1abs, fabs(e0)) * REVENANT_EPMACH;
         if (err2 <= tol2 && err3 <= tol3) {
             *result = res;
             *abserr = err2 + err3;
@@ -547,7 +547,7 @@ static void charon_dqelg(int n, double *epstab, double *result, double *abserr, 
         epstab[k1 - 1] = e1;
         delta1 = e1 - e3;
         err1 = fabs(delta1);
-        tol1 = fmax(e1abs, fabs(e3)) * CHARON_EPMACH;
+        tol1 = fmax(e1abs, fabs(e3)) * REVENANT_EPMACH;
         if (err1 <= tol1 || err2 <= tol2 || err3 <= tol3) {
             drop = 1;
             break;
@@ -594,7 +594,7 @@ static void charon_dqelg(int n, double *epstab, double *result, double *abserr, 
  last:
     if (*nres < 4) {
         res3la[*nres - 1] = *result;
-        *abserr = CHARON_OFLOW;
+        *abserr = REVENANT_OFLOW;
         goto final;
     }
     *abserr = fabs(*result - res3la[2]) + fabs(*result - res3la[1]) + fabs(*result - res3la[0]);
@@ -602,10 +602,10 @@ static void charon_dqelg(int n, double *epstab, double *result, double *abserr, 
     res3la[1] = res3la[2];
     res3la[2] = *result;
  final:
-    *abserr = fmax(*abserr, 5.0 * CHARON_EPMACH * fabs(*result));
+    *abserr = fmax(*abserr, 5.0 * REVENANT_EPMACH * fabs(*result));
 }
 
-static void charon_dqk15i(CharonIntegrand fun, void *arg, double boun, int inf, double a, double b, double *result,
+static void revenant_dqk15i(RevenantIntegrand fun, void *arg, double boun, int inf, double a, double b, double *result,
                           double *abserr, double *resabs, double *defabs)
 {
     double hlgth = 0.5 * (b - a);
@@ -618,11 +618,11 @@ static void charon_dqk15i(CharonIntegrand fun, void *arg, double boun, int inf, 
     const int pairs = 7;
     tabsc1 = boun + dinf * (1.0 - centr) / centr;
     xs[0] = tabsc1;
-    charon_call(fun, arg, xs, ys, 1);
+    revenant_call(fun, arg, xs, ys, 1);
     fval1 = ys[0];
     if (inf == 2) {
         xs[0] = -tabsc1;
-        charon_call(fun, arg, xs, ys, 1);
+        revenant_call(fun, arg, xs, ys, 1);
         fval1 += ys[0];
     }
     fc = (fval1 / centr) / centr;
@@ -638,7 +638,7 @@ static void charon_dqk15i(CharonIntegrand fun, void *arg, double boun, int inf, 
         xs[2 * j] = tabsc1;
         xs[2 * j + 1] = tabsc2;
     }
-    charon_call(fun, arg, xs, ys, 2 * pairs);
+    revenant_call(fun, arg, xs, ys, 2 * pairs);
     for (int j = 0; j < pairs; j++) {
         absc1 = centr - hlgth * k15_xgk[j];
         absc2 = centr + hlgth * k15_xgk[j];
@@ -647,11 +647,11 @@ static void charon_dqk15i(CharonIntegrand fun, void *arg, double boun, int inf, 
         if (inf == 2) {
             tabsc1 = boun + dinf * (1.0 - absc1) / absc1;
             xs[0] = -tabsc1;
-            charon_call(fun, arg, xs, ys, 1);
+            revenant_call(fun, arg, xs, ys, 1);
             fval1 += ys[0];
             tabsc2 = boun + dinf * (1.0 - absc2) / absc2;
             xs[0] = -tabsc2;
-            charon_call(fun, arg, xs, ys, 1);
+            revenant_call(fun, arg, xs, ys, 1);
             fval2 += ys[0];
         }
         fval1 = (fval1 / absc1) / absc1;
@@ -677,8 +677,8 @@ static void charon_dqk15i(CharonIntegrand fun, void *arg, double boun, int inf, 
     if (resasc != 0.0 && *abserr != 0.0) {
         *abserr = resasc * fmin(1.0, pow(200.0 * (*abserr) / resasc, 1.5));
     }
-    if (resabs_value > CHARON_UFLOW / (50.0 * CHARON_EPMACH)) {
-        *abserr = fmax((CHARON_EPMACH * 50.0) * resabs_value, *abserr);
+    if (resabs_value > REVENANT_UFLOW / (50.0 * REVENANT_EPMACH)) {
+        *abserr = fmax((REVENANT_EPMACH * 50.0) * resabs_value, *abserr);
     }
     if (resabs) {
         *resabs = resabs_value;
@@ -688,8 +688,8 @@ static void charon_dqk15i(CharonIntegrand fun, void *arg, double boun, int inf, 
     }
 }
 
-static int charon_dqags(CharonIntegrand fun, void *arg, double a, double b, double epsabs, double epsrel,
-                        size_t limit, const CharonRule *rule, int inf, int extrapolate, double *result,
+static int revenant_dqags(RevenantIntegrand fun, void *arg, double a, double b, double epsabs, double epsrel,
+                        size_t limit, const RevenantRule *rule, int inf, int extrapolate, double *result,
                         double *abserr, int *neval, double *work, int *iwork)
 {
 double alist[2 * 1000], blist[2 * 1000], rlist[2 * 1000], elist[2 * 1000];
@@ -697,7 +697,7 @@ double alist[2 * 1000], blist[2 * 1000], rlist[2 * 1000], elist[2 * 1000];
     int iord[2 * 1000];
     int last, k, ier = 0, ierro = 0, maxerr, nrmax, nres, ktmin, numrl2, iroff1, iroff2, iroff3, ksgn;
     int extrap, noext, id, jupbnd;
-    double uflow = CHARON_UFLOW, oflow = CHARON_OFLOW;
+    double uflow = REVENANT_UFLOW, oflow = REVENANT_OFLOW;
     double dres, errbnd, defabs, resabs, errmax, area, errsum, area1, error1, defab1, area2, error2, defab2;
     double area12, erro12, erlast, small, erlarg, ertest, correc, reseps, abseps, a1, b1, a2, b2;
     (void)k;
@@ -716,15 +716,15 @@ double alist[2 * 1000], blist[2 * 1000], rlist[2 * 1000], elist[2 * 1000];
     }
     rlist[0] = 0.0;
     elist[0] = 0.0;
-    if (epsabs <= 0.0 && epsrel < fmax(50.0 * CHARON_EPMACH, 0.5e-28)) {
+    if (epsabs <= 0.0 && epsrel < fmax(50.0 * REVENANT_EPMACH, 0.5e-28)) {
         return 6;
     }
     double boun = 0.0;
     if (inf == 0) {
-        charon_dqk(rule, fun, arg, a, b, result, abserr, &resabs, &defabs);
+        revenant_dqk(rule, fun, arg, a, b, result, abserr, &resabs, &defabs);
     } else {
         boun = inf == 2 ? 0.0 : a;
-        charon_dqk15i(fun, arg, boun, inf, 0.0, 1.0, result, abserr, &resabs, &defabs);
+        revenant_dqk15i(fun, arg, boun, inf, 0.0, 1.0, result, abserr, &resabs, &defabs);
     }
     dres = fabs(*result);
     errbnd = fmax(epsabs, epsrel * dres);
@@ -732,7 +732,7 @@ double alist[2 * 1000], blist[2 * 1000], rlist[2 * 1000], elist[2 * 1000];
     rlist[0] = *result;
     elist[0] = *abserr;
     iord[0] = 1;
-    if (!extrapolate && *abserr <= 100.0 * CHARON_EPMACH * defabs && *abserr > errbnd) {
+    if (!extrapolate && *abserr <= 100.0 * REVENANT_EPMACH * defabs && *abserr > errbnd) {
         ier = 2;
     }
     if (limit == 1) {
@@ -755,7 +755,7 @@ double alist[2 * 1000], blist[2 * 1000], rlist[2 * 1000], elist[2 * 1000];
     noext = 0;
     iroff1 = iroff2 = iroff3 = 0;
     ksgn = -1;
-    if (dres >= (1.0 - 50.0 * CHARON_EPMACH) * defabs) {
+    if (dres >= (1.0 - 50.0 * REVENANT_EPMACH) * defabs) {
         ksgn = 1;
     }
     for (last = 2; last <= (int)limit; last++) {
@@ -765,11 +765,11 @@ double alist[2 * 1000], blist[2 * 1000], rlist[2 * 1000], elist[2 * 1000];
         b2 = blist[maxerr - 1];
         erlast = errmax;
         if (inf == 0) {
-            charon_dqk(rule, fun, arg, a1, b1, &area1, &error1, &resabs, &defab1);
-            charon_dqk(rule, fun, arg, a2, b2, &area2, &error2, &resabs, &defab2);
+            revenant_dqk(rule, fun, arg, a1, b1, &area1, &error1, &resabs, &defab1);
+            revenant_dqk(rule, fun, arg, a2, b2, &area2, &error2, &resabs, &defab2);
         } else {
-            charon_dqk15i(fun, arg, boun, inf, a1, b1, &area1, &error1, &resabs, &defab1);
-            charon_dqk15i(fun, arg, boun, inf, a2, b2, &area2, &error2, &resabs, &defab2);
+            revenant_dqk15i(fun, arg, boun, inf, a1, b1, &area1, &error1, &resabs, &defab1);
+            revenant_dqk15i(fun, arg, boun, inf, a2, b2, &area2, &error2, &resabs, &defab2);
         }
         area12 = area1 + area2;
         erro12 = error1 + error2;
@@ -799,7 +799,7 @@ double alist[2 * 1000], blist[2 * 1000], rlist[2 * 1000], elist[2 * 1000];
         if (extrapolate && (size_t)last == limit) {
             ier = 1;
         }
-        if (fmax(fabs(a1), fabs(b2)) <= (1.0 + 1000.0 * CHARON_EPMACH) * (fabs(a2) + 10000.0 * uflow)) {
+        if (fmax(fabs(a1), fabs(b2)) <= (1.0 + 1000.0 * REVENANT_EPMACH) * (fabs(a2) + 10000.0 * uflow)) {
             ier = 4;
         }
         if (error2 <= error1) {
@@ -817,7 +817,7 @@ double alist[2 * 1000], blist[2 * 1000], rlist[2 * 1000], elist[2 * 1000];
             elist[maxerr - 1] = error2;
             elist[last - 1] = error1;
         }
-        charon_dqpsrt((int)limit, last, &maxerr, &errmax, elist, iord, &nrmax);
+        revenant_dqpsrt((int)limit, last, &maxerr, &errmax, elist, iord, &nrmax);
         if (errsum <= errbnd) {
             goto sum_up;
         }
@@ -869,7 +869,7 @@ extrapolate:
 do_extrapolate:
         numrl2 += 1;
         rlist2[numrl2 - 1] = area;
-        charon_dqelg(numrl2, rlist2, &reseps, &abseps, res3la, &nres);
+        revenant_dqelg(numrl2, rlist2, &reseps, &abseps, res3la, &nres);
         ktmin += 1;
         if (ktmin > 5 && *abserr < 0.01 * errsum) {
             ier = 5;
@@ -948,7 +948,7 @@ exit:
     return ier;
 }
 
-static quadrature_status charon_status_of(int ier)
+static quadrature_status revenant_status_of(int ier)
 {
     switch (ier) {
         case 0:
@@ -973,7 +973,7 @@ double quadrature_integrate(const quadrature_integrate_function *__f, double __a
     if (!__f || !__options) {
         return 0.0;
     }
-    const CharonIntegrand fun = __f->fun;
+    const RevenantIntegrand fun = __f->fun;
     void *arg = __f->fun_arg;
     if (!fun) {
         return 0.0;
@@ -981,7 +981,7 @@ double quadrature_integrate(const quadrature_integrate_function *__f, double __a
     const size_t per_interval = __options->integrator == QUADRATURE_INTEGRATE_QAGS
                                     ? QUADRATURE_INTEGRATE_QAGS_WORKSPACE_PER_INTERVAL
                                     : QUADRATURE_INTEGRATE_QAG_WORKSPACE_PER_INTERVAL;
-    const CharonRule *rule = NULL;
+    const RevenantRule *rule = NULL;
     switch (__options->integrator) {
         case QUADRATURE_INTEGRATE_QNG:
             break;
@@ -990,22 +990,22 @@ double quadrature_integrate(const quadrature_integrate_function *__f, double __a
             switch (__options->qag_points_per_interval) {
                 case 0:
                 case 21:
-                    rule = &charon_k21;
+                    rule = &revenant_k21;
                     break;
                 case 15:
-                    rule = &charon_k15;
+                    rule = &revenant_k15;
                     break;
                 case 31:
-                    rule = &charon_k31;
+                    rule = &revenant_k31;
                     break;
                 case 41:
-                    rule = &charon_k41;
+                    rule = &revenant_k41;
                     break;
                 case 51:
-                    rule = &charon_k51;
+                    rule = &revenant_k51;
                     break;
                 case 61:
-                    rule = &charon_k61;
+                    rule = &revenant_k61;
                     break;
                 default:
                     if (__abs_error) {
@@ -1050,7 +1050,7 @@ double quadrature_integrate(const quadrature_integrate_function *__f, double __a
     int neval = 0;
     int ier;
     if (__options->integrator == QUADRATURE_INTEGRATE_QNG) {
-        ier = charon_dqng(fun, arg, a, b, __options->abs_tolerance, __options->rel_tolerance, &result, &abserr, &neval);
+        ier = revenant_dqng(fun, arg, a, b, __options->abs_tolerance, __options->rel_tolerance, &result, &abserr, &neval);
     } else {
         size_t limit = __options->max_intervals;
         if (__workspace) {
@@ -1065,12 +1065,12 @@ double quadrature_integrate(const quadrature_integrate_function *__f, double __a
         if (limit > 1000) {
             limit = 1000;
         }
-        ier = charon_dqags(fun, arg, a, b, __options->abs_tolerance, __options->rel_tolerance, limit, rule, inf,
+        ier = revenant_dqags(fun, arg, a, b, __options->abs_tolerance, __options->rel_tolerance, limit, rule, inf,
                            __options->integrator == QUADRATURE_INTEGRATE_QAGS, &result, &abserr, &neval,
                            (double *)__workspace, NULL);
     }
     if (__status) {
-        *__status = charon_status_of(ier);
+        *__status = revenant_status_of(ier);
     }
     if (__abs_error) {
         *__abs_error = abserr;

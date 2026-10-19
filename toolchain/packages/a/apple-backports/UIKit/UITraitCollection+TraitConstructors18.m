@@ -1,15 +1,15 @@
 #import <UIKit/UIKit.h>
-#import "CharonTraits17.h"
+#import "RevenantTraits17.h"
 
 #if !__has_include(<UIKit/UITrait.h>)
 
-@interface UITraitCollection (CharonTraitConstructors18)
+@interface UITraitCollection (RevenantTraitConstructors18)
 + (UITraitCollection *)traitCollectionWithListEnvironment:(UIListEnvironment)listEnvironment;
 @end
 
 #endif
 
-@implementation UITraitCollection (CharonTraitConstructors18)
+@implementation UITraitCollection (RevenantTraitConstructors18)
 
 + (UITraitCollection *)traitCollectionWithListEnvironment:(UIListEnvironment)listEnvironment
 {

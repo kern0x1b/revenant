@@ -1,4 +1,4 @@
-#import "CharonMLCompute.h"
+#import "RevenantMLCompute.h"
 
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
 #pragma clang diagnostic ignored "-Wobjc-designated-initializers"
@@ -316,20 +316,20 @@ NSString *MLCGradientClippingTypeDebugDescription(MLCGradientClippingType gradie
     }
 }
 
-static BOOL CharonMLCHasRNGSeed = NO;
-static NSInteger CharonMLCRNGSeed = 0;
+static BOOL RevenantMLCHasRNGSeed = NO;
+static NSInteger RevenantMLCRNGSeed = 0;
 
 @implementation MLCPlatform
 
 + (void)setRNGSeedTo:(NSNumber *)seed
 {
-    CharonMLCHasRNGSeed = YES;
-    CharonMLCRNGSeed = seed.longLongValue;
+    RevenantMLCHasRNGSeed = YES;
+    RevenantMLCRNGSeed = seed.longLongValue;
 }
 
 + (NSNumber *)getRNGseed
 {
-    return CharonMLCHasRNGSeed ? @(CharonMLCRNGSeed) : nil;
+    return RevenantMLCHasRNGSeed ? @(RevenantMLCRNGSeed) : nil;
 }
 
 @end

@@ -2,7 +2,7 @@
 
 NSString *const NSProcessInfoPowerStateDidChangeNotification = @"NSProcessInfoPowerStateDidChangeNotification";
 
-@implementation NSProcessInfo (CharonPowerState)
+@implementation NSProcessInfo (RevenantPowerState)
 
 - (BOOL)isLowPowerModeEnabled
 {

@@ -6,7 +6,7 @@ static int checks, failures;
 static NSString *plain(id value)
 {
     NSString *text = [value description] ?: @"(nil)";
-    text = [text stringByReplacingOccurrencesOfString:@"CharonHost" withString:@""];
+    text = [text stringByReplacingOccurrencesOfString:@"RevenantHost" withString:@""];
     return [[NSRegularExpression regularExpressionWithPattern:@"0x[0-9a-f]+" options:0 error:NULL]
                stringByReplacingMatchesInString:text options:0 range:NSMakeRange(0, text.length) withTemplate:@"0x"];
 }
@@ -30,8 +30,8 @@ static NSDictionary *answers(NSPersistentStoreDescription *d)
 
 static void compare(NSString *what, void (^change)(NSPersistentStoreDescription *))
 {
-    Class mine = NSClassFromString(@"CharonHostNSPersistentStoreDescription");
-    NSURL *url = [NSURL fileURLWithPath:@"/tmp/charon-store.sqlite"];
+    Class mine = NSClassFromString(@"RevenantHostNSPersistentStoreDescription");
+    NSURL *url = [NSURL fileURLWithPath:@"/tmp/revenant-store.sqlite"];
     for (NSNumber *withURL in @[@NO, @YES]) {
         NSPersistentStoreDescription *ours = withURL.boolValue ? [[mine alloc] initWithURL:url] : [[mine alloc] init];
         NSPersistentStoreDescription *theirs = withURL.boolValue ? [[NSPersistentStoreDescription alloc] initWithURL:url]

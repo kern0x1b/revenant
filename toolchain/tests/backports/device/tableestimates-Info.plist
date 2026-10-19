@@ -9,7 +9,7 @@
 	<key>CFBundleExecutable</key>
 	<string>tableestimates</string>
 	<key>CFBundleIdentifier</key>
-	<string>local.charon.backports.tableestimates</string>
+	<string>local.revenant.backports.tableestimates</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>

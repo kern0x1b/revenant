@@ -1,16 +1,16 @@
 #import <UIKit/UIKit.h>
 #import <objc/runtime.h>
 
-static const char charon_observed_key;
-static void *const charon_observed_context = (void *)&charon_observed_key;
+static const char revenant_observed_key;
+static void *const revenant_observed_context = (void *)&revenant_observed_key;
 
-@interface CharonProgressObserver : NSObject
+@interface RevenantProgressObserver : NSObject
 @property (nonatomic, weak) UIProgressView *view;
 @property (nonatomic, strong) NSProgress *progress;
 - (void)stop;
 @end
 
-@implementation CharonProgressObserver {
+@implementation RevenantProgressObserver {
     BOOL _observing;
 }
 
@@ -18,7 +18,7 @@ static void *const charon_observed_context = (void *)&charon_observed_key;
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
 {
-    if (context != charon_observed_context) {
+    if (context != revenant_observed_context) {
         [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
         return;
     }
@@ -27,7 +27,7 @@ static void *const charon_observed_context = (void *)&charon_observed_key;
         self.view.progress = fraction;
         return;
     }
-    __weak CharonProgressObserver *weakSelf = self;
+    __weak RevenantProgressObserver *weakSelf = self;
     dispatch_async(dispatch_get_main_queue(), ^{
         weakSelf.view.progress = fraction;
     });
@@ -38,7 +38,7 @@ static void *const charon_observed_context = (void *)&charon_observed_key;
     if (_observing)
         return;
     _observing = YES;
-    [_progress addObserver:self forKeyPath:@"fractionCompleted" options:NSKeyValueObservingOptionInitial context:charon_observed_context];
+    [_progress addObserver:self forKeyPath:@"fractionCompleted" options:NSKeyValueObservingOptionInitial context:revenant_observed_context];
 }
 
 - (void)stop
@@ -46,7 +46,7 @@ static void *const charon_observed_context = (void *)&charon_observed_key;
     if (!_observing)
         return;
     _observing = NO;
-    [_progress removeObserver:self forKeyPath:@"fractionCompleted" context:charon_observed_context];
+    [_progress removeObserver:self forKeyPath:@"fractionCompleted" context:revenant_observed_context];
 }
 
 - (void)dealloc
@@ -56,26 +56,26 @@ static void *const charon_observed_context = (void *)&charon_observed_key;
 
 @end
 
-@implementation UIProgressView (CharonObservedProgress)
+@implementation UIProgressView (RevenantObservedProgress)
 
 - (NSProgress *)observedProgress
 {
-    return [(CharonProgressObserver *)objc_getAssociatedObject(self, &charon_observed_key) progress];
+    return [(RevenantProgressObserver *)objc_getAssociatedObject(self, &revenant_observed_key) progress];
 }
 
 - (void)setObservedProgress:(NSProgress *)observedProgress
 {
-    CharonProgressObserver *observer = objc_getAssociatedObject(self, &charon_observed_key);
+    RevenantProgressObserver *observer = objc_getAssociatedObject(self, &revenant_observed_key);
     if (observer.progress == observedProgress || [observer.progress isEqual:observedProgress])
         return;
     [observer stop];
-    objc_setAssociatedObject(self, &charon_observed_key, nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, &revenant_observed_key, nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     if (!observedProgress)
         return;
-    CharonProgressObserver *fresh = [[CharonProgressObserver alloc] init];
+    RevenantProgressObserver *fresh = [[RevenantProgressObserver alloc] init];
     fresh.view = self;
     fresh.progress = observedProgress;
-    objc_setAssociatedObject(self, &charon_observed_key, fresh, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, &revenant_observed_key, fresh, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     [fresh start];
 }
 

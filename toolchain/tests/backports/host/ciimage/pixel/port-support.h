@@ -2,8 +2,8 @@
 #import <CoreImage/CoreImage.h>
 #import <CoreGraphics/CoreGraphics.h>
 
-#ifdef CHARON_PORT
-@interface CharonCIImageAccumulator : NSObject
+#ifdef REVENANT_PORT
+@interface RevenantCIImageAccumulator : NSObject
 + (instancetype)imageAccumulatorWithExtent:(CGRect)extent format:(CIFormat)format;
 + (instancetype)imageAccumulatorWithExtent:(CGRect)extent format:(CIFormat)format colorSpace:(CGColorSpaceRef)colorSpace;
 - (CIImage *)image;
@@ -14,29 +14,29 @@
 @property (nonatomic, readonly) CIFormat format;
 @end
 
-@interface CharonCIFilterShape : NSObject
+@interface RevenantCIFilterShape : NSObject
 + (instancetype)shapeWithRect:(CGRect)rect;
 - (instancetype)initWithRect:(CGRect)rect;
-- (CharonCIFilterShape *)intersectWith:(CharonCIFilterShape *)other;
-- (CharonCIFilterShape *)intersectWithRect:(CGRect)rect;
-- (CharonCIFilterShape *)unionWith:(CharonCIFilterShape *)other;
-- (CharonCIFilterShape *)unionWithRect:(CGRect)rect;
-- (CharonCIFilterShape *)insetByX:(int)dx Y:(int)dy;
-- (CharonCIFilterShape *)transformBy:(CGAffineTransform)transform interior:(BOOL)interior;
+- (RevenantCIFilterShape *)intersectWith:(RevenantCIFilterShape *)other;
+- (RevenantCIFilterShape *)intersectWithRect:(CGRect)rect;
+- (RevenantCIFilterShape *)unionWith:(RevenantCIFilterShape *)other;
+- (RevenantCIFilterShape *)unionWithRect:(CGRect)rect;
+- (RevenantCIFilterShape *)insetByX:(int)dx Y:(int)dy;
+- (RevenantCIFilterShape *)transformBy:(CGAffineTransform)transform interior:(BOOL)interior;
 @property (nonatomic, readonly) CGRect extent;
 @end
 
-@interface CharonGGCtxContext : CIContext
+@interface RevenantGGCtxContext : CIContext
 - (instancetype)initWithContext:(CIContext *)context cgContext:(CGContextRef)cgctx options:(NSDictionary *)options;
-- (CGContextRef)charon_drawingContext;
+- (CGContextRef)revenant_drawingContext;
 @property (nonatomic, readonly) CGColorSpaceRef workingColorSpace;
 @property (nonatomic, readonly) CIFormat workingFormat;
 - (void)drawImage:(CIImage *)image inRect:(CGRect)inRect fromRect:(CGRect)fromRect;
 @end
 
-#define PORT_ACCUMULATOR CharonCIImageAccumulator
-#define PORT_SHAPE CharonCIFilterShape
-#define PORT_CONTEXT CharonGGCtxContext
+#define PORT_ACCUMULATOR RevenantCIImageAccumulator
+#define PORT_SHAPE RevenantCIFilterShape
+#define PORT_CONTEXT RevenantGGCtxContext
 #define PORT_NAME "port"
 #else
 #define PORT_ACCUMULATOR CIImageAccumulator

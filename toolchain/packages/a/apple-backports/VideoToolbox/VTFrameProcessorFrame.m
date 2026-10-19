@@ -1,4 +1,4 @@
-#import "CharonVideoToolbox.h"
+#import "RevenantVideoToolbox.h"
 #import "VideoToolboxValueStore.h"
 
 @implementation VTFrameProcessorFrame{ CVPixelBufferRef _buffer;}
@@ -13,7 +13,7 @@
 - (CMTime)presentationTimeStamp
 {
     CMTime value = {0};
-    NSValue *boxed = CharonValueStore(self)[@"presentationTimeStamp"];
+    NSValue *boxed = RevenantValueStore(self)[@"presentationTimeStamp"];
     if (boxed)
         [boxed getValue:&value];
     return value;
@@ -30,7 +30,7 @@
     if (self->_buffer)
         CFRetain(self->_buffer);
     { CMTime boxed = presentationTimeStamp;
-      CharonValueSet(self, [NSValue valueWithBytes:&boxed objCType:@encode(CMTime)], @"presentationTimeStamp"); }
+      RevenantValueSet(self, [NSValue valueWithBytes:&boxed objCType:@encode(CMTime)], @"presentationTimeStamp"); }
     return self;
 }
 

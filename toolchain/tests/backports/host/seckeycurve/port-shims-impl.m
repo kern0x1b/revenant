@@ -5,45 +5,45 @@
 
 #include "port-shims.h"
 
-static SecKeyRef CharonShimPortKey = NULL;
-static SecKeyRef CharonShimPortPublicKey = NULL;
-static uint8_t CharonShimPortScalar[32];
-static size_t CharonShimPortScalarLength = 0;
+static SecKeyRef RevenantShimPortKey = NULL;
+static SecKeyRef RevenantShimPortPublicKey = NULL;
+static uint8_t RevenantShimPortScalar[32];
+static size_t RevenantShimPortScalarLength = 0;
 
-#define CHARON_SHIM_RELEASE_KEYS 6
-static SecKeyRef CharonShimReleaseKey[CHARON_SHIM_RELEASE_KEYS];
-static CFStringRef CharonShimReleaseType[CHARON_SHIM_RELEASE_KEYS];
-static size_t CharonShimReleaseCount = 0;
+#define REVENANT_SHIM_RELEASE_KEYS 6
+static SecKeyRef RevenantShimReleaseKey[REVENANT_SHIM_RELEASE_KEYS];
+static CFStringRef RevenantShimReleaseType[REVENANT_SHIM_RELEASE_KEYS];
+static size_t RevenantShimReleaseCount = 0;
 
-void CharonShimMarkPortKey(SecKeyRef privateKey, const uint8_t *scalar, size_t length)
+void RevenantShimMarkPortKey(SecKeyRef privateKey, const uint8_t *scalar, size_t length)
 {
-    CharonShimPortKey = privateKey;
-    if (scalar && length == sizeof CharonShimPortScalar) {
-        memcpy(CharonShimPortScalar, scalar, sizeof CharonShimPortScalar);
-        CharonShimPortScalarLength = length;
+    RevenantShimPortKey = privateKey;
+    if (scalar && length == sizeof RevenantShimPortScalar) {
+        memcpy(RevenantShimPortScalar, scalar, sizeof RevenantShimPortScalar);
+        RevenantShimPortScalarLength = length;
     }
 }
 
-void CharonShimMarkPortPublicKey(SecKeyRef publicKey)
+void RevenantShimMarkPortPublicKey(SecKeyRef publicKey)
 {
-    CharonShimPortPublicKey = publicKey;
+    RevenantShimPortPublicKey = publicKey;
 }
 
-void CharonShimMarkReleaseKey(SecKeyRef key, CFStringRef type)
+void RevenantShimMarkReleaseKey(SecKeyRef key, CFStringRef type)
 {
-    if (key == NULL || CharonShimReleaseCount >= CHARON_SHIM_RELEASE_KEYS) {
+    if (key == NULL || RevenantShimReleaseCount >= REVENANT_SHIM_RELEASE_KEYS) {
         return;
     }
-    CharonShimReleaseKey[CharonShimReleaseCount] = key;
-    CharonShimReleaseType[CharonShimReleaseCount] = type;
-    CharonShimReleaseCount++;
+    RevenantShimReleaseKey[RevenantShimReleaseCount] = key;
+    RevenantShimReleaseType[RevenantShimReleaseCount] = type;
+    RevenantShimReleaseCount++;
 }
 
-static CFDictionaryRef CharonShimKeyType(SecKeyRef key, CFStringRef *typeOut)
+static CFDictionaryRef RevenantShimKeyType(SecKeyRef key, CFStringRef *typeOut)
 {
-    for (size_t index = 0; index < CharonShimReleaseCount; index++) {
-        if (key != NULL && key == CharonShimReleaseKey[index]) {
-            *typeOut = CharonShimReleaseType[index];
+    for (size_t index = 0; index < RevenantShimReleaseCount; index++) {
+        if (key != NULL && key == RevenantShimReleaseKey[index]) {
+            *typeOut = RevenantShimReleaseType[index];
             return CFDictionaryCreate(kCFAllocatorDefault, (const void *[]){kSecAttrKeyType},
                                       (const void *[]){*typeOut}, 1, &kCFTypeDictionaryKeyCallBacks,
                                       &kCFTypeDictionaryValueCallBacks);
@@ -52,7 +52,7 @@ static CFDictionaryRef CharonShimKeyType(SecKeyRef key, CFStringRef *typeOut)
     return NULL;
 }
 
-OSStatus charonHost_SecItemCopyMatching(CFDictionaryRef query, CFTypeRef *result)
+OSStatus revenantHost_SecItemCopyMatching(CFDictionaryRef query, CFTypeRef *result)
 {
     if (query == NULL || result == NULL) {
         return errSecParam;
@@ -62,7 +62,7 @@ OSStatus charonHost_SecItemCopyMatching(CFDictionaryRef query, CFTypeRef *result
         return errSecParam;
     }
     CFStringRef type = NULL;
-    CFDictionaryRef attributes = CharonShimKeyType((SecKeyRef)wanted, &type);
+    CFDictionaryRef attributes = RevenantShimKeyType((SecKeyRef)wanted, &type);
     if (attributes == NULL) {
         return errSecItemNotFound;
     }
@@ -70,10 +70,10 @@ OSStatus charonHost_SecItemCopyMatching(CFDictionaryRef query, CFTypeRef *result
     return errSecSuccess;
 }
 
-CFDictionaryRef charonHost_SecKeyCopyAttributeDictionary(SecKeyRef key)
+CFDictionaryRef revenantHost_SecKeyCopyAttributeDictionary(SecKeyRef key)
 {
     CFDictionaryRef hostAttributes = SecKeyCopyAttributes(key);
-    if (key != CharonShimPortKey && key != CharonShimPortPublicKey) {
+    if (key != RevenantShimPortKey && key != RevenantShimPortPublicKey) {
         return hostAttributes;
     }
     CFMutableDictionaryRef attributes = hostAttributes
@@ -86,10 +86,10 @@ CFDictionaryRef charonHost_SecKeyCopyAttributeDictionary(SecKeyRef key)
         }
         return NULL;
     }
-    CFDictionarySetValue(attributes, CFSTR(CHARON_SHIM_SECKEY_MARKER), kCFBooleanTrue);
-    if (key == CharonShimPortKey && CharonShimPortScalarLength == sizeof CharonShimPortScalar) {
-        CFDataRef scalar = CFDataCreate(kCFAllocatorDefault, CharonShimPortScalar,
-                                        (CFIndex)CharonShimPortScalarLength);
+    CFDictionarySetValue(attributes, CFSTR(REVENANT_SHIM_SECKEY_MARKER), kCFBooleanTrue);
+    if (key == RevenantShimPortKey && RevenantShimPortScalarLength == sizeof RevenantShimPortScalar) {
+        CFDataRef scalar = CFDataCreate(kCFAllocatorDefault, RevenantShimPortScalar,
+                                        (CFIndex)RevenantShimPortScalarLength);
         if (scalar) {
             CFDictionarySetValue(attributes, kSecValueData, scalar);
             CFRelease(scalar);

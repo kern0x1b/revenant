@@ -14,7 +14,7 @@
 #include <mutex>
 #include <vector>
 
-namespace shade {
+namespace emulator {
 
 void CompatibilityKernel::dispatch_bsd_code_signing(Cpu& cpu, bool require_audit_token)
 {

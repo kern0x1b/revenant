@@ -1,11 +1,11 @@
 #import <MapKit/MapKit.h>
 #import <UIKit/UIKit.h>
 #import <objc/message.h>
-#import "CharonMapKit.h"
+#import "RevenantMapKit.h"
 
-@implementation MKMapView (CharonDelegate)
+@implementation MKMapView (RevenantDelegate)
 
-- (nullable id)charon_askForRendererOf:(id<MKOverlay>)overlay
+- (nullable id)revenant_askForRendererOf:(id<MKOverlay>)overlay
 {
     id<MKMapViewDelegate> delegate = [self delegate];
     SEL asked = NSSelectorFromString(@"mapView:rendererForOverlay:");
@@ -15,7 +15,7 @@
     return nil;
 }
 
-- (nullable UIView *)charon_askForSelectionAccessoryOf:(id<MKAnnotation>)annotation
+- (nullable UIView *)revenant_askForSelectionAccessoryOf:(id<MKAnnotation>)annotation
 {
     id<MKMapViewDelegate> delegate = [self delegate];
     SEL asked = NSSelectorFromString(@"mapView:selectionAccessoryForAnnotation:");
@@ -25,7 +25,7 @@
     return nil;
 }
 
-- (nullable id)charon_askForClusterOf:(NSArray<id<MKAnnotation>> *)memberAnnotations
+- (nullable id)revenant_askForClusterOf:(NSArray<id<MKAnnotation>> *)memberAnnotations
 {
     id<MKMapViewDelegate> delegate = [self delegate];
     SEL asked = NSSelectorFromString(@"mapView:clusterAnnotationForMemberAnnotations:");
@@ -35,7 +35,7 @@
     return nil;
 }
 
-- (void)charon_didAddOverlayRenderers:(NSArray *)renderers
+- (void)revenant_didAddOverlayRenderers:(NSArray *)renderers
 {
     id<MKMapViewDelegate> delegate = [self delegate];
     SEL asked = NSSelectorFromString(@"mapView:didAddOverlayRenderers:");
@@ -44,7 +44,7 @@
     }
 }
 
-- (void)charon_willStartRendering
+- (void)revenant_willStartRendering
 {
     id<MKMapViewDelegate> delegate = [self delegate];
     SEL asked = NSSelectorFromString(@"mapViewWillStartRenderingMap:");
@@ -53,7 +53,7 @@
     }
 }
 
-- (void)charon_didFinishRenderingFully:(BOOL)fullyRendered
+- (void)revenant_didFinishRenderingFully:(BOOL)fullyRendered
 {
     id<MKMapViewDelegate> delegate = [self delegate];
     SEL asked = NSSelectorFromString(@"mapViewDidFinishRenderingMap:fullyRendered:");
@@ -62,7 +62,7 @@
     }
 }
 
-- (void)charon_didChangeVisibleRegion
+- (void)revenant_didChangeVisibleRegion
 {
     id<MKMapViewDelegate> delegate = [self delegate];
     SEL asked = NSSelectorFromString(@"mapViewDidChangeVisibleRegion:");
@@ -71,7 +71,7 @@
     }
 }
 
-- (void)charon_didSelectAnnotation:(id<MKAnnotation>)annotation
+- (void)revenant_didSelectAnnotation:(id<MKAnnotation>)annotation
 {
     id<MKMapViewDelegate> delegate = [self delegate];
     SEL asked = NSSelectorFromString(@"mapView:didSelectAnnotation:");
@@ -80,7 +80,7 @@
     }
 }
 
-- (void)charon_didDeselectAnnotation:(id<MKAnnotation>)annotation
+- (void)revenant_didDeselectAnnotation:(id<MKAnnotation>)annotation
 {
     id<MKMapViewDelegate> delegate = [self delegate];
     SEL asked = NSSelectorFromString(@"mapView:didDeselectAnnotation:");

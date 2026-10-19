@@ -2,7 +2,7 @@
 
 #pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
 
-@implementation UIScreen (CharonLatency13)
+@implementation UIScreen (RevenantLatency13)
 
 - (NSTimeInterval)calibratedLatency
 {

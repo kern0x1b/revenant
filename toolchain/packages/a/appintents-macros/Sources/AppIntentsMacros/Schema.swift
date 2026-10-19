@@ -3,7 +3,7 @@ import SwiftSyntax
 import SwiftSyntaxBuilder
 import SwiftSyntaxMacros
 
-struct CharonSchemaMacro {
+struct RevenantSchemaMacro {
     let conformances: [String]
     let memberName: String
 
@@ -40,7 +40,7 @@ public struct AppEnumMacro: ExtensionMacro {
         conformingTo protocols: [TypeSyntax],
         in context: some MacroExpansionContext
     ) throws -> [ExtensionDeclSyntax] {
-        return CharonSchemaMacro(conformances: ["AppEnum", "AssistantSchemaEnum"],
+        return RevenantSchemaMacro(conformances: ["AppEnum", "AssistantSchemaEnum"],
                                  memberName: "__appSchemaEnum").expansion(of: node, attachedTo: declaration)
     }
 }
@@ -53,7 +53,7 @@ public struct AppEntityMacro: ExtensionMacro {
         conformingTo protocols: [TypeSyntax],
         in context: some MacroExpansionContext
     ) throws -> [ExtensionDeclSyntax] {
-        return CharonSchemaMacro(conformances: ["AppEntity", "AssistantSchemaEntity", "FileEntity",
+        return RevenantSchemaMacro(conformances: ["AppEntity", "AssistantSchemaEntity", "FileEntity",
                                                  "UniqueAppEntity", "URLRepresentableEntity"],
                                  memberName: "__appSchemaEntity").expansion(of: node, attachedTo: declaration)
     }
@@ -67,7 +67,7 @@ public struct AppIntentMacro: ExtensionMacro {
         conformingTo protocols: [TypeSyntax],
         in context: some MacroExpansionContext
     ) throws -> [ExtensionDeclSyntax] {
-        return CharonSchemaMacro(
+        return RevenantSchemaMacro(
             conformances: ["AppIntent", "AssistantSchemaIntent", "ShowInAppSearchResultsIntent",
                            "OpenIntent", "DeleteIntent", "AudioPlaybackIntent",
                            "AudioRecordingIntent", "LiveActivityIntent", "URLRepresentableIntent"],

@@ -1,7 +1,7 @@
 #import <Foundation/Foundation.h>
 #import <ExposureNotification/ExposureNotification.h>
 
-@implementation ENManager (CharonExposureInfo13)
+@implementation ENManager (RevenantExposureInfo13)
 
 - (void)getExposureInfoFromSummary:(ENExposureDetectionSummary *)summary
                   userExplanation:(NSString *)userExplanation

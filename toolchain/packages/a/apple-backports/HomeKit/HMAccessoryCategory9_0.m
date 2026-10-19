@@ -1,8 +1,8 @@
-#import "CharonHomeKitInternal.h"
+#import "RevenantHomeKitInternal.h"
 
 @implementation HMAccessoryCategory
 
-@synthesize charon_categoryType = _charon_categoryType;
+@synthesize revenant_categoryType = _revenant_categoryType;
 
 - (instancetype)init
 {
@@ -12,14 +12,14 @@
 
 - (NSString *)categoryType
 {
-    return [self.charon_categoryType copy];
+    return [self.revenant_categoryType copy];
 }
 
 @end
 
-HMAccessoryCategory *CharonHomeKitAccessoryCategory(NSString *categoryType)
+HMAccessoryCategory *RevenantHomeKitAccessoryCategory(NSString *categoryType)
 {
     HMAccessoryCategory *category = [[HMAccessoryCategory alloc] init];
-    category.charon_categoryType = categoryType;
+    category.revenant_categoryType = categoryType;
     return category;
 }

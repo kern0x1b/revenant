@@ -29,7 +29,7 @@ int main(int argc, char **argv)
 {
     setvbuf(stdout, NULL, _IONBF, 0);
     @autoreleasepool {
-        port = dlopen(argc > 1 ? argv[1] : "libCharonCMTag.dylib", RTLD_LOCAL | RTLD_FIRST);
+        port = dlopen(argc > 1 ? argv[1] : "libRevenantCMTag.dylib", RTLD_LOCAL | RTLD_FIRST);
         if (!port) {
             printf("dlopen failed: %s\n", dlerror());
             return 1;
@@ -153,7 +153,7 @@ int main(int argc, char **argv)
              [NSString stringWithFormat:@"%d", (int)CMTaggedBufferGroupFormatDescriptionMatchesTaggedBufferGroup(hFromNull, NULL)],
              [NSString stringWithFormat:@"%d", (int)port_CMTaggedBufferGroupFormatDescriptionMatchesTaggedBufferGroup(pFromNull, NULL)]);
 
-        const void *eKeys[] = { CFSTR("charon.test") };
+        const void *eKeys[] = { CFSTR("revenant.test") };
         const void *eVals[] = { CFSTR("value") };
         CFDictionaryRef ext = CFDictionaryCreate(NULL, eKeys, eVals, 1, &kCFTypeDictionaryKeyCallBacks,
                                                  &kCFTypeDictionaryValueCallBacks);

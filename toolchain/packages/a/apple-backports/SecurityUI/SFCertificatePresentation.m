@@ -1,6 +1,6 @@
-#import "CharonSecurityUI.h"
+#import "RevenantSecurityUI.h"
 
-@interface CharonCertificateSheetController : UIViewController
+@interface RevenantCertificateSheetController : UIViewController
 @property (nonatomic, copy) NSString *sheetTitle;
 @property (nonatomic, copy) NSString *sheetMessage;
 @property (nonatomic, copy) NSArray<NSString *> *lines;
@@ -10,7 +10,7 @@
 + (NSArray<NSString *> *)linesForTrust:(SecTrustRef)trust;
 @end
 
-@implementation CharonCertificateSheetController {
+@implementation RevenantCertificateSheetController {
     UILabel *_titleLabel;
     UILabel *_messageLabel;
     NSMutableArray<UILabel *> *_lineLabels;
@@ -56,7 +56,7 @@
     if (self.helpURL) {
         _learnMore = [UIButton buttonWithType:UIButtonTypeSystem];
         [_learnMore setTitle:NSLocalizedString(@"Learn More", nil) forState:UIControlStateNormal];
-        [_learnMore addTarget:self action:@selector(charon_openHelp) forControlEvents:UIControlEventTouchUpInside];
+        [_learnMore addTarget:self action:@selector(revenant_openHelp) forControlEvents:UIControlEventTouchUpInside];
         [self.view addSubview:_learnMore];
     }
 }
@@ -82,7 +82,7 @@
     }
 }
 
-- (void)charon_openHelp
+- (void)revenant_openHelp
 {
     UIApplication *application = [UIApplication sharedApplication];
     if (application && self.helpURL)
@@ -125,7 +125,7 @@
         }
     }
 
-#ifndef CHARON_HOST_DIFFERENTIAL
+#ifndef REVENANT_HOST_DIFFERENTIAL
     NSArray *properties = (__bridge_transfer NSArray *)SecTrustCopyProperties(trust);
     for (NSDictionary *property in properties) {
         NSString *label = property[@"label"];
@@ -141,7 +141,7 @@
 
 @interface SFCertificatePresentation ()
 @property (nonatomic, weak) UIViewController *presentation;
-@property (nonatomic, strong) CharonCertificateSheetController *sheet;
+@property (nonatomic, strong) RevenantCertificateSheetController *sheet;
 @end
 
 @implementation SFCertificatePresentation
@@ -183,10 +183,10 @@
         return;
     [self dismissSheet];
 
-    CharonCertificateSheetController *sheet = [[CharonCertificateSheetController alloc] init];
+    RevenantCertificateSheetController *sheet = [[RevenantCertificateSheetController alloc] init];
     sheet.sheetTitle = self.title;
     sheet.sheetMessage = self.message;
-    sheet.lines = [[CharonCertificateSheetController class] linesForTrust:self.trust];
+    sheet.lines = [[RevenantCertificateSheetController class] linesForTrust:self.trust];
     sheet.helpURL = self.helpURL;
     sheet.dismissHandler = dismissHandler;
     sheet.modalPresentationStyle = UIModalPresentationFormSheet;
@@ -197,7 +197,7 @@
 
 - (void)dismissSheet
 {
-    CharonCertificateSheetController *sheet = _sheet;
+    RevenantCertificateSheetController *sheet = _sheet;
     UIViewController *presentation = _presentation;
     _sheet = nil;
     _presentation = nil;

@@ -19,7 +19,7 @@
 #include <set>
 #include <vector>
 
-namespace shade::bsd {
+namespace emulator::bsd {
 
 enum class AdvisoryLockKind : std::uint8_t {
     Shared,

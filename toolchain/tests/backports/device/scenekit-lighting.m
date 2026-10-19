@@ -154,11 +154,11 @@ static void check_presented(SCNView *view)
     uint8_t near[4], far[4], animated[4], parented[4];
     pixel_of(view, scene_for(omni(2)), near);
     pixel_of(view, scene_for(omni(4)), far);
-    charon_check(abs((int)near[0] - (int)far[0]) > 4, "the light at 2 and at 4 draw different pixels", [NSString stringWithFormat:@"%d and %d", near[0], far[0]]);
+    revenant_check(abs((int)near[0] - (int)far[0]) > 4, "the light at 2 and at 4 draw different pixels", [NSString stringWithFormat:@"%d and %d", near[0], far[0]]);
     SCNScene *lit = scene_for(omni(4));
     [light_node(lit) addAnimation:hold_position(0, 0, 2) forKey:@"held"];
     pixel_of(view, lit, animated);
-    charon_check(memcmp(near, animated, 4) == 0, "a light whose position is animated is drawn at the presented position",
+    revenant_check(memcmp(near, animated, 4) == 0, "a light whose position is animated is drawn at the presented position",
                  [NSString stringWithFormat:@"%d, presented position gives %d, model position gives %d", animated[0], near[0], far[0]]);
     SCNScene *under = scene_for(omni(0));
     SCNNode *parent = [SCNNode node];
@@ -166,7 +166,7 @@ static void check_presented(SCNView *view)
     [parent addChildNode:light_node(under)];
     [parent addAnimation:hold_position(0, 0, 2) forKey:@"held"];
     pixel_of(view, under, parented);
-    charon_check(memcmp(near, parented, 4) == 0, "a light under a parent whose position is animated is drawn at the presented position",
+    revenant_check(memcmp(near, parented, 4) == 0, "a light under a parent whose position is animated is drawn at the presented position",
                  [NSString stringWithFormat:@"%d, presented position gives %d", parented[0], near[0]]);
     uint8_t seen[4], gone[4], moved[4];
     NSDictionary *plain = @{@"name": @"presented", @"model": @"Constant", @"diffuse": @[@0.5, @0.5, @0.5, @1], @"lights": @[]};
@@ -174,11 +174,11 @@ static void check_presented(SCNView *view)
     SCNScene *away = scene_for(plain);
     camera_node(away).position = SCNVector3Make(10, 0, 5);
     pixel_of(view, away, gone);
-    charon_check(memcmp(seen, gone, 4) != 0, "the camera at x = 10 sees other pixels than the camera at x = 0", [NSString stringWithFormat:@"%d and %d", seen[3], gone[3]]);
+    revenant_check(memcmp(seen, gone, 4) != 0, "the camera at x = 10 sees other pixels than the camera at x = 0", [NSString stringWithFormat:@"%d and %d", seen[3], gone[3]]);
     SCNScene *panned = scene_for(plain);
     [camera_node(panned) addAnimation:hold_position(10, 0, 5) forKey:@"held"];
     pixel_of(view, panned, moved);
-    charon_check(memcmp(gone, moved, 4) == 0, "a camera whose position is animated looks from the presented position",
+    revenant_check(memcmp(gone, moved, 4) == 0, "a camera whose position is animated looks from the presented position",
                  [NSString stringWithFormat:@"%d, presented position gives %d, model position gives %d", moved[3], gone[3], seen[3]]);
 }
 
@@ -278,9 +278,9 @@ int main(void)
             }
         }
         size_t openCount = sizeof known_open / sizeof known_open[0];
-        charon_check(outside == 0, "every case not known open within one level of SceneKit's pixel",
+        revenant_check(outside == 0, "every case not known open within one level of SceneKit's pixel",
                      [NSString stringWithFormat:@"%d of %lu cases outside", outside, (unsigned long)cases.count - openCount]);
-        charon_check(stillOpen == (int)openCount && opened == 0, "every known open case is in the grid and still more than one level off SceneKit's pixel",
+        revenant_check(stillOpen == (int)openCount && opened == 0, "every known open case is in the grid and still more than one level off SceneKit's pixel",
                      [NSString stringWithFormat:@"%d of %zu still open, %d now within one level", stillOpen, openCount, opened]);
         printf("cases %lu, within one level %d, known open %d; off by 0: %d, 1: %d, 2: %d, 3+: %d\n", (unsigned long)cases.count, within,
                stillOpen, histogram[0], histogram[1], histogram[2], (int)cases.count - histogram[0] - histogram[1] - histogram[2]);
@@ -289,10 +289,10 @@ int main(void)
             printf("negative control %s: the port misses the wrong renderer's pixel on %d of the %d cases that differ from SceneKit's by more than two levels\n", kind.UTF8String, missed, total);
         }
         int roughTotal = mutantCases[@"roughness +0.02"].intValue;
-        charon_check(roughTotal >= 256, "the grid holds the cases that tell a renderer with roughness 0.02 too large from SceneKit",
+        revenant_check(roughTotal >= 256, "the grid holds the cases that tell a renderer with roughness 0.02 too large from SceneKit",
                      [NSString stringWithFormat:@"%d of them, at least 256 wanted", roughTotal]);
         check_presented(view);
-        printf("%d of %d checks failed\n", charon_failures, charon_checks);
-        return charon_failures;
+        printf("%d of %d checks failed\n", revenant_failures, revenant_checks);
+        return revenant_failures;
     }
 }

@@ -1,7 +1,7 @@
-#import "CharonUserNotifications.h"
+#import "RevenantUserNotifications.h"
 
 @interface UNNotificationContent ()
-- (instancetype)initCharonWithContent:(UNNotificationContent *)content;
+- (instancetype)initRevenantWithContent:(UNNotificationContent *)content;
 @end
 
 @implementation UNNotificationContent {
@@ -43,7 +43,7 @@
     return self;
 }
 
-- (instancetype)initCharonWithContent:(UNNotificationContent *)content
+- (instancetype)initRevenantWithContent:(UNNotificationContent *)content
 {
     if ((self = [super init])) {
         _attachments = [content.attachments copy];
@@ -118,7 +118,7 @@
 
 - (id)mutableCopyWithZone:(NSZone *)zone
 {
-    return [[UNMutableNotificationContent allocWithZone:zone] initCharonWithContent:self];
+    return [[UNMutableNotificationContent allocWithZone:zone] initRevenantWithContent:self];
 }
 
 - (NSArray *)attachments
@@ -201,7 +201,7 @@
     return _filterCriteria;
 }
 
-static BOOL charon_same(id a, id b)
+static BOOL revenant_same(id a, id b)
 {
     return a == b || [a isEqual:b];
 }
@@ -213,14 +213,14 @@ static BOOL charon_same(id a, id b)
     if (![object isKindOfClass:[UNNotificationContent class]])
         return NO;
     UNNotificationContent *other = object;
-    return charon_same(_userInfo, other.userInfo) && charon_same(_title, other.title) && charon_same(_body, other.body)
-        && charon_same(_subtitle, other.subtitle) && charon_same(_threadIdentifier, other.threadIdentifier)
-        && charon_same(_sound, other.sound) && charon_same(_launchImageName, other.launchImageName)
-        && charon_same(_categoryIdentifier, other.categoryIdentifier) && charon_same(_badge, other.badge)
-        && charon_same(_attachments, other.attachments) && charon_same(_summaryArgument, other.summaryArgument)
-        && _summaryArgumentCount == other.summaryArgumentCount && charon_same(_targetContentIdentifier, other.targetContentIdentifier)
+    return revenant_same(_userInfo, other.userInfo) && revenant_same(_title, other.title) && revenant_same(_body, other.body)
+        && revenant_same(_subtitle, other.subtitle) && revenant_same(_threadIdentifier, other.threadIdentifier)
+        && revenant_same(_sound, other.sound) && revenant_same(_launchImageName, other.launchImageName)
+        && revenant_same(_categoryIdentifier, other.categoryIdentifier) && revenant_same(_badge, other.badge)
+        && revenant_same(_attachments, other.attachments) && revenant_same(_summaryArgument, other.summaryArgument)
+        && _summaryArgumentCount == other.summaryArgumentCount && revenant_same(_targetContentIdentifier, other.targetContentIdentifier)
         && _interruptionLevel == other.interruptionLevel && _relevanceScore == other.relevanceScore
-        && charon_same(_filterCriteria, other.filterCriteria);
+        && revenant_same(_filterCriteria, other.filterCriteria);
 }
 
 - (NSUInteger)hash
@@ -243,7 +243,7 @@ static BOOL charon_same(id a, id b)
 
 - (id)copyWithZone:(NSZone *)zone
 {
-    return [[UNNotificationContent allocWithZone:zone] initCharonWithContent:self];
+    return [[UNNotificationContent allocWithZone:zone] initRevenantWithContent:self];
 }
 
 - (void)setAttachments:(NSArray *)attachments
@@ -340,15 +340,15 @@ static BOOL charon_same(id a, id b)
 
 + (instancetype)defaultSound
 {
-    return [[self alloc] initCharonWithName:nil];
+    return [[self alloc] initRevenantWithName:nil];
 }
 
 + (instancetype)soundNamed:(NSString *)name
 {
-    return [[self alloc] initCharonWithName:name];
+    return [[self alloc] initRevenantWithName:name];
 }
 
-- (instancetype)initCharonWithName:(NSString *)name
+- (instancetype)initRevenantWithName:(NSString *)name
 {
     if ((self = [super init]))
         _name = [name copy];
@@ -357,7 +357,7 @@ static BOOL charon_same(id a, id b)
 
 - (instancetype)initWithCoder:(NSCoder *)coder
 {
-    return [self initCharonWithName:[coder decodeObjectOfClass:[NSString class] forKey:@"toneFileName"]];
+    return [self initRevenantWithName:[coder decodeObjectOfClass:[NSString class] forKey:@"toneFileName"]];
 }
 
 - (void)encodeWithCoder:(NSCoder *)coder
@@ -370,7 +370,7 @@ static BOOL charon_same(id a, id b)
     return self;
 }
 
-- (NSString *)charon_fileName
+- (NSString *)revenant_fileName
 {
     return _name;
 }
@@ -379,7 +379,7 @@ static BOOL charon_same(id a, id b)
 {
     if (object == self)
         return YES;
-    return [object isKindOfClass:[UNNotificationSound class]] && charon_same(_name, [object charon_fileName]);
+    return [object isKindOfClass:[UNNotificationSound class]] && revenant_same(_name, [object revenant_fileName]);
 }
 
 - (NSUInteger)hash

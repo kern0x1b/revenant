@@ -1,19 +1,19 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
 
-#import "CharonMPSNN.h"
+#import "RevenantMPSNN.h"
 
 @implementation MPSNNStateNode {
     id<MPSHandle> _handle;
     BOOL _exportFromGraph;
-    MPSState *_charonState;
+    MPSState *_revenantState;
 }
 
 @synthesize handle = _handle;
 @synthesize exportFromGraph = _exportFromGraph;
 
-- (MPSState *)charon_mps_state { return _charonState; }
-- (void)charon_mps_setState:(MPSState *)state { _charonState = state; }
+- (MPSState *)revenant_mps_state { return _revenantState; }
+- (void)revenant_mps_setState:(MPSState *)state { _revenantState = state; }
 
 @end
 
@@ -37,7 +37,7 @@
 @synthesize secondaryStrideInPixelsY = _secondaryStrideInPixelsY;
 @synthesize secondaryStrideInFeatureChannels = _secondaryStrideInFeatureChannels;
 
-+ (Class)charon_mps_kernelClass { return [MPSImageAdd class]; }
++ (Class)revenant_mps_kernelClass { return [MPSImageAdd class]; }
 
 - (instancetype)initWithLeftSource:(MPSNNImageNode *)left rightSource:(MPSNNImageNode *)right
 {
@@ -47,8 +47,8 @@
         _bias = 0.0f;
         _minimumValue = -FLT_MAX;
         _maximumValue = FLT_MAX;
-        [self charon_mps_addSourceNode:left];
-        [self charon_mps_addSourceNode:right];
+        [self revenant_mps_addSourceNode:left];
+        [self revenant_mps_addSourceNode:right];
     }
     return self;
 }
@@ -61,7 +61,7 @@
 - (instancetype)initWithSources:(NSArray<MPSNNImageNode *> *)sourceNodes
 {
     if (sourceNodes.count != 2) {
-        CharonMPSRefuse(@"%@: an arithmetic node needs exactly two sources and was given %lu, so none was made",
+        RevenantMPSRefuse(@"%@: an arithmetic node needs exactly two sources and was given %lu, so none was made",
                         NSStringFromClass([self class]), (unsigned long)sourceNodes.count);
         return nil;
     }
@@ -73,31 +73,31 @@
     return [[self alloc] initWithSources:sourceNodes];
 }
 
-- (MPSKernel *)charon_mps_kernel
+- (MPSKernel *)revenant_mps_kernel
 {
     if (!_kernel) {
-        id<MTLDevice> device = [self charon_mps_device];
+        id<MTLDevice> device = [self revenant_mps_device];
         if (!device)
             device = MTLCreateSystemDefaultDevice();
-        _kernel = [[[self class] charon_mps_kernelClass] alloc];
+        _kernel = [[[self class] revenant_mps_kernelClass] alloc];
         _kernel = [_kernel initWithDevice:device];
     }
     return _kernel;
 }
 
-- (void)charon_mps_encodeToCommandBuffer:(id<MTLCommandBuffer>)commandBuffer
+- (void)revenant_mps_encodeToCommandBuffer:(id<MTLCommandBuffer>)commandBuffer
 {
-    MPSImage *primary = [self charon_mps_sourceImageAtIndex:0];
-    MPSImage *secondary = [self charon_mps_sourceImageAtIndex:1];
-    MPSImage *destination = [self charon_mps_destinationImage];
+    MPSImage *primary = [self revenant_mps_sourceImageAtIndex:0];
+    MPSImage *secondary = [self revenant_mps_sourceImageAtIndex:1];
+    MPSImage *destination = [self revenant_mps_destinationImage];
     if (!primary || !secondary || !destination) {
-        CharonMPSRefuse(@"%@: an arithmetic node needs two sources and a destination and was not given all three",
+        RevenantMPSRefuse(@"%@: an arithmetic node needs two sources and a destination and was not given all three",
                         NSStringFromClass([self class]));
         return;
     }
-    if (!CharonMPSCommandBufferPermits(commandBuffer))
+    if (!RevenantMPSCommandBufferPermits(commandBuffer))
         return;
-    [self charon_mps_kernel];
+    [self revenant_mps_kernel];
     MPSImageArithmetic *kernel = (MPSImageArithmetic *)_kernel;
     kernel.primaryScale = self.primaryScale;
     kernel.secondaryScale = self.secondaryScale;
@@ -112,7 +112,7 @@
                      primaryImage:primary
                    secondaryImage:secondary
                 destinationImage:destination];
-    [self.resultImage charon_mps_setImage:destination];
+    [self.resultImage revenant_mps_setImage:destination];
 }
 
 @end
@@ -123,7 +123,7 @@
     NSUInteger _kernelWidth, _kernelHeight, _strideX, _strideY;
 }
 
-+ (Class)charon_mps_kernelClass { return nil; }
++ (Class)revenant_mps_kernelClass { return nil; }
 
 - (instancetype)initWithSource:(MPSNNImageNode *)sourceNode
                   kernelWidth:(NSUInteger)kernelWidth
@@ -136,7 +136,7 @@
         _kernelHeight = kernelHeight ? kernelHeight : 1;
         _strideX = strideX ? strideX : 1;
         _strideY = strideY ? strideY : 1;
-        [self charon_mps_addSourceNode:sourceNode];
+        [self revenant_mps_addSourceNode:sourceNode];
     }
     return self;
 }
@@ -161,13 +161,13 @@
     return [[self alloc] initWithSource:sourceNode filterSize:size stride:stride];
 }
 
-- (MPSKernel *)charon_mps_kernel
+- (MPSKernel *)revenant_mps_kernel
 {
     if (!_kernel) {
-        Class kernelClass = [[self class] charon_mps_kernelClass];
+        Class kernelClass = [[self class] revenant_mps_kernelClass];
         if (!kernelClass)
             return nil;
-        id<MTLDevice> device = [self charon_mps_device];
+        id<MTLDevice> device = [self revenant_mps_device];
         if (!device)
             device = MTLCreateSystemDefaultDevice();
         _kernel = [kernelClass alloc];
@@ -180,24 +180,24 @@
     return _kernel;
 }
 
-- (void)charon_mps_encodeToCommandBuffer:(id<MTLCommandBuffer>)commandBuffer
+- (void)revenant_mps_encodeToCommandBuffer:(id<MTLCommandBuffer>)commandBuffer
 {
-    MPSImage *source = [self charon_mps_sourceImageAtIndex:0];
-    MPSImage *destination = [self charon_mps_destinationImage];
+    MPSImage *source = [self revenant_mps_sourceImageAtIndex:0];
+    MPSImage *destination = [self revenant_mps_destinationImage];
     if (!source || !destination) {
-        CharonMPSRefuse(@"%@: a pooling node needs a source and a destination and was not given both",
+        RevenantMPSRefuse(@"%@: a pooling node needs a source and a destination and was not given both",
                         NSStringFromClass([self class]));
         return;
     }
-    if (!CharonMPSCommandBufferPermits(commandBuffer))
+    if (!RevenantMPSCommandBufferPermits(commandBuffer))
         return;
-    MPSCNNPooling *kernel = (MPSCNNPooling *)[self charon_mps_kernel];
+    MPSCNNPooling *kernel = (MPSCNNPooling *)[self revenant_mps_kernel];
     if (!kernel) {
-        CharonMPSRefuse(@"%@: no pooling kernel to run, so it was not run", NSStringFromClass([self class]));
+        RevenantMPSRefuse(@"%@: no pooling kernel to run, so it was not run", NSStringFromClass([self class]));
         return;
     }
     [kernel encodeToCommandBuffer:commandBuffer sourceImage:source destinationImage:destination];
-    [self.resultImage charon_mps_setImage:destination];
+    [self.resultImage revenant_mps_setImage:destination];
 }
 
 @end

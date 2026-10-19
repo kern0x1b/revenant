@@ -9,7 +9,7 @@
 #include <array>
 #include <string_view>
 
-namespace shade {
+namespace emulator {
 
 inline constexpr std::array<std::string_view, 3> application_path_prefixes {
     "/Applications/", "/var/mobile/Applications/",

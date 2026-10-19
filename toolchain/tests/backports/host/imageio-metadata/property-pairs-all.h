@@ -1,9 +1,9 @@
 typedef struct {
     CFStringRef dictionary;
     CFStringRef property;
-} charon_pair;
+} revenant_pair;
 
-static size_t charon_pairs(charon_pair *out)
+static size_t revenant_pairs(revenant_pair *out)
 {
     out[0].dictionary = kCGImagePropertyTIFFDictionary; out[0].property = kCGImagePropertyTIFFCompression;
     out[1].dictionary = kCGImagePropertyTIFFDictionary; out[1].property = kCGImagePropertyTIFFPhotometricInterpretation;

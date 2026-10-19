@@ -61,14 +61,14 @@ int main(int argc, char **argv)
 {
     @autoreleasepool {
         if (argc > 1)
-            charon_log_to(@(argv[1]));
+            revenant_log_to(@(argv[1]));
         if (argc > 2 && !strcmp(argv[2], "on")) {
             set_network(YES);
             return 0;
         }
         CHECK(wifi_open(), "the Wi-Fi manager can be reached");
         atexit(restore_network);
-        const char *image = class_getImageName(objc_getClass("CharonNWPathMonitor"));
+        const char *image = class_getImageName(objc_getClass("RevenantNWPathMonitor"));
         CHECK(image && strstr(image, "libFoundationBackports.dylib"), "the monitor comes from the backports library");
         set_network(YES);
         dispatch_queue_t queue = dispatch_queue_create("nwpath.test", DISPATCH_QUEUE_SERIAL);
@@ -131,7 +131,7 @@ int main(int argc, char **argv)
         wait_until(^BOOL { return NO; }, 3);
         CHECK(log.paths.count == count, "and no path comes after it");
         CHECK(wait_until(^BOOL { return YES; }, 1) && cancelled == 1, "nor a second cancel handler");
-        printf("checks=%d failures=%d\n", charon_checks, charon_failures);
+        printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
     }
-    return charon_failures ? 1 : 0;
+    return revenant_failures ? 1 : 0;
 }

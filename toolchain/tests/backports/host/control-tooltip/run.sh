@@ -9,13 +9,13 @@ here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 uikit=$here/../../../../packages/a/apple-backports/UIKit
 category=${CONTROL_TOOLTIP_PORT_SOURCE:-$uikit/UIControl+ToolTip15.m}
-build=${CONTROL_TOOLTIP_BUILD:-$(runs_fresh charon-control-tooltip)}
+build=${CONTROL_TOOLTIP_BUILD:-$(runs_fresh revenant-control-tooltip)}
 sdk=$(xcrun --show-sdk-path)
 common="-target arm64-apple-ios15.0-macabi -isysroot $sdk -iframework $sdk/System/iOSSupport/System/Library/Frameworks -fobjc-arc -w -I $uikit"
 host_app="$build/control-tooltip-host"
 port_app="$build/control-tooltip-port"
 xcrun clang $common "$here/test.m" -framework UIKit -framework Foundation -framework CoreGraphics -o "$host_app"
-xcrun clang $common -DUIToolTipInteraction=CharonPortUIToolTipInteraction \
+xcrun clang $common -DUIToolTipInteraction=RevenantPortUIToolTipInteraction \
     "$category" "$uikit/UIToolTipInteraction.m" "$uikit/UIView+Interactions.m" "$here/test.m" \
     -framework UIKit -framework Foundation -framework CoreGraphics -o "$port_app"
 codesign -s - --force "$host_app" > /dev/null 2>&1

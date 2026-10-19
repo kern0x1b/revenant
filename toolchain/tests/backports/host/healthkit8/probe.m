@@ -68,20 +68,20 @@ int main(void)
         printf("stage: the sixteen rows of registry/HealthKit/ios8.json that sit at absent, asked of both halves\n");
 
         probe_init(@"-[HKCategorySample init]", [HKCategorySample class],
-                   NSClassFromString(@"CharonHostHKCategorySample"));
-        probe_init(@"-[HKObject init]", [HKObject class], NSClassFromString(@"CharonHostHKObject"));
+                   NSClassFromString(@"RevenantHostHKCategorySample"));
+        probe_init(@"-[HKObject init]", [HKObject class], NSClassFromString(@"RevenantHostHKObject"));
         probe_init(@"-[HKObjectType init]", [HKObjectType class],
-                   NSClassFromString(@"CharonHostHKObjectType"));
-        probe_init(@"-[HKQuantity init]", [HKQuantity class], NSClassFromString(@"CharonHostHKQuantity"));
-        probe_init(@"-[HKSource init]", [HKSource class], NSClassFromString(@"CharonHostHKSource"));
-        probe_init(@"-[HKStatistics init]", [HKStatistics class], NSClassFromString(@"CharonHostHKStatistics"));
+                   NSClassFromString(@"RevenantHostHKObjectType"));
+        probe_init(@"-[HKQuantity init]", [HKQuantity class], NSClassFromString(@"RevenantHostHKQuantity"));
+        probe_init(@"-[HKSource init]", [HKSource class], NSClassFromString(@"RevenantHostHKSource"));
+        probe_init(@"-[HKStatistics init]", [HKStatistics class], NSClassFromString(@"RevenantHostHKStatistics"));
         probe_init(@"-[HKStatisticsCollection init]", [HKStatisticsCollection class],
-                   NSClassFromString(@"CharonHostHKStatisticsCollection"));
+                   NSClassFromString(@"RevenantHostHKStatisticsCollection"));
         probe_init(@"-[HKWorkoutEvent init]", [HKWorkoutEvent class],
-                   NSClassFromString(@"CharonHostHKWorkoutEvent"));
+                   NSClassFromString(@"RevenantHostHKWorkoutEvent"));
 
         Class hostStore = [HKHealthStore class];
-        Class portStore = NSClassFromString(@"CharonHostHKHealthStore");
+        Class portStore = NSClassFromString(@"RevenantHostHKHealthStore");
         probe_not_answered(@"-[HKHealthStore startWorkoutSession:]", hostStore, portStore, NO,
                            @selector(startWorkoutSession:));
         probe_not_answered(@"-[HKHealthStore endWorkoutSession:]", hostStore, portStore, NO,
@@ -92,7 +92,7 @@ int main(void)
                            @selector(resumeWorkoutSession:));
 
         Class hostQuery = [HKQuery class];
-        Class portQuery = NSClassFromString(@"CharonHostHKQuery");
+        Class portQuery = NSClassFromString(@"RevenantHostHKQuery");
         probe_not_answered(@"+[HKQuery predicateForStatesOfMindWithAssociation:]", hostQuery, portQuery,
                            YES, sel_registerName("predicateForStatesOfMindWithAssociation:"));
         probe_not_answered(@"+[HKQuery predicateForStatesOfMindWithKind:]", hostQuery, portQuery, YES,

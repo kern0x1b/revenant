@@ -125,10 +125,10 @@ mkdir -p "$scratch"
 for f in "$root/packages/a/apple-backports/UIKit/"*.m "$root/packages/a/apple-backports/UIKit/"*.h; do
     [ -f "$f" ] && cp "$f" "$scratch/"
 done
-# The group's sources reach three headers in the PARENT directory - CharonSayOnce.h through CharonMenus.h,
-# which CharonLists.h imports, plus CharonSRGB.h and charon_alias.h - and CharonMenus.h spells that
-# "../CharonSayOnce.h".  $scratch is a flat directory, so that path resolves to $build/CharonSayOnce.h and
-# nothing else, and every file that transitively includes CharonMenus.h stops compiling.  That is not the
+# The group's sources reach three headers in the PARENT directory - RevenantSayOnce.h through RevenantMenus.h,
+# which RevenantLists.h imports, plus RevenantSRGB.h and revenant_alias.h - and RevenantMenus.h spells that
+# "../RevenantSayOnce.h".  $scratch is a flat directory, so that path resolves to $build/RevenantSayOnce.h and
+# nothing else, and every file that transitively includes RevenantMenus.h stops compiling.  That is not the
 # plant's failure but the control's: a control that cannot build the group it controls reports "no result
 # line" instead of "the group went red", which is the wrong answer to the wrong question.  So the parent
 # goes beside $scratch, which is what "../" resolves to.

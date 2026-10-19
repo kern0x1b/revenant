@@ -1,12 +1,12 @@
 #import <UIKit/UIKit.h>
 #import <objc/runtime.h>
 
-static BOOL charon_is_keyboard_notification(NSString *name)
+static BOOL revenant_is_keyboard_notification(NSString *name)
 {
     return [name hasPrefix:@"UIKeyboard"] && ([name hasSuffix:@"ShowNotification"] || [name hasSuffix:@"HideNotification"] || [name hasSuffix:@"FrameNotification"]);
 }
 
-static NSDictionary *charon_local_info(NSDictionary *info)
+static NSDictionary *revenant_local_info(NSDictionary *info)
 {
     if (!info || info[UIKeyboardIsLocalUserInfoKey])
         return info;
@@ -15,10 +15,10 @@ static NSDictionary *charon_local_info(NSDictionary *info)
     return merged;
 }
 
-@interface CharonKeyboardLocalInstaller : NSObject
+@interface RevenantKeyboardLocalInstaller : NSObject
 @end
 
-@implementation CharonKeyboardLocalInstaller
+@implementation RevenantKeyboardLocalInstaller
 
 + (void)load
 {
@@ -27,7 +27,7 @@ static NSDictionary *charon_local_info(NSDictionary *info)
     Method namedMethod = class_getInstanceMethod(center, named);
     void (*namedOriginal)(id, SEL, NSString *, id, NSDictionary *) = (void (*)(id, SEL, NSString *, id, NSDictionary *))method_getImplementation(namedMethod);
     class_replaceMethod(center, named, imp_implementationWithBlock(^(NSNotificationCenter *self, NSString *name, id object, NSDictionary *info) {
-        namedOriginal(self, named, name, object, charon_is_keyboard_notification(name) ? charon_local_info(info) : info);
+        namedOriginal(self, named, name, object, revenant_is_keyboard_notification(name) ? revenant_local_info(info) : info);
     }), method_getTypeEncoding(namedMethod));
 
     SEL whole = @selector(postNotification:);
@@ -35,8 +35,8 @@ static NSDictionary *charon_local_info(NSDictionary *info)
     void (*wholeOriginal)(id, SEL, NSNotification *) = (void (*)(id, SEL, NSNotification *))method_getImplementation(wholeMethod);
     class_replaceMethod(center, whole, imp_implementationWithBlock(^(NSNotificationCenter *self, NSNotification *notification) {
         NSString *name = notification.name;
-        if (charon_is_keyboard_notification(name) && notification.userInfo && !notification.userInfo[UIKeyboardIsLocalUserInfoKey])
-            notification = [NSNotification notificationWithName:name object:notification.object userInfo:charon_local_info(notification.userInfo)];
+        if (revenant_is_keyboard_notification(name) && notification.userInfo && !notification.userInfo[UIKeyboardIsLocalUserInfoKey])
+            notification = [NSNotification notificationWithName:name object:notification.object userInfo:revenant_local_info(notification.userInfo)];
         wholeOriginal(self, whole, notification);
     }), method_getTypeEncoding(wholeMethod));
 }

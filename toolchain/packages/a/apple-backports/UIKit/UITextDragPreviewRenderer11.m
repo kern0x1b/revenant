@@ -21,7 +21,7 @@
 {
     if ((self = [super init])) {
         _layoutManager = layoutManager;
-        [self charon_measureRange:range unify:unifyRects];
+        [self revenant_measureRange:range unify:unifyRects];
     }
     return self;
 }
@@ -31,7 +31,7 @@
     return [self initWithLayoutManager:layoutManager range:range unifyRects:NO];
 }
 
-- (void)charon_measureRange:(NSRange)range unify:(BOOL)unify
+- (void)revenant_measureRange:(NSRange)range unify:(BOOL)unify
 {
     if (!_layoutManager || range.location == NSNotFound || !range.length ||
         [_layoutManager numberOfGlyphs] == 0) {

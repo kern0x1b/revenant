@@ -1,7 +1,7 @@
 #import <UIKit/UIKit.h>
 #import <QuartzCore/QuartzCore.h>
 
-@implementation UICollectionViewLayoutAttributes (CharonAffineTransform)
+@implementation UICollectionViewLayoutAttributes (RevenantAffineTransform)
 
 - (CGAffineTransform)transform
 {

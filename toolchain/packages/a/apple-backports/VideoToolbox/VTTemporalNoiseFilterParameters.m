@@ -1,28 +1,28 @@
-#import "CharonVideoToolbox.h"
+#import "RevenantVideoToolbox.h"
 #import "VideoToolboxValueStore.h"
 
-CHARON_VIDEO_TOOLBOX_VALUE_STORE(VTTemporalNoiseFilterParameters)
+REVENANT_VIDEO_TOOLBOX_VALUE_STORE(VTTemporalNoiseFilterParameters)
 
 @implementation VTTemporalNoiseFilterParameters
 
 #pragma mark - The protocol's own properties, implemented for this class
 
-CHARON_VALUE_PROPERTY(VTFrameProcessorFrame *, sourceFrame)
+REVENANT_VALUE_PROPERTY(VTFrameProcessorFrame *, sourceFrame)
 
-CHARON_VALUE_PROPERTY(VTFrameProcessorFrame *, destinationFrame)
+REVENANT_VALUE_PROPERTY(VTFrameProcessorFrame *, destinationFrame)
 
-CHARON_VALUE_PROPERTY(NSArray<VTFrameProcessorFrame *> *, destinationFrames)
+REVENANT_VALUE_PROPERTY(NSArray<VTFrameProcessorFrame *> *, destinationFrames)
 
 
 #pragma mark - This class's own properties
 
-CHARON_VALUE_PROPERTY(NSArray<VTFrameProcessorFrame *> *, nextFrames)
+REVENANT_VALUE_PROPERTY(NSArray<VTFrameProcessorFrame *> *, nextFrames)
 
-CHARON_VALUE_PROPERTY(NSArray<VTFrameProcessorFrame *> *, previousFrames)
+REVENANT_VALUE_PROPERTY(NSArray<VTFrameProcessorFrame *> *, previousFrames)
 
-CHARON_DOUBLE_PROPERTY(float, filterStrength)
+REVENANT_DOUBLE_PROPERTY(float, filterStrength)
 
-CHARON_SCALAR_PROPERTY(BOOL, hasDiscontinuity)
+REVENANT_SCALAR_PROPERTY(BOOL, hasDiscontinuity)
 
 
 #pragma mark - The SDK's designated initialisers
@@ -35,12 +35,12 @@ CHARON_SCALAR_PROPERTY(BOOL, hasDiscontinuity)
                         hasDiscontinuity:(Boolean)hasDiscontinuity
 {
     self = [super init];
-    CharonValueSet(self, sourceFrame, @"sourceFrame");
-    CharonValueSet(self, nextFrames, @"nextFrames");
-    CharonValueSet(self, previousFrames, @"previousFrames");
-    CharonValueSet(self, destinationFrame, @"destinationFrame");
-    CharonValueSet(self, @(filterStrength), @"filterStrength");
-    CharonValueSet(self, @(hasDiscontinuity), @"hasDiscontinuity");
+    RevenantValueSet(self, sourceFrame, @"sourceFrame");
+    RevenantValueSet(self, nextFrames, @"nextFrames");
+    RevenantValueSet(self, previousFrames, @"previousFrames");
+    RevenantValueSet(self, destinationFrame, @"destinationFrame");
+    RevenantValueSet(self, @(filterStrength), @"filterStrength");
+    RevenantValueSet(self, @(hasDiscontinuity), @"hasDiscontinuity");
     return self;
 }
 

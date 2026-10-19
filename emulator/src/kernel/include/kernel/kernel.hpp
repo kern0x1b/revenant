@@ -72,7 +72,7 @@
 #include "network/wifi_state.hpp"
 #include "mach/xnu_scheduler.hpp"
 
-namespace shade {
+namespace emulator {
 
 class MachOImage;
 

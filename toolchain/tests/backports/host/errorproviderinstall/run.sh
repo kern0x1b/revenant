@@ -20,7 +20,7 @@ here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 sources=${SOURCES:-$here/../../../../packages/a/apple-backports/Foundation}
 device=${DEVICE:-$here/../../device}
-build=${BUILD:-$(runs_fresh charon-errorproviderinstall)}
+build=${BUILD:-$(runs_fresh revenant-errorproviderinstall)}
 quiet="-Wno-deprecated-declarations -Wno-unguarded-availability-new -Wno-nullability-completeness"
 mkdir -p "$build/plain" "$build/prefixed"
 

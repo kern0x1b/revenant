@@ -1,7 +1,7 @@
-#import "CharonUIKit26.h"
+#import "RevenantUIKit26.h"
 #import <objc/runtime.h>
 
-static inline id CharonBox(id value) { return value; }
+static inline id RevenantBox(id value) { return value; }
 
 @implementation UIGlassEffect
 @end
@@ -66,96 +66,96 @@ static inline id CharonBox(id value) { return value; }
 @implementation UISymbolContentTransition
 @end
 
-@implementation UIScrollView (CharonUIKit26)
+@implementation UIScrollView (RevenantUIKit26)
 
-static char CharonTopEdgeEffectKey, CharonLeftEdgeEffectKey;
-static char CharonRightEdgeEffectKey, CharonBottomEdgeEffectKey;
+static char RevenantTopEdgeEffectKey, RevenantLeftEdgeEffectKey;
+static char RevenantRightEdgeEffectKey, RevenantBottomEdgeEffectKey;
 
-- (UIScrollEdgeEffect *)topEdgeEffect { return objc_getAssociatedObject(self, &CharonTopEdgeEffectKey); }
+- (UIScrollEdgeEffect *)topEdgeEffect { return objc_getAssociatedObject(self, &RevenantTopEdgeEffectKey); }
 - (void)setTopEdgeEffect:(UIScrollEdgeEffect *)effect
 {
-    objc_setAssociatedObject(self, &CharonTopEdgeEffectKey, effect, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, &RevenantTopEdgeEffectKey, effect, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
-- (UIScrollEdgeEffect *)leftEdgeEffect { return objc_getAssociatedObject(self, &CharonLeftEdgeEffectKey); }
+- (UIScrollEdgeEffect *)leftEdgeEffect { return objc_getAssociatedObject(self, &RevenantLeftEdgeEffectKey); }
 - (void)setLeftEdgeEffect:(UIScrollEdgeEffect *)effect
 {
-    objc_setAssociatedObject(self, &CharonLeftEdgeEffectKey, effect, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, &RevenantLeftEdgeEffectKey, effect, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
-- (UIScrollEdgeEffect *)rightEdgeEffect { return objc_getAssociatedObject(self, &CharonRightEdgeEffectKey); }
+- (UIScrollEdgeEffect *)rightEdgeEffect { return objc_getAssociatedObject(self, &RevenantRightEdgeEffectKey); }
 - (void)setRightEdgeEffect:(UIScrollEdgeEffect *)effect
 {
-    objc_setAssociatedObject(self, &CharonRightEdgeEffectKey, effect, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, &RevenantRightEdgeEffectKey, effect, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
-- (UIScrollEdgeEffect *)bottomEdgeEffect { return objc_getAssociatedObject(self, &CharonBottomEdgeEffectKey); }
+- (UIScrollEdgeEffect *)bottomEdgeEffect { return objc_getAssociatedObject(self, &RevenantBottomEdgeEffectKey); }
 - (void)setBottomEdgeEffect:(UIScrollEdgeEffect *)effect
 {
-    objc_setAssociatedObject(self, &CharonBottomEdgeEffectKey, effect, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, &RevenantBottomEdgeEffectKey, effect, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 @end
 
-@implementation UISlider (CharonUIKit26)
+@implementation UISlider (RevenantUIKit26)
 
-static char CharonSliderStyleKey, CharonSliderTrackConfigurationKey;
+static char RevenantSliderStyleKey, RevenantSliderTrackConfigurationKey;
 
 - (NSInteger)sliderStyle
 {
-    return [(NSNumber *)objc_getAssociatedObject(self, &CharonSliderStyleKey) integerValue];
+    return [(NSNumber *)objc_getAssociatedObject(self, &RevenantSliderStyleKey) integerValue];
 }
 - (void)setSliderStyle:(NSInteger)style
 {
-    objc_setAssociatedObject(self, &CharonSliderStyleKey, [NSNumber numberWithInteger:style],
+    objc_setAssociatedObject(self, &RevenantSliderStyleKey, [NSNumber numberWithInteger:style],
                              OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 - (UISliderTrackConfiguration *)trackConfiguration
 {
-    return objc_getAssociatedObject(self, &CharonSliderTrackConfigurationKey);
+    return objc_getAssociatedObject(self, &RevenantSliderTrackConfigurationKey);
 }
 - (void)setTrackConfiguration:(UISliderTrackConfiguration *)configuration
 {
-    objc_setAssociatedObject(self, &CharonSliderTrackConfigurationKey, configuration,
+    objc_setAssociatedObject(self, &RevenantSliderTrackConfigurationKey, configuration,
                              OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 @end
 
-@implementation UIBarButtonItem (CharonUIKit26)
+@implementation UIBarButtonItem (RevenantUIKit26)
 
-static char CharonBarItemBadgeKey, CharonBarItemIdentifierKey;
-static char CharonBarItemSharesBackgroundKey, CharonBarItemHidesSharedBackgroundKey;
+static char RevenantBarItemBadgeKey, RevenantBarItemIdentifierKey;
+static char RevenantBarItemSharesBackgroundKey, RevenantBarItemHidesSharedBackgroundKey;
 
-- (UIBarButtonItemBadge *)badge { return objc_getAssociatedObject(self, &CharonBarItemBadgeKey); }
+- (UIBarButtonItemBadge *)badge { return objc_getAssociatedObject(self, &RevenantBarItemBadgeKey); }
 - (void)setBadge:(UIBarButtonItemBadge *)badge
 {
-    objc_setAssociatedObject(self, &CharonBarItemBadgeKey, badge, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, &RevenantBarItemBadgeKey, badge, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
-- (NSString *)identifier { return objc_getAssociatedObject(self, &CharonBarItemIdentifierKey); }
+- (NSString *)identifier { return objc_getAssociatedObject(self, &RevenantBarItemIdentifierKey); }
 - (void)setIdentifier:(NSString *)identifier
 {
-    objc_setAssociatedObject(self, &CharonBarItemIdentifierKey, [identifier copy],
+    objc_setAssociatedObject(self, &RevenantBarItemIdentifierKey, [identifier copy],
                              OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 - (BOOL)sharesBackground
 {
-    return [(NSNumber *)objc_getAssociatedObject(self, &CharonBarItemSharesBackgroundKey) boolValue];
+    return [(NSNumber *)objc_getAssociatedObject(self, &RevenantBarItemSharesBackgroundKey) boolValue];
 }
 - (void)setSharesBackground:(BOOL)shares
 {
-    objc_setAssociatedObject(self, &CharonBarItemSharesBackgroundKey, [NSNumber numberWithBool:shares],
+    objc_setAssociatedObject(self, &RevenantBarItemSharesBackgroundKey, [NSNumber numberWithBool:shares],
                              OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 - (BOOL)hidesSharedBackground
 {
-    return [(NSNumber *)objc_getAssociatedObject(self, &CharonBarItemHidesSharedBackgroundKey) boolValue];
+    return [(NSNumber *)objc_getAssociatedObject(self, &RevenantBarItemHidesSharedBackgroundKey) boolValue];
 }
 - (void)setHidesSharedBackground:(BOOL)hides
 {
-    objc_setAssociatedObject(self, &CharonBarItemHidesSharedBackgroundKey, [NSNumber numberWithBool:hides],
+    objc_setAssociatedObject(self, &RevenantBarItemHidesSharedBackgroundKey, [NSNumber numberWithBool:hides],
                              OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 @end
 
-@implementation UIDeferredMenuElement (CharonUIKit26)
+@implementation UIDeferredMenuElement (RevenantUIKit26)
 
-static char CharonDeferredElementIdentifierKey;
+static char RevenantDeferredElementIdentifierKey;
 
 + (UIDeferredMenuElement *)elementUsingFocusWithIdentifier:(NSString *)identifier
                                             shouldCacheItems:(BOOL)shouldCache
@@ -166,109 +166,109 @@ static char CharonDeferredElementIdentifierKey;
     }];
 }
 
-- (NSString *)identifier { return objc_getAssociatedObject(self, &CharonDeferredElementIdentifierKey); }
+- (NSString *)identifier { return objc_getAssociatedObject(self, &RevenantDeferredElementIdentifierKey); }
 @end
 
-@implementation UIScene (CharonUIKit26)
+@implementation UIScene (RevenantUIKit26)
 
-static char CharonSceneDestructionConditionsKey;
+static char RevenantSceneDestructionConditionsKey;
 
 - (NSSet<UISceneDestructionCondition *> *)destructionConditions
 {
-    return objc_getAssociatedObject(self, &CharonSceneDestructionConditionsKey);
+    return objc_getAssociatedObject(self, &RevenantSceneDestructionConditionsKey);
 }
 - (void)setDestructionConditions:(NSSet<UISceneDestructionCondition *> *)conditions
 {
-    objc_setAssociatedObject(self, &CharonSceneDestructionConditionsKey, [conditions copy],
+    objc_setAssociatedObject(self, &RevenantSceneDestructionConditionsKey, [conditions copy],
                              OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 @end
 
-@implementation UISplitViewController (CharonUIKit26)
+@implementation UISplitViewController (RevenantUIKit26)
 
-static char CharonMaxInspectorKey, CharonMinInspectorKey, CharonMinSecondaryKey;
-static char CharonPrefInspectorKey, CharonPrefInspectorFractionKey;
-static char CharonPrefSecondaryKey, CharonPrefSecondaryFractionKey;
+static char RevenantMaxInspectorKey, RevenantMinInspectorKey, RevenantMinSecondaryKey;
+static char RevenantPrefInspectorKey, RevenantPrefInspectorFractionKey;
+static char RevenantPrefSecondaryKey, RevenantPrefSecondaryFractionKey;
 
 - (CGFloat)maximumInspectorColumnWidth
 {
-    return [(NSNumber *)objc_getAssociatedObject(self, &CharonMaxInspectorKey) doubleValue];
+    return [(NSNumber *)objc_getAssociatedObject(self, &RevenantMaxInspectorKey) doubleValue];
 }
 - (void)setMaximumInspectorColumnWidth:(CGFloat)width
 {
-    objc_setAssociatedObject(self, &CharonMaxInspectorKey, [NSNumber numberWithDouble:(double)width],
+    objc_setAssociatedObject(self, &RevenantMaxInspectorKey, [NSNumber numberWithDouble:(double)width],
                              OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 - (CGFloat)minimumInspectorColumnWidth
 {
-    return [(NSNumber *)objc_getAssociatedObject(self, &CharonMinInspectorKey) doubleValue];
+    return [(NSNumber *)objc_getAssociatedObject(self, &RevenantMinInspectorKey) doubleValue];
 }
 - (void)setMinimumInspectorColumnWidth:(CGFloat)width
 {
-    objc_setAssociatedObject(self, &CharonMinInspectorKey, [NSNumber numberWithDouble:(double)width],
+    objc_setAssociatedObject(self, &RevenantMinInspectorKey, [NSNumber numberWithDouble:(double)width],
                              OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 - (CGFloat)minimumSecondaryColumnWidth
 {
-    return [(NSNumber *)objc_getAssociatedObject(self, &CharonMinSecondaryKey) doubleValue];
+    return [(NSNumber *)objc_getAssociatedObject(self, &RevenantMinSecondaryKey) doubleValue];
 }
 - (void)setMinimumSecondaryColumnWidth:(CGFloat)width
 {
-    objc_setAssociatedObject(self, &CharonMinSecondaryKey, [NSNumber numberWithDouble:(double)width],
+    objc_setAssociatedObject(self, &RevenantMinSecondaryKey, [NSNumber numberWithDouble:(double)width],
                              OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 - (CGFloat)preferredInspectorColumnWidth
 {
-    return [(NSNumber *)objc_getAssociatedObject(self, &CharonPrefInspectorKey) doubleValue];
+    return [(NSNumber *)objc_getAssociatedObject(self, &RevenantPrefInspectorKey) doubleValue];
 }
 - (void)setPreferredInspectorColumnWidth:(CGFloat)width
 {
-    objc_setAssociatedObject(self, &CharonPrefInspectorKey, [NSNumber numberWithDouble:(double)width],
+    objc_setAssociatedObject(self, &RevenantPrefInspectorKey, [NSNumber numberWithDouble:(double)width],
                              OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 - (CGFloat)preferredInspectorColumnWidthFraction
 {
-    return [(NSNumber *)objc_getAssociatedObject(self, &CharonPrefInspectorFractionKey) doubleValue];
+    return [(NSNumber *)objc_getAssociatedObject(self, &RevenantPrefInspectorFractionKey) doubleValue];
 }
 - (void)setPreferredInspectorColumnWidthFraction:(CGFloat)fraction
 {
-    objc_setAssociatedObject(self, &CharonPrefInspectorFractionKey,
+    objc_setAssociatedObject(self, &RevenantPrefInspectorFractionKey,
                              [NSNumber numberWithDouble:(double)fraction], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 - (CGFloat)preferredSecondaryColumnWidth
 {
-    return [(NSNumber *)objc_getAssociatedObject(self, &CharonPrefSecondaryKey) doubleValue];
+    return [(NSNumber *)objc_getAssociatedObject(self, &RevenantPrefSecondaryKey) doubleValue];
 }
 - (void)setPreferredSecondaryColumnWidth:(CGFloat)width
 {
-    objc_setAssociatedObject(self, &CharonPrefSecondaryKey, [NSNumber numberWithDouble:(double)width],
+    objc_setAssociatedObject(self, &RevenantPrefSecondaryKey, [NSNumber numberWithDouble:(double)width],
                              OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 - (CGFloat)preferredSecondaryColumnWidthFraction
 {
-    return [(NSNumber *)objc_getAssociatedObject(self, &CharonPrefSecondaryFractionKey) doubleValue];
+    return [(NSNumber *)objc_getAssociatedObject(self, &RevenantPrefSecondaryFractionKey) doubleValue];
 }
 - (void)setPreferredSecondaryColumnWidthFraction:(CGFloat)fraction
 {
-    objc_setAssociatedObject(self, &CharonPrefSecondaryFractionKey,
+    objc_setAssociatedObject(self, &RevenantPrefSecondaryFractionKey,
                              [NSNumber numberWithDouble:(double)fraction], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
 - (BOOL)isShowingColumn:(id)column { return NO; }
 @end
 
-@implementation UITabBarController (CharonUIKit26)
+@implementation UITabBarController (RevenantUIKit26)
 
-static char CharonTabBarBottomAccessoryKey, CharonTabBarMinimizeBehaviorKey;
-static char CharonTabBarContentLayoutGuideKey;
+static char RevenantTabBarBottomAccessoryKey, RevenantTabBarMinimizeBehaviorKey;
+static char RevenantTabBarContentLayoutGuideKey;
 
 - (UITabAccessory *)bottomAccessory
 {
-    return objc_getAssociatedObject(self, &CharonTabBarBottomAccessoryKey);
+    return objc_getAssociatedObject(self, &RevenantTabBarBottomAccessoryKey);
 }
 - (void)setBottomAccessory:(UITabAccessory *)accessory
 {
-    objc_setAssociatedObject(self, &CharonTabBarBottomAccessoryKey, accessory,
+    objc_setAssociatedObject(self, &RevenantTabBarBottomAccessoryKey, accessory,
                              OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 - (void)setBottomAccessory:(UITabAccessory *)accessory animated:(BOOL)animated
@@ -277,40 +277,40 @@ static char CharonTabBarContentLayoutGuideKey;
 }
 - (NSInteger)tabBarMinimizeBehavior
 {
-    return [(NSNumber *)objc_getAssociatedObject(self, &CharonTabBarMinimizeBehaviorKey) integerValue];
+    return [(NSNumber *)objc_getAssociatedObject(self, &RevenantTabBarMinimizeBehaviorKey) integerValue];
 }
 - (void)setTabBarMinimizeBehavior:(NSInteger)behavior
 {
-    objc_setAssociatedObject(self, &CharonTabBarMinimizeBehaviorKey, [NSNumber numberWithInteger:behavior],
+    objc_setAssociatedObject(self, &RevenantTabBarMinimizeBehaviorKey, [NSNumber numberWithInteger:behavior],
                              OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 - (id)contentLayoutGuide
 {
-    return objc_getAssociatedObject(self, &CharonTabBarContentLayoutGuideKey);
+    return objc_getAssociatedObject(self, &RevenantTabBarContentLayoutGuideKey);
 }
 - (void)setContentLayoutGuide:(id)guide
 {
-    objc_setAssociatedObject(self, &CharonTabBarContentLayoutGuideKey, guide,
+    objc_setAssociatedObject(self, &RevenantTabBarContentLayoutGuideKey, guide,
                              OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 @end
 
-@implementation UITextView (CharonUIKit26)
+@implementation UITextView (RevenantUIKit26)
 
-static char CharonTextViewSelectedRangesKey;
+static char RevenantTextViewSelectedRangesKey;
 
 - (NSArray<NSValue *> *)selectedRanges
 {
-    return objc_getAssociatedObject(self, &CharonTextViewSelectedRangesKey);
+    return objc_getAssociatedObject(self, &RevenantTextViewSelectedRangesKey);
 }
 - (void)setSelectedRanges:(NSArray<NSValue *> *)ranges
 {
-    objc_setAssociatedObject(self, &CharonTextViewSelectedRangesKey,
+    objc_setAssociatedObject(self, &RevenantTextViewSelectedRangesKey,
                              ranges.count ? [ranges copy] : nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 @end
 
-@implementation NSTextList (CharonUIKit26)
+@implementation NSTextList (RevenantUIKit26)
 
 + (BOOL)includesTextListMarkers
 {
@@ -319,288 +319,288 @@ static char CharonTextViewSelectedRangesKey;
 
 @end
 
-@implementation UIColor (CharonUIKit26)
+@implementation UIColor (RevenantUIKit26)
 
-static char CharonColorLinearExposureKey;
+static char RevenantColorLinearExposureKey;
 
 - (CGFloat)linearExposure
 {
-    return [(NSNumber *)objc_getAssociatedObject(self, &CharonColorLinearExposureKey) doubleValue];
+    return [(NSNumber *)objc_getAssociatedObject(self, &RevenantColorLinearExposureKey) doubleValue];
 }
 - (void)setLinearExposure:(CGFloat)exposure
 {
-    objc_setAssociatedObject(self, &CharonColorLinearExposureKey, [NSNumber numberWithDouble:(double)exposure],
+    objc_setAssociatedObject(self, &RevenantColorLinearExposureKey, [NSNumber numberWithDouble:(double)exposure],
                              OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 - (UIColor *)standardDynamicRangeColor { return nil; }
 @end
 
-@implementation UIColorPickerViewController (CharonUIKit26)
+@implementation UIColorPickerViewController (RevenantUIKit26)
 
-static char CharonPickerMaxExposureKey, CharonPickerSupportsEyedropperKey;
+static char RevenantPickerMaxExposureKey, RevenantPickerSupportsEyedropperKey;
 
 - (CGFloat)maximumLinearExposure
 {
-    return [(NSNumber *)objc_getAssociatedObject(self, &CharonPickerMaxExposureKey) doubleValue];
+    return [(NSNumber *)objc_getAssociatedObject(self, &RevenantPickerMaxExposureKey) doubleValue];
 }
 - (void)setMaximumLinearExposure:(CGFloat)exposure
 {
-    objc_setAssociatedObject(self, &CharonPickerMaxExposureKey, [NSNumber numberWithDouble:(double)exposure],
+    objc_setAssociatedObject(self, &RevenantPickerMaxExposureKey, [NSNumber numberWithDouble:(double)exposure],
                              OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 - (BOOL)supportsEyedropper
 {
-    return [(NSNumber *)objc_getAssociatedObject(self, &CharonPickerSupportsEyedropperKey) boolValue];
+    return [(NSNumber *)objc_getAssociatedObject(self, &RevenantPickerSupportsEyedropperKey) boolValue];
 }
 - (void)setSupportsEyedropper:(BOOL)supports
 {
-    objc_setAssociatedObject(self, &CharonPickerSupportsEyedropperKey, [NSNumber numberWithBool:supports],
+    objc_setAssociatedObject(self, &RevenantPickerSupportsEyedropperKey, [NSNumber numberWithBool:supports],
                              OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 @end
 
-@implementation UIColorWell (CharonUIKit26)
+@implementation UIColorWell (RevenantUIKit26)
 
-static char CharonColorWellMaxExposureKey, CharonColorWellSupportsEyedropperKey;
+static char RevenantColorWellMaxExposureKey, RevenantColorWellSupportsEyedropperKey;
 
 - (CGFloat)maximumLinearExposure
 {
-    return [(NSNumber *)objc_getAssociatedObject(self, &CharonColorWellMaxExposureKey) doubleValue];
+    return [(NSNumber *)objc_getAssociatedObject(self, &RevenantColorWellMaxExposureKey) doubleValue];
 }
 - (void)setMaximumLinearExposure:(CGFloat)exposure
 {
-    objc_setAssociatedObject(self, &CharonColorWellMaxExposureKey, [NSNumber numberWithDouble:(double)exposure],
+    objc_setAssociatedObject(self, &RevenantColorWellMaxExposureKey, [NSNumber numberWithDouble:(double)exposure],
                              OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 - (BOOL)supportsEyedropper
 {
-    return [(NSNumber *)objc_getAssociatedObject(self, &CharonColorWellSupportsEyedropperKey) boolValue];
+    return [(NSNumber *)objc_getAssociatedObject(self, &RevenantColorWellSupportsEyedropperKey) boolValue];
 }
 - (void)setSupportsEyedropper:(BOOL)supports
 {
-    objc_setAssociatedObject(self, &CharonColorWellSupportsEyedropperKey, [NSNumber numberWithBool:supports],
+    objc_setAssociatedObject(self, &RevenantColorWellSupportsEyedropperKey, [NSNumber numberWithBool:supports],
                              OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 @end
 
-@implementation UINavigationItem (CharonUIKit26)
+@implementation UINavigationItem (RevenantUIKit26)
 
-static char CharonNavItemAttributedTitleKey, CharonNavItemAttributedSubtitleKey;
-static char CharonNavItemLargeTitleKey, CharonNavItemLargeSubtitleKey;
-static char CharonNavItemLargeAttributedTitleKey, CharonNavItemLargeAttributedSubtitleKey;
-static char CharonNavItemSubtitleViewKey, CharonNavItemLargeSubtitleViewKey, CharonNavItemLargeSubtitleKey;
-static char CharonNavItemSearchPlacementKey, CharonNavItemSearchExternalKey, CharonNavItemSearchToolbarKey;
-static char CharonNavItemSubtitleKey;
+static char RevenantNavItemAttributedTitleKey, RevenantNavItemAttributedSubtitleKey;
+static char RevenantNavItemLargeTitleKey, RevenantNavItemLargeSubtitleKey;
+static char RevenantNavItemLargeAttributedTitleKey, RevenantNavItemLargeAttributedSubtitleKey;
+static char RevenantNavItemSubtitleViewKey, RevenantNavItemLargeSubtitleViewKey, RevenantNavItemLargeSubtitleKey;
+static char RevenantNavItemSearchPlacementKey, RevenantNavItemSearchExternalKey, RevenantNavItemSearchToolbarKey;
+static char RevenantNavItemSubtitleKey;
 
-- (NSAttributedString *)attributedTitle { return objc_getAssociatedObject(self, &CharonNavItemAttributedTitleKey); }
+- (NSAttributedString *)attributedTitle { return objc_getAssociatedObject(self, &RevenantNavItemAttributedTitleKey); }
 - (void)setAttributedTitle:(NSAttributedString *)title
 {
-    objc_setAssociatedObject(self, &CharonNavItemAttributedTitleKey, [title copy],
+    objc_setAssociatedObject(self, &RevenantNavItemAttributedTitleKey, [title copy],
                              OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
-- (NSAttributedString *)attributedSubtitle { return objc_getAssociatedObject(self, &CharonNavItemAttributedSubtitleKey); }
+- (NSAttributedString *)attributedSubtitle { return objc_getAssociatedObject(self, &RevenantNavItemAttributedSubtitleKey); }
 - (void)setAttributedSubtitle:(NSAttributedString *)subtitle
 {
-    objc_setAssociatedObject(self, &CharonNavItemAttributedSubtitleKey, [subtitle copy],
+    objc_setAssociatedObject(self, &RevenantNavItemAttributedSubtitleKey, [subtitle copy],
                              OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
-- (NSString *)largeTitle { return objc_getAssociatedObject(self, &CharonNavItemLargeTitleKey); }
+- (NSString *)largeTitle { return objc_getAssociatedObject(self, &RevenantNavItemLargeTitleKey); }
 - (void)setLargeTitle:(NSString *)title
 {
-    objc_setAssociatedObject(self, &CharonNavItemLargeTitleKey, [title copy], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, &RevenantNavItemLargeTitleKey, [title copy], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
-- (NSAttributedString *)largeAttributedTitle { return objc_getAssociatedObject(self, &CharonNavItemLargeAttributedTitleKey); }
+- (NSAttributedString *)largeAttributedTitle { return objc_getAssociatedObject(self, &RevenantNavItemLargeAttributedTitleKey); }
 - (void)setLargeAttributedTitle:(NSAttributedString *)title
 {
-    objc_setAssociatedObject(self, &CharonNavItemLargeAttributedTitleKey, [title copy],
+    objc_setAssociatedObject(self, &RevenantNavItemLargeAttributedTitleKey, [title copy],
                              OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
-- (NSAttributedString *)largeAttributedSubtitle { return objc_getAssociatedObject(self, &CharonNavItemLargeAttributedSubtitleKey); }
+- (NSAttributedString *)largeAttributedSubtitle { return objc_getAssociatedObject(self, &RevenantNavItemLargeAttributedSubtitleKey); }
 - (void)setLargeAttributedSubtitle:(NSAttributedString *)subtitle
 {
-    objc_setAssociatedObject(self, &CharonNavItemLargeAttributedSubtitleKey, [subtitle copy],
+    objc_setAssociatedObject(self, &RevenantNavItemLargeAttributedSubtitleKey, [subtitle copy],
                              OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
-- (UIView *)subtitleView { return objc_getAssociatedObject(self, &CharonNavItemSubtitleViewKey); }
+- (UIView *)subtitleView { return objc_getAssociatedObject(self, &RevenantNavItemSubtitleViewKey); }
 - (void)setSubtitleView:(UIView *)view
 {
-    objc_setAssociatedObject(self, &CharonNavItemSubtitleViewKey, view, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, &RevenantNavItemSubtitleViewKey, view, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
-- (UIView *)largeSubtitleView { return objc_getAssociatedObject(self, &CharonNavItemLargeSubtitleViewKey); }
+- (UIView *)largeSubtitleView { return objc_getAssociatedObject(self, &RevenantNavItemLargeSubtitleViewKey); }
 - (void)setLargeSubtitleView:(UIView *)view
 {
-    objc_setAssociatedObject(self, &CharonNavItemLargeSubtitleViewKey, view, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, &RevenantNavItemLargeSubtitleViewKey, view, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
-- (NSString *)subtitle { return objc_getAssociatedObject(self, &CharonNavItemSubtitleKey); }
+- (NSString *)subtitle { return objc_getAssociatedObject(self, &RevenantNavItemSubtitleKey); }
 - (void)setSubtitle:(NSString *)subtitle
 {
-    objc_setAssociatedObject(self, &CharonNavItemSubtitleKey, [subtitle copy],
+    objc_setAssociatedObject(self, &RevenantNavItemSubtitleKey, [subtitle copy],
                              OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
-- (id)largeSubtitle { return objc_getAssociatedObject(self, &CharonNavItemLargeSubtitleKey); }
+- (id)largeSubtitle { return objc_getAssociatedObject(self, &RevenantNavItemLargeSubtitleKey); }
 - (void)setLargeSubtitle:(id)subtitle
 {
-    objc_setAssociatedObject(self, &CharonNavItemLargeSubtitleKey, subtitle, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, &RevenantNavItemLargeSubtitleKey, subtitle, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 - (NSInteger)searchBarPlacementBarButtonItem
 {
-    return [(NSNumber *)objc_getAssociatedObject(self, &CharonNavItemSearchPlacementKey) integerValue];
+    return [(NSNumber *)objc_getAssociatedObject(self, &RevenantNavItemSearchPlacementKey) integerValue];
 }
 - (void)setSearchBarPlacementBarButtonItem:(NSInteger)placement
 {
-    objc_setAssociatedObject(self, &CharonNavItemSearchPlacementKey, [NSNumber numberWithInteger:placement],
+    objc_setAssociatedObject(self, &RevenantNavItemSearchPlacementKey, [NSNumber numberWithInteger:placement],
                              OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 - (BOOL)searchBarPlacementAllowsExternalIntegration
 {
-    return [(NSNumber *)objc_getAssociatedObject(self, &CharonNavItemSearchExternalKey) boolValue];
+    return [(NSNumber *)objc_getAssociatedObject(self, &RevenantNavItemSearchExternalKey) boolValue];
 }
 - (void)setSearchBarPlacementAllowsExternalIntegration:(BOOL)allows
 {
-    objc_setAssociatedObject(self, &CharonNavItemSearchExternalKey, [NSNumber numberWithBool:allows],
+    objc_setAssociatedObject(self, &RevenantNavItemSearchExternalKey, [NSNumber numberWithBool:allows],
                              OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 - (BOOL)searchBarPlacementAllowsToolbarIntegration
 {
-    return [(NSNumber *)objc_getAssociatedObject(self, &CharonNavItemSearchToolbarKey) boolValue];
+    return [(NSNumber *)objc_getAssociatedObject(self, &RevenantNavItemSearchToolbarKey) boolValue];
 }
 - (void)setSearchBarPlacementAllowsToolbarIntegration:(BOOL)allows
 {
-    objc_setAssociatedObject(self, &CharonNavItemSearchToolbarKey, [NSNumber numberWithBool:allows],
+    objc_setAssociatedObject(self, &RevenantNavItemSearchToolbarKey, [NSNumber numberWithBool:allows],
                              OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 @end
 
-@implementation UINavigationBarAppearance (CharonUIKit26)
+@implementation UINavigationBarAppearance (RevenantUIKit26)
 
-static char CharonBarAppearanceSubtitleAttributesKey, CharonBarAppearanceLargeSubtitleAttributesKey;
+static char RevenantBarAppearanceSubtitleAttributesKey, RevenantBarAppearanceLargeSubtitleAttributesKey;
 
 - (NSDictionary<NSAttributedStringKey, id> *)subtitleTextAttributes
 {
-    return objc_getAssociatedObject(self, &CharonBarAppearanceSubtitleAttributesKey);
+    return objc_getAssociatedObject(self, &RevenantBarAppearanceSubtitleAttributesKey);
 }
 - (void)setSubtitleTextAttributes:(NSDictionary<NSAttributedStringKey, id> *)attributes
 {
-    objc_setAssociatedObject(self, &CharonBarAppearanceSubtitleAttributesKey, [attributes copy],
+    objc_setAssociatedObject(self, &RevenantBarAppearanceSubtitleAttributesKey, [attributes copy],
                              OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 - (NSDictionary<NSAttributedStringKey, id> *)largeSubtitleTextAttributes
 {
-    return objc_getAssociatedObject(self, &CharonBarAppearanceLargeSubtitleAttributesKey);
+    return objc_getAssociatedObject(self, &RevenantBarAppearanceLargeSubtitleAttributesKey);
 }
 - (void)setLargeSubtitleTextAttributes:(NSDictionary<NSAttributedStringKey, id> *)attributes
 {
-    objc_setAssociatedObject(self, &CharonBarAppearanceLargeSubtitleAttributesKey, [attributes copy],
+    objc_setAssociatedObject(self, &RevenantBarAppearanceLargeSubtitleAttributesKey, [attributes copy],
                              OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 @end
 
-@implementation UINavigationController (CharonUIKit26)
+@implementation UINavigationController (RevenantUIKit26)
 
-static char CharonNavControllerContentPopGestureKey;
+static char RevenantNavControllerContentPopGestureKey;
 
 - (UIGestureRecognizer *)interactiveContentPopGestureRecognizer
 {
-    return objc_getAssociatedObject(self, &CharonNavControllerContentPopGestureKey);
+    return objc_getAssociatedObject(self, &RevenantNavControllerContentPopGestureKey);
 }
 - (void)setInteractiveContentPopGestureRecognizer:(UIGestureRecognizer *)recognizer
 {
-    objc_setAssociatedObject(self, &CharonNavControllerContentPopGestureKey, recognizer,
+    objc_setAssociatedObject(self, &RevenantNavControllerContentPopGestureKey, recognizer,
                              OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 @end
 
-@implementation NSObject (CharonUIKit26_TextInputTraits)
+@implementation NSObject (RevenantUIKit26_TextInputTraits)
 
-static char CharonTextInputTraitsAllowsNumberPadPopoverKey;
+static char RevenantTextInputTraitsAllowsNumberPadPopoverKey;
 
 - (BOOL)allowsNumberPadPopover
 {
-    return [(NSNumber *)objc_getAssociatedObject(self, &CharonTextInputTraitsAllowsNumberPadPopoverKey) boolValue];
+    return [(NSNumber *)objc_getAssociatedObject(self, &RevenantTextInputTraitsAllowsNumberPadPopoverKey) boolValue];
 }
 - (void)setAllowsNumberPadPopover:(BOOL)allows
 {
-    objc_setAssociatedObject(self, &CharonTextInputTraitsAllowsNumberPadPopoverKey,
+    objc_setAssociatedObject(self, &RevenantTextInputTraitsAllowsNumberPadPopoverKey,
                              [NSNumber numberWithBool:allows], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 @end
 
-@implementation UIViewPropertyAnimator (CharonUIKit26)
+@implementation UIViewPropertyAnimator (RevenantUIKit26)
 
-static char CharonAnimatorFlushUpdatesKey;
+static char RevenantAnimatorFlushUpdatesKey;
 
 - (BOOL)flushUpdates
 {
-    return [(NSNumber *)objc_getAssociatedObject(self, &CharonAnimatorFlushUpdatesKey) boolValue];
+    return [(NSNumber *)objc_getAssociatedObject(self, &RevenantAnimatorFlushUpdatesKey) boolValue];
 }
 - (void)setFlushUpdates:(BOOL)flushUpdates
 {
-    objc_setAssociatedObject(self, &CharonAnimatorFlushUpdatesKey, [NSNumber numberWithBool:flushUpdates],
+    objc_setAssociatedObject(self, &RevenantAnimatorFlushUpdatesKey, [NSNumber numberWithBool:flushUpdates],
                              OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 @end
 
-@implementation UIView (CharonUIKit26)
+@implementation UIView (RevenantUIKit26)
 
-static char CharonViewNeedsUpdatePropertiesKey;
+static char RevenantViewNeedsUpdatePropertiesKey;
 
 - (void)setNeedsUpdateProperties
 {
-    objc_setAssociatedObject(self, &CharonViewNeedsUpdatePropertiesKey, @YES, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, &RevenantViewNeedsUpdatePropertiesKey, @YES, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 - (void)updatePropertiesIfNeeded
 {
-    if ([(NSNumber *)objc_getAssociatedObject(self, &CharonViewNeedsUpdatePropertiesKey) boolValue]) {
-        objc_setAssociatedObject(self, &CharonViewNeedsUpdatePropertiesKey, @NO, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    if ([(NSNumber *)objc_getAssociatedObject(self, &RevenantViewNeedsUpdatePropertiesKey) boolValue]) {
+        objc_setAssociatedObject(self, &RevenantViewNeedsUpdatePropertiesKey, @NO, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
         [self updateProperties];
     }
 }
 - (void)updateProperties { }
 @end
 
-@implementation UIViewController (CharonUIKit26)
+@implementation UIViewController (RevenantUIKit26)
 
-static char CharonVCNeedsUpdatePropertiesKey;
-static char CharonVCPrefersOrientationLockedKey, CharonVCChildForOrientationLockKey;
+static char RevenantVCNeedsUpdatePropertiesKey;
+static char RevenantVCPrefersOrientationLockedKey, RevenantVCChildForOrientationLockKey;
 
 - (void)setNeedsUpdateProperties
 {
-    objc_setAssociatedObject(self, &CharonVCNeedsUpdatePropertiesKey, @YES, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, &RevenantVCNeedsUpdatePropertiesKey, @YES, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 - (void)updatePropertiesIfNeeded
 {
-    if ([(NSNumber *)objc_getAssociatedObject(self, &CharonVCNeedsUpdatePropertiesKey) boolValue]) {
-        objc_setAssociatedObject(self, &CharonVCNeedsUpdatePropertiesKey, @NO, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    if ([(NSNumber *)objc_getAssociatedObject(self, &RevenantVCNeedsUpdatePropertiesKey) boolValue]) {
+        objc_setAssociatedObject(self, &RevenantVCNeedsUpdatePropertiesKey, @NO, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
         [self updateProperties];
     }
 }
 - (void)updateProperties { }
 - (void)setNeedsUpdateOfPrefersInterfaceOrientationLocked
 {
-    objc_setAssociatedObject(self, &CharonVCNeedsUpdatePropertiesKey, @YES, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, &RevenantVCNeedsUpdatePropertiesKey, @YES, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 - (BOOL)prefersInterfaceOrientationLocked
 {
-    return [(NSNumber *)objc_getAssociatedObject(self, &CharonVCPrefersOrientationLockedKey) boolValue];
+    return [(NSNumber *)objc_getAssociatedObject(self, &RevenantVCPrefersOrientationLockedKey) boolValue];
 }
 - (void)setPrefersInterfaceOrientationLocked:(BOOL)locked
 {
-    objc_setAssociatedObject(self, &CharonVCPrefersOrientationLockedKey, [NSNumber numberWithBool:locked],
+    objc_setAssociatedObject(self, &RevenantVCPrefersOrientationLockedKey, [NSNumber numberWithBool:locked],
                              OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 - (UIViewController *)childViewControllerForInterfaceOrientationLock
 {
-    return objc_getAssociatedObject(self, &CharonVCChildForOrientationLockKey);
+    return objc_getAssociatedObject(self, &RevenantVCChildForOrientationLockKey);
 }
 - (void)setChildViewControllerForInterfaceOrientationLock:(UIViewController *)child
 {
-    objc_setAssociatedObject(self, &CharonVCChildForOrientationLockKey, child,
+    objc_setAssociatedObject(self, &RevenantVCChildForOrientationLockKey, child,
                              OBJC_ASSOCIATION_ASSIGN);
 }
 @end
 
-@implementation NSObject (CharonUIKit26_MenuBuilder)
+@implementation NSObject (RevenantUIKit26_MenuBuilder)
 - (void)insertElements:(NSArray *)elements afterMenuForIdentifier:(NSString *)identifier { }
 - (void)insertElements:(NSArray *)elements afterActionForIdentifier:(NSString *)identifier { }
 - (void)insertElements:(NSArray *)elements beforeMenuForIdentifier:(NSString *)identifier { }
@@ -619,7 +619,7 @@ static char CharonVCPrefersOrientationLockedKey, CharonVCChildForOrientationLock
 - (void)removeCommandForAction:(NSString *)action propertyList:(id)propertyList { }
 @end
 
-@implementation UIColor (CharonUIKit26_Constructors)
+@implementation UIColor (RevenantUIKit26_Constructors)
 + (UIColor *)colorWithRed:(CGFloat)red green:(CGFloat)green blue:(CGFloat)blue
                    alpha:(CGFloat)alpha exposure:(CGFloat)exposure
 {
@@ -643,7 +643,7 @@ static char CharonVCPrefersOrientationLockedKey, CharonVCChildForOrientationLock
 - (UIColor *)colorByApplyingContentHeadroom:(CGFloat)contentHeadroom { return self; }
 @end
 
-@implementation UIImageSymbolConfiguration (CharonUIKit26)
+@implementation UIImageSymbolConfiguration (RevenantUIKit26)
 + (UIImageSymbolConfiguration *)configurationWithColorRenderingMode:(id)mode
 {
     return [self configurationWithPaletteColors:@[]];
@@ -654,7 +654,7 @@ static char CharonVCPrefersOrientationLockedKey, CharonVCChildForOrientationLock
 }
 @end
 
-@implementation UITraitCollection (CharonUIKit26)
+@implementation UITraitCollection (RevenantUIKit26)
 + (UITraitCollection *)traitCollectionWithHDRHeadroomUsageLimit:(id)limit
 {
     return [[self currentTraitCollection] copy];
@@ -669,22 +669,22 @@ static char CharonVCPrefersOrientationLockedKey, CharonVCChildForOrientationLock
 }
 @end
 
-@implementation UIBarButtonItem (CharonUIKit26_Constructors)
+@implementation UIBarButtonItem (RevenantUIKit26_Constructors)
 + (UIBarButtonItem *)fixedSpaceItem
 {
     return [[self alloc] initWithTitle:@"" style:UIBarButtonItemStylePlain target:nil action:NULL];
 }
 @end
 
-@implementation UIBarButtonItemGroup (CharonUIKit26)
+@implementation UIBarButtonItemGroup (RevenantUIKit26)
 + (UIBarButtonItemGroup *)groupWithFixedSpace { return [[self alloc] init]; }
 @end
 
-@implementation UIResponder (CharonUIKit26)
+@implementation UIResponder (RevenantUIKit26)
 - (id)providerForDeferredMenuElement:(id)element { return nil; }
 @end
 
-@implementation NSObject (CharonUIKit26_EditActions)
+@implementation NSObject (RevenantUIKit26_EditActions)
 - (void)alignLeft:(id)sender { }
 - (void)alignCenter:(id)sender { }
 - (void)alignRight:(id)sender { }
@@ -694,7 +694,7 @@ static char CharonVCPrefersOrientationLockedKey, CharonVCChildForOrientationLock
 - (void)toggleInspector:(id)sender { }
 @end
 
-@implementation NSObject (CharonUIKit26_SearchBarDelegate)
+@implementation NSObject (RevenantUIKit26_SearchBarDelegate)
 - (BOOL)searchBar:(UISearchBar *)searchBar shouldChangeTextInRanges:(NSArray<NSValue *> *)ranges
    replacementText:(NSString *)text
 {
@@ -702,12 +702,12 @@ static char CharonVCPrefersOrientationLockedKey, CharonVCChildForOrientationLock
 }
 @end
 
-@implementation NSObject (CharonUIKit26_SplitViewDelegate)
+@implementation NSObject (RevenantUIKit26_SplitViewDelegate)
 - (void)splitViewController:(UISplitViewController *)controller didShowColumn:(id)column { }
 - (void)splitViewController:(UISplitViewController *)controller didHideColumn:(id)column { }
 @end
 
-@implementation NSObject (CharonUIKit26_TextFieldDelegate)
+@implementation NSObject (RevenantUIKit26_TextFieldDelegate)
 - (BOOL)textField:(UITextField *)field shouldChangeCharactersInRanges:(NSArray<NSValue *> *)ranges
     replacementString:(NSString *)string
 {
@@ -720,7 +720,7 @@ static char CharonVCPrefersOrientationLockedKey, CharonVCChildForOrientationLock
 }
 @end
 
-@implementation NSObject (CharonUIKit26_TextViewDelegate)
+@implementation NSObject (RevenantUIKit26_TextViewDelegate)
 - (BOOL)textView:(UITextView *)view shouldChangeTextInRanges:(NSArray<NSValue *> *)ranges
     replacementText:(NSString *)text
 {
@@ -733,7 +733,7 @@ static char CharonVCPrefersOrientationLockedKey, CharonVCChildForOrientationLock
 }
 @end
 
-@implementation NSObject (CharonUIKit26_WindowSceneDelegate)
+@implementation NSObject (RevenantUIKit26_WindowSceneDelegate)
 - (void)windowScene:(id)scene didUpdateEffectiveGeometry:(id)geometry { }
 - (UISceneWindowingControlStyle *)preferredWindowingControlStyleForScene:(id)scene
 {

@@ -1,4 +1,4 @@
-#import "CharonSCN.h"
+#import "RevenantSCN.h"
 
 SCNParticleProperty const SCNParticlePropertyPosition = @"position";
 SCNParticleProperty const SCNParticlePropertyAngle = @"angle";
@@ -90,36 +90,36 @@ SCNParticleProperty const SCNParticlePropertyContactNormal = @"contactNormal";
         if ([coder containsValueForKey:@"emissionDuration"]) {
             _emissionDuration = [coder decodeDoubleForKey:@"emissionDuration"];
         }
-        _loops = [CharonSCNCoding decodeBool:coder forKey:@"loops" default:YES];
+        _loops = [RevenantSCNCoding decodeBool:coder forKey:@"loops" default:YES];
         if ([coder containsValueForKey:@"birthRate"]) {
             _birthRate = [coder decodeDoubleForKey:@"birthRate"];
         }
         _warmupDuration = [coder decodeDoubleForKey:@"warmupDuration"];
         _emitterShape = [coder decodeObjectOfClass:[SCNGeometry class] forKey:@"emitterShape"];
         _spreadingAngle = [coder decodeDoubleForKey:@"spreadingAngle"];
-        _emittingDirection = [coder containsValueForKey:@"emittingDirection"] ? [CharonSCNCoding decodeVector3:coder forKey:@"emittingDirection"] : _emittingDirection;
-        _acceleration = [CharonSCNCoding decodeVector3:coder forKey:@"acceleration"];
+        _emittingDirection = [coder containsValueForKey:@"emittingDirection"] ? [RevenantSCNCoding decodeVector3:coder forKey:@"emittingDirection"] : _emittingDirection;
+        _acceleration = [RevenantSCNCoding decodeVector3:coder forKey:@"acceleration"];
         _particleAngleVariation = [coder decodeDoubleForKey:@"particleAngleVariation"];
         BOOL velocityFound = [coder containsValueForKey:@"particleVelocity"];
         if (velocityFound) {
             _particleVelocity = [coder decodeDoubleForKey:@"particleVelocity"];
         }
-        [CharonSCNCoding markFound:velocityFound forKey:@"particleVelocity" onObject:self];
+        [RevenantSCNCoding markFound:velocityFound forKey:@"particleVelocity" onObject:self];
         _particleVelocityVariation = [coder decodeDoubleForKey:@"particleVelocityVariation"];
         _particleAngularVelocity = [coder decodeDoubleForKey:@"particleAngularVelocity"];
         BOOL lifeSpanFound = [coder containsValueForKey:@"particleLifeSpan"];
         if (lifeSpanFound) {
             _particleLifeSpan = [coder decodeDoubleForKey:@"particleLifeSpan"];
         }
-        [CharonSCNCoding markFound:lifeSpanFound forKey:@"particleLifeSpan" onObject:self];
+        [RevenantSCNCoding markFound:lifeSpanFound forKey:@"particleLifeSpan" onObject:self];
         _particleLifeSpanVariation = [coder decodeDoubleForKey:@"particleLifeSpanVariation"];
-        NSString *imageName = [CharonSCNCoding decodeFileReferenceName:coder forKey:@"particleImage"];
+        NSString *imageName = [RevenantSCNCoding decodeFileReferenceName:coder forKey:@"particleImage"];
         _particleImage = imageName ?: [coder decodeObjectOfClasses:[NSSet setWithObjects:[NSString class], [UIColor class], nil] forKey:@"particleImage"];
-        UIColor *color = [CharonSCNCoding decodeColor:coder forKey:@"particleColor"];
+        UIColor *color = [RevenantSCNCoding decodeColor:coder forKey:@"particleColor"];
         if (color) {
             _particleColor = color;
         }
-        _particleColorVariation = [CharonSCNCoding decodeVector4:coder forKey:@"particleColorVariation"];
+        _particleColorVariation = [RevenantSCNCoding decodeVector4:coder forKey:@"particleColorVariation"];
         if ([coder containsValueForKey:@"particleSize"]) {
             _particleSize = [coder decodeDoubleForKey:@"particleSize"];
         }
@@ -131,19 +131,19 @@ SCNParticleProperty const SCNParticlePropertyContactNormal = @"contactNormal";
         if ([coder containsValueForKey:@"sortingMode"]) {
             _sortingMode = [coder decodeIntegerForKey:@"sortingMode"];
         }
-        _lightingEnabled = [CharonSCNCoding decodeBool:coder forKey:@"lightingEnabled" default:NO];
-        _affectedByGravity = [CharonSCNCoding decodeBool:coder forKey:@"affectedByGravity" default:_affectedByGravity];
-        _affectedByPhysicsFields = [CharonSCNCoding decodeBool:coder forKey:@"affectedByPhysicsFields" default:_affectedByPhysicsFields];
+        _lightingEnabled = [RevenantSCNCoding decodeBool:coder forKey:@"lightingEnabled" default:NO];
+        _affectedByGravity = [RevenantSCNCoding decodeBool:coder forKey:@"affectedByGravity" default:_affectedByGravity];
+        _affectedByPhysicsFields = [RevenantSCNCoding decodeBool:coder forKey:@"affectedByPhysicsFields" default:_affectedByPhysicsFields];
         BOOL speedFactorFound = [coder containsValueForKey:@"speedFactor"];
         if (speedFactorFound) {
             _speedFactor = [coder decodeDoubleForKey:@"speedFactor"];
         }
-        [CharonSCNCoding markFound:speedFactorFound forKey:@"speedFactor" onObject:self];
+        [RevenantSCNCoding markFound:speedFactorFound forKey:@"speedFactor" onObject:self];
         BOOL stretchFactorFound = [coder containsValueForKey:@"stretchFactor"];
         if (stretchFactorFound) {
             _stretchFactor = [coder decodeDoubleForKey:@"stretchFactor"];
         }
-        [CharonSCNCoding markFound:stretchFactorFound forKey:@"stretchFactor" onObject:self];
+        [RevenantSCNCoding markFound:stretchFactorFound forKey:@"stretchFactor" onObject:self];
         _propertyControllers = [coder decodeObjectOfClasses:[NSSet setWithObjects:[NSDictionary class], [SCNParticlePropertyController class], nil] forKey:@"propertyControllers"];
     }
     return self;
@@ -157,8 +157,8 @@ SCNParticleProperty const SCNParticlePropertyContactNormal = @"contactNormal";
     [coder encodeDouble:_warmupDuration forKey:@"warmupDuration"];
     [coder encodeObject:_emitterShape forKey:@"emitterShape"];
     [coder encodeDouble:_spreadingAngle forKey:@"spreadingAngle"];
-    [CharonSCNCoding encodeVector3:_emittingDirection coder:coder forKey:@"emittingDirection"];
-    [CharonSCNCoding encodeVector3:_acceleration coder:coder forKey:@"acceleration"];
+    [RevenantSCNCoding encodeVector3:_emittingDirection coder:coder forKey:@"emittingDirection"];
+    [RevenantSCNCoding encodeVector3:_acceleration coder:coder forKey:@"acceleration"];
     [coder encodeDouble:_particleVelocity forKey:@"particleVelocity"];
     [coder encodeDouble:_particleVelocityVariation forKey:@"particleVelocityVariation"];
     [coder encodeDouble:_particleLifeSpan forKey:@"particleLifeSpan"];

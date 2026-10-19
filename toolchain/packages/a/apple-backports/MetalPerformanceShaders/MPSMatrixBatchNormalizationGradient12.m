@@ -1,12 +1,12 @@
-#define CHARON_MPS_NEURON_IVARS \
+#define REVENANT_MPS_NEURON_IVARS \
     MPSCNNNeuronType _neuronType; \
     float _neuronParameterA, _neuronParameterB, _neuronParameterC; \
     NSData *_neuronPrelu;
 
-#define CHARON_MPS_NEURON_COMMON \
-    - (CharonMPSNeuron)charon_mps_neuron \
+#define REVENANT_MPS_NEURON_COMMON \
+    - (RevenantMPSNeuron)revenant_mps_neuron \
     { \
-        CharonMPSNeuron neuron; \
+        RevenantMPSNeuron neuron; \
         neuron.type = _neuronType; \
         neuron.a = _neuronParameterA; \
         neuron.b = _neuronParameterB; \
@@ -45,20 +45,20 @@
     }
 
 
-#import "CharonMPS.h"
+#import "RevenantMPS.h"
 
 #include <stdio.h>
 #include <stdio.h>
 
 @implementation MPSMatrixBatchNormalizationGradient {
-    CHARON_MPS_NEURON_IVARS
+    REVENANT_MPS_NEURON_IVARS
     NSUInteger _sourceNumberOfFeatureVectors, _sourceInputFeatureChannels;
     float _epsilon;
     MTLOrigin _primarySourceMatrixOrigin, _secondarySourceMatrixOrigin, _resultMatrixOrigin;
     NSUInteger _batchStart, _batchSize;
 }
 
-CHARON_MPS_NEURON_COMMON
+REVENANT_MPS_NEURON_COMMON
 
 - (instancetype)initWithDevice:(id<MTLDevice>)device
 {
@@ -89,39 +89,39 @@ CHARON_MPS_NEURON_COMMON
  resultGradientForGammaVector:(MPSVector *)resultGradientForGammaVector
   resultGradientForBetaVector:(MPSVector *)resultGradientForBetaVector
 {
-    if (!CharonMPSCommandBufferPermits(commandBuffer))
+    if (!RevenantMPSCommandBufferPermits(commandBuffer))
         return;
-    CharonMPSMatrixView gradient = CharonMPSMatrixViewOf(gradientMatrix), in = CharonMPSMatrixViewOf(inputMatrix), out = CharonMPSMatrixViewOf(resultGradientForDataMatrix);
-    if (!CharonMPSDataTypeIsElement(gradient.dataType) || !CharonMPSDataTypeIsElement(in.dataType) || !CharonMPSDataTypeIsElement(out.dataType)) {
-        CharonMPSRefuse(@"MPSMatrixBatchNormalizationGradient: a matrix of a data type that is not one of the eight element types was given");
+    RevenantMPSMatrixView gradient = RevenantMPSMatrixViewOf(gradientMatrix), in = RevenantMPSMatrixViewOf(inputMatrix), out = RevenantMPSMatrixViewOf(resultGradientForDataMatrix);
+    if (!RevenantMPSDataTypeIsElement(gradient.dataType) || !RevenantMPSDataTypeIsElement(in.dataType) || !RevenantMPSDataTypeIsElement(out.dataType)) {
+        RevenantMPSRefuse(@"MPSMatrixBatchNormalizationGradient: a matrix of a data type that is not one of the eight element types was given");
         return;
     }
     NSUInteger available = in.rows - _secondarySourceMatrixOrigin.x;
     NSUInteger vectors = _sourceNumberOfFeatureVectors < available ? _sourceNumberOfFeatureVectors : available;
     NSUInteger columns = in.columns - _secondarySourceMatrixOrigin.y;
     NSUInteger channels = _sourceInputFeatureChannels < columns ? _sourceInputFeatureChannels : columns;
-    CharonMPSVectorView mean = CharonMPSVectorViewOf(meanVector), variance = CharonMPSVectorViewOf(varianceVector);
-    CharonMPSVectorView gamma = {0, 0, 0, 0, 0, 0};
+    RevenantMPSVectorView mean = RevenantMPSVectorViewOf(meanVector), variance = RevenantMPSVectorViewOf(varianceVector);
+    RevenantMPSVectorView gamma = {0, 0, 0, 0, 0, 0};
     if (gammaVector)
-        gamma = CharonMPSVectorViewOf(gammaVector);
+        gamma = RevenantMPSVectorViewOf(gammaVector);
     NSUInteger start, count;
-    CharonMPSBatch(_batchStart, _batchSize, in.matrices, &start, &count);
+    RevenantMPSBatch(_batchStart, _batchSize, in.matrices, &start, &count);
     count = count < gradient.matrices ? count : gradient.matrices;
     count = count < out.matrices ? count : out.matrices;
     for (NSUInteger b = start; b < start + count; b++) {
-        if (!CharonMPSMatrixHolds(&gradient, b, _primarySourceMatrixOrigin.x, _primarySourceMatrixOrigin.y, vectors, channels) ||
-            !CharonMPSMatrixHolds(&in, b, _secondarySourceMatrixOrigin.x, _secondarySourceMatrixOrigin.y, vectors, channels) ||
-            !CharonMPSMatrixHolds(&out, b, _resultMatrixOrigin.x, _resultMatrixOrigin.y, vectors, channels)) {
-            CharonMPSRefuse(@"MPSMatrixBatchNormalizationGradient: a matrix of the batch [%lu, %lu) does not hold the %lux%lu region its origin names", (unsigned long)start, (unsigned long)(start + count), (unsigned long)vectors, (unsigned long)channels);
+        if (!RevenantMPSMatrixHolds(&gradient, b, _primarySourceMatrixOrigin.x, _primarySourceMatrixOrigin.y, vectors, channels) ||
+            !RevenantMPSMatrixHolds(&in, b, _secondarySourceMatrixOrigin.x, _secondarySourceMatrixOrigin.y, vectors, channels) ||
+            !RevenantMPSMatrixHolds(&out, b, _resultMatrixOrigin.x, _resultMatrixOrigin.y, vectors, channels)) {
+            RevenantMPSRefuse(@"MPSMatrixBatchNormalizationGradient: a matrix of the batch [%lu, %lu) does not hold the %lux%lu region its origin names", (unsigned long)start, (unsigned long)(start + count), (unsigned long)vectors, (unsigned long)channels);
             return;
         }
     }
     for (NSUInteger b = start; b < start + count; b++) {
         for (NSUInteger column = 0; column < channels; column++) {
-            double m = mean.length > column ? CharonMPSLoad(CharonMPSVectorElement(&mean, 0, column), mean.dataType, 0) : 0.0;
-            double v = variance.length > column ? CharonMPSLoad(CharonMPSVectorElement(&variance, 0, column), variance.dataType, 0) : 0.0;
-            double g = gamma.length > column ? CharonMPSLoad(CharonMPSVectorElement(&gamma, 0, column), gamma.dataType, 0) : 1.0;
-#ifdef CHARON_BN_TRACE
+            double m = mean.length > column ? RevenantMPSLoad(RevenantMPSVectorElement(&mean, 0, column), mean.dataType, 0) : 0.0;
+            double v = variance.length > column ? RevenantMPSLoad(RevenantMPSVectorElement(&variance, 0, column), variance.dataType, 0) : 0.0;
+            double g = gamma.length > column ? RevenantMPSLoad(RevenantMPSVectorElement(&gamma, 0, column), gamma.dataType, 0) : 1.0;
+#ifdef REVENANT_BN_TRACE
             fprintf(stderr, "BNP ch%lu  mean %g variance %g gamma %g  -> divisor %g  rowBytes(in) %lu\n",
                     (unsigned long)column, m, v, g, g / sqrt(v + (double)_epsilon),
                     (unsigned long)in.rowBytes);
@@ -129,8 +129,8 @@ CHARON_MPS_NEURON_COMMON
             double divisor = g / sqrt(v + (double)_epsilon);
             double sum = 0.0, gammaGradient = 0.0, betaGradient = 0.0;
             for (NSUInteger row = 0; row < vectors; row++) {
-                double d = CharonMPSLoad(CharonMPSMatrixElement(&gradient, b, _primarySourceMatrixOrigin.x + row, _primarySourceMatrixOrigin.y + column), gradient.dataType, 0);
-                double x = CharonMPSLoad(CharonMPSMatrixElement(&in, b, _secondarySourceMatrixOrigin.x + row, _secondarySourceMatrixOrigin.y + column), in.dataType, 0);
+                double d = RevenantMPSLoad(RevenantMPSMatrixElement(&gradient, b, _primarySourceMatrixOrigin.x + row, _primarySourceMatrixOrigin.y + column), gradient.dataType, 0);
+                double x = RevenantMPSLoad(RevenantMPSMatrixElement(&in, b, _secondarySourceMatrixOrigin.x + row, _secondarySourceMatrixOrigin.y + column), in.dataType, 0);
                 double normalised = (x - m) / sqrt(v + (double)_epsilon);
                 sum += d;
                 gammaGradient += d * normalised;
@@ -139,16 +139,16 @@ CHARON_MPS_NEURON_COMMON
             double meanGradient = vectors ? sum / (double)vectors : 0.0;
             double scaledSum = vectors ? sum / (double)vectors : 0.0;
             for (NSUInteger row = 0; row < vectors; row++) {
-                double d = CharonMPSLoad(CharonMPSMatrixElement(&gradient, b, _primarySourceMatrixOrigin.x + row, _primarySourceMatrixOrigin.y + column), gradient.dataType, 0);
-                double x = CharonMPSLoad(CharonMPSMatrixElement(&in, b, _secondarySourceMatrixOrigin.x + row, _secondarySourceMatrixOrigin.y + column), in.dataType, 0);
+                double d = RevenantMPSLoad(RevenantMPSMatrixElement(&gradient, b, _primarySourceMatrixOrigin.x + row, _primarySourceMatrixOrigin.y + column), gradient.dataType, 0);
+                double x = RevenantMPSLoad(RevenantMPSMatrixElement(&in, b, _secondarySourceMatrixOrigin.x + row, _secondarySourceMatrixOrigin.y + column), in.dataType, 0);
                 double normalised = (x - m) / sqrt(v + (double)_epsilon);
                 double gradientForData = divisor * (d - meanGradient - normalised * scaledSum);
-                CharonMPSStore(CharonMPSMatrixElement(&out, b, _resultMatrixOrigin.x + row, _resultMatrixOrigin.y + column), out.dataType, 0, gradientForData);
+                RevenantMPSStore(RevenantMPSMatrixElement(&out, b, _resultMatrixOrigin.x + row, _resultMatrixOrigin.y + column), out.dataType, 0, gradientForData);
             }
         }
     }
-    CharonMPSConsumeReadCount(gradientMatrix);
-    CharonMPSConsumeReadCount(inputMatrix);
+    RevenantMPSConsumeReadCount(gradientMatrix);
+    RevenantMPSConsumeReadCount(inputMatrix);
 }
 
 - (instancetype)initWithCoder:(NSCoder *)aDecoder device:(id<MTLDevice>)device

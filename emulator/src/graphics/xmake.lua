@@ -2,7 +2,7 @@
 -- License, v. 2.0. If a copy of the MPL was not distributed with this
 -- file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-target("shade_graphics")
+target("emulator_graphics")
     set_kind("static")
     add_files("boot_logo.cpp", "display.cpp", "core_animation_remote_abi.cpp", "gles_renderer.cpp",
               "gles_primitive_assembler.cpp", "gles_resources.cpp", "gles_rasterizer.cpp",
@@ -11,7 +11,7 @@ target("shade_graphics")
               "layerkit_compatibility.cpp", "local_scene_background.cpp", "opengles_guest_capabilities.cpp",
               "eagl_dispatch_profile.cpp", "gles_program_state.cpp", "presentation_tracker.cpp",
               "scanout_composition.cpp", "surface_store.cpp", "touch_replay.cpp")
-    add_deps("shade_foundation", {public = true})
+    add_deps("emulator_foundation", {public = true})
     add_packages("libpng")
     on_config(function (target)
         local png = io.readfile(path.join(target:scriptdir(), "assets", "boot-placeholder.png"), {encoding = "binary"})

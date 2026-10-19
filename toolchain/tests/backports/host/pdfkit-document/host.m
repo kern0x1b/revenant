@@ -81,7 +81,7 @@ static void printOutlineWalk(const char *name, PDFOutline *outline, int depth)
 }
 
 
-static BOOL charonFixtureNamesItsWidgets(const char *name)
+static BOOL revenantFixtureNamesItsWidgets(const char *name)
 {
     static const char *const named[] = {
         "widget-t-literal", "widget-t-empty", "widget-t-merged", "widget-t-mergedname",
@@ -104,7 +104,7 @@ static void printAnnotationFlagFacts(const char *prefix, PDFAnnotation *annotati
     printf("%s.flags.listChoice=%d\n", prefix, (int)annotation.isListChoice);
     printf("%s.flags.widgetControlType=%ld\n", prefix, (long)annotation.widgetControlType);
     printf("%s.flags.activatableTextField=%d\n", prefix, (int)annotation.isActivatableTextField);
-    if (charonFixtureNamesItsWidgets(prefix))
+    if (revenantFixtureNamesItsWidgets(prefix))
         printf("%s.flags.fieldName=%s\n", prefix, annotation.fieldName.UTF8String ?: "(nil)");
     printf("%s.state.onName=%s\n", prefix, annotation.buttonWidgetStateString.UTF8String ?: "(nil)");
     printf("%s.state.on=%ld\n", prefix, (long)annotation.buttonWidgetState);
@@ -346,7 +346,7 @@ static void printAnnotationColour(const char *label, const char *member, id colo
            [[parts componentsJoinedByString:@","] UTF8String]);
 }
 
-static const char *charonAnnotationName(PDFAnnotation *annotation)
+static const char *revenantAnnotationName(PDFAnnotation *annotation)
 {
     id name = [annotation valueForAnnotationKey:@"NM"];
     if (![name isKindOfClass:[NSString class]] || [(NSString *)name length] == 0)
@@ -358,7 +358,7 @@ static void printAnnotationColourFacts(const char *fixture, PDFPage *page)
 {
     NSMutableArray *names = [NSMutableArray array];
     for (unsigned a = 0; a < page.annotations.count; a++) {
-        const char *name = charonAnnotationName(page.annotations[a]);
+        const char *name = revenantAnnotationName(page.annotations[a]);
         if (name != NULL)
             [names addObject:@(name)];
     }
@@ -367,7 +367,7 @@ static void printAnnotationColourFacts(const char *fixture, PDFPage *page)
     printf("%s.colours.names=%s\n", fixture, [[names componentsJoinedByString:@","] UTF8String]);
     for (unsigned a = 0; a < page.annotations.count; a++) {
         PDFAnnotation *annotation = page.annotations[a];
-        const char *name = charonAnnotationName(annotation);
+        const char *name = revenantAnnotationName(annotation);
         if (name == NULL)
             continue;
         char label[512];

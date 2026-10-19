@@ -41,9 +41,9 @@ local function test_foreign_siblings(check)
     local target = path.join(dir, "out.txt")
     io.writefile(target, "old\n")
     local foreign, expected = {}, {"out.txt"}
-    table.insert(foreign, target .. ".charon-new")
+    table.insert(foreign, target .. ".revenant-new")
     for n = 1, 64 do
-        table.insert(foreign, target .. ".charon-new." .. os.getpid() .. "." .. n)
+        table.insert(foreign, target .. ".revenant-new." .. os.getpid() .. "." .. n)
     end
     for _, file in ipairs(foreign) do
         io.writefile(file, "foreign " .. path.filename(file))

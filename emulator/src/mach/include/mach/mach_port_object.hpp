@@ -15,7 +15,7 @@
 #include <map>
 #include <optional>
 
-namespace shade::xnu::ipc {
+namespace emulator::xnu::ipc {
 
 using PortObjectId = std::uint32_t;
 using TaskIdentity = std::uint32_t;

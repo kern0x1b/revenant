@@ -3,11 +3,11 @@
 #import <UIKit/UICollectionView.h>
 #import <UIKit/UITableView.h>
 
-#import "CharonDragDrop.h"
-#import "CharonDragSession.h"
+#import "RevenantDragDrop.h"
+#import "RevenantDragSession.h"
 #import "UIDropCoordinators.h"
 
-@interface CharonTestDropSession : NSObject <UIDropSession>
+@interface RevenantTestDropSession : NSObject <UIDropSession>
 @property (nonatomic, strong) UIDragItem *item;
 @property (nonatomic, assign) CGPoint point;
 @property (nonatomic, strong) NSProgress *progress;
@@ -15,7 +15,7 @@
 - (instancetype)initWithPoint:(CGPoint)point;
 @end
 
-@implementation CharonTestDropSession
+@implementation RevenantTestDropSession
 @synthesize item = _item;
 @synthesize point = _point;
 @synthesize progress = _progress;
@@ -25,7 +25,7 @@
 {
     if ((self = [super init])) {
         _point = point;
-        _item = [[UIDragItem alloc] initWithItemProvider:[[NSItemProvider alloc] initWithObject:@"charon"]];
+        _item = [[UIDragItem alloc] initWithItemProvider:[[NSItemProvider alloc] initWithObject:@"revenant"]];
         _progress = [NSProgress progressWithTotalUnitCount:1];
     }
     return self;
@@ -68,32 +68,32 @@
 
 @end
 
-@interface UICollectionView (CharonDropSequence11)
-- (BOOL)charon_canHandleDropSession:(id<UIDropSession>)session;
-- (void)charon_tellDropDelegateDidEnter:(id<UIDropSession>)session;
-- (UICollectionViewDropProposal *)charon_dropProposalForSession:(id<UIDropSession>)session atIndexPath:(NSIndexPath *)destination;
-- (UIDragPreviewParameters *)charon_dropPreviewParametersForItemAtIndexPath:(NSIndexPath *)indexPath;
-- (void)charon_performDropOfSession:(id<UIDropSession>)session;
-- (void)charon_tellDropDelegateDidExit:(id<UIDropSession>)session;
-- (void)charon_tellDropDelegateDidEnd:(id<UIDropSession>)session;
+@interface UICollectionView (RevenantDropSequence11)
+- (BOOL)revenant_canHandleDropSession:(id<UIDropSession>)session;
+- (void)revenant_tellDropDelegateDidEnter:(id<UIDropSession>)session;
+- (UICollectionViewDropProposal *)revenant_dropProposalForSession:(id<UIDropSession>)session atIndexPath:(NSIndexPath *)destination;
+- (UIDragPreviewParameters *)revenant_dropPreviewParametersForItemAtIndexPath:(NSIndexPath *)indexPath;
+- (void)revenant_performDropOfSession:(id<UIDropSession>)session;
+- (void)revenant_tellDropDelegateDidExit:(id<UIDropSession>)session;
+- (void)revenant_tellDropDelegateDidEnd:(id<UIDropSession>)session;
 @end
 
-@interface UITableView (CharonDropSequence11)
-- (BOOL)charon_canHandleDropSession:(id<UIDropSession>)session;
-- (void)charon_tellDropDelegateDidEnter:(id<UIDropSession>)session;
-- (UITableViewDropProposal *)charon_dropProposalForSession:(id<UIDropSession>)session atIndexPath:(NSIndexPath *)destination;
-- (UIDragPreviewParameters *)charon_dropPreviewParametersForRowAtIndexPath:(NSIndexPath *)indexPath;
-- (void)charon_performDropOfSession:(id<UIDropSession>)session;
-- (void)charon_tellDropDelegateDidExit:(id<UIDropSession>)session;
-- (void)charon_tellDropDelegateDidEnd:(id<UIDropSession>)session;
+@interface UITableView (RevenantDropSequence11)
+- (BOOL)revenant_canHandleDropSession:(id<UIDropSession>)session;
+- (void)revenant_tellDropDelegateDidEnter:(id<UIDropSession>)session;
+- (UITableViewDropProposal *)revenant_dropProposalForSession:(id<UIDropSession>)session atIndexPath:(NSIndexPath *)destination;
+- (UIDragPreviewParameters *)revenant_dropPreviewParametersForRowAtIndexPath:(NSIndexPath *)indexPath;
+- (void)revenant_performDropOfSession:(id<UIDropSession>)session;
+- (void)revenant_tellDropDelegateDidExit:(id<UIDropSession>)session;
+- (void)revenant_tellDropDelegateDidEnd:(id<UIDropSession>)session;
 @end
 
-@implementation UICollectionView (CharonDropSequence11)
+@implementation UICollectionView (RevenantDropSequence11)
 
-- (void)charon_driveDropSessionAtPoint:(CGPoint)point
+- (void)revenant_driveDropSessionAtPoint:(CGPoint)point
 {
-    CharonTestDropSession *session = [[CharonTestDropSession alloc] initWithPoint:point];
-    UIDropInteraction *interaction = [self charon_dropInteraction];
+    RevenantTestDropSession *session = [[RevenantTestDropSession alloc] initWithPoint:point];
+    UIDropInteraction *interaction = [self revenant_dropInteraction];
     if (!interaction)
         return;
     id<UIDropInteractionDelegate> delegate = interaction.delegate;
@@ -113,7 +113,7 @@
     ((void (*)(id, SEL, id, id))objc_msgSend)(delegate, @selector(dropInteraction:sessionDidEnd:), interaction, session);
 }
 
-- (UIDropInteraction *)charon_dropInteraction
+- (UIDropInteraction *)revenant_dropInteraction
 {
     for (id<UIInteraction> interaction in self.interactions)
         if ([interaction isKindOfClass:[UIDropInteraction class]])
@@ -123,12 +123,12 @@
 
 @end
 
-@implementation UITableView (CharonDropSequence11)
+@implementation UITableView (RevenantDropSequence11)
 
-- (void)charon_driveDropSessionAtPoint:(CGPoint)point
+- (void)revenant_driveDropSessionAtPoint:(CGPoint)point
 {
-    CharonTestDropSession *session = [[CharonTestDropSession alloc] initWithPoint:point];
-    UIDropInteraction *interaction = [self charon_dropInteraction];
+    RevenantTestDropSession *session = [[RevenantTestDropSession alloc] initWithPoint:point];
+    UIDropInteraction *interaction = [self revenant_dropInteraction];
     if (!interaction)
         return;
     id<UIDropInteractionDelegate> delegate = interaction.delegate;
@@ -148,7 +148,7 @@
     ((void (*)(id, SEL, id, id))objc_msgSend)(delegate, @selector(dropInteraction:sessionDidEnd:), interaction, session);
 }
 
-- (UIDropInteraction *)charon_dropInteraction
+- (UIDropInteraction *)revenant_dropInteraction
 {
     for (id<UIInteraction> interaction in self.interactions)
         if ([interaction isKindOfClass:[UIDropInteraction class]])

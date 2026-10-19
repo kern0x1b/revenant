@@ -1,5 +1,5 @@
-#ifndef CHARON_MEMSET_S_H
-#define CHARON_MEMSET_S_H
+#ifndef REVENANT_MEMSET_S_H
+#define REVENANT_MEMSET_S_H
 
 #include <stddef.h>
 
@@ -7,12 +7,12 @@
 extern "C" {
 #endif
 
-int charon_memset_s(void *bytes, size_t capacity, int value, size_t count);
+int revenant_memset_s(void *bytes, size_t capacity, int value, size_t count);
 
 #ifdef __cplusplus
 }
 #endif
 
-#define memset_s charon_memset_s
+#define memset_s revenant_memset_s
 
 #endif

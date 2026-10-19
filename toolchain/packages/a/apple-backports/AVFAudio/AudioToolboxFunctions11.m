@@ -1,7 +1,7 @@
 #import <AudioToolbox/AudioToolbox.h>
 #import <AudioToolbox/AUComponent.h>
 
-#define CharonAudioUnitExtensionUnknownStatus ((OSStatus)0x626E643F)
+#define RevenantAudioUnitExtensionUnknownStatus ((OSStatus)0x626E643F)
 
 CFArrayRef AudioUnitExtensionCopyComponentList(CFStringRef extensionIdentifier)
 {
@@ -10,5 +10,5 @@ CFArrayRef AudioUnitExtensionCopyComponentList(CFStringRef extensionIdentifier)
 
 OSStatus AudioUnitExtensionSetComponentList(CFStringRef extensionIdentifier, CFArrayRef audioComponentInfo)
 {
-    return CharonAudioUnitExtensionUnknownStatus;
+    return RevenantAudioUnitExtensionUnknownStatus;
 }

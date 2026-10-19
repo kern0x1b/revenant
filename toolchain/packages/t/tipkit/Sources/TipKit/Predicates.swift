@@ -45,8 +45,8 @@ public enum PredicateExpressions {
             let comparing = op
             let name = keyPath
             return input.donations.contains { donation in
-                guard let found = CharonDonationValue.read(donation, eventID: eventID, key: name) else { return false }
-                return CharonDonationCompare.compare(found, wanted, comparing)
+                guard let found = RevenantDonationValue.read(donation, eventID: eventID, key: name) else { return false }
+                return RevenantDonationCompare.compare(found, wanted, comparing)
             }
         }
     }
@@ -61,7 +61,7 @@ public enum PredicateExpressions {
             let start = timeRange.start(before: Date())
             let name = eventID
             return input.donations.contains { donation in
-                guard CharonDonationValue.has(donation, eventID: name) else { return false }
+                guard RevenantDonationValue.has(donation, eventID: name) else { return false }
                 return donation.date >= start
             }
         }
@@ -74,7 +74,7 @@ public enum PredicateExpressions {
         public let keyPath: String
 
         public func select(_ donations: any Tips.RuleInput) -> [Tips.Event<Tips.EmptyDonation>.Donation] {
-            return CharonDonationSubset.largest(of: CharonDonationSubset.candidates(
+            return RevenantDonationSubset.largest(of: RevenantDonationSubset.candidates(
                 donations.donations, eventID: input.eventID, keyPath: keyPath, value: input.value, op: input.op))
         }
 
@@ -88,7 +88,7 @@ public enum PredicateExpressions {
         public let keyPath: String
 
         public func select(_ donations: any Tips.RuleInput) -> [Tips.Event<Tips.EmptyDonation>.Donation] {
-            return CharonDonationSubset.smallest(of: CharonDonationSubset.candidates(
+            return RevenantDonationSubset.smallest(of: RevenantDonationSubset.candidates(
                 donations.donations, eventID: input.eventID, keyPath: keyPath, value: input.value, op: input.op))
         }
 
@@ -113,7 +113,7 @@ public enum PredicateExpressions {
     }
 }
 
-enum CharonDonationValue {
+enum RevenantDonationValue {
     static func read(_ donation: Tips.Event<Tips.EmptyDonation>.Donation, eventID: String,
                      key: String) -> String? {
         let values: [String: String] = donation.value
@@ -128,14 +128,14 @@ enum CharonDonationValue {
     }
 }
 
-enum CharonDonationDate {
+enum RevenantDonationDate {
     static func isAfter(_ donation: Any, _ date: Date) -> Bool {
-        guard let donation = donation as? Tips.Event<CharonAnyDonation>.Donation else { return false }
+        guard let donation = donation as? Tips.Event<RevenantAnyDonation>.Donation else { return false }
         return donation.date >= date
     }
 }
 
-public struct CharonAnyDonation: Codable, Sendable {
+public struct RevenantAnyDonation: Codable, Sendable {
     public let value: [String: String]
     public let date: Date
 
@@ -145,20 +145,20 @@ public struct CharonAnyDonation: Codable, Sendable {
     }
 }
 
-enum CharonDonationCompare {
+enum RevenantDonationCompare {
     static func compare(_ found: String, _ wanted: String, _ op: PredicateExpressions.DonationFilterOperator) -> Bool {
         switch op {
         case .equal: return found == wanted
         case .notEqual: return found != wanted
-        case .lessThan: return CharonDonationSubset.number(found, wanted, { $0 < 0 })
-        case .lessThanOrEqual: return CharonDonationSubset.number(found, wanted) { $0 <= 0 }
-        case .greaterThan: return CharonDonationSubset.number(found, wanted) { $0 > 0 }
-        case .greaterThanOrEqual: return CharonDonationSubset.number(found, wanted) { $0 >= 0 }
+        case .lessThan: return RevenantDonationSubset.number(found, wanted, { $0 < 0 })
+        case .lessThanOrEqual: return RevenantDonationSubset.number(found, wanted) { $0 <= 0 }
+        case .greaterThan: return RevenantDonationSubset.number(found, wanted) { $0 > 0 }
+        case .greaterThanOrEqual: return RevenantDonationSubset.number(found, wanted) { $0 >= 0 }
         }
     }
 }
 
-enum CharonDonationSubset {
+enum RevenantDonationSubset {
     static func number(_ found: String, _ wanted: String, _ accept: (Int) -> Bool) -> Bool {
         guard let left = Double(found), let right = Double(wanted) else { return false }
         if left < right { return accept(-1) }
@@ -170,7 +170,7 @@ enum CharonDonationSubset {
                        keyPath: String) -> [String: [Tips.Event<Tips.EmptyDonation>.Donation]] {
         var grouped: [String: [Tips.Event<Tips.EmptyDonation>.Donation]] = [:]
         for donation in donations {
-            guard let group: String = CharonDonationValue.read(donation, eventID: eventID, key: keyPath) else { continue }
+            guard let group: String = RevenantDonationValue.read(donation, eventID: eventID, key: keyPath) else { continue }
             grouped[group, default: []].append(donation)
         }
         return grouped
@@ -180,7 +180,7 @@ enum CharonDonationSubset {
                            value: String,
                            op: PredicateExpressions.DonationFilterOperator) -> [String: [Tips.Event<Tips.EmptyDonation>.Donation]] {
         return groups(donations, eventID: eventID, keyPath: keyPath).filter {
-            CharonDonationCompare.compare($0.key, value, op)
+            RevenantDonationCompare.compare($0.key, value, op)
         }
     }
 
@@ -197,7 +197,7 @@ extension Sequence {
     public func donatedWithin<DonationInfo>(_ timeRange: Tips.DonationTimeRange) -> [Element]
         where Element == Tips.Event<DonationInfo>.Donation {
         let start = timeRange.start(before: Date())
-        return filter { (donation: Element) -> Bool in CharonDonationDate.isAfter(donation, start) }
+        return filter { (donation: Element) -> Bool in RevenantDonationDate.isAfter(donation, start) }
     }
 
     public func largestSubset<DonationInfo, Value>(groupedBy keyPath: KeyPath<DonationInfo, Value>) -> Self
@@ -211,13 +211,13 @@ extension Sequence {
     }
 }
 
-enum CharonDonationKeys {
+enum RevenantDonationKeys {
     static func of<Output>(_ keyPath: KeyPath<[String: String], Output>) -> [String] {
-        return CharonKeyPathNames.read(keyPath)
+        return RevenantKeyPathNames.read(keyPath)
     }
 }
 
-enum CharonKeyPathNames {
+enum RevenantKeyPathNames {
     static func read<Root, Value>(_ keyPath: KeyPath<Root, Value>) -> [String] {
         let written = keyPath.debugDescription
         guard let start = written.firstIndex(of: ".") else { return [] }

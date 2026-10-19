@@ -6,12 +6,12 @@
 
 static NSString *bare(NSString *name)
 {
-    return [name stringByReplacingOccurrencesOfString:@"CharonHost" withString:@""];
+    return [name stringByReplacingOccurrencesOfString:@"RevenantHost" withString:@""];
 }
 
 static Class port(NSString *name)
 {
-    Class found = NSClassFromString([@"CharonHost" stringByAppendingString:name]);
+    Class found = NSClassFromString([@"RevenantHost" stringByAppendingString:name]);
     CHECK(found != Nil, [[name stringByAppendingString:@" is carried"] UTF8String]);
     return found;
 }
@@ -23,7 +23,7 @@ static void same_class(Class ours, Class theirs)
                 [[what stringByAppendingString:@" has the release's superclass"] UTF8String]);
 }
 
-extern NSString *const CharonHostDCErrorDomain, *const CharonHostARErrorDomain, *const CharonHostARReferenceObjectArchiveExtension, *const CharonHostNFCErrorDomain;
+extern NSString *const RevenantHostDCErrorDomain, *const RevenantHostARErrorDomain, *const RevenantHostARReferenceObjectArchiveExtension, *const RevenantHostNFCErrorDomain;
 
 static void device_check(void)
 {
@@ -33,7 +33,7 @@ static void device_check(void)
     CHECK(DCDevice.currentDevice == DCDevice.currentDevice, "the host's DCDevice.currentDevice is one shared object");
     CHECK_EQUAL(@([ours isSupported]), @([DCDevice.currentDevice isSupported]), "-isSupported answers what DeviceCheck answers");
     CHECK([ours isSupported], "-isSupported answers YES, which no release ever answered otherwise");
-    CHECK_EQUAL(CharonHostDCErrorDomain, DCErrorDomain, "DCErrorDomain is DeviceCheck's string");
+    CHECK_EQUAL(RevenantHostDCErrorDomain, DCErrorDomain, "DCErrorDomain is DeviceCheck's string");
     same_class(mine, [DCDevice class]);
 }
 
@@ -51,8 +51,8 @@ static void augmented_reality(void)
         CHECK(![ours isSupported], [[name stringByAppendingString:@".isSupported is NO"] UTF8String]);
         same_class(ours, theirs);
     }
-    CHECK_EQUAL(CharonHostARErrorDomain, ARErrorDomain, "ARErrorDomain is ARKit's string");
-    CHECK_EQUAL(CharonHostARReferenceObjectArchiveExtension, ARReferenceObjectArchiveExtension,
+    CHECK_EQUAL(RevenantHostARErrorDomain, ARErrorDomain, "ARErrorDomain is ARKit's string");
+    CHECK_EQUAL(RevenantHostARReferenceObjectArchiveExtension, ARReferenceObjectArchiveExtension,
                 "ARReferenceObjectArchiveExtension is ARKit's string");
     Class world = port(@"ARWorldTrackingConfiguration");
     id copy = [[[world alloc] init] copy];
@@ -68,7 +68,7 @@ static void tag_reading(void)
     same_class(base, [NFCReaderSession class]);
     same_class(ndef, [NFCNDEFReaderSession class]);
     CHECK([ndef superclass] == base, "NFCNDEFReaderSession is a subclass of NFCReaderSession");
-    CHECK_EQUAL(CharonHostNFCErrorDomain, NFCErrorDomain, "NFCErrorDomain is CoreNFC's string");
+    CHECK_EQUAL(RevenantHostNFCErrorDomain, NFCErrorDomain, "NFCErrorDomain is CoreNFC's string");
 }
 
 static void absences(void)
@@ -91,7 +91,7 @@ int main(void)
         augmented_reality();
         tag_reading();
         absences();
-        printf("%d of %d checks failed\n", charon_failures, charon_checks);
-        return charon_failures;
+        printf("%d of %d checks failed\n", revenant_failures, revenant_checks);
+        return revenant_failures;
     }
 }

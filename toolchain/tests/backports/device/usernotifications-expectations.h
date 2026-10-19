@@ -1,5 +1,5 @@
-struct charon_matching { const char *zone, *spec; int repeats; double after, next; };
-static const struct charon_matching charon_matchings[] = {
+struct revenant_matching { const char *zone, *spec; int repeats; double after, next; };
+static const struct revenant_matching revenant_matchings[] = {
     {"GMT", "hour=8,minute=30", 0, 650000000, NAN},
     {"GMT", "hour=8,minute=30", 0, 653226327.70000005, NAN},
     {"GMT", "hour=8,minute=30", 0, 656452655.39999998, NAN},

@@ -1,6 +1,6 @@
 #import <Foundation/Foundation.h>
 
-@implementation NSHTTPURLResponse (CharonHeaderField)
+@implementation NSHTTPURLResponse (RevenantHeaderField)
 
 - (NSString *)valueForHTTPHeaderField:(NSString *)field
 {

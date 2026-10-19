@@ -1,6 +1,6 @@
 #import <Foundation/Foundation.h>
 
-@implementation NSURLCache (CharonDataTask)
+@implementation NSURLCache (RevenantDataTask)
 
 - (void)storeCachedResponse:(NSCachedURLResponse *)cachedResponse forDataTask:(NSURLSessionDataTask *)dataTask
 {

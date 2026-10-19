@@ -1,23 +1,23 @@
 #import <Foundation/Foundation.h>
-#import "CharonMethodProem.h"
+#import "RevenantMethodProem.h"
 #import <objc/runtime.h>
 
 double const NSBundleResourceRequestLoadingPriorityUrgent = 1.0;
 NSString *const NSBundleResourceRequestLowDiskSpaceNotification = @"NSBundleResourceRequestLowDiskSpaceNotification";
 
-static NSString *const charon_manifest_resource = @"OnDemandResources";
-static NSString *const charon_manifest_tags_key = @"NSBundleResourceRequestTags";
-static NSString *const charon_manifest_pack_path_key = @"NSBundleResourceRequestPath";
+static NSString *const revenant_manifest_resource = @"OnDemandResources";
+static NSString *const revenant_manifest_tags_key = @"NSBundleResourceRequestTags";
+static NSString *const revenant_manifest_pack_path_key = @"NSBundleResourceRequestPath";
 
-static NSInteger const charon_invalid_tag = 4994;
+static NSInteger const revenant_invalid_tag = 4994;
 
-static NSString *CharonInvalidTagError(NSString *tag)
+static NSString *RevenantInvalidTagError(NSString *tag)
 {
     return [NSString stringWithFormat:NSLocalizedString(@"The value “%@” is not a tag in this bundle's asset manifest.",
                                                        @"NSBundleResourceRequest invalid tag"), tag];
 }
 
-static NSMutableDictionary *CharonPriorities(void)
+static NSMutableDictionary *RevenantPriorities(void)
 {
     static NSMutableDictionary *priorities;
     static dispatch_once_t once;
@@ -27,7 +27,7 @@ static NSMutableDictionary *CharonPriorities(void)
     return priorities;
 }
 
-static NSMutableDictionary *CharonManifests(void)
+static NSMutableDictionary *RevenantManifests(void)
 {
     static NSMutableDictionary *manifests;
     static dispatch_once_t once;
@@ -37,26 +37,26 @@ static NSMutableDictionary *CharonManifests(void)
     return manifests;
 }
 
-static NSDictionary *CharonManifestForBundle(NSBundle *bundle)
+static NSDictionary *RevenantManifestForBundle(NSBundle *bundle)
 {
     if (bundle == nil)
         return nil;
     NSString *key = bundle.bundlePath ?: @"";
-    NSDictionary *held = CharonManifests()[key];
+    NSDictionary *held = RevenantManifests()[key];
     if (held)
         return held;
     NSDictionary *manifest = nil;
-    NSString *path = [bundle pathForResource:charon_manifest_resource ofType:@"plist"];
+    NSString *path = [bundle pathForResource:revenant_manifest_resource ofType:@"plist"];
     if (path)
         manifest = [NSDictionary dictionaryWithContentsOfFile:path];
-    NSDictionary *tags = manifest[charon_manifest_tags_key];
-    CharonManifests()[key] = [tags isKindOfClass:[NSDictionary class]] ? [tags mutableCopy] : [NSMutableDictionary dictionary];
-    return CharonManifests()[key];
+    NSDictionary *tags = manifest[revenant_manifest_tags_key];
+    RevenantManifests()[key] = [tags isKindOfClass:[NSDictionary class]] ? [tags mutableCopy] : [NSMutableDictionary dictionary];
+    return RevenantManifests()[key];
 }
 
-static BOOL CharonTagIsResolvable(NSBundle *bundle, NSString *tag)
+static BOOL RevenantTagIsResolvable(NSBundle *bundle, NSString *tag)
 {
-    return CharonManifestForBundle(bundle)[tag] != nil;
+    return RevenantManifestForBundle(bundle)[tag] != nil;
 }
 
 @implementation NSBundleResourceRequest {
@@ -119,29 +119,29 @@ static BOOL CharonTagIsResolvable(NSBundle *bundle, NSString *tag)
     return _progress;
 }
 
-- (NSSet<NSString *> *)charon_unresolvableTags
+- (NSSet<NSString *> *)revenant_unresolvableTags
 {
     NSMutableSet *missing = [NSMutableSet set];
     for (NSString *tag in _tags)
-        if (!CharonTagIsResolvable(_bundle, tag))
+        if (!RevenantTagIsResolvable(_bundle, tag))
             [missing addObject:tag];
     return missing;
 }
 
-- (NSError *)charon_errorForUnresolvableTags:(NSSet<NSString *> *)missing
+- (NSError *)revenant_errorForUnresolvableTags:(NSSet<NSString *> *)missing
 {
     if ([missing count] == 0)
         return nil;
     NSString *tag = [[missing allObjects] sortedArrayUsingSelector:@selector(compare:)][0];
     return [NSError errorWithDomain:NSCocoaErrorDomain
-                               code:charon_invalid_tag
-                           userInfo:@{NSLocalizedDescriptionKey: CharonInvalidTagError(tag)}];
+                               code:revenant_invalid_tag
+                           userInfo:@{NSLocalizedDescriptionKey: RevenantInvalidTagError(tag)}];
 }
 
 - (void)beginAccessingResourcesWithCompletionHandler:(void (^)(NSError *error))handler
 {
     if (handler)
-        handler([self charon_errorForUnresolvableTags:[self charon_unresolvableTags]]);
+        handler([self revenant_errorForUnresolvableTags:[self revenant_unresolvableTags]]);
 }
 
 - (void)conditionallyBeginAccessingResourcesWithCompletionHandler:(void (^)(BOOL available))handler
@@ -162,19 +162,19 @@ static BOOL CharonTagIsResolvable(NSBundle *bundle, NSString *tag)
 {
     NSBundle *bundle = self;
     SEL selector = _cmd;
-    NSDictionary *manifest = CharonManifestForBundle(bundle);
+    NSDictionary *manifest = RevenantManifestForBundle(bundle);
     if ([manifest count] == 0) {
         [NSException raise:NSInvalidArgumentException
                     format:@"%@: this bundle has no on demand resource tag information",
-                           charon_method_proem(bundle, selector)];
+                           revenant_method_proem(bundle, selector)];
         return;
     }
-    NSMutableDictionary *priorities = CharonPriorities()[bundle.bundlePath ?: @""];
+    NSMutableDictionary *priorities = RevenantPriorities()[bundle.bundlePath ?: @""];
     for (NSString *tag in tags) {
         if (manifest[tag] == nil) {
             [NSException raise:NSInvalidArgumentException
                         format:@"%@: \u201c%@\u201d is not a tag in this bundle's asset manifest",
-                               charon_method_proem(bundle, selector), tag];
+                               revenant_method_proem(bundle, selector), tag];
             return;
         }
         priorities[tag] = @(priority);
@@ -183,13 +183,13 @@ static BOOL CharonTagIsResolvable(NSBundle *bundle, NSString *tag)
 
 - (double)preservationPriorityForTag:(NSString *)tag
 {
-    NSNumber *held = CharonPriorities()[self.bundlePath ?: @""][tag];
+    NSNumber *held = RevenantPriorities()[self.bundlePath ?: @""][tag];
     return held ? [held doubleValue] : 0.0;
 }
 
 @end
 
-void CharonInstallNSBundleAdditions(Class bundle)
+void RevenantInstallNSBundleAdditions(Class bundle)
 {
     BOOL hasSet = class_getInstanceMethod(bundle, @selector(setPreservationPriority:forTags:)) != NULL;
     BOOL hasGet = class_getInstanceMethod(bundle, @selector(preservationPriorityForTag:)) != NULL;
@@ -203,12 +203,12 @@ void CharonInstallNSBundleAdditions(Class bundle)
                         "d@:@@");
 }
 
-__attribute__((constructor)) static void CharonInstallOnNSBundle(void)
+__attribute__((constructor)) static void RevenantInstallOnNSBundle(void)
 {
     Class bundle = objc_getClass("NSBundle");
     if (bundle == Nil) {
-        fprintf(stderr, "charon: no NSBundle in this process; the two additions are not installed\n");
+        fprintf(stderr, "revenant: no NSBundle in this process; the two additions are not installed\n");
         return;
     }
-    CharonInstallNSBundleAdditions(bundle);
+    RevenantInstallNSBundleAdditions(bundle);
 }

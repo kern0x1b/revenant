@@ -1,3 +1,3 @@
 #import <ARKit/ARKit.h>
 
-__attribute__((used)) static Protocol *CharonEmitARAnchorCopying(void) { return @protocol(ARAnchorCopying); }
+__attribute__((used)) static Protocol *RevenantEmitARAnchorCopying(void) { return @protocol(ARAnchorCopying); }

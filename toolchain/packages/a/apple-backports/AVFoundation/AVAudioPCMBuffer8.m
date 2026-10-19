@@ -1,4 +1,4 @@
-#import "CharonAVAudioBuffer.h"
+#import "RevenantAVAudioBuffer.h"
 
 @implementation AVAudioPCMBuffer
 
@@ -25,8 +25,8 @@
             list->mBuffers[i].mData = frameCapacity ? calloc(1, asbd->mBytesPerFrame * frameCapacity) : NULL;
         }
 
-        CharonAudioBufferImpl *impl = [self charon_allocate];
-        [self charon_setFormat:format];
+        RevenantAudioBufferImpl *impl = [self revenant_allocate];
+        [self revenant_setFormat:format];
         impl->bufferList = list;
         impl->frameCapacity = frameCapacity;
         impl->frameLength = 0;
@@ -50,28 +50,28 @@
     return self;
 }
 
-- (void)charon_syncFrameLength
+- (void)revenant_syncFrameLength
 {
-    CharonAudioBufferImpl *impl = [self charon_allocate];
+    RevenantAudioBufferImpl *impl = [self revenant_allocate];
     for (UInt32 i = 0; i < impl->bufferList->mNumberBuffers; i++)
         impl->bufferList->mBuffers[i].mDataByteSize = impl->frameLength * impl->bytesPerFramePerBuffer;
 }
 
 - (AVAudioFrameCount)frameCapacity
 {
-    CharonAudioBufferImpl *impl = [self charon_impl];
+    RevenantAudioBufferImpl *impl = [self revenant_impl];
     return impl ? impl->frameCapacity : 0;
 }
 
 - (AVAudioFrameCount)frameLength
 {
-    CharonAudioBufferImpl *impl = [self charon_impl];
+    RevenantAudioBufferImpl *impl = [self revenant_impl];
     return impl ? impl->frameLength : 0;
 }
 
 - (void)setFrameLength:(AVAudioFrameCount)frameLength
 {
-    CharonAudioBufferImpl *impl = [self charon_impl];
+    RevenantAudioBufferImpl *impl = [self revenant_impl];
     if (!impl)
         return;
     if (frameLength > impl->frameCapacity)
@@ -83,39 +83,39 @@
 
 - (NSUInteger)stride
 {
-    CharonAudioBufferImpl *impl = [self charon_impl];
+    RevenantAudioBufferImpl *impl = [self revenant_impl];
     return impl ? impl->stride : 0;
 }
 
 - (float *const *)floatChannelData
 {
-    CharonAudioBufferImpl *impl = [self charon_impl];
+    RevenantAudioBufferImpl *impl = [self revenant_impl];
     return (impl && [self.format commonFormat] == AVAudioPCMFormatFloat32) ? (float *const *)impl->channelPointers : NULL;
 }
 
 - (int16_t *const *)int16ChannelData
 {
-    CharonAudioBufferImpl *impl = [self charon_impl];
+    RevenantAudioBufferImpl *impl = [self revenant_impl];
     return (impl && [self.format commonFormat] == AVAudioPCMFormatInt16) ? (int16_t *const *)impl->channelPointers : NULL;
 }
 
 - (int32_t *const *)int32ChannelData
 {
-    CharonAudioBufferImpl *impl = [self charon_impl];
+    RevenantAudioBufferImpl *impl = [self revenant_impl];
     return (impl && [self.format commonFormat] == AVAudioPCMFormatInt32) ? (int32_t *const *)impl->channelPointers : NULL;
 }
 
 - (id)copyWithZone:(NSZone *)zone
 {
-    CharonAudioBufferImpl *impl = [self charon_impl];
+    RevenantAudioBufferImpl *impl = [self revenant_impl];
     if (!impl)
         return nil;
     AVAudioPCMBuffer *copy = [[AVAudioPCMBuffer allocWithZone:zone] initWithPCMFormat:self.format frameCapacity:impl->frameCapacity];
-    CharonAudioBufferImpl *other = [copy charon_impl];
+    RevenantAudioBufferImpl *other = [copy revenant_impl];
     other->frameLength = impl->frameLength;
     for (UInt32 i = 0; i < impl->bufferList->mNumberBuffers; i++)
         memcpy(other->bufferList->mBuffers[i].mData, impl->bufferList->mBuffers[i].mData, impl->bufferList->mBuffers[i].mDataByteSize);
-    [copy charon_syncFrameLength];
+    [copy revenant_syncFrameLength];
     return copy;
 }
 
@@ -126,7 +126,7 @@
 
 - (NSString *)description
 {
-    CharonAudioBufferImpl *impl = [self charon_impl];
+    RevenantAudioBufferImpl *impl = [self revenant_impl];
     return [NSString stringWithFormat:@"<AVAudioPCMBuffer %p: %@, frameLength %u / %u>", self, self.format,
                                       (unsigned)impl->frameLength, (unsigned)impl->frameCapacity];
 }

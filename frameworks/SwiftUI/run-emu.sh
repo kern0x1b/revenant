@@ -9,25 +9,25 @@ out=$PWD/runs.noindex/$name
 [ -e "$out" ] && { echo "run $out exists" >&2; exit 1; }
 mkdir -p "$out"
 # xmake emulate needs the packages it copies already in the store, so the port is configured and
-# built here first. CHARON_REPO points the package repository at a checkout, CHARON_ADDON at the addon
+# built here first. REVENANT_REPO points the package repository at a checkout, REVENANT_ADDON at the addon
 # version to build with; both default to what the machine has. -c: without it xmake keeps the package
 # versions it resolved at the last configure, so a pin that moved (a new version in the recipe, another
-# CHARON_REPO) was not installed and the run tested the tree it had tested before; nothing the script
+# REVENANT_REPO) was not installed and the run tested the tree it had tested before; nothing the script
 # sets lives in the cache it clears.
-xmake f -c -P eidolon -p iphoneos -a armv7 -y > "$out/configure.log" 2>&1
-xmake emulate -P eidolon -d iPhone4,1 -r 6.1.3 install > "$out/install.log" 2>&1
+xmake f -c -P SwiftUI -p iphoneos -a armv7 -y > "$out/configure.log" 2>&1
+xmake emulate -P SwiftUI -d iPhone4,1 -r 6.1.3 install > "$out/install.log" 2>&1
 ran=0
 marker=$out/.marked
 : > "$marker"
-xmake emulate -P eidolon -d iPhone4,1 -r 6.1.3 -s "${SECONDS_BUDGET:-240}" -t 1500 \
-    run /usr/libexec/EidolonTests > "$out/run.log" 2>&1 || ran=$?
+xmake emulate -P SwiftUI -d iPhone4,1 -r 6.1.3 -s "${SECONDS_BUDGET:-240}" -t 1500 \
+    run /usr/libexec/SwiftUITests > "$out/run.log" 2>&1 || ran=$?
 cat "$out/run.log"
 echo "the run itself exited $ran"
 # This run's verdict, not the newest on the machine: a marker is written just before the run and the
 # verdict is the one written after it, and zero or more than one is refused rather than guessed at. The
 # verdict carries the absolute paths of what the test binary wrote, so the folder comes from there. An
 # older console line is the last resort, for a tree that prints one.
-find "${HOME}/.charon/emulator/images.noindex" -path "*/iPhone4,1_*/run/verdict.json" -newer "$marker" \
+find "${HOME}/.revenant/emulator/images.noindex" -path "*/iPhone4,1_*/run/verdict.json" -newer "$marker" \
     > "$out/.verdicts" 2>/dev/null || true
 count=$(grep -c . "$out/.verdicts" || true)
 if [ "$count" -gt 1 ]; then

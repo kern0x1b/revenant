@@ -4,11 +4,11 @@ here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 UIKIT=${UIKIT:-$here/../../../../packages/a/apple-backports/UIKit}
 harness=${RENDERERFORMAT_HARNESS:-$here/../../device}
-build=${RENDERERFORMAT_BUILD:-$(runs_folder charon-rendererformat-host)}
+build=${RENDERERFORMAT_BUILD:-$(runs_folder revenant-rendererformat-host)}
 sources="UIGraphicsRendererFormat.m UIGraphicsImageRendererFormat.m UIGraphicsRendererFormat+Preferred.m"
 sdk=$(xcrun --show-sdk-path)
 target="-target arm64-apple-ios15.0-macabi -isysroot $sdk -iframework $sdk/System/iOSSupport/System/Library/Frameworks"
-renames="-DUIGraphicsRendererFormat=CharonHostUIGraphicsRendererFormat -DUIGraphicsImageRendererFormat=CharonHostUIGraphicsImageRendererFormat"
+renames="-DUIGraphicsRendererFormat=RevenantHostUIGraphicsRendererFormat -DUIGraphicsImageRendererFormat=RevenantHostUIGraphicsImageRendererFormat"
 rm -rf "$build"
 mkdir -p "$build"
 objects=""

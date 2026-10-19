@@ -1,12 +1,12 @@
-#import "CharonAVAudioUnit.h"
-#import "CharonDistortionPresets.h"
+#import "RevenantAVAudioUnit.h"
+#import "RevenantDistortionPresets.h"
 #import <AudioToolbox/AudioUnitParameters.h>
 
 @implementation AVAudioUnitTimeEffect
 
 - (instancetype)initWithAudioComponentDescription:(AudioComponentDescription)audioComponentDescription
 {
-    return [self initWithCharonComponentDescription:audioComponentDescription name:nil manufacturerName:nil version:0];
+    return [self initWithRevenantComponentDescription:audioComponentDescription name:nil manufacturerName:nil version:0];
 }
 
 @end
@@ -15,316 +15,316 @@
 
 - (instancetype)initWithAudioComponentDescription:(AudioComponentDescription)audioComponentDescription
 {
-    return [self initWithCharonComponentDescription:audioComponentDescription name:nil manufacturerName:nil version:0];
+    return [self initWithRevenantComponentDescription:audioComponentDescription name:nil manufacturerName:nil version:0];
 }
 
 @end
 
-#define CharonParameterOf(unit, identifier) CharonUnitParameter((unit).audioUnit, (identifier))
-#define CharonSetParameterOf(unit, identifier, value) CharonSetUnitParameter((unit).audioUnit, (identifier), (value))
+#define RevenantParameterOf(unit, identifier) RevenantUnitParameter((unit).audioUnit, (identifier))
+#define RevenantSetParameterOf(unit, identifier, value) RevenantSetUnitParameter((unit).audioUnit, (identifier), (value))
 
 @implementation AVAudioUnitDelay {
-    float _charon_delayTime;
-    BOOL _charon_havedelayTime;
-    float _charon_feedback;
-    BOOL _charon_havefeedback;
-    float _charon_lowPassCutoff;
-    BOOL _charon_havelowPassCutoff;
-    float _charon_wetDryMix;
-    BOOL _charon_havewetDryMix;
+    float _revenant_delayTime;
+    BOOL _revenant_havedelayTime;
+    float _revenant_feedback;
+    BOOL _revenant_havefeedback;
+    float _revenant_lowPassCutoff;
+    BOOL _revenant_havelowPassCutoff;
+    float _revenant_wetDryMix;
+    BOOL _revenant_havewetDryMix;
 }
 
 - (instancetype)initWithAudioComponentDescription:(AudioComponentDescription)audioComponentDescription
 {
     self = [super initWithAudioComponentDescription:audioComponentDescription];
     if (self) {
-        _charon_delayTime = 0;
-        _charon_havedelayTime = NO;
-        _charon_feedback = 0;
-        _charon_havefeedback = NO;
-        _charon_lowPassCutoff = 0;
-        _charon_havelowPassCutoff = NO;
-        _charon_wetDryMix = 0;
-        _charon_havewetDryMix = NO;
+        _revenant_delayTime = 0;
+        _revenant_havedelayTime = NO;
+        _revenant_feedback = 0;
+        _revenant_havefeedback = NO;
+        _revenant_lowPassCutoff = 0;
+        _revenant_havelowPassCutoff = NO;
+        _revenant_wetDryMix = 0;
+        _revenant_havewetDryMix = NO;
     }
     return self;
 }
 
 - (NSTimeInterval)delayTime
 {
-    if (_charon_havedelayTime) {
-        return _charon_delayTime;
+    if (_revenant_havedelayTime) {
+        return _revenant_delayTime;
     }
-    return CharonParameterOf(self, kDelayParam_DelayTime);
+    return RevenantParameterOf(self, kDelayParam_DelayTime);
 }
 
 - (void)setDelayTime:(NSTimeInterval)delayTime
 {
-    _charon_delayTime = (float)delayTime;
-    _charon_havedelayTime = YES;
-    CharonSetParameterOf(self, kDelayParam_DelayTime, _charon_delayTime);
+    _revenant_delayTime = (float)delayTime;
+    _revenant_havedelayTime = YES;
+    RevenantSetParameterOf(self, kDelayParam_DelayTime, _revenant_delayTime);
 }
 
 - (float)feedback
 {
-    if (_charon_havefeedback) {
-        return _charon_feedback;
+    if (_revenant_havefeedback) {
+        return _revenant_feedback;
     }
-    return CharonParameterOf(self, kDelayParam_Feedback);
+    return RevenantParameterOf(self, kDelayParam_Feedback);
 }
 
 - (void)setFeedback:(float)feedback
 {
-    _charon_feedback = feedback;
-    CharonSetParameterOf(self, kDelayParam_Feedback, feedback);
+    _revenant_feedback = feedback;
+    RevenantSetParameterOf(self, kDelayParam_Feedback, feedback);
 }
 
 - (float)lowPassCutoff
 {
-    if (_charon_havelowPassCutoff) {
-        return _charon_lowPassCutoff;
+    if (_revenant_havelowPassCutoff) {
+        return _revenant_lowPassCutoff;
     }
-    return CharonParameterOf(self, kDelayParam_LopassCutoff);
+    return RevenantParameterOf(self, kDelayParam_LopassCutoff);
 }
 
 - (void)setLowPassCutoff:(float)lowPassCutoff
 {
-    _charon_lowPassCutoff = lowPassCutoff;
-    CharonSetParameterOf(self, kDelayParam_LopassCutoff, lowPassCutoff);
+    _revenant_lowPassCutoff = lowPassCutoff;
+    RevenantSetParameterOf(self, kDelayParam_LopassCutoff, lowPassCutoff);
 }
 
 - (float)wetDryMix
 {
-    if (_charon_havewetDryMix) {
-        return _charon_wetDryMix;
+    if (_revenant_havewetDryMix) {
+        return _revenant_wetDryMix;
     }
-    return CharonParameterOf(self, kDelayParam_WetDryMix);
+    return RevenantParameterOf(self, kDelayParam_WetDryMix);
 }
 
 - (void)setWetDryMix:(float)wetDryMix
 {
-    _charon_wetDryMix = wetDryMix;
-    CharonSetParameterOf(self, kDelayParam_WetDryMix, wetDryMix);
+    _revenant_wetDryMix = wetDryMix;
+    RevenantSetParameterOf(self, kDelayParam_WetDryMix, wetDryMix);
 }
 
-- (void)charon_applyPendingParameters
+- (void)revenant_applyPendingParameters
 {
-    if (_charon_havedelayTime) CharonSetParameterOf(self, kDelayParam_DelayTime, _charon_delayTime);
-    if (_charon_havefeedback) CharonSetParameterOf(self, kDelayParam_Feedback, _charon_feedback);
-    if (_charon_havelowPassCutoff) CharonSetParameterOf(self, kDelayParam_LopassCutoff, _charon_lowPassCutoff);
-    if (_charon_havewetDryMix) CharonSetParameterOf(self, kDelayParam_WetDryMix, _charon_wetDryMix);
-    [super charon_applyPendingParameters];
+    if (_revenant_havedelayTime) RevenantSetParameterOf(self, kDelayParam_DelayTime, _revenant_delayTime);
+    if (_revenant_havefeedback) RevenantSetParameterOf(self, kDelayParam_Feedback, _revenant_feedback);
+    if (_revenant_havelowPassCutoff) RevenantSetParameterOf(self, kDelayParam_LopassCutoff, _revenant_lowPassCutoff);
+    if (_revenant_havewetDryMix) RevenantSetParameterOf(self, kDelayParam_WetDryMix, _revenant_wetDryMix);
+    [super revenant_applyPendingParameters];
 }
 
 @end
 
 @implementation AVAudioUnitVarispeed {
-    float _charon_rate;
-    BOOL _charon_haverate;
+    float _revenant_rate;
+    BOOL _revenant_haverate;
 }
 
 - (instancetype)initWithAudioComponentDescription:(AudioComponentDescription)audioComponentDescription
 {
     self = [super initWithAudioComponentDescription:audioComponentDescription];
     if (self) {
-        _charon_rate = 0;
-        _charon_haverate = NO;
+        _revenant_rate = 0;
+        _revenant_haverate = NO;
     }
     return self;
 }
 
 - (float)rate
 {
-    if (_charon_haverate) {
-        return _charon_rate;
+    if (_revenant_haverate) {
+        return _revenant_rate;
     }
-    return CharonParameterOf(self, kVarispeedParam_PlaybackRate);
+    return RevenantParameterOf(self, kVarispeedParam_PlaybackRate);
 }
 
 - (void)setRate:(float)rate
 {
-    _charon_rate = rate;
-    CharonSetParameterOf(self, kVarispeedParam_PlaybackRate, rate);
+    _revenant_rate = rate;
+    RevenantSetParameterOf(self, kVarispeedParam_PlaybackRate, rate);
 }
 
-- (void)charon_applyPendingParameters
+- (void)revenant_applyPendingParameters
 {
-    if (_charon_haverate) CharonSetParameterOf(self, kVarispeedParam_PlaybackRate, _charon_rate);
-    [super charon_applyPendingParameters];
+    if (_revenant_haverate) RevenantSetParameterOf(self, kVarispeedParam_PlaybackRate, _revenant_rate);
+    [super revenant_applyPendingParameters];
 }
 
 @end
 
 @implementation AVAudioUnitTimePitch {
-    float _charon_rate;
-    BOOL _charon_haverate;
-    float _charon_pitch;
-    BOOL _charon_havepitch;
-    float _charon_overlap;
-    BOOL _charon_haveoverlap;
+    float _revenant_rate;
+    BOOL _revenant_haverate;
+    float _revenant_pitch;
+    BOOL _revenant_havepitch;
+    float _revenant_overlap;
+    BOOL _revenant_haveoverlap;
 }
 
 - (instancetype)initWithAudioComponentDescription:(AudioComponentDescription)audioComponentDescription
 {
     self = [super initWithAudioComponentDescription:audioComponentDescription];
     if (self) {
-        _charon_rate = 0;
-        _charon_haverate = NO;
-        _charon_pitch = 0;
-        _charon_havepitch = NO;
-        _charon_overlap = 0;
-        _charon_haveoverlap = NO;
+        _revenant_rate = 0;
+        _revenant_haverate = NO;
+        _revenant_pitch = 0;
+        _revenant_havepitch = NO;
+        _revenant_overlap = 0;
+        _revenant_haveoverlap = NO;
     }
     return self;
 }
 
 - (float)rate
 {
-    if (_charon_haverate) {
-        return _charon_rate;
+    if (_revenant_haverate) {
+        return _revenant_rate;
     }
-    return CharonParameterOf(self, kTimePitchParam_Rate);
+    return RevenantParameterOf(self, kTimePitchParam_Rate);
 }
 
 - (void)setRate:(float)rate
 {
-    _charon_rate = rate;
-    CharonSetParameterOf(self, kTimePitchParam_Rate, rate);
+    _revenant_rate = rate;
+    RevenantSetParameterOf(self, kTimePitchParam_Rate, rate);
 }
 
 - (float)pitch
 {
-    if (_charon_havepitch) {
-        return _charon_pitch;
+    if (_revenant_havepitch) {
+        return _revenant_pitch;
     }
-    return CharonParameterOf(self, kTimePitchParam_Pitch);
+    return RevenantParameterOf(self, kTimePitchParam_Pitch);
 }
 
 - (void)setPitch:(float)pitch
 {
-    _charon_pitch = pitch;
-    CharonSetParameterOf(self, kTimePitchParam_Pitch, pitch);
+    _revenant_pitch = pitch;
+    RevenantSetParameterOf(self, kTimePitchParam_Pitch, pitch);
 }
 
 - (float)overlap
 {
-    if (_charon_haveoverlap) {
-        return _charon_overlap;
+    if (_revenant_haveoverlap) {
+        return _revenant_overlap;
     }
-    return CharonParameterOf(self, kTimePitchParam_EffectBlend);
+    return RevenantParameterOf(self, kTimePitchParam_EffectBlend);
 }
 
 - (void)setOverlap:(float)overlap
 {
-    _charon_overlap = overlap;
-    CharonSetParameterOf(self, kTimePitchParam_EffectBlend, overlap);
+    _revenant_overlap = overlap;
+    RevenantSetParameterOf(self, kTimePitchParam_EffectBlend, overlap);
 }
 
-- (void)charon_applyPendingParameters
+- (void)revenant_applyPendingParameters
 {
-    if (_charon_haverate) CharonSetParameterOf(self, kTimePitchParam_Rate, _charon_rate);
-    if (_charon_havepitch) CharonSetParameterOf(self, kTimePitchParam_Pitch, _charon_pitch);
-    if (_charon_haveoverlap) CharonSetParameterOf(self, kTimePitchParam_EffectBlend, _charon_overlap);
-    [super charon_applyPendingParameters];
+    if (_revenant_haverate) RevenantSetParameterOf(self, kTimePitchParam_Rate, _revenant_rate);
+    if (_revenant_havepitch) RevenantSetParameterOf(self, kTimePitchParam_Pitch, _revenant_pitch);
+    if (_revenant_haveoverlap) RevenantSetParameterOf(self, kTimePitchParam_EffectBlend, _revenant_overlap);
+    [super revenant_applyPendingParameters];
 }
 
 @end
 
 @implementation AVAudioUnitDistortion {
-    NSInteger _charon_preset;
-    float _charon_preGain;
-    BOOL _charon_havepreGain;
-    float _charon_wetDryMix;
-    BOOL _charon_havewetDryMix;
+    NSInteger _revenant_preset;
+    float _revenant_preGain;
+    BOOL _revenant_havepreGain;
+    float _revenant_wetDryMix;
+    BOOL _revenant_havewetDryMix;
 }
 
 - (instancetype)initWithAudioComponentDescription:(AudioComponentDescription)audioComponentDescription
 {
     self = [super initWithAudioComponentDescription:audioComponentDescription];
     if (self) {
-        _charon_preset = 0;
-        _charon_preGain = CharonDistortionPresets[0][14];
-        _charon_wetDryMix = CharonDistortionPresets[0][15];
+        _revenant_preset = 0;
+        _revenant_preGain = RevenantDistortionPresets[0][14];
+        _revenant_wetDryMix = RevenantDistortionPresets[0][15];
     }
     return self;
 }
 
 - (float)preGain
 {
-    return _charon_preGain;
+    return _revenant_preGain;
 }
 
 - (void)setPreGain:(float)preGain
 {
-    _charon_preGain = preGain;
-    _charon_havepreGain = YES;
-    CharonSetParameterOf(self, kDistortionParam_SoftClipGain, preGain);
+    _revenant_preGain = preGain;
+    _revenant_havepreGain = YES;
+    RevenantSetParameterOf(self, kDistortionParam_SoftClipGain, preGain);
 }
 
 - (float)wetDryMix
 {
-    return _charon_wetDryMix;
+    return _revenant_wetDryMix;
 }
 
 - (void)setWetDryMix:(float)wetDryMix
 {
-    _charon_wetDryMix = wetDryMix;
-    _charon_havewetDryMix = YES;
-    CharonSetParameterOf(self, kDistortionParam_FinalMix, wetDryMix);
+    _revenant_wetDryMix = wetDryMix;
+    _revenant_havewetDryMix = YES;
+    RevenantSetParameterOf(self, kDistortionParam_FinalMix, wetDryMix);
 }
 
 - (void)loadFactoryPreset:(AVAudioUnitDistortionPreset)preset
 {
-    if (preset < 0 || preset >= CharonDistortionPresetCount) {
+    if (preset < 0 || preset >= RevenantDistortionPresetCount) {
         return;
     }
-    _charon_preset = (NSInteger)preset;
-    CharonApplyDistortionPreset(self.audioUnit, _charon_preset);
+    _revenant_preset = (NSInteger)preset;
+    RevenantApplyDistortionPreset(self.audioUnit, _revenant_preset);
 }
 
-- (void)charon_applyPendingParameters
+- (void)revenant_applyPendingParameters
 {
-    CharonApplyDistortionPreset(self.audioUnit, _charon_preset);
-    if (_charon_havepreGain) CharonSetParameterOf(self, kDistortionParam_SoftClipGain, _charon_preGain);
-    if (_charon_havewetDryMix) CharonSetParameterOf(self, kDistortionParam_FinalMix, _charon_wetDryMix);
-    [super charon_applyPendingParameters];
+    RevenantApplyDistortionPreset(self.audioUnit, _revenant_preset);
+    if (_revenant_havepreGain) RevenantSetParameterOf(self, kDistortionParam_SoftClipGain, _revenant_preGain);
+    if (_revenant_havewetDryMix) RevenantSetParameterOf(self, kDistortionParam_FinalMix, _revenant_wetDryMix);
+    [super revenant_applyPendingParameters];
 }
 
 @end
 
 @implementation AVAudioUnitReverb {
-    float _charon_wetDryMix;
-    BOOL _charon_havewetDryMix;
+    float _revenant_wetDryMix;
+    BOOL _revenant_havewetDryMix;
 }
 
 - (instancetype)initWithAudioComponentDescription:(AudioComponentDescription)audioComponentDescription
 {
     self = [super initWithAudioComponentDescription:audioComponentDescription];
     if (self) {
-        _charon_wetDryMix = 0;
-        _charon_havewetDryMix = NO;
+        _revenant_wetDryMix = 0;
+        _revenant_havewetDryMix = NO;
     }
     return self;
 }
 
 - (float)wetDryMix
 {
-    if (_charon_havewetDryMix) {
-        return _charon_wetDryMix;
+    if (_revenant_havewetDryMix) {
+        return _revenant_wetDryMix;
     }
-    return CharonParameterOf(self, kReverb2Param_DryWetMix);
+    return RevenantParameterOf(self, kReverb2Param_DryWetMix);
 }
 
 - (void)setWetDryMix:(float)wetDryMix
 {
-    _charon_wetDryMix = wetDryMix;
-    CharonSetParameterOf(self, kReverb2Param_DryWetMix, wetDryMix);
+    _revenant_wetDryMix = wetDryMix;
+    RevenantSetParameterOf(self, kReverb2Param_DryWetMix, wetDryMix);
 }
 
-- (void)charon_applyPendingParameters
+- (void)revenant_applyPendingParameters
 {
-    if (_charon_havewetDryMix) CharonSetParameterOf(self, kReverb2Param_DryWetMix, _charon_wetDryMix);
-    [super charon_applyPendingParameters];
+    if (_revenant_havewetDryMix) RevenantSetParameterOf(self, kReverb2Param_DryWetMix, _revenant_wetDryMix);
+    [super revenant_applyPendingParameters];
 }
 
 @end

@@ -1,6 +1,6 @@
-#import "CharonMLCompute.h"
+#import "RevenantMLCompute.h"
 
-@implementation MLCInferenceGraph (CharonConstants)
+@implementation MLCInferenceGraph (RevenantConstants)
 
 - (BOOL)compileWithOptions:(MLCGraphCompilationOptions)options
                     device:(MLCDevice *)device
@@ -21,7 +21,7 @@
 
 @end
 
-@implementation MLCTrainingGraph (CharonConstants)
+@implementation MLCTrainingGraph (RevenantConstants)
 
 - (BOOL)compileWithOptions:(MLCGraphCompilationOptions)options
                     device:(MLCDevice *)device

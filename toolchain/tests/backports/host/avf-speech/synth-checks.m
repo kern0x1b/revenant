@@ -334,8 +334,8 @@ int main(int argc, char **argv)
     @autoreleasepool {
         NSArray *names = nil;
         NSArray *host = transcripts(NSClassFromString(@"AVSpeechSynthesizer"), NSClassFromString(@"AVSpeechUtterance"), &names);
-        NSArray *port = transcripts(NSClassFromString(@"charon_host_AVSpeechSynthesizer"),
-                                    NSClassFromString(@"charon_host_AVSpeechUtterance"), NULL);
+        NSArray *port = transcripts(NSClassFromString(@"revenant_host_AVSpeechSynthesizer"),
+                                    NSClassFromString(@"revenant_host_AVSpeechUtterance"), NULL);
         int checks = 0, failures = 0;
         for (NSUInteger i = 0; i < names.count; i++) {
             BOOL same = [host[i] length] > 0 && [host[i] isEqualToString:port[i]];

@@ -114,9 +114,9 @@ grep  Source/WebKitLegacy/PlatformCocoa.cmake -exported_symbols_list ${WEBKIT_IO
 grep  Source/cmake/WebKitMacros.cmake MACOSX_FRAMEWORK_INFO_PLIST
 
 # ---- the build settings the device depends on -----------------------------
-set   charon.toml ENABLE_JIT = "ON"
-set   charon.toml ENABLE_C_LOOP = "OFF"
-set   charon.toml ENABLE_DFG_JIT = "ON"
+set   revenant.toml ENABLE_JIT = "ON"
+set   revenant.toml ENABLE_C_LOOP = "OFF"
+set   revenant.toml ENABLE_DFG_JIT = "ON"
 
 # ---- the port's own notes -------------------------------------------------
 file  PORTING-IOS6.md

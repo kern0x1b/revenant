@@ -1,15 +1,15 @@
 import("fixtures")
 
 local PROJECT = [[
-add_repositories("charon %s")
-add_addons("charon")
+add_repositories("revenant %s")
+add_addons("revenant")
 set_config("apple_minimum", "6.0")
-includes("@addon/charon/apple-ios")
+includes("@addon/revenant/apple-ios")
 set_allowedplats("iphoneos")
 set_allowedarchs("iphoneos|armv7")
 set_defaultplat("iphoneos")
 set_defaultarchs("iphoneos|armv7")
-add_requires("charon@apple-callkit-screen", {alias = "callkit-screen"})
+add_requires("revenant@apple-callkit-screen", {alias = "callkit-screen"})
 target("probe")
     set_kind("phony")
     add_packages("callkit-screen")
@@ -28,9 +28,9 @@ function failures(opt)
         table.insert(found, "the callkit-screen tweak, out of the addon already installed and this checkout's own package repository, must build: " .. refused)
     else
         local dylib = os.files(path.join(os.getenv("HOME"), ".xmake", "packages", "a", "apple-callkit-screen", "**",
-                                          "Library", "MobileSubstrate", "DynamicLibraries", "charon-callkit-screen.dylib"))
+                                          "Library", "MobileSubstrate", "DynamicLibraries", "revenant-callkit-screen.dylib"))
         local filter = os.files(path.join(os.getenv("HOME"), ".xmake", "packages", "a", "apple-callkit-screen", "**",
-                                           "Library", "MobileSubstrate", "DynamicLibraries", "charon-callkit-screen.plist"))
+                                           "Library", "MobileSubstrate", "DynamicLibraries", "revenant-callkit-screen.plist"))
         if #dylib == 0 then
             table.insert(found, "the callkit-screen tweak built but its dylib is not under Library/MobileSubstrate/DynamicLibraries")
         elseif #filter == 0 then

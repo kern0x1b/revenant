@@ -7,7 +7,7 @@
       "introduced": "9.0",
       "minimum": "6.0",
       "status": "implemented",
-      "reason": "the release's engine answers it and the port already asks: charon_js_is_array asks Array.isArray of the virtual machine's own context, which is ES5's own test (15.4.3.2) and the one the release's inherits<JSArray>() is, and -[JSValue isArray] has been answering through it",
+      "reason": "the release's engine answers it and the port already asks: revenant_js_is_array asks Array.isArray of the virtual machine's own context, which is ES5's own test (15.4.3.2) and the one the release's inherits<JSArray>() is, and -[JSValue isArray] has been answering through it",
       "effect": "true of every value that is an array by class - a literal, a frozen one, one made in another context of the same virtual machine - and false of a number, a string, null, undefined, a plain object, a function and an object that only inherits Array.prototype. Script that replaces Array.isArray changes nothing, because the question is asked of a context no script runs in; the host's own engine answers the same on all of them, measured in the same run",
       "facts": "facts/JavaScriptCore/CAPI.md",
       "source": "SDK 16.4 for the contract; JavaScriptCore-254/Source/JavaScriptCore/API/JSValueRef.cpp, JSObjectRef.cpp and JSContextRef.cpp for what each function is; tests/backports/host/jscontext/checks.m for the answers, the host's own JavaScriptCore as the oracle"
@@ -18,7 +18,7 @@
       "introduced": "9.0",
       "minimum": "6.0",
       "status": "implemented",
-      "reason": "the same shape as JSValueIsArray: charon_js_is_date asks Object.prototype.toString's [[Class]] of the virtual machine's own context, which is what inherits<DateInstance>() is, and -[JSValue isDate] answers through it",
+      "reason": "the same shape as JSValueIsArray: revenant_js_is_date asks Object.prototype.toString's [[Class]] of the virtual machine's own context, which is what inherits<DateInstance>() is, and -[JSValue isDate] answers through it",
       "effect": "true of a Date and false of everything else this engine can hold, including an object that only inherits Date.prototype. Neither engine keeps Object.prototype.toString replaced by script, and the host's own engine answers the same on every value of the list, measured in the same run",
       "facts": "facts/JavaScriptCore/CAPI.md",
       "source": "SDK 16.4 for the contract; JavaScriptCore-254/Source/JavaScriptCore/API/JSValueRef.cpp, JSObjectRef.cpp and JSContextRef.cpp for what each function is; tests/backports/host/jscontext/checks.m for the answers, the host's own JavaScriptCore as the oracle"
@@ -84,7 +84,7 @@
       "introduced": "13.0",
       "minimum": "6.0",
       "status": "implemented",
-      "reason": "a promise is not a value this engine has, so this is the port's own ES5 promise - the one +[JSValue valueWithNewPromiseInContext:fromExecutor:] builds - and the same constructor, the same executor and the same promise object, not a second promise (charon_js_deferred_promise, CharonJSPromise.m)",
+      "reason": "a promise is not a value this engine has, so this is the port's own ES5 promise - the one +[JSValue valueWithNewPromiseInContext:fromExecutor:] builds - and the same constructor, the same executor and the same promise object, not a second promise (revenant_js_deferred_promise, RevenantJSPromise.m)",
       "effect": "answers a promise and the two functions that settle it, both functions of their own. A resolve reaches a reaction the promise was given, on the next run loop turn rather than as the call returns, which is the difference +[JSValue valueWithNewPromiseInContext:fromExecutor:] already carries: the release with a native promise drains its microtask queue as the outermost call into script returns, and this queue has no leave of its own to run at when a C client makes the call itself. A rejection through the C API leaves its reaction unrun on this engine and on the host's own one alike, measured in the same run and asserted on neither. NULL with the exception left where the caller reads it when the promise could not be made",
       "facts": "facts/JavaScriptCore/CAPI.md",
       "source": "SDK 16.4 for the contract; JavaScriptCore-254/Source/JavaScriptCore/API/JSValueRef.cpp, JSObjectRef.cpp and JSContextRef.cpp for what each function is; tests/backports/host/jscontext/checks.m for the answers, the host's own JavaScriptCore as the oracle"

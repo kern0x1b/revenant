@@ -46,7 +46,7 @@ rm -rf "$plant"
 mkdir -p "$plant"
 cp "$vision/"*.m "$vision/"*.c "$vision/"*.h "$plant/"
 cat >> "$plant/VNHumanObservation.m" <<'PLANT'
-@implementation VNHumanObservation (CharonPlant)
+@implementation VNHumanObservation (RevenantPlant)
 - (BOOL)upperBodyOnly { return YES; }
 @end
 PLANT

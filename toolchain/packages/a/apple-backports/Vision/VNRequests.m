@@ -1,4 +1,4 @@
-#import "CharonVision.h"
+#import "RevenantVision.h"
 #import <ImageIO/ImageIO.h>
 
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
@@ -6,7 +6,7 @@
 #pragma clang diagnostic ignored "-Wnullability-completeness"
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 
-static NSArray<NSNumber *> *charon_vision_revisions(Class cls)
+static NSArray<NSNumber *> *revenant_vision_revisions(Class cls)
 {
     if ([cls isSubclassOfClass:[VNDetectFaceRectanglesRequest class]] || [cls isSubclassOfClass:[VNDetectFaceLandmarksRequest class]] || [cls isSubclassOfClass:[VNTrackObjectRequest class]])
         return @[@1, @2];
@@ -24,7 +24,7 @@ static NSArray<NSNumber *> *charon_vision_revisions(Class cls)
 + (NSIndexSet *)supportedRevisions
 {
     NSMutableIndexSet *set = [NSMutableIndexSet indexSet];
-    for (NSNumber *revision in charon_vision_revisions(self))
+    for (NSNumber *revision in revenant_vision_revisions(self))
         [set addIndex:revision.unsignedIntegerValue];
     return set;
 }
@@ -83,7 +83,7 @@ static NSArray<NSNumber *> *charon_vision_revisions(Class cls)
     _revision = revision;
 }
 
-- (void)charon_setResults:(NSArray *)results
+- (void)revenant_setResults:(NSArray *)results
 {
     _results = [results copy];
 }
@@ -100,7 +100,7 @@ static NSArray<NSNumber *> *charon_vision_revisions(Class cls)
 
 - (id)copyWithZone:(NSZone *)zone
 {
-    VNRequest *copy = charon_vision_clone(self, zone);
+    VNRequest *copy = revenant_vision_clone(self, zone);
     copy->_results = nil;
     return copy;
 }
@@ -219,12 +219,12 @@ static NSArray<NSNumber *> *charon_vision_revisions(Class cls)
     id<MLFeatureProvider> _featureProvider;
 }
 
-- (MLModel *)charon_coreml_model
+- (MLModel *)revenant_coreml_model
 {
     return _model;
 }
 
-- (NSString *)charon_coreml_image_feature
+- (NSString *)revenant_coreml_image_feature
 {
     if (_inputImageFeatureName != nil) {
         return _inputImageFeatureName;
@@ -245,7 +245,7 @@ static NSArray<NSNumber *> *charon_vision_revisions(Class cls)
     VNCoreMLModel *wrapper;
     if (model == nil) {
         if (error)
-            *error = charon_vision_error(VNErrorInvalidModel, @"there is no Core ML model to prepare");
+            *error = revenant_vision_error(VNErrorInvalidModel, @"there is no Core ML model to prepare");
         return nil;
     }
     wrapper = [[VNCoreMLModel alloc] init];
@@ -253,9 +253,9 @@ static NSArray<NSNumber *> *charon_vision_revisions(Class cls)
         return nil;
     }
     wrapper->_model = model;
-    if ([wrapper charon_coreml_image_feature] == nil) {
+    if ([wrapper revenant_coreml_image_feature] == nil) {
         if (error)
-            *error = charon_vision_error(VNErrorInvalidModel,
+            *error = revenant_vision_error(VNErrorInvalidModel,
                                          @"the model does not have an input feature of type image");
         return nil;
     }
@@ -264,7 +264,7 @@ static NSArray<NSNumber *> *charon_vision_revisions(Class cls)
 
 - (NSString *)inputImageFeatureName
 {
-    return [self charon_coreml_image_feature];
+    return [self revenant_coreml_image_feature];
 }
 
 - (void)setInputImageFeatureName:(NSString *)inputImageFeatureName

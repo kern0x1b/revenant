@@ -12,7 +12,7 @@
 # 'RealityFoundation' is an implementation detail of 'RealityKit'". The package's shape is the
 # authoritative one, so this is that shape.
 #
-# The compiler is the Swift 6.4.0 the package builds with (charon@swift 6.4.0, swift-6.4-RELEASE),
+# The compiler is the Swift 6.4.0 the package builds with (revenant@swift 6.4.0, swift-6.4-RELEASE),
 # named rather than taken from PATH; RF_SWIFTC overrides it.
 #
 # What this is not: a system comparison - no release before iOS 13 carries either module and the

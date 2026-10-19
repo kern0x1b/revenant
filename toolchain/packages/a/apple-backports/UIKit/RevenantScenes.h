@@ -1,32 +1,32 @@
 #import <UIKit/UIKit.h>
 
-@interface UIOpenURLContext (CharonScenes)
-- (instancetype)initCharonWithURL:(NSURL *)URL options:(UISceneOpenURLOptions *)options;
+@interface UIOpenURLContext (RevenantScenes)
+- (instancetype)initRevenantWithURL:(NSURL *)URL options:(UISceneOpenURLOptions *)options;
 @end
 
-@interface UISceneOpenURLOptions (CharonScenes)
-- (instancetype)initCharonWithSourceApplication:(NSString *)sourceApplication annotation:(id)annotation openInPlace:(BOOL)openInPlace;
+@interface UISceneOpenURLOptions (RevenantScenes)
+- (instancetype)initRevenantWithSourceApplication:(NSString *)sourceApplication annotation:(id)annotation openInPlace:(BOOL)openInPlace;
 @end
 
-@interface UISceneConnectionOptions (CharonScenes)
-- (instancetype)initCharonWithURLContexts:(NSSet *)URLContexts sourceApplication:(NSString *)sourceApplication;
+@interface UISceneConnectionOptions (RevenantScenes)
+- (instancetype)initRevenantWithURLContexts:(NSSet *)URLContexts sourceApplication:(NSString *)sourceApplication;
 @end
 
-@interface UISceneSession (CharonScenes)
-- (instancetype)initCharonWithRole:(UISceneSessionRole)role configuration:(UISceneConfiguration *)configuration persistentIdentifier:(NSString *)persistentIdentifier;
-- (void)charon_setScene:(UIScene *)scene;
+@interface UISceneSession (RevenantScenes)
+- (instancetype)initRevenantWithRole:(UISceneSessionRole)role configuration:(UISceneConfiguration *)configuration persistentIdentifier:(NSString *)persistentIdentifier;
+- (void)revenant_setScene:(UIScene *)scene;
 @end
 
-@interface UIStatusBarManager (CharonScenes)
-- (instancetype)initCharon;
+@interface UIStatusBarManager (RevenantScenes)
+- (instancetype)initRevenant;
 @end
 
-@interface UIScene (CharonScenes)
-- (void)charon_setActivationState:(UISceneActivationState)state;
+@interface UIScene (RevenantScenes)
+- (void)revenant_setActivationState:(UISceneActivationState)state;
 @end
 
-@interface UIApplication (CharonScenes)
-- (UIWindowScene *)charon_scene;
+@interface UIApplication (RevenantScenes)
+- (UIWindowScene *)revenant_scene;
 @end
 
-UIWindowScene *charon_scene(void);
+UIWindowScene *revenant_scene(void);

@@ -98,14 +98,14 @@ system = ["task:audit", "build:engine"]
     local KNOWN = {build = "/port/build/system", sdk = "/sdks/iPhoneOS16.4.sdk"}
 
     do
-        local root = folder_with({["charon.toml"] = '[port]\nname = "p"\nversion = "1"\n'
+        local root = folder_with({["revenant.toml"] = '[port]\nname = "p"\nversion = "1"\n'
                                   .. '[pipeline]\nsystem = ["build:device-library"]\n'})
         local declared = spec_load(root)
         local names = keys_of(decl_variants(declared))
         check(list_equal(names, {"system"}),
               "a manifest with one pipeline and no [variants] must build that pipeline as its variant: got " ..
               table.concat(names, ","))
-        local two = folder_with({["charon.toml"] = '[port]\nname = "p"\nversion = "1"\n[variants.a]\n'
+        local two = folder_with({["revenant.toml"] = '[port]\nname = "p"\nversion = "1"\n[variants.a]\n'
                                  .. '[pipeline]\na = ["build:device-library"]\nb = ["build:device-library"]\n'})
         local listed = keys_of(decl_variants(spec_load(two)))
         check(list_equal(listed, {"a"}),
@@ -113,12 +113,12 @@ system = ["task:audit", "build:engine"]
     end
 
     do
-        local root = folder_with({["charon.toml"] = MANIFEST})
+        local root = folder_with({["revenant.toml"] = MANIFEST})
         local declared = spec_load(root)
-        check(spec_load(path.join(root, "nowhere")) == nil, "a folder with no charon.toml must read as no declaration")
+        check(spec_load(path.join(root, "nowhere")) == nil, "a folder with no revenant.toml must read as no declaration")
         check(decl_path(declared, "tasks") == path.join(root, "steps"), "a declared path must win over the default")
         check(decl_path(declared, "build") == path.join(root, "build"), "an undeclared path must fall back to the convention")
-        check(decl_path(declared, "profiles") == nil, "a path declared empty means Charon generates it, so it reads as absent")
+        check(decl_path(declared, "profiles") == nil, "a path declared empty means Revenant generates it, so it reads as absent")
         check(refused(function () decl_path(declared, "nonsense") end) ~= nil, "an unknown path name must be refused")
         check(decl_using(declared, "engine-toolchain") == path.join(root, "cmake", "mine.cmake"),
               "an escape hatch must resolve against the port")
@@ -195,7 +195,7 @@ cpu = "cortex-a9"
 arch = "armv8"
 os-version = "7.0"
 ]==]
-        local root = folder_with({["charon.toml"] = PLATFORMED})
+        local root = folder_with({["revenant.toml"] = PLATFORMED})
         local declared = spec_load(root)
         local platform = decl_platform(declared)
         check(platform.os == "iOS" and platform.arch == "armv7" and platform["os-version"] == "6.0"
@@ -203,7 +203,7 @@ os-version = "7.0"
         local tools = platform["tool-requires"]
         local has_ld64, has_sdk = false, false
         for _, reference in ipairs(tools) do
-            if reference == "ld64/956.6@charon/stable" then
+            if reference == "ld64/956.6@revenant/stable" then
                 has_ld64 = true
             end
             if string.sub(reference, 1, #"iphoneos-sdk/") == "iphoneos-sdk/" then
@@ -225,11 +225,11 @@ os-version = "7.0"
         check(not stray, "an architecture's own tools must not reach another architecture")
 
         local REFUSED = {
-            {"a platform nobody defines", 'use = "palm-os"', "neither the port nor Charon defines"},
+            {"a platform nobody defines", 'use = "palm-os"', "neither the port nor Revenant defines"},
             {"an architecture the platform does not build", 'arch = "x86"', "which builds for"},
             {"a release older than the architecture allows", 'os-version = "5.1"', "starts at 6.0"},
             {"a distribution the platform does not know", 'distribution = "floppy"', "does not know"},
-            {"a key Charon does not read", 'flavour = "sweet"', "does not read"},
+            {"a key Revenant does not read", 'flavour = "sweet"', "does not read"},
         }
         for _, case in ipairs(REFUSED) do
             local description, line, reason = case[1], case[2], case[3]
@@ -242,7 +242,7 @@ os-version = "7.0"
                 end
             end
             table.insert(kept, line)
-            local bad = folder_with({["charon.toml"] = table.concat(kept, "\n") .. "\n"})
+            local bad = folder_with({["revenant.toml"] = table.concat(kept, "\n") .. "\n"})
             local message = refused(function () decl_platform(spec_load(bad)) end)
             if message == nil then
                 table.insert(found, description .. " must be refused")
@@ -251,7 +251,7 @@ os-version = "7.0"
             end
         end
 
-        local repeated = folder_with({["charon.toml"] = string.gsub(PLATFORMED, 'cpu = "cortex%-a9"',
+        local repeated = folder_with({["revenant.toml"] = string.gsub(PLATFORMED, 'cpu = "cortex%-a9"',
                                                                     'arch = "armv7"')})
         local message = refused(function () decl_platform(spec_load(repeated)) end)
         if message == nil then
@@ -261,15 +261,15 @@ os-version = "7.0"
         end
 
         local own = folder_with({
-            ["charon.toml"] = string.gsub(PLATFORMED, 'os%-version = "6.0"', 'os-version = "5.1"'),
+            ["revenant.toml"] = string.gsub(PLATFORMED, 'os%-version = "6.0"', 'os-version = "5.1"'),
             ["platforms/apple-ios.toml"] = 'os = "iOS"\n[distributions.jailbreak]\n[architectures.armv7]\n'
                                             .. 'os-version = { min = "5.0" }\n',
         })
         local overridden = refused(function () decl_platform(spec_load(own)) end)
         if overridden ~= nil then
-            table.insert(found, "a port's own platform definition must be used before Charon's: " .. overridden)
+            table.insert(found, "a port's own platform definition must be used before Revenant's: " .. overridden)
         elseif decl_platform(spec_load(own))["os-version"] ~= "5.1" then
-            table.insert(found, "a port's own platforms/ must override Charon's platform of the same name")
+            table.insert(found, "a port's own platforms/ must override Revenant's platform of the same name")
         end
     end
 
@@ -307,7 +307,7 @@ control = "packaging/tweak/control"
 [variants.broken.targets.Nobody]
 strip = ""
 ]==]
-        local root = folder_with({["charon.toml"] = VARIANTS})
+        local root = folder_with({["revenant.toml"] = VARIANTS})
         local declared = spec_load(root)
         local arm64 = decl_for_variant(declared, "arm64")
         check(arm64.content.target.arch == "armv8" and arm64.content.target["os-version"] == "7.0",

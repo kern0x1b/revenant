@@ -1,5 +1,5 @@
 #!/bin/sh
-# run.sh - the port's CoreData names (renamed charonHost_*) against the host's own CoreData, which
+# run.sh - the port's CoreData names (renamed revenantHost_*) against the host's own CoreData, which
 # exports every one of them. The values were read out of the arm64e shared cache of iOS 18.0; this is
 # the second, independent source, and a key mistyped on the way out of the cache shows up here.
 set -eu
@@ -9,12 +9,12 @@ port=${PORT:-$here/../../../../packages/a/apple-backports/.gen/CoreData}
 # CoreDataNames70 is committed (it is not one of the measured table's objects); the others are gen's output in .gen/CoreData.
 committed=$here/../../../../packages/a/apple-backports/CoreData
 harness=${COREDATANAMES_HARNESS:-$here/../../device}
-build=${COREDATANAMES_BUILD:-$(runs_fresh charon-coredatanames)}
+build=${COREDATANAMES_BUILD:-$(runs_fresh revenant-coredatanames)}
 rm -rf "$build"
 mkdir -p "$build"
 renames=""
 for name in $(sed -e '1,3d' "$here/names.txt"); do
-    renames="$renames -D$name=charonHost_$name"
+    renames="$renames -D$name=revenantHost_$name"
 done
 objects=""
 for source in CoreDataNames70 CoreDataNames100 CoreDataNames103 CoreDataNames140 CoreDataNames170 CoreDataNames180; do

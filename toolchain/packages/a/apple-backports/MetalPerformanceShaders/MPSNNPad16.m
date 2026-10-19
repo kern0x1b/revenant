@@ -1,4 +1,4 @@
-#import "CharonMPSCnn.h"
+#import "RevenantMPSCnn.h"
 
 @implementation MPSNNPad {
     MPSImageCoordinate _paddingSizeBefore;
@@ -53,11 +53,11 @@
              destinationImage:(MPSImage *)destinationImage
 {
     NSString *what = @"MPSNNPad";
-    if (!CharonMPSCommandBufferPermits(commandBuffer))
+    if (!RevenantMPSCommandBufferPermits(commandBuffer))
         return;
     if (!sourceImage || !destinationImage || !sourceImage.width || !sourceImage.height ||
         !destinationImage.width || !destinationImage.height) {
-        CharonMPSRefuse(@"%@: an image with no shape was given, so nothing was written", what);
+        RevenantMPSRefuse(@"%@: an image with no shape was given, so nothing was written", what);
         return;
     }
     NSUInteger wantWidth = sourceImage.width + _paddingSizeBefore.x + _paddingSizeAfter.x;
@@ -65,7 +65,7 @@
     NSUInteger wantChannels = sourceImage.featureChannels + _paddingSizeBefore.channel + _paddingSizeAfter.channel;
     if (destinationImage.width != wantWidth || destinationImage.height != wantHeight ||
         destinationImage.featureChannels != wantChannels) {
-        CharonMPSRefuse(@"%@: a %lux%lu source with %lu before and %lu after pads is %lux%lu with %lu feature"
+        RevenantMPSRefuse(@"%@: a %lux%lu source with %lu before and %lu after pads is %lux%lu with %lu feature"
                         @" channels, and the destination is %lux%lu with %lu; nothing was written", what,
                         (unsigned long)sourceImage.width, (unsigned long)sourceImage.height,
                         (unsigned long)_paddingSizeBefore.x, (unsigned long)_paddingSizeAfter.x,
@@ -79,16 +79,16 @@
     if (fill)
         perChannel = (NSUInteger)([_fillValueArray length] / sizeof(float));
     if (fill && perChannel < wantChannels) {
-        CharonMPSRefuse(@"%@: the fill array holds %lu value(s) and the destination has %lu feature channels,"
+        RevenantMPSRefuse(@"%@: the fill array holds %lu value(s) and the destination has %lu feature channels,"
                         @" which is undefined behavior, so nothing was written", what,
                         (unsigned long)perChannel, (unsigned long)wantChannels);
         return;
     }
 
-    CharonMPSCnnPlane from, to;
+    RevenantMPSCnnPlane from, to;
     size_t inWidth, inHeight, inChannels, outWidth, outHeight, outChannels;
-    CharonMPSCnnTake(sourceImage, &from, &inWidth, &inHeight, &inChannels);
-    CharonMPSCnnTake(destinationImage, &to, &outWidth, &outHeight, &outChannels);
+    RevenantMPSCnnTake(sourceImage, &from, &inWidth, &inHeight, &inChannels);
+    RevenantMPSCnnTake(destinationImage, &to, &outWidth, &outHeight, &outChannels);
     for (NSUInteger channel = 0; channel < outChannels; channel++) {
         double filled = fill ? (double)fill[channel] : (double)_fillValue;
         for (NSUInteger oy = 0; oy < outHeight; oy++) {
@@ -99,16 +99,16 @@
                 double value = filled;
                 if (sx >= 0 && sy >= 0 && sc >= 0 && (NSUInteger)sx < inWidth && (NSUInteger)sy < inHeight &&
                     (NSUInteger)sc < inChannels) {
-                    value = CharonMPSLoad(CharonMPSCnnPixel(&from, (size_t)sx, (size_t)sy, (size_t)sc),
+                    value = RevenantMPSLoad(RevenantMPSCnnPixel(&from, (size_t)sx, (size_t)sy, (size_t)sc),
                                           MPSDataTypeFloat32, 0);
                 }
-                CharonMPSStore(CharonMPSCnnPixelMutable(&to, ox, oy, channel), MPSDataTypeFloat32, 0, value);
+                RevenantMPSStore(RevenantMPSCnnPixelMutable(&to, ox, oy, channel), MPSDataTypeFloat32, 0, value);
             }
         }
     }
-    CharonMPSCnnGive(destinationImage, &to);
-    CharonMPSCnnGive(sourceImage, &from);
-    CharonMPSConsumeReadCount(sourceImage);
+    RevenantMPSCnnGive(destinationImage, &to);
+    RevenantMPSCnnGive(sourceImage, &from);
+    RevenantMPSConsumeReadCount(sourceImage);
 }
 
 @end

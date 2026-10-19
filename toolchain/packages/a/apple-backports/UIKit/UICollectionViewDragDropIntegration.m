@@ -2,20 +2,20 @@
 #import <objc/runtime.h>
 #import <UIKit/UICollectionView.h>
 
-#import "CharonDragDrop.h"
-#import "CharonDragSession.h"
+#import "RevenantDragDrop.h"
+#import "RevenantDragSession.h"
 #import "UIDropCoordinators.h"
 
 #pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
 
-@interface UICollectionView (CharonDragDropIntegration11)
-- (NSArray<UIDragInteraction *> *)charon_dragInteractions;
-- (NSArray<id<UICollectionViewDropItem>> *)charon_dropItemsAtPoint:(CGPoint)point session:(id<UIDropSession>)session;
+@interface UICollectionView (RevenantDragDropIntegration11)
+- (NSArray<UIDragInteraction *> *)revenant_dragInteractions;
+- (NSArray<id<UICollectionViewDropItem>> *)revenant_dropItemsAtPoint:(CGPoint)point session:(id<UIDropSession>)session;
 @end
 
-@implementation UICollectionView (CharonDragDropIntegration11)
+@implementation UICollectionView (RevenantDragDropIntegration11)
 
-- (NSArray<UIDragInteraction *> *)charon_dragInteractions
+- (NSArray<UIDragInteraction *> *)revenant_dragInteractions
 {
     NSMutableArray *found = [NSMutableArray array];
     for (id<UIInteraction> interaction in self.interactions)
@@ -26,7 +26,7 @@
 
 - (BOOL)hasActiveDrag
 {
-    for (UIDragInteraction *drag in [self charon_dragInteractions])
+    for (UIDragInteraction *drag in [self revenant_dragInteractions])
         if (drag.session)
             return YES;
     return NO;
@@ -43,7 +43,7 @@
     return NO;
 }
 
-- (NSArray<id<UICollectionViewDropItem>> *)charon_dropItemsAtPoint:(CGPoint)point session:(id<UIDropSession>)session
+- (NSArray<id<UICollectionViewDropItem>> *)revenant_dropItemsAtPoint:(CGPoint)point session:(id<UIDropSession>)session
 {
     NSMutableArray *items = [NSMutableArray array];
     for (id<UIInteraction> interaction in self.interactions) {
@@ -57,7 +57,7 @@
             continue;
         UICollectionViewLayoutAttributes *attributes = [self.collectionViewLayout layoutAttributesForItemAtIndexPath:destination];
         for (UIDragItem *item in session.items) {
-            CharonCollectionDropItem *drop = [[CharonCollectionDropItem alloc] init];
+            RevenantCollectionDropItem *drop = [[RevenantCollectionDropItem alloc] init];
             drop.item = item;
             drop.source = nil;
             drop.size = attributes ? attributes.size : CGSizeZero;

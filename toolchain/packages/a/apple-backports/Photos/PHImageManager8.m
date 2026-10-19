@@ -1,4 +1,4 @@
-#import "CharonPhotos.h"
+#import "RevenantPhotos.h"
 #import <AVFoundation/AVFoundation.h>
 #import <UIKit/UIKit.h>
 #import <ImageIO/ImageIO.h>
@@ -44,20 +44,20 @@ NSString *const PHImageErrorKey = @"PHImageErrorKey";
 @implementation PHVideoRequestOptions
 @end
 
-static BOOL charon_turned(ALAssetOrientation orientation)
+static BOOL revenant_turned(ALAssetOrientation orientation)
 {
     return orientation == ALAssetOrientationLeft || orientation == ALAssetOrientationRight
         || orientation == ALAssetOrientationLeftMirrored || orientation == ALAssetOrientationRightMirrored;
 }
 
-static UIImage *charon_image(ALAsset *asset, CGSize target, PHImageContentMode mode, PHImageRequestOptions *options)
+static UIImage *revenant_image(ALAsset *asset, CGSize target, PHImageContentMode mode, PHImageRequestOptions *options)
 {
     ALAssetRepresentation *representation = asset.defaultRepresentation;
     if (!representation)
         return nil;
     ALAssetOrientation orientation = representation.orientation;
     CGSize stored = representation.dimensions;
-    CGSize shown = charon_turned(orientation) ? CGSizeMake(stored.height, stored.width) : stored;
+    CGSize shown = revenant_turned(orientation) ? CGSizeMake(stored.height, stored.width) : stored;
     BOOL maximum = target.width <= 0 || target.height <= 0;
     BOOL exact = options.resizeMode == PHImageRequestOptionsResizeModeExact;
     CGRect crop = options.normalizedCropRect;
@@ -107,7 +107,7 @@ static UIImage *charon_image(ALAsset *asset, CGSize target, PHImageContentMode m
     return rendered;
 }
 
-static NSData *charon_data(ALAssetRepresentation *representation)
+static NSData *revenant_data(ALAssetRepresentation *representation)
 {
     NSMutableData *data = [NSMutableData dataWithLength:(NSUInteger)representation.size];
     NSUInteger read = 0;
@@ -167,7 +167,7 @@ static NSData *charon_data(ALAssetRepresentation *representation)
     }
 }
 
-- (PHImageRequestID)charon_request:(PHImageRequestID)requestID synchronous:(BOOL)synchronous work:(void (^)(BOOL cancelled, NSMutableDictionary *info))work
+- (PHImageRequestID)revenant_request:(PHImageRequestID)requestID synchronous:(BOOL)synchronous work:(void (^)(BOOL cancelled, NSMutableDictionary *info))work
 {
     NSMutableDictionary *(^fresh)(void) = ^NSMutableDictionary *{
         return [NSMutableDictionary dictionaryWithObjectsAndKeys:@(requestID), PHImageResultRequestIDKey, @NO, PHImageResultIsInCloudKey, nil];
@@ -193,10 +193,10 @@ static NSData *charon_data(ALAssetRepresentation *representation)
     BOOL synchronous = options.synchronous;
     __block UIImage *rendered = nil;
     void (^render)(void) = ^{
-        rendered = charon_image([asset charon_asset], targetSize, contentMode, options);
+        rendered = revenant_image([asset revenant_asset], targetSize, contentMode, options);
     };
     if (!synchronous) {
-        return [self charon_request:requestID synchronous:NO work:^(BOOL cancelled, NSMutableDictionary *info) {
+        return [self revenant_request:requestID synchronous:NO work:^(BOOL cancelled, NSMutableDictionary *info) {
             info[PHImageResultIsDegradedKey] = @NO;
             if (cancelled) {
                 info[PHImageCancelledKey] = @YES;
@@ -207,17 +207,17 @@ static NSData *charon_data(ALAssetRepresentation *representation)
                 render();
                 dispatch_async(dispatch_get_main_queue(), ^{
                     if (!rendered)
-                        info[PHImageErrorKey] = [CharonPhotosStore errorWithCode:PHPhotosErrorInvalidResource reason:@"the image of the asset could not be read"];
+                        info[PHImageErrorKey] = [RevenantPhotosStore errorWithCode:PHPhotosErrorInvalidResource reason:@"the image of the asset could not be read"];
                     resultHandler(rendered, info);
                 });
             });
         }];
     }
-    return [self charon_request:requestID synchronous:YES work:^(BOOL cancelled, NSMutableDictionary *info) {
+    return [self revenant_request:requestID synchronous:YES work:^(BOOL cancelled, NSMutableDictionary *info) {
         render();
         info[PHImageResultIsDegradedKey] = @NO;
         if (!rendered)
-            info[PHImageErrorKey] = [CharonPhotosStore errorWithCode:PHPhotosErrorInvalidResource reason:@"the image of the asset could not be read"];
+            info[PHImageErrorKey] = [RevenantPhotosStore errorWithCode:PHPhotosErrorInvalidResource reason:@"the image of the asset could not be read"];
         resultHandler(rendered, info);
     }];
 }
@@ -227,13 +227,13 @@ static NSData *charon_data(ALAssetRepresentation *representation)
 {
     PHImageRequestID requestID = [PHImageManager issue];
     void (^deliver)(NSMutableDictionary *) = ^(NSMutableDictionary *info) {
-        ALAssetRepresentation *representation = [asset charon_asset].defaultRepresentation;
-        NSData *data = representation ? charon_data(representation) : nil;
+        ALAssetRepresentation *representation = [asset revenant_asset].defaultRepresentation;
+        NSData *data = representation ? revenant_data(representation) : nil;
         if (!data)
-            info[PHImageErrorKey] = [CharonPhotosStore errorWithCode:PHPhotosErrorInvalidResource reason:@"the data of the asset could not be read"];
+            info[PHImageErrorKey] = [RevenantPhotosStore errorWithCode:PHPhotosErrorInvalidResource reason:@"the data of the asset could not be read"];
         resultHandler(data, data ? representation.UTI : nil, data ? (UIImageOrientation)representation.orientation : UIImageOrientationUp, info);
     };
-    return [self charon_request:requestID synchronous:options.synchronous work:^(BOOL cancelled, NSMutableDictionary *info) {
+    return [self revenant_request:requestID synchronous:options.synchronous work:^(BOOL cancelled, NSMutableDictionary *info) {
         if (cancelled) {
             info[PHImageCancelledKey] = @YES;
             resultHandler(nil, nil, UIImageOrientationUp, info);
@@ -254,20 +254,20 @@ static NSData *charon_data(ALAssetRepresentation *representation)
     }];
 }
 
-- (NSURL *)charon_videoURL:(PHAsset *)asset
+- (NSURL *)revenant_videoURL:(PHAsset *)asset
 {
-    return asset.mediaType == PHAssetMediaTypeVideo ? [asset charon_asset].defaultRepresentation.url : nil;
+    return asset.mediaType == PHAssetMediaTypeVideo ? [asset revenant_asset].defaultRepresentation.url : nil;
 }
 
-- (PHImageRequestID)charon_requestVideo:(PHAsset *)asset result:(void (^)(AVURLAsset *video, NSMutableDictionary *info))result
+- (PHImageRequestID)revenant_requestVideo:(PHAsset *)asset result:(void (^)(AVURLAsset *video, NSMutableDictionary *info))result
 {
     PHImageRequestID requestID = [PHImageManager issue];
-    return [self charon_request:requestID synchronous:NO work:^(BOOL cancelled, NSMutableDictionary *info) {
-        NSURL *url = cancelled ? nil : [self charon_videoURL:asset];
+    return [self revenant_request:requestID synchronous:NO work:^(BOOL cancelled, NSMutableDictionary *info) {
+        NSURL *url = cancelled ? nil : [self revenant_videoURL:asset];
         if (cancelled)
             info[PHImageCancelledKey] = @YES;
         else if (!url)
-            info[PHImageErrorKey] = [CharonPhotosStore errorWithCode:PHPhotosErrorInvalidResource reason:@"the asset is not a video that can be read"];
+            info[PHImageErrorKey] = [RevenantPhotosStore errorWithCode:PHPhotosErrorInvalidResource reason:@"the asset is not a video that can be read"];
         result(url ? [AVURLAsset URLAssetWithURL:url options:nil] : nil, info);
     }];
 }
@@ -275,7 +275,7 @@ static NSData *charon_data(ALAssetRepresentation *representation)
 - (PHImageRequestID)requestAVAssetForVideo:(PHAsset *)asset options:(PHVideoRequestOptions *)options
                              resultHandler:(void (^)(AVAsset *asset, AVAudioMix *audioMix, NSDictionary *info))resultHandler
 {
-    return [self charon_requestVideo:asset result:^(AVURLAsset *video, NSMutableDictionary *info) {
+    return [self revenant_requestVideo:asset result:^(AVURLAsset *video, NSMutableDictionary *info) {
         resultHandler(video, nil, info);
     }];
 }
@@ -283,7 +283,7 @@ static NSData *charon_data(ALAssetRepresentation *representation)
 - (PHImageRequestID)requestPlayerItemForVideo:(PHAsset *)asset options:(PHVideoRequestOptions *)options
                                 resultHandler:(void (^)(AVPlayerItem *playerItem, NSDictionary *info))resultHandler
 {
-    return [self charon_requestVideo:asset result:^(AVURLAsset *video, NSMutableDictionary *info) {
+    return [self revenant_requestVideo:asset result:^(AVURLAsset *video, NSMutableDictionary *info) {
         resultHandler(video ? [AVPlayerItem playerItemWithAsset:video] : nil, info);
     }];
 }
@@ -291,7 +291,7 @@ static NSData *charon_data(ALAssetRepresentation *representation)
 - (PHImageRequestID)requestExportSessionForVideo:(PHAsset *)asset options:(PHVideoRequestOptions *)options exportPreset:(NSString *)exportPreset
                                    resultHandler:(void (^)(AVAssetExportSession *exportSession, NSDictionary *info))resultHandler
 {
-    return [self charon_requestVideo:asset result:^(AVURLAsset *video, NSMutableDictionary *info) {
+    return [self revenant_requestVideo:asset result:^(AVURLAsset *video, NSMutableDictionary *info) {
         resultHandler(video ? [AVAssetExportSession exportSessionWithAsset:video presetName:exportPreset] : nil, info);
     }];
 }

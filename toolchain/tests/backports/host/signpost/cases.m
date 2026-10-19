@@ -5,14 +5,14 @@
 #import <objc/message.h>
 #import <unistd.h>
 
-os_log_t charon_port_os_log_create(const char *subsystem, const char *category)
+os_log_t revenant_port_os_log_create(const char *subsystem, const char *category)
 {
     return os_log_create(subsystem, category);
 }
 
 void signpost_run(CertificateRecorder record)
 {
-    os_log_t log = os_log_create("com.apple.metrickit.log", "charon-test");
+    os_log_t log = os_log_create("com.apple.metrickit.log", "revenant-test");
     record(@"log.isEnabled", os_log_is_enabled(log) ? @"1" : @"0");
     record(@"signpost.enabled", os_signpost_enabled(log) ? @"1" : @"0");
     os_signpost_id_t first = os_signpost_id_generate(log);

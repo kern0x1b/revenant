@@ -15,7 +15,7 @@ static NSString *const results_folder = @"/private/var/backports";
 {
     [[NSFileManager defaultManager] createDirectoryAtPath:results_folder withIntermediateDirectories:YES attributes:nil error:NULL];
     [[NSFileManager defaultManager] removeItemAtPath:[results_folder stringByAppendingPathComponent:@"layoutsupport.done"] error:NULL];
-    charon_log_to([results_folder stringByAppendingPathComponent:@"layoutsupport.log"]);
+    revenant_log_to([results_folder stringByAppendingPathComponent:@"layoutsupport.log"]);
     self.window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
     self.window.rootViewController = [[UIViewController alloc] init];
     [self.window makeKeyAndVisible];
@@ -28,9 +28,9 @@ static NSString *const results_folder = @"/private/var/backports";
         });
         for (NSString *name in [expected.allKeys sortedArrayUsingSelector:@selector(compare:)]) {
             if ([expected[name] isEqualToString:records[name]] )
-                charon_check(YES, name.UTF8String, nil);
+                revenant_check(YES, name.UTF8String, nil);
             else
-                charon_check(NO, name.UTF8String, [NSString stringWithFormat:@"\n    device %@\n    host   %@", records[name], expected[name]]);
+                revenant_check(NO, name.UTF8String, [NSString stringWithFormat:@"\n    device %@\n    host   %@", records[name], expected[name]]);
         }
         UIViewController *page = [[UIViewController alloc] init];
         page.wantsFullScreenLayout = YES;
@@ -62,8 +62,8 @@ static NSString *const results_folder = @"/private/var/backports";
         navigation.toolbarHidden = YES;
         [page.view layoutIfNeeded];
         CHECK(bottom.length == 0 || fabs(bottom.length) < 1, "the bottom guide is nothing with the toolbar away");
-        printf("checks=%d failures=%d\n", charon_checks, charon_failures);
-        NSString *summary = [NSString stringWithFormat:@"%@ checks=%d failures=%d\n", charon_failures ? @"FAIL" : @"ok", charon_checks, charon_failures];
+        printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
+        NSString *summary = [NSString stringWithFormat:@"%@ checks=%d failures=%d\n", revenant_failures ? @"FAIL" : @"ok", revenant_checks, revenant_failures];
         [summary writeToFile:[results_folder stringByAppendingPathComponent:@"layoutsupport.done"] atomically:YES encoding:NSUTF8StringEncoding error:NULL];
     });
     return YES;

@@ -2,7 +2,7 @@
 # The PassKit Secure Element and the wallet: one case per member, driven against the PORT'S OWN
 # renamed classes, with a mutant that answers YES where a registry row says NO.
 #
-# The port's categories are compiled onto classes the run renames (charonHost_PKPassLibrary and the
+# The port's categories are compiled onto classes the run renames (revenantHost_PKPassLibrary and the
 # rest), so the runner reaches the port through the runtime and never the host's PassKit. The value
 # is checked against the port's own registry rows, because a Mac answers these from a real Secure
 # Element and this device has none -- the host is not the oracle for what a 4S should say. It IS the
@@ -29,19 +29,19 @@ rm -f "$build"/cc.log "$build"/runner.log "$build"/*.txt "$build"/*.body "$build
       "$build"/*.mutated.m "$build"/runner "$build"/port-classes.o
 MACOSX_SDK=$(xcrun --sdk macosx --show-sdk-path)
 TARGET="-target arm64-apple-ios17.0-macabi -isysroot $MACOSX_SDK -isystem $MACOSX_SDK/System/iOSSupport/usr/include -F $MACOSX_SDK/System/iOSSupport/System/Library/Frameworks"
-RENAME="-DPKPassLibrary=charonHost_PKPassLibrary \
-    -DPKPaymentAuthorizationController=charonHost_PKPaymentAuthorizationController \
-    -DPKPaymentAuthorizationViewController=charonHost_PKPaymentAuthorizationViewController \
-    -DPKAddPassesViewController=charonHost_PKAddPassesViewController \
-    -DPKPaymentAuthorizationResult=charonHost_PKPaymentAuthorizationResult \
-    -DPKPaymentRequestUpdate=charonHost_PKPaymentRequestUpdate \
-    -DPKPaymentRequestShippingMethodUpdate=charonHost_PKPaymentRequestShippingMethodUpdate \
-    -DPKPaymentRequestPaymentMethodUpdate=charonHost_PKPaymentRequestPaymentMethodUpdate \
-    -DPKPaymentRequestShippingContactUpdate=charonHost_PKPaymentRequestShippingContactUpdate"
+RENAME="-DPKPassLibrary=revenantHost_PKPassLibrary \
+    -DPKPaymentAuthorizationController=revenantHost_PKPaymentAuthorizationController \
+    -DPKPaymentAuthorizationViewController=revenantHost_PKPaymentAuthorizationViewController \
+    -DPKAddPassesViewController=revenantHost_PKAddPassesViewController \
+    -DPKPaymentAuthorizationResult=revenantHost_PKPaymentAuthorizationResult \
+    -DPKPaymentRequestUpdate=revenantHost_PKPaymentRequestUpdate \
+    -DPKPaymentRequestShippingMethodUpdate=revenantHost_PKPaymentRequestShippingMethodUpdate \
+    -DPKPaymentRequestPaymentMethodUpdate=revenantHost_PKPaymentRequestPaymentMethodUpdate \
+    -DPKPaymentRequestShippingContactUpdate=revenantHost_PKPaymentRequestShippingContactUpdate"
 
 # The shim names the four classes literally, so it is compiled WITHOUT the -D renames -- the renames
 # exist to move the PORT's references, and the shim's whole job is to declare what they moved onto.
-xcrun clang -fobjc-arc -Wall -fPIC $TARGET -DCHARON_HOST_PROBE=1 \
+xcrun clang -fobjc-arc -Wall -fPIC $TARGET -DREVENANT_HOST_PROBE=1 \
     -I"$port" -framework Foundation -framework PassKit -framework UIKit \
     -c "$here/port-classes.m" -o "$build/port-classes.o" 2> "$build/ccclasses.log" || {
         grep -m5 ': error:' "$build/ccclasses.log" || true; exit 1; }
@@ -49,10 +49,10 @@ xcrun clang -fobjc-arc -Wall -fPIC $TARGET -DCHARON_HOST_PROBE=1 \
 build_port() {
     out=$1
     shift
-    xcrun clang -fobjc-arc -Wall -fPIC -dynamiclib $TARGET -DCHARON_HOST_PROBE=1 $RENAME \
+    xcrun clang -fobjc-arc -Wall -fPIC -dynamiclib $TARGET -DREVENANT_HOST_PROBE=1 $RENAME \
         -I"$port" -framework Foundation -framework PassKit -framework UIKit \
-        -DCHARON_PASSKIT_STANDIN=1 \
-        "$build/port-classes.o" "$port/CharonPassKit.m" "$port/PKSecureElement8.m" "$port/PKWallet.m" \
+        -DREVENANT_PASSKIT_STANDIN=1 \
+        "$build/port-classes.o" "$port/RevenantPassKit.m" "$port/PKSecureElement8.m" "$port/PKWallet.m" \
         "$port/PKPaymentAuthorizationController10.m" "$port/PKPaymentAuthorizationViewController8.m" \
         "$port/PKPaymentAuthorizationViewController9.m" "$port/PKPaymentRequestStatus11.m" -o "$out" 2> "$build/cc.log" || {
             grep -m5 ': error:' "$build/cc.log" || true; exit 1; }
@@ -154,7 +154,7 @@ PY4
 # is, and why the control has to be this one.
 #
 # It is a HEADER, and that decides where the copies go. A quoted #import resolves against the importing
-# file's own directory FIRST, so a mutated CharonPassKitStandin.h dropped beside the port's sources
+# file's own directory FIRST, so a mutated RevenantPassKitStandin.h dropped beside the port's sources
 # would be reached by nothing -- every port file sits in $port and would find its own -- while the
 # copies mutants 3 and 4 already have in $build would silently be built against it too. So the fifth
 # mutant gets its own directory: the mutated header and the one port file that implements the class are
@@ -164,7 +164,7 @@ PY4
 # compiled with.
 mut5=$build/mut5
 mkdir -p "$mut5"
-cp "$port/CharonPassKitStandin.h" "$mut5/CharonPassKitStandin.h"
+cp "$port/RevenantPassKitStandin.h" "$mut5/RevenantPassKitStandin.h"
 cp "$port/PKPaymentAuthorizationViewController8.m" "$mut5/PKPaymentAuthorizationViewController8.m"
 python3 - "$mut5/CharonPassKitStandin.h" <<'PY5'
 import sys
@@ -176,7 +176,7 @@ assert text.count(old) == 1, "the superclass the fifth mutant changes is not the
 open(path, "w").write(text.replace(old, new, 1))
 PY5
 
-cp "$port/CharonPassKit.m" "$build/CharonPassKit.mutated.m"
+cp "$port/RevenantPassKit.m" "$build/RevenantPassKit.mutated.m"
 python3 - "$build/CharonPassKit.mutated.m" <<'PY2'
 import sys
 text = open(sys.argv[1]).read()
@@ -191,46 +191,46 @@ PY2
 # MUTANT 3: the Secure Element file, on its own -- a flipped answer AND a reworded comment, which
 # must come out opposite ways. It is built as its own dylib so the transcript can say which of the two
 # it saw.
-xcrun clang -fobjc-arc -Wall -fPIC -dynamiclib $TARGET -DCHARON_HOST_PROBE=1 $RENAME \
+xcrun clang -fobjc-arc -Wall -fPIC -dynamiclib $TARGET -DREVENANT_HOST_PROBE=1 $RENAME \
     -I"$port" -framework Foundation -framework PassKit -framework UIKit \
-    -DCHARON_PASSKIT_STANDIN=1 \
-    "$build/port-classes.o" "$port/CharonPassKit.m" "$build/PKSecureElement8.mutated.m" \
+    -DREVENANT_PASSKIT_STANDIN=1 \
+    "$build/port-classes.o" "$port/RevenantPassKit.m" "$build/PKSecureElement8.mutated.m" \
     "$port/PKWallet.m" "$port/PKPaymentAuthorizationController10.m" \
     "$port/PKPaymentAuthorizationViewController8.m" \
     "$port/PKPaymentAuthorizationViewController9.m" "$port/PKPaymentRequestStatus11.m" -o "$build/libmutant3.dylib" 2> "$build/ccmut3.log" || {
         grep -m5 ': error:' "$build/ccmut3.log" || true; exit 1; }
 
-xcrun clang -fobjc-arc -Wall -fPIC -dynamiclib $TARGET -DCHARON_HOST_PROBE=1 $RENAME \
+xcrun clang -fobjc-arc -Wall -fPIC -dynamiclib $TARGET -DREVENANT_HOST_PROBE=1 $RENAME \
     -I"$port" -framework Foundation -framework PassKit -framework UIKit \
-    -DCHARON_PASSKIT_STANDIN=1 \
-    "$build/port-classes.o" "$port/CharonPassKit.m" "$port/PKSecureElement8.m" "$port/PKWallet.m" \
+    -DREVENANT_PASSKIT_STANDIN=1 \
+    "$build/port-classes.o" "$port/RevenantPassKit.m" "$port/PKSecureElement8.m" "$port/PKWallet.m" \
     "$port/PKPaymentAuthorizationController10.m" "$port/PKPaymentAuthorizationViewController8.m" \
     "$port/PKPaymentAuthorizationViewController9.m" "$build/PKPaymentRequestStatus11.mutated.m" \
     -o "$build/libmutant4.dylib" 2> "$build/ccmut4.log" || {
         grep -m5 ': error:' "$build/ccmut4.log" || true; exit 1; }
 
-xcrun clang -fobjc-arc -Wall -fPIC -dynamiclib $TARGET -DCHARON_HOST_PROBE=1 $RENAME \
+xcrun clang -fobjc-arc -Wall -fPIC -dynamiclib $TARGET -DREVENANT_HOST_PROBE=1 $RENAME \
     -I"$port" -framework Foundation -framework PassKit -framework UIKit \
-    -DCHARON_PASSKIT_STANDIN=1 \
-    "$build/port-classes.o" "$port/CharonPassKit.m" "$port/PKSecureElement8.m" "$port/PKWallet.m" \
+    -DREVENANT_PASSKIT_STANDIN=1 \
+    "$build/port-classes.o" "$port/RevenantPassKit.m" "$port/PKSecureElement8.m" "$port/PKWallet.m" \
     "$build/PKPaymentAuthorizationController10.mutated.m" \
     "$port/PKPaymentAuthorizationViewController8.m" \
     "$port/PKPaymentAuthorizationViewController9.m" "$port/PKPaymentRequestStatus11.m" -o "$build/libmutant.dylib" 2> "$build/ccmut.log" || {
         grep -m5 ': error:' "$build/ccmut.log" || true; exit 1; }
-xcrun clang -fobjc-arc -Wall -fPIC -dynamiclib $TARGET -DCHARON_HOST_PROBE=1 $RENAME \
+xcrun clang -fobjc-arc -Wall -fPIC -dynamiclib $TARGET -DREVENANT_HOST_PROBE=1 $RENAME \
     -I"$port" -framework Foundation -framework PassKit -framework UIKit \
-    -DCHARON_PASSKIT_STANDIN=1 \
-    "$build/port-classes.o" "$build/CharonPassKit.mutated.m" "$port/PKSecureElement8.m" "$port/PKWallet.m" \
+    -DREVENANT_PASSKIT_STANDIN=1 \
+    "$build/port-classes.o" "$build/RevenantPassKit.mutated.m" "$port/PKSecureElement8.m" "$port/PKWallet.m" \
     "$port/PKPaymentAuthorizationController10.m" "$port/PKPaymentAuthorizationViewController8.m" \
     "$port/PKPaymentAuthorizationViewController9.m" "$port/PKPaymentRequestStatus11.m" -o "$build/libmutant2.dylib" 2> "$build/ccmut2.log" || {
         grep -m5 ': error:' "$build/ccmut2.log" || true; exit 1; }
 
 # MUTANT 5: the view controller's superclass. Its own directory, so the mutated stand-in header is
 # reached by exactly the one file copied into it and by nothing else.
-xcrun clang -fobjc-arc -Wall -fPIC -dynamiclib $TARGET -DCHARON_HOST_PROBE=1 $RENAME \
+xcrun clang -fobjc-arc -Wall -fPIC -dynamiclib $TARGET -DREVENANT_HOST_PROBE=1 $RENAME \
     -I"$port" -framework Foundation -framework PassKit -framework UIKit \
-    -DCHARON_PASSKIT_STANDIN=1 \
-    "$build/port-classes.o" "$port/CharonPassKit.m" "$port/PKSecureElement8.m" "$port/PKWallet.m" \
+    -DREVENANT_PASSKIT_STANDIN=1 \
+    "$build/port-classes.o" "$port/RevenantPassKit.m" "$port/PKSecureElement8.m" "$port/PKWallet.m" \
     "$port/PKPaymentAuthorizationController10.m" "$mut5/PKPaymentAuthorizationViewController8.m" \
     "$port/PKPaymentAuthorizationViewController9.m" "$port/PKPaymentRequestStatus11.m" -o "$build/libmutant5.dylib" 2> "$build/ccmut5.log" || {
         grep -m5 ': error:' "$build/ccmut5.log" || true; exit 1; }
@@ -240,17 +240,17 @@ xcrun clang -fobjc-arc -Wall $TARGET -ldl -framework Foundation -framework PassK
         grep -m5 ': error:' "$build/runner.log" || true; exit 1; }
 
 DYLD_FRAMEWORK_PATH="$MACOSX_SDK/System/iOSSupport/System/Library/Frameworks" \
-    CHARON_PORT_DYLIB="$build/libport.dylib" "$build/runner" > "$build/real.txt" 2>&1 && true
+    REVENANT_PORT_DYLIB="$build/libport.dylib" "$build/runner" > "$build/real.txt" 2>&1 && true
 DYLD_FRAMEWORK_PATH="$MACOSX_SDK/System/iOSSupport/System/Library/Frameworks" \
-    CHARON_PORT_DYLIB="$build/libmutant.dylib" "$build/runner" > "$build/mutant.txt" 2>&1 && true
+    REVENANT_PORT_DYLIB="$build/libmutant.dylib" "$build/runner" > "$build/mutant.txt" 2>&1 && true
 DYLD_FRAMEWORK_PATH="$MACOSX_SDK/System/iOSSupport/System/Library/Frameworks" \
-    CHARON_PORT_DYLIB="$build/libmutant2.dylib" "$build/runner" > "$build/mutant2.txt" 2>&1 && true
+    REVENANT_PORT_DYLIB="$build/libmutant2.dylib" "$build/runner" > "$build/mutant2.txt" 2>&1 && true
 DYLD_FRAMEWORK_PATH="$MACOSX_SDK/System/iOSSupport/System/Library/Frameworks" \
-    CHARON_PORT_DYLIB="$build/libmutant3.dylib" "$build/runner" > "$build/mutant3.txt" 2>&1 && true
+    REVENANT_PORT_DYLIB="$build/libmutant3.dylib" "$build/runner" > "$build/mutant3.txt" 2>&1 && true
 DYLD_FRAMEWORK_PATH="$MACOSX_SDK/System/iOSSupport/System/Library/Frameworks" \
-    CHARON_PORT_DYLIB="$build/libmutant4.dylib" "$build/runner" > "$build/mutant4.txt" 2>&1 && true
+    REVENANT_PORT_DYLIB="$build/libmutant4.dylib" "$build/runner" > "$build/mutant4.txt" 2>&1 && true
 DYLD_FRAMEWORK_PATH="$MACOSX_SDK/System/iOSSupport/System/Library/Frameworks" \
-    CHARON_PORT_DYLIB="$build/libmutant5.dylib" "$build/runner" > "$build/mutant5.txt" 2>&1 && true
+    REVENANT_PORT_DYLIB="$build/libmutant5.dylib" "$build/runner" > "$build/mutant5.txt" 2>&1 && true
 cat "$build/real.txt"; cat "$build/mutant.txt"; cat "$build/mutant2.txt"; cat "$build/mutant3.txt"; cat "$build/mutant4.txt"; cat "$build/mutant5.txt"
 
 # the member lines, and the continuation lines under them: an operation's error is checked in

@@ -36,7 +36,7 @@ static SEL selector(NSString *name, BOOL port)
 {
     if (!port)
         return NSSelectorFromString(name);
-    return NSSelectorFromString([@"charonHost" stringByAppendingString:[[name substringToIndex:1].uppercaseString stringByAppendingString:[name substringFromIndex:1]]]);
+    return NSSelectorFromString([@"revenantHost" stringByAppendingString:[[name substringToIndex:1].uppercaseString stringByAppendingString:[name substringFromIndex:1]]]);
 }
 
 static NSString *read_up_to(NSFileHandle *handle, BOOL port, NSUInteger length)
@@ -163,7 +163,7 @@ int main(int argc, char **argv)
         }
         for (NSString *sample in samples)
             printf("%s\n", sample.UTF8String);
-        charon_check(wrong == 0, "every random scenario reads, writes, seeks, truncates and closes as the system's handle does", [NSString stringWithFormat:@"%lu of %lu differ", (unsigned long)wrong, (unsigned long)scenarios]);
+        revenant_check(wrong == 0, "every random scenario reads, writes, seeks, truncates and closes as the system's handle does", [NSString stringWithFormat:@"%lu of %lu differ", (unsigned long)wrong, (unsigned long)scenarios]);
 
         NSFileHandle *handle = [NSFileHandle fileHandleForUpdatingAtPath:portPath];
         [handle closeFile];
@@ -192,6 +192,6 @@ int main(int argc, char **argv)
         }
         CHECK_EQUAL(pipeA, pipeB, "a pipe reads and writes but cannot seek, truncate or sync, with the system's errors");
     }
-    printf("checks=%d failures=%d\n", charon_checks, charon_failures);
-    return charon_failures;
+    printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
+    return revenant_failures;
 }

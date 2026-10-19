@@ -26,7 +26,7 @@
 #include "foundation/scene_coordinator.hpp"
 #include "foundation/userland_hle.hpp"
 
-namespace shade::graphics_services_input {
+namespace emulator::graphics_services_input {
 namespace {
 
     constexpr std::uint32_t copy_send_bits = 19;

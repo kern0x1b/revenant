@@ -1,40 +1,40 @@
 #import <UIKit/UIKit.h>
-#import "CharonSheet.h"
+#import "RevenantSheet.h"
 
 #pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
 
 const CGFloat UISheetPresentationControllerDetentInactive = CGFLOAT_MAX;
 
-@interface CharonSheetDetentContext (CharonResolution) <UISheetPresentationControllerDetentResolutionContext>
+@interface RevenantSheetDetentContext (RevenantResolution) <UISheetPresentationControllerDetentResolutionContext>
 @end
 
-@implementation CharonSheetDetentContext (CharonResolution)
+@implementation RevenantSheetDetentContext (RevenantResolution)
 @end
 
-@implementation UISheetPresentationControllerDetent (CharonCustom)
+@implementation UISheetPresentationControllerDetent (RevenantCustom)
 
 + (instancetype)customDetentWithIdentifier:(NSString *)identifier resolver:(CGFloat (^)(id<UISheetPresentationControllerDetentResolutionContext> context))resolver
 {
-    return [self charon_customDetentWithIdentifier:identifier resolver:resolver];
+    return [self revenant_customDetentWithIdentifier:identifier resolver:resolver];
 }
 
 - (NSString *)identifier
 {
-    return [self charon_identifier];
+    return [self revenant_identifier];
 }
 
 - (CGFloat)resolvedValueInContext:(id<UISheetPresentationControllerDetentResolutionContext>)context
 {
-    return [self charon_resolvedValueInContext:context];
+    return [self revenant_resolvedValueInContext:context];
 }
 
 @end
 
-@implementation UISheetPresentationController (CharonInvalidate)
+@implementation UISheetPresentationController (RevenantInvalidate)
 
 - (void)invalidateDetents
 {
-    [self charon_invalidateDetents];
+    [self revenant_invalidateDetents];
 }
 
 @end

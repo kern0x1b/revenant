@@ -6,15 +6,15 @@
 #include <stdlib.h>
 #include <string.h>
 
-@interface AVCaptureResolvedPhotoSettings (CharonProbe)
-- (instancetype)initCharonWithUniqueID:(int64_t)uniqueID photoDimensions:(CMVideoDimensions)photoDimensions
+@interface AVCaptureResolvedPhotoSettings (RevenantProbe)
+- (instancetype)initRevenantWithUniqueID:(int64_t)uniqueID photoDimensions:(CMVideoDimensions)photoDimensions
                      previewDimensions:(CMVideoDimensions)previewDimensions
            embeddedThumbnailDimensions:(CMVideoDimensions)embeddedThumbnailDimensions flashEnabled:(BOOL)flashEnabled
         stillImageStabilizationEnabled:(BOOL)stillImageStabilizationEnabled;
 @end
 
-@interface AVCapturePhoto (CharonProbe)
-- (instancetype)initCharonWithSampleBuffer:(CMSampleBufferRef)photo previewSampleBuffer:(CMSampleBufferRef)preview
+@interface AVCapturePhoto (RevenantProbe)
+- (instancetype)initRevenantWithSampleBuffer:(CMSampleBufferRef)photo previewSampleBuffer:(CMSampleBufferRef)preview
                           resolvedSettings:(AVCaptureResolvedPhotoSettings *)resolvedSettings
                            bracketSettings:(AVCaptureBracketedStillImageSettings *)bracketSettings photoCount:(NSInteger)photoCount
               embeddedThumbnailPhotoFormat:(NSDictionary *)thumbnailFormat sourceDeviceType:(AVCaptureDeviceType)sourceDeviceType;
@@ -304,13 +304,13 @@ static CMSampleBufferRef JPEGSample(int32_t w, int32_t h)
 
 static void PhotoObjectChecks(void)
 {
-    AVCaptureResolvedPhotoSettings *resolved = [[AVCaptureResolvedPhotoSettings alloc] initCharonWithUniqueID:7 photoDimensions:Dimensions(64, 48)
+    AVCaptureResolvedPhotoSettings *resolved = [[AVCaptureResolvedPhotoSettings alloc] initRevenantWithUniqueID:7 photoDimensions:Dimensions(64, 48)
                                                                                            previewDimensions:Dimensions(0, 0)
                                                                                  embeddedThumbnailDimensions:Dimensions(0, 0)
                                                                                                 flashEnabled:NO
                                                                               stillImageStabilizationEnabled:NO];
     CMSampleBufferRef bgra = BGRASample(64, 48);
-    AVCapturePhoto *raw = [[AVCapturePhoto alloc] initCharonWithSampleBuffer:bgra previewSampleBuffer:NULL resolvedSettings:resolved
+    AVCapturePhoto *raw = [[AVCapturePhoto alloc] initRevenantWithSampleBuffer:bgra previewSampleBuffer:NULL resolvedSettings:resolved
                                                              bracketSettings:nil photoCount:1 embeddedThumbnailPhotoFormat:nil
                                                              sourceDeviceType:AVCaptureDeviceTypeBuiltInWideAngleCamera];
     CVPixelBufferRef buffer = raw.pixelBuffer;
@@ -325,7 +325,7 @@ static void PhotoObjectChecks(void)
     CFRelease(bgra);
 
     CMSampleBufferRef jpeg = JPEGSample(64, 48);
-    AVCapturePhoto *jpegPhoto = [[AVCapturePhoto alloc] initCharonWithSampleBuffer:jpeg previewSampleBuffer:NULL resolvedSettings:resolved
+    AVCapturePhoto *jpegPhoto = [[AVCapturePhoto alloc] initRevenantWithSampleBuffer:jpeg previewSampleBuffer:NULL resolvedSettings:resolved
                                                                     bracketSettings:nil photoCount:1 embeddedThumbnailPhotoFormat:nil sourceDeviceType:nil];
     NSData *file = jpegPhoto.fileDataRepresentation;
     check(jpegPhoto.pixelBuffer == NULL && file.length > 2 && ((const uint8_t *)file.bytes)[0] == 0xFF && ((const uint8_t *)file.bytes)[1] == 0xD8,
@@ -336,7 +336,7 @@ static void PhotoObjectChecks(void)
     check(width.integerValue == 64, @"photo-jpeg-metadata-width", [NSString stringWithFormat:@"%@", width]);
     CFRelease(jpeg);
 
-    AVCapturePhoto *failed = [[AVCapturePhoto alloc] initCharonWithSampleBuffer:NULL previewSampleBuffer:NULL resolvedSettings:resolved
+    AVCapturePhoto *failed = [[AVCapturePhoto alloc] initRevenantWithSampleBuffer:NULL previewSampleBuffer:NULL resolvedSettings:resolved
                                                                  bracketSettings:nil photoCount:1 embeddedThumbnailPhotoFormat:nil
                                                                  sourceDeviceType:nil];
     check(failed != nil && failed.pixelBuffer == NULL && failed.fileDataRepresentation == nil && failed.CGImageRepresentation == NULL

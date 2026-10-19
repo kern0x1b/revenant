@@ -1,9 +1,9 @@
 #import <Foundation/Foundation.h>
 #import <Metal/Metal.h>
 #import <objc/runtime.h>
-#import "CharonMetal26Types.h"
+#import "RevenantMetal26Types.h"
 
-static BOOL CharonMetal4GeometryBaseEqual(MTL4AccelerationStructureGeometryDescriptor *mine,
+static BOOL RevenantMetal4GeometryBaseEqual(MTL4AccelerationStructureGeometryDescriptor *mine,
                                           MTL4AccelerationStructureGeometryDescriptor *theirs)
 {
     if (mine.intersectionFunctionTableOffset != theirs.intersectionFunctionTableOffset) return NO;
@@ -17,7 +17,7 @@ static BOOL CharonMetal4GeometryBaseEqual(MTL4AccelerationStructureGeometryDescr
     return YES;
 }
 
-static NSUInteger CharonMetal4GeometryBaseHash(MTL4AccelerationStructureGeometryDescriptor *mine)
+static NSUInteger RevenantMetal4GeometryBaseHash(MTL4AccelerationStructureGeometryDescriptor *mine)
 {
     NSUInteger hash = (NSUInteger)object_getClass(mine);
     hash = hash * 31u + (uint32_t)mine.intersectionFunctionTableOffset;
@@ -68,12 +68,12 @@ static NSUInteger CharonMetal4GeometryBaseHash(MTL4AccelerationStructureGeometry
 {
     if (self == object) return YES;
     if (![object isKindOfClass:[MTL4AccelerationStructureGeometryDescriptor class]]) return NO;
-    return CharonMetal4GeometryBaseEqual(self, object);
+    return RevenantMetal4GeometryBaseEqual(self, object);
 }
 
 - (NSUInteger)hash
 {
-    return CharonMetal4GeometryBaseHash(self);
+    return RevenantMetal4GeometryBaseHash(self);
 }
 
 - (id)copyWithZone:(NSZone *)zone
@@ -91,7 +91,7 @@ static NSUInteger CharonMetal4GeometryBaseHash(MTL4AccelerationStructureGeometry
 
 @end
 
-enum { CharonMetal4Float3 = 30, CharonMetal4Float1 = 28 };
+enum { RevenantMetal4Float3 = 30, RevenantMetal4Float1 = 28 };
 
 @implementation MTL4AccelerationStructureTriangleGeometryDescriptor {
     MTL4BufferRange _vertexBuffer;
@@ -116,7 +116,7 @@ enum { CharonMetal4Float3 = 30, CharonMetal4Float1 = 28 };
 - (instancetype)init
 {
     if ((self = [super init])) {
-        _vertexFormat = (MTLAttributeFormat)CharonMetal4Float3;
+        _vertexFormat = (MTLAttributeFormat)RevenantMetal4Float3;
         _indexType = MTLIndexTypeUInt32;
     }
     return self;
@@ -126,7 +126,7 @@ enum { CharonMetal4Float3 = 30, CharonMetal4Float1 = 28 };
 {
     if (self == object) return YES;
     if (![object isKindOfClass:[MTL4AccelerationStructureTriangleGeometryDescriptor class]]) return NO;
-    if (!CharonMetal4GeometryBaseEqual(self, object)) return NO;
+    if (!RevenantMetal4GeometryBaseEqual(self, object)) return NO;
     if (_vertexBuffer.bufferAddress != ((MTL4AccelerationStructureTriangleGeometryDescriptor *)object).vertexBuffer.bufferAddress) return NO;
     if (_vertexBuffer.length != ((MTL4AccelerationStructureTriangleGeometryDescriptor *)object).vertexBuffer.length) return NO;
     if (_vertexFormat != ((MTL4AccelerationStructureTriangleGeometryDescriptor *)object).vertexFormat) return NO;
@@ -143,7 +143,7 @@ enum { CharonMetal4Float3 = 30, CharonMetal4Float1 = 28 };
 
 - (NSUInteger)hash
 {
-    NSUInteger hash = CharonMetal4GeometryBaseHash(self);
+    NSUInteger hash = RevenantMetal4GeometryBaseHash(self);
     hash = hash * 31u + (uint32_t)_vertexBuffer.bufferAddress;
     hash = hash * 31u + (uint32_t)_vertexBuffer.length;
     hash = hash * 31u + (uint32_t)_vertexFormat;
@@ -202,7 +202,7 @@ enum { CharonMetal4Float3 = 30, CharonMetal4Float1 = 28 };
 {
     if (self == object) return YES;
     if (![object isKindOfClass:[MTL4AccelerationStructureBoundingBoxGeometryDescriptor class]]) return NO;
-    if (!CharonMetal4GeometryBaseEqual(self, object)) return NO;
+    if (!RevenantMetal4GeometryBaseEqual(self, object)) return NO;
     if (_boundingBoxBuffer.bufferAddress != ((MTL4AccelerationStructureBoundingBoxGeometryDescriptor *)object).boundingBoxBuffer.bufferAddress) return NO;
     if (_boundingBoxBuffer.length != ((MTL4AccelerationStructureBoundingBoxGeometryDescriptor *)object).boundingBoxBuffer.length) return NO;
     if (_boundingBoxStride != ((MTL4AccelerationStructureBoundingBoxGeometryDescriptor *)object).boundingBoxStride) return NO;
@@ -212,7 +212,7 @@ enum { CharonMetal4Float3 = 30, CharonMetal4Float1 = 28 };
 
 - (NSUInteger)hash
 {
-    NSUInteger hash = CharonMetal4GeometryBaseHash(self);
+    NSUInteger hash = RevenantMetal4GeometryBaseHash(self);
     hash = hash * 31u + (uint32_t)_boundingBoxBuffer.bufferAddress;
     hash = hash * 31u + (uint32_t)_boundingBoxBuffer.length;
     hash = hash * 31u + (uint32_t)_boundingBoxStride;
@@ -273,8 +273,8 @@ enum { CharonMetal4Float3 = 30, CharonMetal4Float1 = 28 };
 - (instancetype)init
 {
     if ((self = [super init])) {
-        _controlPointFormat = (MTLAttributeFormat)CharonMetal4Float3;
-        _radiusFormat = (MTLAttributeFormat)CharonMetal4Float1;
+        _controlPointFormat = (MTLAttributeFormat)RevenantMetal4Float3;
+        _radiusFormat = (MTLAttributeFormat)RevenantMetal4Float1;
     }
     return self;
 }
@@ -283,53 +283,53 @@ enum { CharonMetal4Float3 = 30, CharonMetal4Float1 = 28 };
 {
     if (self == object) return YES;
     if (![object isKindOfClass:[MTL4AccelerationStructureCurveGeometryDescriptor class]]) return NO;
-    if (!CharonMetal4GeometryBaseEqual(self, object)) return NO;
+    if (!RevenantMetal4GeometryBaseEqual(self, object)) return NO;
     MTL4AccelerationStructureCurveGeometryDescriptor *theirs = object;
-#define CharonMetal4SameRange(field) \
+#define RevenantMetal4SameRange(field) \
     if (_##field.bufferAddress != theirs.field.bufferAddress) return NO; \
     if (_##field.length != theirs.field.length) return NO;
-#define CharonMetal4Same(field) if (_##field != theirs.field) return NO;
-    CharonMetal4SameRange(controlPointBuffer)
-    CharonMetal4Same(controlPointCount)
-    CharonMetal4Same(controlPointStride)
-    CharonMetal4Same(controlPointFormat)
-    CharonMetal4SameRange(radiusBuffer)
-    CharonMetal4Same(radiusFormat)
-    CharonMetal4Same(radiusStride)
-    CharonMetal4SameRange(indexBuffer)
-    CharonMetal4Same(indexType)
-    CharonMetal4Same(segmentCount)
-    CharonMetal4Same(segmentControlPointCount)
-    CharonMetal4Same(curveType)
-    CharonMetal4Same(curveBasis)
-    CharonMetal4Same(curveEndCaps)
-#undef CharonMetal4SameRange
-#undef CharonMetal4Same
+#define RevenantMetal4Same(field) if (_##field != theirs.field) return NO;
+    RevenantMetal4SameRange(controlPointBuffer)
+    RevenantMetal4Same(controlPointCount)
+    RevenantMetal4Same(controlPointStride)
+    RevenantMetal4Same(controlPointFormat)
+    RevenantMetal4SameRange(radiusBuffer)
+    RevenantMetal4Same(radiusFormat)
+    RevenantMetal4Same(radiusStride)
+    RevenantMetal4SameRange(indexBuffer)
+    RevenantMetal4Same(indexType)
+    RevenantMetal4Same(segmentCount)
+    RevenantMetal4Same(segmentControlPointCount)
+    RevenantMetal4Same(curveType)
+    RevenantMetal4Same(curveBasis)
+    RevenantMetal4Same(curveEndCaps)
+#undef RevenantMetal4SameRange
+#undef RevenantMetal4Same
     return YES;
 }
 
 - (NSUInteger)hash
 {
-    NSUInteger hash = CharonMetal4GeometryBaseHash(self);
-#define CharonMetal4HashRange(field) \
+    NSUInteger hash = RevenantMetal4GeometryBaseHash(self);
+#define RevenantMetal4HashRange(field) \
     hash = hash * 31u + (uint32_t)_##field.bufferAddress; hash = hash * 31u + (uint32_t)_##field.length;
-#define CharonMetal4Hash(field) hash = hash * 31u + (uint32_t)_##field;
-    CharonMetal4HashRange(controlPointBuffer)
-    CharonMetal4Hash(controlPointCount)
-    CharonMetal4Hash(controlPointStride)
-    CharonMetal4Hash(controlPointFormat)
-    CharonMetal4HashRange(radiusBuffer)
-    CharonMetal4Hash(radiusFormat)
-    CharonMetal4Hash(radiusStride)
-    CharonMetal4HashRange(indexBuffer)
-    CharonMetal4Hash(indexType)
-    CharonMetal4Hash(segmentCount)
-    CharonMetal4Hash(segmentControlPointCount)
-    CharonMetal4Hash(curveType)
-    CharonMetal4Hash(curveBasis)
-    CharonMetal4Hash(curveEndCaps)
-#undef CharonMetal4HashRange
-#undef CharonMetal4Hash
+#define RevenantMetal4Hash(field) hash = hash * 31u + (uint32_t)_##field;
+    RevenantMetal4HashRange(controlPointBuffer)
+    RevenantMetal4Hash(controlPointCount)
+    RevenantMetal4Hash(controlPointStride)
+    RevenantMetal4Hash(controlPointFormat)
+    RevenantMetal4HashRange(radiusBuffer)
+    RevenantMetal4Hash(radiusFormat)
+    RevenantMetal4Hash(radiusStride)
+    RevenantMetal4HashRange(indexBuffer)
+    RevenantMetal4Hash(indexType)
+    RevenantMetal4Hash(segmentCount)
+    RevenantMetal4Hash(segmentControlPointCount)
+    RevenantMetal4Hash(curveType)
+    RevenantMetal4Hash(curveBasis)
+    RevenantMetal4Hash(curveEndCaps)
+#undef RevenantMetal4HashRange
+#undef RevenantMetal4Hash
     return hash;
 }
 
@@ -385,7 +385,7 @@ enum { CharonMetal4Float3 = 30, CharonMetal4Float1 = 28 };
 - (instancetype)init
 {
     if ((self = [super init])) {
-        _vertexFormat = (MTLAttributeFormat)CharonMetal4Float3;
+        _vertexFormat = (MTLAttributeFormat)RevenantMetal4Float3;
         _indexType = MTLIndexTypeUInt32;
     }
     return self;
@@ -395,7 +395,7 @@ enum { CharonMetal4Float3 = 30, CharonMetal4Float1 = 28 };
 {
     if (self == object) return YES;
     if (![object isKindOfClass:[MTL4AccelerationStructureMotionTriangleGeometryDescriptor class]]) return NO;
-    if (!CharonMetal4GeometryBaseEqual(self, object)) return NO;
+    if (!RevenantMetal4GeometryBaseEqual(self, object)) return NO;
     MTL4AccelerationStructureMotionTriangleGeometryDescriptor *theirs = object;
     if (_vertexBuffers.bufferAddress != theirs.vertexBuffers.bufferAddress) return NO;
     if (_vertexBuffers.length != theirs.vertexBuffers.length) return NO;
@@ -413,7 +413,7 @@ enum { CharonMetal4Float3 = 30, CharonMetal4Float1 = 28 };
 
 - (NSUInteger)hash
 {
-    NSUInteger hash = CharonMetal4GeometryBaseHash(self);
+    NSUInteger hash = RevenantMetal4GeometryBaseHash(self);
     hash = hash * 31u + (uint32_t)_vertexBuffers.bufferAddress;
     hash = hash * 31u + (uint32_t)_vertexBuffers.length;
     hash = hash * 31u + (uint32_t)_vertexFormat;
@@ -472,7 +472,7 @@ enum { CharonMetal4Float3 = 30, CharonMetal4Float1 = 28 };
 {
     if (self == object) return YES;
     if (![object isKindOfClass:[MTL4AccelerationStructureMotionBoundingBoxGeometryDescriptor class]]) return NO;
-    if (!CharonMetal4GeometryBaseEqual(self, object)) return NO;
+    if (!RevenantMetal4GeometryBaseEqual(self, object)) return NO;
     MTL4AccelerationStructureMotionBoundingBoxGeometryDescriptor *theirs = object;
     if (_boundingBoxBuffers.bufferAddress != theirs.boundingBoxBuffers.bufferAddress) return NO;
     if (_boundingBoxBuffers.length != theirs.boundingBoxBuffers.length) return NO;
@@ -483,7 +483,7 @@ enum { CharonMetal4Float3 = 30, CharonMetal4Float1 = 28 };
 
 - (NSUInteger)hash
 {
-    NSUInteger hash = CharonMetal4GeometryBaseHash(self);
+    NSUInteger hash = RevenantMetal4GeometryBaseHash(self);
     hash = hash * 31u + (uint32_t)_boundingBoxBuffers.bufferAddress;
     hash = hash * 31u + (uint32_t)_boundingBoxBuffers.length;
     hash = hash * 31u + (uint32_t)_boundingBoxStride;
@@ -544,8 +544,8 @@ enum { CharonMetal4Float3 = 30, CharonMetal4Float1 = 28 };
 - (instancetype)init
 {
     if ((self = [super init])) {
-        _controlPointFormat = (MTLAttributeFormat)CharonMetal4Float3;
-        _radiusFormat = (MTLAttributeFormat)CharonMetal4Float1;
+        _controlPointFormat = (MTLAttributeFormat)RevenantMetal4Float3;
+        _radiusFormat = (MTLAttributeFormat)RevenantMetal4Float1;
     }
     return self;
 }
@@ -554,53 +554,53 @@ enum { CharonMetal4Float3 = 30, CharonMetal4Float1 = 28 };
 {
     if (self == object) return YES;
     if (![object isKindOfClass:[MTL4AccelerationStructureMotionCurveGeometryDescriptor class]]) return NO;
-    if (!CharonMetal4GeometryBaseEqual(self, object)) return NO;
+    if (!RevenantMetal4GeometryBaseEqual(self, object)) return NO;
     MTL4AccelerationStructureMotionCurveGeometryDescriptor *theirs = object;
-#define CharonMetal4SameRange(field) \
+#define RevenantMetal4SameRange(field) \
     if (_##field.bufferAddress != theirs.field.bufferAddress) return NO; \
     if (_##field.length != theirs.field.length) return NO;
-#define CharonMetal4Same(field) if (_##field != theirs.field) return NO;
-    CharonMetal4SameRange(controlPointBuffers)
-    CharonMetal4Same(controlPointCount)
-    CharonMetal4Same(controlPointStride)
-    CharonMetal4Same(controlPointFormat)
-    CharonMetal4SameRange(radiusBuffers)
-    CharonMetal4Same(radiusFormat)
-    CharonMetal4Same(radiusStride)
-    CharonMetal4SameRange(indexBuffer)
-    CharonMetal4Same(indexType)
-    CharonMetal4Same(segmentCount)
-    CharonMetal4Same(segmentControlPointCount)
-    CharonMetal4Same(curveType)
-    CharonMetal4Same(curveBasis)
-    CharonMetal4Same(curveEndCaps)
-#undef CharonMetal4SameRange
-#undef CharonMetal4Same
+#define RevenantMetal4Same(field) if (_##field != theirs.field) return NO;
+    RevenantMetal4SameRange(controlPointBuffers)
+    RevenantMetal4Same(controlPointCount)
+    RevenantMetal4Same(controlPointStride)
+    RevenantMetal4Same(controlPointFormat)
+    RevenantMetal4SameRange(radiusBuffers)
+    RevenantMetal4Same(radiusFormat)
+    RevenantMetal4Same(radiusStride)
+    RevenantMetal4SameRange(indexBuffer)
+    RevenantMetal4Same(indexType)
+    RevenantMetal4Same(segmentCount)
+    RevenantMetal4Same(segmentControlPointCount)
+    RevenantMetal4Same(curveType)
+    RevenantMetal4Same(curveBasis)
+    RevenantMetal4Same(curveEndCaps)
+#undef RevenantMetal4SameRange
+#undef RevenantMetal4Same
     return YES;
 }
 
 - (NSUInteger)hash
 {
-    NSUInteger hash = CharonMetal4GeometryBaseHash(self);
-#define CharonMetal4HashRange(field) \
+    NSUInteger hash = RevenantMetal4GeometryBaseHash(self);
+#define RevenantMetal4HashRange(field) \
     hash = hash * 31u + (uint32_t)_##field.bufferAddress; hash = hash * 31u + (uint32_t)_##field.length;
-#define CharonMetal4Hash(field) hash = hash * 31u + (uint32_t)_##field;
-    CharonMetal4HashRange(controlPointBuffers)
-    CharonMetal4Hash(controlPointCount)
-    CharonMetal4Hash(controlPointStride)
-    CharonMetal4Hash(controlPointFormat)
-    CharonMetal4HashRange(radiusBuffers)
-    CharonMetal4Hash(radiusFormat)
-    CharonMetal4Hash(radiusStride)
-    CharonMetal4HashRange(indexBuffer)
-    CharonMetal4Hash(indexType)
-    CharonMetal4Hash(segmentCount)
-    CharonMetal4Hash(segmentControlPointCount)
-    CharonMetal4Hash(curveType)
-    CharonMetal4Hash(curveBasis)
-    CharonMetal4Hash(curveEndCaps)
-#undef CharonMetal4HashRange
-#undef CharonMetal4Hash
+#define RevenantMetal4Hash(field) hash = hash * 31u + (uint32_t)_##field;
+    RevenantMetal4HashRange(controlPointBuffers)
+    RevenantMetal4Hash(controlPointCount)
+    RevenantMetal4Hash(controlPointStride)
+    RevenantMetal4Hash(controlPointFormat)
+    RevenantMetal4HashRange(radiusBuffers)
+    RevenantMetal4Hash(radiusFormat)
+    RevenantMetal4Hash(radiusStride)
+    RevenantMetal4HashRange(indexBuffer)
+    RevenantMetal4Hash(indexType)
+    RevenantMetal4Hash(segmentCount)
+    RevenantMetal4Hash(segmentControlPointCount)
+    RevenantMetal4Hash(curveType)
+    RevenantMetal4Hash(curveBasis)
+    RevenantMetal4Hash(curveEndCaps)
+#undef RevenantMetal4HashRange
+#undef RevenantMetal4Hash
     return hash;
 }
 

@@ -1,36 +1,36 @@
 #import <UIKit/UIKit.h>
 #import <objc/runtime.h>
-#import "CharonLists.h"
+#import "RevenantLists.h"
 
-static const char CharonSeparatorVisualEffectKey;
+static const char RevenantSeparatorVisualEffectKey;
 
-static UIVisualEffect *charon_separator_visual_effect(UIListSeparatorConfiguration *configuration)
+static UIVisualEffect *revenant_separator_visual_effect(UIListSeparatorConfiguration *configuration)
 {
-    return objc_getAssociatedObject(configuration, &CharonSeparatorVisualEffectKey);
+    return objc_getAssociatedObject(configuration, &RevenantSeparatorVisualEffectKey);
 }
 
-@implementation UIListSeparatorConfiguration (CharonVisualEffect15)
+@implementation UIListSeparatorConfiguration (RevenantVisualEffect15)
 
 - (UIVisualEffect *)visualEffect
 {
-    return charon_separator_visual_effect(self);
+    return revenant_separator_visual_effect(self);
 }
 
 - (void)setVisualEffect:(UIVisualEffect *)visualEffect
 {
-    objc_setAssociatedObject(self, &CharonSeparatorVisualEffectKey, [visualEffect copy],
+    objc_setAssociatedObject(self, &RevenantSeparatorVisualEffectKey, [visualEffect copy],
                              OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
-- (void)charon_takeVisualEffectFrom:(UIListSeparatorConfiguration *)other
+- (void)revenant_takeVisualEffectFrom:(UIListSeparatorConfiguration *)other
 {
-    [self setVisualEffect:charon_separator_visual_effect(other)];
+    [self setVisualEffect:revenant_separator_visual_effect(other)];
 }
 
-- (BOOL)charon_visualEffectIsEqualTo:(UIListSeparatorConfiguration *)other
+- (BOOL)revenant_visualEffectIsEqualTo:(UIListSeparatorConfiguration *)other
 {
-    UIVisualEffect *mine = charon_separator_visual_effect(self);
-    UIVisualEffect *theirs = charon_separator_visual_effect(other);
+    UIVisualEffect *mine = revenant_separator_visual_effect(self);
+    UIVisualEffect *theirs = revenant_separator_visual_effect(other);
     if (mine == theirs)
         return YES;
     if (!mine || !theirs)
@@ -38,12 +38,12 @@ static UIVisualEffect *charon_separator_visual_effect(UIListSeparatorConfigurati
     return [mine isEqual:theirs];
 }
 
-- (void)charon_encodeVisualEffectWithCoder:(NSCoder *)coder
+- (void)revenant_encodeVisualEffectWithCoder:(NSCoder *)coder
 {
-    [coder encodeObject:charon_separator_visual_effect(self) forKey:@"visualEffect"];
+    [coder encodeObject:revenant_separator_visual_effect(self) forKey:@"visualEffect"];
 }
 
-- (void)charon_decodeVisualEffectWithCoder:(NSCoder *)coder
+- (void)revenant_decodeVisualEffectWithCoder:(NSCoder *)coder
 {
     UIVisualEffect *effect = [coder decodeObjectOfClass:[UIVisualEffect class] forKey:@"visualEffect"];
     if (effect)

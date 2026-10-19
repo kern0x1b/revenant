@@ -2,7 +2,7 @@
 # run.sh - AVDepthData and AVCameraCalibrationData (iOS 11.0), the port against the host's own framework.
 #
 # probe.m is built twice: plain, where every name is Apple's, and with the two class names renamed to the
-# port's own (charon_host_AVDepthData, charon_host_AVCameraCalibrationData) and the port's AVDepthData11.m linked
+# port's own (revenant_host_AVDepthData, revenant_host_AVCameraCalibrationData) and the port's AVDepthData11.m linked
 # in, so the same questions are asked of the port's classes in the same binary. Both outputs are one line per
 # answer, and diff is the check: the port must say what the host says, line for line, except where the named
 # divergence below says otherwise.
@@ -33,7 +33,7 @@ ALLOWED_DIFF="metadata-0 metadata-1 metadata-2 metadata-3 metadata-4 tagged tagg
 rm -rf "$build"
 mkdir -p "$build"
 frameworks="-framework Foundation -framework AVFoundation -framework CoreVideo -framework CoreGraphics"
-renames="-DAVDepthData=charon_host_AVDepthData -DAVCameraCalibrationData=charon_host_AVCameraCalibrationData"
+renames="-DAVDepthData=revenant_host_AVDepthData -DAVCameraCalibrationData=revenant_host_AVCameraCalibrationData"
 source="$avf/AVDepthData11.m"
 [ -f "$source" ] || { echo "FAIL: $source does not exist, so the port's classes are not there to check"; exit 1; }
 if [ "$mutant" = 1 ] && [ "$control" = 1 ]; then
@@ -53,7 +53,7 @@ fi
 
 clang -fobjc-arc -Wall -c $renames "$source" -o "$build/port.o" 2> "$build/port-build.log" || {
     echo "RUN FAILED: the port's AVDepthData11.m did not build:"; head -1 "$build/port-build.log"; exit 1; }
-clang -fobjc-arc -DCHARON_PORT=1 $renames "$here/probe.m" "$build/port.o" $frameworks -o "$build/port" 2> "$build/port-link.log" || {
+clang -fobjc-arc -DREVENANT_PORT=1 $renames "$here/probe.m" "$build/port.o" $frameworks -o "$build/port" 2> "$build/port-link.log" || {
     echo "RUN FAILED: the port probe did not link:"; head -1 "$build/port-link.log"; exit 1; }
 clang -fobjc-arc "$here/probe.m" $frameworks -o "$build/host" 2> "$build/host-link.log" || {
     echo "RUN FAILED: the host probe did not link:"; head -1 "$build/host-link.log"; exit 1; }

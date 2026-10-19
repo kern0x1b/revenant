@@ -23,7 +23,7 @@ package("micro-ecc")
                         "-isysroot", toolchain:config("sdkdir"), "-I" .. os.curdir()}
         local objects = {}
         local sources = {{path = "uECC.c", where = "."},
-                         {path = path.join(os.scriptdir(), "files", "CharonCKWebAuth.c"), where = path.join(os.scriptdir(), "files")}}
+                         {path = path.join(os.scriptdir(), "files", "RevenantCKWebAuth.c"), where = path.join(os.scriptdir(), "files")}}
         for _, entry in ipairs(sources) do
             local object = path.absolute(path.join("objects", (path.filename(entry.path) .. ".o")))
             os.mkdir(path.directory(object))
@@ -31,7 +31,7 @@ package("micro-ecc")
             table.insert(objects, object)
         end
         os.vrunv("xcrun", table.join({"libtool", "-static", "-o", path.join(package:installdir("lib"), "libmicro-ecc.a")}, objects))
-        for _, header in ipairs({"uECC.h", "uECC_vli.h", "types.h", path.join(os.scriptdir(), "files", "CharonCKWebAuth.h")}) do
+        for _, header in ipairs({"uECC.h", "uECC_vli.h", "types.h", path.join(os.scriptdir(), "files", "RevenantCKWebAuth.h")}) do
             os.vcp(header, package:installdir("include"))
         end
         os.vcp("LICENSE.txt", package:installdir("licenses"))
@@ -40,21 +40,21 @@ package("micro-ecc")
     on_test(function (package)
         assert(os.isfile(path.join(package:installdir("lib"), "libmicro-ecc.a")))
         assert(os.isfile(path.join(package:installdir("include"), "uECC.h")))
-        assert(os.isfile(path.join(package:installdir("include"), "CharonCKWebAuth.h")))
+        assert(os.isfile(path.join(package:installdir("include"), "RevenantCKWebAuth.h")))
         local hashed = #os.files(path.join(os.scriptdir(), "files", "**"))
         assert(hashed > 0, "the recipe digests the files it adds and found none of them")
-        local added = {"CharonCKWebAuth.c", "CharonCKWebAuth.h"}
+        local added = {"RevenantCKWebAuth.c", "RevenantCKWebAuth.h"}
         for _, name in ipairs(added) do
             assert(os.isfile(path.join(os.scriptdir(), "files", name)), "the recipe adds " .. name .. " and it is not there")
         end
         assert(hashed == #added, "the digest read " .. hashed .. " files and the recipe adds " .. #added)
-        local header = io.readfile(path.join(os.scriptdir(), "files", "CharonCKWebAuth.h"))
-        local wrapper = io.readfile(path.join(os.scriptdir(), "files", "CharonCKWebAuth.c"))
-        for name in header:gmatch("%s(Charon%w+)%s*%(") do
+        local header = io.readfile(path.join(os.scriptdir(), "files", "RevenantCKWebAuth.h"))
+        local wrapper = io.readfile(path.join(os.scriptdir(), "files", "RevenantCKWebAuth.c"))
+        for name in header:gmatch("%s(Revenant%w+)%s*%(") do
             local defined = wrapper:match("[%a][%w%* ]*" .. name .. "%s*%(")
             if not defined then
                 assert(false, "the header declares " .. name .. " and the source does not define it")
             end
         end
-        assert(header:find("CharonCKSHA256"), "the header declares the SHA-256 the message-level pair is built on")
+        assert(header:find("RevenantCKSHA256"), "the header declares the SHA-256 the message-level pair is built on")
     end)

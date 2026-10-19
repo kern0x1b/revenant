@@ -1,7 +1,7 @@
 #import <Foundation/Foundation.h>
-#import "CharonDimension.h"
+#import "RevenantDimension.h"
 
-static Class charon_dimension_kind(NSUnit *unit)
+static Class revenant_dimension_kind(NSUnit *unit)
 {
     if (![unit isKindOfClass:[NSDimension class]])
         return Nil;
@@ -74,7 +74,7 @@ static Class charon_dimension_kind(NSUnit *unit)
 
 - (BOOL)canBeConvertedToUnit:(NSUnit *)unit
 {
-    Class mine = charon_dimension_kind(_unit), theirs = charon_dimension_kind(unit);
+    Class mine = revenant_dimension_kind(_unit), theirs = revenant_dimension_kind(unit);
     if (mine || theirs)
         return mine == theirs;
     return [_unit class] == [unit class];
@@ -89,7 +89,7 @@ static Class charon_dimension_kind(NSUnit *unit)
     }
     if ([_unit isEqual:unit])
         return [[NSMeasurement alloc] initWithDoubleValue:_doubleValue unit:unit];
-    if (!charon_dimension_kind(_unit)) {
+    if (!revenant_dimension_kind(_unit)) {
         [NSException raise:NSInvalidArgumentException format:@"Cannot convert differing units that are non-dimensional! lhs: %@ rhs: %@",
                                                             [_unit class], [unit class]];
         return nil;
@@ -98,11 +98,11 @@ static Class charon_dimension_kind(NSUnit *unit)
     return [[NSMeasurement alloc] initWithDoubleValue:[[(NSDimension *)unit converter] valueFromBaseUnitValue:base] unit:unit];
 }
 
-- (NSMeasurement *)charon_combineWith:(NSMeasurement *)measurement sign:(double)sign verb:(NSString *)verb
+- (NSMeasurement *)revenant_combineWith:(NSMeasurement *)measurement sign:(double)sign verb:(NSString *)verb
 {
     if ([_unit isEqual:measurement.unit])
         return [[NSMeasurement alloc] initWithDoubleValue:_doubleValue + sign * measurement.doubleValue unit:_unit];
-    if (!charon_dimension_kind(_unit)) {
+    if (!revenant_dimension_kind(_unit)) {
         [NSException raise:NSInvalidArgumentException format:@"Cannot %@ differing units that are non-dimensional! lhs: %@ rhs: %@",
                                                             verb, [_unit class], [measurement.unit class]];
         return nil;
@@ -120,12 +120,12 @@ static Class charon_dimension_kind(NSUnit *unit)
 
 - (NSMeasurement *)measurementByAddingMeasurement:(NSMeasurement *)measurement
 {
-    return [self charon_combineWith:measurement sign:1 verb:@"add"];
+    return [self revenant_combineWith:measurement sign:1 verb:@"add"];
 }
 
 - (NSMeasurement *)measurementBySubtractingMeasurement:(NSMeasurement *)measurement
 {
-    return [self charon_combineWith:measurement sign:-1 verb:@"subtract"];
+    return [self revenant_combineWith:measurement sign:-1 verb:@"subtract"];
 }
 
 - (BOOL)isEqual:(id)object

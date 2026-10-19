@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-OSStatus CharonHostCMSampleBufferCopyPCMDataIntoAudioBufferList(CMSampleBufferRef sbuf, int32_t frameOffset, int32_t numFrames, AudioBufferList *bufferList);
+OSStatus RevenantHostCMSampleBufferCopyPCMDataIntoAudioBufferList(CMSampleBufferRef sbuf, int32_t frameOffset, int32_t numFrames, AudioBufferList *bufferList);
 
 static int failures, checks, cornerSame, cornerDifferent;
 
@@ -77,7 +77,7 @@ static void compare(const char *name, CMSampleBufferRef buffer, int32_t offset, 
         port->mBuffers[index].mNumberChannels = shape->mBuffers[index].mNumberChannels;
     }
     OSStatus a = CMSampleBufferCopyPCMDataIntoAudioBufferList(buffer, offset, frames, system);
-    OSStatus b = CharonHostCMSampleBufferCopyPCMDataIntoAudioBufferList(buffer, offset, frames, port);
+    OSStatus b = RevenantHostCMSampleBufferCopyPCMDataIntoAudioBufferList(buffer, offset, frames, port);
     int claimed = buffer && insideClaim(buffer, offset, frames, shape->mNumberBuffers, NULL);
     if (!claimed) {
         cornerSame += a == b;
@@ -195,7 +195,7 @@ int main(void)
                             free(shape->mBuffers[0].mData);
                             shape->mBuffers[0].mData = NULL;
                             OSStatus a = CMSampleBufferCopyPCMDataIntoAudioBufferList(buffer, 0, (int32_t)frameCounts[n], shape);
-                            OSStatus b = CharonHostCMSampleBufferCopyPCMDataIntoAudioBufferList(buffer, 0, (int32_t)frameCounts[n], shape);
+                            OSStatus b = RevenantHostCMSampleBufferCopyPCMDataIntoAudioBufferList(buffer, 0, (int32_t)frameCounts[n], shape);
                             checks++;
                             if (a != b) {
                                 failures++;

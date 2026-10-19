@@ -1,5 +1,5 @@
-#ifndef CHARON_MORPHOLOGY_26_H
-#define CHARON_MORPHOLOGY_26_H
+#ifndef REVENANT_MORPHOLOGY_26_H
+#define REVENANT_MORPHOLOGY_26_H
 
 #import <Foundation/Foundation.h>
 
@@ -7,7 +7,7 @@ FOUNDATION_EXPORT NSAttributedStringKey const NSMorphologyAttributeName;
 
 @class NSMorphologyCustomPronoun;
 
-@interface NSMorphology (Charon26)
+@interface NSMorphology (Revenant26)
 
 @property (nonatomic) NSGrammaticalGender grammaticalGender;
 @property (nonatomic) NSGrammaticalPartOfSpeech partOfSpeech;
@@ -26,7 +26,7 @@ FOUNDATION_EXPORT NSAttributedStringKey const NSMorphologyAttributeName;
 
 @end
 
-@interface NSMorphologyCustomPronoun (Charon26)
+@interface NSMorphologyCustomPronoun (Revenant26)
 
 + (BOOL)isSupportedForLanguage:(NSString *)language;
 + (NSArray<NSString *> *)requiredKeysForLanguage:(NSString *)language;
@@ -39,7 +39,7 @@ FOUNDATION_EXPORT NSAttributedStringKey const NSMorphologyAttributeName;
 
 @end
 
-@interface NSMorphologyPronoun (Charon26)
+@interface NSMorphologyPronoun (Revenant26)
 
 - (instancetype)initWithPronoun:(NSString *)pronoun
                       morphology:(NSMorphology *)morphology
@@ -51,7 +51,7 @@ FOUNDATION_EXPORT NSAttributedStringKey const NSMorphologyAttributeName;
 
 @end
 
-@interface NSInflectionRule (Charon26)
+@interface NSInflectionRule (Revenant26)
 
 @property (class, readonly) NSInflectionRule *automaticRule;
 + (BOOL)canInflectLanguage:(NSString *)language;
@@ -59,7 +59,7 @@ FOUNDATION_EXPORT NSAttributedStringKey const NSMorphologyAttributeName;
 
 @end
 
-@interface NSInflectionRuleExplicit (Charon26)
+@interface NSInflectionRuleExplicit (Revenant26)
 
 - (instancetype)initWithMorphology:(NSMorphology *)morphology;
 @property (readonly, copy) NSMorphology *morphology;

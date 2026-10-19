@@ -63,11 +63,11 @@ int main(int argc, char **argv)
 {
     @autoreleasepool {
         if (argc > 1)
-            charon_log_to(@(argv[1]));
+            revenant_log_to(@(argv[1]));
         check_lists();
         check_notifications();
         check_discovery();
-        printf("%d checks, %d failed\n", charon_checks, charon_failures);
+        printf("%d checks, %d failed\n", revenant_checks, revenant_failures);
     }
-    return charon_failures;
+    return revenant_failures;
 }

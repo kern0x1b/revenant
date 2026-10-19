@@ -3,7 +3,7 @@
 
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
 
-__attribute__((used)) static Protocol *CharonEmitARSCNViewDelegate(void) { return @protocol(ARSCNViewDelegate); }
+__attribute__((used)) static Protocol *RevenantEmitARSCNViewDelegate(void) { return @protocol(ARSCNViewDelegate); }
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -12,11 +12,11 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, strong) NSMapTable<SCNNode *, ARAnchor *> *anchorsByNode;
 @property (nonatomic, strong) NSMapTable<ARAnchor *, SCNNode *> *nodesByAnchor;
 
-- (void)charon_resetAnchorMaps;
+- (void)revenant_resetAnchorMaps;
 
-- (void)charon_placeAnchor:(ARAnchor *)anchor atNode:(SCNNode *)node;
-- (void)charon_moveAnchor:(ARAnchor *)anchor toNode:(SCNNode *)node;
-- (void)charon_removeAnchor:(ARAnchor *)anchor;
+- (void)revenant_placeAnchor:(ARAnchor *)anchor atNode:(SCNNode *)node;
+- (void)revenant_moveAnchor:(ARAnchor *)anchor toNode:(SCNNode *)node;
+- (void)revenant_removeAnchor:(ARAnchor *)anchor;
 
 @end
 
@@ -35,7 +35,7 @@ NS_ASSUME_NONNULL_BEGIN
 {
     self = [super initWithFrame:frame];
     if (self)
-        [self charon_resetAnchorMaps];
+        [self revenant_resetAnchorMaps];
     return self;
 }
 
@@ -43,17 +43,17 @@ NS_ASSUME_NONNULL_BEGIN
 {
     self = [super initWithCoder:coder];
     if (self)
-        [self charon_resetAnchorMaps];
+        [self revenant_resetAnchorMaps];
     return self;
 }
 
-- (void)charon_resetAnchorMaps
+- (void)revenant_resetAnchorMaps
 {
     _anchorsByNode = [NSMapTable weakToWeakObjectsMapTable];
     _nodesByAnchor = [NSMapTable weakToWeakObjectsMapTable];
 }
 
-- (void)charon_placeAnchor:(ARAnchor *)anchor atNode:(SCNNode *)node
+- (void)revenant_placeAnchor:(ARAnchor *)anchor atNode:(SCNNode *)node
 {
     [self.anchorsByNode setObject:anchor forKey:node];
     [self.nodesByAnchor setObject:node forKey:anchor];
@@ -61,7 +61,7 @@ NS_ASSUME_NONNULL_BEGIN
         [self.delegate renderer:self didAddNode:node forAnchor:anchor];
 }
 
-- (void)charon_moveAnchor:(ARAnchor *)anchor toNode:(SCNNode *)node
+- (void)revenant_moveAnchor:(ARAnchor *)anchor toNode:(SCNNode *)node
 {
     SCNNode *was = [self.nodesByAnchor objectForKey:anchor];
     if ([self.delegate respondsToSelector:@selector(renderer:willUpdateNode:forAnchor:)])
@@ -72,7 +72,7 @@ NS_ASSUME_NONNULL_BEGIN
         [self.delegate renderer:self didUpdateNode:node forAnchor:anchor];
 }
 
-- (void)charon_removeAnchor:(ARAnchor *)anchor
+- (void)revenant_removeAnchor:(ARAnchor *)anchor
 {
     SCNNode *node = [self.nodesByAnchor objectForKey:anchor];
     if (node)
@@ -100,7 +100,7 @@ NS_ASSUME_NONNULL_BEGIN
     if ([self.delegate respondsToSelector:@selector(renderer:nodeForAnchor:)]) {
         node = [self.delegate renderer:self nodeForAnchor:anchor];
         if (node)
-            [self charon_placeAnchor:anchor atNode:node];
+            [self revenant_placeAnchor:anchor atNode:node];
     }
     return node;
 }

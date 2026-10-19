@@ -1,37 +1,37 @@
-#import "CharonMetal.h"
-#import "CharonMetalDebugGroups.h"
+#import "RevenantMetal.h"
+#import "RevenantMetalDebugGroups.h"
 
 #pragma clang diagnostic ignored "-Wprotocol"
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
 
-@implementation CharonMetalQueue
+@implementation RevenantMetalQueue
 
 @synthesize label;
 
 - (id<MTLDevice>)device
 {
-    return [CharonMetalDevice shared];
+    return [RevenantMetalDevice shared];
 }
 
 - (id<MTLCommandBuffer>)commandBuffer
 {
-    return [self charonCommandBufferRetainingReferences:YES errorOptions:MTLCommandBufferErrorOptionNone];
+    return [self revenantCommandBufferRetainingReferences:YES errorOptions:MTLCommandBufferErrorOptionNone];
 }
 
 - (id<MTLCommandBuffer>)commandBufferWithUnretainedReferences
 {
-    return [self charonCommandBufferRetainingReferences:NO errorOptions:MTLCommandBufferErrorOptionNone];
+    return [self revenantCommandBufferRetainingReferences:NO errorOptions:MTLCommandBufferErrorOptionNone];
 }
 
-- (id<MTLCommandBuffer>)charonCommandBufferRetainingReferences:(BOOL)retaining errorOptions:(MTLCommandBufferErrorOption)options
+- (id<MTLCommandBuffer>)revenantCommandBufferRetainingReferences:(BOOL)retaining errorOptions:(MTLCommandBufferErrorOption)options
 {
-    return (id<MTLCommandBuffer>)[[CharonMetalCommandBuffer alloc] initWithQueue:self retainingReferences:retaining errorOptions:options];
+    return (id<MTLCommandBuffer>)[[RevenantMetalCommandBuffer alloc] initWithQueue:self retainingReferences:retaining errorOptions:options];
 }
 
 @end
 
-@implementation CharonMetalCommandBuffer {
-    CharonMetalQueue *_queue;
+@implementation RevenantMetalCommandBuffer {
+    RevenantMetalQueue *_queue;
     BOOL _retainingReferences;
     MTLCommandBufferErrorOption _errorOptions;
     id<MTLDrawable> _drawable;
@@ -51,7 +51,7 @@
     return [self initWithQueue:nil retainingReferences:YES errorOptions:MTLCommandBufferErrorOptionNone];
 }
 
-- (instancetype)initWithQueue:(CharonMetalQueue *)queue retainingReferences:(BOOL)retaining errorOptions:(MTLCommandBufferErrorOption)options
+- (instancetype)initWithQueue:(RevenantMetalQueue *)queue retainingReferences:(BOOL)retaining errorOptions:(MTLCommandBufferErrorOption)options
 {
     if ((self = [super init])) {
         _queue = queue;
@@ -67,7 +67,7 @@
 
 - (id<MTLDevice>)device
 {
-    return [CharonMetalDevice shared];
+    return [RevenantMetalDevice shared];
 }
 
 - (id<MTLCommandQueue>)commandQueue
@@ -90,22 +90,22 @@
     return _retainingReferences;
 }
 
-- (MTLCommandBufferErrorOption)charonErrorOptions
+- (MTLCommandBufferErrorOption)revenantErrorOptions
 {
     return _errorOptions;
 }
 
-- (CFTimeInterval)charonStartTime
+- (CFTimeInterval)revenantStartTime
 {
     return _status == MTLCommandBufferStatusCompleted ? _startTime : 0;
 }
 
-- (CFTimeInterval)charonEndTime
+- (CFTimeInterval)revenantEndTime
 {
     return _status == MTLCommandBufferStatusCompleted ? _endTime : 0;
 }
 
-- (void)charonBeginWork
+- (void)revenantBeginWork
 {
     if (!_startTime)
         _startTime = CACurrentMediaTime();
@@ -124,9 +124,9 @@
         return;
     }
     _status = MTLCommandBufferStatusCommitted;
-    CharonMetalDevice *device = [CharonMetalDevice shared];
+    RevenantMetalDevice *device = [RevenantMetalDevice shared];
     [device acquire];
-    [self charonBeginWork];
+    [self revenantBeginWork];
     if (_drawable)
         [_drawable present];
     glFlush();
@@ -187,38 +187,38 @@
         NSLog(@"Metal: waitUntilCompleted on a command buffer that was never committed: it would wait for ever");
         return;
     }
-    CharonMetalDevice *device = [CharonMetalDevice shared];
+    RevenantMetalDevice *device = [RevenantMetalDevice shared];
     [device acquire];
     glFinish();
     [device relinquish];
 }
 
-- (void)charonPushDebugGroup:(NSString *)name
+- (void)revenantPushDebugGroup:(NSString *)name
 {
-    CharonMetalPushDebugGroup(_groups, name);
+    RevenantMetalPushDebugGroup(_groups, name);
 }
 
-- (void)charonPopDebugGroup
+- (void)revenantPopDebugGroup
 {
-    CharonMetalPopDebugGroup(_groups, self);
+    RevenantMetalPopDebugGroup(_groups, self);
 }
 
 - (id<MTLComputeCommandEncoder>)computeCommandEncoder
 {
-    [self charonBeginWork];
-    return (id<MTLComputeCommandEncoder>)[[CharonMetalComputeEncoder alloc] init];
+    [self revenantBeginWork];
+    return (id<MTLComputeCommandEncoder>)[[RevenantMetalComputeEncoder alloc] init];
 }
 
 - (id<MTLBlitCommandEncoder>)blitCommandEncoder
 {
-    [self charonBeginWork];
-    return (id<MTLBlitCommandEncoder>)[[CharonMetalBlitEncoder alloc] init];
+    [self revenantBeginWork];
+    return (id<MTLBlitCommandEncoder>)[[RevenantMetalBlitEncoder alloc] init];
 }
 
 - (id<MTLRenderCommandEncoder>)renderCommandEncoderWithDescriptor:(MTLRenderPassDescriptor *)renderPassDescriptor
 {
-    [self charonBeginWork];
-    return (id<MTLRenderCommandEncoder>)[[CharonMetalEncoder alloc] initWithDescriptor:renderPassDescriptor];
+    [self revenantBeginWork];
+    return (id<MTLRenderCommandEncoder>)[[RevenantMetalEncoder alloc] initWithDescriptor:renderPassDescriptor];
 }
 
 @end

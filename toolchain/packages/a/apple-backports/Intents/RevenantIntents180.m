@@ -1,40 +1,40 @@
 #import <Intents/Intents.h>
 #import <objc/runtime.h>
-#import "CharonIntents262.h"
-#import "../../../c/charon-coding/files/CharonCoding.h"
+#import "RevenantIntents262.h"
+#import "../../../c/revenant-coding/files/RevenantCoding.h"
 
 #pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
 #pragma clang diagnostic ignored "-Wobjc-designated-initializers"
 #pragma clang diagnostic ignored "-Wunguarded-availability-new"
 #pragma clang diagnostic ignored "-Wunguarded-availability"
 
-static NSString *const charon_message_sticker_key = @"INMessage.sticker";
-static NSString *const charon_message_reaction_key = @"INMessage.reaction";
-static NSString *const charon_message_referenced_key = @"INMessage.referencedMessage";
+static NSString *const revenant_message_sticker_key = @"INMessage.sticker";
+static NSString *const revenant_message_reaction_key = @"INMessage.reaction";
+static NSString *const revenant_message_referenced_key = @"INMessage.referencedMessage";
 
-static const void *charon_message_sticker_tag = &charon_message_sticker_tag;
-static const void *charon_message_reaction_tag = &charon_message_reaction_tag;
-static const void *charon_message_referenced_tag = &charon_message_referenced_tag;
+static const void *revenant_message_sticker_tag = &revenant_message_sticker_tag;
+static const void *revenant_message_reaction_tag = &revenant_message_reaction_tag;
+static const void *revenant_message_referenced_tag = &revenant_message_referenced_tag;
 
-static void charon_intents_keep_referenced(INMessage *message, INMessage *_Nullable referenced)
+static void revenant_intents_keep_referenced(INMessage *message, INMessage *_Nullable referenced)
 {
-    objc_setAssociatedObject(message, charon_message_referenced_tag, referenced,
+    objc_setAssociatedObject(message, revenant_message_referenced_tag, referenced,
                              OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
-static INMessage *_Nullable charon_intents_referenced(INMessage *message)
+static INMessage *_Nullable revenant_intents_referenced(INMessage *message)
 {
-    return objc_getAssociatedObject(message, charon_message_referenced_tag);
+    return objc_getAssociatedObject(message, revenant_message_referenced_tag);
 }
 
-static void charon_intents_carry_referenced(INMessage *copy, INMessage *message)
+static void revenant_intents_carry_referenced(INMessage *copy, INMessage *message)
 {
-    charon_intents_keep_referenced(copy, charon_intents_referenced(message));
+    revenant_intents_keep_referenced(copy, revenant_intents_referenced(message));
 }
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface INMessage (CharonMessage18)
+@interface INMessage (RevenantMessage18)
 
 - (instancetype)initWithIdentifier:(NSString *)identifier
             conversationIdentifier:(nullable NSString *)conversationIdentifier
@@ -68,26 +68,26 @@ NS_ASSUME_NONNULL_BEGIN
 
 NS_ASSUME_NONNULL_END
 
-@implementation INMessage (CharonMessage18)
+@implementation INMessage (RevenantMessage18)
 
 - (INSticker *)sticker
 {
-    return objc_getAssociatedObject(self, charon_message_sticker_tag);
+    return objc_getAssociatedObject(self, revenant_message_sticker_tag);
 }
 
 - (void)setSticker:(INSticker *)sticker
 {
-    objc_setAssociatedObject(self, charon_message_sticker_tag, [sticker copy], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, revenant_message_sticker_tag, [sticker copy], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
 - (INMessageReaction *)reaction
 {
-    return objc_getAssociatedObject(self, charon_message_reaction_tag);
+    return objc_getAssociatedObject(self, revenant_message_reaction_tag);
 }
 
 - (void)setReaction:(INMessageReaction *)reaction
 {
-    objc_setAssociatedObject(self, charon_message_reaction_tag, [reaction copy], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, revenant_message_reaction_tag, [reaction copy], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
 - (instancetype)initWithIdentifier:(NSString *)identifier
@@ -114,7 +114,7 @@ NS_ASSUME_NONNULL_END
                              serviceName:serviceName])) {
         self.sticker = sticker;
         self.reaction = reaction;
-        charon_intents_keep_referenced(self, referencedMessage);
+        revenant_intents_keep_referenced(self, referencedMessage);
     }
     return self;
 }
@@ -141,7 +141,7 @@ NS_ASSUME_NONNULL_END
                              messageType:messageType
                              serviceName:serviceName])) {
         self.reaction = reaction;
-        charon_intents_keep_referenced(self, referencedMessage);
+        revenant_intents_keep_referenced(self, referencedMessage);
     }
     return self;
 }
@@ -149,36 +149,36 @@ NS_ASSUME_NONNULL_END
 - (id)copyWithZone:(NSZone *)zone
 {
     INMessage *copy = [[[self class] allocWithZone:zone] init];
-    charon_intents_copy(copy, self);
+    revenant_intents_copy(copy, self);
     copy.sticker = self.sticker;
     copy.reaction = self.reaction;
-    charon_intents_carry_referenced(copy, self);
+    revenant_intents_carry_referenced(copy, self);
     return copy;
 }
 
 - (void)encodeWithCoder:(NSCoder *)coder
 {
-    charon_intents_encode(self, coder);
-    [coder encodeObject:self.sticker forKey:charon_message_sticker_key];
-    [coder encodeObject:self.reaction forKey:charon_message_reaction_key];
-    [coder encodeObject:charon_intents_referenced(self) forKey:charon_message_referenced_key];
+    revenant_intents_encode(self, coder);
+    [coder encodeObject:self.sticker forKey:revenant_message_sticker_key];
+    [coder encodeObject:self.reaction forKey:revenant_message_reaction_key];
+    [coder encodeObject:revenant_intents_referenced(self) forKey:revenant_message_referenced_key];
 }
 
 - (instancetype)initWithCoder:(NSCoder *)coder
 {
-    if ((self = charon_intents_super_init(self, [NSObject class])))
-        charon_intents_decode(self, coder);
-    INSticker *sticker = [coder decodeObjectOfClass:[INSticker class] forKey:charon_message_sticker_key];
+    if ((self = revenant_intents_super_init(self, [NSObject class])))
+        revenant_intents_decode(self, coder);
+    INSticker *sticker = [coder decodeObjectOfClass:[INSticker class] forKey:revenant_message_sticker_key];
     if (sticker) {
         self.sticker = sticker;
     }
-    INMessageReaction *reaction = [coder decodeObjectOfClass:[INMessageReaction class] forKey:charon_message_reaction_key];
+    INMessageReaction *reaction = [coder decodeObjectOfClass:[INMessageReaction class] forKey:revenant_message_reaction_key];
     if (reaction) {
         self.reaction = reaction;
     }
-    INMessage *referenced = [coder decodeObjectOfClass:[INMessage class] forKey:charon_message_referenced_key];
+    INMessage *referenced = [coder decodeObjectOfClass:[INMessage class] forKey:revenant_message_referenced_key];
     if (referenced) {
-        charon_intents_keep_referenced(self, referenced);
+        revenant_intents_keep_referenced(self, referenced);
     }
     return self;
 }

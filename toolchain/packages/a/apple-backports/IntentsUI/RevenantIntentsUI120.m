@@ -5,9 +5,9 @@
 #import <UIKit/UIKit.h>
 
 
-static NSError *charon_intents_ui_error(NSInteger code, NSString *reason)
+static NSError *revenant_intents_ui_error(NSInteger code, NSString *reason)
 {
-    return [NSError errorWithDomain:@"org.charon.intentsui" code:code
+    return [NSError errorWithDomain:@"org.revenant.intentsui" code:code
                            userInfo:@{NSLocalizedDescriptionKey: reason}];
 }
 
@@ -29,8 +29,8 @@ static NSError *charon_intents_ui_error(NSInteger code, NSString *reason)
 {
     if ((self = [super initWithFrame:CGRectZero])) {
         _style = style;
-        [self charon_applyStyle];
-        [self charon_installAction];
+        [self revenant_applyStyle];
+        [self revenant_installAction];
     }
     return self;
 }
@@ -38,17 +38,17 @@ static NSError *charon_intents_ui_error(NSInteger code, NSString *reason)
 - (void)setStyle:(INUIAddVoiceShortcutButtonStyle)style
 {
     _style = style;
-    [self charon_applyStyle];
+    [self revenant_applyStyle];
 }
 
 - (void)setShortcut:(INShortcut *)shortcut
 {
     _shortcut = shortcut;
-    [self charon_installAction];
-    [self setTitle:[self charon_phrase] forState:UIControlStateNormal];
+    [self revenant_installAction];
+    [self setTitle:[self revenant_phrase] forState:UIControlStateNormal];
 }
 
-- (void)charon_applyStyle
+- (void)revenant_applyStyle
 {
     BOOL dark = _style == INUIAddVoiceShortcutButtonStyleBlack ||
                 _style == INUIAddVoiceShortcutButtonStyleBlackOutline ||
@@ -67,7 +67,7 @@ static NSError *charon_intents_ui_error(NSInteger code, NSString *reason)
     self.layer.cornerRadius = _cornerRadius > 0 ? _cornerRadius : 5.0f;
 }
 
-- (NSString *)charon_phrase
+- (NSString *)revenant_phrase
 {
     NSString *phrase = _shortcut.intent.suggestedInvocationPhrase;
     if (phrase.length) {
@@ -98,17 +98,17 @@ static NSError *charon_intents_ui_error(NSInteger code, NSString *reason)
     [super traitCollectionDidChange:previous];
     if (_style == INUIAddVoiceShortcutButtonStyleAutomatic ||
         _style == INUIAddVoiceShortcutButtonStyleAutomaticOutline) {
-        [self charon_applyStyle];
+        [self revenant_applyStyle];
     }
 }
 
-- (void)charon_installAction
+- (void)revenant_installAction
 {
     [self removeTarget:self action:NULL forControlEvents:UIControlEventAllEvents];
-    [self addTarget:self action:@selector(charon_pressed:) forControlEvents:UIControlEventTouchUpInside];
+    [self addTarget:self action:@selector(revenant_pressed:) forControlEvents:UIControlEventTouchUpInside];
 }
 
-- (void)charon_pressed:(id)sender
+- (void)revenant_pressed:(id)sender
 {
     id<INUIAddVoiceShortcutButtonDelegate> delegate = _delegate;
     if ([delegate respondsToSelector:@selector(presentAddVoiceShortcutViewController:forAddVoiceShortcutButton:)]
@@ -140,25 +140,25 @@ static NSError *charon_intents_ui_error(NSInteger code, NSString *reason)
         self.view.backgroundColor = [UIColor whiteColor];
 
         _phrase = [[UILabel alloc] initWithFrame:CGRectZero];
-        _phrase.text = [self charon_phrase];
+        _phrase.text = [self revenant_phrase];
         _phrase.textAlignment = NSTextAlignmentCenter;
         _phrase.numberOfLines = 0;
         [self.view addSubview:_phrase];
 
         _done = [UIButton buttonWithType:UIButtonTypeSystem];
         [_done setTitle:@"Add" forState:UIControlStateNormal];
-        [_done addTarget:self action:@selector(charon_done:) forControlEvents:UIControlEventTouchUpInside];
+        [_done addTarget:self action:@selector(revenant_done:) forControlEvents:UIControlEventTouchUpInside];
         [self.view addSubview:_done];
 
         _cancel = [UIButton buttonWithType:UIButtonTypeSystem];
         [_cancel setTitle:@"Cancel" forState:UIControlStateNormal];
-        [_cancel addTarget:self action:@selector(charon_cancel:) forControlEvents:UIControlEventTouchUpInside];
+        [_cancel addTarget:self action:@selector(revenant_cancel:) forControlEvents:UIControlEventTouchUpInside];
         [self.view addSubview:_cancel];
     }
     return self;
 }
 
-- (NSString *)charon_phrase
+- (NSString *)revenant_phrase
 {
     NSString *phrase = _shortcut.intent.suggestedInvocationPhrase;
     if (phrase.length) {
@@ -179,15 +179,15 @@ static NSError *charon_intents_ui_error(NSInteger code, NSString *reason)
                                88.0f, 44.0f);
 }
 
-- (void)charon_done:(id)sender
+- (void)revenant_done:(id)sender
 {
     [_delegate addVoiceShortcutViewController:self
                        didFinishWithVoiceShortcut:nil
-                                            error:charon_intents_ui_error(-1,
+                                            error:revenant_intents_ui_error(-1,
                                                 @"this release has no shortcut database, so no voice shortcut can be added")];
 }
 
-- (void)charon_cancel:(id)sender
+- (void)revenant_cancel:(id)sender
 {
     [_delegate addVoiceShortcutViewControllerDidCancel:self];
 }
@@ -219,12 +219,12 @@ static NSError *charon_intents_ui_error(NSInteger code, NSString *reason)
 
         _save = [UIButton buttonWithType:UIButtonTypeSystem];
         [_save setTitle:@"Save" forState:UIControlStateNormal];
-        [_save addTarget:self action:@selector(charon_save:) forControlEvents:UIControlEventTouchUpInside];
+        [_save addTarget:self action:@selector(revenant_save:) forControlEvents:UIControlEventTouchUpInside];
         [self.view addSubview:_save];
 
         _delete = [UIButton buttonWithType:UIButtonTypeSystem];
         [_delete setTitle:@"Delete" forState:UIControlStateNormal];
-        [_delete addTarget:self action:@selector(charon_delete:) forControlEvents:UIControlEventTouchUpInside];
+        [_delete addTarget:self action:@selector(revenant_delete:) forControlEvents:UIControlEventTouchUpInside];
         [self.view addSubview:_delete];
     }
     return self;
@@ -241,15 +241,15 @@ static NSError *charon_intents_ui_error(NSInteger code, NSString *reason)
                                88.0f, 44.0f);
 }
 
-- (void)charon_save:(id)sender
+- (void)revenant_save:(id)sender
 {
     [_delegate editVoiceShortcutViewController:self
                        didUpdateVoiceShortcut:nil
-                                         error:charon_intents_ui_error(-1,
+                                         error:revenant_intents_ui_error(-1,
                                              @"this release has no shortcut database, so a voice shortcut's phrase cannot be changed")];
 }
 
-- (void)charon_delete:(id)sender
+- (void)revenant_delete:(id)sender
 {
     [_delegate editVoiceShortcutViewController:self
             didDeleteVoiceShortcutWithIdentifier:_voiceShortcut.identifier];

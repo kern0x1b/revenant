@@ -52,7 +52,7 @@ library=${MPITEM_LIBRARY:-$(cd "$here/../../../../packages/a/apple-backports/Med
 }
 echo "library: $library"
 
-bin=$(runs_folder charon-mediaplayeritem)/probe-$$
+bin=$(runs_folder revenant-mediaplayeritem)/probe-$$
 rm -f "$bin"
 xcrun clang -fobjc-arc -framework Foundation -framework MediaPlayer -o "$bin" "$here/probe.m"
 # The status is taken through `|| status=$?`, not by reading $? on the next line: under `set -e` the probe

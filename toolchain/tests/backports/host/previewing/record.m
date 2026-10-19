@@ -1,9 +1,9 @@
 #import <UIKit/UIKit.h>
 #import "previewing-cases.h"
 
-void charon_windowed_run(UIWindow *window);
+void revenant_windowed_run(UIWindow *window);
 
-void charon_windowed_run(UIWindow *window)
+void revenant_windowed_run(UIWindow *window)
 {
     NSMutableDictionary *records = [NSMutableDictionary dictionary];
     previewing_run(window, ^(NSString *name, NSString *value) {

@@ -9,7 +9,7 @@ int main(int argc, char **argv)
 {
     @autoreleasepool {
         if (argc > 1)
-            charon_log_to(@(argv[1]));
+            revenant_log_to(@(argv[1]));
         AVAudioSession *session = [AVAudioSession sharedInstance];
         NSError *error = nil;
         CHECK([session setCategory:AVAudioSessionCategoryPlayAndRecord error:&error] && [session setActive:YES error:&error], "a record session starts");
@@ -31,7 +31,7 @@ int main(int argc, char **argv)
         CHECK_EQUAL(refused.domain, NSOSStatusErrorDomain, "in the domain of OS status codes");
         CHECK(refused.code == AVAudioSessionErrorCodeResourceNotAvailable, "with the code of a resource that is not there");
         CHECK(session.preferredInput == nil, "and nothing is preferred");
-        printf("%d checks, %d failures\n", charon_checks, charon_failures);
-        return charon_failures;
+        printf("%d checks, %d failures\n", revenant_checks, revenant_failures);
+        return revenant_failures;
     }
 }

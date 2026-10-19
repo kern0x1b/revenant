@@ -151,15 +151,15 @@ int main(void)
     @autoreleasepool {
         for (NSString *cls in @[@"PKPaymentToken", @"PKPayment", @"PKPaymentOrderDetails", @"PKPaymentMethod"]) {
             NSString *host = NSClassFromString(cls) ? @"yes" : @"no";
-            NSString *port = NSClassFromString([@"charonHost_" stringByAppendingString:cls]) ? @"yes" : @"no";
+            NSString *port = NSClassFromString([@"revenantHost_" stringByAppendingString:cls]) ? @"yes" : @"no";
             report([cls stringByAppendingString:@" exists"], host, port);
         }
         for (NSString *cls in @[@"PKPaymentToken", @"PKPayment", @"PKPaymentOrderDetails", @"PKPaymentMethod"]) {
             NSString *host = [NSClassFromString(cls) respondsToSelector:@selector(supportsSecureCoding)]
                 ? ([NSClassFromString(cls) supportsSecureCoding] ? @"yes" : @"no") : @"no";
-            NSString *port = [NSClassFromString([@"charonHost_" stringByAppendingString:cls])
+            NSString *port = [NSClassFromString([@"revenantHost_" stringByAppendingString:cls])
                 respondsToSelector:@selector(supportsSecureCoding)]
-                ? ([NSClassFromString([@"charonHost_" stringByAppendingString:cls]) supportsSecureCoding] ? @"yes" : @"no")
+                ? ([NSClassFromString([@"revenantHost_" stringByAppendingString:cls]) supportsSecureCoding] ? @"yes" : @"no")
                 : @"no";
             report([cls stringByAppendingString:@" supportsSecureCoding"], host, port);
         }
@@ -167,14 +167,14 @@ int main(void)
         NSArray *tokenGetters = @[@"paymentData", @"transactionIdentifier", @"paymentInstrumentName", @"paymentNetwork"];
         for (NSString *getter in tokenGetters) {
             id hostToken = make(@"PKPaymentToken", @"init", nil);
-            id portToken = make(@"charonHost_PKPaymentToken", @"init", nil);
+            id portToken = make(@"revenantHost_PKPaymentToken", @"init", nil);
             report([@"fresh token " stringByAppendingString:getter], show(get(hostToken, getter)), show(get(portToken, getter)));
         }
 
         NSMutableData *hostData = [NSMutableData dataWithBytes:"abc" length:3];
         NSMutableData *portData = [NSMutableData dataWithBytes:"abc" length:3];
         id hostToken = make(@"PKPaymentToken", @"init", nil);
-        id portToken = make(@"charonHost_PKPaymentToken", @"init", nil);
+        id portToken = make(@"revenantHost_PKPaymentToken", @"init", nil);
         set(hostToken, @"setPaymentData:", hostData);
         set(portToken, @"setPaymentData:", portData);
         hostData.length = 1;
@@ -198,7 +198,7 @@ int main(void)
             printf("  port token archive error: %s\n", portArchiveError.description.UTF8String);
         id hostBack = [NSKeyedUnarchiver unarchivedObjectOfClass:NSClassFromString(@"PKPaymentToken") fromData:hostArchive error:NULL];
         NSError *portError = nil;
-        id portBack = [NSKeyedUnarchiver unarchivedObjectOfClass:NSClassFromString(@"charonHost_PKPaymentToken") fromData:portArchive error:&portError];
+        id portBack = [NSKeyedUnarchiver unarchivedObjectOfClass:NSClassFromString(@"revenantHost_PKPaymentToken") fromData:portArchive error:&portError];
         if (!portBack)
             printf("  port token unarchive error: %s\n", portError.description.UTF8String);
         report(@"token round trip keeps transactionIdentifier", show(get(hostBack, @"transactionIdentifier")),
@@ -206,12 +206,12 @@ int main(void)
         report(@"token round trip keeps paymentData", show(get(hostBack, @"paymentData")), show(get(portBack, @"paymentData")));
 
         id hostPayment = make(@"PKPayment", @"initWithToken:", hostToken);
-        id portPayment = make(@"charonHost_PKPayment", @"initWithToken:", portToken);
+        id portPayment = make(@"revenantHost_PKPayment", @"initWithToken:", portToken);
         report(@"payment token is the same object", [get(hostPayment, @"token") isEqual:hostToken] ? @"same" : @"other",
                [get(portPayment, @"token") isEqual:portToken] ? @"same" : @"other");
 
         id hostEmpty = make(@"PKPayment", @"init", nil);
-        id portEmpty = make(@"charonHost_PKPayment", @"init", nil);
+        id portEmpty = make(@"revenantHost_PKPayment", @"init", nil);
         report(@"empty payment token", show(get(hostEmpty, @"token")), show(get(portEmpty, @"token")));
         report(@"empty payment shippingMethod", show(get(hostEmpty, @"shippingMethod")), show(get(portEmpty, @"shippingMethod")));
 
@@ -225,18 +225,18 @@ int main(void)
         NSData *hostPaymentArchive = [NSKeyedArchiver archivedDataWithRootObject:hostPayment requiringSecureCoding:YES error:NULL];
         NSData *portPaymentArchive = [NSKeyedArchiver archivedDataWithRootObject:portPayment requiringSecureCoding:YES error:NULL];
         id hostPaymentBack = [NSKeyedUnarchiver unarchivedObjectOfClass:NSClassFromString(@"PKPayment") fromData:hostPaymentArchive error:NULL];
-        id portPaymentBack = [NSKeyedUnarchiver unarchivedObjectOfClass:NSClassFromString(@"charonHost_PKPayment") fromData:portPaymentArchive error:NULL];
+        id portPaymentBack = [NSKeyedUnarchiver unarchivedObjectOfClass:NSClassFromString(@"revenantHost_PKPayment") fromData:portPaymentArchive error:NULL];
         report(@"payment round trip keeps the token's identifier",
                show(get(get(hostPaymentBack, @"token"), @"transactionIdentifier")),
                show(get(get(portPaymentBack, @"token"), @"transactionIdentifier")));
         NSURL *url = [NSURL URLWithString:@"https://example.com/w"];
         id hostOrder = make4(@"PKPaymentOrderDetails", @"type", @"order-1", url, @"token");
-        id portOrder = make4(@"charonHost_PKPaymentOrderDetails", @"type", @"order-1", url, @"token");
+        id portOrder = make4(@"revenantHost_PKPaymentOrderDetails", @"type", @"order-1", url, @"token");
         for (NSString *getter in @[@"orderTypeIdentifier", @"orderIdentifier", @"webServiceURL", @"authenticationToken"]) {
             report([@"order " stringByAppendingString:getter], show(get(hostOrder, getter)), show(get(portOrder, getter)));
         }
         id hostEmptyOrder = make(@"PKPaymentOrderDetails", @"init", nil);
-        id portEmptyOrder = make(@"charonHost_PKPaymentOrderDetails", @"init", nil);
+        id portEmptyOrder = make(@"revenantHost_PKPaymentOrderDetails", @"init", nil);
         report(@"fresh order identifier", show(get(hostEmptyOrder, @"orderIdentifier")),
                show(get(portEmptyOrder, @"orderIdentifier")));
 
@@ -252,7 +252,7 @@ int main(void)
         NSData *hostOrderArchive = [NSKeyedArchiver archivedDataWithRootObject:hostOrder requiringSecureCoding:YES error:NULL];
         NSData *portOrderArchive = [NSKeyedArchiver archivedDataWithRootObject:portOrder requiringSecureCoding:YES error:NULL];
         id hostOrderBack = [NSKeyedUnarchiver unarchivedObjectOfClass:NSClassFromString(@"PKPaymentOrderDetails") fromData:hostOrderArchive error:NULL];
-        id portOrderBack = [NSKeyedUnarchiver unarchivedObjectOfClass:NSClassFromString(@"charonHost_PKPaymentOrderDetails") fromData:portOrderArchive error:NULL];
+        id portOrderBack = [NSKeyedUnarchiver unarchivedObjectOfClass:NSClassFromString(@"revenantHost_PKPaymentOrderDetails") fromData:portOrderArchive error:NULL];
         report(@"order round trip keeps its identifier", show(get(hostOrderBack, @"orderIdentifier")),
                show(get(portOrderBack, @"orderIdentifier")));
         report(@"order round trip keeps its URL", show(get(get(hostOrderBack, @"webServiceURL"), @"absoluteString")),
@@ -261,12 +261,12 @@ int main(void)
         report(@"order archive keys and value classes", archiveFields(hostOrderArchive, @"PKPaymentOrderDetails"),
                archiveFields(portOrderArchive, @"PKPaymentOrderDetails"));
         report(@"port decodes the host's order archive", orderValues(decodeAs(hostOrderArchive, @"PKPaymentOrderDetails",
-               @"charonHost_PKPaymentOrderDetails")), orderValues(hostOrder));
+               @"revenantHost_PKPaymentOrderDetails")), orderValues(hostOrder));
         report(@"host decodes the port's order archive", orderValues(decodeAs(portOrderArchive,
-               @"charonHost_PKPaymentOrderDetails", @"PKPaymentOrderDetails")), orderValues(hostOrder));
+               @"revenantHost_PKPaymentOrderDetails", @"PKPaymentOrderDetails")), orderValues(hostOrder));
 
         id hostMethod = make(@"PKPaymentMethod", @"init", nil);
-        id portMethod = make(@"charonHost_PKPaymentMethod", @"init", nil);
+        id portMethod = make(@"revenantHost_PKPaymentMethod", @"init", nil);
         report(@"fresh method type", typeOf(hostMethod), typeOf(portMethod));
         for (NSString *getter in @[@"displayName", @"network", @"paymentPass"]) {
             report([@"fresh method " stringByAppendingString:getter], show(get(hostMethod, getter)), show(get(portMethod, getter)));
@@ -288,7 +288,7 @@ int main(void)
         id hostFromPass = [NSClassFromString(@"PKPaymentMethod") alloc];
         hostFromPass = ((id (*)(id, SEL, id, BOOL))objc_msgSend)(hostFromPass,
             NSSelectorFromString(@"initWithPaymentPass:obfuscateNetworks:"), pass, YES);
-        id portFromPass = [NSClassFromString(@"charonHost_PKPaymentMethod") alloc];
+        id portFromPass = [NSClassFromString(@"revenantHost_PKPaymentMethod") alloc];
         portFromPass = ((id (*)(id, SEL, id, BOOL))objc_msgSend)(portFromPass,
             NSSelectorFromString(@"initWithPaymentPass:obfuscateNetworks:"), pass, YES);
         report(@"method from a fresh pass type", typeOf(hostFromPass), typeOf(portFromPass));
@@ -306,8 +306,8 @@ int main(void)
         NSArray *carried = @[@"type", @"displayName", @"network", @"paymentPass"];
         report(@"method archive keys and value classes", fieldsNamed(archiveFields(hostMethodArchive, @"PKPaymentMethod"), carried),
                fieldsNamed(archiveFields(portMethodArchive, @"PKPaymentMethod"), carried));
-        id portFromHostMethod = decodeAs(hostMethodArchive, @"PKPaymentMethod", @"charonHost_PKPaymentMethod");
-        id hostFromPortMethod = decodeAs(portMethodArchive, @"charonHost_PKPaymentMethod", @"PKPaymentMethod");
+        id portFromHostMethod = decodeAs(hostMethodArchive, @"PKPaymentMethod", @"revenantHost_PKPaymentMethod");
+        id hostFromPortMethod = decodeAs(portMethodArchive, @"revenantHost_PKPaymentMethod", @"PKPaymentMethod");
         report(@"port decodes the host's method archive", [NSString stringWithFormat:@"%@ %@", typeOf(portFromHostMethod),
                show(get(portFromHostMethod, @"displayName"))], [NSString stringWithFormat:@"%@ %@", typeOf(hostMethod),
                show(get(hostMethod, @"displayName"))]);

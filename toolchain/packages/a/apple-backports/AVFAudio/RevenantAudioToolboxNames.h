@@ -1,2 +1,2 @@
-#define CharonAudioComponentRegistrationsChangedName @"com.apple.coreaudio.AudioComponentRegistrationsChanged"
-#define CharonAudioComponentInstanceInvalidatedName @"com.apple.coreaudio.AudioComponentInstanceInvalidated"
+#define RevenantAudioComponentRegistrationsChangedName @"com.apple.coreaudio.AudioComponentRegistrationsChanged"
+#define RevenantAudioComponentInstanceInvalidatedName @"com.apple.coreaudio.AudioComponentInstanceInvalidated"

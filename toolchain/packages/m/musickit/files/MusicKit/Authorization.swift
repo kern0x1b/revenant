@@ -25,29 +25,29 @@ public enum MusicDeveloperToken {
     }
 
     public static func mint(keyIdentifier: String, teamIdentifier: String, privateKeyPEM: String) -> String? {
-        guard let key = CharonBase64URL.decode(CharonBase64URL.pemBody(privateKeyPEM)),
+        guard let key = RevenantBase64URL.decode(RevenantBase64URL.pemBody(privateKeyPEM)),
               key.count > 0 else { return nil }
         let now = Int(Date().timeIntervalSince1970)
         let header = #"{"alg":"ES256","kid":"\#(keyIdentifier)"}"#
         let payload = #"{"iss":"\#(teamIdentifier)","iat":\#(now),"exp":\#(now + 3600)}"#
-        let encodedHeader = CharonBase64URL.encode(Data(header.utf8))
-        let encodedPayload = CharonBase64URL.encode(Data(payload.utf8))
+        let encodedHeader = RevenantBase64URL.encode(Data(header.utf8))
+        let encodedPayload = RevenantBase64URL.encode(Data(payload.utf8))
         let signing = "\(encodedHeader).\(encodedPayload)"
         let message = Array(signing.utf8)
         var der = [UInt8](repeating: 0, count: 72)
         let keyBytes = Array(key)
         let length = keyBytes.withUnsafeBufferPointer { privateKey in
             message.withUnsafeBufferPointer { body in
-                CharonMusicKitSignES256(privateKey.baseAddress, privateKey.count,
+                RevenantMusicKitSignES256(privateKey.baseAddress, privateKey.count,
                                        body.baseAddress, body.count, &der, der.count)
             }
         }
         guard length > 0 else { return nil }
-        return "\(signing).\(CharonBase64URL.encode(Data(der[0..<Int(length)])))"
+        return "\(signing).\(RevenantBase64URL.encode(Data(der[0..<Int(length)])))"
     }
 }
 
-enum CharonBase64URL {
+enum RevenantBase64URL {
     static func pemBody(_ pem: String) -> String {
         guard let begin = pem.range(of: "-----BEGIN"),
               let end = pem.range(of: "-----END", range: begin.upperBound ..< pem.endIndex) else {

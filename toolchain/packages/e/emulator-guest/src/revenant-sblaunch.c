@@ -20,7 +20,7 @@ static double now(void)
 
 static void usage(void)
 {
-    fprintf(stderr, "usage: charon-sblaunch [--wait SECONDS] [--stdout PATH] [--stderr PATH] <bundle identifier>\n"
+    fprintf(stderr, "usage: revenant-sblaunch [--wait SECONDS] [--stdout PATH] [--stderr PATH] <bundle identifier>\n"
                     "  --wait: retry until SpringBoard takes the launch and the application is frontmost\n");
 }
 
@@ -32,7 +32,7 @@ static void say(const char* state)
     if (strcmp(last, state) == 0)
         return;
     snprintf(last, sizeof last, "%s", state);
-    printf("charon-sblaunch: %.1f s: %s\n", now() - started, state);
+    printf("revenant-sblaunch: %.1f s: %s\n", now() - started, state);
     fflush(stdout);
 }
 
@@ -79,7 +79,7 @@ int main(int argc, char** argv)
     launch_function launch = services ? (launch_function)dlsym(services, "SBSLaunchApplicationWithIdentifier") : NULL;
     debug_launch_function debug_launch = services ? (debug_launch_function)dlsym(services, "SBSLaunchApplicationForDebugging") : NULL;
     if (!launch || ((out || err) && !debug_launch)) {
-        fprintf(stderr, "charon-sblaunch: SpringBoardServices has no %s\n",
+        fprintf(stderr, "revenant-sblaunch: SpringBoardServices has no %s\n",
                 launch ? "SBSLaunchApplicationForDebugging, which the application's output needs" : "SBSLaunchApplicationWithIdentifier");
         return 3;
     }
@@ -88,7 +88,7 @@ int main(int argc, char** argv)
     CFStringRef (*error_string)(int) = (CFStringRef (*)(int))dlsym(services, "SBSApplicationLaunchingErrorString");
     CFStringRef (*frontmost)(void) = (CFStringRef (*)(void))dlsym(services, "SBSCopyFrontmostApplicationDisplayIdentifier");
     if (wait > 0 && !frontmost) {
-        fprintf(stderr, "charon-sblaunch: SpringBoardServices has no SBSCopyFrontmostApplicationDisplayIdentifier, which --wait needs\n");
+        fprintf(stderr, "revenant-sblaunch: SpringBoardServices has no SBSCopyFrontmostApplicationDisplayIdentifier, which --wait needs\n");
         return 3;
     }
 
@@ -133,7 +133,7 @@ int main(int argc, char** argv)
     if (result != 0) {
         char reason[96];
         c_string(error_string ? error_string(result) : NULL, reason, sizeof reason);
-        fprintf(stderr, "charon-sblaunch: SpringBoard refused %s with %d (%s)%s\n", bundle, result, reason,
+        fprintf(stderr, "revenant-sblaunch: SpringBoard refused %s with %d (%s)%s\n", bundle, result, reason,
                 screen(locked, passcode));
         return 1;
     }
@@ -154,7 +154,7 @@ int main(int argc, char** argv)
             break;
         usleep(500000);
     }
-    fprintf(stderr, "charon-sblaunch: SpringBoard took the launch of %s, and after %.0f seconds %s is frontmost\n",
+    fprintf(stderr, "revenant-sblaunch: SpringBoard took the launch of %s, and after %.0f seconds %s is frontmost\n",
             bundle, wait, front);
     return 4;
 }

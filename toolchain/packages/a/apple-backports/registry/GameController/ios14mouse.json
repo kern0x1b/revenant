@@ -8,7 +8,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "reason": "an external mouse is peripheral the owner may attach over Bluetooth, not hardware absent from the phone (COORDINATION.md verdict, 2026-09-22); §2's capability-honest device-template treatment applies: the class exists, the profile is real, only the fact of a physical mouse being connected is not detected",
-      "effect": "a real GCMouseInput, built through the same spec-driven element pipeline (GCPhysicalInputProfile14.m/CharonGCTables.m) GCController's own profiles use; every GCMouse instance carries one",
+      "effect": "a real GCMouseInput, built through the same spec-driven element pipeline (GCPhysicalInputProfile14.m/RevenantGCTables.m) GCController's own profiles use; every GCMouse instance carries one",
       "facts": "facts/GameController/Mouse.md",
       "source": "the header of iOS 16.4 for the contract; this port's own GCController.m for the pattern (mouseInput mirrors GCController's profile properties)"
     },

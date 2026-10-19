@@ -1,13 +1,13 @@
 #import <objc/message.h>
 #import <objc/runtime.h>
-#import "CharonScenes.h"
+#import "RevenantScenes.h"
 
-static UIWindowScene *charon_scene_object;
-static NSURL *charon_launch_url;
-static UISceneConnectionOptions *charon_launch_options;
-static BOOL charon_connected;
+static UIWindowScene *revenant_scene_object;
+static NSURL *revenant_launch_url;
+static UISceneConnectionOptions *revenant_launch_options;
+static BOOL revenant_connected;
 
-static NSDictionary *charon_manifest_entry(NSString *name)
+static NSDictionary *revenant_manifest_entry(NSString *name)
 {
     NSDictionary *manifest = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"UIApplicationSceneManifest"];
     NSDictionary *configurations = [manifest isKindOfClass:[NSDictionary class]] ? manifest[@"UISceneConfigurations"] : nil;
@@ -20,7 +20,7 @@ static NSDictionary *charon_manifest_entry(NSString *name)
     return nil;
 }
 
-static void charon_fill_configuration(UISceneConfiguration *configuration, NSDictionary *entry)
+static void revenant_fill_configuration(UISceneConfiguration *configuration, NSDictionary *entry)
 {
     NSString *sceneClass = entry[@"UISceneClassName"], *delegateClass = entry[@"UISceneDelegateClassName"], *storyboard = entry[@"UISceneStoryboardFile"];
     if (sceneClass && !configuration.sceneClass)
@@ -31,18 +31,18 @@ static void charon_fill_configuration(UISceneConfiguration *configuration, NSDic
         configuration.storyboard = [UIStoryboard storyboardWithName:storyboard bundle:nil];
 }
 
-static UISceneConfiguration *charon_manifest_configuration(void)
+static UISceneConfiguration *revenant_manifest_configuration(void)
 {
-    NSDictionary *entry = charon_manifest_entry(nil);
+    NSDictionary *entry = revenant_manifest_entry(nil);
     UISceneConfiguration *configuration = [UISceneConfiguration configurationWithName:entry[@"UISceneConfigurationName"] sessionRole:UIWindowSceneSessionRoleApplication];
-    charon_fill_configuration(configuration, entry);
+    revenant_fill_configuration(configuration, entry);
     return configuration;
 }
 
-static NSString *charon_session_identifier(void)
+static NSString *revenant_session_identifier(void)
 {
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-    NSString *key = @"space.kern0x1b.charon.UISceneSessionIdentifier";
+    NSString *key = @"space.kern0x1b.revenant.UISceneSessionIdentifier";
     NSString *identifier = [defaults stringForKey:key];
     if (!identifier) {
         CFUUIDRef uuid = CFUUIDCreate(NULL);
@@ -53,12 +53,12 @@ static NSString *charon_session_identifier(void)
     return identifier;
 }
 
-static NSString *charon_restoration_key(void)
+static NSString *revenant_restoration_key(void)
 {
-    return [@"space.kern0x1b.charon.UISceneStateRestoration." stringByAppendingString:charon_session_identifier()];
+    return [@"space.kern0x1b.revenant.UISceneStateRestoration." stringByAppendingString:revenant_session_identifier()];
 }
 
-static NSSet *charon_restoration_classes(void)
+static NSSet *revenant_restoration_classes(void)
 {
     static NSSet *classes;
     static dispatch_once_t once;
@@ -69,7 +69,7 @@ static NSSet *charon_restoration_classes(void)
     return classes;
 }
 
-static NSData *charon_archive_activity(NSUserActivity *activity)
+static NSData *revenant_archive_activity(NSUserActivity *activity)
 {
     NSMutableDictionary *record = [NSMutableDictionary dictionary];
     record[@"type"] = activity.activityType;
@@ -95,112 +95,112 @@ static NSData *charon_archive_activity(NSUserActivity *activity)
     return data;
 }
 
-static id charon_kept(id value, Class wanted)
+static id revenant_kept(id value, Class wanted)
 {
     return [value isKindOfClass:wanted] ? value : nil;
 }
 
-static NSUserActivity *charon_unarchive_activity(NSData *data)
+static NSUserActivity *revenant_unarchive_activity(NSData *data)
 {
     NSError *error = nil;
     NSDictionary *record = nil;
     @try {
-        record = [NSKeyedUnarchiver unarchivedObjectOfClasses:charon_restoration_classes() fromData:data error:&error];
+        record = [NSKeyedUnarchiver unarchivedObjectOfClasses:revenant_restoration_classes() fromData:data error:&error];
     } @catch (NSException *exception) {
         return nil;
     }
     if (![record isKindOfClass:[NSDictionary class]] || ![record[@"type"] isKindOfClass:[NSString class]])
         return nil;
     NSUserActivity *activity = [[NSUserActivity alloc] initWithActivityType:record[@"type"]];
-    activity.title = charon_kept(record[@"title"], [NSString class]);
-    NSDictionary *userInfo = charon_kept(record[@"userInfo"], [NSDictionary class]);
+    activity.title = revenant_kept(record[@"title"], [NSString class]);
+    NSDictionary *userInfo = revenant_kept(record[@"userInfo"], [NSDictionary class]);
     if (userInfo)
         activity.userInfo = userInfo;
-    activity.webpageURL = charon_kept(record[@"webpageURL"], [NSURL class]);
-    activity.requiredUserInfoKeys = charon_kept(record[@"requiredUserInfoKeys"], [NSSet class]);
-    activity.expirationDate = charon_kept(record[@"expirationDate"], [NSDate class]);
-    activity.keywords = charon_kept(record[@"keywords"], [NSSet class]);
+    activity.webpageURL = revenant_kept(record[@"webpageURL"], [NSURL class]);
+    activity.requiredUserInfoKeys = revenant_kept(record[@"requiredUserInfoKeys"], [NSSet class]);
+    activity.expirationDate = revenant_kept(record[@"expirationDate"], [NSDate class]);
+    activity.keywords = revenant_kept(record[@"keywords"], [NSSet class]);
     return activity;
 }
 
-static void charon_save_restoration(void)
+static void revenant_save_restoration(void)
 {
-    UIScene *scene = charon_scene_object;
+    UIScene *scene = revenant_scene_object;
     id<UISceneDelegate> delegate = scene.delegate;
-    if (!scene || !charon_connected || ![delegate respondsToSelector:@selector(stateRestorationActivityForScene:)])
+    if (!scene || !revenant_connected || ![delegate respondsToSelector:@selector(stateRestorationActivityForScene:)])
         return;
     NSUserActivity *activity = [delegate stateRestorationActivityForScene:scene];
-    NSData *data = activity ? charon_archive_activity(activity) : nil;
+    NSData *data = activity ? revenant_archive_activity(activity) : nil;
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
     if (data)
-        [defaults setObject:data forKey:charon_restoration_key()];
+        [defaults setObject:data forKey:revenant_restoration_key()];
     else
-        [defaults removeObjectForKey:charon_restoration_key()];
+        [defaults removeObjectForKey:revenant_restoration_key()];
     [defaults synchronize];
 }
 
-static NSUserActivity *charon_saved_restoration(void)
+static NSUserActivity *revenant_saved_restoration(void)
 {
-    NSData *data = [[NSUserDefaults standardUserDefaults] dataForKey:charon_restoration_key()];
-    return data ? charon_unarchive_activity(data) : nil;
+    NSData *data = [[NSUserDefaults standardUserDefaults] dataForKey:revenant_restoration_key()];
+    return data ? revenant_unarchive_activity(data) : nil;
 }
 
-UIWindowScene *charon_scene(void)
+UIWindowScene *revenant_scene(void)
 {
     @synchronized([UIApplication class]) {
-        if (charon_scene_object)
-            return charon_scene_object;
+        if (revenant_scene_object)
+            return revenant_scene_object;
         id<UIApplicationDelegate> delegate = [UIApplication sharedApplication].delegate;
         if (!delegate)
             return nil;
-        UISceneConfiguration *configuration = charon_manifest_configuration();
-        UISceneSession *session = [[UISceneSession alloc] initCharonWithRole:UIWindowSceneSessionRoleApplication configuration:configuration
-                                                          persistentIdentifier:charon_session_identifier()];
-        UISceneConnectionOptions *options = charon_launch_options ?: [[UISceneConnectionOptions alloc] initCharonWithURLContexts:nil sourceApplication:nil];
+        UISceneConfiguration *configuration = revenant_manifest_configuration();
+        UISceneSession *session = [[UISceneSession alloc] initRevenantWithRole:UIWindowSceneSessionRoleApplication configuration:configuration
+                                                          persistentIdentifier:revenant_session_identifier()];
+        UISceneConnectionOptions *options = revenant_launch_options ?: [[UISceneConnectionOptions alloc] initRevenantWithURLContexts:nil sourceApplication:nil];
         if ([delegate respondsToSelector:@selector(application:configurationForConnectingSceneSession:options:)]) {
             UISceneConfiguration *chosen = [[delegate application:[UIApplication sharedApplication] configurationForConnectingSceneSession:session options:options] copy];
             if (chosen) {
                 if (chosen.name)
-                    charon_fill_configuration(chosen, charon_manifest_entry(chosen.name));
-                session = [[UISceneSession alloc] initCharonWithRole:UIWindowSceneSessionRoleApplication configuration:chosen persistentIdentifier:session.persistentIdentifier];
+                    revenant_fill_configuration(chosen, revenant_manifest_entry(chosen.name));
+                session = [[UISceneSession alloc] initRevenantWithRole:UIWindowSceneSessionRoleApplication configuration:chosen persistentIdentifier:session.persistentIdentifier];
             }
         }
         Class sceneClass = session.configuration.sceneClass ?: [UIWindowScene class];
-        charon_scene_object = [[sceneClass alloc] initWithSession:session connectionOptions:options];
-        return charon_scene_object;
+        revenant_scene_object = [[sceneClass alloc] initWithSession:session connectionOptions:options];
+        return revenant_scene_object;
     }
 }
 
-static void charon_post(NSNotificationName name, UIScene *scene)
+static void revenant_post(NSNotificationName name, UIScene *scene)
 {
     [[NSNotificationCenter defaultCenter] postNotificationName:name object:scene];
 }
 
-static void charon_transition(UISceneActivationState state, SEL callback, NSNotificationName name)
+static void revenant_transition(UISceneActivationState state, SEL callback, NSNotificationName name)
 {
-    UIScene *scene = charon_scene_object;
-    if (!scene || !charon_connected)
+    UIScene *scene = revenant_scene_object;
+    if (!scene || !revenant_connected)
         return;
-    [scene charon_setActivationState:state];
+    [scene revenant_setActivationState:state];
     id<UISceneDelegate> delegate = scene.delegate;
     if ([delegate respondsToSelector:callback])
         ((void (*)(id, SEL, UIScene *))objc_msgSend)(delegate, callback, scene);
-    charon_post(name, scene);
+    revenant_post(name, scene);
 }
 
-static void charon_enter_foreground(void)
+static void revenant_enter_foreground(void)
 {
-    if (charon_scene_object.activationState == UISceneActivationStateBackground)
-        charon_transition(UISceneActivationStateForegroundInactive, @selector(sceneWillEnterForeground:), UISceneWillEnterForegroundNotification);
+    if (revenant_scene_object.activationState == UISceneActivationStateBackground)
+        revenant_transition(UISceneActivationStateForegroundInactive, @selector(sceneWillEnterForeground:), UISceneWillEnterForegroundNotification);
 }
 
-static UIOpenURLContext *charon_context(NSURL *url, NSString *source, id annotation)
+static UIOpenURLContext *revenant_context(NSURL *url, NSString *source, id annotation)
 {
-    UISceneOpenURLOptions *options = [[UISceneOpenURLOptions alloc] initCharonWithSourceApplication:source annotation:annotation openInPlace:NO];
-    return [[UIOpenURLContext alloc] initCharonWithURL:url options:options];
+    UISceneOpenURLOptions *options = [[UISceneOpenURLOptions alloc] initRevenantWithSourceApplication:source annotation:annotation openInPlace:NO];
+    return [[UIOpenURLContext alloc] initRevenantWithURL:url options:options];
 }
 
-static void charon_hook_open_url(id delegate)
+static void revenant_hook_open_url(id delegate)
 {
     Class cls = object_getClass(delegate);
     static char hooked;
@@ -211,14 +211,14 @@ static void charon_hook_open_url(id delegate)
     Method existing = class_getInstanceMethod(cls, selector);
     IMP original = existing ? method_getImplementation(existing) : NULL;
     IMP replacement = imp_implementationWithBlock(^BOOL(id self, UIApplication *application, NSURL *url, NSString *source, id annotation) {
-        UIScene *scene = charon_scene_object;
+        UIScene *scene = revenant_scene_object;
         id<UISceneDelegate> sceneDelegate = scene.delegate;
-        if (charon_launch_url && [charon_launch_url isEqual:url]) {
-            charon_launch_url = nil;
+        if (revenant_launch_url && [revenant_launch_url isEqual:url]) {
+            revenant_launch_url = nil;
             return YES;
         }
         if ([sceneDelegate respondsToSelector:@selector(scene:openURLContexts:)]) {
-            [sceneDelegate scene:scene openURLContexts:[NSSet setWithObject:charon_context(url, source, annotation)]];
+            [sceneDelegate scene:scene openURLContexts:[NSSet setWithObject:revenant_context(url, source, annotation)]];
             return YES;
         }
         return original ? ((BOOL (*)(id, SEL, UIApplication *, NSURL *, NSString *, id))original)(self, selector, application, url, source, annotation) : NO;
@@ -227,17 +227,17 @@ static void charon_hook_open_url(id delegate)
         method_setImplementation(existing, replacement);
 }
 
-static void charon_connect(NSDictionary *launchOptions)
+static void revenant_connect(NSDictionary *launchOptions)
 {
     NSURL *url = launchOptions[UIApplicationLaunchOptionsURLKey];
     NSString *source = launchOptions[UIApplicationLaunchOptionsSourceApplicationKey];
-    NSSet *contexts = url ? [NSSet setWithObject:charon_context(url, source, launchOptions[UIApplicationLaunchOptionsAnnotationKey])] : nil;
-    charon_launch_url = url;
-    charon_launch_options = [[UISceneConnectionOptions alloc] initCharonWithURLContexts:contexts sourceApplication:source];
-    UIWindowScene *scene = charon_scene();
+    NSSet *contexts = url ? [NSSet setWithObject:revenant_context(url, source, launchOptions[UIApplicationLaunchOptionsAnnotationKey])] : nil;
+    revenant_launch_url = url;
+    revenant_launch_options = [[UISceneConnectionOptions alloc] initRevenantWithURLContexts:contexts sourceApplication:source];
+    UIWindowScene *scene = revenant_scene();
     if (!scene)
         return;
-    NSUserActivity *restored = charon_saved_restoration();
+    NSUserActivity *restored = revenant_saved_restoration();
     if (restored)
         scene.session.stateRestorationActivity = restored;
     UISceneConfiguration *configuration = scene.session.configuration;
@@ -252,52 +252,52 @@ static void charon_connect(NSDictionary *launchOptions)
             [(id<UIWindowSceneDelegate>)delegate setWindow:window];
         [window makeKeyAndVisible];
     }
-    charon_connected = YES;
+    revenant_connected = YES;
     if ([delegate respondsToSelector:@selector(scene:willConnectToSession:options:)])
-        [delegate scene:scene willConnectToSession:scene.session options:charon_launch_options];
+        [delegate scene:scene willConnectToSession:scene.session options:revenant_launch_options];
     if (restored && [delegate respondsToSelector:@selector(scene:restoreInteractionStateWithUserActivity:)])
         [delegate scene:scene restoreInteractionStateWithUserActivity:restored];
-    [scene charon_setActivationState:UISceneActivationStateBackground];
-    charon_post(UISceneWillConnectNotification, scene);
+    [scene revenant_setActivationState:UISceneActivationStateBackground];
+    revenant_post(UISceneWillConnectNotification, scene);
     if ([UIApplication sharedApplication].applicationState != UIApplicationStateBackground)
-        charon_enter_foreground();
+        revenant_enter_foreground();
     id appDelegate = [UIApplication sharedApplication].delegate;
     if ([delegate respondsToSelector:@selector(scene:openURLContexts:)] || [appDelegate respondsToSelector:@selector(application:openURL:sourceApplication:annotation:)])
-        charon_hook_open_url(appDelegate);
+        revenant_hook_open_url(appDelegate);
 }
 
-@interface CharonSceneObserver : NSObject
+@interface RevenantSceneObserver : NSObject
 @end
 
-@implementation CharonSceneObserver
+@implementation RevenantSceneObserver
 
 + (void)load
 {
     NSNotificationCenter *center = [NSNotificationCenter defaultCenter];
     [center addObserverForName:UIApplicationDidFinishLaunchingNotification object:nil queue:nil usingBlock:^(NSNotification *launched) {
-        charon_connect(launched.userInfo);
+        revenant_connect(launched.userInfo);
     }];
     [center addObserverForName:UIApplicationWillEnterForegroundNotification object:nil queue:nil usingBlock:^(NSNotification *note) {
-        charon_enter_foreground();
+        revenant_enter_foreground();
     }];
     [center addObserverForName:UIApplicationDidBecomeActiveNotification object:nil queue:nil usingBlock:^(NSNotification *note) {
-        charon_enter_foreground();
-        if (charon_scene_object.activationState == UISceneActivationStateForegroundInactive)
-            charon_transition(UISceneActivationStateForegroundActive, @selector(sceneDidBecomeActive:), UISceneDidActivateNotification);
+        revenant_enter_foreground();
+        if (revenant_scene_object.activationState == UISceneActivationStateForegroundInactive)
+            revenant_transition(UISceneActivationStateForegroundActive, @selector(sceneDidBecomeActive:), UISceneDidActivateNotification);
     }];
     [center addObserverForName:UIApplicationWillResignActiveNotification object:nil queue:nil usingBlock:^(NSNotification *note) {
-        if (charon_scene_object.activationState == UISceneActivationStateForegroundActive)
-            charon_transition(UISceneActivationStateForegroundInactive, @selector(sceneWillResignActive:), UISceneWillDeactivateNotification);
+        if (revenant_scene_object.activationState == UISceneActivationStateForegroundActive)
+            revenant_transition(UISceneActivationStateForegroundInactive, @selector(sceneWillResignActive:), UISceneWillDeactivateNotification);
     }];
     [center addObserverForName:UIApplicationDidEnterBackgroundNotification object:nil queue:nil usingBlock:^(NSNotification *note) {
-        if (charon_scene_object.activationState == UISceneActivationStateForegroundActive)
-            charon_transition(UISceneActivationStateForegroundInactive, @selector(sceneWillResignActive:), UISceneWillDeactivateNotification);
-        if (charon_scene_object.activationState == UISceneActivationStateForegroundInactive)
-            charon_transition(UISceneActivationStateBackground, @selector(sceneDidEnterBackground:), UISceneDidEnterBackgroundNotification);
-        charon_save_restoration();
+        if (revenant_scene_object.activationState == UISceneActivationStateForegroundActive)
+            revenant_transition(UISceneActivationStateForegroundInactive, @selector(sceneWillResignActive:), UISceneWillDeactivateNotification);
+        if (revenant_scene_object.activationState == UISceneActivationStateForegroundInactive)
+            revenant_transition(UISceneActivationStateBackground, @selector(sceneDidEnterBackground:), UISceneDidEnterBackgroundNotification);
+        revenant_save_restoration();
     }];
     [center addObserverForName:UIApplicationWillTerminateNotification object:nil queue:nil usingBlock:^(NSNotification *note) {
-        charon_save_restoration();
+        revenant_save_restoration();
     }];
 }
 

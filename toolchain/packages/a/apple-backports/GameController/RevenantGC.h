@@ -1,77 +1,77 @@
 #import <GameController/GameController.h>
 
-@interface CharonGCTables : NSObject
+@interface RevenantGCTables : NSObject
 + (NSArray<NSDictionary *> *)extendedSpecs;
 + (NSArray<NSDictionary *> *)microSpecs;
 + (NSArray<NSDictionary *> *)mouseSpecs;
 + (NSArray<NSDictionary *> *)keyboardSpecs;
 @end
 
-@interface GCControllerElement (Charon)
-- (instancetype)initWithCharonSpec:(NSDictionary *)spec;
-- (void)charon_attachToProfile:(GCPhysicalInputProfile *)profile;
-- (void)charon_setCollection:(GCControllerElement *)collection;
-- (void)charon_enqueue:(dispatch_block_t)block;
+@interface GCControllerElement (Revenant)
+- (instancetype)initWithRevenantSpec:(NSDictionary *)spec;
+- (void)revenant_attachToProfile:(GCPhysicalInputProfile *)profile;
+- (void)revenant_setCollection:(GCControllerElement *)collection;
+- (void)revenant_enqueue:(dispatch_block_t)block;
 @end
 
-@interface GCControllerButtonInput (Charon)
-- (void)charon_deriveFromAxis:(GCControllerAxisInput *)axis sign:(float)sign;
-- (void)charon_axisChanged;
-- (void)charon_update:(float)value;
+@interface GCControllerButtonInput (Revenant)
+- (void)revenant_deriveFromAxis:(GCControllerAxisInput *)axis sign:(float)sign;
+- (void)revenant_axisChanged;
+- (void)revenant_update:(float)value;
 @end
 
-@interface GCControllerAxisInput (Charon)
-- (void)charon_linkPositive:(GCControllerButtonInput *)positive negative:(GCControllerButtonInput *)negative dpad:(GCControllerDirectionPad *)dpad;
-- (void)charon_setValue:(float)value;
+@interface GCControllerAxisInput (Revenant)
+- (void)revenant_linkPositive:(GCControllerButtonInput *)positive negative:(GCControllerButtonInput *)negative dpad:(GCControllerDirectionPad *)dpad;
+- (void)revenant_setValue:(float)value;
 @end
 
-@interface GCControllerDirectionPad (Charon)
-- (void)charon_linkXAxis:(GCControllerAxisInput *)x yAxis:(GCControllerAxisInput *)y up:(GCControllerButtonInput *)up down:(GCControllerButtonInput *)down
+@interface GCControllerDirectionPad (Revenant)
+- (void)revenant_linkXAxis:(GCControllerAxisInput *)x yAxis:(GCControllerAxisInput *)y up:(GCControllerButtonInput *)up down:(GCControllerButtonInput *)down
                     left:(GCControllerButtonInput *)left right:(GCControllerButtonInput *)right;
-- (void)charon_axisChanged;
+- (void)revenant_axisChanged;
 @end
 
-@interface GCDualSenseAdaptiveTrigger (Charon)
+@interface GCDualSenseAdaptiveTrigger (Revenant)
 
-- (GCDualSenseAdaptiveTriggerMode)charon_requestedMode;
-- (void)charon_setRequestedMode:(GCDualSenseAdaptiveTriggerMode)mode;
-- (void)charon_setArmPosition:(float)armPosition;
+- (GCDualSenseAdaptiveTriggerMode)revenant_requestedMode;
+- (void)revenant_setRequestedMode:(GCDualSenseAdaptiveTriggerMode)mode;
+- (void)revenant_setArmPosition:(float)armPosition;
 
 @end
 
-@interface GCPhysicalInputProfile (Charon)
-- (instancetype)initWithCharonSpecs:(NSArray<NSDictionary *> *)specs;
-- (void)charon_setDevice:(id<GCDevice>)device;
-- (GCControllerElement *)charon_elementNamed:(NSString *)alias;
+@interface GCPhysicalInputProfile (Revenant)
+- (instancetype)initWithRevenantSpecs:(NSArray<NSDictionary *> *)specs;
+- (void)revenant_setDevice:(id<GCDevice>)device;
+- (GCControllerElement *)revenant_elementNamed:(NSString *)alias;
 @end
 
-@interface GCKeyboardInput (Charon)
-- (void)charon_setPressed:(BOOL)pressed forKeyCode:(GCKeyCode)code value:(float)value;
+@interface GCKeyboardInput (Revenant)
+- (void)revenant_setPressed:(BOOL)pressed forKeyCode:(GCKeyCode)code value:(float)value;
 @end
 
-@interface GCDeviceBattery (Charon)
-- (void)charon_setBatteryLevel:(float)batteryLevel;
-- (void)charon_setBatteryState:(GCDeviceBatteryState)batteryState;
+@interface GCDeviceBattery (Revenant)
+- (void)revenant_setBatteryLevel:(float)batteryLevel;
+- (void)revenant_setBatteryState:(GCDeviceBatteryState)batteryState;
 @end
 
-@interface GCGamepad (Charon)
-- (void)charon_setController:(GCController *)controller;
+@interface GCGamepad (Revenant)
+- (void)revenant_setController:(GCController *)controller;
 @end
 
-@interface GCExtendedGamepad (Charon)
-- (void)charon_setController:(GCController *)controller;
+@interface GCExtendedGamepad (Revenant)
+- (void)revenant_setController:(GCController *)controller;
 @end
 
-@interface GCMicroGamepad (Charon)
-- (void)charon_setController:(GCController *)controller;
+@interface GCMicroGamepad (Revenant)
+- (void)revenant_setController:(GCController *)controller;
 @end
 
-@interface GCController (Charon)
-- (instancetype)initWithCharonProfile:(GCPhysicalInputProfile *)profile vendorName:(NSString *)vendorName productCategory:(NSString *)productCategory;
+@interface GCController (Revenant)
+- (instancetype)initWithRevenantProfile:(GCPhysicalInputProfile *)profile vendorName:(NSString *)vendorName productCategory:(NSString *)productCategory;
 @end
 
-@interface GCMotion (Charon)
-- (instancetype)initWithCharonAttitudeAndRotationRate:(BOOL)has;
-- (void)charon_setHasAttitudeAndRotationRate:(BOOL)has;
-- (void)charon_setController:(GCController *)controller;
+@interface GCMotion (Revenant)
+- (instancetype)initWithRevenantAttitudeAndRotationRate:(BOOL)has;
+- (void)revenant_setHasAttitudeAndRotationRate:(BOOL)has;
+- (void)revenant_setController:(GCController *)controller;
 @end

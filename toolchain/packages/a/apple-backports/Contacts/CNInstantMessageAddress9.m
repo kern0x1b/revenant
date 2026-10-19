@@ -1,10 +1,10 @@
-#import "CharonContacts.h"
+#import "RevenantContacts.h"
 
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
 
 @implementation CNInstantMessageAddress {
-    NSString *_charonUsername;
-    NSString *_charonService;
+    NSString *_revenantUsername;
+    NSString *_revenantService;
 }
 
 @dynamic username, service;
@@ -13,14 +13,14 @@
 {
     self = [super init];
     if (self) {
-        _charonUsername = [username copy];
-        _charonService = [service copy];
+        _revenantUsername = [username copy];
+        _revenantService = [service copy];
     }
     return self;
 }
 
-- (NSString *)username { return _charonUsername ?: @""; }
-- (NSString *)service { return _charonService ?: @""; }
+- (NSString *)username { return _revenantUsername ?: @""; }
+- (NSString *)service { return _revenantService ?: @""; }
 
 + (NSString *)localizedStringForKey:(NSString *)key
 {
@@ -44,16 +44,16 @@
 
 - (void)encodeWithCoder:(NSCoder *)coder
 {
-    [coder encodeObject:_charonUsername forKey:@"username"];
-    [coder encodeObject:_charonService forKey:@"service"];
+    [coder encodeObject:_revenantUsername forKey:@"username"];
+    [coder encodeObject:_revenantService forKey:@"service"];
 }
 
 - (instancetype)initWithCoder:(NSCoder *)coder
 {
     self = [super init];
     if (self) {
-        _charonUsername = [[coder decodeObjectOfClass:[NSString class] forKey:@"username"] copy];
-        _charonService = [[coder decodeObjectOfClass:[NSString class] forKey:@"service"] copy];
+        _revenantUsername = [[coder decodeObjectOfClass:[NSString class] forKey:@"username"] copy];
+        _revenantService = [[coder decodeObjectOfClass:[NSString class] forKey:@"service"] copy];
     }
     return self;
 }
@@ -74,7 +74,7 @@
 
 - (NSString *)description
 {
-    return [NSString stringWithFormat:@"<%@: %p: username=%@, service=%@>", NSStringFromClass([self class]), self, _charonUsername, _charonService];
+    return [NSString stringWithFormat:@"<%@: %p: username=%@, service=%@>", NSStringFromClass([self class]), self, _revenantUsername, _revenantService];
 }
 
 @end

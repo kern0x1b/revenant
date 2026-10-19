@@ -67,7 +67,7 @@ static int writeMovie(NSString *path, double seconds, int fps, int width, int he
     const long long audioFrames = llround(seconds * kAudioRate);
     __block int frame = 0;
     __block long long audioDone = 0;
-    dispatch_queue_t queue = dispatch_queue_create("charon.avmovie4.writer", DISPATCH_QUEUE_SERIAL);
+    dispatch_queue_t queue = dispatch_queue_create("revenant.avmovie4.writer", DISPATCH_QUEUE_SERIAL);
     dispatch_group_t inputs = dispatch_group_create();
 
     dispatch_group_enter(inputs);

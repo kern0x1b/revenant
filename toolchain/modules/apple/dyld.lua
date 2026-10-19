@@ -24,7 +24,7 @@ local function uleb(data, at)
 end
 
 function root()
-    return path.join(os.getenv("CHARON_HOME") or path.join(os.getenv("HOME"), ".charon"), "dyld")
+    return path.join(os.getenv("REVENANT_HOME") or path.join(os.getenv("HOME"), ".revenant"), "dyld")
 end
 
 local function parts(version)
@@ -1137,7 +1137,7 @@ function check(cachefile, binaries, folder, opt)
                                        #names, #names == 1 and "" or "s", cache.architecture, cachefile,
                                        guards and ", and the runtime's guard table records no guard for it" or "", shown)
             if opt.release and not opt.waived and not exempt[binary] then
-                table.insert(missing, {binary, text .. "; a released image is refused these unless the target waives the check with charon.waive.weak-imports and says why every call is guarded"})
+                table.insert(missing, {binary, text .. "; a released image is refused these unless the target waives the check with revenant.waive.weak-imports and says why every call is guarded"})
             else
                 unguarded = unguarded + #names
                 table.insert(warnings, binary .. " " .. text)

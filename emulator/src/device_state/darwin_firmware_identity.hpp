@@ -10,7 +10,7 @@
 #include <filesystem>
 #include <string>
 
-namespace shade {
+namespace emulator {
 
 [[nodiscard]] std::string read_darwin_build_version(
     const std::filesystem::path& rootfs);

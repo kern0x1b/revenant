@@ -1,5 +1,5 @@
-#import "CharonMPS.h"
-#import "CharonMPS26.h"
+#import "RevenantMPS.h"
+#import "RevenantMPS26.h"
 
 #pragma clang diagnostic ignored "-Wprotocol"
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
@@ -227,22 +227,22 @@
     _dilationRateY = value;
 }
 
-- (float)charon_mps_neuronParameterC
+- (float)revenant_mps_neuronParameterC
 {
     return _neuronParameterC;
 }
 
-- (void)charon_mps_setNeuronParameterC:(float)value
+- (void)revenant_mps_setNeuronParameterC:(float)value
 {
     _neuronParameterC = value;
 }
 
-- (BOOL)charon_mps_hasBatchNormalization
+- (BOOL)revenant_mps_hasBatchNormalization
 {
     return _hasBatchNormalization;
 }
 
-- (void)charon_mps_fold:(float)value x:(NSUInteger)x y:(NSUInteger)y channel:(NSUInteger)channel
+- (void)revenant_mps_fold:(float)value x:(NSUInteger)x y:(NSUInteger)y channel:(NSUInteger)channel
 {
     (void)x;
     (void)y;

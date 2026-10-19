@@ -13,7 +13,7 @@
 #include <algorithm>
 #include <limits>
 
-namespace shade::xnu::ipc {
+namespace emulator::xnu::ipc {
 namespace {
 
     constexpr std::size_t right_count = 5;

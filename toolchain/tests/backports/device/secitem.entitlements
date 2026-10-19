@@ -3,10 +3,10 @@
 <plist version="1.0">
 <dict>
     <key>application-identifier</key>
-    <string>local.charon.backports.secitem</string>
+    <string>local.revenant.backports.secitem</string>
     <key>keychain-access-groups</key>
     <array>
-        <string>local.charon.backports.secitem</string>
+        <string>local.revenant.backports.secitem</string>
     </array>
 </dict>
 </plist>

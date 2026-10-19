@@ -570,7 +570,7 @@ function main(...)
     end
 
     local root = path.absolute(path.join(os.scriptdir(), "..", ".."))
-    local schema = proto.load(path.join(root, "packages", "a", "apple-backports", "CoreML", "CharonMLSchema.inc"))
+    local schema = proto.load(path.join(root, "packages", "a", "apple-backports", "CoreML", "RevenantMLSchema.inc"))
     local runs = workspace.run("make-models", "work")
     local target = check and path.join(runs, "check") or out
     os.tryrm(target)

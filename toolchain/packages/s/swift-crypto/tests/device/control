@@ -1,5 +1,5 @@
-Package: org.charon.cryptoprobe
+Package: org.revenant.cryptoprobe
 Name: cryptoprobe
 Architecture: iphoneos-arm
-Maintainer: charon band v-int-swift9
+Maintainer: revenant band v-int-swift9
 Description: swift-crypto probe for the armv7 iOS 6.1.3 emulator (v-int-swift9)

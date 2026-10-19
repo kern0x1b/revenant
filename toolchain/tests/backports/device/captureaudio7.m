@@ -10,10 +10,10 @@ static BOOL wait_until(BOOL (^done)(void), NSTimeInterval seconds)
     return done();
 }
 
-@interface CharonAudioFrames : NSObject <AVCaptureAudioDataOutputSampleBufferDelegate>
+@interface RevenantAudioFrames : NSObject <AVCaptureAudioDataOutputSampleBufferDelegate>
 @property (atomic) int buffers;
 @end
-@implementation CharonAudioFrames
+@implementation RevenantAudioFrames
 - (void)captureOutput:(AVCaptureOutput *)output didOutputSampleBuffer:(CMSampleBufferRef)sample fromConnection:(AVCaptureConnection *)connection
 {
     self.buffers++;
@@ -31,7 +31,7 @@ int main(int argc, char **argv)
 {
     @autoreleasepool {
         if (argc > 1)
-            charon_log_to([NSString stringWithUTF8String:argv[1]]);
+            revenant_log_to([NSString stringWithUTF8String:argv[1]]);
         __block int interruptions = 0;
         [[NSNotificationCenter defaultCenter] addObserverForName:AVAudioSessionInterruptionNotification object:nil queue:nil usingBlock:^(NSNotification *note) {
             interruptions++;
@@ -47,7 +47,7 @@ int main(int argc, char **argv)
         if (mic)
             [capture addInput:mic];
         AVCaptureAudioDataOutput *output = [[AVCaptureAudioDataOutput alloc] init];
-        CharonAudioFrames *frames = [[CharonAudioFrames alloc] init];
+        RevenantAudioFrames *frames = [[RevenantAudioFrames alloc] init];
         [output setSampleBufferDelegate:frames queue:dispatch_queue_create("audio", NULL)];
         [capture addOutput:output];
         [capture startRunning];
@@ -62,7 +62,7 @@ int main(int argc, char **argv)
         capture.usesApplicationAudioSession = YES;
         capture.automaticallyConfiguresApplicationAudioSession = YES;
         CHECK(!capture.usesApplicationAudioSession && !capture.automaticallyConfiguresApplicationAudioSession, "asking for it leaves both NO");
-        printf("checks=%d failures=%d\n", charon_checks, charon_failures);
+        printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
     }
-    return charon_failures;
+    return revenant_failures;
 }

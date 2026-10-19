@@ -1,5 +1,5 @@
 #!/bin/sh
-# run.sh - this port's twenty CoreVideo constant strings and six functions (renamed charonHost_*)
+# run.sh - this port's twenty CoreVideo constant strings and six functions (renamed revenantHost_*)
 # against the host's own CoreVideo, which exports nineteen of the twenty constants and all six
 # functions. Both answers are in one process, so every line is the port beside the system.
 #
@@ -47,8 +47,8 @@ CVPixelBufferCopyCreationAttributes
 CVIsCompressedPixelFormatAvailable"
 
 renames=""
-for name in $constants; do renames="$renames -D$name=charonHost_$name"; done
-for name in $functions; do renames="$renames -D$name=charonHost_$name"; done
+for name in $constants; do renames="$renames -D$name=revenantHost_$name"; done
+for name in $functions; do renames="$renames -D$name=revenantHost_$name"; done
 
 # The port's own objects, one release each, renamed so both implementations are callable at once.
 objects=""
@@ -83,7 +83,7 @@ if [ "${MUTATE:-0}" = "1" ]; then
     xcrun clang -fobjc-arc -w $renames -c "$build/mutant/CoreVideoNames140.m" \
         -o "$build/mutant/CoreVideoNames140.o"
     printf '%s\n' '#import <CoreFoundation/CoreFoundation.h>' \
-        'Boolean charonHost_CVIsCompressedPixelFormatAvailable(OSType t) { (void)t; return true; }' \
+        'Boolean revenantHost_CVIsCompressedPixelFormatAvailable(OSType t) { (void)t; return true; }' \
         > "$build/mutant/CVPixelFormatDescription15.m"
     # shellcheck disable=SC2086
     xcrun clang -fobjc-arc -w $renames -c "$build/mutant/CVPixelFormatDescription15.m" \

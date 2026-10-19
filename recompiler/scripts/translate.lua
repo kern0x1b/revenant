@@ -270,7 +270,7 @@ function translate(input, includes, out, images, opt)
         return os.getenv(name)
     end
     local e = env()
-    local lab = e.katabasis
+    local lab = e.recompiler
     input = path.absolute(input)
     includes = path.absolute(includes)
     out = path.absolute(out)
@@ -590,7 +590,7 @@ end
 
 function main(input, includes, out, ...)
     if not input or not includes or not out then
-        raise("usage: ./xmakew l katabasis/scripts/translate.lua INPUT INCLUDES OUT [GUEST-IMAGE ...]")
+        raise("usage: ./xmakew l recompiler/scripts/translate.lua INPUT INCLUDES OUT [GUEST-IMAGE ...]")
     end
     translate(input, includes, out, {...})
 end

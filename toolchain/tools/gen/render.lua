@@ -187,9 +187,9 @@ function render(tree, fw, corpus, sdk_release)
     local files = {}
 
     local lines = {layout.constants().MARK, "// Framework: " .. fw .. ". Spec: " .. sdk_id .. ".",
-                   "#ifndef CHARON_" .. string.upper(fw) .. "_SPEC_H", "#define CHARON_" .. string.upper(fw) .. "_SPEC_H"}
+                   "#ifndef REVENANT_" .. string.upper(fw) .. "_SPEC_H", "#define REVENANT_" .. string.upper(fw) .. "_SPEC_H"}
     for _, r in ipairs(spec) do
-        table.insert(lines, "#define CHARON_SPEC_HASH_" .. r.key .. " 0x" .. r.hash .. "ULL")
+        table.insert(lines, "#define REVENANT_SPEC_HASH_" .. r.key .. " 0x" .. r.hash .. "ULL")
     end
     table.insert(lines, "#endif")
     files["spec.h"] = table.concat(lines, "\n") .. "\n"
@@ -203,8 +203,8 @@ function render(tree, fw, corpus, sdk_release)
         files[fw .. "Constants" .. release_tag(release) .. ".m"] = table.concat(body, "\n") .. "\n"
     end
 
-    local verify = {layout.constants().MARK, '#include "spec.h"', "#define CHARON_IMPLEMENTS(key, pinned, name) \\",
-                    '  _Static_assert(CHARON_SPEC_HASH_##key == (pinned), name " was written against another declaration: the ' .. sdk_release .. ' spec changed, review the override and re-pin it")'}
+    local verify = {layout.constants().MARK, '#include "spec.h"', "#define REVENANT_IMPLEMENTS(key, pinned, name) \\",
+                    '  _Static_assert(REVENANT_SPEC_HASH_##key == (pinned), name " was written against another declaration: the ' .. sdk_release .. ' spec changed, review the override and re-pin it")'}
     local stale, removed = {}, {}
     local by_key = {}
     for _, r in ipairs(spec) do
@@ -222,7 +222,7 @@ function render(tree, fw, corpus, sdk_release)
             if target.hash ~= p["pinned"] then
                 table.insert(stale, {p.api, p.key, p["pinned"], target.hash, p.registry})
             end
-            table.insert(verify, string.format('CHARON_IMPLEMENTS(%s, 0x%sULL, "%s");', p.key, p["pinned"], p.api))
+            table.insert(verify, string.format('REVENANT_IMPLEMENTS(%s, 0x%sULL, "%s");', p.key, p["pinned"], p.api))
         end
     end
     local api_names = table.move(override_order, 1, #override_order, 1, {})

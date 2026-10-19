@@ -5,15 +5,15 @@
 #import <Security/SecProtocolTypes.h>
 #import <CoreFoundation/CoreFoundation.h>
 
-@interface CharonSecCertificate : NSObject <OS_sec_certificate>
+@interface RevenantSecCertificate : NSObject <OS_sec_certificate>
 {
     SecCertificateRef _certificate;
 }
 - (instancetype)initWithCertificate:(SecCertificateRef)certificate;
-- (SecCertificateRef)charonCertificate;
+- (SecCertificateRef)revenantCertificate;
 @end
 
-@implementation CharonSecCertificate
+@implementation RevenantSecCertificate
 - (instancetype)initWithCertificate:(SecCertificateRef)certificate
 {
     self = [super init];
@@ -21,19 +21,19 @@
         _certificate = certificate ? (SecCertificateRef)CFRetain(certificate) : NULL;
     return self;
 }
-- (SecCertificateRef)charonCertificate { return _certificate; }
+- (SecCertificateRef)revenantCertificate { return _certificate; }
 - (void)dealloc { if (_certificate) CFRelease(_certificate); }
 @end
 
-@interface CharonSecTrust : NSObject <OS_sec_trust>
+@interface RevenantSecTrust : NSObject <OS_sec_trust>
 {
     SecTrustRef _trust;
 }
 - (instancetype)initWithTrust:(SecTrustRef)trust;
-- (SecTrustRef)charonTrust;
+- (SecTrustRef)revenantTrust;
 @end
 
-@implementation CharonSecTrust
+@implementation RevenantSecTrust
 - (instancetype)initWithTrust:(SecTrustRef)trust
 {
     self = [super init];
@@ -41,32 +41,32 @@
         _trust = trust ? (SecTrustRef)CFRetain(trust) : NULL;
     return self;
 }
-- (SecTrustRef)charonTrust { return _trust; }
+- (SecTrustRef)revenantTrust { return _trust; }
 - (void)dealloc { if (_trust) CFRelease(_trust); }
 @end
 
 sec_certificate_t sec_certificate_create(SecCertificateRef certificate)
 {
-    return (sec_certificate_t)[[CharonSecCertificate alloc] initWithCertificate:certificate];
+    return (sec_certificate_t)[[RevenantSecCertificate alloc] initWithCertificate:certificate];
 }
 
 SecCertificateRef sec_certificate_copy_ref(sec_certificate_t certificate)
 {
-    if (![certificate isKindOfClass:CharonSecCertificate.class])
+    if (![certificate isKindOfClass:RevenantSecCertificate.class])
         return NULL;
-    SecCertificateRef held = [(CharonSecCertificate *)certificate charonCertificate];
+    SecCertificateRef held = [(RevenantSecCertificate *)certificate revenantCertificate];
     return held ? (SecCertificateRef)CFRetain(held) : NULL;
 }
 
 sec_trust_t sec_trust_create(SecTrustRef trust)
 {
-    return (sec_trust_t)[[CharonSecTrust alloc] initWithTrust:trust];
+    return (sec_trust_t)[[RevenantSecTrust alloc] initWithTrust:trust];
 }
 
 SecTrustRef sec_trust_copy_ref(sec_trust_t trust)
 {
-    if (![trust isKindOfClass:CharonSecTrust.class])
+    if (![trust isKindOfClass:RevenantSecTrust.class])
         return NULL;
-    SecTrustRef held = [(CharonSecTrust *)trust charonTrust];
+    SecTrustRef held = [(RevenantSecTrust *)trust revenantTrust];
     return held ? (SecTrustRef)CFRetain(held) : NULL;
 }

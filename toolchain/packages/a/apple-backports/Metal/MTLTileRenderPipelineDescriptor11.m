@@ -1,9 +1,9 @@
 #import <Foundation/Foundation.h>
 #import <Metal/Metal.h>
-#import "CharonMetal26Types.h"
+#import "RevenantMetal26Types.h"
 
-static const NSUInteger CharonTileColorSlots = 8;
-static const NSUInteger CharonTileBufferSlots = 31;
+static const NSUInteger RevenantTileColorSlots = 8;
+static const NSUInteger RevenantTileBufferSlots = 31;
 
 @implementation MTLTileRenderPipelineDescriptor {
     NSString *_label;
@@ -50,10 +50,10 @@ static const NSUInteger CharonTileBufferSlots = 31;
     _label = nil;
     _tileFunction = nil;
     _rasterSampleCount = 1;
-    for (NSUInteger slot = 0; slot < CharonTileColorSlots; slot++)
+    for (NSUInteger slot = 0; slot < RevenantTileColorSlots; slot++)
         _colorAttachments[slot] = nil;
     _threadgroupSizeMatchesTileSize = NO;
-    for (NSUInteger slot = 0; slot < CharonTileBufferSlots; slot++)
+    for (NSUInteger slot = 0; slot < RevenantTileBufferSlots; slot++)
         _tileBuffers[slot] = nil;
     _maxTotalThreadsPerThreadgroup = 0;
     _binaryArchives = nil;
@@ -102,10 +102,10 @@ static const NSUInteger CharonTileBufferSlots = 31;
     copy.label = _label;
     copy.tileFunction = _tileFunction;
     copy.rasterSampleCount = _rasterSampleCount;
-    for (NSUInteger slot = 0; slot < CharonTileColorSlots; slot++)
+    for (NSUInteger slot = 0; slot < RevenantTileColorSlots; slot++)
         copy->_colorAttachments[slot] = _colorAttachments[slot];
     copy.threadgroupSizeMatchesTileSize = _threadgroupSizeMatchesTileSize;
-    for (NSUInteger slot = 0; slot < CharonTileBufferSlots; slot++)
+    for (NSUInteger slot = 0; slot < RevenantTileBufferSlots; slot++)
         copy->_tileBuffers[slot] = _tileBuffers[slot];
     copy.maxTotalThreadsPerThreadgroup = _maxTotalThreadsPerThreadgroup;
     copy.binaryArchives = _binaryArchives;

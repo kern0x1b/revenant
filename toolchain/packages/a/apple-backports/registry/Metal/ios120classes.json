@@ -2,12 +2,12 @@
   "framework": "Metal",
   "entries": [
     {
-      "api": "CharonMetalEventState",
+      "api": "RevenantMetalEventState",
       "kind": "class",
       "introduced": "12.0",
       "minimum": "6.0",
       "status": "owed",
-      "reason": "build the class CharonMetalEventState",
+      "reason": "build the class RevenantMetalEventState",
       "effect": "until built: NSClassFromString answers nil",
       "source": "SDK 16.4, Metal, the header of MTLSharedEvent, whose API arrived in 12.0",
       "facts": "facts/Metal/PortInternals.md"

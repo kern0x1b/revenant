@@ -11,7 +11,7 @@
 
 #include "runtime/boot_options.hpp"
 
-namespace shade {
+namespace emulator {
 
 class Output;
 class SessionHost;

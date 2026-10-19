@@ -796,7 +796,7 @@
     "introduced": "18.4",
     "minimum": "6.0",
     "status": "implemented",
-    "reason": "the manifest's name and what the context is showing: the host answers 'Charon probe \u2014 Extension Background Page' for a manifest with a background section, an em dash and all. Measured.",
+    "reason": "the manifest's name and what the context is showing: the host answers 'Revenant probe \u2014 Extension Background Page' for a manifest with a background section, an em dash and all. Measured.",
     "effect": "a caller reads the manifest's name, an em dash, and what the context is showing",
     "facts": "facts/WebKit/WebExtension.md",
     "source": "the host's own WebKit under Mac Catalyst; the iOS 18.4 web-extension API, read off the host while building the classes of this series (the probes are the band's own and are not yet in the tree -- facts/WebKit/WebExtension.md holds the answers they gave)"
@@ -1803,12 +1803,12 @@
     "source": "the host's own WebKit under Mac Catalyst, in the cases empty.identifiers, afterRefusals.identifiers, stored.identifiers and stored.identifiersAfterRewrite of tests/backports/host/webkit/contentrulelist_scenario.h, and the unsorted order measured over fifteen lists in facts/WebKit/WKContentRuleList.md"
   },
   {
-    "api": "-[WKContentRuleList charon_initWithIdentifier:]",
+    "api": "-[WKContentRuleList revenant_initWithIdentifier:]",
     "kind": "method",
     "introduced": "11.0",
     "minimum": "6.0",
     "status": "implemented",
-    "reason": "no SDK header declares this name: it is the port's own initialiser for a class the release builds only inside its store, and it is charon_-prefixed and carries objc_method_family(init) for the same reason WKWebExtension's is",
+    "reason": "no SDK header declares this name: it is the port's own initialiser for a class the release builds only inside its store, and it is revenant_-prefixed and carries objc_method_family(init) for the same reason WKWebExtension's is",
     "effect": "the port's store builds a list; an application cannot call it and does not need to",
     "facts": "facts/WebKit/WKContentRuleList.md",
     "source": "the port's own WebKit/WKContentRuleList11.m, held to the release by the 106 cases of tests/backports/host/webkit/contentrulelist_scenario.h"

@@ -18,7 +18,7 @@ typedef NSString *AVSpatialCaptureDiscomfortReason NS_TYPED_ENUM API_AVAILABLE(i
 
 @class AVZoomRange;
 
-@interface AVCaptureDevice (CharonCaptureDeviceCapabilities18)
+@interface AVCaptureDevice (RevenantCaptureDeviceCapabilities18)
 
 @property(nonatomic, getter=isAutoVideoFrameRateEnabled) BOOL autoVideoFrameRateEnabled API_AVAILABLE(ios(18.0));
 @property(nonatomic, readonly, getter=isBackgroundReplacementActive) BOOL backgroundReplacementActive API_AVAILABLE(ios(18.0));
@@ -28,7 +28,7 @@ typedef NSString *AVSpatialCaptureDiscomfortReason NS_TYPED_ENUM API_AVAILABLE(i
 
 @end
 
-@interface AVCaptureDeviceFormat (CharonCaptureDeviceFormatCapabilities18)
+@interface AVCaptureDeviceFormat (RevenantCaptureDeviceFormatCapabilities18)
 
 @property(nonatomic, readonly, getter=isAutoVideoFrameRateSupported) BOOL autoVideoFrameRateSupported API_AVAILABLE(ios(18.0));
 @property(nonatomic, readonly, getter=isBackgroundReplacementSupported) BOOL backgroundReplacementSupported API_AVAILABLE(ios(18.0));
@@ -39,7 +39,7 @@ typedef NSString *AVSpatialCaptureDiscomfortReason NS_TYPED_ENUM API_AVAILABLE(i
 
 @end
 
-@interface AVCaptureDeviceInput (CharonCaptureDeviceInputCapabilities18)
+@interface AVCaptureDeviceInput (RevenantCaptureDeviceInputCapabilities18)
 
 - (BOOL)isMultichannelAudioModeSupported:(AVCaptureMultichannelAudioMode)multichannelAudioMode API_AVAILABLE(ios(18.0));
 @property(nonatomic) AVCaptureMultichannelAudioMode multichannelAudioMode API_AVAILABLE(ios(18.0));

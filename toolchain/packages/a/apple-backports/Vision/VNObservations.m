@@ -1,4 +1,4 @@
-#import "CharonVision.h"
+#import "RevenantVision.h"
 
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
 #pragma clang diagnostic ignored "-Wprotocol"
@@ -6,7 +6,7 @@
 #pragma clang diagnostic ignored "-Wobjc-protocol-property-synthesis"
 #pragma clang diagnostic ignored "-Wobjc-designated-initializers"
 
-static NSSet *charon_vision_coded_classes(void)
+static NSSet *revenant_vision_coded_classes(void)
 {
     static NSSet *classes;
     static dispatch_once_t once;
@@ -16,7 +16,7 @@ static NSSet *charon_vision_coded_classes(void)
     return classes;
 }
 
-static void charon_vision_encode(id object, NSCoder *coder)
+static void revenant_vision_encode(id object, NSCoder *coder)
 {
     for (Class cls = [object class]; cls && cls != [NSObject class]; cls = class_getSuperclass(cls)) {
         unsigned count = 0;
@@ -38,7 +38,7 @@ static void charon_vision_encode(id object, NSCoder *coder)
     }
 }
 
-static void charon_vision_decode(id object, NSCoder *coder)
+static void revenant_vision_decode(id object, NSCoder *coder)
 {
     for (Class cls = [object class]; cls && cls != [NSObject class]; cls = class_getSuperclass(cls)) {
         unsigned count = 0;
@@ -47,7 +47,7 @@ static void charon_vision_decode(id object, NSCoder *coder)
             const char *type = ivar_getTypeEncoding(ivars[index]);
             NSString *key = [NSString stringWithFormat:@"%s.%s", class_getName(cls), ivar_getName(ivars[index])];
             if (type[0] == '@') {
-                id value = [coder decodeObjectOfClasses:charon_vision_coded_classes() forKey:key];
+                id value = [coder decodeObjectOfClasses:revenant_vision_coded_classes() forKey:key];
                 if (value)
                     object_setIvar(object, ivars[index], value);
             } else if (type[0] != '^') {
@@ -110,18 +110,18 @@ static void charon_vision_decode(id object, NSCoder *coder)
 
 - (id)copyWithZone:(NSZone *)zone
 {
-    return charon_vision_clone(self, zone);
+    return revenant_vision_clone(self, zone);
 }
 
 - (void)encodeWithCoder:(NSCoder *)coder
 {
-    charon_vision_encode(self, coder);
+    revenant_vision_encode(self, coder);
 }
 
 - (instancetype)initWithCoder:(NSCoder *)coder
 {
     if ((self = [self init]))
-        charon_vision_decode(self, coder);
+        revenant_vision_decode(self, coder);
     return self;
 }
 
@@ -170,7 +170,7 @@ static void charon_vision_decode(id object, NSCoder *coder)
     NSString *_identifier;
 }
 
-- (instancetype)charon_initWithIdentifier:(NSString *)identifier confidence:(float)confidence
+- (instancetype)revenant_initWithIdentifier:(NSString *)identifier confidence:(float)confidence
 {
     VNClassificationObservation *built = [super init];
     if (built != nil) {
@@ -191,7 +191,7 @@ static void charon_vision_decode(id object, NSCoder *coder)
     NSString *_featureName;
 }
 
-- (instancetype)charon_initWithFeatureValue:(MLFeatureValue *)featureValue featureName:(NSString *)featureName
+- (instancetype)revenant_initWithFeatureValue:(MLFeatureValue *)featureValue featureName:(NSString *)featureName
 {
     VNCoreMLFeatureValueObservation *built = [super init];
     if (built != nil) {
@@ -217,7 +217,7 @@ static void charon_vision_decode(id object, NSCoder *coder)
     NSString *_featureName;
 }
 
-- (instancetype)charon_initWithPixelBuffer:(CVPixelBufferRef)pixelBuffer featureName:(NSString *)featureName
+- (instancetype)revenant_initWithPixelBuffer:(CVPixelBufferRef)pixelBuffer featureName:(NSString *)featureName
 {
     VNPixelBufferObservation *built = [super init];
     if (built != nil) {

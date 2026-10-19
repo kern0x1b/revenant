@@ -17,13 +17,13 @@
 
 @end
 
-static char charon_keyboard_guide_key;
+static char revenant_keyboard_guide_key;
 
-@implementation UIView (CharonKeyboardLayoutGuide)
+@implementation UIView (RevenantKeyboardLayoutGuide)
 
 - (UIKeyboardLayoutGuide *)keyboardLayoutGuide
 {
-    UIKeyboardLayoutGuide *guide = objc_getAssociatedObject(self, &charon_keyboard_guide_key);
+    UIKeyboardLayoutGuide *guide = objc_getAssociatedObject(self, &revenant_keyboard_guide_key);
     if (!guide) {
         guide = [[UIKeyboardLayoutGuide alloc] init];
         [self addLayoutGuide:guide];
@@ -32,7 +32,7 @@ static char charon_keyboard_guide_key;
             [guide.leadingAnchor constraintEqualToAnchor:self.leadingAnchor],
             [guide.trailingAnchor constraintEqualToAnchor:self.trailingAnchor],
             [guide.heightAnchor constraintEqualToConstant:0]]];
-        objc_setAssociatedObject(self, &charon_keyboard_guide_key, guide, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+        objc_setAssociatedObject(self, &revenant_keyboard_guide_key, guide, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     }
     return guide;
 }

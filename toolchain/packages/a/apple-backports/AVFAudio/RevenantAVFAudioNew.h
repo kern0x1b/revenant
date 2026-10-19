@@ -27,7 +27,7 @@ typedef NS_ENUM(NSInteger, AVAudioApplicationMicrophoneInjectionPermission) {
 + (void)requestMicrophoneInjectionPermissionWithCompletionHandler:(void (^)(AVAudioApplicationMicrophoneInjectionPermission permission))response;
 @end
 
-@interface AVAudioEnvironmentNode (CharonHeadTracking)
+@interface AVAudioEnvironmentNode (RevenantHeadTracking)
 @property (nonatomic) BOOL listenerHeadTrackingEnabled;
 @end
 

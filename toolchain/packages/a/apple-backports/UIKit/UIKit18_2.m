@@ -1,4 +1,4 @@
-#import "CharonUIKit18.h"
+#import "RevenantUIKit18.h"
 #import <objc/runtime.h>
 
 @implementation UIWritingToolsCoordinator
@@ -10,27 +10,27 @@
 @implementation UIWritingToolsCoordinatorAnimationParameters
 @end
 
-@implementation UITextView (CharonUIKit18_WritingTools)
+@implementation UITextView (RevenantUIKit18_WritingTools)
 
-static char CharonTextViewWritingToolsCoordinatorKey;
-static char CharonTextViewWritingToolsCoordinatorSubclassKey;
+static char RevenantTextViewWritingToolsCoordinatorKey;
+static char RevenantTextViewWritingToolsCoordinatorSubclassKey;
 
 - (id)writingToolsCoordinator
 {
-    return objc_getAssociatedObject(self, &CharonTextViewWritingToolsCoordinatorKey);
+    return objc_getAssociatedObject(self, &RevenantTextViewWritingToolsCoordinatorKey);
 }
 - (void)setWritingToolsCoordinator:(id)coordinator
 {
-    objc_setAssociatedObject(self, &CharonTextViewWritingToolsCoordinatorKey, coordinator,
+    objc_setAssociatedObject(self, &RevenantTextViewWritingToolsCoordinatorKey, coordinator,
                              OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 - (id)subclassForWritingToolsCoordinator
 {
-    return objc_getAssociatedObject(self, &CharonTextViewWritingToolsCoordinatorSubclassKey);
+    return objc_getAssociatedObject(self, &RevenantTextViewWritingToolsCoordinatorSubclassKey);
 }
 - (void)setSubclassForWritingToolsCoordinator:(id)subclass
 {
-    objc_setAssociatedObject(self, &CharonTextViewWritingToolsCoordinatorSubclassKey, subclass,
+    objc_setAssociatedObject(self, &RevenantTextViewWritingToolsCoordinatorSubclassKey, subclass,
                              OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 

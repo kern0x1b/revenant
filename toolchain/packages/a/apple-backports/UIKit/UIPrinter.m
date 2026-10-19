@@ -7,55 +7,55 @@
 #import <sys/socket.h>
 #import <unistd.h>
 
-static const NSTimeInterval kCharonContactTimeout = 30;
+static const NSTimeInterval kRevenantContactTimeout = 30;
 
-static const uint16_t kCharonIPPGetPrinterAttributes = 0x000B;
-static const uint8_t kCharonIPPOperationGroup = 0x01;
-static const uint8_t kCharonIPPEndOfAttributes = 0x03;
-static const uint8_t kCharonIPPCharset = 0x47;
-static const uint8_t kCharonIPPNaturalLanguage = 0x48;
-static const uint8_t kCharonIPPURI = 0x45;
-static const unsigned kCharonIPPSuccessfulStatusLimit = 0x0100;
+static const uint16_t kRevenantIPPGetPrinterAttributes = 0x000B;
+static const uint8_t kRevenantIPPOperationGroup = 0x01;
+static const uint8_t kRevenantIPPEndOfAttributes = 0x03;
+static const uint8_t kRevenantIPPCharset = 0x47;
+static const uint8_t kRevenantIPPNaturalLanguage = 0x48;
+static const uint8_t kRevenantIPPURI = 0x45;
+static const unsigned kRevenantIPPSuccessfulStatusLimit = 0x0100;
 
-static void charon_appendUInt16(NSMutableData *data, uint16_t value)
+static void revenant_appendUInt16(NSMutableData *data, uint16_t value)
 {
     uint8_t bytes[2] = { value >> 8, value & 0xFF };
     [data appendBytes:bytes length:2];
 }
 
-static void charon_appendAttribute(NSMutableData *data, uint8_t tag, NSString *name, NSString *value)
+static void revenant_appendAttribute(NSMutableData *data, uint8_t tag, NSString *name, NSString *value)
 {
     NSData *nameBytes = [name dataUsingEncoding:NSUTF8StringEncoding];
     NSData *valueBytes = [value dataUsingEncoding:NSUTF8StringEncoding];
     [data appendBytes:&tag length:1];
-    charon_appendUInt16(data, (uint16_t)[nameBytes length]);
+    revenant_appendUInt16(data, (uint16_t)[nameBytes length]);
     [data appendData:nameBytes];
-    charon_appendUInt16(data, (uint16_t)[valueBytes length]);
+    revenant_appendUInt16(data, (uint16_t)[valueBytes length]);
     [data appendData:valueBytes];
 }
 
-static NSData *charon_ippRequest(NSString *printerURI)
+static NSData *revenant_ippRequest(NSString *printerURI)
 {
     NSMutableData *data = [NSMutableData data];
-    charon_appendUInt16(data, 0x0101);
-    charon_appendUInt16(data, kCharonIPPGetPrinterAttributes);
+    revenant_appendUInt16(data, 0x0101);
+    revenant_appendUInt16(data, kRevenantIPPGetPrinterAttributes);
     uint8_t requestID[4] = { 0, 0, 0, 1 };
     [data appendBytes:requestID length:4];
-    [data appendBytes:&kCharonIPPOperationGroup length:1];
-    charon_appendAttribute(data, kCharonIPPCharset, @"attributes-charset", @"utf-8");
-    charon_appendAttribute(data, kCharonIPPNaturalLanguage, @"attributes-natural-language", @"en");
-    charon_appendAttribute(data, kCharonIPPURI, @"printer-uri", printerURI);
-    [data appendBytes:&kCharonIPPEndOfAttributes length:1];
+    [data appendBytes:&kRevenantIPPOperationGroup length:1];
+    revenant_appendAttribute(data, kRevenantIPPCharset, @"attributes-charset", @"utf-8");
+    revenant_appendAttribute(data, kRevenantIPPNaturalLanguage, @"attributes-natural-language", @"en");
+    revenant_appendAttribute(data, kRevenantIPPURI, @"printer-uri", printerURI);
+    [data appendBytes:&kRevenantIPPEndOfAttributes length:1];
     return data;
 }
 
-static NSData *charon_httpRequest(NSURL *url, NSString *host, NSString *port)
+static NSData *revenant_httpRequest(NSURL *url, NSString *host, NSString *port)
 {
     NSString *target = [[url path] length] ? [url path] : @"/";
     if ([url query])
         target = [target stringByAppendingFormat:@"?%@", [url query]];
     NSString *authority = [host rangeOfString:@":"].location != NSNotFound ? [NSString stringWithFormat:@"[%@]", host] : host;
-    NSData *body = charon_ippRequest([url absoluteString]);
+    NSData *body = revenant_ippRequest([url absoluteString]);
     NSString *head = [NSString stringWithFormat:@"POST %@ HTTP/1.1\r\nHost: %@:%@\r\nContent-Type: application/ipp\r\n"
                       "Content-Length: %lu\r\nConnection: close\r\n\r\n", target, authority, port, (unsigned long)[body length]];
     NSMutableData *request = [[head dataUsingEncoding:NSUTF8StringEncoding] mutableCopy];
@@ -63,7 +63,7 @@ static NSData *charon_httpRequest(NSURL *url, NSString *host, NSString *port)
     return request;
 }
 
-static NSData *charon_ippResponseBody(NSData *response)
+static NSData *revenant_ippResponseBody(NSData *response)
 {
     NSData *separator = [@"\r\n\r\n" dataUsingEncoding:NSUTF8StringEncoding];
     NSRange end = [response rangeOfData:separator options:0 range:NSMakeRange(0, [response length])];
@@ -104,7 +104,7 @@ static NSData *charon_ippResponseBody(NSData *response)
     }
 }
 
-static BOOL charon_waitReady(int fd, short events, NSDate *deadline)
+static BOOL revenant_waitReady(int fd, short events, NSDate *deadline)
 {
     NSTimeInterval left = [deadline timeIntervalSinceNow];
     if (left <= 0)
@@ -113,7 +113,7 @@ static BOOL charon_waitReady(int fd, short events, NSDate *deadline)
     return poll(&wait, 1, (int)(left * 1000)) == 1;
 }
 
-static int charon_connect(NSString *host, NSString *port, NSDate *deadline)
+static int revenant_connect(NSString *host, NSString *port, NSDate *deadline)
 {
     struct addrinfo hints = { 0 }, *addresses = NULL;
     hints.ai_family = AF_UNSPEC;
@@ -133,7 +133,7 @@ static int charon_connect(NSString *host, NSString *port, NSDate *deadline)
             continue;
         }
         BOOL ok = connect(fd, address->ai_addr, address->ai_addrlen) == 0;
-        if (!ok && errno == EINPROGRESS && charon_waitReady(fd, POLLOUT, deadline)) {
+        if (!ok && errno == EINPROGRESS && revenant_waitReady(fd, POLLOUT, deadline)) {
             int error = -1;
             socklen_t length = sizeof error;
             ok = getsockopt(fd, SOL_SOCKET, SO_ERROR, &error, &length) == 0 && error == 0;
@@ -147,12 +147,12 @@ static int charon_connect(NSString *host, NSString *port, NSDate *deadline)
     return connected;
 }
 
-static NSData *charon_exchange(int fd, NSData *request, NSDate *deadline)
+static NSData *revenant_exchange(int fd, NSData *request, NSDate *deadline)
 {
     const uint8_t *bytes = [request bytes];
     NSUInteger sent = 0;
     while (sent < [request length]) {
-        if (!charon_waitReady(fd, POLLOUT, deadline))
+        if (!revenant_waitReady(fd, POLLOUT, deadline))
             return nil;
         ssize_t n = write(fd, bytes + sent, [request length] - sent);
         if (n < 0 && (errno == EAGAIN || errno == EINTR))
@@ -165,7 +165,7 @@ static NSData *charon_exchange(int fd, NSData *request, NSDate *deadline)
     NSMutableData *response = [NSMutableData data];
     uint8_t buffer[4096];
     for (;;) {
-        if (!charon_waitReady(fd, POLLIN, deadline))
+        if (!revenant_waitReady(fd, POLLIN, deadline))
             return nil;
         ssize_t n = read(fd, buffer, sizeof buffer);
         if (n < 0 && (errno == EAGAIN || errno == EINTR))
@@ -178,7 +178,7 @@ static NSData *charon_exchange(int fd, NSData *request, NSDate *deadline)
     }
 }
 
-struct charon_tlsExchange {
+struct revenant_tlsExchange {
     const uint8_t *bytes;
     CFIndex length;
     CFIndex sent;
@@ -187,9 +187,9 @@ struct charon_tlsExchange {
     BOOL failed;
 };
 
-static void charon_readEvent(CFReadStreamRef stream, CFStreamEventType event, void *info)
+static void revenant_readEvent(CFReadStreamRef stream, CFStreamEventType event, void *info)
 {
-    struct charon_tlsExchange *exchange = info;
+    struct revenant_tlsExchange *exchange = info;
     uint8_t buffer[4096];
     if (event == kCFStreamEventHasBytesAvailable) {
         CFIndex n = CFReadStreamRead(stream, buffer, sizeof buffer);
@@ -204,9 +204,9 @@ static void charon_readEvent(CFReadStreamRef stream, CFStreamEventType event, vo
     }
 }
 
-static void charon_writeEvent(CFWriteStreamRef stream, CFStreamEventType event, void *info)
+static void revenant_writeEvent(CFWriteStreamRef stream, CFStreamEventType event, void *info)
 {
-    struct charon_tlsExchange *exchange = info;
+    struct revenant_tlsExchange *exchange = info;
     if (event == kCFStreamEventCanAcceptBytes && exchange->sent < exchange->length) {
         CFIndex n = CFWriteStreamWrite(stream, exchange->bytes + exchange->sent, exchange->length - exchange->sent);
         if (n < 0)
@@ -218,7 +218,7 @@ static void charon_writeEvent(CFWriteStreamRef stream, CFStreamEventType event, 
     }
 }
 
-static NSData *charon_tlsExchange(int fd, NSString *host, NSData *request, NSDate *deadline)
+static NSData *revenant_tlsExchange(int fd, NSString *host, NSData *request, NSDate *deadline)
 {
     CFReadStreamRef readStream = NULL;
     CFWriteStreamRef writeStream = NULL;
@@ -236,11 +236,11 @@ static NSData *charon_tlsExchange(int fd, NSString *host, NSData *request, NSDat
         return nil;
     }
 
-    struct charon_tlsExchange exchange = { [request bytes], [request length], 0, [NSMutableData data], NO, NO };
+    struct revenant_tlsExchange exchange = { [request bytes], [request length], 0, [NSMutableData data], NO, NO };
     CFStreamClientContext context = { 0, &exchange, NULL, NULL, NULL };
     CFReadStreamSetClient(readStream, kCFStreamEventHasBytesAvailable | kCFStreamEventEndEncountered |
-                          kCFStreamEventErrorOccurred, charon_readEvent, &context);
-    CFWriteStreamSetClient(writeStream, kCFStreamEventCanAcceptBytes | kCFStreamEventErrorOccurred, charon_writeEvent,
+                          kCFStreamEventErrorOccurred, revenant_readEvent, &context);
+    CFWriteStreamSetClient(writeStream, kCFStreamEventCanAcceptBytes | kCFStreamEventErrorOccurred, revenant_writeEvent,
                            &context);
     CFRunLoopRef loop = CFRunLoopGetCurrent();
     CFReadStreamScheduleWithRunLoop(readStream, loop, kCFRunLoopDefaultMode);
@@ -261,7 +261,7 @@ static NSData *charon_tlsExchange(int fd, NSString *host, NSData *request, NSDat
     return exchange.finished && !exchange.failed ? exchange.response : nil;
 }
 
-static BOOL charon_printerAnswers(NSURL *url)
+static BOOL revenant_printerAnswers(NSURL *url)
 {
     NSString *scheme = [[url scheme] lowercaseString];
     NSString *host = [url host];
@@ -281,19 +281,19 @@ static BOOL charon_printerAnswers(NSURL *url)
     else
         port = @"80";
 
-    NSDate *deadline = [NSDate dateWithTimeIntervalSinceNow:kCharonContactTimeout];
-    int fd = charon_connect(host, port, deadline);
+    NSDate *deadline = [NSDate dateWithTimeIntervalSinceNow:kRevenantContactTimeout];
+    int fd = revenant_connect(host, port, deadline);
     if (fd < 0)
         return NO;
-    NSData *request = charon_httpRequest(url, host, port);
-    NSData *response = tls ? charon_tlsExchange(fd, host, request, deadline) : charon_exchange(fd, request, deadline);
+    NSData *request = revenant_httpRequest(url, host, port);
+    NSData *response = tls ? revenant_tlsExchange(fd, host, request, deadline) : revenant_exchange(fd, request, deadline);
     close(fd);
-    NSData *body = response ? charon_ippResponseBody(response) : nil;
+    NSData *body = response ? revenant_ippResponseBody(response) : nil;
     if ([body length] < 4)
         return NO;
     const uint8_t *status = [body bytes];
     unsigned code = (status[2] << 8) | status[3];
-    return code < kCharonIPPSuccessfulStatusLimit;
+    return code < kRevenantIPPSuccessfulStatusLimit;
 }
 
 @implementation UIPrinter {
@@ -353,7 +353,7 @@ static BOOL charon_printerAnswers(NSURL *url)
         return;
     }
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-        BOOL available = charon_printerAnswers(url);
+        BOOL available = revenant_printerAnswers(url);
         dispatch_async(dispatch_get_main_queue(), ^{
             handler(available);
         });

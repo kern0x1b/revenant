@@ -4,7 +4,7 @@
 int main(void)
 {
     @autoreleasepool {
-        Class ours = NSClassFromString(@"CharonHostNSUserActivity");
+        Class ours = NSClassFromString(@"RevenantHostNSUserActivity");
         CHECK(ours != Nil, "the port defines the class");
         id port = [[ours alloc] initWithActivityType:@"com.example.a"];
         NSUserActivity *system = [[NSUserActivity alloc] initWithActivityType:@"com.example.a"];
@@ -25,6 +25,6 @@ int main(void)
         [port setTargetContentIdentifier:@"x"];
         CHECK([other targetContentIdentifier] == nil, "each activity has its own");
     }
-    printf("checks=%d failures=%d\n", charon_checks, charon_failures);
-    return charon_failures;
+    printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
+    return revenant_failures;
 }

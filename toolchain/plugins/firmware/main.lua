@@ -30,16 +30,16 @@ function main()
     local architecture = option.get("arch") or config.arch()
     local tool = project.required_package("firmware-tools")
     if not tool then
-        raise("the project requires no firmware-tools; includes(\"@addon/charon/apple-ios\") provides it")
+        raise("the project requires no firmware-tools; includes(\"@addon/revenant/apple-ios\") provides it")
     end
-    local charon_firmware = path.join(tool:installdir(), "bin", "charon-firmware")
+    local revenant_firmware = path.join(tool:installdir(), "bin", "revenant-firmware")
     if action == "rootfs" then
         local device = option.get("device") or raise("xmake firmware rootfs needs --device=IDENTIFIER, e.g. iPhone3,1")
-        local folder, chosen = firmware.rootfs(device, release, {tool = charon_firmware})
+        local folder, chosen = firmware.rootfs(device, release, {tool = revenant_firmware})
         cprint("${bright}%s${clear}: %s iOS %s (%s)", folder, chosen.identifier, chosen.version, chosen.build)
         return
     end
-    local held, fetched = firmware.fetch(architecture, release, {tool = charon_firmware})
+    local held, fetched = firmware.fetch(architecture, release, {tool = revenant_firmware})
     if action == "extract" then
         local library = option.get("library") or raise("xmake firmware extract needs --library=INSTALL, e.g. --library=UIKit")
         local output = option.get("output") or path.join(path.directory(held), path.filename(library))

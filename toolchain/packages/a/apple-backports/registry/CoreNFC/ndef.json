@@ -10,7 +10,7 @@
       "reason": "a payload is a value - a type, an identifier and bytes - and needs no radio, so it is carried whole on a device with none",
       "effect": "the class exists, holds what it is given, copies and compares by the four fields, and archives under its own keys; the chunking is kept apart from the bytes so that a payload is never marked by the encoder",
       "facts": "facts/CoreNFC/NDEF.md",
-      "source": "the headers of CoreNFC in the SDK 16.4 (NFCNDEFPayload.h, NFCNDEFMessage.h); the record shape of the NFC Forum NDEF Technical Specification written out in packages/a/apple-backports/CoreNFC/CharonNDEF.h; tests/backports/host/corenfc, 39 checks against NDEF vectors"
+      "source": "the headers of CoreNFC in the SDK 16.4 (NFCNDEFPayload.h, NFCNDEFMessage.h); the record shape of the NFC Forum NDEF Technical Specification written out in packages/a/apple-backports/CoreNFC/RevenantNDEF.h; tests/backports/host/corenfc, 39 checks against NDEF vectors"
     },
     {
       "api": "NFCNDEFMessage",

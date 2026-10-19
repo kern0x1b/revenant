@@ -1,7 +1,7 @@
 #import <CoreML/CoreML.h>
 
-#include "CharonMLBridge.h"
-#include "CharonMLInternal.h"
+#include "RevenantMLBridge.h"
+#include "RevenantMLInternal.h"
 
 @implementation MLModelConfiguration {
     MLComputeUnits _computeUnits;

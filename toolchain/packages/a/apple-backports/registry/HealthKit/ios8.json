@@ -74,7 +74,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "reason": "HealthKit arrived in iOS 8.0 and this release, iOS 6.1.3, has none of it: the armv7 shared cache of 6.1.3 and the one of 4.3 hold no HealthKit image and neither exports a name of it (measured: no string of either cache is HealthKit, with NSObject and PassKit as the controls that say the probe finds what is there). The store is this port's own SQLite database, not Apple's, so the class is carried whole. samples of several types over one period, kept as one object",
-      "effect": "objectsForType: answers the members of one type; objects is every member; the members are kept out of CharonHKStore, the SQLite database under Application Support that stands in for the healthd of the releases that have one, over the device's own /usr/lib/libsqlite3.dylib, and a member's correlation is filled in when it is read back, so a predicate built with HKPredicateKeyPathCorrelation finds it. NSSecureCoding carries the correlation type and the members",
+      "effect": "objectsForType: answers the members of one type; objects is every member; the members are kept out of RevenantHKStore, the SQLite database under Application Support that stands in for the healthd of the releases that have one, over the device's own /usr/lib/libsqlite3.dylib, and a member's correlation is filled in when it is read back, so a predicate built with HKPredicateKeyPathCorrelation finds it. NSSecureCoding carries the correlation type and the members",
       "facts": "facts/HealthKit/HealthKit.md",
       "source": "the header of iOS 26.2 for the contract (coordination/corpus/sdk-26.2-surface.tsv); the armv7 shared cache of iOS 8.0, HealthKit.framework, extracted with modules/apple/dyld.lua's extract()"
     },
@@ -107,7 +107,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "reason": "HealthKit arrived in iOS 8.0 and this release, iOS 6.1.3, has none of it: the armv7 shared cache of 6.1.3 and the one of 4.3 hold no HealthKit image and neither exports a name of it (measured: no string of either cache is HealthKit, with NSObject and PassKit as the controls that say the probe finds what is there). The store is this port's own SQLite database, not Apple's, so the class is carried whole. what an application asks of the health data",
-      "effect": "every answer comes out of CharonHKStore, the SQLite database under Application Support that stands in for the healthd of the releases that have one, over the device's own /usr/lib/libsqlite3.dylib; the authorization sheet is a SpringBoard surface and this release has no health application to put one up, so a request records what it was asked for and calls its completion with success, and the store then enforces it: a save of a type the process may not share fails with HKErrorAuthorizationDenied and a query that finds a type it may not read answers the same error; background delivery is registered and kept and nothing wakes the process, which is said once in the log; the user's own biological sex, blood type and date of birth are entered in the Health application of a release that has one, and iOS 8.0's public API of this class has no way to write them either, so the three readers answer nil, and the date of birth leaves the error empty as the release does. the class holds no state of its own but the queries it is running",
+      "effect": "every answer comes out of RevenantHKStore, the SQLite database under Application Support that stands in for the healthd of the releases that have one, over the device's own /usr/lib/libsqlite3.dylib; the authorization sheet is a SpringBoard surface and this release has no health application to put one up, so a request records what it was asked for and calls its completion with success, and the store then enforces it: a save of a type the process may not share fails with HKErrorAuthorizationDenied and a query that finds a type it may not read answers the same error; background delivery is registered and kept and nothing wakes the process, which is said once in the log; the user's own biological sex, blood type and date of birth are entered in the Health application of a release that has one, and iOS 8.0's public API of this class has no way to write them either, so the three readers answer nil, and the date of birth leaves the error empty as the release does. the class holds no state of its own but the queries it is running",
       "facts": "facts/HealthKit/HealthKit.md",
       "source": "the header of iOS 26.2 for the contract (coordination/corpus/sdk-26.2-surface.tsv); the armv7 shared cache of iOS 8.0, HealthKit.framework, extracted with modules/apple/dyld.lua's extract()"
     },
@@ -1836,7 +1836,7 @@
       "reason": "build +[HKQuery predicateForStatesOfMindWithAssociation:]",
       "effect": "until built: respondsToSelector: answers NO",
       "facts": "facts/HealthKit/HealthKit8Absent.md",
-      "source": "the header of iOS 26.2 for the contract (coordination/corpus/sdk-26.2-surface.tsv); which release has the name and which class declares it, measured and re-runnable: xmake l tools/cache-index/first-rung.lua --rungs predicateForStatesOfMindWithAssociation: reads 18.0 as the first held rung holding the selector, and CHARON_ROOT=$PWD xmake l packages/a/apple-backports/facts/HealthKit/rows-code-map.lua 8.0 9.0 18.0 reads what HKHealthStore declares of its own on each; both outputs are in facts/HealthKit/HealthKit8Absent.md"
+      "source": "the header of iOS 26.2 for the contract (coordination/corpus/sdk-26.2-surface.tsv); which release has the name and which class declares it, measured and re-runnable: xmake l tools/cache-index/first-rung.lua --rungs predicateForStatesOfMindWithAssociation: reads 18.0 as the first held rung holding the selector, and REVENANT_ROOT=$PWD xmake l packages/a/apple-backports/facts/HealthKit/rows-code-map.lua 8.0 9.0 18.0 reads what HKHealthStore declares of its own on each; both outputs are in facts/HealthKit/HealthKit8Absent.md"
     },
     {
       "api": "+[HKQuery predicateForStatesOfMindWithKind:]",
@@ -1847,7 +1847,7 @@
       "reason": "build +[HKQuery predicateForStatesOfMindWithKind:]",
       "effect": "until built: respondsToSelector: answers NO",
       "facts": "facts/HealthKit/HealthKit8Absent.md",
-      "source": "the header of iOS 26.2 for the contract (coordination/corpus/sdk-26.2-surface.tsv); which release has the name and which class declares it, measured and re-runnable: xmake l tools/cache-index/first-rung.lua --rungs predicateForStatesOfMindWithKind: reads 18.0 as the first held rung holding the selector, and CHARON_ROOT=$PWD xmake l packages/a/apple-backports/facts/HealthKit/rows-code-map.lua 8.0 9.0 18.0 reads what HKHealthStore declares of its own on each; both outputs are in facts/HealthKit/HealthKit8Absent.md"
+      "source": "the header of iOS 26.2 for the contract (coordination/corpus/sdk-26.2-surface.tsv); which release has the name and which class declares it, measured and re-runnable: xmake l tools/cache-index/first-rung.lua --rungs predicateForStatesOfMindWithKind: reads 18.0 as the first held rung holding the selector, and REVENANT_ROOT=$PWD xmake l packages/a/apple-backports/facts/HealthKit/rows-code-map.lua 8.0 9.0 18.0 reads what HKHealthStore declares of its own on each; both outputs are in facts/HealthKit/HealthKit8Absent.md"
     },
     {
       "api": "+[HKQuery predicateForStatesOfMindWithLabel:]",
@@ -1858,7 +1858,7 @@
       "reason": "build +[HKQuery predicateForStatesOfMindWithLabel:]",
       "effect": "until built: respondsToSelector: answers NO",
       "facts": "facts/HealthKit/HealthKit8Absent.md",
-      "source": "the header of iOS 26.2 for the contract (coordination/corpus/sdk-26.2-surface.tsv); which release has the name and which class declares it, measured and re-runnable: xmake l tools/cache-index/first-rung.lua --rungs predicateForStatesOfMindWithLabel: reads 18.0 as the first held rung holding the selector, and CHARON_ROOT=$PWD xmake l packages/a/apple-backports/facts/HealthKit/rows-code-map.lua 8.0 9.0 18.0 reads what HKHealthStore declares of its own on each; both outputs are in facts/HealthKit/HealthKit8Absent.md"
+      "source": "the header of iOS 26.2 for the contract (coordination/corpus/sdk-26.2-surface.tsv); which release has the name and which class declares it, measured and re-runnable: xmake l tools/cache-index/first-rung.lua --rungs predicateForStatesOfMindWithLabel: reads 18.0 as the first held rung holding the selector, and REVENANT_ROOT=$PWD xmake l packages/a/apple-backports/facts/HealthKit/rows-code-map.lua 8.0 9.0 18.0 reads what HKHealthStore declares of its own on each; both outputs are in facts/HealthKit/HealthKit8Absent.md"
     },
     {
       "api": "+[HKQuery predicateForStatesOfMindWithValence:operatorType:]",
@@ -1869,7 +1869,7 @@
       "reason": "build +[HKQuery predicateForStatesOfMindWithValence:operatorType:]",
       "effect": "until built: respondsToSelector: answers NO",
       "facts": "facts/HealthKit/HealthKit8Absent.md",
-      "source": "the header of iOS 26.2 for the contract (coordination/corpus/sdk-26.2-surface.tsv); which release has the name and which class declares it, measured and re-runnable: xmake l tools/cache-index/first-rung.lua --rungs predicateForStatesOfMindWithValence:operatorType: reads 18.0 as the first held rung holding the selector, and CHARON_ROOT=$PWD xmake l packages/a/apple-backports/facts/HealthKit/rows-code-map.lua 8.0 9.0 18.0 reads what HKHealthStore declares of its own on each; both outputs are in facts/HealthKit/HealthKit8Absent.md"
+      "source": "the header of iOS 26.2 for the contract (coordination/corpus/sdk-26.2-surface.tsv); which release has the name and which class declares it, measured and re-runnable: xmake l tools/cache-index/first-rung.lua --rungs predicateForStatesOfMindWithValence:operatorType: reads 18.0 as the first held rung holding the selector, and REVENANT_ROOT=$PWD xmake l packages/a/apple-backports/facts/HealthKit/rows-code-map.lua 8.0 9.0 18.0 reads what HKHealthStore declares of its own on each; both outputs are in facts/HealthKit/HealthKit8Absent.md"
     },
     {
       "api": "+[HKQuery predicateForWorkoutsWithOperatorType:duration:]",
@@ -2493,7 +2493,7 @@
       "introduced": "8.0",
       "minimum": "6.0",
       "status": "implemented",
-      "reason": "the SDK header declares -(instancetype)init NS_UNAVAILABLE for HKCategorySample, and the release's own class carries an -init of its own (the reader table in facts/HealthKit/HealthKit8Absent.md). Measured at run time on the macOS host: [[HKCategorySample alloc] init] and [HKCategorySample new] both raise NSInvalidArgumentException with the reason 'The -init method is not available on HKCategorySample', and the port's class answers the same exception and reason. The port closes the selector with CHARON_HEALTHKIT_UNCREATABLE_INIT and builds its own instances through charon constructors that never reach it.",
+      "reason": "the SDK header declares -(instancetype)init NS_UNAVAILABLE for HKCategorySample, and the release's own class carries an -init of its own (the reader table in facts/HealthKit/HealthKit8Absent.md). Measured at run time on the macOS host: [[HKCategorySample alloc] init] and [HKCategorySample new] both raise NSInvalidArgumentException with the reason 'The -init method is not available on HKCategorySample', and the port's class answers the same exception and reason. The port closes the selector with REVENANT_HEALTHKIT_UNCREATABLE_INIT and builds its own instances through the Revenant constructors that never reach it.",
       "effect": "a caller that calls -init or +new on HKCategorySample gets NSInvalidArgumentException with the reason 'The -init method is not available on HKCategorySample', as the host does, and no object is made; respondsToSelector: answers YES for -init, because the selector is in the class's own list",
       "facts": "facts/HealthKit/HealthKit8Absent.md",
       "source": "the header of iOS 26.2 for the contract (coordination/corpus/sdk-26.2-surface.tsv); measured at run time by sh tests/backports/host/init-inherited/host.sh on macOS, where HKCategorySample init and new answer the same as the port (SAME lines); checked on every light guard by xmake lua tests/backports/host/init-inherited/check.lua"
@@ -2628,7 +2628,7 @@
       "reason": "build -[HKHealthStore endWorkoutSession:]",
       "effect": "until built: respondsToSelector: answers NO",
       "facts": "facts/HealthKit/HealthKit8Absent.md",
-      "source": "the header of iOS 26.2 for the contract (coordination/corpus/sdk-26.2-surface.tsv); which release has the name and which class declares it, measured and re-runnable: xmake l tools/cache-index/first-rung.lua --rungs endWorkoutSession: reads 9.0 as the first held rung holding the selector, and CHARON_ROOT=$PWD xmake l packages/a/apple-backports/facts/HealthKit/rows-code-map.lua 8.0 9.0 9.0 reads what HKHealthStore declares of its own on each; both outputs are in facts/HealthKit/HealthKit8Absent.md"
+      "source": "the header of iOS 26.2 for the contract (coordination/corpus/sdk-26.2-surface.tsv); which release has the name and which class declares it, measured and re-runnable: xmake l tools/cache-index/first-rung.lua --rungs endWorkoutSession: reads 9.0 as the first held rung holding the selector, and REVENANT_ROOT=$PWD xmake l packages/a/apple-backports/facts/HealthKit/rows-code-map.lua 8.0 9.0 9.0 reads what HKHealthStore declares of its own on each; both outputs are in facts/HealthKit/HealthKit8Absent.md"
     },
     {
       "api": "-[HKHealthStore executeQuery:]",
@@ -2650,7 +2650,7 @@
       "reason": "build -[HKHealthStore pauseWorkoutSession:]",
       "effect": "until built: respondsToSelector: answers NO",
       "facts": "facts/HealthKit/HealthKit8Absent.md",
-      "source": "the header of iOS 26.2 for the contract (coordination/corpus/sdk-26.2-surface.tsv); which release has the name and which class declares it, measured and re-runnable: xmake l tools/cache-index/first-rung.lua --rungs pauseWorkoutSession: reads 10.0.1 as the first held rung holding the selector, and CHARON_ROOT=$PWD xmake l packages/a/apple-backports/facts/HealthKit/rows-code-map.lua 8.0 9.0 10.0.1 reads what HKHealthStore declares of its own on each; both outputs are in facts/HealthKit/HealthKit8Absent.md"
+      "source": "the header of iOS 26.2 for the contract (coordination/corpus/sdk-26.2-surface.tsv); which release has the name and which class declares it, measured and re-runnable: xmake l tools/cache-index/first-rung.lua --rungs pauseWorkoutSession: reads 10.0.1 as the first held rung holding the selector, and REVENANT_ROOT=$PWD xmake l packages/a/apple-backports/facts/HealthKit/rows-code-map.lua 8.0 9.0 10.0.1 reads what HKHealthStore declares of its own on each; both outputs are in facts/HealthKit/HealthKit8Absent.md"
     },
     {
       "api": "-[HKHealthStore requestAuthorizationToShareTypes:readTypes:completion:]",
@@ -2672,7 +2672,7 @@
       "reason": "build -[HKHealthStore resumeWorkoutSession:]",
       "effect": "until built: respondsToSelector: answers NO",
       "facts": "facts/HealthKit/HealthKit8Absent.md",
-      "source": "the header of iOS 26.2 for the contract (coordination/corpus/sdk-26.2-surface.tsv); which release has the name and which class declares it, measured and re-runnable: xmake l tools/cache-index/first-rung.lua --rungs resumeWorkoutSession: reads 10.0.1 as the first held rung holding the selector, and CHARON_ROOT=$PWD xmake l packages/a/apple-backports/facts/HealthKit/rows-code-map.lua 8.0 9.0 10.0.1 reads what HKHealthStore declares of its own on each; both outputs are in facts/HealthKit/HealthKit8Absent.md"
+      "source": "the header of iOS 26.2 for the contract (coordination/corpus/sdk-26.2-surface.tsv); which release has the name and which class declares it, measured and re-runnable: xmake l tools/cache-index/first-rung.lua --rungs resumeWorkoutSession: reads 10.0.1 as the first held rung holding the selector, and REVENANT_ROOT=$PWD xmake l packages/a/apple-backports/facts/HealthKit/rows-code-map.lua 8.0 9.0 10.0.1 reads what HKHealthStore declares of its own on each; both outputs are in facts/HealthKit/HealthKit8Absent.md"
     },
     {
       "api": "-[HKHealthStore saveObject:withCompletion:]",
@@ -2705,7 +2705,7 @@
       "reason": "build -[HKHealthStore startWorkoutSession:]",
       "effect": "until built: respondsToSelector: answers NO",
       "facts": "facts/HealthKit/HealthKit8Absent.md",
-      "source": "the header of iOS 26.2 for the contract (coordination/corpus/sdk-26.2-surface.tsv); which release has the name and which class declares it, measured and re-runnable: xmake l tools/cache-index/first-rung.lua --rungs startWorkoutSession: reads 9.0 as the first held rung holding the selector, and CHARON_ROOT=$PWD xmake l packages/a/apple-backports/facts/HealthKit/rows-code-map.lua 8.0 9.0 9.0 reads what HKHealthStore declares of its own on each; both outputs are in facts/HealthKit/HealthKit8Absent.md"
+      "source": "the header of iOS 26.2 for the contract (coordination/corpus/sdk-26.2-surface.tsv); which release has the name and which class declares it, measured and re-runnable: xmake l tools/cache-index/first-rung.lua --rungs startWorkoutSession: reads 9.0 as the first held rung holding the selector, and REVENANT_ROOT=$PWD xmake l packages/a/apple-backports/facts/HealthKit/rows-code-map.lua 8.0 9.0 9.0 reads what HKHealthStore declares of its own on each; both outputs are in facts/HealthKit/HealthKit8Absent.md"
     },
     {
       "api": "-[HKHealthStore stopQuery:]",
@@ -2724,7 +2724,7 @@
       "introduced": "8.0",
       "minimum": "6.0",
       "status": "implemented",
-      "reason": "the SDK header declares -(instancetype)init NS_UNAVAILABLE for HKObject, and the release's own class carries an -init of its own (the reader table in facts/HealthKit/HealthKit8Absent.md). Measured at run time on the macOS host: [[HKObject alloc] init] and [HKObject new] both raise NSInvalidArgumentException with the reason 'The -init method is not available on HKObject', and the port's class answers the same exception and reason. The port closes the selector with CHARON_HEALTHKIT_UNCREATABLE_INIT and builds its own instances through charon constructors that never reach it.",
+      "reason": "the SDK header declares -(instancetype)init NS_UNAVAILABLE for HKObject, and the release's own class carries an -init of its own (the reader table in facts/HealthKit/HealthKit8Absent.md). Measured at run time on the macOS host: [[HKObject alloc] init] and [HKObject new] both raise NSInvalidArgumentException with the reason 'The -init method is not available on HKObject', and the port's class answers the same exception and reason. The port closes the selector with REVENANT_HEALTHKIT_UNCREATABLE_INIT and builds its own instances through the Revenant constructors that never reach it.",
       "effect": "a caller that calls -init or +new on HKObject gets NSInvalidArgumentException with the reason 'The -init method is not available on HKObject', as the host does, and no object is made; respondsToSelector: answers YES for -init, because the selector is in the class's own list",
       "facts": "facts/HealthKit/HealthKit8Absent.md",
       "source": "the header of iOS 26.2 for the contract (coordination/corpus/sdk-26.2-surface.tsv); measured at run time by sh tests/backports/host/init-inherited/host.sh on macOS, where HKObject init and new answer the same as the port (SAME lines); checked on every light guard by xmake lua tests/backports/host/init-inherited/check.lua"
@@ -2735,7 +2735,7 @@
       "introduced": "8.0",
       "minimum": "6.0",
       "status": "implemented",
-      "reason": "the SDK header declares -(instancetype)init NS_UNAVAILABLE for HKObjectType, and the release's own class carries an -init of its own (the reader table in facts/HealthKit/HealthKit8Absent.md). Measured at run time on the macOS host: [[HKObjectType alloc] init] and [HKObjectType new] both raise NSInvalidArgumentException with the reason 'The -init method is not available on HKObjectType', and the port's class answers the same exception and reason. The port closes the selector with CHARON_HEALTHKIT_UNCREATABLE_INIT and builds its own instances through charon constructors that never reach it.",
+      "reason": "the SDK header declares -(instancetype)init NS_UNAVAILABLE for HKObjectType, and the release's own class carries an -init of its own (the reader table in facts/HealthKit/HealthKit8Absent.md). Measured at run time on the macOS host: [[HKObjectType alloc] init] and [HKObjectType new] both raise NSInvalidArgumentException with the reason 'The -init method is not available on HKObjectType', and the port's class answers the same exception and reason. The port closes the selector with REVENANT_HEALTHKIT_UNCREATABLE_INIT and builds its own instances through the Revenant constructors that never reach it.",
       "effect": "a caller that calls -init or +new on HKObjectType gets NSInvalidArgumentException with the reason 'The -init method is not available on HKObjectType', as the host does, and no object is made; respondsToSelector: answers YES for -init, because the selector is in the class's own list",
       "facts": "facts/HealthKit/HealthKit8Absent.md",
       "source": "the header of iOS 26.2 for the contract (coordination/corpus/sdk-26.2-surface.tsv); measured at run time by sh tests/backports/host/init-inherited/host.sh on macOS, where HKObjectType init and new answer the same as the port (SAME lines); checked on every light guard by xmake lua tests/backports/host/init-inherited/check.lua"
@@ -2779,7 +2779,7 @@
       "introduced": "8.0",
       "minimum": "6.0",
       "status": "implemented",
-      "reason": "the SDK header declares -(instancetype)init NS_UNAVAILABLE for HKQuantity, and the release's own class carries an -init of its own (the reader table in facts/HealthKit/HealthKit8Absent.md). Measured at run time on the macOS host: [[HKQuantity alloc] init] and [HKQuantity new] both raise NSInvalidArgumentException with the reason 'The -init method is not available on HKQuantity', and the port's class answers the same exception and reason. The port closes the selector with CHARON_HEALTHKIT_UNCREATABLE_INIT and builds its own instances through charon constructors that never reach it.",
+      "reason": "the SDK header declares -(instancetype)init NS_UNAVAILABLE for HKQuantity, and the release's own class carries an -init of its own (the reader table in facts/HealthKit/HealthKit8Absent.md). Measured at run time on the macOS host: [[HKQuantity alloc] init] and [HKQuantity new] both raise NSInvalidArgumentException with the reason 'The -init method is not available on HKQuantity', and the port's class answers the same exception and reason. The port closes the selector with REVENANT_HEALTHKIT_UNCREATABLE_INIT and builds its own instances through the Revenant constructors that never reach it.",
       "effect": "a caller that calls -init or +new on HKQuantity gets NSInvalidArgumentException with the reason 'The -init method is not available on HKQuantity', as the host does, and no object is made; respondsToSelector: answers YES for -init, because the selector is in the class's own list",
       "facts": "facts/HealthKit/HealthKit8Absent.md",
       "source": "the header of iOS 26.2 for the contract (coordination/corpus/sdk-26.2-surface.tsv); measured at run time by sh tests/backports/host/init-inherited/host.sh on macOS, where HKQuantity init and new answer the same as the port (SAME lines); checked on every light guard by xmake lua tests/backports/host/init-inherited/check.lua"
@@ -2834,7 +2834,7 @@
       "introduced": "8.0",
       "minimum": "6.0",
       "status": "implemented",
-      "reason": "the SDK header declares -(instancetype)init NS_UNAVAILABLE for HKSource, and the release's own class carries an -init of its own (the reader table in facts/HealthKit/HealthKit8Absent.md). Measured at run time on the macOS host: [[HKSource alloc] init] and [HKSource new] both raise NSInvalidArgumentException with the reason 'The -init method is not available on HKSource', and the port's class answers the same exception and reason. The port closes the selector with CHARON_HEALTHKIT_UNCREATABLE_INIT and builds its own instances through charon constructors that never reach it.",
+      "reason": "the SDK header declares -(instancetype)init NS_UNAVAILABLE for HKSource, and the release's own class carries an -init of its own (the reader table in facts/HealthKit/HealthKit8Absent.md). Measured at run time on the macOS host: [[HKSource alloc] init] and [HKSource new] both raise NSInvalidArgumentException with the reason 'The -init method is not available on HKSource', and the port's class answers the same exception and reason. The port closes the selector with REVENANT_HEALTHKIT_UNCREATABLE_INIT and builds its own instances through the Revenant constructors that never reach it.",
       "effect": "a caller that calls -init or +new on HKSource gets NSInvalidArgumentException with the reason 'The -init method is not available on HKSource', as the host does, and no object is made; respondsToSelector: answers YES for -init, because the selector is in the class's own list",
       "facts": "facts/HealthKit/HealthKit8Absent.md",
       "source": "the header of iOS 26.2 for the contract (coordination/corpus/sdk-26.2-surface.tsv); measured at run time by sh tests/backports/host/init-inherited/host.sh on macOS, where HKSource init and new answer the same as the port (SAME lines); checked on every light guard by xmake lua tests/backports/host/init-inherited/check.lua"
@@ -2878,7 +2878,7 @@
       "introduced": "8.0",
       "minimum": "6.0",
       "status": "implemented",
-      "reason": "the SDK header declares -(instancetype)init NS_UNAVAILABLE for HKStatistics, and the release's own class carries an -init of its own (the reader table in facts/HealthKit/HealthKit8Absent.md). Measured at run time on the macOS host: [[HKStatistics alloc] init] and [HKStatistics new] both raise NSInvalidArgumentException with the reason 'The -init method is not available on HKStatistics', and the port's class answers the same exception and reason. The port closes the selector with CHARON_HEALTHKIT_UNCREATABLE_INIT and builds its own instances through charon constructors that never reach it.",
+      "reason": "the SDK header declares -(instancetype)init NS_UNAVAILABLE for HKStatistics, and the release's own class carries an -init of its own (the reader table in facts/HealthKit/HealthKit8Absent.md). Measured at run time on the macOS host: [[HKStatistics alloc] init] and [HKStatistics new] both raise NSInvalidArgumentException with the reason 'The -init method is not available on HKStatistics', and the port's class answers the same exception and reason. The port closes the selector with REVENANT_HEALTHKIT_UNCREATABLE_INIT and builds its own instances through the Revenant constructors that never reach it.",
       "effect": "a caller that calls -init or +new on HKStatistics gets NSInvalidArgumentException with the reason 'The -init method is not available on HKStatistics', as the host does, and no object is made; respondsToSelector: answers YES for -init, because the selector is in the class's own list",
       "facts": "facts/HealthKit/HealthKit8Absent.md",
       "source": "the header of iOS 26.2 for the contract (coordination/corpus/sdk-26.2-surface.tsv); measured at run time by sh tests/backports/host/init-inherited/host.sh on macOS, where HKStatistics init and new answer the same as the port (SAME lines); checked on every light guard by xmake lua tests/backports/host/init-inherited/check.lua"
@@ -2966,7 +2966,7 @@
       "introduced": "8.0",
       "minimum": "6.0",
       "status": "implemented",
-      "reason": "the SDK header declares -(instancetype)init NS_UNAVAILABLE for HKStatisticsCollection, and the release's own class carries an -init of its own (the reader table in facts/HealthKit/HealthKit8Absent.md). Measured at run time on the macOS host: [[HKStatisticsCollection alloc] init] and [HKStatisticsCollection new] both raise NSInvalidArgumentException with the reason 'The -init method is not available on HKStatisticsCollection', and the port's class answers the same exception and reason. The port closes the selector with CHARON_HEALTHKIT_UNCREATABLE_INIT and builds its own instances through charon constructors that never reach it.",
+      "reason": "the SDK header declares -(instancetype)init NS_UNAVAILABLE for HKStatisticsCollection, and the release's own class carries an -init of its own (the reader table in facts/HealthKit/HealthKit8Absent.md). Measured at run time on the macOS host: [[HKStatisticsCollection alloc] init] and [HKStatisticsCollection new] both raise NSInvalidArgumentException with the reason 'The -init method is not available on HKStatisticsCollection', and the port's class answers the same exception and reason. The port closes the selector with REVENANT_HEALTHKIT_UNCREATABLE_INIT and builds its own instances through the Revenant constructors that never reach it.",
       "effect": "a caller that calls -init or +new on HKStatisticsCollection gets NSInvalidArgumentException with the reason 'The -init method is not available on HKStatisticsCollection', as the host does, and no object is made; respondsToSelector: answers YES for -init, because the selector is in the class's own list",
       "facts": "facts/HealthKit/HealthKit8Absent.md",
       "source": "the header of iOS 26.2 for the contract (coordination/corpus/sdk-26.2-surface.tsv); measured at run time by sh tests/backports/host/init-inherited/host.sh on macOS, where HKStatisticsCollection init and new answer the same as the port (SAME lines); checked on every light guard by xmake lua tests/backports/host/init-inherited/check.lua"
@@ -3098,7 +3098,7 @@
       "introduced": "8.0",
       "minimum": "6.0",
       "status": "implemented",
-      "reason": "the SDK header declares -(instancetype)init NS_UNAVAILABLE for HKWorkoutEvent, and the release's own class carries an -init of its own (the reader table in facts/HealthKit/HealthKit8Absent.md). Measured at run time on the macOS host: [[HKWorkoutEvent alloc] init] and [HKWorkoutEvent new] both raise NSInvalidArgumentException with the reason 'The -init method is not available on HKWorkoutEvent', and the port's class answers the same exception and reason. The port closes the selector with CHARON_HEALTHKIT_UNCREATABLE_INIT and builds its own instances through charon constructors that never reach it.",
+      "reason": "the SDK header declares -(instancetype)init NS_UNAVAILABLE for HKWorkoutEvent, and the release's own class carries an -init of its own (the reader table in facts/HealthKit/HealthKit8Absent.md). Measured at run time on the macOS host: [[HKWorkoutEvent alloc] init] and [HKWorkoutEvent new] both raise NSInvalidArgumentException with the reason 'The -init method is not available on HKWorkoutEvent', and the port's class answers the same exception and reason. The port closes the selector with REVENANT_HEALTHKIT_UNCREATABLE_INIT and builds its own instances through the Revenant constructors that never reach it.",
       "effect": "a caller that calls -init or +new on HKWorkoutEvent gets NSInvalidArgumentException with the reason 'The -init method is not available on HKWorkoutEvent', as the host does, and no object is made; respondsToSelector: answers YES for -init, because the selector is in the class's own list",
       "facts": "facts/HealthKit/HealthKit8Absent.md",
       "source": "the header of iOS 26.2 for the contract (coordination/corpus/sdk-26.2-surface.tsv); measured at run time by sh tests/backports/host/init-inherited/host.sh on macOS, where HKWorkoutEvent init and new answer the same as the port (SAME lines); checked on every light guard by xmake lua tests/backports/host/init-inherited/check.lua"

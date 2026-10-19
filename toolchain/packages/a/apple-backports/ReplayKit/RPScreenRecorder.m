@@ -1,5 +1,5 @@
 #import <ReplayKit/ReplayKit.h>
-#import "../CharonSayOnce.h"
+#import "../RevenantSayOnce.h"
 
 @implementation RPScreenRecorder
 
@@ -15,7 +15,7 @@
 
 - (BOOL)isAvailable
 {
-    charon_say_once_for(@"ReplayKit.RPScreenRecorder.available",
+    revenant_say_once_for(@"ReplayKit.RPScreenRecorder.available",
                        @"ReplayKit: RPScreenRecorder.available answers NO: this device cannot record the screen yet, so an application "
                        @"that checks first starts no recording. The host answers YES.");
     return NO;

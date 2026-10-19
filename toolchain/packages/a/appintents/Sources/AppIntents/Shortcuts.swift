@@ -2,12 +2,12 @@ import Foundation
 
 public struct AppShortcut {
     public let intent: any AppIntent
-    public let phrases: [any CharonShortcutPhrase]
+    public let phrases: [any RevenantShortcutPhrase]
     public let shortTitle: LocalizedStringResource
     public let systemImageName: String
     public let parameterPresentation: AppShortcutParameterPresentationSnapshot
 
-    public init(intent: some AppIntent, phrases: [any CharonShortcutPhrase], shortTitle: LocalizedStringResource,
+    public init(intent: some AppIntent, phrases: [any RevenantShortcutPhrase], shortTitle: LocalizedStringResource,
                 systemImageName: String) {
         self.intent = intent
         self.phrases = phrases
@@ -16,7 +16,7 @@ public struct AppShortcut {
         self.parameterPresentation = AppShortcutParameterPresentationSnapshot()
     }
 
-    public init(intent: some AppIntent, phrases: [any CharonShortcutPhrase], shortTitle: LocalizedStringResource,
+    public init(intent: some AppIntent, phrases: [any RevenantShortcutPhrase], shortTitle: LocalizedStringResource,
                 systemImageName: String, parameterPresentation: some AppShortcutParameterPresentationProtocol) {
         self.intent = intent
         self.phrases = phrases
@@ -43,7 +43,7 @@ public struct AppShortcutParameterPresentation<Intent, Value, Parameter, Paramet
                 @AppShortcutParameterPresentationTitleBuilder<Intent, Value, Parameter, ParameterKeyPath>
                 _: () -> AppShortcutParameterPresentationTitle<Intent, Value, Parameter, ParameterKeyPath>) {
         guard let keyPath = summary.keyPath else {
-            CharonUnset.fatal("a parameter presentation is made for the parameter its summary names")
+            RevenantUnset.fatal("a parameter presentation is made for the parameter its summary names")
         }
         self.keyPath = keyPath
     }
@@ -192,11 +192,11 @@ public struct AppShortcutParameterPresentationTitleString<Intent, Value, Paramet
     }
 }
 
-public protocol CharonShortcutPhrase {
+public protocol RevenantShortcutPhrase {
     var text: String { get }
 }
 
-public struct AppShortcutPhrase<Intent>: ExpressibleByStringInterpolation, CharonShortcutPhrase where Intent: AppIntent {
+public struct AppShortcutPhrase<Intent>: ExpressibleByStringInterpolation, RevenantShortcutPhrase where Intent: AppIntent {
     public let text: String
 
     public init(_ text: String) {
@@ -388,7 +388,7 @@ extension AppShortcutsProvider {
     public static var shortcutTileColor: ShortcutTileColor { return .blue }
 
     public static func updateAppShortcutParameters() {
-        CharonShortcutStore.shared.register(appShortcuts)
+        RevenantShortcutStore.shared.register(appShortcuts)
     }
 }
 
@@ -417,8 +417,8 @@ public enum AppShortcutsBuilder {
     public static func buildOptional(_ shortcut: AppShortcut?) -> [AppShortcut] { return shortcut.map { [$0] } ?? [] }
 }
 
-public final class CharonShortcutStore {
-    public static let shared = CharonShortcutStore()
+public final class RevenantShortcutStore {
+    public static let shared = RevenantShortcutStore()
 
     private var shortcuts: [AppShortcut] = []
     private let lock = NSLock()

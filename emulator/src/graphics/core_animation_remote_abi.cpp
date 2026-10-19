@@ -17,7 +17,7 @@
 
 #include "foundation/macho.hpp"
 
-namespace shade {
+namespace emulator {
 namespace {
 
     constexpr std::array<std::string_view, 2> encoder_send_symbols {

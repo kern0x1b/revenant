@@ -1,4 +1,4 @@
-#import "CharonDiffable.h"
+#import "RevenantDiffable.h"
 
 @implementation NSDiffableDataSourceSectionTransaction {
 @private
@@ -8,7 +8,7 @@
     NSOrderedCollectionDifference *_difference;
 }
 
-- (instancetype)initCharonWithSection:(id)section initial:(NSArray *)initial final:(NSArray *)final
+- (instancetype)initRevenantWithSection:(id)section initial:(NSArray *)initial final:(NSArray *)final
 {
     if ((self = [super init])) {
         _sectionIdentifier = section;
@@ -51,7 +51,7 @@
     NSArray *_sectionTransactions;
 }
 
-- (instancetype)initCharonWithInitial:(NSDiffableDataSourceSnapshot *)initial final:(NSDiffableDataSourceSnapshot *)final
+- (instancetype)initRevenantWithInitial:(NSDiffableDataSourceSnapshot *)initial final:(NSDiffableDataSourceSnapshot *)final
 {
     if ((self = [super init])) {
         _initialSnapshot = [initial copy];
@@ -62,7 +62,7 @@
             NSArray *before = [initial indexOfSectionIdentifier:section] == NSNotFound ? @[] : [initial itemIdentifiersInSectionWithIdentifier:section];
             NSArray *after = [final itemIdentifiersInSectionWithIdentifier:section];
             if (![before isEqual:after])
-                [changed addObject:[[NSDiffableDataSourceSectionTransaction alloc] initCharonWithSection:section initial:before final:after]];
+                [changed addObject:[[NSDiffableDataSourceSectionTransaction alloc] initRevenantWithSection:section initial:before final:after]];
         }
         _sectionTransactions = [[changed reverseObjectEnumerator] allObjects];
     }

@@ -1,8 +1,8 @@
 #import <Foundation/Foundation.h>
 #import <MediaPlayer/MediaPlayer.h>
 
-@interface MPMusicPlayerQueueDescriptor (CharonSubclassInit11)
-- (instancetype)charonInitAbstractQueueDescriptor;
+@interface MPMusicPlayerQueueDescriptor (RevenantSubclassInit11)
+- (instancetype)revenantInitAbstractQueueDescriptor;
 @end
 
 @implementation MPMusicPlayerPlayParameters
@@ -33,7 +33,7 @@
 @synthesize startItemPlayParameters = _startItemPlayParameters;
 
 - (instancetype)initWithPlayParametersQueue:(NSArray<MPMusicPlayerPlayParameters *> *)playParametersQueue {
-    self = [self charonInitAbstractQueueDescriptor];
+    self = [self revenantInitAbstractQueueDescriptor];
     if (self) {
         _playParametersQueue = [playParametersQueue copy];
     }
@@ -44,14 +44,14 @@
 - (MPMusicPlayerPlayParameters *)startItemPlayParameters { return _startItemPlayParameters; }
 
 - (void)setStartTime:(NSTimeInterval)startTime forItemWithPlayParameters:(MPMusicPlayerPlayParameters *)playParameters {
-    [self charonRecordTime:startTime atKey:@"start" forEntry:playParameters];
+    [self revenantRecordTime:startTime atKey:@"start" forEntry:playParameters];
 }
 
 - (void)setEndTime:(NSTimeInterval)endTime forItemWithPlayParameters:(MPMusicPlayerPlayParameters *)playParameters {
-    [self charonRecordTime:endTime atKey:@"end" forEntry:playParameters];
+    [self revenantRecordTime:endTime atKey:@"end" forEntry:playParameters];
 }
 
-- (void)charonRecordTime:(NSTimeInterval)time
+- (void)revenantRecordTime:(NSTimeInterval)time
                    atKey:(NSString *)which
                  forEntry:(MPMusicPlayerPlayParameters *)playParameters {
     if (!playParameters || !_playParametersQueue) {

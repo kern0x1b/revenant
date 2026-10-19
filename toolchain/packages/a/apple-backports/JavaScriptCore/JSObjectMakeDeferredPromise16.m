@@ -11,7 +11,7 @@ JSObjectRef JSObjectMakeDeferredPromise(JSContextRef context, JSObjectRef *resol
     JSValueRef thrown = NULL;
     if (!context)
         return NULL;
-    JSObjectRef promise = charon_js_deferred_promise([JSContext charon_wrapperForGlobalContext:context create:YES], resolve, reject, &thrown);
+    JSObjectRef promise = revenant_js_deferred_promise([JSContext revenant_wrapperForGlobalContext:context create:YES], resolve, reject, &thrown);
     if (!promise) {
         if (exception)
             *exception = thrown;
@@ -19,6 +19,6 @@ JSObjectRef JSObjectMakeDeferredPromise(JSContextRef context, JSObjectRef *resol
     }
     if (exception)
         *exception = NULL;
-    charon_js_leave();
+    revenant_js_leave();
     return promise;
 }

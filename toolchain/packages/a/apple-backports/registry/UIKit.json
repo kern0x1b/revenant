@@ -73,7 +73,7 @@
       "introduced": "10.0",
       "minimum": "6.0",
       "status": "implemented",
-      "reason": "private to CoreGraphics and in no header; the image renderer's bytes per row is its answer, so Charon declares and calls it rather than guessing an alignment",
+      "reason": "private to CoreGraphics and in no header; the image renderer's bytes per row is its answer, so the toolchain declares and calls it rather than guessing an alignment",
       "effect": "checked present in every shared cache from 3.1.3 to 10.3.4, so it is exported over the whole band; no fallback is needed",
       "facts": "facts/UIKit/UIGraphicsImageRenderer.md",
       "source": "UIKit of the armv7s cache of iOS 10.3.4"
@@ -368,7 +368,7 @@
       "source": "the host's own UIKit under Mac Catalyst through tests/backports/host/tail2, and tests/backports/device/tail2.m on iOS 6"
     },
     {
-      "api": "-[UIPasteboard charonRecordOptions:]",
+      "api": "-[UIPasteboard revenantRecordOptions:]",
       "kind": "method",
       "introduced": "10.0",
       "minimum": "6.0",
@@ -378,7 +378,7 @@
       "source": "the port's own surface, read out of the compiled objects; the UIKit headers of the SDK of iOS 10.3.4 declare neither"
     },
     {
-      "api": "-[UIPasteboard charonRecordedOptionsForTest]",
+      "api": "-[UIPasteboard revenantRecordedOptionsForTest]",
       "kind": "method",
       "introduced": "10.0",
       "minimum": "6.0",

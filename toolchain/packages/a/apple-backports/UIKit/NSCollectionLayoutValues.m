@@ -1,8 +1,8 @@
-#import "CharonCompositionalLayout.h"
+#import "RevenantCompositionalLayout.h"
 
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
 
-static NSUInteger charon_float_hash(CGFloat value)
+static NSUInteger revenant_float_hash(CGFloat value)
 {
     double widened = value;
     NSUInteger bits[2] = {0, 0};
@@ -12,11 +12,11 @@ static NSUInteger charon_float_hash(CGFloat value)
 
 @implementation NSCollectionLayoutDimension {
 @private
-    CharonDimensionKind _kind;
+    RevenantDimensionKind _kind;
     CGFloat _value;
 }
 
-- (instancetype)initCharonWithKind:(CharonDimensionKind)kind value:(CGFloat)value
+- (instancetype)initRevenantWithKind:(RevenantDimensionKind)kind value:(CGFloat)value
 {
     if ((self = [super init])) {
         _kind = kind;
@@ -29,48 +29,48 @@ static NSUInteger charon_float_hash(CGFloat value)
 {
     if (!isfinite(fractionalWidth))
         [NSException raise:NSInternalInconsistencyException format:@"Invalid fractional width: %g. The fraction must be a finite value.", (double)fractionalWidth];
-    return [[self alloc] initCharonWithKind:CharonDimensionKindFractionalWidth value:fractionalWidth];
+    return [[self alloc] initRevenantWithKind:RevenantDimensionKindFractionalWidth value:fractionalWidth];
 }
 
 + (instancetype)fractionalHeightDimension:(CGFloat)fractionalHeight
 {
     if (!isfinite(fractionalHeight))
         [NSException raise:NSInternalInconsistencyException format:@"Invalid fractional height: %g. The fraction must be a finite value.", (double)fractionalHeight];
-    return [[self alloc] initCharonWithKind:CharonDimensionKindFractionalHeight value:fractionalHeight];
+    return [[self alloc] initRevenantWithKind:RevenantDimensionKindFractionalHeight value:fractionalHeight];
 }
 
 + (instancetype)absoluteDimension:(CGFloat)absoluteDimension
 {
     if (!isfinite(absoluteDimension))
         [NSException raise:NSInternalInconsistencyException format:@"Invalid absolute dimension: %g. The dimension must be a finite value.", (double)absoluteDimension];
-    return [[self alloc] initCharonWithKind:CharonDimensionKindAbsolute value:absoluteDimension];
+    return [[self alloc] initRevenantWithKind:RevenantDimensionKindAbsolute value:absoluteDimension];
 }
 
 + (instancetype)estimatedDimension:(CGFloat)estimatedDimension
 {
     if (!isfinite(estimatedDimension))
         [NSException raise:NSInternalInconsistencyException format:@"Invalid estimated dimension: %g. The dimension must be a finite value.", (double)estimatedDimension];
-    return [[self alloc] initCharonWithKind:CharonDimensionKindEstimated value:estimatedDimension];
+    return [[self alloc] initRevenantWithKind:RevenantDimensionKindEstimated value:estimatedDimension];
 }
 
 - (BOOL)isFractionalWidth
 {
-    return _kind == CharonDimensionKindFractionalWidth;
+    return _kind == RevenantDimensionKindFractionalWidth;
 }
 
 - (BOOL)isFractionalHeight
 {
-    return _kind == CharonDimensionKindFractionalHeight;
+    return _kind == RevenantDimensionKindFractionalHeight;
 }
 
 - (BOOL)isAbsolute
 {
-    return _kind == CharonDimensionKindAbsolute;
+    return _kind == RevenantDimensionKindAbsolute;
 }
 
 - (BOOL)isEstimated
 {
-    return _kind == CharonDimensionKindEstimated;
+    return _kind == RevenantDimensionKindEstimated;
 }
 
 - (CGFloat)dimension
@@ -80,7 +80,7 @@ static NSUInteger charon_float_hash(CGFloat value)
 
 - (id)copyWithZone:(NSZone *)zone
 {
-    return [[[self class] allocWithZone:zone] initCharonWithKind:_kind value:_value];
+    return [[[self class] allocWithZone:zone] initRevenantWithKind:_kind value:_value];
 }
 
 - (BOOL)isEqual:(id)object
@@ -95,12 +95,12 @@ static NSUInteger charon_float_hash(CGFloat value)
 
 - (NSUInteger)hash
 {
-    return (NSUInteger)_kind * 1000003 ^ charon_float_hash(_value);
+    return (NSUInteger)_kind * 1000003 ^ revenant_float_hash(_value);
 }
 
 @end
 
-static NSString *charon_dimension_text(NSCollectionLayoutDimension *dimension)
+static NSString *revenant_dimension_text(NSCollectionLayoutDimension *dimension)
 {
     if (dimension.isFractionalWidth)
         return [NSString stringWithFormat:@".containerWidthFactor(%g)", (double)dimension.dimension];
@@ -117,7 +117,7 @@ static NSString *charon_dimension_text(NSCollectionLayoutDimension *dimension)
     NSCollectionLayoutDimension *_height;
 }
 
-- (instancetype)initCharonWithWidth:(NSCollectionLayoutDimension *)width height:(NSCollectionLayoutDimension *)height
+- (instancetype)initRevenantWithWidth:(NSCollectionLayoutDimension *)width height:(NSCollectionLayoutDimension *)height
 {
     if ((self = [super init])) {
         _width = width ?: [NSCollectionLayoutDimension absoluteDimension:0];
@@ -128,12 +128,12 @@ static NSString *charon_dimension_text(NSCollectionLayoutDimension *dimension)
 
 - (instancetype)init
 {
-    return [self initCharonWithWidth:nil height:nil];
+    return [self initRevenantWithWidth:nil height:nil];
 }
 
 + (instancetype)sizeWithWidthDimension:(NSCollectionLayoutDimension *)width heightDimension:(NSCollectionLayoutDimension *)height
 {
-    return [[self alloc] initCharonWithWidth:width height:height];
+    return [[self alloc] initRevenantWithWidth:width height:height];
 }
 
 - (NSCollectionLayoutDimension *)widthDimension
@@ -148,7 +148,7 @@ static NSString *charon_dimension_text(NSCollectionLayoutDimension *dimension)
 
 - (id)copyWithZone:(NSZone *)zone
 {
-    return [[[self class] allocWithZone:zone] initCharonWithWidth:_width height:_height];
+    return [[[self class] allocWithZone:zone] initRevenantWithWidth:_width height:_height];
 }
 
 - (BOOL)isEqual:(id)object
@@ -168,7 +168,7 @@ static NSString *charon_dimension_text(NSCollectionLayoutDimension *dimension)
 
 - (NSString *)description
 {
-    return [NSString stringWithFormat:@"{%@, %@}", charon_dimension_text(_width), charon_dimension_text(_height)];
+    return [NSString stringWithFormat:@"{%@, %@}", revenant_dimension_text(_width), revenant_dimension_text(_height)];
 }
 
 @end
@@ -179,7 +179,7 @@ static NSString *charon_dimension_text(NSCollectionLayoutDimension *dimension)
     BOOL _flexible;
 }
 
-- (instancetype)initCharonWithSpacing:(CGFloat)spacing flexible:(BOOL)flexible
+- (instancetype)initRevenantWithSpacing:(CGFloat)spacing flexible:(BOOL)flexible
 {
     if ((self = [super init])) {
         _spacing = spacing;
@@ -190,12 +190,12 @@ static NSString *charon_dimension_text(NSCollectionLayoutDimension *dimension)
 
 + (instancetype)flexibleSpacing:(CGFloat)flexibleSpacing
 {
-    return [[self alloc] initCharonWithSpacing:flexibleSpacing flexible:YES];
+    return [[self alloc] initRevenantWithSpacing:flexibleSpacing flexible:YES];
 }
 
 + (instancetype)fixedSpacing:(CGFloat)fixedSpacing
 {
-    return [[self alloc] initCharonWithSpacing:fixedSpacing flexible:NO];
+    return [[self alloc] initRevenantWithSpacing:fixedSpacing flexible:NO];
 }
 
 - (CGFloat)spacing
@@ -215,7 +215,7 @@ static NSString *charon_dimension_text(NSCollectionLayoutDimension *dimension)
 
 - (id)copyWithZone:(NSZone *)zone
 {
-    return [[[self class] allocWithZone:zone] initCharonWithSpacing:_spacing flexible:_flexible];
+    return [[[self class] allocWithZone:zone] initRevenantWithSpacing:_spacing flexible:_flexible];
 }
 
 - (BOOL)isEqual:(id)object
@@ -230,7 +230,7 @@ static NSString *charon_dimension_text(NSCollectionLayoutDimension *dimension)
 
 - (NSUInteger)hash
 {
-    return charon_float_hash(_spacing) ^ (_flexible ? 0x5bd1e995 : 0);
+    return revenant_float_hash(_spacing) ^ (_flexible ? 0x5bd1e995 : 0);
 }
 
 - (NSString *)description
@@ -284,7 +284,7 @@ static NSString *charon_dimension_text(NSCollectionLayoutDimension *dimension)
     return [[self class] spacingForLeading:[_leading copy] top:[_top copy] trailing:[_trailing copy] bottom:[_bottom copy]];
 }
 
-static BOOL charon_same(id a, id b)
+static BOOL revenant_same(id a, id b)
 {
     return a == b || (a && b && [a isEqual:b]);
 }
@@ -296,7 +296,7 @@ static BOOL charon_same(id a, id b)
     if (![object isKindOfClass:[NSCollectionLayoutEdgeSpacing class]])
         return NO;
     NSCollectionLayoutEdgeSpacing *other = object;
-    return charon_same(other->_leading, _leading) && charon_same(other->_top, _top) && charon_same(other->_trailing, _trailing) && charon_same(other->_bottom, _bottom);
+    return revenant_same(other->_leading, _leading) && revenant_same(other->_top, _top) && revenant_same(other->_trailing, _trailing) && revenant_same(other->_bottom, _bottom);
 }
 
 - (NSUInteger)hash
@@ -363,7 +363,7 @@ static BOOL charon_same(id a, id b)
     return !_absolute;
 }
 
-- (CGPoint)charon_anchorPoint
+- (CGPoint)revenant_anchorPoint
 {
     BOOL leading = (_edges & NSDirectionalRectEdgeLeading) != 0, trailing = (_edges & NSDirectionalRectEdgeTrailing) != 0;
     BOOL top = (_edges & NSDirectionalRectEdgeTop) != 0, bottom = (_edges & NSDirectionalRectEdgeBottom) != 0;
@@ -389,12 +389,12 @@ static BOOL charon_same(id a, id b)
 
 - (NSUInteger)hash
 {
-    return (NSUInteger)_edges * 31 ^ charon_float_hash(_offset.x) ^ charon_float_hash(_offset.y) * 7 ^ (_absolute ? 1 : 0);
+    return (NSUInteger)_edges * 31 ^ revenant_float_hash(_offset.x) ^ revenant_float_hash(_offset.y) * 7 ^ (_absolute ? 1 : 0);
 }
 
 - (NSString *)description
 {
-    CGPoint point = [self charon_anchorPoint];
+    CGPoint point = [self revenant_anchorPoint];
     return [NSString stringWithFormat:@"<NSCollectionLayoutAnchor %p: edges=%lu; offset={%g, %g}; anchorPoint={%g, %g}>", self, (unsigned long)_edges, (double)_offset.x,
                                       (double)_offset.y, (double)point.x, (double)point.y];
 }

@@ -9,7 +9,7 @@ static NSDictionary *item(NSString *account, id sync, BOOL data)
 {
     NSMutableDictionary *d = [NSMutableDictionary dictionaryWithDictionary:@{
         (__bridge id)kSecClass: (__bridge id)kSecClassGenericPassword,
-        (__bridge id)kSecAttrService: @"charon.secitem",
+        (__bridge id)kSecAttrService: @"revenant.secitem",
         (__bridge id)kSecAttrAccount: account}];
     if (sync)
         d[(__bridge id)kSecAttrSynchronizable] = sync;
@@ -91,9 +91,9 @@ static void run(void)
 {
     [[NSFileManager defaultManager] createDirectoryAtPath:results_folder withIntermediateDirectories:YES attributes:nil error:NULL];
     [[NSFileManager defaultManager] removeItemAtPath:[results_folder stringByAppendingPathComponent:@"secitem.done"] error:NULL];
-    charon_log_to([results_folder stringByAppendingPathComponent:@"secitem.log"]);
+    revenant_log_to([results_folder stringByAppendingPathComponent:@"secitem.log"]);
     run();
-    NSString *summary = [NSString stringWithFormat:@"%d checks, %d failed\n", charon_checks, charon_failures];
+    NSString *summary = [NSString stringWithFormat:@"%d checks, %d failed\n", revenant_checks, revenant_failures];
     [summary writeToFile:[results_folder stringByAppendingPathComponent:@"secitem.done"] atomically:YES encoding:NSUTF8StringEncoding error:NULL];
     self.window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
     self.window.backgroundColor = [UIColor whiteColor];

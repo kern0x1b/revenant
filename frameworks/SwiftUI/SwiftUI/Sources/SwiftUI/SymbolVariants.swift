@@ -1,6 +1,6 @@
 //
 //  SymbolVariants.swift
-//  Eidolon — the variant of a symbol an Image or a Label is drawn with.
+//  SwiftUI — the variant of a symbol an Image or a Label is drawn with.
 //
 //  Taken from OpenSwiftUIProject/OpenSwiftUI, Sources/OpenSwiftUICore/View/Image/SymbolVariants.swift,
 //  commit efa103755b95bd5a6ab42681a261c7cc66be6f75, MIT (Copyright (c) 2023-2025 Kyle-Ye). Its doc comments come with it.

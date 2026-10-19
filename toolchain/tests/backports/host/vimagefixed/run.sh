@@ -5,7 +5,7 @@ set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 ACCELERATE=${ACCELERATE:-$here/../../../../packages/a/apple-backports/Accelerate}
-build=${VIMAGEFIXED_BUILD:-$(runs_folder charon-vimagefixed-host)}
+build=${VIMAGEFIXED_BUILD:-$(runs_folder revenant-vimagefixed-host)}
 rm -rf "$build"
 mkdir -p "$build"
 
@@ -24,7 +24,7 @@ for part in ("ios7fixedpoint.json", "ios10fixedpoint.json"):
             print(entry["api"].rstrip("()"))
 PY
 ); do
-    renames="$renames -D$name=charon_host_$name"
+    renames="$renames -D$name=revenant_host_$name"
 done
 
 objects=""

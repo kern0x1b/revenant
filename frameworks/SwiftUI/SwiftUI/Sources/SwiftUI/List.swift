@@ -358,7 +358,7 @@ final class ListNode: LayoutNode {
         let table = uiView as! UITableView
         table.dataSource = controller
         table.delegate = controller
-        let install = NSSelectorFromString("charon_installSwipeActions")
+        let install = NSSelectorFromString("revenant_installSwipeActions")
         if table.responds(to: install) { table.perform(install) }
     }
     override func update(_ view: any View, _ env: EnvironmentValues) {

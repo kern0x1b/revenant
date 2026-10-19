@@ -1,5 +1,5 @@
-#ifndef CHARON_OPENAT_H
-#define CHARON_OPENAT_H
+#ifndef REVENANT_OPENAT_H
+#define REVENANT_OPENAT_H
 
 #include <fcntl.h>
 #include <fcntl.h>
@@ -8,12 +8,12 @@
 extern "C" {
 #endif
 
-int charon_openat(int directory, const char *path, int flags, ...);
+int revenant_openat(int directory, const char *path, int flags, ...);
 
 #ifdef __cplusplus
 }
 #endif
 
-#define openat charon_openat
+#define openat revenant_openat
 
 #endif

@@ -1,6 +1,6 @@
 #import <UIKit/UIKit.h>
 
-@implementation UIImage (CharonHorizontalFlip)
+@implementation UIImage (RevenantHorizontalFlip)
 
 - (UIImage *)imageWithHorizontallyFlippedOrientation
 {

@@ -1,5 +1,5 @@
 #!/bin/sh
-# The engine of UIKit Dynamics as charon@box2d builds it gives, bit for bit, what upstream Box2D 2.2.1
+# The engine of UIKit Dynamics as revenant@box2d builds it gives, bit for bit, what upstream Box2D 2.2.1
 # gives built the way its own CMake builds it: the recipe's flags (hidden symbols, no exceptions or
 # RTTI, -Os) change nothing in the physics. A copy with one constant changed must differ, or the
 # comparison proves nothing. The source is the recipe's own pinned archive, checked by its digest.
@@ -7,7 +7,7 @@ set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 box2d=$here
-BUILD=${BUILD:-$(runs_fresh charon-box2d)}
+BUILD=${BUILD:-$(runs_fresh revenant-box2d)}
 . "$here/source.sh"
 rm -rf "$BUILD/mutant"
 cp -R "$source" "$BUILD/mutant"

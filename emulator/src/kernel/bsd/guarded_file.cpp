@@ -7,7 +7,7 @@
 #include "kernel/darwin_abi.hpp"
 #include "support.hpp"
 #include <string>
-namespace shade {
+namespace emulator {
 bool CompatibilityKernel::reject_guarded_descriptor(
     Cpu& cpu, std::uint32_t fd, std::uint32_t flags)
 {

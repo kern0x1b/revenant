@@ -1,9 +1,9 @@
 #import <Foundation/Foundation.h>
 
-@interface CharonHostNSProgress : NSObject
+@interface RevenantHostNSProgress : NSObject
 + (instancetype)progressWithTotalUnitCount:(int64_t)unitCount;
-+ (CharonHostNSProgress *)currentProgress;
-- (instancetype)initWithParent:(CharonHostNSProgress *)parent userInfo:(NSDictionary *)userInfo;
++ (RevenantHostNSProgress *)currentProgress;
+- (instancetype)initWithParent:(RevenantHostNSProgress *)parent userInfo:(NSDictionary *)userInfo;
 - (void)becomeCurrentWithPendingUnitCount:(int64_t)unitCount;
 - (void)resignCurrent;
 @property int64_t totalUnitCount;
@@ -65,12 +65,12 @@ static void tolerated(NSString *reason, NSString *what, id ours, id theirs)
 int main(void)
 {
     @autoreleasepool {
-        Class ours = [CharonHostNSProgress class];
+        Class ours = [RevenantHostNSProgress class];
         Class theirs = [NSProgress class];
         expect(ours != theirs, @"the classes are two", @"one class");
 
         for (int i = 0; i <= 4; i++) {
-            CharonHostNSProgress *o = [CharonHostNSProgress progressWithTotalUnitCount:4];
+            RevenantHostNSProgress *o = [RevenantHostNSProgress progressWithTotalUnitCount:4];
             NSProgress *t = [NSProgress progressWithTotalUnitCount:4];
             o.completedUnitCount = i;
             t.completedUnitCount = i;
@@ -79,7 +79,7 @@ int main(void)
             sameDouble(o.fractionCompleted, t.fractionCompleted, [what stringByAppendingString:@" fractionCompleted"]);
         }
 
-        CharonHostNSProgress *zeroOurs = [CharonHostNSProgress progressWithTotalUnitCount:0];
+        RevenantHostNSProgress *zeroOurs = [RevenantHostNSProgress progressWithTotalUnitCount:0];
         NSProgress *zeroTheirs = [NSProgress progressWithTotalUnitCount:0];
         expect(isnan(zeroOurs.fractionCompleted), @"zero total fractionCompleted is NaN (ours, iOS 6)", [NSString stringWithFormat:@"%g", zeroOurs.fractionCompleted]);
         if (isnan(zeroTheirs.fractionCompleted))
@@ -87,12 +87,12 @@ int main(void)
         else
             tolerated(@"iOS 6 answers NaN for a zero total; the newest release does not", @"zero total fractionCompleted", @(zeroOurs.fractionCompleted), @(zeroTheirs.fractionCompleted));
 
-        CharonHostNSProgress *negOurs = [CharonHostNSProgress progressWithTotalUnitCount:-1];
+        RevenantHostNSProgress *negOurs = [RevenantHostNSProgress progressWithTotalUnitCount:-1];
         NSProgress *negTheirs = [NSProgress progressWithTotalUnitCount:-1];
         sameBool(negOurs.isIndeterminate, negTheirs.isIndeterminate, @"negative total is indeterminate");
         expect(negOurs.isIndeterminate, @"negative total is indeterminate (ours)", @"NO");
 
-        CharonHostNSProgress *freshOurs = [CharonHostNSProgress progressWithTotalUnitCount:0];
+        RevenantHostNSProgress *freshOurs = [RevenantHostNSProgress progressWithTotalUnitCount:0];
         NSProgress *freshTheirs = [NSProgress progressWithTotalUnitCount:0];
         expect(freshOurs.isIndeterminate == NO, @"a fresh progress's isIndeterminate is NO (ours, iOS 6)", [NSString stringWithFormat:@"%d", freshOurs.isIndeterminate]);
         if (freshTheirs.isIndeterminate == NO)
@@ -100,11 +100,11 @@ int main(void)
         else
             tolerated(@"iOS 6 answers NO for a fresh progress; the newest release may answer YES", @"a fresh progress's isIndeterminate", @(freshOurs.isIndeterminate), @(freshTheirs.isIndeterminate));
 
-        sameBool([CharonHostNSProgress new].isCancellable, [NSProgress new].isCancellable, @"isCancellable default");
-        sameBool([CharonHostNSProgress new].isPausable, [NSProgress new].isPausable, @"isPausable default");
+        sameBool([RevenantHostNSProgress new].isCancellable, [NSProgress new].isCancellable, @"isCancellable default");
+        sameBool([RevenantHostNSProgress new].isPausable, [NSProgress new].isPausable, @"isPausable default");
 
         __block int oursHandlerCalls = 0, theirsHandlerCalls = 0;
-        CharonHostNSProgress *cancelOurs = [CharonHostNSProgress progressWithTotalUnitCount:1];
+        RevenantHostNSProgress *cancelOurs = [RevenantHostNSProgress progressWithTotalUnitCount:1];
         NSProgress *cancelTheirs = [NSProgress progressWithTotalUnitCount:1];
         cancelOurs.cancellationHandler = ^{ oursHandlerCalls++; };
         cancelTheirs.cancellationHandler = ^{ theirsHandlerCalls++; };
@@ -115,7 +115,7 @@ int main(void)
         [[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.2]];
         sameInt(theirsHandlerCalls, 1, @"the cancellation handler fired once (host, after the wait)");
         oursHandlerCalls = theirsHandlerCalls = 0;
-        CharonHostNSProgress *lateOurs = [CharonHostNSProgress progressWithTotalUnitCount:1];
+        RevenantHostNSProgress *lateOurs = [RevenantHostNSProgress progressWithTotalUnitCount:1];
         NSProgress *lateTheirs = [NSProgress progressWithTotalUnitCount:1];
         [lateOurs cancel];
         [lateTheirs cancel];
@@ -129,7 +129,7 @@ int main(void)
             tolerated(@"the newest release calls a cancellation handler set after cancel; iOS 6 does not", @"a handler set after cancel", @(oursHandlerCalls), @(theirsHandlerCalls));
 
         __block int oursPauseCalls = 0, theirsPauseCalls = 0;
-        CharonHostNSProgress *pauseOurs = [CharonHostNSProgress progressWithTotalUnitCount:1];
+        RevenantHostNSProgress *pauseOurs = [RevenantHostNSProgress progressWithTotalUnitCount:1];
         NSProgress *pauseTheirs = [NSProgress progressWithTotalUnitCount:1];
         pauseOurs.pausable = YES;
         pauseTheirs.pausable = YES;
@@ -150,7 +150,7 @@ int main(void)
         else
             tolerated(@"iOS 6 cannot resume a paused progress; the host, since 10.11, can", @"isPaused after resume", @(pauseOurs.isPaused), @(pauseTheirs.isPaused));
 
-        CharonHostNSProgress *infoOurs = [CharonHostNSProgress progressWithTotalUnitCount:1];
+        RevenantHostNSProgress *infoOurs = [RevenantHostNSProgress progressWithTotalUnitCount:1];
         NSProgress *infoTheirs = [NSProgress progressWithTotalUnitCount:1];
         [infoOurs setUserInfoObject:@"x" forKey:@"k"];
         [infoTheirs setUserInfoObject:@"x" forKey:@"k"];
@@ -162,11 +162,11 @@ int main(void)
         infoTheirs.kind = @"custom";
         sameObject(infoOurs.kind, infoTheirs.kind, @"kind roundtrip");
 
-        CharonHostNSProgress *rootOurs = [CharonHostNSProgress progressWithTotalUnitCount:10];
+        RevenantHostNSProgress *rootOurs = [RevenantHostNSProgress progressWithTotalUnitCount:10];
         NSProgress *rootTheirs = [NSProgress progressWithTotalUnitCount:10];
         [rootOurs becomeCurrentWithPendingUnitCount:6];
         [rootTheirs becomeCurrentWithPendingUnitCount:6];
-        CharonHostNSProgress *childOurs = [CharonHostNSProgress progressWithTotalUnitCount:4];
+        RevenantHostNSProgress *childOurs = [RevenantHostNSProgress progressWithTotalUnitCount:4];
         NSProgress *childTheirs = [NSProgress progressWithTotalUnitCount:4];
         [rootOurs resignCurrent];
         [rootTheirs resignCurrent];
@@ -178,7 +178,7 @@ int main(void)
         childTheirs.completedUnitCount = 4;
         sameDouble(rootOurs.fractionCompleted, rootTheirs.fractionCompleted, @"implicit child, all done");
 
-        CharonHostNSProgress *noChildOurs = [CharonHostNSProgress progressWithTotalUnitCount:10];
+        RevenantHostNSProgress *noChildOurs = [RevenantHostNSProgress progressWithTotalUnitCount:10];
         NSProgress *noChildTheirs = [NSProgress progressWithTotalUnitCount:10];
         [noChildOurs becomeCurrentWithPendingUnitCount:3];
         [noChildTheirs becomeCurrentWithPendingUnitCount:3];
@@ -187,13 +187,13 @@ int main(void)
         sameInt(noChildOurs.completedUnitCount, noChildTheirs.completedUnitCount, @"resignCurrent with no child, completedUnitCount");
         sameDouble(noChildOurs.fractionCompleted, noChildTheirs.fractionCompleted, @"resignCurrent with no child, fractionCompleted");
 
-        CharonHostNSProgress *twoOurs = [CharonHostNSProgress progressWithTotalUnitCount:10];
+        RevenantHostNSProgress *twoOurs = [RevenantHostNSProgress progressWithTotalUnitCount:10];
         NSProgress *twoTheirs = [NSProgress progressWithTotalUnitCount:10];
         [twoOurs becomeCurrentWithPendingUnitCount:10];
         [twoTheirs becomeCurrentWithPendingUnitCount:10];
-        CharonHostNSProgress *firstOurs = [CharonHostNSProgress progressWithTotalUnitCount:2];
+        RevenantHostNSProgress *firstOurs = [RevenantHostNSProgress progressWithTotalUnitCount:2];
         NSProgress *firstTheirs = [NSProgress progressWithTotalUnitCount:2];
-        CharonHostNSProgress *secondOurs = [CharonHostNSProgress progressWithTotalUnitCount:2];
+        RevenantHostNSProgress *secondOurs = [RevenantHostNSProgress progressWithTotalUnitCount:2];
         NSProgress *secondTheirs = [NSProgress progressWithTotalUnitCount:2];
         [twoOurs resignCurrent];
         [twoTheirs resignCurrent];
@@ -203,15 +203,15 @@ int main(void)
         secondTheirs.completedUnitCount = 2;
         sameDouble(twoOurs.fractionCompleted, twoTheirs.fractionCompleted, @"only the first of two attaches");
 
-        CharonHostNSProgress *outerOurs = [CharonHostNSProgress progressWithTotalUnitCount:10];
+        RevenantHostNSProgress *outerOurs = [RevenantHostNSProgress progressWithTotalUnitCount:10];
         NSProgress *outerTheirs = [NSProgress progressWithTotalUnitCount:10];
         [outerOurs becomeCurrentWithPendingUnitCount:10];
         [outerTheirs becomeCurrentWithPendingUnitCount:10];
-        CharonHostNSProgress *middleOurs = [CharonHostNSProgress progressWithTotalUnitCount:10];
+        RevenantHostNSProgress *middleOurs = [RevenantHostNSProgress progressWithTotalUnitCount:10];
         NSProgress *middleTheirs = [NSProgress progressWithTotalUnitCount:10];
         [middleOurs becomeCurrentWithPendingUnitCount:5];
         [middleTheirs becomeCurrentWithPendingUnitCount:5];
-        CharonHostNSProgress *innerOurs = [CharonHostNSProgress progressWithTotalUnitCount:4];
+        RevenantHostNSProgress *innerOurs = [RevenantHostNSProgress progressWithTotalUnitCount:4];
         NSProgress *innerTheirs = [NSProgress progressWithTotalUnitCount:4];
         [middleOurs resignCurrent];
         [middleTheirs resignCurrent];
@@ -222,16 +222,16 @@ int main(void)
         sameDouble(outerOurs.fractionCompleted, outerTheirs.fractionCompleted, @"a nested becomeCurrent scope, outer fraction");
         sameDouble(middleOurs.fractionCompleted, middleTheirs.fractionCompleted, @"a nested becomeCurrent scope, middle fraction");
 
-        __weak CharonHostNSProgress *weakOurs;
+        __weak RevenantHostNSProgress *weakOurs;
         __weak NSProgress *weakTheirs;
         @autoreleasepool {
-            CharonHostNSProgress *earlyOurs = [CharonHostNSProgress progressWithTotalUnitCount:10];
+            RevenantHostNSProgress *earlyOurs = [RevenantHostNSProgress progressWithTotalUnitCount:10];
             NSProgress *earlyTheirs = [NSProgress progressWithTotalUnitCount:10];
             [earlyOurs cancel];
             [earlyTheirs cancel];
             [earlyOurs becomeCurrentWithPendingUnitCount:10];
             [earlyTheirs becomeCurrentWithPendingUnitCount:10];
-            CharonHostNSProgress *afterOurs = [CharonHostNSProgress progressWithTotalUnitCount:4];
+            RevenantHostNSProgress *afterOurs = [RevenantHostNSProgress progressWithTotalUnitCount:4];
             NSProgress *afterTheirs = [NSProgress progressWithTotalUnitCount:4];
             [earlyOurs resignCurrent];
             [earlyTheirs resignCurrent];

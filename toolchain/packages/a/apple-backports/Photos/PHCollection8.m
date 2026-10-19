@@ -1,4 +1,4 @@
-#import "CharonPhotos.h"
+#import "RevenantPhotos.h"
 #import <CoreLocation/CoreLocation.h>
 
 #pragma clang diagnostic ignored "-Wobjc-missing-property-synthesis"
@@ -6,12 +6,12 @@
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 
-static PHFetchResult *charon_collections(NSArray *(^query)(void), PHFetchOptions *options)
+static PHFetchResult *revenant_collections(NSArray *(^query)(void), PHFetchOptions *options)
 {
-    return [[PHFetchResult alloc] initWithCharonQuery:query options:options];
+    return [[PHFetchResult alloc] initWithRevenantQuery:query options:options];
 }
 
-static NSArray *charon_no_collections(void)
+static NSArray *revenant_no_collections(void)
 {
     return @[];
 }
@@ -40,13 +40,13 @@ static NSArray *charon_no_collections(void)
 
 + (PHFetchResult<PHCollection *> *)fetchCollectionsInCollectionList:(PHCollectionList *)collectionList options:(PHFetchOptions *)options
 {
-    return charon_collections(^{ return charon_no_collections(); }, options);
+    return revenant_collections(^{ return revenant_no_collections(); }, options);
 }
 
 + (PHFetchResult<PHCollection *> *)fetchTopLevelUserCollectionsWithOptions:(PHFetchOptions *)options
 {
-    return charon_collections(^{
-        return [CharonPhotosStore collectionsOfGroupTypes:ALAssetsGroupAlbum];
+    return revenant_collections(^{
+        return [RevenantPhotosStore collectionsOfGroupTypes:ALAssetsGroupAlbum];
     }, options);
 }
 
@@ -60,10 +60,10 @@ static NSArray *charon_no_collections(void)
     NSUInteger _estimatedAssetCount;
 }
 
-- (instancetype)initWithCharonGroup:(ALAssetsGroup *)group
+- (instancetype)initWithRevenantGroup:(ALAssetsGroup *)group
 {
     NSString *identifier = [[group valueForProperty:ALAssetsGroupPropertyURL] absoluteString];
-    self = [self initWithCharonLocalIdentifier:identifier];
+    self = [self initWithRevenantLocalIdentifier:identifier];
     if (!self)
         return nil;
     _group = group;
@@ -97,9 +97,9 @@ static NSArray *charon_no_collections(void)
     return self;
 }
 
-- (instancetype)initWithCharonSmartSubtype:(PHAssetCollectionSubtype)subtype
+- (instancetype)initWithRevenantSmartSubtype:(PHAssetCollectionSubtype)subtype
 {
-    self = [self initWithCharonLocalIdentifier:[NSString stringWithFormat:@"CHARON/SMART/%ld", (long)subtype]];
+    self = [self initWithRevenantLocalIdentifier:[NSString stringWithFormat:@"REVENANT/SMART/%ld", (long)subtype]];
     if (!self)
         return nil;
     _assetCollectionType = PHAssetCollectionTypeSmartAlbum;
@@ -144,33 +144,33 @@ static NSArray *charon_no_collections(void)
     return @[];
 }
 
-- (NSArray<PHAsset *> *)charon_assets
+- (NSArray<PHAsset *> *)revenant_assets
 {
     if (_group)
-        return [CharonPhotosStore assetsInGroupWithURL:[NSURL URLWithString:self.localIdentifier] filter:nil];
+        return [RevenantPhotosStore assetsInGroupWithURL:[NSURL URLWithString:self.localIdentifier] filter:nil];
     if (_assetCollectionSubtype == PHAssetCollectionSubtypeSmartAlbumVideos)
-        return [CharonPhotosStore assetsOfSourceTypes:0 filter:[ALAssetsFilter allVideos]];
+        return [RevenantPhotosStore assetsOfSourceTypes:0 filter:[ALAssetsFilter allVideos]];
     return @[];
 }
 
-- (PHObject *)charon_refetched
+- (PHObject *)revenant_refetched
 {
-    return [CharonPhotosStore collectionWithIdentifier:self.localIdentifier];
+    return [RevenantPhotosStore collectionWithIdentifier:self.localIdentifier];
 }
 
-- (BOOL)charon_sameStateAs:(PHObject *)other
+- (BOOL)revenant_sameStateAs:(PHObject *)other
 {
     PHAssetCollection *collection = (PHAssetCollection *)other;
     return [collection isKindOfClass:[PHAssetCollection class]] && collection.estimatedAssetCount == _estimatedAssetCount &&
            (collection.localizedTitle == _title || [collection.localizedTitle isEqualToString:_title]);
 }
 
-- (ALAssetsGroup *)charon_group
+- (ALAssetsGroup *)revenant_group
 {
     return _group;
 }
 
-+ (NSArray *)charon_smartSubtypes
++ (NSArray *)revenant_smartSubtypes
 {
     return @[@(PHAssetCollectionSubtypeSmartAlbumVideos), @(PHAssetCollectionSubtypeSmartAlbumFavorites),
              @(PHAssetCollectionSubtypeSmartAlbumBursts), @(PHAssetCollectionSubtypeSmartAlbumAllHidden)];
@@ -178,27 +178,27 @@ static NSArray *charon_no_collections(void)
 
 + (PHFetchResult<PHAssetCollection *> *)fetchAssetCollectionsWithType:(PHAssetCollectionType)type subtype:(PHAssetCollectionSubtype)subtype options:(PHFetchOptions *)options
 {
-    return charon_collections(^{
-        return [self charon_collectionsWithType:type subtype:subtype];
+    return revenant_collections(^{
+        return [self revenant_collectionsWithType:type subtype:subtype];
     }, options);
 }
 
-+ (NSArray *)charon_collectionsWithType:(PHAssetCollectionType)type subtype:(PHAssetCollectionSubtype)subtype
++ (NSArray *)revenant_collectionsWithType:(PHAssetCollectionType)type subtype:(PHAssetCollectionSubtype)subtype
 {
     NSMutableArray *found = [NSMutableArray array];
     if (type == PHAssetCollectionTypeAlbum) {
-        for (PHAssetCollection *collection in [CharonPhotosStore collectionsOfGroupTypes:ALAssetsGroupAlbum | ALAssetsGroupEvent | ALAssetsGroupFaces | ALAssetsGroupLibrary | ALAssetsGroupPhotoStream]) {
+        for (PHAssetCollection *collection in [RevenantPhotosStore collectionsOfGroupTypes:ALAssetsGroupAlbum | ALAssetsGroupEvent | ALAssetsGroupFaces | ALAssetsGroupLibrary | ALAssetsGroupPhotoStream]) {
             if (subtype == PHAssetCollectionSubtypeAny || collection.assetCollectionSubtype == subtype)
                 [found addObject:collection];
         }
     } else if (type == PHAssetCollectionTypeSmartAlbum) {
-        for (PHAssetCollection *collection in [CharonPhotosStore collectionsOfGroupTypes:ALAssetsGroupSavedPhotos]) {
+        for (PHAssetCollection *collection in [RevenantPhotosStore collectionsOfGroupTypes:ALAssetsGroupSavedPhotos]) {
             if (subtype == PHAssetCollectionSubtypeAny || collection.assetCollectionSubtype == subtype)
                 [found addObject:collection];
         }
-        for (NSNumber *smart in [self charon_smartSubtypes]) {
+        for (NSNumber *smart in [self revenant_smartSubtypes]) {
             if (subtype == PHAssetCollectionSubtypeAny || subtype == smart.integerValue)
-                [found addObject:[[PHAssetCollection alloc] initWithCharonSmartSubtype:(PHAssetCollectionSubtype)smart.integerValue]];
+                [found addObject:[[PHAssetCollection alloc] initWithRevenantSmartSubtype:(PHAssetCollectionSubtype)smart.integerValue]];
         }
     }
     return found;
@@ -207,10 +207,10 @@ static NSArray *charon_no_collections(void)
 + (PHFetchResult<PHAssetCollection *> *)fetchAssetCollectionsWithLocalIdentifiers:(NSArray<NSString *> *)identifiers options:(PHFetchOptions *)options
 {
     NSArray *kept = [identifiers copy];
-    return charon_collections(^{
+    return revenant_collections(^{
         NSMutableArray *found = [NSMutableArray array];
         for (NSString *identifier in kept) {
-            PHAssetCollection *collection = [CharonPhotosStore collectionWithIdentifier:identifier];
+            PHAssetCollection *collection = [RevenantPhotosStore collectionWithIdentifier:identifier];
             if (collection)
                 [found addObject:collection];
         }
@@ -221,9 +221,9 @@ static NSArray *charon_no_collections(void)
 + (PHFetchResult<PHAssetCollection *> *)fetchAssetCollectionsContainingAsset:(PHAsset *)asset withType:(PHAssetCollectionType)type options:(PHFetchOptions *)options
 {
     NSString *identifier = asset.localIdentifier;
-    return charon_collections(^{
+    return revenant_collections(^{
         NSMutableArray *found = [NSMutableArray array];
-        for (PHAssetCollection *collection in [CharonPhotosStore collectionsContainingAssetWithIdentifier:identifier]) {
+        for (PHAssetCollection *collection in [RevenantPhotosStore collectionsContainingAssetWithIdentifier:identifier]) {
             if (collection.assetCollectionType == type)
                 [found addObject:collection];
         }
@@ -250,17 +250,17 @@ static NSArray *charon_no_collections(void)
 
 + (PHFetchResult<PHCollectionList *> *)fetchCollectionListsContainingCollection:(PHCollection *)collection options:(PHFetchOptions *)options
 {
-    return charon_collections(^{ return charon_no_collections(); }, options);
+    return revenant_collections(^{ return revenant_no_collections(); }, options);
 }
 
 + (PHFetchResult<PHCollectionList *> *)fetchCollectionListsWithLocalIdentifiers:(NSArray<NSString *> *)identifiers options:(PHFetchOptions *)options
 {
-    return charon_collections(^{ return charon_no_collections(); }, options);
+    return revenant_collections(^{ return revenant_no_collections(); }, options);
 }
 
 + (PHFetchResult<PHCollectionList *> *)fetchCollectionListsWithType:(PHCollectionListType)collectionListType subtype:(PHCollectionListSubtype)subtype options:(PHFetchOptions *)options
 {
-    return charon_collections(^{ return charon_no_collections(); }, options);
+    return revenant_collections(^{ return revenant_no_collections(); }, options);
 }
 
 @end

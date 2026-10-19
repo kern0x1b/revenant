@@ -10,7 +10,7 @@ import("@self.apple.firmware")
 local function required(name)
     local package = project.required_package(name)
     if not package then
-        raise("the project requires no %s; add includes(\"@addon/charon/emulate\") after includes(\"@addon/charon/apple-ios\")", name)
+        raise("the project requires no %s; add includes(\"@addon/revenant/emulate\") after includes(\"@addon/revenant/apple-ios\")", name)
     end
     return package
 end
@@ -43,21 +43,21 @@ local function context()
         raise("xmake emulate runs on macOS arm64 hosts only, and this is %s %s", os.host(), os.arch())
     end
     task.run("config", {}, {disable_dump = true})
-    local shade = required("shade")
+    local emulator_package = required("emulator")
     local guest = required("emulator-guest")
     local swiftshader = required("swiftshader")
-    local tool = path.join(required("firmware-tools"):installdir(), "bin", "charon-firmware")
-    local program = path.join(shade:installdir(), "bin", "shade")
+    local tool = path.join(required("firmware-tools"):installdir(), "bin", "revenant-firmware")
+    local program = path.join(emulator_package:installdir(), "bin", "emulator")
     local release = option.get("release") or config.get("apple_minimum") or raise("xmake emulate needs -r RELEASE or set_config(\"apple_minimum\", ...)")
     local chosen = emulator.choose(firmware.catalog().devices, emulator.profiles(program),
                                    {device = option.get("device"), architecture = config.arch(), release = release})
     if not emulator.kernel(program, chosen.build) then
-        raise("Shade emulates no Darwin kernel for %s iOS %s (%s); it has %s", chosen.identifier, chosen.version, chosen.build,
+        raise("the emulator emulates no Darwin kernel for %s iOS %s (%s); it has %s", chosen.identifier, chosen.version, chosen.build,
               table.concat(emulator.kernels(program), ", "))
     end
     local owner = (project.name() or path.filename(os.projectdir())) .. "-" .. hash.strhash32(os.projectdir())
     local image = path.join(emulator.root(), "images.noindex", owner, chosen.identifier .. "_" .. chosen.build)
-    return {shade = program, shade_hash = path.filename(shade:installdir()), guest = guest:installdir(), tool = tool,
+    return {emulator = program, emulator_hash = path.filename(emulator_package:installdir()), guest = guest:installdir(), tool = tool,
             icd = path.join(swiftshader:installdir(), "share", "vulkan", "icd.d", "vk_swiftshader_icd.json"),
             identifier = chosen.identifier, version = chosen.version, build = chosen.build, image = image,
             deadline = tonumber(option.get("timeout")), network = network()}
@@ -232,7 +232,7 @@ local function launch(ctx, identifier, steps)
         if reason == "" then
             local states = path.join(folder, "results", "test.stdout")
             local last = os.isfile(states) and io.readfile(states):match("([^\n]*)\n?$") or ""
-            reason = string.format("charon-sblaunch was ended at the -s deadline of %d guest seconds; its last state: %s",
+            reason = string.format("revenant-sblaunch was ended at the -s deadline of %d guest seconds; its last state: %s",
                                    seconds, last ~= "" and last or "none")
         end
         raise("SpringBoard did not launch %s %s: %s; the emulator log is %s", identifier, where, reason, booted.log)

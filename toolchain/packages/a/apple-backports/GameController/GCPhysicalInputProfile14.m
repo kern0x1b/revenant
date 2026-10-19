@@ -1,4 +1,4 @@
-#import "CharonGC.h"
+#import "RevenantGC.h"
 
 #pragma clang diagnostic ignored "-Wobjc-missing-property-synthesis"
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
@@ -10,7 +10,7 @@
     NSArray<GCControllerElement *> *_ordered;
 }
 
-- (instancetype)initWithCharonSpecs:(NSArray<NSDictionary *> *)specs
+- (instancetype)initWithRevenantSpecs:(NSArray<NSDictionary *> *)specs
 {
     self = [super init];
     if (!self)
@@ -31,8 +31,8 @@
             elementClass = [GCDualSenseAdaptiveTrigger class];
         else
             elementClass = [GCControllerButtonInput class];
-        GCControllerElement *element = [[elementClass alloc] initWithCharonSpec:spec];
-        [element charon_attachToProfile:self];
+        GCControllerElement *element = [[elementClass alloc] initWithRevenantSpec:spec];
+        [element revenant_attachToProfile:self];
         for (NSString *alias in spec[@"aliases"])
             byAlias[alias] = element;
         [all addObject:element];
@@ -49,7 +49,7 @@
     for (NSDictionary *spec in specs) {
         id collection = spec[@"collection"];
         if (collection != [NSNull null] && collection)
-            [byAlias[[spec[@"aliases"] firstObject]] charon_setCollection:byAlias[collection]];
+            [byAlias[[spec[@"aliases"] firstObject]] revenant_setCollection:byAlias[collection]];
     }
     for (GCControllerElement *element in all) {
         if (![element isKindOfClass:[GCControllerDirectionPad class]])
@@ -61,16 +61,16 @@
         GCControllerButtonInput *down = (id)byAlias[[name stringByAppendingString:@" Down"]];
         GCControllerButtonInput *left = (id)byAlias[[name stringByAppendingString:@" Left"]];
         GCControllerButtonInput *right = (id)byAlias[[name stringByAppendingString:@" Right"]];
-        [(GCControllerDirectionPad *)element charon_linkXAxis:x yAxis:y up:up down:down left:left right:right];
-        [x charon_linkPositive:right negative:left dpad:(GCControllerDirectionPad *)element];
-        [y charon_linkPositive:up negative:down dpad:(GCControllerDirectionPad *)element];
+        [(GCControllerDirectionPad *)element revenant_linkXAxis:x yAxis:y up:up down:down left:left right:right];
+        [x revenant_linkPositive:right negative:left dpad:(GCControllerDirectionPad *)element];
+        [y revenant_linkPositive:up negative:down dpad:(GCControllerDirectionPad *)element];
     }
     _elements = byAlias;
     _allElements = all;
     return self;
 }
 
-- (void)charon_setDevice:(id<GCDevice>)device
+- (void)revenant_setDevice:(id<GCDevice>)device
 {
     _device = device;
 }
@@ -80,7 +80,7 @@
     return _device;
 }
 
-- (GCControllerElement *)charon_elementNamed:(NSString *)alias
+- (GCControllerElement *)revenant_elementNamed:(NSString *)alias
 {
     return _elements[alias];
 }
@@ -95,7 +95,7 @@
     return NO;
 }
 
-- (NSDictionary<NSString *, GCControllerElement *> *)charon_elementsOfClass:(Class)elementClass
+- (NSDictionary<NSString *, GCControllerElement *> *)revenant_elementsOfClass:(Class)elementClass
 {
     NSMutableDictionary *found = [NSMutableDictionary dictionary];
     [_elements enumerateKeysAndObjectsUsingBlock:^(NSString *key, GCControllerElement *element, BOOL *stop) {
@@ -105,7 +105,7 @@
     return found;
 }
 
-- (NSSet *)charon_allOfClass:(Class)elementClass
+- (NSSet *)revenant_allOfClass:(Class)elementClass
 {
     NSMutableSet *found = [NSMutableSet set];
     for (GCControllerElement *element in _allElements) {
@@ -122,17 +122,17 @@
 
 - (NSDictionary<NSString *, GCControllerButtonInput *> *)buttons
 {
-    return (id)[self charon_elementsOfClass:[GCControllerButtonInput class]];
+    return (id)[self revenant_elementsOfClass:[GCControllerButtonInput class]];
 }
 
 - (NSDictionary<NSString *, GCControllerAxisInput *> *)axes
 {
-    return (id)[self charon_elementsOfClass:[GCControllerAxisInput class]];
+    return (id)[self revenant_elementsOfClass:[GCControllerAxisInput class]];
 }
 
 - (NSDictionary<NSString *, GCControllerDirectionPad *> *)dpads
 {
-    return (id)[self charon_elementsOfClass:[GCControllerDirectionPad class]];
+    return (id)[self revenant_elementsOfClass:[GCControllerDirectionPad class]];
 }
 
 - (NSDictionary *)touchpads
@@ -147,17 +147,17 @@
 
 - (NSSet<GCControllerButtonInput *> *)allButtons
 {
-    return [self charon_allOfClass:[GCControllerButtonInput class]];
+    return [self revenant_allOfClass:[GCControllerButtonInput class]];
 }
 
 - (NSSet<GCControllerAxisInput *> *)allAxes
 {
-    return [self charon_allOfClass:[GCControllerAxisInput class]];
+    return [self revenant_allOfClass:[GCControllerAxisInput class]];
 }
 
 - (NSSet<GCControllerDirectionPad *> *)allDpads
 {
-    return [self charon_allOfClass:[GCControllerDirectionPad class]];
+    return [self revenant_allOfClass:[GCControllerDirectionPad class]];
 }
 
 - (NSSet *)allTouchpads

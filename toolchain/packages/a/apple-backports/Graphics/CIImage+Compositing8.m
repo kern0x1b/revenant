@@ -2,7 +2,7 @@
 
 #pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
 
-@implementation CIImage (CharonCompositing)
+@implementation CIImage (RevenantCompositing)
 
 - (CIImage *)imageByCompositingOverImage:(CIImage *)dest
 {
@@ -16,7 +16,7 @@
 
 @end
 
-@implementation CIFilter (CharonInputParameters)
+@implementation CIFilter (RevenantInputParameters)
 
 + (CIFilter *)filterWithName:(NSString *)name withInputParameters:(NSDictionary<NSString *, id> *)params
 {

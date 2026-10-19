@@ -14,13 +14,13 @@ import("shared_runtime", {alias = "staged"})
 function waivers(target)
     local waived = {}
     for _, name in ipairs(macho.waivable()) do
-        waived[name] = target:values("charon.waive." .. name)
+        waived[name] = target:values("revenant.waive." .. name)
     end
     return waived
 end
 
 function import_options(target, provided, runtime)
-    return {release = os.getenv("CHARON_RELEASE") ~= nil, waived = waivers(target)["weak-imports"], exempt = provided,
+    return {release = os.getenv("REVENANT_RELEASE") ~= nil, waived = waivers(target)["weak-imports"], exempt = provided,
             runtime = runtime, guards = runtime_guards.guards()}
 end
 
@@ -73,7 +73,7 @@ function verify_inputs(target)
         end
     end
     for _, package in ipairs(target:orderpkgs()) do
-        local reason = target:values("charon.waive.input-minimum." .. package:name())
+        local reason = target:values("revenant.waive.input-minimum." .. package:name())
         if reason then
             wprint("%s: input-minimum not checked for %s: %s", target:name(), package:name(), reason)
         else
@@ -129,7 +129,7 @@ function verify_minimum(target, binary)
 end
 
 function imports_source(target, architecture)
-    local tool = path.join(target:pkg("firmware-tools"):installdir(), "bin", "charon-firmware")
+    local tool = path.join(target:pkg("firmware-tools"):installdir(), "bin", "revenant-firmware")
     return (firmware.ensure(architecture or target:arch(), deployment(target), {tool = tool}))
 end
 
@@ -156,9 +156,9 @@ function shared_runtime(target)
     local all, identities, libraries = {}, {}, {}
     for _, alias in ipairs(SHARED) do
         local package = target:pkg(alias)
-        for _, entry in ipairs(package and table.wrap((package:envs() or {}).CHARON_SHARED_PACKAGE)[1] and table.wrap((package:envs() or {}).CHARON_SHARED_PACKAGE)[1]:split(";") or {}) do
+        for _, entry in ipairs(package and table.wrap((package:envs() or {}).REVENANT_SHARED_PACKAGE)[1] and table.wrap((package:envs() or {}).REVENANT_SHARED_PACKAGE)[1]:split(";") or {}) do
             local name, needs = entry:match("^([^=]+)=?(.*)$")
-            local folder = "/usr/lib/charon/" .. name
+            local folder = "/usr/lib/revenant/" .. name
             local root = path.join(package:installdir(), "share", "root")
             local described = staged.metadata(path.join(package:installdir(), "share", "shared-packages"), name)
             local held = {}
@@ -180,7 +180,7 @@ function shared_runtime(target)
     end
     for _, shared in ipairs(all) do
         if shared.needs and not byname[shared.needs] then
-            raise("target(%s) shares %s, which is linked against %s, and the target itself takes the C++ runtime from a different build; require charon@libcxx with the same configs as the runtime does (packaged)", target:name(), shared.name, shared.needs)
+            raise("target(%s) shares %s, which is linked against %s, and the target itself takes the C++ runtime from a different build; require revenant@libcxx with the same configs as the runtime does (packaged)", target:name(), shared.name, shared.needs)
         end
     end
     local used = {}
@@ -265,7 +265,7 @@ end
 function verify_one_runtime(target)
     local marks, cxx = {}, {}
     for _, dependency in ipairs(target:orderpkgs()) do
-        for _, mark in ipairs(table.wrap((dependency:envs() or {}).CHARON_SWIFT_RUNTIME_MARK)) do
+        for _, mark in ipairs(table.wrap((dependency:envs() or {}).REVENANT_SWIFT_RUNTIME_MARK)) do
             marks[mark] = marks[mark] or {}
             table.insert(marks[mark], dependency:name())
         end
@@ -305,16 +305,16 @@ function verify(target, binary, opt)
 end
 
 function carried_folder(target)
-    local control = target:values("charon.control")
+    local control = target:values("revenant.control")
     if not control then
-        raise("target(%s) carries %s, and a tweak or daemon keeps what it carries in /usr/lib/charon/<Package>; name the package with set_values(\"charon.control\", ...)", target:name(), table.concat(table.wrap(target:values("charon.libraries")), ", "))
+        raise("target(%s) carries %s, and a tweak or daemon keeps what it carries in /usr/lib/revenant/<Package>; name the package with set_values(\"revenant.control\", ...)", target:name(), table.concat(table.wrap(target:values("revenant.libraries")), ", "))
     end
     local debian = import("debian", {rootdir = path.join(os.scriptdir(), ".."), anonymous = true})
     local package = debian.control_fields(path.absolute(control, target:scriptdir())).Package
     if not package or package == "" then
         raise("%s has no Package field to name the folder target(%s) carries its libraries in", control, target:name())
     end
-    return "/usr/lib/charon/" .. package
+    return "/usr/lib/revenant/" .. package
 end
 
 local function carries_runtime(library)
@@ -345,7 +345,7 @@ function reached(offered, roots)
 end
 
 function place_carried(target, root, binary)
-    local libraries = reached(bundle.carried_libraries(target, "charon.libraries"), {binary})
+    local libraries = reached(bundle.carried_libraries(target, "revenant.libraries"), {binary})
     local shared = shared_runtime(target)
     if #libraries == 0 then
         if shared then
@@ -370,10 +370,10 @@ function place_carried(target, root, binary)
 end
 
 function verify_placed(target, installed)
-    if #table.wrap(target:values("charon.libraries")) == 0 and not shared_runtime(target) then
+    if #table.wrap(target:values("revenant.libraries")) == 0 and not shared_runtime(target) then
         return verify(target, target:targetfile())
     end
-    local root = path.join(target:targetdir(), ".charon", "placed", target:name())
+    local root = path.join(target:targetdir(), ".revenant", "placed", target:name())
     os.tryrm(root)
     local binary = path.join(root, installed)
     os.mkdir(path.directory(binary))
@@ -456,7 +456,7 @@ function ldid(target)
 end
 
 function strip(target, binary)
-    local arguments = (target:values("charon.strip") or "-x"):split("%s+")
+    local arguments = (target:values("revenant.strip") or "-x"):split("%s+")
     os.vrunv("xcrun", table.join({"strip"}, arguments, {binary}))
 end
 
@@ -469,7 +469,7 @@ end
 
 function finish(target, binary)
     strip(target, binary)
-    sign(target, binary, target:values("charon.entitlements"))
+    sign(target, binary, target:values("revenant.entitlements"))
 end
 
 function install_files(target)
@@ -517,9 +517,9 @@ function application(target)
         strip(target, binary)
     end
     for index = #binaries, 1, -1 do
-        sign(target, binaries[index], binaries[index] == executable and target:values("charon.entitlements") or nil)
+        sign(target, binaries[index], binaries[index] == executable and target:values("revenant.entitlements") or nil)
     end
-    if not os.getenv("CHARON_SLICE") then
+    if not os.getenv("REVENANT_SLICE") then
         local source = imports_source(target)
         local provided = provided_libraries(target)
         dyld.check(source, table.join(binaries, provided), folder, import_options(target, provided, runtime))

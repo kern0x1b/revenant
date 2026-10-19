@@ -7,11 +7,11 @@ static char *const members[][3] = {
 {
     NSDictionary *properties;
 }
-- (void)charon_set_properties:(NSDictionary *)properties { self->properties = properties; }
+- (void)revenant_set_properties:(NSDictionary *)properties { self->properties = properties; }
 - (id)valueForProperty:(NSString *)property { return self->properties[property]; }
 @end
 
-#define CHARON_MEDIAPLAYER_STANDIN 1
+#define REVENANT_MEDIAPLAYER_STANDIN 1
 #include "MPMediaItem80.m"
 
 static int failures = 0;
@@ -35,7 +35,7 @@ int main(void) {
                             @"compilation": @YES, @"cloudItem": @NO, @"lyrics": @"words",
                             @"comments": @"note", @"userGrouping": @"group", @"assetURL": [NSURL URLWithString:@"file:///a"]};
     MPMediaItem *item = [[MPMediaItem alloc] init];
-    [item charon_set_properties:given];
+    [item revenant_set_properties:given];
     const NSUInteger wanted[] = {11, 12, 13, 14, 15, 16, 3, 1, 128};
     for (size_t i = 0; i < sizeof members / sizeof *members; ++i) {
         const char *name = members[i][0];
@@ -58,7 +58,7 @@ int main(void) {
         check(name, got == wanted[i], number(wanted[i], 0), number(got, 1));
     }
     MPMediaItem *empty = [[MPMediaItem alloc] init];
-    [empty charon_set_properties:@{}];
+    [empty revenant_set_properties:@{}];
     check("a missing key answers zero or nil",
           empty.albumTrackCount == 0 && empty.isCompilation == NO && empty.lyrics == nil && empty.assetURL == nil
           && empty.albumPersistentID == nil,

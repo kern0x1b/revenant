@@ -12,7 +12,7 @@
 
 #include "foundation/host_memory.hpp"
 
-namespace shade {
+namespace emulator {
 
 class AudioDecoder;
 class AudioSink;

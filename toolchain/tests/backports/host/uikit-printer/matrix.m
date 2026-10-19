@@ -72,10 +72,10 @@ static void print_destinations(void)
     }
 }
 
-@interface CharonPickerParent : UIViewController <UIPrinterPickerControllerDelegate>
+@interface RevenantPickerParent : UIViewController <UIPrinterPickerControllerDelegate>
 @end
 
-@implementation CharonPickerParent
+@implementation RevenantPickerParent
 - (UIViewController *)printerPickerControllerParentViewController:(UIPrinterPickerController *)picker
 {
     return self;
@@ -104,7 +104,7 @@ static void print_picker(void)
     printf("open:picker-nil-initial: set=%d url=%s\n", none.selectedPrinter != nil,
            none.selectedPrinter.URL ? "set" : "nil");
 
-    CharonPickerParent *parent = [[CharonPickerParent alloc] init];
+    RevenantPickerParent *parent = [[RevenantPickerParent alloc] init];
     picker.delegate = parent;
     __block int calls = 0, selected = -1, sameController = 0;
     __block NSError *error = nil;

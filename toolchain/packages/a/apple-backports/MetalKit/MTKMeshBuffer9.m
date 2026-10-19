@@ -4,7 +4,7 @@
 
 #include <string.h>
 
-@interface MTKMeshBuffer (CharonAllocator)
+@interface MTKMeshBuffer (RevenantAllocator)
 - (instancetype)initWithBuffer:(id<MTLBuffer>)buffer
                         offset:(NSUInteger)offset
                         length:(NSUInteger)length
@@ -15,86 +15,86 @@
 
 @interface MTKMeshBufferZone : NSObject <MDLMeshBufferZone>
 {
-    id<MTLBuffer> _charonBuffer;
-    NSUInteger _charonCapacity;
-    NSUInteger _charonUsed;
-    MTKMeshBufferAllocator *_charonAllocator;
+    id<MTLBuffer> _revenantBuffer;
+    NSUInteger _revenantCapacity;
+    NSUInteger _revenantUsed;
+    MTKMeshBufferAllocator *_revenantAllocator;
 }
 @property (nonatomic, readonly) id<MTLBuffer> buffer;
 @property (nonatomic, readonly) NSUInteger capacity;
 @property (nonatomic, readonly) NSUInteger used;
 - (MTKMeshBufferAllocator *)allocator;
 - (instancetype)initWithBuffer:(id<MTLBuffer>)buffer capacity:(NSUInteger)capacity allocator:(MTKMeshBufferAllocator *)allocator;
-- (id<MDLMeshBuffer>)charonBufferTakingLength:(NSUInteger)length type:(MDLMeshBufferType)type;
+- (id<MDLMeshBuffer>)revenantBufferTakingLength:(NSUInteger)length type:(MDLMeshBufferType)type;
 @end
 
 @implementation MTKMeshBufferZone
 
 - (id<MTLBuffer>)buffer
 {
-    return _charonBuffer;
+    return _revenantBuffer;
 }
 
 - (NSUInteger)capacity
 {
-    return _charonCapacity;
+    return _revenantCapacity;
 }
 
 - (NSUInteger)used
 {
-    return _charonUsed;
+    return _revenantUsed;
 }
 
 - (MTKMeshBufferAllocator *)allocator
 {
-    return _charonAllocator;
+    return _revenantAllocator;
 }
 
 - (instancetype)initWithBuffer:(id<MTLBuffer>)buffer capacity:(NSUInteger)capacity allocator:(MTKMeshBufferAllocator *)allocator
 {
     if ((self = [super init])) {
-        _charonBuffer = buffer;
-        _charonCapacity = capacity;
-        _charonUsed = 0;
-        _charonAllocator = allocator;
+        _revenantBuffer = buffer;
+        _revenantCapacity = capacity;
+        _revenantUsed = 0;
+        _revenantAllocator = allocator;
     }
     return self;
 }
 
-- (id<MDLMeshBuffer>)charonBufferTakingLength:(NSUInteger)length type:(MDLMeshBufferType)type
+- (id<MDLMeshBuffer>)revenantBufferTakingLength:(NSUInteger)length type:(MDLMeshBufferType)type
 {
-    NSUInteger offset = _charonUsed;
-    _charonUsed += length;
-    return [[MTKMeshBuffer alloc] initWithBuffer:_charonBuffer
+    NSUInteger offset = _revenantUsed;
+    _revenantUsed += length;
+    return [[MTKMeshBuffer alloc] initWithBuffer:_revenantBuffer
                                          offset:offset
                                          length:length
                                            zone:self
                                            type:type
-                                      allocator:_charonAllocator];
+                                      allocator:_revenantAllocator];
 }
 
 @end
 
 @implementation MTKMeshBufferAllocator
 {
-    id<MTLDevice> _charonDevice;
+    id<MTLDevice> _revenantDevice;
 }
 
 - (instancetype)initWithDevice:(id<MTLDevice>)device
 {
     if ((self = [super init]))
-        _charonDevice = device;
+        _revenantDevice = device;
     return self;
 }
 
 - (id<MTLDevice>)device
 {
-    return _charonDevice;
+    return _revenantDevice;
 }
 
 - (id<MDLMeshBufferZone>)newZone:(NSUInteger)capacity
 {
-    id<MTLBuffer> buffer = [_charonDevice newBufferWithLength:capacity options:0];
+    id<MTLBuffer> buffer = [_revenantDevice newBufferWithLength:capacity options:0];
     if (!buffer)
         return nil;
     return [[MTKMeshBufferZone alloc] initWithBuffer:buffer capacity:capacity allocator:self];
@@ -125,12 +125,12 @@
         zone = [self newZone:length];
         if (!zone)
             return nil;
-        return [(MTKMeshBufferZone *)zone charonBufferTakingLength:length type:type];
+        return [(MTKMeshBufferZone *)zone revenantBufferTakingLength:length type:type];
     }
     MTKMeshBufferZone *own = (MTKMeshBufferZone *)zone;
     if (own.used + length > own.capacity)
         return nil;
-    return [own charonBufferTakingLength:length type:type];
+    return [own revenantBufferTakingLength:length type:type];
 }
 
 - (id<MDLMeshBuffer>)newBufferFromZone:(id<MDLMeshBufferZone>)zone data:(NSData *)data type:(MDLMeshBufferType)type
@@ -148,12 +148,12 @@
 
 @implementation MTKMeshBuffer
 {
-    id<MTLBuffer> _charonBuffer;
-    MTKMeshBufferAllocator *_charonAllocator;
-    id<MDLMeshBufferZone> _charonZone;
-    NSUInteger _charonOffset;
-    NSUInteger _charonLength;
-    MDLMeshBufferType _charonType;
+    id<MTLBuffer> _revenantBuffer;
+    MTKMeshBufferAllocator *_revenantAllocator;
+    id<MDLMeshBufferZone> _revenantZone;
+    NSUInteger _revenantOffset;
+    NSUInteger _revenantLength;
+    MDLMeshBufferType _revenantType;
 }
 
 - (instancetype)initWithBuffer:(id<MTLBuffer>)buffer
@@ -164,44 +164,44 @@
                     allocator:(MTKMeshBufferAllocator *)allocator
 {
     if ((self = [super init])) {
-        _charonBuffer = buffer;
-        _charonOffset = offset;
-        _charonLength = length;
-        _charonZone = zone;
-        _charonType = type;
-        _charonAllocator = allocator;
+        _revenantBuffer = buffer;
+        _revenantOffset = offset;
+        _revenantLength = length;
+        _revenantZone = zone;
+        _revenantType = type;
+        _revenantAllocator = allocator;
     }
     return self;
 }
 
 - (NSUInteger)length
 {
-    return _charonLength;
+    return _revenantLength;
 }
 
 - (MTKMeshBufferAllocator *)allocator
 {
-    return _charonAllocator;
+    return _revenantAllocator;
 }
 
 - (id<MDLMeshBufferZone>)zone
 {
-    return _charonZone;
+    return _revenantZone;
 }
 
 - (id<MTLBuffer>)buffer
 {
-    return _charonBuffer;
+    return _revenantBuffer;
 }
 
 - (NSUInteger)offset
 {
-    return _charonOffset;
+    return _revenantOffset;
 }
 
 - (MDLMeshBufferType)type
 {
-    return _charonType;
+    return _revenantType;
 }
 
 - (NSString *)name
@@ -216,43 +216,43 @@
 
 - (void)fillData:(NSData *)data offset:(NSUInteger)offset
 {
-    void *contents = [_charonBuffer contents];
+    void *contents = [_revenantBuffer contents];
     if (!contents || !data.length)
         return;
-    NSUInteger room = _charonLength > offset ? _charonLength - offset : 0;
-    memcpy((uint8_t *)contents + _charonOffset + offset, data.bytes, MIN(room, data.length));
+    NSUInteger room = _revenantLength > offset ? _revenantLength - offset : 0;
+    memcpy((uint8_t *)contents + _revenantOffset + offset, data.bytes, MIN(room, data.length));
 }
 
 - (MDLMeshBufferMap *)map
 {
-    void *contents = [_charonBuffer contents];
-    return [[MDLMeshBufferMap alloc] initWithBytes:contents ? (uint8_t *)contents + _charonOffset : NULL
+    void *contents = [_revenantBuffer contents];
+    return [[MDLMeshBufferMap alloc] initWithBytes:contents ? (uint8_t *)contents + _revenantOffset : NULL
                                             deallocator:nil];
 }
 
 - (id)copyWithZone:(NSZone *)zone
 {
     (void)zone;
-    return [[MTKMeshBuffer alloc] initWithBuffer:_charonBuffer
-                                         offset:_charonOffset
-                                         length:_charonLength
-                                           zone:_charonZone
-                                           type:_charonType
-                                      allocator:_charonAllocator];
+    return [[MTKMeshBuffer alloc] initWithBuffer:_revenantBuffer
+                                         offset:_revenantOffset
+                                         length:_revenantLength
+                                           zone:_revenantZone
+                                           type:_revenantType
+                                      allocator:_revenantAllocator];
 }
 
 @end
 
 @implementation MTKSubmesh
 {
-    MTKMesh *_charonMesh;
-    NSUInteger _charonIndex;
-    NSUInteger _charonVertexStart;
-    NSUInteger _charonVertexCount;
-    NSUInteger _charonIndexStart;
-    NSUInteger _charonIndexCount;
-    MTLIndexType _charonIndexType;
-    MTLPrimitiveType _charonPrimitiveType;
+    MTKMesh *_revenantMesh;
+    NSUInteger _revenantIndex;
+    NSUInteger _revenantVertexStart;
+    NSUInteger _revenantVertexCount;
+    NSUInteger _revenantIndexStart;
+    NSUInteger _revenantIndexCount;
+    MTLIndexType _revenantIndexType;
+    MTLPrimitiveType _revenantPrimitiveType;
 }
 
 - (instancetype)initWithMesh:(MTKMesh *)mesh
@@ -265,56 +265,56 @@
               primitiveType:(MTLPrimitiveType)primitiveType
 {
     if ((self = [super init])) {
-        _charonMesh = mesh;
-        _charonIndex = submesh;
-        _charonVertexStart = vertexStart;
-        _charonVertexCount = vertexCount;
-        _charonIndexStart = indexStart;
-        _charonIndexCount = indexCount;
-        _charonIndexType = indexType;
-        _charonPrimitiveType = primitiveType;
+        _revenantMesh = mesh;
+        _revenantIndex = submesh;
+        _revenantVertexStart = vertexStart;
+        _revenantVertexCount = vertexCount;
+        _revenantIndexStart = indexStart;
+        _revenantIndexCount = indexCount;
+        _revenantIndexType = indexType;
+        _revenantPrimitiveType = primitiveType;
     }
     return self;
 }
 
 - (MTKMesh *)mesh
 {
-    return _charonMesh;
+    return _revenantMesh;
 }
 
 - (NSUInteger)submeshIndex
 {
-    return _charonIndex;
+    return _revenantIndex;
 }
 
 - (NSUInteger)vertexStart
 {
-    return _charonVertexStart;
+    return _revenantVertexStart;
 }
 
 - (NSUInteger)vertexCount
 {
-    return _charonVertexCount;
+    return _revenantVertexCount;
 }
 
 - (NSUInteger)indexStart
 {
-    return _charonIndexStart;
+    return _revenantIndexStart;
 }
 
 - (NSUInteger)indexCount
 {
-    return _charonIndexCount;
+    return _revenantIndexCount;
 }
 
 - (MTLIndexType)indexType
 {
-    return _charonIndexType;
+    return _revenantIndexType;
 }
 
 - (MTLPrimitiveType)primitiveType
 {
-    return _charonPrimitiveType;
+    return _revenantPrimitiveType;
 }
 
 @end

@@ -1,13 +1,13 @@
 #import <MapKit/MapKit.h>
 #import <UIKit/UIKit.h>
 #import <objc/message.h>
-#import "CharonMapKitUI.h"
+#import "RevenantMapKitUI.h"
 
 @implementation MKOverlayRenderer {
     CGBlendMode _blendMode;
-    double _charonMapPointsPerPoint;
-    MKMapPoint _charonMapOrigin;
-    CGPoint _charonViewOrigin;
+    double _revenantMapPointsPerPoint;
+    MKMapPoint _revenantMapOrigin;
+    CGPoint _revenantViewOrigin;
 }
 
 @synthesize overlay = _overlay;
@@ -15,72 +15,72 @@
 
 - (instancetype)initWithOverlay:(id <MKOverlay>)overlay
 {
-    id (*charon_init)(id, SEL, id) = (id (*)(id, SEL, id))objc_msgSend;
-    self = charon_init([[self class] alloc], @selector(initWithOverlay:), overlay);
+    id (*revenant_init)(id, SEL, id) = (id (*)(id, SEL, id))objc_msgSend;
+    self = revenant_init([[self class] alloc], @selector(initWithOverlay:), overlay);
     if (self) {
         _overlay = overlay;
         _blendMode = kCGBlendModeNormal;
-        [(id<CharonOverlayView>)self setBackgroundColor:[UIColor clearColor]];
-        [(id<CharonOverlayView>)self setOpaque:NO];
-        [(id<CharonOverlayView>)self setUserInteractionEnabled:NO];
-        [(id<CharonOverlayView>)self setAutoresizingMask:UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight];
-        [self charon_recompute];
+        [(id<RevenantOverlayView>)self setBackgroundColor:[UIColor clearColor]];
+        [(id<RevenantOverlayView>)self setOpaque:NO];
+        [(id<RevenantOverlayView>)self setUserInteractionEnabled:NO];
+        [(id<RevenantOverlayView>)self setAutoresizingMask:UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight];
+        [self revenant_recompute];
     }
     return self;
 }
 
 - (instancetype)initWithCoder:(NSCoder *)coder
 {
-    id (*charon_coder)(id, SEL, NSCoder *) = (id (*)(id, SEL, NSCoder *))objc_msgSend;
-    self = charon_coder([[self class] alloc], @selector(initWithCoder:), coder);
+    id (*revenant_coder)(id, SEL, NSCoder *) = (id (*)(id, SEL, NSCoder *))objc_msgSend;
+    self = revenant_coder([[self class] alloc], @selector(initWithCoder:), coder);
     if (self) {
         _blendMode = kCGBlendModeNormal;
-        [self charon_recompute];
+        [self revenant_recompute];
     }
     return self;
 }
 
-- (void)charon_recompute
+- (void)revenant_recompute
 {
     MKMapRect bounds = self.overlay ? self.overlay.boundingMapRect : MKMapRectWorld;
-    CGRect view = [(id<CharonOverlayView>)self bounds];
-    _charonMapOrigin = bounds.origin;
-    _charonViewOrigin = view.origin;
+    CGRect view = [(id<RevenantOverlayView>)self bounds];
+    _revenantMapOrigin = bounds.origin;
+    _revenantViewOrigin = view.origin;
     if (view.size.width > 0.0 && bounds.size.width > 0.0) {
-        _charonMapPointsPerPoint = bounds.size.width / view.size.width;
+        _revenantMapPointsPerPoint = bounds.size.width / view.size.width;
     } else if (view.size.height > 0.0 && bounds.size.height > 0.0) {
-        _charonMapPointsPerPoint = bounds.size.height / view.size.height;
+        _revenantMapPointsPerPoint = bounds.size.height / view.size.height;
     } else {
-        _charonMapPointsPerPoint = 1.0;
+        _revenantMapPointsPerPoint = 1.0;
     }
 }
 
 - (void)setFrame:(CGRect)frame
 {
-    [(id<CharonOverlayView>)self setFrame:frame];
-    [self charon_recompute];
+    [(id<RevenantOverlayView>)self setFrame:frame];
+    [self revenant_recompute];
 }
 
 - (void)setBounds:(CGRect)bounds
 {
-    [(id<CharonOverlayView>)self setBounds:bounds];
-    [self charon_recompute];
+    [(id<RevenantOverlayView>)self setBounds:bounds];
+    [self revenant_recompute];
 }
 
 - (CGPoint)pointForMapPoint:(MKMapPoint)mapPoint
 {
-    [self charon_recompute];
-    double per = _charonMapPointsPerPoint;
-    return CGPointMake(_charonViewOrigin.x + (mapPoint.x - _charonMapOrigin.x) / per,
-                       _charonViewOrigin.y + (mapPoint.y - _charonMapOrigin.y) / per);
+    [self revenant_recompute];
+    double per = _revenantMapPointsPerPoint;
+    return CGPointMake(_revenantViewOrigin.x + (mapPoint.x - _revenantMapOrigin.x) / per,
+                       _revenantViewOrigin.y + (mapPoint.y - _revenantMapOrigin.y) / per);
 }
 
 - (MKMapPoint)mapPointForPoint:(CGPoint)point
 {
-    [self charon_recompute];
-    double per = _charonMapPointsPerPoint;
-    return MKMapPointMake(_charonMapOrigin.x + (point.x - _charonViewOrigin.x) * per,
-                          _charonMapOrigin.y + (point.y - _charonViewOrigin.y) * per);
+    [self revenant_recompute];
+    double per = _revenantMapPointsPerPoint;
+    return MKMapPointMake(_revenantMapOrigin.x + (point.x - _revenantViewOrigin.x) * per,
+                          _revenantMapOrigin.y + (point.y - _revenantViewOrigin.y) * per);
 }
 
 - (CGRect)rectForMapRect:(MKMapRect)mapRect
@@ -105,7 +105,7 @@
     return !MKMapRectIsEmpty(MKMapRectIntersection(mapRect, visible));
 }
 
-- (void)charon_drawInContext:(CGContextRef)context zoomScale:(MKZoomScale)zoomScale mapRect:(MKMapRect)mapRect
+- (void)revenant_drawInContext:(CGContextRef)context zoomScale:(MKZoomScale)zoomScale mapRect:(MKMapRect)mapRect
 {
 }
 
@@ -121,24 +121,24 @@
     if (_blendMode != kCGBlendModeNormal) {
         CGContextSetBlendMode(context, _blendMode);
     }
-    [self charon_drawInContext:context zoomScale:zoomScale mapRect:wanted];
+    [self revenant_drawInContext:context zoomScale:zoomScale mapRect:wanted];
     CGContextRestoreGState(context);
 }
 
 - (void)setNeedsDisplay
 {
-    [(id<CharonOverlayView>)self setNeedsDisplay];
+    [(id<RevenantOverlayView>)self setNeedsDisplay];
     [self setNeedsDisplayInMapRect:self.overlay ? self.overlay.boundingMapRect : MKMapRectWorld];
 }
 
-- (MKZoomScale)charon_zoomScale
+- (MKZoomScale)revenant_zoomScale
 {
     MKMapSize size = self.overlay ? self.overlay.boundingMapRect.size : MKMapSizeWorld;
-    return [CharonMapKit charon_zoomScaleForMapSize:size];
+    return [RevenantMapKit revenant_zoomScaleForMapSize:size];
 }
 - (void)setNeedsDisplayInMapRect:(MKMapRect)mapRect
 {
-    [self setNeedsDisplayInMapRect:mapRect zoomScale:[self charon_zoomScale]];
+    [self setNeedsDisplayInMapRect:mapRect zoomScale:[self revenant_zoomScale]];
 }
 
 - (void)setNeedsDisplayInMapRect:(MKMapRect)mapRect zoomScale:(MKZoomScale)zoomScale
@@ -147,17 +147,17 @@
     if (CGRectIsNull(rect) || CGRectIsEmpty(rect)) {
         return;
     }
-    [(id<CharonOverlayView>)self setNeedsDisplayInRect:rect];
+    [(id<RevenantOverlayView>)self setNeedsDisplayInRect:rect];
 }
 
 - (CGFloat)alpha
 {
-    return [(id<CharonOverlayView>)self alpha];
+    return [(id<RevenantOverlayView>)self alpha];
 }
 
 - (void)setAlpha:(CGFloat)alpha
 {
-    [(id<CharonOverlayView>)self setAlpha:alpha];
+    [(id<RevenantOverlayView>)self setAlpha:alpha];
 }
 
 - (CGFloat)contentScaleFactor

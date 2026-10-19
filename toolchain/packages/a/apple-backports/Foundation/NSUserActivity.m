@@ -225,7 +225,7 @@ NSString *const NSUserActivityTypeBrowsingWeb = @"NSUserActivityTypeBrowsingWeb"
 
 + (void)deleteAllSavedUserActivitiesWithCompletionHandler:(void (^)(void))completionHandler
 {
-    NSLog(@"[charon] +[NSUserActivity deleteAllSavedUserActivitiesWithCompletionHandler:] deletes "
+    NSLog(@"[revenant] +[NSUserActivity deleteAllSavedUserActivitiesWithCompletionHandler:] deletes "
            "nothing: this package keeps no saved activities");
     completionHandler();
 }
@@ -233,7 +233,7 @@ NSString *const NSUserActivityTypeBrowsingWeb = @"NSUserActivityTypeBrowsingWeb"
 + (void)deleteSavedUserActivitiesWithPersistentIdentifiers:(NSArray<NSUserActivityPersistentIdentifier> *)persistentIdentifiers
                                          completionHandler:(void (^)(void))completionHandler
 {
-    NSLog(@"[charon] +[NSUserActivity deleteSavedUserActivitiesWithPersistentIdentifiers:completionHandler:] "
+    NSLog(@"[revenant] +[NSUserActivity deleteSavedUserActivitiesWithPersistentIdentifiers:completionHandler:] "
            "deletes nothing: this package keeps no saved activities, so there is no store to delete from "
            "(%lu identifier(s) asked for)", (unsigned long)persistentIdentifiers.count);
     completionHandler();

@@ -16,7 +16,7 @@
 
 #include "foundation/address_space.hpp"
 
-namespace shade {
+namespace emulator {
 
 class GuestExclusiveAddressResolver {
 public:

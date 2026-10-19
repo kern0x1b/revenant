@@ -1,4 +1,4 @@
-#include "CharonMLTrain.h"
+#include "RevenantMLTrain.h"
 
 #include <math.h>
 #include <stdint.h>
@@ -32,7 +32,7 @@ typedef struct {
     float *state_weight, *state_bias, *state2_weight, *state2_bias;
 } layer;
 
-struct charon_ml_trainer {
+struct revenant_ml_trainer {
     layer *layers;
     size_t layer_count;
     size_t trainable_count;
@@ -84,29 +84,29 @@ static int volume4(size_t a, size_t b, size_t c, size_t d, size_t *out)
     return volume(a, b, c, &abc) && product(abc, d, out);
 }
 
-static const charon_ml_node *child(const charon_ml_node *node, const char *name)
+static const revenant_ml_node *child(const revenant_ml_node *node, const char *name)
 {
-    return node ? charon_ml_get(node, name) : NULL;
+    return node ? revenant_ml_get(node, name) : NULL;
 }
 
-static double number_parameter(const charon_ml_node *parameter, const char *name, double fallback)
+static double number_parameter(const revenant_ml_node *parameter, const char *name, double fallback)
 {
-    const charon_ml_node *value = child(parameter, name);
-    return value ? charon_ml_double(child(value, "defaultValue"), fallback) : fallback;
+    const revenant_ml_node *value = child(parameter, name);
+    return value ? revenant_ml_double(child(value, "defaultValue"), fallback) : fallback;
 }
 
-static long long integer_parameter(const charon_ml_node *parameter, const char *name, long long fallback)
+static long long integer_parameter(const revenant_ml_node *parameter, const char *name, long long fallback)
 {
-    const charon_ml_node *value = child(parameter, name);
-    return value ? charon_ml_int(child(value, "defaultValue"), fallback) : fallback;
+    const revenant_ml_node *value = child(parameter, name);
+    return value ? revenant_ml_int(child(value, "defaultValue"), fallback) : fallback;
 }
 
-static float *read_tensor(const charon_ml_node *params, size_t expected, size_t *count)
+static float *read_tensor(const revenant_ml_node *params, size_t expected, size_t *count)
 {
     if (!params) {
         return NULL;
     }
-    size_t n = charon_ml_count_field(params, "floatValue");
+    size_t n = revenant_ml_count_field(params, "floatValue");
     if (n != expected) {
         return NULL;
     }
@@ -115,7 +115,7 @@ static float *read_tensor(const charon_ml_node *params, size_t expected, size_t 
         return NULL;
     }
     for (size_t i = 0; i < n; i++) {
-        values[i] = (float)charon_ml_double_at(params, "floatValue", i, 0);
+        values[i] = (float)revenant_ml_double_at(params, "floatValue", i, 0);
     }
     *count = n;
     return values;
@@ -138,7 +138,7 @@ static void free_layer(layer *l)
     free(l->state2_bias);
 }
 
-void charon_ml_trainer_free(charon_ml_trainer *trainer)
+void revenant_ml_trainer_free(revenant_ml_trainer *trainer)
 {
     if (!trainer) {
         return;
@@ -150,54 +150,54 @@ void charon_ml_trainer_free(charon_ml_trainer *trainer)
     free(trainer);
 }
 
-static int input_shape(const charon_ml_node *document, size_t *channels, size_t *height, size_t *width)
+static int input_shape(const revenant_ml_node *document, size_t *channels, size_t *height, size_t *width)
 {
-    const charon_ml_node *description = child(document, "description");
-    const charon_ml_node *feature = description ? charon_ml_node_at_field(description, "input", 0) : NULL;
-    const charon_ml_node *multi = child(child(feature, "type"), "multiArrayType");
-    size_t rank = multi ? charon_ml_count_field(multi, "shape") : 0;
+    const revenant_ml_node *description = child(document, "description");
+    const revenant_ml_node *feature = description ? revenant_ml_node_at_field(description, "input", 0) : NULL;
+    const revenant_ml_node *multi = child(child(feature, "type"), "multiArrayType");
+    size_t rank = multi ? revenant_ml_count_field(multi, "shape") : 0;
     if (rank == 3) {
-        return dimension(charon_ml_int_at(multi, "shape", 0, 0), channels) &&
-               dimension(charon_ml_int_at(multi, "shape", 1, 0), height) &&
-               dimension(charon_ml_int_at(multi, "shape", 2, 0), width);
+        return dimension(revenant_ml_int_at(multi, "shape", 0, 0), channels) &&
+               dimension(revenant_ml_int_at(multi, "shape", 1, 0), height) &&
+               dimension(revenant_ml_int_at(multi, "shape", 2, 0), width);
     }
     if (rank == 1) {
         *height = 1;
         *width = 1;
-        return dimension(charon_ml_int_at(multi, "shape", 0, 0), channels);
+        return dimension(revenant_ml_int_at(multi, "shape", 0, 0), channels);
     }
     return 0;
 }
 
-charon_ml_trainer *charon_ml_trainer_new(const charon_ml_node *document, char *error, size_t error_size)
+revenant_ml_trainer *revenant_ml_trainer_new(const revenant_ml_node *document, char *error, size_t error_size)
 {
-    const charon_ml_node *network = charon_ml_oneof(document, "neuralNetwork");
+    const revenant_ml_node *network = revenant_ml_oneof(document, "neuralNetwork");
     if (!network) {
         fail(error, error_size, "the model has no neural network to train", NULL);
         return NULL;
     }
-    const charon_ml_node *update = child(network, "updateParams");
+    const revenant_ml_node *update = child(network, "updateParams");
     if (!update) {
         fail(error, error_size, "the neural network is not updatable: it has no update parameters", NULL);
         return NULL;
     }
 
-    charon_ml_trainer *trainer = calloc(1, sizeof *trainer);
+    revenant_ml_trainer *trainer = calloc(1, sizeof *trainer);
     if (!trainer) {
         return NULL;
     }
 
-    const charon_ml_node *loss_layer = charon_ml_node_at_field(update, "lossLayers", 0);
-    if (!charon_ml_oneof(loss_layer, "meanSquaredErrorLossLayer")) {
+    const revenant_ml_node *loss_layer = revenant_ml_node_at_field(update, "lossLayers", 0);
+    if (!revenant_ml_oneof(loss_layer, "meanSquaredErrorLossLayer")) {
         fail(error, error_size, "the loss is not the mean squared error", NULL);
         free(trainer);
         return NULL;
     }
 
-    const charon_ml_node *optimiser = child(update, "optimizer");
-    const charon_ml_node *sgd = charon_ml_oneof(optimiser, "sgdOptimizer");
-    const charon_ml_node *adam = charon_ml_oneof(optimiser, "adamOptimizer");
-    const charon_ml_node *hyper = sgd ? sgd : adam;
+    const revenant_ml_node *optimiser = child(update, "optimizer");
+    const revenant_ml_node *sgd = revenant_ml_oneof(optimiser, "sgdOptimizer");
+    const revenant_ml_node *adam = revenant_ml_oneof(optimiser, "adamOptimizer");
+    const revenant_ml_node *hyper = sgd ? sgd : adam;
     if (!hyper) {
         fail(error, error_size, "the optimiser is neither stochastic gradient descent nor Adam", NULL);
         free(trainer);
@@ -219,8 +219,8 @@ charon_ml_trainer *charon_ml_trainer_new(const charon_ml_node *document, char *e
         free(trainer);
         return NULL;
     }
-    const charon_ml_node *shuffle = child(update, "shuffle");
-    if (shuffle && charon_ml_int(child(shuffle, "defaultValue"), 0) != 0) {
+    const revenant_ml_node *shuffle = child(update, "shuffle");
+    if (shuffle && revenant_ml_int(child(shuffle, "defaultValue"), 0) != 0) {
         fail(error, error_size, "shuffled training is not implemented", NULL);
         free(trainer);
         return NULL;
@@ -233,7 +233,7 @@ charon_ml_trainer *charon_ml_trainer_new(const charon_ml_node *document, char *e
         return NULL;
     }
 
-    size_t count = charon_ml_count_field(network, "layers");
+    size_t count = revenant_ml_count_field(network, "layers");
     trainer->layers = calloc(count ? count : 1, sizeof(layer));
     if (!trainer->layers) {
         free(trainer);
@@ -244,37 +244,37 @@ charon_ml_trainer *charon_ml_trainer_new(const charon_ml_node *document, char *e
     int vector = 0;
     size_t flat = trainer->input_count;
     for (size_t i = 0; i < count; i++) {
-        const charon_ml_node *node = charon_ml_node_at_field(network, "layers", i);
+        const revenant_ml_node *node = revenant_ml_node_at_field(network, "layers", i);
         layer *l = &trainer->layers[trainer->layer_count++];
         memset(l, 0, sizeof *l);
         char name[256] = "";
-        charon_ml_text(child(node, "name"), name, sizeof name);
+        revenant_ml_text(child(node, "name"), name, sizeof name);
         snprintf(l->name, sizeof l->name, "%s", name);
-        l->updatable = charon_ml_int(child(node, "isUpdatable"), 0) != 0;
-        const charon_ml_node *conv = charon_ml_oneof(node, "convolution");
-        const charon_ml_node *flatten = charon_ml_oneof(node, "flatten");
-        const charon_ml_node *ip = charon_ml_oneof(node, "innerProduct");
+        l->updatable = revenant_ml_int(child(node, "isUpdatable"), 0) != 0;
+        const revenant_ml_node *conv = revenant_ml_oneof(node, "convolution");
+        const revenant_ml_node *flatten = revenant_ml_oneof(node, "flatten");
+        const revenant_ml_node *ip = revenant_ml_oneof(node, "innerProduct");
         if (conv) {
-            if (vector || charon_ml_oneof(conv, "same") || charon_ml_int_at(conv, "dilationFactor", 0, 1) != 1 ||
-                charon_ml_int_at(conv, "dilationFactor", 1, 1) != 1 || charon_ml_int(child(conv, "nGroups"), 1) != 1 ||
-                charon_ml_int(child(conv, "isDeconvolution"), 0) != 0) {
+            if (vector || revenant_ml_oneof(conv, "same") || revenant_ml_int_at(conv, "dilationFactor", 0, 1) != 1 ||
+                revenant_ml_int_at(conv, "dilationFactor", 1, 1) != 1 || revenant_ml_int(child(conv, "nGroups"), 1) != 1 ||
+                revenant_ml_int(child(conv, "isDeconvolution"), 0) != 0) {
                 fail(error, error_size, "the convolution is not one the trainer runs (valid padding, one group, no dilation):", l->name);
-                charon_ml_trainer_free(trainer);
+                revenant_ml_trainer_free(trainer);
                 return NULL;
             }
             l->kind = LAYER_CONVOLUTION;
             l->in_channels = channels;
             l->in_height = height;
             l->in_width = width;
-            l->has_bias = charon_ml_int(child(conv, "hasBias"), 0) != 0;
-            if (!dimension(charon_ml_int(child(conv, "outputChannels"), 0), &l->out_channels) ||
-                !dimension(charon_ml_int_at(conv, "kernelSize", 0, 0), &l->kernel_height) ||
-                !dimension(charon_ml_int_at(conv, "kernelSize", 1, 0), &l->kernel_width) ||
-                !dimension(charon_ml_int_at(conv, "stride", 0, 1), &l->stride_height) ||
-                !dimension(charon_ml_int_at(conv, "stride", 1, 1), &l->stride_width) ||
+            l->has_bias = revenant_ml_int(child(conv, "hasBias"), 0) != 0;
+            if (!dimension(revenant_ml_int(child(conv, "outputChannels"), 0), &l->out_channels) ||
+                !dimension(revenant_ml_int_at(conv, "kernelSize", 0, 0), &l->kernel_height) ||
+                !dimension(revenant_ml_int_at(conv, "kernelSize", 1, 0), &l->kernel_width) ||
+                !dimension(revenant_ml_int_at(conv, "stride", 0, 1), &l->stride_height) ||
+                !dimension(revenant_ml_int_at(conv, "stride", 1, 1), &l->stride_width) ||
                 l->in_height < l->kernel_height || l->in_width < l->kernel_width) {
                 fail(error, error_size, "the convolution's shape is not one the trainer runs:", l->name);
-                charon_ml_trainer_free(trainer);
+                revenant_ml_trainer_free(trainer);
                 return NULL;
             }
             l->out_height = (l->in_height - l->kernel_height) / l->stride_height + 1;
@@ -286,27 +286,27 @@ charon_ml_trainer *charon_ml_trainer_new(const charon_ml_node *document, char *e
                 !volume(l->out_channels, l->out_height, l->out_width, &l->out_count) ||
                 !volume4(l->out_channels, l->in_channels, l->kernel_height, l->kernel_width, &l->weight_count)) {
                 fail(error, error_size, "the convolution is too large for the trainer:", l->name);
-                charon_ml_trainer_free(trainer);
+                revenant_ml_trainer_free(trainer);
                 return NULL;
             }
             l->bias_count = l->has_bias ? l->out_channels : 0;
             l->weight = read_tensor(child(conv, "weights"), l->weight_count, &l->weight_count);
             if (!l->weight || (l->has_bias && !(l->bias = read_tensor(child(conv, "bias"), l->bias_count, &l->bias_count)))) {
                 fail(error, error_size, "the convolution's weights are missing or not the size its shape says:", l->name);
-                charon_ml_trainer_free(trainer);
+                revenant_ml_trainer_free(trainer);
                 return NULL;
             }
             flat = l->out_count;
         } else if (flatten) {
-            if (charon_ml_int(child(flatten, "mode"), 0) != 0 || vector) {
+            if (revenant_ml_int(child(flatten, "mode"), 0) != 0 || vector) {
                 fail(error, error_size, "the flatten is not the channel-first one the trainer runs:", l->name);
-                charon_ml_trainer_free(trainer);
+                revenant_ml_trainer_free(trainer);
                 return NULL;
             }
             l->kind = LAYER_FLATTEN;
             if (!volume(channels, height, width, &l->in_count)) {
                 fail(error, error_size, "the flatten is too large for the trainer:", l->name);
-                charon_ml_trainer_free(trainer);
+                revenant_ml_trainer_free(trainer);
                 return NULL;
             }
             l->out_count = l->in_count;
@@ -315,33 +315,33 @@ charon_ml_trainer *charon_ml_trainer_new(const charon_ml_node *document, char *e
         } else if (ip) {
             l->kind = LAYER_INNER_PRODUCT;
             size_t in = 0, out = 0;
-            if (!dimension(charon_ml_int(child(ip, "inputChannels"), 0), &in) ||
-                !dimension(charon_ml_int(child(ip, "outputChannels"), 0), &out) || in != flat) {
+            if (!dimension(revenant_ml_int(child(ip, "inputChannels"), 0), &in) ||
+                !dimension(revenant_ml_int(child(ip, "outputChannels"), 0), &out) || in != flat) {
                 fail(error, error_size, "the inner product's input size does not match the layer before it:", l->name);
-                charon_ml_trainer_free(trainer);
+                revenant_ml_trainer_free(trainer);
                 return NULL;
             }
-            l->has_bias = charon_ml_int(child(ip, "hasBias"), 0) != 0;
+            l->has_bias = revenant_ml_int(child(ip, "hasBias"), 0) != 0;
             l->in_count = in;
             l->out_count = out;
             l->out_channels = out;
             if (!product(in, out, &l->weight_count)) {
                 fail(error, error_size, "the inner product is too large for the trainer:", l->name);
-                charon_ml_trainer_free(trainer);
+                revenant_ml_trainer_free(trainer);
                 return NULL;
             }
             l->bias_count = l->has_bias ? out : 0;
             l->weight = read_tensor(child(ip, "weights"), l->weight_count, &l->weight_count);
             if (!l->weight || (l->has_bias && !(l->bias = read_tensor(child(ip, "bias"), l->bias_count, &l->bias_count)))) {
                 fail(error, error_size, "the inner product's weights are missing or not the size its shape says:", l->name);
-                charon_ml_trainer_free(trainer);
+                revenant_ml_trainer_free(trainer);
                 return NULL;
             }
             vector = 1;
             flat = out;
         } else {
             fail(error, error_size, "a layer the trainer does not run:", l->name);
-            charon_ml_trainer_free(trainer);
+            revenant_ml_trainer_free(trainer);
             return NULL;
         }
         if (l->weight_count) {
@@ -361,23 +361,23 @@ charon_ml_trainer *charon_ml_trainer_new(const charon_ml_node *document, char *e
     trainer->output_count = trainer->layer_count ? trainer->layers[trainer->layer_count - 1].out_count : 0;
     if (trainer->layer_count == 0 || trainer->output_count == 0) {
         fail(error, error_size, "the network has no layers to train", NULL);
-        charon_ml_trainer_free(trainer);
+        revenant_ml_trainer_free(trainer);
         return NULL;
     }
     return trainer;
 }
 
-size_t charon_ml_trainer_minibatch_size(const charon_ml_trainer *trainer) { return trainer->minibatch; }
-long long charon_ml_trainer_epochs(const charon_ml_trainer *trainer) { return trainer->epochs; }
-size_t charon_ml_trainer_input_count(const charon_ml_trainer *trainer) { return trainer->input_count; }
-size_t charon_ml_trainer_output_count(const charon_ml_trainer *trainer) { return trainer->output_count; }
+size_t revenant_ml_trainer_minibatch_size(const revenant_ml_trainer *trainer) { return trainer->minibatch; }
+long long revenant_ml_trainer_epochs(const revenant_ml_trainer *trainer) { return trainer->epochs; }
+size_t revenant_ml_trainer_input_count(const revenant_ml_trainer *trainer) { return trainer->input_count; }
+size_t revenant_ml_trainer_output_count(const revenant_ml_trainer *trainer) { return trainer->output_count; }
 
-size_t charon_ml_trainer_layer_count(const charon_ml_trainer *trainer)
+size_t revenant_ml_trainer_layer_count(const revenant_ml_trainer *trainer)
 {
     return trainer->trainable_count;
 }
 
-static const layer *trainable(const charon_ml_trainer *trainer, size_t which)
+static const layer *trainable(const revenant_ml_trainer *trainer, size_t which)
 {
     size_t seen = 0;
     for (size_t i = 0; i < trainer->layer_count; i++) {
@@ -391,13 +391,13 @@ static const layer *trainable(const charon_ml_trainer *trainer, size_t which)
     return NULL;
 }
 
-const char *charon_ml_trainer_layer_name(const charon_ml_trainer *trainer, size_t which)
+const char *revenant_ml_trainer_layer_name(const revenant_ml_trainer *trainer, size_t which)
 {
     const layer *l = trainable(trainer, which);
     return l ? l->name : NULL;
 }
 
-const char *charon_ml_trainer_layer_kind(const charon_ml_trainer *trainer, size_t which)
+const char *revenant_ml_trainer_layer_kind(const revenant_ml_trainer *trainer, size_t which)
 {
     const layer *l = trainable(trainer, which);
     if (!l) {
@@ -406,7 +406,7 @@ const char *charon_ml_trainer_layer_kind(const charon_ml_trainer *trainer, size_
     return l->kind == LAYER_CONVOLUTION ? "convolution" : "innerProduct";
 }
 
-const float *charon_ml_trainer_tensor(const charon_ml_trainer *trainer, size_t which, int bias, size_t *count)
+const float *revenant_ml_trainer_tensor(const revenant_ml_trainer *trainer, size_t which, int bias, size_t *count)
 {
     const layer *l = trainable(trainer, which);
     if (!l) {
@@ -513,13 +513,13 @@ static void backward(layer *l, const float *in, const float *grad_out, float *gr
     }
 }
 
-static size_t boundary_size(const charon_ml_trainer *trainer, size_t index)
+static size_t boundary_size(const revenant_ml_trainer *trainer, size_t index)
 {
     return index == 0 ? trainer->input_count : trainer->layers[index - 1].out_count;
 }
 
 static void apply(float *value, float *velocity, float *second, const float *gradient, size_t count,
-                  const charon_ml_trainer *trainer)
+                  const revenant_ml_trainer *trainer)
 {
     if (trainer->optimiser == OPTIMISER_SGD) {
         float lr = (float)trainer->learning_rate;
@@ -541,7 +541,7 @@ static void apply(float *value, float *velocity, float *second, const float *gra
     }
 }
 
-int charon_ml_trainer_step(charon_ml_trainer *trainer, const float *inputs, const float *targets, size_t samples,
+int revenant_ml_trainer_step(revenant_ml_trainer *trainer, const float *inputs, const float *targets, size_t samples,
                            char *error, size_t error_size)
 {
     if (samples == 0) {
@@ -632,13 +632,13 @@ done:
     return ok;
 }
 
-static int store_tensor(const charon_ml_node *params, const float *values, size_t count)
+static int store_tensor(const revenant_ml_node *params, const float *values, size_t count)
 {
-    if (!params || charon_ml_count_field(params, "floatValue") != count) {
+    if (!params || revenant_ml_count_field(params, "floatValue") != count) {
         return 0;
     }
     for (size_t i = 0; i < count; i++) {
-        charon_ml_node *entry = (charon_ml_node *)charon_ml_node_at_field(params, "floatValue", i);
+        revenant_ml_node *entry = (revenant_ml_node *)revenant_ml_node_at_field(params, "floatValue", i);
         if (!entry) {
             return 0;
         }
@@ -647,9 +647,9 @@ static int store_tensor(const charon_ml_node *params, const float *values, size_
     return 1;
 }
 
-int charon_ml_trainer_store(const charon_ml_trainer *trainer, charon_ml_node *document)
+int revenant_ml_trainer_store(const revenant_ml_trainer *trainer, revenant_ml_node *document)
 {
-    const charon_ml_node *network = charon_ml_oneof(document, "neuralNetwork");
+    const revenant_ml_node *network = revenant_ml_oneof(document, "neuralNetwork");
     if (!network) {
         return 0;
     }
@@ -659,11 +659,11 @@ int charon_ml_trainer_store(const charon_ml_trainer *trainer, charon_ml_node *do
         if (!l->weight_count) {
             continue;
         }
-        const charon_ml_node *node = charon_ml_node_at_field(network, "layers", i);
+        const revenant_ml_node *node = revenant_ml_node_at_field(network, "layers", i);
         if (!node) {
             return 0;
         }
-        const charon_ml_node *params = charon_ml_oneof(node, l->kind == LAYER_CONVOLUTION ? "convolution" : "innerProduct");
+        const revenant_ml_node *params = revenant_ml_oneof(node, l->kind == LAYER_CONVOLUTION ? "convolution" : "innerProduct");
         if (!params) {
             return 0;
         }

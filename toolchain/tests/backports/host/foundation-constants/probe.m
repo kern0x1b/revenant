@@ -18,7 +18,7 @@ static struct Entry ENTRIES[] = {
     {"NSCalendarIdentifierVikram", nil, 1}, {"NSURLUbiquitousItemIsSyncPausedKey", nil, 1},
     {"NSURLUbiquitousItemSupportedSyncControlsKey", nil, 1},
     {"NSFileProtectionCompleteWhenUserInactive", nil, 1}, {"NSHTTPCookieSetByJavaScript", nil, 1},
-    {"NSCalendarIdentifierCharonProbeNoSuchConstant", nil, 0},
+    {"NSCalendarIdentifierRevenantProbeNoSuchConstant", nil, 0},
 };
 
 static void fill_ours(void)

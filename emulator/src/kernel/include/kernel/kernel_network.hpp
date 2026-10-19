@@ -12,7 +12,7 @@
 #include "network/darwin_network_abi.hpp"
 #include "kernel/kernel_shared_state.hpp"
 
-namespace shade::kernel_network {
+namespace emulator::kernel_network {
 
 inline constexpr std::string_view isolated_ipv4_stream_descriptor {
     "isolated-inet-stream"

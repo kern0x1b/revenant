@@ -3,7 +3,7 @@
 #import "datecomponents-cases.h"
 #import "datecomponents-expectations.h"
 
-@interface CharonHostNSDateComponentsFormatter : NSFormatter
+@interface RevenantHostNSDateComponentsFormatter : NSFormatter
 @property NSDateComponentsFormatterUnitsStyle unitsStyle;
 @property NSCalendarUnit allowedUnits;
 @property NSDateComponentsFormatterZeroFormattingBehavior zeroFormattingBehavior;
@@ -57,7 +57,7 @@ int main(int argc, char **argv)
     @autoreleasepool {
         for (size_t index = 0; index < DATE_COMPONENTS_CASE_COUNT; index++) {
             NSString *name = [NSString stringWithFormat:@"recorded case %zu", index];
-            CHECK_EQUAL(date_components_answer([[CharonHostNSDateComponentsFormatter alloc] init], &date_components_cases[index]), @(date_components_expectations[index]), name.UTF8String);
+            CHECK_EQUAL(date_components_answer([[RevenantHostNSDateComponentsFormatter alloc] init], &date_components_cases[index]), @(date_components_expectations[index]), name.UTF8String);
         }
         NSUInteger cases = argc > 1 ? (NSUInteger)atoi(argv[1]) : 3000;
         NSArray *unitPool = @[@(NSCalendarUnitYear), @(NSCalendarUnitMonth), @(NSCalendarUnitWeekOfMonth), @(NSCalendarUnitDay), @(NSCalendarUnitHour), @(NSCalendarUnitMinute), @(NSCalendarUnitSecond)];
@@ -73,7 +73,7 @@ int main(int argc, char **argv)
             if (next() % 5 == 0)
                 units = 0;
             NSDictionary *config = @{@"style": @(next() % 6), @"units": @(units), @"zero": zeros[next() % zeros.count], @"max": @(next() % 4), @"collapse": @(next() % 4 == 0), @"approx": @(next() % 5 == 0), @"remaining": @(next() % 5 == 0)};
-            CharonHostNSDateComponentsFormatter *ours = [[CharonHostNSDateComponentsFormatter alloc] init];
+            RevenantHostNSDateComponentsFormatter *ours = [[RevenantHostNSDateComponentsFormatter alloc] init];
             NSDateComponentsFormatter *system = [[NSDateComponentsFormatter alloc] init];
             configure(ours, config);
             configure(system, config);
@@ -106,8 +106,8 @@ int main(int argc, char **argv)
         NSArray *keys = [mismatches.allKeys sortedArrayUsingComparator:^NSComparisonResult(NSString *a, NSString *b) { return [mismatches[b] compare:mismatches[a]]; }];
         for (NSString *key in [keys subarrayWithRange:NSMakeRange(0, MIN(keys.count, (NSUInteger)15))])
             printf("  %s: %ld\n", key.UTF8String, (long)[mismatches[key] integerValue]);
-        charon_check(wrong * 100 <= total * 5, "the formatter answers as the system's for all but a few percent of random configurations", [NSString stringWithFormat:@"%lu of %lu differ", (unsigned long)wrong, (unsigned long)total]);
+        revenant_check(wrong * 100 <= total * 5, "the formatter answers as the system's for all but a few percent of random configurations", [NSString stringWithFormat:@"%lu of %lu differ", (unsigned long)wrong, (unsigned long)total]);
     }
-    printf("checks=%d failures=%d\n", charon_checks, charon_failures);
-    return charon_failures;
+    printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
+    return revenant_failures;
 }

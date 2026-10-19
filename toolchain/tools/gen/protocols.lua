@@ -112,7 +112,7 @@ function protocol_files(tree, fw, corpus, sdk_release)
             table.insert(body, "#import <" .. fw .. "/" .. fw .. ".h>")
         end
         table.insert(body, "")
-        table.insert(body, "__attribute__((used)) Protocol *const charon_" .. fw .. "_protocols" .. tag .. "[] = {")
+        table.insert(body, "__attribute__((used)) Protocol *const revenant_" .. fw .. "_protocols" .. tag .. "[] = {")
         for _, name in ipairs(names) do
             table.insert(body, "    @protocol(" .. name .. "),")
         end

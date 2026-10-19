@@ -3,7 +3,7 @@
 #include <time.h>
 
 __attribute__((visibility("hidden")))
-int charon_clock_getres(clockid_t which, struct timespec *resolution)
+int revenant_clock_getres(clockid_t which, struct timespec *resolution)
 {
     long nanoseconds;
     if (which == CLOCK_REALTIME || which == CLOCK_MONOTONIC || which == CLOCK_MONOTONIC_RAW ||

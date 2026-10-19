@@ -1,4 +1,4 @@
-#import "CharonMPSCnn.h"
+#import "RevenantMPSCnn.h"
 
 @implementation MPSCNNNormalizationMeanAndVarianceState {
     id<MTLBuffer> _mean;
@@ -8,7 +8,7 @@
 - (instancetype)initWithMean:(id<MTLBuffer>)mean variance:(id<MTLBuffer>)variance
 {
     if (!mean || !variance) {
-        CharonMPSRefuse(@"MPSCNNNormalizationMeanAndVarianceState: -initWithMean:variance: was given no mean or no"
+        RevenantMPSRefuse(@"MPSCNNNormalizationMeanAndVarianceState: -initWithMean:variance: was given no mean or no"
                         @" variance, so no state was made");
         return nil;
     }
@@ -31,7 +31,7 @@
     if (!device)
         device = MTLCreateSystemDefaultDevice();
     if (!device || !numberOfFeatureChannels) {
-        CharonMPSRefuse(@"MPSCNNNormalizationMeanAndVarianceState: no device or no feature channels, so no"
+        RevenantMPSRefuse(@"MPSCNNNormalizationMeanAndVarianceState: no device or no feature channels, so no"
                         @" state was made");
         return nil;
     }
@@ -40,14 +40,14 @@
     id<MTLBuffer> variance = [device newBufferWithLength:numberOfFeatureChannels * sizeof(float)
                                                 options:MTLResourceStorageModeShared];
     if (!mean || !variance) {
-        CharonMPSRefuse(@"MPSCNNNormalizationMeanAndVarianceState: the device made no %lu byte buffer, so no"
+        RevenantMPSRefuse(@"MPSCNNNormalizationMeanAndVarianceState: the device made no %lu byte buffer, so no"
                         @" state was made",
                         (unsigned long)(numberOfFeatureChannels * sizeof(float)));
         return nil;
     }
     MPSCNNNormalizationMeanAndVarianceState *state = [[self alloc] initWithMean:mean variance:variance];
-    [state charon_mps_appendResource:mean];
-    [state charon_mps_appendResource:variance];
+    [state revenant_mps_appendResource:mean];
+    [state revenant_mps_appendResource:variance];
     return state;
 }
 

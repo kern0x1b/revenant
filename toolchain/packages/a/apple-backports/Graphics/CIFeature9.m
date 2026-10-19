@@ -1,7 +1,7 @@
 #import <CoreImage/CoreImage.h>
 
 @interface CITextFeature ()
-- (instancetype)initWithCharonBounds:(CGRect)boundsRect
+- (instancetype)initWithRevenantBounds:(CGRect)boundsRect
                               topLeft:(CGPoint)topLeftPoint
                              topRight:(CGPoint)topRightPoint
                            bottomLeft:(CGPoint)bottomLeftPoint
@@ -19,7 +19,7 @@
     NSArray *_subFeatures;
 }
 
-- (instancetype)initWithCharonBounds:(CGRect)boundsRect
+- (instancetype)initWithRevenantBounds:(CGRect)boundsRect
                               topLeft:(CGPoint)topLeftPoint
                              topRight:(CGPoint)topRightPoint
                            bottomLeft:(CGPoint)bottomLeftPoint

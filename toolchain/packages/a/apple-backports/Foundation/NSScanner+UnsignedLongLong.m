@@ -1,7 +1,7 @@
 #import <Foundation/Foundation.h>
 #include <limits.h>
 
-@implementation NSScanner (CharonUnsignedLongLong)
+@implementation NSScanner (RevenantUnsignedLongLong)
 
 - (BOOL)scanUnsignedLongLong:(unsigned long long *)result
 {

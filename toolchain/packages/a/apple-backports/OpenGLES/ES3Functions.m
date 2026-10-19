@@ -3,14 +3,14 @@
 #include <dlfcn.h>
 #include <string.h>
 
-static void charon_es3_error(void)
+static void revenant_es3_error(void)
 {
     void (*bind)(GLenum, GLuint) = (void (*)(GLenum, GLuint))dlsym(RTLD_DEFAULT, "glBindTexture");
     if (bind)
         bind(0, 0);
 }
 
-static void charon_es3_value_error(void)
+static void revenant_es3_value_error(void)
 {
     void (*generate)(GLsizei, GLuint *) = (void (*)(GLsizei, GLuint *))dlsym(RTLD_DEFAULT, "glGenTextures");
     if (generate)
@@ -112,62 +112,62 @@ extern void glGetInternalformativ(GLenum target, GLenum internalformat, GLenum p
 
 void glReadBuffer(GLenum mode)
 {
-    charon_es3_error();
+    revenant_es3_error();
 }
 
 void glTexImage3D(GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLsizei depth, GLint border, GLenum format, GLenum type, const GLvoid* pixels)
 {
-    charon_es3_error();
+    revenant_es3_error();
 }
 
 void glTexSubImage3D(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, const GLvoid* pixels)
 {
-    charon_es3_error();
+    revenant_es3_error();
 }
 
 void glCopyTexSubImage3D(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLint x, GLint y, GLsizei width, GLsizei height)
 {
-    charon_es3_error();
+    revenant_es3_error();
 }
 
 void glDrawBuffers(GLsizei n, const GLenum* bufs)
 {
-    charon_es3_error();
+    revenant_es3_error();
 }
 
 void glUniformMatrix2x3fv(GLint location, GLsizei count, GLboolean transpose, const GLfloat* value)
 {
-    charon_es3_error();
+    revenant_es3_error();
 }
 
 void glUniformMatrix3x2fv(GLint location, GLsizei count, GLboolean transpose, const GLfloat* value)
 {
-    charon_es3_error();
+    revenant_es3_error();
 }
 
 void glUniformMatrix2x4fv(GLint location, GLsizei count, GLboolean transpose, const GLfloat* value)
 {
-    charon_es3_error();
+    revenant_es3_error();
 }
 
 void glUniformMatrix4x2fv(GLint location, GLsizei count, GLboolean transpose, const GLfloat* value)
 {
-    charon_es3_error();
+    revenant_es3_error();
 }
 
 void glUniformMatrix3x4fv(GLint location, GLsizei count, GLboolean transpose, const GLfloat* value)
 {
-    charon_es3_error();
+    revenant_es3_error();
 }
 
 void glUniformMatrix4x3fv(GLint location, GLsizei count, GLboolean transpose, const GLfloat* value)
 {
-    charon_es3_error();
+    revenant_es3_error();
 }
 
 void glBlitFramebuffer(GLint srcX0, GLint srcY0, GLint srcX1, GLint srcY1, GLint dstX0, GLint dstY0, GLint dstX1, GLint dstY1, GLbitfield mask, GLenum filter)
 {
-    charon_es3_error();
+    revenant_es3_error();
 }
 
 void glRenderbufferStorageMultisample(GLenum target, GLsizei samples, GLenum internalformat, GLsizei width, GLsizei height)
@@ -177,12 +177,12 @@ void glRenderbufferStorageMultisample(GLenum target, GLsizei samples, GLenum int
         fn = (void (*)(GLenum target, GLsizei samples, GLenum internalformat, GLsizei width, GLsizei height))dlsym(RTLD_DEFAULT, "glRenderbufferStorageMultisampleAPPLE");
     if (fn)
         { fn(target, samples, internalformat, width, height); return; }
-    charon_es3_error();
+    revenant_es3_error();
 }
 
 void glFramebufferTextureLayer(GLenum target, GLenum attachment, GLuint texture, GLint level, GLint layer)
 {
-    charon_es3_error();
+    revenant_es3_error();
 }
 
 GLvoid* glMapBufferRange(GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access)
@@ -192,7 +192,7 @@ GLvoid* glMapBufferRange(GLenum target, GLintptr offset, GLsizeiptr length, GLbi
         fn = (GLvoid* (*)(GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access))dlsym(RTLD_DEFAULT, "glMapBufferRangeEXT");
     if (fn)
         return fn(target, offset, length, access);
-    charon_es3_error();
+    revenant_es3_error();
     return NULL;
 }
 
@@ -203,7 +203,7 @@ void glFlushMappedBufferRange(GLenum target, GLintptr offset, GLsizeiptr length)
         fn = (void (*)(GLenum target, GLintptr offset, GLsizeiptr length))dlsym(RTLD_DEFAULT, "glFlushMappedBufferRangeEXT");
     if (fn)
         { fn(target, offset, length); return; }
-    charon_es3_error();
+    revenant_es3_error();
 }
 
 void glBindVertexArray(GLuint array)
@@ -213,7 +213,7 @@ void glBindVertexArray(GLuint array)
         fn = (void (*)(GLuint array))dlsym(RTLD_DEFAULT, "glBindVertexArrayOES");
     if (fn)
         { fn(array); return; }
-    charon_es3_error();
+    revenant_es3_error();
 }
 
 void glDeleteVertexArrays(GLsizei n, const GLuint* arrays)
@@ -223,7 +223,7 @@ void glDeleteVertexArrays(GLsizei n, const GLuint* arrays)
         fn = (void (*)(GLsizei n, const GLuint* arrays))dlsym(RTLD_DEFAULT, "glDeleteVertexArraysOES");
     if (fn)
         { fn(n, arrays); return; }
-    charon_es3_error();
+    revenant_es3_error();
 }
 
 void glGenVertexArrays(GLsizei n, GLuint* arrays)
@@ -233,7 +233,7 @@ void glGenVertexArrays(GLsizei n, GLuint* arrays)
         fn = (void (*)(GLsizei n, GLuint* arrays))dlsym(RTLD_DEFAULT, "glGenVertexArraysOES");
     if (fn)
         { fn(n, arrays); return; }
-    charon_es3_error();
+    revenant_es3_error();
 }
 
 GLboolean glIsVertexArray(GLuint array)
@@ -243,156 +243,156 @@ GLboolean glIsVertexArray(GLuint array)
         fn = (GLboolean (*)(GLuint array))dlsym(RTLD_DEFAULT, "glIsVertexArrayOES");
     if (fn)
         return fn(array);
-    charon_es3_error();
+    revenant_es3_error();
     return (GLboolean)0;
 }
 
 void glGetIntegeri_v(GLenum target, GLuint index, GLint* data)
 {
-    charon_es3_error();
+    revenant_es3_error();
 }
 
 void glBeginTransformFeedback(GLenum primitiveMode)
 {
-    charon_es3_error();
+    revenant_es3_error();
 }
 
 void glEndTransformFeedback(void)
 {
-    charon_es3_error();
+    revenant_es3_error();
 }
 
 void glBindBufferRange(GLenum target, GLuint index, GLuint buffer, GLintptr offset, GLsizeiptr size)
 {
-    charon_es3_error();
+    revenant_es3_error();
 }
 
 void glBindBufferBase(GLenum target, GLuint index, GLuint buffer)
 {
-    charon_es3_error();
+    revenant_es3_error();
 }
 
 void glTransformFeedbackVaryings(GLuint program, GLsizei count, const GLchar* const *varyings, GLenum bufferMode)
 {
-    charon_es3_error();
+    revenant_es3_error();
 }
 
 void glGetTransformFeedbackVarying(GLuint program, GLuint index, GLsizei bufSize, GLsizei* length, GLsizei* size, GLenum* type, GLchar* name)
 {
-    charon_es3_error();
+    revenant_es3_error();
 }
 
 void glVertexAttribIPointer(GLuint index, GLint size, GLenum type, GLsizei stride, const GLvoid* pointer)
 {
-    charon_es3_error();
+    revenant_es3_error();
 }
 
 void glGetVertexAttribIiv(GLuint index, GLenum pname, GLint* params)
 {
-    charon_es3_error();
+    revenant_es3_error();
 }
 
 void glGetVertexAttribIuiv(GLuint index, GLenum pname, GLuint* params)
 {
-    charon_es3_error();
+    revenant_es3_error();
 }
 
 void glVertexAttribI4i(GLuint index, GLint x, GLint y, GLint z, GLint w)
 {
-    charon_es3_error();
+    revenant_es3_error();
 }
 
 void glVertexAttribI4ui(GLuint index, GLuint x, GLuint y, GLuint z, GLuint w)
 {
-    charon_es3_error();
+    revenant_es3_error();
 }
 
 void glVertexAttribI4iv(GLuint index, const GLint* v)
 {
-    charon_es3_error();
+    revenant_es3_error();
 }
 
 void glVertexAttribI4uiv(GLuint index, const GLuint* v)
 {
-    charon_es3_error();
+    revenant_es3_error();
 }
 
 void glGetUniformuiv(GLuint program, GLint location, GLuint* params)
 {
-    charon_es3_error();
+    revenant_es3_error();
 }
 
 GLint glGetFragDataLocation(GLuint program, const GLchar *name)
 {
-    charon_es3_error();
+    revenant_es3_error();
     return (GLint)0;
 }
 
 void glUniform1ui(GLint location, GLuint v0)
 {
-    charon_es3_error();
+    revenant_es3_error();
 }
 
 void glUniform2ui(GLint location, GLuint v0, GLuint v1)
 {
-    charon_es3_error();
+    revenant_es3_error();
 }
 
 void glUniform3ui(GLint location, GLuint v0, GLuint v1, GLuint v2)
 {
-    charon_es3_error();
+    revenant_es3_error();
 }
 
 void glUniform4ui(GLint location, GLuint v0, GLuint v1, GLuint v2, GLuint v3)
 {
-    charon_es3_error();
+    revenant_es3_error();
 }
 
 void glUniform1uiv(GLint location, GLsizei count, const GLuint* value)
 {
-    charon_es3_error();
+    revenant_es3_error();
 }
 
 void glUniform2uiv(GLint location, GLsizei count, const GLuint* value)
 {
-    charon_es3_error();
+    revenant_es3_error();
 }
 
 void glUniform3uiv(GLint location, GLsizei count, const GLuint* value)
 {
-    charon_es3_error();
+    revenant_es3_error();
 }
 
 void glUniform4uiv(GLint location, GLsizei count, const GLuint* value)
 {
-    charon_es3_error();
+    revenant_es3_error();
 }
 
 void glClearBufferiv(GLenum buffer, GLint drawbuffer, const GLint* value)
 {
-    charon_es3_error();
+    revenant_es3_error();
 }
 
 void glClearBufferuiv(GLenum buffer, GLint drawbuffer, const GLuint* value)
 {
-    charon_es3_error();
+    revenant_es3_error();
 }
 
 void glClearBufferfv(GLenum buffer, GLint drawbuffer, const GLfloat* value)
 {
-    charon_es3_error();
+    revenant_es3_error();
 }
 
 void glClearBufferfi(GLenum buffer, GLint drawbuffer, GLfloat depth, GLint stencil)
 {
-    charon_es3_error();
+    revenant_es3_error();
 }
 
 const GLubyte *glGetStringi(GLenum name, GLuint index)
 {
     const GLubyte *(*get)(GLenum) = (const GLubyte *(*)(GLenum))dlsym(RTLD_DEFAULT, "glGetString");
     if (name != 0x1F03 || !get) {
-        charon_es3_error();
+        revenant_es3_error();
         return NULL;
     }
     const char *text = (const char *)get(0x1F03);
@@ -411,54 +411,54 @@ const GLubyte *glGetStringi(GLenum name, GLuint index)
         }
         text += length;
     }
-    charon_es3_value_error();
+    revenant_es3_value_error();
     return NULL;
 }
 
 void glCopyBufferSubData(GLenum readTarget, GLenum writeTarget, GLintptr readOffset, GLintptr writeOffset, GLsizeiptr size)
 {
-    charon_es3_error();
+    revenant_es3_error();
 }
 
 void glGetUniformIndices(GLuint program, GLsizei uniformCount, const GLchar* const *uniformNames, GLuint* uniformIndices)
 {
-    charon_es3_error();
+    revenant_es3_error();
 }
 
 void glGetActiveUniformsiv(GLuint program, GLsizei uniformCount, const GLuint* uniformIndices, GLenum pname, GLint* params)
 {
-    charon_es3_error();
+    revenant_es3_error();
 }
 
 GLuint glGetUniformBlockIndex(GLuint program, const GLchar* uniformBlockName)
 {
-    charon_es3_error();
+    revenant_es3_error();
     return (GLuint)0;
 }
 
 void glGetActiveUniformBlockiv(GLuint program, GLuint uniformBlockIndex, GLenum pname, GLint* params)
 {
-    charon_es3_error();
+    revenant_es3_error();
 }
 
 void glGetActiveUniformBlockName(GLuint program, GLuint uniformBlockIndex, GLsizei bufSize, GLsizei* length, GLchar* uniformBlockName)
 {
-    charon_es3_error();
+    revenant_es3_error();
 }
 
 void glUniformBlockBinding(GLuint program, GLuint uniformBlockIndex, GLuint uniformBlockBinding)
 {
-    charon_es3_error();
+    revenant_es3_error();
 }
 
 void glDrawArraysInstanced(GLenum mode, GLint first, GLsizei count, GLsizei instancecount)
 {
-    charon_es3_error();
+    revenant_es3_error();
 }
 
 void glDrawElementsInstanced(GLenum mode, GLsizei count, GLenum type, const GLvoid* indices, GLsizei instancecount)
 {
-    charon_es3_error();
+    revenant_es3_error();
 }
 
 GLsync glFenceSync(GLenum condition, GLbitfield flags)
@@ -468,7 +468,7 @@ GLsync glFenceSync(GLenum condition, GLbitfield flags)
         fn = (GLsync (*)(GLenum condition, GLbitfield flags))dlsym(RTLD_DEFAULT, "glFenceSyncAPPLE");
     if (fn)
         return fn(condition, flags);
-    charon_es3_error();
+    revenant_es3_error();
     return (GLsync)0;
 }
 
@@ -479,7 +479,7 @@ GLboolean glIsSync(GLsync sync)
         fn = (GLboolean (*)(GLsync sync))dlsym(RTLD_DEFAULT, "glIsSyncAPPLE");
     if (fn)
         return fn(sync);
-    charon_es3_error();
+    revenant_es3_error();
     return (GLboolean)0;
 }
 
@@ -490,7 +490,7 @@ void glDeleteSync(GLsync sync)
         fn = (void (*)(GLsync sync))dlsym(RTLD_DEFAULT, "glDeleteSyncAPPLE");
     if (fn)
         { fn(sync); return; }
-    charon_es3_error();
+    revenant_es3_error();
 }
 
 GLenum glClientWaitSync(GLsync sync, GLbitfield flags, GLuint64 timeout)
@@ -500,7 +500,7 @@ GLenum glClientWaitSync(GLsync sync, GLbitfield flags, GLuint64 timeout)
         fn = (GLenum (*)(GLsync sync, GLbitfield flags, GLuint64 timeout))dlsym(RTLD_DEFAULT, "glClientWaitSyncAPPLE");
     if (fn)
         return fn(sync, flags, timeout);
-    charon_es3_error();
+    revenant_es3_error();
     return (GLenum)0;
 }
 
@@ -511,7 +511,7 @@ void glWaitSync(GLsync sync, GLbitfield flags, GLuint64 timeout)
         fn = (void (*)(GLsync sync, GLbitfield flags, GLuint64 timeout))dlsym(RTLD_DEFAULT, "glWaitSyncAPPLE");
     if (fn)
         { fn(sync, flags, timeout); return; }
-    charon_es3_error();
+    revenant_es3_error();
 }
 
 void glGetInteger64v(GLenum pname, GLint64* params)
@@ -521,7 +521,7 @@ void glGetInteger64v(GLenum pname, GLint64* params)
         fn = (void (*)(GLenum pname, GLint64* params))dlsym(RTLD_DEFAULT, "glGetInteger64vAPPLE");
     if (fn)
         { fn(pname, params); return; }
-    charon_es3_error();
+    revenant_es3_error();
 }
 
 void glGetSynciv(GLsync sync, GLenum pname, GLsizei bufSize, GLsizei* length, GLint* values)
@@ -531,114 +531,114 @@ void glGetSynciv(GLsync sync, GLenum pname, GLsizei bufSize, GLsizei* length, GL
         fn = (void (*)(GLsync sync, GLenum pname, GLsizei bufSize, GLsizei* length, GLint* values))dlsym(RTLD_DEFAULT, "glGetSyncivAPPLE");
     if (fn)
         { fn(sync, pname, bufSize, length, values); return; }
-    charon_es3_error();
+    revenant_es3_error();
 }
 
 void glGetInteger64i_v(GLenum target, GLuint index, GLint64* data)
 {
-    charon_es3_error();
+    revenant_es3_error();
 }
 
 void glGetBufferParameteri64v(GLenum target, GLenum pname, GLint64* params)
 {
-    charon_es3_error();
+    revenant_es3_error();
 }
 
 void glGenSamplers(GLsizei count, GLuint* samplers)
 {
-    charon_es3_error();
+    revenant_es3_error();
 }
 
 void glDeleteSamplers(GLsizei count, const GLuint* samplers)
 {
-    charon_es3_error();
+    revenant_es3_error();
 }
 
 GLboolean glIsSampler(GLuint sampler)
 {
-    charon_es3_error();
+    revenant_es3_error();
     return (GLboolean)0;
 }
 
 void glBindSampler(GLuint unit, GLuint sampler)
 {
-    charon_es3_error();
+    revenant_es3_error();
 }
 
 void glSamplerParameteri(GLuint sampler, GLenum pname, GLint param)
 {
-    charon_es3_error();
+    revenant_es3_error();
 }
 
 void glSamplerParameteriv(GLuint sampler, GLenum pname, const GLint* param)
 {
-    charon_es3_error();
+    revenant_es3_error();
 }
 
 void glSamplerParameterf(GLuint sampler, GLenum pname, GLfloat param)
 {
-    charon_es3_error();
+    revenant_es3_error();
 }
 
 void glSamplerParameterfv(GLuint sampler, GLenum pname, const GLfloat* param)
 {
-    charon_es3_error();
+    revenant_es3_error();
 }
 
 void glGetSamplerParameteriv(GLuint sampler, GLenum pname, GLint* params)
 {
-    charon_es3_error();
+    revenant_es3_error();
 }
 
 void glGetSamplerParameterfv(GLuint sampler, GLenum pname, GLfloat* params)
 {
-    charon_es3_error();
+    revenant_es3_error();
 }
 
 void glVertexAttribDivisor(GLuint index, GLuint divisor)
 {
-    charon_es3_error();
+    revenant_es3_error();
 }
 
 void glBindTransformFeedback(GLenum target, GLuint id)
 {
-    charon_es3_error();
+    revenant_es3_error();
 }
 
 void glDeleteTransformFeedbacks(GLsizei n, const GLuint* ids)
 {
-    charon_es3_error();
+    revenant_es3_error();
 }
 
 void glGenTransformFeedbacks(GLsizei n, GLuint* ids)
 {
-    charon_es3_error();
+    revenant_es3_error();
 }
 
 GLboolean glIsTransformFeedback(GLuint id)
 {
-    charon_es3_error();
+    revenant_es3_error();
     return (GLboolean)0;
 }
 
 void glPauseTransformFeedback(void)
 {
-    charon_es3_error();
+    revenant_es3_error();
 }
 
 void glResumeTransformFeedback(void)
 {
-    charon_es3_error();
+    revenant_es3_error();
 }
 
 void glGetProgramBinary(GLuint program, GLsizei bufSize, GLsizei* length, GLenum* binaryFormat, GLvoid* binary)
 {
-    charon_es3_error();
+    revenant_es3_error();
 }
 
 void glProgramBinary(GLuint program, GLenum binaryFormat, const GLvoid* binary, GLsizei length)
 {
-    charon_es3_error();
+    revenant_es3_error();
 }
 
 void glProgramParameteri(GLuint program, GLenum pname, GLint value)
@@ -648,7 +648,7 @@ void glProgramParameteri(GLuint program, GLenum pname, GLint value)
         fn = (void (*)(GLuint program, GLenum pname, GLint value))dlsym(RTLD_DEFAULT, "glProgramParameteriEXT");
     if (fn)
         { fn(program, pname, value); return; }
-    charon_es3_error();
+    revenant_es3_error();
 }
 
 void glInvalidateFramebuffer(GLenum target, GLsizei numAttachments, const GLenum* attachments)
@@ -658,12 +658,12 @@ void glInvalidateFramebuffer(GLenum target, GLsizei numAttachments, const GLenum
         fn = (void (*)(GLenum target, GLsizei numAttachments, const GLenum* attachments))dlsym(RTLD_DEFAULT, "glDiscardFramebufferEXT");
     if (fn)
         { fn(target, numAttachments, attachments); return; }
-    charon_es3_error();
+    revenant_es3_error();
 }
 
 void glInvalidateSubFramebuffer(GLenum target, GLsizei numAttachments, const GLenum* attachments, GLint x, GLint y, GLsizei width, GLsizei height)
 {
-    charon_es3_error();
+    revenant_es3_error();
 }
 
 void glTexStorage2D(GLenum target, GLsizei levels, GLenum internalformat, GLsizei width, GLsizei height)
@@ -673,15 +673,15 @@ void glTexStorage2D(GLenum target, GLsizei levels, GLenum internalformat, GLsize
         fn = (void (*)(GLenum target, GLsizei levels, GLenum internalformat, GLsizei width, GLsizei height))dlsym(RTLD_DEFAULT, "glTexStorage2DEXT");
     if (fn)
         { fn(target, levels, internalformat, width, height); return; }
-    charon_es3_error();
+    revenant_es3_error();
 }
 
 void glTexStorage3D(GLenum target, GLsizei levels, GLenum internalformat, GLsizei width, GLsizei height, GLsizei depth)
 {
-    charon_es3_error();
+    revenant_es3_error();
 }
 
 void glGetInternalformativ(GLenum target, GLenum internalformat, GLenum pname, GLsizei bufSize, GLint* params)
 {
-    charon_es3_error();
+    revenant_es3_error();
 }

@@ -3,11 +3,11 @@
 
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 
-@interface UIAlertAction (CharonAlertController)
-- (void (^)(UIAlertAction *action))charon_handler;
+@interface UIAlertAction (RevenantAlertController)
+- (void (^)(UIAlertAction *action))revenant_handler;
 @end
 
-@interface CharonAlertPopoverPresentation : NSObject
+@interface RevenantAlertPopoverPresentation : NSObject
 @property (nonatomic, strong) UIView *sourceView;
 @property (nonatomic) CGRect sourceRect;
 @property (nonatomic, strong) UIBarButtonItem *barButtonItem;
@@ -18,7 +18,7 @@
 @property (nonatomic) UIEdgeInsets popoverLayoutMargins;
 @end
 
-@implementation CharonAlertPopoverPresentation
+@implementation RevenantAlertPopoverPresentation
 
 @synthesize sourceView = _sourceView, sourceRect = _sourceRect, barButtonItem = _barButtonItem,
             permittedArrowDirections = _permittedArrowDirections, delegate = _delegate, passthroughViews = _passthroughViews,
@@ -34,73 +34,73 @@
 @end
 
 @interface UIAlertController () <UIAlertViewDelegate, UIActionSheetDelegate>
-- (void)charon_presentFromViewController:(UIViewController *)controller animated:(BOOL)animated completion:(void (^)(void))completion;
-- (void)charon_dismissAnimated:(BOOL)animated completion:(void (^)(void))completion;
-- (BOOL)charon_isPresented;
+- (void)revenant_presentFromViewController:(UIViewController *)controller animated:(BOOL)animated completion:(void (^)(void))completion;
+- (void)revenant_dismissAnimated:(BOOL)animated completion:(void (^)(void))completion;
+- (BOOL)revenant_isPresented;
 @end
 
-static char charon_presented_alert_key;
+static char revenant_presented_alert_key;
 
-static void (*charon_present_original)(id, SEL, UIViewController *, BOOL, void (^)(void));
-static void (*charon_dismiss_original)(id, SEL, BOOL, void (^)(void));
-static id (*charon_presented_original)(id, SEL);
+static void (*revenant_present_original)(id, SEL, UIViewController *, BOOL, void (^)(void));
+static void (*revenant_dismiss_original)(id, SEL, BOOL, void (^)(void));
+static id (*revenant_presented_original)(id, SEL);
 
-static UIViewController *charon_presentation_host(UIViewController *controller)
+static UIViewController *revenant_presentation_host(UIViewController *controller)
 {
     while (controller.parentViewController)
         controller = controller.parentViewController;
     return controller;
 }
 
-static UIAlertController *charon_presented_alert(UIViewController *controller)
+static UIAlertController *revenant_presented_alert(UIViewController *controller)
 {
-    return controller ? objc_getAssociatedObject(charon_presentation_host(controller), &charon_presented_alert_key) : nil;
+    return controller ? objc_getAssociatedObject(revenant_presentation_host(controller), &revenant_presented_alert_key) : nil;
 }
 
-static UIViewController *charon_natively_presented(UIViewController *controller)
+static UIViewController *revenant_natively_presented(UIViewController *controller)
 {
-    if (charon_presented_original)
-        return charon_presented_original(controller, @selector(presentedViewController));
+    if (revenant_presented_original)
+        return revenant_presented_original(controller, @selector(presentedViewController));
     return controller.presentedViewController;
 }
 
-static void charon_present(UIViewController *receiver, SEL selector, UIViewController *controller, BOOL animated, void (^completion)(void))
+static void revenant_present(UIViewController *receiver, SEL selector, UIViewController *controller, BOOL animated, void (^completion)(void))
 {
     if ([controller isKindOfClass:[UIAlertController class]]) {
-        [(UIAlertController *)controller charon_presentFromViewController:receiver animated:animated completion:completion];
+        [(UIAlertController *)controller revenant_presentFromViewController:receiver animated:animated completion:completion];
         return;
     }
-    UIAlertController *alert = charon_presented_alert(receiver);
+    UIAlertController *alert = revenant_presented_alert(receiver);
     if (alert) {
-        NSLog(@"Warning: Attempt to present %@ on %@ which is already presenting %@", controller, charon_presentation_host(receiver), alert);
+        NSLog(@"Warning: Attempt to present %@ on %@ which is already presenting %@", controller, revenant_presentation_host(receiver), alert);
         return;
     }
-    charon_present_original(receiver, selector, controller, animated, completion);
+    revenant_present_original(receiver, selector, controller, animated, completion);
 }
 
-static void charon_dismiss(UIViewController *receiver, SEL selector, BOOL animated, void (^completion)(void))
+static void revenant_dismiss(UIViewController *receiver, SEL selector, BOOL animated, void (^completion)(void))
 {
-    if ([receiver isKindOfClass:[UIAlertController class]] && [(UIAlertController *)receiver charon_isPresented]) {
-        [(UIAlertController *)receiver charon_dismissAnimated:animated completion:completion];
+    if ([receiver isKindOfClass:[UIAlertController class]] && [(UIAlertController *)receiver revenant_isPresented]) {
+        [(UIAlertController *)receiver revenant_dismissAnimated:animated completion:completion];
         return;
     }
-    UIAlertController *alert = charon_presented_alert(receiver);
+    UIAlertController *alert = revenant_presented_alert(receiver);
     if (alert) {
-        [alert charon_dismissAnimated:animated completion:completion];
+        [alert revenant_dismissAnimated:animated completion:completion];
         return;
     }
-    for (UIViewController *above = charon_natively_presented(receiver); above; above = charon_natively_presented(above))
-        [charon_presented_alert(above) charon_dismissAnimated:NO completion:nil];
-    charon_dismiss_original(receiver, selector, animated, completion);
+    for (UIViewController *above = revenant_natively_presented(receiver); above; above = revenant_natively_presented(above))
+        [revenant_presented_alert(above) revenant_dismissAnimated:NO completion:nil];
+    revenant_dismiss_original(receiver, selector, animated, completion);
 }
 
-static id charon_presented(UIViewController *receiver, SEL selector)
+static id revenant_presented(UIViewController *receiver, SEL selector)
 {
-    id presented = charon_presented_original(receiver, selector);
-    return presented ? presented : charon_presented_alert(receiver);
+    id presented = revenant_presented_original(receiver, selector);
+    return presented ? presented : revenant_presented_alert(receiver);
 }
 
-static void charon_install_presentation(void)
+static void revenant_install_presentation(void)
 {
     Class controller = [UIViewController class];
     Method present = class_getInstanceMethod(controller, @selector(presentViewController:animated:completion:));
@@ -108,17 +108,17 @@ static void charon_install_presentation(void)
     Method presented = class_getInstanceMethod(controller, @selector(presentedViewController));
     if (!present || !dismiss || !presented)
         return;
-    charon_present_original = (void (*)(id, SEL, UIViewController *, BOOL, void (^)(void)))method_setImplementation(present, (IMP)charon_present);
-    charon_dismiss_original = (void (*)(id, SEL, BOOL, void (^)(void)))method_setImplementation(dismiss, (IMP)charon_dismiss);
-    charon_presented_original = (id (*)(id, SEL))method_setImplementation(presented, (IMP)charon_presented);
+    revenant_present_original = (void (*)(id, SEL, UIViewController *, BOOL, void (^)(void)))method_setImplementation(present, (IMP)revenant_present);
+    revenant_dismiss_original = (void (*)(id, SEL, BOOL, void (^)(void)))method_setImplementation(dismiss, (IMP)revenant_dismiss);
+    revenant_presented_original = (id (*)(id, SEL))method_setImplementation(presented, (IMP)revenant_presented);
 }
 
-static NSString *charon_button_title(UIAlertAction *action)
+static NSString *revenant_button_title(UIAlertAction *action)
 {
     return action.title ? action.title : @"";
 }
 
-static NSString *charon_sheet_title(NSString *title, NSString *message)
+static NSString *revenant_sheet_title(NSString *title, NSString *message)
 {
     if (title.length && message.length)
         return [NSString stringWithFormat:@"%@\n%@", title, message];
@@ -127,7 +127,7 @@ static NSString *charon_sheet_title(NSString *title, NSString *message)
     return message.length ? message : nil;
 }
 
-static void charon_place(NSMutableArray *buttons, NSInteger index, UIAlertAction *action)
+static void revenant_place(NSMutableArray *buttons, NSInteger index, UIAlertAction *action)
 {
     if (index < 0 || !action)
         return;
@@ -136,7 +136,7 @@ static void charon_place(NSMutableArray *buttons, NSInteger index, UIAlertAction
     [buttons replaceObjectAtIndex:index withObject:action];
 }
 
-static UIAlertAction *charon_action_at(NSArray *buttons, NSInteger index)
+static UIAlertAction *revenant_action_at(NSArray *buttons, NSInteger index)
 {
     if (index < 0 || index >= (NSInteger)buttons.count)
         return nil;
@@ -144,7 +144,7 @@ static UIAlertAction *charon_action_at(NSArray *buttons, NSInteger index)
     return action == [NSNull null] ? nil : action;
 }
 
-static UIAlertViewStyle charon_alert_view_style(NSArray *fields)
+static UIAlertViewStyle revenant_alert_view_style(NSArray *fields)
 {
     if (fields.count == 0)
         return UIAlertViewStyleDefault;
@@ -153,19 +153,19 @@ static UIAlertViewStyle charon_alert_view_style(NSArray *fields)
     return UIAlertViewStyleLoginAndPasswordInput;
 }
 
-static BOOL charon_differs(id value, id standard)
+static BOOL revenant_differs(id value, id standard)
 {
     return value != standard && ![value isEqual:standard];
 }
 
-static void charon_copy_field(UITextField *from, UITextField *to)
+static void revenant_copy_field(UITextField *from, UITextField *to)
 {
     UITextField *pristine = [[UITextField alloc] init];
-    if (charon_differs(from.placeholder, pristine.placeholder))
+    if (revenant_differs(from.placeholder, pristine.placeholder))
         to.placeholder = from.placeholder;
-    if (charon_differs(from.font, pristine.font))
+    if (revenant_differs(from.font, pristine.font))
         to.font = from.font;
-    if (charon_differs(from.textColor, pristine.textColor))
+    if (revenant_differs(from.textColor, pristine.textColor))
         to.textColor = from.textColor;
     if (from.textAlignment != pristine.textAlignment)
         to.textAlignment = from.textAlignment;
@@ -207,13 +207,13 @@ static void charon_copy_field(UITextField *from, UITextField *to)
         to.delegate = from.delegate;
     if (from.tag != pristine.tag)
         to.tag = from.tag;
-    if (charon_differs(from.accessibilityLabel, pristine.accessibilityLabel))
+    if (revenant_differs(from.accessibilityLabel, pristine.accessibilityLabel))
         to.accessibilityLabel = from.accessibilityLabel;
     to.secureTextEntry = from.secureTextEntry;
     to.text = from.text;
 }
 
-static void charon_copy_actions(UITextField *from, UITextField *to)
+static void revenant_copy_actions(UITextField *from, UITextField *to)
 {
     UIControlEvents events = from.allControlEvents;
     for (id target in from.allTargets) {
@@ -233,7 +233,7 @@ static void charon_copy_actions(UITextField *from, UITextField *to)
     UIAlertControllerStyle _preferredStyle;
     NSMutableArray *_actions;
     NSMutableArray *_textFields;
-    CharonAlertPopoverPresentation *_popover;
+    RevenantAlertPopoverPresentation *_popover;
     UIAlertView *_alertView;
     UIActionSheet *_actionSheet;
     NSArray *_buttonActions;
@@ -251,7 +251,7 @@ static void charon_copy_actions(UITextField *from, UITextField *to)
     static dispatch_once_t once;
     dispatch_once(&once, ^{
         if (objc_getClass("UIAlertController") == [UIAlertController class])
-            charon_install_presentation();
+            revenant_install_presentation();
     });
 }
 
@@ -276,7 +276,7 @@ static void charon_copy_actions(UITextField *from, UITextField *to)
 
 - (void)dealloc
 {
-    [self charon_releaseNativeView];
+    [self revenant_releaseNativeView];
 }
 
 - (NSArray *)actions
@@ -325,14 +325,14 @@ static void charon_copy_actions(UITextField *from, UITextField *to)
 {
     _message = [message copy];
     _alertView.message = _message;
-    _actionSheet.title = charon_sheet_title(self.title, _message);
+    _actionSheet.title = revenant_sheet_title(self.title, _message);
 }
 
 - (void)setTitle:(NSString *)title
 {
     [super setTitle:title];
     _alertView.title = self.title;
-    _actionSheet.title = charon_sheet_title(self.title, _message);
+    _actionSheet.title = revenant_sheet_title(self.title, _message);
 }
 
 - (UIAlertControllerStyle)preferredStyle
@@ -345,7 +345,7 @@ static void charon_copy_actions(UITextField *from, UITextField *to)
     if (_preferredStyle != UIAlertControllerStyleActionSheet || [UIDevice currentDevice].userInterfaceIdiom != UIUserInterfaceIdiomPad)
         return nil;
     if (!_popover)
-        _popover = [[CharonAlertPopoverPresentation alloc] init];
+        _popover = [[RevenantAlertPopoverPresentation alloc] init];
     return (id)_popover;
 }
 
@@ -369,22 +369,22 @@ static void charon_copy_actions(UITextField *from, UITextField *to)
     return _presenter ? [_presenter shouldAutorotateToInterfaceOrientation:orientation] : [super shouldAutorotateToInterfaceOrientation:orientation];
 }
 
-- (BOOL)charon_isPresented
+- (BOOL)revenant_isPresented
 {
     return _presenter != nil;
 }
 
-- (UIView *)charon_nativeView
+- (UIView *)revenant_nativeView
 {
-    [self charon_releaseNativeView];
+    [self revenant_releaseNativeView];
     if (_preferredStyle == UIAlertControllerStyleActionSheet)
-        [self charon_makeActionSheet];
+        [self revenant_makeActionSheet];
     else
-        [self charon_makeAlertView];
+        [self revenant_makeAlertView];
     return _alertView ? (UIView *)_alertView : (UIView *)_actionSheet;
 }
 
-- (void)charon_makeAlertView
+- (void)revenant_makeAlertView
 {
     UIAlertAction *cancel = nil;
     NSMutableArray *others = [NSMutableArray array];
@@ -396,26 +396,26 @@ static void charon_copy_actions(UITextField *from, UITextField *to)
     }
     UIAlertAction *first = others.count ? [others objectAtIndex:0] : nil;
     UIAlertView *view = [[UIAlertView alloc] initWithTitle:self.title message:_message delegate:self
-                                         cancelButtonTitle:cancel ? charon_button_title(cancel) : nil
-                                         otherButtonTitles:first ? charon_button_title(first) : nil, nil];
+                                         cancelButtonTitle:cancel ? revenant_button_title(cancel) : nil
+                                         otherButtonTitles:first ? revenant_button_title(first) : nil, nil];
     NSMutableArray *buttons = [NSMutableArray array];
-    charon_place(buttons, view.cancelButtonIndex, cancel);
-    charon_place(buttons, view.firstOtherButtonIndex, first);
+    revenant_place(buttons, view.cancelButtonIndex, cancel);
+    revenant_place(buttons, view.firstOtherButtonIndex, first);
     for (NSUInteger index = 1; index < others.count; index++) {
         UIAlertAction *action = [others objectAtIndex:index];
-        charon_place(buttons, [view addButtonWithTitle:charon_button_title(action)], action);
+        revenant_place(buttons, [view addButtonWithTitle:revenant_button_title(action)], action);
     }
-    view.alertViewStyle = charon_alert_view_style(_textFields);
+    view.alertViewStyle = revenant_alert_view_style(_textFields);
     NSMutableArray *nativeFields = [NSMutableArray array];
     for (NSUInteger index = 0; index < _textFields.count; index++) {
         UITextField *field = [_textFields objectAtIndex:index];
         UITextField *native = [view textFieldAtIndex:index];
         if (!native)
             continue;
-        charon_copy_field(field, native);
-        [native addTarget:self action:@selector(charon_nativeFieldChanged:) forControlEvents:UIControlEventEditingChanged];
-        charon_copy_actions(field, native);
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(charon_nativeFieldDidChange:) name:UITextFieldTextDidChangeNotification object:native];
+        revenant_copy_field(field, native);
+        [native addTarget:self action:@selector(revenant_nativeFieldChanged:) forControlEvents:UIControlEventEditingChanged];
+        revenant_copy_actions(field, native);
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(revenant_nativeFieldDidChange:) name:UITextFieldTextDidChangeNotification object:native];
         [nativeFields addObject:native];
     }
     _alertView = view;
@@ -423,9 +423,9 @@ static void charon_copy_actions(UITextField *from, UITextField *to)
     _nativeFields = nativeFields;
 }
 
-- (void)charon_makeActionSheet
+- (void)revenant_makeActionSheet
 {
-    UIActionSheet *sheet = [[UIActionSheet alloc] initWithTitle:charon_sheet_title(self.title, _message) delegate:self
+    UIActionSheet *sheet = [[UIActionSheet alloc] initWithTitle:revenant_sheet_title(self.title, _message) delegate:self
                                               cancelButtonTitle:nil destructiveButtonTitle:nil otherButtonTitles:nil];
     NSMutableArray *buttons = [NSMutableArray array];
     UIAlertAction *cancel = nil;
@@ -434,26 +434,26 @@ static void charon_copy_actions(UITextField *from, UITextField *to)
             cancel = action;
             continue;
         }
-        NSInteger index = [sheet addButtonWithTitle:charon_button_title(action)];
-        charon_place(buttons, index, action);
+        NSInteger index = [sheet addButtonWithTitle:revenant_button_title(action)];
+        revenant_place(buttons, index, action);
         if (action.style == UIAlertActionStyleDestructive && sheet.destructiveButtonIndex < 0)
             sheet.destructiveButtonIndex = index;
     }
     if (cancel) {
-        NSInteger index = [sheet addButtonWithTitle:charon_button_title(cancel)];
+        NSInteger index = [sheet addButtonWithTitle:revenant_button_title(cancel)];
         sheet.cancelButtonIndex = index;
-        charon_place(buttons, index, cancel);
+        revenant_place(buttons, index, cancel);
     }
     _actionSheet = sheet;
     _buttonActions = buttons;
     _nativeFields = nil;
 }
 
-- (void)charon_releaseNativeView
+- (void)revenant_releaseNativeView
 {
     [[NSNotificationCenter defaultCenter] removeObserver:self name:UITextFieldTextDidChangeNotification object:nil];
     for (UITextField *native in _nativeFields)
-        [native removeTarget:self action:@selector(charon_nativeFieldChanged:) forControlEvents:UIControlEventEditingChanged];
+        [native removeTarget:self action:@selector(revenant_nativeFieldChanged:) forControlEvents:UIControlEventEditingChanged];
     _alertView.delegate = nil;
     _actionSheet.delegate = nil;
     _alertView = nil;
@@ -462,14 +462,14 @@ static void charon_copy_actions(UITextField *from, UITextField *to)
     _nativeFields = nil;
 }
 
-- (void)charon_presentFromViewController:(UIViewController *)controller animated:(BOOL)animated completion:(void (^)(void))completion
+- (void)revenant_presentFromViewController:(UIViewController *)controller animated:(BOOL)animated completion:(void (^)(void))completion
 {
     if (_presenter)
         [NSException raise:NSInvalidArgumentException format:@"Application tried to present modally an active controller %@.", self];
-    UIViewController *host = charon_presentation_host(controller);
-    UIViewController *busy = charon_natively_presented(host);
+    UIViewController *host = revenant_presentation_host(controller);
+    UIViewController *busy = revenant_natively_presented(host);
     if (!busy)
-        busy = charon_presented_alert(host);
+        busy = revenant_presented_alert(host);
     if (busy) {
         NSLog(@"Warning: Attempt to present %@ on %@ which is already presenting %@", self, host, busy);
         return;
@@ -483,13 +483,13 @@ static void charon_copy_actions(UITextField *from, UITextField *to)
     _presentCompletion = [completion copy];
     _dismissCompletion = nil;
     _dismissing = NO;
-    objc_setAssociatedObject(host, &charon_presented_alert_key, self, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-    [self charon_nativeView];
+    objc_setAssociatedObject(host, &revenant_presented_alert_key, self, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    [self revenant_nativeView];
     if (_alertView) {
         [_alertView show];
         return;
     }
-    CharonAlertPopoverPresentation *popover = [UIDevice currentDevice].userInterfaceIdiom == UIUserInterfaceIdiomPad ? _popover : nil;
+    RevenantAlertPopoverPresentation *popover = [UIDevice currentDevice].userInterfaceIdiom == UIUserInterfaceIdiomPad ? _popover : nil;
     if (popover.barButtonItem)
         [_actionSheet showFromBarButtonItem:popover.barButtonItem animated:animated];
     else if (popover.sourceView.window)
@@ -498,7 +498,7 @@ static void charon_copy_actions(UITextField *from, UITextField *to)
         [_actionSheet showInView:window];
 }
 
-- (void)charon_dismissAnimated:(BOOL)animated completion:(void (^)(void))completion
+- (void)revenant_dismissAnimated:(BOOL)animated completion:(void (^)(void))completion
 {
     if (_dismissing || (!_alertView && !_actionSheet))
         return;
@@ -510,7 +510,7 @@ static void charon_copy_actions(UITextField *from, UITextField *to)
         [_actionSheet dismissWithClickedButtonIndex:_actionSheet.cancelButtonIndex animated:animated];
 }
 
-- (void)charon_syncTextFields
+- (void)revenant_syncTextFields
 {
     for (NSUInteger index = 0; index < _nativeFields.count && index < _textFields.count; index++) {
         UITextField *field = [_textFields objectAtIndex:index];
@@ -520,20 +520,20 @@ static void charon_copy_actions(UITextField *from, UITextField *to)
     }
 }
 
-- (void)charon_nativeFieldChanged:(UITextField *)native
+- (void)revenant_nativeFieldChanged:(UITextField *)native
 {
-    [self charon_syncTextFields];
+    [self revenant_syncTextFields];
 }
 
-- (void)charon_nativeFieldDidChange:(NSNotification *)notification
+- (void)revenant_nativeFieldDidChange:(NSNotification *)notification
 {
-    [self charon_syncTextFields];
+    [self revenant_syncTextFields];
     NSUInteger index = [_nativeFields indexOfObjectIdenticalTo:notification.object];
     if (index != NSNotFound && index < _textFields.count)
         [[NSNotificationCenter defaultCenter] postNotificationName:UITextFieldTextDidChangeNotification object:[_textFields objectAtIndex:index]];
 }
 
-- (void)charon_finishPresentation
+- (void)revenant_finishPresentation
 {
     void (^completion)(void) = _presentCompletion;
     _presentCompletion = nil;
@@ -541,27 +541,27 @@ static void charon_copy_actions(UITextField *from, UITextField *to)
         completion();
 }
 
-- (void)charon_nativeView:(UIView *)view didDismissWithButtonIndex:(NSInteger)index
+- (void)revenant_nativeView:(UIView *)view didDismissWithButtonIndex:(NSInteger)index
 {
     if (!view || (view != _alertView && view != _actionSheet))
         return;
     __attribute__((objc_precise_lifetime)) UIAlertController *keep = self;
-    [self charon_syncTextFields];
-    UIAlertAction *action = _dismissing ? nil : charon_action_at(_buttonActions, index);
+    [self revenant_syncTextFields];
+    UIAlertAction *action = _dismissing ? nil : revenant_action_at(_buttonActions, index);
     if (!action.enabled)
         action = nil;
     void (^presented)(void) = _presentCompletion;
     void (^dismissed)(void) = _dismissCompletion;
-    [self charon_releaseNativeView];
-    if (_presenter && objc_getAssociatedObject(_presenter, &charon_presented_alert_key) == keep)
-        objc_setAssociatedObject(_presenter, &charon_presented_alert_key, nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    [self revenant_releaseNativeView];
+    if (_presenter && objc_getAssociatedObject(_presenter, &revenant_presented_alert_key) == keep)
+        objc_setAssociatedObject(_presenter, &revenant_presented_alert_key, nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     _presenter = nil;
     _presentCompletion = nil;
     _dismissCompletion = nil;
     _dismissing = NO;
     if (presented)
         presented();
-    void (^handler)(UIAlertAction *action) = [action charon_handler];
+    void (^handler)(UIAlertAction *action) = [action revenant_handler];
     if (handler)
         handler(action);
     if (dismissed)
@@ -571,35 +571,35 @@ static void charon_copy_actions(UITextField *from, UITextField *to)
 - (void)didPresentAlertView:(UIAlertView *)alertView
 {
     if (alertView == _alertView)
-        [self charon_finishPresentation];
+        [self revenant_finishPresentation];
 }
 
 - (BOOL)alertViewShouldEnableFirstOtherButton:(UIAlertView *)alertView
 {
-    UIAlertAction *action = charon_action_at(_buttonActions, alertView.firstOtherButtonIndex);
+    UIAlertAction *action = revenant_action_at(_buttonActions, alertView.firstOtherButtonIndex);
     return action ? action.enabled : YES;
 }
 
 - (void)alertView:(UIAlertView *)alertView willDismissWithButtonIndex:(NSInteger)buttonIndex
 {
     if (alertView == _alertView)
-        [self charon_syncTextFields];
+        [self revenant_syncTextFields];
 }
 
 - (void)alertView:(UIAlertView *)alertView didDismissWithButtonIndex:(NSInteger)buttonIndex
 {
-    [self charon_nativeView:alertView didDismissWithButtonIndex:buttonIndex];
+    [self revenant_nativeView:alertView didDismissWithButtonIndex:buttonIndex];
 }
 
 - (void)didPresentActionSheet:(UIActionSheet *)actionSheet
 {
     if (actionSheet == _actionSheet)
-        [self charon_finishPresentation];
+        [self revenant_finishPresentation];
 }
 
 - (void)actionSheet:(UIActionSheet *)actionSheet didDismissWithButtonIndex:(NSInteger)buttonIndex
 {
-    [self charon_nativeView:actionSheet didDismissWithButtonIndex:buttonIndex];
+    [self revenant_nativeView:actionSheet didDismissWithButtonIndex:buttonIndex];
 }
 
 @end

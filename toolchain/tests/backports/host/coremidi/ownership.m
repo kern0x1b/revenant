@@ -3,11 +3,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#import "CharonCoreMIDI.h"
+#import "RevenantCoreMIDI.h"
 
 static int gCompletions = 0;
 
-OSStatus charon_test_MIDISendSysex(MIDISysexSendRequest *request)
+OSStatus revenant_test_MIDISendSysex(MIDISysexSendRequest *request)
 {
     request->completionProc(request);
     return noErr;

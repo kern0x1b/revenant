@@ -1,4 +1,4 @@
-Package: org.charon.emulateoutput
+Package: org.revenant.emulateoutput
 Name: emulate output probe
 Architecture: iphoneos-arm
 Description: A program that prints a known line to stdout and a known line to stderr, and sleeps past

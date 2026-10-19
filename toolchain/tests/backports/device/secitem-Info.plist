@@ -9,7 +9,7 @@
 	<key>CFBundleExecutable</key>
 	<string>secitem</string>
 	<key>CFBundleIdentifier</key>
-	<string>local.charon.backports.secitem</string>
+	<string>local.revenant.backports.secitem</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>

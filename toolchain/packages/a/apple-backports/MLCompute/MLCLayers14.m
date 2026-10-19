@@ -1,22 +1,22 @@
-#import "CharonMLCompute.h"
+#import "RevenantMLCompute.h"
 
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
 #pragma clang diagnostic ignored "-Wobjc-designated-initializers"
 #pragma clang diagnostic ignored "-Wnullability-completeness"
 
-@interface MLCLayer (CharonFactory)
-- (instancetype)charon_init;
-- (instancetype)charon_label:(NSString *)name;
+@interface MLCLayer (RevenantFactory)
+- (instancetype)revenant_init;
+- (instancetype)revenant_label:(NSString *)name;
 @end
 
-@interface MLCPaddingLayer (CharonPadding)
-+ (instancetype)charon_layerWithType:(MLCPaddingType)type
+@interface MLCPaddingLayer (RevenantPadding)
++ (instancetype)revenant_layerWithType:(MLCPaddingType)type
                              padding:(NSArray<NSNumber *> *)padding
                        constantValue:(float)constantValue;
 @end
 
-@interface MLCInstanceNormalizationLayer (CharonNormalizing)
-- (void)charon_setFeatureChannelCount:(NSUInteger)channels
+@interface MLCInstanceNormalizationLayer (RevenantNormalizing)
+- (void)revenant_setFeatureChannelCount:(NSUInteger)channels
                                   beta:(MLCTensor *)beta
                                  gamma:(MLCTensor *)gamma
                          varianceEpsilon:(float)epsilon
@@ -25,9 +25,9 @@
                                variance:(MLCTensor *)variance;
 @end
 
-@interface MLCLSTMLayer (CharonGates)
-+ (NSArray<MLCActivationDescriptor *> *)charon_defaultGates;
-+ (instancetype)charon_layerWithDescriptor:(MLCLSTMDescriptor *)descriptor
+@interface MLCLSTMLayer (RevenantGates)
++ (NSArray<MLCActivationDescriptor *> *)revenant_defaultGates;
++ (instancetype)revenant_layerWithDescriptor:(MLCLSTMDescriptor *)descriptor
                               inputWeights:(NSArray<MLCTensor *> *)inputWeights
                              hiddenWeights:(NSArray<MLCTensor *> *)hiddenWeights
                             peepholeWeights:(NSArray<MLCTensor *> *)peepholeWeights
@@ -36,19 +36,19 @@
                         outputResultActivation:(MLCActivationDescriptor *)outputResultActivation;
 @end
 
-static MLCTensorParameter *CharonMLCParameter(MLCTensor *tensor)
+static MLCTensorParameter *RevenantMLCParameter(MLCTensor *tensor)
 {
     return tensor ? [MLCTensorParameter parameterWithTensor:tensor] : nil;
 }
 
-static NSArray<MLCTensorParameter *> *CharonMLCParameters(NSArray<MLCTensor *> *tensors)
+static NSArray<MLCTensorParameter *> *RevenantMLCParameters(NSArray<MLCTensor *> *tensors)
 {
     if (!tensors) {
         return nil;
     }
     NSMutableArray *parameters = [NSMutableArray arrayWithCapacity:tensors.count];
     for (MLCTensor *tensor in tensors) {
-        [parameters addObject:CharonMLCParameter(tensor)];
+        [parameters addObject:RevenantMLCParameter(tensor)];
     }
     return parameters;
 }
@@ -59,8 +59,8 @@ static NSArray<MLCTensorParameter *> *CharonMLCParameters(NSArray<MLCTensor *> *
 
 + (instancetype)layer
 {
-    MLCSelectionLayer *layer = [[MLCSelectionLayer alloc] charon_init];
-    [layer charon_label:@"Selection"];
+    MLCSelectionLayer *layer = [[MLCSelectionLayer alloc] revenant_init];
+    [layer revenant_label:@"Selection"];
     return layer;
 }
 
@@ -72,157 +72,157 @@ static NSArray<MLCTensorParameter *> *CharonMLCParameters(NSArray<MLCTensor *> *
     MLCActivationDescriptor *_descriptor;
 }
 
-static MLCActivationLayer *CharonMLCActivation(MLCActivationDescriptor *descriptor)
+static MLCActivationLayer *RevenantMLCActivation(MLCActivationDescriptor *descriptor)
 {
-    MLCActivationLayer *layer = [[MLCActivationLayer alloc] charon_init];
+    MLCActivationLayer *layer = [[MLCActivationLayer alloc] revenant_init];
     layer->_descriptor = descriptor;
-    [layer charon_label:@"Activation"];
+    [layer revenant_label:@"Activation"];
     return layer;
 }
 
 + (instancetype)layerWithDescriptor:(MLCActivationDescriptor *)descriptor
 {
-    return CharonMLCActivation(descriptor);
+    return RevenantMLCActivation(descriptor);
 }
 
 + (MLCActivationLayer *)reluLayer
 {
-    return CharonMLCActivation([MLCActivationDescriptor descriptorWithType:MLCActivationTypeReLU]);
+    return RevenantMLCActivation([MLCActivationDescriptor descriptorWithType:MLCActivationTypeReLU]);
 }
 
 + (MLCActivationLayer *)relu6Layer
 {
-    return CharonMLCActivation([MLCActivationDescriptor descriptorWithType:MLCActivationTypeReLUN a:0 b:6]);
+    return RevenantMLCActivation([MLCActivationDescriptor descriptorWithType:MLCActivationTypeReLUN a:0 b:6]);
 }
 
 + (MLCActivationLayer *)leakyReLULayer
 {
-    return CharonMLCActivation([MLCActivationDescriptor descriptorWithType:MLCActivationTypeReLU a:0.01]);
+    return RevenantMLCActivation([MLCActivationDescriptor descriptorWithType:MLCActivationTypeReLU a:0.01]);
 }
 
 + (instancetype)leakyReLULayerWithNegativeSlope:(float)negativeSlope
 {
-    return CharonMLCActivation([MLCActivationDescriptor descriptorWithType:MLCActivationTypeReLU a:negativeSlope]);
+    return RevenantMLCActivation([MLCActivationDescriptor descriptorWithType:MLCActivationTypeReLU a:negativeSlope]);
 }
 
 + (instancetype)linearLayerWithScale:(float)scale bias:(float)bias
 {
-    return CharonMLCActivation([MLCActivationDescriptor descriptorWithType:MLCActivationTypeLinear a:scale b:bias]);
+    return RevenantMLCActivation([MLCActivationDescriptor descriptorWithType:MLCActivationTypeLinear a:scale b:bias]);
 }
 
 + (MLCActivationLayer *)sigmoidLayer
 {
-    return CharonMLCActivation([MLCActivationDescriptor descriptorWithType:MLCActivationTypeSigmoid]);
+    return RevenantMLCActivation([MLCActivationDescriptor descriptorWithType:MLCActivationTypeSigmoid]);
 }
 
 + (MLCActivationLayer *)hardSigmoidLayer
 {
-    return CharonMLCActivation([MLCActivationDescriptor descriptorWithType:MLCActivationTypeHardSigmoid]);
+    return RevenantMLCActivation([MLCActivationDescriptor descriptorWithType:MLCActivationTypeHardSigmoid]);
 }
 
 + (MLCActivationLayer *)tanhLayer
 {
-    return CharonMLCActivation([MLCActivationDescriptor descriptorWithType:MLCActivationTypeTanh]);
+    return RevenantMLCActivation([MLCActivationDescriptor descriptorWithType:MLCActivationTypeTanh]);
 }
 
 + (MLCActivationLayer *)absoluteLayer
 {
-    return CharonMLCActivation([MLCActivationDescriptor descriptorWithType:MLCActivationTypeAbsolute]);
+    return RevenantMLCActivation([MLCActivationDescriptor descriptorWithType:MLCActivationTypeAbsolute]);
 }
 
 + (MLCActivationLayer *)softPlusLayer
 {
-    return CharonMLCActivation([MLCActivationDescriptor descriptorWithType:MLCActivationTypeSoftPlus]);
+    return RevenantMLCActivation([MLCActivationDescriptor descriptorWithType:MLCActivationTypeSoftPlus]);
 }
 
 + (instancetype)softPlusLayerWithBeta:(float)beta
 {
-    return CharonMLCActivation([MLCActivationDescriptor descriptorWithType:MLCActivationTypeSoftPlus a:1.0f b:beta]);
+    return RevenantMLCActivation([MLCActivationDescriptor descriptorWithType:MLCActivationTypeSoftPlus a:1.0f b:beta]);
 }
 
 + (MLCActivationLayer *)softSignLayer
 {
-    return CharonMLCActivation([MLCActivationDescriptor descriptorWithType:MLCActivationTypeSoftSign]);
+    return RevenantMLCActivation([MLCActivationDescriptor descriptorWithType:MLCActivationTypeSoftSign]);
 }
 
 + (MLCActivationLayer *)eluLayer
 {
-    return CharonMLCActivation([MLCActivationDescriptor descriptorWithType:MLCActivationTypeELU]);
+    return RevenantMLCActivation([MLCActivationDescriptor descriptorWithType:MLCActivationTypeELU]);
 }
 
 + (instancetype)eluLayerWithA:(float)a
 {
-    return CharonMLCActivation([MLCActivationDescriptor descriptorWithType:MLCActivationTypeELU a:a]);
+    return RevenantMLCActivation([MLCActivationDescriptor descriptorWithType:MLCActivationTypeELU a:a]);
 }
 
 + (instancetype)relunLayerWithA:(float)a b:(float)b
 {
-    return CharonMLCActivation([MLCActivationDescriptor descriptorWithType:MLCActivationTypeReLUN a:a b:b]);
+    return RevenantMLCActivation([MLCActivationDescriptor descriptorWithType:MLCActivationTypeReLUN a:a b:b]);
 }
 
 + (MLCActivationLayer *)logSigmoidLayer
 {
-    return CharonMLCActivation([MLCActivationDescriptor descriptorWithType:MLCActivationTypeLogSigmoid]);
+    return RevenantMLCActivation([MLCActivationDescriptor descriptorWithType:MLCActivationTypeLogSigmoid]);
 }
 
 + (MLCActivationLayer *)seluLayer
 {
-    return CharonMLCActivation([MLCActivationDescriptor descriptorWithType:MLCActivationTypeSELU]);
+    return RevenantMLCActivation([MLCActivationDescriptor descriptorWithType:MLCActivationTypeSELU]);
 }
 
 + (MLCActivationLayer *)celuLayer
 {
-    return CharonMLCActivation([MLCActivationDescriptor descriptorWithType:MLCActivationTypeCELU]);
+    return RevenantMLCActivation([MLCActivationDescriptor descriptorWithType:MLCActivationTypeCELU]);
 }
 
 + (instancetype)celuLayerWithA:(float)a
 {
-    return CharonMLCActivation([MLCActivationDescriptor descriptorWithType:MLCActivationTypeCELU a:a]);
+    return RevenantMLCActivation([MLCActivationDescriptor descriptorWithType:MLCActivationTypeCELU a:a]);
 }
 
 + (MLCActivationLayer *)hardShrinkLayer
 {
-    return CharonMLCActivation([MLCActivationDescriptor descriptorWithType:MLCActivationTypeHardShrink]);
+    return RevenantMLCActivation([MLCActivationDescriptor descriptorWithType:MLCActivationTypeHardShrink]);
 }
 
 + (instancetype)hardShrinkLayerWithA:(float)a
 {
-    return CharonMLCActivation([MLCActivationDescriptor descriptorWithType:MLCActivationTypeHardShrink a:a]);
+    return RevenantMLCActivation([MLCActivationDescriptor descriptorWithType:MLCActivationTypeHardShrink a:a]);
 }
 
 + (MLCActivationLayer *)softShrinkLayer
 {
-    return CharonMLCActivation([MLCActivationDescriptor descriptorWithType:MLCActivationTypeSoftShrink]);
+    return RevenantMLCActivation([MLCActivationDescriptor descriptorWithType:MLCActivationTypeSoftShrink]);
 }
 
 + (instancetype)softShrinkLayerWithA:(float)a
 {
-    return CharonMLCActivation([MLCActivationDescriptor descriptorWithType:MLCActivationTypeSoftShrink a:a]);
+    return RevenantMLCActivation([MLCActivationDescriptor descriptorWithType:MLCActivationTypeSoftShrink a:a]);
 }
 
 + (MLCActivationLayer *)tanhShrinkLayer
 {
-    return CharonMLCActivation([MLCActivationDescriptor descriptorWithType:MLCActivationTypeTanhShrink a:0]);
+    return RevenantMLCActivation([MLCActivationDescriptor descriptorWithType:MLCActivationTypeTanhShrink a:0]);
 }
 
 + (instancetype)thresholdLayerWithThreshold:(float)threshold replacement:(float)replacement
 {
-    return CharonMLCActivation([MLCActivationDescriptor descriptorWithType:MLCActivationTypeThreshold a:threshold b:replacement]);
+    return RevenantMLCActivation([MLCActivationDescriptor descriptorWithType:MLCActivationTypeThreshold a:threshold b:replacement]);
 }
 
 + (MLCActivationLayer *)geluLayer
 {
-    return CharonMLCActivation([MLCActivationDescriptor descriptorWithType:MLCActivationTypeGELU a:0.7978845608f b:0.044715f]);
+    return RevenantMLCActivation([MLCActivationDescriptor descriptorWithType:MLCActivationTypeGELU a:0.7978845608f b:0.044715f]);
 }
 
 + (MLCActivationLayer *)hardSwishLayer
 {
-    return CharonMLCActivation([MLCActivationDescriptor descriptorWithType:MLCActivationTypeHardSwish]);
+    return RevenantMLCActivation([MLCActivationDescriptor descriptorWithType:MLCActivationTypeHardSwish]);
 }
 
 + (instancetype)clampLayerWithMinValue:(float)minValue maxValue:(float)maxValue
 {
-    return CharonMLCActivation([MLCActivationDescriptor descriptorWithType:MLCActivationTypeClamp a:minValue b:maxValue]);
+    return RevenantMLCActivation([MLCActivationDescriptor descriptorWithType:MLCActivationTypeClamp a:minValue b:maxValue]);
 }
 
 - (MLCActivationDescriptor *)descriptor
@@ -240,9 +240,9 @@ static MLCActivationLayer *CharonMLCActivation(MLCActivationDescriptor *descript
 
 + (instancetype)layerWithOperation:(MLCArithmeticOperation)operation
 {
-    MLCArithmeticLayer *layer = [[MLCArithmeticLayer alloc] charon_init];
+    MLCArithmeticLayer *layer = [[MLCArithmeticLayer alloc] revenant_init];
     layer->_operation = operation;
-    [layer charon_label:@"Arithmetic"];
+    [layer revenant_label:@"Arithmetic"];
     return layer;
 }
 
@@ -261,9 +261,9 @@ static MLCActivationLayer *CharonMLCActivation(MLCActivationDescriptor *descript
 
 + (instancetype)layerWithOperation:(MLCComparisonOperation)operation
 {
-    MLCComparisonLayer *layer = [[MLCComparisonLayer alloc] charon_init];
+    MLCComparisonLayer *layer = [[MLCComparisonLayer alloc] revenant_init];
     layer->_operation = operation;
-    [layer charon_label:@"Compare"];
+    [layer revenant_label:@"Compare"];
     return layer;
 }
 
@@ -287,9 +287,9 @@ static MLCActivationLayer *CharonMLCActivation(MLCActivationDescriptor *descript
 
 + (instancetype)layerWithDimension:(NSUInteger)dimension
 {
-    MLCConcatenationLayer *layer = [[MLCConcatenationLayer alloc] charon_init];
+    MLCConcatenationLayer *layer = [[MLCConcatenationLayer alloc] revenant_init];
     layer->_dimension = dimension;
-    [layer charon_label:@"Concat"];
+    [layer revenant_label:@"Concat"];
     return layer;
 }
 
@@ -310,7 +310,7 @@ static MLCActivationLayer *CharonMLCActivation(MLCActivationDescriptor *descript
     MLCTensorParameter *_biasesParameter;
 }
 
-static BOOL CharonMLCWeightsMatch(MLCConvolutionDescriptor *descriptor, MLCTensor *weights)
+static BOOL RevenantMLCWeightsMatch(MLCConvolutionDescriptor *descriptor, MLCTensor *weights)
 {
     if (!descriptor || !weights || !weights.descriptor) {
         return NO;
@@ -324,17 +324,17 @@ static BOOL CharonMLCWeightsMatch(MLCConvolutionDescriptor *descriptor, MLCTenso
                            biases:(MLCTensor *)biases
                        descriptor:(MLCConvolutionDescriptor *)descriptor
 {
-    MLCConvolutionLayer *layer = [[MLCConvolutionLayer alloc] charon_init];
-    [layer charon_label:@"Convolution"];
-    if (!CharonMLCWeightsMatch(descriptor, weights)) {
+    MLCConvolutionLayer *layer = [[MLCConvolutionLayer alloc] revenant_init];
+    [layer revenant_label:@"Convolution"];
+    if (!RevenantMLCWeightsMatch(descriptor, weights)) {
         return layer;
     }
     layer->_descriptor = descriptor;
     layer->_weights = weights;
-    layer->_weightsParameter = CharonMLCParameter(weights);
+    layer->_weightsParameter = RevenantMLCParameter(weights);
     if (biases && biases.descriptor) {
         layer->_biases = biases;
-        layer->_biasesParameter = CharonMLCParameter(biases);
+        layer->_biasesParameter = RevenantMLCParameter(biases);
     }
     return layer;
 }
@@ -380,14 +380,14 @@ static BOOL CharonMLCWeightsMatch(MLCConvolutionDescriptor *descriptor, MLCTenso
                            biases:(MLCTensor *)biases
                        descriptor:(MLCConvolutionDescriptor *)descriptor
 {
-    MLCFullyConnectedLayer *layer = [[MLCFullyConnectedLayer alloc] charon_init];
-    [layer charon_label:@"FullyConnected"];
+    MLCFullyConnectedLayer *layer = [[MLCFullyConnectedLayer alloc] revenant_init];
+    [layer revenant_label:@"FullyConnected"];
     layer->_descriptor = descriptor;
     layer->_weights = weights;
-    layer->_weightsParameter = CharonMLCParameter(weights);
+    layer->_weightsParameter = RevenantMLCParameter(weights);
     if (biases) {
         layer->_biases = biases;
-        layer->_biasesParameter = CharonMLCParameter(biases);
+        layer->_biasesParameter = RevenantMLCParameter(biases);
     }
     return layer;
 }
@@ -427,9 +427,9 @@ static BOOL CharonMLCWeightsMatch(MLCConvolutionDescriptor *descriptor, MLCTenso
 
 + (instancetype)layerWithDescriptor:(MLCPoolingDescriptor *)descriptor
 {
-    MLCPoolingLayer *layer = [[MLCPoolingLayer alloc] charon_init];
+    MLCPoolingLayer *layer = [[MLCPoolingLayer alloc] revenant_init];
     layer->_descriptor = descriptor;
-    [layer charon_label:@"Pooling"];
+    [layer revenant_label:@"Pooling"];
     return layer;
 }
 
@@ -453,25 +453,25 @@ static BOOL CharonMLCWeightsMatch(MLCConvolutionDescriptor *descriptor, MLCTenso
 
 + (instancetype)layerWithZeroPadding:(NSArray<NSNumber *> *)padding
 {
-    return [self charon_layerWithType:MLCPaddingTypeZero padding:padding constantValue:0];
+    return [self revenant_layerWithType:MLCPaddingTypeZero padding:padding constantValue:0];
 }
 
 + (instancetype)layerWithSymmetricPadding:(NSArray<NSNumber *> *)padding
 {
-    return [self charon_layerWithType:MLCPaddingTypeSymmetric padding:padding constantValue:0];
+    return [self revenant_layerWithType:MLCPaddingTypeSymmetric padding:padding constantValue:0];
 }
 
 + (instancetype)layerWithReflectionPadding:(NSArray<NSNumber *> *)padding
 {
-    return [self charon_layerWithType:MLCPaddingTypeReflect padding:padding constantValue:0];
+    return [self revenant_layerWithType:MLCPaddingTypeReflect padding:padding constantValue:0];
 }
 
 + (instancetype)layerWithConstantPadding:(NSArray<NSNumber *> *)padding constantValue:(float)constantValue
 {
-    return [self charon_layerWithType:MLCPaddingTypeConstant padding:padding constantValue:constantValue];
+    return [self revenant_layerWithType:MLCPaddingTypeConstant padding:padding constantValue:constantValue];
 }
 
-+ (instancetype)charon_layerWithType:(MLCPaddingType)type
++ (instancetype)revenant_layerWithType:(MLCPaddingType)type
                             padding:(NSArray<NSNumber *> *)padding
                       constantValue:(float)constantValue
 {
@@ -479,8 +479,8 @@ static BOOL CharonMLCWeightsMatch(MLCConvolutionDescriptor *descriptor, MLCTenso
         [NSException raise:NSRangeException format:@"*** -[__NSArrayM objectAtIndex:]: index 3 beyond bounds [0 .. %d]",
                            (int)(padding.count > 0 ? padding.count - 1 : 0)];
     }
-    MLCPaddingLayer *paddingLayer = [[MLCPaddingLayer alloc] charon_init];
-    [paddingLayer charon_label:@"Padding"];
+    MLCPaddingLayer *paddingLayer = [[MLCPaddingLayer alloc] revenant_init];
+    [paddingLayer revenant_label:@"Padding"];
     paddingLayer->_paddingType = type;
     NSUInteger top = 0, bottom = 0, left = 0, right = 0;
     if (padding.count == 1) {
@@ -504,7 +504,7 @@ static BOOL CharonMLCWeightsMatch(MLCConvolutionDescriptor *descriptor, MLCTenso
 
 - (id)copyWithZone:(NSZone *)zone
 {
-    MLCPaddingLayer *copy = [MLCPaddingLayer charon_layerWithType:_paddingType
+    MLCPaddingLayer *copy = [MLCPaddingLayer revenant_layerWithType:_paddingType
                                                                   padding:@[ @(_paddingTop), @(_paddingBottom), @(_paddingLeft), @(_paddingRight) ]
                                                             constantValue:_constantValue];
     copy.label = self.label;
@@ -557,10 +557,10 @@ static BOOL CharonMLCWeightsMatch(MLCConvolutionDescriptor *descriptor, MLCTenso
 
 + (instancetype)layerWithOperation:(MLCSoftmaxOperation)operation dimension:(NSUInteger)dimension
 {
-    MLCSoftmaxLayer *layer = [[MLCSoftmaxLayer alloc] charon_init];
+    MLCSoftmaxLayer *layer = [[MLCSoftmaxLayer alloc] revenant_init];
     layer->_operation = operation;
     layer->_dimension = dimension;
-    [layer charon_label:@"Softmax"];
+    [layer revenant_label:@"Softmax"];
     return layer;
 }
 
@@ -591,11 +591,11 @@ static BOOL CharonMLCWeightsMatch(MLCConvolutionDescriptor *descriptor, MLCTenso
 
 + (instancetype)layerWithReductionType:(MLCReductionType)reductionType dimensions:(NSArray<NSNumber *> *)dimensions
 {
-    MLCReductionLayer *layer = [[MLCReductionLayer alloc] charon_init];
+    MLCReductionLayer *layer = [[MLCReductionLayer alloc] revenant_init];
     layer->_reductionType = reductionType;
     layer->_dimensions = [dimensions copy];
     layer->_dimension = dimensions.count ? dimensions.firstObject.unsignedIntegerValue : 0;
-    [layer charon_label:@"Reduction"];
+    [layer revenant_label:@"Reduction"];
     return layer;
 }
 
@@ -624,9 +624,9 @@ static BOOL CharonMLCWeightsMatch(MLCConvolutionDescriptor *descriptor, MLCTenso
 
 + (instancetype)layerWithShape:(NSArray<NSNumber *> *)shape
 {
-    MLCReshapeLayer *layer = [[MLCReshapeLayer alloc] charon_init];
+    MLCReshapeLayer *layer = [[MLCReshapeLayer alloc] revenant_init];
     layer->_shape = [shape copy];
-    [layer charon_label:@"Reshape"];
+    [layer revenant_label:@"Reshape"];
     return layer;
 }
 
@@ -643,9 +643,9 @@ static BOOL CharonMLCWeightsMatch(MLCConvolutionDescriptor *descriptor, MLCTenso
 
 + (instancetype)layerWithDimensions:(NSArray<NSNumber *> *)dimensions
 {
-    MLCTransposeLayer *layer = [[MLCTransposeLayer alloc] charon_init];
+    MLCTransposeLayer *layer = [[MLCTransposeLayer alloc] revenant_init];
     layer->_dimensions = [dimensions copy];
-    [layer charon_label:@"Transpose"];
+    [layer revenant_label:@"Transpose"];
     return layer;
 }
 
@@ -666,7 +666,7 @@ static BOOL CharonMLCWeightsMatch(MLCConvolutionDescriptor *descriptor, MLCTenso
                                 end:(NSArray<NSNumber *> *)end
                              stride:(NSArray<NSNumber *> *)stride
 {
-    MLCSliceLayer *layer = [[MLCSliceLayer alloc] charon_init];
+    MLCSliceLayer *layer = [[MLCSliceLayer alloc] revenant_init];
     layer->_start = [start copy];
     layer->_end = [end copy];
     NSUInteger count = MAX(MAX(start.count, end.count), stride.count);
@@ -675,7 +675,7 @@ static BOOL CharonMLCWeightsMatch(MLCConvolutionDescriptor *descriptor, MLCTenso
         [every addObject:@(index < stride.count ? stride[index].unsignedIntegerValue : 1)];
     }
     layer->_stride = every;
-    [layer charon_label:@"Slice"];
+    [layer revenant_label:@"Slice"];
     return layer;
 }
 
@@ -704,10 +704,10 @@ static BOOL CharonMLCWeightsMatch(MLCConvolutionDescriptor *descriptor, MLCTenso
 
 + (instancetype)layerWithSplitCount:(NSUInteger)splitCount dimension:(NSUInteger)dimension
 {
-    MLCSplitLayer *layer = [[MLCSplitLayer alloc] charon_init];
+    MLCSplitLayer *layer = [[MLCSplitLayer alloc] revenant_init];
     layer->_dimension = dimension;
     layer->_splitCount = splitCount;
-    [layer charon_label:@"Split"];
+    [layer revenant_label:@"Split"];
     return layer;
 }
 
@@ -750,11 +750,11 @@ static BOOL CharonMLCWeightsMatch(MLCConvolutionDescriptor *descriptor, MLCTenso
                     sampleMode:(MLCSampleMode)sampleMode
                  alignsCorners:(BOOL)alignsCorners
 {
-    MLCUpsampleLayer *layer = [[MLCUpsampleLayer alloc] charon_init];
+    MLCUpsampleLayer *layer = [[MLCUpsampleLayer alloc] revenant_init];
     layer->_shape = [shape copy];
     layer->_sampleMode = sampleMode;
     layer->_alignsCorners = alignsCorners;
-    [layer charon_label:@"Upsampling"];
+    [layer revenant_label:@"Upsampling"];
     return layer;
 }
 
@@ -781,9 +781,9 @@ static BOOL CharonMLCWeightsMatch(MLCConvolutionDescriptor *descriptor, MLCTenso
 
 + (instancetype)layerWithDimension:(NSUInteger)dimension
 {
-    MLCGatherLayer *layer = [[MLCGatherLayer alloc] charon_init];
+    MLCGatherLayer *layer = [[MLCGatherLayer alloc] revenant_init];
     layer->_dimension = dimension;
-    [layer charon_label:@"Gather"];
+    [layer revenant_label:@"Gather"];
     return layer;
 }
 
@@ -804,10 +804,10 @@ static BOOL CharonMLCWeightsMatch(MLCConvolutionDescriptor *descriptor, MLCTenso
     if (reductionType != MLCReductionTypeNone && reductionType != MLCReductionTypeSum) {
         return nil;
     }
-    MLCScatterLayer *layer = [[MLCScatterLayer alloc] charon_init];
+    MLCScatterLayer *layer = [[MLCScatterLayer alloc] revenant_init];
     layer->_dimension = dimension;
     layer->_reductionType = reductionType;
-    [layer charon_label:@"Scatter"];
+    [layer revenant_label:@"Scatter"];
     return layer;
 }
 
@@ -832,10 +832,10 @@ static BOOL CharonMLCWeightsMatch(MLCConvolutionDescriptor *descriptor, MLCTenso
 
 + (instancetype)layerWithRate:(float)rate seed:(NSUInteger)seed
 {
-    MLCDropoutLayer *layer = [[MLCDropoutLayer alloc] charon_init];
+    MLCDropoutLayer *layer = [[MLCDropoutLayer alloc] revenant_init];
     layer->_rate = rate;
     layer->_seed = seed;
-    [layer charon_label:@"Dropout"];
+    [layer revenant_label:@"Dropout"];
     return layer;
 }
 
@@ -857,9 +857,9 @@ static BOOL CharonMLCWeightsMatch(MLCConvolutionDescriptor *descriptor, MLCTenso
 
 + (instancetype)layerWithScale:(float)scale
 {
-    MLCGramMatrixLayer *layer = [[MLCGramMatrixLayer alloc] charon_init];
+    MLCGramMatrixLayer *layer = [[MLCGramMatrixLayer alloc] revenant_init];
     layer->_scale = scale;
-    [layer charon_label:@"GramMatrix"];
+    [layer revenant_label:@"GramMatrix"];
     return layer;
 }
 
@@ -878,9 +878,9 @@ static BOOL CharonMLCWeightsMatch(MLCConvolutionDescriptor *descriptor, MLCTenso
 
 + (instancetype)layerWithDescriptor:(MLCMatMulDescriptor *)descriptor
 {
-    MLCMatMulLayer *layer = [[MLCMatMulLayer alloc] charon_init];
+    MLCMatMulLayer *layer = [[MLCMatMulLayer alloc] revenant_init];
     layer->_descriptor = descriptor;
-    [layer charon_label:@"MatMul"];
+    [layer revenant_label:@"MatMul"];
     return layer;
 }
 
@@ -899,11 +899,11 @@ static BOOL CharonMLCWeightsMatch(MLCConvolutionDescriptor *descriptor, MLCTenso
 
 + (instancetype)layerWithDescriptor:(MLCEmbeddingDescriptor *)descriptor weights:(MLCTensor *)weights
 {
-    MLCEmbeddingLayer *layer = [[MLCEmbeddingLayer alloc] charon_init];
+    MLCEmbeddingLayer *layer = [[MLCEmbeddingLayer alloc] revenant_init];
     layer->_descriptor = descriptor;
     layer->_weights = weights;
-    layer->_weightsParameter = CharonMLCParameter(weights);
-    [layer charon_label:@"Embedding"];
+    layer->_weightsParameter = RevenantMLCParameter(weights);
+    [layer revenant_label:@"Embedding"];
     return layer;
 }
 
@@ -926,7 +926,7 @@ static BOOL CharonMLCWeightsMatch(MLCConvolutionDescriptor *descriptor, MLCTenso
 
 #pragma mark - the three normalizations and the layer normalization
 
-static BOOL CharonMLCPerChannel(MLCTensor *tensor, NSUInteger channels)
+static BOOL RevenantMLCPerChannel(MLCTensor *tensor, NSUInteger channels)
 {
     if (!tensor || !tensor.descriptor) {
         return NO;
@@ -935,7 +935,7 @@ static BOOL CharonMLCPerChannel(MLCTensor *tensor, NSUInteger channels)
     return [tensor.descriptor.shape isEqualToArray:wanted];
 }
 
-static BOOL CharonMLCNormalized(MLCTensor *tensor, NSArray<NSNumber *> *shape)
+static BOOL RevenantMLCNormalized(MLCTensor *tensor, NSArray<NSNumber *> *shape)
 {
     if (!tensor || !tensor.descriptor) {
         return NO;
@@ -979,8 +979,8 @@ static BOOL CharonMLCNormalized(MLCTensor *tensor, NSArray<NSNumber *> *shape)
                                varianceEpsilon:(float)varianceEpsilon
                                      momentum:(float)momentum
 {
-    MLCBatchNormalizationLayer *layer = [[MLCBatchNormalizationLayer alloc] charon_init];
-    if (!CharonMLCPerChannel(mean, featureChannelCount) || !CharonMLCPerChannel(variance, featureChannelCount)) {
+    MLCBatchNormalizationLayer *layer = [[MLCBatchNormalizationLayer alloc] revenant_init];
+    if (!RevenantMLCPerChannel(mean, featureChannelCount) || !RevenantMLCPerChannel(variance, featureChannelCount)) {
         return layer;
     }
     layer->_featureChannelCount = featureChannelCount;
@@ -988,13 +988,13 @@ static BOOL CharonMLCNormalized(MLCTensor *tensor, NSArray<NSNumber *> *shape)
     layer->_variance = variance;
     layer->_varianceEpsilon = varianceEpsilon;
     layer->_momentum = momentum;
-    if (beta && CharonMLCPerChannel(beta, featureChannelCount)) {
+    if (beta && RevenantMLCPerChannel(beta, featureChannelCount)) {
         layer->_beta = beta;
-        layer->_betaParameter = CharonMLCParameter(beta);
+        layer->_betaParameter = RevenantMLCParameter(beta);
     }
-    if (gamma && CharonMLCPerChannel(gamma, featureChannelCount)) {
+    if (gamma && RevenantMLCPerChannel(gamma, featureChannelCount)) {
         layer->_gamma = gamma;
-        layer->_gammaParameter = CharonMLCParameter(gamma);
+        layer->_gammaParameter = RevenantMLCParameter(gamma);
     }
     return layer;
 }
@@ -1066,9 +1066,9 @@ static BOOL CharonMLCNormalized(MLCTensor *tensor, NSArray<NSNumber *> *shape)
                                varianceEpsilon:(float)varianceEpsilon
                                      momentum:(float)momentum
 {
-    MLCInstanceNormalizationLayer *layer = [[MLCInstanceNormalizationLayer alloc] charon_init];
-    [layer charon_label:@"InstanceNorm"];
-    if (!CharonMLCPerChannel(beta, featureChannelCount) && !(beta == nil && gamma == nil)) {
+    MLCInstanceNormalizationLayer *layer = [[MLCInstanceNormalizationLayer alloc] revenant_init];
+    [layer revenant_label:@"InstanceNorm"];
+    if (!RevenantMLCPerChannel(beta, featureChannelCount) && !(beta == nil && gamma == nil)) {
         return layer;
     }
     layer->_featureChannelCount = featureChannelCount;
@@ -1076,13 +1076,13 @@ static BOOL CharonMLCNormalized(MLCTensor *tensor, NSArray<NSNumber *> *shape)
     layer->_momentum = momentum;
     if (beta) {
         layer->_beta = beta;
-        layer->_betaParameter = CharonMLCParameter(beta);
+        layer->_betaParameter = RevenantMLCParameter(beta);
     }
     if (gamma) {
         layer->_gamma = gamma;
-        layer->_gammaParameter = CharonMLCParameter(gamma);
+        layer->_gammaParameter = RevenantMLCParameter(gamma);
     }
-    if (mean && CharonMLCPerChannel(mean, featureChannelCount) && variance && CharonMLCPerChannel(variance, featureChannelCount)) {
+    if (mean && RevenantMLCPerChannel(mean, featureChannelCount) && variance && RevenantMLCPerChannel(variance, featureChannelCount)) {
         layer->_mean = mean;
         layer->_variance = variance;
     }
@@ -1107,9 +1107,9 @@ static BOOL CharonMLCNormalized(MLCTensor *tensor, NSArray<NSNumber *> *shape)
                                varianceEpsilon:(float)varianceEpsilon
                                      momentum:(float)momentum
 {
-    MLCInstanceNormalizationLayer *layer = [[MLCInstanceNormalizationLayer alloc] charon_init];
-    [layer charon_label:@"InstanceNorm"];
-    [layer charon_setFeatureChannelCount:featureChannelCount
+    MLCInstanceNormalizationLayer *layer = [[MLCInstanceNormalizationLayer alloc] revenant_init];
+    [layer revenant_label:@"InstanceNorm"];
+    [layer revenant_setFeatureChannelCount:featureChannelCount
                                     beta:beta
                                    gamma:gamma
                            varianceEpsilon:varianceEpsilon
@@ -1119,7 +1119,7 @@ static BOOL CharonMLCNormalized(MLCTensor *tensor, NSArray<NSNumber *> *shape)
     return layer;
 }
 
-- (void)charon_setFeatureChannelCount:(NSUInteger)channels
+- (void)revenant_setFeatureChannelCount:(NSUInteger)channels
                                   beta:(MLCTensor *)beta
                                  gamma:(MLCTensor *)gamma
                          varianceEpsilon:(float)epsilon
@@ -1127,7 +1127,7 @@ static BOOL CharonMLCNormalized(MLCTensor *tensor, NSArray<NSNumber *> *shape)
                                    mean:(MLCTensor *)mean
                                variance:(MLCTensor *)variance
 {
-    if (!CharonMLCPerChannel(beta, channels) && !(beta == nil && gamma == nil)) {
+    if (!RevenantMLCPerChannel(beta, channels) && !(beta == nil && gamma == nil)) {
         return;
     }
     _featureChannelCount = channels;
@@ -1135,13 +1135,13 @@ static BOOL CharonMLCNormalized(MLCTensor *tensor, NSArray<NSNumber *> *shape)
     _momentum = momentum;
     if (beta) {
         _beta = beta;
-        _betaParameter = CharonMLCParameter(beta);
+        _betaParameter = RevenantMLCParameter(beta);
     }
     if (gamma) {
         _gamma = gamma;
-        _gammaParameter = CharonMLCParameter(gamma);
+        _gammaParameter = RevenantMLCParameter(gamma);
     }
-    if (mean && variance && CharonMLCPerChannel(mean, channels) && CharonMLCPerChannel(variance, channels)) {
+    if (mean && variance && RevenantMLCPerChannel(mean, channels) && RevenantMLCPerChannel(variance, channels)) {
         _mean = mean;
         _variance = variance;
     }
@@ -1210,9 +1210,9 @@ static BOOL CharonMLCNormalized(MLCTensor *tensor, NSArray<NSNumber *> *shape)
                                         gamma:(MLCTensor *)gamma
                                varianceEpsilon:(float)varianceEpsilon
 {
-    MLCGroupNormalizationLayer *layer = [[MLCGroupNormalizationLayer alloc] charon_init];
-    [layer charon_label:@"GroupNorm"];
-    if (groupCount == 0 || !CharonMLCPerChannel(beta, featureChannelCount) || !CharonMLCPerChannel(gamma, featureChannelCount)) {
+    MLCGroupNormalizationLayer *layer = [[MLCGroupNormalizationLayer alloc] revenant_init];
+    [layer revenant_label:@"GroupNorm"];
+    if (groupCount == 0 || !RevenantMLCPerChannel(beta, featureChannelCount) || !RevenantMLCPerChannel(gamma, featureChannelCount)) {
         return layer;
     }
     layer->_featureChannelCount = featureChannelCount;
@@ -1220,8 +1220,8 @@ static BOOL CharonMLCNormalized(MLCTensor *tensor, NSArray<NSNumber *> *shape)
     layer->_beta = beta;
     layer->_gamma = gamma;
     layer->_varianceEpsilon = varianceEpsilon;
-    layer->_betaParameter = CharonMLCParameter(beta);
-    layer->_gammaParameter = CharonMLCParameter(gamma);
+    layer->_betaParameter = RevenantMLCParameter(beta);
+    layer->_gammaParameter = RevenantMLCParameter(gamma);
     return layer;
 }
 
@@ -1276,17 +1276,17 @@ static BOOL CharonMLCNormalized(MLCTensor *tensor, NSArray<NSNumber *> *shape)
                                    gamma:(MLCTensor *)gamma
                            varianceEpsilon:(float)varianceEpsilon
 {
-    MLCLayerNormalizationLayer *layer = [[MLCLayerNormalizationLayer alloc] charon_init];
-    [layer charon_label:@"LayerNorm"];
-    if (!CharonMLCNormalized(beta, normalizedShape) || !CharonMLCNormalized(gamma, normalizedShape)) {
+    MLCLayerNormalizationLayer *layer = [[MLCLayerNormalizationLayer alloc] revenant_init];
+    [layer revenant_label:@"LayerNorm"];
+    if (!RevenantMLCNormalized(beta, normalizedShape) || !RevenantMLCNormalized(gamma, normalizedShape)) {
         return layer;
     }
     layer->_normalizedShape = [normalizedShape copy];
     layer->_beta = beta;
     layer->_gamma = gamma;
     layer->_varianceEpsilon = varianceEpsilon;
-    layer->_betaParameter = CharonMLCParameter(beta);
-    layer->_gammaParameter = CharonMLCParameter(gamma);
+    layer->_betaParameter = RevenantMLCParameter(beta);
+    layer->_gammaParameter = RevenantMLCParameter(gamma);
     return layer;
 }
 
@@ -1331,17 +1331,17 @@ static BOOL CharonMLCNormalized(MLCTensor *tensor, NSArray<NSNumber *> *shape)
 
 + (instancetype)layerWithDescriptor:(MLCLossDescriptor *)lossDescriptor
 {
-    MLCLossLayer *layer = [[MLCLossLayer alloc] charon_init];
+    MLCLossLayer *layer = [[MLCLossLayer alloc] revenant_init];
     layer->_descriptor = lossDescriptor;
-    return [layer charon_label:@"Loss"];
+    return [layer revenant_label:@"Loss"];
 }
 
 + (instancetype)layerWithDescriptor:(MLCLossDescriptor *)lossDescriptor weights:(MLCTensor *)weights
 {
-    MLCLossLayer *layer = [[MLCLossLayer alloc] charon_init];
+    MLCLossLayer *layer = [[MLCLossLayer alloc] revenant_init];
     layer->_descriptor = lossDescriptor;
     layer->_weights = weights;
-    [layer charon_label:@"Loss"];
+    [layer revenant_label:@"Loss"];
     return layer;
 }
 
@@ -1542,9 +1542,9 @@ static BOOL CharonMLCNormalized(MLCTensor *tensor, NSArray<NSNumber *> *shape)
 
 + (instancetype)layerWithDescriptor:(MLCYOLOLossDescriptor *)lossDescriptor
 {
-    MLCYOLOLossLayer *layer = [[MLCYOLOLossLayer alloc] charon_init];
+    MLCYOLOLossLayer *layer = [[MLCYOLOLossLayer alloc] revenant_init];
     layer->_yoloLossDescriptor = lossDescriptor;
-    [layer charon_label:@"Loss"];
+    [layer revenant_label:@"Loss"];
     return layer;
 }
 
@@ -1571,7 +1571,7 @@ static BOOL CharonMLCNormalized(MLCTensor *tensor, NSArray<NSNumber *> *shape)
     NSArray<MLCTensorParameter *> *_biasesParameters;
 }
 
-+ (instancetype)charon_layerWithDescriptor:(MLCLSTMDescriptor *)descriptor
++ (instancetype)revenant_layerWithDescriptor:(MLCLSTMDescriptor *)descriptor
                              inputWeights:(NSArray<MLCTensor *> *)inputWeights
                             hiddenWeights:(NSArray<MLCTensor *> *)hiddenWeights
                            peepholeWeights:(NSArray<MLCTensor *> *)peepholeWeights
@@ -1579,21 +1579,21 @@ static BOOL CharonMLCNormalized(MLCTensor *tensor, NSArray<NSNumber *> *shape)
                             gateActivations:(NSArray<MLCActivationDescriptor *> *)gateActivations
                        outputResultActivation:(MLCActivationDescriptor *)outputResultActivation
 {
-    MLCLSTMLayer *layer = [[MLCLSTMLayer alloc] charon_init];
-    [layer charon_label:@"LSTM"];
+    MLCLSTMLayer *layer = [[MLCLSTMLayer alloc] revenant_init];
+    [layer revenant_label:@"LSTM"];
     layer->_descriptor = descriptor;
     layer->_inputWeights = [inputWeights copy];
     layer->_hiddenWeights = [hiddenWeights copy];
     layer->_peepholeWeights = [peepholeWeights copy];
     layer->_biases = [biases copy];
-    layer->_inputWeightsParameters = CharonMLCParameters(inputWeights);
-    layer->_hiddenWeightsParameters = CharonMLCParameters(hiddenWeights);
-    layer->_peepholeWeightsParameters = CharonMLCParameters(peepholeWeights);
-    layer->_biasesParameters = CharonMLCParameters(biases);
+    layer->_inputWeightsParameters = RevenantMLCParameters(inputWeights);
+    layer->_hiddenWeightsParameters = RevenantMLCParameters(hiddenWeights);
+    layer->_peepholeWeightsParameters = RevenantMLCParameters(peepholeWeights);
+    layer->_biasesParameters = RevenantMLCParameters(biases);
     if (gateActivations) {
         layer->_gateActivations = [gateActivations copy];
     } else if (layer->_inputWeights) {
-        layer->_gateActivations = [MLCLSTMLayer charon_defaultGates];
+        layer->_gateActivations = [MLCLSTMLayer revenant_defaultGates];
     }
     if (outputResultActivation) {
         layer->_outputResultActivation = outputResultActivation;
@@ -1603,7 +1603,7 @@ static BOOL CharonMLCNormalized(MLCTensor *tensor, NSArray<NSNumber *> *shape)
     return layer;
 }
 
-+ (NSArray<MLCActivationDescriptor *> *)charon_defaultGates
++ (NSArray<MLCActivationDescriptor *> *)revenant_defaultGates
 {
     static const MLCActivationType types[] = { MLCActivationTypeSigmoid, MLCActivationTypeSigmoid,
                                                MLCActivationTypeTanh, MLCActivationTypeSigmoid };
@@ -1619,7 +1619,7 @@ static BOOL CharonMLCNormalized(MLCTensor *tensor, NSArray<NSNumber *> *shape)
                        hiddenWeights:(NSArray<MLCTensor *> *)hiddenWeights
                              biases:(NSArray<MLCTensor *> *)biases
 {
-    return [self charon_layerWithDescriptor:descriptor
+    return [self revenant_layerWithDescriptor:descriptor
                               inputWeights:inputWeights
                              hiddenWeights:hiddenWeights
                             peepholeWeights:nil

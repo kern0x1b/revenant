@@ -19,7 +19,7 @@
 #include <utility>
 #include <vector>
 
-namespace shade::bsd {
+namespace emulator::bsd {
 
 enum class VirtualUdpStatus {
     Success,

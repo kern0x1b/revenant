@@ -9,7 +9,7 @@
 	<key>CFBundleExecutable</key>
 	<string>openurl</string>
 	<key>CFBundleIdentifier</key>
-	<string>local.charon.backports.openurl</string>
+	<string>local.revenant.backports.openurl</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
@@ -41,10 +41,10 @@
 	<array>
 		<dict>
 			<key>CFBundleURLName</key>
-			<string>local.charon.backports.openurl</string>
+			<string>local.revenant.backports.openurl</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>charonopenurltest</string>
+				<string>revenantopenurltest</string>
 			</array>
 		</dict>
 	</array>

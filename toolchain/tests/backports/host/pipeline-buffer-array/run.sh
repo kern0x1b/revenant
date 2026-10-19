@@ -2,7 +2,7 @@
 # run.sh - the 11.0 pipeline buffer descriptor and its array, against Apple's own objects, and a mutant.
 #
 # MTLReflection11.m is built for Catalyst beside Apple's Metal in one process: its two classes are renamed
-# CharonHost<Name> while it is compiled, the way metalkit-init and metal-census/descriptors do it, and
+# RevenantHost<Name> while it is compiled, the way metalkit-init and metal-census/descriptors do it, and
 # array.m asks Apple's class and the port's the same questions. The array has 31 slots on Apple's side and
 # index 31 stops Apple's process, so that boundary is asked in a child process, whose death is the answer.
 #
@@ -12,11 +12,11 @@ set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 METAL=${METAL:-$here/../../../../packages/a/apple-backports/Metal}
-BUILD=${BUILD:-$(runs_fresh charon-pipeline-buffer-array)}
+BUILD=${BUILD:-$(runs_fresh revenant-pipeline-buffer-array)}
 sdk=$(xcrun --show-sdk-path)
 target="-target arm64-apple-ios16.0-macabi -isysroot $sdk -iframework $sdk/System/iOSSupport/System/Library/Frameworks"
 quiet="-Wno-deprecated-declarations -Wno-unguarded-availability-new -Wno-objc-designated-initializers"
-renames="-DMTLPipelineBufferDescriptorArray=CharonHostMTLPipelineBufferDescriptorArray -DMTLPipelineBufferDescriptor=CharonHostMTLPipelineBufferDescriptor"
+renames="-DMTLPipelineBufferDescriptorArray=RevenantHostMTLPipelineBufferDescriptorArray -DMTLPipelineBufferDescriptor=RevenantHostMTLPipelineBufferDescriptor"
 
 xcrun clang $target -fobjc-arc -fvisibility=hidden $quiet $renames -I"$here/../metalblit/gl-stub" -I"$METAL" -c "$METAL/MTLReflection11.m" -o "$BUILD/port.o"
 xcrun clang $target -fobjc-arc $quiet -I"$here" "$here/array.m" "$BUILD/port.o" \

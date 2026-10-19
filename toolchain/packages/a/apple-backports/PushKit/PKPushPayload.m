@@ -12,7 +12,7 @@
 @synthesize type = _type;
 @synthesize dictionaryPayload = _dictionaryPayload;
 
-- (instancetype)initWithCharonType:(PKPushType)type dictionaryPayload:(NSDictionary *)dictionaryPayload
+- (instancetype)initWithRevenantType:(PKPushType)type dictionaryPayload:(NSDictionary *)dictionaryPayload
 {
     if ((self = [super init])) {
         _type = [type copy];

@@ -1,26 +1,26 @@
 import("fixtures")
 import("core.package.addon")
 
-local CONTROL = "Package: org.charon.tweaktest\nName: Tweak test\nArchitecture: iphoneos-arm\nDescription: a tweak the tests build\nDepends: mobilesubstrate\n"
+local CONTROL = "Package: org.revenant.tweaktest\nName: Tweak test\nArchitecture: iphoneos-arm\nDescription: a tweak the tests build\nDepends: mobilesubstrate\n"
 local FILTER = '{ Filter = { Bundles = ( "com.apple.Preferences" ); }; }\n'
 
 local PROJECT = [[
-add_repositories("charon %s")
-add_addons("charon %s")
+add_repositories("revenant %s")
+add_addons("revenant %s")
 set_config("apple_minimum", "6.0")
-includes("@addon/charon/apple-ios")
+includes("@addon/revenant/apple-ios")
 set_allowedplats("iphoneos")
 set_allowedarchs("iphoneos|armv7")
 set_defaultplat("iphoneos")
 set_defaultarchs("iphoneos|armv7")
 
 target("safearea")
-    add_rules("@addon/charon/tweak")
+    add_rules("@addon/revenant/tweak")
     add_files("safearea-tweak.m", "check.m")
     add_includedirs(".")
     add_frameworks("UIKit", "Foundation", "CoreGraphics")
     set_values("tweak.filter", "safearea.plist")
-    set_values("charon.control", "control")
+    set_values("revenant.control", "control")
 ]]
 
 local function tweak(folder, version, device)
@@ -31,7 +31,7 @@ local function tweak(folder, version, device)
     os.cp(path.join(device, "check.h"), path.join(at, "check.h"))
     io.writefile(path.join(at, "control"), CONTROL)
     io.writefile(path.join(at, "safearea.plist"), FILTER)
-    io.writefile(path.join(at, "xmake.lua"), string.format(PROJECT, folder .. "/charon", version))
+    io.writefile(path.join(at, "xmake.lua"), string.format(PROJECT, folder .. "/revenant", version))
     return at
 end
 
@@ -64,8 +64,8 @@ function failures(opt)
         end
     end
 
-    addon.unregister("charon", version)
-    os.tryrm(path.join(addon.installdir(), addon.dirname("charon"), version))
+    addon.unregister("revenant", version)
+    os.tryrm(path.join(addon.installdir(), addon.dirname("revenant"), version))
     os.tryrm(folder)
     return found
 end

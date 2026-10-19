@@ -2,7 +2,7 @@
 #import <SceneKit/SceneKit.h>
 #import <simd/simd.h>
 
-#import "../SceneKit/CharonSCN.h"
+#import "../SceneKit/RevenantSCN.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -74,7 +74,7 @@ NS_ASSUME_NONNULL_BEGIN
                                                                   bytesPerIndex:(NSInteger)sizeof(int)];
 
     _retainedSources = @[ positions, uvs ];
-    [self charon_replaceSources:@[ positionsSource, textureSource ] elements:@[ element ]];
+    [self revenant_replaceSources:@[ positionsSource, textureSource ] elements:@[ element ]];
 }
 
 @end

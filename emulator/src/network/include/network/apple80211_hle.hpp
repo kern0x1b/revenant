@@ -18,7 +18,7 @@
 
 #include "network/wifi_state.hpp"
 
-namespace shade {
+namespace emulator {
 
 class UserlandHleCall;
 class UserlandHleRegistry;

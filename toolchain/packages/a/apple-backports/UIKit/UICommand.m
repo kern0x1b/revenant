@@ -1,4 +1,4 @@
-#import "CharonMenus.h"
+#import "RevenantMenus.h"
 #import <objc/runtime.h>
 
 #pragma clang diagnostic ignored "-Wprotocol"
@@ -8,7 +8,7 @@
 
 NSString *const UICommandTagShare = @"com.apple.command-tag.share";
 
-static void charon_require(BOOL condition, NSString *what)
+static void revenant_require(BOOL condition, NSString *what)
 {
     if (!condition)
         [NSException raise:NSInternalInconsistencyException format:@"Invalid parameter not satisfying: %@", what];
@@ -114,26 +114,26 @@ static void charon_require(BOOL condition, NSString *what)
 
 + (instancetype)commandWithTitle:(NSString *)title image:(UIImage *)image action:(SEL)action propertyList:(id)propertyList alternates:(NSArray<UICommandAlternate *> *)alternates
 {
-    return [[self alloc] initCharonWithTitle:title image:image action:action propertyList:propertyList alternates:alternates];
+    return [[self alloc] initRevenantWithTitle:title image:image action:action propertyList:propertyList alternates:alternates];
 }
 
 - (instancetype)init
 {
-    return [self initCharonWithTitle:nil image:nil action:NULL propertyList:nil alternates:@[]];
+    return [self initRevenantWithTitle:nil image:nil action:NULL propertyList:nil alternates:@[]];
 }
 
-- (instancetype)initCharonWithTitle:(NSString *)title image:(UIImage *)image action:(SEL)action propertyList:(id)propertyList alternates:(NSArray *)alternates
+- (instancetype)initRevenantWithTitle:(NSString *)title image:(UIImage *)image action:(SEL)action propertyList:(id)propertyList alternates:(NSArray *)alternates
 {
-    if ((self = [super initCharonWithTitle:title image:image])) {
+    if ((self = [super initRevenantWithTitle:title image:image])) {
         _action = action;
         if (propertyList) {
-            charon_require(CFPropertyListIsValid((__bridge CFPropertyListRef)propertyList, kCFPropertyListBinaryFormat_v1_0), @"propertyListCopy");
+            revenant_require(CFPropertyListIsValid((__bridge CFPropertyListRef)propertyList, kCFPropertyListBinaryFormat_v1_0), @"propertyListCopy");
             _propertyList = CFBridgingRelease(CFPropertyListCreateDeepCopy(kCFAllocatorDefault, (__bridge CFPropertyListRef)propertyList, kCFPropertyListImmutable));
         }
         NSMutableIndexSet *seen = [NSMutableIndexSet indexSet];
         for (UICommandAlternate *alternate in alternates) {
             NSInteger flags = alternate.modifierFlags;
-            charon_require(flags != 0 && ![seen containsIndex:(NSUInteger)flags], @"alternateModifierFlags != 0 && ![allAlternateModifierFlags containsIndex:alternateModifierFlags]");
+            revenant_require(flags != 0 && ![seen containsIndex:(NSUInteger)flags], @"alternateModifierFlags != 0 && ![allAlternateModifierFlags containsIndex:alternateModifierFlags]");
             [seen addIndex:(NSUInteger)flags];
         }
         _alternates = alternates ? [alternates copy] : @[];
@@ -174,7 +174,7 @@ static void charon_require(BOOL condition, NSString *what)
 
 - (id)copyWithZone:(NSZone *)zone
 {
-    UICommand *copy = [[[self class] allocWithZone:zone] initCharonWithTitle:self.title image:self.image action:_action propertyList:_propertyList alternates:_alternates];
+    UICommand *copy = [[[self class] allocWithZone:zone] initRevenantWithTitle:self.title image:self.image action:_action propertyList:_propertyList alternates:_alternates];
     copy->_discoverabilityTitle = [_discoverabilityTitle copy];
     copy->_attributes = _attributes;
     copy->_state = _state;
@@ -188,7 +188,7 @@ static void charon_require(BOOL condition, NSString *what)
 
 - (void)setTitle:(NSString *)title
 {
-    [self charon_setTitle:title];
+    [self revenant_setTitle:title];
 }
 
 - (UIImage *)image
@@ -198,7 +198,7 @@ static void charon_require(BOOL condition, NSString *what)
 
 - (void)setImage:(UIImage *)image
 {
-    [self charon_setImage:image];
+    [self revenant_setImage:image];
 }
 
 - (NSString *)discoverabilityTitle
@@ -246,7 +246,7 @@ static void charon_require(BOOL condition, NSString *what)
     _state = state;
 }
 
-- (void)charon_performWithSender:(id)sender target:(id)target
+- (void)revenant_performWithSender:(id)sender target:(id)target
 {
     objc_setAssociatedObject(self, @selector(sender), sender, OBJC_ASSOCIATION_ASSIGN);
     [[UIApplication sharedApplication] sendAction:_action to:target from:self forEvent:nil];

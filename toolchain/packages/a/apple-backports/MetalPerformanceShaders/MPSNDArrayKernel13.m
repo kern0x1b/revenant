@@ -1,4 +1,4 @@
-#import "CharonMPSNDArray.h"
+#import "RevenantMPSNDArray.h"
 
 #pragma clang diagnostic ignored "-Wprotocol"
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
@@ -7,60 +7,60 @@
 @implementation MPSNDArrayGradientState {
     NSUInteger _sourceCount;
     NSUInteger _sourceGradientIndex;
-    CharonMPSNDArrayFilter *_filters;
-    NSUInteger _sourceShapes[CHARON_MPS_NDARRAY_MAX_DIMENSIONS * CHARON_MPS_NDARRAY_MAX_DIMENSIONS];
-    NSUInteger _sourceDimensions[CHARON_MPS_NDARRAY_MAX_DIMENSIONS];
+    RevenantMPSNDArrayFilter *_filters;
+    NSUInteger _sourceShapes[REVENANT_MPS_NDARRAY_MAX_DIMENSIONS * REVENANT_MPS_NDARRAY_MAX_DIMENSIONS];
+    NSUInteger _sourceDimensions[REVENANT_MPS_NDARRAY_MAX_DIMENSIONS];
     NSUInteger _axis;
     NSString *_recorded;
 }
 
 
-- (void)charon_mps_recordFor:(MPSNDArrayMultiaryBase *)kernel sources:(NSArray<MPSNDArray *> *)sources
+- (void)revenant_mps_recordFor:(MPSNDArrayMultiaryBase *)kernel sources:(NSArray<MPSNDArray *> *)sources
 {
     NSUInteger count = [sources count];
-    if (count > CHARON_MPS_NDARRAY_MAX_DIMENSIONS)
-        count = CHARON_MPS_NDARRAY_MAX_DIMENSIONS;
+    if (count > REVENANT_MPS_NDARRAY_MAX_DIMENSIONS)
+        count = REVENANT_MPS_NDARRAY_MAX_DIMENSIONS;
     if (count) {
-        _filters = (CharonMPSNDArrayFilter *)realloc(_filters, count * sizeof(CharonMPSNDArrayFilter));
+        _filters = (RevenantMPSNDArrayFilter *)realloc(_filters, count * sizeof(RevenantMPSNDArrayFilter));
         memset(_sourceShapes, 0, sizeof(_sourceShapes));
         memset(_sourceDimensions, 0, sizeof(_sourceDimensions));
         for (NSUInteger i = 0; i < count; i++) {
             MPSNDArray *source = [sources objectAtIndex:i];
-            _filters[i] = [kernel charon_mps_filterAtSourceIndex:i];
+            _filters[i] = [kernel revenant_mps_filterAtSourceIndex:i];
             _sourceDimensions[i] = source ? source.numberOfDimensions : 0;
-            for (NSUInteger d = 0; d < _sourceDimensions[i] && d < CHARON_MPS_NDARRAY_MAX_DIMENSIONS; d++)
-                _sourceShapes[i * CHARON_MPS_NDARRAY_MAX_DIMENSIONS + d] = [source lengthOfDimension:d];
+            for (NSUInteger d = 0; d < _sourceDimensions[i] && d < REVENANT_MPS_NDARRAY_MAX_DIMENSIONS; d++)
+                _sourceShapes[i * REVENANT_MPS_NDARRAY_MAX_DIMENSIONS + d] = [source lengthOfDimension:d];
         }
         _sourceCount = count;
     }
-    _sourceGradientIndex = [kernel charon_mps_sourceGradientIndex];
-    _axis = [kernel conformsToProtocol:@protocol(CharonMPSNDArrayAxisKernel)]
-         ? (NSUInteger)[(id<CharonMPSNDArrayAxisKernel>)kernel axis] : 0;
+    _sourceGradientIndex = [kernel revenant_mps_sourceGradientIndex];
+    _axis = [kernel conformsToProtocol:@protocol(RevenantMPSNDArrayAxisKernel)]
+         ? (NSUInteger)[(id<RevenantMPSNDArrayAxisKernel>)kernel axis] : 0;
     _recorded = [NSString stringWithFormat:@"%lu sources, gradient of source %lu",
                     (unsigned long)_sourceCount, (unsigned long)_sourceGradientIndex];
 }
 
-- (CharonMPSNDArrayFilter)charon_mps_filterOfSource:(NSUInteger)index
+- (RevenantMPSNDArrayFilter)revenant_mps_filterOfSource:(NSUInteger)index
 {
     if (!_filters || index >= _sourceCount)
-        return CharonMPSNDArrayDefaultFilter();
+        return RevenantMPSNDArrayDefaultFilter();
     return _filters[index];
 }
 
-- (NSUInteger)charon_mps_dimensionsOfSource:(NSUInteger)index
+- (NSUInteger)revenant_mps_dimensionsOfSource:(NSUInteger)index
 {
     if (!_filters || index >= _sourceCount)
         return 0;
     return _sourceDimensions[index];
 }
 
-- (NSUInteger)charon_mps_axis { return _axis; }
+- (NSUInteger)revenant_mps_axis { return _axis; }
 
-- (NSUInteger)charon_mps_lengthOfSource:(NSUInteger)index dimension:(NSUInteger)dimension
+- (NSUInteger)revenant_mps_lengthOfSource:(NSUInteger)index dimension:(NSUInteger)dimension
 {
-    if (!_filters || index >= _sourceCount || dimension >= CHARON_MPS_NDARRAY_MAX_DIMENSIONS)
+    if (!_filters || index >= _sourceCount || dimension >= REVENANT_MPS_NDARRAY_MAX_DIMENSIONS)
         return 1;
-    return _sourceShapes[index * CHARON_MPS_NDARRAY_MAX_DIMENSIONS + dimension];
+    return _sourceShapes[index * REVENANT_MPS_NDARRAY_MAX_DIMENSIONS + dimension];
 }
 
 - (void)dealloc
@@ -72,7 +72,7 @@
 
 @implementation MPSNDArrayMultiaryBase {
     NSUInteger _sourceCount;
-    CharonMPSNDArrayFilter *_filters;
+    RevenantMPSNDArrayFilter *_filters;
     id<MPSNDArrayAllocator> _destinationArrayAllocator;
 }
 
@@ -81,9 +81,9 @@
     if ((self = [super initWithDevice:device])) {
         _sourceCount = count;
         if (count) {
-            _filters = (CharonMPSNDArrayFilter *)malloc(count * sizeof(CharonMPSNDArrayFilter));
+            _filters = (RevenantMPSNDArrayFilter *)malloc(count * sizeof(RevenantMPSNDArrayFilter));
             for (NSUInteger i = 0; i < count; i++)
-                _filters[i] = CharonMPSNDArrayDefaultFilter();
+                _filters[i] = RevenantMPSNDArrayDefaultFilter();
         }
         _destinationArrayAllocator = [MPSNDArray defaultAllocator];
     }
@@ -102,10 +102,10 @@
     if ((self = [super initWithCoder:aDecoder device:device])) {
         _sourceCount = (NSUInteger)[aDecoder decodeIntegerForKey:@"sourceCount"];
         if (_sourceCount) {
-            _filters = (CharonMPSNDArrayFilter *)malloc(_sourceCount * sizeof(CharonMPSNDArrayFilter));
+            _filters = (RevenantMPSNDArrayFilter *)malloc(_sourceCount * sizeof(RevenantMPSNDArrayFilter));
             for (NSUInteger i = 0; i < _sourceCount; i++) {
-                _filters[i] = CharonMPSNDArrayDefaultFilter();
-                for (NSUInteger d = 0; d < CHARON_MPS_NDARRAY_MAX_DIMENSIONS; d++) {
+                _filters[i] = RevenantMPSNDArrayDefaultFilter();
+                for (NSUInteger d = 0; d < REVENANT_MPS_NDARRAY_MAX_DIMENSIONS; d++) {
                     NSString *key = [NSString stringWithFormat:@"offsets.%lu.%lu", (unsigned long)i, (unsigned long)d];
                     if ([aDecoder containsValueForKey:key])
                         _filters[i].offsets[d] = (NSInteger)[aDecoder decodeIntegerForKey:key];
@@ -122,7 +122,7 @@
     [super encodeWithCoder:aCoder];
     [aCoder encodeInt64:(int64_t)_sourceCount forKey:@"sourceCount"];
     for (NSUInteger i = 0; _filters && i < _sourceCount; i++) {
-        for (NSUInteger d = 0; d < CHARON_MPS_NDARRAY_MAX_DIMENSIONS; d++) {
+        for (NSUInteger d = 0; d < REVENANT_MPS_NDARRAY_MAX_DIMENSIONS; d++) {
             NSString *key = [NSString stringWithFormat:@"offsets.%lu.%lu", (unsigned long)i, (unsigned long)d];
             [aCoder encodeInt64:(int64_t)_filters[i].offsets[d] forKey:key];
         }
@@ -139,61 +139,61 @@
     _destinationArrayAllocator = destinationArrayAllocator;
 }
 
-- (CharonMPSNDArrayFilter)charon_mps_filterAtSourceIndex:(NSUInteger)sourceIndex
+- (RevenantMPSNDArrayFilter)revenant_mps_filterAtSourceIndex:(NSUInteger)sourceIndex
 {
     if (!_filters || sourceIndex >= _sourceCount)
-        return CharonMPSNDArrayDefaultFilter();
+        return RevenantMPSNDArrayDefaultFilter();
     return _filters[sourceIndex];
 }
 
-- (void)charon_mps_setFilter:(CharonMPSNDArrayFilter)filter atSourceIndex:(NSUInteger)sourceIndex
+- (void)revenant_mps_setFilter:(RevenantMPSNDArrayFilter)filter atSourceIndex:(NSUInteger)sourceIndex
 {
     if (!_filters || sourceIndex >= _sourceCount)
         return;
     _filters[sourceIndex] = filter;
 }
 
-- (NSUInteger)charon_mps_sourceCount { return _sourceCount; }
+- (NSUInteger)revenant_mps_sourceCount { return _sourceCount; }
 
-- (NSUInteger)charon_mps_sourceGradientIndex { return 0; }
+- (NSUInteger)revenant_mps_sourceGradientIndex { return 0; }
 
 - (MPSNDArrayOffsets)offsetsAtSourceIndex:(NSUInteger)sourceIndex
 {
-    CharonMPSNDArrayFilter filter = [self charon_mps_filterAtSourceIndex:sourceIndex];
+    RevenantMPSNDArrayFilter filter = [self revenant_mps_filterAtSourceIndex:sourceIndex];
     MPSNDArrayOffsets offsets;
-    for (NSUInteger i = 0; i < CHARON_MPS_NDARRAY_MAX_DIMENSIONS; i++)
+    for (NSUInteger i = 0; i < REVENANT_MPS_NDARRAY_MAX_DIMENSIONS; i++)
         offsets.dimensions[i] = filter.offsets[i];
     return offsets;
 }
 
 - (MPSImageEdgeMode)edgeModeAtSourceIndex:(NSUInteger)sourceIndex
 {
-    return [self charon_mps_filterAtSourceIndex:sourceIndex].edgeMode;
+    return [self revenant_mps_filterAtSourceIndex:sourceIndex].edgeMode;
 }
 
 - (MPSNDArraySizes)kernelSizesForSourceIndex:(NSUInteger)sourceIndex
 {
-    CharonMPSNDArrayFilter filter = [self charon_mps_filterAtSourceIndex:sourceIndex];
+    RevenantMPSNDArrayFilter filter = [self revenant_mps_filterAtSourceIndex:sourceIndex];
     MPSNDArraySizes sizes;
-    for (NSUInteger i = 0; i < CHARON_MPS_NDARRAY_MAX_DIMENSIONS; i++)
+    for (NSUInteger i = 0; i < REVENANT_MPS_NDARRAY_MAX_DIMENSIONS; i++)
         sizes.dimensions[i] = filter.kernelSizes[i];
     return sizes;
 }
 
 - (MPSNDArrayOffsets)stridesForSourceIndex:(NSUInteger)sourceIndex
 {
-    CharonMPSNDArrayFilter filter = [self charon_mps_filterAtSourceIndex:sourceIndex];
+    RevenantMPSNDArrayFilter filter = [self revenant_mps_filterAtSourceIndex:sourceIndex];
     MPSNDArrayOffsets strides;
-    for (NSUInteger i = 0; i < CHARON_MPS_NDARRAY_MAX_DIMENSIONS; i++)
+    for (NSUInteger i = 0; i < REVENANT_MPS_NDARRAY_MAX_DIMENSIONS; i++)
         strides.dimensions[i] = filter.strides[i];
     return strides;
 }
 
 - (MPSNDArraySizes)dilationRatesForSourceIndex:(NSUInteger)sourceIndex
 {
-    CharonMPSNDArrayFilter filter = [self charon_mps_filterAtSourceIndex:sourceIndex];
+    RevenantMPSNDArrayFilter filter = [self revenant_mps_filterAtSourceIndex:sourceIndex];
     MPSNDArraySizes rates;
-    for (NSUInteger i = 0; i < CHARON_MPS_NDARRAY_MAX_DIMENSIONS; i++)
+    for (NSUInteger i = 0; i < REVENANT_MPS_NDARRAY_MAX_DIMENSIONS; i++)
         rates.dimensions[i] = filter.dilationRates[i];
     return rates;
 }
@@ -205,10 +205,10 @@
     if (![sources count])
         return nil;
     MPSNDArray *last = [sources lastObject];
-    CharonMPSNDArrayFilter filter = [self charon_mps_filterAtSourceIndex:[sources count] - 1];
-    NSUInteger sizes[CHARON_MPS_NDARRAY_MAX_DIMENSIONS];
+    RevenantMPSNDArrayFilter filter = [self revenant_mps_filterAtSourceIndex:[sources count] - 1];
+    NSUInteger sizes[REVENANT_MPS_NDARRAY_MAX_DIMENSIONS];
     NSUInteger dimensions = last.numberOfDimensions;
-    for (NSUInteger d = 0; d < dimensions && d < CHARON_MPS_NDARRAY_MAX_DIMENSIONS; d++) {
+    for (NSUInteger d = 0; d < dimensions && d < REVENANT_MPS_NDARRAY_MAX_DIMENSIONS; d++) {
         NSInteger extent = (NSInteger)[last lengthOfDimension:d];
         NSInteger kernel = (NSInteger)filter.kernelSizes[d];
         NSInteger stride = filter.strides[d] ? filter.strides[d] : 1;
@@ -227,7 +227,7 @@
     (void)sourceStates;
     (void)destinationArray;
     MPSNDArrayGradientState *state = [[MPSNDArrayGradientState alloc] initWithResource:nil];
-    [state charon_mps_recordFor:self sources:sources];
+    [state revenant_mps_recordFor:self sources:sources];
     return state;
 }
 
@@ -236,7 +236,7 @@
     MPSNDArrayMultiaryBase *copy = [[[self class] allocWithZone:zone] initWithDevice:(device ? device : self.device)
                                                                     sourceCount:_sourceCount];
     for (NSUInteger i = 0; i < _sourceCount; i++)
-        [copy charon_mps_setFilter:[self charon_mps_filterAtSourceIndex:i] atSourceIndex:i];
+        [copy revenant_mps_setFilter:[self revenant_mps_filterAtSourceIndex:i] atSourceIndex:i];
     copy.destinationArrayAllocator = _destinationArrayAllocator;
     return copy;
 }
@@ -250,50 +250,50 @@
 
 @implementation MPSNDArrayMultiaryKernel
 
-- (BOOL)charon_mps_run:(NSArray<MPSNDArray *> *)sources state:(MPSState *)state destination:(MPSNDArray *)destination
+- (BOOL)revenant_mps_run:(NSArray<MPSNDArray *> *)sources state:(MPSState *)state destination:(MPSNDArray *)destination
 {
     if (![sources count]) {
-        CharonMPSRefuse(@"%@: an encode was given no source arrays", NSStringFromClass([self class]));
+        RevenantMPSRefuse(@"%@: an encode was given no source arrays", NSStringFromClass([self class]));
         return NO;
     }
     NSUInteger count = [sources count];
-    CharonMPSNDArrayLayout *layouts = (CharonMPSNDArrayLayout *)calloc(count, sizeof(CharonMPSNDArrayLayout));
+    RevenantMPSNDArrayLayout *layouts = (RevenantMPSNDArrayLayout *)calloc(count, sizeof(RevenantMPSNDArrayLayout));
     if (!layouts)
         return NO;
     BOOL usable = YES;
     for (NSUInteger i = 0; i < count; i++) {
         NSString *what = [NSString stringWithFormat:@"%@: source %lu", NSStringFromClass([self class]), (unsigned long)i];
-        if (!CharonMPSNDArrayTake([sources objectAtIndex:i], &layouts[i], what)) {
+        if (!RevenantMPSNDArrayTake([sources objectAtIndex:i], &layouts[i], what)) {
             usable = NO;
             break;
         }
     }
     if (usable) {
         if (destination) {
-            CharonMPSNDArrayLayout out;
-            if (!CharonMPSNDArrayTake(destination, &out, [NSString stringWithFormat:@"%@: destination", NSStringFromClass([self class])]))
+            RevenantMPSNDArrayLayout out;
+            if (!RevenantMPSNDArrayTake(destination, &out, [NSString stringWithFormat:@"%@: destination", NSStringFromClass([self class])]))
                 usable = NO;
             else {
-                [self charon_mps_fillFromSources:layouts count:count state:state into:&out];
-                CharonMPSNDArrayPut(destination, &out);
+                [self revenant_mps_fillFromSources:layouts count:count state:state into:&out];
+                RevenantMPSNDArrayPut(destination, &out);
             }
         }
     }
     for (NSUInteger i = 0; i < count; i++)
-        CharonMPSNDArrayGive(&layouts[i]);
+        RevenantMPSNDArrayGive(&layouts[i]);
     free(layouts);
     for (NSUInteger i = 0; i < count; i++)
-        CharonMPSConsumeReadCount([sources objectAtIndex:i]);
+        RevenantMPSConsumeReadCount([sources objectAtIndex:i]);
     return usable;
 }
 
-- (void)charon_mps_fillFromSources:(CharonMPSNDArrayLayout *)sources count:(NSUInteger)count state:(MPSState *)state into:(CharonMPSNDArrayLayout *)destination
+- (void)revenant_mps_fillFromSources:(RevenantMPSNDArrayLayout *)sources count:(NSUInteger)count state:(MPSState *)state into:(RevenantMPSNDArrayLayout *)destination
 {
     (void)sources;
     (void)count;
     (void)state;
-    CharonMPSRefuse(@"%@: this class declares no arithmetic, so nothing was written. A subclass writes "
-                    @"-charon_mps_fillFromSources:count:into:, which is where MPSNDArrayGather, "
+    RevenantMPSRefuse(@"%@: this class declares no arithmetic, so nothing was written. A subclass writes "
+                    @"-revenant_mps_fillFromSources:count:into:, which is where MPSNDArrayGather, "
                     @"MPSNDArrayStridedSlice and MPSNDArrayMatrixMultiplication put theirs",
                     NSStringFromClass([self class]));
     (void)destination;
@@ -301,7 +301,7 @@
 
 - (MPSNDArray *)encodeToCommandBuffer:(id<MTLCommandBuffer>)cmdBuf sourceArrays:(NSArray<MPSNDArray *> *)sourceArrays
 {
-    if (!CharonMPSCommandBufferPermits(cmdBuf))
+    if (!RevenantMPSCommandBufferPermits(cmdBuf))
         return nil;
     MPSNDArrayDescriptor *descriptor = [self destinationArrayDescriptorForSourceArrays:sourceArrays sourceState:nil];
     if (!descriptor)
@@ -316,9 +316,9 @@
                 sourceArrays:(NSArray<MPSNDArray *> *)sourceArrays
             destinationArray:(MPSNDArray *)destination
 {
-    if (!CharonMPSCommandBufferPermits(cmdBuf))
+    if (!RevenantMPSCommandBufferPermits(cmdBuf))
         return;
-    [self charon_mps_run:sourceArrays state:nil destination:destination];
+    [self revenant_mps_run:sourceArrays state:nil destination:destination];
 }
 
 - (MPSNDArray *)encodeToCommandBuffer:(id<MTLCommandBuffer>)cmdBuf
@@ -339,11 +339,11 @@
                  resultState:(MPSState *)outGradientState
             destinationArray:(MPSNDArray *)destination
 {
-    if (!CharonMPSCommandBufferPermits(cmdBuf))
+    if (!RevenantMPSCommandBufferPermits(cmdBuf))
         return;
     if (outGradientState && [outGradientState isKindOfClass:[MPSNDArrayGradientState class]])
-        [(MPSNDArrayGradientState *)outGradientState charon_mps_recordFor:self sources:sourceArrays];
-    [self charon_mps_run:sourceArrays state:outGradientState destination:destination];
+        [(MPSNDArrayGradientState *)outGradientState revenant_mps_recordFor:self sources:sourceArrays];
+    [self revenant_mps_run:sourceArrays state:outGradientState destination:destination];
 }
 
 @end
@@ -371,14 +371,14 @@
     return nil;
 }
 
-- (NSUInteger)charon_mps_sourceGradientIndex { return _sourceGradientIndex; }
+- (NSUInteger)revenant_mps_sourceGradientIndex { return _sourceGradientIndex; }
 
-- (void)charon_mps_fillFromSources:(CharonMPSNDArrayLayout *)sources count:(NSUInteger)count state:(MPSState *)state into:(CharonMPSNDArrayLayout *)destination
+- (void)revenant_mps_fillFromSources:(RevenantMPSNDArrayLayout *)sources count:(NSUInteger)count state:(MPSState *)state into:(RevenantMPSNDArrayLayout *)destination
 {
     (void)count;
     (void)state;
-    CharonMPSRefuse(@"%@: this class declares no gradient arithmetic, so nothing was written. A "
-                    @"subclass writes -charon_mps_fillFromSources:count:into:, which is where "
+    RevenantMPSRefuse(@"%@: this class declares no gradient arithmetic, so nothing was written. A "
+                    @"subclass writes -revenant_mps_fillFromSources:count:into:, which is where "
                     @"MPSNDArrayGatherGradient and MPSNDArrayStridedSliceGradient put theirs",
                     NSStringFromClass([self class]));
     (void)sources;
@@ -390,7 +390,7 @@
                       sourceGradient:(MPSNDArray *)gradient
                        gradientState:(MPSState *)state
 {
-    if (!CharonMPSCommandBufferPermits(cmdBuf))
+    if (!RevenantMPSCommandBufferPermits(cmdBuf))
         return nil;
     MPSNDArrayDescriptor *descriptor = [gradient descriptor];
     id<MTLDevice> device = [cmdBuf respondsToSelector:@selector(device)] ? [cmdBuf device] : self.device;
@@ -406,37 +406,37 @@
                gradientState:(MPSState *)state
             destinationArray:(MPSNDArray *)destination
 {
-    if (!CharonMPSCommandBufferPermits(cmdBuf))
+    if (!RevenantMPSCommandBufferPermits(cmdBuf))
         return;
     NSMutableArray *sources = [NSMutableArray arrayWithArray:sourceArrays];
     [sources addObject:gradient];
-    CharonMPSNDArrayLayout *layouts = (CharonMPSNDArrayLayout *)calloc([sources count], sizeof(CharonMPSNDArrayLayout));
+    RevenantMPSNDArrayLayout *layouts = (RevenantMPSNDArrayLayout *)calloc([sources count], sizeof(RevenantMPSNDArrayLayout));
     if (!layouts)
         return;
     BOOL usable = YES;
     for (NSUInteger i = 0; i < [sources count]; i++) {
         NSString *what = [NSString stringWithFormat:@"%@: gradient source %lu", NSStringFromClass([self class]), (unsigned long)i];
-        if (!CharonMPSNDArrayTake([sources objectAtIndex:i], &layouts[i], what)) {
+        if (!RevenantMPSNDArrayTake([sources objectAtIndex:i], &layouts[i], what)) {
             usable = NO;
             break;
         }
     }
     if (usable) {
-        CharonMPSNDArrayLayout out;
+        RevenantMPSNDArrayLayout out;
         if (destination) {
-            if (!CharonMPSNDArrayTake(destination, &out, [NSString stringWithFormat:@"%@: destination", NSStringFromClass([self class])]))
+            if (!RevenantMPSNDArrayTake(destination, &out, [NSString stringWithFormat:@"%@: destination", NSStringFromClass([self class])]))
                 usable = NO;
             else {
-                [self charon_mps_fillFromSources:layouts count:[sources count] state:state into:&out];
-                CharonMPSNDArrayPut(destination, &out);
+                [self revenant_mps_fillFromSources:layouts count:[sources count] state:state into:&out];
+                RevenantMPSNDArrayPut(destination, &out);
             }
         }
     }
     for (NSUInteger i = 0; i < [sources count]; i++)
-        CharonMPSNDArrayGive(&layouts[i]);
+        RevenantMPSNDArrayGive(&layouts[i]);
     free(layouts);
     for (NSUInteger i = 0; i < [sources count]; i++)
-        CharonMPSConsumeReadCount([sources objectAtIndex:i]);
+        RevenantMPSConsumeReadCount([sources objectAtIndex:i]);
 }
 
 @end
@@ -456,7 +456,7 @@
 
 - (MPSNDArray *)encodeToCommandBuffer:(id<MTLCommandBuffer>)cmdBuf sourceArray:(MPSNDArray *)sourceArray
 {
-    if (!CharonMPSCommandBufferPermits(cmdBuf))
+    if (!RevenantMPSCommandBufferPermits(cmdBuf))
         return nil;
     NSArray *sources = [NSArray arrayWithObject:sourceArray];
     MPSNDArrayDescriptor *descriptor = [self destinationArrayDescriptorForSourceArrays:sources sourceState:nil];
@@ -472,9 +472,9 @@
                   sourceArray:(MPSNDArray *)sourceArray
              destinationArray:(MPSNDArray *)destination
 {
-    if (!CharonMPSCommandBufferPermits(cmdBuf))
+    if (!RevenantMPSCommandBufferPermits(cmdBuf))
         return;
-    [self charon_mps_run:[NSArray arrayWithObject:sourceArray] state:nil destination:destination];
+    [self revenant_mps_run:[NSArray arrayWithObject:sourceArray] state:nil destination:destination];
 }
 
 - (MPSNDArray *)encodeToCommandBuffer:(id<MTLCommandBuffer>)cmdBuf
@@ -496,12 +496,12 @@
                  resultState:(MPSState *)outGradientState
             destinationArray:(MPSNDArray *)destination
 {
-    if (!CharonMPSCommandBufferPermits(cmdBuf))
+    if (!RevenantMPSCommandBufferPermits(cmdBuf))
         return;
     if (outGradientState && [outGradientState isKindOfClass:[MPSNDArrayGradientState class]])
-        [(MPSNDArrayGradientState *)outGradientState charon_mps_recordFor:self
+        [(MPSNDArrayGradientState *)outGradientState revenant_mps_recordFor:self
                                                                  sources:[NSArray arrayWithObject:sourceArray]];
-    [self charon_mps_run:[NSArray arrayWithObject:sourceArray] state:outGradientState destination:destination];
+    [self revenant_mps_run:[NSArray arrayWithObject:sourceArray] state:outGradientState destination:destination];
 }
 
 @end
@@ -556,7 +556,7 @@
                    primarySourceArray:(MPSNDArray *)primarySourceArray
                  secondarySourceArray:(MPSNDArray *)secondarySourceArray
 {
-    if (!CharonMPSCommandBufferPermits(cmdBuf))
+    if (!RevenantMPSCommandBufferPermits(cmdBuf))
         return nil;
     NSArray *sources = [NSArray arrayWithObjects:primarySourceArray, secondarySourceArray, nil];
     MPSNDArrayDescriptor *descriptor = [self destinationArrayDescriptorForSourceArrays:sources sourceState:nil];
@@ -574,9 +574,9 @@
          secondarySourceArray:(MPSNDArray *)secondarySourceArray
              destinationArray:(MPSNDArray *)destination
 {
-    if (!CharonMPSCommandBufferPermits(cmdBuf))
+    if (!RevenantMPSCommandBufferPermits(cmdBuf))
         return;
-    [self charon_mps_run:[NSArray arrayWithObjects:primarySourceArray, secondarySourceArray, nil] state:nil
+    [self revenant_mps_run:[NSArray arrayWithObjects:primarySourceArray, secondarySourceArray, nil] state:nil
              destination:destination];
 }
 
@@ -601,17 +601,17 @@
                   resultState:(MPSState *)outGradientState
              destinationArray:(MPSNDArray *)destination
 {
-    if (!CharonMPSCommandBufferPermits(cmdBuf))
+    if (!RevenantMPSCommandBufferPermits(cmdBuf))
         return;
     NSArray *sources = [NSArray arrayWithObjects:primarySourceArray, secondarySourceArray, nil];
     if (outGradientState && [outGradientState isKindOfClass:[MPSNDArrayGradientState class]])
-        [(MPSNDArrayGradientState *)outGradientState charon_mps_recordFor:self sources:sources];
-    [self charon_mps_run:sources state:outGradientState destination:destination];
+        [(MPSNDArrayGradientState *)outGradientState revenant_mps_recordFor:self sources:sources];
+    [self revenant_mps_run:sources state:outGradientState destination:destination];
 }
 
 @end
 
-#define CHARON_MPS_BINARY_GRADIENT_ENCODES                                              \
+#define REVENANT_MPS_BINARY_GRADIENT_ENCODES                                              \
     - (MPSNDArray *)encodeToCommandBuffer:(id<MTLCommandBuffer>)cmdBuf                 \
                        primarySourceArray:(MPSNDArray *)primarySourceArray             \
                      secondarySourceArray:(MPSNDArray *)secondarySourceArray           \
@@ -639,7 +639,7 @@
 
 @implementation MPSNDArrayBinaryPrimaryGradientKernel
 
-CHARON_MPS_BINARY_GRADIENT_ENCODES
+REVENANT_MPS_BINARY_GRADIENT_ENCODES
 
 - (instancetype)initWithDevice:(id<MTLDevice>)device
 {
@@ -650,7 +650,7 @@ CHARON_MPS_BINARY_GRADIENT_ENCODES
 
 @implementation MPSNDArrayBinarySecondaryGradientKernel
 
-CHARON_MPS_BINARY_GRADIENT_ENCODES
+REVENANT_MPS_BINARY_GRADIENT_ENCODES
 
 - (instancetype)initWithDevice:(id<MTLDevice>)device
 {

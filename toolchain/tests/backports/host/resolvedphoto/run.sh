@@ -7,7 +7,7 @@ here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
 AV=${AV:-$root/packages/a/apple-backports/AVFoundation}
-BUILD=${BUILD:-$(runs_fresh charon-resolvedphoto)}
+BUILD=${BUILD:-$(runs_fresh revenant-resolvedphoto)}
 sdk=$(xcrun --show-sdk-path)
 target="-target arm64-apple-ios15.0-macabi -isysroot $sdk -iframework $sdk/System/iOSSupport/System/Library/Frameworks"
 quiet="-Wno-deprecated-declarations -Wno-unguarded-availability-new -Wno-availability -Wno-incomplete-implementation -Wno-objc-property-synthesis"
@@ -25,7 +25,7 @@ echo "declared: $(wc -l < "$B/declared.txt" | tr -d ' ') members"
 
 oracle() { # oracle NAME SOURCE...: the oracle over a port class built from SOURCE
     name=$1; shift
-    xcrun clang -fobjc-arc $target $quiet -DAVCaptureResolvedPhotoSettings=CharonHostAVCaptureResolvedPhotoSettings -I"$AV" -c "$@" -o "$B/$name.o"
+    xcrun clang -fobjc-arc $target $quiet -DAVCaptureResolvedPhotoSettings=RevenantHostAVCaptureResolvedPhotoSettings -I"$AV" -c "$@" -o "$B/$name.o"
     xcrun clang -fobjc-arc $target $quiet "$here/oracle.m" "$B/$name.o" -framework AVFoundation -framework CoreMedia -framework Foundation -o "$B/$name"
     "$B/$name" "$B/declared.txt"
 }

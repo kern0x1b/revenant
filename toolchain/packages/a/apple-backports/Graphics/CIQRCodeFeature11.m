@@ -1,6 +1,6 @@
 #import <CoreImage/CoreImage.h>
 
-@implementation CIQRCodeFeature (CharonSymbolDescriptor)
+@implementation CIQRCodeFeature (RevenantSymbolDescriptor)
 
 - (CIQRCodeDescriptor *)symbolDescriptor
 {

@@ -1,13 +1,13 @@
 #import <HealthKit/HealthKit.h>
 
-#import "CharonHKStore.h"
+#import "RevenantHKStore.h"
 
 #pragma mark - HKClinicalType
 
 @implementation HKClinicalType
 @end
 
-@implementation HKObjectType (CharonIOS120)
+@implementation HKObjectType (RevenantIOS120)
 
 + (nullable HKClinicalType *)clinicalTypeForIdentifier:(HKClinicalTypeIdentifier)identifier
 {
@@ -26,15 +26,15 @@
     });
     if (![known containsObject:identifier])
         return nil;
-    return [HKClinicalType charon_typeWithIdentifier:identifier];
+    return [HKClinicalType revenant_typeWithIdentifier:identifier];
 }
 
 @end
 
 #pragma mark - HKFHIRResource
 
-@interface HKFHIRResource (CharonIOS120)
-+ (nullable instancetype)charon_resourceWithType:(HKFHIRResourceType)resourceType
+@interface HKFHIRResource (RevenantIOS120)
++ (nullable instancetype)revenant_resourceWithType:(HKFHIRResourceType)resourceType
                                       identifier:(NSString *)identifier
                                             data:(NSData *)data
                                        sourceURL:(nullable NSURL *)sourceURL;
@@ -46,7 +46,7 @@
     NSData *_data;
     NSURL *_sourceURL;
 }
-CHARON_HEALTHKIT_UNCREATABLE_INIT
+REVENANT_HEALTHKIT_UNCREATABLE_INIT
 
 @dynamic FHIRVersion;
 
@@ -55,12 +55,12 @@ CHARON_HEALTHKIT_UNCREATABLE_INIT
     return YES;
 }
 
-+ (instancetype)charon_resourceWithType:(HKFHIRResourceType)resourceType
++ (instancetype)revenant_resourceWithType:(HKFHIRResourceType)resourceType
                              identifier:(NSString *)identifier
                                    data:(NSData *)data
                               sourceURL:(nullable NSURL *)sourceURL
 {
-    HKFHIRResource *resource = [[self alloc] charon_init];
+    HKFHIRResource *resource = [[self alloc] revenant_init];
     if (resource) {
         resource->_resourceType = [resourceType copy];
         resource->_identifier = [identifier copy] ?: @"";
@@ -70,7 +70,7 @@ CHARON_HEALTHKIT_UNCREATABLE_INIT
     return resource;
 }
 
-- (instancetype)charon_init
+- (instancetype)revenant_init
 {
     return [super init];
 }
@@ -97,7 +97,7 @@ CHARON_HEALTHKIT_UNCREATABLE_INIT
 
 - (id)copyWithZone:(NSZone *)zone
 {
-    return [HKFHIRResource charon_resourceWithType:_resourceType identifier:_identifier data:_data sourceURL:_sourceURL];
+    return [HKFHIRResource revenant_resourceWithType:_resourceType identifier:_identifier data:_data sourceURL:_sourceURL];
 }
 
 - (HKFHIRResourceType)resourceType
@@ -134,21 +134,21 @@ CHARON_HEALTHKIT_UNCREATABLE_INIT
     NSString *_displayName;
     HKFHIRResource *_FHIRResource;
 }
-CHARON_HEALTHKIT_UNCREATABLE_INIT
+REVENANT_HEALTHKIT_UNCREATABLE_INIT
 
 + (BOOL)supportsSecureCoding
 {
     return YES;
 }
 
-+ (instancetype)charon_recordWithType:(HKClinicalType *)clinicalType
++ (instancetype)revenant_recordWithType:(HKClinicalType *)clinicalType
                           displayName:(NSString *)displayName
                          FHIRResource:(nullable HKFHIRResource *)resource
                            startDate:(NSDate *)startDate
                              endDate:(NSDate *)endDate
                              metadata:(nullable NSDictionary *)metadata
 {
-    HKClinicalRecord *record = [[self alloc] charon_initWithType:(HKSampleType *)clinicalType
+    HKClinicalRecord *record = [[self alloc] revenant_initWithType:(HKSampleType *)clinicalType
                                                         metadata:metadata
                                                        startDate:startDate
                                                          endDate:endDate];
@@ -179,9 +179,9 @@ CHARON_HEALTHKIT_UNCREATABLE_INIT
     [coder encodeObject:_FHIRResource forKey:@"FHIRResource"];
 }
 
-- (instancetype)charon_copyForStore
+- (instancetype)revenant_copyForStore
 {
-    HKClinicalRecord *copy = [super charon_copyForStore];
+    HKClinicalRecord *copy = [super revenant_copyForStore];
     if (copy) {
         copy->_clinicalType = [_clinicalType copy];
         copy->_displayName = [_displayName copy];
@@ -190,12 +190,12 @@ CHARON_HEALTHKIT_UNCREATABLE_INIT
     return copy;
 }
 
-- (NSString *)charon_storeTypeIdentifier
+- (NSString *)revenant_storeTypeIdentifier
 {
     return _clinicalType.identifier ?: @"";
 }
 
-- (NSInteger)charon_storeKind
+- (NSInteger)revenant_storeKind
 {
     return 4;
 }
@@ -224,7 +224,7 @@ CHARON_HEALTHKIT_UNCREATABLE_INIT
 
 #pragma mark - HKQuery
 
-@implementation HKQuery (CharonIOS120)
+@implementation HKQuery (RevenantIOS120)
 
 + (NSPredicate *)predicateForClinicalRecordsFromSource:(HKSource *)source
                                         FHIRResourceType:(HKFHIRResourceType)resourceType
@@ -248,8 +248,8 @@ CHARON_HEALTHKIT_UNCREATABLE_INIT
 
 @end
 
-@interface HKClinicalRecord (CharonHKStorable) <CharonHKStorable>
+@interface HKClinicalRecord (RevenantHKStorable) <RevenantHKStorable>
 @end
 
-@implementation HKClinicalRecord (CharonHKStorable)
+@implementation HKClinicalRecord (RevenantHKStorable)
 @end

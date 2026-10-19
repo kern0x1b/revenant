@@ -12,9 +12,9 @@ static void check(BOOL ok, NSString *what)
 int main(void)
 {
     @autoreleasepool {
-        NSArray *vended = @[ @"CharonMetalBinding", @"CharonMetalBufferBinding",
-                              @"CharonMetalTextureBinding", @"CharonMetalThreadgroupBinding",
-                              @"CharonMetalObjectPayloadBinding" ];
+        NSArray *vended = @[ @"RevenantMetalBinding", @"RevenantMetalBufferBinding",
+                              @"RevenantMetalTextureBinding", @"RevenantMetalThreadgroupBinding",
+                              @"RevenantMetalObjectPayloadBinding" ];
         for (NSString *name in vended) {
             check(NSClassFromString(name) != nil,
                   ([NSString stringWithFormat:@"the port vends %@, and the runtime finds it", name]));
@@ -29,7 +29,7 @@ int main(void)
         total = objc_getClassList(all, total);
         for (int i = 0; i < total; i++) {
             NSString *name = NSStringFromClass(all[i]);
-            if ([name hasPrefix:@"CharonMetal"]) { [portClasses addObject:name]; }
+            if ([name hasPrefix:@"RevenantMetal"]) { [portClasses addObject:name]; }
         }
         free(all);
         NSArray *sorted = [portClasses sortedArrayUsingSelector:@selector(compare:)];

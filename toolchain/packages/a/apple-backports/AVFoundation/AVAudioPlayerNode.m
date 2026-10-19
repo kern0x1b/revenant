@@ -1,12 +1,12 @@
-#import "CharonAVAudioEngine.h"
-#import "CharonAVAudioBuffer.h"
+#import "RevenantAVAudioEngine.h"
+#import "RevenantAVAudioBuffer.h"
 
-OSStatus CharonPlayerRenderCallback(void *inRefCon, AudioUnitRenderActionFlags *ioActionFlags, const AudioTimeStamp *inTimeStamp,
+OSStatus RevenantPlayerRenderCallback(void *inRefCon, AudioUnitRenderActionFlags *ioActionFlags, const AudioTimeStamp *inTimeStamp,
                                     UInt32 inBusNumber, UInt32 inNumberFrames, AudioBufferList *ioData)
 {
     AVAudioPlayerNode *node = (__bridge AVAudioPlayerNode *)inRefCon;
-    NSMutableArray<CharonScheduledBuffer *> *queue = [node charon_queue];
-    CharonAudioNodeImpl *impl = [node charon_impl];
+    NSMutableArray<RevenantScheduledBuffer *> *queue = [node revenant_queue];
+    RevenantAudioNodeImpl *impl = [node revenant_impl];
 
     for (UInt32 b = 0; b < ioData->mNumberBuffers; b++)
         memset(ioData->mBuffers[b].mData, 0, ioData->mBuffers[b].mDataByteSize);
@@ -20,9 +20,9 @@ OSStatus CharonPlayerRenderCallback(void *inRefCon, AudioUnitRenderActionFlags *
 
         UInt32 framesFilled = 0;
         while (framesFilled < inNumberFrames && queue.count > 0) {
-            CharonScheduledBuffer *scheduled = queue.firstObject;
+            RevenantScheduledBuffer *scheduled = queue.firstObject;
             AVAudioPCMBuffer *source = scheduled.buffer;
-            CharonAudioBufferImpl *sourceImpl = [source charon_impl];
+            RevenantAudioBufferImpl *sourceImpl = [source revenant_impl];
             AVAudioFrameCount available = [source frameLength] - scheduled.framesConsumed;
             UInt32 toCopy = MIN(available, inNumberFrames - framesFilled);
 
@@ -56,33 +56,33 @@ OSStatus CharonPlayerRenderCallback(void *inRefCon, AudioUnitRenderActionFlags *
 
 - (void)scheduleBuffer:(AVAudioPCMBuffer *)buffer atTime:(AVAudioTime *)when options:(NSUInteger)options completionHandler:(void (^)(void))completionHandler
 {
-    CharonScheduledBuffer *scheduled = [CharonScheduledBuffer new];
+    RevenantScheduledBuffer *scheduled = [RevenantScheduledBuffer new];
     scheduled.buffer = buffer;
     scheduled.completionHandler = completionHandler;
     scheduled.framesConsumed = 0;
-    NSMutableArray *queue = [self charon_queue];
+    NSMutableArray *queue = [self revenant_queue];
     @synchronized(queue) {
         [queue addObject:scheduled];
     }
-    if (![self charon_impl]->attached)
-        [self charon_setFormat:buffer.format];
+    if (![self revenant_impl]->attached)
+        [self revenant_setFormat:buffer.format];
 }
 
 - (void)play
 {
-    [self charon_impl]->playing = YES;
+    [self revenant_impl]->playing = YES;
 }
 
 - (void)pause
 {
-    [self charon_impl]->playing = NO;
+    [self revenant_impl]->playing = NO;
 }
 
 - (void)stop
 {
-    CharonAudioNodeImpl *impl = [self charon_impl];
+    RevenantAudioNodeImpl *impl = [self revenant_impl];
     impl->playing = NO;
-    NSMutableArray *queue = [self charon_queue];
+    NSMutableArray *queue = [self revenant_queue];
     @synchronized(queue) {
         [queue removeAllObjects];
     }
@@ -90,7 +90,7 @@ OSStatus CharonPlayerRenderCallback(void *inRefCon, AudioUnitRenderActionFlags *
 
 - (BOOL)isPlaying
 {
-    return [self charon_impl]->playing;
+    return [self revenant_impl]->playing;
 }
 
 @end

@@ -1,21 +1,21 @@
-#import "CharonMPSCnn.h"
-#import "CharonMPSReduce.h"
+#import "RevenantMPSCnn.h"
+#import "RevenantMPSReduce.h"
 
 
 @implementation MPSNNReduceUnary {
     MTLRegion _clipRectSource;
     BOOL _byColumn;
     BOOL _byFeatureChannel;
-    CharonMPSReduceOperation _operation;
-    float _charonWeight;
+    RevenantMPSReduceOperation _operation;
+    float _revenantWeight;
 }
 
 @synthesize clipRectSource = _clipRectSource;
 
-- (instancetype)charon_nnReduceWithDevice:(id<MTLDevice>)device
+- (instancetype)revenant_nnReduceWithDevice:(id<MTLDevice>)device
                                  byColumn:(BOOL)byColumn
                          byFeatureChannel:(BOOL)byFeatureChannel
-                               operation:(CharonMPSReduceOperation)operation
+                               operation:(RevenantMPSReduceOperation)operation
 {
     MPSNNReduceUnary *made = [super initWithDevice:device];
     if (made) {
@@ -23,14 +23,14 @@
         made->_byColumn = byColumn;
         made->_byFeatureChannel = byFeatureChannel;
         made->_operation = operation;
-        made->_charonWeight = 1.0f;
+        made->_revenantWeight = 1.0f;
     }
     return made;
 }
 
 - (instancetype)initWithDevice:(id<MTLDevice>)device
 {
-    CharonMPSRefuse(@"MPSNNReduceUnary: -initWithDevice: is unavailable on the abstract base - use one of the twelve"
+    RevenantMPSRefuse(@"MPSNNReduceUnary: -initWithDevice: is unavailable on the abstract base - use one of the twelve"
                     @" concrete classes");
     return nil;
 }
@@ -41,14 +41,14 @@
         _clipRectSource = MPSRectNoClip;
         _byColumn = NO;
         _byFeatureChannel = NO;
-        _operation = CharonMPSReduceSum;
-        _charonWeight = 1.0f;
+        _operation = RevenantMPSReduceSum;
+        _revenantWeight = 1.0f;
     }
     return self;
 }
 
-- (float)charon_nnReduceWeight { return _charonWeight; }
-- (void)charon_setNnReduceWeight:(float)weight { _charonWeight = weight; }
+- (float)revenant_nnReduceWeight { return _revenantWeight; }
+- (void)revenant_setNnReduceWeight:(float)weight { _revenantWeight = weight; }
 
 - (void)encodeToCommandBuffer:(id<MTLCommandBuffer>)commandBuffer
                   sourceImage:(MPSImage *)sourceImage
@@ -56,25 +56,25 @@
 {
     NSString *what = NSStringFromClass([self class]);
     if (!commandBuffer) {
-        CharonMPSRefuse(@"%@: no command buffer, so nothing was written", what);
+        RevenantMPSRefuse(@"%@: no command buffer, so nothing was written", what);
         return;
     }
-    if (!CharonMPSCommandBufferPermits(commandBuffer))
+    if (!RevenantMPSCommandBufferPermits(commandBuffer))
         return;
-    if (!CharonMPSImageUsable(sourceImage, what)) {
-        CharonMPSRefuse(@"%@: the source image cannot be walked", what);
+    if (!RevenantMPSImageUsable(sourceImage, what)) {
+        RevenantMPSRefuse(@"%@: the source image cannot be walked", what);
         return;
     }
     if (!destinationImage) {
-        CharonMPSRefuse(@"%@: no destination image, so nothing was written", what);
+        RevenantMPSRefuse(@"%@: no destination image, so nothing was written", what);
         return;
     }
 
-    CharonMPSImageLayout in = CharonMPSImageLayoutOf(sourceImage);
-    CharonMPSImageLayout out = CharonMPSImageLayoutOf(destinationImage);
+    RevenantMPSImageLayout in = RevenantMPSImageLayoutOf(sourceImage);
+    RevenantMPSImageLayout out = RevenantMPSImageLayoutOf(destinationImage);
 
     NSUInteger winX, winY, winCols, winRows;
-    CharonMPSImageRegionIsEmpty(_clipRectSource)
+    RevenantMPSImageRegionIsEmpty(_clipRectSource)
         ? (winX = 0, winY = 0, winCols = in.width, winRows = in.height)
         : (winX = (NSUInteger)self.clipRectSource.origin.x, winY = (NSUInteger)self.clipRectSource.origin.y,
            winCols = (NSUInteger)self.clipRectSource.size.width,
@@ -84,7 +84,7 @@
     if (winY + winRows > in.height)
         winRows = in.height - (winY < in.height ? winY : in.height);
     if (!winCols || !winRows) {
-        CharonMPSRefuse(@"%@: clipRectSource intersects the %lux%lu source to nothing, so nothing was"
+        RevenantMPSRefuse(@"%@: clipRectSource intersects the %lux%lu source to nothing, so nothing was"
                         @" written", what, (unsigned long)in.width, (unsigned long)in.height);
         return;
     }
@@ -98,7 +98,7 @@
         span = _byColumn ? winRows : winCols;
         runs = (_byColumn ? winCols : winRows) * channels;
         if (!span) {
-            CharonMPSRefuse(@"%@: the window is one pixel along the reduction's axis, so there is"
+            RevenantMPSRefuse(@"%@: the window is one pixel along the reduction's axis, so there is"
                             @" nothing to reduce and nothing was written", what);
             return;
         }
@@ -119,7 +119,7 @@
         needChannels = channels;
     }
     if (out.width < needCols || out.height < needRows || out.channels < needChannels) {
-        CharonMPSRefuse(@"%@: a %@ reduction over a %lux%lu window of %lu channels answers %lu values"
+        RevenantMPSRefuse(@"%@: a %@ reduction over a %lux%lu window of %lu channels answers %lu values"
                         @" and needs a %lux%lux%lu destination, and this one is %lux%lux%lu, so nothing"
                         @" was written",
                         what, _byFeatureChannel ? @"feature channel" : (_byColumn ? @"column" : @"row"),
@@ -130,16 +130,16 @@
         return;
     }
 
-    CharonMPSImageLayout slice = in;
+    RevenantMPSImageLayout slice = in;
     slice.count = winCols * winRows * in.channels;
-    void *from = CharonMPSImageReadRegion(sourceImage, &slice,
+    void *from = RevenantMPSImageReadRegion(sourceImage, &slice,
                                           MTLRegionMake2D(winX, winY, winCols, winRows), what);
     if (slice.count && !from)
         return;
 
     double *result = calloc(runs ? runs : 1, sizeof(double));
     if (!result) {
-        CharonMPSRefuse(@"%@: no memory for %lu reduced values, so nothing was written", what,
+        RevenantMPSRefuse(@"%@: no memory for %lu reduced values, so nothing was written", what,
                         (unsigned long)runs);
         free(from);
         return;
@@ -165,18 +165,18 @@
             NSUInteger which = _byFeatureChannel ? s : channel;
             if (at >= winCols * winRows || which >= channels)
                 continue;
-            double value = CharonMPSImageLoad(from, &slice, CharonMPSImageIndex(&slice, at, which));
-            if (_byFeatureChannel && (_operation == CharonMPSReduceSum || _operation == CharonMPSReduceMean))
-                value *= (double)_charonWeight;
+            double value = RevenantMPSImageLoad(from, &slice, RevenantMPSImageIndex(&slice, at, which));
+            if (_byFeatureChannel && (_operation == RevenantMPSReduceSum || _operation == RevenantMPSReduceMean))
+                value *= (double)_revenantWeight;
             if (s == 0 || value < smallest) smallest = value;
             if (s == 0 || value > largest) largest = value;
             total += value;
         }
         switch (_operation) {
-            case CharonMPSReduceMin: result[r] = smallest; break;
-            case CharonMPSReduceMax: result[r] = largest; break;
-            case CharonMPSReduceMean: result[r] = total / (double)span; break;
-            case CharonMPSReduceSum: result[r] = total; break;
+            case RevenantMPSReduceMin: result[r] = smallest; break;
+            case RevenantMPSReduceMax: result[r] = largest; break;
+            case RevenantMPSReduceMean: result[r] = total / (double)span; break;
+            case RevenantMPSReduceSum: result[r] = total; break;
         }
     }
     free(from);
@@ -184,12 +184,12 @@
     MTLRegion writeRegion = _byFeatureChannel
         ? MTLRegionMake2D(0, 0, winCols, winRows)
         : (_byColumn ? MTLRegionMake2D(0, 0, winCols, 1) : MTLRegionMake2D(0, 0, 1, winRows));
-    CharonMPSImageLayout staged = out;
+    RevenantMPSImageLayout staged = out;
     staged.channels = needChannels;
     staged.count = writeRegion.size.width * writeRegion.size.height * staged.channels;
     void *bytes = calloc(staged.count ? staged.count : 1, staged.elementSize);
     if (!bytes) {
-        CharonMPSRefuse(@"%@: no memory for a %lux%lux%lu result, so nothing was written", what,
+        RevenantMPSRefuse(@"%@: no memory for a %lux%lux%lu result, so nothing was written", what,
                         (unsigned long)writeRegion.size.width, (unsigned long)writeRegion.size.height,
                         (unsigned long)staged.channels);
         free(result);
@@ -208,13 +208,13 @@
             x = _byColumn ? spatial : 0;
             y = _byColumn ? 0 : spatial;
         }
-        CharonMPSImageStore(bytes, &staged, CharonMPSImageIndex(&staged, y * writeRegion.size.width + x, c),
+        RevenantMPSImageStore(bytes, &staged, RevenantMPSImageIndex(&staged, y * writeRegion.size.width + x, c),
                             result[r]);
     }
-    CharonMPSImageWriteRegion(destinationImage, &staged, writeRegion, bytes, what);
+    RevenantMPSImageWriteRegion(destinationImage, &staged, writeRegion, bytes, what);
     free(bytes);
     free(result);
-    CharonMPSConsumeReadCount(sourceImage);
+    RevenantMPSConsumeReadCount(sourceImage);
 }
 
 @end

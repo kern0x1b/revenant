@@ -1,9 +1,9 @@
-#import "CharonHomeKitInternal.h"
+#import "RevenantHomeKitInternal.h"
 
 @implementation HMAccessorySetupPayload
 
-@synthesize charon_setupPayloadURL = _charon_setupPayloadURL;
-@synthesize charon_ownershipToken = _charon_ownershipToken;
+@synthesize revenant_setupPayloadURL = _revenant_setupPayloadURL;
+@synthesize revenant_ownershipToken = _revenant_ownershipToken;
 
 - (instancetype)initWithURL:(NSURL *)setupPayloadURL
 {
@@ -12,7 +12,7 @@
     }
     self = [super init];
     if (self) {
-        _charon_setupPayloadURL = setupPayloadURL;
+        _revenant_setupPayloadURL = setupPayloadURL;
     }
     return self;
 }

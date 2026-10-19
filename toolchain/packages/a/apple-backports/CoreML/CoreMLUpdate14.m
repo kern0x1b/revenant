@@ -1,9 +1,9 @@
 #import <CoreML/CoreML.h>
-#import "CharonMLUpdateTask.h"
+#import "RevenantMLUpdateTask.h"
 
 #pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
 
-@implementation MLUpdateTask (CharonMLUpdateTaskiOS14)
+@implementation MLUpdateTask (RevenantMLUpdateTaskiOS14)
 
 + (nullable instancetype)updateTaskForModelAtURL:(NSURL *)modelURL
                                     trainingData:(id<MLBatchProvider>)trainingData

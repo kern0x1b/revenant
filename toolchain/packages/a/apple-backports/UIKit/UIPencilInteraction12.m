@@ -1,4 +1,4 @@
-#import "CharonMenus.h"
+#import "RevenantMenus.h"
 
 @implementation UIPencilInteraction {
 @private
@@ -57,7 +57,7 @@
 {
     _view = view;
     if (view)
-        charon_menus_say_once(@"pencil", @"UIPencilInteraction: this release has no Apple Pencil, so the interaction is attached and its delegate is never called; preferredTapAction is UIPencilPreferredActionIgnore");
+        revenant_menus_say_once(@"pencil", @"UIPencilInteraction: this release has no Apple Pencil, so the interaction is attached and its delegate is never called; preferredTapAction is UIPencilPreferredActionIgnore");
 }
 
 @end

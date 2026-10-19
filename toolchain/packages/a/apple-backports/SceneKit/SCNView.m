@@ -1,6 +1,6 @@
-#import "CharonSCN.h"
-#import "CharonSCNMath.h"
-#import "../CharonSayOnce.h"
+#import "RevenantSCN.h"
+#import "RevenantSCNMath.h"
+#import "../RevenantSayOnce.h"
 #import <OpenGLES/EAGL.h>
 #import <OpenGLES/ES2/gl.h>
 #import <OpenGLES/ES2/glext.h>
@@ -9,7 +9,7 @@
 @implementation SCNView
 {
     EAGLContext *_context;
-    CharonSCNRenderer *_renderer;
+    RevenantSCNRenderer *_renderer;
     GLuint _framebuffer, _colorBuffer, _depthBuffer;
     GLint _drawableWidth, _drawableHeight;
     CADisplayLink *_displayLink;
@@ -28,7 +28,7 @@
 - (instancetype)initWithFrame:(CGRect)frame options:(NSDictionary<NSString *, id> *)options
 {
     if ((self = [super initWithFrame:frame])) {
-        [self charonSetUp];
+        [self revenantSetUp];
     }
     return self;
 }
@@ -41,12 +41,12 @@
 - (instancetype)initWithCoder:(NSCoder *)coder
 {
     if ((self = [super initWithCoder:coder])) {
-        [self charonSetUp];
+        [self revenantSetUp];
     }
     return self;
 }
 
-- (void)charonSetUp
+- (void)revenantSetUp
 {
     self.contentScaleFactor = [UIScreen mainScreen].scale;
     CAEAGLLayer *layer = (CAEAGLLayer *)self.layer;
@@ -54,30 +54,30 @@
     layer.drawableProperties = @{kEAGLDrawablePropertyRetainedBacking: @NO, kEAGLDrawablePropertyColorFormat: kEAGLColorFormatRGBA8};
     EAGLContext *context = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2];
     if (context == nil) {
-        charon_say_once_for(@"scenekit no context", @"SceneKit: this device has no OpenGL ES 2.0 context: an SCNView draws nothing, -snapshot answers nil and no frame is reported to its delegate");
+        revenant_say_once_for(@"scenekit no context", @"SceneKit: this device has no OpenGL ES 2.0 context: an SCNView draws nothing, -snapshot answers nil and no frame is reported to its delegate");
     }
-    [self charonSetContext:context];
+    [self revenantSetContext:context];
 }
 
 - (void)dealloc
 {
     [_displayLink invalidate];
-    [self charonDeleteFramebuffer];
+    [self revenantDeleteFramebuffer];
 }
 
 #pragma mark Context and framebuffer
 
-- (void)charonSetContext:(EAGLContext *)context
+- (void)revenantSetContext:(EAGLContext *)context
 {
     if (context == _context) {
         return;
     }
-    [self charonDeleteFramebuffer];
+    [self revenantDeleteFramebuffer];
     _context = context;
-    _renderer = context ? [[CharonSCNRenderer alloc] initWithContext:context] : nil;
+    _renderer = context ? [[RevenantSCNRenderer alloc] initWithContext:context] : nil;
 }
 
-- (void)charonDeleteFramebuffer
+- (void)revenantDeleteFramebuffer
 {
     if (_context == nil || _framebuffer == 0) {
         return;
@@ -92,7 +92,7 @@
     [EAGLContext setCurrentContext:previous];
 }
 
-- (BOOL)charonPrepareDrawable
+- (BOOL)revenantPrepareDrawable
 {
     GLint width = (GLint)lroundf(self.bounds.size.width * self.contentScaleFactor);
     GLint height = (GLint)lroundf(self.bounds.size.height * self.contentScaleFactor);
@@ -111,7 +111,7 @@
     glBindFramebuffer(GL_FRAMEBUFFER, _framebuffer);
     glBindRenderbuffer(GL_RENDERBUFFER, _colorBuffer);
     if (![_context renderbufferStorage:GL_RENDERBUFFER fromDrawable:(CAEAGLLayer *)self.layer]) {
-        charon_say_once_for(@"scenekit drawable", @"SceneKit: the view's layer would not give the context a drawable: nothing is drawn to the view");
+        revenant_say_once_for(@"scenekit drawable", @"SceneKit: the view's layer would not give the context a drawable: nothing is drawn to the view");
         return NO;
     }
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, _colorBuffer);
@@ -131,12 +131,12 @@
 - (void)layoutSubviews
 {
     [super layoutSubviews];
-    [self charonDrawFrame];
+    [self revenantDrawFrame];
 }
 
 #pragma mark Frames
 
-- (void)charonClear
+- (void)revenantClear
 {
     float c[4] = {0, 0, 0, 0};
     UIColor *background = self.backgroundColor;
@@ -151,7 +151,7 @@
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
-- (void)charonRenderAtTime:(NSTimeInterval)time width:(GLint)width height:(GLint)height
+- (void)revenantRenderAtTime:(NSTimeInterval)time width:(GLint)width height:(GLint)height
 {
     id<SCNSceneRendererDelegate> delegate = _delegate;
     SCNScene *scene = _scene;
@@ -159,7 +159,7 @@
         [delegate renderer:self updateAtTime:time];
     }
     if (scene) {
-        [CharonSCNAnimations evaluateScene:scene atTime:CACurrentMediaTime()];
+        [RevenantSCNAnimations evaluateScene:scene atTime:CACurrentMediaTime()];
     }
     if ([delegate respondsToSelector:@selector(renderer:didApplyAnimationsAtTime:)]) {
         [delegate renderer:self didApplyAnimationsAtTime:time];
@@ -173,34 +173,34 @@
     if (scene && [delegate respondsToSelector:@selector(renderer:willRenderScene:atTime:)]) {
         [delegate renderer:self willRenderScene:scene atTime:time];
     }
-    [self charonClear];
+    [self revenantClear];
     [_renderer renderScene:scene pointOfView:_pointOfView width:width height:height];
     if (scene && [delegate respondsToSelector:@selector(renderer:didRenderScene:atTime:)]) {
         [delegate renderer:self didRenderScene:scene atTime:time];
     }
 }
 
-- (void)charonDrawFrame
+- (void)revenantDrawFrame
 {
     if (_context == nil || self.window == nil) {
         return;
     }
     EAGLContext *previous = [EAGLContext currentContext];
     [EAGLContext setCurrentContext:_context];
-    if ([self charonPrepareDrawable]) {
-        [self charonRenderAtTime:CACurrentMediaTime() width:_drawableWidth height:_drawableHeight];
+    if ([self revenantPrepareDrawable]) {
+        [self revenantRenderAtTime:CACurrentMediaTime() width:_drawableWidth height:_drawableHeight];
         glBindRenderbuffer(GL_RENDERBUFFER, _colorBuffer);
         [_context presentRenderbuffer:GL_RENDERBUFFER];
     }
     [EAGLContext setCurrentContext:previous];
 }
 
-- (void)charonDisplayLinkFired:(CADisplayLink *)link
+- (void)revenantDisplayLinkFired:(CADisplayLink *)link
 {
-    [self charonDrawFrame];
+    [self revenantDrawFrame];
 }
 
-- (void)charonUpdateDisplayLink
+- (void)revenantUpdateDisplayLink
 {
     BOOL wanted = self.window != nil && _scene != nil;
     if (!wanted) {
@@ -209,7 +209,7 @@
         return;
     }
     if (_displayLink == nil) {
-        _displayLink = [CADisplayLink displayLinkWithTarget:self selector:@selector(charonDisplayLinkFired:)];
+        _displayLink = [CADisplayLink displayLinkWithTarget:self selector:@selector(revenantDisplayLinkFired:)];
         [_displayLink addToRunLoop:[NSRunLoop mainRunLoop] forMode:NSRunLoopCommonModes];
     }
     NSInteger fps = _preferredFramesPerSecond;
@@ -219,7 +219,7 @@
 - (void)didMoveToWindow
 {
     [super didMoveToWindow];
-    [self charonUpdateDisplayLink];
+    [self revenantUpdateDisplayLink];
 }
 
 - (UIImage *)snapshot
@@ -244,7 +244,7 @@
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depth);
     UIImage *image = nil;
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE) {
-        [self charonRenderAtTime:0 width:width height:height];
+        [self revenantRenderAtTime:0 width:width height:height];
         NSMutableData *pixels = [NSMutableData dataWithLength:(NSUInteger)(width * height * 4)];
         glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, pixels.mutableBytes);
         NSMutableData *flipped = [NSMutableData dataWithLength:pixels.length];
@@ -277,8 +277,8 @@
 - (void)setScene:(SCNScene *)scene
 {
     _scene = scene;
-    _pointOfView = scene ? [CharonSCNRenderer defaultPointOfViewInScene:scene] : nil;
-    [self charonUpdateDisplayLink];
+    _pointOfView = scene ? [RevenantSCNRenderer defaultPointOfViewInScene:scene] : nil;
+    [self revenantUpdateDisplayLink];
 }
 
 - (SCNNode *)pointOfView
@@ -309,7 +309,7 @@
 - (void)setPreferredFramesPerSecond:(NSInteger)preferredFramesPerSecond
 {
     _preferredFramesPerSecond = preferredFramesPerSecond;
-    [self charonUpdateDisplayLink];
+    [self revenantUpdateDisplayLink];
 }
 
 - (BOOL)isJitteringEnabled
@@ -321,7 +321,7 @@
 {
     _jitteringEnabled = jitteringEnabled;
     if (jitteringEnabled) {
-        charon_say_once_for(@"scenekit jittering", @"SceneKit: SCNView keeps jitteringEnabled, but a still scene is not refined by jittered frames yet");
+        revenant_say_once_for(@"scenekit jittering", @"SceneKit: SCNView keeps jitteringEnabled, but a still scene is not refined by jittered frames yet");
     }
 }
 
@@ -332,7 +332,7 @@
 
 - (void)setEaglContext:(EAGLContext *)eaglContext
 {
-    [self charonSetContext:eaglContext];
+    [self revenantSetContext:eaglContext];
 }
 
 - (SCNRenderingAPI)renderingAPI

@@ -35,16 +35,16 @@ python3 - "$original" "$mutated" <<'PYMUT'
 import sys
 src, dst = sys.argv[1], sys.argv[2]
 s = open(src).read()
-drag_from = "    CharonWeakDelegateBox *box = objc_getAssociatedObject(control, &CharonTextDragDelegateKey);\n    return box.target;"
-drag_to = "    return objc_getAssociatedObject(control, &CharonTextDragDelegateKey);"
+drag_from = "    RevenantWeakDelegateBox *box = objc_getAssociatedObject(control, &RevenantTextDragDelegateKey);\n    return box.target;"
+drag_to = "    return objc_getAssociatedObject(control, &RevenantTextDragDelegateKey);"
 set_drag = """    if (!delegate) {
-        objc_setAssociatedObject(control, &CharonTextDragDelegateKey, nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+        objc_setAssociatedObject(control, &RevenantTextDragDelegateKey, nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
         return;
     }
-    CharonWeakDelegateBox *box = [[CharonWeakDelegateBox alloc] init];
+    RevenantWeakDelegateBox *box = [[RevenantWeakDelegateBox alloc] init];
     box.target = delegate;
-    objc_setAssociatedObject(control, &CharonTextDragDelegateKey, box, OBJC_ASSOCIATION_RETAIN_NONATOMIC);"""
-set_drag_mut = "    objc_setAssociatedObject(control, &CharonTextDragDelegateKey, delegate, OBJC_ASSOCIATION_ASSIGN);"
+    objc_setAssociatedObject(control, &RevenantTextDragDelegateKey, box, OBJC_ASSOCIATION_RETAIN_NONATOMIC);"""
+set_drag_mut = "    objc_setAssociatedObject(control, &RevenantTextDragDelegateKey, delegate, OBJC_ASSOCIATION_ASSIGN);"
 if s.count(drag_from) != 1 or s.count(set_drag) != 1:
     sys.exit("the mutation is anchored on text that is not there")
 s = s.replace(drag_from, drag_to).replace(set_drag, set_drag_mut)
@@ -82,7 +82,7 @@ run_one() {
         echo "$half $release: killed (status 137) before the guest ran -- the machine was out of memory, not a verdict"
         return 1
     fi
-    verdict=$(ls -d "$HOME/.charon/emulator/images.noindex/$image/iPhone3,1_"*"/run/verdict.json" 2>/dev/null | head -1)
+    verdict=$(ls -d "$HOME/.revenant/emulator/images.noindex/$image/iPhone3,1_"*"/run/verdict.json" 2>/dev/null | head -1)
     [ -n "$verdict" ] && echo "$half $release: $(python3 -c "
 import json
 d=json.load(open('$verdict'))
@@ -100,7 +100,7 @@ guest_lines() {
     release=$1
     half=$2
     image=$3
-    rootfs=$(ls -d "$HOME/.charon/emulator/images.noindex/$image/iPhone3,1_"*"/run/rootfs" 2>/dev/null | head -1)
+    rootfs=$(ls -d "$HOME/.revenant/emulator/images.noindex/$image/iPhone3,1_"*"/run/rootfs" 2>/dev/null | head -1)
     [ -n "$rootfs" ] || { echo "$half: no image rootfs"; return 0; }
     done_file="$rootfs/private/var/backports/textdragweak.done"
     asked_file="$rootfs/private/var/backports/textdragweak.asked"
@@ -114,9 +114,9 @@ guest_lines() {
 }
 
 failed=0
-image=$(ls -td "$HOME/.charon/emulator/images.noindex/"textdragweak-* 2>/dev/null | head -1 | xargs basename 2>/dev/null)
+image=$(ls -td "$HOME/.revenant/emulator/images.noindex/"textdragweak-* 2>/dev/null | head -1 | xargs basename 2>/dev/null)
 for release in $releases; do
-    [ -n "$image" ] || image=$(ls -td "$HOME/.charon/emulator/images.noindex/"textdragweak-* 2>/dev/null | head -1 | xargs basename)
+    [ -n "$image" ] || image=$(ls -td "$HOME/.revenant/emulator/images.noindex/"textdragweak-* 2>/dev/null | head -1 | xargs basename)
     run_one "$release" clean "$image" && guest_lines "$release" clean "$image" || failed=1
 done
 # the mutant, in the scratch tree only; the live source is never touched

@@ -27,12 +27,12 @@
     return managed;
 }
 
-- (void *)charon_objectKey
+- (void *)revenant_objectKey
 {
     return (__bridge void *)self;
 }
 
-- (void *)charon_globalKey
+- (void *)revenant_globalKey
 {
     return &_globalContext;
 }
@@ -45,9 +45,9 @@
     JSGlobalContextRef globalContext = context.JSGlobalContextRef;
     if (!globalContext)
         return self;
-    _weakContext = JSGlobalContextRetain([context.virtualMachine charon_weakContext:&_weak]);
+    _weakContext = JSGlobalContextRetain([context.virtualMachine revenant_weakContext:&_weak]);
     _globalContext = globalContext;
-    JSWeakObjectMapSet(_weakContext, _weak, self.charon_globalKey, JSContextGetGlobalObject(globalContext));
+    JSWeakObjectMapSet(_weakContext, _weak, self.revenant_globalKey, JSContextGetGlobalObject(globalContext));
     JSValueRef ref = value.JSValueRef;
     _type = JSValueGetType(globalContext, ref);
     switch (_type) {
@@ -59,13 +59,13 @@
         break;
     case kJSTypeString: {
         JSStringRef string = JSValueToStringCopy(globalContext, ref, NULL);
-        _string = charon_ns_string(string);
+        _string = revenant_ns_string(string);
         if (string)
             JSStringRelease(string);
         break;
     }
     case kJSTypeObject:
-        JSWeakObjectMapSet(_weakContext, _weak, self.charon_objectKey, (JSObjectRef)ref);
+        JSWeakObjectMapSet(_weakContext, _weak, self.revenant_objectKey, (JSObjectRef)ref);
         break;
     default:
         break;
@@ -77,21 +77,21 @@
 {
     if (!_weakContext)
         return;
-    JSWeakObjectMapRemove(_weakContext, _weak, self.charon_objectKey);
-    JSWeakObjectMapRemove(_weakContext, _weak, self.charon_globalKey);
+    JSWeakObjectMapRemove(_weakContext, _weak, self.revenant_objectKey);
+    JSWeakObjectMapRemove(_weakContext, _weak, self.revenant_globalKey);
     JSGlobalContextRelease(_weakContext);
 }
 
-- (JSObjectRef)charon_object
+- (JSObjectRef)revenant_object
 {
     if (!_weakContext || _type != kJSTypeObject)
         return NULL;
-    return JSWeakObjectMapGet(_weakContext, _weak, self.charon_objectKey);
+    return JSWeakObjectMapGet(_weakContext, _weak, self.revenant_objectKey);
 }
 
 - (JSValue *)value
 {
-    volatile JSObjectRef global = _weakContext ? JSWeakObjectMapGet(_weakContext, _weak, self.charon_globalKey) : NULL;
+    volatile JSObjectRef global = _weakContext ? JSWeakObjectMapGet(_weakContext, _weak, self.revenant_globalKey) : NULL;
     if (!global)
         return nil;
     JSGlobalContextRef context = _globalContext;
@@ -110,20 +110,20 @@
         ref = JSValueMakeNumber(context, _number);
         break;
     case kJSTypeString: {
-        JSStringRef string = charon_js_string(_string);
+        JSStringRef string = revenant_js_string(_string);
         ref = JSValueMakeString(context, string);
         JSStringRelease(string);
         break;
     }
     case kJSTypeObject:
-        ref = [self charon_object];
+        ref = [self revenant_object];
         break;
     default:
         break;
     }
     if (!ref)
         return nil;
-    return [JSValue charon_valueWithJSValueRef:ref context:[JSContext charon_wrapperForGlobalContext:context create:YES]];
+    return [JSValue revenant_valueWithJSValueRef:ref context:[JSContext revenant_wrapperForGlobalContext:context create:YES]];
 }
 
 @end

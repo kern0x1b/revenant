@@ -1,6 +1,6 @@
-#import "CharonAVFAudio.h"
+#import "RevenantAVFAudio.h"
 
-static struct mach_timebase_info CharonTimeBase(void)
+static struct mach_timebase_info RevenantTimeBase(void)
 {
     static struct mach_timebase_info base;
     static dispatch_once_t once;
@@ -13,15 +13,15 @@ static struct mach_timebase_info CharonTimeBase(void)
 }
 
 @implementation AVAudioTime {
-    AudioTimeStamp _charon_stamp;
-    double _charon_sampleRate;
+    AudioTimeStamp _revenant_stamp;
+    double _revenant_sampleRate;
 }
 
 - (instancetype)initWithAudioTimeStamp:(const AudioTimeStamp *)ts sampleRate:(double)sampleRate
 {
     if ((self = [super init])) {
-        _charon_stamp = ts != NULL ? *ts : (AudioTimeStamp){0};
-        _charon_sampleRate = sampleRate;
+        _revenant_stamp = ts != NULL ? *ts : (AudioTimeStamp){0};
+        _revenant_sampleRate = sampleRate;
     }
     return self;
 }
@@ -73,7 +73,7 @@ static struct mach_timebase_info CharonTimeBase(void)
 
 + (uint64_t)hostTimeForSeconds:(NSTimeInterval)seconds
 {
-    struct mach_timebase_info base = CharonTimeBase();
+    struct mach_timebase_info base = RevenantTimeBase();
     if (base.denom == 0) {
         return 0;
     }
@@ -82,7 +82,7 @@ static struct mach_timebase_info CharonTimeBase(void)
 
 + (NSTimeInterval)secondsForHostTime:(uint64_t)hostTime
 {
-    struct mach_timebase_info base = CharonTimeBase();
+    struct mach_timebase_info base = RevenantTimeBase();
     if (base.denom == 0) {
         return 0;
     }
@@ -91,19 +91,19 @@ static struct mach_timebase_info CharonTimeBase(void)
 
 - (nullable AVAudioTime *)extrapolateTimeFromAnchor:(AVAudioTime *)anchorTime
 {
-    if (anchorTime == nil || _charon_sampleRate <= 0 || !anchorTime.hostTimeValid || !anchorTime.sampleTimeValid) {
+    if (anchorTime == nil || _revenant_sampleRate <= 0 || !anchorTime.hostTimeValid || !anchorTime.sampleTimeValid) {
         return nil;
     }
-    if ((_charon_stamp.mFlags & (kAudioTimeStampHostTimeValid | kAudioTimeStampSampleTimeValid)) == 0) {
+    if ((_revenant_stamp.mFlags & (kAudioTimeStampHostTimeValid | kAudioTimeStampSampleTimeValid)) == 0) {
         return nil;
     }
-    AudioTimeStamp stamp = _charon_stamp;
-    const double rate = _charon_sampleRate;
-    if ((_charon_stamp.mFlags & kAudioTimeStampHostTimeValid) && !(_charon_stamp.mFlags & kAudioTimeStampSampleTimeValid)) {
+    AudioTimeStamp stamp = _revenant_stamp;
+    const double rate = _revenant_sampleRate;
+    if ((_revenant_stamp.mFlags & kAudioTimeStampHostTimeValid) && !(_revenant_stamp.mFlags & kAudioTimeStampSampleTimeValid)) {
         double seconds = [[self class] secondsForHostTime:anchorTime.hostTime];
         stamp.mFlags |= kAudioTimeStampSampleTimeValid;
         stamp.mSampleTime = (AVAudioFramePosition)llround(seconds * rate) + anchorTime.sampleTime;
-    } else if (!(_charon_stamp.mFlags & kAudioTimeStampHostTimeValid)) {
+    } else if (!(_revenant_stamp.mFlags & kAudioTimeStampHostTimeValid)) {
         stamp.mFlags |= kAudioTimeStampHostTimeValid;
         NSTimeInterval offset = ((double)stamp.mSampleTime - (double)anchorTime.sampleTime) / rate;
         stamp.mHostTime = (uint64_t)llround([[self class] hostTimeForSeconds:offset]) + anchorTime.hostTime;
@@ -113,32 +113,32 @@ static struct mach_timebase_info CharonTimeBase(void)
 
 - (BOOL)isHostTimeValid
 {
-    return (_charon_stamp.mFlags & kAudioTimeStampHostTimeValid) != 0;
+    return (_revenant_stamp.mFlags & kAudioTimeStampHostTimeValid) != 0;
 }
 
 - (uint64_t)hostTime
 {
-    return _charon_stamp.mHostTime;
+    return _revenant_stamp.mHostTime;
 }
 
 - (BOOL)isSampleTimeValid
 {
-    return (_charon_stamp.mFlags & kAudioTimeStampSampleTimeValid) != 0;
+    return (_revenant_stamp.mFlags & kAudioTimeStampSampleTimeValid) != 0;
 }
 
 - (AVAudioFramePosition)sampleTime
 {
-    return _charon_stamp.mSampleTime;
+    return _revenant_stamp.mSampleTime;
 }
 
 - (double)sampleRate
 {
-    return _charon_sampleRate;
+    return _revenant_sampleRate;
 }
 
 - (AudioTimeStamp)audioTimeStamp
 {
-    return _charon_stamp;
+    return _revenant_stamp;
 }
 
 @end

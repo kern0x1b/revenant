@@ -1,60 +1,60 @@
-#import "CharonLists.h"
+#import "RevenantLists.h"
 #import <objc/runtime.h>
 
-static const char CharonListConfigurationKey;
-static const char CharonNotedSectionsKey;
-static const char CharonSectionConfigurationKey;
+static const char RevenantListConfigurationKey;
+static const char RevenantNotedSectionsKey;
+static const char RevenantSectionConfigurationKey;
 
-@implementation UICollectionViewCompositionalLayout (CharonListState)
+@implementation UICollectionViewCompositionalLayout (RevenantListState)
 
-- (UICollectionLayoutListConfiguration *)charon_listConfiguration
+- (UICollectionLayoutListConfiguration *)revenant_listConfiguration
 {
-    return objc_getAssociatedObject(self, &CharonListConfigurationKey);
+    return objc_getAssociatedObject(self, &RevenantListConfigurationKey);
 }
 
-- (void)charon_setListConfiguration:(UICollectionLayoutListConfiguration *)configuration
+- (void)revenant_setListConfiguration:(UICollectionLayoutListConfiguration *)configuration
 {
-    objc_setAssociatedObject(self, &CharonListConfigurationKey, configuration, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, &RevenantListConfigurationKey, configuration, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
-- (void)charon_beginNotingSections
+- (void)revenant_beginNotingSections
 {
-    objc_setAssociatedObject(self, &CharonNotedSectionsKey, [NSMutableArray array], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, &RevenantNotedSectionsKey, [NSMutableArray array], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
-- (void)charon_noteSection:(NSCollectionLayoutSection *)section
+- (void)revenant_noteSection:(NSCollectionLayoutSection *)section
 {
-    NSMutableArray *noted = objc_getAssociatedObject(self, &CharonNotedSectionsKey);
+    NSMutableArray *noted = objc_getAssociatedObject(self, &RevenantNotedSectionsKey);
     [noted addObject:section ?: (id)[NSNull null]];
 }
 
-- (UICollectionLayoutListConfiguration *)charon_listConfigurationForSectionIndex:(NSInteger)index
+- (UICollectionLayoutListConfiguration *)revenant_listConfigurationForSectionIndex:(NSInteger)index
 {
-    NSArray *noted = objc_getAssociatedObject(self, &CharonNotedSectionsKey);
+    NSArray *noted = objc_getAssociatedObject(self, &RevenantNotedSectionsKey);
     id section = index >= 0 && (NSUInteger)index < noted.count ? noted[(NSUInteger)index] : nil;
-    UICollectionLayoutListConfiguration *own = [section isKindOfClass:[NSCollectionLayoutSection class]] ? [(NSCollectionLayoutSection *)section charon_listConfiguration] : nil;
-    return own ?: [self charon_listConfiguration];
+    UICollectionLayoutListConfiguration *own = [section isKindOfClass:[NSCollectionLayoutSection class]] ? [(NSCollectionLayoutSection *)section revenant_listConfiguration] : nil;
+    return own ?: [self revenant_listConfiguration];
 }
 
 @end
 
-@implementation NSCollectionLayoutSection (CharonLists)
+@implementation NSCollectionLayoutSection (RevenantLists)
 
-- (UICollectionLayoutListConfiguration *)charon_listConfiguration
+- (UICollectionLayoutListConfiguration *)revenant_listConfiguration
 {
-    return objc_getAssociatedObject(self, &CharonSectionConfigurationKey);
+    return objc_getAssociatedObject(self, &RevenantSectionConfigurationKey);
 }
 
-- (void)charon_setListConfiguration:(UICollectionLayoutListConfiguration *)configuration
+- (void)revenant_setListConfiguration:(UICollectionLayoutListConfiguration *)configuration
 {
-    objc_setAssociatedObject(self, &CharonSectionConfigurationKey, configuration, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, &RevenantSectionConfigurationKey, configuration, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
 @end
 
-@implementation UICollectionViewCell (CharonListConfigurationLookup)
+@implementation UICollectionViewCell (RevenantListConfigurationLookup)
 
-- (UICollectionLayoutListConfiguration *)charon_layoutListConfiguration
+- (UICollectionLayoutListConfiguration *)revenant_layoutListConfiguration
 {
     UIView *candidate = self.superview;
     while (candidate && ![candidate isKindOfClass:[UICollectionView class]])
@@ -64,7 +64,7 @@ static const char CharonSectionConfigurationKey;
     if (![layout isKindOfClass:[UICollectionViewCompositionalLayout class]])
         return nil;
     NSIndexPath *path = [view indexPathForCell:self];
-    return [(UICollectionViewCompositionalLayout *)layout charon_listConfigurationForSectionIndex:path ? path.section : 0];
+    return [(UICollectionViewCompositionalLayout *)layout revenant_listConfigurationForSectionIndex:path ? path.section : 0];
 }
 
 @end

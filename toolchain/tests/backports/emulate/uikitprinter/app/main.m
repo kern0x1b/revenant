@@ -1,13 +1,13 @@
 #import <UIKit/UIKit.h>
 
-static NSObject *charon_delegate;
-static UIPrinterPickerController *charon_picker;
-static int charon_completions;
+static NSObject *revenant_delegate;
+static UIPrinterPickerController *revenant_picker;
+static int revenant_completions;
 
-@interface CharonPickerDelegate : NSObject <UIPrinterPickerControllerDelegate>
+@interface RevenantPickerDelegate : NSObject <UIPrinterPickerControllerDelegate>
 @end
 
-@implementation CharonPickerDelegate
+@implementation RevenantPickerDelegate
 
 - (void)printerPickerControllerWillPresent:(UIPrinterPickerController *)picker
 {
@@ -41,10 +41,10 @@ static int charon_completions;
 
 @end
 
-@interface CharonBareBrowser : NSObject <NSNetServiceBrowserDelegate>
+@interface RevenantBareBrowser : NSObject <NSNetServiceBrowserDelegate>
 @end
 
-@implementation CharonBareBrowser
+@implementation RevenantBareBrowser
 
 - (void)netServiceBrowserWillSearch:(NSNetServiceBrowser *)browser
 {
@@ -66,18 +66,18 @@ static int charon_completions;
 
 @end
 
-static CharonBareBrowser *charon_bare;
-static NSNetServiceBrowser *charon_browser;
+static RevenantBareBrowser *revenant_bare;
+static NSNetServiceBrowser *revenant_browser;
 
-@interface CharonAppDelegate : UIResponder <UIApplicationDelegate>
+@interface RevenantAppDelegate : UIResponder <UIApplicationDelegate>
 @property (nonatomic, strong) UIWindow *window;
-- (void)charon_present;
-- (void)charon_presentPicker;
-- (void)charon_finish;
-- (void)charon_deadline;
+- (void)revenant_present;
+- (void)revenant_presentPicker;
+- (void)revenant_finish;
+- (void)revenant_deadline;
 @end
 
-@implementation CharonAppDelegate
+@implementation RevenantAppDelegate
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)options
 {
@@ -88,53 +88,53 @@ static NSNetServiceBrowser *charon_browser;
     [self.window makeKeyAndVisible];
     printf("window: key %s, root %s\n", self.window.isKeyWindow ? "YES" : "NO", NSStringFromClass([root class]).UTF8String);
     fflush(stdout);
-    [self performSelector:@selector(charon_present) withObject:nil afterDelay:2];
+    [self performSelector:@selector(revenant_present) withObject:nil afterDelay:2];
     return YES;
 }
 
-- (void)charon_present
+- (void)revenant_present
 {
-    charon_bare = [[CharonBareBrowser alloc] init];
-    charon_browser = [[NSNetServiceBrowser alloc] init];
-    charon_browser.delegate = charon_bare;
-    [charon_browser searchForServicesOfType:@"_universal._sub._ipp._tcp." inDomain:@"local."];
-    [self performSelector:@selector(charon_presentPicker) withObject:nil afterDelay:3];
+    revenant_bare = [[RevenantBareBrowser alloc] init];
+    revenant_browser = [[NSNetServiceBrowser alloc] init];
+    revenant_browser.delegate = revenant_bare;
+    [revenant_browser searchForServicesOfType:@"_universal._sub._ipp._tcp." inDomain:@"local."];
+    [self performSelector:@selector(revenant_presentPicker) withObject:nil afterDelay:3];
 }
 
-- (void)charon_presentPicker
+- (void)revenant_presentPicker
 {
-    [charon_browser stop];
-    charon_delegate = [[CharonPickerDelegate alloc] init];
-    charon_picker = [UIPrinterPickerController printerPickerControllerWithInitiallySelectedPrinter:nil];
-    charon_picker.delegate = (id<UIPrinterPickerControllerDelegate>)charon_delegate;
-    printf("picker: class %s, selectedPrinter %s\n", NSStringFromClass([charon_picker class]).UTF8String,
-           charon_picker.selectedPrinter ? "present" : "nil");
+    [revenant_browser stop];
+    revenant_delegate = [[RevenantPickerDelegate alloc] init];
+    revenant_picker = [UIPrinterPickerController printerPickerControllerWithInitiallySelectedPrinter:nil];
+    revenant_picker.delegate = (id<UIPrinterPickerControllerDelegate>)revenant_delegate;
+    printf("picker: class %s, selectedPrinter %s\n", NSStringFromClass([revenant_picker class]).UTF8String,
+           revenant_picker.selectedPrinter ? "present" : "nil");
     fflush(stdout);
-    BOOL presented = [charon_picker presentAnimated:YES completionHandler:^(UIPrinterPickerController *picker, BOOL userDidSelect, NSError *error) {
-        charon_completions++;
-        printf("completion %d: userDidSelect %s, error %s\n", charon_completions, userDidSelect ? "YES" : "NO",
+    BOOL presented = [revenant_picker presentAnimated:YES completionHandler:^(UIPrinterPickerController *picker, BOOL userDidSelect, NSError *error) {
+        revenant_completions++;
+        printf("completion %d: userDidSelect %s, error %s\n", revenant_completions, userDidSelect ? "YES" : "NO",
                error ? error.description.UTF8String : "nil");
         fflush(stdout);
-        [self performSelector:@selector(charon_finish) withObject:nil afterDelay:2];
+        [self performSelector:@selector(revenant_finish) withObject:nil afterDelay:2];
     }];
     printf("present: %s\n", presented ? "YES" : "NO");
     fflush(stdout);
     if (!presented) {
         exit(2);
     }
-    [self performSelector:@selector(charon_deadline) withObject:nil afterDelay:60];
+    [self performSelector:@selector(revenant_deadline) withObject:nil afterDelay:60];
 }
 
-- (void)charon_finish
+- (void)revenant_finish
 {
-    printf("finished: %d completion(s)\n", charon_completions);
+    printf("finished: %d completion(s)\n", revenant_completions);
     fflush(stdout);
-    exit(charon_completions == 1 ? 0 : 1);
+    exit(revenant_completions == 1 ? 0 : 1);
 }
 
-- (void)charon_deadline
+- (void)revenant_deadline
 {
-    printf("deadline: the picker completed %d time(s) in 60 s; no tap reached Cancel\n", charon_completions);
+    printf("deadline: the picker completed %d time(s) in 60 s; no tap reached Cancel\n", revenant_completions);
     fflush(stdout);
     exit(3);
 }
@@ -144,6 +144,6 @@ static NSNetServiceBrowser *charon_browser;
 int main(int argc, char *argv[])
 {
     @autoreleasepool {
-        return UIApplicationMain(argc, argv, nil, NSStringFromClass([CharonAppDelegate class]));
+        return UIApplicationMain(argc, argv, nil, NSStringFromClass([RevenantAppDelegate class]));
     }
 }

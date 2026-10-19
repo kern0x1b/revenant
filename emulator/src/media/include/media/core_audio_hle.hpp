@@ -18,7 +18,7 @@
 #include <optional>
 #include <vector>
 
-namespace shade {
+namespace emulator {
 
 class AudioService;
 class AddressSpace;

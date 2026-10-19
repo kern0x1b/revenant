@@ -41,7 +41,7 @@ typedef struct {
 
 typedef struct {
     uint32_t tid;
-    charon_v4i thread, group, size;
+    revenant_v4i thread, group, size;
     Work *work;
 } ThreadArgument;
 

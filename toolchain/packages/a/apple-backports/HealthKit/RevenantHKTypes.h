@@ -2,39 +2,39 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-typedef NS_ENUM(NSInteger, CharonHKTypeKind) {
-    CharonHKTypeKindQuantity = 0,
-    CharonHKTypeKindCategory = 1,
-    CharonHKTypeKindCorrelation = 2,
-    CharonHKTypeKindCharacteristic = 3,
-    CharonHKTypeKindWorkout = 4,
+typedef NS_ENUM(NSInteger, RevenantHKTypeKind) {
+    RevenantHKTypeKindQuantity = 0,
+    RevenantHKTypeKindCategory = 1,
+    RevenantHKTypeKindCorrelation = 2,
+    RevenantHKTypeKindCharacteristic = 3,
+    RevenantHKTypeKindWorkout = 4,
 };
 
-typedef NS_ENUM(NSInteger, CharonHKAggregationStyle) {
-    CharonHKAggregationCumulativeSum = 0,
-    CharonHKAggregationDiscreteArithmetic = 1,
-    CharonHKAggregationDiscreteStatistical = 2,
-    CharonHKAggregationDiscreteMostRecent = 3,
-    CharonHKAggregationDiscreteEquivalentContinuousLevel = 4,
-    CharonHKAggregationDiscreteTemporallyWeighted = 5,
+typedef NS_ENUM(NSInteger, RevenantHKAggregationStyle) {
+    RevenantHKAggregationCumulativeSum = 0,
+    RevenantHKAggregationDiscreteArithmetic = 1,
+    RevenantHKAggregationDiscreteStatistical = 2,
+    RevenantHKAggregationDiscreteMostRecent = 3,
+    RevenantHKAggregationDiscreteEquivalentContinuousLevel = 4,
+    RevenantHKAggregationDiscreteTemporallyWeighted = 5,
 };
 
 typedef struct {
     __unsafe_unretained NSString *identifier;
     __unsafe_unretained NSString *unit;
-    CharonHKAggregationStyle aggregation;
-} CharonHKTypeEntry;
+    RevenantHKAggregationStyle aggregation;
+} RevenantHKTypeEntry;
 
-extern const CharonHKTypeEntry *_Nullable CharonHKQuantityTypeEntry(NSString *identifier);
-extern NSUInteger CharonHKQuantityTypeCount(void);
-extern const CharonHKTypeEntry *_Nullable CharonHKQuantityTypeEntryAt(NSUInteger index);
+extern const RevenantHKTypeEntry *_Nullable RevenantHKQuantityTypeEntry(NSString *identifier);
+extern NSUInteger RevenantHKQuantityTypeCount(void);
+extern const RevenantHKTypeEntry *_Nullable RevenantHKQuantityTypeEntryAt(NSUInteger index);
 
-extern Class _Nullable CharonHKClassForObjectKind(NSInteger kind);
+extern Class _Nullable RevenantHKClassForObjectKind(NSInteger kind);
 
-typedef Class _Nullable (^CharonHKClassResolver)(NSString *name);
-extern void CharonHKSetClassResolver(CharonHKClassResolver _Nullable resolver);
-extern Class _Nullable CharonHKClassForTypeKind(NSInteger kind);
+typedef Class _Nullable (^RevenantHKClassResolver)(NSString *name);
+extern void RevenantHKSetClassResolver(RevenantHKClassResolver _Nullable resolver);
+extern Class _Nullable RevenantHKClassForTypeKind(NSInteger kind);
 
-extern BOOL CharonHKHasTypeIdentifier(NSString *identifier, CharonHKTypeKind kind);
+extern BOOL RevenantHKHasTypeIdentifier(NSString *identifier, RevenantHKTypeKind kind);
 
 NS_ASSUME_NONNULL_END

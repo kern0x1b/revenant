@@ -1,6 +1,6 @@
 #import <Foundation/Foundation.h>
 
-@implementation NSProcessInfo (CharonPlatform)
+@implementation NSProcessInfo (RevenantPlatform)
 
 - (BOOL)isiOSAppOnVision
 {

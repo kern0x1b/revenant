@@ -1,10 +1,10 @@
-#import "CharonVideoToolbox.h"
+#import "RevenantVideoToolbox.h"
 #import "VideoToolboxValueStore.h"
 
 
-typedef NSDictionary<NSString *, id> CharonVTFrameAttributes;
+typedef NSDictionary<NSString *, id> RevenantVTFrameAttributes;
 
-CHARON_VIDEO_TOOLBOX_VALUE_STORE(VTFrameRateConversionConfiguration)
+REVENANT_VIDEO_TOOLBOX_VALUE_STORE(VTFrameRateConversionConfiguration)
 
 @implementation VTFrameRateConversionConfiguration
 
@@ -15,20 +15,20 @@ CHARON_VIDEO_TOOLBOX_VALUE_STORE(VTFrameRateConversionConfiguration)
     return NO;
 }
 
-CHARON_VALUE_PROPERTY(NSArray<NSNumber *> *, frameSupportedPixelFormats)
+REVENANT_VALUE_PROPERTY(NSArray<NSNumber *> *, frameSupportedPixelFormats)
 
-CHARON_VALUE_PROPERTY(CharonVTFrameAttributes *, sourcePixelBufferAttributes)
+REVENANT_VALUE_PROPERTY(RevenantVTFrameAttributes *, sourcePixelBufferAttributes)
 
-CHARON_VALUE_PROPERTY(CharonVTFrameAttributes *, destinationPixelBufferAttributes)
+REVENANT_VALUE_PROPERTY(RevenantVTFrameAttributes *, destinationPixelBufferAttributes)
 
-CHARON_SCALAR_PROPERTY(NSInteger, nextFrameCount)
+REVENANT_SCALAR_PROPERTY(NSInteger, nextFrameCount)
 
-CHARON_SCALAR_PROPERTY(NSInteger, previousFrameCount)
+REVENANT_SCALAR_PROPERTY(NSInteger, previousFrameCount)
 
 + (CMVideoDimensions)maximumDimensions
 {
     CMVideoDimensions value = {0};
-    NSValue *boxed = CharonValueStoreOfClass([self class])[@"maximumDimensions"];
+    NSValue *boxed = RevenantValueStoreOfClass([self class])[@"maximumDimensions"];
     if (boxed)
         [boxed getValue:&value];
     return value;
@@ -37,7 +37,7 @@ CHARON_SCALAR_PROPERTY(NSInteger, previousFrameCount)
 + (CMVideoDimensions)minimumDimensions
 {
     CMVideoDimensions value = {0};
-    NSValue *boxed = CharonValueStoreOfClass([self class])[@"minimumDimensions"];
+    NSValue *boxed = RevenantValueStoreOfClass([self class])[@"minimumDimensions"];
     if (boxed)
         [boxed getValue:&value];
     return value;
@@ -46,24 +46,24 @@ CHARON_SCALAR_PROPERTY(NSInteger, previousFrameCount)
 
 #pragma mark - This class's own properties
 
-CHARON_SCALAR_PROPERTY(NSInteger, frameWidth)
+REVENANT_SCALAR_PROPERTY(NSInteger, frameWidth)
 
-CHARON_SCALAR_PROPERTY(NSInteger, frameHeight)
+REVENANT_SCALAR_PROPERTY(NSInteger, frameHeight)
 
-CHARON_SCALAR_PROPERTY(BOOL, usePrecomputedFlow)
+REVENANT_SCALAR_PROPERTY(BOOL, usePrecomputedFlow)
 
-CHARON_SCALAR_PROPERTY(VTFrameRateConversionConfigurationQualityPrioritization, qualityPrioritization)
+REVENANT_SCALAR_PROPERTY(VTFrameRateConversionConfigurationQualityPrioritization, qualityPrioritization)
 
-CHARON_SCALAR_PROPERTY(VTFrameRateConversionConfigurationRevision, revision)
+REVENANT_SCALAR_PROPERTY(VTFrameRateConversionConfigurationRevision, revision)
 
 + (NSIndexSet *)supportedRevisions
 {
-    return (NSIndexSet *)CharonValueStoreOfClass([self class])[@"supportedRevisions"];
+    return (NSIndexSet *)RevenantValueStoreOfClass([self class])[@"supportedRevisions"];
 }
 
 + (VTFrameRateConversionConfigurationRevision)defaultRevision
 {
-    return (VTFrameRateConversionConfigurationRevision)[CharonValueStoreOfClass([self class])[@"defaultRevision"] longLongValue];
+    return (VTFrameRateConversionConfigurationRevision)[RevenantValueStoreOfClass([self class])[@"defaultRevision"] longLongValue];
 }
 
 
@@ -76,11 +76,11 @@ CHARON_SCALAR_PROPERTY(VTFrameRateConversionConfigurationRevision, revision)
                         revision:(VTFrameRateConversionConfigurationRevision)revision
 {
     self = [super init];
-    CharonValueSet(self, @(frameWidth), @"frameWidth");
-    CharonValueSet(self, @(frameHeight), @"frameHeight");
-    CharonValueSet(self, @(usePrecomputedFlow), @"usePrecomputedFlow");
-    CharonValueSet(self, @(qualityPrioritization), @"qualityPrioritization");
-    CharonValueSet(self, @(revision), @"revision");
+    RevenantValueSet(self, @(frameWidth), @"frameWidth");
+    RevenantValueSet(self, @(frameHeight), @"frameHeight");
+    RevenantValueSet(self, @(usePrecomputedFlow), @"usePrecomputedFlow");
+    RevenantValueSet(self, @(qualityPrioritization), @"qualityPrioritization");
+    RevenantValueSet(self, @(revision), @"revision");
     return self;
 }
 

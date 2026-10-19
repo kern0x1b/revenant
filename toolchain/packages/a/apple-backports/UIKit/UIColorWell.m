@@ -1,7 +1,7 @@
-#import "CharonMenus.h"
+#import "RevenantMenus.h"
 
-@interface UIColorWell (CharonWell) <UIColorPickerViewControllerDelegate>
-- (void)charon_present;
+@interface UIColorWell (RevenantWell) <UIColorPickerViewControllerDelegate>
+- (void)revenant_present;
 @end
 
 @implementation UIColorWell {
@@ -27,7 +27,7 @@
         _fill = [CALayer layer];
         [self.layer addSublayer:_ring];
         [self.layer addSublayer:_fill];
-        [self charon_refresh];
+        [self revenant_refresh];
     }
     return self;
 }
@@ -60,7 +60,7 @@
 - (void)setSelectedColor:(UIColor *)selectedColor
 {
     _selectedColor = selectedColor;
-    [self charon_refresh];
+    [self revenant_refresh];
 }
 
 - (CGSize)sizeThatFits:(CGSize)size
@@ -85,7 +85,7 @@
     _fill.cornerRadius = _fill.bounds.size.width / 2;
 }
 
-- (void)charon_refresh
+- (void)revenant_refresh
 {
     _fill.backgroundColor = (_selectedColor ?: [UIColor whiteColor]).CGColor;
 }
@@ -95,10 +95,10 @@
     BOOL inside = touch && [self pointInside:[touch locationInView:self] withEvent:event];
     [super endTrackingWithTouch:touch withEvent:event];
     if (inside)
-        [self charon_present];
+        [self revenant_present];
 }
 
-- (void)charon_present
+- (void)revenant_present
 {
     UIResponder *responder = self;
     while (responder && ![responder isKindOfClass:[UIViewController class]])
@@ -107,7 +107,7 @@
     while (top.presentedViewController)
         top = top.presentedViewController;
     if (!top) {
-        charon_menus_say_once(@"color-well-presenter", @"UIColorWell: the well is not in a view controller's view, so there is nothing to present the color picker from");
+        revenant_menus_say_once(@"color-well-presenter", @"UIColorWell: the well is not in a view controller's view, so there is nothing to present the color picker from");
         return;
     }
     UIColorPickerViewController *picker = [[UIColorPickerViewController alloc] init];

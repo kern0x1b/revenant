@@ -3,16 +3,16 @@
 #import <Accelerate/Accelerate.h>
 #include <string.h>
 
-typedef struct CharonTurn {
+typedef struct RevenantTurn {
     int inside;
     vImagePixelCount sourceRow;
     vImagePixelCount sourceColumn;
-} CharonTurn;
+} RevenantTurn;
 
-static inline CharonTurn charon_turn(uint8_t rotationConstant, vImagePixelCount dx, vImagePixelCount dy,
+static inline RevenantTurn revenant_turn(uint8_t rotationConstant, vImagePixelCount dx, vImagePixelCount dy,
                                      vImagePixelCount width, vImagePixelCount height)
 {
-    CharonTurn found;
+    RevenantTurn found;
     switch (rotationConstant) {
     case 0:  found.sourceRow = dy;            found.sourceColumn = dx;               break;
     case 1:  found.sourceRow = dx;            found.sourceColumn = width - 1 - dy;   break;
@@ -23,7 +23,7 @@ static inline CharonTurn charon_turn(uint8_t rotationConstant, vImagePixelCount 
     return found;
 }
 
-static inline vImage_Error charon_turn_ready(const vImage_Buffer *src, const vImage_Buffer *dest,
+static inline vImage_Error revenant_turn_ready(const vImage_Buffer *src, const vImage_Buffer *dest,
                                              uint8_t rotationConstant)
 {
     if (rotationConstant > 3)
@@ -33,7 +33,7 @@ static inline vImage_Error charon_turn_ready(const vImage_Buffer *src, const vIm
     return kvImageNoError;
 }
 
-static inline vImage_Error charon_turn_run(const vImage_Buffer *src, const vImage_Buffer *dest,
+static inline vImage_Error revenant_turn_run(const vImage_Buffer *src, const vImage_Buffer *dest,
                                            uint8_t rotationConstant, const void *backColor, size_t bytes,
                                            vImage_Flags flags)
 {
@@ -50,7 +50,7 @@ static inline vImage_Error charon_turn_run(const vImage_Buffer *src, const vImag
         uint8_t *out = (uint8_t *)dest->data + (size_t)dy * dest->rowBytes;
         for (vImagePixelCount dx = 0; dx < dest->width; dx++) {
             long tx = (long)dx - offsetX, ty = (long)dy - offsetY;
-            CharonTurn from;
+            RevenantTurn from;
             const uint8_t *pixel;
             if (tx < 0 || ty < 0 || (vImagePixelCount)tx >= turnedWidth || (vImagePixelCount)ty >= turnedHeight) {
                 if (!extend) {
@@ -62,7 +62,7 @@ static inline vImage_Error charon_turn_run(const vImage_Buffer *src, const vImag
                 if ((vImagePixelCount)tx >= turnedWidth) tx = turnedWidth ? turnedWidth - 1 : 0;
                 if ((vImagePixelCount)ty >= turnedHeight) ty = turnedHeight ? turnedHeight - 1 : 0;
             }
-            from = charon_turn(rotationConstant, (vImagePixelCount)tx, (vImagePixelCount)ty, width, height);
+            from = revenant_turn(rotationConstant, (vImagePixelCount)tx, (vImagePixelCount)ty, width, height);
             if (from.inside)
                 pixel = (const uint8_t *)src->data + (size_t)from.sourceRow * src->rowBytes
                       + (size_t)from.sourceColumn * bytes;

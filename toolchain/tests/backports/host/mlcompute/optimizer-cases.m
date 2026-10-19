@@ -2,7 +2,7 @@
 
 #import "mlcompute-16.h"
 
-@interface MLCAdamOptimizer (CharonFifteen)
+@interface MLCAdamOptimizer (RevenantFifteen)
 + (instancetype)optimizerWithDescriptor:(MLCOptimizerDescriptor *)optimizerDescriptor
                                   beta1:(float)beta1
                                   beta2:(float)beta2
@@ -11,14 +11,14 @@
                                timeStep:(NSUInteger)timeStep;
 @end
 
-@interface MLCOptimizer (CharonFifteen)
+@interface MLCOptimizer (RevenantFifteen)
 @property (readonly, nonatomic) MLCGradientClippingType gradientClippingType;
 @property (readonly, nonatomic) float maximumClippingNorm;
 @property (readonly, nonatomic) float customGlobalNorm;
 @end
 
-#define CHARON_STRINGIFY_(token) #token
-#define CHARON_STRINGIFY(token) CHARON_STRINGIFY_(token)
+#define REVENANT_STRINGIFY_(token) #token
+#define REVENANT_STRINGIFY(token) REVENANT_STRINGIFY_(token)
 
 static NSString *nameHere(Class cls)
 {
@@ -47,8 +47,8 @@ static void named(NSString *name, const char *text)
         return;
     }
     NSString *value = [NSString stringWithUTF8String:text];
-    if ([value hasPrefix:@"Charon"])
-        value = [value substringFromIndex:6];
+    if ([value hasPrefix:@"Revenant"])
+        value = [value substringFromIndex:8];
     key(name, value);
 }
 
@@ -87,9 +87,9 @@ static void adamNumbers(NSString *name, float beta1, float beta2, float epsilon,
     number([name stringByAppendingString:@" timeStep"], (double)timeStep);
 }
 
-void charon_mlcompute_optimizer_cases(void);
+void revenant_mlcompute_optimizer_cases(void);
 
-void charon_mlcompute_optimizer_cases(void)
+void revenant_mlcompute_optimizer_cases(void)
 {
     @autoreleasepool {
         MLCOptimizerDescriptor *full = [MLCOptimizerDescriptor descriptorWithLearningRate:0.125f
@@ -170,14 +170,14 @@ void charon_mlcompute_optimizer_cases(void)
 
         Class base = class_getSuperclass([(id)sgd class]);
         named(@"base class", class_getName(base));
-        MLCOptimizer *bare = CharonNew(base);
+        MLCOptimizer *bare = RevenantNew(base);
         numbers(@"base new", bare);
         kinds(@"base new", bare);
-        flag(@"base new twice distinct", CharonNew(base) != CharonNew(base));
+        flag(@"base new twice distinct", RevenantNew(base) != RevenantNew(base));
 
-        Class deviceData = NSClassFromString(@(CHARON_STRINGIFY(MLCTensorOptimizerDeviceData)));
+        Class deviceData = NSClassFromString(@(REVENANT_STRINGIFY(MLCTensorOptimizerDeviceData)));
         named(@"device data class", class_getName(deviceData));
-        named(@"device data new", class_getName([CharonNew(deviceData) class]));
+        named(@"device data new", class_getName([RevenantNew(deviceData) class]));
 
         MLCSGDOptimizer *sgdCopy = [sgdMomentum copy];
         numbers(@"sgd copy", sgdCopy);

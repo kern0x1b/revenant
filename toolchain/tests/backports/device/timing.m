@@ -3,7 +3,7 @@
 #include <dlfcn.h>
 #import "check.h"
 
-@interface UISpringTimingParameters (CharonSettling)
+@interface UISpringTimingParameters (RevenantSettling)
 - (NSTimeInterval)settlingDuration;
 @end
 
@@ -116,7 +116,7 @@ int main(void)
         CHECK([[[UISpringTimingParameters alloc] initWithDampingRatio:0.5] settlingDuration] == 0,
               "a spring made from a ratio alone settles in no time");
 
-        printf("%d checks, %d failures\n", charon_checks, charon_failures);
-        return charon_failures;
+        printf("%d checks, %d failures\n", revenant_checks, revenant_failures);
+        return revenant_failures;
     }
 }

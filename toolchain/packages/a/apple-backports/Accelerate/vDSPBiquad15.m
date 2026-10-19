@@ -5,7 +5,7 @@ struct vDSP_biquad_SetupStruct {
     double coeff[1];
 };
 
-static inline void charon_biquad15_set(void *setup, vDSP_Length section, const double *block)
+static inline void revenant_biquad15_set(void *setup, vDSP_Length section, const double *block)
 {
     struct vDSP_biquad_SetupStruct *asSetup = (struct vDSP_biquad_SetupStruct *)setup;
     if (section >= asSetup->sections) {
@@ -24,7 +24,7 @@ void vDSP_biquad_SetCoefficientsDouble(vDSP_biquad_Setup __setup, const double *
         return;
     }
     for (vDSP_Length at = 0; at < __nsec; at++) {
-        charon_biquad15_set(__setup, __start_sec + at, __coeffs + (size_t)at * 5);
+        revenant_biquad15_set(__setup, __start_sec + at, __coeffs + (size_t)at * 5);
     }
 }
 
@@ -39,6 +39,6 @@ void vDSP_biquad_SetCoefficientsSingle(vDSP_biquad_Setup __setup, const float *_
         for (int k = 0; k < 5; k++) {
             block[k] = (double)__coeffs[(size_t)at * 5 + k];
         }
-        charon_biquad15_set(__setup, __start_sec + at, block);
+        revenant_biquad15_set(__setup, __start_sec + at, block);
     }
 }

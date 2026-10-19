@@ -3,7 +3,7 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-build=${AVFAUDIO_ENVIRONMENT_BUILD:-$(runs_folder charon-avfaudio-environment)}
+build=${AVFAUDIO_ENVIRONMENT_BUILD:-$(runs_folder revenant-avfaudio-environment)}
 rm -rf "$build"
 mkdir -p "$build"
 

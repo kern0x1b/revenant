@@ -38,7 +38,7 @@ static BOOL sameURL(NSString *input, id expectedString, id expectedURL, id actua
 static void mismatch(const char *section, NSString *detail)
 {
     if (++mismatches <= 100)
-        charon_check(NO, section, detail);
+        revenant_check(NO, section, detail);
 }
 
 static id value(id object)
@@ -124,7 +124,7 @@ static BOOL compareDumps(const char *section, NSString *input, id expected, id a
 
 static void summary(const char *section, NSUInteger records, int before)
 {
-    charon_check(mismatches == before && records > 0, section, [NSString stringWithFormat:@"%d of %lu records differ", mismatches - before, (unsigned long)records]);
+    revenant_check(mismatches == before && records > 0, section, [NSString stringWithFormat:@"%d of %lu records differ", mismatches - before, (unsigned long)records]);
     printf("%s: %lu records\n", section, (unsigned long)records);
 }
 
@@ -410,6 +410,6 @@ int main(void)
         testQueryItems(expected[@"queryGet"], expected[@"querySet"]);
         testObject();
     }
-    printf("checks=%d failures=%d\n", charon_checks, charon_failures);
-    return charon_failures;
+    printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
+    return revenant_failures;
 }

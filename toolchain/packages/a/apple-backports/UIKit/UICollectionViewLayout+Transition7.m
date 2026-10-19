@@ -1,6 +1,6 @@
 #import <UIKit/UIKit.h>
 
-@implementation UICollectionViewLayout (CharonTransition7)
+@implementation UICollectionViewLayout (RevenantTransition7)
 
 - (CGPoint)targetContentOffsetForProposedContentOffset:(CGPoint)proposedContentOffset
 {

@@ -188,7 +188,7 @@ end
 local function one(args, fw, sdk, sdk16, sdk_release)
     local snap = layout.snap_dir(args.tree, fw)
     local wanted = protocol_wanted(args.tree, fw, args.coordination, sdk, sdk_release)
-    for _, stale in ipairs(files.glob(path.join(snap, "Charon*Protocols.h"))) do
+    for _, stale in ipairs(files.glob(path.join(snap, "Revenant*Protocols.h"))) do
         os.rm(stale)
     end
     if #wanted == 0 then

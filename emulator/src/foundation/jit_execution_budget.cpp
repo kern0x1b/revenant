@@ -10,7 +10,7 @@
 #include <algorithm>
 #include <limits>
 
-namespace shade {
+namespace emulator {
 
 std::uint32_t JitHostExecutionBudget::next(
     std::chrono::nanoseconds target) const noexcept

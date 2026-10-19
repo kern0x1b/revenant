@@ -3,7 +3,7 @@
 # (11.0 and 11.3), against Apple's own objects on the same inputs, in one process.
 #
 # The port's sources are built for Catalyst beside Apple's MetalPerformanceShaders, and every class they define is
-# renamed CharonHost<Name>, so Apple's classes and the port's coexist in the process. The two descriptors subclass
+# renamed RevenantHost<Name>, so Apple's classes and the port's coexist in the process. The two descriptors subclass
 # the base descriptor (MPSCNNConvolutionDescriptor10.m) and the padding policies subclass MPSNNDefaultPadding
 # (MPSNNGraph11.m), so those files are built too. Nothing is stubbed: a symbol the port needs and does not have
 # would stop the link here.
@@ -34,7 +34,7 @@ for source in $sources; do
 done
 renames=""
 for name in $(sort -u "$BUILD/classes.txt"); do
-    renames="$renames -D$name=CharonHost$name"
+    renames="$renames -D$name=RevenantHost$name"
 done
 echo "renamed:$renames"
 

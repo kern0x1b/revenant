@@ -7,7 +7,7 @@
 #include <cstdint>
 #include <optional>
 
-namespace shade {
+namespace emulator {
 
 class KeventTimer {
 public:

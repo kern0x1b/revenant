@@ -1,6 +1,6 @@
 #import <Foundation/Foundation.h>
 
-#import "CharonMorphology.h"
+#import "RevenantMorphology.h"
 
 @implementation NSMorphologyPronoun
 {

@@ -48,7 +48,7 @@ static void same_point(CGPoint ours, CGPoint theirs, NSString *what)
 
 static NSString *shape_of(NSString *description)
 {
-    NSString *text = [description stringByReplacingOccurrencesOfString:@"CharonHost" withString:@""];
+    NSString *text = [description stringByReplacingOccurrencesOfString:@"RevenantHost" withString:@""];
     NSRange open = [text rangeOfString:@"("], close = [text rangeOfString:@")"];
     if (open.location == NSNotFound || close.location == NSNotFound || close.location < open.location)
         return text;
@@ -66,7 +66,7 @@ static void same_description(id ours, id theirs, NSString *what)
 
 static Class ours_of(NSString *name)
 {
-    Class mine = NSClassFromString([@"CharonHost" stringByAppendingString:name]);
+    Class mine = NSClassFromString([@"RevenantHost" stringByAppendingString:name]);
     if (!mine)
         fail(@"the backport defines no %@", name);
     return mine;
@@ -78,7 +78,7 @@ static NSString *reason_of(void (^block)(void))
         block();
     } @catch (NSException *exception) {
         return [NSString stringWithFormat:@"%@: %@", exception.name,
-                [exception.reason stringByReplacingOccurrencesOfString:@"CharonHost" withString:@""]];
+                [exception.reason stringByReplacingOccurrencesOfString:@"RevenantHost" withString:@""]];
     }
     return nil;
 }

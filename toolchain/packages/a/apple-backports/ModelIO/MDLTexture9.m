@@ -5,7 +5,7 @@
 
 #pragma clang diagnostic ignored "-Wobjc-missing-property-synthesis"
 
-static NSUInteger CharonMDLChannelSize(MDLTextureChannelEncoding encoding)
+static NSUInteger RevenantMDLChannelSize(MDLTextureChannelEncoding encoding)
 {
     switch (encoding) {
         case MDLTextureChannelEncodingUInt8:
@@ -23,7 +23,7 @@ static NSUInteger CharonMDLChannelSize(MDLTextureChannelEncoding encoding)
     return 0;
 }
 
-static CGColorRef CharonMDLCreateColorOfTemperature(float kelvin)
+static CGColorRef RevenantMDLCreateColorOfTemperature(float kelvin)
 {
     double t = kelvin / 100.0;
     double red, green, blue;
@@ -40,7 +40,7 @@ static CGColorRef CharonMDLCreateColorOfTemperature(float kelvin)
     return CGColorCreateGenericRGB(components[0], components[1], components[2], 1);
 }
 
-static float CharonMDLChannelAt(const uint8_t *texels, NSInteger stride, NSInteger width, NSInteger height, NSUInteger channels,
+static float RevenantMDLChannelAt(const uint8_t *texels, NSInteger stride, NSInteger width, NSInteger height, NSUInteger channels,
                                 NSInteger x, NSInteger y)
 {
     if (x < 0)
@@ -55,12 +55,12 @@ static float CharonMDLChannelAt(const uint8_t *texels, NSInteger stride, NSInteg
 }
 
 @interface MDLTexture ()
-- (void)charon_setGeometry:(vector_int2)dimensions rowStride:(NSInteger)rowStride channelCount:(NSUInteger)channelCount;
-- (NSData *)charon_texelDataTopLeft:(BOOL)topLeft atMipLevel:(NSInteger)level;
-- (uint8_t *)charon_texelMutableBytes;
-- (void)charon_setTexels:(NSData *)texels;
-- (void)charon_fillCheckerboard;
-- (void)charon_fillNoiseSmoothness:(float)smoothness channels:(NSUInteger)channels grayscale:(BOOL)grayscale cellular:(BOOL)cellular;
+- (void)revenant_setGeometry:(vector_int2)dimensions rowStride:(NSInteger)rowStride channelCount:(NSUInteger)channelCount;
+- (NSData *)revenant_texelDataTopLeft:(BOOL)topLeft atMipLevel:(NSInteger)level;
+- (uint8_t *)revenant_texelMutableBytes;
+- (void)revenant_setTexels:(NSData *)texels;
+- (void)revenant_fillCheckerboard;
+- (void)revenant_fillNoiseSmoothness:(float)smoothness channels:(NSUInteger)channels grayscale:(BOOL)grayscale cellular:(BOOL)cellular;
 @end
 
 @implementation MDLTexture {
@@ -102,7 +102,7 @@ static float CharonMDLChannelAt(const uint8_t *texels, NSInteger stride, NSInteg
         _mipLevelCount = 1;
         _hasAlphaValues = channelCount == 2 || channelCount == 4;
         NSUInteger width = dimensions.x > 0 ? (NSUInteger)dimensions.x : 0;
-        NSUInteger stride = rowStride > 0 ? (NSUInteger)rowStride : width * CharonMDLChannelSize(channelEncoding) * channelCount;
+        NSUInteger stride = rowStride > 0 ? (NSUInteger)rowStride : width * RevenantMDLChannelSize(channelEncoding) * channelCount;
         _rowStride = (NSInteger)stride;
         NSUInteger wanted = pixelData ? stride * (NSUInteger)(dimensions.y > 0 ? dimensions.y : 0) : 0;
         if (pixelData && pixelData.length >= wanted)
@@ -117,7 +117,7 @@ static float CharonMDLChannelAt(const uint8_t *texels, NSInteger stride, NSInteg
 {
 }
 
-- (NSData *)charon_texelDataTopLeft:(BOOL)topLeft atMipLevel:(NSInteger)level
+- (NSData *)revenant_texelDataTopLeft:(BOOL)topLeft atMipLevel:(NSInteger)level
 {
     if (level < 0 || (NSUInteger)level >= _mipLevelCount)
         return nil;
@@ -136,29 +136,29 @@ static float CharonMDLChannelAt(const uint8_t *texels, NSInteger stride, NSInteg
 
 - (NSData *)texelDataWithTopLeftOrigin
 {
-    return [self charon_texelDataTopLeft:YES atMipLevel:0];
+    return [self revenant_texelDataTopLeft:YES atMipLevel:0];
 }
 
 - (NSData *)texelDataWithBottomLeftOrigin
 {
-    return [self charon_texelDataTopLeft:NO atMipLevel:0];
+    return [self revenant_texelDataTopLeft:NO atMipLevel:0];
 }
 
 - (NSData *)texelDataWithTopLeftOriginAtMipLevel:(NSInteger)level create:(BOOL)create
 {
-    return [self charon_texelDataTopLeft:YES atMipLevel:level];
+    return [self revenant_texelDataTopLeft:YES atMipLevel:level];
 }
 
 - (NSData *)texelDataWithBottomLeftOriginAtMipLevel:(NSInteger)level create:(BOOL)create
 {
-    return [self charon_texelDataTopLeft:NO atMipLevel:level];
+    return [self revenant_texelDataTopLeft:NO atMipLevel:level];
 }
 
 - (CGImageRef)imageFromTexture
 {
     if (_channelEncoding != MDLTextureChannelEncodingUInt8 || _channelCount < 1 || _channelCount > 4)
         return NULL;
-    NSData *texels = [self charon_texelDataTopLeft:NO atMipLevel:0];
+    NSData *texels = [self revenant_texelDataTopLeft:NO atMipLevel:0];
     if (!texels)
         return NULL;
     static const CGBitmapInfo infos[4] = {kCGImageAlphaNone, kCGImageAlphaOnly, kCGImageAlphaNoneSkipLast,
@@ -192,7 +192,7 @@ static float CharonMDLChannelAt(const uint8_t *texels, NSInteger stride, NSInteg
     return written;
 }
 
-- (void)charon_setGeometry:(vector_int2)dimensions rowStride:(NSInteger)rowStride channelCount:(NSUInteger)channelCount
+- (void)revenant_setGeometry:(vector_int2)dimensions rowStride:(NSInteger)rowStride channelCount:(NSUInteger)channelCount
 {
     _dimensions = dimensions;
     _rowStride = rowStride;
@@ -200,12 +200,12 @@ static float CharonMDLChannelAt(const uint8_t *texels, NSInteger stride, NSInteg
     _hasAlphaValues = channelCount == 2 || channelCount == 4;
 }
 
-- (uint8_t *)charon_texelMutableBytes
+- (uint8_t *)revenant_texelMutableBytes
 {
     return (uint8_t *)_texels.mutableBytes;
 }
 
-- (void)charon_setTexels:(NSData *)texels
+- (void)revenant_setTexels:(NSData *)texels
 {
     NSUInteger wanted = (NSUInteger)MAX(_dimensions.y, 0) * (NSUInteger)_rowStride;
     if (texels.length < wanted)
@@ -252,12 +252,12 @@ static float CharonMDLChannelAt(const uint8_t *texels, NSInteger stride, NSInteg
     return cube;
 }
 
-- (void)charon_fillNoiseSmoothness:(float)smoothness channels:(NSUInteger)channels grayscale:(BOOL)grayscale cellular:(BOOL)cellular
+- (void)revenant_fillNoiseSmoothness:(float)smoothness channels:(NSUInteger)channels grayscale:(BOOL)grayscale cellular:(BOOL)cellular
 {
     if (self.channelEncoding != MDLTextureChannelEncodingUInt8 || !channels)
         return;
     NSUInteger width = (NSUInteger)MAX(self.dimensions.x, 0), height = (NSUInteger)MAX(self.dimensions.y, 0);
-    uint8_t *texels = [self charon_texelMutableBytes];
+    uint8_t *texels = [self revenant_texelMutableBytes];
     if (!texels || !width || !height)
         return;
     float period = MAX(1.0f, smoothness);
@@ -335,8 +335,8 @@ static float CharonMDLChannelAt(const uint8_t *texels, NSInteger stride, NSInteg
         CGContextRelease(context);
     }
     CGImageRelease(image);
-    [self charon_setGeometry:(vector_int2){(int)width, (int)height} rowStride:(NSInteger)(width * components) channelCount:components];
-    [self charon_setTexels:texels];
+    [self revenant_setGeometry:(vector_int2){(int)width, (int)height} rowStride:(NSInteger)(width * components) channelCount:components];
+    [self revenant_setTexels:texels];
     _URL = URL;
     return self;
 }
@@ -380,7 +380,7 @@ static float CharonMDLChannelAt(const uint8_t *texels, NSInteger stride, NSInteg
     _divisions = divisions;
     _color1 = color1 ? CGColorRetain(color1) : NULL;
     _color2 = color2 ? CGColorRetain(color2) : NULL;
-    [self charon_fillCheckerboard];
+    [self revenant_fillCheckerboard];
     return self;
 }
 
@@ -400,7 +400,7 @@ static float CharonMDLChannelAt(const uint8_t *texels, NSInteger stride, NSInteg
     if (_color1 != color1) {
         CGColorRelease(_color1);
         _color1 = color1 ? CGColorRetain(color1) : NULL;
-        [self charon_fillCheckerboard];
+        [self revenant_fillCheckerboard];
     }
 }
 
@@ -414,11 +414,11 @@ static float CharonMDLChannelAt(const uint8_t *texels, NSInteger stride, NSInteg
     if (_color2 != color2) {
         CGColorRelease(_color2);
         _color2 = color2 ? CGColorRetain(color2) : NULL;
-        [self charon_fillCheckerboard];
+        [self revenant_fillCheckerboard];
     }
 }
 
-- (void)charon_fillCheckerboard
+- (void)revenant_fillCheckerboard
 {
     if (self.channelEncoding != MDLTextureChannelEncodingUInt8 || self.channelCount < 3)
         return;
@@ -426,7 +426,7 @@ static float CharonMDLChannelAt(const uint8_t *texels, NSInteger stride, NSInteg
     if (!width || !height)
         return;
     NSUInteger across = (NSUInteger)MAX(_divisions, 1.0f), up = (NSUInteger)MAX(_divisions, 1.0f);
-    uint8_t *texels = [self charon_texelMutableBytes];
+    uint8_t *texels = [self revenant_texelMutableBytes];
     if (!texels)
         return;
     const CGFloat *first = _color1 ? CGColorGetComponents(_color1) : NULL;
@@ -453,7 +453,7 @@ static float CharonMDLChannelAt(const uint8_t *texels, NSInteger stride, NSInteg
                       channelEncoding:MDLTextureChannelEncodingUInt8]))
         return nil;
     NSUInteger width = (NSUInteger)MAX(textureDimensions.x, 0), height = (NSUInteger)MAX(textureDimensions.y, 0);
-    uint8_t *texels = [self charon_texelMutableBytes];
+    uint8_t *texels = [self revenant_texelMutableBytes];
     if (texels && width && height) {
         const CGFloat *first = CGColorGetComponents(color1), *second = CGColorGetComponents(color2);
         for (NSUInteger y = 0; y < height; y++)
@@ -473,8 +473,8 @@ static float CharonMDLChannelAt(const uint8_t *texels, NSInteger stride, NSInteg
                                                  name:(NSString *)name
                                     textureDimensions:(vector_int2)textureDimensions
 {
-    CGColorRef first = CharonMDLCreateColorOfTemperature(colorTemperature1);
-    CGColorRef second = CharonMDLCreateColorOfTemperature(colorTemperature2);
+    CGColorRef first = RevenantMDLCreateColorOfTemperature(colorTemperature1);
+    CGColorRef second = RevenantMDLCreateColorOfTemperature(colorTemperature2);
     MDLColorSwatchTexture *texture = [self initWithColorGradientFrom:first toColor:second name:name
                                                        textureDimensions:textureDimensions];
     CGColorRelease(first);
@@ -494,7 +494,7 @@ static float CharonMDLChannelAt(const uint8_t *texels, NSInteger stride, NSInteg
     if ((self = [super initWithData:nil topLeftOrigin:NO name:name dimensions:textureDimensions rowStride:0 channelCount:3
                       channelEncoding:channelEncoding]))
         return nil;
-    [self charon_fillNoiseSmoothness:smoothness channels:3 grayscale:NO cellular:NO];
+    [self revenant_fillNoiseSmoothness:smoothness channels:3 grayscale:NO cellular:NO];
     return self;
 }
 
@@ -508,7 +508,7 @@ static float CharonMDLChannelAt(const uint8_t *texels, NSInteger stride, NSInteg
     if ((self = [super initWithData:nil topLeftOrigin:NO name:name dimensions:textureDimensions rowStride:0 channelCount:channelCount
                       channelEncoding:channelEncoding]))
         return nil;
-    [self charon_fillNoiseSmoothness:smoothness channels:grayscale ? 1 : channelCount grayscale:grayscale cellular:NO];
+    [self revenant_fillNoiseSmoothness:smoothness channels:grayscale ? 1 : channelCount grayscale:grayscale cellular:NO];
     return self;
 }
 
@@ -519,7 +519,7 @@ static float CharonMDLChannelAt(const uint8_t *texels, NSInteger stride, NSInteg
     if ((self = [super initWithData:nil topLeftOrigin:NO name:name dimensions:textureDimensions rowStride:0 channelCount:1
                       channelEncoding:MDLTextureChannelEncodingUInt8]))
         return nil;
-    [self charon_fillNoiseSmoothness:frequency channels:1 grayscale:YES cellular:YES];
+    [self revenant_fillNoiseSmoothness:frequency channels:1 grayscale:YES cellular:YES];
     return self;
 }
 
@@ -535,8 +535,8 @@ static float CharonMDLChannelAt(const uint8_t *texels, NSInteger stride, NSInteg
     if ((self = [super initWithData:nil topLeftOrigin:NO name:name dimensions:sourceTexture.dimensions rowStride:0 channelCount:3
                       channelEncoding:MDLTextureChannelEncodingUInt8]))
         return nil;
-    NSData *source = [sourceTexture charon_texelDataTopLeft:NO atMipLevel:0];
-    uint8_t *texels = [self charon_texelMutableBytes];
+    NSData *source = [sourceTexture revenant_texelDataTopLeft:NO atMipLevel:0];
+    uint8_t *texels = [self revenant_texelMutableBytes];
     NSInteger width = sourceTexture.dimensions.x, height = sourceTexture.dimensions.y, stride = sourceTexture.rowStride;
     NSUInteger channels = sourceTexture.channelCount;
     if (source && texels && width > 0 && height > 0) {
@@ -544,10 +544,10 @@ static float CharonMDLChannelAt(const uint8_t *texels, NSInteger stride, NSInteg
         float scale = contrast != 0 ? contrast : 1;
         for (NSInteger y = 0; y < height; y++)
             for (NSInteger x = 0; x < width; x++) {
-                float left = CharonMDLChannelAt(from, stride, width, height, channels, x - 1, y);
-                float right = CharonMDLChannelAt(from, stride, width, height, channels, x + 1, y);
-                float down = CharonMDLChannelAt(from, stride, width, height, channels, x, y - 1);
-                float up = CharonMDLChannelAt(from, stride, width, height, channels, x, y + 1);
+                float left = RevenantMDLChannelAt(from, stride, width, height, channels, x - 1, y);
+                float right = RevenantMDLChannelAt(from, stride, width, height, channels, x + 1, y);
+                float down = RevenantMDLChannelAt(from, stride, width, height, channels, x, y - 1);
+                float up = RevenantMDLChannelAt(from, stride, width, height, channels, x, y + 1);
                 vector_float3 normal = simd_normalize((vector_float3){(left - right) * scale, (down - up) * scale, 1});
                 uint8_t *at = texels + y * (NSUInteger)stride + x * 3;
                 for (NSUInteger c = 0; c < 3; c++)

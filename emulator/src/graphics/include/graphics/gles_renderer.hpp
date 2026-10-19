@@ -22,7 +22,7 @@
 #include "graphics/host_graphics.hpp"
 #include "foundation/performance.hpp"
 
-namespace shade {
+namespace emulator {
 
 struct DisplayFrame;
 

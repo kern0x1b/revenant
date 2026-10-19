@@ -1,6 +1,6 @@
-#import "CharonMetal.h"
+#import "RevenantMetal.h"
 
 id<MTLDevice> MTLCreateSystemDefaultDevice(void)
 {
-    return [CharonMetalDevice shared];
+    return [RevenantMetalDevice shared];
 }

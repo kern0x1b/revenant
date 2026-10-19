@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-MTLDataType CharonDataTypeFromScalar(NSString *scalar)
+MTLDataType RevenantDataTypeFromScalar(NSString *scalar)
 {
     static NSDictionary *table;
     static dispatch_once_t once;
@@ -16,7 +16,7 @@ MTLDataType CharonDataTypeFromScalar(NSString *scalar)
     return found ? (MTLDataType)found.unsignedIntegerValue : MTLDataTypeNone;
 }
 
-MTLArgumentAccess CharonAccessFromWord(NSString *word)
+MTLArgumentAccess RevenantAccessFromWord(NSString *word)
 {
     if ([word isEqualToString:@"read-write"])
         return MTLArgumentAccessReadWrite;
@@ -25,7 +25,7 @@ MTLArgumentAccess CharonAccessFromWord(NSString *word)
     return MTLArgumentAccessReadOnly;
 }
 
-id CharonTypedNode(NSDictionary *node, Class wanted)
+id RevenantTypedNode(NSDictionary *node, Class wanted)
 {
     if (![node isKindOfClass:[NSDictionary class]])
         return nil;
@@ -65,40 +65,40 @@ id CharonTypedNode(NSDictionary *node, Class wanted)
 
 - (MTLDataType)dataType
 {
-    return CharonDataTypeFromScalar(_node[@"scalar"]);
+    return RevenantDataTypeFromScalar(_node[@"scalar"]);
 }
 
-- (NSString *)charonKind
+- (NSString *)revenantKind
 {
     return _node[@"kind"] ?: @"";
 }
 
-- (NSDictionary *)charonNode
+- (NSDictionary *)revenantNode
 {
     return _node;
 }
 
-- (MTLType *)charonElement
+- (MTLType *)revenantElement
 {
     return _element;
 }
 
-- (NSUInteger)charonSize
+- (NSUInteger)revenantSize
 {
     return [_node[@"size"] unsignedIntegerValue];
 }
 
-- (NSUInteger)charonAlignment
+- (NSUInteger)revenantAlignment
 {
     return [_node[@"alignSize"] unsignedIntegerValue];
 }
 
-- (MTLDataType)charonDataType
+- (MTLDataType)revenantDataType
 {
-    return CharonDataTypeFromScalar(_node[@"scalar"]);
+    return RevenantDataTypeFromScalar(_node[@"scalar"]);
 }
 
-- (NSMutableArray<MTLStructMember *> *)charonMemberList
+- (NSMutableArray<MTLStructMember *> *)revenantMemberList
 {
     if (!_members) {
         _members = [NSMutableArray array];
@@ -106,7 +106,7 @@ id CharonTypedNode(NSDictionary *node, Class wanted)
             if (![member isKindOfClass:[NSDictionary class]])
                 continue;
             MTLStructMember *made = [[MTLStructMember alloc] init];
-            [made charonSetName:(member[@"name"] ?: @"")
+            [made revenantSetName:(member[@"name"] ?: @"")
                          offset:[member[@"offset"] unsignedIntegerValue]
                            node:member[@"type"]];
             [_members addObject:made];
@@ -171,13 +171,13 @@ id CharonTypedNode(NSDictionary *node, Class wanted)
 - (MTLDataType)elementType
 {
     NSDictionary *element = _node[@"elementType"];
-    return [element isKindOfClass:[NSDictionary class]] ? CharonDataTypeFromScalar(element[@"scalar"])
+    return [element isKindOfClass:[NSDictionary class]] ? RevenantDataTypeFromScalar(element[@"scalar"])
                                                         : MTLDataTypeNone;
 }
 
 - (MTLArgumentAccess)access
 {
-    return CharonAccessFromWord(_node[@"access"]);
+    return RevenantAccessFromWord(_node[@"access"]);
 }
 
 - (NSUInteger)alignment
@@ -206,7 +206,7 @@ id CharonTypedNode(NSDictionary *node, Class wanted)
 
 - (MTLArgumentAccess)access
 {
-    return CharonAccessFromWord(_node[@"access"]);
+    return RevenantAccessFromWord(_node[@"access"]);
 }
 
 - (BOOL)isDepthTexture

@@ -13,8 +13,8 @@ static uint32_t next(void)
 int main(int argc, char **argv)
 {
     @autoreleasepool {
-        Class ours = NSClassFromString(@"CharonHostNSUnitInformationStorage");
-        Class ourMeasurement = NSClassFromString(@"CharonHostNSMeasurement");
+        Class ours = NSClassFromString(@"RevenantHostNSUnitInformationStorage");
+        Class ourMeasurement = NSClassFromString(@"RevenantHostNSMeasurement");
         CHECK(ours != Nil && ourMeasurement != Nil, "the port defines the unit and the measurement");
         NSArray *names = @[@"bits", @"nibbles", @"bytes", @"kilobits", @"kilobytes", @"kibibits", @"kibibytes", @"megabits", @"megabytes", @"mebibits", @"mebibytes", @"gigabits", @"gigabytes",
                            @"gibibits", @"gibibytes", @"terabits", @"terabytes", @"tebibits", @"tebibytes", @"petabits", @"petabytes", @"pebibits", @"pebibytes", @"exabits", @"exabytes",
@@ -27,7 +27,7 @@ int main(int argc, char **argv)
             NSUnitConverterLinear *a = (id)port.converter, *b = (id)system.converter;
             BOOL same = [port.symbol isEqualToString:system.symbol] && a.coefficient == b.coefficient && a.constant == b.constant &&
                         [[port valueForKey:@"specifier"] isEqual:[system valueForKey:@"specifier"]] &&
-                        port == ((id (*)(id, SEL))objc_msgSend)(ours, NSSelectorFromString(name)) && [NSStringFromClass([port class]) isEqualToString:@"CharonHostNSUnitInformationStorage"];
+                        port == ((id (*)(id, SEL))objc_msgSend)(ours, NSSelectorFromString(name)) && [NSStringFromClass([port class]) isEqualToString:@"RevenantHostNSUnitInformationStorage"];
             if (!same) {
                 wrong++;
                 printf("  %s: port %s %a %a %@ | system %s %a %a %@\n", name.UTF8String, port.symbol.UTF8String, a.coefficient, a.constant, [port valueForKey:@"specifier"], system.symbol.UTF8String, b.coefficient, b.constant, [system valueForKey:@"specifier"]);
@@ -63,6 +63,6 @@ int main(int argc, char **argv)
         NSUnit *decoded = [NSKeyedUnarchiver unarchivedObjectOfClasses:[NSSet setWithObjects:ours, [NSUnit class], nil] fromData:archive error:&error];
         CHECK(decoded != nil && [decoded.symbol isEqualToString:@"KiB"] && [decoded isKindOfClass:ours], "a unit survives its own archive");
     }
-    printf("checks=%d failures=%d\n", charon_checks, charon_failures);
-    return charon_failures;
+    printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
+    return revenant_failures;
 }

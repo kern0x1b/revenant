@@ -38,7 +38,7 @@ echo "intents rows: the 21 -init rows, class by class, against the system's own 
 "$build/init-rows" "$here/init-classes.txt" | tee "$build/init-rows.log"
 
 echo "intents rows: the negative control - a class list the system does not carry must all fail"
-printf '# the negative control: one class the system does not carry, and one it does\nINCharonNoSuchClassForThisHarness\nNSObject\n' \
+printf '# the negative control: one class the system does not carry, and one it does\nINRevenantNoSuchClassForThisHarness\nNSObject\n' \
     > "$build/control-classes.txt"
 if "$build/init-rows" "$build/control-classes.txt" > "$build/control.log" 2>&1; then
     echo "intents rows: FAIL the harness passed a class the system does not carry, so it cannot tell the two apart"
@@ -74,7 +74,7 @@ xcrun clang $flags "$here/intents12-rows.m" -framework Intents -framework Founda
 classes_line=$(cat "$build/classes.log")
 echo "$classes_line" | tee -a "$build/intents12-rows.log"
 case "$classes_line" in
-    *INCharonNoSuchClassForThisHarness=0*) : ;;
+    *INRevenantNoSuchClassForThisHarness=0*) : ;;
     *) echo "intents rows: FAIL the system answered for a class it does not carry: $classes_line"
        exit 1 ;;
 esac
@@ -150,10 +150,10 @@ echo "intents rows: 12.0 group measured; what it settles and what it does not is
 # port's own generated body, because the port's objects are armv7 and do not run on this host and
 # cannot be linked beside the framework either.  That is measured, and facts/Intents/Intents.md
 # writes it out: tests/backports/host/prefix_selectors.py renames SELECTORS and not class names (its
-# own docstring: "gives one to the selectors the port's Charon categories carry"), the class renaming
+# own docstring: "gives one to the selectors the port's Revenant categories carry"), the class renaming
 # is -D, and a -D moves the SDK's own declaration of the same class along with the port's - so for
-# CharonIntents262.h:39 the host build answers
-#   error: duplicate interface definition for class 'CharonHostINMessageLinkMetadata'
+# RevenantIntents262.h:39 the host build answers
+#   error: duplicate interface definition for class 'RevenantHostINMessageLinkMetadata'
 # and there is nothing in the tree that renames the port's class without the SDK's.
 #
 # So the expectation still comes from the measurement above - the handler must not be called before

@@ -1,6 +1,6 @@
 #import <Foundation/Foundation.h>
 #import <dlfcn.h>
-#import "CharonMorphology26.h"
+#import "RevenantMorphology26.h"
 
 static int checks, failures;
 
@@ -13,12 +13,12 @@ static void expect(BOOL ok, NSString *what, NSString *detail)
     printf("FAIL %s: %s\n", what.UTF8String, detail.UTF8String);
 }
 
-static NSString *charon_normalised(NSString *text)
+static NSString *revenant_normalised(NSString *text)
 {
     if (!text)
         return nil;
     NSMutableString *out = [text mutableCopy];
-    [out replaceOccurrencesOfString:@"charonHost" withString:@"" options:0 range:NSMakeRange(0, out.length)];
+    [out replaceOccurrencesOfString:@"revenantHost" withString:@"" options:0 range:NSMakeRange(0, out.length)];
     static NSRegularExpression *address;
     static dispatch_once_t once;
     dispatch_once(&once, ^{ address = [NSRegularExpression regularExpressionWithPattern:@"0x[0-9a-f]+" options:0 error:NULL]; });
@@ -26,7 +26,7 @@ static NSString *charon_normalised(NSString *text)
     return out;
 }
 
-static NSString *charon_field(NSString *description, NSString *property)
+static NSString *revenant_field(NSString *description, NSString *property)
 {
     NSRange at = [description rangeOfString:[property stringByAppendingString:@" = "]];
     if (at.location == NSNotFound)
@@ -57,7 +57,7 @@ static void expectEqualInt(long ours, long theirs, NSString *what)
     printf("FAIL %s: ours %ld host %ld\n", what.UTF8String, ours, theirs);
 }
 
-static void charon_report_uncaught(NSException *exception)
+static void revenant_report_uncaught(NSException *exception)
 {
     fprintf(stderr, "\nuncaught %s: %s\n", exception.name.UTF8String, exception.reason.UTF8String);
     for (NSUInteger index = 0; index < exception.callStackSymbols.count; index++)
@@ -68,7 +68,7 @@ static void charon_report_uncaught(NSException *exception)
 int main(int argc, char **argv)
 {
     setvbuf(stdout, NULL, _IONBF, 0);
-    NSSetUncaughtExceptionHandler(&charon_report_uncaught);
+    NSSetUncaughtExceptionHandler(&revenant_report_uncaught);
     @autoreleasepool {
         NSString *path = argc > 1 ? [NSString stringWithUTF8String:argv[1]] : @"expected.txt";
         NSString *table = [NSString stringWithContentsOfFile:path encoding:NSUTF8StringEncoding error:NULL];
@@ -90,7 +90,7 @@ int main(int argc, char **argv)
         for (int s = 0; settingNames[s]; s++) {
             const char *name = settingNames[s];
             for (NSInteger value = 0; value <= 3; value++) {
-                charonHostNSMorphology *ours = [[charonHostNSMorphology alloc] init];
+                revenantHostNSMorphology *ours = [[revenantHostNSMorphology alloc] init];
                 NSMorphology *theirs = [[NSMorphology alloc] init];
                 [ours setValue:@(value) forKey:[NSString stringWithUTF8String:name]];
                 [theirs setValue:@(value) forKey:[NSString stringWithUTF8String:name]];
@@ -104,17 +104,17 @@ int main(int argc, char **argv)
             }
         }
         {
-            charonHostNSMorphology *ours = [[charonHostNSMorphology alloc] init];
+            revenantHostNSMorphology *ours = [[revenantHostNSMorphology alloc] init];
             NSMorphology *theirs = [[NSMorphology alloc] init];
             expect(ours.isUnspecified == theirs.isUnspecified, @"fresh.unspecified", @"a fresh one is unspecified");
-            expect([[charonHostNSMorphology class] userMorphology].isUnspecified
+            expect([[revenantHostNSMorphology class] userMorphology].isUnspecified
                        == [NSMorphology userMorphology].isUnspecified,
                    @"userMorphology.unspecified", @"+userMorphology");
         }
         for (int s = 0; settingNames[s]; s++) {
             const char *name = settingNames[s];
             for (NSInteger value = 0; value <= 2; value++) {
-                charonHostNSMorphology *ours = [[charonHostNSMorphology alloc] init];
+                revenantHostNSMorphology *ours = [[revenantHostNSMorphology alloc] init];
                 NSMorphology *theirs = [[NSMorphology alloc] init];
                 NSString *key = [NSString stringWithFormat:[NSString stringWithUTF8String:name]];
                 [ours setValue:@(value) forKey:key];
@@ -129,7 +129,7 @@ int main(int argc, char **argv)
         {
             const char *names[] = {"grammaticalGender", "number", "partOfSpeech", "grammaticalCase", "definiteness",
                                    "determination", "grammaticalPerson", "pronounType", NULL};
-            charonHostNSMorphology *ours = [[charonHostNSMorphology alloc] init];
+            revenantHostNSMorphology *ours = [[revenantHostNSMorphology alloc] init];
             NSMorphology *theirs = [[NSMorphology alloc] init];
             const long inRange[] = {1, 2, 9, 3, 2, 1, 2, 1};
             for (int i = 0; names[i]; i++) {
@@ -137,12 +137,12 @@ int main(int argc, char **argv)
                 [ours setValue:@(inRange[i]) forKey:key];
                 [theirs setValue:@(inRange[i]) forKey:key];
             }
-            expectEqual((charon_normalised([ours description])),
-                        (charon_normalised([theirs description])), @"description.ordered");
-            expectEqual((charon_normalised([ours description])),
-                        (charon_normalised(expected[@"description.ordered"])), @"description.ordered.golden");
+            expectEqual((revenant_normalised([ours description])),
+                        (revenant_normalised([theirs description])), @"description.ordered");
+            expectEqual((revenant_normalised([ours description])),
+                        (revenant_normalised(expected[@"description.ordered"])), @"description.ordered.golden");
 
-            charonHostNSMorphology *odd = [[charonHostNSMorphology alloc] init];
+            revenantHostNSMorphology *odd = [[revenantHostNSMorphology alloc] init];
             NSMorphology *theirsOdd = [[NSMorphology alloc] init];
             const long outOfRange[] = {-2, -2, -2, 40, -1, 9, -1, 9};
             for (int i = 0; names[i]; i++) {
@@ -150,10 +150,10 @@ int main(int argc, char **argv)
                 [odd setValue:@(outOfRange[i]) forKey:key];
                 [theirsOdd setValue:@(outOfRange[i]) forKey:key];
             }
-            expectEqual((charon_normalised([odd description])),
-                        (charon_normalised([theirsOdd description])), @"description.outOfRange");
-            expectEqual((charon_normalised([odd description])),
-                        (charon_normalised(expected[@"description.outOfRange"])), @"description.outOfRange.golden");
+            expectEqual((revenant_normalised([odd description])),
+                        (revenant_normalised([theirsOdd description])), @"description.outOfRange");
+            expectEqual((revenant_normalised([odd description])),
+                        (revenant_normalised(expected[@"description.outOfRange"])), @"description.outOfRange.golden");
         }
         {
             static const struct { const char *property; NSInteger count; } sets[] = {
@@ -166,13 +166,13 @@ int main(int argc, char **argv)
                 NSArray *pair = [[NSString stringWithUTF8String:sets[set].property] componentsSeparatedByString:@":"];
                 NSString *property = pair[0], *field = pair.count > 1 ? pair[1] : pair[0];
                 for (NSInteger value = 0; value <= sets[set].count; value++) {
-                    charonHostNSMorphology *ours = [[charonHostNSMorphology alloc] init];
+                    revenantHostNSMorphology *ours = [[revenantHostNSMorphology alloc] init];
                     NSMorphology *theirs = [[NSMorphology alloc] init];
                     [ours setValue:@(value) forKey:property];
                     [theirs setValue:@(value) forKey:property];
                     NSString *label = [NSString stringWithFormat:@"every.enumeration.name.%@%ld", property, (long)value];
-                    NSString *mine = charon_field([ours description], field);
-                    NSString *theirs_ = charon_field([theirs description], field);
+                    NSString *mine = revenant_field([ours description], field);
+                    NSString *theirs_ = revenant_field([theirs description], field);
                     expectEqual(mine, theirs_, label);
                     expectEqual(mine, expected[label], [label stringByAppendingString:@".golden"]);
                 }
@@ -184,13 +184,13 @@ int main(int argc, char **argv)
                                    @"zh", @"it", @"nl", @"pl", @"tr", @"ko", @"he", @"th", @"hi", @"und", @"", @"xx_YY",
                                    @"klingon", @"123"];
             for (NSString *language in languages) {
-                BOOL ours = [charonHostNSMorphologyCustomPronoun isSupportedForLanguage:language];
+                BOOL ours = [revenantHostNSMorphologyCustomPronoun isSupportedForLanguage:language];
                 BOOL theirs = [NSMorphologyCustomPronoun isSupportedForLanguage:language];
                 expect(ours == theirs, [NSString stringWithFormat:@"supported.%@", language],
                        [NSString stringWithFormat:@"ours %d host %d", (int)ours, (int)theirs]);
                 expectEqual(ours ? @"1" : @"0", expected[[NSString stringWithFormat:@"supported.%@", language]],
                             [NSString stringWithFormat:@"supported.%@.golden", language]);
-                NSArray *oursKeys = [charonHostNSMorphologyCustomPronoun requiredKeysForLanguage:language];
+                NSArray *oursKeys = [revenantHostNSMorphologyCustomPronoun requiredKeysForLanguage:language];
                 NSArray *theirKeys = [NSMorphologyCustomPronoun requiredKeysForLanguage:language];
                 expectEqual([oursKeys componentsJoinedByString:@","], [theirKeys componentsJoinedByString:@","],
                             [NSString stringWithFormat:@"required.%@", language]);
@@ -198,11 +198,11 @@ int main(int argc, char **argv)
                             expected[[NSString stringWithFormat:@"required.%@", language]],
                             [NSString stringWithFormat:@"required.%@.golden", language]);
             }
-            charonHostNSMorphologyCustomPronoun *full = [[charonHostNSMorphologyCustomPronoun alloc] init];
+            revenantHostNSMorphologyCustomPronoun *full = [[revenantHostNSMorphologyCustomPronoun alloc] init];
             full.subjectForm = @"she"; full.objectForm = @"her"; full.possessiveForm = @"hers";
             full.possessiveAdjectiveForm = @"her"; full.reflexiveForm = @"herself";
             for (NSString *language in @[@"en", @"fr", @"xx_YY", @"klingon", @"", @"123"]) {
-                charonHostNSMorphology *ours = [[charonHostNSMorphology alloc] init];
+                revenantHostNSMorphology *ours = [[revenantHostNSMorphology alloc] init];
                 NSMorphology *theirs = [[NSMorphology alloc] init];
                 NSError *ourError = nil, *theirError = nil;
                 BOOL oursOK = [ours setCustomPronoun:full forLanguage:language error:&ourError];
@@ -216,9 +216,9 @@ int main(int argc, char **argv)
                             [theirs customPronounForLanguage:language].subjectForm, [label stringByAppendingString:@".readBack"]);
             }
             for (NSString *language in @[@"en", @"fr", @"xx_YY"]) {
-                charonHostNSMorphologyCustomPronoun *subjectOnly = [[charonHostNSMorphologyCustomPronoun alloc] init];
+                revenantHostNSMorphologyCustomPronoun *subjectOnly = [[revenantHostNSMorphologyCustomPronoun alloc] init];
                 subjectOnly.subjectForm = @"sie";
-                charonHostNSMorphology *ours = [[charonHostNSMorphology alloc] init];
+                revenantHostNSMorphology *ours = [[revenantHostNSMorphology alloc] init];
                 NSMorphology *theirs = [[NSMorphology alloc] init];
                 NSError *ourError = nil, *theirError = nil;
                 BOOL oursOK = [ours setCustomPronoun:subjectOnly forLanguage:language error:&ourError];
@@ -227,10 +227,10 @@ int main(int argc, char **argv)
                 expect(oursOK == theirOK, label, @"the same verdict");
                 expectEqual(ourError.localizedDescription, theirError.localizedDescription, [label stringByAppendingString:@".wording"]);
 
-                charonHostNSMorphology *oursEmpty = [[charonHostNSMorphology alloc] init];
+                revenantHostNSMorphology *oursEmpty = [[revenantHostNSMorphology alloc] init];
                 NSMorphology *theirsEmpty = [[NSMorphology alloc] init];
                 NSError *ourEmpty = nil, *theirEmpty = nil;
-                BOOL oursEmptyOK = [oursEmpty setCustomPronoun:[[charonHostNSMorphologyCustomPronoun alloc] init]
+                BOOL oursEmptyOK = [oursEmpty setCustomPronoun:[[revenantHostNSMorphologyCustomPronoun alloc] init]
                                               forLanguage:language error:&ourEmpty];
                 BOOL theirsEmptyOK = [theirsEmpty setCustomPronoun:[[NSMorphologyCustomPronoun alloc] init]
                                                   forLanguage:language error:&theirEmpty];
@@ -238,27 +238,27 @@ int main(int argc, char **argv)
                 expectEqual(ourEmpty.localizedDescription, theirEmpty.localizedDescription,
                             [NSString stringWithFormat:@"setEmpty.%@.wording", language]);
 
-                charonHostNSMorphology *oursNil = [[charonHostNSMorphology alloc] init];
+                revenantHostNSMorphology *oursNil = [[revenantHostNSMorphology alloc] init];
                 NSMorphology *theirsNil = [[NSMorphology alloc] init];
                 NSError *ourNil = nil, *theirNil = nil;
                 BOOL oursNilOK = [oursNil setCustomPronoun:nil forLanguage:language error:&ourNil];
                 BOOL theirsNilOK = [theirsNil setCustomPronoun:nil forLanguage:language error:&theirNil];
                 expect(oursNilOK == theirsNilOK, [NSString stringWithFormat:@"setNil.%@", language], @"the same verdict");
             }
-            charonHostNSMorphologyCustomPronoun *oursForms = [[charonHostNSMorphologyCustomPronoun alloc] init];
+            revenantHostNSMorphologyCustomPronoun *oursForms = [[revenantHostNSMorphologyCustomPronoun alloc] init];
             NSMorphologyCustomPronoun *theirForms = [[NSMorphologyCustomPronoun alloc] init];
-            expectEqual((charon_normalised([oursForms description])),
-                        (charon_normalised([theirForms description])), @"forms.empty");
+            expectEqual((revenant_normalised([oursForms description])),
+                        (revenant_normalised([theirForms description])), @"forms.empty");
             oursForms.objectForm = @"o"; oursForms.possessiveForm = @"p";
             oursForms.possessiveAdjectiveForm = @"pa"; oursForms.reflexiveForm = @"r";
             theirForms.objectForm = @"o"; theirForms.possessiveForm = @"p";
             theirForms.possessiveAdjectiveForm = @"pa"; theirForms.reflexiveForm = @"r";
-            expectEqual((charon_normalised([oursForms description])),
-                        (charon_normalised([theirForms description])), @"forms.four");
+            expectEqual((revenant_normalised([oursForms description])),
+                        (revenant_normalised([theirForms description])), @"forms.four");
         }
         {
-            charonHostNSMorphologyPronoun *ours = [[charonHostNSMorphologyPronoun alloc] initWithPronoun:@"she"
-                                                                                             morphology:[[charonHostNSMorphology alloc] init]
+            revenantHostNSMorphologyPronoun *ours = [[revenantHostNSMorphologyPronoun alloc] initWithPronoun:@"she"
+                                                                                             morphology:[[revenantHostNSMorphology alloc] init]
                                                                                      dependentMorphology:nil];
             NSMorphologyPronoun *theirs = [[NSMorphologyPronoun alloc] initWithPronoun:@"she"
                                                                             morphology:[[NSMorphology alloc] init]
@@ -273,21 +273,21 @@ int main(int argc, char **argv)
                                    @"zh", @"it", @"nl", @"pl", @"tr", @"ko", @"he", @"th", @"hi", @"und", @"", @"xx_YY",
                                    @"klingon", @"123"];
             for (NSString *language in languages) {
-                BOOL ours = [charonHostNSInflectionRule canInflectLanguage:language];
+                BOOL ours = [revenantHostNSInflectionRule canInflectLanguage:language];
                 BOOL theirs = [NSInflectionRule canInflectLanguage:language];
                 NSString *label = [NSString stringWithFormat:@"canInflect.%@", language];
                 expect(ours == theirs, label, [NSString stringWithFormat:@"ours %d host %d", (int)ours, (int)theirs]);
                 expectEqual(ours ? @"1" : @"0", expected[label], [label stringByAppendingString:@".golden"]);
             }
-            expectEqual([[charonHostNSInflectionRule automaticRule] description],
+            expectEqual([[revenantHostNSInflectionRule automaticRule] description],
                         [[NSInflectionRule automaticRule] description], @"automaticRule");
-            expectEqualInt((long)[charonHostNSInflectionRule canInflectPreferredLocalization],
+            expectEqualInt((long)[revenantHostNSInflectionRule canInflectPreferredLocalization],
                            (long)[NSInflectionRule canInflectPreferredLocalization], @"canInflectPreferredLocalization");
         }
         {
-            charonHostNSMorphology *morphology = [[charonHostNSMorphology alloc] init];
+            revenantHostNSMorphology *morphology = [[revenantHostNSMorphology alloc] init];
             morphology.number = 2;
-            charonHostNSInflectionRuleExplicit *ours = [[charonHostNSInflectionRuleExplicit alloc] initWithMorphology:morphology];
+            revenantHostNSInflectionRuleExplicit *ours = [[revenantHostNSInflectionRuleExplicit alloc] initWithMorphology:morphology];
             NSMorphology *theirMorphology = [[NSMorphology alloc] init];
             theirMorphology.number = 2;
             NSInflectionRuleExplicit *theirs = [[NSInflectionRuleExplicit alloc] initWithMorphology:theirMorphology];
@@ -299,29 +299,29 @@ int main(int argc, char **argv)
             @catch (NSException *e) { oursCopy = [NSString stringWithFormat:@"raises %@: %@", e.name, e.reason]; }
             @try { theirCopy = [theirs copy] ? @"a copy" : @"(nil)"; }
             @catch (NSException *e) { theirCopy = [NSString stringWithFormat:@"raises %@: %@", e.name, e.reason]; }
-            expectEqual(charon_normalised(oursCopy), charon_normalised(theirCopy), @"explicit.copy");
-            expectEqual(charon_normalised(oursCopy), expected[@"explicit.copy"], @"explicit.copy.golden");
+            expectEqual(revenant_normalised(oursCopy), revenant_normalised(theirCopy), @"explicit.copy");
+            expectEqual(revenant_normalised(oursCopy), expected[@"explicit.copy"], @"explicit.copy.golden");
         }
         {
-            charonHostNSMorphology *ours = [[charonHostNSMorphology alloc] init];
+            revenantHostNSMorphology *ours = [[revenantHostNSMorphology alloc] init];
             ours.number = 2;
             NSMutableData *ourData = [NSMutableData data];
             NSKeyedArchiver *ourArchiver = [[NSKeyedArchiver alloc] initForWritingWithMutableData:ourData];
             [ourArchiver encodeObject:ours forKey:NSKeyedArchiveRootObjectKey];
             [ourArchiver finishEncoding];
             NSKeyedUnarchiver *ourUnarchiver = [[NSKeyedUnarchiver alloc] initForReadingWithData:ourData];
-            charonHostNSMorphology *ourBack = [ourUnarchiver decodeObjectForKey:NSKeyedArchiveRootObjectKey];
+            revenantHostNSMorphology *ourBack = [ourUnarchiver decodeObjectForKey:NSKeyedArchiveRootObjectKey];
             expectEqualInt((long)ourBack.number, 2, @"archive.morphology.number");
             expectEqualInt((long)ourBack.isUnspecified, 0, @"archive.morphology.unspecified");
 
-            charonHostNSMorphologyCustomPronoun *ourPronoun = [[charonHostNSMorphologyCustomPronoun alloc] init];
+            revenantHostNSMorphologyCustomPronoun *ourPronoun = [[revenantHostNSMorphologyCustomPronoun alloc] init];
             ourPronoun.subjectForm = @"she";
             NSMutableData *ourPronounData = [NSMutableData data];
             NSKeyedArchiver *ourPronounArchiver = [[NSKeyedArchiver alloc] initForWritingWithMutableData:ourPronounData];
             [ourPronounArchiver encodeObject:ourPronoun forKey:NSKeyedArchiveRootObjectKey];
             [ourPronounArchiver finishEncoding];
             NSKeyedUnarchiver *ourPronounUnarchiver = [[NSKeyedUnarchiver alloc] initForReadingWithData:ourPronounData];
-            charonHostNSMorphologyCustomPronoun *ourPronounBack =
+            revenantHostNSMorphologyCustomPronoun *ourPronounBack =
                 [ourPronounUnarchiver decodeObjectForKey:NSKeyedArchiveRootObjectKey];
             expectEqual(ourPronounBack.subjectForm, @"she", @"archive.pronoun.subjectForm");
         }
@@ -358,7 +358,7 @@ int main(int argc, char **argv)
             expectEqual(expected[key], @"1", [key stringByAppendingString:@".golden"]);
         }
         {
-            NSMorphology *ours = [[charonHostNSMorphology class] userMorphology];
+            NSMorphology *ours = [[revenantHostNSMorphology class] userMorphology];
             NSMorphology *theirs = [NSMorphology userMorphology];
             expect((ours == nil) == (theirs == nil), @"class.userMorphology",
                    [NSString stringWithFormat:@"ours %@ host %@", ours, theirs]);
@@ -368,12 +368,12 @@ int main(int argc, char **argv)
                    @"class.userMorphology.unspecified", @"the two read the same setting");
         }
         {
-            charonHostNSMorphology *morphology = [[charonHostNSMorphology alloc] init];
+            revenantHostNSMorphology *morphology = [[revenantHostNSMorphology alloc] init];
             [morphology setValue:@(2) forKey:@"grammaticalCase"];
             NSMorphology *hostMorphology = [[NSMorphology alloc] init];
             [hostMorphology setValue:@(2) forKey:@"grammaticalCase"];
 
-            charonHostNSMorphologyPronoun *ours = [[charonHostNSMorphologyPronoun alloc]
+            revenantHostNSMorphologyPronoun *ours = [[revenantHostNSMorphologyPronoun alloc]
                     initWithPronoun:@"they" morphology:morphology dependentMorphology:nil];
             NSMorphologyPronoun *theirs = [[NSMorphologyPronoun alloc]
                     initWithPronoun:@"they" morphology:hostMorphology dependentMorphology:nil];
@@ -387,7 +387,7 @@ int main(int argc, char **argv)
                    @"constructed.dependentMorphology", @"neither keeps a dependent one");
             expect([ours copy] != nil, @"constructed.pronoun.copy", @"-copy answers an object");
 
-            charonHostNSInflectionRuleExplicit *rule = [[charonHostNSInflectionRuleExplicit alloc]
+            revenantHostNSInflectionRuleExplicit *rule = [[revenantHostNSInflectionRuleExplicit alloc]
                     initWithMorphology:morphology];
             NSInflectionRuleExplicit *hostRule = [[NSInflectionRuleExplicit alloc]
                     initWithMorphology:hostMorphology];

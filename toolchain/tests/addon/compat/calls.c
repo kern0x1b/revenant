@@ -14,14 +14,14 @@
 #include <time.h>
 #include <unistd.h>
 
-int charon_memset_s(void *, size_t, int, size_t);
-void charon_arc4random_buf(void *, size_t);
+int revenant_memset_s(void *, size_t, int, size_t);
+void revenant_arc4random_buf(void *, size_t);
 extern const char *__progname;
 void *voucher_copy(void);
 void *voucher_adopt(void *);
 unsigned int qos_class_self(void);
-int charon_clock_getres(clockid_t, struct timespec *);
-dispatch_queue_t charon_dispatch_get_global_queue(long, unsigned long);
+int revenant_clock_getres(clockid_t, struct timespec *);
+dispatch_queue_t revenant_dispatch_get_global_queue(long, unsigned long);
 void shim_activate(dispatch_object_t) __asm("_dispatch_activate");
 void shim_assert_queue(dispatch_queue_t) __asm("_dispatch_assert_queue$V2");
 
@@ -52,7 +52,7 @@ static int dies(const char *scenario)
 static void memsets(void)
 {
     int (*darwin)(void *, size_t, int, size_t) = dlsym(RTLD_DEFAULT, "memset_s");
-    expect(darwin && darwin != charon_memset_s, "the test reaches Darwin's memset_s beside the shim");
+    expect(darwin && darwin != revenant_memset_s, "the test reaches Darwin's memset_s beside the shim");
     static const struct { size_t capacity, count; int null; } cases[] = {
         {16, 8, 0}, {16, 16, 0}, {16, 17, 0}, {16, SIZE_MAX, 0}, {SIZE_MAX, 4, 0}, {16, 8, 1}, {0, 0, 0},
     };
@@ -60,7 +60,7 @@ static void memsets(void)
         unsigned char mine[24], theirs[24];
         memset(mine, 0xaa, sizeof mine);
         memset(theirs, 0xaa, sizeof theirs);
-        int got = charon_memset_s(cases[index].null ? NULL : mine, cases[index].capacity, 0x5c, cases[index].count);
+        int got = revenant_memset_s(cases[index].null ? NULL : mine, cases[index].capacity, 0x5c, cases[index].count);
         int wanted = darwin(cases[index].null ? NULL : theirs, cases[index].capacity, 0x5c, cases[index].count);
         char what[160];
         snprintf(what, sizeof what, "memset_s(capacity %zu, count %zu%s) answers %d and writes the bytes Darwin's does",
@@ -79,46 +79,46 @@ static void names(void)
            "the name read is this program's own copy, not the system's");
 }
 
-static uint32_t charon_test_words;
+static uint32_t revenant_test_words;
 
 uint32_t arc4random(void)
 {
-    return ++charon_test_words;
+    return ++revenant_test_words;
 }
 
 static void randoms(void)
 {
     void (*darwin)(void *, size_t) = dlsym(RTLD_DEFAULT, "arc4random_buf");
-    expect(darwin && darwin != charon_arc4random_buf, "the test reaches Darwin's arc4random_buf beside the shim");
+    expect(darwin && darwin != revenant_arc4random_buf, "the test reaches Darwin's arc4random_buf beside the shim");
     static const size_t lengths[] = {0, 1, 3, 4, 5, 8, 31, 64};
     for (size_t index = 0; index < sizeof lengths / sizeof lengths[0]; index++) {
         size_t length = lengths[index];
         unsigned char mine[96], wanted[96];
         memset(mine, 0xaa, sizeof mine);
         memset(wanted, 0xaa, sizeof wanted);
-        charon_test_words = 0;
+        revenant_test_words = 0;
         for (size_t at = 0; at < length; at += sizeof(uint32_t)) {
             uint32_t word = at + sizeof(uint32_t) <= length ? (uint32_t)(at / sizeof(uint32_t) + 1) : (uint32_t)(length / sizeof(uint32_t) + 1);
             size_t bytes = length - at < sizeof(uint32_t) ? length - at : sizeof(uint32_t);
             memcpy(wanted + 16 + at, &word, bytes);
         }
-        charon_test_words = 0;
-        charon_arc4random_buf(mine + 16, length);
+        revenant_test_words = 0;
+        revenant_arc4random_buf(mine + 16, length);
         char what[160];
         snprintf(what, sizeof what, "arc4random_buf fills %zu bytes from the stream, the tail included, and nothing around them", length);
         expect(memcmp(mine, wanted, sizeof mine) == 0, what);
     }
     unsigned char named[16], renamed[16];
-    charon_test_words = 0;
+    revenant_test_words = 0;
     arc4random_buf(named, sizeof named);
-    charon_test_words = 0;
-    charon_arc4random_buf(renamed, sizeof renamed);
+    revenant_test_words = 0;
+    revenant_arc4random_buf(renamed, sizeof renamed);
     expect(memcmp(named, renamed, sizeof named) == 0, "the shim answers to the name of the call itself");
 
-    charon_test_words = 0;
+    revenant_test_words = 0;
     unsigned char first[32], second[32];
-    charon_arc4random_buf(first, sizeof first);
-    charon_arc4random_buf(second, sizeof second);
+    revenant_arc4random_buf(first, sizeof first);
+    revenant_arc4random_buf(second, sizeof second);
     expect(memcmp(first, second, sizeof first) != 0, "two fills of the same length read on through the stream");
 }
 
@@ -175,21 +175,21 @@ static void resolutions(void)
     };
     for (size_t index = 0; index < sizeof clocks / sizeof clocks[0]; index++) {
         struct timespec mine = {-1, -1}, theirs = {-1, -1};
-        int got = charon_clock_getres(clocks[index].clock, &mine);
+        int got = revenant_clock_getres(clocks[index].clock, &mine);
         clock_getres(clocks[index].clock, &theirs);
         char what[160];
         if (clocks[index].as_darwin) {
             snprintf(what, sizeof what, "clock %d resolves to Darwin's %ld ns", clocks[index].clock, theirs.tv_nsec);
             expect(got == 0 && mine.tv_sec == theirs.tv_sec && mine.tv_nsec == theirs.tv_nsec, what);
         } else {
-            snprintf(what, sizeof what, "clock %d, which charon_clock_gettime counts in microseconds, resolves to one", clocks[index].clock);
+            snprintf(what, sizeof what, "clock %d, which revenant_clock_gettime counts in microseconds, resolves to one", clocks[index].clock);
             expect(got == 0 && mine.tv_sec == 0 && mine.tv_nsec == 1000, what);
         }
     }
     errno = 0;
     struct timespec unused;
-    expect(charon_clock_getres((clockid_t)12345, &unused) == -1 && errno == EINVAL, "an unknown clock is refused");
-    expect(charon_clock_getres(CLOCK_REALTIME, NULL) == 0, "a known clock without a result to fill answers 0");
+    expect(revenant_clock_getres((clockid_t)12345, &unused) == -1 && errno == EINVAL, "an unknown clock is refused");
+    expect(revenant_clock_getres(CLOCK_REALTIME, NULL) == 0, "a known clock without a result to fill answers 0");
 }
 
 static void global_queues(void)
@@ -204,11 +204,11 @@ static void global_queues(void)
         char what[160];
         snprintf(what, sizeof what, "class or priority %ld reaches the global queue of priority %ld", classes[index].identifier,
                  classes[index].priority);
-        expect(charon_dispatch_get_global_queue(classes[index].identifier, 0) == dispatch_get_global_queue(classes[index].priority, 0),
+        expect(revenant_dispatch_get_global_queue(classes[index].identifier, 0) == dispatch_get_global_queue(classes[index].priority, 0),
                what);
     }
-    expect(charon_dispatch_get_global_queue(7, 0) == NULL, "an identifier that is neither a class nor a priority answers NULL");
-    expect(charon_dispatch_get_global_queue(0x19, 2) == dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 2),
+    expect(revenant_dispatch_get_global_queue(7, 0) == NULL, "an identifier that is neither a class nor a priority answers NULL");
+    expect(revenant_dispatch_get_global_queue(0x19, 2) == dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 2),
            "the flags reach the system unchanged");
 }
 
@@ -228,7 +228,7 @@ static void activations(void)
         usleep(5000);
     expect(atomic_load(&fired) == 1, "an activated source fires, and a second activation resumes nothing more");
     dispatch_source_cancel(source);
-    dispatch_queue_t queue = dispatch_queue_create("charon.activate", NULL);
+    dispatch_queue_t queue = dispatch_queue_create("revenant.activate", NULL);
     shim_activate(queue);
     __block int ran = 0;
     dispatch_sync(queue, ^{
@@ -254,8 +254,8 @@ static int scenario(const char *name)
     freopen("/dev/null", "w", stderr);
     alarm(10);
     void (*darwin)(dispatch_queue_t) = dlsym(RTLD_DEFAULT, "dispatch_assert_queue$V2");
-    serial = dispatch_queue_create("charon.serial", NULL);
-    inner = dispatch_queue_create("charon.inner", NULL);
+    serial = dispatch_queue_create("revenant.serial", NULL);
+    inner = dispatch_queue_create("revenant.inner", NULL);
     dispatch_set_target_queue(inner, serial);
     if (!strcmp(name, "foreign-voucher"))
         voucher_adopt((void *)0x1000);
@@ -278,8 +278,8 @@ static void assertions(void)
 {
     void (*darwin)(dispatch_queue_t) = dlsym(RTLD_DEFAULT, "dispatch_assert_queue$V2");
     expect(darwin != NULL, "the test reaches Darwin's dispatch_assert_queue$V2");
-    serial = dispatch_queue_create("charon.serial", NULL);
-    inner = dispatch_queue_create("charon.inner", NULL);
+    serial = dispatch_queue_create("revenant.serial", NULL);
+    inner = dispatch_queue_create("revenant.inner", NULL);
     dispatch_set_target_queue(inner, serial);
     shim_assert_queue(dispatch_get_main_queue());
     darwin(dispatch_get_main_queue());

@@ -12,7 +12,7 @@
 #include <cstdint>
 #include <map>
 
-namespace shade {
+namespace emulator {
 
 struct GlesSamplerState {
     std::uint32_t min_filter { gles_abi::nearest_mipmap_linear };

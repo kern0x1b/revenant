@@ -1,12 +1,12 @@
-#define CHARON_MPS_NEURON_IVARS \
+#define REVENANT_MPS_NEURON_IVARS \
     MPSCNNNeuronType _neuronType; \
     float _neuronParameterA, _neuronParameterB, _neuronParameterC; \
     NSData *_neuronPrelu;
 
-#define CHARON_MPS_NEURON_COMMON \
-    - (CharonMPSNeuron)charon_mps_neuron \
+#define REVENANT_MPS_NEURON_COMMON \
+    - (RevenantMPSNeuron)revenant_mps_neuron \
     { \
-        CharonMPSNeuron neuron; \
+        RevenantMPSNeuron neuron; \
         neuron.type = _neuronType; \
         neuron.a = _neuronParameterA; \
         neuron.b = _neuronParameterB; \
@@ -45,17 +45,17 @@
     }
 
 
-#import "CharonMPS.h"
+#import "RevenantMPS.h"
 
 
 @implementation MPSMatrixSum {
-    CHARON_MPS_NEURON_IVARS
+    REVENANT_MPS_NEURON_IVARS
     NSUInteger _rows, _columns, _count;
     BOOL _transpose;
     MTLOrigin _resultMatrixOrigin;
 }
 
-CHARON_MPS_NEURON_COMMON
+REVENANT_MPS_NEURON_COMMON
 
 - (instancetype)initWithDevice:(id<MTLDevice>)device
 {
@@ -99,23 +99,23 @@ CHARON_MPS_NEURON_COMMON
                    biasVector:(MPSVector *)biasVector
                    startIndex:(NSUInteger)startIndex
 {
-    if (!CharonMPSCommandBufferPermits(commandBuffer))
+    if (!RevenantMPSCommandBufferPermits(commandBuffer))
         return;
-    CharonMPSMatrixView out = CharonMPSMatrixViewOf(resultMatrix);
-    if (!CharonMPSDataTypeIsElement(out.dataType)) {
-        CharonMPSRefuse(@"MPSMatrixSum: the result matrix has a data type that is not one of the eight element types");
+    RevenantMPSMatrixView out = RevenantMPSMatrixViewOf(resultMatrix);
+    if (!RevenantMPSDataTypeIsElement(out.dataType)) {
+        RevenantMPSRefuse(@"MPSMatrixSum: the result matrix has a data type that is not one of the eight element types");
         return;
     }
-    CharonMPSVectorView scales = {0, 0, 0, 0, 0, 0};
+    RevenantMPSVectorView scales = {0, 0, 0, 0, 0, 0};
     if (scaleVector)
-        scales = CharonMPSVectorViewOf(scaleVector);
-    CharonMPSVectorView bias = {0, 0, 0, 0, 0, 0};
+        scales = RevenantMPSVectorViewOf(scaleVector);
+    RevenantMPSVectorView bias = {0, 0, 0, 0, 0, 0};
     if (biasVector)
-        bias = CharonMPSVectorViewOf(biasVector);
+        bias = RevenantMPSVectorViewOf(biasVector);
     const MPSMatrixOffset *offsets = NULL;
     if (offsetVector)
         offsets = (const MPSMatrixOffset *)((const char *)[offsetVector.data contents] + offsetVector.offset);
-    CharonMPSNeuron neuron = [self charon_mps_neuron];
+    RevenantMPSNeuron neuron = [self revenant_mps_neuron];
     NSUInteger extent = _transpose ? (_rows < _columns ? _rows : _columns) : _rows;
     NSUInteger extentAcross = _transpose ? extent : _columns;
     for (NSUInteger row = 0; row < extent; row++) {
@@ -127,11 +127,11 @@ CHARON_MPS_NEURON_COMMON
                 pairs = _count;
             for (NSUInteger index = 0; index < pairs; index++) {
                 if (index >= sourceMatrices.count) {
-                    CharonMPSRefuse(@"MPSMatrixSum: %lu matrices were named and only %lu were given", (unsigned long)_count, (unsigned long)sourceMatrices.count);
+                    RevenantMPSRefuse(@"MPSMatrixSum: %lu matrices were named and only %lu were given", (unsigned long)_count, (unsigned long)sourceMatrices.count);
                     return;
                 }
                 MPSMatrix *source = sourceMatrices[index];
-                CharonMPSMatrixView view = CharonMPSMatrixViewOf(source);
+                RevenantMPSMatrixView view = RevenantMPSMatrixViewOf(source);
                 NSUInteger sourceRow = row, sourceColumn = column;
                 if (offsets) {
                     sourceRow += offsets[startIndex + index].rowOffset;
@@ -142,28 +142,28 @@ CHARON_MPS_NEURON_COMMON
                     sourceRow = sourceColumn;
                     sourceColumn = swap;
                 }
-                if (!CharonMPSDataTypeIsElement(view.dataType) || !CharonMPSMatrixHolds(&view, 0, sourceRow, sourceColumn, 1, 1)) {
-                    CharonMPSRefuse(@"MPSMatrixSum: source %lu does not hold the element (%lu, %lu) the operation names", (unsigned long)index, (unsigned long)sourceRow, (unsigned long)sourceColumn);
+                if (!RevenantMPSDataTypeIsElement(view.dataType) || !RevenantMPSMatrixHolds(&view, 0, sourceRow, sourceColumn, 1, 1)) {
+                    RevenantMPSRefuse(@"MPSMatrixSum: source %lu does not hold the element (%lu, %lu) the operation names", (unsigned long)index, (unsigned long)sourceRow, (unsigned long)sourceColumn);
                     return;
                 }
-                double value = CharonMPSLoad(CharonMPSMatrixElement(&view, 0, sourceRow, sourceColumn), view.dataType, 0);
+                double value = RevenantMPSLoad(RevenantMPSMatrixElement(&view, 0, sourceRow, sourceColumn), view.dataType, 0);
                 double scale = 1.0;
                 {
                     NSUInteger which = (startIndex + index) / MAX((NSUInteger)1, scales.length);
                     NSUInteger component = (startIndex + index) % MAX((NSUInteger)1, scales.length);
                     if (which < scales.vectors)
-                        scale = CharonMPSLoad(CharonMPSVectorElement(&scales, which, component), scales.dataType, 0);
+                        scale = RevenantMPSLoad(RevenantMPSVectorElement(&scales, which, component), scales.dataType, 0);
                 }
                 sum += scale * value;
             }
             if (bias.length > column)
-                sum += CharonMPSLoad(CharonMPSVectorElement(&bias, 0, column), bias.dataType, 0);
-            double y = CharonMPSApplyNeuron(neuron.type, sum, neuron.a, neuron.b, neuron.c, CharonMPSNeuronA(&neuron, column));
-            CharonMPSStore(CharonMPSMatrixElement(&out, 0, _resultMatrixOrigin.x + row, _resultMatrixOrigin.y + column), out.dataType, 0, y);
+                sum += RevenantMPSLoad(RevenantMPSVectorElement(&bias, 0, column), bias.dataType, 0);
+            double y = RevenantMPSApplyNeuron(neuron.type, sum, neuron.a, neuron.b, neuron.c, RevenantMPSNeuronA(&neuron, column));
+            RevenantMPSStore(RevenantMPSMatrixElement(&out, 0, _resultMatrixOrigin.x + row, _resultMatrixOrigin.y + column), out.dataType, 0, y);
         }
     }
     for (MPSMatrix *source in sourceMatrices)
-        CharonMPSConsumeReadCount(source);
+        RevenantMPSConsumeReadCount(source);
 }
 
 - (instancetype)initWithCoder:(NSCoder *)aDecoder device:(id<MTLDevice>)device

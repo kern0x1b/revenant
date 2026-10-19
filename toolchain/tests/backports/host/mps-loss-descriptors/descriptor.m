@@ -602,10 +602,10 @@ int main(int argc, char **argv)
     (void)argv;
     setvbuf(stdout, NULL, _IONBF, 0);
     @autoreleasepool {
-        Class lossDataPort = NSClassFromString(@"CharonHostMPSCNNLossDataDescriptor");
-        Class lossPort = NSClassFromString(@"CharonHostMPSCNNLossDescriptor");
-        Class yoloPort = NSClassFromString(@"CharonHostMPSCNNYOLOLossDescriptor");
-        Class neuronPort = NSClassFromString(@"CharonHostMPSNNNeuronDescriptor");
+        Class lossDataPort = NSClassFromString(@"RevenantHostMPSCNNLossDataDescriptor");
+        Class lossPort = NSClassFromString(@"RevenantHostMPSCNNLossDescriptor");
+        Class yoloPort = NSClassFromString(@"RevenantHostMPSCNNYOLOLossDescriptor");
+        Class neuronPort = NSClassFromString(@"RevenantHostMPSNNNeuronDescriptor");
         check(lossDataPort != nil, @"the port's MPSCNNLossDataDescriptor is built in this process");
         check(lossPort != nil, @"the port's MPSCNNLossDescriptor is built in this process");
         check(yoloPort != nil, @"the port's MPSCNNYOLOLossDescriptor is built in this process");

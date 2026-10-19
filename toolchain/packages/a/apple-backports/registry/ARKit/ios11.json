@@ -324,7 +324,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "reason": "carried: a geometry over a plane the detector found, and the SceneKit port implements SCNGeometry oracle: measured by tests/backports/host/arkit/run.sh against the host's own SceneKit, with the mutation in --mutants showing the check can fail",
-      "effect": "a geometry source over the plane's four corners and four coordinate pairs and an element over its six indices, filled by -updateFromPlaneGeometry: through the port's package-internal charon_replaceSources:elements:",
+      "effect": "a geometry source over the plane's four corners and four coordinate pairs and an element over its six indices, filled by -updateFromPlaneGeometry: through the port's package-internal revenant_replaceSources:elements:",
       "source": "the armv7 shared cache of iOS 6.1.3, read with modules/apple/objc.lua: no depth and no face class of any kind",
       "facts": "facts/ARKit/ARSCNViewFamily.md"
     },
@@ -1235,7 +1235,7 @@
       "introduced": "11.0",
       "minimum": "6.0",
       "status": "implemented",
-      "reason": "carried: a SceneKit view, declared by the SDK as @interface ARSCNView : SCNView<ARSessionProviding>, and the SceneKit port implements that very class - SCNView.m is @implementation SCNView carrying _OBJC_CLASS_$_SCNView, with CharonSCN.h:1 importing the SDK's own SceneKit.h as its declaration - so the superclass this subclasses is one the tree already has oracle: measured by tests/backports/host/arkit/run.sh against the host's own SceneKit, with the mutation in --mutants showing the check can fail",
+      "reason": "carried: a SceneKit view, declared by the SDK as @interface ARSCNView : SCNView<ARSessionProviding>, and the SceneKit port implements that very class - SCNView.m is @implementation SCNView carrying _OBJC_CLASS_$_SCNView, with RevenantSCN.h:1 importing the SDK's own SceneKit.h as its declaration - so the superclass this subclasses is one the tree already has oracle: measured by tests/backports/host/arkit/run.sh against the host's own SceneKit, with the mutation in --mutants showing the check can fail",
       "effect": "a real SCNView subclass rather than a view that holds one: the class and its 11.0 members are in ARSCNView11.m and its one 12.0 member in a category in ARSCNView12.m, a caller puts an SCNNode in the view's own scene and gets the ARKit anchor back through anchorForNode:, and a node the caller built is nil because it was never paired",
       "source": "the SDK 16.4 headers of ARKit",
       "facts": "facts/ARKit/ARSCNViewFamily.md"
@@ -1259,7 +1259,7 @@
       "status": "owed",
       "reason": "owed to the v-impl-games band: ARSKView is an SKView, and SpriteKit (the SKView) is being built there. The port builds the view on that SKView once it is on main, and until then there is no view to subclass",
       "effect": "until built: NSClassFromString answers nil",
-      "source": "the armv7 shared cache of iOS 6.1.3 (244881694 bytes) and of 4.3 (153152518 bytes), read with modules/apple/objc.lua's inventory, which walks each cache's own __objc_classlist, __objc_catlist and __objc_protolist: 0 of the 11378 class names and 0 of the 1171 protocol names of 6.1.3 begin AR, and 0 of its 12549 class and protocol names contain Depth, TrueDepth, LiDAR, SceneDepth, Tracked or DepthData; 4.3 answers 0 of 7187 class names, 0 of 564 protocol names and 0 of 7751 names for those words. The controls of those same two reads: AVCaptureDevice is present with 100 instance and 5 class methods in 6.1.3 and 66 and 5 in 4.3, CMMotionManager with 74 and 4 against 64 and 1, UIView with 597 and 66 against 341 and 51, and the nonsense name charonNegativeControlZZZ is absent from both, and ARSKView is absent, 0 entries, from the class list of both; tools/cache-index/first-rung.lua reads 7.0 for both SKView and _OBJC_CLASS_$_SKView, with the nonsense control reading NONE, so even a release that has ARKit has not always had the view. SpriteKit has no folder, no row and no implementation in this tree. The declaration is `@interface ARSKView : SKView<ARSessionProviding>` in ARKit.framework/Headers/ARSKView.h of the iPhoneOS16.4 SDK"
+      "source": "the armv7 shared cache of iOS 6.1.3 (244881694 bytes) and of 4.3 (153152518 bytes), read with modules/apple/objc.lua's inventory, which walks each cache's own __objc_classlist, __objc_catlist and __objc_protolist: 0 of the 11378 class names and 0 of the 1171 protocol names of 6.1.3 begin AR, and 0 of its 12549 class and protocol names contain Depth, TrueDepth, LiDAR, SceneDepth, Tracked or DepthData; 4.3 answers 0 of 7187 class names, 0 of 564 protocol names and 0 of 7751 names for those words. The controls of those same two reads: AVCaptureDevice is present with 100 instance and 5 class methods in 6.1.3 and 66 and 5 in 4.3, CMMotionManager with 74 and 4 against 64 and 1, UIView with 597 and 66 against 341 and 51, and the nonsense name revenantNegativeControlZZZ is absent from both, and ARSKView is absent, 0 entries, from the class list of both; tools/cache-index/first-rung.lua reads 7.0 for both SKView and _OBJC_CLASS_$_SKView, with the nonsense control reading NONE, so even a release that has ARKit has not always had the view. SpriteKit has no folder, no row and no implementation in this tree. The declaration is `@interface ARSKView : SKView<ARSessionProviding>` in ARKit.framework/Headers/ARSKView.h of the iPhoneOS16.4 SDK"
     },
     {
       "api": "ARSKViewDelegate",
@@ -1269,7 +1269,7 @@
       "status": "owed",
       "reason": "owed to the v-impl-games band with ARSKView: the protocol the view calls, built once the SKView it serves is on main",
       "effect": "until built: NSProtocolFromString answers nil",
-      "source": "the armv7 shared cache of iOS 6.1.3 (244881694 bytes) and of 4.3 (153152518 bytes), read with modules/apple/objc.lua's inventory, which walks each cache's own __objc_classlist, __objc_catlist and __objc_protolist: 0 of the 11378 class names and 0 of the 1171 protocol names of 6.1.3 begin AR, and 0 of its 12549 class and protocol names contain Depth, TrueDepth, LiDAR, SceneDepth, Tracked or DepthData; 4.3 answers 0 of 7187 class names, 0 of 564 protocol names and 0 of 7751 names for those words. The controls of those same two reads: AVCaptureDevice is present with 100 instance and 5 class methods in 6.1.3 and 66 and 5 in 4.3, CMMotionManager with 74 and 4 against 64 and 1, UIView with 597 and 66 against 341 and 51, and the nonsense name charonNegativeControlZZZ is absent from both, and ARSKViewDelegate is absent, 0 entries, from the protocol list of both; tools/cache-index/first-rung.lua reads NONE for the name, the nonsense control reading NONE as it must. The declaration is `@protocol ARSKViewDelegate <SKViewDelegate, ARSessionObserver>` in ARKit.framework/Headers/ARSKView.h of the iPhoneOS16.4 SDK"
+      "source": "the armv7 shared cache of iOS 6.1.3 (244881694 bytes) and of 4.3 (153152518 bytes), read with modules/apple/objc.lua's inventory, which walks each cache's own __objc_classlist, __objc_catlist and __objc_protolist: 0 of the 11378 class names and 0 of the 1171 protocol names of 6.1.3 begin AR, and 0 of its 12549 class and protocol names contain Depth, TrueDepth, LiDAR, SceneDepth, Tracked or DepthData; 4.3 answers 0 of 7187 class names, 0 of 564 protocol names and 0 of 7751 names for those words. The controls of those same two reads: AVCaptureDevice is present with 100 instance and 5 class methods in 6.1.3 and 66 and 5 in 4.3, CMMotionManager with 74 and 4 against 64 and 1, UIView with 597 and 66 against 341 and 51, and the nonsense name revenantNegativeControlZZZ is absent from both, and ARSKViewDelegate is absent, 0 entries, from the protocol list of both; tools/cache-index/first-rung.lua reads NONE for the name, the nonsense control reading NONE as it must. The declaration is `@protocol ARSKViewDelegate <SKViewDelegate, ARSessionObserver>` in ARKit.framework/Headers/ARSKView.h of the iPhoneOS16.4 SDK"
     },
     {
       "api": "ARVideoFormat",
@@ -1351,7 +1351,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "reason": "carried: how many pictures the session reports at once, which is a number the caller sets oracle: measured by the tracker's own differential, tests/backports/host/arkit/run.sh over a 30-frame synthetic sequence, whose numbers are recorded in facts/ARKit/TrackerDifferential.md",
-      "effect": "the number as the caller set it. The tracker carries no reference-image detection, so no image anchor is ever reported and the number limits nothing - measured, the names ARReferenceImage and ARImageAnchor occur in neither CharonARTracker.m nor ARSession.m, and -[ARImageTrackingConfiguration maximumNumberOfTrackedImages] at ARConfiguration3.m:46 is the same setting with the same reach",
+      "effect": "the number as the caller set it. The tracker carries no reference-image detection, so no image anchor is ever reported and the number limits nothing - measured, the names ARReferenceImage and ARImageAnchor occur in neither RevenantARTracker.m nor ARSession.m, and -[ARImageTrackingConfiguration maximumNumberOfTrackedImages] at ARConfiguration3.m:46 is the same setting with the same reach",
       "source": "the SDK 16.4 headers of ARKit",
       "facts": "facts/ARKit/ARSCNViewFamily.md"
     },
@@ -1560,7 +1560,7 @@
       "status": "implemented",
       "facts": "facts/ARKit/ARSCNViewFamily.md",
       "source": "ARKit of the iOS 16.4 SDK: ARSCNPlaneGeometry.h:9; documented, not measured: the buffers the update is given come from an ARPlaneGeometry, an ARKit class the host has not; the part SceneKit can see - the sources and the element it reads back - is measured in tests/backports/host/arkit",
-      "reason": "carried: the two properties it would set are readonly - SCNGeometry.h:121 and :135 - and the only public way into a geometry is +geometryWithSources:elements:, which returns a new object, so the in-place update goes through the port's own package-internal charon_replaceSources:elements: declared in CharonSCN.h and in no public header The oracle is Apple's documentation, said so in `source` oracle: Apple's documentation for the signature and what it is stated to answer; not measured, because the answer depends on hardware this gate machine does not have",
+      "reason": "carried: the two properties it would set are readonly - SCNGeometry.h:121 and :135 - and the only public way into a geometry is +geometryWithSources:elements:, which returns a new object, so the in-place update goes through the port's own package-internal revenant_replaceSources:elements: declared in RevenantSCN.h and in no public header The oracle is Apple's documentation, said so in `source` oracle: Apple's documentation for the signature and what it is stated to answer; not measured, because the answer depends on hardware this gate machine does not have",
       "effect": "the geometry's sources become the plane's own vertex and coordinate buffers and its element the plane's six indices, copied into the int16 layout SceneKit takes, with the buffers kept for as long as the sources read them"
     },
     {
@@ -2151,7 +2151,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "facts": "facts/ARKit/AbsentClasses.md",
-      "reason": "carried: ARGeoTrackingConfiguration.m defines -init through the base class initialiser under the port private name (initCharonCommon), as the other configurations do",
+      "reason": "carried: ARGeoTrackingConfiguration.m defines -init through the base class initialiser under the port private name (initRevenantCommon), as the other configurations do",
       "effect": "answers an object of the class; the class answers +isSupported NO, and a session started with it is refused through session:didFailWithError:",
       "source": "ARKit of the arm64e shared cache of iOS 16.0, read with modules/apple/objc.lua's inventory. The controls of that read, because a reader that answered nothing would answer this too: 28851 of the cache's classes carry `-init` in their own instance list and NSObject carries it too, so a class's own methods are visible"
     },

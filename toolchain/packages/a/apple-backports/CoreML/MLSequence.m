@@ -1,6 +1,6 @@
 #import <CoreML/CoreML.h>
 
-#include "CharonMLBridge.h"
+#include "RevenantMLBridge.h"
 
 @interface MLSequence () {
 @public

@@ -4,10 +4,10 @@ import("dyld")
 import("core.base.json")
 import("byteorder", {rootdir = path.join(os.scriptdir(), "..")})
 
-local ADDON = path.join(os.scriptdir(), "..", "..", "addons", "c", "charon", "xmake.lua")
+local ADDON = path.join(os.scriptdir(), "..", "..", "addons", "r", "revenant", "xmake.lua")
 
 function package_name(kind, buildhash)
-    return "org.charon." .. kind .. "-" .. buildhash:sub(1, 8)
+    return "org.revenant." .. kind .. "-" .. buildhash:sub(1, 8)
 end
 
 function package_version(buildhash)
@@ -17,11 +17,11 @@ function package_version(buildhash)
             released = version
         end
     end
-    return assert(released, "the addon recipe names no Charon release") .. "+" .. buildhash:sub(1, 8)
+    return assert(released, "the addon recipe names no Revenant release") .. "+" .. buildhash:sub(1, 8)
 end
 
 function folder_of(name)
-    return "/usr/lib/charon/" .. name
+    return "/usr/lib/revenant/" .. name
 end
 
 function unbound_dependencies(image, architecture)

@@ -1,26 +1,26 @@
 #import <Foundation/Foundation.h>
 #include <dlfcn.h>
 
-typedef void CharonICUCalendar;
+typedef void RevenantICUCalendar;
 
 enum {
-    CharonICUWeekday = 0,
-    CharonICUWeekend = 1,
-    CharonICUWeekendOnset = 2,
-    CharonICUWeekendCease = 3
+    RevenantICUWeekday = 0,
+    RevenantICUWeekend = 1,
+    RevenantICUWeekendOnset = 2,
+    RevenantICUWeekendCease = 3
 };
 
 typedef struct {
-    CharonICUCalendar *(*open)(const unichar *zoneID, int32_t length, const char *locale, int32_t type, int32_t *status);
-    void (*close)(CharonICUCalendar *calendar);
-    unsigned char (*isWeekend)(const CharonICUCalendar *calendar, double date, int32_t *status);
-    int32_t (*dayOfWeekType)(const CharonICUCalendar *calendar, int32_t dayOfWeek, int32_t *status);
-    int32_t (*weekendTransition)(const CharonICUCalendar *calendar, int32_t dayOfWeek, int32_t *status);
-} CharonICU;
+    RevenantICUCalendar *(*open)(const unichar *zoneID, int32_t length, const char *locale, int32_t type, int32_t *status);
+    void (*close)(RevenantICUCalendar *calendar);
+    unsigned char (*isWeekend)(const RevenantICUCalendar *calendar, double date, int32_t *status);
+    int32_t (*dayOfWeekType)(const RevenantICUCalendar *calendar, int32_t dayOfWeek, int32_t *status);
+    int32_t (*weekendTransition)(const RevenantICUCalendar *calendar, int32_t dayOfWeek, int32_t *status);
+} RevenantICU;
 
-static const CharonICU *charon_icu(void)
+static const RevenantICU *revenant_icu(void)
 {
-    static CharonICU functions;
+    static RevenantICU functions;
     static BOOL loaded;
     static dispatch_once_t once;
     dispatch_once(&once, ^{
@@ -39,7 +39,7 @@ static const CharonICU *charon_icu(void)
     return loaded ? &functions : NULL;
 }
 
-static CharonICUCalendar *charon_icu_calendar(NSCalendar *calendar, const CharonICU *icu)
+static RevenantICUCalendar *revenant_icu_calendar(NSCalendar *calendar, const RevenantICU *icu)
 {
     NSString *zone = calendar.timeZone.name;
     NSString *locale = calendar.locale.localeIdentifier;
@@ -48,7 +48,7 @@ static CharonICUCalendar *charon_icu_calendar(NSCalendar *calendar, const Charon
     unichar *characters = malloc((length ? length : 1) * sizeof(unichar));
     [zone getCharacters:characters range:NSMakeRange(0, length)];
     int32_t status = 0;
-    CharonICUCalendar *opened = icu->open(characters, (int32_t)length, locale.UTF8String, 0, &status);
+    RevenantICUCalendar *opened = icu->open(characters, (int32_t)length, locale.UTF8String, 0, &status);
     free(characters);
     if (status > 0) {
         icu->close(opened);
@@ -57,21 +57,21 @@ static CharonICUCalendar *charon_icu_calendar(NSCalendar *calendar, const Charon
     return opened;
 }
 
-static int32_t charon_day_type(const CharonICU *icu, CharonICUCalendar *opened, NSInteger weekday)
+static int32_t revenant_day_type(const RevenantICU *icu, RevenantICUCalendar *opened, NSInteger weekday)
 {
     int32_t status = 0;
     int32_t type = icu->dayOfWeekType(opened, (int32_t)weekday, &status);
-    return status > 0 ? CharonICUWeekday : type;
+    return status > 0 ? RevenantICUWeekday : type;
 }
 
-static NSTimeInterval charon_transition(const CharonICU *icu, CharonICUCalendar *opened, NSInteger weekday)
+static NSTimeInterval revenant_transition(const RevenantICU *icu, RevenantICUCalendar *opened, NSInteger weekday)
 {
     int32_t status = 0;
     int32_t milliseconds = icu->weekendTransition(opened, (int32_t)weekday, &status);
     return status > 0 ? 0 : milliseconds / 1000.0;
 }
 
-static NSDate *charon_next_day(NSCalendar *calendar, NSDate *day)
+static NSDate *revenant_next_day(NSCalendar *calendar, NSDate *day)
 {
     NSDateComponents *step = [[NSDateComponents alloc] init];
     step.day = 1;
@@ -80,12 +80,12 @@ static NSDate *charon_next_day(NSCalendar *calendar, NSDate *day)
     return start;
 }
 
-static BOOL charon_weekend_range(NSCalendar *calendar, NSDate *date, NSDate **startDate, NSTimeInterval *interval)
+static BOOL revenant_weekend_range(NSCalendar *calendar, NSDate *date, NSDate **startDate, NSTimeInterval *interval)
 {
-    const CharonICU *icu = charon_icu();
+    const RevenantICU *icu = revenant_icu();
     if (!icu)
         return NO;
-    CharonICUCalendar *opened = charon_icu_calendar(calendar, icu);
+    RevenantICUCalendar *opened = revenant_icu_calendar(calendar, icu);
     if (!opened)
         return NO;
     int32_t status = 0;
@@ -99,9 +99,9 @@ static BOOL charon_weekend_range(NSCalendar *calendar, NSDate *date, NSDate **st
     NSDate *start = day, *finish = nil;
     for (NSInteger moved = 0; moved < 8; moved++) {
         NSInteger weekday = [calendar components:NSCalendarUnitWeekday fromDate:start].weekday;
-        int32_t type = charon_day_type(icu, opened, weekday);
-        if (type == CharonICUWeekendOnset) {
-            start = [start dateByAddingTimeInterval:charon_transition(icu, opened, weekday)];
+        int32_t type = revenant_day_type(icu, opened, weekday);
+        if (type == RevenantICUWeekendOnset) {
+            start = [start dateByAddingTimeInterval:revenant_transition(icu, opened, weekday)];
             break;
         }
         NSDateComponents *back = [[NSDateComponents alloc] init];
@@ -109,25 +109,25 @@ static BOOL charon_weekend_range(NSCalendar *calendar, NSDate *date, NSDate **st
         NSDate *previousDay = nil;
         [calendar rangeOfUnit:NSCalendarUnitDay startDate:&previousDay interval:NULL forDate:[calendar dateByAddingComponents:back toDate:start options:0]];
         NSInteger previousWeekday = [calendar components:NSCalendarUnitWeekday fromDate:previousDay].weekday;
-        int32_t previousType = charon_day_type(icu, opened, previousWeekday);
-        if (previousType != CharonICUWeekend && previousType != CharonICUWeekendOnset)
+        int32_t previousType = revenant_day_type(icu, opened, previousWeekday);
+        if (previousType != RevenantICUWeekend && previousType != RevenantICUWeekendOnset)
             break;
         start = previousDay;
     }
     finish = day;
     for (NSInteger moved = 0; moved < 8; moved++) {
         NSInteger weekday = [calendar components:NSCalendarUnitWeekday fromDate:finish].weekday;
-        int32_t type = charon_day_type(icu, opened, weekday);
-        if (type == CharonICUWeekendCease) {
-            NSTimeInterval transition = charon_transition(icu, opened, weekday);
-            finish = transition >= 86400 ? charon_next_day(calendar, finish) : [finish dateByAddingTimeInterval:transition];
+        int32_t type = revenant_day_type(icu, opened, weekday);
+        if (type == RevenantICUWeekendCease) {
+            NSTimeInterval transition = revenant_transition(icu, opened, weekday);
+            finish = transition >= 86400 ? revenant_next_day(calendar, finish) : [finish dateByAddingTimeInterval:transition];
             break;
         }
-        NSDate *nextDay = charon_next_day(calendar, finish);
+        NSDate *nextDay = revenant_next_day(calendar, finish);
         NSInteger nextWeekday = [calendar components:NSCalendarUnitWeekday fromDate:nextDay].weekday;
-        int32_t nextType = charon_day_type(icu, opened, nextWeekday);
+        int32_t nextType = revenant_day_type(icu, opened, nextWeekday);
         finish = nextDay;
-        if (nextType != CharonICUWeekend && nextType != CharonICUWeekendCease)
+        if (nextType != RevenantICUWeekend && nextType != RevenantICUWeekendCease)
             break;
     }
     icu->close(opened);
@@ -138,14 +138,14 @@ static BOOL charon_weekend_range(NSCalendar *calendar, NSDate *date, NSDate **st
     return YES;
 }
 
-@implementation NSCalendar (CharonWeekend)
+@implementation NSCalendar (RevenantWeekend)
 
 - (BOOL)isDateInWeekend:(NSDate *)date
 {
-    const CharonICU *icu = charon_icu();
+    const RevenantICU *icu = revenant_icu();
     if (!icu)
         return NO;
-    CharonICUCalendar *opened = charon_icu_calendar(self, icu);
+    RevenantICUCalendar *opened = revenant_icu_calendar(self, icu);
     if (!opened)
         return NO;
     int32_t status = 0;
@@ -156,7 +156,7 @@ static BOOL charon_weekend_range(NSCalendar *calendar, NSDate *date, NSDate **st
 
 - (BOOL)rangeOfWeekendStartDate:(NSDate **)datep interval:(NSTimeInterval *)tip containingDate:(NSDate *)date
 {
-    return charon_weekend_range(self, date, datep, tip);
+    return revenant_weekend_range(self, date, datep, tip);
 }
 
 - (BOOL)nextWeekendStartDate:(NSDate **)datep interval:(NSTimeInterval *)tip options:(NSCalendarOptions)options afterDate:(NSDate *)date
@@ -173,7 +173,7 @@ static BOOL charon_weekend_range(NSCalendar *calendar, NSDate *date, NSDate **st
     for (NSInteger moved = 0; moved < 40; moved++) {
         NSDate *start = nil;
         NSTimeInterval interval = 0;
-        if (charon_weekend_range(self, cursor, &start, &interval)) {
+        if (revenant_weekend_range(self, cursor, &start, &interval)) {
             if (backwards || [start compare:date] == NSOrderedDescending) {
                 if (datep)
                     *datep = start;

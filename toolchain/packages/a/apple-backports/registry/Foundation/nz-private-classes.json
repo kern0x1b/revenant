@@ -8,10 +8,10 @@
       "minimum": "6.0",
       "status": "implemented",
       "facts": "facts/Foundation/NSDecidedRows.md",
-      "source": "SDK 26.2 headers declare no such class; it is this port's own, and CharonStreamTaskState.m is where it is defined and used"
+      "source": "SDK 26.2 headers declare no such class; it is this port's own, and RevenantStreamTaskState.m is where it is defined and used"
     },
     {
-      "api": "CharonPresentationIntentState",
+      "api": "RevenantPresentationIntentState",
       "kind": "class",
       "introduced": "6.0",
       "minimum": "6.0",
@@ -20,7 +20,7 @@
       "source": "SDK 26.2 headers declare no such class; it is this port's own, and NSPresentationIntent15.m is where it is defined and used"
     },
     {
-      "api": "CharonTermOfAddressState",
+      "api": "RevenantTermOfAddressState",
       "kind": "class",
       "introduced": "6.0",
       "minimum": "6.0",
@@ -29,7 +29,7 @@
       "source": "SDK 26.2 headers declare no such class; it is this port's own, and NSTermOfAddress17.m is where it is defined and used"
     },
     {
-      "api": "CharonPersonNameParts",
+      "api": "RevenantPersonNameParts",
       "kind": "class",
       "introduced": "6.0",
       "minimum": "6.0",

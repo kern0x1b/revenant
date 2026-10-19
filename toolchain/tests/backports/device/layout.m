@@ -12,7 +12,7 @@ static NSString *const results_folder = @"/private/var/backports";
 
 #define NAMED(...) ([NSString stringWithFormat:__VA_ARGS__].UTF8String)
 
-struct charon_stack_case {
+struct revenant_stack_case {
     int nested;
     int margins;
     int axis;
@@ -24,7 +24,7 @@ struct charon_stack_case {
     double frames[24];
 };
 
-static const struct charon_stack_case charon_stack_cases[] = {
+static const struct revenant_stack_case revenant_stack_cases[] = {
     {0, 0, 0, 0, 0, 0, 0, 5, {10, 20, 150, 50, 10, 20, 40, 50, 55, 20, 60, 50, 120, 20, 10, 50, 135, 20, 25, 50, }},
     {0, 0, 0, 0, 0, 0, 1, 5, {10, 20, 400, 300, 10, 20, 290, 300, 305, 20, 60, 300, 370, 20, 10, 300, 385, 20, 25, 300, }},
     {0, 0, 0, 0, 0, 1, 0, 5, {10, 20, 85, 50, 10, 20, 40, 50, 53, 20, 0, 50, 55, 20, 10, 50, 70, 20, 25, 50, }},
@@ -658,8 +658,8 @@ static UILabel *label(NSString *text, CGFloat size)
 }
 @end
 
-@interface NSObject (CharonLayoutGuideView)
-- (UIView *)charon_view;
+@interface NSObject (RevenantLayoutGuideView)
+- (UIView *)revenant_view;
 @end
 
 static void test_mechanism(void)
@@ -929,7 +929,7 @@ static void test_guides(void)
     layout_tree(container);
     CHECK(rect_close(gap.layoutFrame, CGRectMake(50, 25, 80, 30)), NAMED(@"layoutFrame of a guide: %@", NSStringFromCGRect(gap.layoutFrame)));
     CHECK(rect_close(b.frame, CGRectMake(130, 55, 60, 20)), NAMED(@"views constrained to a guide: %@", NSStringFromCGRect(b.frame)));
-    UIView *helper = [gap charon_view];
+    UIView *helper = [gap revenant_view];
     CHECK(helper.superview == container && helper.hidden && !helper.userInteractionEnabled, "a guide is backed by a hidden view that ignores touches");
     CHECK([container hitTest:CGPointMake(90, 40) withEvent:nil] == container, "hit testing inside a guide finds the owning view");
     gap.identifier = @"kept";
@@ -1025,7 +1025,7 @@ static void test_engine_multiplier(void)
            (unsigned long)seen.count, (unsigned long)[seen countForObject:@"20 30 50 25 "]);
 }
 
-static UIStackView *lay_out_case(const struct charon_stack_case *item, UIView *root, NSArray **arrangedOut)
+static UIStackView *lay_out_case(const struct revenant_stack_case *item, UIView *root, NSArray **arrangedOut)
 {
     NSArray *arranged;
     if (item->nested) {
@@ -1062,7 +1062,7 @@ static UIStackView *lay_out_case(const struct charon_stack_case *item, UIView *r
     return stack;
 }
 
-static NSString *case_frames(const struct charon_stack_case *item)
+static NSString *case_frames(const struct revenant_stack_case *item)
 {
     UIView *root = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 600, 600)];
     NSArray *arranged;
@@ -1073,7 +1073,7 @@ static NSString *case_frames(const struct charon_stack_case *item)
     return frames;
 }
 
-static BOOL engine_varies(const struct charon_stack_case *item, NSString *first)
+static BOOL engine_varies(const struct revenant_stack_case *item, NSString *first)
 {
     NSMutableArray *ballast = [NSMutableArray array];
     NSMutableSet *answers = [NSMutableSet setWithObject:first];
@@ -1089,9 +1089,9 @@ static BOOL engine_varies(const struct charon_stack_case *item, NSString *first)
 
 static void test_stack_table(void)
 {
-    int matched = 0, known = 0, count = sizeof charon_stack_cases / sizeof charon_stack_cases[0];
+    int matched = 0, known = 0, count = sizeof revenant_stack_cases / sizeof revenant_stack_cases[0];
     for (int index = 0; index < count; index++) {
-        const struct charon_stack_case *item = &charon_stack_cases[index];
+        const struct revenant_stack_case *item = &revenant_stack_cases[index];
         @autoreleasepool {
             UIView *root = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 600, 600)];
             NSArray *arranged;
@@ -1136,7 +1136,7 @@ static void test_stack_table(void)
                     NSUInteger position = [arranged indexOfObjectIdenticalTo:constraint.firstItem];
                     recipe = recipe && fabs(constraint.multiplier * total - proportional_length(constraint.firstItem, stack.axis)) < 0.01 && constraint.priority == UILayoutPriorityRequired - 1 - position;
                 }
-                charon_check(recipe && proportions == (int)visible.count, NAMED(@"proportional constraints of nested=%d margins=%d axis=%d alignment=%d hidden=%d are the share of each item at 999 less its index", item->nested, item->margins, item->axis, item->alignment, item->hidden),
+                revenant_check(recipe && proportions == (int)visible.count, NAMED(@"proportional constraints of nested=%d margins=%d axis=%d alignment=%d hidden=%d are the share of each item at 999 less its index", item->nested, item->margins, item->axis, item->alignment, item->hidden),
                              [NSString stringWithFormat:@"%d of %lu", proportions, (unsigned long)visible.count]);
             }
             if (same) {
@@ -1153,7 +1153,7 @@ static void test_stack_table(void)
                 NSMutableString *expected = [NSMutableString string];
                 for (int view = 0; view < item->count; view++)
                     [expected appendFormat:@"%@ ", NSStringFromCGRect(CGRectMake(item->frames[view * 4], item->frames[view * 4 + 1], item->frames[view * 4 + 2], item->frames[view * 4 + 3]))];
-                charon_check(NO, NAMED(@"stack frames nested=%d margins=%d axis=%d distribution=%d alignment=%d hidden=%d size=%d", item->nested, item->margins, item->axis, item->distribution, item->alignment, item->hidden, item->size), [NSString stringWithFormat:@"\n  expected %@\n  actual   %@", expected, actual]);
+                revenant_check(NO, NAMED(@"stack frames nested=%d margins=%d axis=%d distribution=%d alignment=%d hidden=%d size=%d", item->nested, item->margins, item->axis, item->distribution, item->alignment, item->hidden, item->size), [NSString stringWithFormat:@"\n  expected %@\n  actual   %@", expected, actual]);
             }
         }
     }
@@ -1240,7 +1240,7 @@ static void test_stack_api(void)
 {
     [[NSFileManager defaultManager] createDirectoryAtPath:results_folder withIntermediateDirectories:YES attributes:nil error:NULL];
     [[NSFileManager defaultManager] removeItemAtPath:[results_folder stringByAppendingPathComponent:@"layout.done"] error:NULL];
-    charon_log_to([results_folder stringByAppendingPathComponent:@"layout.log"]);
+    revenant_log_to([results_folder stringByAppendingPathComponent:@"layout.log"]);
     printf("layout device test started\n");
     UIViewController *host = [[UIViewController alloc] init];
     host.view.backgroundColor = [UIColor whiteColor];
@@ -1292,10 +1292,10 @@ static void test_stack_api(void)
 
 - (void)finish
 {
-    printf("checks=%d failures=%d\n", charon_checks, charon_failures);
-    self.status.text = [NSString stringWithFormat:@"%@ checks=%d failures=%d", charon_failures ? @"FAIL" : @"ok", charon_checks, charon_failures];
+    printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
+    self.status.text = [NSString stringWithFormat:@"%@ checks=%d failures=%d", revenant_failures ? @"FAIL" : @"ok", revenant_checks, revenant_failures];
     after(1, ^{
-        NSString *summary = [NSString stringWithFormat:@"%@ checks=%d failures=%d\n", charon_failures ? @"FAIL" : @"ok", charon_checks, charon_failures];
+        NSString *summary = [NSString stringWithFormat:@"%@ checks=%d failures=%d\n", revenant_failures ? @"FAIL" : @"ok", revenant_checks, revenant_failures];
         [summary writeToFile:[results_folder stringByAppendingPathComponent:@"layout.done"] atomically:YES encoding:NSUTF8StringEncoding error:NULL];
     });
 }

@@ -16,7 +16,7 @@
 # WHY THIS IS NOT A DIFFERENTIAL, stated here rather than left for a reader to discover. There is no
 # behavioural oracle for SRSensorReader on this machine and that is measured, not assumed: the host's own
 # SensorKit.framework declares the class and implements nothing (respondsToSelector: is 0 for
-# +authorizationStatus and +sharedReader), and the port's CharonSensorKit.h cannot be compiled against
+# +authorizationStatus and +sharedReader), and the port's RevenantSensorKit.h cannot be compiled against
 # the host's newer SDK at all - clang answers "typedef redefinition with different types ('NSInteger'
 # vs 'enum SRAcousticSettingsSampleLifetime')" for the fifteen enumerations it redeclares, because the
 # host's SensorKit spells them NS_ENUM. The armv7 object is the port's own answer, built the way the
@@ -31,7 +31,7 @@ here=$(cd "$(dirname "$0")" && pwd)
 ensure_generated "$here" SensorKit
 appledir=${APPLEDIR:-$here/../../../../packages/a/apple-backports}
 reader=${READER:-$appledir/SensorKit/SRSensorReader.m}
-build=${BUILD:-$(runs_fresh charon-sensorkit-reader)}
+build=${BUILD:-$(runs_fresh revenant-sensorkit-reader)}
 mkdir -p "$build"
 
 # The toolchain the armv7 band is built with, out of the shared store the whole build depends on. A
@@ -77,20 +77,20 @@ echo "--- the metadata the port emits for the protocol, counted"
 mkdir -p "$build/mutant-protocols"
 sed -e 's/^@protocol SRSensorReaderDelegate <NSObject>$/@protocol SRSensorReaderDelegate;/' \
     -e '/^@optional$/,/^@end$/d' \
-    "$appledir/.gen/SensorKit/CharonSensorKitProtocols.h" > "$build/mutant-protocols/CharonSensorKitProtocols.h"
-if grep -q '^@optional$' "$build/mutant-protocols/CharonSensorKitProtocols.h"; then
+    "$appledir/.gen/SensorKit/RevenantSensorKitProtocols.h" > "$build/mutant-protocols/RevenantSensorKitProtocols.h"
+if grep -q '^@optional$' "$build/mutant-protocols/RevenantSensorKitProtocols.h"; then
     echo "MUTATION DID NOT APPLY: the mutant header still declares the ten members"
     survived=$((survived + 1))
 fi
 generated() {
     mkdir -p "$1"
-    cp "$2" "$1/CharonSensorKitProtocols.h"
+    cp "$2" "$1/RevenantSensorKitProtocols.h"
     {
         echo '// SensorKitBackportsProtocols14.0.m - written by modules/apple/backports.lua, not by hand.'
-        echo '#import "CharonSensorKitProtocols.h"'
+        echo '#import "RevenantSensorKitProtocols.h"'
         echo
-        echo 'void charon_SensorKitBackports_protocols(void) __attribute__((used));'
-        echo 'void charon_SensorKitBackports_protocols(void)'
+        echo 'void revenant_SensorKitBackports_protocols(void) __attribute__((used));'
+        echo 'void revenant_SensorKitBackports_protocols(void)'
         echo '{'
         echo '    (void)@protocol(SRSensorReaderDelegate);'
         echo '}'
@@ -99,13 +99,13 @@ generated() {
     xcrun clang -fobjc-arc -w -I"$appledir/SensorKit" "$here/protocol-count.m" "$1/protocols.o" \
         -framework Foundation -o "$1/protocol-count"
 }
-generated "$build/protocols" "$appledir/.gen/SensorKit/CharonSensorKitProtocols.h"
+generated "$build/protocols" "$appledir/.gen/SensorKit/RevenantSensorKitProtocols.h"
 "$build/protocols/protocol-count" > "$build/protocol.out"
 cat "$build/protocol.out"
 xmake l "$here/check_protocol.lua" "$build/protocol.out"
 
 echo "--- and its plant: the protocol forwarded instead of declared, which is what the header used to do"
-generated "$build/protocols-mutant" "$build/mutant-protocols/CharonSensorKitProtocols.h"
+generated "$build/protocols-mutant" "$build/mutant-protocols/RevenantSensorKitProtocols.h"
 "$build/protocols-mutant/protocol-count" > "$build/protocol-mutant.out"
 if xmake l "$here/check_protocol.lua" "$build/protocol-mutant.out" > "$build/protocol-mutant-cmp.out" 2>&1; then
     echo "MUTANT SURVIVED: the protocol counted the same with its ten members deleted"

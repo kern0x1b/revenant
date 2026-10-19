@@ -7,7 +7,7 @@
 extern NSUInteger gCompared;
 extern NSUInteger gMismatches;
 
-static inline double CharonNNOneUlp(double want)
+static inline double RevenantNNOneUlp(double want)
 {
     if (want == 0.0)
         return 0.0;
@@ -22,15 +22,15 @@ static inline double CharonNNOneUlp(double want)
 }
 
 typedef enum {
-    CharonNNReduceMin = 0,
-    CharonNNReduceMax,
-    CharonNNReduceMean,
-    CharonNNReduceSum,
-} CharonNNReduceOp;
+    RevenantNNReduceMin = 0,
+    RevenantNNReduceMax,
+    RevenantNNReduceMean,
+    RevenantNNReduceSum,
+} RevenantNNReduceOp;
 
-static void CharonNNReduceReference(const char *name, const float *src, NSUInteger rows, NSUInteger cols,
+static void RevenantNNReduceReference(const char *name, const float *src, NSUInteger rows, NSUInteger cols,
                                     NSUInteger channels, int byColumn, int byFeatureChannel,
-                                    CharonNNReduceOp op, float weight, int weighted,
+                                    RevenantNNReduceOp op, float weight, int weighted,
                                     const float *out, NSUInteger dstCols, NSUInteger dstChannels)
 {
     NSUInteger span = byFeatureChannel ? channels : (byColumn ? rows : cols);
@@ -53,7 +53,7 @@ static void CharonNNReduceReference(const char *name, const float *src, NSUInteg
                 at = byColumn ? sp + s * cols : sp * cols + s;
             }
             double v = (double)src[at * channels + c];
-            if (byFeatureChannel && weighted && (op == CharonNNReduceSum || op == CharonNNReduceMean))
+            if (byFeatureChannel && weighted && (op == RevenantNNReduceSum || op == RevenantNNReduceMean))
                 v *= (double)weight;
             if (s == 0 || v < smallest) smallest = v;
             if (s == 0 || v > largest) largest = v;
@@ -61,10 +61,10 @@ static void CharonNNReduceReference(const char *name, const float *src, NSUInteg
         }
         double want;
         switch (op) {
-            case CharonNNReduceMin: want = smallest; break;
-            case CharonNNReduceMax: want = largest; break;
-            case CharonNNReduceMean: want = total / (double)span; break;
-            case CharonNNReduceSum: want = total; break;
+            case RevenantNNReduceMin: want = smallest; break;
+            case RevenantNNReduceMax: want = largest; break;
+            case RevenantNNReduceMean: want = total / (double)span; break;
+            case RevenantNNReduceSum: want = total; break;
         }
 
         NSUInteger x, y, c;
@@ -82,8 +82,8 @@ static void CharonNNReduceReference(const char *name, const float *src, NSUInteg
         double have = (double)out[(y * dstCols + x) * dstChannels + c];
 
         gCompared++;
-        int exact = (op == CharonNNReduceMean) ? 0 : 1;
-        double bound = exact ? 0.0 : CharonNNOneUlp(want);
+        int exact = (op == RevenantNNReduceMean) ? 0 : 1;
+        double bound = exact ? 0.0 : RevenantNNOneUlp(want);
         if (exact ? (have != want) : (fabs(have - want) > bound)) {
             gMismatches++;
             printf("\n  MISMATCH %s run %lu reference %.9g port %.9g, %s\n", name, (unsigned long)r,

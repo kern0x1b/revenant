@@ -1,41 +1,41 @@
 #import <UIKit/UIKit.h>
 #import <objc/runtime.h>
 
-static const char CharonInteractionsKey;
+static const char RevenantInteractionsKey;
 
-static NSMutableArray *charon_interactions(UIView *view, BOOL create)
+static NSMutableArray *revenant_interactions(UIView *view, BOOL create)
 {
-    NSMutableArray *held = objc_getAssociatedObject(view, &CharonInteractionsKey);
+    NSMutableArray *held = objc_getAssociatedObject(view, &RevenantInteractionsKey);
     if (!held && create) {
         held = [NSMutableArray array];
-        objc_setAssociatedObject(view, &CharonInteractionsKey, held, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+        objc_setAssociatedObject(view, &RevenantInteractionsKey, held, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     }
     return held;
 }
 
-static void charon_needs(BOOL held, NSString *condition)
+static void revenant_needs(BOOL held, NSString *condition)
 {
     if (!held)
         [NSException raise:NSInternalInconsistencyException format:@"Invalid parameter not satisfying: %@", condition];
 }
 
-static void charon_moved(id<UIInteraction> interaction, UIView *view)
+static void revenant_moved(id<UIInteraction> interaction, UIView *view)
 {
     [interaction willMoveToView:view];
     [interaction didMoveToView:view];
 }
 
-@implementation UIView (CharonInteractions)
+@implementation UIView (RevenantInteractions)
 
 - (NSArray<id<UIInteraction>> *)interactions
 {
-    NSMutableArray *held = charon_interactions(self, NO);
+    NSMutableArray *held = revenant_interactions(self, NO);
     return held ? [NSArray arrayWithArray:held] : [NSArray array];
 }
 
 - (void)setInteractions:(NSArray<id<UIInteraction>> *)interactions
 {
-    charon_needs(interactions != nil, @"interactions");
+    revenant_needs(interactions != nil, @"interactions");
     NSArray *wanted = [interactions copy];
     for (id<UIInteraction> interaction in [self interactions])
         [self removeInteraction:interaction];
@@ -45,30 +45,30 @@ static void charon_moved(id<UIInteraction> interaction, UIView *view)
 
 - (void)addInteraction:(id<UIInteraction>)interaction
 {
-    charon_needs(interaction != nil, @"interaction != nil");
+    revenant_needs(interaction != nil, @"interaction != nil");
     UIView *held = interaction.view;
     if (held == self)
         return;
     if (held)
         [held removeInteraction:interaction];
-    NSMutableArray *list = charon_interactions(self, YES);
+    NSMutableArray *list = revenant_interactions(self, YES);
     if ([list indexOfObjectIdenticalTo:interaction] != NSNotFound) {
-        charon_moved(interaction, self);
+        revenant_moved(interaction, self);
         return;
     }
     [list addObject:interaction];
-    charon_moved(interaction, self);
+    revenant_moved(interaction, self);
 }
 
 - (void)removeInteraction:(id<UIInteraction>)interaction
 {
-    charon_needs(interaction != nil, @"interaction != nil");
-    NSMutableArray *held = charon_interactions(self, NO);
+    revenant_needs(interaction != nil, @"interaction != nil");
+    NSMutableArray *held = revenant_interactions(self, NO);
     NSUInteger index = held ? [held indexOfObjectIdenticalTo:interaction] : NSNotFound;
     if (index == NSNotFound)
         return;
     [held removeObjectAtIndex:index];
-    charon_moved(interaction, nil);
+    revenant_moved(interaction, nil);
 }
 
 @end

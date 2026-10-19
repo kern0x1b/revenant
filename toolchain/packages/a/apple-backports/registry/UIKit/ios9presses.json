@@ -95,7 +95,7 @@
       "status": "implemented",
       "effect": "iOS 7.0's animator over unmodified Box2D 2.2.1: bodies, joints, masks, boundaries, exceptions, callback order and the write-back of center and transform follow 7.0; the trajectory is 7.0's integrator (fixed 0.004 s sub-steps, a box 1 pt inside the item with a 0.001 m skin), predicted from the 7.0 listing, while the host's integrator, which the test compares with, sub-steps at 1/120 s; removeAllBehaviors dissociates a child once where 7.0 does it twice; an empty boundary path raises where 7.0's Box2D asserts; a resting animator wakes when its reference view's bounds size changes through setFrame: or setBounds:, seen by KVO of frame and bounds (facts M3: the same paths on emulated 4.3, 5.1.1, 6.0 and 6.1.3, Auto Layout from 6.0, and the shipped watch on those four, its wake checks on 5.1.1 to 6.1.3 only, a bare 4.3 process having no display link; not on a device)",
       "facts": "facts/UIKit/UIDynamicAnimator.md",
-      "source": "the host's UIKitCore and PhysicsKit through Mac Catalyst, held against the port by tests/backports/host/dynamics; UIKit and PhysicsKit of the iOS 7.0 arm64 cache, read function by function; Box2D 2.2.1 (charon@box2d), the engine 7.0's PhysicsKit is a fork of"
+      "source": "the host's UIKitCore and PhysicsKit through Mac Catalyst, held against the port by tests/backports/host/dynamics; UIKit and PhysicsKit of the iOS 7.0 arm64 cache, read function by function; Box2D 2.2.1 (revenant@box2d), the engine 7.0's PhysicsKit is a fork of"
     },
     {
       "api": "UIDynamicBehavior",
@@ -103,7 +103,7 @@
       "introduced": "7.0",
       "status": "implemented",
       "facts": "facts/UIKit/UIDynamicAnimator.md",
-      "source": "the host's UIKitCore and PhysicsKit through Mac Catalyst, held against the port by tests/backports/host/dynamics; UIKit and PhysicsKit of the iOS 7.0 arm64 cache, read function by function; Box2D 2.2.1 (charon@box2d), the engine 7.0's PhysicsKit is a fork of"
+      "source": "the host's UIKitCore and PhysicsKit through Mac Catalyst, held against the port by tests/backports/host/dynamics; UIKit and PhysicsKit of the iOS 7.0 arm64 cache, read function by function; Box2D 2.2.1 (revenant@box2d), the engine 7.0's PhysicsKit is a fork of"
     },
     {
       "api": "UIDynamicItemBehavior",
@@ -111,7 +111,7 @@
       "introduced": "7.0",
       "status": "implemented",
       "facts": "facts/UIKit/UIDynamicAnimator.md",
-      "source": "the host's UIKitCore and PhysicsKit through Mac Catalyst, held against the port by tests/backports/host/dynamics; UIKit and PhysicsKit of the iOS 7.0 arm64 cache, read function by function; Box2D 2.2.1 (charon@box2d), the engine 7.0's PhysicsKit is a fork of"
+      "source": "the host's UIKitCore and PhysicsKit through Mac Catalyst, held against the port by tests/backports/host/dynamics; UIKit and PhysicsKit of the iOS 7.0 arm64 cache, read function by function; Box2D 2.2.1 (revenant@box2d), the engine 7.0's PhysicsKit is a fork of"
     },
     {
       "api": "UIGravityBehavior",
@@ -119,7 +119,7 @@
       "introduced": "7.0",
       "status": "implemented",
       "facts": "facts/UIKit/UIDynamicAnimator.md",
-      "source": "the host's UIKitCore and PhysicsKit through Mac Catalyst, held against the port by tests/backports/host/dynamics; UIKit and PhysicsKit of the iOS 7.0 arm64 cache, read function by function; Box2D 2.2.1 (charon@box2d), the engine 7.0's PhysicsKit is a fork of"
+      "source": "the host's UIKitCore and PhysicsKit through Mac Catalyst, held against the port by tests/backports/host/dynamics; UIKit and PhysicsKit of the iOS 7.0 arm64 cache, read function by function; Box2D 2.2.1 (revenant@box2d), the engine 7.0's PhysicsKit is a fork of"
     },
     {
       "api": "UICollisionBehavior",
@@ -127,7 +127,7 @@
       "introduced": "7.0",
       "status": "implemented",
       "facts": "facts/UIKit/UIDynamicAnimator.md",
-      "source": "the host's UIKitCore and PhysicsKit through Mac Catalyst, held against the port by tests/backports/host/dynamics; UIKit and PhysicsKit of the iOS 7.0 arm64 cache, read function by function; Box2D 2.2.1 (charon@box2d), the engine 7.0's PhysicsKit is a fork of"
+      "source": "the host's UIKitCore and PhysicsKit through Mac Catalyst, held against the port by tests/backports/host/dynamics; UIKit and PhysicsKit of the iOS 7.0 arm64 cache, read function by function; Box2D 2.2.1 (revenant@box2d), the engine 7.0's PhysicsKit is a fork of"
     },
     {
       "api": "UIAttachmentBehavior",
@@ -135,7 +135,7 @@
       "introduced": "7.0",
       "status": "implemented",
       "facts": "facts/UIKit/UIDynamicAnimator.md",
-      "source": "the host's UIKitCore and PhysicsKit through Mac Catalyst, held against the port by tests/backports/host/dynamics; UIKit and PhysicsKit of the iOS 7.0 arm64 cache, read function by function; Box2D 2.2.1 (charon@box2d), the engine 7.0's PhysicsKit is a fork of"
+      "source": "the host's UIKitCore and PhysicsKit through Mac Catalyst, held against the port by tests/backports/host/dynamics; UIKit and PhysicsKit of the iOS 7.0 arm64 cache, read function by function; Box2D 2.2.1 (revenant@box2d), the engine 7.0's PhysicsKit is a fork of"
     },
     {
       "api": "UIPushBehavior",
@@ -143,7 +143,7 @@
       "introduced": "7.0",
       "status": "implemented",
       "facts": "facts/UIKit/UIDynamicAnimator.md",
-      "source": "the host's UIKitCore and PhysicsKit through Mac Catalyst, held against the port by tests/backports/host/dynamics; UIKit and PhysicsKit of the iOS 7.0 arm64 cache, read function by function; Box2D 2.2.1 (charon@box2d), the engine 7.0's PhysicsKit is a fork of"
+      "source": "the host's UIKitCore and PhysicsKit through Mac Catalyst, held against the port by tests/backports/host/dynamics; UIKit and PhysicsKit of the iOS 7.0 arm64 cache, read function by function; Box2D 2.2.1 (revenant@box2d), the engine 7.0's PhysicsKit is a fork of"
     },
     {
       "api": "UISnapBehavior",
@@ -151,7 +151,7 @@
       "introduced": "7.0",
       "status": "implemented",
       "facts": "facts/UIKit/UIDynamicAnimator.md",
-      "source": "the host's UIKitCore and PhysicsKit through Mac Catalyst, held against the port by tests/backports/host/dynamics; UIKit and PhysicsKit of the iOS 7.0 arm64 cache, read function by function; Box2D 2.2.1 (charon@box2d), the engine 7.0's PhysicsKit is a fork of"
+      "source": "the host's UIKitCore and PhysicsKit through Mac Catalyst, held against the port by tests/backports/host/dynamics; UIKit and PhysicsKit of the iOS 7.0 arm64 cache, read function by function; Box2D 2.2.1 (revenant@box2d), the engine 7.0's PhysicsKit is a fork of"
     },
     {
       "api": "UIDynamicItemBehavior.charge",

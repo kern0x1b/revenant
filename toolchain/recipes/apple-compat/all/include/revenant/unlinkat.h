@@ -1,5 +1,5 @@
-#ifndef CHARON_UNLINKAT_H
-#define CHARON_UNLINKAT_H
+#ifndef REVENANT_UNLINKAT_H
+#define REVENANT_UNLINKAT_H
 
 #include <fcntl.h>
 #include <unistd.h>
@@ -8,12 +8,12 @@
 extern "C" {
 #endif
 
-int charon_unlinkat(int directory, const char *path, int flags);
+int revenant_unlinkat(int directory, const char *path, int flags);
 
 #ifdef __cplusplus
 }
 #endif
 
-#define unlinkat charon_unlinkat
+#define unlinkat revenant_unlinkat
 
 #endif

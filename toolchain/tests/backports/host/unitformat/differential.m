@@ -1,7 +1,7 @@
 #import <Foundation/Foundation.h>
 #import <objc/runtime.h>
 
-@interface CharonHostLengthFormatter : NSObject
+@interface RevenantHostLengthFormatter : NSObject
 @property (copy) NSNumberFormatter *numberFormatter;
 @property NSFormattingUnitStyle unitStyle;
 @property (getter=isForPersonHeightUse) BOOL forPersonHeightUse;
@@ -12,7 +12,7 @@
 - (BOOL)getObjectValue:(id *)obj forString:(NSString *)string errorDescription:(NSString **)error;
 @end
 
-@interface CharonHostMassFormatter : NSObject
+@interface RevenantHostMassFormatter : NSObject
 @property (copy) NSNumberFormatter *numberFormatter;
 @property NSFormattingUnitStyle unitStyle;
 @property (getter=isForPersonMassUse) BOOL forPersonMassUse;
@@ -23,7 +23,7 @@
 - (BOOL)getObjectValue:(id *)obj forString:(NSString *)string errorDescription:(NSString **)error;
 @end
 
-@interface CharonHostEnergyFormatter : NSObject
+@interface RevenantHostEnergyFormatter : NSObject
 @property (copy) NSNumberFormatter *numberFormatter;
 @property NSFormattingUnitStyle unitStyle;
 @property (getter=isForFoodEnergyUse) BOOL forFoodEnergyUse;
@@ -37,8 +37,8 @@
 static int checks, failures;
 
 static NSString *withoutNames(NSString *written);
-static NSString *charon_number_of(NSString *written);
-static NSString *charon_digits_of(NSString *written)
+static NSString *revenant_number_of(NSString *written);
+static NSString *revenant_digits_of(NSString *written)
 {
     NSCharacterSet *digits = [NSCharacterSet decimalDigitCharacterSet];
     NSMutableString *into = [NSMutableString string];
@@ -48,7 +48,7 @@ static NSString *charon_digits_of(NSString *written)
     return into;
 }
 
-static BOOL charon_written_agrees(NSString *ours, NSString *theirs);
+static BOOL revenant_written_agrees(NSString *ours, NSString *theirs);
 
 static BOOL englishNames;
 
@@ -96,7 +96,7 @@ static BOOL sameText(NSString *ours, NSString *theirs)
     return ours == nil || [ours isEqualToString:theirs];
 }
 
-static NSString *charon_number_of(NSString *written)
+static NSString *revenant_number_of(NSString *written)
 {
     if (!written)
         return nil;
@@ -113,13 +113,13 @@ static NSString *charon_number_of(NSString *written)
     return end ? [written substringToIndex:end] : nil;
 }
 
-static BOOL charon_number_agrees(NSString *ours, NSString *theirs, NSNumberFormatterStyle style)
+static BOOL revenant_number_agrees(NSString *ours, NSString *theirs, NSNumberFormatterStyle style)
 {
     if (englishNames)
-        return sameText(charon_number_of(withoutNames(ours)), charon_number_of(withoutNames(theirs)));
+        return sameText(revenant_number_of(withoutNames(ours)), revenant_number_of(withoutNames(theirs)));
     if (!ours || !theirs)
         return ours != nil || theirs != nil;
-    NSString *mine = charon_digits_of(ours), *yours = charon_digits_of(theirs);
+    NSString *mine = revenant_digits_of(ours), *yours = revenant_digits_of(theirs);
     if (![mine length] || ![yours length])
         return YES;
     if (style == NSNumberFormatterSpellOutStyle || style == NSNumberFormatterScientificStyle)
@@ -127,7 +127,7 @@ static BOOL charon_number_agrees(NSString *ours, NSString *theirs, NSNumberForma
     return [mine isEqualToString:yours];
 }
 
-static BOOL charon_written_agrees(NSString *ours, NSString *theirs)
+static BOOL revenant_written_agrees(NSString *ours, NSString *theirs)
 {
     if (englishNames && (ours == nil) != (theirs == nil))
         return NO;
@@ -139,13 +139,13 @@ static BOOL charon_written_agrees(NSString *ours, NSString *theirs)
         return [withoutNames(ours) isEqualToString:withoutNames(theirs)];
     if (ours == nil || theirs == nil)
         return YES;
-    NSString *mine = charon_digits_of(ours), *yours = charon_digits_of(theirs);
+    NSString *mine = revenant_digits_of(ours), *yours = revenant_digits_of(theirs);
     if ([mine length] == 0 || [yours length] == 0)
         return YES;
     return [mine isEqualToString:yours];
 }
 
-static BOOL charon_style_mark(NSNumberFormatterStyle style, NSString *written)
+static BOOL revenant_style_mark(NSNumberFormatterStyle style, NSString *written)
 {
     switch (style) {
         case NSNumberFormatterCurrencyStyle: return [written rangeOfString:@"\u00a4"].location != NSNotFound;
@@ -260,7 +260,7 @@ int main(void)
                         double v = value.doubleValue;
                         NSInteger u = unit.integerValue;
 
-                        CharonHostLengthFormatter *ourLength = [[CharonHostLengthFormatter alloc] init];
+                        RevenantHostLengthFormatter *ourLength = [[RevenantHostLengthFormatter alloc] init];
                         NSLengthFormatter *theirLength = [[NSLengthFormatter alloc] init];
                         ourLength.unitStyle = theirLength.unitStyle = style;
                         if (englishNames || knownUnit(@"length", u)) checkName(@"length unitStringFromValue:unit:",
@@ -268,7 +268,7 @@ int main(void)
                         if (englishNames || knownUnit(@"length", u)) checkWritten(@"length stringFromValue:unit:",
                                    [ourLength stringFromValue:v unit:u], [theirLength stringFromValue:v unit:u], style, !knownUnit(@"length", u));
 
-                        CharonHostMassFormatter *ourMass = [[CharonHostMassFormatter alloc] init];
+                        RevenantHostMassFormatter *ourMass = [[RevenantHostMassFormatter alloc] init];
                         NSMassFormatter *theirMass = [[NSMassFormatter alloc] init];
                         ourMass.unitStyle = theirMass.unitStyle = style;
                         if (englishNames || knownUnit(@"mass", u)) checkName(@"mass unitStringFromValue:unit:",
@@ -279,7 +279,7 @@ int main(void)
                         if (englishNames || knownUnit(@"mass", u)) checkName(@"mass person unitStringFromValue:unit:",
                                   [ourMass unitStringFromValue:v unit:u], [theirMass unitStringFromValue:v unit:u]);
 
-                        CharonHostEnergyFormatter *ourEnergy = [[CharonHostEnergyFormatter alloc] init];
+                        RevenantHostEnergyFormatter *ourEnergy = [[RevenantHostEnergyFormatter alloc] init];
                         NSEnergyFormatter *theirEnergy = [[NSEnergyFormatter alloc] init];
                         ourEnergy.unitStyle = theirEnergy.unitStyle = style;
                         if (englishNames || knownUnit(@"energy", u)) checkName(@"energy unitStringFromValue:unit:",
@@ -300,7 +300,7 @@ int main(void)
                 for (NSNumber *value in values) {
                     double v = value.doubleValue;
 
-                    CharonHostLengthFormatter *ourLength = [[CharonHostLengthFormatter alloc] init];
+                    RevenantHostLengthFormatter *ourLength = [[RevenantHostLengthFormatter alloc] init];
                     NSLengthFormatter *theirLength = [[NSLengthFormatter alloc] init];
                     ourLength.unitStyle = theirLength.unitStyle = style;
                     NSInteger ourUnit = -1, theirUnit = -1;
@@ -308,7 +308,7 @@ int main(void)
                     NSString *theirName = [theirLength unitStringFromMeters:v usedUnit:&theirUnit];
                     expect((!englishNames || sameChosenName(ourName, theirName)) && ourUnit == theirUnit, @"length unitStringFromMeters:usedUnit:",
                            [NSString stringWithFormat:@"v=%g ours \"%@\" unit %ld, host \"%@\" unit %ld", v, ourName, (long)ourUnit, theirName, (long)theirUnit]);
-                    expect(charon_written_agrees([ourLength stringFromMeters:v], [theirLength stringFromMeters:v]), @"length stringFromMeters:",
+                    expect(revenant_written_agrees([ourLength stringFromMeters:v], [theirLength stringFromMeters:v]), @"length stringFromMeters:",
                            [NSString stringWithFormat:@"v=%g ours \"%@\", host \"%@\"", v, [ourLength stringFromMeters:v], [theirLength stringFromMeters:v]]);
 
                     ourLength.forPersonHeightUse = theirLength.forPersonHeightUse = YES;
@@ -317,10 +317,10 @@ int main(void)
                     theirName = [theirLength unitStringFromMeters:v usedUnit:&theirUnit];
                     expect((!englishNames || sameChosenName(ourName, theirName)) && ourUnit == theirUnit, @"length person unitStringFromMeters:usedUnit:",
                            [NSString stringWithFormat:@"v=%g ours \"%@\" unit %ld, host \"%@\" unit %ld", v, ourName, (long)ourUnit, theirName, (long)theirUnit]);
-                    expect(charon_written_agrees([ourLength stringFromMeters:v], [theirLength stringFromMeters:v]), @"length person stringFromMeters:",
+                    expect(revenant_written_agrees([ourLength stringFromMeters:v], [theirLength stringFromMeters:v]), @"length person stringFromMeters:",
                            [NSString stringWithFormat:@"v=%g ours \"%@\", host \"%@\"", v, [ourLength stringFromMeters:v], [theirLength stringFromMeters:v]]);
 
-                    CharonHostMassFormatter *ourMass = [[CharonHostMassFormatter alloc] init];
+                    RevenantHostMassFormatter *ourMass = [[RevenantHostMassFormatter alloc] init];
                     NSMassFormatter *theirMass = [[NSMassFormatter alloc] init];
                     ourMass.unitStyle = theirMass.unitStyle = style;
                     ourUnit = theirUnit = -1;
@@ -328,7 +328,7 @@ int main(void)
                     theirName = [theirMass unitStringFromKilograms:v usedUnit:&theirUnit];
                     expect((!englishNames || sameChosenName(ourName, theirName)) && ourUnit == theirUnit, @"mass unitStringFromKilograms:usedUnit:",
                            [NSString stringWithFormat:@"v=%g ours \"%@\" unit %ld, host \"%@\" unit %ld", v, ourName, (long)ourUnit, theirName, (long)theirUnit]);
-                    expect(charon_written_agrees([ourMass stringFromKilograms:v], [theirMass stringFromKilograms:v]), @"mass stringFromKilograms:",
+                    expect(revenant_written_agrees([ourMass stringFromKilograms:v], [theirMass stringFromKilograms:v]), @"mass stringFromKilograms:",
                            [NSString stringWithFormat:@"v=%g ours \"%@\", host \"%@\"", v, [ourMass stringFromKilograms:v], [theirMass stringFromKilograms:v]]);
                     ourMass.forPersonMassUse = theirMass.forPersonMassUse = YES;
                     ourUnit = theirUnit = -1;
@@ -336,10 +336,10 @@ int main(void)
                     theirName = [theirMass unitStringFromKilograms:v usedUnit:&theirUnit];
                     expect((!englishNames || sameChosenName(ourName, theirName)) && ourUnit == theirUnit, @"mass person unitStringFromKilograms:usedUnit:",
                            [NSString stringWithFormat:@"v=%g ours \"%@\" unit %ld, host \"%@\" unit %ld", v, ourName, (long)ourUnit, theirName, (long)theirUnit]);
-                    expect(charon_written_agrees([ourMass stringFromKilograms:v], [theirMass stringFromKilograms:v]), @"mass person stringFromKilograms:",
+                    expect(revenant_written_agrees([ourMass stringFromKilograms:v], [theirMass stringFromKilograms:v]), @"mass person stringFromKilograms:",
                            [NSString stringWithFormat:@"v=%g ours \"%@\", host \"%@\"", v, [ourMass stringFromKilograms:v], [theirMass stringFromKilograms:v]]);
 
-                    CharonHostEnergyFormatter *ourEnergy = [[CharonHostEnergyFormatter alloc] init];
+                    RevenantHostEnergyFormatter *ourEnergy = [[RevenantHostEnergyFormatter alloc] init];
                     NSEnergyFormatter *theirEnergy = [[NSEnergyFormatter alloc] init];
                     ourEnergy.unitStyle = theirEnergy.unitStyle = style;
                     ourUnit = theirUnit = -1;
@@ -347,7 +347,7 @@ int main(void)
                     theirName = [theirEnergy unitStringFromJoules:v usedUnit:&theirUnit];
                     expect((!englishNames || sameChosenName(ourName, theirName)) && ourUnit == theirUnit, @"energy unitStringFromJoules:usedUnit:",
                            [NSString stringWithFormat:@"v=%g ours \"%@\" unit %ld, host \"%@\" unit %ld", v, ourName, (long)ourUnit, theirName, (long)theirUnit]);
-                    expect(charon_written_agrees([ourEnergy stringFromJoules:v], [theirEnergy stringFromJoules:v]), @"energy stringFromJoules:",
+                    expect(revenant_written_agrees([ourEnergy stringFromJoules:v], [theirEnergy stringFromJoules:v]), @"energy stringFromJoules:",
                            [NSString stringWithFormat:@"v=%g ours \"%@\", host \"%@\"", v, [ourEnergy stringFromJoules:v], [theirEnergy stringFromJoules:v]]);
                     ourEnergy.forFoodEnergyUse = theirEnergy.forFoodEnergyUse = YES;
                     ourUnit = theirUnit = -1;
@@ -368,29 +368,29 @@ int main(void)
                         double v = pivots[index] * side;
                         double below = nextafter(v, side < 0 ? -INFINITY : INFINITY);
                         double above = nextafter(v, side < 0 ? -INFINITY : INFINITY);
-                        CharonHostLengthFormatter *ourLength = [[CharonHostLengthFormatter alloc] init];
+                        RevenantHostLengthFormatter *ourLength = [[RevenantHostLengthFormatter alloc] init];
                         NSLengthFormatter *theirLength = [[NSLengthFormatter alloc] init];
-                        expect(charon_written_agrees([ourLength stringFromMeters:v], [theirLength stringFromMeters:v])
-                                   && charon_written_agrees([ourLength stringFromMeters:below], [theirLength stringFromMeters:below])
-                                   && charon_written_agrees([ourLength stringFromMeters:above], [theirLength stringFromMeters:above]),
+                        expect(revenant_written_agrees([ourLength stringFromMeters:v], [theirLength stringFromMeters:v])
+                                   && revenant_written_agrees([ourLength stringFromMeters:below], [theirLength stringFromMeters:below])
+                                   && revenant_written_agrees([ourLength stringFromMeters:above], [theirLength stringFromMeters:above]),
                                @"length at a switch",
                                [NSString stringWithFormat:@"%g ours \"%@\"/\"%@\"/\"%@\" host \"%@\"/\"%@\"/\"%@\"", v,
                                 [ourLength stringFromMeters:v], [ourLength stringFromMeters:below], [ourLength stringFromMeters:above],
                                 [theirLength stringFromMeters:v], [theirLength stringFromMeters:below], [theirLength stringFromMeters:above]]);
-                        CharonHostMassFormatter *ourMass = [[CharonHostMassFormatter alloc] init];
+                        RevenantHostMassFormatter *ourMass = [[RevenantHostMassFormatter alloc] init];
                         NSMassFormatter *theirMass = [[NSMassFormatter alloc] init];
-                        expect(charon_written_agrees([ourMass stringFromKilograms:v], [theirMass stringFromKilograms:v])
-                                   && charon_written_agrees([ourMass stringFromKilograms:below], [theirMass stringFromKilograms:below])
-                                   && charon_written_agrees([ourMass stringFromKilograms:above], [theirMass stringFromKilograms:above]),
+                        expect(revenant_written_agrees([ourMass stringFromKilograms:v], [theirMass stringFromKilograms:v])
+                                   && revenant_written_agrees([ourMass stringFromKilograms:below], [theirMass stringFromKilograms:below])
+                                   && revenant_written_agrees([ourMass stringFromKilograms:above], [theirMass stringFromKilograms:above]),
                                @"mass at a switch",
                                [NSString stringWithFormat:@"%g ours \"%@\"/\"%@\"/\"%@\" host \"%@\"/\"%@\"/\"%@\"", v,
                                 [ourMass stringFromKilograms:v], [ourMass stringFromKilograms:below], [ourMass stringFromKilograms:above],
                                 [theirMass stringFromKilograms:v], [theirMass stringFromKilograms:below], [theirMass stringFromKilograms:above]]);
-                        CharonHostEnergyFormatter *ourEnergy = [[CharonHostEnergyFormatter alloc] init];
+                        RevenantHostEnergyFormatter *ourEnergy = [[RevenantHostEnergyFormatter alloc] init];
                         NSEnergyFormatter *theirEnergy = [[NSEnergyFormatter alloc] init];
-                        expect(charon_written_agrees([ourEnergy stringFromJoules:v], [theirEnergy stringFromJoules:v])
-                                   && charon_written_agrees([ourEnergy stringFromJoules:below], [theirEnergy stringFromJoules:below])
-                                   && charon_written_agrees([ourEnergy stringFromJoules:above], [theirEnergy stringFromJoules:above]),
+                        expect(revenant_written_agrees([ourEnergy stringFromJoules:v], [theirEnergy stringFromJoules:v])
+                                   && revenant_written_agrees([ourEnergy stringFromJoules:below], [theirEnergy stringFromJoules:below])
+                                   && revenant_written_agrees([ourEnergy stringFromJoules:above], [theirEnergy stringFromJoules:above]),
                                @"energy at a switch",
                                [NSString stringWithFormat:@"%g ours \"%@\"/\"%@\"/\"%@\" host \"%@\"/\"%@\"/\"%@\"", v,
                                 [ourEnergy stringFromJoules:v], [ourEnergy stringFromJoules:below], [ourEnergy stringFromJoules:above],
@@ -411,7 +411,7 @@ int main(void)
                     }
                     ourNumbers.maximumFractionDigits = theirNumbers.maximumFractionDigits = 5;
                     ourNumbers.usesGroupingSeparator = theirNumbers.usesGroupingSeparator = NO;
-                    CharonHostLengthFormatter *ourLength = [[CharonHostLengthFormatter alloc] init];
+                    RevenantHostLengthFormatter *ourLength = [[RevenantHostLengthFormatter alloc] init];
                     NSLengthFormatter *theirLength = [[NSLengthFormatter alloc] init];
                     ourLength.unitStyle = theirLength.unitStyle = style;
                     ourLength.numberFormatter = ourNumbers;
@@ -422,25 +422,25 @@ int main(void)
                         NSString *what = [NSString stringWithFormat:@"length with a number formatter: kind=%@ style=%ld v=%g",
                                           styleKind, (long)style, value.doubleValue];
                         if ((NSNumberFormatterStyle)styleKind.integerValue <= NSNumberFormatterDecimalStyle) {
-                            expect(charon_written_agrees(mine, host), what,
+                            expect(revenant_written_agrees(mine, host), what,
                                    [NSString stringWithFormat:@"ours \"%@\", host \"%@\"", mine, host]);
                             continue;
                         }
-                        expect(charon_number_agrees(mine, host, (NSNumberFormatterStyle)styleKind.integerValue), what,
+                        expect(revenant_number_agrees(mine, host, (NSNumberFormatterStyle)styleKind.integerValue), what,
                                [NSString stringWithFormat:@"the number: ours \"%@\", host \"%@\"", mine, host]);
                         if (englishNames)
-                            expect(charon_style_mark((NSNumberFormatterStyle)styleKind.integerValue, mine)
-                                       == charon_style_mark((NSNumberFormatterStyle)styleKind.integerValue, host), what,
+                            expect(revenant_style_mark((NSNumberFormatterStyle)styleKind.integerValue, mine)
+                                       == revenant_style_mark((NSNumberFormatterStyle)styleKind.integerValue, host), what,
                                    [NSString stringWithFormat:@"the mark: ours \"%@\", host \"%@\"", mine, host]);
                     }
                 }
             }
             {
-                CharonHostLengthFormatter *ourLength = [[CharonHostLengthFormatter alloc] init];
+                RevenantHostLengthFormatter *ourLength = [[RevenantHostLengthFormatter alloc] init];
                 NSLengthFormatter *theirLength = [[NSLengthFormatter alloc] init];
                 ourLength.numberFormatter = nil;
                 theirLength.numberFormatter = nil;
-                expect(charon_written_agrees([ourLength stringFromMeters:1234.5], [theirLength stringFromMeters:1234.5])
+                expect(revenant_written_agrees([ourLength stringFromMeters:1234.5], [theirLength stringFromMeters:1234.5])
                            && (ourLength.numberFormatter != nil) == (theirLength.numberFormatter != nil),
                        @"length numberFormatter reset to nil",
                        [NSString stringWithFormat:@"ours \"%@\" (%@), host \"%@\" (%@)", [ourLength stringFromMeters:1234.5],
@@ -450,7 +450,7 @@ int main(void)
                        [NSString stringWithFormat:@"ours %ld, host %ld", (long)ourLength.unitStyle, (long)theirLength.unitStyle]);
             }
 
-            CharonHostLengthFormatter *ourLength = [[CharonHostLengthFormatter alloc] init];
+            RevenantHostLengthFormatter *ourLength = [[RevenantHostLengthFormatter alloc] init];
             NSLengthFormatter *theirLength = [[NSLengthFormatter alloc] init];
             for (NSString *text in @[@"", @"1", @"1.5 km", @"nonsense", @"1,5 km", @"   ", @"1e400"]) {
                 id ourObject = @"untouched", theirObject = @"untouched";
@@ -462,7 +462,7 @@ int main(void)
                        @"length getObjectValue:forString:errorDescription:",
                        [NSString stringWithFormat:@"\"%@\" ours %d %@ %@, host %d %@ %@", text, (int)ourOK, ourObject, ourError,
                         (int)theirOK, theirObject, theirError]);
-                CharonHostMassFormatter *ourMass = [[CharonHostMassFormatter alloc] init];
+                RevenantHostMassFormatter *ourMass = [[RevenantHostMassFormatter alloc] init];
                 NSMassFormatter *theirMass = [[NSMassFormatter alloc] init];
                 ourObject = theirObject = nil;
                 ourError = theirError = nil;
@@ -470,7 +470,7 @@ int main(void)
                            == [theirMass getObjectValue:&theirObject forString:text errorDescription:&theirError]
                            && ourObject == nil && theirObject == nil && ourError == nil && theirError == nil,
                        @"mass getObjectValue:forString:errorDescription:", text);
-                CharonHostEnergyFormatter *ourEnergy = [[CharonHostEnergyFormatter alloc] init];
+                RevenantHostEnergyFormatter *ourEnergy = [[RevenantHostEnergyFormatter alloc] init];
                 NSEnergyFormatter *theirEnergy = [[NSEnergyFormatter alloc] init];
                 ourObject = theirObject = nil;
                 ourError = theirError = nil;
@@ -481,7 +481,7 @@ int main(void)
             }
 
             {
-                CharonHostLengthFormatter *a = [[CharonHostLengthFormatter alloc] init];
+                RevenantHostLengthFormatter *a = [[RevenantHostLengthFormatter alloc] init];
                 NSLengthFormatter *b = [[NSLengthFormatter alloc] init];
                 expect(a.unitStyle == b.unitStyle && ourLength.isForPersonHeightUse == theirLength.isForPersonHeightUse
                            && (a.numberFormatter == nil) == (b.numberFormatter == nil),
@@ -496,7 +496,7 @@ int main(void)
                        @"length a person's height in the long style",
                        [NSString stringWithFormat:@"ours \"%@\", host \"%@\"", [a stringFromMeters:1.8], [b stringFromMeters:1.8]]);
                 for (NSNumber *styleNumber in @[@0, @1, @2, @3, @4, @-1]) {
-                    CharonHostLengthFormatter *a = [[CharonHostLengthFormatter alloc] init];
+                    RevenantHostLengthFormatter *a = [[RevenantHostLengthFormatter alloc] init];
                     NSLengthFormatter *b = [[NSLengthFormatter alloc] init];
                     a.unitStyle = b.unitStyle = (NSFormattingUnitStyle)styleNumber.integerValue;
                     expect(a.unitStyle == b.unitStyle, @"length unitStyle reads back what was set",

@@ -1,7 +1,7 @@
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
 #import <WebKit/WebKit.h>
-#import "CharonWebExtension.h"
+#import "RevenantWebExtension.h"
 
 @class WKWebExtension;
 @class WKWebExtensionContext;
@@ -9,7 +9,7 @@
 @class WKWebExtensionDataRecord;
 @protocol WKWebExtensionTab;
 
-#ifndef CHARON_HOST_DIFFERENTIAL
+#ifndef REVENANT_HOST_DIFFERENTIAL
 
 typedef NSString *WKWebExtensionDataType NS_TYPED_ENUM;
 
@@ -72,15 +72,15 @@ typedef NS_ENUM(NSInteger, WKWebExtensionDataRecordError) {
 
 #endif
 
-@interface WKWebExtensionControllerConfiguration (CharonInit)
-- (instancetype)charon_initWithIdentifier:(NSUUID *)identifier
+@interface WKWebExtensionControllerConfiguration (RevenantInit)
+- (instancetype)revenant_initWithIdentifier:(NSUUID *)identifier
                                 persistent:(BOOL)persistent
                      webViewConfiguration:(WKWebViewConfiguration *)webViewConfiguration
                                    store:(WKWebsiteDataStore *)store __attribute__((objc_method_family(init)));
 @end
 
-@interface WKWebExtensionDataRecord (CharonInit)
-- (instancetype)charon_initWithIdentifier:(NSString *)identifier
+@interface WKWebExtensionDataRecord (RevenantInit)
+- (instancetype)revenant_initWithIdentifier:(NSString *)identifier
                               displayName:(NSString *)displayName
                        containedDataTypes:(NSSet<WKWebExtensionDataType> *)containedDataTypes
                                     errors:(NSArray<NSError *> *)errors __attribute__((objc_method_family(init)));

@@ -58,7 +58,7 @@ local function diagnose(tree, fw, corpus, sdk_release)
         table.insert(problems, "build directory holds a constants object the generator no longer emits: " .. name)
     end
     local defined = {}
-    for key in string.gmatch(emitted["spec.h"], "CHARON_SPEC_HASH_([%w_]+)") do
+    for key in string.gmatch(emitted["spec.h"], "REVENANT_SPEC_HASH_([%w_]+)") do
         defined[key] = true
     end
     for _, r in ipairs(snapshot.load(tree, fw)) do

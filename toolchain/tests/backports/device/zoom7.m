@@ -4,14 +4,14 @@
 
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 
-@interface AVCaptureDevice (CharonReleaseLock)
+@interface AVCaptureDevice (RevenantReleaseLock)
 - (BOOL)isLockedForConfiguration;
 @end
 
 #define GRID_W 32
 #define GRID_H 24
 
-@interface CharonGrid : NSObject <AVCaptureVideoDataOutputSampleBufferDelegate>
+@interface RevenantGrid : NSObject <AVCaptureVideoDataOutputSampleBufferDelegate>
 @property (atomic) int frames;
 @property (atomic) size_t width, height;
 @property (atomic) OSType format;
@@ -55,7 +55,7 @@ static float difference(NSData *a, NSData *b)
     return sum / (GRID_W * GRID_H);
 }
 
-@implementation CharonGrid
+@implementation RevenantGrid
 
 - (void)captureOutput:(AVCaptureOutput *)output didOutputSampleBuffer:(CMSampleBufferRef)sample fromConnection:(AVCaptureConnection *)connection
 {
@@ -95,13 +95,13 @@ static NSString *raised(void (^block)(void))
     return @"nothing";
 }
 
-static BOOL take(CharonGrid *frames)
+static BOOL take(RevenantGrid *frames)
 {
     frames.wanted = YES;
     return wait_until(^BOOL { return !frames.wanted; }, 5);
 }
 
-CMSampleBufferRef charon_create_zoomed_sample(CMSampleBufferRef sample, CGFloat factor);
+CMSampleBufferRef revenant_create_zoomed_sample(CMSampleBufferRef sample, CGFloat factor);
 
 static void check_crop(OSType format, const char *name)
 {
@@ -129,7 +129,7 @@ static void check_crop(OSType format, const char *name)
     CMSampleTimingInfo timing = {CMTimeMake(1, 30), CMTimeMake(7, 30), kCMTimeInvalid};
     CMSampleBufferRef sample = NULL;
     CMSampleBufferCreateForImageBuffer(kCFAllocatorDefault, pixels, true, NULL, NULL, description, &timing, &sample);
-    CMSampleBufferRef zoomed = charon_create_zoomed_sample(sample, 2);
+    CMSampleBufferRef zoomed = revenant_create_zoomed_sample(sample, 2);
     CVPixelBufferRef out = zoomed ? CMSampleBufferGetImageBuffer(zoomed) : NULL;
     char label[160];
     snprintf(label, sizeof label, "%s: a buffer is zoomed into one of its own size and format, at its time", name);
@@ -170,7 +170,7 @@ static void check_crop(OSType format, const char *name)
     CVPixelBufferRelease(pixels);
 }
 
-static void measure_frames(AVCaptureDevice *camera, CharonGrid *frames, const char *name)
+static void measure_frames(AVCaptureDevice *camera, RevenantGrid *frames, const char *name)
 {
     [camera lockForConfiguration:NULL];
     camera.videoZoomFactor = 1;
@@ -192,7 +192,7 @@ int main(int argc, char **argv)
 {
     @autoreleasepool {
         if (argc > 1)
-            charon_log_to(@(argv[1]));
+            revenant_log_to(@(argv[1]));
         check_crop(kCVPixelFormatType_32BGRA, "32BGRA");
         check_crop(kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange, "420v");
         AVCaptureDevice *camera = [AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeVideo];
@@ -211,9 +211,9 @@ int main(int argc, char **argv)
         [session addInput:[AVCaptureDeviceInput deviceInputWithDevice:camera error:NULL]];
         AVCaptureVideoDataOutput *data = [[AVCaptureVideoDataOutput alloc] init];
         data.videoSettings = @{(__bridge NSString *)kCVPixelBufferPixelFormatTypeKey: @(kCVPixelFormatType_32BGRA)};
-        CharonGrid *frames = [[CharonGrid alloc] init];
+        RevenantGrid *frames = [[RevenantGrid alloc] init];
         [data setSampleBufferDelegate:frames queue:dispatch_queue_create("frames", NULL)];
-        CHECK([data.sampleBufferDelegate isEqual:frames] && [data.sampleBufferDelegate class] == [CharonGrid class],
+        CHECK([data.sampleBufferDelegate isEqual:frames] && [data.sampleBufferDelegate class] == [RevenantGrid class],
               "the output's delegate answers as the application's: equal, of its class");
         [session addOutput:data];
         AVCaptureStillImageOutput *still = [[AVCaptureStillImageOutput alloc] init];
@@ -277,7 +277,7 @@ int main(int argc, char **argv)
         wait_until(^BOOL { return NO; }, 1);
         printf("release: movie file connection max scale and crop %g\n", [movie connectionWithMediaType:AVMediaTypeVideo].videoMaxScaleAndCropFactor);
         [recording stopRunning];
-        printf("%d checks, %d failed\n", charon_checks, charon_failures);
+        printf("%d checks, %d failed\n", revenant_checks, revenant_failures);
     }
-    return charon_failures;
+    return revenant_failures;
 }

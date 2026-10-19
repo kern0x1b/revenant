@@ -1,25 +1,25 @@
-#import "CharonMenus.h"
+#import "RevenantMenus.h"
 #import <objc/runtime.h>
 
-static const char CharonPointerInteractionKey;
-static const char CharonPointerStyleProviderKey;
+static const char RevenantPointerInteractionKey;
+static const char RevenantPointerStyleProviderKey;
 
-@implementation UIButton (CharonPointer)
+@implementation UIButton (RevenantPointer)
 
 - (BOOL)isPointerInteractionEnabled
 {
-    UIPointerInteraction *held = objc_getAssociatedObject(self, &CharonPointerInteractionKey);
+    UIPointerInteraction *held = objc_getAssociatedObject(self, &RevenantPointerInteractionKey);
     return held.enabled;
 }
 
 - (void)setPointerInteractionEnabled:(BOOL)enabled
 {
-    UIPointerInteraction *held = objc_getAssociatedObject(self, &CharonPointerInteractionKey);
+    UIPointerInteraction *held = objc_getAssociatedObject(self, &RevenantPointerInteractionKey);
     if (!held) {
         if (!enabled)
             return;
         held = [[UIPointerInteraction alloc] initWithDelegate:nil];
-        objc_setAssociatedObject(self, &CharonPointerInteractionKey, held, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+        objc_setAssociatedObject(self, &RevenantPointerInteractionKey, held, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
         [self addInteraction:held];
     }
     held.enabled = enabled;
@@ -27,12 +27,12 @@ static const char CharonPointerStyleProviderKey;
 
 - (UIButtonPointerStyleProvider)pointerStyleProvider
 {
-    return objc_getAssociatedObject(self, &CharonPointerStyleProviderKey);
+    return objc_getAssociatedObject(self, &RevenantPointerStyleProviderKey);
 }
 
 - (void)setPointerStyleProvider:(UIButtonPointerStyleProvider)pointerStyleProvider
 {
-    objc_setAssociatedObject(self, &CharonPointerStyleProviderKey, pointerStyleProvider, OBJC_ASSOCIATION_COPY_NONATOMIC);
+    objc_setAssociatedObject(self, &RevenantPointerStyleProviderKey, pointerStyleProvider, OBJC_ASSOCIATION_COPY_NONATOMIC);
     if (pointerStyleProvider)
         [self setPointerInteractionEnabled:YES];
 }

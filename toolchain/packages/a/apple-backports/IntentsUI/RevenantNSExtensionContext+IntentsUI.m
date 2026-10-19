@@ -1,10 +1,10 @@
 #import <Foundation/Foundation.h>
 #import <CoreGraphics/CoreGraphics.h>
 
-@interface NSExtensionContext (CharonIntentsUIHostedView)
+@interface NSExtensionContext (RevenantIntentsUIHostedView)
 @end
 
-@implementation NSExtensionContext (CharonIntentsUIHostedView)
+@implementation NSExtensionContext (RevenantIntentsUIHostedView)
 
 - (CGSize)hostedViewMinimumAllowedSize
 {

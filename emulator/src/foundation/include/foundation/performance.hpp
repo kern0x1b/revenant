@@ -24,7 +24,7 @@
 
 #include "foundation/block_profile.hpp"
 
-namespace shade {
+namespace emulator {
 
 enum class PerfFallbackReason : std::uint8_t {
     None,

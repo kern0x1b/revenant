@@ -3,24 +3,24 @@
 
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 
-static const char CharonImageExportPresetKey;
-static const char CharonVideoExportPresetKey;
+static const char RevenantImageExportPresetKey;
+static const char RevenantVideoExportPresetKey;
 
-@implementation UIImagePickerController (CharonExportPresets)
+@implementation UIImagePickerController (RevenantExportPresets)
 
 - (UIImagePickerControllerImageURLExportPreset)imageExportPreset
 {
-    return (UIImagePickerControllerImageURLExportPreset)[objc_getAssociatedObject(self, &CharonImageExportPresetKey) integerValue];
+    return (UIImagePickerControllerImageURLExportPreset)[objc_getAssociatedObject(self, &RevenantImageExportPresetKey) integerValue];
 }
 
 - (void)setImageExportPreset:(UIImagePickerControllerImageURLExportPreset)imageExportPreset
 {
-    objc_setAssociatedObject(self, &CharonImageExportPresetKey, @(imageExportPreset), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, &RevenantImageExportPresetKey, @(imageExportPreset), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
 - (NSString *)videoExportPreset
 {
-    return objc_getAssociatedObject(self, &CharonVideoExportPresetKey);
+    return objc_getAssociatedObject(self, &RevenantVideoExportPresetKey);
 }
 
 - (void)setVideoExportPreset:(NSString *)videoExportPreset
@@ -31,7 +31,7 @@ static const char CharonVideoExportPresetKey;
             NSLog(@"UIImagePickerController.videoExportPreset is kept and not applied on iOS 6: the picker transcodes a movie by its videoQuality and takes no export preset");
         });
     }
-    objc_setAssociatedObject(self, &CharonVideoExportPresetKey, [videoExportPreset copy], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, &RevenantVideoExportPresetKey, [videoExportPreset copy], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
 @end

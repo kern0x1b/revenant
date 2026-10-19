@@ -24,7 +24,7 @@ extern char** environ;
 
 extern kern_return_t bootstrap_look_up(mach_port_t bootstrap, const char* name, mach_port_t* service);
 
-static const char* verdict_directory = "/private/var/charon";
+static const char* verdict_directory = "/private/var/revenant";
 
 static double now(void)
 {
@@ -75,8 +75,8 @@ static void system_version(char* version, size_t size)
 
 static void keep_own_output(void)
 {
-    int out = open("/private/var/charon/runner.stdout", O_WRONLY | O_CREAT | O_TRUNC, 0644);
-    int err = open("/private/var/charon/runner.stderr", O_WRONLY | O_CREAT | O_TRUNC, 0644);
+    int out = open("/private/var/revenant/runner.stdout", O_WRONLY | O_CREAT | O_TRUNC, 0644);
+    int err = open("/private/var/revenant/runner.stderr", O_WRONLY | O_CREAT | O_TRUNC, 0644);
     if (out >= 0) {
         dup2(out, STDOUT_FILENO);
         close(out);
@@ -223,7 +223,7 @@ int main(int argc, char** argv)
         int count = 0;
         char** job = read_job(argv[2], argv[0], &count);
         if (!job) {
-            printf("charon-runner: cannot read the job %s: %s\n", argv[2], strerror(errno));
+            printf("revenant-runner: cannot read the job %s: %s\n", argv[2], strerror(errno));
             return 1;
         }
         argc = count;
@@ -235,15 +235,15 @@ int main(int argc, char** argv)
     double waited = 0;
     int missing = wait_for_daemons(deadline, &declared, &waited, absent, sizeof absent);
     double started = now();
-    printf("charon-runner: started pid=%d uid=%d\n", getpid(), getuid());
+    printf("revenant-runner: started pid=%d uid=%d\n", getpid(), getuid());
     fflush(stdout);
-    openlog("charon-runner", LOG_PID, LOG_USER);
-    syslog(LOG_NOTICE, "charon-runner started pid=%d", getpid());
+    openlog("revenant-runner", LOG_PID, LOG_USER);
+    syslog(LOG_NOTICE, "revenant-runner started pid=%d", getpid());
     if (missing) {
-        printf("charon-runner: launchd had not registered %d of %d services after %.1f s, the first being %s; starting the test anyway\n", missing, declared, waited, absent);
-        syslog(LOG_WARNING, "charon-runner: launchd had not registered %d of %d services after %.1f s, the first being %s", missing, declared, waited, absent);
+        printf("revenant-runner: launchd had not registered %d of %d services after %.1f s, the first being %s; starting the test anyway\n", missing, declared, waited, absent);
+        syslog(LOG_WARNING, "revenant-runner: launchd had not registered %d of %d services after %.1f s, the first being %s", missing, declared, waited, absent);
     } else {
-        printf("charon-runner: launchd had registered all %d services after %.1f s\n", declared, waited);
+        printf("revenant-runner: launchd had registered all %d services after %.1f s\n", declared, waited);
     }
     fflush(stdout);
 
@@ -263,13 +263,13 @@ int main(int argc, char** argv)
         fflush(stdout);
         fflush(stderr);
         int saved_out = dup(STDOUT_FILENO), saved_err = dup(STDERR_FILENO);
-        int out = open("/private/var/charon/test.stdout", O_WRONLY | O_CREAT | O_TRUNC, 0644);
-        int err = open("/private/var/charon/test.stderr", O_WRONLY | O_CREAT | O_TRUNC, 0644);
+        int out = open("/private/var/revenant/test.stdout", O_WRONLY | O_CREAT | O_TRUNC, 0644);
+        int err = open("/private/var/revenant/test.stderr", O_WRONLY | O_CREAT | O_TRUNC, 0644);
         captured = (out >= 0 && err >= 0);
         if (!captured) {
-            syslog(LOG_ERR, "charon-runner cannot open the program's output in %s: %s",
+            syslog(LOG_ERR, "revenant-runner cannot open the program's output in %s: %s",
                    verdict_directory, strerror(errno));
-            fprintf(stderr, "charon-runner: cannot open the program's stdout/stderr: %s\n", strerror(errno));
+            fprintf(stderr, "revenant-runner: cannot open the program's stdout/stderr: %s\n", strerror(errno));
         }
         if (out >= 0)
             dup2(out, STDOUT_FILENO);
@@ -319,7 +319,7 @@ int main(int argc, char** argv)
     snprintf(final, sizeof final, "%s/verdict.json", verdict_directory);
     FILE* file = fopen(partial, "w");
     if (!file) {
-        syslog(LOG_ERR, "charon-runner cannot write %s: %s", partial, strerror(errno));
+        syslog(LOG_ERR, "revenant-runner cannot write %s: %s", partial, strerror(errno));
         return 1;
     }
     fprintf(file, "{\"machine\":");
@@ -343,7 +343,7 @@ int main(int argc, char** argv)
     fprintf(file, "}\n");
     fclose(file);
     rename(partial, final);
-    printf("charon-runner: verdict written\n");
-    syslog(LOG_NOTICE, "charon-runner verdict written");
+    printf("revenant-runner: verdict written\n");
+    syslog(LOG_NOTICE, "revenant-runner verdict written");
     return 0;
 }

@@ -5,24 +5,24 @@
 #include <stdlib.h>
 #include <string.h>
 
-OSStatus CharonHostCMSampleBufferCreateReady(CFAllocatorRef allocator, CMBlockBufferRef dataBuffer, CMFormatDescriptionRef formatDescription,
+OSStatus RevenantHostCMSampleBufferCreateReady(CFAllocatorRef allocator, CMBlockBufferRef dataBuffer, CMFormatDescriptionRef formatDescription,
                                              CMItemCount numSamples, CMItemCount numSampleTimingEntries, const CMSampleTimingInfo *sampleTimingArray,
                                              CMItemCount numSampleSizeEntries, const size_t *sampleSizeArray, CMSampleBufferRef *sampleBufferOut);
-OSStatus CharonHostCMSampleBufferCreateReadyWithImageBuffer(CFAllocatorRef allocator, CVImageBufferRef imageBuffer, CMVideoFormatDescriptionRef formatDescription,
+OSStatus RevenantHostCMSampleBufferCreateReadyWithImageBuffer(CFAllocatorRef allocator, CVImageBufferRef imageBuffer, CMVideoFormatDescriptionRef formatDescription,
                                                             const CMSampleTimingInfo *sampleTiming, CMSampleBufferRef *sampleBufferOut);
-OSStatus CharonHostCMSampleBufferCallBlockForEachSample(CMSampleBufferRef sbuf, OSStatus (^handler)(CMSampleBufferRef sampleBuffer, CMItemCount index));
-OSStatus CharonHostCMSampleBufferCreateWithMakeDataReadyHandler(CFAllocatorRef allocator, CMBlockBufferRef dataBuffer, Boolean dataReady,
+OSStatus RevenantHostCMSampleBufferCallBlockForEachSample(CMSampleBufferRef sbuf, OSStatus (^handler)(CMSampleBufferRef sampleBuffer, CMItemCount index));
+OSStatus RevenantHostCMSampleBufferCreateWithMakeDataReadyHandler(CFAllocatorRef allocator, CMBlockBufferRef dataBuffer, Boolean dataReady,
                                                               CMFormatDescriptionRef formatDescription, CMItemCount numSamples,
                                                               CMItemCount numSampleTimingEntries, const CMSampleTimingInfo *sampleTimingArray,
                                                               CMItemCount numSampleSizeEntries, const size_t *sampleSizeArray,
                                                               CMSampleBufferRef *sampleBufferOut, CMSampleBufferMakeDataReadyHandler handler);
-OSStatus CharonHostCMSampleBufferCreateForImageBufferWithMakeDataReadyHandler(CFAllocatorRef allocator, CVImageBufferRef imageBuffer, Boolean dataReady,
+OSStatus RevenantHostCMSampleBufferCreateForImageBufferWithMakeDataReadyHandler(CFAllocatorRef allocator, CVImageBufferRef imageBuffer, Boolean dataReady,
                                                                             CMVideoFormatDescriptionRef formatDescription, const CMSampleTimingInfo *sampleTiming,
                                                                             CMSampleBufferRef *sampleBufferOut, CMSampleBufferMakeDataReadyHandler handler);
 
 static int failures, checks, cornerSame, cornerDifferent;
 
-OSStatus CharonHostCMAudioSampleBufferCreateReadyWithPacketDescriptions(CFAllocatorRef allocator, CMBlockBufferRef dataBuffer,
+OSStatus RevenantHostCMAudioSampleBufferCreateReadyWithPacketDescriptions(CFAllocatorRef allocator, CMBlockBufferRef dataBuffer,
                                                                       CMFormatDescriptionRef formatDescription, CMItemCount numSamples,
                                                                       CMTime presentationTimeStamp,
                                                                       const AudioStreamPacketDescription *packetDescriptions,
@@ -157,7 +157,7 @@ int main(void)
                 compare(name,
                         CMSampleBufferCreateReady(kCFAllocatorDefault, block, format, sampleCounts[n], timingCounts[t], timings, sampleCounts[n], sizes, &system),
                         system,
-                        CharonHostCMSampleBufferCreateReady(kCFAllocatorDefault, block, format, sampleCounts[n], timingCounts[t], timings, sampleCounts[n], sizes, &port),
+                        RevenantHostCMSampleBufferCreateReady(kCFAllocatorDefault, block, format, sampleCounts[n], timingCounts[t], timings, sampleCounts[n], sizes, &port),
                         port, 1, 0);
                 system = port = NULL;
                 snprintf(name, sizeof name, "CreateWithMakeDataReadyHandler %lu samples %lu timings", (unsigned long)sampleCounts[n], (unsigned long)timingCounts[t]);
@@ -166,7 +166,7 @@ int main(void)
                         CMSampleBufferCreateWithMakeDataReadyHandler(kCFAllocatorDefault, block, false, format, sampleCounts[n], timingCounts[t], timings, sampleCounts[n], sizes, &system,
                                                                      ^OSStatus(CMSampleBufferRef ready) { ran++; return 0; }),
                         system,
-                        CharonHostCMSampleBufferCreateWithMakeDataReadyHandler(kCFAllocatorDefault, block, false, format, sampleCounts[n], timingCounts[t], timings, sampleCounts[n], sizes, &port,
+                        RevenantHostCMSampleBufferCreateWithMakeDataReadyHandler(kCFAllocatorDefault, block, false, format, sampleCounts[n], timingCounts[t], timings, sampleCounts[n], sizes, &port,
                                                                                  ^OSStatus(CMSampleBufferRef ready) { ran++; return 0; }),
                         port, 1, 0);
                 system = port = NULL;
@@ -174,19 +174,19 @@ int main(void)
                 compare(name,
                         CMSampleBufferCreateWithMakeDataReadyHandler(kCFAllocatorDefault, block, true, format, sampleCounts[n], timingCounts[t], timings, sampleCounts[n], sizes, &system, nil),
                         system,
-                        CharonHostCMSampleBufferCreateWithMakeDataReadyHandler(kCFAllocatorDefault, block, true, format, sampleCounts[n], timingCounts[t], timings, sampleCounts[n], sizes, &port, nil),
+                        RevenantHostCMSampleBufferCreateWithMakeDataReadyHandler(kCFAllocatorDefault, block, true, format, sampleCounts[n], timingCounts[t], timings, sampleCounts[n], sizes, &port, nil),
                         port, 1, 0);
                 system = port = NULL;
                 snprintf(name, sizeof name, "CreateReady with no data buffer %lu samples", (unsigned long)sampleCounts[n]);
                 compare(name,
                         CMSampleBufferCreateReady(kCFAllocatorDefault, NULL, format, sampleCounts[n], timingCounts[t], timings, sampleCounts[n], sizes, &system),
                         system,
-                        CharonHostCMSampleBufferCreateReady(kCFAllocatorDefault, NULL, format, sampleCounts[n], timingCounts[t], timings, sampleCounts[n], sizes, &port),
+                        RevenantHostCMSampleBufferCreateReady(kCFAllocatorDefault, NULL, format, sampleCounts[n], timingCounts[t], timings, sampleCounts[n], sizes, &port),
                         port, 1, 0);
                 system = port = NULL;
                 snprintf(name, sizeof name, "CreateReady with no out pointer %lu samples", (unsigned long)sampleCounts[n]);
                 compare(name, CMSampleBufferCreateReady(kCFAllocatorDefault, block, format, sampleCounts[n], timingCounts[t], timings, sampleCounts[n], sizes, NULL), NULL,
-                        CharonHostCMSampleBufferCreateReady(kCFAllocatorDefault, block, format, sampleCounts[n], timingCounts[t], timings, sampleCounts[n], sizes, NULL), NULL, 1, 0);
+                        RevenantHostCMSampleBufferCreateReady(kCFAllocatorDefault, block, format, sampleCounts[n], timingCounts[t], timings, sampleCounts[n], sizes, NULL), NULL, 1, 0);
                 free(sizes);
                 free(timings);
                 CFRelease(block);
@@ -200,18 +200,18 @@ int main(void)
             snprintf(name, sizeof name, "CreateReadyWithImageBuffer timings %lu", (unsigned long)timingCounts[t]);
             (void)t;
             compare(name, CMSampleBufferCreateReadyWithImageBuffer(kCFAllocatorDefault, pixels, format, &timing, &system), system,
-                    CharonHostCMSampleBufferCreateReadyWithImageBuffer(kCFAllocatorDefault, pixels, format, &timing, &port), port, 1, 0);
+                    RevenantHostCMSampleBufferCreateReadyWithImageBuffer(kCFAllocatorDefault, pixels, format, &timing, &port), port, 1, 0);
             system = port = NULL;
             compare("CreateForImageBufferWithMakeDataReadyHandler",
                     CMSampleBufferCreateForImageBufferWithMakeDataReadyHandler(kCFAllocatorDefault, pixels, false, format, &timing, &system,
                                                                                ^OSStatus(CMSampleBufferRef ready) { return 0; }),
                     system,
-                    CharonHostCMSampleBufferCreateForImageBufferWithMakeDataReadyHandler(kCFAllocatorDefault, pixels, false, format, &timing, &port,
+                    RevenantHostCMSampleBufferCreateForImageBufferWithMakeDataReadyHandler(kCFAllocatorDefault, pixels, false, format, &timing, &port,
                                                                                          ^OSStatus(CMSampleBufferRef ready) { return 0; }),
                     port, 1, 0);
             system = port = NULL;
             compare("CreateReadyWithImageBuffer with no format", CMSampleBufferCreateReadyWithImageBuffer(kCFAllocatorDefault, pixels, NULL, &timing, &system), system,
-                    CharonHostCMSampleBufferCreateReadyWithImageBuffer(kCFAllocatorDefault, pixels, NULL, &timing, &port), port, 1, 0);
+                    RevenantHostCMSampleBufferCreateReadyWithImageBuffer(kCFAllocatorDefault, pixels, NULL, &timing, &port), port, 1, 0);
         }
         {
             static const UInt32 frameCounts[] = {1, 1024, 0};
@@ -248,7 +248,7 @@ int main(void)
                                     CMAudioSampleBufferCreateReadyWithPacketDescriptions(kCFAllocatorDefault, block, format, count, pts,
                                                                                        withPackets ? descriptions : NULL, &system),
                                     system,
-                                    CharonHostCMAudioSampleBufferCreateReadyWithPacketDescriptions(kCFAllocatorDefault, block, format, count, pts,
+                                    RevenantHostCMAudioSampleBufferCreateReadyWithPacketDescriptions(kCFAllocatorDefault, block, format, count, pts,
                                                                                               withPackets ? descriptions : NULL, &port),
                                     port, audioClaim((UInt32)count, withPackets ? descriptions : NULL, NO), 0);
                         }
@@ -269,7 +269,7 @@ int main(void)
                         char name[128];
                         snprintf(name, sizeof name, "AudioSampleBufferCreate linear, %lu packets, frames %u", (unsigned long)count, frameCounts[f]);
                         compare(name, CMAudioSampleBufferCreateReadyWithPacketDescriptions(kCFAllocatorDefault, block, linear, count, CMTimeMake(count, 48000), descriptions, &system), system,
-                                CharonHostCMAudioSampleBufferCreateReadyWithPacketDescriptions(kCFAllocatorDefault, block, linear, count, CMTimeMake(count, 48000), descriptions, &port), port, 1, 0);
+                                RevenantHostCMAudioSampleBufferCreateReadyWithPacketDescriptions(kCFAllocatorDefault, block, linear, count, CMTimeMake(count, 48000), descriptions, &port), port, 1, 0);
                         if (linear)
                             CFRelease(linear);
                     }
@@ -303,7 +303,7 @@ int main(void)
                 });
                 __block NSMutableString *mine = [NSMutableString string];
                 __block int myStop = 0;
-                OSStatus b = CharonHostCMSampleBufferCallBlockForEachSample(source, ^OSStatus(CMSampleBufferRef piece, CMItemCount index) {
+                OSStatus b = RevenantHostCMSampleBufferCallBlockForEachSample(source, ^OSStatus(CMSampleBufferRef piece, CMItemCount index) {
                     [mine appendFormat:@"%lu:%@", (unsigned long)index, describe(piece, 1)];
                     if (index == 1)
                         myStop = 1;
@@ -321,7 +321,7 @@ int main(void)
                 __block int count = 0;
                 compare("CallBlockForEachSample counting",
                         CMSampleBufferCallBlockForEachSample(source, ^OSStatus(CMSampleBufferRef piece, CMItemCount index) { count++; return 0; }), NULL,
-                        CharonHostCMSampleBufferCallBlockForEachSample(source, ^OSStatus(CMSampleBufferRef piece, CMItemCount index) { count++; return 0; }), NULL,
+                        RevenantHostCMSampleBufferCallBlockForEachSample(source, ^OSStatus(CMSampleBufferRef piece, CMItemCount index) { count++; return 0; }), NULL,
                         insideClaim(sampleCounts[n], timingCounts[t]), 1);
                 if (source)
                     CFRelease(source);

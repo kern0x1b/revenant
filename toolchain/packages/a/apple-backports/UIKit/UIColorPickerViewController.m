@@ -1,23 +1,23 @@
-#import "CharonMenus.h"
+#import "RevenantMenus.h"
 
-static const NSInteger CharonGridColumns = 12;
-static const NSInteger CharonGridRows = 10;
+static const NSInteger RevenantGridColumns = 12;
+static const NSInteger RevenantGridRows = 10;
 
-static UIColor *charon_grid_color(NSInteger column, NSInteger row)
+static UIColor *revenant_grid_color(NSInteger column, NSInteger row)
 {
     if (row == 0)
-        return [UIColor colorWithWhite:1 - (CGFloat)column / (CharonGridColumns - 1) alpha:1];
-    CGFloat hue = (CGFloat)column / CharonGridColumns;
+        return [UIColor colorWithWhite:1 - (CGFloat)column / (RevenantGridColumns - 1) alpha:1];
+    CGFloat hue = (CGFloat)column / RevenantGridColumns;
     if (row <= 4)
         return [UIColor colorWithHue:hue saturation:row * 0.2f brightness:1 alpha:1];
     return [UIColor colorWithHue:hue saturation:1 brightness:1 - (row - 5) * 0.15f alpha:1];
 }
 
-@interface CharonColorGrid : UIView
+@interface RevenantColorGrid : UIView
 @property (nonatomic, copy) void (^picked)(UIColor *color, BOOL continuously);
 @end
 
-@implementation CharonColorGrid {
+@implementation RevenantColorGrid {
 @private
     void (^_picked)(UIColor *, BOOL);
 }
@@ -37,10 +37,10 @@ static UIColor *charon_grid_color(NSInteger column, NSInteger row)
 - (void)drawRect:(CGRect)rect
 {
     CGContextRef context = UIGraphicsGetCurrentContext();
-    CGFloat width = CGRectGetWidth(self.bounds) / CharonGridColumns, height = CGRectGetHeight(self.bounds) / CharonGridRows;
-    for (NSInteger row = 0; row < CharonGridRows; row++) {
-        for (NSInteger column = 0; column < CharonGridColumns; column++) {
-            CGContextSetFillColorWithColor(context, charon_grid_color(column, row).CGColor);
+    CGFloat width = CGRectGetWidth(self.bounds) / RevenantGridColumns, height = CGRectGetHeight(self.bounds) / RevenantGridRows;
+    for (NSInteger row = 0; row < RevenantGridRows; row++) {
+        for (NSInteger column = 0; column < RevenantGridColumns; column++) {
+            CGContextSetFillColorWithColor(context, revenant_grid_color(column, row).CGColor);
             CGContextFillRect(context, CGRectMake(column * width, row * height, width, height));
         }
     }
@@ -48,10 +48,10 @@ static UIColor *charon_grid_color(NSInteger column, NSInteger row)
 
 - (void)pickAt:(CGPoint)point continuously:(BOOL)continuously
 {
-    NSInteger column = MAX(0, MIN(CharonGridColumns - 1, (NSInteger)(point.x / (CGRectGetWidth(self.bounds) / CharonGridColumns))));
-    NSInteger row = MAX(0, MIN(CharonGridRows - 1, (NSInteger)(point.y / (CGRectGetHeight(self.bounds) / CharonGridRows))));
+    NSInteger column = MAX(0, MIN(RevenantGridColumns - 1, (NSInteger)(point.x / (CGRectGetWidth(self.bounds) / RevenantGridColumns))));
+    NSInteger row = MAX(0, MIN(RevenantGridRows - 1, (NSInteger)(point.y / (CGRectGetHeight(self.bounds) / RevenantGridRows))));
     if (_picked)
-        _picked(charon_grid_color(column, row), continuously);
+        _picked(revenant_grid_color(column, row), continuously);
 }
 
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
@@ -71,11 +71,11 @@ static UIColor *charon_grid_color(NSInteger column, NSInteger row)
 
 @end
 
-@interface CharonColorRoot : UIView
+@interface RevenantColorRoot : UIView
 @property (nonatomic, copy) void (^laidOut)(void);
 @end
 
-@implementation CharonColorRoot {
+@implementation RevenantColorRoot {
 @private
     void (^_laidOut)(void);
 }
@@ -101,11 +101,11 @@ static UIColor *charon_grid_color(NSInteger column, NSInteger row)
 
 @end
 
-@interface UIColorPickerViewController (CharonPicker)
-- (void)charon_pickColor:(UIColor *)color continuously:(BOOL)continuously;
-- (void)charon_done;
-- (void)charon_finished;
-- (void)charon_dismissedOrForce:(UIViewController *)presenter;
+@interface UIColorPickerViewController (RevenantPicker)
+- (void)revenant_pickColor:(UIColor *)color continuously:(BOOL)continuously;
+- (void)revenant_done;
+- (void)revenant_finished;
+- (void)revenant_dismissedOrForce:(UIViewController *)presenter;
 @end
 
 @implementation UIColorPickerViewController {
@@ -116,7 +116,7 @@ static UIColor *charon_grid_color(NSInteger column, NSInteger row)
     CGFloat _alpha;
     BOOL _finishing;
     UINavigationBar *_bar;
-    CharonColorGrid *_grid;
+    RevenantColorGrid *_grid;
     UIView *_swatch;
     UISlider *_slider;
 }
@@ -169,7 +169,7 @@ static UIColor *charon_grid_color(NSInteger column, NSInteger row)
     CGFloat alpha = 1;
     if ([selectedColor getRed:NULL green:NULL blue:NULL alpha:&alpha] || [selectedColor getWhite:NULL alpha:&alpha])
         _alpha = alpha;
-    [self charon_refresh];
+    [self revenant_refresh];
 }
 
 - (BOOL)supportsAlpha
@@ -180,26 +180,26 @@ static UIColor *charon_grid_color(NSInteger column, NSInteger row)
 - (void)setSupportsAlpha:(BOOL)supportsAlpha
 {
     _supportsAlpha = supportsAlpha;
-    [self charon_refresh];
+    [self revenant_refresh];
 }
 
 - (void)loadView
 {
-    CharonColorRoot *view = [[CharonColorRoot alloc] initWithFrame:CGRectMake(0, 0, 320, 480)];
+    RevenantColorRoot *view = [[RevenantColorRoot alloc] initWithFrame:CGRectMake(0, 0, 320, 480)];
     __weak UIColorPickerViewController *weakSelf = self;
     view.laidOut = ^{
-        [weakSelf charon_layout];
+        [weakSelf revenant_layout];
     };
     view.backgroundColor = [UIColor whiteColor];
     _bar = [[UINavigationBar alloc] init];
     UINavigationItem *item = [[UINavigationItem alloc] initWithTitle:self.title ?: @"Colors"];
-    item.rightBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:self action:@selector(charon_done)];
+    item.rightBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:self action:@selector(revenant_done)];
     _bar.items = @[item];
     [view addSubview:_bar];
-    _grid = [[CharonColorGrid alloc] init];
+    _grid = [[RevenantColorGrid alloc] init];
     __weak UIColorPickerViewController *weak = self;
     _grid.picked = ^(UIColor *color, BOOL continuously) {
-        [weak charon_pickColor:color continuously:continuously];
+        [weak revenant_pickColor:color continuously:continuously];
     };
     [view addSubview:_grid];
     _swatch = [[UIView alloc] init];
@@ -207,14 +207,14 @@ static UIColor *charon_grid_color(NSInteger column, NSInteger row)
     _swatch.layer.borderColor = [UIColor lightGrayColor].CGColor;
     [view addSubview:_swatch];
     _slider = [[UISlider alloc] init];
-    [_slider addTarget:self action:@selector(charon_alphaChanged:) forControlEvents:UIControlEventValueChanged];
+    [_slider addTarget:self action:@selector(revenant_alphaChanged:) forControlEvents:UIControlEventValueChanged];
     [view addSubview:_slider];
     self.view = view;
-    [self charon_layout];
-    [self charon_refresh];
+    [self revenant_layout];
+    [self revenant_refresh];
 }
 
-- (void)charon_layout
+- (void)revenant_layout
 {
     CGRect bounds = self.view.bounds;
     _bar.frame = CGRectMake(0, 0, CGRectGetWidth(bounds), 44);
@@ -228,10 +228,10 @@ static UIColor *charon_grid_color(NSInteger column, NSInteger row)
 - (void)viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
-    [self charon_layout];
+    [self revenant_layout];
 }
 
-- (void)charon_refresh
+- (void)revenant_refresh
 {
     if (!self.isViewLoaded)
         return;
@@ -240,21 +240,21 @@ static UIColor *charon_grid_color(NSInteger column, NSInteger row)
     _slider.value = (float)_alpha;
 }
 
-- (void)charon_alphaChanged:(UISlider *)slider
+- (void)revenant_alphaChanged:(UISlider *)slider
 {
     _alpha = slider.value;
     UIColor *base = _selectedColor;
     CGFloat red = 0, green = 0, blue = 0, white = 0;
     if ([base getRed:&red green:&green blue:&blue alpha:NULL])
-        [self charon_pickColor:[UIColor colorWithRed:red green:green blue:blue alpha:1] continuously:slider.tracking];
+        [self revenant_pickColor:[UIColor colorWithRed:red green:green blue:blue alpha:1] continuously:slider.tracking];
     else if ([base getWhite:&white alpha:NULL])
-        [self charon_pickColor:[UIColor colorWithWhite:white alpha:1] continuously:slider.tracking];
+        [self revenant_pickColor:[UIColor colorWithWhite:white alpha:1] continuously:slider.tracking];
 }
 
-- (void)charon_pickColor:(UIColor *)color continuously:(BOOL)continuously
+- (void)revenant_pickColor:(UIColor *)color continuously:(BOOL)continuously
 {
     _selectedColor = _supportsAlpha && _alpha < 1 ? [color colorWithAlphaComponent:_alpha] : color;
-    [self charon_refresh];
+    [self revenant_refresh];
     id<UIColorPickerViewControllerDelegate> delegate = _delegate;
     if ([delegate respondsToSelector:@selector(colorPickerViewController:didSelectColor:continuously:)])
         [delegate colorPickerViewController:self didSelectColor:_selectedColor continuously:continuously];
@@ -262,10 +262,10 @@ static UIColor *charon_grid_color(NSInteger column, NSInteger row)
         [delegate colorPickerViewControllerDidSelectColor:self];
 }
 
-- (void)charon_done
+- (void)revenant_done
 {
     if (![NSThread isMainThread]) {
-        [self performSelectorOnMainThread:@selector(charon_done) withObject:nil waitUntilDone:NO];
+        [self performSelectorOnMainThread:@selector(revenant_done) withObject:nil waitUntilDone:NO];
         return;
     }
     if (_finishing)
@@ -277,30 +277,30 @@ static UIColor *charon_grid_color(NSInteger column, NSInteger row)
     UIViewController *presenter = root.presentingViewController;
     NSLog(@"UIColorPickerViewController: Done, presenter %@, delegate %@", presenter, _delegate);
     if (!presenter) {
-        [self charon_finished];
+        [self revenant_finished];
         return;
     }
     [presenter dismissViewControllerAnimated:YES completion:^{
-        [self charon_finished];
+        [self revenant_finished];
     }];
-    [self performSelector:@selector(charon_dismissedOrForce:) withObject:presenter afterDelay:1.0];
+    [self performSelector:@selector(revenant_dismissedOrForce:) withObject:presenter afterDelay:1.0];
 }
 
-- (void)charon_dismissedOrForce:(UIViewController *)presenter
+- (void)revenant_dismissedOrForce:(UIViewController *)presenter
 {
     if (!_finishing)
         return;
     NSLog(@"UIColorPickerViewController: the dismissal did not finish, dismissing without animation");
     [presenter dismissViewControllerAnimated:NO completion:nil];
-    [self charon_finished];
+    [self revenant_finished];
 }
 
-- (void)charon_finished
+- (void)revenant_finished
 {
     if (!_finishing)
         return;
     _finishing = NO;
-    [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(charon_dismissedOrForce:) object:self.presentingViewController];
+    [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(revenant_dismissedOrForce:) object:self.presentingViewController];
     id<UIColorPickerViewControllerDelegate> delegate = _delegate;
     if ([delegate respondsToSelector:@selector(colorPickerViewControllerDidFinish:)])
         [delegate colorPickerViewControllerDidFinish:self];

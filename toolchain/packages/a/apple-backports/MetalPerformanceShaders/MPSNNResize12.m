@@ -1,8 +1,8 @@
-#import "CharonMPS.h"
-#import "CharonMPSImage.h"
+#import "RevenantMPS.h"
+#import "RevenantMPSImage.h"
 
 
-static inline long CharonMPSResizeSampleInHalfPixels(long destination, long destinationSize,
+static inline long RevenantMPSResizeSampleInHalfPixels(long destination, long destinationSize,
                                                       long size, BOOL alignCorners)
 {
     if (destinationSize < 1)
@@ -26,7 +26,7 @@ static inline long CharonMPSResizeSampleInHalfPixels(long destination, long dest
     return doubled;
 }
 
-static inline void CharonMPSResizeCorners(const void *bytes, const CharonMPSImageLayout *in,
+static inline void RevenantMPSResizeCorners(const void *bytes, const RevenantMPSImageLayout *in,
                                           long originX, long originY,
                                           long windowWidth, long windowHeight, long strideWidth,
                                           NSUInteger channel, long lowX, long highX,
@@ -41,13 +41,13 @@ static inline void CharonMPSResizeCorners(const void *bytes, const CharonMPSImag
         if (xs[corner] >= originX + windowWidth || ys[corner] >= originY + windowHeight)
             continue;
         NSUInteger pixel = (NSUInteger)ys[corner] * (NSUInteger)strideWidth + (NSUInteger)xs[corner];
-        NSUInteger index = CharonMPSImageIndex(in, pixel, channel);
+        NSUInteger index = RevenantMPSImageIndex(in, pixel, channel);
         if (index != (NSUInteger)-1)
-            corners[corner] = CharonMPSImageLoad(bytes, in, index);
+            corners[corner] = RevenantMPSImageLoad(bytes, in, index);
     }
 }
 
-static inline double CharonMPSResizeBlend(const double corners[4], long atX, long atY)
+static inline double RevenantMPSResizeBlend(const double corners[4], long atX, long atY)
 {
     double alongX = (atX - 2 * (atX / 2)) * 0.5;
     double acrossX = 1.0 - alongX;
@@ -58,22 +58,22 @@ static inline double CharonMPSResizeBlend(const double corners[4], long atX, lon
     return top * acrossY + bottom * alongY;
 }
 
-static BOOL CharonMPSResizePrepare(MPSImage *sourceImage, MPSImage *destinationImage,
+static BOOL RevenantMPSResizePrepare(MPSImage *sourceImage, MPSImage *destinationImage,
                                    NSUInteger resizeWidth, NSUInteger resizeHeight,
                                    NSString *what, BOOL checkDestinationSize)
 {
-    if (!CharonMPSImageUsable(sourceImage, what) || !CharonMPSImageUsable(destinationImage, what))
+    if (!RevenantMPSImageUsable(sourceImage, what) || !RevenantMPSImageUsable(destinationImage, what))
         return NO;
     if (checkDestinationSize &&
         (destinationImage.width != resizeWidth || destinationImage.height != resizeHeight)) {
-        CharonMPSRefuse(@"%@: the destination is %lux%lu and the kernel was asked for %lux%lu, so nothing "
+        RevenantMPSRefuse(@"%@: the destination is %lux%lu and the kernel was asked for %lux%lu, so nothing "
                         @"was written", what, (unsigned long)destinationImage.width,
                         (unsigned long)destinationImage.height,
                         (unsigned long)resizeWidth, (unsigned long)resizeHeight);
         return NO;
     }
     if (sourceImage.featureChannels != destinationImage.featureChannels) {
-        CharonMPSRefuse(@"%@: the source holds %lu feature channel(s) and the destination %lu, and this "
+        RevenantMPSRefuse(@"%@: the source holds %lu feature channel(s) and the destination %lu, and this "
                         @"resize keeps the number of them, so nothing was written", what,
                         (unsigned long)sourceImage.featureChannels,
                         (unsigned long)destinationImage.featureChannels);
@@ -82,15 +82,15 @@ static BOOL CharonMPSResizePrepare(MPSImage *sourceImage, MPSImage *destinationI
     return YES;
 }
 
-static BOOL CharonMPSResizeBuffers(MPSImage *sourceImage, MPSImage *destinationImage,
-                                   CharonMPSImageLayout *in, CharonMPSImageLayout *out,
+static BOOL RevenantMPSResizeBuffers(MPSImage *sourceImage, MPSImage *destinationImage,
+                                   RevenantMPSImageLayout *in, RevenantMPSImageLayout *out,
                                    void **from, unsigned char **to, NSString *what)
 {
-    *in = CharonMPSImageLayoutOf(sourceImage);
-    *out = CharonMPSImageLayoutOf(destinationImage);
+    *in = RevenantMPSImageLayoutOf(sourceImage);
+    *out = RevenantMPSImageLayoutOf(destinationImage);
     in->count = sourceImage.width * sourceImage.height * in->channels;
     out->count = destinationImage.width * destinationImage.height * out->channels;
-    *from = CharonMPSImageReadRegion(sourceImage, in,
+    *from = RevenantMPSImageReadRegion(sourceImage, in,
                                      MTLRegionMake2D(0, 0, sourceImage.width, sourceImage.height), what);
     if (!*from)
         return NO;
@@ -99,7 +99,7 @@ static BOOL CharonMPSResizeBuffers(MPSImage *sourceImage, MPSImage *destinationI
     if (!*to) {
         free(*from);
         *from = NULL;
-        CharonMPSRefuse(@"%@: no memory for a %lux%lu result, so nothing was written", what,
+        RevenantMPSRefuse(@"%@: no memory for a %lux%lu result, so nothing was written", what,
                         (unsigned long)destinationImage.width, (unsigned long)destinationImage.height);
         return NO;
     }
@@ -146,40 +146,40 @@ static BOOL CharonMPSResizeBuffers(MPSImage *sourceImage, MPSImage *destinationI
 {
     NSString *what = NSStringFromClass([self class]);
     if (!commandBuffer) {
-        CharonMPSRefuse(@"%@: no command buffer, so nothing was written", what);
+        RevenantMPSRefuse(@"%@: no command buffer, so nothing was written", what);
         return;
     }
-    if (!CharonMPSResizePrepare(sourceImage, destinationImage, _resizeWidth, _resizeHeight, what, YES))
+    if (!RevenantMPSResizePrepare(sourceImage, destinationImage, _resizeWidth, _resizeHeight, what, YES))
         return;
     if (!destinationImage.width || !destinationImage.height)
         return;
 
-    CharonMPSImageLayout in, out;
+    RevenantMPSImageLayout in, out;
     void *from;
     unsigned char *to;
-    if (!CharonMPSResizeBuffers(sourceImage, destinationImage, &in, &out, &from, &to, what))
+    if (!RevenantMPSResizeBuffers(sourceImage, destinationImage, &in, &out, &from, &to, what))
         return;
 
     long sourceWidth = (long)sourceImage.width, sourceHeight = (long)sourceImage.height;
     long destinationWidth = (long)destinationImage.width, destinationHeight = (long)destinationImage.height;
     for (long y = 0; y < destinationHeight; y++) {
-        long atY = CharonMPSResizeSampleInHalfPixels(y, destinationHeight, sourceHeight, _alignCorners);
+        long atY = RevenantMPSResizeSampleInHalfPixels(y, destinationHeight, sourceHeight, _alignCorners);
         for (long x = 0; x < destinationWidth; x++) {
-            long atX = CharonMPSResizeSampleInHalfPixels(x, destinationWidth, sourceWidth, _alignCorners);
+            long atX = RevenantMPSResizeSampleInHalfPixels(x, destinationWidth, sourceWidth, _alignCorners);
             for (NSUInteger c = 0; c < destinationImage.featureChannels; c++) {
                 double corners[4];
-                CharonMPSResizeCorners(from, &in, 0, 0, sourceWidth, sourceHeight, sourceWidth,
+                RevenantMPSResizeCorners(from, &in, 0, 0, sourceWidth, sourceHeight, sourceWidth,
                                        c, atX / 2, atX / 2 + 1, atY / 2, atY / 2 + 1, corners);
-                double blend = CharonMPSResizeBlend(corners, atX, atY);
+                double blend = RevenantMPSResizeBlend(corners, atX, atY);
                 NSUInteger pixel = (NSUInteger)(y * destinationWidth + x);
-                NSUInteger into = CharonMPSImageIndex(&out, pixel, c);
+                NSUInteger into = RevenantMPSImageIndex(&out, pixel, c);
                 if (into != (NSUInteger)-1)
-                    CharonMPSImageStore(to, &out, into, blend);
+                    RevenantMPSImageStore(to, &out, into, blend);
             }
         }
     }
     free(from);
-    (void)CharonMPSImageWriteRegion(destinationImage, &out,
+    (void)RevenantMPSImageWriteRegion(destinationImage, &out,
                                     MTLRegionMake2D(0, 0, destinationImage.width, destinationImage.height),
                                     to, what);
     free(to);
@@ -226,7 +226,7 @@ static BOOL CharonMPSResizeBuffers(MPSImage *sourceImage, MPSImage *destinationI
 - (NSUInteger)numberOfRegions { return _numberOfRegions; }
 - (const MPSRegion *)regions { return _regions; }
 
-static void CharonMPSCropWindow(MPSRegion region, NSUInteger sourceWidth, NSUInteger sourceHeight,
+static void RevenantMPSCropWindow(MPSRegion region, NSUInteger sourceWidth, NSUInteger sourceHeight,
                                 long *originX, long *originY, long *windowWidth, long *windowHeight)
 {
     double left = region.origin.x * (double)sourceWidth;
@@ -256,55 +256,55 @@ static void CharonMPSCropWindow(MPSRegion region, NSUInteger sourceWidth, NSUInt
 {
     NSString *what = NSStringFromClass([self class]);
     if (!commandBuffer) {
-        CharonMPSRefuse(@"%@: no command buffer, so nothing was written", what);
+        RevenantMPSRefuse(@"%@: no command buffer, so nothing was written", what);
         return;
     }
     NSUInteger needed = _resizeHeight * _numberOfRegions;
-    if (!CharonMPSResizePrepare(sourceImage, destinationImage, _resizeWidth, needed, what, YES))
+    if (!RevenantMPSResizePrepare(sourceImage, destinationImage, _resizeWidth, needed, what, YES))
         return;
     if (!_numberOfRegions || !_regions) {
-        CharonMPSRefuse(@"%@: no region was given, so nothing was written", what);
+        RevenantMPSRefuse(@"%@: no region was given, so nothing was written", what);
         return;
     }
     if (!destinationImage.width || !needed)
         return;
 
-    CharonMPSImageLayout in, out;
+    RevenantMPSImageLayout in, out;
     void *from;
     unsigned char *to;
-    if (!CharonMPSResizeBuffers(sourceImage, destinationImage, &in, &out, &from, &to, what))
+    if (!RevenantMPSResizeBuffers(sourceImage, destinationImage, &in, &out, &from, &to, what))
         return;
 
     for (NSUInteger region = 0; region < _numberOfRegions; region++) {
         long originX = 0, originY = 0, windowWidth = 0, windowHeight = 0;
-        CharonMPSCropWindow(_regions[region], sourceImage.width, sourceImage.height,
+        RevenantMPSCropWindow(_regions[region], sourceImage.width, sourceImage.height,
                             &originX, &originY, &windowWidth, &windowHeight);
         if (windowWidth < 1 || windowHeight < 1) {
-            CharonMPSRefuse(@"%@: region %lu does not meet the %lux%lu source, so it was not resized",
+            RevenantMPSRefuse(@"%@: region %lu does not meet the %lux%lu source, so it was not resized",
                             what, (unsigned long)region,
                             (unsigned long)sourceImage.width, (unsigned long)sourceImage.height);
             continue;
         }
         for (NSUInteger y = 0; y < _resizeHeight; y++) {
-            long atY = CharonMPSResizeSampleInHalfPixels((long)y, (long)_resizeHeight, windowHeight, NO);
+            long atY = RevenantMPSResizeSampleInHalfPixels((long)y, (long)_resizeHeight, windowHeight, NO);
             for (NSUInteger x = 0; x < _resizeWidth; x++) {
-                long atX = CharonMPSResizeSampleInHalfPixels((long)x, (long)_resizeWidth, windowWidth, NO);
+                long atX = RevenantMPSResizeSampleInHalfPixels((long)x, (long)_resizeWidth, windowWidth, NO);
                 for (NSUInteger c = 0; c < destinationImage.featureChannels; c++) {
                     double corners[4];
-                    CharonMPSResizeCorners(from, &in, originX, originY, windowWidth, windowHeight,
+                    RevenantMPSResizeCorners(from, &in, originX, originY, windowWidth, windowHeight,
                                            (long)sourceImage.width, c,
                                            atX / 2, atX / 2 + 1, atY / 2, atY / 2 + 1, corners);
-                    double blend = CharonMPSResizeBlend(corners, atX, atY);
+                    double blend = RevenantMPSResizeBlend(corners, atX, atY);
                     NSUInteger pixel = (NSUInteger)((y + region * _resizeHeight) * destinationImage.width + x);
-                    NSUInteger into = CharonMPSImageIndex(&out, pixel, c);
+                    NSUInteger into = RevenantMPSImageIndex(&out, pixel, c);
                     if (into != (NSUInteger)-1)
-                        CharonMPSImageStore(to, &out, into, blend);
+                        RevenantMPSImageStore(to, &out, into, blend);
                 }
             }
         }
     }
     free(from);
-    (void)CharonMPSImageWriteRegion(destinationImage, &out,
+    (void)RevenantMPSImageWriteRegion(destinationImage, &out,
                                     MTLRegionMake2D(0, 0, destinationImage.width, needed),
                                     to, what);
     free(to);

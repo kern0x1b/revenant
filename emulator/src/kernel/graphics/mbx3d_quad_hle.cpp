@@ -28,7 +28,7 @@
 #include "foundation/performance.hpp"
 #include "foundation/userland_hle.hpp"
 
-namespace shade {
+namespace emulator {
 namespace {
 
     struct Point {

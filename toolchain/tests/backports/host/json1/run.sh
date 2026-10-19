@@ -13,11 +13,11 @@ set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 FOUNDATION=${FOUNDATION:-$here/../../../../packages/a/apple-backports/Foundation}
-BUILD=${BUILD:-$(runs_fresh charon-json1)}
+BUILD=${BUILD:-$(runs_fresh revenant-json1)}
 quiet="-Wno-deprecated-declarations -Wno-unguarded-availability-new -Wno-incomplete-implementation -Wno-objc-protocol-method-implementation -Wno-nullability-completeness -Wno-objc-designated-initializers"
 rm -rf "$BUILD/port"
 mkdir -p "$BUILD/port"
-xcrun clang -fobjc-arc $quiet -DNSJSONSerialization=CharonHostNSJSONSerialization \
+xcrun clang -fobjc-arc $quiet -DNSJSONSerialization=RevenantHostNSJSONSerialization \
     -c "$FOUNDATION/NSJSONSerialization.m" -o "$BUILD/port/NSJSONSerialization.o"
 xcrun clang -fobjc-arc $quiet "$here/differential.m" "$BUILD/port/NSJSONSerialization.o" -framework Foundation -o "$BUILD/differential"
 "$BUILD/differential"

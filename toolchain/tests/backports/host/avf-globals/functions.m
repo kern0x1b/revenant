@@ -36,13 +36,13 @@ int main(void)
         printf("CONTROL\tAVCaption\tHAS %p\n", (__bridge void *)caption);
 
         void *hostMake = lookup("AVCaptionDimensionMake");
-        void *portMake = lookup("charon_host_AVCaptionDimensionMake");
+        void *portMake = lookup("revenant_host_AVCaptionDimensionMake");
         void *hostPoint = lookup("AVCaptionPointMake");
-        void *portPoint = lookup("charon_host_AVCaptionPointMake");
+        void *portPoint = lookup("revenant_host_AVCaptionPointMake");
         void *hostSize = lookup("AVCaptionSizeMake");
-        void *portSize = lookup("charon_host_AVCaptionSizeMake");
+        void *portSize = lookup("revenant_host_AVCaptionSizeMake");
         void *hostImage = lookup("AVCaptureReactionSystemImageNameForType");
-        void *portImage = lookup("charon_host_AVCaptureReactionSystemImageNameForType");
+        void *portImage = lookup("revenant_host_AVCaptureReactionSystemImageNameForType");
 
         AVCaptionDimension (*make)(CGFloat, AVCaptionUnitsType) =
             (AVCaptionDimension (*)(CGFloat, AVCaptionUnitsType))hostMake;

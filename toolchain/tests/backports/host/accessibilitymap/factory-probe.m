@@ -1,4 +1,4 @@
-#import "CharonBrailleMap.h"
+#import "RevenantBrailleMap.h"
 #import <objc/runtime.h>
 
 static void say(NSString *label, id value)
@@ -25,12 +25,12 @@ static void expect(NSString *rule, id got, id want)
 int main(void)
 {
     @autoreleasepool {
-        Class mapClass = NSClassFromString(@"CharonPortAXBrailleMap");
+        Class mapClass = NSClassFromString(@"RevenantPortAXBrailleMap");
         say(@"class.present", NSStringFromClass(mapClass));
         printf("class.respondsToFactory\t%d\n",
-               [mapClass respondsToSelector:@selector(charon_mapWithDimensions:)]);
+               [mapClass respondsToSelector:@selector(revenant_mapWithDimensions:)]);
 
-        AXBrailleMap *sized = [AXBrailleMap charon_mapWithDimensions:CGSizeMake(3, 2)];
+        AXBrailleMap *sized = [AXBrailleMap revenant_mapWithDimensions:CGSizeMake(3, 2)];
         say(@"sized.dimensions", NSStringFromSize([sized dimensions]));
         num(@"sized.height(0,0).before", [sized heightAtPoint:CGPointMake(0, 0)]);
         for (int column = 0; column < 3; column++) {
@@ -57,14 +57,14 @@ int main(void)
         num(@"sized.height(2,1)", [sized heightAtPoint:CGPointMake(2, 1)]);
         num(@"sized.height(3,0).outside", [sized heightAtPoint:CGPointMake(3, 0)]);
 
-        AXBrailleMap *other = [AXBrailleMap charon_mapWithDimensions:CGSizeMake(1, 1)];
+        AXBrailleMap *other = [AXBrailleMap revenant_mapWithDimensions:CGSizeMake(1, 1)];
         say(@"other.dimensions", NSStringFromSize([other dimensions]));
         num(@"other.height(0,0)", [other heightAtPoint:CGPointMake(0, 0)]);
         [other setHeight:0.75f atPoint:CGPointMake(0, 0)];
         num(@"other.height(0,0).afterWrite", [other heightAtPoint:CGPointMake(0, 0)]);
         num(@"sized.height(0,0).afterOtherWrite", [sized heightAtPoint:CGPointMake(0, 0)]);
 
-        AXBrailleMap *zero = [AXBrailleMap charon_mapWithDimensions:CGSizeZero];
+        AXBrailleMap *zero = [AXBrailleMap revenant_mapWithDimensions:CGSizeZero];
         say(@"zero.dimensions", NSStringFromSize([zero dimensions]));
         [zero setHeight:1.0f atPoint:CGPointMake(0, 0)];
         num(@"zero.height(0,0)", [zero heightAtPoint:CGPointMake(0, 0)]);

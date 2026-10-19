@@ -1,38 +1,38 @@
 #import <Foundation/Foundation.h>
 
-#import "CharonHKTypes.h"
+#import "RevenantHKTypes.h"
 #import <HealthKit/HealthKit.h>
 
-Class CharonHKClassForTypeKind(NSInteger kind)
+Class RevenantHKClassForTypeKind(NSInteger kind)
 {
     switch (kind) {
-    case CharonHKTypeKindQuantity:
+    case RevenantHKTypeKindQuantity:
         return NSClassFromString(@"HKQuantityType");
-    case CharonHKTypeKindCategory:
+    case RevenantHKTypeKindCategory:
         return NSClassFromString(@"HKCategoryType");
-    case CharonHKTypeKindCorrelation:
+    case RevenantHKTypeKindCorrelation:
         return NSClassFromString(@"HKCorrelationType");
-    case CharonHKTypeKindCharacteristic:
+    case RevenantHKTypeKindCharacteristic:
         return NSClassFromString(@"HKCharacteristicType");
-    case CharonHKTypeKindWorkout:
+    case RevenantHKTypeKindWorkout:
         return NSClassFromString(@"HKWorkoutType");
     default:
         return Nil;
     }
 }
 
-static CharonHKClassResolver charon_hk_class_resolver = ^Class(NSString *name) {
+static RevenantHKClassResolver revenant_hk_class_resolver = ^Class(NSString *name) {
     return NSClassFromString(name);
 };
 
-void CharonHKSetClassResolver(CharonHKClassResolver resolver)
+void RevenantHKSetClassResolver(RevenantHKClassResolver resolver)
 {
-    charon_hk_class_resolver = resolver ?: ^Class(NSString *name) { return NSClassFromString(name); };
+    revenant_hk_class_resolver = resolver ?: ^Class(NSString *name) { return NSClassFromString(name); };
 }
 
-Class CharonHKClassForObjectKind(NSInteger kind)
+Class RevenantHKClassForObjectKind(NSInteger kind)
 {
-    CharonHKClassResolver resolve = charon_hk_class_resolver;
+    RevenantHKClassResolver resolve = revenant_hk_class_resolver;
     switch (kind) {
     case 0:
         return resolve(@"HKCategorySample");
@@ -53,164 +53,164 @@ Class CharonHKClassForObjectKind(NSInteger kind)
     }
 }
 
-static const CharonHKTypeEntry charon_hk_quantity_types[] = {
-    {@"HKQuantityTypeIdentifierActiveEnergyBurned", @"kcal", CharonHKAggregationCumulativeSum},
-    {@"HKQuantityTypeIdentifierAppleExerciseTime", @"min", CharonHKAggregationCumulativeSum},
-    {@"HKQuantityTypeIdentifierAppleMoveTime", @"min", CharonHKAggregationCumulativeSum},
-    {@"HKQuantityTypeIdentifierAppleSleepingBreathingDisturbances", @"count", CharonHKAggregationDiscreteArithmetic},
-    {@"HKQuantityTypeIdentifierAppleSleepingWristTemperature", @"degC", CharonHKAggregationDiscreteArithmetic},
-    {@"HKQuantityTypeIdentifierAppleStandTime", @"min", CharonHKAggregationCumulativeSum},
-    {@"HKQuantityTypeIdentifierAppleWalkingSteadiness", @"%", CharonHKAggregationDiscreteArithmetic},
-    {@"HKQuantityTypeIdentifierAtrialFibrillationBurden", @"%", CharonHKAggregationDiscreteTemporallyWeighted},
-    {@"HKQuantityTypeIdentifierBasalBodyTemperature", @"degC", CharonHKAggregationDiscreteArithmetic},
-    {@"HKQuantityTypeIdentifierBasalEnergyBurned", @"kcal", CharonHKAggregationCumulativeSum},
-    {@"HKQuantityTypeIdentifierBloodAlcoholContent", @"%", CharonHKAggregationDiscreteArithmetic},
-    {@"HKQuantityTypeIdentifierBloodGlucose", @"mg/dL", CharonHKAggregationDiscreteArithmetic},
-    {@"HKQuantityTypeIdentifierBloodPressureDiastolic", @"mmHg", CharonHKAggregationDiscreteArithmetic},
-    {@"HKQuantityTypeIdentifierBloodPressureSystolic", @"mmHg", CharonHKAggregationDiscreteArithmetic},
-    {@"HKQuantityTypeIdentifierBodyFatPercentage", @"%", CharonHKAggregationDiscreteArithmetic},
-    {@"HKQuantityTypeIdentifierBodyMass", @"kg", CharonHKAggregationDiscreteArithmetic},
-    {@"HKQuantityTypeIdentifierBodyMassIndex", @"count", CharonHKAggregationDiscreteArithmetic},
-    {@"HKQuantityTypeIdentifierBodyTemperature", @"degC", CharonHKAggregationDiscreteArithmetic},
-    {@"HKQuantityTypeIdentifierCrossCountrySkiingSpeed", @"m/s", CharonHKAggregationDiscreteArithmetic},
-    {@"HKQuantityTypeIdentifierCyclingCadence", @"count/min", CharonHKAggregationDiscreteArithmetic},
-    {@"HKQuantityTypeIdentifierCyclingFunctionalThresholdPower", @"W", CharonHKAggregationDiscreteArithmetic},
-    {@"HKQuantityTypeIdentifierCyclingPower", @"W", CharonHKAggregationDiscreteArithmetic},
-    {@"HKQuantityTypeIdentifierCyclingSpeed", @"m/s", CharonHKAggregationDiscreteArithmetic},
-    {@"HKQuantityTypeIdentifierDietaryBiotin", @"g", CharonHKAggregationCumulativeSum},
-    {@"HKQuantityTypeIdentifierDietaryCaffeine", @"g", CharonHKAggregationCumulativeSum},
-    {@"HKQuantityTypeIdentifierDietaryCalcium", @"g", CharonHKAggregationCumulativeSum},
-    {@"HKQuantityTypeIdentifierDietaryCarbohydrates", @"g", CharonHKAggregationCumulativeSum},
-    {@"HKQuantityTypeIdentifierDietaryChloride", @"g", CharonHKAggregationCumulativeSum},
-    {@"HKQuantityTypeIdentifierDietaryCholesterol", @"g", CharonHKAggregationCumulativeSum},
-    {@"HKQuantityTypeIdentifierDietaryChromium", @"g", CharonHKAggregationCumulativeSum},
-    {@"HKQuantityTypeIdentifierDietaryCopper", @"g", CharonHKAggregationCumulativeSum},
-    {@"HKQuantityTypeIdentifierDietaryEnergyConsumed", @"kcal", CharonHKAggregationCumulativeSum},
-    {@"HKQuantityTypeIdentifierDietaryFatMonounsaturated", @"g", CharonHKAggregationCumulativeSum},
-    {@"HKQuantityTypeIdentifierDietaryFatPolyunsaturated", @"g", CharonHKAggregationCumulativeSum},
-    {@"HKQuantityTypeIdentifierDietaryFatSaturated", @"g", CharonHKAggregationCumulativeSum},
-    {@"HKQuantityTypeIdentifierDietaryFatTotal", @"g", CharonHKAggregationCumulativeSum},
-    {@"HKQuantityTypeIdentifierDietaryFiber", @"g", CharonHKAggregationCumulativeSum},
-    {@"HKQuantityTypeIdentifierDietaryFolate", @"g", CharonHKAggregationCumulativeSum},
-    {@"HKQuantityTypeIdentifierDietaryIodine", @"g", CharonHKAggregationCumulativeSum},
-    {@"HKQuantityTypeIdentifierDietaryIron", @"g", CharonHKAggregationCumulativeSum},
-    {@"HKQuantityTypeIdentifierDietaryMagnesium", @"g", CharonHKAggregationCumulativeSum},
-    {@"HKQuantityTypeIdentifierDietaryManganese", @"g", CharonHKAggregationCumulativeSum},
-    {@"HKQuantityTypeIdentifierDietaryMolybdenum", @"g", CharonHKAggregationCumulativeSum},
-    {@"HKQuantityTypeIdentifierDietaryNiacin", @"g", CharonHKAggregationCumulativeSum},
-    {@"HKQuantityTypeIdentifierDietaryPantothenicAcid", @"g", CharonHKAggregationCumulativeSum},
-    {@"HKQuantityTypeIdentifierDietaryPhosphorus", @"g", CharonHKAggregationCumulativeSum},
-    {@"HKQuantityTypeIdentifierDietaryPotassium", @"g", CharonHKAggregationCumulativeSum},
-    {@"HKQuantityTypeIdentifierDietaryProtein", @"g", CharonHKAggregationCumulativeSum},
-    {@"HKQuantityTypeIdentifierDietaryRiboflavin", @"g", CharonHKAggregationCumulativeSum},
-    {@"HKQuantityTypeIdentifierDietarySelenium", @"g", CharonHKAggregationCumulativeSum},
-    {@"HKQuantityTypeIdentifierDietarySodium", @"g", CharonHKAggregationCumulativeSum},
-    {@"HKQuantityTypeIdentifierDietarySugar", @"g", CharonHKAggregationCumulativeSum},
-    {@"HKQuantityTypeIdentifierDietaryThiamin", @"g", CharonHKAggregationCumulativeSum},
-    {@"HKQuantityTypeIdentifierDietaryVitaminA", @"g", CharonHKAggregationCumulativeSum},
-    {@"HKQuantityTypeIdentifierDietaryVitaminB12", @"g", CharonHKAggregationCumulativeSum},
-    {@"HKQuantityTypeIdentifierDietaryVitaminB6", @"g", CharonHKAggregationCumulativeSum},
-    {@"HKQuantityTypeIdentifierDietaryVitaminC", @"g", CharonHKAggregationCumulativeSum},
-    {@"HKQuantityTypeIdentifierDietaryVitaminD", @"g", CharonHKAggregationCumulativeSum},
-    {@"HKQuantityTypeIdentifierDietaryVitaminE", @"g", CharonHKAggregationCumulativeSum},
-    {@"HKQuantityTypeIdentifierDietaryVitaminK", @"g", CharonHKAggregationCumulativeSum},
-    {@"HKQuantityTypeIdentifierDietaryWater", @"mL", CharonHKAggregationCumulativeSum},
-    {@"HKQuantityTypeIdentifierDietaryZinc", @"g", CharonHKAggregationCumulativeSum},
-    {@"HKQuantityTypeIdentifierDistanceCrossCountrySkiing", @"m", CharonHKAggregationCumulativeSum},
-    {@"HKQuantityTypeIdentifierDistanceCycling", @"m", CharonHKAggregationCumulativeSum},
-    {@"HKQuantityTypeIdentifierDistanceDownhillSnowSports", @"m", CharonHKAggregationCumulativeSum},
-    {@"HKQuantityTypeIdentifierDistancePaddleSports", @"m", CharonHKAggregationCumulativeSum},
-    {@"HKQuantityTypeIdentifierDistanceRowing", @"m", CharonHKAggregationCumulativeSum},
-    {@"HKQuantityTypeIdentifierDistanceSkatingSports", @"m", CharonHKAggregationCumulativeSum},
-    {@"HKQuantityTypeIdentifierDistanceSwimming", @"m", CharonHKAggregationCumulativeSum},
-    {@"HKQuantityTypeIdentifierDistanceWalkingRunning", @"m", CharonHKAggregationCumulativeSum},
-    {@"HKQuantityTypeIdentifierDistanceWheelchair", @"m", CharonHKAggregationCumulativeSum},
-    {@"HKQuantityTypeIdentifierElectrodermalActivity", @"S", CharonHKAggregationDiscreteArithmetic},
-    {@"HKQuantityTypeIdentifierEnvironmentalAudioExposure", @"dBASPL", CharonHKAggregationDiscreteEquivalentContinuousLevel},
-    {@"HKQuantityTypeIdentifierEnvironmentalSoundReduction", @"dBASPL", CharonHKAggregationDiscreteEquivalentContinuousLevel},
-    {@"HKQuantityTypeIdentifierEstimatedWorkoutEffortScore", @"appleEffortScore", CharonHKAggregationDiscreteArithmetic},
-    {@"HKQuantityTypeIdentifierFlightsClimbed", @"count", CharonHKAggregationCumulativeSum},
-    {@"HKQuantityTypeIdentifierForcedExpiratoryVolume1", @"L", CharonHKAggregationDiscreteArithmetic},
-    {@"HKQuantityTypeIdentifierForcedVitalCapacity", @"L", CharonHKAggregationDiscreteArithmetic},
-    {@"HKQuantityTypeIdentifierHeadphoneAudioExposure", @"dBASPL", CharonHKAggregationDiscreteEquivalentContinuousLevel},
-    {@"HKQuantityTypeIdentifierHeartRate", @"count/s", CharonHKAggregationDiscreteTemporallyWeighted},
-    {@"HKQuantityTypeIdentifierHeartRateRecoveryOneMinute", @"count/min", CharonHKAggregationDiscreteArithmetic},
-    {@"HKQuantityTypeIdentifierHeartRateVariabilitySDNN", @"ms", CharonHKAggregationDiscreteArithmetic},
-    {@"HKQuantityTypeIdentifierHeight", @"m", CharonHKAggregationDiscreteArithmetic},
-    {@"HKQuantityTypeIdentifierInhalerUsage", @"count", CharonHKAggregationCumulativeSum},
-    {@"HKQuantityTypeIdentifierInsulinDelivery", @"IU", CharonHKAggregationCumulativeSum},
-    {@"HKQuantityTypeIdentifierLeanBodyMass", @"kg", CharonHKAggregationDiscreteArithmetic},
-    {@"HKQuantityTypeIdentifierNikeFuel", @"count", CharonHKAggregationCumulativeSum},
-    {@"HKQuantityTypeIdentifierNumberOfAlcoholicBeverages", @"count", CharonHKAggregationCumulativeSum},
-    {@"HKQuantityTypeIdentifierNumberOfTimesFallen", @"count", CharonHKAggregationCumulativeSum},
-    {@"HKQuantityTypeIdentifierOxygenSaturation", @"%", CharonHKAggregationDiscreteArithmetic},
-    {@"HKQuantityTypeIdentifierPaddleSportsSpeed", @"m/s", CharonHKAggregationDiscreteArithmetic},
-    {@"HKQuantityTypeIdentifierPeakExpiratoryFlowRate", @"L/min", CharonHKAggregationDiscreteArithmetic},
-    {@"HKQuantityTypeIdentifierPeripheralPerfusionIndex", @"%", CharonHKAggregationDiscreteArithmetic},
-    {@"HKQuantityTypeIdentifierPhysicalEffort", @"kcal/(kg*hr)", CharonHKAggregationDiscreteArithmetic},
-    {@"HKQuantityTypeIdentifierPushCount", @"count", CharonHKAggregationCumulativeSum},
-    {@"HKQuantityTypeIdentifierRespiratoryRate", @"count/s", CharonHKAggregationDiscreteArithmetic},
-    {@"HKQuantityTypeIdentifierRestingHeartRate", @"count/min", CharonHKAggregationDiscreteArithmetic},
-    {@"HKQuantityTypeIdentifierRowingSpeed", @"m/s", CharonHKAggregationDiscreteArithmetic},
-    {@"HKQuantityTypeIdentifierRunningGroundContactTime", @"ms", CharonHKAggregationDiscreteArithmetic},
-    {@"HKQuantityTypeIdentifierRunningPower", @"W", CharonHKAggregationDiscreteArithmetic},
-    {@"HKQuantityTypeIdentifierRunningSpeed", @"m/s", CharonHKAggregationDiscreteArithmetic},
-    {@"HKQuantityTypeIdentifierRunningStrideLength", @"m", CharonHKAggregationDiscreteArithmetic},
-    {@"HKQuantityTypeIdentifierRunningVerticalOscillation", @"cm", CharonHKAggregationDiscreteArithmetic},
-    {@"HKQuantityTypeIdentifierSixMinuteWalkTestDistance", @"m", CharonHKAggregationDiscreteArithmetic},
-    {@"HKQuantityTypeIdentifierStairAscentSpeed", @"m/s", CharonHKAggregationDiscreteArithmetic},
-    {@"HKQuantityTypeIdentifierStairDescentSpeed", @"m/s", CharonHKAggregationDiscreteArithmetic},
-    {@"HKQuantityTypeIdentifierStepCount", @"count", CharonHKAggregationCumulativeSum},
-    {@"HKQuantityTypeIdentifierSwimmingStrokeCount", @"count", CharonHKAggregationCumulativeSum},
-    {@"HKQuantityTypeIdentifierTimeInDaylight", @"min", CharonHKAggregationCumulativeSum},
-    {@"HKQuantityTypeIdentifierUVExposure", @"count", CharonHKAggregationDiscreteArithmetic},
-    {@"HKQuantityTypeIdentifierUnderwaterDepth", @"m", CharonHKAggregationDiscreteArithmetic},
-    {@"HKQuantityTypeIdentifierVO2Max", @"ml/(kg*min)", CharonHKAggregationDiscreteArithmetic},
-    {@"HKQuantityTypeIdentifierWaistCircumference", @"m", CharonHKAggregationDiscreteArithmetic},
-    {@"HKQuantityTypeIdentifierWalkingAsymmetryPercentage", @"%", CharonHKAggregationDiscreteArithmetic},
-    {@"HKQuantityTypeIdentifierWalkingDoubleSupportPercentage", @"%", CharonHKAggregationDiscreteArithmetic},
-    {@"HKQuantityTypeIdentifierWalkingHeartRateAverage", @"count/min", CharonHKAggregationDiscreteArithmetic},
-    {@"HKQuantityTypeIdentifierWalkingSpeed", @"m/s", CharonHKAggregationDiscreteArithmetic},
-    {@"HKQuantityTypeIdentifierWalkingStepLength", @"m", CharonHKAggregationDiscreteArithmetic},
-    {@"HKQuantityTypeIdentifierWaterTemperature", @"degC", CharonHKAggregationDiscreteArithmetic},
-    {@"HKQuantityTypeIdentifierWorkoutEffortScore", @"appleEffortScore", CharonHKAggregationDiscreteArithmetic},
+static const RevenantHKTypeEntry revenant_hk_quantity_types[] = {
+    {@"HKQuantityTypeIdentifierActiveEnergyBurned", @"kcal", RevenantHKAggregationCumulativeSum},
+    {@"HKQuantityTypeIdentifierAppleExerciseTime", @"min", RevenantHKAggregationCumulativeSum},
+    {@"HKQuantityTypeIdentifierAppleMoveTime", @"min", RevenantHKAggregationCumulativeSum},
+    {@"HKQuantityTypeIdentifierAppleSleepingBreathingDisturbances", @"count", RevenantHKAggregationDiscreteArithmetic},
+    {@"HKQuantityTypeIdentifierAppleSleepingWristTemperature", @"degC", RevenantHKAggregationDiscreteArithmetic},
+    {@"HKQuantityTypeIdentifierAppleStandTime", @"min", RevenantHKAggregationCumulativeSum},
+    {@"HKQuantityTypeIdentifierAppleWalkingSteadiness", @"%", RevenantHKAggregationDiscreteArithmetic},
+    {@"HKQuantityTypeIdentifierAtrialFibrillationBurden", @"%", RevenantHKAggregationDiscreteTemporallyWeighted},
+    {@"HKQuantityTypeIdentifierBasalBodyTemperature", @"degC", RevenantHKAggregationDiscreteArithmetic},
+    {@"HKQuantityTypeIdentifierBasalEnergyBurned", @"kcal", RevenantHKAggregationCumulativeSum},
+    {@"HKQuantityTypeIdentifierBloodAlcoholContent", @"%", RevenantHKAggregationDiscreteArithmetic},
+    {@"HKQuantityTypeIdentifierBloodGlucose", @"mg/dL", RevenantHKAggregationDiscreteArithmetic},
+    {@"HKQuantityTypeIdentifierBloodPressureDiastolic", @"mmHg", RevenantHKAggregationDiscreteArithmetic},
+    {@"HKQuantityTypeIdentifierBloodPressureSystolic", @"mmHg", RevenantHKAggregationDiscreteArithmetic},
+    {@"HKQuantityTypeIdentifierBodyFatPercentage", @"%", RevenantHKAggregationDiscreteArithmetic},
+    {@"HKQuantityTypeIdentifierBodyMass", @"kg", RevenantHKAggregationDiscreteArithmetic},
+    {@"HKQuantityTypeIdentifierBodyMassIndex", @"count", RevenantHKAggregationDiscreteArithmetic},
+    {@"HKQuantityTypeIdentifierBodyTemperature", @"degC", RevenantHKAggregationDiscreteArithmetic},
+    {@"HKQuantityTypeIdentifierCrossCountrySkiingSpeed", @"m/s", RevenantHKAggregationDiscreteArithmetic},
+    {@"HKQuantityTypeIdentifierCyclingCadence", @"count/min", RevenantHKAggregationDiscreteArithmetic},
+    {@"HKQuantityTypeIdentifierCyclingFunctionalThresholdPower", @"W", RevenantHKAggregationDiscreteArithmetic},
+    {@"HKQuantityTypeIdentifierCyclingPower", @"W", RevenantHKAggregationDiscreteArithmetic},
+    {@"HKQuantityTypeIdentifierCyclingSpeed", @"m/s", RevenantHKAggregationDiscreteArithmetic},
+    {@"HKQuantityTypeIdentifierDietaryBiotin", @"g", RevenantHKAggregationCumulativeSum},
+    {@"HKQuantityTypeIdentifierDietaryCaffeine", @"g", RevenantHKAggregationCumulativeSum},
+    {@"HKQuantityTypeIdentifierDietaryCalcium", @"g", RevenantHKAggregationCumulativeSum},
+    {@"HKQuantityTypeIdentifierDietaryCarbohydrates", @"g", RevenantHKAggregationCumulativeSum},
+    {@"HKQuantityTypeIdentifierDietaryChloride", @"g", RevenantHKAggregationCumulativeSum},
+    {@"HKQuantityTypeIdentifierDietaryCholesterol", @"g", RevenantHKAggregationCumulativeSum},
+    {@"HKQuantityTypeIdentifierDietaryChromium", @"g", RevenantHKAggregationCumulativeSum},
+    {@"HKQuantityTypeIdentifierDietaryCopper", @"g", RevenantHKAggregationCumulativeSum},
+    {@"HKQuantityTypeIdentifierDietaryEnergyConsumed", @"kcal", RevenantHKAggregationCumulativeSum},
+    {@"HKQuantityTypeIdentifierDietaryFatMonounsaturated", @"g", RevenantHKAggregationCumulativeSum},
+    {@"HKQuantityTypeIdentifierDietaryFatPolyunsaturated", @"g", RevenantHKAggregationCumulativeSum},
+    {@"HKQuantityTypeIdentifierDietaryFatSaturated", @"g", RevenantHKAggregationCumulativeSum},
+    {@"HKQuantityTypeIdentifierDietaryFatTotal", @"g", RevenantHKAggregationCumulativeSum},
+    {@"HKQuantityTypeIdentifierDietaryFiber", @"g", RevenantHKAggregationCumulativeSum},
+    {@"HKQuantityTypeIdentifierDietaryFolate", @"g", RevenantHKAggregationCumulativeSum},
+    {@"HKQuantityTypeIdentifierDietaryIodine", @"g", RevenantHKAggregationCumulativeSum},
+    {@"HKQuantityTypeIdentifierDietaryIron", @"g", RevenantHKAggregationCumulativeSum},
+    {@"HKQuantityTypeIdentifierDietaryMagnesium", @"g", RevenantHKAggregationCumulativeSum},
+    {@"HKQuantityTypeIdentifierDietaryManganese", @"g", RevenantHKAggregationCumulativeSum},
+    {@"HKQuantityTypeIdentifierDietaryMolybdenum", @"g", RevenantHKAggregationCumulativeSum},
+    {@"HKQuantityTypeIdentifierDietaryNiacin", @"g", RevenantHKAggregationCumulativeSum},
+    {@"HKQuantityTypeIdentifierDietaryPantothenicAcid", @"g", RevenantHKAggregationCumulativeSum},
+    {@"HKQuantityTypeIdentifierDietaryPhosphorus", @"g", RevenantHKAggregationCumulativeSum},
+    {@"HKQuantityTypeIdentifierDietaryPotassium", @"g", RevenantHKAggregationCumulativeSum},
+    {@"HKQuantityTypeIdentifierDietaryProtein", @"g", RevenantHKAggregationCumulativeSum},
+    {@"HKQuantityTypeIdentifierDietaryRiboflavin", @"g", RevenantHKAggregationCumulativeSum},
+    {@"HKQuantityTypeIdentifierDietarySelenium", @"g", RevenantHKAggregationCumulativeSum},
+    {@"HKQuantityTypeIdentifierDietarySodium", @"g", RevenantHKAggregationCumulativeSum},
+    {@"HKQuantityTypeIdentifierDietarySugar", @"g", RevenantHKAggregationCumulativeSum},
+    {@"HKQuantityTypeIdentifierDietaryThiamin", @"g", RevenantHKAggregationCumulativeSum},
+    {@"HKQuantityTypeIdentifierDietaryVitaminA", @"g", RevenantHKAggregationCumulativeSum},
+    {@"HKQuantityTypeIdentifierDietaryVitaminB12", @"g", RevenantHKAggregationCumulativeSum},
+    {@"HKQuantityTypeIdentifierDietaryVitaminB6", @"g", RevenantHKAggregationCumulativeSum},
+    {@"HKQuantityTypeIdentifierDietaryVitaminC", @"g", RevenantHKAggregationCumulativeSum},
+    {@"HKQuantityTypeIdentifierDietaryVitaminD", @"g", RevenantHKAggregationCumulativeSum},
+    {@"HKQuantityTypeIdentifierDietaryVitaminE", @"g", RevenantHKAggregationCumulativeSum},
+    {@"HKQuantityTypeIdentifierDietaryVitaminK", @"g", RevenantHKAggregationCumulativeSum},
+    {@"HKQuantityTypeIdentifierDietaryWater", @"mL", RevenantHKAggregationCumulativeSum},
+    {@"HKQuantityTypeIdentifierDietaryZinc", @"g", RevenantHKAggregationCumulativeSum},
+    {@"HKQuantityTypeIdentifierDistanceCrossCountrySkiing", @"m", RevenantHKAggregationCumulativeSum},
+    {@"HKQuantityTypeIdentifierDistanceCycling", @"m", RevenantHKAggregationCumulativeSum},
+    {@"HKQuantityTypeIdentifierDistanceDownhillSnowSports", @"m", RevenantHKAggregationCumulativeSum},
+    {@"HKQuantityTypeIdentifierDistancePaddleSports", @"m", RevenantHKAggregationCumulativeSum},
+    {@"HKQuantityTypeIdentifierDistanceRowing", @"m", RevenantHKAggregationCumulativeSum},
+    {@"HKQuantityTypeIdentifierDistanceSkatingSports", @"m", RevenantHKAggregationCumulativeSum},
+    {@"HKQuantityTypeIdentifierDistanceSwimming", @"m", RevenantHKAggregationCumulativeSum},
+    {@"HKQuantityTypeIdentifierDistanceWalkingRunning", @"m", RevenantHKAggregationCumulativeSum},
+    {@"HKQuantityTypeIdentifierDistanceWheelchair", @"m", RevenantHKAggregationCumulativeSum},
+    {@"HKQuantityTypeIdentifierElectrodermalActivity", @"S", RevenantHKAggregationDiscreteArithmetic},
+    {@"HKQuantityTypeIdentifierEnvironmentalAudioExposure", @"dBASPL", RevenantHKAggregationDiscreteEquivalentContinuousLevel},
+    {@"HKQuantityTypeIdentifierEnvironmentalSoundReduction", @"dBASPL", RevenantHKAggregationDiscreteEquivalentContinuousLevel},
+    {@"HKQuantityTypeIdentifierEstimatedWorkoutEffortScore", @"appleEffortScore", RevenantHKAggregationDiscreteArithmetic},
+    {@"HKQuantityTypeIdentifierFlightsClimbed", @"count", RevenantHKAggregationCumulativeSum},
+    {@"HKQuantityTypeIdentifierForcedExpiratoryVolume1", @"L", RevenantHKAggregationDiscreteArithmetic},
+    {@"HKQuantityTypeIdentifierForcedVitalCapacity", @"L", RevenantHKAggregationDiscreteArithmetic},
+    {@"HKQuantityTypeIdentifierHeadphoneAudioExposure", @"dBASPL", RevenantHKAggregationDiscreteEquivalentContinuousLevel},
+    {@"HKQuantityTypeIdentifierHeartRate", @"count/s", RevenantHKAggregationDiscreteTemporallyWeighted},
+    {@"HKQuantityTypeIdentifierHeartRateRecoveryOneMinute", @"count/min", RevenantHKAggregationDiscreteArithmetic},
+    {@"HKQuantityTypeIdentifierHeartRateVariabilitySDNN", @"ms", RevenantHKAggregationDiscreteArithmetic},
+    {@"HKQuantityTypeIdentifierHeight", @"m", RevenantHKAggregationDiscreteArithmetic},
+    {@"HKQuantityTypeIdentifierInhalerUsage", @"count", RevenantHKAggregationCumulativeSum},
+    {@"HKQuantityTypeIdentifierInsulinDelivery", @"IU", RevenantHKAggregationCumulativeSum},
+    {@"HKQuantityTypeIdentifierLeanBodyMass", @"kg", RevenantHKAggregationDiscreteArithmetic},
+    {@"HKQuantityTypeIdentifierNikeFuel", @"count", RevenantHKAggregationCumulativeSum},
+    {@"HKQuantityTypeIdentifierNumberOfAlcoholicBeverages", @"count", RevenantHKAggregationCumulativeSum},
+    {@"HKQuantityTypeIdentifierNumberOfTimesFallen", @"count", RevenantHKAggregationCumulativeSum},
+    {@"HKQuantityTypeIdentifierOxygenSaturation", @"%", RevenantHKAggregationDiscreteArithmetic},
+    {@"HKQuantityTypeIdentifierPaddleSportsSpeed", @"m/s", RevenantHKAggregationDiscreteArithmetic},
+    {@"HKQuantityTypeIdentifierPeakExpiratoryFlowRate", @"L/min", RevenantHKAggregationDiscreteArithmetic},
+    {@"HKQuantityTypeIdentifierPeripheralPerfusionIndex", @"%", RevenantHKAggregationDiscreteArithmetic},
+    {@"HKQuantityTypeIdentifierPhysicalEffort", @"kcal/(kg*hr)", RevenantHKAggregationDiscreteArithmetic},
+    {@"HKQuantityTypeIdentifierPushCount", @"count", RevenantHKAggregationCumulativeSum},
+    {@"HKQuantityTypeIdentifierRespiratoryRate", @"count/s", RevenantHKAggregationDiscreteArithmetic},
+    {@"HKQuantityTypeIdentifierRestingHeartRate", @"count/min", RevenantHKAggregationDiscreteArithmetic},
+    {@"HKQuantityTypeIdentifierRowingSpeed", @"m/s", RevenantHKAggregationDiscreteArithmetic},
+    {@"HKQuantityTypeIdentifierRunningGroundContactTime", @"ms", RevenantHKAggregationDiscreteArithmetic},
+    {@"HKQuantityTypeIdentifierRunningPower", @"W", RevenantHKAggregationDiscreteArithmetic},
+    {@"HKQuantityTypeIdentifierRunningSpeed", @"m/s", RevenantHKAggregationDiscreteArithmetic},
+    {@"HKQuantityTypeIdentifierRunningStrideLength", @"m", RevenantHKAggregationDiscreteArithmetic},
+    {@"HKQuantityTypeIdentifierRunningVerticalOscillation", @"cm", RevenantHKAggregationDiscreteArithmetic},
+    {@"HKQuantityTypeIdentifierSixMinuteWalkTestDistance", @"m", RevenantHKAggregationDiscreteArithmetic},
+    {@"HKQuantityTypeIdentifierStairAscentSpeed", @"m/s", RevenantHKAggregationDiscreteArithmetic},
+    {@"HKQuantityTypeIdentifierStairDescentSpeed", @"m/s", RevenantHKAggregationDiscreteArithmetic},
+    {@"HKQuantityTypeIdentifierStepCount", @"count", RevenantHKAggregationCumulativeSum},
+    {@"HKQuantityTypeIdentifierSwimmingStrokeCount", @"count", RevenantHKAggregationCumulativeSum},
+    {@"HKQuantityTypeIdentifierTimeInDaylight", @"min", RevenantHKAggregationCumulativeSum},
+    {@"HKQuantityTypeIdentifierUVExposure", @"count", RevenantHKAggregationDiscreteArithmetic},
+    {@"HKQuantityTypeIdentifierUnderwaterDepth", @"m", RevenantHKAggregationDiscreteArithmetic},
+    {@"HKQuantityTypeIdentifierVO2Max", @"ml/(kg*min)", RevenantHKAggregationDiscreteArithmetic},
+    {@"HKQuantityTypeIdentifierWaistCircumference", @"m", RevenantHKAggregationDiscreteArithmetic},
+    {@"HKQuantityTypeIdentifierWalkingAsymmetryPercentage", @"%", RevenantHKAggregationDiscreteArithmetic},
+    {@"HKQuantityTypeIdentifierWalkingDoubleSupportPercentage", @"%", RevenantHKAggregationDiscreteArithmetic},
+    {@"HKQuantityTypeIdentifierWalkingHeartRateAverage", @"count/min", RevenantHKAggregationDiscreteArithmetic},
+    {@"HKQuantityTypeIdentifierWalkingSpeed", @"m/s", RevenantHKAggregationDiscreteArithmetic},
+    {@"HKQuantityTypeIdentifierWalkingStepLength", @"m", RevenantHKAggregationDiscreteArithmetic},
+    {@"HKQuantityTypeIdentifierWaterTemperature", @"degC", RevenantHKAggregationDiscreteArithmetic},
+    {@"HKQuantityTypeIdentifierWorkoutEffortScore", @"appleEffortScore", RevenantHKAggregationDiscreteArithmetic},
 };
-static const NSUInteger charon_hk_quantity_type_count = sizeof(charon_hk_quantity_types) / sizeof(charon_hk_quantity_types[0]);
+static const NSUInteger revenant_hk_quantity_type_count = sizeof(revenant_hk_quantity_types) / sizeof(revenant_hk_quantity_types[0]);
 
-NSUInteger CharonHKQuantityTypeCount(void)
+NSUInteger RevenantHKQuantityTypeCount(void)
 {
-    return charon_hk_quantity_type_count;
+    return revenant_hk_quantity_type_count;
 }
 
-const CharonHKTypeEntry *CharonHKQuantityTypeEntryAt(NSUInteger index)
+const RevenantHKTypeEntry *RevenantHKQuantityTypeEntryAt(NSUInteger index)
 {
-    return index < charon_hk_quantity_type_count ? &charon_hk_quantity_types[index] : NULL;
+    return index < revenant_hk_quantity_type_count ? &revenant_hk_quantity_types[index] : NULL;
 }
 
-const CharonHKTypeEntry *CharonHKQuantityTypeEntry(NSString *identifier)
+const RevenantHKTypeEntry *RevenantHKQuantityTypeEntry(NSString *identifier)
 {
     if (![identifier isKindOfClass:[NSString class]])
         return NULL;
-    for (NSUInteger index = 0; index < charon_hk_quantity_type_count; index++)
-        if ([charon_hk_quantity_types[index].identifier isEqualToString:identifier])
-            return &charon_hk_quantity_types[index];
+    for (NSUInteger index = 0; index < revenant_hk_quantity_type_count; index++)
+        if ([revenant_hk_quantity_types[index].identifier isEqualToString:identifier])
+            return &revenant_hk_quantity_types[index];
     return NULL;
 }
 
-BOOL CharonHKHasTypeIdentifier(NSString *identifier, CharonHKTypeKind kind)
+BOOL RevenantHKHasTypeIdentifier(NSString *identifier, RevenantHKTypeKind kind)
 {
     if (![identifier isKindOfClass:[NSString class]] || !identifier.length)
         return NO;
     switch (kind) {
-    case CharonHKTypeKindQuantity:
-        return CharonHKQuantityTypeEntry(identifier) != NULL;
-    case CharonHKTypeKindCategory:
+    case RevenantHKTypeKindQuantity:
+        return RevenantHKQuantityTypeEntry(identifier) != NULL;
+    case RevenantHKTypeKindCategory:
         return [identifier hasPrefix:@"HKCategoryTypeIdentifier"];
-    case CharonHKTypeKindCharacteristic:
+    case RevenantHKTypeKindCharacteristic:
         return [identifier hasPrefix:@"HKCharacteristicTypeIdentifier"];
-    case CharonHKTypeKindCorrelation:
+    case RevenantHKTypeKindCorrelation:
         return [identifier hasPrefix:@"HKCorrelationTypeIdentifier"];
-    case CharonHKTypeKindWorkout:
+    case RevenantHKTypeKindWorkout:
     default:
         return [identifier hasPrefix:@"HKWorkoutTypeIdentifier"];
     }

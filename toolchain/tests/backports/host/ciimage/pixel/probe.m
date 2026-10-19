@@ -143,7 +143,7 @@ static void reportRepresentations(void)
     } else {
         put(@"repr cgimage none");
     }
-    NSString *path = [NSTemporaryDirectory() stringByAppendingPathComponent:@"charon-ci-repr.png"];
+    NSString *path = [NSTemporaryDirectory() stringByAppendingPathComponent:@"revenant-ci-repr.png"];
     NSURL *url = [NSURL fileURLWithPath:path];
     NSError *error = nil;
     BOOL written = [context writePNGRepresentationOfImage:image toURL:url format:kCIFormatRGBA8 colorSpace:NULL
@@ -180,7 +180,7 @@ static void reportAlgebra(void)
                  CGRectMake(0, 0, 12, 8));
     put_algebra(@"alg transformed hq",
                  [image imageByApplyingTransform:CGAffineTransformMakeScale(0.5, 0.5) highQualityDownsample:YES], bounds);
-    put_algebra(@"alg properties", [image imageBySettingProperties:@{@"charonProbe": @"one"}], bounds);
+    put_algebra(@"alg properties", [image imageBySettingProperties:@{@"revenantProbe": @"one"}], bounds);
     for (NSString *name in @[ @"blackImage", @"whiteImage", @"grayImage", @"redImage", @"greenImage", @"blueImage",
                               @"cyanImage", @"magentaImage", @"yellowImage", @"clearImage" ]) {
         SEL selector = NSSelectorFromString(name);

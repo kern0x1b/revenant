@@ -122,7 +122,7 @@ static void read_keys(NSString *name, id object, NSArray<NSString *> *keys, void
     }
 }
 
-void charon_scenekit_default_cases(void (^report)(NSString *name, NSString *value))
+void revenant_scenekit_default_cases(void (^report)(NSString *name, NSString *value))
 {
     NSArray *slots = @[@"diffuse", @"ambient", @"specular", @"normal", @"reflective", @"emission", @"transparent", @"multiply",
                        @"displacement", @"ambientOcclusion", @"selfIllumination", @"metalness", @"roughness", @"clearCoat",

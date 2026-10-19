@@ -1,6 +1,6 @@
 package("swift-data")
-    set_homepage("https://github.com/kern0x1b/charon")
-    set_description("SwiftData for the port's armv7 releases: Schema, ModelConfiguration, ModelContainer, ModelContext, FetchDescriptor and PersistentIdentifier over the device's own Core Data. The Swift module is built against the charon@swift-runtime a port carries, so a program writes `import SwiftData`. The storage layer is the Core Data of the release: NSPersistentContainer and NSPersistentStoreDescription from iOS 6.0 are the substrate, and this package adds the SwiftData API as a layer on top.")
+    set_homepage("https://github.com/kern0x1b/revenant/tree/main/toolchain")
+    set_description("SwiftData for the port's armv7 releases: Schema, ModelConfiguration, ModelContainer, ModelContext, FetchDescriptor and PersistentIdentifier over the device's own Core Data. The Swift module is built against the revenant@swift-runtime a port carries, so a program writes `import SwiftData`. The storage layer is the Core Data of the release: NSPersistentContainer and NSPersistentStoreDescription from iOS 6.0 are the substrate, and this package adds the SwiftData API as a layer on top.")
     set_license("Apache-2.0")
     set_policy("package.strict_compatibility", true)
 
@@ -20,10 +20,10 @@ package("swift-data")
     add_configs("recipe", {description = "The digest of this recipe, so a changed recipe is a different package.", default = hash.strhash128(table.concat(digests, ";")), type = "string", readonly = true})
 
     on_load("iphoneos", function (package)
-        package:add("deps", "charon@swift-runtime", {alias = "swift-runtime", configs = {shared = package:config("shared") or nil,
+        package:add("deps", "revenant@swift-runtime", {alias = "swift-runtime", configs = {shared = package:config("shared") or nil,
                     backports = package:config("backports") or nil, backports_uikit = package:config("backports_uikit") or nil}})
         package:add("frameworks", "CoreData", "Foundation", "CoreFoundation")
-        package:add("deps", "charon@swift-foundation", {alias = "swift-foundation"})
+        package:add("deps", "revenant@swift-foundation", {alias = "swift-foundation"})
     end)
 
     on_install("iphoneos", function (package)
@@ -31,7 +31,7 @@ package("swift-data")
         local swift = import("apple.swift", {rootdir = modules_root, anonymous = true})
         local toolchain = assert(package:toolchains(), "SwiftData is built with the apple-ios toolchain")[1]
         toolchain:load()
-        local runtime = assert(package:dep("swift-runtime"), "SwiftData is compiled against charon@swift-runtime")
+        local runtime = assert(package:dep("swift-runtime"), "SwiftData is compiled against revenant@swift-runtime")
         local swiftc = assert(table.wrap((runtime:envs() or {}).SWIFT_EXEC)[1], "swift-runtime names no compiler; reinstall it")
         local minimum = toolchain:config("deployment")
         local triple = package:arch() .. "-apple-ios" .. minimum
@@ -46,7 +46,7 @@ package("swift-data")
             table.insert(sources, path.join(package:scriptdir(), "files", module, "*.swift"))
         end
 
-        local port_headers = table.wrap((runtime:envs() or {}).CHARON_SWIFT_PORT_HEADERS)
+        local port_headers = table.wrap((runtime:envs() or {}).REVENANT_SWIFT_PORT_HEADERS)
         local overlay = #port_headers > 0 and {"-vfsoverlay", table.concat(port_headers, path.envsep())} or {}
         for _, module in ipairs(modules) do
             local folder = path.join(install, module .. ".swiftmodule")
@@ -64,7 +64,7 @@ package("swift-data")
                          path.join(objects, module .. ".o")})
         end
 
-        package:setenv("CHARON_SWIFT_MODULES", install)
+        package:setenv("REVENANT_SWIFT_MODULES", install)
         os.cp(path.join(package:scriptdir(), "README.md"), package:installdir())
     end)
 
@@ -95,7 +95,7 @@ package("swift-data")
                    ", so a Core Data API was added without a fact behind it")
         end
 
-        os.envs("CHARON_SWIFTDATA_OBJECT", path.join(package:installdir(), "lib", "libSwiftData.a"))
+        os.envs("REVENANT_SWIFTDATA_OBJECT", path.join(package:installdir(), "lib", "libSwiftData.a"))
         import("@self.harness.symbols")
         local names = symbols.undefined_names(exported)
         local ok, why = symbols.check_pending(names)

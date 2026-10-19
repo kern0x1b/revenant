@@ -7,7 +7,7 @@ typedef struct {
     uint16_t low[16][8];
     uint16_t mid[16][8];
     uint16_t high[256];
-} CharonLengthModel;
+} RevenantLengthModel;
 
 typedef struct {
     uint16_t match[12][16];
@@ -19,13 +19,13 @@ typedef struct {
     uint16_t slot[4][64];
     uint16_t special[114];
     uint16_t align[16];
-    CharonLengthModel length;
-    CharonLengthModel repLength;
+    RevenantLengthModel length;
+    RevenantLengthModel repLength;
     uint16_t *literal;
     unsigned lc, lp, pb;
-} CharonLZMAModel;
+} RevenantLZMAModel;
 
-static void charon_lzma_reset(CharonLZMAModel *model, unsigned lc, unsigned lp, unsigned pb)
+static void revenant_lzma_reset(RevenantLZMAModel *model, unsigned lc, unsigned lp, unsigned pb)
 {
     uint16_t *literal = model->literal;
     NSUInteger count = 0x300u << (lc + lp);
@@ -37,7 +37,7 @@ static void charon_lzma_reset(CharonLZMAModel *model, unsigned lc, unsigned lp, 
     model->lp = lp;
     model->pb = pb;
     uint16_t *probs = (uint16_t *)model;
-    NSUInteger tableCount = (offsetof(CharonLZMAModel, literal)) / sizeof(uint16_t);
+    NSUInteger tableCount = (offsetof(RevenantLZMAModel, literal)) / sizeof(uint16_t);
     for (NSUInteger index = 0; index < tableCount; index++)
         probs[index] = 1024;
     for (NSUInteger index = 0; index < count; index++)
@@ -50,9 +50,9 @@ typedef struct {
     uint8_t cache;
     uint64_t cacheSize;
     NSMutableData *out;
-} CharonRangeEncoder;
+} RevenantRangeEncoder;
 
-static void charon_rc_shift(CharonRangeEncoder *rc)
+static void revenant_rc_shift(RevenantRangeEncoder *rc)
 {
     if ((uint32_t)rc->low < 0xFF000000u || (rc->low >> 32) != 0) {
         uint8_t carry = (uint8_t)(rc->low >> 32);
@@ -68,7 +68,7 @@ static void charon_rc_shift(CharonRangeEncoder *rc)
     rc->low = (rc->low & 0x00FFFFFFu) << 8;
 }
 
-static void charon_rc_bit(CharonRangeEncoder *rc, uint16_t *probability, int bit)
+static void revenant_rc_bit(RevenantRangeEncoder *rc, uint16_t *probability, int bit)
 {
     uint32_t bound = (rc->range >> 11) * *probability;
     if (!bit) {
@@ -81,11 +81,11 @@ static void charon_rc_bit(CharonRangeEncoder *rc, uint16_t *probability, int bit
     }
     while (rc->range < (1u << 24)) {
         rc->range <<= 8;
-        charon_rc_shift(rc);
+        revenant_rc_shift(rc);
     }
 }
 
-static void charon_rc_direct(CharonRangeEncoder *rc, uint32_t value, int bits)
+static void revenant_rc_direct(RevenantRangeEncoder *rc, uint32_t value, int bits)
 {
     for (int index = bits - 1; index >= 0; index--) {
         rc->range >>= 1;
@@ -93,82 +93,82 @@ static void charon_rc_direct(CharonRangeEncoder *rc, uint32_t value, int bits)
             rc->low += rc->range;
         while (rc->range < (1u << 24)) {
             rc->range <<= 8;
-            charon_rc_shift(rc);
+            revenant_rc_shift(rc);
         }
     }
 }
 
-static void charon_rc_tree(CharonRangeEncoder *rc, uint16_t *probabilities, int bits, uint32_t symbol)
+static void revenant_rc_tree(RevenantRangeEncoder *rc, uint16_t *probabilities, int bits, uint32_t symbol)
 {
     uint32_t node = 1;
     for (int index = bits - 1; index >= 0; index--) {
         int bit = (symbol >> index) & 1;
-        charon_rc_bit(rc, &probabilities[node], bit);
+        revenant_rc_bit(rc, &probabilities[node], bit);
         node = (node << 1) | (uint32_t)bit;
     }
 }
 
-static void charon_rc_tree_reverse(CharonRangeEncoder *rc, uint16_t *probabilities, int bits, uint32_t symbol)
+static void revenant_rc_tree_reverse(RevenantRangeEncoder *rc, uint16_t *probabilities, int bits, uint32_t symbol)
 {
     uint32_t node = 1;
     for (int index = 0; index < bits; index++) {
         int bit = symbol & 1;
         symbol >>= 1;
-        charon_rc_bit(rc, &probabilities[node], bit);
+        revenant_rc_bit(rc, &probabilities[node], bit);
         node = (node << 1) | (uint32_t)bit;
     }
 }
 
-static void charon_rc_length(CharonRangeEncoder *rc, CharonLengthModel *model, uint32_t length, unsigned posState)
+static void revenant_rc_length(RevenantRangeEncoder *rc, RevenantLengthModel *model, uint32_t length, unsigned posState)
 {
     if (length < 8) {
-        charon_rc_bit(rc, &model->choice, 0);
-        charon_rc_tree(rc, model->low[posState], 3, length);
+        revenant_rc_bit(rc, &model->choice, 0);
+        revenant_rc_tree(rc, model->low[posState], 3, length);
     } else if (length < 16) {
-        charon_rc_bit(rc, &model->choice, 1);
-        charon_rc_bit(rc, &model->choice2, 0);
-        charon_rc_tree(rc, model->mid[posState], 3, length - 8);
+        revenant_rc_bit(rc, &model->choice, 1);
+        revenant_rc_bit(rc, &model->choice2, 0);
+        revenant_rc_tree(rc, model->mid[posState], 3, length - 8);
     } else {
-        charon_rc_bit(rc, &model->choice, 1);
-        charon_rc_bit(rc, &model->choice2, 1);
-        charon_rc_tree(rc, model->high, 8, length - 16);
+        revenant_rc_bit(rc, &model->choice, 1);
+        revenant_rc_bit(rc, &model->choice2, 1);
+        revenant_rc_tree(rc, model->high, 8, length - 16);
     }
 }
 
-static const NSUInteger charon_lzma_chunk = 32768;
-static const NSUInteger charon_lzma_window = 16u * 1024 * 1024;
+static const NSUInteger revenant_lzma_chunk = 32768;
+static const NSUInteger revenant_lzma_window = 16u * 1024 * 1024;
 
 typedef struct {
     const unsigned char *bytes;
     NSUInteger length;
     int32_t *head;
     int32_t *previous;
-} CharonMatchFinder;
+} RevenantMatchFinder;
 
-static uint32_t charon_lzma_hash(const unsigned char *at)
+static uint32_t revenant_lzma_hash(const unsigned char *at)
 {
     return (((uint32_t)at[0] | ((uint32_t)at[1] << 8) | ((uint32_t)at[2] << 16)) * 2654435761u) >> 16;
 }
 
-static void charon_lzma_insert(CharonMatchFinder *finder, NSUInteger position)
+static void revenant_lzma_insert(RevenantMatchFinder *finder, NSUInteger position)
 {
     if (position + 3 > finder->length)
         return;
-    uint32_t slot = charon_lzma_hash(finder->bytes + position);
+    uint32_t slot = revenant_lzma_hash(finder->bytes + position);
     finder->previous[position] = finder->head[slot];
     finder->head[slot] = (int32_t)position;
 }
 
-static NSUInteger charon_lzma_find(CharonMatchFinder *finder, NSUInteger position, NSUInteger *distance)
+static NSUInteger revenant_lzma_find(RevenantMatchFinder *finder, NSUInteger position, NSUInteger *distance)
 {
     if (position + 3 > finder->length)
         return 0;
     NSUInteger best = 0;
     NSUInteger limit = MIN((NSUInteger)273, finder->length - position);
-    int32_t candidate = finder->head[charon_lzma_hash(finder->bytes + position)];
+    int32_t candidate = finder->head[revenant_lzma_hash(finder->bytes + position)];
     for (int depth = 0; depth < 24 && candidate >= 0; depth++) {
         NSUInteger away = position - (NSUInteger)candidate;
-        if (away > charon_lzma_window)
+        if (away > revenant_lzma_window)
             break;
         NSUInteger size = 0;
         while (size < limit && finder->bytes[candidate + size] == finder->bytes[position + size])
@@ -184,23 +184,23 @@ static NSUInteger charon_lzma_find(CharonMatchFinder *finder, NSUInteger positio
     return best >= 3 ? best : 0;
 }
 
-static NSData *charon_lzma_encode_chunk(CharonLZMAModel *model, CharonMatchFinder *finder, NSUInteger start, NSUInteger end, unsigned *state, NSUInteger *lastDistance)
+static NSData *revenant_lzma_encode_chunk(RevenantLZMAModel *model, RevenantMatchFinder *finder, NSUInteger start, NSUInteger end, unsigned *state, NSUInteger *lastDistance)
 {
     NSMutableData *out = [NSMutableData data];
-    CharonRangeEncoder rc = {0, 0xFFFFFFFFu, 0, 1, out};
+    RevenantRangeEncoder rc = {0, 0xFFFFFFFFu, 0, 1, out};
     NSUInteger position = start;
     while (position < end) {
         unsigned posState = position & ((1u << model->pb) - 1);
         NSUInteger distance = 0;
-        NSUInteger length = charon_lzma_find(finder, position, &distance);
+        NSUInteger length = revenant_lzma_find(finder, position, &distance);
         if (position + length > end)
             length = end - position;
         if (length < 3)
             length = 0;
         if (length) {
-            charon_rc_bit(&rc, &model->match[*state][posState], 1);
-            charon_rc_bit(&rc, &model->rep[*state], 0);
-            charon_rc_length(&rc, &model->length, (uint32_t)(length - 2), posState);
+            revenant_rc_bit(&rc, &model->match[*state][posState], 1);
+            revenant_rc_bit(&rc, &model->rep[*state], 0);
+            revenant_rc_length(&rc, &model->length, (uint32_t)(length - 2), posState);
             uint32_t reduced = (uint32_t)(distance - 1);
             uint32_t lengthState = length - 2 < 4 ? (uint32_t)(length - 2) : 3;
             uint32_t slot;
@@ -210,53 +210,53 @@ static NSData *charon_lzma_encode_chunk(CharonLZMAModel *model, CharonMatchFinde
                 int top = 31 - __builtin_clz(reduced);
                 slot = (uint32_t)(2 * top) + ((reduced >> (top - 1)) & 1);
             }
-            charon_rc_tree(&rc, model->slot[lengthState], 6, slot);
+            revenant_rc_tree(&rc, model->slot[lengthState], 6, slot);
             if (slot >= 4) {
                 int footer = (int)(slot >> 1) - 1;
                 uint32_t base = (2 | (slot & 1)) << footer;
                 uint32_t rest = reduced - base;
                 if (slot < 14) {
-                    charon_rc_tree_reverse(&rc, model->special + base - slot - 1, footer, rest);
+                    revenant_rc_tree_reverse(&rc, model->special + base - slot - 1, footer, rest);
                 } else {
-                    charon_rc_direct(&rc, rest >> 4, footer - 4);
-                    charon_rc_tree_reverse(&rc, model->align, 4, rest & 15);
+                    revenant_rc_direct(&rc, rest >> 4, footer - 4);
+                    revenant_rc_tree_reverse(&rc, model->align, 4, rest & 15);
                 }
             }
             *state = *state < 7 ? 7 : 10;
             *lastDistance = distance;
             for (NSUInteger index = 0; index < length; index++)
-                charon_lzma_insert(finder, position + index);
+                revenant_lzma_insert(finder, position + index);
             position += length;
         } else {
-            charon_rc_bit(&rc, &model->match[*state][posState], 0);
+            revenant_rc_bit(&rc, &model->match[*state][posState], 0);
             unsigned char previous = position ? finder->bytes[position - 1] : 0;
             unsigned literalState = (unsigned)(((position & ((1u << model->lp) - 1)) << model->lc) + (previous >> (8 - model->lc)));
             uint16_t *probabilities = model->literal + 0x300 * literalState;
             uint32_t symbol = finder->bytes[position];
             if (*state < 7) {
-                charon_rc_tree(&rc, probabilities, 8, symbol);
+                revenant_rc_tree(&rc, probabilities, 8, symbol);
             } else {
                 uint32_t matchByte = finder->bytes[position - *lastDistance];
                 uint32_t offset = 0x100;
                 uint32_t coded = symbol | 0x100;
                 do {
                     matchByte <<= 1;
-                    charon_rc_bit(&rc, &probabilities[offset + (matchByte & offset) + (coded >> 8)], (coded >> 7) & 1);
+                    revenant_rc_bit(&rc, &probabilities[offset + (matchByte & offset) + (coded >> 8)], (coded >> 7) & 1);
                     coded <<= 1;
                     offset &= ~(matchByte ^ coded);
                 } while (coded < 0x10000);
             }
             *state = *state < 4 ? 0 : (*state < 10 ? *state - 3 : *state - 6);
-            charon_lzma_insert(finder, position);
+            revenant_lzma_insert(finder, position);
             position++;
         }
     }
     for (int index = 0; index < 5; index++)
-        charon_rc_shift(&rc);
+        revenant_rc_shift(&rc);
     return out;
 }
 
-static uint32_t charon_crc32(const unsigned char *bytes, NSUInteger length)
+static uint32_t revenant_crc32(const unsigned char *bytes, NSUInteger length)
 {
     static uint32_t table[256];
     static dispatch_once_t once;
@@ -274,13 +274,13 @@ static uint32_t charon_crc32(const unsigned char *bytes, NSUInteger length)
     return ~crc;
 }
 
-static void charon_put_le32(NSMutableData *data, uint32_t value)
+static void revenant_put_le32(NSMutableData *data, uint32_t value)
 {
     unsigned char bytes[4] = {value & 0xFF, (value >> 8) & 0xFF, (value >> 16) & 0xFF, (value >> 24) & 0xFF};
     [data appendBytes:bytes length:4];
 }
 
-static void charon_put_varint(NSMutableData *data, uint64_t value)
+static void revenant_put_varint(NSMutableData *data, uint64_t value)
 {
     do {
         unsigned char byte = value & 0x7F;
@@ -291,32 +291,32 @@ static void charon_put_varint(NSMutableData *data, uint64_t value)
     } while (value);
 }
 
-NSData *charon_lzma_compress(NSData *input);
-NSData *charon_lzma_decompress(NSData *input);
+NSData *revenant_lzma_compress(NSData *input);
+NSData *revenant_lzma_decompress(NSData *input);
 
-NSData *charon_lzma_compress(NSData *input)
+NSData *revenant_lzma_compress(NSData *input)
 {
     NSMutableData *out = [NSMutableData data];
     const unsigned char header[8] = {0xFD, '7', 'z', 'X', 'Z', 0x00, 0x00, 0x00};
     [out appendBytes:header length:8];
-    charon_put_le32(out, charon_crc32(header + 6, 2));
+    revenant_put_le32(out, revenant_crc32(header + 6, 2));
     NSUInteger length = input.length;
     NSMutableData *body = [NSMutableData data];
     if (length) {
         const unsigned char *bytes = input.bytes;
-        CharonMatchFinder finder = {bytes, length, malloc(65536 * sizeof(int32_t)), malloc(length * sizeof(int32_t))};
+        RevenantMatchFinder finder = {bytes, length, malloc(65536 * sizeof(int32_t)), malloc(length * sizeof(int32_t))};
         memset(finder.head, 0xFF, 65536 * sizeof(int32_t));
-        CharonLZMAModel model;
+        RevenantLZMAModel model;
         memset(&model, 0, sizeof(model));
         unsigned state = 0;
         NSUInteger lastDistance = 1;
         BOOL dictionaryReset = NO;
         BOOL propertiesSent = NO;
-        for (NSUInteger start = 0; start < length; start += charon_lzma_chunk) {
-            NSUInteger end = MIN(length, start + charon_lzma_chunk);
-            charon_lzma_reset(&model, 3, 0, 2);
+        for (NSUInteger start = 0; start < length; start += revenant_lzma_chunk) {
+            NSUInteger end = MIN(length, start + revenant_lzma_chunk);
+            revenant_lzma_reset(&model, 3, 0, 2);
             state = 0;
-            NSData *packed = charon_lzma_encode_chunk(&model, &finder, start, end, &state, &lastDistance);
+            NSData *packed = revenant_lzma_encode_chunk(&model, &finder, start, end, &state, &lastDistance);
             NSUInteger size = end - start;
             if (packed.length < size) {
                 unsigned control = !dictionaryReset ? 0xE0 : (!propertiesSent ? 0xC0 : 0xA0);
@@ -344,7 +344,7 @@ NSData *charon_lzma_compress(NSData *input)
         [body appendBytes:&end length:1];
         const unsigned char blockHeader[8] = {0x02, 0x00, 0x21, 0x01, 0x18, 0x00, 0x00, 0x00};
         NSMutableData *block = [NSMutableData dataWithBytes:blockHeader length:8];
-        charon_put_le32(block, charon_crc32(blockHeader, 8));
+        revenant_put_le32(block, revenant_crc32(blockHeader, 8));
         [block appendData:body];
         NSUInteger unpadded = block.length;
         while (block.length % 4)
@@ -353,32 +353,32 @@ NSData *charon_lzma_compress(NSData *input)
         NSMutableData *index = [NSMutableData data];
         unsigned char indicator = 0;
         [index appendBytes:&indicator length:1];
-        charon_put_varint(index, 1);
-        charon_put_varint(index, unpadded);
-        charon_put_varint(index, length);
+        revenant_put_varint(index, 1);
+        revenant_put_varint(index, unpadded);
+        revenant_put_varint(index, length);
         while ((index.length + 4) % 4)
             [index appendBytes:"\0" length:1];
-        charon_put_le32(index, charon_crc32(index.bytes, index.length));
+        revenant_put_le32(index, revenant_crc32(index.bytes, index.length));
         [out appendData:index];
         NSMutableData *footer = [NSMutableData data];
-        charon_put_le32(footer, (uint32_t)(index.length / 4 - 1));
+        revenant_put_le32(footer, (uint32_t)(index.length / 4 - 1));
         const unsigned char flags[2] = {0, 0};
         [footer appendBytes:flags length:2];
         NSMutableData *checked = [NSMutableData dataWithData:footer];
-        charon_put_le32(out, charon_crc32(checked.bytes, checked.length));
+        revenant_put_le32(out, revenant_crc32(checked.bytes, checked.length));
         [out appendData:footer];
         [out appendBytes:"YZ" length:2];
         return out;
     }
     unsigned char indexBytes[8] = {0x00, 0x00, 0x00, 0x00};
     NSMutableData *index = [NSMutableData dataWithBytes:indexBytes length:4];
-    charon_put_le32(index, charon_crc32(index.bytes, index.length));
+    revenant_put_le32(index, revenant_crc32(index.bytes, index.length));
     [out appendData:index];
     NSMutableData *footer = [NSMutableData data];
-    charon_put_le32(footer, (uint32_t)(index.length / 4 - 1));
+    revenant_put_le32(footer, (uint32_t)(index.length / 4 - 1));
     const unsigned char flags[2] = {0, 0};
     [footer appendBytes:flags length:2];
-    charon_put_le32(out, charon_crc32(footer.bytes, footer.length));
+    revenant_put_le32(out, revenant_crc32(footer.bytes, footer.length));
     [out appendData:footer];
     [out appendBytes:"YZ" length:2];
     return out;
@@ -391,9 +391,9 @@ typedef struct {
     uint32_t range;
     uint32_t code;
     BOOL failed;
-} CharonRangeDecoder;
+} RevenantRangeDecoder;
 
-static void charon_rd_normalize(CharonRangeDecoder *rd)
+static void revenant_rd_normalize(RevenantRangeDecoder *rd)
 {
     if (rd->range < (1u << 24)) {
         rd->range <<= 8;
@@ -405,7 +405,7 @@ static void charon_rd_normalize(CharonRangeDecoder *rd)
     }
 }
 
-static int charon_rd_bit(CharonRangeDecoder *rd, uint16_t *probability)
+static int revenant_rd_bit(RevenantRangeDecoder *rd, uint16_t *probability)
 {
     uint32_t bound = (rd->range >> 11) * *probability;
     int bit;
@@ -419,11 +419,11 @@ static int charon_rd_bit(CharonRangeDecoder *rd, uint16_t *probability)
         *probability -= *probability >> 5;
         bit = 1;
     }
-    charon_rd_normalize(rd);
+    revenant_rd_normalize(rd);
     return bit;
 }
 
-static uint32_t charon_rd_direct(CharonRangeDecoder *rd, int bits)
+static uint32_t revenant_rd_direct(RevenantRangeDecoder *rd, int bits)
 {
     uint32_t result = 0;
     while (bits--) {
@@ -434,50 +434,50 @@ static uint32_t charon_rd_direct(CharonRangeDecoder *rd, int bits)
             bit = 1;
         }
         result = (result << 1) | (uint32_t)bit;
-        charon_rd_normalize(rd);
+        revenant_rd_normalize(rd);
     }
     return result;
 }
 
-static uint32_t charon_rd_tree(CharonRangeDecoder *rd, uint16_t *probabilities, int bits)
+static uint32_t revenant_rd_tree(RevenantRangeDecoder *rd, uint16_t *probabilities, int bits)
 {
     uint32_t node = 1;
     for (int index = 0; index < bits; index++)
-        node = (node << 1) | (uint32_t)charon_rd_bit(rd, &probabilities[node]);
+        node = (node << 1) | (uint32_t)revenant_rd_bit(rd, &probabilities[node]);
     return node - (1u << bits);
 }
 
-static uint32_t charon_rd_tree_reverse(CharonRangeDecoder *rd, uint16_t *probabilities, int bits)
+static uint32_t revenant_rd_tree_reverse(RevenantRangeDecoder *rd, uint16_t *probabilities, int bits)
 {
     uint32_t node = 1;
     uint32_t result = 0;
     for (int index = 0; index < bits; index++) {
-        int bit = charon_rd_bit(rd, &probabilities[node]);
+        int bit = revenant_rd_bit(rd, &probabilities[node]);
         node = (node << 1) | (uint32_t)bit;
         result |= (uint32_t)bit << index;
     }
     return result;
 }
 
-static uint32_t charon_rd_length(CharonRangeDecoder *rd, CharonLengthModel *model, unsigned posState)
+static uint32_t revenant_rd_length(RevenantRangeDecoder *rd, RevenantLengthModel *model, unsigned posState)
 {
-    if (!charon_rd_bit(rd, &model->choice))
-        return charon_rd_tree(rd, model->low[posState], 3);
-    if (!charon_rd_bit(rd, &model->choice2))
-        return 8 + charon_rd_tree(rd, model->mid[posState], 3);
-    return 16 + charon_rd_tree(rd, model->high, 8);
+    if (!revenant_rd_bit(rd, &model->choice))
+        return revenant_rd_tree(rd, model->low[posState], 3);
+    if (!revenant_rd_bit(rd, &model->choice2))
+        return 8 + revenant_rd_tree(rd, model->mid[posState], 3);
+    return 16 + revenant_rd_tree(rd, model->high, 8);
 }
 
-static BOOL charon_lzma_decode_chunk(CharonLZMAModel *model, const unsigned char *packed, NSUInteger packedLength, unsigned char *out, NSUInteger position, NSUInteger size, NSUInteger dictionaryStart, unsigned *state, uint32_t reps[4])
+static BOOL revenant_lzma_decode_chunk(RevenantLZMAModel *model, const unsigned char *packed, NSUInteger packedLength, unsigned char *out, NSUInteger position, NSUInteger size, NSUInteger dictionaryStart, unsigned *state, uint32_t reps[4])
 {
     if (packedLength < 5 || packed[0] != 0)
         return NO;
-    CharonRangeDecoder rd = {packed, packedLength, 5, 0xFFFFFFFFu, ((uint32_t)packed[1] << 24) | ((uint32_t)packed[2] << 16) | ((uint32_t)packed[3] << 8) | packed[4], NO};
+    RevenantRangeDecoder rd = {packed, packedLength, 5, 0xFFFFFFFFu, ((uint32_t)packed[1] << 24) | ((uint32_t)packed[2] << 16) | ((uint32_t)packed[3] << 8) | packed[4], NO};
     NSUInteger end = position + size;
     unsigned s = *state;
     while (position < end) {
         unsigned posState = position & ((1u << model->pb) - 1);
-        if (!charon_rd_bit(&rd, &model->match[s][posState])) {
+        if (!revenant_rd_bit(&rd, &model->match[s][posState])) {
             unsigned char previous = position > dictionaryStart ? out[position - 1] : 0;
             unsigned literalState = (unsigned)(((position & ((1u << model->lp) - 1)) << model->lc) + (previous >> (8 - model->lc)));
             uint16_t *probabilities = model->literal + 0x300 * literalState;
@@ -490,24 +490,24 @@ static BOOL charon_lzma_decode_chunk(CharonLZMAModel *model, const unsigned char
                 do {
                     matchByte <<= 1;
                     uint32_t bit = matchByte & offset;
-                    int decoded = charon_rd_bit(&rd, &probabilities[offset + bit + symbol]);
+                    int decoded = revenant_rd_bit(&rd, &probabilities[offset + bit + symbol]);
                     symbol = (symbol << 1) | (uint32_t)decoded;
                     offset &= decoded ? bit : ~bit;
                 } while (symbol < 0x100);
             } else {
                 do {
-                    symbol = (symbol << 1) | (uint32_t)charon_rd_bit(&rd, &probabilities[symbol]);
+                    symbol = (symbol << 1) | (uint32_t)revenant_rd_bit(&rd, &probabilities[symbol]);
                 } while (symbol < 0x100);
             }
             out[position++] = (unsigned char)symbol;
             s = s < 4 ? 0 : (s < 10 ? s - 3 : s - 6);
         } else {
             uint32_t length;
-            if (charon_rd_bit(&rd, &model->rep[s])) {
+            if (revenant_rd_bit(&rd, &model->rep[s])) {
                 if (position == dictionaryStart)
                     return NO;
-                if (!charon_rd_bit(&rd, &model->repG0[s])) {
-                    if (!charon_rd_bit(&rd, &model->rep0Long[s][posState])) {
+                if (!revenant_rd_bit(&rd, &model->repG0[s])) {
+                    if (!revenant_rd_bit(&rd, &model->rep0Long[s][posState])) {
                         if (reps[0] + 1 > position - dictionaryStart)
                             return NO;
                         out[position] = out[position - reps[0] - 1];
@@ -517,10 +517,10 @@ static BOOL charon_lzma_decode_chunk(CharonLZMAModel *model, const unsigned char
                     }
                 } else {
                     uint32_t distance;
-                    if (!charon_rd_bit(&rd, &model->repG1[s])) {
+                    if (!revenant_rd_bit(&rd, &model->repG1[s])) {
                         distance = reps[1];
                     } else {
-                        if (!charon_rd_bit(&rd, &model->repG2[s])) {
+                        if (!revenant_rd_bit(&rd, &model->repG2[s])) {
                             distance = reps[2];
                         } else {
                             distance = reps[3];
@@ -531,25 +531,25 @@ static BOOL charon_lzma_decode_chunk(CharonLZMAModel *model, const unsigned char
                     reps[1] = reps[0];
                     reps[0] = distance;
                 }
-                length = charon_rd_length(&rd, &model->repLength, posState);
+                length = revenant_rd_length(&rd, &model->repLength, posState);
                 s = s < 7 ? 8 : 11;
             } else {
                 reps[3] = reps[2];
                 reps[2] = reps[1];
                 reps[1] = reps[0];
-                length = charon_rd_length(&rd, &model->length, posState);
+                length = revenant_rd_length(&rd, &model->length, posState);
                 s = s < 7 ? 7 : 10;
                 uint32_t lengthState = length < 4 ? length : 3;
-                uint32_t slot = charon_rd_tree(&rd, model->slot[lengthState], 6);
+                uint32_t slot = revenant_rd_tree(&rd, model->slot[lengthState], 6);
                 uint32_t distance = slot;
                 if (slot >= 4) {
                     int footer = (int)(slot >> 1) - 1;
                     distance = (2 | (slot & 1)) << footer;
                     if (slot < 14) {
-                        distance += charon_rd_tree_reverse(&rd, model->special + distance - slot - 1, footer);
+                        distance += revenant_rd_tree_reverse(&rd, model->special + distance - slot - 1, footer);
                     } else {
-                        distance += charon_rd_direct(&rd, footer - 4) << 4;
-                        distance += charon_rd_tree_reverse(&rd, model->align, 4);
+                        distance += revenant_rd_direct(&rd, footer - 4) << 4;
+                        distance += revenant_rd_tree_reverse(&rd, model->align, 4);
                     }
                 }
                 if (distance == 0xFFFFFFFFu)
@@ -569,7 +569,7 @@ static BOOL charon_lzma_decode_chunk(CharonLZMAModel *model, const unsigned char
     return !rd.failed && rd.at == packedLength && rd.code == 0;
 }
 
-static BOOL charon_read_varint(const unsigned char *bytes, NSUInteger length, NSUInteger *at, uint64_t *value)
+static BOOL revenant_read_varint(const unsigned char *bytes, NSUInteger length, NSUInteger *at, uint64_t *value)
 {
     *value = 0;
     for (int shift = 0; shift < 63; shift += 7) {
@@ -583,13 +583,13 @@ static BOOL charon_read_varint(const unsigned char *bytes, NSUInteger length, NS
     return NO;
 }
 
-NSData *charon_lzma_decompress(NSData *input)
+NSData *revenant_lzma_decompress(NSData *input)
 {
     const unsigned char *bytes = input.bytes;
     NSUInteger length = input.length;
     if (length < 32 || memcmp(bytes, "\xFD" "7zXZ\0", 6) != 0 || bytes[6] != 0 || (bytes[7] & 0xF0) != 0)
         return nil;
-    if (charon_crc32(bytes + 6, 2) != ((uint32_t)bytes[8] | ((uint32_t)bytes[9] << 8) | ((uint32_t)bytes[10] << 16) | ((uint32_t)bytes[11] << 24)))
+    if (revenant_crc32(bytes + 6, 2) != ((uint32_t)bytes[8] | ((uint32_t)bytes[9] << 8) | ((uint32_t)bytes[10] << 16) | ((uint32_t)bytes[11] << 24)))
         return nil;
     unsigned check = bytes[7] & 0x0F;
     NSUInteger checkSize = check == 0 ? 0 : (check == 1 ? 4 : (check == 4 ? 8 : (check == 10 ? 32 : NSNotFound)));
@@ -597,7 +597,7 @@ NSData *charon_lzma_decompress(NSData *input)
         return nil;
     NSMutableData *out = [NSMutableData data];
     NSUInteger at = 12;
-    CharonLZMAModel model;
+    RevenantLZMAModel model;
     memset(&model, 0, sizeof(model));
     BOOL ok = YES;
     NSUInteger records = 0;
@@ -613,7 +613,7 @@ NSData *charon_lzma_decompress(NSData *input)
             ok = NO;
             break;
         }
-        if (charon_crc32(bytes + at, headerSize - 4) != ((uint32_t)bytes[at + headerSize - 4] | ((uint32_t)bytes[at + headerSize - 3] << 8) | ((uint32_t)bytes[at + headerSize - 2] << 16) | ((uint32_t)bytes[at + headerSize - 1] << 24))) {
+        if (revenant_crc32(bytes + at, headerSize - 4) != ((uint32_t)bytes[at + headerSize - 4] | ((uint32_t)bytes[at + headerSize - 3] << 8) | ((uint32_t)bytes[at + headerSize - 2] << 16) | ((uint32_t)bytes[at + headerSize - 1] << 24))) {
             ok = NO;
             break;
         }
@@ -625,12 +625,12 @@ NSData *charon_lzma_decompress(NSData *input)
             break;
         }
         if (flags & 0x40)
-            ok = charon_read_varint(bytes, at + headerSize - 4, &cursor, &skipped);
+            ok = revenant_read_varint(bytes, at + headerSize - 4, &cursor, &skipped);
         if (ok && (flags & 0x80))
-            ok = charon_read_varint(bytes, at + headerSize - 4, &cursor, &skipped);
+            ok = revenant_read_varint(bytes, at + headerSize - 4, &cursor, &skipped);
         uint64_t filter, propertySize;
-        ok = ok && charon_read_varint(bytes, at + headerSize - 4, &cursor, &filter) && filter == 0x21 &&
-             charon_read_varint(bytes, at + headerSize - 4, &cursor, &propertySize) && propertySize == 1 && cursor < at + headerSize - 4 && bytes[cursor] <= 40;
+        ok = ok && revenant_read_varint(bytes, at + headerSize - 4, &cursor, &filter) && filter == 0x21 &&
+             revenant_read_varint(bytes, at + headerSize - 4, &cursor, &propertySize) && propertySize == 1 && cursor < at + headerSize - 4 && bytes[cursor] <= 40;
         if (!ok)
             break;
         NSUInteger blockStart = at;
@@ -703,7 +703,7 @@ NSData *charon_lzma_decompress(NSData *input)
                 }
                 free(model.literal);
                 model.literal = NULL;
-                charon_lzma_reset(&model, lc, lp, pb);
+                revenant_lzma_reset(&model, lc, lp, pb);
                 haveProperties = YES;
                 state = 0;
                 memset(reps, 0, sizeof(reps));
@@ -712,7 +712,7 @@ NSData *charon_lzma_decompress(NSData *input)
                     ok = NO;
                     break;
                 }
-                charon_lzma_reset(&model, model.lc, model.lp, model.pb);
+                revenant_lzma_reset(&model, model.lc, model.lp, model.pb);
                 state = 0;
                 memset(reps, 0, sizeof(reps));
             }
@@ -722,7 +722,7 @@ NSData *charon_lzma_decompress(NSData *input)
             }
             NSUInteger position = out.length;
             out.length = position + size;
-            ok = charon_lzma_decode_chunk(&model, bytes + at, packedSize, out.mutableBytes, position, size, dictionaryStart, &state, reps);
+            ok = revenant_lzma_decode_chunk(&model, bytes + at, packedSize, out.mutableBytes, position, size, dictionaryStart, &state, reps);
             at += packedSize;
             if (!ok)
                 break;
@@ -752,12 +752,12 @@ NSData *charon_lzma_decompress(NSData *input)
         return nil;
     NSUInteger indexStart = at++;
     uint64_t count;
-    if (!charon_read_varint(bytes, length, &at, &count) || count != records)
+    if (!revenant_read_varint(bytes, length, &at, &count) || count != records)
         return nil;
     uint64_t totalUnpacked = 0;
     for (uint64_t index = 0; index < count; index++) {
         uint64_t unpadded, unpacked;
-        if (!charon_read_varint(bytes, length, &at, &unpadded) || !charon_read_varint(bytes, length, &at, &unpacked))
+        if (!revenant_read_varint(bytes, length, &at, &unpadded) || !revenant_read_varint(bytes, length, &at, &unpacked))
             return nil;
         totalUnpacked += unpacked;
     }
@@ -771,12 +771,12 @@ NSData *charon_lzma_decompress(NSData *input)
     if (at + 4 + 12 != length)
         return nil;
     uint32_t indexCRC = (uint32_t)bytes[at] | ((uint32_t)bytes[at + 1] << 8) | ((uint32_t)bytes[at + 2] << 16) | ((uint32_t)bytes[at + 3] << 24);
-    if (charon_crc32(bytes + indexStart, at - indexStart) != indexCRC)
+    if (revenant_crc32(bytes + indexStart, at - indexStart) != indexCRC)
         return nil;
     at += 4;
     uint32_t footerCRC = (uint32_t)bytes[at] | ((uint32_t)bytes[at + 1] << 8) | ((uint32_t)bytes[at + 2] << 16) | ((uint32_t)bytes[at + 3] << 24);
     uint32_t backward = (uint32_t)bytes[at + 4] | ((uint32_t)bytes[at + 5] << 8) | ((uint32_t)bytes[at + 6] << 16) | ((uint32_t)bytes[at + 7] << 24);
-    if (charon_crc32(bytes + at + 4, 6) != footerCRC || memcmp(bytes + at + 8, bytes + 6, 2) != 0 || memcmp(bytes + at + 10, "YZ", 2) != 0 ||
+    if (revenant_crc32(bytes + at + 4, 6) != footerCRC || memcmp(bytes + at + 8, bytes + 6, 2) != 0 || memcmp(bytes + at + 10, "YZ", 2) != 0 ||
         ((NSUInteger)backward + 1) * 4 != at - indexStart)
         return nil;
     return out;

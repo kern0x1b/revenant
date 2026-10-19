@@ -17,7 +17,7 @@
 #include "graphics/gles_renderer.hpp"
 #include "network/host_network.hpp"
 
-namespace shade {
+namespace emulator {
 
 enum class JitProfileMode : std::uint8_t {
     Adaptive,

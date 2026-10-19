@@ -1,15 +1,15 @@
 #import <MapKit/MKGeodesicPolyline.h>
 #import <CoreLocation/CoreLocation.h>
 #import <math.h>
-#import "CharonMapKit.h"
+#import "RevenantMapKit.h"
 
-@interface MKMultiPoint (CharonCoordinates)
+@interface MKMultiPoint (RevenantCoordinates)
 - (void)setCoordinates:(const CLLocationCoordinate2D *)coords count:(NSUInteger)count;
 @end
 
 @implementation MKGeodesicPolyline
 
-+ (double)charon_angleFromCoordinate:(CLLocationCoordinate2D)from toCoordinate:(CLLocationCoordinate2D)to
++ (double)revenant_angleFromCoordinate:(CLLocationCoordinate2D)from toCoordinate:(CLLocationCoordinate2D)to
 {
     static const double pi = 3.14159265358979323846;
     double lat1 = from.latitude * pi / 180.0;
@@ -21,13 +21,13 @@
     return 2.0 * asin(fmin(1.0, sqrt(a)));
 }
 
-+ (CLLocationCoordinate2D)charon_coordinateFromCoordinate:(CLLocationCoordinate2D)from
++ (CLLocationCoordinate2D)revenant_coordinateFromCoordinate:(CLLocationCoordinate2D)from
                                              toCoordinate:(CLLocationCoordinate2D)to
                                                 fraction:(double)fraction
 {
     static const double pi = 3.14159265358979323846;
     CLLocationCoordinate2D result = from;
-    double delta = [self charon_angleFromCoordinate:from toCoordinate:to];
+    double delta = [self revenant_angleFromCoordinate:from toCoordinate:to];
     if (delta < 1e-12) {
         return result;
     }
@@ -79,13 +79,13 @@
     for (NSUInteger index = 1; index < count; index++) {
         CLLocationCoordinate2D from = sampled > 0 ? flat[sampled - 1] : coords[index - 1];
         CLLocationCoordinate2D to = coords[index];
-        double degrees = [self charon_angleFromCoordinate:from toCoordinate:to] * 180.0 / pi;
+        double degrees = [self revenant_angleFromCoordinate:from toCoordinate:to] * 180.0 / pi;
         NSUInteger steps = (NSUInteger)fmin(fmax(ceil(degrees / 2.0), 1.0), 2048.0);
         if (sampled + steps > capacity) {
             break;
         }
         for (NSUInteger step = 1; step < steps; step++) {
-            flat[sampled++] = [self charon_coordinateFromCoordinate:from toCoordinate:to
+            flat[sampled++] = [self revenant_coordinateFromCoordinate:from toCoordinate:to
                                                             fraction:(double)step / (double)steps];
         }
         if (sampled + 1 <= capacity) {

@@ -6,7 +6,7 @@ typedef struct {
     SEL selector;
     BOOL isMethod;
     const char *argumentTypes;
-} CharonExportEntry;
+} RevenantExportEntry;
 
 extern const char *_protocol_getMethodTypeEncoding(Protocol *protocol, SEL selector, BOOL isRequiredMethod, BOOL isInstanceMethod);
 
@@ -16,17 +16,17 @@ static const char *MethodArgumentTypes(Protocol *protocol, SEL selector)
     if (!types)
         return NULL;
     for (int skip = 0; skip < 3 && *types; skip++)
-        types = charon_js_skip_type(types);
+        types = revenant_js_skip_type(types);
     return types;
 }
 
-@interface CharonExportBinding : NSObject
+@interface RevenantExportBinding : NSObject
 @property (nonatomic, strong) id target;
 @property (nonatomic, assign) SEL selector;
 @property (nonatomic, assign) const char *argumentTypes;
 @end
 
-@implementation CharonExportBinding
+@implementation RevenantExportBinding
 @synthesize target = _target;
 @synthesize selector = _selector;
 @synthesize argumentTypes = _argumentTypes;
@@ -94,11 +94,11 @@ static void CollectProtocol(Protocol *protocol, NSMutableDictionary<NSString *, 
         SEL setter = sel_registerName(setterAttribute ?: defaultSetterName.UTF8String);
         [accessors addObject:NSStringFromSelector(getter)];
         [accessors addObject:NSStringFromSelector(setter)];
-        CharonExportEntry getEntry = {getter, NO, NULL};
-        entries[propertyName] = [NSValue value:&getEntry withObjCType:@encode(CharonExportEntry)];
+        RevenantExportEntry getEntry = {getter, NO, NULL};
+        entries[propertyName] = [NSValue value:&getEntry withObjCType:@encode(RevenantExportEntry)];
         if (!readonly) {
-            CharonExportEntry setEntry = {setter, NO, property_getAttributes(properties[index]) + 1};
-            entries[[propertyName stringByAppendingString:@"$set"]] = [NSValue value:&setEntry withObjCType:@encode(CharonExportEntry)];
+            RevenantExportEntry setEntry = {setter, NO, property_getAttributes(properties[index]) + 1};
+            entries[[propertyName stringByAppendingString:@"$set"]] = [NSValue value:&setEntry withObjCType:@encode(RevenantExportEntry)];
         }
         free(getterAttribute);
         free(setterAttribute);
@@ -115,8 +115,8 @@ static void CollectProtocol(Protocol *protocol, NSMutableDictionary<NSString *, 
         if ([accessors containsObject:selectorName])
             continue;
         NSString *jsName = renames[selectorName] ?: JavaScriptNameForSelector(selectorName);
-        CharonExportEntry entry = {required[index].name, YES, MethodArgumentTypes(protocol, required[index].name)};
-        entries[jsName] = [NSValue value:&entry withObjCType:@encode(CharonExportEntry)];
+        RevenantExportEntry entry = {required[index].name, YES, MethodArgumentTypes(protocol, required[index].name)};
+        entries[jsName] = [NSValue value:&entry withObjCType:@encode(RevenantExportEntry)];
     }
     free(required);
 
@@ -149,7 +149,7 @@ static NSDictionary<NSString *, NSValue *> *ExportTableForClass(Class objcClass)
     return entries;
 }
 
-BOOL charon_js_class_conforms_to_export(Class objcClass)
+BOOL revenant_js_class_conforms_to_export(Class objcClass)
 {
     for (Class cursor = objcClass; cursor; cursor = class_getSuperclass(cursor)) {
         unsigned count = 0;
@@ -170,7 +170,7 @@ static JSValueRef InvokeSelector(JSContextRef ctx, id target, SEL selector, cons
 {
     NSMethodSignature *signature = [target methodSignatureForSelector:selector];
     if (!signature) {
-        JSContext *context = [JSContext charon_wrapperForGlobalContext:JSContextGetGlobalContext(ctx) create:YES];
+        JSContext *context = [JSContext revenant_wrapperForGlobalContext:JSContextGetGlobalContext(ctx) create:YES];
         if (exception)
             *exception = [JSValue valueWithNewErrorFromMessage:[NSString stringWithFormat:@"%@ does not respond to %@", target, NSStringFromSelector(selector)] inContext:context].JSValueRef;
         return JSValueMakeUndefined(ctx);
@@ -185,10 +185,10 @@ static JSValueRef InvokeSelector(JSContextRef ctx, id target, SEL selector, cons
         JSValueRef value = index < argumentCount ? arguments[index] : JSValueMakeUndefined(ctx);
         const char *declared = argumentTypes && *argumentTypes ? argumentTypes : NULL;
         if (declared)
-            argumentTypes = charon_js_skip_type(argumentTypes);
+            argumentTypes = revenant_js_skip_type(argumentTypes);
         if (type[0] == '@') {
             JSValueRef failure = NULL;
-            id object = declared ? charon_js_argument(ctx, declared, value, &failure) : charon_js_unbox(ctx, value);
+            id object = declared ? revenant_js_argument(ctx, declared, value, &failure) : revenant_js_unbox(ctx, value);
             if (failure) {
                 if (exception)
                     *exception = failure;
@@ -196,12 +196,12 @@ static JSValueRef InvokeSelector(JSContextRef ctx, id target, SEL selector, cons
             }
             [invocation setArgument:&object atIndex:index + 2];
         } else if (type[0] == '#') {
-            id object = charon_js_unbox(ctx, value);
+            id object = revenant_js_unbox(ctx, value);
             [invocation setArgument:&object atIndex:index + 2];
         } else {
             JSValueRef failure = NULL;
-            if (!charon_js_set_scalar_argument(invocation, index + 2, type, ctx, value, &failure)) {
-                JSContext *context = [JSContext charon_wrapperForGlobalContext:JSContextGetGlobalContext(ctx) create:YES];
+            if (!revenant_js_set_scalar_argument(invocation, index + 2, type, ctx, value, &failure)) {
+                JSContext *context = [JSContext revenant_wrapperForGlobalContext:JSContextGetGlobalContext(ctx) create:YES];
                 failure = [JSValue valueWithNewErrorFromMessage:[NSString stringWithFormat:@"argument %lu of %@ has an unsupported type for JSExport", (unsigned long)index, NSStringFromSelector(selector)] inContext:context].JSValueRef;
             }
             if (failure) {
@@ -212,20 +212,20 @@ static JSValueRef InvokeSelector(JSContextRef ctx, id target, SEL selector, cons
         }
     }
     [invocation invoke];
-    return charon_js_invocation_result(invocation, signature.methodReturnType, ctx);
+    return revenant_js_invocation_result(invocation, signature.methodReturnType, ctx);
 }
 
 static JSValueRef BoundFunctionCallAsFunction(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception)
 {
     (void)thisObject;
-    CharonExportBinding *binding = (__bridge CharonExportBinding *)JSObjectGetPrivate(function);
-    JSContext *context = [JSContext charon_wrapperForGlobalContext:JSContextGetGlobalContext(ctx) create:YES];
+    RevenantExportBinding *binding = (__bridge RevenantExportBinding *)JSObjectGetPrivate(function);
+    JSContext *context = [JSContext revenant_wrapperForGlobalContext:JSContextGetGlobalContext(ctx) create:YES];
     NSMutableArray<JSValue *> *boxedArguments = [NSMutableArray array];
     for (size_t index = 0; index < argumentCount; index++)
-        [boxedArguments addObject:[JSValue charon_valueWithJSValueRef:arguments[index] context:context]];
-    charon_js_push_callback(context, [JSValue charon_valueWithJSValueRef:thisObject context:context], [JSValue charon_valueWithJSValueRef:function context:context], boxedArguments);
+        [boxedArguments addObject:[JSValue revenant_valueWithJSValueRef:arguments[index] context:context]];
+    revenant_js_push_callback(context, [JSValue revenant_valueWithJSValueRef:thisObject context:context], [JSValue revenant_valueWithJSValueRef:function context:context], boxedArguments);
     JSValueRef result = InvokeSelector(ctx, binding.target, binding.selector, binding.argumentTypes, argumentCount, arguments, exception);
-    JSValue *thrown = charon_js_pop_callback();
+    JSValue *thrown = revenant_js_pop_callback();
     if (thrown) {
         if (exception)
             *exception = thrown.JSValueRef;
@@ -236,7 +236,7 @@ static JSValueRef BoundFunctionCallAsFunction(JSContextRef ctx, JSObjectRef func
 
 static void BoundFunctionFinalize(JSObjectRef object)
 {
-    charon_js_release_soon(JSObjectGetPrivate(object));
+    revenant_js_release_soon(JSObjectGetPrivate(object));
 }
 
 static JSClassRef BoundFunctionClass(void)
@@ -245,7 +245,7 @@ static JSClassRef BoundFunctionClass(void)
     static dispatch_once_t once;
     dispatch_once(&once, ^{
         JSClassDefinition definition = kJSClassDefinitionEmpty;
-        definition.className = "CharonExportMethod";
+        definition.className = "RevenantExportMethod";
         definition.callAsFunction = BoundFunctionCallAsFunction;
         definition.finalize = BoundFunctionFinalize;
         boundClass = JSClassCreate(&definition);
@@ -253,7 +253,7 @@ static JSClassRef BoundFunctionClass(void)
     return boundClass;
 }
 
-static BOOL LookupEntry(NSDictionary<NSString *, NSValue *> *table, NSString *name, CharonExportEntry *outEntry)
+static BOOL LookupEntry(NSDictionary<NSString *, NSValue *> *table, NSString *name, RevenantExportEntry *outEntry)
 {
     NSValue *boxed = table[name];
     if (!boxed)
@@ -268,13 +268,13 @@ static JSValueRef ExportGetProperty(JSContextRef ctx, JSObjectRef object, JSStri
     if (!target)
         return NULL;
     NSDictionary *table = ExportTableForClass(object_getClass(target));
-    NSString *name = charon_ns_string(propertyName);
-    CharonExportEntry entry;
+    NSString *name = revenant_ns_string(propertyName);
+    RevenantExportEntry entry;
     if (!LookupEntry(table, name, &entry))
         return NULL;
     if (!entry.isMethod)
         return InvokeSelector(ctx, target, entry.selector, NULL, 0, NULL, exception);
-    CharonExportBinding *binding = [CharonExportBinding new];
+    RevenantExportBinding *binding = [RevenantExportBinding new];
     binding.target = target;
     binding.selector = entry.selector;
     binding.argumentTypes = entry.argumentTypes;
@@ -287,8 +287,8 @@ static bool ExportSetProperty(JSContextRef ctx, JSObjectRef object, JSStringRef 
     if (!target)
         return false;
     NSDictionary *table = ExportTableForClass(object_getClass(target));
-    NSString *name = [charon_ns_string(propertyName) stringByAppendingString:@"$set"];
-    CharonExportEntry entry;
+    NSString *name = [revenant_ns_string(propertyName) stringByAppendingString:@"$set"];
+    RevenantExportEntry entry;
     if (!LookupEntry(table, name, &entry))
         return false;
     InvokeSelector(ctx, target, entry.selector, entry.argumentTypes, 1, &value, exception);
@@ -302,22 +302,22 @@ static bool ExportHasProperty(JSContextRef ctx, JSObjectRef object, JSStringRef 
     if (!target)
         return false;
     NSDictionary *table = ExportTableForClass(object_getClass(target));
-    CharonExportEntry entry;
-    return LookupEntry(table, charon_ns_string(propertyName), &entry);
+    RevenantExportEntry entry;
+    return LookupEntry(table, revenant_ns_string(propertyName), &entry);
 }
 
 static void ExportFinalize(JSObjectRef object)
 {
-    charon_js_release_soon(JSObjectGetPrivate(object));
+    revenant_js_release_soon(JSObjectGetPrivate(object));
 }
 
-JSClassRef charon_js_export_class(void)
+JSClassRef revenant_js_export_class(void)
 {
     static JSClassRef exportClass;
     static dispatch_once_t once;
     dispatch_once(&once, ^{
         JSClassDefinition definition = kJSClassDefinitionEmpty;
-        definition.className = "CharonExportObject";
+        definition.className = "RevenantExportObject";
         definition.getProperty = ExportGetProperty;
         definition.setProperty = ExportSetProperty;
         definition.hasProperty = ExportHasProperty;

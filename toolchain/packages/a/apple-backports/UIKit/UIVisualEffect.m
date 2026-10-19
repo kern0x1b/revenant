@@ -1,4 +1,4 @@
-#import "CharonBlur.h"
+#import "RevenantBlur.h"
 
 @implementation UIVisualEffect
 
@@ -35,7 +35,7 @@
     return effect;
 }
 
-- (UIBlurEffectStyle)charon_style
+- (UIBlurEffectStyle)revenant_style
 {
     return _style;
 }
@@ -82,7 +82,7 @@
 + (UIVibrancyEffect *)effectForBlurEffect:(UIBlurEffect *)blurEffect
 {
     UIVibrancyEffect *effect = [[self alloc] init];
-    effect->_style = blurEffect ? [blurEffect charon_style] : 0;
+    effect->_style = blurEffect ? [blurEffect revenant_style] : 0;
     return effect;
 }
 

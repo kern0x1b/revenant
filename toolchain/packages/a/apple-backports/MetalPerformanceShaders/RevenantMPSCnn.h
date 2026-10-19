@@ -1,8 +1,8 @@
-#import "CharonMPS.h"
-#import "CharonMPS26.h"
+#import "RevenantMPS.h"
+#import "RevenantMPS26.h"
 
-@interface MPSCNNKernel (CharonMPSCnn)
-- (void)charon_mps_setWindowWidth:(NSUInteger)width
+@interface MPSCNNKernel (RevenantMPSCnn)
+- (void)revenant_mps_setWindowWidth:(NSUInteger)width
                            height:(NSUInteger)height
                     strideInPixelsX:(NSUInteger)strideX
                     strideInPixelsY:(NSUInteger)strideY
@@ -10,10 +10,10 @@
                      dilationRateY:(NSUInteger)dilationY;
 @end
 
-@interface MPSCNNPooling (CharonMPSCnn)
-- (void)charon_mps_setMaximum:(BOOL)maximum;
-- (NSUInteger)charon_mps_zeroPadSizeX;
-- (NSUInteger)charon_mps_zeroPadSizeY;
+@interface MPSCNNPooling (RevenantMPSCnn)
+- (void)revenant_mps_setMaximum:(BOOL)maximum;
+- (NSUInteger)revenant_mps_zeroPadSizeX;
+- (NSUInteger)revenant_mps_zeroPadSizeY;
 @end
 
 
@@ -22,19 +22,19 @@ typedef struct {
     size_t width, height, channels;
     size_t stride;
     size_t element;
-} CharonMPSCnnPlane;
+} RevenantMPSCnnPlane;
 
-static inline const void *CharonMPSCnnPixel(const CharonMPSCnnPlane *plane, size_t x, size_t y, size_t channel)
+static inline const void *RevenantMPSCnnPixel(const RevenantMPSCnnPlane *plane, size_t x, size_t y, size_t channel)
 {
     return (const char *)plane->base + (channel * plane->height + y) * plane->stride + x * plane->element;
 }
 
-static inline void *CharonMPSCnnPixelMutable(CharonMPSCnnPlane *plane, size_t x, size_t y, size_t channel)
+static inline void *RevenantMPSCnnPixelMutable(RevenantMPSCnnPlane *plane, size_t x, size_t y, size_t channel)
 {
     return (char *)plane->base + (channel * plane->height + y) * plane->stride + x * plane->element;
 }
 
-static inline BOOL CharonMPSCnnTake(MPSImage *image, CharonMPSCnnPlane *plane, size_t *width, size_t *height, size_t *channels)
+static inline BOOL RevenantMPSCnnTake(MPSImage *image, RevenantMPSCnnPlane *plane, size_t *width, size_t *height, size_t *channels)
 {
     size_t element = MPSSizeofMPSDataType(MPSDataTypeFloat32);
     *width = image.width;
@@ -53,7 +53,7 @@ static inline BOOL CharonMPSCnnTake(MPSImage *image, CharonMPSCnnPlane *plane, s
     return YES;
 }
 
-static inline void CharonMPSCnnGive(MPSImage *image, CharonMPSCnnPlane *plane)
+static inline void RevenantMPSCnnGive(MPSImage *image, RevenantMPSCnnPlane *plane)
 {
     [[image texture] replaceRegion:MTLRegionMake2D(0, 0, plane->width, plane->height)
                       mipmapLevel:0 withBytes:plane->base bytesPerRow:plane->stride];
@@ -65,9 +65,9 @@ static inline void CharonMPSCnnGive(MPSImage *image, CharonMPSCnnPlane *plane)
 typedef struct {
     size_t tap;
     NSUInteger y, x;
-} CharonMPSCnnTap;
+} RevenantMPSCnnTap;
 
-static inline NSUInteger CharonMPSCnnTaps(NSUInteger kernelWidth, NSUInteger kernelHeight, NSUInteger strideX, NSUInteger strideY, CharonMPSCnnTap *out)
+static inline NSUInteger RevenantMPSCnnTaps(NSUInteger kernelWidth, NSUInteger kernelHeight, NSUInteger strideX, NSUInteger strideY, RevenantMPSCnnTap *out)
 {
     NSUInteger count = 0;
     for (NSUInteger ky = 0; ky < kernelHeight; ky++)
@@ -82,7 +82,7 @@ static inline NSUInteger CharonMPSCnnTaps(NSUInteger kernelWidth, NSUInteger ker
     return count;
 }
 
-static inline BOOL CharonMPSCnnSourceFor(NSUInteger outX, NSUInteger outY,
+static inline BOOL RevenantMPSCnnSourceFor(NSUInteger outX, NSUInteger outY,
                                           NSUInteger tapX, NSUInteger tapY,
                                           NSUInteger strideX, NSUInteger strideY,
                                           NSUInteger dilationX, NSUInteger dilationY,

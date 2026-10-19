@@ -10,7 +10,7 @@
 #include <cstdint>
 #include <span>
 
-namespace shade {
+namespace emulator {
 
 class Fixed8PixelBlender {
 public:

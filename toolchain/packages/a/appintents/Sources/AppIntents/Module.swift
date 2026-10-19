@@ -1,8 +1,8 @@
 import Foundation
 
-enum CharonLocalized {
+enum RevenantLocalized {
     static func resource(_ text: String) -> LocalizedStringResource {
-        #if CHARON_APPINTENTS_CARRIES_LOCALIZED_STRING
+        #if REVENANT_APPINTENTS_CARRIES_LOCALIZED_STRING
         return LocalizedStringResource(stringLiteral: text)
         #else
         return LocalizedStringResource(text)
@@ -10,7 +10,7 @@ enum CharonLocalized {
     }
 
     static func resource(_ text: String, defaultValue: String) -> LocalizedStringResource {
-        #if CHARON_APPINTENTS_CARRIES_LOCALIZED_STRING
+        #if REVENANT_APPINTENTS_CARRIES_LOCALIZED_STRING
         return LocalizedStringResource(stringLiteral: defaultValue)
         #else
         return LocalizedStringResource(text, defaultValue: defaultValue)
@@ -18,7 +18,7 @@ enum CharonLocalized {
     }
 
     static func string(of resource: LocalizedStringResource) -> String {
-        #if CHARON_APPINTENTS_CARRIES_LOCALIZED_STRING
+        #if REVENANT_APPINTENTS_CARRIES_LOCALIZED_STRING
         return table(resource) ?? resource.key
         #else
         return table(resource) ?? resource.defaultValue ?? resource.key

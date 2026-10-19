@@ -4,14 +4,14 @@
 #include <stdio.h>
 #include <string.h>
 
-vImage_Error charon_host_vImageConvert_Planar1toPlanar8(const vImage_Buffer *, const vImage_Buffer *, vImage_Flags);
-vImage_Error charon_host_vImageConvert_Planar2toPlanar8(const vImage_Buffer *, const vImage_Buffer *, vImage_Flags);
-vImage_Error charon_host_vImageConvert_Planar4toPlanar8(const vImage_Buffer *, const vImage_Buffer *, vImage_Flags);
-vImage_Error charon_host_vImageConvert_Indexed1toPlanar8(const vImage_Buffer *, const vImage_Buffer *,
+vImage_Error revenant_host_vImageConvert_Planar1toPlanar8(const vImage_Buffer *, const vImage_Buffer *, vImage_Flags);
+vImage_Error revenant_host_vImageConvert_Planar2toPlanar8(const vImage_Buffer *, const vImage_Buffer *, vImage_Flags);
+vImage_Error revenant_host_vImageConvert_Planar4toPlanar8(const vImage_Buffer *, const vImage_Buffer *, vImage_Flags);
+vImage_Error revenant_host_vImageConvert_Indexed1toPlanar8(const vImage_Buffer *, const vImage_Buffer *,
                                                        const Pixel_8[2], vImage_Flags);
-vImage_Error charon_host_vImageConvert_Indexed2toPlanar8(const vImage_Buffer *, const vImage_Buffer *,
+vImage_Error revenant_host_vImageConvert_Indexed2toPlanar8(const vImage_Buffer *, const vImage_Buffer *,
                                                        const Pixel_8[4], vImage_Flags);
-vImage_Error charon_host_vImageConvert_Indexed4toPlanar8(const vImage_Buffer *, const vImage_Buffer *,
+vImage_Error revenant_host_vImageConvert_Indexed4toPlanar8(const vImage_Buffer *, const vImage_Buffer *,
                                                        const Pixel_8[16], vImage_Flags);
 
 #define W 19
@@ -160,15 +160,15 @@ int main(void)
 {
     setbuf(stdout, NULL);
     @autoreleasepool {
-        expand("vImageConvert_Planar1toPlanar8", vImageConvert_Planar1toPlanar8, charon_host_vImageConvert_Planar1toPlanar8, 1);
-        expand("vImageConvert_Planar2toPlanar8", vImageConvert_Planar2toPlanar8, charon_host_vImageConvert_Planar2toPlanar8, 2);
-        expand("vImageConvert_Planar4toPlanar8", vImageConvert_Planar4toPlanar8, charon_host_vImageConvert_Planar4toPlanar8, 4);
+        expand("vImageConvert_Planar1toPlanar8", vImageConvert_Planar1toPlanar8, revenant_host_vImageConvert_Planar1toPlanar8, 1);
+        expand("vImageConvert_Planar2toPlanar8", vImageConvert_Planar2toPlanar8, revenant_host_vImageConvert_Planar2toPlanar8, 2);
+        expand("vImageConvert_Planar4toPlanar8", vImageConvert_Planar4toPlanar8, revenant_host_vImageConvert_Planar4toPlanar8, 4);
         expand_indexed("vImageConvert_Indexed1toPlanar8", vImageConvert_Indexed1toPlanar8,
-                       charon_host_vImageConvert_Indexed1toPlanar8, 1);
+                       revenant_host_vImageConvert_Indexed1toPlanar8, 1);
         expand_indexed("vImageConvert_Indexed2toPlanar8", vImageConvert_Indexed2toPlanar8,
-                       charon_host_vImageConvert_Indexed2toPlanar8, 2);
+                       revenant_host_vImageConvert_Indexed2toPlanar8, 2);
         expand_indexed("vImageConvert_Indexed4toPlanar8", vImageConvert_Indexed4toPlanar8,
-                       charon_host_vImageConvert_Indexed4toPlanar8, 4);
+                       revenant_host_vImageConvert_Indexed4toPlanar8, 4);
         printf("%d checks, %d failures\n", checks, failures);
     }
     return failures == 0 ? 0 : 1;

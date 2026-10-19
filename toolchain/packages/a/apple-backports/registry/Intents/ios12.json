@@ -131,7 +131,7 @@
       "facts": "facts/Intents/Intents.md",
       "source": "the header of iPhoneOS 16.4 for the contract, and the armv7 release caches for the release each object file is carried from (tools/intents/measure-intents.lua)",
       "reason": "a data class of the framework: every property the SDK's header declares is kept in the class's own state with the ownership the header gives it, the initialisers the header declares keep every value they are given, NSSecureCoding and NSCopying carry the whole ivar chain, and a member whose type is a class of a later group has an entry of its own below that says so",
-      "effect": "defaultStore is one instance for the process, which is what the header's own note asks for; setRelevantShortcuts:completionHandler: replaces the whole set rather than adding to it, as the header's note says, keeps it in the class's own state and answers the handler with no error; charon_relevantShortcuts reads the set back, which is where a port reads what it offered, because on a release with Siri the system is the reader"
+      "effect": "defaultStore is one instance for the process, which is what the header's own note asks for; setRelevantShortcuts:completionHandler: replaces the whole set rather than adding to it, as the header's note says, keeps it in the class's own state and answers the handler with no error; revenant_relevantShortcuts reads the set back, which is where a port reads what it offered, because on a release with Siri the system is the reader"
     },
     {
       "api": "INShortcut",
@@ -164,7 +164,7 @@
       "facts": "facts/Intents/Intents.md",
       "source": "the header of iPhoneOS 16.4 for the contract, and the armv7 release caches for the release each object file is carried from (tools/intents/measure-intents.lua)",
       "reason": "a data class of the framework: every property the SDK's header declares is kept in the class's own state with the ownership the header gives it, the initialisers the header declares keep every value they are given, NSSecureCoding and NSCopying carry the whole ivar chain, and a member whose type is a class of a later group has an entry of its own below that says so",
-      "effect": "sharedManager is one instance for the process; setSuggestedMediaIntents: keeps the intents it is given in the order they were given; setPredictionMode:forType: keeps one mode per media item type and removes the entry for the enumeration own zero case; charon_suggestedMediaIntents and charon_predictionModeForType: read both back"
+      "effect": "sharedManager is one instance for the process; setSuggestedMediaIntents: keeps the intents it is given in the order they were given; setPredictionMode:forType: keeps one mode per media item type and removes the entry for the enumeration own zero case; revenant_suggestedMediaIntents and revenant_predictionModeForType: read both back"
     },
     {
       "api": "INVoiceShortcut",
@@ -186,7 +186,7 @@
       "facts": "facts/Intents/Intents.md",
       "source": "the header of iPhoneOS 16.4 for the contract, and the armv7 release caches for the release each object file is carried from (tools/intents/measure-intents.lua)",
       "reason": "a data class of the framework: every property the SDK's header declares is kept in the class's own state with the ownership the header gives it, the initialisers the header declares keep every value they are given, NSSecureCoding and NSCopying carry the whole ivar chain, and a member whose type is a class of a later group has an entry of its own below that says so",
-      "effect": "sharedCenter is one instance for the process; setShortcutSuggestions: keeps the suggestions it is given in the order they were given; getAllVoiceShortcutsWithCompletion: answers an empty array and no error, and getVoiceShortcutWithIdentifier:completion: nil and no error, because this release runs no assistant daemon and has no Shortcuts app, so no shortcut was ever added to Siri; charon_shortcutSuggestions reads the suggestions back"
+      "effect": "sharedCenter is one instance for the process; setShortcutSuggestions: keeps the suggestions it is given in the order they were given; getAllVoiceShortcutsWithCompletion: answers an empty array and no error, and getVoiceShortcutWithIdentifier:completion: nil and no error, because this release runs no assistant daemon and has no Shortcuts app, so no shortcut was ever added to Siri; revenant_shortcutSuggestions reads the suggestions back"
     },
     {
       "api": "+[INShortcut new]",

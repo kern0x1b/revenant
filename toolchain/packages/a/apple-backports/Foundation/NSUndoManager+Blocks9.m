@@ -1,30 +1,30 @@
 #import <Foundation/Foundation.h>
 
-@interface CharonUndoBlockInvoker : NSObject
+@interface RevenantUndoBlockInvoker : NSObject
 @property (copy) void (^block)(id target);
 @property (weak) id target;
 @end
 
-@implementation CharonUndoBlockInvoker
+@implementation RevenantUndoBlockInvoker
 @synthesize block = _block;
 @synthesize target = _target;
 @end
 
-@implementation NSUndoManager (CharonUndoBlocks)
+@implementation NSUndoManager (RevenantUndoBlocks)
 
 - (void)registerUndoWithTarget:(id)target handler:(void (^)(id target))undoHandler
 {
-    CharonUndoBlockInvoker *invoker = [CharonUndoBlockInvoker new];
+    RevenantUndoBlockInvoker *invoker = [RevenantUndoBlockInvoker new];
     invoker.block = undoHandler;
     invoker.target = target;
-    [self registerUndoWithTarget:invoker selector:@selector(charonInvoke:) object:invoker];
+    [self registerUndoWithTarget:invoker selector:@selector(revenantInvoke:) object:invoker];
 }
 
 @end
 
-@implementation CharonUndoBlockInvoker (CharonInvoke)
+@implementation RevenantUndoBlockInvoker (RevenantInvoke)
 
-- (void)charonInvoke:(id)object
+- (void)revenantInvoke:(id)object
 {
     if (self.block && self.target)
         self.block(self.target);

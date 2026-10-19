@@ -1,4 +1,4 @@
-#import "CharonContacts.h"
+#import "RevenantContacts.h"
 
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
 
@@ -8,7 +8,7 @@
 
 - (void)setName:(NSString *)name
 {
-    [self charon_setIdentifier:nil name:name];
+    [self revenant_setIdentifier:nil name:name];
 }
 
 @end

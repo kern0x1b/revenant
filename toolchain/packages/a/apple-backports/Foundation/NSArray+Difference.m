@@ -1,8 +1,8 @@
-#import "CharonOrderedCollections.h"
+#import "RevenantOrderedCollections.h"
 
-@implementation NSArray (CharonDifference)
+@implementation NSArray (RevenantDifference)
 
-- (NSOrderedCollectionDifference *)charon_differenceFromArray:(NSArray *)other withOptions:(NSOrderedCollectionDifferenceCalculationOptions)options usingEquivalenceTest:(BOOL (NS_NOESCAPE ^)(id, id))block
+- (NSOrderedCollectionDifference *)revenant_differenceFromArray:(NSArray *)other withOptions:(NSOrderedCollectionDifferenceCalculationOptions)options usingEquivalenceTest:(BOOL (NS_NOESCAPE ^)(id, id))block
 {
     if (!other)
         [NSException raise:NSInvalidArgumentException format:@"Cannot diff nil parameter"];
@@ -48,10 +48,10 @@
         free(trace[d]);
     free(trace);
     free(row);
-    return [self charon_differenceFromArray:old removed:[[removals reverseObjectEnumerator] allObjects] inserted:[[insertions reverseObjectEnumerator] allObjects] options:options];
+    return [self revenant_differenceFromArray:old removed:[[removals reverseObjectEnumerator] allObjects] inserted:[[insertions reverseObjectEnumerator] allObjects] options:options];
 }
 
-- (NSOrderedCollectionDifference *)charon_differenceFromArray:(NSArray *)old removed:(NSArray *)removals inserted:(NSArray *)insertions options:(NSOrderedCollectionDifferenceCalculationOptions)options
+- (NSOrderedCollectionDifference *)revenant_differenceFromArray:(NSArray *)old removed:(NSArray *)removals inserted:(NSArray *)insertions options:(NSOrderedCollectionDifferenceCalculationOptions)options
 {
     NSArray *current = self;
     NSMutableArray *removalChanges = [NSMutableArray arrayWithCapacity:removals.count], *insertionChanges = [NSMutableArray arrayWithCapacity:insertions.count];
@@ -85,7 +85,7 @@
             link = [[removedAt objectForKey:object] unsignedIntegerValue];
         [insertionChanges addObject:[NSOrderedCollectionChange changeWithObject:(options & NSOrderedCollectionDifferenceCalculationOmitInsertedObjects) ? nil : object type:NSCollectionChangeInsert index:index associatedIndex:link]];
     }
-    return [[NSOrderedCollectionDifference alloc] charon_initWithInsertions:insertionChanges removals:removalChanges];
+    return [[NSOrderedCollectionDifference alloc] revenant_initWithInsertions:insertionChanges removals:removalChanges];
 }
 
 - (NSOrderedCollectionDifference *)differenceFromArray:(NSArray *)other withOptions:(NSOrderedCollectionDifferenceCalculationOptions)options usingEquivalenceTest:(BOOL (NS_NOESCAPE ^)(id, id))block
@@ -94,14 +94,14 @@
         [NSException raise:NSInvalidArgumentException format:@"Cannot diff nil parameter"];
     if (options & NSOrderedCollectionDifferenceCalculationInferMoves)
         [NSException raise:NSInvalidArgumentException format:@"Inferring moves is not supported when using a custom equivalence test"];
-    return [self charon_differenceFromArray:other withOptions:options usingEquivalenceTest:block];
+    return [self revenant_differenceFromArray:other withOptions:options usingEquivalenceTest:block];
 }
 
 - (NSOrderedCollectionDifference *)differenceFromArray:(NSArray *)other withOptions:(NSOrderedCollectionDifferenceCalculationOptions)options
 {
     if (!other)
         [NSException raise:NSInvalidArgumentException format:@"Cannot diff nil parameter"];
-    return [self charon_differenceFromArray:other withOptions:options usingEquivalenceTest:^BOOL(id one, id two) {
+    return [self revenant_differenceFromArray:other withOptions:options usingEquivalenceTest:^BOOL(id one, id two) {
         return one == two || [one isEqual:two];
     }];
 }
@@ -132,7 +132,7 @@
 
 @end
 
-@implementation NSMutableArray (CharonDifference)
+@implementation NSMutableArray (RevenantDifference)
 
 - (void)applyDifference:(NSOrderedCollectionDifference *)difference
 {

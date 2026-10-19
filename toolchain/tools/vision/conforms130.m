@@ -81,7 +81,7 @@ int main(void)
             {"VNRecognizeTextRequest", "supportedRecognitionLanguagesForTextRecognitionLevel:revision:error:"},
         };
         for (unsigned i = 0; i < sizeof(missing) / sizeof(missing[0]); i++) {
-            Class cls = NSClassFromString([NSString stringWithFormat:@"Charon%s", missing[i].class]);
+            Class cls = NSClassFromString([NSString stringWithFormat:@"Revenant%s", missing[i].class]);
             printf("%-34s +%-58s answered: %s\n", missing[i].class, missing[i].selector,
                    cls && [cls instancesRespondToSelector:NSSelectorFromString([NSString stringWithUTF8String:missing[i].selector])]
                        ? "yes" : "no, a caller sending it gets an unrecognised selector");

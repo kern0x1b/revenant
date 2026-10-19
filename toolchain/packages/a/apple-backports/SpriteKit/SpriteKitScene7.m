@@ -1,9 +1,9 @@
-#import "CharonSpriteKit.h"
+#import "RevenantSpriteKit.h"
 #if !TARGET_OS_IPHONE
 #import <AppKit/AppKit.h>
 #endif
 
-static CharonSKColor *CharonSKDefaultBackground(void)
+static RevenantSKColor *RevenantSKDefaultBackground(void)
 {
 #if TARGET_OS_IPHONE
     return [UIColor colorWithRed:0.15 green:0.15 blue:0.15 alpha:1];
@@ -16,7 +16,7 @@ static CharonSKColor *CharonSKDefaultBackground(void)
     CGSize _size;
     SKSceneScaleMode _scaleMode;
     CGPoint _anchorPoint;
-    CharonSKColor *_backgroundColor;
+    RevenantSKColor *_backgroundColor;
 #if TARGET_OS_IPHONE
     __weak SKView *_view;
 #endif
@@ -39,7 +39,7 @@ static CharonSKColor *CharonSKDefaultBackground(void)
         _size = size;
         _scaleMode = SKSceneScaleModeFill;
         _anchorPoint = CGPointZero;
-        _backgroundColor = CharonSKDefaultBackground();
+        _backgroundColor = RevenantSKDefaultBackground();
         [self didChangeSize:size];
     }
     return self;
@@ -77,12 +77,12 @@ static CharonSKColor *CharonSKDefaultBackground(void)
     _anchorPoint = anchorPoint;
 }
 
-- (CharonSKColor *)backgroundColor
+- (RevenantSKColor *)backgroundColor
 {
     return _backgroundColor;
 }
 
-- (void)setBackgroundColor:(CharonSKColor *)backgroundColor
+- (void)setBackgroundColor:(RevenantSKColor *)backgroundColor
 {
     _backgroundColor = backgroundColor;
 }
@@ -165,9 +165,9 @@ static CharonSKColor *CharonSKDefaultBackground(void)
 
 @end
 
-@implementation SKScene (CharonSpriteKitView)
+@implementation SKScene (RevenantSpriteKitView)
 
-- (void)charon_setView:(SKView *)view
+- (void)revenant_setView:(SKView *)view
 {
 #if TARGET_OS_IPHONE
     _view = view;
@@ -176,7 +176,7 @@ static CharonSKColor *CharonSKDefaultBackground(void)
 
 @end
 
-@implementation SKNode (CharonSpriteKitScene)
+@implementation SKNode (RevenantSpriteKitScene)
 
 - (SKScene *)scene
 {

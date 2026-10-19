@@ -1,4 +1,4 @@
-#import "CharonSearch.h"
+#import "RevenantSearch.h"
 
 @implementation UISearchToken {
 @private
@@ -9,10 +9,10 @@
 
 + (UISearchToken *)tokenWithIcon:(UIImage *)icon text:(NSString *)text
 {
-    return [[self alloc] initCharonWithIcon:icon text:text];
+    return [[self alloc] initRevenantWithIcon:icon text:text];
 }
 
-- (instancetype)initCharonWithIcon:(UIImage *)icon text:(NSString *)text
+- (instancetype)initRevenantWithIcon:(UIImage *)icon text:(NSString *)text
 {
     if ((self = [super init])) {
         _icon = icon;
@@ -31,12 +31,12 @@
     _representedObject = representedObject;
 }
 
-- (NSString *)charon_text
+- (NSString *)revenant_text
 {
     return _text;
 }
 
-- (UIImage *)charon_icon
+- (UIImage *)revenant_icon
 {
     return _icon;
 }

@@ -5,7 +5,7 @@
 # the registry the way that function reads it, then compiled for the triple of their rows' minimum, with
 # that library's own folder on the include path and the library's flags, against the 16.4 SDK. It is the
 # step that caught UIKit's eight trait protocols: the rows were in the registry, the sources were
-# generated, and CharonUIKitProtocols.h had never been regenerated to declare them, so
+# generated, and RevenantUIKitProtocols.h had never been regenerated to declare them, so
 # UIKitBackportsProtocols17.0.m did not compile and nothing before the gate reads that header.
 #
 # protocol_headers_test.lua is the cheap half of this and runs in the light guard: a row whose protocol is
@@ -103,9 +103,9 @@ for _, lib in ipairs(libraries) do
         local target = path.join(out, "src", lib.name .. "Protocols" .. intro .. ".m")
         local body = {
             string.format("// %sProtocols%s.m - written by modules/apple/backports.lua, not by hand.", lib.name, intro),
-            string.format('#import "Charon%sProtocols.h"', folder), "",
-            string.format("static void charon_%s_protocols(void) __attribute__((used));", lib.name),
-            string.format("static void charon_%s_protocols(void)", lib.name), "{"
+            string.format('#import "Revenant%sProtocols.h"', folder), "",
+            string.format("static void revenant_%s_protocols(void) __attribute__((used));", lib.name),
+            string.format("static void revenant_%s_protocols(void)", lib.name), "{"
         }
         for _, n in ipairs(names) do
             table.insert(body, string.format("    (void)@protocol(%s);", n))
@@ -131,7 +131,7 @@ while IFS='	' read -r file folder minimum name; do
   target="armv7-apple-ios${minimum}"
   # the library's protocol header is written by tools/gen (protocolheaders), into this run's own folder, so the check needs no .gen
   # from an earlier build: a fresh checkout compiles the same header the build writes
-  if [ ! -f "$OUT/hdr/$folder/Charon${folder}Protocols.h" ]; then
+  if [ ! -f "$OUT/hdr/$folder/Revenant${folder}Protocols.h" ]; then
     mkdir -p "$OUT/hdr/$folder"
     xmake l "$ROOT/tools/gen.lua" protocolheaders --tree "$ROOT" --framework "$folder" --out "$OUT/hdr/$folder" \
       > /dev/null 2> "$OUT/hdr/$folder.err" \

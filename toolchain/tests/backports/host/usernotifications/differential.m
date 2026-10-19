@@ -17,7 +17,7 @@ static void fail(NSString *format, ...)
 static NSString *plain(id value)
 {
     NSString *text = [value description] ?: @"(nil)";
-    text = [text stringByReplacingOccurrencesOfString:@"CharonHost" withString:@""];
+    text = [text stringByReplacingOccurrencesOfString:@"RevenantHost" withString:@""];
     return [[NSRegularExpression regularExpressionWithPattern:@"0x[0-9a-f]+" options:0 error:NULL]
                stringByReplacingMatchesInString:text options:0 range:NSMakeRange(0, text.length) withTemplate:@"0x"];
 }
@@ -32,7 +32,7 @@ static void same(id ours, id theirs, NSString *what)
 
 static Class ours(Class theirs)
 {
-    return NSClassFromString([@"CharonHost" stringByAppendingString:NSStringFromClass(theirs)]);
+    return NSClassFromString([@"RevenantHost" stringByAppendingString:NSStringFromClass(theirs)]);
 }
 
 static NSString *raised(void (^block)(void))
@@ -216,8 +216,8 @@ static void compare_matching(void)
 static void write_expectations(void)
 {
     Class calendar = [UNCalendarNotificationTrigger class];
-    printf("struct charon_matching { const char *zone, *spec; int repeats; double after, next; };\n");
-    printf("static const struct charon_matching charon_matchings[] = {\n");
+    printf("struct revenant_matching { const char *zone, *spec; int repeats; double after, next; };\n");
+    printf("static const struct revenant_matching revenant_matchings[] = {\n");
     for (NSString *zone in matching_zones())
         for (NSDictionary *spec in matching_specs())
             for (NSNumber *repeats in @[@NO, @YES])
@@ -510,7 +510,7 @@ static void compare_push_triggers(void)
     printf("note: this framework's UNPushNotificationTrigger declares %s\n",
            [[own_methods(theirClass) componentsJoinedByString:@" "] UTF8String]);
 
-    id mine = ((id (*)(id, SEL))objc_msgSend)(myClass, @selector(charon_pushTrigger));
+    id mine = ((id (*)(id, SEL))objc_msgSend)(myClass, @selector(revenant_pushTrigger));
     checks++;
     if (![mine isKindOfClass:myClass] || [mine repeats])
         fail(@"a push trigger of the backport is a %@ that repeats %@", NSStringFromClass([mine class]), flag([mine repeats]));

@@ -1,16 +1,16 @@
-#import "CharonWebKit.h"
+#import "RevenantWebKit.h"
 #import <objc/runtime.h>
 
 @implementation WKNavigation {
     NSURLRequest *_request;
 }
 
-- (NSURLRequest *)charon_request
+- (NSURLRequest *)revenant_request
 {
     return _request;
 }
 
-- (void)setCharon_request:(NSURLRequest *)request
+- (void)setRevenant_request:(NSURLRequest *)request
 {
     _request = [request copy];
 }
@@ -22,7 +22,7 @@
     NSURLRequest *_request;
 }
 
-+ (instancetype)charon_frameWithMainFrame:(BOOL)mainFrame request:(NSURLRequest *)request
++ (instancetype)revenant_frameWithMainFrame:(BOOL)mainFrame request:(NSURLRequest *)request
 {
     WKFrameInfo *frame = [self alloc];
     frame->_mainFrame = mainFrame;
@@ -54,13 +54,13 @@
     WKFrameInfo *_targetFrame;
 }
 
-+ (instancetype)charon_actionWithRequest:(NSURLRequest *)request type:(WKNavigationType)type mainFrame:(BOOL)mainFrame
++ (instancetype)revenant_actionWithRequest:(NSURLRequest *)request type:(WKNavigationType)type mainFrame:(BOOL)mainFrame
 {
     WKNavigationAction *action = [self alloc];
     action->_request = [request copy];
     action->_type = type;
-    action->_sourceFrame = [WKFrameInfo charon_frameWithMainFrame:mainFrame request:request];
-    action->_targetFrame = [WKFrameInfo charon_frameWithMainFrame:mainFrame request:request];
+    action->_sourceFrame = [WKFrameInfo revenant_frameWithMainFrame:mainFrame request:request];
+    action->_targetFrame = [WKFrameInfo revenant_frameWithMainFrame:mainFrame request:request];
     return action;
 }
 

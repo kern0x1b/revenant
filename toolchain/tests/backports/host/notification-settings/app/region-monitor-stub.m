@@ -1,28 +1,28 @@
-#import "CharonUserNotifications.h"
+#import "RevenantUserNotifications.h"
 
-@implementation CharonRegionMonitor
+@implementation RevenantRegionMonitor
 
-+ (CharonRegionMonitor *)charon_sharedMonitor
++ (RevenantRegionMonitor *)revenant_sharedMonitor
 {
-    static CharonRegionMonitor *monitor;
+    static RevenantRegionMonitor *monitor;
     static dispatch_once_t once;
     dispatch_once(&once, ^{
-        monitor = [[CharonRegionMonitor alloc] init];
+        monitor = [[RevenantRegionMonitor alloc] init];
     });
     return monitor;
 }
 
-- (NSError *)charon_monitorRequest:(UNNotificationRequest *)request
+- (NSError *)revenant_monitorRequest:(UNNotificationRequest *)request
 {
     return nil;
 }
 
-- (NSArray<UNNotificationRequest *> *)charon_requests
+- (NSArray<UNNotificationRequest *> *)revenant_requests
 {
     return @[];
 }
 
-- (void)charon_removeRequestsWithIdentifiers:(NSSet<NSString *> *)identifiers
+- (void)revenant_removeRequestsWithIdentifiers:(NSSet<NSString *> *)identifiers
 {
 }
 

@@ -2,31 +2,31 @@
 #import <UIKit/UICollectionView.h>
 #import <UIKit/UITableView.h>
 
-@interface CharonCollectionDropItem : NSObject <UICollectionViewDropItem>
+@interface RevenantCollectionDropItem : NSObject <UICollectionViewDropItem>
 @property (nonatomic, strong) UIDragItem *item;
 @property (nonatomic, strong) NSIndexPath *source;
 @property (nonatomic, assign) CGSize size;
 @end
 
-@interface CharonTableDropItem : NSObject <UITableViewDropItem>
+@interface RevenantTableDropItem : NSObject <UITableViewDropItem>
 @property (nonatomic, strong) UIDragItem *item;
 @property (nonatomic, strong) NSIndexPath *source;
 @property (nonatomic, assign) CGSize size;
 @end
 
-@interface CharonCollectionPlaceholderContext : NSObject <UICollectionViewDropPlaceholderContext>
+@interface RevenantCollectionPlaceholderContext : NSObject <UICollectionViewDropPlaceholderContext>
 - (instancetype)initWithPlaceholder:(UICollectionViewDropPlaceholder *)placeholder
                                 item:(UIDragItem *)item
                               inView:(UICollectionView *)collectionView;
 @end
 
-@interface CharonTablePlaceholderContext : NSObject <UITableViewDropPlaceholderContext>
+@interface RevenantTablePlaceholderContext : NSObject <UITableViewDropPlaceholderContext>
 - (instancetype)initWithPlaceholder:(UITableViewDropPlaceholder *)placeholder
                                 item:(UIDragItem *)item
                               inView:(UITableView *)tableView;
 @end
 
-@interface CharonCollectionDropCoordinator : NSObject <UICollectionViewDropCoordinator>
+@interface RevenantCollectionDropCoordinator : NSObject <UICollectionViewDropCoordinator>
 @property (nonatomic, strong) NSArray<id<UICollectionViewDropItem>> *dropItems;
 @property (nonatomic, strong) NSIndexPath *destination;
 @property (nonatomic, strong) UICollectionViewDropProposal *dropProposal;
@@ -39,7 +39,7 @@
                      session:(id<UIDropSession>)session;
 @end
 
-@interface CharonTableDropCoordinator : NSObject <UITableViewDropCoordinator>
+@interface RevenantTableDropCoordinator : NSObject <UITableViewDropCoordinator>
 @property (nonatomic, strong) NSArray<id<UITableViewDropItem>> *dropItems;
 @property (nonatomic, strong) NSIndexPath *destination;
 @property (nonatomic, strong) UITableViewDropProposal *dropProposal;

@@ -1,8 +1,8 @@
-#import "CharonOrderedCollections.h"
+#import "RevenantOrderedCollections.h"
 
-@implementation NSOrderedSet (CharonDifference)
+@implementation NSOrderedSet (RevenantDifference)
 
-- (NSOrderedCollectionDifference *)charon_differenceFromOrderedSet:(NSOrderedSet *)other options:(NSOrderedCollectionDifferenceCalculationOptions)options
+- (NSOrderedCollectionDifference *)revenant_differenceFromOrderedSet:(NSOrderedSet *)other options:(NSOrderedCollectionDifferenceCalculationOptions)options
 {
     NSInteger n = (NSInteger)other.count, m = (NSInteger)self.count, i = 0, j = 0;
     NSMutableArray *removals = [NSMutableArray array], *insertions = [NSMutableArray array];
@@ -29,7 +29,7 @@
         [removals addObject:@(i)];
     for (; j < m; j++)
         [insertions addObject:@(j)];
-    return [self.array charon_differenceFromArray:other.array removed:removals inserted:insertions options:options];
+    return [self.array revenant_differenceFromArray:other.array removed:removals inserted:insertions options:options];
 }
 
 - (NSOrderedCollectionDifference *)differenceFromOrderedSet:(NSOrderedSet *)other withOptions:(NSOrderedCollectionDifferenceCalculationOptions)options usingEquivalenceTest:(BOOL (NS_NOESCAPE ^)(id, id))block
@@ -38,14 +38,14 @@
         [NSException raise:NSInvalidArgumentException format:@"Cannot diff nil parameter"];
     if (options & NSOrderedCollectionDifferenceCalculationInferMoves)
         [NSException raise:NSInvalidArgumentException format:@"Inferring moves is not supported when using a custom equivalence test"];
-    return [self.array charon_differenceFromArray:other.array withOptions:options usingEquivalenceTest:block];
+    return [self.array revenant_differenceFromArray:other.array withOptions:options usingEquivalenceTest:block];
 }
 
 - (NSOrderedCollectionDifference *)differenceFromOrderedSet:(NSOrderedSet *)other withOptions:(NSOrderedCollectionDifferenceCalculationOptions)options
 {
     if (!other)
         [NSException raise:NSInvalidArgumentException format:@"Cannot diff nil parameter"];
-    return [self charon_differenceFromOrderedSet:other options:options];
+    return [self revenant_differenceFromOrderedSet:other options:options];
 }
 
 - (NSOrderedSet *)orderedSetByApplyingDifference:(NSOrderedCollectionDifference *)difference
@@ -74,7 +74,7 @@
 
 @end
 
-@implementation NSMutableOrderedSet (CharonDifference)
+@implementation NSMutableOrderedSet (RevenantDifference)
 
 - (void)applyDifference:(NSOrderedCollectionDifference *)difference
 {

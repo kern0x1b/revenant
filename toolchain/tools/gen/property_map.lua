@@ -106,9 +106,9 @@ function pairs_header(header_text)
         "typedef struct {",
         "    CFStringRef dictionary;",
         "    CFStringRef property;",
-        "} charon_pair;",
+        "} revenant_pair;",
         "",
-        "static size_t charon_pairs(charon_pair *out)",
+        "static size_t revenant_pairs(revenant_pair *out)",
         "{",
     }
     for i, pair in ipairs(found) do

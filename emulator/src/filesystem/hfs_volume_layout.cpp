@@ -14,7 +14,7 @@
 #include <string>
 #include <system_error>
 
-namespace shade::hfs {
+namespace emulator::hfs {
 namespace {
 
     constexpr std::uint32_t mount_read_only = 0x00000001U;

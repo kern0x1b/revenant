@@ -1,9 +1,9 @@
-local GENERATED = "# Written by Charon from charon.toml. Edits here are lost on the next build."
+local GENERATED = "# Written by Revenant from revenant.toml. Edits here are lost on the next build."
 local CMAKE_MINIMUM = "3.24"
-local PORT = "${CHARON_PORT}"
-local REQUIRES_PORT = 'if (NOT CHARON_PORT)\n'
+local PORT = "${REVENANT_PORT}"
+local REQUIRES_PORT = 'if (NOT REVENANT_PORT)\n'
     .. '    message(FATAL_ERROR\n'
-    .. '        "CHARON_PORT names the folder charon.toml lives in, and every path below is written '
+    .. '        "REVENANT_PORT names the folder revenant.toml lives in, and every path below is written '
     .. 'against it; the build passes it")\n'
     .. 'endif ()'
 local LANGUAGES = {[".c"] = "C", [".m"] = "OBJC", [".mm"] = "OBJCXX", [".cpp"] = "CXX", [".cc"] = "CXX",
@@ -93,7 +93,7 @@ local function has_pattern(text)
 end
 
 local function manifest_of(declared)
-    return path.join(declared.root, "charon.toml")
+    return path.join(declared.root, "revenant.toml")
 end
 
 local function languages_of(sources)
@@ -109,7 +109,7 @@ local function languages_of(sources)
         local suffix = dot and pattern:sub(dot) or ""
         local language = LANGUAGES[suffix]
         if language == nil then
-            raise("%s is a source Charon cannot name a language for", pattern)
+            raise("%s is a source Revenant cannot name a language for", pattern)
         end
         unique_append(found, language)
     end
@@ -536,7 +536,7 @@ function generate_cmake_project(declared, kind, project)
             "foreach (variable " .. table.concat(wanted, " ") .. ")",
             "    if (NOT ${variable})",
             '        message(FATAL_ERROR "${variable} is named by the declaration and answered from the '
-                .. 'dependency graph; configure through charon build")',
+                .. 'dependency graph; configure through revenant build")',
             "    endif ()",
             "endforeach ()",
             "",
@@ -553,11 +553,11 @@ function generate_cmake_project(declared, kind, project)
     end
     if #packages > 0 then
         for _, line in ipairs({
-            "if (NOT CHARON_PACKAGES)",
-            '    message(FATAL_ERROR "CHARON_PACKAGES names the file that finds ' .. table.concat(packages, ", ")
-                .. ' under the names the dependency graph gives them; configure through charon build")',
+            "if (NOT REVENANT_PACKAGES)",
+            '    message(FATAL_ERROR "REVENANT_PACKAGES names the file that finds ' .. table.concat(packages, ", ")
+                .. ' under the names the dependency graph gives them; configure through revenant build")',
             "endif ()",
-            'include("${CHARON_PACKAGES}")',
+            'include("${REVENANT_PACKAGES}")',
         }) do
             table.insert(lines, line)
         end
@@ -594,7 +594,7 @@ local function format_template(text, values)
             local close = text:find("}", index, true)
             local name = close and text:sub(index + 1, close - 1)
             if name == nil or values[name] == nil then
-                raise("the cross toolchain template names %s, which Charon does not supply", name or text:sub(index))
+                raise("the cross toolchain template names %s, which Revenant does not supply", name or text:sub(index))
             end
             table.insert(out, tostring(values[name]))
             index = close + 1
@@ -623,7 +623,7 @@ function generate_cross_toolchain(declared)
     return format_template(text, {
         generated = GENERATED,
         system = target["system-name"] or "Darwin",
-        processor = target["system-processor"] or "${CHARON_ARCHITECTURE}",
+        processor = target["system-processor"] or "${REVENANT_ARCHITECTURE}",
         defines = table.concat(defines),
     })
 end
@@ -664,7 +664,7 @@ function generate_written(declared, required)
         end
     end
     if required and next_key(produced) == nil then
-        raise("%s declares nothing Charon can generate", manifest_of(declared))
+        raise("%s declares nothing Revenant can generate", manifest_of(declared))
     end
     return produced
 end

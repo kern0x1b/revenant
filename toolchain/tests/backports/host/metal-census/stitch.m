@@ -1,5 +1,5 @@
 #import <Foundation/Foundation.h>
-#import "CharonMetal.h"
+#import "RevenantMetal.h"
 
 static int failures;
 
@@ -19,8 +19,8 @@ int main(void)
         check(a0.argumentIndex == 7, @"argumentIndex is readwrite");
 
         MTLFunctionStitchingFunctionNode *fn = [[MTLFunctionStitchingFunctionNode alloc]
-            initWithName:@"charonBlend" arguments:@[a0, a1] controlDependencies:@[]];
-        check([fn.name isEqualToString:@"charonBlend"], @"a function node reads its name back");
+            initWithName:@"revenantBlend" arguments:@[a0, a1] controlDependencies:@[]];
+        check([fn.name isEqualToString:@"revenantBlend"], @"a function node reads its name back");
         check(fn.arguments.count == 2 && fn.arguments[0] == a0 && fn.arguments[1] == a1,
               @"a function node reads both argument nodes back, in order");
         check(fn.controlDependencies.count == 0, @"an empty control-dependency list reads back empty");
@@ -28,15 +28,15 @@ int main(void)
         MTLFunctionStitchingAttributeAlwaysInline *attr =
             [[MTLFunctionStitchingAttributeAlwaysInline alloc] init];
         MTLFunctionStitchingGraph *graph = [[MTLFunctionStitchingGraph alloc]
-            initWithFunctionName:@"charonStitched" nodes:@[fn] outputNode:fn attributes:@[attr]];
-        check([graph.functionName isEqualToString:@"charonStitched"], @"a graph reads its functionName");
+            initWithFunctionName:@"revenantStitched" nodes:@[fn] outputNode:fn attributes:@[attr]];
+        check([graph.functionName isEqualToString:@"revenantStitched"], @"a graph reads its functionName");
         check(graph.nodes.count == 1 && graph.nodes[0] == fn, @"a graph reads its node list back");
         check(graph.outputNode == fn, @"the output node that was SET is that node");
         check(graph.attributes.count == 1 && graph.attributes[0] == attr,
               @"a graph reads its attribute list back");
 
         MTLFunctionStitchingGraph *noOutput = [[MTLFunctionStitchingGraph alloc]
-            initWithFunctionName:@"charonNoOutput" nodes:@[] outputNode:nil attributes:@[]];
+            initWithFunctionName:@"revenantNoOutput" nodes:@[] outputNode:nil attributes:@[]];
         check(noOutput.outputNode == nil, @"an outputNode that was not set stays nil");
 
         MTLFunctionStitchingGraph *gcopy = [graph copyWithZone:nil];
@@ -56,7 +56,7 @@ int main(void)
         descriptor.functionGraphs = @[graph];
         descriptor.functions = @[];
         check(descriptor.functionGraphs.count == 1 &&
-              [(descriptor.functionGraphs[0]).functionName isEqualToString:@"charonStitched"],
+              [(descriptor.functionGraphs[0]).functionName isEqualToString:@"revenantStitched"],
               @"a descriptor holds a graph under the header's functionGraphs and reads it back");
         check(descriptor.functions.count == 0, @"the header's functions list reads back empty");
         MTLStitchedLibraryDescriptor *dcopy = [descriptor copyWithZone:nil];

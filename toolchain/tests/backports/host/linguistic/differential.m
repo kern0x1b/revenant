@@ -2,9 +2,9 @@
 #import <objc/runtime.h>
 #import "check.h"
 
-@interface CharonHostNSLinguisticTagger : NSLinguisticTagger
+@interface RevenantHostNSLinguisticTagger : NSLinguisticTagger
 @end
-@implementation CharonHostNSLinguisticTagger
+@implementation RevenantHostNSLinguisticTagger
 @end
 
 static const char *label(NSString *format, ...)
@@ -25,7 +25,7 @@ static NSString *raised(void (^block)(void))
     @try {
         block();
     } @catch (NSException *exception) {
-        return [NSString stringWithFormat:@"%@: %@", exception.name, [exception.reason stringByReplacingOccurrencesOfString:@"CharonHost" withString:@""]];
+        return [NSString stringWithFormat:@"%@: %@", exception.name, [exception.reason stringByReplacingOccurrencesOfString:@"RevenantHost" withString:@""]];
     }
     return @"ok";
 }
@@ -49,7 +49,7 @@ static NSArray *schemes(void)
 
 static NSLinguisticTagger *make_tagger(BOOL ours, NSString *text)
 {
-    Class cls = ours ? [CharonHostNSLinguisticTagger class] : [NSLinguisticTagger class];
+    Class cls = ours ? [RevenantHostNSLinguisticTagger class] : [NSLinguisticTagger class];
     NSLinguisticTagger *tagger = [[cls alloc] initWithTagSchemes:schemes() options:0];
     tagger.string = text;
     return tagger;
@@ -106,7 +106,7 @@ static void larger_units(void)
                 CHECK_EQUAL(enumeration(ours, NSMakeRange(text.length / 3, text.length / 3), unit, NSLinguisticTagSchemeLanguage, 0), enumeration(system, NSMakeRange(text.length / 3, text.length / 3), unit, NSLinguisticTagSchemeLanguage, 0), label(@"text %lu unit %ld partial range", (unsigned long)index, (long)unit));
         }
         CHECK_EQUAL(ours.dominantLanguage ?: @"nil", system.dominantLanguage ?: @"nil", label(@"text %lu dominant language", (unsigned long)index));
-        CHECK_EQUAL([CharonHostNSLinguisticTagger dominantLanguageForString:text] ?: @"nil", [NSLinguisticTagger dominantLanguageForString:text] ?: @"nil", label(@"text %lu dominant language of a string", (unsigned long)index));
+        CHECK_EQUAL([RevenantHostNSLinguisticTagger dominantLanguageForString:text] ?: @"nil", [NSLinguisticTagger dominantLanguageForString:text] ?: @"nil", label(@"text %lu dominant language of a string", (unsigned long)index));
         index++;
     }
 }
@@ -133,29 +133,29 @@ static void document_unit(void)
     NSArray *ranges = nil;
     NSArray *tags = [make_tagger(YES, @"   ") tagsInRange:NSMakeRange(0, 3) unit:NSLinguisticTaggerUnitSentence scheme:NSLinguisticTagSchemeLanguage options:0 tokenRanges:&ranges];
     CHECK(tags.count == 1 && tags[0] == [NSNull null] && ranges.count == 1, "a unit with no words is a null tag");
-    CHECK_EQUAL([CharonHostNSLinguisticTagger dominantLanguageForString:@"Sí. No. Ok. Ya. This is a somewhat longer english sentence that goes on and on."] ?: @"nil", @"en", "the language most of the words are tagged with wins");
+    CHECK_EQUAL([RevenantHostNSLinguisticTagger dominantLanguageForString:@"Sí. No. Ok. Ya. This is a somewhat longer english sentence that goes on and on."] ?: @"nil", @"en", "the language most of the words are tagged with wins");
 }
 
 static void schemes_and_conveniences(void)
 {
     for (NSString *language in @[@"en", @"es"])
         for (NSLinguisticTaggerUnit unit = NSLinguisticTaggerUnitSentence; unit <= NSLinguisticTaggerUnitDocument; unit++)
-            CHECK_EQUAL([[CharonHostNSLinguisticTagger availableTagSchemesForUnit:unit language:language] description], @"(\n    Language,\n    Script\n)", label(@"unit %ld schemes %@", (long)unit, language));
+            CHECK_EQUAL([[RevenantHostNSLinguisticTagger availableTagSchemesForUnit:unit language:language] description], @"(\n    Language,\n    Script\n)", label(@"unit %ld schemes %@", (long)unit, language));
     NSString *text = texts()[0];
     NSRange ourRange = NSMakeRange(0, 0), systemRange = NSMakeRange(0, 0);
-    NSString *ourTag = [CharonHostNSLinguisticTagger tagForString:text atIndex:3 unit:NSLinguisticTaggerUnitWord scheme:NSLinguisticTagSchemeLexicalClass orthography:nil tokenRange:&ourRange];
+    NSString *ourTag = [RevenantHostNSLinguisticTagger tagForString:text atIndex:3 unit:NSLinguisticTaggerUnitWord scheme:NSLinguisticTagSchemeLexicalClass orthography:nil tokenRange:&ourRange];
     NSString *systemTag = [NSLinguisticTagger tagForString:text atIndex:3 unit:NSLinguisticTaggerUnitWord scheme:NSLinguisticTagSchemeLexicalClass orthography:nil tokenRange:&systemRange];
     CHECK([ourTag isEqual:systemTag] && NSEqualRanges(ourRange, systemRange), "class tagForString");
     NSArray *ourRanges = nil, *systemRanges = nil;
-    NSArray *ourTags = [CharonHostNSLinguisticTagger tagsForString:text range:NSMakeRange(0, 30) unit:NSLinguisticTaggerUnitWord scheme:NSLinguisticTagSchemeLexicalClass options:NSLinguisticTaggerOmitPunctuation | NSLinguisticTaggerOmitWhitespace orthography:nil tokenRanges:&ourRanges];
+    NSArray *ourTags = [RevenantHostNSLinguisticTagger tagsForString:text range:NSMakeRange(0, 30) unit:NSLinguisticTaggerUnitWord scheme:NSLinguisticTagSchemeLexicalClass options:NSLinguisticTaggerOmitPunctuation | NSLinguisticTaggerOmitWhitespace orthography:nil tokenRanges:&ourRanges];
     NSArray *systemTags = [NSLinguisticTagger tagsForString:text range:NSMakeRange(0, 30) unit:NSLinguisticTaggerUnitWord scheme:NSLinguisticTagSchemeLexicalClass options:NSLinguisticTaggerOmitPunctuation | NSLinguisticTaggerOmitWhitespace orthography:nil tokenRanges:&systemRanges];
     CHECK([ourTags isEqual:systemTags] && [ourRanges isEqual:systemRanges], "class tagsForString");
     __block NSUInteger ourCount = 0, systemCount = 0;
-    [CharonHostNSLinguisticTagger enumerateTagsForString:text range:NSMakeRange(0, text.length) unit:NSLinguisticTaggerUnitWord scheme:NSLinguisticTagSchemeLexicalClass options:0 orthography:nil usingBlock:^(NSLinguisticTag tag, NSRange r, BOOL *stop) { if (++ourCount == 3) *stop = YES; }];
+    [RevenantHostNSLinguisticTagger enumerateTagsForString:text range:NSMakeRange(0, text.length) unit:NSLinguisticTaggerUnitWord scheme:NSLinguisticTagSchemeLexicalClass options:0 orthography:nil usingBlock:^(NSLinguisticTag tag, NSRange r, BOOL *stop) { if (++ourCount == 3) *stop = YES; }];
     [NSLinguisticTagger enumerateTagsForString:text range:NSMakeRange(0, text.length) unit:NSLinguisticTaggerUnitWord scheme:NSLinguisticTagSchemeLexicalClass options:0 orthography:nil usingBlock:^(NSLinguisticTag tag, NSRange r, BOOL *stop) { if (++systemCount == 3) *stop = YES; }];
     CHECK(ourCount == 3 && systemCount == 3, "the stop flag ends the class enumeration");
     NSOrthography *orthography = [NSOrthography orthographyWithDominantScript:@"Latn" languageMap:@{@"Latn": @[@"es"]}];
-    ourTags = [CharonHostNSLinguisticTagger tagsForString:@"El perro come" range:NSMakeRange(0, 13) unit:NSLinguisticTaggerUnitWord scheme:NSLinguisticTagSchemeLexicalClass options:0 orthography:orthography tokenRanges:NULL];
+    ourTags = [RevenantHostNSLinguisticTagger tagsForString:@"El perro come" range:NSMakeRange(0, 13) unit:NSLinguisticTaggerUnitWord scheme:NSLinguisticTagSchemeLexicalClass options:0 orthography:orthography tokenRanges:NULL];
     systemTags = [NSLinguisticTagger tagsForString:@"El perro come" range:NSMakeRange(0, 13) unit:NSLinguisticTaggerUnitWord scheme:NSLinguisticTagSchemeLexicalClass options:0 orthography:orthography tokenRanges:NULL];
     CHECK([ourTags isEqual:systemTags], "an orthography given for the string");
 }
@@ -168,10 +168,10 @@ static void bounds(void)
     CHECK_EQUAL(raised(^{ [ours tokenRangeAtIndex:text.length + 10 unit:NSLinguisticTaggerUnitSentence]; }), raised(^{ [system tokenRangeAtIndex:text.length + 10 unit:NSLinguisticTaggerUnitSentence]; }), "token range past the end");
     CHECK_EQUAL(raised(^{ [ours tagAtIndex:text.length + 3 unit:NSLinguisticTaggerUnitWord scheme:NSLinguisticTagSchemeTokenType tokenRange:NULL]; }), raised(^{ [system tagAtIndex:text.length + 3 unit:NSLinguisticTaggerUnitWord scheme:NSLinguisticTagSchemeTokenType tokenRange:NULL]; }), "tag past the end");
     CHECK_EQUAL(enumeration(ours, NSMakeRange(0, text.length + 5), NSLinguisticTaggerUnitWord, NSLinguisticTagSchemeTokenType, 0), enumeration(system, NSMakeRange(0, text.length + 5), NSLinguisticTaggerUnitWord, NSLinguisticTagSchemeTokenType, 0), "range past the end");
-    NSLinguisticTagger *emptyOurs = [[CharonHostNSLinguisticTagger alloc] initWithTagSchemes:@[NSLinguisticTagSchemeTokenType] options:0], *emptySystem = [[NSLinguisticTagger alloc] initWithTagSchemes:@[NSLinguisticTagSchemeTokenType] options:0];
+    NSLinguisticTagger *emptyOurs = [[RevenantHostNSLinguisticTagger alloc] initWithTagSchemes:@[NSLinguisticTagSchemeTokenType] options:0], *emptySystem = [[NSLinguisticTagger alloc] initWithTagSchemes:@[NSLinguisticTagSchemeTokenType] options:0];
     CHECK_EQUAL(raised(^{ [emptyOurs tokenRangeAtIndex:0 unit:NSLinguisticTaggerUnitWord]; }), raised(^{ [emptySystem tokenRangeAtIndex:0 unit:NSLinguisticTaggerUnitWord]; }), "no string");
     CHECK([emptyOurs dominantLanguage] == nil && [emptySystem dominantLanguage] == nil, "no string, no language");
-    CHECK([CharonHostNSLinguisticTagger dominantLanguageForString:@""] == nil && [CharonHostNSLinguisticTagger dominantLanguageForString:@"12345 67890"] == [NSLinguisticTagger dominantLanguageForString:@"12345 67890"], "no language for nothing or digits");
+    CHECK([RevenantHostNSLinguisticTagger dominantLanguageForString:@""] == nil && [RevenantHostNSLinguisticTagger dominantLanguageForString:@"12345 67890"] == [NSLinguisticTagger dominantLanguageForString:@"12345 67890"], "no language for nothing or digits");
 }
 
 int main(void)
@@ -183,7 +183,7 @@ int main(void)
         document_unit();
         schemes_and_conveniences();
         bounds();
-        printf("checks=%d failures=%d\n", charon_checks, charon_failures);
+        printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
     }
-    return charon_failures ? 1 : 0;
+    return revenant_failures ? 1 : 0;
 }

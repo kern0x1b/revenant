@@ -13,7 +13,7 @@ package("musickit")
     for _, file in ipairs(os.files(path.join(os.scriptdir(), "files", "**", "*.swift"))) do
         table.insert(sources, file)
     end
-    table.insert(sources, path.join(os.scriptdir(), "files", "CharonC.c"))
+    table.insert(sources, path.join(os.scriptdir(), "files", "RevenantC.c"))
     local digests = {path.join(os.scriptdir(), "xmake.lua"), path.join(os.scriptdir(), "README.md")}
     for _, file in ipairs(sources) do
         table.insert(digests, path.filename(file) .. "=" .. hash.sha256(file))
@@ -22,10 +22,10 @@ package("musickit")
     add_configs("recipe", {description = "The digest of this recipe and the sources it compiles, so a changed recipe or a changed source is a different module.", default = hash.strhash128(table.concat(digests, ";")), type = "string", readonly = true})
 
     on_load("iphoneos", function (package)
-        package:add("deps", "charon@swift-runtime", {alias = "swift-runtime", configs = {shared = package:config("shared") or nil,
+        package:add("deps", "revenant@swift-runtime", {alias = "swift-runtime", configs = {shared = package:config("shared") or nil,
                     backports = package:config("backports") or nil}})
         package:add("frameworks", "Foundation", "CoreGraphics")
-        package:add("deps", "charon@micro-ecc", {alias = "micro-ecc"})
+        package:add("deps", "revenant@micro-ecc", {alias = "micro-ecc"})
     end)
 
     on_install("iphoneos", function (package)
@@ -33,7 +33,7 @@ package("musickit")
         local swift = import("apple.swift", {rootdir = modules, anonymous = true})
         local toolchain = assert(package:toolchains(), "MusicKit is built with the apple-ios toolchain")[1]
         toolchain:load()
-        local runtime = assert(package:dep("swift-runtime"), "MusicKit is compiled against charon@swift-runtime")
+        local runtime = assert(package:dep("swift-runtime"), "MusicKit is compiled against revenant@swift-runtime")
         local swiftc = assert(table.wrap((runtime:envs() or {}).SWIFT_EXEC)[1], "swift-runtime names no compiler; reinstall it")
         local minimum = toolchain:config("deployment")
         local triple = package:arch() .. "-apple-ios" .. minimum
@@ -46,11 +46,11 @@ package("musickit")
         local files = os.files(path.join("files", "MusicKit", "**.swift"))
         assert(#files > 0, "the module has no sources")
         os.mkdir(path.absolute("objects"))
-        local micro = assert(package:dep("micro-ecc"), "MusicKit signs its developer token with charon@micro-ecc")
+        local micro = assert(package:dep("micro-ecc"), "MusicKit signs its developer token with revenant@micro-ecc")
         os.vrunv(toolchain:tool("cc"), table.join(target, {"-I" .. path.join(os.scriptdir(), "files", "include"),
                  "-I" .. path.join(micro:installdir("include")), "-I" .. path.join("files"),
-                 "-Os", "-fvisibility=hidden", "-c", path.join("files", "CharonC.c"),
-                 "-o", path.absolute(path.join("objects", "CharonC.o"))}))
+                 "-Os", "-fvisibility=hidden", "-c", path.join("files", "RevenantC.c"),
+                 "-o", path.absolute(path.join("objects", "RevenantC.o"))}))
         os.vrunv(swiftc, table.join(swift.runtime_flags({
             architecture = package:arch(), deployment = minimum, sdk = sdk,
             resources = path.join(runtime:installdir(), "lib", "swift"),
@@ -62,8 +62,8 @@ package("musickit")
             {"-o", path.absolute(path.join("objects", "MusicKit.o"))}))
         os.vrunv(toolchain:tool("ar"), {"-rcs", path.join(package:installdir("lib"), "libMusicKit.a"),
                                        path.absolute(path.join("objects", "MusicKit.o")),
-                                       path.absolute(path.join("objects", "CharonC.o"))})
-        package:setenv("CHARON_SWIFT_MODULES", swiftdir)
+                                       path.absolute(path.join("objects", "RevenantC.o"))})
+        package:setenv("REVENANT_SWIFT_MODULES", swiftdir)
         os.cp("LICENSE", package:installdir("licenses"))
     end)
 

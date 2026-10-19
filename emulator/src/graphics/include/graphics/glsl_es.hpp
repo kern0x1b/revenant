@@ -15,7 +15,7 @@
 #include <string_view>
 #include <vector>
 
-namespace shade::glsl {
+namespace emulator::glsl {
 
 inline constexpr std::size_t maximum_source_bytes = 256U * 1024U;
 

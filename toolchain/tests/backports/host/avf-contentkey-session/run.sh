@@ -3,7 +3,7 @@
 # framework, and the port's decryption against an independent oracle.
 #
 # probe.m is built twice: plain, where every name is Apple's, and with the port's class names renamed
-# (charon_host_AVContentKeySession, ..._AVContentKeyRequest, ..._AVContentKey, ..._AVContentKeyResponse,
+# (revenant_host_AVContentKeySession, ..._AVContentKeyRequest, ..._AVContentKey, ..._AVContentKeyResponse,
 # ..._AVContentKeySpecifier) and the port's object files linked in, so the same questions are asked of the port's
 # classes in the same binary. Both outputs are one line per answer, and diff is the check. No divergence is named for
 # these classes, so ALLOWED_DIFF is empty.
@@ -37,9 +37,9 @@ ALLOWED_DIFF=""
 rm -rf "$build"
 mkdir -p "$build"
 frameworks="-framework Foundation -framework AVFoundation -framework CoreMedia -framework CoreVideo"
-renames="-DAVContentKeySession=charon_host_AVContentKeySession -DAVContentKeyRequest=charon_host_AVContentKeyRequest"
-renames="$renames -DAVContentKey=charon_host_AVContentKey -DAVContentKeyResponse=charon_host_AVContentKeyResponse"
-renames="$renames -DAVContentKeySpecifier=charon_host_AVContentKeySpecifier"
+renames="-DAVContentKeySession=revenant_host_AVContentKeySession -DAVContentKeyRequest=revenant_host_AVContentKeyRequest"
+renames="$renames -DAVContentKey=revenant_host_AVContentKey -DAVContentKeyResponse=revenant_host_AVContentKeyResponse"
+renames="$renames -DAVContentKeySpecifier=revenant_host_AVContentKeySpecifier"
 session="$avf/AVContentKeySession103.m"
 key="$avf/AVContentKey145.m"
 response="$avf/AVContentKeyResponse103.m"

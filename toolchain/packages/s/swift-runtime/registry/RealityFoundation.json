@@ -677,7 +677,7 @@
             "introduced": "15.0",
             "minimum": "6.1.3",
             "status": "absent",
-            "reason": "it returns a LoadRequest, which is a Combine Publisher; Combine on a release this old is the separate charon@styx package, which this module does not depend on, so the type itself cannot be declared here",
+            "reason": "it returns a LoadRequest, which is a Combine Publisher; Combine on a release this old is the separate revenant@combine package, which this module does not depend on, so the type itself cannot be declared here",
             "effect": "a caller cannot spell this member; the absence is in the registry rather than in a stub that returns something else",
             "source": "the host differential in the tree, tests/backports/host/realityfoundation (319 checks, run by tests/backports/host/run-all.sh), and the SDK interface each declaration was read from"
         },
@@ -4467,7 +4467,7 @@
             "introduced": "13.0",
             "minimum": "6.1.3",
             "status": "absent",
-            "reason": "Combine is the separate charon@styx package and this module does not depend on it, so a Publisher cannot be declared here",
+            "reason": "Combine is the separate revenant@combine package and this module does not depend on it, so a Publisher cannot be declared here",
             "effect": "a caller cannot spell this member; the scene's own surface is carried whole and this is not part of it",
             "source": "the host differential in the tree, tests/backports/host/realityfoundation (319 checks, run by tests/backports/host/run-all.sh), and the SDK interface each declaration was read from"
         },

@@ -1,13 +1,13 @@
-#import "CharonDiffable.h"
-#import "CharonLists.h"
+#import "RevenantDiffable.h"
+#import "RevenantLists.h"
 #import <objc/message.h>
 #import <objc/runtime.h>
 
 #pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
 
-static const char CharonMovementKey;
+static const char RevenantMovementKey;
 
-@interface CharonMovement : NSObject
+@interface RevenantMovement : NSObject
 @property (nonatomic, strong) NSIndexPath *original;
 @property (nonatomic, strong) NSIndexPath *current;
 @property (nonatomic, strong) UIImageView *proxy;
@@ -18,7 +18,7 @@ static const char CharonMovementKey;
 @property (nonatomic) BOOL cancelled;
 @end
 
-@implementation CharonMovement
+@implementation RevenantMovement
 @synthesize original = _original;
 @synthesize current = _current;
 @synthesize proxy = _proxy;
@@ -107,16 +107,16 @@ static const char CharonMovementKey;
 
 @end
 
-@implementation UICollectionView (CharonInteractiveMovement)
+@implementation UICollectionView (RevenantInteractiveMovement)
 
-- (CharonMovement *)charon_movement
+- (RevenantMovement *)revenant_movement
 {
-    return objc_getAssociatedObject(self, &CharonMovementKey);
+    return objc_getAssociatedObject(self, &RevenantMovementKey);
 }
 
 - (BOOL)beginInteractiveMovementForItemAtIndexPath:(NSIndexPath *)indexPath
 {
-    if ([self charon_movement] || !indexPath)
+    if ([self revenant_movement] || !indexPath)
         return NO;
     id source = self.dataSource;
     UICollectionViewCell *cell = [self cellForItemAtIndexPath:indexPath];
@@ -128,7 +128,7 @@ static const char CharonMovementKey;
     [cell.layer renderInContext:UIGraphicsGetCurrentContext()];
     UIImage *image = UIGraphicsGetImageFromCurrentImageContext();
     UIGraphicsEndImageContext();
-    CharonMovement *movement = [[CharonMovement alloc] init];
+    RevenantMovement *movement = [[RevenantMovement alloc] init];
     movement.view = self;
     movement.original = indexPath;
     movement.current = indexPath;
@@ -142,23 +142,23 @@ static const char CharonMovementKey;
     movement.proxy.layer.shadowOffset = CGSizeMake(0, 2);
     [self addSubview:movement.proxy];
     cell.alpha = 0;
-    objc_setAssociatedObject(self, &CharonMovementKey, movement, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-    if ([source respondsToSelector:@selector(charon_reorderBegan)])
-        [(UICollectionViewDiffableDataSource *)source charon_reorderBegan];
+    objc_setAssociatedObject(self, &RevenantMovementKey, movement, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    if ([source respondsToSelector:@selector(revenant_reorderBegan)])
+        [(UICollectionViewDiffableDataSource *)source revenant_reorderBegan];
     movement.scroller = [NSTimer scheduledTimerWithTimeInterval:1.0 / 60 target:movement selector:@selector(autoscroll) userInfo:nil repeats:YES];
     return YES;
 }
 
 - (void)updateInteractiveMovementTargetPosition:(CGPoint)targetPosition
 {
-    CharonMovement *movement = [self charon_movement];
+    RevenantMovement *movement = [self revenant_movement];
     if (!movement || movement.ending)
         return;
     movement.position = targetPosition;
     [movement update];
 }
 
-- (void)charon_finishMovement:(CharonMovement *)movement
+- (void)revenant_finishMovement:(RevenantMovement *)movement
 {
     movement.ending = YES;
     [movement.scroller invalidate];
@@ -168,7 +168,7 @@ static const char CharonMovementKey;
     [layout invalidateLayoutWithContext:[layout invalidationContextForEndingInteractiveMovementOfItemsToFinalIndexPaths:@[movement.current]
                                                                                        previousIndexPaths:@[movement.original]
                                                                                        movementCancelled:movement.cancelled]];
-    objc_setAssociatedObject(view, &CharonMovementKey, nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(view, &RevenantMovementKey, nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     UICollectionViewCell *cell = [view cellForItemAtIndexPath:movement.current];
     UIImageView *proxy = movement.proxy;
     [UIView animateWithDuration:0.2 animations:^{
@@ -182,27 +182,27 @@ static const char CharonMovementKey;
 
 - (void)endInteractiveMovement
 {
-    CharonMovement *movement = [self charon_movement];
+    RevenantMovement *movement = [self revenant_movement];
     if (!movement || movement.ending)
         return;
-    [self charon_finishMovement:movement];
+    [self revenant_finishMovement:movement];
     id source = self.dataSource;
-    if ([source respondsToSelector:@selector(charon_reorderEnded)])
-        [(UICollectionViewDiffableDataSource *)source charon_reorderEnded];
+    if ([source respondsToSelector:@selector(revenant_reorderEnded)])
+        [(UICollectionViewDiffableDataSource *)source revenant_reorderEnded];
 }
 
 - (void)cancelInteractiveMovement
 {
-    CharonMovement *movement = [self charon_movement];
+    RevenantMovement *movement = [self revenant_movement];
     if (!movement || movement.ending)
         return;
     movement.cancelled = YES;
     if (![movement.current isEqual:movement.original])
         [movement moveTo:movement.original];
-    [self charon_finishMovement:movement];
+    [self revenant_finishMovement:movement];
     id source = self.dataSource;
-    if ([source respondsToSelector:@selector(charon_reorderCancelled)])
-        [(UICollectionViewDiffableDataSource *)source charon_reorderCancelled];
+    if ([source respondsToSelector:@selector(revenant_reorderCancelled)])
+        [(UICollectionViewDiffableDataSource *)source revenant_reorderCancelled];
 }
 
 @end

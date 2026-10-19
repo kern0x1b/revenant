@@ -14,19 +14,19 @@ typedef struct {
     int green;
     int blue;
     BOOL premultiplied;
-} charon_layout;
+} revenant_layout;
 
-static unsigned charon_clamp(unsigned value)
+static unsigned revenant_clamp(unsigned value)
 {
     return value > 255 ? 255 : value;
 }
 
-static BOOL charon_known_flags(vImage_Flags flags, vImage_Flags allowed)
+static BOOL revenant_known_flags(vImage_Flags flags, vImage_Flags allowed)
 {
     return (flags & ~allowed) == 0;
 }
 
-static vImage_Error charon_check_format(const vImage_CGImageFormat *format, charon_layout *layout)
+static vImage_Error revenant_check_format(const vImage_CGImageFormat *format, revenant_layout *layout)
 {
     if (format->version != 0)
         return kvImageInvalidImageFormat;
@@ -77,7 +77,7 @@ static vImage_Error charon_check_format(const vImage_CGImageFormat *format, char
     return kvImageNoError;
 }
 
-static CGColorSpaceRef charon_space(const vImage_CGImageFormat *format)
+static CGColorSpaceRef revenant_space(const vImage_CGImageFormat *format)
 {
     if (format->colorSpace)
         return CGColorSpaceRetain(format->colorSpace);
@@ -88,10 +88,10 @@ vImage_Error vImageBuffer_InitWithCGImage(vImage_Buffer *buf, vImage_CGImageForm
 {
     if (!format || !image)
         return kvImageNullPointerArgument;
-    if (!charon_known_flags(flags, kvImageNoAllocate | kvImagePrintDiagnosticsToConsole))
+    if (!revenant_known_flags(flags, kvImageNoAllocate | kvImagePrintDiagnosticsToConsole))
         return kvImageUnknownFlagsBit;
-    charon_layout layout;
-    vImage_Error status = charon_check_format(format, &layout);
+    revenant_layout layout;
+    vImage_Error status = revenant_check_format(format, &layout);
     if (status != kvImageNoError)
         return status;
     size_t width = CGImageGetWidth(image), height = CGImageGetHeight(image);
@@ -108,7 +108,7 @@ vImage_Error vImageBuffer_InitWithCGImage(vImage_Buffer *buf, vImage_CGImageForm
         buf->height = height;
         buf->width = width;
     }
-    CGColorSpaceRef space = charon_space(format);
+    CGColorSpaceRef space = revenant_space(format);
     size_t stride = width * 4;
     uint8_t *scratch = calloc(stride * (height ? height : 1), 1);
     CGContextRef context = CGBitmapContextCreate(scratch, width, height, 8, stride, space, kCGImageAlphaPremultipliedLast | kCGBitmapByteOrderDefault);
@@ -146,9 +146,9 @@ vImage_Error vImageBuffer_InitWithCGImage(vImage_Buffer *buf, vImage_CGImageForm
                 if (a == 0) {
                     r = g = b = 0;
                 } else if (a != 255) {
-                    r = (uint8_t)charon_clamp(((unsigned)r * 255 + a / 2) / a);
-                    g = (uint8_t)charon_clamp(((unsigned)g * 255 + a / 2) / a);
-                    b = (uint8_t)charon_clamp(((unsigned)b * 255 + a / 2) / a);
+                    r = (uint8_t)revenant_clamp(((unsigned)r * 255 + a / 2) / a);
+                    g = (uint8_t)revenant_clamp(((unsigned)g * 255 + a / 2) / a);
+                    b = (uint8_t)revenant_clamp(((unsigned)b * 255 + a / 2) / a);
                 }
             }
             pixel[layout.red] = r;
@@ -163,11 +163,11 @@ vImage_Error vImageBuffer_InitWithCGImage(vImage_Buffer *buf, vImage_CGImageForm
 typedef struct {
     void (*callback)(void *userData, void *data);
     void *userData;
-} charon_release;
+} revenant_release;
 
-static void charon_release_data(void *info, const void *data, size_t size)
+static void revenant_release_data(void *info, const void *data, size_t size)
 {
-    charon_release *release = info;
+    revenant_release *release = info;
     if (release->callback)
         release->callback(release->userData, (void *)data);
     else
@@ -179,12 +179,12 @@ CGImageRef vImageCreateCGImageFromBuffer(const vImage_Buffer *buf, const vImage_
 {
     vImage_Error status = kvImageNoError;
     CGImageRef image = NULL;
-    charon_layout layout;
+    revenant_layout layout;
     if (!buf || !format) {
         status = kvImageNullPointerArgument;
-    } else if (!charon_known_flags(flags, kvImageNoAllocate | kvImagePrintDiagnosticsToConsole | kvImageHighQualityResampling | kvImageDoNotTile)) {
+    } else if (!revenant_known_flags(flags, kvImageNoAllocate | kvImagePrintDiagnosticsToConsole | kvImageHighQualityResampling | kvImageDoNotTile)) {
         status = kvImageUnknownFlagsBit;
-    } else if ((status = charon_check_format(format, &layout)) == kvImageNoError) {
+    } else if ((status = revenant_check_format(format, &layout)) == kvImageNoError) {
         size_t minimum = (buf->width * format->bitsPerPixel + 7) / 8;
         if (!buf->data || buf->rowBytes < minimum) {
             status = kvImageInvalidRowBytes;
@@ -192,16 +192,16 @@ CGImageRef vImageCreateCGImageFromBuffer(const vImage_Buffer *buf, const vImage_
             size_t size = buf->rowBytes * buf->height;
             CGDataProviderRef provider;
             if (flags & kvImageNoAllocate) {
-                charon_release *release = malloc(sizeof(*release));
+                revenant_release *release = malloc(sizeof(*release));
                 release->callback = callback;
                 release->userData = userData;
-                provider = CGDataProviderCreateWithData(release, buf->data, size, charon_release_data);
+                provider = CGDataProviderCreateWithData(release, buf->data, size, revenant_release_data);
             } else {
                 CFDataRef copy = CFDataCreate(kCFAllocatorDefault, buf->data, (CFIndex)size);
                 provider = CGDataProviderCreateWithCFData(copy);
                 CFRelease(copy);
             }
-            CGColorSpaceRef space = charon_space(format);
+            CGColorSpaceRef space = revenant_space(format);
             image = CGImageCreate(buf->width, buf->height, format->bitsPerComponent, format->bitsPerPixel, buf->rowBytes, space, format->bitmapInfo, provider, format->decode, false, format->renderingIntent);
             CGColorSpaceRelease(space);
             CGDataProviderRelease(provider);

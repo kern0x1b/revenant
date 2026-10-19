@@ -26,7 +26,7 @@ index ba8dd37..0faa1d8 100644
 +import Foundation
 +import UIKit
 +
-+public enum CharonUIButton {
++public enum RevenantUIButton {
 +    public enum Configuration {
 +        public enum CornerStyle {
 +            case capsule
@@ -65,7 +65,7 @@ index ba8dd37..0faa1d8 100644
 +public enum UICellAccessory {
 +    public enum AccessoryType {
 +        case checkmark
-+        case customView(CharonUIView)
++        case customView(RevenantUIView)
 +        case delete
 +        case detail
 +        case disclosureIndicator
@@ -194,7 +194,7 @@ index ba8dd37..0faa1d8 100644
 +    case verticalBeam(length: CGFloat)
 +}
 +
-+public enum CharonUITabBarController {
++public enum RevenantUITabBarController {
 +    public enum Sidebar {
 +        public enum ScrollTarget {
 +            case footer
@@ -203,7 +203,7 @@ index ba8dd37..0faa1d8 100644
 +    }
 +}
 +
-+public enum CharonUIView {
++public enum RevenantUIView {
 +    public enum LayoutRegion {
 +        public enum AdaptivityAxis {
 +            case horizontal
@@ -214,11 +214,11 @@ index ba8dd37..0faa1d8 100644
 +
 +
 +extension UIButton {
-+    public typealias Configuration = CharonUIButton.Configuration
++    public typealias Configuration = RevenantUIButton.Configuration
 +}
 +extension UITabBarController {
-+    public typealias Sidebar = CharonUITabBarController.Sidebar
++    public typealias Sidebar = RevenantUITabBarController.Sidebar
 +}
 +extension UIView {
-+    public typealias LayoutRegion = CharonUIView.LayoutRegion
++    public typealias LayoutRegion = RevenantUIView.LayoutRegion
 +}

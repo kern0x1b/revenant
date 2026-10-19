@@ -1,10 +1,10 @@
-#import "CharonCompositionalLayout.h"
+#import "RevenantCompositionalLayout.h"
 #import <QuartzCore/QuartzCore.h>
 
-static const CGFloat CharonDecelerationPerMillisecond = 0.998;
-static const CGFloat CharonSpringFrequency = 14;
+static const CGFloat RevenantDecelerationPerMillisecond = 0.998;
+static const CGFloat RevenantSpringFrequency = 14;
 
-@interface CharonCollectionLayoutVisibleItem : NSObject <NSCollectionLayoutVisibleItem> {
+@interface RevenantCollectionLayoutVisibleItem : NSObject <NSCollectionLayoutVisibleItem> {
 @public
     CGRect _frame;
     CGRect _bounds;
@@ -22,7 +22,7 @@ static const CGFloat CharonSpringFrequency = 14;
 }
 @end
 
-@implementation CharonCollectionLayoutVisibleItem
+@implementation RevenantCollectionLayoutVisibleItem
 
 - (CGFloat)alpha { return _alpha; }
 - (void)setAlpha:(CGFloat)alpha { _alpha = alpha; }
@@ -45,7 +45,7 @@ static const CGFloat CharonSpringFrequency = 14;
 
 @end
 
-@implementation CharonOrthogonalController {
+@implementation RevenantOrthogonalController {
 @private
     __weak UICollectionViewLayout *_layout;
     __weak UICollectionView *_view;
@@ -74,30 +74,30 @@ static const CGFloat CharonSpringFrequency = 14;
     return self;
 }
 
-- (CharonSolvedSection *)solvedForSection:(NSInteger)section
+- (RevenantSolvedSection *)solvedForSection:(NSInteger)section
 {
-    for (CharonSolvedSection *solved in _sections) {
+    for (RevenantSolvedSection *solved in _sections) {
         if (solved->section == section)
             return solved;
     }
     return nil;
 }
 
-- (CGFloat)centeringOf:(CharonSolvedSection *)solved atGroup:(NSUInteger)index
+- (CGFloat)centeringOf:(RevenantSolvedSection *)solved atGroup:(NSUInteger)index
 {
     NSArray *widths = solved->groupWidths;
     CGFloat width = index < widths.count ? [widths[index] doubleValue] : 0;
     return (solved->viewport.size.width - width) / 2;
 }
 
-- (CGFloat)minimumOf:(CharonSolvedSection *)solved
+- (CGFloat)minimumOf:(RevenantSolvedSection *)solved
 {
     if (solved->behavior == UICollectionLayoutSectionOrthogonalScrollingBehaviorGroupPagingCentered && solved->contentWidth > 0)
         return -[self centeringOf:solved atGroup:0];
     return 0;
 }
 
-- (CGFloat)maximumOf:(CharonSolvedSection *)solved
+- (CGFloat)maximumOf:(RevenantSolvedSection *)solved
 {
     CGFloat viewport = solved->viewport.size.width;
     CGFloat edge = 0;
@@ -106,12 +106,12 @@ static const CGFloat CharonSpringFrequency = 14;
     return MAX([self minimumOf:solved], solved->contentWidth - viewport + edge);
 }
 
-- (BOOL)scrollable:(CharonSolvedSection *)solved
+- (BOOL)scrollable:(RevenantSolvedSection *)solved
 {
     return [self maximumOf:solved] > [self minimumOf:solved];
 }
 
-- (NSArray *)snapsOf:(CharonSolvedSection *)solved
+- (NSArray *)snapsOf:(RevenantSolvedSection *)solved
 {
     CGFloat low = [self minimumOf:solved], high = [self maximumOf:solved];
     NSMutableArray *snaps = [NSMutableArray array];
@@ -138,7 +138,7 @@ static const CGFloat CharonSpringFrequency = 14;
     return snaps;
 }
 
-- (CGFloat)nearestSnap:(CGFloat)offset of:(CharonSolvedSection *)solved
+- (CGFloat)nearestSnap:(CGFloat)offset of:(RevenantSolvedSection *)solved
 {
     CGFloat best = offset, distance = CGFLOAT_MAX;
     if (solved->behavior == UICollectionLayoutSectionOrthogonalScrollingBehaviorPaging && solved->viewport.size.width > 0) {
@@ -169,22 +169,22 @@ static const CGFloat CharonSpringFrequency = 14;
 
 - (BOOL)viewportShows:(CGRect)shifted section:(NSInteger)section
 {
-    CharonSolvedSection *solved = [self solvedForSection:section];
+    RevenantSolvedSection *solved = [self solvedForSection:section];
     return solved && CGRectIntersectsRect(shifted, solved->extent);
 }
 
-- (NSString *)keyFor:(CharonSolvedElement *)element
+- (NSString *)keyFor:(RevenantSolvedElement *)element
 {
     return [NSString stringWithFormat:@"%ld/%@/%ld/%ld", (long)element->category, element->kind ?: @"", (long)element->indexPath.section, (long)element->indexPath.item];
 }
 
-- (void)runHandlerFor:(CharonSolvedSection *)solved
+- (void)runHandlerFor:(RevenantSolvedSection *)solved
 {
     NSCollectionLayoutSectionVisibleItemsInvalidationHandler handler = solved->handler;
     NSMutableArray *stale = [NSMutableArray array];
     NSMutableDictionary *previous = [NSMutableDictionary dictionary];
     for (NSString *key in _visible) {
-        CharonCollectionLayoutVisibleItem *old = _visible[key];
+        RevenantCollectionLayoutVisibleItem *old = _visible[key];
         if (old->_indexPath.section == solved->section) {
             [stale addObject:key];
             previous[key] = old;
@@ -197,7 +197,7 @@ static const CGFloat CharonSpringFrequency = 14;
     NSMutableArray *items = [NSMutableArray array];
     NSMutableArray *ordered = [NSMutableArray array];
     for (NSInteger rank = 0; rank < 3; rank++) {
-        for (CharonSolvedElement *element in solved->elements) {
+        for (RevenantSolvedElement *element in solved->elements) {
             BOOL supplementary = element->category == 1;
             BOOL base = element->scrolls && element->frame.origin.x < solved->extent.origin.x + solved->extent.size.width && CGRectGetMaxX(element->frame) > solved->extent.origin.x;
             NSInteger mine = supplementary ? 1 : (base ? 0 : 2);
@@ -205,12 +205,12 @@ static const CGFloat CharonSpringFrequency = 14;
                 [ordered addObject:element];
         }
     }
-    for (CharonSolvedElement *element in ordered) {
+    for (RevenantSolvedElement *element in ordered) {
         if (element->scrolls && !CGRectIntersectsRect([self shiftedFrame:element->frame section:solved->section], solved->extent))
             continue;
-        CharonCollectionLayoutVisibleItem *item = previous[[self keyFor:element]];
+        RevenantCollectionLayoutVisibleItem *item = previous[[self keyFor:element]];
         if (!item) {
-            item = [[CharonCollectionLayoutVisibleItem alloc] init];
+            item = [[RevenantCollectionLayoutVisibleItem alloc] init];
             item->_center = CGPointMake(CGRectGetMidX(element->frame), CGRectGetMidY(element->frame));
             item->_alpha = 1;
             item->_zIndex = element->zIndex;
@@ -232,7 +232,7 @@ static const CGFloat CharonSpringFrequency = 14;
 
 - (void)runAllHandlers
 {
-    for (CharonSolvedSection *solved in [_sections reverseObjectEnumerator])
+    for (RevenantSolvedSection *solved in [_sections reverseObjectEnumerator])
         [self runHandlerFor:solved];
 }
 
@@ -241,13 +241,13 @@ static const CGFloat CharonSpringFrequency = 14;
     _view = view;
     _environment = environment;
     NSMutableArray *found = [NSMutableArray array];
-    for (CharonSolvedSection *solved in sections) {
+    for (RevenantSolvedSection *solved in sections) {
         if (solved->orthogonal)
             [found addObject:solved];
     }
     _sections = found;
     NSMutableDictionary *kept = [NSMutableDictionary dictionary];
-    for (CharonSolvedSection *solved in found) {
+    for (RevenantSolvedSection *solved in found) {
         NSNumber *key = @(solved->section);
         CGFloat offset = _offsets[key] ? [_offsets[key] doubleValue] : [self minimumOf:solved];
         kept[key] = @(MIN(MAX(offset, [self minimumOf:solved]), [self maximumOf:solved]));
@@ -276,9 +276,9 @@ static const CGFloat CharonSpringFrequency = 14;
     }
 }
 
-- (CharonSolvedSection *)sectionAtPoint:(CGPoint)point
+- (RevenantSolvedSection *)sectionAtPoint:(CGPoint)point
 {
-    for (CharonSolvedSection *solved in _sections) {
+    for (RevenantSolvedSection *solved in _sections) {
         if (CGRectContainsPoint(solved->viewport, point))
             return solved;
     }
@@ -289,14 +289,14 @@ static const CGFloat CharonSpringFrequency = 14;
 {
     if (recognizer != _pan || !_view)
         return YES;
-    CharonSolvedSection *solved = [self sectionAtPoint:[recognizer locationInView:_view]];
+    RevenantSolvedSection *solved = [self sectionAtPoint:[recognizer locationInView:_view]];
     if (!solved || ![self scrollable:solved])
         return NO;
     CGPoint translation = [_pan translationInView:_view];
     return fabs(translation.x) > fabs(translation.y);
 }
 
-- (CGFloat)rubberBand:(CGFloat)raw of:(CharonSolvedSection *)solved
+- (CGFloat)rubberBand:(CGFloat)raw of:(RevenantSolvedSection *)solved
 {
     CGFloat low = [self minimumOf:solved], high = [self maximumOf:solved], width = MAX(1, solved->viewport.size.width);
     CGFloat (^band)(CGFloat) = ^CGFloat(CGFloat excess) { return (1 - 1 / (excess * 0.55 / width + 1)) * width; };
@@ -307,16 +307,16 @@ static const CGFloat CharonSpringFrequency = 14;
     return raw;
 }
 
-- (void)setOffset:(CGFloat)offset section:(CharonSolvedSection *)solved
+- (void)setOffset:(CGFloat)offset section:(RevenantSolvedSection *)solved
 {
     _offsets[@(solved->section)] = @(offset);
     [self runHandlerFor:solved];
-    [_layout charon_offsetsDidChange];
+    [_layout revenant_offsetsDidChange];
 }
 
 - (void)pan:(UIPanGestureRecognizer *)recognizer
 {
-    CharonSolvedSection *solved = _active >= 0 ? [self solvedForSection:_active] : nil;
+    RevenantSolvedSection *solved = _active >= 0 ? [self solvedForSection:_active] : nil;
     switch (recognizer.state) {
     case UIGestureRecognizerStateBegan: {
         [_link invalidate];
@@ -343,7 +343,7 @@ static const CGFloat CharonSpringFrequency = 14;
     }
 }
 
-- (void)release:(CharonSolvedSection *)solved velocity:(CGFloat)velocity
+- (void)release:(RevenantSolvedSection *)solved velocity:(CGFloat)velocity
 {
     CGFloat offset = [self offsetOfSection:solved->section];
     CGFloat low = [self minimumOf:solved], high = [self maximumOf:solved];
@@ -379,7 +379,7 @@ static const CGFloat CharonSpringFrequency = 14;
 
 - (void)step:(CADisplayLink *)link
 {
-    CharonSolvedSection *solved = [self solvedForSection:_active];
+    RevenantSolvedSection *solved = [self solvedForSection:_active];
     if (!solved) {
         [self finish];
         return;
@@ -393,12 +393,12 @@ static const CGFloat CharonSpringFrequency = 14;
         CGFloat dt = MIN(elapsed, 1.0 / 120);
         elapsed -= dt;
         if (_spring) {
-            CGFloat acceleration = -CharonSpringFrequency * CharonSpringFrequency * (x - _target) - 2 * CharonSpringFrequency * _velocity;
+            CGFloat acceleration = -RevenantSpringFrequency * RevenantSpringFrequency * (x - _target) - 2 * RevenantSpringFrequency * _velocity;
             _velocity += acceleration * dt;
             x += _velocity * dt;
         } else {
             x += _velocity * dt;
-            _velocity *= pow(CharonDecelerationPerMillisecond, dt * 1000);
+            _velocity *= pow(RevenantDecelerationPerMillisecond, dt * 1000);
             if (x < low || x > high) {
                 _spring = YES;
                 _target = x < low ? low : high;
@@ -419,7 +419,7 @@ static const CGFloat CharonSpringFrequency = 14;
 
 - (void)scrollSection:(NSInteger)section toOffset:(CGFloat)offset settle:(BOOL)settle
 {
-    CharonSolvedSection *solved = [self solvedForSection:section];
+    RevenantSolvedSection *solved = [self solvedForSection:section];
     if (!solved)
         return;
     [self finish];
@@ -430,12 +430,12 @@ static const CGFloat CharonSpringFrequency = 14;
     [self setOffset:offset section:solved];
 }
 
-- (void)applyToAttributes:(UICollectionViewLayoutAttributes *)attributes element:(CharonSolvedElement *)element
+- (void)applyToAttributes:(UICollectionViewLayoutAttributes *)attributes element:(RevenantSolvedElement *)element
 {
     CGFloat offset = [self offsetOfSection:element->indexPath.section];
     CGPoint center = attributes.center;
     center.x -= offset;
-    CharonCollectionLayoutVisibleItem *item = _visible[[self keyFor:element]];
+    RevenantCollectionLayoutVisibleItem *item = _visible[[self keyFor:element]];
     if (item) {
         center.x += item->_center.x - item->_baseCenter.x;
         center.y += item->_center.y - item->_baseCenter.y;

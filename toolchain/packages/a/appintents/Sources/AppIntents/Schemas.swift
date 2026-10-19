@@ -1,6 +1,6 @@
 import Foundation
 
-public protocol CharonNamedSchema {
+public protocol RevenantNamedSchema {
     var identifier: String { get }
 }
 
@@ -19,21 +19,21 @@ public struct AssistantSchema: Sendable {
 }
 
 extension AssistantSchemas {
-    public struct IntentSchema: CharonNamedSchema {
+    public struct IntentSchema: RevenantNamedSchema {
         public let identifier: String
 
         public init(_ identifier: String) {
             self.identifier = identifier
         }
     }
-    public struct EntitySchema: CharonNamedSchema {
+    public struct EntitySchema: RevenantNamedSchema {
         public let identifier: String
 
         public init(_ identifier: String) {
             self.identifier = identifier
         }
     }
-    public struct EnumSchema: CharonNamedSchema {
+    public struct EnumSchema: RevenantNamedSchema {
         public let identifier: String
 
         public init(_ identifier: String) {

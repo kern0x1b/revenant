@@ -1,6 +1,6 @@
 #import <CoreSpotlight/CoreSpotlight.h>
 
-static NSCharacterSet *CharonCustomKeyRefused(void)
+static NSCharacterSet *RevenantCustomKeyRefused(void)
 {
     static NSCharacterSet *refused;
     static dispatch_once_t once;
@@ -10,11 +10,11 @@ static NSCharacterSet *CharonCustomKeyRefused(void)
     return refused;
 }
 
-static BOOL CharonCustomKeyNameIsValid(NSString *keyName)
+static BOOL RevenantCustomKeyNameIsValid(NSString *keyName)
 {
     if (!keyName)
         return NO;
-    NSCharacterSet *refused = CharonCustomKeyRefused();
+    NSCharacterSet *refused = RevenantCustomKeyRefused();
     for (NSUInteger i = 0; i < keyName.length; i++) {
         unichar c = [keyName characterAtIndex:i];
         if (c > 127 || [refused characterIsMember:c])
@@ -48,7 +48,7 @@ static BOOL CharonCustomKeyNameIsValid(NSString *keyName)
                          unique:(BOOL)unique
                     multiValued:(BOOL)multiValued
 {
-    if (!CharonCustomKeyNameIsValid(keyName))
+    if (!RevenantCustomKeyNameIsValid(keyName))
         return nil;
     if ((self = [super init])) {
         _keyName = keyName;

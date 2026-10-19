@@ -1,34 +1,34 @@
-#import "CharonMPS.h"
+#import "RevenantMPS.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
-#define CHARON_MPS_NDARRAY_MAX_DIMENSIONS 16
+#define REVENANT_MPS_NDARRAY_MAX_DIMENSIONS 16
 
 typedef struct {
     void *bytes;
     MPSDataType dataType;
     size_t elementSize;
     NSUInteger dimensions;
-    NSUInteger lengths[CHARON_MPS_NDARRAY_MAX_DIMENSIONS];
-} CharonMPSNDArrayLayout;
+    NSUInteger lengths[REVENANT_MPS_NDARRAY_MAX_DIMENSIONS];
+} RevenantMPSNDArrayLayout;
 
-static inline BOOL CharonMPSNDArrayUsable(MPSNDArray *_Nullable array, NSString *what)
+static inline BOOL RevenantMPSNDArrayUsable(MPSNDArray *_Nullable array, NSString *what)
 {
     if (!array) {
-        CharonMPSRefuse(@"%@: no array", what);
+        RevenantMPSRefuse(@"%@: no array", what);
         return NO;
     }
-    if (!CharonMPSDataTypeIsElement(array.dataType)) {
-        CharonMPSRefuse(@"%@: an array of data type %u is not one of the eight element types", what, (unsigned)array.dataType);
+    if (!RevenantMPSDataTypeIsElement(array.dataType)) {
+        RevenantMPSRefuse(@"%@: an array of data type %u is not one of the eight element types", what, (unsigned)array.dataType);
         return NO;
     }
-    if (array.numberOfDimensions == 0 || array.numberOfDimensions > CHARON_MPS_NDARRAY_MAX_DIMENSIONS) {
-        CharonMPSRefuse(@"%@: an array of %lu dimensions, and the header allows 1 to 16", what, (unsigned long)array.numberOfDimensions);
+    if (array.numberOfDimensions == 0 || array.numberOfDimensions > REVENANT_MPS_NDARRAY_MAX_DIMENSIONS) {
+        RevenantMPSRefuse(@"%@: an array of %lu dimensions, and the header allows 1 to 16", what, (unsigned long)array.numberOfDimensions);
         return NO;
     }
     for (NSUInteger i = 0; i < array.numberOfDimensions; i++) {
         if ([array lengthOfDimension:i] == 0) {
-            CharonMPSRefuse(@"%@: dimension %lu of the array is empty", what, (unsigned long)i);
+            RevenantMPSRefuse(@"%@: dimension %lu of the array is empty", what, (unsigned long)i);
             return NO;
         }
     }
@@ -41,94 +41,94 @@ static inline size_t MPSNDArrayRoundedRowBytes(NSUInteger elements, size_t eleme
     return (bytes + 15u) & ~(size_t)15u;
 }
 
-static inline NSUInteger CharonMPSNDArrayElementCount(const CharonMPSNDArrayLayout *layout)
+static inline NSUInteger RevenantMPSNDArrayElementCount(const RevenantMPSNDArrayLayout *layout)
 {
     NSUInteger count = 1;
-    for (NSUInteger i = 0; i < layout->dimensions && i < CHARON_MPS_NDARRAY_MAX_DIMENSIONS; i++)
+    for (NSUInteger i = 0; i < layout->dimensions && i < REVENANT_MPS_NDARRAY_MAX_DIMENSIONS; i++)
         count *= layout->lengths[i];
     return count;
 }
 
-static inline BOOL CharonMPSNDArrayTake(MPSNDArray *array, CharonMPSNDArrayLayout *layout, NSString *what)
+static inline BOOL RevenantMPSNDArrayTake(MPSNDArray *array, RevenantMPSNDArrayLayout *layout, NSString *what)
 {
     memset(layout, 0, sizeof(*layout));
-    for (NSUInteger i = 0; i < CHARON_MPS_NDARRAY_MAX_DIMENSIONS; i++)
+    for (NSUInteger i = 0; i < REVENANT_MPS_NDARRAY_MAX_DIMENSIONS; i++)
         layout->lengths[i] = 1;
-    if (!CharonMPSNDArrayUsable(array, what))
+    if (!RevenantMPSNDArrayUsable(array, what))
         return NO;
     layout->dataType = array.dataType;
     layout->elementSize = MPSSizeofMPSDataType(array.dataType);
     layout->dimensions = array.numberOfDimensions;
     for (NSUInteger i = 0; i < layout->dimensions; i++)
         layout->lengths[i] = [array lengthOfDimension:i];
-    NSUInteger count = CharonMPSNDArrayElementCount(layout);
+    NSUInteger count = RevenantMPSNDArrayElementCount(layout);
     layout->bytes = malloc(count * layout->elementSize);
     if (!layout->bytes) {
-        CharonMPSRefuse(@"%@: no memory for %lu elements of %lu bytes", what, (unsigned long)count, (unsigned long)layout->elementSize);
+        RevenantMPSRefuse(@"%@: no memory for %lu elements of %lu bytes", what, (unsigned long)count, (unsigned long)layout->elementSize);
         return NO;
     }
     [array readBytes:layout->bytes strideBytes:NULL];
     return YES;
 }
 
-static inline void CharonMPSNDArrayGive(CharonMPSNDArrayLayout *layout)
+static inline void RevenantMPSNDArrayGive(RevenantMPSNDArrayLayout *layout)
 {
     free(layout->bytes);
     layout->bytes = NULL;
     layout->dimensions = 0;
 }
 
-static inline void CharonMPSNDArrayPut(MPSNDArray *array, CharonMPSNDArrayLayout *layout)
+static inline void RevenantMPSNDArrayPut(MPSNDArray *array, RevenantMPSNDArrayLayout *layout)
 {
     [array writeBytes:layout->bytes strideBytes:NULL];
-    CharonMPSNDArrayGive(layout);
+    RevenantMPSNDArrayGive(layout);
 }
 
-static inline NSUInteger CharonMPSNDArrayLinearIndex(const CharonMPSNDArrayLayout *layout, const NSUInteger *index)
+static inline NSUInteger RevenantMPSNDArrayLinearIndex(const RevenantMPSNDArrayLayout *layout, const NSUInteger *index)
 {
     NSUInteger linear = 0, stride = 1;
-    for (NSUInteger i = 0; i < layout->dimensions && i < CHARON_MPS_NDARRAY_MAX_DIMENSIONS; i++) {
+    for (NSUInteger i = 0; i < layout->dimensions && i < REVENANT_MPS_NDARRAY_MAX_DIMENSIONS; i++) {
         linear += index[i] * stride;
         stride *= layout->lengths[i];
     }
     return linear;
 }
 
-static inline double CharonMPSNDArrayLoad(const CharonMPSNDArrayLayout *layout, NSUInteger linear)
+static inline double RevenantMPSNDArrayLoad(const RevenantMPSNDArrayLayout *layout, NSUInteger linear)
 {
-    return CharonMPSLoad(layout->bytes, layout->dataType, linear);
+    return RevenantMPSLoad(layout->bytes, layout->dataType, linear);
 }
 
-static inline void CharonMPSNDArrayStore(CharonMPSNDArrayLayout *layout, NSUInteger linear, double value)
+static inline void RevenantMPSNDArrayStore(RevenantMPSNDArrayLayout *layout, NSUInteger linear, double value)
 {
-    CharonMPSStore(layout->bytes, layout->dataType, linear, value);
+    RevenantMPSStore(layout->bytes, layout->dataType, linear, value);
 }
 
-static inline BOOL CharonMPSNDArraySameShape(const CharonMPSNDArrayLayout *a, const CharonMPSNDArrayLayout *b)
+static inline BOOL RevenantMPSNDArraySameShape(const RevenantMPSNDArrayLayout *a, const RevenantMPSNDArrayLayout *b)
 {
     if (a->dimensions != b->dimensions)
         return NO;
-    for (NSUInteger i = 0; i < a->dimensions && i < CHARON_MPS_NDARRAY_MAX_DIMENSIONS; i++)
+    for (NSUInteger i = 0; i < a->dimensions && i < REVENANT_MPS_NDARRAY_MAX_DIMENSIONS; i++)
         if (a->lengths[i] != b->lengths[i])
             return NO;
     return YES;
 }
 
-static inline void CharonMPSNDArrayIndexOf(const CharonMPSNDArrayLayout *layout, NSUInteger linear, NSUInteger *index)
+static inline void RevenantMPSNDArrayIndexOf(const RevenantMPSNDArrayLayout *layout, NSUInteger linear, NSUInteger *index)
 {
-    for (NSUInteger i = 0; i < CHARON_MPS_NDARRAY_MAX_DIMENSIONS; i++)
+    for (NSUInteger i = 0; i < REVENANT_MPS_NDARRAY_MAX_DIMENSIONS; i++)
         index[i] = 0;
-    for (NSUInteger i = 0; i < layout->dimensions && i < CHARON_MPS_NDARRAY_MAX_DIMENSIONS; i++) {
+    for (NSUInteger i = 0; i < layout->dimensions && i < REVENANT_MPS_NDARRAY_MAX_DIMENSIONS; i++) {
         index[i] = linear % layout->lengths[i];
         linear /= layout->lengths[i];
     }
 }
 
-static inline void CharonMPSBatchIndex(const CharonMPSNDArrayLayout *layout, NSUInteger batch,
+static inline void RevenantMPSBatchIndex(const RevenantMPSNDArrayLayout *layout, NSUInteger batch,
                                        NSUInteger matrices, NSUInteger first, NSUInteger second,
                                        NSUInteger *index)
 {
-    for (NSUInteger i = 0; i < CHARON_MPS_NDARRAY_MAX_DIMENSIONS; i++)
+    for (NSUInteger i = 0; i < REVENANT_MPS_NDARRAY_MAX_DIMENSIONS; i++)
         index[i] = 0;
     index[0] = first;
     if (layout->dimensions > 1)
@@ -139,7 +139,7 @@ static inline void CharonMPSBatchIndex(const CharonMPSNDArrayLayout *layout, NSU
         index[3] = (matrices < layout->lengths[3]) ? matrices : 0;
 }
 
-static inline NSUInteger CharonMPSNDArrayZeroEdge(NSInteger position, NSUInteger length)
+static inline NSUInteger RevenantMPSNDArrayZeroEdge(NSInteger position, NSUInteger length)
 {
     if (position < 0)
         return 0;
@@ -148,22 +148,22 @@ static inline NSUInteger CharonMPSNDArrayZeroEdge(NSInteger position, NSUInteger
     return (NSUInteger)position;
 }
 
-@protocol CharonMPSNDArrayAxisKernel <NSObject>
+@protocol RevenantMPSNDArrayAxisKernel <NSObject>
 - (NSUInteger)axis;
 @end
 
 typedef struct {
-    NSInteger offsets[CHARON_MPS_NDARRAY_MAX_DIMENSIONS];
-    NSUInteger kernelSizes[CHARON_MPS_NDARRAY_MAX_DIMENSIONS];
-    NSInteger strides[CHARON_MPS_NDARRAY_MAX_DIMENSIONS];
-    NSUInteger dilationRates[CHARON_MPS_NDARRAY_MAX_DIMENSIONS];
+    NSInteger offsets[REVENANT_MPS_NDARRAY_MAX_DIMENSIONS];
+    NSUInteger kernelSizes[REVENANT_MPS_NDARRAY_MAX_DIMENSIONS];
+    NSInteger strides[REVENANT_MPS_NDARRAY_MAX_DIMENSIONS];
+    NSUInteger dilationRates[REVENANT_MPS_NDARRAY_MAX_DIMENSIONS];
     MPSImageEdgeMode edgeMode;
-} CharonMPSNDArrayFilter;
+} RevenantMPSNDArrayFilter;
 
-static inline CharonMPSNDArrayFilter CharonMPSNDArrayDefaultFilter(void)
+static inline RevenantMPSNDArrayFilter RevenantMPSNDArrayDefaultFilter(void)
 {
-    CharonMPSNDArrayFilter filter;
-    for (NSUInteger i = 0; i < CHARON_MPS_NDARRAY_MAX_DIMENSIONS; i++) {
+    RevenantMPSNDArrayFilter filter;
+    for (NSUInteger i = 0; i < REVENANT_MPS_NDARRAY_MAX_DIMENSIONS; i++) {
         filter.offsets[i] = 0;
         filter.kernelSizes[i] = 1;
         filter.strides[i] = 1;
@@ -174,26 +174,26 @@ static inline CharonMPSNDArrayFilter CharonMPSNDArrayDefaultFilter(void)
 }
 
 
-@interface MPSNDArrayMultiaryBase (CharonMPSNDArrayKernel)
-- (CharonMPSNDArrayFilter)charon_mps_filterAtSourceIndex:(NSUInteger)sourceIndex;
-- (void)charon_mps_setFilter:(CharonMPSNDArrayFilter)filter atSourceIndex:(NSUInteger)sourceIndex;
-- (NSUInteger)charon_mps_sourceCount;
-- (NSUInteger)charon_mps_sourceGradientIndex;
+@interface MPSNDArrayMultiaryBase (RevenantMPSNDArrayKernel)
+- (RevenantMPSNDArrayFilter)revenant_mps_filterAtSourceIndex:(NSUInteger)sourceIndex;
+- (void)revenant_mps_setFilter:(RevenantMPSNDArrayFilter)filter atSourceIndex:(NSUInteger)sourceIndex;
+- (NSUInteger)revenant_mps_sourceCount;
+- (NSUInteger)revenant_mps_sourceGradientIndex;
 @end
 
-@interface MPSNDArrayMultiaryKernel (CharonMPSNDArrayKernel)
-- (BOOL)charon_mps_run:(NSArray<MPSNDArray *> *)sources destination:(MPSNDArray *)destination;
-- (void)charon_mps_fillFromSources:(CharonMPSNDArrayLayout *)sources count:(NSUInteger)count into:(CharonMPSNDArrayLayout *)destination;
+@interface MPSNDArrayMultiaryKernel (RevenantMPSNDArrayKernel)
+- (BOOL)revenant_mps_run:(NSArray<MPSNDArray *> *)sources destination:(MPSNDArray *)destination;
+- (void)revenant_mps_fillFromSources:(RevenantMPSNDArrayLayout *)sources count:(NSUInteger)count into:(RevenantMPSNDArrayLayout *)destination;
 @end
 
-@interface MPSNDArrayGradientState (CharonMPSNDArrayKernel)
-- (void)charon_mps_recordFor:(MPSNDArrayMultiaryBase *)kernel sources:(NSArray<MPSNDArray *> *)sources;
-- (CharonMPSNDArrayFilter)charon_mps_filterOfSource:(NSUInteger)index;
-- (NSUInteger)charon_mps_dimensionsOfSource:(NSUInteger)index;
-- (NSUInteger)charon_mps_lengthOfSource:(NSUInteger)index dimension:(NSUInteger)dimension;
+@interface MPSNDArrayGradientState (RevenantMPSNDArrayKernel)
+- (void)revenant_mps_recordFor:(MPSNDArrayMultiaryBase *)kernel sources:(NSArray<MPSNDArray *> *)sources;
+- (RevenantMPSNDArrayFilter)revenant_mps_filterOfSource:(NSUInteger)index;
+- (NSUInteger)revenant_mps_dimensionsOfSource:(NSUInteger)index;
+- (NSUInteger)revenant_mps_lengthOfSource:(NSUInteger)index dimension:(NSUInteger)dimension;
 @end
 
-static inline NSInteger CharonMPSNDArrayApplyEdgeMode(NSInteger position, NSUInteger length, MPSImageEdgeMode mode)
+static inline NSInteger RevenantMPSNDArrayApplyEdgeMode(NSInteger position, NSUInteger length, MPSImageEdgeMode mode)
 {
     if (length == 0)
         return 0;
@@ -201,7 +201,7 @@ static inline NSInteger CharonMPSNDArrayApplyEdgeMode(NSInteger position, NSUInt
     case MPSImageEdgeModeZero:
         return (position < 0 || (NSUInteger)position >= length) ? 0 : position;
     case MPSImageEdgeModeClamp:
-        return CharonMPSNDArrayZeroEdge(position, length) == (NSUInteger)position ? position
+        return RevenantMPSNDArrayZeroEdge(position, length) == (NSUInteger)position ? position
              : (position < 0 ? 0 : (NSInteger)(length - 1));
     case MPSImageEdgeModeMirror: {
         if (length == 1)

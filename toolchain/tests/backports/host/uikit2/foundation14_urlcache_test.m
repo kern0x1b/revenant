@@ -43,6 +43,6 @@ int main(void)
         NSURLCache *theirs = [[NSURLCache alloc] initWithMemoryCapacity:4096 diskCapacity:8192 directoryURL:nil];
         CHECK(nothing.memoryCapacity == theirs.memoryCapacity && nothing.diskCapacity == theirs.diskCapacity, "no directory keeps the capacities and the default place");
     }
-    printf("checks=%d failures=%d\n", charon_checks, charon_failures);
-    return charon_failures;
+    printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
+    return revenant_failures;
 }

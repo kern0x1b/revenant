@@ -5,7 +5,7 @@ set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 ACCELERATE=${ACCELERATE:-$here/../../../../packages/a/apple-backports/Accelerate}
-build=${VDSPBIQUAD6_BUILD:-$(runs_folder charon-vdspbiquad6-host)}
+build=${VDSPBIQUAD6_BUILD:-$(runs_folder revenant-vdspbiquad6-host)}
 
 # SAN=1 builds and links the renamed port objects and the differential under AddressSanitizer, through
 # this script's own flags, so the objects are made exactly the way the plain run makes them. An
@@ -36,7 +36,7 @@ for part in ("ios6sve.json",):
             print(entry["api"].rstrip("()"))
 PY
 ); do
-    renames="$renames -D$name=charon_host_$name"
+    renames="$renames -D$name=revenant_host_$name"
 done
 
 objects=""

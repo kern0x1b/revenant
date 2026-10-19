@@ -33,14 +33,14 @@ function run(opt)
     local out = opt.out or steps.env("PHOTOBRACKET_RUN")
                 or steps.workspace().run("v-impl-avf-1", "photobracket-" .. steps.stamp())
     steps.copy(path.join(HERE, "app"), {"xmake.lua", "Info.plist", "control", "main.m"}, out)
-    local envs = {CHARPHOTOBRACKET_ROOT = steps.charon(), CHARPHOTOBRACKET_MINIMUM = "6.1.3"}
+    local envs = {CHARPHOTOBRACKET_ROOT = steps.revenant(), CHARPHOTOBRACKET_MINIMUM = "6.1.3"}
     steps.required({what = "the probe", verb = "configure", curdir = out, envs = envs,
                     argv = {"f", "-p", "iphoneos", "-a", "armv7", "-y"}, log = path.join(out, "configure.log")})
     steps.required({what = "the probe", verb = "install", curdir = out, envs = envs,
                     argv = table.join(DEVICE, {"install"}), log = path.join(out, "install.log")})
     local run_status = steps.spawn({curdir = out, envs = envs, log = path.join(out, "launch.log"),
                                     argv = table.join(DEVICE, {"run",
-                                                      "/Applications/charonphotobracketprobe.app/charonphotobracketprobe"})})
+                                                      "/Applications/revenantphotobracketprobe.app/revenantphotobracketprobe"})})
     steps.spawn({curdir = out, envs = envs, argv = table.join(DEVICE, {"log"}), log = path.join(out, "emulate.log")})
     print("run folder: %s (run status %d: the probe's exit status is its failure count)", out, run_status)
     local result = verdict(steps.read(path.join(out, "launch.log")), out)

@@ -29,7 +29,7 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-build=${BUILD:-$(runs_fresh charon-videotoolbox-pixelrotation)}
+build=${BUILD:-$(runs_fresh revenant-videotoolbox-pixelrotation)}
 mkdir -p "$build"
 
 frameworks="-framework VideoToolbox -framework CoreVideo -framework CoreMedia -framework Foundation -framework IOSurface"

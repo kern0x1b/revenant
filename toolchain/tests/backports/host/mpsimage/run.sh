@@ -3,7 +3,7 @@
 #
 # Two builds of one case file:
 #   * the system build links the host's MetalPerformanceShaders and runs the release's kernels;
-#   * the port build is marked -DCHARON_PORT_BUILD, is renamed through a header generated from the
+#   * the port build is marked -DREVENANT_PORT_BUILD, is renamed through a header generated from the
 #     classes THIS package's objects actually define, and links those objects with the Metal band's, so
 #     the MPSImage it builds and the answer it reads back are the port's own. A case that ran against the
 #     release's class would compare the release with itself, and the two builds' `class …` lines say
@@ -31,12 +31,12 @@ sdk=$(xcrun --show-sdk-path)
 target="-target arm64-apple-macos13.0 -isysroot $sdk"
 # NO Metal-band objects, and the host's -framework Metal instead - the route mpscnn takes
 # (`metal sources in mpscnn run.sh: 0`). The band cannot be built for a host binary here:
-# Metal/CharonMetal.h:3 includes <OpenGLES/EAGL.h> with no guard, and the iPhoneOS SDK keeps that
+# Metal/RevenantMetal.h:3 includes <OpenGLES/EAGL.h> with no guard, and the iPhoneOS SDK keeps that
 # header at System/Library/Frameworks/OpenGLES.framework/Headers/EAGL.h, which no single -I makes
 # reachable as <OpenGLES/EAGL.h>:
 #
 #   $ xcrun clang … -I"$SDK/System/Library/Frameworks" -c Metal/CAMetalLayer8.m
-#   ./CharonMetal.h:3:9: fatal error: 'OpenGLES/EAGL.h' file not found
+#   ./RevenantMetal.h:3:9: fatal error: 'OpenGLES/EAGL.h' file not found
 #
 # So in THIS harness the port's MPSImage resolves MTLTextureDescriptor to the HOST's class, and that
 # difference between the harness and the shipped build is named in
@@ -59,7 +59,7 @@ for line in open(sys.argv[1]):
         defined.add(line[len("_OBJC_CLASS_$_"):])
 with open(sys.argv[2], "w") as out:
     for name in sorted(defined):
-        out.write("#define %s Charon%s\n" % (name, name))
+        out.write("#define %s Revenant%s\n" % (name, name))
 PY
 n_def=$(grep -c define "$build/rename.h")
 n_cls=$(wc -l < "$build/port-defines.txt" | tr -d ' ')
@@ -85,10 +85,10 @@ build_one() {
     for source in "$mps"/*.m; do
         _s=$(basename "$source" .m)
         xcrun clang -fobjc-arc -fvisibility=hidden $target $quiet -I"$mps" -include "$build/rename.h" \
-            -DCHARON_PLANT=$_plant -c "$source" -o "$_objdir/$_s.o" || return 1
+            -DREVENANT_PLANT=$_plant -c "$source" -o "$_objdir/$_s.o" || return 1
         _objects="$_objects $_objdir/$_s.o"
     done
-    xcrun clang -fobjc-arc $target $quiet -DCHARON_PORT_BUILD=1 -DCHARON_PLANT=$_plant \
+    xcrun clang -fobjc-arc $target $quiet -DREVENANT_PORT_BUILD=1 -DREVENANT_PLANT=$_plant \
         -include "$build/rename.h" "$here/image-cases.m" $_objects \
         -framework Metal -framework MetalPerformanceShaders -o "$build/$_name" 2>/dev/null || return 1
     "$build/$_name" > "$build/$_name.txt" 2> "$build/$_name.err"

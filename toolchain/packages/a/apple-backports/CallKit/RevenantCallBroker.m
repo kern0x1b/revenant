@@ -1,6 +1,6 @@
-#import "CharonCallKit.h"
+#import "RevenantCallKit.h"
 
-@implementation CharonCallBroker {
+@implementation RevenantCallBroker {
     NSHashTable *_providers;
     NSHashTable *_observers;
     NSMutableArray<CXCall *> *_calls;
@@ -8,10 +8,10 @@
 
 + (instancetype)shared
 {
-    static CharonCallBroker *shared;
+    static RevenantCallBroker *shared;
     static dispatch_once_t once;
     dispatch_once(&once, ^{
-        shared = [[CharonCallBroker alloc] init];
+        shared = [[RevenantCallBroker alloc] init];
     });
     return shared;
 }
@@ -44,7 +44,7 @@
 {
     @synchronized (self) {
         for (CXProvider *provider in _providers) {
-            if ([provider charon_isValid])
+            if ([provider revenant_isValid])
                 return provider;
         }
     }
@@ -70,7 +70,7 @@
     NSMutableArray *found = [NSMutableArray array];
     @synchronized (self) {
         for (CXCall *call in _calls)
-            [found addObject:[call charon_snapshot]];
+            [found addObject:[call revenant_snapshot]];
     }
     return found;
 }
@@ -93,7 +93,7 @@
     NSMutableArray *found = [NSMutableArray array];
     @synchronized (self) {
         for (CXCall *call in _calls) {
-            if (call.charon_provider == provider)
+            if (call.revenant_provider == provider)
                 [found addObject:call];
         }
     }
@@ -105,9 +105,9 @@
     NSMutableSet *groups = [NSMutableSet set];
     @synchronized (self) {
         for (CXCall *call in _calls) {
-            if (call.charon_provider != provider || call.hasEnded)
+            if (call.revenant_provider != provider || call.hasEnded)
                 continue;
-            [groups addObject:call.charon_groupedWith ?: call.UUID];
+            [groups addObject:call.revenant_groupedWith ?: call.UUID];
         }
     }
     return groups.count;
@@ -129,32 +129,32 @@
 - (void)removeCall:(CXCall *)call
 {
     BOOL wasConnected = call.hasConnected;
-    CXProvider *provider = call.charon_provider;
-    [call charon_setHasEnded:YES];
+    CXProvider *provider = call.revenant_provider;
+    [call revenant_setHasEnded:YES];
     @synchronized (self) {
         [_calls removeObjectIdenticalTo:call];
     }
     [self callChanged:call];
-    [[CharonCallScreen shared] dismiss:call];
+    [[RevenantCallScreen shared] dismiss:call];
     if (wasConnected && provider)
-        [[CharonCallAudio shared] callEndedFor:provider];
+        [[RevenantCallAudio shared] callEndedFor:provider];
 }
 
 - (void)callConnected:(CXCall *)call
 {
-    if (call.charon_provider)
-        [[CharonCallAudio shared] callConnectedFor:call.charon_provider];
+    if (call.revenant_provider)
+        [[RevenantCallAudio shared] callConnectedFor:call.revenant_provider];
 }
 
 - (void)callChanged:(CXCall *)call
 {
-    CXCall *snapshot = [call charon_snapshot];
+    CXCall *snapshot = [call revenant_snapshot];
     NSArray *observers;
     @synchronized (self) {
         observers = _observers.allObjects;
     }
     for (CXCallObserver *observer in observers)
-        [observer charon_callChanged:snapshot];
+        [observer revenant_callChanged:snapshot];
 }
 
 - (void)applyAction:(CXAction *)action
@@ -165,35 +165,35 @@
     CXCall *call = [self callWithUUID:call_action.callUUID];
     if (!call)
         return;
-    NSDate *date = call_action.charon_date ?: [NSDate date];
-    if (!action.charon_fulfilled) {
+    NSDate *date = call_action.revenant_date ?: [NSDate date];
+    if (!action.revenant_fulfilled) {
         if ([action isKindOfClass:[CXStartCallAction class]] || [action isKindOfClass:[CXAnswerCallAction class]]) {
-            call.charon_dateEnded = date;
-            call.charon_endedReason = CXCallEndedReasonFailed;
+            call.revenant_dateEnded = date;
+            call.revenant_endedReason = CXCallEndedReasonFailed;
             [self removeCall:call];
         }
         return;
     }
     if ([action isKindOfClass:[CXStartCallAction class]]) {
-        call.charon_dateStartedConnecting = call.charon_dateStartedConnecting ?: date;
+        call.revenant_dateStartedConnecting = call.revenant_dateStartedConnecting ?: date;
         [self callChanged:call];
     } else if ([action isKindOfClass:[CXAnswerCallAction class]]) {
-        [[CharonCallScreen shared] dismiss:call];
-        call.charon_dateConnected = date;
-        [call charon_setHasConnected:YES];
+        [[RevenantCallScreen shared] dismiss:call];
+        call.revenant_dateConnected = date;
+        [call revenant_setHasConnected:YES];
         [self callChanged:call];
         [self callConnected:call];
     } else if ([action isKindOfClass:[CXEndCallAction class]]) {
-        call.charon_dateEnded = date;
+        call.revenant_dateEnded = date;
         [self removeCall:call];
     } else if ([action isKindOfClass:[CXSetHeldCallAction class]]) {
-        [call charon_setOnHold:((CXSetHeldCallAction *)action).isOnHold];
+        [call revenant_setOnHold:((CXSetHeldCallAction *)action).isOnHold];
         [self callChanged:call];
     } else if ([action isKindOfClass:[CXSetMutedCallAction class]]) {
-        call.charon_muted = ((CXSetMutedCallAction *)action).isMuted;
+        call.revenant_muted = ((CXSetMutedCallAction *)action).isMuted;
         [self callChanged:call];
     } else if ([action isKindOfClass:[CXSetGroupCallAction class]]) {
-        call.charon_groupedWith = ((CXSetGroupCallAction *)action).callUUIDToGroupWith;
+        call.revenant_groupedWith = ((CXSetGroupCallAction *)action).callUUIDToGroupWith;
         [self callChanged:call];
     }
 }

@@ -1,9 +1,9 @@
-#import "CharonNW.h"
-#import "CharonNWSupport.h"
+#import "RevenantNW.h"
+#import "RevenantNWSupport.h"
 
 #include <string.h>
 
-@class CharonNWProtocolMetadata;
+@class RevenantNWProtocolMetadata;
 
 #pragma mark - definition and options
 
@@ -11,7 +11,7 @@ nw_protocol_definition_t nw_framer_create_definition(const char *identifier, uin
 {
     if (!identifier || !*identifier)
         return NULL;
-    CharonNWProtocolDefinition *definition = [[CharonNWProtocolDefinition alloc] init];
+    RevenantNWProtocolDefinition *definition = [[RevenantNWProtocolDefinition alloc] init];
     definition->_family = @(identifier);
     definition->_identifier = @(identifier);
     definition->_flags = flags;
@@ -23,8 +23,8 @@ nw_protocol_options_t nw_framer_create_options(nw_protocol_definition_t framer_d
 {
     if (!framer_definition)
         return NULL;
-    CharonNWProtocolOptions *options = [[CharonNWProtocolOptions alloc] init];
-    options->_definition = (CharonNWProtocolDefinition *)framer_definition;
+    RevenantNWProtocolOptions *options = [[RevenantNWProtocolOptions alloc] init];
+    options->_definition = (RevenantNWProtocolDefinition *)framer_definition;
     options->_values = [NSMutableDictionary dictionary];
     options->_objects = [NSMutableDictionary dictionary];
     return options;
@@ -36,15 +36,15 @@ nw_framer_message_t nw_framer_message_create(nw_framer_t framer)
 {
     if (!framer)
         return NULL;
-    return nw_framer_protocol_create_message(((CharonNWFramer *)framer)->_definition);
+    return nw_framer_protocol_create_message(((RevenantNWFramer *)framer)->_definition);
 }
 
 nw_framer_message_t nw_framer_protocol_create_message(nw_protocol_definition_t definition)
 {
     if (!definition)
         return NULL;
-    CharonNWProtocolMetadata *message = [[CharonNWProtocolMetadata alloc] init];
-    message->_definition = (CharonNWProtocolDefinition *)definition;
+    RevenantNWProtocolMetadata *message = [[RevenantNWProtocolMetadata alloc] init];
+    message->_definition = (RevenantNWProtocolDefinition *)definition;
     message->_values = [NSMutableDictionary dictionary];
     message->_objects = [NSMutableDictionary dictionary];
     return message;
@@ -52,16 +52,16 @@ nw_framer_message_t nw_framer_protocol_create_message(nw_protocol_definition_t d
 
 bool nw_protocol_metadata_is_framer_message(nw_protocol_metadata_t metadata)
 {
-    CharonNWProtocolMetadata *value = (CharonNWProtocolMetadata *)metadata;
+    RevenantNWProtocolMetadata *value = (RevenantNWProtocolMetadata *)metadata;
     if (!value)
         return false;
-    CharonNWProtocolDefinition *definition = value->_definition;
+    RevenantNWProtocolDefinition *definition = value->_definition;
     return definition->_payload != nil || [definition->_family isEqualToString:@"nw_ws"];
 }
 
 void nw_framer_message_set_value(nw_framer_message_t message, const char *key, void *value, nw_framer_message_dispose_value_t dispose_value)
 {
-    CharonNWProtocolMetadata *held = (CharonNWProtocolMetadata *)message;
+    RevenantNWProtocolMetadata *held = (RevenantNWProtocolMetadata *)message;
     if (!held || !key)
         return;
     NSString *name = @(key);
@@ -72,7 +72,7 @@ void nw_framer_message_set_value(nw_framer_message_t message, const char *key, v
 
 bool nw_framer_message_access_value(nw_framer_message_t message, const char *key, bool (^access_value)(const void *value))
 {
-    CharonNWProtocolMetadata *held = (CharonNWProtocolMetadata *)message;
+    RevenantNWProtocolMetadata *held = (RevenantNWProtocolMetadata *)message;
     if (!held || !key || !access_value)
         return false;
     NSValue *boxed = held->_objects[@(key)];
@@ -81,7 +81,7 @@ bool nw_framer_message_access_value(nw_framer_message_t message, const char *key
 
 void nw_framer_message_set_object_value(nw_framer_message_t message, const char *key, id value)
 {
-    CharonNWProtocolMetadata *held = (CharonNWProtocolMetadata *)message;
+    RevenantNWProtocolMetadata *held = (RevenantNWProtocolMetadata *)message;
     if (!held || !key)
         return;
     if (value)
@@ -92,7 +92,7 @@ void nw_framer_message_set_object_value(nw_framer_message_t message, const char 
 
 id nw_framer_message_copy_object_value(nw_framer_message_t message, const char *key)
 {
-    CharonNWProtocolMetadata *held = (CharonNWProtocolMetadata *)message;
+    RevenantNWProtocolMetadata *held = (RevenantNWProtocolMetadata *)message;
     if (!held || !key)
         return nil;
     return held->_objects[@(key)];
@@ -102,57 +102,57 @@ id nw_framer_message_copy_object_value(nw_framer_message_t message, const char *
 
 nw_parameters_t nw_framer_copy_parameters(nw_framer_t framer)
 {
-    return framer ? ((CharonNWFramer *)framer)->_parameters : NULL;
+    return framer ? ((RevenantNWFramer *)framer)->_parameters : NULL;
 }
 
 nw_endpoint_t nw_framer_copy_local_endpoint(nw_framer_t framer)
 {
-    return framer ? ((CharonNWFramer *)framer)->_localEndpoint : NULL;
+    return framer ? ((RevenantNWFramer *)framer)->_localEndpoint : NULL;
 }
 
 nw_endpoint_t nw_framer_copy_remote_endpoint(nw_framer_t framer)
 {
-    return framer ? ((CharonNWFramer *)framer)->_remoteEndpoint : NULL;
+    return framer ? ((RevenantNWFramer *)framer)->_remoteEndpoint : NULL;
 }
 
 void nw_framer_set_input_handler(nw_framer_t framer, nw_framer_input_handler_t input_handler)
 {
-    CharonNWFramer *value = (CharonNWFramer *)framer;
+    RevenantNWFramer *value = (RevenantNWFramer *)framer;
     if (value)
         value->_inputHandler = [input_handler copy];
 }
 
 void nw_framer_set_output_handler(nw_framer_t framer, nw_framer_output_handler_t output_handler)
 {
-    CharonNWFramer *value = (CharonNWFramer *)framer;
+    RevenantNWFramer *value = (RevenantNWFramer *)framer;
     if (value)
         value->_outputHandler = [output_handler copy];
 }
 
 void nw_framer_set_stop_handler(nw_framer_t framer, nw_framer_stop_handler_t stop_handler)
 {
-    CharonNWFramer *value = (CharonNWFramer *)framer;
+    RevenantNWFramer *value = (RevenantNWFramer *)framer;
     if (value)
         value->_stopHandler = [stop_handler copy];
 }
 
 void nw_framer_set_cleanup_handler(nw_framer_t framer, nw_framer_cleanup_handler_t cleanup_handler)
 {
-    CharonNWFramer *value = (CharonNWFramer *)framer;
+    RevenantNWFramer *value = (RevenantNWFramer *)framer;
     if (value)
         value->_cleanupHandler = [cleanup_handler copy];
 }
 
 void nw_framer_set_wakeup_handler(nw_framer_t framer, nw_framer_wakeup_handler_t wakeup_handler)
 {
-    CharonNWFramer *value = (CharonNWFramer *)framer;
+    RevenantNWFramer *value = (RevenantNWFramer *)framer;
     if (value)
         value->_wakeupHandler = [wakeup_handler copy];
 }
 
 void nw_framer_async(nw_framer_t framer, nw_framer_block_t async_block)
 {
-    CharonNWFramer *value = (CharonNWFramer *)framer;
+    RevenantNWFramer *value = (RevenantNWFramer *)framer;
     if (!value || !async_block)
         return;
     if (value->_queue)
@@ -163,14 +163,14 @@ void nw_framer_async(nw_framer_t framer, nw_framer_block_t async_block)
 
 void nw_framer_mark_ready(nw_framer_t framer)
 {
-    CharonNWFramer *value = (CharonNWFramer *)framer;
+    RevenantNWFramer *value = (RevenantNWFramer *)framer;
     if (value)
         value->_ready = YES;
 }
 
 void nw_framer_mark_failed_with_error(nw_framer_t framer, int error_code)
 {
-    CharonNWFramer *value = (CharonNWFramer *)framer;
+    RevenantNWFramer *value = (RevenantNWFramer *)framer;
     if (!value)
         return;
     value->_failed = YES;
@@ -179,22 +179,22 @@ void nw_framer_mark_failed_with_error(nw_framer_t framer, int error_code)
 
 void nw_framer_pass_through_input(nw_framer_t framer)
 {
-    CharonNWFramer *value = (CharonNWFramer *)framer;
+    RevenantNWFramer *value = (RevenantNWFramer *)framer;
     if (value)
         value->_inputPassThrough = YES;
 }
 
 void nw_framer_pass_through_output(nw_framer_t framer)
 {
-    CharonNWFramer *value = (CharonNWFramer *)framer;
+    RevenantNWFramer *value = (RevenantNWFramer *)framer;
     if (value)
         value->_outputPassThrough = YES;
 }
 
 bool nw_framer_prepend_application_protocol(nw_framer_t framer, nw_protocol_options_t protocol_options)
 {
-    CharonNWFramer *value = (CharonNWFramer *)framer;
-    CharonNWProtocolOptions *protocol = (CharonNWProtocolOptions *)protocol_options;
+    RevenantNWFramer *value = (RevenantNWFramer *)framer;
+    RevenantNWProtocolOptions *protocol = (RevenantNWProtocolOptions *)protocol_options;
     if (!value || !protocol)
         return false;
     NSString *family = protocol->_definition ? protocol->_definition->_family : nil;
@@ -208,7 +208,7 @@ bool nw_framer_prepend_application_protocol(nw_framer_t framer, nw_protocol_opti
 
 void nw_framer_schedule_wakeup(nw_framer_t framer, uint64_t milliseconds)
 {
-    CharonNWFramer *value = (CharonNWFramer *)framer;
+    RevenantNWFramer *value = (RevenantNWFramer *)framer;
     if (!value)
         return;
     uint64_t generation = ++value->_wakeupGeneration;
@@ -232,7 +232,7 @@ void nw_framer_schedule_wakeup(nw_framer_t framer, uint64_t milliseconds)
 
 bool nw_framer_parse_input(nw_framer_t framer, size_t minimum_incomplete_length, size_t maximum_length, uint8_t *temp_buffer, nw_framer_parse_completion_t parse)
 {
-    CharonNWFramer *value = (CharonNWFramer *)framer;
+    RevenantNWFramer *value = (RevenantNWFramer *)framer;
     if (!value || !parse)
         return false;
     size_t available = value->_input.length;
@@ -255,7 +255,7 @@ bool nw_framer_parse_input(nw_framer_t framer, size_t minimum_incomplete_length,
 
 void nw_framer_deliver_input(nw_framer_t framer, const uint8_t *input_buffer, size_t input_length, nw_framer_message_t message, bool is_complete)
 {
-    CharonNWFramer *value = (CharonNWFramer *)framer;
+    RevenantNWFramer *value = (RevenantNWFramer *)framer;
     if (!value || !input_buffer || !input_length)
         return;
     [value->_delivered addObject:@[(id)[NSData dataWithBytes:input_buffer length:input_length],
@@ -264,7 +264,7 @@ void nw_framer_deliver_input(nw_framer_t framer, const uint8_t *input_buffer, si
 
 bool nw_framer_deliver_input_no_copy(nw_framer_t framer, size_t input_length, nw_framer_message_t message, bool is_complete)
 {
-    CharonNWFramer *value = (CharonNWFramer *)framer;
+    RevenantNWFramer *value = (RevenantNWFramer *)framer;
     if (!value || !input_length || input_length > value->_input.length)
         return false;
     nw_framer_deliver_input(framer, (const uint8_t *)value->_input.bytes, input_length, message, is_complete);
@@ -274,7 +274,7 @@ bool nw_framer_deliver_input_no_copy(nw_framer_t framer, size_t input_length, nw
 
 void nw_framer_write_output(nw_framer_t framer, const uint8_t *output_buffer, size_t output_length)
 {
-    CharonNWFramer *value = (CharonNWFramer *)framer;
+    RevenantNWFramer *value = (RevenantNWFramer *)framer;
     if (!value || !output_length)
         return;
     [value->_output appendBytes:output_buffer length:output_length];
@@ -282,7 +282,7 @@ void nw_framer_write_output(nw_framer_t framer, const uint8_t *output_buffer, si
 
 void nw_framer_write_output_data(nw_framer_t framer, dispatch_data_t output_data)
 {
-    CharonNWFramer *value = (CharonNWFramer *)framer;
+    RevenantNWFramer *value = (RevenantNWFramer *)framer;
     if (!value || !output_data)
         return;
     size_t length = dispatch_data_get_size(output_data);
@@ -299,7 +299,7 @@ void nw_framer_write_output_data(nw_framer_t framer, dispatch_data_t output_data
 
 bool nw_framer_write_output_no_copy(nw_framer_t framer, size_t output_length)
 {
-    CharonNWFramer *value = (CharonNWFramer *)framer;
+    RevenantNWFramer *value = (RevenantNWFramer *)framer;
     if (!value || !output_length)
         return false;
     if (value->_failed)
@@ -312,7 +312,7 @@ bool nw_framer_write_output_no_copy(nw_framer_t framer, size_t output_length)
 
 bool nw_framer_parse_output(nw_framer_t framer, size_t minimum_incomplete_length, size_t maximum_length, uint8_t *temp_buffer, nw_framer_parse_completion_t parse)
 {
-    CharonNWFramer *value = (CharonNWFramer *)framer;
+    RevenantNWFramer *value = (RevenantNWFramer *)framer;
     if (!value || !parse)
         return false;
     size_t available = value->_output.length;

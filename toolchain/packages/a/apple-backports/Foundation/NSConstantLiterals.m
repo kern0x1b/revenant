@@ -1,12 +1,12 @@
 #import <Foundation/Foundation.h>
 #import <math.h>
-#import "CharonMethodProem.h"
+#import "RevenantMethodProem.h"
 
 typedef struct {
     Class isa;
     uint64_t count;
     id const *objects;
-} CharonConstantArrayLayout;
+} RevenantConstantArrayLayout;
 
 typedef struct {
     Class isa;
@@ -14,19 +14,19 @@ typedef struct {
     uint64_t count;
     id const *keys;
     id const *objects;
-} CharonConstantDictionaryLayout;
+} RevenantConstantDictionaryLayout;
 
 typedef struct {
     Class isa;
     const char *objCType;
     int64_t value;
-} CharonConstantIntegerNumberLayout;
+} RevenantConstantIntegerNumberLayout;
 
 typedef struct {
     Class isa;
     const char *objCType;
     double value;
-} CharonConstantDoubleNumberLayout;
+} RevenantConstantDoubleNumberLayout;
 
 @interface NSConstantArray : NSArray
 @end
@@ -35,15 +35,15 @@ typedef struct {
 
 - (NSUInteger)count
 {
-    return (NSUInteger)((const CharonConstantArrayLayout *)(__bridge const void *)self)->count;
+    return (NSUInteger)((const RevenantConstantArrayLayout *)(__bridge const void *)self)->count;
 }
 
 - (id)objectAtIndex:(NSUInteger)index
 {
-    const CharonConstantArrayLayout *layout = (const CharonConstantArrayLayout *)(__bridge const void *)self;
+    const RevenantConstantArrayLayout *layout = (const RevenantConstantArrayLayout *)(__bridge const void *)self;
     if (index >= layout->count) {
         [NSException raise:NSRangeException format:@"%@: index %lu beyond bounds [0 .. %llu]",
-                                                     charon_method_proem(self, _cmd), (unsigned long)index,
+                                                     revenant_method_proem(self, _cmd), (unsigned long)index,
                                                      layout->count == 0 ? 0 : layout->count - 1];
     }
     return layout->objects[index];
@@ -58,12 +58,12 @@ typedef struct {
 
 - (NSUInteger)count
 {
-    return (NSUInteger)((const CharonConstantDictionaryLayout *)(__bridge const void *)self)->count;
+    return (NSUInteger)((const RevenantConstantDictionaryLayout *)(__bridge const void *)self)->count;
 }
 
 - (id)objectForKey:(id)key
 {
-    const CharonConstantDictionaryLayout *layout = (const CharonConstantDictionaryLayout *)(__bridge const void *)self;
+    const RevenantConstantDictionaryLayout *layout = (const RevenantConstantDictionaryLayout *)(__bridge const void *)self;
     for (uint64_t index = 0; index < layout->count; index++) {
         if ([layout->keys[index] isEqual:key]) {
             return layout->objects[index];
@@ -74,7 +74,7 @@ typedef struct {
 
 - (NSEnumerator *)keyEnumerator
 {
-    const CharonConstantDictionaryLayout *layout = (const CharonConstantDictionaryLayout *)(__bridge const void *)self;
+    const RevenantConstantDictionaryLayout *layout = (const RevenantConstantDictionaryLayout *)(__bridge const void *)self;
     return [[NSArray arrayWithObjects:layout->keys count:(NSUInteger)layout->count] objectEnumerator];
 }
 
@@ -85,42 +85,42 @@ typedef struct {
 
 @implementation NSConstantIntegerNumber
 
-- (const CharonConstantIntegerNumberLayout *)charon_layout
+- (const RevenantConstantIntegerNumberLayout *)revenant_layout
 {
-    return (const CharonConstantIntegerNumberLayout *)(__bridge const void *)self;
+    return (const RevenantConstantIntegerNumberLayout *)(__bridge const void *)self;
 }
 
 - (const char *)objCType
 {
-    return [self charon_layout]->objCType;
+    return [self revenant_layout]->objCType;
 }
 
 - (void)getValue:(void *)buffer
 {
     NSUInteger size = 0;
     NSGetSizeAndAlignment([self objCType], &size, NULL);
-    memcpy(buffer, &[self charon_layout]->value, size == 0 ? sizeof(int64_t) : MIN(size, sizeof(int64_t)));
+    memcpy(buffer, &[self revenant_layout]->value, size == 0 ? sizeof(int64_t) : MIN(size, sizeof(int64_t)));
 }
 
-- (char)charValue { return (char)[self charon_layout]->value; }
-- (unsigned char)unsignedCharValue { return (unsigned char)[self charon_layout]->value; }
-- (short)shortValue { return (short)[self charon_layout]->value; }
-- (unsigned short)unsignedShortValue { return (unsigned short)[self charon_layout]->value; }
-- (int)intValue { return (int)[self charon_layout]->value; }
-- (unsigned int)unsignedIntValue { return (unsigned int)[self charon_layout]->value; }
-- (long)longValue { return (long)[self charon_layout]->value; }
-- (unsigned long)unsignedLongValue { return (unsigned long)[self charon_layout]->value; }
-- (long long)longLongValue { return (long long)[self charon_layout]->value; }
-- (unsigned long long)unsignedLongLongValue { return (unsigned long long)[self charon_layout]->value; }
-- (NSInteger)integerValue { return (NSInteger)[self charon_layout]->value; }
-- (NSUInteger)unsignedIntegerValue { return (NSUInteger)[self charon_layout]->value; }
-- (float)floatValue { return (float)[self charon_layout]->value; }
-- (double)doubleValue { return (double)[self charon_layout]->value; }
-- (BOOL)boolValue { return [self charon_layout]->value != 0; }
+- (char)charValue { return (char)[self revenant_layout]->value; }
+- (unsigned char)unsignedCharValue { return (unsigned char)[self revenant_layout]->value; }
+- (short)shortValue { return (short)[self revenant_layout]->value; }
+- (unsigned short)unsignedShortValue { return (unsigned short)[self revenant_layout]->value; }
+- (int)intValue { return (int)[self revenant_layout]->value; }
+- (unsigned int)unsignedIntValue { return (unsigned int)[self revenant_layout]->value; }
+- (long)longValue { return (long)[self revenant_layout]->value; }
+- (unsigned long)unsignedLongValue { return (unsigned long)[self revenant_layout]->value; }
+- (long long)longLongValue { return (long long)[self revenant_layout]->value; }
+- (unsigned long long)unsignedLongLongValue { return (unsigned long long)[self revenant_layout]->value; }
+- (NSInteger)integerValue { return (NSInteger)[self revenant_layout]->value; }
+- (NSUInteger)unsignedIntegerValue { return (NSUInteger)[self revenant_layout]->value; }
+- (float)floatValue { return (float)[self revenant_layout]->value; }
+- (double)doubleValue { return (double)[self revenant_layout]->value; }
+- (BOOL)boolValue { return [self revenant_layout]->value != 0; }
 
 - (NSString *)stringValue
 {
-    return [NSString stringWithFormat:@"%lld", [self charon_layout]->value];
+    return [NSString stringWithFormat:@"%lld", [self revenant_layout]->value];
 }
 
 - (NSString *)descriptionWithLocale:(id)locale
@@ -170,19 +170,19 @@ typedef struct {
 
 @implementation NSConstantDoubleNumber
 
-- (const CharonConstantDoubleNumberLayout *)charon_layout
+- (const RevenantConstantDoubleNumberLayout *)revenant_layout
 {
-    return (const CharonConstantDoubleNumberLayout *)(__bridge const void *)self;
+    return (const RevenantConstantDoubleNumberLayout *)(__bridge const void *)self;
 }
 
 - (const char *)objCType
 {
-    return [self charon_layout]->objCType;
+    return [self revenant_layout]->objCType;
 }
 
 - (void)getValue:(void *)buffer
 {
-    double value = [self charon_layout]->value;
+    double value = [self revenant_layout]->value;
     if (strcmp([self objCType], @encode(float)) == 0) {
         float narrowed = (float)value;
         memcpy(buffer, &narrowed, sizeof(narrowed));
@@ -193,25 +193,25 @@ typedef struct {
     memcpy(buffer, &value, size == 0 ? sizeof(double) : MIN(size, sizeof(double)));
 }
 
-- (char)charValue { return (char)[self charon_layout]->value; }
-- (unsigned char)unsignedCharValue { return (unsigned char)[self charon_layout]->value; }
-- (short)shortValue { return (short)[self charon_layout]->value; }
-- (unsigned short)unsignedShortValue { return (unsigned short)[self charon_layout]->value; }
-- (int)intValue { return (int)[self charon_layout]->value; }
-- (unsigned int)unsignedIntValue { return (unsigned int)[self charon_layout]->value; }
-- (long)longValue { return (long)[self charon_layout]->value; }
-- (unsigned long)unsignedLongValue { return (unsigned long)[self charon_layout]->value; }
-- (long long)longLongValue { return (long long)[self charon_layout]->value; }
-- (unsigned long long)unsignedLongLongValue { return (unsigned long long)[self charon_layout]->value; }
-- (NSInteger)integerValue { return (NSInteger)[self charon_layout]->value; }
-- (NSUInteger)unsignedIntegerValue { return (NSUInteger)[self charon_layout]->value; }
-- (float)floatValue { return (float)[self charon_layout]->value; }
-- (double)doubleValue { return [self charon_layout]->value; }
-- (BOOL)boolValue { return [self charon_layout]->value != 0; }
+- (char)charValue { return (char)[self revenant_layout]->value; }
+- (unsigned char)unsignedCharValue { return (unsigned char)[self revenant_layout]->value; }
+- (short)shortValue { return (short)[self revenant_layout]->value; }
+- (unsigned short)unsignedShortValue { return (unsigned short)[self revenant_layout]->value; }
+- (int)intValue { return (int)[self revenant_layout]->value; }
+- (unsigned int)unsignedIntValue { return (unsigned int)[self revenant_layout]->value; }
+- (long)longValue { return (long)[self revenant_layout]->value; }
+- (unsigned long)unsignedLongValue { return (unsigned long)[self revenant_layout]->value; }
+- (long long)longLongValue { return (long long)[self revenant_layout]->value; }
+- (unsigned long long)unsignedLongLongValue { return (unsigned long long)[self revenant_layout]->value; }
+- (NSInteger)integerValue { return (NSInteger)[self revenant_layout]->value; }
+- (NSUInteger)unsignedIntegerValue { return (NSUInteger)[self revenant_layout]->value; }
+- (float)floatValue { return (float)[self revenant_layout]->value; }
+- (double)doubleValue { return [self revenant_layout]->value; }
+- (BOOL)boolValue { return [self revenant_layout]->value != 0; }
 
 - (NSString *)stringValue
 {
-    double value = [self charon_layout]->value;
+    double value = [self revenant_layout]->value;
     if (isnan(value))
         return @"nan";
     if (isinf(value))

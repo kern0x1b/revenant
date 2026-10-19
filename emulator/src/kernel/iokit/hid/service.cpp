@@ -32,7 +32,7 @@
 #include <string_view>
 #include <utility>
 
-namespace shade::kernel_iokit::hid {
+namespace emulator::kernel_iokit::hid {
 namespace {
 
     namespace device_mig = xnu::mig::device;

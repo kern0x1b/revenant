@@ -9,7 +9,7 @@
 	<key>CFBundleExecutable</key>
 	<string>previewing</string>
 	<key>CFBundleIdentifier</key>
-	<string>local.charon.backports.previewing</string>
+	<string>local.revenant.backports.previewing</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>

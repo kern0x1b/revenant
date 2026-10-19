@@ -9,7 +9,7 @@
 
 #include <algorithm>
 
-namespace shade {
+namespace emulator {
 namespace {
 
     [[nodiscard]] JitWorkScheduleSkip skip_for(

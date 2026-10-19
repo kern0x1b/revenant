@@ -83,7 +83,7 @@ sum=$mps/MPSMatrixSum11.m
 forward=$mps/MPSMatrixBatchNormalization12.m
 gradient=$mps/MPSMatrixBatchNormalizationGradient12.m
 multiply=$mps/MPSMatrixMultiplication10.m
-header=$mps/CharonMPS.h
+header=$mps/RevenantMPS.h
 
 # Every anchor resolved before a single harness run, in one python process, which prints one line per
 # site and exits non-zero naming the ones that do not resolve exactly once. A campaign costs three

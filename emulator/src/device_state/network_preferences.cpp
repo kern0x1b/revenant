@@ -22,11 +22,11 @@
 #include <utility>
 #include <vector>
 
-#if defined(SHADE_HAS_LIBPLIST)
+#if defined(REVENANT_EMULATOR_HAS_LIBPLIST)
 #include <plist/plist.h>
 #endif
 
-namespace shade {
+namespace emulator {
 namespace {
 
     constexpr std::string_view default_set_identifier {
@@ -35,9 +35,9 @@ namespace {
     constexpr std::string_view default_service_identifier {
         "A1F4F2E2-EE3B-4C6D-8B67-1E6A43530001"
     };
-    constexpr std::string_view managed_service_key { "ShadeManaged" };
+    constexpr std::string_view managed_service_key { "EmulatorManaged" };
 
-#if defined(SHADE_HAS_LIBPLIST)
+#if defined(REVENANT_EMULATOR_HAS_LIBPLIST)
 
     class PlistOwner {
     public:
@@ -428,7 +428,7 @@ namespace {
 
         std::filesystem::create_directories(path.parent_path());
         auto temporary = path;
-        temporary += ".shade.tmp";
+        temporary += ".emulator.tmp";
         {
             std::ofstream output { temporary,
                 std::ios::binary | std::ios::trunc };
@@ -490,7 +490,7 @@ NetworkPreferencesResult ensure_network_preferences(
     result.path = resolver.resolve(
         "/Library/Preferences/SystemConfiguration/preferences.plist");
 
-#if defined(SHADE_HAS_LIBPLIST)
+#if defined(REVENANT_EMULATOR_HAS_LIBPLIST)
     result.supported = true;
     result.preferred_wifi_networks = preferred_wifi_networks(resolver);
     bool wifi_capability_changed = false;

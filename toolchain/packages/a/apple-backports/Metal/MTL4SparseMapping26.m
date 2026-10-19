@@ -1,6 +1,6 @@
 #import <Foundation/Foundation.h>
 
-NSString *CharonMetal4SparseBufferUpdateRefusal(BOOL bufferIsPlacementSparse, BOOL heapPresent, BOOL heapIsPlacement, BOOL mappingMode)
+NSString *RevenantMetal4SparseBufferUpdateRefusal(BOOL bufferIsPlacementSparse, BOOL heapPresent, BOOL heapIsPlacement, BOOL mappingMode)
 {
     if (!bufferIsPlacementSparse)
         return @"Buffer is not a Placement Sparse Buffer";
@@ -11,7 +11,7 @@ NSString *CharonMetal4SparseBufferUpdateRefusal(BOOL bufferIsPlacementSparse, BO
     return nil;
 }
 
-NSString *CharonMetal4SparseBufferCopyRefusal(BOOL sourceIsPlacementSparse, BOOL destinationIsPlacementSparse)
+NSString *RevenantMetal4SparseBufferCopyRefusal(BOOL sourceIsPlacementSparse, BOOL destinationIsPlacementSparse)
 {
     if (!sourceIsPlacementSparse)
         return @"Source Buffer is not a Placement Sparse Buffer";
@@ -20,7 +20,7 @@ NSString *CharonMetal4SparseBufferCopyRefusal(BOOL sourceIsPlacementSparse, BOOL
     return nil;
 }
 
-NSString *CharonMetal4SparseTextureUpdateRefusal(BOOL textureIsPlacementSparse, BOOL heapPresent, BOOL heapIsPlacement, BOOL mappingMode)
+NSString *RevenantMetal4SparseTextureUpdateRefusal(BOOL textureIsPlacementSparse, BOOL heapPresent, BOOL heapIsPlacement, BOOL mappingMode)
 {
     if (!textureIsPlacementSparse)
         return @"Texture is not a Placement Sparse Texture";
@@ -31,7 +31,7 @@ NSString *CharonMetal4SparseTextureUpdateRefusal(BOOL textureIsPlacementSparse, 
     return nil;
 }
 
-NSString *CharonMetal4SparseTextureCopyRefusal(BOOL sourceIsPlacementSparse, BOOL destinationIsPlacementSparse)
+NSString *RevenantMetal4SparseTextureCopyRefusal(BOOL sourceIsPlacementSparse, BOOL destinationIsPlacementSparse)
 {
     if (!sourceIsPlacementSparse)
         return @"Source Texture is not a Placement Sparse Texture";

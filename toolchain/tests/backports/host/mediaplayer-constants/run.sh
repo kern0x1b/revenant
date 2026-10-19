@@ -1,7 +1,7 @@
 #!/bin/sh
 # The port's MediaPlayer constants against Apple's own, in one process, with a mutant per constant.
 #
-# Each run: the port's two objects are compiled with every constant name renamed to charonHost_*, Apple's
+# Each run: the port's two objects are compiled with every constant name renamed to revenantHost_*, Apple's
 # own MediaPlayer answers for the unrenamed name beside it, and the two tables are diffed. A name the port
 # does not define is a LINK ERROR, and a run that compared nothing is a failure.
 set -eu
@@ -29,7 +29,7 @@ d=$(grep -hc '^NSString \*const ' $files | paste -sd+ - | bc)
 #
 # THE RELEASE IS 7.0's armv7 CACHE, read by the project's own reader (tools/corpus/cache-value.lua, through
 # modules/apple/dyld.lua), which reads a 32-bit cache in place: no extraction and no second reader.
-CACHE_ROOT=${CACHE_ROOT:-$HOME/.charon/dyld}
+CACHE_ROOT=${CACHE_ROOT:-$HOME/.revenant/dyld}
 CACHE=$CACHE_ROOT/7.0/dyld_shared_cache_armv7
 READER=$root/tools/corpus/cache-value.lua
 : > "$build/oracle.txt"
@@ -48,13 +48,13 @@ xcrun clang -fobjc-arc -w "$probe" -framework Foundation -o "$build/probe" 2>"$b
 # answers one line per symbol, in the order asked: its own columns when an image exports the symbol, and dashes when none does (the
 # dashes carry no name, so the position is the answer).
 symbols="$build/cache-symbols.tsv"
-printf 'CharonNoSuchPlantedName\tp\tp\ts\n' > "$symbols"
+printf 'RevenantNoSuchPlantedName\tp\tp\ts\n' > "$symbols"
 while read -r nm <&3; do
   if ! grep -qx "H $nm" "$build/host-has.txt"; then
     printf '%s\tp\tp\ts\n' "$nm" >> "$symbols"
   fi
 done 3< "$build/strings.txt"
-CHARON_ROOT=$root xmake l "$READER" "$CACHE" "$symbols" > "$build/cache.txt" 2> "$build/cache.log" || {
+REVENANT_ROOT=$root xmake l "$READER" "$CACHE" "$symbols" > "$build/cache.txt" 2> "$build/cache.log" || {
   echo "CACHE-ORACLE  the reader failed on $CACHE:"; tail -3 "$build/cache.log" | sed 's/^/    /'; exit 1; }
 # THE NEGATIVE CONTROL MUST BE THE READER'S OWN ANSWER: the planted name is the first symbol asked, so the first answer line after the
 # "#cache" header must be dashes. A reader that answered with a value for a name no image exports would judge every name by nothing.
@@ -86,12 +86,12 @@ while read -r name <&3; do
   or=$(awk -F'\t' -v n="$name" '$2==n{print $1}' "$build/oracle.txt")
   cv=$(awk -F'\t' -v n="$name" '$2==n{print $3}' "$build/oracle.txt")
   [ -n "$or" ] || { echo "BUILD  $name has no oracle"; exit 1; }
-  printf 'extern NSString *const %s;\nextern NSString *const charonHost_%s;\n' "$name" "$name" >> "$build/decls.h"
+  printf 'extern NSString *const %s;\nextern NSString *const revenantHost_%s;\n' "$name" "$name" >> "$build/decls.h"
   if [ "$or" = cache ]; then cvlit=$(printf '%s' "$cv" | sed 's/"/\\"/g')
   else cvlit=""; fi
-  printf 'static void charonCheck_%s(void) { charonCompareString(@"%s", charonHost_%s, (NSString *const *)dlsym(g_handle, "%s"), "%s", %s%s%s); }\n' \
+  printf 'static void revenantCheck_%s(void) { revenantCompareString(@"%s", revenantHost_%s, (NSString *const *)dlsym(g_handle, "%s"), "%s", %s%s%s); }\n' \
     "$name" "$name" "$name" "$name" "$or" "$([ "$or" = cache ] && printf '"%s"' "$cvlit" || printf 'NULL')" >> "$build/checks.h"
-  printf '    charonCheck_%s();\n' "$name" >> "$build/calls.h"
+  printf '    revenantCheck_%s();\n' "$name" >> "$build/calls.h"
   names_seen=$((names_seen + 1))
 done 3< "$build/strings.txt"
 [ "$names_seen" -eq "$n" ] || { echo "expected $n names in the generated pieces, got $names_seen"; exit 1; }
@@ -114,7 +114,7 @@ green=0; red=0
 run_case() {   # $1 = output tag, $2.. = the object sources to compile with the renames
   out=$1; shift
   renames=""
-  while read -r rn <&4; do renames="$renames -D$rn=charonHost_$rn"; done 4< "$build/strings.txt"
+  while read -r rn <&4; do renames="$renames -D$rn=revenantHost_$rn"; done 4< "$build/strings.txt"
   case "$renames" in *" -D"*) ;; *) echo "BUILD  $out: no renames were built, so the port objects would carry the UNPREFIXED names"; return 1;; esac
   objs=""
   k=0
@@ -124,8 +124,8 @@ run_case() {   # $1 = output tag, $2.. = the object sources to compile with the 
       2>"$build/$out-$k.log" || { echo "BUILD  $out: $src did not compile"; tail -3 "$build/$out-$k.log" | sed 's/^/    /'; return 1; }
     objs="$objs $build/$out-$k.o"
   done
-  # The generated differential declares the charonHost_* names ITSELF, so compiling it under the SAME -D
-  # renames is a double rename and the -D wins: #define NAME charonHost_NAME collides with the extern the
+  # The generated differential declares the revenantHost_* names ITSELF, so compiling it under the SAME -D
+  # renames is a double rename and the -D wins: #define NAME revenantHost_NAME collides with the extern the
   # template already emits. The port's objects keep the -D; the differential does not.
   xcrun clang -fobjc-arc -w -I"$root/packages/a/apple-backports" "$build/differential.m" $objs \
     -framework Foundation -o "$build/$out.bin" 2>"$build/$out.link" || {
@@ -208,7 +208,7 @@ while read -r name <&3; do
         # the mutation is an awk one-liner keyed on the exact name, with the variables EXPANDED: a
         # single-quoted sed BRE left $name and $i literal, matched nothing, and produced a copy
         # identical to the original - which the loop then correctly reported as NOT NOTICED
-        sed "s%^NSString \*const $name = @\"[^\"]*\";%NSString *const $name = @\"charon-mutant-$i\";%" \
+        sed "s%^NSString \*const $name = @\"[^\"]*\";%NSString *const $name = @\"revenant-mutant-$i\";%" \
           "$build/src-m$i/$b" > "$build/src-m$i/$b.tmp" && mv "$build/src-m$i/$b.tmp" "$build/src-m$i/$b"
         # and the copy must DIFFER FROM THE ORIGINAL BY EXACTLY ONE LINE, or it is not a mutation
         c=$(diff "$f" "$build/src-m$i/$b" | grep -c "^>" || true)

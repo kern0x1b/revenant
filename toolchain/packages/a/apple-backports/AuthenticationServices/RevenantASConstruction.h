@@ -1,31 +1,31 @@
-#ifndef CHARON_AS_CONSTRUCTION_H
-#define CHARON_AS_CONSTRUCTION_H
+#ifndef REVENANT_AS_CONSTRUCTION_H
+#define REVENANT_AS_CONSTRUCTION_H
 
 #import <Foundation/Foundation.h>
 #import <AuthenticationServices/AuthenticationServices.h>
 
-#define CHARON_AS_CONSTRUCTION(cls, ...) \
-    @interface cls (CharonASConstruction) \
-    - (instancetype)charon_initWithProvider:(id<ASAuthorizationProvider>)provider __VA_ARGS__ \
+#define REVENANT_AS_CONSTRUCTION(cls, ...) \
+    @interface cls (RevenantASConstruction) \
+    - (instancetype)revenant_initWithProvider:(id<ASAuthorizationProvider>)provider __VA_ARGS__ \
     __attribute__((objc_method_family(init))); \
     @end
 
-@interface ASAuthorizationRequest (CharonASConstruction)
-- (instancetype)charon_initWithProvider:(id<ASAuthorizationProvider>)provider
+@interface ASAuthorizationRequest (RevenantASConstruction)
+- (instancetype)revenant_initWithProvider:(id<ASAuthorizationProvider>)provider
     __attribute__((objc_method_family(init)));
 @end
 
-@interface ASAuthorizationOpenIDRequest (CharonASConstruction)
-- (instancetype)charon_initWithProvider:(id<ASAuthorizationProvider>)provider
+@interface ASAuthorizationOpenIDRequest (RevenantASConstruction)
+- (instancetype)revenant_initWithProvider:(id<ASAuthorizationProvider>)provider
     __attribute__((objc_method_family(init)));
 @end
-@interface ASAuthorizationAppleIDRequest (CharonASConstruction)
-- (instancetype)charon_initWithProvider:(id<ASAuthorizationProvider>)provider
+@interface ASAuthorizationAppleIDRequest (RevenantASConstruction)
+- (instancetype)revenant_initWithProvider:(id<ASAuthorizationProvider>)provider
     __attribute__((objc_method_family(init)));
 @end
 
-@interface ASAuthorizationAppleIDCredential (CharonASConstruction)
-- (instancetype)charon_initWithUser:(NSString *)user
+@interface ASAuthorizationAppleIDCredential (RevenantASConstruction)
+- (instancetype)revenant_initWithUser:(NSString *)user
                    authorizedScopes:(NSArray<ASAuthorizationScope> *)authorizedScopes
                      identityToken:(NSData *)identityToken
                   authorizationCode:(NSData *)authorizationCode
@@ -36,30 +36,30 @@
     __attribute__((objc_method_family(init)));
 @end
 
-@interface ASAuthorization (CharonASConstruction)
-- (instancetype)charon_initWithProvider:(id<ASAuthorizationProvider>)provider
+@interface ASAuthorization (RevenantASConstruction)
+- (instancetype)revenant_initWithProvider:(id<ASAuthorizationProvider>)provider
                               credential:(id<ASAuthorizationCredential>)credential
     __attribute__((objc_method_family(init)));
 @end
 
-@interface ASCredentialIdentityStore (CharonASConstruction)
-- (instancetype)charon_initWithStorePath:(NSString *)path
+@interface ASCredentialIdentityStore (RevenantASConstruction)
+- (instancetype)revenant_initWithStorePath:(NSString *)path
     __attribute__((objc_method_family(init)));
 @end
 
-@interface ASCredentialIdentityStoreState (CharonASConstruction)
-- (instancetype)charon_initWithEnabled:(BOOL)enabled
+@interface ASCredentialIdentityStoreState (RevenantASConstruction)
+- (instancetype)revenant_initWithEnabled:(BOOL)enabled
            supportsIncrementalUpdates:(BOOL)supportsIncrementalUpdates
     __attribute__((objc_method_family(init)));
 @end
 
-@interface ASPasswordCredential (CharonASConstruction)
-- (instancetype)charon_initWithUser:(NSString *)user password:(NSString *)password
+@interface ASPasswordCredential (RevenantASConstruction)
+- (instancetype)revenant_initWithUser:(NSString *)user password:(NSString *)password
     __attribute__((objc_method_family(init)));
 @end
 
-@interface ASAuthorizationAppleIDProvider (CharonASConstruction)
-- (instancetype)charon_initWithCredentialState:(id)store
+@interface ASAuthorizationAppleIDProvider (RevenantASConstruction)
+- (instancetype)revenant_initWithCredentialState:(id)store
     __attribute__((objc_method_family(init)));
 @end
 

@@ -1,12 +1,12 @@
 #import <Foundation/Foundation.h>
 
-static NSString *charon_query_decode(NSString *string)
+static NSString *revenant_query_decode(NSString *string)
 {
     NSString *decoded = [string stringByRemovingPercentEncoding];
     return decoded ? decoded : @"";
 }
 
-static NSString *charon_query_encode(NSString *string)
+static NSString *revenant_query_encode(NSString *string)
 {
     static NSCharacterSet *allowed;
     static dispatch_once_t once;
@@ -19,7 +19,7 @@ static NSString *charon_query_encode(NSString *string)
     return encoded ? encoded : @"";
 }
 
-@implementation NSURLComponents (CharonQueryItems)
+@implementation NSURLComponents (RevenantQueryItems)
 
 - (NSArray *)queryItems
 {
@@ -32,9 +32,9 @@ static NSString *charon_query_encode(NSString *string)
     for (NSString *pair in [query componentsSeparatedByString:@"&"]) {
         NSRange equals = [pair rangeOfString:@"="];
         if (equals.location == NSNotFound) {
-            [items addObject:[NSURLQueryItem queryItemWithName:charon_query_decode(pair) value:nil]];
+            [items addObject:[NSURLQueryItem queryItemWithName:revenant_query_decode(pair) value:nil]];
         } else {
-            NSString *name = charon_query_decode([pair substringToIndex:equals.location]);
+            NSString *name = revenant_query_decode([pair substringToIndex:equals.location]);
             NSString *value = [[pair substringFromIndex:NSMaxRange(equals)] stringByRemovingPercentEncoding];
             [items addObject:[NSURLQueryItem queryItemWithName:name value:value]];
         }
@@ -50,8 +50,8 @@ static NSString *charon_query_encode(NSString *string)
     }
     NSMutableArray *pairs = [NSMutableArray arrayWithCapacity:queryItems.count];
     for (NSURLQueryItem *item in queryItems) {
-        NSString *name = charon_query_encode(item.name);
-        [pairs addObject:item.value ? [NSString stringWithFormat:@"%@=%@", name, charon_query_encode(item.value)] : name];
+        NSString *name = revenant_query_encode(item.name);
+        [pairs addObject:item.value ? [NSString stringWithFormat:@"%@=%@", name, revenant_query_encode(item.value)] : name];
     }
     self.percentEncodedQuery = [pairs componentsJoinedByString:@"&"];
 }

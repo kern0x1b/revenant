@@ -1,10 +1,10 @@
-#import "CharonMetal.h"
+#import "RevenantMetal.h"
 
-@interface CharonMTLCaptureScope : NSObject <MTLCaptureScope>
+@interface RevenantMTLCaptureScope : NSObject <MTLCaptureScope>
 - (instancetype)initWithDevice:(id<MTLDevice>)device commandQueue:(id<MTLCommandQueue>)commandQueue;
 @end
 
-@implementation CharonMTLCaptureScope
+@implementation RevenantMTLCaptureScope
 {
     id<MTLDevice> _device;
     id<MTLCommandQueue> _commandQueue;
@@ -48,24 +48,24 @@
     static MTLCaptureManager *shared;
     static dispatch_once_t once;
     dispatch_once(&once, ^{
-        shared = [[MTLCaptureManager alloc] initCharon];
+        shared = [[MTLCaptureManager alloc] initRevenant];
     });
     return shared;
 }
 
-- (instancetype)initCharon
+- (instancetype)initRevenant
 {
     return [super init];
 }
 
 - (id<MTLCaptureScope>)newCaptureScopeWithDevice:(id<MTLDevice>)device
 {
-    return [[CharonMTLCaptureScope alloc] initWithDevice:device commandQueue:nil];
+    return [[RevenantMTLCaptureScope alloc] initWithDevice:device commandQueue:nil];
 }
 
 - (id<MTLCaptureScope>)newCaptureScopeWithCommandQueue:(id<MTLCommandQueue>)commandQueue
 {
-    return [[CharonMTLCaptureScope alloc] initWithDevice:commandQueue.device commandQueue:commandQueue];
+    return [[RevenantMTLCaptureScope alloc] initWithDevice:commandQueue.device commandQueue:commandQueue];
 }
 
 - (void)startCaptureWithDevice:(id<MTLDevice>)device

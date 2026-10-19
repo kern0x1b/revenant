@@ -1,7 +1,7 @@
-#import "CharonCloudKit.h"
-#import "CharonCKConstants.h"
-#import "CharonCKSubscription.h"
-#import "CharonCKSyncEngine26.h"
+#import "RevenantCloudKit.h"
+#import "RevenantCKConstants.h"
+#import "RevenantCKSubscription.h"
+#import "RevenantCKSyncEngine26.h"
 
 @implementation CKSyncEnginePendingRecordZoneChange
 @synthesize recordID = _recordID;
@@ -112,8 +112,8 @@
             }
             if (change.type == CKSyncEnginePendingRecordZoneChangeTypeDeleteRecord) {
                 [deletions addObject:change.recordID];
-            } else if ([recordProvider respondsToSelector:@selector(charon_recordForRecordID:)]) {
-                CKRecord *record = [recordProvider charon_recordForRecordID:change.recordID];
+            } else if ([recordProvider respondsToSelector:@selector(revenant_recordForRecordID:)]) {
+                CKRecord *record = [recordProvider revenant_recordForRecordID:change.recordID];
                 if (record) {
                     [records addObject:record];
                 }

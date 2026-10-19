@@ -6,7 +6,7 @@ function failures(opt)
     local runtime = path.join(opt.modules, "..", "packages", "i", "iphoneos-sdk", "blocks", "BlocksRuntime.m")
     local probe = path.join(os.scriptdir(), "blocks", "blocks_probe.m")
     local modes = {
-        {"without a system blocks runtime", {"-DCHARON_WITHOUT_NATIVE", "-Ddlsym=charon_test_dlsym", "-DMALLOC_BLOCK_CLASS=\"__CharonMallocBlock\""}},
+        {"without a system blocks runtime", {"-DREVENANT_WITHOUT_NATIVE", "-Ddlsym=revenant_test_dlsym", "-DMALLOC_BLOCK_CLASS=\"__RevenantMallocBlock\""}},
         {"forwarding to the system blocks runtime", {"-DMALLOC_BLOCK_CLASS=\"__NSMallocBlock__\""}}
     }
     for index, mode in ipairs(modes) do

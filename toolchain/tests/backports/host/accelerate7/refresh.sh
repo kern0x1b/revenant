@@ -3,7 +3,7 @@ set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 device=$here/../../device
-build=${ACCELERATE7_BUILD:-$(runs_folder charon-accelerate7-refresh)}
+build=${ACCELERATE7_BUILD:-$(runs_folder revenant-accelerate7-refresh)}
 rm -rf "$build"
 mkdir -p "$build"
 cat > "$build/main.m" <<'M'
@@ -12,7 +12,7 @@ int main(void)
 {
     @autoreleasepool {
         printf("// The answers of the host's vImage, written by host/accelerate7/refresh.sh from accelerate7-cases.m.\n");
-        charon_vimage_cases(^(NSString *name, NSString *value) {
+        revenant_vimage_cases(^(NSString *name, NSString *value) {
             printf("    {\"%s\", \"%s\"},\n", [name UTF8String], [value UTF8String]);
         });
     }

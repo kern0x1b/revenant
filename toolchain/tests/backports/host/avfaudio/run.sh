@@ -20,13 +20,13 @@ xcrun clang -fobjc-arc -Wall -Wno-deprecated-declarations \
     -o "$here/../../../.agent-work/avfaudio-offline" 2>/dev/null || {
         xcrun clang -fobjc-arc -Wall -Wno-deprecated-declarations "$here/offline.m" \
             -framework Foundation -framework AudioToolbox -framework AVFAudio -framework CoreAudio \
-            -o "$(runs_folder charon-avfaudio-offline)/avfaudio-offline"
+            -o "$(runs_folder revenant-avfaudio-offline)/avfaudio-offline"
     }
 offline_bin="$here/../../../.agent-work/avfaudio-offline"
-[ -x "$offline_bin" ] || offline_bin="$(runs_folder charon-avfaudio-offline)/avfaudio-offline"
+[ -x "$offline_bin" ] || offline_bin="$(runs_folder revenant-avfaudio-offline)/avfaudio-offline"
 "$offline_bin" || exit $?
 AVFAUDIO=${AVFAUDIO:-$here/../../../../packages/a/apple-backports/AVFAudio}
-build=${AVFAUDIO_HOST_BUILD:-$(runs_folder charon-avfaudio-host)}
+build=${AVFAUDIO_HOST_BUILD:-$(runs_folder revenant-avfaudio-host)}
 rm -rf "$build"
 mkdir -p "$build"
 xcrun clang -fobjc-arc -Wall -Wno-deprecated-declarations \

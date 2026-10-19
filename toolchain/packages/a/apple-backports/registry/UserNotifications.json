@@ -182,7 +182,7 @@
   "reason": "build the class UNNotificationAttachment",
   "effect": "until built: NSClassFromString answers nil",
   "facts": "facts/UserNotifications/UNUserNotificationCenter.md",
-  "source": "UserNotifications of the armv7s cache of iOS 10.3.4, UIApplication and UIConcreteLocalNotification of the armv7 cache of iOS 4.3 read through $HOME/.charon/dyld/4.3/classes_armv7.json, the selector set of the armv7 cache of iOS 6.1.3 ($HOME/.charon/dyld/6.1.3/selectors_armv7.txt, 113981 selectors) and BulletinBoard as measured on an iPhone4,1 running 6.1.3; the facts page sets out each half with the command it was read by"
+  "source": "UserNotifications of the armv7s cache of iOS 10.3.4, UIApplication and UIConcreteLocalNotification of the armv7 cache of iOS 4.3 read through $HOME/.revenant/dyld/4.3/classes_armv7.json, the selector set of the armv7 cache of iOS 6.1.3 ($HOME/.revenant/dyld/6.1.3/selectors_armv7.txt, 113981 selectors) and BulletinBoard as measured on an iPhone4,1 running 6.1.3; the facts page sets out each half with the command it was read by"
  },
  {
   "api": "UNNotificationCategory",
@@ -265,7 +265,7 @@
   "reason": "the delivered notifications live in BulletinBoard, which answers no application on this jailbreak: every call comes back empty with an XPC error, as root, as mobile and with its entitlements applied",
   "effect": "the method is not there, so respondsToSelector: answers NO",
   "facts": "facts/UserNotifications/UNUserNotificationCenter.md",
-  "source": "UserNotifications of the armv7s cache of iOS 10.3.4, UIApplication and UIConcreteLocalNotification of the armv7 cache of iOS 4.3 read through $HOME/.charon/dyld/4.3/classes_armv7.json, the selector set of the armv7 cache of iOS 6.1.3 ($HOME/.charon/dyld/6.1.3/selectors_armv7.txt, 113981 selectors) and BulletinBoard as measured on an iPhone4,1 running 6.1.3; the facts page sets out each half with the command it was read by",
+  "source": "UserNotifications of the armv7s cache of iOS 10.3.4, UIApplication and UIConcreteLocalNotification of the armv7 cache of iOS 4.3 read through $HOME/.revenant/dyld/4.3/classes_armv7.json, the selector set of the armv7 cache of iOS 6.1.3 ($HOME/.revenant/dyld/6.1.3/selectors_armv7.txt, 113981 selectors) and BulletinBoard as measured on an iPhone4,1 running 6.1.3; the facts page sets out each half with the command it was read by",
   "maximum": "10.0"
  },
  {
@@ -277,7 +277,7 @@
   "reason": "the delivered notifications live in BulletinBoard, which answers no application on this jailbreak: every call comes back empty with an XPC error, as root, as mobile and with its entitlements applied, and UIApplication of iOS 4.3 has no member that reads one",
   "effect": "the method is not there, so respondsToSelector: answers NO",
   "facts": "facts/UserNotifications/UNUserNotificationCenter.md",
-  "source": "UserNotifications of the armv7s cache of iOS 10.3.4, UIApplication and UIConcreteLocalNotification of the armv7 cache of iOS 4.3 read through $HOME/.charon/dyld/4.3/classes_armv7.json, the selector set of the armv7 cache of iOS 6.1.3 ($HOME/.charon/dyld/6.1.3/selectors_armv7.txt, 113981 selectors) and BulletinBoard as measured on an iPhone4,1 running 6.1.3; the facts page sets out each half with the command it was read by",
+  "source": "UserNotifications of the armv7s cache of iOS 10.3.4, UIApplication and UIConcreteLocalNotification of the armv7 cache of iOS 4.3 read through $HOME/.revenant/dyld/4.3/classes_armv7.json, the selector set of the armv7 cache of iOS 6.1.3 ($HOME/.revenant/dyld/6.1.3/selectors_armv7.txt, 113981 selectors) and BulletinBoard as measured on an iPhone4,1 running 6.1.3; the facts page sets out each half with the command it was read by",
   "maximum": "10.0"
  },
  {
@@ -289,7 +289,7 @@
   "reason": "the delivered notifications live in BulletinBoard, which answers no application on this jailbreak: every call comes back empty with an XPC error, as root, as mobile and with its entitlements applied, and UIApplication of iOS 4.3 has no member that reads one",
   "effect": "the method is not there, so respondsToSelector: answers NO",
   "facts": "facts/UserNotifications/UNUserNotificationCenter.md",
-  "source": "UserNotifications of the armv7s cache of iOS 10.3.4, UIApplication and UIConcreteLocalNotification of the armv7 cache of iOS 4.3 read through $HOME/.charon/dyld/4.3/classes_armv7.json, the selector set of the armv7 cache of iOS 6.1.3 ($HOME/.charon/dyld/6.1.3/selectors_armv7.txt, 113981 selectors) and BulletinBoard as measured on an iPhone4,1 running 6.1.3; the facts page sets out each half with the command it was read by",
+  "source": "UserNotifications of the armv7s cache of iOS 10.3.4, UIApplication and UIConcreteLocalNotification of the armv7 cache of iOS 4.3 read through $HOME/.revenant/dyld/4.3/classes_armv7.json, the selector set of the armv7 cache of iOS 6.1.3 ($HOME/.revenant/dyld/6.1.3/selectors_armv7.txt, 113981 selectors) and BulletinBoard as measured on an iPhone4,1 running 6.1.3; the facts page sets out each half with the command it was read by",
   "maximum": "10.0"
  },
  {

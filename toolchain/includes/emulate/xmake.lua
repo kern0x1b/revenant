@@ -1,3 +1,3 @@
-add_requires("charon@shade", {alias = "shade"})
-add_requires("charon@swiftshader", {alias = "swiftshader"})
-add_requires("charon@emulator-guest", {alias = "emulator-guest"})
+add_requires("revenant@emulator", {alias = "emulator"})
+add_requires("revenant@swiftshader", {alias = "swiftshader"})
+add_requires("revenant@emulator-guest", {alias = "emulator-guest"})

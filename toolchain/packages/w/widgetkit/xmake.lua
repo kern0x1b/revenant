@@ -1,6 +1,6 @@
 package("widgetkit")
-    set_homepage("https://github.com/kern0x1b/charon")
-    set_description("The WidgetKit framework of iOS 16.1, as one Swift module a port writes `import WidgetKit` for, built against the charon@swift-runtime a port carries: `Activity`, its attributes, its content state, its push tokens and the errors it refuses with. A Live Activity is a registration the system's activity daemon owns and these releases run no such daemon, so the module answers as a device without Live Activities does - `areActivitiesEnabled` is false, `request` throws `unsupported`, the update streams are empty and the push tokens are nothing - and every value the app owns is real. facts/WidgetKit/Availability.md")
+    set_homepage("https://github.com/kern0x1b/revenant/tree/main/toolchain")
+    set_description("The WidgetKit framework of iOS 16.1, as one Swift module a port writes `import WidgetKit` for, built against the revenant@swift-runtime a port carries: `Activity`, its attributes, its content state, its push tokens and the errors it refuses with. A Live Activity is a registration the system's activity daemon owns and these releases run no such daemon, so the module answers as a device without Live Activities does - `areActivitiesEnabled` is false, `request` throws `unsupported`, the update streams are empty and the push tokens are nothing - and every value the app owns is real. facts/WidgetKit/Availability.md")
     set_license("MIT")
     set_policy("package.strict_compatibility", true)
 
@@ -17,11 +17,11 @@ package("widgetkit")
     add_configs("backports_uikit", {description = "With backports: the runtime whose UIKit overlay is linked to the UIKit backports, for an application.", default = false, type = "boolean"})
 
     on_load("iphoneos", function (package)
-        package:add("deps", "charon@swift-runtime", {alias = "swift-runtime", configs = {shared = package:config("shared") or nil,
+        package:add("deps", "revenant@swift-runtime", {alias = "swift-runtime", configs = {shared = package:config("shared") or nil,
                     backports = package:config("backports") or nil, backports_uikit = package:config("backports_uikit") or nil}})
-        package:add("deps", "charon@appintents", {alias = "appintents", configs = {shared = package:config("shared") or nil,
+        package:add("deps", "revenant@appintents", {alias = "appintents", configs = {shared = package:config("shared") or nil,
                     backports = package:config("backports") or nil, backports_uikit = package:config("backports_uikit") or nil}})
-        package:add("deps", "charon@activitykit", {alias = "activitykit", configs = {shared = package:config("shared") or nil,
+        package:add("deps", "revenant@activitykit", {alias = "activitykit", configs = {shared = package:config("shared") or nil,
                     backports = package:config("backports") or nil, backports_uikit = package:config("backports_uikit") or nil}})
         package:add("links", "WidgetKit")
         package:add("frameworks", "Foundation", "CoreFoundation")
@@ -32,7 +32,7 @@ package("widgetkit")
         local swift = import("apple.swift", {rootdir = modules, anonymous = true})
         local toolchain = assert(package:toolchains(), "WidgetKit is built with the apple-ios toolchain")[1]
         toolchain:load()
-        local runtime = assert(package:dep("swift-runtime"), "WidgetKit is compiled against charon@swift-runtime")
+        local runtime = assert(package:dep("swift-runtime"), "WidgetKit is compiled against revenant@swift-runtime")
         local swiftc = assert(table.wrap((runtime:envs() or {}).SWIFT_EXEC)[1], "swift-runtime names no compiler; reinstall it")
         local minimum = toolchain:config("deployment")
         local triple = package:arch() .. "-apple-ios" .. minimum
@@ -70,7 +70,7 @@ package("widgetkit")
                  path.join(objects, "WidgetKit.o")})
 
         os.tryrm(probe_dir)
-        package:setenv("CHARON_SWIFT_MODULES", swiftdir)
+        package:setenv("REVENANT_SWIFT_MODULES", swiftdir)
         os.cp(path.join(os.scriptdir(), "..", "..", "..", "LICENSE"), path.join(package:installdir("licenses")))
         os.cp("README.md", path.join(package:installdir("share")))
     end)

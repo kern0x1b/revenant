@@ -1,4 +1,4 @@
-#import "CharonUserNotifications.h"
+#import "RevenantUserNotifications.h"
 
 @implementation UNNotificationRequest {
 @private
@@ -15,10 +15,10 @@
 + (instancetype)requestWithIdentifier:(NSString *)identifier content:(UNNotificationContent *)content
                               trigger:(UNNotificationTrigger *)trigger
 {
-    return [[self alloc] initCharonWithIdentifier:identifier content:content trigger:trigger];
+    return [[self alloc] initRevenantWithIdentifier:identifier content:content trigger:trigger];
 }
 
-- (instancetype)initCharonWithIdentifier:(NSString *)identifier content:(UNNotificationContent *)content
+- (instancetype)initRevenantWithIdentifier:(NSString *)identifier content:(UNNotificationContent *)content
                                   trigger:(UNNotificationTrigger *)trigger
 {
     NSAssert(identifier != nil, @"Invalid parameter not satisfying: %@", @"identifier != nil");
@@ -37,7 +37,7 @@
     Class location = NSClassFromString(@"UNLocationNotificationTrigger");
     if (location)
         [triggers addObject:location];
-    return [self initCharonWithIdentifier:[coder decodeObjectOfClass:[NSString class] forKey:@"identifier"] ?: @""
+    return [self initRevenantWithIdentifier:[coder decodeObjectOfClass:[NSString class] forKey:@"identifier"] ?: @""
                                    content:[coder decodeObjectOfClass:[UNNotificationContent class] forKey:@"content"]
                                    trigger:[coder decodeObjectOfClasses:triggers forKey:@"trigger"]];
 }
@@ -106,10 +106,10 @@
 
 + (instancetype)notificationWithRequest:(UNNotificationRequest *)request date:(NSDate *)date
 {
-    return [[self alloc] initCharonWithRequest:request date:date];
+    return [[self alloc] initRevenantWithRequest:request date:date];
 }
 
-- (instancetype)initCharonWithRequest:(UNNotificationRequest *)request date:(NSDate *)date
+- (instancetype)initRevenantWithRequest:(UNNotificationRequest *)request date:(NSDate *)date
 {
     if ((self = [super init])) {
         _request = [request copy];
@@ -120,7 +120,7 @@
 
 - (instancetype)initWithCoder:(NSCoder *)coder
 {
-    return [self initCharonWithRequest:[coder decodeObjectOfClass:[UNNotificationRequest class] forKey:@"request"]
+    return [self initRevenantWithRequest:[coder decodeObjectOfClass:[UNNotificationRequest class] forKey:@"request"]
                                    date:[coder decodeObjectOfClass:[NSDate class] forKey:@"date"]];
 }
 
@@ -178,10 +178,10 @@
 
 + (instancetype)responseWithNotification:(UNNotification *)notification actionIdentifier:(NSString *)actionIdentifier
 {
-    return [[self alloc] initCharonWithNotification:notification actionIdentifier:actionIdentifier];
+    return [[self alloc] initRevenantWithNotification:notification actionIdentifier:actionIdentifier];
 }
 
-- (instancetype)initCharonWithNotification:(UNNotification *)notification actionIdentifier:(NSString *)actionIdentifier
+- (instancetype)initRevenantWithNotification:(UNNotification *)notification actionIdentifier:(NSString *)actionIdentifier
 {
     if ((self = [super init])) {
         _notification = [notification copy];
@@ -192,7 +192,7 @@
 
 - (instancetype)initWithCoder:(NSCoder *)coder
 {
-    return [self initCharonWithNotification:[coder decodeObjectOfClass:[UNNotification class] forKey:@"notification"]
+    return [self initRevenantWithNotification:[coder decodeObjectOfClass:[UNNotification class] forKey:@"notification"]
                             actionIdentifier:[coder decodeObjectOfClass:[NSString class] forKey:@"actionIdentifier"]];
 }
 
@@ -249,12 +249,12 @@ NSString *const UNErrorDomain = @"UNErrorDomain";
 
 + (instancetype)responseWithNotification:(UNNotification *)notification actionIdentifier:(NSString *)actionIdentifier userText:(NSString *)userText
 {
-    return [[self alloc] initCharonWithNotification:notification actionIdentifier:actionIdentifier userText:userText];
+    return [[self alloc] initRevenantWithNotification:notification actionIdentifier:actionIdentifier userText:userText];
 }
 
-- (instancetype)initCharonWithNotification:(UNNotification *)notification actionIdentifier:(NSString *)actionIdentifier userText:(NSString *)userText
+- (instancetype)initRevenantWithNotification:(UNNotification *)notification actionIdentifier:(NSString *)actionIdentifier userText:(NSString *)userText
 {
-    if ((self = [super initCharonWithNotification:notification actionIdentifier:actionIdentifier]))
+    if ((self = [super initRevenantWithNotification:notification actionIdentifier:actionIdentifier]))
         _userText = [userText copy];
     return self;
 }

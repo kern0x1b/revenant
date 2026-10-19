@@ -1,11 +1,11 @@
 #!/bin/sh
 # tests/backports/device/<program>.m for the classes the backports carry below iOS 6, as device binaries run on emulated releases: the
 # port's answers on 4.3 and 5.0 are held to the release's own on 6.0 (the `answer` lines), and each program's own checks must pass.
-# Two builds (xmake.lua), each with charon@apple-backports linked: "ported", apple_minimum 4.3, run on every release below the class's
+# Two builds (xmake.lua), each with revenant@apple-backports linked: "ported", apple_minimum 4.3, run on every release below the class's
 # own minimum; "bare", apple_minimum set to the reference release (6.0) itself, run on it alone - "bare" for what band() (modules/
 # apple/backports.lua) puts in that band, not for whether the package is linked: at apple_minimum 6.0 it reexports the class instead
 # of carrying it, the same way the real apple-backports .deb's own band 6.0 does (checked with nm: no NSProgress/NSUUID class metadata
-# there, only a reexport stub). Charon's own "copy the library in" mechanism (charon/AGENTS.md, "charon.libraries and verify_placed")
+# there, only a reexport stub). Revenant's own "copy the library in" mechanism (toolchain/AGENTS.md, "revenant.libraries and verify_placed")
 # copies the band a build's own apple_minimum names, so a "ported" binary (band 4.3, which does carry the class) run on the
 # reference release instead would hold two classes of the same name next to the release's real Foundation, and the runtime's own
 # choice between them ("which one is undefined") is not a measurement of either. Like tests/backports/device/display-probe/xmake.lua's
@@ -26,7 +26,7 @@ export BELOW6_ROOT=$(cd "$here/../../../.." && pwd)
 releases=${BELOW6_RELEASES:-"6.0 4.3 5.0"}
 reference=$(echo "$releases" | awk '{print $1}')
 others=$(echo "$releases" | cut -d' ' -f2-)
-build=${BELOW6_BUILD:-$(runs_folder charon-below6)}
+build=${BELOW6_BUILD:-$(runs_folder revenant-below6)}
 rm -rf "$build"
 mkdir -p "$build/ported" "$build/bare"
 cp "$here/xmake.lua" "$here/control" "$build/ported/"

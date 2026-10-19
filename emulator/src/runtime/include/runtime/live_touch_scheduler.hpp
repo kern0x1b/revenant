@@ -16,7 +16,7 @@
 #include "debug/control_channel.hpp"
 #include "foundation/touch_input.hpp"
 
-namespace shade {
+namespace emulator {
 
 class LiveTouchScheduler {
 public:

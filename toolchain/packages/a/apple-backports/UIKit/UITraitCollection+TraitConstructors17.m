@@ -1,9 +1,9 @@
 #import <UIKit/UIKit.h>
-#import "CharonTraits17.h"
+#import "RevenantTraits17.h"
 
 #if !__has_include(<UIKit/UITrait.h>)
 
-@interface UITraitCollection (CharonTraitConstructors17)
+@interface UITraitCollection (RevenantTraitConstructors17)
 + (UITraitCollection *)traitCollectionWithImageDynamicRange:(UIImageDynamicRange)imageDynamicRange;
 + (UITraitCollection *)traitCollectionWithSceneCaptureState:(UISceneCaptureState)sceneCaptureState;
 + (UITraitCollection *)traitCollectionWithTypesettingLanguage:(NSString *)typesettingLanguage;
@@ -11,7 +11,7 @@
 
 #endif
 
-@implementation UITraitCollection (CharonTraitConstructors17)
+@implementation UITraitCollection (RevenantTraitConstructors17)
 
 + (UITraitCollection *)traitCollectionWithImageDynamicRange:(UIImageDynamicRange)imageDynamicRange
 {

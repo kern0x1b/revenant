@@ -3,7 +3,7 @@
 #
 # The system builds an AXBrailleTable and an AXBrailleTranslator out of a provider's dot patterns,
 # and this port builds the same two out of the published Unified English Braille grade 1 tables
-# (CharonBraille.m). The check is: give both the same text, and the cells must be the same cells.
+# (RevenantBraille.m). The check is: give both the same text, and the cells must be the same cells.
 #
 # It runs on the host because the host has the framework - macOS 26 and later carry
 # AXBrailleTranslator, and its Accessibility.framework is in the macOS SDK - and the two
@@ -17,7 +17,7 @@ set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../common/runs.sh" "$here"
 root=$(cd "$here/../../.." && pwd)
-build=${BUILD:-$(runs_fresh charon-accessibility)}
+build=${BUILD:-$(runs_fresh revenant-accessibility)}
 mkdir -p "$build"
 sdk=$(xcrun --show-sdk-path)
 if [ ! -f "$sdk/System/Library/Frameworks/Accessibility.framework/Headers/AXBrailleTranslator.h" ]; then
@@ -36,15 +36,15 @@ host_build() {
 }
 port_build() {
     xcrun clang -target arm64-apple-macos26.0 -isysroot "$sdk" -fobjc-arc -O0 -Wall \
-        -DCHARON_HALF_PORT=1 -DCHARON_BRAILLE_ONLY=1 \
-        -DAXBrailleTable=CharonPortBrailleTable \
-        -DAXBrailleTranslationResult=CharonPortBrailleTranslationResult \
-        -DAXBrailleTranslator=CharonPortBrailleTranslator \
+        -DREVENANT_HALF_PORT=1 -DREVENANT_BRAILLE_ONLY=1 \
+        -DAXBrailleTable=RevenantPortBrailleTable \
+        -DAXBrailleTranslationResult=RevenantPortBrailleTranslationResult \
+        -DAXBrailleTranslator=RevenantPortBrailleTranslator \
         -I"$root/packages/a/apple-backports/Accessibility" \
         -I"$root/packages/a/apple-backports/Intents" \
         "$here/braille-differential.m" \
-        "$root/packages/a/apple-backports/Accessibility/CharonBraille.m" \
-        "$root/packages/a/apple-backports/Foundation/CharonCoding.m" \
+        "$root/packages/a/apple-backports/Accessibility/RevenantBraille.m" \
+        "$root/packages/a/apple-backports/Foundation/RevenantCoding.m" \
         -I"$root/packages/a/apple-backports/Intents" \
         -framework Foundation -framework CoreLocation -o "$build/port" 2>>"$build/build.log" || return 1
 }

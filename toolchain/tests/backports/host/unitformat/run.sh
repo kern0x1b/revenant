@@ -25,16 +25,16 @@ set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 FOUNDATION=${FOUNDATION:-$here/../../../../packages/a/apple-backports/Foundation}
-BUILD=${BUILD:-$(runs_fresh charon-unitformat)}
+BUILD=${BUILD:-$(runs_fresh revenant-unitformat)}
 quiet="-Wno-deprecated-declarations -Wno-unguarded-availability-new -Wno-incomplete-implementation -Wno-objc-protocol-method-implementation -Wno-nullability-completeness -Wno-objc-designated-initializers -Wno-format-security"
 rm -rf "$BUILD/port"
 mkdir -p "$BUILD/port"
-for pair in "NSLengthFormatter:CharonHostLengthFormatter" "NSMassFormatter:CharonHostMassFormatter" "NSEnergyFormatter:CharonHostEnergyFormatter"; do
+for pair in "NSLengthFormatter:RevenantHostLengthFormatter" "NSMassFormatter:RevenantHostMassFormatter" "NSEnergyFormatter:RevenantHostEnergyFormatter"; do
     ours=${pair%%:*}
     theirs=${pair##*:}
     xcrun clang -fobjc-arc $quiet -D${ours}=${theirs} -I "$FOUNDATION" -c "$FOUNDATION/$ours.m" -o "$BUILD/port/$ours.o"
 done
-xcrun clang -fobjc-arc $quiet -I "$FOUNDATION" -c "$FOUNDATION/CharonUnitFormat.m" -o "$BUILD/port/CharonUnitFormat.o"
+xcrun clang -fobjc-arc $quiet -I "$FOUNDATION" -c "$FOUNDATION/RevenantUnitFormat.m" -o "$BUILD/port/RevenantUnitFormat.o"
 xcrun clang -fobjc-arc $quiet "$here/differential.m" "$BUILD/port"/*.o -framework Foundation -o "$BUILD/differential"
 
 status=0

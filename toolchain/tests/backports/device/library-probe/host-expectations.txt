@@ -1,7 +1,7 @@
 # host-expectations.txt - the library probe (library.m) run on Apple's Metal, macOS 27.0.1.
 # Captured by: clang -fobjc-arc -framework Foundation -framework Metal library.m, then the binary with no argument.
 # The library is built from source on the host, so its install name is Metal's default. The port cannot build a
-# library from source (CharonMetalDevice refuses it), so the port side needs a library loaded from a file; that run is
+# library from source (RevenantMetalDevice refuses it), so the port side needs a library loaded from a file; that run is
 # not done. Each line is key=value, read by key.
 ## main
 device.present=1

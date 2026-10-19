@@ -5,7 +5,7 @@
 #   1. the port's own sources are COMPILED and LINKED into the differential, which prints what the port
 #      holds - two of them, because an object carries the API of one release and the family now spans
 #      seven: SensorKitNames14.m for the 39 names of iOS 14.0, and names-extra.m, which imports
-#      CharonSensorKitNames.h with all six later guards, for the 18 of 15.0 .. 26.0
+#      RevenantSensorKitNames.h with all six later guards, for the 18 of 15.0 .. 26.0
 #   2. the reader is COMPILED and LINKED separately, and opens the host's framework to print what it holds
 #   3. compare.lua puts the two side by side, name by name, over the one list both walk
 #   4. three plants: every value wrong in both port sources, one value wrong in the first, and one in
@@ -18,7 +18,7 @@ set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 port=${PORT:-$here/../../../../packages/a/apple-backports/SensorKit}
-build=${SENSORKIT_NAMES_BUILD:-$(runs_fresh charon-sensorkit-names)}
+build=${SENSORKIT_NAMES_BUILD:-$(runs_fresh revenant-sensorkit-names)}
 mkdir -p "$build"
 
 # The two port-side sources, compiled from a directory and linked into one differential.
@@ -35,14 +35,14 @@ port_objects() {
 port_sources_into() {
     mkdir -p "$1"
     cp "$port/SensorKitNames14.m" "$1/SensorKitNames14.m"
-    cp "$port/CharonSensorKitNames.h" "$1/CharonSensorKitNames.h"
+    cp "$port/RevenantSensorKitNames.h" "$1/RevenantSensorKitNames.h"
     cp "$here/names-extra.m" "$1/names-extra.m"
 }
 
 # The one-wrong plant: $1 the directory, $2 the file inside it to rewrite.
 # The identifier is read off the line before the initialiser rather than off a fixed spelling of the
 # declaration, because the two port-side sources do not spell it the same way: SensorKitNames14.m
-# writes CFStringRef const and CharonSensorKitNames.h writes NSString * const, the latter because the
+# writes CFStringRef const and RevenantSensorKitNames.h writes NSString * const, the latter because the
 # build's own SDK declares four of those names and a definition must match THAT declaration's type.
 one_wrong() {
     line=$(grep -m 1 -n 'CFSTR("' "$1/$2" | cut -d: -f1)
@@ -89,8 +89,8 @@ echo "--- the all-wrong plant: every value replaced in both port sources"
 port_sources_into "$build/allwrong"
 sed 's/CFSTR("[^"]*")/CFSTR("WRONG")/g' "$build/allwrong/SensorKitNames14.m" > "$build/allwrong/SensorKitNames14.m.tmp"
 mv "$build/allwrong/SensorKitNames14.m.tmp" "$build/allwrong/SensorKitNames14.m"
-sed 's/CFSTR("[^"]*")/CFSTR("WRONG")/g' "$build/allwrong/CharonSensorKitNames.h" > "$build/allwrong/CharonSensorKitNames.h.tmp"
-mv "$build/allwrong/CharonSensorKitNames.h.tmp" "$build/allwrong/CharonSensorKitNames.h"
+sed 's/CFSTR("[^"]*")/CFSTR("WRONG")/g' "$build/allwrong/RevenantSensorKitNames.h" > "$build/allwrong/RevenantSensorKitNames.h.tmp"
+mv "$build/allwrong/RevenantSensorKitNames.h.tmp" "$build/allwrong/RevenantSensorKitNames.h"
 port_objects "$build/allwrong" "$build/allwrong"
 xcrun clang -fobjc-arc -w "$build/differential.o" "$build/allwrong-names14.o" "$build/allwrong-extra.o" \
     -framework Foundation -o "$build/differential-allwrong"
@@ -105,7 +105,7 @@ echo "--- the one-wrong plants: exactly one value replaced, in each of the two p
 port_sources_into "$build/onewrong14"
 one_wrong "$build/onewrong14" "SensorKitNames14.m"
 port_sources_into "$build/onewrongextra"
-one_wrong "$build/onewrongextra" "CharonSensorKitNames.h"
+one_wrong "$build/onewrongextra" "RevenantSensorKitNames.h"
 
 echo "--- the comparator's own control: a HOST file with no rows must be red"
 : > "$build/host-empty.out"

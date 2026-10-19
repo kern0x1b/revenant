@@ -14,7 +14,7 @@
 #include <optional>
 #include <vector>
 
-namespace shade {
+namespace emulator {
 
 class OpenGlesHle;
 class UserlandHleCall;

@@ -9,7 +9,7 @@
 
 #include <algorithm>
 
-namespace shade {
+namespace emulator {
 
 GuestParallelismPolicy::GuestParallelismPolicy(
     std::uint64_t guest_ticks_per_second)

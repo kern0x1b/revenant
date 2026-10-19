@@ -1,10 +1,10 @@
-#import "CharonUserNotifications.h"
+#import "RevenantUserNotifications.h"
 
 @implementation UNPushNotificationTrigger
 
-+ (instancetype)charon_pushTrigger
++ (instancetype)revenant_pushTrigger
 {
-    return [[self alloc] initCharonWithRepeats:NO];
+    return [[self alloc] initRevenantWithRepeats:NO];
 }
 
 @end

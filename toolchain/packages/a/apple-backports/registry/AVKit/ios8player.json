@@ -31,7 +31,7 @@
       "status": "owed",
       "reason": "build the property AVPlayerViewController.showsTimecodes",
       "effect": "until built: respondsToSelector: answers NO",
-      "source": "the armv7 shared cache of 6.1.3 (568965 names, armv7) for timecodeStatus and currentTimeline absent; packages/a/apple-backports/AVKit/AVPlayerViewController.m (charon_time_text); SDK 26.2 AVKit/AVPlayerViewController.h:67-70",
+      "source": "the armv7 shared cache of 6.1.3 (568965 names, armv7) for timecodeStatus and currentTimeline absent; packages/a/apple-backports/AVKit/AVPlayerViewController.m (revenant_time_text); SDK 26.2 AVKit/AVPlayerViewController.h:67-70",
       "facts": "facts/AVKit/Absent.md"
     },
     {
@@ -107,7 +107,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "reason": "the full screen of the backports' AVPlayerViewController is a presentation, and UIKitBackports, which AVKitBackports links, gives every presentation and dismissal a transition coordinator",
-      "effect": "sent once when the full screen presentation starts, with the CharonTransitionCoordinator of that transition: the delegate can animate alongside it, and its completion runs when the transition ends",
+      "effect": "sent once when the full screen presentation starts, with the RevenantTransitionCoordinator of that transition: the delegate can animate alongside it, and its completion runs when the transition ends",
       "source": "SDK 16.4, AVKit; tests/backports/device/avplayer.m on an iPad 2 running 6.1.3",
       "facts": "facts/AVKit/AVPlayerViewController.md"
     },
@@ -118,7 +118,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "reason": "the full screen of the backports' AVPlayerViewController is a presentation, and UIKitBackports, which AVKitBackports links, gives every presentation and dismissal a transition coordinator",
-      "effect": "sent once when the full screen dismissal starts, with the CharonTransitionCoordinator of that transition: the delegate can animate alongside it, and its completion runs when the transition ends",
+      "effect": "sent once when the full screen dismissal starts, with the RevenantTransitionCoordinator of that transition: the delegate can animate alongside it, and its completion runs when the transition ends",
       "source": "SDK 16.4, AVKit; tests/backports/device/avplayer.m on an iPad 2 running 6.1.3",
       "facts": "facts/AVKit/AVPlayerViewController.md"
     }

@@ -7,7 +7,7 @@
 #include <algorithm>
 #include <limits>
 
-namespace shade {
+namespace emulator {
 namespace {
     constexpr auto maximum = std::numeric_limits<std::uint64_t>::max();
 

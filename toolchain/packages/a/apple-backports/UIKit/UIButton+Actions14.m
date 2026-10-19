@@ -1,16 +1,16 @@
-#import "CharonMenus.h"
+#import "RevenantMenus.h"
 #import <objc/runtime.h>
 
 #pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
 #pragma clang diagnostic ignored "-Wprotocol"
 #pragma clang diagnostic ignored "-Wobjc-designated-initializers"
 
-static const char charon_menu_key, charon_role_key;
+static const char revenant_menu_key, revenant_role_key;
 
-@interface UIButton (CharonActions14) <UIContextMenuInteractionDelegate>
+@interface UIButton (RevenantActions14) <UIContextMenuInteractionDelegate>
 @end
 
-@implementation UIButton (CharonActions14)
+@implementation UIButton (RevenantActions14)
 
 + (instancetype)buttonWithType:(UIButtonType)buttonType primaryAction:(UIAction *)primaryAction
 {
@@ -39,25 +39,25 @@ static const char charon_menu_key, charon_role_key;
 
 - (UIMenu *)menu
 {
-    return objc_getAssociatedObject(self, &charon_menu_key);
+    return objc_getAssociatedObject(self, &revenant_menu_key);
 }
 
 - (void)setMenu:(UIMenu *)menu
 {
-    objc_setAssociatedObject(self, &charon_menu_key, [menu copy], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, &revenant_menu_key, [menu copy], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     [self setContextMenuInteractionEnabled:menu != nil];
 }
 
 - (UIButtonRole)role
 {
-    return (UIButtonRole)[objc_getAssociatedObject(self, &charon_role_key) integerValue];
+    return (UIButtonRole)[objc_getAssociatedObject(self, &revenant_role_key) integerValue];
 }
 
 - (void)setRole:(UIButtonRole)role
 {
     if (role != UIButtonRoleNormal)
-        charon_menus_say_once(@"button-role", @"UIButton.role: iOS 6 draws every button the same whatever its role, so the role is kept and read back");
-    objc_setAssociatedObject(self, &charon_role_key, @(role), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+        revenant_menus_say_once(@"button-role", @"UIButton.role: iOS 6 draws every button the same whatever its role, so the role is kept and read back");
+    objc_setAssociatedObject(self, &revenant_role_key, @(role), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
 - (UIContextMenuConfiguration *)contextMenuInteraction:(UIContextMenuInteraction *)interaction configurationForMenuAtLocation:(CGPoint)location

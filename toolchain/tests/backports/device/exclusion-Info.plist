@@ -9,7 +9,7 @@
 	<key>CFBundleExecutable</key>
 	<string>exclusion</string>
 	<key>CFBundleIdentifier</key>
-	<string>local.charon.backports.exclusion</string>
+	<string>local.revenant.backports.exclusion</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>

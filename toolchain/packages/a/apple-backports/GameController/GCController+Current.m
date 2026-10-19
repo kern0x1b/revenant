@@ -2,7 +2,7 @@
 
 #pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
 
-@implementation GCController (CharonCurrent)
+@implementation GCController (RevenantCurrent)
 
 + (GCController *)current
 {

@@ -4,7 +4,7 @@
 <dict>
 	<key>CFBundleDevelopmentRegion</key><string>en</string>
 	<key>CFBundleExecutable</key><string>UIDemo</string>
-	<key>CFBundleIdentifier</key><string>org.charon.xlate.uidemo</string>
+	<key>CFBundleIdentifier</key><string>org.revenant.xlate.uidemo</string>
 	<key>CFBundleInfoDictionaryVersion</key><string>6.0</string>
 	<key>CFBundleName</key><string>UIDemo</string>
 	<key>CFBundlePackageType</key><string>APPL</string>

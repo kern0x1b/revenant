@@ -11,7 +11,7 @@ package("ggml")
     add_configs("recipe", {description = "The digest of this recipe, so a changed flag is a different library.", default = hash.strhash128(hash.sha256(path.join(os.scriptdir(), "xmake.lua")) .. hash.sha256(path.join(os.scriptdir(), "ggml-libcxx.cpp"))), type = "string", readonly = true})
 
     local FLAGS = {"-Os", "-fvisibility=hidden", "-fno-exceptions", "-fno-rtti", "-D_GNU_SOURCE", "-Dggml_EXPORTS", "-DGGML_CPU_GENERIC",
-        "-Dclock_gettime=charon_ggml_clock_gettime"}
+        "-Dclock_gettime=revenant_ggml_clock_gettime"}
     local CXXFLAGS = {"-std=c++17", "-fvisibility-inlines-hidden"}
     local SOURCES = {"ggml.c", "ggml-alloc.c", "ggml-quants.c", "ggml-cpu/ggml-cpu.c", "ggml-cpu/quants.c",
                      "ggml.cpp", "ggml-backend.cpp", "ggml-backend-meta.cpp", "ggml-threading.cpp", "ggml-opt.cpp",

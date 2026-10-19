@@ -16,19 +16,19 @@
 
 + (instancetype)filterIncludingAllCategories
 {
-    return [[[self alloc] init] charon_setIncluding:nil excluding:nil];
+    return [[[self alloc] init] revenant_setIncluding:nil excluding:nil];
 }
 
 + (instancetype)filterExcludingAllCategories
 {
-    return [[[self alloc] init] charon_setIncluding:nil excluding:nil];
+    return [[[self alloc] init] revenant_setIncluding:nil excluding:nil];
 }
 
 - (instancetype)initIncludingCategories:(NSSet<MKPointOfInterestCategory> *)categories
 {
     self = [super init];
     if (self) {
-        [self charon_setIncluding:categories excluding:nil];
+        [self revenant_setIncluding:categories excluding:nil];
     }
     return self;
 }
@@ -37,12 +37,12 @@
 {
     self = [super init];
     if (self) {
-        [self charon_setIncluding:nil excluding:categories];
+        [self revenant_setIncluding:nil excluding:categories];
     }
     return self;
 }
 
-- (instancetype)charon_setIncluding:(NSSet<MKPointOfInterestCategory> *)including
+- (instancetype)revenant_setIncluding:(NSSet<MKPointOfInterestCategory> *)including
                            excluding:(NSSet<MKPointOfInterestCategory> *)excluding
 {
     _includingCategories = [including copy];
@@ -98,7 +98,7 @@
 - (id)copyWithZone:(NSZone *)zone
 {
     MKPointOfInterestFilter *copy = [[[self class] allocWithZone:zone] initIncludingCategories:_includingCategories];
-    [copy charon_setIncluding:_includingCategories excluding:_excludingCategories];
+    [copy revenant_setIncluding:_includingCategories excluding:_excludingCategories];
     return copy;
 }
 
@@ -112,7 +112,7 @@
 {
     self = [super init];
     if (self) {
-        [self charon_setIncluding:[coder decodeObjectForKey:@"MKPointOfInterestFilterIncludingCategories"]
+        [self revenant_setIncluding:[coder decodeObjectForKey:@"MKPointOfInterestFilterIncludingCategories"]
                         excluding:[coder decodeObjectForKey:@"MKPointOfInterestFilterExcludingCategories"]];
     }
     return self;

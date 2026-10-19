@@ -21,7 +21,7 @@ end
 expect(count == 1, "the table writes one object, got " .. count)
 local text = objects["ImageIOMetadata7.m"]
 
-expect(has(text, "#define CHARON_PROPERTY_ROWS 357\n"), "the row count is 357")
+expect(has(text, "#define REVENANT_PROPERTY_ROWS 357\n"), "the row count is 357")
 local rows = 0
 for line in string.gmatch(text, "[^\n]+") do
     if string.match(line, '^    { "') then

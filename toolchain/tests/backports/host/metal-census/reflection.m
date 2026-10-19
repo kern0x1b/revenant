@@ -28,7 +28,7 @@ int main(int argc, char **argv)
         for (int i = 1; i < argc; i++) {
             NSString *path = [NSString stringWithUTF8String:argv[i]];
             printf("%s\n", [path.lastPathComponent UTF8String]);
-            CharonMetalTypeTree *tree = [CharonMetalTypeTree treeWithContentsOfFile:path];
+            RevenantMetalTypeTree *tree = [RevenantMetalTypeTree treeWithContentsOfFile:path];
             NSArray *functions = [tree functions];
             check(functions.count > 0, @"the file has at least one function");
 

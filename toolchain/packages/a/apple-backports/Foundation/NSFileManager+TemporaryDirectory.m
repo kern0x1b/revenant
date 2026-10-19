@@ -1,6 +1,6 @@
 #import <Foundation/Foundation.h>
 
-@implementation NSFileManager (CharonTemporaryDirectory)
+@implementation NSFileManager (RevenantTemporaryDirectory)
 
 - (NSURL *)temporaryDirectory
 {

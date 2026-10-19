@@ -27,7 +27,7 @@
 #include "../mach/support.hpp"
 #include "support.hpp"
 
-namespace shade {
+namespace emulator {
 namespace {
 
     constexpr std::uint32_t maximum_psynch_traces = 512U;

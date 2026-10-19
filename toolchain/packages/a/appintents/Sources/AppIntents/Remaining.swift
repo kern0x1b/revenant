@@ -77,12 +77,12 @@ public protocol AssistantSchemaIntent: AssistantIntent {
 extension AssistantSchemaIntent {
     public static var isAssistantOnly: Bool { return false }
 
-    public static var title: LocalizedStringResource { return CharonAssistantTitle.of(Self.self) }
+    public static var title: LocalizedStringResource { return RevenantAssistantTitle.of(Self.self) }
 }
 
-public enum CharonAssistantTitle {
+public enum RevenantAssistantTitle {
     public static func of(_ type: Any.Type) -> LocalizedStringResource {
-        return CharonLocalized.resource(String(describing: type))
+        return RevenantLocalized.resource(String(describing: type))
     }
 }
 
@@ -94,7 +94,7 @@ extension AssistantSchemaEntity {
     public static var isAssistantOnly: Bool { return false }
 
     public static var typeDisplayRepresentation: TypeDisplayRepresentation {
-        return TypeDisplayRepresentation(name: CharonLocalized.resource(String(describing: Self.self)))
+        return TypeDisplayRepresentation(name: RevenantLocalized.resource(String(describing: Self.self)))
     }
 }
 
@@ -106,7 +106,7 @@ extension AssistantSchemaEnum {
     public static var isAssistantOnly: Bool { return false }
 
     public static var typeDisplayRepresentation: TypeDisplayRepresentation {
-        return TypeDisplayRepresentation(name: CharonLocalized.resource(String(describing: Self.self)))
+        return TypeDisplayRepresentation(name: RevenantLocalized.resource(String(describing: Self.self)))
     }
 }
 
@@ -166,11 +166,11 @@ extension IntentChoiceOption {
 extension IntentDonationManager {
     @discardableResult
     public func donate<Intent: AppIntent>(intent: Intent) -> IntentDonationIdentifier {
-        return donate(intent: intent, result: CharonIntentResultText.empty)
+        return donate(intent: intent, result: RevenantIntentResultText.empty)
     }
 }
 
-extension CharonIntentResultText {
+extension RevenantIntentResultText {
     static let empty = IntentResultContainer<Never, Never, Never, Never>()
 }
 
@@ -194,7 +194,7 @@ extension ForegroundContinuableIntent {
     }
 }
 
-extension CharonForeground {
+extension RevenantForeground {
     public struct Continuation {
         public var mayContinue: Bool
 
@@ -204,7 +204,7 @@ extension CharonForeground {
     }
 }
 
-extension CharonRun {
+extension RevenantRun {
     public static func awaitBool(_ body: @escaping () async throws -> Bool) -> Bool {
         let finished = DispatchSemaphore(value: 0)
         var answer = false
@@ -260,12 +260,12 @@ extension IntentPerson.Identifier {
 }
 
 extension SetFocusFilterIntentError {
-    public func hash(into hasher: inout Hasher) { hasher.combine(CharonFocusError.ordinal(self)) }
+    public func hash(into hasher: inout Hasher) { hasher.combine(RevenantFocusError.ordinal(self)) }
 
-    public var hashValue: Int { return CharonFocusError.ordinal(self) }
+    public var hashValue: Int { return RevenantFocusError.ordinal(self) }
 }
 
-public enum CharonFocusError {
+public enum RevenantFocusError {
     public static func ordinal(_ error: SetFocusFilterIntentError) -> Int {
         switch error {
         case .notFound: return 0

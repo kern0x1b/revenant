@@ -5,7 +5,7 @@ set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 uikit=$here/../../../../packages/a/apple-backports/UIKit
-build=${PRESENTATION_DELEGATE_BUILD:-$(runs_fresh charon-presentation-delegate)}
+build=${PRESENTATION_DELEGATE_BUILD:-$(runs_fresh revenant-presentation-delegate)}
 . "$here/../../common/twoprocess.sh"
 if [ -n "${PRESENTATION_DELEGATE_PORT_SOURCES:-}" ]; then
     set -- $PRESENTATION_DELEGATE_PORT_SOURCES

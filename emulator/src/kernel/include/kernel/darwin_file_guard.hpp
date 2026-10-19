@@ -3,7 +3,7 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 #pragma once
 #include <cstdint>
-namespace shade {
+namespace emulator {
 struct DarwinFileGuard {
     static constexpr std::uint32_t close = 1U;
     static constexpr std::uint32_t duplicate = 2U;

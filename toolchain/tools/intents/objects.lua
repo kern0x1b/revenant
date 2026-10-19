@@ -53,7 +53,7 @@ function main(...)
     local workspace = import("workspace", {rootdir = path.join(os.scriptdir(), "..", "..", "modules"), anonymous = true})
     local sdk_newer = options.sdk or workspace.sdk()
     if not os.isdir(sdk_newer) then
-        raise("--sdk names the iPhoneOS 26.2 SDK the surface is read from (CHARON_GEN_SDK in the build): %s", sdk_newer)
+        raise("--sdk names the iPhoneOS 26.2 SDK the surface is read from (REVENANT_GEN_SDK in the build): %s", sdk_newer)
     end
     local sdk_port = options["port-sdk"] or workspace.sdk_package(PORT_SDK_VERSION)
     if not os.isdir(sdk_port) then

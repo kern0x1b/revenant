@@ -1,21 +1,21 @@
 #import <Foundation/Foundation.h>
 #import <objc/runtime.h>
 
-static NSURL *charon_receipt(NSBundle *bundle)
+static NSURL *revenant_receipt(NSBundle *bundle)
 {
     return [bundle.bundleURL URLByAppendingPathComponent:@"StoreKit/receipt"];
 }
 
-@interface CharonReceiptInstaller : NSObject
+@interface RevenantReceiptInstaller : NSObject
 @end
 
-@implementation CharonReceiptInstaller
+@implementation RevenantReceiptInstaller
 
 + (void)load
 {
     SEL selector = @selector(appStoreReceiptURL);
     IMP replacement = imp_implementationWithBlock(^NSURL *(NSBundle *self_) {
-        return charon_receipt(self_);
+        return revenant_receipt(self_);
     });
     Method method = class_getInstanceMethod([NSBundle class], selector);
     if (method)
@@ -26,11 +26,11 @@ static NSURL *charon_receipt(NSBundle *bundle)
 
 @end
 
-@implementation NSBundle (CharonReceiptURL)
+@implementation NSBundle (RevenantReceiptURL)
 
 - (NSURL *)appStoreReceiptURL
 {
-    return charon_receipt(self);
+    return revenant_receipt(self);
 }
 
 @end

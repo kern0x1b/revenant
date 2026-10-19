@@ -1,6 +1,6 @@
 #import <Foundation/Foundation.h>
 
-#import "CharonUnitFormat.h"
+#import "RevenantUnitFormat.h"
 
 @implementation NSEnergyFormatter {
     NSNumberFormatter *_numbers;
@@ -77,51 +77,51 @@
     _forFoodEnergyUse = forFoodEnergyUse;
 }
 
-- (NSString *)charon_nameOfUnit:(NSInteger)unit value:(double)value system:(CharonUnitSystem)system written:(BOOL)written
+- (NSString *)revenant_nameOfUnit:(NSInteger)unit value:(double)value system:(RevenantUnitSystem)system written:(BOOL)written
 {
     NSNumberFormatter *numbers = self.numberFormatter;
     if (_forFoodEnergyUse) {
-        NSString *food = charon_unit_food_name(unit, _unitStyle, value, written, numbers);
+        NSString *food = revenant_unit_food_name(unit, _unitStyle, value, written, numbers);
         if (food)
             return food;
     }
-    return written && _unitStyle == NSFormattingUnitStyleShort ? charon_unit_written_short(@"energy", system, unit)
-                                                               : charon_unit_name(@"energy", system, unit, _unitStyle, value);
+    return written && _unitStyle == NSFormattingUnitStyleShort ? revenant_unit_written_short(@"energy", system, unit)
+                                                               : revenant_unit_name(@"energy", system, unit, _unitStyle, value);
 }
 
 - (NSString *)stringFromValue:(double)value unit:(NSEnergyFormatterUnit)unit
 {
-    CharonUnitSystem system = charon_unit_system([NSLocale currentLocale]);
-    NSString *food = _forFoodEnergyUse ? charon_unit_food_name(unit, _unitStyle, value, YES, self.numberFormatter) : nil;
+    RevenantUnitSystem system = revenant_unit_system([NSLocale currentLocale]);
+    NSString *food = _forFoodEnergyUse ? revenant_unit_food_name(unit, _unitStyle, value, YES, self.numberFormatter) : nil;
     if (food) {
-        NSString *number = charon_unit_number(value, self.numberFormatter);
-        return charon_unit_joins_with_space(_unitStyle) ? [NSString stringWithFormat:@"%@ %@", number, food]
+        NSString *number = revenant_unit_number(value, self.numberFormatter);
+        return revenant_unit_joins_with_space(_unitStyle) ? [NSString stringWithFormat:@"%@ %@", number, food]
                                                         : [NSString stringWithFormat:@"%@%@", number, food];
     }
-    return charon_unit_given(@"energy", system, value, unit, _unitStyle, self.numberFormatter);
+    return revenant_unit_given(@"energy", system, value, unit, _unitStyle, self.numberFormatter);
 }
 
 - (NSString *)stringFromJoules:(double)numberInJoules
 {
-    CharonUnitSystem system = charon_unit_system([NSLocale currentLocale]);
+    RevenantUnitSystem system = revenant_unit_system([NSLocale currentLocale]);
     double inUnit = 0;
-    NSInteger unit = charon_unit_chosen(@"energy", system, NO, numberInJoules, &inUnit);
-    return charon_unit_written(@"energy", system, NO, numberInJoules, unit, _unitStyle, self.numberFormatter);
+    NSInteger unit = revenant_unit_chosen(@"energy", system, NO, numberInJoules, &inUnit);
+    return revenant_unit_written(@"energy", system, NO, numberInJoules, unit, _unitStyle, self.numberFormatter);
 }
 
 - (NSString *)unitStringFromValue:(double)value unit:(NSEnergyFormatterUnit)unit
 {
-    return [self charon_nameOfUnit:unit value:value system:charon_unit_system([NSLocale currentLocale]) written:NO];
+    return [self revenant_nameOfUnit:unit value:value system:revenant_unit_system([NSLocale currentLocale]) written:NO];
 }
 
 - (NSString *)unitStringFromJoules:(double)numberInJoules usedUnit:(NSEnergyFormatterUnit *)unitp
 {
-    CharonUnitSystem system = charon_unit_system([NSLocale currentLocale]);
+    RevenantUnitSystem system = revenant_unit_system([NSLocale currentLocale]);
     double inUnit = 0;
-    NSInteger unit = charon_unit_chosen(@"energy", system, NO, numberInJoules, &inUnit);
+    NSInteger unit = revenant_unit_chosen(@"energy", system, NO, numberInJoules, &inUnit);
     if (unitp)
         *unitp = (NSEnergyFormatterUnit)unit;
-    return [self charon_nameOfUnit:unit value:inUnit system:system written:NO];
+    return [self revenant_nameOfUnit:unit value:inUnit system:system written:NO];
 }
 
 - (BOOL)getObjectValue:(id *)obj forString:(NSString *)string errorDescription:(NSString **)error

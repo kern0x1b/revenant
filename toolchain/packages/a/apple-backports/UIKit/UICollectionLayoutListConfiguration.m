@@ -1,5 +1,5 @@
-#import "CharonLists.h"
-#import "CharonCompositionalLayout.h"
+#import "RevenantLists.h"
+#import "RevenantCompositionalLayout.h"
 
 #pragma clang diagnostic ignored "-Wobjc-designated-initializers"
 
@@ -84,7 +84,7 @@
     return _appearance;
 }
 
-- (UICollectionLayoutListAppearance)charon_appearance
+- (UICollectionLayoutListAppearance)revenant_appearance
 {
     return _appearance;
 }
@@ -94,7 +94,7 @@
     return _showsSeparators;
 }
 
-- (BOOL)charon_showsSeparators
+- (BOOL)revenant_showsSeparators
 {
     return _showsSeparators;
 }
@@ -156,20 +156,20 @@
 
 @end
 
-static const CGFloat CharonListRowEstimate = 44;
+static const CGFloat RevenantListRowEstimate = 44;
 
-@implementation NSCollectionLayoutSection (CharonListConfiguration)
+@implementation NSCollectionLayoutSection (RevenantListConfiguration)
 
 + (instancetype)sectionWithListConfiguration:(UICollectionLayoutListConfiguration *)configuration layoutEnvironment:(id<NSCollectionLayoutEnvironment>)layoutEnvironment
 {
-    UICollectionLayoutListAppearance appearance = [configuration charon_appearance];
+    UICollectionLayoutListAppearance appearance = [configuration revenant_appearance];
     UICollectionLayoutListHeaderMode header = configuration.headerMode;
     UICollectionLayoutListFooterMode footer = configuration.footerMode;
     BOOL plain = appearance == UICollectionLayoutListAppearancePlain, sidebarPlain = appearance == UICollectionLayoutListAppearanceSidebarPlain;
     BOOL grouped = appearance == UICollectionLayoutListAppearanceGrouped || appearance == UICollectionLayoutListAppearanceInsetGrouped;
     BOOL sidebar = appearance == UICollectionLayoutListAppearanceSidebar;
     NSCollectionLayoutItem *item = [NSCollectionLayoutItem itemWithLayoutSize:[NSCollectionLayoutSize sizeWithWidthDimension:[NSCollectionLayoutDimension fractionalWidthDimension:1]
-                                                                                                          heightDimension:[NSCollectionLayoutDimension estimatedDimension:CharonListRowEstimate]]];
+                                                                                                          heightDimension:[NSCollectionLayoutDimension estimatedDimension:RevenantListRowEstimate]]];
     NSCollectionLayoutGroup *group = [NSCollectionLayoutGroup horizontalGroupWithLayoutSize:item.layoutSize subitems:@[item]];
     NSCollectionLayoutSection *section = [NSCollectionLayoutSection sectionWithGroup:group];
     CGFloat top = 0, bottom = 0, side = 0;
@@ -207,13 +207,13 @@ static const CGFloat CharonListRowEstimate = 44;
         [boundaries addObject:boundary];
     }
     section.boundarySupplementaryItems = boundaries;
-    [section charon_setListConfiguration:[configuration copy]];
+    [section revenant_setListConfiguration:[configuration copy]];
     return section;
 }
 
 @end
 
-@implementation UICollectionViewCompositionalLayout (CharonListConfiguration)
+@implementation UICollectionViewCompositionalLayout (RevenantListConfiguration)
 
 + (instancetype)layoutWithListConfiguration:(UICollectionLayoutListConfiguration *)configuration
 {
@@ -221,7 +221,7 @@ static const CGFloat CharonListRowEstimate = 44;
     UICollectionViewCompositionalLayout *layout = [[UICollectionViewCompositionalLayout alloc] initWithSectionProvider:^NSCollectionLayoutSection *(NSInteger sectionIndex, id<NSCollectionLayoutEnvironment> environment) {
         return [NSCollectionLayoutSection sectionWithListConfiguration:copy layoutEnvironment:environment];
     }];
-    [layout charon_setListConfiguration:copy];
+    [layout revenant_setListConfiguration:copy];
     return layout;
 }
 

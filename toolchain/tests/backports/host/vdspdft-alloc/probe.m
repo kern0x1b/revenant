@@ -3,17 +3,17 @@
 #include <stdlib.h>
 #include <string.h>
 
-extern volatile int charon_tracing;
-extern volatile long charon_fail_at, charon_seen, charon_failed_calls;
+extern volatile int revenant_tracing;
+extern volatile long revenant_fail_at, revenant_seen, revenant_failed_calls;
 
-#ifdef CHARON_PORT
-extern vDSP_DFT_Interleaved_Setup charon_host_vDSP_DFT_Interleaved_CreateSetup(vDSP_DFT_Interleaved_Setup, vDSP_Length, vDSP_DFT_Direction, vDSP_DFT_RealtoComplex);
-extern vDSP_DFT_Interleaved_SetupD charon_host_vDSP_DFT_Interleaved_CreateSetupD(vDSP_DFT_Interleaved_SetupD, vDSP_Length, vDSP_DFT_Direction, vDSP_DFT_RealtoComplex);
-extern void charon_host_vDSP_DFT_Interleaved_DestroySetup(vDSP_DFT_Interleaved_Setup);
-extern void charon_host_vDSP_DFT_Interleaved_DestroySetupD(vDSP_DFT_Interleaved_SetupD);
-#define DESTROY(dbl, s) ((dbl) ? charon_host_vDSP_DFT_Interleaved_DestroySetupD((vDSP_DFT_Interleaved_SetupD)(s)) : charon_host_vDSP_DFT_Interleaved_DestroySetup((vDSP_DFT_Interleaved_Setup)(s)))
-#define CREATE(dbl, n, dir, form) ((dbl) ? (void *)charon_host_vDSP_DFT_Interleaved_CreateSetupD(NULL, (n), (dir), (form)) \
-                                         : (void *)charon_host_vDSP_DFT_Interleaved_CreateSetup(NULL, (n), (dir), (form)))
+#ifdef REVENANT_PORT
+extern vDSP_DFT_Interleaved_Setup revenant_host_vDSP_DFT_Interleaved_CreateSetup(vDSP_DFT_Interleaved_Setup, vDSP_Length, vDSP_DFT_Direction, vDSP_DFT_RealtoComplex);
+extern vDSP_DFT_Interleaved_SetupD revenant_host_vDSP_DFT_Interleaved_CreateSetupD(vDSP_DFT_Interleaved_SetupD, vDSP_Length, vDSP_DFT_Direction, vDSP_DFT_RealtoComplex);
+extern void revenant_host_vDSP_DFT_Interleaved_DestroySetup(vDSP_DFT_Interleaved_Setup);
+extern void revenant_host_vDSP_DFT_Interleaved_DestroySetupD(vDSP_DFT_Interleaved_SetupD);
+#define DESTROY(dbl, s) ((dbl) ? revenant_host_vDSP_DFT_Interleaved_DestroySetupD((vDSP_DFT_Interleaved_SetupD)(s)) : revenant_host_vDSP_DFT_Interleaved_DestroySetup((vDSP_DFT_Interleaved_Setup)(s)))
+#define CREATE(dbl, n, dir, form) ((dbl) ? (void *)revenant_host_vDSP_DFT_Interleaved_CreateSetupD(NULL, (n), (dir), (form)) \
+                                         : (void *)revenant_host_vDSP_DFT_Interleaved_CreateSetup(NULL, (n), (dir), (form)))
 static const char *who = "port";
 #else
 #define DESTROY(dbl, s) ((dbl) ? vDSP_DFT_Interleaved_DestroySetupD((vDSP_DFT_Interleaved_SetupD)(s)) : vDSP_DFT_Interleaved_DestroySetup((vDSP_DFT_Interleaved_Setup)(s)))
@@ -26,14 +26,14 @@ static int failures = 0;
 
 static void *createWith(int dbl, vDSP_Length n, vDSP_DFT_Direction dir, vDSP_DFT_RealtoComplex form, long k, long *calls, long *hit)
 {
-    charon_fail_at = k;
-    charon_seen = 0;
-    charon_failed_calls = 0;
-    charon_tracing = 1;
+    revenant_fail_at = k;
+    revenant_seen = 0;
+    revenant_failed_calls = 0;
+    revenant_tracing = 1;
     void *s = CREATE(dbl, n, dir, form);
-    charon_tracing = 0;
-    if (calls) { *calls = charon_seen; }
-    if (hit) { *hit = charon_failed_calls; }
+    revenant_tracing = 0;
+    if (calls) { *calls = revenant_seen; }
+    if (hit) { *hit = revenant_failed_calls; }
     return s;
 }
 

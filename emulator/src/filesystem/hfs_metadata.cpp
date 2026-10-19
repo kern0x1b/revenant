@@ -33,7 +33,7 @@
 #define st_ctim st_ctimespec
 #endif
 
-namespace shade::hfs {
+namespace emulator::hfs {
 namespace {
 
     constexpr std::uint32_t hfs_root_catalog_id = 2;

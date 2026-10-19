@@ -13,29 +13,29 @@ typedef struct {
     NSUInteger widthSlot;
     NSUInteger precisionSlot;
     NSUInteger slot;
-} CharonConversion;
+} RevenantConversion;
 
 typedef enum {
-    CharonArgumentNone = 0,
-    CharonArgumentInt,
-    CharonArgumentUnsigned,
-    CharonArgumentLong,
-    CharonArgumentUnsignedLong,
-    CharonArgumentLongLong,
-    CharonArgumentUnsignedLongLong,
-    CharonArgumentPtrDiff,
-    CharonArgumentSize,
-    CharonArgumentIntMax,
-    CharonArgumentUIntMax,
-    CharonArgumentDouble,
-    CharonArgumentLongDouble,
-    CharonArgumentCharPointer,
-    CharonArgumentVoidPointer,
-    CharonArgumentObject,
-} CharonArgumentKind;
+    RevenantArgumentNone = 0,
+    RevenantArgumentInt,
+    RevenantArgumentUnsigned,
+    RevenantArgumentLong,
+    RevenantArgumentUnsignedLong,
+    RevenantArgumentLongLong,
+    RevenantArgumentUnsignedLongLong,
+    RevenantArgumentPtrDiff,
+    RevenantArgumentSize,
+    RevenantArgumentIntMax,
+    RevenantArgumentUIntMax,
+    RevenantArgumentDouble,
+    RevenantArgumentLongDouble,
+    RevenantArgumentCharPointer,
+    RevenantArgumentVoidPointer,
+    RevenantArgumentObject,
+} RevenantArgumentKind;
 
 typedef struct {
-    CharonArgumentKind kind;
+    RevenantArgumentKind kind;
     union {
         int i;
         unsigned u;
@@ -53,24 +53,24 @@ typedef struct {
         void *vp;
         void *object;
     } value;
-} CharonFormatArgument;
+} RevenantFormatArgument;
 
-static BOOL CharonFlag(unichar c)
+static BOOL RevenantFlag(unichar c)
 {
     return c == '-' || c == '+' || c == ' ' || c == '#' || c == '0' || c == '\'';
 }
 
-static BOOL CharonLength(unichar c)
+static BOOL RevenantLength(unichar c)
 {
     return c == 'h' || c == 'l' || c == 'z' || c == 'j' || c == 't' || c == 'q';
 }
 
-static BOOL CharonUses(unichar c)
+static BOOL RevenantUses(unichar c)
 {
     return c != 0 && strchr("diouxXeEfFgGaAcCsSpn@", c) != NULL;
 }
 
-static void CharonConversionAt(NSString *format, NSUInteger percent, CharonConversion *out)
+static void RevenantConversionAt(NSString *format, NSUInteger percent, RevenantConversion *out)
 {
     NSUInteger length = format.length, index = percent + 1, digits;
     memset(out, 0, sizeof *out);
@@ -98,7 +98,7 @@ static void CharonConversionAt(NSString *format, NSUInteger percent, CharonConve
             index = start;
         }
     }
-    while (index < length && CharonFlag([format characterAtIndex:index]) && out->flagLength < sizeof out->flags / sizeof *out->flags)
+    while (index < length && RevenantFlag([format characterAtIndex:index]) && out->flagLength < sizeof out->flags / sizeof *out->flags)
         out->flags[out->flagLength++] = [format characterAtIndex:index++];
     if (index < length && [format characterAtIndex:index] == '*') {
         out->widthSlot = NSUIntegerMax;
@@ -125,7 +125,7 @@ static void CharonConversionAt(NSString *format, NSUInteger percent, CharonConve
             out->precision = digits;
         }
     }
-    while (index < length && CharonLength([format characterAtIndex:index])) {
+    while (index < length && RevenantLength([format characterAtIndex:index])) {
         if ([format characterAtIndex:index] == 'l' && index + 1 < length && [format characterAtIndex:index + 1] == 'l') {
             out->length = 'q';
             index += 2;
@@ -134,7 +134,7 @@ static void CharonConversionAt(NSString *format, NSUInteger percent, CharonConve
         out->length = (int)[format characterAtIndex:index];
         index++;
     }
-    if (index < length && CharonUses([format characterAtIndex:index])) {
+    if (index < length && RevenantUses([format characterAtIndex:index])) {
         out->conversion = [format characterAtIndex:index];
         out->end = index + 1;
         return;
@@ -147,80 +147,80 @@ static void CharonConversionAt(NSString *format, NSUInteger percent, CharonConve
         out->end = percent + 1;
 }
 
-static CharonArgumentKind CharonKind(CharonConversion spec)
+static RevenantArgumentKind RevenantKind(RevenantConversion spec)
 {
     switch (spec.conversion) {
     case 'd': case 'i': case 'c':
         switch (spec.length) {
-        case 'l': return CharonArgumentLong;
-        case 'q': return CharonArgumentLongLong;
-        case 'z': return CharonArgumentPtrDiff;
-        case 't': return CharonArgumentPtrDiff;
-        case 'j': return CharonArgumentIntMax;
-        default: return CharonArgumentInt;
+        case 'l': return RevenantArgumentLong;
+        case 'q': return RevenantArgumentLongLong;
+        case 'z': return RevenantArgumentPtrDiff;
+        case 't': return RevenantArgumentPtrDiff;
+        case 'j': return RevenantArgumentIntMax;
+        default: return RevenantArgumentInt;
         }
     case 'u': case 'o': case 'x': case 'X':
         switch (spec.length) {
-        case 'l': return CharonArgumentUnsignedLong;
-        case 'q': return CharonArgumentUnsignedLongLong;
-        case 'z': return CharonArgumentSize;
-        case 't': return CharonArgumentUIntMax;
-        case 'j': return CharonArgumentUIntMax;
-        default: return CharonArgumentUnsigned;
+        case 'l': return RevenantArgumentUnsignedLong;
+        case 'q': return RevenantArgumentUnsignedLongLong;
+        case 'z': return RevenantArgumentSize;
+        case 't': return RevenantArgumentUIntMax;
+        case 'j': return RevenantArgumentUIntMax;
+        default: return RevenantArgumentUnsigned;
         }
     case 'f': case 'F': case 'e': case 'E': case 'g': case 'G': case 'a': case 'A':
-        return spec.length == 'L' ? CharonArgumentLongDouble : CharonArgumentDouble;
+        return spec.length == 'L' ? RevenantArgumentLongDouble : RevenantArgumentDouble;
     case 's':
-        return CharonArgumentCharPointer;
+        return RevenantArgumentCharPointer;
     case 'p':
-        return CharonArgumentVoidPointer;
+        return RevenantArgumentVoidPointer;
     case '@':
-        return CharonArgumentObject;
+        return RevenantArgumentObject;
     default:
-        return CharonArgumentNone;
+        return RevenantArgumentNone;
     }
 }
 
-static CharonFormatArgument CharonRead(va_list *arguments, CharonArgumentKind kind)
+static RevenantFormatArgument RevenantRead(va_list *arguments, RevenantArgumentKind kind)
 {
-    CharonFormatArgument argument;
+    RevenantFormatArgument argument;
     memset(&argument, 0, sizeof argument);
     argument.kind = kind;
     switch (kind) {
-    case CharonArgumentInt: argument.value.i = va_arg(*arguments, int); break;
-    case CharonArgumentUnsigned: argument.value.u = va_arg(*arguments, unsigned); break;
-    case CharonArgumentLong: argument.value.l = va_arg(*arguments, long); break;
-    case CharonArgumentUnsignedLong: argument.value.ul = va_arg(*arguments, unsigned long); break;
-    case CharonArgumentLongLong: argument.value.ll = va_arg(*arguments, long long); break;
-    case CharonArgumentUnsignedLongLong: argument.value.ull = va_arg(*arguments, unsigned long long); break;
-    case CharonArgumentPtrDiff: argument.value.z = va_arg(*arguments, ptrdiff_t); break;
-    case CharonArgumentSize: argument.value.zs = va_arg(*arguments, size_t); break;
-    case CharonArgumentIntMax: argument.value.j = va_arg(*arguments, intmax_t); break;
-    case CharonArgumentUIntMax: argument.value.ju = va_arg(*arguments, uintmax_t); break;
-    case CharonArgumentDouble: argument.value.d = va_arg(*arguments, double); break;
-    case CharonArgumentLongDouble: argument.value.ld = va_arg(*arguments, long double); break;
-    case CharonArgumentCharPointer: argument.value.cs = va_arg(*arguments, char *); break;
-    case CharonArgumentVoidPointer: argument.value.vp = va_arg(*arguments, void *); break;
-    case CharonArgumentObject: {
+    case RevenantArgumentInt: argument.value.i = va_arg(*arguments, int); break;
+    case RevenantArgumentUnsigned: argument.value.u = va_arg(*arguments, unsigned); break;
+    case RevenantArgumentLong: argument.value.l = va_arg(*arguments, long); break;
+    case RevenantArgumentUnsignedLong: argument.value.ul = va_arg(*arguments, unsigned long); break;
+    case RevenantArgumentLongLong: argument.value.ll = va_arg(*arguments, long long); break;
+    case RevenantArgumentUnsignedLongLong: argument.value.ull = va_arg(*arguments, unsigned long long); break;
+    case RevenantArgumentPtrDiff: argument.value.z = va_arg(*arguments, ptrdiff_t); break;
+    case RevenantArgumentSize: argument.value.zs = va_arg(*arguments, size_t); break;
+    case RevenantArgumentIntMax: argument.value.j = va_arg(*arguments, intmax_t); break;
+    case RevenantArgumentUIntMax: argument.value.ju = va_arg(*arguments, uintmax_t); break;
+    case RevenantArgumentDouble: argument.value.d = va_arg(*arguments, double); break;
+    case RevenantArgumentLongDouble: argument.value.ld = va_arg(*arguments, long double); break;
+    case RevenantArgumentCharPointer: argument.value.cs = va_arg(*arguments, char *); break;
+    case RevenantArgumentVoidPointer: argument.value.vp = va_arg(*arguments, void *); break;
+    case RevenantArgumentObject: {
         __unsafe_unretained id object = va_arg(*arguments, id);
         argument.value.object = (__bridge void *)object;
         break;
     }
-    case CharonArgumentNone: break;
+    case RevenantArgumentNone: break;
     }
     return argument;
 }
 
-static NSUInteger CharonScan(NSString *text, CharonConversion *conversions, CharonArgumentKind *kinds, NSUInteger *arguments)
+static NSUInteger RevenantScan(NSString *text, RevenantConversion *conversions, RevenantArgumentKind *kinds, NSUInteger *arguments)
 {
     NSUInteger length = text.length, index = 0, found = 0, next = 1, bound = length + 1;
-    CharonConversion spec;
+    RevenantConversion spec;
     while (index < length) {
         if ([text characterAtIndex:index] != '%') {
             index++;
             continue;
         }
-        CharonConversionAt(text, index, &spec);
+        RevenantConversionAt(text, index, &spec);
         index = MAX(spec.end, index + 1);
         if (spec.conversion == 0 || spec.conversion == '%') {
             conversions[found++] = spec;
@@ -228,11 +228,11 @@ static NSUInteger CharonScan(NSString *text, CharonConversion *conversions, Char
         }
         if (spec.widthSlot != 0) {
             spec.widthSlot = next;
-            kinds[next++] = CharonArgumentInt;
+            kinds[next++] = RevenantArgumentInt;
         }
         if (spec.precisionSlot != 0) {
             spec.precisionSlot = next;
-            kinds[next++] = CharonArgumentInt;
+            kinds[next++] = RevenantArgumentInt;
         }
         if (spec.argument) {
             if (spec.argument > bound)
@@ -240,10 +240,10 @@ static NSUInteger CharonScan(NSString *text, CharonConversion *conversions, Char
             if (spec.argument > next)
                 next = spec.argument;
             spec.slot = spec.argument;
-            kinds[spec.slot] = CharonKind(spec);
+            kinds[spec.slot] = RevenantKind(spec);
         } else {
             spec.slot = next < bound ? next : bound;
-            kinds[spec.slot] = CharonKind(spec);
+            kinds[spec.slot] = RevenantKind(spec);
             if (next < bound)
                 next++;
         }
@@ -253,7 +253,7 @@ static NSUInteger CharonScan(NSString *text, CharonConversion *conversions, Char
     return found;
 }
 
-static NSString *CharonSpecifier(CharonConversion spec)
+static NSString *RevenantSpecifier(RevenantConversion spec)
 {
     NSMutableString *text = [NSMutableString stringWithString:@"%"];
     for (NSUInteger i = 0; i < spec.flagLength; i++)
@@ -268,7 +268,7 @@ static NSString *CharonSpecifier(CharonConversion spec)
     return text;
 }
 
-static NSString *CharonApply(NSLocale *locale, NSString *specifier, ...)
+static NSString *RevenantApply(NSLocale *locale, NSString *specifier, ...)
 {
     va_list arguments;
     va_start(arguments, specifier);
@@ -277,7 +277,7 @@ static NSString *CharonApply(NSLocale *locale, NSString *specifier, ...)
     return formatted;
 }
 
-static void CharonApplyStars(CharonConversion *spec, NSLocale *locale, const CharonFormatArgument *arguments)
+static void RevenantApplyStars(RevenantConversion *spec, NSLocale *locale, const RevenantFormatArgument *arguments)
 {
     if (spec->widthSlot) {
         int width = arguments[spec->widthSlot - 1].value.i;
@@ -301,44 +301,44 @@ static void CharonApplyStars(CharonConversion *spec, NSLocale *locale, const Cha
     }
 }
 
-static NSString *CharonNumericArgument(CharonConversion spec, NSLocale *locale, CharonFormatArgument argument)
+static NSString *RevenantNumericArgument(RevenantConversion spec, NSLocale *locale, RevenantFormatArgument argument)
 {
-    NSString *specifier = CharonSpecifier(spec);
+    NSString *specifier = RevenantSpecifier(spec);
     switch (spec.conversion) {
     case 'd': case 'i':
         switch (spec.length) {
-        case 'l': return CharonApply(locale, specifier, argument.value.l);
-        case 'q': return CharonApply(locale, specifier, argument.value.ll);
-        case 'z': return CharonApply(locale, specifier, (long)argument.value.z);
-        case 't': return CharonApply(locale, specifier, (long)argument.value.z);
-        case 'j': return CharonApply(locale, specifier, (long)argument.value.j);
-        default: return CharonApply(locale, specifier, argument.value.i);
+        case 'l': return RevenantApply(locale, specifier, argument.value.l);
+        case 'q': return RevenantApply(locale, specifier, argument.value.ll);
+        case 'z': return RevenantApply(locale, specifier, (long)argument.value.z);
+        case 't': return RevenantApply(locale, specifier, (long)argument.value.z);
+        case 'j': return RevenantApply(locale, specifier, (long)argument.value.j);
+        default: return RevenantApply(locale, specifier, argument.value.i);
         }
     case 'u': case 'o': case 'x': case 'X':
         switch (spec.length) {
-        case 'l': return CharonApply(locale, specifier, argument.value.ul);
-        case 'q': return CharonApply(locale, specifier, argument.value.ull);
-        case 'z': return CharonApply(locale, specifier, (unsigned long)argument.value.zs);
-        case 't': return CharonApply(locale, specifier, (unsigned long)argument.value.ju);
-        case 'j': return CharonApply(locale, specifier, (unsigned long)argument.value.ju);
-        default: return CharonApply(locale, specifier, argument.value.u);
+        case 'l': return RevenantApply(locale, specifier, argument.value.ul);
+        case 'q': return RevenantApply(locale, specifier, argument.value.ull);
+        case 'z': return RevenantApply(locale, specifier, (unsigned long)argument.value.zs);
+        case 't': return RevenantApply(locale, specifier, (unsigned long)argument.value.ju);
+        case 'j': return RevenantApply(locale, specifier, (unsigned long)argument.value.ju);
+        default: return RevenantApply(locale, specifier, argument.value.u);
         }
     case 'f': case 'F': case 'e': case 'E': case 'g': case 'G': case 'a': case 'A':
         if (spec.length == 'L')
-            return CharonApply(locale, specifier, argument.value.ld);
-        return CharonApply(locale, specifier, argument.value.d);
+            return RevenantApply(locale, specifier, argument.value.ld);
+        return RevenantApply(locale, specifier, argument.value.d);
     case 'c':
-        return CharonApply(locale, specifier, argument.value.i);
+        return RevenantApply(locale, specifier, argument.value.i);
     case 's':
-        return CharonApply(locale, specifier, argument.value.cs);
+        return RevenantApply(locale, specifier, argument.value.cs);
     case 'p':
-        return CharonApply(locale, specifier, argument.value.vp);
+        return RevenantApply(locale, specifier, argument.value.vp);
     default:
         return @"";
     }
 }
 
-static NSDictionary *CharonAttributes(NSDictionary *formatAttributes, NSDictionary *argumentAttributes,
+static NSDictionary *RevenantAttributes(NSDictionary *formatAttributes, NSDictionary *argumentAttributes,
                                       NSUInteger options, NSUInteger replacement)
 {
     NSMutableDictionary *attributes;
@@ -354,19 +354,19 @@ static NSDictionary *CharonAttributes(NSDictionary *formatAttributes, NSDictiona
     return attributes;
 }
 
-static void CharonAppend(NSMutableAttributedString *result, NSString *text, NSDictionary *attributes)
+static void RevenantAppend(NSMutableAttributedString *result, NSString *text, NSDictionary *attributes)
 {
     if (text.length)
         [result appendAttributedString:[[NSAttributedString alloc] initWithString:text attributes:attributes]];
 }
 
-static void CharonAppendText(NSMutableAttributedString *result, NSAttributedString *format, NSString *text, NSUInteger index)
+static void RevenantAppendText(NSMutableAttributedString *result, NSAttributedString *format, NSString *text, NSUInteger index)
 {
     NSDictionary *attributes = [format attributesAtIndex:index effectiveRange:NULL] ?: [NSDictionary dictionary];
     [result appendAttributedString:[[NSAttributedString alloc] initWithString:text attributes:attributes]];
 }
 
-static void CharonAppendLiteral(NSMutableAttributedString *result, NSAttributedString *format, NSString *text,
+static void RevenantAppendLiteral(NSMutableAttributedString *result, NSAttributedString *format, NSString *text,
                                 NSUInteger start, NSUInteger end)
 {
     NSUInteger at = start;
@@ -376,19 +376,19 @@ static void CharonAppendLiteral(NSMutableAttributedString *result, NSAttributedS
         NSUInteger stop = MIN(effective.location + effective.length, end);
         if (stop <= at)
             stop = at + 1;
-        CharonAppendText(result, format, [text substringWithRange:NSMakeRange(at, stop - at)], at);
+        RevenantAppendText(result, format, [text substringWithRange:NSMakeRange(at, stop - at)], at);
         at = stop;
     }
 }
 
-static NSAttributedString *CharonFormat(NSAttributedString *format, NSUInteger options, NSLocale *locale, va_list arguments)
+static NSAttributedString *RevenantFormat(NSAttributedString *format, NSUInteger options, NSLocale *locale, va_list arguments)
 {
     NSString *text;
     NSMutableAttributedString *result;
     NSMutableData *scanned, *kinds, *read;
-    CharonConversion *conversions;
-    CharonArgumentKind *argumentKinds;
-    CharonFormatArgument *values;
+    RevenantConversion *conversions;
+    RevenantArgumentKind *argumentKinds;
+    RevenantFormatArgument *values;
     NSUInteger length, found, wanted, index;
     if (!format) {
 #pragma clang diagnostic push
@@ -398,24 +398,24 @@ static NSAttributedString *CharonFormat(NSAttributedString *format, NSUInteger o
     }
     text = [format string];
     length = text.length;
-    scanned = [NSMutableData dataWithLength:(length + 1) * sizeof(CharonConversion)];
-    conversions = (CharonConversion *)[scanned mutableBytes];
-    kinds = [NSMutableData dataWithLength:(length + 1) * sizeof(CharonArgumentKind)];
-    argumentKinds = (CharonArgumentKind *)[kinds mutableBytes];
+    scanned = [NSMutableData dataWithLength:(length + 1) * sizeof(RevenantConversion)];
+    conversions = (RevenantConversion *)[scanned mutableBytes];
+    kinds = [NSMutableData dataWithLength:(length + 1) * sizeof(RevenantArgumentKind)];
+    argumentKinds = (RevenantArgumentKind *)[kinds mutableBytes];
     wanted = 1;
-    found = CharonScan(text, conversions, argumentKinds, &wanted);
-    read = [NSMutableData dataWithLength:(wanted + 1) * sizeof(CharonFormatArgument)];
-    values = (CharonFormatArgument *)[read mutableBytes];
+    found = RevenantScan(text, conversions, argumentKinds, &wanted);
+    read = [NSMutableData dataWithLength:(wanted + 1) * sizeof(RevenantFormatArgument)];
+    values = (RevenantFormatArgument *)[read mutableBytes];
     for (index = 0; index < wanted; index++)
-        values[index] = CharonRead(&arguments, argumentKinds[index + 1]);
+        values[index] = RevenantRead(&arguments, argumentKinds[index + 1]);
     result = [[NSMutableAttributedString alloc] init];
     index = 0;
     for (NSUInteger i = 0; i < found; i++) {
-        CharonConversion spec = conversions[i];
+        RevenantConversion spec = conversions[i];
         if (spec.start > index)
-            CharonAppendLiteral(result, format, text, index, spec.start);
+            RevenantAppendLiteral(result, format, text, index, spec.start);
         if (spec.conversion == '%') {
-            CharonAppendText(result, format, @"%", spec.start);
+            RevenantAppendText(result, format, @"%", spec.start);
         } else if (spec.conversion == 0) {
         } else if (spec.conversion == '@') {
             id argument = (__bridge id)values[spec.slot - 1].value.object;
@@ -425,33 +425,33 @@ static NSAttributedString *CharonFormat(NSAttributedString *format, NSUInteger o
                 NSString *attributedText = [attributed string];
                 [attributed enumerateAttributesInRange:NSMakeRange(0, attributed.length) options:0
                                              usingBlock:^(NSDictionary *attributes, NSRange range, BOOL *stop) {
-                    CharonAppend(result, [attributedText substringWithRange:range],
-                                 CharonAttributes(formatAttributes, attributes, options, spec.slot));
+                    RevenantAppend(result, [attributedText substringWithRange:range],
+                                 RevenantAttributes(formatAttributes, attributes, options, spec.slot));
                 }];
             } else {
-                CharonAppend(result, argument ? [argument description] : @"(null)",
-                             CharonAttributes(formatAttributes, nil, options, spec.slot));
+                RevenantAppend(result, argument ? [argument description] : @"(null)",
+                             RevenantAttributes(formatAttributes, nil, options, spec.slot));
             }
         } else {
-            CharonApplyStars(&spec, locale, values);
-            CharonAppend(result, CharonNumericArgument(spec, locale, values[spec.slot - 1]),
-                         CharonAttributes([format attributesAtIndex:spec.start effectiveRange:NULL], nil, options, spec.slot));
+            RevenantApplyStars(&spec, locale, values);
+            RevenantAppend(result, RevenantNumericArgument(spec, locale, values[spec.slot - 1]),
+                         RevenantAttributes([format attributesAtIndex:spec.start effectiveRange:NULL], nil, options, spec.slot));
         }
         index = spec.end;
     }
     if (index < text.length)
-        CharonAppendLiteral(result, format, text, index, text.length);
+        RevenantAppendLiteral(result, format, text, index, text.length);
     return result;
 }
 
-@implementation NSAttributedString (CharonAttributedFormat15)
+@implementation NSAttributedString (RevenantAttributedFormat15)
 
 - (instancetype)initWithFormat:(NSAttributedString *)format
                        options:(NSAttributedStringFormattingOptions)options
                         locale:(NSLocale *)locale
                      arguments:(va_list)arguments
 {
-    return [self initWithAttributedString:CharonFormat(format, options, locale, arguments)];
+    return [self initWithAttributedString:RevenantFormat(format, options, locale, arguments)];
 }
 
 - (instancetype)initWithFormat:(NSAttributedString *)format
@@ -461,7 +461,7 @@ static NSAttributedString *CharonFormat(NSAttributedString *format, NSUInteger o
     va_list arguments;
     (void)locale;
     va_start(arguments, locale);
-    NSAttributedString *result = CharonFormat(format, options, nil, arguments);
+    NSAttributedString *result = RevenantFormat(format, options, nil, arguments);
     va_end(arguments);
     return [self initWithAttributedString:result];
 }
@@ -470,7 +470,7 @@ static NSAttributedString *CharonFormat(NSAttributedString *format, NSUInteger o
 {
     va_list arguments;
     va_start(arguments, format);
-    NSAttributedString *result = CharonFormat(format, 0, [NSLocale currentLocale], arguments);
+    NSAttributedString *result = RevenantFormat(format, 0, [NSLocale currentLocale], arguments);
     va_end(arguments);
     return result;
 }
@@ -480,20 +480,20 @@ static NSAttributedString *CharonFormat(NSAttributedString *format, NSUInteger o
 {
     va_list arguments;
     va_start(arguments, options);
-    NSAttributedString *result = CharonFormat(format, options, [NSLocale currentLocale], arguments);
+    NSAttributedString *result = RevenantFormat(format, options, [NSLocale currentLocale], arguments);
     va_end(arguments);
     return result;
 }
 
 @end
 
-@implementation NSMutableAttributedString (CharonAttributedFormat15)
+@implementation NSMutableAttributedString (RevenantAttributedFormat15)
 
 - (void)appendLocalizedFormat:(NSAttributedString *)format, ...
 {
     va_list arguments;
     va_start(arguments, format);
-    NSAttributedString *result = CharonFormat(format, 0, [NSLocale currentLocale], arguments);
+    NSAttributedString *result = RevenantFormat(format, 0, [NSLocale currentLocale], arguments);
     va_end(arguments);
     [self appendAttributedString:result];
 }

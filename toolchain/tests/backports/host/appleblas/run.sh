@@ -6,10 +6,10 @@ set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 ACCELERATE=${ACCELERATE:-$here/../../../../packages/a/apple-backports/Accelerate}
-build=${APPLEBLAS_BUILD:-$(runs_folder charon-appleblas-host)}
+build=${APPLEBLAS_BUILD:-$(runs_folder revenant-appleblas-host)}
 rm -rf "$build"
 mkdir -p "$build"
-xcrun clang -fobjc-arc -w -Dappleblas_sgeadd=charon_host_appleblas_sgeadd -Dappleblas_dgeadd=charon_host_appleblas_dgeadd \
+xcrun clang -fobjc-arc -w -Dappleblas_sgeadd=revenant_host_appleblas_sgeadd -Dappleblas_dgeadd=revenant_host_appleblas_dgeadd \
     -I"$ACCELERATE" -c "$ACCELERATE/AppleBLAS8.m" -o "$build/AppleBLAS8.o"
 xcrun clang -fobjc-arc -Wall -Wno-deprecated-declarations \
     "$here/differential.m" "$build/AppleBLAS8.o" \

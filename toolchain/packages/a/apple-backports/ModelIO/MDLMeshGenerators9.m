@@ -7,10 +7,10 @@ typedef struct {
     vector_float3 position;
     vector_float3 normal;
     vector_float2 uv;
-} CharonMDLGeneratedVertex;
+} RevenantMDLGeneratedVertex;
 
-@interface MDLMesh (CharonGenerators)
-- (instancetype)charon_meshWithVertices:(NSData *)vertices
+@interface MDLMesh (RevenantGenerators)
+- (instancetype)revenant_meshWithVertices:(NSData *)vertices
                              vertexCount:(NSUInteger)vertexCount
                                 indices:(NSData *)indices
                              indexCount:(NSUInteger)indexCount
@@ -18,9 +18,9 @@ typedef struct {
                                    name:(NSString *)name;
 @end
 
-@implementation MDLMesh (CharonGenerators)
+@implementation MDLMesh (RevenantGenerators)
 
-- (instancetype)charon_meshWithVertices:(NSData *)vertices
+- (instancetype)revenant_meshWithVertices:(NSData *)vertices
                              vertexCount:(NSUInteger)vertexCount
                                 indices:(NSData *)indices
                              indexCount:(NSUInteger)indexCount
@@ -45,7 +45,7 @@ typedef struct {
     [descriptor addOrReplaceAttribute:position];
     [descriptor addOrReplaceAttribute:normal];
     [descriptor addOrReplaceAttribute:uv];
-    [descriptor.layouts addObject:[[MDLVertexBufferLayout alloc] initWithStride:sizeof(CharonMDLGeneratedVertex)]];
+    [descriptor.layouts addObject:[[MDLVertexBufferLayout alloc] initWithStride:sizeof(RevenantMDLGeneratedVertex)]];
 
     MDLMaterial *material = [[MDLMaterial alloc] initWithName:@""
                                           scatteringFunction:[[MDLPhysicallyPlausibleScatteringFunction alloc] init]];
@@ -59,25 +59,25 @@ typedef struct {
 @end
 
 typedef struct {
-    CharonMDLGeneratedVertex *vertex;
+    RevenantMDLGeneratedVertex *vertex;
     NSUInteger vertexCount, vertexCapacity;
     uint32_t *index;
     NSUInteger indexCount, indexCapacity;
-} CharonMDLBuilder;
+} RevenantMDLBuilder;
 
-static void CharonMDLBuilderVertex(CharonMDLBuilder *builder, vector_float3 position, vector_float3 normal, vector_float2 uv)
+static void RevenantMDLBuilderVertex(RevenantMDLBuilder *builder, vector_float3 position, vector_float3 normal, vector_float2 uv)
 {
     if (builder->vertexCount == builder->vertexCapacity) {
         builder->vertexCapacity = builder->vertexCapacity ? builder->vertexCapacity * 2 : 64;
-        builder->vertex = realloc(builder->vertex, builder->vertexCapacity * sizeof(CharonMDLGeneratedVertex));
+        builder->vertex = realloc(builder->vertex, builder->vertexCapacity * sizeof(RevenantMDLGeneratedVertex));
     }
-    CharonMDLGeneratedVertex *at = builder->vertex + builder->vertexCount++;
+    RevenantMDLGeneratedVertex *at = builder->vertex + builder->vertexCount++;
     at->position = position;
     at->normal = normal;
     at->uv = uv;
 }
 
-static void CharonMDLBuilderIndex(CharonMDLBuilder *builder, uint32_t value)
+static void RevenantMDLBuilderIndex(RevenantMDLBuilder *builder, uint32_t value)
 {
     if (builder->indexCount == builder->indexCapacity) {
         builder->indexCapacity = builder->indexCapacity ? builder->indexCapacity * 2 : 96;
@@ -86,19 +86,19 @@ static void CharonMDLBuilderIndex(CharonMDLBuilder *builder, uint32_t value)
     builder->index[builder->indexCount++] = value;
 }
 
-static NSData *CharonMDLBuilderVertices(CharonMDLBuilder *builder, NSUInteger *count)
+static NSData *RevenantMDLBuilderVertices(RevenantMDLBuilder *builder, NSUInteger *count)
 {
     *count = builder->vertexCount;
-    return [NSData dataWithBytes:builder->vertex length:builder->vertexCount * sizeof(CharonMDLGeneratedVertex)];
+    return [NSData dataWithBytes:builder->vertex length:builder->vertexCount * sizeof(RevenantMDLGeneratedVertex)];
 }
 
-static NSData *CharonMDLBuilderIndices(CharonMDLBuilder *builder, NSUInteger *count)
+static NSData *RevenantMDLBuilderIndices(RevenantMDLBuilder *builder, NSUInteger *count)
 {
     *count = builder->indexCount;
     return [NSData dataWithBytes:builder->index length:builder->indexCount * sizeof(uint32_t)];
 }
 
-static void CharonMDLBuilderFree(CharonMDLBuilder *builder)
+static void RevenantMDLBuilderFree(RevenantMDLBuilder *builder)
 {
     free(builder->vertex);
     free(builder->index);
@@ -112,41 +112,41 @@ static void CharonMDLBuilderFree(CharonMDLBuilder *builder)
                         inwardNormals:(BOOL)inwardNormals
                             allocator:(id<MDLMeshBufferAllocator>)allocator
 {
-    CharonMDLBuilder builder = {0};
+    RevenantMDLBuilder builder = {0};
     NSUInteger across = MAX((NSUInteger)1, segments.x), up = MAX((NSUInteger)1, segments.y);
     for (NSUInteger row = 0; row <= up; row++) {
         for (NSUInteger column = 0; column <= across; column++) {
             vector_float2 uv = {(float)column / (float)across, (float)row / (float)up};
             vector_float3 position = {(uv.x - 0.5f) * dimensions.x, 0, (0.5f - uv.y) * dimensions.y};
             vector_float3 normal = inwardNormals ? (vector_float3){0, -1, 0} : (vector_float3){0, 1, 0};
-            CharonMDLBuilderVertex(&builder, position, normal, uv);
+            RevenantMDLBuilderVertex(&builder, position, normal, uv);
         }
     }
     for (NSUInteger row = 0; row < up; row++)
         for (NSUInteger column = 0; column < across; column++) {
             uint32_t a = (uint32_t)(row * (across + 1) + column), b = a + 1, c = a + (uint32_t)(across + 1), d = c + 1;
             if (geometryType == MDLGeometryTypeQuads) {
-                CharonMDLBuilderIndex(&builder, a);
-                CharonMDLBuilderIndex(&builder, c);
-                CharonMDLBuilderIndex(&builder, d);
-                CharonMDLBuilderIndex(&builder, a);
-                CharonMDLBuilderIndex(&builder, d);
-                CharonMDLBuilderIndex(&builder, b);
+                RevenantMDLBuilderIndex(&builder, a);
+                RevenantMDLBuilderIndex(&builder, c);
+                RevenantMDLBuilderIndex(&builder, d);
+                RevenantMDLBuilderIndex(&builder, a);
+                RevenantMDLBuilderIndex(&builder, d);
+                RevenantMDLBuilderIndex(&builder, b);
             } else {
-                CharonMDLBuilderIndex(&builder, a);
-                CharonMDLBuilderIndex(&builder, c);
-                CharonMDLBuilderIndex(&builder, b);
-                CharonMDLBuilderIndex(&builder, b);
-                CharonMDLBuilderIndex(&builder, c);
-                CharonMDLBuilderIndex(&builder, d);
+                RevenantMDLBuilderIndex(&builder, a);
+                RevenantMDLBuilderIndex(&builder, c);
+                RevenantMDLBuilderIndex(&builder, b);
+                RevenantMDLBuilderIndex(&builder, b);
+                RevenantMDLBuilderIndex(&builder, c);
+                RevenantMDLBuilderIndex(&builder, d);
             }
         }
     NSUInteger vertexCount, indexCount;
-    NSData *vertices = CharonMDLBuilderVertices(&builder, &vertexCount), *indices = CharonMDLBuilderIndices(&builder, &indexCount);
+    NSData *vertices = RevenantMDLBuilderVertices(&builder, &vertexCount), *indices = RevenantMDLBuilderIndices(&builder, &indexCount);
     MDLMesh *mesh = [[MDLMesh alloc] initWithBufferAllocator:allocator];
-    mesh = [mesh charon_meshWithVertices:vertices vertexCount:vertexCount indices:indices indexCount:indexCount
+    mesh = [mesh revenant_meshWithVertices:vertices vertexCount:vertexCount indices:indices indexCount:indexCount
                             geometryType:geometryType name:@"plane"];
-    CharonMDLBuilderFree(&builder);
+    RevenantMDLBuilderFree(&builder);
     return mesh;
 }
 
@@ -169,7 +169,7 @@ static void CharonMDLBuilderFree(CharonMDLBuilder *builder)
                            hemisphere:(BOOL)hemisphere
                             allocator:(id<MDLMeshBufferAllocator>)allocator
 {
-    CharonMDLBuilder builder = {0};
+    RevenantMDLBuilder builder = {0};
     NSUInteger around = MAX((NSUInteger)3, radialSegments), down = MAX((NSUInteger)2, verticalSegments);
     NSUInteger rows = down + 2;
     for (NSUInteger row = 0; row < rows; row++) {
@@ -187,25 +187,25 @@ static void CharonMDLBuilderFree(CharonMDLBuilder *builder)
                 normal = (vector_float3){0, y > 0 ? 1 : -1, 0};
             if (inwardNormals)
                 normal = (vector_float3){-normal.x, -normal.y, -normal.z};
-            CharonMDLBuilderVertex(&builder, position, normal, (vector_float2){u, v});
+            RevenantMDLBuilderVertex(&builder, position, normal, (vector_float2){u, v});
         }
     }
     for (NSUInteger row = 0; row < down; row++)
         for (NSUInteger column = 0; column < around; column++) {
             uint32_t a = (uint32_t)(row * (around + 1) + column), b = a + 1, c = a + (uint32_t)(around + 1), d = c + 1;
-            CharonMDLBuilderIndex(&builder, a);
-            CharonMDLBuilderIndex(&builder, c);
-            CharonMDLBuilderIndex(&builder, b);
-            CharonMDLBuilderIndex(&builder, b);
-            CharonMDLBuilderIndex(&builder, c);
-            CharonMDLBuilderIndex(&builder, d);
+            RevenantMDLBuilderIndex(&builder, a);
+            RevenantMDLBuilderIndex(&builder, c);
+            RevenantMDLBuilderIndex(&builder, b);
+            RevenantMDLBuilderIndex(&builder, b);
+            RevenantMDLBuilderIndex(&builder, c);
+            RevenantMDLBuilderIndex(&builder, d);
         }
     NSUInteger vertexCount, indexCount;
-    NSData *vertices = CharonMDLBuilderVertices(&builder, &vertexCount), *indices = CharonMDLBuilderIndices(&builder, &indexCount);
+    NSData *vertices = RevenantMDLBuilderVertices(&builder, &vertexCount), *indices = RevenantMDLBuilderIndices(&builder, &indexCount);
     MDLMesh *mesh = [[MDLMesh alloc] initWithBufferAllocator:allocator];
-    mesh = [mesh charon_meshWithVertices:vertices vertexCount:vertexCount indices:indices indexCount:indexCount
+    mesh = [mesh revenant_meshWithVertices:vertices vertexCount:vertexCount indices:indices indexCount:indexCount
                             geometryType:geometryType name:@"ellipsoid"];
-    CharonMDLBuilderFree(&builder);
+    RevenantMDLBuilderFree(&builder);
     return mesh;
 }
 
@@ -215,7 +215,7 @@ static void CharonMDLBuilderFree(CharonMDLBuilder *builder)
                      geometryType:(MDLGeometryType)geometryType
                         allocator:(id<MDLMeshBufferAllocator>)allocator
 {
-    CharonMDLBuilder builder = {0};
+    RevenantMDLBuilder builder = {0};
     static const int normalAxis[6] = {0, 0, 1, 1, 2, 2};
     static const int normalSign[6] = {1, -1, 1, -1, 1, -1};
     static const int uAxis[6] = {1, 1, 2, 2, 0, 0};
@@ -234,25 +234,25 @@ static void CharonMDLBuilderFree(CharonMDLBuilder *builder)
                 position[axis] = normalSign[face] * extent[axis] * 0.5f;
                 position[uAxis[face]] = (uv.x - 0.5f) * extent[uAxis[face]];
                 position[vAxis[face]] = (uv.y - 0.5f) * extent[vAxis[face]];
-                CharonMDLBuilderVertex(&builder, position, normal, uv);
+                RevenantMDLBuilderVertex(&builder, position, normal, uv);
             }
         for (NSUInteger row = 0; row < v; row++)
             for (NSUInteger column = 0; column < u; column++) {
                 uint32_t a = (uint32_t)(first + row * (u + 1) + column), b = a + 1, c = a + (uint32_t)(u + 1), d = c + 1;
-                CharonMDLBuilderIndex(&builder, a);
-                CharonMDLBuilderIndex(&builder, c);
-                CharonMDLBuilderIndex(&builder, d);
-                CharonMDLBuilderIndex(&builder, a);
-                CharonMDLBuilderIndex(&builder, d);
-                CharonMDLBuilderIndex(&builder, b);
+                RevenantMDLBuilderIndex(&builder, a);
+                RevenantMDLBuilderIndex(&builder, c);
+                RevenantMDLBuilderIndex(&builder, d);
+                RevenantMDLBuilderIndex(&builder, a);
+                RevenantMDLBuilderIndex(&builder, d);
+                RevenantMDLBuilderIndex(&builder, b);
             }
     }
     NSUInteger vertexCount, indexCount;
-    NSData *vertices = CharonMDLBuilderVertices(&builder, &vertexCount), *indices = CharonMDLBuilderIndices(&builder, &indexCount);
+    NSData *vertices = RevenantMDLBuilderVertices(&builder, &vertexCount), *indices = RevenantMDLBuilderIndices(&builder, &indexCount);
     MDLMesh *mesh = [[MDLMesh alloc] initWithBufferAllocator:allocator];
-    mesh = [mesh charon_meshWithVertices:vertices vertexCount:vertexCount indices:indices indexCount:indexCount
+    mesh = [mesh revenant_meshWithVertices:vertices vertexCount:vertexCount indices:indices indexCount:indexCount
                             geometryType:geometryType name:@"box"];
-    CharonMDLBuilderFree(&builder);
+    RevenantMDLBuilderFree(&builder);
     return [self initWithVertexBuffers:mesh.vertexBuffers vertexCount:mesh.vertexCount descriptor:mesh.vertexDescriptor
                              submeshes:mesh.submeshes];
 }
@@ -281,7 +281,7 @@ static void CharonMDLBuilderFree(CharonMDLBuilder *builder)
                         allocator:allocator];
 }
 
-static void CharonMDLTaperedTube(CharonMDLBuilder *builder, float lower, float upper, float height, NSUInteger around,
+static void RevenantMDLTaperedTube(RevenantMDLBuilder *builder, float lower, float upper, float height, NSUInteger around,
                                  NSUInteger up, BOOL inwardNormals, BOOL topCap, BOOL bottomCap)
 {
     float halfHeight = height * 0.5f;
@@ -299,18 +299,18 @@ static void CharonMDLTaperedTube(CharonMDLBuilder *builder, float lower, float u
             vector_float3 normal = inwardNormals ? (vector_float3){-outward.x, -outward.y, -outward.z} : outward;
             if (pole)
                 normal = (vector_float3){0, y > 0 ? 1 : (y < 0 ? -1 : 0), 0};
-            CharonMDLBuilderVertex(builder, (vector_float3){outward.x * radius, y, outward.z * radius}, normal, (vector_float2){u, v});
+            RevenantMDLBuilderVertex(builder, (vector_float3){outward.x * radius, y, outward.z * radius}, normal, (vector_float2){u, v});
         }
     }
     for (NSUInteger ring = 0; ring < up + 1; ring++)
         for (NSUInteger column = 0; column < around; column++) {
             uint32_t a = (uint32_t)(ring * (around + 1) + column), b = a + 1, c = a + (uint32_t)(around + 1), d = c + 1;
-            CharonMDLBuilderIndex(builder, a);
-            CharonMDLBuilderIndex(builder, c);
-            CharonMDLBuilderIndex(builder, b);
-            CharonMDLBuilderIndex(builder, b);
-            CharonMDLBuilderIndex(builder, c);
-            CharonMDLBuilderIndex(builder, d);
+            RevenantMDLBuilderIndex(builder, a);
+            RevenantMDLBuilderIndex(builder, c);
+            RevenantMDLBuilderIndex(builder, b);
+            RevenantMDLBuilderIndex(builder, b);
+            RevenantMDLBuilderIndex(builder, c);
+            RevenantMDLBuilderIndex(builder, d);
         }
     for (int end = 0; end < 2; end++) {
         if (end ? !topCap : !bottomCap)
@@ -318,12 +318,12 @@ static void CharonMDLTaperedTube(CharonMDLBuilder *builder, float lower, float u
         float sign = end ? 1 : -1;
         vector_float3 normal = {0, inwardNormals ? -sign : sign, 0};
         uint32_t centre = (uint32_t)builder->vertexCount;
-        CharonMDLBuilderVertex(builder, (vector_float3){0, sign * halfHeight, 0}, normal, (vector_float2){0.5f, 0.5f});
+        RevenantMDLBuilderVertex(builder, (vector_float3){0, sign * halfHeight, 0}, normal, (vector_float2){0.5f, 0.5f});
         uint32_t ring = (uint32_t)(end ? up + 1 : 0) * (uint32_t)(around + 1);
         for (NSUInteger column = 0; column < around; column++) {
-            CharonMDLBuilderIndex(builder, ring + (uint32_t)column);
-            CharonMDLBuilderIndex(builder, ring + (uint32_t)column + 1);
-            CharonMDLBuilderIndex(builder, centre);
+            RevenantMDLBuilderIndex(builder, ring + (uint32_t)column);
+            RevenantMDLBuilderIndex(builder, ring + (uint32_t)column + 1);
+            RevenantMDLBuilderIndex(builder, centre);
         }
     }
 }
@@ -336,15 +336,15 @@ static void CharonMDLTaperedTube(CharonMDLBuilder *builder, float lower, float u
                         inwardNormals:(BOOL)inwardNormals
                             allocator:(id<MDLMeshBufferAllocator>)allocator
 {
-    CharonMDLBuilder builder = {0};
-    CharonMDLTaperedTube(&builder, radii.x, radii.y, height, MAX((NSUInteger)3, radialSegments), MAX((NSUInteger)1, verticalSegments),
+    RevenantMDLBuilder builder = {0};
+    RevenantMDLTaperedTube(&builder, radii.x, radii.y, height, MAX((NSUInteger)3, radialSegments), MAX((NSUInteger)1, verticalSegments),
                          inwardNormals, radii.y > 0, radii.x > 0);
     NSUInteger vertexCount, indexCount;
-    NSData *vertices = CharonMDLBuilderVertices(&builder, &vertexCount), *indices = CharonMDLBuilderIndices(&builder, &indexCount);
+    NSData *vertices = RevenantMDLBuilderVertices(&builder, &vertexCount), *indices = RevenantMDLBuilderIndices(&builder, &indexCount);
     MDLMesh *mesh = [[MDLMesh alloc] initWithBufferAllocator:allocator];
-    mesh = [mesh charon_meshWithVertices:vertices vertexCount:vertexCount indices:indices indexCount:indexCount
+    mesh = [mesh revenant_meshWithVertices:vertices vertexCount:vertexCount indices:indices indexCount:indexCount
                             geometryType:geometryType name:@"cylinder"];
-    CharonMDLBuilderFree(&builder);
+    RevenantMDLBuilderFree(&builder);
     return mesh;
 }
 
@@ -356,15 +356,15 @@ static void CharonMDLTaperedTube(CharonMDLBuilder *builder, float lower, float u
                           geometryType:(MDLGeometryType)geometryType
                              allocator:(id<MDLMeshBufferAllocator>)allocator
 {
-    CharonMDLBuilder builder = {0};
-    CharonMDLTaperedTube(&builder, extent.x * 0.5f, extent.z * 0.5f, extent.y, MAX((NSUInteger)3, segments.x),
+    RevenantMDLBuilder builder = {0};
+    RevenantMDLTaperedTube(&builder, extent.x * 0.5f, extent.z * 0.5f, extent.y, MAX((NSUInteger)3, segments.x),
                          MAX((NSUInteger)1, segments.y), inwardNormals, topCap, bottomCap);
     NSUInteger vertexCount, indexCount;
-    NSData *vertices = CharonMDLBuilderVertices(&builder, &vertexCount), *indices = CharonMDLBuilderIndices(&builder, &indexCount);
+    NSData *vertices = RevenantMDLBuilderVertices(&builder, &vertexCount), *indices = RevenantMDLBuilderIndices(&builder, &indexCount);
     MDLMesh *mesh = [[MDLMesh alloc] initWithBufferAllocator:allocator];
-    mesh = [mesh charon_meshWithVertices:vertices vertexCount:vertexCount indices:indices indexCount:indexCount
+    mesh = [mesh revenant_meshWithVertices:vertices vertexCount:vertexCount indices:indices indexCount:indexCount
                             geometryType:geometryType name:@"cylinder"];
-    CharonMDLBuilderFree(&builder);
+    RevenantMDLBuilderFree(&builder);
     return [self initWithVertexBuffers:mesh.vertexBuffers vertexCount:mesh.vertexCount descriptor:mesh.vertexDescriptor
                              submeshes:mesh.submeshes];
 }
@@ -376,7 +376,7 @@ static void CharonMDLTaperedTube(CharonMDLBuilder *builder, float lower, float u
                       geometryType:(MDLGeometryType)geometryType
                          allocator:(id<MDLMeshBufferAllocator>)allocator
 {
-    CharonMDLBuilder builder = {0};
+    RevenantMDLBuilder builder = {0};
     float radius = (extent.x > extent.z ? extent.x : extent.z) * 0.5f, halfHeight = extent.y * 0.5f;
     NSUInteger around = MAX((NSUInteger)3, segments.x);
     for (NSUInteger column = 0; column <= around; column++) {
@@ -385,32 +385,32 @@ static void CharonMDLTaperedTube(CharonMDLBuilder *builder, float lower, float u
         vector_float3 normal = simd_normalize((vector_float3){outward.x, radius / halfHeight, outward.z});
         if (inwardNormals)
             normal = (vector_float3){-normal.x, -normal.y, -normal.z};
-        CharonMDLBuilderVertex(&builder, (vector_float3){outward.x * radius, -halfHeight, outward.z * radius}, normal, (vector_float2){u, 1});
+        RevenantMDLBuilderVertex(&builder, (vector_float3){outward.x * radius, -halfHeight, outward.z * radius}, normal, (vector_float2){u, 1});
     }
-    CharonMDLBuilderVertex(&builder, (vector_float3){0, halfHeight, 0}, (vector_float3){0, inwardNormals ? -1 : 1, 0},
+    RevenantMDLBuilderVertex(&builder, (vector_float3){0, halfHeight, 0}, (vector_float3){0, inwardNormals ? -1 : 1, 0},
                            (vector_float2){0.5f, 0});
     uint32_t apex = (uint32_t)(around + 1);
     for (NSUInteger column = 0; column < around; column++) {
-        CharonMDLBuilderIndex(&builder, (uint32_t)column);
-        CharonMDLBuilderIndex(&builder, (uint32_t)column + 1);
-        CharonMDLBuilderIndex(&builder, apex);
+        RevenantMDLBuilderIndex(&builder, (uint32_t)column);
+        RevenantMDLBuilderIndex(&builder, (uint32_t)column + 1);
+        RevenantMDLBuilderIndex(&builder, apex);
     }
     if (cap) {
         uint32_t centre = (uint32_t)builder.vertexCount;
-        CharonMDLBuilderVertex(&builder, (vector_float3){0, -halfHeight, 0}, (vector_float3){0, inwardNormals ? 1 : -1, 0},
+        RevenantMDLBuilderVertex(&builder, (vector_float3){0, -halfHeight, 0}, (vector_float3){0, inwardNormals ? 1 : -1, 0},
                                (vector_float2){0.5f, 0.5f});
         for (NSUInteger column = 0; column < around; column++) {
-            CharonMDLBuilderIndex(&builder, (uint32_t)column);
-            CharonMDLBuilderIndex(&builder, apex - 1 - (uint32_t)column);
-            CharonMDLBuilderIndex(&builder, centre);
+            RevenantMDLBuilderIndex(&builder, (uint32_t)column);
+            RevenantMDLBuilderIndex(&builder, apex - 1 - (uint32_t)column);
+            RevenantMDLBuilderIndex(&builder, centre);
         }
     }
     NSUInteger vertexCount, indexCount;
-    NSData *vertices = CharonMDLBuilderVertices(&builder, &vertexCount), *indices = CharonMDLBuilderIndices(&builder, &indexCount);
+    NSData *vertices = RevenantMDLBuilderVertices(&builder, &vertexCount), *indices = RevenantMDLBuilderIndices(&builder, &indexCount);
     MDLMesh *mesh = [[MDLMesh alloc] initWithBufferAllocator:allocator];
-    mesh = [mesh charon_meshWithVertices:vertices vertexCount:vertexCount indices:indices indexCount:indexCount
+    mesh = [mesh revenant_meshWithVertices:vertices vertexCount:vertexCount indices:indices indexCount:indexCount
                             geometryType:geometryType name:@"cone"];
-    CharonMDLBuilderFree(&builder);
+    RevenantMDLBuilderFree(&builder);
     return [self initWithVertexBuffers:mesh.vertexBuffers vertexCount:mesh.vertexCount descriptor:mesh.vertexDescriptor
                              submeshes:mesh.submeshes];
 }

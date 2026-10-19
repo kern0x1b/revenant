@@ -503,9 +503,9 @@ int main(int argc, char **argv)
             return 2;
         }
         hostSettings = [AVCapturePhotoSettings class];
-        portSettings = NSClassFromString(@"CharonHostAVCapturePhotoSettings");
+        portSettings = NSClassFromString(@"RevenantHostAVCapturePhotoSettings");
         hostOutput = [AVCapturePhotoOutput class];
-        portOutput = NSClassFromString(@"CharonHostAVCapturePhotoOutput");
+        portOutput = NSClassFromString(@"RevenantHostAVCapturePhotoOutput");
         check(hostSettings && portSettings && hostOutput && portOutput && hostSettings != portSettings && hostOutput != portOutput,
               @"the host's classes and the port's are all here, apart");
         NSMutableDictionary *rows = [NSMutableDictionary dictionary];

@@ -36,19 +36,19 @@ names = set(re.findall(r"^@implementation\s+(CI\w+)", open(source).read(), re.M)
 assert names, "no class found in the port's source: the rename would leave the port's classes colliding"
 with open(out, "w") as handle:
     for name in sorted(names):
-        handle.write("#define %s Charon%s\n" % (name, name))
+        handle.write("#define %s Revenant%s\n" % (name, name))
 print("  RENAMED: %d names the port defines, in this build only" % len(names))
 PY
 
 # THE HOST'S BUILD: CoreImage answers every case.
-if ! xcrun clang $common -DCHARON_HOST "$here/cases.m" -framework Foundation -framework CoreImage -o "$build/host" 2>"$build/host.log"; then
+if ! xcrun clang $common -DREVENANT_HOST "$here/cases.m" -framework Foundation -framework CoreImage -o "$build/host" 2>"$build/host.log"; then
   echo "BUILD  host"
   head -5 "$build/host.log" | sed 's/^/    /'
   exit 1
 fi
 # THE PORT'S BUILD: the same cases.m with the port's object, and every name of it renamed, and CoreImage
 # linked too - which is safe now precisely because the names differ.
-if ! xcrun clang $common -DCHARON_PORT -include "$build/rename.h" -I"$port" "$here/cases.m" \
+if ! xcrun clang $common -DREVENANT_PORT -include "$build/rename.h" -I"$port" "$here/cases.m" \
     "$port/CIBarcodeDescriptor11.m" -framework Foundation -framework CoreImage -o "$build/port" 2>"$build/port.log"; then
   echo "BUILD  port"
   head -5 "$build/port.log" | sed 's/^/    /'
@@ -104,7 +104,7 @@ notices() {  # does the mutated port differ from the host where the host is reac
   return 1
 }
 plant() {  # $1 = label; $2 = the pattern that must have changed
-  if ! xcrun clang $common -DCHARON_PORT -include "$build/rename.h" -I"$port" "$plant/cases.m" \
+  if ! xcrun clang $common -DREVENANT_PORT -include "$build/rename.h" -I"$port" "$plant/cases.m" \
       "$plant/CIBarcodeDescriptor11.m" -framework Foundation -framework CoreImage -o "$build/plantbin" 2>"$build/plant.log"; then
     echo "BUILD  the mutated port ($1)"
     head -3 "$build/plant.log" | sed 's/^/    /'

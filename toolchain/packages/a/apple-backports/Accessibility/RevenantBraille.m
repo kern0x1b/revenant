@@ -1,85 +1,85 @@
 #import <Foundation/Foundation.h>
-#ifndef CHARON_BRAILLE_ONLY
+#ifndef REVENANT_BRAILLE_ONLY
 #import <Accessibility/Accessibility.h>
 #endif
 #import <ctype.h>
 #import <stdint.h>
 
-#import "CharonBraille.h"
-#import "../../../c/charon-coding/files/CharonCoding.h"
+#import "RevenantBraille.h"
+#import "../../../c/revenant-coding/files/RevenantCoding.h"
 
 #pragma mark - The standard's tables
 
-static const uint16_t charon_ueb_letters[26] = {
+static const uint16_t revenant_ueb_letters[26] = {
     0x01, 0x03, 0x09, 0x19, 0x11, 0x0B, 0x1B, 0x13,
     0x0A, 0x1A, 0x05, 0x07, 0x0D, 0x1D, 0x15, 0x0F,
     0x1F, 0x17, 0x0E, 0x1E, 0x25, 0x27, 0x3A, 0x2D,
     0x3D, 0x35,
 };
 
-static const uint16_t charon_ueb_capital = 0x20;
-static const uint16_t charon_ueb_number = 0x3C;
+static const uint16_t revenant_ueb_capital = 0x20;
+static const uint16_t revenant_ueb_number = 0x3C;
 
-static const uint16_t charon_ueb_grade1 = 0x30;
+static const uint16_t revenant_ueb_grade1 = 0x30;
 
-#define CHARON_UEB_BASE 0x2800
-static unichar charon_ueb_pattern(uint16_t mask)
+#define REVENANT_UEB_BASE 0x2800
+static unichar revenant_ueb_pattern(uint16_t mask)
 {
-    return (unichar)(CHARON_UEB_BASE + mask);
+    return (unichar)(REVENANT_UEB_BASE + mask);
 }
 
 enum {
-    CharonBrailleSpace = 0x00,
-    CharonBrailleComma = 0x02,
-    CharonBrailleSemicolon = 0x06,
-    CharonBrailleColon = 0x12,
-    CharonBraillePeriod = 0x32,
-    CharonBrailleExclamation = 0x16,
-    CharonBrailleQuestion = 0x26,
-    CharonBrailleApostrophe = 0x04,
-    CharonBrailleHyphen = 0x24,
-    CharonBraillePair = 0x17,
-    CharonBrailleSlash = 0x2F,
+    RevenantBrailleSpace = 0x00,
+    RevenantBrailleComma = 0x02,
+    RevenantBrailleSemicolon = 0x06,
+    RevenantBrailleColon = 0x12,
+    RevenantBraillePeriod = 0x32,
+    RevenantBrailleExclamation = 0x16,
+    RevenantBrailleQuestion = 0x26,
+    RevenantBrailleApostrophe = 0x04,
+    RevenantBrailleHyphen = 0x24,
+    RevenantBraillePair = 0x17,
+    RevenantBrailleSlash = 0x2F,
 };
 
-static const struct { unichar character; uint16_t cell; } charon_ueb_punctuation[] = {
-    { ',', CharonBrailleComma },
-    { ';', CharonBrailleSemicolon },
-    { ':', CharonBrailleColon },
-    { '.', CharonBraillePeriod },
-    { '!', CharonBrailleExclamation },
-    { '?', CharonBrailleQuestion },
-    { '\'', CharonBrailleApostrophe },
-    { '-', CharonBrailleHyphen },
-    { '(', CharonBraillePair },
-    { ')', CharonBraillePair },
-    { '*', CharonBraillePair },
-    { '/', CharonBrailleSlash },
-    { '"', CharonBrailleQuestion },
+static const struct { unichar character; uint16_t cell; } revenant_ueb_punctuation[] = {
+    { ',', RevenantBrailleComma },
+    { ';', RevenantBrailleSemicolon },
+    { ':', RevenantBrailleColon },
+    { '.', RevenantBraillePeriod },
+    { '!', RevenantBrailleExclamation },
+    { '?', RevenantBrailleQuestion },
+    { '\'', RevenantBrailleApostrophe },
+    { '-', RevenantBrailleHyphen },
+    { '(', RevenantBraillePair },
+    { ')', RevenantBraillePair },
+    { '*', RevenantBraillePair },
+    { '/', RevenantBrailleSlash },
+    { '"', RevenantBrailleQuestion },
 };
 
-static const unsigned charon_ueb_punctuation_count =
-    sizeof(charon_ueb_punctuation) / sizeof(charon_ueb_punctuation[0]);
+static const unsigned revenant_ueb_punctuation_count =
+    sizeof(revenant_ueb_punctuation) / sizeof(revenant_ueb_punctuation[0]);
 
-static uint16_t charon_ueb_cell(unichar character, BOOL *covered)
+static uint16_t revenant_ueb_cell(unichar character, BOOL *covered)
 {
     *covered = YES;
     if (character >= 'a' && character <= 'z') {
-        return charon_ueb_letters[character - 'a'];
+        return revenant_ueb_letters[character - 'a'];
     }
     if (character >= 'A' && character <= 'Z') {
-        return charon_ueb_letters[character - 'A'];
+        return revenant_ueb_letters[character - 'A'];
     }
-    for (unsigned index = 0; index < charon_ueb_punctuation_count; index++) {
-        if (charon_ueb_punctuation[index].character == character) {
-            return charon_ueb_punctuation[index].cell;
+    for (unsigned index = 0; index < revenant_ueb_punctuation_count; index++) {
+        if (revenant_ueb_punctuation[index].character == character) {
+            return revenant_ueb_punctuation[index].cell;
         }
     }
     *covered = NO;
-    return CharonBrailleSpace;
+    return RevenantBrailleSpace;
 }
 
-static BOOL charon_ueb_run_starts(unichar character, NSString *text, NSUInteger index)
+static BOOL revenant_ueb_run_starts(unichar character, NSString *text, NSUInteger index)
 {
     (void)character;
     NSUInteger next = index + 1;
@@ -150,14 +150,14 @@ static BOOL charon_ueb_run_starts(unichar character, NSString *text, NSUInteger 
 {
     NSString *identifier = [coder decodeObjectOfClass:[NSString class] forKey:@"identifier"];
     if ((self = [[[self class] alloc] initWithIdentifier:identifier])) {
-        charon_intents_decode(self, coder);
+        revenant_intents_decode(self, coder);
     }
     return self;
 }
 
 - (void)encodeWithCoder:(NSCoder *)coder
 {
-    charon_intents_encode(self, coder);
+    revenant_intents_encode(self, coder);
 }
 
 - (id)copyWithZone:(NSZone *)zone
@@ -190,18 +190,18 @@ static BOOL charon_ueb_run_starts(unichar character, NSString *text, NSUInteger 
 @synthesize resultString = _resultString;
 @synthesize locationMap = _locationMap;
 
-- (NSUInteger)charon_unmappedCount
+- (NSUInteger)revenant_unmappedCount
 {
     return _unmapped;
 }
 
-- (instancetype)charon_withResultString:(NSString *)resultString
+- (instancetype)revenant_withResultString:(NSString *)resultString
                                 locations:(NSArray<NSNumber *> *)locations
 {
-    return [self charon_withResultString:resultString locations:locations unmapped:0];
+    return [self revenant_withResultString:resultString locations:locations unmapped:0];
 }
 
-- (instancetype)charon_withResultString:(NSString *)resultString
+- (instancetype)revenant_withResultString:(NSString *)resultString
                                 locations:(NSArray<NSNumber *> *)locations
                                  unmapped:(NSUInteger)unmapped
 {
@@ -220,19 +220,19 @@ static BOOL charon_ueb_run_starts(unichar character, NSString *text, NSUInteger 
 - (instancetype)initWithCoder:(NSCoder *)coder
 {
     if ((self = [super init])) {
-        charon_intents_decode(self, coder);
+        revenant_intents_decode(self, coder);
     }
     return self;
 }
 
 - (void)encodeWithCoder:(NSCoder *)coder
 {
-    charon_intents_encode(self, coder);
+    revenant_intents_encode(self, coder);
 }
 
 - (id)copyWithZone:(NSZone *)zone
 {
-    return [[AXBrailleTranslationResult alloc] charon_withResultString:_resultString
+    return [[AXBrailleTranslationResult alloc] revenant_withResultString:_resultString
                                                               locations:_locationMap
                                                                unmapped:_unmapped];
 }
@@ -269,7 +269,7 @@ static BOOL charon_ueb_run_starts(unichar character, NSString *text, NSUInteger 
     while (index < count) {
         unichar character = [printText characterAtIndex:index];
         if (character == ' ' || character == '\n' || character == '\t') {
-            [cells appendString:[NSString stringWithFormat:@"%C", charon_ueb_pattern(CharonBrailleSpace)]];
+            [cells appendString:[NSString stringWithFormat:@"%C", revenant_ueb_pattern(RevenantBrailleSpace)]];
             [map addObject:@(index)];
             capitals = 0;
             inNumbers = NO;
@@ -278,13 +278,13 @@ static BOOL charon_ueb_run_starts(unichar character, NSString *text, NSUInteger 
         }
         if (character >= '0' && character <= '9') {
             if (!inNumbers) {
-                [cells appendString:[NSString stringWithFormat:@"%C", charon_ueb_pattern(charon_ueb_number)]];
+                [cells appendString:[NSString stringWithFormat:@"%C", revenant_ueb_pattern(revenant_ueb_number)]];
                 [map addObject:@(index)];
                 inNumbers = YES;
             }
-            uint16_t digit = character == '0' ? charon_ueb_letters[9]
-                                              : charon_ueb_letters[character - '1'];
-            [cells appendString:[NSString stringWithFormat:@"%C", charon_ueb_pattern(digit)]];
+            uint16_t digit = character == '0' ? revenant_ueb_letters[9]
+                                              : revenant_ueb_letters[character - '1'];
+            [cells appendString:[NSString stringWithFormat:@"%C", revenant_ueb_pattern(digit)]];
             [map addObject:@(index)];
             capitals = 0;
             index++;
@@ -293,36 +293,36 @@ static BOOL charon_ueb_run_starts(unichar character, NSString *text, NSUInteger 
         if (character >= 'A' && character <= 'Z') {
             inNumbers = NO;
             if (capitals == 0) {
-                BOOL run = charon_ueb_run_starts(character, printText, index);
+                BOOL run = revenant_ueb_run_starts(character, printText, index);
                 for (unsigned added = 0; added < (run ? 2 : 1); added++) {
                     [cells appendString:[NSString stringWithFormat:@"%C",
-                                         charon_ueb_pattern(charon_ueb_capital)]];
+                                         revenant_ueb_pattern(revenant_ueb_capital)]];
                     [map addObject:@(index)];
                 }
             }
             capitals++;
             [cells appendString:[NSString stringWithFormat:@"%C",
-                                 charon_ueb_pattern(charon_ueb_letters[character - 'A'])]];
+                                 revenant_ueb_pattern(revenant_ueb_letters[character - 'A'])]];
             [map addObject:@(index)];
             index++;
             continue;
         }
         capitals = 0;
         if (inNumbers && character >= 'a' && character <= 'j') {
-            [cells appendString:[NSString stringWithFormat:@"%C", charon_ueb_pattern(charon_ueb_grade1)]];
+            [cells appendString:[NSString stringWithFormat:@"%C", revenant_ueb_pattern(revenant_ueb_grade1)]];
             [map addObject:@(index)];
             inNumbers = NO;
         }
         BOOL covered = NO;
-        uint16_t cell = charon_ueb_cell(character, &covered);
+        uint16_t cell = revenant_ueb_cell(character, &covered);
         if (!covered) {
             unmapped++;
         }
-        [cells appendString:[NSString stringWithFormat:@"%C", charon_ueb_pattern(cell)]];
+        [cells appendString:[NSString stringWithFormat:@"%C", revenant_ueb_pattern(cell)]];
         [map addObject:@(index)];
         index++;
     }
-    return [[AXBrailleTranslationResult alloc] charon_withResultString:cells
+    return [[AXBrailleTranslationResult alloc] revenant_withResultString:cells
                                                                locations:map
                                                                 unmapped:unmapped];
 }
@@ -335,26 +335,26 @@ static BOOL charon_ueb_run_starts(unichar character, NSString *text, NSUInteger 
     BOOL inNumbers = NO;
     while (index < count) {
         unichar pattern = [braille characterAtIndex:index];
-        if (pattern < CHARON_UEB_BASE || pattern > CHARON_UEB_BASE + 0xFF) {
+        if (pattern < REVENANT_UEB_BASE || pattern > REVENANT_UEB_BASE + 0xFF) {
             unmapped++;
             index++;
             continue;
         }
-        uint16_t cell = (uint16_t)(pattern - CHARON_UEB_BASE);
-        if (cell == CharonBrailleSpace) {
+        uint16_t cell = (uint16_t)(pattern - REVENANT_UEB_BASE);
+        if (cell == RevenantBrailleSpace) {
             [text appendString:@" "];
             [map addObject:@(index)];
             index++;
             continue;
         }
-        if (cell == charon_ueb_capital) {
+        if (cell == revenant_ueb_capital) {
             capitals++;
             index++;
             continue;
         }
-        if (inNumbers && cell != charon_ueb_letters[0] && cell != charon_ueb_number) {
+        if (inNumbers && cell != revenant_ueb_letters[0] && cell != revenant_ueb_number) {
         }
-        if (cell == charon_ueb_number) {
+        if (cell == revenant_ueb_number) {
             inNumbers = YES;
             index++;
             continue;
@@ -362,7 +362,7 @@ static BOOL charon_ueb_run_starts(unichar character, NSString *text, NSUInteger 
         unichar character = 0;
         if (inNumbers) {
             for (unsigned digit = 0; digit < 10; digit++) {
-                if (charon_ueb_letters[digit] == cell) {
+                if (revenant_ueb_letters[digit] == cell) {
                     character = (unichar)(digit == 9 ? '0' : '1' + digit);
                     break;
                 }
@@ -370,16 +370,16 @@ static BOOL charon_ueb_run_starts(unichar character, NSString *text, NSUInteger 
         }
         if (character == 0) {
             for (unsigned letter = 0; letter < 26; letter++) {
-                if (charon_ueb_letters[letter] == cell) {
+                if (revenant_ueb_letters[letter] == cell) {
                     character = (unichar)('a' + letter);
                     break;
                 }
             }
         }
         if (character == 0) {
-            for (unsigned entry = 0; entry < charon_ueb_punctuation_count; entry++) {
-                if (charon_ueb_punctuation[entry].cell == cell) {
-                    character = charon_ueb_punctuation[entry].character;
+            for (unsigned entry = 0; entry < revenant_ueb_punctuation_count; entry++) {
+                if (revenant_ueb_punctuation[entry].cell == cell) {
+                    character = revenant_ueb_punctuation[entry].character;
                     break;
                 }
             }
@@ -397,7 +397,7 @@ static BOOL charon_ueb_run_starts(unichar character, NSString *text, NSUInteger 
         [map addObject:@(index)];
         index++;
     }
-    return [[AXBrailleTranslationResult alloc] charon_withResultString:text
+    return [[AXBrailleTranslationResult alloc] revenant_withResultString:text
                                                                locations:map
                                                                 unmapped:unmapped];
 }

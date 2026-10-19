@@ -1,10 +1,10 @@
-#import "CharonMethodProem.h"
+#import "RevenantMethodProem.h"
 
-@interface NSRunLoop (CharonPrivate)
+@interface NSRunLoop (RevenantPrivate)
 - (CFRunLoopRef)getCFRunLoop;
 @end
 
-@implementation NSRunLoop (CharonBlocks)
+@implementation NSRunLoop (RevenantBlocks)
 
 - (void)performBlock:(void (^)(void))block
 {
@@ -14,10 +14,10 @@
 - (void)performInModes:(NSArray *)modes block:(void (^)(void))block
 {
     if (!block)
-        [NSException raise:NSInvalidArgumentException format:@"%@: block targets for run loops cannot be nil", charon_method_proem(self, _cmd)];
+        [NSException raise:NSInvalidArgumentException format:@"%@: block targets for run loops cannot be nil", revenant_method_proem(self, _cmd)];
     if (!modes.count)
         [NSException raise:NSInvalidArgumentException
-                    format:@"%@: modes for block performers on run loops cannot be nil or contain no elements", charon_method_proem(self, _cmd)];
+                    format:@"%@: modes for block performers on run loops cannot be nil or contain no elements", revenant_method_proem(self, _cmd)];
     CFRunLoopRef loop = [self getCFRunLoop];
     CFRunLoopPerformBlock(loop, (__bridge CFArrayRef)modes, block);
     CFRunLoopWakeUp(loop);

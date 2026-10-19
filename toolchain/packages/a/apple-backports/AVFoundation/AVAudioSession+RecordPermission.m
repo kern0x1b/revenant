@@ -2,7 +2,7 @@
 
 #pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
 
-@implementation AVAudioSession (CharonRecordPermission)
+@implementation AVAudioSession (RevenantRecordPermission)
 
 - (AVAudioSessionRecordPermission)recordPermission
 {

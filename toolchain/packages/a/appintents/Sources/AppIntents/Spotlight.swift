@@ -1,6 +1,6 @@
 import Foundation
 
-#if CHARON_APPINTENTS_CORESPOTLIGHT
+#if REVENANT_APPINTENTS_CORESPOTLIGHT
 import CoreSpotlight
 
 extension CSSearchableIndex {
@@ -22,14 +22,14 @@ extension CSSearchableIndex {
     }
 
     public func deleteAppEntities<Entity>(ofType entityType: Entity.Type) async throws where Entity: IndexedEntity {
-        let identifiers = CharonSpotlightIndex.recordedIdentifiers(ofType: CharonSpotlightIndex.contentType(of: Entity.self))
+        let identifiers = RevenantSpotlightIndex.recordedIdentifiers(ofType: RevenantSpotlightIndex.contentType(of: Entity.self))
         try await delete(identifiers: identifiers)
     }
 
     public func deleteAppEntities<Entity>(identifiedBy identifiers: [Entity.ID],
                                             ofType type: Entity.Type) async throws where Entity: IndexedEntity {
         let wanted: [String] = identifiers.map { $0.entityIdentifierString }
-        let recorded = CharonSpotlightIndex.recordedIdentifiers(ofType: CharonSpotlightIndex.contentType(of: Entity.self))
+        let recorded = RevenantSpotlightIndex.recordedIdentifiers(ofType: RevenantSpotlightIndex.contentType(of: Entity.self))
         try await delete(identifiers: wanted.filter { recorded.contains($0) })
     }
 
@@ -53,10 +53,10 @@ extension CSSearchableItem {
     }
 
     public convenience init<Entity>(appEntity: Entity, priority: Int) where Entity: IndexedEntity {
-        let attributes = CSSearchableItemAttributeSet(itemContentType: CharonSpotlightIndex.contentType(of: Entity.self))
+        let attributes = CSSearchableItemAttributeSet(itemContentType: RevenantSpotlightIndex.contentType(of: Entity.self))
         attributes.associateAppEntity(appEntity, priority: priority)
         self.init(uniqueIdentifier: appEntity.id.entityIdentifierString,
-                  domainIdentifier: CharonSpotlightIndex.domain,
+                  domainIdentifier: RevenantSpotlightIndex.domain,
                   attributeSet: attributes)
     }
 
@@ -67,20 +67,20 @@ extension CSSearchableItem {
 
 extension CSSearchableItemAttributeSet {
     public func associateAppEntity<Entity>(_ appEntity: Entity, priority: Int = 0) where Entity: IndexedEntity {
-        title = CharonLocalized.string(of: appEntity.displayRepresentation.title)
-        contentDescription = appEntity.displayRepresentation.subtitle.map { CharonLocalized.string(of: $0) }
-        keywords = appEntity.displayRepresentation.synonyms.map { CharonLocalized.string(of: $0) }
-        setValue(appEntity.id.entityIdentifierString, forKey: CharonAppEntityIdentifierAttribute)
+        title = RevenantLocalized.string(of: appEntity.displayRepresentation.title)
+        contentDescription = appEntity.displayRepresentation.subtitle.map { RevenantLocalized.string(of: $0) }
+        keywords = appEntity.displayRepresentation.synonyms.map { RevenantLocalized.string(of: $0) }
+        setValue(appEntity.id.entityIdentifierString, forKey: RevenantAppEntityIdentifierAttribute)
     }
 
     public var appEntityIdentifier: String? {
-        return value(forKey: CharonAppEntityIdentifierAttribute) as? String
+        return value(forKey: RevenantAppEntityIdentifierAttribute) as? String
     }
 }
 
-public enum CharonSpotlightIndex {
+public enum RevenantSpotlightIndex {
     public static var domain: String {
-        return Bundle.main.bundleIdentifier ?? "charon.appintents"
+        return Bundle.main.bundleIdentifier ?? "revenant.appintents"
     }
 
     public static func contentType(of entityType: any Any.Type) -> String {
@@ -92,11 +92,11 @@ public enum CharonSpotlightIndex {
     }
 
     public static func recordedIdentifiers(ofType contentType: String) -> [String] {
-        return CharonSpotlightStore.records().filter { $0.contentType == contentType }.map { $0.identifier }
+        return RevenantSpotlightStore.records().filter { $0.contentType == contentType }.map { $0.identifier }
     }
 }
 
-public struct CharonSpotlightRecord {
+public struct RevenantSpotlightRecord {
     public let identifier: String
     public let domain: String
     public let contentType: String
@@ -110,21 +110,21 @@ public struct CharonSpotlightRecord {
     }
 }
 
-public enum CharonSpotlightStore {
-    public static func records() -> [CharonSpotlightRecord] {
-        return CharonSpotlightJournal.records ?? []
+public enum RevenantSpotlightStore {
+    public static func records() -> [RevenantSpotlightRecord] {
+        return RevenantSpotlightJournal.records ?? []
     }
 }
 
-public enum CharonSpotlightJournal {
-    public static let root = "/var/mobile/Library/Caches/org.charon.corespotlight"
+public enum RevenantSpotlightJournal {
+    public static let root = "/var/mobile/Library/Caches/org.revenant.corespotlight"
 
     public static let entityIdentifierAttribute = "appEntityIdentifier"
 
-    public static var records: [CharonSpotlightRecord]? {
+    public static var records: [RevenantSpotlightRecord]? {
         guard FileManager.default.fileExists(atPath: root) else { return nil }
         let paths = (try? FileManager.default.subpathsOfDirectory(atPath: root)) ?? []
-        var records = [CharonSpotlightRecord]()
+        var records = [RevenantSpotlightRecord]()
         for path in paths where path.hasSuffix(".plist") {
             let full = (root as NSString).appendingPathComponent(path)
             guard let data = FileManager.default.contents(atPath: full),
@@ -133,9 +133,9 @@ public enum CharonSpotlightJournal {
             for (identifier, entry) in entries {
                 guard let archive = entry as? [String: Any] else { continue }
                 let attributes = archive["attributeSet"] as? [String: Any]
-                records.append(CharonSpotlightRecord(identifier: identifier,
+                records.append(RevenantSpotlightRecord(identifier: identifier,
                                                      domain: archive["domainIdentifier"] as? String
-                                                         ?? CharonSpotlightIndex.domain,
+                                                         ?? RevenantSpotlightIndex.domain,
                                                      contentType: attributes?["contentType"] as? String ?? "",
                                                      appEntityIdentifier: attributes?[entityIdentifierAttribute] as? String))
             }
@@ -144,13 +144,13 @@ public enum CharonSpotlightJournal {
     }
 }
 
-public let CharonAppEntityIdentifierAttribute = CharonSpotlightJournal.entityIdentifierAttribute
+public let RevenantAppEntityIdentifierAttribute = RevenantSpotlightJournal.entityIdentifierAttribute
 #endif
 
-#if CHARON_APPINTENTS_PORT_HEADERS
+#if REVENANT_APPINTENTS_PORT_HEADERS
 @available(iOS 8.0, *)
 extension NSUserActivity {
-#if CHARON_APPINTENTS_NSUSERACTIVITY_INTENT
+#if REVENANT_APPINTENTS_NSUSERACTIVITY_INTENT
     public func widgetConfigurationIntent<Intent>(of intentType: Intent.Type = Intent.self) -> Intent?
         where Intent: WidgetConfigurationIntent {
         return intent as? Intent
@@ -158,9 +158,9 @@ extension NSUserActivity {
 #endif
 
     public var appEntityIdentifier: String? {
-        return userInfo?[CharonAppEntityIdentifierKey] as? String
+        return userInfo?[RevenantAppEntityIdentifierKey] as? String
     }
 }
 
-public let CharonAppEntityIdentifierKey = "AppIntentsEntityIdentifier"
+public let RevenantAppEntityIdentifierKey = "AppIntentsEntityIdentifier"
 #endif

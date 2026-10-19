@@ -27,7 +27,7 @@ extern AVAudioTimePitchAlgorithm const AVAudioTimePitchAlgorithmTimeDomain;
 extern NSString *const AVSampleBufferAudioRendererWasFlushedAutomaticallyNotification;
 extern NSString *const AVSampleBufferAudioRendererFlushTimeKey;
 
-@interface NSValue (CharonCMTimeBox)
+@interface NSValue (RevenantCMTimeBox)
 + (NSValue *)valueWithCMTime:(CMTime)time;
 - (CMTime)CMTimeValue;
 @end

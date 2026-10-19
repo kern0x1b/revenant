@@ -1,4 +1,4 @@
-#import "CharonVision.h"
+#import "RevenantVision.h"
 
 #pragma clang diagnostic ignored "-Wprotocol"
 #pragma clang diagnostic ignored "-Wobjc-property-implementation"

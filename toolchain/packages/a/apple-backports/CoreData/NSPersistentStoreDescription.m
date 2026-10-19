@@ -1,6 +1,6 @@
-#import "CharonCoreData.h"
+#import "RevenantCoreData.h"
 
-static NSString *const CharonAddStoreAsynchronouslyOption = @"NSAddStoreAsynchronouslyOption";
+static NSString *const RevenantAddStoreAsynchronouslyOption = @"NSAddStoreAsynchronouslyOption";
 
 @implementation NSPersistentStoreDescription {
 @private
@@ -120,12 +120,12 @@ static NSString *const CharonAddStoreAsynchronouslyOption = @"NSAddStoreAsynchro
 
 - (BOOL)shouldAddStoreAsynchronously
 {
-    return [_options[CharonAddStoreAsynchronouslyOption] boolValue];
+    return [_options[RevenantAddStoreAsynchronouslyOption] boolValue];
 }
 
 - (void)setShouldAddStoreAsynchronously:(BOOL)asynchronously
 {
-    _options[CharonAddStoreAsynchronouslyOption] = @(asynchronously);
+    _options[RevenantAddStoreAsynchronouslyOption] = @(asynchronously);
 }
 
 - (BOOL)shouldMigrateStoreAutomatically
@@ -148,7 +148,7 @@ static NSString *const CharonAddStoreAsynchronouslyOption = @"NSAddStoreAsynchro
     _options[NSInferMappingModelAutomaticallyOption] = @(infer);
 }
 
-static BOOL charon_same(id a, id b)
+static BOOL revenant_same(id a, id b)
 {
     return a == b || [a isEqual:b];
 }
@@ -160,8 +160,8 @@ static BOOL charon_same(id a, id b)
     if (![object isKindOfClass:[self class]])
         return NO;
     NSPersistentStoreDescription *other = object;
-    return charon_same(_URL, other.URL) && charon_same(_type, other.type) && charon_same(_configuration, other.configuration)
-        && charon_same(_options, other->_options);
+    return revenant_same(_URL, other.URL) && revenant_same(_type, other.type) && revenant_same(_configuration, other.configuration)
+        && revenant_same(_options, other->_options);
 }
 
 - (NSUInteger)hash

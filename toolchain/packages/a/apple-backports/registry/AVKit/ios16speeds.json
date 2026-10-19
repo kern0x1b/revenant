@@ -13,7 +13,7 @@
       "source": "SDK 26.2 AVKit/AVPlaybackSpeed.h:26-67; the host's own AVKit, read by tests/backports/host/avkitspeeds at locale en_US@rg=plzzzz: 5 speeds, fastest first, and a speed built by the public initialiser named \"port probe\" at rate 1.75 answering the numeric name 1,75x, so that name is computed from the rate and not stored"
     },
     {
-      "api": "-[AVPlayerViewController charon_applySelectedSpeed]",
+      "api": "-[AVPlayerViewController revenant_applySelectedSpeed]",
       "kind": "method",
       "introduced": "16.0",
       "minimum": "6.0",
@@ -21,7 +21,7 @@
       "reason": "the seam through which the 8.0 object's play path hands the play press to the 16.0 object that owns the speed: AVPlaybackSpeed.h:51 says the rate is set in response to the play button being pressed, and the press is handled in AVPlayerViewController.m, which must not define 16.0 API of its own",
       "effect": "sets the player's rate to the selected speed's, and does nothing when no speed is selected or there is no player; the 8.0 object asks for it with respondsToSelector: first, because it also links in the bands that do not carry the 16.0 object",
       "facts": "facts/AVKit/AVPlaybackSpeed.md",
-      "source": "no SDK header declares this name; the date is this port's own, the release whose object carries it, and it is defined in AVPlayerViewControllerSpeeds16.m and declared in CharonAVKitSpeeds.h"
+      "source": "no SDK header declares this name; the date is this port's own, the release whose object carries it, and it is defined in AVPlayerViewControllerSpeeds16.m and declared in RevenantAVKitSpeeds.h"
     }
   ]
 }

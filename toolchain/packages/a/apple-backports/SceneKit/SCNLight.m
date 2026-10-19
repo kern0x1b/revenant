@@ -1,4 +1,4 @@
-#import "CharonSCN.h"
+#import "RevenantSCN.h"
 
 SCNLightType const SCNLightTypeAmbient = @"ambient";
 SCNLightType const SCNLightTypeOmni = @"omni";
@@ -63,11 +63,11 @@ SCNLightType const SCNLightTypeSpot = @"spot";
             _type = type;
         }
         _name = [coder decodeObjectOfClass:[NSString class] forKey:@"name"];
-        UIColor *color = [CharonSCNCoding decodeColor:coder forKey:@"color"];
+        UIColor *color = [RevenantSCNCoding decodeColor:coder forKey:@"color"];
         if (color) {
             _color = color;
         }
-        UIColor *shadowColor = [CharonSCNCoding decodeColor:coder forKey:@"shadowColor"];
+        UIColor *shadowColor = [RevenantSCNCoding decodeColor:coder forKey:@"shadowColor"];
         if (shadowColor) {
             _shadowColor = shadowColor;
         }
@@ -77,7 +77,7 @@ SCNLightType const SCNLightTypeSpot = @"spot";
         if ([coder containsValueForKey:@"intensity"]) {
             _intensity = [coder decodeDoubleForKey:@"intensity"];
         }
-        _castsShadow = [CharonSCNCoding decodeBool:coder forKey:@"castsShadow" default:NO];
+        _castsShadow = [RevenantSCNCoding decodeBool:coder forKey:@"castsShadow" default:NO];
         if ([coder containsValueForKey:@"shadowRadius"]) {
             _shadowRadius = [coder decodeDoubleForKey:@"shadowRadius"];
         }

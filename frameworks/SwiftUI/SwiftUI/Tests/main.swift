@@ -3413,7 +3413,7 @@ final class NoteDocument: FileDocument {
 }
 
 let noteDirectory = URL(fileURLWithPath: NSTemporaryDirectory())
-let noteURL = noteDirectory.appendingPathComponent("eidolon-note.txt")
+let noteURL = noteDirectory.appendingPathComponent("swiftui-note.txt")
 try? Data("the first line\n".utf8).write(to: noteURL)
 let noteGroup = DocumentGroup<NoteDocument, Text>(newDocument: NoteDocument()) { configuration in
     Text(verbatim: configuration.document.text)

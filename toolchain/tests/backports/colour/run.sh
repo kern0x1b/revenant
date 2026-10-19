@@ -23,7 +23,7 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../common/runs.sh" "$here"
-build=${BUILD:-$(runs_folder charon-accessibility-colour)}
+build=${BUILD:-$(runs_folder revenant-accessibility-colour)}
 seed=${SEED:-20260929}
 wrong=0
 for argument in "$@"; do

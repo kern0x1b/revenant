@@ -8,30 +8,30 @@ NSString * const NSStringEncodingDetectionFromWindowsKey = @"NSStringEncodingDet
 NSString * const NSStringEncodingDetectionLossySubstitutionKey = @"NSStringEncodingDetectionLossySubstitutionKey";
 NSString * const NSStringEncodingDetectionLikelyLanguageKey = @"NSStringEncodingDetectionLikelyLanguageKey";
 
-static BOOL charon_bom(NSData *data, const uint8_t *mark, NSUInteger length)
+static BOOL revenant_bom(NSData *data, const uint8_t *mark, NSUInteger length)
 {
     if (data.length < length)
         return NO;
     return memcmp(data.bytes, mark, length) == 0;
 }
 
-static NSStringEncoding charon_encoding_from_bom(NSData *data)
+static NSStringEncoding revenant_encoding_from_bom(NSData *data)
 {
     static const uint8_t utf32be[] = {0x00, 0x00, 0xFE, 0xFF};
     static const uint8_t utf32le[] = {0xFF, 0xFE, 0x00, 0x00};
     static const uint8_t utf8bom[] = {0xEF, 0xBB, 0xBF};
     static const uint8_t utf16be[] = {0xFE, 0xFF};
     static const uint8_t utf16le[] = {0xFF, 0xFE};
-    if (charon_bom(data, utf32be, sizeof utf32be) || charon_bom(data, utf32le, sizeof utf32le))
+    if (revenant_bom(data, utf32be, sizeof utf32be) || revenant_bom(data, utf32le, sizeof utf32le))
         return NSUTF32StringEncoding;
-    if (charon_bom(data, utf8bom, sizeof utf8bom))
+    if (revenant_bom(data, utf8bom, sizeof utf8bom))
         return NSUTF8StringEncoding;
-    if (charon_bom(data, utf16be, sizeof utf16be) || charon_bom(data, utf16le, sizeof utf16le))
+    if (revenant_bom(data, utf16be, sizeof utf16be) || revenant_bom(data, utf16le, sizeof utf16le))
         return NSUnicodeStringEncoding;
     return 0;
 }
 
-static BOOL charon_all_ascii(NSData *data)
+static BOOL revenant_all_ascii(NSData *data)
 {
     const uint8_t *bytes = data.bytes;
     for (NSUInteger index = 0; index < data.length; index++) {
@@ -41,7 +41,7 @@ static BOOL charon_all_ascii(NSData *data)
     return YES;
 }
 
-@implementation NSString (CharonEncodingDetection8)
+@implementation NSString (RevenantEncodingDetection8)
 
 + (NSStringEncoding)stringEncodingForData:(NSData *)data
                           encodingOptions:(NSDictionary *)opts
@@ -68,10 +68,10 @@ static BOOL charon_all_ascii(NSData *data)
     for (NSNumber *encoding in suggested)
         [candidates addObject:encoding];
     if (!onlySuggested) {
-        NSStringEncoding bom = charon_encoding_from_bom(data);
+        NSStringEncoding bom = revenant_encoding_from_bom(data);
         if (bom)
             [candidates addObject:@(bom)];
-        if (charon_all_ascii(data))
+        if (revenant_all_ascii(data))
             [candidates addObject:@(NSASCIIStringEncoding)];
         [candidates addObject:@(NSUTF8StringEncoding)];
         [candidates addObject:@(NSWindowsCP1252StringEncoding)];

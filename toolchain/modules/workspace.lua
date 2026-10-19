@@ -1,9 +1,9 @@
 import("core.base.json")
 
 local SDK_VERSION = "26.2"
-local SDK_VARIABLE = "CHARON_GEN_SDK"
-local CORPUS_VARIABLE = "CHARON_CORPUS_ROOT"
-local TASK_VARIABLE = "HADES_TASK"
+local SDK_VARIABLE = "REVENANT_GEN_SDK"
+local CORPUS_VARIABLE = "REVENANT_CORPUS_ROOT"
+local TASK_VARIABLE = "REVENANT_TASK"
 
 local resolved = {}
 
@@ -14,7 +14,7 @@ end
 local function home()
     local value = os.getenv("HOME")
     if not value or value == "" then
-        raise("workspace: HOME is not set, so there is no $HOME/.cache/hades to put run output in")
+        raise("workspace: HOME is not set, so there is no $HOME/.revenant/cache to put run output in")
     end
     return value
 end
@@ -38,7 +38,7 @@ function task()
 end
 
 function cache()
-    return path.join(home(), ".cache", "hades")
+    return path.join(home(), ".revenant", "cache")
 end
 
 function run(...)
@@ -96,7 +96,7 @@ end
 local function package_sdk(version, install)
     local scratch = fresh("sdk-resolve")
     io.writefile(path.join(scratch, "xmake.lua"), string.format("add_repositories(%q)\nadd_requires(%q)\n",
-                                                                 "charon " .. root(), "iphoneos-sdk " .. version))
+                                                                 "revenant " .. root(), "iphoneos-sdk " .. version))
     local failure
     local result = try {
         function ()
@@ -120,10 +120,10 @@ local function package_sdk(version, install)
     }
     os.tryrm(scratch)
     if failure then
-        raise("workspace: xmake could not resolve charon's iphoneos-sdk %s package: %s", version, failure)
+        raise("workspace: xmake could not resolve revenant's iphoneos-sdk %s package: %s", version, failure)
     end
     if not result then
-        raise("workspace: xmake named no install folder for charon's iphoneos-sdk %s package", version)
+        raise("workspace: xmake named no install folder for revenant's iphoneos-sdk %s package", version)
     end
     return sdk_in(result, version), result
 end
@@ -136,7 +136,7 @@ function sdk_package(version, opt)
     end
     local folder, installdir = package_sdk(version, opt.install)
     if not os.isfile(path.join(folder, "SDKSettings.json")) then
-        raise("workspace: the iPhoneOS %s SDK is not there: charon's iphoneos-sdk %s package is not installed at %s. "
+        raise("workspace: the iPhoneOS %s SDK is not there: revenant's iphoneos-sdk %s package is not installed at %s. "
               .. "Install it with `xmake l %s %s --install`%s",
               version, version, installdir, path.join(root(), "modules", "workspace.lua"), opt.command or ("sdk-package " .. version),
               opt.alternative or "")

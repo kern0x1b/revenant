@@ -1,6 +1,6 @@
 #import <CoreData/CoreData.h>
 
-static inline NSPersistentStoreCoordinator *charon_store_coordinator(NSManagedObjectContext *context)
+static inline NSPersistentStoreCoordinator *revenant_store_coordinator(NSManagedObjectContext *context)
 {
     NSManagedObjectContext *root = context;
     while (root.parentContext)

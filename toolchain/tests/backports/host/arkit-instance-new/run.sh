@@ -13,7 +13,7 @@ runs=${RUNS:-$repo/.agent-work/runs/arkit-instance-new}
 rm -rf "$runs"
 mkdir -p "$runs"
 
-sdk26=${CHARON_GEN_SDK:-$HOME/Git/projects/ios/charon/.agent-work/sdk-26.2/iPhoneOS26.2.sdk}
+sdk26=${REVENANT_GEN_SDK:-$HOME/Git/projects/ios/charon/.agent-work/sdk-26.2/iPhoneOS26.2.sdk}
 hdr=$sdk26/System/Library/Frameworks/ARKit.framework/Headers
 spec=$repo/packages/a/apple-backports/spec/ARKit/declarations.tsv
 for c in ARRaycastQuery ARRaycastResult ARTrackedRaycast; do

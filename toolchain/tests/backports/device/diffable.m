@@ -24,15 +24,15 @@ static NSDiffableDataSourceSnapshot *snapshot_from(NSString *spec, NSString *rel
     return snapshot;
 }
 
-@interface CharonDiffableDelegate : UIResponder <UIApplicationDelegate>
+@interface RevenantDiffableDelegate : UIResponder <UIApplicationDelegate>
 @property (nonatomic, strong) UIWindow *window;
 @end
 
-@implementation CharonDiffableDelegate
+@implementation RevenantDiffableDelegate
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)options
 {
-    charon_log_to([results_folder stringByAppendingPathComponent:@"diffable.log"]);
+    revenant_log_to([results_folder stringByAppendingPathComponent:@"diffable.log"]);
     self.window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
     self.window.rootViewController = [[UIViewController alloc] init];
     [self.window makeKeyAndVisible];
@@ -45,9 +45,9 @@ static NSDiffableDataSourceSnapshot *snapshot_from(NSString *spec, NSString *rel
     @try {
         [self run];
     } @catch (NSException *exception) {
-        charon_check(NO, "the checks raise no exception", [NSString stringWithFormat:@"%@: %@", exception.name, exception.reason]);
+        revenant_check(NO, "the checks raise no exception", [NSString stringWithFormat:@"%@: %@", exception.name, exception.reason]);
     }
-    NSString *summary = [NSString stringWithFormat:@"%@ checks=%d failures=%d\n", charon_failures ? @"FAIL" : @"ok", charon_checks, charon_failures];
+    NSString *summary = [NSString stringWithFormat:@"%@ checks=%d failures=%d\n", revenant_failures ? @"FAIL" : @"ok", revenant_checks, revenant_failures];
     [summary writeToFile:[results_folder stringByAppendingPathComponent:@"diffable.done"] atomically:YES encoding:NSUTF8StringEncoding error:NULL];
 }
 
@@ -99,7 +99,7 @@ static NSDiffableDataSourceSnapshot *snapshot_from(NSString *spec, NSString *rel
 {
     Dl_info info;
     for (Class cls in @[[NSDiffableDataSourceSnapshot class], [NSDiffableDataSourceSectionSnapshot class], [UICollectionViewDiffableDataSource class], [UITableViewDiffableDataSource class]])
-        charon_check(dladdr((__bridge const void *)cls, &info) && !strcmp(strrchr(info.dli_fname, '/') + 1, "libUIKitBackports.dylib"), [NSString stringWithFormat:@"%@ comes from the backports library", NSStringFromClass(cls)].UTF8String, @"dladdr");
+        revenant_check(dladdr((__bridge const void *)cls, &info) && !strcmp(strrchr(info.dli_fname, '/') + 1, "libUIKitBackports.dylib"), [NSString stringWithFormat:@"%@ comes from the backports library", NSStringFromClass(cls)].UTF8String, @"dladdr");
 
     CHECK(sizeof df_expectations / sizeof df_expectations[0] == DIFFABLE_CASE_COUNT, "there is one recorded fingerprint for every case");
     size_t wrong = 0;
@@ -108,7 +108,7 @@ static NSDiffableDataSourceSnapshot *snapshot_from(NSString *spec, NSString *rel
         if (df_hash(answer) != df_expectations[index]) {
             wrong++;
             if (wrong <= 3)
-                charon_check(NO, [NSString stringWithFormat:@"case %zu answers as the system does", index].UTF8String, answer);
+                revenant_check(NO, [NSString stringWithFormat:@"case %zu answers as the system does", index].UTF8String, answer);
         }
     }
     CHECK(wrong == 0, "all recorded snapshot and section snapshot cases answer as the system does");
@@ -141,7 +141,7 @@ static NSDiffableDataSourceSnapshot *snapshot_from(NSString *spec, NSString *rel
             } table:table from:scenario[0]];
             NSArray *sorted = [asked sortedArrayUsingSelector:@selector(compare:)], *expected = [scenario[4] sortedArrayUsingSelector:@selector(compare:)];
             NSString *name = [NSString stringWithFormat:@"%@ %@ -> %@ reloading [%@|%@] asks the provider for %@", table ? @"table" : @"collection", scenario[0], scenario[1], scenario[2], scenario[3], [scenario[4] componentsJoinedByString:@" "]];
-            charon_check([sorted isEqual:expected], name.UTF8String, [asked componentsJoinedByString:@" "]);
+            revenant_check([sorted isEqual:expected], name.UTF8String, [asked componentsJoinedByString:@" "]);
         }
 
     for (int table = 0; table < 2; table++) {
@@ -235,7 +235,7 @@ static NSDiffableDataSourceSnapshot *snapshot_from(NSString *spec, NSString *rel
         CHECK([source reorderingHandlers] != nil && [source sectionSnapshotHandlers] != nil, "the handlers are kept");
         [collection removeFromSuperview];
     }
-    printf("checks=%d failures=%d\n", charon_checks, charon_failures);
+    printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
 }
 
 @end
@@ -244,6 +244,6 @@ int main(int argc, char *argv[])
 {
     @autoreleasepool {
         [[NSFileManager defaultManager] createDirectoryAtPath:results_folder withIntermediateDirectories:YES attributes:nil error:NULL];
-        return UIApplicationMain(argc, argv, nil, @"CharonDiffableDelegate");
+        return UIApplicationMain(argc, argv, nil, @"RevenantDiffableDelegate");
     }
 }

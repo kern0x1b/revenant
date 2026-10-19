@@ -6,19 +6,19 @@
 #include <dispatch/dispatch.h>
 #include <stdlib.h>
 
-int charon_roundtrip_run(void);
+int revenant_roundtrip_run(void);
 
-#ifdef CHARON_6_1_3_PROBE
+#ifdef REVENANT_6_1_3_PROBE
 #include "../../../host/coremidi/oracle/stamp.h"
 #include "../../../host/coremidi/oracle/disposewait.h"
 
-static void charon_probe_read(const MIDIPacketList *packets, void *readRefCon, void *srcConnRefCon)
+static void revenant_probe_read(const MIDIPacketList *packets, void *readRefCon, void *srcConnRefCon)
 {
 }
 
 static int gProbeRemovals;
 
-static void charon_probe_notify(const MIDINotification *message, void *refCon)
+static void revenant_probe_notify(const MIDINotification *message, void *refCon)
 {
     if (message->messageID != kMIDIMsgObjectRemoved)
         return;
@@ -28,7 +28,7 @@ static void charon_probe_notify(const MIDINotification *message, void *refCon)
     fflush(stdout);
 }
 
-static void charon_probe_unique(const char *label, MIDIObjectRef object)
+static void revenant_probe_unique(const char *label, MIDIObjectRef object)
 {
     SInt32 value = -1;
     OSStatus status = MIDIObjectGetIntegerProperty(object, kMIDIPropertyUniqueID, &value);
@@ -36,7 +36,7 @@ static void charon_probe_unique(const char *label, MIDIObjectRef object)
     fflush(stdout);
 }
 
-static void charon_probe_umpkey(const char *label, MIDIObjectRef object, CFStringRef key)
+static void revenant_probe_umpkey(const char *label, MIDIObjectRef object, CFStringRef key)
 {
     SInt32 value = -1;
     OSStatus status = MIDIObjectGetIntegerProperty(object, key, &value);
@@ -44,7 +44,7 @@ static void charon_probe_umpkey(const char *label, MIDIObjectRef object, CFStrin
     fflush(stdout);
 }
 
-static void charon_probe_selectors(void)
+static void revenant_probe_selectors(void)
 {
     void *handle = dlopen("/System/Library/Frameworks/CoreBluetooth.framework/CoreBluetooth", RTLD_NOW);
     Class peripheral = NSClassFromString(@"CBPeripheral");
@@ -57,47 +57,47 @@ static void charon_probe_selectors(void)
     fflush(stdout);
 }
 
-static void charon_probe_objects(void)
+static void revenant_probe_objects(void)
 {
     MIDIClientRef client = 0;
-    OSStatus clientStatus = MIDIClientCreate(CFSTR("charon-probe"), NULL, NULL, &client);
+    OSStatus clientStatus = MIDIClientCreate(CFSTR("revenant-probe"), NULL, NULL, &client);
     printf("probe 6.1.3: client create status %d\n", (int)clientStatus);
     fflush(stdout);
     if (clientStatus != noErr)
         return;
-    charon_probe_unique("client live", client);
+    revenant_probe_unique("client live", client);
 
     MIDIEndpointRef dest = 0;
-    OSStatus created = MIDIDestinationCreate(client, CFSTR("charon-probe-dest"), charon_probe_read, NULL, &dest);
+    OSStatus created = MIDIDestinationCreate(client, CFSTR("revenant-probe-dest"), revenant_probe_read, NULL, &dest);
     printf("probe 6.1.3: destination create status %d\n", (int)created);
     fflush(stdout);
     if (created == noErr) {
-        charon_probe_unique("destination live", dest);
-        charon_probe_umpkey("destination UMP key 'active group bitmap'", dest, CFSTR("active group bitmap"));
-        charon_probe_umpkey("destination UMP key 'ump endpoint'", dest, CFSTR("ump endpoint"));
-        charon_probe_umpkey("destination UMP key 'associated endpoint'", dest, CFSTR("associated endpoint"));
+        revenant_probe_unique("destination live", dest);
+        revenant_probe_umpkey("destination UMP key 'active group bitmap'", dest, CFSTR("active group bitmap"));
+        revenant_probe_umpkey("destination UMP key 'ump endpoint'", dest, CFSTR("ump endpoint"));
+        revenant_probe_umpkey("destination UMP key 'associated endpoint'", dest, CFSTR("associated endpoint"));
         MIDIEndpointDispose(dest);
-        charon_probe_unique("destination disposed", dest);
+        revenant_probe_unique("destination disposed", dest);
     }
 
     MIDIEndpointRef src = 0;
-    OSStatus srcStatus = MIDISourceCreate(client, CFSTR("charon-probe-src"), &src);
+    OSStatus srcStatus = MIDISourceCreate(client, CFSTR("revenant-probe-src"), &src);
     printf("probe 6.1.3: source create status %d\n", (int)srcStatus);
     fflush(stdout);
     if (srcStatus == noErr) {
-        charon_probe_unique("source live", src);
+        revenant_probe_unique("source live", src);
         MIDIEndpointDispose(src);
-        charon_probe_unique("source disposed", src);
+        revenant_probe_unique("source disposed", src);
     }
 
     MIDIPortRef port = 0;
-    OSStatus portStatus = MIDIInputPortCreate(client, CFSTR("charon-probe-in"), charon_probe_read, NULL, &port);
+    OSStatus portStatus = MIDIInputPortCreate(client, CFSTR("revenant-probe-in"), revenant_probe_read, NULL, &port);
     printf("probe 6.1.3: input port create status %d\n", (int)portStatus);
     fflush(stdout);
     if (portStatus == noErr) {
-        charon_probe_unique("input port live", port);
+        revenant_probe_unique("input port live", port);
         MIDIPortDispose(port);
-        charon_probe_unique("input port disposed", port);
+        revenant_probe_unique("input port disposed", port);
     }
 
     ItemCount devices = MIDIGetNumberOfDevices();
@@ -106,30 +106,30 @@ static void charon_probe_objects(void)
     if (devices > 0) {
         MIDIDeviceRef device = MIDIGetDevice(0);
         MIDIEntityRef entity = 0;
-        OSStatus entityStatus = MIDIDeviceNewEntity(device, CFSTR("charon-probe-entity"), kMIDIProtocol_2_0, false, 0, 0, &entity);
+        OSStatus entityStatus = MIDIDeviceNewEntity(device, CFSTR("revenant-probe-entity"), kMIDIProtocol_2_0, false, 0, 0, &entity);
         printf("probe 6.1.3: MIDIDeviceNewEntity (protocol 2.0) status %d, entity ref %u\n", (int)entityStatus, (unsigned)entity);
         fflush(stdout);
         if (entityStatus == noErr) {
-            charon_probe_umpkey("entity protocol read back", entity, CFSTR("protocol"));
+            revenant_probe_umpkey("entity protocol read back", entity, CFSTR("protocol"));
             OSStatus removed = MIDIDeviceRemoveEntity(device, entity);
             printf("probe 6.1.3: MIDIDeviceRemoveEntity status %d\n", (int)removed);
             fflush(stdout);
         }
     }
     MIDIClientDispose(client);
-    charon_probe_unique("client disposed", client);
+    revenant_probe_unique("client disposed", client);
 
     MIDIClientRef notifying = 0;
-    if (MIDIClientCreate(CFSTR("charon-probe-notify"), charon_probe_notify, NULL, &notifying) == noErr) {
+    if (MIDIClientCreate(CFSTR("revenant-probe-notify"), revenant_probe_notify, NULL, &notifying) == noErr) {
         MIDIEndpointRef first = 0, second = 0;
-        MIDIDestinationCreate(notifying, CFSTR("charon-probe-first"), charon_probe_read, NULL, &first);
+        MIDIDestinationCreate(notifying, CFSTR("revenant-probe-first"), revenant_probe_read, NULL, &first);
         MIDIEndpointDispose(first);
-        MIDIDestinationCreate(notifying, CFSTR("charon-probe-second"), charon_probe_read, NULL, &second);
+        MIDIDestinationCreate(notifying, CFSTR("revenant-probe-second"), revenant_probe_read, NULL, &second);
         printf("probe 6.1.3: destination ref after a dispose: first %u, second %u\n", (unsigned)first, (unsigned)second);
         fflush(stdout);
         MIDIEndpointDispose(second);
         MIDIEndpointRef noted = 0;
-        if (MIDISourceCreate(notifying, CFSTR("charon-probe-noted-src"), &noted) == noErr)
+        if (MIDISourceCreate(notifying, CFSTR("revenant-probe-noted-src"), &noted) == noErr)
             MIDIEndpointDispose(noted);
         for (int i = 0; i < 200 && gProbeRemovals < 3; i++)
             CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0.1, false);
@@ -139,7 +139,7 @@ static void charon_probe_objects(void)
     }
 }
 
-static void charon_probe_list_keys(const char *label, MIDIObjectRef object)
+static void revenant_probe_list_keys(const char *label, MIDIObjectRef object)
 {
     CFPropertyListRef properties = NULL;
     OSStatus status = MIDIObjectGetProperties(object, &properties, true);
@@ -171,16 +171,16 @@ static UInt32 gProbeWords[8];
 static int gProbeWordCount = -1;
 static int gProbeProtocol = -1;
 
-static void charon_probe_connection(void)
+static void revenant_probe_connection(void)
 {
     MIDIClientRef client = 0;
-    if (MIDIClientCreate(CFSTR("charon-probe-conn"), NULL, NULL, &client) != noErr)
+    if (MIDIClientCreate(CFSTR("revenant-probe-conn"), NULL, NULL, &client) != noErr)
         return;
     gProbeArrival = dispatch_semaphore_create(0);
     MIDIEndpointRef src = 0;
     MIDIPortRef port = 0;
-    OSStatus srcStatus = MIDISourceCreateWithProtocol(client, CFSTR("charon-probe-src2"), kMIDIProtocol_2_0, &src);
-    OSStatus portStatus = MIDIInputPortCreateWithProtocol(client, CFSTR("charon-probe-in2"), kMIDIProtocol_2_0, &port,
+    OSStatus srcStatus = MIDISourceCreateWithProtocol(client, CFSTR("revenant-probe-src2"), kMIDIProtocol_2_0, &src);
+    OSStatus portStatus = MIDIInputPortCreateWithProtocol(client, CFSTR("revenant-probe-in2"), kMIDIProtocol_2_0, &port,
         ^(const MIDIEventList *list, void *srcConnRefCon) {
             if (list->numPackets > 0 && gProbeWordCount < 0) {
                 const MIDIEventPacket *packet = &list->packet[0];
@@ -194,13 +194,13 @@ static void charon_probe_connection(void)
     printf("probe 6.1.3: 2.0 source status %d, 2.0 input port status %d\n", (int)srcStatus, (int)portStatus);
     fflush(stdout);
     if (srcStatus == noErr && portStatus == noErr) {
-        charon_probe_list_keys("source before connect", src);
-        charon_probe_list_keys("port before connect", port);
+        revenant_probe_list_keys("source before connect", src);
+        revenant_probe_list_keys("port before connect", port);
         OSStatus connected = MIDIPortConnectSource(port, src, NULL);
         printf("probe 6.1.3: MIDIPortConnectSource status %d\n", (int)connected);
         fflush(stdout);
-        charon_probe_list_keys("source after connect", src);
-        charon_probe_list_keys("port after connect", port);
+        revenant_probe_list_keys("source after connect", src);
+        revenant_probe_list_keys("port after connect", port);
         Byte buffer[64];
         MIDIEventList *list = (MIDIEventList *)buffer;
         UInt32 words[2] = {0x40903C00u, 0x12340000u};
@@ -224,7 +224,7 @@ static void charon_probe_connection(void)
 
 #endif
 
-static void charon_probe_wrap_send(void)
+static void revenant_probe_wrap_send(void)
 {
     Byte buffer[64];
     MIDIEventList *list = (MIDIEventList *)buffer;
@@ -239,7 +239,7 @@ static void charon_probe_wrap_send(void)
     fflush(stdout);
 }
 
-static void charon_probe_wrap_add(void)
+static void revenant_probe_wrap_add(void)
 {
     Byte buffer[64];
     MIDIEventList *list = (MIDIEventList *)buffer;
@@ -253,15 +253,15 @@ static void charon_probe_wrap_add(void)
     fflush(stdout);
 }
 
-@interface CharonAppDelegate : UIResponder <UIApplicationDelegate>
+@interface RevenantAppDelegate : UIResponder <UIApplicationDelegate>
 @property (nonatomic, strong) UIWindow *window;
 @end
 
-@implementation CharonAppDelegate
+@implementation RevenantAppDelegate
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)options
 {
-#ifndef CHARON_NO_AUDIO_SESSION
+#ifndef REVENANT_NO_AUDIO_SESSION
     OSStatus session = AudioSessionInitialize(NULL, NULL, NULL, NULL);
     UInt32 category = kAudioSessionCategory_MediaPlayback;
     OSStatus category_status = AudioSessionSetProperty(kAudioSessionProperty_AudioCategory, sizeof(category), &category);
@@ -269,21 +269,21 @@ static void charon_probe_wrap_add(void)
     printf("audio session: initialize %d, category %d, active %d\n", (int)session, (int)category_status, (int)active);
     fflush(stdout);
 #else
-    printf("audio session: not activated (CHARON_NO_AUDIO_SESSION)\n");
+    printf("audio session: not activated (REVENANT_NO_AUDIO_SESSION)\n");
     fflush(stdout);
 #endif
-#ifdef CHARON_6_1_3_PROBE
-    charon_probe_selectors();
+#ifdef REVENANT_6_1_3_PROBE
+    revenant_probe_selectors();
 #endif
-    charon_probe_wrap_send();
-    charon_probe_wrap_add();
-#ifdef CHARON_6_1_3_PROBE
-    charon_probe_objects();
-    charon_probe_connection();
-    charon_stamp_probe();
-    charon_dispose_wait_probe();
+    revenant_probe_wrap_send();
+    revenant_probe_wrap_add();
+#ifdef REVENANT_6_1_3_PROBE
+    revenant_probe_objects();
+    revenant_probe_connection();
+    revenant_stamp_probe();
+    revenant_dispose_wait_probe();
 #endif
-    int failures = charon_roundtrip_run();
+    int failures = revenant_roundtrip_run();
     printf("application exit: %d\n", failures);
     fflush(stdout);
     exit(failures);
@@ -295,6 +295,6 @@ static void charon_probe_wrap_add(void)
 int main(int argc, char *argv[])
 {
     @autoreleasepool {
-        return UIApplicationMain(argc, argv, nil, NSStringFromClass([CharonAppDelegate class]));
+        return UIApplicationMain(argc, argv, nil, NSStringFromClass([RevenantAppDelegate class]));
     }
 }

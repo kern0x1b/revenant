@@ -125,7 +125,7 @@ int main(int argc, const char **argv)
                                                        (unsigned long)one.length, (unsigned long)png.length,
                                                        (unsigned long)tiff.length]);
 
-#ifdef CHARON_PORT
+#ifdef REVENANT_PORT
         {
             struct { const char *name; const void *address; } rows[] = {
                 { "CGAnimateImageAtURLWithBlock", (const void *)&CGAnimateImageAtURLWithBlock },

@@ -70,7 +70,7 @@ int main(void)
 {
     setvbuf(stdout, NULL, _IONBF, 0);
     @autoreleasepool {
-        Class portClass = NSClassFromString(@"CharonHostMTLIndirectCommandBufferDescriptor");
+        Class portClass = NSClassFromString(@"RevenantHostMTLIndirectCommandBufferDescriptor");
         check(portClass != nil, @"the port's class is built in this process");
         if (!portClass)
             return 1;

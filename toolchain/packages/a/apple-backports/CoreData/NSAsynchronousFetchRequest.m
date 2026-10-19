@@ -1,6 +1,6 @@
 #import <CoreData/CoreData.h>
 #import <dispatch/dispatch.h>
-#import "CharonStoreCoordinator.h"
+#import "RevenantStoreCoordinator.h"
 
 @implementation NSPersistentStoreAsynchronousResult {
 @public
@@ -51,7 +51,7 @@
 
 @end
 
-static id charon_execute_async_fetch(NSManagedObjectContext *context, NSAsynchronousFetchRequest *request);
+static id revenant_execute_async_fetch(NSManagedObjectContext *context, NSAsynchronousFetchRequest *request);
 
 @implementation NSAsynchronousFetchRequest {
     NSFetchRequest *_fetchRequest;
@@ -96,9 +96,9 @@ static id charon_execute_async_fetch(NSManagedObjectContext *context, NSAsynchro
     return NSFetchRequestType;
 }
 
-- (id)charonExecuteInContext:(NSManagedObjectContext *)context error:(NSError **)error
+- (id)revenantExecuteInContext:(NSManagedObjectContext *)context error:(NSError **)error
 {
-    return charon_execute_async_fetch(context, self);
+    return revenant_execute_async_fetch(context, self);
 }
 
 - (NSString *)description
@@ -108,7 +108,7 @@ static id charon_execute_async_fetch(NSManagedObjectContext *context, NSAsynchro
 
 @end
 
-static NSArray *charon_load(NSManagedObjectContext *context, NSArray *identifiers)
+static NSArray *revenant_load(NSManagedObjectContext *context, NSArray *identifiers)
 {
     NSMutableArray *objects = [NSMutableArray arrayWithCapacity:identifiers.count];
     for (NSManagedObjectID *identifier in identifiers)
@@ -116,10 +116,10 @@ static NSArray *charon_load(NSManagedObjectContext *context, NSArray *identifier
     return objects;
 }
 
-static id charon_execute_async_fetch(NSManagedObjectContext *context, NSAsynchronousFetchRequest *request)
+static id revenant_execute_async_fetch(NSManagedObjectContext *context, NSAsynchronousFetchRequest *request)
 {
     NSFetchRequest *fetch = request.fetchRequest;
-    id entity = fetch.entityName ? charon_store_coordinator(context).managedObjectModel.entitiesByName[fetch.entityName] : nil;
+    id entity = fetch.entityName ? revenant_store_coordinator(context).managedObjectModel.entitiesByName[fetch.entityName] : nil;
     if (!entity)
         [NSException raise:NSInvalidArgumentException format:@"%@ A fetch request must have an entity.", @"_executeAsynchronousFetchRequest:"];
     if (context.concurrencyType == NSConfinementConcurrencyType)
@@ -155,7 +155,7 @@ static id charon_execute_async_fetch(NSManagedObjectContext *context, NSAsynchro
             if (__atomic_load_n(&result->_cancelled, __ATOMIC_SEQ_CST))
                 final = @[];
             else if (final && type == NSManagedObjectResultType && !inContext)
-                final = charon_load(context, final);
+                final = revenant_load(context, final);
             result->_finalResult = final;
             result->_error = failure;
             if (final) {
@@ -182,7 +182,7 @@ static id charon_execute_async_fetch(NSManagedObjectContext *context, NSAsynchro
         }];
         return result;
     }
-    NSPersistentStoreCoordinator *coordinator = charon_store_coordinator(context);
+    NSPersistentStoreCoordinator *coordinator = revenant_store_coordinator(context);
     NSManagedObjectContext *worker = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSPrivateQueueConcurrencyType];
     worker.persistentStoreCoordinator = coordinator;
     NSFetchRequest *stored = [original copy];

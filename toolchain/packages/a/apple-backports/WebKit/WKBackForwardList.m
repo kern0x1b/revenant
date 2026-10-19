@@ -1,11 +1,11 @@
-#import "CharonWebKit.h"
+#import "RevenantWebKit.h"
 
 @implementation WKBackForwardListItem {
     NSURL *_URL;
     NSString *_title;
 }
 
-+ (instancetype)charon_itemWithURL:(NSURL *)url title:(NSString *)title
++ (instancetype)revenant_itemWithURL:(NSURL *)url title:(NSString *)title
 {
     WKBackForwardListItem *item = [self alloc];
     item->_URL = [url copy];
@@ -28,12 +28,12 @@
     return _title;
 }
 
-- (NSString *)charon_title
+- (NSString *)revenant_title
 {
     return _title;
 }
 
-- (void)setCharon_title:(NSString *)title
+- (void)setRevenant_title:(NSString *)title
 {
     _title = [title copy];
 }
@@ -45,7 +45,7 @@
     NSInteger _index;
 }
 
-- (void)charon_setItems:(NSArray<WKBackForwardListItem *> *)items index:(NSInteger)index
+- (void)revenant_setItems:(NSArray<WKBackForwardListItem *> *)items index:(NSInteger)index
 {
     _items = [items copy];
     _index = index;

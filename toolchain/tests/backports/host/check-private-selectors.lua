@@ -1,4 +1,4 @@
-local DEFAULT_PREFIXES = {"charonHost", "charonHost_", "charon_host_", "CharonHost"}
+local DEFAULT_PREFIXES = {"revenantHost", "revenantHost_", "revenant_host_", "RevenantHost"}
 
 local function defined_selector(line)
     for sign_at in line:gmatch("()[-+]%[") do

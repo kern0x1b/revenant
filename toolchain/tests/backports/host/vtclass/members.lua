@@ -14,7 +14,7 @@ function VT_DIR()
 end
 
 function HEADER()
-    return VT_DIR() .. "/CharonVideoToolbox.h"
+    return VT_DIR() .. "/RevenantVideoToolbox.h"
 end
 
 function TEMPLATE_CLASS()
@@ -42,7 +42,7 @@ function METHOD_DECL()
 end
 
 function MACRO_ACCESSOR()
-    return [==[CHARON_\w+_PROPERTY\((.*)\)]==]
+    return [==[REVENANT_\w+_PROPERTY\((.*)\)]==]
 end
 
 function HAND_ACCESSOR()
@@ -50,7 +50,7 @@ function HAND_ACCESSOR()
 end
 
 function INITIALISER_KEYWORD()
-    return [==[@"(charon\.private\.)?(\w+)"]==]
+    return [==[@"(revenant\.private\.)?(\w+)"]==]
 end
 
 local function read_checked(path)
@@ -312,7 +312,7 @@ function macro_accessor_calls(text)
     end
     local i = 1
     while true do
-        local at = string.find(text, "CHARON_", i, true)
+        local at = string.find(text, "REVENANT_", i, true)
         if at == nil then
             break
         end

@@ -1,7 +1,7 @@
 #import <AVKit/AVKit.h>
 
-@implementation AVPlayerViewController (CharonAutomaticPresentation)
-- (UIModalPresentationStyle)charon_preferredModalPresentationStyle
+@implementation AVPlayerViewController (RevenantAutomaticPresentation)
+- (UIModalPresentationStyle)revenant_preferredModalPresentationStyle
 {
     return UIModalPresentationFullScreen;
 }

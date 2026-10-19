@@ -8,7 +8,7 @@
 #   of each class - not a value set and read back, which was never a measurement of a default;
 #
 #   the port half compiles the port's own PHASEValueTypes15.m with its class names renamed, so
-#   charon_host_PHASECardioidDirectivityModelSubbandParameters sits beside Apple's in one binary, and
+#   revenant_host_PHASECardioidDirectivityModelSubbandParameters sits beside Apple's in one binary, and
 #   holds a fresh port object to the same eight numbers the host's fresh object answers. A default the
 #   port gets wrong is then a difference, not a comment.
 #
@@ -19,7 +19,7 @@ here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 root=${PHASE_ROOT:-$(cd "$here/../../../.." && pwd)}
 AVFAUDIO="$root/packages/a/apple-backports/AVFAudio"
-build=${PHASE_VALUES_BUILD:-$(runs_folder charon-phase-values)}
+build=${PHASE_VALUES_BUILD:-$(runs_folder revenant-phase-values)}
 rm -rf "$build"
 mkdir -p "$build"
 
@@ -32,7 +32,7 @@ for name in PHASENumericPair PHASEDistanceModelParameters PHASEDistanceModelFade
              PHASECardioidDirectivityModelParameters PHASEConeDirectivityModelParameters PHASEEngine PHASEObject \
              PHASEEnvelope PHASEEnvelopeSegment PHASEEnvelopeDistanceModelParameters
 do
-    renames="$renames -D$name=charon_host_$name"
+    renames="$renames -D$name=revenant_host_$name"
 done
 
 # One -c and one -o per source: a single -c with two inputs and one -o is rejected, which is what

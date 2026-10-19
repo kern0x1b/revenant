@@ -33,10 +33,10 @@ rm -rf "$plant"; mkdir -p "$plant"
 cp "$coreml/"*.m "$coreml/"*.c "$coreml/"*.h "$coreml/"*.inc "$plant/"
 cat >> "$plant/MLParameter.m" <<'PLANT'
 
-@interface MLKey (CharonPlant)
+@interface MLKey (RevenantPlant)
 - (instancetype)init;
 @end
-@implementation MLKey (CharonPlant)
+@implementation MLKey (RevenantPlant)
 - (instancetype)init { return [super init]; }
 @end
 PLANT

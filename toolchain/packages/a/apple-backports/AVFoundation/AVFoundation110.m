@@ -2,7 +2,7 @@
 
 #pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
 
-@implementation AVVideoComposition (CharonAVFoundationSourceTrackForFrameTiming)
+@implementation AVVideoComposition (RevenantAVFoundationSourceTrackForFrameTiming)
 
 - (CMPersistentTrackID)sourceTrackIDForFrameTiming
 {
@@ -19,7 +19,7 @@
 
 @end
 
-@implementation AVMutableVideoComposition (CharonAVFoundationMutableSourceTrackForFrameTiming)
+@implementation AVMutableVideoComposition (RevenantAVFoundationMutableSourceTrackForFrameTiming)
 
 - (CMPersistentTrackID)sourceTrackIDForFrameTiming
 {

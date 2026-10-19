@@ -16,7 +16,7 @@
 #include <string_view>
 #include <vector>
 
-namespace shade::dnssd_ipc {
+namespace emulator::dnssd_ipc {
 
 inline constexpr std::uint32_t version = 1;
 inline constexpr std::uint32_t flag_no_reply = 1U;

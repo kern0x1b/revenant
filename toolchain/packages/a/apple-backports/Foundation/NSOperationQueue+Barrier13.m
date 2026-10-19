@@ -1,16 +1,16 @@
 #import <Foundation/Foundation.h>
 #import <objc/runtime.h>
 
-static char CharonQueueStateKey;
-static char CharonOperationPreparedKey;
+static char RevenantQueueStateKey;
+static char RevenantOperationPreparedKey;
 
 __attribute__((visibility("hidden")))
-@interface CharonBarrierGate : NSOperation
+@interface RevenantBarrierGate : NSOperation
 - (void)finish;
-- (void)charon_wait;
+- (void)revenant_wait;
 @end
 
-@implementation CharonBarrierGate {
+@implementation RevenantBarrierGate {
     NSCondition *_condition;
     BOOL _done;
 }
@@ -55,7 +55,7 @@ __attribute__((visibility("hidden")))
     [self didChangeValueForKey:@"isFinished"];
 }
 
-- (void)charon_wait
+- (void)revenant_wait
 {
     [_condition lock];
     while (!_done)
@@ -66,14 +66,14 @@ __attribute__((visibility("hidden")))
 @end
 
 __attribute__((visibility("hidden")))
-@interface CharonQueueState : NSObject {
+@interface RevenantQueueState : NSObject {
 @package
     NSMutableArray *_gates;
     NSProgress *_progress;
 }
 @end
 
-@implementation CharonQueueState
+@implementation RevenantQueueState
 
 - (instancetype)init
 {
@@ -84,31 +84,31 @@ __attribute__((visibility("hidden")))
 
 @end
 
-static NSOperationQueue *charon_tick_queue(void)
+static NSOperationQueue *revenant_tick_queue(void)
 {
     static NSOperationQueue *queue;
     static dispatch_once_t once;
     dispatch_once(&once, ^{
         queue = [[NSOperationQueue alloc] init];
         queue.maxConcurrentOperationCount = 1;
-        queue.name = @"charon.operationqueue.progress";
+        queue.name = @"revenant.operationqueue.progress";
     });
     return queue;
 }
 
-static CharonQueueState *charon_queue_state(NSOperationQueue *queue, BOOL create)
+static RevenantQueueState *revenant_queue_state(NSOperationQueue *queue, BOOL create)
 {
     @synchronized (queue) {
-        CharonQueueState *state = objc_getAssociatedObject(queue, &CharonQueueStateKey);
+        RevenantQueueState *state = objc_getAssociatedObject(queue, &RevenantQueueStateKey);
         if (!state && create) {
-            state = [[CharonQueueState alloc] init];
-            objc_setAssociatedObject(queue, &CharonQueueStateKey, state, OBJC_ASSOCIATION_RETAIN);
+            state = [[RevenantQueueState alloc] init];
+            objc_setAssociatedObject(queue, &RevenantQueueStateKey, state, OBJC_ASSOCIATION_RETAIN);
         }
         return state;
     }
 }
 
-static void charon_queue_count(CharonQueueState *state, NSOperation *operation)
+static void revenant_queue_count(RevenantQueueState *state, NSOperation *operation)
 {
     NSProgress *progress = state->_progress;
     NSBlockOperation *tick = [NSBlockOperation blockOperationWithBlock:^{
@@ -116,26 +116,26 @@ static void charon_queue_count(CharonQueueState *state, NSOperation *operation)
             progress.completedUnitCount += 1;
     }];
     [tick addDependency:operation];
-    [charon_tick_queue() addOperation:tick];
+    [revenant_tick_queue() addOperation:tick];
 }
 
-static void charon_queue_prepare(NSOperationQueue *queue, NSOperation *operation)
+static void revenant_queue_prepare(NSOperationQueue *queue, NSOperation *operation)
 {
-    CharonQueueState *state = charon_queue_state(queue, NO);
-    if (!state || objc_getAssociatedObject(operation, &CharonOperationPreparedKey))
+    RevenantQueueState *state = revenant_queue_state(queue, NO);
+    if (!state || objc_getAssociatedObject(operation, &RevenantOperationPreparedKey))
         return;
-    CharonBarrierGate *gate = nil;
+    RevenantBarrierGate *gate = nil;
     @synchronized (state) {
         gate = state->_gates.lastObject;
     }
     if (gate && !operation.isExecuting && !operation.isFinished)
         [operation addDependency:gate];
     if (state->_progress)
-        charon_queue_count(state, operation);
-    objc_setAssociatedObject(operation, &CharonOperationPreparedKey, @YES, OBJC_ASSOCIATION_RETAIN);
+        revenant_queue_count(state, operation);
+    objc_setAssociatedObject(operation, &RevenantOperationPreparedKey, @YES, OBJC_ASSOCIATION_RETAIN);
 }
 
-static void charon_queue_hook(SEL selector, IMP (^make)(IMP original, SEL selector))
+static void revenant_queue_hook(SEL selector, IMP (^make)(IMP original, SEL selector))
 {
     Class cls = [NSOperationQueue class];
     Method method = class_getInstanceMethod(cls, selector);
@@ -144,26 +144,26 @@ static void charon_queue_hook(SEL selector, IMP (^make)(IMP original, SEL select
     class_replaceMethod(cls, selector, make(method_getImplementation(method), selector), method_getTypeEncoding(method));
 }
 
-static void charon_queue_install(void)
+static void revenant_queue_install(void)
 {
     static dispatch_once_t once;
     dispatch_once(&once, ^{
-        charon_queue_hook(@selector(addOperation:), ^IMP(IMP original, SEL selector) {
+        revenant_queue_hook(@selector(addOperation:), ^IMP(IMP original, SEL selector) {
             return imp_implementationWithBlock(^(NSOperationQueue *queue, NSOperation *operation) {
-                charon_queue_prepare(queue, operation);
+                revenant_queue_prepare(queue, operation);
                 ((void (*)(id, SEL, id))original)(queue, selector, operation);
             });
         });
-        charon_queue_hook(@selector(addOperations:waitUntilFinished:), ^IMP(IMP original, SEL selector) {
+        revenant_queue_hook(@selector(addOperations:waitUntilFinished:), ^IMP(IMP original, SEL selector) {
             return imp_implementationWithBlock(^(NSOperationQueue *queue, NSArray *operations, BOOL wait) {
                 for (NSOperation *operation in operations)
-                    charon_queue_prepare(queue, operation);
+                    revenant_queue_prepare(queue, operation);
                 ((void (*)(id, SEL, id, BOOL))original)(queue, selector, operations, wait);
             });
         });
-        charon_queue_hook(@selector(addOperationWithBlock:), ^IMP(IMP original, SEL selector) {
+        revenant_queue_hook(@selector(addOperationWithBlock:), ^IMP(IMP original, SEL selector) {
             return imp_implementationWithBlock(^(NSOperationQueue *queue, void (^block)(void)) {
-                CharonQueueState *state = charon_queue_state(queue, NO);
+                RevenantQueueState *state = revenant_queue_state(queue, NO);
                 BOOL tracked = NO;
                 if (state) {
                     @synchronized (state) {
@@ -177,9 +177,9 @@ static void charon_queue_install(void)
                 [queue addOperation:[NSBlockOperation blockOperationWithBlock:block]];
             });
         });
-        charon_queue_hook(@selector(cancelAllOperations), ^IMP(IMP original, SEL selector) {
+        revenant_queue_hook(@selector(cancelAllOperations), ^IMP(IMP original, SEL selector) {
             return imp_implementationWithBlock(^(NSOperationQueue *queue) {
-                CharonQueueState *state = charon_queue_state(queue, NO);
+                RevenantQueueState *state = revenant_queue_state(queue, NO);
                 NSArray *gates = nil;
                 if (state) {
                     @synchronized (state) {
@@ -191,12 +191,12 @@ static void charon_queue_install(void)
                 ((void (*)(id, SEL))original)(queue, selector);
             });
         });
-        charon_queue_hook(@selector(waitUntilAllOperationsAreFinished), ^IMP(IMP original, SEL selector) {
+        revenant_queue_hook(@selector(waitUntilAllOperationsAreFinished), ^IMP(IMP original, SEL selector) {
             return imp_implementationWithBlock(^(NSOperationQueue *queue) {
                 ((void (*)(id, SEL))original)(queue, selector);
-                CharonQueueState *state = charon_queue_state(queue, NO);
+                RevenantQueueState *state = revenant_queue_state(queue, NO);
                 for (;;) {
-                    CharonBarrierGate *gate = nil;
+                    RevenantBarrierGate *gate = nil;
                     if (state) {
                         @synchronized (state) {
                             gate = state->_gates.lastObject;
@@ -204,7 +204,7 @@ static void charon_queue_install(void)
                     }
                     if (!gate)
                         return;
-                    [gate charon_wait];
+                    [gate revenant_wait];
                     ((void (*)(id, SEL))original)(queue, selector);
                 }
             });
@@ -212,18 +212,18 @@ static void charon_queue_install(void)
     });
 }
 
-@implementation NSOperationQueue (CharonBarrier)
+@implementation NSOperationQueue (RevenantBarrier)
 
 - (void)addBarrierBlock:(void (^)(void))barrier
 {
     if (!barrier)
         [NSException raise:NSInvalidArgumentException format:@"*** -[NSOperationQueue addBarrierBlock:]: block cannot be nil"];
-    charon_queue_install();
-    CharonQueueState *state = charon_queue_state(self, YES);
+    revenant_queue_install();
+    RevenantQueueState *state = revenant_queue_state(self, YES);
     void (^block)(void) = [barrier copy];
-    CharonBarrierGate *gate = [[CharonBarrierGate alloc] init];
+    RevenantBarrierGate *gate = [[RevenantBarrierGate alloc] init];
     NSArray *waits;
-    CharonBarrierGate *previous;
+    RevenantBarrierGate *previous;
     @synchronized (state) {
         waits = [[self operations] copy];
         previous = state->_gates.lastObject;
@@ -232,7 +232,7 @@ static void charon_queue_install(void)
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         for (NSOperation *operation in waits)
             [operation waitUntilFinished];
-        [previous charon_wait];
+        [previous revenant_wait];
         if (!gate.isCancelled)
             block();
         @synchronized (state) {
@@ -244,7 +244,7 @@ static void charon_queue_install(void)
 
 - (NSProgress *)progress
 {
-    CharonQueueState *state = charon_queue_state(self, YES);
+    RevenantQueueState *state = revenant_queue_state(self, YES);
     NSProgress *created = nil;
     @synchronized (state) {
         if (state->_progress)
@@ -254,9 +254,9 @@ static void charon_queue_install(void)
         created.pausable = NO;
         state->_progress = created;
     }
-    charon_queue_install();
+    revenant_queue_install();
     for (NSOperation *operation in [self operations])
-        charon_queue_prepare(self, operation);
+        revenant_queue_prepare(self, operation);
     return created;
 }
 

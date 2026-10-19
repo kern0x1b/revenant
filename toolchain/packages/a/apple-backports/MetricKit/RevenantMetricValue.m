@@ -1,234 +1,234 @@
-#import "CharonMetricValue.h"
-#import "CharonMetricKit.h"
+#import "RevenantMetricValue.h"
+#import "RevenantMetricKit.h"
 #import <objc/runtime.h>
 
 #pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
 
-@implementation CharonMetricValue
+@implementation RevenantMetricValue
 
 + (NSArray<NSString *> *)propertyNamesOf:(Class)cls
 {
-    return CharonValuePropertyNames(cls);
+    return RevenantValuePropertyNames(cls);
 }
 
 + (NSDictionary *)dictionaryOf:(id)value
 {
-    return CharonValueConvertProperties(value, [MXMetric class], [MXDiagnostic class]);
+    return RevenantValueConvertProperties(value, [MXMetric class], [MXDiagnostic class]);
 }
 
 + (NSData *)jsonOf:(id)value
 {
-    return CharonValueJSON(value, [MXMetric class], [MXDiagnostic class]);
+    return RevenantValueJSON(value, [MXMetric class], [MXDiagnostic class]);
 }
 
 + (NSSet<Class> *)decodableClasses
 {
-    return CharonValueDecodableClasses(@"MX");
+    return RevenantValueDecodableClasses(@"MX");
 }
 
 @end
 
-static NSSet<Class> *charon_decodable(void)
+static NSSet<Class> *revenant_decodable(void)
 {
-    return CharonValueDecodableClasses(@"MX");
+    return RevenantValueDecodableClasses(@"MX");
 }
 
-@implementation MXMetric (CharonMetricValue)
-CHARON_VALUE_STORE_IMPLEMENTATION
-- (NSData *)JSONRepresentation { return [CharonMetricValue jsonOf:self]; }
-- (NSDictionary *)DictionaryRepresentation { return [CharonMetricValue dictionaryOf:self]; }
-- (NSDictionary *)dictionaryRepresentation { return [CharonMetricValue dictionaryOf:self]; }
+@implementation MXMetric (RevenantMetricValue)
+REVENANT_VALUE_STORE_IMPLEMENTATION
+- (NSData *)JSONRepresentation { return [RevenantMetricValue jsonOf:self]; }
+- (NSDictionary *)DictionaryRepresentation { return [RevenantMetricValue dictionaryOf:self]; }
+- (NSDictionary *)dictionaryRepresentation { return [RevenantMetricValue dictionaryOf:self]; }
 + (BOOL)supportsSecureCoding { return YES; }
-- (void)encodeWithCoder:(NSCoder *)coder { [self charon_encodePropertiesWithCoder:coder]; }
+- (void)encodeWithCoder:(NSCoder *)coder { [self revenant_encodePropertiesWithCoder:coder]; }
 - (instancetype)initWithCoder:(NSCoder *)coder
 {
     if ((self = [super init]))
-        [self charon_decodePropertiesWithCoder:coder];
+        [self revenant_decodePropertiesWithCoder:coder];
     return self;
 }
-CHARON_VALUE_CODING_METHODS
+REVENANT_VALUE_CODING_METHODS
 @end
 
-@implementation MXDiagnostic (CharonMetricValue)
-CHARON_VALUE_STORE_IMPLEMENTATION
+@implementation MXDiagnostic (RevenantMetricValue)
+REVENANT_VALUE_STORE_IMPLEMENTATION
 - (NSArray<MXSignpostRecord *> *)signpostData
 {
-    return (NSArray<MXSignpostRecord *> *)[self charon_valueForKey:@"signpostData"];
+    return (NSArray<MXSignpostRecord *> *)[self revenant_valueForKey:@"signpostData"];
 }
 
-- (NSData *)JSONRepresentation { return [CharonMetricValue jsonOf:self]; }
-- (NSDictionary *)dictionaryRepresentation { return [CharonMetricValue dictionaryOf:self]; }
+- (NSData *)JSONRepresentation { return [RevenantMetricValue jsonOf:self]; }
+- (NSDictionary *)dictionaryRepresentation { return [RevenantMetricValue dictionaryOf:self]; }
 + (BOOL)supportsSecureCoding { return YES; }
-- (void)encodeWithCoder:(NSCoder *)coder { [self charon_encodePropertiesWithCoder:coder]; }
+- (void)encodeWithCoder:(NSCoder *)coder { [self revenant_encodePropertiesWithCoder:coder]; }
 - (instancetype)initWithCoder:(NSCoder *)coder
 {
     if ((self = [super init]))
-        [self charon_decodePropertiesWithCoder:coder];
+        [self revenant_decodePropertiesWithCoder:coder];
     return self;
 }
-CHARON_VALUE_CODING_METHODS
+REVENANT_VALUE_CODING_METHODS
 @end
 
-@implementation MXAverage (CharonMetricValue)
-CHARON_VALUE_STORE_IMPLEMENTATION
-- (NSData *)JSONRepresentation { return [CharonMetricValue jsonOf:self]; }
-- (NSDictionary *)dictionaryRepresentation { return [CharonMetricValue dictionaryOf:self]; }
-CHARON_VALUE_CODING_METHODS
+@implementation MXAverage (RevenantMetricValue)
+REVENANT_VALUE_STORE_IMPLEMENTATION
+- (NSData *)JSONRepresentation { return [RevenantMetricValue jsonOf:self]; }
+- (NSDictionary *)dictionaryRepresentation { return [RevenantMetricValue dictionaryOf:self]; }
+REVENANT_VALUE_CODING_METHODS
 + (BOOL)supportsSecureCoding { return YES; }
-- (void)encodeWithCoder:(NSCoder *)coder { [self charon_encodePropertiesWithCoder:coder]; }
+- (void)encodeWithCoder:(NSCoder *)coder { [self revenant_encodePropertiesWithCoder:coder]; }
 - (instancetype)initWithCoder:(NSCoder *)coder
 {
     if ((self = [super init]))
-        [self charon_decodePropertiesWithCoder:coder];
-    return self;
-}
-@end
-
-@implementation MXHistogram (CharonMetricValue)
-CHARON_VALUE_STORE_IMPLEMENTATION
-CHARON_VALUE_CODING_METHODS
-+ (BOOL)supportsSecureCoding { return YES; }
-- (void)encodeWithCoder:(NSCoder *)coder { [self charon_encodePropertiesWithCoder:coder]; }
-- (instancetype)initWithCoder:(NSCoder *)coder
-{
-    if ((self = [super init]))
-        [self charon_decodePropertiesWithCoder:coder];
+        [self revenant_decodePropertiesWithCoder:coder];
     return self;
 }
 @end
 
-@implementation MXHistogramBucket (CharonMetricValue)
-CHARON_VALUE_STORE_IMPLEMENTATION
-CHARON_VALUE_CODING_METHODS
+@implementation MXHistogram (RevenantMetricValue)
+REVENANT_VALUE_STORE_IMPLEMENTATION
+REVENANT_VALUE_CODING_METHODS
 + (BOOL)supportsSecureCoding { return YES; }
-- (void)encodeWithCoder:(NSCoder *)coder { [self charon_encodePropertiesWithCoder:coder]; }
+- (void)encodeWithCoder:(NSCoder *)coder { [self revenant_encodePropertiesWithCoder:coder]; }
 - (instancetype)initWithCoder:(NSCoder *)coder
 {
     if ((self = [super init]))
-        [self charon_decodePropertiesWithCoder:coder];
+        [self revenant_decodePropertiesWithCoder:coder];
     return self;
 }
 @end
 
-@implementation MXMetaData (CharonMetricValue)
-CHARON_VALUE_STORE_IMPLEMENTATION
-CHARON_VALUE_CODING_METHODS
+@implementation MXHistogramBucket (RevenantMetricValue)
+REVENANT_VALUE_STORE_IMPLEMENTATION
+REVENANT_VALUE_CODING_METHODS
 + (BOOL)supportsSecureCoding { return YES; }
-- (void)encodeWithCoder:(NSCoder *)coder { [self charon_encodePropertiesWithCoder:coder]; }
+- (void)encodeWithCoder:(NSCoder *)coder { [self revenant_encodePropertiesWithCoder:coder]; }
 - (instancetype)initWithCoder:(NSCoder *)coder
 {
     if ((self = [super init]))
-        [self charon_decodePropertiesWithCoder:coder];
-    return self;
-}
-- (NSData *)JSONRepresentation { return [CharonMetricValue jsonOf:self]; }
-- (NSDictionary *)DictionaryRepresentation { return [CharonMetricValue dictionaryOf:self]; }
-- (NSDictionary *)dictionaryRepresentation { return [CharonMetricValue dictionaryOf:self]; }
-@end
-
-@implementation MXMetricPayload (CharonMetricValue)
-CHARON_VALUE_STORE_IMPLEMENTATION
-CHARON_VALUE_CODING_METHODS
-+ (BOOL)supportsSecureCoding { return YES; }
-- (void)encodeWithCoder:(NSCoder *)coder { [self charon_encodePropertiesWithCoder:coder]; }
-- (instancetype)initWithCoder:(NSCoder *)coder
-{
-    if ((self = [super init]))
-        [self charon_decodePropertiesWithCoder:coder];
-    return self;
-}
-- (NSData *)JSONRepresentation { return [CharonMetricValue jsonOf:self]; }
-- (NSDictionary *)DictionaryRepresentation { return [CharonMetricValue dictionaryOf:self]; }
-- (NSDictionary *)dictionaryRepresentation { return [CharonMetricValue dictionaryOf:self]; }
-@end
-
-@implementation MXDiagnosticPayload (CharonMetricValue)
-CHARON_VALUE_STORE_IMPLEMENTATION
-CHARON_VALUE_CODING_METHODS
-+ (BOOL)supportsSecureCoding { return YES; }
-- (void)encodeWithCoder:(NSCoder *)coder { [self charon_encodePropertiesWithCoder:coder]; }
-- (instancetype)initWithCoder:(NSCoder *)coder
-{
-    if ((self = [super init]))
-        [self charon_decodePropertiesWithCoder:coder];
+        [self revenant_decodePropertiesWithCoder:coder];
     return self;
 }
 @end
 
-@implementation MXCrashDiagnosticObjectiveCExceptionReason (CharonMetricValue)
-CHARON_VALUE_STORE_IMPLEMENTATION
-CHARON_VALUE_CODING_METHODS
-@end
-
-@implementation MXSignpostRecord (CharonMetricValue)
-CHARON_VALUE_STORE_IMPLEMENTATION
-CHARON_VALUE_CODING_METHODS
-@end
-
-@implementation MXSignpostIntervalData (CharonMetricValue)
-CHARON_VALUE_STORE_IMPLEMENTATION
-- (NSData *)JSONRepresentation { return [CharonMetricValue jsonOf:self]; }
-- (NSDictionary *)dictionaryRepresentation { return [CharonMetricValue dictionaryOf:self]; }
-CHARON_VALUE_CODING_METHODS
+@implementation MXMetaData (RevenantMetricValue)
+REVENANT_VALUE_STORE_IMPLEMENTATION
+REVENANT_VALUE_CODING_METHODS
 + (BOOL)supportsSecureCoding { return YES; }
-- (void)encodeWithCoder:(NSCoder *)coder { [self charon_encodePropertiesWithCoder:coder]; }
+- (void)encodeWithCoder:(NSCoder *)coder { [self revenant_encodePropertiesWithCoder:coder]; }
 - (instancetype)initWithCoder:(NSCoder *)coder
 {
     if ((self = [super init]))
-        [self charon_decodePropertiesWithCoder:coder];
+        [self revenant_decodePropertiesWithCoder:coder];
+    return self;
+}
+- (NSData *)JSONRepresentation { return [RevenantMetricValue jsonOf:self]; }
+- (NSDictionary *)DictionaryRepresentation { return [RevenantMetricValue dictionaryOf:self]; }
+- (NSDictionary *)dictionaryRepresentation { return [RevenantMetricValue dictionaryOf:self]; }
+@end
+
+@implementation MXMetricPayload (RevenantMetricValue)
+REVENANT_VALUE_STORE_IMPLEMENTATION
+REVENANT_VALUE_CODING_METHODS
++ (BOOL)supportsSecureCoding { return YES; }
+- (void)encodeWithCoder:(NSCoder *)coder { [self revenant_encodePropertiesWithCoder:coder]; }
+- (instancetype)initWithCoder:(NSCoder *)coder
+{
+    if ((self = [super init]))
+        [self revenant_decodePropertiesWithCoder:coder];
+    return self;
+}
+- (NSData *)JSONRepresentation { return [RevenantMetricValue jsonOf:self]; }
+- (NSDictionary *)DictionaryRepresentation { return [RevenantMetricValue dictionaryOf:self]; }
+- (NSDictionary *)dictionaryRepresentation { return [RevenantMetricValue dictionaryOf:self]; }
+@end
+
+@implementation MXDiagnosticPayload (RevenantMetricValue)
+REVENANT_VALUE_STORE_IMPLEMENTATION
+REVENANT_VALUE_CODING_METHODS
++ (BOOL)supportsSecureCoding { return YES; }
+- (void)encodeWithCoder:(NSCoder *)coder { [self revenant_encodePropertiesWithCoder:coder]; }
+- (instancetype)initWithCoder:(NSCoder *)coder
+{
+    if ((self = [super init]))
+        [self revenant_decodePropertiesWithCoder:coder];
     return self;
 }
 @end
 
-@implementation MXBackgroundExitData (CharonMetricValue)
-CHARON_VALUE_STORE_IMPLEMENTATION
-- (NSData *)JSONRepresentation { return [CharonMetricValue jsonOf:self]; }
-- (NSDictionary *)dictionaryRepresentation { return [CharonMetricValue dictionaryOf:self]; }
-CHARON_VALUE_CODING_METHODS
+@implementation MXCrashDiagnosticObjectiveCExceptionReason (RevenantMetricValue)
+REVENANT_VALUE_STORE_IMPLEMENTATION
+REVENANT_VALUE_CODING_METHODS
+@end
+
+@implementation MXSignpostRecord (RevenantMetricValue)
+REVENANT_VALUE_STORE_IMPLEMENTATION
+REVENANT_VALUE_CODING_METHODS
+@end
+
+@implementation MXSignpostIntervalData (RevenantMetricValue)
+REVENANT_VALUE_STORE_IMPLEMENTATION
+- (NSData *)JSONRepresentation { return [RevenantMetricValue jsonOf:self]; }
+- (NSDictionary *)dictionaryRepresentation { return [RevenantMetricValue dictionaryOf:self]; }
+REVENANT_VALUE_CODING_METHODS
 + (BOOL)supportsSecureCoding { return YES; }
-- (void)encodeWithCoder:(NSCoder *)coder { [self charon_encodePropertiesWithCoder:coder]; }
+- (void)encodeWithCoder:(NSCoder *)coder { [self revenant_encodePropertiesWithCoder:coder]; }
 - (instancetype)initWithCoder:(NSCoder *)coder
 {
     if ((self = [super init]))
-        [self charon_decodePropertiesWithCoder:coder];
+        [self revenant_decodePropertiesWithCoder:coder];
     return self;
 }
 @end
 
-@implementation MXForegroundExitData (CharonMetricValue)
-CHARON_VALUE_STORE_IMPLEMENTATION
-- (NSData *)JSONRepresentation { return [CharonMetricValue jsonOf:self]; }
-- (NSDictionary *)dictionaryRepresentation { return [CharonMetricValue dictionaryOf:self]; }
-CHARON_VALUE_CODING_METHODS
+@implementation MXBackgroundExitData (RevenantMetricValue)
+REVENANT_VALUE_STORE_IMPLEMENTATION
+- (NSData *)JSONRepresentation { return [RevenantMetricValue jsonOf:self]; }
+- (NSDictionary *)dictionaryRepresentation { return [RevenantMetricValue dictionaryOf:self]; }
+REVENANT_VALUE_CODING_METHODS
 + (BOOL)supportsSecureCoding { return YES; }
-- (void)encodeWithCoder:(NSCoder *)coder { [self charon_encodePropertiesWithCoder:coder]; }
+- (void)encodeWithCoder:(NSCoder *)coder { [self revenant_encodePropertiesWithCoder:coder]; }
 - (instancetype)initWithCoder:(NSCoder *)coder
 {
     if ((self = [super init]))
-        [self charon_decodePropertiesWithCoder:coder];
+        [self revenant_decodePropertiesWithCoder:coder];
     return self;
 }
 @end
 
-@implementation MXCallStackTree (CharonMetricValue)
-CHARON_VALUE_STORE_IMPLEMENTATION
-- (NSData *)JSONRepresentation { return [CharonMetricValue jsonOf:self]; }
-- (NSDictionary *)dictionaryRepresentation { return [CharonMetricValue dictionaryOf:self]; }
-CHARON_VALUE_CODING_METHODS
+@implementation MXForegroundExitData (RevenantMetricValue)
+REVENANT_VALUE_STORE_IMPLEMENTATION
+- (NSData *)JSONRepresentation { return [RevenantMetricValue jsonOf:self]; }
+- (NSDictionary *)dictionaryRepresentation { return [RevenantMetricValue dictionaryOf:self]; }
+REVENANT_VALUE_CODING_METHODS
 + (BOOL)supportsSecureCoding { return YES; }
-- (void)encodeWithCoder:(NSCoder *)coder { [self charon_encodePropertiesWithCoder:coder]; }
+- (void)encodeWithCoder:(NSCoder *)coder { [self revenant_encodePropertiesWithCoder:coder]; }
 - (instancetype)initWithCoder:(NSCoder *)coder
 {
     if ((self = [super init]))
-        [self charon_decodePropertiesWithCoder:coder];
+        [self revenant_decodePropertiesWithCoder:coder];
     return self;
 }
 @end
 
-@implementation MXUnitAveragePixelLuminance (CharonMetricValue)
-CHARON_VALUE_STORE_IMPLEMENTATION
+@implementation MXCallStackTree (RevenantMetricValue)
+REVENANT_VALUE_STORE_IMPLEMENTATION
+- (NSData *)JSONRepresentation { return [RevenantMetricValue jsonOf:self]; }
+- (NSDictionary *)dictionaryRepresentation { return [RevenantMetricValue dictionaryOf:self]; }
+REVENANT_VALUE_CODING_METHODS
++ (BOOL)supportsSecureCoding { return YES; }
+- (void)encodeWithCoder:(NSCoder *)coder { [self revenant_encodePropertiesWithCoder:coder]; }
+- (instancetype)initWithCoder:(NSCoder *)coder
+{
+    if ((self = [super init]))
+        [self revenant_decodePropertiesWithCoder:coder];
+    return self;
+}
 @end
 
-@implementation MXUnitSignalBars (CharonMetricValue)
-CHARON_VALUE_STORE_IMPLEMENTATION
+@implementation MXUnitAveragePixelLuminance (RevenantMetricValue)
+REVENANT_VALUE_STORE_IMPLEMENTATION
+@end
+
+@implementation MXUnitSignalBars (RevenantMetricValue)
+REVENANT_VALUE_STORE_IMPLEMENTATION
 @end

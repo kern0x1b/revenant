@@ -26,7 +26,7 @@
 #include "foundation/memory_permission.hpp"
 #include "foundation/vm_map.hpp"
 
-namespace shade {
+namespace emulator {
 
 struct MemoryFault {
     std::uint32_t address { };

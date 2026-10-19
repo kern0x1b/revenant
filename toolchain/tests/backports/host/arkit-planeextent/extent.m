@@ -4,7 +4,7 @@
 #include <string.h>
 #import <float.h>
 
-@interface CharonPortARPlaneExtent : NSObject <NSSecureCoding>
+@interface RevenantPortARPlaneExtent : NSObject <NSSecureCoding>
 @property (nonatomic, readonly) float rotationOnYAxis;
 @property (nonatomic, readonly) float width;
 @property (nonatomic, readonly) float height;
@@ -49,18 +49,18 @@ static BOOL archive_carries(NSData *data, const char *key)
 int main(void)
 {
     @autoreleasepool {
-        CharonPortARPlaneExtent *fresh = [[CharonPortARPlaneExtent alloc] init];
+        RevenantPortARPlaneExtent *fresh = [[RevenantPortARPlaneExtent alloc] init];
         ok(fresh.rotationOnYAxis == 0.0f, @"a fresh extent's rotation is the release's zero");
         ok(fresh.width == -1.0f, @"a fresh extent's width is the release's -1");
         ok(fresh.height == -1.0f, @"a fresh extent's height is the release's -1");
         ok(![fresh isKindOfClass:[NSArray class]], @"the extent is not something else");
 
-        ok([CharonPortARPlaneExtent supportsSecureCoding],
+        ok([RevenantPortARPlaneExtent supportsSecureCoding],
            @"the extent answers YES to +supportsSecureCoding");
-        ok(class_implements([CharonPortARPlaneExtent class], @selector(supportsSecureCoding)),
+        ok(class_implements([RevenantPortARPlaneExtent class], @selector(supportsSecureCoding)),
            @"the class carries +supportsSecureCoding itself, as the release's one-entry class list does");
 
-        CharonPortARPlaneExtent *extent = [[CharonPortARPlaneExtent alloc] init];
+        RevenantPortARPlaneExtent *extent = [[RevenantPortARPlaneExtent alloc] init];
         [extent setRotationOnYAxis:0.7853981633974483f];
         [extent setWidth:2.5f];
         [extent setHeight:-0.25f];
@@ -77,8 +77,8 @@ int main(void)
            @"the archive does not carry the property name as a key, which is what the release writes");
 
         NSError *failure = nil;
-        CharonPortARPlaneExtent *read =
-            [NSKeyedUnarchiver unarchivedObjectOfClass:[CharonPortARPlaneExtent class]
+        RevenantPortARPlaneExtent *read =
+            [NSKeyedUnarchiver unarchivedObjectOfClass:[RevenantPortARPlaneExtent class]
                                               fromData:archive
                                                  error:&failure];
         ok(read != nil && failure == nil, @"the port reads its own archive back");
@@ -86,15 +86,15 @@ int main(void)
         ok(read.width == extent.width, @"the width survives the archive");
         ok(read.height == extent.height, @"the height survives the archive");
 
-        CharonPortARPlaneExtent *odd = [[CharonPortARPlaneExtent alloc] init];
+        RevenantPortARPlaneExtent *odd = [[RevenantPortARPlaneExtent alloc] init];
         [odd setRotationOnYAxis:0.1234567f];
         [odd setWidth:12345.6789f];
         [odd setHeight:-1.0e-8f];
         NSData *oddArchive = [NSKeyedArchiver archivedDataWithRootObject:odd
                                                    requiringSecureCoding:YES
                                                                    error:NULL];
-        CharonPortARPlaneExtent *oddRead =
-            [NSKeyedUnarchiver unarchivedObjectOfClass:[CharonPortARPlaneExtent class]
+        RevenantPortARPlaneExtent *oddRead =
+            [NSKeyedUnarchiver unarchivedObjectOfClass:[RevenantPortARPlaneExtent class]
                                               fromData:oddArchive
                                                  error:NULL];
         ok(oddRead != NULL, @"the second archive reads back");
@@ -108,21 +108,21 @@ int main(void)
         ok(memcmp(&gotHeight, &wantHeight, sizeof(float)) == 0,
            @"the odd height survives bit for bit");
 
-        CharonPortARPlaneExtent *twin = [[CharonPortARPlaneExtent alloc] init];
+        RevenantPortARPlaneExtent *twin = [[RevenantPortARPlaneExtent alloc] init];
         [twin setRotationOnYAxis:extent.rotationOnYAxis];
         [twin setWidth:extent.width];
         [twin setHeight:extent.height];
         ok(twin != extent && [twin isEqual:extent] && [extent isEqual:twin],
            @"two extents with the same three floats are equal, and are not the same object");
 
-        CharonPortARPlaneExtent *near = [[CharonPortARPlaneExtent alloc] init];
+        RevenantPortARPlaneExtent *near = [[RevenantPortARPlaneExtent alloc] init];
         [near setRotationOnYAxis:extent.rotationOnYAxis + FLT_EPSILON / 2];
         [near setWidth:extent.width];
         [near setHeight:extent.height];
         ok([near isEqual:extent],
            @"a rotation below the release's tolerance still counts as equal");
 
-        CharonPortARPlaneExtent *far = [[CharonPortARPlaneExtent alloc] init];
+        RevenantPortARPlaneExtent *far = [[RevenantPortARPlaneExtent alloc] init];
         [far setRotationOnYAxis:extent.rotationOnYAxis + 1.0f];
         [far setWidth:extent.width];
         [far setHeight:extent.height];
@@ -130,7 +130,7 @@ int main(void)
 
         ok(![extent isEqual:@"not an extent"], @"an extent is not equal to a string");
 
-        CharonPortARPlaneExtent *copy = [extent copyWithZone:NULL];
+        RevenantPortARPlaneExtent *copy = [extent copyWithZone:NULL];
         ok(copy != extent, @"a copy is a different object");
         ok([copy isEqual:extent], @"a copy equals the original");
         ok(copy.rotationOnYAxis == extent.rotationOnYAxis && copy.width == extent.width &&

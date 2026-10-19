@@ -2,14 +2,14 @@
 #import <simd/simd.h>
 #import <math.h>
 
-static inline float CharonGKLength2(vector_float2 from, vector_float2 to)
+static inline float RevenantGKLength2(vector_float2 from, vector_float2 to)
 {
     float dx = to.x - from.x;
     float dy = to.y - from.y;
     return (float)sqrt((double)(dx * dx + dy * dy));
 }
 
-static inline float CharonGKLength3(vector_float3 from, vector_float3 to)
+static inline float RevenantGKLength3(vector_float3 from, vector_float3 to)
 {
     float dx = to.x - from.x;
     float dy = to.y - from.y;
@@ -17,55 +17,55 @@ static inline float CharonGKLength3(vector_float3 from, vector_float3 to)
     return (float)sqrt((double)(dx * dx + dy * dy + dz * dz));
 }
 
-static inline float CharonGKCellDistance(vector_int2 from, vector_int2 to)
+static inline float RevenantGKCellDistance(vector_int2 from, vector_int2 to)
 {
     float dx = (float)(to.x - from.x);
     float dy = (float)(to.y - from.y);
     return (float)sqrt((double)(dx * dx + dy * dy));
 }
 
-float CharonGKCellSize(float minimum, float extent);
+float RevenantGKCellSize(float minimum, float extent);
 
-float CharonGKCellFloor(float value, float size);
-float CharonGKCellCeiling(float value, float size, float limit);
+float RevenantGKCellFloor(float value, float size);
+float RevenantGKCellCeiling(float value, float size, float limit);
 
-float CharonGKNodeSize(float cellSize);
+float RevenantGKNodeSize(float cellSize);
 
-float CharonGKNodeCeiling(float edge, float limit);
+float RevenantGKNodeCeiling(float edge, float limit);
 
-BOOL CharonGKPointInPolygon(vector_float2 point, const vector_float2 *vertices, NSUInteger count,
+BOOL RevenantGKPointInPolygon(vector_float2 point, const vector_float2 *vertices, NSUInteger count,
                             float buffer);
 
-BOOL CharonGKPointOnBoundary(vector_float2 point, const vector_float2 *vertices, NSUInteger count);
+BOOL RevenantGKPointOnBoundary(vector_float2 point, const vector_float2 *vertices, NSUInteger count);
 
-BOOL CharonGKSegmentCrossesPolygon(vector_float2 from, vector_float2 to, const vector_float2 *vertices,
+BOOL RevenantGKSegmentCrossesPolygon(vector_float2 from, vector_float2 to, const vector_float2 *vertices,
                                    NSUInteger count, float buffer);
 
-NSArray *CharonGKFindPath(NSArray *nodes, id start, id goal);
+NSArray *RevenantGKFindPath(NSArray *nodes, id start, id goal);
 
-@interface CharonGKEntry : NSObject {
+@interface RevenantGKEntry : NSObject {
 @public
-    id charon_element;
-    vector_float3 charon_min;
-    vector_float3 charon_max;
-    BOOL charon_isPoint;
+    id revenant_element;
+    vector_float3 revenant_min;
+    vector_float3 revenant_max;
+    BOOL revenant_isPoint;
 }
 
-+ (instancetype)charon_entryWithElement:(id)element low:(vector_float3)low high:(vector_float3)high
++ (instancetype)revenant_entryWithElement:(id)element low:(vector_float3)low high:(vector_float3)high
                                isPoint:(BOOL)isPoint;
 
-- (BOOL)charon_holdsPoint:(vector_float3)point;
+- (BOOL)revenant_holdsPoint:(vector_float3)point;
 
-- (BOOL)charon_meetsRange:(vector_float2)low high:(vector_float2)high;
+- (BOOL)revenant_meetsRange:(vector_float2)low high:(vector_float2)high;
 
 @end
 
 
-NSArray *CharonGKConnected(id node);
-float CharonGKSearchScore(id node);
-float CharonGKCostTo(id from, id to);
+NSArray *RevenantGKConnected(id node);
+float RevenantGKSearchScore(id node);
+float RevenantGKCostTo(id from, id to);
 
-@interface CharonGKPoint2 : NSObject {
+@interface RevenantGKPoint2 : NSObject {
 @public
     vector_float2 point;
 }
@@ -73,14 +73,14 @@ float CharonGKCostTo(id from, id to);
 - (vector_float2)vector;
 @end
 
-@interface CharonGKTriangle3 : NSObject {
+@interface RevenantGKTriangle3 : NSObject {
 @public
     vector_float3 points[3];
 }
 + (instancetype)triangleAt:(vector_float2)a first:(vector_float2)b second:(vector_float2)c;
 @end
 
-@interface CharonGKEdgePair : NSObject {
+@interface RevenantGKEdgePair : NSObject {
 @public
     NSUInteger first;
     NSUInteger second;
@@ -88,23 +88,23 @@ float CharonGKCostTo(id from, id to);
 + (instancetype)pairWithFirst:(NSUInteger)first second:(NSUInteger)second;
 @end
 
-id CharonGKPointNodeWithClass(Class nodeClass, vector_float2 point);
+id RevenantGKPointNodeWithClass(Class nodeClass, vector_float2 point);
 
-NSArray *CharonGKTriangulateRegion(NSArray *outline, NSArray *holes);
+NSArray *RevenantGKTriangulateRegion(NSArray *outline, NSArray *holes);
 
-NSArray *CharonGKBufferedCorners(NSArray *obstacles, float buffer, NSMutableArray *perObstacle);
+NSArray *RevenantGKBufferedCorners(NSArray *obstacles, float buffer, NSMutableArray *perObstacle);
 
-NSArray *CharonGKVisibilityEdges(NSArray *corners, NSArray *obstacles, float buffer);
+NSArray *RevenantGKVisibilityEdges(NSArray *corners, NSArray *obstacles, float buffer);
 
-NSArray *CharonGKVerticesOfObstacle(id obstacle);
+NSArray *RevenantGKVerticesOfObstacle(id obstacle);
 
-extern NSString *const CharonGKSearchClosedKey;
-extern NSString *const CharonGKSearchScoreKey;
-extern NSString *const CharonGKSearchParentKey;
-extern NSString *const CharonGKGraphNodesKey;
-extern NSString *const CharonGKGraphNodeClassKey;
-extern NSString *const CharonGKGraphNodePositionKey;
-extern NSString *const CharonGKObstacleVerticesKey;
-extern NSString *const CharonGKObstacleGraphObstaclesKey;
-extern NSString *const CharonGKObstacleGraphBufferKey;
-extern NSString *const CharonGKObstacleGraphLocksKey;
+extern NSString *const RevenantGKSearchClosedKey;
+extern NSString *const RevenantGKSearchScoreKey;
+extern NSString *const RevenantGKSearchParentKey;
+extern NSString *const RevenantGKGraphNodesKey;
+extern NSString *const RevenantGKGraphNodeClassKey;
+extern NSString *const RevenantGKGraphNodePositionKey;
+extern NSString *const RevenantGKObstacleVerticesKey;
+extern NSString *const RevenantGKObstacleGraphObstaclesKey;
+extern NSString *const RevenantGKObstacleGraphBufferKey;
+extern NSString *const RevenantGKObstacleGraphLocksKey;

@@ -7,13 +7,13 @@ end
 
 function main(input, includes, output)
     if not input or not includes or not output then
-        raise("usage: ./xmakew l katabasis/scripts/ipa.lua INPUT.ipa INCLUDES OUTPUT.ipa")
+        raise("usage: ./xmakew l recompiler/scripts/ipa.lua INPUT.ipa INCLUDES OUTPUT.ipa")
     end
     input = path.absolute(input)
     includes = path.absolute(includes)
     output = path.absolute(output)
     local e = env()
-    local work = path.join(e.builddir, "katabasis", "ipa", path.basename(input))
+    local work = path.join(e.builddir, "recompiler", "ipa", path.basename(input))
     os.tryrm(work)
     os.mkdir(work)
     try {

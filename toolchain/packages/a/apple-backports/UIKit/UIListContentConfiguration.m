@@ -1,37 +1,37 @@
-#import "CharonLists.h"
+#import "RevenantLists.h"
 
 #pragma clang diagnostic ignored "-Wobjc-designated-initializers"
 
-static NSString *charon_style_name(NSInteger style)
+static NSString *revenant_style_name(NSInteger style)
 {
     static NSString *const names[] = {@"Cell", @"Cell", @"Subtitle Cell", @"Value Cell", @"Plain Header", @"Plain Footer", @"Grouped Header", @"Grouped Footer", @"Sidebar Cell",
                                       @"Sidebar Subtitle Cell", @"Accompanied Sidebar Cell", @"Accompanied Sidebar Subtitle Cell", @"Sidebar Header", @"Header", @"Footer"};
     return style >= 0 && style < 15 ? names[style] : @"Cell";
 }
 
-static BOOL charon_is_sidebar_cell(NSInteger style)
+static BOOL revenant_is_sidebar_cell(NSInteger style)
 {
-    return style == CharonListStyleSidebarCell || style == CharonListStyleSidebarSubtitle || style == CharonListStyleAccompaniedSidebar || style == CharonListStyleAccompaniedSidebarSubtitle;
+    return style == RevenantListStyleSidebarCell || style == RevenantListStyleSidebarSubtitle || style == RevenantListStyleAccompaniedSidebar || style == RevenantListStyleAccompaniedSidebarSubtitle;
 }
 
-static BOOL charon_is_plain_cell(NSInteger style)
+static BOOL revenant_is_plain_cell(NSInteger style)
 {
-    return style == CharonListStyleCell || style == CharonListStyleSubtitle || style == CharonListStyleValue;
+    return style == RevenantListStyleCell || style == RevenantListStyleSubtitle || style == RevenantListStyleValue;
 }
 
-static NSString *charon_axes_text(UIAxis axes)
+static NSString *revenant_axes_text(UIAxis axes)
 {
     if (axes == (UIAxisHorizontal | UIAxisVertical))
         return @"Both";
     return axes == UIAxisVertical ? @"[Vertical]" : @"[Horizontal]";
 }
 
-static NSString *charon_attributed_text(NSAttributedString *text)
+static NSString *revenant_attributed_text(NSAttributedString *text)
 {
     return text.string;
 }
 
-static UIConfigurationColorTransformer charon_thirty_percent(void)
+static UIConfigurationColorTransformer revenant_thirty_percent(void)
 {
     return ^UIColor *(UIColor *color) {
         return [color colorWithAlphaComponent:CGColorGetAlpha(color.CGColor) * 0.3];
@@ -63,128 +63,128 @@ static UIConfigurationColorTransformer charon_thirty_percent(void)
     return YES;
 }
 
-+ (instancetype)charon_configurationWithStyle:(NSInteger)style
++ (instancetype)revenant_configurationWithStyle:(NSInteger)style
 {
-    return [[UIListContentConfiguration alloc] initCharonWithStyle:style];
+    return [[UIListContentConfiguration alloc] initRevenantWithStyle:style];
 }
 
 + (instancetype)cellConfiguration
 {
-    return [self charon_configurationWithStyle:CharonListStyleCell];
+    return [self revenant_configurationWithStyle:RevenantListStyleCell];
 }
 
 + (instancetype)headerConfiguration
 {
-    return [self charon_configurationWithStyle:CharonListStyleHeader];
+    return [self revenant_configurationWithStyle:RevenantListStyleHeader];
 }
 
 + (instancetype)footerConfiguration
 {
-    return [self charon_configurationWithStyle:CharonListStyleFooter];
+    return [self revenant_configurationWithStyle:RevenantListStyleFooter];
 }
 
 + (instancetype)subtitleCellConfiguration
 {
-    return [self charon_configurationWithStyle:CharonListStyleSubtitle];
+    return [self revenant_configurationWithStyle:RevenantListStyleSubtitle];
 }
 
 + (instancetype)valueCellConfiguration
 {
-    return [self charon_configurationWithStyle:CharonListStyleValue];
+    return [self revenant_configurationWithStyle:RevenantListStyleValue];
 }
 
 + (instancetype)plainHeaderConfiguration
 {
-    return [self charon_configurationWithStyle:CharonListStylePlainHeader];
+    return [self revenant_configurationWithStyle:RevenantListStylePlainHeader];
 }
 
 + (instancetype)plainFooterConfiguration
 {
-    return [self charon_configurationWithStyle:CharonListStylePlainFooter];
+    return [self revenant_configurationWithStyle:RevenantListStylePlainFooter];
 }
 
 + (instancetype)groupedHeaderConfiguration
 {
-    return [self charon_configurationWithStyle:CharonListStyleGroupedHeader];
+    return [self revenant_configurationWithStyle:RevenantListStyleGroupedHeader];
 }
 
 + (instancetype)groupedFooterConfiguration
 {
-    return [self charon_configurationWithStyle:CharonListStyleGroupedFooter];
+    return [self revenant_configurationWithStyle:RevenantListStyleGroupedFooter];
 }
 
 + (instancetype)sidebarCellConfiguration
 {
-    return [self charon_configurationWithStyle:CharonListStyleSidebarCell];
+    return [self revenant_configurationWithStyle:RevenantListStyleSidebarCell];
 }
 
 + (instancetype)sidebarSubtitleCellConfiguration
 {
-    return [self charon_configurationWithStyle:CharonListStyleSidebarSubtitle];
+    return [self revenant_configurationWithStyle:RevenantListStyleSidebarSubtitle];
 }
 
 + (instancetype)accompaniedSidebarCellConfiguration
 {
-    return [self charon_configurationWithStyle:CharonListStyleAccompaniedSidebar];
+    return [self revenant_configurationWithStyle:RevenantListStyleAccompaniedSidebar];
 }
 
 + (instancetype)accompaniedSidebarSubtitleCellConfiguration
 {
-    return [self charon_configurationWithStyle:CharonListStyleAccompaniedSidebarSubtitle];
+    return [self revenant_configurationWithStyle:RevenantListStyleAccompaniedSidebarSubtitle];
 }
 
 + (instancetype)sidebarHeaderConfiguration
 {
-    return [self charon_configurationWithStyle:CharonListStyleSidebarHeader];
+    return [self revenant_configurationWithStyle:RevenantListStyleSidebarHeader];
 }
 
-- (instancetype)initCharonWithStyle:(NSInteger)style
+- (instancetype)initRevenantWithStyle:(NSInteger)style
 {
     if ((self = [super init])) {
         _style = style;
-        _alpha = style == CharonListStyleBare ? 0 : 1;
-        NSInteger textStyle = style == CharonListStyleBare ? CharonListStyleBare - 1 : style;
-        _textProperties = [[UIListContentTextProperties alloc] initCharonWithStyle:textStyle secondary:NO];
-        _secondaryTextProperties = [[UIListContentTextProperties alloc] initCharonWithStyle:textStyle secondary:YES];
-        _imageProperties = style == CharonListStyleBare ? [[UIListContentImageProperties alloc] initCharonBare] : [[UIListContentImageProperties alloc] initCharonDefault];
-        _axes = style == CharonListStyleBare ? 0 : UIAxisHorizontal;
-        _horizontalPadding = style == CharonListStyleBare ? 0 : 8;
+        _alpha = style == RevenantListStyleBare ? 0 : 1;
+        NSInteger textStyle = style == RevenantListStyleBare ? RevenantListStyleBare - 1 : style;
+        _textProperties = [[UIListContentTextProperties alloc] initRevenantWithStyle:textStyle secondary:NO];
+        _secondaryTextProperties = [[UIListContentTextProperties alloc] initRevenantWithStyle:textStyle secondary:YES];
+        _imageProperties = style == RevenantListStyleBare ? [[UIListContentImageProperties alloc] initRevenantBare] : [[UIListContentImageProperties alloc] initRevenantDefault];
+        _axes = style == RevenantListStyleBare ? 0 : UIAxisHorizontal;
+        _horizontalPadding = style == RevenantListStyleBare ? 0 : 8;
         _verticalPadding = 4;
         _imageToTextPadding = 16;
         switch (style) {
-        case CharonListStyleBare:
+        case RevenantListStyleBare:
             _verticalPadding = 0;
             _imageToTextPadding = 0;
             break;
-        case CharonListStyleCell:
+        case RevenantListStyleCell:
             _margins = NSDirectionalEdgeInsetsMake(15, 16, 15, 8);
             break;
-        case CharonListStyleSubtitle:
+        case RevenantListStyleSubtitle:
             _margins = NSDirectionalEdgeInsetsMake(15, 16, 15, 8);
             _verticalPadding = 0;
             break;
-        case CharonListStyleValue:
+        case RevenantListStyleValue:
             _margins = NSDirectionalEdgeInsetsMake(15, 16, 15, 8);
             _sideBySide = YES;
             break;
-        case CharonListStylePlainHeader:
-        case CharonListStyleGroupedHeader:
-        case CharonListStyleHeader:
+        case RevenantListStylePlainHeader:
+        case RevenantListStyleGroupedHeader:
+        case RevenantListStyleHeader:
             _margins = NSDirectionalEdgeInsetsMake(10, 8, 10, 8);
             break;
-        case CharonListStylePlainFooter:
-        case CharonListStyleGroupedFooter:
-        case CharonListStyleFooter:
+        case RevenantListStylePlainFooter:
+        case RevenantListStyleGroupedFooter:
+        case RevenantListStyleFooter:
             _margins = NSDirectionalEdgeInsetsMake(8, 8, 6, 8);
             break;
-        case CharonListStyleSidebarCell:
-        case CharonListStyleAccompaniedSidebar:
-        case CharonListStyleSidebarHeader:
+        case RevenantListStyleSidebarCell:
+        case RevenantListStyleAccompaniedSidebar:
+        case RevenantListStyleSidebarHeader:
             _margins = NSDirectionalEdgeInsetsMake(11, 8, 11, 8);
             _imageToTextPadding = 10;
             break;
-        case CharonListStyleSidebarSubtitle:
-        case CharonListStyleAccompaniedSidebarSubtitle:
+        case RevenantListStyleSidebarSubtitle:
+        case RevenantListStyleAccompaniedSidebarSubtitle:
             _margins = NSDirectionalEdgeInsetsMake(4, 8, 4, 8);
             _imageToTextPadding = 10;
             _verticalPadding = 0;
@@ -196,12 +196,12 @@ static UIConfigurationColorTransformer charon_thirty_percent(void)
 
 - (instancetype)init
 {
-    return [self initCharonWithStyle:CharonListStyleBare];
+    return [self initRevenantWithStyle:RevenantListStyleBare];
 }
 
 - (instancetype)initWithCoder:(NSCoder *)coder
 {
-    if ((self = [self initCharonWithStyle:(NSInteger)[coder decodeIntegerForKey:@"style"]])) {
+    if ((self = [self initRevenantWithStyle:(NSInteger)[coder decodeIntegerForKey:@"style"]])) {
         _image = [coder decodeObjectOfClass:[UIImage class] forKey:@"image"];
         _text = [coder decodeObjectOfClass:[NSString class] forKey:@"text"];
         _attributedText = [coder decodeObjectOfClass:[NSAttributedString class] forKey:@"attributedText"];
@@ -224,7 +224,7 @@ static UIConfigurationColorTransformer charon_thirty_percent(void)
         _horizontalPadding = (CGFloat)[coder decodeDoubleForKey:@"textToSecondaryTextHorizontalPadding"];
         _verticalPadding = (CGFloat)[coder decodeDoubleForKey:@"textToSecondaryTextVerticalPadding"];
         _alpha = (CGFloat)[coder decodeDoubleForKey:@"alpha"];
-        [self charon_syncOwners];
+        [self revenant_syncOwners];
     }
     return self;
 }
@@ -252,16 +252,16 @@ static UIConfigurationColorTransformer charon_thirty_percent(void)
     [coder encodeDouble:_alpha forKey:@"alpha"];
 }
 
-- (void)charon_syncOwners
+- (void)revenant_syncOwners
 {
-    [_textProperties charon_setOwnerText:_text ?: _attributedText.string];
-    [_secondaryTextProperties charon_setOwnerText:_secondaryText ?: _secondaryAttributedText.string];
-    [_imageProperties charon_setOwnerImage:_image];
+    [_textProperties revenant_setOwnerText:_text ?: _attributedText.string];
+    [_secondaryTextProperties revenant_setOwnerText:_secondaryText ?: _secondaryAttributedText.string];
+    [_imageProperties revenant_setOwnerImage:_image];
 }
 
 - (id)copyWithZone:(NSZone *)zone
 {
-    UIListContentConfiguration *copy = [[[self class] allocWithZone:zone] initCharonWithStyle:_style];
+    UIListContentConfiguration *copy = [[[self class] allocWithZone:zone] initRevenantWithStyle:_style];
     copy->_image = _image;
     copy->_text = _text;
     copy->_attributedText = _attributedText;
@@ -280,17 +280,17 @@ static UIConfigurationColorTransformer charon_thirty_percent(void)
     return copy;
 }
 
-- (NSInteger)charon_style
+- (NSInteger)revenant_style
 {
     return _style;
 }
 
-- (BOOL)charon_isHeaderFooterStyle
+- (BOOL)revenant_isHeaderFooterStyle
 {
-    return _style >= CharonListStylePlainHeader && _style != CharonListStyleSidebarCell && !charon_is_sidebar_cell(_style) && _style != CharonListStyleSidebarHeader;
+    return _style >= RevenantListStylePlainHeader && _style != RevenantListStyleSidebarCell && !revenant_is_sidebar_cell(_style) && _style != RevenantListStyleSidebarHeader;
 }
 
-- (CGFloat)charon_alpha
+- (CGFloat)revenant_alpha
 {
     return _alpha;
 }
@@ -313,7 +313,7 @@ static UIConfigurationColorTransformer charon_thirty_percent(void)
 - (void)setImage:(UIImage *)image
 {
     _image = image;
-    [_imageProperties charon_setOwnerImage:image];
+    [_imageProperties revenant_setOwnerImage:image];
 }
 
 - (UIListContentImageProperties *)imageProperties
@@ -331,7 +331,7 @@ static UIConfigurationColorTransformer charon_thirty_percent(void)
     _text = [text copy];
     if (text)
         _attributedText = nil;
-    [_textProperties charon_setOwnerText:_text ?: _attributedText.string];
+    [_textProperties revenant_setOwnerText:_text ?: _attributedText.string];
 }
 
 - (NSAttributedString *)attributedText
@@ -344,7 +344,7 @@ static UIConfigurationColorTransformer charon_thirty_percent(void)
     _attributedText = [attributedText copy];
     if (attributedText)
         _text = nil;
-    [_textProperties charon_setOwnerText:_text ?: _attributedText.string];
+    [_textProperties revenant_setOwnerText:_text ?: _attributedText.string];
 }
 
 - (UIListContentTextProperties *)textProperties
@@ -362,7 +362,7 @@ static UIConfigurationColorTransformer charon_thirty_percent(void)
     _secondaryText = [secondaryText copy];
     if (secondaryText)
         _secondaryAttributedText = nil;
-    [_secondaryTextProperties charon_setOwnerText:_secondaryText ?: _secondaryAttributedText.string];
+    [_secondaryTextProperties revenant_setOwnerText:_secondaryText ?: _secondaryAttributedText.string];
 }
 
 - (NSAttributedString *)secondaryAttributedText
@@ -375,7 +375,7 @@ static UIConfigurationColorTransformer charon_thirty_percent(void)
     _secondaryAttributedText = [secondaryAttributedText copy];
     if (secondaryAttributedText)
         _secondaryText = nil;
-    [_secondaryTextProperties charon_setOwnerText:_secondaryText ?: _secondaryAttributedText.string];
+    [_secondaryTextProperties revenant_setOwnerText:_secondaryText ?: _secondaryAttributedText.string];
 }
 
 - (UIListContentTextProperties *)secondaryTextProperties
@@ -451,12 +451,12 @@ static UIConfigurationColorTransformer charon_thirty_percent(void)
 - (instancetype)updatedConfigurationForState:(id<UIConfigurationState>)state
 {
     UIListContentConfiguration *updated = [self copy];
-    if (_style == CharonListStyleBare || ![(id)state isKindOfClass:[UIViewConfigurationState class]])
+    if (_style == RevenantListStyleBare || ![(id)state isKindOfClass:[UIViewConfigurationState class]])
         return updated;
     UIViewConfigurationState *view = (UIViewConfigurationState *)state;
     UICellConfigurationState *cell = [view isKindOfClass:[UICellConfigurationState class]] ? (UICellConfigurationState *)view : nil;
-    BOOL sidebar = charon_is_sidebar_cell(_style);
-    BOOL sidebarLike = sidebar || _style == CharonListStyleSidebarHeader;
+    BOOL sidebar = revenant_is_sidebar_cell(_style);
+    BOOL sidebarLike = sidebar || _style == RevenantListStyleSidebarHeader;
     BOOL faded = view.disabled && !cell.swiped;
     UIListContentTextProperties *text = updated->_textProperties, *secondary = updated->_secondaryTextProperties;
     UIListContentImageProperties *image = updated->_imageProperties;
@@ -464,33 +464,33 @@ static UIConfigurationColorTransformer charon_thirty_percent(void)
         if (sidebarLike) {
             updated->_alpha = 0.5;
         } else {
-            if (charon_is_plain_cell(_style)) {
-                if (![text charon_colorCustomized])
-                    [text charon_setDefaultColor:charon_semantic_color(CharonSemanticColorTertiaryLabel)];
-                if (![secondary charon_colorCustomized])
-                    [secondary charon_setDefaultColor:charon_semantic_color(CharonSemanticColorQuaternaryLabel)];
+            if (revenant_is_plain_cell(_style)) {
+                if (![text revenant_colorCustomized])
+                    [text revenant_setDefaultColor:revenant_semantic_color(RevenantSemanticColorTertiaryLabel)];
+                if (![secondary revenant_colorCustomized])
+                    [secondary revenant_setDefaultColor:revenant_semantic_color(RevenantSemanticColorQuaternaryLabel)];
             }
-            if (![image charon_tintCustomized])
-                [image charon_setDefaultTintColor:charon_semantic_color(CharonSemanticColorTertiaryLabel)];
+            if (![image revenant_tintCustomized])
+                [image revenant_setDefaultTintColor:revenant_semantic_color(RevenantSemanticColorTertiaryLabel)];
         }
     }
     BOOL targeted = cell.cellDropState == UICellConfigurationDropStateTargeted;
     BOOL fontLike = sidebar && !cell.editing && ((view.selected && !faded) || targeted) && !(view.focused && faded);
     BOOL whiteLike = sidebar && view.focused && ((view.selected && !cell.editing) || targeted) && !faded;
-    if (fontLike && ![text charon_fontCustomized])
-        [text charon_setDefaultFont:charon_medium_font(text.font.pointSize)];
+    if (fontLike && ![text revenant_fontCustomized])
+        [text revenant_setDefaultFont:revenant_medium_font(text.font.pointSize)];
     if (whiteLike) {
-        if (![text charon_colorCustomized])
-            [text charon_setDefaultColor:[UIColor whiteColor]];
-        if (![secondary charon_colorCustomized])
-            [secondary charon_setDefaultColor:[UIColor colorWithWhite:1 alpha:0.8]];
-        if (![image charon_tintCustomized])
-            [image charon_setDefaultTintColor:[UIColor whiteColor]];
+        if (![text revenant_colorCustomized])
+            [text revenant_setDefaultColor:[UIColor whiteColor]];
+        if (![secondary revenant_colorCustomized])
+            [secondary revenant_setDefaultColor:[UIColor colorWithWhite:1 alpha:0.8]];
+        if (![image revenant_tintCustomized])
+            [image revenant_setDefaultTintColor:[UIColor whiteColor]];
     }
     if (view.highlighted && sidebarLike) {
-        [text charon_setTransformerNamed:@"30% Alpha" block:charon_thirty_percent()];
-        [secondary charon_setTransformerNamed:@"30% Alpha" block:charon_thirty_percent()];
-        [image charon_setTransformerNamed:@"30% Alpha" block:charon_thirty_percent()];
+        [text revenant_setTransformerNamed:@"30% Alpha" block:revenant_thirty_percent()];
+        [secondary revenant_setTransformerNamed:@"30% Alpha" block:revenant_thirty_percent()];
+        [image revenant_setTransformerNamed:@"30% Alpha" block:revenant_thirty_percent()];
     }
     return updated;
 }
@@ -523,16 +523,16 @@ static UIConfigurationColorTransformer charon_thirty_percent(void)
     if (_image)
         [text appendFormat:@"; image = <UIImage: %p; anonymous>", _image];
     if (_text || _attributedText)
-        [text appendFormat:@"; text = %@", charon_elided_text(_text ?: charon_attributed_text(_attributedText))];
+        [text appendFormat:@"; text = %@", revenant_elided_text(_text ?: revenant_attributed_text(_attributedText))];
     if (_secondaryText || _secondaryAttributedText)
-        [text appendFormat:@"; secondaryText = %@", charon_elided_text(_secondaryText ?: charon_attributed_text(_secondaryAttributedText))];
+        [text appendFormat:@"; secondaryText = %@", revenant_elided_text(_secondaryText ?: revenant_attributed_text(_secondaryAttributedText))];
     if (_alpha != 1)
         [text appendFormat:@"; alpha = %g", _alpha];
-    [text appendFormat:@"; Base Style = %@", charon_style_name(_style)];
+    [text appendFormat:@"; Base Style = %@", revenant_style_name(_style)];
     if (!NSDirectionalEdgeInsetsEqualToDirectionalEdgeInsets(_margins, NSDirectionalEdgeInsetsZero))
         [text appendFormat:@"; directionalLayoutMargins = %@", NSStringFromDirectionalEdgeInsets(_margins)];
     if (_axes)
-        [text appendFormat:@"; axesPreservingSuperviewLayoutMargins = %@", charon_axes_text(_axes)];
+        [text appendFormat:@"; axesPreservingSuperviewLayoutMargins = %@", revenant_axes_text(_axes)];
     if (_sideBySide)
         [text appendString:@"; prefersSideBySideTextAndSecondaryText = YES"];
     [text appendFormat:@"; imageToTextPadding = %g", _imageToTextPadding];

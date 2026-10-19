@@ -2,7 +2,7 @@
 
 #import <objc/runtime.h>
 
-@interface CharonGraphEdge : NSObject
+@interface RevenantGraphEdge : NSObject
 {
 @public
     NSInteger _count;
@@ -10,16 +10,16 @@
 }
 @end
 
-@implementation CharonGraphEdge
+@implementation RevenantGraphEdge
 @end
 
-@interface CharonGraphToken : NSObject
+@interface RevenantGraphToken : NSObject
 {
 @public
     __weak JSVirtualMachine *_machine;
     __weak id _object;
-    NSMapTable<CharonGraphToken *, CharonGraphEdge *> *_owned;
-    NSHashTable<CharonGraphToken *> *_owners;
+    NSMapTable<RevenantGraphToken *, RevenantGraphEdge *> *_owned;
+    NSHashTable<RevenantGraphToken *> *_owners;
     NSMapTable *_wrapperKeys;
     JSStringRef _name;
 }
@@ -34,23 +34,23 @@
     JSWeakObjectMapRef _weak;
     JSObjectRef _isArray;
     JSObjectRef _classOf;
-    NSHashTable<CharonGraphToken *> *_tokens;
+    NSHashTable<RevenantGraphToken *> *_tokens;
 }
-- (void)charon_forgetToken:(CharonGraphToken *)token;
+- (void)revenant_forgetToken:(RevenantGraphToken *)token;
 @end
 
-@implementation CharonGraphToken
+@implementation RevenantGraphToken
 
 - (void)dealloc
 {
-    [_machine charon_forgetToken:self];
+    [_machine revenant_forgetToken:self];
     JSStringRelease(_name);
 }
 
 @end
 
-static NSString *const CharonNodeName = @"charon.managed.node";
-static NSString *const CharonValueName = @"charon.managed.value";
+static NSString *const RevenantNodeName = @"revenant.managed.node";
+static NSString *const RevenantValueName = @"revenant.managed.value";
 
 static JSClassRef NodeClass(void)
 {
@@ -58,7 +58,7 @@ static JSClassRef NodeClass(void)
     static dispatch_once_t once;
     dispatch_once(&once, ^{
         JSClassDefinition definition = kJSClassDefinitionEmpty;
-        definition.className = "CharonManagedNode";
+        definition.className = "RevenantManagedNode";
         nodeClass = JSClassCreate(&definition);
     });
     return nodeClass;
@@ -86,23 +86,23 @@ static id GraphObject(id object)
 {
     if ([object isKindOfClass:[JSValue class]]) {
         JSValue *value = object;
-        id wrapped = charon_js_wrapped_object(value.context.JSGlobalContextRef, value.JSValueRef);
+        id wrapped = revenant_js_wrapped_object(value.context.JSGlobalContextRef, value.JSValueRef);
         if (wrapped)
             return wrapped;
     }
     return object;
 }
 
-static NSMapTable *charon_machines;
-static NSLock *charon_machines_lock;
+static NSMapTable *revenant_machines;
+static NSLock *revenant_machines_lock;
 
 static void MachinesInit(void)
 {
     static dispatch_once_t once;
     dispatch_once(&once, ^{
-        charon_machines = [NSMapTable mapTableWithKeyOptions:NSPointerFunctionsOpaqueMemory | NSPointerFunctionsOpaquePersonality
+        revenant_machines = [NSMapTable mapTableWithKeyOptions:NSPointerFunctionsOpaqueMemory | NSPointerFunctionsOpaquePersonality
                                                 valueOptions:NSPointerFunctionsWeakMemory | NSPointerFunctionsObjectPersonality];
-        charon_machines_lock = [NSLock new];
+        revenant_machines_lock = [NSLock new];
     });
 }
 
@@ -110,10 +110,10 @@ static void MachinesInit(void)
 
 - (instancetype)init
 {
-    return [self initWithCharonGroup:JSContextGroupCreate() retained:NO];
+    return [self initWithRevenantGroup:JSContextGroupCreate() retained:NO];
 }
 
-- (instancetype)initWithCharonGroup:(JSContextGroupRef)group retained:(BOOL)retained
+- (instancetype)initWithRevenantGroup:(JSContextGroupRef)group retained:(BOOL)retained
 {
     if ((self = [super init])) {
         _group = group;
@@ -127,33 +127,33 @@ static void MachinesInit(void)
         _nodeLock = [NSRecursiveLock new];
         _tokens = [NSHashTable weakObjectsHashTable];
         MachinesInit();
-        [charon_machines_lock lock];
-        [charon_machines setObject:self forKey:(__bridge id)_group];
-        [charon_machines_lock unlock];
+        [revenant_machines_lock lock];
+        [revenant_machines setObject:self forKey:(__bridge id)_group];
+        [revenant_machines_lock unlock];
     }
     return self;
 }
 
-+ (nullable JSVirtualMachine *)charon_machineForGroup:(JSContextGroupRef)group
++ (nullable JSVirtualMachine *)revenant_machineForGroup:(JSContextGroupRef)group
 {
     MachinesInit();
-    [charon_machines_lock lock];
-    JSVirtualMachine *machine = [charon_machines objectForKey:(__bridge id)group];
-    [charon_machines_lock unlock];
+    [revenant_machines_lock lock];
+    JSVirtualMachine *machine = [revenant_machines objectForKey:(__bridge id)group];
+    [revenant_machines_lock unlock];
     return machine;
 }
 
 - (void)dealloc
 {
-    [charon_machines_lock lock];
-    if ([charon_machines objectForKey:(__bridge id)_group] == nil)
-        [charon_machines removeObjectForKey:(__bridge id)_group];
-    [charon_machines_lock unlock];
-    for (CharonGraphToken *token in _tokens.allObjects) {
+    [revenant_machines_lock lock];
+    if ([revenant_machines objectForKey:(__bridge id)_group] == nil)
+        [revenant_machines removeObjectForKey:(__bridge id)_group];
+    [revenant_machines_lock unlock];
+    for (RevenantGraphToken *token in _tokens.allObjects) {
         JSObjectRef node = JSWeakObjectMapGet(_weakContext, _weak, (__bridge void *)token);
         if (!node)
             continue;
-        for (CharonGraphToken *owned in token->_owned.keyEnumerator.allObjects)
+        for (RevenantGraphToken *owned in token->_owned.keyEnumerator.allObjects)
             JSObjectDeletePrivateProperty(_weakContext, node, owned->_name);
     }
     JSValueUnprotect(_weakContext, _isArray);
@@ -161,32 +161,32 @@ static void MachinesInit(void)
     JSGlobalContextRelease(_weakContext);
 }
 
-- (JSContextGroupRef)charon_group
+- (JSContextGroupRef)revenant_group
 {
     return _group;
 }
 
-- (CharonGraphToken *)charon_tokenOf:(id)object create:(BOOL)create
+- (RevenantGraphToken *)revenant_tokenOf:(id)object create:(BOOL)create
 {
-    CharonGraphToken *token = objc_getAssociatedObject(object, (__bridge const void *)self);
+    RevenantGraphToken *token = objc_getAssociatedObject(object, (__bridge const void *)self);
     if (token && token->_machine != self)
         token = nil;
     if (token || !create)
         return token;
-    token = [CharonGraphToken new];
+    token = [RevenantGraphToken new];
     token->_machine = self;
     token->_object = object;
     token->_owned = [NSMapTable weakToStrongObjectsMapTable];
     token->_owners = [NSHashTable weakObjectsHashTable];
     token->_wrapperKeys = [NSMapTable mapTableWithKeyOptions:NSPointerFunctionsOpaqueMemory | NSPointerFunctionsOpaquePersonality
                                                 valueOptions:NSPointerFunctionsStrongMemory | NSPointerFunctionsObjectPersonality];
-    token->_name = JSStringCreateWithUTF8CString([NSString stringWithFormat:@"charon.managed.owned.%p", token].UTF8String);
+    token->_name = JSStringCreateWithUTF8CString([NSString stringWithFormat:@"revenant.managed.owned.%p", token].UTF8String);
     objc_setAssociatedObject(object, (__bridge const void *)self, token, OBJC_ASSOCIATION_RETAIN);
     [_tokens addObject:token];
     return token;
 }
 
-- (nullable JSObjectRef)charon_nodeOf:(CharonGraphToken *)token create:(BOOL)create
+- (nullable JSObjectRef)revenant_nodeOf:(RevenantGraphToken *)token create:(BOOL)create
 {
     JSGlobalContextRef context = _weakContext;
     JSWeakObjectMapRef weak = _weak;
@@ -199,42 +199,42 @@ static void MachinesInit(void)
         node = JSObjectMake(context, NodeClass(), NULL);
         JSWeakObjectMapSet(context, weak, (__bridge void *)token, node);
         id object = token->_object;
-        JSObjectRef value = [object isKindOfClass:[JSManagedValue class]] ? [(JSManagedValue *)object charon_object] : NULL;
+        JSObjectRef value = [object isKindOfClass:[JSManagedValue class]] ? [(JSManagedValue *)object revenant_object] : NULL;
         if (value) {
-            JSStringRef name = charon_js_string(CharonValueName);
+            JSStringRef name = revenant_js_string(RevenantValueName);
             JSObjectSetPrivateProperty(context, node, name, value);
             JSStringRelease(name);
         }
         [_lock lock];
-        NSArray<CharonGraphToken *> *owned = token->_owned.keyEnumerator.allObjects;
+        NSArray<RevenantGraphToken *> *owned = token->_owned.keyEnumerator.allObjects;
         [_lock unlock];
-        for (CharonGraphToken *each in owned)
-            [self charon_syncEdgeFrom:token to:each];
+        for (RevenantGraphToken *each in owned)
+            [self revenant_syncEdgeFrom:token to:each];
     }
     [_nodeLock unlock];
     return node;
 }
 
-- (void)charon_syncEdgeFrom:(CharonGraphToken *)owner to:(CharonGraphToken *)owned
+- (void)revenant_syncEdgeFrom:(RevenantGraphToken *)owner to:(RevenantGraphToken *)owned
 {
     JSGlobalContextRef context = _weakContext;
     JSWeakObjectMapRef weak = _weak;
     for (;;) {
         [_lock lock];
-        CharonGraphEdge *edge = [owner->_owned objectForKey:owned];
+        RevenantGraphEdge *edge = [owner->_owned objectForKey:owned];
         NSUInteger generation = edge ? edge->_generation : 0;
         BOOL wanted = edge && edge->_count > 0;
         [_lock unlock];
         JSObjectRef node = JSWeakObjectMapGet(context, weak, (__bridge void *)owner);
         if (!node)
             return;
-        JSObjectRef target = wanted && owned->_object ? [self charon_nodeOf:owned create:YES] : NULL;
+        JSObjectRef target = wanted && owned->_object ? [self revenant_nodeOf:owned create:YES] : NULL;
         if (target)
             JSObjectSetPrivateProperty(context, node, owned->_name, target);
         else
             JSObjectDeletePrivateProperty(context, node, owned->_name);
         [_lock lock];
-        CharonGraphEdge *now = [owner->_owned objectForKey:owned];
+        RevenantGraphEdge *now = [owner->_owned objectForKey:owned];
         BOOL settled = now == edge && (!now || now->_generation == generation);
         [_lock unlock];
         if (settled)
@@ -242,27 +242,27 @@ static void MachinesInit(void)
     }
 }
 
-- (JSGlobalContextRef)charon_weakContext:(JSWeakObjectMapRef *)outWeak
+- (JSGlobalContextRef)revenant_weakContext:(JSWeakObjectMapRef *)outWeak
 {
     *outWeak = _weak;
     return _weakContext;
 }
 
-- (JSGlobalContextRef)charon_ownContextIsArray:(JSObjectRef *)outIsArray classOf:(JSObjectRef *)outClassOf
+- (JSGlobalContextRef)revenant_ownContextIsArray:(JSObjectRef *)outIsArray classOf:(JSObjectRef *)outClassOf
 {
     *outIsArray = _isArray;
     *outClassOf = _classOf;
     return _weakContext;
 }
 
-- (JSObjectRef)charon_wrapperOf:(id)object class:(JSClassRef)jsClass context:(JSContextRef)context
+- (JSObjectRef)revenant_wrapperOf:(id)object class:(JSClassRef)jsClass context:(JSContextRef)context
 {
     JSGlobalContextRef weakContext = _weakContext;
     JSWeakObjectMapRef weak = _weak;
     JSGlobalContextRef global = JSContextGetGlobalContext(context);
     [_nodeLock lock];
     [_lock lock];
-    CharonGraphToken *token = [self charon_tokenOf:object create:YES];
+    RevenantGraphToken *token = [self revenant_tokenOf:object create:YES];
     id key = (__bridge id)NSMapGet(token->_wrapperKeys, global);
     if (!key) {
         key = [NSObject new];
@@ -272,31 +272,31 @@ static void MachinesInit(void)
     JSObjectRef wrapper = JSWeakObjectMapGet(weakContext, weak, (__bridge void *)key);
     if (!wrapper) {
         wrapper = JSObjectMake(context, jsClass, (void *)CFBridgingRetain(object));
-        charon_js_wrapper_made(context, wrapper, jsClass);
+        revenant_js_wrapper_made(context, wrapper, jsClass);
         JSWeakObjectMapSet(weakContext, weak, (__bridge void *)key, wrapper);
-        [self charon_attachWrapper:wrapper token:token context:context];
+        [self revenant_attachWrapper:wrapper token:token context:context];
     }
     [_nodeLock unlock];
     return wrapper;
 }
 
-- (void)charon_attachWrapper:(JSObjectRef)wrapper token:(CharonGraphToken *)token context:(JSContextRef)context
+- (void)revenant_attachWrapper:(JSObjectRef)wrapper token:(RevenantGraphToken *)token context:(JSContextRef)context
 {
     id object = token->_object;
-    JSObjectRef node = [self charon_nodeOf:token create:YES];
-    JSStringRef name = charon_js_string(CharonNodeName);
+    JSObjectRef node = [self revenant_nodeOf:token create:YES];
+    JSStringRef name = revenant_js_string(RevenantNodeName);
     bool attached = JSObjectSetPrivateProperty(context, wrapper, name, node);
     JSStringRelease(name);
     if (!attached)
         NSLog(@"JSVirtualMachine: a wrapper of %@ took no private property; what the object owns is not kept through it", [object class]);
 }
 
-- (void)charon_forgetToken:(CharonGraphToken *)token
+- (void)revenant_forgetToken:(RevenantGraphToken *)token
 {
     [_lock lock];
-    NSArray<CharonGraphToken *> *owners = token->_owners.allObjects;
+    NSArray<RevenantGraphToken *> *owners = token->_owners.allObjects;
     [_lock unlock];
-    for (CharonGraphToken *owner in owners) {
+    for (RevenantGraphToken *owner in owners) {
         JSObjectRef node = JSWeakObjectMapGet(_weakContext, _weak, (__bridge void *)owner);
         if (node)
             JSObjectDeletePrivateProperty(_weakContext, node, token->_name);
@@ -313,18 +313,18 @@ static void MachinesInit(void)
     if (!object || !owner)
         return;
     [_lock lock];
-    CharonGraphToken *ownedToken = [self charon_tokenOf:object create:YES];
-    CharonGraphToken *ownerToken = [self charon_tokenOf:owner create:YES];
-    CharonGraphEdge *edge = [ownerToken->_owned objectForKey:ownedToken];
+    RevenantGraphToken *ownedToken = [self revenant_tokenOf:object create:YES];
+    RevenantGraphToken *ownerToken = [self revenant_tokenOf:owner create:YES];
+    RevenantGraphEdge *edge = [ownerToken->_owned objectForKey:ownedToken];
     if (!edge) {
-        edge = [CharonGraphEdge new];
+        edge = [RevenantGraphEdge new];
         [ownerToken->_owned setObject:edge forKey:ownedToken];
     }
     edge->_count++;
     edge->_generation++;
     [ownedToken->_owners addObject:ownerToken];
     [_lock unlock];
-    [self charon_syncEdgeFrom:ownerToken to:ownedToken];
+    [self revenant_syncEdgeFrom:ownerToken to:ownedToken];
 }
 
 - (void)removeManagedReference:(id)object withOwner:(id)owner
@@ -334,9 +334,9 @@ static void MachinesInit(void)
     if (!object || !owner)
         return;
     [_lock lock];
-    CharonGraphToken *ownedToken = [self charon_tokenOf:object create:NO];
-    CharonGraphToken *ownerToken = [self charon_tokenOf:owner create:NO];
-    CharonGraphEdge *edge = ownedToken && ownerToken ? [ownerToken->_owned objectForKey:ownedToken] : nil;
+    RevenantGraphToken *ownedToken = [self revenant_tokenOf:object create:NO];
+    RevenantGraphToken *ownerToken = [self revenant_tokenOf:owner create:NO];
+    RevenantGraphEdge *edge = ownedToken && ownerToken ? [ownerToken->_owned objectForKey:ownedToken] : nil;
     if (!edge || edge->_count == 0) {
         [_lock unlock];
         return;
@@ -346,7 +346,7 @@ static void MachinesInit(void)
     if (edge->_count == 0)
         [ownedToken->_owners removeObject:ownerToken];
     [_lock unlock];
-    [self charon_syncEdgeFrom:ownerToken to:ownedToken];
+    [self revenant_syncEdgeFrom:ownerToken to:ownedToken];
 }
 
 @end

@@ -1,24 +1,24 @@
 #import <AVFoundation/AVFoundation.h>
 #import <objc/runtime.h>
 
-static const char charon_url_asset_initialization_options_key;
+static const char revenant_url_asset_initialization_options_key;
 
-@implementation AVComposition (CharonAVFoundationURLAssetInitializationOptions)
+@implementation AVComposition (RevenantAVFoundationURLAssetInitializationOptions)
 
 - (NSDictionary *)URLAssetInitializationOptions
 {
-    return objc_getAssociatedObject(self, &charon_url_asset_initialization_options_key);
+    return objc_getAssociatedObject(self, &revenant_url_asset_initialization_options_key);
 }
 
 - (void)setURLAssetInitializationOptions:(NSDictionary *)URLAssetInitializationOptions
 {
-    objc_setAssociatedObject(self, &charon_url_asset_initialization_options_key,
+    objc_setAssociatedObject(self, &revenant_url_asset_initialization_options_key,
                              [URLAssetInitializationOptions copy], OBJC_ASSOCIATION_COPY_NONATOMIC);
 }
 
 @end
 
-@implementation AVMutableComposition (CharonAVFoundationURLAssetInitializationOptions)
+@implementation AVMutableComposition (RevenantAVFoundationURLAssetInitializationOptions)
 
 + (instancetype)compositionWithURLAssetInitializationOptions:(NSDictionary *)options
 {

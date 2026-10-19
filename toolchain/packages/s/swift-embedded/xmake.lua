@@ -4,7 +4,7 @@ package("swift-embedded")
     set_license("Apache-2.0 WITH Swift-exception")
     set_policy("package.strict_compatibility", true)
 
-    add_deps("charon@swift 6.4.0", {alias = "swift", host = true, private = true, system = false})
+    add_deps("revenant@swift 6.4.0", {alias = "swift", host = true, private = true, system = false})
 
     on_load("iphoneos", function (package)
         package:add("links", "swiftUnicodeDataTables")

@@ -1,15 +1,15 @@
-#import "CharonLists.h"
+#import "RevenantLists.h"
 #import <objc/runtime.h>
 
 #pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
 
-static const void *CharonReconfiguredItemsKey = &CharonReconfiguredItemsKey;
+static const void *RevenantReconfiguredItemsKey = &RevenantReconfiguredItemsKey;
 
-@implementation NSDiffableDataSourceSnapshot (CharonReconfigure15)
+@implementation NSDiffableDataSourceSnapshot (RevenantReconfigure15)
 
 - (NSArray *)reconfiguredItemIdentifiers
 {
-    NSMutableOrderedSet *kept = objc_getAssociatedObject(self, CharonReconfiguredItemsKey);
+    NSMutableOrderedSet *kept = objc_getAssociatedObject(self, RevenantReconfiguredItemsKey);
     return kept ? kept.array : @[];
 }
 
@@ -17,17 +17,17 @@ static const void *CharonReconfiguredItemsKey = &CharonReconfiguredItemsKey;
 {
     if (!identifiers.count)
         return;
-    NSMutableOrderedSet *kept = objc_getAssociatedObject(self, CharonReconfiguredItemsKey);
+    NSMutableOrderedSet *kept = objc_getAssociatedObject(self, RevenantReconfiguredItemsKey);
     if (!kept) {
         kept = [NSMutableOrderedSet orderedSet];
-        objc_setAssociatedObject(self, CharonReconfiguredItemsKey, kept, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+        objc_setAssociatedObject(self, RevenantReconfiguredItemsKey, kept, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     }
     [kept unionOrderedSet:[NSOrderedSet orderedSetWithArray:identifiers]];
 }
 
 @end
 
-@implementation UICollectionView (CharonReconfigure15)
+@implementation UICollectionView (RevenantReconfigure15)
 
 - (void)reconfigureItemsAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths
 {
@@ -40,7 +40,7 @@ static const void *CharonReconfiguredItemsKey = &CharonReconfiguredItemsKey;
 
 @end
 
-@implementation UITableView (CharonReconfigure15)
+@implementation UITableView (RevenantReconfigure15)
 
 - (void)reconfigureRowsAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths
 {

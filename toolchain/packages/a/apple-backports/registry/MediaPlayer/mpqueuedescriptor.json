@@ -156,24 +156,24 @@
    "facts": "facts/MediaPlayer/QueueDescriptors.md"
   },
   {
-   "api": "-[MPMusicPlayerQueueDescriptor charonInitAbstractQueueDescriptor]",
+   "api": "-[MPMusicPlayerQueueDescriptor revenantInitAbstractQueueDescriptor]",
    "kind": "method",
    "introduced": "10.1",
    "minimum": "6.0",
    "status": "implemented",
    "source": "no SDK header declares it; it is the port's own, and MP_INIT_UNAVAILABLE on MPMusicPlayerQueueDescriptor is why it exists",
-   "reason": "A SEAM THE PORT OWNS, registered because the registry check asks what is built and finds nothing otherwise - the rule AGENTS.md records after a reviewer's verdict on a helper that carried no release. It exists because MP_INIT_UNAVAILABLE is a COMPILE-TIME attribute: MediaPlayerDefines.h:70-73 expands it to '+ (instancetype)new NS_UNAVAILABLE; - (instancetype)init NS_UNAVAILABLE;', so a subclass initializer cannot call [super init] - measured, three 'init' is unavailable errors, one per initializer, before this was added. Both concrete subclasses of the base in this library call it instead: MPMusicPlayerMediaItemQueueDescriptor and MPMusicPlayerStoreQueueDescriptor here, and MPMusicPlayerPlayParametersQueueDescriptor from the 11.0 object. It is declared ONCE, on the base in this object, and the 11.0 object only uses it - restating the category in that file produced 'duplicate definition of category CharonSubclassInit on interface MPMusicPlayerQueueDescriptor', measured",
+   "reason": "A SEAM THE PORT OWNS, registered because the registry check asks what is built and finds nothing otherwise - the rule AGENTS.md records after a reviewer's verdict on a helper that carried no release. It exists because MP_INIT_UNAVAILABLE is a COMPILE-TIME attribute: MediaPlayerDefines.h:70-73 expands it to '+ (instancetype)new NS_UNAVAILABLE; - (instancetype)init NS_UNAVAILABLE;', so a subclass initializer cannot call [super init] - measured, three 'init' is unavailable errors, one per initializer, before this was added. Both concrete subclasses of the base in this library call it instead: MPMusicPlayerMediaItemQueueDescriptor and MPMusicPlayerStoreQueueDescriptor here, and MPMusicPlayerPlayParametersQueueDescriptor from the 11.0 object. It is declared ONCE, on the base in this object, and the 11.0 object only uses it - restating the category in that file produced 'duplicate definition of category RevenantSubclassInit on interface MPMusicPlayerQueueDescriptor', measured",
    "effect": "the base's one initializer, reachable by the header's own concrete initializers; +new and -init stay unavailable exactly as the header writes them, and -init still refuses at runtime on the abstract base",
    "facts": "facts/MediaPlayer/QueueDescriptors.md"
   },
   {
-   "api": "-[MPMusicPlayerControllerQueue initWithCharonItems:]",
+   "api": "-[MPMusicPlayerControllerQueue initWithRevenantItems:]",
    "kind": "method",
    "introduced": "10.3",
    "minimum": "6.0",
    "status": "implemented",
    "source": "no SDK header declares it; it is the port's own, and MP_INIT_UNAVAILABLE on MPMusicPlayerControllerQueue is why it exists",
-   "reason": "A SEAM THE PORT OWNS, registered for the reason the row above gives. MPMusicPlayerControllerQueue is MP_INIT_UNAVAILABLE, so -[MPMusicPlayerApplicationController performQueueTransaction:completionHandler:] cannot build one with -init; it calls this instead, and the mutable subclass inherits it. The name begins with 'init' because it IS an initializer and the compiler enforces the init family: a first draft called it charonInitQueueWithItems: and clang rejected 'cannot assign to self outside of a method in the init family'. Its argument is the port's own queue value rather than the release's, because the release's queue is not readable as one - -nowPlayingItem is the item being played and -nowPlayingItemAtIndex: indexes it, and neither returns it - and an implementation that seeded this from the release's live queue would hand a caller a queue the release never produced",
+   "reason": "A SEAM THE PORT OWNS, registered for the reason the row above gives. MPMusicPlayerControllerQueue is MP_INIT_UNAVAILABLE, so -[MPMusicPlayerApplicationController performQueueTransaction:completionHandler:] cannot build one with -init; it calls this instead, and the mutable subclass inherits it. The name begins with 'init' because it IS an initializer and the compiler enforces the init family: a first draft called it revenantInitQueueWithItems: and clang rejected 'cannot assign to self outside of a method in the init family'. Its argument is the port's own queue value rather than the release's, because the release's queue is not readable as one - -nowPlayingItem is the item being played and -nowPlayingItemAtIndex: indexes it, and neither returns it - and an implementation that seeded this from the release's live queue would hand a caller a queue the release never produced",
    "effect": "a queue is built from the port's own item array, copied, which is what a transaction and the mutable subclass hand back to a caller",
    "facts": "facts/MediaPlayer/QueueDescriptors.md"
   }

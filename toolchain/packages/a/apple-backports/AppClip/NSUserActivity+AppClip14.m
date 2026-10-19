@@ -1,13 +1,13 @@
 #import <Foundation/Foundation.h>
 #import <AppClip/APActivationPayload.h>
 
-@interface NSUserActivity (CharonAppClip)
+@interface NSUserActivity (RevenantAppClip)
 
 @property (nullable, nonatomic, readonly, strong) APActivationPayload *appClipActivationPayload;
 
 @end
 
-@implementation NSUserActivity (CharonAppClip)
+@implementation NSUserActivity (RevenantAppClip)
 
 @dynamic appClipActivationPayload;
 

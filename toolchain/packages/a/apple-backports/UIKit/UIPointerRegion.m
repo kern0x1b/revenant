@@ -1,11 +1,11 @@
-#import "CharonPointer.h"
+#import "RevenantPointer.h"
 
-@interface UIPointerRegionRequest (CharonPointer)
-- (instancetype)initCharonWithLocation:(CGPoint)location modifiers:(UIKeyModifierFlags)modifiers;
+@interface UIPointerRegionRequest (RevenantPointer)
+- (instancetype)initRevenantWithLocation:(CGPoint)location modifiers:(UIKeyModifierFlags)modifiers;
 @end
 
-@interface UIPointerRegion (CharonPointer)
-- (instancetype)initCharonWithRect:(CGRect)rect identifier:(id<NSObject>)identifier;
+@interface UIPointerRegion (RevenantPointer)
+- (instancetype)initRevenantWithRect:(CGRect)rect identifier:(id<NSObject>)identifier;
 @end
 
 @implementation UIPointerRegion {
@@ -17,10 +17,10 @@
 
 + (instancetype)regionWithRect:(CGRect)rect identifier:(id<NSObject>)identifier
 {
-    return [[self alloc] initCharonWithRect:rect identifier:identifier];
+    return [[self alloc] initRevenantWithRect:rect identifier:identifier];
 }
 
-- (instancetype)initCharonWithRect:(CGRect)rect identifier:(id<NSObject>)identifier
+- (instancetype)initRevenantWithRect:(CGRect)rect identifier:(id<NSObject>)identifier
 {
     if ((self = [super init])) {
         _rect = rect;
@@ -51,7 +51,7 @@
 
 - (id)copyWithZone:(NSZone *)zone
 {
-    UIPointerRegion *copy = [[[self class] allocWithZone:zone] initCharonWithRect:_rect identifier:_identifier];
+    UIPointerRegion *copy = [[[self class] allocWithZone:zone] initRevenantWithRect:_rect identifier:_identifier];
     copy->_latchingAxes = _latchingAxes;
     return copy;
 }
@@ -69,7 +69,7 @@
 
 - (NSUInteger)hash
 {
-    return charon_hash_part(_rect.origin.x) ^ charon_hash_part(_rect.origin.y) ^ charon_hash_part(_rect.size.width) ^ charon_hash_part(_rect.size.height)
+    return revenant_hash_part(_rect.origin.x) ^ revenant_hash_part(_rect.origin.y) ^ revenant_hash_part(_rect.size.width) ^ revenant_hash_part(_rect.size.height)
         ^ _identifier.hash ^ (NSUInteger)_latchingAxes;
 }
 
@@ -79,7 +79,7 @@
                                                               (double)_rect.size.width, (double)_rect.size.height];
     if (_identifier)
         [text appendFormat:@"; identifier = %@", _identifier];
-    NSString *axes = charon_axes_text(_latchingAxes);
+    NSString *axes = revenant_axes_text(_latchingAxes);
     if (axes)
         [text appendFormat:@"; latchingAxes = (%@)", axes];
     [text appendString:@">"];
@@ -94,7 +94,7 @@
     UIKeyModifierFlags _modifiers;
 }
 
-- (instancetype)initCharonWithLocation:(CGPoint)location modifiers:(UIKeyModifierFlags)modifiers
+- (instancetype)initRevenantWithLocation:(CGPoint)location modifiers:(UIKeyModifierFlags)modifiers
 {
     if ((self = [super init])) {
         _location = location;

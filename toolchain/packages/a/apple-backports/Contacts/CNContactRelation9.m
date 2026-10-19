@@ -1,9 +1,9 @@
-#import "CharonContacts.h"
+#import "RevenantContacts.h"
 
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
 
 @implementation CNContactRelation {
-    NSString *_charonName;
+    NSString *_revenantName;
 }
 
 @dynamic name;
@@ -17,13 +17,13 @@
 {
     self = [super init];
     if (self)
-        _charonName = [name copy];
+        _revenantName = [name copy];
     return self;
 }
 
 - (NSString *)name
 {
-    return _charonName ?: @"";
+    return _revenantName ?: @"";
 }
 
 - (id)copyWithZone:(NSZone *)zone
@@ -38,14 +38,14 @@
 
 - (void)encodeWithCoder:(NSCoder *)coder
 {
-    [coder encodeObject:_charonName forKey:@"name"];
+    [coder encodeObject:_revenantName forKey:@"name"];
 }
 
 - (instancetype)initWithCoder:(NSCoder *)coder
 {
     self = [super init];
     if (self)
-        _charonName = [[coder decodeObjectOfClass:[NSString class] forKey:@"name"] copy];
+        _revenantName = [[coder decodeObjectOfClass:[NSString class] forKey:@"name"] copy];
     return self;
 }
 
@@ -61,7 +61,7 @@
 
 - (NSString *)description
 {
-    return [NSString stringWithFormat:@"<%@: %p: name=%@>", NSStringFromClass([self class]), self, _charonName];
+    return [NSString stringWithFormat:@"<%@: %p: name=%@>", NSStringFromClass([self class]), self, _revenantName];
 }
 
 @end

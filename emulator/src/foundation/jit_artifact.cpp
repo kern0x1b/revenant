@@ -30,7 +30,7 @@
 
 #include "dynarmic_ir_artifact.hpp"
 
-namespace shade {
+namespace emulator {
 namespace {
 
     constexpr std::array<char, 8> artifact_magic { 'i', 'L', 'J', 'A', 'R', 'T',

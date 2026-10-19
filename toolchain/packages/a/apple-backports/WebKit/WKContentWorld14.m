@@ -1,4 +1,4 @@
-#import "CharonWebKit.h"
+#import "RevenantWebKit.h"
 
 @implementation WKContentWorld {
 @private
@@ -50,7 +50,7 @@
 
 @end
 
-@implementation WKUserContentController (CharonContentWorld14)
+@implementation WKUserContentController (RevenantContentWorld14)
 
 - (void)removeScriptMessageHandlerForName:(NSString *)name contentWorld:(WKContentWorld *)contentWorld
 {

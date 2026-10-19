@@ -5,16 +5,16 @@
 #include <stdlib.h>
 #include <string.h>
 
-#import "CharonCoreMIDI.h"
+#import "RevenantCoreMIDI.h"
 
 OSStatus MIDIEventPacketSysexBytesForGroup(const MIDIEventPacket *pkt, UInt8 groupIndex, CFDataRef *outData)
 {
     *outData = NULL;
     if (groupIndex > 15 || pkt->wordCount < 2)
-        return charon_paramErr;
+        return revenant_paramErr;
     UInt32 first = pkt->words[0];
     if ((first >> 28) != 0x3 || ((first >> 24) & 0x0F) != groupIndex)
-        return charon_paramErr;
+        return revenant_paramErr;
     size_t parts = 0;
     for (size_t i = 0; i + 1 < pkt->wordCount; i += 2) {
         UInt32 word = pkt->words[i];
@@ -23,12 +23,12 @@ OSStatus MIDIEventPacketSysexBytesForGroup(const MIDIEventPacket *pkt, UInt8 gro
         parts++;
     }
     size_t room = 0;
-    if (!charon_size_mul(&room, parts, 8) || room > (size_t)LONG_MAX)
-        return charon_memFullErr;
+    if (!revenant_size_mul(&room, parts, 8) || room > (size_t)LONG_MAX)
+        return revenant_memFullErr;
     CFIndex capacity = (CFIndex)room;
     CFMutableDataRef data = CFDataCreateMutable(kCFAllocatorDefault, capacity);
     if (!data)
-        return charon_memFullErr;
+        return revenant_memFullErr;
     CFDataSetLength(data, capacity);
     UInt8 *bytes = CFDataGetMutableBytePtr(data);
     CFIndex count = 0;
@@ -55,15 +55,15 @@ OSStatus MIDIEventPacketSysexBytesForGroup(const MIDIEventPacket *pkt, UInt8 gro
     return noErr;
 }
 
-static OSStatus charon_send_ump(MIDISysexSendRequestUMP *umpRequest)
+static OSStatus revenant_send_ump(MIDISysexSendRequestUMP *umpRequest)
 {
     if (!umpRequest)
-        return charon_paramErr;
+        return revenant_paramErr;
     UInt32 count = umpRequest->wordsToSend;
     umpRequest->wordsToSend = 0;
     int queued = 0;
-    if (count > 0 && umpRequest->words && !CharonMIDIDeliverInProcess(umpRequest->destination, umpRequest->words, count))
-        queued = CharonMIDIUMPReleaseSend(umpRequest, umpRequest->destination, umpRequest->words, count);
+    if (count > 0 && umpRequest->words && !RevenantMIDIDeliverInProcess(umpRequest->destination, umpRequest->words, count))
+        queued = RevenantMIDIUMPReleaseSend(umpRequest, umpRequest->destination, umpRequest->words, count);
     if (!queued) {
         umpRequest->complete = YES;
         if (umpRequest->completionProc)
@@ -74,10 +74,10 @@ static OSStatus charon_send_ump(MIDISysexSendRequestUMP *umpRequest)
 
 OSStatus MIDISendUMPSysex(MIDISysexSendRequestUMP *umpRequest)
 {
-    return charon_send_ump(umpRequest);
+    return revenant_send_ump(umpRequest);
 }
 
 OSStatus MIDISendUMPSysex8(MIDISysexSendRequestUMP *umpRequest)
 {
-    return charon_send_ump(umpRequest);
+    return revenant_send_ump(umpRequest);
 }

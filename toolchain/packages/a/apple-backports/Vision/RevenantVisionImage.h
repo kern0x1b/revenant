@@ -1,22 +1,22 @@
-#ifndef CHARON_VISION_IMAGE_H
-#define CHARON_VISION_IMAGE_H
+#ifndef REVENANT_VISION_IMAGE_H
+#define REVENANT_VISION_IMAGE_H
 
 #import <CoreGraphics/CoreGraphics.h>
 
 #include <stddef.h>
 #include <stdint.h>
 
-extern void charon_vision_bilinear(const uint8_t *source, size_t sourceStride, size_t sourceWide,
+extern void revenant_vision_bilinear(const uint8_t *source, size_t sourceStride, size_t sourceWide,
                                    size_t sourceHigh, uint8_t *target, size_t targetStride, long insetX,
                                    long insetY, long drawWide, long drawHigh, long targetWide, long targetHigh);
 
 #import <CoreVideo/CoreVideo.h>
 
-#ifndef CHARON_VISION_INTERPOLATION
-#define CHARON_VISION_INTERPOLATION kCGInterpolationHigh
+#ifndef REVENANT_VISION_INTERPOLATION
+#define REVENANT_VISION_INTERPOLATION kCGInterpolationHigh
 #endif
 
-static inline CVPixelBufferRef charon_vision_pixels(CVPixelBufferRef source, size_t wide, size_t high,
+static inline CVPixelBufferRef revenant_vision_pixels(CVPixelBufferRef source, size_t wide, size_t high,
                                             VNImageCropAndScaleOption option)
 {
     CVPixelBufferRef buffer = NULL;
@@ -65,14 +65,14 @@ static inline CVPixelBufferRef charon_vision_pixels(CVPixelBufferRef source, siz
     out = (uint8_t *)CVPixelBufferGetBaseAddress(buffer);
     outStride = CVPixelBufferGetBytesPerRow(buffer);
     memset(out, 0, outStride * high);
-    charon_vision_bilinear(bytes, stride, sw, sh, out, outStride, insetX, insetY, (long)drawWide,
+    revenant_vision_bilinear(bytes, stride, sw, sh, out, outStride, insetX, insetY, (long)drawWide,
                            (long)drawHigh, (long)wide, (long)high);
     CVPixelBufferUnlockBaseAddress(source, kCVPixelBufferLock_ReadOnly);
     CVPixelBufferUnlockBaseAddress(buffer, 0);
     return buffer;
 }
 
-static inline CVPixelBufferRef charon_vision_buffer_of_image(CGImageRef image)
+static inline CVPixelBufferRef revenant_vision_buffer_of_image(CGImageRef image)
 {
     CVPixelBufferRef buffer = NULL;
     CGColorSpaceRef space;
@@ -101,7 +101,7 @@ static inline CVPixelBufferRef charon_vision_buffer_of_image(CGImageRef image)
         CGColorSpaceRelease(space);
     }
     if (context != NULL) {
-        CGContextSetInterpolationQuality(context, CHARON_VISION_INTERPOLATION);
+        CGContextSetInterpolationQuality(context, REVENANT_VISION_INTERPOLATION);
     }
     if (context == NULL) {
         CVPixelBufferUnlockBaseAddress(buffer, 0);

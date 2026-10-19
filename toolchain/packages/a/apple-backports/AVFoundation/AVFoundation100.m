@@ -5,12 +5,12 @@
 
 #pragma clang diagnostic ignored "-Wobjc-designated-initializers"
 
-static const char charon_waits_to_minimize_stalling_key;
-static const char charon_color_primaries_key;
-static const char charon_color_ycbcr_matrix_key;
-static const char charon_color_transfer_function_key;
+static const char revenant_waits_to_minimize_stalling_key;
+static const char revenant_color_primaries_key;
+static const char revenant_color_ycbcr_matrix_key;
+static const char revenant_color_transfer_function_key;
 
-@implementation AVPlayer (CharonAVFoundationPlayAtRate)
+@implementation AVPlayer (RevenantAVFoundationPlayAtRate)
 
 - (void)playImmediatelyAtRate:(float)rate
 {
@@ -19,23 +19,23 @@ static const char charon_color_transfer_function_key;
 
 @end
 
-@implementation AVPlayer (CharonAVFoundationWaitsToMinimizeStalling)
+@implementation AVPlayer (RevenantAVFoundationWaitsToMinimizeStalling)
 
 - (BOOL)automaticallyWaitsToMinimizeStalling
 {
-    NSNumber *stored = objc_getAssociatedObject(self, &charon_waits_to_minimize_stalling_key);
+    NSNumber *stored = objc_getAssociatedObject(self, &revenant_waits_to_minimize_stalling_key);
     return stored ? stored.boolValue : YES;
 }
 
 - (void)setAutomaticallyWaitsToMinimizeStalling:(BOOL)automaticallyWaitsToMinimizeStalling
 {
-    objc_setAssociatedObject(self, &charon_waits_to_minimize_stalling_key,
+    objc_setAssociatedObject(self, &revenant_waits_to_minimize_stalling_key,
                              @(automaticallyWaitsToMinimizeStalling), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
 @end
 
-static NSString *charon_avf_pixel_buffer_attribute(NSString *key)
+static NSString *revenant_avf_pixel_buffer_attribute(NSString *key)
 {
     static NSDictionary *keys;
     static dispatch_once_t once;
@@ -48,54 +48,54 @@ static NSString *charon_avf_pixel_buffer_attribute(NSString *key)
     return keys[key];
 }
 
-@implementation AVPlayerItemVideoOutput (CharonAVFoundationOutputSettings)
+@implementation AVPlayerItemVideoOutput (RevenantAVFoundationOutputSettings)
 
 - (instancetype)initWithOutputSettings:(NSDictionary *)outputSettings
 {
     NSMutableDictionary *attributes = nil;
     for (NSString *name in @[@"PixelFormat", @"Width", @"Height", @"IOSurface"]) {
-        id value = outputSettings[charon_avf_pixel_buffer_attribute(name)];
+        id value = outputSettings[revenant_avf_pixel_buffer_attribute(name)];
         if (!value)
             continue;
         if (!attributes)
             attributes = [NSMutableDictionary dictionary];
-        attributes[charon_avf_pixel_buffer_attribute(name)] = value;
+        attributes[revenant_avf_pixel_buffer_attribute(name)] = value;
     }
     return [self initWithPixelBufferAttributes:attributes];
 }
 
 @end
 
-@implementation AVVideoComposition (CharonAVFoundationColorProperties)
+@implementation AVVideoComposition (RevenantAVFoundationColorProperties)
 
 - (NSString *)colorPrimaries
 {
-    return objc_getAssociatedObject(self, &charon_color_primaries_key);
+    return objc_getAssociatedObject(self, &revenant_color_primaries_key);
 }
 
 - (void)setColorPrimaries:(NSString *)colorPrimaries
 {
-    objc_setAssociatedObject(self, &charon_color_primaries_key, [colorPrimaries copy], OBJC_ASSOCIATION_COPY_NONATOMIC);
+    objc_setAssociatedObject(self, &revenant_color_primaries_key, [colorPrimaries copy], OBJC_ASSOCIATION_COPY_NONATOMIC);
 }
 
 - (NSString *)colorYCbCrMatrix
 {
-    return objc_getAssociatedObject(self, &charon_color_ycbcr_matrix_key);
+    return objc_getAssociatedObject(self, &revenant_color_ycbcr_matrix_key);
 }
 
 - (void)setColorYCbCrMatrix:(NSString *)colorYCbCrMatrix
 {
-    objc_setAssociatedObject(self, &charon_color_ycbcr_matrix_key, [colorYCbCrMatrix copy], OBJC_ASSOCIATION_COPY_NONATOMIC);
+    objc_setAssociatedObject(self, &revenant_color_ycbcr_matrix_key, [colorYCbCrMatrix copy], OBJC_ASSOCIATION_COPY_NONATOMIC);
 }
 
 - (NSString *)colorTransferFunction
 {
-    return objc_getAssociatedObject(self, &charon_color_transfer_function_key);
+    return objc_getAssociatedObject(self, &revenant_color_transfer_function_key);
 }
 
 - (void)setColorTransferFunction:(NSString *)colorTransferFunction
 {
-    objc_setAssociatedObject(self, &charon_color_transfer_function_key, [colorTransferFunction copy], OBJC_ASSOCIATION_COPY_NONATOMIC);
+    objc_setAssociatedObject(self, &revenant_color_transfer_function_key, [colorTransferFunction copy], OBJC_ASSOCIATION_COPY_NONATOMIC);
 }
 
 @end

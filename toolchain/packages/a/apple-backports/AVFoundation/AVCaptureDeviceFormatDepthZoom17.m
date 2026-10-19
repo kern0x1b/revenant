@@ -1,6 +1,6 @@
-#import "CharonAVCaptureDeviceReactions17.h"
+#import "RevenantAVCaptureDeviceReactions17.h"
 
-@implementation AVCaptureDeviceFormat (CharonCaptureDeviceFormatDepthZoom17)
+@implementation AVCaptureDeviceFormat (RevenantCaptureDeviceFormatDepthZoom17)
 
 - (NSArray<AVZoomRange *> *)supportedVideoZoomRangesForDepthDataDelivery
 {

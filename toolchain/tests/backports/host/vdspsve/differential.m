@@ -7,8 +7,8 @@
 
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 
-void charon_host_vDSP_sve_svesq(const float *a, vDSP_Stride ia, float *sum, float *sumsquares, vDSP_Length n);
-void charon_host_vDSP_sve_svesqD(const double *a, vDSP_Stride ia, double *sum, double *sumsquares, vDSP_Length n);
+void revenant_host_vDSP_sve_svesq(const float *a, vDSP_Stride ia, float *sum, float *sumsquares, vDSP_Length n);
+void revenant_host_vDSP_sve_svesqD(const double *a, vDSP_Stride ia, double *sum, double *sumsquares, vDSP_Length n);
 
 static int checks, failures;
 
@@ -36,7 +36,7 @@ static int control(void)
 {
     float in[4] = {1.0f, 2.0f, 3.0f, 4.0f};
     float sum = -1.0f, squares = -1.0f;
-    charon_host_vDSP_sve_svesq(in, 1, &sum, &squares, 4);
+    revenant_host_vDSP_sve_svesq(in, 1, &sum, &squares, 4);
     const float want_sum = 10.0f, want_squares = 30.0f;
     checks++;
     if (memcmp(&sum, &want_sum, sizeof sum) == 0 && memcmp(&squares, &want_squares, sizeof squares) == 0) {
@@ -54,7 +54,7 @@ static int control(void)
 static void compare(const char *label, const float *a, vDSP_Stride stride, vDSP_Length n)
 {
     float mine_sum = -1.0f, mine_sq = -1.0f, host_sum = -1.0f, host_sq = -1.0f;
-    charon_host_vDSP_sve_svesq(a, stride, &mine_sum, &mine_sq, n);
+    revenant_host_vDSP_sve_svesq(a, stride, &mine_sum, &mine_sq, n);
     vDSP_sve_svesq(a, stride, &host_sum, &host_sq, n);
     char note[96];
     snprintf(note, sizeof note, "%s, N %d, stride %d, the sum", label, (int)n, (int)stride);
@@ -66,7 +66,7 @@ static void compare(const char *label, const float *a, vDSP_Stride stride, vDSP_
 static void compare_double(const char *label, const double *a, vDSP_Stride stride, vDSP_Length n)
 {
     double mine_sum = -1.0, mine_sq = -1.0, host_sum = -1.0, host_sq = -1.0;
-    charon_host_vDSP_sve_svesqD(a, stride, &mine_sum, &mine_sq, n);
+    revenant_host_vDSP_sve_svesqD(a, stride, &mine_sum, &mine_sq, n);
     vDSP_sve_svesqD(a, stride, &host_sum, &host_sq, n);
     char note[96];
     snprintf(note, sizeof note, "%s, N %d, stride %d, the sum", label, (int)n, (int)stride);
@@ -105,7 +105,7 @@ static void order_case(void)
 {
     static const float v[6] = {1e30f, 1.0f, -1e30f, 1.0f, 1e-30f, 3.0f};
     float mine = -1.0f, mine_q = -1.0f, host = -1.0f, host_q = -1.0f;
-    charon_host_vDSP_sve_svesq(v, 1, &mine, &mine_q, 6);
+    revenant_host_vDSP_sve_svesq(v, 1, &mine, &mine_q, 6);
     vDSP_sve_svesq(v, 1, &host, &host_q, 6);
     float seq = order_sequential(v, 6), blk2 = order_blocked(v, 6, 2), blk4 = order_blocked(v, 6, 4),
           pair = order_pairwise(v, 6);

@@ -2,22 +2,22 @@
 #import "NSPersonNameComponentKeys.h"
 #import <objc/runtime.h>
 
-static char CharonPersonNameStyleKey;
-static char CharonPersonNamePhoneticKey;
+static char RevenantPersonNameStyleKey;
+static char RevenantPersonNamePhoneticKey;
 
-@interface CharonPersonNameParts : NSObject
+@interface RevenantPersonNameParts : NSObject
 @property BOOL familyFirst;
 @property NSString *delimiter;
 @property NSString *composite;
 @end
 
-@implementation CharonPersonNameParts
+@implementation RevenantPersonNameParts
 @synthesize familyFirst = _familyFirst;
 @synthesize delimiter = _delimiter;
 @synthesize composite = _composite;
 @end
 
-static BOOL charon_language_is_family_first(NSString *identifier)
+static BOOL revenant_language_is_family_first(NSString *identifier)
 {
     static NSSet *familyFirst;
     static dispatch_once_t once;
@@ -31,10 +31,10 @@ static BOOL charon_language_is_family_first(NSString *identifier)
     return [familyFirst containsObject:language];
 }
 
-static CharonPersonNameParts *charon_parts(NSPersonNameComponents *components, NSString *identifier)
+static RevenantPersonNameParts *revenant_parts(NSPersonNameComponents *components, NSString *identifier)
 {
-    CharonPersonNameParts *parts = [[CharonPersonNameParts alloc] init];
-    parts.familyFirst = charon_language_is_family_first(identifier);
+    RevenantPersonNameParts *parts = [[RevenantPersonNameParts alloc] init];
+    parts.familyFirst = revenant_language_is_family_first(identifier);
     parts.delimiter = @" ";
     NSString *given = components.givenName, *family = components.familyName;
     NSMutableString *composite = [NSMutableString string];
@@ -48,14 +48,14 @@ static CharonPersonNameParts *charon_parts(NSPersonNameComponents *components, N
     return parts;
 }
 
-static NSString *charon_initial(NSString *text)
+static NSString *revenant_initial(NSString *text)
 {
     if (!text.length)
         return nil;
     return [[text substringToIndex:1] uppercaseString];
 }
 
-static NSPersonNameComponents *charon_reads(NSPersonNameComponents *components, BOOL phonetic)
+static NSPersonNameComponents *revenant_reads(NSPersonNameComponents *components, BOOL phonetic)
 {
     if (!phonetic)
         return components;
@@ -63,7 +63,7 @@ static NSPersonNameComponents *charon_reads(NSPersonNameComponents *components, 
     return spelling ?: components;
 }
 
-static NSArray *charon_pieces(NSString *first, NSString *second, NSString *third, NSString *fourth, NSString *fifth)
+static NSArray *revenant_pieces(NSString *first, NSString *second, NSString *third, NSString *fourth, NSString *fifth)
 {
     NSMutableArray *pieces = [NSMutableArray array];
     for (NSString *piece in @[first ?: @"", second ?: @"", third ?: @"", fourth ?: @"", fifth ?: @""])
@@ -72,7 +72,7 @@ static NSArray *charon_pieces(NSString *first, NSString *second, NSString *third
     return pieces;
 }
 
-static NSString *charon_join(NSArray<NSString *> *pieces, NSString *delimiter)
+static NSString *revenant_join(NSArray<NSString *> *pieces, NSString *delimiter)
 {
     NSMutableArray *kept = [NSMutableArray array];
     for (NSString *piece in pieces)
@@ -86,33 +86,33 @@ static NSString *charon_join(NSArray<NSString *> *pieces, NSString *delimiter)
 - (instancetype)init
 {
     if ((self = [super init]))
-        objc_setAssociatedObject(self, &CharonPersonNameStyleKey, @(NSPersonNameComponentsFormatterStyleDefault),
+        objc_setAssociatedObject(self, &RevenantPersonNameStyleKey, @(NSPersonNameComponentsFormatterStyleDefault),
                                  OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     return self;
 }
 
 - (NSPersonNameComponentsFormatterStyle)style
 {
-    NSNumber *stored = objc_getAssociatedObject(self, &CharonPersonNameStyleKey);
+    NSNumber *stored = objc_getAssociatedObject(self, &RevenantPersonNameStyleKey);
     return (NSPersonNameComponentsFormatterStyle)(stored ? stored.integerValue : NSPersonNameComponentsFormatterStyleDefault);
 }
 
 - (void)setStyle:(NSPersonNameComponentsFormatterStyle)style
 {
-    objc_setAssociatedObject(self, &CharonPersonNameStyleKey, @(style), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, &RevenantPersonNameStyleKey, @(style), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
 - (BOOL)isPhonetic
 {
-    return [objc_getAssociatedObject(self, &CharonPersonNamePhoneticKey) boolValue];
+    return [objc_getAssociatedObject(self, &RevenantPersonNamePhoneticKey) boolValue];
 }
 
 - (void)setPhonetic:(BOOL)phonetic
 {
-    objc_setAssociatedObject(self, &CharonPersonNamePhoneticKey, @(phonetic), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, &RevenantPersonNamePhoneticKey, @(phonetic), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
-- (NSString *)charon_nameLocale
+- (NSString *)revenant_nameLocale
 {
     return self.locale.localeIdentifier ?: [NSLocale autoupdatingCurrentLocale].localeIdentifier;
 }
@@ -121,7 +121,7 @@ static NSString *charon_join(NSArray<NSString *> *pieces, NSString *delimiter)
 {
     if (!components)
         [NSException raise:NSInternalInconsistencyException format:@"Invalid parameter not satisfying: components != nil"];
-    NSPersonNameComponents *read = charon_reads(components, self.isPhonetic);
+    NSPersonNameComponents *read = revenant_reads(components, self.isPhonetic);
     NSString *given = read.givenName, *family = read.familyName, *middle = read.middleName;
     NSString *prefix = read.namePrefix, *suffix = read.nameSuffix, *nickname = read.nickname;
     switch (self.style) {
@@ -140,32 +140,32 @@ static NSString *charon_join(NSArray<NSString *> *pieces, NSString *delimiter)
                     first = second;
                     second = swap;
                 }
-                return [charon_pieces(charon_initial([read valueForKey:first]),
-                                      charon_initial([read valueForKey:second]), nil, nil, nil)
+                return [revenant_pieces(revenant_initial([read valueForKey:first]),
+                                      revenant_initial([read valueForKey:second]), nil, nil, nil)
                         componentsJoinedByString:@""];
             }
             if (!given.length && !family.length)
                 return nickname ?: @"";
-            CharonPersonNameParts *parts = charon_parts(read, [self charon_nameLocale]);
-            return [charon_pieces(parts.familyFirst ? charon_initial(family) : charon_initial(given),
-                                  parts.familyFirst ? charon_initial(given) : charon_initial(family),
+            RevenantPersonNameParts *parts = revenant_parts(read, [self revenant_nameLocale]);
+            return [revenant_pieces(parts.familyFirst ? revenant_initial(family) : revenant_initial(given),
+                                  parts.familyFirst ? revenant_initial(given) : revenant_initial(family),
                                   nil, nil, nil) componentsJoinedByString:@""];
         }
         case NSPersonNameComponentsFormatterStyleLong: {
-            CharonPersonNameParts *parts = charon_parts(read, [self charon_nameLocale]);
+            RevenantPersonNameParts *parts = revenant_parts(read, [self revenant_nameLocale]);
             NSArray *pieces = parts.familyFirst
-                ? charon_pieces(prefix, family, given, middle, suffix)
-                : charon_pieces(prefix, given, middle, family, suffix);
+                ? revenant_pieces(prefix, family, given, middle, suffix)
+                : revenant_pieces(prefix, given, middle, family, suffix);
             if (!pieces.count)
                 return nickname ?: @"";
-            return charon_join(pieces, parts.delimiter);
+            return revenant_join(pieces, parts.delimiter);
         }
         case NSPersonNameComponentsFormatterStyleDefault:
         case NSPersonNameComponentsFormatterStyleMedium:
         default: {
-            CharonPersonNameParts *parts = charon_parts(read, [self charon_nameLocale]);
-            return charon_join(parts.familyFirst ? charon_pieces(family, given, nil, nil, nil)
-                                                : charon_pieces(given, family, nil, nil, nil),
+            RevenantPersonNameParts *parts = revenant_parts(read, [self revenant_nameLocale]);
+            return revenant_join(parts.familyFirst ? revenant_pieces(family, given, nil, nil, nil)
+                                                : revenant_pieces(given, family, nil, nil, nil),
                                parts.delimiter);
         }
     }
@@ -183,9 +183,9 @@ static NSString *charon_join(NSArray<NSString *> *pieces, NSString *delimiter)
 
 - (NSAttributedString *)annotatedStringFromPersonNameComponents:(NSPersonNameComponents *)components
 {
-    NSPersonNameComponents *read = charon_reads(components, self.isPhonetic);
+    NSPersonNameComponents *read = revenant_reads(components, self.isPhonetic);
     self.style = NSPersonNameComponentsFormatterStyleDefault;
-    CharonPersonNameParts *parts = charon_parts(read, [self charon_nameLocale]);
+    RevenantPersonNameParts *parts = revenant_parts(read, [self revenant_nameLocale]);
     NSArray *order = parts.familyFirst
         ? @[@[read.familyName ?: @"", NSPersonNameComponentFamilyName],
            @[read.givenName ?: @"", NSPersonNameComponentGivenName]]

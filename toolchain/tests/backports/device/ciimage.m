@@ -21,7 +21,7 @@ int main(int argc, char **argv)
 {
     @autoreleasepool {
         if (argc > 1)
-            charon_log_to([NSString stringWithUTF8String:argv[1]]);
+            revenant_log_to([NSString stringWithUTF8String:argv[1]]);
         context = [CIContext contextWithOptions:@{kCIContextUseSoftwareRenderer: @YES, kCIContextWorkingColorSpace: [NSNull null]}];
         CIImage *red = [[CIImage imageWithColor:[CIColor colorWithRed:1 green:0 blue:0 alpha:0.5]] imageByCroppingToRect:CGRectMake(0, 0, 10, 10)];
         CIImage *blue = [[CIImage imageWithColor:[CIColor colorWithRed:0 green:0 blue:1 alpha:1]] imageByCroppingToRect:CGRectMake(5, 5, 10, 10)];
@@ -75,7 +75,7 @@ int main(int argc, char **argv)
         rgba(scaled, CGPointMake(12, 7), edge);
         printf("measure the release's scaled edge at 12,7: %d %d %d %d\n", edge[0], edge[1], edge[2], edge[3]);
         CHECK(edge[3] > 64 && edge[3] < 192, "the release samples a scaled edge half covered as half, so linearly");
-        printf("checks=%d failures=%d\n", charon_checks, charon_failures);
+        printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
     }
-    return charon_failures ? 1 : 0;
+    return revenant_failures ? 1 : 0;
 }

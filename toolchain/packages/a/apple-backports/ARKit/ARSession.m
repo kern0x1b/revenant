@@ -1,17 +1,17 @@
 #import <ARKit/ARKit.h>
 #import <CoreLocation/CoreLocation.h>
 
-#import "CharonARTracker.h"
-#import "CharonARKitPrivate.h"
+#import "RevenantARTracker.h"
+#import "RevenantARKitPrivate.h"
 
 #pragma clang diagnostic ignored "-Wunguarded-availability-new"
 
-@interface ARSession () <CharonARTrackerDelegate>
+@interface ARSession () <RevenantARTrackerDelegate>
 @end
 
 @implementation ARSession
 {
-    CharonARTracker *_tracker;
+    RevenantARTracker *_tracker;
     NSOperationQueue *_captureQueue;
     NSMutableArray<ARAnchor *> *_anchors;
     NSMutableArray<ARAnchor *> *_pending;
@@ -33,7 +33,7 @@
     self = [super init];
     if (!self)
         return nil;
-    _tracker = [[CharonARTracker alloc] init];
+    _tracker = [[RevenantARTracker alloc] init];
     _tracker.delegate = self;
     _anchors = [NSMutableArray array];
     _pending = [NSMutableArray array];
@@ -42,7 +42,7 @@
     _captureQueue.maxConcurrentOperationCount = 1;
     _captureQueue.name = @"space.kern0x1b.arkit.capture";
     _trackedRaycasts = [NSMutableArray array];
-    _worldOrigin = CharonARKitIdentityFloat4x4;
+    _worldOrigin = RevenantARKitIdentityFloat4x4;
     return self;
 }
 
@@ -123,7 +123,7 @@
 
 #pragma mark - What the tracker reports
 
-- (void)tracker:(CharonARTracker *)tracker didUpdateWithTimestamp:(NSTimeInterval)timestamp
+- (void)tracker:(RevenantARTracker *)tracker didUpdateWithTimestamp:(NSTimeInterval)timestamp
 {
     NSArray<ARAnchor *> *added = [_pending copy];
     [_pending removeAllObjects];
@@ -155,10 +155,10 @@
     });
 }
 
-- (NSArray<ARPlaneAnchor *> *)planeAnchorsForTracker:(CharonARTracker *)tracker
+- (NSArray<ARPlaneAnchor *> *)planeAnchorsForTracker:(RevenantARTracker *)tracker
 {
     NSMutableArray<ARPlaneAnchor *> *out = [NSMutableArray array];
-    for (CharonARValue *value in tracker.planes) {
+    for (RevenantARValue *value in tracker.planes) {
         [out addObject:[[ARPlaneAnchor alloc] initWithPlaneValue:value]];
     }
     return out;
@@ -181,7 +181,7 @@
 
 - (ARFrame *)frameWithPixelBuffer:(CVPixelBufferRef)pixelBuffer
 {
-    CharonARTracker *tracker = _tracker;
+    RevenantARTracker *tracker = _tracker;
     return [[ARFrame alloc] initWithCameraTransform:tracker.cameraTransform
                                     deviceTransform:tracker.deviceTransform
                               cameraTransformTime:tracker.timestamp
@@ -247,24 +247,24 @@
         types:(ARHitTestResultType)types
        results:(NSMutableArray<ARHitTestResult *> *)results
 {
-    NSMutableArray<CharonARValue *> *hits = [NSMutableArray array];
+    NSMutableArray<RevenantARValue *> *hits = [NSMutableArray array];
     if (types & ARHitTestResultTypeFeaturePoint)
         [_tracker hitTestPoint:point results:hits];
     if (types & (ARHitTestResultTypeExistingPlaneUsingGeometry |
                  ARHitTestResultTypeEstimatedHorizontalPlane |
                  ARHitTestResultTypeEstimatedVerticalPlane))
         [_tracker hitTestPoint:point existingPlane:YES results:hits];
-    for (CharonARValue *value in hits)
+    for (RevenantARValue *value in hits)
         [results addObject:[[ARHitTestResult alloc] initWithHitValue:value]];
 }
 
 - (void)raycastWithQuery:(ARRaycastQuery *)query
               results:(NSMutableArray<ARRaycastResult *> *)results
 {
-    NSMutableArray<CharonARValue *> *hits = [NSMutableArray array];
+    NSMutableArray<RevenantARValue *> *hits = [NSMutableArray array];
     [_tracker raycastFromOrigin:query.origin direction:query.direction
                          allowing:query.target results:hits];
-    for (CharonARValue *value in hits)
+    for (RevenantARValue *value in hits)
         [results addObject:[[ARRaycastResult alloc] initWithHitValue:value]];
 }
 

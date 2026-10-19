@@ -3,11 +3,11 @@
 #
 # What runs here, and what does not, is deliberate and is written down rather than discovered:
 #
-#   * The port's **buffer** blits run. CharonMetalBuffer.m and the copy and fill methods of
-#     CharonMetalBlitEncoder hold no OpenGL ES 2.0, so they compile for Mac Catalyst with the port's
+#   * The port's **buffer** blits run. RevenantMetalBuffer.m and the copy and fill methods of
+#     RevenantMetalBlitEncoder hold no OpenGL ES 2.0, so they compile for Mac Catalyst with the port's
 #     classes renamed and run in one process beside macOS Metal's own blit encoder, on the same
 #     inputs, and the bytes that come out are compared.
-#   * The port's **texture** blits do not run here. CharonMetalTexture is an ES 2.0 texture, and
+#   * The port's **texture** blits do not run here. RevenantMetalTexture is an ES 2.0 texture, and
 #     Catalyst has no EAGL context to make one in. What this test does for those is record macOS
 #     Metal's own answers into metalblit-expectations.h, which tests/backports/device/metalblit.m
 #     holds the port to on the device; the recording is the oracle, and the device test is where the
@@ -19,7 +19,7 @@ set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 METAL=${METAL:-$here/../../../../packages/a/apple-backports/Metal}
-BUILD=${BUILD:-$(runs_fresh charon-metalblit)}
+BUILD=${BUILD:-$(runs_fresh revenant-metalblit)}
 sources=${SOURCES:-$(cat "$here/sources.txt")}
 sdk=$(xcrun --show-sdk-path)
 target="-target arm64-apple-ios15.0-macabi -isysroot $sdk -iframework $sdk/System/iOSSupport/System/Library/Frameworks"
@@ -41,14 +41,14 @@ for source in $sources; do
 done
 renames=""
 for name in $(xcrun nm -gU "$BUILD"/plain/*.o | awk 'NF == 3 {print $3}' | grep -E '^_OBJC_CLASS_\$_' | sed -e 's/^_OBJC_CLASS_\$_//' | sort -u); do
-    renames="$renames -D$name=CharonHost$name"
+    renames="$renames -D$name=RevenantHost$name"
 done
 echo "renamed:$renames"
 for source in $sources; do
     xcrun clang $target -fobjc-arc -fvisibility=hidden $quiet $renames -I"$here/gl-stub" -I"$METAL" -c "$METAL/$source" -o "$BUILD/renamed/$source.o"
 done
-# The port's buffer files name two classes this test cannot have: CharonMetalDevice, which makes an
-# EAGL context, and CharonMetalTexture, which is an ES 2.0 texture. host-fixtures.m supplies the two
+# The port's buffer files name two classes this test cannot have: RevenantMetalDevice, which makes an
+# EAGL context, and RevenantMetalTexture, which is an ES 2.0 texture. host-fixtures.m supplies the two
 # names, and every entry point of them raises, so a path under test that ever reached one would abort
 # this test rather than be compared against a stand-in that agrees with it.
 xcrun clang $target -fobjc-arc $quiet $renames -I"$here" -c "$here/host-fixtures.m" -o "$BUILD/host-fixtures.o"

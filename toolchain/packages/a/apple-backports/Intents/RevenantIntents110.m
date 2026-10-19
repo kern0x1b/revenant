@@ -2,7 +2,7 @@
 #import <Intents/INParameter.h>
 #import <objc/runtime.h>
 
-#import "../../../c/charon-coding/files/CharonCoding.h"
+#import "../../../c/revenant-coding/files/RevenantCoding.h"
 
 #pragma mark - INParameter
 
@@ -67,19 +67,19 @@
 - (instancetype)initWithCoder:(NSCoder *)coder
 {
     if ((self = [super init]))
-        charon_intents_decode(self, coder);
+        revenant_intents_decode(self, coder);
     return self;
 }
 
 - (void)encodeWithCoder:(NSCoder *)coder
 {
-    charon_intents_encode(self, coder);
+    revenant_intents_encode(self, coder);
 }
 
 - (id)copyWithZone:(NSZone *)zone
 {
     INParameter *copy = [[[self class] allocWithZone:zone] init];
-    charon_intents_copy(copy, self);
+    revenant_intents_copy(copy, self);
     return copy;
 }
 

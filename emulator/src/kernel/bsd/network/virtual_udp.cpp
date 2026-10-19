@@ -13,7 +13,7 @@
 #include <array>
 #include <limits>
 
-namespace shade::bsd {
+namespace emulator::bsd {
 namespace {
 
     using namespace darwin::network;

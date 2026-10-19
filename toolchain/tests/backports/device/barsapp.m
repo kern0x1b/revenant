@@ -49,10 +49,10 @@ static UITabBarAppearance *tab_appearance(UIColor *colour)
     return appearance;
 }
 
-@interface CharonRowsController : UITableViewController
+@interface RevenantRowsController : UITableViewController
 @end
 
-@implementation CharonRowsController
+@implementation RevenantRowsController
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
@@ -68,15 +68,15 @@ static UITabBarAppearance *tab_appearance(UIColor *colour)
 
 @end
 
-@interface CharonBarsDelegate : UIResponder <UIApplicationDelegate>
+@interface RevenantBarsDelegate : UIResponder <UIApplicationDelegate>
 @property (nonatomic, strong) UIWindow *window;
 @end
 
-@implementation CharonBarsDelegate
+@implementation RevenantBarsDelegate
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)options
 {
-    charon_log_to([results_folder stringByAppendingPathComponent:@"barsapp.log"]);
+    revenant_log_to([results_folder stringByAppendingPathComponent:@"barsapp.log"]);
     UIViewController *root = [[UIViewController alloc] init];
     root.title = @"Bars";
     UINavigationController *navigation = [[UINavigationController alloc] initWithRootViewController:root];
@@ -92,12 +92,12 @@ static UITabBarAppearance *tab_appearance(UIColor *colour)
     @try {
         [self run];
     } @catch (NSException *exception) {
-        charon_check(NO, "the checks raise no exception", [NSString stringWithFormat:@"%@: %@", exception.name, exception.reason]);
+        revenant_check(NO, "the checks raise no exception", [NSString stringWithFormat:@"%@: %@", exception.name, exception.reason]);
     }
     @try {
         [self runScrolling];
     } @catch (NSException *exception) {
-        charon_check(NO, "the scrolling checks raise no exception", [NSString stringWithFormat:@"%@: %@", exception.name, exception.reason]);
+        revenant_check(NO, "the scrolling checks raise no exception", [NSString stringWithFormat:@"%@: %@", exception.name, exception.reason]);
     }
     if (gesture_ready() && [UIApplication sharedApplication].applicationState == UIApplicationStateActive)
         [self performSelector:@selector(runDragAndFinish) withObject:nil afterDelay:1.0];
@@ -107,7 +107,7 @@ static UITabBarAppearance *tab_appearance(UIColor *colour)
 
 - (void)finish
 {
-    NSString *summary = [NSString stringWithFormat:@"%@ checks=%d failures=%d\n", charon_failures ? @"FAIL" : @"ok", charon_checks, charon_failures];
+    NSString *summary = [NSString stringWithFormat:@"%@ checks=%d failures=%d\n", revenant_failures ? @"FAIL" : @"ok", revenant_checks, revenant_failures];
     [summary writeToFile:[results_folder stringByAppendingPathComponent:@"barsapp.done"] atomically:YES encoding:NSUTF8StringEncoding error:NULL];
 }
 
@@ -150,11 +150,11 @@ static UITabBarAppearance *tab_appearance(UIColor *colour)
 - (void)runScrolling
 {
     UITabBarController *tabs = [[UITabBarController alloc] init];
-    CharonRowsController *first = [[CharonRowsController alloc] initWithStyle:UITableViewStylePlain];
+    RevenantRowsController *first = [[RevenantRowsController alloc] initWithStyle:UITableViewStylePlain];
     first.title = @"first";
     UINavigationController *firstNavigation = [[UINavigationController alloc] initWithRootViewController:first];
     firstNavigation.tabBarItem = [[UITabBarItem alloc] initWithTitle:@"first" image:nil tag:0];
-    CharonRowsController *second = [[CharonRowsController alloc] initWithStyle:UITableViewStylePlain];
+    RevenantRowsController *second = [[RevenantRowsController alloc] initWithStyle:UITableViewStylePlain];
     second.title = @"second";
     second.tabBarItem = [[UITabBarItem alloc] initWithTitle:@"second" image:nil tag:1];
     tabs.viewControllers = @[firstNavigation, second];
@@ -192,7 +192,7 @@ static UITabBarAppearance *tab_appearance(UIColor *colour)
     [firstNavigation popViewControllerAnimated:NO];
     CHECK(wait_until(^BOOL { return is_colour(background(), 0, 0, 1); }, 3), "popping it returns the bar's own");
 
-    CharonRowsController *pushed = [[CharonRowsController alloc] initWithStyle:UITableViewStylePlain];
+    RevenantRowsController *pushed = [[RevenantRowsController alloc] initWithStyle:UITableViewStylePlain];
     pushed.title = @"pushed";
     pushed.navigationItem.standardAppearance = navigation_appearance(purple);
     [firstNavigation pushViewController:pushed animated:YES];
@@ -295,6 +295,6 @@ int main(int argc, char *argv[])
 {
     @autoreleasepool {
         [[NSFileManager defaultManager] createDirectoryAtPath:results_folder withIntermediateDirectories:YES attributes:nil error:NULL];
-        return UIApplicationMain(argc, argv, nil, @"CharonBarsDelegate");
+        return UIApplicationMain(argc, argv, nil, @"RevenantBarsDelegate");
     }
 }

@@ -9,7 +9,7 @@
 	<key>CFBundleExecutable</key>
 	<string>smallapis</string>
 	<key>CFBundleIdentifier</key>
-	<string>local.charon.backports.smallapis</string>
+	<string>local.revenant.backports.smallapis</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>

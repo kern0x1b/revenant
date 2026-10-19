@@ -9,7 +9,7 @@ set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 METAL=${METAL:-$here/../../../../packages/a/apple-backports/Metal}
-BUILD=${BUILD:-$(runs_fresh charon-mtl4-sparse-mapping)}
+BUILD=${BUILD:-$(runs_fresh revenant-mtl4-sparse-mapping)}
 xcrun clang -O -fobjc-arc -fvisibility=hidden -Wno-objc-designated-initializers -c "$METAL/MTL4SparseMapping26.m" -o "$BUILD/MTL4SparseMapping26.o"
 xcrun clang -O -fobjc-arc "$here/differential.m" "$BUILD/MTL4SparseMapping26.o" -framework Foundation -framework Metal -o "$BUILD/differential"
 "$BUILD/differential" "$BUILD"

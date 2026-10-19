@@ -21,12 +21,12 @@ NSString *const NSExtensionItemAttachmentsKey = @"NSExtensionItemAttachmentsKey"
     return self;
 }
 
-- (id)charon_valueForKey:(NSString *)key
+- (id)revenant_valueForKey:(NSString *)key
 {
     return _userInfo[key];
 }
 
-- (void)charon_setValue:(id)value forKey:(NSString *)key
+- (void)revenant_setValue:(id)value forKey:(NSString *)key
 {
     NSMutableDictionary *info = _userInfo ? [_userInfo mutableCopy] : [NSMutableDictionary dictionary];
     if (value)
@@ -36,40 +36,40 @@ NSString *const NSExtensionItemAttachmentsKey = @"NSExtensionItemAttachmentsKey"
     _userInfo = [info copy];
 }
 
-- (NSAttributedString *)charon_attributedStringForKey:(NSString *)key
+- (NSAttributedString *)revenant_attributedStringForKey:(NSString *)key
 {
-    NSData *data = [self charon_valueForKey:key];
+    NSData *data = [self revenant_valueForKey:key];
     return [data isKindOfClass:[NSData class]] ? [NSKeyedUnarchiver unarchiveObjectWithData:data] : nil;
 }
 
 - (NSAttributedString *)attributedTitle
 {
-    return [self charon_attributedStringForKey:NSExtensionItemAttributedTitleKey];
+    return [self revenant_attributedStringForKey:NSExtensionItemAttributedTitleKey];
 }
 
 - (void)setAttributedTitle:(NSAttributedString *)title
 {
-    [self charon_setValue:title ? [NSKeyedArchiver archivedDataWithRootObject:title] : nil forKey:NSExtensionItemAttributedTitleKey];
+    [self revenant_setValue:title ? [NSKeyedArchiver archivedDataWithRootObject:title] : nil forKey:NSExtensionItemAttributedTitleKey];
 }
 
 - (NSAttributedString *)attributedContentText
 {
-    return [self charon_attributedStringForKey:NSExtensionItemAttributedContentTextKey];
+    return [self revenant_attributedStringForKey:NSExtensionItemAttributedContentTextKey];
 }
 
 - (void)setAttributedContentText:(NSAttributedString *)text
 {
-    [self charon_setValue:text ? [NSKeyedArchiver archivedDataWithRootObject:text] : nil forKey:NSExtensionItemAttributedContentTextKey];
+    [self revenant_setValue:text ? [NSKeyedArchiver archivedDataWithRootObject:text] : nil forKey:NSExtensionItemAttributedContentTextKey];
 }
 
 - (NSArray<NSItemProvider *> *)attachments
 {
-    return [self charon_valueForKey:NSExtensionItemAttachmentsKey];
+    return [self revenant_valueForKey:NSExtensionItemAttachmentsKey];
 }
 
 - (void)setAttachments:(NSArray<NSItemProvider *> *)attachments
 {
-    [self charon_setValue:[attachments copy] forKey:NSExtensionItemAttachmentsKey];
+    [self revenant_setValue:[attachments copy] forKey:NSExtensionItemAttachmentsKey];
 }
 
 - (NSDictionary *)userInfo

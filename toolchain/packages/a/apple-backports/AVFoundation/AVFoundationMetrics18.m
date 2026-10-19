@@ -1,9 +1,9 @@
-#import "CharonAVMetrics18.h"
+#import "RevenantAVMetrics18.h"
 #import <AVFoundation/AVFoundation.h>
 #import <Foundation/Foundation.h>
 #import <CoreMedia/CoreMedia.h>
 #import <objc/runtime.h>
-#import "../../../c/charon-coding/files/CharonCoding.h"
+#import "../../../c/revenant-coding/files/RevenantCoding.h"
 
 @interface AVMetricEventStream ()
 {
@@ -123,13 +123,13 @@
 
 - (void)encodeWithCoder:(NSCoder *)coder
 {
-    charon_intents_encode(self, coder);
+    revenant_intents_encode(self, coder);
 }
 
 - (instancetype)initWithCoder:(NSCoder *)coder
 {
-    if ((self = charon_intents_super_init(self, [NSObject class]))) {
-        charon_intents_decode(self, coder);
+    if ((self = revenant_intents_super_init(self, [NSObject class]))) {
+        revenant_intents_decode(self, coder);
     }
     return self;
 }

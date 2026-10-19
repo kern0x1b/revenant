@@ -5,9 +5,9 @@ NSHTTPCookiePropertyKey const NSHTTPCookieSameSitePolicy = @"SameSite";
 NSHTTPCookieStringPolicy const NSHTTPCookieSameSiteLax = @"lax";
 NSHTTPCookieStringPolicy const NSHTTPCookieSameSiteStrict = @"strict";
 
-static char CharonCookiePolicyKey;
+static char RevenantCookiePolicyKey;
 
-static NSMutableDictionary *charon_cookie_policies(void)
+static NSMutableDictionary *revenant_cookie_policies(void)
 {
     static NSMutableDictionary *policies;
     static dispatch_once_t once;
@@ -17,12 +17,12 @@ static NSMutableDictionary *charon_cookie_policies(void)
     return policies;
 }
 
-static NSString *charon_cookie_key(NSHTTPCookie *cookie)
+static NSString *revenant_cookie_key(NSHTTPCookie *cookie)
 {
     return [NSString stringWithFormat:@"%@\n%@\n%@", cookie.name, cookie.domain.lowercaseString, cookie.path];
 }
 
-static NSString *charon_cookie_policy(id value)
+static NSString *revenant_cookie_policy(id value)
 {
     if (![value isKindOfClass:[NSString class]])
         return nil;
@@ -30,43 +30,43 @@ static NSString *charon_cookie_policy(id value)
     return [@[@"lax", @"strict", @"none"] containsObject:policy] ? policy : nil;
 }
 
-static NSHTTPCookie *charon_cookie_mark(NSHTTPCookie *cookie, NSString *policy)
+static NSHTTPCookie *revenant_cookie_mark(NSHTTPCookie *cookie, NSString *policy)
 {
     if (!cookie)
         return nil;
-    objc_setAssociatedObject(cookie, &CharonCookiePolicyKey, policy ?: (id)[NSNull null], OBJC_ASSOCIATION_RETAIN);
-    NSMutableDictionary *policies = charon_cookie_policies();
+    objc_setAssociatedObject(cookie, &RevenantCookiePolicyKey, policy ?: (id)[NSNull null], OBJC_ASSOCIATION_RETAIN);
+    NSMutableDictionary *policies = revenant_cookie_policies();
     @synchronized (policies) {
         if (policy)
-            policies[charon_cookie_key(cookie)] = policy;
+            policies[revenant_cookie_key(cookie)] = policy;
         else
-            [policies removeObjectForKey:charon_cookie_key(cookie)];
+            [policies removeObjectForKey:revenant_cookie_key(cookie)];
     }
     return cookie;
 }
 
-@implementation NSHTTPCookie (CharonSameSite)
+@implementation NSHTTPCookie (RevenantSameSite)
 
 - (NSHTTPCookieStringPolicy)sameSitePolicy
 {
-    id marked = objc_getAssociatedObject(self, &CharonCookiePolicyKey);
+    id marked = objc_getAssociatedObject(self, &RevenantCookiePolicyKey);
     if (marked)
         return marked == [NSNull null] ? nil : marked;
-    NSMutableDictionary *policies = charon_cookie_policies();
+    NSMutableDictionary *policies = revenant_cookie_policies();
     @synchronized (policies) {
-        return policies[charon_cookie_key(self)];
+        return policies[revenant_cookie_key(self)];
     }
 }
 
-+ (NSHTTPCookie *)charon_cookieWithProperties:(NSDictionary *)properties original:(NSHTTPCookie *(^)(NSDictionary *))original
++ (NSHTTPCookie *)revenant_cookieWithProperties:(NSDictionary *)properties original:(NSHTTPCookie *(^)(NSDictionary *))original
 {
-    NSString *policy = charon_cookie_policy(properties[NSHTTPCookieSameSitePolicy]);
+    NSString *policy = revenant_cookie_policy(properties[NSHTTPCookieSameSitePolicy]);
     NSMutableDictionary *plain = [properties mutableCopy];
     [plain removeObjectForKey:NSHTTPCookieSameSitePolicy];
-    return charon_cookie_mark(original(plain), policy);
+    return revenant_cookie_mark(original(plain), policy);
 }
 
-+ (NSArray *)charon_cookiesWithHeaderFields:(NSDictionary *)headerFields forURL:(NSURL *)URL original:(NSArray *(^)(void))original
++ (NSArray *)revenant_cookiesWithHeaderFields:(NSDictionary *)headerFields forURL:(NSURL *)URL original:(NSArray *(^)(void))original
 {
     NSMutableArray *cookies = [NSMutableArray array];
     for (NSHTTPCookie *cookie in original()) {
@@ -98,19 +98,19 @@ static NSHTTPCookie *charon_cookie_mark(NSHTTPCookie *cookie, NSString *policy)
             NSRange equals = [attribute rangeOfString:@"="];
             NSString *key = [(equals.location == NSNotFound ? attribute : [attribute substringToIndex:equals.location]) stringByTrimmingCharactersInSet:blank];
             if ([key caseInsensitiveCompare:@"SameSite"] == NSOrderedSame)
-                spellings[key] = equals.location == NSNotFound ? (id)[NSNull null] : (charon_cookie_policy([[attribute substringFromIndex:NSMaxRange(equals)] stringByTrimmingCharactersInSet:blank]) ?: (id)[NSNull null]);
+                spellings[key] = equals.location == NSNotFound ? (id)[NSNull null] : (revenant_cookie_policy([[attribute substringFromIndex:NSMaxRange(equals)] stringByTrimmingCharactersInSet:blank]) ?: (id)[NSNull null]);
         }
         id policy = spellings.count ? spellings[[[spellings allKeys] sortedArrayUsingSelector:@selector(compare:)].firstObject] : nil;
         byName[name] = policy ?: (id)[NSNull null];
     }
     for (NSHTTPCookie *cookie in cookies) {
         id policy = byName[cookie.name];
-        charon_cookie_mark(cookie, policy == [NSNull null] ? nil : policy);
+        revenant_cookie_mark(cookie, policy == [NSNull null] ? nil : policy);
     }
     return cookies;
 }
 
-- (NSDictionary *)charon_properties:(NSDictionary *)original
+- (NSDictionary *)revenant_properties:(NSDictionary *)original
 {
     NSString *policy = self.sameSitePolicy;
     if (!policy)
@@ -122,35 +122,35 @@ static NSHTTPCookie *charon_cookie_mark(NSHTTPCookie *cookie, NSString *policy)
 
 @end
 
-@interface CharonSameSiteInstaller : NSObject
+@interface RevenantSameSiteInstaller : NSObject
 @end
 
-@implementation CharonSameSiteInstaller
+@implementation RevenantSameSiteInstaller
 
 + (void)load
 {
-#ifdef CHARON_HOST_DIFFERENTIAL
+#ifdef REVENANT_HOST_DIFFERENTIAL
     return;
 #endif
     Class meta = object_getClass([NSHTTPCookie class]);
     SEL make = @selector(cookieWithProperties:);
     IMP makeOriginal = method_getImplementation(class_getClassMethod([NSHTTPCookie class], make));
     class_replaceMethod(meta, make, imp_implementationWithBlock(^NSHTTPCookie *(Class cls, NSDictionary *properties) {
-        return [NSHTTPCookie charon_cookieWithProperties:properties original:^NSHTTPCookie *(NSDictionary *plain) {
+        return [NSHTTPCookie revenant_cookieWithProperties:properties original:^NSHTTPCookie *(NSDictionary *plain) {
             return ((id (*)(id, SEL, id))makeOriginal)(cls, make, plain);
         }];
     }), method_getTypeEncoding(class_getClassMethod([NSHTTPCookie class], make)));
     SEL parse = @selector(cookiesWithResponseHeaderFields:forURL:);
     IMP parseOriginal = method_getImplementation(class_getClassMethod([NSHTTPCookie class], parse));
     class_replaceMethod(meta, parse, imp_implementationWithBlock(^NSArray *(Class cls, NSDictionary *fields, NSURL *URL) {
-        return [NSHTTPCookie charon_cookiesWithHeaderFields:fields forURL:URL original:^NSArray *{
+        return [NSHTTPCookie revenant_cookiesWithHeaderFields:fields forURL:URL original:^NSArray *{
             return ((id (*)(id, SEL, id, id))parseOriginal)(cls, parse, fields, URL);
         }];
     }), method_getTypeEncoding(class_getClassMethod([NSHTTPCookie class], parse)));
     SEL properties = @selector(properties);
     IMP propertiesOriginal = method_getImplementation(class_getInstanceMethod([NSHTTPCookie class], properties));
     class_replaceMethod([NSHTTPCookie class], properties, imp_implementationWithBlock(^NSDictionary *(NSHTTPCookie *cookie) {
-        return [cookie charon_properties:((id (*)(id, SEL))propertiesOriginal)(cookie, properties)];
+        return [cookie revenant_properties:((id (*)(id, SEL))propertiesOriginal)(cookie, properties)];
     }), method_getTypeEncoding(class_getInstanceMethod([NSHTTPCookie class], properties)));
 }
 

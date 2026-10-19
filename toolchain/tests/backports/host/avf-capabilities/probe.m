@@ -2,13 +2,13 @@
 #import <AVFoundation/AVFoundation.h>
 #import <objc/runtime.h>
 #import <objc/message.h>
-#import "../CharonProgramSDK.h"
+#import "../RevenantProgramSDK.h"
 #include <dlfcn.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#define PORT_PREFIX "charon_host_"
+#define PORT_PREFIX "revenant_host_"
 
 static void answer_of(id object, SEL selector, char *out, size_t room)
 {
@@ -158,7 +158,7 @@ static void print_class_answer(Class host, Class port, const char *label, SEL se
 
 static void set_present(Class portDevice, NSArray *devices)
 {
-    ((void (*)(Class, SEL, id))objc_msgSend)(portDevice, @selector(charon_host_setPresentDevices:), devices);
+    ((void (*)(Class, SEL, id))objc_msgSend)(portDevice, @selector(revenant_host_setPresentDevices:), devices);
 }
 
 static id make_device(Class portDevice, NSString *identifier, NSString *name, long position)
@@ -183,7 +183,7 @@ static void prefcam_setup(Class portDevice)
 static NSString *stored_history(void)
 {
     id history = [[NSUserDefaults standardUserDefaults]
-        objectForKey:@"CharonCaptureUserPreferredCameraHistory"];
+        objectForKey:@"RevenantCaptureUserPreferredCameraHistory"];
     NSArray *entries = [history isKindOfClass:[NSArray class]] ? history : [NSArray array];
     return [NSString stringWithFormat:@"%lu entr%s [%@]", (unsigned long)entries.count,
                                       entries.count == 1 ? "y" : "ies",
@@ -203,14 +203,14 @@ static void persist_phase(Class portDevice, const char *mode)
 {
     if (!strcmp(mode, "set")) {
         [[NSUserDefaults standardUserDefaults]
-            removeObjectForKey:@"CharonCaptureUserPreferredCameraHistory"];
+            removeObjectForKey:@"RevenantCaptureUserPreferredCameraHistory"];
         ((void (*)(Class, SEL, id))objc_msgSend)(portDevice, @selector(setUserPreferredCamera:), prefcam_front);
     }
     char user[512], system[512];
     class_answer_of(portDevice, @selector(userPreferredCamera), user, sizeof user);
     class_answer_of(portDevice, @selector(systemPreferredCamera), system, sizeof system);
     id history = [[NSUserDefaults standardUserDefaults]
-        objectForKey:@"CharonCaptureUserPreferredCameraHistory"];
+        objectForKey:@"RevenantCaptureUserPreferredCameraHistory"];
     NSArray *entries = [history isKindOfClass:[NSArray class]] ? history : [NSArray array];
     printf("PERSIST\t%s\t%s\tsystem=[%s]\t%lu entr%s in this bundle's own defaults\n",
            strcmp(mode, "set") ? "second-launch" : "first-launch", user, system, (unsigned long)entries.count,
@@ -232,9 +232,9 @@ static void support_phase(id hostInput, id portInput)
     }
 }
 
-typedef enum { CharonGetterBool, CharonGetterEnum } CharonGetterKind;
+typedef enum { RevenantGetterBool, RevenantGetterEnum } RevenantGetterKind;
 
-static void setter_case(id hostObject, id portObject, SEL setter, SEL getter, CharonGetterKind kind,
+static void setter_case(id hostObject, id portObject, SEL setter, SEL getter, RevenantGetterKind kind,
                         NSInteger argument, const char *label)
 {
     char hostAnswer[512], portAnswer[512];
@@ -245,7 +245,7 @@ static void setter_case(id hostObject, id portObject, SEL setter, SEL getter, Ch
             @try {
                 ((void (*)(id, SEL, NSInteger))objc_msgSend)(object, setter, argument);
                 char readback[64];
-                if (kind == CharonGetterBool)
+                if (kind == RevenantGetterBool)
                     snprintf(readback, sizeof readback, "%d",
                              (int)((BOOL (*)(id, SEL))objc_msgSend)(object, getter));
                 else
@@ -264,21 +264,21 @@ static void setter_case(id hostObject, id portObject, SEL setter, SEL getter, Ch
 static void setter_phase(id hostCamera, id portCamera, id hostInput, id portInput)
 {
     setter_case(hostCamera, portCamera, @selector(setAutoVideoFrameRateEnabled:),
-                @selector(isAutoVideoFrameRateEnabled), CharonGetterBool, 1,
+                @selector(isAutoVideoFrameRateEnabled), RevenantGetterBool, 1,
                 "AVCaptureDevice.setAutoVideoFrameRateEnabled: true");
     setter_case(hostCamera, portCamera, @selector(setAutoVideoFrameRateEnabled:),
-                @selector(isAutoVideoFrameRateEnabled), CharonGetterBool, 0,
+                @selector(isAutoVideoFrameRateEnabled), RevenantGetterBool, 0,
                 "AVCaptureDevice.setAutoVideoFrameRateEnabled: false");
     setter_case(hostInput, portInput, @selector(setMultichannelAudioMode:), @selector(multichannelAudioMode),
-                CharonGetterEnum, 0, "AVCaptureDeviceInput.setMultichannelAudioMode: None");
+                RevenantGetterEnum, 0, "AVCaptureDeviceInput.setMultichannelAudioMode: None");
     setter_case(hostInput, portInput, @selector(setMultichannelAudioMode:), @selector(multichannelAudioMode),
-                CharonGetterEnum, 1, "AVCaptureDeviceInput.setMultichannelAudioMode: Stereo");
+                RevenantGetterEnum, 1, "AVCaptureDeviceInput.setMultichannelAudioMode: Stereo");
     setter_case(hostInput, portInput, @selector(setMultichannelAudioMode:), @selector(multichannelAudioMode),
-                CharonGetterEnum, 2, "AVCaptureDeviceInput.setMultichannelAudioMode: FirstOrderAmbisonics");
+                RevenantGetterEnum, 2, "AVCaptureDeviceInput.setMultichannelAudioMode: FirstOrderAmbisonics");
     setter_case(hostInput, portInput, @selector(setWindNoiseRemovalEnabled:), @selector(isWindNoiseRemovalEnabled),
-                CharonGetterBool, 1, "AVCaptureDeviceInput.setWindNoiseRemovalEnabled: true");
+                RevenantGetterBool, 1, "AVCaptureDeviceInput.setWindNoiseRemovalEnabled: true");
     setter_case(hostInput, portInput, @selector(setWindNoiseRemovalEnabled:), @selector(isWindNoiseRemovalEnabled),
-                CharonGetterBool, 0, "AVCaptureDeviceInput.setWindNoiseRemovalEnabled: false");
+                RevenantGetterBool, 0, "AVCaptureDeviceInput.setWindNoiseRemovalEnabled: false");
 }
 
 static void rect_case(id hostObject, id portObject, SEL getter, const char *label)
@@ -388,7 +388,7 @@ static void cinematic_phase(id hostCamera, id portCamera, id hostInput, id portI
 static void rect_phase(id hostCamera, id portCamera, Class portStandinClass)
 {
     ((void (*)(Class, SEL, BOOL))objc_msgSend)(portStandinClass,
-                                               @selector(charon_host_setPointsOfInterestSupported:), YES);
+                                               @selector(revenant_host_setPointsOfInterestSupported:), YES);
     rect_case(hostCamera, portCamera, @selector(focusRectOfInterest), "AVCaptureDevice.focusRectOfInterest unset");
     rect_case(hostCamera, portCamera, @selector(exposureRectOfInterest),
               "AVCaptureDevice.exposureRectOfInterest unset");
@@ -536,7 +536,7 @@ static void deferred_phase(id hostSession, id portSession, id hostOutput, id por
                             id portLayer)
 {
     AvfProbeDelegate *delegate = [[AvfProbeDelegate alloc] init];
-    dispatch_queue_t queue = dispatch_queue_create("org.charon.probe.avf-deferred", DISPATCH_QUEUE_SERIAL);
+    dispatch_queue_t queue = dispatch_queue_create("org.revenant.probe.avf-deferred", DISPATCH_QUEUE_SERIAL);
     struct { const char *label; id hostObject; id portObject; SEL selector; int kind; } cases[] = {
         {"-[AVCaptureSession setDeferredStartDelegate:deferredStartDelegateCallbackQueue:] with a delegate and a queue",
          hostSession, portSession, @selector(setDeferredStartDelegate:deferredStartDelegateCallbackQueue:), 0},
@@ -630,12 +630,12 @@ static void prefcam_phase(Class hostDevice, Class portDevice, const char *mode)
     prefcam_step(portDevice, "no-camera-at-all");
 
     set_present(portDevice, @[prefcam_back, prefcam_front]);
-    [[NSUserDefaults standardUserDefaults] removeObjectForKey:@"CharonCaptureUserPreferredCameraHistory"];
+    [[NSUserDefaults standardUserDefaults] removeObjectForKey:@"RevenantCaptureUserPreferredCameraHistory"];
     ((void (*)(Class, SEL, id))objc_msgSend)(portDevice, @selector(setUserPreferredCamera:), prefcam_front);
     set_present(portDevice, @[prefcam_back]);
     prefcam_step(portDevice, "history-exhausted");
 
-    [[NSUserDefaults standardUserDefaults] removeObjectForKey:@"CharonCaptureUserPreferredCameraHistory"];
+    [[NSUserDefaults standardUserDefaults] removeObjectForKey:@"RevenantCaptureUserPreferredCameraHistory"];
     set_present(portDevice, @[prefcam_back, prefcam_front]);
     prefcam_step(portDevice, "nothing-ever-chosen");
 }
@@ -662,20 +662,20 @@ int main(int argc, char **argv)
         Class portLayerClass = objc_getClass(PORT_PREFIX "AVCaptureVideoPreviewLayer");
         AVCaptureDevice *camera = hostDevice ? [AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeVideo] : nil;
         AVCaptureDeviceFormat *format = camera ? [camera activeFormat] : nil;
-        printf("CONTROL\tlinked-sdk\t%u.%u\n", (unsigned)(charon_program_sdk_on_platform(0) >> 16),
-               (unsigned)((charon_program_sdk_on_platform(0) >> 8) & 0xff));
+        printf("CONTROL\tlinked-sdk\t%u.%u\n", (unsigned)(revenant_program_sdk_on_platform(0) >> 16),
+               (unsigned)((revenant_program_sdk_on_platform(0) >> 8) & 0xff));
         printf("CONTROL\tAVCaptureNoSuchClass\t%s\n",
                NSClassFromString(@"AVCaptureNoSuchClass") ? "HAS" : "ABSENT");
         printf("CONTROL\tAVCaptureDevice\t%s\tcamera=%s\n", hostDevice ? "HAS" : "ABSENT",
                camera ? "one" : "NONE");
         printf("CONTROL\tAVCaptureDeviceFormat\t%s\tactive format=%s\n", hostFormat ? "HAS" : "ABSENT",
                format ? "one" : "NONE");
-        printf("CONTROL\tcharon_host_AVCaptureDevice\t%s\n", portDevice ? "HAS" : "ABSENT");
-        printf("CONTROL\tcharon_host_AVCaptureDeviceFormat\t%s\n", portFormat ? "HAS" : "ABSENT");
-        printf("CONTROL\tcharon_host_AVCaptureDeviceInput\t%s\n", portInputClass ? "HAS" : "ABSENT");
-        printf("CONTROL\tcharon_host_AVCaptureSession\t%s\n", portSessionClass ? "HAS" : "ABSENT");
-        printf("CONTROL\tcharon_host_AVCaptureOutput\t%s\n", portOutputClass ? "HAS" : "ABSENT");
-        printf("CONTROL\tcharon_host_AVCaptureVideoPreviewLayer\t%s\n", portLayerClass ? "HAS" : "ABSENT");
+        printf("CONTROL\trevenant_host_AVCaptureDevice\t%s\n", portDevice ? "HAS" : "ABSENT");
+        printf("CONTROL\trevenant_host_AVCaptureDeviceFormat\t%s\n", portFormat ? "HAS" : "ABSENT");
+        printf("CONTROL\trevenant_host_AVCaptureDeviceInput\t%s\n", portInputClass ? "HAS" : "ABSENT");
+        printf("CONTROL\trevenant_host_AVCaptureSession\t%s\n", portSessionClass ? "HAS" : "ABSENT");
+        printf("CONTROL\trevenant_host_AVCaptureOutput\t%s\n", portOutputClass ? "HAS" : "ABSENT");
+        printf("CONTROL\trevenant_host_AVCaptureVideoPreviewLayer\t%s\n", portLayerClass ? "HAS" : "ABSENT");
         AVCaptureDevice *microphone = hostDevice ? [AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeAudio]
                                                  : nil;
         NSError *inputError = nil;
@@ -704,12 +704,12 @@ int main(int argc, char **argv)
         id portSession = [portSessionClass new];
         id portOutput = [portOutputClass new];
         id portLayer = [portLayerClass new];
-        ((void (*)(Class, SEL, id))objc_msgSend)(portInputClass, @selector(charon_host_setDevice:), portCamera);
+        ((void (*)(Class, SEL, id))objc_msgSend)(portInputClass, @selector(revenant_host_setDevice:), portCamera);
         ((void (*)(Class, SEL, BOOL))objc_msgSend)(portDevice,
-                                                   @selector(charon_host_setPointsOfInterestSupported:), YES);
+                                                   @selector(revenant_host_setPointsOfInterestSupported:), YES);
         prefcam_setup(portDevice);
         if (argc <= 2)
-            [[NSUserDefaults standardUserDefaults] removeObjectForKey:@"CharonCaptureUserPreferredCameraHistory"];
+            [[NSUserDefaults standardUserDefaults] removeObjectForKey:@"RevenantCaptureUserPreferredCameraHistory"];
 
         FILE *list = fopen(argv[1], "r");
         if (list == NULL) {

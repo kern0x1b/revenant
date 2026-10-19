@@ -9,7 +9,7 @@
 	<key>CFBundleExecutable</key>
 	<string>backgroundtasks</string>
 	<key>CFBundleIdentifier</key>
-	<string>local.charon.backports.backgroundtasks</string>
+	<string>local.revenant.backports.backgroundtasks</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
@@ -26,10 +26,10 @@
 	<array>
 		<dict>
 			<key>CFBundleURLName</key>
-			<string>local.charon.backports.backgroundtasks</string>
+			<string>local.revenant.backports.backgroundtasks</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>charon-backports-backgroundtasks</string>
+				<string>revenant-backports-backgroundtasks</string>
 			</array>
 		</dict>
 	</array>
@@ -41,8 +41,8 @@
 	<string>6.0</string>
 	<key>BGTaskSchedulerPermittedIdentifiers</key>
 	<array>
-		<string>local.charon.refresh</string>
-		<string>local.charon.processing</string>
+		<string>local.revenant.refresh</string>
+		<string>local.revenant.processing</string>
 	</array>
 	<key>UIBackgroundModes</key>
 	<array>

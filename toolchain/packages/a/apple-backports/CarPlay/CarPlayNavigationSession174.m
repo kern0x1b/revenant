@@ -1,64 +1,64 @@
 #import <CarPlay/CarPlay.h>
 #import <UIKit/UIKit.h>
-#import "CharonCarPlay174.h"
+#import "RevenantCarPlay174.h"
 
-@interface CPNavigationSession (CharonRouteInformation174)
-- (void)charon_addManeuvers:(NSArray<CPManeuver *> *)maneuvers;
-- (void)charon_addLaneGuidances:(NSArray<CPLaneGuidance *> *)laneGuidances;
-- (CPLaneGuidance *)charon_currentLaneGuidance;
-- (void)charon_setCurrentLaneGuidance:(CPLaneGuidance *)laneGuidance;
-- (NSArray<NSString *> *)charon_currentRoadNameVariants;
-- (void)charon_setCurrentRoadNameVariants:(NSArray<NSString *> *)variants;
-- (CPManeuverState)charon_maneuverStateValue;
-- (void)charon_setManeuverState:(CPManeuverState)state;
-- (void)charon_resumeWithRouteInformation:(CPRouteInformation *)routeInformation;
+@interface CPNavigationSession (RevenantRouteInformation174)
+- (void)revenant_addManeuvers:(NSArray<CPManeuver *> *)maneuvers;
+- (void)revenant_addLaneGuidances:(NSArray<CPLaneGuidance *> *)laneGuidances;
+- (CPLaneGuidance *)revenant_currentLaneGuidance;
+- (void)revenant_setCurrentLaneGuidance:(CPLaneGuidance *)laneGuidance;
+- (NSArray<NSString *> *)revenant_currentRoadNameVariants;
+- (void)revenant_setCurrentRoadNameVariants:(NSArray<NSString *> *)variants;
+- (CPManeuverState)revenant_maneuverStateValue;
+- (void)revenant_setManeuverState:(CPManeuverState)state;
+- (void)revenant_resumeWithRouteInformation:(CPRouteInformation *)routeInformation;
 @end
 
-@implementation CPNavigationSession (CharonRouteInformation174)
+@implementation CPNavigationSession (RevenantRouteInformation174)
 
 - (void)addManeuvers:(NSArray<CPManeuver *> *)maneuvers
 {
-    [self charon_addManeuvers:maneuvers];
+    [self revenant_addManeuvers:maneuvers];
 }
 
 - (void)addLaneGuidances:(NSArray<CPLaneGuidance *> *)laneGuidances
 {
-    [self charon_addLaneGuidances:laneGuidances];
+    [self revenant_addLaneGuidances:laneGuidances];
 }
 
 - (CPLaneGuidance *)currentLaneGuidance
 {
-    return [self charon_currentLaneGuidance];
+    return [self revenant_currentLaneGuidance];
 }
 
 - (NSArray<NSString *> *)currentRoadNameVariants
 {
-    return [self charon_currentRoadNameVariants];
+    return [self revenant_currentRoadNameVariants];
 }
 
 - (CPManeuverState)maneuverState
 {
-    return [self charon_maneuverStateValue];
+    return [self revenant_maneuverStateValue];
 }
 
 - (void)setCurrentLaneGuidance:(CPLaneGuidance *)currentLaneGuidance
 {
-    [self charon_setCurrentLaneGuidance:currentLaneGuidance];
+    [self revenant_setCurrentLaneGuidance:currentLaneGuidance];
 }
 
 - (void)setCurrentRoadNameVariants:(NSArray<NSString *> *)currentRoadNameVariants
 {
-    [self charon_setCurrentRoadNameVariants:currentRoadNameVariants];
+    [self revenant_setCurrentRoadNameVariants:currentRoadNameVariants];
 }
 
 - (void)setManeuverState:(CPManeuverState)maneuverState
 {
-    [self charon_setManeuverState:maneuverState];
+    [self revenant_setManeuverState:maneuverState];
 }
 
 - (void)resumeTripWithUpdatedRouteInformation:(CPRouteInformation *)routeInformation
 {
-    [self charon_resumeWithRouteInformation:routeInformation];
+    [self revenant_resumeWithRouteInformation:routeInformation];
 }
 
 @end

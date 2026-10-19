@@ -51,11 +51,11 @@ static NSArray *config_lines(Class config, Class picker)
     return lines;
 }
 
-void charon_windowed_run(UIWindow *window)
+void revenant_windowed_run(UIWindow *window)
 {
     @autoreleasepool {
-        Class ourConfig = NSClassFromString(@"CharonHostUIFontPickerViewControllerConfiguration"), ourPicker = NSClassFromString(@"CharonHostUIFontPickerViewController");
-        charon_check(ourConfig && ourPicker, "the port's classes are linked under their host names", @"missing");
+        Class ourConfig = NSClassFromString(@"RevenantHostUIFontPickerViewControllerConfiguration"), ourPicker = NSClassFromString(@"RevenantHostUIFontPickerViewController");
+        revenant_check(ourConfig && ourPicker, "the port's classes are linked under their host names", @"missing");
         ur_agree(@"font picker values", config_lines(ourConfig, ourPicker), config_lines([UIFontPickerViewControllerConfiguration class], [UIFontPickerViewController class]));
         UIFontPickerViewController *picker = [[ourPicker alloc] initWithConfiguration:[[ourConfig alloc] init]];
         PickerDelegate *delegate = [[PickerDelegate alloc] init];
@@ -66,8 +66,8 @@ void charon_windowed_run(UIWindow *window)
             if ([subview isKindOfClass:[UIButton class]])
                 cancel = (UIButton *)subview;
         }
-        charon_check(cancel != nil, "the picker offers a button", @"it has none");
+        revenant_check(cancel != nil, "the picker offers a button", @"it has none");
         [cancel sendActionsForControlEvents:UIControlEventTouchUpInside];
-        charon_check([delegate.events isEqual:@[@"cancel"]], "the button tells the delegate the picker was cancelled", ur_norm(delegate.events));
+        revenant_check([delegate.events isEqual:@[@"cancel"]], "the button tells the delegate the picker was cancelled", ur_norm(delegate.events));
     }
 }

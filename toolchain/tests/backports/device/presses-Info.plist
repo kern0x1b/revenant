@@ -9,7 +9,7 @@
 	<key>CFBundleExecutable</key>
 	<string>presses</string>
 	<key>CFBundleIdentifier</key>
-	<string>local.charon.backports.presses</string>
+	<string>local.revenant.backports.presses</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>

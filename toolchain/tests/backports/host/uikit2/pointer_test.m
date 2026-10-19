@@ -9,15 +9,15 @@
 #pragma clang diagnostic ignored "-Wincompatible-pointer-types-discards-qualifiers"
 #pragma clang diagnostic ignored "-Wcompare-distinct-pointer-types"
 
-extern NSString *const CharonHostUIKeyInputHome, *const CharonHostUIKeyInputEnd, *const CharonHostUIKeyInputF1, *const CharonHostUIKeyInputF2, *const CharonHostUIKeyInputF3,
-    *const CharonHostUIKeyInputF4, *const CharonHostUIKeyInputF5, *const CharonHostUIKeyInputF6, *const CharonHostUIKeyInputF7, *const CharonHostUIKeyInputF8,
-    *const CharonHostUIKeyInputF9, *const CharonHostUIKeyInputF10, *const CharonHostUIKeyInputF11, *const CharonHostUIKeyInputF12;
+extern NSString *const RevenantHostUIKeyInputHome, *const RevenantHostUIKeyInputEnd, *const RevenantHostUIKeyInputF1, *const RevenantHostUIKeyInputF2, *const RevenantHostUIKeyInputF3,
+    *const RevenantHostUIKeyInputF4, *const RevenantHostUIKeyInputF5, *const RevenantHostUIKeyInputF6, *const RevenantHostUIKeyInputF7, *const RevenantHostUIKeyInputF8,
+    *const RevenantHostUIKeyInputF9, *const RevenantHostUIKeyInputF10, *const RevenantHostUIKeyInputF11, *const RevenantHostUIKeyInputF12;
 
-@interface CharonRecorder : NSCoder
+@interface RevenantRecorder : NSCoder
 @property (nonatomic, strong) NSMutableArray *rows;
 @end
 
-@implementation CharonRecorder
+@implementation RevenantRecorder
 
 - (instancetype)init
 {
@@ -63,12 +63,12 @@ extern NSString *const CharonHostUIKeyInputHome, *const CharonHostUIKeyInputEnd,
 
 @end
 
-void charon_windowed_run(UIWindow *window);
+void revenant_windowed_run(UIWindow *window);
 
 static NSString *norm(id object)
 {
     NSString *text = [NSString stringWithFormat:@"%@", object];
-    text = [text stringByReplacingOccurrencesOfString:@"CharonHost" withString:@""];
+    text = [text stringByReplacingOccurrencesOfString:@"RevenantHost" withString:@""];
     NSRegularExpression *pointer = [NSRegularExpression regularExpressionWithPattern:@"0x[0-9a-f]+" options:0 error:nil];
     return [pointer stringByReplacingMatchesInString:text options:0 range:NSMakeRange(0, text.length) withTemplate:@"PTR"];
 }
@@ -90,7 +90,7 @@ static void agree(NSString *name, NSArray *ours, NSArray *system)
         if (![a isEqual:b])
             [detail appendFormat:@"\n    port   %@\n    system %@", a, b];
     }
-    charon_check(detail.length == 0, name.UTF8String, detail);
+    revenant_check(detail.length == 0, name.UTF8String, detail);
 }
 
 static NSString *line(NSString *label, id value)
@@ -347,15 +347,15 @@ static NSArray *key_lines(Class key, id (^make)(Class, NSString *, NSString *, N
     return lines;
 }
 
-void charon_windowed_run(UIWindow *window)
+void revenant_windowed_run(UIWindow *window)
 {
-    Class ourRegion = NSClassFromString(@"CharonHostUIPointerRegion"), ourRequest = NSClassFromString(@"CharonHostUIPointerRegionRequest"), ourShape = NSClassFromString(@"CharonHostUIPointerShape"),
-          ourEffect = NSClassFromString(@"CharonHostUIPointerEffect"), ourHighlight = NSClassFromString(@"CharonHostUIPointerHighlightEffect"), ourLift = NSClassFromString(@"CharonHostUIPointerLiftEffect"),
-          ourHover = NSClassFromString(@"CharonHostUIPointerHoverEffect"), ourStyle = NSClassFromString(@"CharonHostUIPointerStyle"), ourInteraction = NSClassFromString(@"CharonHostUIPointerInteraction"),
-          ourRecognizer = NSClassFromString(@"CharonHostUIHoverGestureRecognizer"), ourKey = NSClassFromString(@"CharonHostUIKey");
-    charon_check(ourRegion && ourRequest && ourShape && ourEffect && ourHighlight && ourLift && ourHover && ourStyle && ourInteraction && ourRecognizer && ourKey,
+    Class ourRegion = NSClassFromString(@"RevenantHostUIPointerRegion"), ourRequest = NSClassFromString(@"RevenantHostUIPointerRegionRequest"), ourShape = NSClassFromString(@"RevenantHostUIPointerShape"),
+          ourEffect = NSClassFromString(@"RevenantHostUIPointerEffect"), ourHighlight = NSClassFromString(@"RevenantHostUIPointerHighlightEffect"), ourLift = NSClassFromString(@"RevenantHostUIPointerLiftEffect"),
+          ourHover = NSClassFromString(@"RevenantHostUIPointerHoverEffect"), ourStyle = NSClassFromString(@"RevenantHostUIPointerStyle"), ourInteraction = NSClassFromString(@"RevenantHostUIPointerInteraction"),
+          ourRecognizer = NSClassFromString(@"RevenantHostUIHoverGestureRecognizer"), ourKey = NSClassFromString(@"RevenantHostUIKey");
+    revenant_check(ourRegion && ourRequest && ourShape && ourEffect && ourHighlight && ourLift && ourHover && ourStyle && ourInteraction && ourRecognizer && ourKey,
                  "the port's classes are linked under their host names", @"one is missing");
-    charon_check(class_getSuperclass(ourHighlight) == ourEffect && class_getSuperclass(ourLift) == ourEffect && class_getSuperclass(ourHover) == ourEffect && class_getSuperclass(ourEffect) == [NSObject class]
+    revenant_check(class_getSuperclass(ourHighlight) == ourEffect && class_getSuperclass(ourLift) == ourEffect && class_getSuperclass(ourHover) == ourEffect && class_getSuperclass(ourEffect) == [NSObject class]
                      && class_getSuperclass(ourRegion) == [NSObject class] && class_getSuperclass(ourShape) == [NSObject class] && class_getSuperclass(ourRecognizer) == [UIGestureRecognizer class]
                      && class_getSuperclass(ourInteraction) == [NSObject class] && class_getSuperclass(ourKey) == [NSObject class],
                  "the classes descend as the system's do", @"a superclass differs");
@@ -368,10 +368,10 @@ void charon_windowed_run(UIWindow *window)
             [request setValue:@(modifiers) forKey:@"modifiers"];
             return request;
         }
-        return ((id (*)(id, SEL, CGPoint, NSInteger))objc_msgSend)([cls alloc], NSSelectorFromString(@"initCharonWithLocation:modifiers:"), point, modifiers);
+        return ((id (*)(id, SEL, CGPoint, NSInteger))objc_msgSend)([cls alloc], NSSelectorFromString(@"initRevenantWithLocation:modifiers:"), point, modifiers);
     };
     agree(@"pointer region request values", request_lines(ourRequest, made_request), request_lines([UIPointerRegionRequest class], made_request));
-    agree(@"pointer shape values", shape_lines(ourShape, ^UIBezierPath *(id shape) { return ((UIBezierPath * (*)(id, SEL))objc_msgSend)(shape, NSSelectorFromString(@"charon_path")); }),
+    agree(@"pointer shape values", shape_lines(ourShape, ^UIBezierPath *(id shape) { return ((UIBezierPath * (*)(id, SEL))objc_msgSend)(shape, NSSelectorFromString(@"revenant_path")); }),
           shape_lines([UIPointerShape class], ^UIBezierPath *(id shape) { return [shape valueForKey:@"path"]; }));
 
     UIView *view = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 100, 50)];
@@ -381,18 +381,18 @@ void charon_windowed_run(UIWindow *window)
     UITargetedPreview *preview = [[UITargetedPreview alloc] initWithView:view], *other = [[UITargetedPreview alloc] initWithView:far];
     agree(@"pointer effect values", effect_lines(ourEffect, ourHighlight, ourLift, ourHover, preview, other), effect_lines([UIPointerEffect class], [UIPointerHighlightEffect class], [UIPointerLiftEffect class], [UIPointerHoverEffect class], preview, other));
     agree(@"pointer style values",
-          style_lines(ourStyle, ourShape, ourHover, preview, ^UIPointerEffect *(id style) { return ((id (*)(id, SEL))objc_msgSend)(style, NSSelectorFromString(@"charon_effect")); },
-                      ^UIPointerShape *(id style) { return ((id (*)(id, SEL))objc_msgSend)(style, NSSelectorFromString(@"charon_shape")); },
-                      ^NSInteger(id style) { return ((NSInteger (*)(id, SEL))objc_msgSend)(style, NSSelectorFromString(@"charon_axes")); }),
+          style_lines(ourStyle, ourShape, ourHover, preview, ^UIPointerEffect *(id style) { return ((id (*)(id, SEL))objc_msgSend)(style, NSSelectorFromString(@"revenant_effect")); },
+                      ^UIPointerShape *(id style) { return ((id (*)(id, SEL))objc_msgSend)(style, NSSelectorFromString(@"revenant_shape")); },
+                      ^NSInteger(id style) { return ((NSInteger (*)(id, SEL))objc_msgSend)(style, NSSelectorFromString(@"revenant_axes")); }),
           style_lines([UIPointerStyle class], [UIPointerShape class], [UIPointerHoverEffect class], preview, ^UIPointerEffect *(id style) { return [style valueForKey:@"pointerEffect"]; },
                       ^UIPointerShape *(id style) { return [style valueForKey:@"pointerShape"]; }, ^NSInteger(id style) { return [[style valueForKey:@"constrainedAxes"] integerValue]; }));
     agree(@"pointer interaction", interaction_lines(ourInteraction, view), interaction_lines([UIPointerInteraction class], far));
     agree(@"hover gesture recognizer", hover_lines(ourRecognizer, view), hover_lines([UIHoverGestureRecognizer class], far));
-    charon_check([ourRecognizer instancesRespondToSelector:@selector(zOffset)] && [ourRecognizer instancesRespondToSelector:@selector(altitudeAngle)] &&
+    revenant_check([ourRecognizer instancesRespondToSelector:@selector(zOffset)] && [ourRecognizer instancesRespondToSelector:@selector(altitudeAngle)] &&
                      ![ourRecognizer instancesRespondToSelector:NSSelectorFromString(@"rollAngle")],
                  "the hover recognizer answers the members of 16.1 and 16.4 and leaves rollAngle of 17.5 to the release",
                  @"one is answered when it should not be, or is not when it should");
-    charon_check(![ourStyle instancesRespondToSelector:@selector(accessories)] && [UIPointerStyle instancesRespondToSelector:@selector(accessories)], "the pointer style leaves the accessories of iOS 15 to the release", @"it answers them");
+    revenant_check(![ourStyle instancesRespondToSelector:@selector(accessories)] && [UIPointerStyle instancesRespondToSelector:@selector(accessories)], "the pointer style leaves the accessories of iOS 15 to the release", @"it answers them");
 
     id (^made_key)(Class, NSString *, NSString *, NSInteger, NSInteger) = ^id(Class cls, NSString *characters, NSString *unmodified, NSInteger code, NSInteger flags) {
         if (cls == [UIKey class]) {
@@ -403,10 +403,10 @@ void charon_windowed_run(UIWindow *window)
             ((void (*)(id, SEL, NSInteger))objc_msgSend)(made, NSSelectorFromString(@"_setModifierFlags:"), flags);
             return made;
         }
-        return ((id (*)(id, SEL, NSString *, NSString *, NSInteger, NSInteger))objc_msgSend)([cls alloc], NSSelectorFromString(@"initCharonWithCharacters:unmodified:keyCode:modifierFlags:"), characters, unmodified, code, flags);
+        return ((id (*)(id, SEL, NSString *, NSString *, NSInteger, NSInteger))objc_msgSend)([cls alloc], NSSelectorFromString(@"initRevenantWithCharacters:unmodified:keyCode:modifierFlags:"), characters, unmodified, code, flags);
     };
     NSArray *(^archived)(id) = ^NSArray *(id made) {
-        CharonRecorder *recorder = [[CharonRecorder alloc] init];
+        RevenantRecorder *recorder = [[RevenantRecorder alloc] init];
         [made encodeWithCoder:recorder];
         NSMutableArray *rows = [NSMutableArray arrayWithArray:[recorder.rows sortedArrayUsingSelector:@selector(compare:)]];
         NSData *data = [NSKeyedArchiver archivedDataWithRootObject:made requiringSecureCoding:NO error:nil];
@@ -420,8 +420,8 @@ void charon_windowed_run(UIWindow *window)
 
     BOOL constants = YES;
     NSMutableString *wrong = [NSMutableString string];
-#define COMPARE(name) if (![CharonHostUIKeyInput##name isEqualToString:UIKeyInput##name]) { constants = NO; [wrong appendFormat:@" %s", #name]; }
+#define COMPARE(name) if (![RevenantHostUIKeyInput##name isEqualToString:UIKeyInput##name]) { constants = NO; [wrong appendFormat:@" %s", #name]; }
     COMPARE(Home) COMPARE(End) COMPARE(F1) COMPARE(F2) COMPARE(F3) COMPARE(F4) COMPARE(F5) COMPARE(F6) COMPARE(F7) COMPARE(F8) COMPARE(F9) COMPARE(F10) COMPARE(F11) COMPARE(F12)
-    charon_check(constants, "the 14 key input strings are the system's", wrong);
+    revenant_check(constants, "the 14 key input strings are the system's", wrong);
 
 }

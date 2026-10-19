@@ -1,8 +1,8 @@
 #import <Foundation/Foundation.h>
 
-NSError *charon_coder_error(NSException *exception, NSInteger code);
+NSError *revenant_coder_error(NSException *exception, NSInteger code);
 
-static id charon_unarchive(NSSet *classes, NSData *data, NSError **error)
+static id revenant_unarchive(NSSet *classes, NSData *data, NSError **error)
 {
     NSError *failure = nil;
     NSKeyedUnarchiver *unarchiver = [[NSKeyedUnarchiver alloc] initForReadingFromData:data error:&failure];
@@ -22,7 +22,7 @@ static id charon_unarchive(NSSet *classes, NSData *data, NSError **error)
     return decoded;
 }
 
-@implementation NSKeyedUnarchiver (CharonSecureCoding)
+@implementation NSKeyedUnarchiver (RevenantSecureCoding)
 
 - (instancetype)initForReadingFromData:(NSData *)data error:(NSError **)error
 {
@@ -30,7 +30,7 @@ static id charon_unarchive(NSSet *classes, NSData *data, NSError **error)
         self = [self initForReadingWithData:data];
     } @catch (NSException *exception) {
         if (error)
-            *error = charon_coder_error(exception, NSCoderReadCorruptError);
+            *error = revenant_coder_error(exception, NSCoderReadCorruptError);
         return nil;
     }
     if (!self) {
@@ -46,12 +46,12 @@ static id charon_unarchive(NSSet *classes, NSData *data, NSError **error)
 
 + (id)unarchivedObjectOfClass:(Class)cls fromData:(NSData *)data error:(NSError **)error
 {
-    return charon_unarchive([NSSet setWithObject:cls], data, error);
+    return revenant_unarchive([NSSet setWithObject:cls], data, error);
 }
 
 + (id)unarchivedObjectOfClasses:(NSSet *)classes fromData:(NSData *)data error:(NSError **)error
 {
-    return charon_unarchive(classes, data, error);
+    return revenant_unarchive(classes, data, error);
 }
 
 @end

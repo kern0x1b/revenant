@@ -1,13 +1,13 @@
 #import <Foundation/Foundation.h>
 #import <MediaPlayer/MediaPlayer.h>
 
-@interface MPMusicPlayerQueueDescriptor (CharonSubclassInit)
-- (instancetype)charonInitAbstractQueueDescriptor;
+@interface MPMusicPlayerQueueDescriptor (RevenantSubclassInit)
+- (instancetype)revenantInitAbstractQueueDescriptor;
 @end
 
 @implementation MPMusicPlayerQueueDescriptor
 
-- (instancetype)charonInitAbstractQueueDescriptor {
+- (instancetype)revenantInitAbstractQueueDescriptor {
     return [super init];
 }
 
@@ -18,7 +18,7 @@
                            NSStringFromClass([self class])];
         return nil;
     }
-    return [self charonInitAbstractQueueDescriptor];
+    return [self revenantInitAbstractQueueDescriptor];
 }
 
 @end
@@ -33,7 +33,7 @@
 @synthesize startItem = _startItem;
 
 - (instancetype)initWithQuery:(MPMediaQuery *)query {
-    self = [self charonInitAbstractQueueDescriptor];
+    self = [self revenantInitAbstractQueueDescriptor];
     if (self) {
         _query = [query copy];
     }
@@ -41,7 +41,7 @@
 }
 
 - (instancetype)initWithItemCollection:(MPMediaItemCollection *)itemCollection {
-    self = [self charonInitAbstractQueueDescriptor];
+    self = [self revenantInitAbstractQueueDescriptor];
     if (self) {
         _itemCollection = itemCollection;
     }
@@ -53,14 +53,14 @@
 - (MPMediaItem *)startItem { return _startItem; }
 
 - (void)setStartTime:(NSTimeInterval)startTime forItem:(MPMediaItem *)mediaItem {
-    [self charonRecordTime:startTime atKey:@"start" forItem:mediaItem];
+    [self revenantRecordTime:startTime atKey:@"start" forItem:mediaItem];
 }
 
 - (void)setEndTime:(NSTimeInterval)endTime forItem:(MPMediaItem *)mediaItem {
-    [self charonRecordTime:endTime atKey:@"end" forItem:mediaItem];
+    [self revenantRecordTime:endTime atKey:@"end" forItem:mediaItem];
 }
 
-- (void)charonRecordTime:(NSTimeInterval)time
+- (void)revenantRecordTime:(NSTimeInterval)time
                    atKey:(NSString *)which
                 forItem:(MPMediaItem *)mediaItem {
     MPMediaEntityPersistentID persistentID = [mediaItem persistentID];
@@ -87,7 +87,7 @@
 @synthesize startItemID = _startItemID;
 
 - (instancetype)initWithStoreIDs:(NSArray<NSString *> *)storeIDs {
-    self = [self charonInitAbstractQueueDescriptor];
+    self = [self revenantInitAbstractQueueDescriptor];
     if (self) {
         _storeIDs = [storeIDs copy];
     }

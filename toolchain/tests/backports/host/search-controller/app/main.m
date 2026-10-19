@@ -92,10 +92,10 @@ static void checks(const char *side, UISearchController *controller, UINavigatio
     report(side, "navigation-class", NSStringFromClass([navigation class]));
 }
 
-@interface CharonAppDelegate : UIResponder <UIApplicationDelegate>
+@interface RevenantAppDelegate : UIResponder <UIApplicationDelegate>
 @end
 
-@implementation CharonAppDelegate
+@implementation RevenantAppDelegate
 
 - (UISceneConfiguration *)application:(UIApplication *)application configurationForConnectingSceneSession:(UISceneSession *)session options:(UISceneConnectionOptions *)options
 {
@@ -104,22 +104,22 @@ static void checks(const char *side, UISearchController *controller, UINavigatio
 
 @end
 
-@interface CharonSceneDelegate : UIResponder <UIWindowSceneDelegate>
+@interface RevenantSceneDelegate : UIResponder <UIWindowSceneDelegate>
 @property (nonatomic, strong) UIWindow *window;
 @end
 
-@implementation CharonSceneDelegate
+@implementation RevenantSceneDelegate
 
 - (void)scene:(UIScene *)scene willConnectToSession:(UISceneSession *)session options:(UISceneConnectionOptions *)connectionOptions
 {
-    const char *path = getenv("CHARON_SCENE_OUT");
+    const char *path = getenv("REVENANT_SCENE_OUT");
     out = fopen(path ? path : "/dev/stdout", "w");
     UIViewController *root = [[UIViewController alloc] init];
     UINavigationController *navigation = [[UINavigationController alloc] initWithRootViewController:root];
     self.window = [[UIWindow alloc] initWithWindowScene:(UIWindowScene *)scene];
     self.window.rootViewController = navigation;
     [self.window makeKeyAndVisible];
-#ifdef CHARON_PORT_SIDE
+#ifdef REVENANT_PORT_SIDE
     checks("port", [[UISearchController alloc] initWithSearchResultsController:nil], navigation, root);
 #else
     checks("host", [[UISearchController alloc] initWithSearchResultsController:nil], navigation, root);
@@ -133,6 +133,6 @@ static void checks(const char *side, UISearchController *controller, UINavigatio
 int main(int argc, char *argv[])
 {
     @autoreleasepool {
-        return UIApplicationMain(argc, argv, nil, NSStringFromClass([CharonAppDelegate class]));
+        return UIApplicationMain(argc, argv, nil, NSStringFromClass([RevenantAppDelegate class]));
     }
 }

@@ -5,9 +5,9 @@
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 #pragma clang diagnostic ignored "-Wnonnull"
 
-@interface NSObject (CharonHostAlert)
-- (void (^)(UIAlertAction *action))charon_handler;
-- (UIView *)charon_nativeView;
+@interface NSObject (RevenantHostAlert)
+- (void (^)(UIAlertAction *action))revenant_handler;
+- (UIView *)revenant_nativeView;
 @end
 
 @interface Recorder : NSObject
@@ -101,7 +101,7 @@ static void compare_actions(Class system, Class mine)
     CHECK_EQUAL(@(oursCopy.style), @(theirsCopy.style), "copy keeps the style like the system");
     CHECK_EQUAL(@(oursCopy.enabled), @(theirsCopy.enabled), "copy keeps enabled like the system");
     CHECK([oursCopy isEqual:ours] == [theirsCopy isEqual:theirs], "copy equality matches the system");
-    [oursCopy charon_handler](oursCopy);
+    [oursCopy revenant_handler](oursCopy);
     CHECK(calls == 1, "copy keeps the handler");
     oursCopy.enabled = YES;
     CHECK(!ours.enabled, "enabling a copy leaves the original");
@@ -212,7 +212,7 @@ static void check_mapping(Class controller, Class action)
 {
     NSMutableArray *log = [NSMutableArray array];
     UIAlertController *alert = make(controller, action, UIAlertControllerStyleAlert, @[@[@"A", @0], @[@"C", @1], @[@"D", @2]], log);
-    UIAlertView *view = (UIAlertView *)[alert charon_nativeView];
+    UIAlertView *view = (UIAlertView *)[alert revenant_nativeView];
     CHECK([view isKindOfClass:[UIAlertView class]], "alert style builds a UIAlertView");
     CHECK_EQUAL(titles_of(view), (@[@"C", @"A", @"D"]), "alert view lists cancel first, then the others in order");
     CHECK_EQUAL(@(view.cancelButtonIndex), @0, "alert view cancel index");
@@ -230,7 +230,7 @@ static void check_mapping(Class controller, Class action)
 
     [log removeAllObjects];
     alert = make(controller, action, UIAlertControllerStyleAlert, @[@[@"A", @0], @[[NSNull null], @0]], log);
-    view = (UIAlertView *)[alert charon_nativeView];
+    view = (UIAlertView *)[alert revenant_nativeView];
     CHECK_EQUAL(titles_of(view), (@[@"A", @""]), "alert without cancel keeps order and shows a nil title as empty");
     CHECK_EQUAL(@(view.cancelButtonIndex), @(-1), "alert without cancel has no cancel index");
     CHECK_EQUAL(@(view.firstOtherButtonIndex), @0, "alert without cancel starts others at zero");
@@ -239,22 +239,22 @@ static void check_mapping(Class controller, Class action)
     CHECK(![(id)alert alertViewShouldEnableFirstOtherButton:view], "disabled first other action disables the button");
     [view.delegate alertView:view didDismissWithButtonIndex:0];
     CHECK_EQUAL(log, (@[]), "dismissal on a disabled action runs no handler");
-    view = (UIAlertView *)[alert charon_nativeView];
+    view = (UIAlertView *)[alert revenant_nativeView];
     [view.delegate alertView:view didDismissWithButtonIndex:1];
     CHECK_EQUAL(log, (@[@"<nil>"]), "a rebuilt alert view runs handlers again");
-    view = (UIAlertView *)[alert charon_nativeView];
+    view = (UIAlertView *)[alert revenant_nativeView];
     [view.delegate alertView:view didDismissWithButtonIndex:-1];
     CHECK_EQUAL(log, (@[@"<nil>"]), "index -1 runs no handler");
 
     alert = make(controller, action, UIAlertControllerStyleAlert, @[@[@"C", @1]], log);
-    view = (UIAlertView *)[alert charon_nativeView];
+    view = (UIAlertView *)[alert revenant_nativeView];
     CHECK_EQUAL(titles_of(view), (@[@"C"]), "cancel-only alert");
     CHECK_EQUAL(@(view.firstOtherButtonIndex), @(-1), "cancel-only alert has no other button");
     CHECK([(id)alert alertViewShouldEnableFirstOtherButton:view], "without another button the delegate answers yes");
 
     [log removeAllObjects];
     UIAlertController *sheet = make(controller, action, UIAlertControllerStyleActionSheet, @[@[@"A", @0], @[@"D1", @2], @[@"C", @1], @[@"D2", @2]], log);
-    UIActionSheet *actionSheet = (UIActionSheet *)[sheet charon_nativeView];
+    UIActionSheet *actionSheet = (UIActionSheet *)[sheet revenant_nativeView];
     CHECK([actionSheet isKindOfClass:[UIActionSheet class]], "action sheet style builds a UIActionSheet");
     CHECK_EQUAL(titles_of(actionSheet), (@[@"A", @"D1", @"D2", @"C"]), "action sheet keeps order and puts cancel last");
     CHECK_EQUAL(@(actionSheet.cancelButtonIndex), @3, "action sheet cancel index");
@@ -263,19 +263,19 @@ static void check_mapping(Class controller, Class action)
     [actionSheet.delegate actionSheet:actionSheet didDismissWithButtonIndex:3];
     CHECK_EQUAL(log, (@[@"C"]), "action sheet cancel runs the cancel handler");
     sheet.title = nil;
-    CHECK_EQUAL(((UIActionSheet *)[sheet charon_nativeView]).title, @"M", "action sheet with only a message shows it");
+    CHECK_EQUAL(((UIActionSheet *)[sheet revenant_nativeView]).title, @"M", "action sheet with only a message shows it");
     sheet.message = @"";
-    CHECK(((UIActionSheet *)[sheet charon_nativeView]).title == nil, "action sheet without title and message has none");
+    CHECK(((UIActionSheet *)[sheet revenant_nativeView]).title == nil, "action sheet without title and message has none");
     UIAlertController *plain = make(controller, action, UIAlertControllerStyleActionSheet, @[@[@"A", @0]], log);
-    actionSheet = (UIActionSheet *)[plain charon_nativeView];
+    actionSheet = (UIActionSheet *)[plain revenant_nativeView];
     CHECK_EQUAL(@(actionSheet.cancelButtonIndex), @(-1), "action sheet without cancel has no cancel index");
     CHECK_EQUAL(@(actionSheet.destructiveButtonIndex), @(-1), "action sheet without destructive has no destructive index");
 
     alert = make(controller, action, UIAlertControllerStyleAlert, @[@[@"OK", @0]], log);
     [alert addTextFieldWithConfigurationHandler:^(UITextField *field) { field.placeholder = @"Name"; }];
-    CHECK_EQUAL(@(((UIAlertView *)[alert charon_nativeView]).alertViewStyle), @(UIAlertViewStylePlainTextInput), "one plain field gives plain text input");
+    CHECK_EQUAL(@(((UIAlertView *)[alert revenant_nativeView]).alertViewStyle), @(UIAlertViewStylePlainTextInput), "one plain field gives plain text input");
     alert.textFields[0].secureTextEntry = YES;
-    CHECK_EQUAL(@(((UIAlertView *)[alert charon_nativeView]).alertViewStyle), @(UIAlertViewStyleSecureTextInput), "one secure field gives secure text input");
+    CHECK_EQUAL(@(((UIAlertView *)[alert revenant_nativeView]).alertViewStyle), @(UIAlertViewStyleSecureTextInput), "one secure field gives secure text input");
 
     [log removeAllObjects];
     Recorder *recorder = [Recorder new];
@@ -295,7 +295,7 @@ static void check_mapping(Class controller, Class action)
         field.secureTextEntry = NO;
     }];
     [[NSNotificationCenter defaultCenter] addObserver:listener selector:@selector(notice:) name:UITextFieldTextDidChangeNotification object:login];
-    view = (UIAlertView *)[alert charon_nativeView];
+    view = (UIAlertView *)[alert revenant_nativeView];
     CHECK_EQUAL(@(view.alertViewStyle), @(UIAlertViewStyleLoginAndPasswordInput), "two fields give login and password input");
     UITextField *nativeLogin = [view textFieldAtIndex:0];
     UITextField *nativePassword = [view textFieldAtIndex:1];
@@ -320,14 +320,14 @@ static void check_mapping(Class controller, Class action)
 int main(void)
 {
     @autoreleasepool {
-        Class mineAction = NSClassFromString(@"CharonHostUIAlertAction");
-        Class mineController = NSClassFromString(@"CharonHostUIAlertController");
+        Class mineAction = NSClassFromString(@"RevenantHostUIAlertAction");
+        Class mineController = NSClassFromString(@"RevenantHostUIAlertController");
         CHECK(mineAction != Nil && mineController != Nil, "renamed backport classes are loaded");
         CHECK([mineController isSubclassOfClass:[UIViewController class]], "controller is a view controller");
         compare_actions([UIAlertAction class], mineAction);
         compare_controllers([UIAlertController class], mineController, [UIAlertAction class], mineAction);
         check_mapping(mineController, mineAction);
     }
-    printf("checks=%d failures=%d\n", charon_checks, charon_failures);
-    return charon_failures;
+    printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
+    return revenant_failures;
 }

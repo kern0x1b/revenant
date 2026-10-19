@@ -15,7 +15,7 @@
 #include "graphics/gles_rasterizer.hpp"
 #include "graphics/glsl_es.hpp"
 
-namespace shade {
+namespace emulator {
 
 struct DisplayFrame;
 

@@ -1,33 +1,33 @@
 #import <Foundation/Foundation.h>
 #import <PassKit/PassKit.h>
 
-@interface charonHost_PKPassLibrary : PKPassLibrary
+@interface revenantHost_PKPassLibrary : PKPassLibrary
 @end
-@implementation charonHost_PKPassLibrary
-@end
-
-@interface charonHost_PKAddPassesViewController : PKAddPassesViewController
-@end
-@implementation charonHost_PKAddPassesViewController
+@implementation revenantHost_PKPassLibrary
 @end
 
-@interface charonHost_PKPaymentAuthorizationController : NSObject
+@interface revenantHost_PKAddPassesViewController : PKAddPassesViewController
+@end
+@implementation revenantHost_PKAddPassesViewController
 @end
 
-@interface charonHost_PKPaymentAuthorizationViewController : UIViewController
+@interface revenantHost_PKPaymentAuthorizationController : NSObject
 @end
 
-@interface charonHost_PKPaymentAuthorizationResult : NSObject
+@interface revenantHost_PKPaymentAuthorizationViewController : UIViewController
 @end
 
-@interface charonHost_PKPaymentRequestUpdate : NSObject
+@interface revenantHost_PKPaymentAuthorizationResult : NSObject
 @end
 
-@interface charonHost_PKPaymentRequestShippingMethodUpdate : charonHost_PKPaymentRequestUpdate
+@interface revenantHost_PKPaymentRequestUpdate : NSObject
 @end
 
-@interface charonHost_PKPaymentRequestPaymentMethodUpdate : charonHost_PKPaymentRequestUpdate
+@interface revenantHost_PKPaymentRequestShippingMethodUpdate : revenantHost_PKPaymentRequestUpdate
 @end
 
-@interface charonHost_PKPaymentRequestShippingContactUpdate : charonHost_PKPaymentRequestUpdate
+@interface revenantHost_PKPaymentRequestPaymentMethodUpdate : revenantHost_PKPaymentRequestUpdate
+@end
+
+@interface revenantHost_PKPaymentRequestShippingContactUpdate : revenantHost_PKPaymentRequestUpdate
 @end

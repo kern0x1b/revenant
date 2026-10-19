@@ -12,7 +12,7 @@ static void probe_class(const char *name)
 {
     Class host = NSClassFromString([NSString stringWithUTF8String:name]);
     char prefixed[512];
-    snprintf(prefixed, sizeof prefixed, "charon_host_%s", name);
+    snprintf(prefixed, sizeof prefixed, "revenant_host_%s", name);
     Class port = objc_getClass(prefixed);
     printf("CLASS\t%s\thost=%s\tport=%s\n", name,
            host ? "present" : "ABSENT", port ? "present" : "ABSENT");
@@ -23,8 +23,8 @@ static void probe_class(const char *name)
         char portStripped[256];
         if (portParent) {
             const char *raw = class_getName(portParent);
-            if (!strncmp(raw, "charon_host_", 12)) {
-                snprintf(portStripped, sizeof portStripped, "%s", raw + 12);
+            if (!strncmp(raw, "revenant_host_", 14)) {
+                snprintf(portStripped, sizeof portStripped, "%s", raw + 14);
             } else {
                 snprintf(portStripped, sizeof portStripped, "%s", raw);
             }
@@ -51,7 +51,7 @@ static void probe_protocol(const char *name)
         free(all);
     }
     char prefixed[512];
-    snprintf(prefixed, sizeof prefixed, "charon_host_%s", name);
+    snprintf(prefixed, sizeof prefixed, "revenant_host_%s", name);
     printf("PROTOCOL\t%s\thost=%s\tport=%s\n", name,
            host ? "present" : "ABSENT", port ? "present" : "ABSENT");
 }
@@ -60,7 +60,7 @@ static void probe_member(const char *owner, const char *selector)
 {
     Class host = gHost ? NSClassFromString([NSString stringWithUTF8String:owner]) : Nil;
     char prefixed[512];
-    snprintf(prefixed, sizeof prefixed, "charon_host_%s", owner);
+    snprintf(prefixed, sizeof prefixed, "revenant_host_%s", owner);
     Class port = objc_getClass(prefixed);
     printf("RESPONDS\t-[%s %s]\thost=%s\tport=%s\n", owner, selector,
            (host && class_getInstanceMethod(host, sel_registerName(selector))) ? "yes" : "no",

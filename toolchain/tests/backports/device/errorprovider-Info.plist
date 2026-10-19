@@ -9,7 +9,7 @@
 	<key>CFBundleExecutable</key>
 	<string>errorprovider</string>
 	<key>CFBundleIdentifier</key>
-	<string>local.charon.backports.errorprovider</string>
+	<string>local.revenant.backports.errorprovider</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>

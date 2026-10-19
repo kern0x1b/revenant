@@ -2,7 +2,7 @@
 
 extern NSString *const LAErrorDomain;
 
-static NSError *charon_error(NSInteger code, NSString *description, NSString *debug)
+static NSError *revenant_error(NSInteger code, NSString *description, NSString *debug)
 {
     NSMutableDictionary *info = [NSMutableDictionary dictionaryWithObject:description forKey:NSLocalizedDescriptionKey];
     if (debug)
@@ -43,24 +43,24 @@ static NSError *charon_error(NSInteger code, NSString *description, NSString *de
 {
 }
 
-- (NSError *)charon_errorForPolicy:(LAPolicy)policy
+- (NSError *)revenant_errorForPolicy:(LAPolicy)policy
 {
     if (_invalidated)
-        return charon_error(LAErrorInvalidContext, @"Authentication failure.", @"Invalid context.");
+        return revenant_error(LAErrorInvalidContext, @"Authentication failure.", @"Invalid context.");
     switch ((NSInteger)policy) {
     case 1:
-        return charon_error(LAErrorBiometryNotAvailable, @"Biometry is not available on this device.", nil);
+        return revenant_error(LAErrorBiometryNotAvailable, @"Biometry is not available on this device.", nil);
     case 2:
-        return charon_error(LAErrorNotInteractive, @"Authentication failure.", @"Displaying the required authentication user interface is forbidden.");
+        return revenant_error(LAErrorNotInteractive, @"Authentication failure.", @"Displaying the required authentication user interface is forbidden.");
     }
-    NSError *error = charon_error(-1001, @"Authentication failure.", [NSString stringWithFormat:@"Unknown policy: '%ld'", (long)policy]);
+    NSError *error = revenant_error(-1001, @"Authentication failure.", [NSString stringWithFormat:@"Unknown policy: '%ld'", (long)policy]);
     [NSException raise:NSInvalidArgumentException format:@"%@", error];
     return nil;
 }
 
 - (BOOL)canEvaluatePolicy:(LAPolicy)policy error:(NSError *__autoreleasing *)error
 {
-    NSError *failure = [self charon_errorForPolicy:policy];
+    NSError *failure = [self revenant_errorForPolicy:policy];
     if (error)
         *error = failure;
     return NO;
@@ -68,7 +68,7 @@ static NSError *charon_error(NSInteger code, NSString *description, NSString *de
 
 - (void)evaluatePolicy:(LAPolicy)policy localizedReason:(NSString *)localizedReason reply:(void (^)(BOOL, NSError *))reply
 {
-    NSError *failure = [self charon_errorForPolicy:policy];
+    NSError *failure = [self revenant_errorForPolicy:policy];
     if (localizedReason.length == 0)
         [NSException raise:NSInvalidArgumentException format:@"Non-empty localizedReason must be provided."];
     if (!reply)
@@ -81,8 +81,8 @@ static NSError *charon_error(NSInteger code, NSString *description, NSString *de
 
 - (void)evaluateAccessControl:(SecAccessControlRef)accessControl operation:(LAAccessControlOperation)operation localizedReason:(NSString *)localizedReason reply:(void (^)(BOOL, NSError *))reply
 {
-    NSError *failure = _invalidated ? charon_error(LAErrorInvalidContext, @"Authentication failure.", @"Invalid context.")
-                                    : charon_error(LAErrorNotInteractive, @"Authentication failure.", @"Displaying the required authentication user interface is forbidden.");
+    NSError *failure = _invalidated ? revenant_error(LAErrorInvalidContext, @"Authentication failure.", @"Invalid context.")
+                                    : revenant_error(LAErrorNotInteractive, @"Authentication failure.", @"Displaying the required authentication user interface is forbidden.");
     if (localizedReason.length == 0)
         [NSException raise:NSInvalidArgumentException format:@"Non-empty localizedReason must be provided."];
     if (!reply)
@@ -109,7 +109,7 @@ static NSError *charon_error(NSInteger code, NSString *description, NSString *de
     }
     if ((NSInteger)type == -1)
         return NO;
-    NSError *error = charon_error(-1001, @"Authentication failure.", [NSString stringWithFormat:@"Unknown credential type: '%ld'", (long)type]);
+    NSError *error = revenant_error(-1001, @"Authentication failure.", [NSString stringWithFormat:@"Unknown credential type: '%ld'", (long)type]);
     [NSException raise:NSInvalidArgumentException format:@"%@", error];
     return NO;
 }

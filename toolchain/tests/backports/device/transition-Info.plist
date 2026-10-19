@@ -9,7 +9,7 @@
 	<key>CFBundleExecutable</key>
 	<string>transition</string>
 	<key>CFBundleIdentifier</key>
-	<string>local.charon.backports.transition</string>
+	<string>local.revenant.backports.transition</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>

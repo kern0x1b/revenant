@@ -1,17 +1,17 @@
-#ifndef CHARON_CARPLAY_LANE_H
-#define CHARON_CARPLAY_LANE_H
+#ifndef REVENANT_CARPLAY_LANE_H
+#define REVENANT_CARPLAY_LANE_H
 
 #import <Foundation/Foundation.h>
-#import "CharonCarPlay174.h"
+#import "RevenantCarPlay174.h"
 
-@interface CPLane (CharonLaneAngles)
+@interface CPLane (RevenantLaneAngles)
 
-- (NSMeasurement<NSUnitAngle *> *)charon_highlightedAngle;
-- (void)charon_setHighlightedAngle:(NSMeasurement<NSUnitAngle *> *)angle;
-- (NSArray<NSMeasurement<NSUnitAngle *> *> *)charon_angles;
-- (void)charon_setAngles:(NSArray<NSMeasurement<NSUnitAngle *> *> *)angles;
+- (NSMeasurement<NSUnitAngle *> *)revenant_highlightedAngle;
+- (void)revenant_setHighlightedAngle:(NSMeasurement<NSUnitAngle *> *)angle;
+- (NSArray<NSMeasurement<NSUnitAngle *> *> *)revenant_angles;
+- (void)revenant_setAngles:(NSArray<NSMeasurement<NSUnitAngle *> *> *)angles;
 
-- (instancetype)initCharonWithAngles:(NSArray<NSMeasurement<NSUnitAngle *> *> *)angles
+- (instancetype)initRevenantWithAngles:(NSArray<NSMeasurement<NSUnitAngle *> *> *)angles
                     highlightedAngle:(NSMeasurement<NSUnitAngle *> *)highlightedAngle
                           isPreferred:(BOOL)preferred;
 

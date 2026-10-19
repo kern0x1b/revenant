@@ -1,21 +1,21 @@
-#import "CharonAVCaptureDeviceCapabilities18.h"
+#import "RevenantAVCaptureDeviceCapabilities18.h"
 #import <objc/runtime.h>
 
-static const char charon_auto_video_frame_rate_key;
-static const char charon_multichannel_audio_mode_key;
-static const char charon_wind_noise_removal_key;
+static const char revenant_auto_video_frame_rate_key;
+static const char revenant_multichannel_audio_mode_key;
+static const char revenant_wind_noise_removal_key;
 
-static id charon_capture_value(id object, const char *key, id fallback)
+static id revenant_capture_value(id object, const char *key, id fallback)
 {
     id stored = objc_getAssociatedObject(object, key);
     return stored ? stored : fallback;
 }
 
-@implementation AVCaptureDevice (CharonCaptureDeviceCapabilities18)
+@implementation AVCaptureDevice (RevenantCaptureDeviceCapabilities18)
 
 - (BOOL)isAutoVideoFrameRateEnabled
 {
-    return [charon_capture_value(self, &charon_auto_video_frame_rate_key, @NO) boolValue];
+    return [revenant_capture_value(self, &revenant_auto_video_frame_rate_key, @NO) boolValue];
 }
 
 - (void)setAutoVideoFrameRateEnabled:(BOOL)enabled
@@ -28,7 +28,7 @@ static id charon_capture_value(id object, const char *key, id fallback)
                            NSStringFromSelector(_cmd)];
         return;
     }
-    objc_setAssociatedObject(self, &charon_auto_video_frame_rate_key, @(enabled), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, &revenant_auto_video_frame_rate_key, @(enabled), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
 - (BOOL)isBackgroundReplacementActive
@@ -53,7 +53,7 @@ static id charon_capture_value(id object, const char *key, id fallback)
 
 @end
 
-@implementation AVCaptureDeviceFormat (CharonCaptureDeviceFormatCapabilities18)
+@implementation AVCaptureDeviceFormat (RevenantCaptureDeviceFormatCapabilities18)
 
 - (BOOL)isAutoVideoFrameRateSupported
 {
@@ -87,7 +87,7 @@ static id charon_capture_value(id object, const char *key, id fallback)
 
 @end
 
-@implementation AVCaptureDeviceInput (CharonCaptureDeviceInputCapabilities18)
+@implementation AVCaptureDeviceInput (RevenantCaptureDeviceInputCapabilities18)
 
 - (BOOL)isMultichannelAudioModeSupported:(AVCaptureMultichannelAudioMode)multichannelAudioMode
 {
@@ -96,7 +96,7 @@ static id charon_capture_value(id object, const char *key, id fallback)
 
 - (AVCaptureMultichannelAudioMode)multichannelAudioMode
 {
-    return (AVCaptureMultichannelAudioMode)[charon_capture_value(self, &charon_multichannel_audio_mode_key,
+    return (AVCaptureMultichannelAudioMode)[revenant_capture_value(self, &revenant_multichannel_audio_mode_key,
                                                                 @(AVCaptureMultichannelAudioModeNone)) integerValue];
 }
 
@@ -107,7 +107,7 @@ static id charon_capture_value(id object, const char *key, id fallback)
                     format:@"*** -[AVCaptureDeviceInput %@] Not supported", NSStringFromSelector(_cmd)];
         return;
     }
-    objc_setAssociatedObject(self, &charon_multichannel_audio_mode_key, @(multichannelAudioMode),
+    objc_setAssociatedObject(self, &revenant_multichannel_audio_mode_key, @(multichannelAudioMode),
                              OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
@@ -118,12 +118,12 @@ static id charon_capture_value(id object, const char *key, id fallback)
 
 - (BOOL)isWindNoiseRemovalEnabled
 {
-    return [charon_capture_value(self, &charon_wind_noise_removal_key, @NO) boolValue];
+    return [revenant_capture_value(self, &revenant_wind_noise_removal_key, @NO) boolValue];
 }
 
 - (void)setWindNoiseRemovalEnabled:(BOOL)windNoiseRemovalEnabled
 {
-    objc_setAssociatedObject(self, &charon_wind_noise_removal_key, @(windNoiseRemovalEnabled),
+    objc_setAssociatedObject(self, &revenant_wind_noise_removal_key, @(windNoiseRemovalEnabled),
                              OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 

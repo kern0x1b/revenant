@@ -1,14 +1,14 @@
 #import <Foundation/Foundation.h>
 #import <objc/runtime.h>
 
-NSError *charon_coder_error(NSException *exception, NSInteger code);
+NSError *revenant_coder_error(NSException *exception, NSInteger code);
 
-static char CharonArchiverDataKey;
-static char CharonArchiverFinishedKey;
+static char RevenantArchiverDataKey;
+static char RevenantArchiverFinishedKey;
 
-static NSMutableData *charon_archiver_buffer(NSKeyedArchiver *archiver)
+static NSMutableData *revenant_archiver_buffer(NSKeyedArchiver *archiver)
 {
-    NSMutableData *data = objc_getAssociatedObject(archiver, &CharonArchiverDataKey);
+    NSMutableData *data = objc_getAssociatedObject(archiver, &RevenantArchiverDataKey);
     if (data)
         return data;
     Ivar stream = class_getInstanceVariable([NSKeyedArchiver class], "_stream");
@@ -16,25 +16,25 @@ static NSMutableData *charon_archiver_buffer(NSKeyedArchiver *archiver)
     return [output isKindOfClass:[NSMutableData class]] ? output : nil;
 }
 
-@implementation NSKeyedArchiver (CharonSecureCoding)
+@implementation NSKeyedArchiver (RevenantSecureCoding)
 
 - (instancetype)initRequiringSecureCoding:(BOOL)requiresSecureCoding
 {
     NSMutableData *data = [NSMutableData data];
     if ((self = [self initForWritingWithMutableData:data])) {
         self.requiresSecureCoding = requiresSecureCoding;
-        objc_setAssociatedObject(self, &CharonArchiverDataKey, data, OBJC_ASSOCIATION_RETAIN);
+        objc_setAssociatedObject(self, &RevenantArchiverDataKey, data, OBJC_ASSOCIATION_RETAIN);
     }
     return self;
 }
 
 - (NSData *)encodedData
 {
-    NSMutableData *data = charon_archiver_buffer(self);
+    NSMutableData *data = revenant_archiver_buffer(self);
     if (!data)
         return [NSMutableData data];
-    if (!objc_getAssociatedObject(self, &CharonArchiverFinishedKey)) {
-        objc_setAssociatedObject(self, &CharonArchiverFinishedKey, @YES, OBJC_ASSOCIATION_RETAIN);
+    if (!objc_getAssociatedObject(self, &RevenantArchiverFinishedKey)) {
+        objc_setAssociatedObject(self, &RevenantArchiverFinishedKey, @YES, OBJC_ASSOCIATION_RETAIN);
         [self finishEncoding];
     }
     return data;
@@ -47,7 +47,7 @@ static NSMutableData *charon_archiver_buffer(NSKeyedArchiver *archiver)
         [archiver encodeObject:object forKey:NSKeyedArchiveRootObjectKey];
     } @catch (NSException *exception) {
         if (error) {
-            NSError *underlying = charon_coder_error(exception, NSCoderReadCorruptError);
+            NSError *underlying = revenant_coder_error(exception, NSCoderReadCorruptError);
             *error = [NSError errorWithDomain:NSCocoaErrorDomain code:NSCoderInvalidValueError userInfo:@{NSUnderlyingErrorKey: underlying}];
         }
         return nil;

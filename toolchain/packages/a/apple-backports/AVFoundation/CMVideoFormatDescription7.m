@@ -82,11 +82,11 @@ typedef struct {
     size_t length;
     size_t bit;
     BOOL failed;
-} CharonBitReader;
+} RevenantBitReader;
 
-static CharonBitReader charon_rbsp(const uint8_t *nal, size_t size)
+static RevenantBitReader revenant_rbsp(const uint8_t *nal, size_t size)
 {
-    CharonBitReader reader = {malloc(size ? size : 1), 0, 0, NO};
+    RevenantBitReader reader = {malloc(size ? size : 1), 0, 0, NO};
     int zeros = 0;
     for (size_t i = 1; i < size; i++) {
         if (zeros >= 2 && nal[i] == 3) {
@@ -99,7 +99,7 @@ static CharonBitReader charon_rbsp(const uint8_t *nal, size_t size)
     return reader;
 }
 
-static uint32_t charon_bits(CharonBitReader *reader, int count)
+static uint32_t revenant_bits(RevenantBitReader *reader, int count)
 {
     uint32_t value = 0;
     for (int i = 0; i < count; i++) {
@@ -113,26 +113,26 @@ static uint32_t charon_bits(CharonBitReader *reader, int count)
     return value;
 }
 
-static uint32_t charon_ue_within(CharonBitReader *reader, int longest)
+static uint32_t revenant_ue_within(RevenantBitReader *reader, int longest)
 {
     int zeros = 0;
-    while (!reader->failed && charon_bits(reader, 1) == 0)
+    while (!reader->failed && revenant_bits(reader, 1) == 0)
         zeros++;
     if (reader->failed || zeros > longest) {
         reader->failed = YES;
         return 0;
     }
-    return (uint32_t)(((uint64_t)1 << zeros) - 1 + charon_bits(reader, zeros));
+    return (uint32_t)(((uint64_t)1 << zeros) - 1 + revenant_bits(reader, zeros));
 }
 
-static uint32_t charon_ue(CharonBitReader *reader)
+static uint32_t revenant_ue(RevenantBitReader *reader)
 {
-    return charon_ue_within(reader, 12);
+    return revenant_ue_within(reader, 12);
 }
 
-static int32_t charon_se(CharonBitReader *reader)
+static int32_t revenant_se(RevenantBitReader *reader)
 {
-    uint32_t code = charon_ue(reader);
+    uint32_t code = revenant_ue(reader);
     return code & 1 ? (int32_t)((code + 1) / 2) : -(int32_t)(code / 2);
 }
 
@@ -147,9 +147,9 @@ typedef struct {
     BOOL hasVUI, hasAspect, hasSignal, hasColour, hasChromaLocation;
     int aspect, sarWidth, sarHeight, fullRange, primaries, transfer, matrix, chromaTop, chromaBottom;
     BOOL complete;
-} CharonSequence;
+} RevenantSequence;
 
-static BOOL charon_has_format_syntax(int profile)
+static BOOL revenant_has_format_syntax(int profile)
 {
     switch (profile) {
     case 100: case 110: case 122: case 244: case 44: case 83: case 86: case 118: case 128: case 138: case 139: case 134: case 135:
@@ -159,104 +159,104 @@ static BOOL charon_has_format_syntax(int profile)
     }
 }
 
-static BOOL charon_writes_format(int profile)
+static BOOL revenant_writes_format(int profile)
 {
     return profile == 100 || profile == 110 || profile == 122 || profile == 144;
 }
 
-static void charon_skip_scaling_list(CharonBitReader *reader, int size)
+static void revenant_skip_scaling_list(RevenantBitReader *reader, int size)
 {
     int last = 8, next = 8;
     for (int j = 0; j < size && !reader->failed; j++) {
         if (next != 0) {
-            int32_t delta = charon_se(reader);
+            int32_t delta = revenant_se(reader);
             next = ((last + delta) % 256 + 256) % 256;
         }
         last = next == 0 ? last : next;
     }
 }
 
-static void charon_skip_hrd(CharonBitReader *reader)
+static void revenant_skip_hrd(RevenantBitReader *reader)
 {
-    uint32_t count = charon_ue(reader) + 1;
+    uint32_t count = revenant_ue(reader) + 1;
     if (count > 32) {
         reader->failed = YES;
         return;
     }
-    charon_bits(reader, 8);
+    revenant_bits(reader, 8);
     for (uint32_t i = 0; i < count && !reader->failed; i++) {
-        charon_ue_within(reader, 31);
-        charon_ue_within(reader, 31);
-        charon_bits(reader, 1);
+        revenant_ue_within(reader, 31);
+        revenant_ue_within(reader, 31);
+        revenant_bits(reader, 1);
     }
-    charon_bits(reader, 20);
+    revenant_bits(reader, 20);
 }
 
-static void charon_parse_sequence(const uint8_t *nal, size_t size, CharonSequence *out)
+static void revenant_parse_sequence(const uint8_t *nal, size_t size, RevenantSequence *out)
 {
     memset(out, 0, sizeof *out);
-    CharonBitReader reader = charon_rbsp(nal, size);
-    CharonBitReader *r = &reader;
-    out->profile = (int)charon_bits(r, 8);
-    out->constraints = (int)charon_bits(r, 8);
-    out->level = (int)charon_bits(r, 8);
-    uint32_t identifier = charon_ue(r);
+    RevenantBitReader reader = revenant_rbsp(nal, size);
+    RevenantBitReader *r = &reader;
+    out->profile = (int)revenant_bits(r, 8);
+    out->constraints = (int)revenant_bits(r, 8);
+    out->level = (int)revenant_bits(r, 8);
+    uint32_t identifier = revenant_ue(r);
     if (r->failed || identifier > 31)
         goto done;
     out->chroma = 1;
-    if (charon_has_format_syntax(out->profile)) {
-        uint32_t chroma = charon_ue(r);
+    if (revenant_has_format_syntax(out->profile)) {
+        uint32_t chroma = revenant_ue(r);
         if (r->failed || chroma > 3)
             goto done;
         if (chroma == 3)
-            charon_bits(r, 1);
-        uint32_t luma = charon_ue(r), chromaDepth = charon_ue(r);
+            revenant_bits(r, 1);
+        uint32_t luma = revenant_ue(r), chromaDepth = revenant_ue(r);
         if (r->failed || luma > 6 || chromaDepth > 6)
             goto done;
         out->chroma = (int)chroma;
         out->lumaDepth = (int)luma;
         out->chromaDepth = (int)chromaDepth;
         out->hasFormat = YES;
-        charon_bits(r, 1);
-        if (charon_bits(r, 1))
+        revenant_bits(r, 1);
+        if (revenant_bits(r, 1))
             for (int i = 0; i < (chroma != 3 ? 8 : 12) && !r->failed; i++)
-                if (charon_bits(r, 1))
-                    charon_skip_scaling_list(r, i < 6 ? 16 : 64);
+                if (revenant_bits(r, 1))
+                    revenant_skip_scaling_list(r, i < 6 ? 16 : 64);
         if (r->failed)
             goto done;
     }
-    charon_ue(r);
-    uint32_t order = charon_ue(r);
+    revenant_ue(r);
+    uint32_t order = revenant_ue(r);
     if (order == 0) {
-        if (charon_ue(r) > 12)
+        if (revenant_ue(r) > 12)
             goto done;
     } else if (order == 1) {
-        charon_bits(r, 1);
-        charon_se(r);
-        charon_se(r);
-        uint32_t cycle = charon_ue(r);
+        revenant_bits(r, 1);
+        revenant_se(r);
+        revenant_se(r);
+        uint32_t cycle = revenant_ue(r);
         if (cycle > 255)
             goto done;
         for (uint32_t i = 0; i < cycle && !r->failed; i++)
-            charon_se(r);
+            revenant_se(r);
     }
-    charon_ue(r);
-    charon_bits(r, 1);
-    uint32_t widthMbs = charon_ue(r) + 1, heightUnits = charon_ue(r) + 1;
-    int frameOnly = (int)charon_bits(r, 1);
+    revenant_ue(r);
+    revenant_bits(r, 1);
+    uint32_t widthMbs = revenant_ue(r) + 1, heightUnits = revenant_ue(r) + 1;
+    int frameOnly = (int)revenant_bits(r, 1);
     if (r->failed)
         goto done;
     out->frameOnly = frameOnly;
     out->hasFrames = YES;
     if (!frameOnly)
-        charon_bits(r, 1);
-    charon_bits(r, 1);
+        revenant_bits(r, 1);
+    revenant_bits(r, 1);
     uint32_t left = 0, right = 0, top = 0, bottom = 0;
-    if (charon_bits(r, 1)) {
-        left = charon_ue(r);
-        right = charon_ue(r);
-        top = charon_ue(r);
-        bottom = charon_ue(r);
+    if (revenant_bits(r, 1)) {
+        left = revenant_ue(r);
+        right = revenant_ue(r);
+        top = revenant_ue(r);
+        bottom = revenant_ue(r);
     }
     if (r->failed)
         goto done;
@@ -269,52 +269,52 @@ static void charon_parse_sequence(const uint8_t *nal, size_t size, CharonSequenc
     if (!out->width || !out->height)
         goto done;
     out->hasSize = YES;
-    if (charon_bits(r, 1)) {
+    if (revenant_bits(r, 1)) {
         out->hasVUI = YES;
-        if (charon_bits(r, 1)) {
-            out->aspect = (int)charon_bits(r, 8);
+        if (revenant_bits(r, 1)) {
+            out->aspect = (int)revenant_bits(r, 8);
             if (out->aspect == 255) {
-                out->sarWidth = (int)charon_bits(r, 16);
-                out->sarHeight = (int)charon_bits(r, 16);
+                out->sarWidth = (int)revenant_bits(r, 16);
+                out->sarHeight = (int)revenant_bits(r, 16);
             }
             out->hasAspect = !r->failed;
         }
-        if (charon_bits(r, 1))
-            charon_bits(r, 1);
-        if (charon_bits(r, 1)) {
-            charon_bits(r, 3);
-            out->fullRange = (int)charon_bits(r, 1);
-            if (charon_bits(r, 1)) {
-                out->primaries = (int)charon_bits(r, 8);
-                out->transfer = (int)charon_bits(r, 8);
-                out->matrix = (int)charon_bits(r, 8);
+        if (revenant_bits(r, 1))
+            revenant_bits(r, 1);
+        if (revenant_bits(r, 1)) {
+            revenant_bits(r, 3);
+            out->fullRange = (int)revenant_bits(r, 1);
+            if (revenant_bits(r, 1)) {
+                out->primaries = (int)revenant_bits(r, 8);
+                out->transfer = (int)revenant_bits(r, 8);
+                out->matrix = (int)revenant_bits(r, 8);
                 out->hasColour = !r->failed;
             }
             out->hasSignal = !r->failed;
         }
-        if (charon_bits(r, 1)) {
-            out->chromaTop = (int)charon_ue(r);
-            out->chromaBottom = (int)charon_ue(r);
+        if (revenant_bits(r, 1)) {
+            out->chromaTop = (int)revenant_ue(r);
+            out->chromaBottom = (int)revenant_ue(r);
             out->hasChromaLocation = !r->failed;
         }
-        if (charon_bits(r, 1)) {
-            charon_bits(r, 32);
-            charon_bits(r, 32);
-            charon_bits(r, 1);
+        if (revenant_bits(r, 1)) {
+            revenant_bits(r, 32);
+            revenant_bits(r, 32);
+            revenant_bits(r, 1);
         }
-        int nalHRD = (int)charon_bits(r, 1);
+        int nalHRD = (int)revenant_bits(r, 1);
         if (nalHRD)
-            charon_skip_hrd(r);
-        int vclHRD = (int)charon_bits(r, 1);
+            revenant_skip_hrd(r);
+        int vclHRD = (int)revenant_bits(r, 1);
         if (vclHRD)
-            charon_skip_hrd(r);
+            revenant_skip_hrd(r);
         if (nalHRD || vclHRD)
-            charon_bits(r, 1);
-        charon_bits(r, 1);
-        if (charon_bits(r, 1)) {
-            charon_bits(r, 1);
+            revenant_bits(r, 1);
+        revenant_bits(r, 1);
+        if (revenant_bits(r, 1)) {
+            revenant_bits(r, 1);
             for (int i = 0; i < 6; i++)
-                charon_ue(r);
+                revenant_ue(r);
         }
     }
     if (r->failed)
@@ -330,23 +330,23 @@ typedef struct {
     int type, profile, constraints, level;
     BOOL hasFormat;
     uint32_t chroma, lumaDepth, chromaDepth;
-} CharonParameterSet;
+} RevenantParameterSet;
 
-static BOOL charon_read_parameter_set(const uint8_t *nal, size_t size, CharonParameterSet *out)
+static BOOL revenant_read_parameter_set(const uint8_t *nal, size_t size, RevenantParameterSet *out)
 {
-    CharonBitReader reader = charon_rbsp(nal, size);
+    RevenantBitReader reader = revenant_rbsp(nal, size);
     if (out->type == 7) {
-        out->profile = (int)charon_bits(&reader, 8);
-        out->constraints = (int)charon_bits(&reader, 8);
-        out->level = (int)charon_bits(&reader, 8);
+        out->profile = (int)revenant_bits(&reader, 8);
+        out->constraints = (int)revenant_bits(&reader, 8);
+        out->level = (int)revenant_bits(&reader, 8);
     }
-    out->identifier = charon_ue(&reader);
-    if (out->type == 7 && charon_writes_format(out->profile)) {
-        out->chroma = charon_ue(&reader);
+    out->identifier = revenant_ue(&reader);
+    if (out->type == 7 && revenant_writes_format(out->profile)) {
+        out->chroma = revenant_ue(&reader);
         if (out->chroma == 3)
-            charon_bits(&reader, 1);
-        out->lumaDepth = charon_ue(&reader);
-        out->chromaDepth = charon_ue(&reader);
+            revenant_bits(&reader, 1);
+        out->lumaDepth = revenant_ue(&reader);
+        out->chromaDepth = revenant_ue(&reader);
         out->hasFormat = YES;
     }
     BOOL readable = !reader.failed;
@@ -354,10 +354,10 @@ static BOOL charon_read_parameter_set(const uint8_t *nal, size_t size, CharonPar
     return readable;
 }
 
-static void charon_sort_by_identifier(CharonParameterSet *sets, size_t count)
+static void revenant_sort_by_identifier(RevenantParameterSet *sets, size_t count)
 {
     for (size_t i = 1; i < count; i++) {
-        CharonParameterSet moving = sets[i];
+        RevenantParameterSet moving = sets[i];
         size_t j = i;
         for (; j > 0 && sets[j - 1].identifier > moving.identifier; j--)
             sets[j] = sets[j - 1];
@@ -365,7 +365,7 @@ static void charon_sort_by_identifier(CharonParameterSet *sets, size_t count)
     }
 }
 
-static CFStringRef charon_chroma_location(int code)
+static CFStringRef revenant_chroma_location(int code)
 {
     switch (code) {
     case 0: return kCVImageBufferChromaLocation_Left;
@@ -378,13 +378,13 @@ static CFStringRef charon_chroma_location(int code)
     }
 }
 
-static void charon_set_code(CFMutableDictionaryRef extensions, CFStringRef key, CFStringRef value)
+static void revenant_set_code(CFMutableDictionaryRef extensions, CFStringRef key, CFStringRef value)
 {
     if (value)
         CFDictionarySetValue(extensions, key, value);
 }
 
-static void charon_append_sets(CFMutableDataRef record, const uint8_t *const *pointers, const size_t *sizes, const CharonParameterSet *sets, size_t count)
+static void revenant_append_sets(CFMutableDataRef record, const uint8_t *const *pointers, const size_t *sizes, const RevenantParameterSet *sets, size_t count)
 {
     for (size_t i = 0; i < count; i++) {
         size_t size = sizes[sets[i].index];
@@ -401,10 +401,10 @@ OSStatus CMVideoFormatDescriptionCreateFromH264ParameterSets(CFAllocatorRef allo
         return invalidParameter;
     if (parameterSetCount < 2 || !parameterSetPointers || !parameterSetSizes || (NALUnitHeaderLength != 1 && NALUnitHeaderLength != 2 && NALUnitHeaderLength != 4))
         return malformedRecord;
-    CharonParameterSet *sets = calloc(3 * parameterSetCount, sizeof *sets);
-    CharonParameterSet *sequences = sets, *pictures = sets + parameterSetCount, *extensionSets = sets + 2 * parameterSetCount;
+    RevenantParameterSet *sets = calloc(3 * parameterSetCount, sizeof *sets);
+    RevenantParameterSet *sequences = sets, *pictures = sets + parameterSetCount, *extensionSets = sets + 2 * parameterSetCount;
     size_t sequenceCount = 0, pictureCount = 0, extensionCount = 0, lastSequence = 0;
-    CharonParameterSet format = {0};
+    RevenantParameterSet format = {0};
     BOOL hasFormat = NO;
     OSStatus status = noErr;
     for (size_t i = 0; i < parameterSetCount && status == noErr; i++) {
@@ -414,12 +414,12 @@ OSStatus CMVideoFormatDescriptionCreateFromH264ParameterSets(CFAllocatorRef allo
             status = malformedRecord;
             break;
         }
-        CharonParameterSet set = {i, 0, nal[0] & 0x1F};
+        RevenantParameterSet set = {i, 0, nal[0] & 0x1F};
         if (set.type != 7 && set.type != 8 && set.type != 13) {
             status = malformedRecord;
             break;
         }
-        if (!charon_read_parameter_set(nal, size, &set)) {
+        if (!revenant_read_parameter_set(nal, size, &set)) {
             status = unreadableParameterSet;
             break;
         }
@@ -448,11 +448,11 @@ OSStatus CMVideoFormatDescriptionCreateFromH264ParameterSets(CFAllocatorRef allo
         level = sequences[i].level > level ? sequences[i].level : level;
         constraints &= sequences[i].constraints;
     }
-    CharonSequence *parsed = status == noErr ? calloc(sequenceCount, sizeof *parsed) : NULL;
-    const CharonSequence *sized = NULL;
+    RevenantSequence *parsed = status == noErr ? calloc(sequenceCount, sizeof *parsed) : NULL;
+    const RevenantSequence *sized = NULL;
     for (size_t i = 0; i < sequenceCount && status == noErr; i++) {
-        CharonSequence *sequence = &parsed[i];
-        charon_parse_sequence(parameterSetPointers[sequences[i].index], parameterSetSizes[sequences[i].index], sequence);
+        RevenantSequence *sequence = &parsed[i];
+        revenant_parse_sequence(parameterSetPointers[sequences[i].index], parameterSetSizes[sequences[i].index], sequence);
         if (!sequence->complete && sequences[i].index == lastSequence)
             status = invalidParameter;
         if (sequence->complete) {
@@ -468,32 +468,32 @@ OSStatus CMVideoFormatDescriptionCreateFromH264ParameterSets(CFAllocatorRef allo
         free(sets);
         return status;
     }
-    BOOL tail = charon_writes_format(profile);
+    BOOL tail = revenant_writes_format(profile);
     if (!tail) {
         memcpy(sequences + sequenceCount, extensionSets, extensionCount * sizeof *sets);
         sequenceCount += extensionCount;
         extensionCount = 0;
     }
-    charon_sort_by_identifier(sequences, sequenceCount);
-    charon_sort_by_identifier(pictures, pictureCount);
-    charon_sort_by_identifier(extensionSets, extensionCount);
+    revenant_sort_by_identifier(sequences, sequenceCount);
+    revenant_sort_by_identifier(pictures, pictureCount);
+    revenant_sort_by_identifier(extensionSets, extensionCount);
     CFMutableDataRef record = CFDataCreateMutable(allocator, 0);
     uint8_t header[6] = {1, (uint8_t)profile, (uint8_t)constraints, (uint8_t)level, (uint8_t)(0xFC | (NALUnitHeaderLength - 1)), (uint8_t)(0xE0 | sequenceCount)};
     CFDataAppendBytes(record, header, 6);
-    charon_append_sets(record, parameterSetPointers, parameterSetSizes, sequences, sequenceCount);
+    revenant_append_sets(record, parameterSetPointers, parameterSetSizes, sequences, sequenceCount);
     uint8_t pictureTotal = (uint8_t)pictureCount;
     CFDataAppendBytes(record, &pictureTotal, 1);
-    charon_append_sets(record, parameterSetPointers, parameterSetSizes, pictures, pictureCount);
+    revenant_append_sets(record, parameterSetPointers, parameterSetSizes, pictures, pictureCount);
     if (tail) {
         uint8_t bytes[4] = {(uint8_t)(0xFC | format.chroma), (uint8_t)(0xF8 | format.lumaDepth), (uint8_t)(0xF8 | format.chromaDepth), (uint8_t)extensionCount};
         CFDataAppendBytes(record, bytes, 4);
-        charon_append_sets(record, parameterSetPointers, parameterSetSizes, extensionSets, extensionCount);
+        revenant_append_sets(record, parameterSetPointers, parameterSetSizes, extensionSets, extensionCount);
     }
-    CharonSequence described;
-    charon_parse_sequence(parameterSetPointers[sequences[0].index], parameterSetSizes[sequences[0].index], &described);
+    RevenantSequence described;
+    revenant_parse_sequence(parameterSetPointers[sequences[0].index], parameterSetSizes[sequences[0].index], &described);
     if (!described.complete)
         memset(&described, 0, sizeof described);
-    const CharonSequence *first = &described;
+    const RevenantSequence *first = &described;
     CFMutableDictionaryRef extensions = CFDictionaryCreateMutable(allocator, 0, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
     CFMutableDictionaryRef atoms = CFDictionaryCreateMutable(allocator, 0, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
     CFDictionarySetValue(atoms, CFSTR("avcC"), record);
@@ -509,8 +509,8 @@ OSStatus CMVideoFormatDescriptionCreateFromH264ParameterSets(CFAllocatorRef allo
     int top = first->hasChromaLocation ? first->chromaTop : 0, bottom = first->hasChromaLocation ? first->chromaBottom : 0;
     if (top == 2 && bottom == 2)
         top = bottom = 1;
-    charon_set_code(extensions, kCVImageBufferChromaLocationTopFieldKey, charon_chroma_location(top));
-    charon_set_code(extensions, kCVImageBufferChromaLocationBottomFieldKey, charon_chroma_location(bottom));
+    revenant_set_code(extensions, kCVImageBufferChromaLocationTopFieldKey, revenant_chroma_location(top));
+    revenant_set_code(extensions, kCVImageBufferChromaLocationBottomFieldKey, revenant_chroma_location(bottom));
     if (first->hasVUI) {
         CFDictionarySetValue(extensions, kCMFormatDescriptionExtension_FullRangeVideo, first->hasSignal && first->fullRange ? kCFBooleanTrue : kCFBooleanFalse);
         static const int ratios[17][2] = {{0, 0}, {1, 1}, {12, 11}, {10, 11}, {16, 11}, {40, 33}, {24, 11}, {20, 11}, {32, 11}, {80, 33}, {18, 11}, {15, 11}, {64, 33}, {160, 99}, {4, 3}, {3, 2}, {2, 1}};
@@ -533,9 +533,9 @@ OSStatus CMVideoFormatDescriptionCreateFromH264ParameterSets(CFAllocatorRef allo
             CFRelease(v);
         }
         if (first->hasColour) {
-            charon_set_code(extensions, kCVImageBufferColorPrimariesKey, CVColorPrimariesGetStringForIntegerCodePoint(first->primaries));
-            charon_set_code(extensions, kCVImageBufferTransferFunctionKey, CVTransferFunctionGetStringForIntegerCodePoint(first->transfer));
-            charon_set_code(extensions, kCVImageBufferYCbCrMatrixKey, CVYCbCrMatrixGetStringForIntegerCodePoint(first->matrix));
+            revenant_set_code(extensions, kCVImageBufferColorPrimariesKey, CVColorPrimariesGetStringForIntegerCodePoint(first->primaries));
+            revenant_set_code(extensions, kCVImageBufferTransferFunctionKey, CVTransferFunctionGetStringForIntegerCodePoint(first->transfer));
+            revenant_set_code(extensions, kCVImageBufferYCbCrMatrixKey, CVYCbCrMatrixGetStringForIntegerCodePoint(first->matrix));
         }
     }
     status = CMVideoFormatDescriptionCreate(allocator, kCMVideoCodecType_H264, sized->width, sized->height, extensions, formatDescriptionOut);

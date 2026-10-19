@@ -7,7 +7,7 @@
 #include "foundation/jit_artifact.hpp"
 #include <sstream>
 
-namespace shade {
+namespace emulator {
 
 [[nodiscard]] std::string disk_hit_fingerprint_text(
     const JitArtifactStoreStats& stats)

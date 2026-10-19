@@ -33,7 +33,7 @@
 #endif
 #endif
 
-namespace shade {
+namespace emulator {
 namespace {
 
     constexpr auto stable_delay = std::chrono::milliseconds { 50 };

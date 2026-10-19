@@ -1,44 +1,44 @@
 #import <UIKit/UIKit.h>
 #import <objc/runtime.h>
 
-static const void *CharonPrefersLargeTitlesKey = &CharonPrefersLargeTitlesKey;
-static const void *CharonLargeTitleAttributesKey = &CharonLargeTitleAttributesKey;
-static const void *CharonLargeTitleModeKey = &CharonLargeTitleModeKey;
+static const void *RevenantPrefersLargeTitlesKey = &RevenantPrefersLargeTitlesKey;
+static const void *RevenantLargeTitleAttributesKey = &RevenantLargeTitleAttributesKey;
+static const void *RevenantLargeTitleModeKey = &RevenantLargeTitleModeKey;
 
-@implementation UINavigationBar (CharonLargeTitles)
+@implementation UINavigationBar (RevenantLargeTitles)
 
 - (BOOL)prefersLargeTitles
 {
-    return [objc_getAssociatedObject(self, CharonPrefersLargeTitlesKey) boolValue];
+    return [objc_getAssociatedObject(self, RevenantPrefersLargeTitlesKey) boolValue];
 }
 
 - (void)setPrefersLargeTitles:(BOOL)prefers
 {
-    objc_setAssociatedObject(self, CharonPrefersLargeTitlesKey, @(prefers), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, RevenantPrefersLargeTitlesKey, @(prefers), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
 - (NSDictionary<NSAttributedStringKey, id> *)largeTitleTextAttributes
 {
-    return objc_getAssociatedObject(self, CharonLargeTitleAttributesKey);
+    return objc_getAssociatedObject(self, RevenantLargeTitleAttributesKey);
 }
 
 - (void)setLargeTitleTextAttributes:(NSDictionary<NSAttributedStringKey, id> *)attributes
 {
-    objc_setAssociatedObject(self, CharonLargeTitleAttributesKey, [attributes copy], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, RevenantLargeTitleAttributesKey, [attributes copy], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
 @end
 
-@implementation UINavigationItem (CharonLargeTitleDisplayMode)
+@implementation UINavigationItem (RevenantLargeTitleDisplayMode)
 
 - (UINavigationItemLargeTitleDisplayMode)largeTitleDisplayMode
 {
-    return (UINavigationItemLargeTitleDisplayMode)[objc_getAssociatedObject(self, CharonLargeTitleModeKey) integerValue];
+    return (UINavigationItemLargeTitleDisplayMode)[objc_getAssociatedObject(self, RevenantLargeTitleModeKey) integerValue];
 }
 
 - (void)setLargeTitleDisplayMode:(UINavigationItemLargeTitleDisplayMode)mode
 {
-    objc_setAssociatedObject(self, CharonLargeTitleModeKey, @(mode), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, RevenantLargeTitleModeKey, @(mode), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
 @end

@@ -10,7 +10,7 @@
 #include <atomic>
 #include <cstdint>
 
-namespace shade {
+namespace emulator {
 
 class VirtualClock {
 public:

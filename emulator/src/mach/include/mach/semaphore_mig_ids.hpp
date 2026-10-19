@@ -18,7 +18,7 @@
 
 #include "mach/xnu_mig_adapter.hpp"
 
-namespace shade::xnu::mig::semaphore {
+namespace emulator::xnu::mig::semaphore {
 
 inline constexpr std::string_view subsystem_name{"semaphore"};
 inline constexpr std::uint32_t subsystem_base = 617200U;

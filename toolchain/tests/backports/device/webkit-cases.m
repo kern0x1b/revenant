@@ -170,7 +170,7 @@ static NSString *evaluate(WKWebView *view, NSString *script)
 
 void webkit_run(UIView *container, WebKitRecorder record)
 {
-    NSURL *base = [NSURL URLWithString:@"https://charon.invalid/base"];
+    NSURL *base = [NSURL URLWithString:@"https://revenant.invalid/base"];
 
     {
         WebKitWatcher *watcher = [[WebKitWatcher alloc] init];
@@ -280,14 +280,14 @@ void webkit_run(UIView *container, WebKitRecorder record)
     {
         WebKitWatcher *watcher = [[WebKitWatcher alloc] init];
         watcher.policy = ^WKNavigationActionPolicy(WKNavigationAction *action) {
-            return [action.request.URL.scheme isEqualToString:@"charon-cancel"] ? WKNavigationActionPolicyCancel : WKNavigationActionPolicyAllow;
+            return [action.request.URL.scheme isEqualToString:@"revenant-cancel"] ? WKNavigationActionPolicyCancel : WKNavigationActionPolicyAllow;
         };
         WKWebView *view = make(container, watcher, nil);
-        [view loadHTMLString:html(@"T1", @"<a id=l href='charon-cancel://x'>x</a>") baseURL:base];
+        [view loadHTMLString:html(@"T1", @"<a id=l href='revenant-cancel://x'>x</a>") baseURL:base];
         spin_until(5, ^BOOL { return !view.loading && view.title.length; });
         spin(0.3);
         [watcher.events removeAllObjects];
-        evaluate(view, @"location.href = 'charon-cancel://x'; 1");
+        evaluate(view, @"location.href = 'revenant-cancel://x'; 1");
         spin(1);
         record(@"cancel.events", joined(watcher.events));
         record(@"cancel.state", state(view));
@@ -301,7 +301,7 @@ void webkit_run(UIView *container, WebKitRecorder record)
     {
         WebKitWatcher *watcher = [[WebKitWatcher alloc] init];
         WKWebView *view = make(container, watcher, nil);
-        [view loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:@"charon-none://x/y"]]];
+        [view loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:@"revenant-none://x/y"]]];
         spin_until(5, ^BOOL { return watcher.events.count >= 3; });
         spin(0.5);
         record(@"bad.events", joined(watcher.events));
@@ -441,7 +441,7 @@ void webkit_run(UIView *container, WebKitRecorder record)
         record(@"async.state", state(view));
         [watcher.events removeAllObjects];
         watcher.policy = ^WKNavigationActionPolicy(WKNavigationAction *action) { return WKNavigationActionPolicyCancel; };
-        [view loadHTMLString:html(@"T9", @"y") baseURL:[NSURL URLWithString:@"https://charon.invalid/second"]];
+        [view loadHTMLString:html(@"T9", @"y") baseURL:[NSURL URLWithString:@"https://revenant.invalid/second"]];
         spin(1.5);
         record(@"async.cancel", joined(watcher.events));
         record(@"async.cancelState", state(view));

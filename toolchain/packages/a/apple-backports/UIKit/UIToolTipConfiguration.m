@@ -13,10 +13,10 @@
 
 + (instancetype)configurationWithToolTip:(NSString *)toolTip inRect:(CGRect)sourceRect
 {
-    return [[self alloc] charon_initWithToolTip:toolTip inRect:sourceRect];
+    return [[self alloc] revenant_initWithToolTip:toolTip inRect:sourceRect];
 }
 
-- (instancetype)charon_initWithToolTip:(NSString *)toolTip inRect:(CGRect)sourceRect
+- (instancetype)revenant_initWithToolTip:(NSString *)toolTip inRect:(CGRect)sourceRect
 {
     [super init];
     _toolTip = [toolTip copy];

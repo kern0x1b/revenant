@@ -1,11 +1,11 @@
 #import <Foundation/Foundation.h>
 #import <objc/message.h>
 
-@interface NSXPCConnection (CharonReleaseProxy)
+@interface NSXPCConnection (RevenantReleaseProxy)
 - (id)synchronousRemoteObjectProxy;
 @end
 
-@implementation NSXPCConnection (CharonBarrier)
+@implementation NSXPCConnection (RevenantBarrier)
 
 - (id)synchronousRemoteObjectProxyWithErrorHandler:(void (^)(NSError *error))handler
 {

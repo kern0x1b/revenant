@@ -5,36 +5,36 @@
 
 @implementation AVPictureInPictureControllerContentSource
 {
-    AVPlayerLayer *_charonPlayerLayer;
+    AVPlayerLayer *_revenantPlayerLayer;
 }
 
 - (instancetype)initWithPlayerLayer:(AVPlayerLayer *)playerLayer
 {
     if ((self = [super init]))
-        _charonPlayerLayer = playerLayer;
+        _revenantPlayerLayer = playerLayer;
     return self;
 }
 
 - (AVPlayerLayer *)playerLayer
 {
-    return _charonPlayerLayer;
+    return _revenantPlayerLayer;
 }
 
 - (NSString *)description
 {
     return [NSString stringWithFormat:@"<AVPictureInPictureControllerContentSource layer=%@>",
-            _charonPlayerLayer ? NSStringFromClass([_charonPlayerLayer class]) : @"nil"];
+            _revenantPlayerLayer ? NSStringFromClass([_revenantPlayerLayer class]) : @"nil"];
 }
 
 @end
 
-static const void *CharonContentSourceKey = &CharonContentSourceKey;
+static const void *RevenantContentSourceKey = &RevenantContentSourceKey;
 
-@interface AVPictureInPictureController (CharonContentSource15)
+@interface AVPictureInPictureController (RevenantContentSource15)
 @property (nonatomic, strong) AVPlayerLayer *playerLayer;
 @end
 
-@implementation AVPictureInPictureController (CharonContentSource15)
+@implementation AVPictureInPictureController (RevenantContentSource15)
 
 - (instancetype)initWithContentSource:(AVPictureInPictureControllerContentSource *)contentSource
 {
@@ -42,18 +42,18 @@ static const void *CharonContentSourceKey = &CharonContentSourceKey;
     if (!layer)
         return nil;
     if ((self = [self initWithPlayerLayer:layer]))
-        objc_setAssociatedObject(self, CharonContentSourceKey, contentSource, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+        objc_setAssociatedObject(self, RevenantContentSourceKey, contentSource, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     return self;
 }
 
 - (AVPictureInPictureControllerContentSource *)contentSource
 {
-    return objc_getAssociatedObject(self, CharonContentSourceKey);
+    return objc_getAssociatedObject(self, RevenantContentSourceKey);
 }
 
 - (void)setContentSource:(AVPictureInPictureControllerContentSource *)contentSource
 {
-    objc_setAssociatedObject(self, CharonContentSourceKey, contentSource, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, RevenantContentSourceKey, contentSource, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     if (contentSource.playerLayer)
         self.playerLayer = contentSource.playerLayer;
 }

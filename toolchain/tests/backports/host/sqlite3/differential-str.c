@@ -13,16 +13,16 @@ int sqlite3_str_errcode(sqlite3_str *);
 int sqlite3_str_length(sqlite3_str *);
 char *sqlite3_str_value(sqlite3_str *);
 
-sqlite3_str *charon_port_sqlite3_str_new(sqlite3 *);
-char *charon_port_sqlite3_str_finish(sqlite3_str *);
-void charon_port_sqlite3_str_append(sqlite3_str *, const char *, int);
-void charon_port_sqlite3_str_appendall(sqlite3_str *, const char *);
-void charon_port_sqlite3_str_appendchar(sqlite3_str *, int, char);
-void charon_port_sqlite3_str_appendf(sqlite3_str *, const char *, ...);
-void charon_port_sqlite3_str_reset(sqlite3_str *);
-int charon_port_sqlite3_str_errcode(sqlite3_str *);
-int charon_port_sqlite3_str_length(sqlite3_str *);
-char *charon_port_sqlite3_str_value(sqlite3_str *);
+sqlite3_str *revenant_port_sqlite3_str_new(sqlite3 *);
+char *revenant_port_sqlite3_str_finish(sqlite3_str *);
+void revenant_port_sqlite3_str_append(sqlite3_str *, const char *, int);
+void revenant_port_sqlite3_str_appendall(sqlite3_str *, const char *);
+void revenant_port_sqlite3_str_appendchar(sqlite3_str *, int, char);
+void revenant_port_sqlite3_str_appendf(sqlite3_str *, const char *, ...);
+void revenant_port_sqlite3_str_reset(sqlite3_str *);
+int revenant_port_sqlite3_str_errcode(sqlite3_str *);
+int revenant_port_sqlite3_str_length(sqlite3_str *);
+char *revenant_port_sqlite3_str_value(sqlite3_str *);
 
 static int failures;
 
@@ -53,23 +53,23 @@ static void same_text(struct pair *x, const char *step, const char *a, const cha
 static void compare(struct pair *x, const char *step)
 {
     char what[128];
-    int hl = sqlite3_str_length(x->host), pl = charon_port_sqlite3_str_length(x->port);
+    int hl = sqlite3_str_length(x->host), pl = revenant_port_sqlite3_str_length(x->port);
     if (hl != pl) {
         snprintf(what, sizeof what, "length host=%d port=%d", hl, pl);
         fail(x, step, what);
     }
-    int he = sqlite3_str_errcode(x->host), pe = charon_port_sqlite3_str_errcode(x->port);
+    int he = sqlite3_str_errcode(x->host), pe = revenant_port_sqlite3_str_errcode(x->port);
     if (he != pe) {
         snprintf(what, sizeof what, "errcode host=%d port=%d", he, pe);
         fail(x, step, what);
     }
-    same_text(x, step, sqlite3_str_value(x->host), charon_port_sqlite3_str_value(x->port), "value");
+    same_text(x, step, sqlite3_str_value(x->host), revenant_port_sqlite3_str_value(x->port), "value");
 }
 
 static void finish(struct pair *x, const char *step)
 {
     char *h = sqlite3_str_finish(x->host);
-    char *p = charon_port_sqlite3_str_finish(x->port);
+    char *p = revenant_port_sqlite3_str_finish(x->port);
     same_text(x, step, h, p, "finish");
     sqlite3_free(h);
     sqlite3_free(p);
@@ -85,42 +85,42 @@ static void report(struct pair *x)
 static void append(struct pair *x, const char *z, int n, const char *step)
 {
     sqlite3_str_append(x->host, z, n);
-    charon_port_sqlite3_str_append(x->port, z, n);
+    revenant_port_sqlite3_str_append(x->port, z, n);
     compare(x, step);
 }
 
 static void appendall(struct pair *x, const char *z, const char *step)
 {
     sqlite3_str_appendall(x->host, z);
-    charon_port_sqlite3_str_appendall(x->port, z);
+    revenant_port_sqlite3_str_appendall(x->port, z);
     compare(x, step);
 }
 
 static void appendchar(struct pair *x, int n, char c, const char *step)
 {
     sqlite3_str_appendchar(x->host, n, c);
-    charon_port_sqlite3_str_appendchar(x->port, n, c);
+    revenant_port_sqlite3_str_appendchar(x->port, n, c);
     compare(x, step);
 }
 
 static void appendf_int(struct pair *x, const char *format, long long v, const char *step)
 {
     sqlite3_str_appendf(x->host, format, v);
-    charon_port_sqlite3_str_appendf(x->port, format, v);
+    revenant_port_sqlite3_str_appendf(x->port, format, v);
     compare(x, step);
 }
 
 static void appendf_text(struct pair *x, const char *format, const char *v, const char *step)
 {
     sqlite3_str_appendf(x->host, format, v);
-    charon_port_sqlite3_str_appendf(x->port, format, v);
+    revenant_port_sqlite3_str_appendf(x->port, format, v);
     compare(x, step);
 }
 
 static void reset(struct pair *x, const char *step)
 {
     sqlite3_str_reset(x->host);
-    charon_port_sqlite3_str_reset(x->port);
+    revenant_port_sqlite3_str_reset(x->port);
     compare(x, step);
 }
 
@@ -129,7 +129,7 @@ static void begin(struct pair *x, const char *scenario, sqlite3 *db)
     memset(x, 0, sizeof *x);
     x->scenario = scenario;
     x->host = sqlite3_str_new(db);
-    x->port = charon_port_sqlite3_str_new(db);
+    x->port = revenant_port_sqlite3_str_new(db);
     if (x->host == NULL || x->port == NULL) {
         fail(x, "new", "a builder is NULL");
         return;
@@ -264,7 +264,7 @@ static void scenario_null(void)
     appendf_int(&x, "%lld", 1, "appendf-null");
     reset(&x, "reset-null");
     compare(&x, "null-state");
-    char *h = sqlite3_str_finish(NULL), *p = charon_port_sqlite3_str_finish(NULL);
+    char *h = sqlite3_str_finish(NULL), *p = revenant_port_sqlite3_str_finish(NULL);
     same_text(&x, "finish-null", h, p, "finish");
     report(&x);
 }

@@ -15,7 +15,7 @@
 
 #include "../support.hpp"
 
-namespace shade {
+namespace emulator {
 
 void CompatibilityKernel::dispatch_bsd_process_sockets(Cpu& cpu)
 {

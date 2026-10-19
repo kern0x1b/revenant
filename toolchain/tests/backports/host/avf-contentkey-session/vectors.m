@@ -1,7 +1,7 @@
 #import <Foundation/Foundation.h>
 #import <AVFoundation/AVFoundation.h>
 #import <CommonCrypto/CommonCrypto.h>
-#import "../../../../packages/a/apple-backports/AVFoundation/CharonAVContentKey.h"
+#import "../../../../packages/a/apple-backports/AVFoundation/RevenantAVContentKey.h"
 
 static int failures = 0;
 
@@ -71,7 +71,7 @@ static void Check(NSString *label, NSData *got, NSData *want, NSError *error)
 static void CheckRefused(NSString *label, AVContentKey *key, NSData *input)
 {
     NSError *error = nil;
-    NSData *got = [key charon_decryptSampleData:input error:&error];
+    NSData *got = [key revenant_decryptSampleData:input error:&error];
     BOOL refused = got == nil && error != nil;
     printf("%s %s\n", refused ? "ok  " : "FAIL", [label UTF8String]);
     if (!refused) failures++;
@@ -85,21 +85,21 @@ int main(void)
         const uint8_t ivBytes[16] = { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f };
         NSData *key = [NSData dataWithBytes:keyBytes length:16];
         NSData *iv = [NSData dataWithBytes:ivBytes length:16];
-        NSData *plaintext = [@"charon sample data 0123456789abcdef-tail" dataUsingEncoding:NSUTF8StringEncoding];
+        NSData *plaintext = [@"revenant sample data 0123456789abcdef-tail" dataUsingEncoding:NSUTF8StringEncoding];
 
         for (NSUInteger length = 0; length <= 40; length += 7) {
             NSData *p = [plaintext subdataWithRange:NSMakeRange(0, length)];
             NSData *cipher = OracleCBCEncrypt(key, iv, Pkcs7Pad(p));
-            AVContentKey *ck = [AVContentKey charon_contentKeyWithSpecifier:nil keyData:key initializationVector:iv];
+            AVContentKey *ck = [AVContentKey revenant_contentKeyWithSpecifier:nil keyData:key initializationVector:iv];
             NSError *error = nil;
-            NSData *got = [ck charon_decryptSampleData:cipher error:&error];
+            NSData *got = [ck revenant_decryptSampleData:cipher error:&error];
             Check([NSString stringWithFormat:@"cbc length %lu", (unsigned long)length], got, p, error);
         }
         {
             NSData *p = [plaintext subdataWithRange:NSMakeRange(0, 16)];
-            AVContentKey *ck = [AVContentKey charon_contentKeyWithSpecifier:nil keyData:key initializationVector:iv];
+            AVContentKey *ck = [AVContentKey revenant_contentKeyWithSpecifier:nil keyData:key initializationVector:iv];
             NSError *error = nil;
-            NSData *got = [ck charon_decryptSampleData:OracleCBCEncrypt(key, iv, Pkcs7Pad(p)) error:&error];
+            NSData *got = [ck revenant_decryptSampleData:OracleCBCEncrypt(key, iv, Pkcs7Pad(p)) error:&error];
             Check(@"cbc whole padding block", got, p, error);
         }
 
@@ -107,16 +107,16 @@ int main(void)
         for (NSUInteger length = 1; length <= 40; length += 13) {
             NSData *p = [plaintext subdataWithRange:NSMakeRange(0, length)];
             NSData *cipher = OracleCTR(key, vector8, p);
-            AVContentKey *ck = [AVContentKey charon_contentKeyWithSpecifier:nil keyData:key initializationVector:vector8];
+            AVContentKey *ck = [AVContentKey revenant_contentKeyWithSpecifier:nil keyData:key initializationVector:vector8];
             NSError *error = nil;
-            NSData *got = [ck charon_decryptSampleData:cipher error:&error];
+            NSData *got = [ck revenant_decryptSampleData:cipher error:&error];
             Check([NSString stringWithFormat:@"ctr length %lu", (unsigned long)length], got, p, error);
         }
 
-        AVContentKey *shortKey = [AVContentKey charon_contentKeyWithSpecifier:nil keyData:[NSData dataWithBytes:keyBytes length:15]
+        AVContentKey *shortKey = [AVContentKey revenant_contentKeyWithSpecifier:nil keyData:[NSData dataWithBytes:keyBytes length:15]
                                                           initializationVector:iv];
         CheckRefused(@"refuses a 15-byte key", shortKey, plaintext);
-        AVContentKey *oddVector = [AVContentKey charon_contentKeyWithSpecifier:nil keyData:key
+        AVContentKey *oddVector = [AVContentKey revenant_contentKeyWithSpecifier:nil keyData:key
                                                           initializationVector:[iv subdataWithRange:NSMakeRange(0, 12)]];
         CheckRefused(@"refuses a 12-byte vector", oddVector, plaintext);
     }

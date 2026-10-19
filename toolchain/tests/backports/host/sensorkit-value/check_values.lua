@@ -25,7 +25,7 @@ end
 local function declares_value_property(body, name)
     local from = 1
     while true do
-        local _, e = body:find("CHARON_VALUE_PROPERTY(", from, true)
+        local _, e = body:find("REVENANT_VALUE_PROPERTY(", from, true)
         if not e then
             return false
         end
@@ -56,7 +56,7 @@ local function count_body(body, name)
 end
 
 local function key_helper_body(body)
-    local head = "static NSString *CharonKeyboardSentimentKey("
+    local head = "static NSString *RevenantKeyboardSentimentKey("
     local from = 1
     while true do
         local _, e = body:find(head, from, true)
@@ -109,15 +109,15 @@ function main(...)
     local key_ok = helper_body:find("stringWithFormat", 1, true) ~= nil
         and helper_body:find("(long)category", 1, true) ~= nil
         and helper_body:find("selector", 1, true) ~= nil
-    print(string.format("%-26s source=%s", "CharonKeyboardSentimentKey",
+    print(string.format("%-26s source=%s", "RevenantKeyboardSentimentKey",
         key_ok and "selector and category both in the key" or "MISSING OR INCOMPLETE"))
     if not key_ok then
-        failures[#failures + 1] = "CharonKeyboardSentimentKey does not build a key from both the selector and the category, so every category would answer the same number"
+        failures[#failures + 1] = "RevenantKeyboardSentimentKey does not build a key from both the selector and the category, so every category would answer the same number"
     end
 
     for _, name in ipairs(COUNTS) do
         local body = count_body(body150, name)
-        local reads_store = body:find("charon_valueForKey:CharonKeyboardSentimentKey(", 1, true) ~= nil
+        local reads_store = body:find("revenant_valueForKey:RevenantKeyboardSentimentKey(", 1, true) ~= nil
             and body:find('@"' .. name .. '"', 1, true) ~= nil
         local carries_type = body:find(COUNT_SHAPE, 1, true) ~= nil
         local implemented = reads_store and carries_type

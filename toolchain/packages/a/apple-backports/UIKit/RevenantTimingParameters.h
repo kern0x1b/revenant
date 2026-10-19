@@ -2,26 +2,26 @@
 #import <QuartzCore/QuartzCore.h>
 
 enum {
-    CharonCubicCurveDefault = 5,
-    CharonCubicCurveControlPoints = 6
+    RevenantCubicCurveDefault = 5,
+    RevenantCubicCurveControlPoints = 6
 };
 
-@interface CharonViewCubicTimingFunction : NSObject <NSCopying, NSCoding>
+@interface RevenantViewCubicTimingFunction : NSObject <NSCopying, NSCoding>
 - (instancetype)initWithControlPoint1:(CGPoint)point1 controlPoint2:(CGPoint)point2;
 @property (nonatomic, readonly) CGPoint controlPoint1;
 @property (nonatomic, readonly) CGPoint controlPoint2;
 - (CAMediaTimingFunction *)_mediaTimingFunction;
 @end
 
-Class charon_cubic_timing_function_class(void);
-id charon_cubic_timing_function(CGPoint point1, CGPoint point2);
+Class revenant_cubic_timing_function_class(void);
+id revenant_cubic_timing_function(CGPoint point1, CGPoint point2);
 
-@interface UICubicTimingParameters (CharonTiming)
-- (CharonViewCubicTimingFunction *)timingFunction;
-- (CharonViewCubicTimingFunction *)effectiveTimingFunction;
+@interface UICubicTimingParameters (RevenantTiming)
+- (RevenantViewCubicTimingFunction *)timingFunction;
+- (RevenantViewCubicTimingFunction *)effectiveTimingFunction;
 @end
 
-@interface UISpringTimingParameters (CharonTiming)
+@interface UISpringTimingParameters (RevenantTiming)
 - (BOOL)implicitDuration;
 - (CGFloat)mass;
 - (CGFloat)stiffness;
@@ -30,10 +30,10 @@ id charon_cubic_timing_function(CGPoint point1, CGPoint point2);
 - (NSTimeInterval)settlingDuration;
 @end
 
-double charon_spring_frequency(double duration, double dampingRatio, double velocity);
-double charon_spring_progress(double omega, double dampingRatio, double velocity, double time);
+double revenant_spring_frequency(double duration, double dampingRatio, double velocity);
+double revenant_spring_progress(double omega, double dampingRatio, double velocity, double time);
 
-@interface UIViewPropertyAnimator (CharonAnimator)
+@interface UIViewPropertyAnimator (RevenantAnimator)
 - (NSTimeInterval)internalDuration;
 - (NSString *)_stateAsString;
 @end

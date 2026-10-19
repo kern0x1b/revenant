@@ -7,15 +7,15 @@
 @property (nonatomic, strong, readwrite) AVPlayerLayer *playerLayer;
 @end
 
-@interface CharonPictureInPictureWindow : UIWindow
-@property (nonatomic, weak) AVPictureInPictureController *charonController;
+@interface RevenantPictureInPictureWindow : UIWindow
+@property (nonatomic, weak) AVPictureInPictureController *revenantController;
 @end
 
-@implementation CharonPictureInPictureWindow
+@implementation RevenantPictureInPictureWindow
 
-@synthesize charonController = _charonController;
+@synthesize revenantController = _revenantController;
 
-- (void)charon_pan:(UIPanGestureRecognizer *)recognizer
+- (void)revenant_pan:(UIPanGestureRecognizer *)recognizer
 {
     UIView *dragged = recognizer.view.window ?: recognizer.view;
     CGPoint translation = [recognizer translationInView:dragged.superview ?: dragged];
@@ -30,9 +30,9 @@
     self.frame = frame;
 }
 
-- (void)charon_close:(UITapGestureRecognizer *)recognizer
+- (void)revenant_close:(UITapGestureRecognizer *)recognizer
 {
-    [self.charonController stopPictureInPicture];
+    [self.revenantController stopPictureInPicture];
 }
 
 @end
@@ -41,11 +41,11 @@ NSString * const AVKitErrorDomain = @"AVKitErrorDomain";
 
 @implementation AVPictureInPictureController
 {
-    CharonPictureInPictureWindow *_charonWindow;
-    CALayer *_charonOriginalSuperlayer;
-    NSInteger _charonOriginalSublayerIndex;
-    CGRect _charonOriginalFrame;
-    __weak id<AVPictureInPictureControllerDelegate> _charonDelegate;
+    RevenantPictureInPictureWindow *_revenantWindow;
+    CALayer *_revenantOriginalSuperlayer;
+    NSInteger _revenantOriginalSublayerIndex;
+    CGRect _revenantOriginalFrame;
+    __weak id<AVPictureInPictureControllerDelegate> _revenantDelegate;
 }
 
 @synthesize playerLayer = _playerLayer;
@@ -73,17 +73,17 @@ NSString * const AVKitErrorDomain = @"AVKitErrorDomain";
 
 - (id<AVPictureInPictureControllerDelegate>)delegate
 {
-    return _charonDelegate;
+    return _revenantDelegate;
 }
 
 - (void)setDelegate:(id<AVPictureInPictureControllerDelegate>)delegate
 {
-    _charonDelegate = delegate;
+    _revenantDelegate = delegate;
 }
 
 - (BOOL)isPictureInPictureActive
 {
-    return _charonWindow != nil;
+    return _revenantWindow != nil;
 }
 
 - (BOOL)isPictureInPicturePossible
@@ -93,83 +93,83 @@ NSString * const AVKitErrorDomain = @"AVKitErrorDomain";
 
 - (void)startPictureInPicture
 {
-    if (_charonWindow)
+    if (_revenantWindow)
         return;
     CALayer *layer = self.playerLayer;
     CALayer *superlayer = layer.superlayer;
     if (!superlayer || !self.isPictureInPicturePossible) {
         NSError *error = [NSError errorWithDomain:AVKitErrorDomain code:-1001
                                           userInfo:@{NSLocalizedDescriptionKey: @"Picture in Picture could not be started"}];
-        if ([_charonDelegate respondsToSelector:@selector(pictureInPictureController:failedToStartPictureInPictureWithError:)])
-            [_charonDelegate pictureInPictureController:self failedToStartPictureInPictureWithError:error];
+        if ([_revenantDelegate respondsToSelector:@selector(pictureInPictureController:failedToStartPictureInPictureWithError:)])
+            [_revenantDelegate pictureInPictureController:self failedToStartPictureInPictureWithError:error];
         return;
     }
 
-    if ([_charonDelegate respondsToSelector:@selector(pictureInPictureControllerWillStartPictureInPicture:)])
-        [_charonDelegate pictureInPictureControllerWillStartPictureInPicture:self];
+    if ([_revenantDelegate respondsToSelector:@selector(pictureInPictureControllerWillStartPictureInPicture:)])
+        [_revenantDelegate pictureInPictureControllerWillStartPictureInPicture:self];
 
-    _charonOriginalSuperlayer = superlayer;
-    _charonOriginalFrame = layer.frame;
-    _charonOriginalSublayerIndex = [superlayer.sublayers indexOfObject:layer];
+    _revenantOriginalSuperlayer = superlayer;
+    _revenantOriginalFrame = layer.frame;
+    _revenantOriginalSublayerIndex = [superlayer.sublayers indexOfObject:layer];
 
     CGSize screen = [UIScreen mainScreen].bounds.size;
     CGSize size = CGSizeMake(160, 90);
     CGRect frame = CGRectMake(screen.width - size.width - 16, screen.height - size.height - 64, size.width, size.height);
 
-    _charonWindow = [[CharonPictureInPictureWindow alloc] initWithFrame:frame];
-    _charonWindow.charonController = self;
-    _charonWindow.windowLevel = UIWindowLevelAlert - 1;
-    _charonWindow.backgroundColor = [UIColor blackColor];
-    _charonWindow.layer.cornerRadius = 8;
-    _charonWindow.clipsToBounds = YES;
-    _charonWindow.hidden = NO;
+    _revenantWindow = [[RevenantPictureInPictureWindow alloc] initWithFrame:frame];
+    _revenantWindow.revenantController = self;
+    _revenantWindow.windowLevel = UIWindowLevelAlert - 1;
+    _revenantWindow.backgroundColor = [UIColor blackColor];
+    _revenantWindow.layer.cornerRadius = 8;
+    _revenantWindow.clipsToBounds = YES;
+    _revenantWindow.hidden = NO;
 
     [CATransaction begin];
     [CATransaction setDisableActions:YES];
-    layer.frame = _charonWindow.bounds;
-    [_charonWindow.layer addSublayer:layer];
+    layer.frame = _revenantWindow.bounds;
+    [_revenantWindow.layer addSublayer:layer];
     [CATransaction commit];
 
-    UIPanGestureRecognizer *pan = [[UIPanGestureRecognizer alloc] initWithTarget:_charonWindow action:@selector(charon_pan:)];
-    [_charonWindow addGestureRecognizer:pan];
-    UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:_charonWindow action:@selector(charon_close:)];
+    UIPanGestureRecognizer *pan = [[UIPanGestureRecognizer alloc] initWithTarget:_revenantWindow action:@selector(revenant_pan:)];
+    [_revenantWindow addGestureRecognizer:pan];
+    UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:_revenantWindow action:@selector(revenant_close:)];
     tap.numberOfTapsRequired = 2;
-    [_charonWindow addGestureRecognizer:tap];
+    [_revenantWindow addGestureRecognizer:tap];
 
-    if ([_charonDelegate respondsToSelector:@selector(pictureInPictureControllerDidStartPictureInPicture:)])
-        [_charonDelegate pictureInPictureControllerDidStartPictureInPicture:self];
+    if ([_revenantDelegate respondsToSelector:@selector(pictureInPictureControllerDidStartPictureInPicture:)])
+        [_revenantDelegate pictureInPictureControllerDidStartPictureInPicture:self];
 }
 
 - (void)stopPictureInPicture
 {
-    if (!_charonWindow)
+    if (!_revenantWindow)
         return;
 
-    if ([_charonDelegate respondsToSelector:@selector(pictureInPictureControllerWillStopPictureInPicture:)])
-        [_charonDelegate pictureInPictureControllerWillStopPictureInPicture:self];
+    if ([_revenantDelegate respondsToSelector:@selector(pictureInPictureControllerWillStopPictureInPicture:)])
+        [_revenantDelegate pictureInPictureControllerWillStopPictureInPicture:self];
 
     CALayer *layer = self.playerLayer;
     [CATransaction begin];
     [CATransaction setDisableActions:YES];
     [layer removeFromSuperlayer];
-    layer.frame = _charonOriginalFrame;
-    NSArray<CALayer *> *siblings = _charonOriginalSuperlayer.sublayers;
-    if (_charonOriginalSublayerIndex != NSNotFound && _charonOriginalSublayerIndex <= (NSInteger)siblings.count)
-        [_charonOriginalSuperlayer insertSublayer:layer atIndex:(unsigned)_charonOriginalSublayerIndex];
+    layer.frame = _revenantOriginalFrame;
+    NSArray<CALayer *> *siblings = _revenantOriginalSuperlayer.sublayers;
+    if (_revenantOriginalSublayerIndex != NSNotFound && _revenantOriginalSublayerIndex <= (NSInteger)siblings.count)
+        [_revenantOriginalSuperlayer insertSublayer:layer atIndex:(unsigned)_revenantOriginalSublayerIndex];
     else
-        [_charonOriginalSuperlayer addSublayer:layer];
+        [_revenantOriginalSuperlayer addSublayer:layer];
     [CATransaction commit];
 
-    _charonWindow.hidden = YES;
-    _charonWindow = nil;
-    _charonOriginalSuperlayer = nil;
+    _revenantWindow.hidden = YES;
+    _revenantWindow = nil;
+    _revenantOriginalSuperlayer = nil;
 
     void (^finish)(void) = ^{
-        if ([self->_charonDelegate respondsToSelector:@selector(pictureInPictureControllerDidStopPictureInPicture:)])
-            [self->_charonDelegate pictureInPictureControllerDidStopPictureInPicture:self];
+        if ([self->_revenantDelegate respondsToSelector:@selector(pictureInPictureControllerDidStopPictureInPicture:)])
+            [self->_revenantDelegate pictureInPictureControllerDidStopPictureInPicture:self];
     };
-    if ([_charonDelegate respondsToSelector:@selector(pictureInPictureController:restoreUserInterfaceForPictureInPictureStopWithCompletionHandler:)]) {
-        [_charonDelegate pictureInPictureController:self restoreUserInterfaceForPictureInPictureStopWithCompletionHandler:^(BOOL restored) {
+    if ([_revenantDelegate respondsToSelector:@selector(pictureInPictureController:restoreUserInterfaceForPictureInPictureStopWithCompletionHandler:)]) {
+        [_revenantDelegate pictureInPictureController:self restoreUserInterfaceForPictureInPictureStopWithCompletionHandler:^(BOOL restored) {
             (void)restored;
             finish();
         }];

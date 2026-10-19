@@ -1,4 +1,4 @@
-#import "CharonWebKit.h"
+#import "RevenantWebKit.h"
 
 NSString *const WKErrorDomain = @"WKErrorDomain";
 

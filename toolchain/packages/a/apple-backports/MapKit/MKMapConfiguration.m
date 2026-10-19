@@ -15,7 +15,7 @@
     return [super init];
 }
 
-- (instancetype)charon_baseInit
+- (instancetype)revenant_baseInit
 {
     return [super init];
 }
@@ -83,7 +83,7 @@
 
 - (instancetype)init
 {
-    self = [self charon_baseInit];
+    self = [self revenant_baseInit];
     if (self) {
         _emphasisStyle = MKStandardMapEmphasisStyleDefault;
         _showsTraffic = NO;
@@ -135,7 +135,7 @@
 
 - (instancetype)init
 {
-    self = [self charon_baseInit];
+    self = [self revenant_baseInit];
     if (self) {
         _showsTraffic = NO;
     }
@@ -157,7 +157,7 @@
 
 - (instancetype)init
 {
-    return [self charon_baseInit];
+    return [self revenant_baseInit];
 }
 
 - (instancetype)initWithElevationStyle:(MKMapElevationStyle)elevationStyle

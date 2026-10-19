@@ -7,7 +7,7 @@ static void Mark(NSString *event)
     NSString *line = [NSString stringWithFormat:@"UIDEMO %@\n", event];
     fputs(line.UTF8String, stdout);
     fflush(stdout);
-    NSString *path = @"/private/var/charon/uidemo.log";
+    NSString *path = @"/private/var/revenant/uidemo.log";
     NSFileHandle *handle = [NSFileHandle fileHandleForWritingAtPath:path];
     if (!handle) {
         [[NSFileManager defaultManager] createFileAtPath:path contents:nil attributes:nil];

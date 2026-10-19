@@ -3,24 +3,24 @@
 
 #pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
 
-static const char charon_default_rate_key;
+static const char revenant_default_rate_key;
 
-static dispatch_queue_t charon_avf_composition_queue(void)
+static dispatch_queue_t revenant_avf_composition_queue(void)
 {
     static dispatch_queue_t queue;
     static dispatch_once_t once;
     dispatch_once(&once, ^{
-        queue = dispatch_queue_create("org.charon.avf.composition", DISPATCH_QUEUE_SERIAL);
+        queue = dispatch_queue_create("org.revenant.avf.composition", DISPATCH_QUEUE_SERIAL);
     });
     return queue;
 }
 
-@interface NSValue (CharonAVFoundationVideoDimensions)
+@interface NSValue (RevenantAVFoundationVideoDimensions)
 + (NSValue *)valueWithCMVideoDimensions:(CMVideoDimensions)dimensions;
 - (CMVideoDimensions)CMVideoDimensionsValue;
 @end
 
-@implementation NSValue (CharonAVFoundationVideoDimensions)
+@implementation NSValue (RevenantAVFoundationVideoDimensions)
 
 + (NSValue *)valueWithCMVideoDimensions:(CMVideoDimensions)dimensions
 {
@@ -36,22 +36,22 @@ static dispatch_queue_t charon_avf_composition_queue(void)
 
 @end
 
-@implementation AVPlayer (CharonAVFoundationDefaultRate)
+@implementation AVPlayer (RevenantAVFoundationDefaultRate)
 
 - (float)defaultRate
 {
-    NSNumber *stored = objc_getAssociatedObject(self, &charon_default_rate_key);
+    NSNumber *stored = objc_getAssociatedObject(self, &revenant_default_rate_key);
     return stored ? (float)stored.doubleValue : 1.0f;
 }
 
 - (void)setDefaultRate:(float)defaultRate
 {
-    objc_setAssociatedObject(self, &charon_default_rate_key, @(defaultRate), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, &revenant_default_rate_key, @(defaultRate), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
 @end
 
-@implementation AVAssetImageGenerator (CharonAVFoundationSingleImage)
+@implementation AVAssetImageGenerator (RevenantAVFoundationSingleImage)
 
 - (void)generateCGImageAsynchronouslyForTime:(CMTime)requestedTime completionHandler:(void (^)(CGImageRef image, CMTime actualTime, NSError *error))handler
 {
@@ -63,7 +63,7 @@ static dispatch_queue_t charon_avf_composition_queue(void)
 
 @end
 
-@implementation AVMutableComposition (CharonAVFoundationAsyncInsert)
+@implementation AVMutableComposition (RevenantAVFoundationAsyncInsert)
 
 - (void)insertTimeRange:(CMTimeRange)timeRange ofAsset:(AVAsset *)asset atTime:(CMTime)startTime completionHandler:(void (^)(NSError *error))completionHandler
 {
@@ -76,11 +76,11 @@ static dispatch_queue_t charon_avf_composition_queue(void)
 
 @end
 
-@implementation AVVideoComposition (CharonAVFoundationAsyncProperties)
+@implementation AVVideoComposition (RevenantAVFoundationAsyncProperties)
 
 + (void)videoCompositionWithPropertiesOfAsset:(AVAsset *)asset completionHandler:(void (^)(AVVideoComposition *videoComposition, NSError *error))completionHandler
 {
-    dispatch_async(charon_avf_composition_queue(), ^{
+    dispatch_async(revenant_avf_composition_queue(), ^{
         completionHandler([AVVideoComposition videoCompositionWithPropertiesOfAsset:asset], nil);
     });
 }
@@ -93,20 +93,20 @@ static dispatch_queue_t charon_avf_composition_queue(void)
 
 @end
 
-@implementation AVMutableVideoComposition (CharonAVFoundationAsyncProperties)
+@implementation AVMutableVideoComposition (RevenantAVFoundationAsyncProperties)
 
 + (void)videoCompositionWithPropertiesOfAsset:(AVAsset *)asset completionHandler:(void (^)(AVMutableVideoComposition *videoComposition, NSError *error))completionHandler
 {
-    dispatch_async(charon_avf_composition_queue(), ^{
+    dispatch_async(revenant_avf_composition_queue(), ^{
         completionHandler([AVMutableVideoComposition videoCompositionWithPropertiesOfAsset:asset], nil);
     });
 }
 
 + (void)videoCompositionWithPropertiesOfAsset:(AVAsset *)asset prototypeInstruction:(AVVideoCompositionInstruction *)prototypeInstruction completionHandler:(void (^)(AVMutableVideoComposition *videoComposition, NSError *error))completionHandler
 {
-    dispatch_async(charon_avf_composition_queue(), ^{
+    dispatch_async(revenant_avf_composition_queue(), ^{
         if (![prototypeInstruction isKindOfClass:[AVVideoCompositionInstruction class]]) {
-            completionHandler(nil, [NSError errorWithDomain:@"org.charon.avf.composition" code:1 userInfo:@{NSLocalizedDescriptionKey: @"6.1.3 composes with AVVideoCompositionInstruction instances only"}]);
+            completionHandler(nil, [NSError errorWithDomain:@"org.revenant.avf.composition" code:1 userInfo:@{NSLocalizedDescriptionKey: @"6.1.3 composes with AVVideoCompositionInstruction instances only"}]);
             return;
         }
         AVMutableVideoComposition *composition = [AVMutableVideoComposition videoCompositionWithPropertiesOfAsset:asset];

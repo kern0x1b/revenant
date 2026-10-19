@@ -22,13 +22,13 @@
 
 @end
 
-@interface CharonPhotosStore : NSObject
+@interface RevenantPhotosStore : NSObject
 + (ALAssetsLibrary *)library;
 @end
 
 static void post_library_changed(void)
 {
-    [[NSNotificationCenter defaultCenter] postNotificationName:ALAssetsLibraryChangedNotification object:[CharonPhotosStore library]];
+    [[NSNotificationCenter defaultCenter] postNotificationName:ALAssetsLibraryChangedNotification object:[RevenantPhotosStore library]];
 }
 
 static void turn(NSUInteger times)
@@ -41,7 +41,7 @@ int main(int argc, char **argv)
 {
     @autoreleasepool {
         if (argc > 1)
-            charon_log_to(@(argv[1]));
+            revenant_log_to(@(argv[1]));
 
         ALAuthorizationStatus status = [ALAssetsLibrary authorizationStatus];
         printf("AssetsLibrary authorization %ld\n", (long)status);
@@ -90,7 +90,7 @@ int main(int argc, char **argv)
         CHECK(late.calls == 0, "a registration after the state is known tells nothing");
         CHECK(!late.onMain || late.calls == 0, "nothing was delivered on the main thread");
 
-        printf("%d checks, %d failed\n", charon_checks, charon_failures);
+        printf("%d checks, %d failed\n", revenant_checks, revenant_failures);
     }
-    return charon_failures;
+    return revenant_failures;
 }

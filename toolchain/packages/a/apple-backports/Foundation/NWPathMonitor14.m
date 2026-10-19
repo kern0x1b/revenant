@@ -1,8 +1,8 @@
-#import "CharonNWPathMonitor.h"
+#import "RevenantNWPathMonitor.h"
 
 void nw_path_monitor_prohibit_interface_type(nw_path_monitor_t monitor, nw_interface_type_t interface_type)
 {
-    CharonNWPathMonitor *value = (CharonNWPathMonitor *)monitor;
+    RevenantNWPathMonitor *value = (RevenantNWPathMonitor *)monitor;
     if (!value)
         return;
     if (!value->_prohibitedTypes)

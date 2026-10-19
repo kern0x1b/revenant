@@ -20,7 +20,7 @@ set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 port=${PORT:-$here/../../../../packages/a/apple-backports/GameplayKit}
-out=${BUILD:-$(runs_fresh charon-gameplaykit-core)}
+out=${BUILD:-$(runs_fresh revenant-gameplaykit-core)}
 mkdir -p "$out"
 
 # The families this differential covers, and the two random sources NSArray's shuffle reaches, all of
@@ -28,7 +28,7 @@ mkdir -p "$out"
 # one object holds one release and no file here mixes with the 10.0 graph object beside them.
 objects=""
 for source in GKStateMachine GKComponentSystem GKBehavior GKGoal GKRuleSystem GKRandomDistribution \
-              CharonGKRandomCommon GKRandomSource GKARC4RandomSource GKLinearCongruentialRandomSource \
+              RevenantGKRandomCommon GKRandomSource GKARC4RandomSource GKLinearCongruentialRandomSource \
               GKMersenneTwisterRandomSource; do
     xcrun clang -fobjc-arc -w -I"$port" -c "$port/$source.m" -o "$out/$source.o"
     objects="$objects $out/$source.o"

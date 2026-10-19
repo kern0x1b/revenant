@@ -1,21 +1,21 @@
 #import <UIKit/UIKit.h>
 #import <objc/runtime.h>
 
-static const char CharonContentAlignmentPointKey;
-static const char CharonTransfersHorizontalKey;
-static const char CharonTransfersVerticalKey;
+static const char RevenantContentAlignmentPointKey;
+static const char RevenantTransfersHorizontalKey;
+static const char RevenantTransfersVerticalKey;
 
-@implementation UIScrollView (CharonContentAlignment17)
+@implementation UIScrollView (RevenantContentAlignment17)
 
 - (CGPoint)contentAlignmentPoint
 {
-    NSValue *stored = objc_getAssociatedObject(self, &CharonContentAlignmentPointKey);
+    NSValue *stored = objc_getAssociatedObject(self, &RevenantContentAlignmentPointKey);
     return stored ? stored.CGPointValue : CGPointZero;
 }
 
 - (void)setContentAlignmentPoint:(CGPoint)contentAlignmentPoint
 {
-    objc_setAssociatedObject(self, &CharonContentAlignmentPointKey,
+    objc_setAssociatedObject(self, &RevenantContentAlignmentPointKey,
                             [NSValue valueWithCGPoint:contentAlignmentPoint],
                             OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
@@ -32,25 +32,25 @@ static const char CharonTransfersVerticalKey;
 
 - (BOOL)transfersHorizontalScrollingToParent
 {
-    NSNumber *stored = objc_getAssociatedObject(self, &CharonTransfersHorizontalKey);
+    NSNumber *stored = objc_getAssociatedObject(self, &RevenantTransfersHorizontalKey);
     return stored ? stored.boolValue : YES;
 }
 
 - (void)setTransfersHorizontalScrollingToParent:(BOOL)transfersHorizontalScrollingToParent
 {
-    objc_setAssociatedObject(self, &CharonTransfersHorizontalKey,
+    objc_setAssociatedObject(self, &RevenantTransfersHorizontalKey,
                             @(transfersHorizontalScrollingToParent), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
 - (BOOL)transfersVerticalScrollingToParent
 {
-    NSNumber *stored = objc_getAssociatedObject(self, &CharonTransfersVerticalKey);
+    NSNumber *stored = objc_getAssociatedObject(self, &RevenantTransfersVerticalKey);
     return stored ? stored.boolValue : YES;
 }
 
 - (void)setTransfersVerticalScrollingToParent:(BOOL)transfersVerticalScrollingToParent
 {
-    objc_setAssociatedObject(self, &CharonTransfersVerticalKey,
+    objc_setAssociatedObject(self, &RevenantTransfersVerticalKey,
                             @(transfersVerticalScrollingToParent), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 

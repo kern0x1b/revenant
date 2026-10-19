@@ -10,7 +10,7 @@
 #include <cstddef>
 #include <cstdint>
 
-namespace shade::mobile_framebuffer_abi {
+namespace emulator::mobile_framebuffer_abi {
 
 inline constexpr std::uint32_t layer_count = 3;
 inline constexpr std::uint32_t maximum_layer_index = layer_count - 1U;

@@ -54,7 +54,7 @@ static NSString *compareProperties(Class port, Class host)
 static void compareShape(NSString *name, NSString *superName, Protocol *protocol)
 {
     Class host = NSClassFromString(name);
-    Class port = NSClassFromString([@"CharonPort" stringByAppendingString:name]);
+    Class port = NSClassFromString([@"RevenantPort" stringByAppendingString:name]);
     if (!host || !port) {
         verdict(NO, [name stringByAppendingString:@" resolves"], @"one side answers nil");
         return;
@@ -88,7 +88,7 @@ int main(void)
         place.columns[3] = (simd_float4){1.5f, -2.0f, 0.25f, 1.0f};
         simd_float3 extent = {3.0f, 2.0f, 4.0f};
         id host = [[NSClassFromString(@"AREnvironmentProbeAnchor") alloc] initWithTransform:place extent:extent];
-        id port = [[NSClassFromString(@"CharonPortAREnvironmentProbeAnchor") alloc] initWithTransform:place extent:extent];
+        id port = [[NSClassFromString(@"RevenantPortAREnvironmentProbeAnchor") alloc] initWithTransform:place extent:extent];
         verdict(host && port, @"probe: initWithTransform:extent: builds on both sides", @"a side answers nil");
         if (host && port) {
             simd_float3 hostExtent = probeExtent(host);
@@ -103,7 +103,7 @@ int main(void)
         }
 
         id hostNamed = [[NSClassFromString(@"AREnvironmentProbeAnchor") alloc] initWithName:@"room" transform:place extent:extent];
-        id portNamed = [[NSClassFromString(@"CharonPortAREnvironmentProbeAnchor") alloc] initWithName:@"room" transform:place extent:extent];
+        id portNamed = [[NSClassFromString(@"RevenantPortAREnvironmentProbeAnchor") alloc] initWithName:@"room" transform:place extent:extent];
         verdict(hostNamed && portNamed, @"probe: initWithName:transform:extent: builds on both sides", @"a side answers nil");
         if (hostNamed && portNamed) {
             verdict([anchorName(hostNamed) isEqualToString:@"room"] && [anchorName(portNamed) isEqualToString:@"room"],

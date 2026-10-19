@@ -104,8 +104,8 @@ static int churn_protection(const char *path, int rounds)
 int main(int argc, char **argv)
 {
     setvbuf(stdout, NULL, _IONBF, 0);
-    const char *first = argc > 2 ? argv[1] : "/usr/local/lib/charon-remap-1.dylib";
-    const char *second = argc > 2 ? argv[2] : "/usr/local/lib/charon-remap-2.dylib";
+    const char *first = argc > 2 ? argv[1] : "/usr/local/lib/revenant-remap-1.dylib";
+    const char *second = argc > 2 ? argv[2] : "/usr/local/lib/revenant-remap-2.dylib";
     int failures = swap_images(first, second, 200);
     failures += churn_protection(first, 500);
     printf("failures=%d\n", failures);

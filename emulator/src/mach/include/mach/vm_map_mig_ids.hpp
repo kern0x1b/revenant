@@ -18,7 +18,7 @@
 
 #include "mach/xnu_mig_adapter.hpp"
 
-namespace shade::xnu::mig::vm_map {
+namespace emulator::xnu::mig::vm_map {
 
 inline constexpr std::string_view subsystem_name{"vm_map"};
 inline constexpr std::uint32_t subsystem_base = 3800U;

@@ -325,7 +325,7 @@
       "reason": "named groups are the release's ICU's own: 3.1.3-8.4.1 carry ICU 40-53, which rejects (?<name>...) and exports no uregex_groupNumberFromName; 9.0-10.3.4 carry ICU 55/57, which compiles named groups and exports the lookup. The method asks that ICU for the group number of the result's own pattern and options and answers -rangeAtIndex:, as swift-corelibs-foundation does through _CFRegularExpressionGetCaptureGroupNumberWithName; where the lookup is not exported no pattern carries a name, and the answer is {NSNotFound, 0} for every name",
       "effect": "a named group answers its range from iOS 9 on; a name the pattern does not carry, a result of no expression and a nil name answer {NSNotFound, 0}, as the system does",
       "facts": "facts/Foundation/NSTextCheckingResultRangeWithName.md",
-      "source": "the SDK 16.4 headers; $HOME/.charon/dyld/<release>/dyld_shared_cache_armv7 from 3.1.3 to 10.3.4 for the icudt version and the uregex_groupNumberFromName export; tests/backports/host/rangewithname against the host's own method"
+      "source": "the SDK 16.4 headers; $HOME/.revenant/dyld/<release>/dyld_shared_cache_armv7 from 3.1.3 to 10.3.4 for the icudt version and the uregex_groupNumberFromName export; tests/backports/host/rangewithname against the host's own method"
     },
     {
       "api": "-[NSFileManager trashItemAtURL:resultingItemURL:error:]",

@@ -23,7 +23,7 @@ mkdir -p "$build"
 : > "$build/rename.h"
 for name in $(sed -n -e 's/^@interface \(CI[A-Za-z]*\).*/\1/p' -e 's/^@implementation \(CI[A-Za-z]*\).*/\1/p' \
         "$gfx/CIFeature8.m" "$gfx/CIFeature9.m" "$gfx/CIQRCodeFeature11.m" "$here/port-base.m" | sort -u); do
-    echo "#define $name CharonPort$name" >> "$build/rename.h"
+    echo "#define $name RevenantPort$name" >> "$build/rename.h"
 done
 
 xcrun clang -fobjc-arc -w -framework Foundation -framework CoreImage -framework CoreText -framework CoreGraphics \

@@ -1,63 +1,63 @@
-#import "CharonMenus.h"
+#import "RevenantMenus.h"
 #import <objc/runtime.h>
 
 #pragma clang diagnostic ignored "-Wprotocol"
 
 NSString *const UILargeContentViewerInteractionEnabledStatusDidChangeNotification = @"UILargeContentViewerInteractionEnabledStatusDidChangeNotification";
 
-static const char charon_shows_key, charon_title_key, charon_image_key, charon_scales_key, charon_insets_key;
+static const char revenant_shows_key, revenant_title_key, revenant_image_key, revenant_scales_key, revenant_insets_key;
 
-@implementation UIView (CharonLargeContentViewer)
+@implementation UIView (RevenantLargeContentViewer)
 
 - (BOOL)showsLargeContentViewer
 {
-    return [objc_getAssociatedObject(self, &charon_shows_key) boolValue];
+    return [objc_getAssociatedObject(self, &revenant_shows_key) boolValue];
 }
 
 - (void)setShowsLargeContentViewer:(BOOL)showsLargeContentViewer
 {
-    objc_setAssociatedObject(self, &charon_shows_key, @(showsLargeContentViewer), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, &revenant_shows_key, @(showsLargeContentViewer), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
 - (NSString *)largeContentTitle
 {
-    return objc_getAssociatedObject(self, &charon_title_key);
+    return objc_getAssociatedObject(self, &revenant_title_key);
 }
 
 - (void)setLargeContentTitle:(NSString *)largeContentTitle
 {
-    objc_setAssociatedObject(self, &charon_title_key, largeContentTitle, OBJC_ASSOCIATION_COPY_NONATOMIC);
+    objc_setAssociatedObject(self, &revenant_title_key, largeContentTitle, OBJC_ASSOCIATION_COPY_NONATOMIC);
 }
 
 - (UIImage *)largeContentImage
 {
-    return objc_getAssociatedObject(self, &charon_image_key);
+    return objc_getAssociatedObject(self, &revenant_image_key);
 }
 
 - (void)setLargeContentImage:(UIImage *)largeContentImage
 {
-    objc_setAssociatedObject(self, &charon_image_key, largeContentImage, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, &revenant_image_key, largeContentImage, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
 - (BOOL)scalesLargeContentImage
 {
-    return [objc_getAssociatedObject(self, &charon_scales_key) boolValue];
+    return [objc_getAssociatedObject(self, &revenant_scales_key) boolValue];
 }
 
 - (void)setScalesLargeContentImage:(BOOL)scalesLargeContentImage
 {
-    objc_setAssociatedObject(self, &charon_scales_key, @(scalesLargeContentImage), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, &revenant_scales_key, @(scalesLargeContentImage), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
 - (UIEdgeInsets)largeContentImageInsets
 {
-    NSValue *held = objc_getAssociatedObject(self, &charon_insets_key);
+    NSValue *held = objc_getAssociatedObject(self, &revenant_insets_key);
     return held ? [held UIEdgeInsetsValue] : UIEdgeInsetsZero;
 }
 
 - (void)setLargeContentImageInsets:(UIEdgeInsets)largeContentImageInsets
 {
-    objc_setAssociatedObject(self, &charon_insets_key, [NSValue valueWithUIEdgeInsets:largeContentImageInsets], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, &revenant_insets_key, [NSValue valueWithUIEdgeInsets:largeContentImageInsets], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
 @end
@@ -117,7 +117,7 @@ static const char charon_shows_key, charon_title_key, charon_image_key, charon_s
     _recognizer = [[UIGestureRecognizer alloc] initWithTarget:nil action:NULL];
     _recognizer.enabled = NO;
     [view addGestureRecognizer:_recognizer];
-    charon_menus_say_once(@"large-content", @"UILargeContentViewerInteraction: iOS 6 has no large content viewer, so the interaction is attached and its delegate is never called; UILargeContentViewerInteraction.enabled is NO");
+    revenant_menus_say_once(@"large-content", @"UILargeContentViewerInteraction: iOS 6 has no large content viewer, so the interaction is attached and its delegate is never called; UILargeContentViewerInteraction.enabled is NO");
 }
 
 @end

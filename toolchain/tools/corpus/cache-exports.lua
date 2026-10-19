@@ -8,7 +8,7 @@ local function split(text)
     return words
 end
 
-local root = os.getenv("HOME") .. "/.charon/dyld"
+local root = os.getenv("HOME") .. "/.revenant/dyld"
 local wanted = split(os.getenv("VNET_SYMBOLS"))
 local images = split(os.getenv("VNET_IMAGES"))
 

@@ -6,7 +6,7 @@
 
 #pragma once
 
-namespace shade {
+namespace emulator {
 
 class UserlandHleRegistry;
 

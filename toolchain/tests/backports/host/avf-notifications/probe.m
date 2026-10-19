@@ -17,11 +17,11 @@ static const char *const unnameableLabels[] = {
 };
 
 static const char *const unnameable[] = {
-#ifdef CHARON_PORT_BUILD
-    "charon_host_AVCaptureDeviceTypeBuiltInDualWideCamera",
-    "charon_host_AVCaptureDeviceTypeBuiltInTripleCamera",
-    "charon_host_AVCaptureDeviceTypeBuiltInUltraWideCamera",
-    "charon_host_AVCaptureDeviceTypeBuiltInLiDARDepthCamera",
+#ifdef REVENANT_PORT_BUILD
+    "revenant_host_AVCaptureDeviceTypeBuiltInDualWideCamera",
+    "revenant_host_AVCaptureDeviceTypeBuiltInTripleCamera",
+    "revenant_host_AVCaptureDeviceTypeBuiltInUltraWideCamera",
+    "revenant_host_AVCaptureDeviceTypeBuiltInLiDARDepthCamera",
 #else
     "AVCaptureDeviceTypeBuiltInDualWideCamera",
     "AVCaptureDeviceTypeBuiltInTripleCamera",
@@ -64,9 +64,9 @@ int main(void)
             const float *iso = (const float *)dlsym(RTLD_DEFAULT, "AVCaptureISOCurrent");
             const float *bias = (const float *)dlsym(RTLD_DEFAULT, "AVCaptureExposureTargetBiasCurrent");
             const float *lens = (const float *)dlsym(RTLD_DEFAULT, "AVCaptureLensPositionCurrent");
-            struct charon_wb_gains { float redGain; float blueGain; };
-            const struct charon_wb_gains *gains =
-                (const struct charon_wb_gains *)dlsym(RTLD_DEFAULT, "AVCaptureWhiteBalanceGainsCurrent");
+            struct revenant_wb_gains { float redGain; float blueGain; };
+            const struct revenant_wb_gains *gains =
+                (const struct revenant_wb_gains *)dlsym(RTLD_DEFAULT, "AVCaptureWhiteBalanceGainsCurrent");
             printf("%-78s = {value %lld, timescale %lld, flags %lld}\n", "AVCaptureExposureDurationCurrent",
                    duration ? (long long)duration->value : -999, duration ? (long long)duration->timescale : 0,
                    duration ? (long long)duration->flags : 0);

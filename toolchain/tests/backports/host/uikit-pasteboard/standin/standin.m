@@ -5,41 +5,41 @@ UIPasteboardOption const UIPasteboardOptionLocalOnly = @"localOnly";
 NSArray *UIPasteboardTypeListString = nil;
 NSArray *UIPasteboardTypeListURL = nil;
 
-__attribute__((constructor)) static void charon_set_lists(void);
-__attribute__((constructor)) static void charon_set_lists(void)
+__attribute__((constructor)) static void revenant_set_lists(void);
+__attribute__((constructor)) static void revenant_set_lists(void)
 {
-    UIPasteboardTypeListString = @[ @"charon.string.type.one", @"charon.string.type.two" ];
-    UIPasteboardTypeListURL = @[ @"charon.url.type.one", @"charon.url.type.two" ];
+    UIPasteboardTypeListString = @[ @"revenant.string.type.one", @"revenant.string.type.two" ];
+    UIPasteboardTypeListURL = @[ @"revenant.url.type.one", @"revenant.url.type.two" ];
 }
 
-NSMutableArray *charon_calls = nil;
+NSMutableArray *revenant_calls = nil;
 
-void charon_reset_records(void);
-void charon_reset_records(void)
+void revenant_reset_records(void);
+void revenant_reset_records(void)
 {
-    charon_calls = [NSMutableArray array];
+    revenant_calls = [NSMutableArray array];
 }
 
-NSMutableArray *charon_take_calls(void);
-NSMutableArray *charon_take_calls(void)
+NSMutableArray *revenant_take_calls(void);
+NSMutableArray *revenant_take_calls(void)
 {
-    NSMutableArray *calls = charon_calls ?: [NSMutableArray array];
-    charon_calls = [NSMutableArray array];
+    NSMutableArray *calls = revenant_calls ?: [NSMutableArray array];
+    revenant_calls = [NSMutableArray array];
     return calls;
 }
 
-void charon_plant(NSString *mode);
-static NSString *charon_planted = nil;
+void revenant_plant(NSString *mode);
+static NSString *revenant_planted = nil;
 
-void charon_plant(NSString *mode)
+void revenant_plant(NSString *mode)
 {
-    charon_planted = [mode copy];
+    revenant_planted = [mode copy];
 }
 
-NSString *charon_plant_mode(void);
-NSString *charon_plant_mode(void)
+NSString *revenant_plant_mode(void);
+NSString *revenant_plant_mode(void)
 {
-    return charon_planted ?: @"clean";
+    return revenant_planted ?: @"clean";
 }
 
 @implementation UIPasteboard {
@@ -56,14 +56,14 @@ NSString *charon_plant_mode(void)
 
 - (void)setItems:(NSArray *)items
 {
-    [charon_calls addObject:[NSString stringWithFormat:@"setItems|%lu", (unsigned long)items.count]];
+    [revenant_calls addObject:[NSString stringWithFormat:@"setItems|%lu", (unsigned long)items.count]];
     _items = [items copy];
 }
 
-NSString *charon_reported(NSString *what);
-NSString *charon_reported(NSString *what)
+NSString *revenant_reported(NSString *what);
+NSString *revenant_reported(NSString *what)
 {
-    NSString *mode = charon_plant_mode();
+    NSString *mode = revenant_plant_mode();
     if ([mode isEqualToString:@"all-wrong"])
         return @"planted-wrong";
     static BOOL misreported_once = NO;
@@ -82,7 +82,7 @@ NSString *charon_reported(NSString *what)
 
 - (void)setValue:(id)value forPasteboardType:(NSString *)type
 {
-    [charon_calls addObject:[NSString stringWithFormat:@"setValue|%@|%@", type, value]];
+    [revenant_calls addObject:[NSString stringWithFormat:@"setValue|%@|%@", type, value]];
     _byType[type] = value;
 }
 

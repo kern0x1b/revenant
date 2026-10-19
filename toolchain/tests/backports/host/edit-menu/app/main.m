@@ -18,7 +18,7 @@ static NSString *yes_no(BOOL answer)
 static NSString *class_name(id object)
 {
     NSString *name = NSStringFromClass([object class]);
-    return [name hasPrefix:@"CharonPort"] ? [name substringFromIndex:10] : name;
+    return [name hasPrefix:@"RevenantPort"] ? [name substringFromIndex:12] : name;
 }
 
 static FILE *hostOnly;
@@ -34,11 +34,11 @@ static void call(NSString *what)
     report("delegate-call", [NSString stringWithFormat:@"%d %@", ++sequence, what]);
 }
 
-@interface CharonEditMenuDelegate : NSObject <UIEditMenuInteractionDelegate>
+@interface RevenantEditMenuDelegate : NSObject <UIEditMenuInteractionDelegate>
 @property (nonatomic, strong) UIMenu *menu;
 @end
 
-@implementation CharonEditMenuDelegate
+@implementation RevenantEditMenuDelegate
 
 - (UIMenu *)editMenuInteraction:(UIEditMenuInteraction *)interaction menuForConfiguration:(UIEditMenuConfiguration *)configuration suggestedActions:(NSArray<UIMenuElement *> *)suggestedActions
 {
@@ -60,15 +60,15 @@ static void call(NSString *what)
 
 @end
 
-@interface CharonSceneDelegate : UIResponder <UIWindowSceneDelegate>
+@interface RevenantSceneDelegate : UIResponder <UIWindowSceneDelegate>
 @property (nonatomic, strong) UIWindow *window;
 @end
 
-@implementation CharonSceneDelegate
+@implementation RevenantSceneDelegate
 
 static void checks(UIView *view, UIEditMenuInteraction *(^make)(id<UIEditMenuInteractionDelegate>))
 {
-    CharonEditMenuDelegate *delegate = [[CharonEditMenuDelegate alloc] init];
+    RevenantEditMenuDelegate *delegate = [[RevenantEditMenuDelegate alloc] init];
     delegate.menu = [UIMenu menuWithTitle:@"menu" children:@[[UIAction actionWithTitle:@"first" image:nil identifier:nil handler:^(UIAction *action) {}]]];
     UIEditMenuInteraction *interaction = make(delegate);
     report("interaction-class", class_name(interaction));
@@ -97,13 +97,13 @@ static void checks(UIView *view, UIEditMenuInteraction *(^make)(id<UIEditMenuInt
 
 - (void)scene:(UIScene *)scene willConnectToSession:(UISceneSession *)session options:(UISceneConnectionOptions *)connectionOptions
 {
-    const char *path = getenv("CHARON_SCENE_OUT");
+    const char *path = getenv("REVENANT_SCENE_OUT");
     out = fopen(path ? path : "/dev/stdout", "w");
-#ifndef CHARON_PORT_SIDE
-    const char *extra = getenv("CHARON_HOST_ONLY_OUT");
+#ifndef REVENANT_PORT_SIDE
+    const char *extra = getenv("REVENANT_HOST_ONLY_OUT");
     hostOnly = extra ? fopen(extra, "w") : NULL;
 #endif
-#ifdef CHARON_PORT_SIDE
+#ifdef REVENANT_PORT_SIDE
     side = "port";
 #else
     side = "host";
@@ -120,7 +120,7 @@ static void checks(UIView *view, UIEditMenuInteraction *(^make)(id<UIEditMenuInt
         report("window-key", yes_no(self.window.isKeyWindow));
         report("view-in-window", yes_no(view.window == self.window));
         {
-            CharonEditMenuDelegate *gone = [[CharonEditMenuDelegate alloc] init];
+            RevenantEditMenuDelegate *gone = [[RevenantEditMenuDelegate alloc] init];
             __weak id weakDelegate = gone;
             UIEditMenuInteraction *lone = [[UIEditMenuInteraction alloc] initWithDelegate:gone];
             gone = nil;
@@ -143,6 +143,6 @@ static void checks(UIView *view, UIEditMenuInteraction *(^make)(id<UIEditMenuInt
 int main(int argc, char *argv[])
 {
     @autoreleasepool {
-        return UIApplicationMain(argc, argv, nil, NSStringFromClass([CharonSceneDelegate class]));
+        return UIApplicationMain(argc, argv, nil, NSStringFromClass([RevenantSceneDelegate class]));
     }
 }

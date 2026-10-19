@@ -4,7 +4,7 @@
 #include <dlfcn.h>
 #include <unistd.h>
 #import "check.h"
-#import "../../../packages/a/apple-backports/charon_alias.h"
+#import "../../../packages/a/apple-backports/revenant_alias.h"
 
 #pragma clang diagnostic ignored "-Wunguarded-availability-new"
 #pragma clang diagnostic ignored "-Wnonnull"
@@ -25,8 +25,8 @@
 - (NSUInteger)numberOfColumns;
 @end
 
-CHARON_ALIAS(NSTextBlock)
-CHARON_ALIAS(NSTextTable)
+REVENANT_ALIAS(NSTextBlock)
+REVENANT_ALIAS(NSTextTable)
 
 @implementation NSTextBlock (TextAliasProbe)
 
@@ -127,7 +127,7 @@ static void check_text_tab(void)
     CHECK_EQUAL(image_of_method(class_getClassMethod(release, @selector(columnTerminatorsForLocale:))), @"libUIKitBackports.dylib",
                 "NSTextTab: the category's class method is on the release's class");
     CHECK([[NSTextTab columnTerminatorsForLocale:nil] characterIsMember:'.'], "NSTextTab: the class method answers through the name");
-    CHECK(!own_class_method(objc_getClass("CharonNSTextTab"), @selector(load)), "NSTextTab: the alias has no +load of its own");
+    CHECK(!own_class_method(objc_getClass("RevenantNSTextTab"), @selector(load)), "NSTextTab: the alias has no +load of its own");
 }
 
 static void check_text_list(void)
@@ -141,7 +141,7 @@ static void check_text_list(void)
                 "NSTextList: the two-argument initializer is the release's own");
     CHECK_EQUAL(image_of_method(class_getInstanceMethod(release, three)), @"libUIKitBackports.dylib",
                 "NSTextList: the category's three-argument initializer is on the release's class");
-    CHECK(objc_getClass("CharonTextListInit16") == Nil, "NSTextList: no class of the library adds the initializer by name");
+    CHECK(objc_getClass("RevenantTextListInit16") == Nil, "NSTextList: no class of the library adds the initializer by name");
     NSTextList *list = [[NSTextList alloc] initWithMarkerFormat:@"{decimal}" options:0 startingItemNumber:5];
     CHECK(object_getClass(list) == release && [list isKindOfClass:[NSTextList class]], "NSTextList: a list made through the name is the release's");
     CHECK(list.startingItemNumber == 5 && [list.markerFormat isEqualToString:@"{decimal}"], "NSTextList: the list keeps its format and its starting number");
@@ -150,7 +150,7 @@ static void check_text_list(void)
 #define CHECK_INTROSPECTION(Name, member, protocol)                                                                       \
     do {                                                                                                               \
         Class release = objc_getClass(#Name);                                                                          \
-        CHECK(class_getSuperclass(objc_getClass("Charon" #Name)) == release, #Name ": the alias is a subclass of the release's class"); \
+        CHECK(class_getSuperclass(objc_getClass("Revenant" #Name)) == release, #Name ": the alias is a subclass of the release's class"); \
         CHECK([Name instancesRespondToSelector:member] && [release instancesRespondToSelector:member],                \
               #Name ": instancesRespondToSelector: answers the release's member");                                    \
         CHECK([Name instanceMethodForSelector:member] == [release instanceMethodForSelector:member],                  \
@@ -174,7 +174,7 @@ static void check_text_list(void)
 static void check_subclasses(void)
 {
     Class list = objc_getClass("NSTextList"), tab = objc_getClass("NSTextTab");
-    CHECK(class_getSuperclass([TextAliasList class]) == objc_getClass("CharonNSTextList") && [TextAliasList superclass] == list,
+    CHECK(class_getSuperclass([TextAliasList class]) == objc_getClass("RevenantNSTextList") && [TextAliasList superclass] == list,
           "subclass of NSTextList: its superclass is the release's class");
     CHECK(class_getInstanceSize([TextAliasList class]) >= class_getInstanceSize(list) + sizeof(NSInteger) * 4,
           "subclass of NSTextList: its instance variables come after the release's");
@@ -203,7 +203,7 @@ static void check_loader(void)
 {
     Class block = objc_getClass("NSTextBlock"), table = objc_getClass("NSTextTable");
     CHECK(block && table && [NSTextBlock class] == block && [NSTextTable class] == table, "this image's aliases: +class is the release's class");
-    CHECK(class_getSuperclass(objc_getClass("CharonNSTextBlock")) == block, "NSTextBlock: the alias is a subclass of the release's class");
+    CHECK(class_getSuperclass(objc_getClass("RevenantNSTextBlock")) == block, "NSTextBlock: the alias is a subclass of the release's class");
     TextAliasBlock *made = [[TextAliasBlock alloc] init];
     made.backgroundColor = [UIColor blueColor];
     made->_mark[0] = 11;
@@ -214,7 +214,7 @@ static void check_loader(void)
           "NSTextBlock: a method the release lacks is given to the release's class, and a subclass has it");
     CHECK_EQUAL(image_of_method(class_getInstanceMethod(block, @selector(textAliasProbe))), @"textalias", "NSTextBlock: the method given is the category's");
 
-    CHECK(class_getSuperclass(objc_getClass("CharonNSTextTable")) == [NSObject class], "NSTextTable: an alias laid out before the loader stays under NSObject");
+    CHECK(class_getSuperclass(objc_getClass("RevenantNSTextTable")) == [NSObject class], "NSTextTable: an alias laid out before the loader stays under NSObject");
     CHECK(object_getClass([[NSTextTable alloc] init]) == table && [NSTextTable instancesRespondToSelector:@selector(numberOfColumns)],
           "NSTextTable: the alias still answers as the release's class");
     CHECK([NSTextTable textAliasClassProbe] == 43 && [table textAliasClassProbe] == 43,
@@ -223,14 +223,14 @@ static void check_loader(void)
           "NSTextTable: its subclass does not inherit the release's class");
     aslmsg query = asl_new(ASL_TYPE_QUERY);
     asl_set_query(query, ASL_KEY_PID, [NSString stringWithFormat:@"%d", getpid()].UTF8String, ASL_QUERY_OP_EQUAL);
-    asl_set_query(query, ASL_KEY_MSG, "CharonNSTextTable was laid out before the library's loader ran", ASL_QUERY_OP_EQUAL | ASL_QUERY_OP_SUBSTRING);
+    asl_set_query(query, ASL_KEY_MSG, "RevenantNSTextTable was laid out before the library's loader ran", ASL_QUERY_OP_EQUAL | ASL_QUERY_OP_SUBSTRING);
     aslresponse found = asl_search(NULL, query);
     BOOL logged = found && aslresponse_next(found) != NULL;
     aslresponse_free(found);
     asl_free(query);
     CHECK(logged, "NSTextTable: the log names the alias laid out before the loader");
 
-    Class proxy = objc_getClass("CharonNSTextTable");
+    Class proxy = objc_getClass("RevenantNSTextTable");
     size_t before = class_getInstanceSize(proxy);
     ptrdiff_t mark = ivar_getOffset(class_getInstanceVariable([TextAliasTable class], "_mark"));
     class_setSuperclass(proxy, table);
@@ -246,14 +246,14 @@ int main(int argc, char **argv)
 {
     @autoreleasepool {
         if (argc > 1)
-            charon_log_to(@(argv[1]));
+            revenant_log_to(@(argv[1]));
         check_text_tab();
         check_text_list();
         CHECK_INTROSPECTION(NSTextList, @selector(markerFormat), @protocol(NSCoding));
         CHECK_INTROSPECTION(NSTextTab, @selector(location), @protocol(NSCoding));
         check_subclasses();
         check_loader();
-        printf("%d checks, %d failed\n", charon_checks, charon_failures);
+        printf("%d checks, %d failed\n", revenant_checks, revenant_failures);
     }
-    return charon_failures;
+    return revenant_failures;
 }

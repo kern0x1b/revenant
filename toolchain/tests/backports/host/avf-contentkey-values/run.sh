@@ -3,7 +3,7 @@
 # against the host's own framework.
 #
 # probe.m is built twice: plain, where every name is Apple's, and with the two class names renamed to the port's own
-# (charon_host_AVContentKeySpecifier, charon_host_AVContentKeyResponse) and the port's two object files linked in, so
+# (revenant_host_AVContentKeySpecifier, revenant_host_AVContentKeyResponse) and the port's two object files linked in, so
 # the same questions are asked of the port's classes in the same binary. Both outputs are one line per answer, and
 # diff is the check: the port must say what the host says, line for line. No divergence is named for these classes,
 # so ALLOWED_DIFF is empty; the probe asks nothing about a class's name or its private subclasses for that reason.
@@ -28,7 +28,7 @@ ALLOWED_DIFF=""
 rm -rf "$build"
 mkdir -p "$build"
 frameworks="-framework Foundation -framework AVFoundation -framework CoreMedia -framework CoreVideo"
-renames="-DAVContentKeySpecifier=charon_host_AVContentKeySpecifier -DAVContentKeyResponse=charon_host_AVContentKeyResponse"
+renames="-DAVContentKeySpecifier=revenant_host_AVContentKeySpecifier -DAVContentKeyResponse=revenant_host_AVContentKeyResponse"
 specifier="$avf/AVContentKeySpecifier145.m"
 response="$avf/AVContentKeyResponse103.m"
 for f in "$specifier" "$response"; do

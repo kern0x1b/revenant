@@ -17,7 +17,7 @@
 #include <utility>
 #include <vector>
 
-namespace shade::kernel_iokit::battery {
+namespace emulator::kernel_iokit::battery {
 namespace {
 
     constexpr std::string_view io_service_class { "IOService" };

@@ -82,8 +82,8 @@ MUTATIONS = {
                     "        CMTimebaseSetRate(rendererTimebase, CMTimebaseGetRate(_timebase));"),
     # the periodic observer's re-arm: the port re-arms one interval on, and this re-arms where it already is.
     # Read by "consecutive periodic times are 100 ms apart within 20 ms" and by the three-fires row.
-    "periodicinterval": ("        [self charon_armAt:CMTimeAdd(now, self->interval)];",
-                         "        [self charon_armAt:now];"),
+    "periodicinterval": ("        [self revenant_armAt:CMTimeAdd(now, self->interval)];",
+                         "        [self revenant_armAt:now];"),
     # -removeTimeObserver: does nothing, so the first periodic observer keeps firing. Read by "no further
     # periodic calls after removeTimeObserver:", which the host answers YES and so does the port.
     "removeobserver": ("    if (![_observers containsObject:observer])\n        return;      // measured: removing the same token twice is accepted and does nothing\n    [_observers removeObject:observer];",
@@ -102,14 +102,14 @@ MUTATIONS = {
                  "    (void)0;"),
     # -flush claims the renderer has rendered. Read by "status after -flush, with no media", which both
     # answer 0.
-    "flushstatus": ("    [self charon_reportReadiness];\n}\n\n- (void)flushFromSourceTime:",
-                    "    _status = AVQueuedSampleBufferRenderingStatusRendering;\n    [self charon_reportReadiness];\n}\n\n- (void)flushFromSourceTime:"),
+    "flushstatus": ("    [self revenant_reportReadiness];\n}\n\n- (void)flushFromSourceTime:",
+                    "    _status = AVQueuedSampleBufferRenderingStatusRendering;\n    [self revenant_reportReadiness];\n}\n\n- (void)flushFromSourceTime:"),
     # -isReadyForMoreMediaData answers YES whatever the renderer holds. Read by "isReadyForMoreMediaData
     # after the first enqueue", which both answer NO.
     "readiness": ("        return _pending.count == 0;", "        return YES;"),
     # -setVolume: holds a fixed volume whatever it is given. Read by "volume after setVolume: 0.25", which
     # both answer 0.250.
-    "volume": ("    _volume = volume;\n    [self charon_applyVolume];", "    _volume = 1.0f;\n    [self charon_applyVolume];"),
+    "volume": ("    _volume = volume;\n    [self revenant_applyVolume];", "    _volume = 1.0f;\n    [self revenant_applyVolume];"),
     # One @dynamic removed, which is what a class answers when clang is left to synthesise a property the
     # rows say is absent: the accessors come back and respondsToSelector: answers YES. Read by "absent: the
     # renderer answers respondsToSelector: for allowedAudioSpatializationFormats", which the join requires
@@ -118,8 +118,8 @@ MUTATIONS = {
     # the rate a synchronizer change reaches its renderers with: this never sets it. Read by "rate 0 stops
     # the renderer's timebase" and "the renderer reads the synchronizer's rate through its timebase", which
     # both answer YES.
-    "raterenderers": ("        CMTimebaseSetRate(renderer.timebase, rate);\n        if ([renderer respondsToSelector:@selector(charon_renderSynchronizerDidChangeRate)])",
-                      "        if ([renderer respondsToSelector:@selector(charon_renderSynchronizerDidChangeRate)])"),
+    "raterenderers": ("        CMTimebaseSetRate(renderer.timebase, rate);\n        if ([renderer respondsToSelector:@selector(revenant_renderSynchronizerDidChangeRate)])",
+                      "        if ([renderer respondsToSelector:@selector(revenant_renderSynchronizerDidChangeRate)])"),
 }
 before, after = MUTATIONS[which]
 if before not in text:

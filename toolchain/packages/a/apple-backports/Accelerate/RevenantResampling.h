@@ -3,17 +3,17 @@
 #import <Accelerate/Accelerate.h>
 
 enum {
-    CharonResampleSlot = (int)(sizeof(void *) >= 8 ? 8 : 4),
-    CharonResampleMaxPhases = 64
+    RevenantResampleSlot = (int)(sizeof(void *) >= 8 ? 8 : 4),
+    RevenantResampleMaxPhases = 64
 };
 
-#define CHARON_RESAMPLE_OFFSET(index) \
-    ((index) == 0 ? (size_t)0 : (size_t)8 + (size_t)(CharonResampleSlot) * (size_t)((index) - 1))
+#define REVENANT_RESAMPLE_OFFSET(index) \
+    ((index) == 0 ? (size_t)0 : (size_t)8 + (size_t)(RevenantResampleSlot) * (size_t)((index) - 1))
 
-#define CHARON_RESAMPLE_SLOT(object, index, type) \
-    (*(type *)(void *)((const char *)(object) + CHARON_RESAMPLE_OFFSET(index)))
+#define REVENANT_RESAMPLE_SLOT(object, index, type) \
+    (*(type *)(void *)((const char *)(object) + REVENANT_RESAMPLE_OFFSET(index)))
 
-typedef struct CharonResampleFilter {
+typedef struct RevenantResampleFilter {
     double reciprocal;
     double scale;
     const int16_t *row;
@@ -23,9 +23,9 @@ typedef struct CharonResampleFilter {
     unsigned taps;
     unsigned centre;
     unsigned offset;
-} CharonResampleFilter;
+} RevenantResampleFilter;
 
-static inline int CharonResampleFilterOf(ResamplingFilter filter, CharonResampleFilter *out)
+static inline int RevenantResampleFilterOf(ResamplingFilter filter, RevenantResampleFilter *out)
 {
     out->reciprocal = 0.0;
     out->scale = 0.0;
@@ -39,18 +39,18 @@ static inline int CharonResampleFilterOf(ResamplingFilter filter, CharonResample
     if (!filter || !out)
         return 0;
 
-    double reciprocal = CHARON_RESAMPLE_SLOT(filter, 0, double);
-    unsigned taps = CHARON_RESAMPLE_SLOT(filter, 1, unsigned);
-    unsigned floatStride = CHARON_RESAMPLE_SLOT(filter, 2, unsigned);
-    unsigned int16Stride = CHARON_RESAMPLE_SLOT(filter, 3, unsigned);
-    unsigned phases = CHARON_RESAMPLE_SLOT(filter, 4, unsigned);
-    unsigned exponent = CHARON_RESAMPLE_SLOT(filter, 5, unsigned);
-    unsigned offset = CHARON_RESAMPLE_SLOT(filter, 6, unsigned);
-    const char *table = (const char *)CHARON_RESAMPLE_SLOT(filter, 7, const char *);
+    double reciprocal = REVENANT_RESAMPLE_SLOT(filter, 0, double);
+    unsigned taps = REVENANT_RESAMPLE_SLOT(filter, 1, unsigned);
+    unsigned floatStride = REVENANT_RESAMPLE_SLOT(filter, 2, unsigned);
+    unsigned int16Stride = REVENANT_RESAMPLE_SLOT(filter, 3, unsigned);
+    unsigned phases = REVENANT_RESAMPLE_SLOT(filter, 4, unsigned);
+    unsigned exponent = REVENANT_RESAMPLE_SLOT(filter, 5, unsigned);
+    unsigned offset = REVENANT_RESAMPLE_SLOT(filter, 6, unsigned);
+    const char *table = (const char *)REVENANT_RESAMPLE_SLOT(filter, 7, const char *);
 
     if (!(reciprocal > 0.0) || taps < 1 || int16Stride < 2 || (int16Stride & 1))
         return 0;
-    if (phases == 0 || phases > (unsigned)CharonResampleMaxPhases || (phases & (phases - 1)) != 0)
+    if (phases == 0 || phases > (unsigned)RevenantResampleMaxPhases || (phases & (phases - 1)) != 0)
         return 0;
     if (!table || table <= (const char *)filter)
         return 0;
@@ -61,7 +61,7 @@ static inline int CharonResampleFilterOf(ResamplingFilter filter, CharonResample
         return 0;
     if ((size_t)offset != inside + (size_t)phases * (size_t)int16Stride)
         return 0;
-    const char *base = CHARON_RESAMPLE_SLOT(filter, 8, const char *);
+    const char *base = REVENANT_RESAMPLE_SLOT(filter, 8, const char *);
     if (!base || base > table)
         return 0;
     size_t fromBase = (size_t)(table - base);
@@ -92,7 +92,7 @@ static inline int CharonResampleFilterOf(ResamplingFilter filter, CharonResample
     return 1;
 }
 
-static inline void CharonResamplePhase(const CharonResampleFilter *filter, long long position,
+static inline void RevenantResamplePhase(const RevenantResampleFilter *filter, long long position,
                                        unsigned *phase, long *base)
 {
     unsigned bits = filter->exponent;
@@ -103,7 +103,7 @@ static inline void CharonResamplePhase(const CharonResampleFilter *filter, long 
     *base = (long)(position >> 32) + (long)filter->centre;
 }
 
-static inline long long CharonResampleQ32(double scaled)
+static inline long long RevenantResampleQ32(double scaled)
 {
     if (scaled >= 9223372036854775808.0)
         return (-9223372036854775807LL - 1);
@@ -112,12 +112,12 @@ static inline long long CharonResampleQ32(double scaled)
     return (long long)scaled;
 }
 
-static inline long long CharonResampleStep(const CharonResampleFilter *filter)
+static inline long long RevenantResampleStep(const RevenantResampleFilter *filter)
 {
-    return CharonResampleQ32(filter->reciprocal * 4294967296.0);
+    return RevenantResampleQ32(filter->reciprocal * 4294967296.0);
 }
 
-static inline double CharonResampleRowSum(const CharonResampleFilter *filter, unsigned phase)
+static inline double RevenantResampleRowSum(const RevenantResampleFilter *filter, unsigned phase)
 {
     const int16_t *row = filter->row + (size_t)phase * filter->width;
     long sum = 0;

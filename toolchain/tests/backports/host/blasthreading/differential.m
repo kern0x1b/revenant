@@ -5,8 +5,8 @@
 #include <stdio.h>
 #include <unistd.h>
 
-int charon_host_BLASSetThreading(const enum BLAS_THREADING threading);
-enum BLAS_THREADING charon_host_BLASGetThreading(void);
+int revenant_host_BLASSetThreading(const enum BLAS_THREADING threading);
+enum BLAS_THREADING revenant_host_BLASGetThreading(void);
 
 static int failures;
 static int checks;
@@ -90,7 +90,7 @@ static int mine_in_a_thread, theirs_in_a_thread;
 
 static void *reads_both(void *ignored)
 {
-    mine_in_a_thread = (int)charon_host_BLASGetThreading();
+    mine_in_a_thread = (int)revenant_host_BLASGetThreading();
     theirs_in_a_thread = (int)BLASGetThreading();
     return NULL;
 }
@@ -98,26 +98,26 @@ static void *reads_both(void *ignored)
 int main(void)
 {
     @autoreleasepool {
-        answer("a thread that has set nothing", -1, (int)charon_host_BLASGetThreading(), -1,
+        answer("a thread that has set nothing", -1, (int)revenant_host_BLASGetThreading(), -1,
                (int)BLASGetThreading());
-        answer("a set to single-threaded is kept", charon_host_BLASSetThreading(BLAS_THREADING_SINGLE_THREADED),
-               (int)charon_host_BLASGetThreading(), BLASSetThreading(BLAS_THREADING_SINGLE_THREADED),
+        answer("a set to single-threaded is kept", revenant_host_BLASSetThreading(BLAS_THREADING_SINGLE_THREADED),
+               (int)revenant_host_BLASGetThreading(), BLASSetThreading(BLAS_THREADING_SINGLE_THREADED),
                (int)BLASGetThreading());
-        answer("a set back to multi-threaded is kept", charon_host_BLASSetThreading(BLAS_THREADING_MULTI_THREADED),
-               (int)charon_host_BLASGetThreading(), BLASSetThreading(BLAS_THREADING_MULTI_THREADED),
+        answer("a set back to multi-threaded is kept", revenant_host_BLASSetThreading(BLAS_THREADING_MULTI_THREADED),
+               (int)revenant_host_BLASGetThreading(), BLASSetThreading(BLAS_THREADING_MULTI_THREADED),
                (int)BLASGetThreading());
         answer("a value the library does not have is refused and the setting is left",
-               charon_host_BLASSetThreading((enum BLAS_THREADING)99), (int)charon_host_BLASGetThreading(),
+               revenant_host_BLASSetThreading((enum BLAS_THREADING)99), (int)revenant_host_BLASGetThreading(),
                BLASSetThreading((enum BLAS_THREADING)99), (int)BLASGetThreading());
 
         pthread_t other;
-        charon_host_BLASSetThreading(BLAS_THREADING_SINGLE_THREADED);
+        revenant_host_BLASSetThreading(BLAS_THREADING_SINGLE_THREADED);
         BLASSetThreading(BLAS_THREADING_SINGLE_THREADED);
         pthread_create(&other, NULL, reads_both, NULL);
         pthread_join(other, NULL);
         report(mine_in_a_thread == BLAS_THREADING_MULTI_THREADED && theirs_in_a_thread == BLAS_THREADING_MULTI_THREADED,
                "another thread answers the model it has set (which is none), on both sides");
-        charon_host_BLASSetThreading(BLAS_THREADING_MULTI_THREADED);
+        revenant_host_BLASSetThreading(BLAS_THREADING_MULTI_THREADED);
         BLASSetThreading(BLAS_THREADING_MULTI_THREADED);
 
         int multi = threads_while_working(BLAS_THREADING_MULTI_THREADED);

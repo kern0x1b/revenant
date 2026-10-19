@@ -1,4 +1,4 @@
-#import "CharonGC.h"
+#import "RevenantGC.h"
 
 #pragma clang diagnostic ignored "-Wobjc-missing-property-synthesis"
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
@@ -11,27 +11,27 @@
 
 - (instancetype)init
 {
-    return [self initWithCharonSpecs:[CharonGCTables mouseSpecs]];
+    return [self initWithRevenantSpecs:[RevenantGCTables mouseSpecs]];
 }
 
 - (GCDeviceCursor *)scroll
 {
-    return (id)[self charon_elementNamed:@"Scroll"];
+    return (id)[self revenant_elementNamed:@"Scroll"];
 }
 
 - (GCControllerButtonInput *)leftButton
 {
-    return (id)[self charon_elementNamed:@"Left Button"];
+    return (id)[self revenant_elementNamed:@"Left Button"];
 }
 
 - (GCControllerButtonInput *)rightButton
 {
-    return (id)[self charon_elementNamed:@"Right Button"];
+    return (id)[self revenant_elementNamed:@"Right Button"];
 }
 
 - (GCControllerButtonInput *)middleButton
 {
-    return (id)[self charon_elementNamed:@"Middle Button"];
+    return (id)[self revenant_elementNamed:@"Middle Button"];
 }
 
 - (NSArray<GCControllerButtonInput *> *)auxiliaryButtons

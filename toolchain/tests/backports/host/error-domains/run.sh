@@ -6,7 +6,7 @@ set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 METAL=${METAL:-$here/../../../../packages/a/apple-backports/Metal}
-BUILD=${BUILD:-$(runs_fresh charon-error-domains)}
+BUILD=${BUILD:-$(runs_fresh revenant-error-domains)}
 sdk=$(xcrun --show-sdk-path --sdk macosx)
 common="-isysroot $sdk -fobjc-arc -I$METAL"
 

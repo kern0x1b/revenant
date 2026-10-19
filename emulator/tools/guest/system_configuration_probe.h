@@ -7,4 +7,4 @@
 
 #pragma once
 
-int shade_run_system_configuration_probe(const char* reachability_name);
+int emulator_run_system_configuration_probe(const char* reachability_name);

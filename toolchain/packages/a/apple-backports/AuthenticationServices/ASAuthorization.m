@@ -1,12 +1,12 @@
 #import <AuthenticationServices/AuthenticationServices.h>
-#import "CharonASConstruction.h"
+#import "RevenantASConstruction.h"
 
 @implementation ASAuthorization
 
 @synthesize provider = _provider;
 @synthesize credential = _credential;
 
-- (instancetype)charon_initWithProvider:(id<ASAuthorizationProvider>)provider
+- (instancetype)revenant_initWithProvider:(id<ASAuthorizationProvider>)provider
                               credential:(id<ASAuthorizationCredential>)credential
 {
     self = [super init];
@@ -31,7 +31,7 @@
 
 - (id)copyWithZone:(NSZone *)zone
 {
-    return [[[self class] allocWithZone:zone] charon_initWithProvider:_provider credential:_credential];
+    return [[[self class] allocWithZone:zone] revenant_initWithProvider:_provider credential:_credential];
 }
 
 + (BOOL)supportsSecureCoding
@@ -41,7 +41,7 @@
 
 - (instancetype)initWithCoder:(NSCoder *)coder
 {
-    return [self charon_initWithProvider:nil credential:nil];
+    return [self revenant_initWithProvider:nil credential:nil];
 }
 
 - (void)encodeWithCoder:(NSCoder *)coder

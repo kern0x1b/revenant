@@ -6,7 +6,7 @@
 #endif
 
 #if TARGET_OS_IPHONE
-static UIImage *CharonBlankComponentIcon(void)
+static UIImage *RevenantBlankComponentIcon(void)
 {
     UIGraphicsBeginImageContextWithOptions(CGSizeMake(32, 32), NO, 1);
     UIImage *icon = UIGraphicsGetImageFromCurrentImageContext();
@@ -19,6 +19,6 @@ UIImage *AudioComponentCopyIcon(AudioComponent comp)
     if (comp == NULL) {
         return nil;
     }
-    return CharonBlankComponentIcon();
+    return RevenantBlankComponentIcon();
 }
 #endif

@@ -6,7 +6,7 @@ package("libcxx")
 
     add_urls("https://github.com/llvm/llvm-project.git")
     add_versions("23.1.1", "6dfe1677ab8dffbc6ec13d53a1e0215d75147689")
-    add_deps("charon@apple-compat", {alias = "apple-compat"})
+    add_deps("revenant@apple-compat", {alias = "apple-compat"})
     add_deps("cmake", "ninja", {kind = "binary"})
 
     includes(path.join(os.scriptdir(), "digest.lua"))
@@ -16,7 +16,7 @@ package("libcxx")
     end
     local folder = path.join(os.scriptdir(), "..", "..", "a", "apple-compat")
     for _, shim in ipairs(table.join(os.files(path.join(folder, "src", "*.c")), os.files(path.join(folder, "src", "*.h")),
-                                     os.files(path.join(folder, "include", "charon", "*.h")))) do
+                                     os.files(path.join(folder, "include", "revenant", "*.h")))) do
         table.insert(digests, "apple-compat/" .. path.filename(shim) .. "=" .. hash.sha256(shim))
     end
     table.sort(digests)
@@ -56,7 +56,7 @@ package("libcxx")
         local cxxflags = {"-mllvm", "-hot-cold-split=false", "-D_LIBCPP_NO_UTIMENSAT"}
         local shflags = {"-Wl,-force_symbols_not_weak_list," .. path.join(package:scriptdir(), "operators-not-weak.exp")}
         for _, symbol in ipairs(compat:data("provided") or {}) do
-            local header = path.join(compat:installdir("include"), "charon", symbol .. ".h")
+            local header = path.join(compat:installdir("include"), "revenant", symbol .. ".h")
             if os.isfile(header) then
                 table.insert(cxxflags, "-include" .. header)
             end
@@ -94,7 +94,7 @@ package("libcxx")
             end
             local leaked = {}
             for _, symbol in ipairs(compat:data("provided") or {}) do
-                if imported[symbol] or imported["charon_" .. symbol] then
+                if imported[symbol] or imported["revenant_" .. symbol] then
                     table.insert(leaked, symbol)
                 end
             end
@@ -198,11 +198,11 @@ package("libcxx")
                                                                                     {home = shared.folder_of(name) .. "/"})
             shared.stage({packages = {{name = name, version = shared.package_version(package:buildhash()),
                                        title = "C++ runtime " .. package:buildhash():sub(1, 8),
-                                       description = "libc++ and libc++abi of one build of Charon's charon@libcxx,",
+                                       description = "libc++ and libc++abi of one build of Revenant's revenant@libcxx,",
                                        libraries = {}, extra = held}},
                           root = path.join(package:installdir("share"), "root"),
                           metadata = path.join(package:installdir("share"), "shared-packages"), strip = {"-x"}})
-            package:setenv("CHARON_SHARED_PACKAGE", name)
+            package:setenv("REVENANT_SHARED_PACKAGE", name)
         end
     end)
 

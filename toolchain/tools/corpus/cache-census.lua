@@ -1,11 +1,11 @@
 import("byteorder", {rootdir = path.join(os.scriptdir(), "..", "..", "modules")})
 
 local SELECTOR_CONTROLS = {"-isEqual:", "-description", "-initWithFrame:"}
-local SELECTOR_NEGATIVE = "-charonNoSuchSelectorAnywhere:"
+local SELECTOR_NEGATIVE = "-revenantNoSuchSelectorAnywhere:"
 
 function main(prefix, ...)
-    local objc = import("apple.objc", {rootdir = path.join(os.getenv("CHARON_ROOT"), "modules"), anonymous = true})
-    local dyld = import("apple.dyld", {rootdir = path.join(os.getenv("CHARON_ROOT"), "modules"), anonymous = true})
+    local objc = import("apple.objc", {rootdir = path.join(os.getenv("REVENANT_ROOT"), "modules"), anonymous = true})
+    local dyld = import("apple.dyld", {rootdir = path.join(os.getenv("REVENANT_ROOT"), "modules"), anonymous = true})
     local root = dyld.root()
 
     if prefix == "--selectors" then

@@ -1,16 +1,16 @@
-#import "CharonAVCapture.h"
+#import "RevenantAVCapture.h"
 #import <objc/runtime.h>
 
-@interface AVCaptureDevice (CharonPrivateExposure8)
+@interface AVCaptureDevice (RevenantPrivateExposure8)
 - (float)autoExposureBias;
 - (void)setAutoExposureBias:(float)bias;
 @end
 
-@interface AVCaptureDevice (CharonReleaseLock8)
+@interface AVCaptureDevice (RevenantReleaseLock8)
 - (BOOL)isLockedForConfiguration;
 @end
 
-@implementation AVCaptureDevice (CharonExposureTargetBias8)
+@implementation AVCaptureDevice (RevenantExposureTargetBias8)
 
 - (void)setExposureTargetBias:(float)bias completionHandler:(void (^)(CMTime syncTime))handler
 {
@@ -28,7 +28,7 @@
 
 @end
 
-@implementation AVCaptureVideoPreviewLayer (CharonSessionWithNoConnection8)
+@implementation AVCaptureVideoPreviewLayer (RevenantSessionWithNoConnection8)
 
 - (void)setSessionWithNoConnection:(AVCaptureSession *)session
 {

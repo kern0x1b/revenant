@@ -20,7 +20,7 @@
 #include "graphics/host_graphics.hpp"
 #include "graphics/surface_store.hpp"
 
-namespace shade {
+namespace emulator {
 namespace {
 
     struct PixelLayout {

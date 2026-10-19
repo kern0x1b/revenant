@@ -1,9 +1,9 @@
-#import "CharonAVSampleBufferRender.h"
+#import "RevenantAVSampleBufferRender.h"
 
 #import <AudioToolbox/AudioToolbox.h>
 #import <CoreMedia/CoreMedia.h>
 
-@interface CharonAVPendingBuffer : NSObject
+@interface RevenantAVPendingBuffer : NSObject
 {
 @public
     CMSampleBufferRef sampleBuffer;
@@ -11,10 +11,10 @@
 }
 @end
 
-@implementation CharonAVPendingBuffer
+@implementation RevenantAVPendingBuffer
 @end
 
-static void charon_queueReturnedBuffer(void *userData, AudioQueueRef queue, AudioQueueBufferRef buffer);
+static void revenant_queueReturnedBuffer(void *userData, AudioQueueRef queue, AudioQueueBufferRef buffer);
 
 @interface AVSampleBufferAudioRenderer ()
 {
@@ -52,7 +52,7 @@ static void charon_queueReturnedBuffer(void *userData, AudioQueueRef queue, Audi
     if (CMTimebaseCreateWithMasterClock(kCFAllocatorDefault, CMClockGetHostTimeClock(), &_timebase) != noErr)
         return nil;
     _pending = [[NSMutableArray alloc] init];
-    _workQueue = dispatch_queue_create("charon.samplebuffer.render", DISPATCH_QUEUE_SERIAL);
+    _workQueue = dispatch_queue_create("revenant.samplebuffer.render", DISPATCH_QUEUE_SERIAL);
     _status = AVQueuedSampleBufferRenderingStatusUnknown;
     _volume = 1.0f;
     _audioTimePitchAlgorithm = AVAudioTimePitchAlgorithmTimeDomain;
@@ -61,7 +61,7 @@ static void charon_queueReturnedBuffer(void *userData, AudioQueueRef queue, Audi
 
 - (void)dealloc
 {
-    [self charon_releaseQueue];
+    [self revenant_releaseQueue];
     free(_spares);
 }
 
@@ -86,7 +86,7 @@ static void charon_queueReturnedBuffer(void *userData, AudioQueueRef queue, Audi
                     format:@"-[AVSampleBufferAudioRenderer enqueueSampleBuffer:] was given no sample buffer"];
     CMTime presentation = CMSampleBufferGetOutputPresentationTimeStamp(sampleBuffer);
     if (CMTIME_IS_NUMERIC(presentation)) {
-        CharonAVPendingBuffer *pending = [[CharonAVPendingBuffer alloc] init];
+        RevenantAVPendingBuffer *pending = [[RevenantAVPendingBuffer alloc] init];
         pending->sampleBuffer = (CMSampleBufferRef)CFRetain(sampleBuffer);
         pending->presentation = presentation;
         @synchronized (self) {
@@ -96,20 +96,20 @@ static void charon_queueReturnedBuffer(void *userData, AudioQueueRef queue, Audi
         }
     }
     @synchronized (self) {
-        [self charon_drainPending];
+        [self revenant_drainPending];
     }
-    [self charon_reportReadiness];
+    [self revenant_reportReadiness];
 }
 
 - (void)flush
 {
     @synchronized (self) {
         if (_queue)
-            [self charon_resetQueue];
+            [self revenant_resetQueue];
         [_pending removeAllObjects];
         _running = NO;
     }
-    [self charon_reportReadiness];
+    [self revenant_reportReadiness];
 }
 
 - (void)flushFromSourceTime:(CMTime)time completionHandler:(void (^)(BOOL flushSucceeded))completionHandler
@@ -117,22 +117,22 @@ static void charon_queueReturnedBuffer(void *userData, AudioQueueRef queue, Audi
     @synchronized (self) {
         if (_queue) {
             NSUInteger dropped = 0;
-            for (CharonAVPendingBuffer *pending in [_pending copy]) {
+            for (RevenantAVPendingBuffer *pending in [_pending copy]) {
                 if (!CMTIME_IS_NUMERIC(time) || CMTimeCompare(pending->presentation, time) >= 0) {
                     [_pending removeObject:pending];
                     dropped++;
                 }
             }
             if (dropped) {
-                [self charon_resetQueue];
+                [self revenant_resetQueue];
                 _running = NO;
             }
-            [self charon_drainPending];
+            [self revenant_drainPending];
         } else {
             [_pending removeAllObjects];
         }
     }
-    [self charon_reportReadiness];
+    [self revenant_reportReadiness];
     if (completionHandler)
         completionHandler(YES);
 }
@@ -145,7 +145,7 @@ static void charon_queueReturnedBuffer(void *userData, AudioQueueRef queue, Audi
         _requestQueue = queue ? queue : dispatch_get_main_queue();
         _requestBlock = block;
     }
-    [self charon_reportReadiness];
+    [self revenant_reportReadiness];
 }
 
 - (void)stopRequestingMediaData
@@ -156,7 +156,7 @@ static void charon_queueReturnedBuffer(void *userData, AudioQueueRef queue, Audi
     }
 }
 
-- (void)charon_reportReadiness
+- (void)revenant_reportReadiness
 {
     dispatch_queue_t queue = NULL;
     void (^block)(void) = nil;
@@ -203,7 +203,7 @@ static void charon_queueReturnedBuffer(void *userData, AudioQueueRef queue, Audi
 - (void)setVolume:(float)volume
 {
     _volume = volume;
-    [self charon_applyVolume];
+    [self revenant_applyVolume];
 }
 
 - (BOOL)isMuted
@@ -214,10 +214,10 @@ static void charon_queueReturnedBuffer(void *userData, AudioQueueRef queue, Audi
 - (void)setMuted:(BOOL)muted
 {
     _muted = muted;
-    [self charon_applyVolume];
+    [self revenant_applyVolume];
 }
 
-- (void)charon_applyVolume
+- (void)revenant_applyVolume
 {
     AudioQueueRef queue = NULL;
     @synchronized (self) {
@@ -229,7 +229,7 @@ static void charon_queueReturnedBuffer(void *userData, AudioQueueRef queue, Audi
     AudioQueueSetParameter(queue, kAudioQueueParam_Volume, volume);
 }
 
-- (void)charon_renderSynchronizerDidChangeRate
+- (void)revenant_renderSynchronizerDidChangeRate
 {
     float now = (float)CMTimebaseGetRate(_timebase);
     float was = _lastRate;
@@ -246,9 +246,9 @@ static void charon_queueReturnedBuffer(void *userData, AudioQueueRef queue, Audi
     @synchronized (self) {
         if (!_pending.count)
             return;
-        flushedAt = ((CharonAVPendingBuffer *)[_pending firstObject])->presentation;
+        flushedAt = ((RevenantAVPendingBuffer *)[_pending firstObject])->presentation;
         if (_queue)
-            [self charon_resetQueue];
+            [self revenant_resetQueue];
         [_pending removeAllObjects];
         _running = NO;
     }
@@ -256,62 +256,62 @@ static void charon_queueReturnedBuffer(void *userData, AudioQueueRef queue, Audi
         postNotificationName:AVSampleBufferAudioRendererWasFlushedAutomaticallyNotification
                       object:self
                     userInfo:@{ AVSampleBufferAudioRendererFlushTimeKey: [NSValue valueWithCMTime:flushedAt] }];
-    [self charon_reportReadiness];
+    [self revenant_reportReadiness];
 }
 
 #pragma mark - the queue
 
-- (void)charon_drainPending
+- (void)revenant_drainPending
 {
     if (!_pending.count)
         return;
     double rate = CMTimebaseGetRate(_timebase);
     if (rate <= 0.0)
         return;
-    if (!_queue && ![self charon_openQueueFor:(CharonAVPendingBuffer *)[_pending firstObject]])
+    if (!_queue && ![self revenant_openQueueFor:(RevenantAVPendingBuffer *)[_pending firstObject]])
         return;
     while (_pending.count) {
-        CharonAVPendingBuffer *pending = [_pending objectAtIndex:0];
-        AudioQueueBufferRef buffer = [self charon_bufferForBytes:(UInt32)[self charon_bytesOf:pending]];
+        RevenantAVPendingBuffer *pending = [_pending objectAtIndex:0];
+        AudioQueueBufferRef buffer = [self revenant_bufferForBytes:(UInt32)[self revenant_bytesOf:pending]];
         if (!buffer)
             break;
-        if (![self charon_fill:buffer from:pending] || ![self charon_enqueue:buffer at:pending->presentation]) {
+        if (![self revenant_fill:buffer from:pending] || ![self revenant_enqueue:buffer at:pending->presentation]) {
             break;
         }
         [_pending removeObjectAtIndex:0];
     }
 }
 
-- (BOOL)charon_openQueueFor:(CharonAVPendingBuffer *)pending
+- (BOOL)revenant_openQueueFor:(RevenantAVPendingBuffer *)pending
 {
     CMAudioFormatDescriptionRef format = CMSampleBufferGetFormatDescription(pending->sampleBuffer);
     if (!format) {
-        [self charon_failWithReason:@"the sample buffer carries no format description"];
+        [self revenant_failWithReason:@"the sample buffer carries no format description"];
         return NO;
     }
     const AudioStreamBasicDescription *asbd = CMAudioFormatDescriptionGetStreamBasicDescription(format);
     if (!asbd) {
-        [self charon_failWithReason:@"the sample buffer's format description carries no stream format"];
+        [self revenant_failWithReason:@"the sample buffer's format description carries no stream format"];
         return NO;
     }
     if (asbd->mFormatID != kAudioFormatLinearPCM) {
-        [self charon_failWithReason:[NSString stringWithFormat:@"the sample buffer is in format %u, which is not linear PCM",
+        [self revenant_failWithReason:[NSString stringWithFormat:@"the sample buffer is in format %u, which is not linear PCM",
                                      (unsigned)asbd->mFormatID]];
         return NO;
     }
     _format = *asbd;
-    OSStatus status = AudioQueueNewOutput(&_format, charon_queueReturnedBuffer, (__bridge void *)self,
+    OSStatus status = AudioQueueNewOutput(&_format, revenant_queueReturnedBuffer, (__bridge void *)self,
                                           NULL, NULL, 0, &_queue);
     if (status != noErr || !_queue) {
         _queue = NULL;
-        [self charon_failWithReason:[NSString stringWithFormat:@"AudioQueueNewOutput answered %d", (int)status]];
+        [self revenant_failWithReason:[NSString stringWithFormat:@"AudioQueueNewOutput answered %d", (int)status]];
         return NO;
     }
-    [self charon_applyVolume];
+    [self revenant_applyVolume];
     return YES;
 }
 
-- (UInt32)charon_bytesOf:(CharonAVPendingBuffer *)pending
+- (UInt32)revenant_bytesOf:(RevenantAVPendingBuffer *)pending
 {
     const AudioStreamBasicDescription *asbd =
         CMAudioFormatDescriptionGetStreamBasicDescription(CMSampleBufferGetFormatDescription(pending->sampleBuffer));
@@ -324,7 +324,7 @@ static void charon_queueReturnedBuffer(void *userData, AudioQueueRef queue, Audi
     return (UInt32)(bytes ? bytes : 1);
 }
 
-- (AudioQueueBufferRef)charon_bufferForBytes:(UInt32)bytes
+- (AudioQueueBufferRef)revenant_bufferForBytes:(UInt32)bytes
 {
     for (NSUInteger index = _spareCount; index > 0; index--) {
         AudioQueueBufferRef spare = _spares[index - 1];
@@ -340,7 +340,7 @@ static void charon_queueReturnedBuffer(void *userData, AudioQueueRef queue, Audi
     return buffer;
 }
 
-- (void)charon_keepSpare:(AudioQueueBufferRef)buffer
+- (void)revenant_keepSpare:(AudioQueueBufferRef)buffer
 {
     if (_spareCount == _spareCapacity) {
         NSUInteger capacity = _spareCapacity ? _spareCapacity * 2 : 4;
@@ -353,7 +353,7 @@ static void charon_queueReturnedBuffer(void *userData, AudioQueueRef queue, Audi
     _spares[_spareCount++] = buffer;
 }
 
-- (BOOL)charon_fill:(AudioQueueBufferRef)buffer from:(CharonAVPendingBuffer *)pending
+- (BOOL)revenant_fill:(AudioQueueBufferRef)buffer from:(RevenantAVPendingBuffer *)pending
 {
     const AudioStreamBasicDescription *asbd =
         CMAudioFormatDescriptionGetStreamBasicDescription(CMSampleBufferGetFormatDescription(pending->sampleBuffer));
@@ -367,7 +367,7 @@ static void charon_queueReturnedBuffer(void *userData, AudioQueueRef queue, Audi
         return NO;
     AudioBufferList *source = calloc(1, needed);
     if (!source) {
-        [self charon_failWithReason:@"the audio buffer list for the sample buffer could not be allocated"];
+        [self revenant_failWithReason:@"the audio buffer list for the sample buffer could not be allocated"];
         return NO;
     }
     CMBlockBufferRef block = NULL;
@@ -388,7 +388,7 @@ static void charon_queueReturnedBuffer(void *userData, AudioQueueRef queue, Audi
         }
         buffer->mAudioDataByteSize = written;
     } else if (status == noErr) {
-        [self charon_failWithReason:[NSString stringWithFormat:@"the sample buffer holds %u audio buffers for %u channels",
+        [self revenant_failWithReason:[NSString stringWithFormat:@"the sample buffer holds %u audio buffers for %u channels",
                                      (unsigned)source->mNumberBuffers, (unsigned)asbd->mChannelsPerFrame]];
         status = kCMSampleBufferError_InvalidSampleData;
     }
@@ -397,18 +397,18 @@ static void charon_queueReturnedBuffer(void *userData, AudioQueueRef queue, Audi
     free(source);
     if (status != noErr) {
         if (_error == nil)
-            [self charon_failWithReason:[NSString stringWithFormat:@"CMSampleBufferGetAudioBufferListWithRetainedBlockBuffer answered %d", (int)status]];
+            [self revenant_failWithReason:[NSString stringWithFormat:@"CMSampleBufferGetAudioBufferListWithRetainedBlockBuffer answered %d", (int)status]];
         return NO;
     }
     return YES;
 }
 
-- (BOOL)charon_enqueue:(AudioQueueBufferRef)buffer at:(CMTime)presentation
+- (BOOL)revenant_enqueue:(AudioQueueBufferRef)buffer at:(CMTime)presentation
 {
     if (!_running) {
         OSStatus started = AudioQueueStart(_queue, NULL);
         if (started != noErr) {
-            [self charon_failWithReason:[NSString stringWithFormat:@"AudioQueueStart answered %d", (int)started]];
+            [self revenant_failWithReason:[NSString stringWithFormat:@"AudioQueueStart answered %d", (int)started]];
             AudioQueueFreeBuffer(_queue, buffer);
             return NO;
         }
@@ -417,7 +417,7 @@ static void charon_queueReturnedBuffer(void *userData, AudioQueueRef queue, Audi
     AudioTimeStamp anchor = {0};
     if (AudioQueueGetCurrentTime(_queue, NULL, &anchor, NULL) != noErr
         || !(anchor.mFlags & kAudioTimeStampSampleTimeValid)) {
-        [self charon_failWithReason:@"the audio queue did not answer its own current time"];
+        [self revenant_failWithReason:@"the audio queue did not answer its own current time"];
         AudioQueueFreeBuffer(_queue, buffer);
         return NO;
     }
@@ -431,35 +431,35 @@ static void charon_queueReturnedBuffer(void *userData, AudioQueueRef queue, Audi
     OSStatus status = AudioQueueEnqueueBufferWithParameters(_queue, buffer, 0, NULL, 0, 0, 0, NULL,
                                                             &start, &actual);
     if (status != noErr) {
-        [self charon_failWithReason:[NSString stringWithFormat:@"AudioQueueEnqueueBufferWithParameters answered %d", (int)status]];
+        [self revenant_failWithReason:[NSString stringWithFormat:@"AudioQueueEnqueueBufferWithParameters answered %d", (int)status]];
         AudioQueueFreeBuffer(_queue, buffer);
         return NO;
     }
     return YES;
 }
 
-static void charon_queueReturnedBuffer(void *userData, AudioQueueRef queue, AudioQueueBufferRef buffer)
+static void revenant_queueReturnedBuffer(void *userData, AudioQueueRef queue, AudioQueueBufferRef buffer)
 {
     AVSampleBufferAudioRenderer *renderer = (__bridge AVSampleBufferAudioRenderer *)userData;
     (void)queue;
     dispatch_async(renderer->_workQueue, ^{
         @synchronized (renderer) {
             if (renderer->_queue)
-                [renderer charon_keepSpare:buffer];
-            [renderer charon_drainPending];
+                [renderer revenant_keepSpare:buffer];
+            [renderer revenant_drainPending];
         }
-        [renderer charon_reportReadiness];
+        [renderer revenant_reportReadiness];
     });
 }
 
-- (void)charon_resetQueue
+- (void)revenant_resetQueue
 {
     OSStatus status = AudioQueueReset(_queue);
     if (status != noErr)
-        [self charon_failWithReason:[NSString stringWithFormat:@"AudioQueueReset answered %d", (int)status]];
+        [self revenant_failWithReason:[NSString stringWithFormat:@"AudioQueueReset answered %d", (int)status]];
 }
 
-- (void)charon_releaseQueue
+- (void)revenant_releaseQueue
 {
     if (_queue) {
         AudioQueueDispose(_queue, true);
@@ -469,7 +469,7 @@ static void charon_queueReturnedBuffer(void *userData, AudioQueueRef queue, Audi
     _spareCount = 0;
 }
 
-- (void)charon_failWithReason:(NSString *)reason
+- (void)revenant_failWithReason:(NSString *)reason
 {
     _status = AVQueuedSampleBufferRenderingStatusFailed;
     if (!_error)

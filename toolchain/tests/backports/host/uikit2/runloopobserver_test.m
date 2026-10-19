@@ -1,26 +1,26 @@
 #import <Foundation/Foundation.h>
 #import "check.h"
 
-CFRunLoopObserverRef CharonHostCFRunLoopObserverCreateWithHandler(CFAllocatorRef allocator, CFOptionFlags activities, Boolean repeats, CFIndex order,
+CFRunLoopObserverRef RevenantHostCFRunLoopObserverCreateWithHandler(CFAllocatorRef allocator, CFOptionFlags activities, Boolean repeats, CFIndex order,
                                                                   void (^block)(CFRunLoopObserverRef observer, CFRunLoopActivity activity));
 
-typedef CFRunLoopObserverRef (*charon_maker)(CFAllocatorRef, CFOptionFlags, Boolean, CFIndex, void (^)(CFRunLoopObserverRef, CFRunLoopActivity));
+typedef CFRunLoopObserverRef (*revenant_maker)(CFAllocatorRef, CFOptionFlags, Boolean, CFIndex, void (^)(CFRunLoopObserverRef, CFRunLoopActivity));
 
-@interface CharonProbe : NSObject
+@interface RevenantProbe : NSObject
 @end
 
-@implementation CharonProbe
+@implementation RevenantProbe
 @end
 
-static NSDictionary *observe(charon_maker make, CFOptionFlags activities, Boolean repeats, CFIndex order)
+static NSDictionary *observe(revenant_maker make, CFOptionFlags activities, Boolean repeats, CFIndex order)
 {
     NSMutableArray *seen = [NSMutableArray array];
-    __weak CharonProbe *weakProbe;
+    __weak RevenantProbe *weakProbe;
     __block CFRunLoopObserverRef given = NULL;
     BOOL sameObserver = YES;
     CFRunLoopObserverRef observer;
     @autoreleasepool {
-        CharonProbe *probe = [CharonProbe new];
+        RevenantProbe *probe = [RevenantProbe new];
         weakProbe = probe;
         observer = make(NULL, activities, repeats, order, ^(CFRunLoopObserverRef which, CFRunLoopActivity activity) {
             (void)probe;
@@ -55,12 +55,12 @@ int main(void)
         };
         for (size_t index = 0; index < sizeof cases / sizeof cases[0]; index++) {
             NSDictionary *system = observe(CFRunLoopObserverCreateWithHandler, cases[index].activities, cases[index].repeats, cases[index].order);
-            NSDictionary *ours = observe(CharonHostCFRunLoopObserverCreateWithHandler, cases[index].activities, cases[index].repeats, cases[index].order);
-            charon_check([system isEqual:ours], "an observer made from a block behaves as the system's",
+            NSDictionary *ours = observe(RevenantHostCFRunLoopObserverCreateWithHandler, cases[index].activities, cases[index].repeats, cases[index].order);
+            revenant_check([system isEqual:ours], "an observer made from a block behaves as the system's",
                          [NSString stringWithFormat:@"case %zu: ours %@ system %@", index, ours, system]);
-            charon_check([system[@"seen"] count] > 0, "the loop ran the observer at all", [NSString stringWithFormat:@"case %zu", index]);
+            revenant_check([system[@"seen"] count] > 0, "the loop ran the observer at all", [NSString stringWithFormat:@"case %zu", index]);
         }
-        printf("checks=%d failures=%d\n", charon_checks, charon_failures);
-        return charon_failures ? 1 : 0;
+        printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
+        return revenant_failures ? 1 : 0;
     }
 }

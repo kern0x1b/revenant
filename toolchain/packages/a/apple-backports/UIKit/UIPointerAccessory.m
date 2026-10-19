@@ -15,7 +15,7 @@
     return accessory;
 }
 
-static UIBezierPath *charon_arrowPath(void)
+static UIBezierPath *revenant_arrowPath(void)
 {
     UIBezierPath *path = [UIBezierPath bezierPath];
     [path moveToPoint:CGPointMake(8.5394097477840791, 8.11336884234737)];
@@ -34,7 +34,7 @@ static UIBezierPath *charon_arrowPath(void)
 
 + (instancetype)arrowAccessoryWithPosition:(UIPointerAccessoryPosition)position
 {
-    UIPointerAccessory *accessory = [self accessoryWithShape:[UIPointerShape shapeWithPath:charon_arrowPath()] position:position];
+    UIPointerAccessory *accessory = [self accessoryWithShape:[UIPointerShape shapeWithPath:revenant_arrowPath()] position:position];
     accessory->_orientationMatchesAngle = YES;
     return accessory;
 }

@@ -1,19 +1,19 @@
-#import "CharonCloudKit.h"
-#import "CharonCKConstants.h"
-#import "CharonCKRecordPrivate.h"
+#import "RevenantCloudKit.h"
+#import "RevenantCKConstants.h"
+#import "RevenantCKRecordPrivate.h"
 
-static NSString *const CharonCKExceptionName = @"CKException";
-static NSString *const CharonCKInvalidArgumentName = @"NSInvalidArgumentException";
+static NSString *const RevenantCKExceptionName = @"CKException";
+static NSString *const RevenantCKInvalidArgumentName = @"NSInvalidArgumentException";
 
-static void CharonCKRefuse(NSString *name, NSString *reason)
+static void RevenantCKRefuse(NSString *name, NSString *reason)
 {
     [[NSException exceptionWithName:name reason:reason userInfo:nil] raise];
 }
 
-static BOOL CharonCKFieldKeyIsValid(NSString *key)
+static BOOL RevenantCKFieldKeyIsValid(NSString *key)
 {
     if (![key isKindOfClass:[NSString class]] || key.length == 0) {
-        CharonCKRefuse(CharonCKInvalidArgumentName, @"recordKey can not be empty");
+        RevenantCKRefuse(RevenantCKInvalidArgumentName, @"recordKey can not be empty");
         return NO;
     }
     static NSCharacterSet *first = nil;
@@ -27,13 +27,13 @@ static BOOL CharonCKFieldKeyIsValid(NSString *key)
         rest = [letters copy];
     });
     if (![first characterIsMember:[key characterAtIndex:0]]) {
-        CharonCKRefuse(CharonCKInvalidArgumentName,
+        RevenantCKRefuse(RevenantCKInvalidArgumentName,
                        [NSString stringWithFormat:@"recordKey (%@) contains invalid characters", key]);
         return NO;
     }
     for (NSUInteger at = 1; at < key.length; at++) {
         if (![rest characterIsMember:[key characterAtIndex:at]]) {
-            CharonCKRefuse(CharonCKInvalidArgumentName,
+            RevenantCKRefuse(RevenantCKInvalidArgumentName,
                            [NSString stringWithFormat:@"recordKey (%@) contains invalid characters", key]);
             return NO;
         }
@@ -52,7 +52,7 @@ static BOOL CharonCKFieldKeyIsValid(NSString *key)
 
 - (instancetype)init
 {
-    CharonCKRefuse(CharonCKInvalidArgumentName,
+    RevenantCKRefuse(RevenantCKInvalidArgumentName,
                    @"You must call -[CKRecordZoneID initWithZoneName:ownerName:]");
     return nil;
 }
@@ -60,10 +60,10 @@ static BOOL CharonCKFieldKeyIsValid(NSString *key)
 - (instancetype)initWithZoneName:(NSString *)zoneName ownerName:(NSString *)ownerName
 {
     if (!zoneName) {
-        CharonCKRefuse(CharonCKExceptionName, @"zoneName can not be nil");
+        RevenantCKRefuse(RevenantCKExceptionName, @"zoneName can not be nil");
     }
     if (!ownerName) {
-        CharonCKRefuse(CharonCKExceptionName, @"ownerName can not be nil");
+        RevenantCKRefuse(RevenantCKExceptionName, @"ownerName can not be nil");
     }
     self = [super init];
     if (self) {
@@ -126,7 +126,7 @@ static BOOL CharonCKFieldKeyIsValid(NSString *key)
 
 - (instancetype)init
 {
-    CharonCKRefuse(CharonCKInvalidArgumentName,
+    RevenantCKRefuse(RevenantCKInvalidArgumentName,
                    @"You must call -[CKRecordID initWithRecordName:] or -[CKRecordID initWithRecordName:zoneID:]");
     return nil;
 }
@@ -141,10 +141,10 @@ static BOOL CharonCKFieldKeyIsValid(NSString *key)
 - (instancetype)initWithRecordName:(NSString *)recordName zoneID:(CKRecordZoneID *)zoneID
 {
     if (!recordName) {
-        CharonCKRefuse(CharonCKExceptionName, @"recordName can not be nil");
+        RevenantCKRefuse(RevenantCKExceptionName, @"recordName can not be nil");
     }
     if (!zoneID) {
-        CharonCKRefuse(CharonCKExceptionName, @"zoneID can not be nil");
+        RevenantCKRefuse(RevenantCKExceptionName, @"zoneID can not be nil");
     }
     self = [super init];
     if (self) {
@@ -205,7 +205,7 @@ static BOOL CharonCKFieldKeyIsValid(NSString *key)
 
 - (instancetype)init
 {
-    CharonCKRefuse(CharonCKExceptionName, @"You can't call init on CKServerChangeToken");
+    RevenantCKRefuse(RevenantCKExceptionName, @"You can't call init on CKServerChangeToken");
     return nil;
 }
 
@@ -274,7 +274,7 @@ static BOOL CharonCKFieldKeyIsValid(NSString *key)
 
 - (instancetype)init
 {
-    CharonCKRefuse(CharonCKInvalidArgumentName,
+    RevenantCKRefuse(RevenantCKInvalidArgumentName,
                    @"You must call -[CKReference initWithRecordID:] or -[CKReference initWithRecord:] or -[CKReference initWithAsset:]");
     return nil;
 }
@@ -282,7 +282,7 @@ static BOOL CharonCKFieldKeyIsValid(NSString *key)
 - (instancetype)initWithRecordID:(CKRecordID *)recordID action:(CKReferenceAction)action
 {
     if (!recordID) {
-        CharonCKRefuse(CharonCKExceptionName, @"recordID can not be nil");
+        RevenantCKRefuse(RevenantCKExceptionName, @"recordID can not be nil");
     }
     self = [super init];
     if (self) {
@@ -295,7 +295,7 @@ static BOOL CharonCKFieldKeyIsValid(NSString *key)
 - (instancetype)initWithRecord:(CKRecord *)record action:(CKReferenceAction)action
 {
     if (!record) {
-        CharonCKRefuse(CharonCKExceptionName, @"record can not be nil");
+        RevenantCKRefuse(RevenantCKExceptionName, @"record can not be nil");
     }
     return [self initWithRecordID:record.recordID action:action];
 }
@@ -354,7 +354,7 @@ static BOOL CharonCKFieldKeyIsValid(NSString *key)
 
 - (instancetype)init
 {
-    CharonCKRefuse(CharonCKInvalidArgumentName,
+    RevenantCKRefuse(RevenantCKInvalidArgumentName,
                    @"You must call -[CKAsset initWithFileURL:] or -[CKAsset initWithData:]");
     return nil;
 }
@@ -362,7 +362,7 @@ static BOOL CharonCKFieldKeyIsValid(NSString *key)
 - (instancetype)initWithFileURL:(NSURL *)fileURL
 {
     if (!fileURL) {
-        CharonCKRefuse(CharonCKInvalidArgumentName, @"Null fileURL");
+        RevenantCKRefuse(RevenantCKInvalidArgumentName, @"Null fileURL");
     }
     self = [super init];
     if (self) {
@@ -446,7 +446,7 @@ typedef NS_ENUM(NSInteger, CKRecordZoneEncryptionScope) {
 - (instancetype)initWithZoneID:(CKRecordZoneID *)zoneID
 {
     if (!zoneID) {
-        CharonCKRefuse(CharonCKExceptionName, @"zoneID can not be nil");
+        RevenantCKRefuse(RevenantCKExceptionName, @"zoneID can not be nil");
     }
     self = [super init];
     if (self) {
@@ -469,7 +469,7 @@ typedef NS_ENUM(NSInteger, CKRecordZoneEncryptionScope) {
     [coder encodeObject:@(_capabilities) forKey:@"capabilities"];
 }
 
-static NSString *CharonCapabilitiesText(NSUInteger capabilities)
+static NSString *RevenantCapabilitiesText(NSUInteger capabilities)
 {
     if (capabilities == 0) {
         return @"(none)";
@@ -482,7 +482,7 @@ static NSString *CharonCapabilitiesText(NSUInteger capabilities)
     return [NSString stringWithFormat:@"(%@)", [names componentsJoinedByString:@", "]];
 }
 
-static NSString *CharonZoneText(CKRecordZoneID *zone)
+static NSString *RevenantZoneText(CKRecordZoneID *zone)
 {
     return zone ? [NSString stringWithFormat:@"%@:%@", zone.zoneName, zone.ownerName] : @"<null>";
 }
@@ -501,7 +501,7 @@ static NSString *CharonZoneText(CKRecordZoneID *zone)
                                                                               : @"per-record";
     return [NSString stringWithFormat:@"<CKRecordZone: %p; zoneID=%@, capabilities=%@,"
                                       " encryptionScope=%@, share=%@>",
-                                      self, CharonZoneText(_zoneID), CharonCapabilitiesText(_capabilities),
+                                      self, RevenantZoneText(_zoneID), RevenantCapabilitiesText(_capabilities),
                                       scopeText, _share ? [_share description] : @"<null>"];
 }
 
@@ -541,7 +541,7 @@ static NSString *CharonZoneText(CKRecordZoneID *zone)
 
 - (instancetype)init
 {
-    CharonCKRefuse(CharonCKInvalidArgumentName, @"You must call -[CKRecord initWithRecordType:]");
+    RevenantCKRefuse(RevenantCKInvalidArgumentName, @"You must call -[CKRecord initWithRecordType:]");
     return nil;
 }
 
@@ -554,10 +554,10 @@ static NSString *CharonZoneText(CKRecordZoneID *zone)
 - (instancetype)initWithRecordType:(NSString *)recordType recordID:(CKRecordID *)recordID
 {
     if (!recordType) {
-        CharonCKRefuse(CharonCKExceptionName, @"recordType can not be nil");
+        RevenantCKRefuse(RevenantCKExceptionName, @"recordType can not be nil");
     }
     if (!recordID) {
-        CharonCKRefuse(CharonCKExceptionName, @"recordID can not be nil");
+        RevenantCKRefuse(RevenantCKExceptionName, @"recordID can not be nil");
     }
     self = [super init];
     if (self) {
@@ -572,7 +572,7 @@ static NSString *CharonZoneText(CKRecordZoneID *zone)
 - (instancetype)initWithRecordType:(NSString *)recordType zoneID:(CKRecordZoneID *)zoneID
 {
     if (!zoneID) {
-        CharonCKRefuse(CharonCKExceptionName, @"zoneID can not be nil");
+        RevenantCKRefuse(RevenantCKExceptionName, @"zoneID can not be nil");
     }
     return [self initWithRecordType:recordType
                             recordID:[[CKRecordID alloc] initWithRecordName:[[NSUUID UUID] UUIDString]
@@ -591,7 +591,7 @@ static NSString *CharonZoneText(CKRecordZoneID *zone)
 
 - (void)setObject:(id)object forKey:(NSString *)key
 {
-    if (!CharonCKFieldKeyIsValid(key)) {
+    if (!RevenantCKFieldKeyIsValid(key)) {
         return;
     }
     if (![_changedKeys containsObject:key]) {
@@ -687,12 +687,12 @@ static NSString *CharonZoneText(CKRecordZoneID *zone)
 
 - (void)setParentReferenceFromRecordID:(CKRecordID *)parentRecordID
 {
-    CharonCKRecordSetParentReferenceFromRecordID(self, parentRecordID);
+    RevenantCKRecordSetParentReferenceFromRecordID(self, parentRecordID);
 }
 
 - (void)setParentReferenceFromRecord:(CKRecord *)parentRecord
 {
-    CharonCKRecordSetParentReferenceFromRecord(self, parentRecord);
+    RevenantCKRecordSetParentReferenceFromRecord(self, parentRecord);
 }
 - (id<CKRecordKeyValueSetting>)encryptedValues
 {

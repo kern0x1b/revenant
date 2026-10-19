@@ -7,9 +7,9 @@
 # library's own flags, then on the resulting OBJECTS runs the two checks below. A compile cannot
 # catch either of them, and both cost a merge.
 #
-# 1. NO UNRESOLVED _Charon* SYMBOL. A `static` that is DECLARED in one .m and DEFINED in another is
+# 1. NO UNRESOLVED _Revenant* SYMBOL. A `static` that is DECLARED in one .m and DEFINED in another is
 #    a link error, not a compile error: each file compiles alone, and the 6.1.3 link fails on
-#    undefined _CharonAttributesFromFunction. So every undefined _Charon* symbol of every object is
+#    undefined _RevenantAttributesFromFunction. So every undefined _Revenant* symbol of every object is
 #    resolved against the DEFINED symbols of the whole library directory, and one that no object
 #    defines is a failure with its name.
 #
@@ -111,11 +111,11 @@ done
 [ "$bad" -eq 0 ] || { echo "pre-export: $bad file(s) do not compile" >&2; exit 1; }
 echo "$count files, 0 errors"
 
-# 1. every undefined _Charon* resolved against every DEFINED symbol of this library
+# 1. every undefined _Revenant* resolved against every DEFINED symbol of this library
 #
 # NM MUST HAVE WORKED, AND MUST HAVE READ SOMETHING. It used to run with 2>/dev/null into a pipeline,
 # so an nm that failed - or one that printed nothing - left $defined empty, no symbol ever looked
-# undefined, and a library with a real link error printed "no unresolved _Charon* symbol in 58
+# undefined, and a library with a real link error printed "no unresolved _Revenant* symbol in 58
 # object(s)" and passed. An empty result is the absence of evidence and is now a failure.
 nm_all=$work/nm-all.txt
 nm_status=0
@@ -140,21 +140,21 @@ for object in "$work"/obj/*.o; do
         exit 1
     fi
     examined=$((examined + $(wc -l < "$one" | tr -d ' ')))
-    for symbol in $(awk '$1 == "U" || $2 == "U" {print $NF}' "$one" | grep "^_Charon" | sort -u); do
+    for symbol in $(awk '$1 == "U" || $2 == "U" {print $NF}' "$one" | grep "^_Revenant" | sort -u); do
         if ! printf '%s\n' "$defined" | grep -qx "$symbol"; then
             unresolved=$((unresolved + 1))
             echo "FAIL $(basename "$object") needs $symbol and no object of this library defines it" >&2
         fi
     done
 done
-[ "$unresolved" -eq 0 ] || { echo "pre-export: $unresolved unresolved _Charon* symbol(s)" >&2; exit 1; }
+[ "$unresolved" -eq 0 ] || { echo "pre-export: $unresolved unresolved _Revenant* symbol(s)" >&2; exit 1; }
 # A pass is only a pass if symbols were actually read. Zero defined symbols AND zero lines examined
 # means nm produced nothing at all, whatever its exit status said.
 if [ "$defined_count" -eq 0 ] && [ "$examined" -eq 0 ]; then
     echo "FAIL: check 1 examined no symbols at all, so it cannot have found an unresolved one" >&2
     exit 1
 fi
-echo "no unresolved _Charon* symbol in $objects object(s); nm read $examined symbol line(s), $defined_count defined"
+echo "no unresolved _Revenant* symbol in $objects object(s); nm read $examined symbol line(s), $defined_count defined"
 
 # 2. release-split on SPLIT_DIR, whatever library that is: one release each
 run_split

@@ -1,4 +1,4 @@
-#import "CharonPDFKit.h"
+#import "RevenantPDFKit.h"
 
 @implementation PDFOutline {
     CGPDFDictionaryRef _item;
@@ -23,7 +23,7 @@
 @synthesize label = _label;
 @synthesize index = _index;
 
-- (NSArray *)charon_children
+- (NSArray *)revenant_children
 {
     if (_children != nil)
         return _children;
@@ -32,7 +32,7 @@
         CGPDFDictionaryRef child = NULL;
         if (CGPDFDictionaryGetDictionary(_item, "First", &child) && child != NULL) {
             while (child != NULL && [answer count] < 4096) {
-                PDFOutline *outline = [[PDFOutline alloc] initWithCharonItem:child
+                PDFOutline *outline = [[PDFOutline alloc] initWithRevenantItem:child
                                                                   document:_document
                                                                      parent:self
                                                                       index:[answer count]];
@@ -52,12 +52,12 @@
 
 - (NSUInteger)numberOfChildren
 {
-    return [self charon_children].count;
+    return [self revenant_children].count;
 }
 
 - (PDFOutline *)childAtIndex:(NSUInteger)index
 {
-    NSArray *children = [self charon_children];
+    NSArray *children = [self revenant_children];
     if (index >= children.count) {
         if (children.count > 0) {
             [NSException raise:NSRangeException
@@ -99,10 +99,10 @@
         CGPDFArrayRef array = NULL;
         if (!CGPDFObjectGetValue(object, kCGPDFObjectTypeArray, &array) || array == NULL)
             return nil;
-        return [[PDFDestination alloc] initWithCharonDestinationArray:array inDocument:_document];
+        return [[PDFDestination alloc] initWithRevenantDestinationArray:array inDocument:_document];
     }
     if (type == kCGPDFObjectTypeName || type == kCGPDFObjectTypeString)
-        return [[PDFDestination alloc] initWithCharonDestinationArray:NULL inDocument:_document];
+        return [[PDFDestination alloc] initWithRevenantDestinationArray:NULL inDocument:_document];
     return nil;
 }
 
@@ -120,14 +120,14 @@
     CGPDFDictionaryRef action = NULL;
     if (!CGPDFDictionaryGetDictionary(_item, "A", &action) || action == NULL)
         return nil;
-    return [PDFAction charon_actionWithDictionary:action inDocument:_document];
+    return [PDFAction revenant_actionWithDictionary:action inDocument:_document];
 }
 
 @end
 
-@implementation PDFOutline (CharonInternals)
+@implementation PDFOutline (RevenantInternals)
 
-- (instancetype)initWithCharonItem:(CGPDFDictionaryRef)item
+- (instancetype)initWithRevenantItem:(CGPDFDictionaryRef)item
                            document:(nullable PDFDocument *)document
                              parent:(nullable PDFOutline *)parent
                               index:(NSUInteger)index
@@ -139,11 +139,11 @@
     _document = document;
     _parent = parent;
     _index = index;
-    _label = [self charon_title] ?: @"";
+    _label = [self revenant_title] ?: @"";
     return self;
 }
 
-- (NSString *)charon_title
+- (NSString *)revenant_title
 {
     if (_item == NULL)
         return nil;

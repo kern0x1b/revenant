@@ -1,6 +1,6 @@
 #import <Foundation/Foundation.h>
 
-@implementation NSDate (CharonNow)
+@implementation NSDate (RevenantNow)
 
 + (NSDate *)now
 {

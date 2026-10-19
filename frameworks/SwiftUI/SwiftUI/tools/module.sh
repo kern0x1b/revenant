@@ -6,7 +6,7 @@ full build.
 # compile their snippets against out/mods/SwiftUI.swiftmodule, so this is the light loop before a full build.
 set -e
 ROOT=$1
-O=$ROOT/eidolon/out
+O=$ROOT/SwiftUI/out
 cd "$ROOT"
 source ./pkg-env.sh
 mkdir -p "$O/mods" "$O/mc"

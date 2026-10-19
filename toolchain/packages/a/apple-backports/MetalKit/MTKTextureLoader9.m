@@ -11,7 +11,7 @@ NSString *const MTKTextureLoaderOptionAllocateMipmaps = @"MTKTextureLoaderOption
 NSString *const MTKTextureLoaderOptionTextureUsage = @"MTKTextureLoaderOptionTextureUsage";
 NSString *const MTKTextureLoaderOptionTextureCPUCacheMode = @"MTKTextureLoaderOptionTextureCPUCacheMode";
 
-static void CharonMTKFlipRows(NSMutableData *rgba, size_t width, size_t height)
+static void RevenantMTKFlipRows(NSMutableData *rgba, size_t width, size_t height)
 {
     size_t stride = width * 4;
     uint8_t *bytes = (uint8_t *)rgba.mutableBytes, *row = malloc(stride);
@@ -25,7 +25,7 @@ static void CharonMTKFlipRows(NSMutableData *rgba, size_t width, size_t height)
     free(row);
 }
 
-static BOOL CharonMTKShouldFlip(NSDictionary<NSString *, id> *options)
+static BOOL RevenantMTKShouldFlip(NSDictionary<NSString *, id> *options)
 {
     NSString *origin = options[MTKTextureLoaderOptionOrigin];
     if ([origin isEqualToString:MTKTextureLoaderOriginFlippedVertically])
@@ -33,7 +33,7 @@ static BOOL CharonMTKShouldFlip(NSDictionary<NSString *, id> *options)
     return [origin isEqualToString:MTKTextureLoaderOriginTopLeft];
 }
 
-static id<MTLTexture> CharonMTKTextureFromCGImage(id<MTLDevice> device, CGImageRef image, NSDictionary<NSString *, id> *options, NSError **error)
+static id<MTLTexture> RevenantMTKTextureFromCGImage(id<MTLDevice> device, CGImageRef image, NSDictionary<NSString *, id> *options, NSError **error)
 {
     if (!image) {
         if (error)
@@ -59,8 +59,8 @@ static id<MTLTexture> CharonMTKTextureFromCGImage(id<MTLDevice> device, CGImageR
     CGContextDrawImage(context, CGRectMake(0, 0, width, height), image);
     CGContextRelease(context);
 
-    if (CharonMTKShouldFlip(options))
-        CharonMTKFlipRows(rgba, width, height);
+    if (RevenantMTKShouldFlip(options))
+        RevenantMTKFlipRows(rgba, width, height);
 
     BOOL srgb = [options[MTKTextureLoaderOptionSRGB] boolValue];
     MTLPixelFormat format = srgb ? MTLPixelFormatRGBA8Unorm_sRGB : MTLPixelFormatRGBA8Unorm;
@@ -113,7 +113,7 @@ static id<MTLTexture> CharonMTKTextureFromCGImage(id<MTLDevice> device, CGImageR
 
 - (id<MTLTexture>)newTextureWithCGImage:(CGImageRef)cgImage options:(NSDictionary<NSString *, id> *)options error:(NSError **)error
 {
-    return CharonMTKTextureFromCGImage(_device, cgImage, options, error);
+    return RevenantMTKTextureFromCGImage(_device, cgImage, options, error);
 }
 
 - (void)newTextureWithCGImage:(CGImageRef)cgImage options:(NSDictionary<NSString *, id> *)options completionHandler:(void (^)(id<MTLTexture>, NSError *))completionHandler
@@ -132,7 +132,7 @@ static id<MTLTexture> CharonMTKTextureFromCGImage(id<MTLDevice> device, CGImageR
             *error = [NSError errorWithDomain:MTKTextureLoaderErrorDomain code:4 userInfo:@{NSLocalizedDescriptionKey: @"the data is not an image this port can decode"}];
         return nil;
     }
-    return CharonMTKTextureFromCGImage(_device, image.CGImage, options, error);
+    return RevenantMTKTextureFromCGImage(_device, image.CGImage, options, error);
 }
 
 - (void)newTextureWithData:(NSData *)data options:(NSDictionary<NSString *, id> *)options completionHandler:(void (^)(id<MTLTexture>, NSError *))completionHandler
@@ -185,7 +185,7 @@ static id<MTLTexture> CharonMTKTextureFromCGImage(id<MTLDevice> device, CGImageR
             *error = [NSError errorWithDomain:MTKTextureLoaderErrorDomain code:5 userInfo:@{NSLocalizedDescriptionKey: [NSString stringWithFormat:@"no image named %@ in the given bundle", name]}];
         return nil;
     }
-    return CharonMTKTextureFromCGImage(_device, image.CGImage, options, error);
+    return RevenantMTKTextureFromCGImage(_device, image.CGImage, options, error);
 }
 
 - (void)newTextureWithName:(NSString *)name scaleFactor:(CGFloat)scaleFactor bundle:(NSBundle *)bundle options:(NSDictionary<NSString *, id> *)options completionHandler:(void (^)(id<MTLTexture>, NSError *))completionHandler

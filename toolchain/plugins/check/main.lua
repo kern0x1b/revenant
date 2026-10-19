@@ -39,14 +39,14 @@ function main()
     local wanted = option.get("names")
     local targets = {}
     for _, target in ipairs(project.ordertargets()) do
-        if target:rule("@addon/charon/check") or target:values("check.command") or target:values("check.script") then
+        if target:rule("@addon/revenant/check") or target:values("check.command") or target:values("check.script") then
             if not wanted or table.contains(wanted, target:name()) then
                 table.insert(targets, target)
             end
         end
     end
     if #targets == 0 then
-        raise("the project declares no check; a check is a target with add_rules(\"@addon/charon/check\") and set_values(\"check.command\", ...)")
+        raise("the project declares no check; a check is a target with add_rules(\"@addon/revenant/check\") and set_values(\"check.command\", ...)")
     end
     local ran, failed = checks.run(targets, {staged = option.get("staged"), changed = option.get("changed"), files = files})
     if #failed > 0 then

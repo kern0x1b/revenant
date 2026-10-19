@@ -22,9 +22,9 @@ local INHERITED_BY = {
 }
 
 local MUTANT_ROWS = {
-    {"MTLFunction", "CharonMetalFunction", "Metal/CharonMetalLibrary.m"},
-    {"MTLDepthStencilState", "CharonMetalDepthStencil", "Metal/CharonMetalDepthStencil.m"},
-    {"MTLCaptureScope", "CharonMTLCaptureScope", "Metal/MTLCaptureManager11.m"},
+    {"MTLFunction", "RevenantMetalFunction", "Metal/RevenantMetalLibrary.m"},
+    {"MTLDepthStencilState", "RevenantMetalDepthStencil", "Metal/RevenantMetalDepthStencil.m"},
+    {"MTLCaptureScope", "RevenantMTLCaptureScope", "Metal/MTLCaptureManager11.m"},
 }
 
 local function q(s)

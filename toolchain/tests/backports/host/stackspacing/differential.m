@@ -22,7 +22,7 @@ static SizedView *sized(CGFloat height)
 
 static UIStackView *build(BOOL system, NSArray<UIView *> *arranged, UIView * __strong *held)
 {
-    Class stack_class = system ? [UIStackView class] : NSClassFromString(@"CharonHostUIStackView");
+    Class stack_class = system ? [UIStackView class] : NSClassFromString(@"RevenantHostUIStackView");
     UIStackView *stack = [[stack_class alloc] initWithArrangedSubviews:arranged];
     stack.axis = UILayoutConstraintAxisVertical;
     stack.alignment = UIStackViewAlignmentFill;
@@ -186,7 +186,7 @@ int main(void)
             printf("  system %s: %s\n", [entry[0] UTF8String], describe(entry[1]).UTF8String);
         facts_of_the_system(system);
 
-        Class ported = NSClassFromString(@"CharonHostUIStackView");
+        Class ported = NSClassFromString(@"RevenantHostUIStackView");
         BOOL carried = ported != Nil
             && [ported instancesRespondToSelector:@selector(setCustomSpacing:afterView:)]
             && [ported instancesRespondToSelector:@selector(customSpacingAfterView:)];
@@ -198,11 +198,11 @@ int main(void)
             for (NSUInteger index = 0; index < system.count; index++) {
                 NSArray *mine = index < ours.count ? ours[index] : nil;
                 id expected = system[index][1], actual = mine ? mine[1] : nil;
-                charon_check(mine != nil && same(expected, actual), [system[index][0] UTF8String],
+                revenant_check(mine != nil && same(expected, actual), [system[index][0] UTF8String],
                              [NSString stringWithFormat:@"%@ != %@", actual ? describe(actual) : @"nothing", describe(expected)]);
             }
         }
     }
-    printf("checks=%d failures=%d\n", charon_checks, charon_failures);
-    return charon_failures;
+    printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
+    return revenant_failures;
 }

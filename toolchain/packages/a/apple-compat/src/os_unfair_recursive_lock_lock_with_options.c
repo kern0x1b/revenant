@@ -1,29 +1,29 @@
 #include "system_function.h"
 #include "unfair_lock.h"
 
-static _Atomic(uintptr_t) charon_system_recursive_lock;
+static _Atomic(uintptr_t) revenant_system_recursive_lock;
 
 __attribute__((constructor))
-static void charon_resolve_recursive_lock(void)
+static void revenant_resolve_recursive_lock(void)
 {
-    charon_system_function(&charon_system_recursive_lock, CHARON_LIBSYSTEM_PLATFORM, "os_unfair_recursive_lock_lock_with_options");
+    revenant_system_function(&revenant_system_recursive_lock, REVENANT_LIBSYSTEM_PLATFORM, "os_unfair_recursive_lock_lock_with_options");
 }
 
 __attribute__((visibility("default")))
-void os_unfair_recursive_lock_lock_with_options(charon_unfair_recursive_lock *lock, uint32_t options)
+void os_unfair_recursive_lock_lock_with_options(revenant_unfair_recursive_lock *lock, uint32_t options)
 {
-    void (*system)(charon_unfair_recursive_lock *, uint32_t) =
-        charon_system_function(&charon_system_recursive_lock, CHARON_LIBSYSTEM_PLATFORM, "os_unfair_recursive_lock_lock_with_options");
+    void (*system)(revenant_unfair_recursive_lock *, uint32_t) =
+        revenant_system_function(&revenant_system_recursive_lock, REVENANT_LIBSYSTEM_PLATFORM, "os_unfair_recursive_lock_lock_with_options");
     if (system) {
         system(lock, options);
         return;
     }
-    uint32_t self = charon_unfair_self();
-    if (charon_unfair_trylock(&lock->lock, self))
+    uint32_t self = revenant_unfair_self();
+    if (revenant_unfair_trylock(&lock->lock, self))
         return;
-    if ((atomic_load_explicit(&lock->lock.value, memory_order_relaxed) | CHARON_UNFAIR_NO_WAITERS) == self) {
+    if ((atomic_load_explicit(&lock->lock.value, memory_order_relaxed) | REVENANT_UNFAIR_NO_WAITERS) == self) {
         lock->count++;
         return;
     }
-    charon_unfair_lock_slow(&lock->lock, self);
+    revenant_unfair_lock_slow(&lock->lock, self);
 }

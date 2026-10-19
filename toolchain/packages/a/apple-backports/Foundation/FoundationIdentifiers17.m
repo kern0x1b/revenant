@@ -1,3 +1,3 @@
-#import "CharonFoundationIdentifiers.h"
+#import "RevenantFoundationIdentifiers.h"
 
 NSString * const NSFileProtectionCompleteWhenUserInactive = @"NSFileProtectionCompleteWhenUserInactive";

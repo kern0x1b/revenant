@@ -5,9 +5,9 @@
 #import <stdio.h>
 #import <string.h>
 
-bool CharonCertificateReadTLV(const uint8_t *bytes, size_t length, size_t at, uint8_t *tag,
+bool RevenantCertificateReadTLV(const uint8_t *bytes, size_t length, size_t at, uint8_t *tag,
                               size_t *content, size_t *next, size_t limit);
-bool CharonCertificateNameTLV(const uint8_t *bytes, size_t length, bool wantSubject,
+bool RevenantCertificateNameTLV(const uint8_t *bytes, size_t length, bool wantSubject,
                              size_t *outStart, size_t *outEnd);
 
 static const unsigned char Fixture[] = {
@@ -21,7 +21,7 @@ static void walk(const unsigned char *bytes, size_t length)
 {
     for (int subject = 0; subject < 2; subject++) {
         size_t start = 0, end = 0;
-        if (CharonCertificateNameTLV(bytes, length, subject ? true : false, &start, &end)) {
+        if (RevenantCertificateNameTLV(bytes, length, subject ? true : false, &start, &end)) {
             accepted++;
             if (end < start || end > length)
                 { printf("OUT-OF-RANGE start=%zu end=%zu of %zu\n", start, end, length); abort(); }
@@ -32,7 +32,7 @@ static void walk(const unsigned char *bytes, size_t length)
     for (size_t at = 0; at < length; at++) {
         uint8_t tag = 0;
         size_t content = 0, next = 0;
-        if (CharonCertificateReadTLV(bytes, length, at, &tag, &content, &next, length)) {
+        if (RevenantCertificateReadTLV(bytes, length, at, &tag, &content, &next, length)) {
             if (content < at || next < content || next > length)
                 { printf("TLV-OUT-OF-RANGE at=%zu content=%zu next=%zu of %zu\n", at, content, next, length); abort(); }
         }

@@ -5,11 +5,11 @@ CG_EXTERN size_t CGBitmapGetAlignedBytesPerRow(size_t bytesPerRow);
 CG_EXTERN CGBlendMode CGContextGetBlendMode(CGContextRef context);
 CG_EXTERN CGFloat CGContextGetLineWidth(CGContextRef context);
 
-@interface UIGraphicsRendererFormat (CharonRenderer)
+@interface UIGraphicsRendererFormat (RevenantRenderer)
 - (void)_setBounds:(CGRect)bounds;
 @end
 
-@interface UIGraphicsRenderer (CharonRenderer)
+@interface UIGraphicsRenderer (RevenantRenderer)
 - (BOOL)runDrawingActions:(NS_NOESCAPE UIGraphicsDrawingActions)drawingActions
          completionActions:(NS_NOESCAPE UIGraphicsDrawingActions)completionActions
                     format:(UIGraphicsRendererFormat *)format
@@ -18,11 +18,11 @@ CG_EXTERN CGFloat CGContextGetLineWidth(CGContextRef context);
 - (void)popContext:(UIGraphicsRendererContext *)context;
 @end
 
-@interface UIGraphicsRendererContext (CharonRenderer)
+@interface UIGraphicsRendererContext (RevenantRenderer)
 - (instancetype)initWithCGContext:(CGContextRef)context format:(UIGraphicsRendererFormat *)format;
 @property (nonatomic) BOOL __createsImages;
 @end
 
-@interface UIGraphicsImageRendererFormat (CharonRenderer)
+@interface UIGraphicsImageRendererFormat (RevenantRenderer)
 - (CGFloat)_contextScale;
 @end

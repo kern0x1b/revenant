@@ -1,17 +1,17 @@
 #import <CoreData/CoreData.h>
 #import <objc/runtime.h>
 
-static const char CharonQueryGenerationKey;
+static const char RevenantQueryGenerationKey;
 
-@interface NSQueryGenerationToken (CharonCoordinator)
+@interface NSQueryGenerationToken (RevenantCoordinator)
 - (NSPersistentStoreCoordinator *)persistentStoreCoordinator;
 @end
 
-@implementation NSManagedObjectContext (CharonQueryGeneration)
+@implementation NSManagedObjectContext (RevenantQueryGeneration)
 
 - (NSQueryGenerationToken *)queryGenerationToken
 {
-    return objc_getAssociatedObject(self, &CharonQueryGenerationKey);
+    return objc_getAssociatedObject(self, &RevenantQueryGenerationKey);
 }
 
 - (BOOL)setQueryGenerationFromToken:(NSQueryGenerationToken *)token error:(NSError **)error
@@ -23,7 +23,7 @@ static const char CharonQueryGenerationKey;
     }
     if (token && token != [NSQueryGenerationToken currentQueryGenerationToken])
         (void)[token persistentStoreCoordinator];
-    objc_setAssociatedObject(self, &CharonQueryGenerationKey, token, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, &RevenantQueryGenerationKey, token, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     return YES;
 }
 

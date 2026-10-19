@@ -6,26 +6,26 @@
 #include <stdlib.h>
 #include <string.h>
 
-#import "CharonCoreMIDI.h"
+#import "RevenantCoreMIDI.h"
 
 static int gFailures;
 static long gMallocs;
 static long gReads;
 static int gFailAllocations;
 
-void *charon_count_malloc(size_t size)
+void *revenant_count_malloc(size_t size)
 {
     gMallocs++;
     return gFailAllocations ? NULL : malloc(size);
 }
 
-void *charon_count_calloc(size_t count, size_t size)
+void *revenant_count_calloc(size_t count, size_t size)
 {
     gMallocs++;
     return gFailAllocations ? NULL : calloc(count, size);
 }
 
-void *charon_count_realloc(void *pointer, size_t size)
+void *revenant_count_realloc(void *pointer, size_t size)
 {
     gMallocs++;
     return gFailAllocations ? NULL : realloc(pointer, size);
@@ -33,7 +33,7 @@ void *charon_count_realloc(void *pointer, size_t size)
 
 static NSMutableArray *gLog;
 
-void charon_test_NSLog(NSString *format, ...)
+void revenant_test_NSLog(NSString *format, ...)
 {
     va_list arguments;
     va_start(arguments, format);
@@ -47,7 +47,7 @@ static void *gReadRefCon;
 static int gDelivered;
 static dispatch_semaphore_t gDeliveredSignal;
 
-OSStatus charon_test_MIDIInputPortCreate(MIDIClientRef client, CFStringRef portName, MIDIReadProc readProc, void *refCon,
+OSStatus revenant_test_MIDIInputPortCreate(MIDIClientRef client, CFStringRef portName, MIDIReadProc readProc, void *refCon,
                                          MIDIPortRef *outPort)
 {
     gReadProc = readProc;
@@ -59,7 +59,7 @@ OSStatus charon_test_MIDIInputPortCreate(MIDIClientRef client, CFStringRef portN
 static MIDIEndpointRef gNextDestination = 2;
 static MIDIReadProc gDestProc;
 
-OSStatus charon_test_MIDIDestinationCreate(MIDIClientRef client, CFStringRef name, MIDIReadProc readProc, void *refCon,
+OSStatus revenant_test_MIDIDestinationCreate(MIDIClientRef client, CFStringRef name, MIDIReadProc readProc, void *refCon,
                                            MIDIEndpointRef *outDest)
 {
     gDestProc = readProc;
@@ -73,21 +73,21 @@ static int gOwnerSet[STANDIN_OBJECTS];
 static pthread_t gSender;
 static long gSenderReads;
 
-OSStatus charon_test_MIDIObjectSetIntegerProperty(MIDIObjectRef object, CFStringRef propertyID, SInt32 value)
+OSStatus revenant_test_MIDIObjectSetIntegerProperty(MIDIObjectRef object, CFStringRef propertyID, SInt32 value)
 {
-    if (object < STANDIN_OBJECTS && propertyID && CFEqual(propertyID, CHARON_OWNER_KEY)) {
+    if (object < STANDIN_OBJECTS && propertyID && CFEqual(propertyID, REVENANT_OWNER_KEY)) {
         gOwnerValue[object] = value;
         gOwnerSet[object] = 1;
     }
     return noErr;
 }
 
-OSStatus charon_test_MIDIObjectGetIntegerProperty(MIDIObjectRef object, CFStringRef propertyID, SInt32 *outValue)
+OSStatus revenant_test_MIDIObjectGetIntegerProperty(MIDIObjectRef object, CFStringRef propertyID, SInt32 *outValue)
 {
     gReads++;
     if (pthread_equal(pthread_self(), gSender))
         gSenderReads++;
-    if (object < STANDIN_OBJECTS && propertyID && CFEqual(propertyID, CHARON_OWNER_KEY) && gOwnerSet[object]) {
+    if (object < STANDIN_OBJECTS && propertyID && CFEqual(propertyID, REVENANT_OWNER_KEY) && gOwnerSet[object]) {
         *outValue = gOwnerValue[object];
         return noErr;
     }
@@ -96,13 +96,13 @@ OSStatus charon_test_MIDIObjectGetIntegerProperty(MIDIObjectRef object, CFString
 
 static int gSent;
 
-OSStatus charon_test_MIDISend(MIDIPortRef port, MIDIEndpointRef dest, const MIDIPacketList *pktlist)
+OSStatus revenant_test_MIDISend(MIDIPortRef port, MIDIEndpointRef dest, const MIDIPacketList *pktlist)
 {
     gSent += (int)pktlist->numPackets;
     return noErr;
 }
 
-OSStatus charon_test_MIDIReceived(MIDIEndpointRef src, const MIDIPacketList *pktlist)
+OSStatus revenant_test_MIDIReceived(MIDIEndpointRef src, const MIDIPacketList *pktlist)
 {
     gSent += (int)pktlist->numPackets;
     return noErr;
@@ -112,7 +112,7 @@ static int gSysexCalls;
 static size_t gSysexCopied;
 static UInt8 gSysexCopy[16];
 
-OSStatus charon_test_MIDISendSysex(MIDISysexSendRequest *request)
+OSStatus revenant_test_MIDISendSysex(MIDISysexSendRequest *request)
 {
     gSysexCalls++;
     gSysexCopied = request->bytesToSend < sizeof(gSysexCopy) ? request->bytesToSend : sizeof(gSysexCopy);
@@ -141,7 +141,7 @@ int main(void)
         gDeliveredSignal = dispatch_semaphore_create(0);
         gSender = pthread_self();
         MIDIPortRef port = 0;
-        OSStatus status = CharonMIDIInputPort(0, CFSTR("port"), kMIDIProtocol_2_0, &port, ^(const MIDIEventList *list, void *ref) {
+        OSStatus status = RevenantMIDIInputPort(0, CFSTR("port"), kMIDIProtocol_2_0, &port, ^(const MIDIEventList *list, void *ref) {
             gDelivered += (int)list->numPackets;
         });
         if (status != noErr || !gReadProc) {
@@ -182,23 +182,23 @@ int main(void)
         MIDIEventList *list = (MIDIEventList *)listBuffer;
         MIDIEventPacket *end = MIDIEventListInit(list, kMIDIProtocol_2_0);
         UInt32 words[2] = {0x40903C00u, 0x12340000u};
-        CharonMIDIEventListAdd(list, sizeof(listBuffer), end, 0, 2, words);
+        RevenantMIDIEventListAdd(list, sizeof(listBuffer), end, 0, 2, words);
         gMallocs = 0;
         gReads = 0;
         gSent = 0;
-        OSStatus sent = CharonMIDISend(0, 99, list);
+        OSStatus sent = RevenantMIDISend(0, 99, list);
         long firstSend = gMallocs;
         expect(sent == noErr && gSent == 1 && firstSend == 2, "the first send to a release endpoint makes its route and the table's first growth", firstSend);
         gMallocs = 0;
         gReads = 0;
         gSent = 0;
-        sent = CharonMIDISend(0, 99, list);
+        sent = RevenantMIDISend(0, 99, list);
         long send = gMallocs;
         expect(sent == noErr && gSent == 1 && send == 0 && gReads == 0,
                "a short 2.0 list sent to a release endpoint is converted without an allocation and without a property read", send);
 
         MIDIEndpointRef dest = 0;
-        OSStatus destStatus = CharonMIDIDestination(0, CFSTR("dest"), kMIDIProtocol_2_0, &dest, ^(const MIDIEventList *received, void *ref) {
+        OSStatus destStatus = RevenantMIDIDestination(0, CFSTR("dest"), kMIDIProtocol_2_0, &dest, ^(const MIDIEventList *received, void *ref) {
             gDelivered = (int)received->numPackets;
             dispatch_semaphore_signal(gDeliveredSignal);
         });
@@ -206,7 +206,7 @@ int main(void)
         gReads = 0;
         gDelivered = 0;
         gSenderReads = 0;
-        OSStatus inProcess = destStatus == noErr ? CharonMIDISend(0, dest, list) : destStatus;
+        OSStatus inProcess = destStatus == noErr ? RevenantMIDISend(0, dest, list) : destStatus;
         long delivery = gMallocs;
         long senderReads = gSenderReads;
         int arrived = dispatch_semaphore_wait(gDeliveredSignal, dispatch_time(DISPATCH_TIME_NOW, 2 * NSEC_PER_SEC)) == 0;
@@ -217,7 +217,7 @@ int main(void)
         static MIDIEndpointRef rows[1024];
         int made = 1;
         for (int i = 0; i < 1024 && made; i++)
-            made = CharonMIDIDestination(0, CFSTR("row"), kMIDIProtocol_2_0, &rows[i], ^(const MIDIEventList *received, void *ref) {
+            made = RevenantMIDIDestination(0, CFSTR("row"), kMIDIProtocol_2_0, &rows[i], ^(const MIDIEventList *received, void *ref) {
                 dispatch_semaphore_signal(gDeliveredSignal);
             }) == noErr;
         long rowAllocations = 0;
@@ -227,7 +227,7 @@ int main(void)
         for (int k = 0; k < 2 && reached; k++) {
             gMallocs = 0;
             gSenderReads = 0;
-            OSStatus rowStatus = CharonMIDISend(0, ends[k], list);
+            OSStatus rowStatus = RevenantMIDISend(0, ends[k], list);
             rowAllocations += gMallocs;
             rowReads += gSenderReads;
             reached = rowStatus == noErr && dispatch_semaphore_wait(gDeliveredSignal, dispatch_time(DISPATCH_TIME_NOW, 2 * NSEC_PER_SEC)) == 0;
@@ -237,13 +237,13 @@ int main(void)
                rowAllocations);
         gMallocs = 0;
         gSent = 0;
-        OSStatus second = CharonMIDISend(0, 100, list);
+        OSStatus second = RevenantMIDISend(0, 100, list);
         long secondEndpoint = gMallocs;
         expect(second == noErr && gSent == 1 && secondEndpoint == 1, "a second release endpoint makes its route alone", secondEndpoint);
         gMallocs = 0;
         gReads = 0;
         gSent = 0;
-        second = CharonMIDISend(0, 100, list);
+        second = RevenantMIDISend(0, 100, list);
         expect(second == noErr && gSent == 1 && gMallocs == 0 && gReads == 0, "a send through an existing route allocates nothing and reads nothing",
                gMallocs);
 
@@ -252,7 +252,7 @@ int main(void)
         memset(&umpRequest, 0, sizeof(umpRequest));
         gMallocs = 0;
         gSysexCalls = 0;
-        int queuedSysex = CharonMIDIUMPReleaseSend(&umpRequest, 99, sysex, 2);
+        int queuedSysex = RevenantMIDIUMPReleaseSend(&umpRequest, 99, sysex, 2);
         long sysexAllocations = gMallocs;
         static const UInt8 framed[5] = {0xF0, 0x01, 0x02, 0x03, 0xF7};
         int framedRight = gSysexCopied == sizeof(framed) && memcmp(gSysexCopy, framed, sizeof(framed)) == 0;

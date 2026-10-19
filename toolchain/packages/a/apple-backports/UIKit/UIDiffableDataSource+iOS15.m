@@ -1,71 +1,71 @@
-#import "CharonDiffable.h"
+#import "RevenantDiffable.h"
 
 #pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
 
-static id charon_section_at(NSDiffableDataSourceSnapshot *snapshot, NSInteger index)
+static id revenant_section_at(NSDiffableDataSourceSnapshot *snapshot, NSInteger index)
 {
-    NSArray *sections = [snapshot charon_sections];
+    NSArray *sections = [snapshot revenant_sections];
     return index >= 0 && (NSUInteger)index < sections.count ? sections[(NSUInteger)index] : nil;
 }
 
-@implementation NSDiffableDataSourceSnapshot (CharonFifteen)
+@implementation NSDiffableDataSourceSnapshot (RevenantFifteen)
 
 - (NSArray *)reloadedItemIdentifiers
 {
-    return [self charon_reloadedItems];
+    return [self revenant_reloadedItems];
 }
 
 - (NSArray *)reloadedSectionIdentifiers
 {
-    return [self charon_reloadedSections];
+    return [self revenant_reloadedSections];
 }
 
 @end
 
-@implementation UICollectionViewDiffableDataSource (CharonFifteen)
+@implementation UICollectionViewDiffableDataSource (RevenantFifteen)
 
 - (void)applySnapshotUsingReloadData:(NSDiffableDataSourceSnapshot *)snapshot
 {
-    [self charon_applyReloadingData:snapshot completion:nil];
+    [self revenant_applyReloadingData:snapshot completion:nil];
 }
 
 - (void)applySnapshotUsingReloadData:(NSDiffableDataSourceSnapshot *)snapshot completion:(void (^)(void))completion
 {
-    [self charon_applyReloadingData:snapshot completion:completion];
+    [self revenant_applyReloadingData:snapshot completion:completion];
 }
 
 - (id)sectionIdentifierForIndex:(NSInteger)index
 {
-    return charon_section_at([self charon_current], index);
+    return revenant_section_at([self revenant_current], index);
 }
 
 - (NSInteger)indexForSectionIdentifier:(id)identifier
 {
-    return [[self charon_current] indexOfSectionIdentifier:identifier];
+    return [[self revenant_current] indexOfSectionIdentifier:identifier];
 }
 
 @end
 
-@implementation UITableViewDiffableDataSource (CharonFifteen)
+@implementation UITableViewDiffableDataSource (RevenantFifteen)
 
 - (void)applySnapshotUsingReloadData:(NSDiffableDataSourceSnapshot *)snapshot
 {
-    [self charon_applyReloadingData:snapshot completion:nil];
+    [self revenant_applyReloadingData:snapshot completion:nil];
 }
 
 - (void)applySnapshotUsingReloadData:(NSDiffableDataSourceSnapshot *)snapshot completion:(void (^)(void))completion
 {
-    [self charon_applyReloadingData:snapshot completion:completion];
+    [self revenant_applyReloadingData:snapshot completion:completion];
 }
 
 - (id)sectionIdentifierForIndex:(NSInteger)index
 {
-    return charon_section_at([self charon_current], index);
+    return revenant_section_at([self revenant_current], index);
 }
 
 - (NSInteger)indexForSectionIdentifier:(id)identifier
 {
-    return [[self charon_current] indexOfSectionIdentifier:identifier];
+    return [[self revenant_current] indexOfSectionIdentifier:identifier];
 }
 
 @end

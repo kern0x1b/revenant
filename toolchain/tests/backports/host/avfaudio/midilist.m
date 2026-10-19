@@ -2,7 +2,7 @@
 #import <CoreMIDI/MIDIServices.h>
 #include <stdio.h>
 #include <string.h>
-#include "../../../../packages/a/apple-backports/AVFAudio/CharonMIDIEventList.h"
+#include "../../../../packages/a/apple-backports/AVFAudio/RevenantMIDIEventList.h"
 
 static int failures = 0;
 static int checks = 0;
@@ -20,7 +20,7 @@ static void recordList(const UInt32 *words, UInt32 wordCount, Sent *sent)
     MIDIEventPacket *packet = MIDIEventListInit(list, kMIDIProtocol_2_0);
     MIDIEventListAdd(list, sizeof(buffer), packet, 0, wordCount, words);
     memset(sent, 0, sizeof *sent);
-    CharonForEachMIDIMessage(list, ^(const uint8_t *bytes, UInt32 length) {
+    RevenantForEachMIDIMessage(list, ^(const uint8_t *bytes, UInt32 length) {
         if (sent->count < 32 && length <= 16) {
             memcpy(sent->bytes[sent->count], bytes, length);
             sent->length[sent->count] = length;

@@ -25,7 +25,7 @@
 #include <span>
 #include <string>
 
-namespace shade::kernel_iokit::display {
+namespace emulator::kernel_iokit::display {
 namespace {
 
     namespace device_mig = xnu::mig::device;

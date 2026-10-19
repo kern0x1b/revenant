@@ -4,7 +4,7 @@
 #import <Vision/Vision.h>
 #import <Foundation/Foundation.h>
 
-#define CHARON_SYNTHETIC_BIAS 2
+#define REVENANT_SYNTHETIC_BIAS 2
 
 static void fit(CVPixelBufferRef buffer, size_t tw, size_t th, int k, int bias, const char *what)
 {
@@ -70,7 +70,7 @@ static void synthetic_case(double scaleX, double offsetX, double scaleY, double 
     size_t sstride, ostride, x, y, dx, dy;
     char what[128];
 
-    if (k * (sw - 1) + CHARON_SYNTHETIC_BIAS > 255 || k * (sh - 1) + CHARON_SYNTHETIC_BIAS > 255) {
+    if (k * (sw - 1) + REVENANT_SYNTHETIC_BIAS > 255 || k * (sh - 1) + REVENANT_SYNTHETIC_BIAS > 255) {
         printf("| synthetic, k=%d over %d x %d | the builder would wrap a byte | | | | | |\n", k, sw, sh);
         return;
     }
@@ -91,8 +91,8 @@ static void synthetic_case(double scaleX, double offsetX, double scaleY, double 
         for (x = 0; x < (size_t)sw; x++) {
             size_t at = y * sstride + x * 4;
             sbase[at] = 0;
-            sbase[at + 1] = (uint8_t)(y * k + CHARON_SYNTHETIC_BIAS);
-            sbase[at + 2] = (uint8_t)(x * k + CHARON_SYNTHETIC_BIAS);
+            sbase[at + 1] = (uint8_t)(y * k + REVENANT_SYNTHETIC_BIAS);
+            sbase[at + 2] = (uint8_t)(x * k + REVENANT_SYNTHETIC_BIAS);
             sbase[at + 3] = 255;
         }
     }
@@ -113,7 +113,7 @@ static void synthetic_case(double scaleX, double offsetX, double scaleY, double 
     }
     snprintf(what, sizeof what, "synthetic, map x = %g*d + %g and y = %g*d + %g", scaleX, offsetX, scaleY,
              offsetY);
-    fit(out, tw, th, k, CHARON_SYNTHETIC_BIAS, what);
+    fit(out, tw, th, k, REVENANT_SYNTHETIC_BIAS, what);
     CVPixelBufferUnlockBaseAddress(source, 0);
     CVPixelBufferUnlockBaseAddress(out, 0);
     CVPixelBufferRelease(source);

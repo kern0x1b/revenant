@@ -3,7 +3,7 @@
 #pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 
-@implementation UIMenuController (CharonThirteen)
+@implementation UIMenuController (RevenantThirteen)
 
 - (void)showMenuFromView:(UIView *)targetView rect:(CGRect)targetRect
 {

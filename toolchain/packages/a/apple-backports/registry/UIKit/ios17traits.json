@@ -299,7 +299,7 @@
       "status": "implemented",
       "facts": "facts/UIKit/UITrait17.md",
       "effect": "the protocol is there and class_conformsToProtocol: answers it, so a class an application writes can adopt it and the port's own classes do",
-      "source": "the conformance is the port's own: UITraitOverrides17.m declares NSObject (CharonTraitChange) <UITraitChangeObservable>, so the protocol is in NSObject's own class list, which check_registration in tests/backports/host/uikit2/traits17_test.m holds; the host's own UITrait.h declares the protocol's members"
+      "source": "the conformance is the port's own: UITraitOverrides17.m declares NSObject (RevenantTraitChange) <UITraitChangeObservable>, so the protocol is in NSObject's own class list, which check_registration in tests/backports/host/uikit2/traits17_test.m holds; the host's own UITrait.h declares the protocol's members"
     },
     {
       "api": "+[UITraitCollection traitCollectionWithCGFloatValue:forTrait:]",
@@ -408,8 +408,8 @@
       "minimum": "6.0",
       "status": "implemented",
       "facts": "facts/UIKit/UITrait17.md",
-      "effect": "a registration on the object itself, which is where the port's CharonTraitChange category puts it",
-      "source": "the port builds it on NSObject, in the CharonTraitChange category; the SDK declares the same selector on UITraitChangeObservable, whose row above covers the protocol"
+      "effect": "a registration on the object itself, which is where the port's RevenantTraitChange category puts it",
+      "source": "the port builds it on NSObject, in the RevenantTraitChange category; the SDK declares the same selector on UITraitChangeObservable, whose row above covers the protocol"
     },
     {
       "api": "-[UITraitChangeObservable registerForTraitChanges:withTarget:action:]",
@@ -429,7 +429,7 @@
       "status": "implemented",
       "facts": "facts/UIKit/UITrait17.md",
       "effect": "a registration that calls the method with the environment and the collection",
-      "source": "the port builds it on NSObject, in the CharonTraitChange category; the SDK declares the same selector on UITraitChangeObservable, whose row above covers the protocol"
+      "source": "the port builds it on NSObject, in the RevenantTraitChange category; the SDK declares the same selector on UITraitChangeObservable, whose row above covers the protocol"
     },
     {
       "api": "-[UITraitChangeObservable registerForTraitChanges:withAction:]",
@@ -449,7 +449,7 @@
       "status": "implemented",
       "facts": "facts/UIKit/UITrait17.md",
       "effect": "a registration that calls the selector the port's category adds, with no environment",
-      "source": "the port builds it on NSObject, in the CharonTraitChange category; the SDK declares the same selector on UITraitChangeObservable, whose row above covers the protocol"
+      "source": "the port builds it on NSObject, in the RevenantTraitChange category; the SDK declares the same selector on UITraitChangeObservable, whose row above covers the protocol"
     },
     {
       "api": "-[UITraitChangeObservable unregisterForTraitChanges:]",
@@ -469,7 +469,7 @@
       "status": "implemented",
       "facts": "facts/UIKit/UITrait17.md",
       "effect": "the way to take a registration back, on the object the port's category adds it to",
-      "source": "the port builds it on NSObject, in the CharonTraitChange category; the SDK declares the same selector on UITraitChangeObservable, whose row above covers the protocol"
+      "source": "the port builds it on NSObject, in the RevenantTraitChange category; the SDK declares the same selector on UITraitChangeObservable, whose row above covers the protocol"
     },
     {
       "api": "-[UIView updateTraitsIfNeeded]",

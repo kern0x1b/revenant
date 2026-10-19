@@ -1,37 +1,37 @@
-#import "CharonPhotos.h"
+#import "RevenantPhotos.h"
 
 #pragma clang diagnostic ignored "-Wobjc-missing-property-synthesis"
 
-@protocol CharonPhotosChange <NSObject>
-- (BOOL)charon_validate:(NSError **)error;
-- (BOOL)charon_commit:(NSError **)error;
+@protocol RevenantPhotosChange <NSObject>
+- (BOOL)revenant_validate:(NSError **)error;
+- (BOOL)revenant_commit:(NSError **)error;
 @optional
-- (BOOL)charon_commitRelations:(NSError **)error;
+- (BOOL)revenant_commitRelations:(NSError **)error;
 @end
 
-static NSString *const CharonPhotosTransactionKey = @"space.kern0x1b.photos.transaction";
+static NSString *const RevenantPhotosTransactionKey = @"space.kern0x1b.photos.transaction";
 
-@implementation CharonPhotosTransaction {
+@implementation RevenantPhotosTransaction {
     NSMutableArray *_changes;
     NSString *_refusal;
 }
 
-+ (CharonPhotosTransaction *)current
++ (RevenantPhotosTransaction *)current
 {
-    return [NSThread currentThread].threadDictionary[CharonPhotosTransactionKey];
+    return [NSThread currentThread].threadDictionary[RevenantPhotosTransactionKey];
 }
 
-+ (CharonPhotosTransaction *)begin
++ (RevenantPhotosTransaction *)begin
 {
-    CharonPhotosTransaction *transaction = [[self alloc] init];
+    RevenantPhotosTransaction *transaction = [[self alloc] init];
     transaction->_changes = [NSMutableArray array];
-    [NSThread currentThread].threadDictionary[CharonPhotosTransactionKey] = transaction;
+    [NSThread currentThread].threadDictionary[RevenantPhotosTransactionKey] = transaction;
     return transaction;
 }
 
 + (void)end
 {
-    [[NSThread currentThread].threadDictionary removeObjectForKey:CharonPhotosTransactionKey];
+    [[NSThread currentThread].threadDictionary removeObjectForKey:RevenantPhotosTransactionKey];
 }
 
 - (void)addChange:(id)change
@@ -54,25 +54,25 @@ static NSString *const CharonPhotosTransactionKey = @"space.kern0x1b.photos.tran
     ALAuthorizationStatus status = [ALAssetsLibrary authorizationStatus];
     if (status == ALAuthorizationStatusDenied || status == ALAuthorizationStatusRestricted) {
         if (error)
-            *error = [CharonPhotosStore errorWithCode:status == ALAuthorizationStatusDenied ? PHPhotosErrorAccessUserDenied : PHPhotosErrorAccessRestricted
+            *error = [RevenantPhotosStore errorWithCode:status == ALAuthorizationStatusDenied ? PHPhotosErrorAccessUserDenied : PHPhotosErrorAccessRestricted
                                                reason:@"the application is not allowed to change the photo library"];
         return NO;
     }
     if (_refusal) {
         if (error)
-            *error = [CharonPhotosStore errorWithCode:PHPhotosErrorChangeNotSupported reason:_refusal];
+            *error = [RevenantPhotosStore errorWithCode:PHPhotosErrorChangeNotSupported reason:_refusal];
         return NO;
     }
-    for (id<CharonPhotosChange> change in _changes) {
-        if (![change charon_validate:error])
+    for (id<RevenantPhotosChange> change in _changes) {
+        if (![change revenant_validate:error])
             return NO;
     }
-    for (id<CharonPhotosChange> change in _changes) {
-        if (![change charon_commit:error])
+    for (id<RevenantPhotosChange> change in _changes) {
+        if (![change revenant_commit:error])
             return NO;
     }
-    for (id<CharonPhotosChange> change in _changes) {
-        if ([change respondsToSelector:@selector(charon_commitRelations:)] && ![change charon_commitRelations:error])
+    for (id<RevenantPhotosChange> change in _changes) {
+        if ([change respondsToSelector:@selector(revenant_commitRelations:)] && ![change revenant_commitRelations:error])
             return NO;
     }
     return YES;
@@ -80,7 +80,7 @@ static NSString *const CharonPhotosTransactionKey = @"space.kern0x1b.photos.tran
 
 + (BOOL)runAndWait:(dispatch_block_t)changes error:(NSError **)error
 {
-    CharonPhotosTransaction *transaction = [self begin];
+    RevenantPhotosTransaction *transaction = [self begin];
     @try {
         changes();
     } @finally {

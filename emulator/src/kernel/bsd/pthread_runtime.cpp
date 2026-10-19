@@ -21,7 +21,7 @@
 #include <array>
 #include <limits>
 
-namespace shade {
+namespace emulator {
 namespace {
 
     constexpr std::uint32_t workqueue_stack_size = 512U * 1024U;

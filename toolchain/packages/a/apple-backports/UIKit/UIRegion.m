@@ -1,20 +1,20 @@
 #import <UIKit/UIKit.h>
 #include <math.h>
 
-static const float CharonRegionPTM = 100.0f;
-static const float CharonRegionInversePTM = 0.01f;
+static const float RevenantRegionPTM = 100.0f;
+static const float RevenantRegionInversePTM = 0.01f;
 
 enum {
-    CharonRegionInfinite = 1,
-    CharonRegionEllipse = 2,
-    CharonRegionRectangle = 3,
+    RevenantRegionInfinite = 1,
+    RevenantRegionEllipse = 2,
+    RevenantRegionRectangle = 3,
 };
 
 enum {
-    CharonRegionAlone = 0,
-    CharonRegionUnion = 1,
-    CharonRegionMinus = 2,
-    CharonRegionIntersection = 3,
+    RevenantRegionAlone = 0,
+    RevenantRegionUnion = 1,
+    RevenantRegionMinus = 2,
+    RevenantRegionIntersection = 3,
 };
 
 typedef struct {
@@ -24,58 +24,58 @@ typedef struct {
     int operation;
     int secondShape;
     float secondHalfWidth, secondHalfHeight;
-} CharonRegion;
+} RevenantRegion;
 
-static float charon_region_ellipse(float halfWidth, float halfHeight, CGPoint point)
+static float revenant_region_ellipse(float halfWidth, float halfHeight, CGPoint point)
 {
     float x = halfWidth > 0 ? (float)(point.x / (double)halfWidth) : 0;
     float y = halfHeight > 0 ? (float)(point.y / (double)halfHeight) : 0;
     return fmaf(x, x, y * y);
 }
 
-static BOOL charon_region_inside(int shape, float halfWidth, float halfHeight, CGPoint point)
+static BOOL revenant_region_inside(int shape, float halfWidth, float halfHeight, CGPoint point)
 {
     switch (shape) {
-    case CharonRegionInfinite:
+    case RevenantRegionInfinite:
         return YES;
-    case CharonRegionEllipse:
-        return charon_region_ellipse(halfWidth, halfHeight, point) <= 1.0f;
-    case CharonRegionRectangle:
+    case RevenantRegionEllipse:
+        return revenant_region_ellipse(halfWidth, halfHeight, point) <= 1.0f;
+    case RevenantRegionRectangle:
         return fabsf((float)point.x) < halfWidth && fabsf((float)point.y) < halfHeight;
     }
     return NO;
 }
 
-static BOOL charon_region_not_outside(int shape, float halfWidth, float halfHeight, CGPoint point)
+static BOOL revenant_region_not_outside(int shape, float halfWidth, float halfHeight, CGPoint point)
 {
     switch (shape) {
-    case CharonRegionInfinite:
+    case RevenantRegionInfinite:
         return YES;
-    case CharonRegionEllipse:
-        return !(charon_region_ellipse(halfWidth, halfHeight, point) > 1.0f);
-    case CharonRegionRectangle:
+    case RevenantRegionEllipse:
+        return !(revenant_region_ellipse(halfWidth, halfHeight, point) > 1.0f);
+    case RevenantRegionRectangle:
         return !(fabsf((float)point.x) > halfWidth) && !(fabsf((float)point.y) > halfHeight);
     }
     return NO;
 }
 
-static BOOL charon_region_contains(const CharonRegion *region, CGPoint point)
+static BOOL revenant_region_contains(const RevenantRegion *region, CGPoint point)
 {
-    BOOL first = charon_region_inside(region->shape, region->halfWidth, region->halfHeight, point) != region->exclusive;
+    BOOL first = revenant_region_inside(region->shape, region->halfWidth, region->halfHeight, point) != region->exclusive;
     switch (region->operation) {
-    case CharonRegionUnion:
-        return first || charon_region_inside(region->secondShape, region->secondHalfWidth, region->secondHalfHeight, point);
-    case CharonRegionMinus:
-        return first && !charon_region_inside(region->secondShape, region->secondHalfWidth, region->secondHalfHeight, point);
-    case CharonRegionIntersection:
-        return first && charon_region_not_outside(region->secondShape, region->secondHalfWidth, region->secondHalfHeight, point);
+    case RevenantRegionUnion:
+        return first || revenant_region_inside(region->secondShape, region->secondHalfWidth, region->secondHalfHeight, point);
+    case RevenantRegionMinus:
+        return first && !revenant_region_inside(region->secondShape, region->secondHalfWidth, region->secondHalfHeight, point);
+    case RevenantRegionIntersection:
+        return first && revenant_region_not_outside(region->secondShape, region->secondHalfWidth, region->secondHalfHeight, point);
     }
     return first;
 }
 
 @implementation UIRegion {
     BOOL _defined;
-    CharonRegion _region;
+    RevenantRegion _region;
 }
 
 + (UIRegion *)infiniteRegion
@@ -83,12 +83,12 @@ static BOOL charon_region_contains(const CharonRegion *region, CGPoint point)
     static UIRegion *infinite;
     static dispatch_once_t once;
     dispatch_once(&once, ^{
-        infinite = [[UIRegion alloc] charon_initWithRegion:(CharonRegion){.shape = CharonRegionInfinite}];
+        infinite = [[UIRegion alloc] revenant_initWithRegion:(RevenantRegion){.shape = RevenantRegionInfinite}];
     });
     return infinite;
 }
 
-- (instancetype)charon_initWithRegion:(CharonRegion)region __attribute__((objc_method_family(init)))
+- (instancetype)revenant_initWithRegion:(RevenantRegion)region __attribute__((objc_method_family(init)))
 {
     if (!(self = [super init]))
         return nil;
@@ -99,15 +99,15 @@ static BOOL charon_region_contains(const CharonRegion *region, CGPoint point)
 
 - (instancetype)initWithRadius:(CGFloat)radius
 {
-    float extent = (float)(radius * (double)CharonRegionPTM) * CharonRegionInversePTM;
-    return [self charon_initWithRegion:(CharonRegion){.shape = CharonRegionEllipse, .halfWidth = extent, .halfHeight = extent}];
+    float extent = (float)(radius * (double)RevenantRegionPTM) * RevenantRegionInversePTM;
+    return [self revenant_initWithRegion:(RevenantRegion){.shape = RevenantRegionEllipse, .halfWidth = extent, .halfHeight = extent}];
 }
 
 - (instancetype)initWithSize:(CGSize)size
 {
-    float halfWidth = (float)(size.width * (double)CharonRegionPTM * 0.5 * (double)CharonRegionInversePTM);
-    float halfHeight = (float)(size.height * (double)CharonRegionPTM * 0.5 * (double)CharonRegionInversePTM);
-    return [self charon_initWithRegion:(CharonRegion){.shape = CharonRegionRectangle, .halfWidth = halfWidth, .halfHeight = halfHeight}];
+    float halfWidth = (float)(size.width * (double)RevenantRegionPTM * 0.5 * (double)RevenantRegionInversePTM);
+    float halfHeight = (float)(size.height * (double)RevenantRegionPTM * 0.5 * (double)RevenantRegionInversePTM);
+    return [self revenant_initWithRegion:(RevenantRegion){.shape = RevenantRegionRectangle, .halfWidth = halfWidth, .halfHeight = halfHeight}];
 }
 
 - (id)copyWithZone:(NSZone *)zone
@@ -126,7 +126,7 @@ static BOOL charon_region_contains(const CharonRegion *region, CGPoint point)
     return inverse;
 }
 
-- (instancetype)charon_regionBy:(int)operation inverted:(int)inverted with:(UIRegion *)other selector:(SEL)selector
+- (instancetype)revenant_regionBy:(int)operation inverted:(int)inverted with:(UIRegion *)other selector:(SEL)selector
 {
     if (!other || !other->_defined)
         [NSException raise:NSInvalidArgumentException format:@"-[%@ %@]: %@ is not a region with a shape", [self class], NSStringFromSelector(selector), other];
@@ -142,22 +142,22 @@ static BOOL charon_region_contains(const CharonRegion *region, CGPoint point)
 
 - (instancetype)regionByUnionWithRegion:(UIRegion *)region
 {
-    return [self charon_regionBy:CharonRegionUnion inverted:CharonRegionMinus with:region selector:_cmd];
+    return [self revenant_regionBy:RevenantRegionUnion inverted:RevenantRegionMinus with:region selector:_cmd];
 }
 
 - (instancetype)regionByDifferenceFromRegion:(UIRegion *)region
 {
-    return [self charon_regionBy:CharonRegionMinus inverted:CharonRegionUnion with:region selector:_cmd];
+    return [self revenant_regionBy:RevenantRegionMinus inverted:RevenantRegionUnion with:region selector:_cmd];
 }
 
 - (instancetype)regionByIntersectionWithRegion:(UIRegion *)region
 {
-    return [self charon_regionBy:CharonRegionIntersection inverted:CharonRegionIntersection with:region selector:_cmd];
+    return [self revenant_regionBy:RevenantRegionIntersection inverted:RevenantRegionIntersection with:region selector:_cmd];
 }
 
 - (BOOL)containsPoint:(CGPoint)point
 {
-    return _defined && charon_region_contains(&_region, point);
+    return _defined && revenant_region_contains(&_region, point);
 }
 
 - (void)encodeWithCoder:(NSCoder *)coder

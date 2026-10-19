@@ -1,20 +1,20 @@
-#import "CharonCloudKit.h"
-#import "CharonCKConstants.h"
-#import "CharonCKRecordPrivate.h"
+#import "RevenantCloudKit.h"
+#import "RevenantCKConstants.h"
+#import "RevenantCKRecordPrivate.h"
 #import <objc/runtime.h>
 
-static const char CharonCKRecordParentKey[] = "CharonCKRecordParent";
-static const char CharonCKRecordShareKey[] = "CharonCKRecordShare";
+static const char RevenantCKRecordParentKey[] = "RevenantCKRecordParent";
+static const char RevenantCKRecordShareKey[] = "RevenantCKRecordShare";
 
-void CharonCKRecordSetParent(CKRecord *record, CKReference *parent)
+void RevenantCKRecordSetParent(CKRecord *record, CKReference *parent)
 {
-    objc_setAssociatedObject(record, CharonCKRecordParentKey, parent, OBJC_ASSOCIATION_COPY_NONATOMIC);
+    objc_setAssociatedObject(record, RevenantCKRecordParentKey, parent, OBJC_ASSOCIATION_COPY_NONATOMIC);
 }
 
-void CharonCKRecordSetParentReferenceFromRecordID(CKRecord *record, CKRecordID *parentRecordID)
+void RevenantCKRecordSetParentReferenceFromRecordID(CKRecord *record, CKRecordID *parentRecordID)
 {
     if (!parentRecordID) {
-        CharonCKRecordSetParent(record, nil);
+        RevenantCKRecordSetParent(record, nil);
         return;
     }
     if (![record.recordID.zoneID isEqual:parentRecordID.zoneID]) {
@@ -22,49 +22,49 @@ void CharonCKRecordSetParentReferenceFromRecordID(CKRecord *record, CKRecordID *
                                 reason:@"Parent record must be in the same zone as the current record"
                               userInfo:nil] raise];
     }
-    CharonCKRecordSetParent(record, [[CKReference alloc] initWithRecordID:parentRecordID
+    RevenantCKRecordSetParent(record, [[CKReference alloc] initWithRecordID:parentRecordID
                                                                  action:CKReferenceActionDeleteSelf]);
 }
 
-void CharonCKRecordSetParentReferenceFromRecord(CKRecord *record, CKRecord *parentRecord)
+void RevenantCKRecordSetParentReferenceFromRecord(CKRecord *record, CKRecord *parentRecord)
 {
-    CharonCKRecordSetParentReferenceFromRecordID(record, parentRecord ? parentRecord.recordID : nil);
+    RevenantCKRecordSetParentReferenceFromRecordID(record, parentRecord ? parentRecord.recordID : nil);
 }
 
-@implementation CKRecord (CharonCKParent)
+@implementation CKRecord (RevenantCKParent)
 
 - (CKReference *)parent
 {
-    return objc_getAssociatedObject(self, CharonCKRecordParentKey);
+    return objc_getAssociatedObject(self, RevenantCKRecordParentKey);
 }
 
 - (void)setParent:(CKReference *)parent
 {
-    CharonCKRecordSetParent(self, parent);
+    RevenantCKRecordSetParent(self, parent);
 }
 
 - (CKReference *)share
 {
-    return objc_getAssociatedObject(self, CharonCKRecordShareKey);
+    return objc_getAssociatedObject(self, RevenantCKRecordShareKey);
 }
 
 @end
 
-@interface CharonCKRecordParentInstaller : NSObject
+@interface RevenantCKRecordParentInstaller : NSObject
 @end
 
-@implementation CharonCKRecordParentInstaller
+@implementation RevenantCKRecordParentInstaller
 
 + (void)load
 {
     Class record = [CKRecord class];
     if (!class_getInstanceMethod(record, @selector(setParentReferenceFromRecordID:))) {
         class_addMethod(record, @selector(setParentReferenceFromRecordID:),
-                        (IMP)CharonCKRecordSetParentReferenceFromRecordID, "v@:@");
+                        (IMP)RevenantCKRecordSetParentReferenceFromRecordID, "v@:@");
     }
     if (!class_getInstanceMethod(record, @selector(setParentReferenceFromRecord:))) {
         class_addMethod(record, @selector(setParentReferenceFromRecord:),
-                        (IMP)CharonCKRecordSetParentReferenceFromRecord, "v@:@");
+                        (IMP)RevenantCKRecordSetParentReferenceFromRecord, "v@:@");
     }
 }
 

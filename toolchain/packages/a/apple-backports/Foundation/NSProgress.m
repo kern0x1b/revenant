@@ -1,16 +1,16 @@
 #import <Foundation/Foundation.h>
 
-@interface CharonProgressFrame : NSObject
+@interface RevenantProgressFrame : NSObject
 @property (nonatomic, strong) NSProgress *progress;
 @property (nonatomic) int64_t pendingUnitCount;
 @property (nonatomic) BOOL childAttached;
-@property (nonatomic, strong) CharonProgressFrame *next;
+@property (nonatomic, strong) RevenantProgressFrame *next;
 @end
-@implementation CharonProgressFrame
+@implementation RevenantProgressFrame
 @synthesize progress = _progress, pendingUnitCount = _pendingUnitCount, childAttached = _childAttached, next = _next;
 @end
 
-static NSString *const CharonProgressThreadKey = @"org.charon.apple-backports.NSProgress.current";
+static NSString *const RevenantProgressThreadKey = @"org.revenant.apple-backports.NSProgress.current";
 
 @implementation NSProgress {
     int64_t _totalUnitCount;
@@ -26,7 +26,7 @@ static NSString *const CharonProgressThreadKey = @"org.charon.apple-backports.NS
     NSString *_localizedDescription;
     NSString *_localizedAdditionalDescription;
     NSMutableDictionary<NSProgressUserInfoKey, id> *_userInfo;
-    NSMutableArray<CharonProgressFrame *> *_implicitChildFrames;
+    NSMutableArray<RevenantProgressFrame *> *_implicitChildFrames;
 }
 
 @dynamic estimatedTimeRemaining, throughput, fileOperationKind, fileURL, fileTotalCount, fileCompletedCount;
@@ -34,23 +34,23 @@ static NSString *const CharonProgressThreadKey = @"org.charon.apple-backports.NS
 
 #pragma mark - The current-progress stack
 
-+ (CharonProgressFrame *)charon_topFrame
++ (RevenantProgressFrame *)revenant_topFrame
 {
-    return [NSThread currentThread].threadDictionary[CharonProgressThreadKey];
+    return [NSThread currentThread].threadDictionary[RevenantProgressThreadKey];
 }
 
-+ (void)charon_setTopFrame:(CharonProgressFrame *)frame
++ (void)revenant_setTopFrame:(RevenantProgressFrame *)frame
 {
     NSMutableDictionary *dictionary = [NSThread currentThread].threadDictionary;
     if (frame)
-        dictionary[CharonProgressThreadKey] = frame;
+        dictionary[RevenantProgressThreadKey] = frame;
     else
-        [dictionary removeObjectForKey:CharonProgressThreadKey];
+        [dictionary removeObjectForKey:RevenantProgressThreadKey];
 }
 
 + (NSProgress *)currentProgress
 {
-    return [self charon_topFrame].progress;
+    return [self revenant_topFrame].progress;
 }
 
 + (NSProgress *)progressWithTotalUnitCount:(int64_t)unitCount
@@ -62,31 +62,31 @@ static NSString *const CharonProgressThreadKey = @"org.charon.apple-backports.NS
 
 - (void)becomeCurrentWithPendingUnitCount:(int64_t)unitCount
 {
-    CharonProgressFrame *frame = [[CharonProgressFrame alloc] init];
+    RevenantProgressFrame *frame = [[RevenantProgressFrame alloc] init];
     frame.progress = self;
     frame.pendingUnitCount = unitCount;
-    frame.next = [NSProgress charon_topFrame];
-    [NSProgress charon_setTopFrame:frame];
+    frame.next = [NSProgress revenant_topFrame];
+    [NSProgress revenant_setTopFrame:frame];
 }
 
 - (void)resignCurrent
 {
-    CharonProgressFrame *frame = [NSProgress charon_topFrame];
+    RevenantProgressFrame *frame = [NSProgress revenant_topFrame];
     NSAssert(frame && frame.progress == self, @"-resignCurrent was called without a matching -becomeCurrentWithPendingUnitCount:");
     if (!frame.childAttached)
         self.completedUnitCount += frame.pendingUnitCount;
-    [NSProgress charon_setTopFrame:frame.next];
+    [NSProgress revenant_setTopFrame:frame.next];
 }
 
-- (void)charon_attachImplicitChild:(NSProgress *)child
+- (void)revenant_attachImplicitChild:(NSProgress *)child
 {
-    CharonProgressFrame *frame = [NSProgress charon_topFrame];
+    RevenantProgressFrame *frame = [NSProgress revenant_topFrame];
     if (!frame || frame.progress != self || frame.childAttached)
         return;
     frame.childAttached = YES;
     if (!_implicitChildFrames)
         _implicitChildFrames = [NSMutableArray array];
-    CharonProgressFrame *held = [[CharonProgressFrame alloc] init];
+    RevenantProgressFrame *held = [[RevenantProgressFrame alloc] init];
     held.progress = child;
     held.pendingUnitCount = frame.pendingUnitCount;
     [_implicitChildFrames addObject:held];
@@ -110,7 +110,7 @@ static NSString *const CharonProgressThreadKey = @"org.charon.apple-backports.NS
         _cancellable = YES;
         _pausable = NO;
         if (parentProgressOrNil)
-            [parentProgressOrNil charon_attachImplicitChild:self];
+            [parentProgressOrNil revenant_attachImplicitChild:self];
     }
     return self;
 }
@@ -143,7 +143,7 @@ static NSString *const CharonProgressThreadKey = @"org.charon.apple-backports.NS
         return NAN;
     double total = (double)_totalUnitCount;
     double fraction = (double)_completedUnitCount;
-    for (CharonProgressFrame *frame in _implicitChildFrames) {
+    for (RevenantProgressFrame *frame in _implicitChildFrames) {
         double childFraction = frame.progress.fractionCompleted;
         if (isnan(childFraction) || childFraction < 0)
             childFraction = 0;
@@ -225,7 +225,7 @@ static NSString *const CharonProgressThreadKey = @"org.charon.apple-backports.NS
         if (_cancellationHandler)
             _cancellationHandler();
     }
-    for (CharonProgressFrame *frame in _implicitChildFrames)
+    for (RevenantProgressFrame *frame in _implicitChildFrames)
         [frame.progress cancel];
 }
 
@@ -238,7 +238,7 @@ static NSString *const CharonProgressThreadKey = @"org.charon.apple-backports.NS
         if (_pausingHandler)
             _pausingHandler();
     }
-    for (CharonProgressFrame *frame in _implicitChildFrames)
+    for (RevenantProgressFrame *frame in _implicitChildFrames)
         [frame.progress pause];
 }
 

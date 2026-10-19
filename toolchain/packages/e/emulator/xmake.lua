@@ -1,18 +1,18 @@
-package("shade")
+package("emulator")
     set_kind("binary")
-    set_homepage("https://github.com/kern0x1b/shade")
-    set_description("Shade, Charon's emulator for an iPhone OS or iOS firmware's own userland: it boots the firmware over an emulated XNU on macOS arm64 hosts, for the devices and releases Charon emulates. Provenance and required attribution in Shade's NOTICE.")
+    set_homepage("https://github.com/kern0x1b/revenant/tree/main/emulator")
+    set_description("Revenant's emulator for an iPhone OS or iOS firmware's own userland: it boots the firmware over an emulated XNU on macOS arm64 hosts, for the devices and releases Revenant emulates. Provenance and required attribution in the emulator's NOTICE.")
     set_license("MPL-2.0")
 
-    add_urls("https://github.com/kern0x1b/shade.git")
+    add_urls("https://github.com/kern0x1b/revenant.git")
     local revision = "5e9716f1e8fe800cb24c1bc54d2534d490d508ba"
     add_versions("2026.10.15+1", revision)
-    add_configs("revision", {description = "The Shade commit this package builds, so another commit is another emulator.", default = revision, type = "string", readonly = true})
+    add_configs("revision", {description = "The emulator commit this package builds, so another commit is another emulator.", default = revision, type = "string", readonly = true})
     add_configs("sdl", {description = "Build the SDL2 window backend, for watching a guest on the desktop.", default = false, type = "boolean"})
     add_configs("ffmpeg", {description = "Build the FFmpeg audio decoder, for a guest that plays compressed audio.", default = false, type = "boolean"})
 
     add_deps("cmake", "ninja", "pkgconf", {kind = "binary"})
-    add_deps("charon@openssl 4.0.2", "charon@libplist 2.7.0", "charon@swiftshader")
+    add_deps("revenant@openssl 4.0.2", "revenant@libplist 2.7.0", "revenant@swiftshader")
     add_deps("vulkan-headers 1.4.335+0", "vulkan-loader 1.4.335+0", "libpng", "libjpeg-turbo", {system = false})
     add_deps("shaderc", {kind = "binary", system = false})
 
@@ -28,7 +28,7 @@ package("shade")
     on_install("macosx|arm64", function (package)
         local head = os.iorunv("git", {"rev-parse", "HEAD"}):trim()
         if head ~= package:config("revision") then
-            raise("the Shade source xmake holds for %s is commit %s, not the pinned %s; the pin needs a version name of its own",
+            raise("the emulator source xmake holds for %s is commit %s, not the pinned %s; the pin needs a version name of its own",
                   package:version_str(), head, package:config("revision"))
         end
         local plist = package:dep("libplist")
@@ -37,7 +37,7 @@ package("shade")
         io.writefile(path.join(pkgconfig, "libplist-2.0.pc"), table.concat({
             "prefix=" .. plist:installdir(),
             "Name: libplist-2.0",
-            "Description: libplist as Charon builds it",
+            "Description: libplist as Revenant builds it",
             "Version: " .. plist:version_str(),
             "Cflags: -I${prefix}/include -DLIBPLIST_STATIC",
             "Libs: -L${prefix}/lib -lplist-2.0",
@@ -85,15 +85,15 @@ package("shade")
                 known = known or (library and library:startswith(prefix))
             end
             if library and not known then
-                raise("the emulator links %s, which is neither a system library nor one of its packages; the build found a library outside Charon", library)
+                raise("the emulator links %s, which is neither a system library nor one of its packages; the build found a library outside Revenant", library)
             end
         end
-        os.cp(path.join("build", "shade"), package:installdir("bin") .. "/")
+        os.cp(path.join("build", "shade"), path.join(package:installdir("bin"), "emulator"))
         os.cp("LICENSE", package:installdir("licenses") .. "/")
         os.cp("NOTICE", package:installdir("licenses") .. "/")
     end)
 
     on_test(function (package)
-        local listed = os.iorunv(path.join(package:installdir("bin"), "shade"), {"profile", "--list"})
+        local listed = os.iorunv(path.join(package:installdir("bin"), "emulator"), {"profile", "--list"})
         assert(listed:find("iPhone3,1", 1, true))
     end)

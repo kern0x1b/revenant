@@ -10,7 +10,7 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-build=${REMAINING_BUILD:-$(runs_fresh charon-intents-remaining)}
+build=${REMAINING_BUILD:-$(runs_fresh revenant-intents-remaining)}
 sdk=$(xcrun --show-sdk-path)
 target="-target arm64-apple-ios15.0-macabi -isysroot $sdk -iframework $sdk/System/iOSSupport/System/Library/Frameworks"
 xcrun clang -fno-objc-arc -w $target -framework Foundation -framework Intents "$here/probe.m" -o "$build/catalyst"

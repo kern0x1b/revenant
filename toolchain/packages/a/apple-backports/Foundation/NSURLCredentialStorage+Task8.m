@@ -1,6 +1,6 @@
 #import <Foundation/Foundation.h>
 
-@implementation NSURLCredentialStorage (CharonTaskCredentials)
+@implementation NSURLCredentialStorage (RevenantTaskCredentials)
 
 - (void)getCredentialsForProtectionSpace:(NSURLProtectionSpace *)space
                                     task:(NSURLSessionTask *)task

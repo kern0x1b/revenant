@@ -28,12 +28,12 @@ static void compare(NSString *name, NSString *system, NSString *ours)
 
 static NSDirectionalEdgeInsets ours_directional(UIView *view)
 {
-    return ((NSDirectionalEdgeInsets (*)(id, SEL))objc_msgSend)(view, NSSelectorFromString(@"charonHost_directionalLayoutMargins"));
+    return ((NSDirectionalEdgeInsets (*)(id, SEL))objc_msgSend)(view, NSSelectorFromString(@"revenantHost_directionalLayoutMargins"));
 }
 
 static void set_ours_directional(UIView *view, NSDirectionalEdgeInsets insets)
 {
-    ((void (*)(id, SEL, NSDirectionalEdgeInsets))objc_msgSend)(view, NSSelectorFromString(@"charonHost_setDirectionalLayoutMargins:"), insets);
+    ((void (*)(id, SEL, NSDirectionalEdgeInsets))objc_msgSend)(view, NSSelectorFromString(@"revenantHost_setDirectionalLayoutMargins:"), insets);
 }
 
 int main(void)

@@ -46,7 +46,7 @@ static NSString *const results_folder = @"/private/var/backports";
 {
     [[NSFileManager defaultManager] createDirectoryAtPath:results_folder withIntermediateDirectories:YES attributes:nil error:NULL];
     [[NSFileManager defaultManager] removeItemAtPath:[results_folder stringByAppendingPathComponent:POPOVER_NAME @".done"] error:NULL];
-    charon_log_to([results_folder stringByAppendingPathComponent:POPOVER_NAME @".log"]);
+    revenant_log_to([results_folder stringByAppendingPathComponent:POPOVER_NAME @".log"]);
     self.events = [NSMutableArray array];
     self.root = [[UIViewController alloc] init];
     self.root.view.backgroundColor = [UIColor whiteColor];
@@ -61,9 +61,9 @@ static NSString *const results_folder = @"/private/var/backports";
         popover_defaults(scratch, ^(NSString *name, NSString *value) { records[name] = value; });
         for (NSString *name in [expected.allKeys sortedArrayUsingSelector:@selector(compare:)]) {
             if ([expected[name] isEqualToString:records[name]])
-                charon_check(YES, name.UTF8String, nil);
+                revenant_check(YES, name.UTF8String, nil);
             else
-                charon_check(NO, name.UTF8String, [NSString stringWithFormat:@"\n    device %@\n    host   %@", records[name], expected[name]]);
+                revenant_check(NO, name.UTF8String, [NSString stringWithFormat:@"\n    device %@\n    host   %@", records[name], expected[name]]);
         }
         self.button = [UIButton buttonWithType:UIButtonTypeRoundedRect];
         self.button.frame = CGRectMake(40, 120, 120, 44);
@@ -158,8 +158,8 @@ static NSString *const results_folder = @"/private/var/backports";
                 [self.root dismissViewControllerAnimated:NO completion:nil];
         });
         gesture_run(^{
-            printf("checks=%d failures=%d\n", charon_checks, charon_failures);
-            NSString *summary = [NSString stringWithFormat:@"%@ checks=%d failures=%d\n", charon_failures ? @"FAIL" : @"ok", charon_checks, charon_failures];
+            printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
+            NSString *summary = [NSString stringWithFormat:@"%@ checks=%d failures=%d\n", revenant_failures ? @"FAIL" : @"ok", revenant_checks, revenant_failures];
             [summary writeToFile:[results_folder stringByAppendingPathComponent:POPOVER_NAME @".done"] atomically:YES encoding:NSUTF8StringEncoding error:NULL];
         });
     });

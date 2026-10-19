@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <string.h>
 
-@interface MPSImage (CharonProbeReadCount)
+@interface MPSImage (RevenantProbeReadCount)
 - (NSUInteger)readCount;
 - (void)setReadCount:(NSUInteger)count;
 @end
@@ -92,7 +92,7 @@ int main(void)
 
         if (!temporary) {
             printf("NOT MEASURED: the release made no temporary image\n");
-#ifdef CHARON_PORT_BUILD
+#ifdef REVENANT_PORT_BUILD
             printf("FAIL the port must make its own MPSTemporaryImage\n");
             return 1;
 #else
@@ -123,7 +123,7 @@ int main(void)
         NSUInteger afterTwo = [temporary readCount];
         printf("readCount after two encodes -> %lu\n", (unsigned long)afterTwo);
 
-#ifdef CHARON_PORT_BUILD
+#ifdef REVENANT_PORT_BUILD
         expect(afterOne == 1, "check 2: one encode that reads the temporary takes 2 to 1");
         expect(afterTwo == 0, "check 3: the next takes it to 0");
 

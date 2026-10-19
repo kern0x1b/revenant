@@ -1,6 +1,6 @@
 #import <Foundation/Foundation.h>
 
-@implementation NSLocale (CharonIdentifiers17)
+@implementation NSLocale (RevenantIdentifiers17)
 
 - (NSString *)languageIdentifier
 {

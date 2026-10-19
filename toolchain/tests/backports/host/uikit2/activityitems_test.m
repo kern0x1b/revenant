@@ -46,8 +46,8 @@ static NSArray *config_lines(Class cls, NSArray *(^interactions)(id), id (^makeO
 int main(void)
 {
     @autoreleasepool {
-        Class ours = NSClassFromString(@"CharonHostUIActivityItemsConfiguration");
-        charon_check(ours != Nil, "the port's configuration is linked under its host name", @"missing");
+        Class ours = NSClassFromString(@"RevenantHostUIActivityItemsConfiguration");
+        revenant_check(ours != Nil, "the port's configuration is linked under its host name", @"missing");
         NSArray *(^portInteractions)(id) = ^NSArray *(id c) { return [c supportedInteractions]; };
         NSArray *(^systemInteractions)(id) = ^NSArray *(id c) {
             NSMutableArray *kept = [NSMutableArray array];
@@ -61,13 +61,13 @@ int main(void)
         id (^providers)(Class, NSArray *) = ^id(Class cls, NSArray *items) { return [cls activityItemsConfigurationWithItemProviders:items]; };
         ur_agree(@"configuration values", config_lines(ours, portInteractions, objects, providers), config_lines([UIActivityItemsConfiguration class], systemInteractions, objects, providers));
         NSString *(^constant)(const char *) = ^NSString *(const char *name) { return *(NSString *const *)dlsym(RTLD_DEFAULT, name); };
-        charon_check([constant("CharonHostUIActivityItemsConfigurationInteractionShare") isEqualToString:UIActivityItemsConfigurationInteractionShare] &&
-                         [constant("CharonHostUIActivityItemsConfigurationMetadataKeyTitle") isEqualToString:UIActivityItemsConfigurationMetadataKeyTitle] &&
-                         [constant("CharonHostUIActivityItemsConfigurationMetadataKeyMessageBody") isEqualToString:UIActivityItemsConfigurationMetadataKeyMessageBody] &&
-                         [constant("CharonHostUIActivityItemsConfigurationPreviewIntentFullSize") isEqualToString:UIActivityItemsConfigurationPreviewIntentFullSize] &&
-                         [constant("CharonHostUIActivityItemsConfigurationPreviewIntentThumbnail") isEqualToString:UIActivityItemsConfigurationPreviewIntentThumbnail],
+        revenant_check([constant("RevenantHostUIActivityItemsConfigurationInteractionShare") isEqualToString:UIActivityItemsConfigurationInteractionShare] &&
+                         [constant("RevenantHostUIActivityItemsConfigurationMetadataKeyTitle") isEqualToString:UIActivityItemsConfigurationMetadataKeyTitle] &&
+                         [constant("RevenantHostUIActivityItemsConfigurationMetadataKeyMessageBody") isEqualToString:UIActivityItemsConfigurationMetadataKeyMessageBody] &&
+                         [constant("RevenantHostUIActivityItemsConfigurationPreviewIntentFullSize") isEqualToString:UIActivityItemsConfigurationPreviewIntentFullSize] &&
+                         [constant("RevenantHostUIActivityItemsConfigurationPreviewIntentThumbnail") isEqualToString:UIActivityItemsConfigurationPreviewIntentThumbnail],
                      "the constants are the system's strings", @"one differs");
-        printf("checks=%d failures=%d\n", charon_checks, charon_failures);
-        return charon_failures ? 1 : 0;
+        printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
+        return revenant_failures ? 1 : 0;
     }
 }

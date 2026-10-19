@@ -1,17 +1,17 @@
 framework	oracle	class	own-init	own-new	answer	exception	reason	reason-template	port-init	port-new	port-macro	port-source	port-object
-HealthKit	host	HKClinicalRecord	1	0	raises	NSInvalidArgumentException	The -init method is not available on HKClinicalRecord	The -init method is not available on %@	raise	none	CHARON_HEALTHKIT_UNCREATABLE_INIT	HealthKit/HKClinicalRecord120.m	HKClinicalRecord120.m.o
+HealthKit	host	HKClinicalRecord	1	0	raises	NSInvalidArgumentException	The -init method is not available on HKClinicalRecord	The -init method is not available on %@	raise	none	REVENANT_HEALTHKIT_UNCREATABLE_INIT	HealthKit/HKClinicalRecord120.m	HKClinicalRecord120.m.o
 HealthKit	host	HKDeletedObject	0	0	ok				none	none	-	HealthKit/HKSourceRevision9.m	HKSourceRevision9.m.o
-HealthKit	host	HKDevice	1	0	raises	NSInvalidArgumentException	The -init method is not available on HKDevice	The -init method is not available on %@	raise	none	CHARON_HEALTHKIT_UNCREATABLE_INIT	HealthKit/HKDevice9.m	HKDevice9.m.o
-HealthKit	host	HKFHIRResource	1	0	raises	NSInvalidArgumentException	The -init method is not available on HKFHIRResource	The -init method is not available on %@	raise	none	CHARON_HEALTHKIT_UNCREATABLE_INIT	HealthKit/HKClinicalRecord120.m	HKClinicalRecord120.m.o
-HealthKit	host	HKQuantitySeriesSampleBuilder	1	0	raises	NSInvalidArgumentException	The -init method is not available on HKQuantitySeriesSampleBuilder	The -init method is not available on %@	raise	none	CHARON_HEALTHKIT_UNCREATABLE_INIT	HealthKit/HKQuantitySeriesSampleBuilder120.m	HKQuantitySeriesSampleBuilder120.m.o
-HealthKit	host	HKSourceRevision	1	0	raises	NSInvalidArgumentException	The -init method is not available on HKSourceRevision	The -init method is not available on %@	raise	none	CHARON_HEALTHKIT_UNCREATABLE_INIT	HealthKit/HKSourceRevision9.m	HKSourceRevision9.m.o
-HealthKit	host	HKWorkoutBuilder	1	0	raises	NSInvalidArgumentException	The -init method is not available on HKWorkoutBuilder	The -init method is not available on %@	raise	none	CHARON_HEALTHKIT_UNCREATABLE_INIT	HealthKit/HKWorkoutBuilder120.m	HKWorkoutBuilder120.m.o
-HomeKit	ios16	HMAccessControl	1	0	raises	NSInternalInconsistencyException	init is unavailable	%@ is unavailable	raise	none	CHARON_HOMEKIT_UNAVAILABLE_INIT	HomeKit/HMAccessControl11_2.m	HMAccessControl11_2.m.o
+HealthKit	host	HKDevice	1	0	raises	NSInvalidArgumentException	The -init method is not available on HKDevice	The -init method is not available on %@	raise	none	REVENANT_HEALTHKIT_UNCREATABLE_INIT	HealthKit/HKDevice9.m	HKDevice9.m.o
+HealthKit	host	HKFHIRResource	1	0	raises	NSInvalidArgumentException	The -init method is not available on HKFHIRResource	The -init method is not available on %@	raise	none	REVENANT_HEALTHKIT_UNCREATABLE_INIT	HealthKit/HKClinicalRecord120.m	HKClinicalRecord120.m.o
+HealthKit	host	HKQuantitySeriesSampleBuilder	1	0	raises	NSInvalidArgumentException	The -init method is not available on HKQuantitySeriesSampleBuilder	The -init method is not available on %@	raise	none	REVENANT_HEALTHKIT_UNCREATABLE_INIT	HealthKit/HKQuantitySeriesSampleBuilder120.m	HKQuantitySeriesSampleBuilder120.m.o
+HealthKit	host	HKSourceRevision	1	0	raises	NSInvalidArgumentException	The -init method is not available on HKSourceRevision	The -init method is not available on %@	raise	none	REVENANT_HEALTHKIT_UNCREATABLE_INIT	HealthKit/HKSourceRevision9.m	HKSourceRevision9.m.o
+HealthKit	host	HKWorkoutBuilder	1	0	raises	NSInvalidArgumentException	The -init method is not available on HKWorkoutBuilder	The -init method is not available on %@	raise	none	REVENANT_HEALTHKIT_UNCREATABLE_INIT	HealthKit/HKWorkoutBuilder120.m	HKWorkoutBuilder120.m.o
+HomeKit	ios16	HMAccessControl	1	0	raises	NSInternalInconsistencyException	init is unavailable	%@ is unavailable	raise	none	REVENANT_HOMEKIT_UNAVAILABLE_INIT	HomeKit/HMAccessControl11_2.m	HMAccessControl11_2.m.o
 HomeKit	ios16	HMAccessoryProfile	0	0	ok				none	none	-	HomeKit/HMAccessoryProfile10_0.m	HMAccessoryProfile10_0.m.o
 HomeKit	ios16	HMAccessorySetupPayload	0	0	ok				none	none	-	HomeKit/HMAccessorySetupPayload11_3.m	HMAccessorySetupPayload11_3.m.o
 HomeKit	ios16	HMAccessorySetupResult	0	0	ok				none	none	-	HomeKit/HMAccessorySetupResult15_4.m	HMAccessorySetupResult15_4.m.o
 HomeKit	ios16	HMAction	1	0	constructs				construct	none	-	HomeKit/HMAction8_0.m	HMAction8_0.m.o
-HomeKit	ios16	HMActionSet	1	0	nil				nil	none	CHARON_HOMEKIT_NIL_INIT	HomeKit/HMHomeGraph8_0.m	HMHomeGraph8_0.m.o
+HomeKit	ios16	HMActionSet	1	0	nil				nil	none	REVENANT_HOMEKIT_NIL_INIT	HomeKit/HMHomeGraph8_0.m	HMHomeGraph8_0.m.o
 HomeKit	ios16	HMCalendarEvent	0	0	ok				none	none	-	HomeKit/HMTimeEvent11_0.m	HMTimeEvent11_0.m.o
 HomeKit	ios16	HMCameraProfile	0	0	ok				none	none	-	HomeKit/HMAccessoryProfile10_0.m	HMAccessoryProfile10_0.m.o
 HomeKit	ios16	HMCharacteristicThresholdRangeEvent	0	0	ok				none	none	-	HomeKit/HMTimeEvent11_0.m	HMTimeEvent11_0.m.o
@@ -19,7 +19,7 @@ HomeKit	ios16	HMCharacteristicWriteAction	0	0	ok				none	none	-	HomeKit/HMAccess
 HomeKit	ios16	HMDurationEvent	0	0	ok				none	none	-	HomeKit/HMTimeEvent11_0.m	HMTimeEvent11_0.m.o
 HomeKit	ios16	HMEvent	0	0	ok				none	none	-	HomeKit/HMEventTrigger9_0.m	HMEventTrigger9_0.m.o
 HomeKit	ios16	HMEventTrigger	0	0	ok				none	none	-	HomeKit/HMEventTrigger9_0.m	HMEventTrigger9_0.m.o
-HomeKit	ios16	HMHome	1	0	nil				nil	none	CHARON_HOMEKIT_NIL_INIT	HomeKit/HMHomeManager8_0.m	HMHomeManager8_0.m.o
+HomeKit	ios16	HMHome	1	0	nil				nil	none	REVENANT_HOMEKIT_NIL_INIT	HomeKit/HMHomeManager8_0.m	HMHomeManager8_0.m.o
 HomeKit	ios16	HMHomeAccessControl	0	0	ok				none	none	-	HomeKit/HMEventTrigger9_0.m	HMEventTrigger9_0.m.o
 HomeKit	ios16	HMHomeManager	1	0	constructs				construct	none	-	HomeKit/HMHomeManager8_0.m	HMHomeManager8_0.m.o
 HomeKit	ios16	HMMutableCalendarEvent	0	0	ok				none	none	-	HomeKit/HMTimeEvent11_0.m	HMTimeEvent11_0.m.o
@@ -29,30 +29,30 @@ HomeKit	ios16	HMMutableDurationEvent	0	0	ok				none	none	-	HomeKit/HMTimeEvent11
 HomeKit	ios16	HMMutablePresenceEvent	0	0	ok				none	none	-	HomeKit/HMTimeEvent11_0.m	HMTimeEvent11_0.m.o
 HomeKit	ios16	HMNumberRange	0	0	ok				none	none	-	HomeKit/HMNumberRange11_0.m	HMNumberRange11_0.m.o
 HomeKit	ios16	HMPresenceEvent	0	0	ok				none	none	-	HomeKit/HMTimeEvent11_0.m	HMTimeEvent11_0.m.o
-HomeKit	ios16	HMRoom	1	0	nil				nil	none	CHARON_HOMEKIT_NIL_INIT	HomeKit/HMHomeGraph8_0.m	HMHomeGraph8_0.m.o
-HomeKit	ios16	HMServiceGroup	1	0	nil				nil	none	CHARON_HOMEKIT_NIL_INIT	HomeKit/HMHomeGraph8_0.m	HMHomeGraph8_0.m.o
+HomeKit	ios16	HMRoom	1	0	nil				nil	none	REVENANT_HOMEKIT_NIL_INIT	HomeKit/HMHomeGraph8_0.m	HMHomeGraph8_0.m.o
+HomeKit	ios16	HMServiceGroup	1	0	nil				nil	none	REVENANT_HOMEKIT_NIL_INIT	HomeKit/HMHomeGraph8_0.m	HMHomeGraph8_0.m.o
 HomeKit	ios16	HMSignificantTimeEvent	0	0	ok				none	none	-	HomeKit/HMTimeEvent11_0.m	HMTimeEvent11_0.m.o
-HomeKit	ios16	HMTimerTrigger	1	0	nil				nil	none	CHARON_HOMEKIT_NIL_INIT	HomeKit/HMHomeGraph8_0.m	HMHomeGraph8_0.m.o
+HomeKit	ios16	HMTimerTrigger	1	0	nil				nil	none	REVENANT_HOMEKIT_NIL_INIT	HomeKit/HMHomeGraph8_0.m	HMHomeGraph8_0.m.o
 HomeKit	ios16	HMTrigger	0	0	ok				none	none	-	HomeKit/HMHomeGraph8_0.m	HMHomeGraph8_0.m.o
-HomeKit	ios16	HMUser	1	0	raises	NSInternalInconsistencyException	init is unavailable	%@ is unavailable	raise	none	CHARON_HOMEKIT_UNAVAILABLE_INIT	HomeKit/HMHomeGraph8_0.m	HMHomeGraph8_0.m.o
-HomeKit	ios16	HMZone	1	0	nil				nil	none	CHARON_HOMEKIT_NIL_INIT	HomeKit/HMHomeGraph8_0.m	HMHomeGraph8_0.m.o
+HomeKit	ios16	HMUser	1	0	raises	NSInternalInconsistencyException	init is unavailable	%@ is unavailable	raise	none	REVENANT_HOMEKIT_UNAVAILABLE_INIT	HomeKit/HMHomeGraph8_0.m	HMHomeGraph8_0.m.o
+HomeKit	ios16	HMZone	1	0	nil				nil	none	REVENANT_HOMEKIT_NIL_INIT	HomeKit/HMHomeGraph8_0.m	HMHomeGraph8_0.m.o
 SensorKit	host	SRAcousticSettings	0	0	ok				none	none	-	SensorKit/SensorKit260.m	SensorKit260.m.o
-SensorKit	host	SRAudioLevel	1	1	raises	NSInternalInconsistencyException			raise	raise	CHARON_SENSORKIT_UNCREATABLE_NEW_AND_INIT	SensorKit/SensorKit170.m	SensorKit170.m.o
-SensorKit	host	SRElectrocardiogramData	1	1	raises	NSInternalInconsistencyException			raise	raise	CHARON_SENSORKIT_UNCREATABLE_NEW_AND_INIT	SensorKit/SensorKit174.m	SensorKit174.m.o
-SensorKit	host	SRElectrocardiogramSample	1	1	raises	NSInternalInconsistencyException			raise	raise	CHARON_SENSORKIT_UNCREATABLE_NEW_AND_INIT	SensorKit/SensorKit174.m	SensorKit174.m.o
-SensorKit	host	SRElectrocardiogramSession	1	1	raises	NSInternalInconsistencyException			raise	raise	CHARON_SENSORKIT_UNCREATABLE_NEW_AND_INIT	SensorKit/SensorKit174.m	SensorKit174.m.o
-SensorKit	host	SRFaceMetrics	1	1	raises	NSInternalInconsistencyException	Not available		raise	raise	CHARON_SENSORKIT_UNCREATABLE_NEW_AND_INIT	SensorKit/SensorKit170.m	SensorKit170.m.o
-SensorKit	host	SRFaceMetricsExpression	1	1	raises	NSInternalInconsistencyException	Not available		raise	raise	CHARON_SENSORKIT_UNCREATABLE_NEW_AND_INIT	SensorKit/SensorKit170.m	SensorKit170.m.o
-SensorKit	host	SRFetchResult	1	1	raises	NSInternalInconsistencyException	Not available		raise	raise	CHARON_SENSORKIT_UNCREATABLE_NEW_AND_INIT	SensorKit/SensorKit140.m	SensorKit140.m.o
+SensorKit	host	SRAudioLevel	1	1	raises	NSInternalInconsistencyException			raise	raise	REVENANT_SENSORKIT_UNCREATABLE_NEW_AND_INIT	SensorKit/SensorKit170.m	SensorKit170.m.o
+SensorKit	host	SRElectrocardiogramData	1	1	raises	NSInternalInconsistencyException			raise	raise	REVENANT_SENSORKIT_UNCREATABLE_NEW_AND_INIT	SensorKit/SensorKit174.m	SensorKit174.m.o
+SensorKit	host	SRElectrocardiogramSample	1	1	raises	NSInternalInconsistencyException			raise	raise	REVENANT_SENSORKIT_UNCREATABLE_NEW_AND_INIT	SensorKit/SensorKit174.m	SensorKit174.m.o
+SensorKit	host	SRElectrocardiogramSession	1	1	raises	NSInternalInconsistencyException			raise	raise	REVENANT_SENSORKIT_UNCREATABLE_NEW_AND_INIT	SensorKit/SensorKit174.m	SensorKit174.m.o
+SensorKit	host	SRFaceMetrics	1	1	raises	NSInternalInconsistencyException	Not available		raise	raise	REVENANT_SENSORKIT_UNCREATABLE_NEW_AND_INIT	SensorKit/SensorKit170.m	SensorKit170.m.o
+SensorKit	host	SRFaceMetricsExpression	1	1	raises	NSInternalInconsistencyException	Not available		raise	raise	REVENANT_SENSORKIT_UNCREATABLE_NEW_AND_INIT	SensorKit/SensorKit170.m	SensorKit170.m.o
+SensorKit	host	SRFetchResult	1	1	raises	NSInternalInconsistencyException	Not available		raise	raise	REVENANT_SENSORKIT_UNCREATABLE_NEW_AND_INIT	SensorKit/SensorKit140.m	SensorKit140.m.o
 SensorKit	host	SRPhotoplethysmogramAccelerometerSample	0	0	ok				none	none	-	SensorKit/SensorKit174.m	SensorKit174.m.o
 SensorKit	host	SRPhotoplethysmogramOpticalSample	0	0	ok				none	none	-	SensorKit/SensorKit174.m	SensorKit174.m.o
-SensorKit	host	SRPhotoplethysmogramSample	1	1	raises	NSInternalInconsistencyException			raise	raise	CHARON_SENSORKIT_UNCREATABLE_NEW_AND_INIT	SensorKit/SensorKit174.m	SensorKit174.m.o
-SensorKit	host	SRSensorReader	1	1	raises	NSInternalInconsistencyException	Use initWithSensor:		raise	raise	CHARON_SENSORKIT_UNCREATABLE_NEW_AND_INIT	SensorKit/SRSensorReader.m	SRSensorReader.m.o
+SensorKit	host	SRPhotoplethysmogramSample	1	1	raises	NSInternalInconsistencyException			raise	raise	REVENANT_SENSORKIT_UNCREATABLE_NEW_AND_INIT	SensorKit/SensorKit174.m	SensorKit174.m.o
+SensorKit	host	SRSensorReader	1	1	raises	NSInternalInconsistencyException	Use initWithSensor:		raise	raise	REVENANT_SENSORKIT_UNCREATABLE_NEW_AND_INIT	SensorKit/SRSensorReader.m	SRSensorReader.m.o
 SensorKit	host	SRSleepSession	0	0	ok				none	none	-	SensorKit/SensorKit260.m	SensorKit260.m.o
-SensorKit	host	SRSpeechExpression	1	1	raises	NSInternalInconsistencyException			raise	raise	CHARON_SENSORKIT_UNCREATABLE_NEW_AND_INIT	SensorKit/SensorKit170.m	SensorKit170.m.o
-SensorKit	host	SRSpeechMetrics	1	1	raises	NSInternalInconsistencyException			raise	raise	CHARON_SENSORKIT_UNCREATABLE_NEW_AND_INIT	SensorKit/SensorKit170.m	SensorKit170.m.o
-SensorKit	host	SRSupplementalCategory	1	1	raises	NSInternalInconsistencyException	Not available		raise	raise	CHARON_SENSORKIT_UNCREATABLE_NEW_AND_INIT	SensorKit/SensorKit164.m	SensorKit164.m.o
-SensorKit	host	SRWristTemperature	1	1	raises	NSInternalInconsistencyException			raise	raise	CHARON_SENSORKIT_UNCREATABLE_NEW_AND_INIT	SensorKit/SensorKit170.m	SensorKit170.m.o
-SensorKit	host	SRWristTemperatureSession	1	1	raises	NSInternalInconsistencyException			raise	raise	CHARON_SENSORKIT_UNCREATABLE_NEW_AND_INIT	SensorKit/SensorKit170.m	SensorKit170.m.o
+SensorKit	host	SRSpeechExpression	1	1	raises	NSInternalInconsistencyException			raise	raise	REVENANT_SENSORKIT_UNCREATABLE_NEW_AND_INIT	SensorKit/SensorKit170.m	SensorKit170.m.o
+SensorKit	host	SRSpeechMetrics	1	1	raises	NSInternalInconsistencyException			raise	raise	REVENANT_SENSORKIT_UNCREATABLE_NEW_AND_INIT	SensorKit/SensorKit170.m	SensorKit170.m.o
+SensorKit	host	SRSupplementalCategory	1	1	raises	NSInternalInconsistencyException	Not available		raise	raise	REVENANT_SENSORKIT_UNCREATABLE_NEW_AND_INIT	SensorKit/SensorKit164.m	SensorKit164.m.o
+SensorKit	host	SRWristTemperature	1	1	raises	NSInternalInconsistencyException			raise	raise	REVENANT_SENSORKIT_UNCREATABLE_NEW_AND_INIT	SensorKit/SensorKit170.m	SensorKit170.m.o
+SensorKit	host	SRWristTemperatureSession	1	1	raises	NSInternalInconsistencyException			raise	raise	REVENANT_SENSORKIT_UNCREATABLE_NEW_AND_INIT	SensorKit/SensorKit170.m	SensorKit170.m.o
 
-AVFoundation	host	AVCaptureDeviceDiscoverySession	1	0	ok				nil	none	CHARON_AVFOUNDATION_UNAVAILABLE_INIT	AVFoundation/AVCaptureDeviceDiscoverySession.m	AVCaptureDeviceDiscoverySession.m.o
+AVFoundation	host	AVCaptureDeviceDiscoverySession	1	0	ok				nil	none	REVENANT_AVFOUNDATION_UNAVAILABLE_INIT	AVFoundation/AVCaptureDeviceDiscoverySession.m	AVCaptureDeviceDiscoverySession.m.o

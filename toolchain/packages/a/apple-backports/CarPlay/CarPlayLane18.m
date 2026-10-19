@@ -1,29 +1,29 @@
 #import <Foundation/Foundation.h>
-#import "CharonCarPlay174.h"
-#import "CharonCarPlayLane.h"
+#import "RevenantCarPlay174.h"
+#import "RevenantCarPlayLane.h"
 
-@implementation CPLane (CharonLaneAngles18)
+@implementation CPLane (RevenantLaneAngles18)
 
 - (instancetype)initWithAngles:(NSArray<NSMeasurement<NSUnitAngle *> *> *)angles
 {
-    return [self initCharonWithAngles:angles highlightedAngle:nil isPreferred:NO];
+    return [self initRevenantWithAngles:angles highlightedAngle:nil isPreferred:NO];
 }
 
 - (instancetype)initWithAngles:(NSArray<NSMeasurement<NSUnitAngle *> *> *)angles
              highlightedAngle:(NSMeasurement<NSUnitAngle *> *)highlightedAngle
                    isPreferred:(BOOL)preferred
 {
-    return [self initCharonWithAngles:angles highlightedAngle:highlightedAngle isPreferred:preferred];
+    return [self initRevenantWithAngles:angles highlightedAngle:highlightedAngle isPreferred:preferred];
 }
 
 - (NSMeasurement<NSUnitAngle *> *)highlightedAngle
 {
-    return [self charon_highlightedAngle];
+    return [self revenant_highlightedAngle];
 }
 
 - (NSArray<NSMeasurement<NSUnitAngle *> *> *)angles
 {
-    return [self charon_angles];
+    return [self revenant_angles];
 }
 
 @end

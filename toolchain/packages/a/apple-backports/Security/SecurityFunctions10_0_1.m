@@ -3,14 +3,14 @@
 #import <CoreFoundation/CoreFoundation.h>
 #include <stdlib.h>
 
-extern bool CharonSecurityKeyIsPortEC(SecKeyRef key);
-extern bool CharonSecKeyECCarries(SecKeyOperationType operation, SecKeyAlgorithm algorithm);
-extern CFDataRef CharonSecKeyECSign(SecKeyRef key, SecKeyAlgorithm algorithm, CFDataRef dataToSign, CFErrorRef *error);
-extern Boolean CharonSecKeyECVerify(SecKeyRef key, SecKeyAlgorithm algorithm, CFDataRef signedData, CFDataRef signature, CFErrorRef *error);
-extern CFDataRef CharonSecKeyECExchange(SecKeyRef privateKey, SecKeyAlgorithm algorithm, SecKeyRef publicKey, CFDictionaryRef parameters, CFErrorRef *error);
-extern void CharonSecKeyFail(CFErrorRef *error, OSStatus status, NSString *description);
+extern bool RevenantSecurityKeyIsPortEC(SecKeyRef key);
+extern bool RevenantSecKeyECCarries(SecKeyOperationType operation, SecKeyAlgorithm algorithm);
+extern CFDataRef RevenantSecKeyECSign(SecKeyRef key, SecKeyAlgorithm algorithm, CFDataRef dataToSign, CFErrorRef *error);
+extern Boolean RevenantSecKeyECVerify(SecKeyRef key, SecKeyAlgorithm algorithm, CFDataRef signedData, CFDataRef signature, CFErrorRef *error);
+extern CFDataRef RevenantSecKeyECExchange(SecKeyRef privateKey, SecKeyAlgorithm algorithm, SecKeyRef publicKey, CFDictionaryRef parameters, CFErrorRef *error);
+extern void RevenantSecKeyFail(CFErrorRef *error, OSStatus status, NSString *description);
 
-CFDictionaryRef CharonSecurityAttributesFromItemResult(CFTypeRef result)
+CFDictionaryRef RevenantSecurityAttributesFromItemResult(CFTypeRef result)
 {
     if (!result)
         return NULL;
@@ -35,17 +35,17 @@ CFDictionaryRef SecKeyCopyAttributes(SecKeyRef key)
     CFRelease(query);
     if (status != errSecSuccess)
         return NULL;
-    return CharonSecurityAttributesFromItemResult(found);
+    return RevenantSecurityAttributesFromItemResult(found);
 }
 
-bool CharonSecurityCarries(SecKeyOperationType operation, SecKeyAlgorithm algorithm, bool rsa, bool ec);
+bool RevenantSecurityCarries(SecKeyOperationType operation, SecKeyAlgorithm algorithm, bool rsa, bool ec);
 
 Boolean SecKeyIsAlgorithmSupported(SecKeyRef key, SecKeyOperationType operation, SecKeyAlgorithm algorithm)
 {
     if (!key || !algorithm)
         return false;
-    if (CharonSecurityKeyIsPortEC(key))
-        return CharonSecKeyECCarries(operation, algorithm);
+    if (RevenantSecurityKeyIsPortEC(key))
+        return RevenantSecKeyECCarries(operation, algorithm);
     CFDictionaryRef attributes = SecKeyCopyAttributes(key);
     if (!attributes)
         return false;
@@ -56,10 +56,10 @@ Boolean SecKeyIsAlgorithmSupported(SecKeyRef key, SecKeyOperationType operation,
     if (!rsa && !ec) {
         return false;
     }
-    return CharonSecurityCarries(operation, algorithm, rsa, ec);
+    return RevenantSecurityCarries(operation, algorithm, rsa, ec);
 }
 
-bool CharonSecurityCarries(SecKeyOperationType operation, SecKeyAlgorithm algorithm, bool rsa, bool ec)
+bool RevenantSecurityCarries(SecKeyOperationType operation, SecKeyAlgorithm algorithm, bool rsa, bool ec)
 {
     if (operation == kSecKeyOperationTypeSign || operation == kSecKeyOperationTypeVerify) {
         if (rsa) {
@@ -81,7 +81,7 @@ bool CharonSecurityCarries(SecKeyOperationType operation, SecKeyAlgorithm algori
     return false;
 }
 
-static size_t CharonSecuritySignatureRoom(SecKeyRef key, bool ec, CFIndex length)
+static size_t RevenantSecuritySignatureRoom(SecKeyRef key, bool ec, CFIndex length)
 {
     if (ec) {
         return 72;
@@ -105,7 +105,7 @@ static size_t CharonSecuritySignatureRoom(SecKeyRef key, bool ec, CFIndex length
     return (size_t)(length > 0 ? length : 0);
 }
 
-SecPadding CharonSecurityPaddingFor(SecKeyAlgorithm algorithm)
+SecPadding RevenantSecurityPaddingFor(SecKeyAlgorithm algorithm)
 {
     if (CFEqual(algorithm, kSecKeyAlgorithmECDSASignatureDigestX962SHA256) ||
         CFEqual(algorithm, kSecKeyAlgorithmECDSASignatureMessageX962SHA256))
@@ -130,8 +130,8 @@ CFDataRef SecKeyCreateSignature(SecKeyRef key, SecKeyAlgorithm algorithm, CFData
         return NULL;
     if (error)
         *error = NULL;
-    if (CharonSecurityKeyIsPortEC(key))
-        return CharonSecKeyECSign(key, algorithm, dataToSign, error);
+    if (RevenantSecurityKeyIsPortEC(key))
+        return RevenantSecKeyECSign(key, algorithm, dataToSign, error);
     CFDictionaryRef attributes = SecKeyCopyAttributes(key);
     if (!attributes)
         return NULL;
@@ -142,13 +142,13 @@ CFDataRef SecKeyCreateSignature(SecKeyRef key, SecKeyAlgorithm algorithm, CFData
     if (!rsa && !ec) {
         return NULL;
     }
-    if (!CharonSecurityCarries(kSecKeyOperationTypeSign, algorithm, rsa, ec))
+    if (!RevenantSecurityCarries(kSecKeyOperationTypeSign, algorithm, rsa, ec))
         return NULL;
-    SecPadding padding = CharonSecurityPaddingFor(algorithm);
+    SecPadding padding = RevenantSecurityPaddingFor(algorithm);
     CFIndex length = CFDataGetLength(dataToSign);
     if (length < 0)
         return NULL;
-    size_t room = CharonSecuritySignatureRoom(key, ec, length);
+    size_t room = RevenantSecuritySignatureRoom(key, ec, length);
     if (room == 0)
         return NULL;
     unsigned char *buffer = calloc(room, 1);
@@ -178,8 +178,8 @@ Boolean SecKeyVerifySignature(SecKeyRef key, SecKeyAlgorithm algorithm, CFDataRe
         return false;
     if (error)
         *error = NULL;
-    if (CharonSecurityKeyIsPortEC(key))
-        return CharonSecKeyECVerify(key, algorithm, signedData, signature, error);
+    if (RevenantSecurityKeyIsPortEC(key))
+        return RevenantSecKeyECVerify(key, algorithm, signedData, signature, error);
     CFDictionaryRef attributes = SecKeyCopyAttributes(key);
     if (!attributes)
         return false;
@@ -190,9 +190,9 @@ Boolean SecKeyVerifySignature(SecKeyRef key, SecKeyAlgorithm algorithm, CFDataRe
     if (!rsa && !ec) {
         return false;
     }
-    if (!CharonSecurityCarries(kSecKeyOperationTypeVerify, algorithm, rsa, ec))
+    if (!RevenantSecurityCarries(kSecKeyOperationTypeVerify, algorithm, rsa, ec))
         return false;
-    SecPadding padding = CharonSecurityPaddingFor(algorithm);
+    SecPadding padding = RevenantSecurityPaddingFor(algorithm);
     CFIndex signedLength = CFDataGetLength(signedData);
     CFIndex signatureLength = CFDataGetLength(signature);
     if (signedLength < 1 || signatureLength < 1)
@@ -209,10 +209,10 @@ Boolean SecKeyVerifySignature(SecKeyRef key, SecKeyAlgorithm algorithm, CFDataRe
 CFDataRef SecKeyCopyKeyExchangeResult(SecKeyRef privateKey, SecKeyAlgorithm algorithm, SecKeyRef publicKey,
                                       CFDictionaryRef parameters, CFErrorRef *error)
 {
-    if (privateKey && CharonSecurityKeyIsPortEC(privateKey))
-        return CharonSecKeyECExchange(privateKey, algorithm, publicKey, parameters, error);
+    if (privateKey && RevenantSecurityKeyIsPortEC(privateKey))
+        return RevenantSecKeyECExchange(privateKey, algorithm, publicKey, parameters, error);
 
-    CharonSecKeyFail(error, errSecParam,
+    RevenantSecKeyFail(error, errSecParam,
                      @"the release has no elliptic key agreement: its Security exports SecKeyRawSign and SecKeyRawVerify and only the finite-field SecDH family, so a key of its keychain cannot exchange");
     return NULL;
 }

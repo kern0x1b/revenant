@@ -1,11 +1,11 @@
 #import <Foundation/Foundation.h>
 #import "CoreNFC/CoreNFC.h"
 #import "check.h"
-#import "CharonNDEF.h"
+#import "RevenantNDEF.h"
 
 static void check_named(BOOL passed, NSString *name, NSString *detail)
 {
-    charon_check(passed, [name UTF8String], detail);
+    revenant_check(passed, [name UTF8String], detail);
 }
 
 static NSData *bytes(const unsigned char *values, size_t length)
@@ -87,7 +87,7 @@ int main(int argc, char **argv)
     NFCNDEFMessage *built = [[NFCNDEFMessage alloc] initWithNDEFRecords:@[text2]];
     check_named(built.length == text.length, @"a message the port builds weighs what the vector weighs",
                  [NSString stringWithFormat:@"%lu against %lu", (unsigned long)built.length, (unsigned long)text.length]);
-    NFCNDEFMessage *reread = [NFCNDEFMessage ndefMessageWithData:CharonNDEFEncodedRecords(built)];
+    NFCNDEFMessage *reread = [NFCNDEFMessage ndefMessageWithData:RevenantNDEFEncodedRecords(built)];
     check_named([reread.records.firstObject.payload isEqualToData:textRecord.payload], @"and its own bytes read back as the same payload",
                  [reread.records.firstObject.payload description]);
     NFCNDEFPayload *emptyID = [[NFCNDEFPayload alloc] initWithFormat:NFCTypeNameFormatEmpty type:[NSData data]
@@ -105,7 +105,7 @@ int main(int argc, char **argv)
                                                              type:[@"T" dataUsingEncoding:NSUTF8StringEncoding]
                                                         identifier:nil payload:ten chunkSize:4];
     NFCNDEFMessage *chunkedMessage = [[NFCNDEFMessage alloc] initWithNDEFRecords:@[chunked]];
-    NSData *chunkedBytes = CharonNDEFEncodedRecords(chunkedMessage);
+    NSData *chunkedBytes = RevenantNDEFEncodedRecords(chunkedMessage);
     check_named(chunkedBytes.length == 23, @"a ten byte payload chunked by four is three records of 4, 4 and 2 bytes with their markers",
                  [NSString stringWithFormat:@"%lu bytes", (unsigned long)chunkedBytes.length]);
     check_named((((const unsigned char *)chunkedBytes.bytes)[0] & 0x01) == 0, @"whose first record is not a continuation", nil);
@@ -153,6 +153,6 @@ int main(int argc, char **argv)
     check_named([archived.records.firstObject.payload isEqualToData:textRecord.payload], @"and the payload with it",
                  [archived.records.firstObject.payload description]);
 
-    printf("checks=%d failures=%d\n", charon_checks, charon_failures);
-    return charon_failures == 0 ? 0 : 1;
+    printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
+    return revenant_failures == 0 ? 0 : 1;
 }

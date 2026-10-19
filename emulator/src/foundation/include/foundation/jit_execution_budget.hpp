@@ -10,7 +10,7 @@
 #include <chrono>
 #include <cstdint>
 
-namespace shade {
+namespace emulator {
 
 class JitHostExecutionBudget {
 public:

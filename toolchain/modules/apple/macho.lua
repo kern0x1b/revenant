@@ -682,7 +682,7 @@ function late_imports(binary, arrived, process_wide)
         for _, symbol in ipairs(names) do
             local release = arrived[symbol]
             if release and found.minimum < encoded_version(release) then
-                local remedy = (process_wide or {})[symbol] and "link charon@libcxx, whose libc++abi exports it once for the process" or ("link apple-compat::" .. symbol)
+                local remedy = (process_wide or {})[symbol] and "link revenant@libcxx, whose libc++abi exports it once for the process" or ("link apple-compat::" .. symbol)
                 local described = string.format("%s: %s arrived in %s, after %s; %s", found.architecture, symbol, release, version_text(found.minimum), remedy)
                 table.insert(imported[symbol].weak and weak or strong, described)
             end

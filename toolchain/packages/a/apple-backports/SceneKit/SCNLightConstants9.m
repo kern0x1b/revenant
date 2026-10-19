@@ -1,3 +1,3 @@
-#import "CharonSCN.h"
+#import "RevenantSCN.h"
 
 SCNLightType const SCNLightTypeProbe = @"probe";

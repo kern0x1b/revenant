@@ -1,10 +1,10 @@
 package("swiftui")
-    set_homepage("https://github.com/kern0x1b/eidolon")
-    set_description("Eidolon's SwiftUI for iOS 6 as a module and a static library a port imports: the module keeps Apple's name on purpose, because the mangled names of every symbol an app takes from SwiftUI depend on it. The sources are the eidolon repository at the version below, built with the flags Eidolon's own build uses, so the module a port compiles against is the one Eidolon's own binaries are proven with. The textual interface of the module is written beside it, for a reader and for a diff.")
+    set_homepage("https://github.com/kern0x1b/revenant/tree/main/frameworks/SwiftUI")
+    set_description("Revenant's SwiftUI for iOS 6 as a module and a static library a port imports: the module keeps Apple's name on purpose, because the mangled names of every symbol an app takes from SwiftUI depend on it. The sources are the SwiftUI repository at the version below, built with the flags SwiftUI's own build uses, so the module a port compiles against is the one SwiftUI's own binaries are proven with. The textual interface of the module is written beside it, for a reader and for a diff.")
     set_license("MIT")
     set_policy("package.strict_compatibility", true)
 
-    add_urls("https://github.com/kern0x1b/eidolon.git")
+    add_urls("https://github.com/kern0x1b/revenant.git")
     add_versions("2026.09.28", "cc5f8b59259fa247799ae259a110d9328a9cf9cb")
 
     add_configs("shared", {description = "Compile against a shared swift-runtime and its packaged libc++, for a port that requires them so.", default = false, type = "boolean"})
@@ -14,11 +14,11 @@ package("swiftui")
     add_configs("recipe", {description = "The digest of this recipe, so a changed one is a different package.", default = hash.strhash128(hash.sha256(path.join(os.scriptdir(), "xmake.lua"))), type = "string", readonly = true})
 
     on_load("iphoneos", function (package)
-        package:add("deps", "charon@swift-runtime", {alias = "swift-runtime", configs = {shared = package:config("shared") or nil,
+        package:add("deps", "revenant@swift-runtime", {alias = "swift-runtime", configs = {shared = package:config("shared") or nil,
                     backports = package:config("backports") or nil, backports_uikit = package:config("backports_uikit") or nil}})
-        package:add("deps", "charon@styx", {alias = "styx", configs = {shared = package:config("shared") or nil,
+        package:add("deps", "revenant@combine", {alias = "combine", configs = {shared = package:config("shared") or nil,
                     backports = package:config("backports") or nil, backports_uikit = package:config("backports_uikit") or nil}})
-        package:add("links", "EidolonSwiftUI")
+        package:add("links", "RevenantSwiftUI")
         package:add("frameworks", "UIKit", "CoreGraphics", "QuartzCore", "CoreData", "CoreImage", "Foundation", "CoreFoundation")
     end)
 
@@ -27,8 +27,8 @@ package("swiftui")
         local swift = import("apple.swift", {rootdir = modules, anonymous = true})
         local toolchain = assert(package:toolchains(), "SwiftUI is built with the apple-ios toolchain")[1]
         toolchain:load()
-        local runtime = assert(package:dep("swift-runtime"), "SwiftUI is compiled against charon@swift-runtime")
-        local styx = assert(package:dep("styx"), "SwiftUI imports Combine, the module charon@styx builds")
+        local runtime = assert(package:dep("swift-runtime"), "SwiftUI is compiled against revenant@swift-runtime")
+        local combine = assert(package:dep("combine"), "SwiftUI imports Combine, the module revenant@combine builds")
         local swiftc = assert(table.wrap((runtime:envs() or {}).SWIFT_EXEC)[1], "swift-runtime names no compiler; reinstall it")
         local minimum = toolchain:config("deployment")
         local sdk = toolchain:config("sdkdir")
@@ -46,18 +46,18 @@ package("swiftui")
             resources = path.join(runtime:installdir(), "lib", "swift"),
             plugins = table.wrap((runtime:envs() or {}).SWIFT_PLUGIN_PATH)[1],
             module = "SwiftUI", optimize = "fastest",
-            prefix_map = os.curdir() .. "=/eidolon"}),
-            {"-I", path.join(styx:installdir(), "lib", "swift", "iphoneos"),
-             "-I", path.join(styx:installdir(), "include", "CombineHelpers"),
+            prefix_map = os.curdir() .. "=/SwiftUI"}),
+            {"-I", path.join(combine:installdir(), "lib", "swift", "iphoneos"),
+             "-I", path.join(combine:installdir(), "include", "CombineHelpers"),
              "-enforce-exclusivity=unchecked", "-suppress-warnings",
              "-emit-module", "-emit-module-path", path.join(module, package:arch() .. "-apple-ios.swiftmodule"),
              "-swift-version", "5", "-emit-module-interface-path", path.join(module, "SwiftUI.swiftinterface"),
              "-c"}, sources, {"-o", path.join(objects, "SwiftUI.o")})
         os.vrunv(swiftc, argv)
 
-        os.vrunv(toolchain:tool("ar"), {"-rcs", path.join(package:installdir("lib"), "libEidolonSwiftUI.a"),
+        os.vrunv(toolchain:tool("ar"), {"-rcs", path.join(package:installdir("lib"), "libRevenantSwiftUI.a"),
                  path.join(objects, "SwiftUI.o")})
 
-        package:setenv("CHARON_SWIFT_MODULES", swiftdir)
+        package:setenv("REVENANT_SWIFT_MODULES", swiftdir)
         os.cp(path.join("eidolon", "LICENSE"), package:installdir("licenses"))
     end)

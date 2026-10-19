@@ -3,8 +3,8 @@
 #import <CoreLocation/CoreLocation.h>
 #import <CoreMotion/CoreMotion.h>
 
-#import "CharonARKitPrivate.h"
-#import "CharonARTracker.h"
+#import "RevenantARKitPrivate.h"
+#import "RevenantARTracker.h"
 
 #pragma clang diagnostic ignored "-Wunguarded-availability-new"
 
@@ -20,7 +20,7 @@
 
 - (instancetype)init
 {
-    self = [super initCharonCommon];
+    self = [super initRevenantCommon];
     if (self)
         _planeDetection = ARPlaneDetectionHorizontal;
     return self;
@@ -77,7 +77,7 @@
 
 - (instancetype)init
 {
-    self = [super initCharonCommon];
+    self = [super initRevenantCommon];
     if (self)
         _planeDetection = ARPlaneDetectionHorizontal;
     return self;
@@ -97,7 +97,7 @@
 
 + (BOOL)isSupported
 {
-    if (![CharonARTracker isSupported])
+    if (![RevenantARTracker isSupported])
         return NO;
     return [CLLocationManager class] != nil;
 }

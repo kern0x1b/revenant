@@ -4,13 +4,13 @@
 #import <dispatch/dispatch.h>
 #import <stdio.h>
 
-@interface CharonSecProtocolOptionsHeld : NSObject <OS_sec_protocol_options>
+@interface RevenantSecProtocolOptionsHeld : NSObject <OS_sec_protocol_options>
 @end
 
-@interface CharonSecProtocolOptionsHeld (CharonProbe)
-- (size_t)charonCiphersuiteCount;
-- (size_t)charonGroupCount;
-- (sec_protocol_pre_shared_key_selection_t)charonPSKSelection;
+@interface RevenantSecProtocolOptionsHeld (RevenantProbe)
+- (size_t)revenantCiphersuiteCount;
+- (size_t)revenantGroupCount;
+- (sec_protocol_pre_shared_key_selection_t)revenantPSKSelection;
 @end
 
 static int failures = 0;
@@ -31,7 +31,7 @@ static void makeABlockThatOutlivesItsFrame(sec_protocol_options_t options)
             madeInDeadFrame++;
             if (done) done(NULL);
         };
-    dispatch_queue_t queue = dispatch_queue_create("charon.probe", DISPATCH_QUEUE_SERIAL);
+    dispatch_queue_t queue = dispatch_queue_create("revenant.probe", DISPATCH_QUEUE_SERIAL);
     sec_protocol_options_set_pre_shared_key_selection_block(options, block, queue);
 }
 
@@ -40,16 +40,16 @@ int main(void)
     setvbuf(stdout, NULL, _IONBF, 0);
     __weak id weakOptions = nil;
     @autoreleasepool {
-        Class cls = NSClassFromString(@"CharonSecProtocolOptionsHeld");
+        Class cls = NSClassFromString(@"RevenantSecProtocolOptionsHeld");
         printf("port-class\t%s\n", cls ? "found" : "MISSING");
         if (!cls) return 1;
         sec_protocol_options_t o = (sec_protocol_options_t)[[cls alloc] init];
 
         sec_protocol_options_append_tls_ciphersuite(o, tls_ciphersuite_AES_128_GCM_SHA256);
         sec_protocol_options_append_tls_ciphersuite(o, tls_ciphersuite_AES_256_GCM_SHA384);
-        want("ciphersuites-held", (long)[(id)o charonCiphersuiteCount], 2);
+        want("ciphersuites-held", (long)[(id)o revenantCiphersuiteCount], 2);
         sec_protocol_options_append_tls_ciphersuite_group(o, tls_ciphersuite_group_default);
-        want("groups-held", (long)[(id)o charonGroupCount], 1);
+        want("groups-held", (long)[(id)o revenantGroupCount], 1);
 
         sec_protocol_options_t p = (sec_protocol_options_t)[[cls alloc] init];
         sec_protocol_options_set_min_tls_protocol_version(o, tls_protocol_version_TLSv10);
@@ -67,7 +67,7 @@ int main(void)
         printf("hint-set\t1\n");
 
         makeABlockThatOutlivesItsFrame(o);
-        sec_protocol_pre_shared_key_selection_t held = [(id)o charonPSKSelection];
+        sec_protocol_pre_shared_key_selection_t held = [(id)o revenantPSKSelection];
         printf("held-block-present\t%d\n", held ? 1 : 0);
         if (held)
             held(NULL, NULL, NULL);

@@ -22,17 +22,17 @@ int main(void)
 {
     @autoreleasepool {
         Class hostMorph = NSClassFromString(@"NSMorphology");
-        Class portMorph = NSClassFromString(@"charonHostNSMorphology");
+        Class portMorph = NSClassFromString(@"revenantHostNSMorphology");
         Class hostPronoun = NSClassFromString(@"NSMorphologyPronoun");
-        Class portPronoun = NSClassFromString(@"charonHostNSMorphologyPronoun");
+        Class portPronoun = NSClassFromString(@"revenantHostNSMorphologyPronoun");
         printf("provenance: the two classes the differential compares\n");
         where("host  +[NSMorphology customPronounFor...]", hostMorph, @selector(customPronounForLanguage:), YES);
-        where("port  +[charonHostNSMorphology ...]", portMorph, @selector(customPronounForLanguage:), YES);
+        where("port  +[revenantHostNSMorphology ...]", portMorph, @selector(customPronounForLanguage:), YES);
         where("host  +[NSMorphologyPronoun isSupported...]", hostPronoun, @selector(isSupportedForLanguage:), YES);
-        where("port  +[charonHostNSMorphologyPronoun..]", portPronoun, @selector(isSupportedForLanguage:), YES);
+        where("port  +[revenantHostNSMorphologyPronoun..]", portPronoun, @selector(isSupportedForLanguage:), YES);
         printf("  %-34s %s\n", "host  -[NSMorphology grammaticalCase]",
                class_getInstanceMethod(hostMorph, @selector(grammaticalCase)) ? "PRESENT" : "absent (ios17 name)");
-        where("port  -[charonHostNSMorphological...]", portMorph, @selector(grammaticalCase), NO);
+        where("port  -[revenantHostNSMorphological...]", portMorph, @selector(grammaticalCase), NO);
         return 0;
     }
 }

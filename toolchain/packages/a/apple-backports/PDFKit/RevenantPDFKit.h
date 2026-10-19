@@ -4,7 +4,7 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @class PDFPage;
-@class CharonPDFPageText;
+@class RevenantPDFPageText;
 @class PDFSelection;
 @class PDFBorder;
 @class UIColor;
@@ -67,13 +67,13 @@ extern NSString *const PDFDocumentDidUnlockNotification;
 @property (readonly, copy) NSArray *annotations;
 @end
 
-@interface PDFDocument (CharonInternals)
-- (nullable CGPDFDocumentRef)charon_CGPDFDocument;
+@interface PDFDocument (RevenantInternals)
+- (nullable CGPDFDocumentRef)revenant_CGPDFDocument;
 @end
 
-@interface PDFPage (CharonInternals)
-- (nullable CGPDFPageRef)charon_CGPDFPage;
-- (nullable CharonPDFPageText *)charon_textLayout;
+@interface PDFPage (RevenantInternals)
+- (nullable CGPDFPageRef)revenant_CGPDFPage;
+- (nullable RevenantPDFPageText *)revenant_textLayout;
 @end
 
 @interface PDFAnnotation : NSObject
@@ -93,11 +93,11 @@ extern NSString *const PDFDocumentDidUnlockNotification;
 @end
 
 
-@interface PDFAnnotation (CharonInternals)
-- (nullable instancetype)initWithCharonDictionary:(CGPDFDictionaryRef)annotation
+@interface PDFAnnotation (RevenantInternals)
+- (nullable instancetype)initWithRevenantDictionary:(CGPDFDictionaryRef)annotation
                                           onPage:(nullable PDFPage *)page;
-- (CGPDFDictionaryRef)charon_CGPDFDictionary;
-- (long)charon_flags;
+- (CGPDFDictionaryRef)revenant_CGPDFDictionary;
+- (long)revenant_flags;
 @end
 
 typedef NS_ENUM(NSInteger, PDFBorderStyle) {
@@ -132,8 +132,8 @@ extern NSString *const PDFAppearanceCharacteristicsKeyDownCaption;
 @property (nonatomic, readonly, copy) NSDictionary *borderKeyValues;
 @end
 
-@interface PDFBorder (CharonInternals)
-- (nullable instancetype)initWithCharonAnnotationDictionary:(CGPDFDictionaryRef)annotation;
+@interface PDFBorder (RevenantInternals)
+- (nullable instancetype)initWithRevenantAnnotationDictionary:(CGPDFDictionaryRef)annotation;
 @end
 
 @interface PDFAppearanceCharacteristics : NSObject
@@ -195,8 +195,8 @@ typedef NS_ENUM(NSInteger, PDFActionNamedName) {
 @property (nonatomic) CGFloat zoom;
 @end
 
-@interface PDFDestination (CharonInternals)
-- (instancetype)initWithCharonDestinationArray:(nullable CGPDFArrayRef)array
+@interface PDFDestination (RevenantInternals)
+- (instancetype)initWithRevenantDestinationArray:(nullable CGPDFArrayRef)array
                                     inDocument:(nullable PDFDocument *)document;
 @end
 
@@ -204,10 +204,10 @@ typedef NS_ENUM(NSInteger, PDFActionNamedName) {
 @property (nonatomic, readonly, copy, nullable) NSString *type;
 @end
 
-@interface PDFAction (CharonInternals)
-+ (nullable instancetype)charon_actionWithDictionary:(CGPDFDictionaryRef)action
+@interface PDFAction (RevenantInternals)
++ (nullable instancetype)revenant_actionWithDictionary:(CGPDFDictionaryRef)action
                                            inDocument:(nullable PDFDocument *)document;
-- (void)charon_setTypeName:(nullable NSString *)name;
+- (void)revenant_setTypeName:(nullable NSString *)name;
 @end
 
 @interface PDFActionGoTo : PDFAction <NSCopying>
@@ -215,8 +215,8 @@ typedef NS_ENUM(NSInteger, PDFActionNamedName) {
 @property (nonatomic, strong, nullable) PDFDestination *destination;
 @end
 
-@interface PDFActionGoTo (CharonInternals)
-- (nullable instancetype)initWithCharonActionDictionary:(CGPDFDictionaryRef)action
+@interface PDFActionGoTo (RevenantInternals)
+- (nullable instancetype)initWithRevenantActionDictionary:(CGPDFDictionaryRef)action
                                               inDocument:(nullable PDFDocument *)document;
 @end
 
@@ -225,8 +225,8 @@ typedef NS_ENUM(NSInteger, PDFActionNamedName) {
 @property (nonatomic) PDFActionNamedName name;
 @end
 
-@interface PDFActionNamed (CharonInternals)
-- (nullable instancetype)initWithCharonActionDictionary:(CGPDFDictionaryRef)action;
+@interface PDFActionNamed (RevenantInternals)
+- (nullable instancetype)initWithRevenantActionDictionary:(CGPDFDictionaryRef)action;
 @end
 
 @interface PDFActionURL : PDFAction <NSCopying>
@@ -234,9 +234,9 @@ typedef NS_ENUM(NSInteger, PDFActionNamedName) {
 @property (nonatomic, copy, nullable) NSURL *URL;
 @end
 
-@interface PDFActionURL (CharonInternals)
-- (nullable instancetype)initWithCharonActionDictionary:(CGPDFDictionaryRef)action;
-- (nullable instancetype)initWithCharonLaunchDictionary:(CGPDFDictionaryRef)action
+@interface PDFActionURL (RevenantInternals)
+- (nullable instancetype)initWithRevenantActionDictionary:(CGPDFDictionaryRef)action;
+- (nullable instancetype)initWithRevenantLaunchDictionary:(CGPDFDictionaryRef)action
                                              inDocument:(nullable PDFDocument *)document;
 @end
 
@@ -249,8 +249,8 @@ typedef NS_ENUM(NSInteger, PDFActionNamedName) {
 @property (nonatomic, copy, nullable) NSURL *URL;
 @end
 
-@interface PDFActionRemoteGoTo (CharonInternals)
-- (nullable instancetype)initWithCharonActionDictionary:(CGPDFDictionaryRef)action
+@interface PDFActionRemoteGoTo (RevenantInternals)
+- (nullable instancetype)initWithRevenantActionDictionary:(CGPDFDictionaryRef)action
                                             inDocument:(nullable PDFDocument *)document;
 @end
 
@@ -260,8 +260,8 @@ typedef NS_ENUM(NSInteger, PDFActionNamedName) {
 @property (nonatomic) BOOL fieldsIncludedAreCleared;
 @end
 
-@interface PDFActionResetForm (CharonInternals)
-- (nullable instancetype)initWithCharonActionDictionary:(CGPDFDictionaryRef)action;
+@interface PDFActionResetForm (RevenantInternals)
+- (nullable instancetype)initWithRevenantActionDictionary:(CGPDFDictionaryRef)action;
 @end
 
 @interface PDFOutline : NSObject
@@ -277,8 +277,8 @@ typedef NS_ENUM(NSInteger, PDFActionNamedName) {
 @property (nonatomic, readonly, nullable) PDFAction *action;
 @end
 
-@interface PDFOutline (CharonInternals)
-- (nullable instancetype)initWithCharonItem:(CGPDFDictionaryRef)item
+@interface PDFOutline (RevenantInternals)
+- (nullable instancetype)initWithRevenantItem:(CGPDFDictionaryRef)item
                                   document:(nullable PDFDocument *)document
                                     parent:(nullable PDFOutline *)parent
                                      index:(NSUInteger)index;
@@ -307,8 +307,8 @@ typedef NS_ENUM(NSInteger, PDFActionNamedName) {
 - (void)extendSelectionForLineBoundaries;
 @end
 
-@interface PDFSelection (CharonInternals)
-- (void)charon_addSpanOnPage:(PDFPage *)page range:(NSRange)range;
+@interface PDFSelection (RevenantInternals)
+- (void)revenant_addSpanOnPage:(PDFPage *)page range:(NSRange)range;
 @end
 
 NS_ASSUME_NONNULL_END

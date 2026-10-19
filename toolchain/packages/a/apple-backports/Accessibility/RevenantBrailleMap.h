@@ -2,8 +2,8 @@
 #import <Accessibility/Accessibility.h>
 #import <CoreGraphics/CoreGraphics.h>
 
-@interface AXBrailleMap (CharonFactory)
+@interface AXBrailleMap (RevenantFactory)
 
-+ (instancetype)charon_mapWithDimensions:(CGSize)dimensions;
++ (instancetype)revenant_mapWithDimensions:(CGSize)dimensions;
 
 @end

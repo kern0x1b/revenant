@@ -1,7 +1,7 @@
 #import <CoreML/CoreML.h>
 
-#include "CharonMLBridge.h"
-#include "CharonMLInternal.h"
+#include "RevenantMLBridge.h"
+#include "RevenantMLInternal.h"
 
 
 @implementation MLArrayBatchProvider {
@@ -28,7 +28,7 @@
         return nil;
     }
     if (dictionary == nil) {
-        charon_ml_error(error, CHARON_ML_ERROR_FEATURE_TYPE,
+        revenant_ml_error(error, REVENANT_ML_ERROR_FEATURE_TYPE,
                         @"a batch provider is made from a dictionary, and there was none");
         return nil;
     }
@@ -41,7 +41,7 @@
         if (count == 0) {
             count = [dictionary[name] count];
         } else if ([dictionary[name] count] != count) {
-            charon_ml_error(error, CHARON_ML_ERROR_GENERIC,
+            revenant_ml_error(error, REVENANT_ML_ERROR_GENERIC,
                             [NSString stringWithFormat:@"the values of '%@' are %lu of %lu, and every "
                                                        @"feature of a batch has to be of one length",
                                                        name, (unsigned long)[dictionary[name] count],

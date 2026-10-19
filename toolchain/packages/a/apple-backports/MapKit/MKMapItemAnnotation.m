@@ -1,12 +1,12 @@
 #import <MapKit/MapKit.h>
 #import <CoreLocation/CoreLocation.h>
 #import <objc/message.h>
-#import "CharonMapKit.h"
+#import "RevenantMapKit.h"
 
-@interface MKPlacemark (CharonMapItemAddress)
+@interface MKPlacemark (RevenantMapItemAddress)
 @end
 
-@interface MKMapItem (CharonMembers)
+@interface MKMapItem (RevenantMembers)
 
 - (nullable NSDictionary *)dictionaryRepresentation;
 
@@ -20,7 +20,7 @@
 
 @end
 
-@implementation MKMapItem (CharonMembers)
+@implementation MKMapItem (RevenantMembers)
 
 - (NSString *)identifier
 {
@@ -104,7 +104,7 @@
 
 @end
 
-#if !CHARON_HOST_PROBE
+#if !REVENANT_HOST_PROBE
 @interface MKMapItemAnnotation : NSObject
 - (instancetype)initWithMapItem:(MKMapItem *)mapItem;
 @property (nonatomic, strong) MKMapItem *mapItem;

@@ -1,9 +1,9 @@
 #import <Accessibility/Accessibility.h>
 
 @interface AXCustomContent () {
-    NSAttributedString *_charon_attributedLabel;
-    NSAttributedString *_charon_attributedValue;
-    AXCustomContentImportance _charon_importance;
+    NSAttributedString *_revenant_attributedLabel;
+    NSAttributedString *_revenant_attributedValue;
+    AXCustomContentImportance _revenant_importance;
 }
 @end
 
@@ -12,8 +12,8 @@
 + (instancetype)customContentWithLabel:(NSString *)label value:(NSString *)value
 {
     AXCustomContent *content = [[self alloc] init];
-    content->_charon_attributedLabel = [[NSAttributedString alloc] initWithString:label];
-    content->_charon_attributedValue = [[NSAttributedString alloc] initWithString:value];
+    content->_revenant_attributedLabel = [[NSAttributedString alloc] initWithString:label];
+    content->_revenant_attributedValue = [[NSAttributedString alloc] initWithString:value];
     return content;
 }
 
@@ -21,39 +21,39 @@
                                  attributedValue:(NSAttributedString *)value
 {
     AXCustomContent *content = [[self alloc] init];
-    content->_charon_attributedLabel = [label copy];
-    content->_charon_attributedValue = [value copy];
+    content->_revenant_attributedLabel = [label copy];
+    content->_revenant_attributedValue = [value copy];
     return content;
 }
 
 - (NSAttributedString *)attributedLabel
 {
-    return _charon_attributedLabel;
+    return _revenant_attributedLabel;
 }
 
 - (NSAttributedString *)attributedValue
 {
-    return _charon_attributedValue;
+    return _revenant_attributedValue;
 }
 
 - (NSString *)label
 {
-    return _charon_attributedLabel.string;
+    return _revenant_attributedLabel.string;
 }
 
 - (NSString *)value
 {
-    return _charon_attributedValue.string;
+    return _revenant_attributedValue.string;
 }
 
 - (AXCustomContentImportance)importance
 {
-    return _charon_importance;
+    return _revenant_importance;
 }
 
 - (void)setImportance:(AXCustomContentImportance)importance
 {
-    _charon_importance = importance;
+    _revenant_importance = importance;
 }
 
 #pragma mark - NSSecureCoding
@@ -66,18 +66,18 @@
 - (instancetype)initWithCoder:(NSCoder *)coder
 {
     if ((self = [super init])) {
-        _charon_attributedLabel = [coder decodeObjectOfClass:[NSAttributedString class] forKey:@"attributedLabel"];
-        _charon_attributedValue = [coder decodeObjectOfClass:[NSAttributedString class] forKey:@"attributedValue"];
-        _charon_importance = (AXCustomContentImportance)[coder decodeIntegerForKey:@"importance"];
+        _revenant_attributedLabel = [coder decodeObjectOfClass:[NSAttributedString class] forKey:@"attributedLabel"];
+        _revenant_attributedValue = [coder decodeObjectOfClass:[NSAttributedString class] forKey:@"attributedValue"];
+        _revenant_importance = (AXCustomContentImportance)[coder decodeIntegerForKey:@"importance"];
     }
     return self;
 }
 
 - (void)encodeWithCoder:(NSCoder *)coder
 {
-    [coder encodeObject:_charon_attributedLabel forKey:@"attributedLabel"];
-    [coder encodeObject:_charon_attributedValue forKey:@"attributedValue"];
-    [coder encodeInteger:(NSInteger)_charon_importance forKey:@"importance"];
+    [coder encodeObject:_revenant_attributedLabel forKey:@"attributedLabel"];
+    [coder encodeObject:_revenant_attributedValue forKey:@"attributedValue"];
+    [coder encodeInteger:(NSInteger)_revenant_importance forKey:@"importance"];
 }
 
 #pragma mark - NSCopying
@@ -85,9 +85,9 @@
 - (id)copyWithZone:(NSZone *)zone
 {
     AXCustomContent *copy = [[AXCustomContent allocWithZone:zone] init];
-    copy->_charon_attributedLabel = _charon_attributedLabel;
-    copy->_charon_attributedValue = _charon_attributedValue;
-    copy->_charon_importance = _charon_importance;
+    copy->_revenant_attributedLabel = _revenant_attributedLabel;
+    copy->_revenant_attributedValue = _revenant_attributedValue;
+    copy->_revenant_importance = _revenant_importance;
     return copy;
 }
 
@@ -100,21 +100,21 @@
         return NO;
     }
     AXCustomContent *content = (AXCustomContent *)other;
-    return [_charon_attributedLabel isEqualToAttributedString:content->_charon_attributedLabel]
-        && [_charon_attributedValue isEqualToAttributedString:content->_charon_attributedValue]
-        && _charon_importance == content->_charon_importance;
+    return [_revenant_attributedLabel isEqualToAttributedString:content->_revenant_attributedLabel]
+        && [_revenant_attributedValue isEqualToAttributedString:content->_revenant_attributedValue]
+        && _revenant_importance == content->_revenant_importance;
 }
 
 - (NSUInteger)hash
 {
-    return ([_charon_attributedLabel hash] ^ [_charon_attributedValue hash]) ^ (NSUInteger)_charon_importance;
+    return ([_revenant_attributedLabel hash] ^ [_revenant_attributedValue hash]) ^ (NSUInteger)_revenant_importance;
 }
 
 - (NSString *)description
 {
     return [NSString stringWithFormat:@"<%@: %p>: label: %@, value: %@",
             NSStringFromClass([self class]), (void *)self,
-            _charon_attributedLabel.string, _charon_attributedValue.string];
+            _revenant_attributedLabel.string, _revenant_attributedValue.string];
 }
 
 @end

@@ -3,62 +3,62 @@
 #import <CoreFoundation/CoreFoundation.h>
 #import <pthread.h>
 
-typedef struct CharonSecurityPolicyHeld {
+typedef struct RevenantSecurityPolicyHeld {
     const void *policy;
     CFStringRef oid;
     CFDictionaryRef properties;
-} CharonSecurityPolicyHeld;
+} RevenantSecurityPolicyHeld;
 
-static pthread_mutex_t CharonSecurityHoldLock = PTHREAD_MUTEX_INITIALIZER;
-static CFMutableArrayRef CharonSecurityPolicyHolds;
+static pthread_mutex_t RevenantSecurityHoldLock = PTHREAD_MUTEX_INITIALIZER;
+static CFMutableArrayRef RevenantSecurityPolicyHolds;
 
-static CharonSecurityPolicyHeld *CharonSecurityPolicyHeldFor(const void *policy)
+static RevenantSecurityPolicyHeld *RevenantSecurityPolicyHeldFor(const void *policy)
 {
-    if (!CharonSecurityPolicyHolds)
+    if (!RevenantSecurityPolicyHolds)
         return NULL;
-    for (CFIndex i = 0; i < CFArrayGetCount(CharonSecurityPolicyHolds); i++) {
-        CharonSecurityPolicyHeld *held = (CharonSecurityPolicyHeld *)CFArrayGetValueAtIndex(CharonSecurityPolicyHolds, i);
+    for (CFIndex i = 0; i < CFArrayGetCount(RevenantSecurityPolicyHolds); i++) {
+        RevenantSecurityPolicyHeld *held = (RevenantSecurityPolicyHeld *)CFArrayGetValueAtIndex(RevenantSecurityPolicyHolds, i);
         if (held->policy == policy)
             return held;
     }
     return NULL;
 }
 
-static CFMutableArrayRef CharonSecurityEmptyList(void)
+static CFMutableArrayRef RevenantSecurityEmptyList(void)
 {
     return CFArrayCreateMutable(kCFAllocatorDefault, 0, &kCFTypeArrayCallBacks);
 }
 
-static CFMutableArrayRef CharonSecurityEmptyRecords(void)
+static CFMutableArrayRef RevenantSecurityEmptyRecords(void)
 {
     return CFArrayCreateMutable(kCFAllocatorDefault, 0, NULL);
 }
 
-static void CharonSecurityRecordPolicy(SecPolicyRef policy, CFStringRef oid, CFDictionaryRef properties)
+static void RevenantSecurityRecordPolicy(SecPolicyRef policy, CFStringRef oid, CFDictionaryRef properties)
 {
     if (!policy || !oid)
         return;
-    pthread_mutex_lock(&CharonSecurityHoldLock);
-    if (!CharonSecurityPolicyHolds)
-        CharonSecurityPolicyHolds = CharonSecurityEmptyRecords();
-    CharonSecurityPolicyHeld *held = CharonSecurityPolicyHeldFor(policy);
-    if (!held && CharonSecurityPolicyHolds) {
-        held = (CharonSecurityPolicyHeld *)calloc(1, sizeof(CharonSecurityPolicyHeld));
+    pthread_mutex_lock(&RevenantSecurityHoldLock);
+    if (!RevenantSecurityPolicyHolds)
+        RevenantSecurityPolicyHolds = RevenantSecurityEmptyRecords();
+    RevenantSecurityPolicyHeld *held = RevenantSecurityPolicyHeldFor(policy);
+    if (!held && RevenantSecurityPolicyHolds) {
+        held = (RevenantSecurityPolicyHeld *)calloc(1, sizeof(RevenantSecurityPolicyHeld));
         if (held) {
             held->policy = policy;
             held->oid = (CFStringRef)CFRetain(oid);
             held->properties = properties ? (CFDictionaryRef)CFRetain(properties) : NULL;
-            CFArrayAppendValue(CharonSecurityPolicyHolds, (const void *)held);
+            CFArrayAppendValue(RevenantSecurityPolicyHolds, (const void *)held);
         }
     }
-    pthread_mutex_unlock(&CharonSecurityHoldLock);
+    pthread_mutex_unlock(&RevenantSecurityHoldLock);
 }
 
 OSStatus SecTrustCopyPolicies(SecTrustRef trust, CFArrayRef *policies)
 {
     if (!trust || !policies)
         return errSecParam;
-    CFMutableArrayRef copy = CharonSecurityEmptyList();
+    CFMutableArrayRef copy = RevenantSecurityEmptyList();
     if (!copy)
         return errSecAllocate;
     *policies = copy;
@@ -102,11 +102,11 @@ CFDictionaryRef SecPolicyCopyProperties(SecPolicyRef policyRef)
 {
     if (!policyRef)
         return NULL;
-    pthread_mutex_lock(&CharonSecurityHoldLock);
-    CharonSecurityPolicyHeld *held = CharonSecurityPolicyHeldFor(policyRef);
+    pthread_mutex_lock(&RevenantSecurityHoldLock);
+    RevenantSecurityPolicyHeld *held = RevenantSecurityPolicyHeldFor(policyRef);
     CFStringRef oid = held ? (CFStringRef)CFRetain(held->oid) : NULL;
     CFDictionaryRef properties = held && held->properties ? (CFDictionaryRef)CFRetain(held->properties) : NULL;
-    pthread_mutex_unlock(&CharonSecurityHoldLock);
+    pthread_mutex_unlock(&RevenantSecurityHoldLock);
     if (!oid) {
         if (properties) CFRelease(properties);
         return NULL;
@@ -161,6 +161,6 @@ SecPolicyRef SecPolicyCreateWithProperties(CFTypeRef policyIdentifier, CFDiction
         oid = kSecPolicyAppleSSL;
     }
     if (policy)
-        CharonSecurityRecordPolicy(policy, oid, properties);
+        RevenantSecurityRecordPolicy(policy, oid, properties);
     return policy;
 }

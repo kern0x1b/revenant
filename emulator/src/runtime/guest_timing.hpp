@@ -12,7 +12,7 @@
 #include <limits>
 #include <stdexcept>
 
-namespace shade::runtime_detail {
+namespace emulator::runtime_detail {
 
 class GuestTickClock {
 public:

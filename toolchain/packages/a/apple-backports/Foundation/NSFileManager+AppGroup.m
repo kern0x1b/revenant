@@ -1,6 +1,6 @@
 #import <Foundation/Foundation.h>
 
-static NSString *charon_group_folder_name(NSString *identifier)
+static NSString *revenant_group_folder_name(NSString *identifier)
 {
     NSMutableString *name = [NSMutableString stringWithCapacity:identifier.length];
     for (NSUInteger index = 0; index < identifier.length; index++) {
@@ -28,13 +28,13 @@ static NSString *charon_group_folder_name(NSString *identifier)
     return name;
 }
 
-@implementation NSFileManager (CharonAppGroup)
+@implementation NSFileManager (RevenantAppGroup)
 
 - (NSURL *)containerURLForSecurityApplicationGroupIdentifier:(NSString *)groupIdentifier
 {
     if (![groupIdentifier isKindOfClass:[NSString class]] || !groupIdentifier.length)
         return nil;
-    NSString *path = [[NSHomeDirectory() stringByAppendingPathComponent:@"Library/Group Containers"] stringByAppendingPathComponent:charon_group_folder_name(groupIdentifier)];
+    NSString *path = [[NSHomeDirectory() stringByAppendingPathComponent:@"Library/Group Containers"] stringByAppendingPathComponent:revenant_group_folder_name(groupIdentifier)];
     if (![self createDirectoryAtPath:path withIntermediateDirectories:YES attributes:nil error:NULL])
         return nil;
     return [NSURL fileURLWithPath:path isDirectory:YES];

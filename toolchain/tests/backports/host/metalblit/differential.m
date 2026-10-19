@@ -3,13 +3,13 @@
 #import <dlfcn.h>
 #import "metalblit-expectations.h"
 
-@interface CharonHostCharonMetalBuffer : NSObject
+@interface RevenantHostRevenantMetalBuffer : NSObject
 - (instancetype)initWithLength:(NSUInteger)length bytes:(const void *)bytes;
 - (void *)bytes;
 - (NSUInteger)length;
 @end
 
-@interface CharonHostCharonMetalBlitEncoder : NSObject
+@interface RevenantHostRevenantMetalBlitEncoder : NSObject
 - (void)copyFromBuffer:(id)sourceBuffer sourceOffset:(NSUInteger)sourceOffset
                toBuffer:(id)destinationBuffer destinationOffset:(NSUInteger)destinationOffset size:(NSUInteger)size;
 - (void)fillBuffer:(id)buffer range:(NSRange)range value:(uint8_t)value;
@@ -88,9 +88,9 @@ int main(void)
         id<MTLCommandQueue> queue = [device newCommandQueue];
 
         {
-            CharonHostCharonMetalBuffer *port = [[CharonHostCharonMetalBuffer alloc] initWithLength:64 bytes:NULL];
+            RevenantHostRevenantMetalBuffer *port = [[RevenantHostRevenantMetalBuffer alloc] initWithLength:64 bytes:NULL];
             memset(port.bytes, 0, 64);
-            CharonHostCharonMetalBlitEncoder *blit = [[CharonHostCharonMetalBlitEncoder alloc] init];
+            RevenantHostRevenantMetalBlitEncoder *blit = [[RevenantHostRevenantMetalBlitEncoder alloc] init];
             [blit fillBuffer:port range:NSMakeRange(8, 16) value:0xAB];
 
             id<MTLBuffer> system = [device newBufferWithLength:64 options:0];
@@ -112,9 +112,9 @@ int main(void)
             for (int index = 0; index < 64; index++)
                 pattern[index] = (uint8_t)index;
 
-            CharonHostCharonMetalBuffer *portSource = [[CharonHostCharonMetalBuffer alloc] initWithLength:64 bytes:pattern];
-            CharonHostCharonMetalBuffer *portDestination = [[CharonHostCharonMetalBuffer alloc] initWithLength:64 bytes:NULL];
-            CharonHostCharonMetalBlitEncoder *blit = [[CharonHostCharonMetalBlitEncoder alloc] init];
+            RevenantHostRevenantMetalBuffer *portSource = [[RevenantHostRevenantMetalBuffer alloc] initWithLength:64 bytes:pattern];
+            RevenantHostRevenantMetalBuffer *portDestination = [[RevenantHostRevenantMetalBuffer alloc] initWithLength:64 bytes:NULL];
+            RevenantHostRevenantMetalBlitEncoder *blit = [[RevenantHostRevenantMetalBlitEncoder alloc] init];
             [blit copyFromBuffer:portSource sourceOffset:8 toBuffer:portDestination destinationOffset:40 size:16];
 
             same_bytes([NSData dataWithBytes:portDestination.bytes length:64], metalblit_buffer_copy, 64,
@@ -126,8 +126,8 @@ int main(void)
             for (int index = 0; index < 64; index++)
                 pattern[index] = (uint8_t)index;
 
-            CharonHostCharonMetalBuffer *port = [[CharonHostCharonMetalBuffer alloc] initWithLength:64 bytes:pattern];
-            CharonHostCharonMetalBlitEncoder *blit = [[CharonHostCharonMetalBlitEncoder alloc] init];
+            RevenantHostRevenantMetalBuffer *port = [[RevenantHostRevenantMetalBuffer alloc] initWithLength:64 bytes:pattern];
+            RevenantHostRevenantMetalBlitEncoder *blit = [[RevenantHostRevenantMetalBlitEncoder alloc] init];
             [blit copyFromBuffer:port sourceOffset:0 toBuffer:port destinationOffset:8 size:32];
 
             checks++;
@@ -142,8 +142,8 @@ int main(void)
             for (int index = 0; index < 64; index++)
                 pattern[index] = (uint8_t)index;
 
-            CharonHostCharonMetalBuffer *port = [[CharonHostCharonMetalBuffer alloc] initWithLength:64 bytes:pattern];
-            CharonHostCharonMetalBlitEncoder *blit = [[CharonHostCharonMetalBlitEncoder alloc] init];
+            RevenantHostRevenantMetalBuffer *port = [[RevenantHostRevenantMetalBuffer alloc] initWithLength:64 bytes:pattern];
+            RevenantHostRevenantMetalBlitEncoder *blit = [[RevenantHostRevenantMetalBlitEncoder alloc] init];
             [blit fillBuffer:port range:NSMakeRange(8, 80) value:0xCC];
             [blit copyFromBuffer:port sourceOffset:0 toBuffer:port destinationOffset:32 size:64];
 
@@ -190,7 +190,7 @@ int main(void)
             if (memcmp(after, pixels, 64) != 0)
                 fail(@"Metal's access hints changed the bytes of a texture, which a hint must not do");
 
-            CharonHostCharonMetalBlitEncoder *blit = [[CharonHostCharonMetalBlitEncoder alloc] init];
+            RevenantHostRevenantMetalBlitEncoder *blit = [[RevenantHostRevenantMetalBlitEncoder alloc] init];
             NSUInteger logBefore = logged.count;
             [blit optimizeContentsForCPUAccess:texture];
             [blit optimizeContentsForGPUAccess:texture];

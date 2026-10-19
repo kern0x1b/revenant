@@ -10,7 +10,7 @@
 #include <functional>
 #include <memory>
 
-namespace shade {
+namespace emulator {
 
 class UserlandHleRegistry;
 class WifiState;

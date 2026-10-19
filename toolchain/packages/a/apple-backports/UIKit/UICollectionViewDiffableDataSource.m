@@ -1,6 +1,6 @@
-#import "CharonDiffable.h"
+#import "RevenantDiffable.h"
 
-static NSString *const charon_source_file = @"UIDiffableDataSource.m";
+static NSString *const revenant_source_file = @"UIDiffableDataSource.m";
 
 @implementation UICollectionViewDiffableDataSource {
 @private
@@ -41,39 +41,39 @@ static NSString *const charon_source_file = @"UIDiffableDataSource.m";
     _supplementaryViewProvider = [supplementaryViewProvider copy];
 }
 
-- (NSDiffableDataSourceSnapshot *)charon_current
+- (NSDiffableDataSourceSnapshot *)revenant_current
 {
     if (!_snapshot)
         _snapshot = [[NSDiffableDataSourceSnapshot alloc] init];
     return _snapshot;
 }
 
-- (void)charon_replaceCurrent:(NSDiffableDataSourceSnapshot *)snapshot
+- (void)revenant_replaceCurrent:(NSDiffableDataSourceSnapshot *)snapshot
 {
     _snapshot = snapshot;
 }
 
-- (UICollectionView *)charon_collectionView
+- (UICollectionView *)revenant_collectionView
 {
     return _collectionView;
 }
 
 - (NSDiffableDataSourceSnapshot *)snapshot
 {
-    NSDiffableDataSourceSnapshot *held = [self respondsToSelector:@selector(charon_reorderInitial)] ? [self charon_reorderInitial] : nil;
+    NSDiffableDataSourceSnapshot *held = [self respondsToSelector:@selector(revenant_reorderInitial)] ? [self revenant_reorderInitial] : nil;
     if (held)
         return [held copy];
-    return [[self charon_current] charon_copyWithoutReloads];
+    return [[self revenant_current] revenant_copyWithoutReloads];
 }
 
 - (id)itemIdentifierForIndexPath:(NSIndexPath *)indexPath
 {
-    return [[self charon_current] charon_itemAtIndexPath:indexPath];
+    return [[self revenant_current] revenant_itemAtIndexPath:indexPath];
 }
 
 - (NSIndexPath *)indexPathForItemIdentifier:(id)identifier
 {
-    return [[self charon_current] charon_indexPathForItem:identifier];
+    return [[self revenant_current] revenant_indexPathForItem:identifier];
 }
 
 - (void)applySnapshot:(NSDiffableDataSourceSnapshot *)snapshot animatingDifferences:(BOOL)animatingDifferences
@@ -85,11 +85,11 @@ static NSString *const charon_source_file = @"UIDiffableDataSource.m";
 {
     if (!snapshot)
         [NSException raise:NSInternalInconsistencyException format:@"Invalid parameter not satisfying: snapshot"];
-    NSDiffableDataSourceSnapshot *old = [self charon_current], *updated = [snapshot charon_copyWithoutReloads];
-    if ([self respondsToSelector:@selector(charon_rebaseSectionSnapshotsFrom:onto:)])
-        [self charon_rebaseSectionSnapshotsFrom:old onto:updated];
+    NSDiffableDataSourceSnapshot *old = [self revenant_current], *updated = [snapshot revenant_copyWithoutReloads];
+    if ([self respondsToSelector:@selector(revenant_rebaseSectionSnapshotsFrom:onto:)])
+        [self revenant_rebaseSectionSnapshotsFrom:old onto:updated];
     UICollectionView *view = _collectionView;
-    NSDictionary *changes = charon_diffable_changes(old, snapshot, NO);
+    NSDictionary *changes = revenant_diffable_changes(old, snapshot, NO);
     BOOL visible = view.window != nil, initial = !_applied, structural = visible && !initial && ![changes[@"fallback"] boolValue];
     _applied = YES;
     NSIndexSet *deleteSections = changes[@"deleteSections"], *insertSections = changes[@"insertSections"], *reloadSections = changes[@"reloadSections"];
@@ -106,7 +106,7 @@ static NSString *const charon_source_file = @"UIDiffableDataSource.m";
     BOOL reloads = visible && (initial ? animatingDifferences : ![changes[@"fallback"] boolValue]) && (reloadSections.count || reloadItems.count);
     void (^reload)(void) = ^{
         if (!reloads) {
-            charon_diffable_finish(finish);
+            revenant_diffable_finish(finish);
             return;
         }
         if (initial) {
@@ -171,54 +171,54 @@ static NSString *const charon_source_file = @"UIDiffableDataSource.m";
         [UIView setAnimationsEnabled:animations];
 }
 
-- (void)charon_applyReloadingData:(NSDiffableDataSourceSnapshot *)snapshot completion:(void (^)(void))completion
+- (void)revenant_applyReloadingData:(NSDiffableDataSourceSnapshot *)snapshot completion:(void (^)(void))completion
 {
     if (!snapshot)
         [NSException raise:NSInternalInconsistencyException format:@"Invalid parameter not satisfying: snapshot"];
-    NSDiffableDataSourceSnapshot *updated = [snapshot charon_copyWithoutReloads];
-    if ([self respondsToSelector:@selector(charon_rebaseSectionSnapshotsFrom:onto:)])
-        [self charon_rebaseSectionSnapshotsFrom:[self charon_current] onto:updated];
+    NSDiffableDataSourceSnapshot *updated = [snapshot revenant_copyWithoutReloads];
+    if ([self respondsToSelector:@selector(revenant_rebaseSectionSnapshotsFrom:onto:)])
+        [self revenant_rebaseSectionSnapshotsFrom:[self revenant_current] onto:updated];
     _applied = YES;
     _snapshot = updated;
     [_collectionView reloadData];
     [_collectionView layoutIfNeeded];
-    charon_diffable_finish(completion);
+    revenant_diffable_finish(completion);
 }
 
 - (NSInteger)numberOfSectionsInCollectionView:(UICollectionView *)collectionView
 {
-    return [self charon_current].numberOfSections;
+    return [self revenant_current].numberOfSections;
 }
 
 - (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section
 {
-    NSDiffableDataSourceSnapshot *snapshot = [self charon_current];
-    charon_diffable_require(section < snapshot.numberOfSections, charon_source_file, 141, @"section < _impl.numberOfSections");
-    return (NSInteger)[snapshot charon_countInSectionAtIndex:(NSUInteger)section];
+    NSDiffableDataSourceSnapshot *snapshot = [self revenant_current];
+    revenant_diffable_require(section < snapshot.numberOfSections, revenant_source_file, 141, @"section < _impl.numberOfSections");
+    return (NSInteger)[snapshot revenant_countInSectionAtIndex:(NSUInteger)section];
 }
 
 - (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath
 {
-    charon_diffable_require(indexPath != nil, charon_source_file, 146, @"indexPath");
-    id item = [[self charon_current] charon_itemAtIndexPath:indexPath];
+    revenant_diffable_require(indexPath != nil, revenant_source_file, 146, @"indexPath");
+    id item = [[self revenant_current] revenant_itemAtIndexPath:indexPath];
     UICollectionViewCell *cell = _cellProvider ? _cellProvider(collectionView, indexPath, item) : nil;
     if (!cell)
-        charon_diffable_raise(@"_UIDiffableDataSourceImpl.m", 1533, [NSString stringWithFormat:@"UICollectionViewDiffableDataSource cell provider returned nil for index path %@ with item identifier '%@', which is not allowed. You must always return a cell to the collection view: %@", indexPath, item, collectionView]);
-    if ([self respondsToSelector:@selector(charon_configureCell:item:indexPath:)])
-        [self charon_configureCell:cell item:item indexPath:indexPath];
+        revenant_diffable_raise(@"_UIDiffableDataSourceImpl.m", 1533, [NSString stringWithFormat:@"UICollectionViewDiffableDataSource cell provider returned nil for index path %@ with item identifier '%@', which is not allowed. You must always return a cell to the collection view: %@", indexPath, item, collectionView]);
+    if ([self respondsToSelector:@selector(revenant_configureCell:item:indexPath:)])
+        [self revenant_configureCell:cell item:item indexPath:indexPath];
     return cell;
 }
 
 - (UICollectionReusableView *)collectionView:(UICollectionView *)collectionView viewForSupplementaryElementOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
 {
     if (!_supplementaryViewProvider)
-        charon_diffable_raise(charon_source_file, 152, [NSString stringWithFormat:@"CollectionView %@ requested a supplementary view, but a supplementaryViewProvider was not specified on the diffable data source. Please configure the diffable data source accordingly and add the supplementary provider", collectionView]);
+        revenant_diffable_raise(revenant_source_file, 152, [NSString stringWithFormat:@"CollectionView %@ requested a supplementary view, but a supplementaryViewProvider was not specified on the diffable data source. Please configure the diffable data source accordingly and add the supplementary provider", collectionView]);
     return _supplementaryViewProvider(collectionView, kind, indexPath);
 }
 
 - (NSString *)description
 {
-    return charon_diffable_source_description([self charon_current]);
+    return revenant_diffable_source_description([self revenant_current]);
 }
 
 @end

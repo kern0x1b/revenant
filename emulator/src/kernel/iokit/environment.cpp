@@ -17,7 +17,7 @@
 #include <utility>
 #include <vector>
 
-namespace shade::kernel_iokit::environment {
+namespace emulator::kernel_iokit::environment {
 namespace {
 
     constexpr std::string_view io_service_class { "IOService" };

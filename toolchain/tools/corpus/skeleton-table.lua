@@ -1,7 +1,7 @@
 local dyld_module = "apple.dyld"
 
 local function open(root, cachefile)
-    local dyld = import(dyld_module, {rootdir = path.join(os.getenv("CHARON_ROOT"), "modules"), anonymous = true})
+    local dyld = import(dyld_module, {rootdir = path.join(os.getenv("REVENANT_ROOT"), "modules"), anonymous = true})
     return dyld.open_cache(cachefile)
 end
 
@@ -310,7 +310,7 @@ end
 
 function main(cachefile, wanted, what, ...)
     local arguments = {...}
-    local dyld = import(dyld_module, {rootdir = path.join(os.getenv("CHARON_ROOT"), "modules"), anonymous = true})
+    local dyld = import(dyld_module, {rootdir = path.join(os.getenv("REVENANT_ROOT"), "modules"), anonymous = true})
     local cache = dyld.open_cache(cachefile)
     local found = images(cache, wanted)
     assert(#found > 0, "no image of that cache has an install name containing " .. tostring(wanted))

@@ -1,19 +1,19 @@
 #import <Foundation/Foundation.h>
 #include <stdint.h>
 
-typedef double CharonUDate;
-typedef void *CharonUDateIntervalFormat;
-typedef int32_t CharonUErrorCode;
+typedef double RevenantUDate;
+typedef void *RevenantUDateIntervalFormat;
+typedef int32_t RevenantUErrorCode;
 
-extern __attribute__((weak_import)) CharonUDateIntervalFormat
+extern __attribute__((weak_import)) RevenantUDateIntervalFormat
     udtitvfmt_open(const char *locale, const uint16_t *skeleton, int32_t skeletonLength,
-                   const uint16_t *tzID, int32_t tzIDLength, CharonUErrorCode *status);
-extern __attribute__((weak_import)) void udtitvfmt_close(CharonUDateIntervalFormat *formatter);
+                   const uint16_t *tzID, int32_t tzIDLength, RevenantUErrorCode *status);
+extern __attribute__((weak_import)) void udtitvfmt_close(RevenantUDateIntervalFormat *formatter);
 extern __attribute__((weak_import)) int32_t
-    udtitvfmt_format(const CharonUDateIntervalFormat *formatter, CharonUDate fromDate, CharonUDate toDate,
-                     uint16_t *result, int32_t resultCapacity, void *position, CharonUErrorCode *status);
+    udtitvfmt_format(const RevenantUDateIntervalFormat *formatter, RevenantUDate fromDate, RevenantUDate toDate,
+                     uint16_t *result, int32_t resultCapacity, void *position, RevenantUErrorCode *status);
 
-static NSString *CharonDateSkeleton(NSInteger style)
+static NSString *RevenantDateSkeleton(NSInteger style)
 {
     switch (style) {
         case 1: return @"yMd";
@@ -24,7 +24,7 @@ static NSString *CharonDateSkeleton(NSInteger style)
     }
 }
 
-static NSString *CharonTimeSkeleton(NSInteger style)
+static NSString *RevenantTimeSkeleton(NSInteger style)
 {
     switch (style) {
         case 1: return @"jm";
@@ -35,7 +35,7 @@ static NSString *CharonTimeSkeleton(NSInteger style)
     }
 }
 
-static NSString *CharonPatternSkeleton(NSString *pattern)
+static NSString *RevenantPatternSkeleton(NSString *pattern)
 {
     static const char *order = "GyYuMLwWdDFEegGzZabBchHKkmsSAzzyvVLPA";
     NSMutableDictionary *runs = [NSMutableDictionary dictionary];
@@ -77,11 +77,11 @@ static NSString *CharonPatternSkeleton(NSString *pattern)
     return skeleton;
 }
 
-static NSString *CharonIntervalSkeleton(NSInteger dateStyle, NSInteger timeStyle, NSString *template, NSLocale *locale)
+static NSString *RevenantIntervalSkeleton(NSInteger dateStyle, NSInteger timeStyle, NSString *template, NSLocale *locale)
 {
     if (template.length)
-        return CharonPatternSkeleton([NSDateFormatter dateFormatFromTemplate:template options:0 locale:locale]);
-    return [CharonDateSkeleton(dateStyle) stringByAppendingString:CharonTimeSkeleton(timeStyle)];
+        return RevenantPatternSkeleton([NSDateFormatter dateFormatFromTemplate:template options:0 locale:locale]);
+    return [RevenantDateSkeleton(dateStyle) stringByAppendingString:RevenantTimeSkeleton(timeStyle)];
 }
 
 @implementation NSDateIntervalFormatter {
@@ -212,9 +212,9 @@ static NSString *CharonIntervalSkeleton(NSInteger dateStyle, NSInteger timeStyle
     _timeStyle = timeStyle;
 }
 
-- (NSString *)charon_intervalFrom:(NSDate *)from to:(NSDate *)to
+- (NSString *)revenant_intervalFrom:(NSDate *)from to:(NSDate *)to
 {
-    NSString *skeleton = CharonIntervalSkeleton((NSInteger)_dateStyle, (NSInteger)_timeStyle, _dateTemplate, self.locale);
+    NSString *skeleton = RevenantIntervalSkeleton((NSInteger)_dateStyle, (NSInteger)_timeStyle, _dateTemplate, self.locale);
     if (!skeleton.length)
         return @"";
     NSString *zone = self.timeZone.name ?: @"GMT";
@@ -227,17 +227,17 @@ static NSString *CharonIntervalSkeleton(NSInteger dateStyle, NSInteger timeStyle
 
     if (!udtitvfmt_open || !udtitvfmt_format || !udtitvfmt_close)
         return nil;
-    CharonUErrorCode status = 0;
-    CharonUDateIntervalFormat formatter =
+    RevenantUErrorCode status = 0;
+    RevenantUDateIntervalFormat formatter =
         udtitvfmt_open(self.locale.localeIdentifier.UTF8String, skeletonChars, skeletonLength,
                        zoneChars, zoneLength, &status);
     if (status != 0 || !formatter)
         return nil;
     uint16_t buffer[512];
     status = 0;
-    int32_t written = udtitvfmt_format(&formatter, (CharonUDate)from.timeIntervalSinceReferenceDate,
-                                       (CharonUDate)to.timeIntervalSinceReferenceDate, buffer, 512, NULL, &status);
-    CharonUDateIntervalFormat closing = formatter;
+    int32_t written = udtitvfmt_format(&formatter, (RevenantUDate)from.timeIntervalSinceReferenceDate,
+                                       (RevenantUDate)to.timeIntervalSinceReferenceDate, buffer, 512, NULL, &status);
+    RevenantUDateIntervalFormat closing = formatter;
     udtitvfmt_close(&closing);
     if (status != 0 || written <= 0)
         return nil;
@@ -248,14 +248,14 @@ static NSString *CharonIntervalSkeleton(NSInteger dateStyle, NSInteger timeStyle
 {
     if (!fromDate || !toDate)
         return nil;
-    return [self charon_intervalFrom:fromDate to:toDate];
+    return [self revenant_intervalFrom:fromDate to:toDate];
 }
 
 - (NSString *)stringFromDateInterval:(NSDateInterval *)dateInterval
 {
     if (!dateInterval)
         return nil;
-    return [self charon_intervalFrom:dateInterval.startDate to:dateInterval.endDate];
+    return [self revenant_intervalFrom:dateInterval.startDate to:dateInterval.endDate];
 }
 
 @end

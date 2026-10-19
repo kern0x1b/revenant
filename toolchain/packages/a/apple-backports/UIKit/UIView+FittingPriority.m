@@ -1,6 +1,6 @@
 #import <UIKit/UIKit.h>
 
-@implementation UIView (CharonFittingPriority)
+@implementation UIView (RevenantFittingPriority)
 
 - (CGSize)systemLayoutSizeFittingSize:(CGSize)targetSize withHorizontalFittingPriority:(UILayoutPriority)horizontalFittingPriority verticalFittingPriority:(UILayoutPriority)verticalFittingPriority
 {

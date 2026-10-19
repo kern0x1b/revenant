@@ -53,10 +53,10 @@ echo "  FIXTURES: three.gif carries per-frame delays 0.1, 0.3 and 0.5, written o
 # A definition in an object wins over one in a dylib, which is what the port relies on at run time, and
 # cases.m proves it with dladdr.
 # shellcheck disable=SC2086  # $files is a LIST and must word-split
-xcrun clang -w -DCHARON_PORT -fobjc-arc -I"$port" $files "$port/ImageIONames130.m" "$here/cases.m" \
+xcrun clang -w -DREVENANT_PORT -fobjc-arc -I"$port" $files "$port/ImageIONames130.m" "$here/cases.m" \
   -framework Foundation -framework CoreGraphics -framework ImageIO -o "$build/port" 2>"$build/port.log" || {
   echo "BUILD  port"; head -5 "$build/port.log" | sed 's/^/    /'; exit 1; }
-xcrun clang -w -DCHARON_HOST -fobjc-arc "$here/cases.m" \
+xcrun clang -w -DREVENANT_HOST -fobjc-arc "$here/cases.m" \
   -framework Foundation -framework CoreGraphics -framework ImageIO -o "$build/host" 2>"$build/host.log" || {
   echo "BUILD  host"; head -5 "$build/host.log" | sed 's/^/    /'; exit 1; }
 
@@ -129,11 +129,11 @@ build_plant() {  # $1 = label; builds the planted port
   objs=""
   for f in "$plant"/*.m; do
     [ "$f" = "$plant/cases.m" ] && continue
-    xcrun clang -w -DCHARON_PORT -fobjc-arc -I"$port" -c "$f" -o "$f.o" 2>"$build/plant.log" || {
+    xcrun clang -w -DREVENANT_PORT -fobjc-arc -I"$port" -c "$f" -o "$f.o" 2>"$build/plant.log" || {
       echo "BUILD  the mutated port ($f)"; head -3 "$build/plant.log" | sed 's/^/    /'; exit 1; }
     objs="$objs $f.o"
   done
-  xcrun clang -w -DCHARON_PORT -fobjc-arc "$port/ImageIONames130.m" $objs "$plant/cases.m" \
+  xcrun clang -w -DREVENANT_PORT -fobjc-arc "$port/ImageIONames130.m" $objs "$plant/cases.m" \
     -framework Foundation -framework CoreGraphics -framework ImageIO -o "$build/plantbin" 2>"$build/plant.log" || {
     echo "BUILD  the mutated port ($1)"; head -3 "$build/plant.log" | sed 's/^/    /'; exit 1; }
 }
@@ -152,8 +152,8 @@ fi
 echo "  MUTATION 1: an animation that does not advance the index moves records, so the frame walk can go red"
 
 # 2. the delay: every frame drawn at the delay the file gives the FIRST frame
-sed -i '' 's/double delay = charon_frame_delay(_source, index);/double delay = charon_frame_delay(_source, 0);/' "$animation"
-hit=$(grep -c 'charon_frame_delay(_source, 0)' "$animation" || true)
+sed -i '' 's/double delay = revenant_frame_delay(_source, index);/double delay = revenant_frame_delay(_source, 0);/' "$animation"
+hit=$(grep -c 'revenant_frame_delay(_source, 0)' "$animation" || true)
 [ "$hit" -eq 1 ] || { echo "FAIL  the second mutation changed nothing (the pattern is stale)"; exit 1; }
 build_plant "delay" > /dev/null
 "$build/plantbin" "$build" > "$build/plant.out" 2>"$build/plant.err" || { echo "FAIL  the mutated port build raised"; exit 1; }

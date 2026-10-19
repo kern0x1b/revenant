@@ -62,7 +62,7 @@ static NSArray *allMembers(NSString *cls)
 
 static NSString *portName(NSString *cls)
 {
-    return [@"CharonHost" stringByAppendingString:cls];
+    return [@"RevenantHost" stringByAppendingString:cls];
 }
 
 static id makeInit(NSString *cls, BOOL port)

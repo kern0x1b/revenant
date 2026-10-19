@@ -13,7 +13,7 @@
 #include <array>
 #include <stdexcept>
 
-namespace shade {
+namespace emulator {
 namespace {
 
     constexpr DarwinAbi disk_policy_abi {

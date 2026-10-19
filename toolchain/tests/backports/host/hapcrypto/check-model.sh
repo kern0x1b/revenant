@@ -14,7 +14,7 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-scratch=$(runs_fresh charon-hapcrypto-check)
+scratch=$(runs_fresh revenant-hapcrypto-check)
 root=${1:-$here/../../../..}
 package=${PACKAGE:-$root/packages/a/apple-backports}
 framework=${FRAMEWORK:-HomeKit}
@@ -86,11 +86,11 @@ sort -u "$answered" -o "$answered"
 comm -23 "$listed" "$implemented" > "$missing"
 cat "$answered" >> "$implemented"
 sort -u "$implemented" -o "$implemented"
-# The port's own classes are not API: modules/apple/backports.lua filters a name starting with `Charon`
+# The port's own classes are not API: modules/apple/backports.lua filters a name starting with `Revenant`
 # out of what an object is weighed for, and a store the model sits on is the substrate rather than a row
 # of the surface. They are named here so the difference is visible, and not counted as a failure.
 cat "$listed" "$answered" | sort -u > "$all_listed"
-comm -13 "$all_listed" "$implemented" | grep -v -e '^Charon' -e '^NSObject$' > "$unlisted" || true
+comm -13 "$all_listed" "$implemented" | grep -v -e '^Revenant' -e '^NSObject$' > "$unlisted" || true
 
 printf '%s\n' "registry $framework: classes and protocols the tree defines and the registry lists"
 printf '  %-44s %s\n' "defined by the library:" "$(wc -l < "$implemented" | tr -d ' ')"

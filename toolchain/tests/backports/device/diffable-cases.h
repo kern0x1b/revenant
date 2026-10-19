@@ -27,7 +27,7 @@ static uint64_t df_hash(NSString *text)
 static NSString *df_normalized(NSString *text)
 {
     NSMutableString *result = [text mutableCopy];
-    [result replaceOccurrencesOfString:@"CharonHost" withString:@"" options:0 range:NSMakeRange(0, result.length)];
+    [result replaceOccurrencesOfString:@"RevenantHost" withString:@"" options:0 range:NSMakeRange(0, result.length)];
     for (NSString *pattern in @[@"0x[0-9a-fA-F]+", @"[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}"]) {
         NSRegularExpression *expression = [NSRegularExpression regularExpressionWithPattern:pattern options:0 error:NULL];
         [result setString:[expression stringByReplacingMatchesInString:result options:0 range:NSMakeRange(0, result.length) withTemplate:[pattern hasPrefix:@"0x"] ? @"0x" : @"GEN"]];

@@ -12,7 +12,7 @@ SECSRC=${SECSRC:-$root/packages/a/apple-backports/Security}
 build=${CC_BUILD:-$root/.agent-work/runs/commoncrypto-host}
 rm -rf "$build"
 mkdir -p "$build"
-xcrun clang -fobjc-arc -fvisibility=hidden -w -DCCRandomGenerateBytes=charon_host_CCRandomGenerateBytes \
+xcrun clang -fobjc-arc -fvisibility=hidden -w -DCCRandomGenerateBytes=revenant_host_CCRandomGenerateBytes \
     -c "$CCSRC/CCRandomGenerateBytes.m" -o "$build/port.o"
 xcrun clang -w "$here/differential.c" "$build/port.o" -framework Security -o "$build/differential"
 xcrun clang -fobjc-arc -w -c "$SECSRC/SecurityNames100.m" -o "$build/names.o"

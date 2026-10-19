@@ -11,7 +11,7 @@ static BOOL reordering_allowed = YES;
 
 static Class named(int side, NSString *name)
 {
-    return side ? NSClassFromString([@"CharonHost" stringByAppendingString:name]) : NSClassFromString(name);
+    return side ? NSClassFromString([@"RevenantHost" stringByAppendingString:name]) : NSClassFromString(name);
 }
 
 static uint64_t rng = 0x2545F4914F6CDD1DULL;
@@ -95,7 +95,7 @@ static NSString *normalised(id object)
         return out;
     };
     NSMutableString *text = [([object description] ?: @"nil") mutableCopy];
-    [text replaceOccurrencesOfString:@"CharonHost" withString:@"" options:0 range:NSMakeRange(0, text.length)];
+    [text replaceOccurrencesOfString:@"RevenantHost" withString:@"" options:0 range:NSMakeRange(0, text.length)];
     NSRegularExpression *pointer = [NSRegularExpression regularExpressionWithPattern:@"0x[0-9a-f]+|fobj=0x[0-9a-f]+, spc=[0-9.]+" options:0 error:NULL];
     [pointer replaceMatchesInString:text options:0 range:NSMakeRange(0, text.length) withTemplate:@"0x"];
     NSRegularExpression *named = [NSRegularExpression regularExpressionWithPattern:@"<UI(Dynamic|Mac)(System|Catalog)?Color: 0x; name = [A-Za-z0-9_]+>" options:0 error:NULL];
@@ -106,9 +106,9 @@ static NSString *normalised(id object)
 static void same(NSString *name, NSString *system, NSString *port)
 {
     if ([system isEqual:port])
-        charon_check(YES, name.UTF8String, nil);
+        revenant_check(YES, name.UTF8String, nil);
     else
-        charon_check(NO, name.UTF8String, [NSString stringWithFormat:@"\n  system %@\n  port   %@", system, port]);
+        revenant_check(NO, name.UTF8String, [NSString stringWithFormat:@"\n  system %@\n  port   %@", system, port]);
 }
 
 static UIImage *square(CGFloat side)

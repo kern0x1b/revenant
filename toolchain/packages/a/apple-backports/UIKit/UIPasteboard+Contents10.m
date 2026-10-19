@@ -1,6 +1,6 @@
 #import <UIKit/UIKit.h>
 
-@implementation UIPasteboard (CharonContents10)
+@implementation UIPasteboard (RevenantContents10)
 
 - (BOOL)hasStrings
 {

@@ -1,5 +1,5 @@
-#ifndef CHARON_TEST_CORENFC_H
-#define CHARON_TEST_CORENFC_H
+#ifndef REVENANT_TEST_CORENFC_H
+#define REVENANT_TEST_CORENFC_H
 
 #import <Foundation/Foundation.h>
 

@@ -1,9 +1,9 @@
-#import "CharonCoreData.h"
+#import "RevenantCoreData.h"
 #import <objc/runtime.h>
 
 NSString * const NSPersistentStoreRemoteChangeNotificationPostOptionKey = @"NSPersistentStoreRemoteChangeNotificationOptionKey";
 
-static void charon_cloudkit_say_once(void)
+static void revenant_cloudkit_say_once(void)
 {
     static dispatch_once_t once;
     dispatch_once(&once, ^{
@@ -37,25 +37,25 @@ static void charon_cloudkit_say_once(void)
 
 - (instancetype)initWithName:(NSString *)name managedObjectModel:(NSManagedObjectModel *)model
 {
-    charon_cloudkit_say_once();
+    revenant_cloudkit_say_once();
     return [super initWithName:name managedObjectModel:model];
 }
 
 @end
 
-static const char charon_cloudkit_options_key;
+static const char revenant_cloudkit_options_key;
 
-@implementation NSPersistentStoreDescription (CharonCloudKit)
+@implementation NSPersistentStoreDescription (RevenantCloudKit)
 
 - (NSPersistentCloudKitContainerOptions *)cloudKitContainerOptions
 {
-    return objc_getAssociatedObject(self, &charon_cloudkit_options_key);
+    return objc_getAssociatedObject(self, &revenant_cloudkit_options_key);
 }
 
 - (void)setCloudKitContainerOptions:(NSPersistentCloudKitContainerOptions *)cloudKitContainerOptions
 {
-    charon_cloudkit_say_once();
-    objc_setAssociatedObject(self, &charon_cloudkit_options_key, cloudKitContainerOptions, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    revenant_cloudkit_say_once();
+    objc_setAssociatedObject(self, &revenant_cloudkit_options_key, cloudKitContainerOptions, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
 @end

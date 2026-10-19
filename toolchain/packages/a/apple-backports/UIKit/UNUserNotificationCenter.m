@@ -1,12 +1,12 @@
-#import "CharonUserNotifications.h"
-#import "../CharonSayOnce.h"
+#import "RevenantUserNotifications.h"
+#import "../RevenantSayOnce.h"
 #import <objc/runtime.h>
 
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 
-static NSString *const CharonRequestKey = @"org.charon.apple-backports.UNNotificationRequest";
-static NSString *const CharonAuthorizedKey = @"org.charon.apple-backports.UIUserNotificationTypes";
-static const BOOL CharonReleaseShowsTitles = NO;
+static NSString *const RevenantRequestKey = @"org.revenant.apple-backports.UNNotificationRequest";
+static NSString *const RevenantAuthorizedKey = @"org.revenant.apple-backports.UIUserNotificationTypes";
+static const BOOL RevenantReleaseShowsTitles = NO;
 
 @implementation UNNotificationSettings {
 @private
@@ -23,7 +23,7 @@ static const BOOL CharonReleaseShowsTitles = NO;
     return YES;
 }
 
-- (instancetype)initCharonWithOptions:(NSNumber *)options
+- (instancetype)initRevenantWithOptions:(NSNumber *)options
 {
     if ((self = [super init])) {
         _showPreviewsSetting = UNShowPreviewsSettingWhenAuthenticated;
@@ -171,7 +171,7 @@ static const BOOL CharonReleaseShowsTitles = NO;
     return _directMessagesSetting;
 }
 
-static NSString *charon_setting_name(UNNotificationSetting setting)
+static NSString *revenant_setting_name(UNNotificationSetting setting)
 {
     switch (setting) {
         case UNNotificationSettingNotSupported: return @"NotSupported";
@@ -187,25 +187,25 @@ static NSString *charon_setting_name(UNNotificationSetting setting)
     NSArray *styles = @[@"None", @"Banner", @"Alert"];
     return [NSString stringWithFormat:@"<%@: %p; authorizationStatus: %@, notificationCenterSetting: %@, soundSetting: %@, "
                                       @"badgeSetting: %@, lockScreenSetting: %@, alertSetting: %@, carPlaySetting: %@, alertStyle: %@>",
-                                      [self class], self, statuses[_authorizationStatus], charon_setting_name(_notificationCenterSetting),
-                                      charon_setting_name(_soundSetting), charon_setting_name(_badgeSetting),
-                                      charon_setting_name(_lockScreenSetting), charon_setting_name(_alertSetting),
-                                      charon_setting_name(UNNotificationSettingNotSupported), styles[_alertStyle]];
+                                      [self class], self, statuses[_authorizationStatus], revenant_setting_name(_notificationCenterSetting),
+                                      revenant_setting_name(_soundSetting), revenant_setting_name(_badgeSetting),
+                                      revenant_setting_name(_lockScreenSetting), revenant_setting_name(_alertSetting),
+                                      revenant_setting_name(UNNotificationSettingNotSupported), styles[_alertStyle]];
 }
 
 @end
 
-static dispatch_queue_t charon_center_queue(void)
+static dispatch_queue_t revenant_center_queue(void)
 {
     static dispatch_queue_t queue;
     static dispatch_once_t once;
     dispatch_once(&once, ^{
-        queue = dispatch_queue_create("org.charon.apple-backports.UNUserNotificationCenter", DISPATCH_QUEUE_SERIAL);
+        queue = dispatch_queue_create("org.revenant.apple-backports.UNUserNotificationCenter", DISPATCH_QUEUE_SERIAL);
     });
     return queue;
 }
 
-void charon_on_main(void (^work)(void))
+void revenant_on_main(void (^work)(void))
 {
     if ([NSThread isMainThread])
         work();
@@ -213,20 +213,20 @@ void charon_on_main(void (^work)(void))
         dispatch_sync(dispatch_get_main_queue(), work);
 }
 
-static void charon_say_once(NSString *key, NSString *text)
+static void revenant_say_once(NSString *key, NSString *text)
 {
-    charon_say_once_for(key, text);
+    revenant_say_once_for(key, text);
 }
 
-NSError *charon_unsupported(NSString *reason)
+NSError *revenant_unsupported(NSString *reason)
 {
     return [NSError errorWithDomain:NSCocoaErrorDomain code:NSFeatureUnsupportedError
                            userInfo:@{NSLocalizedDescriptionKey: reason}];
 }
 
-static UNNotificationRequest *charon_request_of(UILocalNotification *notification)
+static UNNotificationRequest *revenant_request_of(UILocalNotification *notification)
 {
-    NSData *archived = notification.userInfo[CharonRequestKey];
+    NSData *archived = notification.userInfo[RevenantRequestKey];
     if (![archived isKindOfClass:[NSData class]])
         return nil;
     @try {
@@ -237,7 +237,7 @@ static UNNotificationRequest *charon_request_of(UILocalNotification *notificatio
     }
 }
 
-static NSInteger charon_highest_unit(NSDateComponents *components)
+static NSInteger revenant_highest_unit(NSDateComponents *components)
 {
     if (components.era != NSUndefinedDateComponent || components.year != NSUndefinedDateComponent
         || components.yearForWeekOfYear != NSUndefinedDateComponent)
@@ -258,7 +258,7 @@ static NSInteger charon_highest_unit(NSDateComponents *components)
     return components.second != NSUndefinedDateComponent ? -1 : -2;
 }
 
-static BOOL charon_schedule_repeat(UILocalNotification *notification, UNNotificationTrigger *trigger, NSError **error)
+static BOOL revenant_schedule_repeat(UILocalNotification *notification, UNNotificationTrigger *trigger, NSError **error)
 {
     if ([trigger isKindOfClass:[UNTimeIntervalNotificationTrigger class]]) {
         NSTimeInterval interval = ((UNTimeIntervalNotificationTrigger *)trigger).timeInterval;
@@ -274,7 +274,7 @@ static BOOL charon_schedule_repeat(UILocalNotification *notification, UNNotifica
                 notification.repeatCalendar.timeZone = [NSTimeZone timeZoneForSecondsFromGMT:0];
                 return YES;
             }
-        *error = charon_unsupported([NSString stringWithFormat:@"iOS %@ repeats a local notification only every minute, hour, day or week, so a trigger repeating every %g seconds cannot be scheduled", [UIDevice currentDevice].systemVersion, interval]);
+        *error = revenant_unsupported([NSString stringWithFormat:@"iOS %@ repeats a local notification only every minute, hour, day or week, so a trigger repeating every %g seconds cannot be scheduled", [UIDevice currentDevice].systemVersion, interval]);
         return NO;
     }
     UNCalendarNotificationTrigger *calendarTrigger = (UNCalendarNotificationTrigger *)trigger;
@@ -292,7 +292,7 @@ static BOOL charon_schedule_repeat(UILocalNotification *notification, UNNotifica
     if (!trigger.repeats)
         return YES;
     NSCalendarUnit unit = 0;
-    switch (charon_highest_unit(components)) {
+    switch (revenant_highest_unit(components)) {
         case -1: unit = NSMinuteCalendarUnit; break;
         case 0: unit = NSHourCalendarUnit; break;
         case 1: unit = NSDayCalendarUnit; break;
@@ -305,7 +305,7 @@ static BOOL charon_schedule_repeat(UILocalNotification *notification, UNNotifica
         default: break;
     }
     if (!unit) {
-        *error = charon_unsupported([NSString stringWithFormat:@"iOS %@ repeats a local notification by one calendar unit from its first date, which does not follow the dates %@ matches when it repeats", [UIDevice currentDevice].systemVersion, components]);
+        *error = revenant_unsupported([NSString stringWithFormat:@"iOS %@ repeats a local notification by one calendar unit from its first date, which does not follow the dates %@ matches when it repeats", [UIDevice currentDevice].systemVersion, components]);
         return NO;
     }
     notification.repeatInterval = unit;
@@ -313,38 +313,38 @@ static BOOL charon_schedule_repeat(UILocalNotification *notification, UNNotifica
     return YES;
 }
 
-static UILocalNotification *charon_local_notification(UNNotificationRequest *request)
+static UILocalNotification *revenant_local_notification(UNNotificationRequest *request)
 {
     UNNotificationContent *content = request.content;
     UILocalNotification *notification = [[UILocalNotification alloc] init];
     notification.alertBody = content.body;
-    if (CharonReleaseShowsTitles)
+    if (RevenantReleaseShowsTitles)
         [notification setValue:content.title forKey:@"alertTitle"];
     else if (content.title.length || content.subtitle.length)
-        charon_say_once(@"title", [NSString stringWithFormat:@"UNNotificationContent: iOS %@ shows no title or subtitle on a local notification, so they are kept with the request and not shown", [UIDevice currentDevice].systemVersion]);
+        revenant_say_once(@"title", [NSString stringWithFormat:@"UNNotificationContent: iOS %@ shows no title or subtitle on a local notification, so they are kept with the request and not shown", [UIDevice currentDevice].systemVersion]);
     if (content.categoryIdentifier.length || content.threadIdentifier.length)
-        charon_say_once(@"category", [NSString stringWithFormat:@"UNNotificationContent: iOS %@ has no notification categories or threads, so categoryIdentifier and threadIdentifier are kept with the request and change nothing", [UIDevice currentDevice].systemVersion]);
+        revenant_say_once(@"category", [NSString stringWithFormat:@"UNNotificationContent: iOS %@ has no notification categories or threads, so categoryIdentifier and threadIdentifier are kept with the request and change nothing", [UIDevice currentDevice].systemVersion]);
     if (content.badge)
         notification.applicationIconBadgeNumber = content.badge.integerValue;
     if (content.sound) {
-        NSString *name = [content.sound charon_fileName];
+        NSString *name = [content.sound revenant_fileName];
         notification.soundName = name ?: UILocalNotificationDefaultSoundName;
     }
     if (content.launchImageName.length)
         notification.alertLaunchImage = content.launchImageName;
     NSMutableDictionary *userInfo = [NSMutableDictionary dictionaryWithDictionary:content.userInfo ?: @{}];
-    userInfo[CharonRequestKey] = [NSKeyedArchiver archivedDataWithRootObject:request];
+    userInfo[RevenantRequestKey] = [NSKeyedArchiver archivedDataWithRootObject:request];
     notification.userInfo = userInfo;
     return notification;
 }
 
 @interface UNUserNotificationCenter ()
-- (void)charon_deliver:(UILocalNotification *)notification state:(UIApplicationState)state;
+- (void)revenant_deliver:(UILocalNotification *)notification state:(UIApplicationState)state;
 @end
 
-static UNUserNotificationCenter *charon_center;
+static UNUserNotificationCenter *revenant_center;
 
-static UNNotificationRequest *charon_push_request(NSDictionary *userInfo)
+static UNNotificationRequest *revenant_push_request(NSDictionary *userInfo)
 {
     NSDictionary *aps = [userInfo[@"aps"] isKindOfClass:[NSDictionary class]] ? userInfo[@"aps"] : nil;
     NSString *alert = [aps[@"alert"] isKindOfClass:[NSString class]] ? aps[@"alert"] : nil;
@@ -361,10 +361,10 @@ static UNNotificationRequest *charon_push_request(NSDictionary *userInfo)
     if (sound)
         content.sound = [sound isEqualToString:@"default"] ? [UNNotificationSound defaultSound] : [UNNotificationSound soundNamed:sound];
     return [UNNotificationRequest requestWithIdentifier:[[NSUUID UUID] UUIDString] content:content
-                                                trigger:[UNPushNotificationTrigger charon_pushTrigger]];
+                                                trigger:[UNPushNotificationTrigger revenant_pushTrigger]];
 }
 
-static void charon_hook_delegate(void)
+static void revenant_hook_delegate(void)
 {
     id delegate = [UIApplication sharedApplication].delegate;
     if (!delegate)
@@ -378,8 +378,8 @@ static void charon_hook_delegate(void)
     Method existing = class_getInstanceMethod(cls, selector);
     IMP original = existing ? method_getImplementation(existing) : NULL;
     IMP replacement = imp_implementationWithBlock(^(id self, UIApplication *application, UILocalNotification *notification) {
-        if (charon_center && charon_request_of(notification)) {
-            [charon_center charon_deliver:notification state:application.applicationState];
+        if (revenant_center && revenant_request_of(notification)) {
+            [revenant_center revenant_deliver:notification state:application.applicationState];
             return;
         }
         if (original)
@@ -392,8 +392,8 @@ static void charon_hook_delegate(void)
     Method existing_push = class_getInstanceMethod(cls, pushed);
     IMP original_push = existing_push ? method_getImplementation(existing_push) : NULL;
     IMP replacement_push = imp_implementationWithBlock(^(id self, UIApplication *application, NSDictionary *userInfo) {
-        if ([userInfo isKindOfClass:[NSDictionary class]] && charon_center)
-            [charon_center charon_deliverRequest:charon_push_request(userInfo) state:application.applicationState];
+        if ([userInfo isKindOfClass:[NSDictionary class]] && revenant_center)
+            [revenant_center revenant_deliverRequest:revenant_push_request(userInfo) state:application.applicationState];
         if (original_push)
             ((void (*)(id, SEL, UIApplication *, NSDictionary *))original_push)(self, pushed, application, userInfo);
     });
@@ -410,11 +410,11 @@ static void charon_hook_delegate(void)
 {
     [[NSNotificationCenter defaultCenter] addObserverForName:UIApplicationDidFinishLaunchingNotification object:nil queue:nil
                                                   usingBlock:^(NSNotification *launched) {
-        charon_hook_delegate();
+        revenant_hook_delegate();
         UILocalNotification *notification = launched.userInfo[UIApplicationLaunchOptionsLocalNotificationKey];
-        if (notification && charon_request_of(notification))
+        if (notification && revenant_request_of(notification))
             dispatch_async(dispatch_get_main_queue(), ^{
-                [[UNUserNotificationCenter currentNotificationCenter] charon_deliver:notification state:UIApplicationStateInactive];
+                [[UNUserNotificationCenter currentNotificationCenter] revenant_deliver:notification state:UIApplicationStateInactive];
             });
     }];
 }
@@ -423,19 +423,19 @@ static void charon_hook_delegate(void)
 {
     static dispatch_once_t once;
     dispatch_once(&once, ^{
-        charon_center = [[self alloc] initCharon];
+        revenant_center = [[self alloc] initRevenant];
     });
-    return charon_center;
+    return revenant_center;
 }
 
-- (instancetype)initCharon
+- (instancetype)initRevenant
 {
     return [super init];
 }
 
-- (UILocalNotification *)charon_localNotificationForRequest:(UNNotificationRequest *)request
+- (UILocalNotification *)revenant_localNotificationForRequest:(UNNotificationRequest *)request
 {
-    return charon_local_notification(request);
+    return revenant_local_notification(request);
 }
 
 - (id <UNUserNotificationCenterDelegate>)delegate
@@ -446,8 +446,8 @@ static void charon_hook_delegate(void)
 - (void)setDelegate:(id <UNUserNotificationCenterDelegate>)delegate
 {
     _delegate = delegate;
-    charon_on_main(^{
-        charon_hook_delegate();
+    revenant_on_main(^{
+        revenant_hook_delegate();
     });
 }
 
@@ -461,10 +461,10 @@ static void charon_hook_delegate(void)
 {
     UNAuthorizationOptions kept = options & (UNAuthorizationOptionBadge | UNAuthorizationOptionSound | UNAuthorizationOptionAlert);
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-    [defaults setObject:@(kept) forKey:CharonAuthorizedKey];
+    [defaults setObject:@(kept) forKey:RevenantAuthorizedKey];
     [defaults synchronize];
     void (^done)(BOOL, NSError *) = [completionHandler copy];
-    dispatch_async(charon_center_queue(), ^{
+    dispatch_async(revenant_center_queue(), ^{
         if (done)
             done(YES, nil);
     });
@@ -473,9 +473,9 @@ static void charon_hook_delegate(void)
 - (void)getNotificationSettingsWithCompletionHandler:(void (^)(UNNotificationSettings *settings))completionHandler
 {
     UNNotificationSettings *settings =
-        [[UNNotificationSettings alloc] initCharonWithOptions:[[NSUserDefaults standardUserDefaults] objectForKey:CharonAuthorizedKey]];
+        [[UNNotificationSettings alloc] initRevenantWithOptions:[[NSUserDefaults standardUserDefaults] objectForKey:RevenantAuthorizedKey]];
     void (^done)(UNNotificationSettings *) = [completionHandler copy];
-    dispatch_async(charon_center_queue(), ^{
+    dispatch_async(revenant_center_queue(), ^{
         done(settings);
     });
 }
@@ -487,15 +487,15 @@ static void charon_hook_delegate(void)
     if (!request.content) {
         failure = [NSError errorWithDomain:UNErrorDomain code:UNErrorCodeNotificationInvalidNoContent userInfo:nil];
     } else if ([request.trigger isKindOfClass:[UNLocationNotificationTrigger class]]) {
-        failure = [[CharonRegionMonitor charon_sharedMonitor] charon_monitorRequest:request];
+        failure = [[RevenantRegionMonitor revenant_sharedMonitor] revenant_monitorRequest:request];
     } else {
-        UILocalNotification *notification = charon_local_notification(request);
-        BOOL keep = !request.trigger || charon_schedule_repeat(notification, request.trigger, &failure);
+        UILocalNotification *notification = revenant_local_notification(request);
+        BOOL keep = !request.trigger || revenant_schedule_repeat(notification, request.trigger, &failure);
         if (keep)
-            charon_on_main(^{
+            revenant_on_main(^{
                 UIApplication *application = [UIApplication sharedApplication];
                 for (UILocalNotification *pending in application.scheduledLocalNotifications)
-                    if ([charon_request_of(pending).identifier isEqualToString:request.identifier])
+                    if ([revenant_request_of(pending).identifier isEqualToString:request.identifier])
                         [application cancelLocalNotification:pending];
                 if (request.trigger)
                     [application scheduleLocalNotification:notification];
@@ -503,7 +503,7 @@ static void charon_hook_delegate(void)
                     [application presentLocalNotificationNow:notification];
             });
     }
-    dispatch_async(charon_center_queue(), ^{
+    dispatch_async(revenant_center_queue(), ^{
         if (done)
             done(failure);
     });
@@ -513,22 +513,22 @@ static void charon_hook_delegate(void)
 {
     NSData *archived = categories.count ? [NSKeyedArchiver archivedDataWithRootObject:categories] : nil;
     if (archived)
-        charon_say_once(@"categories", [NSString stringWithFormat:@"UNUserNotificationCenter: iOS %@ shows no actions on a notification, so the categories are kept and handed back and change nothing",
+        revenant_say_once(@"categories", [NSString stringWithFormat:@"UNUserNotificationCenter: iOS %@ shows no actions on a notification, so the categories are kept and handed back and change nothing",
                                                                   [UIDevice currentDevice].systemVersion]);
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
     if (archived)
-        [defaults setObject:archived forKey:@"space.kern0x1b.charon.UNNotificationCategories"];
+        [defaults setObject:archived forKey:@"space.kern0x1b.revenant.UNNotificationCategories"];
     else
-        [defaults removeObjectForKey:@"space.kern0x1b.charon.UNNotificationCategories"];
+        [defaults removeObjectForKey:@"space.kern0x1b.revenant.UNNotificationCategories"];
     [defaults synchronize];
 }
 
 - (void)getNotificationCategoriesWithCompletionHandler:(void (^)(NSSet<UNNotificationCategory *> *categories))completionHandler
 {
-    NSData *archived = [[NSUserDefaults standardUserDefaults] objectForKey:@"space.kern0x1b.charon.UNNotificationCategories"];
+    NSData *archived = [[NSUserDefaults standardUserDefaults] objectForKey:@"space.kern0x1b.revenant.UNNotificationCategories"];
     NSSet *categories = archived ? [NSKeyedUnarchiver unarchiveObjectWithData:archived] : nil;
     void (^done)(NSSet *) = [completionHandler copy];
-    dispatch_async(charon_center_queue(), ^{
+    dispatch_async(revenant_center_queue(), ^{
         done(categories ?: [NSSet set]);
     });
 }
@@ -536,16 +536,16 @@ static void charon_hook_delegate(void)
 - (void)getPendingNotificationRequestsWithCompletionHandler:(void (^)(NSArray<UNNotificationRequest *> *requests))completionHandler
 {
     __block NSMutableArray *requests = [NSMutableArray array];
-    charon_on_main(^{
+    revenant_on_main(^{
         for (UILocalNotification *pending in [UIApplication sharedApplication].scheduledLocalNotifications) {
-            UNNotificationRequest *request = charon_request_of(pending);
+            UNNotificationRequest *request = revenant_request_of(pending);
             if (request)
                 [requests addObject:request];
         }
     });
-    [requests addObjectsFromArray:[[CharonRegionMonitor charon_sharedMonitor] charon_requests]];
+    [requests addObjectsFromArray:[[RevenantRegionMonitor revenant_sharedMonitor] revenant_requests]];
     void (^done)(NSArray *) = [completionHandler copy];
-    dispatch_async(charon_center_queue(), ^{
+    dispatch_async(revenant_center_queue(), ^{
         done([requests copy]);
     });
 }
@@ -553,34 +553,34 @@ static void charon_hook_delegate(void)
 - (void)removePendingNotificationRequestsWithIdentifiers:(NSArray *)identifiers
 {
     NSSet *wanted = [NSSet setWithArray:identifiers ?: @[]];
-    charon_on_main(^{
+    revenant_on_main(^{
         UIApplication *application = [UIApplication sharedApplication];
         for (UILocalNotification *pending in application.scheduledLocalNotifications) {
-            UNNotificationRequest *request = charon_request_of(pending);
+            UNNotificationRequest *request = revenant_request_of(pending);
             if (request && [wanted containsObject:request.identifier])
                 [application cancelLocalNotification:pending];
         }
     });
-    [[CharonRegionMonitor charon_sharedMonitor] charon_removeRequestsWithIdentifiers:wanted];
+    [[RevenantRegionMonitor revenant_sharedMonitor] revenant_removeRequestsWithIdentifiers:wanted];
 }
 
 - (void)removeAllPendingNotificationRequests
 {
-    charon_on_main(^{
+    revenant_on_main(^{
         UIApplication *application = [UIApplication sharedApplication];
         for (UILocalNotification *pending in application.scheduledLocalNotifications)
-            if (charon_request_of(pending))
+            if (revenant_request_of(pending))
                 [application cancelLocalNotification:pending];
     });
-    [[CharonRegionMonitor charon_sharedMonitor] charon_removeRequestsWithIdentifiers:nil];
+    [[RevenantRegionMonitor revenant_sharedMonitor] revenant_removeRequestsWithIdentifiers:nil];
 }
 
-- (void)charon_deliver:(UILocalNotification *)local state:(UIApplicationState)state
+- (void)revenant_deliver:(UILocalNotification *)local state:(UIApplicationState)state
 {
-    [self charon_deliverRequest:charon_request_of(local) state:state];
+    [self revenant_deliverRequest:revenant_request_of(local) state:state];
 }
 
-- (void)charon_deliverRequest:(UNNotificationRequest *)request state:(UIApplicationState)state
+- (void)revenant_deliverRequest:(UNNotificationRequest *)request state:(UIApplicationState)state
 {
     if (!request)
         return;
@@ -596,7 +596,7 @@ static void charon_hook_delegate(void)
                     [UIApplication sharedApplication].applicationIconBadgeNumber = request.content.badge.integerValue;
                 });
             if (options & ~UNNotificationPresentationOptionBadge)
-                charon_say_once(@"present", [NSString stringWithFormat:@"UNUserNotificationCenter: iOS %@ shows nothing and plays nothing for a notification that arrives while the application is in front, so only the badge of the presentation options is applied", [UIDevice currentDevice].systemVersion]);
+                revenant_say_once(@"present", [NSString stringWithFormat:@"UNUserNotificationCenter: iOS %@ shows nothing and plays nothing for a notification that arrives while the application is in front, so only the badge of the presentation options is applied", [UIDevice currentDevice].systemVersion]);
         }];
         return;
     }

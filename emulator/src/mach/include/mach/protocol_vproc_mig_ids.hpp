@@ -18,7 +18,7 @@
 
 #include "mach/xnu_mig_adapter.hpp"
 
-namespace shade::xnu::mig::protocol_vproc {
+namespace emulator::xnu::mig::protocol_vproc {
 
 inline constexpr std::string_view subsystem_name{"protocol_vproc"};
 inline constexpr std::uint32_t subsystem_base = 400U;

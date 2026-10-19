@@ -1,34 +1,34 @@
-#ifndef CHARON_CK_SUBSCRIPTION_H
-#define CHARON_CK_SUBSCRIPTION_H
+#ifndef REVENANT_CK_SUBSCRIPTION_H
+#define REVENANT_CK_SUBSCRIPTION_H
 
 #import <Foundation/Foundation.h>
 #import <CloudKit/CloudKit.h>
 
-@interface CKServerChangeToken (CharonCKBuilding)
+@interface CKServerChangeToken (RevenantCKBuilding)
 + (instancetype)tokenWithData:(NSData *)data;
 - (NSData *)data;
 @end
 
-@interface CKQueryCursor (CharonCKBuilding)
+@interface CKQueryCursor (RevenantCKBuilding)
 - (instancetype)initWithToken:(NSData *)token;
 - (NSData *)serverChangeToken;
 @end
 
-@interface CKUserIdentity (CharonCKBuilding)
+@interface CKUserIdentity (RevenantCKBuilding)
 @property (nonatomic, copy, nullable) CKRecordID *userRecordID;
 @property (nonatomic, assign) BOOL hasiCloudAccount;
 @property (nonatomic, copy, nullable) CKUserIdentityLookupInfo *lookupInfo;
 @property (nonatomic, copy, nullable) NSArray<NSString *> *contactIdentifiers;
-- (instancetype)charon_identity;
+- (instancetype)revenant_identity;
 @end
 
-@interface CKShareParticipant (CharonCKBuilding)
+@interface CKShareParticipant (RevenantCKBuilding)
 @property (nonatomic, copy, nullable) CKUserIdentity *userIdentity;
 @property (nonatomic, copy, nullable) NSString *participantID;
 - (instancetype)initWithType:(CKShareParticipantType)type;
 @end
 
-@interface CKShareMetadata (CharonCKBuilding)
+@interface CKShareMetadata (RevenantCKBuilding)
 - (instancetype)initWithRootRecordID:(CKRecordID *)rootRecordID
                   containerIdentifier:(nullable NSString *)containerIdentifier
                              shareURL:(NSURL *)shareURL
@@ -43,11 +43,11 @@
 @property (nonatomic, assign) CKShareParticipantRole participantRole;
 @end
 
-@interface CKSubscription (CharonCKBuilding)
+@interface CKSubscription (RevenantCKBuilding)
 - (instancetype)initWithSubscriptionID:(CKSubscriptionID)subscriptionID;
 @end
 
-@interface CKNotificationID (CharonCKBuilding)
+@interface CKNotificationID (RevenantCKBuilding)
 - (instancetype)initWithNotificationName:(NSString *)notificationName object:(id)object;
 @end
 

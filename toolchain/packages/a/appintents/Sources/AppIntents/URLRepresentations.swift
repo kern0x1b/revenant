@@ -27,7 +27,7 @@ public struct EntityURLRepresentation<Entity>: ExpressibleByStringInterpolation 
     }
 
     public init(stringLiteral value: String) {
-        self.init(URL(string: value) ?? CharonURL.placeholder)
+        self.init(URL(string: value) ?? RevenantURL.placeholder)
     }
 
     public init(stringInterpolation: StringInterpolation) {
@@ -39,7 +39,7 @@ public struct EntityURLRepresentation<Entity>: ExpressibleByStringInterpolation 
 
         fileprivate var literal = ""
         fileprivate var identifier = ""
-        fileprivate var url: URL { return CharonURL.make(path: identifier, query: literal) }
+        fileprivate var url: URL { return RevenantURL.make(path: identifier, query: literal) }
 
         public init(literalCapacity: Int, interpolationCount: Int) {
             literal.reserveCapacity(literalCapacity)
@@ -76,7 +76,7 @@ public struct EnumURLRepresentation<Enum>: ExpressibleByStringInterpolation wher
         }
 
         public init(stringLiteral value: String) {
-            self.init(URL(string: value) ?? CharonURL.placeholder)
+            self.init(URL(string: value) ?? RevenantURL.placeholder)
         }
 
         public init(stringInterpolation: StringInterpolation) {
@@ -88,7 +88,7 @@ public struct EnumURLRepresentation<Enum>: ExpressibleByStringInterpolation wher
 
             fileprivate var literal = ""
             fileprivate var rawValue = ""
-            fileprivate var url: URL { return CharonURL.make(path: rawValue, query: literal) }
+            fileprivate var url: URL { return RevenantURL.make(path: rawValue, query: literal) }
 
             public init(literalCapacity: Int, interpolationCount: Int) {
                 literal.reserveCapacity(literalCapacity)
@@ -119,7 +119,7 @@ public struct EnumURLRepresentation<Enum>: ExpressibleByStringInterpolation wher
     }
 
     public init(stringLiteral value: String) {
-        self.init(URL(string: value) ?? CharonURL.placeholder)
+        self.init(URL(string: value) ?? RevenantURL.placeholder)
     }
 
     public init(stringInterpolation: StringInterpolation) {
@@ -131,7 +131,7 @@ public struct EnumURLRepresentation<Enum>: ExpressibleByStringInterpolation wher
 
         fileprivate var literal = ""
         fileprivate var rawValue = ""
-        fileprivate var url: URL { return CharonURL.make(path: rawValue, query: literal) }
+        fileprivate var url: URL { return RevenantURL.make(path: rawValue, query: literal) }
 
         public init(literalCapacity: Int, interpolationCount: Int) {
             literal.reserveCapacity(literalCapacity)
@@ -167,7 +167,7 @@ public struct IntentURLRepresentation<Intent>: ExpressibleByStringInterpolation 
     }
 
     public init(stringLiteral value: String) {
-        self.init(URL(string: value) ?? CharonURL.placeholder)
+        self.init(URL(string: value) ?? RevenantURL.placeholder)
     }
 
     public init(stringInterpolation: StringInterpolation) {
@@ -178,7 +178,7 @@ public struct IntentURLRepresentation<Intent>: ExpressibleByStringInterpolation 
         public typealias StringLiteralType = String
 
         fileprivate var literal = ""
-        fileprivate var url: URL { return CharonURL.make(path: literal, query: "") }
+        fileprivate var url: URL { return RevenantURL.make(path: literal, query: "") }
 
         public init(literalCapacity: Int, interpolationCount: Int) {
             literal.reserveCapacity(literalCapacity)
@@ -194,7 +194,7 @@ public struct IntentURLRepresentation<Intent>: ExpressibleByStringInterpolation 
     }
 }
 
-public enum CharonURL {
+public enum RevenantURL {
     public static let scheme = "appintents"
 
     public static func make(path: String, query: String) -> URL {

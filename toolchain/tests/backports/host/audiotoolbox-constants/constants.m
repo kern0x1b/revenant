@@ -7,7 +7,7 @@
 #import <AudioUnit/AudioUnitProperties.h>
 #import <AudioUnit/AUComponent.h>
 #include <stdio.h>
-#include "../../../../packages/a/apple-backports/AVFAudio/CharonAudioToolboxNames.h"
+#include "../../../../packages/a/apple-backports/AVFAudio/RevenantAudioToolboxNames.h"
 
 static int checks = 0;
 static int failures = 0;
@@ -29,9 +29,9 @@ static int sameString(CFStringRef host, NSString *port)
 int main(void)
 {
     @autoreleasepool {
-        check(sameString(kAudioComponentRegistrationsChangedNotification, CharonAudioComponentRegistrationsChangedName),
+        check(sameString(kAudioComponentRegistrationsChangedNotification, RevenantAudioComponentRegistrationsChangedName),
               "kAudioComponentRegistrationsChangedNotification has the host's string");
-        check(sameString(kAudioComponentInstanceInvalidationNotification, CharonAudioComponentInstanceInvalidatedName),
+        check(sameString(kAudioComponentInstanceInvalidationNotification, RevenantAudioComponentInstanceInvalidatedName),
               "kAudioComponentInstanceInvalidationNotification has the host's string");
 
         check((long long)k3DMixerParam_BusEnable == 20, "k3DMixerParam_BusEnable is 20 in the iOS 26.2 declarations");

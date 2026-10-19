@@ -51,7 +51,7 @@
 #include "foundation/jit_work_policy.hpp"
 #include "foundation/performance.hpp"
 
-namespace shade {
+namespace emulator {
 namespace {
 
     constexpr std::uint32_t shared_region_first_address = 0x20000000U;
@@ -66,29 +66,29 @@ namespace {
     [[nodiscard]] bool jit_demand_disabled() noexcept
     {
         static const bool disabled =
-            jit_env_flag("SHADE_JIT_DISABLE_DEMAND_ARTIFACT");
+            jit_env_flag("REVENANT_EMULATOR_JIT_DISABLE_DEMAND_ARTIFACT");
         return disabled;
     }
 
     [[nodiscard]] bool jit_sync_preload_disabled() noexcept
     {
         static const bool disabled =
-            jit_env_flag("SHADE_JIT_DISABLE_SYNC_PRELOAD");
+            jit_env_flag("REVENANT_EMULATOR_JIT_DISABLE_SYNC_PRELOAD");
         return disabled;
     }
 
     [[nodiscard]] bool jit_portable_handoff_disabled() noexcept
     {
         static const bool disabled =
-            jit_env_flag("SHADE_JIT_DISABLE_PORTABLE_HANDOFF");
+            jit_env_flag("REVENANT_EMULATOR_JIT_DISABLE_PORTABLE_HANDOFF");
         return disabled;
     }
 
     [[nodiscard]] bool jit_sync_disk_lookup_enabled() noexcept
     {
         static const bool enabled =
-            jit_env_flag("SHADE_JIT_ALLOW_SYNC_DISK_LOOKUP") &&
-            !jit_env_flag("SHADE_JIT_MEMORY_ONLY_LOOKUP");
+            jit_env_flag("REVENANT_EMULATOR_JIT_ALLOW_SYNC_DISK_LOOKUP") &&
+            !jit_env_flag("REVENANT_EMULATOR_JIT_MEMORY_ONLY_LOOKUP");
         return enabled;
     }
 
@@ -96,7 +96,7 @@ namespace {
         const JitArtifactKey& key) noexcept
     {
         static const bool force_test_collision =
-            jit_env_flag("SHADE_TEST_DEMAND_PROBE_FINGERPRINT_COLLISION");
+            jit_env_flag("REVENANT_EMULATOR_TEST_DEMAND_PROBE_FINGERPRINT_COLLISION");
         if (force_test_collision)
             return 0x9e3779b97f4a7c15ULL;
         return static_cast<std::uint64_t>(JitArtifactKeyHash { }(key));
@@ -106,7 +106,7 @@ namespace {
     jit_test_ignore_demand_probe_content_generation() noexcept
     {
         static const bool enabled =
-            jit_env_flag("SHADE_TEST_DEMAND_PROBE_IGNORE_CONTENT_GENERATION");
+            jit_env_flag("REVENANT_EMULATOR_TEST_DEMAND_PROBE_IGNORE_CONTENT_GENERATION");
         return enabled;
     }
 

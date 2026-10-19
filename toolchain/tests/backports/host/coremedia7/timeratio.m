@@ -2,7 +2,7 @@
 #import <Foundation/Foundation.h>
 #include <math.h>
 
-CMTime CharonHostCMTimeMultiplyByRatio(CMTime time, int32_t multiplier, int32_t divisor);
+CMTime RevenantHostCMTimeMultiplyByRatio(CMTime time, int32_t multiplier, int32_t divisor);
 
 static int identical, cornerSame, cornerWithinTolerance, cornerLost, different;
 
@@ -50,7 +50,7 @@ static double exact_seconds(int64_t value, int32_t timescale, int32_t multiplier
 static void compare(CMTime time, int32_t multiplier, int32_t divisor)
 {
     CMTime system = CMTimeMultiplyByRatio(time, multiplier, divisor);
-    CMTime port = CharonHostCMTimeMultiplyByRatio(time, multiplier, divisor);
+    CMTime port = RevenantHostCMTimeMultiplyByRatio(time, multiplier, divisor);
     if ([shown(system) isEqualToString:shown(port)]) {
         identical++;
         return;

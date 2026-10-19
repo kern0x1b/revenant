@@ -3,7 +3,7 @@
 
 #pragma mark - AVCaptureDeviceFormat.supportedColorSpaces
 
-@implementation AVCaptureDeviceFormat (CharonSupportedColorSpaces10)
+@implementation AVCaptureDeviceFormat (RevenantSupportedColorSpaces10)
 
 - (NSArray<NSNumber *> *)supportedColorSpaces
 {
@@ -14,19 +14,19 @@
 
 #pragma mark - AVCaptureSession.automaticallyConfiguresCaptureDeviceForWideColor
 
-static const char charon_wideColorKey;
+static const char revenant_wideColorKey;
 
-@implementation AVCaptureSession (CharonWideColor10)
+@implementation AVCaptureSession (RevenantWideColor10)
 
 - (BOOL)automaticallyConfiguresCaptureDeviceForWideColor
 {
-    NSNumber *stored = objc_getAssociatedObject(self, &charon_wideColorKey);
+    NSNumber *stored = objc_getAssociatedObject(self, &revenant_wideColorKey);
     return stored ? stored.boolValue : YES;
 }
 
 - (void)setAutomaticallyConfiguresCaptureDeviceForWideColor:(BOOL)automaticallyConfiguresCaptureDeviceForWideColor
 {
-    objc_setAssociatedObject(self, &charon_wideColorKey, @(automaticallyConfiguresCaptureDeviceForWideColor), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, &revenant_wideColorKey, @(automaticallyConfiguresCaptureDeviceForWideColor), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
 @end

@@ -164,7 +164,7 @@ typedef void (^Step)(void (^done)(void));
 {
     [[NSFileManager defaultManager] createDirectoryAtPath:results_folder withIntermediateDirectories:YES attributes:nil error:NULL];
     [[NSFileManager defaultManager] removeItemAtPath:[results_folder stringByAppendingPathComponent:@"safariviewcontroller.done"] error:NULL];
-    charon_log_to([results_folder stringByAppendingPathComponent:@"safariviewcontroller.log"]);
+    revenant_log_to([results_folder stringByAppendingPathComponent:@"safariviewcontroller.log"]);
     start_server();
     self.root = [[UIViewController alloc] init];
     self.root.view.backgroundColor = [UIColor lightGrayColor];
@@ -181,9 +181,9 @@ typedef void (^Step)(void (^done)(void));
 - (void)run:(NSArray *)steps index:(NSUInteger)index
 {
     if (index == steps.count) {
-        printf("checks=%d failures=%d\n", charon_checks, charon_failures);
+        printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
         after(1, ^{
-            NSString *summary = [NSString stringWithFormat:@"%@ checks=%d failures=%d\n", charon_failures ? @"FAIL" : @"ok", charon_checks, charon_failures];
+            NSString *summary = [NSString stringWithFormat:@"%@ checks=%d failures=%d\n", revenant_failures ? @"FAIL" : @"ok", revenant_checks, revenant_failures];
             [summary writeToFile:[results_folder stringByAppendingPathComponent:@"safariviewcontroller.done"] atomically:YES encoding:NSUTF8StringEncoding error:NULL];
         });
         return;
@@ -200,7 +200,7 @@ typedef void (^Step)(void (^done)(void));
     };
     after(40, ^{
         if (!finished) {
-            charon_check(NO, "step finishes in time", [NSString stringWithFormat:@"step %lu timed out", (unsigned long)index + 1]);
+            revenant_check(NO, "step finishes in time", [NSString stringWithFormat:@"step %lu timed out", (unsigned long)index + 1]);
             done();
         }
     });
@@ -278,7 +278,7 @@ typedef void (^Step)(void (^done)(void));
             controller.delegate = recorder;
             [root presentViewController:controller animated:NO completion:nil];
             after(4, ^{
-                [controller.childViewControllers.firstObject performSelector:NSSelectorFromString(@"charon_action:") withObject:nil];
+                [controller.childViewControllers.firstObject performSelector:NSSelectorFromString(@"revenant_action:") withObject:nil];
                 after(2, ^{
                     CHECK_EQUAL([recorder.log subarrayWithRange:NSMakeRange(1, recorder.log.count - 1)], (@[@"activities /page Hello Page", @"excluded"]), "the action button asks the delegate for activities and exclusions, with the page's URL and title");
                     CHECK(controller.presentedViewController != nil || UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad, "and shows the sheet");

@@ -67,7 +67,7 @@ static NSString *shown(id value)
 
 static NSString *call(id receiver, NSString *selector, id argument, BOOL ours)
 {
-    SEL chosen = NSSelectorFromString(ours ? [@"charonHost_" stringByAppendingString:selector] : selector);
+    SEL chosen = NSSelectorFromString(ours ? [@"revenantHost_" stringByAppendingString:selector] : selector);
     @try {
         return shown(argument ? ((id (*)(id, SEL, id))objc_msgSend)(receiver, chosen, argument) : ((id (*)(id, SEL))objc_msgSend)(receiver, chosen));
     } @catch (NSException *exception) {
@@ -81,7 +81,7 @@ static void character_sets(void)
     for (NSString *name in @[@"URLUserAllowedCharacterSet", @"URLPasswordAllowedCharacterSet", @"URLHostAllowedCharacterSet",
                              @"URLPathAllowedCharacterSet", @"URLQueryAllowedCharacterSet", @"URLFragmentAllowedCharacterSet"]) {
         NSCharacterSet *system = ((id (*)(id, SEL))objc_msgSend)([NSCharacterSet class], NSSelectorFromString(name));
-        NSCharacterSet *port = ((id (*)(id, SEL))objc_msgSend)([NSCharacterSet class], NSSelectorFromString([@"charonHost_" stringByAppendingString:name]));
+        NSCharacterSet *port = ((id (*)(id, SEL))objc_msgSend)([NSCharacterSet class], NSSelectorFromString([@"revenantHost_" stringByAppendingString:name]));
         NSMutableArray *wrong = [NSMutableArray array];
         for (UTF32Char c = 0; c < 0x110000; c++)
             if ([system longCharacterIsMember:c] != [port longCharacterIsMember:c] && wrong.count < 8)
@@ -95,7 +95,7 @@ static NSCharacterSet *allowed_ours;
 
 static NSCharacterSet *predefined(NSString *name, BOOL ours)
 {
-    SEL selector = NSSelectorFromString(ours ? [@"charonHost_" stringByAppendingString:name] : name);
+    SEL selector = NSSelectorFromString(ours ? [@"revenantHost_" stringByAppendingString:name] : name);
     NSCharacterSet *set = ((id (*)(id, SEL))objc_msgSend)([NSCharacterSet class], selector);
     if (!ours)
         allowed_ours = predefined(name, YES);
@@ -190,21 +190,21 @@ int main(int argc, char **argv)
                                     @(NSDataBase64Encoding76CharacterLineLength | NSDataBase64EncodingEndLineWithLineFeed),
                                     @(NSDataBase64EncodingEndLineWithCarriageReturn | NSDataBase64EncodingEndLineWithLineFeed)][roll(6)] unsignedIntegerValue];
             NSString *systemEncoded = shown([data base64EncodedStringWithOptions:encoding]);
-            NSString *portEncoded = shown(((id (*)(id, SEL, NSUInteger))objc_msgSend)(data, NSSelectorFromString(@"charonHost_base64EncodedStringWithOptions:"), encoding));
+            NSString *portEncoded = shown(((id (*)(id, SEL, NSUInteger))objc_msgSend)(data, NSSelectorFromString(@"revenantHost_base64EncodedStringWithOptions:"), encoding));
             fuzz_compare(@"encode.string", [NSString stringWithFormat:@"%lu bytes options %lu", (unsigned long)data.length, (unsigned long)encoding], systemEncoded, portEncoded);
             NSString *systemData = shown([data base64EncodedDataWithOptions:encoding]);
-            NSString *portData = shown(((id (*)(id, SEL, NSUInteger))objc_msgSend)(data, NSSelectorFromString(@"charonHost_base64EncodedDataWithOptions:"), encoding));
+            NSString *portData = shown(((id (*)(id, SEL, NSUInteger))objc_msgSend)(data, NSSelectorFromString(@"revenantHost_base64EncodedDataWithOptions:"), encoding));
             fuzz_compare(@"encode.data", [NSString stringWithFormat:@"%lu bytes options %lu", (unsigned long)data.length, (unsigned long)encoding], systemData, portData);
             NSString *encoded = base64_text();
             NSUInteger decoding = roll(2) ? NSDataBase64DecodingIgnoreUnknownCharacters : 0;
             NSString *systemDecoded = shown([[NSData alloc] initWithBase64EncodedString:encoded options:decoding]);
-            NSString *portDecoded = shown(((id (*)(id, SEL, id, NSUInteger))objc_msgSend)([NSData alloc], NSSelectorFromString(@"initCharonHostWithBase64EncodedString:options:"), encoded, decoding));
+            NSString *portDecoded = shown(((id (*)(id, SEL, id, NSUInteger))objc_msgSend)([NSData alloc], NSSelectorFromString(@"initRevenantHostWithBase64EncodedString:options:"), encoded, decoding));
             fuzz_compare([NSString stringWithFormat:@"decode.string.options%lu%@", (unsigned long)decoding, padding_inside(encoded)], [NSString stringWithFormat:@"[%@]", shown(encoded)], systemDecoded, portDecoded);
             NSData *encodedData = [encoded dataUsingEncoding:NSUTF8StringEncoding];
             if (!encodedData)
                 continue;
             NSString *systemFromData = shown([[NSData alloc] initWithBase64EncodedData:encodedData options:decoding]);
-            NSString *portFromData = shown(((id (*)(id, SEL, id, NSUInteger))objc_msgSend)([NSData alloc], NSSelectorFromString(@"initCharonHostWithBase64EncodedData:options:"), encodedData, decoding));
+            NSString *portFromData = shown(((id (*)(id, SEL, id, NSUInteger))objc_msgSend)([NSData alloc], NSSelectorFromString(@"initRevenantHostWithBase64EncodedData:options:"), encodedData, decoding));
             fuzz_compare([NSString stringWithFormat:@"decode.data.options%lu%@", (unsigned long)decoding, padding_inside(encoded)], [NSString stringWithFormat:@"[%@]", shown(encoded)], systemFromData, portFromData);
         }
         return fuzz_finish();

@@ -43,7 +43,7 @@
 
 #include "support.hpp"
 
-namespace shade {
+namespace emulator {
 namespace {
 
     std::optional<std::uint32_t> canonical_no_cancel_syscall(

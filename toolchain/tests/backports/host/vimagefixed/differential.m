@@ -5,16 +5,16 @@
 #include <stdio.h>
 #include <string.h>
 
-vImage_Error charon_host_vImageConvert_16Q12to16U(const vImage_Buffer *, const vImage_Buffer *, vImage_Flags);
-vImage_Error charon_host_vImageConvert_16Q12to8(const vImage_Buffer *, const vImage_Buffer *, vImage_Flags);
-vImage_Error charon_host_vImageConvert_16Q12toF(const vImage_Buffer *, const vImage_Buffer *, vImage_Flags);
-vImage_Error charon_host_vImageConvert_Fto16Q12(const vImage_Buffer *, const vImage_Buffer *, vImage_Flags);
-vImage_Error charon_host_vImageConvert_8to16Q12(const vImage_Buffer *, const vImage_Buffer *, vImage_Flags);
-vImage_Error charon_host_vImageConvert_16Uto16Q12(const vImage_Buffer *, const vImage_Buffer *, vImage_Flags);
-vImage_Error charon_host_vImageConvert_16Uto16F(const vImage_Buffer *, const vImage_Buffer *, vImage_Flags);
-vImage_Error charon_host_vImageConvert_16Fto16U(const vImage_Buffer *, const vImage_Buffer *, vImage_Flags);
-vImage_Error charon_host_vImageConvert_16Fto16Q12(const vImage_Buffer *, const vImage_Buffer *, vImage_Flags);
-vImage_Error charon_host_vImageConvert_16Q12to16F(const vImage_Buffer *, const vImage_Buffer *, vImage_Flags);
+vImage_Error revenant_host_vImageConvert_16Q12to16U(const vImage_Buffer *, const vImage_Buffer *, vImage_Flags);
+vImage_Error revenant_host_vImageConvert_16Q12to8(const vImage_Buffer *, const vImage_Buffer *, vImage_Flags);
+vImage_Error revenant_host_vImageConvert_16Q12toF(const vImage_Buffer *, const vImage_Buffer *, vImage_Flags);
+vImage_Error revenant_host_vImageConvert_Fto16Q12(const vImage_Buffer *, const vImage_Buffer *, vImage_Flags);
+vImage_Error revenant_host_vImageConvert_8to16Q12(const vImage_Buffer *, const vImage_Buffer *, vImage_Flags);
+vImage_Error revenant_host_vImageConvert_16Uto16Q12(const vImage_Buffer *, const vImage_Buffer *, vImage_Flags);
+vImage_Error revenant_host_vImageConvert_16Uto16F(const vImage_Buffer *, const vImage_Buffer *, vImage_Flags);
+vImage_Error revenant_host_vImageConvert_16Fto16U(const vImage_Buffer *, const vImage_Buffer *, vImage_Flags);
+vImage_Error revenant_host_vImageConvert_16Fto16Q12(const vImage_Buffer *, const vImage_Buffer *, vImage_Flags);
+vImage_Error revenant_host_vImageConvert_16Q12to16F(const vImage_Buffer *, const vImage_Buffer *, vImage_Flags);
 
 #define COUNT 32
 
@@ -108,10 +108,10 @@ int main(void)
             memcpy(float8 + at * 4, &floats[at], 4);
         }
 
-        compare("vImageConvert_16Q12to16U", vImageConvert_16Q12to16U, charon_host_vImageConvert_16Q12to16U, q12_8, 2, 2, 2);
-        compare("vImageConvert_16Q12to8", vImageConvert_16Q12to8, charon_host_vImageConvert_16Q12to8, q12_8, 2, 1, 2);
-        compare("vImageConvert_16Q12toF", vImageConvert_16Q12toF, charon_host_vImageConvert_16Q12toF, q12_8, 2, 4, 2);
-        compare("vImageConvert_16Q12to16F", vImageConvert_16Q12to16F, charon_host_vImageConvert_16Q12to16F, q12_8, 2, 2, 2);
+        compare("vImageConvert_16Q12to16U", vImageConvert_16Q12to16U, revenant_host_vImageConvert_16Q12to16U, q12_8, 2, 2, 2);
+        compare("vImageConvert_16Q12to8", vImageConvert_16Q12to8, revenant_host_vImageConvert_16Q12to8, q12_8, 2, 1, 2);
+        compare("vImageConvert_16Q12toF", vImageConvert_16Q12toF, revenant_host_vImageConvert_16Q12toF, q12_8, 2, 4, 2);
+        compare("vImageConvert_16Q12to16F", vImageConvert_16Q12to16F, revenant_host_vImageConvert_16Q12to16F, q12_8, 2, 2, 2);
         {
             uint16_t *halves = calloc(64, sizeof(uint16_t));
             uint16_t *out = calloc(64, sizeof(uint16_t));
@@ -132,26 +132,26 @@ int main(void)
                        "the host wrote %u and %u", first, second);
             }
         }
-        compare("vImageConvert_16Fto16Q12", vImageConvert_16Fto16Q12, charon_host_vImageConvert_16Fto16Q12, half8, 2, 2,
+        compare("vImageConvert_16Fto16Q12", vImageConvert_16Fto16Q12, revenant_host_vImageConvert_16Fto16Q12, half8, 2, 2,
                 2);
-        compare("vImageConvert_16Uto16Q12", vImageConvert_16Uto16Q12, charon_host_vImageConvert_16Uto16Q12, ramp16, 2, 2, 2);
-        compare("vImageConvert_16Uto16F", vImageConvert_16Uto16F, charon_host_vImageConvert_16Uto16F, ramp16, 2, 2, 2);
-        compare("vImageConvert_8to16Q12", vImageConvert_8to16Q12, charon_host_vImageConvert_8to16Q12, small8, 1, 2, 1);
-        compare("vImageConvert_Fto16Q12", vImageConvert_Fto16Q12, charon_host_vImageConvert_Fto16Q12, float8, 4, 2, 4);
+        compare("vImageConvert_16Uto16Q12", vImageConvert_16Uto16Q12, revenant_host_vImageConvert_16Uto16Q12, ramp16, 2, 2, 2);
+        compare("vImageConvert_16Uto16F", vImageConvert_16Uto16F, revenant_host_vImageConvert_16Uto16F, ramp16, 2, 2, 2);
+        compare("vImageConvert_8to16Q12", vImageConvert_8to16Q12, revenant_host_vImageConvert_8to16Q12, small8, 1, 2, 1);
+        compare("vImageConvert_Fto16Q12", vImageConvert_Fto16Q12, revenant_host_vImageConvert_Fto16Q12, float8, 4, 2, 4);
 
         {
             vImage_Buffer small_buf = {ramp16, 1, 1, 8};
             vImage_Buffer large_buf = {ramp16, 4, 1, 8};
             vImage_Error mine_error = vImageConvert_16Q12to16U(&small_buf, &large_buf, 0);
-            vImage_Error host_error = charon_host_vImageConvert_16Q12to16U(&small_buf, &large_buf, 0);
+            vImage_Error host_error = revenant_host_vImageConvert_16Q12to16U(&small_buf, &large_buf, 0);
             report(mine_error == kvImageRoiLargerThanInputBuffer && host_error == kvImageRoiLargerThanInputBuffer,
                    "a destination larger than the source is kvImageRoiLargerThanInputBuffer on both sides", "");
             mine_error = vImageConvert_16Q12to16U(&small_buf, &small_buf, 0x4000);
-            host_error = charon_host_vImageConvert_16Q12to16U(&small_buf, &small_buf, 0x4000);
+            host_error = revenant_host_vImageConvert_16Q12to16U(&small_buf, &small_buf, 0x4000);
             report(mine_error == kvImageUnknownFlagsBit && host_error == kvImageUnknownFlagsBit,
                    "a flag outside the set the header lists is kvImageUnknownFlagsBit on both sides", "");
             mine_error = vImageConvert_16Q12to16U(&small_buf, &small_buf, kvImageGetTempBufferSize);
-            host_error = charon_host_vImageConvert_16Q12to16U(&small_buf, &small_buf, kvImageGetTempBufferSize);
+            host_error = revenant_host_vImageConvert_16Q12to16U(&small_buf, &small_buf, kvImageGetTempBufferSize);
             report(mine_error == 0 && host_error == 0,
                    "kvImageGetTempBufferSize does no work and answers zero on both sides", "");
         }

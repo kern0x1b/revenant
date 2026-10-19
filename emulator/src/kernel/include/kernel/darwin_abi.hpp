@@ -19,7 +19,7 @@
 #include "foundation/darwin_errno.hpp"
 #include "network/darwin_socket_abi.hpp"
 
-namespace shade::darwin {
+namespace emulator::darwin {
 
 
 namespace aio {

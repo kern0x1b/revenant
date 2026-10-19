@@ -6,7 +6,7 @@
 
 #include <cstdint>
 
-namespace shade::darwin::process_policy {
+namespace emulator::darwin::process_policy {
 
 inline constexpr std::uint32_t syscall_number = 323;
 inline constexpr std::uint32_t scope_process = 1;

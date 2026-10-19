@@ -112,8 +112,8 @@ import CoreImage
            dladdr(unsafeBitCast(method_getImplementation(method), to: UnsafeRawPointer.self), &info) != 0, let name = info.dli_fname {
             image = String(cString: name)
         }
-        let installer = objc_getClass("CharonSwipeInstaller") != nil
-        let installs = UITableView.instancesRespond(to: NSSelectorFromString("charon_installSwipeActions"))
+        let installer = objc_getClass("RevenantSwipeInstaller") != nil
+        let installs = UITableView.instancesRespond(to: NSSelectorFromString("revenant_installSwipeActions"))
         return "installerClass=\(installer) tableInstallMethod=\(installs) setDelegateIn=\(image) "
             + "available=\(SwipeActionsBridge.available) action=\(action != nil) configuration=\(configuration != nil) "
             + "controllerResponds=\(ListController.instancesRespond(to: NSSelectorFromString("tableView:trailingSwipeActionsConfigurationForRowAtIndexPath:"))) queries=\(ListController.swipeQueries) "

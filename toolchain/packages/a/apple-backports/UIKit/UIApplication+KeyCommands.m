@@ -6,12 +6,12 @@
 #pragma clang diagnostic ignored "-Wundeclared-selector"
 
 enum {
-    CharonShift = 1 << 17,
-    CharonControl = 1 << 18,
-    CharonAlternate = 1 << 19,
-    CharonCommand = 1 << 20,
-    CharonModifiers = CharonShift | CharonControl | CharonAlternate | CharonCommand,
-    CharonKeyDown = 10
+    RevenantShift = 1 << 17,
+    RevenantControl = 1 << 18,
+    RevenantAlternate = 1 << 19,
+    RevenantCommand = 1 << 20,
+    RevenantModifiers = RevenantShift | RevenantControl | RevenantAlternate | RevenantCommand,
+    RevenantKeyDown = 10
 };
 
 static long (*gs_type)(void *);
@@ -19,7 +19,7 @@ static long (*gs_key_code)(void *);
 static long (*gs_flags)(void *);
 static CFStringRef (*gs_plain)(void *);
 
-static NSString *charon_input_for_event(void *event)
+static NSString *revenant_input_for_event(void *event)
 {
     long code = gs_key_code ? gs_key_code(event) : 0;
     switch (code) {
@@ -44,33 +44,33 @@ static NSString *charon_input_for_event(void *event)
     return plain;
 }
 
-static BOOL charon_command_matches(UIKeyCommand *command, NSString *input, NSInteger flags)
+static BOOL revenant_command_matches(UIKeyCommand *command, NSString *input, NSInteger flags)
 {
     if (![command isKindOfClass:[UIKeyCommand class]] || !command.action || !command.input)
         return NO;
-    if ((command.modifierFlags & CharonModifiers) != (flags & CharonModifiers))
+    if ((command.modifierFlags & RevenantModifiers) != (flags & RevenantModifiers))
         return NO;
     return [command.input caseInsensitiveCompare:input] == NSOrderedSame;
 }
 
-static UIResponder *charon_first_responder(UIView *view)
+static UIResponder *revenant_first_responder(UIView *view)
 {
     if (view.isFirstResponder)
         return view;
     for (UIView *subview in view.subviews) {
-        UIResponder *found = charon_first_responder(subview);
+        UIResponder *found = revenant_first_responder(subview);
         if (found)
             return found;
     }
     return nil;
 }
 
-static BOOL charon_fire_key_command(NSString *input, NSInteger flags)
+static BOOL revenant_fire_key_command(NSString *input, NSInteger flags)
 {
     UIApplication *application = [UIApplication sharedApplication];
     UIWindow *window = application.keyWindow;
     NSMutableArray *chain = [NSMutableArray array];
-    for (UIResponder *responder = charon_first_responder(window) ?: window; responder; responder = responder.nextResponder)
+    for (UIResponder *responder = revenant_first_responder(window) ?: window; responder; responder = responder.nextResponder)
         [chain addObject:responder];
     if (application.delegate && ![chain containsObject:application.delegate])
         [chain addObject:application.delegate];
@@ -78,17 +78,17 @@ static BOOL charon_fire_key_command(NSString *input, NSInteger flags)
         if (![responder respondsToSelector:@selector(keyCommands)])
             continue;
         for (UIKeyCommand *command in [responder keyCommands]) {
-            if (charon_command_matches(command, input, flags) && [responder canPerformAction:command.action withSender:command] && [application sendAction:command.action to:responder from:command forEvent:nil])
+            if (revenant_command_matches(command, input, flags) && [responder canPerformAction:command.action withSender:command] && [application sendAction:command.action to:responder from:command forEvent:nil])
                 return YES;
         }
     }
     return NO;
 }
 
-@interface CharonKeyCommandInstaller : NSObject
+@interface RevenantKeyCommandInstaller : NSObject
 @end
 
-@implementation CharonKeyCommandInstaller
+@implementation RevenantKeyCommandInstaller
 
 + (void)load
 {
@@ -103,9 +103,9 @@ static BOOL charon_fire_key_command(NSString *input, NSInteger flags)
         return;
     void (*original)(id, SEL, void *) = (void (*)(id, SEL, void *))method_getImplementation(method);
     class_replaceMethod([UIApplication class], selector, imp_implementationWithBlock(^(UIApplication *application, void *event) {
-        if (event && gs_type(event) == CharonKeyDown) {
-            NSString *input = charon_input_for_event(event);
-            if (input && charon_fire_key_command(input, (NSInteger)gs_flags(event)))
+        if (event && gs_type(event) == RevenantKeyDown) {
+            NSString *input = revenant_input_for_event(event);
+            if (input && revenant_fire_key_command(input, (NSInteger)gs_flags(event)))
                 return;
         }
         original(application, selector, event);

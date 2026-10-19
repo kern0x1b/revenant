@@ -4,7 +4,7 @@
 #if HOST_SIDE
 #import <NetworkExtension/NetworkExtension.h>
 #else
-#import "CharonNEHotspot.h"
+#import "RevenantNEHotspot.h"
 #endif
 
 static void wait_for(NSTimeInterval seconds)
@@ -48,7 +48,7 @@ static void network(void)
 
 static void config(void)
 {
-    NEHotspotConfiguration *c = [[NEHotspotConfiguration alloc] initWithSSID:@"charon-probe"];
+    NEHotspotConfiguration *c = [[NEHotspotConfiguration alloc] initWithSSID:@"revenant-probe"];
     line("config.SSID", c.SSID);
     line("config.SSIDPrefix", c.SSIDPrefix);
     printf("config.hidden\t%d\n", c.hidden);
@@ -106,7 +106,7 @@ static void fetch(void)
 
 static void apply(void)
 {
-    NEHotspotConfiguration *c = [[NEHotspotConfiguration alloc] initWithSSID:@"charon-probe-no-such-ssid"];
+    NEHotspotConfiguration *c = [[NEHotspotConfiguration alloc] initWithSSID:@"revenant-probe-no-such-ssid"];
     __block int calls = 0;
     __block NSError *err = nil;
     __block int main = -1;
@@ -153,9 +153,9 @@ static void removes(void)
     NEHotspotConfigurationManager *m = [NEHotspotConfigurationManager sharedManager];
     printf("shared.same\t%d\n", m == [NEHotspotConfigurationManager sharedManager]);
     line("shared.class", NSStringFromClass([m class]));
-    [m removeConfigurationForSSID:@"charon-probe-no-such-ssid"];
+    [m removeConfigurationForSSID:@"revenant-probe-no-such-ssid"];
     printf("remove.ssid.returned\t1\n");
-    [m removeConfigurationForHS20DomainName:@"charon-probe-no-such-domain"];
+    [m removeConfigurationForHS20DomainName:@"revenant-probe-no-such-domain"];
     printf("remove.hs20.returned\t1\n");
 }
 

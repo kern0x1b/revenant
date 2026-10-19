@@ -47,14 +47,14 @@ function run(opt)
     local out = opt.out or steps.env("AVMOVIE5_APP") or workspace.run("v-avmovie5", "emu-" .. steps.stamp())
     steps.copy(path.join(host, "movies"), {"movie-a.mov", "movie-b.mov", "movie-c.mov"}, path.join(out, "movies"))
     steps.copy(path.join(HERE, "app"), {"xmake.lua", "Info.plist", "control"}, out)
-    local envs = {CHARAVMOVIE_ROOT = steps.charon(), CHARAVMOVIE_MINIMUM = "6.1.3"}
+    local envs = {CHARAVMOVIE_ROOT = steps.revenant(), CHARAVMOVIE_MINIMUM = "6.1.3"}
     steps.required({what = "the application", verb = "configure", curdir = out, envs = envs,
                     argv = {"f", "-p", "iphoneos", "-a", "armv7", "-y"}, log = path.join(out, "configure.log")})
     steps.required({what = "the application", verb = "install", curdir = out, envs = envs,
                     argv = table.join({"emulate"}, DEVICE, {"install"}), log = path.join(out, "install.log")})
     local launch_status = steps.spawn({curdir = out, envs = envs, log = path.join(out, "launch.log"),
                                        argv = table.join({"emulate"}, DEVICE, {"-s", "240", "launch",
-                                                         "local.charon.backports.avmovieprobe", "until-exit"})})
+                                                         "local.revenant.backports.avmovieprobe", "until-exit"})})
     steps.spawn({curdir = out, envs = envs, argv = table.join({"emulate"}, DEVICE, {"log"}),
                  log = path.join(out, "emulate.log")})
     print("run folder: %s (launch status %d)", out, launch_status)

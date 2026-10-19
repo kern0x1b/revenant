@@ -2934,7 +2934,7 @@
    "facts": "facts/VideoToolbox/FrameProcessorClasses.md",
    "api": "VTFrameProcessorConfiguration",
    "kind": "protocol",
-   "reason": "the SDK declares it at VTFrameProcessorConfiguration.h:28 as an @protocol with a body, API_AVAILABLE ios(26.0); CharonVideoToolbox.h declares it for a caller to compile against, and the seven configuration classes declare the conformance, so the built armv7 library carries its protocol metadata - tools/corpus/objc-inventory.lua over the 6.1.3 gate's libVideoToolboxBackports.dylib reads it with its selectors. The rows of its properties name it as their owner, and check_registry answers such a row only through the owner's own protocol row",
+   "reason": "the SDK declares it at VTFrameProcessorConfiguration.h:28 as an @protocol with a body, API_AVAILABLE ios(26.0); RevenantVideoToolbox.h declares it for a caller to compile against, and the seven configuration classes declare the conformance, so the built armv7 library carries its protocol metadata - tools/corpus/objc-inventory.lua over the 6.1.3 gate's libVideoToolboxBackports.dylib reads it with its selectors. The rows of its properties name it as their owner, and check_registry answers such a row only through the owner's own protocol row",
    "effect": "@protocol(VTFrameProcessorConfiguration) and -conformsToProtocol: answer as on a release that has the frame processor; its requirements are the property rows that name it, each carried by every conforming class",
    "source": "SDK 26.2, VideoToolbox/Headers/VTFrameProcessorConfiguration.h:28"
   },
@@ -2945,7 +2945,7 @@
    "facts": "facts/VideoToolbox/FrameProcessorClasses.md",
    "api": "VTFrameProcessorParameters",
    "kind": "protocol",
-   "reason": "the SDK declares it at VTFrameProcessorParameters.h:26 as an @protocol with a body, API_AVAILABLE ios(26.0); CharonVideoToolbox.h declares it for a caller to compile against, and the seven parameters classes declare the conformance, so the built armv7 library carries its protocol metadata - tools/corpus/objc-inventory.lua over the 6.1.3 gate's libVideoToolboxBackports.dylib reads it with its selectors. The rows of its properties name it as their owner, and check_registry answers such a row only through the owner's own protocol row",
+   "reason": "the SDK declares it at VTFrameProcessorParameters.h:26 as an @protocol with a body, API_AVAILABLE ios(26.0); RevenantVideoToolbox.h declares it for a caller to compile against, and the seven parameters classes declare the conformance, so the built armv7 library carries its protocol metadata - tools/corpus/objc-inventory.lua over the 6.1.3 gate's libVideoToolboxBackports.dylib reads it with its selectors. The rows of its properties name it as their owner, and check_registry answers such a row only through the owner's own protocol row",
    "effect": "@protocol(VTFrameProcessorParameters) and -conformsToProtocol: answer as on a release that has the frame processor; its requirements are the property rows that name it, each carried by every conforming class",
    "source": "SDK 26.2, VideoToolbox/Headers/VTFrameProcessorParameters.h:26"
   },
@@ -2991,7 +2991,7 @@
    "kind": "function",
    "reason": "the 16.4 SDK declares it and the release has no such symbol, so the port exports it. It exists to hand the caller the encoded frame through a block passed per call, and the release cannot do that: the header requires a session created with a NULL callback (\"Cannot be called with a session created with a VTCompressionOutputCallback\"), the callback is fixed at VTCompressionSessionCreate time, and there is no VTCompressionSessionSetOutputCallback in the release - measured over its own symbol table, one hit for _VTCompressionSessionCreate and _VTCompressionSessionEncodeFrame and ZERO for _VTCompressionSessionSetOutputCallback - nor in the 26.2 SDK. The frame therefore cannot reach the block, and this entry point says so with a status instead of encoding the frame and dropping it, which would be work the caller cannot see",
    "effect": "kVTVideoEncoderNotAvailableNowErr (-12915) and NO work done: the frame is not encoded, so nothing is encoded and thrown away and the caller's block is not called with a hole where a frame should have been. A caller that needs frames on this release is not stuck: it creates the session with a VTCompressionOutputCallback and calls VTCompressionSessionEncodeFrame, which the release exports and which this port does not touch. This entry point is the one that cannot work here and it reports that rather than failing quietly",
-   "source": "SDK 26.2, VTCompressionSession.h:313 for the declaration and the \"Cannot be called\" line in the same header's @discussion; the absence of a setter measured with tools/corpus/dump-cache.lua over $HOME/.charon/dyld/6.1.3/dyld_shared_cache_armv7 on 2026-10-03"
+   "source": "SDK 26.2, VTCompressionSession.h:313 for the declaration and the \"Cannot be called\" line in the same header's @discussion; the absence of a setter measured with tools/corpus/dump-cache.lua over $HOME/.revenant/dyld/6.1.3/dyld_shared_cache_armv7 on 2026-10-03"
   },
   {
    "introduced": "9.0",
@@ -3002,7 +3002,7 @@
    "kind": "function",
    "reason": "the same cause on the decompression side, measured the same way: the header requires a session created with a NULL callback (\"Cannot be called with a session created with a VTDecompressionOutputCallbackRecord\"), _VTDecompressionSessionCreate and _VTDecompressionSessionDecodeFrame are in the 6.1.3 symbol table and _VTDecompressionSessionSetOutputCallback is not, in the release or in the 26.2 SDK",
    "effect": "kVTVideoDecoderNotAvailableNowErr (-12913) and NO work done: the frame is not decoded and the caller's block is not called. The notification route does not deliver it either, and that was measured rather than assumed: _kVTDecompressionSessionNotification_FrameDecodeCompleted IS in the 6.1.3 symbol table, but it is declared in no C header of the 16.4 SDK, the 26.2 SDK or the host - only in the three VideoToolbox.tbd export tables - so there is no declared contract for what it carries, and kVTDecompressionSessionFrameDecodeNotificationUserInfoKey, the key that would name the frame, is not in the 6.1.3 symbol table at all. A caller that needs frames creates the session with a VTDecompressionOutputCallbackRecord and calls VTDecompressionSessionDecodeFrame",
-   "source": "SDK 26.2, VTDecompressionSession.h:225 for the declaration and the \"Cannot be called\" line in the same header's @discussion; both the missing setter and the notification's missing header and missing user-info key measured with tools/corpus/dump-cache.lua over $HOME/.charon/dyld/6.1.3/dyld_shared_cache_armv7 on 2026-10-03"
+   "source": "SDK 26.2, VTDecompressionSession.h:225 for the declaration and the \"Cannot be called\" line in the same header's @discussion; both the missing setter and the notification's missing header and missing user-info key measured with tools/corpus/dump-cache.lua over $HOME/.revenant/dyld/6.1.3/dyld_shared_cache_armv7 on 2026-10-03"
   },
   {
    "introduced": "8.0",
@@ -3012,7 +3012,7 @@
    "api": "VTMultiPassStorageGetTypeID()",
    "kind": "function",
    "reason": "a CFTypeID for a CF type that arrived with iOS 8 and which the 6.1.3 release carries no symbol for (tools/corpus/dump-cache.lua over the 6.1.3 armv7 cache: zero hits for _VTMultiPassStorageGetTypeID), so the port has to export it. Apple's own answers 75 on this host and 75 is not copied: a CFTypeID is a slot in a process-wide table and a literal would claim another type's slot in every process that loads this library",
-   "effect": "the CharonVTMultiPassStorage class pointer, which is the answer AVFoundation/CMTaggedBufferGroup17.m gives CMTaggedBufferGroupGetTypeID and Graphics/CVMetalTexture80.m gives CVMetalTextureCacheGetTypeID - the tree's own mechanism, reused rather than replaced. Measured stable across calls on the host (75 twice), which is the property a caller compares it for",
+   "effect": "the RevenantVTMultiPassStorage class pointer, which is the answer AVFoundation/CMTaggedBufferGroup17.m gives CMTaggedBufferGroupGetTypeID and Graphics/CVMetalTexture80.m gives CVMetalTextureCacheGetTypeID - the tree's own mechanism, reused rather than replaced. Measured stable across calls on the host (75 twice), which is the property a caller compares it for",
    "source": "SDK 26.2, VTMultiPassStorage.h:40 for the declaration; the host's own answer measured twice on 2026-10-03 as 75; the reuse of the tree's mechanism is the point of the effect, not a paraphrase"
   },
   {

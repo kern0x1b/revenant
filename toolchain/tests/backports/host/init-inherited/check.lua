@@ -81,7 +81,7 @@ local function carries_macro(files, wanted)
             elseif line:match("^@end") then
                 current = nil
             end
-            if current and line:match("^CHARON_HEALTHKIT_UNCREATABLE_INIT%s*$") then
+            if current and line:match("^REVENANT_HEALTHKIT_UNCREATABLE_INIT%s*$") then
                 found[current] = true
             end
         end
@@ -105,11 +105,11 @@ local function constructions(files, classes)
     return hits
 end
 
-local function charon_builds(files, name)
+local function revenant_builds(files, name)
     local count = 0
     for _, file in ipairs(files) do
         for line in io.lines(file) do
-            if line:find("%[%[%s*" .. name .. "%s+alloc%]%s+charon_init%]") then
+            if line:find("%[%[%s*" .. name .. "%s+alloc%]%s+revenant_init%]") then
                 count = count + 1
             end
         end
@@ -117,8 +117,8 @@ local function charon_builds(files, name)
     return count
 end
 
-function main(charon)
-    local apple = path.join(charon, "packages", "a", "apple-backports")
+function main(revenant)
+    local apple = path.join(revenant, "packages", "a", "apple-backports")
     local files = table.join(os.files(path.join(apple, "HomeKit", "*.m")), os.files(path.join(apple, "HealthKit", "*.m")))
 
     local status = {}
@@ -154,7 +154,7 @@ function main(charon)
     end
     local macros = carries_macro(hk_files, raise_wanted)
     for _, name in ipairs(raising) do
-        expect(name .. " carries CHARON_HEALTHKIT_UNCREATABLE_INIT in its own @implementation block", macros[name])
+        expect(name .. " carries REVENANT_HEALTHKIT_UNCREATABLE_INIT in its own @implementation block", macros[name])
     end
 
     local hits = constructions(hk_files, table.join(raising, inheriting))
@@ -162,9 +162,9 @@ function main(charon)
         print("  " .. hit)
     end
     expect("no HealthKit source builds a raising class through -init or +new", #hits == 0)
-    expect("the control: HKStatistics builds through charon_init at least twice", charon_builds(hk_files, "HKStatistics") >= 2)
-    expect("the control: HKStatisticsCollection builds through charon_init at least twice",
-           charon_builds(hk_files, "HKStatisticsCollection") >= 2)
+    expect("the control: HKStatistics builds through revenant_init at least twice", revenant_builds(hk_files, "HKStatistics") >= 2)
+    expect("the control: HKStatisticsCollection builds through revenant_init at least twice",
+           revenant_builds(hk_files, "HKStatisticsCollection") >= 2)
 
     print(string.format("checks=%d failures=%d", checks, failures))
     if failures > 0 then

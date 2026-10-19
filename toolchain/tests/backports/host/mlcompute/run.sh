@@ -11,12 +11,12 @@ here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 port=${MLCOMPUTE_PORT:-$here/../../../../packages/a/apple-backports/MLCompute}
 registry=${MLCOMPUTE_REGISTRY:-$here/../../../../packages/a/apple-backports/registry/MLCompute}
-build=${MLCOMPUTE_BUILD:-$(runs_folder charon-mlcompute-host)}
+build=${MLCOMPUTE_BUILD:-$(runs_folder revenant-mlcompute-host)}
 # The engine the port's own MLCInferenceGraph computes its forward pass with, built by the one script both
 # MLCompute harnesses use and kept beside $build rather than inside it, so the rm below does not throw it away
 # and a second run does not build it again. The release build compiles the engine's five C units for armv7
 # and needs no C++ runtime; this is the harness only.
-engine=${MLCOMPUTE_ENGINE_BUILD:-$(runs_folder charon-mlcompute-engine-host)}
+engine=${MLCOMPUTE_ENGINE_BUILD:-$(runs_folder revenant-mlcompute-engine-host)}
 rm -rf "$build"
 mkdir -p "$build"
 sdk=$(xcrun --show-sdk-path)
@@ -24,13 +24,13 @@ common="-target arm64-apple-ios15.0-macabi -isysroot $sdk -fobjc-arc -w -I$here"
 libs="-framework Foundation -framework Accelerate"
 ggmlhost=$(sh "$here/ggml-host.sh" "$engine")
 ggml=${MLCOMPUTE_GGML:-$(ls -td "$HOME"/.xmake/packages/g/ggml/0.25.3/*/ 2>/dev/null | head -1 | sed "s:/$::")}
-# The port's own translation units, the engine's archive and the engine's header: CharonMLCGraph.mm is where
+# The port's own translation units, the engine's archive and the engine's header: RevenantMLCGraph.mm is where
 # the port computes, so a case that asks the port what an execute computed is asking the port's arithmetic.
 portsources() {
     printf '%s' "$port/MLCTypes14.m $port/MLCDevice15.m $port/MLCTensors14.m $port/MLCDescriptors14.m \
 $port/MLCLayers14.m $port/MLCOptimizers14.m $port/MLCOptimizers15.m $port/MLCAdamAMSGrad15.m \
 $port/MLCGraph14.m $port/MLCInferenceGraph14.m $port/MLCTrainingGraph14.m $port/MLCGraphConstants15.m \
-$port/CharonMLCGraph.mm"
+$port/RevenantMLCGraph.mm"
 }
 
 # Every MLC name the port's own sources define, taken from the sources so that nothing can be added to one
@@ -54,7 +54,7 @@ for entry in sorted(os.listdir(port)):
 # The port's own private names never collide with the framework's and are not renamed.
 with open(out, "w") as handle:
     for name in sorted(names):
-        handle.write("#define %s Charon%s\n" % (name, name))
+        handle.write("#define %s Revenant%s\n" % (name, name))
 print("renamed %d names" % len(names))
 PY
 
@@ -73,9 +73,9 @@ xcrun clang $common -include "$build/rename.h" -I"$port" -I"$ggml/include" "$her
 
 # The red control: the same program and the same objects with every optimizer default one step off, which
 # is what a default nobody measured looks like. It exists because a comparison that cannot see a wrong
-# number is not a comparison: -DCHARON_MLC_PLANT is compiled into CharonMLCOptimizerState's initialiser in
+# number is not a comparison: -DREVENANT_MLC_PLANT is compiled into RevenantMLCOptimizerState's initialiser in
 # MLCompute/MLCOptimizers14.m and into nothing else, so a build of the library carries no plant.
-xcrun clang $common -DCHARON_MLC_PLANT=1 -include "$build/rename.h" -I"$port" -I"$ggml/include" "$here/record.m" \
+xcrun clang $common -DREVENANT_MLC_PLANT=1 -include "$build/rename.h" -I"$port" -I"$ggml/include" "$here/record.m" \
     "$here/cases.m" "$here/layer-cases.m" "$here/optimizer-cases.m" "$here/graph-cases.m" \
     "$here/inference-cases.m" $(portsources) "$ggmlhost" $libs -lc++ -o "$build/port-plant1"
 "$build/port-plant1" > "$build/port-plant1.log" 2>&1 || { echo "the planted port run failed:"; tail -20 "$build/port-plant1.log"; exit 1; }

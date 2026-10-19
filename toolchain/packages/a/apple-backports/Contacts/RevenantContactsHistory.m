@@ -1,14 +1,14 @@
-#import "CharonContacts.h"
+#import "RevenantContacts.h"
 
-#define CharonHistoryMaxGenerations 24
+#define RevenantHistoryMaxGenerations 24
 
-@implementation CharonContactsHistory
+@implementation RevenantContactsHistory
 
 + (NSString *)directory
 {
     NSArray *paths = NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, YES);
     NSString *base = paths.firstObject ?: NSTemporaryDirectory();
-    NSString *directory = [base stringByAppendingPathComponent:@"CharonContacts/History"];
+    NSString *directory = [base stringByAppendingPathComponent:@"RevenantContacts/History"];
     [[NSFileManager defaultManager] createDirectoryAtPath:directory withIntermediateDirectories:YES attributes:nil error:NULL];
     return directory;
 }
@@ -75,14 +75,14 @@
     NSFileManager *manager = [NSFileManager defaultManager];
     NSString *directory = [self directory];
     NSArray *names = [manager contentsOfDirectoryAtPath:directory error:NULL];
-    if (names.count <= CharonHistoryMaxGenerations)
+    if (names.count <= RevenantHistoryMaxGenerations)
         return;
     NSArray *sorted = [names sortedArrayUsingComparator:^NSComparisonResult(NSString *a, NSString *b) {
         NSDate *dateA = [manager attributesOfItemAtPath:[directory stringByAppendingPathComponent:a] error:NULL][NSFileModificationDate];
         NSDate *dateB = [manager attributesOfItemAtPath:[directory stringByAppendingPathComponent:b] error:NULL][NSFileModificationDate];
         return [dateA compare:dateB];
     }];
-    NSInteger overflow = (NSInteger)sorted.count - CharonHistoryMaxGenerations;
+    NSInteger overflow = (NSInteger)sorted.count - RevenantHistoryMaxGenerations;
     for (NSInteger index = 0; index < overflow; index++)
         [manager removeItemAtPath:[directory stringByAppendingPathComponent:sorted[index]] error:NULL];
 }
@@ -106,54 +106,54 @@
 + (void)addContactEventsFrom:(NSDictionary *)previous to:(NSDictionary *)current book:(ABAddressBookRef)book
                       request:(CNChangeHistoryFetchRequest *)request into:(NSMutableArray *)events
 {
-    NSSet *keys = [CharonContactsBook keysFromDescriptors:request.additionalContactKeyDescriptors];
+    NSSet *keys = [RevenantContactsBook keysFromDescriptors:request.additionalContactKeyDescriptors];
     for (NSString *identifier in current) {
         ABRecordRef person = ABAddressBookGetPersonWithRecordID(book, (ABRecordID)[identifier intValue]);
         if (!person)
             continue;
         NSNumber *previousStamp = previous[identifier];
         if (!previousStamp) {
-            CNContact *contact = [CharonContactsBook contactWithRecord:person keys:keys unify:request.shouldUnifyResults
+            CNContact *contact = [RevenantContactsBook contactWithRecord:person keys:keys unify:request.shouldUnifyResults
                                                                 mutable:request.mutableObjects];
-            ABRecordRef source = [CharonContactsBook sourceOfPersonWithIdentifier:identifier inBook:book];
+            ABRecordRef source = [RevenantContactsBook sourceOfPersonWithIdentifier:identifier inBook:book];
             NSString *containerIdentifier = source ? [self identifierOfRecord:source] : nil;
-            [events addObject:[CNChangeHistoryAddContactEvent charon_eventWithContact:contact containerIdentifier:containerIdentifier]];
+            [events addObject:[CNChangeHistoryAddContactEvent revenant_eventWithContact:contact containerIdentifier:containerIdentifier]];
         } else if (![previousStamp isEqual:current[identifier]]) {
-            CNContact *contact = [CharonContactsBook contactWithRecord:person keys:keys unify:request.shouldUnifyResults
+            CNContact *contact = [RevenantContactsBook contactWithRecord:person keys:keys unify:request.shouldUnifyResults
                                                                 mutable:request.mutableObjects];
-            [events addObject:[CNChangeHistoryUpdateContactEvent charon_eventWithContact:contact]];
+            [events addObject:[CNChangeHistoryUpdateContactEvent revenant_eventWithContact:contact]];
         }
     }
     for (NSString *identifier in previous) {
         if (!current[identifier])
-            [events addObject:[CNChangeHistoryDeleteContactEvent charon_eventWithContactIdentifier:identifier]];
+            [events addObject:[CNChangeHistoryDeleteContactEvent revenant_eventWithContactIdentifier:identifier]];
     }
 }
 
 + (void)addGroupEventsFrom:(NSDictionary *)previous to:(NSDictionary *)current book:(ABAddressBookRef)book
                     request:(CNChangeHistoryFetchRequest *)request into:(NSMutableArray *)events
 {
-    NSSet *keys = [CharonContactsBook keysFromDescriptors:request.additionalContactKeyDescriptors];
+    NSSet *keys = [RevenantContactsBook keysFromDescriptors:request.additionalContactKeyDescriptors];
     for (NSString *identifier in current) {
         ABRecordRef group = ABAddressBookGetGroupWithRecordID(book, (ABRecordID)[identifier intValue]);
         if (!group)
             continue;
         NSDictionary *previousInfo = previous[identifier];
         if (!previousInfo) {
-            CNGroup *cnGroup = [CharonContactsBook groupWithRecord:group mutable:NO];
-            ABRecordRef source = [CharonContactsBook sourceOfGroupWithIdentifier:identifier inBook:book];
+            CNGroup *cnGroup = [RevenantContactsBook groupWithRecord:group mutable:NO];
+            ABRecordRef source = [RevenantContactsBook sourceOfGroupWithIdentifier:identifier inBook:book];
             NSString *containerIdentifier = source ? [self identifierOfRecord:source] : nil;
-            [events addObject:[CNChangeHistoryAddGroupEvent charon_eventWithGroup:cnGroup containerIdentifier:containerIdentifier]];
+            [events addObject:[CNChangeHistoryAddGroupEvent revenant_eventWithGroup:cnGroup containerIdentifier:containerIdentifier]];
             continue;
         }
         NSDictionary *currentInfo = current[identifier];
         if (![previousInfo[@"name"] isEqual:currentInfo[@"name"]])
-            [events addObject:[CNChangeHistoryUpdateGroupEvent charon_eventWithGroup:[CharonContactsBook groupWithRecord:group mutable:NO]]];
+            [events addObject:[CNChangeHistoryUpdateGroupEvent revenant_eventWithGroup:[RevenantContactsBook groupWithRecord:group mutable:NO]]];
         NSArray *previousMembers = previousInfo[@"members"];
         NSArray *currentMembers = currentInfo[@"members"];
         if ([previousMembers isEqual:currentMembers])
             continue;
-        CNGroup *cnGroup = [CharonContactsBook groupWithRecord:group mutable:NO];
+        CNGroup *cnGroup = [RevenantContactsBook groupWithRecord:group mutable:NO];
         NSMutableSet *added = [NSMutableSet setWithArray:currentMembers];
         [added minusSet:[NSSet setWithArray:previousMembers]];
         NSMutableSet *removed = [NSMutableSet setWithArray:previousMembers];
@@ -162,28 +162,28 @@
             ABRecordRef person = ABAddressBookGetPersonWithRecordID(book, (ABRecordID)[memberIdentifier intValue]);
             if (!person)
                 continue;
-            CNContact *contact = [CharonContactsBook contactWithRecord:person keys:keys unify:request.shouldUnifyResults
+            CNContact *contact = [RevenantContactsBook contactWithRecord:person keys:keys unify:request.shouldUnifyResults
                                                                 mutable:request.mutableObjects];
-            [events addObject:[CNChangeHistoryAddMemberToGroupEvent charon_eventWithMember:contact group:cnGroup]];
+            [events addObject:[CNChangeHistoryAddMemberToGroupEvent revenant_eventWithMember:contact group:cnGroup]];
         }
         for (NSString *memberIdentifier in removed) {
             ABRecordRef person = ABAddressBookGetPersonWithRecordID(book, (ABRecordID)[memberIdentifier intValue]);
             if (!person)
                 continue;
-            CNContact *contact = [CharonContactsBook contactWithRecord:person keys:keys unify:request.shouldUnifyResults
+            CNContact *contact = [RevenantContactsBook contactWithRecord:person keys:keys unify:request.shouldUnifyResults
                                                                 mutable:request.mutableObjects];
-            [events addObject:[CNChangeHistoryRemoveMemberFromGroupEvent charon_eventWithMember:contact group:cnGroup]];
+            [events addObject:[CNChangeHistoryRemoveMemberFromGroupEvent revenant_eventWithMember:contact group:cnGroup]];
         }
     }
     for (NSString *identifier in previous) {
         if (!current[identifier])
-            [events addObject:[CNChangeHistoryDeleteGroupEvent charon_eventWithGroupIdentifier:identifier]];
+            [events addObject:[CNChangeHistoryDeleteGroupEvent revenant_eventWithGroupIdentifier:identifier]];
     }
 }
 
 + (NSData *)currentToken
 {
-    ABAddressBookRef book = [CharonContactsBook createBook:NULL];
+    ABAddressBookRef book = [RevenantContactsBook createBook:NULL];
     if (!book)
         return nil;
     NSDictionary *snapshot = [self snapshotFromBook:book];
@@ -193,7 +193,7 @@
 
 + (CNFetchResult<NSEnumerator<CNChangeHistoryEvent *> *> *)enumeratorForRequest:(CNChangeHistoryFetchRequest *)request error:(NSError **)error
 {
-    ABAddressBookRef book = [CharonContactsBook createBook:error];
+    ABAddressBookRef book = [RevenantContactsBook createBook:error];
     if (!book)
         return nil;
 
@@ -208,7 +208,7 @@
         if (!previous) {
             CFRelease(book);
             if (error)
-                *error = [CharonContacts errorWithCode:CNErrorCodeChangeHistoryInvalidAnchor
+                *error = [RevenantContacts errorWithCode:CNErrorCodeChangeHistoryInvalidAnchor
                                                  reason:@"This token does not name a snapshot this store still holds."];
             return nil;
         }
@@ -224,7 +224,7 @@
     NSString *newGeneration = [self writeGeneration:current];
     CFRelease(book);
 
-    return [CNFetchResult charon_resultWithValue:[events objectEnumerator] historyToken:[self tokenForGeneration:newGeneration]];
+    return [CNFetchResult revenant_resultWithValue:[events objectEnumerator] historyToken:[self tokenForGeneration:newGeneration]];
 }
 
 @end

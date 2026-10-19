@@ -166,10 +166,10 @@ function main(binary, corpus, diff, out, framework)
             "#import <Foundation/Foundation.h>",
             "#import <Matter/Matter.h>",
             "",
-            "@interface " .. owner .. " (CharonAppleSpelling)",
+            "@interface " .. owner .. " (RevenantAppleSpelling)",
             "@end",
             "",
-            "@implementation " .. owner .. " (CharonAppleSpelling)",
+            "@implementation " .. owner .. " (RevenantAppleSpelling)",
             ""
         }
         for _, f in ipairs(byowner[owner]) do

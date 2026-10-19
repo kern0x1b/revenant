@@ -14,7 +14,7 @@
 #include <cstddef>
 #include <cstdint>
 
-namespace shade::darwin::mig_wire {
+namespace emulator::darwin::mig_wire {
 
 inline constexpr std::uint32_t message_header_size = 24;
 inline constexpr std::uint32_t header_bits_offset = 0;

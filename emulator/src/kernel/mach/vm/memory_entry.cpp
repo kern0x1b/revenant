@@ -23,7 +23,7 @@
 #include "../support.hpp"
 #include "wire_reply.hpp"
 
-namespace shade {
+namespace emulator {
 namespace {
 
     using namespace mach_support;

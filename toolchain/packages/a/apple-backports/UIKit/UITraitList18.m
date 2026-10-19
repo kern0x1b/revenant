@@ -1,24 +1,24 @@
-#import "CharonTraits17.h"
+#import "RevenantTraits17.h"
 
-CHARON_TRAIT(17, UITraitListEnvironment, @"ListEnvironment", CharonTraitValueNSInteger, CharonTraitHomeExtras, @(0), YES)
+REVENANT_TRAIT(17, UITraitListEnvironment, @"ListEnvironment", RevenantTraitValueNSInteger, RevenantTraitHomeExtras, @(0), YES)
 
-@interface CharonTraitList18 : NSObject
+@interface RevenantTraitList18 : NSObject
 @end
 
-@implementation CharonTraitList18
+@implementation RevenantTraitList18
 
 + (void)load
 {
-    charon_define_UITraitListEnvironment();
+    revenant_define_UITraitListEnvironment();
 }
 
 @end
 
 @implementation UITraitListEnvironment
 
-+ (NSString *)identifier { return charon_identifier_of(self); }
-+ (NSString *)name { return charon_trait_name_of(self); }
-+ (BOOL)affectsColorAppearance { return charon_appearance_of(self); }
-+ (NSInteger)defaultValue { return charon_integer_default_of(self); }
++ (NSString *)identifier { return revenant_identifier_of(self); }
++ (NSString *)name { return revenant_trait_name_of(self); }
++ (BOOL)affectsColorAppearance { return revenant_appearance_of(self); }
++ (NSInteger)defaultValue { return revenant_integer_default_of(self); }
 
 @end

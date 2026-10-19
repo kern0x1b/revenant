@@ -10,22 +10,22 @@ local RELEASED = "int unreferenced_probe(void) { return 2; }\nstatic int answer(
                  "int (*volatile hook)(void) = answer;\nint main(void) { return hook(); }\n"
 local MODES = 'add_rules("mode.release", "mode.releasedbg", "mode.debug")'
 
-local CONTROL = "Package: org.charon.porttest\nName: Port test\nArchitecture: iphoneos-arm\nDescription: a port the tests build\n"
+local CONTROL = "Package: org.revenant.porttest\nName: Port test\nArchitecture: iphoneos-arm\nDescription: a port the tests build\n"
 
 local PROJECT = [[
-add_repositories("charon %s")
-add_addons("charon %s")
+add_repositories("revenant %s")
+add_addons("revenant %s")
 set_config("apple_minimum", "6.0")
-includes("@addon/charon/apple-ios")
+includes("@addon/revenant/apple-ios")
 set_allowedplats("iphoneos")
 set_allowedarchs("iphoneos|armv7")
 set_defaultplat("iphoneos")
 set_defaultarchs("iphoneos|armv7")
 %s
 target("probe")
-    add_rules("@addon/charon/daemon")
+    add_rules("@addon/revenant/daemon")
     add_files("main.c")
-    set_values("charon.control", "control")
+    set_values("revenant.control", "control")
 %s
 ]]
 
@@ -34,7 +34,7 @@ local function port(folder, version, name, source, head, body)
     os.mkdir(at)
     io.writefile(path.join(at, "main.c"), source)
     io.writefile(path.join(at, "control"), CONTROL)
-    io.writefile(path.join(at, "xmake.lua"), string.format(PROJECT, folder .. "/charon", version, head or "", body or ""))
+    io.writefile(path.join(at, "xmake.lua"), string.format(PROJECT, folder .. "/revenant", version, head or "", body or ""))
     return at
 end
 
@@ -52,7 +52,7 @@ function failures(opt)
     end
 
     for _, case in ipairs({{"later", LATER, "apple%-compat::dispatch_activate"},
-                           {"locked", LOCKED, "charon@libcxx"}}) do
+                           {"locked", LOCKED, "revenant@libcxx"}}) do
         local told = fixtures.refusal(function () fixtures.build(port(folder, version, case[1], case[2])) end)
         if not told then
             table.insert(found, string.format("a port calling %s must be refused at %s", case[1], "iOS 6.0"))
@@ -93,8 +93,8 @@ function failures(opt)
         table.insert(found, 'the refusal of a port that sets strip "all" must say it arrived stripped: ' .. told)
     end
 
-    addon.unregister("charon", version)
-    os.tryrm(path.join(addon.installdir(), addon.dirname("charon"), version))
+    addon.unregister("revenant", version)
+    os.tryrm(path.join(addon.installdir(), addon.dirname("revenant"), version))
     os.tryrm(folder)
     return found
 end

@@ -3,7 +3,7 @@
 #import "check.h"
 #import "underlying-cases.h"
 
-@interface CharonHostCharonOperationScheduler : NSObject
+@interface RevenantHostRevenantOperationScheduler : NSObject
 - (instancetype)initWithDispatchQueue:(dispatch_queue_t)queue owner:(NSOperationQueue *)owner;
 @property (nonatomic, readonly) dispatch_queue_t dispatchQueue;
 @property (nonatomic) BOOL suspended;
@@ -19,7 +19,7 @@
 @end
 
 @implementation PortQueue {
-    CharonHostCharonOperationScheduler *_scheduler;
+    RevenantHostRevenantOperationScheduler *_scheduler;
     NSString *_name;
 }
 
@@ -45,7 +45,7 @@
         _scheduler = nil;
         return;
     }
-    _scheduler = [[CharonHostCharonOperationScheduler alloc] initWithDispatchQueue:underlyingQueue owner:self];
+    _scheduler = [[RevenantHostRevenantOperationScheduler alloc] initWithDispatchQueue:underlyingQueue owner:self];
     _scheduler.suspended = suspended;
     _scheduler.maxConcurrentOperationCount = limit;
 }
@@ -133,7 +133,7 @@ int main(int argc, char **argv)
             NSData *data = [NSJSONSerialization dataWithJSONObject:system options:NSJSONWritingPrettyPrinted | NSJSONWritingSortedKeys error:NULL];
             [data writeToFile:@(argv[1]) atomically:YES];
         }
-        printf("checks=%d failures=%d\n", charon_checks, charon_failures);
-        return charon_failures;
+        printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
+        return revenant_failures;
     }
 }

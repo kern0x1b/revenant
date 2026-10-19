@@ -9,7 +9,7 @@
 #include <cstdint>
 #include <string>
 
-namespace shade {
+namespace emulator {
 
 struct ProcessSnapshot {
     std::uint32_t pid { };

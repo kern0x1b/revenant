@@ -57,7 +57,7 @@ end
 local function load_registry()
     local reg, intro = {}, {}
     if not os.isfile(EXPORT) then
-        raise("weak-imports.lua: registry export not found at %s (CHARON_REGISTRY_TSV).", EXPORT)
+        raise("weak-imports.lua: registry export not found at %s (REVENANT_REGISTRY_TSV).", EXPORT)
     end
     for line in io.lines(EXPORT) do
         local p = tsv.split(line)
@@ -151,7 +151,7 @@ local function tier_of(row)
         return "3 nil class"
     end
     if row.kind == "runtime" then
-        return "5 compiler runtime (Katabasis)"
+        return "5 compiler runtime (the recompiler)"
     end
     return "4 swift/c++ (other track)"
 end
@@ -276,7 +276,7 @@ function main(file, out_override)
     end
     rows = sorted
 
-    local out = out_override or os.getenv("CHARON_WEAK_IMPORTS_OUT") or path.join(CORPUS, "weak-imports-ranked.tsv")
+    local out = out_override or os.getenv("REVENANT_WEAK_IMPORTS_OUT") or path.join(CORPUS, "weak-imports-ranked.tsv")
     local file_out = assert(io.open(out, "w"))
     file_out:write("tier\tsymbol\tkind\tframework\tintroduced\tregistry\tcorpus_apps_importing\tcorpus_strong\n")
     for _, row in ipairs(rows) do

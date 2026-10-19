@@ -1,17 +1,17 @@
-#import "CharonNW.h"
+#import "RevenantNW.h"
 
 void nw_advertise_descriptor_set_txt_record_object(nw_advertise_descriptor_t advertise_descriptor, nw_txt_record_t txt_record)
 {
-    CharonNWAdvertiseDescriptor *value = (CharonNWAdvertiseDescriptor *)advertise_descriptor;
+    RevenantNWAdvertiseDescriptor *value = (RevenantNWAdvertiseDescriptor *)advertise_descriptor;
     if (!value)
         return;
-    value->_txtRecordObject = (CharonNWTxtRecord *)txt_record;
+    value->_txtRecordObject = (RevenantNWTxtRecord *)txt_record;
     value->_txtRecord = nil;
 }
 
 nw_txt_record_t nw_advertise_descriptor_copy_txt_record_object(nw_advertise_descriptor_t advertise_descriptor)
 {
-    CharonNWAdvertiseDescriptor *value = (CharonNWAdvertiseDescriptor *)advertise_descriptor;
+    RevenantNWAdvertiseDescriptor *value = (RevenantNWAdvertiseDescriptor *)advertise_descriptor;
     if (!value)
         return NULL;
     if (value->_txtRecordObject)

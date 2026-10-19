@@ -1,13 +1,13 @@
 #import <HealthKit/HealthKit.h>
 
-#import "CharonHKStore.h"
+#import "RevenantHKStore.h"
 
 #pragma mark - HKCategorySample
 
 @implementation HKCategorySample {
     NSInteger _value;
 }
-CHARON_HEALTHKIT_UNCREATABLE_INIT
+REVENANT_HEALTHKIT_UNCREATABLE_INIT
 
 + (BOOL)supportsSecureCoding
 {
@@ -34,7 +34,7 @@ CHARON_HEALTHKIT_UNCREATABLE_INIT
                            type];
         return nil;
     }
-    HKCategorySample *sample = [[HKCategorySample alloc] charon_initWithType:(HKSampleType *)type
+    HKCategorySample *sample = [[HKCategorySample alloc] revenant_initWithType:(HKSampleType *)type
                                                                    metadata:metadata
                                                                   startDate:startDate
                                                                     endDate:endDate];
@@ -57,9 +57,9 @@ CHARON_HEALTHKIT_UNCREATABLE_INIT
     [coder encodeInteger:_value forKey:@"value"];
 }
 
-- (instancetype)charon_copyForStore
+- (instancetype)revenant_copyForStore
 {
-    HKCategorySample *copy = [super charon_copyForStore];
+    HKCategorySample *copy = [super revenant_copyForStore];
     if (copy)
         copy->_value = _value;
     return copy;
@@ -70,7 +70,7 @@ CHARON_HEALTHKIT_UNCREATABLE_INIT
     return _value;
 }
 
-- (NSInteger)charon_storeKind
+- (NSInteger)revenant_storeKind
 {
     return 0;
 }
@@ -120,13 +120,13 @@ CHARON_HEALTHKIT_UNCREATABLE_INIT
         [NSException raise:NSInvalidArgumentException format:@"%@ is not a quantity.", quantity];
         return nil;
     }
-    if (![type isCompatibleWithUnit:[quantity charon_unit]]) {
+    if (![type isCompatibleWithUnit:[quantity revenant_unit]]) {
         [NSException raise:NSInvalidArgumentException
                     format:@"A quantity in %@ cannot be saved as a sample of %@, which is counted in a different dimension.",
-                           [quantity charon_unit].unitString, type.identifier];
+                           [quantity revenant_unit].unitString, type.identifier];
         return nil;
     }
-    HKQuantitySample *sample = [[HKQuantitySample alloc] charon_initWithType:(HKSampleType *)type
+    HKQuantitySample *sample = [[HKQuantitySample alloc] revenant_initWithType:(HKSampleType *)type
                                                                    metadata:metadata
                                                                   startDate:startDate
                                                                     endDate:endDate];
@@ -149,9 +149,9 @@ CHARON_HEALTHKIT_UNCREATABLE_INIT
     [coder encodeObject:_quantity forKey:@"quantity"];
 }
 
-- (instancetype)charon_copyForStore
+- (instancetype)revenant_copyForStore
 {
-    HKQuantitySample *copy = [super charon_copyForStore];
+    HKQuantitySample *copy = [super revenant_copyForStore];
     if (copy)
         copy->_quantity = [_quantity copy];
     return copy;
@@ -167,7 +167,7 @@ CHARON_HEALTHKIT_UNCREATABLE_INIT
     return (HKQuantityType *)self.sampleType;
 }
 
-- (NSInteger)charon_storeKind
+- (NSInteger)revenant_storeKind
 {
     return 1;
 }
@@ -213,7 +213,7 @@ CHARON_HEALTHKIT_UNCREATABLE_INIT
                            type];
         return nil;
     }
-    HKCorrelation *correlation = [[HKCorrelation alloc] charon_initWithType:(HKSampleType *)type
+    HKCorrelation *correlation = [[HKCorrelation alloc] revenant_initWithType:(HKSampleType *)type
                                                                   metadata:metadata
                                                                  startDate:startDate
                                                                    endDate:endDate];
@@ -222,9 +222,9 @@ CHARON_HEALTHKIT_UNCREATABLE_INIT
     correlation->_correlationType = type;
     correlation->_byType = [NSMutableDictionary dictionary];
     for (HKSample *object in objects) {
-        if (![object conformsToProtocol:@protocol(CharonHKStorable)])
+        if (![object conformsToProtocol:@protocol(RevenantHKStorable)])
             continue;
-        NSString *identifier = [(id<CharonHKStorable>)object charon_storeTypeIdentifier];
+        NSString *identifier = [(id<RevenantHKStorable>)object revenant_storeTypeIdentifier];
         if (!identifier.length)
             continue;
         if (![correlation->_byType[identifier] containsObject:object])
@@ -254,9 +254,9 @@ CHARON_HEALTHKIT_UNCREATABLE_INIT
     [coder encodeObject:_byType forKey:@"objects"];
 }
 
-- (instancetype)charon_copyForStore
+- (instancetype)revenant_copyForStore
 {
-    HKCorrelation *copy = [super charon_copyForStore];
+    HKCorrelation *copy = [super revenant_copyForStore];
     if (copy) {
         copy->_correlationType = [_correlationType copy];
         copy->_byType = [_byType mutableCopy];
@@ -276,10 +276,10 @@ CHARON_HEALTHKIT_UNCREATABLE_INIT
 
 - (NSSet<HKObject *> *)objects
 {
-    return [self charon_allObjectsSet];
+    return [self revenant_allObjectsSet];
 }
 
-- (NSArray<HKObject *> *)charon_allObjects
+- (NSArray<HKObject *> *)revenant_allObjects
 {
     NSMutableArray *all = [NSMutableArray array];
     for (NSArray *group in _byType.allValues)
@@ -287,12 +287,12 @@ CHARON_HEALTHKIT_UNCREATABLE_INIT
     return all;
 }
 
-- (NSSet<HKObject *> *)charon_allObjectsSet
+- (NSSet<HKObject *> *)revenant_allObjectsSet
 {
-    return [NSSet setWithArray:[self charon_allObjects]];
+    return [NSSet setWithArray:[self revenant_allObjects]];
 }
 
-- (NSInteger)charon_storeKind
+- (NSInteger)revenant_storeKind
 {
     return 2;
 }
@@ -305,20 +305,20 @@ CHARON_HEALTHKIT_UNCREATABLE_INIT
 
 @end
 
-@interface HKCategorySample (CharonHKStorable) <CharonHKStorable>
+@interface HKCategorySample (RevenantHKStorable) <RevenantHKStorable>
 @end
 
-@implementation HKCategorySample (CharonHKStorable)
+@implementation HKCategorySample (RevenantHKStorable)
 @end
 
-@interface HKQuantitySample (CharonHKStorable) <CharonHKStorable>
+@interface HKQuantitySample (RevenantHKStorable) <RevenantHKStorable>
 @end
 
-@implementation HKQuantitySample (CharonHKStorable)
+@implementation HKQuantitySample (RevenantHKStorable)
 @end
 
-@interface HKCorrelation (CharonHKStorable) <CharonHKStorable>
+@interface HKCorrelation (RevenantHKStorable) <RevenantHKStorable>
 @end
 
-@implementation HKCorrelation (CharonHKStorable)
+@implementation HKCorrelation (RevenantHKStorable)
 @end

@@ -50,15 +50,15 @@ static void check_classes(void)
 
 static void check_scripted_cases(void)
 {
-    NSArray *cases = charon_appearance_cases();
-    CHECK_EQUAL(@(cases.count), @(sizeof charon_appearance_expectations / sizeof *charon_appearance_expectations), "there is an expectation for every scripted case");
-    CharonAppearanceMaker maker = ^id(NSString *kind) { return [[NSClassFromString(kind) alloc] init]; };
-    for (NSUInteger index = 0; index < cases.count && index < sizeof charon_appearance_expectations / sizeof *charon_appearance_expectations; index++) {
+    NSArray *cases = revenant_appearance_cases();
+    CHECK_EQUAL(@(cases.count), @(sizeof revenant_appearance_expectations / sizeof *revenant_appearance_expectations), "there is an expectation for every scripted case");
+    RevenantAppearanceMaker maker = ^id(NSString *kind) { return [[NSClassFromString(kind) alloc] init]; };
+    for (NSUInteger index = 0; index < cases.count && index < sizeof revenant_appearance_expectations / sizeof *revenant_appearance_expectations; index++) {
         NSDictionary *one = cases[index];
-        id object = ((CharonAppearanceCase)one[@"body"])(maker);
-        NSString *actual = object ? charon_snapshot(object) : @"nil";
-        charon_check([actual isEqual:charon_appearance_expectations[index]], ([NSString stringWithFormat:@"the host's answers for: %@", one[@"name"]].UTF8String),
-                     [NSString stringWithFormat:@"\n  actual   %@\n  expected %@", actual, charon_appearance_expectations[index]]);
+        id object = ((RevenantAppearanceCase)one[@"body"])(maker);
+        NSString *actual = object ? revenant_snapshot(object) : @"nil";
+        revenant_check([actual isEqual:revenant_appearance_expectations[index]], ([NSString stringWithFormat:@"the host's answers for: %@", one[@"name"]].UTF8String),
+                     [NSString stringWithFormat:@"\n  actual   %@\n  expected %@", actual, revenant_appearance_expectations[index]]);
     }
 }
 
@@ -77,21 +77,21 @@ static void check_extras(void)
     id decoded = [NSKeyedUnarchiver unarchivedObjectOfClass:NSClassFromString(@"UINavigationBarAppearance") fromData:data error:NULL];
     NSDictionary *attributes = [decoded titleTextAttributes];
     CHECK(decoded != nil && [attributes[NSFontAttributeName] pointSize] == 20 && [attributes[NSFontAttributeName] fontName].length && [attributes[NSKernAttributeName] isEqual:@3], "a title font, colour and kern survive a secure archive");
-    CHECK([charon_rgba(attributes[NSForegroundColorAttributeName]) isEqual:charon_rgba([UIColor redColor])], "the title colour survives a secure archive");
+    CHECK([revenant_rgba(attributes[NSForegroundColorAttributeName]) isEqual:revenant_rgba([UIColor redColor])], "the title colour survives a secure archive");
     CHECK([[navigation titleTextAttributes][NSFontAttributeName] fontName].length && [[decoded titleTextAttributes][NSFontAttributeName] fontName].length, "the fonts are named");
 }
 
 static NSString *const results_folder = @"/private/var/backports";
 
-@interface CharonAppearancesDelegate : UIResponder <UIApplicationDelegate>
+@interface RevenantAppearancesDelegate : UIResponder <UIApplicationDelegate>
 @property (nonatomic, strong) UIWindow *window;
 @end
 
-@implementation CharonAppearancesDelegate
+@implementation RevenantAppearancesDelegate
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)options
 {
-    charon_log_to([results_folder stringByAppendingPathComponent:@"appearances.log"]);
+    revenant_log_to([results_folder stringByAppendingPathComponent:@"appearances.log"]);
     self.window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
     self.window.rootViewController = [[UIViewController alloc] init];
     [self.window makeKeyAndVisible];
@@ -102,13 +102,13 @@ static NSString *const results_folder = @"/private/var/backports";
 - (void)runAndReport
 {
     @try {
-        charon_prepare_images();
+        revenant_prepare_images();
         check_scripted_cases();
         check_extras();
     } @catch (NSException *exception) {
-        charon_check(NO, "the checks raise no exception", [NSString stringWithFormat:@"%@: %@", exception.name, exception.reason]);
+        revenant_check(NO, "the checks raise no exception", [NSString stringWithFormat:@"%@: %@", exception.name, exception.reason]);
     }
-    NSString *summary = [NSString stringWithFormat:@"%@ checks=%d failures=%d\n", charon_failures ? @"FAIL" : @"ok", charon_checks, charon_failures];
+    NSString *summary = [NSString stringWithFormat:@"%@ checks=%d failures=%d\n", revenant_failures ? @"FAIL" : @"ok", revenant_checks, revenant_failures];
     [summary writeToFile:[results_folder stringByAppendingPathComponent:@"appearances.done"] atomically:YES encoding:NSUTF8StringEncoding error:NULL];
 }
 
@@ -118,6 +118,6 @@ int main(int argc, char *argv[])
 {
     @autoreleasepool {
         [[NSFileManager defaultManager] createDirectoryAtPath:results_folder withIntermediateDirectories:YES attributes:nil error:NULL];
-        return UIApplicationMain(argc, argv, nil, @"CharonAppearancesDelegate");
+        return UIApplicationMain(argc, argv, nil, @"RevenantAppearancesDelegate");
     }
 }

@@ -8,9 +8,9 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-int charon_fstatat(int directory, const char *path, struct stat *buffer, int flags);
-int charon_unlinkat(int directory, const char *path, int flags);
-DIR *charon_fdopendir(int descriptor);
+int revenant_fstatat(int directory, const char *path, struct stat *buffer, int flags);
+int revenant_unlinkat(int directory, const char *path, int flags);
+DIR *revenant_fdopendir(int descriptor);
 
 static uint64_t state;
 static uint64_t next(void)
@@ -43,7 +43,7 @@ int main(int argc, char **argv)
         memset(&mine, 0, sizeof mine);
         memset(&theirs, 0, sizeof theirs);
         errno = 0;
-        int a = charon_fstatat(fd, name, &mine, flags);
+        int a = revenant_fstatat(fd, name, &mine, flags);
         int ea = errno;
         errno = 0;
         int b = fstatat(fd, name, &theirs, flags);
@@ -54,7 +54,7 @@ int main(int argc, char **argv)
     for (int i = 0; i < 3; i++) {
         int d = open(i == 0 ? "sub" : ".", O_RDONLY);
         int copy = dup(d);
-        DIR *mine = charon_fdopendir(copy);
+        DIR *mine = revenant_fdopendir(copy);
         DIR *theirs = fdopendir(d);
         printf("fdopendir[%d] mine=%s theirs=%s\n", i, mine ? "open" : "NULL", theirs ? "open" : "NULL");
         if (mine) closedir(mine);
@@ -65,7 +65,7 @@ int main(int argc, char **argv)
         snprintf(name, sizeof name, "u-%d.txt", i);
         int c = open(name, O_CREAT | O_WRONLY, 0644);
         close(c);
-        int r = charon_unlinkat(AT_FDCWD, name, 0);
+        int r = revenant_unlinkat(AT_FDCWD, name, 0);
         struct stat s;
         int gone = stat(name, &s) == -1 && errno == ENOENT;
         printf("unlinkat[%d] %s rc=%d gone=%d\n", i, name, r, gone);

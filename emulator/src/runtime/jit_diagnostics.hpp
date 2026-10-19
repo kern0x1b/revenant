@@ -9,7 +9,7 @@
 
 #include "process.hpp"
 
-namespace shade::runtime_detail {
+namespace emulator::runtime_detail {
 
 struct RuntimeJitMemoryAggregate {
     std::size_t runtime_count { };

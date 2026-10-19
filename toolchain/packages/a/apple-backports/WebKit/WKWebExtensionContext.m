@@ -1,5 +1,5 @@
 #pragma clang diagnostic ignored "-Wnullability-completeness"
-#import "CharonWebExtension.h"
+#import "RevenantWebExtension.h"
 
 NSString *const WKWebExtensionContextErrorDomain = @"WKWebExtensionContextErrorDomain";
 NSString *const WKWebExtensionContextPermissionsWereGrantedNotification = @"WKWebExtensionContextPermissionsWereGranted";
@@ -26,12 +26,12 @@ NSString *const WKWebExtensionContextNotificationUserInfoKeyMatchPatterns = @"ma
 {
     if (![extension isKindOfClass:[WKWebExtension class]])
         return nil;
-    WKWebExtensionContext *context = [[self alloc] charon_initWithExtension:extension];
-    [context charon_buildFromManifest];
+    WKWebExtensionContext *context = [[self alloc] revenant_initWithExtension:extension];
+    [context revenant_buildFromManifest];
     return context;
 }
 
-- (instancetype)charon_initWithExtension:(WKWebExtension *)extension
+- (instancetype)revenant_initWithExtension:(WKWebExtension *)extension
 {
     if ((self = [super init])) {
         _webExtension = extension;
@@ -41,7 +41,7 @@ NSString *const WKWebExtensionContextNotificationUserInfoKeyMatchPatterns = @"ma
     return self;
 }
 
-- (void)charon_buildFromManifest
+- (void)revenant_buildFromManifest
 {
     WKWebExtension *extension = _webExtension;
     if (extension == nil)
@@ -49,10 +49,10 @@ NSString *const WKWebExtensionContextNotificationUserInfoKeyMatchPatterns = @"ma
     NSMutableArray<WKWebExtensionCommand *> *commands = [NSMutableArray array];
     id actionSection = extension.manifest[@"action"];
     if (actionSection != nil) {
-        (void)[[WKWebExtensionAction alloc] charon_initWithContext:self];
+        (void)[[WKWebExtensionAction alloc] revenant_initWithContext:self];
         NSString *title = [actionSection[@"default_title"] isKindOfClass:[NSString class]]
                              ? actionSection[@"default_title"] : extension.displayName;
-        WKWebExtensionCommand *execute = [[WKWebExtensionCommand alloc] charon_initWithContext:self
+        WKWebExtensionCommand *execute = [[WKWebExtensionCommand alloc] revenant_initWithContext:self
                                                                                identifier:@"_execute_action"
                                                                                     title:title];
         [commands addObject:execute];
@@ -91,10 +91,10 @@ NSString *const WKWebExtensionContextNotificationUserInfoKeyMatchPatterns = @"ma
 
 - (NSURL *)baseURL
 {
-    return [NSURL URLWithString:[self charon_baseString]];
+    return [NSURL URLWithString:[self revenant_baseString]];
 }
 
-- (NSString *)charon_baseString
+- (NSString *)revenant_baseString
 {
     return [NSString stringWithFormat:@"webkit-extension://%@/", _uniqueIdentifier];
 }

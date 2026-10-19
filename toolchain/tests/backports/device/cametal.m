@@ -10,7 +10,7 @@ int main(int argc, char **argv)
 {
     @autoreleasepool {
         if (argc > 1)
-            charon_log_to(@(argv[1]));
+            revenant_log_to(@(argv[1]));
         Class cls = NSClassFromString(@"CAMetalLayer");
         CHECK(cls != Nil, "CAMetalLayer exists");
         Dl_info info;
@@ -54,7 +54,7 @@ int main(int argc, char **argv)
         layer.developerHUDProperties = @{@"mode": @"default"};
         CHECK(layer.wantsExtendedDynamicRangeContent && [layer.developerHUDProperties[@"mode"] isEqualToString:@"default"], "the properties of iOS 16 keep what they are given");
         CHECK(layer.EDRMetadata == nil, "and there is no extended range metadata");
-        printf("%d checks, %d failed\n", charon_checks, charon_failures);
+        printf("%d checks, %d failed\n", revenant_checks, revenant_failures);
     }
-    return charon_failures;
+    return revenant_failures;
 }

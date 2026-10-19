@@ -1,10 +1,10 @@
-#import "CharonCloudKit.h"
-#import "CharonCKConstants.h"
-#import "CharonCKSubscription.h"
+#import "RevenantCloudKit.h"
+#import "RevenantCKConstants.h"
+#import "RevenantCKSubscription.h"
 
 #import <objc/runtime.h>
 
-NSDictionary *CharonCKSubscriptionDocument(CKSubscription *subscription)
+NSDictionary *RevenantCKSubscriptionDocument(CKSubscription *subscription)
 {
     NSMutableDictionary *document = [NSMutableDictionary dictionary];
     document[@"subscriptionID"] = subscription.subscriptionID;
@@ -18,7 +18,7 @@ NSDictionary *CharonCKSubscriptionDocument(CKSubscription *subscription)
                                     @"ownerName": query.zoneID.ownerName};
         }
         NSError *refused = nil;
-        NSDictionary *filter = CharonCKQueryDocument([[CKQuery alloc] initWithRecordType:query.recordType
+        NSDictionary *filter = RevenantCKQueryDocument([[CKQuery alloc] initWithRecordType:query.recordType
                                                                      predicate:query.predicate ?: [NSPredicate predicateWithValue:YES]],
                                                      query.zoneID.zoneName, nil, 0, &refused);
         if (!filter) {
@@ -79,7 +79,7 @@ NSDictionary *CharonCKSubscriptionDocument(CKSubscription *subscription)
     return document;
 }
 
-CKSubscription *CharonCKSubscriptionWithDocument(NSDictionary *document)
+CKSubscription *RevenantCKSubscriptionWithDocument(NSDictionary *document)
 {
     if (![document isKindOfClass:[NSDictionary class]]) {
         return nil;
@@ -131,7 +131,7 @@ CKSubscription *CharonCKSubscriptionWithDocument(NSDictionary *document)
     return subscription;
 }
 
-NSDictionary *CharonCKFieldsSnapshot(CKRecord *record)
+NSDictionary *RevenantCKFieldsSnapshot(CKRecord *record)
 {
     NSMutableDictionary *fields = [NSMutableDictionary dictionary];
     for (NSString *key in record.allKeys) {
@@ -146,7 +146,7 @@ NSDictionary *CharonCKFieldsSnapshot(CKRecord *record)
     return fields;
 }
 
-NSDictionary *CharonCKSystemFieldsSnapshot(CKRecord *record)
+NSDictionary *RevenantCKSystemFieldsSnapshot(CKRecord *record)
 {
     NSMutableDictionary *fields = [NSMutableDictionary dictionary];
     if (record.recordChangeTag) {
@@ -168,29 +168,29 @@ NSDictionary *CharonCKSystemFieldsSnapshot(CKRecord *record)
     return fields;
 }
 
-NSData *CharonCKSystemFieldsSnapshotToken(CKServerChangeToken *token)
+NSData *RevenantCKSystemFieldsSnapshotToken(CKServerChangeToken *token)
 {
     return token.data;
 }
 
-CKServerChangeToken *CharonCKServerTokenFromData(NSData *data)
+CKServerChangeToken *RevenantCKServerTokenFromData(NSData *data)
 {
     return data.length ? [CKServerChangeToken tokenWithData:data] : nil;
 }
 
-@interface CharonCKOPSchedulerEntry : NSObject
+@interface RevenantCKOPSchedulerEntry : NSObject
 @property (nonatomic, strong) NSOperation *operation;
 @end
 
-@implementation CharonCKOPSchedulerEntry
+@implementation RevenantCKOPSchedulerEntry
 
 @synthesize operation = _operation;
 
 @end
 
-@implementation CharonCKOPScheduler
+@implementation RevenantCKOPScheduler
 
-static NSOperationQueue *CharonCKQueue(void)
+static NSOperationQueue *RevenantCKQueue(void)
 {
     static NSOperationQueue *queue;
     static dispatch_once_t once;
@@ -207,35 +207,35 @@ static NSOperationQueue *CharonCKQueue(void)
     if (!operation) {
         return;
     }
-    [CharonCKQueue() addOperation:operation];
+    [RevenantCKQueue() addOperation:operation];
 }
 
 + (void)complete:(NSOperation *)operation
 {
-    objc_setAssociatedObject(operation, "CharonCKFinished", @YES, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(operation, "RevenantCKFinished", @YES, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     [operation setValue:@YES forKey:@"finished"];
 }
 
 + (void)cancelAll
 {
-    [CharonCKQueue() cancelAllOperations];
+    [RevenantCKQueue() cancelAllOperations];
 }
 
 @end
 
-CKUserIdentity *CharonCKUserIdentityWithDocument(NSDictionary *document)
+CKUserIdentity *RevenantCKUserIdentityWithDocument(NSDictionary *document)
 {
     if (![document isKindOfClass:[NSDictionary class]]) {
         return nil;
     }
-    CKUserIdentity *identity = [[CKUserIdentity alloc] charon_identity];
-    CKRecordID *recordID = CharonCKRecordIDFromDocument(document[@"userRecordID"]);
+    CKUserIdentity *identity = [[CKUserIdentity alloc] revenant_identity];
+    CKRecordID *recordID = RevenantCKRecordIDFromDocument(document[@"userRecordID"]);
     if (recordID) {
         identity.userRecordID = recordID;
     }
     identity.hasiCloudAccount = [document[@"hasiCloudAccount"] boolValue];
     if ([document[@"lookupInfo"] isKindOfClass:[NSDictionary class]]) {
-        identity.lookupInfo = CharonCKLookupInfoWithDocument(document[@"lookupInfo"]);
+        identity.lookupInfo = RevenantCKLookupInfoWithDocument(document[@"lookupInfo"]);
     }
     if ([document[@"contactIdentifiers"] isKindOfClass:[NSArray class]]) {
         identity.contactIdentifiers = document[@"contactIdentifiers"];
@@ -243,7 +243,7 @@ CKUserIdentity *CharonCKUserIdentityWithDocument(NSDictionary *document)
     return identity;
 }
 
-CKUserIdentityLookupInfo *CharonCKLookupInfoWithDocument(NSDictionary *document)
+CKUserIdentityLookupInfo *RevenantCKLookupInfoWithDocument(NSDictionary *document)
 {
     if (![document isKindOfClass:[NSDictionary class]]) {
         return nil;
@@ -254,30 +254,30 @@ CKUserIdentityLookupInfo *CharonCKLookupInfoWithDocument(NSDictionary *document)
     if ([document[@"phoneNumber"] isKindOfClass:[NSString class]]) {
         return [[CKUserIdentityLookupInfo alloc] initWithPhoneNumber:document[@"phoneNumber"]];
     }
-    CKRecordID *recordID = CharonCKRecordIDFromDocument(document[@"userRecordID"]);
+    CKRecordID *recordID = RevenantCKRecordIDFromDocument(document[@"userRecordID"]);
     return recordID ? [[CKUserIdentityLookupInfo alloc] initWithUserRecordID:recordID] : nil;
 }
 
-CKShareParticipant *CharonCKShareParticipantWithDocument(NSDictionary *document)
+CKShareParticipant *RevenantCKShareParticipantWithDocument(NSDictionary *document)
 {
     if (![document isKindOfClass:[NSDictionary class]]) {
         return nil;
     }
     CKShareParticipant *participant = [[CKShareParticipant alloc] initWithType:CKShareParticipantTypeOwner];
-    participant.userIdentity = CharonCKUserIdentityWithDocument(document[@"userIdentity"]);
+    participant.userIdentity = RevenantCKUserIdentityWithDocument(document[@"userIdentity"]);
     if ([document[@"participantID"] isKindOfClass:[NSString class]]) {
         participant.participantID = document[@"participantID"];
     }
     return participant;
 }
 
-CKShareMetadata *CharonCKShareMetadataWithDocument(NSDictionary *document, CKContainer *container)
+CKShareMetadata *RevenantCKShareMetadataWithDocument(NSDictionary *document, CKContainer *container)
 {
     if (![document isKindOfClass:[NSDictionary class]]) {
         return nil;
     }
     NSString *url = [document[@"shareURL"] isKindOfClass:[NSString class]] ? document[@"shareURL"] : nil;
-    CKRecordID *root = CharonCKRecordIDFromDocument(document[@"rootRecordID"]);
+    CKRecordID *root = RevenantCKRecordIDFromDocument(document[@"rootRecordID"]);
     if (!url || !root) {
         return nil;
     }
@@ -286,9 +286,9 @@ CKShareMetadata *CharonCKShareMetadataWithDocument(NSDictionary *document, CKCon
                                                                     shareURL:[NSURL URLWithString:url]
                                                              participantType:CKShareParticipantTypeOwner
                                                                   permission:CKShareParticipantPermissionReadWrite];
-    metadata.ownerIdentity = CharonCKUserIdentityWithDocument(document[@"ownerIdentity"]);
+    metadata.ownerIdentity = RevenantCKUserIdentityWithDocument(document[@"ownerIdentity"]);
     if ([document[@"hierarchicalRootRecordID"] isKindOfClass:[NSDictionary class]]) {
-        metadata.hierarchicalRootRecordID = CharonCKRecordIDFromDocument(document[@"hierarchicalRootRecordID"]);
+        metadata.hierarchicalRootRecordID = RevenantCKRecordIDFromDocument(document[@"hierarchicalRootRecordID"]);
     }
     return metadata;
 }

@@ -17,7 +17,7 @@
 
 #include "support.hpp"
 
-namespace shade {
+namespace emulator {
 namespace {
 
     constexpr std::size_t arm32_timespec_size = 8;
@@ -26,7 +26,7 @@ namespace {
     std::array<std::byte, host_uuid_size> platform_uuid(
         const DeviceModel& profile)
     {
-        std::string identity { "Shade-platform-uuid-v1" };
+        std::string identity { "Revenant-platform-uuid-v1" };
         for (const auto field :
             { profile.identity.product_type, profile.identity.board_config,
                 profile.identity.model_number, profile.processor.soc }) {

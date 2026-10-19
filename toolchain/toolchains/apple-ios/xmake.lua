@@ -1,6 +1,6 @@
 toolchain("apple-ios")
     set_kind("standalone")
-    set_homepage("https://github.com/kern0x1b/charon")
+    set_homepage("https://github.com/kern0x1b/revenant/tree/main/toolchain")
     set_description("iPhoneOS through the llvm package's clang, an SDK package and, for armv7, cctools-port ld64")
 
     set_toolset("cc", "clang")
@@ -48,10 +48,10 @@ toolchain("apple-ios")
         local found = parts(toolchain, import("core.project.project"))
         local declared = toolchain:config("minimum")
         if not found.sdk or not declared or not found.clang then
-            raise("toolchain(apple-ios) needs the SDK and llvm packages and apple_minimum; includes(\"@addon/charon/apple-ios\") provides them")
+            raise("toolchain(apple-ios) needs the SDK and llvm packages and apple_minimum; includes(\"@addon/revenant/apple-ios\") provides them")
         end
         if not os.isfile(path.join(found.sdk, "SDKSettings.json")) then
-            raise("the iphoneos-sdk package has no %s: xmake-requires.lock pins a Charon package repository older than this addon; delete the lock, or run xmake require --upgrade, after moving add_addons to a new tag", found.sdk)
+            raise("the iphoneos-sdk package has no %s: xmake-requires.lock pins a Revenant package repository older than this addon; delete the lock, or run xmake require --upgrade, after moving add_addons to a new tag", found.sdk)
         end
         local minimum = import("@self.apple.architectures").deployment(toolchain:arch(), declared)
         local clangxx = found.clang .. "++"

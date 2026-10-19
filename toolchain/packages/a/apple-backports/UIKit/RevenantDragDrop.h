@@ -1,6 +1,6 @@
 #import <UIKit/UIKit.h>
 
-@interface CharonDragDropBox : NSObject {
+@interface RevenantDragDropBox : NSObject {
 @public
     __weak id dragDelegate;
     __weak id dropDelegate;
@@ -9,7 +9,7 @@
 }
 @end
 
-CharonDragDropBox *charon_drag_drop_box(id object);
-BOOL charon_drag_interaction_enabled(id object);
-void charon_set_drag_interaction_enabled_default(BOOL enabled);
-void charon_set_drag_interaction_enabled(id object, BOOL enabled);
+RevenantDragDropBox *revenant_drag_drop_box(id object);
+BOOL revenant_drag_interaction_enabled(id object);
+void revenant_set_drag_interaction_enabled_default(BOOL enabled);
+void revenant_set_drag_interaction_enabled(id object, BOOL enabled);

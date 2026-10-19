@@ -18,7 +18,7 @@
 
 #include "mach/xnu_mig_adapter.hpp"
 
-namespace shade::xnu::mig::host_priv {
+namespace emulator::xnu::mig::host_priv {
 
 inline constexpr std::string_view subsystem_name{"host_priv"};
 inline constexpr std::uint32_t subsystem_base = 400U;

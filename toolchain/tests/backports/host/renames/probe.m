@@ -1,19 +1,19 @@
 #import <Foundation/Foundation.h>
 
-NSString *charon_renames_probe_value(NSString *name);
+NSString *revenant_renames_probe_value(NSString *name);
 
-@interface CharonRenamesProbe : NSObject
+@interface RevenantRenamesProbe : NSObject
 - (id)setObject:(id)object forTrait:(id)trait;
 - (id)object;
 - (id)target;
 - (id)value;
 @end
 
-@implementation CharonRenamesProbe
+@implementation RevenantRenamesProbe
 
 - (id)setObject:(id)object forTrait:(id)trait
 {
-    return @([charon_renames_probe_value([object description]) hasPrefix:trait]);
+    return @([revenant_renames_probe_value([object description]) hasPrefix:trait]);
 }
 
 - (id)object
@@ -33,11 +33,11 @@ NSString *charon_renames_probe_value(NSString *name);
 
 @end
 
-@interface CharonRenamesProbe (CharonRenamesProbeExtras)
+@interface RevenantRenamesProbe (RevenantRenamesProbeExtras)
 - (id)extra;
 @end
 
-@implementation CharonRenamesProbe (CharonRenamesProbeExtras)
+@implementation RevenantRenamesProbe (RevenantRenamesProbeExtras)
 
 - (id)extra
 {
@@ -46,11 +46,11 @@ NSString *charon_renames_probe_value(NSString *name);
 
 @end
 
-@interface NSString (CharonRenamesProbeCategory)
+@interface NSString (RevenantRenamesProbeCategory)
 - (NSString *)probeOf:(id)object forKey:(id)key;
 @end
 
-@implementation NSString (CharonRenamesProbeCategory)
+@implementation NSString (RevenantRenamesProbeCategory)
 
 - (NSString *)probeOf:(id)object forKey:(id)key
 {
@@ -59,7 +59,7 @@ NSString *charon_renames_probe_value(NSString *name);
 
 @end
 
-NSString *charon_renames_probe_value(NSString *name)
+NSString *revenant_renames_probe_value(NSString *name)
 {
     return [name uppercaseString];
 }

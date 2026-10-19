@@ -1,10 +1,10 @@
 #import <UIKit/UIKit.h>
 #import <objc/runtime.h>
 
-@interface CharonButtonTint : NSObject
+@interface RevenantButtonTint : NSObject
 @end
 
-@implementation CharonButtonTint
+@implementation RevenantButtonTint
 
 + (void)load
 {

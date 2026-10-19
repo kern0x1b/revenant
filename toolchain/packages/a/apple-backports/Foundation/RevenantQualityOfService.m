@@ -1,6 +1,6 @@
 #import <Foundation/Foundation.h>
 
-NSQualityOfService charon_quality_of_service(NSInteger quality)
+NSQualityOfService revenant_quality_of_service(NSInteger quality)
 {
     switch (quality) {
     case NSQualityOfServiceUserInteractive:

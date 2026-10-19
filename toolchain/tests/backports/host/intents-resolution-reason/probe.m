@@ -5,12 +5,12 @@
 #include <string.h>
 
 #ifdef PORT
-#define PREFIX "CharonHost"
+#define PREFIX "RevenantHost"
 #else
 #define PREFIX ""
 #endif
 
-static Class charonClass(NSString *name)
+static Class revenantClass(NSString *name)
 {
     return NSClassFromString([NSString stringWithFormat:@"%s%@", PREFIX, name]);
 }
@@ -55,7 +55,7 @@ static void answer(NSString *label, id result)
 int main(void)
 {
     @autoreleasepool {
-        Class resultClass = charonClass(@"INIntentResolutionResult");
+        Class resultClass = revenantClass(@"INIntentResolutionResult");
 
         answer(@"+needsValue", [resultClass needsValue]);
         answer(@"+notRequired", [resultClass notRequired]);
@@ -81,15 +81,15 @@ int main(void)
             answer(@"+confirmationRequiredWithItemToConfirm:nil forReason:0", nothing);
         }
 
-        Class integerClass = charonClass(@"INIntegerResolutionResult");
+        Class integerClass = revenantClass(@"INIntegerResolutionResult");
         SEL success = NSSelectorFromString(@"successWithResolvedValue:");
         answer(@"INIntegerResolutionResult +successWithResolvedValue:7",
                ((id (*)(id, SEL, NSInteger))objc_msgSend)(integerClass, success, 7));
         SEL valueConfirm = NSSelectorFromString(@"confirmationRequiredWithValueToConfirm:");
         answer(@"INIntegerResolutionResult +confirmationRequiredWithValueToConfirm:3",
                ((id (*)(id, SEL, id))objc_msgSend)(integerClass, valueConfirm, @3));
-        Class speakableClass = charonClass(@"INSpeakableStringResolutionResult");
-        Class stringClass = charonClass(@"INSpeakableString");
+        Class speakableClass = revenantClass(@"INSpeakableStringResolutionResult");
+        Class stringClass = revenantClass(@"INSpeakableString");
         id speakable = ((id (*)(id, SEL, id))objc_msgSend)([stringClass alloc], NSSelectorFromString(@"initWithSpokenPhrase:"), @"Ann");
         id other = ((id (*)(id, SEL, id))objc_msgSend)([stringClass alloc], NSSelectorFromString(@"initWithSpokenPhrase:"), @"Bob");
         SEL disambiguation = NSSelectorFromString(@"disambiguationWithStringsToDisambiguate:");

@@ -2,7 +2,7 @@
 
 NSString *const NSProcessInfoThermalStateDidChangeNotification = @"NSProcessInfoThermalStateDidChangeNotification";
 
-@implementation NSProcessInfo (CharonThermalState)
+@implementation NSProcessInfo (RevenantThermalState)
 
 - (NSProcessInfoThermalState)thermalState
 {

@@ -1,8 +1,8 @@
-#import "CharonAVSampleBufferRender.h"
+#import "RevenantAVSampleBufferRender.h"
 
 #import <CoreMedia/CoreMedia.h>
 
-@implementation AVSampleBufferRenderSynchronizer (CharonCurrentTime12)
+@implementation AVSampleBufferRenderSynchronizer (RevenantCurrentTime12)
 
 - (CMTime)currentTime
 {

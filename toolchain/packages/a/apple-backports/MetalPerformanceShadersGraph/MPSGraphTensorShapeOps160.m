@@ -1,12 +1,12 @@
-#import "CharonMPSGraph.h"
+#import "RevenantMPSGraph.h"
 
-@implementation MPSGraph (CharonMPSGraphTensorShape160)
+@implementation MPSGraph (RevenantMPSGraphTensorShape160)
 
 - (MPSGraphTensor *)transposeTensor:(MPSGraphTensor *)tensor
                          permutation:(NSArray<NSNumber *> *)permutation
                                 name:(NSString *)name
 {
-    return [self charon_mps_gather:CharonMPSGraphOperationKindTranspose
+    return [self revenant_mps_gather:RevenantMPSGraphOperationKindTranspose
                              tensor:tensor
                         parameters:@{@"gather": @"transpose", @"gatherPermutation": permutation ?: @[]}
                                name:name];

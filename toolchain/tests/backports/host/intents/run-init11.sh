@@ -91,7 +91,7 @@ fi
 echo "  intents-11 init: the plant is red on top of the baseline, as it must be"
 
 echo "== 3. names the host does not carry: every line red, and the control still speaks"
-sed 's/^    "\(IN[A-Za-z_]*\)",$/    "ccharonHost_\1",/' "$here/init11.m" > "$build/absent.m"
+sed 's/^    "\(IN[A-Za-z_]*\)",$/    "crevenantHost_\1",/' "$here/init11.m" > "$build/absent.m"
 if cmp -s "$build/absent.m" "$here/init11.m"; then
     echo "  intents-11 init: FAIL the substitution changed nothing, so build 3 proves nothing"
     exit 1

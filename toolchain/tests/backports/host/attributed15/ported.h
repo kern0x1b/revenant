@@ -1,45 +1,45 @@
 #import <Foundation/Foundation.h>
 #import <stdarg.h>
 
-@interface NSAttributedString (CharonPortedFormat)
-- (instancetype)initCharonHostWithFormat:(NSAttributedString *)format
+@interface NSAttributedString (RevenantPortedFormat)
+- (instancetype)initRevenantHostWithFormat:(NSAttributedString *)format
                                  options:(NSAttributedStringFormattingOptions)options
                                   locale:(NSLocale *)locale, ...;
-- (instancetype)initCharonHostWithFormat:(NSAttributedString *)format
+- (instancetype)initRevenantHostWithFormat:(NSAttributedString *)format
                                  options:(NSAttributedStringFormattingOptions)options
                                   locale:(NSLocale *)locale
                                arguments:(va_list)arguments;
-+ (instancetype)charonHost_localizedAttributedStringWithFormat:(NSAttributedString *)format, ...;
-+ (instancetype)charonHost_localizedAttributedStringWithFormat:(NSAttributedString *)format
++ (instancetype)revenantHost_localizedAttributedStringWithFormat:(NSAttributedString *)format, ...;
++ (instancetype)revenantHost_localizedAttributedStringWithFormat:(NSAttributedString *)format
                                                        options:(NSAttributedStringFormattingOptions)options, ...;
-- (NSAttributedString *)charonHost_attributedStringByInflectingString;
+- (NSAttributedString *)revenantHost_attributedStringByInflectingString;
 @end
 
-@interface NSMutableAttributedString (CharonPortedFormat)
-- (void)charonHost_appendLocalizedFormat:(NSAttributedString *)format, ...;
+@interface NSMutableAttributedString (RevenantPortedFormat)
+- (void)revenantHost_appendLocalizedFormat:(NSAttributedString *)format, ...;
 @end
 
-@interface NSBundle (CharonPortedBundle)
-- (NSAttributedString *)charonHost_localizedAttributedStringForKey:(NSString *)key
+@interface NSBundle (RevenantPortedBundle)
+- (NSAttributedString *)revenantHost_localizedAttributedStringForKey:(NSString *)key
                                                             value:(NSString *)value
                                                             table:(NSString *)tableName;
 @end
 
-@interface NSURLSessionTask (CharonPortedTaskDelegate)
-- (id<NSURLSessionTaskDelegate>)charonHost_delegate;
-- (void)charonHost_setDelegate:(id<NSURLSessionTaskDelegate>)delegate;
+@interface NSURLSessionTask (RevenantPortedTaskDelegate)
+- (id<NSURLSessionTaskDelegate>)revenantHost_delegate;
+- (void)revenantHost_setDelegate:(id<NSURLSessionTaskDelegate>)delegate;
 @end
 
-@interface NSAttributedString (CharonPortedMarkdown)
-- (instancetype)initCharonHostWithMarkdown:(NSData *)markdown
+@interface NSAttributedString (RevenantPortedMarkdown)
+- (instancetype)initRevenantHostWithMarkdown:(NSData *)markdown
                                    options:(id)options
                                    baseURL:(NSURL *)baseURL
                                     error:(NSError **)error;
-- (instancetype)initCharonHostWithMarkdownString:(NSString *)markdownString
+- (instancetype)initRevenantHostWithMarkdownString:(NSString *)markdownString
                                          options:(id)options
                                          baseURL:(NSURL *)baseURL
                                           error:(NSError **)error;
-- (instancetype)initCharonHostWithContentsOfMarkdownFileAtURL:(NSURL *)markdownFile
+- (instancetype)initRevenantHostWithContentsOfMarkdownFileAtURL:(NSURL *)markdownFile
                                                      options:(id)options
                                                      baseURL:(NSURL *)baseURL
                                                        error:(NSError **)error;

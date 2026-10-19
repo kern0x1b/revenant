@@ -1,7 +1,7 @@
 #import <UIKit/UIKit.h>
 #import <objc/runtime.h>
 
-static const char CharonRotorsKey;
+static const char RevenantRotorsKey;
 
 @implementation UIAccessibilityCustomRotorSearchPredicate {
 @private
@@ -163,16 +163,16 @@ static const char CharonRotorsKey;
 
 @end
 
-@implementation NSObject (CharonAccessibilityCustomRotor)
+@implementation NSObject (RevenantAccessibilityCustomRotor)
 
 - (NSArray<UIAccessibilityCustomRotor *> *)accessibilityCustomRotors
 {
-    return objc_getAssociatedObject(self, &CharonRotorsKey);
+    return objc_getAssociatedObject(self, &RevenantRotorsKey);
 }
 
 - (void)setAccessibilityCustomRotors:(NSArray<UIAccessibilityCustomRotor *> *)accessibilityCustomRotors
 {
-    objc_setAssociatedObject(self, &CharonRotorsKey, accessibilityCustomRotors, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, &RevenantRotorsKey, accessibilityCustomRotors, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
 @end

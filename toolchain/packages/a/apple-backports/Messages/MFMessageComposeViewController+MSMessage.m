@@ -3,11 +3,11 @@
 #import <Messages/MSMessage.h>
 #import <objc/runtime.h>
 
-@interface MFMessageComposeViewController (CharonMSMessage)
+@interface MFMessageComposeViewController (RevenantMSMessage)
 @property (nonatomic, copy, nullable) MSMessage *message;
 @end
 
-@implementation MFMessageComposeViewController (CharonMSMessage)
+@implementation MFMessageComposeViewController (RevenantMSMessage)
 
 @dynamic message;
 

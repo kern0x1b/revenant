@@ -6,11 +6,11 @@
 #include <dlfcn.h>
 #include <stdio.h>
 
-#if CHARON_PORT_BUILD
-#import "CharonStandInPlayerItem.h"
-#define ITEM_CLASS CharonStandInPlayerItem
-static AVPlayerItem *nativeItem(id item) { return [(CharonStandInPlayerItem *)item item]; }
-static id plainItem(AVAsset *asset) { return [[CharonStandInPlayerItem alloc] initWithAsset:asset]; }
+#if REVENANT_PORT_BUILD
+#import "RevenantStandInPlayerItem.h"
+#define ITEM_CLASS RevenantStandInPlayerItem
+static AVPlayerItem *nativeItem(id item) { return [(RevenantStandInPlayerItem *)item item]; }
+static id plainItem(AVAsset *asset) { return [[RevenantStandInPlayerItem alloc] initWithAsset:asset]; }
 #else
 #define ITEM_CLASS AVPlayerItem
 static AVPlayerItem *nativeItem(id item) { return (AVPlayerItem *)item; }
@@ -124,7 +124,7 @@ int main(int argc, const char *argv[])
 
         AVURLAsset *assetC = [AVURLAsset URLAssetWithURL:movie options:nil];
         id itemC = ((id (*)(id, SEL, id, id))objc_msgSend)([ITEM_CLASS alloc],
-            sel_registerName("initWithAsset:automaticallyLoadedAssetKeys:"), assetC, @[@"charon-no-such-key"]);
+            sel_registerName("initWithAsset:automaticallyLoadedAssetKeys:"), assetC, @[@"revenant-no-such-key"]);
         emitInt("C.made", itemC != nil);
         emit("C.keys.start", keysOf(itemC));
         spin(1.0);

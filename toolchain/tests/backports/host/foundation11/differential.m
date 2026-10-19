@@ -17,7 +17,7 @@ int main(int argc, char **argv)
         foundation11_run(systemImplementation, system);
 
         Foundation11Recorder *ours = [Foundation11Recorder new];
-        Foundation11Implementation ourImplementation = {.prefix = @"charonHost_", .transformer = NSClassFromString(@"CharonHostNSSecureUnarchiveFromDataTransformer")};
+        Foundation11Implementation ourImplementation = {.prefix = @"revenantHost_", .transformer = NSClassFromString(@"RevenantHostNSSecureUnarchiveFromDataTransformer")};
         foundation11_run(ourImplementation, ours);
 
         int failures = 0;

@@ -22,7 +22,7 @@
 #include <utility>
 #include <vector>
 
-namespace shade::kernel_iokit::mbx {
+namespace emulator::kernel_iokit::mbx {
 
 namespace {
 

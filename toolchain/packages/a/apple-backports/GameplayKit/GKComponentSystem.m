@@ -1,4 +1,4 @@
-#import "CharonGK.h"
+#import "RevenantGK.h"
 
 @implementation GKComponent {
     __weak GKEntity *_owner;
@@ -14,7 +14,7 @@
     return _owner;
 }
 
-- (void)charon_attachToEntity:(GKEntity *)entity
+- (void)revenant_attachToEntity:(GKEntity *)entity
 {
     _owner = entity;
 }
@@ -77,14 +77,14 @@
     self = [self init];
     if (self) {
         NSArray<NSString *> *names = [coder decodeObjectOfClasses:[NSSet setWithObjects:[NSArray class], [NSString class], nil]
-                                                          forKey:CharonGKEntityComponentsKey];
+                                                          forKey:RevenantGKEntityComponentsKey];
         for (NSString *name in names) {
             Class componentClass = NSClassFromString(name);
             if (![componentClass isSubclassOfClass:[GKComponent class]]) {
                 continue;
             }
             NSData *bytes = [coder decodeObjectOfClass:[NSData class]
-                                                forKey:[NSString stringWithFormat:@"%@.%@", CharonGKEntityComponentsKey, name]];
+                                                forKey:[NSString stringWithFormat:@"%@.%@", RevenantGKEntityComponentsKey, name]];
             GKComponent *component = nil;
             if ([bytes length] > 0) {
                 component = [NSKeyedUnarchiver unarchiveObjectWithData:bytes];
@@ -106,10 +106,10 @@
         [names addObject:name];
         NSData *bytes = [NSKeyedArchiver archivedDataWithRootObject:component];
         if ([bytes length]) {
-            [coder encodeObject:bytes forKey:[NSString stringWithFormat:@"%@.%@", CharonGKEntityComponentsKey, name]];
+            [coder encodeObject:bytes forKey:[NSString stringWithFormat:@"%@.%@", RevenantGKEntityComponentsKey, name]];
         }
     }
-    [coder encodeObject:names forKey:CharonGKEntityComponentsKey];
+    [coder encodeObject:names forKey:RevenantGKEntityComponentsKey];
 }
 
 - (NSArray<GKComponent *> *)components
@@ -132,7 +132,7 @@
     }
     _byClass[name] = component;
     [_ordered addObject:component];
-    [component charon_attachToEntity:self];
+    [component revenant_attachToEntity:self];
     [component didAddToEntity];
 }
 
@@ -153,7 +153,7 @@
     [_byClass removeObjectForKey:NSStringFromClass(componentClass)];
     [_ordered removeObject:component];
     [component willRemoveFromEntity];
-    [component charon_attachToEntity:nil];
+    [component revenant_attachToEntity:nil];
 }
 
 - (void)updateWithDeltaTime:(NSTimeInterval)seconds

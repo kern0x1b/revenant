@@ -2,17 +2,17 @@
 #import <CoreImage/CoreImage.h>
 #import <CoreVideo/CoreVideo.h>
 
-@interface CIImage (CharonHost)
-- (CIImage *)charonHost_imageByCompositingOverImage:(CIImage *)dest;
-- (instancetype)initCharonHostWithCVImageBuffer:(CVImageBufferRef)buffer;
-- (instancetype)initCharonHostWithCVImageBuffer:(CVImageBufferRef)buffer options:(NSDictionary *)options;
-+ (CIImage *)charonHost_imageWithCVImageBuffer:(CVImageBufferRef)buffer;
-+ (CIImage *)charonHost_imageWithCVImageBuffer:(CVImageBufferRef)buffer options:(NSDictionary *)options;
-- (CIImage *)charonHost_imageBySamplingLinear;
+@interface CIImage (RevenantHost)
+- (CIImage *)revenantHost_imageByCompositingOverImage:(CIImage *)dest;
+- (instancetype)initRevenantHostWithCVImageBuffer:(CVImageBufferRef)buffer;
+- (instancetype)initRevenantHostWithCVImageBuffer:(CVImageBufferRef)buffer options:(NSDictionary *)options;
++ (CIImage *)revenantHost_imageWithCVImageBuffer:(CVImageBufferRef)buffer;
++ (CIImage *)revenantHost_imageWithCVImageBuffer:(CVImageBufferRef)buffer options:(NSDictionary *)options;
+- (CIImage *)revenantHost_imageBySamplingLinear;
 @end
 
-@interface CIFilter (CharonHost)
-+ (CIFilter *)charonHost_filterWithName:(NSString *)name withInputParameters:(NSDictionary *)params;
+@interface CIFilter (RevenantHost)
++ (CIFilter *)revenantHost_filterWithName:(NSString *)name withInputParameters:(NSDictionary *)params;
 @end
 
 void host_attach_prefixed(const char *prefix);
@@ -108,16 +108,16 @@ int main(void)
                             [CIImage imageWithColor:[CIColor colorWithRed:0.1 green:0.2 blue:0.3 alpha:0.4]]];
         for (NSUInteger i = 0; i < images.count; i++) {
             for (NSUInteger j = 0; j < images.count; j++)
-                same_image([images[i] imageByCompositingOverImage:images[j]], [images[i] charonHost_imageByCompositingOverImage:images[j]],
+                same_image([images[i] imageByCompositingOverImage:images[j]], [images[i] revenantHost_imageByCompositingOverImage:images[j]],
                            [NSString stringWithFormat:@"composite %lu over %lu", (unsigned long)i, (unsigned long)j]);
-            same_image([images[i] imageByCompositingOverImage:nil], [images[i] charonHost_imageByCompositingOverImage:nil],
+            same_image([images[i] imageByCompositingOverImage:nil], [images[i] revenantHost_imageByCompositingOverImage:nil],
                        [NSString stringWithFormat:@"composite %lu over nil", (unsigned long)i]);
             CIImage *scaled = [images[i] imageByApplyingTransform:CGAffineTransformMakeScale(2.5, 1.5)];
             near_image([[images[i] imageBySamplingLinear] imageByApplyingTransform:CGAffineTransformMakeScale(2.5, 1.5)],
-                       [[images[i] charonHost_imageBySamplingLinear] imageByApplyingTransform:CGAffineTransformMakeScale(2.5, 1.5)],
+                       [[images[i] revenantHost_imageBySamplingLinear] imageByApplyingTransform:CGAffineTransformMakeScale(2.5, 1.5)],
                        [NSString stringWithFormat:@"sampling linear %lu, scaled", (unsigned long)i]);
-            check([images[i] charonHost_imageBySamplingLinear] == images[i], [NSString stringWithFormat:@"sampling linear %lu is the image", (unsigned long)i]);
-            same_image(scaled, [[images[i] charonHost_imageBySamplingLinear] imageByApplyingTransform:CGAffineTransformMakeScale(2.5, 1.5)],
+            check([images[i] revenantHost_imageBySamplingLinear] == images[i], [NSString stringWithFormat:@"sampling linear %lu is the image", (unsigned long)i]);
+            same_image(scaled, [[images[i] revenantHost_imageBySamplingLinear] imageByApplyingTransform:CGAffineTransformMakeScale(2.5, 1.5)],
                        [NSString stringWithFormat:@"sampling linear %lu is the image's own sampling", (unsigned long)i]);
         }
 
@@ -128,7 +128,7 @@ int main(void)
             for (id given in parameters) {
                 NSDictionary *params = given == [NSNull null] ? nil : given;
                 id host = outcome(^CIFilter *{ return [CIFilter filterWithName:name withInputParameters:params]; });
-                id port = outcome(^CIFilter *{ return [CIFilter charonHost_filterWithName:name withInputParameters:params]; });
+                id port = outcome(^CIFilter *{ return [CIFilter revenantHost_filterWithName:name withInputParameters:params]; });
                 check([host isEqual:port], [NSString stringWithFormat:@"filter %@ with %@: %@ and %@", name, params, host, port]);
             }
         }
@@ -147,17 +147,17 @@ int main(void)
             }
             CVPixelBufferUnlockBaseAddress(buffer, 0);
             NSString *what = [NSString stringWithFormat:@"pixel buffer %zu", f];
-            same_image([[CIImage alloc] initWithCVImageBuffer:buffer], [[CIImage alloc] initCharonHostWithCVImageBuffer:buffer], [what stringByAppendingString:@" init"]);
+            same_image([[CIImage alloc] initWithCVImageBuffer:buffer], [[CIImage alloc] initRevenantHostWithCVImageBuffer:buffer], [what stringByAppendingString:@" init"]);
             NSDictionary *options = @{kCIImageColorSpace: [NSNull null]};
-            same_image([[CIImage alloc] initWithCVImageBuffer:buffer options:options], [[CIImage alloc] initCharonHostWithCVImageBuffer:buffer options:options],
+            same_image([[CIImage alloc] initWithCVImageBuffer:buffer options:options], [[CIImage alloc] initRevenantHostWithCVImageBuffer:buffer options:options],
                        [what stringByAppendingString:@" init with options"]);
-            same_image([CIImage imageWithCVImageBuffer:buffer], [CIImage charonHost_imageWithCVImageBuffer:buffer], [what stringByAppendingString:@" image"]);
-            same_image([CIImage imageWithCVImageBuffer:buffer options:options], [CIImage charonHost_imageWithCVImageBuffer:buffer options:options],
+            same_image([CIImage imageWithCVImageBuffer:buffer], [CIImage revenantHost_imageWithCVImageBuffer:buffer], [what stringByAppendingString:@" image"]);
+            same_image([CIImage imageWithCVImageBuffer:buffer options:options], [CIImage revenantHost_imageWithCVImageBuffer:buffer options:options],
                        [what stringByAppendingString:@" image with options"]);
             CVPixelBufferRelease(buffer);
         }
-        same_image([[CIImage alloc] initWithCVImageBuffer:NULL], [[CIImage alloc] initCharonHostWithCVImageBuffer:NULL], @"NULL buffer init");
-        same_image([CIImage imageWithCVImageBuffer:NULL], [CIImage charonHost_imageWithCVImageBuffer:NULL], @"NULL buffer image");
+        same_image([[CIImage alloc] initWithCVImageBuffer:NULL], [[CIImage alloc] initRevenantHostWithCVImageBuffer:NULL], @"NULL buffer init");
+        same_image([CIImage imageWithCVImageBuffer:NULL], [CIImage revenantHost_imageWithCVImageBuffer:NULL], @"NULL buffer image");
 
         printf("ciimage: %ld checks, %ld different\n", checks, different);
         return different ? 1 : 0;

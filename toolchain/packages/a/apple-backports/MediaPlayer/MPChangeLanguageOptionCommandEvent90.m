@@ -1,11 +1,11 @@
 #import <Foundation/Foundation.h>
-#if defined(CHARON_MEDIAPLAYER_STANDIN)
+#if defined(REVENANT_MEDIAPLAYER_STANDIN)
 #import "MPMediaItemStandin.h"
 #else
 #import <MediaPlayer/MediaPlayer.h>
 #endif
 
-#if defined(CHARON_MEDIAPLAYER_STANDIN)
+#if defined(REVENANT_MEDIAPLAYER_STANDIN)
 @interface MPChangeLanguageOptionCommandEvent : MPRemoteCommandEvent
 @property (nonatomic, strong, readwrite) MPNowPlayingInfoLanguageOption *languageOption;
 @property (nonatomic, assign, readwrite) MPChangeLanguageOptionSetting setting;

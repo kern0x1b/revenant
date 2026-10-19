@@ -2,7 +2,7 @@
 #import <objc/message.h>
 #import "check.h"
 
-extern NSString *const CharonHostNSMarkdownSourcePositionAttributeName;
+extern NSString *const RevenantHostNSMarkdownSourcePositionAttributeName;
 
 static NSString *answer(id position)
 {
@@ -98,13 +98,13 @@ int main(void)
 {
     @autoreleasepool {
         Class system = NSClassFromString(@"NSAttributedStringMarkdownSourcePosition");
-        Class ours = NSClassFromString(@"CharonHostNSAttributedStringMarkdownSourcePosition");
+        Class ours = NSClassFromString(@"RevenantHostNSAttributedStringMarkdownSourcePosition");
         CHECK(system != Nil, "the system has NSAttributedStringMarkdownSourcePosition");
         CHECK(ours != Nil, "the port defines NSAttributedStringMarkdownSourcePosition under its own name");
 
         CHECK_EQUAL(NSMarkdownSourcePositionAttributeName, @"NSMarkdownSourcePosition",
                     "the system's attribute key is NSMarkdownSourcePosition");
-        CHECK_EQUAL(CharonHostNSMarkdownSourcePositionAttributeName, NSMarkdownSourcePositionAttributeName,
+        CHECK_EQUAL(RevenantHostNSMarkdownSourcePositionAttributeName, NSMarkdownSourcePositionAttributeName,
                     "the backport's attribute key is the system's own string");
 
         const NSInteger cases[][4] = {
@@ -114,14 +114,14 @@ int main(void)
         for (unsigned index = 0; index < sizeof cases / sizeof cases[0]; index++) {
             id ourPosition = makeIn(ours, cases[index][0], cases[index][1], cases[index][2], cases[index][3]);
             id systemPosition = makeIn(system, cases[index][0], cases[index][1], cases[index][2], cases[index][3]);
-            charon_check([answer(ourPosition) isEqualToString:answer(systemPosition)],
+            revenant_check([answer(ourPosition) isEqualToString:answer(systemPosition)],
                          [[NSString stringWithFormat:@"the four numbers, %@", answer(systemPosition)] UTF8String],
                          [NSString stringWithFormat:@"the system answers %@, the backport answers %@",
                           answer(systemPosition), answer(ourPosition)]);
         }
 
         id ourEmpty = [[ours alloc] init], systemEmpty = [[system alloc] init];
-        charon_check([answer(ourEmpty) isEqualToString:answer(systemEmpty)],
+        revenant_check([answer(ourEmpty) isEqualToString:answer(systemEmpty)],
                      [[NSString stringWithFormat:@"-init gives four zeroes, %@", answer(systemEmpty)] UTF8String],
                      [NSString stringWithFormat:@"the system answers %@, the backport answers %@",
                       answer(systemEmpty), answer(ourEmpty)]);
@@ -130,7 +130,7 @@ int main(void)
         CHECK([systemPosition conformsToProtocol:@protocol(NSCopying)] && [ours conformsToProtocol:@protocol(NSCopying)],
               "both sides answer NSCopying");
         id ourCopy = [ourPosition copy], systemCopy = [systemPosition copy];
-        charon_check([answer(ourCopy) isEqualToString:answer(systemCopy)],
+        revenant_check([answer(ourCopy) isEqualToString:answer(systemCopy)],
                      [[NSString stringWithFormat:@"the copy carries the four numbers, %@", answer(systemCopy)] UTF8String],
                      [NSString stringWithFormat:@"the system answers %@, the backport answers %@",
                       answer(systemCopy), answer(ourCopy)]);
@@ -168,7 +168,7 @@ int main(void)
 
         NSArray *systemKeys = keysInArchive(systemPosition);
         NSArray *ourKeys = keysInArchive(ourPosition);
-        charon_check([systemKeys isEqualToArray:ourKeys], "the archive's keys and their values",
+        revenant_check([systemKeys isEqualToArray:ourKeys], "the archive's keys and their values",
                       [NSString stringWithFormat:@"the system writes %@, the backport writes %@", systemKeys, ourKeys]);
 
         NSError *error = nil;
@@ -188,10 +188,10 @@ int main(void)
             readOurOwn = readSystemBySystem = nil;
             printf("FAIL an archive raises %s: %s\n", exception.name.UTF8String, exception.reason.UTF8String);
         }
-        charon_check(readOurOwn && [answer(readOurOwn) isEqualToString:answer(ourPosition)],
+        revenant_check(readOurOwn && [answer(readOurOwn) isEqualToString:answer(ourPosition)],
                      "the backport's own archive reads back",
                      [NSString stringWithFormat:@"the position in is %@, the position out is %@", answer(ourPosition), answer(readOurOwn)]);
-        charon_check(readSystemBySystem && [answer(readSystemBySystem) isEqualToString:answer(systemPosition)],
+        revenant_check(readSystemBySystem && [answer(readSystemBySystem) isEqualToString:answer(systemPosition)],
                      "the system's archive reads back into the system's class",
                      [NSString stringWithFormat:@"the position in is %@, the position out is %@", answer(systemPosition), answer(readSystemBySystem)]);
 
@@ -211,10 +211,10 @@ int main(void)
             readSystemByOurs = readOursBySystem = nil;
             printf("FAIL an archive read across raises %s: %s\n", exception.name.UTF8String, exception.reason.UTF8String);
         }
-        charon_check(readSystemByOurs && [answer(readSystemByOurs) isEqualToString:answer(systemPosition)],
+        revenant_check(readSystemByOurs && [answer(readSystemByOurs) isEqualToString:answer(systemPosition)],
                      "the system's archive reads back into the backport's class",
                      [NSString stringWithFormat:@"the position in is %@, the position out is %@", answer(systemPosition), answer(readSystemByOurs)]);
-        charon_check(readOursBySystem && [answer(readOursBySystem) isEqualToString:answer(ourPosition)],
+        revenant_check(readOursBySystem && [answer(readOursBySystem) isEqualToString:answer(ourPosition)],
                      "the backport's archive reads back into the system's class",
                      [NSString stringWithFormat:@"the position in is %@, the position out is %@", answer(ourPosition), answer(readOursBySystem)]);
 
@@ -227,7 +227,7 @@ int main(void)
                                                                                      options:options
                                                                                      baseURL:nil
                                                                                        error:&parseError];
-            charon_check(parsed != nil, "the system's own parser reads a document of the corpus",
+            revenant_check(parsed != nil, "the system's own parser reads a document of the corpus",
                          [NSString stringWithFormat:@"the parser answers %@", parseError]);
             if (!parsed)
                 continue;
@@ -269,9 +269,9 @@ int main(void)
                 }
             }];
         }
-        charon_check(outside == 0, "the backport's range is inside the document it was handed",
+        revenant_check(outside == 0, "the backport's range is inside the document it was handed",
                      [NSString stringWithFormat:@"%lu of %lu answers point outside it", (unsigned long)outside, (unsigned long)marked]);
-        charon_check(agreed + differed == 29 && agreed == 28 && differed == 1,
+        revenant_check(agreed + differed == 29 && agreed == 28 && differed == 1,
                      [[NSString stringWithFormat:@"the two answer the same range on 28 of the %lu marked positions", (unsigned long)marked] UTF8String],
                      [NSString stringWithFormat:@"they agree on %lu and differ on %lu", (unsigned long)agreed, (unsigned long)differed]);
         printf("ok   the range over the parser's own positions: %lu marked, the two agree on %lu and differ on %lu; "
@@ -311,12 +311,12 @@ int main(void)
                 printf("ok   the system answers the same position {%lu,%lu}\n", (unsigned long)systemRange.location,
                        (unsigned long)systemRange.length);
             }
-        charon_check(refused == asked, "a position the document does not reach has no range",
+        revenant_check(refused == asked, "a position the document does not reach has no range",
                      [NSString stringWithFormat:@"%lu of %lu are answered with a range", (unsigned long)(asked - refused),
                       (unsigned long)asked]);
 
-        printf("checks=%d failures=%d\n", charon_checks, charon_failures);
+        printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
         fflush(stdout);
     }
-    return charon_failures;
+    return revenant_failures;
 }

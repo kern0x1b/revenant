@@ -1,35 +1,35 @@
 #import <HealthKit/HealthKit.h>
 
-#import "CharonHKStore.h"
+#import "RevenantHKStore.h"
 
 @implementation HKSourceRevision {
     HKSource *_source;
     NSString *_version;
-    NSString *_charonProductType;
-    NSOperatingSystemVersion _charonOperatingSystemVersion;
+    NSString *_revenantProductType;
+    NSOperatingSystemVersion _revenantOperatingSystemVersion;
 }
-CHARON_HEALTHKIT_UNCREATABLE_INIT
+REVENANT_HEALTHKIT_UNCREATABLE_INIT
 
-- (instancetype)charon_initWithSource:(HKSource *)source version:(nullable NSString *)version
+- (instancetype)revenant_initWithSource:(HKSource *)source version:(nullable NSString *)version
 {
     return [self initWithSource:source version:version];
 }
 
-- (void)charon_setProductType:(nullable NSString *)productType
+- (void)revenant_setProductType:(nullable NSString *)productType
          operatingSystemVersion:(NSOperatingSystemVersion)operatingSystemVersion
 {
-    _charonProductType = [productType copy];
-    _charonOperatingSystemVersion = operatingSystemVersion;
+    _revenantProductType = [productType copy];
+    _revenantOperatingSystemVersion = operatingSystemVersion;
 }
 
-- (nullable NSString *)charon_storedProductType
+- (nullable NSString *)revenant_storedProductType
 {
-    return _charonProductType;
+    return _revenantProductType;
 }
 
-- (NSOperatingSystemVersion)charon_storedOperatingSystemVersion
+- (NSOperatingSystemVersion)revenant_storedOperatingSystemVersion
 {
-    return _charonOperatingSystemVersion;
+    return _revenantOperatingSystemVersion;
 }
 @dynamic productType;
 @dynamic operatingSystemVersion;
@@ -65,10 +65,10 @@ CHARON_HEALTHKIT_UNCREATABLE_INIT
         (NSInteger)[coder decodeDoubleForKey:@"osMinor"],
         (NSInteger)[coder decodeDoubleForKey:@"osPatch"]
     };
-    HKSourceRevision *revision = [self initWithSource:source ?: [HKSource charon_sourceWithName:@"" bundleIdentifier:@""]
+    HKSourceRevision *revision = [self initWithSource:source ?: [HKSource revenant_sourceWithName:@"" bundleIdentifier:@""]
                                              version:version];
     if (revision)
-        [revision charon_setProductType:productType operatingSystemVersion:operatingSystem];
+        [revision revenant_setProductType:productType operatingSystemVersion:operatingSystem];
     return revision;
 }
 
@@ -76,10 +76,10 @@ CHARON_HEALTHKIT_UNCREATABLE_INIT
 {
     [coder encodeObject:_source forKey:@"source"];
     [coder encodeObject:_version forKey:@"version"];
-    [coder encodeObject:_charonProductType forKey:@"productType"];
-    [coder encodeDouble:(double)_charonOperatingSystemVersion.majorVersion forKey:@"osMajor"];
-    [coder encodeDouble:(double)_charonOperatingSystemVersion.minorVersion forKey:@"osMinor"];
-    [coder encodeDouble:(double)_charonOperatingSystemVersion.patchVersion forKey:@"osPatch"];
+    [coder encodeObject:_revenantProductType forKey:@"productType"];
+    [coder encodeDouble:(double)_revenantOperatingSystemVersion.majorVersion forKey:@"osMajor"];
+    [coder encodeDouble:(double)_revenantOperatingSystemVersion.minorVersion forKey:@"osMinor"];
+    [coder encodeDouble:(double)_revenantOperatingSystemVersion.patchVersion forKey:@"osPatch"];
 }
 
 - (id)copyWithZone:(NSZone *)zone
@@ -123,7 +123,7 @@ CHARON_HEALTHKIT_UNCREATABLE_INIT
 
 @implementation HKDeletedObject {
     NSUUID *_UUID;
-    NSDictionary *_charonDeletedMetadata;
+    NSDictionary *_revenantDeletedMetadata;
 }
 @dynamic metadata;
 
@@ -133,7 +133,7 @@ CHARON_HEALTHKIT_UNCREATABLE_INIT
     return YES;
 }
 
-- (instancetype)charon_initWithUUID:(NSUUID *)uuid
+- (instancetype)revenant_initWithUUID:(NSUUID *)uuid
 {
     HKDeletedObject *deleted = [super init];
     if (deleted)
@@ -149,14 +149,14 @@ CHARON_HEALTHKIT_UNCREATABLE_INIT
         NSDictionary *metadata = [coder decodeObjectOfClasses:[NSSet setWithObjects:[NSDictionary class], [NSString class],
                                                                             [NSNumber class], [NSDate class], [NSData class], nil]
                                                 forKey:@"deletedMetadata"];
-        deleted->_charonDeletedMetadata = [metadata copy];
+        deleted->_revenantDeletedMetadata = [metadata copy];
     return deleted;
 }
 
 - (void)encodeWithCoder:(NSCoder *)coder
 {
     [coder encodeObject:_UUID forKey:@"UUID"];
-    [coder encodeObject:_charonDeletedMetadata forKey:@"deletedMetadata"];
+    [coder encodeObject:_revenantDeletedMetadata forKey:@"deletedMetadata"];
 }
 
 - (NSUUID *)UUID
@@ -164,9 +164,9 @@ CHARON_HEALTHKIT_UNCREATABLE_INIT
     return _UUID;
 }
 
-- (nullable NSDictionary<NSString *, id> *)charon_deletedMetadata
+- (nullable NSDictionary<NSString *, id> *)revenant_deletedMetadata
 {
-    return _charonDeletedMetadata;
+    return _revenantDeletedMetadata;
 }
 
 - (NSString *)description

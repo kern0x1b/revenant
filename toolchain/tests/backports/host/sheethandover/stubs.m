@@ -1,53 +1,53 @@
 #import <UIKit/UIKit.h>
 #import <objc/runtime.h>
-#import "CharonCustomTransition.h"
+#import "RevenantCustomTransition.h"
 
-BOOL charon_custom_transition(CharonTransitionKind kind, UIViewController *from, UIViewController *to, UIViewController *source, id<UIViewControllerAnimatedTransitioning> animator, id<UIViewControllerInteractiveTransitioning> interactor, UIModalPresentationStyle style, void (^native)(void), void (^undo)(void), void (^completion)(BOOL finished))
+BOOL revenant_custom_transition(RevenantTransitionKind kind, UIViewController *from, UIViewController *to, UIViewController *source, id<UIViewControllerAnimatedTransitioning> animator, id<UIViewControllerInteractiveTransitioning> interactor, UIModalPresentationStyle style, void (^native)(void), void (^undo)(void), void (^completion)(BOOL finished))
 {
     return NO;
 }
 
-BOOL charon_document_menu_present(UIViewController *presenting, UIViewController *presented, BOOL animated, void (^completion)(void))
+BOOL revenant_document_menu_present(UIViewController *presenting, UIViewController *presented, BOOL animated, void (^completion)(void))
 {
     return NO;
 }
 
-BOOL charon_popover_present(UIViewController *presenting, UIViewController *presented, BOOL animated, void (^completion)(void))
+BOOL revenant_popover_present(UIViewController *presenting, UIViewController *presented, BOOL animated, void (^completion)(void))
 {
     return NO;
 }
 
-BOOL charon_popover_dismiss(UIViewController *controller, BOOL animated, void (^completion)(void))
+BOOL revenant_popover_dismiss(UIViewController *controller, BOOL animated, void (^completion)(void))
 {
     return NO;
 }
 
-id<UIViewControllerAnimatedTransitioning> charon_edge_pop_animator(UINavigationController *navigation)
+id<UIViewControllerAnimatedTransitioning> revenant_edge_pop_animator(UINavigationController *navigation)
 {
     return nil;
 }
 
-id<UIViewControllerInteractiveTransitioning> charon_edge_pop_interactor(UINavigationController *navigation)
+id<UIViewControllerInteractiveTransitioning> revenant_edge_pop_interactor(UINavigationController *navigation)
 {
     return nil;
 }
 
-void charon_presentation_present(UIViewController *presenting, UIViewController *presented, UIPresentationController *presentation, id<UIViewControllerAnimatedTransitioning> animator, void (^native)(void), void (^completion)(BOOL finished))
+void revenant_presentation_present(UIViewController *presenting, UIViewController *presented, UIPresentationController *presentation, id<UIViewControllerAnimatedTransitioning> animator, void (^native)(void), void (^completion)(BOOL finished))
 {
 }
 
-void charon_presentation_dismiss(UIViewController *presented, UIViewController *presenting, UIPresentationController *presentation, id<UIViewControllerAnimatedTransitioning> animator, void (^native)(void), void (^completion)(BOOL finished))
+void revenant_presentation_dismiss(UIViewController *presented, UIViewController *presenting, UIPresentationController *presentation, id<UIViewControllerAnimatedTransitioning> animator, void (^native)(void), void (^completion)(BOOL finished))
 {
 }
 
-static const char charon_presentation_key;
+static const char revenant_presentation_key;
 
-UIPresentationController *charon_presentation_controller_of(UIViewController *controller)
+UIPresentationController *revenant_presentation_controller_of(UIViewController *controller)
 {
-    return objc_getAssociatedObject(controller, &charon_presentation_key);
+    return objc_getAssociatedObject(controller, &revenant_presentation_key);
 }
 
-void charon_set_presentation_controller(UIViewController *controller, UIPresentationController *presentation)
+void revenant_set_presentation_controller(UIViewController *controller, UIPresentationController *presentation)
 {
-    objc_setAssociatedObject(controller, &charon_presentation_key, presentation, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(controller, &revenant_presentation_key, presentation, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }

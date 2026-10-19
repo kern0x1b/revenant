@@ -4,18 +4,18 @@
 #import <Security/SecProtocolTypes.h>
 #import <CoreFoundation/CoreFoundation.h>
 
-@interface CharonSecIdentity : NSObject <OS_sec_identity>
-- (CFArrayRef)charonCertificates;
+@interface RevenantSecIdentity : NSObject <OS_sec_identity>
+- (CFArrayRef)revenantCertificates;
 @end
 
-@interface CharonSecProtocolCertificateMaker : NSObject
-+ (SecCertificateRef)charonRefForCertificate:(SecCertificateRef)certificate;
+@interface RevenantSecProtocolCertificateMaker : NSObject
++ (SecCertificateRef)revenantRefForCertificate:(SecCertificateRef)certificate;
 @end
 bool sec_identity_access_certificates(sec_identity_t identity, void (^handler)(sec_certificate_t))
 {
-    if (![identity isKindOfClass:CharonSecIdentity.class] || !handler)
+    if (![identity isKindOfClass:RevenantSecIdentity.class] || !handler)
         return false;
-    CFArrayRef held = [(CharonSecIdentity *)identity charonCertificates];
+    CFArrayRef held = [(RevenantSecIdentity *)identity revenantCertificates];
     if (!held)
         return true;
     CFIndex count = CFArrayGetCount(held);

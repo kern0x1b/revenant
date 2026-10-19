@@ -1,12 +1,12 @@
 #import <Foundation/Foundation.h>
 
-#import "CharonCloudKit.h"
-#import "CharonCKConstants.h"
-#import "CharonCKSyncEngine26.h"
+#import "RevenantCloudKit.h"
+#import "RevenantCKConstants.h"
+#import "RevenantCKSyncEngine26.h"
 
-static NSError *CharonCKSyncEngineNoAccount(void)
+static NSError *RevenantCKSyncEngineNoAccount(void)
 {
-    return CharonCKError(CKErrorNotAuthenticated,
+    return RevenantCKError(CKErrorNotAuthenticated,
                          @"this release has no iCloud account, so the service is not reachable and"
                          " every request answers the transport's own refusal",
                          nil);
@@ -40,7 +40,7 @@ static NSError *CharonCKSyncEngineNoAccount(void)
 - (void)fetchChangesWithCompletionHandler:(nullable void (^)(NSError *_Nullable))completionHandler
 {
     if (completionHandler) {
-        completionHandler(CharonCKSyncEngineNoAccount());
+        completionHandler(RevenantCKSyncEngineNoAccount());
     }
 }
 
@@ -53,7 +53,7 @@ static NSError *CharonCKSyncEngineNoAccount(void)
 - (void)sendChangesWithCompletionHandler:(nullable void (^)(NSError *_Nullable))completionHandler
 {
     if (completionHandler) {
-        completionHandler(CharonCKSyncEngineNoAccount());
+        completionHandler(RevenantCKSyncEngineNoAccount());
     }
 }
 

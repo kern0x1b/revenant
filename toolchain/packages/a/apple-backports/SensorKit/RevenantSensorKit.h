@@ -1,5 +1,5 @@
-#ifndef CHARON_SENSORKIT_H
-#define CHARON_SENSORKIT_H
+#ifndef REVENANT_SENSORKIT_H
+#define REVENANT_SENSORKIT_H
 
 #import <Foundation/Foundation.h>
 #import <CoreMedia/CoreMedia.h>
@@ -171,7 +171,7 @@ typedef NSUInteger SRWristTemperatureCondition;
 @property (nonatomic, readonly, strong, nullable) id soundClassification;
 @end
 
-@interface SRSpeechMetrics (CharonSensorKit172)
+@interface SRSpeechMetrics (RevenantSensorKit172)
 @property (nonatomic, readonly, assign) NSTimeInterval timeSinceAudioStart;
 @end
 
@@ -189,44 +189,44 @@ typedef NSUInteger SRWristTemperatureCondition;
 @property (nonatomic, readonly, assign) NSTimeInterval duration;
 @end
 
-@interface SRApplicationUsage (CharonSensorKit150)
+@interface SRApplicationUsage (RevenantSensorKit150)
 @property (nonatomic, readonly, strong, nullable) NSString *reportApplicationIdentifier;
 @property (nonatomic, readonly, strong, nullable) NSArray<SRTextInputSession *> *textInputSessions;
 @end
 
-@interface SRApplicationUsage (CharonSensorKit164)
+@interface SRApplicationUsage (RevenantSensorKit164)
 @property (nonatomic, readonly, assign) NSTimeInterval relativeStartTime;
 @property (nonatomic, readonly, strong, nullable) NSArray<NSString *> *supplementalCategories;
 @end
 
 
-@interface SRDevice (CharonSensorKit170)
+@interface SRDevice (RevenantSensorKit170)
 @property (nonatomic, readonly, copy, nullable) NSString *productType;
 @end
 
 
-@interface SRDeviceUsageReport (CharonSensorKit164)
+@interface SRDeviceUsageReport (RevenantSensorKit164)
 @property (nonatomic, readonly, copy, nullable) NSString *version;
 @end
 
 
-@interface SRKeyboardMetrics (CharonSensorKit150)
+@interface SRKeyboardMetrics (RevenantSensorKit150)
 @property (nonatomic, readonly, copy, nullable) NSArray<NSString *> *inputModes;
 @end
 
-@interface SRKeyboardMetrics (CharonSensorKit164)
+@interface SRKeyboardMetrics (RevenantSensorKit164)
 @property (nonatomic, readonly, copy, nullable) NSArray<NSString *> *sessionIdentifiers;
 @property (nonatomic, readonly, strong, nullable) NSArray<SRKeyboardProbabilityMetric *> *longWordTouchUpDown;
 @property (nonatomic, readonly, strong, nullable) SRKeyboardProbabilityMetric *touchUpDown;
 @end
 
 
-@interface SRTextInputSession (CharonSensorKit164)
+@interface SRTextInputSession (RevenantSensorKit164)
 @property (nonatomic, readonly, copy, nullable) NSString *sessionIdentifier;
 @end
 
 
-@interface SRWristDetection (CharonSensorKit164)
+@interface SRWristDetection (RevenantSensorKit164)
 @property (nonatomic, readonly, strong, nullable) NSDate *offWristDate;
 @property (nonatomic, readonly, strong, nullable) NSDate *onWristDate;
 @end

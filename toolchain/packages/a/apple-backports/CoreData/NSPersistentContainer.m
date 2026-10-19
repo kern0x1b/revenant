@@ -1,4 +1,4 @@
-#import "CharonCoreData.h"
+#import "RevenantCoreData.h"
 
 @implementation NSPersistentContainer {
 @private
@@ -44,7 +44,7 @@
     return directory;
 }
 
-+ (NSManagedObjectModel *)charon_modelNamed:(NSString *)name
++ (NSManagedObjectModel *)revenant_modelNamed:(NSString *)name
 {
     for (NSBundle *bundle in @[[NSBundle mainBundle], [NSBundle bundleForClass:self]]) {
         NSURL *found = [bundle URLForResource:name withExtension:@"momd"] ?: [bundle URLForResource:name withExtension:@"mom"];
@@ -66,7 +66,7 @@
 
 - (instancetype)initWithName:(NSString *)name
 {
-    return [self initWithName:name managedObjectModel:[[self class] charon_modelNamed:name] ?: [[NSManagedObjectModel alloc] init]];
+    return [self initWithName:name managedObjectModel:[[self class] revenant_modelNamed:name] ?: [[NSManagedObjectModel alloc] init]];
 }
 
 - (instancetype)initWithName:(NSString *)name managedObjectModel:(NSManagedObjectModel *)model

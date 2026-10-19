@@ -1,24 +1,24 @@
-#import "CharonAVCaptureDeviceReactions17.h"
+#import "RevenantAVCaptureDeviceReactions17.h"
 
-#define CHARON_CAPTURE_USER_PREFERRED_HISTORY_KEY @"CharonCaptureUserPreferredCameraHistory"
-#define CHARON_CAPTURE_USER_PREFERRED_HISTORY_DEPTH 3
+#define REVENANT_CAPTURE_USER_PREFERRED_HISTORY_KEY @"RevenantCaptureUserPreferredCameraHistory"
+#define REVENANT_CAPTURE_USER_PREFERRED_HISTORY_DEPTH 3
 
-static NSArray<NSString *> *charon_user_preferred_history(void)
+static NSArray<NSString *> *revenant_user_preferred_history(void)
 {
-    id stored = [[NSUserDefaults standardUserDefaults] objectForKey:CHARON_CAPTURE_USER_PREFERRED_HISTORY_KEY];
+    id stored = [[NSUserDefaults standardUserDefaults] objectForKey:REVENANT_CAPTURE_USER_PREFERRED_HISTORY_KEY];
     if (![stored isKindOfClass:[NSArray class]])
         return [NSArray array];
     NSMutableArray<NSString *> *identifiers = [NSMutableArray array];
     for (id entry in (NSArray *)stored) {
         if ([entry isKindOfClass:[NSString class]] && [entry length] && ![identifiers containsObject:entry])
             [identifiers addObject:entry];
-        if (identifiers.count >= CHARON_CAPTURE_USER_PREFERRED_HISTORY_DEPTH)
+        if (identifiers.count >= REVENANT_CAPTURE_USER_PREFERRED_HISTORY_DEPTH)
             break;
     }
     return identifiers;
 }
 
-@implementation AVCaptureDevice (CharonCaptureDeviceReactions17)
+@implementation AVCaptureDevice (RevenantCaptureDeviceReactions17)
 
 - (NSSet<AVCaptureReactionType> *)availableReactionTypes
 {
@@ -65,7 +65,7 @@ static NSArray<NSString *> *charon_user_preferred_history(void)
 
 + (AVCaptureDevice *)userPreferredCamera
 {
-    NSArray<NSString *> *history = charon_user_preferred_history();
+    NSArray<NSString *> *history = revenant_user_preferred_history();
     NSArray<AVCaptureDevice *> *present = [AVCaptureDevice devicesWithMediaType:AVMediaTypeVideo];
     for (NSString *identifier in history) {
         for (AVCaptureDevice *device in present) {
@@ -85,14 +85,14 @@ static NSArray<NSString *> *charon_user_preferred_history(void)
     NSString *identifier = userPreferredCamera.uniqueID;
     if (![identifier length])
         return;
-    NSMutableArray<NSString *> *history = [charon_user_preferred_history() mutableCopy];
+    NSMutableArray<NSString *> *history = [revenant_user_preferred_history() mutableCopy];
     [history removeObject:identifier];
     [history insertObject:identifier atIndex:0];
-    if (history.count > CHARON_CAPTURE_USER_PREFERRED_HISTORY_DEPTH)
-        [history removeObjectsInRange:NSMakeRange(CHARON_CAPTURE_USER_PREFERRED_HISTORY_DEPTH,
-                                                  history.count - CHARON_CAPTURE_USER_PREFERRED_HISTORY_DEPTH)];
+    if (history.count > REVENANT_CAPTURE_USER_PREFERRED_HISTORY_DEPTH)
+        [history removeObjectsInRange:NSMakeRange(REVENANT_CAPTURE_USER_PREFERRED_HISTORY_DEPTH,
+                                                  history.count - REVENANT_CAPTURE_USER_PREFERRED_HISTORY_DEPTH)];
     [[NSUserDefaults standardUserDefaults] setObject:[history copy]
-                                              forKey:CHARON_CAPTURE_USER_PREFERRED_HISTORY_KEY];
+                                              forKey:REVENANT_CAPTURE_USER_PREFERRED_HISTORY_KEY];
 }
 
 - (void)performEffectForReaction:(AVCaptureReactionType)reactionType
@@ -107,7 +107,7 @@ static NSArray<NSString *> *charon_user_preferred_history(void)
 
 @end
 
-@implementation AVCaptureDeviceFormat (CharonCaptureDeviceFormatReactions17)
+@implementation AVCaptureDeviceFormat (RevenantCaptureDeviceFormatReactions17)
 
 - (BOOL)reactionEffectsSupported
 {

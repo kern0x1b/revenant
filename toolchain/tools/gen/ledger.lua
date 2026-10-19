@@ -87,7 +87,7 @@ local function reader(tree, script, file, arch)
     if arch then
         table.insert(args, arch)
     end
-    return os.iorunv("xmake", args, {envs = {CHARON_ROOT = tree}})
+    return os.iorunv("xmake", args, {envs = {REVENANT_ROOT = tree}})
 end
 
 function read_release(tree, release)

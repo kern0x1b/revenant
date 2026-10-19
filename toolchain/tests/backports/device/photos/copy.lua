@@ -1,4 +1,4 @@
-import("device", {rootdir = path.join(os.getenv("HOME"), "Git/projects/ios/charon/modules")})
+import("device", {rootdir = path.join(os.scriptdir(), "..", "..", "..", "..", "modules")})
 
 function main(source, destination, ...)
     local fetch = ({...})[1] == "--fetch"

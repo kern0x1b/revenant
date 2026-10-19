@@ -17,7 +17,7 @@ harness=${TAGCONFIG_HARNESS:-$here/../../device}
 # Built outside the tree, as the two neighbouring runs do: a build directory under the source
 # is what a later `git add` picks up by accident (AGENTS.md, Conventions: build artifacts are
 # never committed).
-build=${TAGCONFIG_BUILD:-$(runs_folder charon-corenfc-tagconfig-host)}
+build=${TAGCONFIG_BUILD:-$(runs_folder revenant-corenfc-tagconfig-host)}
 sdk=$(xcrun --show-sdk-path)
 target="-target arm64-apple-ios15.0-macabi -isysroot $sdk -iframework $sdk/System/iOSSupport/System/Library/Frameworks"
 # NFCNDEFReaderSession and NFCISO15693ReaderSession are in the list because CoreNFC/NFCReaderSession.m implements them too, and a
@@ -25,9 +25,9 @@ target="-target arm64-apple-ios15.0-macabi -isysroot $sdk -iframework $sdk/Syste
 classes="NFCTagCommandConfiguration NFCISO15693CustomCommandConfiguration NFCISO15693ReadMultipleBlocksConfiguration NFCReaderSession NFCNDEFReaderSession NFCISO15693ReaderSession"
 renames=""
 for name in $classes; do
-    renames="$renames -D$name=CharonHost$name"
+    renames="$renames -D$name=RevenantHost$name"
 done
-renames="$renames -DNFCErrorDomain=CharonHostNFCErrorDomain"
+renames="$renames -DNFCErrorDomain=RevenantHostNFCErrorDomain"
 rm -rf "$build"
 mkdir -p "$build"
 cp "$port/NFCTagConfiguration11.m" "$build/NFCTagConfiguration11.m"

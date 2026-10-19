@@ -10,7 +10,7 @@
 
 #include <png.h>
 
-namespace shade {
+namespace emulator {
 namespace {
 
     struct PngImage {

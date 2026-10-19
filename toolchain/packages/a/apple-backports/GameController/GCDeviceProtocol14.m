@@ -1,4 +1,4 @@
-#import "CharonGC.h"
+#import "RevenantGC.h"
 
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
 
@@ -14,7 +14,7 @@
     self = [super init];
     if (self) {
         _keyboardInput = [[GCKeyboardInput alloc] init];
-        [_keyboardInput charon_setDevice:self];
+        [_keyboardInput revenant_setDevice:self];
         _handlerQueue = dispatch_get_main_queue();
         _vendorName = @"Keyboard";
         _productCategory = @"Keyboard";

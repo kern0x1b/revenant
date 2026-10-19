@@ -7,7 +7,7 @@
 
 #include "kernel/kernel_iokit_audio_abi.hpp"
 
-namespace shade::kernel_iokit::audio {
+namespace emulator::kernel_iokit::audio {
 namespace {
 
     constexpr IOKitAudioAbi io_audio2_abi{

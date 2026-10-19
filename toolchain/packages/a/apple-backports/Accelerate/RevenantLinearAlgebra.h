@@ -7,13 +7,13 @@
 #include <string.h>
 
 typedef enum {
-    CharonLAError = 0,
-    CharonLASplat = 1,
-    CharonLAArray = 2
-} CharonLAKind;
+    RevenantLAError = 0,
+    RevenantLASplat = 1,
+    RevenantLAArray = 2
+} RevenantLAKind;
 
-typedef struct CharonLAValue {
-    CharonLAKind kind;
+typedef struct RevenantLAValue {
+    RevenantLAKind kind;
     la_status_t status;
     la_attribute_t attributes;
     la_hint_t hint;
@@ -23,48 +23,48 @@ typedef struct CharonLAValue {
     double splat;
     void *elements;
     la_deallocator_t deallocator;
-} CharonLAValue;
+} RevenantLAValue;
 
 #if OS_OBJECT_USE_OBJC
 
-@interface CharonLAObject : NSObject {
+@interface RevenantLAObject : NSObject {
 @public
-    CharonLAValue value;
+    RevenantLAValue value;
 }
 @end
 
-static inline CharonLAValue *CharonLAValueOf(la_object_t object)
+static inline RevenantLAValue *RevenantLAValueOf(la_object_t object)
 {
-    return object ? &((CharonLAObject *)(object))->value : NULL;
+    return object ? &((RevenantLAObject *)(object))->value : NULL;
 }
-#define CHARON_LA_VALUE(object) CharonLAValueOf(object)
+#define REVENANT_LA_VALUE(object) RevenantLAValueOf(object)
 
-static inline la_object_t CharonLANewObject(void)
+static inline la_object_t RevenantLANewObject(void)
 {
-    return (la_object_t)(id)[[CharonLAObject alloc] init];
+    return (la_object_t)(id)[[RevenantLAObject alloc] init];
 }
 
 #else
 
 struct la_s {
     unsigned long retain_count;
-    CharonLAValue value;
+    RevenantLAValue value;
 };
 
-static inline CharonLAValue *charon_la_value(la_object_t object) { return object ? &object->value : NULL; }
-#define CHARON_LA_VALUE(object) charon_la_value(object)
+static inline RevenantLAValue *revenant_la_value(la_object_t object) { return object ? &object->value : NULL; }
+#define REVENANT_LA_VALUE(object) revenant_la_value(object)
 
-static inline la_object_t CharonLANewObject(void) { return (la_object_t)calloc(1, sizeof(struct la_s)); }
+static inline la_object_t RevenantLANewObject(void) { return (la_object_t)calloc(1, sizeof(struct la_s)); }
 
 #endif
 
-static inline double CharonLAGet(const CharonLAValue *value, la_count_t row, la_count_t col)
+static inline double RevenantLAGet(const RevenantLAValue *value, la_count_t row, la_count_t col)
 {
     la_count_t at = row * value->cols + col;
     return value->scalar_type == LA_SCALAR_TYPE_FLOAT ? ((const float *)value->elements)[at] : ((const double *)value->elements)[at];
 }
 
-static inline void CharonLASet(CharonLAValue *value, la_count_t row, la_count_t col, double element)
+static inline void RevenantLASet(RevenantLAValue *value, la_count_t row, la_count_t col, double element)
 {
     la_count_t at = row * value->cols + col;
     if (value->scalar_type == LA_SCALAR_TYPE_FLOAT) {
@@ -74,9 +74,9 @@ static inline void CharonLASet(CharonLAValue *value, la_count_t row, la_count_t 
     }
 }
 
-static inline size_t CharonLAWidth(la_scalar_type_t scalar_type) { return scalar_type == LA_SCALAR_TYPE_FLOAT ? sizeof(float) : sizeof(double); }
+static inline size_t RevenantLAWidth(la_scalar_type_t scalar_type) { return scalar_type == LA_SCALAR_TYPE_FLOAT ? sizeof(float) : sizeof(double); }
 
-static inline void CharonLAFreeValue(CharonLAValue *value)
+static inline void RevenantLAFreeValue(RevenantLAValue *value)
 {
     if (value->deallocator && value->elements) {
         value->deallocator(value->elements);
@@ -86,9 +86,9 @@ static inline void CharonLAFreeValue(CharonLAValue *value)
     value->deallocator = NULL;
 }
 
-static inline la_count_t CharonLALength(const CharonLAValue *value)
+static inline la_count_t RevenantLALength(const RevenantLAValue *value)
 {
-    if (value->kind != CharonLAArray) {
+    if (value->kind != RevenantLAArray) {
         return 0;
     }
     return value->rows == 1 ? value->cols : value->rows;

@@ -1,4 +1,4 @@
-#import "CharonCallKit.h"
+#import "RevenantCallKit.h"
 
 #pragma clang diagnostic ignored "-Wobjc-designated-initializers"
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
@@ -20,24 +20,24 @@
         _configuration = [configuration copy];
         _queue = dispatch_get_main_queue();
         _pending = [NSMutableArray array];
-        [[CharonCallBroker shared] addProvider:self];
+        [[RevenantCallBroker shared] addProvider:self];
     }
     return self;
 }
 
 - (void)dealloc
 {
-    [[CharonCallBroker shared] removeProvider:self];
+    [[RevenantCallBroker shared] removeProvider:self];
 }
 
-- (BOOL)charon_isValid
+- (BOOL)revenant_isValid
 {
     @synchronized (self) {
         return !_invalidated;
     }
 }
 
-- (dispatch_queue_t)charon_queue
+- (dispatch_queue_t)revenant_queue
 {
     @synchronized (self) {
         return _queue;
@@ -77,7 +77,7 @@
     });
 }
 
-- (id<CXProviderDelegate>)charon_delegate
+- (id<CXProviderDelegate>)revenant_delegate
 {
     @synchronized (self) {
         return _delegate;
@@ -87,38 +87,38 @@
 - (void)reportNewIncomingCallWithUUID:(NSUUID *)UUID update:(CXCallUpdate *)update completion:(void (^)(NSError *))completion
 {
     NSError *failure = nil;
-    if (![self charon_isValid])
-        failure = charon_callkit_error(CXErrorDomainIncomingCall, CXErrorCodeIncomingCallErrorUnknown);
+    if (![self revenant_isValid])
+        failure = revenant_callkit_error(CXErrorDomainIncomingCall, CXErrorCodeIncomingCallErrorUnknown);
     else if (!UUID)
-        failure = charon_callkit_error(CXErrorDomainIncomingCall, CXErrorCodeIncomingCallErrorUnknown);
+        failure = revenant_callkit_error(CXErrorDomainIncomingCall, CXErrorCodeIncomingCallErrorUnknown);
     CXCall *call = nil;
     if (!failure) {
-        call = [[CXCall alloc] charon_initWithUUID:UUID outgoing:NO];
-        call.charon_provider = self;
-        call.charon_update = [update copy];
-        if (![[CharonCallBroker shared] addCall:call]) {
+        call = [[CXCall alloc] revenant_initWithUUID:UUID outgoing:NO];
+        call.revenant_provider = self;
+        call.revenant_update = [update copy];
+        if (![[RevenantCallBroker shared] addCall:call]) {
             call = nil;
-            failure = charon_callkit_error(CXErrorDomainIncomingCall, CXErrorCodeIncomingCallErrorCallUUIDAlreadyExists);
+            failure = revenant_callkit_error(CXErrorDomainIncomingCall, CXErrorCodeIncomingCallErrorCallUUIDAlreadyExists);
         }
     }
     if (call)
-        [self charon_presentIncomingCall:call];
+        [self revenant_presentIncomingCall:call];
     if (!completion)
         return;
-    dispatch_async([self charon_queue], ^{
+    dispatch_async([self revenant_queue], ^{
         completion(failure);
     });
 }
 
-- (void)charon_presentIncomingCall:(CXCall *)call
+- (void)revenant_presentIncomingCall:(CXCall *)call
 {
-    [[CharonCallScreen shared] present:call of:self];
+    [[RevenantCallScreen shared] present:call of:self];
 }
 
-- (void)charon_audioSessionActivated:(id)session
+- (void)revenant_audioSessionActivated:(id)session
 {
-    id<CXProviderDelegate> delegate = [self charon_delegate];
-    dispatch_queue_t queue = [self charon_queue];
+    id<CXProviderDelegate> delegate = [self revenant_delegate];
+    dispatch_queue_t queue = [self revenant_queue];
     if (!delegate || !queue)
         return;
     dispatch_async(queue, ^{
@@ -128,10 +128,10 @@
     });
 }
 
-- (void)charon_audioSessionDeactivated:(id)session
+- (void)revenant_audioSessionDeactivated:(id)session
 {
-    id<CXProviderDelegate> delegate = [self charon_delegate];
-    dispatch_queue_t queue = [self charon_queue];
+    id<CXProviderDelegate> delegate = [self revenant_delegate];
+    dispatch_queue_t queue = [self revenant_queue];
     if (!delegate || !queue)
         return;
     dispatch_async(queue, ^{
@@ -143,45 +143,45 @@
 
 - (void)reportCallWithUUID:(NSUUID *)UUID updated:(CXCallUpdate *)update
 {
-    CXCall *call = [[CharonCallBroker shared] callWithUUID:UUID];
-    if (!call || call.charon_provider != self)
+    CXCall *call = [[RevenantCallBroker shared] callWithUUID:UUID];
+    if (!call || call.revenant_provider != self)
         return;
     CXCallUpdate *merged = [update copy];
-    [merged charon_applyOver:call.charon_update];
-    call.charon_update = merged;
-    [[CharonCallBroker shared] callChanged:call];
+    [merged revenant_applyOver:call.revenant_update];
+    call.revenant_update = merged;
+    [[RevenantCallBroker shared] callChanged:call];
 }
 
 - (void)reportCallWithUUID:(NSUUID *)UUID endedAtDate:(NSDate *)dateEnded reason:(CXCallEndedReason)endedReason
 {
-    CXCall *call = [[CharonCallBroker shared] callWithUUID:UUID];
-    if (!call || call.charon_provider != self)
+    CXCall *call = [[RevenantCallBroker shared] callWithUUID:UUID];
+    if (!call || call.revenant_provider != self)
         return;
-    call.charon_dateEnded = dateEnded ?: [NSDate date];
-    call.charon_endedReason = endedReason;
-    [[CharonCallBroker shared] removeCall:call];
+    call.revenant_dateEnded = dateEnded ?: [NSDate date];
+    call.revenant_endedReason = endedReason;
+    [[RevenantCallBroker shared] removeCall:call];
 }
 
 - (void)reportOutgoingCallWithUUID:(NSUUID *)UUID startedConnectingAtDate:(NSDate *)dateStartedConnecting
 {
-    CXCall *call = [[CharonCallBroker shared] callWithUUID:UUID];
-    if (!call || call.charon_provider != self || !call.isOutgoing)
+    CXCall *call = [[RevenantCallBroker shared] callWithUUID:UUID];
+    if (!call || call.revenant_provider != self || !call.isOutgoing)
         return;
-    call.charon_dateStartedConnecting = dateStartedConnecting ?: [NSDate date];
-    [[CharonCallBroker shared] callChanged:call];
+    call.revenant_dateStartedConnecting = dateStartedConnecting ?: [NSDate date];
+    [[RevenantCallBroker shared] callChanged:call];
 }
 
 - (void)reportOutgoingCallWithUUID:(NSUUID *)UUID connectedAtDate:(NSDate *)dateConnected
 {
-    CXCall *call = [[CharonCallBroker shared] callWithUUID:UUID];
-    if (!call || call.charon_provider != self || !call.isOutgoing)
+    CXCall *call = [[RevenantCallBroker shared] callWithUUID:UUID];
+    if (!call || call.revenant_provider != self || !call.isOutgoing)
         return;
     BOOL first = !call.hasConnected;
-    call.charon_dateConnected = dateConnected ?: [NSDate date];
-    [call charon_setHasConnected:YES];
-    [[CharonCallBroker shared] callChanged:call];
+    call.revenant_dateConnected = dateConnected ?: [NSDate date];
+    [call revenant_setHasConnected:YES];
+    [[RevenantCallBroker shared] callChanged:call];
     if (first)
-        [[CharonCallBroker shared] callConnected:call];
+        [[RevenantCallBroker shared] callConnected:call];
 }
 
 - (void)invalidate
@@ -202,12 +202,12 @@
         for (CXAction *action in transaction.actions)
             [action fail];
     }
-    for (CXCall *call in [[CharonCallBroker shared] callsOfProvider:self]) {
-        call.charon_dateEnded = [NSDate date];
-        call.charon_endedReason = CXCallEndedReasonFailed;
-        [[CharonCallBroker shared] removeCall:call];
+    for (CXCall *call in [[RevenantCallBroker shared] callsOfProvider:self]) {
+        call.revenant_dateEnded = [NSDate date];
+        call.revenant_endedReason = CXCallEndedReasonFailed;
+        [[RevenantCallBroker shared] removeCall:call];
     }
-    [[CharonCallBroker shared] removeProvider:self];
+    [[RevenantCallBroker shared] removeProvider:self];
     if (!delegate || !queue)
         return;
     dispatch_async(queue, ^{
@@ -237,17 +237,17 @@
     return found;
 }
 
-- (void)charon_removeTransaction:(CXTransaction *)transaction
+- (void)revenant_removeTransaction:(CXTransaction *)transaction
 {
     @synchronized (self) {
         [_pending removeObjectIdenticalTo:transaction];
     }
 }
 
-- (void)charon_actionTimedOut:(CXAction *)action
+- (void)revenant_actionTimedOut:(CXAction *)action
 {
-    id<CXProviderDelegate> delegate = [self charon_delegate];
-    dispatch_queue_t queue = [self charon_queue];
+    id<CXProviderDelegate> delegate = [self revenant_delegate];
+    dispatch_queue_t queue = [self revenant_queue];
     if (!delegate || !queue)
         return;
     dispatch_async(queue, ^{
@@ -257,14 +257,14 @@
     });
 }
 
-- (void)charon_execute:(CXTransaction *)transaction
+- (void)revenant_execute:(CXTransaction *)transaction
 {
-    id<CXProviderDelegate> delegate = [self charon_delegate];
-    dispatch_queue_t queue = [self charon_queue];
+    id<CXProviderDelegate> delegate = [self revenant_delegate];
+    dispatch_queue_t queue = [self revenant_queue];
     NSArray<CXAction *> *actions = transaction.actions;
-    transaction.charon_provider = self;
+    transaction.revenant_provider = self;
     for (CXAction *action in actions)
-        action.charon_provider = self;
+        action.revenant_provider = self;
     @synchronized (self) {
         [_pending addObject:transaction];
     }
@@ -278,7 +278,7 @@
         BOOL taken = [held respondsToSelector:@selector(provider:executeTransaction:)] && [held provider:self executeTransaction:transaction];
         if (!taken) {
             for (CXAction *action in actions) {
-                SEL perform = [action charon_performSelector];
+                SEL perform = [action revenant_performSelector];
                 if (perform && [held respondsToSelector:perform]) {
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Warc-performSelector-leaks"
@@ -294,7 +294,7 @@
         NSTimeInterval left = [action.timeoutDate timeIntervalSinceNow];
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(MAX(left, 0.0) * NSEC_PER_SEC)), queue, ^{
             if (!action.isComplete)
-                [action charon_timedOut];
+                [action revenant_timedOut];
         });
     }
 }

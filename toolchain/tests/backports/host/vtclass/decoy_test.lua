@@ -2,7 +2,7 @@ local G = import("gen_body", {rootdir = os.scriptdir()})
 local V = import("vtlib", {rootdir = os.scriptdir()})
 
 local DECOY_CLASS = "VTDecoyFrameProcessorConfiguration"
-local DECOY_ARGUMENT = "charonNotAProperty"
+local DECOY_ARGUMENT = "revenantNotAProperty"
 
 local function run_checks()
     local bad = {}

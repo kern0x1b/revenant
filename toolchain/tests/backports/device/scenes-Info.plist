@@ -9,7 +9,7 @@
 	<key>CFBundleExecutable</key>
 	<string>scenes</string>
 	<key>CFBundleIdentifier</key>
-	<string>local.charon.backports.scenes</string>
+	<string>local.revenant.backports.scenes</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
@@ -26,10 +26,10 @@
 	<array>
 		<dict>
 			<key>CFBundleURLName</key>
-			<string>local.charon.backports.scenes</string>
+			<string>local.revenant.backports.scenes</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>charon-backports-scenes</string>
+				<string>revenant-backports-scenes</string>
 			</array>
 		</dict>
 	</array>
@@ -51,13 +51,13 @@
 					<key>UISceneConfigurationName</key>
 					<string>Other</string>
 					<key>UISceneDelegateClassName</key>
-					<string>CharonWrongSceneDelegate</string>
+					<string>RevenantWrongSceneDelegate</string>
 				</dict>
 				<dict>
 					<key>UISceneConfigurationName</key>
 					<string>Default</string>
 					<key>UISceneDelegateClassName</key>
-					<string>CharonSceneDelegate</string>
+					<string>RevenantSceneDelegate</string>
 				</dict>
 			</array>
 		</dict>

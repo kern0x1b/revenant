@@ -12,7 +12,7 @@
 
 #include "graphics/gles_renderer.hpp"
 
-namespace shade {
+namespace emulator {
 
 [[nodiscard]] std::unique_ptr<GlesRenderer> create_vulkan_gles_renderer(
     const std::filesystem::path& pipeline_cache,

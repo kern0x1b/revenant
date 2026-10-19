@@ -3,11 +3,11 @@
 #import <CoreFoundation/CoreFoundation.h>
 #import <stdio.h>
 
-SecPadding CharonSecurityPaddingFor(SecKeyAlgorithm algorithm);
+SecPadding RevenantSecurityPaddingFor(SecKeyAlgorithm algorithm);
 
 static void padding(const char *label, SecKeyAlgorithm algorithm, long want)
 {
-    SecPadding got = CharonSecurityPaddingFor(algorithm);
+    SecPadding got = RevenantSecurityPaddingFor(algorithm);
     printf("%s\t%ld\n", label, (long)got);
     if ((long)got != want)
         printf("WRONG\t%s: answered %ld and the port claims %ld\n", label, (long)got, want);

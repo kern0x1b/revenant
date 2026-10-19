@@ -1,5 +1,5 @@
-#import "CharonTraits17.h"
-#import "CharonTraitStyle.h"
+#import "RevenantTraits17.h"
+#import "RevenantTraitStyle.h"
 #import <objc/runtime.h>
 
 
@@ -8,26 +8,26 @@
 
 
 
-static const CharonTraitDefinition *charon_definition_for(Class trait, CharonTraitValue kind);
+static const RevenantTraitDefinition *revenant_definition_for(Class trait, RevenantTraitValue kind);
 
-static NSString *charon_kind_name(CharonTraitValue kind)
+static NSString *revenant_kind_name(RevenantTraitValue kind)
 {
     switch (kind) {
-    case CharonTraitValueCGFloat:
+    case RevenantTraitValueCGFloat:
         return @"CGFloat";
-    case CharonTraitValueObject:
+    case RevenantTraitValueObject:
         return @"Object";
     default:
         return @"NSInteger";
     }
 }
 
-static const CharonTraitDefinition *charon_definition_for(Class trait, CharonTraitValue kind)
+static const RevenantTraitDefinition *revenant_definition_for(Class trait, RevenantTraitValue kind)
 {
     if (!trait)
         [NSException raise:NSInternalInconsistencyException
                     format:@"Trait class '(null)' does not implement the required defaultValue class property"];
-    const CharonTraitDefinition *definition = charon_trait_definition(trait);
+    const RevenantTraitDefinition *definition = revenant_trait_definition(trait);
     if (!definition)
         [NSException raise:NSInternalInconsistencyException
                     format:@"Trait class '%@' does not implement the required defaultValue class property",
@@ -35,23 +35,23 @@ static const CharonTraitDefinition *charon_definition_for(Class trait, CharonTra
     if (definition->kind != kind)
         [NSException raise:NSInternalInconsistencyException
                     format:@"Data type (%@) for trait with name '%@' does not match expected data type (%@)",
-                           charon_kind_name(definition->kind), charon_trait_public_name(definition), charon_kind_name(kind)];
+                           revenant_kind_name(definition->kind), revenant_trait_public_name(definition), revenant_kind_name(kind)];
     return definition;
 }
 
-static UITraitCollection *charon_trait_copy(UITraitCollection *collection)
+static UITraitCollection *revenant_trait_copy(UITraitCollection *collection)
 {
     UITraitCollection *result = [UITraitCollection traitCollectionWithTraitsFromCollections:@[collection]];
-    charon_set_trait_force_touch(result, collection.forceTouchCapability);
+    revenant_set_trait_force_touch(result, collection.forceTouchCapability);
     return result;
 }
 
 
 
-UITraitCollection *charon_trait_collection_with(UITraitCollection *collection, const CharonTraitDefinition *definition, id value)
+UITraitCollection *revenant_trait_collection_with(UITraitCollection *collection, const RevenantTraitDefinition *definition, id value)
 {
     switch (definition->home) {
-    case CharonTraitHomeIvar: {
+    case RevenantTraitHomeIvar: {
         UITraitCollection *result = nil;
         if (definition->trait == (Class)[UITraitUserInterfaceIdiom class])
             result = [UITraitCollection traitCollectionWithUserInterfaceIdiom:(UIUserInterfaceIdiom)[value integerValue]];
@@ -63,25 +63,25 @@ UITraitCollection *charon_trait_collection_with(UITraitCollection *collection, c
             result = [UITraitCollection traitCollectionWithVerticalSizeClass:(UIUserInterfaceSizeClass)[value integerValue]];
         return [UITraitCollection traitCollectionWithTraitsFromCollections:@[result, collection]];
     }
-    case CharonTraitHomeStyle: {
-        UITraitCollection *result = charon_trait_copy(collection);
-        charon_set_trait_style(result, (UIUserInterfaceStyle)[value integerValue]);
+    case RevenantTraitHomeStyle: {
+        UITraitCollection *result = revenant_trait_copy(collection);
+        revenant_set_trait_style(result, (UIUserInterfaceStyle)[value integerValue]);
         return result;
     }
-    case CharonTraitHomeForceTouch: {
-        UITraitCollection *result = charon_trait_copy(collection);
-        charon_set_trait_force_touch(result, (UIForceTouchCapability)[value integerValue]);
+    case RevenantTraitHomeForceTouch: {
+        UITraitCollection *result = revenant_trait_copy(collection);
+        revenant_set_trait_force_touch(result, (UIForceTouchCapability)[value integerValue]);
         return result;
     }
     default: {
-        UITraitCollection *result = charon_trait_copy(collection);
-        charon_set_trait_extra_object(result, definition->name, value);
+        UITraitCollection *result = revenant_trait_copy(collection);
+        revenant_set_trait_extra_object(result, definition->name, value);
         return result;
     }
     }
 }
 
-@implementation CharonTraitMutations
+@implementation RevenantTraitMutations
 
 - (instancetype)initWithCollection:(UITraitCollection *)collection
 {
@@ -90,58 +90,58 @@ UITraitCollection *charon_trait_collection_with(UITraitCollection *collection, c
     return self;
 }
 
-- (UITraitCollection *)charon_collection
+- (UITraitCollection *)revenant_collection
 {
     return _collection;
 }
 
-- (const CharonTraitDefinition *)charon_definition:(Class)trait kind:(CharonTraitValue)kind
+- (const RevenantTraitDefinition *)revenant_definition:(Class)trait kind:(RevenantTraitValue)kind
 {
-    return charon_definition_for(trait, kind);
+    return revenant_definition_for(trait, kind);
 }
 
-- (void)charon_set:(const CharonTraitDefinition *)definition value:(id)value
+- (void)revenant_set:(const RevenantTraitDefinition *)definition value:(id)value
 {
-    _collection = charon_trait_collection_with(_collection, definition, value);
+    _collection = revenant_trait_collection_with(_collection, definition, value);
 }
 
 - (void)setCGFloatValue:(CGFloat)value forTrait:(UICGFloatTrait)trait
 {
-    [self charon_set:[self charon_definition:trait kind:CharonTraitValueCGFloat] value:@(value)];
+    [self revenant_set:[self revenant_definition:trait kind:RevenantTraitValueCGFloat] value:@(value)];
 }
 
 - (CGFloat)valueForCGFloatTrait:(UICGFloatTrait)trait
 {
-    const CharonTraitDefinition *definition = [self charon_definition:trait kind:CharonTraitValueCGFloat];
-    id value = charon_trait_value(_collection, definition);
+    const RevenantTraitDefinition *definition = [self revenant_definition:trait kind:RevenantTraitValueCGFloat];
+    id value = revenant_trait_value(_collection, definition);
     return value ? (CGFloat)[value doubleValue] : (CGFloat)[definition->defaultValue doubleValue];
 }
 
 - (void)setNSIntegerValue:(NSInteger)value forTrait:(UINSIntegerTrait)trait
 {
-    [self charon_set:[self charon_definition:trait kind:CharonTraitValueNSInteger] value:@(value)];
+    [self revenant_set:[self revenant_definition:trait kind:RevenantTraitValueNSInteger] value:@(value)];
 }
 
 - (NSInteger)valueForNSIntegerTrait:(UINSIntegerTrait)trait
 {
-    const CharonTraitDefinition *definition = [self charon_definition:trait kind:CharonTraitValueNSInteger];
-    id value = charon_trait_value(_collection, definition);
+    const RevenantTraitDefinition *definition = [self revenant_definition:trait kind:RevenantTraitValueNSInteger];
+    id value = revenant_trait_value(_collection, definition);
     return value ? [value integerValue] : [definition->defaultValue integerValue];
 }
 
 - (void)setObject:(id<NSObject>)object forTrait:(UIObjectTrait)trait
 {
-    [self charon_set:[self charon_definition:trait kind:CharonTraitValueObject] value:object];
+    [self revenant_set:[self revenant_definition:trait kind:RevenantTraitValueObject] value:object];
 }
 
 - (id)objectForTrait:(UIObjectTrait)trait
 {
-    const CharonTraitDefinition *definition = [self charon_definition:trait kind:CharonTraitValueObject];
-    id value = charon_trait_value(_collection, definition);
+    const RevenantTraitDefinition *definition = [self revenant_definition:trait kind:RevenantTraitValueObject];
+    id value = revenant_trait_value(_collection, definition);
     return value ? value : definition->defaultValue;
 }
 
-#define CHARON_TRAIT_PROPERTY(TraitClass, Type, Getter, Setter)                                                                          \
+#define REVENANT_TRAIT_PROPERTY(TraitClass, Type, Getter, Setter)                                                                          \
     - (Type)Getter                                                                                                                     \
     {                                                                                                                                   \
         return (Type)[self valueForTraitClass:TraitClass];                                                                              \
@@ -181,24 +181,24 @@ UITraitCollection *charon_trait_collection_with(UITraitCollection *collection, c
     [self setObject:value forTrait:trait];
 }
 
-CHARON_TRAIT_PROPERTY([UITraitUserInterfaceIdiom class], UIUserInterfaceIdiom, userInterfaceIdiom, setUserInterfaceIdiom)
-CHARON_TRAIT_PROPERTY([UITraitUserInterfaceStyle class], UIUserInterfaceStyle, userInterfaceStyle, setUserInterfaceStyle)
-CHARON_TRAIT_PROPERTY([UITraitLayoutDirection class], UITraitEnvironmentLayoutDirection, layoutDirection, setLayoutDirection)
-CHARON_TRAIT_PROPERTY([UITraitHorizontalSizeClass class], UIUserInterfaceSizeClass, horizontalSizeClass, setHorizontalSizeClass)
-CHARON_TRAIT_PROPERTY([UITraitVerticalSizeClass class], UIUserInterfaceSizeClass, verticalSizeClass, setVerticalSizeClass)
-CHARON_TRAIT_PROPERTY([UITraitForceTouchCapability class], UIForceTouchCapability, forceTouchCapability, setForceTouchCapability)
-CHARON_TRAIT_PROPERTY([UITraitDisplayGamut class], UIDisplayGamut, displayGamut, setDisplayGamut)
-CHARON_TRAIT_PROPERTY([UITraitAccessibilityContrast class], UIAccessibilityContrast, accessibilityContrast, setAccessibilityContrast)
-CHARON_TRAIT_PROPERTY([UITraitUserInterfaceLevel class], UIUserInterfaceLevel, userInterfaceLevel, setUserInterfaceLevel)
-CHARON_TRAIT_PROPERTY([UITraitLegibilityWeight class], UILegibilityWeight, legibilityWeight, setLegibilityWeight)
-CHARON_TRAIT_PROPERTY([UITraitActiveAppearance class], UIUserInterfaceActiveAppearance, activeAppearance, setActiveAppearance)
-CHARON_TRAIT_PROPERTY([UITraitToolbarItemPresentationSize class], UINSToolbarItemPresentationSize, toolbarItemPresentationSize,
+REVENANT_TRAIT_PROPERTY([UITraitUserInterfaceIdiom class], UIUserInterfaceIdiom, userInterfaceIdiom, setUserInterfaceIdiom)
+REVENANT_TRAIT_PROPERTY([UITraitUserInterfaceStyle class], UIUserInterfaceStyle, userInterfaceStyle, setUserInterfaceStyle)
+REVENANT_TRAIT_PROPERTY([UITraitLayoutDirection class], UITraitEnvironmentLayoutDirection, layoutDirection, setLayoutDirection)
+REVENANT_TRAIT_PROPERTY([UITraitHorizontalSizeClass class], UIUserInterfaceSizeClass, horizontalSizeClass, setHorizontalSizeClass)
+REVENANT_TRAIT_PROPERTY([UITraitVerticalSizeClass class], UIUserInterfaceSizeClass, verticalSizeClass, setVerticalSizeClass)
+REVENANT_TRAIT_PROPERTY([UITraitForceTouchCapability class], UIForceTouchCapability, forceTouchCapability, setForceTouchCapability)
+REVENANT_TRAIT_PROPERTY([UITraitDisplayGamut class], UIDisplayGamut, displayGamut, setDisplayGamut)
+REVENANT_TRAIT_PROPERTY([UITraitAccessibilityContrast class], UIAccessibilityContrast, accessibilityContrast, setAccessibilityContrast)
+REVENANT_TRAIT_PROPERTY([UITraitUserInterfaceLevel class], UIUserInterfaceLevel, userInterfaceLevel, setUserInterfaceLevel)
+REVENANT_TRAIT_PROPERTY([UITraitLegibilityWeight class], UILegibilityWeight, legibilityWeight, setLegibilityWeight)
+REVENANT_TRAIT_PROPERTY([UITraitActiveAppearance class], UIUserInterfaceActiveAppearance, activeAppearance, setActiveAppearance)
+REVENANT_TRAIT_PROPERTY([UITraitToolbarItemPresentationSize class], UINSToolbarItemPresentationSize, toolbarItemPresentationSize,
                       setToolbarItemPresentationSize)
-CHARON_TRAIT_PROPERTY([UITraitImageDynamicRange class], UIImageDynamicRange, imageDynamicRange, setImageDynamicRange)
-CHARON_TRAIT_PROPERTY([UITraitSceneCaptureState class], UISceneCaptureState, sceneCaptureState, setSceneCaptureState)
-CHARON_TRAIT_PROPERTY([UITraitListEnvironment class], UIListEnvironment, listEnvironment, setListEnvironment)
-CHARON_TRAIT_PROPERTY([UITraitTabAccessoryEnvironment class], UITabAccessoryEnvironment, tabAccessoryEnvironment, setTabAccessoryEnvironment)
-CHARON_TRAIT_PROPERTY([UITraitSplitViewControllerLayoutEnvironment class], UISplitViewControllerLayoutEnvironment,
+REVENANT_TRAIT_PROPERTY([UITraitImageDynamicRange class], UIImageDynamicRange, imageDynamicRange, setImageDynamicRange)
+REVENANT_TRAIT_PROPERTY([UITraitSceneCaptureState class], UISceneCaptureState, sceneCaptureState, setSceneCaptureState)
+REVENANT_TRAIT_PROPERTY([UITraitListEnvironment class], UIListEnvironment, listEnvironment, setListEnvironment)
+REVENANT_TRAIT_PROPERTY([UITraitTabAccessoryEnvironment class], UITabAccessoryEnvironment, tabAccessoryEnvironment, setTabAccessoryEnvironment)
+REVENANT_TRAIT_PROPERTY([UITraitSplitViewControllerLayoutEnvironment class], UISplitViewControllerLayoutEnvironment,
                       splitViewControllerLayoutEnvironment, setSplitViewControllerLayoutEnvironment)
 
 - (CGFloat)displayScale
@@ -243,72 +243,72 @@ CHARON_TRAIT_PROPERTY([UITraitSplitViewControllerLayoutEnvironment class], UISpl
 
 @end
 
-@implementation UITraitCollection (CharonTraits)
+@implementation UITraitCollection (RevenantTraits)
 
 + (UITraitCollection *)traitCollectionWithTraits:(UITraitMutations NS_NOESCAPE)mutations
 {
-    CharonTraitMutations *mutable = [[CharonTraitMutations alloc] initWithCollection:nil];
+    RevenantTraitMutations *mutable = [[RevenantTraitMutations alloc] initWithCollection:nil];
     if (mutations)
         mutations(mutable);
-    return [mutable charon_collection];
+    return [mutable revenant_collection];
 }
 
 - (UITraitCollection *)traitCollectionByModifyingTraits:(UITraitMutations NS_NOESCAPE)mutations
 {
-    CharonTraitMutations *mutable = [[CharonTraitMutations alloc] initWithCollection:self];
+    RevenantTraitMutations *mutable = [[RevenantTraitMutations alloc] initWithCollection:self];
     if (mutations)
         mutations(mutable);
-    return [mutable charon_collection];
+    return [mutable revenant_collection];
 }
 
 + (UITraitCollection *)traitCollectionWithCGFloatValue:(CGFloat)value forTrait:(UICGFloatTrait)trait
 {
-    return charon_trait_collection_with([[self alloc] init], charon_definition_for(trait, CharonTraitValueCGFloat), @(value));
+    return revenant_trait_collection_with([[self alloc] init], revenant_definition_for(trait, RevenantTraitValueCGFloat), @(value));
 }
 
 - (UITraitCollection *)traitCollectionByReplacingCGFloatValue:(CGFloat)value forTrait:(UICGFloatTrait)trait
 {
-    return charon_trait_collection_with(self, charon_definition_for(trait, CharonTraitValueCGFloat), @(value));
+    return revenant_trait_collection_with(self, revenant_definition_for(trait, RevenantTraitValueCGFloat), @(value));
 }
 
 - (CGFloat)valueForCGFloatTrait:(UICGFloatTrait)trait
 {
-    const CharonTraitDefinition *definition = charon_definition_for(trait, CharonTraitValueCGFloat);
-    id value = charon_trait_value(self, definition);
+    const RevenantTraitDefinition *definition = revenant_definition_for(trait, RevenantTraitValueCGFloat);
+    id value = revenant_trait_value(self, definition);
     return value ? (CGFloat)[value doubleValue] : (CGFloat)[definition->defaultValue doubleValue];
 }
 
 + (UITraitCollection *)traitCollectionWithNSIntegerValue:(NSInteger)value forTrait:(UINSIntegerTrait)trait
 {
-    return charon_trait_collection_with([[self alloc] init], charon_definition_for(trait, CharonTraitValueNSInteger), @(value));
+    return revenant_trait_collection_with([[self alloc] init], revenant_definition_for(trait, RevenantTraitValueNSInteger), @(value));
 }
 
 - (UITraitCollection *)traitCollectionByReplacingNSIntegerValue:(NSInteger)value forTrait:(UINSIntegerTrait)trait
 {
-    return charon_trait_collection_with(self, charon_definition_for(trait, CharonTraitValueNSInteger), @(value));
+    return revenant_trait_collection_with(self, revenant_definition_for(trait, RevenantTraitValueNSInteger), @(value));
 }
 
 - (NSInteger)valueForNSIntegerTrait:(UINSIntegerTrait)trait
 {
-    const CharonTraitDefinition *definition = charon_definition_for(trait, CharonTraitValueNSInteger);
-    id value = charon_trait_value(self, definition);
+    const RevenantTraitDefinition *definition = revenant_definition_for(trait, RevenantTraitValueNSInteger);
+    id value = revenant_trait_value(self, definition);
     return value ? [value integerValue] : [definition->defaultValue integerValue];
 }
 
 + (UITraitCollection *)traitCollectionWithObject:(id<NSObject>)object forTrait:(UIObjectTrait)trait
 {
-    return charon_trait_collection_with([[self alloc] init], charon_definition_for(trait, CharonTraitValueObject), object);
+    return revenant_trait_collection_with([[self alloc] init], revenant_definition_for(trait, RevenantTraitValueObject), object);
 }
 
 - (UITraitCollection *)traitCollectionByReplacingObject:(id<NSObject>)object forTrait:(UIObjectTrait)trait
 {
-    return charon_trait_collection_with(self, charon_definition_for(trait, CharonTraitValueObject), object);
+    return revenant_trait_collection_with(self, revenant_definition_for(trait, RevenantTraitValueObject), object);
 }
 
 - (id)objectForTrait:(UIObjectTrait)trait
 {
-    const CharonTraitDefinition *definition = charon_definition_for(trait, CharonTraitValueObject);
-    id value = charon_trait_value(self, definition);
+    const RevenantTraitDefinition *definition = revenant_definition_for(trait, RevenantTraitValueObject);
+    id value = revenant_trait_value(self, definition);
     return value ? value : definition->defaultValue;
 }
 
@@ -354,18 +354,18 @@ CHARON_TRAIT_PROPERTY([UITraitSplitViewControllerLayoutEnvironment class], UISpl
 
 - (BOOL)resolvesNaturalAlignmentWithBaseWritingDirection
 {
-    const CharonTraitDefinition *definition = charon_trait_definition([UITraitResolvesNaturalAlignmentWithBaseWritingDirection class]);
-    id value = charon_trait_value(self, definition);
+    const RevenantTraitDefinition *definition = revenant_trait_definition([UITraitResolvesNaturalAlignmentWithBaseWritingDirection class]);
+    id value = revenant_trait_value(self, definition);
     return value ? [value boolValue] : YES;
 }
 
 - (NSSet<UITrait> *)changedTraitsFromTraitCollection:(UITraitCollection *)traitCollection
 {
     NSMutableSet *changed = [NSMutableSet set];
-    for (Class trait in charon_trait_classes()) {
-        const CharonTraitDefinition *definition = charon_trait_definition(trait);
-        id mine = charon_trait_value(self, definition);
-        id theirs = traitCollection ? charon_trait_value(traitCollection, definition) : nil;
+    for (Class trait in revenant_trait_classes()) {
+        const RevenantTraitDefinition *definition = revenant_trait_definition(trait);
+        id mine = revenant_trait_value(self, definition);
+        id theirs = traitCollection ? revenant_trait_value(traitCollection, definition) : nil;
         if (mine == nil && theirs == nil)
             continue;
         if (!mine || !theirs || ![mine isEqual:theirs])

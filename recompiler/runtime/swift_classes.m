@@ -56,7 +56,7 @@ static int xl_shadow_logging = -1;
 int xl_shadow_log_enabled(void)
 {
     if (xl_shadow_logging < 0)
-        xl_shadow_logging = access("/private/var/charon/xl-shadow-log", F_OK) == 0;
+        xl_shadow_logging = access("/private/var/revenant/xl-shadow-log", F_OK) == 0;
     return xl_shadow_logging;
 }
 
@@ -64,7 +64,7 @@ void xl_shadow_note(const char *format, ...)
 {
     if (!xl_shadow_log_enabled())
         return;
-    FILE *log = fopen("/private/var/charon/xlate-shadow.log", "a");
+    FILE *log = fopen("/private/var/revenant/xlate-shadow.log", "a");
     if (!log)
         return;
     va_list arguments;

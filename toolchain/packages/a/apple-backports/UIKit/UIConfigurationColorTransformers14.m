@@ -1,6 +1,6 @@
 #import <UIKit/UIKit.h>
 
-static UIColor *CharonGrayscaleColor(UIColor *color)
+static UIColor *RevenantGrayscaleColor(UIColor *color)
 {
     CGColorRef base = color.CGColor;
     if (!base)
@@ -20,7 +20,7 @@ static UIColor *CharonGrayscaleColor(UIColor *color)
 }
 
 const UIConfigurationColorTransformer UIConfigurationColorTransformerGrayscale = ^UIColor *(UIColor *color) {
-    return CharonGrayscaleColor(color);
+    return RevenantGrayscaleColor(color);
 };
 
 const UIConfigurationColorTransformer UIConfigurationColorTransformerPreferredTint = ^UIColor *(UIColor *color) {

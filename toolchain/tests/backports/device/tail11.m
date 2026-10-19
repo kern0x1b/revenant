@@ -90,21 +90,21 @@ static void failure_key(void)
     Dl_info info;
     void *address = dlsym(RTLD_DEFAULT, "NSLocalizedFailureErrorKey");
     CHECK(address && dladdr(address, &info) && [@(info.dli_fname).lastPathComponent isEqualToString:@"libFoundationBackports.dylib"], "the failure key comes from the backports");
-    NSError *error = [NSError errorWithDomain:@"charon" code:1 userInfo:@{NSLocalizedFailureErrorKey: @"The file could not be saved.", NSLocalizedFailureReasonErrorKey: @"The disk is full."}];
+    NSError *error = [NSError errorWithDomain:@"revenant" code:1 userInfo:@{NSLocalizedFailureErrorKey: @"The file could not be saved.", NSLocalizedFailureReasonErrorKey: @"The disk is full."}];
     CHECK_EQUAL(error.userInfo[NSLocalizedFailureErrorKey], @"The file could not be saved.", "an error keeps the failure in its user info");
     CHECK_EQUAL(error.localizedDescription, @"The file could not be saved. The disk is full.", "the description is the failure and the reason");
-    CHECK_EQUAL([NSError errorWithDomain:@"charon" code:1 userInfo:@{NSLocalizedFailureErrorKey: @"Only the failure."}].localizedDescription, @"Only the failure.", "the failure alone is the description when there is no reason");
+    CHECK_EQUAL([NSError errorWithDomain:@"revenant" code:1 userInfo:@{NSLocalizedFailureErrorKey: @"Only the failure."}].localizedDescription, @"Only the failure.", "the failure alone is the description when there is no reason");
     NSError *missing = [NSError errorWithDomain:NSCocoaErrorDomain code:NSFileNoSuchFileError userInfo:@{NSLocalizedFailureErrorKey: @"Only the failure."}];
     NSString *generated = missing.localizedFailureReason;
     CHECK_EQUAL(missing.localizedDescription, generated.length ? [@"Only the failure. " stringByAppendingString:generated] : @"Only the failure.", "the failure takes the reason the release generates for the domain and code, when it generates one");
     printf("note NSCocoaErrorDomain 4: the release's reason is %s; with a failure the description reads: %s; without one: %s\n", generated ? generated.UTF8String : "nil",
            missing.localizedDescription.UTF8String, [NSError errorWithDomain:NSCocoaErrorDomain code:NSFileNoSuchFileError userInfo:nil].localizedDescription.UTF8String);
-    NSError *described = [NSError errorWithDomain:@"charon" code:1 userInfo:@{NSLocalizedDescriptionKey: @"The description.", NSLocalizedFailureErrorKey: @"Only the failure.", NSLocalizedFailureReasonErrorKey: @"The disk is full."}];
+    NSError *described = [NSError errorWithDomain:@"revenant" code:1 userInfo:@{NSLocalizedDescriptionKey: @"The description.", NSLocalizedFailureErrorKey: @"Only the failure.", NSLocalizedFailureReasonErrorKey: @"The disk is full."}];
     CHECK_EQUAL(described.localizedDescription, @"The description.", "the description key comes before the failure");
     CFStringRef keys[] = {(__bridge CFStringRef)NSLocalizedFailureErrorKey, (__bridge CFStringRef)NSLocalizedFailureReasonErrorKey};
     CFTypeRef values[] = {CFSTR("The file could not be saved."), CFSTR("The disk is full.")};
     CFDictionaryRef bridgedInfo = CFDictionaryCreate(NULL, (const void **)keys, values, 2, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
-    CFErrorRef bridged = CFErrorCreate(NULL, CFSTR("charon"), 1, bridgedInfo);
+    CFErrorRef bridged = CFErrorCreate(NULL, CFSTR("revenant"), 1, bridgedInfo);
     CFRelease(bridgedInfo);
     CHECK_EQUAL(((__bridge NSError *)bridged).localizedDescription, @"The file could not be saved. The disk is full.", "an error made by CFErrorCreate describes itself the same way");
     printf("note CFErrorCreate made a %s\n", object_getClassName((__bridge id)bridged));
@@ -112,7 +112,7 @@ static void failure_key(void)
     printf("note CFErrorCopyDescription reads: %s\n", [(__bridge NSString *)copied UTF8String]);
     CFRelease(copied);
     CFRelease(bridged);
-    [NSError setUserInfoValueProviderForDomain:@"charon.provided" provider:^id(NSError *provided, NSErrorUserInfoKey key) {
+    [NSError setUserInfoValueProviderForDomain:@"revenant.provided" provider:^id(NSError *provided, NSErrorUserInfoKey key) {
         if ([key isEqualToString:NSLocalizedDescriptionKey] && provided.code == 1)
             return @"Provided description.";
         if ([key isEqualToString:NSLocalizedFailureErrorKey])
@@ -121,12 +121,12 @@ static void failure_key(void)
             return @"Provided reason.";
         return nil;
     }];
-    CHECK_EQUAL([NSError errorWithDomain:@"charon.provided" code:1 userInfo:@{NSLocalizedFailureErrorKey: @"Own failure."}].localizedDescription, @"Own failure. Provided reason.", "the failure of the user info comes before the provider's description");
-    CHECK_EQUAL([NSError errorWithDomain:@"charon.provided" code:1 userInfo:nil].localizedDescription, @"Provided description.", "the provider's description comes before its failure");
-    CHECK_EQUAL([NSError errorWithDomain:@"charon.provided" code:2 userInfo:nil].localizedDescription, @"Provided failure. Provided reason.", "the provider's failure takes the provider's reason");
-    CHECK_EQUAL([NSError errorWithDomain:@"charon.provided" code:3 userInfo:nil].localizedDescription, @"Provided failure.", "the provider's failure alone when nothing gives a reason");
-    CHECK_EQUAL([NSError errorWithDomain:@"charon.provided" code:2 userInfo:@{NSLocalizedFailureReasonErrorKey: @"Own reason."}].localizedDescription, @"Provided failure. Own reason.", "the provider's failure takes the reason of the user info");
-    [NSError setUserInfoValueProviderForDomain:@"charon.provided" provider:nil];
+    CHECK_EQUAL([NSError errorWithDomain:@"revenant.provided" code:1 userInfo:@{NSLocalizedFailureErrorKey: @"Own failure."}].localizedDescription, @"Own failure. Provided reason.", "the failure of the user info comes before the provider's description");
+    CHECK_EQUAL([NSError errorWithDomain:@"revenant.provided" code:1 userInfo:nil].localizedDescription, @"Provided description.", "the provider's description comes before its failure");
+    CHECK_EQUAL([NSError errorWithDomain:@"revenant.provided" code:2 userInfo:nil].localizedDescription, @"Provided failure. Provided reason.", "the provider's failure takes the provider's reason");
+    CHECK_EQUAL([NSError errorWithDomain:@"revenant.provided" code:3 userInfo:nil].localizedDescription, @"Provided failure.", "the provider's failure alone when nothing gives a reason");
+    CHECK_EQUAL([NSError errorWithDomain:@"revenant.provided" code:2 userInfo:@{NSLocalizedFailureReasonErrorKey: @"Own reason."}].localizedDescription, @"Provided failure. Own reason.", "the provider's failure takes the reason of the user info");
+    [NSError setUserInfoValueProviderForDomain:@"revenant.provided" provider:nil];
 }
 
 static void swipe_actions(void)
@@ -174,7 +174,7 @@ static void regular_expressions(void)
     NSRange unnamed = [match rangeWithName:@"word"];
     CHECK(unnamed.location == NSNotFound && unnamed.length == 0, "a name the pattern does not carry has no range, as on iOS 11");
     CHECK([match rangeAtIndex:1].location == 1 && [match rangeAtIndex:1].length == 2, "and the numbered group is still where it was");
-    NSString *path = [NSTemporaryDirectory() stringByAppendingPathComponent:@"charon-trash-check.txt"];
+    NSString *path = [NSTemporaryDirectory() stringByAppendingPathComponent:@"revenant-trash-check.txt"];
     [@"x" writeToFile:path atomically:YES encoding:NSUTF8StringEncoding error:NULL];
     SEL trash = NSSelectorFromString(@"trashItemAtURL:resultingItemURL:error:");
     CHECK([NSFileManager instancesRespondToSelector:trash], "the release has trashItemAtURL:resultingItemURL:error: itself");
@@ -191,7 +191,7 @@ int main(int argc, char **argv)
 {
     @autoreleasepool {
         if (argc > 1)
-            charon_log_to(@(argv[1]));
+            revenant_log_to(@(argv[1]));
         thermal_state();
         picker_presets();
         absences();
@@ -199,7 +199,7 @@ int main(int argc, char **argv)
         failure_key();
         swipe_actions();
         regular_expressions();
-        printf("%d of %d checks failed\n", charon_failures, charon_checks);
-        return charon_failures;
+        printf("%d of %d checks failed\n", revenant_failures, revenant_checks);
+        return revenant_failures;
     }
 }

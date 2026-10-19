@@ -1,14 +1,14 @@
-#import "CharonAVCaptureControls18.h"
-#import "CharonAVFoundationProtocols.h"
+#import "RevenantAVCaptureControls18.h"
+#import "RevenantAVFoundationProtocols.h"
 #import <objc/runtime.h>
 
-static void charon_controls_unsupported(NSString *selector)
+static void revenant_controls_unsupported(NSString *selector)
 {
     [NSException raise:NSObjectInaccessibleException
                 format:@"*** -[AVCaptureSession %@] Controls are not supported", selector];
 }
 
-static const char charon_mixes_with_others_key;
+static const char revenant_mixes_with_others_key;
 
 @implementation AVCaptureControl {
     BOOL _enabled;
@@ -26,7 +26,7 @@ static const char charon_mixes_with_others_key;
 
 @end
 
-@implementation AVCaptureSession (CharonCaptureControls18)
+@implementation AVCaptureSession (RevenantCaptureControls18)
 
 - (BOOL)supportsControls
 {
@@ -53,18 +53,18 @@ static const char charon_mixes_with_others_key;
 
 - (void)addControl:(AVCaptureControl *)control API_AVAILABLE(ios(18))
 {
-    charon_controls_unsupported(@"addControl:");
+    revenant_controls_unsupported(@"addControl:");
 }
 
 - (void)removeControl:(AVCaptureControl *)control API_AVAILABLE(ios(18))
 {
-    charon_controls_unsupported(@"removeControl:");
+    revenant_controls_unsupported(@"removeControl:");
 }
 
 - (void)setControlsDelegate:(id<AVCaptureSessionControlsDelegate>)controlsDelegate
                       queue:(dispatch_queue_t)controlsDelegateCallbackQueue
 {
-    charon_controls_unsupported(@"setControlsDelegate:queue:");
+    revenant_controls_unsupported(@"setControlsDelegate:queue:");
 }
 
 - (id<AVCaptureSessionControlsDelegate>)controlsDelegate
@@ -79,13 +79,13 @@ static const char charon_mixes_with_others_key;
 
 - (BOOL)configuresApplicationAudioSessionToMixWithOthers
 {
-    NSNumber *mixes = objc_getAssociatedObject(self, &charon_mixes_with_others_key);
+    NSNumber *mixes = objc_getAssociatedObject(self, &revenant_mixes_with_others_key);
     return mixes ? mixes.boolValue : NO;
 }
 
 - (void)setConfiguresApplicationAudioSessionToMixWithOthers:(BOOL)mixes
 {
-    objc_setAssociatedObject(self, &charon_mixes_with_others_key, @(mixes), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, &revenant_mixes_with_others_key, @(mixes), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
 @end

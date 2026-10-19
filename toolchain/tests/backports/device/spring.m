@@ -65,13 +65,13 @@ static void check_spring(NSDictionary *expectations)
         spring.initialVelocity = example.velocity;
         if ((double)spring.mass != example.mass || (double)spring.stiffness != example.stiffness
             || (double)spring.damping != example.damping || (double)spring.initialVelocity != example.velocity) {
-            charon_check(NO, example.name, @"the release does not keep the values the spring was given");
+            revenant_check(NO, example.name, @"the release does not keep the values the spring was given");
             continue;
         }
         double found = spring.settlingDuration, wanted = [expected doubleValue];
         BOOL same = [expected isEqual:@"never"] ? found >= (double)MAXFLOAT
                                                 : fabs(found - wanted) <= 1e-5 * MAX(1.0, fabs(wanted));
-        charon_check(same, example.name, [NSString stringWithFormat:@"%@ is not %@", number(found), expected]);
+        revenant_check(same, example.name, [NSString stringWithFormat:@"%@ is not %@", number(found), expected]);
     }
 }
 
@@ -122,7 +122,7 @@ int main(void)
         CHECK(expectations != nil, "the host's answers are readable");
         check_spring(expectations);
         check_display_link();
-        printf("%d of %d checks failed\n", charon_failures, charon_checks);
-        return charon_failures;
+        printf("%d of %d checks failed\n", revenant_failures, revenant_checks);
+        return revenant_failures;
     }
 }

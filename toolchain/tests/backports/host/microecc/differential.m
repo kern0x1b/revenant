@@ -2,11 +2,11 @@
 #import <Security/Security.h>
 #import <CommonCrypto/CommonDigest.h>
 #import "check.h"
-#import "CharonCKWebAuth.h"
+#import "RevenantCKWebAuth.h"
 
 static void check_named(BOOL passed, NSString *name, NSString *detail)
 {
-    charon_check(passed, [name UTF8String], detail);
+    revenant_check(passed, [name UTF8String], detail);
 }
 
 static SecKeyRef hostPrivate = NULL, hostPublic = NULL;
@@ -66,7 +66,7 @@ static NSData *keyPair(uint8_t *scalar, uint8_t *point)
         for (NSUInteger offset = 0; offset + 32 <= data.length; offset++) {
             uint8_t candidate[65];
             NSData *window = [data subdataWithRange:NSMakeRange(offset, 32)];
-            if (CharonCKPublicKeyES256(window.bytes, candidate) == 65 &&
+            if (RevenantCKPublicKeyES256(window.bytes, candidate) == 65 &&
                 memcmp(candidate, pointData.bytes, 65) == 0) {
                 scalarData = window;
                 printf("  its scalar is at offset %lu\n", (unsigned long)offset);
@@ -95,15 +95,15 @@ int main(int argc, char **argv)
     NSData *hostPoint = keyPair(scalar, point);
     printf("probe: the key is here\n"); fflush(stdout);
     if (!hostPoint) {
-        printf("checks=%d failures=%d\n", charon_checks, charon_failures + 1);
+        printf("checks=%d failures=%d\n", revenant_checks, revenant_failures + 1);
         return 1;
     }
     check_named(hostPoint.length == 65, @"the host's P-256 key exports a 65 byte point", nil);
     if (hostPoint.length != 65) {
-        return charon_failures == 0 ? 0 : 1;
+        return revenant_failures == 0 ? 0 : 1;
     }
     uint8_t derived[65];
-    check_named(CharonCKPublicKeyES256(scalar, derived) == 65, @"the scalar's public point is derived", nil);
+    check_named(RevenantCKPublicKeyES256(scalar, derived) == 65, @"the scalar's public point is derived", nil);
     check_named(memcmp(derived, point, 65) == 0, @"and it is the point the host published for that key", nil);
 
     SecKeyAlgorithm algorithm = kSecKeyAlgorithmECDSASignatureDigestX962SHA256;
@@ -116,7 +116,7 @@ int main(int argc, char **argv)
         CC_SHA256(message.bytes, (CC_LONG)message.length, digest);
 
         uint8_t der[72];
-        int written = CharonCKDigestSignES256(scalar, digest, der, sizeof der);
+        int written = RevenantCKDigestSignES256(scalar, digest, der, sizeof der);
         if (mutated) {
             der[5] ^= 0x01;
         }
@@ -139,7 +139,7 @@ int main(int argc, char **argv)
             hostRejected++;
         }
 
-        int verified = CharonCKDigestVerifyES256(point, 65, digest, der, (size_t)written);
+        int verified = RevenantCKDigestVerifyES256(point, 65, digest, der, (size_t)written);
         if (verified) {
             portVerified++;
         } else {
@@ -169,7 +169,7 @@ int main(int argc, char **argv)
             ((unsigned char *)broken.mutableBytes)[6] ^= 0x01;
             judged = broken;
         }
-        if (CharonCKDigestVerifyES256(point, 65, digest, judged.bytes, judged.length)) {
+        if (RevenantCKDigestVerifyES256(point, 65, digest, judged.bytes, judged.length)) {
             portAccepted++;
         } else {
             portRefusedTheir++;
@@ -185,6 +185,6 @@ int main(int argc, char **argv)
                 [NSString stringWithFormat:@"%lu accepted, %lu rejected", (unsigned long)hostAccepted, (unsigned long)hostRejected]);
     printf("port signed %lu, its own verify accepted %lu, the host accepted %lu, the host rejected %lu\n",
            (unsigned long)portSigned, (unsigned long)portVerified, (unsigned long)hostAccepted, (unsigned long)hostRejected);
-    printf("checks=%d failures=%d\n", charon_checks, charon_failures);
-    return charon_failures == 0 ? 0 : 1;
+    printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
+    return revenant_failures == 0 ? 0 : 1;
 }

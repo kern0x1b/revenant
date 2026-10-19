@@ -2,33 +2,33 @@
 #import <objc/message.h>
 
 @interface AVMetadataMachineReadableCodeObject ()
-@property (nonatomic, copy) NSString *charonStringValue;
-@property (nonatomic, copy) NSArray<NSDictionary *> *charonCorners;
+@property (nonatomic, copy) NSString *revenantStringValue;
+@property (nonatomic, copy) NSArray<NSDictionary *> *revenantCorners;
 @end
 
 @implementation AVMetadataMachineReadableCodeObject
 
-@synthesize charonStringValue = _charonStringValue;
-@synthesize charonCorners = _charonCorners;
+@synthesize revenantStringValue = _revenantStringValue;
+@synthesize revenantCorners = _revenantCorners;
 
 - (instancetype)initWithStringValue:(NSString *)stringValue corners:(NSArray<NSDictionary *> *)corners
 {
     self = ((id (*)(id, SEL))objc_msgSend)(self, sel_registerName("init"));
     if (self) {
-        _charonStringValue = [stringValue copy];
-        _charonCorners = [corners copy] ?: @[];
+        _revenantStringValue = [stringValue copy];
+        _revenantCorners = [corners copy] ?: @[];
     }
     return self;
 }
 
 - (NSString *)stringValue
 {
-    return self.charonStringValue;
+    return self.revenantStringValue;
 }
 
 - (NSArray<NSDictionary *> *)corners
 {
-    return self.charonCorners ?: @[];
+    return self.revenantCorners ?: @[];
 }
 
 @end

@@ -1,7 +1,7 @@
 #import "uirest.h"
 
-@interface UIViewController (CharonHostAppearing)
-- (void)charonHostViewIsAppearing:(BOOL)animated;
+@interface UIViewController (RevenantHostAppearing)
+- (void)revenantHostViewIsAppearing:(BOOL)animated;
 @end
 
 static NSMutableArray *events;
@@ -18,10 +18,10 @@ static NSMutableArray *events;
     [events addObject:[NSString stringWithFormat:@"%@ base will appear after super", NSStringFromClass([self class])]];
 }
 
-- (void)charonHostViewIsAppearing:(BOOL)animated
+- (void)revenantHostViewIsAppearing:(BOOL)animated
 {
     [events addObject:[NSString stringWithFormat:@"%@ is appearing", NSStringFromClass([self class])]];
-    [super charonHostViewIsAppearing:animated];
+    [super revenantHostViewIsAppearing:animated];
 }
 
 - (void)viewDidAppear:(BOOL)animated
@@ -51,7 +51,7 @@ static NSMutableArray *events;
 
 @implementation Plain
 
-- (void)charonHostViewIsAppearing:(BOOL)animated
+- (void)revenantHostViewIsAppearing:(BOOL)animated
 {
     [events addObject:@"Plain is appearing"];
 }
@@ -80,7 +80,7 @@ static NSMutableArray *events;
     [events addObject:@"Storyboardless will appear"];
 }
 
-- (void)charonHostViewIsAppearing:(BOOL)animated
+- (void)revenantHostViewIsAppearing:(BOOL)animated
 {
     [events addObject:@"Storyboardless is appearing"];
 }
@@ -94,7 +94,7 @@ static void show(UIWindow *window, UIViewController *controller)
     ur_spin(^BOOL{ return [events.lastObject hasSuffix:@"is appearing"] || [events.lastObject hasSuffix:@"did appear"]; }, 3);
 }
 
-void charon_windowed_run(UIWindow *window)
+void revenant_windowed_run(UIWindow *window)
 {
     @autoreleasepool {
         events = [NSMutableArray array];
@@ -106,13 +106,13 @@ void charon_windowed_run(UIWindow *window)
                 continue;
             [ours addObject:entry];
         }
-        charon_check([ours isEqual:expected], "viewIsAppearing comes once, after the whole of viewWillAppear", ur_norm(events));
+        revenant_check([ours isEqual:expected], "viewIsAppearing comes once, after the whole of viewWillAppear", ur_norm(events));
         show(window, [[Base alloc] init]);
-        charon_check([[events filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"SELF ENDSWITH 'is appearing'"]] count] == 1 && [events indexOfObject:@"Base is appearing"] > [events indexOfObject:@"Base base will appear after super"], "a class that overrides viewWillAppear only once is wrapped once", ur_norm(events));
+        revenant_check([[events filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"SELF ENDSWITH 'is appearing'"]] count] == 1 && [events indexOfObject:@"Base is appearing"] > [events indexOfObject:@"Base base will appear after super"], "a class that overrides viewWillAppear only once is wrapped once", ur_norm(events));
         show(window, [[Plain alloc] init]);
-        charon_check([events containsObject:@"Plain is appearing"], "a class that does not override viewWillAppear is called too", ur_norm(events));
+        revenant_check([events containsObject:@"Plain is appearing"], "a class that does not override viewWillAppear is called too", ur_norm(events));
         show(window, [[Derived alloc] init]);
-        charon_check([[events filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"SELF == 'Derived is appearing'"]] count] == 1, "and the second time it is once again", ur_norm(events));
+        revenant_check([[events filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"SELF == 'Derived is appearing'"]] count] == 1, "and the second time it is once again", ur_norm(events));
         NSMutableData *data = [NSMutableData data];
         NSKeyedArchiver *archiver = [[NSKeyedArchiver alloc] initRequiringSecureCoding:NO];
         [archiver encodeObject:[[Storyboardless alloc] init] forKey:@"c"];
@@ -122,6 +122,6 @@ void charon_windowed_run(UIWindow *window)
         Storyboardless *decoded = [unarchiver decodeObjectForKey:@"c"];
         (void)data;
         show(window, decoded ?: [[Storyboardless alloc] init]);
-        charon_check([events containsObject:@"Storyboardless is appearing"], "a controller made from a coder is called too", ur_norm(events));
+        revenant_check([events containsObject:@"Storyboardless is appearing"], "a controller made from a coder is called too", ur_norm(events));
     }
 }

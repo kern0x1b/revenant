@@ -12,7 +12,7 @@
 #include <filesystem>
 #include <optional>
 
-namespace shade::runtime_detail {
+namespace emulator::runtime_detail {
 
 struct JitCodeCacheBudget {
     std::size_t total_bytes { };

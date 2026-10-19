@@ -13,7 +13,7 @@
 #include <cstddef>
 #include <cstdint>
 
-namespace shade::darwin::kernel_control {
+namespace emulator::darwin::kernel_control {
 
 inline constexpr std::uint32_t protocol_family_system = 32;
 inline constexpr std::uint32_t protocol_event = 1;

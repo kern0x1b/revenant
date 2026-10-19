@@ -21,7 +21,7 @@ int main(int argc, char **argv)
 {
     @autoreleasepool {
         if (argc > 1)
-            charon_log_to(@(argv[1]));
+            revenant_log_to(@(argv[1]));
 
         NSData *data = [NSData dataWithBytesNoCopy:(void *)contacts_expectations length:strlen(contacts_expectations) freeWhenDone:NO];
         NSError *error = nil;
@@ -43,6 +43,6 @@ int main(int argc, char **argv)
             CHECK_EQUAL(got, want, key.UTF8String);
         }
     }
-    printf("checks=%d failures=%d\n", charon_checks, charon_failures);
-    return charon_failures;
+    printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
+    return revenant_failures;
 }

@@ -1,12 +1,12 @@
 #import <IntentsUI/IntentsUI.h>
 #import <UIKit/UIKit.h>
-#import "CharonIntentsUIImage.h"
+#import "RevenantIntentsUIImage.h"
 
-@implementation INImage (CharonIntentsUI110)
+@implementation INImage (RevenantIntentsUI110)
 
 - (void)fetchUIImageWithCompletion:(void (^)(UIImage *image))completion
 {
-    NSData *bytes = [self charon_imageData];
+    NSData *bytes = [self revenant_imageData];
     if (bytes) {
         completion([UIImage imageWithData:bytes]);
         return;

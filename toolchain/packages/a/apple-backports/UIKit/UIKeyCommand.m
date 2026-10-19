@@ -1,4 +1,4 @@
-#import "CharonMenus.h"
+#import "RevenantMenus.h"
 #import <objc/runtime.h>
 
 #pragma clang diagnostic ignored "-Wprotocol"
@@ -12,7 +12,7 @@ NSString *const UIKeyInputLeftArrow = @"UIKeyInputLeftArrow";
 NSString *const UIKeyInputRightArrow = @"UIKeyInputRightArrow";
 NSString *const UIKeyInputEscape = @"UIKeyInputEscape";
 
-static NSString *charon_modifier_text(NSInteger flags)
+static NSString *revenant_modifier_text(NSInteger flags)
 {
     static const struct {
         NSInteger flag;
@@ -42,7 +42,7 @@ static NSString *charon_modifier_text(NSInteger flags)
 
 - (instancetype)init
 {
-    return [self initCharonWithTitle:@"" image:nil action:sel_registerName("_nop") propertyList:nil alternates:nil];
+    return [self initRevenantWithTitle:@"" image:nil action:sel_registerName("_nop") propertyList:nil alternates:nil];
 }
 
 - (instancetype)initWithCoder:(NSCoder *)coder
@@ -70,7 +70,7 @@ static NSString *charon_modifier_text(NSInteger flags)
 + (instancetype)commandWithTitle:(NSString *)title image:(UIImage *)image action:(SEL)action input:(NSString *)input modifierFlags:(UIKeyModifierFlags)modifierFlags propertyList:(id)propertyList
                       alternates:(NSArray<UICommandAlternate *> *)alternates
 {
-    UIKeyCommand *command = [[self alloc] initCharonWithTitle:title image:image action:action propertyList:propertyList alternates:alternates];
+    UIKeyCommand *command = [[self alloc] initRevenantWithTitle:title image:image action:action propertyList:propertyList alternates:alternates];
     command->_input = [input copy];
     command->_modifierFlags = modifierFlags;
     return command;
@@ -131,7 +131,7 @@ static NSString *charon_modifier_text(NSInteger flags)
         [text appendFormat:@"; action: %@", NSStringFromSelector(self.action)];
     [text appendFormat:@"; input: %@", _input ? _input : @"<none>"];
     if (_modifierFlags)
-        [text appendFormat:@"; modifierFlags: %@", charon_modifier_text(_modifierFlags)];
+        [text appendFormat:@"; modifierFlags: %@", revenant_modifier_text(_modifierFlags)];
     [text appendString:@">"];
     return text;
 }

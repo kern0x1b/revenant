@@ -18,7 +18,7 @@
 
 #include "mach/xnu_mig_adapter.hpp"
 
-namespace shade::xnu::mig::processor_set {
+namespace emulator::xnu::mig::processor_set {
 
 inline constexpr std::string_view subsystem_name{"processor_set"};
 inline constexpr std::uint32_t subsystem_base = 4000U;

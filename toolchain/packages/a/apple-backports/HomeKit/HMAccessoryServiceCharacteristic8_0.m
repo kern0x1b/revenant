@@ -1,78 +1,78 @@
-#import "CharonHomeKitInternal.h"
+#import "RevenantHomeKitInternal.h"
 
 #pragma mark - HMAccessory
 
 @implementation HMAccessory
-@synthesize charon_identifier = _charon_identifier, charon_homeIdentifier = _charon_homeIdentifier, charon_delegate = _charon_delegate;
+@synthesize revenant_identifier = _revenant_identifier, revenant_homeIdentifier = _revenant_homeIdentifier, revenant_delegate = _revenant_delegate;
 
 - (instancetype)init
 {
     self = [super init];
     if (self) {
-        _charon_identifier = [CharonHomeKitNewIdentifier() copy];
-        CharonHomeKitRecord(@"accessories", _charon_identifier);
+        _revenant_identifier = [RevenantHomeKitNewIdentifier() copy];
+        RevenantHomeKitRecord(@"accessories", _revenant_identifier);
     }
     return self;
 }
 
 - (NSString *)identifier
 {
-    return _charon_identifier;
+    return _revenant_identifier;
 }
 
 - (NSString *)uniqueIdentifier
 {
-    return CharonHomeKitStringField(CharonHomeKitRecord(@"accessories", _charon_identifier), @"uniqueIdentifier", _charon_identifier);
+    return RevenantHomeKitStringField(RevenantHomeKitRecord(@"accessories", _revenant_identifier), @"uniqueIdentifier", _revenant_identifier);
 }
 
 - (NSString *)name
 {
-    return CharonHomeKitStringField(CharonHomeKitRecord(@"accessories", _charon_identifier), @"name", @"");
+    return RevenantHomeKitStringField(RevenantHomeKitRecord(@"accessories", _revenant_identifier), @"name", @"");
 }
 
 - (NSString *)category
 {
-    return [CharonHomeKitRecord(@"accessories", _charon_identifier)[@"category"] copy];
+    return [RevenantHomeKitRecord(@"accessories", _revenant_identifier)[@"category"] copy];
 }
 
 - (NSString *)room
 {
-    return [CharonHomeKitRecord(@"accessories", _charon_identifier)[@"room"] copy];
+    return [RevenantHomeKitRecord(@"accessories", _revenant_identifier)[@"room"] copy];
 }
 
 - (BOOL)bridged
 {
-    return CharonHomeKitBoolField(CharonHomeKitRecord(@"accessories", _charon_identifier), @"bridged", NO);
+    return RevenantHomeKitBoolField(RevenantHomeKitRecord(@"accessories", _revenant_identifier), @"bridged", NO);
 }
 
 - (BOOL)blocked
 {
-    return CharonHomeKitBoolField(CharonHomeKitRecord(@"accessories", _charon_identifier), @"blocked", NO);
+    return RevenantHomeKitBoolField(RevenantHomeKitRecord(@"accessories", _revenant_identifier), @"blocked", NO);
 }
 
 - (id<HMAccessoryDelegate>)delegate
 {
-    return _charon_delegate;
+    return _revenant_delegate;
 }
 
 - (void)setDelegate:(id<HMAccessoryDelegate>)delegate
 {
-    _charon_delegate = delegate;
+    _revenant_delegate = delegate;
 }
 
 - (NSString *)manufacturer
 {
-    return CharonHomeKitStringField(CharonHomeKitRecord(@"accessories", _charon_identifier), @"manufacturer", @"");
+    return RevenantHomeKitStringField(RevenantHomeKitRecord(@"accessories", _revenant_identifier), @"manufacturer", @"");
 }
 
 - (NSString *)model
 {
-    return CharonHomeKitStringField(CharonHomeKitRecord(@"accessories", _charon_identifier), @"model", @"");
+    return RevenantHomeKitStringField(RevenantHomeKitRecord(@"accessories", _revenant_identifier), @"model", @"");
 }
 
 - (NSString *)firmwareVersion
 {
-    return CharonHomeKitStringField(CharonHomeKitRecord(@"accessories", _charon_identifier), @"firmwareVersion", @"");
+    return RevenantHomeKitStringField(RevenantHomeKitRecord(@"accessories", _revenant_identifier), @"firmwareVersion", @"");
 }
 
 - (BOOL)supportsIdentify
@@ -88,19 +88,19 @@
 
 - (BOOL)reachable
 {
-    return CharonHomeKitBoolField(CharonHomeKitRecord(@"accessories", _charon_identifier), @"reachable", NO);
+    return RevenantHomeKitBoolField(RevenantHomeKitRecord(@"accessories", _revenant_identifier), @"reachable", NO);
 }
 
 - (NSArray<NSString *> *)identifiersForBridgedAccessories
 {
-    return CharonHomeKitStringListField(CharonHomeKitRecord(@"accessories", _charon_identifier), @"bridgedIdentifiers");
+    return RevenantHomeKitStringListField(RevenantHomeKitRecord(@"accessories", _revenant_identifier), @"bridgedIdentifiers");
 }
 
 - (NSArray<NSString *> *)uniqueIdentifiersForBridgedAccessories
 {
     NSMutableArray *found = [NSMutableArray array];
     for (NSString *identifier in self.identifiersForBridgedAccessories) {
-        HMAccessory *bridged = CharonHomeKitAccessory(identifier, _charon_homeIdentifier);
+        HMAccessory *bridged = RevenantHomeKitAccessory(identifier, _revenant_homeIdentifier);
         if (bridged)
             [found addObject:bridged.uniqueIdentifier];
     }
@@ -111,7 +111,7 @@
 {
     NSMutableArray *found = [NSMutableArray array];
     for (NSString *identifier in self.identifiersForBridgedAccessories) {
-        HMAccessory *bridged = CharonHomeKitAccessory(identifier, _charon_homeIdentifier);
+        HMAccessory *bridged = RevenantHomeKitAccessory(identifier, _revenant_homeIdentifier);
         if (bridged)
             [found addObject:bridged];
     }
@@ -121,79 +121,79 @@
 - (NSArray<HMService *> *)services
 {
     NSMutableArray *found = [NSMutableArray array];
-    for (NSString *identifier in CharonHomeKitStringListField(CharonHomeKitRecord(@"accessories", _charon_identifier), @"services"))
-        [found addObject:CharonHomeKitService(identifier, _charon_identifier)];
+    for (NSString *identifier in RevenantHomeKitStringListField(RevenantHomeKitRecord(@"accessories", _revenant_identifier), @"services"))
+        [found addObject:RevenantHomeKitService(identifier, _revenant_identifier)];
     return found;
 }
 
 - (void)identifyWithCompletionHandler:(void (^)(NSError * _Nullable error))completionHandler
 {
-    CharonHomeKitFinishError(completionHandler, CharonHomeKitErrorForAccessory(HMErrorCodeAccessoryNotReachable, self,
+    RevenantHomeKitFinishError(completionHandler, RevenantHomeKitErrorForAccessory(HMErrorCodeAccessoryNotReachable, self,
                                                                                 @"identify needs a session with the accessory, and this port has none"));
 }
 
 - (void)updateName:(NSString *)name completionHandler:(void (^)(NSError * _Nullable error))completionHandler
 {
     if (!name) {
-        CharonHomeKitFinishError(completionHandler, CharonHomeKitErrorForAccessory(HMErrorCodeNilParameter, self, @"an accessory needs a name"));
+        RevenantHomeKitFinishError(completionHandler, RevenantHomeKitErrorForAccessory(HMErrorCodeNilParameter, self, @"an accessory needs a name"));
         return;
     }
-    CharonHomeKitSetField(@"accessories", _charon_identifier, @"name", name);
+    RevenantHomeKitSetField(@"accessories", _revenant_identifier, @"name", name);
     HMAccessory *accessory = self;
-    CharonHomeKitTell(_charon_delegate, @selector(accessoryDidUpdateName:), ^(id target) {
+    RevenantHomeKitTell(_revenant_delegate, @selector(accessoryDidUpdateName:), ^(id target) {
         [(id<HMAccessoryDelegate>)target accessoryDidUpdateName:accessory];
     });
-    CharonHomeKitFinishError(completionHandler, nil);
+    RevenantHomeKitFinishError(completionHandler, nil);
 }
 
-- (void)charon_setHomeIdentifier:(NSString *)homeIdentifier
+- (void)revenant_setHomeIdentifier:(NSString *)homeIdentifier
 {
-    self.charon_homeIdentifier = homeIdentifier;
+    self.revenant_homeIdentifier = homeIdentifier;
 }
 
-- (void)charon_setRoom:(NSString *)roomIdentifier
+- (void)revenant_setRoom:(NSString *)roomIdentifier
 {
-    CharonHomeKitSetField(@"accessories", _charon_identifier, @"room", roomIdentifier);
+    RevenantHomeKitSetField(@"accessories", _revenant_identifier, @"room", roomIdentifier);
 }
 
-- (void)charon_setServiceIdentifiers:(NSArray<NSString *> *)identifiers
+- (void)revenant_setServiceIdentifiers:(NSArray<NSString *> *)identifiers
 {
-    CharonHomeKitSetField(@"accessories", _charon_identifier, @"services", identifiers);
+    RevenantHomeKitSetField(@"accessories", _revenant_identifier, @"services", identifiers);
 }
 
 @end
 
-HMAccessory *CharonHomeKitAccessory(NSString *identifier, NSString *homeIdentifier)
+HMAccessory *RevenantHomeKitAccessory(NSString *identifier, NSString *homeIdentifier)
 {
     HMAccessory *accessory = [[HMAccessory alloc] init];
-    accessory.charon_identifier = identifier;
-    accessory.charon_homeIdentifier = homeIdentifier;
+    accessory.revenant_identifier = identifier;
+    accessory.revenant_homeIdentifier = homeIdentifier;
     return accessory;
 }
 
 #pragma mark - HMService
 
 @implementation HMService
-@synthesize charon_identifier = _charon_identifier, charon_accessoryIdentifier = _charon_accessoryIdentifier;
+@synthesize revenant_identifier = _revenant_identifier, revenant_accessoryIdentifier = _revenant_accessoryIdentifier;
 
 - (instancetype)init
 {
     self = [super init];
     if (self) {
-        _charon_identifier = [CharonHomeKitNewIdentifier() copy];
-        CharonHomeKitRecord(@"services", _charon_identifier);
+        _revenant_identifier = [RevenantHomeKitNewIdentifier() copy];
+        RevenantHomeKitRecord(@"services", _revenant_identifier);
     }
     return self;
 }
 
 - (NSString *)uniqueIdentifier
 {
-    return _charon_identifier;
+    return _revenant_identifier;
 }
 
 - (NSString *)name
 {
-    return CharonHomeKitStringField(CharonHomeKitRecord(@"services", _charon_identifier), @"name", @"");
+    return RevenantHomeKitStringField(RevenantHomeKitRecord(@"services", _revenant_identifier), @"name", @"");
 }
 
 - (NSString *)localizedDescription
@@ -203,273 +203,273 @@ HMAccessory *CharonHomeKitAccessory(NSString *identifier, NSString *homeIdentifi
 
 - (NSString *)serviceType
 {
-    return CharonHomeKitStringField(CharonHomeKitRecord(@"services", _charon_identifier), @"serviceType", HMServiceTypeAccessoryInformation);
+    return RevenantHomeKitStringField(RevenantHomeKitRecord(@"services", _revenant_identifier), @"serviceType", HMServiceTypeAccessoryInformation);
 }
 
 - (NSString *)associatedServiceType
 {
-    return [CharonHomeKitRecord(@"services", _charon_identifier)[@"associatedServiceType"] copy];
+    return [RevenantHomeKitRecord(@"services", _revenant_identifier)[@"associatedServiceType"] copy];
 }
 
 - (HMAccessory *)accessory
 {
-    return _charon_accessoryIdentifier ? CharonHomeKitAccessory(_charon_accessoryIdentifier, nil) : nil;
+    return _revenant_accessoryIdentifier ? RevenantHomeKitAccessory(_revenant_accessoryIdentifier, nil) : nil;
 }
 
 - (BOOL)userInteractive
 {
-    return CharonHomeKitBoolField(CharonHomeKitRecord(@"services", _charon_identifier), @"userInteractive", YES);
+    return RevenantHomeKitBoolField(RevenantHomeKitRecord(@"services", _revenant_identifier), @"userInteractive", YES);
 }
 
 - (HMService *)primaryService
 {
-    NSString *identifier = CharonHomeKitRecord(@"services", _charon_identifier)[@"primaryService"];
-    return identifier ? CharonHomeKitService(identifier, _charon_accessoryIdentifier) : nil;
+    NSString *identifier = RevenantHomeKitRecord(@"services", _revenant_identifier)[@"primaryService"];
+    return identifier ? RevenantHomeKitService(identifier, _revenant_accessoryIdentifier) : nil;
 }
 
 - (NSArray<HMService *> *)linkedServices
 {
     NSMutableArray *found = [NSMutableArray array];
-    for (NSString *identifier in CharonHomeKitStringListField(CharonHomeKitRecord(@"services", _charon_identifier), @"linkedServices"))
-        [found addObject:CharonHomeKitService(identifier, _charon_accessoryIdentifier)];
+    for (NSString *identifier in RevenantHomeKitStringListField(RevenantHomeKitRecord(@"services", _revenant_identifier), @"linkedServices"))
+        [found addObject:RevenantHomeKitService(identifier, _revenant_accessoryIdentifier)];
     return found;
 }
 
 - (NSArray<HMCharacteristic *> *)characteristics
 {
     NSMutableArray *found = [NSMutableArray array];
-    for (NSString *identifier in CharonHomeKitStringListField(CharonHomeKitRecord(@"services", _charon_identifier), @"characteristics"))
-        [found addObject:CharonHomeKitCharacteristic(identifier, _charon_identifier)];
+    for (NSString *identifier in RevenantHomeKitStringListField(RevenantHomeKitRecord(@"services", _revenant_identifier), @"characteristics"))
+        [found addObject:RevenantHomeKitCharacteristic(identifier, _revenant_identifier)];
     return found;
 }
 
 - (void)updateName:(NSString *)name completionHandler:(void (^)(NSError * _Nullable error))completionHandler
 {
     if (!name) {
-        CharonHomeKitFinishError(completionHandler, CharonHomeKitError(HMErrorCodeNilParameter, @"a service needs a name"));
+        RevenantHomeKitFinishError(completionHandler, RevenantHomeKitError(HMErrorCodeNilParameter, @"a service needs a name"));
         return;
     }
-    CharonHomeKitSetField(@"services", _charon_identifier, @"name", name);
+    RevenantHomeKitSetField(@"services", _revenant_identifier, @"name", name);
     HMAccessory *accessory = self.accessory;
     HMService *service = self;
-    CharonHomeKitTell(accessory.delegate, @selector(accessory:didUpdateNameForService:), ^(id target) {
+    RevenantHomeKitTell(accessory.delegate, @selector(accessory:didUpdateNameForService:), ^(id target) {
         [(id<HMAccessoryDelegate>)target accessory:accessory didUpdateNameForService:service];
     });
-    CharonHomeKitFinishError(completionHandler, nil);
+    RevenantHomeKitFinishError(completionHandler, nil);
 }
 
 - (void)updateAssociatedServiceType:(NSString *)associatedServiceType completionHandler:(void (^)(NSError * _Nullable error))completionHandler
 {
     if (!associatedServiceType) {
-        CharonHomeKitFinishError(completionHandler, CharonHomeKitError(HMErrorCodeNilParameter, @"an associated service type is needed"));
+        RevenantHomeKitFinishError(completionHandler, RevenantHomeKitError(HMErrorCodeNilParameter, @"an associated service type is needed"));
         return;
     }
-    CharonHomeKitSetField(@"services", _charon_identifier, @"associatedServiceType", associatedServiceType);
+    RevenantHomeKitSetField(@"services", _revenant_identifier, @"associatedServiceType", associatedServiceType);
     HMAccessory *accessory = self.accessory;
     HMService *service = self;
-    CharonHomeKitTell(accessory.delegate, @selector(accessory:didUpdateAssociatedServiceTypeForService:), ^(id target) {
+    RevenantHomeKitTell(accessory.delegate, @selector(accessory:didUpdateAssociatedServiceTypeForService:), ^(id target) {
         [(id<HMAccessoryDelegate>)target accessory:accessory didUpdateAssociatedServiceTypeForService:service];
     });
-    CharonHomeKitFinishError(completionHandler, nil);
+    RevenantHomeKitFinishError(completionHandler, nil);
 }
 
-- (void)charon_setAccessoryIdentifier:(NSString *)accessoryIdentifier
+- (void)revenant_setAccessoryIdentifier:(NSString *)accessoryIdentifier
 {
-    self.charon_accessoryIdentifier = accessoryIdentifier;
+    self.revenant_accessoryIdentifier = accessoryIdentifier;
 }
 
-- (void)charon_setCharacteristicIdentifiers:(NSArray<NSString *> *)identifiers
+- (void)revenant_setCharacteristicIdentifiers:(NSArray<NSString *> *)identifiers
 {
-    CharonHomeKitSetField(@"services", _charon_identifier, @"characteristics", identifiers);
+    RevenantHomeKitSetField(@"services", _revenant_identifier, @"characteristics", identifiers);
 }
 
 @end
 
-HMService *CharonHomeKitService(NSString *identifier, NSString *accessoryIdentifier)
+HMService *RevenantHomeKitService(NSString *identifier, NSString *accessoryIdentifier)
 {
     HMService *service = [[HMService alloc] init];
-    service.charon_identifier = identifier;
-    service.charon_accessoryIdentifier = accessoryIdentifier;
+    service.revenant_identifier = identifier;
+    service.revenant_accessoryIdentifier = accessoryIdentifier;
     return service;
 }
 
 #pragma mark - HMCharacteristic
 
 @implementation HMCharacteristic
-@synthesize charon_identifier = _charon_identifier, charon_serviceIdentifier = _charon_serviceIdentifier;
+@synthesize revenant_identifier = _revenant_identifier, revenant_serviceIdentifier = _revenant_serviceIdentifier;
 
 - (instancetype)init
 {
     self = [super init];
     if (self) {
-        _charon_identifier = [CharonHomeKitNewIdentifier() copy];
-        CharonHomeKitRecord(@"characteristics", _charon_identifier);
+        _revenant_identifier = [RevenantHomeKitNewIdentifier() copy];
+        RevenantHomeKitRecord(@"characteristics", _revenant_identifier);
     }
     return self;
 }
 
 - (NSString *)uniqueIdentifier
 {
-    return _charon_identifier;
+    return _revenant_identifier;
 }
 
 - (NSString *)characteristicType
 {
-    return CharonHomeKitStringField(CharonHomeKitRecord(@"characteristics", _charon_identifier), @"type", HMCharacteristicTypeIdentifier);
+    return RevenantHomeKitStringField(RevenantHomeKitRecord(@"characteristics", _revenant_identifier), @"type", HMCharacteristicTypeIdentifier);
 }
 
 - (NSString *)localizedDescription
 {
-    return CharonHomeKitStringField(CharonHomeKitRecord(@"characteristics", _charon_identifier), @"localizedDescription", @"");
+    return RevenantHomeKitStringField(RevenantHomeKitRecord(@"characteristics", _revenant_identifier), @"localizedDescription", @"");
 }
 
 - (HMService *)service
 {
-    return _charon_serviceIdentifier ? CharonHomeKitService(_charon_serviceIdentifier, nil) : nil;
+    return _revenant_serviceIdentifier ? RevenantHomeKitService(_revenant_serviceIdentifier, nil) : nil;
 }
 
 - (id)value
 {
-    return [CharonHomeKitRecord(@"characteristics", _charon_identifier)[@"value"] copy];
+    return [RevenantHomeKitRecord(@"characteristics", _revenant_identifier)[@"value"] copy];
 }
 
 - (NSArray<NSString *> *)properties
 {
-    return CharonHomeKitStringListField(CharonHomeKitRecord(@"characteristics", _charon_identifier), @"properties");
+    return RevenantHomeKitStringListField(RevenantHomeKitRecord(@"characteristics", _revenant_identifier), @"properties");
 }
 
 - (HMCharacteristicMetadata *)metadata
 {
-    return CharonHomeKitCharacteristicMetadataForRecord(CharonHomeKitRecord(@"characteristics", _charon_identifier));
+    return RevenantHomeKitCharacteristicMetadataForRecord(RevenantHomeKitRecord(@"characteristics", _revenant_identifier));
 }
 
 - (BOOL)notificationEnabled
 {
-    return CharonHomeKitBoolField(CharonHomeKitRecord(@"characteristics", _charon_identifier), @"notificationEnabled", NO);
+    return RevenantHomeKitBoolField(RevenantHomeKitRecord(@"characteristics", _revenant_identifier), @"notificationEnabled", NO);
 }
 
 - (void)readValueWithCompletionHandler:(void (^)(NSError * _Nullable error))completionHandler
 {
-    CharonHomeKitFinishError(completionHandler, CharonHomeKitErrorForAccessory(HMErrorCodeAccessoryNotReachable, self.service.accessory,
+    RevenantHomeKitFinishError(completionHandler, RevenantHomeKitErrorForAccessory(HMErrorCodeAccessoryNotReachable, self.service.accessory,
                                                                                 @"reading a value needs a session with the accessory, and this port has none"));
 }
 
 - (void)writeValue:(id)value completionHandler:(void (^)(NSError * _Nullable error))completionHandler
 {
     if (![(NSArray *)self.properties containsObject:HMCharacteristicPropertyWritable]) {
-        CharonHomeKitFinishError(completionHandler, CharonHomeKitErrorForAccessory(HMErrorCodeReadOnlyCharacteristic, self.service.accessory,
+        RevenantHomeKitFinishError(completionHandler, RevenantHomeKitErrorForAccessory(HMErrorCodeReadOnlyCharacteristic, self.service.accessory,
                                                                                      @"the characteristic does not take writes"));
         return;
     }
-    CharonHomeKitFinishError(completionHandler, CharonHomeKitErrorForAccessory(HMErrorCodeAccessoryNotReachable, self.service.accessory,
+    RevenantHomeKitFinishError(completionHandler, RevenantHomeKitErrorForAccessory(HMErrorCodeAccessoryNotReachable, self.service.accessory,
                                                                                 @"writing a value needs a session with the accessory, and this port has none"));
 }
 
 - (void)enableNotification:(BOOL)enable completionHandler:(void (^)(NSError * _Nullable error))completionHandler
 {
     if (![(NSArray *)self.properties containsObject:HMCharacteristicPropertySupportsEventNotification]) {
-        CharonHomeKitFinishError(completionHandler, CharonHomeKitErrorForAccessory(HMErrorCodeNotificationNotSupported, self.service.accessory,
+        RevenantHomeKitFinishError(completionHandler, RevenantHomeKitErrorForAccessory(HMErrorCodeNotificationNotSupported, self.service.accessory,
                                                                                      @"the characteristic does not notify"));
         return;
     }
-    CharonHomeKitFinishError(completionHandler, CharonHomeKitErrorForAccessory(HMErrorCodeAccessoryNotReachable, self.service.accessory,
+    RevenantHomeKitFinishError(completionHandler, RevenantHomeKitErrorForAccessory(HMErrorCodeAccessoryNotReachable, self.service.accessory,
                                                                                 @"subscribing needs a session with the accessory, and this port has none"));
 }
 
 - (void)updateAuthorizationData:(NSData *)authorizationData completionHandler:(void (^)(NSError * _Nullable error))completionHandler
 {
     if (![(NSArray *)self.properties containsObject:HMCharacteristicPropertyRequiresAuthorizationData]) {
-        CharonHomeKitFinishError(completionHandler, CharonHomeKitError(HMErrorCodeOperationNotSupported,
+        RevenantHomeKitFinishError(completionHandler, RevenantHomeKitError(HMErrorCodeOperationNotSupported,
                                                                         @"the characteristic does not take authorization data"));
         return;
     }
-    CharonHomeKitFinishError(completionHandler, CharonHomeKitErrorForAccessory(HMErrorCodeInvalidOrMissingAuthorizationData, self.service.accessory,
+    RevenantHomeKitFinishError(completionHandler, RevenantHomeKitErrorForAccessory(HMErrorCodeInvalidOrMissingAuthorizationData, self.service.accessory,
                                                                                 @"the authorization data needs a session with the accessory, and this port has none"));
 }
 
-- (void)charon_setServiceIdentifier:(NSString *)serviceIdentifier
+- (void)revenant_setServiceIdentifier:(NSString *)serviceIdentifier
 {
-    self.charon_serviceIdentifier = serviceIdentifier;
+    self.revenant_serviceIdentifier = serviceIdentifier;
 }
 
-- (void)charon_setValue:(id)value
+- (void)revenant_setValue:(id)value
 {
-    CharonHomeKitSetField(@"characteristics", _charon_identifier, @"value", value);
+    RevenantHomeKitSetField(@"characteristics", _revenant_identifier, @"value", value);
 }
 
-- (void)charon_setProperties:(NSArray<NSString *> *)properties
+- (void)revenant_setProperties:(NSArray<NSString *> *)properties
 {
-    CharonHomeKitSetField(@"characteristics", _charon_identifier, @"properties", properties);
+    RevenantHomeKitSetField(@"characteristics", _revenant_identifier, @"properties", properties);
 }
 
 @end
 
-HMCharacteristic *CharonHomeKitCharacteristic(NSString *identifier, NSString *serviceIdentifier)
+HMCharacteristic *RevenantHomeKitCharacteristic(NSString *identifier, NSString *serviceIdentifier)
 {
     HMCharacteristic *characteristic = [[HMCharacteristic alloc] init];
-    characteristic.charon_identifier = identifier;
-    characteristic.charon_serviceIdentifier = serviceIdentifier;
+    characteristic.revenant_identifier = identifier;
+    characteristic.revenant_serviceIdentifier = serviceIdentifier;
     return characteristic;
 }
 
 #pragma mark - HMCharacteristicMetadata
 
-HMCharacteristicMetadata *CharonHomeKitCharacteristicMetadataForRecord(NSMutableDictionary *record)
+HMCharacteristicMetadata *RevenantHomeKitCharacteristicMetadataForRecord(NSMutableDictionary *record)
 {
     HMCharacteristicMetadata *metadata = [[HMCharacteristicMetadata alloc] init];
-    metadata.charon_record = record ?: [[NSMutableDictionary alloc] init];
+    metadata.revenant_record = record ?: [[NSMutableDictionary alloc] init];
     return metadata;
 }
 
 @implementation HMCharacteristicMetadata
-@synthesize charon_record = _charon_record;
+@synthesize revenant_record = _revenant_record;
 
 - (instancetype)init
 {
     self = [super init];
     if (self)
-        _charon_record = [[NSMutableDictionary alloc] init];
+        _revenant_record = [[NSMutableDictionary alloc] init];
     return self;
 }
 
 - (NSString *)format
 {
-    return CharonHomeKitStringField(_charon_record, @"format", HMCharacteristicMetadataFormatBool);
+    return RevenantHomeKitStringField(_revenant_record, @"format", HMCharacteristicMetadataFormatBool);
 }
 
 - (NSString *)units
 {
-    return [_charon_record[@"units"] copy];
+    return [_revenant_record[@"units"] copy];
 }
 
 - (NSNumber *)minimumValue
 {
-    return [_charon_record[@"minimumValue"] copy];
+    return [_revenant_record[@"minimumValue"] copy];
 }
 
 - (NSNumber *)maximumValue
 {
-    return [_charon_record[@"maximumValue"] copy];
+    return [_revenant_record[@"maximumValue"] copy];
 }
 
 - (NSNumber *)stepValue
 {
-    return [_charon_record[@"stepValue"] copy];
+    return [_revenant_record[@"stepValue"] copy];
 }
 
 - (NSNumber *)maxLength
 {
-    return [_charon_record[@"maxLength"] copy];
+    return [_revenant_record[@"maxLength"] copy];
 }
 
 - (NSArray *)validValues
 {
-    return [_charon_record[@"validValues"] copy];
+    return [_revenant_record[@"validValues"] copy];
 }
 
 - (NSString *)manufacturerDescription
 {
-    return [_charon_record[@"manufacturerDescription"] copy];
+    return [_revenant_record[@"manufacturerDescription"] copy];
 }
 
 @end
@@ -477,32 +477,32 @@ HMCharacteristicMetadata *CharonHomeKitCharacteristicMetadataForRecord(NSMutable
 #pragma mark - HMCharacteristicWriteAction
 
 @implementation HMCharacteristicWriteAction
-@synthesize charon_characteristic = _charon_characteristic, charon_targetValue = _charon_targetValue;
+@synthesize revenant_characteristic = _revenant_characteristic, revenant_targetValue = _revenant_targetValue;
 
 - (instancetype)initWithCharacteristic:(HMCharacteristic *)characteristic targetValue:(id)targetValue
 {
     self = [super init];
     if (self) {
-        _charon_characteristic = characteristic;
-        _charon_targetValue = [targetValue copy];
+        _revenant_characteristic = characteristic;
+        _revenant_targetValue = [targetValue copy];
     }
     return self;
 }
 
 - (HMCharacteristic *)characteristic
 {
-    return _charon_characteristic;
+    return _revenant_characteristic;
 }
 
 - (id)targetValue
 {
-    return _charon_targetValue;
+    return _revenant_targetValue;
 }
 
 - (void)updateTargetValue:(id)targetValue completionHandler:(void (^)(NSError * _Nullable error))completionHandler
 {
-    _charon_targetValue = [targetValue copy];
-    CharonHomeKitFinishError(completionHandler, nil);
+    _revenant_targetValue = [targetValue copy];
+    RevenantHomeKitFinishError(completionHandler, nil);
 }
 
 @end

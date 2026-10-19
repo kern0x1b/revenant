@@ -12,30 +12,30 @@ static NSString *color(UIColor *c)
 
 static UIContextualAction *make(BOOL ours, NSInteger style, NSString *title, UIContextualActionHandler handler)
 {
-    Class class = ours ? NSClassFromString(@"CharonHostUIContextualAction") : [UIContextualAction class];
+    Class class = ours ? NSClassFromString(@"RevenantHostUIContextualAction") : [UIContextualAction class];
     return ((UIContextualAction * (*)(id, SEL, NSInteger, NSString *, UIContextualActionHandler))objc_msgSend)(class, @selector(contextualActionWithStyle:title:handler:), style, title, handler);
 }
 
 static UISwipeActionsConfiguration *configure(BOOL ours, NSArray *actions)
 {
-    Class class = ours ? NSClassFromString(@"CharonHostUISwipeActionsConfiguration") : [UISwipeActionsConfiguration class];
+    Class class = ours ? NSClassFromString(@"RevenantHostUISwipeActionsConfiguration") : [UISwipeActionsConfiguration class];
     return (UISwipeActionsConfiguration *)[class configurationWithActions:actions];
 }
 
 static UIContextualAction *fresh_action(BOOL ours)
 {
-    return [[NSClassFromString(ours ? @"CharonHostUIContextualAction" : @"UIContextualAction") alloc] init];
+    return [[NSClassFromString(ours ? @"RevenantHostUIContextualAction" : @"UIContextualAction") alloc] init];
 }
 
 static UISwipeActionsConfiguration *fresh_configuration(BOOL ours)
 {
-    return [[NSClassFromString(ours ? @"CharonHostUISwipeActionsConfiguration" : @"UISwipeActionsConfiguration") alloc] init];
+    return [[NSClassFromString(ours ? @"RevenantHostUISwipeActionsConfiguration" : @"UISwipeActionsConfiguration") alloc] init];
 }
 
 static void same(NSString *what, NSString *(^measure)(BOOL ours))
 {
     NSString *ours = measure(YES), *theirs = measure(NO);
-    charon_check([ours isEqualToString:theirs], what.UTF8String, [NSString stringWithFormat:@"ours %@, UIKit %@", ours, theirs]);
+    revenant_check([ours isEqualToString:theirs], what.UTF8String, [NSString stringWithFormat:@"ours %@, UIKit %@", ours, theirs]);
 }
 
 int main(void)
@@ -137,7 +137,7 @@ int main(void)
             return [NSString stringWithFormat:@"%d|%d|%d", [configuration respondsToSelector:@selector(copyWithZone:)], [configuration conformsToProtocol:@protocol(NSSecureCoding)],
                     [configuration respondsToSelector:NSSelectorFromString(@"setActions:")]];
         });
-        printf("%d of %d checks failed\n", charon_failures, charon_checks);
-        return charon_failures;
+        printf("%d of %d checks failed\n", revenant_failures, revenant_checks);
+        return revenant_failures;
     }
 }

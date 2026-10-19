@@ -1,6 +1,6 @@
 #import <UIKit/UIKit.h>
 
-@implementation UIView (CharonAnchorPoint16)
+@implementation UIView (RevenantAnchorPoint16)
 
 - (CGPoint)anchorPoint
 {

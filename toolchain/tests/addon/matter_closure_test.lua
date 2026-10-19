@@ -88,7 +88,7 @@ function failures(opt)
         out[#out + 1] = "emit-closure.tsv has " .. rows .. " rows for " .. input .. " generator input classes"
     end
 
-    for _, file in ipairs(os.files(path.join(objects, "CharonMatter*.m"))) do
+    for _, file in ipairs(os.files(path.join(objects, "RevenantMatter*.m"))) do
         local impl = io.readfile(file):match("@implementation%s+([%w_]+)")
         local shown = path.filename(file)
         if not impl then

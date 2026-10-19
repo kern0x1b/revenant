@@ -1,4 +1,4 @@
-#import "CharonMPSImage.h"
+#import "RevenantMPSImage.h"
 
 
 @implementation MPSImageConversion {
@@ -18,7 +18,7 @@
                   conversionInfo:(CGColorConversionInfoRef)conversionInfo
 {
     if (conversionInfo) {
-        CharonMPSRefuse(@"MPSImageConversion: a colour space conversion was asked for and this port cannot"
+        RevenantMPSRefuse(@"MPSImageConversion: a colour space conversion was asked for and this port cannot"
                         @" perform it - CoreGraphics declares no accessor that reads the source and the"
                         @" destination space back out of a CGColorConversionInfoRef, so there is nothing"
                         @" to convert between. Pass NULL, which means no colour"
@@ -49,32 +49,32 @@
              destinationImage:(MPSImage *)destinationImage
 {
     NSString *what = @"MPSImageConversion";
-    if (!CharonMPSCommandBufferPermits(commandBuffer))
+    if (!RevenantMPSCommandBufferPermits(commandBuffer))
         return;
-    CharonMPSImageLayout from = CharonMPSImageLayoutOf(sourceImage);
-    CharonMPSImageLayout to = CharonMPSImageLayoutOf(destinationImage);
-    if (!CharonMPSImageUsable(sourceImage, @"MPSImageConversion source") ||
-        !CharonMPSImageUsable(destinationImage, @"MPSImageConversion destination")) {
-        CharonMPSRefuse(@"%@: an image with no walkable shape was given, so nothing was written", what);
+    RevenantMPSImageLayout from = RevenantMPSImageLayoutOf(sourceImage);
+    RevenantMPSImageLayout to = RevenantMPSImageLayoutOf(destinationImage);
+    if (!RevenantMPSImageUsable(sourceImage, @"MPSImageConversion source") ||
+        !RevenantMPSImageUsable(destinationImage, @"MPSImageConversion destination")) {
+        RevenantMPSRefuse(@"%@: an image with no walkable shape was given, so nothing was written", what);
         return;
     }
     MTLRegion region = MTLRegionMake2D(0, 0, from.width, from.height);
     if (to.width < from.width || to.height < from.height) {
-        CharonMPSRefuse(@"%@: the destination is %lux%lu and the source %lux%lu, and a conversion does not"
+        RevenantMPSRefuse(@"%@: the destination is %lux%lu and the source %lux%lu, and a conversion does not"
                         @" enlarge or move pixels, so nothing was written", what,
                         (unsigned long)to.width, (unsigned long)to.height,
                         (unsigned long)from.width, (unsigned long)from.height);
         return;
     }
     from.count = (NSUInteger)region.size.width * (NSUInteger)region.size.height * from.channels;
-    void *source = CharonMPSImageReadRegion(sourceImage, &from, region, what);
+    void *source = RevenantMPSImageReadRegion(sourceImage, &from, region, what);
     if (!source)
         return;
     size_t bytes = (size_t)to.width * to.channels * to.height * to.elementSize;
     unsigned char *destination = bytes ? (unsigned char *)calloc(bytes, 1) : NULL;
     if (!destination) {
         free(source);
-        CharonMPSRefuse(@"%@: no memory for a %lux%lu destination, so nothing was written", what,
+        RevenantMPSRefuse(@"%@: no memory for a %lux%lu destination, so nothing was written", what,
                         (unsigned long)to.width, (unsigned long)to.height);
         return;
     }
@@ -86,10 +86,10 @@
         NSUInteger at = pixel * from.channels;
         NSUInteger into = pixel * to.channels;
         double alpha = _flattens || _multiplies || _divides
-            ? (fromAlpha != (NSUInteger)-1 ? CharonMPSImageLoad(source, &from, at + fromAlpha) : 1.0)
+            ? (fromAlpha != (NSUInteger)-1 ? RevenantMPSImageLoad(source, &from, at + fromAlpha) : 1.0)
             : 1.0;
         for (NSUInteger channel = 0; channel < to.channels; channel++) {
-            double value = channel < from.channels ? CharonMPSImageLoad(source, &from, at + channel) : 0.0;
+            double value = channel < from.channels ? RevenantMPSImageLoad(source, &from, at + channel) : 0.0;
             if (toAlpha != (NSUInteger)-1 && channel == toAlpha) {
                 value = _setsAlphaOne ? 1.0 : (fromAlpha != (NSUInteger)-1 ? alpha : 1.0);
             } else if (_divides) {
@@ -99,10 +99,10 @@
             } else if (_flattens) {
                 value = value * alpha + _background[channel < 4 ? channel : 3] * (1.0 - alpha);
             }
-            CharonMPSImageStore(destination, &to, into + channel, value);
+            RevenantMPSImageStore(destination, &to, into + channel, value);
         }
     }
-    CharonMPSImageWriteRegion(destinationImage, &to,
+    RevenantMPSImageWriteRegion(destinationImage, &to,
                               MTLRegionMake2D(0, 0, to.width, to.height), destination, what);
     free(source);
     free(destination);

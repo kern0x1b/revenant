@@ -2,22 +2,22 @@
 
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 
-static NSString *const CharonCategoryIdentifierKey = @"kCategoryIdentifierKey";
-static NSString *const CharonActionsByContextKey = @"kActionsByContextKey";
-static NSString *const CharonIdentifierKey = @"kIdentifierKey";
-static NSString *const CharonTitleKey = @"kTitleKey";
-static NSString *const CharonActivationModeKey = @"kActivationModeKey";
-static NSString *const CharonAuthenticationRequiredKey = @"kIsAuthenticationRequiredKey";
-static NSString *const CharonDestructiveKey = @"kIsDestructiveKey";
-static NSString *const CharonBehaviorKey = @"kBehaviorKey";
-static NSString *const CharonParametersKey = @"kParametersKey";
+static NSString *const RevenantCategoryIdentifierKey = @"kCategoryIdentifierKey";
+static NSString *const RevenantActionsByContextKey = @"kActionsByContextKey";
+static NSString *const RevenantIdentifierKey = @"kIdentifierKey";
+static NSString *const RevenantTitleKey = @"kTitleKey";
+static NSString *const RevenantActivationModeKey = @"kActivationModeKey";
+static NSString *const RevenantAuthenticationRequiredKey = @"kIsAuthenticationRequiredKey";
+static NSString *const RevenantDestructiveKey = @"kIsDestructiveKey";
+static NSString *const RevenantBehaviorKey = @"kBehaviorKey";
+static NSString *const RevenantParametersKey = @"kParametersKey";
 
-static NSString *charon_bool_name(BOOL value)
+static NSString *revenant_bool_name(BOOL value)
 {
     return value ? @"YES" : @"NO";
 }
 
-static NSString *charon_activation_mode_name(UIUserNotificationActivationMode mode)
+static NSString *revenant_activation_mode_name(UIUserNotificationActivationMode mode)
 {
     switch (mode) {
     case UIUserNotificationActivationModeForeground:
@@ -30,18 +30,18 @@ static NSString *charon_activation_mode_name(UIUserNotificationActivationMode mo
 }
 
 @interface UIUserNotificationCategory ()
-- (void)charon_setIdentifier:(NSString *)identifier;
-- (void)charon_setActions:(NSArray *)actions forContext:(UIUserNotificationActionContext)context;
+- (void)revenant_setIdentifier:(NSString *)identifier;
+- (void)revenant_setActions:(NSArray *)actions forContext:(UIUserNotificationActionContext)context;
 @end
 
 @interface UIUserNotificationAction ()
-- (void)charon_setIdentifier:(NSString *)identifier;
-- (void)charon_setTitle:(NSString *)title;
-- (void)charon_setActivationMode:(UIUserNotificationActivationMode)activationMode;
-- (void)charon_setAuthenticationRequired:(BOOL)authenticationRequired;
-- (void)charon_setDestructive:(BOOL)destructive;
-- (void)charon_setBehavior:(UIUserNotificationActionBehavior)behavior;
-- (void)charon_setParameters:(NSDictionary *)parameters;
+- (void)revenant_setIdentifier:(NSString *)identifier;
+- (void)revenant_setTitle:(NSString *)title;
+- (void)revenant_setActivationMode:(UIUserNotificationActivationMode)activationMode;
+- (void)revenant_setAuthenticationRequired:(BOOL)authenticationRequired;
+- (void)revenant_setDestructive:(BOOL)destructive;
+- (void)revenant_setBehavior:(UIUserNotificationActionBehavior)behavior;
+- (void)revenant_setParameters:(NSDictionary *)parameters;
 @end
 
 @implementation UIUserNotificationSettings {
@@ -107,12 +107,12 @@ static NSString *charon_activation_mode_name(UIUserNotificationActivationMode mo
     NSDictionary *_actions;
 }
 
-- (void)charon_setIdentifier:(NSString *)identifier
+- (void)revenant_setIdentifier:(NSString *)identifier
 {
     _identifier = [identifier copy];
 }
 
-- (void)charon_setActions:(NSArray *)actions forContext:(UIUserNotificationActionContext)context
+- (void)revenant_setActions:(NSArray *)actions forContext:(UIUserNotificationActionContext)context
 {
     NSMutableDictionary *updated = _actions ? [_actions mutableCopy] : [NSMutableDictionary dictionary];
     [updated setObject:actions ? [actions copy] : [NSArray array] forKey:@(context)];
@@ -132,9 +132,9 @@ static NSString *charon_activation_mode_name(UIUserNotificationActivationMode mo
 - (instancetype)initWithCoder:(NSCoder *)coder
 {
     if ((self = [super init])) {
-        _identifier = [[coder decodeObjectOfClass:[NSString class] forKey:CharonCategoryIdentifierKey] copy];
+        _identifier = [[coder decodeObjectOfClass:[NSString class] forKey:RevenantCategoryIdentifierKey] copy];
         NSSet *classes = [NSSet setWithObjects:[NSDictionary class], [NSArray class], [NSNumber class], [UIUserNotificationAction class], nil];
-        NSDictionary *actions = [coder decodeObjectOfClasses:classes forKey:CharonActionsByContextKey];
+        NSDictionary *actions = [coder decodeObjectOfClasses:classes forKey:RevenantActionsByContextKey];
         _actions = [actions isKindOfClass:[NSDictionary class]] ? [actions copy] : nil;
     }
     return self;
@@ -142,8 +142,8 @@ static NSString *charon_activation_mode_name(UIUserNotificationActivationMode mo
 
 - (void)encodeWithCoder:(NSCoder *)coder
 {
-    [coder encodeObject:_identifier forKey:CharonCategoryIdentifierKey];
-    [coder encodeObject:_actions forKey:CharonActionsByContextKey];
+    [coder encodeObject:_identifier forKey:RevenantCategoryIdentifierKey];
+    [coder encodeObject:_actions forKey:RevenantActionsByContextKey];
 }
 
 - (id)copyWithZone:(NSZone *)zone
@@ -199,12 +199,12 @@ static NSString *charon_activation_mode_name(UIUserNotificationActivationMode mo
 
 - (void)setIdentifier:(NSString *)identifier
 {
-    [self charon_setIdentifier:identifier];
+    [self revenant_setIdentifier:identifier];
 }
 
 - (void)setActions:(NSArray *)actions forContext:(UIUserNotificationActionContext)context
 {
-    [self charon_setActions:actions forContext:context];
+    [self revenant_setActions:actions forContext:context];
 }
 
 @end
@@ -220,37 +220,37 @@ static NSString *charon_activation_mode_name(UIUserNotificationActivationMode mo
     NSDictionary *_parameters;
 }
 
-- (void)charon_setIdentifier:(NSString *)identifier
+- (void)revenant_setIdentifier:(NSString *)identifier
 {
     _identifier = [identifier copy];
 }
 
-- (void)charon_setTitle:(NSString *)title
+- (void)revenant_setTitle:(NSString *)title
 {
     _title = [title copy];
 }
 
-- (void)charon_setActivationMode:(UIUserNotificationActivationMode)activationMode
+- (void)revenant_setActivationMode:(UIUserNotificationActivationMode)activationMode
 {
     _activationMode = activationMode;
 }
 
-- (void)charon_setAuthenticationRequired:(BOOL)authenticationRequired
+- (void)revenant_setAuthenticationRequired:(BOOL)authenticationRequired
 {
     _authenticationRequired = authenticationRequired;
 }
 
-- (void)charon_setDestructive:(BOOL)destructive
+- (void)revenant_setDestructive:(BOOL)destructive
 {
     _destructive = destructive;
 }
 
-- (void)charon_setBehavior:(UIUserNotificationActionBehavior)behavior
+- (void)revenant_setBehavior:(UIUserNotificationActionBehavior)behavior
 {
     _behavior = behavior;
 }
 
-- (void)charon_setParameters:(NSDictionary *)parameters
+- (void)revenant_setParameters:(NSDictionary *)parameters
 {
     _parameters = [parameters copy];
 }
@@ -268,29 +268,29 @@ static NSString *charon_activation_mode_name(UIUserNotificationActivationMode mo
 - (instancetype)initWithCoder:(NSCoder *)coder
 {
     if ((self = [super init])) {
-        _identifier = [[coder decodeObjectOfClass:[NSString class] forKey:CharonIdentifierKey] copy];
-        _title = [[coder decodeObjectOfClass:[NSString class] forKey:CharonTitleKey] copy];
-        _activationMode = (UIUserNotificationActivationMode)[coder decodeIntegerForKey:CharonActivationModeKey];
-        _authenticationRequired = [coder decodeBoolForKey:CharonAuthenticationRequiredKey];
-        _destructive = [coder decodeBoolForKey:CharonDestructiveKey];
-        _behavior = (UIUserNotificationActionBehavior)[coder decodeIntegerForKey:CharonBehaviorKey];
-        _parameters = [[coder decodeObjectOfClass:[NSDictionary class] forKey:CharonParametersKey] copy];
+        _identifier = [[coder decodeObjectOfClass:[NSString class] forKey:RevenantIdentifierKey] copy];
+        _title = [[coder decodeObjectOfClass:[NSString class] forKey:RevenantTitleKey] copy];
+        _activationMode = (UIUserNotificationActivationMode)[coder decodeIntegerForKey:RevenantActivationModeKey];
+        _authenticationRequired = [coder decodeBoolForKey:RevenantAuthenticationRequiredKey];
+        _destructive = [coder decodeBoolForKey:RevenantDestructiveKey];
+        _behavior = (UIUserNotificationActionBehavior)[coder decodeIntegerForKey:RevenantBehaviorKey];
+        _parameters = [[coder decodeObjectOfClass:[NSDictionary class] forKey:RevenantParametersKey] copy];
     }
     return self;
 }
 
 - (void)encodeWithCoder:(NSCoder *)coder
 {
-    [coder encodeObject:_identifier forKey:CharonIdentifierKey];
-    [coder encodeObject:_title forKey:CharonTitleKey];
-    [coder encodeInteger:(NSInteger)_activationMode forKey:CharonActivationModeKey];
-    [coder encodeBool:_authenticationRequired forKey:CharonAuthenticationRequiredKey];
-    [coder encodeBool:_destructive forKey:CharonDestructiveKey];
-    [coder encodeInteger:(NSInteger)_behavior forKey:CharonBehaviorKey];
-    [coder encodeObject:_parameters forKey:CharonParametersKey];
+    [coder encodeObject:_identifier forKey:RevenantIdentifierKey];
+    [coder encodeObject:_title forKey:RevenantTitleKey];
+    [coder encodeInteger:(NSInteger)_activationMode forKey:RevenantActivationModeKey];
+    [coder encodeBool:_authenticationRequired forKey:RevenantAuthenticationRequiredKey];
+    [coder encodeBool:_destructive forKey:RevenantDestructiveKey];
+    [coder encodeInteger:(NSInteger)_behavior forKey:RevenantBehaviorKey];
+    [coder encodeObject:_parameters forKey:RevenantParametersKey];
 }
 
-- (void)charon_copyInto:(UIUserNotificationAction *)copy
+- (void)revenant_copyInto:(UIUserNotificationAction *)copy
 {
     copy->_identifier = _identifier;
     copy->_title = _title;
@@ -304,14 +304,14 @@ static NSString *charon_activation_mode_name(UIUserNotificationActivationMode mo
 - (id)copyWithZone:(NSZone *)zone
 {
     UIUserNotificationAction *copy = [[UIUserNotificationAction allocWithZone:zone] init];
-    [self charon_copyInto:copy];
+    [self revenant_copyInto:copy];
     return copy;
 }
 
 - (id)mutableCopyWithZone:(NSZone *)zone
 {
     UIMutableUserNotificationAction *copy = [[UIMutableUserNotificationAction allocWithZone:zone] init];
-    [self charon_copyInto:copy];
+    [self revenant_copyInto:copy];
     return copy;
 }
 
@@ -353,7 +353,7 @@ static NSString *charon_activation_mode_name(UIUserNotificationActivationMode mo
 - (NSString *)description
 {
     return [NSString stringWithFormat:@"<%@: %p; identifier: %@, title: %@, activationMode: %@, isAuthenticationRequired:%@, isDestructive:%@>",
-            [self class], self, _identifier, _title, charon_activation_mode_name(_activationMode), charon_bool_name(_authenticationRequired), charon_bool_name(_destructive)];
+            [self class], self, _identifier, _title, revenant_activation_mode_name(_activationMode), revenant_bool_name(_authenticationRequired), revenant_bool_name(_destructive)];
 }
 
 @end
@@ -362,37 +362,37 @@ static NSString *charon_activation_mode_name(UIUserNotificationActivationMode mo
 
 - (void)setIdentifier:(NSString *)identifier
 {
-    [self charon_setIdentifier:identifier];
+    [self revenant_setIdentifier:identifier];
 }
 
 - (void)setTitle:(NSString *)title
 {
-    [self charon_setTitle:title];
+    [self revenant_setTitle:title];
 }
 
 - (void)setActivationMode:(UIUserNotificationActivationMode)activationMode
 {
-    [self charon_setActivationMode:activationMode];
+    [self revenant_setActivationMode:activationMode];
 }
 
 - (void)setAuthenticationRequired:(BOOL)authenticationRequired
 {
-    [self charon_setAuthenticationRequired:authenticationRequired];
+    [self revenant_setAuthenticationRequired:authenticationRequired];
 }
 
 - (void)setDestructive:(BOOL)destructive
 {
-    [self charon_setDestructive:destructive];
+    [self revenant_setDestructive:destructive];
 }
 
 - (void)setBehavior:(UIUserNotificationActionBehavior)behavior
 {
-    [self charon_setBehavior:behavior];
+    [self revenant_setBehavior:behavior];
 }
 
 - (void)setParameters:(NSDictionary *)parameters
 {
-    [self charon_setParameters:parameters];
+    [self revenant_setParameters:parameters];
 }
 
 @end

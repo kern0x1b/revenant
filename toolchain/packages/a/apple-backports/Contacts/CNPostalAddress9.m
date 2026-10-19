@@ -1,10 +1,10 @@
-#import "CharonContacts.h"
+#import "RevenantContacts.h"
 
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
 
 @implementation CNPostalAddress {
 @protected
-    NSMutableDictionary *_charonFields;
+    NSMutableDictionary *_revenantFields;
 }
 
 @dynamic street, subLocality, city, subAdministrativeArea, state, postalCode, country, ISOCountryCode;
@@ -13,36 +13,36 @@
 {
     self = [super init];
     if (self)
-        _charonFields = [NSMutableDictionary dictionary];
+        _revenantFields = [NSMutableDictionary dictionary];
     return self;
 }
 
-- (NSString *)charon_fieldForKey:(NSString *)key
+- (NSString *)revenant_fieldForKey:(NSString *)key
 {
-    return _charonFields[key] ?: @"";
+    return _revenantFields[key] ?: @"";
 }
 
-- (void)charon_setField:(NSString *)value forKey:(NSString *)key
+- (void)revenant_setField:(NSString *)value forKey:(NSString *)key
 {
     if (value)
-        _charonFields[key] = [value copy];
+        _revenantFields[key] = [value copy];
     else
-        [_charonFields removeObjectForKey:key];
+        [_revenantFields removeObjectForKey:key];
 }
 
-- (NSDictionary *)charon_fields
+- (NSDictionary *)revenant_fields
 {
-    return _charonFields;
+    return _revenantFields;
 }
 
-- (NSString *)street { return [self charon_fieldForKey:CNPostalAddressStreetKey]; }
-- (NSString *)subLocality { return [self charon_fieldForKey:CNPostalAddressSubLocalityKey]; }
-- (NSString *)city { return [self charon_fieldForKey:CNPostalAddressCityKey]; }
-- (NSString *)subAdministrativeArea { return [self charon_fieldForKey:CNPostalAddressSubAdministrativeAreaKey]; }
-- (NSString *)state { return [self charon_fieldForKey:CNPostalAddressStateKey]; }
-- (NSString *)postalCode { return [self charon_fieldForKey:CNPostalAddressPostalCodeKey]; }
-- (NSString *)country { return [self charon_fieldForKey:CNPostalAddressCountryKey]; }
-- (NSString *)ISOCountryCode { return [self charon_fieldForKey:CNPostalAddressISOCountryCodeKey]; }
+- (NSString *)street { return [self revenant_fieldForKey:CNPostalAddressStreetKey]; }
+- (NSString *)subLocality { return [self revenant_fieldForKey:CNPostalAddressSubLocalityKey]; }
+- (NSString *)city { return [self revenant_fieldForKey:CNPostalAddressCityKey]; }
+- (NSString *)subAdministrativeArea { return [self revenant_fieldForKey:CNPostalAddressSubAdministrativeAreaKey]; }
+- (NSString *)state { return [self revenant_fieldForKey:CNPostalAddressStateKey]; }
+- (NSString *)postalCode { return [self revenant_fieldForKey:CNPostalAddressPostalCodeKey]; }
+- (NSString *)country { return [self revenant_fieldForKey:CNPostalAddressCountryKey]; }
+- (NSString *)ISOCountryCode { return [self revenant_fieldForKey:CNPostalAddressISOCountryCodeKey]; }
 
 + (NSString *)localizedStringForKey:(NSString *)key
 {
@@ -62,16 +62,16 @@
 - (id)copyWithZone:(NSZone *)zone
 {
     CNPostalAddress *copied = [[CNPostalAddress allocWithZone:zone] init];
-    for (NSString *key in _charonFields)
-        [copied charon_setField:_charonFields[key] forKey:key];
+    for (NSString *key in _revenantFields)
+        [copied revenant_setField:_revenantFields[key] forKey:key];
     return copied;
 }
 
 - (id)mutableCopyWithZone:(NSZone *)zone
 {
     CNMutablePostalAddress *copied = [[CNMutablePostalAddress allocWithZone:zone] init];
-    for (NSString *key in _charonFields)
-        [copied charon_setField:_charonFields[key] forKey:key];
+    for (NSString *key in _revenantFields)
+        [copied revenant_setField:_revenantFields[key] forKey:key];
     return copied;
 }
 
@@ -82,7 +82,7 @@
 
 - (void)encodeWithCoder:(NSCoder *)coder
 {
-    [coder encodeObject:_charonFields forKey:@"fields"];
+    [coder encodeObject:_revenantFields forKey:@"fields"];
 }
 
 - (instancetype)initWithCoder:(NSCoder *)coder
@@ -90,24 +90,24 @@
     self = [self init];
     if (self) {
         NSDictionary *fields = [coder decodeObjectOfClass:[NSDictionary class] forKey:@"fields"];
-        _charonFields = [NSMutableDictionary dictionaryWithDictionary:fields ?: @{}];
+        _revenantFields = [NSMutableDictionary dictionaryWithDictionary:fields ?: @{}];
     }
     return self;
 }
 
 - (BOOL)isEqual:(id)object
 {
-    return self == object || ([object isKindOfClass:[CNPostalAddress class]] && [_charonFields isEqualToDictionary:[object charon_fields]]);
+    return self == object || ([object isKindOfClass:[CNPostalAddress class]] && [_revenantFields isEqualToDictionary:[object revenant_fields]]);
 }
 
 - (NSUInteger)hash
 {
-    return _charonFields.hash;
+    return _revenantFields.hash;
 }
 
 - (NSString *)description
 {
-    return [NSString stringWithFormat:@"<%@: %p: %@>", NSStringFromClass([self class]), self, _charonFields];
+    return [NSString stringWithFormat:@"<%@: %p: %@>", NSStringFromClass([self class]), self, _revenantFields];
 }
 
 @end

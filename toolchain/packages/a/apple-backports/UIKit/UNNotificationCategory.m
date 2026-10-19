@@ -1,4 +1,4 @@
-#import "CharonUserNotifications.h"
+#import "RevenantUserNotifications.h"
 
 @implementation UNNotificationCategory {
 @private
@@ -16,10 +16,10 @@
 + (instancetype)categoryWithIdentifier:(NSString *)identifier actions:(NSArray<UNNotificationAction *> *)actions
                      intentIdentifiers:(NSArray<NSString *> *)intentIdentifiers options:(UNNotificationCategoryOptions)options
 {
-    return [[self alloc] initCharonWithIdentifier:identifier actions:actions intentIdentifiers:intentIdentifiers options:options];
+    return [[self alloc] initRevenantWithIdentifier:identifier actions:actions intentIdentifiers:intentIdentifiers options:options];
 }
 
-- (instancetype)initCharonWithIdentifier:(NSString *)identifier actions:(NSArray *)actions intentIdentifiers:(NSArray *)intentIdentifiers
+- (instancetype)initRevenantWithIdentifier:(NSString *)identifier actions:(NSArray *)actions intentIdentifiers:(NSArray *)intentIdentifiers
                                  options:(UNNotificationCategoryOptions)options
 {
     if ((self = [super init])) {
@@ -34,7 +34,7 @@
 - (instancetype)initWithCoder:(NSCoder *)coder
 {
     NSSet *actions = [NSSet setWithObjects:[NSArray class], [UNNotificationAction class], [UNTextInputNotificationAction class], nil];
-    return [self initCharonWithIdentifier:[coder decodeObjectOfClass:[NSString class] forKey:@"identifier"]
+    return [self initRevenantWithIdentifier:[coder decodeObjectOfClass:[NSString class] forKey:@"identifier"]
                                   actions:[coder decodeObjectOfClasses:actions forKey:@"actions"]
                         intentIdentifiers:[coder decodeObjectOfClasses:[NSSet setWithObjects:[NSArray class], [NSString class], nil] forKey:@"intentIdentifiers"]
                                   options:(UNNotificationCategoryOptions)[coder decodeIntegerForKey:@"options"]];

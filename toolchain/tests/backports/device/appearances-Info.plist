@@ -9,7 +9,7 @@
 	<key>CFBundleExecutable</key>
 	<string>appearances</string>
 	<key>CFBundleIdentifier</key>
-	<string>local.charon.backports.appearances</string>
+	<string>local.revenant.backports.appearances</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
@@ -26,10 +26,10 @@
 	<array>
 		<dict>
 			<key>CFBundleURLName</key>
-			<string>local.charon.backports.appearances</string>
+			<string>local.revenant.backports.appearances</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>charon-backports-appearances</string>
+				<string>revenant-backports-appearances</string>
 			</array>
 		</dict>
 	</array>

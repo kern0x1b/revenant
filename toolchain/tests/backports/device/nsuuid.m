@@ -202,6 +202,6 @@ int main(void)
         CHECK([over hash] == [chosenUUID hash], "and has its hash");
         CHECK([over copy] == nil, "and no copy, as the base class answers");
     }
-    printf("nsuuid: %d checks, %d failed\n", charon_checks, charon_failures);
-    return charon_failures;
+    printf("nsuuid: %d checks, %d failed\n", revenant_checks, revenant_failures);
+    return revenant_failures;
 }

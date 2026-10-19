@@ -6,7 +6,7 @@
 
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 
-void charon_host_vDSP_distancesq(const float *a, vDSP_Stride ia, const float *b, vDSP_Stride ib, float *c,
+void revenant_host_vDSP_distancesq(const float *a, vDSP_Stride ia, const float *b, vDSP_Stride ib, float *c,
                                  vDSP_Length n);
 
 #define CAP 32
@@ -34,7 +34,7 @@ static void run(const char *label, vDSP_Stride ia, vDSP_Stride ib, vDSP_Length n
         memcpy(&mine[i], &gap, sizeof gap);
         memcpy(&theirs[i], &gap, sizeof gap);
     }
-    charon_host_vDSP_distancesq(a, ia, b, ib, mine, n);
+    revenant_host_vDSP_distancesq(a, ia, b, ib, mine, n);
     vDSP_distancesq(a, ia, b, ib, theirs, n);
 
     char note[96];

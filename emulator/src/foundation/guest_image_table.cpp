@@ -10,7 +10,7 @@
 #include <utility>
 #include <vector>
 
-namespace shade {
+namespace emulator {
 namespace {
 
     constexpr std::uint32_t dyld_all_image_info_version_offset = 0;

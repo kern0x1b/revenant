@@ -29,7 +29,7 @@ int main(int argc, char **argv)
 {
     setvbuf(stdout, NULL, _IONBF, 0);
     @autoreleasepool {
-        port = dlopen(argc > 1 ? argv[1] : "libCharonCMTag.dylib", RTLD_LOCAL | RTLD_FIRST);
+        port = dlopen(argc > 1 ? argv[1] : "libRevenantCMTag.dylib", RTLD_LOCAL | RTLD_FIRST);
         if (!port) { printf("dlopen: %s\n", dlerror()); return 1; }
         BIND(CMTagMakeWithOSTypeValue) BIND(CMTagMakeWithSInt64Value) BIND(CMTagMakeWithFlagsValue)
         BIND(CMTagMakeWithFloat64Value) BIND(CMTagGetOSTypeValue) BIND(CMTagGetSInt64Value)

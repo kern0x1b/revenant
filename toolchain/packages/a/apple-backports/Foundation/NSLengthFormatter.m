@@ -1,6 +1,6 @@
 #import <Foundation/Foundation.h>
 
-#import "CharonUnitFormat.h"
+#import "RevenantUnitFormat.h"
 
 @implementation NSLengthFormatter {
     NSNumberFormatter *_numbers;
@@ -79,33 +79,33 @@
 
 - (NSString *)stringFromValue:(double)value unit:(NSLengthFormatterUnit)unit
 {
-    return charon_unit_given(@"length", charon_unit_system([NSLocale currentLocale]), value, unit, _unitStyle, self.numberFormatter);
+    return revenant_unit_given(@"length", revenant_unit_system([NSLocale currentLocale]), value, unit, _unitStyle, self.numberFormatter);
 }
 
 - (NSString *)stringFromMeters:(double)numberInMeters
 {
-    CharonUnitSystem system = charon_unit_system([NSLocale currentLocale]);
+    RevenantUnitSystem system = revenant_unit_system([NSLocale currentLocale]);
     double inUnit = 0;
-    NSInteger unit = charon_unit_chosen(@"length", system, _forPersonHeightUse, numberInMeters, &inUnit);
-    return charon_unit_written(@"length", system, _forPersonHeightUse, numberInMeters, unit, _unitStyle, self.numberFormatter);
+    NSInteger unit = revenant_unit_chosen(@"length", system, _forPersonHeightUse, numberInMeters, &inUnit);
+    return revenant_unit_written(@"length", system, _forPersonHeightUse, numberInMeters, unit, _unitStyle, self.numberFormatter);
 }
 
 - (NSString *)unitStringFromValue:(double)value unit:(NSLengthFormatterUnit)unit
 {
-    return charon_unit_name(@"length", charon_unit_system([NSLocale currentLocale]), unit, _unitStyle, value);
+    return revenant_unit_name(@"length", revenant_unit_system([NSLocale currentLocale]), unit, _unitStyle, value);
 }
 
 - (NSString *)unitStringFromMeters:(double)numberInMeters usedUnit:(NSLengthFormatterUnit *)unitp
 {
-    CharonUnitSystem system = charon_unit_system([NSLocale currentLocale]);
+    RevenantUnitSystem system = revenant_unit_system([NSLocale currentLocale]);
     double inUnit = 0;
-    NSInteger unit = charon_unit_chosen(@"length", system, _forPersonHeightUse, numberInMeters, &inUnit);
+    NSInteger unit = revenant_unit_chosen(@"length", system, _forPersonHeightUse, numberInMeters, &inUnit);
     if (unitp)
         *unitp = (NSLengthFormatterUnit)unit;
-    if (_forPersonHeightUse && system != CharonUnitSystemMetric && _unitStyle != NSFormattingUnitStyleShort
+    if (_forPersonHeightUse && system != RevenantUnitSystemMetric && _unitStyle != NSFormattingUnitStyleShort
         && _unitStyle != NSFormattingUnitStyleMedium)
-        return charon_unit_name(@"length", system, unit, _unitStyle, 2);
-    return charon_unit_name(@"length", system, unit, _unitStyle, inUnit);
+        return revenant_unit_name(@"length", system, unit, _unitStyle, 2);
+    return revenant_unit_name(@"length", system, unit, _unitStyle, inUnit);
 }
 
 - (BOOL)getObjectValue:(id *)obj forString:(NSString *)string errorDescription:(NSString **)error

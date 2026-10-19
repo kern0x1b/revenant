@@ -1,27 +1,27 @@
-#import "CharonAUAudioUnit.h"
+#import "RevenantAUAudioUnit.h"
 
 @implementation AUParameter {
-    CharonAUParameterImpl *_charon;
+    RevenantAUParameterImpl *_revenant;
 }
 
-- (instancetype)initWithCharonImpl:(CharonAUParameterImpl *)impl
+- (instancetype)initWithRevenantImpl:(RevenantAUParameterImpl *)impl
 {
     if ((self = [super init])) {
-        _charon = impl;
-        [self charon_setIdentifier:impl.name];
-        [self charon_setDisplayName:impl.name];
+        _revenant = impl;
+        [self revenant_setIdentifier:impl.name];
+        [self revenant_setDisplayName:impl.name];
     }
     return self;
 }
 
 - (AUValue)value
 {
-    if (_charon.owner == nil || _charon.owner.audioUnit == NULL) {
-        return _charon.minValue;
+    if (_revenant.owner == nil || _revenant.owner.audioUnit == NULL) {
+        return _revenant.minValue;
     }
     AudioUnitParameterValue value = 0;
-    if (AudioUnitGetParameter(_charon.owner.audioUnit, _charon.identifier, _charon.scope, _charon.element, &value) != noErr) {
-        return _charon.minValue;
+    if (AudioUnitGetParameter(_revenant.owner.audioUnit, _revenant.identifier, _revenant.scope, _revenant.element, &value) != noErr) {
+        return _revenant.minValue;
     }
     return (AUValue)value;
 }
@@ -33,120 +33,120 @@
 
 - (void)setValue:(AUValue)value originator:(AUParameterObserverToken)originator
 {
-    [self charon_apply:value originator:originator atHostTime:0 eventType:AUParameterAutomationEventTypeValue automate:NO];
+    [self revenant_apply:value originator:originator atHostTime:0 eventType:AUParameterAutomationEventTypeValue automate:NO];
 }
 
 - (void)setValue:(AUValue)value originator:(AUParameterObserverToken)originator atHostTime:(uint64_t)hostTime
 {
-    [self charon_apply:value originator:originator atHostTime:hostTime eventType:AUParameterAutomationEventTypeValue automate:hostTime != 0];
+    [self revenant_apply:value originator:originator atHostTime:hostTime eventType:AUParameterAutomationEventTypeValue automate:hostTime != 0];
 }
 
-- (void)charon_apply:(AUValue)value
+- (void)revenant_apply:(AUValue)value
            originator:(AUParameterObserverToken)originator
            atHostTime:(uint64_t)hostTime
             eventType:(AUParameterAutomationEventType)eventType
             automate:(BOOL)automate
 {
-    AUAudioUnit *owner = _charon.owner;
+    AUAudioUnit *owner = _revenant.owner;
     if (automate && owner != nil && owner.audioUnit != NULL) {
         AudioUnitParameterEvent event;
         memset(&event, 0, sizeof(event));
-        event.scope = _charon.scope;
-        event.element = _charon.element;
-        event.parameter = _charon.identifier;
+        event.scope = _revenant.scope;
+        event.element = _revenant.element;
+        event.parameter = _revenant.identifier;
         event.eventType = kParameterEvent_Immediate;
         event.eventValues.immediate.value = (AudioUnitParameterValue)value;
         AudioUnitScheduleParameters(owner.audioUnit, &event, 1);
-        [self charon_notifyValue:self.value atAddress:self.address];
+        [self revenant_notifyValue:self.value atAddress:self.address];
         return;
     }
     if (owner != nil && owner.audioUnit != NULL) {
         AudioUnitParameterValue written = (AudioUnitParameterValue)value;
-        AudioUnitSetParameter(owner.audioUnit, _charon.identifier, _charon.scope, _charon.element, written, 0);
+        AudioUnitSetParameter(owner.audioUnit, _revenant.identifier, _revenant.scope, _revenant.element, written, 0);
     }
     if (originator != NULL) {
-        for (NSValue *token in [self charon_observerTokens]) {
+        for (NSValue *token in [self revenant_observerTokens]) {
             if (token.pointerValue == (const void *)originator) {
                 return;
             }
         }
     }
-    [self charon_notifyValue:value atAddress:self.address];
+    [self revenant_notifyValue:value atAddress:self.address];
 }
 
 - (AUValue)minValue
 {
-    return _charon.minValue;
+    return _revenant.minValue;
 }
 
 - (AUValue)maxValue
 {
-    return _charon.maxValue;
+    return _revenant.maxValue;
 }
 
 - (AudioUnitParameterUnit)unit
 {
-    return _charon.unit;
+    return _revenant.unit;
 }
 
 - (NSString *)unitName
 {
-    return _charon.unitName;
+    return _revenant.unitName;
 }
 
 - (AudioUnitParameterOptions)flags
 {
-    return _charon.flags;
+    return _revenant.flags;
 }
 
 - (AUParameterAddress)address
 {
-    return CharonAddress(_charon.identifier, _charon.scope, _charon.element);
+    return RevenantAddress(_revenant.identifier, _revenant.scope, _revenant.element);
 }
 
 - (NSArray<NSString *> *)valueStrings
 {
-    return _charon.valueStrings;
+    return _revenant.valueStrings;
 }
 
 - (NSArray<NSNumber *> *)dependentParameters
 {
-    return _charon.dependentParameters;
+    return _revenant.dependentParameters;
 }
 
 - (NSString *)stringFromValue:(const AUValue *)value
 {
     AUValue wanted = value != NULL ? *value : self.value;
-    if (_charon.valueStrings.count > 0) {
+    if (_revenant.valueStrings.count > 0) {
         NSInteger index = (NSInteger)llround(wanted);
-        if (index >= 0 && index < (NSInteger)_charon.valueStrings.count) {
-            return _charon.valueStrings[index];
+        if (index >= 0 && index < (NSInteger)_revenant.valueStrings.count) {
+            return _revenant.valueStrings[index];
         }
         return nil;
     }
     return [NSString stringWithFormat:@"%g", (double)wanted];
 }
 
-- (AudioUnitParameterID)charon_identifier
+- (AudioUnitParameterID)revenant_identifier
 {
-    return _charon.identifier;
+    return _revenant.identifier;
 }
 
-- (AudioUnitScope)charon_scope
+- (AudioUnitScope)revenant_scope
 {
-    return _charon.scope;
+    return _revenant.scope;
 }
 
-- (AudioUnitElement)charon_element
+- (AudioUnitElement)revenant_element
 {
-    return _charon.element;
+    return _revenant.element;
 }
 
 - (AUValue)valueFromString:(NSString *)string
 {
-    if (_charon.valueStrings.count > 0) {
-        NSUInteger index = [_charon.valueStrings indexOfObject:string];
-        return index == NSNotFound ? _charon.minValue : (AUValue)index;
+    if (_revenant.valueStrings.count > 0) {
+        NSUInteger index = [_revenant.valueStrings indexOfObject:string];
+        return index == NSNotFound ? _revenant.minValue : (AUValue)index;
     }
     return (AUValue)string.doubleValue;
 }
@@ -160,31 +160,31 @@
 
 - (void)encodeWithCoder:(NSCoder *)coder
 {
-    [coder encodeInteger:(NSInteger)_charon.identifier forKey:@"identifier"];
-    [coder encodeInteger:(NSInteger)_charon.scope forKey:@"scope"];
-    [coder encodeInteger:(NSInteger)_charon.element forKey:@"element"];
-    [coder encodeFloat:_charon.minValue forKey:@"minValue"];
-    [coder encodeFloat:_charon.maxValue forKey:@"maxValue"];
-    [coder encodeObject:_charon.unitName forKey:@"unitName"];
+    [coder encodeInteger:(NSInteger)_revenant.identifier forKey:@"identifier"];
+    [coder encodeInteger:(NSInteger)_revenant.scope forKey:@"scope"];
+    [coder encodeInteger:(NSInteger)_revenant.element forKey:@"element"];
+    [coder encodeFloat:_revenant.minValue forKey:@"minValue"];
+    [coder encodeFloat:_revenant.maxValue forKey:@"maxValue"];
+    [coder encodeObject:_revenant.unitName forKey:@"unitName"];
 }
 
 - (instancetype)initWithCoder:(NSCoder *)coder
 {
     if ((self = [super init])) {
-        _charon = [CharonAUParameterImpl new];
-        _charon.identifier = (AudioUnitParameterID)[coder decodeIntegerForKey:@"identifier"];
-        _charon.scope = (AudioUnitScope)[coder decodeIntegerForKey:@"scope"];
-        _charon.element = (AudioUnitElement)[coder decodeIntegerForKey:@"element"];
-        _charon.minValue = [coder decodeFloatForKey:@"minValue"];
-        _charon.maxValue = [coder decodeFloatForKey:@"maxValue"];
-        _charon.unitName = [coder decodeObjectForKey:@"unitName"];
+        _revenant = [RevenantAUParameterImpl new];
+        _revenant.identifier = (AudioUnitParameterID)[coder decodeIntegerForKey:@"identifier"];
+        _revenant.scope = (AudioUnitScope)[coder decodeIntegerForKey:@"scope"];
+        _revenant.element = (AudioUnitElement)[coder decodeIntegerForKey:@"element"];
+        _revenant.minValue = [coder decodeFloatForKey:@"minValue"];
+        _revenant.maxValue = [coder decodeFloatForKey:@"maxValue"];
+        _revenant.unitName = [coder decodeObjectForKey:@"unitName"];
     }
     return self;
 }
 
 @end
 
-AUParameterTree *CharonBuildParameterTree(AUAudioUnit *owner)
+AUParameterTree *RevenantBuildParameterTree(AUAudioUnit *owner)
 {
     AudioUnit unit = owner.audioUnit;
     if (unit == NULL) {
@@ -198,7 +198,7 @@ AUParameterTree *CharonBuildParameterTree(AUAudioUnit *owner)
         if (AudioUnitGetProperty(unit, kAudioUnitProperty_ParameterInfo, kAudioUnitScope_Global, index, &info, &size) != noErr || size < sizeof(info)) {
             break;
         }
-        CharonAUParameterImpl *impl = [CharonAUParameterImpl new];
+        RevenantAUParameterImpl *impl = [RevenantAUParameterImpl new];
         impl.name = [NSString stringWithUTF8String:info.name] ?: [NSString stringWithFormat:@"%u", (unsigned)index];
         impl.identifier = index;
         impl.scope = kAudioUnitScope_Global;
@@ -218,18 +218,18 @@ AUParameterTree *CharonBuildParameterTree(AUAudioUnit *owner)
                 CFRelease(info.cfNameString);
             }
         }
-        AUParameter *parameter = [[AUParameter alloc] initWithCharonImpl:impl];
-        [parameter charon_setIdentifier:impl.name];
-        [parameter charon_setDisplayName:display];
+        AUParameter *parameter = [[AUParameter alloc] initWithRevenantImpl:impl];
+        [parameter revenant_setIdentifier:impl.name];
+        [parameter revenant_setDisplayName:display];
         [parameters addObject:parameter];
     }
     if (parameters.count == 0) {
         return nil;
     }
-    AUParameterTree *tree = [[AUParameterTree alloc] initWithCharonChildren:parameters];
-    [tree charon_setIdentifier:@""];
+    AUParameterTree *tree = [[AUParameterTree alloc] initWithRevenantChildren:parameters];
+    [tree revenant_setIdentifier:@""];
     for (AUParameterNode *child in parameters) {
-        [child charon_setParent:tree keyPath:child.identifier];
+        [child revenant_setParent:tree keyPath:child.identifier];
     }
     return tree;
 }

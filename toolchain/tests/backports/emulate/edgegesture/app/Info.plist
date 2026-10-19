@@ -7,13 +7,13 @@
 	<key>CFBundleDisplayName</key>
 	<string>Edge Probe</string>
 	<key>CFBundleExecutable</key>
-	<string>charonedgeprobe</string>
+	<string>revenantedgeprobe</string>
 	<key>CFBundleIdentifier</key>
-	<string>local.charon.backports.edgeprobe</string>
+	<string>local.revenant.backports.edgeprobe</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>charonedgeprobe</string>
+	<string>revenantedgeprobe</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>

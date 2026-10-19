@@ -1,21 +1,21 @@
 #import <Foundation/Foundation.h>
 #import <objc/runtime.h>
 
-NSQualityOfService charon_quality_of_service(NSInteger quality);
+NSQualityOfService revenant_quality_of_service(NSInteger quality);
 
-static char CharonOperationQualityKey;
+static char RevenantOperationQualityKey;
 
-@implementation NSOperation (CharonQualityOfService)
+@implementation NSOperation (RevenantQualityOfService)
 
 - (NSQualityOfService)qualityOfService
 {
-    NSNumber *quality = objc_getAssociatedObject(self, &CharonOperationQualityKey);
+    NSNumber *quality = objc_getAssociatedObject(self, &RevenantOperationQualityKey);
     return quality ? (NSQualityOfService)quality.integerValue : NSQualityOfServiceDefault;
 }
 
 - (void)setQualityOfService:(NSQualityOfService)qualityOfService
 {
-    objc_setAssociatedObject(self, &CharonOperationQualityKey, @(charon_quality_of_service(qualityOfService)), OBJC_ASSOCIATION_RETAIN);
+    objc_setAssociatedObject(self, &RevenantOperationQualityKey, @(revenant_quality_of_service(qualityOfService)), OBJC_ASSOCIATION_RETAIN);
 }
 
 @end

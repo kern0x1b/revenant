@@ -26,14 +26,14 @@ static NSString *const results_folder = @"/private/var/backports";
 {
     [[NSFileManager defaultManager] createDirectoryAtPath:results_folder withIntermediateDirectories:YES attributes:nil error:NULL];
     [[NSFileManager defaultManager] removeItemAtPath:[results_folder stringByAppendingPathComponent:@"openurl.done"] error:NULL];
-    charon_log_to([results_folder stringByAppendingPathComponent:@"openurl.log"]);
+    revenant_log_to([results_folder stringByAppendingPathComponent:@"openurl.log"]);
     self.window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
     self.window.rootViewController = [[UIViewController alloc] init];
     [self.window makeKeyAndVisible];
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
         SEL old = @selector(application:openURL:sourceApplication:annotation:);
         CHECK([self respondsToSelector:old], "a delegate with only the new form answers the old one the release sends");
-        NSURL *url = [NSURL URLWithString:@"charonopenurltest://first?a=1"];
+        NSURL *url = [NSURL URLWithString:@"revenantopenurltest://first?a=1"];
         BOOL handled = ((BOOL (*)(id, SEL, UIApplication *, NSURL *, NSString *, id))objc_msgSend)(self, old, application, url, @"com.example.sender", @{@"note": @"x"});
         CHECK(handled && self.calls == 1 && [self.url isEqual:url], "the old call reaches the new one with the URL and its answer");
         CHECK_EQUAL(self.options[UIApplicationOpenURLOptionsSourceApplicationKey], @"com.example.sender", "with the source application");
@@ -42,12 +42,12 @@ static NSString *const results_folder = @"/private/var/backports";
         ((BOOL (*)(id, SEL, UIApplication *, NSURL *, NSString *, id))objc_msgSend)(self, old, application, url, nil, nil);
         CHECK(self.options[UIApplicationOpenURLOptionsSourceApplicationKey] == nil && self.options[UIApplicationOpenURLOptionsAnnotationKey] == nil && [self.options[UIApplicationOpenURLOptionsOpenInPlaceKey] isEqual:@NO], "no source and no annotation leave those keys out");
         int before = self.calls;
-        BOOL sent = [application openURL:[NSURL URLWithString:@"charonopenurltest://real"]];
+        BOOL sent = [application openURL:[NSURL URLWithString:@"revenantopenurltest://real"]];
         NSLog(@"openURL own scheme answered %d", sent);
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(4 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-            CHECK(self.calls > before && [self.url.absoluteString isEqual:@"charonopenurltest://real"], "a URL the system sends the application reaches its delegate");
-            printf("checks=%d failures=%d\n", charon_checks, charon_failures);
-            NSString *summary = [NSString stringWithFormat:@"%@ checks=%d failures=%d\n", charon_failures ? @"FAIL" : @"ok", charon_checks, charon_failures];
+            CHECK(self.calls > before && [self.url.absoluteString isEqual:@"revenantopenurltest://real"], "a URL the system sends the application reaches its delegate");
+            printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
+            NSString *summary = [NSString stringWithFormat:@"%@ checks=%d failures=%d\n", revenant_failures ? @"FAIL" : @"ok", revenant_checks, revenant_failures];
             [summary writeToFile:[results_folder stringByAppendingPathComponent:@"openurl.done"] atomically:YES encoding:NSUTF8StringEncoding error:NULL];
         });
     });

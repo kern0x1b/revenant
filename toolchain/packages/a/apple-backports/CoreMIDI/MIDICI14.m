@@ -1,6 +1,6 @@
-#import "CharonMIDICI.h"
+#import "RevenantMIDICI.h"
 
-void charon_ci_inert(const char * _Nonnull action)
+void revenant_ci_inert(const char * _Nonnull action)
 {
     static NSMutableSet *said;
     static dispatch_once_t once;
@@ -13,10 +13,10 @@ void charon_ci_inert(const char * _Nonnull action)
             return;
         [said addObject:name];
     }
-    NSLog(@"charon: %s does nothing: this port has no MIDI-CI transport (facts/CoreMIDI/MIDICI.md)", action);
+    NSLog(@"revenant: %s does nothing: this port has no MIDI-CI transport (facts/CoreMIDI/MIDICI.md)", action);
 }
 
-@implementation MIDICIProfile (CharonMIDI14)
+@implementation MIDICIProfile (RevenantMIDI14)
 
 - (instancetype)initWithData:(NSData *)data
 {
@@ -32,7 +32,7 @@ void charon_ci_inert(const char * _Nonnull action)
 
 @end
 
-@implementation MIDICIProfileState (CharonMIDI14)
+@implementation MIDICIProfileState (RevenantMIDI14)
 
 - (instancetype)initWithEnabledProfiles:(NSArray<MIDICIProfile *> *)enabled disabledProfiles:(NSArray<MIDICIProfile *> *)disabled
 {
@@ -41,11 +41,11 @@ void charon_ci_inert(const char * _Nonnull action)
 
 @end
 
-@implementation MIDICISession (CharonMIDI14)
+@implementation MIDICISession (RevenantMIDI14)
 
 - (BOOL)sendProfile:(MIDICIProfile *)profile onChannel:(MIDIChannelNumber)channel profileData:(NSData *)profileSpecificData
 {
-    charon_ci_inert(__PRETTY_FUNCTION__);
+    revenant_ci_inert(__PRETTY_FUNCTION__);
     return NO;
 }
 
@@ -81,7 +81,7 @@ void charon_ci_inert(const char * _Nonnull action)
 
 - (void)discoverWithHandler:(MIDICIDiscoveryResponseBlock)completedHandler
 {
-    charon_ci_inert(__PRETTY_FUNCTION__);
+    revenant_ci_inert(__PRETTY_FUNCTION__);
 }
 
 @end
@@ -110,9 +110,9 @@ void charon_ci_inert(const char * _Nonnull action)
 - (id<MIDICIProfileResponderDelegate>)profileDelegate { return _profileDelegate; }
 - (MIDICIDeviceInfo *)deviceInfo { return _deviceInfo; }
 
-- (BOOL)notifyProfile:(MIDICIProfile *)aProfile onChannel:(MIDIChannelNumber)channel isEnabled:(BOOL)enabledState { charon_ci_inert(__PRETTY_FUNCTION__); return NO; }
-- (BOOL)sendProfile:(MIDICIProfile *)aProfile onChannel:(MIDIChannelNumber)channel profileData:(NSData *)profileSpecificData { charon_ci_inert(__PRETTY_FUNCTION__); return NO; }
-- (BOOL)start { charon_ci_inert(__PRETTY_FUNCTION__); return NO; }
+- (BOOL)notifyProfile:(MIDICIProfile *)aProfile onChannel:(MIDIChannelNumber)channel isEnabled:(BOOL)enabledState { revenant_ci_inert(__PRETTY_FUNCTION__); return NO; }
+- (BOOL)sendProfile:(MIDICIProfile *)aProfile onChannel:(MIDIChannelNumber)channel profileData:(NSData *)profileSpecificData { revenant_ci_inert(__PRETTY_FUNCTION__); return NO; }
+- (BOOL)start { revenant_ci_inert(__PRETTY_FUNCTION__); return NO; }
 - (void)stop { }
 
 @end

@@ -3,7 +3,7 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-build=${SPEECH_AUTH_BUILD:-$(runs_folder charon-speech-authorization-host)}
+build=${SPEECH_AUTH_BUILD:-$(runs_folder revenant-speech-authorization-host)}
 rm -rf "$build"
 mkdir -p "$build"
 xcrun clang -fobjc-arc -Wall -Wno-deprecated-declarations "$here/speech.m" \

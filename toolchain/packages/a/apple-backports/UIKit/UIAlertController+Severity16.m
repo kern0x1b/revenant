@@ -1,7 +1,7 @@
 #import <UIKit/UIKit.h>
 #import <objc/runtime.h>
 
-@implementation UIAlertController (CharonSeverity16)
+@implementation UIAlertController (RevenantSeverity16)
 
 - (UIAlertControllerSeverity)severity
 {

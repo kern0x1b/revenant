@@ -145,7 +145,7 @@ static int store_case(void)
     id second = makeIdentity(identityClass, make, serviceB, @"bob", nil);
     id third = makeIdentity(identityClass, make, serviceA, @"carol", nil);
 
-    id pathObject = ((id (*)(id, SEL))objc_msgSend)(store, sel_registerName("charon_storePath"));
+    id pathObject = ((id (*)(id, SEL))objc_msgSend)(store, sel_registerName("revenant_storePath"));
     printf("  store   path            %s\n", [[pathObject description] UTF8String]);
 
     port_store_send(store, sel_registerName("saveCredentialIdentities:completion:"),

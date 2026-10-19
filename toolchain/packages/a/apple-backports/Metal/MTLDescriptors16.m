@@ -1,5 +1,5 @@
-#import "CharonMetal.h"
-#import "CharonMetalProtocols.h"
+#import "RevenantMetal.h"
+#import "RevenantMetalProtocols.h"
 
 #pragma clang diagnostic ignored "-Wprotocol"
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
@@ -42,7 +42,7 @@
 }
 @end
 
-static void CharonMetalRefuseAttachmentIndex(NSString *selector, NSUInteger index)
+static void RevenantMetalRefuseAttachmentIndex(NSString *selector, NSUInteger index)
 {
     [NSException raise:NSInvalidArgumentException
                 format:@"%@: attachmentIndex(%lu) must be < 4", selector, (unsigned long)index];
@@ -53,7 +53,7 @@ static void CharonMetalRefuseAttachmentIndex(NSString *selector, NSUInteger inde
 - (MTLAccelerationStructurePassSampleBufferAttachmentDescriptor *)objectAtIndexedSubscript:(NSUInteger)index
 {
     if (index >= 4) {
-        CharonMetalRefuseAttachmentIndex(@"objectAtIndexedSubscript:", index);
+        RevenantMetalRefuseAttachmentIndex(@"objectAtIndexedSubscript:", index);
         return nil;
     }
     if (!_slots[index]) {
@@ -66,7 +66,7 @@ static void CharonMetalRefuseAttachmentIndex(NSString *selector, NSUInteger inde
     atIndexedSubscript:(NSUInteger)index
 {
     if (index >= 4) {
-        CharonMetalRefuseAttachmentIndex(@"setObject:atIndexedSubscript:", index);
+        RevenantMetalRefuseAttachmentIndex(@"setObject:atIndexedSubscript:", index);
         return;
     }
     _slots[index] = attachment ? [attachment copy] : nil;

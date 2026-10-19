@@ -21,7 +21,7 @@
 #include "foundation/output.hpp"
 #include "foundation/userland_hle.hpp"
 
-namespace shade {
+namespace emulator {
 namespace {
 
     constexpr std::string_view aeropuerto_image {

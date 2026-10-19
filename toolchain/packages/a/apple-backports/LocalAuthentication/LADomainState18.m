@@ -35,20 +35,20 @@ typedef NS_ENUM(NSInteger, LACompanionType) {
 #endif
 
 @interface LADomainStateBiometry ()
-- (instancetype)initWithCharonNoSensor;
+- (instancetype)initWithRevenantNoSensor;
 @end
 
 @interface LADomainStateCompanion ()
-- (instancetype)initWithCharonNoCompanion;
+- (instancetype)initWithRevenantNoCompanion;
 @end
 
 @interface LADomainState ()
-- (instancetype)initWithCharonEmptyDomain;
+- (instancetype)initWithRevenantEmptyDomain;
 @end
 
 @implementation LADomainStateBiometry
 
-- (instancetype)initWithCharonNoSensor
+- (instancetype)initWithRevenantNoSensor
 {
     return [super init];
 }
@@ -67,7 +67,7 @@ typedef NS_ENUM(NSInteger, LACompanionType) {
 
 @implementation LADomainStateCompanion
 
-- (instancetype)initWithCharonNoCompanion
+- (instancetype)initWithRevenantNoCompanion
 {
     return [super init];
 }
@@ -91,7 +91,7 @@ typedef NS_ENUM(NSInteger, LACompanionType) {
 
 @implementation LADomainState
 
-- (instancetype)initWithCharonEmptyDomain
+- (instancetype)initWithRevenantEmptyDomain
 {
     return [super init];
 }
@@ -101,7 +101,7 @@ typedef NS_ENUM(NSInteger, LACompanionType) {
     static LADomainStateBiometry *biometry;
     static dispatch_once_t once;
     dispatch_once(&once, ^{
-        biometry = [[LADomainStateBiometry alloc] initWithCharonNoSensor];
+        biometry = [[LADomainStateBiometry alloc] initWithRevenantNoSensor];
     });
     return biometry;
 }
@@ -111,7 +111,7 @@ typedef NS_ENUM(NSInteger, LACompanionType) {
     static LADomainStateCompanion *companion;
     static dispatch_once_t once;
     dispatch_once(&once, ^{
-        companion = [[LADomainStateCompanion alloc] initWithCharonNoCompanion];
+        companion = [[LADomainStateCompanion alloc] initWithRevenantNoCompanion];
     });
     return companion;
 }
@@ -123,31 +123,31 @@ typedef NS_ENUM(NSInteger, LACompanionType) {
 
 @end
 
-static LADomainState *CharonDomainState(void)
+static LADomainState *RevenantDomainState(void)
 {
     static LADomainState *state;
     static dispatch_once_t once;
     dispatch_once(&once, ^{
-        state = [[LADomainState alloc] initWithCharonEmptyDomain];
+        state = [[LADomainState alloc] initWithRevenantEmptyDomain];
     });
     return state;
 }
 
 #pragma mark - the LAContext property that carries it
 
-@interface LAContext (CharonDomainState18)
+@interface LAContext (RevenantDomainState18)
 
 @property (nonatomic, readonly) LADomainState *domainState;
 
 @end
 
-@implementation LAContext (CharonDomainState18)
+@implementation LAContext (RevenantDomainState18)
 
 @dynamic domainState;
 
 - (LADomainState *)domainState
 {
-    return CharonDomainState();
+    return RevenantDomainState();
 }
 
 @end

@@ -5,6 +5,6 @@
 // Generated from the replaceable default PNG; no runtime asset path required.
 #pragma once
 
-namespace shade {
+namespace emulator {
 inline constexpr unsigned char boot_placeholder_png[] { @BOOT_PLACEHOLDER_BYTES@ };
 }

@@ -26,7 +26,7 @@
 #include "kernel/darwin_tty_abi.hpp"
 #include "kernel/offline_baseband_control.hpp"
 
-namespace shade::bsd::baseband_device {
+namespace emulator::bsd::baseband_device {
 
 inline constexpr std::string_view path { "/dev/h5.baseband" };
 inline constexpr std::string_view legacy_path { "/dev/cu.baseband" };

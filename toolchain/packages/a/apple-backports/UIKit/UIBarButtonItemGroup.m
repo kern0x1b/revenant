@@ -1,28 +1,28 @@
 #import <UIKit/UIKit.h>
 #import <objc/runtime.h>
 
-static const void *CharonButtonGroupKey = &CharonButtonGroupKey;
+static const void *RevenantButtonGroupKey = &RevenantButtonGroupKey;
 
-@interface CharonWeakGroup : NSObject
+@interface RevenantWeakGroup : NSObject
 @property (nonatomic, weak) UIBarButtonItemGroup *group;
 @end
 
-@implementation CharonWeakGroup
+@implementation RevenantWeakGroup
 @synthesize group = _group;
 @end
 
-@implementation UIBarButtonItem (CharonButtonGroup)
+@implementation UIBarButtonItem (RevenantButtonGroup)
 
 - (UIBarButtonItemGroup *)buttonGroup
 {
-    return [(CharonWeakGroup *)objc_getAssociatedObject(self, CharonButtonGroupKey) group];
+    return [(RevenantWeakGroup *)objc_getAssociatedObject(self, RevenantButtonGroupKey) group];
 }
 
-- (void)charon_setButtonGroup:(UIBarButtonItemGroup *)group
+- (void)revenant_setButtonGroup:(UIBarButtonItemGroup *)group
 {
-    CharonWeakGroup *box = [[CharonWeakGroup alloc] init];
+    RevenantWeakGroup *box = [[RevenantWeakGroup alloc] init];
     box.group = group;
-    objc_setAssociatedObject(self, CharonButtonGroupKey, box, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, RevenantButtonGroupKey, box, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
 @end
@@ -95,7 +95,7 @@ static const void *CharonButtonGroupKey = &CharonButtonGroupKey;
 {
     _barButtonItems = [items copy];
     for (UIBarButtonItem *item in _barButtonItems)
-        [item charon_setButtonGroup:self];
+        [item revenant_setButtonGroup:self];
 }
 
 - (UIBarButtonItem *)representativeItem

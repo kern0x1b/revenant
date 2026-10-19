@@ -1,10 +1,10 @@
 #import <UIKit/UIKit.h>
 
-static NSString *const kCharonPickerServiceType = @"_universal._sub._ipp._tcp.";
-static NSString *const kCharonPickerDomain = @"local.";
-static const NSTimeInterval kCharonPickerResolveTimeout = 10;
+static NSString *const kRevenantPickerServiceType = @"_universal._sub._ipp._tcp.";
+static NSString *const kRevenantPickerDomain = @"local.";
+static const NSTimeInterval kRevenantPickerResolveTimeout = 10;
 
-static NSURL *charon_printerURL(NSNetService *service)
+static NSURL *revenant_printerURL(NSNetService *service)
 {
     NSString *host = [service hostName];
     if (![host length])
@@ -23,31 +23,31 @@ static NSURL *charon_printerURL(NSNetService *service)
     return [NSURL URLWithString:[NSString stringWithFormat:@"ipp://%@:%ld/%@", host, (long)[service port], escaped]];
 }
 
-@interface CharonPrinterPickerRow : NSObject
+@interface RevenantPrinterPickerRow : NSObject
 @property (nonatomic, strong) NSNetService *service;
 @property (nonatomic, strong) UIPrinter *printer;
 @end
 
-@implementation CharonPrinterPickerRow
+@implementation RevenantPrinterPickerRow
 @synthesize service = _service;
 @synthesize printer = _printer;
 @end
 
-@interface UIPrinterPickerController (CharonList)
-- (void)charon_selectPrinter:(UIPrinter *)printer;
-- (void)charon_cancelWithError:(NSError *)error;
-- (void)charon_popoverDidDismiss;
-- (BOOL)charon_shouldShowPrinter:(UIPrinter *)printer;
+@interface UIPrinterPickerController (RevenantList)
+- (void)revenant_selectPrinter:(UIPrinter *)printer;
+- (void)revenant_cancelWithError:(NSError *)error;
+- (void)revenant_popoverDidDismiss;
+- (BOOL)revenant_shouldShowPrinter:(UIPrinter *)printer;
 @end
 
-@interface CharonPrinterPickerList : UIViewController <UITableViewDataSource, UITableViewDelegate,
+@interface RevenantPrinterPickerList : UIViewController <UITableViewDataSource, UITableViewDelegate,
     NSNetServiceBrowserDelegate, NSNetServiceDelegate, UIPopoverControllerDelegate>
 @property (nonatomic, weak) UIPrinterPickerController *picker;
 - (void)startBrowsing;
 - (void)stopBrowsing;
 @end
 
-@implementation CharonPrinterPickerList {
+@implementation RevenantPrinterPickerList {
     __weak UIPrinterPickerController *_picker;
     UITableView *_table;
     NSNetServiceBrowser *_browser;
@@ -80,7 +80,7 @@ static NSURL *charon_printerURL(NSNetService *service)
 
 - (void)cancel:(id)sender
 {
-    [self.picker charon_cancelWithError:nil];
+    [self.picker revenant_cancelWithError:nil];
 }
 
 - (void)startBrowsing
@@ -89,7 +89,7 @@ static NSURL *charon_printerURL(NSNetService *service)
         return;
     _browser = [[NSNetServiceBrowser alloc] init];
     _browser.delegate = self;
-    [_browser searchForServicesOfType:kCharonPickerServiceType inDomain:kCharonPickerDomain];
+    [_browser searchForServicesOfType:kRevenantPickerServiceType inDomain:kRevenantPickerDomain];
 }
 
 - (void)stopBrowsing
@@ -113,13 +113,13 @@ static NSURL *charon_printerURL(NSNetService *service)
 {
     [_resolving addObject:service];
     service.delegate = self;
-    [service resolveWithTimeout:kCharonPickerResolveTimeout];
+    [service resolveWithTimeout:kRevenantPickerResolveTimeout];
 }
 
 - (void)netServiceBrowser:(NSNetServiceBrowser *)browser didRemoveService:(NSNetService *)service moreComing:(BOOL)more
 {
     [_resolving removeObject:service];
-    for (CharonPrinterPickerRow *row in [_rows copy]) {
+    for (RevenantPrinterPickerRow *row in [_rows copy]) {
         if (row.service == service)
             [_rows removeObject:row];
     }
@@ -131,19 +131,19 @@ static NSURL *charon_printerURL(NSNetService *service)
     NSError *error = [NSError errorWithDomain:NSNetServicesErrorDomain
                                          code:[[errorDict objectForKey:NSNetServicesErrorCode] integerValue]
                                      userInfo:nil];
-    [self.picker charon_cancelWithError:error];
+    [self.picker revenant_cancelWithError:error];
 }
 
 - (void)netServiceDidResolveAddress:(NSNetService *)service
 {
     [_resolving removeObject:service];
-    NSURL *url = charon_printerURL(service);
+    NSURL *url = revenant_printerURL(service);
     if (!url)
         return;
     UIPrinter *printer = [UIPrinter printerWithURL:url];
-    if (![self.picker charon_shouldShowPrinter:printer])
+    if (![self.picker revenant_shouldShowPrinter:printer])
         return;
-    CharonPrinterPickerRow *row = [[CharonPrinterPickerRow alloc] init];
+    RevenantPrinterPickerRow *row = [[RevenantPrinterPickerRow alloc] init];
     row.service = service;
     row.printer = printer;
     [_rows addObject:row];
@@ -167,7 +167,7 @@ static NSURL *charon_printerURL(NSNetService *service)
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    static NSString *const kCell = @"CharonPrinterPickerCell";
+    static NSString *const kCell = @"RevenantPrinterPickerCell";
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:kCell];
     if (!cell)
         cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:kCell];
@@ -178,12 +178,12 @@ static NSURL *charon_printerURL(NSNetService *service)
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
-    [self.picker charon_selectPrinter:[[_rows objectAtIndex:indexPath.row] printer]];
+    [self.picker revenant_selectPrinter:[[_rows objectAtIndex:indexPath.row] printer]];
 }
 
 - (void)popoverControllerDidDismissPopover:(UIPopoverController *)popover
 {
-    [self.picker charon_popoverDidDismiss];
+    [self.picker revenant_popoverDidDismiss];
 }
 
 @end
@@ -191,7 +191,7 @@ static NSURL *charon_printerURL(NSNetService *service)
 @implementation UIPrinterPickerController {
     UIPrinter *_selectedPrinter;
     UIPrinterPickerCompletionHandler _completion;
-    CharonPrinterPickerList *_list;
+    RevenantPrinterPickerList *_list;
     UINavigationController *_navigation;
     UIPopoverController *_popover;
     BOOL _up;
@@ -214,16 +214,16 @@ static NSURL *charon_printerURL(NSNetService *service)
 {
     if (_up)
         return NO;
-    UIViewController *parent = [self charon_parentViewController];
+    UIViewController *parent = [self revenant_parentViewController];
     if (!parent)
         return NO;
-    [self charon_beginWithCompletion:completion animated:animated];
-    [self charon_willPresent];
+    [self revenant_beginWithCompletion:completion animated:animated];
+    [self revenant_willPresent];
     [parent presentViewController:_navigation animated:animated completion:^{
-        [self charon_didPresent];
+        [self revenant_didPresent];
     }];
     if (!_navigation.presentingViewController) {
-        [self charon_abandon];
+        [self revenant_abandon];
         return NO;
     }
     [_list startBrowsing];
@@ -236,12 +236,12 @@ static NSURL *charon_printerURL(NSNetService *service)
         return [self presentAnimated:animated completionHandler:completion];
     if (_up || !view)
         return NO;
-    [self charon_beginWithCompletion:completion animated:animated];
+    [self revenant_beginWithCompletion:completion animated:animated];
     _popover = [[UIPopoverController alloc] initWithContentViewController:_navigation];
     _popover.delegate = _list;
-    [self charon_willPresent];
+    [self revenant_willPresent];
     [_popover presentPopoverFromRect:rect inView:view permittedArrowDirections:UIPopoverArrowDirectionAny animated:animated];
-    [self charon_didPresent];
+    [self revenant_didPresent];
     [_list startBrowsing];
     return YES;
 }
@@ -252,12 +252,12 @@ static NSURL *charon_printerURL(NSNetService *service)
         return [self presentAnimated:animated completionHandler:completion];
     if (_up || !item)
         return NO;
-    [self charon_beginWithCompletion:completion animated:animated];
+    [self revenant_beginWithCompletion:completion animated:animated];
     _popover = [[UIPopoverController alloc] initWithContentViewController:_navigation];
     _popover.delegate = _list;
-    [self charon_willPresent];
+    [self revenant_willPresent];
     [_popover presentPopoverFromBarButtonItem:item permittedArrowDirections:UIPopoverArrowDirectionAny animated:animated];
-    [self charon_didPresent];
+    [self revenant_didPresent];
     [_list startBrowsing];
     return YES;
 }
@@ -266,22 +266,22 @@ static NSURL *charon_printerURL(NSNetService *service)
 {
     if (!_up)
         return;
-    [self charon_finish:NO error:nil animated:animated];
+    [self revenant_finish:NO error:nil animated:animated];
 }
 
 #pragma mark - the picker's state, shared with its list
 
-- (void)charon_beginWithCompletion:(UIPrinterPickerCompletionHandler)completion animated:(BOOL)animated
+- (void)revenant_beginWithCompletion:(UIPrinterPickerCompletionHandler)completion animated:(BOOL)animated
 {
     _up = YES;
     _animated = animated;
     _completion = [completion copy];
-    _list = [[CharonPrinterPickerList alloc] init];
+    _list = [[RevenantPrinterPickerList alloc] init];
     _list.picker = self;
     _navigation = [[UINavigationController alloc] initWithRootViewController:_list];
 }
 
-- (void)charon_abandon
+- (void)revenant_abandon
 {
     [_list stopBrowsing];
     _up = NO;
@@ -290,7 +290,7 @@ static NSURL *charon_printerURL(NSNetService *service)
     _navigation = nil;
 }
 
-- (UIViewController *)charon_parentViewController
+- (UIViewController *)revenant_parentViewController
 {
     UIViewController *parent = nil;
     if ([self.delegate respondsToSelector:@selector(printerPickerControllerParentViewController:)])
@@ -302,44 +302,44 @@ static NSURL *charon_printerURL(NSNetService *service)
     return parent;
 }
 
-- (BOOL)charon_shouldShowPrinter:(UIPrinter *)printer
+- (BOOL)revenant_shouldShowPrinter:(UIPrinter *)printer
 {
     if (![self.delegate respondsToSelector:@selector(printerPickerController:shouldShowPrinter:)])
         return YES;
     return [self.delegate printerPickerController:self shouldShowPrinter:printer];
 }
 
-- (void)charon_willPresent
+- (void)revenant_willPresent
 {
     if ([self.delegate respondsToSelector:@selector(printerPickerControllerWillPresent:)])
         [self.delegate printerPickerControllerWillPresent:self];
 }
 
-- (void)charon_didPresent
+- (void)revenant_didPresent
 {
     if ([self.delegate respondsToSelector:@selector(printerPickerControllerDidPresent:)])
         [self.delegate printerPickerControllerDidPresent:self];
 }
 
-- (void)charon_selectPrinter:(UIPrinter *)printer
+- (void)revenant_selectPrinter:(UIPrinter *)printer
 {
     _selectedPrinter = printer;
     if ([self.delegate respondsToSelector:@selector(printerPickerControllerDidSelectPrinter:)])
         [self.delegate printerPickerControllerDidSelectPrinter:self];
-    [self charon_finish:YES error:nil animated:_animated];
+    [self revenant_finish:YES error:nil animated:_animated];
 }
 
-- (void)charon_cancelWithError:(NSError *)error
+- (void)revenant_cancelWithError:(NSError *)error
 {
-    [self charon_finish:NO error:error animated:_animated];
+    [self revenant_finish:NO error:error animated:_animated];
 }
 
-- (void)charon_popoverDidDismiss
+- (void)revenant_popoverDidDismiss
 {
-    [self charon_finish:NO error:nil animated:NO];
+    [self revenant_finish:NO error:nil animated:NO];
 }
 
-- (void)charon_finish:(BOOL)selected error:(NSError *)error animated:(BOOL)animated
+- (void)revenant_finish:(BOOL)selected error:(NSError *)error animated:(BOOL)animated
 {
     if (!_up)
         return;

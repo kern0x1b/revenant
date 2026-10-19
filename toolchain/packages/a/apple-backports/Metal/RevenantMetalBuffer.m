@@ -1,12 +1,12 @@
-#import "CharonMetal.h"
+#import "RevenantMetal.h"
 
 #pragma clang diagnostic ignored "-Wprotocol"
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
 
-@implementation CharonMetalBuffer {
+@implementation RevenantMetalBuffer {
     void *_bytes;
     NSUInteger _length;
-    __strong CharonMetalHeap *_heap;
+    __strong RevenantMetalHeap *_heap;
     NSUInteger _heapOffset;
 }
 
@@ -23,13 +23,13 @@
     return self;
 }
 
-- (instancetype)initWithHeap:(CharonMetalHeap *)heap offset:(NSUInteger)offset length:(NSUInteger)length
+- (instancetype)initWithHeap:(RevenantMetalHeap *)heap offset:(NSUInteger)offset length:(NSUInteger)length
 {
     if ((self = [super init])) {
         _heap = heap;
         _heapOffset = offset;
         _length = length;
-        _bytes = (uint8_t *)[heap charonBytesAtOffset:offset];
+        _bytes = (uint8_t *)[heap revenantBytesAtOffset:offset];
     }
     return self;
 }
@@ -67,7 +67,7 @@
 
 - (id<MTLDevice>)device
 {
-    return [CharonMetalDevice shared];
+    return [RevenantMetalDevice shared];
 }
 
 - (MTLResourceOptions)resourceOptions

@@ -1,8 +1,8 @@
 #import <Foundation/Foundation.h>
 
-NSError *charon_coder_error(NSException *exception, NSInteger code);
+NSError *revenant_coder_error(NSException *exception, NSInteger code);
 
-@implementation NSKeyedUnarchiver (CharonTopLevel)
+@implementation NSKeyedUnarchiver (RevenantTopLevel)
 
 + (id)unarchiveTopLevelObjectWithData:(NSData *)data error:(NSError **)error
 {
@@ -18,7 +18,7 @@ NSError *charon_coder_error(NSException *exception, NSInteger code);
         [unarchiver finishDecoding];
     } @catch (NSException *exception) {
         if (error)
-            *error = charon_coder_error(exception, NSCoderReadCorruptError);
+            *error = revenant_coder_error(exception, NSCoderReadCorruptError);
         return nil;
     }
     return decoded;

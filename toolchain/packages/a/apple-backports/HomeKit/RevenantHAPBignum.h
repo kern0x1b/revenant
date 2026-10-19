@@ -1,5 +1,5 @@
-#ifndef CHARON_HAP_BIGNUM_H
-#define CHARON_HAP_BIGNUM_H
+#ifndef REVENANT_HAP_BIGNUM_H
+#define REVENANT_HAP_BIGNUM_H
 
 #include <stdint.h>
 #include <string.h>
@@ -11,24 +11,24 @@ typedef struct {
     uint32_t limb[BN_LIMBS];
 } BigNum;
 
-static inline void charon_bn_zero(BigNum *out)
+static inline void revenant_bn_zero(BigNum *out)
 {
     memset(out->limb, 0, sizeof(out->limb));
 }
 
-static inline void charon_bn_set_u32(BigNum *out, uint32_t value)
+static inline void revenant_bn_set_u32(BigNum *out, uint32_t value)
 {
-    charon_bn_zero(out);
+    revenant_bn_zero(out);
     out->limb[0] = value;
 }
 
-void charon_bn_from_bytes(BigNum *out, const uint8_t *bytes, size_t length);
-void charon_bn_to_bytes(uint8_t *bytes, size_t length, const BigNum *value);
+void revenant_bn_from_bytes(BigNum *out, const uint8_t *bytes, size_t length);
+void revenant_bn_to_bytes(uint8_t *bytes, size_t length, const BigNum *value);
 
-void charon_bn_from_bytes_be(BigNum *out, const uint8_t *bytes, size_t length);
-void charon_bn_to_bytes_be(uint8_t *bytes, size_t length, const BigNum *value);
+void revenant_bn_from_bytes_be(BigNum *out, const uint8_t *bytes, size_t length);
+void revenant_bn_to_bytes_be(uint8_t *bytes, size_t length, const BigNum *value);
 
-static inline int charon_bn_cmp(const BigNum *left, const BigNum *right)
+static inline int revenant_bn_cmp(const BigNum *left, const BigNum *right)
 {
     for (int index = BN_LIMBS - 1; index >= 0; --index) {
         if (left->limb[index] != right->limb[index])
@@ -37,7 +37,7 @@ static inline int charon_bn_cmp(const BigNum *left, const BigNum *right)
     return 0;
 }
 
-static inline int charon_bn_is_zero(const BigNum *value)
+static inline int revenant_bn_is_zero(const BigNum *value)
 {
     for (int index = 0; index < BN_LIMBS; ++index) {
         if (value->limb[index])
@@ -46,12 +46,12 @@ static inline int charon_bn_is_zero(const BigNum *value)
     return 1;
 }
 
-static inline int charon_bn_is_odd(const BigNum *value)
+static inline int revenant_bn_is_odd(const BigNum *value)
 {
     return value->limb[0] & 1;
 }
 
-static inline int charon_bn_bits(const BigNum *value)
+static inline int revenant_bn_bits(const BigNum *value)
 {
     for (int index = BN_LIMBS - 1; index >= 0; --index) {
         if (value->limb[index]) {
@@ -67,11 +67,11 @@ static inline int charon_bn_bits(const BigNum *value)
     return 0;
 }
 
-size_t charon_bn_byte_length(const BigNum *value);
-int charon_bn_equal_bytes(const BigNum *left, const uint8_t *right, size_t length);
+size_t revenant_bn_byte_length(const BigNum *value);
+int revenant_bn_equal_bytes(const BigNum *left, const uint8_t *right, size_t length);
 
-uint32_t charon_bn_add(BigNum *out, const BigNum *left, const BigNum *right);
-void charon_bn_sub(BigNum *out, const BigNum *left, const BigNum *right);
+uint32_t revenant_bn_add(BigNum *out, const BigNum *left, const BigNum *right);
+void revenant_bn_sub(BigNum *out, const BigNum *left, const BigNum *right);
 
 typedef struct {
     BigNum modulus;
@@ -80,13 +80,13 @@ typedef struct {
     int limbs;
 } BigNumMont;
 
-void charon_bn_mont_prepare(BigNumMont *mont, const BigNum *modulus);
-void charon_bn_mont_mul(const BigNumMont *mont, BigNum *out, const BigNum *left, const BigNum *right);
-void charon_bn_mont_reduce(const BigNumMont *mont, BigNum *out, const BigNum *value);
-void charon_bn_mont_pow(const BigNumMont *mont, BigNum *out, const BigNum *value, const BigNum *exponent);
-void charon_bn_mont_pow_small(const BigNumMont *mont, BigNum *out, const BigNum *value, uint32_t exponent);
-void charon_bn_mont_add(const BigNumMont *mont, BigNum *out, const BigNum *left, const BigNum *right);
-void charon_bn_mont_sub(const BigNumMont *mont, BigNum *out, const BigNum *left, const BigNum *right);
-void charon_bn_mont_square(const BigNumMont *mont, BigNum *out, const BigNum *left);
+void revenant_bn_mont_prepare(BigNumMont *mont, const BigNum *modulus);
+void revenant_bn_mont_mul(const BigNumMont *mont, BigNum *out, const BigNum *left, const BigNum *right);
+void revenant_bn_mont_reduce(const BigNumMont *mont, BigNum *out, const BigNum *value);
+void revenant_bn_mont_pow(const BigNumMont *mont, BigNum *out, const BigNum *value, const BigNum *exponent);
+void revenant_bn_mont_pow_small(const BigNumMont *mont, BigNum *out, const BigNum *value, uint32_t exponent);
+void revenant_bn_mont_add(const BigNumMont *mont, BigNum *out, const BigNum *left, const BigNum *right);
+void revenant_bn_mont_sub(const BigNumMont *mont, BigNum *out, const BigNum *left, const BigNum *right);
+void revenant_bn_mont_square(const BigNumMont *mont, BigNum *out, const BigNum *left);
 
 #endif

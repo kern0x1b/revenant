@@ -1,12 +1,12 @@
-#import "CharonContacts.h"
+#import "RevenantContacts.h"
 
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
 
 @implementation CNSocialProfile {
-    NSString *_charonUrlString;
-    NSString *_charonUsername;
-    NSString *_charonUserIdentifier;
-    NSString *_charonService;
+    NSString *_revenantUrlString;
+    NSString *_revenantUsername;
+    NSString *_revenantUserIdentifier;
+    NSString *_revenantService;
 }
 
 @dynamic urlString, username, userIdentifier, service;
@@ -15,18 +15,18 @@
 {
     self = [super init];
     if (self) {
-        _charonUrlString = [urlString copy];
-        _charonUsername = [username copy];
-        _charonUserIdentifier = [userIdentifier copy];
-        _charonService = [service copy];
+        _revenantUrlString = [urlString copy];
+        _revenantUsername = [username copy];
+        _revenantUserIdentifier = [userIdentifier copy];
+        _revenantService = [service copy];
     }
     return self;
 }
 
-- (NSString *)urlString { return _charonUrlString ?: @""; }
-- (NSString *)username { return _charonUsername ?: @""; }
-- (NSString *)userIdentifier { return _charonUserIdentifier ?: @""; }
-- (NSString *)service { return _charonService ?: @""; }
+- (NSString *)urlString { return _revenantUrlString ?: @""; }
+- (NSString *)username { return _revenantUsername ?: @""; }
+- (NSString *)userIdentifier { return _revenantUserIdentifier ?: @""; }
+- (NSString *)service { return _revenantService ?: @""; }
 
 + (NSString *)localizedStringForKey:(NSString *)key
 {
@@ -50,20 +50,20 @@
 
 - (void)encodeWithCoder:(NSCoder *)coder
 {
-    [coder encodeObject:_charonUrlString forKey:@"urlString"];
-    [coder encodeObject:_charonUsername forKey:@"username"];
-    [coder encodeObject:_charonUserIdentifier forKey:@"userIdentifier"];
-    [coder encodeObject:_charonService forKey:@"service"];
+    [coder encodeObject:_revenantUrlString forKey:@"urlString"];
+    [coder encodeObject:_revenantUsername forKey:@"username"];
+    [coder encodeObject:_revenantUserIdentifier forKey:@"userIdentifier"];
+    [coder encodeObject:_revenantService forKey:@"service"];
 }
 
 - (instancetype)initWithCoder:(NSCoder *)coder
 {
     self = [super init];
     if (self) {
-        _charonUrlString = [[coder decodeObjectOfClass:[NSString class] forKey:@"urlString"] copy];
-        _charonUsername = [[coder decodeObjectOfClass:[NSString class] forKey:@"username"] copy];
-        _charonUserIdentifier = [[coder decodeObjectOfClass:[NSString class] forKey:@"userIdentifier"] copy];
-        _charonService = [[coder decodeObjectOfClass:[NSString class] forKey:@"service"] copy];
+        _revenantUrlString = [[coder decodeObjectOfClass:[NSString class] forKey:@"urlString"] copy];
+        _revenantUsername = [[coder decodeObjectOfClass:[NSString class] forKey:@"username"] copy];
+        _revenantUserIdentifier = [[coder decodeObjectOfClass:[NSString class] forKey:@"userIdentifier"] copy];
+        _revenantService = [[coder decodeObjectOfClass:[NSString class] forKey:@"service"] copy];
     }
     return self;
 }
@@ -86,7 +86,7 @@
 
 - (NSString *)description
 {
-    return [NSString stringWithFormat:@"<%@: %p: service=%@, username=%@>", NSStringFromClass([self class]), self, _charonService, _charonUsername];
+    return [NSString stringWithFormat:@"<%@: %p: service=%@, username=%@>", NSStringFromClass([self class]), self, _revenantService, _revenantUsername];
 }
 
 @end

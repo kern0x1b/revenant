@@ -39,7 +39,7 @@
     return self;
 }
 
-static void charon_fillASBD(AudioStreamBasicDescription *asbd, AVAudioCommonFormat format, double sampleRate, AVAudioChannelCount channels, BOOL interleaved)
+static void revenant_fillASBD(AudioStreamBasicDescription *asbd, AVAudioCommonFormat format, double sampleRate, AVAudioChannelCount channels, BOOL interleaved)
 {
     memset(asbd, 0, sizeof(*asbd));
     asbd->mSampleRate = sampleRate;
@@ -81,7 +81,7 @@ static void charon_fillASBD(AudioStreamBasicDescription *asbd, AVAudioCommonForm
     if (channels > 2)
         return nil;
     AudioStreamBasicDescription asbd;
-    charon_fillASBD(&asbd, AVAudioPCMFormatFloat32, sampleRate, channels, NO);
+    revenant_fillASBD(&asbd, AVAudioPCMFormatFloat32, sampleRate, channels, NO);
     return [self initWithStreamDescription:&asbd];
 }
 
@@ -90,7 +90,7 @@ static void charon_fillASBD(AudioStreamBasicDescription *asbd, AVAudioCommonForm
     if (!layout)
         return nil;
     AudioStreamBasicDescription asbd;
-    charon_fillASBD(&asbd, AVAudioPCMFormatFloat32, sampleRate, [layout channelCount], NO);
+    revenant_fillASBD(&asbd, AVAudioPCMFormatFloat32, sampleRate, [layout channelCount], NO);
     return [self initWithStreamDescription:&asbd channelLayout:layout];
 }
 
@@ -99,7 +99,7 @@ static void charon_fillASBD(AudioStreamBasicDescription *asbd, AVAudioCommonForm
     if (channels > 2 || format == AVAudioOtherFormat)
         return nil;
     AudioStreamBasicDescription asbd;
-    charon_fillASBD(&asbd, format, sampleRate, channels, interleaved);
+    revenant_fillASBD(&asbd, format, sampleRate, channels, interleaved);
     return [self initWithStreamDescription:&asbd];
 }
 
@@ -108,7 +108,7 @@ static void charon_fillASBD(AudioStreamBasicDescription *asbd, AVAudioCommonForm
     if (!layout || format == AVAudioOtherFormat)
         return nil;
     AudioStreamBasicDescription asbd;
-    charon_fillASBD(&asbd, format, sampleRate, [layout channelCount], interleaved);
+    revenant_fillASBD(&asbd, format, sampleRate, [layout channelCount], interleaved);
     return [self initWithStreamDescription:&asbd channelLayout:layout];
 }
 

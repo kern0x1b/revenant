@@ -3,7 +3,7 @@
 # PDFKit, on three PDFs this harness writes with CGPDFContext's own encryption.
 #
 # The same source, probe.m, is built twice: against the host's PDFKit, and against the port's own
-# CharonPDFKit.h with -DCHARON_PORT and the port's objects. Each side prints one key=value line per fact,
+# RevenantPDFKit.h with -DREVENANT_PORT and the port's objects. Each side prints one key=value line per fact,
 # and the two outputs must be identical. A planted control - a copy of the port in which isLocked answers
 # NO - must make the same comparison go red, or the comparison proves nothing.
 #
@@ -33,7 +33,7 @@ port_objects="$port/PDFDocument11.m $port/PDFPage11.m $port/PDFView11.m $port/PD
     $port/PDFBorder11.m $port/PDFAppearanceCharacteristics11.m $port/PDFDestination11.m $port/PDFAction11.m
     $port/PDFOutline11.m $port/PDFPageText11.m $port/PDFSelection11.m $port/Base14Widths11.m
     $port/PDFKitConstants11.m"
-xcrun clang -fobjc-arc -Wall -Werror=incomplete-implementation -DCHARON_PORT -I "$port" "$here/probe.m" \
+xcrun clang -fobjc-arc -Wall -Werror=incomplete-implementation -DREVENANT_PORT -I "$port" "$here/probe.m" \
     $port_objects -framework Foundation -framework CoreGraphics -o "$build/port-side" 2> "$build/port.log" || {
     echo "BUILD the port side did not compile:"; head -8 "$build/port.log" | sed 's/^/    /'; exit 1; }
 
@@ -48,7 +48,7 @@ mutant_objects="$mutant/PDFDocument11.m $mutant/PDFPage11.m $mutant/PDFView11.m 
     $mutant/PDFBorder11.m $mutant/PDFAppearanceCharacteristics11.m $mutant/PDFDestination11.m $mutant/PDFAction11.m
     $mutant/PDFOutline11.m $mutant/PDFPageText11.m $mutant/PDFSelection11.m $mutant/Base14Widths11.m
     $mutant/PDFKitConstants11.m"
-xcrun clang -fobjc-arc -Wall -Werror=incomplete-implementation -DCHARON_PORT -I "$mutant" "$here/probe.m" \
+xcrun clang -fobjc-arc -Wall -Werror=incomplete-implementation -DREVENANT_PORT -I "$mutant" "$here/probe.m" \
     $mutant_objects -framework Foundation -framework CoreGraphics -o "$build/mutant-side" 2> "$build/mutant.log" || {
     echo "BUILD the planted control did not compile:"; head -8 "$build/mutant.log" | sed 's/^/    /'; exit 1; }
 

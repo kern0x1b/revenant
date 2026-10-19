@@ -1,12 +1,12 @@
 #import <BackgroundTasks/BackgroundTasks.h>
-#import "CharonBackgroundTasks.h"
+#import "RevenantBackgroundTasks.h"
 
 @implementation BGTask {
     NSString *_identifier;
     void (^_expirationHandler)(void);
 }
 
-- (instancetype)initCharonWithIdentifier:(NSString *)identifier
+- (instancetype)initRevenantWithIdentifier:(NSString *)identifier
 {
     if ((self = [super init]))
         _identifier = [identifier copy];

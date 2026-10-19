@@ -1,10 +1,10 @@
-#import "CharonBackdrop.h"
+#import "RevenantBackdrop.h"
 #import <QuartzCore/QuartzCore.h>
 
-static const NSTimeInterval CharonBackdropMinimumInterval = 0.1;
-static const NSTimeInterval CharonBackdropQuietInterval = 0.5;
+static const NSTimeInterval RevenantBackdropMinimumInterval = 0.1;
+static const NSTimeInterval RevenantBackdropQuietInterval = 0.5;
 
-static void charon_backdrop_hide_above(CALayer *layer, CALayer *top, NSMutableArray *hidden)
+static void revenant_backdrop_hide_above(CALayer *layer, CALayer *top, NSMutableArray *hidden)
 {
     if (!layer.hidden) {
         layer.hidden = YES;
@@ -25,9 +25,9 @@ static void charon_backdrop_hide_above(CALayer *layer, CALayer *top, NSMutableAr
     }
 }
 
-@implementation CharonBackdrop {
+@implementation RevenantBackdrop {
     __weak UIView *_view;
-    __weak id<CharonBackdropClient> _client;
+    __weak id<RevenantBackdropClient> _client;
     CADisplayLink *_link;
     NSTimeInterval _nextRefresh;
     uint32_t _lastChecksum;
@@ -38,7 +38,7 @@ static void charon_backdrop_hide_above(CALayer *layer, CALayer *top, NSMutableAr
 
 @synthesize scale = _scale;
 
-- (instancetype)initWithView:(UIView *)view client:(id<CharonBackdropClient>)client
+- (instancetype)initWithView:(UIView *)view client:(id<RevenantBackdropClient>)client
 {
     if ((self = [super init])) {
         _view = view;
@@ -102,7 +102,7 @@ static void charon_backdrop_hide_above(CALayer *layer, CALayer *top, NSMutableAr
     _refreshing = YES;
     NSTimeInterval started = CACurrentMediaTime();
     UIView *view = _view;
-    id<CharonBackdropClient> client = _client;
+    id<RevenantBackdropClient> client = _client;
     UIWindow *window = view.window;
     CGFloat scale = _scale;
     CGRect wanted = [view convertRect:[client backdropRegion:self] toView:window];
@@ -134,7 +134,7 @@ static void charon_backdrop_hide_above(CALayer *layer, CALayer *top, NSMutableAr
     NSMutableArray *hidden = [NSMutableArray array];
     [CATransaction begin];
     [CATransaction setDisableActions:YES];
-    charon_backdrop_hide_above(view.layer, window.layer, hidden);
+    revenant_backdrop_hide_above(view.layer, window.layer, hidden);
     [window.layer renderInContext:context];
     for (CALayer *layer in hidden)
         layer.hidden = NO;
@@ -145,7 +145,7 @@ static void charon_backdrop_hide_above(CALayer *layer, CALayer *top, NSMutableAr
         checksum = (checksum ^ pixels[i] ^ ((uint32_t)pixels[i + 1] << 8) ^ ((uint32_t)pixels[i + 2] << 16)) * 16777619u;
     if (_delivered && checksum == _lastChecksum && CGRectEqualToRect(captured, _lastRect)) {
         free(pixels);
-        _nextRefresh = CACurrentMediaTime() + CharonBackdropQuietInterval;
+        _nextRefresh = CACurrentMediaTime() + RevenantBackdropQuietInterval;
         _refreshing = NO;
         return;
     }
@@ -154,7 +154,7 @@ static void charon_backdrop_hide_above(CALayer *layer, CALayer *top, NSMutableAr
     _delivered = YES;
     [client backdrop:self captured:pixels width:width height:height rowBytes:rowBytes rect:captured];
     NSTimeInterval cost = CACurrentMediaTime() - started;
-    _nextRefresh = CACurrentMediaTime() + MAX(CharonBackdropMinimumInterval, cost * 3);
+    _nextRefresh = CACurrentMediaTime() + MAX(RevenantBackdropMinimumInterval, cost * 3);
     _refreshing = NO;
 }
 

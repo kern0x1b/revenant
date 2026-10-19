@@ -2,10 +2,10 @@
 #import <CoreML/CoreML.h>
 #import <objc/runtime.h>
 
-@interface CharonInitOverrider : NSObject
+@interface RevenantInitOverrider : NSObject
 - (instancetype)init;
 @end
-@implementation CharonInitOverrider
+@implementation RevenantInitOverrider
 - (instancetype)init { return [super init]; }
 @end
 
@@ -31,8 +31,8 @@ int main(void)
             printf("-init %s %d\n", names[i], inherits_nsobject(names[i], NO, @selector(init)));
             printf("+new %s %d\n", names[i], inherits_nsobject(names[i], YES, @selector(new)));
         }
-        printf("-init CharonInitOverrider %d\n", inherits_nsobject("CharonInitOverrider", NO, @selector(init)));
-        printf("-init ZZZNoSuchNameCharonCoreML %d\n", inherits_nsobject("ZZZNoSuchNameCharonCoreML", NO, @selector(init)));
+        printf("-init RevenantInitOverrider %d\n", inherits_nsobject("RevenantInitOverrider", NO, @selector(init)));
+        printf("-init ZZZNoSuchNameRevenantCoreML %d\n", inherits_nsobject("ZZZNoSuchNameRevenantCoreML", NO, @selector(init)));
     }
     return 0;
 }

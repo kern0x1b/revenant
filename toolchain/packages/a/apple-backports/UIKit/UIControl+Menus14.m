@@ -1,13 +1,13 @@
-#import "CharonMenus.h"
+#import "RevenantMenus.h"
 #import <objc/runtime.h>
 
 #pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
 #pragma clang diagnostic ignored "-Wprotocol"
 
-@interface CharonMenuHost : NSObject <UIContextMenuInteractionDelegate>
+@interface RevenantMenuHost : NSObject <UIContextMenuInteractionDelegate>
 @end
 
-@implementation CharonMenuHost {
+@implementation RevenantMenuHost {
 @private
     UIMenu *_menu;
     UIView *_view;
@@ -36,10 +36,10 @@
     [window addSubview:_view];
     _interaction = [[UIContextMenuInteraction alloc] initWithDelegate:self];
     [_view addInteraction:_interaction];
-    [[CharonMenuHost live] addObject:self];
-    [_interaction charon_beginAtLocation:CGPointZero];
+    [[RevenantMenuHost live] addObject:self];
+    [_interaction revenant_beginAtLocation:CGPointZero];
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-        if (_view && ![_interaction charon_visibleMenu])
+        if (_view && ![_interaction revenant_visibleMenu])
             [self finish];
     });
     return YES;
@@ -66,24 +66,24 @@
     [_view removeFromSuperview];
     _view = nil;
     _interaction = nil;
-    [[CharonMenuHost live] removeObject:self];
+    [[RevenantMenuHost live] removeObject:self];
 }
 
 @end
 
-void charon_show_menu(UIMenu *menu)
+void revenant_show_menu(UIMenu *menu)
 {
-    [[[CharonMenuHost alloc] init] showMenu:menu];
+    [[[RevenantMenuHost alloc] init] showMenu:menu];
 }
 
-static const char charon_interaction_key, charon_primary_key, charon_trigger_key;
+static const char revenant_interaction_key, revenant_primary_key, revenant_trigger_key;
 
-@interface CharonMenuTrigger : NSObject
+@interface RevenantMenuTrigger : NSObject
 - (instancetype)initWithControl:(UIControl *)control;
-- (void)charon_fire:(id)sender;
+- (void)revenant_fire:(id)sender;
 @end
 
-@implementation CharonMenuTrigger {
+@implementation RevenantMenuTrigger {
 @private
     __weak UIControl *_control;
 }
@@ -95,38 +95,38 @@ static const char charon_interaction_key, charon_primary_key, charon_trigger_key
     return self;
 }
 
-- (void)charon_fire:(id)sender
+- (void)revenant_fire:(id)sender
 {
     UIControl *control = _control;
     UIContextMenuInteraction *interaction = control.contextMenuInteraction;
     if (interaction)
-        [interaction charon_beginAtLocation:CGPointMake(CGRectGetMidX(control.bounds), CGRectGetMidY(control.bounds))];
+        [interaction revenant_beginAtLocation:CGPointMake(CGRectGetMidX(control.bounds), CGRectGetMidY(control.bounds))];
 }
 
 @end
 
-static void charon_update_trigger(UIControl *control)
+static void revenant_update_trigger(UIControl *control)
 {
-    CharonMenuTrigger *trigger = objc_getAssociatedObject(control, &charon_trigger_key);
+    RevenantMenuTrigger *trigger = objc_getAssociatedObject(control, &revenant_trigger_key);
     BOOL wanted = control.showsMenuAsPrimaryAction && control.contextMenuInteraction;
     if (wanted && !trigger) {
-        trigger = [[CharonMenuTrigger alloc] initWithControl:control];
-        objc_setAssociatedObject(control, &charon_trigger_key, trigger, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-        [control addTarget:trigger action:@selector(charon_fire:) forControlEvents:UIControlEventTouchUpInside];
+        trigger = [[RevenantMenuTrigger alloc] initWithControl:control];
+        objc_setAssociatedObject(control, &revenant_trigger_key, trigger, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+        [control addTarget:trigger action:@selector(revenant_fire:) forControlEvents:UIControlEventTouchUpInside];
     } else if (!wanted && trigger) {
         [control removeTarget:trigger action:NULL forControlEvents:UIControlEventAllEvents];
-        objc_setAssociatedObject(control, &charon_trigger_key, nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+        objc_setAssociatedObject(control, &revenant_trigger_key, nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     }
 }
 
-@interface UIControl (CharonMenus14) <UIContextMenuInteractionDelegate>
+@interface UIControl (RevenantMenus14) <UIContextMenuInteractionDelegate>
 @end
 
-@implementation UIControl (CharonMenus14)
+@implementation UIControl (RevenantMenus14)
 
 - (UIContextMenuInteraction *)contextMenuInteraction
 {
-    return objc_getAssociatedObject(self, &charon_interaction_key);
+    return objc_getAssociatedObject(self, &revenant_interaction_key);
 }
 
 - (BOOL)isContextMenuInteractionEnabled
@@ -139,24 +139,24 @@ static void charon_update_trigger(UIControl *control)
     UIContextMenuInteraction *held = self.contextMenuInteraction;
     if (contextMenuInteractionEnabled && !held) {
         held = [[UIContextMenuInteraction alloc] initWithDelegate:(id<UIContextMenuInteractionDelegate>)self];
-        objc_setAssociatedObject(self, &charon_interaction_key, held, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+        objc_setAssociatedObject(self, &revenant_interaction_key, held, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
         [self addInteraction:held];
     } else if (!contextMenuInteractionEnabled && held) {
         [self removeInteraction:held];
-        objc_setAssociatedObject(self, &charon_interaction_key, nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+        objc_setAssociatedObject(self, &revenant_interaction_key, nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     }
-    charon_update_trigger(self);
+    revenant_update_trigger(self);
 }
 
 - (BOOL)showsMenuAsPrimaryAction
 {
-    return [objc_getAssociatedObject(self, &charon_primary_key) boolValue];
+    return [objc_getAssociatedObject(self, &revenant_primary_key) boolValue];
 }
 
 - (void)setShowsMenuAsPrimaryAction:(BOOL)showsMenuAsPrimaryAction
 {
-    objc_setAssociatedObject(self, &charon_primary_key, @(showsMenuAsPrimaryAction), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-    charon_update_trigger(self);
+    objc_setAssociatedObject(self, &revenant_primary_key, @(showsMenuAsPrimaryAction), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    revenant_update_trigger(self);
 }
 
 - (CGPoint)menuAttachmentPointForConfiguration:(UIContextMenuConfiguration *)configuration

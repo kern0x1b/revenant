@@ -22,7 +22,7 @@ static NSString *const results_folder = @"/private/var/backports";
 {
     [[NSFileManager defaultManager] createDirectoryAtPath:results_folder withIntermediateDirectories:YES attributes:nil error:NULL];
     [[NSFileManager defaultManager] removeItemAtPath:[results_folder stringByAppendingPathComponent:@"touchtypes.done"] error:NULL];
-    charon_log_to([results_folder stringByAppendingPathComponent:@"touchtypes.log"]);
+    revenant_log_to([results_folder stringByAppendingPathComponent:@"touchtypes.log"]);
     self.fired = [NSMutableArray array];
     self.window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
     self.window.rootViewController = [[UIViewController alloc] init];
@@ -33,9 +33,9 @@ static NSString *const results_folder = @"/private/var/backports";
         touchtypes_run(self.window, ^(NSString *name, NSString *value) { records[name] = value; printf("record %s: %s\n", name.UTF8String, value.UTF8String); });
         for (NSString *name in [expected.allKeys sortedArrayUsingSelector:@selector(compare:)]) {
             if ([expected[name] isEqualToString:records[name]])
-                charon_check(YES, name.UTF8String, nil);
+                revenant_check(YES, name.UTF8String, nil);
             else
-                charon_check(NO, name.UTF8String, [NSString stringWithFormat:@"\n    device %@\n    host   %@", records[name], expected[name]]);
+                revenant_check(NO, name.UTF8String, [NSString stringWithFormat:@"\n    device %@\n    host   %@", records[name], expected[name]]);
         }
         UIViewController *controller = self.window.rootViewController;
         NSArray *cases = @[@[@"default", [NSNull null]], @[@"direct", @[@(UITouchTypeDirect)]], @[@"indirect", @[@(UITouchTypeIndirect)]], @[@"empty", @[]], @[@"both", @[@(UITouchTypeIndirect), @(UITouchTypeDirect)]]];
@@ -58,14 +58,14 @@ static NSString *const results_folder = @"/private/var/backports";
             gesture_tap(^{ return CGPointMake(width / 2, 90 + 70 * index); }, 0.4);
             gesture_step(0.1, ^{
                 BOOL did = [self.fired containsObject:name];
-                charon_check(did == should, [[NSString stringWithFormat:@"a real finger %@ a tap recognizer that allows %@", should ? @"runs" : @"does not run", name] UTF8String], nil);
+                revenant_check(did == should, [[NSString stringWithFormat:@"a real finger %@ a tap recognizer that allows %@", should ? @"runs" : @"does not run", name] UTF8String], nil);
             });
         }
         gesture_run(^{
             UITouch *probe = nil;
             (void)probe;
-            printf("checks=%d failures=%d\n", charon_checks, charon_failures);
-            NSString *summary = [NSString stringWithFormat:@"%@ checks=%d failures=%d\n", charon_failures ? @"FAIL" : @"ok", charon_checks, charon_failures];
+            printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
+            NSString *summary = [NSString stringWithFormat:@"%@ checks=%d failures=%d\n", revenant_failures ? @"FAIL" : @"ok", revenant_checks, revenant_failures];
             [summary writeToFile:[results_folder stringByAppendingPathComponent:@"touchtypes.done"] atomically:YES encoding:NSUTF8StringEncoding error:NULL];
         });
     });

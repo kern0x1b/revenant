@@ -4,10 +4,10 @@
 #import <stdio.h>
 #import <string.h>
 
-@interface CharonSecProtocolStrings : NSObject <OS_sec_protocol_options>
-- (const char *)charonServerName;
-- (const char *)charonApplicationProtocolAt:(size_t)index;
-- (size_t)charonApplicationProtocolCount;
+@interface RevenantSecProtocolStrings : NSObject <OS_sec_protocol_options>
+- (const char *)revenantServerName;
+- (const char *)revenantApplicationProtocolAt:(size_t)index;
+- (size_t)revenantApplicationProtocolCount;
 @end
 
 static int failures = 0;
@@ -33,16 +33,16 @@ int main(void)
     setvbuf(stdout, NULL, _IONBF, 0);
     __weak id weakOptions = nil;
     @autoreleasepool {
-        Class cls = NSClassFromString(@"CharonSecProtocolStrings");
+        Class cls = NSClassFromString(@"RevenantSecProtocolStrings");
         printf("port-class\t%s\n", cls ? "found" : "MISSING");
         if (!cls) return 1;
         sec_protocol_options_t o = (sec_protocol_options_t)[[cls alloc] init];
 
         setFromAStackFrameThatReturns(o);
-        const char *heldName = [(id)o charonServerName];
+        const char *heldName = [(id)o revenantServerName];
         if (heldName && strcmp(heldName, "example.invalid") == 0)
             serverNameSurvived = 1;
-        const char *heldAlpn = [(id)o charonApplicationProtocolAt:0];
+        const char *heldAlpn = [(id)o revenantApplicationProtocolAt:0];
         if (heldAlpn && strcmp(heldAlpn, "h2") == 0)
             alpnSurvived = 1;
         want("server-name-survives-dead-frame", serverNameSurvived, 1);
@@ -50,18 +50,18 @@ int main(void)
 
         sec_protocol_options_add_tls_application_protocol(o, "http/1.1");
         sec_protocol_options_add_tls_application_protocol(o, "spdy/2");
-        want("alpn-count", (long)[(id)o charonApplicationProtocolCount], 3);
-        printf("alpn-0\t%s\n", [(id)o charonApplicationProtocolAt:0]);
-        printf("alpn-1\t%s\n", [(id)o charonApplicationProtocolAt:1]);
-        printf("alpn-2\t%s\n", [(id)o charonApplicationProtocolAt:2]);
-        want("alpn-past-end", [(id)o charonApplicationProtocolAt:9] ? 1 : 0, 0);
+        want("alpn-count", (long)[(id)o revenantApplicationProtocolCount], 3);
+        printf("alpn-0\t%s\n", [(id)o revenantApplicationProtocolAt:0]);
+        printf("alpn-1\t%s\n", [(id)o revenantApplicationProtocolAt:1]);
+        printf("alpn-2\t%s\n", [(id)o revenantApplicationProtocolAt:2]);
+        want("alpn-past-end", [(id)o revenantApplicationProtocolAt:9] ? 1 : 0, 0);
         sec_protocol_options_add_tls_application_protocol(o, NULL);
-        want("alpn-after-null", (long)[(id)o charonApplicationProtocolCount], 3);
+        want("alpn-after-null", (long)[(id)o revenantApplicationProtocolCount], 3);
 
         sec_protocol_options_set_tls_server_name(o, "second.invalid");
-        printf("name-after-second\t%s\n", [(id)o charonServerName]);
+        printf("name-after-second\t%s\n", [(id)o revenantServerName]);
         sec_protocol_options_set_tls_server_name(o, NULL);
-        want("name-cleared", [(id)o charonServerName] ? 1 : 0, 0);
+        want("name-cleared", [(id)o revenantServerName] ? 1 : 0, 0);
 
         sec_protocol_options_set_tls_server_name(NULL, "x");
         sec_protocol_options_add_tls_application_protocol(NULL, "x");

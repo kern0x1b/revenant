@@ -1,8 +1,8 @@
-#import "CharonAVFAudio.h"
+#import "RevenantAVFAudio.h"
 #import <PHASE/PHASE.h>
 #import <simd/simd.h>
 
-static const simd_float4x4 CharonIdentityTransform = {{
+static const simd_float4x4 RevenantIdentityTransform = {{
     {1.0f, 0.0f, 0.0f, 0.0f},
     {0.0f, 1.0f, 0.0f, 0.0f},
     {0.0f, 0.0f, 1.0f, 0.0f},
@@ -10,34 +10,34 @@ static const simd_float4x4 CharonIdentityTransform = {{
 }};
 
 @implementation PHASEObject {
-    __weak PHASEObject *_charon_parent;
-    __weak PHASEEngine *_charon_engine;
-    NSMutableArray<PHASEObject *> *_charon_children;
-    simd_float4x4 _charon_transform;
-    simd_float4x4 _charon_worldTransform;
-    simd_float4x4 _charon_localTransform;
+    __weak PHASEObject *_revenant_parent;
+    __weak PHASEEngine *_revenant_engine;
+    NSMutableArray<PHASEObject *> *_revenant_children;
+    simd_float4x4 _revenant_transform;
+    simd_float4x4 _revenant_worldTransform;
+    simd_float4x4 _revenant_localTransform;
 }
 
 - (instancetype)initWithEngine:(PHASEEngine *)engine
 {
     if ((self = [super init])) {
-        _charon_engine = engine;
-        _charon_children = [NSMutableArray array];
-        _charon_transform = CharonIdentityTransform;
-        _charon_localTransform = CharonIdentityTransform;
-        _charon_worldTransform = CharonIdentityTransform;
+        _revenant_engine = engine;
+        _revenant_children = [NSMutableArray array];
+        _revenant_transform = RevenantIdentityTransform;
+        _revenant_localTransform = RevenantIdentityTransform;
+        _revenant_worldTransform = RevenantIdentityTransform;
     }
     return self;
 }
 
 - (PHASEObject *)parent
 {
-    return _charon_parent;
+    return _revenant_parent;
 }
 
 - (NSArray<PHASEObject *> *)children
 {
-    return [_charon_children copy];
+    return [_revenant_children copy];
 }
 
 - (BOOL)addChild:(PHASEObject *)child error:(NSError **)outError
@@ -55,50 +55,50 @@ static const simd_float4x4 CharonIdentityTransform = {{
         }
         return NO;
     }
-    [self charon_setParent:child];
-    [_charon_children addObject:child];
-    [child charon_recomputeWorldTransform];
+    [self revenant_setParent:child];
+    [_revenant_children addObject:child];
+    [child revenant_recomputeWorldTransform];
     return YES;
 }
 
 - (void)removeChild:(PHASEObject *)child
 {
-    if (child == nil || ![_charon_children containsObject:child]) {
+    if (child == nil || ![_revenant_children containsObject:child]) {
         return;
     }
-    [child charon_setParent:nil];
-    [_charon_children removeObject:child];
-    [child charon_recomputeWorldTransform];
+    [child revenant_setParent:nil];
+    [_revenant_children removeObject:child];
+    [child revenant_recomputeWorldTransform];
 }
 
 - (void)removeChildren
 {
-    for (PHASEObject *child in [_charon_children copy]) {
-        [child charon_setParent:nil];
-        [child charon_recomputeWorldTransform];
+    for (PHASEObject *child in [_revenant_children copy]) {
+        [child revenant_setParent:nil];
+        [child revenant_recomputeWorldTransform];
     }
-    [_charon_children removeAllObjects];
+    [_revenant_children removeAllObjects];
 }
 
 - (simd_float4x4)transform
 {
-    return _charon_transform;
+    return _revenant_transform;
 }
 
 - (void)setTransform:(simd_float4x4)transform
 {
-    _charon_transform = transform;
-    [self charon_recomputeWorldTransform];
+    _revenant_transform = transform;
+    [self revenant_recomputeWorldTransform];
 }
 
 - (simd_float4x4)worldTransform
 {
-    return _charon_worldTransform;
+    return _revenant_worldTransform;
 }
 
 - (void)setWorldTransform:(simd_float4x4)worldTransform
 {
-    _charon_worldTransform = worldTransform;
+    _revenant_worldTransform = worldTransform;
 }
 
 + (simd_float3)right
@@ -116,26 +116,26 @@ static const simd_float4x4 CharonIdentityTransform = {{
     return simd_make_float3(0.0f, 0.0f, -1.0f);
 }
 
-- (void)charon_setParent:(PHASEObject *)parent
+- (void)revenant_setParent:(PHASEObject *)parent
 {
-    _charon_parent = parent;
+    _revenant_parent = parent;
 }
 
-- (void)charon_recomputeWorldTransform
+- (void)revenant_recomputeWorldTransform
 {
-    simd_float4x4 accumulated = _charon_transform;
-    for (PHASEObject *ancestor = _charon_parent; ancestor != nil; ancestor = ancestor.parent) {
+    simd_float4x4 accumulated = _revenant_transform;
+    for (PHASEObject *ancestor = _revenant_parent; ancestor != nil; ancestor = ancestor.parent) {
         accumulated = simd_mul(ancestor.transform, accumulated);
     }
-    _charon_worldTransform = accumulated;
+    _revenant_worldTransform = accumulated;
 }
 
 
 - (id)copyWithZone:(NSZone *)zone
 {
-    PHASEObject *copy = [[[self class] allocWithZone:zone] initWithEngine:_charon_engine];
-    copy->_charon_transform = _charon_transform;
-    [copy charon_recomputeWorldTransform];
+    PHASEObject *copy = [[[self class] allocWithZone:zone] initWithEngine:_revenant_engine];
+    copy->_revenant_transform = _revenant_transform;
+    [copy revenant_recomputeWorldTransform];
     return copy;
 }
 

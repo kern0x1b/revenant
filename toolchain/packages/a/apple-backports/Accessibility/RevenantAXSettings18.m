@@ -1,11 +1,11 @@
-#import "CharonAXSettings.h"
-#import "CharonAXSettingsCommon.h"
+#import "RevenantAXSettings.h"
+#import "RevenantAXSettingsCommon.h"
 
-NSErrorDomain const CharonAXSettingsErrorDomain = @"org.charon.Accessibility.Settings";
+NSErrorDomain const RevenantAXSettingsErrorDomain = @"org.revenant.Accessibility.Settings";
 
 BOOL AXPrefersNonBlinkingTextInsertionIndicator(void)
 {
-    return CharonAXSettingIsOffOnThisRelease();
+    return RevenantAXSettingIsOffOnThisRelease();
 }
 
 NSNotificationName const AXPrefersNonBlinkingTextInsertionIndicatorDidChangeNotification =
@@ -13,7 +13,7 @@ NSNotificationName const AXPrefersNonBlinkingTextInsertionIndicatorDidChangeNoti
 
 BOOL AXAssistiveAccessEnabled(void)
 {
-    return CharonAXSettingIsOffOnThisRelease();
+    return RevenantAXSettingIsOffOnThisRelease();
 }
 
 void AXOpenSettingsFeature(AXSettingsFeature feature, void (^completionHandler)(NSError *_Nullable error))
@@ -32,7 +32,7 @@ void AXOpenSettingsFeature(AXSettingsFeature feature, void (^completionHandler)(
         : [NSString stringWithFormat:
             @"the Settings app of this release has no section for AXSettingsFeature %ld, which is not one "
             @"of the sections this API names, so nothing was opened", (long)feature];
-    completionHandler([NSError errorWithDomain:CharonAXSettingsErrorDomain code:feature userInfo:@{
+    completionHandler([NSError errorWithDomain:RevenantAXSettingsErrorDomain code:feature userInfo:@{
         NSLocalizedDescriptionKey: reason,
         @"AXSettingsFeature": @(feature),
     }]);

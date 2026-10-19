@@ -10,9 +10,9 @@
 NS_ASSUME_NONNULL_BEGIN
 
 #if OS_OBJECT_USE_OBJC
-#define CHARON_NW_OBJECT(protocol) NSObject <protocol>
+#define REVENANT_NW_OBJECT(protocol) NSObject <protocol>
 #else
-#define CHARON_NW_OBJECT(protocol) NSObject
+#define REVENANT_NW_OBJECT(protocol) NSObject
 #endif
 
 #if !__has_include(<Network/proxy_config.h>)
@@ -20,37 +20,37 @@ NS_ASSUME_NONNULL_BEGIN
 @end
 @protocol OS_nw_relay_hop <NSObject>
 @end
-typedef CHARON_NW_OBJECT(OS_nw_proxy_config) *nw_proxy_config_t;
-typedef CHARON_NW_OBJECT(OS_nw_relay_hop) *nw_relay_hop_t;
+typedef REVENANT_NW_OBJECT(OS_nw_proxy_config) *nw_proxy_config_t;
+typedef REVENANT_NW_OBJECT(OS_nw_relay_hop) *nw_relay_hop_t;
 #endif
 
 
 
-@class CharonNWEndpoint;
-@class CharonNWParameters;
-@class CharonNWProtocolDefinition;
-@class CharonNWProtocolOptions;
-@class CharonNWProtocolStack;
-@class CharonNWTxtRecord;
-@class CharonNWPrivacyContext;
-@class CharonNWProxyConfig;
-@class CharonNWRelayHop;
-@class CharonNWResolverConfig;
-@class CharonNWBrowseDescriptor;
-@class CharonNWAdvertiseDescriptor;
-@class CharonNWBrowser;
-@class CharonNWBrowseResult;
-@class CharonNWListener;
-@class CharonNWConnection;
-@class CharonNWConnectionGroup;
-@class CharonNWGroupDescriptor;
-@class CharonNWFramer;
-@class CharonNWSecProtocol;
-@class CharonNWWebSocketRequest;
-@class CharonNWWebSocketResponse;
-@class CharonNWEthernetChannel;
+@class RevenantNWEndpoint;
+@class RevenantNWParameters;
+@class RevenantNWProtocolDefinition;
+@class RevenantNWProtocolOptions;
+@class RevenantNWProtocolStack;
+@class RevenantNWTxtRecord;
+@class RevenantNWPrivacyContext;
+@class RevenantNWProxyConfig;
+@class RevenantNWRelayHop;
+@class RevenantNWResolverConfig;
+@class RevenantNWBrowseDescriptor;
+@class RevenantNWAdvertiseDescriptor;
+@class RevenantNWBrowser;
+@class RevenantNWBrowseResult;
+@class RevenantNWListener;
+@class RevenantNWConnection;
+@class RevenantNWConnectionGroup;
+@class RevenantNWGroupDescriptor;
+@class RevenantNWFramer;
+@class RevenantNWSecProtocol;
+@class RevenantNWWebSocketRequest;
+@class RevenantNWWebSocketResponse;
+@class RevenantNWEthernetChannel;
 
-@interface CharonNWEndpoint : CHARON_NW_OBJECT(OS_nw_endpoint) {
+@interface RevenantNWEndpoint : REVENANT_NW_OBJECT(OS_nw_endpoint) {
 @public
     nw_endpoint_type_t _type;
     NSString *_hostname;
@@ -61,11 +61,11 @@ typedef CHARON_NW_OBJECT(OS_nw_relay_hop) *nw_relay_hop_t;
     NSString *_bonjourDomain;
     NSData *_address;
     NSData *_signature;
-    CharonNWTxtRecord *_txtRecord;
+    RevenantNWTxtRecord *_txtRecord;
 }
 @end
 
-@interface CharonNWProtocolDefinition : CHARON_NW_OBJECT(OS_nw_protocol_definition) {
+@interface RevenantNWProtocolDefinition : REVENANT_NW_OBJECT(OS_nw_protocol_definition) {
 @public
     NSString *_family;
     NSString *_identifier;
@@ -74,52 +74,52 @@ typedef CHARON_NW_OBJECT(OS_nw_relay_hop) *nw_relay_hop_t;
 }
 @end
 
-@interface CharonNWProtocolOptions : CHARON_NW_OBJECT(OS_nw_protocol_options) {
+@interface RevenantNWProtocolOptions : REVENANT_NW_OBJECT(OS_nw_protocol_options) {
 @public
-    CharonNWProtocolDefinition *_definition;
+    RevenantNWProtocolDefinition *_definition;
     NSMutableDictionary *_values;
     NSMutableDictionary *_objects;
 }
 @end
 
-@interface CharonNWProtocolMetadata : CHARON_NW_OBJECT(OS_nw_protocol_metadata) {
+@interface RevenantNWProtocolMetadata : REVENANT_NW_OBJECT(OS_nw_protocol_metadata) {
 @public
-    CharonNWProtocolDefinition *_definition;
+    RevenantNWProtocolDefinition *_definition;
     NSMutableDictionary *_values;
     NSMutableDictionary *_objects;
 }
 @end
 
-@interface CharonNWError : CHARON_NW_OBJECT(OS_nw_error) {
+@interface RevenantNWError : REVENANT_NW_OBJECT(OS_nw_error) {
 @public
     nw_error_domain_t _domain;
     int _code;
 }
 @end
 
-@interface CharonNWContentContext : CHARON_NW_OBJECT(OS_nw_content_context) {
+@interface RevenantNWContentContext : REVENANT_NW_OBJECT(OS_nw_content_context) {
 @public
     NSString *_identifier;
     double _relativePriority;
     uint64_t _expirationMilliseconds;
     bool _isFinal;
-    CharonNWContentContext *_antecedent;
+    RevenantNWContentContext *_antecedent;
     NSMutableDictionary *_metadata;
 }
 @end
 
-@interface CharonNWProtocolStack : CHARON_NW_OBJECT(OS_nw_protocol_stack) {
+@interface RevenantNWProtocolStack : REVENANT_NW_OBJECT(OS_nw_protocol_stack) {
 @public
-    CharonNWProtocolOptions *_internet;
-    CharonNWProtocolOptions *_transport;
+    RevenantNWProtocolOptions *_internet;
+    RevenantNWProtocolOptions *_transport;
     NSMutableArray *_application;
 }
 @end
 
-@interface CharonNWParameters : CHARON_NW_OBJECT(OS_nw_parameters) {
+@interface RevenantNWParameters : REVENANT_NW_OBJECT(OS_nw_parameters) {
 @public
-    CharonNWProtocolStack *_stack;
-    CharonNWEndpoint *_localEndpoint;
+    RevenantNWProtocolStack *_stack;
+    RevenantNWEndpoint *_localEndpoint;
     id _requiredInterface;
     nw_interface_type_t _requiredInterfaceType;
     NSMutableArray *_prohibitedInterfaces;
@@ -137,12 +137,12 @@ typedef CHARON_NW_OBJECT(OS_nw_relay_hop) *nw_relay_hop_t;
     nw_multipath_service_t _multipathService;
     nw_parameters_expired_dns_behavior_t _expiredDNSBehavior;
     nw_parameters_attribution_t _attribution;
-    CharonNWPrivacyContext *_privacyContext;
+    RevenantNWPrivacyContext *_privacyContext;
     NSString *_applicationService;
 }
 @end
 
-@interface CharonNWTxtRecord : CHARON_NW_OBJECT(OS_nw_txt_record) {
+@interface RevenantNWTxtRecord : REVENANT_NW_OBJECT(OS_nw_txt_record) {
 @public
     NSMutableArray *_keys;
     NSMutableArray *_values;
@@ -150,23 +150,23 @@ typedef CHARON_NW_OBJECT(OS_nw_relay_hop) *nw_relay_hop_t;
 }
 @end
 
-@interface CharonNWRelayHop : CHARON_NW_OBJECT(OS_nw_relay_hop) {
+@interface RevenantNWRelayHop : REVENANT_NW_OBJECT(OS_nw_relay_hop) {
 @public
-    CharonNWEndpoint *_http3;
-    CharonNWEndpoint *_http2;
-    CharonNWProtocolOptions *_tls;
+    RevenantNWEndpoint *_http3;
+    RevenantNWEndpoint *_http2;
+    RevenantNWProtocolOptions *_tls;
     NSMutableArray *_headerNames;
     NSMutableArray *_headerValues;
 }
 @end
 
-@interface CharonNWProxyConfig : CHARON_NW_OBJECT(OS_nw_proxy_config) {
+@interface RevenantNWProxyConfig : REVENANT_NW_OBJECT(OS_nw_proxy_config) {
 @public
     NSString *_kind;
-    CharonNWEndpoint *_endpoint;
-    CharonNWProtocolOptions *_tls;
-    CharonNWRelayHop *_firstHop;
-    CharonNWRelayHop *_secondHop;
+    RevenantNWEndpoint *_endpoint;
+    RevenantNWProtocolOptions *_tls;
+    RevenantNWRelayHop *_firstHop;
+    RevenantNWRelayHop *_secondHop;
     NSString *_relayResourcePath;
     NSData *_gatewayKeyConfig;
     NSString *_username;
@@ -177,25 +177,25 @@ typedef CHARON_NW_OBJECT(OS_nw_relay_hop) *nw_relay_hop_t;
 }
 @end
 
-@interface CharonNWPrivacyContext : CHARON_NW_OBJECT(OS_nw_privacy_context) {
+@interface RevenantNWPrivacyContext : REVENANT_NW_OBJECT(OS_nw_privacy_context) {
 @public
     NSString *_description;
     BOOL _loggingDisabled;
     BOOL _requireEncrypted;
-    CharonNWResolverConfig *_fallbackResolver;
+    RevenantNWResolverConfig *_fallbackResolver;
     NSMutableArray *_proxies;
 }
 @end
 
-@interface CharonNWResolverConfig : CHARON_NW_OBJECT(OS_nw_resolver_config) {
+@interface RevenantNWResolverConfig : REVENANT_NW_OBJECT(OS_nw_resolver_config) {
 @public
     NSString *_kind;
-    CharonNWEndpoint *_endpoint;
+    RevenantNWEndpoint *_endpoint;
     NSMutableArray *_servers;
 }
 @end
 
-@interface CharonNWBrowseDescriptor : CHARON_NW_OBJECT(OS_nw_browse_descriptor) {
+@interface RevenantNWBrowseDescriptor : REVENANT_NW_OBJECT(OS_nw_browse_descriptor) {
 @public
     NSString *_bonjourType;
     NSString *_bonjourDomain;
@@ -204,7 +204,7 @@ typedef CHARON_NW_OBJECT(OS_nw_relay_hop) *nw_relay_hop_t;
 }
 @end
 
-@interface CharonNWAdvertiseDescriptor : CHARON_NW_OBJECT(OS_nw_advertise_descriptor) {
+@interface RevenantNWAdvertiseDescriptor : REVENANT_NW_OBJECT(OS_nw_advertise_descriptor) {
 @public
     NSString *_bonjourName;
     NSString *_bonjourType;
@@ -212,39 +212,39 @@ typedef CHARON_NW_OBJECT(OS_nw_relay_hop) *nw_relay_hop_t;
     NSString *_applicationService;
     BOOL _noAutoRename;
     NSData *_txtRecord;
-    CharonNWTxtRecord *_txtRecordObject;
+    RevenantNWTxtRecord *_txtRecordObject;
 }
 @end
 
-@interface CharonNWBrowseResult : CHARON_NW_OBJECT(OS_nw_browse_result) {
+@interface RevenantNWBrowseResult : REVENANT_NW_OBJECT(OS_nw_browse_result) {
 @public
     NSString *_name;
     NSString *_type;
     NSString *_domain;
-    CharonNWEndpoint *_endpoint;
-    CharonNWTxtRecord *_txtRecord;
+    RevenantNWEndpoint *_endpoint;
+    RevenantNWTxtRecord *_txtRecord;
     NSMutableArray *_interfaces;
 }
 @end
 
-@interface CharonNWGroupDescriptor : CHARON_NW_OBJECT(OS_nw_group_descriptor) {
+@interface RevenantNWGroupDescriptor : REVENANT_NW_OBJECT(OS_nw_group_descriptor) {
 @public
     NSString *_kind;
-    CharonNWEndpoint *_multicastGroup;
-    CharonNWEndpoint *_remoteEndpoint;
-    CharonNWEndpoint *_specificSource;
+    RevenantNWEndpoint *_multicastGroup;
+    RevenantNWEndpoint *_remoteEndpoint;
+    RevenantNWEndpoint *_specificSource;
     NSMutableArray *_endpoints;
     BOOL _disableUnicastTraffic;
 }
 @end
 
-@interface CharonNWFramer : CHARON_NW_OBJECT(OS_nw_framer) {
+@interface RevenantNWFramer : REVENANT_NW_OBJECT(OS_nw_framer) {
 @public
-    CharonNWProtocolDefinition *_definition;
-    CharonNWProtocolOptions *_options;
-    CharonNWParameters *_parameters;
-    CharonNWEndpoint *_localEndpoint;
-    CharonNWEndpoint *_remoteEndpoint;
+    RevenantNWProtocolDefinition *_definition;
+    RevenantNWProtocolOptions *_options;
+    RevenantNWParameters *_parameters;
+    RevenantNWEndpoint *_localEndpoint;
+    RevenantNWEndpoint *_remoteEndpoint;
     nw_framer_start_handler_t _startHandler;
     nw_framer_input_handler_t _inputHandler;
     nw_framer_output_handler_t _outputHandler;
@@ -266,7 +266,7 @@ typedef CHARON_NW_OBJECT(OS_nw_relay_hop) *nw_relay_hop_t;
 }
 @end
 
-@interface CharonNWWebSocketRequest : CHARON_NW_OBJECT(OS_nw_ws_request) {
+@interface RevenantNWWebSocketRequest : REVENANT_NW_OBJECT(OS_nw_ws_request) {
 @public
     NSMutableArray *_subprotocols;
     NSMutableArray *_headerNames;
@@ -274,7 +274,7 @@ typedef CHARON_NW_OBJECT(OS_nw_relay_hop) *nw_relay_hop_t;
 }
 @end
 
-@interface CharonNWWebSocketResponse : CHARON_NW_OBJECT(OS_nw_ws_response) {
+@interface RevenantNWWebSocketResponse : REVENANT_NW_OBJECT(OS_nw_ws_response) {
 @public
     nw_ws_response_status_t _status;
     NSString *_selectedSubprotocol;
@@ -283,14 +283,14 @@ typedef CHARON_NW_OBJECT(OS_nw_relay_hop) *nw_relay_hop_t;
 }
 @end
 
-@interface CharonNWEstablishmentReport : CHARON_NW_OBJECT(OS_nw_establishment_report) {
+@interface RevenantNWEstablishmentReport : REVENANT_NW_OBJECT(OS_nw_establishment_report) {
 @public
     uint64_t _durationMilliseconds;
     uint64_t _attemptStartedAfterMilliseconds;
     uint32_t _previousAttemptCount;
     BOOL _proxyConfigured;
     BOOL _usedProxy;
-    CharonNWEndpoint *_proxyEndpoint;
+    RevenantNWEndpoint *_proxyEndpoint;
     NSMutableArray *_protocols;
     NSMutableArray *_protocolHandshakeMilliseconds;
     NSMutableArray *_protocolHandshakeRTTMilliseconds;
@@ -299,19 +299,19 @@ typedef CHARON_NW_OBJECT(OS_nw_relay_hop) *nw_relay_hop_t;
 }
 @end
 
-@interface CharonNWResolutionReport : CHARON_NW_OBJECT(OS_nw_resolution_report) {
+@interface RevenantNWResolutionReport : REVENANT_NW_OBJECT(OS_nw_resolution_report) {
 @public
     uint64_t _milliseconds;
     uint32_t _endpointCount;
     nw_report_resolution_protocol_t _protocol;
     nw_report_resolution_source_t _source;
-    CharonNWEndpoint *_preferred;
-    CharonNWEndpoint *_successful;
+    RevenantNWEndpoint *_preferred;
+    RevenantNWEndpoint *_successful;
     NSMutableArray *_endpoints;
 }
 @end
 
-@interface CharonNWDataTransferReport : CHARON_NW_OBJECT(OS_nw_data_transfer_report) {
+@interface RevenantNWDataTransferReport : REVENANT_NW_OBJECT(OS_nw_data_transfer_report) {
 @public
     nw_data_transfer_report_state_t _state;
     uint64_t _durationMilliseconds;
@@ -332,7 +332,7 @@ typedef CHARON_NW_OBJECT(OS_nw_relay_hop) *nw_relay_hop_t;
 }
 @end
 
-@interface CharonNWSecProtocol : NSObject {
+@interface RevenantNWSecProtocol : NSObject {
 @public
     NSMutableDictionary *_values;
     NSMutableArray *_applicationProtocols;
@@ -347,13 +347,13 @@ typedef CHARON_NW_OBJECT(OS_nw_relay_hop) *nw_relay_hop_t;
 }
 @end
 
-extern void CharonNWConnectionAttach(nw_connection_t connection, int handle, BOOL connected);
-extern BOOL CharonNWConnectionTakeSocket(nw_connection_t connection, int *out_handle,
+extern void RevenantNWConnectionAttach(nw_connection_t connection, int handle, BOOL connected);
+extern BOOL RevenantNWConnectionTakeSocket(nw_connection_t connection, int *out_handle,
                                         void *out_endpoint, void *out_parameters);
-extern void CharonNWListenerSetNewConnectionGroup(nw_listener_t listener,
+extern void RevenantNWListenerSetNewConnectionGroup(nw_listener_t listener,
                                                   nw_listener_new_connection_group_handler_t handler);
-extern void CharonNWListenerSetNewConnectionLimit(nw_listener_t listener, uint32_t new_connection_limit);
-extern uint32_t CharonNWListenerGetNewConnectionLimit(nw_listener_t listener);
-extern BOOL CharonNWConnectionHasQueue(nw_connection_t connection);
+extern void RevenantNWListenerSetNewConnectionLimit(nw_listener_t listener, uint32_t new_connection_limit);
+extern uint32_t RevenantNWListenerGetNewConnectionLimit(nw_listener_t listener);
+extern BOOL RevenantNWConnectionHasQueue(nw_connection_t connection);
 
 NS_ASSUME_NONNULL_END

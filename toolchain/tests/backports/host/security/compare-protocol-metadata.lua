@@ -31,7 +31,7 @@ function main(...)
         bad[#bad + 1] = line
     end
     if first("port-class") ~= "found" then
-        bad[#bad + 1] = "port-class: the port's CharonSecProtocolMetadata was not found, so nothing was checked"
+        bad[#bad + 1] = "port-class: the port's RevenantSecProtocolMetadata was not found, so nothing was checked"
     end
     if first("is-metadata") ~= "1" then
         bad[#bad + 1] = "is-metadata: the object does not conform to OS_sec_protocol_metadata"

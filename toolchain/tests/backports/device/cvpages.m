@@ -4,10 +4,10 @@
 
 static CGSize const kContent = {320, 244};
 
-@interface CharonPlainLayout : UICollectionViewLayout
+@interface RevenantPlainLayout : UICollectionViewLayout
 @end
 
-@implementation CharonPlainLayout
+@implementation RevenantPlainLayout
 - (CGSize)collectionViewContentSize { return kContent; }
 - (UICollectionViewLayoutAttributes *)layoutAttributesForItemAtIndexPath:(NSIndexPath *)path
 {
@@ -21,11 +21,11 @@ static CGSize const kContent = {320, 244};
 }
 @end
 
-@interface CharonPagesSource : NSObject <UICollectionViewDataSource>
+@interface RevenantPagesSource : NSObject <UICollectionViewDataSource>
 @property (nonatomic) NSInteger count;
 @end
 
-@implementation CharonPagesSource
+@implementation RevenantPagesSource
 - (NSInteger)collectionView:(UICollectionView *)view numberOfItemsInSection:(NSInteger)section { return self.count; }
 - (UICollectionViewCell *)collectionView:(UICollectionView *)view cellForItemAtIndexPath:(NSIndexPath *)path
 {
@@ -33,7 +33,7 @@ static CGSize const kContent = {320, 244};
 }
 @end
 
-static UICollectionView *show(UICollectionViewLayout *layout, CharonPagesSource *source, CGFloat height)
+static UICollectionView *show(UICollectionViewLayout *layout, RevenantPagesSource *source, CGFloat height)
 {
     UICollectionView *view = [[UICollectionView alloc] initWithFrame:CGRectMake(0, 0, 320, height) collectionViewLayout:layout];
     [view registerClass:[UICollectionViewCell class] forCellWithReuseIdentifier:@"cell"];
@@ -71,16 +71,16 @@ static UICollectionViewLayout *tall_layout(void)
 
 static void release_files_by_pages(void)
 {
-    CharonPagesSource *source = [[CharonPagesSource alloc] init];
+    RevenantPagesSource *source = [[RevenantPagesSource alloc] init];
     source.count = 1;
-    UICollectionView *view = show([[CharonPlainLayout alloc] init], source, 480);
+    UICollectionView *view = show([[RevenantPlainLayout alloc] init], source, 480);
     settle(view);
     printf("note the release %s an item whose frame reaches past both ends of the rectangle it checks\n", cell_at(view, 0) ? "shows" : "loses");
 }
 
 static void spanning_items(void)
 {
-    CharonPagesSource *source = [[CharonPagesSource alloc] init];
+    RevenantPagesSource *source = [[RevenantPagesSource alloc] init];
     source.count = 3;
     UICollectionView *view = show(tall_layout(), source, 480);
     CGSize content = view.contentSize;
@@ -125,10 +125,10 @@ int main(int argc, char **argv)
 {
     @autoreleasepool {
         if (argc > 1)
-            charon_log_to(@(argv[1]));
+            revenant_log_to(@(argv[1]));
         release_files_by_pages();
         spanning_items();
-        printf("%d of %d checks failed\n", charon_failures, charon_checks);
+        printf("%d of %d checks failed\n", revenant_failures, revenant_checks);
     }
-    return charon_failures ? 1 : 0;
+    return revenant_failures ? 1 : 0;
 }

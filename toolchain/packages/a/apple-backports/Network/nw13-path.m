@@ -1,5 +1,5 @@
-#import "CharonNW.h"
-#import "CharonNWSupport.h"
+#import "RevenantNW.h"
+#import "RevenantNWSupport.h"
 
 #include <ifaddrs.h>
 #include <net/if.h>

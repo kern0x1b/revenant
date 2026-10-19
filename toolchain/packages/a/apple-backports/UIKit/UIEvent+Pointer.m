@@ -7,7 +7,7 @@ UIEventButtonMask UIEventButtonMaskForButtonNumber(NSInteger buttonNumber)
     return (UIEventButtonMask)((NSInteger)1 << (buttonNumber > 1 ? buttonNumber - 1 : 0));
 }
 
-@implementation UIEvent (CharonPointer)
+@implementation UIEvent (RevenantPointer)
 
 - (UIKeyModifierFlags)modifierFlags
 {

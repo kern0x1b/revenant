@@ -56,7 +56,7 @@ MTLTileRenderPipelineColorAttachmentDescriptor MTLTileRenderPipelineColorAttachm
 
 prove_defined() {   # $1 nm output
     for name in $class_list; do
-        symbol="_OBJC_CLASS_\$_charonHost_$name"
+        symbol="_OBJC_CLASS_\$_revenantHost_$name"
         found=$(printf '%s\n' "$1" | awk -v s="$symbol" 'index($0, s){n++} END{print n+0}')
         if [ "$found" -eq 0 ]; then
             echo "MISSING $symbol - the case would measure the HOST's Metal, not the port's" >&2
@@ -76,7 +76,7 @@ if [ -n "${SELF_TEST:-}" ]; then
     : > "$fake"
     for name in $class_list; do
         [ "$name" = "MTL4LibraryFunctionDescriptor" ] && continue   # the one left out
-        printf '%s S %s%s%s\n' "0000000000000100" "_OBJC_CLASS_\$_" "charonHost_" "$name" >> "$fake"
+        printf '%s S %s%s%s\n' "0000000000000100" "_OBJC_CLASS_\$_" "revenantHost_" "$name" >> "$fake"
     done
     if prove_defined "$(cat "$fake")"; then
         echo "FAIL: the self-test passed with a class missing from the symbol table" >&2
@@ -84,7 +84,7 @@ if [ -n "${SELF_TEST:-}" ]; then
     fi
     echo "  ok   the self-test's NEGATIVE: the class that is not defined is named"
     : > "$fake"
-    for name in $class_list; do printf '%s S %s%s%s\n' "0000000000000100" "_OBJC_CLASS_\$_" "charonHost_" "$name" >> "$fake"; done
+    for name in $class_list; do printf '%s S %s%s%s\n' "0000000000000100" "_OBJC_CLASS_\$_" "revenantHost_" "$name" >> "$fake"; done
     if ! prove_defined "$(cat "$fake")"; then
         echo "FAIL: the self-test's full list was refused, so prove_defined is not usable" >&2
         rm -rf "$selfdir"; exit 1
@@ -101,32 +101,32 @@ mkdir -p "$work/port"
 cat > "$work/port/port.m" <<'PORTTU'
 /* Written by tests/backports/host/metal-census/descriptors26.sh: the port's Metal 4 descriptors under
  * class names this host does not have, so Apple's keeps the real ones and the two can be compared. */
-#define MTL4PipelineOptions charonHost_MTL4PipelineOptions
-#define MTL4StaticLinkingDescriptor charonHost_MTL4StaticLinkingDescriptor
-#define MTL4PipelineStageDynamicLinkingDescriptor charonHost_MTL4PipelineStageDynamicLinkingDescriptor
-#define MTL4RenderPipelineDynamicLinkingDescriptor charonHost_MTL4RenderPipelineDynamicLinkingDescriptor
-#define MTL4RenderPipelineBinaryFunctionsDescriptor charonHost_MTL4RenderPipelineBinaryFunctionsDescriptor
-#define MTL4RenderPipelineColorAttachmentDescriptor charonHost_MTL4RenderPipelineColorAttachmentDescriptor
-#define MTL4RenderPipelineColorAttachmentDescriptorArray charonHost_MTL4RenderPipelineColorAttachmentDescriptorArray
-#define MTL4PipelineDescriptor charonHost_MTL4PipelineDescriptor
-#define MTL4RenderPipelineDescriptor charonHost_MTL4RenderPipelineDescriptor
-#define MTL4ComputePipelineDescriptor charonHost_MTL4ComputePipelineDescriptor
-#define MTL4TileRenderPipelineDescriptor charonHost_MTL4TileRenderPipelineDescriptor
-#define MTL4MeshRenderPipelineDescriptor charonHost_MTL4MeshRenderPipelineDescriptor
-#define MTL4FunctionDescriptor charonHost_MTL4FunctionDescriptor
-#define MTL4SpecializedFunctionDescriptor charonHost_MTL4SpecializedFunctionDescriptor
-#define MTL4StitchedFunctionDescriptor charonHost_MTL4StitchedFunctionDescriptor
-#define MTL4LibraryFunctionDescriptor charonHost_MTL4LibraryFunctionDescriptor
-#define MTL4AccelerationStructureGeometryDescriptor charonHost_MTL4AccelerationStructureGeometryDescriptor
-#define MTL4AccelerationStructureTriangleGeometryDescriptor charonHost_MTL4AccelerationStructureTriangleGeometryDescriptor
-#define MTL4AccelerationStructureBoundingBoxGeometryDescriptor charonHost_MTL4AccelerationStructureBoundingBoxGeometryDescriptor
-#define MTL4AccelerationStructureCurveGeometryDescriptor charonHost_MTL4AccelerationStructureCurveGeometryDescriptor
-#define MTL4AccelerationStructureMotionTriangleGeometryDescriptor charonHost_MTL4AccelerationStructureMotionTriangleGeometryDescriptor
-#define MTL4AccelerationStructureMotionBoundingBoxGeometryDescriptor charonHost_MTL4AccelerationStructureMotionBoundingBoxGeometryDescriptor
-#define MTL4AccelerationStructureMotionCurveGeometryDescriptor charonHost_MTL4AccelerationStructureMotionCurveGeometryDescriptor
-#define MTL4RenderPassDescriptor charonHost_MTL4RenderPassDescriptor
-#define MTLTileRenderPipelineColorAttachmentDescriptor charonHost_MTLileRenderPipelineColorAttachmentDescriptor
-#define MTLTileRenderPipelineColorAttachmentDescriptorArray charonHost_MTLTileRenderPipelineColorAttachmentDescriptorArray
+#define MTL4PipelineOptions revenantHost_MTL4PipelineOptions
+#define MTL4StaticLinkingDescriptor revenantHost_MTL4StaticLinkingDescriptor
+#define MTL4PipelineStageDynamicLinkingDescriptor revenantHost_MTL4PipelineStageDynamicLinkingDescriptor
+#define MTL4RenderPipelineDynamicLinkingDescriptor revenantHost_MTL4RenderPipelineDynamicLinkingDescriptor
+#define MTL4RenderPipelineBinaryFunctionsDescriptor revenantHost_MTL4RenderPipelineBinaryFunctionsDescriptor
+#define MTL4RenderPipelineColorAttachmentDescriptor revenantHost_MTL4RenderPipelineColorAttachmentDescriptor
+#define MTL4RenderPipelineColorAttachmentDescriptorArray revenantHost_MTL4RenderPipelineColorAttachmentDescriptorArray
+#define MTL4PipelineDescriptor revenantHost_MTL4PipelineDescriptor
+#define MTL4RenderPipelineDescriptor revenantHost_MTL4RenderPipelineDescriptor
+#define MTL4ComputePipelineDescriptor revenantHost_MTL4ComputePipelineDescriptor
+#define MTL4TileRenderPipelineDescriptor revenantHost_MTL4TileRenderPipelineDescriptor
+#define MTL4MeshRenderPipelineDescriptor revenantHost_MTL4MeshRenderPipelineDescriptor
+#define MTL4FunctionDescriptor revenantHost_MTL4FunctionDescriptor
+#define MTL4SpecializedFunctionDescriptor revenantHost_MTL4SpecializedFunctionDescriptor
+#define MTL4StitchedFunctionDescriptor revenantHost_MTL4StitchedFunctionDescriptor
+#define MTL4LibraryFunctionDescriptor revenantHost_MTL4LibraryFunctionDescriptor
+#define MTL4AccelerationStructureGeometryDescriptor revenantHost_MTL4AccelerationStructureGeometryDescriptor
+#define MTL4AccelerationStructureTriangleGeometryDescriptor revenantHost_MTL4AccelerationStructureTriangleGeometryDescriptor
+#define MTL4AccelerationStructureBoundingBoxGeometryDescriptor revenantHost_MTL4AccelerationStructureBoundingBoxGeometryDescriptor
+#define MTL4AccelerationStructureCurveGeometryDescriptor revenantHost_MTL4AccelerationStructureCurveGeometryDescriptor
+#define MTL4AccelerationStructureMotionTriangleGeometryDescriptor revenantHost_MTL4AccelerationStructureMotionTriangleGeometryDescriptor
+#define MTL4AccelerationStructureMotionBoundingBoxGeometryDescriptor revenantHost_MTL4AccelerationStructureMotionBoundingBoxGeometryDescriptor
+#define MTL4AccelerationStructureMotionCurveGeometryDescriptor revenantHost_MTL4AccelerationStructureMotionCurveGeometryDescriptor
+#define MTL4RenderPassDescriptor revenantHost_MTL4RenderPassDescriptor
+#define MTLTileRenderPipelineColorAttachmentDescriptor revenantHost_MTLileRenderPipelineColorAttachmentDescriptor
+#define MTLTileRenderPipelineColorAttachmentDescriptorArray revenantHost_MTLTileRenderPipelineColorAttachmentDescriptorArray
 #include "MTL4Descriptors26.m"
 #include "MTL4AccelerationGeometry26.m"
 #include "MTL4RenderPass26.m"
@@ -494,8 +494,8 @@ expect_red_bounds() {   # $1 mutant name, $2 the bound, $3 what it broke
     esac
 }
 mutate m10 MTL4RenderPass26.m MTL4RenderPassDescriptor \
-    "            if (!CharonMetal4CoordinateIsInRange(positions[index].x))" \
-    "            if (0 && !CharonMetal4CoordinateIsInRange(positions[index].x))   /* MUTATION */" 1
+    "            if (!RevenantMetal4CoordinateIsInRange(positions[index].x))" \
+    "            if (0 && !RevenantMetal4CoordinateIsInRange(positions[index].x))   /* MUTATION */" 1
 build_bounds m10; expect_red_bounds m10 coordinates "M10 the coordinate bound"
 
 mutate m11 MTL4RenderPass26.m MTL4RenderPassDescriptor \

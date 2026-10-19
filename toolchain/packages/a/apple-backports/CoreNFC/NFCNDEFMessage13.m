@@ -1,36 +1,36 @@
 #import <CoreNFC/CoreNFC.h>
-#import "CharonNDEF.h"
+#import "RevenantNDEF.h"
 
-static NSData *CharonNDEFRTD(const char *rtd, size_t length)
+static NSData *RevenantNDEFRTD(const char *rtd, size_t length)
 {
     return [NSData dataWithBytes:rtd length:length];
 }
 
-static NSData *CharonNDEFURIRTD(void)
+static NSData *RevenantNDEFURIRTD(void)
 {
     static NSData *type;
     static dispatch_once_t once;
-    dispatch_once(&once, ^{ type = CharonNDEFRTD("U", 1); });
+    dispatch_once(&once, ^{ type = RevenantNDEFRTD("U", 1); });
     return type;
 }
 
-static NSData *CharonNDEFTextRTD(void)
+static NSData *RevenantNDEFTextRTD(void)
 {
     static NSData *type;
     static dispatch_once_t once;
-    dispatch_once(&once, ^{ type = CharonNDEFRTD("T", 1); });
+    dispatch_once(&once, ^{ type = RevenantNDEFRTD("T", 1); });
     return type;
 }
 
-@interface NFCNDEFPayload (CharonRecord)
+@interface NFCNDEFPayload (RevenantRecord)
 
 - (instancetype)initWithFormat:(NFCTypeNameFormat)format type:(NSData *)type identifier:(NSData *)identifier payload:(NSData *)payload;
 - (instancetype)initWithFormat:(NFCTypeNameFormat)format type:(NSData *)type identifier:(NSData *)identifier payload:(NSData *)payload chunkSize:(size_t)chunkSize;
-- (size_t)charonChunkSize;
+- (size_t)revenantChunkSize;
 
 @end
 
-@implementation NFCNDEFPayload (CharonRecord)
+@implementation NFCNDEFPayload (RevenantRecord)
 
 - (instancetype)initWithFormat:(NFCTypeNameFormat)format type:(NSData *)type identifier:(NSData *)identifier payload:(NSData *)payload
 {
@@ -53,7 +53,7 @@ static NSData *CharonNDEFTextRTD(void)
     return self;
 }
 
-- (size_t)charonChunkSize
+- (size_t)revenantChunkSize
 {
     NSData *size = [self valueForKey:@"chunkSize"];
     return size ? *(const size_t *)size.bytes : 0;
@@ -70,12 +70,12 @@ static NSData *CharonNDEFTextRTD(void)
 
 @implementation NFCNDEFPayload (ConvenienceHelpers)
 
-static uint8_t CharonNDEFPrefixIndex(NSString *uri, NSUInteger *rest)
+static uint8_t RevenantNDEFPrefixIndex(NSString *uri, NSUInteger *rest)
 {
     uint8_t table = 0x00;
     *rest = uri.length;
-    for (NSUInteger index = 1; index < CharonNDEFURIPrefixCount; index++) {
-        NSString *prefix = @(CharonNDEFURIPrefixes[index]);
+    for (NSUInteger index = 1; index < RevenantNDEFURIPrefixCount; index++) {
+        NSString *prefix = @(RevenantNDEFURIPrefixes[index]);
         if (prefix.length && [uri hasPrefix:prefix]) {
             table = (uint8_t)index;
             *rest = uri.length - prefix.length;
@@ -84,10 +84,10 @@ static uint8_t CharonNDEFPrefixIndex(NSString *uri, NSUInteger *rest)
     return table;
 }
 
-static NSData *CharonNDEFURIPayloadData(NSString *uri)
+static NSData *RevenantNDEFURIPayloadData(NSString *uri)
 {
     NSUInteger rest = 0;
-    uint8_t table = CharonNDEFPrefixIndex(uri, &rest);
+    uint8_t table = RevenantNDEFPrefixIndex(uri, &rest);
     NSMutableData *bytes = [NSMutableData dataWithBytes:&table length:1];
     const char *tail = uri.UTF8String;
     if (tail) {
@@ -96,50 +96,50 @@ static NSData *CharonNDEFURIPayloadData(NSString *uri)
     return bytes;
 }
 
-+ (instancetype)charonURIPayload:(NSString *)uri
++ (instancetype)revenantURIPayload:(NSString *)uri
 {
     if (!uri) {
         return nil;
     }
-    return [[self alloc] initWithFormat:NFCTypeNameFormatNFCWellKnown type:CharonNDEFURIRTD() identifier:nil
-                                payload:CharonNDEFURIPayloadData(uri)];
+    return [[self alloc] initWithFormat:NFCTypeNameFormatNFCWellKnown type:RevenantNDEFURIRTD() identifier:nil
+                                payload:RevenantNDEFURIPayloadData(uri)];
 }
 
 + (instancetype)wellKnownTypeURIPayloadWithString:(NSString *)uri
 {
-    return [self charonURIPayload:uri];
+    return [self revenantURIPayload:uri];
 }
 
 + (instancetype)wellKnownTypeURIPayloadWithURL:(NSURL *)url
 {
-    return [self charonURIPayload:url.absoluteString];
+    return [self revenantURIPayload:url.absoluteString];
 }
 
 - (NSURL *)wellKnownTypeURIPayload
 {
-    if (self.typeNameFormat != NFCTypeNameFormatNFCWellKnown || ![self.type isEqualToData:CharonNDEFURIRTD()]
+    if (self.typeNameFormat != NFCTypeNameFormatNFCWellKnown || ![self.type isEqualToData:RevenantNDEFURIRTD()]
         || self.payload.length < 1) {
         return nil;
     }
     const uint8_t *bytes = self.payload.bytes;
-    if (bytes[0] >= CharonNDEFURIPrefixCount) {
+    if (bytes[0] >= RevenantNDEFURIPrefixCount) {
         return nil;
     }
     NSString *text = [[NSString alloc] initWithBytes:bytes + 1 length:self.payload.length - 1 encoding:NSUTF8StringEncoding];
     if (!text) {
         return nil;
     }
-    return [NSURL URLWithString:[NSString stringWithFormat:@"%@%@", @(CharonNDEFURIPrefixes[bytes[0]]), text]];
+    return [NSURL URLWithString:[NSString stringWithFormat:@"%@%@", @(RevenantNDEFURIPrefixes[bytes[0]]), text]];
 }
 
-static NSData *CharonNDEFTextPayloadData(NSString *text, NSString *language)
+static NSData *RevenantNDEFTextPayloadData(NSString *text, NSString *language)
 {
     const char *code = language.UTF8String ?: "en";
     size_t codeLength = strlen(code);
-    if (codeLength == 0 || codeLength > CharonNDEFTextLanguageLengthMask) {
+    if (codeLength == 0 || codeLength > RevenantNDEFTextLanguageLengthMask) {
         return nil;
     }
-    uint8_t status = (uint8_t)(codeLength & CharonNDEFTextLanguageLengthMask);
+    uint8_t status = (uint8_t)(codeLength & RevenantNDEFTextLanguageLengthMask);
     NSMutableData *bytes = [NSMutableData dataWithBytes:&status length:1];
     [bytes appendBytes:code length:codeLength];
     [bytes appendData:[text dataUsingEncoding:NSUTF8StringEncoding] ?: [NSData data]];
@@ -152,11 +152,11 @@ static NSData *CharonNDEFTextPayloadData(NSString *text, NSString *language)
         return nil;
     }
     NSString *language = [locale objectForKey:locale.localeIdentifier ?: @"en"];
-    NSData *payload = CharonNDEFTextPayloadData(text, language);
+    NSData *payload = RevenantNDEFTextPayloadData(text, language);
     if (!payload) {
         return nil;
     }
-    return [[self alloc] initWithFormat:NFCTypeNameFormatNFCWellKnown type:CharonNDEFTextRTD() identifier:nil payload:payload];
+    return [[self alloc] initWithFormat:NFCTypeNameFormatNFCWellKnown type:RevenantNDEFTextRTD() identifier:nil payload:payload];
 }
 
 + (instancetype)wellKnowTypeTextPayloadWithString:(NSString *)text locale:(NSLocale *)locale
@@ -164,18 +164,18 @@ static NSData *CharonNDEFTextPayloadData(NSString *text, NSString *language)
     return [self wellKnownTypeTextPayloadWithString:text locale:locale];
 }
 
-- (NSString *)charonTextWithLocale:(NSLocale *__autoreleasing _Nullable * _Nonnull)outLocale
+- (NSString *)revenantTextWithLocale:(NSLocale *__autoreleasing _Nullable * _Nonnull)outLocale
 {
-    if (self.typeNameFormat != NFCTypeNameFormatNFCWellKnown || ![self.type isEqualToData:CharonNDEFTextRTD()]
+    if (self.typeNameFormat != NFCTypeNameFormatNFCWellKnown || ![self.type isEqualToData:RevenantNDEFTextRTD()]
         || self.payload.length < 1) {
         return nil;
     }
     const uint8_t *bytes = self.payload.bytes;
-    size_t codeLength = bytes[0] & CharonNDEFTextLanguageLengthMask;
+    size_t codeLength = bytes[0] & RevenantNDEFTextLanguageLengthMask;
     if (self.payload.length < 1 + codeLength) {
         return nil;
     }
-    NSStringEncoding encoding = (bytes[0] & CharonNDEFTextUTF16) ? NSUTF16StringEncoding : NSUTF8StringEncoding;
+    NSStringEncoding encoding = (bytes[0] & RevenantNDEFTextUTF16) ? NSUTF16StringEncoding : NSUTF8StringEncoding;
     if (outLocale) {
         NSString *code = codeLength ? [[NSString alloc] initWithBytes:bytes + 1 length:codeLength
                                         encoding:NSASCIIStringEncoding] : nil;
@@ -187,23 +187,23 @@ static NSData *CharonNDEFTextPayloadData(NSString *text, NSString *language)
 
 - (NSString *)wellKnownTypeTextPayloadWithLocale:(NSLocale *__autoreleasing * _Nonnull)locale
 {
-    return [self charonTextWithLocale:locale];
+    return [self revenantTextWithLocale:locale];
 }
 
 @end
 
-@interface NFCNDEFMessage (CharonRecord)
+@interface NFCNDEFMessage (RevenantRecord)
 
 - (instancetype)initWithNDEFRecords:(NSArray<NFCNDEFPayload *> *)records;
 
 @end
 
-@implementation NFCNDEFMessage (CharonRecord)
+@implementation NFCNDEFMessage (RevenantRecord)
 
-static size_t CharonNDEFRender(NFCNDEFPayload *payload, BOOL first, BOOL last, BOOL continuation,
+static size_t RevenantNDEFRender(NFCNDEFPayload *payload, BOOL first, BOOL last, BOOL continuation,
                                uint8_t marker, BOOL withMarker, NSMutableData *into)
 {
-    CharonNDEFRecord record;
+    RevenantNDEFRecord record;
     memset(&record, 0, sizeof record);
     record.format = payload.typeNameFormat;
     record.first = first;
@@ -211,11 +211,11 @@ static size_t CharonNDEFRender(NFCNDEFPayload *payload, BOOL first, BOOL last, B
     record.continuation = continuation;
     record.hasIdentifierField = payload.identifier.length != 0;
     if (!continuation) {
-        record.typeLength = MIN(payload.type.length, (NSUInteger)CharonNDEFMaxTypeLength);
+        record.typeLength = MIN(payload.type.length, (NSUInteger)RevenantNDEFMaxTypeLength);
         if (record.typeLength) {
             memcpy(record.type, payload.type.bytes, record.typeLength);
         }
-        record.identifierLength = MIN(payload.identifier.length, (NSUInteger)CharonNDEFMaxIDLength);
+        record.identifierLength = MIN(payload.identifier.length, (NSUInteger)RevenantNDEFMaxIDLength);
         if (record.identifierLength) {
             memcpy(record.identifier, payload.identifier.bytes, record.identifierLength);
         }
@@ -227,7 +227,7 @@ static size_t CharonNDEFRender(NFCNDEFPayload *payload, BOOL first, BOOL last, B
     }
     record.payload = body;
     record.payloadLength = payloadLength;
-    size_t length = CharonNDEFRecordLength(&record);
+    size_t length = RevenantNDEFRecordLength(&record);
     if (length == 0) {
         return 0;
     }
@@ -235,7 +235,7 @@ static size_t CharonNDEFRender(NFCNDEFPayload *payload, BOOL first, BOOL last, B
     if (!out) {
         return 0;
     }
-    if (CharonNDEFRecordEncode(&record, out, length) != length) {
+    if (RevenantNDEFRecordEncode(&record, out, length) != length) {
         free(out);
         return 0;
     }
@@ -248,11 +248,11 @@ static size_t CharonNDEFRender(NFCNDEFPayload *payload, BOOL first, BOOL last, B
     return length;
 }
 
-- (void)charonAppendPayload:(NFCNDEFPayload *)payload into:(NSMutableData *)into first:(BOOL *)first last:(BOOL)last
+- (void)revenantAppendPayload:(NFCNDEFPayload *)payload into:(NSMutableData *)into first:(BOOL *)first last:(BOOL)last
 {
-    size_t chunkSize = [payload charonChunkSize];
+    size_t chunkSize = [payload revenantChunkSize];
     if (chunkSize == 0 || payload.payload.length <= chunkSize) {
-        CharonNDEFRender(payload, *first, last, NO, 0, NO, into);
+        RevenantNDEFRender(payload, *first, last, NO, 0, NO, into);
         *first = NO;
         return;
     }
@@ -268,36 +268,36 @@ static size_t CharonNDEFRender(NFCNDEFPayload *payload, BOOL first, BOOL last, B
                                                                 payload:[payload.payload subdataWithRange:NSMakeRange(offset, take)]];
         BOOL starts = marker == 0x00;
         BOOL ends = offset + take >= payload.payload.length;
-        CharonNDEFRender(chunk, *first, ends, !starts, marker, YES, into);
+        RevenantNDEFRender(chunk, *first, ends, !starts, marker, YES, into);
         *first = NO;
         offset += take;
         ++marker;
     }
 }
 
-- (NSData *)charonEncodedRecords
+- (NSData *)revenantEncodedRecords
 {
-    NSData *already = [self valueForKey:@"charonEncoded"];
+    NSData *already = [self valueForKey:@"revenantEncoded"];
     if (already) {
         return already;
     }
     NSMutableData *bytes = [NSMutableData data];
     BOOL first = YES;
     for (NFCNDEFPayload *payload in self.records) {
-        [self charonAppendPayload:payload into:bytes first:&first last:payload == self.records.lastObject];
+        [self revenantAppendPayload:payload into:bytes first:&first last:payload == self.records.lastObject];
     }
-    [self setValue:bytes forKey:@"charonEncoded"];
+    [self setValue:bytes forKey:@"revenantEncoded"];
     return bytes;
 }
 
 - (NSUInteger)length
 {
-    return [self charonEncodedRecords].length;
+    return [self revenantEncodedRecords].length;
 }
 
-NSData *CharonNDEFEncodedRecords(NFCNDEFMessage *message)
+NSData *RevenantNDEFEncodedRecords(NFCNDEFMessage *message)
 {
-    return [(id)message performSelector:@selector(charonEncodedRecords)];
+    return [(id)message performSelector:@selector(revenantEncodedRecords)];
 }
 
 - (instancetype)initWithNDEFRecords:(NSArray<NFCNDEFPayload *> *)records
@@ -324,9 +324,9 @@ NSData *CharonNDEFEncodedRecords(NFCNDEFMessage *message)
     NSMutableData *groupPayload = nil;
     uint8_t expected = 1;
     while (offset < length) {
-        CharonNDEFRecord record;
+        RevenantNDEFRecord record;
         memset(&record, 0, sizeof record);
-        size_t used = CharonNDEFRecordDecode(bytes + offset, length - offset, &record);
+        size_t used = RevenantNDEFRecordDecode(bytes + offset, length - offset, &record);
         if (used == 0) {
             break;
         }

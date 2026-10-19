@@ -7,7 +7,7 @@
 #include <array>
 #include <cstdint>
 
-namespace shade {
+namespace emulator {
 class AddressSpace;
 struct KernelSharedState;
 

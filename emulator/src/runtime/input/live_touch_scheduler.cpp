@@ -9,7 +9,7 @@
 
 #include <algorithm>
 
-namespace shade {
+namespace emulator {
 
 void LiveTouchScheduler::schedule(std::span<const LiveTouchEvent> gesture)
 {

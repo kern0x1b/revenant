@@ -6,7 +6,7 @@ here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 ACCELERATE=$here/../../../../packages/a/apple-backports/Accelerate
 REGISTRY=$here/../../../../packages/a/apple-backports/registry/Accelerate
-build=${VIMAGECHANNELS_BUILD:-$(runs_folder charon-vimagechannels-host)}
+build=${VIMAGECHANNELS_BUILD:-$(runs_folder revenant-vimagechannels-host)}
 rm -rf "$build"
 mkdir -p "$build"
 
@@ -28,9 +28,9 @@ if [ -n "${PLANT:-}" ]; then
         cp "$ACCELERATE/$source" "$build/planted/$source"
     done
     # The shared header goes with them: the planted copy is compiled as its own directory, and without
-    # CharonChannels.h beside it every file fails on a missing include, which is a build failure and not a
+    # RevenantChannels.h beside it every file fails on a missing include, which is a build failure and not a
     # measurement.
-    cp "$ACCELERATE/CharonChannels.h" "$build/planted/CharonChannels.h"
+    cp "$ACCELERATE/RevenantChannels.h" "$build/planted/RevenantChannels.h"
     python3 - "$build/planted" "$PLANT" <<'PY'
 import glob, sys
 folder, needle = sys.argv[1], sys.argv[2]
@@ -65,7 +65,7 @@ for part in sys.argv[1:]:
 
 renames=""
 for name in $names; do
-    renames="$renames -D$name=charon_host_$name"
+    renames="$renames -D$name=revenant_host_$name"
 done
 
 objects=""

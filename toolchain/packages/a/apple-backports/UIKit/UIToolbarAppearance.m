@@ -1,6 +1,6 @@
-#import "CharonBarAppearance.h"
+#import "RevenantBarAppearance.h"
 
-static void charon_require_appearance(id appearance)
+static void revenant_require_appearance(id appearance)
 {
     if (!appearance)
         [NSException raise:NSInternalInconsistencyException format:@"use -[UIBarButtonItemAppearance setupDefaultAppearanceForStyle:] to reset appearance values"];
@@ -12,41 +12,41 @@ static void charon_require_appearance(id appearance)
     UIBarButtonItemAppearance *_doneButtonAppearance;
 }
 
-- (void)charon_setUp
+- (void)revenant_setUp
 {
-    [super charon_setUp];
-    _buttonAppearance = [[UIBarButtonItemAppearance alloc] initCharonWithStyle:0];
-    _doneButtonAppearance = [[UIBarButtonItemAppearance alloc] initCharonWithStyle:2];
-    [self charon_adoptChildren];
+    [super revenant_setUp];
+    _buttonAppearance = [[UIBarButtonItemAppearance alloc] initRevenantWithStyle:0];
+    _doneButtonAppearance = [[UIBarButtonItemAppearance alloc] initRevenantWithStyle:2];
+    [self revenant_adoptChildren];
 }
 
-- (void)charon_adoptChildren
+- (void)revenant_adoptChildren
 {
-    charon_adopt_child(self, _buttonAppearance);
-    charon_adopt_child(self, _doneButtonAppearance);
+    revenant_adopt_child(self, _buttonAppearance);
+    revenant_adopt_child(self, _doneButtonAppearance);
 }
 
-- (void)charon_copyExtrasFrom:(UIBarAppearance *)source
+- (void)revenant_copyExtrasFrom:(UIBarAppearance *)source
 {
     if (![source isKindOfClass:[UIToolbarAppearance class]])
         return;
     UIToolbarAppearance *other = (UIToolbarAppearance *)source;
     _buttonAppearance = [other->_buttonAppearance copy];
     _doneButtonAppearance = [other->_doneButtonAppearance copy];
-    [self charon_adoptChildren];
+    [self revenant_adoptChildren];
 }
 
-- (void)charon_encodeExtrasWithCoder:(NSCoder *)coder
+- (void)revenant_encodeExtrasWithCoder:(NSCoder *)coder
 {
     [coder encodeObject:_buttonAppearance forKey:@"button"];
     [coder encodeObject:_doneButtonAppearance forKey:@"done"];
 }
 
-- (void)charon_decodeExtrasWithCoder:(NSCoder *)coder
+- (void)revenant_decodeExtrasWithCoder:(NSCoder *)coder
 {
     _buttonAppearance = [coder decodeObjectOfClass:[UIBarButtonItemAppearance class] forKey:@"button"] ?: _buttonAppearance;
     _doneButtonAppearance = [coder decodeObjectOfClass:[UIBarButtonItemAppearance class] forKey:@"done"] ?: _doneButtonAppearance;
-    [self charon_adoptChildren];
+    [self revenant_adoptChildren];
 }
 
 - (UIBarButtonItemAppearance *)buttonAppearance
@@ -56,10 +56,10 @@ static void charon_require_appearance(id appearance)
 
 - (void)setButtonAppearance:(UIBarButtonItemAppearance *)buttonAppearance
 {
-    charon_require_appearance(buttonAppearance);
+    revenant_require_appearance(buttonAppearance);
     _buttonAppearance = [buttonAppearance copy];
-    [self charon_adoptChildren];
-    [self charon_notify];
+    [self revenant_adoptChildren];
+    [self revenant_notify];
 }
 
 - (UIBarButtonItemAppearance *)doneButtonAppearance
@@ -69,21 +69,21 @@ static void charon_require_appearance(id appearance)
 
 - (void)setDoneButtonAppearance:(UIBarButtonItemAppearance *)doneButtonAppearance
 {
-    charon_require_appearance(doneButtonAppearance);
+    revenant_require_appearance(doneButtonAppearance);
     _doneButtonAppearance = [doneButtonAppearance copy];
-    [self charon_adoptChildren];
-    [self charon_notify];
+    [self revenant_adoptChildren];
+    [self revenant_notify];
 }
 
-- (NSArray *)charon_lines
+- (NSArray *)revenant_lines
 {
-    return [[super charon_lines] arrayByAddingObjectsFromArray:@[[NSString stringWithFormat:@"Plain BarButtonItems(%p): %@", _buttonAppearance, [_buttonAppearance charon_text]],
-                                                                 [NSString stringWithFormat:@"Prominent BarButtonItems(%p): %@", _doneButtonAppearance, [_doneButtonAppearance charon_text]]]];
+    return [[super revenant_lines] arrayByAddingObjectsFromArray:@[[NSString stringWithFormat:@"Plain BarButtonItems(%p): %@", _buttonAppearance, [_buttonAppearance revenant_text]],
+                                                                 [NSString stringWithFormat:@"Prominent BarButtonItems(%p): %@", _doneButtonAppearance, [_doneButtonAppearance revenant_text]]]];
 }
 
-- (NSArray *)charon_signature
+- (NSArray *)revenant_signature
 {
-    return [[super charon_signature] arrayByAddingObjectsFromArray:@[[_buttonAppearance charon_signature], [_doneButtonAppearance charon_signature]]];
+    return [[super revenant_signature] arrayByAddingObjectsFromArray:@[[_buttonAppearance revenant_signature], [_doneButtonAppearance revenant_signature]]];
 }
 
 @end

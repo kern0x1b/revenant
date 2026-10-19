@@ -16,7 +16,7 @@ int main(int argc, char **argv)
 {
     @autoreleasepool {
         if (argc > 1)
-            charon_log_to(@(argv[1]));
+            revenant_log_to(@(argv[1]));
         CHECK_EQUAL(image_of_method([AVCaptureDevice class], @selector(authorizationStatusForMediaType:)), @"libAVFoundationBackports.dylib", "the status comes from the backports");
         AVAuthorizationStatus audio = [AVCaptureDevice authorizationStatusForMediaType:AVMediaTypeAudio];
         AVAuthorizationStatus video = [AVCaptureDevice authorizationStatusForMediaType:AVMediaTypeVideo];
@@ -55,7 +55,7 @@ int main(int argc, char **argv)
             raised = [exception.name isEqualToString:NSInvalidArgumentException];
         }
         CHECK(raised, "a request for another media type raises too");
-        printf("%d checks, %d failed\n", charon_checks, charon_failures);
+        printf("%d checks, %d failed\n", revenant_checks, revenant_failures);
     }
-    return charon_failures;
+    return revenant_failures;
 }

@@ -1,6 +1,6 @@
-#import "CharonLists.h"
+#import "RevenantLists.h"
 
-NSString *charon_elided_text(NSString *text)
+NSString *revenant_elided_text(NSString *text)
 {
     if (!text.length)
         return @"''";
@@ -10,12 +10,12 @@ NSString *charon_elided_text(NSString *text)
     return [NSString stringWithFormat:@"'%@...%@' (length = %lu)", [text substringToIndex:1], [text substringFromIndex:length - 1], (unsigned long)length];
 }
 
-UIFont *charon_medium_font(CGFloat pointSize)
+UIFont *revenant_medium_font(CGFloat pointSize)
 {
     return [UIFont systemFontOfSize:pointSize weight:UIFontWeightMedium];
 }
 
-UIFont *charon_medium_body_font(void)
+UIFont *revenant_medium_body_font(void)
 {
     UIFontDescriptor *descriptor = [[UIFont preferredFontForTextStyle:UIFontTextStyleBody].fontDescriptor fontDescriptorByAddingAttributes:@{UIFontDescriptorTraitsAttribute: @{UIFontWeightTrait: @(UIFontWeightMedium)}}];
     return [UIFont fontWithDescriptor:descriptor size:0];

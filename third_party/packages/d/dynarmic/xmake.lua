@@ -1,10 +1,10 @@
 package("dynarmic")
     set_homepage("https://github.com/MC-XiaoXiao/dynarmic")
-    set_description("Dynarmic, the ARM dynamic recompiler Shade runs a guest's CPU on: MC-XiaoXiao's tree at a commit, with our arm64 backend and test hooks as patches")
+    set_description("Dynarmic, the ARM dynamic recompiler the emulator runs a guest's CPU on: MC-XiaoXiao's tree at a commit, with our arm64 backend and test hooks as patches")
     set_license("0BSD")
 
     local commit = "21944ab87740a957c39ddd73cd4ecaeb700f7e73"
-    local patches = {"0001-Apply-Charon-s-dynarmic-arm64-backend.patch",
+    local patches = {"0001-Apply-the-emulator-s-dynarmic-arm64-backend.patch",
                      "0002-tests-Implement-the-swap-callbacks-in-the-A32-test-e.patch",
                      "0003-Name-the-fault-injection-hooks-for-the-core-not-for-.patch"}
     add_urls("https://github.com/MC-XiaoXiao/dynarmic.git")
@@ -22,7 +22,7 @@ package("dynarmic")
     add_configs("test_emit_failure", {description = "Compile the fault-injection hooks of the portable emitter, for tests.", default = false, type = "boolean"})
 
     add_deps("cmake", "ninja", {kind = "binary"})
-    add_deps("hades-third-party@boost 1.81.0")
+    add_deps("revenant-third-party@boost 1.81.0")
     add_links("dynarmic", "mcl", "fmt")
 
     on_install("macosx|arm64", function (package)

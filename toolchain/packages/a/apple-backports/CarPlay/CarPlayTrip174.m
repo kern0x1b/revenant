@@ -1,21 +1,21 @@
 #import <Foundation/Foundation.h>
 #import <CarPlay/CarPlay.h>
 
-@interface CPTrip (CharonTrip174Storage)
-- (NSArray<NSString *> *)charon_destinationNameVariants;
-- (void)charon_setDestinationNameVariants:(NSArray<NSString *> *)variants;
+@interface CPTrip (RevenantTrip174Storage)
+- (NSArray<NSString *> *)revenant_destinationNameVariants;
+- (void)revenant_setDestinationNameVariants:(NSArray<NSString *> *)variants;
 @end
 
-@implementation CPTrip (CharonTrip174)
+@implementation CPTrip (RevenantTrip174)
 
 - (NSArray<NSString *> *)destinationNameVariants
 {
-    return [self charon_destinationNameVariants];
+    return [self revenant_destinationNameVariants];
 }
 
 - (void)setDestinationNameVariants:(NSArray<NSString *> *)destinationNameVariants
 {
-    [self charon_setDestinationNameVariants:destinationNameVariants];
+    [self revenant_setDestinationNameVariants:destinationNameVariants];
 }
 
 @end

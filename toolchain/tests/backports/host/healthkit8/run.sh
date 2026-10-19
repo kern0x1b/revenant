@@ -2,7 +2,7 @@
 # run.sh — the sixteen rows of registry/HealthKit/ios8.json that sit at `absent`, asked of the port and
 # of the system's own HealthKit in one process.
 #
-# The port's classes are compiled under names of their own (CharonHostHKObject and so on) so that the
+# The port's classes are compiled under names of their own (RevenantHostHKObject and so on) so that the
 # system's HealthKit and the port's run side by side and both can be asked the same question, which is
 # the only way to find out whether a row's `effect` is true of the port and of the class it is a
 # backport of. The eight `-init` rows are the ones this settles: `-init` is `NS_UNAVAILABLE` in the
@@ -23,14 +23,14 @@ here=$(cd "$(dirname "$0")" && pwd)
 checkout=$(cd "$here/../../../.." && pwd)
 healthkit=${HEALTHKIT:-$checkout/packages/a/apple-backports/HealthKit}
 objects=${OBJECTSDIR:-$checkout/.agent-work/runs/healthkit8}
-# CHARON_HOST_BUILD: this is a host differential - the port's process links no framework of the name it
-# measures, so there is no release class for a charon_alias.h proxy to stand in for, nothing for the
+# REVENANT_HOST_BUILD: this is a host differential - the port's process links no framework of the name it
+# measures, so there is no release class for a revenant_alias.h proxy to stand in for, nothing for the
 # library's loader to re-parent and no name to export. The header's own comment gives the two
 # measurements: the macOS linker refuses the metaclass alias ("ld: null objc class data for
-# '_OBJC_METACLASS_$_Charon<Name>'", from the smallest file that carries nothing but CHARON_ALIAS), and
+# '_OBJC_METACLASS_$_Revenant<Name>'", from the smallest file that carries nothing but REVENANT_ALIAS), and
 # a name built by ## cannot be renamed the way this harness renames classes. What the alias is FOR is a
 # device band; here the class of the release's name is the class and every member of it is measured.
-quiet="-w -DCHARON_HOST_BUILD"
+quiet="-w -DREVENANT_HOST_BUILD"
 sdk=$(xcrun --show-sdk-path)
 
 # A fresh tree every run: a differential that fails to link must leave no binary behind, or the next
@@ -44,7 +44,7 @@ mkdir -p "$objects/plain" "$objects/renamed"
 # eight the -init rows are about. HKDevice9.m is NOT in it and cannot be: it imports UIKit for the
 # release's own UIDevice, which a host build has no use for and no framework to find, and the sixteen
 # rows are about eight classes none of which is that one.
-sources="HKUnit.m HKQuantity.m HKQuantityType.m HKQuantityTypes.m HKObjectType.m HKObject.m HKSource.m HKSample.m HKWorkout.m HKStatistics.m HKQuery.m HKQueries.m HKQueryAnchor9.m HKSourceRevision9.m HKSamples.m HKWorkoutRoute110.m HKWorkoutRouteQuery110.m HKCDADocument11.m HKClinicalRecord120.m HKWorkoutBuilder120.m HKQuantitySeriesSampleBuilder120.m HKQuantitySeriesSampleQuery120.m HKCumulativeQuantitySample130.m HKCumulativeQuantitySeriesSample120.m HKDocument10.m HKObject9.m HKSource9.m HKHealthStore.m CharonHKStore.m"
+sources="HKUnit.m HKQuantity.m HKQuantityType.m HKQuantityTypes.m HKObjectType.m HKObject.m HKSource.m HKSample.m HKWorkout.m HKStatistics.m HKQuery.m HKQueries.m HKQueryAnchor9.m HKSourceRevision9.m HKSamples.m HKWorkoutRoute110.m HKWorkoutRouteQuery110.m HKCDADocument11.m HKClinicalRecord120.m HKWorkoutBuilder120.m HKQuantitySeriesSampleBuilder120.m HKQuantitySeriesSampleQuery120.m HKCumulativeQuantitySample130.m HKCumulativeQuantitySeriesSample120.m HKDocument10.m HKObject9.m HKSource9.m HKHealthStore.m RevenantHKStore.m"
 
 for source in $sources; do
     xcrun clang -fobjc-arc $quiet -I"$healthkit" -c "$healthkit/$source" -o "$objects/plain/$source.o"
@@ -54,7 +54,7 @@ done
 renames=""
 for name in $(xcrun nm -gU "$objects"/plain/*.o | awk 'NF == 3 {print $3}' | grep -E '^_OBJC_CLASS_\$_' \
               | sed -e 's/^_OBJC_CLASS_\$_//' | sort -u); do
-    renames="$renames -D$name=CharonHost$name"
+    renames="$renames -D$name=RevenantHost$name"
 done
 
 for source in $sources; do

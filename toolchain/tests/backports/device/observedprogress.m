@@ -21,7 +21,7 @@ static void settle(void)
 
 static void near(UIProgressView *bar, float expected, const char *name)
 {
-    charon_check(fabsf(bar.progress - expected) < 0.0005f, name, [NSString stringWithFormat:@"%.4f, expected %.4f", bar.progress, expected]);
+    revenant_check(fabsf(bar.progress - expected) < 0.0005f, name, [NSString stringWithFormat:@"%.4f, expected %.4f", bar.progress, expected]);
 }
 
 int main(int argc, char **argv)
@@ -30,19 +30,19 @@ int main(int argc, char **argv)
         (void)argc;
         (void)argv;
         for (NSString *name in @[@"observedProgress", @"setObservedProgress:"])
-            charon_check([image_of_method([UIProgressView class], NSSelectorFromString(name)) isEqualToString:@"libUIKitBackports.dylib"],
+            revenant_check([image_of_method([UIProgressView class], NSSelectorFromString(name)) isEqualToString:@"libUIKitBackports.dylib"],
                          [NSString stringWithFormat:@"-[UIProgressView %@] comes from the backports", name].UTF8String,
                          image_of_method([UIProgressView class], NSSelectorFromString(name)));
 
         UIProgressView *bar = [[UIProgressView alloc] initWithProgressViewStyle:UIProgressViewStyleDefault];
-        charon_check(bar.observedProgress == nil, "a progress view observes nothing to start with", nil);
+        revenant_check(bar.observedProgress == nil, "a progress view observes nothing to start with", nil);
         near(bar, 0.0f, "and its progress is zero");
 
         NSProgress *progress = [NSProgress discreteProgressWithTotalUnitCount:10];
         progress.completedUnitCount = 2;
         bar.observedProgress = progress;
         settle();
-        charon_check(bar.observedProgress == progress, "the progress it was given is the one it reads back", nil);
+        revenant_check(bar.observedProgress == progress, "the progress it was given is the one it reads back", nil);
         near(bar, 0.2f, "setting an observed progress takes its fraction at once");
 
         progress.completedUnitCount = 7;
@@ -51,7 +51,7 @@ int main(int argc, char **argv)
 
         bar.progress = 0.1f;
         near(bar, 0.1f, "the progress can still be set by hand");
-        charon_check(bar.observedProgress == progress, "and the observation is not dropped by setting it", nil);
+        revenant_check(bar.observedProgress == progress, "and the observation is not dropped by setting it", nil);
 
         progress.completedUnitCount = 10;
         settle();
@@ -76,13 +76,13 @@ int main(int argc, char **argv)
         near(bar, 0.75f, "the second one does");
 
         bar.observedProgress = nil;
-        charon_check(bar.observedProgress == nil, "the observation can be cleared", nil);
+        revenant_check(bar.observedProgress == nil, "the observation can be cleared", nil);
         other.completedUnitCount = 4;
         settle();
         near(bar, 0.75f, "and the bar stops following once it is");
 
         bar.observedProgress = nil;
-        charon_check(YES, "clearing an observation that is not there is quiet", nil);
+        revenant_check(YES, "clearing an observation that is not there is quiet", nil);
 
         @autoreleasepool {
             UIProgressView *short_lived = [[UIProgressView alloc] initWithProgressViewStyle:UIProgressViewStyleDefault];
@@ -90,9 +90,9 @@ int main(int argc, char **argv)
         }
         other.completedUnitCount = 2;
         settle();
-        charon_check(YES, "a progress view that goes away while observing takes its observation with it", nil);
+        revenant_check(YES, "a progress view that goes away while observing takes its observation with it", nil);
 
-        printf("checks=%d failures=%d\n", charon_checks, charon_failures);
-        return charon_failures;
+        printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
+        return revenant_failures;
     }
 }

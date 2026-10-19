@@ -5,7 +5,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface AVCaptureDevice (CharonCaptureDeviceRectsOfInterest26)
+@interface AVCaptureDevice (RevenantCaptureDeviceRectsOfInterest26)
 
 @property(nonatomic, readonly, getter=isFocusRectOfInterestSupported) BOOL focusRectOfInterestSupported API_AVAILABLE(ios(26.0));
 @property(nonatomic, readonly) CGSize minFocusRectOfInterestSize API_AVAILABLE(ios(26.0));

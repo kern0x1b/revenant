@@ -1,17 +1,17 @@
 #include "system_function.h"
 
-static _Atomic(uintptr_t) charon_system_rpmatch;
+static _Atomic(uintptr_t) revenant_system_rpmatch;
 
 __attribute__((constructor))
-static void charon_resolve_rpmatch(void)
+static void revenant_resolve_rpmatch(void)
 {
-    charon_system_function(&charon_system_rpmatch, CHARON_LIBSYSTEM, "rpmatch");
+    revenant_system_function(&revenant_system_rpmatch, REVENANT_LIBSYSTEM, "rpmatch");
 }
 
 __attribute__((visibility("default")))
 int rpmatch(const char *response)
 {
-    int (*system)(const char *) = charon_system_function(&charon_system_rpmatch, CHARON_LIBSYSTEM, "rpmatch");
+    int (*system)(const char *) = revenant_system_function(&revenant_system_rpmatch, REVENANT_LIBSYSTEM, "rpmatch");
     if (system && response != NULL)
         return system(response);
     if (response == NULL)

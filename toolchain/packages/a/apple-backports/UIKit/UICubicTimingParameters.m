@@ -1,15 +1,15 @@
-#import "CharonTimingParameters.h"
+#import "RevenantTimingParameters.h"
 
 @implementation UICubicTimingParameters {
 @private
     NSInteger _curve;
-    CharonViewCubicTimingFunction *_timingFunction;
+    RevenantViewCubicTimingFunction *_timingFunction;
 }
 
 - (instancetype)init
 {
     if ((self = [super init])) {
-        _curve = CharonCubicCurveDefault;
+        _curve = RevenantCubicCurveDefault;
         _timingFunction = [self effectiveTimingFunction];
     }
     return self;
@@ -27,8 +27,8 @@
 - (instancetype)initWithControlPoint1:(CGPoint)point1 controlPoint2:(CGPoint)point2
 {
     if ((self = [super init])) {
-        _curve = CharonCubicCurveControlPoints;
-        _timingFunction = charon_cubic_timing_function(point1, point2);
+        _curve = RevenantCubicCurveControlPoints;
+        _timingFunction = revenant_cubic_timing_function(point1, point2);
     }
     return self;
 }
@@ -41,7 +41,7 @@
     }
     if ((self = [super init])) {
         if ([coder decodeIntegerForKey:@"curveType"] == UITimingCurveTypeCubic) {
-            _curve = CharonCubicCurveControlPoints;
+            _curve = RevenantCubicCurveControlPoints;
             _timingFunction = [coder decodeObjectForKey:@"timingFunction"];
         } else {
             _curve = [coder decodeIntegerForKey:@"animationCurve"];
@@ -62,7 +62,7 @@
 
 - (UITimingCurveType)timingCurveType
 {
-    return _curve == CharonCubicCurveControlPoints ? UITimingCurveTypeCubic : UITimingCurveTypeBuiltin;
+    return _curve == RevenantCubicCurveControlPoints ? UITimingCurveTypeCubic : UITimingCurveTypeBuiltin;
 }
 
 - (UICubicTimingParameters *)cubicTimingParameters
@@ -85,7 +85,7 @@
     _curve = curve;
 }
 
-- (CharonViewCubicTimingFunction *)timingFunction
+- (RevenantViewCubicTimingFunction *)timingFunction
 {
     return _timingFunction;
 }
@@ -100,7 +100,7 @@
     return _timingFunction ? _timingFunction.controlPoint2 : CGPointZero;
 }
 
-- (CharonViewCubicTimingFunction *)effectiveTimingFunction
+- (RevenantViewCubicTimingFunction *)effectiveTimingFunction
 {
     if (_timingFunction)
         return _timingFunction;
@@ -110,7 +110,7 @@
         case UIViewAnimationCurveEaseIn: name = kCAMediaTimingFunctionEaseIn; break;
         case UIViewAnimationCurveEaseOut: name = kCAMediaTimingFunctionEaseOut; break;
         case UIViewAnimationCurveLinear: name = kCAMediaTimingFunctionLinear; break;
-        case CharonCubicCurveDefault: name = kCAMediaTimingFunctionDefault; break;
+        case RevenantCubicCurveDefault: name = kCAMediaTimingFunctionDefault; break;
         default:
             [NSException raise:NSInvalidArgumentException
                         format:@"Unknown/Unsupported UIViewAnimationCurve type %ld", (long)_curve];
@@ -120,7 +120,7 @@
     float first[2] = {0, 0}, second[2] = {0, 0};
     [function getControlPointAtIndex:1 values:first];
     [function getControlPointAtIndex:2 values:second];
-    return charon_cubic_timing_function(CGPointMake(first[0], first[1]), CGPointMake(second[0], second[1]));
+    return revenant_cubic_timing_function(CGPointMake(first[0], first[1]), CGPointMake(second[0], second[1]));
 }
 
 - (id)copyWithZone:(NSZone *)zone
@@ -140,7 +140,7 @@
         case UIViewAnimationCurveEaseIn: name = @"EaseIn"; break;
         case UIViewAnimationCurveEaseOut: name = @"EaseOut"; break;
         case UIViewAnimationCurveLinear: name = @"linear"; break;
-        case CharonCubicCurveDefault: name = @"CA Default"; break;
+        case RevenantCubicCurveDefault: name = @"CA Default"; break;
         default: name = @"unknown"; break;
     }
     return [NSString stringWithFormat:@"<%@ (%p) builtin type = %@>", [self class], self, name];

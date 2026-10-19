@@ -3,7 +3,7 @@
 int main(void)
 {
     @autoreleasepool {
-        charon_dispose_wait_probe();
+        revenant_dispose_wait_probe();
     }
     return 0;
 }

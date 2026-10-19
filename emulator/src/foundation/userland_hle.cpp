@@ -28,7 +28,7 @@
 #include "foundation/output.hpp"
 #include "foundation/performance.hpp"
 
-namespace shade {
+namespace emulator {
 namespace {
 
     constexpr std::uint32_t arm_svc_opcode = 0xef000000U;
@@ -76,7 +76,7 @@ namespace {
             bytes.push_back(static_cast<std::byte>(value >> (index * 8U)));
     }
 
-    constexpr std::string_view hle_plan_magic_v2 { "SHADE-HLE-PLAN" };
+    constexpr std::string_view hle_plan_magic_v2 { "REVNT-HLE-PLAN" };
     constexpr std::uint32_t hle_plan_artifact_version_v2 = 2U;
     constexpr std::uint32_t hle_plan_builder_version = 6U;
     constexpr std::size_t hle_plan_header_size_v2 = 123U;

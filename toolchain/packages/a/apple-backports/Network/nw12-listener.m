@@ -1,7 +1,7 @@
-#import "CharonNW.h"
+#import "RevenantNW.h"
 #include <mach/mach_time.h>
 #include <stdio.h>
-#import "CharonNWSupport.h"
+#import "RevenantNWSupport.h"
 #import <Foundation/NSNetServices.h>
 
 #include <errno.h>
@@ -15,13 +15,13 @@
 #import <Security/Security.h>
 #import <Security/SecureTransport.h>
 
-@interface CharonNWListener : NSObject <OS_nw_listener> {
+@interface RevenantNWListener : NSObject <OS_nw_listener> {
 @public
     nw_parameters_t _parameters;
     nw_endpoint_t _endpoint;
-    CharonNWEndpoint *_localEndpoint;
-    CharonNWAdvertiseDescriptor *_advertise;
-    CharonNWEndpoint *_advertisedEndpoint;
+    RevenantNWEndpoint *_localEndpoint;
+    RevenantNWAdvertiseDescriptor *_advertise;
+    RevenantNWEndpoint *_advertisedEndpoint;
     dispatch_queue_t _queue;
     nw_listener_state_changed_handler_t _state;
     nw_listener_new_connection_handler_t _newConnection;
@@ -38,28 +38,28 @@
 }
 @end
 
-@implementation CharonNWListener
+@implementation RevenantNWListener
 @end
 
-void CharonNWListenerSetNewConnectionGroup(nw_listener_t value, nw_listener_new_connection_group_handler_t handler)
+void RevenantNWListenerSetNewConnectionGroup(nw_listener_t value, nw_listener_new_connection_group_handler_t handler)
 {
     if (value)
-        ((CharonNWListener *)value)->_newConnectionGroup = [handler copy];
+        ((RevenantNWListener *)value)->_newConnectionGroup = [handler copy];
 }
 
-void CharonNWListenerSetNewConnectionLimit(nw_listener_t value, uint32_t new_connection_limit)
+void RevenantNWListenerSetNewConnectionLimit(nw_listener_t value, uint32_t new_connection_limit)
 {
     if (value)
-        ((CharonNWListener *)value)->_newConnectionLimit = new_connection_limit;
+        ((RevenantNWListener *)value)->_newConnectionLimit = new_connection_limit;
 }
 
-uint32_t CharonNWListenerGetNewConnectionLimit(nw_listener_t value)
+uint32_t RevenantNWListenerGetNewConnectionLimit(nw_listener_t value)
 {
-    CharonNWListener *listener = (CharonNWListener *)value;
+    RevenantNWListener *listener = (RevenantNWListener *)value;
     return listener ? listener->_newConnectionLimit : 0;
 }
 
-static void charon_listener_report(CharonNWListener *listener, nw_listener_state_t state, CharonNWError *error)
+static void revenant_listener_report(RevenantNWListener *listener, nw_listener_state_t state, RevenantNWError *error)
 {
     @synchronized(listener) {
         if (listener->_cancelled && state != nw_listener_state_cancelled)
@@ -73,25 +73,25 @@ static void charon_listener_report(CharonNWListener *listener, nw_listener_state
         handler(state, error);
 }
 
-static CharonNWError *charon_listener_posix(void)
+static RevenantNWError *revenant_listener_posix(void)
 {
-    CharonNWError *error = [[CharonNWError alloc] init];
+    RevenantNWError *error = [[RevenantNWError alloc] init];
     error->_domain = nw_error_domain_posix;
     error->_code = errno;
     return error;
 }
 
-static BOOL charon_listener_is_secure(nw_parameters_t parameters)
+static BOOL revenant_listener_is_secure(nw_parameters_t parameters)
 {
-    CharonNWParameters *value = (CharonNWParameters *)parameters;
-    for (CharonNWProtocolOptions *options in value->_stack->_application) {
+    RevenantNWParameters *value = (RevenantNWParameters *)parameters;
+    for (RevenantNWProtocolOptions *options in value->_stack->_application) {
         if ([options->_definition->_family isEqualToString:@"nw_tls"])
             return YES;
     }
     return NO;
 }
 
-static void charon_listener_adopt(CharonNWListener *listener, int handle)
+static void revenant_listener_adopt(RevenantNWListener *listener, int handle)
 {
     @synchronized(listener) {
         if (listener->_newConnectionLimit != 0 && listener->_accepted >= listener->_newConnectionLimit) {
@@ -105,22 +105,22 @@ static void charon_listener_adopt(CharonNWListener *listener, int handle)
         close(handle);
         return;
     }
-    CharonNWConnectionAttach(connection, handle, YES);
+    RevenantNWConnectionAttach(connection, handle, YES);
     @synchronized(listener) {
         [listener->_connections addObject:(id)connection];
     }
-    __weak CharonNWListener *weak = listener;
-    if (getenv("CHARON_TRACE_CONNECTION")) {
-        extern int charon_nw_connection_socket(nw_connection_t connection);
-        fprintf(stderr, "[charon] adopt accepted=%d the-connection-holds=%d\n", handle,
-                charon_nw_connection_socket(connection));
+    __weak RevenantNWListener *weak = listener;
+    if (getenv("REVENANT_TRACE_CONNECTION")) {
+        extern int revenant_nw_connection_socket(nw_connection_t connection);
+        fprintf(stderr, "[revenant] adopt accepted=%d the-connection-holds=%d\n", handle,
+                revenant_nw_connection_socket(connection));
     }
-    if (!CharonNWConnectionHasQueue(connection))
+    if (!RevenantNWConnectionHasQueue(connection))
         nw_connection_set_queue(connection, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0));
     nw_connection_set_state_changed_handler(connection, ^(nw_connection_state_t state, nw_error_t error) {
-        CharonNWListener *strong = weak;
-        if (getenv("CHARON_TRACE_LISTENER"))
-            fprintf(stderr, "[charon] listener: state %d on %p queue %p handler %p newConnection %p\n",
+        RevenantNWListener *strong = weak;
+        if (getenv("REVENANT_TRACE_LISTENER"))
+            fprintf(stderr, "[revenant] listener: state %d on %p queue %p handler %p newConnection %p\n",
                     state, (__bridge void *)listener, strong ? (__bridge void *)strong->_queue : NULL,
                     (__bridge void *)listener, strong ? (__bridge void *)strong->_newConnection : NULL);
         if (state != nw_connection_state_ready || !strong || !strong->_newConnection)
@@ -130,11 +130,11 @@ static void charon_listener_adopt(CharonNWListener *listener, int handle)
     nw_connection_start(connection);
 }
 
-#define CHARON_LISTENER_BATCH 16
+#define REVENANT_LISTENER_BATCH 16
 
-static void charon_listener_accept(CharonNWListener *listener)
+static void revenant_listener_accept(RevenantNWListener *listener)
 {
-    for (int taken = 0; taken < CHARON_LISTENER_BATCH; taken++) {
+    for (int taken = 0; taken < REVENANT_LISTENER_BATCH; taken++) {
         int handle = accept(listener->_socket, NULL, NULL);
         if (handle < 0) {
             if (errno == EAGAIN || errno == EWOULDBLOCK || errno == EINTR)
@@ -142,22 +142,22 @@ static void charon_listener_accept(CharonNWListener *listener)
             if (errno == EMFILE || errno == ENFILE) {
                 return;
             }
-            charon_listener_report(listener, nw_listener_state_failed, charon_listener_posix());
+            revenant_listener_report(listener, nw_listener_state_failed, revenant_listener_posix());
             return;
         }
-        charon_listener_adopt(listener, handle);
+        revenant_listener_adopt(listener, handle);
     }
 }
 
-static void charon_listener_advertise(CharonNWListener *listener)
+static void revenant_listener_advertise(RevenantNWListener *listener)
 {
-    CharonNWAdvertiseDescriptor *descriptor = (CharonNWAdvertiseDescriptor *)listener->_advertise;
+    RevenantNWAdvertiseDescriptor *descriptor = (RevenantNWAdvertiseDescriptor *)listener->_advertise;
     if (!descriptor)
         return;
     NSString *name = descriptor->_bonjourName.length ? descriptor->_bonjourName : @"";
     NSString *type = descriptor->_bonjourType ?: @"";
     NSString *domain = descriptor->_bonjourDomain.length ? descriptor->_bonjourDomain : @"local.";
-    CharonNWEndpoint *published = [[CharonNWEndpoint alloc] init];
+    RevenantNWEndpoint *published = [[RevenantNWEndpoint alloc] init];
     published->_type = nw_endpoint_type_bonjour_service;
     published->_bonjourName = name;
     published->_bonjourType = type;
@@ -167,7 +167,7 @@ static void charon_listener_advertise(CharonNWListener *listener)
         nw_txt_record_t record = descriptor->_txtRecordObject
             ? descriptor->_txtRecordObject
             : nw_txt_record_create_with_bytes((const uint8_t *)descriptor->_txtRecord.bytes, descriptor->_txtRecord.length);
-        published->_txtRecord = (CharonNWTxtRecord *)record;
+        published->_txtRecord = (RevenantNWTxtRecord *)record;
     }
     listener->_service = [[NSNetService alloc] initWithDomain:domain type:type name:name];
     if (listener->_service)
@@ -177,7 +177,7 @@ static void charon_listener_advertise(CharonNWListener *listener)
         listener->_advertisedChanged((nw_endpoint_t)published, YES);
 }
 
-static void charon_listener_withdraw(CharonNWListener *listener)
+static void revenant_listener_withdraw(RevenantNWListener *listener)
 {
     if (!listener->_service)
         return;
@@ -188,12 +188,12 @@ static void charon_listener_withdraw(CharonNWListener *listener)
     listener->_advertisedEndpoint = nil;
 }
 
-static void charon_listener_open(CharonNWListener *listener)
+static void revenant_listener_open(RevenantNWListener *listener)
 {
-    CharonNWParameters *parameters = (CharonNWParameters *)listener->_parameters;
-    listener->_secure = charon_listener_is_secure(listener->_parameters);
+    RevenantNWParameters *parameters = (RevenantNWParameters *)listener->_parameters;
+    listener->_secure = revenant_listener_is_secure(listener->_parameters);
     uint16_t port = 0;
-    CharonNWEndpoint *local = parameters->_localEndpoint;
+    RevenantNWEndpoint *local = parameters->_localEndpoint;
     if (local && local->_port.length)
         port = (uint16_t)atoi(local->_port.UTF8String);
 
@@ -206,12 +206,12 @@ static void charon_listener_open(CharonNWListener *listener)
     struct addrinfo *list = NULL;
     int failure = getaddrinfo(NULL, port ? [[NSString stringWithFormat:@"%u", port] UTF8String] : "0", &hints, &list);
     if (failure != 0 || !list) {
-        charon_listener_report(listener, nw_listener_state_failed, charon_listener_posix());
+        revenant_listener_report(listener, nw_listener_state_failed, revenant_listener_posix());
         return;
     }
     int last = EADDRNOTAVAIL;
     for (struct addrinfo *entry = list; entry; entry = entry->ai_next) {
-        int handle = charon_nw_blocking_socket(entry->ai_family, entry->ai_socktype, entry->ai_protocol);
+        int handle = revenant_nw_blocking_socket(entry->ai_family, entry->ai_socktype, entry->ai_protocol);
         if (handle < 0) {
             last = errno;
             continue;
@@ -232,35 +232,35 @@ static void charon_listener_open(CharonNWListener *listener)
         memset(&bound, 0, sizeof bound);
         socklen_t length = sizeof bound;
         char text[INET6_ADDRSTRLEN + 4] = {0};
-        charon_nw_sockaddr_text((const struct sockaddr *)&bound, text, sizeof text);
-        charon_nw_sockaddr_port((const struct sockaddr *)&bound);
+        revenant_nw_sockaddr_text((const struct sockaddr *)&bound, text, sizeof text);
+        revenant_nw_sockaddr_port((const struct sockaddr *)&bound);
         if (getsockname(handle, (struct sockaddr *)&bound, &length) == 0) {
-            CharonNWEndpoint *endpoint = [[CharonNWEndpoint alloc] init];
+            RevenantNWEndpoint *endpoint = [[RevenantNWEndpoint alloc] init];
             endpoint->_type = nw_endpoint_type_address;
             endpoint->_address = (__bridge_transfer NSData *)
-                charon_nw_sockaddr_data((const struct sockaddr *)&bound, (socklen_t)length);
+                revenant_nw_sockaddr_data((const struct sockaddr *)&bound, (socklen_t)length);
             char address[INET6_ADDRSTRLEN + 4] = {0};
-            if (charon_nw_sockaddr_text((const struct sockaddr *)&bound, address, sizeof address))
+            if (revenant_nw_sockaddr_text((const struct sockaddr *)&bound, address, sizeof address))
                 endpoint->_hostname = @(address);
-            uint16_t bound_port = charon_nw_sockaddr_port((const struct sockaddr *)&bound);
+            uint16_t bound_port = revenant_nw_sockaddr_port((const struct sockaddr *)&bound);
             endpoint->_port = [NSString stringWithFormat:@"%u", bound_port];
             listener->_localEndpoint = endpoint;
         }
-        charon_nw_set_nonblocking(handle);
+        revenant_nw_set_nonblocking(handle);
         listener->_socket = handle;
         freeaddrinfo(list);
         return;
     }
     freeaddrinfo(list);
     errno = last;
-    charon_listener_report(listener, nw_listener_state_failed, charon_listener_posix());
+    revenant_listener_report(listener, nw_listener_state_failed, revenant_listener_posix());
 }
 
 nw_listener_t nw_listener_create(nw_parameters_t parameters)
 {
     if (!parameters)
         return NULL;
-    CharonNWListener *listener = [[CharonNWListener alloc] init];
+    RevenantNWListener *listener = [[RevenantNWListener alloc] init];
     listener->_parameters = parameters;
     listener->_socket = -1;
     listener->_connections = [NSMutableArray array];
@@ -276,8 +276,8 @@ nw_listener_t nw_listener_create_with_port(const char *port, nw_parameters_t par
     nw_listener_t listener = nw_listener_create(parameters);
     if (!listener)
         return NULL;
-    CharonNWParameters *value = (CharonNWParameters *)parameters;
-    CharonNWEndpoint *local = [[CharonNWEndpoint alloc] init];
+    RevenantNWParameters *value = (RevenantNWParameters *)parameters;
+    RevenantNWEndpoint *local = [[RevenantNWEndpoint alloc] init];
     local->_type = nw_endpoint_type_address;
     local->_port = @(port);
     value->_localEndpoint = local;
@@ -289,17 +289,17 @@ nw_listener_t nw_listener_create_with_connection(nw_connection_t connection, nw_
     if (!connection)
         return NULL;
     int handle = -1;
-    CharonNWEndpoint *remote = NULL;
+    RevenantNWEndpoint *remote = NULL;
     nw_parameters_t connection_parameters = NULL;
     (void)remote;
-    if (!CharonNWConnectionTakeSocket(connection, &handle, &remote, &connection_parameters))
+    if (!RevenantNWConnectionTakeSocket(connection, &handle, &remote, &connection_parameters))
         return NULL;
-    CharonNWListener *listener = (CharonNWListener *)nw_listener_create(connection_parameters ? connection_parameters : parameters);
+    RevenantNWListener *listener = (RevenantNWListener *)nw_listener_create(connection_parameters ? connection_parameters : parameters);
     if (!listener) {
         close(handle);
         return NULL;
     }
-    charon_nw_set_nonblocking(handle);
+    revenant_nw_set_nonblocking(handle);
     listener->_socket = handle;
     listener->_localEndpoint = remote;
     if (listener->_socket >= 0)
@@ -310,37 +310,37 @@ nw_listener_t nw_listener_create_with_connection(nw_connection_t connection, nw_
 void nw_listener_set_queue(nw_listener_t listener, dispatch_queue_t queue)
 {
     if (listener)
-        ((CharonNWListener *)listener)->_queue = queue;
+        ((RevenantNWListener *)listener)->_queue = queue;
 }
 
 void nw_listener_set_state_changed_handler(nw_listener_t listener, nw_listener_state_changed_handler_t handler)
 {
     if (listener)
-        ((CharonNWListener *)listener)->_state = [handler copy];
+        ((RevenantNWListener *)listener)->_state = [handler copy];
 }
 
 void nw_listener_set_new_connection_handler(nw_listener_t listener, nw_listener_new_connection_handler_t handler)
 {
     if (listener)
-        ((CharonNWListener *)listener)->_newConnection = [handler copy];
+        ((RevenantNWListener *)listener)->_newConnection = [handler copy];
 }
 
 
 void nw_listener_set_advertised_endpoint_changed_handler(nw_listener_t listener, nw_listener_advertised_endpoint_changed_handler_t handler)
 {
     if (listener)
-        ((CharonNWListener *)listener)->_advertisedChanged = [handler copy];
+        ((RevenantNWListener *)listener)->_advertisedChanged = [handler copy];
 }
 
 void nw_listener_set_advertise_descriptor(nw_listener_t listener, nw_advertise_descriptor_t advertise_descriptor)
 {
     if (listener)
-        ((CharonNWListener *)listener)->_advertise = (CharonNWAdvertiseDescriptor *)advertise_descriptor;
+        ((RevenantNWListener *)listener)->_advertise = (RevenantNWAdvertiseDescriptor *)advertise_descriptor;
 }
 
 uint16_t nw_listener_get_port(nw_listener_t listener)
 {
-    CharonNWListener *value = (CharonNWListener *)listener;
+    RevenantNWListener *value = (RevenantNWListener *)listener;
     if (!value || !value->_localEndpoint || !value->_localEndpoint->_port.length)
         return 0;
     return (uint16_t)atoi(value->_localEndpoint->_port.UTF8String);
@@ -350,7 +350,7 @@ void nw_listener_start(nw_listener_t listener)
 {
     if (!listener)
         return;
-    CharonNWListener *self = (CharonNWListener *)listener;
+    RevenantNWListener *self = (RevenantNWListener *)listener;
     @synchronized(self) {
         if (self->_started || self->_cancelled || !self->_queue)
             return;
@@ -359,21 +359,21 @@ void nw_listener_start(nw_listener_t listener)
     dispatch_async(self->_queue, ^{
         if (self->_cancelled)
             return;
-        charon_listener_report(self, nw_listener_state_waiting, nil);
-        charon_listener_open(self);
+        revenant_listener_report(self, nw_listener_state_waiting, nil);
+        revenant_listener_open(self);
         if (self->_cancelled || self->_socket < 0)
             return;
-        self->_acceptSource = charon_nw_read_source(self->_socket, self->_queue);
+        self->_acceptSource = revenant_nw_read_source(self->_socket, self->_queue);
         if (self->_acceptSource) {
-            __weak CharonNWListener *weak = self;
+            __weak RevenantNWListener *weak = self;
             dispatch_source_set_event_handler(self->_acceptSource, ^{
-                CharonNWListener *strong = weak;
+                RevenantNWListener *strong = weak;
                 if (strong && !strong->_cancelled)
-                    charon_listener_accept(strong);
+                    revenant_listener_accept(strong);
             });
         }
-        charon_listener_advertise(self);
-        charon_listener_report(self, nw_listener_state_ready, nil);
+        revenant_listener_advertise(self);
+        revenant_listener_report(self, nw_listener_state_ready, nil);
     });
 }
 
@@ -381,7 +381,7 @@ void nw_listener_cancel(nw_listener_t listener)
 {
     if (!listener)
         return;
-    CharonNWListener *self = (CharonNWListener *)listener;
+    RevenantNWListener *self = (RevenantNWListener *)listener;
     dispatch_block_t stop = ^{
         @synchronized(self) {
             if (self->_cancelled)
@@ -397,7 +397,7 @@ void nw_listener_cancel(nw_listener_t listener)
             close(self->_socket);
             self->_socket = -1;
         }
-        charon_listener_withdraw(self);
+        revenant_listener_withdraw(self);
         for (nw_connection_t connection in [self->_connections copy]) {
             nw_connection_cancel(connection);
         }
@@ -406,7 +406,7 @@ void nw_listener_cancel(nw_listener_t listener)
         self->_newConnection = nil;
         self->_newConnectionGroup = nil;
         self->_advertisedChanged = nil;
-        charon_listener_report(self, nw_listener_state_cancelled, nil);
+        revenant_listener_report(self, nw_listener_state_cancelled, nil);
     };
     if (self->_queue)
         dispatch_async(self->_queue, stop);

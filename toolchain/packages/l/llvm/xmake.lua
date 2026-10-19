@@ -6,7 +6,7 @@ package("llvm")
 
     add_urls("https://github.com/llvm/llvm-project.git")
     add_versions("23.1.1", "6dfe1677ab8dffbc6ec13d53a1e0215d75147689")
-    add_deps("charon@iphoneos-sdk", {alias = "iphoneos-sdk"})
+    add_deps("revenant@iphoneos-sdk", {alias = "iphoneos-sdk"})
     add_deps("cmake", "ninja", {kind = "binary"})
 
     local patches = {"clang-emulated-tls-without-dyld.patch", "builtins-leave-emutls-to-the-runtime.patch", "clang-atomic-libcalls-from-the-runtime.patch"}

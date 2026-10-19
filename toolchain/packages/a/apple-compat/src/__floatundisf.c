@@ -2,5 +2,5 @@
 
 float __floatundisf(unsigned long long value)
 {
-    return charon_float(value);
+    return revenant_float(value);
 }

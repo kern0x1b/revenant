@@ -1,8 +1,8 @@
 #import <UIKit/UIKit.h>
 
-static NSString *const CharonScaleSuffixes[] = {@"", @"@2x", @"@3x"};
+static NSString *const RevenantScaleSuffixes[] = {@"", @"@2x", @"@3x"};
 
-static NSArray<NSNumber *> *charon_scale_order(CGFloat wanted)
+static NSArray<NSNumber *> *revenant_scale_order(CGFloat wanted)
 {
     NSInteger want = wanted >= 2.5 ? 3 : (wanted >= 1.5 ? 2 : 1);
     NSMutableArray *order = [NSMutableArray arrayWithObject:@(want)];
@@ -13,7 +13,7 @@ static NSArray<NSNumber *> *charon_scale_order(CGFloat wanted)
     return order;
 }
 
-@implementation UIImage (CharonNamedInBundle)
+@implementation UIImage (RevenantNamedInBundle)
 
 + (UIImage *)imageNamed:(NSString *)name inBundle:(NSBundle *)bundle compatibleWithTraitCollection:(UITraitCollection *)traitCollection
 {
@@ -37,9 +37,9 @@ static NSArray<NSNumber *> *charon_scale_order(CGFloat wanted)
         extension = @"png";
     NSArray *idioms = idiom == UIUserInterfaceIdiomPad ? @[@"~ipad", @""] : @[@"~iphone", @""];
     for (NSString *idiomSuffix in idioms) {
-        for (NSNumber *candidate in charon_scale_order(scale)) {
+        for (NSNumber *candidate in revenant_scale_order(scale)) {
             NSInteger factor = candidate.integerValue;
-            NSString *resource = [NSString stringWithFormat:@"%@%@%@", stem, CharonScaleSuffixes[factor - 1], idiomSuffix];
+            NSString *resource = [NSString stringWithFormat:@"%@%@%@", stem, RevenantScaleSuffixes[factor - 1], idiomSuffix];
             NSString *path = nil;
             NSString *file = [resource stringByAppendingPathExtension:extension];
             if (bundle.resourcePath) {

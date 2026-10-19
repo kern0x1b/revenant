@@ -9,7 +9,7 @@
 
 #include <algorithm>
 
-namespace shade {
+namespace emulator {
 
 [[nodiscard]] std::optional<std::uint64_t> effective_host_memory_limit(
     const HostMemoryBudgetSnapshot& memory)

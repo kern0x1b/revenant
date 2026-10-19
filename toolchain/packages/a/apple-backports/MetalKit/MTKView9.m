@@ -3,26 +3,26 @@
 
 @implementation MTKView
 {
-    id<MTLDevice> _charonDevice;
-    MTLPixelFormat _charonColorPixelFormat;
-    MTLPixelFormat _charonDepthStencilPixelFormat;
-    NSUInteger _charonSampleCount;
-    MTLClearColor _charonClearColor;
-    double _charonClearDepth;
-    uint32_t _charonClearStencil;
-    CGSize _charonDrawableSize;
-    NSInteger _charonPreferredFramesPerSecond;
-    MTLTextureUsage _charonDepthStencilAttachmentTextureUsage;
-    MTLTextureUsage _charonMultisampleColorAttachmentTextureUsage;
-    BOOL _charonEnableSetNeedsDisplay;
-    BOOL _charonAutoResizeDrawable;
-    BOOL _charonPaused;
-    CADisplayLink *_charonDisplayLink;
-    id<MTLTexture> _charonDepthStencilTexture;
-    __weak id<MTKViewDelegate> _charonDelegate;
+    id<MTLDevice> _revenantDevice;
+    MTLPixelFormat _revenantColorPixelFormat;
+    MTLPixelFormat _revenantDepthStencilPixelFormat;
+    NSUInteger _revenantSampleCount;
+    MTLClearColor _revenantClearColor;
+    double _revenantClearDepth;
+    uint32_t _revenantClearStencil;
+    CGSize _revenantDrawableSize;
+    NSInteger _revenantPreferredFramesPerSecond;
+    MTLTextureUsage _revenantDepthStencilAttachmentTextureUsage;
+    MTLTextureUsage _revenantMultisampleColorAttachmentTextureUsage;
+    BOOL _revenantEnableSetNeedsDisplay;
+    BOOL _revenantAutoResizeDrawable;
+    BOOL _revenantPaused;
+    CADisplayLink *_revenantDisplayLink;
+    id<MTLTexture> _revenantDepthStencilTexture;
+    __weak id<MTKViewDelegate> _revenantDelegate;
 }
 
-- (CAMetalLayer *)charonLayer
+- (CAMetalLayer *)revenantLayer
 {
     return (CAMetalLayer *)self.layer;
 }
@@ -35,8 +35,8 @@
 - (instancetype)initWithFrame:(CGRect)frameRect device:(id<MTLDevice>)device
 {
     if ((self = [super initWithFrame:frameRect])) {
-        _charonDevice = device;
-        [self charonSetup];
+        _revenantDevice = device;
+        [self revenantSetup];
     }
     return self;
 }
@@ -44,52 +44,52 @@
 - (instancetype)initWithCoder:(NSCoder *)coder
 {
     if ((self = [super initWithCoder:coder]))
-        [self charonSetup];
+        [self revenantSetup];
     return self;
 }
 
-- (void)charonSetup
+- (void)revenantSetup
 {
-    _charonColorPixelFormat = MTLPixelFormatBGRA8Unorm;
-    _charonDepthStencilPixelFormat = MTLPixelFormatInvalid;
-    _charonSampleCount = 1;
-    _charonClearColor = MTLClearColorMake(0, 0, 0, 1);
-    _charonClearDepth = 1.0;
-    _charonPreferredFramesPerSecond = 60;
-    _charonAutoResizeDrawable = YES;
-    _charonDepthStencilAttachmentTextureUsage = MTLTextureUsageRenderTarget;
-    _charonMultisampleColorAttachmentTextureUsage = MTLTextureUsageRenderTarget;
-    self.charonLayer.device = _charonDevice;
-    self.charonLayer.pixelFormat = _charonColorPixelFormat;
-    self.charonLayer.framebufferOnly = YES;
+    _revenantColorPixelFormat = MTLPixelFormatBGRA8Unorm;
+    _revenantDepthStencilPixelFormat = MTLPixelFormatInvalid;
+    _revenantSampleCount = 1;
+    _revenantClearColor = MTLClearColorMake(0, 0, 0, 1);
+    _revenantClearDepth = 1.0;
+    _revenantPreferredFramesPerSecond = 60;
+    _revenantAutoResizeDrawable = YES;
+    _revenantDepthStencilAttachmentTextureUsage = MTLTextureUsageRenderTarget;
+    _revenantMultisampleColorAttachmentTextureUsage = MTLTextureUsageRenderTarget;
+    self.revenantLayer.device = _revenantDevice;
+    self.revenantLayer.pixelFormat = _revenantColorPixelFormat;
+    self.revenantLayer.framebufferOnly = YES;
 }
 
 - (void)dealloc
 {
-    [_charonDisplayLink invalidate];
+    [_revenantDisplayLink invalidate];
 }
 
 - (void)willMoveToWindow:(UIWindow *)newWindow
 {
     [super willMoveToWindow:newWindow];
     if (!newWindow) {
-        [_charonDisplayLink invalidate];
-        _charonDisplayLink = nil;
-    } else if (!_charonPaused && !_charonEnableSetNeedsDisplay && !_charonDisplayLink) {
-        _charonDisplayLink = [CADisplayLink displayLinkWithTarget:self selector:@selector(charonTick)];
-        [_charonDisplayLink addToRunLoop:[NSRunLoop mainRunLoop] forMode:NSRunLoopCommonModes];
+        [_revenantDisplayLink invalidate];
+        _revenantDisplayLink = nil;
+    } else if (!_revenantPaused && !_revenantEnableSetNeedsDisplay && !_revenantDisplayLink) {
+        _revenantDisplayLink = [CADisplayLink displayLinkWithTarget:self selector:@selector(revenantTick)];
+        [_revenantDisplayLink addToRunLoop:[NSRunLoop mainRunLoop] forMode:NSRunLoopCommonModes];
     }
 }
 
-- (void)charonTick
+- (void)revenantTick
 {
     [self draw];
 }
 
 - (void)draw
 {
-    if (_charonAutoResizeDrawable)
-        self.charonLayer.drawableSize = CGSizeMake(self.bounds.size.width * self.contentScaleFactor, self.bounds.size.height * self.contentScaleFactor);
+    if (_revenantAutoResizeDrawable)
+        self.revenantLayer.drawableSize = CGSizeMake(self.bounds.size.width * self.contentScaleFactor, self.bounds.size.height * self.contentScaleFactor);
     id<MTKViewDelegate> delegate = self.delegate;
     if ([delegate respondsToSelector:@selector(drawInMTKView:)])
         [delegate drawInMTKView:self];
@@ -99,224 +99,224 @@
 
 - (id<MTLDevice>)device
 {
-    return _charonDevice;
+    return _revenantDevice;
 }
 
 - (void)setDevice:(id<MTLDevice>)device
 {
-    _charonDevice = device;
-    self.charonLayer.device = device;
+    _revenantDevice = device;
+    self.revenantLayer.device = device;
 }
 
 - (id<CAMetalDrawable>)currentDrawable
 {
-    return self.charonLayer.nextDrawable;
+    return self.revenantLayer.nextDrawable;
 }
 
 - (MTLPixelFormat)colorPixelFormat
 {
-    return _charonColorPixelFormat;
+    return _revenantColorPixelFormat;
 }
 
 - (void)setColorPixelFormat:(MTLPixelFormat)colorPixelFormat
 {
-    _charonColorPixelFormat = colorPixelFormat;
-    self.charonLayer.pixelFormat = colorPixelFormat;
+    _revenantColorPixelFormat = colorPixelFormat;
+    self.revenantLayer.pixelFormat = colorPixelFormat;
 }
 
 - (MTLPixelFormat)depthStencilPixelFormat
 {
-    return _charonDepthStencilPixelFormat;
+    return _revenantDepthStencilPixelFormat;
 }
 
 - (void)setDepthStencilPixelFormat:(MTLPixelFormat)depthStencilPixelFormat
 {
-    _charonDepthStencilPixelFormat = depthStencilPixelFormat;
-    _charonDepthStencilTexture = nil;
+    _revenantDepthStencilPixelFormat = depthStencilPixelFormat;
+    _revenantDepthStencilTexture = nil;
 }
 
 - (NSUInteger)sampleCount
 {
-    return _charonSampleCount;
+    return _revenantSampleCount;
 }
 
 - (void)setSampleCount:(NSUInteger)sampleCount
 {
-    _charonSampleCount = sampleCount ?: 1;
+    _revenantSampleCount = sampleCount ?: 1;
 }
 
 - (MTLClearColor)clearColor
 {
-    return _charonClearColor;
+    return _revenantClearColor;
 }
 
 - (void)setClearColor:(MTLClearColor)clearColor
 {
-    _charonClearColor = clearColor;
+    _revenantClearColor = clearColor;
 }
 
 - (double)clearDepth
 {
-    return _charonClearDepth;
+    return _revenantClearDepth;
 }
 
 - (void)setClearDepth:(double)clearDepth
 {
-    _charonClearDepth = clearDepth;
+    _revenantClearDepth = clearDepth;
 }
 
 - (uint32_t)clearStencil
 {
-    return _charonClearStencil;
+    return _revenantClearStencil;
 }
 
 - (void)setClearStencil:(uint32_t)clearStencil
 {
-    _charonClearStencil = clearStencil;
+    _revenantClearStencil = clearStencil;
 }
 
 - (CGSize)drawableSize
 {
-    return self.charonLayer.drawableSize;
+    return self.revenantLayer.drawableSize;
 }
 
 - (void)setDrawableSize:(CGSize)drawableSize
 {
-    self.charonLayer.drawableSize = drawableSize;
+    self.revenantLayer.drawableSize = drawableSize;
 }
 
 - (NSInteger)preferredFramesPerSecond
 {
-    return _charonPreferredFramesPerSecond;
+    return _revenantPreferredFramesPerSecond;
 }
 
 - (void)setPreferredFramesPerSecond:(NSInteger)preferredFramesPerSecond
 {
-    _charonPreferredFramesPerSecond = preferredFramesPerSecond;
-    _charonDisplayLink.frameInterval = MAX(1, (NSInteger)round(60.0 / MAX(preferredFramesPerSecond, 1)));
+    _revenantPreferredFramesPerSecond = preferredFramesPerSecond;
+    _revenantDisplayLink.frameInterval = MAX(1, (NSInteger)round(60.0 / MAX(preferredFramesPerSecond, 1)));
 }
 
 - (BOOL)enableSetNeedsDisplay
 {
-    return _charonEnableSetNeedsDisplay;
+    return _revenantEnableSetNeedsDisplay;
 }
 
 - (void)setEnableSetNeedsDisplay:(BOOL)enableSetNeedsDisplay
 {
-    _charonEnableSetNeedsDisplay = enableSetNeedsDisplay;
+    _revenantEnableSetNeedsDisplay = enableSetNeedsDisplay;
     if (enableSetNeedsDisplay) {
-        [_charonDisplayLink invalidate];
-        _charonDisplayLink = nil;
-    } else if (self.window && !_charonPaused && !_charonDisplayLink) {
-        _charonDisplayLink = [CADisplayLink displayLinkWithTarget:self selector:@selector(charonTick)];
-        [_charonDisplayLink addToRunLoop:[NSRunLoop mainRunLoop] forMode:NSRunLoopCommonModes];
+        [_revenantDisplayLink invalidate];
+        _revenantDisplayLink = nil;
+    } else if (self.window && !_revenantPaused && !_revenantDisplayLink) {
+        _revenantDisplayLink = [CADisplayLink displayLinkWithTarget:self selector:@selector(revenantTick)];
+        [_revenantDisplayLink addToRunLoop:[NSRunLoop mainRunLoop] forMode:NSRunLoopCommonModes];
     }
 }
 
 - (BOOL)autoResizeDrawable
 {
-    return _charonAutoResizeDrawable;
+    return _revenantAutoResizeDrawable;
 }
 
 - (void)setAutoResizeDrawable:(BOOL)autoResizeDrawable
 {
-    _charonAutoResizeDrawable = autoResizeDrawable;
+    _revenantAutoResizeDrawable = autoResizeDrawable;
 }
 
 - (BOOL)isPaused
 {
-    return _charonPaused;
+    return _revenantPaused;
 }
 
 - (void)setPaused:(BOOL)paused
 {
-    _charonPaused = paused;
-    if (paused || _charonEnableSetNeedsDisplay) {
-        [_charonDisplayLink invalidate];
-        _charonDisplayLink = nil;
-    } else if (self.window && !_charonDisplayLink) {
-        _charonDisplayLink = [CADisplayLink displayLinkWithTarget:self selector:@selector(charonTick)];
-        [_charonDisplayLink addToRunLoop:[NSRunLoop mainRunLoop] forMode:NSRunLoopCommonModes];
+    _revenantPaused = paused;
+    if (paused || _revenantEnableSetNeedsDisplay) {
+        [_revenantDisplayLink invalidate];
+        _revenantDisplayLink = nil;
+    } else if (self.window && !_revenantDisplayLink) {
+        _revenantDisplayLink = [CADisplayLink displayLinkWithTarget:self selector:@selector(revenantTick)];
+        [_revenantDisplayLink addToRunLoop:[NSRunLoop mainRunLoop] forMode:NSRunLoopCommonModes];
     }
 }
 
 - (void)releaseDrawables
 {
-    _charonDepthStencilTexture = nil;
+    _revenantDepthStencilTexture = nil;
 }
 
 - (MTLTextureUsage)depthStencilAttachmentTextureUsage
 {
-    return _charonDepthStencilAttachmentTextureUsage;
+    return _revenantDepthStencilAttachmentTextureUsage;
 }
 
 - (void)setDepthStencilAttachmentTextureUsage:(MTLTextureUsage)depthStencilAttachmentTextureUsage
 {
-    _charonDepthStencilAttachmentTextureUsage = depthStencilAttachmentTextureUsage;
-    _charonDepthStencilTexture = nil;
+    _revenantDepthStencilAttachmentTextureUsage = depthStencilAttachmentTextureUsage;
+    _revenantDepthStencilTexture = nil;
 }
 
 - (MTLTextureUsage)multisampleColorAttachmentTextureUsage
 {
-    return _charonMultisampleColorAttachmentTextureUsage;
+    return _revenantMultisampleColorAttachmentTextureUsage;
 }
 
 - (void)setMultisampleColorAttachmentTextureUsage:(MTLTextureUsage)multisampleColorAttachmentTextureUsage
 {
-    _charonMultisampleColorAttachmentTextureUsage = multisampleColorAttachmentTextureUsage;
+    _revenantMultisampleColorAttachmentTextureUsage = multisampleColorAttachmentTextureUsage;
 }
 
 - (id<MTKViewDelegate>)delegate
 {
-    return _charonDelegate;
+    return _revenantDelegate;
 }
 
 - (void)setDelegate:(id<MTKViewDelegate>)delegate
 {
-    _charonDelegate = delegate;
+    _revenantDelegate = delegate;
 }
 
 - (BOOL)framebufferOnly
 {
-    return self.charonLayer.framebufferOnly;
+    return self.revenantLayer.framebufferOnly;
 }
 
 - (void)setFramebufferOnly:(BOOL)framebufferOnly
 {
-    self.charonLayer.framebufferOnly = framebufferOnly;
+    self.revenantLayer.framebufferOnly = framebufferOnly;
 }
 
 - (BOOL)presentsWithTransaction
 {
-    return self.charonLayer.presentsWithTransaction;
+    return self.revenantLayer.presentsWithTransaction;
 }
 
 - (void)setPresentsWithTransaction:(BOOL)presentsWithTransaction
 {
-    self.charonLayer.presentsWithTransaction = presentsWithTransaction;
+    self.revenantLayer.presentsWithTransaction = presentsWithTransaction;
 }
 
 - (CGColorSpaceRef)colorspace
 {
-    return self.charonLayer.colorspace;
+    return self.revenantLayer.colorspace;
 }
 
 - (void)setColorspace:(CGColorSpaceRef)colorspace
 {
-    self.charonLayer.colorspace = colorspace;
+    self.revenantLayer.colorspace = colorspace;
 }
 
 - (id<MTLTexture>)depthStencilTexture
 {
-    if (_charonDepthStencilPixelFormat == MTLPixelFormatInvalid)
+    if (_revenantDepthStencilPixelFormat == MTLPixelFormatInvalid)
         return nil;
     CGSize size = self.drawableSize;
-    if (!_charonDepthStencilTexture || _charonDepthStencilTexture.width != (NSUInteger)size.width || _charonDepthStencilTexture.height != (NSUInteger)size.height) {
-        MTLTextureDescriptor *descriptor = [MTLTextureDescriptor texture2DDescriptorWithPixelFormat:_charonDepthStencilPixelFormat width:(NSUInteger)size.width height:(NSUInteger)size.height mipmapped:NO];
-        descriptor.usage = _charonDepthStencilAttachmentTextureUsage;
-        _charonDepthStencilTexture = [_charonDevice newTextureWithDescriptor:descriptor];
+    if (!_revenantDepthStencilTexture || _revenantDepthStencilTexture.width != (NSUInteger)size.width || _revenantDepthStencilTexture.height != (NSUInteger)size.height) {
+        MTLTextureDescriptor *descriptor = [MTLTextureDescriptor texture2DDescriptorWithPixelFormat:_revenantDepthStencilPixelFormat width:(NSUInteger)size.width height:(NSUInteger)size.height mipmapped:NO];
+        descriptor.usage = _revenantDepthStencilAttachmentTextureUsage;
+        _revenantDepthStencilTexture = [_revenantDevice newTextureWithDescriptor:descriptor];
     }
-    return _charonDepthStencilTexture;
+    return _revenantDepthStencilTexture;
 }
 
 - (id<MTLTexture>)multisampleColorTexture
@@ -333,17 +333,17 @@
     descriptor.colorAttachments[0].texture = drawable.texture;
     descriptor.colorAttachments[0].loadAction = MTLLoadActionClear;
     descriptor.colorAttachments[0].storeAction = MTLStoreActionStore;
-    descriptor.colorAttachments[0].clearColor = _charonClearColor;
-    if (_charonDepthStencilPixelFormat != MTLPixelFormatInvalid) {
+    descriptor.colorAttachments[0].clearColor = _revenantClearColor;
+    if (_revenantDepthStencilPixelFormat != MTLPixelFormatInvalid) {
         id<MTLTexture> depthStencil = self.depthStencilTexture;
         descriptor.depthAttachment.texture = depthStencil;
         descriptor.depthAttachment.loadAction = MTLLoadActionClear;
         descriptor.depthAttachment.storeAction = MTLStoreActionDontCare;
-        descriptor.depthAttachment.clearDepth = _charonClearDepth;
+        descriptor.depthAttachment.clearDepth = _revenantClearDepth;
         descriptor.stencilAttachment.texture = depthStencil;
         descriptor.stencilAttachment.loadAction = MTLLoadActionClear;
         descriptor.stencilAttachment.storeAction = MTLStoreActionDontCare;
-        descriptor.stencilAttachment.clearStencil = _charonClearStencil;
+        descriptor.stencilAttachment.clearStencil = _revenantClearStencil;
     }
     return descriptor;
 }
@@ -351,7 +351,7 @@
 - (void)setNeedsDisplay
 {
     [super setNeedsDisplay];
-    if (_charonEnableSetNeedsDisplay)
+    if (_revenantEnableSetNeedsDisplay)
         [self draw];
 }
 

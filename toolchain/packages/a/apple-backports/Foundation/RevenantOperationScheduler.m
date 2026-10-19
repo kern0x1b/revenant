@@ -1,8 +1,8 @@
-#import "CharonOperationScheduler.h"
+#import "RevenantOperationScheduler.h"
 
-NSString *const CharonCurrentOperationQueueKey = @"CharonCurrentOperationQueue";
+NSString *const RevenantCurrentOperationQueueKey = @"RevenantCurrentOperationQueue";
 
-@implementation CharonOperationScheduler {
+@implementation RevenantOperationScheduler {
 @private
     dispatch_queue_t _queue;
     __weak NSOperationQueue *_owner;
@@ -178,14 +178,14 @@ NSString *const CharonCurrentOperationQueueKey = @"CharonCurrentOperationQueue";
         NSOperationQueue *owner = _owner;
         dispatch_async(_queue, ^{
             NSMutableDictionary *thread = [[NSThread currentThread] threadDictionary];
-            id previous = thread[CharonCurrentOperationQueueKey];
+            id previous = thread[RevenantCurrentOperationQueueKey];
             if (owner)
-                thread[CharonCurrentOperationQueueKey] = owner;
+                thread[RevenantCurrentOperationQueueKey] = owner;
             [operation start];
             if (previous)
-                thread[CharonCurrentOperationQueueKey] = previous;
+                thread[RevenantCurrentOperationQueueKey] = previous;
             else
-                [thread removeObjectForKey:CharonCurrentOperationQueueKey];
+                [thread removeObjectForKey:RevenantCurrentOperationQueueKey];
             [self pump];
         });
     }

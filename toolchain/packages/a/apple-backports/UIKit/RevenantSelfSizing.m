@@ -1,15 +1,15 @@
-#import "CharonCompositionalLayout.h"
+#import "RevenantCompositionalLayout.h"
 #import <objc/runtime.h>
 
-static void charon_wrap_labels(UIView *view, NSMutableArray *labels)
+static void revenant_wrap_labels(UIView *view, NSMutableArray *labels)
 {
     if ([view isKindOfClass:[UILabel class]])
         [labels addObject:view];
     for (UIView *sub in view.subviews)
-        charon_wrap_labels(sub, labels);
+        revenant_wrap_labels(sub, labels);
 }
 
-static CGSize charon_constrained_fit(UIView *content, CGSize proposed, BOOL estimatedWidth, BOOL estimatedHeight)
+static CGSize revenant_constrained_fit(UIView *content, CGSize proposed, BOOL estimatedWidth, BOOL estimatedHeight)
 {
     BOOL translates = content.translatesAutoresizingMaskIntoConstraints;
     CGRect frame = content.frame;
@@ -31,7 +31,7 @@ static CGSize charon_constrained_fit(UIView *content, CGSize proposed, BOOL esti
     [content setNeedsLayout];
     [content layoutIfNeeded];
     NSMutableArray *labels = [NSMutableArray array];
-    charon_wrap_labels(content, labels);
+    revenant_wrap_labels(content, labels);
     BOOL wrapped = NO;
     for (UILabel *label in labels) {
         CGFloat width = label.bounds.size.width;
@@ -53,20 +53,20 @@ static CGSize charon_constrained_fit(UIView *content, CGSize proposed, BOOL esti
     return size;
 }
 
-static BOOL charon_overrides_preferred(UICollectionReusableView *view)
+static BOOL revenant_overrides_preferred(UICollectionReusableView *view)
 {
     SEL selector = @selector(preferredLayoutAttributesFittingAttributes:);
     IMP mine = class_getMethodImplementation([view class], selector);
     return mine != class_getMethodImplementation([UICollectionReusableView class], selector) && mine != class_getMethodImplementation([UICollectionViewCell class], selector);
 }
 
-UICollectionViewLayoutAttributes *charon_default_preferred(UICollectionReusableView *view, UICollectionViewLayoutAttributes *attributes, BOOL estimatedWidth, BOOL estimatedHeight)
+UICollectionViewLayoutAttributes *revenant_default_preferred(UICollectionReusableView *view, UICollectionViewLayoutAttributes *attributes, BOOL estimatedWidth, BOOL estimatedHeight)
 {
     UIView *content = [view respondsToSelector:@selector(contentView)] ? [(UICollectionViewCell *)view contentView] : view;
     CGSize proposed = attributes.frame.size;
     CGSize size;
     if (content.constraints.count > 0) {
-        size = charon_constrained_fit(content, proposed, estimatedWidth, estimatedHeight);
+        size = revenant_constrained_fit(content, proposed, estimatedWidth, estimatedHeight);
     } else {
         CGRect frame = view.frame;
         view.frame = CGRectMake(0, 0, proposed.width, proposed.height);
@@ -81,14 +81,14 @@ UICollectionViewLayoutAttributes *charon_default_preferred(UICollectionReusableV
     return preferred;
 }
 
-UICollectionViewLayoutAttributes *charon_preferred_attributes(UICollectionReusableView *view, UICollectionViewLayoutAttributes *attributes, BOOL estimatedWidth, BOOL estimatedHeight, CGFloat scale)
+UICollectionViewLayoutAttributes *revenant_preferred_attributes(UICollectionReusableView *view, UICollectionViewLayoutAttributes *attributes, BOOL estimatedWidth, BOOL estimatedHeight, CGFloat scale)
 {
     UICollectionViewLayoutAttributes *preferred;
-    if (charon_overrides_preferred(view)) {
+    if (revenant_overrides_preferred(view)) {
         [view layoutIfNeeded];
         preferred = [view preferredLayoutAttributesFittingAttributes:attributes];
     } else {
-        preferred = charon_default_preferred(view, attributes, estimatedWidth, estimatedHeight);
+        preferred = revenant_default_preferred(view, attributes, estimatedWidth, estimatedHeight);
     }
     CGSize proposed = attributes.frame.size;
     CGSize size = preferred.frame.size;
@@ -105,7 +105,7 @@ UICollectionViewLayoutAttributes *charon_preferred_attributes(UICollectionReusab
     return result;
 }
 
-void charon_layout_perform(UICollectionViewLayout *layout, void (^work)(UICollectionViewLayout *layout))
+void revenant_layout_perform(UICollectionViewLayout *layout, void (^work)(UICollectionViewLayout *layout))
 {
     __weak UICollectionViewLayout *weak = layout;
     dispatch_async(dispatch_get_main_queue(), ^{
@@ -115,22 +115,22 @@ void charon_layout_perform(UICollectionViewLayout *layout, void (^work)(UICollec
     });
 }
 
-@implementation UICollectionView (CharonSelfSizing)
+@implementation UICollectionView (RevenantSelfSizing)
 
-- (void)charon_layoutSubviews
+- (void)revenant_layoutSubviews
 {
-    [self charon_layoutSubviews];
+    [self revenant_layoutSubviews];
     for (int pass = 0; pass < 4; pass++) {
         UICollectionViewLayout *layout = self.collectionViewLayout;
-        if (![layout respondsToSelector:@selector(charon_settleMeasurements)] || ![layout charon_settleMeasurements])
+        if (![layout respondsToSelector:@selector(revenant_settleMeasurements)] || ![layout revenant_settleMeasurements])
             break;
-        [self charon_layoutSubviews];
+        [self revenant_layoutSubviews];
     }
 }
 
 + (void)load
 {
-    SEL original = @selector(layoutSubviews), replacement = @selector(charon_layoutSubviews);
+    SEL original = @selector(layoutSubviews), replacement = @selector(revenant_layoutSubviews);
     Method own = class_getInstanceMethod([UICollectionView class], replacement);
     IMP replaced = method_getImplementation(own);
     const char *types = method_getTypeEncoding(own);

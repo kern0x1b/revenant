@@ -6,7 +6,7 @@
 
 #include <cstdint>
 
-namespace shade {
+namespace emulator {
 
 struct DeviceMemoryProfile {
     std::uint64_t ram_bytes;

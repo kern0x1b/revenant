@@ -388,7 +388,7 @@ static void CheckPromises(JSContext *context)
         NSString *onReturn = [context[@(directCases[index].name)] toString];
         CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0, true);
         NSString *afterTurn = [context[@(directCases[index].name)] toString];
-#ifdef CHARON_PORT
+#ifdef REVENANT_PORT
         check([onReturn isEqualToString:@"unset"] && [afterTurn isEqualToString:@"ran"],
               [NSString stringWithFormat:@"jobs queued by %s run on the next run loop turn, not as the C API call returns", directCases[index].what]);
 #else
@@ -434,7 +434,7 @@ static void CheckSymbols(JSContext *context)
 {
     context.exception = nil;
     JSValue *symbol = [JSValue valueWithNewSymbolFromDescription:@"d" inContext:context];
-#ifdef CHARON_PORT
+#ifdef REVENANT_PORT
     check(!symbol.isSymbol && symbol.isUndefined && [[context.exception[@"name"] toString] isEqualToString:@"TypeError"], @"a symbol is refused with a TypeError on the context (the release's engine has no symbols)");
 #else
     check(symbol.isSymbol && [[[context evaluateScript:@"(function (x) { return typeof x; })"] callWithArguments:@[symbol]].toString isEqualToString:@"symbol"], @"the host's engine makes a symbol (the divergence the backport names)");
@@ -479,7 +479,7 @@ static void CheckReleaseCAPI(void)
     JSClassDefinition definition = kJSClassDefinitionEmpty;
     JSClassRef jsClass = JSClassCreate(&definition);
     JSGlobalContextRef context = JSGlobalContextCreate(NULL);
-    JSStringRef name = JSStringCreateWithUTF8CString("charon.check");
+    JSStringRef name = JSStringCreateWithUTF8CString("revenant.check");
     JSObjectRef classed = JSObjectMake(context, jsClass, NULL);
     JSObjectRef plain = JSObjectMake(context, NULL, NULL);
     JSValueProtect(context, classed);
@@ -656,7 +656,7 @@ static void CheckCAPIRows(JSContext *context)
     NSString *onReturn = EvalString(ctx, "seen");
     CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0, true);
     NSString *afterTurn = EvalString(ctx, "seen");
-#ifdef CHARON_PORT
+#ifdef REVENANT_PORT
     check([onReturn isEqualToString:@"unset"] && [afterTurn isEqualToString:@"7"],
           @"a promise JSObjectMakeDeferredPromise resolves runs its reactions on the next run loop turn");
 #else
@@ -732,10 +732,10 @@ static void CheckReleaseAfterCollection(JSContext *context)
     CollectOnly(context);
     int onReturn = releasedOwners;
     CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0, true);
-#if defined(CHARON_PORT) && TARGET_OS_IPHONE
+#if defined(REVENANT_PORT) && TARGET_OS_IPHONE
     (void)onReturn;
     check(releasedOwners == 4, @"an exported owner whose wrapper was collected is released once the collection has run");
-#elif defined(CHARON_PORT)
+#elif defined(REVENANT_PORT)
     check(onReturn == 0 && releasedWhileCollecting == 0 && releasedOwners == 4,
           @"an exported owner whose wrapper was collected is released on the next run loop turn, outside the collection");
 #else
@@ -819,7 +819,7 @@ static void CheckReleaseThread(JSContext *context)
     check(releasedOnMain == 4, @"a thread's run loop turn releases what it queued while another thread's queue waits");
     dispatch_semaphore_signal(workerMayExit);
     pthread_join(thread, NULL);
-#ifdef CHARON_PORT
+#ifdef REVENANT_PORT
     check(workerReleasedBeforeExit == 0 && releasedElsewhere == 4, @"a thread with no run loop that calls nothing more releases what it queued when it exits");
 #else
     check(workerReleasedBeforeExit == 4 && releasedElsewhere == 4, @"a torn-down virtual machine's wrapped objects are released as its teardown ends, on its thread");
@@ -951,8 +951,8 @@ static void CheckBlockArguments(void)
     [context evaluateScript:@"takeAny(function () {})"];
     check([got isKindOfClass:[NSDictionary class]], @"an id argument receives a function as toObject converts it");
     check([[[context evaluateScript:@"typeof takeBlock"] toString] isEqualToString:@"object"], @"a block taking a block is no function, as the release has it");
-    typedef struct { int field; } CharonCheckStruct;
-    context[@"takeStruct"] = ^(CharonCheckStruct value) { (void)value; };
+    typedef struct { int field; } RevenantCheckStruct;
+    context[@"takeStruct"] = ^(RevenantCheckStruct value) { (void)value; };
     context[@"takeRange"] = ^(NSRange value) { (void)value; };
     check([[[context evaluateScript:@"typeof takeStruct"] toString] isEqualToString:@"object"], @"a block taking a struct JSValue does not convert is no function");
     check([[[context evaluateScript:@"typeof takeRange"] toString] isEqualToString:@"function"], @"a block taking an NSRange is a function");
@@ -1015,11 +1015,11 @@ static void PrintBlockMatrix(void)
     context.exceptionHandler = ^(JSContext *c, JSValue *exception) { got = [NSString stringWithFormat:@"THROW %@", [exception toString]]; };
     context[@"url"] = [NSURL URLWithString:@"http://example.com/"];
     context[@"obj"] = [PointObject new];
-#define CHARON_MATRIX(T, name, format) context[@"m_" name] = ^T(T a) { got = [NSString stringWithFormat:format, a]; return a; };
-    CHARON_MATRIX(char, "char", @"%d") CHARON_MATRIX(short, "short", @"%d") CHARON_MATRIX(int, "int", @"%d") CHARON_MATRIX(unsigned, "unsigned", @"%u")
-    CHARON_MATRIX(long long, "longlong", @"%lld") CHARON_MATRIX(unsigned long long, "ulonglong", @"%llu")
-    CHARON_MATRIX(float, "float", @"%.9g") CHARON_MATRIX(double, "double", @"%.17g")
-#undef CHARON_MATRIX
+#define REVENANT_MATRIX(T, name, format) context[@"m_" name] = ^T(T a) { got = [NSString stringWithFormat:format, a]; return a; };
+    REVENANT_MATRIX(char, "char", @"%d") REVENANT_MATRIX(short, "short", @"%d") REVENANT_MATRIX(int, "int", @"%d") REVENANT_MATRIX(unsigned, "unsigned", @"%u")
+    REVENANT_MATRIX(long long, "longlong", @"%lld") REVENANT_MATRIX(unsigned long long, "ulonglong", @"%llu")
+    REVENANT_MATRIX(float, "float", @"%.9g") REVENANT_MATRIX(double, "double", @"%.17g")
+#undef REVENANT_MATRIX
     context[@"m_bool"] = ^bool(bool a) { got = a ? @"true" : @"false"; return a; };
     context[@"m_CGPoint"] = ^CGPoint(CGPoint a) { got = [NSString stringWithFormat:@"{%g,%g}", a.x, a.y]; return a; };
     context[@"m_CGSize"] = ^CGSize(CGSize a) { got = [NSString stringWithFormat:@"{%g,%g}", a.width, a.height]; return a; };

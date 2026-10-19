@@ -1,9 +1,9 @@
-#import "CharonAVCaptureDeviceDynamic26.h"
+#import "RevenantAVCaptureDeviceDynamic26.h"
 #import <objc/runtime.h>
 
-static const char charon_simulated_aperture_key;
+static const char revenant_simulated_aperture_key;
 
-@implementation AVCaptureDevice (CharonCaptureDeviceDynamic26)
+@implementation AVCaptureDevice (RevenantCaptureDeviceDynamic26)
 
 - (AVCaptureAspectRatio)dynamicAspectRatio
 {
@@ -52,7 +52,7 @@ static const char charon_simulated_aperture_key;
 
 @end
 
-@implementation AVCaptureDeviceFormat (CharonCaptureDeviceFormatDynamic26)
+@implementation AVCaptureDeviceFormat (RevenantCaptureDeviceFormatDynamic26)
 
 - (BOOL)isCameraLensSmudgeDetectionSupported
 {
@@ -81,11 +81,11 @@ static const char charon_simulated_aperture_key;
 
 @end
 
-@implementation AVCaptureDeviceInput (CharonCaptureDeviceInputDynamic26)
+@implementation AVCaptureDeviceInput (RevenantCaptureDeviceInputDynamic26)
 
 - (float)simulatedAperture
 {
-    id stored = objc_getAssociatedObject(self, &charon_simulated_aperture_key);
+    id stored = objc_getAssociatedObject(self, &revenant_simulated_aperture_key);
     return stored ? [stored floatValue] : 0.0f;
 }
 
@@ -95,7 +95,7 @@ static const char charon_simulated_aperture_key;
     AVCaptureDeviceFormat *format = device ? device.activeFormat : nil;
     float minimum = format ? [(id)format minSimulatedAperture] : 0.0f;
     if (minimum > 0.0f) {
-        objc_setAssociatedObject(self, &charon_simulated_aperture_key, @(simulatedAperture),
+        objc_setAssociatedObject(self, &revenant_simulated_aperture_key, @(simulatedAperture),
                                  OBJC_ASSOCIATION_RETAIN_NONATOMIC);
         return;
     }

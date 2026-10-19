@@ -11,7 +11,7 @@
 
 #include <cstdint>
 
-namespace shade::darwin::kqueue {
+namespace emulator::darwin::kqueue {
 
 inline constexpr std::int16_t filter_read = -1;
 inline constexpr std::int16_t filter_write = -2;

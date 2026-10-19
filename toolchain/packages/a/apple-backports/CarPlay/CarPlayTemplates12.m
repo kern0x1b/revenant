@@ -2,10 +2,10 @@
 #import <UIKit/UIKit.h>
 #import <objc/message.h>
 #import <math.h>
-#import "CharonCarPlayTemplate.h"
-#import "CharonCarPlay174.h"
+#import "RevenantCarPlayTemplate.h"
+#import "RevenantCarPlay174.h"
 
-static CGRect CharonAspectFit(CGSize size, CGRect rect)
+static CGRect RevenantAspectFit(CGSize size, CGRect rect)
 {
     if (size.width <= 0.0 || size.height <= 0.0) {
         return rect;
@@ -47,7 +47,7 @@ static CGRect CharonAspectFit(CGSize size, CGRect rect)
     UIImage *_tabImage;
     UITabBarSystemItem _tabSystemItem;
     BOOL _showsTabBadge;
-    __weak CPInterfaceController *_charonController;
+    __weak CPInterfaceController *_revenantController;
 }
 
 @synthesize userInfo = _userInfo;
@@ -65,7 +65,7 @@ static CGRect CharonAspectFit(CGSize size, CGRect rect)
     return self;
 }
 
-- (UIImage *)charon_tabMark
+- (UIImage *)revenant_tabMark
 {
     if (_tabImage) {
         return _tabImage;
@@ -73,7 +73,7 @@ static CGRect CharonAspectFit(CGSize size, CGRect rect)
     if (_tabSystemItem == UITabBarSystemItemMore) {
         return nil;
     }
-    NSString *name = [CPTemplate charon_nameForSystemItem:_tabSystemItem];
+    NSString *name = [CPTemplate revenant_nameForSystemItem:_tabSystemItem];
     CGSize size = CGSizeMake(25.0, 25.0);
     UIGraphicsBeginImageContextWithOptions(size, NO, 1.0);
     NSDictionary *attributes = @{NSFontAttributeName: [UIFont boldSystemFontOfSize:17.0],
@@ -86,7 +86,7 @@ static CGRect CharonAspectFit(CGSize size, CGRect rect)
     return drawn;
 }
 
-+ (NSString *)charon_nameForSystemItem:(UITabBarSystemItem)item
++ (NSString *)revenant_nameForSystemItem:(UITabBarSystemItem)item
 {
     switch (item) {
         case UITabBarSystemItemFavorites: return @"Favorites";
@@ -127,7 +127,7 @@ static CGRect CharonAspectFit(CGSize size, CGRect rect)
     return YES;
 }
 
-- (UIViewController *)charon_viewControllerForInterfaceController:(CPInterfaceController *)controller
+- (UIViewController *)revenant_viewControllerForInterfaceController:(CPInterfaceController *)controller
 {
     return nil;
 }
@@ -226,7 +226,7 @@ static CGRect CharonAspectFit(CGSize size, CGRect rect)
     return YES;
 }
 
-- (void)charon_drawInRect:(CGRect)rect alpha:(CGFloat)alpha
+- (void)revenant_drawInRect:(CGRect)rect alpha:(CGFloat)alpha
 {
     if (rect.size.width <= 0.0 || rect.size.height <= 0.0) {
         return;
@@ -238,7 +238,7 @@ static CGRect CharonAspectFit(CGSize size, CGRect rect)
     CGContextSaveGState(context);
     CGContextSetAlpha(context, (CGFloat)alpha);
     if (_image) {
-        CGRect box = CharonAspectFit(_image.size, rect);
+        CGRect box = RevenantAspectFit(_image.size, rect);
         [_image drawInRect:box];
     } else if (_title.length > 0) {
         NSDictionary *attributes = @{NSFontAttributeName: [UIFont systemFontOfSize:17.0],
@@ -263,7 +263,7 @@ static CGRect CharonAspectFit(CGSize size, CGRect rect)
     CGContextRestoreGState(context);
 }
 
-- (void)charon_tap
+- (void)revenant_tap
 {
     if (_handler) {
         _handler(self);
@@ -277,7 +277,7 @@ static CGRect CharonAspectFit(CGSize size, CGRect rect)
     UIImage *_image;
     BOOL _enabled;
     void (^_handler)(CPGridButton *);
-    CPMessageGridItemConfiguration *_charon_messageConfiguration;
+    CPMessageGridItemConfiguration *_revenant_messageConfiguration;
 }
 
 @synthesize titleVariants = _titleVariants;
@@ -307,34 +307,34 @@ static CGRect CharonAspectFit(CGSize size, CGRect rect)
     _enabled = enabled;
 }
 
-- (void)charon_setImage:(UIImage *)image
+- (void)revenant_setImage:(UIImage *)image
 {
     _image = image;
 }
 
-- (CPMessageGridItemConfiguration *)charon_messageConfiguration
+- (CPMessageGridItemConfiguration *)revenant_messageConfiguration
 {
-    return _charon_messageConfiguration;
+    return _revenant_messageConfiguration;
 }
 
-- (void)charon_setMessageConfiguration:(CPMessageGridItemConfiguration *)messageConfiguration
+- (void)revenant_setMessageConfiguration:(CPMessageGridItemConfiguration *)messageConfiguration
 {
-    _charon_messageConfiguration = messageConfiguration;
+    _revenant_messageConfiguration = messageConfiguration;
 }
 
-- (void)charon_setTitleVariants:(NSArray<NSString *> *)titleVariants
+- (void)revenant_setTitleVariants:(NSArray<NSString *> *)titleVariants
 {
     _titleVariants = [titleVariants copy] ?: @[];
 }
 
-- (void)charon_drawInRect:(CGRect)rect
+- (void)revenant_drawInRect:(CGRect)rect
 {
     if (CGRectIsEmpty(rect) || !_enabled) {
         return;
     }
     CGFloat imageHeight = MIN(CGRectGetWidth(rect) * 0.6, CGRectGetHeight(rect) * 0.6);
     if (_image) {
-        CGRect box = CharonAspectFit(_image.size, rect);
+        CGRect box = RevenantAspectFit(_image.size, rect);
         box.size.height = MIN(box.size.height, imageHeight);
         box.origin = CGPointMake(CGRectGetMidX(rect) - box.size.width / 2.0, CGRectGetMinY(rect));
         [_image drawInRect:box];
@@ -351,7 +351,7 @@ static CGRect CharonAspectFit(CGSize size, CGRect rect)
        withAttributes:attributes];
 }
 
-- (void)charon_tap
+- (void)revenant_tap
 {
     if (_handler) {
         _handler(self);
@@ -422,7 +422,7 @@ static CGRect CharonAspectFit(CGSize size, CGRect rect)
     _hidden = hidden;
 }
 
-- (void)charon_drawInRect:(CGRect)rect
+- (void)revenant_drawInRect:(CGRect)rect
 {
     if (_hidden || !_enabled || CGRectIsEmpty(rect)) {
         return;
@@ -432,12 +432,12 @@ static CGRect CharonAspectFit(CGSize size, CGRect rect)
     [plate fill];
     UIImage *mark = _image;
     if (mark) {
-        CGRect box = CharonAspectFit(mark.size, CGRectInset(rect, 8.0, 8.0));
+        CGRect box = RevenantAspectFit(mark.size, CGRectInset(rect, 8.0, 8.0));
         [mark drawInRect:box];
     }
 }
 
-- (void)charon_tap
+- (void)revenant_tap
 {
     if (_handler) {
         _handler(self);
@@ -470,7 +470,7 @@ static CGRect CharonAspectFit(CGSize size, CGRect rect)
 @implementation CPTravelEstimates {
     NSMeasurement<NSUnitLength *> *_distanceRemaining;
     NSTimeInterval _timeRemaining;
-    NSMeasurement<NSUnitLength *> *_charon_distanceRemainingToDisplay;
+    NSMeasurement<NSUnitLength *> *_revenant_distanceRemainingToDisplay;
 }
 
 @synthesize distanceRemaining = _distanceRemaining;
@@ -515,14 +515,14 @@ static CGRect CharonAspectFit(CGSize size, CGRect rect)
             [_distanceRemaining doubleValue], _timeRemaining];
 }
 
-- (NSMeasurement<NSUnitLength *> *)charon_distanceRemainingToDisplay
+- (NSMeasurement<NSUnitLength *> *)revenant_distanceRemainingToDisplay
 {
-    return _charon_distanceRemainingToDisplay;
+    return _revenant_distanceRemainingToDisplay;
 }
 
-- (void)charon_setDistanceRemainingToDisplay:(NSMeasurement<NSUnitLength *> *)distance
+- (void)revenant_setDistanceRemainingToDisplay:(NSMeasurement<NSUnitLength *> *)distance
 {
-    _charon_distanceRemainingToDisplay = distance;
+    _revenant_distanceRemainingToDisplay = distance;
 }
 
 @end
@@ -543,14 +543,14 @@ static CGRect CharonAspectFit(CGSize size, CGRect rect)
     UIColor *_cardBackgroundColor;
     CPTravelEstimates *_initialTravelEstimates;
     id _userInfo;
-    CPManeuverType _charon_maneuverType;
-    CPTrafficSide _charon_trafficSide;
-    CPJunctionType _charon_junctionType;
-    NSMeasurement<NSUnitAngle *> *_charon_junctionExitAngle;
-    NSSet<NSMeasurement<NSUnitAngle *> *> *_charon_junctionElementAngles;
-    CPLaneGuidance *_charon_linkedLaneGuidance;
-    NSArray<NSString *> *_charon_roadFollowingManeuverVariants;
-    NSString *_charon_highwayExitLabel;
+    CPManeuverType _revenant_maneuverType;
+    CPTrafficSide _revenant_trafficSide;
+    CPJunctionType _revenant_junctionType;
+    NSMeasurement<NSUnitAngle *> *_revenant_junctionExitAngle;
+    NSSet<NSMeasurement<NSUnitAngle *> *> *_revenant_junctionElementAngles;
+    CPLaneGuidance *_revenant_linkedLaneGuidance;
+    NSArray<NSString *> *_revenant_roadFollowingManeuverVariants;
+    NSString *_revenant_highwayExitLabel;
 }
 
 @synthesize instructionVariants = _instructionVariants;
@@ -620,44 +620,44 @@ static CGRect CharonAspectFit(CGSize size, CGRect rect)
     return YES;
 }
 
-- (CPManeuverType)charon_maneuverType { return _charon_maneuverType; }
-- (void)charon_setManeuverType:(CPManeuverType)type { _charon_maneuverType = type; }
+- (CPManeuverType)revenant_maneuverType { return _revenant_maneuverType; }
+- (void)revenant_setManeuverType:(CPManeuverType)type { _revenant_maneuverType = type; }
 
-- (CPTrafficSide)charon_trafficSide { return _charon_trafficSide; }
-- (void)charon_setTrafficSide:(CPTrafficSide)side { _charon_trafficSide = side; }
+- (CPTrafficSide)revenant_trafficSide { return _revenant_trafficSide; }
+- (void)revenant_setTrafficSide:(CPTrafficSide)side { _revenant_trafficSide = side; }
 
-- (CPJunctionType)charon_junctionType { return _charon_junctionType; }
-- (void)charon_setJunctionType:(CPJunctionType)type { _charon_junctionType = type; }
+- (CPJunctionType)revenant_junctionType { return _revenant_junctionType; }
+- (void)revenant_setJunctionType:(CPJunctionType)type { _revenant_junctionType = type; }
 
-- (NSMeasurement<NSUnitAngle *> *)charon_junctionExitAngle { return _charon_junctionExitAngle; }
-- (void)charon_setJunctionExitAngle:(NSMeasurement<NSUnitAngle *> *)angle
+- (NSMeasurement<NSUnitAngle *> *)revenant_junctionExitAngle { return _revenant_junctionExitAngle; }
+- (void)revenant_setJunctionExitAngle:(NSMeasurement<NSUnitAngle *> *)angle
 {
-    _charon_junctionExitAngle = angle;
+    _revenant_junctionExitAngle = angle;
 }
 
-- (NSSet<NSMeasurement<NSUnitAngle *> *> *)charon_junctionElementAngles
+- (NSSet<NSMeasurement<NSUnitAngle *> *> *)revenant_junctionElementAngles
 {
-    return _charon_junctionElementAngles;
+    return _revenant_junctionElementAngles;
 }
-- (void)charon_setJunctionElementAngles:(NSSet<NSMeasurement<NSUnitAngle *> *> *)angles
+- (void)revenant_setJunctionElementAngles:(NSSet<NSMeasurement<NSUnitAngle *> *> *)angles
 {
-    _charon_junctionElementAngles = angles;
-}
-
-- (CPLaneGuidance *)charon_linkedLaneGuidance { return _charon_linkedLaneGuidance; }
-- (void)charon_setLinkedLaneGuidance:(CPLaneGuidance *)guidance { _charon_linkedLaneGuidance = guidance; }
-
-- (NSArray<NSString *> *)charon_roadFollowingManeuverVariants
-{
-    return _charon_roadFollowingManeuverVariants;
-}
-- (void)charon_setRoadFollowingManeuverVariants:(NSArray<NSString *> *)variants
-{
-    _charon_roadFollowingManeuverVariants = [variants copy];
+    _revenant_junctionElementAngles = angles;
 }
 
-- (NSString *)charon_highwayExitLabel { return _charon_highwayExitLabel; }
-- (void)charon_setHighwayExitLabel:(NSString *)label { _charon_highwayExitLabel = [label copy]; }
+- (CPLaneGuidance *)revenant_linkedLaneGuidance { return _revenant_linkedLaneGuidance; }
+- (void)revenant_setLinkedLaneGuidance:(CPLaneGuidance *)guidance { _revenant_linkedLaneGuidance = guidance; }
+
+- (NSArray<NSString *> *)revenant_roadFollowingManeuverVariants
+{
+    return _revenant_roadFollowingManeuverVariants;
+}
+- (void)revenant_setRoadFollowingManeuverVariants:(NSArray<NSString *> *)variants
+{
+    _revenant_roadFollowingManeuverVariants = [variants copy];
+}
+
+- (NSString *)revenant_highwayExitLabel { return _revenant_highwayExitLabel; }
+- (void)revenant_setHighwayExitLabel:(NSString *)label { _revenant_highwayExitLabel = [label copy]; }
 
 @end
 
@@ -688,12 +688,12 @@ static CGRect CharonAspectFit(CGSize size, CGRect rect)
 {
     self = [self initWithTitle:title style:style handler:handler];
     if (self) {
-        [self charon_setColor:color];
+        [self revenant_setColor:color];
     }
     return self;
 }
 
-- (void)charon_setColor:(UIColor *)color
+- (void)revenant_setColor:(UIColor *)color
 {
     _color = [color copy];
 }

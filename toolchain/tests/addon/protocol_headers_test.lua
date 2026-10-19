@@ -58,11 +58,11 @@ function failures(opt)
         local folder = path.join(root, "packages", "a", "apple-backports", library.folder)
         local rows = implemented_protocols(root, library.folder)
         if #rows > 0 then
-            local header = path.join(folder, "Charon" .. library.folder .. "Protocols.h")
+            local header = path.join(folder, "Revenant" .. library.folder .. "Protocols.h")
             local text = protocol_headers.header_text(root, library.folder)
             if text == nil then
                 table.insert(found, string.format(
-                    "%s has %d implemented protocol row(s) and no Charon%sProtocols.h, which every generated "
+                    "%s has %d implemented protocol row(s) and no Revenant%sProtocols.h, which every generated "
                     .. "protocol source of it imports; the rows are: %s",
                     library.name, #rows, library.folder, table.concat(rows, " ")))
             else
@@ -74,7 +74,7 @@ function failures(opt)
                 for missing in pairs(declared) do
                     if missing:sub(1, 8) == "\0missing" then
                         table.insert(found, string.format(
-                            "%s: Charon%sProtocols.h imports %q, which is not a header of the library's own "
+                            "%s: Revenant%sProtocols.h imports %q, which is not a header of the library's own "
                             .. "folder, so the generated source that imports it cannot open it",
                             library.name, library.folder, missing:sub(9)))
                     end
@@ -84,7 +84,7 @@ function failures(opt)
                     for _, name in ipairs(imported) do named[#named + 1] = name end
                     table.insert(found, string.format(
                         "%s: %d implemented protocol row(s) are named by a generated source and declared "
-                        .. "neither in Charon%sProtocols.h nor in a header it imports (%s): %s",
+                        .. "neither in Revenant%sProtocols.h nor in a header it imports (%s): %s",
                         library.name, #undeclared, library.folder,
                         #named > 0 and table.concat(named, ", ") or "it imports no header of the folder",
                         table.concat(undeclared, " ")))

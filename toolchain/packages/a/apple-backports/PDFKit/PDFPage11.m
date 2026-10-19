@@ -1,11 +1,11 @@
-#import "CharonPDFKit.h"
+#import "RevenantPDFKit.h"
 #import "PDFPageText11.h"
 #include <ctype.h>
 
 @interface PDFPage ()
-- (CGPDFPageRef)charon_CGPDFPage;
-- (void)charon_buildAnnotations;
-- (CharonPDFPageText *)charon_textLayout;
+- (CGPDFPageRef)revenant_CGPDFPage;
+- (void)revenant_buildAnnotations;
+- (RevenantPDFPageText *)revenant_textLayout;
 @end
 
 @implementation PDFPage {
@@ -14,7 +14,7 @@
     CGPDFDocumentRef _documentRef;
     NSUInteger _index;
     NSArray *_annotations;
-    CharonPDFPageText *_layout;
+    RevenantPDFPageText *_layout;
 }
 
 @synthesize pageIndex = _index;
@@ -50,10 +50,10 @@ typedef struct {
     CGFloat leading;
     CGFloat charSpacing;
     NSString *font;
-    CharonPDFFontMetrics *metrics;
-} CharonTextWalk;
+    RevenantPDFFontMetrics *metrics;
+} RevenantTextWalk;
 
-static CGPDFDictionaryRef charonFontDictionary(CGPDFPageRef page)
+static CGPDFDictionaryRef revenantFontDictionary(CGPDFPageRef page)
 {
     if (page == NULL)
         return NULL;
@@ -69,7 +69,7 @@ static CGPDFDictionaryRef charonFontDictionary(CGPDFPageRef page)
     return fonts;
 }
 
-static NSString *charonTextForOperand(CGPDFStringRef operand, CFStringRef characters)
+static NSString *revenantTextForOperand(CGPDFStringRef operand, CFStringRef characters)
 {
     const unsigned char *bytes = CGPDFStringGetBytePtr(operand);
     size_t length = CGPDFStringGetLength(operand);
@@ -89,34 +89,34 @@ static NSString *charonTextForOperand(CGPDFStringRef operand, CFStringRef charac
     return answer;
 }
 
-static void charonAppendOperand(CGPDFScannerRef scanner, CharonTextWalk *walk, CGPDFStringRef operand)
+static void revenantAppendOperand(CGPDFScannerRef scanner, RevenantTextWalk *walk, CGPDFStringRef operand)
 {
     if (operand == NULL)
         return;
     CFStringRef characters = CGPDFStringCopyTextString(operand);
     if (characters == NULL)
         return;
-    NSString *text = charonTextForOperand(operand, characters);
+    NSString *text = revenantTextForOperand(operand, characters);
     [walk->text appendString:text];
     walk->x = collectRun(walk->runs, text, walk->x, walk->y, walk->size * walk->scaleX,
                          walk->size * walk->scaleY, walk->font, walk->metrics, walk->charSpacing);
     CFRelease(characters);
 }
 
-static void charonOpShowText(CGPDFScannerRef scanner, void *info)
+static void revenantOpShowText(CGPDFScannerRef scanner, void *info)
 {
-    CharonTextWalk *walk = info;
+    RevenantTextWalk *walk = info;
     if (walk == NULL)
         return;
     CGPDFStringRef operand = NULL;
     if (CGPDFScannerPopString(scanner, &operand))
-        charonAppendOperand(scanner, walk, operand);
+        revenantAppendOperand(scanner, walk, operand);
     walk->shows++;
 }
 
-static void charonOpShowTextArray(CGPDFScannerRef scanner, void *info)
+static void revenantOpShowTextArray(CGPDFScannerRef scanner, void *info)
 {
-    CharonTextWalk *walk = info;
+    RevenantTextWalk *walk = info;
     if (walk == NULL)
         return;
     CGPDFArrayRef array = NULL;
@@ -130,7 +130,7 @@ static void charonOpShowTextArray(CGPDFScannerRef scanner, void *info)
         if (kind == kCGPDFObjectTypeString) {
             CGPDFStringRef operand = NULL;
             if (CGPDFObjectGetValue(element, kCGPDFObjectTypeString, &operand))
-                charonAppendOperand(scanner, walk, operand);
+                revenantAppendOperand(scanner, walk, operand);
         }
         if (kind == kCGPDFObjectTypeInteger || kind == kCGPDFObjectTypeReal) {
             CGPDFReal adjustment = 0;
@@ -141,9 +141,9 @@ static void charonOpShowTextArray(CGPDFScannerRef scanner, void *info)
     walk->shows++;
 }
 
-static void charonOpTextMatrix(CGPDFScannerRef scanner, void *info)
+static void revenantOpTextMatrix(CGPDFScannerRef scanner, void *info)
 {
-    CharonTextWalk *walk = info;
+    RevenantTextWalk *walk = info;
     if (walk == NULL)
         return;
     CGPDFReal a = 0, b = 0, c = 0, d = 0, e = 0, f = 0;
@@ -159,21 +159,21 @@ static void charonOpTextMatrix(CGPDFScannerRef scanner, void *info)
     }
 }
 
-static void charonMoveText(CGPDFScannerRef scanner, void *info, BOOL setLeading);
+static void revenantMoveText(CGPDFScannerRef scanner, void *info, BOOL setLeading);
 
-static void charonOpMoveText(CGPDFScannerRef scanner, void *info)
+static void revenantOpMoveText(CGPDFScannerRef scanner, void *info)
 {
-    charonMoveText(scanner, info, NO);
+    revenantMoveText(scanner, info, NO);
 }
 
-static void charonOpMoveTextDelta(CGPDFScannerRef scanner, void *info)
+static void revenantOpMoveTextDelta(CGPDFScannerRef scanner, void *info)
 {
-    charonMoveText(scanner, info, YES);
+    revenantMoveText(scanner, info, YES);
 }
 
-static void charonMoveText(CGPDFScannerRef scanner, void *info, BOOL setLeading)
+static void revenantMoveText(CGPDFScannerRef scanner, void *info, BOOL setLeading)
 {
-    CharonTextWalk *walk = info;
+    RevenantTextWalk *walk = info;
     if (walk == NULL)
         return;
     CGPDFReal tx = 0, ty = 0;
@@ -187,9 +187,9 @@ static void charonMoveText(CGPDFScannerRef scanner, void *info, BOOL setLeading)
         walk->leading = -(CGFloat)ty;
 }
 
-static void charonOpNextLine(CGPDFScannerRef scanner, void *info)
+static void revenantOpNextLine(CGPDFScannerRef scanner, void *info)
 {
-    CharonTextWalk *walk = info;
+    RevenantTextWalk *walk = info;
     if (walk == NULL)
         return;
     walk->lineY -= walk->leading;
@@ -197,9 +197,9 @@ static void charonOpNextLine(CGPDFScannerRef scanner, void *info)
     walk->y = walk->lineY;
 }
 
-static void charonOpSetCharSpacing(CGPDFScannerRef scanner, void *info)
+static void revenantOpSetCharSpacing(CGPDFScannerRef scanner, void *info)
 {
-    CharonTextWalk *walk = info;
+    RevenantTextWalk *walk = info;
     if (walk == NULL)
         return;
     CGPDFReal spacing = 0;
@@ -207,9 +207,9 @@ static void charonOpSetCharSpacing(CGPDFScannerRef scanner, void *info)
         walk->charSpacing = (CGFloat)spacing;
 }
 
-static void charonOpSetLeading(CGPDFScannerRef scanner, void *info)
+static void revenantOpSetLeading(CGPDFScannerRef scanner, void *info)
 {
-    CharonTextWalk *walk = info;
+    RevenantTextWalk *walk = info;
     if (walk == NULL)
         return;
     CGPDFReal leading = 0;
@@ -217,9 +217,9 @@ static void charonOpSetLeading(CGPDFScannerRef scanner, void *info)
         walk->leading = (CGFloat)leading;
 }
 
-static void charonOpBeginText(CGPDFScannerRef scanner, void *info)
+static void revenantOpBeginText(CGPDFScannerRef scanner, void *info)
 {
-    CharonTextWalk *walk = info;
+    RevenantTextWalk *walk = info;
     if (walk == NULL)
         return;
     walk->x = 0;
@@ -230,9 +230,9 @@ static void charonOpBeginText(CGPDFScannerRef scanner, void *info)
     walk->lineY = 0;
 }
 
-static void charonOpFontSize(CGPDFScannerRef scanner, void *info)
+static void revenantOpFontSize(CGPDFScannerRef scanner, void *info)
 {
-    CharonTextWalk *walk = info;
+    RevenantTextWalk *walk = info;
     if (walk == NULL)
         return;
     CGPDFReal size = 0;
@@ -243,20 +243,20 @@ static void charonOpFontSize(CGPDFScannerRef scanner, void *info)
     if (!CGPDFScannerPopName(scanner, &name) || name == NULL)
         return;
     walk->font = @(name);
-    CGPDFDictionaryRef fonts = charonFontDictionary(walk->page);
+    CGPDFDictionaryRef fonts = revenantFontDictionary(walk->page);
     CGPDFDictionaryRef fontDictionary = NULL;
     if (fonts != NULL)
         CGPDFDictionaryGetDictionary(fonts, name, &fontDictionary);
-    walk->metrics = [CharonPDFFontMetrics metricsWithFontDictionary:fontDictionary size:1];
+    walk->metrics = [RevenantPDFFontMetrics metricsWithFontDictionary:fontDictionary size:1];
 }
 
 static CGFloat collectRun(NSMutableArray *runs, NSString *text, CGFloat x, CGFloat y, CGFloat sizeX,
-                          CGFloat sizeY, NSString *font, CharonPDFFontMetrics *metrics,
+                          CGFloat sizeY, NSString *font, RevenantPDFFontMetrics *metrics,
                           CGFloat charSpacing)
 {
     if (text == nil || text.length == 0)
         return x;
-    CharonPDFTextRun *run = [[CharonPDFTextRun alloc] init];    run.text = text;
+    RevenantPDFTextRun *run = [[RevenantPDFTextRun alloc] init];    run.text = text;
     run.x = x;
     run.y = y;
     run.size = sizeY;
@@ -272,7 +272,7 @@ static CGFloat collectRun(NSMutableArray *runs, NSString *text, CGFloat x, CGFlo
             rects[i] = CGRectMake(pen, bottom, advance, sizeY);
             pen += advance + (i + 1 < count ? spacing : 0);
         }
-        [run charon_setGlyphRects:rects count:count];
+        [run revenant_setGlyphRects:rects count:count];
         free(rects);
         [runs addObject:run];
         return pen + (count > 0 ? spacing : 0);
@@ -281,9 +281,9 @@ static CGFloat collectRun(NSMutableArray *runs, NSString *text, CGFloat x, CGFlo
     return x;
 }
 
-typedef struct { CGFloat x; CGFloat y; CGFloat size; } CharonTextState;
+typedef struct { CGFloat x; CGFloat y; CGFloat size; } RevenantTextState;
 
-static CharonPDFPageText *charonScanPageText(CGPDFPageRef page, CharonTextState *state)
+static RevenantPDFPageText *revenantScanPageText(CGPDFPageRef page, RevenantTextState *state)
 {
     if (state != NULL) {
         state->x = 0;
@@ -342,7 +342,7 @@ static CharonPDFPageText *charonScanPageText(CGPDFPageRef page, CharonTextState 
     }
     CGPDFScannerRef scanner = NULL;
 
-    CharonTextWalk *walk = malloc(sizeof(*walk));
+    RevenantTextWalk *walk = malloc(sizeof(*walk));
     if (walk == NULL) {
         CGPDFScannerRelease(scanner);
         CGPDFOperatorTableRelease(table);
@@ -363,18 +363,18 @@ static CharonPDFPageText *charonScanPageText(CGPDFPageRef page, CharonTextState 
     walk->leading = -1;
     walk->charSpacing = 0;
     walk->metrics = nil;
-    CGPDFOperatorTableSetCallback(table, "Tj", charonOpShowText);
-    CGPDFOperatorTableSetCallback(table, "'", charonOpShowText);
-    CGPDFOperatorTableSetCallback(table, "\"", charonOpShowText);
-    CGPDFOperatorTableSetCallback(table, "TJ", charonOpShowTextArray);
-    CGPDFOperatorTableSetCallback(table, "Tm", charonOpTextMatrix);
-    CGPDFOperatorTableSetCallback(table, "Tf", charonOpFontSize);
-    CGPDFOperatorTableSetCallback(table, "Td", charonOpMoveText);
-    CGPDFOperatorTableSetCallback(table, "TD", charonOpMoveTextDelta);
-    CGPDFOperatorTableSetCallback(table, "T*", charonOpNextLine);
-    CGPDFOperatorTableSetCallback(table, "TL", charonOpSetLeading);
-    CGPDFOperatorTableSetCallback(table, "Tc", charonOpSetCharSpacing);
-    CGPDFOperatorTableSetCallback(table, "BT", charonOpBeginText);
+    CGPDFOperatorTableSetCallback(table, "Tj", revenantOpShowText);
+    CGPDFOperatorTableSetCallback(table, "'", revenantOpShowText);
+    CGPDFOperatorTableSetCallback(table, "\"", revenantOpShowText);
+    CGPDFOperatorTableSetCallback(table, "TJ", revenantOpShowTextArray);
+    CGPDFOperatorTableSetCallback(table, "Tm", revenantOpTextMatrix);
+    CGPDFOperatorTableSetCallback(table, "Tf", revenantOpFontSize);
+    CGPDFOperatorTableSetCallback(table, "Td", revenantOpMoveText);
+    CGPDFOperatorTableSetCallback(table, "TD", revenantOpMoveTextDelta);
+    CGPDFOperatorTableSetCallback(table, "T*", revenantOpNextLine);
+    CGPDFOperatorTableSetCallback(table, "TL", revenantOpSetLeading);
+    CGPDFOperatorTableSetCallback(table, "Tc", revenantOpSetCharSpacing);
+    CGPDFOperatorTableSetCallback(table, "BT", revenantOpBeginText);
 
     scanner = CGPDFScannerCreate(content, table, walk);
     if (scanner == NULL) {
@@ -400,16 +400,16 @@ static CharonPDFPageText *charonScanPageText(CGPDFPageRef page, CharonTextState 
     if (exhausted) {
         return nil;
     }
-    CharonPDFPageText *layout = [CharonPDFPageText layoutWithRuns:runs];
+    RevenantPDFPageText *layout = [RevenantPDFPageText layoutWithRuns:runs];
     if (layout.string.length == 0)
         return nil;
     return layout;
 }
 
-- (CharonPDFPageText *)charon_textLayout
+- (RevenantPDFPageText *)revenant_textLayout
 {
     if (_layout == nil)
-        _layout = charonScanPageText(_page, NULL);
+        _layout = revenantScanPageText(_page, NULL);
     return _layout;
 }
 
@@ -417,17 +417,17 @@ static CharonPDFPageText *charonScanPageText(CGPDFPageRef page, CharonTextState 
 {
     if (_page == NULL)
         return nil;
-    return [self charon_textLayout].string;
+    return [self revenant_textLayout].string;
 }
 
 - (NSArray *)annotations
 {
     if (_annotations == nil)
-        [self charon_buildAnnotations];
+        [self revenant_buildAnnotations];
     return _annotations != nil ? [_annotations copy] : @[];
 }
 
-- (void)charon_buildAnnotations
+- (void)revenant_buildAnnotations
 {
     _annotations = nil;
     if (_page == NULL)
@@ -467,7 +467,7 @@ static CharonPDFPageText *charonScanPageText(CGPDFPageRef page, CharonTextState 
                     continue;
             }
         }
-        PDFAnnotation *built = [[PDFAnnotation alloc] initWithCharonDictionary:annotation onPage:self];
+        PDFAnnotation *built = [[PDFAnnotation alloc] initWithRevenantDictionary:annotation onPage:self];
         if (built != nil)
             [answer addObject:built];
     }
@@ -486,7 +486,7 @@ static CharonPDFPageText *charonScanPageText(CGPDFPageRef page, CharonTextState 
         return nil;
     if (page == NULL)
         return nil;
-    CGPDFDocumentRef documentRef = [document charon_CGPDFDocument];
+    CGPDFDocumentRef documentRef = [document revenant_CGPDFDocument];
     if (documentRef != NULL)
         CGPDFDocumentRetain(documentRef);
     _page = page;
@@ -539,7 +539,7 @@ static CharonPDFPageText *charonScanPageText(CGPDFPageRef page, CharonTextState 
     return degrees == 0 ? 0 : (degrees % 360 + 360) % 360;
 }
 
-- (CGPDFPageRef)charon_CGPDFPage
+- (CGPDFPageRef)revenant_CGPDFPage
 {
     return _page;
 }

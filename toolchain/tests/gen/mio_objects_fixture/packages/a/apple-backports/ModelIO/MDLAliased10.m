@@ -1,8 +1,8 @@
 #import <ModelIO/ModelIO.h>
 
-CHARON_ALIAS(MDLAliased)
+REVENANT_ALIAS(MDLAliased)
 
-@implementation CHARON_ALIAS_CLASS(MDLAliased) (CharonAlias)
+@implementation REVENANT_ALIAS_CLASS(MDLAliased) (RevenantAlias)
 - (id)aliasedThing:(id)a {
     return nil;
 }

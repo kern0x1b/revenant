@@ -1,6 +1,6 @@
 #import <UIKit/UIKit.h>
 
-@implementation UIImage (CharonItemProvider)
+@implementation UIImage (RevenantItemProvider)
 
 + (NSArray<NSString *> *)readableTypeIdentifiersForItemProvider
 {

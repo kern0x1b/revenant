@@ -8,7 +8,7 @@ set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 ACCELERATE=${ACCELERATE:-$here/../../../../packages/a/apple-backports/Accelerate}
-BUILD=${BUILD:-$(runs_fresh charon-ypcbcr8)}
+BUILD=${BUILD:-$(runs_fresh revenant-ypcbcr8)}
 sdk=$(xcrun --show-sdk-path)
 quiet="-Wno-deprecated-declarations -Wno-unguarded-availability-new -Wno-nullability-completeness"
 
@@ -26,11 +26,11 @@ for part in sorted(os.listdir(registry)):
             print(entry["api"].rstrip("()"))
 PY
 ); do
-    renames="$renames -D$name=charonHost_$name"
+    renames="$renames -D$name=revenantHost_$name"
 done
 for name in kvImage_YpCbCrToARGBMatrix_ITU_R_601_4 kvImage_YpCbCrToARGBMatrix_ITU_R_709_2 \
             kvImage_ARGBToYpCbCrMatrix_ITU_R_601_4 kvImage_ARGBToYpCbCrMatrix_ITU_R_709_2; do
-    renames="$renames -D$name=charonHost_$name"
+    renames="$renames -D$name=revenantHost_$name"
 done
 
 rm -rf "$BUILD"

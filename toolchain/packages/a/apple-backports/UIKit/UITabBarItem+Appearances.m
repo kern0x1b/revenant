@@ -1,23 +1,23 @@
-#import "CharonBarAppearance.h"
+#import "RevenantBarAppearance.h"
 
-static const void *CharonStandardAppearanceKey = &CharonStandardAppearanceKey;
+static const void *RevenantStandardAppearanceKey = &RevenantStandardAppearanceKey;
 
-@implementation UITabBarItem (CharonAppearances)
+@implementation UITabBarItem (RevenantAppearances)
 
 - (UITabBarAppearance *)standardAppearance
 {
-    return charon_appearance_peek(self, CharonStandardAppearanceKey);
+    return revenant_appearance_peek(self, RevenantStandardAppearanceKey);
 }
 
 - (void)setStandardAppearance:(UITabBarAppearance *)standardAppearance
 {
-    charon_appearance_store_observed(self, CharonStandardAppearanceKey, standardAppearance, @selector(charon_appearanceChanged));
-    charon_refresh_bars_showing(self);
+    revenant_appearance_store_observed(self, RevenantStandardAppearanceKey, standardAppearance, @selector(revenant_appearanceChanged));
+    revenant_refresh_bars_showing(self);
 }
 
-- (void)charon_appearanceChanged
+- (void)revenant_appearanceChanged
 {
-    charon_refresh_bars_showing(self);
+    revenant_refresh_bars_showing(self);
 }
 
 @end

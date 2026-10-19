@@ -1,8 +1,8 @@
 import("core.base.json")
 
-local CHARON = path.join(os.scriptdir(), "..", "..", "..")
-local workspace = import("workspace", {rootdir = path.join(CHARON, "modules"), anonymous = true})
-local probe = import("probe-exports", {rootdir = path.join(CHARON, "tests", "backports", "tools"), anonymous = true})
+local REVENANT = path.join(os.scriptdir(), "..", "..", "..")
+local workspace = import("workspace", {rootdir = path.join(REVENANT, "modules"), anonymous = true})
+local probe = import("probe-exports", {rootdir = path.join(REVENANT, "tests", "backports", "tools"), anonymous = true})
 
 local function entry(api, status, kind)
     return {api = api, kind = kind or "function", introduced = "9.0", status = status or "implemented", effect = "none",
@@ -71,7 +71,7 @@ local CASES = {
     end},
     {"probe-exports names the tree and the release in the probe's recipe", function ()
         local text = probe.recipe_text("/some/tree", "6.1")
-        return has(text, 'add_repositories("charon /some/tree")') and has(text, 'set_config("apple_minimum", "6.1")')
+        return has(text, 'add_repositories("revenant /some/tree")') and has(text, 'set_config("apple_minimum", "6.1")')
     end},
 }
 

@@ -6,10 +6,10 @@
 
 static void check_named(BOOL passed, NSString *name, NSString *detail)
 {
-    charon_check(passed, [name UTF8String], detail);
+    revenant_check(passed, [name UTF8String], detail);
 }
 
-@interface CharonHostGKLeaderboardSet : NSObject
+@interface RevenantHostGKLeaderboardSet : NSObject
 @property (nonatomic, readonly, copy) NSString *identifier;
 @property (nonatomic, readonly, copy) NSString *title;
 @property (nonatomic, readonly, copy) NSString *groupIdentifier;
@@ -18,13 +18,13 @@ static void check_named(BOOL passed, NSString *name, NSString *detail)
 - (void)loadImageWithCompletionHandler:(void (^)(id image, NSError *error))completionHandler;
 @end
 
-@interface CharonHostGKBasePlayer : NSObject
+@interface RevenantHostGKBasePlayer : NSObject
 @property (nonatomic, readonly, copy) NSString *playerID;
 @property (nonatomic, readonly, copy) NSString *displayName;
 @end
 
-@interface CharonHostGKCloudPlayer : CharonHostGKBasePlayer
-+ (void)getCurrentSignedInPlayerForContainer:(NSString *)containerID completionHandler:(void (^)(CharonHostGKCloudPlayer *player, NSError *error))completionHandler;
+@interface RevenantHostGKCloudPlayer : RevenantHostGKBasePlayer
++ (void)getCurrentSignedInPlayerForContainer:(NSString *)containerID completionHandler:(void (^)(RevenantHostGKCloudPlayer *player, NSError *error))completionHandler;
 @end
 
 static void hostSetShapes(void (^report)(NSString *name, NSString *detail))
@@ -58,12 +58,12 @@ int main(int argc, char **argv)
 
     __block NSUInteger sets = 99;
     __block NSError *setsError = nil;
-    [CharonHostGKLeaderboardSet loadLeaderboardSetsWithCompletionHandler:^(NSArray *loaded, NSError *error) {
+    [RevenantHostGKLeaderboardSet loadLeaderboardSetsWithCompletionHandler:^(NSArray *loaded, NSError *error) {
         sets = loaded.count;
         setsError = error;
     }];
     if (mutated) {
-        printf("probe: the port is built with CHARON_MUTATE_SETLOAD, and the checks that say it answers "
+        printf("probe: the port is built with REVENANT_MUTATE_SETLOAD, and the checks that say it answers "
                "no sets with GKErrorCommunicationsFailure are the ones that have to fail\n");
     }
     check_named(sets == 0,
@@ -77,7 +77,7 @@ int main(int argc, char **argv)
                     [NSString stringWithFormat:@"%ld", (long)setsError.code]);
     }
 
-    CharonHostGKLeaderboardSet *portSet = [[CharonHostGKLeaderboardSet alloc] init];
+    RevenantHostGKLeaderboardSet *portSet = [[RevenantHostGKLeaderboardSet alloc] init];
 
     check_named(portSet.title == nil && portSet.identifier == nil && portSet.groupIdentifier == nil,
                 @"a set nobody loaded has no title, no identifier and no group", portSet.title);
@@ -89,17 +89,17 @@ int main(int argc, char **argv)
     __block id image = @"unset";
     [portSet loadImageWithCompletionHandler:^(id loaded, NSError *error) { image = loaded; }];
     check_named(image == nil, @"and its image is nil, the server's", image);
-    [CharonHostGKLeaderboardSet loadLeaderboardSetsWithCompletionHandler:nil];
+    [RevenantHostGKLeaderboardSet loadLeaderboardSetsWithCompletionHandler:nil];
     [portSet loadImageWithCompletionHandler:nil];
     check_named(YES, @"a nil handler is allowed by every call", @"raised");
 
-    CharonHostGKBasePlayer *base = [[CharonHostGKBasePlayer alloc] init];
+    RevenantHostGKBasePlayer *base = [[RevenantHostGKBasePlayer alloc] init];
     check_named(base.playerID == nil && base.displayName == nil, @"a base player nobody built has no identifier and no name",
                 base.displayName);
     printf("probe: before the cloud player's call\n"); fflush(stdout);
     __block void *cloud = NULL;
     __block void *cloudError = NULL;
-    [CharonHostGKCloudPlayer getCurrentSignedInPlayerForContainer:@"i.com.charon.probe" completionHandler:^(CharonHostGKCloudPlayer *player, NSError *error) {
+    [RevenantHostGKCloudPlayer getCurrentSignedInPlayerForContainer:@"i.com.revenant.probe" completionHandler:^(RevenantHostGKCloudPlayer *player, NSError *error) {
         cloud = (__bridge_retained void *)player;
         cloudError = (__bridge_retained void *)error;
     }];
@@ -127,6 +127,6 @@ int main(int argc, char **argv)
         }
     }
 
-    printf("checks=%d failures=%d\n", charon_checks, charon_failures);
-    return charon_failures == 0 ? 0 : 1;
+    printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
+    return revenant_failures == 0 ? 0 : 1;
 }

@@ -11,7 +11,7 @@
 #include <iterator>
 #include <limits>
 
-namespace shade {
+namespace emulator {
 namespace {
 
     constexpr std::uint64_t address_space_end =

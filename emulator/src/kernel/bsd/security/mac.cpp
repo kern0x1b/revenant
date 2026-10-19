@@ -16,7 +16,7 @@
 #include <cstdint>
 #include <string>
 
-namespace shade {
+namespace emulator {
 
 bool CompatibilityKernel::dispatch_bsd_security(Cpu& cpu, std::uint32_t number)
 {

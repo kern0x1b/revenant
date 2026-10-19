@@ -1,5 +1,5 @@
 #import <AuthenticationServices/AuthenticationServices.h>
-#import "CharonASConstruction.h"
+#import "RevenantASConstruction.h"
 
 @implementation ASAuthorizationOpenIDRequest
 
@@ -10,12 +10,12 @@
 
 - (instancetype)init
 {
-    return [self charon_initWithProvider:nil];
+    return [self revenant_initWithProvider:nil];
 }
 
-- (instancetype)charon_initWithProvider:(id<ASAuthorizationProvider>)provider __attribute__((objc_method_family(init)))
+- (instancetype)revenant_initWithProvider:(id<ASAuthorizationProvider>)provider __attribute__((objc_method_family(init)))
 {
-    self = [super charon_initWithProvider:provider];
+    self = [super revenant_initWithProvider:provider];
     if (self) {
         _requestedScopes = nil;
         _state = nil;

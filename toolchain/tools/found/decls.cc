@@ -1585,7 +1585,7 @@ int main(int argc, char** argv) {
     } else {
       for (const std::string& h : headers) imports += "#import \"" + h + "\"\n";
     }
-    CXUnsavedFile unsaved = {"charon-module.m", imports.c_str(), (unsigned long)imports.size()};
+    CXUnsavedFile unsaved = {"revenant-module.m", imports.c_str(), (unsigned long)imports.size()};
     const char* triple = std::getenv("IR_TARGET");
     const std::string target = triple != nullptr ? std::string(triple) : target_of(fs::path(sdk));
     std::vector<const char*> args = {"-x", "objective-c", "-target", target.c_str(), "-isysroot", sdk.c_str()};
@@ -1606,7 +1606,7 @@ int main(int argc, char** argv) {
     CXIndex index = clang_createIndex(0, 0);
     CXTranslationUnit tu = nullptr;
     CXErrorCode code = clang_parseTranslationUnit2(
-        index, "charon-module.m", args.data(), (int)args.size(), &unsaved, 1,
+        index, "revenant-module.m", args.data(), (int)args.size(), &unsaved, 1,
         CXTranslationUnit_SkipFunctionBodies | CXTranslationUnit_DetailedPreprocessingRecord | CXTranslationUnit_IncludeAttributedTypes,
         &tu);
     if (code != CXError_Success || !tu) {

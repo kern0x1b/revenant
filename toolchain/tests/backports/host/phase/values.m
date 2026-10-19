@@ -37,14 +37,14 @@ static BOOL hostHas(Class cls)
     return YES;
 }
 
-@interface charon_host_PHASECardioidDirectivityModelSubbandParameters : NSObject
+@interface revenant_host_PHASECardioidDirectivityModelSubbandParameters : NSObject
 - (instancetype)init;
 - (double)frequency;
 - (double)pattern;
 - (double)sharpness;
 @end
 
-@interface charon_host_PHASEConeDirectivityModelSubbandParameters : NSObject
+@interface revenant_host_PHASEConeDirectivityModelSubbandParameters : NSObject
 - (instancetype)init;
 - (double)frequency;
 - (double)innerAngle;
@@ -52,12 +52,12 @@ static BOOL hostHas(Class cls)
 - (double)outerGain;
 @end
 
-@interface charon_host_PHASEGeometricSpreadingDistanceModelParameters : NSObject
+@interface revenant_host_PHASEGeometricSpreadingDistanceModelParameters : NSObject
 - (double)rolloffFactor;
 - (void)setRolloffFactor:(double)rolloffFactor;
 @end
 
-@interface charon_host_PHASENumericPair : NSObject
+@interface revenant_host_PHASENumericPair : NSObject
 - (instancetype)initWithFirstValue:(double)first secondValue:(double)second;
 - (double)first;
 - (double)second;
@@ -65,8 +65,8 @@ static BOOL hostHas(Class cls)
 
 static void compareDefaults(void)
 {
-    Class portCardioid = NSClassFromString(@"charon_host_PHASECardioidDirectivityModelSubbandParameters");
-    Class portCone = NSClassFromString(@"charon_host_PHASEConeDirectivityModelSubbandParameters");
+    Class portCardioid = NSClassFromString(@"revenant_host_PHASECardioidDirectivityModelSubbandParameters");
+    Class portCone = NSClassFromString(@"revenant_host_PHASEConeDirectivityModelSubbandParameters");
     Class hostCardioid = NSClassFromString(@"PHASECardioidDirectivityModelSubbandParameters");
     Class hostCone = NSClassFromString(@"PHASEConeDirectivityModelSubbandParameters");
 
@@ -95,7 +95,7 @@ static void compareDefaults(void)
                        [[mine valueForKey:key] doubleValue], [[theirs valueForKey:key] doubleValue], 0.0);
         }
     }
-    Class portSpreading = NSClassFromString(@"charon_host_PHASEGeometricSpreadingDistanceModelParameters");
+    Class portSpreading = NSClassFromString(@"revenant_host_PHASEGeometricSpreadingDistanceModelParameters");
     if (portSpreading != Nil) {
         id mine = [[portSpreading alloc] init];
         checkClose(@"the port's fresh geometric spreading object has the same rolloff default",
@@ -103,26 +103,26 @@ static void compareDefaults(void)
     }
 }
 
-@interface charon_host_PHASEEnvelopeSegment : NSObject
+@interface revenant_host_PHASEEnvelopeSegment : NSObject
 - (instancetype)initWithEndPoint:(simd_double2)endPoint curveType:(NSInteger)curveType;
 @property(nonatomic, assign) simd_double2 endPoint;
 @property(nonatomic, assign) NSInteger curveType;
 @end
 
-@interface charon_host_PHASEEnvelopeDistanceModelParameters : NSObject
+@interface revenant_host_PHASEEnvelopeDistanceModelParameters : NSObject
 - (instancetype)initWithEnvelope:(id)envelope;
 @property(nonatomic, strong, readonly) id envelope;
 @end
 
-@interface charon_host_PHASEEnvelope : NSObject
+@interface revenant_host_PHASEEnvelope : NSObject
 - (instancetype)initWithStartPoint:(simd_double2)startPoint
-                          segments:(NSArray<charon_host_PHASEEnvelopeSegment *> *)segments;
+                          segments:(NSArray<revenant_host_PHASEEnvelopeSegment *> *)segments;
 - (double)evaluateForValue:(double)x;
 - (PHASENumericPair *)domain;
 - (PHASENumericPair *)range;
 @end
 
-@interface charon_host_PHASEEngine : NSObject
+@interface revenant_host_PHASEEngine : NSObject
 - (instancetype)initWithUpdateMode:(NSInteger)updateMode;
 - (double)unitsPerSecond;
 - (double)unitsPerMeter;
@@ -140,7 +140,7 @@ static void compareDefaults(void)
 
 static void compareEngine(void)
 {
-    Class portEngine = NSClassFromString(@"charon_host_PHASEEngine");
+    Class portEngine = NSClassFromString(@"revenant_host_PHASEEngine");
     Class hostEngine = NSClassFromString(@"PHASEEngine");
     if (portEngine == Nil || hostEngine == Nil) {
         printf("skip the engine: %s\n", portEngine == Nil ? "the host's PHASE does not carry PHASEEngine"
@@ -188,7 +188,7 @@ static void compareEngine(void)
           [[mine duckers] count] == 0 && [[theirs valueForKey:@"duckers"] count] == 0);
     id myRoot = [mine rootObject];
     id theirRoot = [theirs valueForKey:@"rootObject"];
-    Class declared = NSClassFromString(@"charon_host_PHASEObject") ?: NSClassFromString(@"PHASEObject");
+    Class declared = NSClassFromString(@"revenant_host_PHASEObject") ?: NSClassFromString(@"PHASEObject");
     printf("stage a fresh engine's root object: port %s, host %s, declared type PHASEObject\n",
            myRoot ? NSStringFromClass([myRoot class]).UTF8String : "nil",
            theirRoot ? NSStringFromClass([theirRoot class]).UTF8String : "nil");
@@ -209,9 +209,9 @@ static void compareEngine(void)
 
 static void compareEnvelopeDistanceModel(void)
 {
-    Class portModel = NSClassFromString(@"charon_host_PHASEEnvelopeDistanceModelParameters");
+    Class portModel = NSClassFromString(@"revenant_host_PHASEEnvelopeDistanceModelParameters");
     Class hostModel = NSClassFromString(@"PHASEEnvelopeDistanceModelParameters");
-    Class portEnv = NSClassFromString(@"charon_host_PHASEEnvelope");
+    Class portEnv = NSClassFromString(@"revenant_host_PHASEEnvelope");
     Class hostEnv = NSClassFromString(@"PHASEEnvelope");
     if (portModel == Nil || hostModel == Nil) {
         printf("skip the envelope distance model: the host's PHASE does not carry it, or the port's is not here\n");
@@ -221,7 +221,7 @@ static void compareEnvelopeDistanceModel(void)
         [[NSClassFromString(@"PHASEEnvelopeSegment") alloc] initWithEndPoint:simd_make_double2(10.0, 1.0)
                                                                      curveType:PHASECurveTypeInverseSquared]]];
     id mySegment = [[portEnv alloc] initWithStartPoint:simd_make_double2(0.0, 0.0) segments:@[
-        [[NSClassFromString(@"charon_host_PHASEEnvelopeSegment") alloc] initWithEndPoint:simd_make_double2(10.0, 1.0)
+        [[NSClassFromString(@"revenant_host_PHASEEnvelopeSegment") alloc] initWithEndPoint:simd_make_double2(10.0, 1.0)
                                                                                        curveType:PHASECurveTypeInverseSquared]]];
     id theirs = [[hostModel alloc] initWithEnvelope:theirSegment];
     id mine = [[portModel alloc] initWithEnvelope:mySegment];
@@ -236,8 +236,8 @@ static void compareEnvelopeDistanceModel(void)
 
 static void compareEnvelope(void)
 {
-    Class portEnvelope = NSClassFromString(@"charon_host_PHASEEnvelope");
-    Class portSegment = NSClassFromString(@"charon_host_PHASEEnvelopeSegment");
+    Class portEnvelope = NSClassFromString(@"revenant_host_PHASEEnvelope");
+    Class portSegment = NSClassFromString(@"revenant_host_PHASEEnvelopeSegment");
     Class hostEnvelope = NSClassFromString(@"PHASEEnvelope");
     Class hostSegment = NSClassFromString(@"PHASEEnvelopeSegment");
     if (portEnvelope == Nil || hostEnvelope == Nil || portSegment == Nil || hostSegment == Nil) {
@@ -289,7 +289,7 @@ static NSString *shapeOfRaise(void (^call)(void))
     @try {
         call();
     } @catch (NSException *exception) {
-        NSString *reason = [exception.reason stringByReplacingOccurrencesOfString:@"charon_host_" withString:@""];
+        NSString *reason = [exception.reason stringByReplacingOccurrencesOfString:@"revenant_host_" withString:@""];
         return [NSString stringWithFormat:@"%@: %@", exception.name, [reason componentsSeparatedByString:@" 0x"].firstObject];
     }
     return @"no raise";
@@ -297,9 +297,9 @@ static NSString *shapeOfRaise(void (^call)(void))
 
 static void compareUnavailableInits(void)
 {
-    Class portEnvelope = NSClassFromString(@"charon_host_PHASEEnvelope");
+    Class portEnvelope = NSClassFromString(@"revenant_host_PHASEEnvelope");
     Class hostEnvelope = NSClassFromString(@"PHASEEnvelope");
-    Class portModel = NSClassFromString(@"charon_host_PHASEEnvelopeDistanceModelParameters");
+    Class portModel = NSClassFromString(@"revenant_host_PHASEEnvelopeDistanceModelParameters");
     Class hostModel = NSClassFromString(@"PHASEEnvelopeDistanceModelParameters");
     if (portEnvelope == Nil || hostEnvelope == Nil || portModel == Nil || hostModel == Nil) {
         check(@"the host and the port both carry the two envelope classes", NO);

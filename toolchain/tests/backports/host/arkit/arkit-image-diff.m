@@ -14,7 +14,7 @@ static void Check(BOOL ok, NSString *what)
     }
 }
 
-static CGImageRef CharonPicture(size_t width, size_t height)
+static CGImageRef RevenantPicture(size_t width, size_t height)
 {
     CGColorSpaceRef space = CGColorSpaceCreateDeviceRGB();
     CGContextRef ctx = CGBitmapContextCreate(NULL, width, height, 8, 0, space,
@@ -38,7 +38,7 @@ int main(void)
         setbuf(stdout, NULL);
         printf("# transcript: a reference image's physical size, and the reading of a group\n");
 
-        CGImageRef wide = CharonPicture(200, 100);
+        CGImageRef wide = RevenantPicture(200, 100);
         ARReferenceImage *image = [[ARReferenceImage alloc] initWithCGImage:wide
                                                               orientation:kCGImagePropertyOrientationUp
                                                            physicalWidth:2.0];
@@ -50,7 +50,7 @@ int main(void)
         Check(Near(image.physicalSize.width / image.physicalSize.height, 2.0),
               @"the ratio is the picture's own, which is the whole of the arithmetic");
 
-        CGImageRef tall = CharonPicture(100, 300);
+        CGImageRef tall = RevenantPicture(100, 300);
         ARReferenceImage *other = [[ARReferenceImage alloc] initWithCGImage:tall
                                                               orientation:kCGImagePropertyOrientationUp
                                                            physicalWidth:1.5];

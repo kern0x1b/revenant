@@ -1,15 +1,15 @@
 #import <UIKit/UIKit.h>
 
-@interface CharonSelectionWatcher : NSObject
+@interface RevenantSelectionWatcher : NSObject
 @end
 
-@implementation CharonSelectionWatcher
+@implementation RevenantSelectionWatcher
 
-static __weak UITextField *charon_field;
-static NSInteger charon_start, charon_end;
-static CFRunLoopObserverRef charon_observer;
+static __weak UITextField *revenant_field;
+static NSInteger revenant_start, revenant_end;
+static CFRunLoopObserverRef revenant_observer;
 
-static void charon_offsets(UITextField *field, NSInteger *start, NSInteger *end)
+static void revenant_offsets(UITextField *field, NSInteger *start, NSInteger *end)
 {
     UITextRange *range = field.selectedTextRange;
     if (!range) {
@@ -20,17 +20,17 @@ static void charon_offsets(UITextField *field, NSInteger *start, NSInteger *end)
     *end = [field offsetFromPosition:field.beginningOfDocument toPosition:range.end];
 }
 
-static void charon_check(void)
+static void revenant_check(void)
 {
-    UITextField *field = charon_field;
+    UITextField *field = revenant_field;
     if (!field)
         return;
     NSInteger start, end;
-    charon_offsets(field, &start, &end);
-    if (start == charon_start && end == charon_end)
+    revenant_offsets(field, &start, &end);
+    if (start == revenant_start && end == revenant_end)
         return;
-    charon_start = start;
-    charon_end = end;
+    revenant_start = start;
+    revenant_end = end;
     id<UITextFieldDelegate> delegate = field.delegate;
     if ([delegate respondsToSelector:@selector(textFieldDidChangeSelection:)])
         [delegate textFieldDidChangeSelection:field];
@@ -44,26 +44,26 @@ static void charon_check(void)
 
 + (void)began:(NSNotification *)notification
 {
-    charon_field = notification.object;
-    charon_start = charon_end = -2;
-    if (!charon_observer) {
-        charon_observer = CFRunLoopObserverCreateWithHandler(NULL, kCFRunLoopBeforeWaiting, YES, 0, ^(CFRunLoopObserverRef observer, CFRunLoopActivity activity) {
-            charon_check();
+    revenant_field = notification.object;
+    revenant_start = revenant_end = -2;
+    if (!revenant_observer) {
+        revenant_observer = CFRunLoopObserverCreateWithHandler(NULL, kCFRunLoopBeforeWaiting, YES, 0, ^(CFRunLoopObserverRef observer, CFRunLoopActivity activity) {
+            revenant_check();
         });
-        CFRunLoopAddObserver(CFRunLoopGetMain(), charon_observer, kCFRunLoopCommonModes);
+        CFRunLoopAddObserver(CFRunLoopGetMain(), revenant_observer, kCFRunLoopCommonModes);
     }
-    charon_check();
+    revenant_check();
 }
 
 + (void)ended:(NSNotification *)notification
 {
-    charon_check();
-    if (charon_field == notification.object)
-        charon_field = nil;
-    if (charon_observer && !charon_field) {
-        CFRunLoopRemoveObserver(CFRunLoopGetMain(), charon_observer, kCFRunLoopCommonModes);
-        CFRelease(charon_observer);
-        charon_observer = NULL;
+    revenant_check();
+    if (revenant_field == notification.object)
+        revenant_field = nil;
+    if (revenant_observer && !revenant_field) {
+        CFRunLoopRemoveObserver(CFRunLoopGetMain(), revenant_observer, kCFRunLoopCommonModes);
+        CFRelease(revenant_observer);
+        revenant_observer = NULL;
     }
 }
 

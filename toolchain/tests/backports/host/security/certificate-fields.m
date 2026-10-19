@@ -4,7 +4,7 @@
 #import <dlfcn.h>
 #import <stdio.h>
 
-static const unsigned char CharonCertificateFixtureDER[] = {
+static const unsigned char RevenantCertificateFixtureDER[] = {
     0x30, 0x82, 0x03, 0x4b, 0x30, 0x82, 0x02, 0x33, 0xa0, 0x03, 0x02, 0x01,
     0x02, 0x02, 0x09, 0x00, 0xf3, 0x2b, 0xb3, 0x54, 0xfe, 0x37, 0xbb, 0x87,
     0x30, 0x0d, 0x06, 0x09, 0x2a, 0x86, 0x48, 0x86, 0xf7, 0x0d, 0x01, 0x01,
@@ -77,9 +77,9 @@ static const unsigned char CharonCertificateFixtureDER[] = {
     0x3b, 0x6e, 0x1f, 0x82, 0xfc, 0x74, 0xac, 0xe3, 0xfb, 0xc7, 0xbf, 0x5d,
     0x1e, 0xc9, 0x06, 0x18, 0x96, 0x70, 0xac,
 };
-static const size_t CharonCertificateFixtureLength = sizeof CharonCertificateFixtureDER;
+static const size_t RevenantCertificateFixtureLength = sizeof RevenantCertificateFixtureDER;
 
-bool CharonCertificateNameTLV(const uint8_t *bytes, size_t length, bool wantSubject,
+bool RevenantCertificateNameTLV(const uint8_t *bytes, size_t length, bool wantSubject,
                              size_t *outStart, size_t *outEnd);
 
 typedef OSStatus (*CopyCommonName)(SecCertificateRef, CFStringRef *);
@@ -96,8 +96,8 @@ int main(void)
         if (!hostCN || !hostMail)
             return 1;
         SecCertificateRef cert = SecCertificateCreateWithData(NULL,
-                                    CFDataCreate(kCFAllocatorDefault, CharonCertificateFixtureDER,
-                                                 (CFIndex)CharonCertificateFixtureLength));
+                                    CFDataCreate(kCFAllocatorDefault, RevenantCertificateFixtureDER,
+                                                 (CFIndex)RevenantCertificateFixtureLength));
         if (!cert) { printf("no-certificate\n"); return 1; }
 
         CFStringRef portName = NULL, hostName = NULL;

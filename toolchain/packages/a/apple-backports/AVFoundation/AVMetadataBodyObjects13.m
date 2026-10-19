@@ -3,40 +3,40 @@
 #import <objc/message.h>
 #import <objc/runtime.h>
 
-#import "CharonAVMetadataConstruction.h"
+#import "RevenantAVMetadataConstruction.h"
 
 @interface AVMetadataBodyObject ()
-@property (nonatomic) NSInteger charonBodyID;
-@property (nonatomic) NSInteger charonObjectID;
-@property (nonatomic) NSInteger charonFaceID;
-@property (nonatomic) BOOL charonHasRollAngle;
-@property (nonatomic) CGFloat charonRollAngle;
-@property (nonatomic) BOOL charonHasYawAngle;
-@property (nonatomic) CGFloat charonYawAngle;
+@property (nonatomic) NSInteger revenantBodyID;
+@property (nonatomic) NSInteger revenantObjectID;
+@property (nonatomic) NSInteger revenantFaceID;
+@property (nonatomic) BOOL revenantHasRollAngle;
+@property (nonatomic) CGFloat revenantRollAngle;
+@property (nonatomic) BOOL revenantHasYawAngle;
+@property (nonatomic) CGFloat revenantYawAngle;
 @end
 
-static const NSInteger CharonAVMetadataNoObject = -1;
+static const NSInteger RevenantAVMetadataNoObject = -1;
 
 @implementation AVMetadataBodyObject
 
-@synthesize charonBodyID = _charonBodyID;
-@synthesize charonObjectID = _charonObjectID;
-@synthesize charonFaceID = _charonFaceID;
-@synthesize charonHasRollAngle = _charonHasRollAngle;
-@synthesize charonRollAngle = _charonRollAngle;
-@synthesize charonHasYawAngle = _charonHasYawAngle;
-@synthesize charonYawAngle = _charonYawAngle;
+@synthesize revenantBodyID = _revenantBodyID;
+@synthesize revenantObjectID = _revenantObjectID;
+@synthesize revenantFaceID = _revenantFaceID;
+@synthesize revenantHasRollAngle = _revenantHasRollAngle;
+@synthesize revenantRollAngle = _revenantRollAngle;
+@synthesize revenantHasYawAngle = _revenantHasYawAngle;
+@synthesize revenantYawAngle = _revenantYawAngle;
 
 - (instancetype)init
 {
     self = [super init];
     if (self) {
-        _charonObjectID = CharonAVMetadataNoObject;
+        _revenantObjectID = RevenantAVMetadataNoObject;
     }
     return self;
 }
 
-- (instancetype)charon_initWithBodyID:(NSInteger)bodyID
+- (instancetype)revenant_initWithBodyID:(NSInteger)bodyID
                              objectID:(NSInteger)objectID
                                faceID:(NSInteger)faceID
                             rollAngle:(CGFloat)rollAngle
@@ -44,55 +44,55 @@ static const NSInteger CharonAVMetadataNoObject = -1;
 {
     self = ((id (*)(id, SEL))objc_msgSend)(self, sel_registerName("init"));
     if (self) {
-        _charonBodyID = bodyID;
-        _charonObjectID = objectID;
-        _charonFaceID = faceID;
-        _charonHasRollAngle = YES;
-        _charonRollAngle = rollAngle;
-        _charonHasYawAngle = YES;
-        _charonYawAngle = yawAngle;
+        _revenantBodyID = bodyID;
+        _revenantObjectID = objectID;
+        _revenantFaceID = faceID;
+        _revenantHasRollAngle = YES;
+        _revenantRollAngle = rollAngle;
+        _revenantHasYawAngle = YES;
+        _revenantYawAngle = yawAngle;
     }
     return self;
 }
 
 - (NSInteger)bodyID
 {
-    return self.charonBodyID;
+    return self.revenantBodyID;
 }
 
 - (NSInteger)objectID
 {
-    return self.charonObjectID;
+    return self.revenantObjectID;
 }
 
 - (NSInteger)faceID
 {
-    return self.charonFaceID;
+    return self.revenantFaceID;
 }
 
 - (BOOL)hasRollAngle
 {
-    return self.charonHasRollAngle;
+    return self.revenantHasRollAngle;
 }
 
 - (CGFloat)rollAngle
 {
-    return self.charonRollAngle;
+    return self.revenantRollAngle;
 }
 
 - (BOOL)hasYawAngle
 {
-    return self.charonHasYawAngle;
+    return self.revenantHasYawAngle;
 }
 
 - (CGFloat)yawAngle
 {
-    return self.charonYawAngle;
+    return self.revenantYawAngle;
 }
 
 - (id)copyWithZone:(NSZone *)zone
 {
-    return [[[self class] alloc] charon_initWithBodyID:self.bodyID objectID:self.objectID
+    return [[[self class] alloc] revenant_initWithBodyID:self.bodyID objectID:self.objectID
                                                 faceID:self.faceID rollAngle:self.rollAngle
                                                yawAngle:self.yawAngle];
 }
@@ -119,92 +119,92 @@ static const NSInteger CharonAVMetadataNoObject = -1;
 
 @end
 
-#define CHARON_AVMETADATA_BODY(cls) \
+#define REVENANT_AVMETADATA_BODY(cls) \
 @implementation cls \
-- (instancetype)charon_initWithObjectID:(NSInteger)objectID \
+- (instancetype)revenant_initWithObjectID:(NSInteger)objectID \
                                  faceID:(NSInteger)faceID \
                               rollAngle:(CGFloat)rollAngle \
                                yawAngle:(CGFloat)yawAngle \
 { \
-    return [super charon_initWithBodyID:0 objectID:objectID faceID:faceID \
+    return [super revenant_initWithBodyID:0 objectID:objectID faceID:faceID \
                              rollAngle:rollAngle yawAngle:yawAngle]; \
 } \
 @end
 
-CHARON_AVMETADATA_BODY(AVMetadataCatBodyObject)
-CHARON_AVMETADATA_BODY(AVMetadataDogBodyObject)
-CHARON_AVMETADATA_BODY(AVMetadataHumanBodyObject)
+REVENANT_AVMETADATA_BODY(AVMetadataCatBodyObject)
+REVENANT_AVMETADATA_BODY(AVMetadataDogBodyObject)
+REVENANT_AVMETADATA_BODY(AVMetadataHumanBodyObject)
 
-#undef CHARON_AVMETADATA_BODY
+#undef REVENANT_AVMETADATA_BODY
 
 @interface AVMetadataSalientObject ()
-@property (nonatomic) NSInteger charonObjectID;
-@property (nonatomic) NSInteger charonFaceID;
-@property (nonatomic) BOOL charonHasRollAngle;
-@property (nonatomic) CGFloat charonRollAngle;
-@property (nonatomic) BOOL charonHasYawAngle;
-@property (nonatomic) CGFloat charonYawAngle;
+@property (nonatomic) NSInteger revenantObjectID;
+@property (nonatomic) NSInteger revenantFaceID;
+@property (nonatomic) BOOL revenantHasRollAngle;
+@property (nonatomic) CGFloat revenantRollAngle;
+@property (nonatomic) BOOL revenantHasYawAngle;
+@property (nonatomic) CGFloat revenantYawAngle;
 @end
 
 @implementation AVMetadataSalientObject
 
-@synthesize charonObjectID = _charonObjectID;
-@synthesize charonFaceID = _charonFaceID;
-@synthesize charonHasRollAngle = _charonHasRollAngle;
-@synthesize charonRollAngle = _charonRollAngle;
-@synthesize charonHasYawAngle = _charonHasYawAngle;
-@synthesize charonYawAngle = _charonYawAngle;
+@synthesize revenantObjectID = _revenantObjectID;
+@synthesize revenantFaceID = _revenantFaceID;
+@synthesize revenantHasRollAngle = _revenantHasRollAngle;
+@synthesize revenantRollAngle = _revenantRollAngle;
+@synthesize revenantHasYawAngle = _revenantHasYawAngle;
+@synthesize revenantYawAngle = _revenantYawAngle;
 
-- (instancetype)charon_initWithObjectID:(NSInteger)objectID
+- (instancetype)revenant_initWithObjectID:(NSInteger)objectID
                                  faceID:(NSInteger)faceID
                               rollAngle:(CGFloat)rollAngle
                                yawAngle:(CGFloat)yawAngle
 {
     self = ((id (*)(id, SEL))objc_msgSend)(self, sel_registerName("init"));
     if (self) {
-        _charonObjectID = objectID;
-        _charonFaceID = faceID;
-        _charonHasRollAngle = YES;
-        _charonRollAngle = rollAngle;
-        _charonHasYawAngle = YES;
-        _charonYawAngle = yawAngle;
+        _revenantObjectID = objectID;
+        _revenantFaceID = faceID;
+        _revenantHasRollAngle = YES;
+        _revenantRollAngle = rollAngle;
+        _revenantHasYawAngle = YES;
+        _revenantYawAngle = yawAngle;
     }
     return self;
 }
 
 - (NSInteger)objectID
 {
-    return self.charonObjectID;
+    return self.revenantObjectID;
 }
 
 - (NSInteger)faceID
 {
-    return self.charonFaceID;
+    return self.revenantFaceID;
 }
 
 - (BOOL)hasRollAngle
 {
-    return self.charonHasRollAngle;
+    return self.revenantHasRollAngle;
 }
 
 - (CGFloat)rollAngle
 {
-    return self.charonRollAngle;
+    return self.revenantRollAngle;
 }
 
 - (BOOL)hasYawAngle
 {
-    return self.charonHasYawAngle;
+    return self.revenantHasYawAngle;
 }
 
 - (CGFloat)yawAngle
 {
-    return self.charonYawAngle;
+    return self.revenantYawAngle;
 }
 
 - (id)copyWithZone:(NSZone *)zone
 {
-    return [[[self class] alloc] charon_initWithObjectID:self.objectID faceID:self.faceID
+    return [[[self class] alloc] revenant_initWithObjectID:self.objectID faceID:self.faceID
                                                rollAngle:self.rollAngle yawAngle:self.yawAngle];
 }
 

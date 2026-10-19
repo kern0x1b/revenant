@@ -1,11 +1,11 @@
 #!/bin/sh
-# The port's vDSPFixed7.m, vDSPElementwise8.m and CharonVDSPKernel.c held against the host's own vDSP, case
+# The port's vDSPFixed7.m, vDSPElementwise8.m and RevenantVDSPKernel.c held against the host's own vDSP, case
 # by case: the same inputs through each, comparing every element either of them wrote.
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 ACCELERATE=${ACCELERATE:-$here/../../../../packages/a/apple-backports/Accelerate}
-build=${VDSP_BUILD:-$(runs_folder charon-vdsp-host)}
+build=${VDSP_BUILD:-$(runs_folder revenant-vdsp-host)}
 rm -rf "$build"
 mkdir -p "$build"
 
@@ -22,11 +22,11 @@ for part in ("ios7vdsp.json", "ios8vdsp.json"):
             print(entry["api"].rstrip("()"))
 PY
 ); do
-    renames="$renames -D$name=charon_host_$name"
+    renames="$renames -D$name=revenant_host_$name"
 done
 
 objects=""
-for source in CharonVDSPKernel.c vDSPFixed7.m vDSPElementwise8.m; do
+for source in RevenantVDSPKernel.c vDSPFixed7.m vDSPElementwise8.m; do
     xcrun clang -fobjc-arc -w $renames -I"$ACCELERATE" -c "$ACCELERATE/$source" -o "$build/$(basename "$source").o"
     objects="$objects $build/$(basename "$source").o"
 done

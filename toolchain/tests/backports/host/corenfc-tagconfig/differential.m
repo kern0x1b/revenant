@@ -3,12 +3,12 @@
 #import <objc/runtime.h>
 #import "check.h"
 
-@interface CharonHostNFCTagCommandConfiguration : NSObject <NSCopying>
+@interface RevenantHostNFCTagCommandConfiguration : NSObject <NSCopying>
 @property (nonatomic, assign) NSUInteger maximumRetries;
 @property (nonatomic, assign) NSTimeInterval retryInterval;
 @end
 
-@interface CharonHostNFCISO15693CustomCommandConfiguration : CharonHostNFCTagCommandConfiguration
+@interface RevenantHostNFCISO15693CustomCommandConfiguration : RevenantHostNFCTagCommandConfiguration
 @property (nonatomic, assign) NSUInteger manufacturerCode;
 @property (nonatomic, assign) NSUInteger customCommandCode;
 @property (nonatomic, copy) NSData *requestParameters;
@@ -22,7 +22,7 @@
                            retryInterval:(NSTimeInterval)retryInterval;
 @end
 
-@interface CharonHostNFCISO15693ReadMultipleBlocksConfiguration : CharonHostNFCTagCommandConfiguration
+@interface RevenantHostNFCISO15693ReadMultipleBlocksConfiguration : RevenantHostNFCTagCommandConfiguration
 @property (nonatomic, assign) NSRange range;
 @property (nonatomic, assign) NSUInteger chunkSize;
 - (instancetype)initWithRange:(NSRange)range
@@ -37,7 +37,7 @@ static Class port_class(Class declared, const char *name)
 {
     NSString *spelling = [NSString stringWithUTF8String:name];
     Class found = NSClassFromString(spelling);
-    charon_check(found == declared, [[NSString stringWithFormat:@"%@ is carried under its own name", spelling] UTF8String], nil);
+    revenant_check(found == declared, [[NSString stringWithFormat:@"%@ is carried under its own name", spelling] UTF8String], nil);
     return found;
 }
 
@@ -45,19 +45,19 @@ static Class port_class(Class declared, const char *name)
 
 static void check_same(BOOL ours, BOOL theirs, NSString *what)
 {
-    charon_check(ours == theirs, [[NSString stringWithFormat:@"%@ answers what CoreNFC answers", what] UTF8String],
+    revenant_check(ours == theirs, [[NSString stringWithFormat:@"%@ answers what CoreNFC answers", what] UTF8String],
                  [NSString stringWithFormat:@"port %d, host %d", ours, theirs]);
 }
 
 static void check_same_u(NSUInteger ours, NSUInteger theirs, NSString *what)
 {
-    charon_check(ours == theirs, [[NSString stringWithFormat:@"%@ answers what CoreNFC answers", what] UTF8String],
+    revenant_check(ours == theirs, [[NSString stringWithFormat:@"%@ answers what CoreNFC answers", what] UTF8String],
                  [NSString stringWithFormat:@"port %lu, host %lu", (unsigned long)ours, (unsigned long)theirs]);
 }
 
 static void check_same_d(double ours, double theirs, NSString *what)
 {
-    charon_check(ours == theirs, [[NSString stringWithFormat:@"%@ answers what CoreNFC answers", what] UTF8String],
+    revenant_check(ours == theirs, [[NSString stringWithFormat:@"%@ answers what CoreNFC answers", what] UTF8String],
                  [NSString stringWithFormat:@"port %g, host %g", ours, theirs]);
 }
 
@@ -69,7 +69,7 @@ static void check_same_range(NSRange ours, NSRange theirs, NSString *what)
 
 static void check_same_obj(id ours, id theirs, NSString *what)
 {
-    charon_check(ours == theirs || [ours isEqual:theirs],
+    revenant_check(ours == theirs || [ours isEqual:theirs],
                  [[NSString stringWithFormat:@"%@ answers what CoreNFC answers", what] UTF8String],
                  [NSString stringWithFormat:@"port %@, host %@", ours, theirs]);
 }
@@ -81,7 +81,7 @@ static NSData *text(const char *s)
 
 static void base_class(void)
 {
-    CharonHostNFCTagCommandConfiguration *ours = [[PORT_CLASS(CharonHostNFCTagCommandConfiguration) alloc] init];
+    RevenantHostNFCTagCommandConfiguration *ours = [[PORT_CLASS(RevenantHostNFCTagCommandConfiguration) alloc] init];
     NFCTagCommandConfiguration *theirs = [[NFCTagCommandConfiguration alloc] init];
 
     check_same_u(ours.maximumRetries, theirs.maximumRetries, @"maximumRetries of a fresh configuration");
@@ -103,13 +103,13 @@ static void base_class(void)
 
     ours.maximumRetries = 3; theirs.maximumRetries = 3;
     ours.retryInterval = 0.25; theirs.retryInterval = 0.25;
-    CharonHostNFCTagCommandConfiguration *ourcopy = [ours copy];
+    RevenantHostNFCTagCommandConfiguration *ourcopy = [ours copy];
     NFCTagCommandConfiguration *theircopy = [theirs copy];
     check_same([ourcopy class] == [ours class], [theircopy class] == [theirs class], @"a copy is of the same class");
     check_same_u(ourcopy.maximumRetries, theircopy.maximumRetries, @"maximumRetries of a copy");
     check_same_d(ourcopy.retryInterval, theircopy.retryInterval, @"retryInterval of a copy");
 
-    CharonHostNFCTagCommandConfiguration *ours2 = [[PORT_CLASS(CharonHostNFCTagCommandConfiguration) alloc] init];
+    RevenantHostNFCTagCommandConfiguration *ours2 = [[PORT_CLASS(RevenantHostNFCTagCommandConfiguration) alloc] init];
     NFCTagCommandConfiguration *theirs2 = [[NFCTagCommandConfiguration alloc] init];
     ours2.maximumRetries = 3; theirs2.maximumRetries = 3;
     ours2.retryInterval = 0.25; theirs2.retryInterval = 0.25;
@@ -119,8 +119,8 @@ static void base_class(void)
 
 static void custom_command(void)
 {
-    CharonHostNFCISO15693CustomCommandConfiguration *ours =
-        [[PORT_CLASS(CharonHostNFCISO15693CustomCommandConfiguration) alloc] init];
+    RevenantHostNFCISO15693CustomCommandConfiguration *ours =
+        [[PORT_CLASS(RevenantHostNFCISO15693CustomCommandConfiguration) alloc] init];
     NFCISO15693CustomCommandConfiguration *theirs = [[NFCISO15693CustomCommandConfiguration alloc] init];
 
     check_same_u(ours.manufacturerCode, theirs.manufacturerCode, @"manufacturerCode of a fresh configuration");
@@ -130,11 +130,11 @@ static void custom_command(void)
                @"requestParameters of a fresh configuration");
     check_same(ours.requestParameters == nil, YES, @"requestParameters of a fresh configuration is nil");
 
-    check_same([ours superclass] == PORT_CLASS(CharonHostNFCTagCommandConfiguration),
+    check_same([ours superclass] == PORT_CLASS(RevenantHostNFCTagCommandConfiguration),
                [theirs superclass] == [NFCTagCommandConfiguration class], @"the base class of a custom command configuration");
 
-    CharonHostNFCISO15693CustomCommandConfiguration *our_out =
-        [[PORT_CLASS(CharonHostNFCISO15693CustomCommandConfiguration) alloc] initWithManufacturerCode:0x1FF
+    RevenantHostNFCISO15693CustomCommandConfiguration *our_out =
+        [[PORT_CLASS(RevenantHostNFCISO15693CustomCommandConfiguration) alloc] initWithManufacturerCode:0x1FF
                                                                                      customCommandCode:0x5
                                                                                      requestParameters:nil];
     NFCISO15693CustomCommandConfiguration *their_out =
@@ -150,8 +150,8 @@ static void custom_command(void)
     check_same_u(ours.customCommandCode, theirs.customCommandCode, @"customCommandCode set above the header's range");
 
     NSData *params = text("hi");
-    CharonHostNFCISO15693CustomCommandConfiguration *our_three =
-        [[PORT_CLASS(CharonHostNFCISO15693CustomCommandConfiguration) alloc] initWithManufacturerCode:0x04
+    RevenantHostNFCISO15693CustomCommandConfiguration *our_three =
+        [[PORT_CLASS(RevenantHostNFCISO15693CustomCommandConfiguration) alloc] initWithManufacturerCode:0x04
                                                                                      customCommandCode:0xA0
                                                                                      requestParameters:params];
     NFCISO15693CustomCommandConfiguration *their_three =
@@ -164,8 +164,8 @@ static void custom_command(void)
     check_same_u(our_three.maximumRetries, 0, @"the three-field initialiser leaves maximumRetries at zero");
     check_same_d(our_three.retryInterval, 0, @"the three-field initialiser leaves retryInterval at zero");
 
-    CharonHostNFCISO15693CustomCommandConfiguration *our_five =
-        [[PORT_CLASS(CharonHostNFCISO15693CustomCommandConfiguration) alloc] initWithManufacturerCode:0x04
+    RevenantHostNFCISO15693CustomCommandConfiguration *our_five =
+        [[PORT_CLASS(RevenantHostNFCISO15693CustomCommandConfiguration) alloc] initWithManufacturerCode:0x04
                                                                                      customCommandCode:0xA0
                                                                                      requestParameters:params
                                                                                         maximumRetries:5
@@ -179,7 +179,7 @@ static void custom_command(void)
     check_same_u(our_five.maximumRetries, 5, @"maximumRetries of the five-field initialiser is what was asked");
     check_same_d(our_five.retryInterval, 1.5, @"retryInterval of the five-field initialiser is what was asked");
 
-    CharonHostNFCISO15693CustomCommandConfiguration *ourcopy = [our_five copy];
+    RevenantHostNFCISO15693CustomCommandConfiguration *ourcopy = [our_five copy];
     NFCISO15693CustomCommandConfiguration *theircopy = [their_five copy];
     check_same([ourcopy class] == [our_five class], [theircopy class] == [their_five class], @"a copy of a custom command configuration is of the same class");
     check_same_u(ourcopy.manufacturerCode, theircopy.manufacturerCode, @"manufacturerCode of a copy");
@@ -195,11 +195,11 @@ static void custom_command(void)
     check_same_obj(our_five.requestParameters, their_five.requestParameters, @"the original is untouched by the copy");
     check_same_obj(ourcopy.requestParameters, theircopy.requestParameters, @"the copy carries the requestParameters it was set");
 
-    CharonHostNFCISO15693CustomCommandConfiguration *ournil =
-        [[PORT_CLASS(CharonHostNFCISO15693CustomCommandConfiguration) alloc] initWithManufacturerCode:1 customCommandCode:2 requestParameters:nil];
+    RevenantHostNFCISO15693CustomCommandConfiguration *ournil =
+        [[PORT_CLASS(RevenantHostNFCISO15693CustomCommandConfiguration) alloc] initWithManufacturerCode:1 customCommandCode:2 requestParameters:nil];
     NFCISO15693CustomCommandConfiguration *theirnil =
         [[NFCISO15693CustomCommandConfiguration alloc] initWithManufacturerCode:1 customCommandCode:2 requestParameters:nil];
-    CharonHostNFCISO15693CustomCommandConfiguration *ournilcopy = [ournil copy];
+    RevenantHostNFCISO15693CustomCommandConfiguration *ournilcopy = [ournil copy];
     NFCISO15693CustomCommandConfiguration *theirnilcopy = [theirnil copy];
     check_same(ournilcopy.requestParameters == nil, theirnilcopy.requestParameters == nil,
                @"nil requestParameters through a copy");
@@ -209,8 +209,8 @@ static void custom_command(void)
 
 static void read_multiple_blocks(void)
 {
-    CharonHostNFCISO15693ReadMultipleBlocksConfiguration *ours =
-        [[PORT_CLASS(CharonHostNFCISO15693ReadMultipleBlocksConfiguration) alloc] init];
+    RevenantHostNFCISO15693ReadMultipleBlocksConfiguration *ours =
+        [[PORT_CLASS(RevenantHostNFCISO15693ReadMultipleBlocksConfiguration) alloc] init];
     NFCISO15693ReadMultipleBlocksConfiguration *theirs = [[NFCISO15693ReadMultipleBlocksConfiguration alloc] init];
 
     check_same_u(ours.range.location, theirs.range.location, @"range.location of a fresh configuration");
@@ -220,24 +220,24 @@ static void read_multiple_blocks(void)
     check_same_u(ours.range.length, 0, @"range.length of a fresh configuration");
     check_same_u(ours.chunkSize, 0, @"chunkSize of a fresh configuration");
 
-    check_same([ours superclass] == PORT_CLASS(CharonHostNFCTagCommandConfiguration),
+    check_same([ours superclass] == PORT_CLASS(RevenantHostNFCTagCommandConfiguration),
                [theirs superclass] == [NFCTagCommandConfiguration class], @"the base class of a read-multiple-blocks configuration");
 
-    CharonHostNFCISO15693ReadMultipleBlocksConfiguration *our_zero =
-        [[PORT_CLASS(CharonHostNFCISO15693ReadMultipleBlocksConfiguration) alloc] initWithRange:NSMakeRange(300, 0) chunkSize:0];
+    RevenantHostNFCISO15693ReadMultipleBlocksConfiguration *our_zero =
+        [[PORT_CLASS(RevenantHostNFCISO15693ReadMultipleBlocksConfiguration) alloc] initWithRange:NSMakeRange(300, 0) chunkSize:0];
     NFCISO15693ReadMultipleBlocksConfiguration *their_zero =
         [[NFCISO15693ReadMultipleBlocksConfiguration alloc] initWithRange:NSMakeRange(300, 0) chunkSize:0];
     check_same_range(our_zero.range, their_zero.range, @"a zero-length range above the header's start index");
     check_same_u(our_zero.range.length, 0, @"a zero-length range stays zero length");
 
-    CharonHostNFCISO15693ReadMultipleBlocksConfiguration *our_high =
-        [[PORT_CLASS(CharonHostNFCISO15693ReadMultipleBlocksConfiguration) alloc] initWithRange:NSMakeRange(1000, 5) chunkSize:0];
+    RevenantHostNFCISO15693ReadMultipleBlocksConfiguration *our_high =
+        [[PORT_CLASS(RevenantHostNFCISO15693ReadMultipleBlocksConfiguration) alloc] initWithRange:NSMakeRange(1000, 5) chunkSize:0];
     NFCISO15693ReadMultipleBlocksConfiguration *their_high =
         [[NFCISO15693ReadMultipleBlocksConfiguration alloc] initWithRange:NSMakeRange(1000, 5) chunkSize:0];
     check_same_range(our_high.range, their_high.range, @"a range whose start index is above the header's");
 
-    CharonHostNFCISO15693ReadMultipleBlocksConfiguration *our_two =
-        [[PORT_CLASS(CharonHostNFCISO15693ReadMultipleBlocksConfiguration) alloc] initWithRange:NSMakeRange(3, 4) chunkSize:2];
+    RevenantHostNFCISO15693ReadMultipleBlocksConfiguration *our_two =
+        [[PORT_CLASS(RevenantHostNFCISO15693ReadMultipleBlocksConfiguration) alloc] initWithRange:NSMakeRange(3, 4) chunkSize:2];
     NFCISO15693ReadMultipleBlocksConfiguration *their_two =
         [[NFCISO15693ReadMultipleBlocksConfiguration alloc] initWithRange:NSMakeRange(3, 4) chunkSize:2];
     check_same_range(our_two.range, their_two.range, @"the range of the two-field initialiser");
@@ -247,8 +247,8 @@ static void read_multiple_blocks(void)
     check_same_u(our_two.maximumRetries, 0, @"the two-field initialiser leaves maximumRetries at zero");
     check_same_d(our_two.retryInterval, 0, @"the two-field initialiser leaves retryInterval at zero");
 
-    CharonHostNFCISO15693ReadMultipleBlocksConfiguration *our_four =
-        [[PORT_CLASS(CharonHostNFCISO15693ReadMultipleBlocksConfiguration) alloc] initWithRange:NSMakeRange(3, 4)
+    RevenantHostNFCISO15693ReadMultipleBlocksConfiguration *our_four =
+        [[PORT_CLASS(RevenantHostNFCISO15693ReadMultipleBlocksConfiguration) alloc] initWithRange:NSMakeRange(3, 4)
                                                                                     chunkSize:2
                                                                                maximumRetries:7
                                                                                 retryInterval:2.5];
@@ -261,7 +261,7 @@ static void read_multiple_blocks(void)
     check_same_u(our_four.maximumRetries, 7, @"maximumRetries of the four-field initialiser is what was asked");
     check_same_d(our_four.retryInterval, 2.5, @"retryInterval of the four-field initialiser is what was asked");
 
-    CharonHostNFCISO15693ReadMultipleBlocksConfiguration *ourcopy = [our_four copy];
+    RevenantHostNFCISO15693ReadMultipleBlocksConfiguration *ourcopy = [our_four copy];
     NFCISO15693ReadMultipleBlocksConfiguration *theircopy = [their_four copy];
     check_same([ourcopy class] == [our_four class], [theircopy class] == [their_four class],
                @"a copy of a read-multiple-blocks configuration is of the same class");
@@ -278,12 +278,12 @@ static void read_multiple_blocks(void)
 
 static void check_true(BOOL passed, NSString *what)
 {
-    charon_check(passed, [what UTF8String], nil);
+    revenant_check(passed, [what UTF8String], nil);
 }
 
 static void session_answers_as_host(void)
 {
-    Class our_base = NSClassFromString(@"CharonHostNFCReaderSession");
+    Class our_base = NSClassFromString(@"RevenantHostNFCReaderSession");
     check_true(our_base != Nil, @"NFCReaderSession is carried");
     check_same([our_base instancesRespondToSelector:@selector(beginSession)],
                [NFCReaderSession instancesRespondToSelector:@selector(beginSession)],
@@ -300,13 +300,13 @@ static void session_answers_as_host(void)
 
     check_true([NFCReaderSession class] != Nil, @"the host has NFCReaderSession");
     check_true([NFCISO15693ReaderSession class] != Nil, @"the host has NFCISO15693ReaderSession");
-    check_true(NSClassFromString(@"CharonHostNFCISO15693ReaderSession") != Nil,
+    check_true(NSClassFromString(@"RevenantHostNFCISO15693ReaderSession") != Nil,
                @"the port carries NFCISO15693ReaderSession, as the host does");
-    check_true(NSClassFromString(@"CharonHostNFCTagReaderSession") == Nil,
+    check_true(NSClassFromString(@"RevenantHostNFCTagReaderSession") == Nil,
                @"NFCTagReaderSession is absent from the port");
 
-    CharonHostNFCISO15693CustomCommandConfiguration *config =
-        [[PORT_CLASS(CharonHostNFCISO15693CustomCommandConfiguration) alloc] initWithManufacturerCode:1
+    RevenantHostNFCISO15693CustomCommandConfiguration *config =
+        [[PORT_CLASS(RevenantHostNFCISO15693CustomCommandConfiguration) alloc] initWithManufacturerCode:1
                                                                                      customCommandCode:2
                                                                                      requestParameters:nil];
     check_true(![config respondsToSelector:@selector(sendCustomCommandWithConfiguration:completionHandler:)],
@@ -314,16 +314,16 @@ static void session_answers_as_host(void)
     check_true([config respondsToSelector:@selector(copyWithZone:)],
                @"a custom command configuration still copies");
 
-    check_true([NSStringFromClass([(id)config class]) hasPrefix:@"CharonHost"],
-               @"the port's class carries the CharonHost prefix");
-    check_true(NSClassFromString(@"CharonHostNFCISO15693CustomCommandConfiguration") !=
+    check_true([NSStringFromClass([(id)config class]) hasPrefix:@"RevenantHost"],
+               @"the port's class carries the RevenantHost prefix");
+    check_true(NSClassFromString(@"RevenantHostNFCISO15693CustomCommandConfiguration") !=
                NSClassFromString(@"NFCISO15693CustomCommandConfiguration"),
                @"the port's class and the host's class of the same API are two classes");
     NFCISO15693CustomCommandConfiguration *host_config =
         [[NFCISO15693CustomCommandConfiguration alloc] initWithManufacturerCode:1 customCommandCode:2 requestParameters:nil];
-    check_same_u(((CharonHostNFCTagCommandConfiguration *)config).maximumRetries, host_config.maximumRetries,
+    check_same_u(((RevenantHostNFCTagCommandConfiguration *)config).maximumRetries, host_config.maximumRetries,
                  @"the base's maximumRetries of a fresh configuration on both sides");
-    check_same_u(((CharonHostNFCTagCommandConfiguration *)config).maximumRetries, 0,
+    check_same_u(((RevenantHostNFCTagCommandConfiguration *)config).maximumRetries, 0,
                  @"the base's maximumRetries of a fresh configuration");
 }
 
@@ -334,7 +334,7 @@ int main(void)
         custom_command();
         read_multiple_blocks();
         session_answers_as_host();
-        printf("%d of %d checks failed\n", charon_failures, charon_checks);
-        return charon_failures;
+        printf("%d of %d checks failed\n", revenant_failures, revenant_checks);
+        return revenant_failures;
     }
 }

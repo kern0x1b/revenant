@@ -10,14 +10,14 @@ rule("swift")
             raise("target(%s) compiles Swift, and its project requires both swift-runtime and swift-embedded: a program takes one standard library or the other", target:name())
         end
         if not runtime and not embedded then
-            raise("target(%s) compiles Swift, and its project requires neither: add_requires(\"charon@swift-runtime\", {alias = \"swift-runtime\"}) for the whole language, or add_requires(\"charon@swift-embedded\", {alias = \"swift-embedded\"}) for the subset with no runtime library", target:name())
+            raise("target(%s) compiles Swift, and its project requires neither: add_requires(\"revenant@swift-runtime\", {alias = \"swift-runtime\"}) for the whole language, or add_requires(\"revenant@swift-embedded\", {alias = \"swift-embedded\"}) for the subset with no runtime library", target:name())
         end
         if embedded then
             target:add("packages", "swift-embedded")
             return
         end
         if not project.required_package("libcxx") then
-            raise("target(%s) compiles Swift against the runtime it carries, which links the C++ runtime: add_requires(\"charon@libcxx\", {alias = \"libcxx\"})", target:name())
+            raise("target(%s) compiles Swift against the runtime it carries, which links the C++ runtime: add_requires(\"revenant@libcxx\", {alias = \"libcxx\"})", target:name())
         end
         target:add("packages", "swift-runtime", "libcxx")
     end)
@@ -33,11 +33,11 @@ rule("swift")
         local runtime = target:pkg("swift-runtime")
         if runtime and not runtime:requireconf("configs", "shared") then
             for _, carried in ipairs({"swift-runtime", "libcxx"}) do
-                target:add("values", "charon.libraries", carried)
+                target:add("values", "revenant.libraries", carried)
                 target:add("values", "app.frameworks", carried)
             end
         end
-        local sourcebatch = target:sourcebatches()["@addon/charon/swift"] or target:sourcebatches()["swift"]
+        local sourcebatch = target:sourcebatches()["@addon/revenant/swift"] or target:sourcebatches()["swift"]
         if sourcebatch and #sourcebatch.sourcefiles > 0 then
             local objectfile = path.join(target:objectdir(), "swift", target:name() .. ".o")
             target:data_set("swift.objectfile", objectfile)
@@ -49,25 +49,25 @@ rule("swift")
         end
         local package = target:pkg("swift-runtime")
         if package then
-            local mark = table.wrap((package:envs() or {}).CHARON_SWIFT_RUNTIME_MARK)[1]
+            local mark = table.wrap((package:envs() or {}).REVENANT_SWIFT_RUNTIME_MARK)[1]
             if not mark then
                 raise("swift-runtime at %s names no build of itself; reinstall it", package:installdir())
             end
             target:add("ldflags", "-Wl,-u,_" .. mark, {force = true})
-            local port_headers = table.wrap((package:envs() or {}).CHARON_SWIFT_PORT_HEADERS)[1]
+            local port_headers = table.wrap((package:envs() or {}).REVENANT_SWIFT_PORT_HEADERS)[1]
             if port_headers then
                 local carried = target:pkg("apple-backports")
                 if not carried then
-                    raise("target(%s) compiles against swift-runtime built with the backports, and does not carry them: add_requires(\"charon@apple-backports\", {alias = \"apple-backports\"}) and add_packages(\"apple-backports\")", target:name())
+                    raise("target(%s) compiles against swift-runtime built with the backports, and does not carry them: add_requires(\"revenant@apple-backports\", {alias = \"apple-backports\"}) and add_packages(\"apple-backports\")", target:name())
                 end
                 local libraries = {coredata = "CoreDataBackports", uikit = "UIKitBackports"}
-                for _, config in ipairs(table.wrap((package:envs() or {}).CHARON_SWIFT_RUNTIME_BACKPORTS)[1]:split(",")) do
+                for _, config in ipairs(table.wrap((package:envs() or {}).REVENANT_SWIFT_RUNTIME_BACKPORTS)[1]:split(",")) do
                     local found = false
                     for _, folder in ipairs(table.wrap(carried:get("linkdirs"))) do
                         found = found or os.isfile(path.join(folder, "lib" .. libraries[config] .. ".dylib"))
                     end
                     if not found then
-                        raise("target(%s) compiles against swift-runtime built with the %s backports, and its apple-backports package holds no lib%s.dylib: add_requires(\"charon@apple-backports\", {alias = \"apple-backports\", configs = {%s = true}})", target:name(), config, libraries[config], config)
+                        raise("target(%s) compiles against swift-runtime built with the %s backports, and its apple-backports package holds no lib%s.dylib: add_requires(\"revenant@apple-backports\", {alias = \"apple-backports\", configs = {%s = true}})", target:name(), config, libraries[config], config)
                     end
                 end
                 target:add("values", "swift.flags", "-vfsoverlay", port_headers)
@@ -100,8 +100,8 @@ rule("swift")
         local macho = import("@self.apple.macho")
         local folders = {}
         if runtime:requireconf("configs", "shared") then
-            for _, name in ipairs((table.wrap((runtime:envs() or {}).CHARON_SHARED_PACKAGE)[1] or ""):split(";")) do
-                table.insert(folders, path.join(runtime:installdir(), "share", "root", "usr", "lib", "charon", (name:match("^([^=]+)"))))
+            for _, name in ipairs((table.wrap((runtime:envs() or {}).REVENANT_SHARED_PACKAGE)[1] or ""):split(";")) do
+                table.insert(folders, path.join(runtime:installdir(), "share", "root", "usr", "lib", "revenant", (name:match("^([^=]+)"))))
             end
         else
             table.insert(folders, path.join(runtime:installdir(), "lib", "swift", "iphoneos"))
@@ -143,10 +143,10 @@ rule("swift")
             if target:pkg("swift-runtime") then
                 local modules, plugins = {}, {}
                 for _, dependency in ipairs(target:orderpkgs()) do
-                    for _, folder in ipairs(table.wrap((dependency:envs() or {}).CHARON_SWIFT_MODULES)) do
+                    for _, folder in ipairs(table.wrap((dependency:envs() or {}).REVENANT_SWIFT_MODULES)) do
                         table.join2(modules, {"-I", folder})
                     end
-                    for _, folder in ipairs(table.wrap((dependency:envs() or {}).CHARON_SWIFT_PLUGINS)) do
+                    for _, folder in ipairs(table.wrap((dependency:envs() or {}).REVENANT_SWIFT_PLUGINS)) do
                         table.join2(plugins, {"-plugin-path", folder})
                     end
                 end

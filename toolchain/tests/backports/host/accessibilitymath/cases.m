@@ -12,7 +12,7 @@ static NSString *kindName(Class c)
         return @"(nil)";
     }
     NSString *name = NSStringFromClass(c);
-    return [name hasPrefix:@"CharonPort"] ? [name substringFromIndex:@"CharonPort".length] : name;
+    return [name hasPrefix:@"RevenantPort"] ? [name substringFromIndex:@"RevenantPort".length] : name;
 }
 
 static NSString *kind(id o)
@@ -20,7 +20,7 @@ static NSString *kind(id o)
     return o ? kindName([o class]) : @"(nil)";
 }
 
-static NSString *const kMark = @"charon-underline";
+static NSString *const kMark = @"revenant-underline";
 
 static NSInteger underlines(id o)
 {

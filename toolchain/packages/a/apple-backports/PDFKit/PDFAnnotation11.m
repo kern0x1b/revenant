@@ -1,9 +1,9 @@
-#import "CharonPDFKit.h"
+#import "RevenantPDFKit.h"
 
 static const CGFloat kTextAnnotationSize = 24.0;
 
 @interface PDFAnnotation ()
-- (nullable CGPDFDictionaryRef)charon_CGPDFAnnotation;
+- (nullable CGPDFDictionaryRef)revenant_CGPDFAnnotation;
 @end
 
 @implementation PDFAnnotation {
@@ -19,7 +19,7 @@ static const CGFloat kTextAnnotationSize = 24.0;
     BOOL _borderSet;
 }
 
-- (instancetype)initWithCharonDictionary:(CGPDFDictionaryRef)annotation onPage:(PDFPage *)page
+- (instancetype)initWithRevenantDictionary:(CGPDFDictionaryRef)annotation onPage:(PDFPage *)page
 {
     self = [super init];
     if (self == nil)
@@ -29,7 +29,7 @@ static const CGFloat kTextAnnotationSize = 24.0;
     return self;
 }
 
-- (CGPDFDictionaryRef)charon_CGPDFAnnotation
+- (CGPDFDictionaryRef)revenant_CGPDFAnnotation
 {
     return _annotation;
 }
@@ -90,7 +90,7 @@ static const CGFloat kTextAnnotationSize = 24.0;
     return rect;
 }
 
-- (NSString *)charon_stringForKey:(const char *)key
+- (NSString *)revenant_stringForKey:(const char *)key
 {
     if (_annotation == NULL)
         return nil;
@@ -114,7 +114,7 @@ static const CGFloat kTextAnnotationSize = 24.0;
 {
     if (_contents != nil)
         return _contents;
-    _contents = [self charon_stringForKey:"Contents"];
+    _contents = [self revenant_stringForKey:"Contents"];
     return _contents;
 }
 
@@ -126,7 +126,7 @@ static const CGFloat kTextAnnotationSize = 24.0;
         [self type];
     if ([_type isEqualToString:@"Widget"])
         return nil;
-    _userName = [self charon_stringForKey:"T"];
+    _userName = [self revenant_stringForKey:"T"];
     return _userName;
 }
 
@@ -134,7 +134,7 @@ static const CGFloat kTextAnnotationSize = 24.0;
 {
     if (_modificationDate != nil)
         return _modificationDate;
-    NSString *date = [self charon_stringForKey:"M"];
+    NSString *date = [self revenant_stringForKey:"M"];
     if (date.length < 16 || ![date hasPrefix:@"D:"])
         return nil;
     NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
@@ -177,19 +177,19 @@ static const CGFloat kTextAnnotationSize = 24.0;
         return nil;
     CGPDFDictionaryRef action = NULL;
     if (CGPDFDictionaryGetDictionary(_annotation, "A", &action) && action != NULL) {
-        _action = [PDFAction charon_actionWithDictionary:action inDocument:[self charon_document]];
+        _action = [PDFAction revenant_actionWithDictionary:action inDocument:[self revenant_document]];
         return _action;
     }
-    if (![self charon_hasDestination])
+    if (![self revenant_hasDestination])
         return nil;
-    PDFDestination *destination = [self charon_destinationFromDest];
+    PDFDestination *destination = [self revenant_destinationFromDest];
     if (destination == nil)
         return nil;
     _action = [[PDFActionGoTo alloc] initWithDestination:destination];
     return _action;
 }
 
-- (PDFDestination *)charon_destinationFromDest
+- (PDFDestination *)revenant_destinationFromDest
 {
     if (_destination != nil)
         return _destination;
@@ -203,13 +203,13 @@ static const CGFloat kTextAnnotationSize = 24.0;
         CGPDFArrayRef array = NULL;
         if (!CGPDFObjectGetValue(object, kCGPDFObjectTypeArray, &array) || array == NULL)
             return nil;
-        _destination = [[PDFDestination alloc] initWithCharonDestinationArray:array
-                                                                    inDocument:[self charon_document]];
+        _destination = [[PDFDestination alloc] initWithRevenantDestinationArray:array
+                                                                    inDocument:[self revenant_document]];
         return _destination;
     }
     if (type == kCGPDFObjectTypeName || type == kCGPDFObjectTypeString) {
-        _destination = [[PDFDestination alloc] initWithCharonDestinationArray:NULL
-                                                                    inDocument:[self charon_document]];
+        _destination = [[PDFDestination alloc] initWithRevenantDestinationArray:NULL
+                                                                    inDocument:[self revenant_document]];
         return _destination;
     }
     return nil;
@@ -223,7 +223,7 @@ static const CGFloat kTextAnnotationSize = 24.0;
     return [(PDFActionGoTo *)action destination];
 }
 
-- (BOOL)charon_hasDestination
+- (BOOL)revenant_hasDestination
 {
     CGPDFObjectRef object = NULL;
     if (!CGPDFDictionaryGetObject(_annotation, "Dest", &object) || object == NULL)
@@ -233,7 +233,7 @@ static const CGFloat kTextAnnotationSize = 24.0;
            || type == kCGPDFObjectTypeDictionary;
 }
 
-- (PDFDocument *)charon_document
+- (PDFDocument *)revenant_document
 {
     return [_page document];
 }
@@ -277,7 +277,7 @@ static const CGFloat kTextAnnotationSize = 24.0;
     }
     if (!named)
         return nil;
-    _border = [[PDFBorder alloc] initWithCharonAnnotationDictionary:_annotation];
+    _border = [[PDFBorder alloc] initWithRevenantAnnotationDictionary:_annotation];
     return _border;
 }
 
@@ -325,11 +325,11 @@ static const CGFloat kTextAnnotationSize = 24.0;
 @dynamic buttonWidgetStateString;
 @dynamic buttonWidgetState;
 
-typedef struct { NSString *onState; } CharonOnState;
+typedef struct { NSString *onState; } RevenantOnState;
 
-static void charonTakeOnState(const char *key, CGPDFObjectRef value, void *info)
+static void revenantTakeOnState(const char *key, CGPDFObjectRef value, void *info)
 {
-    CharonOnState *state = (CharonOnState *)info;
+    RevenantOnState *state = (RevenantOnState *)info;
     if (key == NULL || state == NULL || state->onState != nil)
         return;
     if (strcmp(key, "Off") == 0)
@@ -347,8 +347,8 @@ static void charonTakeOnState(const char *key, CGPDFObjectRef value, void *info)
     CGPDFDictionaryRef normal = NULL;
     if (!CGPDFDictionaryGetDictionary(appearance, "N", &normal) || normal == NULL)
         return @"Yes";
-    CharonOnState state = {nil};
-    CGPDFDictionaryApplyFunction(normal, charonTakeOnState, &state);
+    RevenantOnState state = {nil};
+    CGPDFDictionaryApplyFunction(normal, revenantTakeOnState, &state);
     return state.onState ?: @"Yes";
 }
 
@@ -388,12 +388,12 @@ static void charonTakeOnState(const char *key, CGPDFObjectRef value, void *info)
     return 0;
 }
 
-- (CGPDFDictionaryRef)charon_CGPDFDictionary
+- (CGPDFDictionaryRef)revenant_CGPDFDictionary
 {
     return _annotation;
 }
 
-- (long)charon_flags
+- (long)revenant_flags
 {
     long flags = 0;
     if (_annotation == NULL)
@@ -405,42 +405,42 @@ static void charonTakeOnState(const char *key, CGPDFObjectRef value, void *info)
 
 - (BOOL)isReadOnly
 {
-    return ([self charon_flags] & (1 << 0)) != 0;
+    return ([self revenant_flags] & (1 << 0)) != 0;
 }
 
 - (BOOL)isMultiline
 {
-    return ([self charon_flags] & (1 << 12)) != 0;
+    return ([self revenant_flags] & (1 << 12)) != 0;
 }
 
 - (BOOL)isPasswordField
 {
-    return ([self charon_flags] & (1 << 13)) != 0;
+    return ([self revenant_flags] & (1 << 13)) != 0;
 }
 
 - (BOOL)hasComb
 {
-    return ([self charon_flags] & (1 << 24)) != 0;
+    return ([self revenant_flags] & (1 << 24)) != 0;
 }
 
 - (BOOL)allowsToggleToOff
 {
-    return ([self charon_flags] & ((1 << 14) | (1 << 16))) == 0;
+    return ([self revenant_flags] & ((1 << 14) | (1 << 16))) == 0;
 }
 
 - (BOOL)radiosInUnison
 {
-    return ([self charon_flags] & (1 << 25)) != 0;
+    return ([self revenant_flags] & (1 << 25)) != 0;
 }
 
 - (BOOL)isListChoice
 {
-    return ([self charon_flags] & (1 << 17)) == 0;
+    return ([self revenant_flags] & (1 << 17)) == 0;
 }
 
 - (PDFWidgetControlType)widgetControlType
 {
-    long flags = [self charon_flags];
+    long flags = [self revenant_flags];
     if ((flags & (1 << 15)) != 0)
         return kPDFWidgetRadioButtonControl;
     if ((flags & (1 << 16)) != 0)

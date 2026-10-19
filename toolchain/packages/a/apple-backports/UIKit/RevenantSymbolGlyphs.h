@@ -1,4 +1,4 @@
-static const struct { const char *name; const char *script; } CharonGlyphs[] = {
+static const struct { const char *name; const char *script; } RevenantGlyphs[] = {
     {"arrow.2.squarepath", "m 8 44 l 8 34 c 8 20 16 12 30 12 l 84 12 h 84 12 0 20 m 92 56 l 92 66 c 92 80 84 88 70 88 l 16 88 h 16 88 180 20 S"},
     {"arrow.down", "m 50 2 l 50 98 m 6 54 l 50 98 l 94 54 S"},
     {"arrow.down.left", "m 94 6 l 6 94 m 6 32 l 6 94 l 68 94 S"},

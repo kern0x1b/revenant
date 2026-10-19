@@ -1,4 +1,4 @@
-#import "CharonNEHotspot.h"
+#import "RevenantNEHotspot.h"
 
 @implementation NEHotspotHS20Settings {
     NSString *_domainName;

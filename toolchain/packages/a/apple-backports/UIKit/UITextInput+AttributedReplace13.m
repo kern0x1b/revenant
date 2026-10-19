@@ -2,7 +2,7 @@
 
 #pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
 
-static void charon_replace(UIView<UITextInput> *input, UITextRange *range, NSAttributedString *text, NSAttributedString *(^get)(void), void (^set)(NSAttributedString *))
+static void revenant_replace(UIView<UITextInput> *input, UITextRange *range, NSAttributedString *text, NSAttributedString *(^get)(void), void (^set)(NSAttributedString *))
 {
     NSInteger start = [input offsetFromPosition:input.beginningOfDocument toPosition:range.start];
     NSInteger end = [input offsetFromPosition:input.beginningOfDocument toPosition:range.end];
@@ -19,20 +19,20 @@ static void charon_replace(UIView<UITextInput> *input, UITextRange *range, NSAtt
         input.selectedTextRange = [input textRangeFromPosition:caret toPosition:caret];
 }
 
-@implementation UITextView (CharonAttributedReplace)
+@implementation UITextView (RevenantAttributedReplace)
 
 - (void)replaceRange:(UITextRange *)range withAttributedText:(NSAttributedString *)attributedText
 {
-    charon_replace(self, range, attributedText, ^NSAttributedString *{ return self.attributedText; }, ^(NSAttributedString *changed) { self.attributedText = changed; });
+    revenant_replace(self, range, attributedText, ^NSAttributedString *{ return self.attributedText; }, ^(NSAttributedString *changed) { self.attributedText = changed; });
 }
 
 @end
 
-@implementation UITextField (CharonAttributedReplace)
+@implementation UITextField (RevenantAttributedReplace)
 
 - (void)replaceRange:(UITextRange *)range withAttributedText:(NSAttributedString *)attributedText
 {
-    charon_replace(self, range, attributedText, ^NSAttributedString *{ return self.attributedText; }, ^(NSAttributedString *changed) { self.attributedText = changed; });
+    revenant_replace(self, range, attributedText, ^NSAttributedString *{ return self.attributedText; }, ^(NSAttributedString *changed) { self.attributedText = changed; });
 }
 
 @end

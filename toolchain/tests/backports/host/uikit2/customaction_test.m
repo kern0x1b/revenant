@@ -1,26 +1,26 @@
 #import "uirest.h"
 
-@protocol charonPerformable
-- (BOOL)charonPerform;
+@protocol revenantPerformable
+- (BOOL)revenantPerform;
 @end
 
-@interface charonCustomActionTarget : NSObject
+@interface revenantCustomActionTarget : NSObject
 @property (nonatomic) NSInteger performed;
-- (void)charonAction;
-- (void)charonRecord:(id)action;
+- (void)revenantAction;
+- (void)revenantRecord:(id)action;
 @end
 
-@implementation charonCustomActionTarget
-- (void)charonAction
+@implementation revenantCustomActionTarget
+- (void)revenantAction
 {
 }
-- (void)charonRecord:(id)action
+- (void)revenantRecord:(id)action
 {
     self.performed++;
 }
 @end
 
-static NSArray *action_lines(Class cls, charonCustomActionTarget *target, UIImage *image)
+static NSArray *action_lines(Class cls, revenantCustomActionTarget *target, UIImage *image)
 {
     NSMutableArray *lines = [NSMutableArray array];
     __block NSInteger ran = 0;
@@ -43,7 +43,7 @@ static NSArray *action_lines(Class cls, charonCustomActionTarget *target, UIImag
     [lines addObject:ur_line(@"image kept", ur_yes([withImage image] == image))];
     [lines addObject:ur_line(@"image handler kept", ur_yes([withImage actionHandler] != nil))];
 
-    id withTarget = [[cls alloc] initWithName:@"print" image:image target:target selector:@selector(charonAction)];
+    id withTarget = [[cls alloc] initWithName:@"print" image:image target:target selector:@selector(revenantAction)];
     [lines addObject:ur_line(@"target name", [withTarget name])];
     [lines addObject:ur_line(@"target image", ur_yes([withTarget image] == image))];
     [lines addObject:ur_line(@"target kept", ur_yes([withTarget target] == target))];
@@ -69,12 +69,12 @@ static NSArray *action_lines(Class cls, charonCustomActionTarget *target, UIImag
 int main(void)
 {
     @autoreleasepool {
-        Class ours = NSClassFromString(@"CharonHostUIAccessibilityCustomAction");
-        charon_check(ours != Nil, "the port's custom action is linked under its host name", @"missing");
+        Class ours = NSClassFromString(@"RevenantHostUIAccessibilityCustomAction");
+        revenant_check(ours != Nil, "the port's custom action is linked under its host name", @"missing");
         UIGraphicsBeginImageContextWithOptions(CGSizeMake(2, 2), NO, 1);
         UIImage *image = UIGraphicsGetImageFromCurrentImageContext();
         UIGraphicsEndImageContext();
-        charonCustomActionTarget *target = [[charonCustomActionTarget alloc] init];
+        revenantCustomActionTarget *target = [[revenantCustomActionTarget alloc] init];
         ur_agree(@"custom action", action_lines(ours, target, image), action_lines([UIAccessibilityCustomAction class], target, image));
 
         __block NSInteger handled = 0;
@@ -84,19 +84,19 @@ int main(void)
             handledWith = action;
             return YES;
         }];
-        BOOL answered = [(id<charonPerformable>)byHandler charonPerform];
-        charon_check(answered && handled == 1 && handledWith == byHandler, "performing a handler action calls its handler once, with the action",
+        BOOL answered = [(id<revenantPerformable>)byHandler revenantPerform];
+        revenant_check(answered && handled == 1 && handledWith == byHandler, "performing a handler action calls its handler once, with the action",
                      [NSString stringWithFormat:@"answer %d handled %ld", answered, (long)handled]);
 
-        charonCustomActionTarget *recorder = [[charonCustomActionTarget alloc] init];
-        id byTarget = [[ours alloc] initWithName:@"record" target:recorder selector:@selector(charonRecord:)];
-        BOOL sent = [(id<charonPerformable>)byTarget charonPerform];
-        charon_check(sent && recorder.performed == 1, "performing a target action sends its selector once to the target",
+        revenantCustomActionTarget *recorder = [[revenantCustomActionTarget alloc] init];
+        id byTarget = [[ours alloc] initWithName:@"record" target:recorder selector:@selector(revenantRecord:)];
+        BOOL sent = [(id<revenantPerformable>)byTarget revenantPerform];
+        revenant_check(sent && recorder.performed == 1, "performing a target action sends its selector once to the target",
                      [NSString stringWithFormat:@"sent %d performed %ld", sent, (long)recorder.performed]);
 
         id nothing = [[ours alloc] initWithName:@"nothing" target:nil selector:NULL];
-        charon_check(![(id<charonPerformable>)nothing charonPerform],"an action with neither a handler nor a target performs nothing", @"performed");
-        printf("checks=%d failures=%d\n", charon_checks, charon_failures);
-        return charon_failures ? 1 : 0;
+        revenant_check(![(id<revenantPerformable>)nothing revenantPerform],"an action with neither a handler nor a target performs nothing", @"performed");
+        printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
+        return revenant_failures ? 1 : 0;
     }
 }

@@ -1,10 +1,10 @@
 #import <UIKit/UIKit.h>
 #import <objc/runtime.h>
 #import "check.h"
-#import "CharonCustomTransition.h"
+#import "RevenantCustomTransition.h"
 
-@implementation UISheetPresentationController (CharonHostStandIn)
-- (id<UIViewControllerAnimatedTransitioning>)charon_transitionAnimator
+@implementation UISheetPresentationController (RevenantHostStandIn)
+- (id<UIViewControllerAnimatedTransitioning>)revenant_transitionAnimator
 {
     return nil;
 }
@@ -12,28 +12,28 @@
 
 static int asked;
 
-@implementation UIViewController (CharonHostCount)
-- (UISheetPresentationController *)charonHost_sheetPresentationController
+@implementation UIViewController (RevenantHostCount)
+- (UISheetPresentationController *)revenantHost_sheetPresentationController
 {
     asked++;
-    UISheetPresentationController *sheet = [self charonHost_sheetPresentationController];
-    charon_set_presentation_controller(self, sheet);
+    UISheetPresentationController *sheet = [self revenantHost_sheetPresentationController];
+    revenant_set_presentation_controller(self, sheet);
     return sheet;
 }
 @end
 
 void host_attach_prefixed(const char *prefix);
 
-@interface UIViewController (CharonHostSheetHold)
-- (void)charonHost_charon_sheetDidDismiss:(UIPresentationController *)sheet;
+@interface UIViewController (RevenantHostSheetHold)
+- (void)revenantHost_revenant_sheetDidDismiss:(UIPresentationController *)sheet;
 @end
 
-@implementation UISheetPresentationController (CharonHostEnd)
-- (void)charonHost_dismissalTransitionDidEnd:(BOOL)completed
+@implementation UISheetPresentationController (RevenantHostEnd)
+- (void)revenantHost_dismissalTransitionDidEnd:(BOOL)completed
 {
-    [self charonHost_dismissalTransitionDidEnd:completed];
+    [self revenantHost_dismissalTransitionDidEnd:completed];
     if (completed)
-        [self.presentedViewController charonHost_charon_sheetDidDismiss:self];
+        [self.presentedViewController revenantHost_revenant_sheetDidDismiss:self];
 }
 @end
 
@@ -77,9 +77,9 @@ static void step(void (^body)(void))
 static void advance(void)
 {
     if (!steps.count) {
-        printf("checks=%d failures=%d\n", charon_checks, charon_failures);
+        printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
         fflush(stdout);
-        exit(charon_failures ? 1 : 0);
+        exit(revenant_failures ? 1 : 0);
     }
     void (^body)(void) = steps.firstObject;
     [steps removeObjectAtIndex:0];
@@ -104,13 +104,13 @@ static UIViewController *presenter(UIViewController *root, UIUserInterfaceSizeCl
 
 static void run(UIViewController *root)
 {
-    host_attach_prefixed("charonHost_");
+    host_attach_prefixed("revenantHost_");
     Method original = class_getInstanceMethod([UIViewController class], @selector(sheetPresentationController));
-    method_exchangeImplementations(original, class_getInstanceMethod([UIViewController class], @selector(charonHost_sheetPresentationController)));
+    method_exchangeImplementations(original, class_getInstanceMethod([UIViewController class], @selector(revenantHost_sheetPresentationController)));
 
-    method_exchangeImplementations(class_getInstanceMethod([UISheetPresentationController class], @selector(dismissalTransitionDidEnd:)), class_getInstanceMethod([UISheetPresentationController class], @selector(charonHost_dismissalTransitionDidEnd:)));
+    method_exchangeImplementations(class_getInstanceMethod([UISheetPresentationController class], @selector(dismissalTransitionDidEnd:)), class_getInstanceMethod([UISheetPresentationController class], @selector(revenantHost_dismissalTransitionDidEnd:)));
 
-    CHECK([UIPresentationController instancesRespondToSelector:@selector(charon_setContainerView:)] == NO, "host.presents");
+    CHECK([UIPresentationController instancesRespondToSelector:@selector(revenant_setContainerView:)] == NO, "host.presents");
 
     UIViewController *compact = presenter(root, UIUserInterfaceSizeClassCompact);
     UIViewController *regular = presenter(root, UIUserInterfaceSizeClassRegular);
@@ -127,7 +127,7 @@ static void run(UIViewController *root)
         [compact presentViewController:controller animated:YES completion:nil];
     });
     step(^{
-        UIPresentationController *sheet = charon_presentation_controller_of(controller);
+        UIPresentationController *sheet = revenant_presentation_controller_of(controller);
         first = sheet;
         sheetSeen = sheet;
         CHECK(asked == 1, "compact.asked.once");
@@ -135,7 +135,7 @@ static void run(UIViewController *root)
         CHECK(controller.presentingViewController != nil, "compact.presented");
         CHECK(controller.modalPresentationStyle == UIModalPresentationPageSheet, "compact.style.back");
         CHECK(controller.presentationController == sheet, "compact.release.uses.sheet");
-        CHECK(controller.transitioningDelegate != caller && [NSStringFromClass([controller.transitioningDelegate class]) isEqualToString:@"CharonSheetHandover"], "compact.delegate.handover");
+        CHECK(controller.transitioningDelegate != caller && [NSStringFromClass([controller.transitioningDelegate class]) isEqualToString:@"RevenantSheetHandover"], "compact.delegate.handover");
         CHECK(caller.presented >= 1, "compact.caller.asked.first");
         CHECK([controller.presentationController isKindOfClass:[UISheetPresentationController class]] && [((UISheetPresentationController *)controller.presentationController).detents.firstObject.identifier isEqual:UISheetPresentationControllerDetentIdentifierMedium], "compact.detents.of.caller");
         [compact dismissViewControllerAnimated:YES completion:nil];
@@ -144,7 +144,7 @@ static void run(UIViewController *root)
         CHECK(controller.presentingViewController == nil, "compact.dismissed");
         CHECK(controller.transitioningDelegate == caller, "compact.delegate.back");
         CHECK(caller.dismissed >= 1, "compact.caller.asked.dismiss");
-        CHECK(charon_presentation_controller_of(controller) == nil, "compact.sheet.dropped");
+        CHECK(revenant_presentation_controller_of(controller) == nil, "compact.sheet.dropped");
         CHECK([controller.sheetPresentationController.detents.firstObject.identifier isEqual:UISheetPresentationControllerDetentIdentifierLarge], "host.sheet.detents.not.kept");
         first = nil;
         asked = 0;
@@ -152,7 +152,7 @@ static void run(UIViewController *root)
     });
     step(^{
         CHECK(sheetSeen == nil, "compact.first.sheet.freed");
-        UIPresentationController *again = charon_presentation_controller_of(controller);
+        UIPresentationController *again = revenant_presentation_controller_of(controller);
         CHECK(asked == 1 && again != nil, "compact.second.sheet.is.new");
         [compact dismissViewControllerAnimated:NO completion:nil];
     });
@@ -164,7 +164,7 @@ static void run(UIViewController *root)
     step(^{
         CHECK(controller.presentingViewController != nil, "regular.presented");
         CHECK(asked == 0, "regular.asked.none");
-        CHECK(charon_presentation_controller_of(controller) == nil, "regular.none.held");
+        CHECK(revenant_presentation_controller_of(controller) == nil, "regular.none.held");
         CHECK(controller.transitioningDelegate == caller, "regular.delegate.untouched");
         [regular dismissViewControllerAnimated:NO completion:nil];
     });
@@ -175,7 +175,7 @@ static void run(UIViewController *root)
         [compact presentViewController:full animated:NO completion:nil];
     });
     step(^{
-        CHECK(asked == 0 && charon_presentation_controller_of(full) == nil, "fullscreen.asked.none");
+        CHECK(asked == 0 && revenant_presentation_controller_of(full) == nil, "fullscreen.asked.none");
         [compact dismissViewControllerAnimated:NO completion:nil];
     });
 
@@ -194,15 +194,15 @@ static void run(UIViewController *root)
         [ancestor presentViewController:chained animated:NO completion:nil];
     });
     step(^{
-        UIPresentationController *sheet = charon_presentation_controller_of(chained);
+        UIPresentationController *sheet = revenant_presentation_controller_of(chained);
         chainSheet = sheet;
         CHECK(chained.presentingViewController == ancestor && asked == 1, "chain.presented");
-        CHECK([sheet isKindOfClass:[UISheetPresentationController class]] && [NSStringFromClass([chained.transitioningDelegate class]) isEqualToString:@"CharonSheetHandover"], "chain.has.sheet.while.presented");
+        CHECK([sheet isKindOfClass:[UISheetPresentationController class]] && [NSStringFromClass([chained.transitioningDelegate class]) isEqualToString:@"RevenantSheetHandover"], "chain.has.sheet.while.presented");
         [compact dismissViewControllerAnimated:NO completion:nil];
     });
     step(^{
         CHECK(chained.presentingViewController == nil && ancestor.presentingViewController == nil, "chain.dismissed");
-        CHECK(charon_presentation_controller_of(chained) == nil, "chain.sheet.dropped");
+        CHECK(revenant_presentation_controller_of(chained) == nil, "chain.sheet.dropped");
         CHECK(chainSheet == nil, "chain.sheet.freed");
         CHECK(chained.transitioningDelegate == chainCaller, "chain.delegate.back");
     });

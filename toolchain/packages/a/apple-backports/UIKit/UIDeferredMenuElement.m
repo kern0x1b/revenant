@@ -1,9 +1,9 @@
-#import "CharonMenus.h"
+#import "RevenantMenus.h"
 
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
 
 @interface UIDeferredMenuElement ()
-- (void)charon_finishWithElements:(NSArray *)elements;
+- (void)revenant_finishWithElements:(NSArray *)elements;
 @end
 
 @implementation UIDeferredMenuElement {
@@ -23,7 +23,7 @@
 
 + (instancetype)elementWithProvider:(void (^)(void (^completion)(NSArray<UIMenuElement *> *elements)))elementProvider
 {
-    UIDeferredMenuElement *element = [[self alloc] initCharonWithTitle:[[NSBundle bundleForClass:[UIApplication class]] localizedStringForKey:@"Loading…"
+    UIDeferredMenuElement *element = [[self alloc] initRevenantWithTitle:[[NSBundle bundleForClass:[UIApplication class]] localizedStringForKey:@"Loading…"
                                                                                                                            value:@"Loading…"
                                                                                                                            table:nil]
                                                                   image:nil];
@@ -58,7 +58,7 @@
     [coder encodeBool:NO forKey:@"fulfilled"];
 }
 
-- (void)charon_fulfillWithCompletion:(void (^)(NSArray<UIMenuElement *> *))completion
+- (void)revenant_fulfillWithCompletion:(void (^)(NSArray<UIMenuElement *> *))completion
 {
     if (!_cached) {
         void (^provider)(void (^)(NSArray<UIMenuElement *> *)) = _provider;
@@ -98,15 +98,15 @@
     if (!ask)
         return;
     if (!provider) {
-        [self charon_finishWithElements:@[]];
+        [self revenant_finishWithElements:@[]];
         return;
     }
     provider(^(NSArray<UIMenuElement *> *elements) {
-        [self charon_finishWithElements:elements ?: @[]];
+        [self revenant_finishWithElements:elements ?: @[]];
     });
 }
 
-- (void)charon_finishWithElements:(NSArray *)elements
+- (void)revenant_finishWithElements:(NSArray *)elements
 {
     NSArray *waiting;
     @synchronized (self) {

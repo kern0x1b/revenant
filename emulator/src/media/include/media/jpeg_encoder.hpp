@@ -12,7 +12,7 @@
 #include <span>
 #include <vector>
 
-namespace shade {
+namespace emulator {
 
 [[nodiscard]] std::optional<std::vector<std::byte>> encode_jpeg_argb(
     std::span<const std::uint32_t> pixels, std::uint32_t width,

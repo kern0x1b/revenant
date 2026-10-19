@@ -8,16 +8,16 @@ here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 sources=${UIKIT2_SOURCES:-$here/../../../../packages/a/apple-backports/UIKit}
 harness=${UIKIT2_HARNESS:-$here/../../device}
-build=${UIKIT2_BUILD:-$(runs_folder charon-uikit2-host)}
+build=${UIKIT2_BUILD:-$(runs_folder revenant-uikit2-host)}
 sdk=$(xcrun --show-sdk-path)
 target="-target arm64-apple-ios15.0-macabi -isysroot $sdk -iframework $sdk/System/iOSSupport/System/Library/Frameworks"
 frameworks="-framework LocalAuthentication -framework MobileCoreServices -framework SafariServices -framework UIKit -framework QuartzCore -framework CoreGraphics -framework Foundation"
-flags="-DCHARON_HOST_DIFFERENTIAL=1 -fobjc-arc -fvisibility=hidden -Wall -Wno-deprecated-declarations -Wno-unguarded-availability-new -Wno-objc-protocol-method-implementation -Wno-incomplete-implementation -Wno-objc-property-implementation"
+flags="-DREVENANT_HOST_DIFFERENTIAL=1 -fobjc-arc -fvisibility=hidden -Wall -Wno-deprecated-declarations -Wno-unguarded-availability-new -Wno-objc-protocol-method-implementation -Wno-incomplete-implementation -Wno-objc-property-implementation"
 rm -rf "$build"
 mkdir -p "$build/plain"
-export CHARON_DATA_ASSETS="$here/../../device/data-assets/Assets.car"
-if [ -n "${CHARON_DATA_ASSET_CATALOG:-}" ] && [ -f "$CHARON_DATA_ASSET_CATALOG" ]; then
-    assetutil --info "$CHARON_DATA_ASSET_CATALOG" > "$build/charon-dataassets.json"
+export REVENANT_DATA_ASSETS="$here/../../device/data-assets/Assets.car"
+if [ -n "${REVENANT_DATA_ASSET_CATALOG:-}" ] && [ -f "$REVENANT_DATA_ASSET_CATALOG" ]; then
+    assetutil --info "$REVENANT_DATA_ASSET_CATALOG" > "$build/revenant-dataassets.json"
 fi
 
 # UIKIT2_ONLY narrows the run to the named groups, space-separated.  Empty - the default - runs all of
@@ -34,7 +34,7 @@ defines_what_it_calls() {
     # nothing in the gate sees; check-private-selectors.lua is the check, and it runs over what this group just
     # built. The source goes with it so the check can tell a whole selector from a piece of one: a test that
     # spells the name it sends at run time holds that name's pieces as literals, and
-    # [@"charonHostSet" stringByAppendingString:...] is not a selector anything has to define.
+    # [@"revenantHostSet" stringByAppendingString:...] is not a selector anything has to define.
     binary=$1
     source=$2
     shift 2
@@ -44,17 +44,17 @@ defines_what_it_calls() {
 }
 
 carried() {
-    # $1: every object of the group. The selectors the port's Charon categories carry, in the whole group and
+    # $1: every object of the group. The selectors the port's Revenant categories carry, in the whole group and
     # not per file: a file that sends one of them without defining it needs the prefix as much as the file
     # that defines it, and a send left unprefixed is an unrecognized selector at run time.
-    nm $1 | sed -n 's/.*[-+]\[[A-Za-z_]*(\(Charon[A-Za-z0-9_]*\)) \([A-Za-z_][A-Za-z0-9_:]*\)\]$/\2/p' | sort -u > "$build/$name.carried"
+    nm $1 | sed -n 's/.*[-+]\[[A-Za-z_]*(\(Revenant[A-Za-z0-9_]*\)) \([A-Za-z_][A-Za-z0-9_:]*\)\]$/\2/p' | sort -u > "$build/$name.carried"
 }
 
 prefixed_build() {
     # $1: group name, $2: sources. A group whose port sources add categories to classes the system owns cannot
     # use the plain path: renames() renames whole identifiers, and a selector is not one (setObject:forTrait: is
     # three), so the port's method would take the name the system's already has and the two sides would be one.
-    # Each file is compiled once plain, to learn the classes, the C symbols and the selectors its Charon
+    # Each file is compiled once plain, to learn the classes, the C symbols and the selectors its Revenant
     # categories carry, then rewritten by prefix_selectors.lua, which prefixes those selectors whole, then
     # compiled again with the class renames and the declarations of the prefixed selectors. Every group of this
     # file that adds no category to a system class stays on the plain path.
@@ -93,7 +93,7 @@ prefixed_build() {
             # SDK names them, so `-ast-dump-filter=haron` drops their bodies whole, and a send of a carried
             # selector from inside one was left unrenamed. prefix_selectors.lua's group_renames() reads them back
             # and maps every name it meets to the spelling the source uses, so nothing else changes.
-            if ! xmake l "$prefixer" "$sources/$file" "$source" charonHost \
+            if ! xmake l "$prefixer" "$sources/$file" "$source" revenantHost \
                 --declarations="$build/$name.declarations.h" \
                 --sources="$(for f in $files; do printf '%s,' "$sources/$f"; done | sed 's/,$//')" \
                 $(cat "$build/$name.flags") $flags -I"$sources" \
@@ -257,11 +257,11 @@ windowed_expected() {
     cp "$here/windowed.plist" "$bundle/Contents/Info.plist"
     codesign -s - --force "$bundle" > /dev/null 2>&1
     expected="$build/$name.expected"
-    if CHARON_EXPECTED="$expected" "$bundle/Contents/MacOS/app" > "$build/$name-system.log" 2>&1; then result=0; else result=$?; fi
+    if REVENANT_EXPECTED="$expected" "$bundle/Contents/MacOS/app" > "$build/$name-system.log" 2>&1; then result=0; else result=$?; fi
     echo "$name-system: exit=$result log=$build/$name-system.log"
     [ "$result" = 0 ] || status=1
-    CHARON_EXPECTED="$expected"
-    export CHARON_EXPECTED
+    REVENANT_EXPECTED="$expected"
+    export REVENANT_EXPECTED
     windowed "$name" "$files" "$test"
 }
 
@@ -286,18 +286,18 @@ prefixed_windowed_expected() {
     cp "$here/windowed.plist" "$bundle/Contents/Info.plist"
     codesign -s - --force "$bundle" > /dev/null 2>&1
     expected="$build/$name.expected"
-    if CHARON_EXPECTED="$expected" "$bundle/Contents/MacOS/app" > "$build/$name-system.log" 2>&1; then result=0; else result=$?; fi
+    if REVENANT_EXPECTED="$expected" "$bundle/Contents/MacOS/app" > "$build/$name-system.log" 2>&1; then result=0; else result=$?; fi
     echo "$name-system: exit=$result log=$build/$name-system.log"
     [ "$result" = 0 ] || status=1
-    CHARON_EXPECTED="$expected"
-    export CHARON_EXPECTED
+    REVENANT_EXPECTED="$expected"
+    export REVENANT_EXPECTED
     prefixed_windowed "$name" "$files" "$test"
 }
 
 renamed_keep() {
     # $1: object files, $2: the selectors that are renamed; every other selector the objects define keeps its name
     printf '%s\n' $2 > "$build/rename.list"
-    nm $1 | sed -n 's/.*[-+]\[[A-Za-z_]*(*[A-Za-z]*)* \([A-Za-z_][A-Za-z0-9_]*\).*\]$/\1/p' | grep -v '^charon_' | sort -u | grep -v -x -f "$build/rename.list" | tr '\n' ' '
+    nm $1 | sed -n 's/.*[-+]\[[A-Za-z_]*(*[A-Za-z]*)* \([A-Za-z_][A-Za-z0-9_]*\).*\]$/\1/p' | grep -v '^revenant_' | sort -u | grep -v -x -f "$build/rename.list" | tr '\n' ' '
 }
 
 windowed_renamed() {
@@ -369,16 +369,16 @@ windowed_renamed_expected() {
     cp "$here/windowed.plist" "$bundle/Contents/Info.plist"
     codesign -s - --force "$bundle" > /dev/null 2>&1
     expected="$build/$name.expected"
-    if CHARON_EXPECTED="$expected" "$bundle/Contents/MacOS/app" > "$build/$name-system.log" 2>&1; then result=0; else result=$?; fi
+    if REVENANT_EXPECTED="$expected" "$bundle/Contents/MacOS/app" > "$build/$name-system.log" 2>&1; then result=0; else result=$?; fi
     echo "$name-system: exit=$result log=$build/$name-system.log"
     [ "$result" = 0 ] || status=1
-    CHARON_EXPECTED="$expected"
-    export CHARON_EXPECTED
+    REVENANT_EXPECTED="$expected"
+    export REVENANT_EXPECTED
     windowed_renamed "$name" "$files" "$renamed" "$test"
 }
 
 status=0
-prefixed_group traits "UITraitCollection.m CharonTraitObservers.m UITraitCollection+UserInterfaceStyle.m UITraitCollection+Appearance13.m UITraitCollection+Appearance14.m UIImageConfiguration.m UIImageSymbolConfiguration.m UIImageSymbolWeight.m UIImageSymbolGlyphs.m UIImage+Baseline13.m UIImage+iOS13.m UIImage+Symbols.m UIImageView+SymbolConfiguration.m UITraitCollection+ForceTouch.m UITraitCollection+TraitStore.m" traits_test.m
+prefixed_group traits "UITraitCollection.m RevenantTraitObservers.m UITraitCollection+UserInterfaceStyle.m UITraitCollection+Appearance13.m UITraitCollection+Appearance14.m UIImageConfiguration.m UIImageSymbolConfiguration.m UIImageSymbolWeight.m UIImageSymbolGlyphs.m UIImage+Baseline13.m UIImage+iOS13.m UIImage+Symbols.m UIImageView+SymbolConfiguration.m UITraitCollection+ForceTouch.m UITraitCollection+TraitStore.m" traits_test.m
 
 group notifications "UIUserNotificationSettings.m" notifications_test.m
 
@@ -398,13 +398,13 @@ prefixed_group attributestransform "UICollectionViewLayoutAttributes+Transform7.
 
 group rowaction "UITableViewRowAction.m" rowaction_test.m
 
-group visualeffect "UIVisualEffect.m UIVisualEffectView.m CharonBlur.m CharonBackdrop.m" visualeffect_test.m
+group visualeffect "UIVisualEffect.m UIVisualEffectView.m RevenantBlur.m RevenantBackdrop.m" visualeffect_test.m
 
 group useractivity "../Foundation/NSUserActivity.m" useractivity_test.m
 
 group localauth "../LocalAuthentication/LAContext.m ../LocalAuthentication/LAErrorDomain.m ../LocalAuthentication/LATouchIDAuthenticationMaximumAllowableReuseDuration.m" localauth_test.m
 
-group documentpicker "UIDocumentPickerViewController.m CharonDocumentBrowser.m" documentpicker_test.m
+group documentpicker "UIDocumentPickerViewController.m RevenantDocumentBrowser.m" documentpicker_test.m
 
 group datecomponentsformatter "../Foundation/NSDateComponentsFormatter.m" datecomponentsformatter_test.m
 
@@ -424,10 +424,10 @@ prefixed_group itemproviderbuiltins "../Foundation/NSString+ItemProvider.m ../Fo
 
 group nsdataasset "NSDataAsset.m" nsdataasset_test.m
 
-group safariviewcontroller "../SafariServices/CharonSafariPage.m ../SafariServices/SFSafariViewController.m ../SafariServices/SFSafariViewControllerConfiguration.m ../SafariServices/SFSafariViewControllerActivityButton.m ../SafariServices/SFSafariViewControllerPrewarmingToken.m ../SafariServices/SFAuthenticationSession.m ../SafariServices/SFAuthenticationErrorDomain.m" safariviewcontroller_test.m
+group safariviewcontroller "../SafariServices/RevenantSafariPage.m ../SafariServices/SFSafariViewController.m ../SafariServices/SFSafariViewControllerConfiguration.m ../SafariServices/SFSafariViewControllerActivityButton.m ../SafariServices/SFSafariViewControllerPrewarmingToken.m ../SafariServices/SFAuthenticationSession.m ../SafariServices/SFAuthenticationErrorDomain.m" safariviewcontroller_test.m
 
 export APPEARANCES_EXPECTATIONS="$harness/appearances-expectations.h"
-prefixed_group appearances "CharonBarAppearance.m CharonBarAppearanceApply.m CharonBarAppearanceTracking.m UIBarAppearance.m UINavigationBarAppearance.m UIToolbarAppearance.m UITabBarAppearance.m UIBarButtonItemAppearance.m UITabBarItemAppearance.m UINavigationBarAppearance+Prominent.m UINavigationBar+Appearances.m UIToolbar+Appearances.m UITabBar+Appearances.m UINavigationItem+Appearances.m UITabBarItem+Appearances.m UIBar+ScrollEdgeAppearances.m" appearances_test.m
+prefixed_group appearances "RevenantBarAppearance.m RevenantBarAppearanceApply.m RevenantBarAppearanceTracking.m UIBarAppearance.m UINavigationBarAppearance.m UIToolbarAppearance.m UITabBarAppearance.m UIBarButtonItemAppearance.m UITabBarItemAppearance.m UINavigationBarAppearance+Prominent.m UINavigationBar+Appearances.m UIToolbar+Appearances.m UITabBar+Appearances.m UINavigationItem+Appearances.m UITabBarItem+Appearances.m UIBar+ScrollEdgeAppearances.m" appearances_test.m
 
 prefixed_group orderedcollections "../Foundation/NSOrderedCollectionChange.m ../Foundation/NSOrderedCollectionDifference.m ../Foundation/NSArray+Difference.m ../Foundation/NSOrderedSet+Difference.m" orderedcollections_test.m
 
@@ -435,9 +435,9 @@ group diffable "NSDiffableDataSourceSnapshot.m" diffable_test.m
 
 group diffablesection "NSDiffableDataSourceSectionSnapshot.m" diffablesection_test.m
 
-windowed diffabledatasource "NSDiffableDataSourceSnapshot.m CharonDiffable.m UICollectionViewDiffableDataSource.m UITableViewDiffableDataSource.m" diffabledatasource_test.m
+windowed diffabledatasource "NSDiffableDataSourceSnapshot.m RevenantDiffable.m UICollectionViewDiffableDataSource.m UITableViewDiffableDataSource.m" diffabledatasource_test.m
 
-windowed diffablesectiondatasource "NSDiffableDataSourceSnapshot.m NSDiffableDataSourceSectionSnapshot.m CharonDiffable.m UICollectionViewDiffableDataSource.m UITableViewDiffableDataSource.m UICollectionViewDiffableDataSource+iOS14.m UICollectionViewDiffableDataSourceHandlers.m" diffablesectiondatasource_test.m
+windowed diffablesectiondatasource "NSDiffableDataSourceSnapshot.m NSDiffableDataSourceSectionSnapshot.m RevenantDiffable.m UICollectionViewDiffableDataSource.m UITableViewDiffableDataSource.m UICollectionViewDiffableDataSource+iOS14.m UICollectionViewDiffableDataSourceHandlers.m" diffablesectiondatasource_test.m
 
 prefixed_windowed snapshots "UIView+Snapshots.m" snapshots_test.m
 
@@ -449,7 +449,7 @@ windowed menus "UIMenuElement.m UIAction.m UIAction+iOS14.m UIMenu.m UIMenu+iOS1
 
 # UIHoverGestureRecognizer+Hover16.m is here and was not, and the check below is why: zOffset of 16.1 and
 # altitudeAngle of 16.4 are a CATEGORY on UIHoverGestureRecognizer, so they reach this group only from that
-# file. Without it the class this group renames is CharonHostUIHoverGestureRecognizer with three methods,
+# file. Without it the class this group renames is RevenantHostUIHoverGestureRecognizer with three methods,
 # the check that reads them fails, and the same four members pass in the hover16 group that does carry the
 # file - one harness list short of a file, not a port defect.
 windowed pointer "UIPointerRegion.m UIPointerStyle.m UIPointerInteraction.m UIHoverGestureRecognizer.m UIHoverGestureRecognizer+Hover16.m UIKey.m UIKeyInputKeys.m" pointer_test.m
@@ -483,17 +483,17 @@ prefixed_windowed inert "UILargeContentViewer.m UIScreenshotService.m UITextForm
 # rather than renaming half of it ("a carried selector the rewrite cannot rename:
 # traitCollectionDidChange:, which the host's UITraitEnvironment declares"), so the prefixed path
 # stops the group at the rewrite. On the plain path the run aborts instead, on
-# -[CharonHostUITraitCollection _hasSpecifiedEssentialTraits]: unrecognized selector. Both are that
+# -[RevenantHostUITraitCollection _hasSpecifiedEssentialTraits]: unrecognized selector. Both are that
 # one send in that file, which is main's and not this branch's; the group goes on prefixed_windowed
 # when the send can be placed.
-prefixed_windowed traits13 "UITraitCollection.m CharonTraitObservers.m UITraitCollection+UserInterfaceStyle.m UITraitCollection+Appearance13.m UITraitCollection+Appearance14.m UIScreen+TraitEnvironment.m UIImageConfiguration.m UIImageSymbolConfiguration.m UIImageSymbolWeight.m UIImageSymbolGlyphs.m UIImage+Baseline13.m UIImage+iOS13.m UIImage+Symbols.m UIImageView+SymbolConfiguration.m UITraitCollection+ForceTouch.m UITraitCollection+TraitStore.m" traits13_test.m
+prefixed_windowed traits13 "UITraitCollection.m RevenantTraitObservers.m UITraitCollection+UserInterfaceStyle.m UITraitCollection+Appearance13.m UITraitCollection+Appearance14.m UIScreen+TraitEnvironment.m UIImageConfiguration.m UIImageSymbolConfiguration.m UIImageSymbolWeight.m UIImageSymbolGlyphs.m UIImage+Baseline13.m UIImage+iOS13.m UIImage+Symbols.m UIImageView+SymbolConfiguration.m UITraitCollection+ForceTouch.m UITraitCollection+TraitStore.m" traits13_test.m
 
 prefixed_windowed_expected controlactions "UIMenuElement.m UIAction.m UIAction+iOS14.m UIMenu.m UIMenu+iOS14.m UIDeferredMenuElement.m UIMenuIdentifiers.m UIMenuIdentifiers14.m UIMenuSystem.m UIContextMenuConfiguration.m UIContextMenuInteraction.m UIContextMenuInteraction+iOS14.m UIPreviewParameters.m UIPreviewParameters+iOS14.m UIPreviewTarget.m UITargetedPreview.m UICommand.m UIControl+Actions14.m UIControl+Menus14.m UIButton+Actions14.m" controlactions_test.m controlactions_system.m
 
 prefixed_windowed_expected controlmenus "UIMenuElement.m UIAction.m UIAction+iOS14.m UIMenu.m UIMenu+iOS14.m UIDeferredMenuElement.m UIMenuIdentifiers.m UIMenuIdentifiers14.m UIMenuSystem.m UIContextMenuConfiguration.m UIContextMenuInteraction.m UIContextMenuInteraction+iOS14.m UIPreviewParameters.m UIPreviewParameters+iOS14.m UIPreviewTarget.m UITargetedPreview.m UICommand.m UIControl+Actions14.m UIControl+Menus14.m UIButton+Actions14.m UIButton+iOS13.m UIBarButtonItem+Actions14.m UISegmentedControl+Actions14.m" controlmenus_test.m controlmenus_system.m
 
 prefixed_windowed_expected views13 "UIView+iOS13.m UIViewController+iOS13.m UIDatePicker+Style134.m UIPanGestureRecognizer+ScrollTypes134.m UISwitch+Style14.m UIPageControl+Indicators14.m UILabel+LineBreakStrategy14.m UIView+FocusGroup14.m UIScrollView+IndicatorInsets13.m UISegmentedControl+SelectedTint13.m UISplitViewController+Background13.m UITextView+TextScaling13.m UISearchBar+ScopeBar13.m UIScreen+Latency13.m UIAccessibility13.m UIAccessibility14.m UIAccessibilityCustomAction+Handler13.m UIAccessibilityCustomAction+Image14.m NSLayoutManager+Text13.m UIResponder+ItemsConfiguration.m UIVibrancyEffect+Style13.m UIFontSystemDesign.m UIViewController+Appearing13.m UIViewController+Unwind13.m NSAttributedString+Constants13.m NSAttributedString+Tracking14.m UIPasteboard+Detection14.m UINavigationItem+BackDisplayMode14.m UITextInput+AttributedReplace13.m UICommand.m UIMenuElement.m" views13_test.m views13_system.m
-prefixed_windowed_expected darkstyle "UIView+iOS13.m UIViewController+iOS13.m UIViewController+TraitEnvironment.m UIView+TraitEnvironment.m UIScreen+TraitEnvironment.m UITraitCollection.m CharonTraitObservers.m UITraitCollection+UserInterfaceStyle.m UITraitCollection+Appearance13.m UITraitCollection+Appearance14.m UITraitCollection+ForceTouch.m UITraitCollection+TraitStore.m UIImageConfiguration.m UIImageSymbolConfiguration.m UIImageSymbolWeight.m UIImageSymbolGlyphs.m UIImage+Baseline13.m UIImage+iOS13.m UIImage+Symbols.m UIImageView+SymbolConfiguration.m" darkstyle_test.m darkstyle_system.m
+prefixed_windowed_expected darkstyle "UIView+iOS13.m UIViewController+iOS13.m UIViewController+TraitEnvironment.m UIView+TraitEnvironment.m UIScreen+TraitEnvironment.m UITraitCollection.m RevenantTraitObservers.m UITraitCollection+UserInterfaceStyle.m UITraitCollection+Appearance13.m UITraitCollection+Appearance14.m UITraitCollection+ForceTouch.m UITraitCollection+TraitStore.m UIImageConfiguration.m UIImageSymbolConfiguration.m UIImageSymbolWeight.m UIImageSymbolGlyphs.m UIImage+Baseline13.m UIImage+iOS13.m UIImage+Symbols.m UIImageView+SymbolConfiguration.m" darkstyle_test.m darkstyle_system.m
 windowed pagecontrol "UIPageControl+Indicators14.m" pagecontrol_test.m
 prefixed_windowed_expected focus "UICollectionView+SelectionFocus14.m UITableView+SelectionFocus14.m" focus_test.m focus_system.m
 
@@ -501,38 +501,38 @@ prefixed_windowed_expected images13 "UIImage+iOS13.m UIImage+Baseline13.m UIImag
 
 prefixed_windowed_expected colors13 "UIColorDynamic.m" colors13_test.m colors13_system.m
 
-prefixed_windowed listmenus "UIMenuElement.m UIAction.m UIAction+iOS14.m UIMenu.m UIMenu+iOS14.m UIDeferredMenuElement.m UIMenuIdentifiers.m UIMenuIdentifiers14.m UIMenuSystem.m UIContextMenuConfiguration.m UIContextMenuInteraction.m UIContextMenuInteraction+iOS14.m UIPreviewParameters.m UIPreviewParameters+iOS14.m UIPreviewTarget.m UITargetedPreview.m UICommand.m CharonListMenu.m UITableView+ContextMenu14.m UICollectionView+ContextMenu132.m" listmenus_test.m
+prefixed_windowed listmenus "UIMenuElement.m UIAction.m UIAction+iOS14.m UIMenu.m UIMenu+iOS14.m UIDeferredMenuElement.m UIMenuIdentifiers.m UIMenuIdentifiers14.m UIMenuSystem.m UIContextMenuConfiguration.m UIContextMenuInteraction.m UIContextMenuInteraction+iOS14.m UIPreviewParameters.m UIPreviewParameters+iOS14.m UIPreviewTarget.m UITargetedPreview.m UICommand.m RevenantListMenu.m UITableView+ContextMenu14.m UICollectionView+ContextMenu132.m" listmenus_test.m
 
 prefixed_windowed appearing "UIViewController+Appearing13.m" appearing_test.m
 
 windowed textinteraction "UITextInteraction.m" textinteraction_test.m
 
-prefixed_group layoutvalues "NSCollectionLayoutValues.m NSCollectionLayoutItems.m UICollectionViewCompositionalLayout.m CharonOrthogonalScroll.m CharonSelfSizing.m NSCollectionLayoutSection+iOS14.m UICollectionViewCompositionalLayoutConfiguration+iOS14.m" layoutvalues_test.m
+prefixed_group layoutvalues "NSCollectionLayoutValues.m NSCollectionLayoutItems.m UICollectionViewCompositionalLayout.m RevenantOrthogonalScroll.m RevenantSelfSizing.m NSCollectionLayoutSection+iOS14.m UICollectionViewCompositionalLayoutConfiguration+iOS14.m" layoutvalues_test.m
 
-export CHARON_ORTHOGONAL_EXPECTATIONS="$here/../../device/compositional-orthogonal-expectations.h"
-export CHARON_SIZED_EXPECTATIONS="$here/../../device/compositional-sized-expectations.h"
-export CHARON_COMPOSITIONAL_EXPECTATIONS="$here/../../device/compositional-expectations.h"
-prefixed_windowed compositionallayout "NSCollectionLayoutValues.m NSCollectionLayoutItems.m UICollectionViewCompositionalLayout.m CharonOrthogonalScroll.m CharonSelfSizing.m NSCollectionLayoutSection+iOS14.m UICollectionViewCompositionalLayoutConfiguration+iOS14.m CharonLists.m UICollectionViewCompositionalLayout+ListConfiguration.m" compositionallayout_test.m
+export REVENANT_ORTHOGONAL_EXPECTATIONS="$here/../../device/compositional-orthogonal-expectations.h"
+export REVENANT_SIZED_EXPECTATIONS="$here/../../device/compositional-sized-expectations.h"
+export REVENANT_COMPOSITIONAL_EXPECTATIONS="$here/../../device/compositional-expectations.h"
+prefixed_windowed compositionallayout "NSCollectionLayoutValues.m NSCollectionLayoutItems.m UICollectionViewCompositionalLayout.m RevenantOrthogonalScroll.m RevenantSelfSizing.m NSCollectionLayoutSection+iOS14.m UICollectionViewCompositionalLayoutConfiguration+iOS14.m RevenantLists.m UICollectionViewCompositionalLayout+ListConfiguration.m" compositionallayout_test.m
 
-prefixed_windowed orthogonal "NSCollectionLayoutValues.m NSCollectionLayoutItems.m UICollectionViewCompositionalLayout.m CharonOrthogonalScroll.m CharonSelfSizing.m NSCollectionLayoutSection+iOS14.m UICollectionViewCompositionalLayoutConfiguration+iOS14.m CharonLists.m UICollectionViewCompositionalLayout+ListConfiguration.m" orthogonal_test.m
+prefixed_windowed orthogonal "NSCollectionLayoutValues.m NSCollectionLayoutItems.m UICollectionViewCompositionalLayout.m RevenantOrthogonalScroll.m RevenantSelfSizing.m NSCollectionLayoutSection+iOS14.m UICollectionViewCompositionalLayoutConfiguration+iOS14.m RevenantLists.m UICollectionViewCompositionalLayout+ListConfiguration.m" orthogonal_test.m
 
-prefixed_windowed sizedlayout "NSCollectionLayoutValues.m NSCollectionLayoutItems.m UICollectionViewCompositionalLayout.m CharonOrthogonalScroll.m CharonSelfSizing.m NSCollectionLayoutSection+iOS14.m UICollectionViewCompositionalLayoutConfiguration+iOS14.m CharonLists.m UICollectionViewCompositionalLayout+ListConfiguration.m" sizedlayout_test.m
+prefixed_windowed sizedlayout "NSCollectionLayoutValues.m NSCollectionLayoutItems.m UICollectionViewCompositionalLayout.m RevenantOrthogonalScroll.m RevenantSelfSizing.m NSCollectionLayoutSection+iOS14.m UICollectionViewCompositionalLayoutConfiguration+iOS14.m RevenantLists.m UICollectionViewCompositionalLayout+ListConfiguration.m" sizedlayout_test.m
 
-prefixed_group listvalues "CharonLists.m UICellAccessory.m UIViewConfigurationState.m UIListContentProperties.m UIListContentConfiguration.m UIBackgroundConfiguration.m UIListContentView.m" listvalues_test.m
+prefixed_group listvalues "RevenantLists.m UICellAccessory.m UIViewConfigurationState.m UIListContentProperties.m UIListContentConfiguration.m UIBackgroundConfiguration.m UIListContentView.m" listvalues_test.m
 
-export CHARON_LISTS_EXPECTATIONS="$here/../../device/lists-expectations.h"
+export REVENANT_LISTS_EXPECTATIONS="$here/../../device/lists-expectations.h"
 group listseparator "UIListSeparatorConfiguration145.m UIListSeparatorConfiguration+VisualEffect15.m" listseparator_test.m
 
-prefixed_windowed listcell "CharonLists.m CharonConfigurationHost.m UICellAccessory.m UIViewConfigurationState.m UIListContentProperties.m UIListContentConfiguration.m UIBackgroundConfiguration.m UIListContentView.m UICollectionViewCell+Configuration.m UITableViewCell+Configuration.m UITableViewHeaderFooterView+Configuration.m UICollectionViewListCell.m UICollectionView+Editing.m UICollectionViewRegistration.m UICollectionLayoutListConfiguration.m UICollectionViewCompositionalLayout+ListConfiguration.m NSCollectionLayoutValues.m NSCollectionLayoutItems.m UICollectionViewCompositionalLayout.m CharonOrthogonalScroll.m CharonSelfSizing.m NSCollectionLayoutSection+iOS14.m UICollectionViewCompositionalLayoutConfiguration+iOS14.m NSDiffableDataSourceSnapshot.m CharonDiffable.m UICollectionViewDiffableDataSource.m CharonSwipeViews.m UICollectionView+SwipeActions.m UIContextualAction.m UISwipeActionsConfiguration.m" listcell_test.m
+prefixed_windowed listcell "RevenantLists.m RevenantConfigurationHost.m UICellAccessory.m UIViewConfigurationState.m UIListContentProperties.m UIListContentConfiguration.m UIBackgroundConfiguration.m UIListContentView.m UICollectionViewCell+Configuration.m UITableViewCell+Configuration.m UITableViewHeaderFooterView+Configuration.m UICollectionViewListCell.m UICollectionView+Editing.m UICollectionViewRegistration.m UICollectionLayoutListConfiguration.m UICollectionViewCompositionalLayout+ListConfiguration.m NSCollectionLayoutValues.m NSCollectionLayoutItems.m UICollectionViewCompositionalLayout.m RevenantOrthogonalScroll.m RevenantSelfSizing.m NSCollectionLayoutSection+iOS14.m UICollectionViewCompositionalLayoutConfiguration+iOS14.m NSDiffableDataSourceSnapshot.m RevenantDiffable.m UICollectionViewDiffableDataSource.m RevenantSwipeViews.m UICollectionView+SwipeActions.m UIContextualAction.m UISwipeActionsConfiguration.m" listcell_test.m
 
-prefixed_windowed listactions "CharonLists.m CharonConfigurationHost.m UICellAccessory.m UIViewConfigurationState.m UIListContentProperties.m UIListContentConfiguration.m UIBackgroundConfiguration.m UIListContentView.m UICollectionViewCell+Configuration.m UITableViewCell+Configuration.m UITableViewHeaderFooterView+Configuration.m UICollectionViewListCell.m UICollectionView+Editing.m UICollectionViewRegistration.m UICollectionLayoutListConfiguration.m UICollectionViewCompositionalLayout+ListConfiguration.m NSCollectionLayoutValues.m NSCollectionLayoutItems.m UICollectionViewCompositionalLayout.m CharonOrthogonalScroll.m CharonSelfSizing.m NSCollectionLayoutSection+iOS14.m UICollectionViewCompositionalLayoutConfiguration+iOS14.m NSDiffableDataSourceSnapshot.m CharonDiffable.m UICollectionViewDiffableDataSource.m NSDiffableDataSourceSectionSnapshot.m UICollectionViewDiffableDataSource+iOS14.m UICollectionViewDiffableDataSourceHandlers.m NSDiffableDataSourceTransaction.m UICollectionView+InteractiveMovement.m CharonSwipeViews.m UICollectionView+SwipeActions.m UIContextualAction.m UISwipeActionsConfiguration.m" listactions_test.m
+prefixed_windowed listactions "RevenantLists.m RevenantConfigurationHost.m UICellAccessory.m UIViewConfigurationState.m UIListContentProperties.m UIListContentConfiguration.m UIBackgroundConfiguration.m UIListContentView.m UICollectionViewCell+Configuration.m UITableViewCell+Configuration.m UITableViewHeaderFooterView+Configuration.m UICollectionViewListCell.m UICollectionView+Editing.m UICollectionViewRegistration.m UICollectionLayoutListConfiguration.m UICollectionViewCompositionalLayout+ListConfiguration.m NSCollectionLayoutValues.m NSCollectionLayoutItems.m UICollectionViewCompositionalLayout.m RevenantOrthogonalScroll.m RevenantSelfSizing.m NSCollectionLayoutSection+iOS14.m UICollectionViewCompositionalLayoutConfiguration+iOS14.m NSDiffableDataSourceSnapshot.m RevenantDiffable.m UICollectionViewDiffableDataSource.m NSDiffableDataSourceSectionSnapshot.m UICollectionViewDiffableDataSource+iOS14.m UICollectionViewDiffableDataSourceHandlers.m NSDiffableDataSourceTransaction.m UICollectionView+InteractiveMovement.m RevenantSwipeViews.m UICollectionView+SwipeActions.m UIContextualAction.m UISwipeActionsConfiguration.m" listactions_test.m
 
 
 windowed_expected transformers "UIConfigurationColorTransformers14.m" transformers_test.m transformers_system.m
 
 prefixed_group foundation14filehandle "../Foundation/NSFileHandle+Errors13.m" foundation14_filehandle_test.m
 
-prefixed_group foundation14compression "../Foundation/NSData+Compression13.m ../Foundation/CharonLZMA.m" foundation14_compression_test.m
+prefixed_group foundation14compression "../Foundation/NSData+Compression13.m ../Foundation/RevenantLZMA.m" foundation14_compression_test.m
 
 group foundation14listformatter "../Foundation/NSListFormatter.m" foundation14_listformatter_test.m
 
@@ -552,25 +552,25 @@ prefixed_group foundation14directoryenumerator "../Foundation/NSDirectoryEnumera
 
 prefixed_group foundation14cookie "../Foundation/NSHTTPCookie+SameSite13.m" foundation14_cookie_test.m
 
-# CharonNetworkAccess.c is here and was not, and the link was why: it is the file that DEFINES
-# charon_network_cellular and its test seam charon_network_cellular_override, and renames() learns a C symbol
+# RevenantNetworkAccess.c is here and was not, and the link was why: it is the file that DEFINES
+# revenant_network_cellular and its test seam revenant_network_cellular_override, and renames() learns a C symbol
 # to rename from the objects that define it. Listed nowhere, both stayed unprefixed in the two .m files that
 # call them while the test declared the prefixed names, so the group died at link with
-#   Undefined symbols for architecture arm64: "_charon_network_cellular", referenced from
-#   +[CharonHostCharonNetworkGate canInitWithRequest:]
+#   Undefined symbols for architecture arm64: "_revenant_network_cellular", referenced from
+#   +[RevenantHostRevenantNetworkGate canInitWithRequest:]
 # and set -e took the rest of the run with it, which is why nine groups after this line never reported at all.
 # The file is plain C and compiles with this harness's flags unchanged (measured: clang -target
 # arm64-apple-ios15.0-macabi -fobjc-arc on the file alone, no diagnostic).
-prefixed_group foundation14networkaccess "../Foundation/CharonNetworkAccess.c ../Foundation/NSURLRequest+NetworkAccess13.m ../Foundation/NSURLSessionConfiguration+NetworkAccess13.m" foundation14_networkaccess_test.m
+prefixed_group foundation14networkaccess "../Foundation/RevenantNetworkAccess.c ../Foundation/NSURLRequest+NetworkAccess13.m ../Foundation/NSURLSessionConfiguration+NetworkAccess13.m" foundation14_networkaccess_test.m
 
 group foundation14resourcekeys "../Foundation/NSURLResourceKeys14.m" foundation14_resourcekeys_test.m
 
 group foundation14useractivity "../Foundation/NSUserActivity.m ../Foundation/NSUserActivity+TargetContent13.m" foundation14_useractivity_test.m
 
 prefixed_group foundation14urlcache "../Foundation/NSURLCache+DirectoryURL13.m" foundation14_urlcache_test.m
-prefixed_group traits17 "UITraitCollection.m CharonTraitObservers.m UITraitCollection+UserInterfaceStyle.m UITraitCollection+Appearance13.m UITraitCollection+Appearance14.m UITraitCollection+Traits10.m UITraitCollection+ForceTouch.m UITrait17.m UITraitList18.m UITrait26.m UITraitCollection+TraitStore.m UITraitCollection+Traits17.m UITraitOverrides17.m" traits17_test.m
+prefixed_group traits17 "UITraitCollection.m RevenantTraitObservers.m UITraitCollection+UserInterfaceStyle.m UITraitCollection+Appearance13.m UITraitCollection+Appearance14.m UITraitCollection+Traits10.m UITraitCollection+ForceTouch.m UITrait17.m UITraitList18.m UITrait26.m UITraitCollection+TraitStore.m UITraitCollection+Traits17.m UITraitOverrides17.m" traits17_test.m
 group textkit2 "NSTextRange15.m NSTextSelection15.m NSTextElement15.m NSTextElement16.m NSTextSelectionNavigation15.m" textkit2_test.m
-group content15 "NSTextContentManager15.m NSTextContentStorage15.m NSTextListElement16.m NSTextElement15.m NSTextElement16.m CharonTextLocation.m" content15_test.m
+group content15 "NSTextContentManager15.m NSTextContentStorage15.m NSTextListElement16.m NSTextElement15.m NSTextElement16.m RevenantTextLocation.m" content15_test.m
 group buttonconfig "UIButtonConfiguration.m" buttonconfig_test.m
 
 # The red control, IN the harness: a wrong default in the port has to make this comparison go RED and name the
@@ -583,7 +583,7 @@ control() {  # $1: what to plant, $2: the exit status that must come back
     # the status is read through an if, not by running the command and then reading $?: this script runs under
     # `set -e`, and a planted run is SUPPOSED to exit non-zero, so a bare invocation would abort the harness
     # before the control could report that it went red. group() above reads its status the same way.
-    if CHARON_MUTATION="$1" "$build/buttonconfig-test" > "$build/buttonconfig-mutated.log" 2>&1; then
+    if REVENANT_MUTATION="$1" "$build/buttonconfig-test" > "$build/buttonconfig-mutated.log" 2>&1; then
         got=0
     else
         got=$?

@@ -1,4 +1,4 @@
-#import "CharonMPS.h"
+#import "RevenantMPS.h"
 
 @implementation MPSCNNLossDataDescriptor {
     MPSDataLayout _layout;
@@ -13,7 +13,7 @@
 {
     (void)data;
     if (layout > MPSDataLayoutFeatureChannelsxHeightxWidth) {
-        CharonMPSRefuse(@"MPSCNNLossDataDescriptor: layout %lu is not an MPSDataLayout, so no descriptor is made",
+        RevenantMPSRefuse(@"MPSCNNLossDataDescriptor: layout %lu is not an MPSDataLayout, so no descriptor is made",
                         (unsigned long)layout);
         return nil;
     }

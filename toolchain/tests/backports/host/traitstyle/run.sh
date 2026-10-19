@@ -4,12 +4,12 @@ here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 sources=${TRAITSTYLE_SOURCES:-$here/../../../../packages/a/apple-backports/UIKit}
 harness=${TRAITSTYLE_HARNESS:-$here/../../device}
-build=${TRAITSTYLE_BUILD:-$(runs_folder charon-traitstyle-host)}
+build=${TRAITSTYLE_BUILD:-$(runs_folder revenant-traitstyle-host)}
 sdk=$(xcrun --show-sdk-path)
 target="-target arm64-apple-ios15.0-macabi -isysroot $sdk -iframework $sdk/System/iOSSupport/System/Library/Frameworks"
 frameworks="-framework UIKit -framework QuartzCore -framework CoreGraphics -framework Foundation"
 flags="-fobjc-arc -fvisibility=hidden -w"
-files="UITraitCollection.m CharonTraitObservers.m UITraitCollection+Appearance13.m UITraitCollection+ForceTouch.m"
+files="UITraitCollection.m RevenantTraitObservers.m UITraitCollection+Appearance13.m UITraitCollection+ForceTouch.m"
 [ -f "$sources/UITraitCollection+UserInterfaceStyle.m" ] && files="$files UITraitCollection+UserInterfaceStyle.m"
 rm -rf "$build"
 mkdir -p "$build/plain" "$build/ours"
@@ -18,7 +18,7 @@ for file in $files; do
     xcrun clang $target $flags -c "$sources/$file" -o "$build/plain/$file.o"
     objects="$objects $build/plain/$file.o"
 done
-renames=$(nm -m $objects | grep -v '(undefined)' | sed -n 's/.* external _OBJC_CLASS_\$_\(.*\)/-D\1=CharonHost\1/p' | sort -u)
+renames=$(nm -m $objects | grep -v '(undefined)' | sed -n 's/.* external _OBJC_CLASS_\$_\(.*\)/-D\1=RevenantHost\1/p' | sort -u)
 printf '%s\n' $renames > "$build/flags"
 built=""
 for file in $files; do

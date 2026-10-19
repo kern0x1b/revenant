@@ -1,4 +1,4 @@
-#import "CharonWebKit.h"
+#import "RevenantWebKit.h"
 #import <objc/runtime.h>
 
 @implementation WKWebpagePreferences {
@@ -29,17 +29,17 @@
 
 @end
 
-static const char charon_default_preferences_key;
+static const char revenant_default_preferences_key;
 
-@implementation WKWebViewConfiguration (CharonWebpagePreferences13)
+@implementation WKWebViewConfiguration (RevenantWebpagePreferences13)
 
 - (WKWebpagePreferences *)defaultWebpagePreferences
 {
     @synchronized (self) {
-        WKWebpagePreferences *preferences = objc_getAssociatedObject(self, &charon_default_preferences_key);
+        WKWebpagePreferences *preferences = objc_getAssociatedObject(self, &revenant_default_preferences_key);
         if (!preferences) {
             preferences = [[WKWebpagePreferences alloc] init];
-            objc_setAssociatedObject(self, &charon_default_preferences_key, preferences, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+            objc_setAssociatedObject(self, &revenant_default_preferences_key, preferences, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
         }
         return preferences;
     }
@@ -48,7 +48,7 @@ static const char charon_default_preferences_key;
 - (void)setDefaultWebpagePreferences:(WKWebpagePreferences *)defaultWebpagePreferences
 {
     @synchronized (self) {
-        objc_setAssociatedObject(self, &charon_default_preferences_key, defaultWebpagePreferences ?: [[WKWebpagePreferences alloc] init], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+        objc_setAssociatedObject(self, &revenant_default_preferences_key, defaultWebpagePreferences ?: [[WKWebpagePreferences alloc] init], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     }
 }
 

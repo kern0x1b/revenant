@@ -9,7 +9,7 @@
 	<key>CFBundleExecutable</key>
 	<string>imagenamed</string>
 	<key>CFBundleIdentifier</key>
-	<string>local.charon.backports.imagenamed</string>
+	<string>local.revenant.backports.imagenamed</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>

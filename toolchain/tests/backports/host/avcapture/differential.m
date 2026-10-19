@@ -3,10 +3,10 @@
 
 void host_attach_prefixed(const char *prefix);
 
-extern AVCaptureDeviceType const CharonHostAVCaptureDeviceTypeBuiltInMicrophone;
-extern AVCaptureDeviceType const CharonHostAVCaptureDeviceTypeBuiltInWideAngleCamera;
-extern AVCaptureDeviceType const CharonHostAVCaptureDeviceTypeBuiltInTelephotoCamera;
-extern AVCaptureDeviceType const CharonHostAVCaptureDeviceTypeBuiltInDualCamera;
+extern AVCaptureDeviceType const RevenantHostAVCaptureDeviceTypeBuiltInMicrophone;
+extern AVCaptureDeviceType const RevenantHostAVCaptureDeviceTypeBuiltInWideAngleCamera;
+extern AVCaptureDeviceType const RevenantHostAVCaptureDeviceTypeBuiltInTelephotoCamera;
+extern AVCaptureDeviceType const RevenantHostAVCaptureDeviceTypeBuiltInDualCamera;
 
 static int failures, checks;
 
@@ -35,13 +35,13 @@ int main(void)
 {
     @autoreleasepool {
         host_attach_prefixed("");
-        Class ours = NSClassFromString(@"CharonHostAVCaptureDeviceDiscoverySession");
+        Class ours = NSClassFromString(@"RevenantHostAVCaptureDeviceDiscoverySession");
         NSDictionary *system_types = @{@"mic": AVCaptureDeviceTypeBuiltInMicrophone, @"wide": AVCaptureDeviceTypeBuiltInWideAngleCamera,
                                        @"tele": AVCaptureDeviceTypeBuiltInTelephotoCamera};
-        NSDictionary *our_types = @{@"mic": CharonHostAVCaptureDeviceTypeBuiltInMicrophone, @"wide": CharonHostAVCaptureDeviceTypeBuiltInWideAngleCamera,
-                                    @"tele": CharonHostAVCaptureDeviceTypeBuiltInTelephotoCamera};
-        compare(@"the wide angle constant", AVCaptureDeviceTypeBuiltInWideAngleCamera, CharonHostAVCaptureDeviceTypeBuiltInWideAngleCamera);
-        compare(@"the telephoto constant", AVCaptureDeviceTypeBuiltInTelephotoCamera, CharonHostAVCaptureDeviceTypeBuiltInTelephotoCamera);
+        NSDictionary *our_types = @{@"mic": RevenantHostAVCaptureDeviceTypeBuiltInMicrophone, @"wide": RevenantHostAVCaptureDeviceTypeBuiltInWideAngleCamera,
+                                    @"tele": RevenantHostAVCaptureDeviceTypeBuiltInTelephotoCamera};
+        compare(@"the wide angle constant", AVCaptureDeviceTypeBuiltInWideAngleCamera, RevenantHostAVCaptureDeviceTypeBuiltInWideAngleCamera);
+        compare(@"the telephoto constant", AVCaptureDeviceTypeBuiltInTelephotoCamera, RevenantHostAVCaptureDeviceTypeBuiltInTelephotoCamera);
 
         for (AVCaptureDevice *device in [AVCaptureDevice devices]) {
             BOOL video = [device hasMediaType:AVMediaTypeVideo];
@@ -49,9 +49,9 @@ int main(void)
                 continue;
             NSString *system_kind = [device.deviceType isEqual:AVCaptureDeviceTypeBuiltInWideAngleCamera] ? @"wide"
                                   : [device.deviceType isEqual:AVCaptureDeviceTypeBuiltInMicrophone] ? @"mic" : device.deviceType;
-            NSString *ours_type = ((NSString * (*)(id, SEL))objc_msgSend)(device, NSSelectorFromString(@"charonHost_deviceType"));
-            NSString *ours_kind = [ours_type isEqual:CharonHostAVCaptureDeviceTypeBuiltInWideAngleCamera] ? @"wide"
-                                : [ours_type isEqual:CharonHostAVCaptureDeviceTypeBuiltInMicrophone] ? @"mic" : ours_type;
+            NSString *ours_type = ((NSString * (*)(id, SEL))objc_msgSend)(device, NSSelectorFromString(@"revenantHost_deviceType"));
+            NSString *ours_kind = [ours_type isEqual:RevenantHostAVCaptureDeviceTypeBuiltInWideAngleCamera] ? @"wide"
+                                : [ours_type isEqual:RevenantHostAVCaptureDeviceTypeBuiltInMicrophone] ? @"mic" : ours_type;
             compare([NSString stringWithFormat:@"the type of %@ (video %d)", device.localizedName, video], system_kind, ours_kind);
         }
 
@@ -77,15 +77,15 @@ int main(void)
         AVCaptureDeviceDiscoverySession *system = [AVCaptureDeviceDiscoverySession discoverySessionWithDeviceTypes:@[AVCaptureDeviceTypeBuiltInWideAngleCamera, AVCaptureDeviceTypeBuiltInMicrophone]
                                                                                                           mediaType:nil position:AVCaptureDevicePositionUnspecified];
         id backport = ((id (*)(id, SEL, NSArray *, NSString *, AVCaptureDevicePosition))objc_msgSend)(ours, NSSelectorFromString(@"discoverySessionWithDeviceTypes:mediaType:position:"),
-                                                                                                        @[CharonHostAVCaptureDeviceTypeBuiltInWideAngleCamera, CharonHostAVCaptureDeviceTypeBuiltInMicrophone], nil, AVCaptureDevicePositionUnspecified);
+                                                                                                        @[RevenantHostAVCaptureDeviceTypeBuiltInWideAngleCamera, RevenantHostAVCaptureDeviceTypeBuiltInMicrophone], nil, AVCaptureDevicePositionUnspecified);
         NSString *(^scrub)(NSString *) = ^NSString *(NSString *text) {
-            text = [text stringByReplacingOccurrencesOfString:@"CharonHost" withString:@""];
+            text = [text stringByReplacingOccurrencesOfString:@"RevenantHost" withString:@""];
             NSRegularExpression *pointer = [NSRegularExpression regularExpressionWithPattern:@"0x[0-9a-f]+" options:0 error:NULL];
             return [pointer stringByReplacingMatchesInString:text options:0 range:NSMakeRange(0, text.length) withTemplate:@"PTR"];
         };
         compare(@"the description", scrub(system.description), scrub([backport description]));
         AVCaptureDeviceDiscoverySession *front = [AVCaptureDeviceDiscoverySession discoverySessionWithDeviceTypes:@[AVCaptureDeviceTypeBuiltInTelephotoCamera] mediaType:AVMediaTypeVideo position:AVCaptureDevicePositionFront];
-        id backportFront = ((id (*)(id, SEL, NSArray *, NSString *, AVCaptureDevicePosition))objc_msgSend)(ours, NSSelectorFromString(@"discoverySessionWithDeviceTypes:mediaType:position:"), @[CharonHostAVCaptureDeviceTypeBuiltInTelephotoCamera], AVMediaTypeVideo, AVCaptureDevicePositionFront);
+        id backportFront = ((id (*)(id, SEL, NSArray *, NSString *, AVCaptureDevicePosition))objc_msgSend)(ours, NSSelectorFromString(@"discoverySessionWithDeviceTypes:mediaType:position:"), @[RevenantHostAVCaptureDeviceTypeBuiltInTelephotoCamera], AVMediaTypeVideo, AVCaptureDevicePositionFront);
         compare(@"the description with a media type and a position", scrub(front.description), scrub([backportFront description]));
 
         for (NSString *kind in @[@"wide", @"tele"]) {
@@ -93,7 +93,7 @@ int main(void)
                 NSString *mediaType = [type isKindOfClass:[NSNull class]] ? nil : type;
                 AVCaptureDevice *system_default = [AVCaptureDevice defaultDeviceWithDeviceType:system_types[kind] mediaType:mediaType position:AVCaptureDevicePositionUnspecified];
                 AVCaptureDevice *our_default = ((id (*)(id, SEL, NSString *, NSString *, AVCaptureDevicePosition))objc_msgSend)([AVCaptureDevice class],
-                    NSSelectorFromString(@"charonHost_defaultDeviceWithDeviceType:mediaType:position:"), our_types[kind], mediaType, AVCaptureDevicePositionUnspecified);
+                    NSSelectorFromString(@"revenantHost_defaultDeviceWithDeviceType:mediaType:position:"), our_types[kind], mediaType, AVCaptureDevicePositionUnspecified);
                 compare([NSString stringWithFormat:@"the default device of %@, media %@", kind, mediaType ?: @"any"], system_default.localizedName ?: @"nil", our_default.localizedName ?: @"nil");
             }
         }
@@ -109,7 +109,7 @@ int main(void)
         };
         compare(@"a nil device type", raised(^{ [AVCaptureDevice defaultDeviceWithDeviceType:nil mediaType:AVMediaTypeVideo position:0]; }),
                 raised(^{ ((void (*)(id, SEL, NSString *, NSString *, AVCaptureDevicePosition))objc_msgSend)([AVCaptureDevice class],
-                    NSSelectorFromString(@"charonHost_defaultDeviceWithDeviceType:mediaType:position:"), nil, AVMediaTypeVideo, 0); }));
+                    NSSelectorFromString(@"revenantHost_defaultDeviceWithDeviceType:mediaType:position:"), nil, AVMediaTypeVideo, 0); }));
         printf("%d checks, %d failures\n", checks, failures);
         return failures;
     }

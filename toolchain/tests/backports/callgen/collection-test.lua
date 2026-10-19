@@ -1,5 +1,5 @@
-local charon = path.absolute(path.join(os.scriptdir(), "..", "..", ".."))
-local workspace = import("workspace", {rootdir = path.join(charon, "modules"), anonymous = true})
+local revenant = path.absolute(path.join(os.scriptdir(), "..", "..", ".."))
+local workspace = import("workspace", {rootdir = path.join(revenant, "modules"), anonymous = true})
 local mutant = import("collection-mutant", {rootdir = os.scriptdir(), anonymous = true})
 
 local FACTORY = "successesWithResolvedMediaItems:"
@@ -23,7 +23,7 @@ end
 
 function factory_source(build)
     local out = path.join(build, "intents")
-    os.execv(os.programfile(), {"l", path.join(charon, "tools", "intents", "objects.lua"), "--out", out, "--work", path.join(build, "intents-work")},
+    os.execv(os.programfile(), {"l", path.join(revenant, "tools", "intents", "objects.lua"), "--out", out, "--work", path.join(build, "intents-work")},
              {stdout = path.join(build, "intents.log")})
     for _, file in ipairs(os.files(path.join(out, "*.m"))) do
         local text = io.readfile(file)
@@ -37,7 +37,7 @@ end
 function run(opt)
     opt = opt or {}
     local here = os.scriptdir()
-    local build = opt.build or workspace.fresh("charon-callgen")
+    local build = opt.build or workspace.fresh("revenant-callgen")
     os.mkdir(build)
     local sdk = os.iorunv("xcrun", {"--show-sdk-path"}):trim()
     local host = {"-target", "arm64-apple-macos26.0", "-isysroot", sdk, "-fobjc-arc", "-O0", "-w"}
@@ -53,7 +53,7 @@ function run(opt)
     local name = path.basename(source)
     io.writefile(path.join(build, name .. ".mutant.m"), mutant.mutated(io.readfile(source, {encoding = "binary"})), {encoding = "binary"})
     local port_sdk = workspace.sdk_package("16.4")
-    local ports = {"CharonPortMediaItemResolutionResult", "CharonPortMediaItem"}
+    local ports = {"RevenantPortMediaItemResolutionResult", "RevenantPortMediaItem"}
     for _, half in ipairs({"real", "mutant"}) do
         print("=== " .. half)
         io.flush()
@@ -61,8 +61,8 @@ function run(opt)
         local object = path.join(build, name .. "." .. half .. ".o")
         local log = path.join(build, "build.log")
         if not clang({"-target", "armv7-apple-ios6.1.3", "-isysroot", port_sdk, "-fobjc-arc", "-O0", "-w",
-                      "-I" .. path.join(charon, "packages", "c", "charon-coding", "files"),
-                      "-I" .. path.join(charon, "packages", "a", "apple-backports", "Intents"), "-c", compiled, "-o", object},
+                      "-I" .. path.join(revenant, "packages", "c", "revenant-coding", "files"),
+                      "-I" .. path.join(revenant, "packages", "a", "apple-backports", "Intents"), "-c", compiled, "-o", object},
                      log, string.format("the %s half did not compile", half)) then
             return 1
         end

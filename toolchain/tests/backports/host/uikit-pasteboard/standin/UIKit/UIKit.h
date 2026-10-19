@@ -9,7 +9,7 @@
 - (void)setItems:(NSArray *)items options:(NSDictionary *)options;
 - (void)setObjects:(NSArray *)objects;
 - (void)setObjects:(NSArray *)objects localOnly:(BOOL)localOnly expirationDate:(NSDate *)expirationDate;
-- (NSArray *)charonRecordedOptionsForTest;
+- (NSArray *)revenantRecordedOptionsForTest;
 @end
 
 typedef NSString *UIPasteboardOption;

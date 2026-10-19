@@ -3,7 +3,7 @@
 #import <Messages/MSMessageLayout.h>
 #import <Messages/MSSession.h>
 
-static NSString *const CharonSenderParticipantKey = @"org.charon.apple-backports.MSMessage.senderParticipant";
+static NSString *const RevenantSenderParticipantKey = @"org.revenant.apple-backports.MSMessage.senderParticipant";
 
 @implementation MSMessage
 
@@ -42,10 +42,10 @@ static NSString *const CharonSenderParticipantKey = @"org.charon.apple-backports
     static dispatch_once_t once;
     dispatch_once(&once, ^{
         NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-        NSString *held = [defaults objectForKey:CharonSenderParticipantKey];
+        NSString *held = [defaults objectForKey:RevenantSenderParticipantKey];
         if (![held isKindOfClass:[NSString class]] || held.length == 0) {
             held = [[NSUUID UUID] UUIDString];
-            [defaults setObject:held forKey:CharonSenderParticipantKey];
+            [defaults setObject:held forKey:RevenantSenderParticipantKey];
             [defaults synchronize];
         }
         identifier = [[NSUUID alloc] initWithUUIDString:held];

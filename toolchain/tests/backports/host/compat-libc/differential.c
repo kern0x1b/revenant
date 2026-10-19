@@ -16,16 +16,16 @@ int64_t OSAtomicDecrement64Barrier(volatile int64_t *);
 int ffsll(long long);
 int flsll(long long);
 
-int32_t charon_port_OSAtomicIncrement32(volatile int32_t *);
-int32_t charon_port_OSAtomicIncrement32Barrier(volatile int32_t *);
-int32_t charon_port_OSAtomicDecrement32(volatile int32_t *);
-int32_t charon_port_OSAtomicDecrement32Barrier(volatile int32_t *);
-int64_t charon_port_OSAtomicIncrement64(volatile int64_t *);
-int64_t charon_port_OSAtomicIncrement64Barrier(volatile int64_t *);
-int64_t charon_port_OSAtomicDecrement64(volatile int64_t *);
-int64_t charon_port_OSAtomicDecrement64Barrier(volatile int64_t *);
-int charon_port_ffsll(long long);
-int charon_port_flsll(long long);
+int32_t revenant_port_OSAtomicIncrement32(volatile int32_t *);
+int32_t revenant_port_OSAtomicIncrement32Barrier(volatile int32_t *);
+int32_t revenant_port_OSAtomicDecrement32(volatile int32_t *);
+int32_t revenant_port_OSAtomicDecrement32Barrier(volatile int32_t *);
+int64_t revenant_port_OSAtomicIncrement64(volatile int64_t *);
+int64_t revenant_port_OSAtomicIncrement64Barrier(volatile int64_t *);
+int64_t revenant_port_OSAtomicDecrement64(volatile int64_t *);
+int64_t revenant_port_OSAtomicDecrement64Barrier(volatile int64_t *);
+int revenant_port_ffsll(long long);
+int revenant_port_flsll(long long);
 
 static int failures;
 
@@ -105,16 +105,16 @@ static void ffs_case(const char *name, int (*host)(long long), int (*port)(long 
 
 int main(void)
 {
-    atomic_case("OSAtomicIncrement32", OSAtomicIncrement32, charon_port_OSAtomicIncrement32);
-    atomic_case("OSAtomicIncrement32Barrier", OSAtomicIncrement32Barrier, charon_port_OSAtomicIncrement32Barrier);
-    atomic_case("OSAtomicDecrement32", OSAtomicDecrement32, charon_port_OSAtomicDecrement32);
-    atomic_case("OSAtomicDecrement32Barrier", OSAtomicDecrement32Barrier, charon_port_OSAtomicDecrement32Barrier);
-    atomic64_case("OSAtomicIncrement64", OSAtomicIncrement64, charon_port_OSAtomicIncrement64);
-    atomic64_case("OSAtomicIncrement64Barrier", OSAtomicIncrement64Barrier, charon_port_OSAtomicIncrement64Barrier);
-    atomic64_case("OSAtomicDecrement64", OSAtomicDecrement64, charon_port_OSAtomicDecrement64);
-    atomic64_case("OSAtomicDecrement64Barrier", OSAtomicDecrement64Barrier, charon_port_OSAtomicDecrement64Barrier);
-    ffs_case("ffsll", ffsll, charon_port_ffsll);
-    ffs_case("flsll", flsll, charon_port_flsll);
+    atomic_case("OSAtomicIncrement32", OSAtomicIncrement32, revenant_port_OSAtomicIncrement32);
+    atomic_case("OSAtomicIncrement32Barrier", OSAtomicIncrement32Barrier, revenant_port_OSAtomicIncrement32Barrier);
+    atomic_case("OSAtomicDecrement32", OSAtomicDecrement32, revenant_port_OSAtomicDecrement32);
+    atomic_case("OSAtomicDecrement32Barrier", OSAtomicDecrement32Barrier, revenant_port_OSAtomicDecrement32Barrier);
+    atomic64_case("OSAtomicIncrement64", OSAtomicIncrement64, revenant_port_OSAtomicIncrement64);
+    atomic64_case("OSAtomicIncrement64Barrier", OSAtomicIncrement64Barrier, revenant_port_OSAtomicIncrement64Barrier);
+    atomic64_case("OSAtomicDecrement64", OSAtomicDecrement64, revenant_port_OSAtomicDecrement64);
+    atomic64_case("OSAtomicDecrement64Barrier", OSAtomicDecrement64Barrier, revenant_port_OSAtomicDecrement64Barrier);
+    ffs_case("ffsll", ffsll, revenant_port_ffsll);
+    ffs_case("flsll", flsll, revenant_port_flsll);
     if (failures == 0)
         printf("checks=all failures=0\n");
     else

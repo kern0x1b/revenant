@@ -1,4 +1,4 @@
-#import "CharonFeedbackGenerator.h"
+#import "RevenantFeedbackGenerator.h"
 
 @implementation UISelectionFeedbackGenerator
 

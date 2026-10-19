@@ -1,5 +1,5 @@
-#import "CharonAVFAudio.h"
-#import "CharonAVFAudioNew.h"
+#import "RevenantAVFAudio.h"
+#import "RevenantAVFAudioNew.h"
 #import <objc/message.h>
 
 NSString * const AVAudioApplicationMuteStateKey = @"AVAudioApplicationMuteStateKey";
@@ -7,8 +7,8 @@ NSString * const AVAudioApplicationInputMuteStateChangeNotification = @"AVAudioA
 NSString * const AVAudioSessionPortContinuityMicrophone = @"ContinuityMicrophone";
 
 @implementation AVAudioApplication {
-    BOOL _charon_inputMuted;
-    BOOL (^_charon_muteHandler)(BOOL);
+    BOOL _revenant_inputMuted;
+    BOOL (^_revenant_muteHandler)(BOOL);
 }
 
 + (AVAudioApplication *)sharedInstance
@@ -31,15 +31,15 @@ NSString * const AVAudioSessionPortContinuityMicrophone = @"ContinuityMicrophone
 
 - (BOOL)setInputMuted:(BOOL)muted error:(NSError **)outError
 {
-    if (muted == _charon_inputMuted) {
+    if (muted == _revenant_inputMuted) {
         if (outError) {
             *outError = [NSError errorWithDomain:@"AVAudioApplicationErrorDomain" code:1 userInfo:nil];
         }
         return NO;
     }
-    _charon_inputMuted = muted;
-    if (_charon_muteHandler) {
-        _charon_muteHandler(muted);
+    _revenant_inputMuted = muted;
+    if (_revenant_muteHandler) {
+        _revenant_muteHandler(muted);
     }
     [[NSNotificationCenter defaultCenter] postNotificationName:AVAudioApplicationInputMuteStateChangeNotification object:self
                                                       userInfo:@{AVAudioApplicationMuteStateKey: @(muted ? 1 : 0)}];
@@ -48,14 +48,14 @@ NSString * const AVAudioSessionPortContinuityMicrophone = @"ContinuityMicrophone
 
 - (BOOL)isInputMuted
 {
-    return _charon_inputMuted;
+    return _revenant_inputMuted;
 }
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunguarded-availability"
 - (BOOL)setInputMuteStateChangeHandler:(BOOL (^)(BOOL))inputMuteHandler error:(NSError **)outError
 {
-    _charon_muteHandler = [inputMuteHandler copy];
+    _revenant_muteHandler = [inputMuteHandler copy];
     return YES;
 }
 #pragma clang diagnostic pop

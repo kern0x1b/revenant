@@ -15,7 +15,7 @@
 #include <cstdint>
 #include <mutex>
 
-namespace shade {
+namespace emulator {
 
 bool CompatibilityKernel::dispatch_bsd_process_policy(
     Cpu& cpu, std::uint32_t number)

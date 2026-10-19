@@ -1,16 +1,16 @@
-#import "CharonLists.h"
+#import "RevenantLists.h"
 
 #pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
 #import <objc/runtime.h>
 
-static const char CharonRegisteredKey;
+static const char RevenantRegisteredKey;
 
-@interface UICollectionViewCellRegistration (CharonLists)
-- (NSString *)charon_identifier;
+@interface UICollectionViewCellRegistration (RevenantLists)
+- (NSString *)revenant_identifier;
 @end
 
-@interface UICollectionViewSupplementaryRegistration (CharonLists)
-- (NSString *)charon_identifier;
+@interface UICollectionViewSupplementaryRegistration (RevenantLists)
+- (NSString *)revenant_identifier;
 @end
 
 @implementation UICollectionViewCellRegistration {
@@ -54,7 +54,7 @@ static const char CharonRegisteredKey;
     return _configurationHandler;
 }
 
-- (NSString *)charon_identifier
+- (NSString *)revenant_identifier
 {
     return _identifier;
 }
@@ -112,19 +112,19 @@ static const char CharonRegisteredKey;
     return _configurationHandler;
 }
 
-- (NSString *)charon_identifier
+- (NSString *)revenant_identifier
 {
     return _identifier;
 }
 
 @end
 
-static BOOL charon_first_use(UICollectionView *view, NSString *identifier)
+static BOOL revenant_first_use(UICollectionView *view, NSString *identifier)
 {
-    NSMutableSet *known = objc_getAssociatedObject(view, &CharonRegisteredKey);
+    NSMutableSet *known = objc_getAssociatedObject(view, &RevenantRegisteredKey);
     if (!known) {
         known = [[NSMutableSet alloc] init];
-        objc_setAssociatedObject(view, &CharonRegisteredKey, known, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+        objc_setAssociatedObject(view, &RevenantRegisteredKey, known, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     }
     if ([known containsObject:identifier])
         return NO;
@@ -132,14 +132,14 @@ static BOOL charon_first_use(UICollectionView *view, NSString *identifier)
     return YES;
 }
 
-@implementation UICollectionView (CharonRegistrations)
+@implementation UICollectionView (RevenantRegistrations)
 
 - (__kindof UICollectionViewCell *)dequeueConfiguredReusableCellWithRegistration:(UICollectionViewCellRegistration *)registration forIndexPath:(NSIndexPath *)indexPath item:(id)item
 {
-    NSString *identifier = [registration charon_identifier];
+    NSString *identifier = [registration revenant_identifier];
     if (!identifier)
         [NSException raise:NSInternalInconsistencyException format:@"UIKit internal inconsistency: registration missing reuse identifier (null)"];
-    if (charon_first_use(self, identifier)) {
+    if (revenant_first_use(self, identifier)) {
         if (registration.cellNib)
             [self registerNib:registration.cellNib forCellWithReuseIdentifier:identifier];
         else
@@ -153,10 +153,10 @@ static BOOL charon_first_use(UICollectionView *view, NSString *identifier)
 
 - (__kindof UICollectionReusableView *)dequeueConfiguredReusableSupplementaryViewWithRegistration:(UICollectionViewSupplementaryRegistration *)registration forIndexPath:(NSIndexPath *)indexPath
 {
-    NSString *identifier = [registration charon_identifier];
+    NSString *identifier = [registration revenant_identifier];
     if (!identifier)
         [NSException raise:NSInternalInconsistencyException format:@"UIKit internal inconsistency: registration missing element kind (null)"];
-    if (charon_first_use(self, identifier)) {
+    if (revenant_first_use(self, identifier)) {
         if (registration.supplementaryNib)
             [self registerNib:registration.supplementaryNib forSupplementaryViewOfKind:registration.elementKind withReuseIdentifier:identifier];
         else

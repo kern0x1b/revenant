@@ -1,16 +1,16 @@
-#include "CharonQRDecode.h"
+#include "RevenantQRDecode.h"
 
 #include <string.h>
 
-#define CHARON_QR_MAX_BLOCKS 81
-#define CHARON_QR_MAX_BLOCK 150
-#define CHARON_QR_MAX_CODEWORDS 3706
-#define CHARON_QR_MAX_SIZE 177
+#define REVENANT_QR_MAX_BLOCKS 81
+#define REVENANT_QR_MAX_BLOCK 150
+#define REVENANT_QR_MAX_CODEWORDS 3706
+#define REVENANT_QR_MAX_SIZE 177
 
 typedef struct {
     uint8_t exp[512];
     uint8_t log[256];
-} charon_qr_gf;
+} revenant_qr_gf;
 
 typedef struct {
     uint8_t ec;
@@ -18,15 +18,15 @@ typedef struct {
     uint8_t d1;
     uint8_t b2;
     uint8_t d2;
-} charon_qr_blocks;
+} revenant_qr_blocks;
 
 typedef struct {
     const uint8_t *bytes;
     size_t bits;
     size_t pos;
-} charon_qr_reader;
+} revenant_qr_reader;
 
-static const charon_qr_blocks kBlocks[41][4] = {
+static const revenant_qr_blocks kBlocks[41][4] = {
     {{0}},
     {{7,1,19,0,0}, {10,1,16,0,0}, {13,1,13,0,0}, {17,1,9,0,0}},
     {{10,1,34,0,0}, {16,1,28,0,0}, {22,1,22,0,0}, {28,1,16,0,0}},
@@ -138,7 +138,7 @@ static int popcount32(uint32_t value)
     return count;
 }
 
-static void gf_init(charon_qr_gf *gf)
+static void gf_init(revenant_qr_gf *gf)
 {
     int x = 1;
     for (int i = 0; i < 255; i++) {
@@ -151,13 +151,13 @@ static void gf_init(charon_qr_gf *gf)
     gf->log[0] = 0;
 }
 
-static uint8_t gf_mul(const charon_qr_gf *gf, uint8_t a, uint8_t b)
+static uint8_t gf_mul(const revenant_qr_gf *gf, uint8_t a, uint8_t b)
 {
     if (a == 0 || b == 0) return 0;
     return gf->exp[gf->log[a] + gf->log[b]];
 }
 
-static uint8_t gf_div(const charon_qr_gf *gf, uint8_t a, uint8_t b)
+static uint8_t gf_div(const revenant_qr_gf *gf, uint8_t a, uint8_t b)
 {
     if (a == 0) return 0;
     return gf->exp[gf->log[a] + 255 - gf->log[b]];
@@ -246,10 +246,10 @@ static int read_format(const uint8_t *modules, int size, int *level, int *mask)
             bestData = data;
         }
     }
-    if (best > 3) return CharonQRDecodeBadFormat;
+    if (best > 3) return RevenantQRDecodeBadFormat;
     *level = kLevelIndex[bestData >> 3];
     *mask = (int)(bestData & 7);
-    return CharonQRDecodeOK;
+    return RevenantQRDecodeOK;
 }
 
 static int read_version(const uint8_t *modules, int size, int version)
@@ -270,10 +270,10 @@ static int read_version(const uint8_t *modules, int size, int version)
             bestVersion = v;
         }
     }
-    return best <= 3 && bestVersion == version ? CharonQRDecodeOK : CharonQRDecodeBadVersion;
+    return best <= 3 && bestVersion == version ? RevenantQRDecodeOK : RevenantQRDecodeBadVersion;
 }
 
-static int rs_correct(const charon_qr_gf *gf, uint8_t *cw, int n, int nsym)
+static int rs_correct(const revenant_qr_gf *gf, uint8_t *cw, int n, int nsym)
 {
     uint8_t syndrome[32] = {0}, lambda[33] = {0}, previous[33] = {0}, saved[33];
     int any = 0;
@@ -348,7 +348,7 @@ static int rs_correct(const charon_qr_gf *gf, uint8_t *cw, int n, int nsym)
     return 0;
 }
 
-static int read_bits(charon_qr_reader *reader, int count, uint32_t *value)
+static int read_bits(revenant_qr_reader *reader, int count, uint32_t *value)
 {
     if (reader->bits - reader->pos < (size_t)count) return 0;
     uint32_t v = 0;
@@ -379,10 +379,10 @@ static int emit_digits(uint8_t *out, size_t capacity, size_t *length, uint32_t v
 static int parse_segments(const uint8_t *data, size_t count, int version, uint8_t *out, size_t capacity, size_t *length,
                           int *mode)
 {
-    charon_qr_reader reader = {data, count * 8, 0};
+    revenant_qr_reader reader = {data, count * 8, 0};
     int seen = 0;
     *length = 0;
-    *mode = CharonQRModeNone;
+    *mode = RevenantQRModeNone;
     for (;;) {
         uint32_t indicator, characters;
         if (reader.bits - reader.pos < 4) break;
@@ -391,86 +391,86 @@ static int parse_segments(const uint8_t *data, size_t count, int version, uint8_
         int segmentMode;
         int countBits;
         if (indicator == 1) {
-            segmentMode = CharonQRModeNumeric;
+            segmentMode = RevenantQRModeNumeric;
             countBits = version <= 9 ? 10 : version <= 26 ? 12 : 14;
         } else if (indicator == 2) {
-            segmentMode = CharonQRModeAlphanumeric;
+            segmentMode = RevenantQRModeAlphanumeric;
             countBits = version <= 9 ? 9 : version <= 26 ? 11 : 13;
         } else if (indicator == 4) {
-            segmentMode = CharonQRModeByte;
+            segmentMode = RevenantQRModeByte;
             countBits = version <= 9 ? 8 : 16;
         } else {
-            return CharonQRDecodeUnsupported;
+            return RevenantQRDecodeUnsupported;
         }
-        if (!read_bits(&reader, countBits, &characters)) return CharonQRDecodeMalformed;
+        if (!read_bits(&reader, countBits, &characters)) return RevenantQRDecodeMalformed;
 
         if (!seen) *mode = segmentMode;
-        else if (*mode != segmentMode) *mode = CharonQRModeMixed;
+        else if (*mode != segmentMode) *mode = RevenantQRModeMixed;
         seen = 1;
 
         uint32_t left = characters;
-        if (segmentMode == CharonQRModeNumeric) {
+        if (segmentMode == RevenantQRModeNumeric) {
             while (left >= 3) {
                 uint32_t v;
-                if (!read_bits(&reader, 10, &v) || v > 999) return CharonQRDecodeMalformed;
-                if (!emit_digits(out, capacity, length, v, 3)) return CharonQRDecodeTooLong;
+                if (!read_bits(&reader, 10, &v) || v > 999) return RevenantQRDecodeMalformed;
+                if (!emit_digits(out, capacity, length, v, 3)) return RevenantQRDecodeTooLong;
                 left -= 3;
             }
             if (left == 2 || left == 1) {
                 uint32_t v;
                 if (!read_bits(&reader, left == 2 ? 7 : 4, &v) || v >= (left == 2 ? 100u : 10u))
-                    return CharonQRDecodeMalformed;
-                if (!emit_digits(out, capacity, length, v, (int)left)) return CharonQRDecodeTooLong;
+                    return RevenantQRDecodeMalformed;
+                if (!emit_digits(out, capacity, length, v, (int)left)) return RevenantQRDecodeTooLong;
             }
-        } else if (segmentMode == CharonQRModeAlphanumeric) {
+        } else if (segmentMode == RevenantQRModeAlphanumeric) {
             while (left >= 2) {
                 uint32_t v;
-                if (!read_bits(&reader, 11, &v) || v >= 45 * 45) return CharonQRDecodeMalformed;
-                if (!emit(out, capacity, length, (uint8_t)kAlphanumeric[v / 45])) return CharonQRDecodeTooLong;
-                if (!emit(out, capacity, length, (uint8_t)kAlphanumeric[v % 45])) return CharonQRDecodeTooLong;
+                if (!read_bits(&reader, 11, &v) || v >= 45 * 45) return RevenantQRDecodeMalformed;
+                if (!emit(out, capacity, length, (uint8_t)kAlphanumeric[v / 45])) return RevenantQRDecodeTooLong;
+                if (!emit(out, capacity, length, (uint8_t)kAlphanumeric[v % 45])) return RevenantQRDecodeTooLong;
                 left -= 2;
             }
             if (left == 1) {
                 uint32_t v;
-                if (!read_bits(&reader, 6, &v) || v >= 45) return CharonQRDecodeMalformed;
-                if (!emit(out, capacity, length, (uint8_t)kAlphanumeric[v])) return CharonQRDecodeTooLong;
+                if (!read_bits(&reader, 6, &v) || v >= 45) return RevenantQRDecodeMalformed;
+                if (!emit(out, capacity, length, (uint8_t)kAlphanumeric[v])) return RevenantQRDecodeTooLong;
             }
         } else {
             while (left > 0) {
                 uint32_t v;
-                if (!read_bits(&reader, 8, &v)) return CharonQRDecodeMalformed;
-                if (!emit(out, capacity, length, (uint8_t)v)) return CharonQRDecodeTooLong;
+                if (!read_bits(&reader, 8, &v)) return RevenantQRDecodeMalformed;
+                if (!emit(out, capacity, length, (uint8_t)v)) return RevenantQRDecodeTooLong;
                 left--;
             }
         }
     }
-    return CharonQRDecodeOK;
+    return RevenantQRDecodeOK;
 }
 
-int CharonQRDecode(const uint8_t *modules, int size, uint8_t *out, size_t capacity, size_t *length, int *mode)
+int RevenantQRDecode(const uint8_t *modules, int size, uint8_t *out, size_t capacity, size_t *length, int *mode)
 {
     if (length) *length = 0;
-    if (mode) *mode = CharonQRModeNone;
-    if (!modules || !out || !length || !mode) return CharonQRDecodeBadArgument;
-    if (size < 21 || size > CHARON_QR_MAX_SIZE || (size - 17) % 4 != 0) return CharonQRDecodeBadSize;
+    if (mode) *mode = RevenantQRModeNone;
+    if (!modules || !out || !length || !mode) return RevenantQRDecodeBadArgument;
+    if (size < 21 || size > REVENANT_QR_MAX_SIZE || (size - 17) % 4 != 0) return RevenantQRDecodeBadSize;
     int version = (size - 17) / 4;
 
     int level, maskIndex;
     int status = read_format(modules, size, &level, &maskIndex);
-    if (status != CharonQRDecodeOK) return status;
+    if (status != RevenantQRDecodeOK) return status;
     if (version >= 7) {
         status = read_version(modules, size, version);
-        if (status != CharonQRDecodeOK) return status;
+        if (status != RevenantQRDecodeOK) return status;
     }
 
-    uint8_t function[CHARON_QR_MAX_SIZE * CHARON_QR_MAX_SIZE];
+    uint8_t function[REVENANT_QR_MAX_SIZE * REVENANT_QR_MAX_SIZE];
     mark_function(size, version, function);
 
-    const charon_qr_blocks *spec = &kBlocks[version][level];
+    const revenant_qr_blocks *spec = &kBlocks[version][level];
     int blocks = spec->b1 + spec->b2;
     int total = spec->b1 * (spec->d1 + spec->ec) + spec->b2 * (spec->d2 + spec->ec);
 
-    uint8_t stream[CHARON_QR_MAX_CODEWORDS] = {0};
+    uint8_t stream[REVENANT_QR_MAX_CODEWORDS] = {0};
     int bits = 0, dataModules = 0, upward = 1;
     for (int col = size - 1; col > 0; col -= 2) {
         if (col == 6) col = 5;
@@ -488,10 +488,10 @@ int CharonQRDecode(const uint8_t *modules, int size, uint8_t *out, size_t capaci
         }
         upward = !upward;
     }
-    if (dataModules != total * 8 + kRemainder[version]) return CharonQRDecodeLayout;
+    if (dataModules != total * 8 + kRemainder[version]) return RevenantQRDecodeLayout;
 
-    uint8_t block[CHARON_QR_MAX_BLOCKS][CHARON_QR_MAX_BLOCK];
-    int dataLength[CHARON_QR_MAX_BLOCKS], blockLength[CHARON_QR_MAX_BLOCKS];
+    uint8_t block[REVENANT_QR_MAX_BLOCKS][REVENANT_QR_MAX_BLOCK];
+    int dataLength[REVENANT_QR_MAX_BLOCKS], blockLength[REVENANT_QR_MAX_BLOCKS];
     int maxData = 0;
     for (int b = 0; b < blocks; b++) {
         dataLength[b] = b < spec->b1 ? spec->d1 : spec->d2;
@@ -506,20 +506,20 @@ int CharonQRDecode(const uint8_t *modules, int size, uint8_t *out, size_t capaci
         for (int b = 0; b < blocks; b++)
             block[b][dataLength[b] + i] = stream[pos++];
 
-    charon_qr_gf gf;
+    revenant_qr_gf gf;
     gf_init(&gf);
-    uint8_t data[CHARON_QR_MAX_CODEWORDS];
+    uint8_t data[REVENANT_QR_MAX_CODEWORDS];
     size_t dataCount = 0;
     for (int b = 0; b < blocks; b++) {
-        if (rs_correct(&gf, block[b], blockLength[b], spec->ec)) return CharonQRDecodeUncorrectable;
+        if (rs_correct(&gf, block[b], blockLength[b], spec->ec)) return RevenantQRDecodeUncorrectable;
         memcpy(data + dataCount, block[b], (size_t)dataLength[b]);
         dataCount += (size_t)dataLength[b];
     }
 
     status = parse_segments(data, dataCount, version, out, capacity, length, mode);
-    if (status != CharonQRDecodeOK) {
+    if (status != RevenantQRDecodeOK) {
         *length = 0;
-        *mode = CharonQRModeNone;
+        *mode = RevenantQRModeNone;
     }
     return status;
 }

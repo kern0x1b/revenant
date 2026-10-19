@@ -2,7 +2,7 @@
 # run.sh - differential host test for the five MetalKit classes whose -init the headers mark NS_UNAVAILABLE.
 #
 # The port's MetalKit objects are built here for Catalyst beside Apple's own MetalKit in one process, the
-# way metalblit does it: every class the port defines is renamed CharonHost<Name>, so the two live side by
+# way metalblit does it: every class the port defines is renamed RevenantHost<Name>, so the two live side by
 # side, and init.m asks each side the same question. The answer is NSObject's own -init on both, which is
 # what the five rows say once they are implemented: the port carries no -init of its own, and a caller
 # reaching -init gets the object NSObject makes, as it does from Apple's class.
@@ -14,7 +14,7 @@ here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 METALKIT=${METALKIT:-$here/../../../../packages/a/apple-backports/MetalKit}
 METAL=${METAL:-$here/../../../../packages/a/apple-backports/Metal}
-BUILD=${BUILD:-$(runs_fresh charon-metalkit-init)}
+BUILD=${BUILD:-$(runs_fresh revenant-metalkit-init)}
 sdk=$(xcrun --show-sdk-path)
 target="-target arm64-apple-ios15.0-macabi -isysroot $sdk -iframework $sdk/System/iOSSupport/System/Library/Frameworks"
 quiet="-Wno-deprecated-declarations -Wno-unguarded-availability-new -Wno-incomplete-implementation -Wno-objc-property-implementation -Wno-nullability-completeness -Wno-objc-designated-initializers -Wno-objc-protocol-method-implementation -Wno-incompatible-property-type -Wmismatched-return-types"
@@ -25,10 +25,10 @@ mkdir -p "$BUILD/plain" "$BUILD/renamed"
 for source in $sources; do
     xcrun clang $target -fobjc-arc -fvisibility=hidden $quiet -I"$METALKIT" -I"$METAL" -c "$METALKIT/$source" -o "$BUILD/plain/$source.o"
 done
-# Every class the port defines gets the CharonHost prefix, in the headers it includes as well as its own code.
+# Every class the port defines gets the RevenantHost prefix, in the headers it includes as well as its own code.
 renames=""
 for name in $(xcrun nm -gU "$BUILD"/plain/*.o | awk 'NF == 3 {print $3}' | grep -E '^_OBJC_CLASS_\$_' | sed -e 's/^_OBJC_CLASS_\$_//' | sort -u); do
-    renames="$renames -D$name=CharonHost$name"
+    renames="$renames -D$name=RevenantHost$name"
 done
 echo "renamed:$renames"
 for source in $sources; do

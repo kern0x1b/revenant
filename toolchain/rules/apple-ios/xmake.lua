@@ -7,7 +7,7 @@ rule("apple-ios")
         end
         local minimum = get_config("apple_minimum")
         if minimum then
-            minimum = import("@self.apple.slices").slice_minimum(get_config("arch"), minimum, os.getenv("CHARON_SLICES"))
+            minimum = import("@self.apple.slices").slice_minimum(get_config("arch"), minimum, os.getenv("REVENANT_SLICES"))
         end
         if not minimum then
             raise("target(%s) builds for apple-ios and its project names no oldest release: set_config(\"apple_minimum\", \"6.0\")", target:name())
@@ -16,14 +16,14 @@ rule("apple-ios")
         for _, name in ipairs({"iphoneos-sdk", "ld64", "llvm"}) do
             local required = project.required_package(name)
             if not required then
-                raise("target(%s) builds for apple-ios without includes(\"@addon/charon/apple-ios\") in its project", target:name())
+                raise("target(%s) builds for apple-ios without includes(\"@addon/revenant/apple-ios\") in its project", target:name())
             end
             versions[name] = required:requirestr():match("%s(%S+)$")
         end
-        target:set("toolchains", string.format("@addon/charon/apple-ios[minimum=%s,sdk=%s,ld64=%s,llvm=%s]", minimum, versions["iphoneos-sdk"], versions.ld64, versions.llvm))
+        target:set("toolchains", string.format("@addon/revenant/apple-ios[minimum=%s,sdk=%s,ld64=%s,llvm=%s]", minimum, versions["iphoneos-sdk"], versions.ld64, versions.llvm))
         target:set("policy", "build.ccache", false)
         if not target:get("strip") then
-            target:data_set("charon.strip.unset", true)
+            target:data_set("revenant.strip.unset", true)
         end
         local mapped = "-ffile-prefix-map=" .. os.projectdir() .. "=/port"
         target:add("cxflags", mapped)
@@ -42,7 +42,7 @@ rule("apple-ios")
     end)
 
     after_config(function (target)
-        if target:data("charon.strip.unset") and target:get("strip") == "all" then
+        if target:data("revenant.strip.unset") and target:get("strip") == "all" then
             target:set("strip", "none")
             if target:is_binary() then
                 target:add("ldflags", "-Wl,-dead_strip", {force = true})

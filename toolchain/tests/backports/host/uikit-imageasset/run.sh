@@ -2,7 +2,7 @@
 # The port's UIImageAsset and UIFocusGuide against Mac Catalyst's own classes, one source for both sides.
 #
 # matrix.m is built twice: plain, against the host's UIKit, and with the port's two classes compiled beside it
-# under CharonHost names (the renames of uikit2/renames.sh), so both live in one process. Each build prints one
+# under RevenantHost names (the renames of uikit2/renames.sh), so both live in one process. Each build prints one
 # line per measurement, and the two outputs must be equal line for line.
 #
 # The planted control: one rule of the port changed in a scratch copy of UIImageAsset.m (the current idiom a lookup

@@ -1,6 +1,6 @@
 package("createml")
-    set_homepage("https://github.com/kern0x1b/charon")
-    set_description("CreateML and CreateMLComponents for the port's armv7 releases: on-device training of the tabular regressors and classifiers, over the device's own BLAS and LAPACK. The Swift modules - CoreML, the shaped-array overlay CreateML's linear models are constrained to; CreateMLComponents; and CreateML - built against the charon@swift-runtime a port carries, so a program writes `import CreateML`. The linear algebra is the Accelerate of the release: cblas_dgemm, cblas_dsyrk, cblas_dgemv, cblas_ddot, dgesv_ and dpotrf_ are the armv7 dyld cache's own symbols from 4.3 up, and the package adds no matrix code of its own. The .mlmodel export is a protobuf writer over the published coremltools schema, in this package's own CoreML module, and the linear model writes through it; the five tree and classifier estimators are declared and refuse, because their kind of model is a TreeEnsembleRegressor or a NeuralNetworkClassifier and not a neural network")
+    set_homepage("https://github.com/kern0x1b/revenant/tree/main/toolchain")
+    set_description("CreateML and CreateMLComponents for the port's armv7 releases: on-device training of the tabular regressors and classifiers, over the device's own BLAS and LAPACK. The Swift modules - CoreML, the shaped-array overlay CreateML's linear models are constrained to; CreateMLComponents; and CreateML - built against the revenant@swift-runtime a port carries, so a program writes `import CreateML`. The linear algebra is the Accelerate of the release: cblas_dgemm, cblas_dsyrk, cblas_dgemv, cblas_ddot, dgesv_ and dpotrf_ are the armv7 dyld cache's own symbols from 4.3 up, and the package adds no matrix code of its own. The .mlmodel export is a protobuf writer over the published coremltools schema, in this package's own CoreML module, and the linear model writes through it; the five tree and classifier estimators are declared and refuse, because their kind of model is a TreeEnsembleRegressor or a NeuralNetworkClassifier and not a neural network")
     set_license("Apache-2.0")
     set_policy("package.strict_compatibility", true)
 
@@ -26,9 +26,9 @@ package("createml")
     add_configs("recipe", {description = "The digest of this recipe, so a changed recipe is a different package.", default = hash.strhash128(table.concat(digests, ";")), type = "string", readonly = true})
 
     on_load("iphoneos", function (package)
-        package:add("deps", "charon@swift-runtime", {alias = "swift-runtime", configs = {shared = package:config("shared") or nil,
+        package:add("deps", "revenant@swift-runtime", {alias = "swift-runtime", configs = {shared = package:config("shared") or nil,
                     backports = package:config("backports") or nil, backports_uikit = package:config("backports_uikit") or nil}})
-        package:add("deps", "charon@apple-backports", {alias = "apple-backports"})
+        package:add("deps", "revenant@apple-backports", {alias = "apple-backports"})
         for _, library in ipairs(libraries) do
             package:add("links", library)
         end
@@ -40,7 +40,7 @@ package("createml")
         local swift = import("apple.swift", {rootdir = modules_root, anonymous = true})
         local toolchain = assert(package:toolchains(), "CreateML is built with the apple-ios toolchain")[1]
         toolchain:load()
-        local runtime = assert(package:dep("swift-runtime"), "CreateML is compiled against charon@swift-runtime")
+        local runtime = assert(package:dep("swift-runtime"), "CreateML is compiled against revenant@swift-runtime")
         local swiftc = assert(table.wrap((runtime:envs() or {}).SWIFT_EXEC)[1], "swift-runtime names no compiler; reinstall it")
         local minimum = toolchain:config("deployment")
         local triple = package:arch() .. "-apple-ios" .. minimum
@@ -55,13 +55,13 @@ package("createml")
             table.insert(sources, path.join(package:scriptdir(), "files", module, "*.swift"))
         end
 
-        local port_headers = table.wrap((runtime:envs() or {}).CHARON_SWIFT_PORT_HEADERS)
+        local port_headers = table.wrap((runtime:envs() or {}).REVENANT_SWIFT_PORT_HEADERS)
         local overlay = #port_headers > 0 and {"-vfsoverlay", table.concat(port_headers, path.envsep())} or {}
         for index, module in ipairs(modules) do
             local folder = path.join(install, module .. ".swiftmodule")
             os.mkdir(folder)
             local header = module == "CoreML"
-                          and {"-import-objc-header", path.join(package:scriptdir(), "files", "CoreML", "CharonCoreML.h")}
+                          and {"-import-objc-header", path.join(package:scriptdir(), "files", "CoreML", "RevenantCoreML.h")}
                           or nil
             local argv = table.join(swift.runtime_flags({
                 architecture = package:arch(), deployment = minimum, sdk = sdk,
@@ -76,7 +76,7 @@ package("createml")
                          path.join(objects, module .. ".o")})
         end
 
-        package:setenv("CHARON_SWIFT_MODULES", install)
+        package:setenv("REVENANT_SWIFT_MODULES", install)
         os.cp(path.join(package:scriptdir(), "README.md"), package:installdir())
     end)
 

@@ -26,7 +26,7 @@ root=${DDR_ROOT:-$here/../../../..}
 port=$root/packages/a/apple-backports/UIKit/UITextDragPreviewRenderer11.m
 build=${DDR_BUILD:-$root/.agent-work/runs/renderer-differential-build}
 sdk=$(xcrun --show-sdk-path)
-port_name=CharonHostCopyTextDragPreviewRenderer
+port_name=RevenantHostCopyTextDragPreviewRenderer
 mkdir -p "$build"
 
 # The port's own file, on its own, with the rename. Its include path is the port's UIKit directory

@@ -1,11 +1,11 @@
-The overlay's calls that take a work item are available below iOS 8, and hand its flags to the release: charon@apple-compat
+The overlay's calls that take a work item are available below iOS 8, and hand its flags to the release: revenant@apple-compat
 carries dispatch_block_create and the rest of dispatch_block_* (packages/a/apple-compat/src/), so what Queue.swift,
 Dispatch.swift and Source.swift marked iOS 8, and asked #available(iOS 8.0) for at run time, is the same code on every
 release. Before this a barrier, a class of service or any other flag given to async(group:qos:flags:), sync(flags:),
 asyncAfter or DispatchGroup.notify was dropped below 8, and the closure was dispatched plainly. The two marks of iOS 8 over
 Queue.swift's class of service stay, and the paragraph after this one says why.
 
-The release's libdispatch reads no block's flags, so the shims' calls to it go through apple-compat's charon_dispatch_async,
+The release's libdispatch reads no block's flags, so the shims' calls to it go through apple-compat's revenant_dispatch_async,
 _sync, _group_async, _group_notify, _after and _source_set_event_handler, which submit a block made with
 DISPATCH_BLOCK_BARRIER, and run a source's event handler made so, as a barrier, as libdispatch-703 (iOS 10) and later do,
 and are the system's calls where the release has dispatch_block_create - which is what iOS 8 and 9 answer by, their
@@ -23,7 +23,7 @@ Taking the marks down is what the compiler refuses, at the deployment target thi
   Queue.swift:162:11: error: '__dispatch_queue_attr_make_with_qos_class' is only available in iOS 8.0 or newer
   Queue.swift:475:44: error: '__dispatch_queue_get_qos_class' is only available in iOS 8.0 or newer
 
-charon@apple-compat does answer both calls below 8 - dispatch_queue_attr_make_with_qos_class hands the attribute back as it
+revenant@apple-compat does answer both calls below 8 - dispatch_queue_attr_make_with_qos_class hands the attribute back as it
 was given, so the queue is the serial or concurrent one it would have been, and dispatch_queue_get_qos_class says it has no
 class (packages/a/apple-compat/src/dispatch_queue_attr_make_with_qos_class.c) - and a program that reaches either call
 through C gets the release's answer. What stays marked is the API the release itself marks: below 8 a queue asked for a
@@ -216,25 +216,25 @@ index 947d83d..a0c2693 100644
 +/* A work item's block carries its flags, and a release before iOS 8 reads none of them: apple-compat's calls submit a
 +   block made with DISPATCH_BLOCK_BARRIER, or run a source's handler made so, as a barrier there, and are the calls
 +   themselves where the release has dispatch_block_create. */
-+void charon_dispatch_async(dispatch_queue_t queue, __swift_shims_dispatch_block_t block);
-+void charon_dispatch_sync(dispatch_queue_t queue, __swift_shims_dispatch_block_t block);
-+void charon_dispatch_group_async(dispatch_group_t group, dispatch_queue_t queue, __swift_shims_dispatch_block_t block);
-+void charon_dispatch_group_notify(dispatch_group_t group, dispatch_queue_t queue, __swift_shims_dispatch_block_t block);
-+void charon_dispatch_after(dispatch_time_t when, dispatch_queue_t queue, __swift_shims_dispatch_block_t block);
-+void charon_dispatch_source_set_event_handler(dispatch_source_t source, __swift_shims_dispatch_block_t _Nullable block);
++void revenant_dispatch_async(dispatch_queue_t queue, __swift_shims_dispatch_block_t block);
++void revenant_dispatch_sync(dispatch_queue_t queue, __swift_shims_dispatch_block_t block);
++void revenant_dispatch_group_async(dispatch_group_t group, dispatch_queue_t queue, __swift_shims_dispatch_block_t block);
++void revenant_dispatch_group_notify(dispatch_group_t group, dispatch_queue_t queue, __swift_shims_dispatch_block_t block);
++void revenant_dispatch_after(dispatch_time_t when, dispatch_queue_t queue, __swift_shims_dispatch_block_t block);
++void revenant_dispatch_source_set_event_handler(dispatch_source_t source, __swift_shims_dispatch_block_t _Nullable block);
 +
  static inline void _swift_dispatch_async(
      dispatch_queue_t queue,
      __swift_shims_dispatch_block_t block) {
 -  dispatch_async(queue, block);
-+  charon_dispatch_async(queue, block);
++  revenant_dispatch_async(queue, block);
  }
  
  static inline void _swift_dispatch_sync(
      dispatch_queue_t queue,
      __swift_shims_dispatch_block_t block) {
 -  dispatch_sync(queue, block);
-+  charon_dispatch_sync(queue, block);
++  revenant_dispatch_sync(queue, block);
  }
  
  static inline void _swift_dispatch_barrier_async(
@@ -243,7 +243,7 @@ index 947d83d..a0c2693 100644
      dispatch_queue_t queue,
      __swift_shims_dispatch_block_t block) {
 -  dispatch_group_async((dispatch_group_t)group, queue, block);
-+  charon_dispatch_group_async((dispatch_group_t)group, queue, block);
++  revenant_dispatch_group_async((dispatch_group_t)group, queue, block);
  }
  
  static inline void _swift_dispatch_group_notify(
@@ -251,7 +251,7 @@ index 947d83d..a0c2693 100644
      dispatch_queue_t queue,
      __swift_shims_dispatch_block_t block) {
 -  dispatch_group_notify(group, queue, block);
-+  charon_dispatch_group_notify(group, queue, block);
++  revenant_dispatch_group_notify(group, queue, block);
  }
  
  static inline void _swift_dispatch_after(
@@ -259,7 +259,7 @@ index 947d83d..a0c2693 100644
      dispatch_queue_t queue,
      __swift_shims_dispatch_block_t block) {
 -  dispatch_after(when, queue, block);
-+  charon_dispatch_after(when, queue, block);
++  revenant_dispatch_after(when, queue, block);
  }
  
  
@@ -268,7 +268,7 @@ index 947d83d..a0c2693 100644
      dispatch_source_t source,
      __swift_shims_dispatch_block_t _Nullable block) {
 -  dispatch_source_set_event_handler(source, block);
-+  charon_dispatch_source_set_event_handler(source, block);
++  revenant_dispatch_source_set_event_handler(source, block);
  }
  
  static inline void _swift_dispatch_source_set_cancel_handler(

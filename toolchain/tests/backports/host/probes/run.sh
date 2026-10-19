@@ -4,7 +4,7 @@ here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 FOUNDATION=${FOUNDATION:-$here/../../../../packages/a/apple-backports/Foundation}
 harness=${PROBES_HARNESS:-$here/../../device}
-build=${PROBES_BUILD:-$(runs_folder charon-probes-host)}
+build=${PROBES_BUILD:-$(runs_folder revenant-probes-host)}
 sources="DCDevice.m DCErrorDomain.m ARConfiguration.m ARImageTrackingConfiguration.m"
 sdk=$(xcrun --show-sdk-path)
 target="-target arm64-apple-ios15.0-macabi -isysroot $sdk -iframework $sdk/System/iOSSupport/System/Library/Frameworks"
@@ -12,7 +12,7 @@ renames=""
 for name in DCDevice DCErrorDomain ARConfiguration ARWorldTrackingConfiguration AROrientationTrackingConfiguration ARFaceTrackingConfiguration \
             ARImageTrackingConfiguration ARObjectScanningConfiguration ARErrorDomain ARReferenceObjectArchiveExtension NFCReaderSession \
             NFCNDEFReaderSession NFCISO15693ReaderSession NFCErrorDomain; do
-    renames="$renames -D$name=CharonHost$name"
+    renames="$renames -D$name=RevenantHost$name"
 done
 rm -rf "$build"
 mkdir -p "$build"

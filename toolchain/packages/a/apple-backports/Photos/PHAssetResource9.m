@@ -1,9 +1,9 @@
-#import "CharonPhotos.h"
+#import "RevenantPhotos.h"
 
 #pragma clang diagnostic ignored "-Wobjc-missing-property-synthesis"
 
-@interface PHAssetResource (Charon)
-- (instancetype)initWithCharonAsset:(PHAsset *)asset;
+@interface PHAssetResource (Revenant)
+- (instancetype)initWithRevenantAsset:(PHAsset *)asset;
 @end
 
 @implementation PHAssetResource {
@@ -13,12 +13,12 @@
     NSString *_originalFilename;
 }
 
-- (instancetype)initWithCharonAsset:(PHAsset *)asset
+- (instancetype)initWithRevenantAsset:(PHAsset *)asset
 {
     self = [super init];
     if (!self)
         return nil;
-    ALAssetRepresentation *representation = [asset charon_asset].defaultRepresentation;
+    ALAssetRepresentation *representation = [asset revenant_asset].defaultRepresentation;
     _type = asset.mediaType == PHAssetMediaTypeVideo ? PHAssetResourceTypeVideo : PHAssetResourceTypePhoto;
     _assetLocalIdentifier = asset.localIdentifier;
     _uniformTypeIdentifier = representation.UTI;
@@ -48,9 +48,9 @@
 
 + (NSArray<PHAssetResource *> *)assetResourcesForAsset:(PHAsset *)asset
 {
-    if (![asset charon_asset])
+    if (![asset revenant_asset])
         return @[];
-    return @[[[self alloc] initWithCharonAsset:asset]];
+    return @[[[self alloc] initWithRevenantAsset:asset]];
 }
 
 + (NSArray<PHAssetResource *> *)assetResourcesForLivePhoto:(PHLivePhoto *)livePhoto

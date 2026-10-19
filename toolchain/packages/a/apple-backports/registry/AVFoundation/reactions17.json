@@ -10,7 +10,7 @@
       "reason": "the port's bands run on an iPhone 4S and an iPad 2, and a reaction effect is a camera feature of the devices Apple shipped from 2016 on, so this camera has none of it: the 6.1.3 armv7 cache's AVCaptureDevice answers none of the reaction selectors either (tools/corpus/objc-inventory.lua), so no type is one that can be performed",
       "effect": "raises NSInvalidArgumentException naming the selector and saying availableReactionTypes is empty. The header's rule is exact: \"The reactionType requested must be one of those listed in availableReactionTypes or an exception will be thrown\" (AVCaptureDevice.h:2496), and the list is empty here. The header names no exception for it; NSInvalidArgumentException is the name the two unsupported-argument refusals of this host's own class raise, measured",
       "facts": "facts/AVFoundation/CaptureDeviceReactions.md",
-      "source": "the header of the SDK 26.2 (AVCaptureDevice.h:2485-2498), transcribed into CharonAVCaptureDeviceReactions17.h"
+      "source": "the header of the SDK 26.2 (AVCaptureDevice.h:2485-2498), transcribed into RevenantAVCaptureDeviceReactions17.h"
     },
     {
       "api": "AVCaptureDevice.availableReactionTypes",
@@ -21,7 +21,7 @@
       "reason": "the port's bands run on an iPhone 4S and an iPad 2, and a reaction effect is a camera feature of the devices Apple shipped from 2016 on, so this camera has none of it: the 6.1.3 armv7 cache's AVCaptureDevice answers none of the reaction selectors either (tools/corpus/objc-inventory.lua). The header's own words for the case are that the list is of the types that can be passed to -performEffectForReaction: and that it \"may differ between devices\"",
       "effect": "an empty NSSet, the list for a camera that can perform none. Measured on this host's own camera: it answers all eight types, for the same reason it answers them - that camera has the hardware. An application that reads an empty set here knows it cannot ask for a reaction, and -performEffectForReaction: agrees",
       "facts": "facts/AVFoundation/CaptureDeviceReactions.md",
-      "source": "the header of the SDK 26.2 (AVCaptureDevice.h:2475-2482), transcribed into CharonAVCaptureDeviceReactions17.h, because SDK 16.4 declares neither it nor AVCaptureReactions.h"
+      "source": "the header of the SDK 26.2 (AVCaptureDevice.h:2475-2482), transcribed into RevenantAVCaptureDeviceReactions17.h, because SDK 16.4 declares neither it nor AVCaptureReactions.h"
     },
     {
       "api": "AVCaptureDevice.canPerformReactionEffects",
@@ -32,7 +32,7 @@
       "reason": "the port's bands run on an iPhone 4S and an iPad 2, and a reaction effect is a camera feature of the devices Apple shipped from 2016 on, so this camera has none of it: the 6.1.3 armv7 cache's AVCaptureDevice answers none of the reaction selectors either (tools/corpus/objc-inventory.lua)",
       "effect": "NO. The header: \"This readonly property returns YES when resources for reactions are available on the device instance\" (AVCaptureDevice.h:2471). Nothing on this release has such resources, so nothing renders and every -performEffectForReaction: is refused",
       "facts": "facts/AVFoundation/CaptureDeviceReactions.md",
-      "source": "the header of the SDK 26.2 (AVCaptureDevice.h:2465-2472), transcribed into CharonAVCaptureDeviceReactions17.h"
+      "source": "the header of the SDK 26.2 (AVCaptureDevice.h:2465-2472), transcribed into RevenantAVCaptureDeviceReactions17.h"
     },
     {
       "api": "AVCaptureDevice.reactionEffectGesturesEnabled",
@@ -43,7 +43,7 @@
       "reason": "a CLASS property whose value \"changes to reflect the Gestures state in Control Center\" (AVCaptureDevice.h:2458), a setting no release of this port has, so what it answers is the documented default and the application's own override of it",
       "effect": "YES by default - the header: \"By default, gesture detection is enabled\" (:2461) - and whatever NSCameraReactionEffectGesturesEnabledDefault in the application's Info.plist says from 17.4 on (:2462-2466). The host answers NO because it reflects this Mac's Control Center setting; a release with no such setting stays at its default, and gesture detection would do nothing here in any case because -canPerformReactionEffects is NO",
       "facts": "facts/AVFoundation/CaptureDeviceReactions.md",
-      "source": "the header of the SDK 26.2 (AVCaptureDevice.h:2455-2466), transcribed into CharonAVCaptureDeviceReactions17.h; the default and the override both measured by tests/backports/host/avf-capabilities"
+      "source": "the header of the SDK 26.2 (AVCaptureDevice.h:2455-2466), transcribed into RevenantAVCaptureDeviceReactions17.h; the default and the override both measured by tests/backports/host/avf-capabilities"
     },
     {
       "api": "AVCaptureDevice.reactionEffectsEnabled",
@@ -54,7 +54,7 @@
       "reason": "a CLASS property about the application, not the hardware: the header's iOS rule is \"enabled by default for video conferencing applications (apps that use \\\"voip\\\" as one of their UIBackgroundModes)\", with NSCameraReactionEffectsEnabled in Info.plist as the opt-in for the others (AVCaptureDevice.h:2448-2450). Both are the application's own Info.plist, so both are read",
       "effect": "YES when the application's Info.plist has UIBackgroundModes containing \"voip\" or NSCameraReactionEffectsEnabled true, and NO otherwise - the header's rule read through NSBundle, not a constant in either direction. It is the application half of the pair: what renders still needs -canPerformReactionEffects, which is NO here. The host answers YES because its own rule is \"enabled by default for all applications\" on macOS, which is another platform's rule",
       "facts": "facts/AVFoundation/CaptureDeviceReactions.md",
-      "source": "the header of the SDK 26.2 (AVCaptureDevice.h:2437-2452), transcribed into CharonAVCaptureDeviceReactions17.h; both branches of the rule measured by tests/backports/host/avf-capabilities, which runs the port's own objects against four Info.plists"
+      "source": "the header of the SDK 26.2 (AVCaptureDevice.h:2437-2452), transcribed into RevenantAVCaptureDeviceReactions17.h; both branches of the rule measured by tests/backports/host/avf-capabilities, which runs the port's own objects against four Info.plists"
     },
     {
       "api": "AVCaptureDevice.reactionEffectsInProgress",
@@ -65,7 +65,7 @@
       "reason": "the port's bands run on an iPhone 4S and an iPad 2, and a reaction effect is a camera feature of the devices Apple shipped from 2016 on, so this camera has none of it: the 6.1.3 armv7 cache's AVCaptureDevice answers none of the reaction selectors either (tools/corpus/objc-inventory.lua)",
       "effect": "an empty array, and the host's own camera answers an empty array here as well (measured): nothing can start a reaction on either, so none is running. The array is empty because the port cannot start one, not because the port does not watch for one",
       "facts": "facts/AVFoundation/CaptureDeviceReactions.md",
-      "source": "the header of the SDK 26.2 (AVCaptureDevice.h), transcribed into CharonAVCaptureDeviceReactions17.h"
+      "source": "the header of the SDK 26.2 (AVCaptureDevice.h), transcribed into RevenantAVCaptureDeviceReactions17.h"
     },
     {
       "api": "AVCaptureDevice.systemPreferredCamera",
@@ -76,7 +76,7 @@
       "reason": "the camera the system prefers, which the header builds out of userPreferredCamera and \"other factors, such as camera suspension and Apple cameras appearing that should be automatically chosen\" (AVCaptureDevice.h:674); the other factors this release has are the ones its own +defaultDeviceWithMediaType: answers, and the port asks that function rather than naming a camera",
       "effect": "the user's choice when there is one, and otherwise the release's own best camera, which on the devices of this port's bands is the one on the back; nil only with no camera at all. The host's own answer is nil here and is NOT Apple's answer for this row: this process's camera authorization is notDetermined, printed beside it by the harness, and a process that was never granted access answers nil",
       "facts": "facts/AVFoundation/CaptureDeviceReactions.md",
-      "source": "the header of the SDK 26.2 (AVCaptureDevice.h), transcribed into CharonAVCaptureDeviceReactions17.h"
+      "source": "the header of the SDK 26.2 (AVCaptureDevice.h), transcribed into RevenantAVCaptureDeviceReactions17.h"
     },
     {
       "api": "AVCaptureDevice.userPreferredCamera",
@@ -84,10 +84,10 @@
       "introduced": "17.0",
       "minimum": "6.0",
       "status": "implemented",
-      "reason": "the camera the user chose, which the header records as a class property with a setter and as persisting \"across app launches and reboots\" behind a \"short history\" (AVCaptureDevice.h:661-662); the release's own store is the system's and is not in the application's domain - measured on this host: setting the property adds 0 keys to the bundle's own defaults - so the port keeps the choice in the application's NSUserDefaults under the key CharonCaptureUserPreferredCameraHistory",
+      "reason": "the camera the user chose, which the header records as a class property with a setter and as persisting \"across app launches and reboots\" behind a \"short history\" (AVCaptureDevice.h:661-662); the release's own store is the system's and is not in the application's domain - measured on this host: setting the property adds 0 keys to the bundle's own defaults - so the port keeps the choice in the application's NSUserDefaults under the key RevenantCaptureUserPreferredCameraHistory",
       "effect": "the most recent entry of the short history that is in the list of connected cameras now, and never an entry that is not; nil while nothing was ever chosen, which is what the host answers too (measured); the release's own best camera once the history is exhausted, which is nil itself on a device with no camera; and a nil set adds nothing, so a choice made before it survives it (measured on the host: after setting nil the getter still answers the camera it was given)",
       "facts": "facts/AVFoundation/CaptureDeviceReactions.md",
-      "source": "the header of the SDK 26.2 (AVCaptureDevice.h), transcribed into CharonAVCaptureDeviceReactions17.h"
+      "source": "the header of the SDK 26.2 (AVCaptureDevice.h), transcribed into RevenantAVCaptureDeviceReactions17.h"
     },
     {
       "api": "AVCaptureDeviceFormat.reactionEffectsSupported",
@@ -98,7 +98,7 @@
       "reason": "the port's bands run on an iPhone 4S and an iPad 2, and a reaction effect is a camera feature of the devices Apple shipped from 2016 on, so this camera has none of it: the 6.1.3 armv7 cache's AVCaptureDevice answers none of the reaction selectors either (tools/corpus/objc-inventory.lua), and a format cannot report what its camera cannot do",
       "effect": "NO for every format of this camera. The host's own camera answers YES for all seven of its formats (measured), because it has the hardware",
       "facts": "facts/AVFoundation/CaptureDeviceReactions.md",
-      "source": "the header of the SDK 26.2 (AVCaptureDeviceFormat), transcribed into CharonAVCaptureDeviceReactions17.h"
+      "source": "the header of the SDK 26.2 (AVCaptureDeviceFormat), transcribed into RevenantAVCaptureDeviceReactions17.h"
     },
     {
       "api": "AVCaptureDeviceFormat.supportedVideoZoomRangesForDepthDataDelivery",
@@ -109,7 +109,7 @@
       "reason": "the zoom ranges that feed depth data delivery; the 6.1.3 armv7 cache's AVCaptureDeviceFormat answers neither this selector nor its companion, and no device of this port's bands has a depth sensor",
       "effect": "an empty array - and this host's own camera answers an empty array here as well (measured), so this row's answer is not the port's judgement about its own hardware alone",
       "facts": "facts/AVFoundation/CaptureDeviceReactions.md",
-      "source": "the header of the SDK 26.2 (AVCaptureDeviceFormat), transcribed into CharonAVCaptureDeviceReactions17.h"
+      "source": "the header of the SDK 26.2 (AVCaptureDeviceFormat), transcribed into RevenantAVCaptureDeviceReactions17.h"
     },
     {
       "api": "AVCaptureDeviceFormat.videoFrameRateRangeForReactionEffectsInProgress",
@@ -120,7 +120,7 @@
       "reason": "the frame rate range a format runs a reaction at, which a format reports only when -reactionEffectsSupported is YES; this one is NO (the hardware, see that row)",
       "effect": "nil, the header's own nullability for the case. Every format of the host's camera reports reactionEffectsSupported YES and a 15-30 AVFrameRateRange (measured, seven of seven), so the NO case cannot be read off this host and the pairing comes from the header's nullable",
       "facts": "facts/AVFoundation/CaptureDeviceReactions.md",
-      "source": "the header of the SDK 26.2 (AVCaptureDeviceFormat), transcribed into CharonAVCaptureDeviceReactions17.h"
+      "source": "the header of the SDK 26.2 (AVCaptureDeviceFormat), transcribed into RevenantAVCaptureDeviceReactions17.h"
     },
     {
       "api": "AVCaptureDeviceFormat.zoomFactorsOutsideOfVideoZoomRangesForDepthDeliverySupported",
@@ -131,7 +131,7 @@
       "reason": "the companion of the row above, and the 6.1.3 armv7 cache's AVCaptureDeviceFormat answers neither",
       "effect": "NO, and this host's own camera answers NO here as well (measured)",
       "facts": "facts/AVFoundation/CaptureDeviceReactions.md",
-      "source": "the header of the SDK 26.2 (AVCaptureDevice.h, AVCaptureDeviceFormat), transcribed into CharonAVCaptureDeviceReactions17.h"
+      "source": "the header of the SDK 26.2 (AVCaptureDevice.h, AVCaptureDeviceFormat), transcribed into RevenantAVCaptureDeviceReactions17.h"
     }
   ]
 }

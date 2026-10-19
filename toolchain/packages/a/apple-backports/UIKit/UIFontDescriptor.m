@@ -13,24 +13,24 @@ static struct {
     CTFontRef (*copyWithTraits)(CTFontRef, CGFloat, const CGAffineTransform *, CTFontSymbolicTraits, CTFontSymbolicTraits);
     CFStringRef (*postScriptName)(CTFontRef);
     CTFontSymbolicTraits (*symbolicTraits)(CTFontRef);
-} charon_ct;
+} revenant_ct;
 
-static void charon_ct_load(void)
+static void revenant_ct_load(void)
 {
     static dispatch_once_t once;
     dispatch_once(&once, ^{
-        charon_ct.descriptorWithAttributes = dlsym(RTLD_DEFAULT, "CTFontDescriptorCreateWithAttributes");
-        charon_ct.descriptorCopyAttribute = dlsym(RTLD_DEFAULT, "CTFontDescriptorCopyAttribute");
-        charon_ct.descriptorCopyAttributes = dlsym(RTLD_DEFAULT, "CTFontDescriptorCopyAttributes");
-        charon_ct.matching = dlsym(RTLD_DEFAULT, "CTFontDescriptorCreateMatchingFontDescriptors");
-        charon_ct.fontWithDescriptor = dlsym(RTLD_DEFAULT, "CTFontCreateWithFontDescriptor");
-        charon_ct.copyWithTraits = dlsym(RTLD_DEFAULT, "CTFontCreateCopyWithSymbolicTraits");
-        charon_ct.postScriptName = dlsym(RTLD_DEFAULT, "CTFontCopyPostScriptName");
-        charon_ct.symbolicTraits = dlsym(RTLD_DEFAULT, "CTFontGetSymbolicTraits");
+        revenant_ct.descriptorWithAttributes = dlsym(RTLD_DEFAULT, "CTFontDescriptorCreateWithAttributes");
+        revenant_ct.descriptorCopyAttribute = dlsym(RTLD_DEFAULT, "CTFontDescriptorCopyAttribute");
+        revenant_ct.descriptorCopyAttributes = dlsym(RTLD_DEFAULT, "CTFontDescriptorCopyAttributes");
+        revenant_ct.matching = dlsym(RTLD_DEFAULT, "CTFontDescriptorCreateMatchingFontDescriptors");
+        revenant_ct.fontWithDescriptor = dlsym(RTLD_DEFAULT, "CTFontCreateWithFontDescriptor");
+        revenant_ct.copyWithTraits = dlsym(RTLD_DEFAULT, "CTFontCreateCopyWithSymbolicTraits");
+        revenant_ct.postScriptName = dlsym(RTLD_DEFAULT, "CTFontCopyPostScriptName");
+        revenant_ct.symbolicTraits = dlsym(RTLD_DEFAULT, "CTFontGetSymbolicTraits");
     });
 }
 
-static const UIFontDescriptorSymbolicTraits CharonTraitMask = UIFontDescriptorTraitItalic | UIFontDescriptorTraitBold | UIFontDescriptorTraitExpanded | UIFontDescriptorTraitCondensed;
+static const UIFontDescriptorSymbolicTraits RevenantTraitMask = UIFontDescriptorTraitItalic | UIFontDescriptorTraitBold | UIFontDescriptorTraitExpanded | UIFontDescriptorTraitCondensed;
 
 @implementation UIFontDescriptor {
     NSDictionary *_attributes;
@@ -91,20 +91,20 @@ static const UIFontDescriptorSymbolicTraits CharonTraitMask = UIFontDescriptorTr
     return [NSString stringWithFormat:@"<UIFontDescriptor: %p> = %@", self, _attributes];
 }
 
-- (CTFontDescriptorRef)charon_descriptor
+- (CTFontDescriptorRef)revenant_descriptor
 {
-    charon_ct_load();
+    revenant_ct_load();
     if (!_descriptor)
-        _descriptor = charon_ct.descriptorWithAttributes((__bridge CFDictionaryRef)_attributes);
+        _descriptor = revenant_ct.descriptorWithAttributes((__bridge CFDictionaryRef)_attributes);
     return _descriptor;
 }
 
-- (CTFontRef)charon_fontWithSize:(CGFloat)size
+- (CTFontRef)revenant_fontWithSize:(CGFloat)size
 {
-    charon_ct_load();
+    revenant_ct_load();
     CGAffineTransform matrix = self.matrix;
     BOOL identity = CGAffineTransformIsIdentity(matrix);
-    return charon_ct.fontWithDescriptor([self charon_descriptor], size > 0 ? size : (self.pointSize > 0 ? self.pointSize : 12), identity ? NULL : &matrix);
+    return revenant_ct.fontWithDescriptor([self revenant_descriptor], size > 0 ? size : (self.pointSize > 0 ? self.pointSize : 12), identity ? NULL : &matrix);
 }
 
 - (NSString *)postscriptName
@@ -112,8 +112,8 @@ static const UIFontDescriptorSymbolicTraits CharonTraitMask = UIFontDescriptorTr
     NSString *name = _attributes[UIFontDescriptorNameAttribute];
     if (name)
         return name;
-    CTFontRef font = [self charon_fontWithSize:0];
-    NSString *resolved = font ? CFBridgingRelease(charon_ct.postScriptName(font)) : nil;
+    CTFontRef font = [self revenant_fontWithSize:0];
+    NSString *resolved = font ? CFBridgingRelease(revenant_ct.postScriptName(font)) : nil;
     if (font)
         CFRelease(font);
     return resolved;
@@ -132,9 +132,9 @@ static const UIFontDescriptorSymbolicTraits CharonTraitMask = UIFontDescriptorTr
 
 - (UIFontDescriptorSymbolicTraits)symbolicTraits
 {
-    charon_ct_load();
-    CTFontRef font = [self charon_fontWithSize:0];
-    UIFontDescriptorSymbolicTraits traits = font ? charon_ct.symbolicTraits(font) : 0;
+    revenant_ct_load();
+    CTFontRef font = [self revenant_fontWithSize:0];
+    UIFontDescriptorSymbolicTraits traits = font ? revenant_ct.symbolicTraits(font) : 0;
     if (font)
         CFRelease(font);
     return traits;
@@ -147,7 +147,7 @@ static const UIFontDescriptorSymbolicTraits CharonTraitMask = UIFontDescriptorTr
         return value;
     if (![attribute isKindOfClass:[NSString class]])
         return nil;
-    return CFBridgingRelease(charon_ct.descriptorCopyAttribute([self charon_descriptor], (__bridge CFStringRef)attribute));
+    return CFBridgingRelease(revenant_ct.descriptorCopyAttribute([self revenant_descriptor], (__bridge CFStringRef)attribute));
 }
 
 - (NSDictionary *)fontAttributes
@@ -157,11 +157,11 @@ static const UIFontDescriptorSymbolicTraits CharonTraitMask = UIFontDescriptorTr
 
 - (NSArray *)matchingFontDescriptorsWithMandatoryKeys:(NSSet *)mandatoryKeys
 {
-    charon_ct_load();
-    CFArrayRef matches = charon_ct.matching([self charon_descriptor], (__bridge CFSetRef)mandatoryKeys);
+    revenant_ct_load();
+    CFArrayRef matches = revenant_ct.matching([self revenant_descriptor], (__bridge CFSetRef)mandatoryKeys);
     NSMutableArray *result = [NSMutableArray array];
     for (id match in CFBridgingRelease(matches)) {
-        NSDictionary *attributes = CFBridgingRelease(charon_ct.descriptorCopyAttributes((__bridge CTFontDescriptorRef)match));
+        NSDictionary *attributes = CFBridgingRelease(revenant_ct.descriptorCopyAttributes((__bridge CTFontDescriptorRef)match));
         if (attributes)
             [result addObject:[[UIFontDescriptor alloc] initWithFontAttributes:attributes]];
     }
@@ -232,17 +232,17 @@ static const UIFontDescriptorSymbolicTraits CharonTraitMask = UIFontDescriptorTr
 
 - (UIFontDescriptor *)fontDescriptorWithSymbolicTraits:(UIFontDescriptorSymbolicTraits)symbolicTraits
 {
-    charon_ct_load();
+    revenant_ct_load();
     CGFloat size = self.pointSize;
-    CTFontRef font = [self charon_fontWithSize:size];
+    CTFontRef font = [self revenant_fontWithSize:size];
     if (!font)
         return nil;
-    UIFontDescriptorSymbolicTraits current = charon_ct.symbolicTraits(font);
-    CTFontRef changed = ((current ^ symbolicTraits) & CharonTraitMask) ? charon_ct.copyWithTraits(font, size > 0 ? size : 12, NULL, symbolicTraits & CharonTraitMask, CharonTraitMask) : (CTFontRef)CFRetain(font);
+    UIFontDescriptorSymbolicTraits current = revenant_ct.symbolicTraits(font);
+    CTFontRef changed = ((current ^ symbolicTraits) & RevenantTraitMask) ? revenant_ct.copyWithTraits(font, size > 0 ? size : 12, NULL, symbolicTraits & RevenantTraitMask, RevenantTraitMask) : (CTFontRef)CFRetain(font);
     CFRelease(font);
     if (!changed)
         return nil;
-    NSString *name = CFBridgingRelease(charon_ct.postScriptName(changed));
+    NSString *name = CFBridgingRelease(revenant_ct.postScriptName(changed));
     CFRelease(changed);
     NSMutableDictionary *attributes = [NSMutableDictionary dictionaryWithObject:name forKey:UIFontDescriptorNameAttribute];
     if (size > 0)
@@ -252,7 +252,7 @@ static const UIFontDescriptorSymbolicTraits CharonTraitMask = UIFontDescriptorTr
 
 @end
 
-@implementation UIFont (CharonFontDescriptor)
+@implementation UIFont (RevenantFontDescriptor)
 
 - (UIFontDescriptor *)fontDescriptor
 {
@@ -261,29 +261,29 @@ static const UIFontDescriptorSymbolicTraits CharonTraitMask = UIFontDescriptorTr
 
 @end
 
-static UIFont *charon_font_with_descriptor(UIFontDescriptor *descriptor, CGFloat size)
+static UIFont *revenant_font_with_descriptor(UIFontDescriptor *descriptor, CGFloat size)
 {
     CGFloat points = size > 0 ? size : (descriptor.pointSize > 0 ? descriptor.pointSize : 12);
-    CTFontRef ct = [descriptor charon_fontWithSize:points];
-    NSString *name = ct ? CFBridgingRelease(charon_ct.postScriptName(ct)) : nil;
+    CTFontRef ct = [descriptor revenant_fontWithSize:points];
+    NSString *name = ct ? CFBridgingRelease(revenant_ct.postScriptName(ct)) : nil;
     if (ct)
         CFRelease(ct);
     return [UIFont fontWithName:name size:points] ?: [UIFont systemFontOfSize:points];
 }
 
-@implementation UIFont (CharonFontWithDescriptor)
+@implementation UIFont (RevenantFontWithDescriptor)
 
 + (UIFont *)fontWithDescriptor:(UIFontDescriptor *)descriptor size:(CGFloat)pointSize
 {
-    return [descriptor isKindOfClass:[UIFontDescriptor class]] ? charon_font_with_descriptor(descriptor, pointSize) : nil;
+    return [descriptor isKindOfClass:[UIFontDescriptor class]] ? revenant_font_with_descriptor(descriptor, pointSize) : nil;
 }
 
 @end
 
-@interface CharonFontDescriptorInstaller : NSObject
+@interface RevenantFontDescriptorInstaller : NSObject
 @end
 
-@implementation CharonFontDescriptorInstaller
+@implementation RevenantFontDescriptorInstaller
 
 + (void)load
 {
@@ -295,7 +295,7 @@ static UIFont *charon_font_with_descriptor(UIFontDescriptor *descriptor, CGFloat
     UIFont *(*original)(id, SEL, id, CGFloat) = (UIFont * (*)(id, SEL, id, CGFloat))method_getImplementation(method);
     method_setImplementation(method, imp_implementationWithBlock(^UIFont *(id self_, id descriptor, CGFloat size) {
         if ([descriptor isKindOfClass:[UIFontDescriptor class]])
-            return charon_font_with_descriptor(descriptor, size);
+            return revenant_font_with_descriptor(descriptor, size);
         return original(self_, selector, descriptor, size);
     }));
 }

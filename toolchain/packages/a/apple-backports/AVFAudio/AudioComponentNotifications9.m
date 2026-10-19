@@ -1,4 +1,4 @@
 #import <AudioToolbox/AudioComponent.h>
-#import "CharonAudioToolboxNames.h"
+#import "RevenantAudioToolboxNames.h"
 
-const CFStringRef kAudioComponentInstanceInvalidationNotification = (__bridge CFStringRef)CharonAudioComponentInstanceInvalidatedName;
+const CFStringRef kAudioComponentInstanceInvalidationNotification = (__bridge CFStringRef)RevenantAudioComponentInstanceInvalidatedName;

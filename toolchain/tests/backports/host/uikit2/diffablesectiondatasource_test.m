@@ -1,7 +1,7 @@
 #import <UIKit/UIKit.h>
 #import "check.h"
 
-void charon_windowed_run(UIWindow *window);
+void revenant_windowed_run(UIWindow *window);
 
 static uint64_t state = 0x510E527FADE682D1ull;
 
@@ -14,7 +14,7 @@ static uint32_t next(void)
 static NSString *normalized(NSString *text)
 {
     NSMutableString *result = [text mutableCopy];
-    [result replaceOccurrencesOfString:@"CharonHost" withString:@"" options:0 range:NSMakeRange(0, result.length)];
+    [result replaceOccurrencesOfString:@"RevenantHost" withString:@"" options:0 range:NSMakeRange(0, result.length)];
     for (NSString *pattern in @[@"0x[0-9a-f]+", @"[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}"]) {
         NSRegularExpression *expression = [NSRegularExpression regularExpressionWithPattern:pattern options:0 error:NULL];
         [result setString:[expression stringByReplacingMatchesInString:result options:0 range:NSMakeRange(0, result.length) withTemplate:[pattern hasPrefix:@"0x"] ? @"0x" : @"GEN"]];
@@ -54,10 +54,10 @@ static NSArray *randomSection(void)
     return @[roots, children, expanded];
 }
 
-void charon_windowed_run(UIWindow *window)
+void revenant_windowed_run(UIWindow *window)
 {
-    Class ourCollection = NSClassFromString(@"CharonHostUICollectionViewDiffableDataSource"), ourSnapshot = NSClassFromString(@"CharonHostNSDiffableDataSourceSnapshot"), ourSection = NSClassFromString(@"CharonHostNSDiffableDataSourceSectionSnapshot");
-    Class ourReordering = NSClassFromString(@"CharonHostUICollectionViewDiffableDataSourceReorderingHandlers"), ourHandlers = NSClassFromString(@"CharonHostUICollectionViewDiffableDataSourceSectionSnapshotHandlers");
+    Class ourCollection = NSClassFromString(@"RevenantHostUICollectionViewDiffableDataSource"), ourSnapshot = NSClassFromString(@"RevenantHostNSDiffableDataSourceSnapshot"), ourSection = NSClassFromString(@"RevenantHostNSDiffableDataSourceSectionSnapshot");
+    Class ourReordering = NSClassFromString(@"RevenantHostUICollectionViewDiffableDataSourceReorderingHandlers"), ourHandlers = NSClassFromString(@"RevenantHostUICollectionViewDiffableDataSourceSectionSnapshotHandlers");
     CHECK(ourCollection != Nil && ourSection != Nil && ourReordering != Nil && ourHandlers != Nil, "the port defines the 14.0 classes");
     for (NSString *name in @[@"canReorderItemHandler", @"willReorderHandler", @"didReorderHandler"])
         CHECK([ourReordering instancesRespondToSelector:NSSelectorFromString(name)] == [UICollectionViewDiffableDataSourceReorderingHandlers instancesRespondToSelector:NSSelectorFromString(name)], "the reordering handlers answer the same properties");
@@ -173,5 +173,5 @@ void charon_windowed_run(UIWindow *window)
     printf("section data sources: compared %lu applies, %lu differing\n", (unsigned long)total, (unsigned long)wrong);
     for (NSString *sample in samples)
         printf("  %s\n", sample.UTF8String);
-    charon_check(wrong == 0, "applying a section snapshot and asking for one answer as the system's do", [NSString stringWithFormat:@"%lu differ", (unsigned long)wrong]);
+    revenant_check(wrong == 0, "applying a section snapshot and asking for one answer as the system's do", [NSString stringWithFormat:@"%lu differ", (unsigned long)wrong]);
 }

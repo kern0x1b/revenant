@@ -1,7 +1,7 @@
 #import <Foundation/Foundation.h>
 #import <Metal/Metal.h>
 #import <MetalPerformanceShaders/MetalPerformanceShaders.h>
-#import "CharonNNReduceReference.h"
+#import "RevenantNNReduceReference.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -10,7 +10,7 @@
 NSUInteger gCompared = 0;
 NSUInteger gMismatches = 0;
 
-static id<MTLDevice> CharonDevice(void)
+static id<MTLDevice> RevenantDevice(void)
 {
     id<MTLDevice> device = MTLCreateSystemDefaultDevice();
     if (!device) {
@@ -30,7 +30,7 @@ static const float kSource[3 * 4 * 4] = {
 #define COLS 4
 #define CHANNELS 4
 
-static MPSImage *CharonMakeSource(id<MTLDevice> device)
+static MPSImage *RevenantMakeSource(id<MTLDevice> device)
 {
     MPSImageDescriptor *descriptor =
         [MPSImageDescriptor imageDescriptorWithChannelFormat:MPSImageFeatureChannelFormatFloat32
@@ -43,14 +43,14 @@ static MPSImage *CharonMakeSource(id<MTLDevice> device)
     return image;
 }
 
-static void CharonReadBack(MPSImage *image, float *out, NSUInteger cols, NSUInteger rows, NSUInteger channels)
+static void RevenantReadBack(MPSImage *image, float *out, NSUInteger cols, NSUInteger rows, NSUInteger channels)
 {
     memset(out, 0, cols * rows * channels * sizeof(float));
     [[image texture] getBytes:out bytesPerRow:cols * channels * sizeof(float)
                      fromRegion:MTLRegionMake2D(0, 0, cols, rows) mipmapLevel:0];
 }
 
-static Class CharonReduceClass(int index)
+static Class RevenantReduceClass(int index)
 {
     Class classes[12] = {
         [MPSNNReduceRowMin class],              [MPSNNReduceColumnMin class],
@@ -63,7 +63,7 @@ static Class CharonReduceClass(int index)
     return classes[index];
 }
 
-static const char *CharonReduceName(int index)
+static const char *RevenantReduceName(int index)
 {
     static const char *names[12] = {
         "reduce-row-min",              "reduce-column-min",              "reduce-feature-channels-min",
@@ -74,28 +74,28 @@ static const char *CharonReduceName(int index)
     return names[index];
 }
 
-static int CharonReduceByColumn(int index)  { return (index % 3) == 1; }
-static int CharonReduceByFeature(int index) { return (index % 3) == 2; }
-static CharonNNReduceOp CharonReduceOp(int index) { return (CharonNNReduceOp)(index / 3); }
+static int RevenantReduceByColumn(int index)  { return (index % 3) == 1; }
+static int RevenantReduceByFeature(int index) { return (index % 3) == 2; }
+static RevenantNNReduceOp RevenantReduceOp(int index) { return (RevenantNNReduceOp)(index / 3); }
 
 int main(int argc, const char **argv)
 {
     int fromSystem = (argc > 1 && strcmp(argv[1], "--system") == 0);
-    id<MTLDevice> device = CharonDevice();
+    id<MTLDevice> device = RevenantDevice();
     id<MTLCommandQueue> queue = [device newCommandQueue];
 
     printf("compared %lu mismatches %lu\n", (unsigned long)gCompared, (unsigned long)gMismatches);
 
     for (int index = 0; index < 12; index++) {
-        Class kernelClass = CharonReduceClass(index);
+        Class kernelClass = RevenantReduceClass(index);
         NSString *present = kernelClass ? NSStringFromClass(kernelClass) : @"(nil)";
-        printf("port  %-28s class %s\n", CharonReduceName(index), [present UTF8String]);
+        printf("port  %-28s class %s\n", RevenantReduceName(index), [present UTF8String]);
 
         if (fromSystem) {
             @try {
                 id oneBuffer = [queue commandBufferWithUnretainedReferences];
                 id kernel = [[kernelClass alloc] initWithDevice:device];
-                MPSImage *source = CharonMakeSource(device);
+                MPSImage *source = RevenantMakeSource(device);
                 [kernel encodeToCommandBuffer:oneBuffer sourceImage:source destinationImage:source];
                 [oneBuffer commit];
                 [oneBuffer waitUntilCompleted];
@@ -107,10 +107,10 @@ int main(int argc, const char **argv)
             continue;
         }
 
-        MPSImage *source = CharonMakeSource(device);
-        NSUInteger dstCols = CharonReduceByFeature(index) ? COLS : (CharonReduceByColumn(index) ? COLS : 1);
-        NSUInteger dstRows = CharonReduceByFeature(index) ? ROWS : (CharonReduceByColumn(index) ? 1 : ROWS);
-        NSUInteger dstChannels = CharonReduceByFeature(index) ? 1 : CHANNELS;
+        MPSImage *source = RevenantMakeSource(device);
+        NSUInteger dstCols = RevenantReduceByFeature(index) ? COLS : (RevenantReduceByColumn(index) ? COLS : 1);
+        NSUInteger dstRows = RevenantReduceByFeature(index) ? ROWS : (RevenantReduceByColumn(index) ? 1 : ROWS);
+        NSUInteger dstChannels = RevenantReduceByFeature(index) ? 1 : CHANNELS;
         MPSImageDescriptor *descriptor =
             [MPSImageDescriptor imageDescriptorWithChannelFormat:MPSImageFeatureChannelFormatFloat32
                                                              width:dstCols
@@ -121,7 +121,7 @@ int main(int argc, const char **argv)
         id kernel = [[kernelClass alloc] initWithDevice:device];
         id commandBuffer = [queue commandBufferWithUnretainedReferences];
         int weighted = 0;
-        if (CharonReduceByFeature(index) && [kernel respondsToSelector:@selector(setWeight:)]) {
+        if (RevenantReduceByFeature(index) && [kernel respondsToSelector:@selector(setWeight:)]) {
             [kernel setWeight:0.5f];
             weighted = 1;
         }
@@ -131,16 +131,16 @@ int main(int argc, const char **argv)
         [commandBuffer waitUntilCompleted];
 
         float got[ROWS * COLS * CHANNELS];
-        CharonReadBack(destination, got, dstCols, dstRows, dstChannels);
+        RevenantReadBack(destination, got, dstCols, dstRows, dstChannels);
 
-        CharonNNReduceReference(CharonReduceName(index), kSource, ROWS, COLS, CHANNELS,
-                                CharonReduceByColumn(index), CharonReduceByFeature(index),
-                                CharonReduceOp(index), 0.5f, weighted, got, dstCols, dstChannels);
+        RevenantNNReduceReference(RevenantReduceName(index), kSource, ROWS, COLS, CHANNELS,
+                                RevenantReduceByColumn(index), RevenantReduceByFeature(index),
+                                RevenantReduceOp(index), 0.5f, weighted, got, dstCols, dstChannels);
     }
 
     {
-        Class kernelClass = CharonReduceClass(9);
-        MPSImage *source = CharonMakeSource(device);
+        Class kernelClass = RevenantReduceClass(9);
+        MPSImage *source = RevenantMakeSource(device);
         MPSImageDescriptor *tooSmall =
             [MPSImageDescriptor imageDescriptorWithChannelFormat:MPSImageFeatureChannelFormatFloat32
                                                              width:1
@@ -156,7 +156,7 @@ int main(int argc, const char **argv)
         [refusalBuffer commit];
         [refusalBuffer waitUntilCompleted];
         float got[1] = {0.0f};
-        CharonReadBack(destination, got, 1, 1, 1);
+        RevenantReadBack(destination, got, 1, 1, 1);
         gCompared++;
         if (got[0] != sentinel) {
             gMismatches++;
@@ -167,8 +167,8 @@ int main(int argc, const char **argv)
     }
 
     {
-        MPSImage *source = CharonMakeSource(device);
-        id sum = [[CharonReduceClass(11) alloc] initWithDevice:device];
+        MPSImage *source = RevenantMakeSource(device);
+        id sum = [[RevenantReduceClass(11) alloc] initWithDevice:device];
         [sum setWeight:0.5f];
 
         for (int which = 2; which <= 5; which += 3) {
@@ -178,15 +178,15 @@ int main(int argc, const char **argv)
                                                                 height:ROWS
                                                         featureChannels:1];
             MPSImage *destination = [[MPSImage alloc] initWithDevice:device imageDescriptor:descriptor];
-            id kernel = [[CharonReduceClass(which) alloc] initWithDevice:device];
+            id kernel = [[RevenantReduceClass(which) alloc] initWithDevice:device];
             id buffer = [queue commandBufferWithUnretainedReferences];
             [kernel encodeToCommandBuffer:buffer sourceImage:source destinationImage:destination];
             [buffer commit];
             [buffer waitUntilCompleted];
             float got[ROWS * COLS];
-            CharonReadBack(destination, got, COLS, ROWS, 1);
-            CharonNNReduceReference(CharonReduceName(which), kSource, ROWS, COLS, CHANNELS,
-                                    0, 1, CharonReduceOp(which), 1.0f, 0, got, COLS, 1);
+            RevenantReadBack(destination, got, COLS, ROWS, 1);
+            RevenantNNReduceReference(RevenantReduceName(which), kSource, ROWS, COLS, CHANNELS,
+                                    0, 1, RevenantReduceOp(which), 1.0f, 0, got, COLS, 1);
         }
     }
 

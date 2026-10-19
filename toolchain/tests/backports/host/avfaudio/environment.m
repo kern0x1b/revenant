@@ -1,7 +1,7 @@
 #import <AVFoundation/AVFoundation.h>
 #include <stdio.h>
-#include "../../../../packages/a/apple-backports/AVFAudio/CharonEnvironmentOutput.h"
-#include "../../../../packages/a/apple-backports/AVFAudio/CharonEnvironmentFilter.h"
+#include "../../../../packages/a/apple-backports/AVFAudio/RevenantEnvironmentOutput.h"
+#include "../../../../packages/a/apple-backports/AVFAudio/RevenantEnvironmentFilter.h"
 
 static int checks = 0;
 static int failures = 0;
@@ -25,24 +25,24 @@ static float mixerValue(AVAudioEnvironmentNode *node, AUParameterAddress address
 int main(void)
 {
     @autoreleasepool {
-        check(CharonResolveEnvironmentOutputType(AVAudioEnvironmentOutputTypeAuto, CharonEnvironmentRouteClassWired)
+        check(RevenantResolveEnvironmentOutputType(AVAudioEnvironmentOutputTypeAuto, RevenantEnvironmentRouteClassWired)
               == AVAudioEnvironmentOutputTypeHeadphones, "auto on a wired route is headphones");
-        check(CharonResolveEnvironmentOutputType(AVAudioEnvironmentOutputTypeAuto, CharonEnvironmentRouteClassBuiltIn)
+        check(RevenantResolveEnvironmentOutputType(AVAudioEnvironmentOutputTypeAuto, RevenantEnvironmentRouteClassBuiltIn)
               == AVAudioEnvironmentOutputTypeBuiltInSpeakers, "auto on the built-in hardware is built-in speakers");
-        check(CharonResolveEnvironmentOutputType(AVAudioEnvironmentOutputTypeAuto, CharonEnvironmentRouteClassExternal)
+        check(RevenantResolveEnvironmentOutputType(AVAudioEnvironmentOutputTypeAuto, RevenantEnvironmentRouteClassExternal)
               == AVAudioEnvironmentOutputTypeExternalSpeakers, "auto on an external route is external speakers");
-        check(CharonResolveEnvironmentOutputType(AVAudioEnvironmentOutputTypeAuto, CharonEnvironmentRouteClassUnknown)
+        check(RevenantResolveEnvironmentOutputType(AVAudioEnvironmentOutputTypeAuto, RevenantEnvironmentRouteClassUnknown)
               == AVAudioEnvironmentOutputTypeExternalSpeakers, "auto on a route the port does not name is external speakers");
 
         for (NSInteger requested = AVAudioEnvironmentOutputTypeHeadphones; requested <= AVAudioEnvironmentOutputTypeExternalSpeakers; requested++) {
-            for (int route = CharonEnvironmentRouteClassUnknown; route <= CharonEnvironmentRouteClassExternal; route++) {
-                check(CharonResolveEnvironmentOutputType((AVAudioEnvironmentOutputType)requested, (CharonEnvironmentRouteClass)route) == requested,
+            for (int route = RevenantEnvironmentRouteClassUnknown; route <= RevenantEnvironmentRouteClassExternal; route++) {
+                check(RevenantResolveEnvironmentOutputType((AVAudioEnvironmentOutputType)requested, (RevenantEnvironmentRouteClass)route) == requested,
                       "an explicit output type is kept on every route");
             }
         }
 
-        check(CharonEnvironmentHeadTrackingAnswer(YES) == NO, "head tracking answers NO when YES is set");
-        check(CharonEnvironmentHeadTrackingAnswer(NO) == NO, "head tracking answers NO when NO is set");
+        check(RevenantEnvironmentHeadTrackingAnswer(YES) == NO, "head tracking answers NO when YES is set");
+        check(RevenantEnvironmentHeadTrackingAnswer(NO) == NO, "head tracking answers NO when NO is set");
 
         AVAudioEnvironmentNode *host = [[AVAudioEnvironmentNode alloc] init];
         check(host.outputType == AVAudioEnvironmentOutputTypeAuto, "the host's outputType defaults to auto");
@@ -53,20 +53,20 @@ int main(void)
 
         host.listenerHeadTrackingEnabled = YES;
         printf("divergence: the host's listenerHeadTrackingEnabled reads %d after YES; the port answers %d\n",
-               (int)host.listenerHeadTrackingEnabled, (int)CharonEnvironmentHeadTrackingAnswer(YES));
+               (int)host.listenerHeadTrackingEnabled, (int)RevenantEnvironmentHeadTrackingAnswer(YES));
 
         AVAudioEngine *engine = [[AVAudioEngine alloc] init];
         AVAudioEnvironmentNode *filterNode = [[AVAudioEnvironmentNode alloc] init];
         [engine attachNode:filterNode];
         AVAudioUnitEQFilterParameters *band = filterNode.reverbParameters.filterParameters;
-        check(band.frequency == CharonEnvironmentFilterDefaultFrequency, "the host's filter frequency defaults to 800");
-        check(band.bandwidth == CharonEnvironmentFilterDefaultBandwidth, "the host's filter bandwidth defaults to 3");
-        check(band.gain == CharonEnvironmentFilterDefaultGain, "the host's filter gain defaults to 0");
+        check(band.frequency == RevenantEnvironmentFilterDefaultFrequency, "the host's filter frequency defaults to 800");
+        check(band.bandwidth == RevenantEnvironmentFilterDefaultBandwidth, "the host's filter bandwidth defaults to 3");
+        check(band.gain == RevenantEnvironmentFilterDefaultGain, "the host's filter gain defaults to 0");
         check(band.filterType == AVAudioUnitEQFilterTypeParametric, "the host's filter type defaults to parametric");
         check(band.bypass == NO, "the host's filter is not bypassed by default");
-        check(mixerValue(filterNode, kReverbParam_FilterFrequency) == CharonEnvironmentFilterDefaultFrequency,
+        check(mixerValue(filterNode, kReverbParam_FilterFrequency) == RevenantEnvironmentFilterDefaultFrequency,
               "the mixer's filter frequency at the default is the band's");
-        check(mixerValue(filterNode, kReverbParam_FilterEnable) == CharonEnvironmentFilterEnableValue(band.bypass),
+        check(mixerValue(filterNode, kReverbParam_FilterEnable) == RevenantEnvironmentFilterEnableValue(band.bypass),
               "the mixer's filter enable at the default is the band's bypass inverted");
 
         band.frequency = 2000;
@@ -78,11 +78,11 @@ int main(void)
         check(mixerValue(filterNode, kReverbParam_FilterBandwidth) == 1.5f, "a set bandwidth lands at mixer id 15");
         check(mixerValue(filterNode, kReverbParam_FilterGain) == 6, "a set gain lands at mixer id 16");
         check(mixerValue(filterNode, kReverbParam_FilterType) == (float)AVAudioUnitEQFilterTypeLowPass, "a set type lands at mixer id 17");
-        check(mixerValue(filterNode, kReverbParam_FilterEnable) == CharonEnvironmentFilterEnableValue(NO), "not bypassed is enable 1");
+        check(mixerValue(filterNode, kReverbParam_FilterEnable) == RevenantEnvironmentFilterEnableValue(NO), "not bypassed is enable 1");
 
         band.bypass = YES;
         check(band.bypass == YES, "the band keeps its bypass");
-        check(mixerValue(filterNode, kReverbParam_FilterEnable) == CharonEnvironmentFilterEnableValue(YES), "bypassed is enable 0");
+        check(mixerValue(filterNode, kReverbParam_FilterEnable) == RevenantEnvironmentFilterEnableValue(YES), "bypassed is enable 0");
 
         band.frequency = 20000;
         band.bandwidth = 5;

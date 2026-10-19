@@ -6,14 +6,14 @@
 #include <stdlib.h>
 #include <string.h>
 
-typedef struct CharonSparseRow {
+typedef struct RevenantSparseRow {
     sparse_index count;
     sparse_index capacity;
     sparse_index *column;
     void *value;
-} CharonSparseRow;
+} RevenantSparseRow;
 
-#define CHARON_SPARSE_MATRIX_BODY                                                                              \
+#define REVENANT_SPARSE_MATRIX_BODY                                                                              \
     uint32_t magic;                                                                                            \
     sparse_dimension rows;                                                                                      \
     sparse_dimension columns;                                                                                   \
@@ -24,66 +24,66 @@ typedef struct CharonSparseRow {
     long property;                                                                                             \
     int inserted;                                                                                              \
     long nonzero;                                                                                              \
-    CharonSparseRow *row;
+    RevenantSparseRow *row;
 
 struct sparse_m_float {
-    CHARON_SPARSE_MATRIX_BODY
+    REVENANT_SPARSE_MATRIX_BODY
 };
 
 struct sparse_m_double {
-    CHARON_SPARSE_MATRIX_BODY
+    REVENANT_SPARSE_MATRIX_BODY
 };
 
 struct sparse_m_float_complex {
-    CHARON_SPARSE_MATRIX_BODY
+    REVENANT_SPARSE_MATRIX_BODY
 };
 
 struct sparse_m_double_complex {
-    CHARON_SPARSE_MATRIX_BODY
+    REVENANT_SPARSE_MATRIX_BODY
 };
 
-#define CHARON_SPARSE_MAGIC_FLOAT 0x53504630u
-#define CHARON_SPARSE_MAGIC_DOUBLE 0x53504644u
-#define CHARON_SPARSE_MAGIC_FLOAT_COMPLEX 0x53504643u
-#define CHARON_SPARSE_MAGIC_DOUBLE_COMPLEX 0x53504645u
+#define REVENANT_SPARSE_MAGIC_FLOAT 0x53504630u
+#define REVENANT_SPARSE_MAGIC_DOUBLE 0x53504644u
+#define REVENANT_SPARSE_MAGIC_FLOAT_COMPLEX 0x53504643u
+#define REVENANT_SPARSE_MAGIC_DOUBLE_COMPLEX 0x53504645u
 
-static inline int CharonSparseIsMatrix(const void *matrix, uint32_t magic)
+static inline int RevenantSparseIsMatrix(const void *matrix, uint32_t magic)
 {
     return matrix && ((const struct sparse_m_float *)matrix)->magic == magic;
 }
 
-static inline int CharonSparseIsFloat(const void *matrix)
+static inline int RevenantSparseIsFloat(const void *matrix)
 {
-    return CharonSparseIsMatrix(matrix, CHARON_SPARSE_MAGIC_FLOAT);
+    return RevenantSparseIsMatrix(matrix, REVENANT_SPARSE_MAGIC_FLOAT);
 }
 
-static inline int CharonSparseIsDouble(const void *matrix)
+static inline int RevenantSparseIsDouble(const void *matrix)
 {
-    return CharonSparseIsMatrix(matrix, CHARON_SPARSE_MAGIC_DOUBLE);
+    return RevenantSparseIsMatrix(matrix, REVENANT_SPARSE_MAGIC_DOUBLE);
 }
 
-static inline int CharonSparseIsFloatComplex(const void *matrix)
+static inline int RevenantSparseIsFloatComplex(const void *matrix)
 {
-    return CharonSparseIsMatrix(matrix, CHARON_SPARSE_MAGIC_FLOAT_COMPLEX);
+    return RevenantSparseIsMatrix(matrix, REVENANT_SPARSE_MAGIC_FLOAT_COMPLEX);
 }
 
-static inline int CharonSparseIsDoubleComplex(const void *matrix)
+static inline int RevenantSparseIsDoubleComplex(const void *matrix)
 {
-    return CharonSparseIsMatrix(matrix, CHARON_SPARSE_MAGIC_DOUBLE_COMPLEX);
+    return RevenantSparseIsMatrix(matrix, REVENANT_SPARSE_MAGIC_DOUBLE_COMPLEX);
 }
 
-static inline int CharonSparseIsAny(const void *matrix)
+static inline int RevenantSparseIsAny(const void *matrix)
 {
-    return CharonSparseIsFloat(matrix) || CharonSparseIsDouble(matrix) || CharonSparseIsFloatComplex(matrix) ||
-           CharonSparseIsDoubleComplex(matrix);
+    return RevenantSparseIsFloat(matrix) || RevenantSparseIsDouble(matrix) || RevenantSparseIsFloatComplex(matrix) ||
+           RevenantSparseIsDoubleComplex(matrix);
 }
 
-static inline long CharonSparseDenseAt(int order, sparse_dimension leading, sparse_dimension row, sparse_dimension column)
+static inline long RevenantSparseDenseAt(int order, sparse_dimension leading, sparse_dimension row, sparse_dimension column)
 {
     return order == CblasRowMajor ? (long)(row * leading + column) : (long)(column * leading + row);
 }
 
-static inline sparse_index CharonSparseSearch(const CharonSparseRow *row, sparse_index column)
+static inline sparse_index RevenantSparseSearch(const RevenantSparseRow *row, sparse_index column)
 {
     sparse_index low = 0, high = row->count;
     while (low < high) {
@@ -97,7 +97,7 @@ static inline sparse_index CharonSparseSearch(const CharonSparseRow *row, sparse
     return low;
 }
 
-static inline int CharonSparseGrow(CharonSparseRow *row, sparse_index wanted, size_t size)
+static inline int RevenantSparseGrow(RevenantSparseRow *row, sparse_index wanted, size_t size)
 {
     if (wanted <= row->capacity) {
         return 1;
@@ -121,9 +121,9 @@ static inline int CharonSparseGrow(CharonSparseRow *row, sparse_index wanted, si
     return 1;
 }
 
-static inline sparse_status CharonSparsePut(CharonSparseRow *row, sparse_index column, double value, size_t size)
+static inline sparse_status RevenantSparsePut(RevenantSparseRow *row, sparse_index column, double value, size_t size)
 {
-    sparse_index at = CharonSparseSearch(row, column);
+    sparse_index at = RevenantSparseSearch(row, column);
     if (at < row->count && row->column[at] == column) {
         if (size == sizeof(float)) {
             ((float *)row->value)[at] = (float)value;
@@ -132,7 +132,7 @@ static inline sparse_status CharonSparsePut(CharonSparseRow *row, sparse_index c
         }
         return SPARSE_SUCCESS;
     }
-    if (!CharonSparseGrow(row, row->count + 1, size)) {
+    if (!RevenantSparseGrow(row, row->count + 1, size)) {
         return SPARSE_SYSTEM_ERROR;
     }
     memmove(row->column + at + 1, row->column + at, (size_t)(row->count - at) * sizeof(sparse_index));
@@ -148,16 +148,16 @@ static inline sparse_status CharonSparsePut(CharonSparseRow *row, sparse_index c
     return SPARSE_SUCCESS;
 }
 
-static inline double CharonSparseElementAt(const CharonSparseRow *row, sparse_index column, size_t size)
+static inline double RevenantSparseElementAt(const RevenantSparseRow *row, sparse_index column, size_t size)
 {
-    sparse_index at = CharonSparseSearch(row, column);
+    sparse_index at = RevenantSparseSearch(row, column);
     if (at >= row->count || row->column[at] != column) {
         return 0.0;
     }
     return size == sizeof(float) ? (double)((const float *)row->value)[at] : ((const double *)row->value)[at];
 }
 
-static inline sparse_dimension CharonSparseBlockAt(const sparse_dimension *sizes, sparse_index blocks, sparse_index element)
+static inline sparse_dimension RevenantSparseBlockAt(const sparse_dimension *sizes, sparse_index blocks, sparse_index element)
 {
     sparse_dimension sum = 0;
     for (sparse_index b = 0; b < blocks; b++) {
@@ -169,7 +169,7 @@ static inline sparse_dimension CharonSparseBlockAt(const sparse_dimension *sizes
     return 0;
 }
 
-static inline sparse_status CharonSparseMake(void **out, uint32_t magic, size_t size, sparse_dimension rows,
+static inline sparse_status RevenantSparseMake(void **out, uint32_t magic, size_t size, sparse_dimension rows,
                                              sparse_dimension columns, sparse_index blockRows, sparse_index blockColumns,
                                              const sparse_dimension *heights, const sparse_dimension *widths)
 {
@@ -209,7 +209,7 @@ static inline sparse_status CharonSparseMake(void **out, uint32_t magic, size_t 
     asFloat->property = 0;
     asFloat->inserted = 0;
     asFloat->nonzero = 0;
-    asFloat->row = totalRows > 0 ? (CharonSparseRow *)calloc((size_t)totalRows, sizeof(CharonSparseRow)) : NULL;
+    asFloat->row = totalRows > 0 ? (RevenantSparseRow *)calloc((size_t)totalRows, sizeof(RevenantSparseRow)) : NULL;
     if (totalRows > 0 && !asFloat->row) {
         free(matrix);
         free(height);
@@ -220,7 +220,7 @@ static inline sparse_status CharonSparseMake(void **out, uint32_t magic, size_t 
     return SPARSE_SUCCESS;
 }
 
-static inline sparse_dimension *CharonSparseRepeated(sparse_dimension value, sparse_index count)
+static inline sparse_dimension *RevenantSparseRepeated(sparse_dimension value, sparse_index count)
 {
     sparse_dimension *sizes = (sparse_dimension *)calloc(count ? (size_t)count : 1, sizeof(sparse_dimension));
     for (sparse_index i = 0; sizes && i < count; i++) {
@@ -229,7 +229,7 @@ static inline sparse_dimension *CharonSparseRepeated(sparse_dimension value, spa
     return sizes;
 }
 
-static inline void CharonSparseWriteComplexValue(void *values, sparse_index at, double re, double im, size_t size)
+static inline void RevenantSparseWriteComplexValue(void *values, sparse_index at, double re, double im, size_t size)
 {
     char *to = (char *)values + (size_t)at * size;
     if (size == sizeof(float _Complex)) {
@@ -245,7 +245,7 @@ static inline void CharonSparseWriteComplexValue(void *values, sparse_index at, 
     }
 }
 
-static inline void CharonSparseReadComplexValue(const void *values, sparse_index at, size_t size, double *re, double *im)
+static inline void RevenantSparseReadComplexValue(const void *values, sparse_index at, size_t size, double *re, double *im)
 {
     const char *from = (const char *)values + (size_t)at * size;
     if (size == sizeof(float _Complex)) {
@@ -261,42 +261,42 @@ static inline void CharonSparseReadComplexValue(const void *values, sparse_index
     }
 }
 
-static inline sparse_status CharonSparsePutComplex(CharonSparseRow *row, sparse_index column, double re, double im,
+static inline sparse_status RevenantSparsePutComplex(RevenantSparseRow *row, sparse_index column, double re, double im,
                                                    size_t size)
 {
-    sparse_index at = CharonSparseSearch(row, column);
+    sparse_index at = RevenantSparseSearch(row, column);
     if (at < row->count && row->column[at] == column) {
-        CharonSparseWriteComplexValue(row->value, at, re, im, size);
+        RevenantSparseWriteComplexValue(row->value, at, re, im, size);
         return SPARSE_SUCCESS;
     }
-    if (!CharonSparseGrow(row, row->count + 1, size)) {
+    if (!RevenantSparseGrow(row, row->count + 1, size)) {
         return SPARSE_SYSTEM_ERROR;
     }
     memmove(row->column + at + 1, row->column + at, (size_t)(row->count - at) * sizeof(sparse_index));
     memmove((char *)row->value + (size_t)(at + 1) * size, (char *)row->value + (size_t)at * size,
             (size_t)(row->count - at) * size);
     row->column[at] = column;
-    CharonSparseWriteComplexValue(row->value, at, re, im, size);
+    RevenantSparseWriteComplexValue(row->value, at, re, im, size);
     row->count++;
     return SPARSE_SUCCESS;
 }
 
-static inline void CharonSparseElementComplexAt(const CharonSparseRow *row, sparse_index column, size_t size, double *re,
+static inline void RevenantSparseElementComplexAt(const RevenantSparseRow *row, sparse_index column, size_t size, double *re,
                                                 double *im)
 {
-    sparse_index at = CharonSparseSearch(row, column);
+    sparse_index at = RevenantSparseSearch(row, column);
     if (at >= row->count || row->column[at] != column) {
         *re = 0.0;
         *im = 0.0;
         return;
     }
-    CharonSparseReadComplexValue(row->value, at, size, re, im);
+    RevenantSparseReadComplexValue(row->value, at, size, re, im);
 }
 
-static inline sparse_status CharonSparseWritable(const void *matrix, uint32_t magic, int wantBlock,
+static inline sparse_status RevenantSparseWritable(const void *matrix, uint32_t magic, int wantBlock,
                                                  struct sparse_m_float **out)
 {
-    if (!CharonSparseIsMatrix(matrix, magic)) {
+    if (!RevenantSparseIsMatrix(matrix, magic)) {
         return SPARSE_ILLEGAL_PARAMETER;
     }
     struct sparse_m_float *asFloat = (struct sparse_m_float *)matrix;
@@ -307,11 +307,11 @@ static inline sparse_status CharonSparseWritable(const void *matrix, uint32_t ma
     return SPARSE_SUCCESS;
 }
 
-static inline sparse_status CharonSparsePutEntry(void *matrix, uint32_t magic, double value, sparse_index i,
+static inline sparse_status RevenantSparsePutEntry(void *matrix, uint32_t magic, double value, sparse_index i,
                                                  sparse_index j, size_t size)
 {
     struct sparse_m_float *asFloat = NULL;
-    sparse_status ready = CharonSparseWritable(matrix, magic, 0, &asFloat);
+    sparse_status ready = RevenantSparseWritable(matrix, magic, 0, &asFloat);
     if (ready != SPARSE_SUCCESS) {
         return ready;
     }
@@ -319,7 +319,7 @@ static inline sparse_status CharonSparsePutEntry(void *matrix, uint32_t magic, d
         return SPARSE_ILLEGAL_PARAMETER;
     }
     sparse_index before = asFloat->row[i].count;
-    sparse_status put = CharonSparsePut(&asFloat->row[i], j, value, size);
+    sparse_status put = RevenantSparsePut(&asFloat->row[i], j, value, size);
     if (put == SPARSE_SUCCESS) {
         asFloat->nonzero += (long)asFloat->row[i].count - (long)before;
         asFloat->inserted = 1;
@@ -327,11 +327,11 @@ static inline sparse_status CharonSparsePutEntry(void *matrix, uint32_t magic, d
     return put;
 }
 
-static inline sparse_status CharonSparsePutEntryComplex(void *matrix, uint32_t magic, double re, double im, sparse_index i,
+static inline sparse_status RevenantSparsePutEntryComplex(void *matrix, uint32_t magic, double re, double im, sparse_index i,
                                                         sparse_index j, size_t size)
 {
     struct sparse_m_float *asFloat = NULL;
-    sparse_status ready = CharonSparseWritable(matrix, magic, 0, &asFloat);
+    sparse_status ready = RevenantSparseWritable(matrix, magic, 0, &asFloat);
     if (ready != SPARSE_SUCCESS) {
         return ready;
     }
@@ -339,7 +339,7 @@ static inline sparse_status CharonSparsePutEntryComplex(void *matrix, uint32_t m
         return SPARSE_ILLEGAL_PARAMETER;
     }
     sparse_index before = asFloat->row[i].count;
-    sparse_status put = CharonSparsePutComplex(&asFloat->row[i], j, re, im, size);
+    sparse_status put = RevenantSparsePutComplex(&asFloat->row[i], j, re, im, size);
     if (put == SPARSE_SUCCESS) {
         asFloat->nonzero += (long)asFloat->row[i].count - (long)before;
         asFloat->inserted = 1;
@@ -347,20 +347,20 @@ static inline sparse_status CharonSparsePutEntryComplex(void *matrix, uint32_t m
     return put;
 }
 
-static inline void CharonSparsePermuteRows(struct sparse_m_float *asFloat, const sparse_index *perm)
+static inline void RevenantSparsePermuteRows(struct sparse_m_float *asFloat, const sparse_index *perm)
 {
     for (sparse_dimension i = 0; i < asFloat->rows; i++) {
         sparse_index target = perm[i];
         if (target < 0 || target >= (sparse_index)asFloat->rows || target == (sparse_index)i) {
             continue;
         }
-        CharonSparseRow held = asFloat->row[i];
+        RevenantSparseRow held = asFloat->row[i];
         asFloat->row[i] = asFloat->row[target];
         asFloat->row[target] = held;
     }
 }
 
-static inline void CharonSparsePermuteColumns(struct sparse_m_float *asFloat, const sparse_index *perm, size_t size)
+static inline void RevenantSparsePermuteColumns(struct sparse_m_float *asFloat, const sparse_index *perm, size_t size)
 {
     for (sparse_dimension j = 0; j < asFloat->columns; j++) {
         sparse_index target = perm[j];
@@ -368,16 +368,16 @@ static inline void CharonSparsePermuteColumns(struct sparse_m_float *asFloat, co
             continue;
         }
         for (sparse_dimension i = 0; i < asFloat->rows; i++) {
-            double here = CharonSparseElementAt(&asFloat->row[i], j, size);
-            double there = CharonSparseElementAt(&asFloat->row[i], target, size);
-            sparse_index atJ = CharonSparseSearch(&asFloat->row[i], j);
-            sparse_index atT = CharonSparseSearch(&asFloat->row[i], target);
+            double here = RevenantSparseElementAt(&asFloat->row[i], j, size);
+            double there = RevenantSparseElementAt(&asFloat->row[i], target, size);
+            sparse_index atJ = RevenantSparseSearch(&asFloat->row[i], j);
+            sparse_index atT = RevenantSparseSearch(&asFloat->row[i], target);
             int hadJ = atJ < asFloat->row[i].count && asFloat->row[i].column[atJ] == j;
             int hadT = atT < asFloat->row[i].count && asFloat->row[i].column[atT] == target;
-            CharonSparsePut(&asFloat->row[i], j, there, size);
-            CharonSparsePut(&asFloat->row[i], target, here, size);
-            atJ = CharonSparseSearch(&asFloat->row[i], j);
-            atT = CharonSparseSearch(&asFloat->row[i], target);
+            RevenantSparsePut(&asFloat->row[i], j, there, size);
+            RevenantSparsePut(&asFloat->row[i], target, here, size);
+            atJ = RevenantSparseSearch(&asFloat->row[i], j);
+            atT = RevenantSparseSearch(&asFloat->row[i], target);
             int hasJ = atJ < asFloat->row[i].count && asFloat->row[i].column[atJ] == j;
             int hasT = atT < asFloat->row[i].count && asFloat->row[i].column[atT] == target;
             asFloat->nonzero += (hasJ + hasT) - (hadJ + hadT);
@@ -385,7 +385,7 @@ static inline void CharonSparsePermuteColumns(struct sparse_m_float *asFloat, co
     }
 }
 
-static inline void CharonSparsePermuteColumnsComplex(struct sparse_m_float *asFloat, const sparse_index *perm, size_t size)
+static inline void RevenantSparsePermuteColumnsComplex(struct sparse_m_float *asFloat, const sparse_index *perm, size_t size)
 {
     for (sparse_dimension j = 0; j < asFloat->columns; j++) {
         sparse_index target = perm[j];
@@ -394,16 +394,16 @@ static inline void CharonSparsePermuteColumnsComplex(struct sparse_m_float *asFl
         }
         for (sparse_dimension i = 0; i < asFloat->rows; i++) {
             double hereRe = 0.0, hereIm = 0.0, thereRe = 0.0, thereIm = 0.0;
-            CharonSparseElementComplexAt(&asFloat->row[i], j, size, &hereRe, &hereIm);
-            CharonSparseElementComplexAt(&asFloat->row[i], target, size, &thereRe, &thereIm);
-            sparse_index atJ = CharonSparseSearch(&asFloat->row[i], j);
-            sparse_index atT = CharonSparseSearch(&asFloat->row[i], target);
+            RevenantSparseElementComplexAt(&asFloat->row[i], j, size, &hereRe, &hereIm);
+            RevenantSparseElementComplexAt(&asFloat->row[i], target, size, &thereRe, &thereIm);
+            sparse_index atJ = RevenantSparseSearch(&asFloat->row[i], j);
+            sparse_index atT = RevenantSparseSearch(&asFloat->row[i], target);
             int hadJ = atJ < asFloat->row[i].count && asFloat->row[i].column[atJ] == j;
             int hadT = atT < asFloat->row[i].count && asFloat->row[i].column[atT] == target;
-            CharonSparsePutComplex(&asFloat->row[i], j, thereRe, thereIm, size);
-            CharonSparsePutComplex(&asFloat->row[i], target, hereRe, hereIm, size);
-            atJ = CharonSparseSearch(&asFloat->row[i], j);
-            atT = CharonSparseSearch(&asFloat->row[i], target);
+            RevenantSparsePutComplex(&asFloat->row[i], j, thereRe, thereIm, size);
+            RevenantSparsePutComplex(&asFloat->row[i], target, hereRe, hereIm, size);
+            atJ = RevenantSparseSearch(&asFloat->row[i], j);
+            atT = RevenantSparseSearch(&asFloat->row[i], target);
             int hasJ = atJ < asFloat->row[i].count && asFloat->row[i].column[atJ] == j;
             int hasT = atT < asFloat->row[i].count && asFloat->row[i].column[atT] == target;
             asFloat->nonzero += (hasJ + hasT) - (hadJ + hadT);

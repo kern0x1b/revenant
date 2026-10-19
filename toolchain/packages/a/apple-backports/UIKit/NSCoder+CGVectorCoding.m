@@ -1,6 +1,6 @@
 #import <UIKit/UIKit.h>
 
-@implementation NSCoder (CharonVectorCoding)
+@implementation NSCoder (RevenantVectorCoding)
 
 - (void)encodeCGVector:(CGVector)vector forKey:(NSString *)key
 {

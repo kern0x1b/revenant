@@ -1,3 +1,3 @@
-#import "CharonSCN.h"
+#import "RevenantSCN.h"
 
 SCNGeometrySourceSemantic const SCNGeometrySourceSemanticTangent = @"kGeometrySourceSemanticTangent";

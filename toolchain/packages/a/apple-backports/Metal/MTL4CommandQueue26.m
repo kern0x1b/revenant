@@ -1,12 +1,12 @@
 #import <Foundation/Foundation.h>
 #import <Metal/Metal.h>
-#import "CharonMetal.h"
-#import "CharonMetal26Types.h"
-#import "CharonMetalProtocols.h"
+#import "RevenantMetal.h"
+#import "RevenantMetal26Types.h"
+#import "RevenantMetalProtocols.h"
 
-@interface CharonMetal4CommandQueue : NSObject <MTL4CommandQueue>
+@interface RevenantMetal4CommandQueue : NSObject <MTL4CommandQueue>
 @property (atomic, readonly) NSString *label;
-- (void)charonSetLabel:(NSString *)label;
+- (void)revenantSetLabel:(NSString *)label;
 - (void)addResidencySet:(id)residencySet;
 - (void)removeResidencySet:(id)residencySet;
 - (void)addResidencySets:(const id *)sets count:(NSUInteger)count;
@@ -25,31 +25,31 @@
 - (void)signalDrawable:(id<MTLDrawable>)drawable;
 @end
 
-NSString *CharonMetal4SparseBufferUpdateRefusal(BOOL bufferIsPlacementSparse, BOOL heapPresent, BOOL heapIsPlacement, BOOL mappingMode);
-NSString *CharonMetal4SparseBufferCopyRefusal(BOOL sourceIsPlacementSparse, BOOL destinationIsPlacementSparse);
-NSString *CharonMetal4SparseTextureUpdateRefusal(BOOL textureIsPlacementSparse, BOOL heapPresent, BOOL heapIsPlacement, BOOL mappingMode);
-NSString *CharonMetal4SparseTextureCopyRefusal(BOOL sourceIsPlacementSparse, BOOL destinationIsPlacementSparse);
+NSString *RevenantMetal4SparseBufferUpdateRefusal(BOOL bufferIsPlacementSparse, BOOL heapPresent, BOOL heapIsPlacement, BOOL mappingMode);
+NSString *RevenantMetal4SparseBufferCopyRefusal(BOOL sourceIsPlacementSparse, BOOL destinationIsPlacementSparse);
+NSString *RevenantMetal4SparseTextureUpdateRefusal(BOOL textureIsPlacementSparse, BOOL heapPresent, BOOL heapIsPlacement, BOOL mappingMode);
+NSString *RevenantMetal4SparseTextureCopyRefusal(BOOL sourceIsPlacementSparse, BOOL destinationIsPlacementSparse);
 
-static BOOL CharonMetal4IsPlacementSparse(id resource)
+static BOOL RevenantMetal4IsPlacementSparse(id resource)
 {
     return [resource respondsToSelector:NSSelectorFromString(@"placementSparsePageSize")];
 }
 
-static void CharonMetal4RaiseSparseRefusal(NSString *reason)
+static void RevenantMetal4RaiseSparseRefusal(NSString *reason)
 {
     [NSException raise:NSInternalInconsistencyException
                 format:@"%@", reason ?: @"a sparse mapping is not performed on this device: no resource of this port is placement sparse"];
 }
 
-@implementation CharonMetal4CommandQueue {
-    CharonMetalQueue *_queue;
+@implementation RevenantMetal4CommandQueue {
+    RevenantMetalQueue *_queue;
     NSString *_label;
 }
 
 - (instancetype)init
 {
     if ((self = [super init]))
-        _queue = [[CharonMetalQueue alloc] init];
+        _queue = [[RevenantMetalQueue alloc] init];
     return self;
 }
 
@@ -63,7 +63,7 @@ static void CharonMetal4RaiseSparseRefusal(NSString *reason)
     return _label;
 }
 
-- (void)charonSetLabel:(NSString *)label
+- (void)revenantSetLabel:(NSString *)label
 {
     _label = [label copy];
 }
@@ -93,7 +93,7 @@ static void CharonMetal4RaiseSparseRefusal(NSString *reason)
 - (void)updateBufferMappings:(id<MTLBuffer>)buffer heap:(id<MTLHeap>)heap
                   operations:(const MTL4UpdateSparseBufferMappingOperation *)operations count:(NSUInteger)count
 {
-    CharonMetal4RaiseSparseRefusal(CharonMetal4SparseBufferUpdateRefusal(CharonMetal4IsPlacementSparse(buffer), heap != nil,
+    RevenantMetal4RaiseSparseRefusal(RevenantMetal4SparseBufferUpdateRefusal(RevenantMetal4IsPlacementSparse(buffer), heap != nil,
                                                                          heap != nil && heap.type == MTLHeapTypePlacement,
                                                                          YES));
 }
@@ -101,7 +101,7 @@ static void CharonMetal4RaiseSparseRefusal(NSString *reason)
 - (void)updateTextureMappings:(id<MTLTexture>)texture heap:(id<MTLHeap>)heap
                    operations:(const MTL4UpdateSparseTextureMappingOperation *)operations count:(NSUInteger)count
 {
-    CharonMetal4RaiseSparseRefusal(CharonMetal4SparseTextureUpdateRefusal(CharonMetal4IsPlacementSparse(texture), heap != nil,
+    RevenantMetal4RaiseSparseRefusal(RevenantMetal4SparseTextureUpdateRefusal(RevenantMetal4IsPlacementSparse(texture), heap != nil,
                                                                            heap != nil && heap.type == MTLHeapTypePlacement,
                                                                            YES));
 }
@@ -109,15 +109,15 @@ static void CharonMetal4RaiseSparseRefusal(NSString *reason)
 - (void)copyBufferMappingsFromBuffer:(id<MTLBuffer>)source toBuffer:(id<MTLBuffer>)destination
                            operations:(const MTL4CopySparseBufferMappingOperation *)operations count:(NSUInteger)count
 {
-    CharonMetal4RaiseSparseRefusal(CharonMetal4SparseBufferCopyRefusal(CharonMetal4IsPlacementSparse(source),
-                                                                       CharonMetal4IsPlacementSparse(destination)));
+    RevenantMetal4RaiseSparseRefusal(RevenantMetal4SparseBufferCopyRefusal(RevenantMetal4IsPlacementSparse(source),
+                                                                       RevenantMetal4IsPlacementSparse(destination)));
 }
 
 - (void)copyTextureMappingsFromTexture:(id<MTLTexture>)source toTexture:(id<MTLTexture>)destination
                               operations:(const MTL4CopySparseTextureMappingOperation *)operations count:(NSUInteger)count
 {
-    CharonMetal4RaiseSparseRefusal(CharonMetal4SparseTextureCopyRefusal(CharonMetal4IsPlacementSparse(source),
-                                                                        CharonMetal4IsPlacementSparse(destination)));
+    RevenantMetal4RaiseSparseRefusal(RevenantMetal4SparseTextureCopyRefusal(RevenantMetal4IsPlacementSparse(source),
+                                                                        RevenantMetal4IsPlacementSparse(destination)));
 }
 
 - (void)waitForDrawable:(id<MTLDrawable>)drawable
@@ -132,8 +132,8 @@ static void CharonMetal4RaiseSparseRefusal(NSString *reason)
 
 - (void)signalEvent:(id)event value:(uint64_t)value
 {
-    if ([event isKindOfClass:[CharonMetalSharedEvent class]]) {
-        [(CharonMetalSharedEvent *)event setSignaledValue:value];
+    if ([event isKindOfClass:[RevenantMetalSharedEvent class]]) {
+        [(RevenantMetalSharedEvent *)event setSignaledValue:value];
         return;
     }
     NSLog(@"Metal: -signalEvent:value: was given a %@ and not one of this port's events, and a signalled value set on it would be a value nothing else could ever read",
@@ -142,8 +142,8 @@ static void CharonMetal4RaiseSparseRefusal(NSString *reason)
 
 - (void)waitForEvent:(id)event value:(uint64_t)value
 {
-    if ([event isKindOfClass:[CharonMetalSharedEvent class]]) {
-        [(CharonMetalSharedEvent *)event charonWaitForValue:value];
+    if ([event isKindOfClass:[RevenantMetalSharedEvent class]]) {
+        [(RevenantMetalSharedEvent *)event revenantWaitForValue:value];
         return;
     }
     NSLog(@"Metal: -waitForEvent:value: was given a %@ and not one of this port's events, and there is no signalled value on it to wait for",
@@ -152,32 +152,32 @@ static void CharonMetal4RaiseSparseRefusal(NSString *reason)
 
 @end
 
-@interface CharonMetalDevice (CharonMetal4CommandQueue26)
+@interface RevenantMetalDevice (RevenantMetal4CommandQueue26)
 - (id)newMTL4CommandQueue;
 - (id)newMTL4CommandQueueWithDescriptor:(MTL4CommandQueueDescriptor *)descriptor error:(NSError **)error;
 @end
 
-@implementation CharonMetalDevice (CharonMetal4CommandQueue26)
+@implementation RevenantMetalDevice (RevenantMetal4CommandQueue26)
 
 - (id)newMTL4CommandQueue
 {
-    return [[CharonMetal4CommandQueue alloc] init];
+    return [[RevenantMetal4CommandQueue alloc] init];
 }
 
 - (id)newMTL4CommandQueueWithDescriptor:(MTL4CommandQueueDescriptor *)descriptor error:(NSError **)error
 {
-    CharonMetal4CommandQueue *queue = [[CharonMetal4CommandQueue alloc] init];
-    [queue charonSetLabel:descriptor.label];
+    RevenantMetal4CommandQueue *queue = [[RevenantMetal4CommandQueue alloc] init];
+    [queue revenantSetLabel:descriptor.label];
     return queue;
 }
 
 @end
 
-@interface MTLCaptureManager (CharonMetal4CaptureScope26)
+@interface MTLCaptureManager (RevenantMetal4CaptureScope26)
 - (id)newCaptureScopeWithMTL4CommandQueue:(id)commandQueue;
 @end
 
-@implementation MTLCaptureManager (CharonMetal4CaptureScope26)
+@implementation MTLCaptureManager (RevenantMetal4CaptureScope26)
 
 - (id)newCaptureScopeWithMTL4CommandQueue:(id)commandQueue
 {

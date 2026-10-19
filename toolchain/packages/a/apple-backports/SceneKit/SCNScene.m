@@ -1,4 +1,4 @@
-#import "CharonSCN.h"
+#import "RevenantSCN.h"
 
 NSString *const SCNSceneStartTimeAttributeKey = @"SCNSceneStartTimeAttributeKey";
 NSString *const SCNSceneEndTimeAttributeKey = @"SCNSceneEndTimeAttributeKey";
@@ -45,7 +45,7 @@ NSString *const SCNSceneUpAxisAttributeKey = @"SCNSceneUpAxisAttributeKey";
     return _lightingEnvironment;
 }
 
-- (NSURL *)charonSourceURL
+- (NSURL *)revenantSourceURL
 {
     return _sourceURL;
 }
@@ -73,17 +73,17 @@ NSString *const SCNSceneUpAxisAttributeKey = @"SCNSceneUpAxisAttributeKey";
     NSKeyedUnarchiver *unarchiver = [[NSKeyedUnarchiver alloc] initForReadingWithData:data];
     unarchiver.requiresSecureCoding = YES;
     id root = nil;
-    [CharonSCNCoding pushSourceURL:url];
+    [RevenantSCNCoding pushSourceURL:url];
     @try {
         root = [unarchiver decodeObjectOfClass:[SCNScene class] forKey:NSKeyedArchiveRootObjectKey];
     } @catch (NSException *exception) {
         if (error) {
             *error = [NSError errorWithDomain:SCNErrorDomain code:1 userInfo:@{NSLocalizedDescriptionKey: exception.reason ?: @"the archive names a class this port does not carry"}];
         }
-        [CharonSCNCoding popSourceURL];
+        [RevenantSCNCoding popSourceURL];
         return nil;
     }
-    [CharonSCNCoding popSourceURL];
+    [RevenantSCNCoding popSourceURL];
     [unarchiver finishDecoding];
     if (![root isKindOfClass:[SCNScene class]]) {
         if (error) {

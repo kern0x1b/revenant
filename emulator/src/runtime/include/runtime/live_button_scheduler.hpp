@@ -14,7 +14,7 @@
 
 #include "foundation/system_button_input.hpp"
 
-namespace shade {
+namespace emulator {
 
 class LiveButtonScheduler {
 public:

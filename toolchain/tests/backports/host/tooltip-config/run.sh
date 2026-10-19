@@ -1,6 +1,6 @@
 #!/bin/sh
 # run.sh: a differential of UIToolTipConfiguration, the port against the Mac Catalyst host's own class, in one process.
-# The port's UIKit/UIToolTipConfiguration.m and test.m are compiled with -DUIToolTipConfiguration=CharonPortUIToolTipConfiguration,
+# The port's UIKit/UIToolTipConfiguration.m and test.m are compiled with -DUIToolTipConfiguration=RevenantPortUIToolTipConfiguration,
 # so the port's class has its own name and the host's class is still reached by name at run time. test.m prints the same
 # checks for both; the run passes when the two sides print the same values, and fails on any difference or on no output.
 # TOOLTIP_PORT_SOURCE replaces the port's source, so a planted wrong port can be run as a control: it must fail.
@@ -8,11 +8,11 @@ set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 port=${TOOLTIP_PORT_SOURCE:-$here/../../../../packages/a/apple-backports/UIKit/UIToolTipConfiguration.m}
-build=${TOOLTIP_BUILD:-$(runs_fresh charon-tooltip-config)}
+build=${TOOLTIP_BUILD:-$(runs_fresh revenant-tooltip-config)}
 sdk=$(xcrun --show-sdk-path)
 app="$build/tooltip-config"
 xcrun clang -target arm64-apple-ios15.0-macabi -isysroot "$sdk" -iframework "$sdk/System/iOSSupport/System/Library/Frameworks" \
-    -fobjc-arc -w -DUIToolTipConfiguration=CharonPortUIToolTipConfiguration \
+    -fobjc-arc -w -DUIToolTipConfiguration=RevenantPortUIToolTipConfiguration \
     "$port" "$here/test.m" -framework UIKit -framework Foundation -framework CoreGraphics -o "$app"
 codesign -s - --force "$app" > /dev/null 2>&1
 "$app" > "$build/tooltip-config.txt"

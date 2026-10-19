@@ -1,3 +1,3 @@
-#include "charon_invert.h"
+#include "revenant_invert.h"
 
-CHARON_INVERT_FUNCTION(__invert_f4, simd_float4x4, float, f4, 4)
+REVENANT_INVERT_FUNCTION(__invert_f4, simd_float4x4, float, f4, 4)

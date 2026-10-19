@@ -1,15 +1,15 @@
 #import <UIKit/UIKit.h>
 
-#import "CharonDragSession.h"
+#import "RevenantDragSession.h"
 #import <objc/runtime.h>
 
 #pragma clang diagnostic ignored "-Wobjc-designated-initializers"
 #pragma clang diagnostic ignored "-Wobjc-property-implementation"
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
 
-@class CharonDragSession;
+@class RevenantDragSession;
 
-@implementation CharonDragSession
+@implementation RevenantDragSession
 @synthesize items = _items;
 @synthesize localContext = _localContext;
 @synthesize location = _location;
@@ -58,13 +58,13 @@
 
 @end
 
-@implementation CharonDropSession
+@implementation RevenantDropSession
 @synthesize progress = _progress;
 @synthesize progressIndicatorStyle = _progressIndicatorStyle;
 @synthesize dragSession = _dragSession;
 @synthesize interaction = _interaction;
 
-- (instancetype)initWithDragSession:(CharonDragSession *)dragSession interaction:(UIDropInteraction *)interaction
+- (instancetype)initWithDragSession:(RevenantDragSession *)dragSession interaction:(UIDropInteraction *)interaction
 {
     if ((self = [super init])) {
         _dragSession = dragSession;

@@ -1,4 +1,4 @@
-module CharonNetworkSeam {
-    header "charon_network_seam.h"
+module RevenantNetworkSeam {
+    header "revenant_network_seam.h"
     export *
 }

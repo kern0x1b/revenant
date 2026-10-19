@@ -1,12 +1,12 @@
-#import "CharonScenes.h"
-#import "../CharonSayOnce.h"
+#import "RevenantScenes.h"
+#import "../RevenantSayOnce.h"
 
-static void charon_say_once(NSString *key, NSString *text)
+static void revenant_say_once(NSString *key, NSString *text)
 {
-    charon_say_once_for(key, text);
+    revenant_say_once_for(key, text);
 }
 
-static void charon_scene_error(void (^handler)(NSError *), NSInteger code)
+static void revenant_scene_error(void (^handler)(NSError *), NSInteger code)
 {
     if (!handler)
         return;
@@ -16,22 +16,22 @@ static void charon_scene_error(void (^handler)(NSError *), NSInteger code)
     });
 }
 
-@implementation UIApplication (CharonScenes)
+@implementation UIApplication (RevenantScenes)
 
-- (UIWindowScene *)charon_scene
+- (UIWindowScene *)revenant_scene
 {
-    return charon_scene();
+    return revenant_scene();
 }
 
 - (NSSet<UIScene *> *)connectedScenes
 {
-    UIWindowScene *scene = charon_scene();
+    UIWindowScene *scene = revenant_scene();
     return scene ? [NSSet setWithObject:scene] : [NSSet set];
 }
 
 - (NSSet<UISceneSession *> *)openSessions
 {
-    UIWindowScene *scene = charon_scene();
+    UIWindowScene *scene = revenant_scene();
     return scene ? [NSSet setWithObject:scene.session] : [NSSet set];
 }
 
@@ -42,19 +42,19 @@ static void charon_scene_error(void (^handler)(NSError *), NSInteger code)
 
 - (void)requestSceneSessionActivation:(UISceneSession *)sceneSession userActivity:(NSUserActivity *)userActivity options:(UISceneActivationRequestOptions *)options errorHandler:(void (^)(NSError *))errorHandler
 {
-    if (sceneSession && sceneSession == charon_scene().session)
+    if (sceneSession && sceneSession == revenant_scene().session)
         return;
-    charon_scene_error(errorHandler, 0);
+    revenant_scene_error(errorHandler, 0);
 }
 
 - (void)requestSceneSessionDestruction:(UISceneSession *)sceneSession options:(UISceneDestructionRequestOptions *)options errorHandler:(void (^)(NSError *))errorHandler
 {
-    charon_scene_error(errorHandler, 1);
+    revenant_scene_error(errorHandler, 1);
 }
 
 - (void)requestSceneSessionRefresh:(UISceneSession *)sceneSession
 {
-    charon_say_once(@"scene-refresh", @"UIApplication requestSceneSessionRefresh: has no scene snapshot to refresh on this release and does nothing");
+    revenant_say_once(@"scene-refresh", @"UIApplication requestSceneSessionRefresh: has no scene snapshot to refresh on this release and does nothing");
 }
 
 @end

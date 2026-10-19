@@ -1,4 +1,4 @@
-#import "CharonMetal.h"
+#import "RevenantMetal.h"
 
 
 @implementation MTLSharedEventListener (Shared)
@@ -8,7 +8,7 @@
     static MTLSharedEventListener *shared;
     static dispatch_once_t once;
     dispatch_once(&once, ^{
-        shared = [[MTLSharedEventListener alloc] initWithDispatchQueue:dispatch_queue_create("charon.MTLSharedEventListener", DISPATCH_QUEUE_SERIAL)];
+        shared = [[MTLSharedEventListener alloc] initWithDispatchQueue:dispatch_queue_create("revenant.MTLSharedEventListener", DISPATCH_QUEUE_SERIAL)];
     });
     return shared;
 }

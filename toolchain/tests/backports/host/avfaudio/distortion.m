@@ -1,7 +1,7 @@
 #import <AVFoundation/AVFoundation.h>
 #import <AudioToolbox/AudioToolbox.h>
 #include <stdio.h>
-#include "../../../../packages/a/apple-backports/AVFAudio/CharonDistortionPresets.h"
+#include "../../../../packages/a/apple-backports/AVFAudio/RevenantDistortionPresets.h"
 
 static int failures = 0;
 
@@ -37,8 +37,8 @@ int main(void)
 
         float fresh[16];
         readBack(hostUnit, fresh);
-        sameAs(fresh, CharonDistortionPresets[0], "fresh unit", 0);
-        if (host.preGain != CharonDistortionPresets[0][14] || host.wetDryMix != CharonDistortionPresets[0][15]) {
+        sameAs(fresh, RevenantDistortionPresets[0], "fresh unit", 0);
+        if (host.preGain != RevenantDistortionPresets[0][14] || host.wetDryMix != RevenantDistortionPresets[0][15]) {
             printf("FAIL fresh preGain/wetDryMix %g %g\n", host.preGain, host.wetDryMix);
             failures++;
         }
@@ -46,17 +46,17 @@ int main(void)
         AVAudioUnitDistortion *port = [[AVAudioUnitDistortion alloc] init];
         AudioUnit portUnit = port.audioUnit;
         const float heldPreGain = host.preGain, heldWetDryMix = host.wetDryMix;
-        for (int preset = 0; preset < CharonDistortionPresetCount; preset++) {
+        for (int preset = 0; preset < RevenantDistortionPresetCount; preset++) {
             [host loadFactoryPreset:(AVAudioUnitDistortionPreset)preset];
             float got[16];
             readBack(hostUnit, got);
-            sameAs(got, CharonDistortionPresets[preset], "host loadFactoryPreset", preset);
+            sameAs(got, RevenantDistortionPresets[preset], "host loadFactoryPreset", preset);
             if (host.preGain != heldPreGain || host.wetDryMix != heldWetDryMix) {
                 printf("FAIL host preGain/wetDryMix followed preset %d: %g %g\n", preset, host.preGain, host.wetDryMix);
                 failures++;
             }
 
-            CharonApplyDistortionPreset(portUnit, preset);
+            RevenantApplyDistortionPreset(portUnit, preset);
             float ported[16];
             readBack(portUnit, ported);
             sameAs(ported, got, "port apply against the host", preset);
@@ -65,13 +65,13 @@ int main(void)
         float before[16], after[16];
         readBack(hostUnit, before);
         [host loadFactoryPreset:(AVAudioUnitDistortionPreset)-1];
-        [host loadFactoryPreset:(AVAudioUnitDistortionPreset)CharonDistortionPresetCount];
+        [host loadFactoryPreset:(AVAudioUnitDistortionPreset)RevenantDistortionPresetCount];
         readBack(hostUnit, after);
         sameAs(after, before, "host out of range", -1);
-        CharonApplyDistortionPreset(portUnit, -1);
-        CharonApplyDistortionPreset(portUnit, CharonDistortionPresetCount);
+        RevenantApplyDistortionPreset(portUnit, -1);
+        RevenantApplyDistortionPreset(portUnit, RevenantDistortionPresetCount);
         readBack(portUnit, after);
-        sameAs(after, CharonDistortionPresets[CharonDistortionPresetCount - 1], "port out of range", CharonDistortionPresetCount - 1);
+        sameAs(after, RevenantDistortionPresets[RevenantDistortionPresetCount - 1], "port out of range", RevenantDistortionPresetCount - 1);
 
         host.preGain = 12.5f;
         host.wetDryMix = 33.25f;
@@ -83,7 +83,7 @@ int main(void)
             failures++;
         }
 
-        printf("presets=%d checks=distortion-presets failures=%d\n", CharonDistortionPresetCount, failures);
+        printf("presets=%d checks=distortion-presets failures=%d\n", RevenantDistortionPresetCount, failures);
     }
     return failures == 0 ? 0 : 1;
 }

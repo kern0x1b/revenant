@@ -1,4 +1,4 @@
-#import "CharonUIKit18.h"
+#import "RevenantUIKit18.h"
 #import <objc/runtime.h>
 
 @implementation UIConversationContext
@@ -25,17 +25,17 @@
 @implementation UISmartReplySuggestion
 @end
 
-@implementation NSObject (CharonUIKit18_ConversationContext)
+@implementation NSObject (RevenantUIKit18_ConversationContext)
 
-static char CharonTextInputTraitsConversationContextKey;
+static char RevenantTextInputTraitsConversationContextKey;
 
 - (id)conversationContext
 {
-    return objc_getAssociatedObject(self, &CharonTextInputTraitsConversationContextKey);
+    return objc_getAssociatedObject(self, &RevenantTextInputTraitsConversationContextKey);
 }
 - (void)setConversationContext:(id)context
 {
-    objc_setAssociatedObject(self, &CharonTextInputTraitsConversationContextKey, context,
+    objc_setAssociatedObject(self, &RevenantTextInputTraitsConversationContextKey, context,
                              OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 

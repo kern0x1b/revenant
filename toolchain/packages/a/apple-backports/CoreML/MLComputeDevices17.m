@@ -1,23 +1,23 @@
-#import "CharonCoreMLComputeDevices.h"
+#import "RevenantCoreMLComputeDevices.h"
 
-@interface MLCPUComputeDevice (CharonFactory)
-- (instancetype)charon_init;
+@interface MLCPUComputeDevice (RevenantFactory)
+- (instancetype)revenant_init;
 @end
 
-@implementation MLCPUComputeDevice (CharonFactory)
+@implementation MLCPUComputeDevice (RevenantFactory)
 
-- (instancetype)charon_init
+- (instancetype)revenant_init
 {
     return [super init];
 }
 
 @end
 
-static MLCPUComputeDevice *CharonMLComputeCPUDevice(void)
+static MLCPUComputeDevice *RevenantMLComputeCPUDevice(void)
 {
     static MLCPUComputeDevice *device = nil;
     if (!device) {
-        device = [[MLCPUComputeDevice alloc] charon_init];
+        device = [[MLCPUComputeDevice alloc] revenant_init];
     }
     return device;
 }
@@ -45,7 +45,7 @@ static MLCPUComputeDevice *CharonMLComputeCPUDevice(void)
 
 NSArray<id<MLComputeDeviceProtocol>> *MLAllComputeDevices(void)
 {
-    return @[CharonMLComputeCPUDevice()];
+    return @[RevenantMLComputeCPUDevice()];
 }
 
 @implementation MLModel (MLComputeDevice)

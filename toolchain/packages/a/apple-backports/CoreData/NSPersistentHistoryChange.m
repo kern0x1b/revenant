@@ -1,5 +1,5 @@
 #import <CoreData/CoreData.h>
-#import "CharonAbstract.h"
+#import "RevenantAbstract.h"
 
 @implementation NSPersistentHistoryChange
 
@@ -10,37 +10,37 @@
 
 - (int64_t)changeID
 {
-    charon_abstract(self, _cmd);
+    revenant_abstract(self, _cmd);
     return -1;
 }
 
 - (NSManagedObjectID *)changedObjectID
 {
-    charon_abstract(self, _cmd);
+    revenant_abstract(self, _cmd);
     return nil;
 }
 
 - (NSPersistentHistoryChangeType)changeType
 {
-    charon_abstract(self, _cmd);
+    revenant_abstract(self, _cmd);
     return NSPersistentHistoryChangeTypeInsert;
 }
 
 - (NSDictionary *)tombstone
 {
-    charon_abstract(self, _cmd);
+    revenant_abstract(self, _cmd);
     return nil;
 }
 
 - (NSPersistentHistoryTransaction *)transaction
 {
-    charon_abstract(self, _cmd);
+    revenant_abstract(self, _cmd);
     return nil;
 }
 
 - (NSSet<NSPropertyDescription *> *)updatedProperties
 {
-    charon_abstract(self, _cmd);
+    revenant_abstract(self, _cmd);
     return nil;
 }
 

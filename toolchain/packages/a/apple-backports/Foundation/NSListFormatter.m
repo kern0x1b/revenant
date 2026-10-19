@@ -1,8 +1,8 @@
 #import <Foundation/Foundation.h>
 
-#import "CharonListPatterns.h"
+#import "RevenantListPatterns.h"
 
-static const CharonListPattern *charon_list_pattern(NSLocale *locale)
+static const RevenantListPattern *revenant_list_pattern(NSLocale *locale)
 {
     NSString *identifier = locale.localeIdentifier;
     NSRange marker = [identifier rangeOfCharacterFromSet:[NSCharacterSet characterSetWithCharactersInString:@"@."]];
@@ -10,13 +10,13 @@ static const CharonListPattern *charon_list_pattern(NSLocale *locale)
         identifier = [identifier substringToIndex:marker.location];
     identifier = [identifier stringByReplacingOccurrencesOfString:@"-" withString:@"_"];
     for (;;) {
-        NSUInteger low = 0, high = sizeof(charon_list_patterns) / sizeof(charon_list_patterns[0]);
+        NSUInteger low = 0, high = sizeof(revenant_list_patterns) / sizeof(revenant_list_patterns[0]);
         const char *wanted = identifier.UTF8String;
         while (low < high) {
             NSUInteger middle = (low + high) / 2;
-            int order = strcmp(wanted, charon_list_patterns[middle].identifier);
+            int order = strcmp(wanted, revenant_list_patterns[middle].identifier);
             if (!order)
-                return &charon_list_patterns[middle];
+                return &revenant_list_patterns[middle];
             if (order < 0)
                 high = middle;
             else
@@ -27,10 +27,10 @@ static const CharonListPattern *charon_list_pattern(NSLocale *locale)
             break;
         identifier = [identifier substringToIndex:cut.location];
     }
-    return charon_list_pattern([NSLocale localeWithLocaleIdentifier:@"en_US"]);
+    return revenant_list_pattern([NSLocale localeWithLocaleIdentifier:@"en_US"]);
 }
 
-static BOOL charon_list_is_right_to_left(UTF32Char point)
+static BOOL revenant_list_is_right_to_left(UTF32Char point)
 {
     return (point >= 0x0590 && point <= 0x08FF && !(point >= 0x0660 && point <= 0x0669) && !(point >= 0x06F0 && point <= 0x06F9) && !(point >= 0x0600 && point <= 0x0605) &&
             !(point >= 0x064B && point <= 0x065F) && point != 0x0670 && !(point >= 0x0591 && point <= 0x05BD) && !(point >= 0x05BF && point <= 0x05C7) && !(point >= 0x06D6 && point <= 0x06DC) &&
@@ -38,18 +38,18 @@ static BOOL charon_list_is_right_to_left(UTF32Char point)
            (point >= 0xFB1D && point <= 0xFDFF) || (point >= 0xFE70 && point <= 0xFEFF) || point == 0x200F || point == 0x061C || (point >= 0x10800 && point < 0x11000) || (point >= 0x1E800 && point < 0x1F000);
 }
 
-static BOOL charon_list_is_hebrew(UTF32Char point)
+static BOOL revenant_list_is_hebrew(UTF32Char point)
 {
     return (point >= 0x0590 && point <= 0x05FF) || (point >= 0xFB1D && point <= 0xFB4F);
 }
 
-static BOOL charon_list_is_inherited(UTF32Char point)
+static BOOL revenant_list_is_inherited(UTF32Char point)
 {
     return (point >= 0x0300 && point <= 0x036F) || (point >= 0x0483 && point <= 0x0489) || (point >= 0x1AB0 && point <= 0x1AFF) || (point >= 0x1DC0 && point <= 0x1DFF) ||
            (point >= 0x20D0 && point <= 0x20FF) || (point >= 0xFE00 && point <= 0xFE0F) || (point >= 0xFE20 && point <= 0xFE2F);
 }
 
-static void charon_list_scan(NSString *text, BOOL *hasLeft, BOOL *hasRight)
+static void revenant_list_scan(NSString *text, BOOL *hasLeft, BOOL *hasRight)
 {
     static NSCharacterSet *letters, *marks;
     static dispatch_once_t once;
@@ -63,14 +63,14 @@ static void charon_list_scan(NSString *text, BOOL *hasLeft, BOOL *hasRight)
         if (first >= 0xD800 && first < 0xDC00 && index + 1 < text.length)
             point = 0x10000 + (((UTF32Char)first - 0xD800) << 10) + ([text characterAtIndex:++index] - 0xDC00);
         BOOL letter = [letters longCharacterIsMember:point] && ![marks longCharacterIsMember:point];
-        if (charon_list_is_right_to_left(point) && (letter || point == 0x200F || point == 0x061C))
+        if (revenant_list_is_right_to_left(point) && (letter || point == 0x200F || point == 0x061C))
             *hasRight = YES;
         else if (point == 0x200E || letter)
             *hasLeft = YES;
     }
 }
 
-static BOOL charon_list_hebrew_start(NSString *text)
+static BOOL revenant_list_hebrew_start(NSString *text)
 {
     if (!text.length)
         return YES;
@@ -79,9 +79,9 @@ static BOOL charon_list_hebrew_start(NSString *text)
         UTF32Char point = first;
         if (first >= 0xD800 && first < 0xDC00 && index + 1 < text.length)
             point = 0x10000 + (((UTF32Char)first - 0xD800) << 10) + ([text characterAtIndex:++index] - 0xDC00);
-        if (charon_list_is_hebrew(point))
+        if (revenant_list_is_hebrew(point))
             return YES;
-        if (!charon_list_is_inherited(point))
+        if (!revenant_list_is_inherited(point))
             return NO;
         if (index + 1 >= text.length)
             return YES;
@@ -89,12 +89,12 @@ static BOOL charon_list_hebrew_start(NSString *text)
     return NO;
 }
 
-static BOOL charon_list_is_thai(unichar point)
+static BOOL revenant_list_is_thai(unichar point)
 {
     return (point >= 0x0E01 && point <= 0x0E3A) || (point >= 0x0E40 && point <= 0x0E5B);
 }
 
-static BOOL charon_list_spanish_start(NSString *text)
+static BOOL revenant_list_spanish_start(NSString *text)
 {
     NSString *lower = text.lowercaseString;
     if ([lower hasPrefix:@"i"])
@@ -102,7 +102,7 @@ static BOOL charon_list_spanish_start(NSString *text)
     return [lower hasPrefix:@"hi"] && ![lower hasPrefix:@"hia"] && ![lower hasPrefix:@"hie"];
 }
 
-static NSString *charon_list_apply(NSString *pattern, NSString *first, NSString *second)
+static NSString *revenant_list_apply(NSString *pattern, NSString *first, NSString *second)
 {
     NSRange one = [pattern rangeOfString:@"{0}"], two = [pattern rangeOfString:@"{1}"];
     if (one.location == NSNotFound || two.location == NSNotFound)
@@ -150,7 +150,7 @@ static NSString *charon_list_apply(NSString *pattern, NSString *first, NSString 
     return copy;
 }
 
-- (NSString *)charon_text:(id)item locale:(NSLocale *)locale
+- (NSString *)revenant_text:(id)item locale:(NSLocale *)locale
 {
     NSString *text = _itemFormatter ? [_itemFormatter stringForObjectValue:item] : nil;
     if (text)
@@ -171,12 +171,12 @@ static NSString *charon_list_apply(NSString *pattern, NSString *first, NSString 
     NSLocale *locale = self.locale;
     NSMutableArray *texts = [NSMutableArray arrayWithCapacity:items.count];
     for (id item in items) {
-        NSString *text = [self charon_text:item locale:locale];
+        NSString *text = [self revenant_text:item locale:locale];
         if (!text)
             return nil;
         [texts addObject:text];
     }
-    const CharonListPattern *pattern = charon_list_pattern(locale);
+    const RevenantListPattern *pattern = revenant_list_pattern(locale);
     NSString *identifier = [[locale.localeIdentifier componentsSeparatedByString:@"@"].firstObject stringByReplacingOccurrencesOfString:@"." withString:@""];
     BOOL rightToLeft = [NSLocale characterDirectionForLanguage:identifier] == NSLocaleLanguageDirectionRightToLeft;
     NSString *language = [locale objectForKey:NSLocaleLanguageCode];
@@ -184,18 +184,18 @@ static NSString *charon_list_apply(NSString *pattern, NSString *first, NSString 
     NSArray *raw = [texts copy];
     for (NSUInteger index = 0; index < texts.count; index++) {
         BOOL hasLeft = NO, hasRight = NO;
-        charon_list_scan(texts[index], &hasLeft, &hasRight);
+        revenant_list_scan(texts[index], &hasLeft, &hasRight);
         if (rightToLeft ? hasLeft : hasRight)
             texts[index] = [NSString stringWithFormat:@"\u2068%@\u2069", texts[index]];
     }
     NSString *two = pattern->two, *end = pattern->end;
-    if ([language isEqualToString:@"es"] && charon_list_spanish_start(last)) {
+    if ([language isEqualToString:@"es"] && revenant_list_spanish_start(last)) {
         two = [two stringByReplacingOccurrencesOfString:@" y " withString:@" e "];
         end = [end stringByReplacingOccurrencesOfString:@" y " withString:@" e "];
     } else if ([language isEqualToString:@"th"]) {
         NSString *before = texts.count > 1 ? raw[raw.count - 2] : @"";
-        BOOL trimBefore = !before.length || charon_list_is_thai([before characterAtIndex:before.length - 1]);
-        BOOL trimAfter = !last.length || charon_list_is_thai([last characterAtIndex:0]);
+        BOOL trimBefore = !before.length || revenant_list_is_thai([before characterAtIndex:before.length - 1]);
+        BOOL trimAfter = !last.length || revenant_list_is_thai([last characterAtIndex:0]);
         for (NSString *name in @[@"two", @"end"]) {
             NSString *pattern = [name isEqualToString:@"two"] ? two : end;
             if (trimBefore && [name isEqualToString:@"two"])
@@ -207,7 +207,7 @@ static NSString *charon_list_apply(NSString *pattern, NSString *first, NSString 
             else
                 end = pattern;
         }
-    } else if ([language isEqualToString:@"he"] && charon_list_hebrew_start(last)) {
+    } else if ([language isEqualToString:@"he"] && revenant_list_hebrew_start(last)) {
         two = [two stringByReplacingOccurrencesOfString:@"\u05D5-" withString:@"\u05D5"];
         end = [end stringByReplacingOccurrencesOfString:@"\u05D5-" withString:@"\u05D5"];
     }
@@ -217,11 +217,11 @@ static NSString *charon_list_apply(NSString *pattern, NSString *first, NSString 
     if (count == 1)
         return texts[0];
     if (count == 2)
-        return charon_list_apply(two, texts[0], texts[1]);
-    NSString *joined = charon_list_apply(end, texts[count - 2], texts[count - 1]);
+        return revenant_list_apply(two, texts[0], texts[1]);
+    NSString *joined = revenant_list_apply(end, texts[count - 2], texts[count - 1]);
     for (NSInteger index = (NSInteger)count - 3; index >= 1; index--)
-        joined = charon_list_apply(pattern->middle, texts[index], joined);
-    return charon_list_apply(pattern->start, texts[0], joined);
+        joined = revenant_list_apply(pattern->middle, texts[index], joined);
+    return revenant_list_apply(pattern->start, texts[0], joined);
 }
 
 - (NSString *)stringForObjectValue:(id)obj

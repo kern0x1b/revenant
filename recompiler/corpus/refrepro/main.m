@@ -9,7 +9,7 @@ static void Mark(NSString *event)
     NSString *line = [NSString stringWithFormat:@"REFREPRO %@\n", event];
     fputs(line.UTF8String, stdout);
     fflush(stdout);
-    NSString *path = @"/private/var/charon/refrepro.log";
+    NSString *path = @"/private/var/revenant/refrepro.log";
     NSFileHandle *handle = [NSFileHandle fileHandleForWritingAtPath:path];
     if (!handle) {
         [[NSFileManager defaultManager] createFileAtPath:path contents:nil attributes:nil];

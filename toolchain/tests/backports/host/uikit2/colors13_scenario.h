@@ -14,11 +14,11 @@ static SEL ur_sel(const char *name)
             continue;
         char tail = name[length];
         if (tail == '\0' || (tail >= 'A' && tail <= 'Z')) {
-            snprintf(renamed, sizeof(renamed), "%sCharonHost%s", families[index], name + length);
+            snprintf(renamed, sizeof(renamed), "%sRevenantHost%s", families[index], name + length);
             return sel_registerName(renamed);
         }
     }
-    snprintf(renamed, sizeof(renamed), "charonHost%c%s", name[0] - 32, name + 1);
+    snprintf(renamed, sizeof(renamed), "revenantHost%c%s", name[0] - 32, name + 1);
     return sel_registerName(renamed);
 }
 
@@ -28,14 +28,14 @@ static UIColor *ur_dynamic(UIColor *(^provider)(UITraitCollection *))
 }
 
 @interface UIColor (UrHostDynamicInit)
-- (instancetype)initCharonHostWithDynamicProvider:(UIColor *(^)(UITraitCollection *))provider;
+- (instancetype)initRevenantHostWithDynamicProvider:(UIColor *(^)(UITraitCollection *))provider;
 @end
 
 static UIColor *ur_dynamic_init(UIColor *(^provider)(UITraitCollection *))
 {
     UIColor *allocated = [UIColor alloc];
     if (ur_port_mode)
-        return [allocated initCharonHostWithDynamicProvider:provider];
+        return [allocated initRevenantHostWithDynamicProvider:provider];
     return [allocated initWithDynamicProvider:provider];
 }
 

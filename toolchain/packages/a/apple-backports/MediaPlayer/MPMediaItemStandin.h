@@ -6,7 +6,7 @@ typedef NSNumber *MPMediaEntityPersistentID;
 - (id)valueForProperty:(NSString *)property;
 @end
 
-@interface MPMediaItem (Charon70)
+@interface MPMediaItem (Revenant70)
 @property (nonatomic, readonly) NSUInteger albumTrackNumber;
 @property (nonatomic, readonly) NSUInteger discNumber;
 @end
@@ -19,7 +19,7 @@ typedef NSNumber *MPMediaEntityPersistentID;
 - (CGRect)bounds;
 @end
 
-@interface MPMediaItemArtwork (Charon100)
+@interface MPMediaItemArtwork (Revenant100)
 - (instancetype)initWithBoundsSize:(CGSize)boundsSize requestHandler:(UIImage *(^)(CGSize size))requestHandler;
 @end
 

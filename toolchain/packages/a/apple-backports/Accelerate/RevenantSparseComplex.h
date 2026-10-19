@@ -2,20 +2,20 @@
 
 #include <math.h>
 
-typedef struct CharonComplex {
+typedef struct RevenantComplex {
     double re;
     double im;
-} CharonComplex;
+} RevenantComplex;
 
-static inline CharonComplex CharonComplexMake(double re, double im)
+static inline RevenantComplex RevenantComplexMake(double re, double im)
 {
-    CharonComplex value;
+    RevenantComplex value;
     value.re = re;
     value.im = im;
     return value;
 }
 
-static inline float _Complex CharonComplexAsFloat(CharonComplex a)
+static inline float _Complex RevenantComplexAsFloat(RevenantComplex a)
 {
     float _Complex out;
     __real__ out = (float)a.re;
@@ -23,7 +23,7 @@ static inline float _Complex CharonComplexAsFloat(CharonComplex a)
     return out;
 }
 
-static inline double _Complex CharonComplexAsDouble(CharonComplex a)
+static inline double _Complex RevenantComplexAsDouble(RevenantComplex a)
 {
     double _Complex out;
     __real__ out = a.re;
@@ -31,47 +31,47 @@ static inline double _Complex CharonComplexAsDouble(CharonComplex a)
     return out;
 }
 
-static inline CharonComplex CharonComplexAdd(CharonComplex a, CharonComplex b)
+static inline RevenantComplex RevenantComplexAdd(RevenantComplex a, RevenantComplex b)
 {
-    return CharonComplexMake(a.re + b.re, a.im + b.im);
+    return RevenantComplexMake(a.re + b.re, a.im + b.im);
 }
 
-static inline CharonComplex CharonComplexSub(CharonComplex a, CharonComplex b)
+static inline RevenantComplex RevenantComplexSub(RevenantComplex a, RevenantComplex b)
 {
-    return CharonComplexMake(a.re - b.re, a.im - b.im);
+    return RevenantComplexMake(a.re - b.re, a.im - b.im);
 }
 
-static inline CharonComplex CharonComplexMul(CharonComplex a, CharonComplex b)
+static inline RevenantComplex RevenantComplexMul(RevenantComplex a, RevenantComplex b)
 {
-    return CharonComplexMake(a.re * b.re - a.im * b.im, a.re * b.im + a.im * b.re);
+    return RevenantComplexMake(a.re * b.re - a.im * b.im, a.re * b.im + a.im * b.re);
 }
 
-static inline CharonComplex CharonComplexDiv(CharonComplex a, CharonComplex b)
+static inline RevenantComplex RevenantComplexDiv(RevenantComplex a, RevenantComplex b)
 {
     double c = fabs(b.re), d = fabs(b.im);
     if (c >= d) {
         double r = 1.0 / b.re;
         double t = d * r;
         double s = 1.0 / (b.re + b.im * t);
-        return CharonComplexMake((a.re + a.im * t) * s, (a.im - a.re * t) * s);
+        return RevenantComplexMake((a.re + a.im * t) * s, (a.im - a.re * t) * s);
     }
     double r = 1.0 / b.im;
     double t = c * r;
     double s = 1.0 / (b.re * t + b.im);
-    return CharonComplexMake((a.re * t + a.im) * s, (a.im * t - a.re) * s);
+    return RevenantComplexMake((a.re * t + a.im) * s, (a.im * t - a.re) * s);
 }
 
-static inline int CharonComplexIsZero(CharonComplex a)
+static inline int RevenantComplexIsZero(RevenantComplex a)
 {
     return a.re == 0.0 && a.im == 0.0;
 }
 
-static inline double CharonComplexModulus(CharonComplex a)
+static inline double RevenantComplexModulus(RevenantComplex a)
 {
     return hypot(a.re, a.im);
 }
 
-static inline double CharonComplexPartSum(CharonComplex a)
+static inline double RevenantComplexPartSum(RevenantComplex a)
 {
     return fabs(a.re) + fabs(a.im);
 }

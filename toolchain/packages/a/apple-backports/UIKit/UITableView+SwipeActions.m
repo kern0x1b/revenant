@@ -1,12 +1,12 @@
-#import "CharonSwipe.h"
-#import "CharonSwipeViews.h"
+#import "RevenantSwipe.h"
+#import "RevenantSwipeViews.h"
 #import <objc/message.h>
 #import <objc/runtime.h>
 #import <dlfcn.h>
 
-static const char charon_controller_key;
+static const char revenant_controller_key;
 
-BOOL charon_swipe_class_is_backport(Class cls)
+BOOL revenant_swipe_class_is_backport(Class cls)
 {
     Dl_info info;
     if (!cls || !dladdr((__bridge const void *)cls, &info) || !info.dli_fname)
@@ -14,7 +14,7 @@ BOOL charon_swipe_class_is_backport(Class cls)
     return strstr(info.dli_fname, "UIKitBackports") != NULL;
 }
 
-static BOOL charon_delegate_answers(Class cls, SEL selector, id delegate)
+static BOOL revenant_delegate_answers(Class cls, SEL selector, id delegate)
 {
     if (![delegate respondsToSelector:selector])
         return NO;
@@ -23,14 +23,14 @@ static BOOL charon_delegate_answers(Class cls, SEL selector, id delegate)
     return !(own && found && method_getImplementation(own) == method_getImplementation(found));
 }
 
-@interface CharonSwipeController : NSObject <UIGestureRecognizerDelegate>
+@interface RevenantSwipeController : NSObject <UIGestureRecognizerDelegate>
 @property (nonatomic, weak) UITableView *table;
 @property (nonatomic, strong) UIPanGestureRecognizer *pan;
 @property (nonatomic, strong) UITapGestureRecognizer *closeTap;
 @property (nonatomic, strong) NSIndexPath *path;
 @property (nonatomic, weak) UITableViewCell *cell;
-@property (nonatomic, strong) NSArray<CharonSwipeItem *> *items;
-@property (nonatomic, strong) CharonSwipeContainer *container;
+@property (nonatomic, strong) NSArray<RevenantSwipeItem *> *items;
+@property (nonatomic, strong) RevenantSwipeContainer *container;
 @property (nonatomic, strong) NSArray<UIView *> *movers;
 @property (nonatomic) NSInteger side;
 @property (nonatomic) CGFloat total;
@@ -39,7 +39,7 @@ static BOOL charon_delegate_answers(Class cls, SEL selector, id delegate)
 @property (nonatomic) BOOL resting;
 @property (nonatomic) CGFloat cellWidth;
 @property (nonatomic, strong) NSIndexPath *pendingPath;
-@property (nonatomic, strong) NSArray<CharonSwipeItem *> *pendingItems;
+@property (nonatomic, strong) NSArray<RevenantSwipeItem *> *pendingItems;
 @property (nonatomic) NSInteger pendingSide;
 @property (nonatomic) BOOL pendingFullSwipe;
 - (BOOL)isOpen;
@@ -47,7 +47,7 @@ static BOOL charon_delegate_answers(Class cls, SEL selector, id delegate)
 - (void)validate;
 @end
 
-@implementation CharonSwipeController
+@implementation RevenantSwipeController
 @synthesize table = _table;
 @synthesize pan = _pan;
 @synthesize closeTap = _closeTap;
@@ -92,17 +92,17 @@ static BOOL charon_delegate_answers(Class cls, SEL selector, id delegate)
 
 - (BOOL)coversRowActions
 {
-    return charon_swipe_class_is_backport(NSClassFromString(@"UITableViewRowAction"));
+    return revenant_swipe_class_is_backport(NSClassFromString(@"UITableViewRowAction"));
 }
 
 - (BOOL)coversConfigurations
 {
-    return charon_swipe_class_is_backport(NSClassFromString(@"UISwipeActionsConfiguration"));
+    return revenant_swipe_class_is_backport(NSClassFromString(@"UISwipeActionsConfiguration"));
 }
 
 - (CGFloat)widthOfTitle:(NSString *)title hasImage:(BOOL)hasImage
 {
-    return charon_swipe_width(title);
+    return revenant_swipe_width(title);
 }
 
 - (BOOL)rowAllowsSwipe:(NSIndexPath *)path
@@ -116,7 +116,7 @@ static BOOL charon_delegate_answers(Class cls, SEL selector, id delegate)
     return YES;
 }
 
-- (NSArray<CharonSwipeItem *> *)itemsForSide:(NSInteger)side path:(NSIndexPath *)path fullSwipe:(BOOL *)fullSwipe
+- (NSArray<RevenantSwipeItem *> *)itemsForSide:(NSInteger)side path:(NSIndexPath *)path fullSwipe:(BOOL *)fullSwipe
 {
     id delegate = _table.delegate;
     NSMutableArray *items = [NSMutableArray array];
@@ -126,7 +126,7 @@ static BOOL charon_delegate_answers(Class cls, SEL selector, id delegate)
         UISwipeActionsConfiguration *(*send)(id, SEL, UITableView *, NSIndexPath *) = (UISwipeActionsConfiguration *(*)(id, SEL, UITableView *, NSIndexPath *))objc_msgSend;
         UISwipeActionsConfiguration *result = send(delegate, configuration, _table, path);
         for (UIContextualAction *action in result.actions) {
-            CharonSwipeItem *item = [[CharonSwipeItem alloc] init];
+            RevenantSwipeItem *item = [[RevenantSwipeItem alloc] init];
             item.title = action.title;
             item.image = action.image;
             item.color = action.backgroundColor;
@@ -139,7 +139,7 @@ static BOOL charon_delegate_answers(Class cls, SEL selector, id delegate)
     }
     if (side < 0 && [self coversRowActions] && [delegate respondsToSelector:@selector(tableView:editActionsForRowAtIndexPath:)]) {
         for (UITableViewRowAction *action in [delegate tableView:_table editActionsForRowAtIndexPath:path]) {
-            CharonSwipeItem *item = [[CharonSwipeItem alloc] init];
+            RevenantSwipeItem *item = [[RevenantSwipeItem alloc] init];
             item.title = action.title;
             item.color = action.backgroundColor;
             item.action = action;
@@ -235,7 +235,7 @@ static BOOL charon_delegate_answers(Class cls, SEL selector, id delegate)
     [_container setOffset:offset inCellWidth:cell.bounds.size.width height:cell.contentView.frame.size.height];
 }
 
-- (void)beginOnPath:(NSIndexPath *)path side:(NSInteger)side items:(NSArray<CharonSwipeItem *> *)items fullSwipe:(BOOL)fullSwipe
+- (void)beginOnPath:(NSIndexPath *)path side:(NSInteger)side items:(NSArray<RevenantSwipeItem *> *)items fullSwipe:(BOOL)fullSwipe
 {
     UITableViewCell *cell = [_table cellForRowAtIndexPath:path];
     _path = path;
@@ -246,14 +246,14 @@ static BOOL charon_delegate_answers(Class cls, SEL selector, id delegate)
     _fullSwipe = fullSwipe;
     CGFloat total = 0;
     NSMutableArray *buttons = [NSMutableArray array];
-    for (CharonSwipeItem *item in items) {
+    for (RevenantSwipeItem *item in items) {
         total += item.width;
-        CharonSwipeButton *button = [[CharonSwipeButton alloc] initWithItem:item];
+        RevenantSwipeButton *button = [[RevenantSwipeButton alloc] initWithItem:item];
         [button addTarget:self action:@selector(buttonTapped:) forControlEvents:UIControlEventTouchUpInside];
         [buttons addObject:button];
     }
     _total = total;
-    _container = [[CharonSwipeContainer alloc] initWithFrame:CGRectZero];
+    _container = [[RevenantSwipeContainer alloc] initWithFrame:CGRectZero];
     _container.side = side;
     _container.totalWidth = total;
     _container.buttons = buttons;
@@ -272,7 +272,7 @@ static BOOL charon_delegate_answers(Class cls, SEL selector, id delegate)
     _movers = movers;
     _closeTap.enabled = YES;
     id delegate = _table.delegate;
-    if (charon_delegate_answers([delegate class], @selector(tableView:willBeginEditingRowAtIndexPath:), delegate))
+    if (revenant_delegate_answers([delegate class], @selector(tableView:willBeginEditingRowAtIndexPath:), delegate))
         [delegate tableView:_table willBeginEditingRowAtIndexPath:path];
 }
 
@@ -291,7 +291,7 @@ static BOOL charon_delegate_answers(Class cls, SEL selector, id delegate)
     _resting = NO;
     _closeTap.enabled = NO;
     id delegate = _table.delegate;
-    if (path && charon_delegate_answers([delegate class], @selector(tableView:didEndEditingRowAtIndexPath:), delegate))
+    if (path && revenant_delegate_answers([delegate class], @selector(tableView:didEndEditingRowAtIndexPath:), delegate))
         [delegate tableView:_table didEndEditingRowAtIndexPath:path];
 }
 
@@ -305,7 +305,7 @@ static BOOL charon_delegate_answers(Class cls, SEL selector, id delegate)
             completion();
     };
     if (animated)
-        [UIView animateWithDuration:CharonSwipeDuration delay:0 options:UIViewAnimationOptionCurveEaseOut | UIViewAnimationOptionBeginFromCurrentState | UIViewAnimationOptionAllowUserInteraction animations:apply completion:done];
+        [UIView animateWithDuration:RevenantSwipeDuration delay:0 options:UIViewAnimationOptionCurveEaseOut | UIViewAnimationOptionBeginFromCurrentState | UIViewAnimationOptionAllowUserInteraction animations:apply completion:done];
     else {
         apply();
         done(YES);
@@ -329,21 +329,21 @@ static BOOL charon_delegate_answers(Class cls, SEL selector, id delegate)
     [self settleAt:_side * _total animated:animated completion:nil];
 }
 
-- (void)perform:(CharonSwipeItem *)item
+- (void)perform:(RevenantSwipeItem *)item
 {
     NSIndexPath *path = _path;
     id action = item.action;
     if ([action isKindOfClass:[UITableViewRowAction class]]) {
-        [(UITableViewRowAction *)action charon_performForIndexPath:path];
+        [(UITableViewRowAction *)action revenant_performForIndexPath:path];
         [self closeAnimated:YES];
         return;
     }
     UIContextualAction *contextual = action;
     UIView *source = nil;
-    for (CharonSwipeButton *button in _container.buttons)
+    for (RevenantSwipeButton *button in _container.buttons)
         if (button.item == item)
             source = button;
-    __weak CharonSwipeController *weakSelf = self;
+    __weak RevenantSwipeController *weakSelf = self;
     if (contextual.handler)
         contextual.handler(contextual, source, ^(BOOL performed) {
             [weakSelf closeAnimated:YES];
@@ -352,7 +352,7 @@ static BOOL charon_delegate_answers(Class cls, SEL selector, id delegate)
         [self closeAnimated:YES];
 }
 
-- (void)buttonTapped:(CharonSwipeButton *)button
+- (void)buttonTapped:(RevenantSwipeButton *)button
 {
     [self perform:button.item];
 }
@@ -394,9 +394,9 @@ static BOOL charon_delegate_answers(Class cls, SEL selector, id delegate)
         CGFloat velocity = [recognizer velocityInView:_table].x;
         CGFloat shown = fabsf(_offset);
         BOOL towardsOpen = velocity * _side > 0;
-        if (_fullSwipe && shown > CharonSwipeFullSwipeFraction * _table.bounds.size.width) {
-            CharonSwipeItem *first = _items[0];
-            __weak CharonSwipeController *weakSelf = self;
+        if (_fullSwipe && shown > RevenantSwipeFullSwipeFraction * _table.bounds.size.width) {
+            RevenantSwipeItem *first = _items[0];
+            __weak RevenantSwipeController *weakSelf = self;
             [self settleAt:_side * _table.bounds.size.width animated:YES completion:^{
                 [weakSelf perform:first];
             }];
@@ -419,36 +419,36 @@ static BOOL charon_delegate_answers(Class cls, SEL selector, id delegate)
 
 @end
 
-static CharonSwipeController *charon_controller(UITableView *table, BOOL create)
+static RevenantSwipeController *revenant_controller(UITableView *table, BOOL create)
 {
-    CharonSwipeController *controller = objc_getAssociatedObject(table, &charon_controller_key);
+    RevenantSwipeController *controller = objc_getAssociatedObject(table, &revenant_controller_key);
     if (!controller && create) {
-        controller = [[CharonSwipeController alloc] initWithTable:table];
-        objc_setAssociatedObject(table, &charon_controller_key, controller, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+        controller = [[RevenantSwipeController alloc] initWithTable:table];
+        objc_setAssociatedObject(table, &revenant_controller_key, controller, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     }
     return controller;
 }
 
-@implementation UITableView (CharonSwipe)
+@implementation UITableView (RevenantSwipe)
 
-- (void)charon_installSwipeActions
+- (void)revenant_installSwipeActions
 {
-    charon_controller(self, YES);
+    revenant_controller(self, YES);
 }
 
 @end
 
-@interface CharonSwipeInstaller : NSObject
+@interface RevenantSwipeInstaller : NSObject
 @end
 
-@implementation CharonSwipeInstaller
+@implementation RevenantSwipeInstaller
 
 + (void)load
 {
     if (![UITableViewRowAction class] || ![UISwipeActionsConfiguration class])
         return;
-    BOOL rows = charon_swipe_class_is_backport([UITableViewRowAction class]);
-    BOOL configurations = charon_swipe_class_is_backport([UISwipeActionsConfiguration class]);
+    BOOL rows = revenant_swipe_class_is_backport([UITableViewRowAction class]);
+    BOOL configurations = revenant_swipe_class_is_backport([UISwipeActionsConfiguration class]);
     if (!rows && !configurations)
         return;
     SEL selector = @selector(setDelegate:);
@@ -456,64 +456,64 @@ static CharonSwipeController *charon_controller(UITableView *table, BOOL create)
     class_replaceMethod([UITableView class], selector, imp_implementationWithBlock(^(UITableView *table, id delegate) {
         original(table, selector, delegate);
         if (delegate)
-            [table charon_installSwipeActions];
+            [table revenant_installSwipeActions];
     }), method_getTypeEncoding(class_getInstanceMethod([UITableView class], selector)));
 
     [self closeBefore:@selector(reloadData) block:^IMP(IMP original, SEL selector) {
         return imp_implementationWithBlock(^(UITableView *table) {
-            [charon_controller(table, NO) closeAnimated:NO];
+            [revenant_controller(table, NO) closeAnimated:NO];
             ((void (*)(id, SEL))original)(table, selector);
         });
     }];
     [self closeBefore:@selector(deleteRowsAtIndexPaths:withRowAnimation:) block:^IMP(IMP original, SEL selector) {
         return imp_implementationWithBlock(^(UITableView *table, NSArray *paths, NSInteger animation) {
-            [charon_controller(table, NO) closeAnimated:NO];
+            [revenant_controller(table, NO) closeAnimated:NO];
             ((void (*)(id, SEL, NSArray *, NSInteger))original)(table, selector, paths, animation);
         });
     }];
     [self closeBefore:@selector(insertRowsAtIndexPaths:withRowAnimation:) block:^IMP(IMP original, SEL selector) {
         return imp_implementationWithBlock(^(UITableView *table, NSArray *paths, NSInteger animation) {
-            [charon_controller(table, NO) closeAnimated:NO];
+            [revenant_controller(table, NO) closeAnimated:NO];
             ((void (*)(id, SEL, NSArray *, NSInteger))original)(table, selector, paths, animation);
         });
     }];
     [self closeBefore:@selector(reloadRowsAtIndexPaths:withRowAnimation:) block:^IMP(IMP original, SEL selector) {
         return imp_implementationWithBlock(^(UITableView *table, NSArray *paths, NSInteger animation) {
-            [charon_controller(table, NO) closeAnimated:NO];
+            [revenant_controller(table, NO) closeAnimated:NO];
             ((void (*)(id, SEL, NSArray *, NSInteger))original)(table, selector, paths, animation);
         });
     }];
     [self closeBefore:@selector(moveRowAtIndexPath:toIndexPath:) block:^IMP(IMP original, SEL selector) {
         return imp_implementationWithBlock(^(UITableView *table, NSIndexPath *from, NSIndexPath *to) {
-            [charon_controller(table, NO) closeAnimated:NO];
+            [revenant_controller(table, NO) closeAnimated:NO];
             ((void (*)(id, SEL, NSIndexPath *, NSIndexPath *))original)(table, selector, from, to);
         });
     }];
     for (NSValue *value in @[[NSValue valueWithPointer:@selector(deleteSections:withRowAnimation:)], [NSValue valueWithPointer:@selector(insertSections:withRowAnimation:)], [NSValue valueWithPointer:@selector(reloadSections:withRowAnimation:)]]) {
         [self closeBefore:[value pointerValue] block:^IMP(IMP original, SEL selector) {
             return imp_implementationWithBlock(^(UITableView *table, NSIndexSet *sections, NSInteger animation) {
-                [charon_controller(table, NO) closeAnimated:NO];
+                [revenant_controller(table, NO) closeAnimated:NO];
                 ((void (*)(id, SEL, NSIndexSet *, NSInteger))original)(table, selector, sections, animation);
             });
         }];
     }
     [self closeBefore:@selector(moveSection:toSection:) block:^IMP(IMP original, SEL selector) {
         return imp_implementationWithBlock(^(UITableView *table, NSInteger from, NSInteger to) {
-            [charon_controller(table, NO) closeAnimated:NO];
+            [revenant_controller(table, NO) closeAnimated:NO];
             ((void (*)(id, SEL, NSInteger, NSInteger))original)(table, selector, from, to);
         });
     }];
     [self closeBefore:@selector(setEditing:animated:) block:^IMP(IMP original, SEL selector) {
         return imp_implementationWithBlock(^(UITableView *table, BOOL editing, BOOL animated) {
             if (editing)
-                [charon_controller(table, NO) closeAnimated:NO];
+                [revenant_controller(table, NO) closeAnimated:NO];
             ((void (*)(id, SEL, BOOL, BOOL))original)(table, selector, editing, animated);
         });
     }];
     [self closeBefore:@selector(layoutSubviews) block:^IMP(IMP original, SEL selector) {
         return imp_implementationWithBlock(^(UITableView *table) {
             ((void (*)(id, SEL))original)(table, selector);
-            [charon_controller(table, NO) validate];
+            [revenant_controller(table, NO) validate];
         });
     }];
 }

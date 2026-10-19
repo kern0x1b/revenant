@@ -486,7 +486,7 @@ end
 
 local function coverage_check(corpus, out)
     local candidates = {}
-    local tools = os.getenv("CHARON_TOOLS_DIR")
+    local tools = os.getenv("REVENANT_TOOLS_DIR")
     if tools and tools ~= "" then
         table.insert(candidates, path.join(tools, "store.json"))
     end

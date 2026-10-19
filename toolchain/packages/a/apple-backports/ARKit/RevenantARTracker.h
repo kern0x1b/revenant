@@ -3,8 +3,8 @@
 #import <CoreVideo/CoreVideo.h>
 #import <AVFoundation/AVFoundation.h>
 
-static const simd_float3x3 CharonARKitIdentityFloat3x3 = {{1, 0, 0}, {0, 1, 0}, {0, 0, 1}};
-static const simd_float4x4 CharonARKitIdentityFloat4x4 = {{1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 1, 0}, {0, 0, 0, 1}};
+static const simd_float3x3 RevenantARKitIdentityFloat3x3 = {{1, 0, 0}, {0, 1, 0}, {0, 0, 1}};
+static const simd_float4x4 RevenantARKitIdentityFloat4x4 = {{1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 1, 0}, {0, 0, 0, 1}};
 #import <simd/simd.h>
 
 NS_ASSUME_NONNULL_BEGIN
@@ -18,7 +18,7 @@ typedef struct {
     uint32_t   identifier;
     uint8_t    age;
     uint8_t    hits;
-} CharonARPoint;
+} RevenantARPoint;
 
 typedef struct {
     simd_float3 center;
@@ -26,19 +26,19 @@ typedef struct {
     simd_float3 extent;
     float       alignment;
     uint32_t    identifier;
-} CharonARPlane;
+} RevenantARPlane;
 
 typedef struct {
     simd_float3 position;
     simd_float3 localNormal;
     uint32_t     planeIdentifier;
-} CharonARHit;
+} RevenantARHit;
 
 typedef struct {
     simd_float3 position;
-} CharonARCloudPoint;
+} RevenantARCloudPoint;
 
-static inline simd_float3 CharonRayDirection(simd_float3x3 intrinsics, simd_float4x4 transform, simd_float2 point)
+static inline simd_float3 RevenantRayDirection(simd_float3x3 intrinsics, simd_float4x4 transform, simd_float2 point)
 {
     float fx = intrinsics.columns[0][0], cx = intrinsics.columns[2][0];
     float fy = intrinsics.columns[1][1], cy = intrinsics.columns[2][1];
@@ -49,7 +49,7 @@ static inline simd_float3 CharonRayDirection(simd_float3x3 intrinsics, simd_floa
     return simd_normalize(simd_make_float3(product.x, product.y, product.z));
 }
 
-static inline simd_float4x4 CharonQuaternionMatrix(simd_quatf q)
+static inline simd_float4x4 RevenantQuaternionMatrix(simd_quatf q)
 {
     float x = q.vector.x, y = q.vector.y, z = q.vector.z, w = q.vector.w;
     simd_float4x4 m;
@@ -60,9 +60,9 @@ static inline simd_float4x4 CharonQuaternionMatrix(simd_quatf q)
     return m;
 }
 
-@protocol CharonARTrackerDelegate;
+@protocol RevenantARTrackerDelegate;
 
-@interface CharonARValue : NSObject
+@interface RevenantARValue : NSObject
 
 - (instancetype)initWithBytes:(const void *)bytes size:(size_t)size NS_DESIGNATED_INITIALIZER;
 - (instancetype)init NS_UNAVAILABLE;
@@ -73,7 +73,7 @@ static inline simd_float4x4 CharonQuaternionMatrix(simd_quatf q)
 
 @end
 
-@interface CharonARTracker : NSObject
+@interface RevenantARTracker : NSObject
 
 + (BOOL)isSupported;
 
@@ -87,7 +87,7 @@ static inline simd_float4x4 CharonQuaternionMatrix(simd_quatf q)
 
 + (void)useCameraIntrinsics:(simd_float3x3)intrinsics;
 
-@property (nonatomic, weak, nullable) id<CharonARTrackerDelegate> delegate;
+@property (nonatomic, weak, nullable) id<RevenantARTrackerDelegate> delegate;
 
 - (BOOL)startWithError:(NSError **)error;
 
@@ -111,7 +111,7 @@ static inline simd_float4x4 CharonQuaternionMatrix(simd_quatf q)
 
 @property (nonatomic, readonly) NSData *pointCloud;
 
-@property (nonatomic, readonly) NSArray<CharonARValue *> *planes;
+@property (nonatomic, readonly) NSArray<RevenantARValue *> *planes;
 
 @property (nonatomic, readonly) simd_float4x4 cameraTransform;
 
@@ -129,24 +129,24 @@ static inline simd_float4x4 CharonQuaternionMatrix(simd_quatf q)
 
 - (BOOL)raycastFromPoint:(CGPoint)point
                 allowing:(NSUInteger)targets
-                results:(NSMutableArray<CharonARValue *> *)results;
+                results:(NSMutableArray<RevenantARValue *> *)results;
 
 - (BOOL)raycastFromOrigin:(simd_float3)origin
                  direction:(simd_float3)direction
                 allowing:(NSUInteger)targets
-                  results:(NSMutableArray<CharonARValue *> *)results;
+                  results:(NSMutableArray<RevenantARValue *> *)results;
 
 - (BOOL)hitTestPoint:(CGPoint)point
-          results:(NSMutableArray<CharonARValue *> *)results;
+          results:(NSMutableArray<RevenantARValue *> *)results;
 
 - (BOOL)hitTestPoint:(CGPoint)point
     existingPlane:(BOOL)existingPlane
-          results:(NSMutableArray<CharonARValue *> *)results;
+          results:(NSMutableArray<RevenantARValue *> *)results;
 
 @end
 
-@protocol CharonARTrackerDelegate <NSObject>
-- (void)tracker:(CharonARTracker *)tracker didUpdateWithTimestamp:(NSTimeInterval)timestamp;
+@protocol RevenantARTrackerDelegate <NSObject>
+- (void)tracker:(RevenantARTracker *)tracker didUpdateWithTimestamp:(NSTimeInterval)timestamp;
 @end
 
 NS_ASSUME_NONNULL_END

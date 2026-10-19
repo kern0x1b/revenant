@@ -12,7 +12,7 @@ set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 PORT=${COREML_UPDATE_PORT:-$here/../../../../packages/a/apple-backports/CoreML}
-build=${COREML_UPDATE_BUILD:-$(runs_folder charon-coreml-update)}
+build=${COREML_UPDATE_BUILD:-$(runs_folder revenant-coreml-update)}
 # The bound on any weight or bias: this many float32 ulps of the largest weight in the host's dump of the event.
 # A float32 ulp at a magnitude m is 2^(e - 23) for the exponent e of m, so the bound scales with the weights.
 ULPS=4
@@ -24,9 +24,9 @@ seed=7
 rm -rf "$build"
 mkdir -p "$build"
 
-cc -std=c11 -Wall -O1 -I"$PORT" -c "$PORT/CharonMLProto.c" -o "$build/proto.o"
-cc -std=c11 -Wall -O1 -I"$PORT" -c "$PORT/CharonMLSchema.c" -o "$build/schema.o"
-cc -std=c11 -Wall -O1 -I"$PORT" -c "$PORT/CharonMLTrain.c" -o "$build/train.o"
+cc -std=c11 -Wall -O1 -I"$PORT" -c "$PORT/RevenantMLProto.c" -o "$build/proto.o"
+cc -std=c11 -Wall -O1 -I"$PORT" -c "$PORT/RevenantMLSchema.c" -o "$build/schema.o"
+cc -std=c11 -Wall -O1 -I"$PORT" -c "$PORT/RevenantMLTrain.c" -o "$build/train.o"
 cc -std=c11 -Wall -O1 -I"$PORT" -o "$build/gen" "$here/gen.c" -lm
 cc -std=c11 -Wall -O1 -I"$PORT" -I"$here" -o "$build/train-check" "$here/train-check.c" \
     "$build/train.o" "$build/proto.o" "$build/schema.o" -lm

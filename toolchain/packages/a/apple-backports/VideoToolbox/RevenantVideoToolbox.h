@@ -1,16 +1,16 @@
-#ifndef CHARON_VIDEOTOOLBOX_H
-#define CHARON_VIDEOTOOLBOX_H
+#ifndef REVENANT_VIDEOTOOLBOX_H
+#define REVENANT_VIDEOTOOLBOX_H
 
 #import <Foundation/Foundation.h>
 #import <CoreMedia/CoreMedia.h>
 #import <CoreVideo/CoreVideo.h>
-#ifndef CHARON_VT_DECLARE_FOR_CASE
+#ifndef REVENANT_VT_DECLARE_FOR_CASE
 #import <VideoToolbox/VideoToolbox.h>
 #endif
 
 NS_ASSUME_NONNULL_BEGIN
 
-#ifdef CHARON_VT_DECLARE_FOR_CASE
+#ifdef REVENANT_VT_DECLARE_FOR_CASE
 enum VTDecodeInfoFlags : UInt32;
 typedef enum VTDecodeInfoFlags VTDecodeInfoFlags;
 enum VTDecodeFrameFlags : uint32_t;
@@ -25,7 +25,7 @@ typedef void (^VTCompressionOutputHandler)(OSStatus, VTEncodeInfoFlags, CMSample
 #endif
 #endif
 
-#if !defined(CHARON_HOST_DIFFERENTIAL) || defined(CHARON_VT_DECLARE_FOR_CASE)
+#if !defined(REVENANT_HOST_DIFFERENTIAL) || defined(REVENANT_VT_DECLARE_FOR_CASE)
 
 @protocol MTLCommandBuffer;
 

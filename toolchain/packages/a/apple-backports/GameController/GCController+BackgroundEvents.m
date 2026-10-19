@@ -2,7 +2,7 @@
 
 static BOOL gMonitorBackgroundEvents;
 
-@implementation GCController (CharonBackgroundEvents)
+@implementation GCController (RevenantBackgroundEvents)
 
 + (BOOL)shouldMonitorBackgroundEvents
 {

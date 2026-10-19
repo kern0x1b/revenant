@@ -40,8 +40,8 @@ static UIWindow *the_window;
 }
 @end
 
-@interface UIDocumentPickerViewController (CharonProbe)
-- (void)charon_cancel;
+@interface UIDocumentPickerViewController (RevenantProbe)
+- (void)revenant_cancel;
 @end
 
 static UIDocumentPickerViewController *current;
@@ -164,7 +164,7 @@ static void locations_scenario(void)
         UINavigationController *navigation = current.childViewControllers.firstObject;
         [navigation popToRootViewControllerAnimated:NO];
     });
-    gesture_step(0.5, ^{ [current charon_cancel]; });
+    gesture_step(0.5, ^{ [current revenant_cancel]; });
     gesture_step(1.0, ^{
         CHECK(current.presentingViewController == nil, "cancelling from the locations dismisses it");
     });
@@ -274,7 +274,7 @@ static void single_scenario(void)
 {
     [[NSFileManager defaultManager] createDirectoryAtPath:results_folder withIntermediateDirectories:YES attributes:nil error:NULL];
     [[NSFileManager defaultManager] removeItemAtPath:[results_folder stringByAppendingPathComponent:@"documentpicker.done"] error:NULL];
-    charon_log_to([results_folder stringByAppendingPathComponent:@"documentpicker.log"]);
+    revenant_log_to([results_folder stringByAppendingPathComponent:@"documentpicker.log"]);
     reset_fixture();
     self.window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
     self.window.rootViewController = [[UIViewController alloc] init];
@@ -290,8 +290,8 @@ static void single_scenario(void)
         move_scenario();
         single_scenario();
         gesture_run(^{
-            printf("checks=%d failures=%d\n", charon_checks, charon_failures);
-            NSString *summary = [NSString stringWithFormat:@"%@ checks=%d failures=%d\n", charon_failures ? @"FAIL" : @"ok", charon_checks, charon_failures];
+            printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
+            NSString *summary = [NSString stringWithFormat:@"%@ checks=%d failures=%d\n", revenant_failures ? @"FAIL" : @"ok", revenant_checks, revenant_failures];
             [summary writeToFile:[results_folder stringByAppendingPathComponent:@"documentpicker.done"] atomically:YES encoding:NSUTF8StringEncoding error:NULL];
         });
     });

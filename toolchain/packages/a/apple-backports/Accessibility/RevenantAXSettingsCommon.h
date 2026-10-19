@@ -1,6 +1,6 @@
 #import <Foundation/Foundation.h>
 
-static inline BOOL CharonAXSettingIsOffOnThisRelease(void)
+static inline BOOL RevenantAXSettingIsOffOnThisRelease(void)
 {
     return NO;
 }

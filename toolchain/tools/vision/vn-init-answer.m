@@ -61,27 +61,27 @@ int main(void)
     printf("-- the fifteen rows, asked of the port's own classes --\n");
 
     printf("+[VNFaceLandmarkRegion new]\n");
-    row("VNFaceLandmarkRegion", objc_getClass("CharonVNFaceLandmarkRegion"), "new", 1);
+    row("VNFaceLandmarkRegion", objc_getClass("RevenantVNFaceLandmarkRegion"), "new", 1);
 
     static const char *instance_rows[][2] = {
-        {"CharonVNCoreMLModel",          "init"},
-        {"CharonVNCoreMLRequest",        "init"},
-        {"CharonVNCoreMLRequest",        "initWithCompletionHandler:"},
-        {"CharonVNFaceLandmarkRegion",   "init"},
-        {"CharonVNFaceLandmarks",        "init"},
-        {"CharonVNImageRequestHandler",  "init"},
-        {"CharonVNTargetedImageRequest", "init"},
-        {"CharonVNTargetedImageRequest", "initWithCompletionHandler:"},
-        {"CharonVNTrackObjectRequest",   "init"},
-        {"CharonVNTrackObjectRequest",   "initWithCompletionHandler:"},
-        {"CharonVNTrackRectangleRequest","init"},
-        {"CharonVNTrackRectangleRequest","initWithCompletionHandler:"},
-        {"CharonVNTrackingRequest",      "init"},
-        {"CharonVNTrackingRequest",      "initWithCompletionHandler:"},
+        {"RevenantVNCoreMLModel",          "init"},
+        {"RevenantVNCoreMLRequest",        "init"},
+        {"RevenantVNCoreMLRequest",        "initWithCompletionHandler:"},
+        {"RevenantVNFaceLandmarkRegion",   "init"},
+        {"RevenantVNFaceLandmarks",        "init"},
+        {"RevenantVNImageRequestHandler",  "init"},
+        {"RevenantVNTargetedImageRequest", "init"},
+        {"RevenantVNTargetedImageRequest", "initWithCompletionHandler:"},
+        {"RevenantVNTrackObjectRequest",   "init"},
+        {"RevenantVNTrackObjectRequest",   "initWithCompletionHandler:"},
+        {"RevenantVNTrackRectangleRequest","init"},
+        {"RevenantVNTrackRectangleRequest","initWithCompletionHandler:"},
+        {"RevenantVNTrackingRequest",      "init"},
+        {"RevenantVNTrackingRequest",      "initWithCompletionHandler:"},
         {NULL, NULL},
     };
     for (int i = 0; instance_rows[i][0]; i++) {
-        const char *label = instance_rows[i][0] + strlen("Charon");
+        const char *label = instance_rows[i][0] + strlen("Revenant");
         printf("-[%s %s]\n", label, instance_rows[i][1]);
         row(label, objc_getClass(instance_rows[i][0]), instance_rows[i][1], 0);
     }
@@ -91,7 +91,7 @@ int main(void)
            objc_getClass("VNNoClassOfThisName") ? "found" : "nil class");
 
     for (int i = 0; instance_rows[i][0]; i++) {
-        const char *name = instance_rows[i][0] + strlen("Charon");
+        const char *name = instance_rows[i][0] + strlen("Revenant");
         Class system = objc_getClass(name);
         if (!system) {
             printf("%-26s %-34s host: no such class\n", name, instance_rows[i][1]);

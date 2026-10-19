@@ -32,7 +32,7 @@ static void configure(id formatter, NSDictionary *config)
 int main(int argc, char **argv)
 {
     @autoreleasepool {
-        Class ours = NSClassFromString(@"CharonHostNSRelativeDateTimeFormatter");
+        Class ours = NSClassFromString(@"RevenantHostNSRelativeDateTimeFormatter");
         CHECK(ours != Nil, "the port defines the class");
         id fresh = [[ours alloc] init], theirs = [[NSRelativeDateTimeFormatter alloc] init];
         CHECK_EQUAL(@([fresh dateTimeStyle]), @([theirs dateTimeStyle]), "the date time style starts numeric");
@@ -121,8 +121,8 @@ int main(int argc, char **argv)
             printf("  %s\n", sample.UTF8String);
         for (NSString *key in [mismatches.allKeys sortedArrayUsingSelector:@selector(compare:)])
             printf("  %s: %ld\n", key.UTF8String, (long)[mismatches[key] integerValue]);
-        charon_check(wrong == 0, "the formatter answers as the system's for every random configuration", [NSString stringWithFormat:@"%lu of %lu differ", (unsigned long)wrong, (unsigned long)total]);
+        revenant_check(wrong == 0, "the formatter answers as the system's for every random configuration", [NSString stringWithFormat:@"%lu of %lu differ", (unsigned long)wrong, (unsigned long)total]);
     }
-    printf("checks=%d failures=%d\n", charon_checks, charon_failures);
-    return charon_failures;
+    printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
+    return revenant_failures;
 }

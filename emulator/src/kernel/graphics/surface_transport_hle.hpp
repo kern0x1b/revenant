@@ -7,7 +7,7 @@
 #include "foundation/userland_hle.hpp"
 #include "graphics/surface_transport_abi.hpp"
 
-namespace shade::surface_transport {
+namespace emulator::surface_transport {
 
 [[nodiscard]] inline Kind io_surface_kind(UserlandHleCall& call)
 {

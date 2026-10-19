@@ -1,18 +1,18 @@
-#import "CharonNDEF.h"
+#import "RevenantNDEF.h"
 
-const char *const CharonNDEFURIPrefixes[CharonNDEFURIPrefixCount] = {
+const char *const RevenantNDEFURIPrefixes[RevenantNDEFURIPrefixCount] = {
     "", "http://www.", "https://www.", "http://", "https://", "tel:", "mailto:",
     "ftp://anonymous:anonymous@", "ftp://ftp.", "ftps://", "sftp://", "smb://", "nfs://", "ftp://",
     "dav://", "news:", "telnet://", "imap:", "rtsp://", "urn:", "pop:", "sip:", "sips:", "tftp:",
     "btspp://", "btl2cap://", "btgoep://", "tcpobex://", "irdaobex://", "file://", "urn:epc:id:",
     "urn:epc:tag:", "urn:epc:pat:", "urn:epc:raw:", "urn:epc:", "urn:nfc:"};
 
-static uint32_t CharonNDEFBigEndian(const uint8_t *bytes)
+static uint32_t RevenantNDEFBigEndian(const uint8_t *bytes)
 {
     return ((uint32_t)bytes[0] << 24) | ((uint32_t)bytes[1] << 16) | ((uint32_t)bytes[2] << 8) | (uint32_t)bytes[3];
 }
 
-static void CharonNDEFPutBigEndian(uint8_t *bytes, uint32_t value)
+static void RevenantNDEFPutBigEndian(uint8_t *bytes, uint32_t value)
 {
     bytes[0] = (uint8_t)(value >> 24);
     bytes[1] = (uint8_t)(value >> 16);
@@ -20,19 +20,19 @@ static void CharonNDEFPutBigEndian(uint8_t *bytes, uint32_t value)
     bytes[3] = (uint8_t)value;
 }
 
-size_t CharonNDEFRecordLength(const CharonNDEFRecord *record)
+size_t RevenantNDEFRecordLength(const RevenantNDEFRecord *record)
 {
-    if (record->typeLength > CharonNDEFMaxTypeLength || record->identifierLength > CharonNDEFMaxIDLength) {
+    if (record->typeLength > RevenantNDEFMaxTypeLength || record->identifierLength > RevenantNDEFMaxIDLength) {
         return 0;
     }
     size_t head = (record->payloadLength < 0x100 ? 3 : 6) + (record->hasIdentifierField ? 1 : 0);
     return head + record->typeLength + record->identifierLength + record->payloadLength;
 }
 
-size_t CharonNDEFRecordEncode(const CharonNDEFRecord *record, uint8_t *out, size_t capacity)
+size_t RevenantNDEFRecordEncode(const RevenantNDEFRecord *record, uint8_t *out, size_t capacity)
 {
     int shortRecord = record->payloadLength < 0x100;
-    size_t total = CharonNDEFRecordLength(record);
+    size_t total = RevenantNDEFRecordLength(record);
     if (total == 0 || total > capacity) {
         return 0;
     }
@@ -58,7 +58,7 @@ size_t CharonNDEFRecordEncode(const CharonNDEFRecord *record, uint8_t *out, size
     if (shortRecord) {
         out[offset++] = (uint8_t)record->payloadLength;
     } else {
-        CharonNDEFPutBigEndian(out + offset, (uint32_t)record->payloadLength);
+        RevenantNDEFPutBigEndian(out + offset, (uint32_t)record->payloadLength);
         offset += 4;
     }
     if (record->hasIdentifierField) {
@@ -79,7 +79,7 @@ size_t CharonNDEFRecordEncode(const CharonNDEFRecord *record, uint8_t *out, size
     return offset;
 }
 
-size_t CharonNDEFRecordDecode(const uint8_t *bytes, size_t length, CharonNDEFRecord *record)
+size_t RevenantNDEFRecordDecode(const uint8_t *bytes, size_t length, RevenantNDEFRecord *record)
 {
     if (length < 4) {
         return 0;
@@ -97,7 +97,7 @@ size_t CharonNDEFRecordDecode(const uint8_t *bytes, size_t length, CharonNDEFRec
         if (length < 7) {
             return 0;
         }
-        payloadLength = CharonNDEFBigEndian(bytes + offset);
+        payloadLength = RevenantNDEFBigEndian(bytes + offset);
         offset += 4;
     }
     size_t identifierLength = 0;
@@ -109,7 +109,7 @@ size_t CharonNDEFRecordDecode(const uint8_t *bytes, size_t length, CharonNDEFRec
         identifierLength = bytes[offset++];
     }
     size_t total = offset + typeLength + identifierLength + payloadLength;
-    if (total > length || typeLength > CharonNDEFMaxTypeLength || identifierLength > CharonNDEFMaxIDLength) {
+    if (total > length || typeLength > RevenantNDEFMaxTypeLength || identifierLength > RevenantNDEFMaxIDLength) {
         return 0;
     }
     record->format = (uint8_t)((header >> 1) & 0x07);

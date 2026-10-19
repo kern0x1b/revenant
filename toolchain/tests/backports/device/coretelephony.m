@@ -16,7 +16,7 @@ int main(int argc, char **argv)
 {
     @autoreleasepool {
         if (argc > 1)
-            charon_log_to(@(argv[1]));
+            revenant_log_to(@(argv[1]));
         NSArray *names = @[CTRadioAccessTechnologyGPRS, CTRadioAccessTechnologyEdge, CTRadioAccessTechnologyWCDMA, CTRadioAccessTechnologyHSDPA, CTRadioAccessTechnologyHSUPA, CTRadioAccessTechnologyCDMA1x, CTRadioAccessTechnologyCDMAEVDORev0, CTRadioAccessTechnologyCDMAEVDORevA, CTRadioAccessTechnologyCDMAEVDORevB, CTRadioAccessTechnologyeHRPD, CTRadioAccessTechnologyLTE];
         CHECK_EQUAL(image_of((void *)&CTRadioAccessTechnologyWCDMA), @"libCoreTelephonyBackports.dylib", "the WCDMA name comes from the backports");
         NSArray *expected = @[@"CTRadioAccessTechnologyGPRS", @"CTRadioAccessTechnologyEdge", @"CTRadioAccessTechnologyWCDMA", @"CTRadioAccessTechnologyHSDPA", @"CTRadioAccessTechnologyHSUPA", @"CTRadioAccessTechnologyCDMA1x", @"CTRadioAccessTechnologyCDMAEVDORev0", @"CTRadioAccessTechnologyCDMAEVDORevA", @"CTRadioAccessTechnologyCDMAEVDORevB", @"CTRadioAccessTechnologyeHRPD", @"CTRadioAccessTechnologyLTE"];
@@ -30,7 +30,7 @@ int main(int argc, char **argv)
         SEL private = sel_registerName("radioAccessTechnology");
         if (![info respondsToSelector:private])
             CHECK(technology == nil, "a release with no private technology class answers nil");
-        printf("%d checks, %d failed\n", charon_checks, charon_failures);
+        printf("%d checks, %d failed\n", revenant_checks, revenant_failures);
     }
-    return charon_failures;
+    return revenant_failures;
 }

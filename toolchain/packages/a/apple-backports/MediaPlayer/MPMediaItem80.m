@@ -1,11 +1,11 @@
 #import <Foundation/Foundation.h>
-#if defined(CHARON_MEDIAPLAYER_STANDIN)
+#if defined(REVENANT_MEDIAPLAYER_STANDIN)
 #import "MPMediaItemStandin.h"
 #else
 #import <MediaPlayer/MediaPlayer.h>
 #endif
 
-@interface MPMediaItem (Charon80)
+@interface MPMediaItem (Revenant80)
 @property (nonatomic, readonly) MPMediaEntityPersistentID albumPersistentID;
 @property (nonatomic, readonly) MPMediaEntityPersistentID artistPersistentID;
 @property (nonatomic, readonly) MPMediaEntityPersistentID albumArtistPersistentID;
@@ -24,7 +24,7 @@
 @end
 
 
-@implementation MPMediaItem (Charon80)
+@implementation MPMediaItem (Revenant80)
 
 - (MPMediaEntityPersistentID)albumPersistentID {
     return (MPMediaEntityPersistentID)[self valueForProperty:@"albumPersistentID"];

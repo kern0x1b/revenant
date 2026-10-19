@@ -1,14 +1,14 @@
 #import <AVFAudio/AVSpeechSynthesis.h>
 #include <dlfcn.h>
 
-@protocol CharonVoiceServicesListing <NSObject>
+@protocol RevenantVoiceServicesListing <NSObject>
 + (NSArray *)availableLanguageCodes;
 + (NSArray *)availableVoicesForLanguageCode:(NSString *)languageCode;
 @end
 
-static NSString *const CharonVoiceServicesPath = @"/System/Library/PrivateFrameworks/VoiceServices.framework/VoiceServices";
+static NSString *const RevenantVoiceServicesPath = @"/System/Library/PrivateFrameworks/VoiceServices.framework/VoiceServices";
 
-static NSDictionary *CharonHostIdentifiers(void)
+static NSDictionary *RevenantHostIdentifiers(void)
 {
     static NSDictionary *table;
     static dispatch_once_t once;
@@ -41,24 +41,24 @@ static NSDictionary *CharonHostIdentifiers(void)
     return table;
 }
 
-static NSString *CharonPrimaryLanguage(NSString *tag)
+static NSString *RevenantPrimaryLanguage(NSString *tag)
 {
     NSRange dash = [tag rangeOfString:@"-"];
     return dash.location == NSNotFound ? tag : [tag substringToIndex:dash.location];
 }
 
-static Class<CharonVoiceServicesListing> CharonListingClass(void)
+static Class<RevenantVoiceServicesListing> RevenantListingClass(void)
 {
     static dispatch_once_t once;
     dispatch_once(&once, ^{
-        dlopen([CharonVoiceServicesPath UTF8String], RTLD_LAZY);
+        dlopen([RevenantVoiceServicesPath UTF8String], RTLD_LAZY);
     });
-    return (Class<CharonVoiceServicesListing>)NSClassFromString(@"VSSpeechSynthesizer");
+    return (Class<RevenantVoiceServicesListing>)NSClassFromString(@"VSSpeechSynthesizer");
 }
 
-static NSString *CharonIdentifierForVoice(NSString *language, NSString *name)
+static NSString *RevenantIdentifierForVoice(NSString *language, NSString *name)
 {
-    NSString *measured = CharonHostIdentifiers()[[NSString stringWithFormat:@"%@ %@", language, name]];
+    NSString *measured = RevenantHostIdentifiers()[[NSString stringWithFormat:@"%@ %@", language, name]];
     return measured ?: [NSString stringWithFormat:@"com.apple.voice.super-compact.%@.%@", language,
                         [name stringByReplacingOccurrencesOfString:@"-" withString:@""]];
 }
@@ -75,7 +75,7 @@ static NSString *CharonIdentifierForVoice(NSString *language, NSString *name)
 
 + (NSArray<AVSpeechSynthesisVoice *> *)speechVoices
 {
-    Class<CharonVoiceServicesListing> listing = CharonListingClass();
+    Class<RevenantVoiceServicesListing> listing = RevenantListingClass();
     NSMutableArray *voices = [NSMutableArray array];
     if (!listing) return voices;
     for (NSString *code in [listing availableLanguageCodes]) {
@@ -83,7 +83,7 @@ static NSString *CharonIdentifierForVoice(NSString *language, NSString *name)
             AVSpeechSynthesisVoice *voice = [[self alloc] init];
             voice->_language = [code copy];
             voice->_name = [name copy];
-            voice->_identifier = CharonIdentifierForVoice(code, name);
+            voice->_identifier = RevenantIdentifierForVoice(code, name);
             voice->_quality = AVSpeechSynthesisVoiceQualityDefault;
             [voices addObject:voice];
         }
@@ -98,10 +98,10 @@ static NSString *CharonIdentifierForVoice(NSString *language, NSString *name)
         NSString *region = [[NSLocale currentLocale] objectForKey:NSLocaleCountryCode];
         if (region) tag = [tag stringByAppendingFormat:@"-%@", region];
     }
-    NSArray *codes = [CharonListingClass() availableLanguageCodes];
+    NSArray *codes = [RevenantListingClass() availableLanguageCodes];
     if ([codes containsObject:tag]) return tag;
     for (NSString *code in codes) {
-        if ([CharonPrimaryLanguage(code) isEqualToString:CharonPrimaryLanguage(tag)]) return code;
+        if ([RevenantPrimaryLanguage(code) isEqualToString:RevenantPrimaryLanguage(tag)]) return code;
     }
     return tag;
 }
@@ -113,15 +113,15 @@ static NSString *CharonIdentifierForVoice(NSString *language, NSString *name)
     for (AVSpeechSynthesisVoice *voice in voices) {
         if ([voice->_language isEqualToString:code]) return voice;
     }
-    NSString *primary = CharonPrimaryLanguage(code);
+    NSString *primary = RevenantPrimaryLanguage(code);
     NSString *current = [self currentLanguageCode];
-    if ([CharonPrimaryLanguage(current) isEqualToString:primary]) {
+    if ([RevenantPrimaryLanguage(current) isEqualToString:primary]) {
         for (AVSpeechSynthesisVoice *voice in voices) {
             if ([voice->_language isEqualToString:current]) return voice;
         }
     }
     for (AVSpeechSynthesisVoice *voice in voices) {
-        if ([CharonPrimaryLanguage(voice->_language) isEqualToString:primary]) return voice;
+        if ([RevenantPrimaryLanguage(voice->_language) isEqualToString:primary]) return voice;
     }
     return nil;
 }

@@ -3,13 +3,13 @@
 #import <dlfcn.h>
 #import "check.h"
 
-extern const CFStringRef charonHost_kCFHTTPVersion2_0;
-extern const CFStringRef charonHost_kCFHTTPVersion3_0;
-extern const CFStringRef charonHost_kCFStreamNetworkServiceTypeCallSignaling;
-extern const CFStringRef charonHost_kCFStreamPropertyAllowConstrainedNetworkAccess;
-extern const CFStringRef charonHost_kCFStreamPropertyAllowExpensiveNetworkAccess;
-extern const CFStringRef charonHost_kCFStreamPropertyConnectionIsExpensive;
-extern const CFStringRef charonHost_kCFStreamPropertySocketExtendedBackgroundIdleMode;
+extern const CFStringRef revenantHost_kCFHTTPVersion2_0;
+extern const CFStringRef revenantHost_kCFHTTPVersion3_0;
+extern const CFStringRef revenantHost_kCFStreamNetworkServiceTypeCallSignaling;
+extern const CFStringRef revenantHost_kCFStreamPropertyAllowConstrainedNetworkAccess;
+extern const CFStringRef revenantHost_kCFStreamPropertyAllowExpensiveNetworkAccess;
+extern const CFStringRef revenantHost_kCFStreamPropertyConnectionIsExpensive;
+extern const CFStringRef revenantHost_kCFStreamPropertySocketExtendedBackgroundIdleMode;
 
 static NSString *text(CFStringRef string)
 {
@@ -27,13 +27,13 @@ static void compare(const char *name, CFStringRef port)
     if (found) {
         host = *(CFStringRef *)found;
     }
-    charon_check(host != NULL, "the host exports the name", [NSString stringWithFormat:@"%s is not exported here", name]);
+    revenant_check(host != NULL, "the host exports the name", [NSString stringWithFormat:@"%s is not exported here", name]);
     if (!host) {
         return;
     }
     NSString *mine = text(port);
     NSString *theirs = text(host);
-    charon_check([mine isEqualToString:theirs], "the port carries the text the host has",
+    revenant_check([mine isEqualToString:theirs], "the port carries the text the host has",
                  [NSString stringWithFormat:@"%s: port %@, host %@", name, mine, theirs]);
 }
 
@@ -41,25 +41,25 @@ int main(void)
 {
     setvbuf(stdout, NULL, _IOLBF, 0);
 
-    compare("kCFHTTPVersion2_0", charonHost_kCFHTTPVersion2_0);
-    compare("kCFHTTPVersion3_0", charonHost_kCFHTTPVersion3_0);
-    compare("kCFStreamNetworkServiceTypeCallSignaling", charonHost_kCFStreamNetworkServiceTypeCallSignaling);
-    compare("kCFStreamPropertyAllowConstrainedNetworkAccess", charonHost_kCFStreamPropertyAllowConstrainedNetworkAccess);
-    compare("kCFStreamPropertyAllowExpensiveNetworkAccess", charonHost_kCFStreamPropertyAllowExpensiveNetworkAccess);
-    compare("kCFStreamPropertyConnectionIsExpensive", charonHost_kCFStreamPropertyConnectionIsExpensive);
-    compare("kCFStreamPropertySocketExtendedBackgroundIdleMode", charonHost_kCFStreamPropertySocketExtendedBackgroundIdleMode);
+    compare("kCFHTTPVersion2_0", revenantHost_kCFHTTPVersion2_0);
+    compare("kCFHTTPVersion3_0", revenantHost_kCFHTTPVersion3_0);
+    compare("kCFStreamNetworkServiceTypeCallSignaling", revenantHost_kCFStreamNetworkServiceTypeCallSignaling);
+    compare("kCFStreamPropertyAllowConstrainedNetworkAccess", revenantHost_kCFStreamPropertyAllowConstrainedNetworkAccess);
+    compare("kCFStreamPropertyAllowExpensiveNetworkAccess", revenantHost_kCFStreamPropertyAllowExpensiveNetworkAccess);
+    compare("kCFStreamPropertyConnectionIsExpensive", revenantHost_kCFStreamPropertyConnectionIsExpensive);
+    compare("kCFStreamPropertySocketExtendedBackgroundIdleMode", revenantHost_kCFStreamPropertySocketExtendedBackgroundIdleMode);
 
-    charon_check([text(charonHost_kCFHTTPVersion2_0) isEqualToString:@"HTTP/2.0"], "the HTTP/2.0 name is the protocol line",
-                 text(charonHost_kCFHTTPVersion2_0));
-    charon_check([text(charonHost_kCFHTTPVersion3_0) isEqualToString:@"HTTP/3.0"], "the HTTP/3.0 name is the protocol line",
-                 text(charonHost_kCFHTTPVersion3_0));
-    charon_check([text(charonHost_kCFStreamPropertyConnectionIsExpensive) isEqualToString:@"kCFStreamPropertyConnectionIsExpensive"],
+    revenant_check([text(revenantHost_kCFHTTPVersion2_0) isEqualToString:@"HTTP/2.0"], "the HTTP/2.0 name is the protocol line",
+                 text(revenantHost_kCFHTTPVersion2_0));
+    revenant_check([text(revenantHost_kCFHTTPVersion3_0) isEqualToString:@"HTTP/3.0"], "the HTTP/3.0 name is the protocol line",
+                 text(revenantHost_kCFHTTPVersion3_0));
+    revenant_check([text(revenantHost_kCFStreamPropertyConnectionIsExpensive) isEqualToString:@"kCFStreamPropertyConnectionIsExpensive"],
                  "a stream property key is the symbol's own text",
-                 text(charonHost_kCFStreamPropertyConnectionIsExpensive));
-    charon_check(CFGetTypeID(charonHost_kCFStreamPropertyConnectionIsExpensive) == CFStringGetTypeID(),
+                 text(revenantHost_kCFStreamPropertyConnectionIsExpensive));
+    revenant_check(CFGetTypeID(revenantHost_kCFStreamPropertyConnectionIsExpensive) == CFStringGetTypeID(),
                  "every name is a CFString, as the header declares",
                  @"not a CFString");
 
-    printf("checks=%d failures=%d\n", charon_checks, charon_failures);
-    return charon_failures == 0 ? 0 : 1;
+    printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
+    return revenant_failures == 0 ? 0 : 1;
 }

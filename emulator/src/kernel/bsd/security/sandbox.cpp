@@ -15,7 +15,7 @@
 #include <optional>
 #include <span>
 
-namespace shade::bsd::sandbox {
+namespace emulator::bsd::sandbox {
 namespace {
 
     constexpr std::uint32_t initialize_named_profile = 1U;

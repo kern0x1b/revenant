@@ -21,13 +21,13 @@ local function digest_step(opt, folder, found)
     local recipe = path.join(opt.modules, "..", "packages", "a", "apple-backports", "xmake.lua")
     local tree_files = {
         [path.join("packages", "a", "apple-backports", "Foundation", "NSThing.m")] = "// a backport\n",
-        [path.join("packages", "a", "apple-backports", "Foundation", "CharonThing.h")] = "// its header\n",
+        [path.join("packages", "a", "apple-backports", "Foundation", "RevenantThing.h")] = "// its header\n",
         [path.join("packages", "a", "apple-backports", "attach.c")] = "// the attach helper\n",
         [path.join("packages", "a", "apple-backports", "registry", "UIKit", "thing.json")] = '{"framework": "UIKit", "entries": []}\n',
         [path.join("packages", "a", "apple-backports", "registry", "flat.json")] = "[]\n",
         [path.join("packages", "a", "apple-backports", "notes.md")] = "notes\n",
         [path.join("modules", "apple", "backports.lua")] = "-- the build module\n",
-        [path.join("addons", "c", "charon", "xmake.lua")] = 'add_versions("v0.8.4", "0")\n'
+        [path.join("addons", "r", "revenant", "xmake.lua")] = 'add_versions("v0.8.4", "0")\n'
     }
     local before, errors = recipe_digest(folder, "digest-before", recipe, tree_files)
     if not before then
@@ -88,8 +88,8 @@ local function surface_step(backports, opt, folder, found)
     end
     local source = path.join(folder, "surface", "NSDateInterval.m")
     io.writefile(source, "#import <Foundation/Foundation.h>\n" ..
-                         "void charon_surface_helper(void);\n" ..
-                         "void charon_surface_helper(void) { }\n" ..
+                         "void revenant_surface_helper(void);\n" ..
+                         "void revenant_surface_helper(void) { }\n" ..
                          "@implementation NSDateInterval\n@end\n")
     local object = path.join(folder, "surface", "NSDateInterval.o")
     backports.compile({triple = "armv7-apple-ios6.0", sdkdir = opt.sdk, deployment = "6.0", cc = opt.clang}, source, object)
@@ -112,8 +112,8 @@ local function surface_step(backports, opt, folder, found)
     end
     local proxy_source = path.join(folder, "surface", "NSProxied.m")
     io.writefile(proxy_source, "#import <Foundation/Foundation.h>\n" ..
-                               "@interface CharonNSProxied : NSObject\n@end\n@implementation CharonNSProxied\n@end\n" ..
-                               "__asm__(\".globl _OBJC_CLASS_$_NSProxied\\n.set _OBJC_CLASS_$_NSProxied, _OBJC_CLASS_$_CharonNSProxied\\n\");\n")
+                               "@interface RevenantNSProxied : NSObject\n@end\n@implementation RevenantNSProxied\n@end\n" ..
+                               "__asm__(\".globl _OBJC_CLASS_$_NSProxied\\n.set _OBJC_CLASS_$_NSProxied, _OBJC_CLASS_$_RevenantNSProxied\\n\");\n")
     local proxy_object = path.join(folder, "surface", "NSProxied.o")
     backports.compile({triple = "armv7-apple-ios6.0", sdkdir = opt.sdk, deployment = "6.0", cc = opt.clang}, proxy_source, proxy_object)
     if #backports.duplicated({proxy_object}, {NSProxied = {image = "UIFoundation"}}) ~= 0 then
@@ -122,7 +122,7 @@ local function surface_step(backports, opt, folder, found)
     local hidden_object = path.join(folder, "surface", "NSProxiedHidden.o")
     fixtures.run(folder, "xcrun", {"clang", "-target", "armv7-apple-ios6.0", "-isysroot", opt.sdk, "-fobjc-arc", "-fvisibility=hidden", "-c", proxy_source, "-o", hidden_object})
     if #backports.duplicated({hidden_object}, {NSProxied = {image = "UIFoundation"}}) ~= 0 then
-        table.insert(found, "a proxy is one whether or not the compiler hid the class it defines under Charon's name")
+        table.insert(found, "a proxy is one whether or not the compiler hid the class it defines under Revenant's name")
     end
     local refused = fixtures.refusal(function () kept, reexported = backports.band(release_ten, {object}) end)
     if refused then
@@ -151,9 +151,9 @@ local function floor_step(backports, opt, folder, found)
     end
     local work = path.join(folder, "floor")
     os.mkdir(work)
-    io.writefile(path.join(work, "libSystem.tbd"), fixtures.system_stub("dyld_stub_binder, _charon_reexported"))
-    io.writefile(path.join(work, "carried.c"), "int charon_carried(void) { return 0; }\n")
-    io.writefile(path.join(work, "reexported.list"), "_charon_reexported\n")
+    io.writefile(path.join(work, "libSystem.tbd"), fixtures.system_stub("dyld_stub_binder, _revenant_reexported"))
+    io.writefile(path.join(work, "carried.c"), "int revenant_carried(void) { return 0; }\n")
+    io.writefile(path.join(work, "reexported.list"), "_revenant_reexported\n")
     for _, deployment in ipairs({"4.1", "4.2"}) do
         local refused = fixtures.refusal(function ()
             fixtures.run(work, "xcrun", {"clang", "-target", "armv7-apple-ios" .. deployment, "-Wno-incompatible-sysroot",
@@ -175,7 +175,7 @@ local function categories_step(backports, opt, folder, found)
     io.writefile(path.join(work, "two.m"), "#import <Foundation/Foundation.h>\n@implementation NSProgress (ProbeTwo)\n+ (int)probeTwo { return 2; }\n@end\n")
     fixtures.run(work, opt.clang, {"-target", "armv7-apple-ios4.3", "-isysroot", opt.sdk, "-Wno-incompatible-sysroot", "-w",
                                    "-mlinker-version=" .. fixtures.linker_version(opt.ld64), "-fuse-ld=" .. opt.ld64, "-dynamiclib",
-                                   "-framework", "Foundation", "-Wl,-rename_section,__DATA,__objc_catlist,__DATA,__charon_catlist",
+                                   "-framework", "Foundation", "-Wl,-rename_section,__DATA,__objc_catlist,__DATA,__revenant_catlist",
                                    "one.m", "two.m", "-o", "libprobe.dylib"})
     local library = path.join(work, "libprobe.dylib")
     local named = table.concat(backports.unattached_categories({exports = {}}, {classes = {}}, {library}, "armv7"), " ")
@@ -191,11 +191,11 @@ local function categories_step(backports, opt, folder, found)
     end
     io.writefile(path.join(work, "alias.m"),
                  "#import <Foundation/Foundation.h>\n" ..
-                 "struct charon_alias { const void *proxy; const char *name; };\n" ..
-                 "extern char charon_alias_class_NSProxied __asm__(\"_OBJC_CLASS_$_CharonNSProxied\");\n" ..
-                 "@interface CharonNSProxied : NSObject\n@end\n@implementation CharonNSProxied\n@end\n" ..
-                 "__asm__(\".globl _OBJC_CLASS_$_NSProxied\\n.set _OBJC_CLASS_$_NSProxied, _OBJC_CLASS_$_CharonNSProxied\\n\");\n" ..
-                 "__attribute__((used, section(\"__DATA,__charon_alias\"))) static const struct charon_alias charon_alias_NSProxied = { &charon_alias_class_NSProxied, \"NSProxied\"};\n")
+                 "struct revenant_alias { const void *proxy; const char *name; };\n" ..
+                 "extern char revenant_alias_class_NSProxied __asm__(\"_OBJC_CLASS_$_RevenantNSProxied\");\n" ..
+                 "@interface RevenantNSProxied : NSObject\n@end\n@implementation RevenantNSProxied\n@end\n" ..
+                 "__asm__(\".globl _OBJC_CLASS_$_NSProxied\\n.set _OBJC_CLASS_$_NSProxied, _OBJC_CLASS_$_RevenantNSProxied\\n\");\n" ..
+                 "__attribute__((used, section(\"__DATA,__revenant_alias\"))) static const struct revenant_alias revenant_alias_NSProxied = { &revenant_alias_class_NSProxied, \"NSProxied\"};\n")
     fixtures.run(work, opt.clang, {"-target", "armv7-apple-ios4.3", "-isysroot", opt.sdk, "-Wno-incompatible-sysroot", "-w",
                                    "-mlinker-version=" .. fixtures.linker_version(opt.ld64), "-fuse-ld=" .. opt.ld64, "-dynamiclib",
                                    "-framework", "Foundation", "alias.m", "-o", "libalias.dylib"})
@@ -467,7 +467,7 @@ function failures(opt)
     local function device(version)
         local root = path.join(folder, "device-" .. version)
         os.tryrm(root)
-        local home = path.join(root, "usr", "lib", "charon", backports.package_name())
+        local home = path.join(root, "usr", "lib", "revenant", backports.package_name())
         for _, band in ipairs({"6.0", "9.3.5"}) do
             os.mkdir(path.join(home, "bands", band))
             io.writefile(path.join(home, "bands", band, "libFoundationBackports.dylib"), band)

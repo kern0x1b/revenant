@@ -6,7 +6,7 @@
 #include "kernel/kernel_shared_state.hpp"
 #include "mach/mig_wire_abi.hpp"
 
-namespace shade::kernel_iokit::audio {
+namespace emulator::kernel_iokit::audio {
 
 IOAudio2PropertyNotifications::IOAudio2PropertyNotifications(
     KernelSharedState& state, std::uint32_t service_object)

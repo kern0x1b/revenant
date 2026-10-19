@@ -54,8 +54,8 @@ function main(release, architecture, modules)
     print("")
     print("CONTROL __AXSInvertColorsEnabled, a name that is in the surface: "
           .. (axs_in_surface["__AXSInvertColorsEnabled"] and "found" or "MISSING"))
-    print("CONTROL __AXSCharonPlanted, a name that is not:                "
-          .. (axs_in_surface["__AXSCharonPlanted"] and "FOUND, which cannot be" or "nil"))
+    print("CONTROL __AXSRevenantPlanted, a name that is not:                "
+          .. (axs_in_surface["__AXSRevenantPlanted"] and "FOUND, which cannot be" or "nil"))
 
     local subjects = {"Motion", "Blink", "Cursor", "Horizontal", "Vertical", "Border", "Slider", "Image",
                       "Hearing", "Pair"}

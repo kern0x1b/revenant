@@ -137,7 +137,7 @@
     "reason": "os_signpost is a software subsystem over the os_log this package already carries from 6.0, and the release's armv7 6.1.3 cache exports none of it: _os_signpost_emit_with_name_impl, os_signpost_enabled, os_signpost_id_generate and os_signpost_id_make_with_pointer are all absent from it. Everything else in signpost.h is a macro over these four, so carrying the four carries the family",
     "effect": "a real identifier and never OS_SIGNPOST_ID_NULL: a process-wide counter from 1, with the high bit left clear. The port had set that bit to keep the two id sources apart and this series' review measured that the header does not require it - os/signpost.h names only the two reserved values - and that the host does not do it: os_signpost_id_generate there answers 0x0000000000000001. The port follows the host, and the test in tests/backports/host/signpost reads both answers and requires them to agree",
     "facts": "facts/Foundation/OSLogSignpost.md",
-    "source": "signpost.h in the lowered 16.4 SDK the port builds against, for the signature; the port's own log from 6.0 (Foundation/OSLog9.m, OSLog10.m, Foundation/CharonOSLogCore.m), which the family sits on"
+    "source": "signpost.h in the lowered 16.4 SDK the port builds against, for the signature; the port's own log from 6.0 (Foundation/OSLog9.m, OSLog10.m, Foundation/RevenantOSLogCore.m), which the family sits on"
   },
   {
     "api": "os_signpost_id_make_with_pointer",
@@ -148,7 +148,7 @@
     "reason": "os_signpost is a software subsystem over the os_log this package already carries from 6.0, and the release's armv7 6.1.3 cache exports none of it: _os_signpost_emit_with_name_impl, os_signpost_enabled, os_signpost_id_generate and os_signpost_id_make_with_pointer are all absent from it. Everything else in signpost.h is a macro over these four, so carrying the four carries the family",
     "effect": "a valid id that is stable for the same pointer and never one of the two reserved values, which is what the header's \"any pointer that disambiguates among concurrent intervals\" needs. The header says the value is MANGLED - \"including removing address randomization\" - so it is not the pointer and the round trip is not a promise; the host's own round trip fails, measured by tests/backports/host/signpost. The port mangles the address the only way it can, clearing the low three bits where an arm64 malloc writes nothing and ORing in its own bit so a pointer's id cannot be mistaken for a generated one. A NULL pointer is NOT answered with OS_SIGNPOST_ID_NULL: the header lists only signposts-turned-off and a system-scoped log as its two failures",
     "facts": "facts/Foundation/OSLogSignpost.md",
-    "source": "signpost.h in the lowered 16.4 SDK the port builds against, for the signature; the port's own log from 6.0 (Foundation/OSLog9.m, OSLog10.m, Foundation/CharonOSLogCore.m), which the family sits on"
+    "source": "signpost.h in the lowered 16.4 SDK the port builds against, for the signature; the port's own log from 6.0 (Foundation/OSLog9.m, OSLog10.m, Foundation/RevenantOSLogCore.m), which the family sits on"
   },
   {
     "api": "os_signpost_enabled",
@@ -159,7 +159,7 @@
     "reason": "os_signpost is a software subsystem over the os_log this package already carries from 6.0, and the release's armv7 6.1.3 cache exports none of it: _os_signpost_emit_with_name_impl, os_signpost_enabled, os_signpost_id_generate and os_signpost_id_make_with_pointer are all absent from it. Everything else in signpost.h is a macro over these four, so carrying the four carries the family",
     "effect": "true, and that is load-bearing rather than convenient: the header's macros compile the whole emit away when this is false, so an answer of false would mean the family recorded nothing at all",
     "facts": "facts/Foundation/OSLogSignpost.md",
-    "source": "signpost.h in the lowered 16.4 SDK the port builds against, for the signature; the port's own log from 6.0 (Foundation/OSLog9.m, OSLog10.m, Foundation/CharonOSLogCore.m), which the family sits on"
+    "source": "signpost.h in the lowered 16.4 SDK the port builds against, for the signature; the port's own log from 6.0 (Foundation/OSLog9.m, OSLog10.m, Foundation/RevenantOSLogCore.m), which the family sits on"
   },
   {
     "api": "_os_signpost_emit_with_name_impl",
@@ -170,6 +170,6 @@
     "reason": "os_signpost is a software subsystem over the os_log this package already carries from 6.0, and the release's armv7 6.1.3 cache exports none of it: _os_signpost_emit_with_name_impl, os_signpost_enabled, os_signpost_id_generate and os_signpost_id_make_with_pointer are all absent from it. Everything else in signpost.h is a macro over these four, so carrying the four carries the family",
     "effect": "records the signpost: an interval begin remembers the monotonic reading under its id, an interval end takes the difference and keeps it, and an event is kept at zero length - each with the name and with the subsystem and category of the handle it was marked through. The snapshot pointer MetricKit passes as the public signpost:metrics field is recorded on the interval, so the mark and the snapshot are the same fact",
     "facts": "facts/Foundation/OSLogSignpost.md",
-    "source": "signpost.h in the lowered 16.4 SDK the port builds against, for the signature; the port's own log from 6.0 (Foundation/OSLog9.m, OSLog10.m, Foundation/CharonOSLogCore.m), which the family sits on"
+    "source": "signpost.h in the lowered 16.4 SDK the port builds against, for the signature; the port's own log from 6.0 (Foundation/OSLog9.m, OSLog10.m, Foundation/RevenantOSLogCore.m), which the family sits on"
   }
 ]}

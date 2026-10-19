@@ -3,11 +3,11 @@
 <plist version="1.0">
 <dict>
     <key>CFBundleExecutable</key>
-    <string>CharonSearchController</string>
+    <string>RevenantSearchController</string>
     <key>CFBundleIdentifier</key>
-    <string>org.charon.hostsearch-controller</string>
+    <string>org.revenant.hostsearch-controller</string>
     <key>CFBundleName</key>
-    <string>CharonSearchController</string>
+    <string>RevenantSearchController</string>
     <key>CFBundlePackageType</key>
     <string>APPL</string>
     <key>CFBundleVersion</key>
@@ -30,7 +30,7 @@
                     <key>UISceneConfigurationName</key>
                     <string>Default</string>
                     <key>UISceneDelegateClassName</key>
-                    <string>CharonSceneDelegate</string>
+                    <string>RevenantSceneDelegate</string>
                 </dict>
             </array>
         </dict>

@@ -1,6 +1,6 @@
-local charon = path.absolute(path.join(os.scriptdir(), "..", "..", ".."))
-local workspace = import("workspace", {rootdir = path.join(charon, "modules"), anonymous = true})
-local byteorder = import("byteorder", {rootdir = path.join(charon, "modules"), anonymous = true})
+local revenant = path.absolute(path.join(os.scriptdir(), "..", "..", ".."))
+local workspace = import("workspace", {rootdir = path.join(revenant, "modules"), anonymous = true})
+local byteorder = import("byteorder", {rootdir = path.join(revenant, "modules"), anonymous = true})
 
 local HEARING = {"_AXMFiHearingDevicePairedUUIDs", "_AXMFiHearingDeviceStreamingEar", "_AXSupportsBidirectionalAXMFiHearingDeviceStreaming"}
 
@@ -35,14 +35,14 @@ end
 function run(opt)
     opt = opt or {}
     local here = os.scriptdir()
-    local sources = opt.sources or path.join(charon, "packages", "a", "apple-backports", "Accessibility")
-    local build = opt.build or workspace.run("charon-accessibility-settings")
+    local sources = opt.sources or path.join(revenant, "packages", "a", "apple-backports", "Accessibility")
+    local build = opt.build or workspace.run("revenant-accessibility-settings")
     os.tryrm(build)
     os.mkdir(build)
     local sdk = os.iorunv("xcrun", {"--show-sdk-path"}):trim()
     if not compile({"-target", "arm64-apple-macos26.0", "-isysroot", sdk, "-fobjc-arc", "-O0", "-Wall", "-Wno-nonnull",
-                    path.join(here, "check.m"), path.join(sources, "CharonAXSettings17.m"), path.join(sources, "CharonAXSettings18.m"),
-                    path.join(sources, "CharonAXSettings26.m"), "-I" .. sources, "-framework", "Foundation", "-framework", "Accessibility",
+                    path.join(here, "check.m"), path.join(sources, "RevenantAXSettings17.m"), path.join(sources, "RevenantAXSettings18.m"),
+                    path.join(sources, "RevenantAXSettings26.m"), "-I" .. sources, "-framework", "Foundation", "-framework", "Accessibility",
                     "-o", path.join(build, "check")}, path.join(build, "build.log"), "the settings check did not build") then
         return 1
     end
@@ -60,8 +60,8 @@ function run(opt)
                    path.join(build, "hearing.log"), "the hearing check did not compile") then
         return 1
     end
-    local object = path.join(build, "CharonHearing15.o")
-    if not compile(table.join(ios, {"-Os", "-g0", "-Wall", "-Wno-nonnull"}, lenient, {path.join(sources, "CharonHearing15.m"), "-o", object}),
+    local object = path.join(build, "RevenantHearing15.o")
+    if not compile(table.join(ios, {"-Os", "-g0", "-Wall", "-Wno-nonnull"}, lenient, {path.join(sources, "RevenantHearing15.m"), "-o", object}),
                    path.join(build, "hearing-obj.log"), "the hearing object did not compile") then
         return 1
     end

@@ -91,7 +91,7 @@ static void test_push(void)
     ours = push(Ours, UIPushBehaviorModeInstantaneous, CGVectorMake(1, 0), UIOffsetZero, CGSizeMake(100, 100), 1, 1);
     check_relative(oracle.velocity[0], 100, "oracle pushes as s_push measured", @"instantaneous (1,0)");
     check_relative(ours.velocity[0], oracle.velocity[0], "T2 instantaneous push velocity as the oracle", @"instantaneous (1,0)");
-    charon_check(!oracle.active && ours.active == oracle.active, "T2 an instantaneous push is inactive after its step, as the oracle's",
+    revenant_check(!oracle.active && ours.active == oracle.active, "T2 an instantaneous push is inactive after its step, as the oracle's",
                  [NSString stringWithFormat:@"ours %d oracle %d", ours.active, oracle.active]);
 
     oracle = push(Oracle, UIPushBehaviorModeContinuous, CGVectorMake(1, 0), UIOffsetMake(0, 50), CGSizeMake(100, 100), 1, 4);
@@ -218,7 +218,7 @@ static Snap snap(Side side)
 static void test_snap(void)
 {
     Snap oracle = snap(Oracle), ours = snap(Ours);
-    charon_check(oracle.elapsedAcrossTurn == 0 && ours.elapsedAcrossTurn == 0, "no display link steps an animator while the run loop turns",
+    revenant_check(oracle.elapsedAcrossTurn == 0 && ours.elapsedAcrossTurn == 0, "no display link steps an animator while the run loop turns",
                  [NSString stringWithFormat:@"oracle %g ours %g", oracle.elapsedAcrossTurn, ours.elapsedAcrossTurn]);
     check_near(oracle.first.x, 113.265648, 5e-6, "oracle snaps as j_snap3 measured", @"frame 1 x");
     check_near(oracle.first.y, 106.623589, 5e-6, "oracle snaps as j_snap3 measured", @"frame 1 y");
@@ -249,8 +249,8 @@ static int calls_until_rest(Side side)
 static void test_rest_and_time(void)
 {
     int oracle = calls_until_rest(Oracle), ours = calls_until_rest(Ours);
-    charon_check(oracle == 31, "oracle rests as s_anim measured", [NSString stringWithFormat:@"call %d", oracle]);
-    charon_check(abs(ours - oracle) <= 1, "T15 a resting item stops the animator at the oracle's call (+-1)",
+    revenant_check(oracle == 31, "oracle rests as s_anim measured", [NSString stringWithFormat:@"call %d", oracle]);
+    revenant_check(abs(ours - oracle) <= 1, "T15 a resting item stops the animator at the oracle's call (+-1)",
                  [NSString stringWithFormat:@"ours call %d, oracle call %d", ours, oracle]);
 
     NSTimeInterval elapsed[2];

@@ -352,7 +352,7 @@
       "source": "the headers of MetalPerformanceShadersGraph in the SDK of iOS 16.4, and the 26.2 headers for the four names 16.4 does not declare; the behaviour measured against the system's own MPSGraph (tests/backports/host/mpsgraph)"
     },
     {
-      "api": "-[MPSGraph charon_mps_addOperationOfKind:name:inputs:outputs:parameters:]",
+      "api": "-[MPSGraph revenant_mps_addOperationOfKind:name:inputs:outputs:parameters:]",
       "kind": "method",
       "introduced": "14.0",
       "minimum": "6.0",
@@ -362,7 +362,7 @@
       "source": "the private surface this library's own files share, read out of the compiled objects; the headers of MetalPerformanceShadersGraph in the SDK of iOS 16.4 declare none of them"
     },
     {
-      "api": "-[MPSGraph charon_mps_arithmetic:operands:name:]",
+      "api": "-[MPSGraph revenant_mps_arithmetic:operands:name:]",
       "kind": "method",
       "introduced": "14.0",
       "minimum": "6.0",
@@ -372,7 +372,7 @@
       "source": "the private surface this library's own files share, read out of the compiled objects; the headers of MetalPerformanceShadersGraph in the SDK of iOS 16.4 declare none of them"
     },
     {
-      "api": "-[MPSGraph charon_mps_device]",
+      "api": "-[MPSGraph revenant_mps_device]",
       "kind": "method",
       "introduced": "14.0",
       "minimum": "6.0",
@@ -382,7 +382,7 @@
       "source": "the private surface this library's own files share, read out of the compiled objects; the headers of MetalPerformanceShadersGraph in the SDK of iOS 16.4 declare none of them"
     },
     {
-      "api": "-[MPSGraph charon_mps_operation:inputs:parameters:name:]",
+      "api": "-[MPSGraph revenant_mps_operation:inputs:parameters:name:]",
       "kind": "method",
       "introduced": "14.0",
       "minimum": "6.0",
@@ -542,7 +542,7 @@
       "source": "the headers of MetalPerformanceShadersGraph in the SDK of iOS 16.4, and the 26.2 headers for the four names 16.4 does not declare; the behaviour measured against the system's own MPSGraph (tests/backports/host/mpsgraph)"
     },
     {
-      "api": "-[MPSGraphOperation charon_mps_kind]",
+      "api": "-[MPSGraphOperation revenant_mps_kind]",
       "kind": "method",
       "introduced": "14.0",
       "minimum": "6.0",
@@ -552,7 +552,7 @@
       "source": "the private surface this library's own files share, read out of the compiled objects; the headers of MetalPerformanceShadersGraph in the SDK of iOS 16.4 declare none of them"
     },
     {
-      "api": "-[MPSGraphOperation charon_mps_parameters]",
+      "api": "-[MPSGraphOperation revenant_mps_parameters]",
       "kind": "method",
       "introduced": "14.0",
       "minimum": "6.0",
@@ -562,7 +562,7 @@
       "source": "the private surface this library's own files share, read out of the compiled objects; the headers of MetalPerformanceShadersGraph in the SDK of iOS 16.4 declare none of them"
     },
     {
-      "api": "-[MPSGraphOperation charon_mps_setOutputTensors:]",
+      "api": "-[MPSGraphOperation revenant_mps_setOutputTensors:]",
       "kind": "method",
       "introduced": "14.0",
       "minimum": "6.0",
@@ -572,7 +572,7 @@
       "source": "the private surface this library's own files share, read out of the compiled objects; the headers of MetalPerformanceShadersGraph in the SDK of iOS 16.4 declare none of them"
     },
     {
-      "api": "-[MPSGraphOperation charon_mps_setParameters:]",
+      "api": "-[MPSGraphOperation revenant_mps_setParameters:]",
       "kind": "method",
       "introduced": "14.0",
       "minimum": "6.0",
@@ -612,7 +612,7 @@
       "source": "the headers of MetalPerformanceShadersGraph in the SDK of iOS 16.4, and the 26.2 headers for the four names 16.4 does not declare; the behaviour measured against the system's own MPSGraph (tests/backports/host/mpsgraph)"
     },
     {
-      "api": "-[MPSGraphTensor charon_mps_elementCount]",
+      "api": "-[MPSGraphTensor revenant_mps_elementCount]",
       "kind": "method",
       "introduced": "14.0",
       "minimum": "6.0",
@@ -622,7 +622,7 @@
       "source": "the private surface this library's own files share, read out of the compiled objects; the headers of MetalPerformanceShadersGraph in the SDK of iOS 16.4 declare none of them"
     },
     {
-      "api": "-[MPSGraphTensor charon_mps_index]",
+      "api": "-[MPSGraphTensor revenant_mps_index]",
       "kind": "method",
       "introduced": "14.0",
       "minimum": "6.0",
@@ -642,7 +642,7 @@
       "source": "the headers of MetalPerformanceShadersGraph in the SDK of iOS 16.4, and the 26.2 headers for the four names 16.4 does not declare; the behaviour measured against the system's own MPSGraph (tests/backports/host/mpsgraph)"
     },
     {
-      "api": "-[MPSGraphTensorData charon_mps_buffer]",
+      "api": "-[MPSGraphTensorData revenant_mps_buffer]",
       "kind": "method",
       "introduced": "14.0",
       "minimum": "6.0",
@@ -652,7 +652,7 @@
       "source": "the private surface this library's own files share, read out of the compiled objects; the headers of MetalPerformanceShadersGraph in the SDK of iOS 16.4 declare none of them"
     },
     {
-      "api": "-[MPSGraphTensorData charon_mps_bytes]",
+      "api": "-[MPSGraphTensorData revenant_mps_bytes]",
       "kind": "method",
       "introduced": "14.0",
       "minimum": "6.0",
@@ -662,7 +662,7 @@
       "source": "the private surface this library's own files share, read out of the compiled objects; the headers of MetalPerformanceShadersGraph in the SDK of iOS 16.4 declare none of them"
     },
     {
-      "api": "-[MPSGraphTensorData charon_mps_elementCount]",
+      "api": "-[MPSGraphTensorData revenant_mps_elementCount]",
       "kind": "method",
       "introduced": "14.0",
       "minimum": "6.0",
@@ -692,7 +692,7 @@
       "source": "the headers of MetalPerformanceShadersGraph in the SDK of iOS 16.4, and the 26.2 headers for the four names 16.4 does not declare; the behaviour measured against the system's own MPSGraph (tests/backports/host/mpsgraph)"
     },
     {
-      "api": "-[MPSGraph charon_mps_predicate:operands:name:]",
+      "api": "-[MPSGraph revenant_mps_predicate:operands:name:]",
       "kind": "method",
       "introduced": "14.0",
       "minimum": "6.0",
@@ -937,7 +937,7 @@
       "introduced": "14.0",
       "minimum": "6.0",
       "status": "implemented",
-      "effect": "the operation is walked on the CPU element by element, and every cell of every case of this operation in tests/backports/host/mpsgraph/graph-cases.m agrees with the release over the file's thirty-two input classes in both MPSDataTypeFloat32 and MPSDataTypeFloat16: byte for byte where the operation is not a transcendental, and within the distance tests/backports/host/mpsgraph/tolerances.txt gives for this operation where it is, which is the largest distance this differential has measured between the two and which no cell exceeds; the half answer for a NaN, an infinity and a zero is the rule of that operation's own row in CharonMPSGraphHalfNaNOf, measured class by class; facts/MetalPerformanceShadersGraph/Core.md carries the run's verdict line and the measurement",
+      "effect": "the operation is walked on the CPU element by element, and every cell of every case of this operation in tests/backports/host/mpsgraph/graph-cases.m agrees with the release over the file's thirty-two input classes in both MPSDataTypeFloat32 and MPSDataTypeFloat16: byte for byte where the operation is not a transcendental, and within the distance tests/backports/host/mpsgraph/tolerances.txt gives for this operation where it is, which is the largest distance this differential has measured between the two and which no cell exceeds; the half answer for a NaN, an infinity and a zero is the rule of that operation's own row in RevenantMPSGraphHalfNaNOf, measured class by class; facts/MetalPerformanceShadersGraph/Core.md carries the run's verdict line and the measurement",
       "facts": "facts/MetalPerformanceShadersGraph/Core.md",
       "source": "the headers of MetalPerformanceShadersGraph in the SDK of iOS 16.4 for every signature and default, and the behaviour measured against the system's own MPSGraph by tests/backports/host/mpsgraph"
     },
@@ -947,7 +947,7 @@
       "introduced": "14.0",
       "minimum": "6.0",
       "status": "implemented",
-      "effect": "the operation is walked on the CPU element by element, and every cell of every case of this operation in tests/backports/host/mpsgraph/graph-cases.m agrees with the release over the file's thirty-two input classes in both MPSDataTypeFloat32 and MPSDataTypeFloat16: byte for byte where the operation is not a transcendental, and within the distance tests/backports/host/mpsgraph/tolerances.txt gives for this operation where it is, which is the largest distance this differential has measured between the two and which no cell exceeds; the half answer for a NaN, an infinity and a zero is the rule of that operation's own row in CharonMPSGraphHalfNaNOf, measured class by class; facts/MetalPerformanceShadersGraph/Core.md carries the run's verdict line and the measurement",
+      "effect": "the operation is walked on the CPU element by element, and every cell of every case of this operation in tests/backports/host/mpsgraph/graph-cases.m agrees with the release over the file's thirty-two input classes in both MPSDataTypeFloat32 and MPSDataTypeFloat16: byte for byte where the operation is not a transcendental, and within the distance tests/backports/host/mpsgraph/tolerances.txt gives for this operation where it is, which is the largest distance this differential has measured between the two and which no cell exceeds; the half answer for a NaN, an infinity and a zero is the rule of that operation's own row in RevenantMPSGraphHalfNaNOf, measured class by class; facts/MetalPerformanceShadersGraph/Core.md carries the run's verdict line and the measurement",
       "facts": "facts/MetalPerformanceShadersGraph/Core.md",
       "source": "the headers of MetalPerformanceShadersGraph in the SDK of iOS 16.4 for every signature and default, and the behaviour measured against the system's own MPSGraph by tests/backports/host/mpsgraph"
     },
@@ -957,7 +957,7 @@
       "introduced": "14.0",
       "minimum": "6.0",
       "status": "implemented",
-      "effect": "the operation is walked on the CPU element by element, and every cell of every case of this operation in tests/backports/host/mpsgraph/graph-cases.m agrees with the release over the file's thirty-two input classes in both MPSDataTypeFloat32 and MPSDataTypeFloat16: byte for byte where the operation is not a transcendental, and within the distance tests/backports/host/mpsgraph/tolerances.txt gives for this operation where it is, which is the largest distance this differential has measured between the two and which no cell exceeds; the half answer for a NaN, an infinity and a zero is the rule of that operation's own row in CharonMPSGraphHalfNaNOf, measured class by class; facts/MetalPerformanceShadersGraph/Core.md carries the run's verdict line and the measurement",
+      "effect": "the operation is walked on the CPU element by element, and every cell of every case of this operation in tests/backports/host/mpsgraph/graph-cases.m agrees with the release over the file's thirty-two input classes in both MPSDataTypeFloat32 and MPSDataTypeFloat16: byte for byte where the operation is not a transcendental, and within the distance tests/backports/host/mpsgraph/tolerances.txt gives for this operation where it is, which is the largest distance this differential has measured between the two and which no cell exceeds; the half answer for a NaN, an infinity and a zero is the rule of that operation's own row in RevenantMPSGraphHalfNaNOf, measured class by class; facts/MetalPerformanceShadersGraph/Core.md carries the run's verdict line and the measurement",
       "facts": "facts/MetalPerformanceShadersGraph/Core.md",
       "source": "the headers of MetalPerformanceShadersGraph in the SDK of iOS 16.4 for every signature and default, and the behaviour measured against the system's own MPSGraph by tests/backports/host/mpsgraph"
     },
@@ -967,7 +967,7 @@
       "introduced": "14.0",
       "minimum": "6.0",
       "status": "implemented",
-      "effect": "the operation is walked on the CPU element by element, and every cell of every case of this operation in tests/backports/host/mpsgraph/graph-cases.m agrees with the release over the file's thirty-two input classes in both MPSDataTypeFloat32 and MPSDataTypeFloat16: byte for byte where the operation is not a transcendental, and within the distance tests/backports/host/mpsgraph/tolerances.txt gives for this operation where it is, which is the largest distance this differential has measured between the two and which no cell exceeds; the half answer for a NaN, an infinity and a zero is the rule of that operation's own row in CharonMPSGraphHalfNaNOf, measured class by class; facts/MetalPerformanceShadersGraph/Core.md carries the run's verdict line and the measurement",
+      "effect": "the operation is walked on the CPU element by element, and every cell of every case of this operation in tests/backports/host/mpsgraph/graph-cases.m agrees with the release over the file's thirty-two input classes in both MPSDataTypeFloat32 and MPSDataTypeFloat16: byte for byte where the operation is not a transcendental, and within the distance tests/backports/host/mpsgraph/tolerances.txt gives for this operation where it is, which is the largest distance this differential has measured between the two and which no cell exceeds; the half answer for a NaN, an infinity and a zero is the rule of that operation's own row in RevenantMPSGraphHalfNaNOf, measured class by class; facts/MetalPerformanceShadersGraph/Core.md carries the run's verdict line and the measurement",
       "facts": "facts/MetalPerformanceShadersGraph/Core.md",
       "source": "the headers of MetalPerformanceShadersGraph in the SDK of iOS 16.4 for every signature and default, and the behaviour measured against the system's own MPSGraph by tests/backports/host/mpsgraph"
     },
@@ -977,7 +977,7 @@
       "introduced": "14.0",
       "minimum": "6.0",
       "status": "implemented",
-      "effect": "the operation is walked on the CPU element by element, and every cell of every case of this operation in tests/backports/host/mpsgraph/graph-cases.m agrees with the release over the file's thirty-two input classes in both MPSDataTypeFloat32 and MPSDataTypeFloat16: byte for byte where the operation is not a transcendental, and within the distance tests/backports/host/mpsgraph/tolerances.txt gives for this operation where it is, which is the largest distance this differential has measured between the two and which no cell exceeds; the half answer for a NaN, an infinity and a zero is the rule of that operation's own row in CharonMPSGraphHalfNaNOf, measured class by class; facts/MetalPerformanceShadersGraph/Core.md carries the run's verdict line and the measurement",
+      "effect": "the operation is walked on the CPU element by element, and every cell of every case of this operation in tests/backports/host/mpsgraph/graph-cases.m agrees with the release over the file's thirty-two input classes in both MPSDataTypeFloat32 and MPSDataTypeFloat16: byte for byte where the operation is not a transcendental, and within the distance tests/backports/host/mpsgraph/tolerances.txt gives for this operation where it is, which is the largest distance this differential has measured between the two and which no cell exceeds; the half answer for a NaN, an infinity and a zero is the rule of that operation's own row in RevenantMPSGraphHalfNaNOf, measured class by class; facts/MetalPerformanceShadersGraph/Core.md carries the run's verdict line and the measurement",
       "facts": "facts/MetalPerformanceShadersGraph/Core.md",
       "source": "the headers of MetalPerformanceShadersGraph in the SDK of iOS 16.4 for every signature and default, and the behaviour measured against the system's own MPSGraph by tests/backports/host/mpsgraph"
     },
@@ -987,7 +987,7 @@
       "introduced": "14.0",
       "minimum": "6.0",
       "status": "implemented",
-      "effect": "the operation is walked on the CPU element by element, and every cell of every case of this operation in tests/backports/host/mpsgraph/graph-cases.m agrees with the release over the file's thirty-two input classes in both MPSDataTypeFloat32 and MPSDataTypeFloat16: byte for byte where the operation is not a transcendental, and within the distance tests/backports/host/mpsgraph/tolerances.txt gives for this operation where it is, which is the largest distance this differential has measured between the two and which no cell exceeds; the half answer for a NaN, an infinity and a zero is the rule of that operation's own row in CharonMPSGraphHalfNaNOf, measured class by class; facts/MetalPerformanceShadersGraph/Core.md carries the run's verdict line and the measurement",
+      "effect": "the operation is walked on the CPU element by element, and every cell of every case of this operation in tests/backports/host/mpsgraph/graph-cases.m agrees with the release over the file's thirty-two input classes in both MPSDataTypeFloat32 and MPSDataTypeFloat16: byte for byte where the operation is not a transcendental, and within the distance tests/backports/host/mpsgraph/tolerances.txt gives for this operation where it is, which is the largest distance this differential has measured between the two and which no cell exceeds; the half answer for a NaN, an infinity and a zero is the rule of that operation's own row in RevenantMPSGraphHalfNaNOf, measured class by class; facts/MetalPerformanceShadersGraph/Core.md carries the run's verdict line and the measurement",
       "facts": "facts/MetalPerformanceShadersGraph/Core.md",
       "source": "the headers of MetalPerformanceShadersGraph in the SDK of iOS 16.4 for every signature and default, and the behaviour measured against the system's own MPSGraph by tests/backports/host/mpsgraph"
     },
@@ -997,7 +997,7 @@
       "introduced": "14.0",
       "minimum": "6.0",
       "status": "implemented",
-      "effect": "the operation is walked on the CPU element by element, and every cell of every case of this operation in tests/backports/host/mpsgraph/graph-cases.m agrees with the release over the file's thirty-two input classes in both MPSDataTypeFloat32 and MPSDataTypeFloat16: byte for byte where the operation is not a transcendental, and within the distance tests/backports/host/mpsgraph/tolerances.txt gives for this operation where it is, which is the largest distance this differential has measured between the two and which no cell exceeds; the half answer for a NaN, an infinity and a zero is the rule of that operation's own row in CharonMPSGraphHalfNaNOf, measured class by class; facts/MetalPerformanceShadersGraph/Core.md carries the run's verdict line and the measurement",
+      "effect": "the operation is walked on the CPU element by element, and every cell of every case of this operation in tests/backports/host/mpsgraph/graph-cases.m agrees with the release over the file's thirty-two input classes in both MPSDataTypeFloat32 and MPSDataTypeFloat16: byte for byte where the operation is not a transcendental, and within the distance tests/backports/host/mpsgraph/tolerances.txt gives for this operation where it is, which is the largest distance this differential has measured between the two and which no cell exceeds; the half answer for a NaN, an infinity and a zero is the rule of that operation's own row in RevenantMPSGraphHalfNaNOf, measured class by class; facts/MetalPerformanceShadersGraph/Core.md carries the run's verdict line and the measurement",
       "facts": "facts/MetalPerformanceShadersGraph/Core.md",
       "source": "the headers of MetalPerformanceShadersGraph in the SDK of iOS 16.4 for every signature and default, and the behaviour measured against the system's own MPSGraph by tests/backports/host/mpsgraph"
     },
@@ -1007,7 +1007,7 @@
       "introduced": "14.0",
       "minimum": "6.0",
       "status": "implemented",
-      "effect": "the operation is walked on the CPU element by element, and every cell of every case of this operation in tests/backports/host/mpsgraph/graph-cases.m agrees with the release over the file's thirty-two input classes in both MPSDataTypeFloat32 and MPSDataTypeFloat16: byte for byte where the specification holds the operation to the correctly rounded answer, and otherwise within the figure tests/backports/host/mpsgraph/tolerances.txt gives for it, which is the Metal Shading Language Specification's own, cited there by table and page; the half answer for a NaN, an infinity and a zero is the rule of that operation's own row in CharonMPSGraphHalfNaNOf, measured class by class; facts/MetalPerformanceShadersGraph/Core.md carries the run's verdict line and the measurement",
+      "effect": "the operation is walked on the CPU element by element, and every cell of every case of this operation in tests/backports/host/mpsgraph/graph-cases.m agrees with the release over the file's thirty-two input classes in both MPSDataTypeFloat32 and MPSDataTypeFloat16: byte for byte where the specification holds the operation to the correctly rounded answer, and otherwise within the figure tests/backports/host/mpsgraph/tolerances.txt gives for it, which is the Metal Shading Language Specification's own, cited there by table and page; the half answer for a NaN, an infinity and a zero is the rule of that operation's own row in RevenantMPSGraphHalfNaNOf, measured class by class; facts/MetalPerformanceShadersGraph/Core.md carries the run's verdict line and the measurement",
       "facts": "facts/MetalPerformanceShadersGraph/Core.md",
       "source": "the headers of MetalPerformanceShadersGraph in the SDK of iOS 16.4 for every signature and default, and the behaviour measured against the system's own MPSGraph by tests/backports/host/mpsgraph"
     },
@@ -1018,7 +1018,7 @@
       "introduced": "14.0",
       "minimum": "6.0",
       "status": "implemented",
-      "effect": "the operation is walked on the CPU element by element, and every cell of every case of this operation in tests/backports/host/mpsgraph/graph-cases.m agrees with the release over the file's thirty-two input classes in both MPSDataTypeFloat32 and MPSDataTypeFloat16: byte for byte where the specification holds the operation to the correctly rounded answer, and otherwise within the figure tests/backports/host/mpsgraph/tolerances.txt gives for it, which is the Metal Shading Language Specification's own, cited there by table and page; the half answer for a NaN, an infinity and a zero is the rule of that operation's own row in CharonMPSGraphHalfNaNOf, measured class by class; facts/MetalPerformanceShadersGraph/Core.md carries the run's verdict line and the measurement",
+      "effect": "the operation is walked on the CPU element by element, and every cell of every case of this operation in tests/backports/host/mpsgraph/graph-cases.m agrees with the release over the file's thirty-two input classes in both MPSDataTypeFloat32 and MPSDataTypeFloat16: byte for byte where the specification holds the operation to the correctly rounded answer, and otherwise within the figure tests/backports/host/mpsgraph/tolerances.txt gives for it, which is the Metal Shading Language Specification's own, cited there by table and page; the half answer for a NaN, an infinity and a zero is the rule of that operation's own row in RevenantMPSGraphHalfNaNOf, measured class by class; facts/MetalPerformanceShadersGraph/Core.md carries the run's verdict line and the measurement",
       "facts": "facts/MetalPerformanceShadersGraph/Core.md",
       "source": "the headers of MetalPerformanceShadersGraph in the SDK of iOS 16.4 for every signature and default, and the behaviour measured against the system's own MPSGraph by tests/backports/host/mpsgraph"
     },
@@ -1029,7 +1029,7 @@
       "introduced": "14.0",
       "minimum": "6.0",
       "status": "implemented",
-      "effect": "the operation is walked on the CPU element by element, and every cell of every case of this operation in tests/backports/host/mpsgraph/graph-cases.m agrees with the release over the file's thirty-two input classes in both MPSDataTypeFloat32 and MPSDataTypeFloat16: byte for byte where the specification holds the operation to the correctly rounded answer, and otherwise within the figure tests/backports/host/mpsgraph/tolerances.txt gives for it, which is the Metal Shading Language Specification's own, cited there by table and page; the half answer for a NaN, an infinity and a zero is the rule of that operation's own row in CharonMPSGraphHalfNaNOf, measured class by class; facts/MetalPerformanceShadersGraph/Core.md carries the run's verdict line and the measurement",
+      "effect": "the operation is walked on the CPU element by element, and every cell of every case of this operation in tests/backports/host/mpsgraph/graph-cases.m agrees with the release over the file's thirty-two input classes in both MPSDataTypeFloat32 and MPSDataTypeFloat16: byte for byte where the specification holds the operation to the correctly rounded answer, and otherwise within the figure tests/backports/host/mpsgraph/tolerances.txt gives for it, which is the Metal Shading Language Specification's own, cited there by table and page; the half answer for a NaN, an infinity and a zero is the rule of that operation's own row in RevenantMPSGraphHalfNaNOf, measured class by class; facts/MetalPerformanceShadersGraph/Core.md carries the run's verdict line and the measurement",
       "facts": "facts/MetalPerformanceShadersGraph/Core.md",
       "source": "the headers of MetalPerformanceShadersGraph in the SDK of iOS 16.4 for every signature and default, and the behaviour measured against the system's own MPSGraph by tests/backports/host/mpsgraph"
     },
@@ -1254,7 +1254,7 @@
       "source": "the headers of MetalPerformanceShadersGraph in the SDK of iOS 16.4 for every signature, and the behaviour measured against the system's own MPSGraph by tests/backports/host/mpsgraph"
     },
     {
-      "api": "-[MPSGraph charon_mps_gatherShapeOfTensor:parameters:named:]",
+      "api": "-[MPSGraph revenant_mps_gatherShapeOfTensor:parameters:named:]",
       "kind": "method",
       "introduced": "14.0",
       "minimum": "6.0",
@@ -1319,7 +1319,7 @@
     }
 ,
 {
-      "api": "-[MPSGraph charon_mps_reduction:axes:tensor:parameters:name:]",
+      "api": "-[MPSGraph revenant_mps_reduction:axes:tensor:parameters:name:]",
       "kind": "method",
       "introduced": "14.0",
       "minimum": "6.0",
@@ -1329,7 +1329,7 @@
       "source": "the private surface this library's own files share, read out of the compiled objects; the headers of MetalPerformanceShadersGraph in the SDK of iOS 16.4 declare none of them"
     },
 {
-      "api": "-[MPSGraph charon_mps_reductionOf:tensor:combination:kind:propagatesNaN:name:]",
+      "api": "-[MPSGraph revenant_mps_reductionOf:tensor:combination:kind:propagatesNaN:name:]",
       "kind": "method",
       "introduced": "14.0",
       "minimum": "6.0",
@@ -1339,7 +1339,7 @@
       "source": "the private surface this library's own files share, read out of the compiled objects; the headers of MetalPerformanceShadersGraph in the SDK of iOS 16.4 declare none of them"
     },
 {
-      "api": "-[MPSGraph charon_mps_nanPropagatingExtreme:secondaryTensor:lesser:name:]",
+      "api": "-[MPSGraph revenant_mps_nanPropagatingExtreme:secondaryTensor:lesser:name:]",
       "kind": "method",
       "introduced": "14.0",
       "minimum": "6.0",
@@ -1511,7 +1511,7 @@
     }
 ,
 {
-      "api": "-[MPSGraph charon_mps_scanAxis:ofRank:named:]",
+      "api": "-[MPSGraph revenant_mps_scanAxis:ofRank:named:]",
       "kind": "method",
       "introduced": "16.0",
       "minimum": "6.0",
@@ -1521,7 +1521,7 @@
       "source": "the private surface this library's own files share, read out of the compiled objects; the headers of MetalPerformanceShadersGraph in the SDK of iOS 16.4 declare none of them"
     },
 {
-      "api": "-[MPSGraph charon_mps_scan:axis:tensor:combination:exclusive:reverse:name:]",
+      "api": "-[MPSGraph revenant_mps_scan:axis:tensor:combination:exclusive:reverse:name:]",
       "kind": "method",
       "introduced": "16.0",
       "minimum": "6.0",
@@ -1531,7 +1531,7 @@
       "source": "the private surface this library's own files share, read out of the compiled objects; the headers of MetalPerformanceShadersGraph in the SDK of iOS 16.4 declare none of them"
     },
 {
-      "api": "-[MPSGraph charon_mps_scan:axisTensor:tensor:combination:exclusive:reverse:name:]",
+      "api": "-[MPSGraph revenant_mps_scan:axisTensor:tensor:combination:exclusive:reverse:name:]",
       "kind": "method",
       "introduced": "16.0",
       "minimum": "6.0",
@@ -1703,7 +1703,7 @@
     }
 ,
 {
-      "api": "-[MPSGraph charon_mps_gather:tensor:parameters:name:]",
+      "api": "-[MPSGraph revenant_mps_gather:tensor:parameters:name:]",
       "kind": "method",
       "introduced": "15.0",
       "minimum": "6.0",
@@ -1713,7 +1713,7 @@
       "source": "the private surface this library's own files share, read out of the compiled objects; the headers of MetalPerformanceShadersGraph in the SDK of iOS 16.4 declare none of them"
     },
 {
-      "api": "-[MPSGraph charon_mps_gather:tensor:fedParameter:parameters:name:]",
+      "api": "-[MPSGraph revenant_mps_gather:tensor:fedParameter:parameters:name:]",
       "kind": "method",
       "introduced": "15.0",
       "minimum": "6.0",
@@ -1723,7 +1723,7 @@
       "source": "the private surface this library's own files share, read out of the compiled objects; the headers of MetalPerformanceShadersGraph in the SDK of iOS 16.4 declare none of them"
     },
 {
-      "api": "-[MPSGraphTensor charon_mps_setShape:]",
+      "api": "-[MPSGraphTensor revenant_mps_setShape:]",
       "kind": "method",
       "introduced": "15.0",
       "minimum": "6.0",
@@ -1853,7 +1853,7 @@
     "source": "the headers of MetalPerformanceShadersGraph in the SDK of iOS 16.4 for every signature, and the behaviour measured against the system's own MPSGraph by tests/backports/host/mpsgraph"
   },
   {
-    "api": "-[MPSGraph charon_mps_slice:inputs:parameters:name:]",
+    "api": "-[MPSGraph revenant_mps_slice:inputs:parameters:name:]",
     "kind": "method",
     "introduced": "14.0",
     "minimum": "6.0",
@@ -1863,7 +1863,7 @@
     "source": "the private surface this library's own files share, read out of the compiled objects; the headers of MetalPerformanceShadersGraph in the SDK of iOS 16.4 declare none of them"
   },
   {
-    "api": "-[MPSGraph charon_mps_constantShapeOfTensor:]",
+    "api": "-[MPSGraph revenant_mps_constantShapeOfTensor:]",
     "kind": "method",
     "introduced": "14.0",
     "minimum": "6.0",
@@ -2043,7 +2043,7 @@
     "source": "the headers of MetalPerformanceShadersGraph in the SDK of iOS 16.4 for every signature, and the behaviour measured against the system's own MPSGraph by tests/backports/host/mpsgraph"
   },
   {
-    "api": "-[MPSGraphExecutable charon_mps_walkInputs:results:executionDescriptor:]",
+    "api": "-[MPSGraphExecutable revenant_mps_walkInputs:results:executionDescriptor:]",
     "kind": "method",
     "introduced": "14.0",
     "minimum": "6.0",
@@ -2053,7 +2053,7 @@
     "source": "the headers of MetalPerformanceShadersGraph in the SDK of iOS 16.4 for every signature, and the behaviour measured against the system's own MPSGraph by tests/backports/host/mpsgraph"
   },
   {
-    "api": "-[MPSGraphExecutionDescriptor charon_mps_applyEventsAtStage:named:]",
+    "api": "-[MPSGraphExecutionDescriptor revenant_mps_applyEventsAtStage:named:]",
     "kind": "method",
     "introduced": "16.0",
     "minimum": "6.0",
@@ -2063,7 +2063,7 @@
     "source": "the headers of MetalPerformanceShadersGraph in the SDK of iOS 16.4 for every signature, and the behaviour measured against the system's own MPSGraph by tests/backports/host/mpsgraph"
   },
   {
-    "api": "-[MPSGraphExecutableExecutionDescriptor charon_mps_applyEventsAtStage:named:]",
+    "api": "-[MPSGraphExecutableExecutionDescriptor revenant_mps_applyEventsAtStage:named:]",
     "kind": "method",
     "introduced": "16.0",
     "minimum": "6.0",
@@ -2113,7 +2113,7 @@
     "source": "the headers of MetalPerformanceShadersGraph in the SDK of iOS 16.4 for every signature, and the behaviour measured against the system's own MPSGraph by tests/backports/host/mpsgraph"
   },
   {
-    "api": "-[MPSGraph charon_mps_concat:tensors:axis:interleave:name:]",
+    "api": "-[MPSGraph revenant_mps_concat:tensors:axis:interleave:name:]",
     "kind": "method",
     "introduced": "14.0",
     "minimum": "6.0",
@@ -2124,12 +2124,12 @@
     "source": "the headers of MetalPerformanceShadersGraph in the SDK of iOS 16.4 for every signature, and the behaviour measured against the system's own MPSGraph by tests/backports/host/mpsgraph"
   },
   {
-    "api": "-[MPSGraph charon_mps_concatShapeOfTensors:axis:interleave:stacked:named:]",
+    "api": "-[MPSGraph revenant_mps_concatShapeOfTensors:axis:interleave:stacked:named:]",
     "kind": "method",
     "introduced": "14.0",
     "minimum": "6.0",
     "status": "implemented",
-    "reason": "a name no SDK header declares: the same reason as -charon_mps_concat:tensors:axis:interleave:name:, which asks it at build time; its own files share it and an application never calls it",
+    "reason": "a name no SDK header declares: the same reason as -revenant_mps_concat:tensors:axis:interleave:name:, which asks it at build time; its own files share it and an application never calls it",
     "effect": "the shape a concatenation's or a stack's result holds, asked when the graph is BUILT so that the output tensor carries it before anything runs - the same reason and the same arrangement as the gather's shape above: the walk's own plan over the INPUTS' shapes, with the axis the caller wrote down, whether the operands interleave along it, and whether that axis is one the operands already have or one the result adds. the run's verdict line is \"gather_concat checks=37 failures=0 recorded=0\" over 742 cells in 38 cases, the red control differing from the release in 38 of the 81 case lines, and facts/MetalPerformanceShadersGraph/Core.md carries every measurement",
     "facts": "facts/MetalPerformanceShadersGraph/Core.md",
     "source": "the headers of MetalPerformanceShadersGraph in the SDK of iOS 16.4 for every signature, and the behaviour measured against the system's own MPSGraph by tests/backports/host/mpsgraph"
@@ -2205,7 +2205,7 @@
     "source": "the headers of MetalPerformanceShadersGraph in the SDK of iOS 16.4 for every signature, and the behaviour measured against the system's own MPSGraph by tests/backports/host/mpsgraph"
   },
   {
-    "api": "-[MPSGraph charon_mps_split:axis:sizes:numSplits:name:]",
+    "api": "-[MPSGraph revenant_mps_split:axis:sizes:numSplits:name:]",
     "kind": "method",
     "introduced": "15.4",
     "minimum": "6.0",
@@ -2216,7 +2216,7 @@
     "source": "the headers of MetalPerformanceShadersGraph in the SDK of iOS 16.4 for every signature, and the behaviour measured against the system's own MPSGraph by tests/backports/host/mpsgraph"
   },
   {
-    "api": "-[MPSGraph charon_mps_splitSizes:numSplits:axis:ofShape:named:]",
+    "api": "-[MPSGraph revenant_mps_splitSizes:numSplits:axis:ofShape:named:]",
     "kind": "method",
     "introduced": "15.4",
     "minimum": "6.0",
@@ -2227,7 +2227,7 @@
     "source": "the headers of MetalPerformanceShadersGraph in the SDK of iOS 16.4 for every signature, and the behaviour measured against the system's own MPSGraph by tests/backports/host/mpsgraph"
   },
   {
-    "api": "-[MPSGraph charon_mps_coordinates:fedAxis:shape:fedShape:name:]",
+    "api": "-[MPSGraph revenant_mps_coordinates:fedAxis:shape:fedShape:name:]",
     "kind": "method",
     "introduced": "15.4",
     "minimum": "6.0",
@@ -2264,7 +2264,7 @@
     "introduced": "15.0",
     "minimum": "6.0",
     "status": "implemented",
-    "effect": "the space-to-depth above with its THREE axes arriving as tensors and the block size still written down, which is what the header declares. the result moves a BLOCK of the operand's spatial axes into the batch axis, or out of it, and the result's batch axis holds the operand's own batch coordinate woven with the block's own coordinates. MEASURED on this host's own MPSGraph (macOS 27.0 build 26A428, M4 Pro, Metal 4) over a [3, 4, 6] of 1 to 72 with a 2x2 block, the spatial axes @[@1, @2] and the batch axis @0, whose result is a [12, 2, 3]: (1) THE BLOCK'S OWN COORDINATES RUN WITH THE LAST SPATIAL AXIS FASTEST, which is what makes the 2D form's (widthAxis, heightAxis) the general form's spatialAxes @[@heightAxis, @widthAxis] - measured, the two forms over the same operand answer byte for byte the same values; (2) BLOCK DIMENSION i BELONGS TO SPATIAL AXIS i and THE RESULT'S AXES ARE THE OPERAND'S OWN in the operand's order - measured over a [2, 4, 8]: spatialAxes @[@1, @2] with block @[@4, @2] answers a [16, 1, 4], axis 1 over ITS OWN block of 4 being 1 and axis 2 over its own block of 2 being 4, while spatialAxes @[@2, @1] with the same @[@4, @2] answers a [16, 2, 2] - the same two numbers read positionally against the other list; and a list written the other way round with the blocks swapped to match pairs each axis with its own block again and answers the SAME shape and DIFFERENT bytes (@[@1, @2] with @[@2, @4] against @[@2, @1] with @[@4, @2], both a [16, 2, 2]; and with an EQUAL block both are a [8, 1, 2] over a [2, 2, 4] and still not the same bytes), because the block's own coordinate runs in the LIST's order with the last of them fastest, whichever order that is; (3) THE FLAG SAYS WHICH OF THE BATCH COORDINATE AND THE BLOCK'S OWN IS FASTEST in the result's batch axis - with usePixelShuffleOrder=NO the batch coordinate is the fastest and the result's d' is d + D*k, with YES it is the slowest and d' is d*(the product of the block) + k, where k is the block's own coordinate in its row-major order with the last spatial axis fastest - measured over the [3, 4, 6]: the operand's (0, 0, w even) is at d' = 0 under both, its (0, 0, w odd) at 3 and 1, its (1, 0, w even) at 1 and 4, and its (0, 1, w even) at 6 and 2; (4) THE RESULT'S SHAPE is the operand's own with the batch axis made D times the product of the block and every spatial axis made extent over block - measured [3, 4, 6] -> [12, 2, 3] - and for the other direction the same statement the other way round, the batch axis made D over the product of the block and every spatial axis extent times its own; (5) EACH OPERATION IS THE INVERSE OF ITS PARTNER WITH THE SAME FLAG and the round trip is the IDENTITY, for both flags - measured, a space-to-depth over the [3, 4, 6] and then the depth-to-space of what it built answers 1 to 72 in the operand's own order - which is the header's own \"This operation is the inverse of\" sentence measured rather than assumed. THE RELEASE'S REFUSALS, each in its own operation's own words and at its own moment, all in refusals.txt: an axis outside the rank is refused where the graph is BUILT, with the result's shape nil - \"'mps.space_to_batch' op invalid axis: 3, axis must be in range - rank <= axis < rank, rank = 3\", and the 2D form's own with the axis's NAME in it, \"invalid width_axis (3) for shape of rank 3\", which a negative one reaches too as \"invalid width_axis (2147483647)\" (the header's own NSUInteger making the caller write it); the same axis twice in the list (\"'mps.space_to_batch' op axis must be unique\"); the batch axis among the spatial ones (\"'mps.batch_to_space' op `batch_axis` = 0 must be unique from `spatial_axes`\"); as many block dimensions as spatial axes (\"`spatial_axes` ... must have same size as `block_dimensions`\"); a block that does not divide the extent it is a block of (\"Invalid `block_dimensions[1] = 5 for input size[2] = 6\", and the 2D form's own \"block_size (3) must be multiple of height 4\" in the direction that moves the blocks IN and \"block_size (3) squared (9) must be multiple of depth 12\" in the direction that moves them OUT - the block divides the height in one and its SQUARE divides the depth in the other, which is the same rule in the words of two different operations); and a degenerate pair of axes (\"'mps.space_to_depth_2d' op Invalid degenerate axes: depth_axis (1) height_axis (1) for shape of rank 3\"), which the release refuses where the graph is COMPILED rather than built - it has built a 3x16x3 by then. The port asks every one of them where the graph is built, with the release's own sentence, which is this library's rule for every extent the release will not run. THE RUN'S VERDICT LINE is \"gather_spacebatch: same as the system on 1416 of the 1416 cells with a result buffer; 1416 within the release's own precision, 0 recorded\" with \"checks=23 failures=0 recorded=0\", over 49 cases whose every cell is byte-identical to the release, the red control differing from the release in 24 of the 49 case lines, and facts/MetalPerformanceShadersGraph/Core.md carries every measurement. THE THREE AXES AS TENSORS, which is the header's fed form of this pair and the only form of it with a parameter the caller can feed, are answered by the release when the graph HOLDS the value: an int32 CONSTANT of shape [1] answers exactly what the written-down axes answer over the same operand, byte for byte, in both directions and under both flags (measured over the same [3, 4, 6] of 1 to 72 with the same axes of 2, 1 and 0 and the same block of 2: a 12x2x3 of (1, 3, 5, 13, 15, 17, 25, ... | 2, 4, 6, 14, ...) and a 3x4x6 of (1, 19, 2, 20, ... | 37, 55, 38, 56, ...), which is what -spaceToDepth2DTensor: and -depthToSpace2DTensor: answer over the same operand), and an int64 of shape [1] answers the same, so the release takes a shape of four or of eight bytes as it does for every other fed shape of this library. A CONSTANT OF NO RANK is not constructible at all: the release's own +constantWithData:shape:dataType: takes the process down with \"failed assertion `shape.count > 0 failed, a constant must be passed a ranked shape'\" (exit 134), so the axis tensor has to be written with a rank at all. A CONSTANT OF MORE THAN ONE NUMBER builds the graph and leaves the result carrying no shape, as a PLACEHOLDER does, and there is then nothing for a caller to read before the run. A PLACEHOLDER answers at RUN TIME, in both directions and under both flags: the graph builds with the result carrying no shape, -compileWithDevice: hands back an executable, and the run writes the written-down form's values into the caller's destination (measured, exit 0, refusals.txt's block-s2d-fed-axis-placeholder and block-d2s-fed-axis-placeholder). This port answers it the same way: the three fed axes become one operation whose walk reads them when the graph runs and asks the plan the written-down forms ask at build time (CharonMPSGraphBlockShufflePlan), so the split shape, the permutation and the result's own shape are built at run time and the result tensor carries no shape until the interpreter puts it on. An int64 axis and a 0D placeholder answer as an int32 one of shape [1], and one fed axis with two constants answers the same again. WHAT THE RELEASE REFUSES OVER A FED AXIS, this port refuses with the release's own sentence: a float32 axis and a two-number axis at the graph's COMPILE (the verifier's own 'operand #1 must be 0D tensor of mps index type values ... but got tensor<1xf32>' and 'tensor<2xsi32>', exit 134) - asked where the graph is BUILT here, which is this library's moment - and an axis whose value cannot be used (a width outside the rank, a degenerate pair, a block that does not divide) at the run, where the release dies or answers a buffer it flags as an error itself.",
+    "effect": "the space-to-depth above with its THREE axes arriving as tensors and the block size still written down, which is what the header declares. the result moves a BLOCK of the operand's spatial axes into the batch axis, or out of it, and the result's batch axis holds the operand's own batch coordinate woven with the block's own coordinates. MEASURED on this host's own MPSGraph (macOS 27.0 build 26A428, M4 Pro, Metal 4) over a [3, 4, 6] of 1 to 72 with a 2x2 block, the spatial axes @[@1, @2] and the batch axis @0, whose result is a [12, 2, 3]: (1) THE BLOCK'S OWN COORDINATES RUN WITH THE LAST SPATIAL AXIS FASTEST, which is what makes the 2D form's (widthAxis, heightAxis) the general form's spatialAxes @[@heightAxis, @widthAxis] - measured, the two forms over the same operand answer byte for byte the same values; (2) BLOCK DIMENSION i BELONGS TO SPATIAL AXIS i and THE RESULT'S AXES ARE THE OPERAND'S OWN in the operand's order - measured over a [2, 4, 8]: spatialAxes @[@1, @2] with block @[@4, @2] answers a [16, 1, 4], axis 1 over ITS OWN block of 4 being 1 and axis 2 over its own block of 2 being 4, while spatialAxes @[@2, @1] with the same @[@4, @2] answers a [16, 2, 2] - the same two numbers read positionally against the other list; and a list written the other way round with the blocks swapped to match pairs each axis with its own block again and answers the SAME shape and DIFFERENT bytes (@[@1, @2] with @[@2, @4] against @[@2, @1] with @[@4, @2], both a [16, 2, 2]; and with an EQUAL block both are a [8, 1, 2] over a [2, 2, 4] and still not the same bytes), because the block's own coordinate runs in the LIST's order with the last of them fastest, whichever order that is; (3) THE FLAG SAYS WHICH OF THE BATCH COORDINATE AND THE BLOCK'S OWN IS FASTEST in the result's batch axis - with usePixelShuffleOrder=NO the batch coordinate is the fastest and the result's d' is d + D*k, with YES it is the slowest and d' is d*(the product of the block) + k, where k is the block's own coordinate in its row-major order with the last spatial axis fastest - measured over the [3, 4, 6]: the operand's (0, 0, w even) is at d' = 0 under both, its (0, 0, w odd) at 3 and 1, its (1, 0, w even) at 1 and 4, and its (0, 1, w even) at 6 and 2; (4) THE RESULT'S SHAPE is the operand's own with the batch axis made D times the product of the block and every spatial axis made extent over block - measured [3, 4, 6] -> [12, 2, 3] - and for the other direction the same statement the other way round, the batch axis made D over the product of the block and every spatial axis extent times its own; (5) EACH OPERATION IS THE INVERSE OF ITS PARTNER WITH THE SAME FLAG and the round trip is the IDENTITY, for both flags - measured, a space-to-depth over the [3, 4, 6] and then the depth-to-space of what it built answers 1 to 72 in the operand's own order - which is the header's own \"This operation is the inverse of\" sentence measured rather than assumed. THE RELEASE'S REFUSALS, each in its own operation's own words and at its own moment, all in refusals.txt: an axis outside the rank is refused where the graph is BUILT, with the result's shape nil - \"'mps.space_to_batch' op invalid axis: 3, axis must be in range - rank <= axis < rank, rank = 3\", and the 2D form's own with the axis's NAME in it, \"invalid width_axis (3) for shape of rank 3\", which a negative one reaches too as \"invalid width_axis (2147483647)\" (the header's own NSUInteger making the caller write it); the same axis twice in the list (\"'mps.space_to_batch' op axis must be unique\"); the batch axis among the spatial ones (\"'mps.batch_to_space' op `batch_axis` = 0 must be unique from `spatial_axes`\"); as many block dimensions as spatial axes (\"`spatial_axes` ... must have same size as `block_dimensions`\"); a block that does not divide the extent it is a block of (\"Invalid `block_dimensions[1] = 5 for input size[2] = 6\", and the 2D form's own \"block_size (3) must be multiple of height 4\" in the direction that moves the blocks IN and \"block_size (3) squared (9) must be multiple of depth 12\" in the direction that moves them OUT - the block divides the height in one and its SQUARE divides the depth in the other, which is the same rule in the words of two different operations); and a degenerate pair of axes (\"'mps.space_to_depth_2d' op Invalid degenerate axes: depth_axis (1) height_axis (1) for shape of rank 3\"), which the release refuses where the graph is COMPILED rather than built - it has built a 3x16x3 by then. The port asks every one of them where the graph is built, with the release's own sentence, which is this library's rule for every extent the release will not run. THE RUN'S VERDICT LINE is \"gather_spacebatch: same as the system on 1416 of the 1416 cells with a result buffer; 1416 within the release's own precision, 0 recorded\" with \"checks=23 failures=0 recorded=0\", over 49 cases whose every cell is byte-identical to the release, the red control differing from the release in 24 of the 49 case lines, and facts/MetalPerformanceShadersGraph/Core.md carries every measurement. THE THREE AXES AS TENSORS, which is the header's fed form of this pair and the only form of it with a parameter the caller can feed, are answered by the release when the graph HOLDS the value: an int32 CONSTANT of shape [1] answers exactly what the written-down axes answer over the same operand, byte for byte, in both directions and under both flags (measured over the same [3, 4, 6] of 1 to 72 with the same axes of 2, 1 and 0 and the same block of 2: a 12x2x3 of (1, 3, 5, 13, 15, 17, 25, ... | 2, 4, 6, 14, ...) and a 3x4x6 of (1, 19, 2, 20, ... | 37, 55, 38, 56, ...), which is what -spaceToDepth2DTensor: and -depthToSpace2DTensor: answer over the same operand), and an int64 of shape [1] answers the same, so the release takes a shape of four or of eight bytes as it does for every other fed shape of this library. A CONSTANT OF NO RANK is not constructible at all: the release's own +constantWithData:shape:dataType: takes the process down with \"failed assertion `shape.count > 0 failed, a constant must be passed a ranked shape'\" (exit 134), so the axis tensor has to be written with a rank at all. A CONSTANT OF MORE THAN ONE NUMBER builds the graph and leaves the result carrying no shape, as a PLACEHOLDER does, and there is then nothing for a caller to read before the run. A PLACEHOLDER answers at RUN TIME, in both directions and under both flags: the graph builds with the result carrying no shape, -compileWithDevice: hands back an executable, and the run writes the written-down form's values into the caller's destination (measured, exit 0, refusals.txt's block-s2d-fed-axis-placeholder and block-d2s-fed-axis-placeholder). This port answers it the same way: the three fed axes become one operation whose walk reads them when the graph runs and asks the plan the written-down forms ask at build time (RevenantMPSGraphBlockShufflePlan), so the split shape, the permutation and the result's own shape are built at run time and the result tensor carries no shape until the interpreter puts it on. An int64 axis and a 0D placeholder answer as an int32 one of shape [1], and one fed axis with two constants answers the same again. WHAT THE RELEASE REFUSES OVER A FED AXIS, this port refuses with the release's own sentence: a float32 axis and a two-number axis at the graph's COMPILE (the verifier's own 'operand #1 must be 0D tensor of mps index type values ... but got tensor<1xf32>' and 'tensor<2xsi32>', exit 134) - asked where the graph is BUILT here, which is this library's moment - and an axis whose value cannot be used (a width outside the rank, a degenerate pair, a block that does not divide) at the run, where the release dies or answers a buffer it flags as an error itself.",
     "facts": "facts/MetalPerformanceShadersGraph/Core.md",
     "source": "the headers of MetalPerformanceShadersGraph in the SDK of iOS 16.4 for every signature, and the behaviour measured against the system's own MPSGraph by tests/backports/host/mpsgraph"
   },
@@ -2274,7 +2274,7 @@
     "introduced": "15.0",
     "minimum": "6.0",
     "status": "implemented",
-    "effect": "the depth-to-space above with its three axes arriving as tensors, and the header's own sentence about the inverse pair holds of the FED pair as well: measured, the same three constants into both directions is the identity over the [3, 4, 6] for both flags. the result moves a BLOCK of the operand's spatial axes into the batch axis, or out of it, and the result's batch axis holds the operand's own batch coordinate woven with the block's own coordinates. MEASURED on this host's own MPSGraph (macOS 27.0 build 26A428, M4 Pro, Metal 4) over a [3, 4, 6] of 1 to 72 with a 2x2 block, the spatial axes @[@1, @2] and the batch axis @0, whose result is a [12, 2, 3]: (1) THE BLOCK'S OWN COORDINATES RUN WITH THE LAST SPATIAL AXIS FASTEST, which is what makes the 2D form's (widthAxis, heightAxis) the general form's spatialAxes @[@heightAxis, @widthAxis] - measured, the two forms over the same operand answer byte for byte the same values; (2) BLOCK DIMENSION i BELONGS TO SPATIAL AXIS i and THE RESULT'S AXES ARE THE OPERAND'S OWN in the operand's order - measured over a [2, 4, 8]: spatialAxes @[@1, @2] with block @[@4, @2] answers a [16, 1, 4], axis 1 over ITS OWN block of 4 being 1 and axis 2 over its own block of 2 being 4, while spatialAxes @[@2, @1] with the same @[@4, @2] answers a [16, 2, 2] - the same two numbers read positionally against the other list; and a list written the other way round with the blocks swapped to match pairs each axis with its own block again and answers the SAME shape and DIFFERENT bytes (@[@1, @2] with @[@2, @4] against @[@2, @1] with @[@4, @2], both a [16, 2, 2]; and with an EQUAL block both are a [8, 1, 2] over a [2, 2, 4] and still not the same bytes), because the block's own coordinate runs in the LIST's order with the last of them fastest, whichever order that is; (3) THE FLAG SAYS WHICH OF THE BATCH COORDINATE AND THE BLOCK'S OWN IS FASTEST in the result's batch axis - with usePixelShuffleOrder=NO the batch coordinate is the fastest and the result's d' is d + D*k, with YES it is the slowest and d' is d*(the product of the block) + k, where k is the block's own coordinate in its row-major order with the last spatial axis fastest - measured over the [3, 4, 6]: the operand's (0, 0, w even) is at d' = 0 under both, its (0, 0, w odd) at 3 and 1, its (1, 0, w even) at 1 and 4, and its (0, 1, w even) at 6 and 2; (4) THE RESULT'S SHAPE is the operand's own with the batch axis made D times the product of the block and every spatial axis made extent over block - measured [3, 4, 6] -> [12, 2, 3] - and for the other direction the same statement the other way round, the batch axis made D over the product of the block and every spatial axis extent times its own; (5) EACH OPERATION IS THE INVERSE OF ITS PARTNER WITH THE SAME FLAG and the round trip is the IDENTITY, for both flags - measured, a space-to-depth over the [3, 4, 6] and then the depth-to-space of what it built answers 1 to 72 in the operand's own order - which is the header's own \"This operation is the inverse of\" sentence measured rather than assumed. THE RELEASE'S REFUSALS, each in its own operation's own words and at its own moment, all in refusals.txt: an axis outside the rank is refused where the graph is BUILT, with the result's shape nil - \"'mps.space_to_batch' op invalid axis: 3, axis must be in range - rank <= axis < rank, rank = 3\", and the 2D form's own with the axis's NAME in it, \"invalid width_axis (3) for shape of rank 3\", which a negative one reaches too as \"invalid width_axis (2147483647)\" (the header's own NSUInteger making the caller write it); the same axis twice in the list (\"'mps.space_to_batch' op axis must be unique\"); the batch axis among the spatial ones (\"'mps.batch_to_space' op `batch_axis` = 0 must be unique from `spatial_axes`\"); as many block dimensions as spatial axes (\"`spatial_axes` ... must have same size as `block_dimensions`\"); a block that does not divide the extent it is a block of (\"Invalid `block_dimensions[1] = 5 for input size[2] = 6\", and the 2D form's own \"block_size (3) must be multiple of height 4\" in the direction that moves the blocks IN and \"block_size (3) squared (9) must be multiple of depth 12\" in the direction that moves them OUT - the block divides the height in one and its SQUARE divides the depth in the other, which is the same rule in the words of two different operations); and a degenerate pair of axes (\"'mps.space_to_depth_2d' op Invalid degenerate axes: depth_axis (1) height_axis (1) for shape of rank 3\"), which the release refuses where the graph is COMPILED rather than built - it has built a 3x16x3 by then. The port asks every one of them where the graph is built, with the release's own sentence, which is this library's rule for every extent the release will not run. THE RUN'S VERDICT LINE is \"gather_spacebatch: same as the system on 1416 of the 1416 cells with a result buffer; 1416 within the release's own precision, 0 recorded\" with \"checks=23 failures=0 recorded=0\", over 49 cases whose every cell is byte-identical to the release, the red control differing from the release in 24 of the 49 case lines, and facts/MetalPerformanceShadersGraph/Core.md carries every measurement. THE THREE AXES AS TENSORS, which is the header's fed form of this pair and the only form of it with a parameter the caller can feed, are answered by the release when the graph HOLDS the value: an int32 CONSTANT of shape [1] answers exactly what the written-down axes answer over the same operand, byte for byte, in both directions and under both flags (measured over the same [3, 4, 6] of 1 to 72 with the same axes of 2, 1 and 0 and the same block of 2: a 12x2x3 of (1, 3, 5, 13, 15, 17, 25, ... | 2, 4, 6, 14, ...) and a 3x4x6 of (1, 19, 2, 20, ... | 37, 55, 38, 56, ...), which is what -spaceToDepth2DTensor: and -depthToSpace2DTensor: answer over the same operand), and an int64 of shape [1] answers the same, so the release takes a shape of four or of eight bytes as it does for every other fed shape of this library. A CONSTANT OF NO RANK is not constructible at all: the release's own +constantWithData:shape:dataType: takes the process down with \"failed assertion `shape.count > 0 failed, a constant must be passed a ranked shape'\" (exit 134), so the axis tensor has to be written with a rank at all. A CONSTANT OF MORE THAN ONE NUMBER builds the graph and leaves the result carrying no shape, as a PLACEHOLDER does, and there is then nothing for a caller to read before the run. A PLACEHOLDER answers at RUN TIME, in both directions and under both flags: the graph builds with the result carrying no shape, -compileWithDevice: hands back an executable, and the run writes the written-down form's values into the caller's destination (measured, exit 0, refusals.txt's block-s2d-fed-axis-placeholder and block-d2s-fed-axis-placeholder). This port answers it the same way: the three fed axes become one operation whose walk reads them when the graph runs and asks the plan the written-down forms ask at build time (CharonMPSGraphBlockShufflePlan), so the split shape, the permutation and the result's own shape are built at run time and the result tensor carries no shape until the interpreter puts it on. An int64 axis and a 0D placeholder answer as an int32 one of shape [1], and one fed axis with two constants answers the same again. WHAT THE RELEASE REFUSES OVER A FED AXIS, this port refuses with the release's own sentence: a float32 axis and a two-number axis at the graph's COMPILE (the verifier's own 'operand #1 must be 0D tensor of mps index type values ... but got tensor<1xf32>' and 'tensor<2xsi32>', exit 134) - asked where the graph is BUILT here, which is this library's moment - and an axis whose value cannot be used (a width outside the rank, a degenerate pair, a block that does not divide) at the run, where the release dies or answers a buffer it flags as an error itself.",
+    "effect": "the depth-to-space above with its three axes arriving as tensors, and the header's own sentence about the inverse pair holds of the FED pair as well: measured, the same three constants into both directions is the identity over the [3, 4, 6] for both flags. the result moves a BLOCK of the operand's spatial axes into the batch axis, or out of it, and the result's batch axis holds the operand's own batch coordinate woven with the block's own coordinates. MEASURED on this host's own MPSGraph (macOS 27.0 build 26A428, M4 Pro, Metal 4) over a [3, 4, 6] of 1 to 72 with a 2x2 block, the spatial axes @[@1, @2] and the batch axis @0, whose result is a [12, 2, 3]: (1) THE BLOCK'S OWN COORDINATES RUN WITH THE LAST SPATIAL AXIS FASTEST, which is what makes the 2D form's (widthAxis, heightAxis) the general form's spatialAxes @[@heightAxis, @widthAxis] - measured, the two forms over the same operand answer byte for byte the same values; (2) BLOCK DIMENSION i BELONGS TO SPATIAL AXIS i and THE RESULT'S AXES ARE THE OPERAND'S OWN in the operand's order - measured over a [2, 4, 8]: spatialAxes @[@1, @2] with block @[@4, @2] answers a [16, 1, 4], axis 1 over ITS OWN block of 4 being 1 and axis 2 over its own block of 2 being 4, while spatialAxes @[@2, @1] with the same @[@4, @2] answers a [16, 2, 2] - the same two numbers read positionally against the other list; and a list written the other way round with the blocks swapped to match pairs each axis with its own block again and answers the SAME shape and DIFFERENT bytes (@[@1, @2] with @[@2, @4] against @[@2, @1] with @[@4, @2], both a [16, 2, 2]; and with an EQUAL block both are a [8, 1, 2] over a [2, 2, 4] and still not the same bytes), because the block's own coordinate runs in the LIST's order with the last of them fastest, whichever order that is; (3) THE FLAG SAYS WHICH OF THE BATCH COORDINATE AND THE BLOCK'S OWN IS FASTEST in the result's batch axis - with usePixelShuffleOrder=NO the batch coordinate is the fastest and the result's d' is d + D*k, with YES it is the slowest and d' is d*(the product of the block) + k, where k is the block's own coordinate in its row-major order with the last spatial axis fastest - measured over the [3, 4, 6]: the operand's (0, 0, w even) is at d' = 0 under both, its (0, 0, w odd) at 3 and 1, its (1, 0, w even) at 1 and 4, and its (0, 1, w even) at 6 and 2; (4) THE RESULT'S SHAPE is the operand's own with the batch axis made D times the product of the block and every spatial axis made extent over block - measured [3, 4, 6] -> [12, 2, 3] - and for the other direction the same statement the other way round, the batch axis made D over the product of the block and every spatial axis extent times its own; (5) EACH OPERATION IS THE INVERSE OF ITS PARTNER WITH THE SAME FLAG and the round trip is the IDENTITY, for both flags - measured, a space-to-depth over the [3, 4, 6] and then the depth-to-space of what it built answers 1 to 72 in the operand's own order - which is the header's own \"This operation is the inverse of\" sentence measured rather than assumed. THE RELEASE'S REFUSALS, each in its own operation's own words and at its own moment, all in refusals.txt: an axis outside the rank is refused where the graph is BUILT, with the result's shape nil - \"'mps.space_to_batch' op invalid axis: 3, axis must be in range - rank <= axis < rank, rank = 3\", and the 2D form's own with the axis's NAME in it, \"invalid width_axis (3) for shape of rank 3\", which a negative one reaches too as \"invalid width_axis (2147483647)\" (the header's own NSUInteger making the caller write it); the same axis twice in the list (\"'mps.space_to_batch' op axis must be unique\"); the batch axis among the spatial ones (\"'mps.batch_to_space' op `batch_axis` = 0 must be unique from `spatial_axes`\"); as many block dimensions as spatial axes (\"`spatial_axes` ... must have same size as `block_dimensions`\"); a block that does not divide the extent it is a block of (\"Invalid `block_dimensions[1] = 5 for input size[2] = 6\", and the 2D form's own \"block_size (3) must be multiple of height 4\" in the direction that moves the blocks IN and \"block_size (3) squared (9) must be multiple of depth 12\" in the direction that moves them OUT - the block divides the height in one and its SQUARE divides the depth in the other, which is the same rule in the words of two different operations); and a degenerate pair of axes (\"'mps.space_to_depth_2d' op Invalid degenerate axes: depth_axis (1) height_axis (1) for shape of rank 3\"), which the release refuses where the graph is COMPILED rather than built - it has built a 3x16x3 by then. The port asks every one of them where the graph is built, with the release's own sentence, which is this library's rule for every extent the release will not run. THE RUN'S VERDICT LINE is \"gather_spacebatch: same as the system on 1416 of the 1416 cells with a result buffer; 1416 within the release's own precision, 0 recorded\" with \"checks=23 failures=0 recorded=0\", over 49 cases whose every cell is byte-identical to the release, the red control differing from the release in 24 of the 49 case lines, and facts/MetalPerformanceShadersGraph/Core.md carries every measurement. THE THREE AXES AS TENSORS, which is the header's fed form of this pair and the only form of it with a parameter the caller can feed, are answered by the release when the graph HOLDS the value: an int32 CONSTANT of shape [1] answers exactly what the written-down axes answer over the same operand, byte for byte, in both directions and under both flags (measured over the same [3, 4, 6] of 1 to 72 with the same axes of 2, 1 and 0 and the same block of 2: a 12x2x3 of (1, 3, 5, 13, 15, 17, 25, ... | 2, 4, 6, 14, ...) and a 3x4x6 of (1, 19, 2, 20, ... | 37, 55, 38, 56, ...), which is what -spaceToDepth2DTensor: and -depthToSpace2DTensor: answer over the same operand), and an int64 of shape [1] answers the same, so the release takes a shape of four or of eight bytes as it does for every other fed shape of this library. A CONSTANT OF NO RANK is not constructible at all: the release's own +constantWithData:shape:dataType: takes the process down with \"failed assertion `shape.count > 0 failed, a constant must be passed a ranked shape'\" (exit 134), so the axis tensor has to be written with a rank at all. A CONSTANT OF MORE THAN ONE NUMBER builds the graph and leaves the result carrying no shape, as a PLACEHOLDER does, and there is then nothing for a caller to read before the run. A PLACEHOLDER answers at RUN TIME, in both directions and under both flags: the graph builds with the result carrying no shape, -compileWithDevice: hands back an executable, and the run writes the written-down form's values into the caller's destination (measured, exit 0, refusals.txt's block-s2d-fed-axis-placeholder and block-d2s-fed-axis-placeholder). This port answers it the same way: the three fed axes become one operation whose walk reads them when the graph runs and asks the plan the written-down forms ask at build time (RevenantMPSGraphBlockShufflePlan), so the split shape, the permutation and the result's own shape are built at run time and the result tensor carries no shape until the interpreter puts it on. An int64 axis and a 0D placeholder answer as an int32 one of shape [1], and one fed axis with two constants answers the same again. WHAT THE RELEASE REFUSES OVER A FED AXIS, this port refuses with the release's own sentence: a float32 axis and a two-number axis at the graph's COMPILE (the verifier's own 'operand #1 must be 0D tensor of mps index type values ... but got tensor<1xf32>' and 'tensor<2xsi32>', exit 134) - asked where the graph is BUILT here, which is this library's moment - and an axis whose value cannot be used (a width outside the rank, a degenerate pair, a block that does not divide) at the run, where the release dies or answers a buffer it flags as an error itself.",
     "facts": "facts/MetalPerformanceShadersGraph/Core.md",
     "source": "the headers of MetalPerformanceShadersGraph in the SDK of iOS 16.4 for every signature, and the behaviour measured against the system's own MPSGraph by tests/backports/host/mpsgraph"
   },
@@ -2319,7 +2319,7 @@
     "source": "the headers of MetalPerformanceShadersGraph in the SDK of iOS 16.4 for every signature, and the behaviour measured against the system's own MPSGraph by tests/backports/host/mpsgraph"
   },
   {
-    "api": "-[MPSGraph charon_mps_blockShuffle:spatial:batch:block:toBatch:shuffle:name:]",
+    "api": "-[MPSGraph revenant_mps_blockShuffle:spatial:batch:block:toBatch:shuffle:name:]",
     "kind": "method",
     "introduced": "14.0",
     "minimum": "6.0",
@@ -2330,18 +2330,18 @@
     "source": "the headers of MetalPerformanceShadersGraph in the SDK of iOS 16.4 for every signature, and the behaviour measured against the system's own MPSGraph by tests/backports/host/mpsgraph"
   },
   {
-      "api": "-[MPSGraph charon_mps_blockShufflePlan:ofShape:spatial:batch:block:toBatch:shuffle:]",
+      "api": "-[MPSGraph revenant_mps_blockShufflePlan:ofShape:spatial:batch:block:toBatch:shuffle:]",
       "kind": "method",
       "introduced": "14.0",
       "minimum": "6.0",
       "status": "implemented",
       "reason": "a name no SDK header declares: the block-moving family's chain is three walks this library already has, and the shape the first splits the operand into, the permutation the second reads and the shape the third merges it back into are the same arithmetic whether the axes are written down or fed, so it is one function and both paths ask it.",
-      "effect": "the plan of the block-moving family, in MPSGraphInterpreter14.m where the walk lives, asked twice over: by -charon_mps_blockShuffle: when the graph is BUILT, over axes the caller wrote down, and by the fed pair of 15.0 when the graph RUNS, over axes that arrive as data. Every refusal of the family is inside it, with the release's own sentence, so a fed form refuses what a written-down one refuses. `operandShape` is the shape the extents are measured against: the tensor's own at build time and the value's own at run time.",
+      "effect": "the plan of the block-moving family, in MPSGraphInterpreter14.m where the walk lives, asked twice over: by -revenant_mps_blockShuffle: when the graph is BUILT, over axes the caller wrote down, and by the fed pair of 15.0 when the graph RUNS, over axes that arrive as data. Every refusal of the family is inside it, with the release's own sentence, so a fed form refuses what a written-down one refuses. `operandShape` is the shape the extents are measured against: the tensor's own at build time and the value's own at run time.",
       "facts": "facts/MetalPerformanceShadersGraph/Core.md",
       "source": "the headers of MetalPerformanceShadersGraph in the SDK of iOS 16.4 for every signature, and the behaviour measured against the system's own MPSGraph by tests/backports/host/mpsgraph"
     },
   {
-      "api": "-[MPSGraph charon_mps_fedBlockShuffle:spatial:batch:block:toBatch:shuffle:name:]",
+      "api": "-[MPSGraph revenant_mps_fedBlockShuffle:spatial:batch:block:toBatch:shuffle:name:]",
     "kind": "method",
     "introduced": "14.0",
     "minimum": "6.0",

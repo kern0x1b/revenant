@@ -116,22 +116,22 @@ static void run_checks(void)
     CHECK(emptyData != nil && emptyData.length == 0, "a renderer of no size answers empty data, never nil");
 }
 
-@interface CharonGraphicsDelegate : UIResponder <UIApplicationDelegate>
+@interface RevenantGraphicsDelegate : UIResponder <UIApplicationDelegate>
 @end
 
-@implementation CharonGraphicsDelegate
+@implementation RevenantGraphicsDelegate
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)options
 {
-    charon_log_to([results_folder stringByAppendingPathComponent:@"graphics.log"]);
+    revenant_log_to([results_folder stringByAppendingPathComponent:@"graphics.log"]);
     @try {
         run_checks();
     } @catch (NSException *exception) {
-        charon_check(NO, "the checks raise no exception",
+        revenant_check(NO, "the checks raise no exception",
                      [NSString stringWithFormat:@"%@: %@", exception.name, exception.reason]);
     }
     NSString *summary = [NSString stringWithFormat:@"%@ checks=%d failures=%d\n",
-                                                   charon_failures ? @"FAIL" : @"ok", charon_checks, charon_failures];
+                                                   revenant_failures ? @"FAIL" : @"ok", revenant_checks, revenant_failures];
     [summary writeToFile:[results_folder stringByAppendingPathComponent:@"graphics.done"]
               atomically:YES encoding:NSUTF8StringEncoding error:NULL];
     return YES;
@@ -144,6 +144,6 @@ int main(int argc, char *argv[])
     @autoreleasepool {
         [[NSFileManager defaultManager] createDirectoryAtPath:results_folder
                                   withIntermediateDirectories:YES attributes:nil error:NULL];
-        return UIApplicationMain(argc, argv, nil, @"CharonGraphicsDelegate");
+        return UIApplicationMain(argc, argv, nil, @"RevenantGraphicsDelegate");
     }
 }

@@ -179,7 +179,7 @@ local function aligned_failures(folder, shims)
         return found, true
     end
     local symbols = tool(folder, "nm", {"-m", "shim.o"})
-    local line = ending(symbols, " _charon_aligned_alloc")
+    local line = ending(symbols, " _revenant_aligned_alloc")
     if not line:find("private external", 1, true) then
         table.insert(found, "aligned_alloc must be a hidden definition so the image exports nothing libc-named: " ..
                             (line ~= "" and line or symbols))
@@ -220,8 +220,8 @@ local function renamed_failures(folder, shims, headers)
             table.insert(found, string.format("a call to %s must compile for iOS 6 with the header: %s", symbol, called.stderr:sub(-300)))
         else
             local undefined = words(tool(folder, "nm", {"-u", symbol .. ".o"}))
-            if contains(undefined, "_" .. symbol) or not contains(undefined, "_charon_" .. symbol) then
-                table.insert(found, string.format("a call to %s must reach charon_%s, never the system's weak import: %s",
+            if contains(undefined, "_" .. symbol) or not contains(undefined, "_revenant_" .. symbol) then
+                table.insert(found, string.format("a call to %s must reach revenant_%s, never the system's weak import: %s",
                                                   symbol, symbol, table.concat(undefined, " ")))
             end
             local shim = clang(folder, table.join(IOS6, {"-Wno-unguarded-availability", "-c", path.join(shims, symbol .. ".c"),
@@ -229,9 +229,9 @@ local function renamed_failures(folder, shims, headers)
             if shim.code ~= 0 then
                 table.insert(found, string.format("the %s shim must compile for armv7 on iOS 6: %s", symbol, shim.stderr:sub(-300)))
             else
-                local line = ending(tool(folder, "nm", {"-m", "shim-" .. symbol .. ".o"}), " _charon_" .. symbol)
+                local line = ending(tool(folder, "nm", {"-m", "shim-" .. symbol .. ".o"}), " _revenant_" .. symbol)
                 if not line:find("private external", 1, true) then
-                    table.insert(found, string.format("charon_%s must be hidden: %s", symbol, line))
+                    table.insert(found, string.format("revenant_%s must be hidden: %s", symbol, line))
                 end
             end
         end
@@ -301,7 +301,7 @@ end
 local function lock_failures(folder, shims, locks, waits)
     local found = {}
     fixture(folder, "unfair.c")
-    local built = clang(folder, table.join({"-O2", "-w", "-DCHARON_COMPAT_SYSTEM=0"}, locks, waits, {"unfair.c", "-o", "unfair"}))
+    local built = clang(folder, table.join({"-O2", "-w", "-DREVENANT_COMPAT_SYSTEM=0"}, locks, waits, {"unfair.c", "-o", "unfair"}))
     if built.code ~= 0 then
         table.insert(found, "the os_unfair_lock shims must compile: " .. built.stderr:sub(-400))
     else
@@ -309,7 +309,7 @@ local function lock_failures(folder, shims, locks, waits)
     end
 
     fixture(folder, "names.c")
-    built = clang(folder, table.join({"-O2", "-w", "-DCHARON_COMPAT_SYSTEM=0", "-I", shims, "names.c"}, waits, {"-o", "names"}))
+    built = clang(folder, table.join({"-O2", "-w", "-DREVENANT_COMPAT_SYSTEM=0", "-I", shims, "names.c"}, waits, {"-o", "names"}))
     if built.code ~= 0 then
         table.insert(found, "the port-name test must compile: " .. built.stderr:sub(-400))
     else
@@ -324,7 +324,7 @@ local function shared_lock_failures(folder, locks, waits)
     os.mkdir(shared)
     fixture(shared, "side.c")
     fixture(shared, "images.c")
-    local steps = {clang(shared, table.join({"-O2", "-w", "-fvisibility=hidden", "-DCHARON_COMPAT_SYSTEM=0", "-dynamiclib"}, locks, waits,
+    local steps = {clang(shared, table.join({"-O2", "-w", "-fvisibility=hidden", "-DREVENANT_COMPAT_SYSTEM=0", "-dynamiclib"}, locks, waits,
                                             {"-install_name", "@rpath/libshared.dylib", "-o", "libshared.dylib"}))}
     for _, side in ipairs({"one", "two"}) do
         table.insert(steps, clang(shared, {"-O2", "-w", "-fvisibility=hidden", "-DSIDE_lock=" .. side .. "_lock", "-DSIDE_unlock=" .. side .. "_unlock",
@@ -368,7 +368,7 @@ end
 local function later_failures(folder, shims, headers)
     local found = {}
     fixture(folder, "calls.c")
-    local built = clang(folder, table.join({"-O2", "-w", "-DCHARON_COMPAT_SYSTEM=0"}, sources_of(shims, LATER), {"calls.c", "-o", "calls"}))
+    local built = clang(folder, table.join({"-O2", "-w", "-DREVENANT_COMPAT_SYSTEM=0"}, sources_of(shims, LATER), {"calls.c", "-o", "calls"}))
     if built.code ~= 0 then
         table.insert(found, "the shims of later dispatch, clock and memory calls must compile: " .. built.stderr:sub(-400))
     else
@@ -376,7 +376,7 @@ local function later_failures(folder, shims, headers)
     end
     fixture(folder, "version.c")
     for _, system in ipairs({"0", "1"}) do
-        built = clang(folder, {"-O2", "-w", "-DCHARON_COMPAT_SYSTEM=" .. system, path.join(shims, "os_system_version_get_current_version.c"),
+        built = clang(folder, {"-O2", "-w", "-DREVENANT_COMPAT_SYSTEM=" .. system, path.join(shims, "os_system_version_get_current_version.c"),
                                "version.c", "-framework", "CoreFoundation", "-o", "version" .. system})
         if built.code ~= 0 then
             table.insert(found, "the os_system_version_get_current_version shim must compile: " .. built.stderr:sub(-400))
@@ -389,7 +389,7 @@ local function later_failures(folder, shims, headers)
     local declared = run(folder, "xcrun", table.join({"clang++"}, IOS6, {"-include", path.join(headers, "os_system_version_get_current_version.h"),
                                                                         "-c", "availability.mm", "-o", "availability.o"}))
     local undefined = declared.code == 0 and words(tool(folder, "nm", {"-u", "availability.o"})) or {}
-    if declared.code ~= 0 or not contains(undefined, "_charon_os_system_version_get_current_version") then
+    if declared.code ~= 0 or not contains(undefined, "_revenant_os_system_version_get_current_version") then
         table.insert(found, "Swift's own declaration of os_system_version_get_current_version must compile with the header forced " ..
                             "in and reach the shim: " .. declared.stderr:sub(-300) .. " " .. table.concat(undefined, " "))
     end
@@ -399,7 +399,7 @@ end
 local function block_failures(folder, blocks)
     local found = {}
     fixture(folder, "blocks.c")
-    local built = clang(folder, table.join({"-O2", "-w", "-fblocks", "-DCHARON_COMPAT_SYSTEM=0"}, blocks, {"blocks.c", "-o", "blocks"}))
+    local built = clang(folder, table.join({"-O2", "-w", "-fblocks", "-DREVENANT_COMPAT_SYSTEM=0"}, blocks, {"blocks.c", "-o", "blocks"}))
     if built.code ~= 0 then
         table.insert(found, "the dispatch_block shims must compile: " .. built.stderr:sub(-400))
     else
@@ -417,8 +417,8 @@ end
 local function submit_failures(folder, blocks, submits)
     local found = {}
     fixture(folder, "submits.c")
-    for _, case in ipairs({{"submits", {"-DCHARON_COMPAT_SYSTEM=0"}}, {"submits-system", {}},
-                           {"submits-plain", {"-DCHARON_COMPAT_SYSTEM=0", "-DSUBMIT_PLAIN"}}}) do
+    for _, case in ipairs({{"submits", {"-DREVENANT_COMPAT_SYSTEM=0"}}, {"submits-system", {}},
+                           {"submits-plain", {"-DREVENANT_COMPAT_SYSTEM=0", "-DSUBMIT_PLAIN"}}}) do
         local name = case[1]
         local built = clang(folder, table.join({"-O2", "-w", "-fblocks"}, case[2], blocks, submits, {"submits.c", "-o", name}))
         if built.code ~= 0 then
@@ -445,7 +445,7 @@ end
 
 local function assert_failures(folder, asserts, locks, waits)
     fixture(folder, "asserts.c")
-    local built = clang(folder, table.join({"-O2", "-w", "-DCHARON_COMPAT_SYSTEM=0"}, asserts, locks, waits, {"asserts.c", "-o", "asserts"}))
+    local built = clang(folder, table.join({"-O2", "-w", "-DREVENANT_COMPAT_SYSTEM=0"}, asserts, locks, waits, {"asserts.c", "-o", "asserts"}))
     if built.code ~= 0 then
         return {"the os_unfair_lock assert shims must compile: " .. built.stderr:sub(-400)}
     end
@@ -454,7 +454,7 @@ end
 
 local function queue_failures(folder, queues)
     fixture(folder, "queues.c")
-    local built = clang(folder, table.join({"-O2", "-w", "-fblocks", "-DCHARON_COMPAT_SYSTEM=0"}, queues, {"queues.c", "-o", "queues"}))
+    local built = clang(folder, table.join({"-O2", "-w", "-fblocks", "-DREVENANT_COMPAT_SYSTEM=0"}, queues, {"queues.c", "-o", "queues"}))
     if built.code ~= 0 then
         return {"the dispatch queue shims must compile: " .. built.stderr:sub(-400)}
     end
@@ -466,9 +466,9 @@ local function barrier_failures(folder, barriers)
     fixture(folder, "barriers.c")
     local steps = {}
     for _, control in ipairs({"", "1"}) do
-        local flags = {"-DCHARON_COMPAT_SYSTEM=0"}
+        local flags = {"-DREVENANT_COMPAT_SYSTEM=0"}
         if control ~= "" then
-            table.insert(flags, "-DCHARON_COMPAT_NO_STATE=" .. control)
+            table.insert(flags, "-DREVENANT_COMPAT_NO_STATE=" .. control)
         end
         local name = "barriers" .. (control ~= "" and "-control" or "")
         table.insert(steps, clang(folder, table.join({"-O1", "-w", "-fblocks"}, flags, barriers, {"barriers.c", "-framework", "Foundation", "-o", name})))
@@ -525,7 +525,7 @@ local function system_failures(folder, shims)
         table.join2(found, outcome("system arc4random_buf", run(folder, path.join(folder, "system-random"))))
     end
     fixture(folder, "alloc.m")
-    built = clang(folder, {"-O2", "-w", "-fobjc-arc", "-DCHARON_COMPAT_SYSTEM=0", path.join(shims, "objc_allocWithZone.c"),
+    built = clang(folder, {"-O2", "-w", "-fobjc-arc", "-DREVENANT_COMPAT_SYSTEM=0", path.join(shims, "objc_allocWithZone.c"),
                            path.join(shims, "objc_opt_self.c"), "alloc.m", "-framework", "Foundation", "-o", "alloc"})
     if built.code ~= 0 then
         table.insert(found, "the objc_allocWithZone shim must compile: " .. built.stderr:sub(-400))
@@ -539,7 +539,7 @@ local function invert_failures(folder, shims)
     fixture(folder, "invert.c")
     local steps, objects = {}, {}
     for _, symbol in ipairs(INVERSES) do
-        table.insert(steps, clang(folder, {"-O2", "-w", "-fvisibility=hidden", "-D" .. symbol .. "=charon_invert_" .. symbol:sub(-2),
+        table.insert(steps, clang(folder, {"-O2", "-w", "-fvisibility=hidden", "-D" .. symbol .. "=revenant_invert_" .. symbol:sub(-2),
                                            "-c", path.join(shims, symbol .. ".c"), "-o", "ours-" .. symbol .. ".o"}))
         table.insert(objects, "ours-" .. symbol .. ".o")
     end
@@ -556,7 +556,7 @@ local function definition_failures(folder, shims, headers)
                                {"objc_allocWithZone", "objc_opt_self", "os_system_version_get_current_version"}, INVERSES)
     for _, symbol in ipairs(symbols) do
         local process_wide = contains(PROCESS_WIDE, symbol)
-        local defined = os.isfile(path.join(headers, symbol .. ".h")) and "_charon_" .. symbol or "_" .. symbol
+        local defined = os.isfile(path.join(headers, symbol .. ".h")) and "_revenant_" .. symbol or "_" .. symbol
         for _, target in ipairs({{"armv7", "6.0"}, {"arm64", "7.0"}}) do
             local architecture, release = target[1], target[2]
             local object = "ios-" .. symbol .. "-" .. architecture .. ".o"
@@ -608,8 +608,8 @@ local function caller_failures(folder, headers)
                 called.stderr:sub(-400)}
     end
     local undefined = words(tool(folder, "nm", {"-u", "caller.o"}))
-    if contains(undefined, "_aligned_alloc") or not contains(undefined, "_charon_aligned_alloc") then
-        return {"the call must reach charon_aligned_alloc, not the system's aligned_alloc: " .. table.concat(undefined, " ")}
+    if contains(undefined, "_aligned_alloc") or not contains(undefined, "_revenant_aligned_alloc") then
+        return {"the call must reach revenant_aligned_alloc, not the system's aligned_alloc: " .. table.concat(undefined, " ")}
     end
     return {}
 end
@@ -617,7 +617,7 @@ end
 function failures(opt)
     local compat = opt.compat or path.join(opt.modules, "..", "packages", "a", "apple-compat")
     local shims = path.absolute(path.join(compat, "src"))
-    local headers = path.absolute(path.join(compat, "include", "charon"))
+    local headers = path.absolute(path.join(compat, "include", "revenant"))
     local folder = fixtures.scratch()
     local found, stop = aligned_failures(folder, shims)
     if not stop then

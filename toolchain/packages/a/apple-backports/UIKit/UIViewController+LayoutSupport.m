@@ -1,14 +1,14 @@
 #import <UIKit/UIKit.h>
 #import <objc/runtime.h>
 
-static const char charon_top_support_key;
-static const char charon_bottom_support_key;
+static const char revenant_top_support_key;
+static const char revenant_bottom_support_key;
 
-@interface CharonLayoutSupport : UILayoutGuide <UILayoutSupport>
+@interface RevenantLayoutSupport : UILayoutGuide <UILayoutSupport>
 @property (nonatomic, assign) BOOL top;
 @end
 
-@implementation CharonLayoutSupport
+@implementation RevenantLayoutSupport
 
 @synthesize top;
 
@@ -20,14 +20,14 @@ static const char charon_bottom_support_key;
 
 @end
 
-static CharonLayoutSupport *charon_support(UIViewController *controller, BOOL top)
+static RevenantLayoutSupport *revenant_support(UIViewController *controller, BOOL top)
 {
-    const void *key = top ? &charon_top_support_key : &charon_bottom_support_key;
-    CharonLayoutSupport *support = objc_getAssociatedObject(controller, key);
+    const void *key = top ? &revenant_top_support_key : &revenant_bottom_support_key;
+    RevenantLayoutSupport *support = objc_getAssociatedObject(controller, key);
     if (support)
         return support;
     UIView *view = controller.view;
-    support = [[CharonLayoutSupport alloc] init];
+    support = [[RevenantLayoutSupport alloc] init];
     support.top = top;
     support.identifier = top ? @"UIViewControllerTopLayoutGuide" : @"UIViewControllerBottomLayoutGuide";
     objc_setAssociatedObject(controller, key, support, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
@@ -47,16 +47,16 @@ static CharonLayoutSupport *charon_support(UIViewController *controller, BOOL to
     return support;
 }
 
-@implementation UIViewController (CharonLayoutSupport)
+@implementation UIViewController (RevenantLayoutSupport)
 
 - (id<UILayoutSupport>)topLayoutGuide
 {
-    return charon_support(self, YES);
+    return revenant_support(self, YES);
 }
 
 - (id<UILayoutSupport>)bottomLayoutGuide
 {
-    return charon_support(self, NO);
+    return revenant_support(self, NO);
 }
 
 @end

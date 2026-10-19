@@ -81,7 +81,7 @@
 
 #include "mach/support.hpp"
 
-namespace shade {
+namespace emulator {
 
 std::size_t CompatibilityKernel::bootstrap_checked_in_service_count() const
 {

@@ -2,7 +2,7 @@
 #import <objc/runtime.h>
 #include <stdio.h>
 
-void charon_SensorKitBackports_protocols(void);
+void revenant_SensorKitBackports_protocols(void);
 
 static unsigned descriptions(Protocol *protocol, BOOL required)
 {
@@ -13,7 +13,7 @@ static unsigned descriptions(Protocol *protocol, BOOL required)
 
 int main(void)
 {
-    charon_SensorKitBackports_protocols();
+    revenant_SensorKitBackports_protocols();
     Protocol *protocol = objc_getProtocol("SRSensorReaderDelegate");
     printf("the PORT's emitted protocol: %s, %u optional, %u required\n",
            protocol ? "found" : "ABSENT",

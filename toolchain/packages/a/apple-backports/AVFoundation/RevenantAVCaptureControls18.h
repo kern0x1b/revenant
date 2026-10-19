@@ -17,7 +17,7 @@ AV_INIT_UNAVAILABLE
 @end
 
 API_AVAILABLE(macos(15), ios(18), tvos(18))
-@interface AVCaptureSession (CharonCaptureControls18)
+@interface AVCaptureSession (RevenantCaptureControls18)
 
 - (BOOL)canAddControl:(AVCaptureControl *)control;
 - (void)addControl:(AVCaptureControl *)control;

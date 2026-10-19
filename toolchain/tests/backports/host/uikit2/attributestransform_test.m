@@ -2,9 +2,9 @@
 #import <QuartzCore/QuartzCore.h>
 #import "check.h"
 
-@interface UICollectionViewLayoutAttributes (CharonHostTransform7)
-- (CGAffineTransform)charonHostTransform;
-- (void)charonHostSetTransform:(CGAffineTransform)transform;
+@interface UICollectionViewLayoutAttributes (RevenantHostTransform7)
+- (CGAffineTransform)revenantHostTransform;
+- (void)revenantHostSetTransform:(CGAffineTransform)transform;
 @end
 
 static NSString *describe(CGAffineTransform t)
@@ -22,11 +22,11 @@ int main(void)
             UICollectionViewLayoutAttributes *system = [UICollectionViewLayoutAttributes layoutAttributesForCellWithIndexPath:path];
             UICollectionViewLayoutAttributes *ours = [UICollectionViewLayoutAttributes layoutAttributesForCellWithIndexPath:path];
             system.transform = affine[index];
-            [ours charonHostSetTransform:affine[index]];
-            charon_check(CATransform3DEqualToTransform(system.transform3D, ours.transform3D), "setting transform sets transform3D as the system does",
+            [ours revenantHostSetTransform:affine[index]];
+            revenant_check(CATransform3DEqualToTransform(system.transform3D, ours.transform3D), "setting transform sets transform3D as the system does",
                          describe(affine[index]));
-            charon_check(CGAffineTransformEqualToTransform(system.transform, ours.charonHostTransform), "transform reads back as the system's",
-                         [NSString stringWithFormat:@"%@ != %@", describe(ours.charonHostTransform), describe(system.transform)]);
+            revenant_check(CGAffineTransformEqualToTransform(system.transform, ours.revenantHostTransform), "transform reads back as the system's",
+                         [NSString stringWithFormat:@"%@ != %@", describe(ours.revenantHostTransform), describe(system.transform)]);
         }
         CATransform3D perspective = CATransform3DIdentity;
         perspective.m34 = -1.0 / 500;
@@ -35,11 +35,11 @@ int main(void)
         for (size_t index = 0; index < sizeof solid / sizeof solid[0]; index++) {
             UICollectionViewLayoutAttributes *attributes = [UICollectionViewLayoutAttributes layoutAttributesForCellWithIndexPath:path];
             attributes.transform3D = solid[index];
-            charon_check(CGAffineTransformEqualToTransform(attributes.transform, attributes.charonHostTransform),
+            revenant_check(CGAffineTransformEqualToTransform(attributes.transform, attributes.revenantHostTransform),
                          "transform read from a transform3D, affine or not, answers as the system's",
-                         [NSString stringWithFormat:@"case %zu: %@ != %@", index, describe(attributes.charonHostTransform), describe(attributes.transform)]);
+                         [NSString stringWithFormat:@"case %zu: %@ != %@", index, describe(attributes.revenantHostTransform), describe(attributes.transform)]);
         }
-        printf("checks=%d failures=%d\n", charon_checks, charon_failures);
-        return charon_failures ? 1 : 0;
+        printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
+        return revenant_failures ? 1 : 0;
     }
 }

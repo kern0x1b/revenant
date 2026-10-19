@@ -1,5 +1,5 @@
-#import "CharonNW.h"
-#import "CharonNWSupport.h"
+#import "RevenantNW.h"
+#import "RevenantNWSupport.h"
 
 #include <string.h>
 
@@ -7,11 +7,11 @@
 
 nw_protocol_options_t nw_ws_create_options(nw_ws_version_t version)
 {
-    CharonNWProtocolOptions *options = [[CharonNWProtocolOptions alloc] init];
-    options->_definition = (CharonNWProtocolDefinition *)nw_protocol_copy_ws_definition();
+    RevenantNWProtocolOptions *options = [[RevenantNWProtocolOptions alloc] init];
+    options->_definition = (RevenantNWProtocolDefinition *)nw_protocol_copy_ws_definition();
     options->_values = [NSMutableDictionary dictionary];
     options->_objects = [NSMutableDictionary dictionary];
-    charon_nw_set_integer((__bridge CFMutableDictionaryRef)options->_values, "version", version);
+    revenant_nw_set_integer((__bridge CFMutableDictionaryRef)options->_values, "version", version);
     NSMutableArray *subprotocols = [NSMutableArray array];
     NSMutableArray *names = [NSMutableArray array];
     NSMutableArray *values = [NSMutableArray array];
@@ -25,7 +25,7 @@ void nw_ws_options_add_subprotocol(nw_protocol_options_t options, const char *su
 {
     if (!subprotocol || !*subprotocol)
         return;
-    NSArray *held = ((CharonNWProtocolOptions *)options)->_objects[@"subprotocols"];
+    NSArray *held = ((RevenantNWProtocolOptions *)options)->_objects[@"subprotocols"];
     [(NSMutableArray *)held addObject:@(subprotocol)];
 }
 
@@ -33,29 +33,29 @@ void nw_ws_options_add_additional_header(nw_protocol_options_t options, const ch
 {
     if (!name || !*name)
         return;
-    CharonNWProtocolOptions *held = (CharonNWProtocolOptions *)options;
+    RevenantNWProtocolOptions *held = (RevenantNWProtocolOptions *)options;
     [(NSMutableArray *)held->_objects[@"header_names"] addObject:@(name)];
     [(NSMutableArray *)held->_objects[@"header_values"] addObject:value ? @(value) : @""];
 }
 
 void nw_ws_options_set_auto_reply_ping(nw_protocol_options_t options, bool auto_reply_ping)
 {
-    charon_nw_set_flag((__bridge CFMutableDictionaryRef)((CharonNWProtocolOptions *)options)->_values, "auto_reply_ping", auto_reply_ping);
+    revenant_nw_set_flag((__bridge CFMutableDictionaryRef)((RevenantNWProtocolOptions *)options)->_values, "auto_reply_ping", auto_reply_ping);
 }
 
 void nw_ws_options_set_maximum_message_size(nw_protocol_options_t options, size_t maximum_message_size)
 {
-    charon_nw_set_integer((__bridge CFMutableDictionaryRef)((CharonNWProtocolOptions *)options)->_values, "maximum_message_size", (int64_t)maximum_message_size);
+    revenant_nw_set_integer((__bridge CFMutableDictionaryRef)((RevenantNWProtocolOptions *)options)->_values, "maximum_message_size", (int64_t)maximum_message_size);
 }
 
 void nw_ws_options_set_skip_handshake(nw_protocol_options_t options, bool skip_handshake)
 {
-    charon_nw_set_flag((__bridge CFMutableDictionaryRef)((CharonNWProtocolOptions *)options)->_values, "skip_handshake", skip_handshake);
+    revenant_nw_set_flag((__bridge CFMutableDictionaryRef)((RevenantNWProtocolOptions *)options)->_values, "skip_handshake", skip_handshake);
 }
 
 void nw_ws_options_set_client_request_handler(nw_protocol_options_t options, dispatch_queue_t client_queue, nw_ws_client_request_handler_t handler)
 {
-    CharonNWProtocolOptions *value = (CharonNWProtocolOptions *)options;
+    RevenantNWProtocolOptions *value = (RevenantNWProtocolOptions *)options;
     value->_objects[@"client_request_queue"] = client_queue;
     value->_objects[@"client_request_handler"] = handler;
 }
@@ -64,12 +64,12 @@ void nw_ws_options_set_client_request_handler(nw_protocol_options_t options, dis
 
 nw_protocol_metadata_t nw_ws_create_metadata(nw_ws_opcode_t opcode)
 {
-    CharonNWProtocolMetadata *metadata = [[CharonNWProtocolMetadata alloc] init];
-    metadata->_definition = (CharonNWProtocolDefinition *)nw_protocol_copy_ws_definition();
+    RevenantNWProtocolMetadata *metadata = [[RevenantNWProtocolMetadata alloc] init];
+    metadata->_definition = (RevenantNWProtocolDefinition *)nw_protocol_copy_ws_definition();
     metadata->_values = [NSMutableDictionary dictionary];
     metadata->_objects = [NSMutableDictionary dictionary];
-    charon_nw_set_integer((__bridge CFMutableDictionaryRef)metadata->_values, "opcode", opcode);
-    charon_nw_set_integer((__bridge CFMutableDictionaryRef)metadata->_values, "close_code", nw_ws_close_code_no_status_received);
+    revenant_nw_set_integer((__bridge CFMutableDictionaryRef)metadata->_values, "opcode", opcode);
+    revenant_nw_set_integer((__bridge CFMutableDictionaryRef)metadata->_values, "close_code", nw_ws_close_code_no_status_received);
     return metadata;
 }
 
@@ -77,30 +77,30 @@ nw_ws_opcode_t nw_ws_metadata_get_opcode(nw_protocol_metadata_t metadata)
 {
     if (!nw_protocol_metadata_is_ws(metadata))
         return nw_ws_opcode_invalid;
-    CharonNWProtocolMetadata *value = (CharonNWProtocolMetadata *)metadata;
-    return (nw_ws_opcode_t)charon_nw_integer((__bridge CFDictionaryRef)value->_values, "opcode", nw_ws_opcode_invalid);
+    RevenantNWProtocolMetadata *value = (RevenantNWProtocolMetadata *)metadata;
+    return (nw_ws_opcode_t)revenant_nw_integer((__bridge CFDictionaryRef)value->_values, "opcode", nw_ws_opcode_invalid);
 }
 
 nw_ws_close_code_t nw_ws_metadata_get_close_code(nw_protocol_metadata_t metadata)
 {
     if (!nw_protocol_metadata_is_ws(metadata))
         return nw_ws_close_code_no_status_received;
-    CharonNWProtocolMetadata *value = (CharonNWProtocolMetadata *)metadata;
-    return (nw_ws_close_code_t)charon_nw_integer((__bridge CFDictionaryRef)value->_values, "close_code", nw_ws_close_code_no_status_received);
+    RevenantNWProtocolMetadata *value = (RevenantNWProtocolMetadata *)metadata;
+    return (nw_ws_close_code_t)revenant_nw_integer((__bridge CFDictionaryRef)value->_values, "close_code", nw_ws_close_code_no_status_received);
 }
 
 void nw_ws_metadata_set_close_code(nw_protocol_metadata_t metadata, nw_ws_close_code_t close_code)
 {
     if (!nw_protocol_metadata_is_ws(metadata))
         return;
-    charon_nw_set_integer((__bridge CFMutableDictionaryRef)((CharonNWProtocolMetadata *)metadata)->_values, "close_code", close_code);
+    revenant_nw_set_integer((__bridge CFMutableDictionaryRef)((RevenantNWProtocolMetadata *)metadata)->_values, "close_code", close_code);
 }
 
 void nw_ws_metadata_set_pong_handler(nw_protocol_metadata_t metadata, dispatch_queue_t client_queue, nw_ws_pong_handler_t pong_handler)
 {
     if (!nw_protocol_metadata_is_ws(metadata))
         return;
-    CharonNWProtocolMetadata *value = (CharonNWProtocolMetadata *)metadata;
+    RevenantNWProtocolMetadata *value = (RevenantNWProtocolMetadata *)metadata;
     value->_objects[@"pong_queue"] = client_queue;
     value->_objects[@"pong_handler"] = pong_handler;
 }
@@ -109,7 +109,7 @@ nw_ws_response_t nw_ws_metadata_copy_server_response(nw_protocol_metadata_t meta
 {
     if (!nw_protocol_metadata_is_ws(metadata))
         return NULL;
-    CharonNWProtocolMetadata *value = (CharonNWProtocolMetadata *)metadata;
+    RevenantNWProtocolMetadata *value = (RevenantNWProtocolMetadata *)metadata;
     return (nw_ws_response_t)value->_objects[@"server_response"];
 }
 
@@ -117,7 +117,7 @@ nw_ws_response_t nw_ws_metadata_copy_server_response(nw_protocol_metadata_t meta
 
 nw_ws_response_t nw_ws_response_create(nw_ws_response_status_t status, const char *selected_subprotocol)
 {
-    CharonNWWebSocketResponse *response = [[CharonNWWebSocketResponse alloc] init];
+    RevenantNWWebSocketResponse *response = [[RevenantNWWebSocketResponse alloc] init];
     response->_status = status;
     response->_selectedSubprotocol = selected_subprotocol ? @(selected_subprotocol) : nil;
     response->_headerNames = [NSMutableArray array];
@@ -127,13 +127,13 @@ nw_ws_response_t nw_ws_response_create(nw_ws_response_status_t status, const cha
 
 nw_ws_response_status_t nw_ws_response_get_status(nw_ws_response_t response)
 {
-    CharonNWWebSocketResponse *value = (CharonNWWebSocketResponse *)response;
+    RevenantNWWebSocketResponse *value = (RevenantNWWebSocketResponse *)response;
     return value ? value->_status : (nw_ws_response_status_t)0;
 }
 
 const char *nw_ws_response_get_selected_subprotocol(nw_ws_response_t response)
 {
-    CharonNWWebSocketResponse *value = (CharonNWWebSocketResponse *)response;
+    RevenantNWWebSocketResponse *value = (RevenantNWWebSocketResponse *)response;
     if (!value || !value->_selectedSubprotocol)
         return NULL;
     return value->_selectedSubprotocol.UTF8String;
@@ -141,7 +141,7 @@ const char *nw_ws_response_get_selected_subprotocol(nw_ws_response_t response)
 
 void nw_ws_response_add_additional_header(nw_ws_response_t response, const char *name, const char *value)
 {
-    CharonNWWebSocketResponse *held = (CharonNWWebSocketResponse *)response;
+    RevenantNWWebSocketResponse *held = (RevenantNWWebSocketResponse *)response;
     if (!held || !name || !*name)
         return;
     [held->_headerNames addObject:@(name)];
@@ -150,7 +150,7 @@ void nw_ws_response_add_additional_header(nw_ws_response_t response, const char 
 
 bool nw_ws_response_enumerate_additional_headers(nw_ws_response_t response, nw_ws_additional_header_enumerator_t enumerator)
 {
-    CharonNWWebSocketResponse *value = (CharonNWWebSocketResponse *)response;
+    RevenantNWWebSocketResponse *value = (RevenantNWWebSocketResponse *)response;
     if (!value || !enumerator)
         return false;
     for (NSUInteger index = 0; index < value->_headerNames.count; index++) {
@@ -163,7 +163,7 @@ bool nw_ws_response_enumerate_additional_headers(nw_ws_response_t response, nw_w
 
 bool nw_ws_request_enumerate_subprotocols(nw_ws_request_t request, nw_ws_subprotocol_enumerator_t enumerator)
 {
-    CharonNWWebSocketRequest *value = (CharonNWWebSocketRequest *)request;
+    RevenantNWWebSocketRequest *value = (RevenantNWWebSocketRequest *)request;
     if (!value || !enumerator)
         return false;
     for (NSString *subprotocol in value->_subprotocols) {
@@ -175,7 +175,7 @@ bool nw_ws_request_enumerate_subprotocols(nw_ws_request_t request, nw_ws_subprot
 
 bool nw_ws_request_enumerate_additional_headers(nw_ws_request_t request, nw_ws_additional_header_enumerator_t enumerator)
 {
-    CharonNWWebSocketRequest *value = (CharonNWWebSocketRequest *)request;
+    RevenantNWWebSocketRequest *value = (RevenantNWWebSocketRequest *)request;
     if (!value || !enumerator)
         return false;
     for (NSUInteger index = 0; index < value->_headerNames.count; index++) {

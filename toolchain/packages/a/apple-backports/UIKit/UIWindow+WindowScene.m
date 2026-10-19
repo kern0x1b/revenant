@@ -1,9 +1,9 @@
 #import <objc/runtime.h>
-#import "CharonScenes.h"
+#import "RevenantScenes.h"
 
-static const char CharonWindowSceneKey;
+static const char RevenantWindowSceneKey;
 
-@implementation UIWindow (CharonWindowScene)
+@implementation UIWindow (RevenantWindowScene)
 
 - (instancetype)initWithWindowScene:(UIWindowScene *)windowScene
 {
@@ -14,12 +14,12 @@ static const char CharonWindowSceneKey;
 
 - (UIWindowScene *)windowScene
 {
-    return objc_getAssociatedObject(self, &CharonWindowSceneKey) ?: charon_scene();
+    return objc_getAssociatedObject(self, &RevenantWindowSceneKey) ?: revenant_scene();
 }
 
 - (void)setWindowScene:(UIWindowScene *)windowScene
 {
-    objc_setAssociatedObject(self, &CharonWindowSceneKey, windowScene, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, &RevenantWindowSceneKey, windowScene, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
 @end

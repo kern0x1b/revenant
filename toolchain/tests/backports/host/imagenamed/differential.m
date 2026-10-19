@@ -21,7 +21,7 @@ static UIImage *lookup(NSString *name, NSBundle *bundle, UITraitCollection *trai
 {
     if (!ours)
         return [UIImage imageNamed:name inBundle:bundle compatibleWithTraitCollection:traits];
-    return ((UIImage * (*)(id, SEL, id, id, id))objc_msgSend)([UIImage class], NSSelectorFromString(@"charonHost_imageNamed:inBundle:compatibleWithTraitCollection:"), name, bundle, traits);
+    return ((UIImage * (*)(id, SEL, id, id, id))objc_msgSend)([UIImage class], NSSelectorFromString(@"revenantHost_imageNamed:inBundle:compatibleWithTraitCollection:"), name, bundle, traits);
 }
 
 int main(void)

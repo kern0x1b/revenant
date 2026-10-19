@@ -1,27 +1,27 @@
 #import <UIKit/UIKit.h>
-#import "../CharonSayOnce.h"
+#import "../RevenantSayOnce.h"
 
-static inline void charon_menus_say_once(NSString *key, NSString *text)
+static inline void revenant_menus_say_once(NSString *key, NSString *text)
 {
-    charon_say_once_for(key, text);
+    revenant_say_once_for(key, text);
 }
 
-static inline NSString *charon_short_description(id object)
+static inline NSString *revenant_short_description(id object)
 {
     return object ? [NSString stringWithFormat:@"<%@: %p>", [object class], object] : @"(null)";
 }
 
-static inline UIWindow *charon_window_of(UIView *view)
+static inline UIWindow *revenant_window_of(UIView *view)
 {
     return [view isKindOfClass:[UIWindow class]] ? (UIWindow *)view : view.window;
 }
 
-NSString *charon_menu_attributes_text(NSUInteger attributes);
+NSString *revenant_menu_attributes_text(NSUInteger attributes);
 
-@interface UIMenuElement (CharonMenus)
-- (instancetype)initCharonWithTitle:(NSString *)title image:(UIImage *)image;
-- (void)charon_setTitle:(NSString *)title;
-- (void)charon_setImage:(UIImage *)image;
+@interface UIMenuElement (RevenantMenus)
+- (instancetype)initRevenantWithTitle:(NSString *)title image:(UIImage *)image;
+- (void)revenant_setTitle:(NSString *)title;
+- (void)revenant_setImage:(UIImage *)image;
 @end
 
 typedef NS_ENUM(NSInteger, UIActionRepeatBehavior) {
@@ -29,41 +29,41 @@ typedef NS_ENUM(NSInteger, UIActionRepeatBehavior) {
     UIActionRepeatBehaviorEnabled = 1,
 };
 
-@interface UIAction (CharonMenus)
-- (instancetype)initCharonWithTitle:(NSString *)title image:(UIImage *)image identifier:(NSString *)identifier handler:(UIActionHandler)handler;
-- (void)charon_performWithSender:(id)sender;
+@interface UIAction (RevenantMenus)
+- (instancetype)initRevenantWithTitle:(NSString *)title image:(UIImage *)image identifier:(NSString *)identifier handler:(UIActionHandler)handler;
+- (void)revenant_performWithSender:(id)sender;
 @end
 
-@interface UICommand (CharonMenus)
-- (instancetype)initCharonWithTitle:(NSString *)title image:(UIImage *)image action:(SEL)action propertyList:(id)propertyList alternates:(NSArray *)alternates;
-- (void)charon_performWithSender:(id)sender target:(id)target;
+@interface UICommand (RevenantMenus)
+- (instancetype)initRevenantWithTitle:(NSString *)title image:(UIImage *)image action:(SEL)action propertyList:(id)propertyList alternates:(NSArray *)alternates;
+- (void)revenant_performWithSender:(id)sender target:(id)target;
 @end
 
-@interface UIMenu (CharonMenus)
-- (instancetype)initCharonWithTitle:(NSString *)title image:(UIImage *)image identifier:(NSString *)identifier options:(UIMenuOptions)options
+@interface UIMenu (RevenantMenus)
+- (instancetype)initRevenantWithTitle:(NSString *)title image:(UIImage *)image identifier:(NSString *)identifier options:(UIMenuOptions)options
                             children:(NSArray<UIMenuElement *> *)children;
 @end
 
-@interface UIDeferredMenuElement (CharonMenus)
-- (void)charon_fulfillWithCompletion:(void (^)(NSArray<UIMenuElement *> *elements))completion;
+@interface UIDeferredMenuElement (RevenantMenus)
+- (void)revenant_fulfillWithCompletion:(void (^)(NSArray<UIMenuElement *> *elements))completion;
 @end
 
-@interface UIContextMenuConfiguration (CharonMenus)
-- (UIContextMenuActionProvider)charon_actionProvider;
+@interface UIContextMenuConfiguration (RevenantMenus)
+- (UIContextMenuActionProvider)revenant_actionProvider;
 @end
 
-@interface UIContextMenuInteraction (CharonMenus)
-- (UIMenu *)charon_visibleMenu;
-- (void)charon_replaceVisibleMenu:(UIMenu *)menu;
-- (void)charon_beginAtLocation:(CGPoint)location;
+@interface UIContextMenuInteraction (RevenantMenus)
+- (UIMenu *)revenant_visibleMenu;
+- (void)revenant_replaceVisibleMenu:(UIMenu *)menu;
+- (void)revenant_beginAtLocation:(CGPoint)location;
 @end
 
 
-@interface CharonControlProxy : NSObject
+@interface RevenantControlProxy : NSObject
 - (instancetype)initWithControl:(UIControl *)control action:(UIAction *)action;
-- (void)charon_fire:(id)sender;
+- (void)revenant_fire:(id)sender;
 @property (nonatomic, weak) UIControl *control;
 @property (nonatomic, strong) UIAction *action;
 @end
 
-void charon_show_menu(UIMenu *menu);
+void revenant_show_menu(UIMenu *menu);

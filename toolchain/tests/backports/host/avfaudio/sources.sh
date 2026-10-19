@@ -48,7 +48,7 @@ check "AUAudioUnitBus.supportedChannelLayoutTags reads kAudioUnitProperty_Suppor
 # method alone: a block copied into an ivar off the render thread is ordinary, a copy inside a
 # comment is a comment, and the break in -removeRenderObserver: is where a break belongs.
 # the comment inside the method explains the very rule this checks, so comments are stripped first
-render=$(sed -n '/- (OSStatus)charon_renderWithActionFlags:/,/^}/p' "$AVFAUDIO/AUAudioUnit9.m" | grep -vE '^[[:space:]]*(//|\*|/)')
+render=$(sed -n '/- (OSStatus)revenant_renderWithActionFlags:/,/^}/p' "$AVFAUDIO/AUAudioUnit9.m" | grep -vE '^[[:space:]]*(//|\*|/)')
 copy=$(printf '%s' "$render" | grep -c "copy\]" || true)
 check "the render method takes no copy of the observer list" \
       "$([ "$copy" -eq 0 ] && echo yes || echo no)"

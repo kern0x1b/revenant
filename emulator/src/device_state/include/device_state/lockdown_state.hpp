@@ -12,7 +12,7 @@
 
 #include "foundation/arm_cpu_model.hpp"
 
-namespace shade {
+namespace emulator {
 
 enum class LockdownActivation {
     Preserve,

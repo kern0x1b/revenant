@@ -9,7 +9,7 @@
 #include <cstddef>
 #include <cstdint>
 
-namespace shade::gles_abi {
+namespace emulator::gles_abi {
 
 inline constexpr std::uint32_t no_error = 0;
 inline constexpr std::uint32_t invalid_enum = 0x0500U;

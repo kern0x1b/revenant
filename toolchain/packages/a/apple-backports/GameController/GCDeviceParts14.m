@@ -1,4 +1,4 @@
-#import "CharonGC.h"
+#import "RevenantGC.h"
 
 #pragma clang diagnostic ignored "-Wobjc-missing-property-synthesis"
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
@@ -28,12 +28,12 @@
     return _batteryState;
 }
 
-- (void)charon_setBatteryLevel:(float)batteryLevel
+- (void)revenant_setBatteryLevel:(float)batteryLevel
 {
     _batteryLevel = fmaxf(0.0f, fminf(1.0f, batteryLevel));
 }
 
-- (void)charon_setBatteryState:(GCDeviceBatteryState)batteryState
+- (void)revenant_setBatteryState:(GCDeviceBatteryState)batteryState
 {
     _batteryState = batteryState;
 }

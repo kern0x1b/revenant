@@ -55,7 +55,7 @@ static NSDictionary *snapshot(MTLMeshRenderPipelineDescriptor *d)
 
 static void setEverything(MTLMeshRenderPipelineDescriptor *d)
 {
-    d.label = @"charon";
+    d.label = @"revenant";
     d.maxTotalThreadsPerObjectThreadgroup = 32;
     d.maxTotalThreadsPerMeshThreadgroup = 48;
     d.objectThreadgroupSizeIsMultipleOfThreadExecutionWidth = YES;
@@ -141,7 +141,7 @@ int main(void)
 {
     setvbuf(stdout, NULL, _IONBF, 0);
     @autoreleasepool {
-        Class portClass = NSClassFromString(@"CharonHostMTLMeshRenderPipelineDescriptor");
+        Class portClass = NSClassFromString(@"RevenantHostMTLMeshRenderPipelineDescriptor");
         check(portClass != nil, @"the port's class is built in this process");
         if (!portClass)
             return 1;

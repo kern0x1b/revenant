@@ -1,8 +1,8 @@
 #!/bin/sh
 # The apple-compat shims OSAtomicIncrement32, OSAtomicIncrement32Barrier, OSAtomicDecrement32, OSAtomicDecrement32Barrier,
 # ffsll and flsll against the HOST's own definitions, in one process: differential.c. The shims are compiled from
-# packages/a/apple-compat/src with CHARON_COMPAT_SYSTEM=0, so the port's own code answers, not a lookup of the system's, and
-# with each name renamed to charon_port_* so the two are callable together. A planted control then replaces the add with
+# packages/a/apple-compat/src with REVENANT_COMPAT_SYSTEM=0, so the port's own code answers, not a lookup of the system's, and
+# with each name renamed to revenant_port_* so the two are callable together. A planted control then replaces the add with
 # one that adds two, and the differential must fail on it: a differential that cannot fail proves nothing.
 # Usage: run.sh   (the build area is .agent-work/runs/compat-libc-host under the checkout)
 set -eu
@@ -15,8 +15,8 @@ mkdir -p "$build/planted"
 names="OSAtomicIncrement32 OSAtomicIncrement32Barrier OSAtomicDecrement32 OSAtomicDecrement32Barrier OSAtomicIncrement64 OSAtomicIncrement64Barrier OSAtomicDecrement64 OSAtomicDecrement64Barrier ffsll flsll timingsafe_bcmp strchrnul rpmatch strtonum strsignal_r timespec_get"
 
 compile() {
-    # compile SOURCE NAME OUTPUT: one shim, its name renamed to charon_port_NAME, the system lookup compiled out
-    xcrun clang -O2 -w -DCHARON_COMPAT_SYSTEM=0 -D"$2"=charon_port_"$2" -I"$src" -c "$1" -o "$3"
+    # compile SOURCE NAME OUTPUT: one shim, its name renamed to revenant_port_NAME, the system lookup compiled out
+    xcrun clang -O2 -w -DREVENANT_COMPAT_SYSTEM=0 -D"$2"=revenant_port_"$2" -I"$src" -c "$1" -o "$3"
 }
 
 objects=""

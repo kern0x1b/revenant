@@ -3,48 +3,48 @@
 typedef struct {
     const uint8_t *bytes;
     size_t length;
-} CharonSpan;
+} RevenantSpan;
 
-static uint32_t be32(CharonSpan span, size_t offset)
+static uint32_t be32(RevenantSpan span, size_t offset)
 {
     if (offset + 4 > span.length)
         return 0;
     return (uint32_t)span.bytes[offset] << 24 | (uint32_t)span.bytes[offset + 1] << 16 | (uint32_t)span.bytes[offset + 2] << 8 | span.bytes[offset + 3];
 }
 
-static uint16_t be16(CharonSpan span, size_t offset)
+static uint16_t be16(RevenantSpan span, size_t offset)
 {
     if (offset + 2 > span.length)
         return 0;
     return (uint16_t)(span.bytes[offset] << 8 | span.bytes[offset + 1]);
 }
 
-static uint32_t le32(CharonSpan span, size_t offset)
+static uint32_t le32(RevenantSpan span, size_t offset)
 {
     if (offset + 4 > span.length)
         return 0;
     return (uint32_t)span.bytes[offset] | (uint32_t)span.bytes[offset + 1] << 8 | (uint32_t)span.bytes[offset + 2] << 16 | (uint32_t)span.bytes[offset + 3] << 24;
 }
 
-static uint16_t le16(CharonSpan span, size_t offset)
+static uint16_t le16(RevenantSpan span, size_t offset)
 {
     if (offset + 2 > span.length)
         return 0;
     return (uint16_t)(span.bytes[offset] | span.bytes[offset + 1] << 8);
 }
 
-static const uint32_t CharonCatalogIdentifier = 17;
-static const uint32_t CharonCatalogIdiom = 15;
-static const uint32_t CharonCatalogScale = 12;
+static const uint32_t RevenantCatalogIdentifier = 17;
+static const uint32_t RevenantCatalogIdiom = 15;
+static const uint32_t RevenantCatalogScale = 12;
 
-@interface CharonAssetCatalog : NSObject
+@interface RevenantAssetCatalog : NSObject
 + (instancetype)catalogAtPath:(NSString *)path;
 - (NSData *)dataNamed:(NSString *)name typeIdentifier:(NSString **)type;
 @end
 
-@implementation CharonAssetCatalog {
+@implementation RevenantAssetCatalog {
     NSData *_file;
-    CharonSpan _span;
+    RevenantSpan _span;
     uint32_t _blockCount;
     NSMutableDictionary<NSString *, NSNumber *> *_variables;
     NSMutableArray<NSNumber *> *_keyFormat;
@@ -60,7 +60,7 @@ static const uint32_t CharonCatalogScale = 12;
     NSDictionary *attributes = [[NSFileManager defaultManager] attributesOfItemAtPath:path error:NULL];
     NSString *key = [NSString stringWithFormat:@"%@|%@|%@", path, attributes[NSFileModificationDate], attributes[NSFileSize]];
     @synchronized(catalogs) {
-        CharonAssetCatalog *catalog = catalogs[key];
+        RevenantAssetCatalog *catalog = catalogs[key];
         if (!catalog) {
             catalog = [[self alloc] initWithPath:path];
             if (catalog)
@@ -76,7 +76,7 @@ static const uint32_t CharonCatalogScale = 12;
     if (!self)
         return nil;
     _file = [NSData dataWithContentsOfFile:path options:NSDataReadingMappedIfSafe error:NULL];
-    _span = (CharonSpan){_file.bytes, _file.length};
+    _span = (RevenantSpan){_file.bytes, _file.length};
     if (_span.length < 32 || memcmp(_span.bytes, "BOMStore", 8))
         return nil;
     _blockCount = be32(_span, 12);
@@ -97,7 +97,7 @@ static const uint32_t CharonCatalogScale = 12;
         cursor += 5 + nameLength;
     }
     _keyFormat = [NSMutableArray array];
-    CharonSpan format = [self block:[_variables[@"KEYFORMAT"] unsignedIntValue]];
+    RevenantSpan format = [self block:[_variables[@"KEYFORMAT"] unsignedIntValue]];
     if (format.length >= 12 && !memcmp(format.bytes, "tmfk", 4)) {
         uint32_t attributes = le32(format, 8);
         for (uint32_t index = 0; index < attributes && 12 + 4 * (index + 1) <= format.length; index++)
@@ -106,24 +106,24 @@ static const uint32_t CharonCatalogScale = 12;
     return _variables[@"FACETKEYS"] && _variables[@"RENDITIONS"] ? self : nil;
 }
 
-- (CharonSpan)block:(uint32_t)index
+- (RevenantSpan)block:(uint32_t)index
 {
     size_t table = be32(_span, 16);
     size_t entries = be32(_span, table);
     if (index >= entries || table + 4 + 8 * (size_t)(index + 1) > _span.length)
-        return (CharonSpan){NULL, 0};
+        return (RevenantSpan){NULL, 0};
     size_t address = be32(_span, table + 4 + 8 * (size_t)index), length = be32(_span, table + 8 + 8 * (size_t)index);
     if (address > _span.length || length > _span.length - address)
-        return (CharonSpan){NULL, 0};
-    return (CharonSpan){_span.bytes + address, length};
+        return (RevenantSpan){NULL, 0};
+    return (RevenantSpan){_span.bytes + address, length};
 }
 
-- (void)enumerateTree:(uint32_t)variable usingBlock:(BOOL (^)(CharonSpan value, CharonSpan key))block
+- (void)enumerateTree:(uint32_t)variable usingBlock:(BOOL (^)(RevenantSpan value, RevenantSpan key))block
 {
-    CharonSpan tree = [self block:variable];
+    RevenantSpan tree = [self block:variable];
     if (tree.length < 20 || memcmp(tree.bytes, "tree", 4))
         return;
-    CharonSpan node = [self block:be32(tree, 8)];
+    RevenantSpan node = [self block:be32(tree, 8)];
     for (int depth = 0; depth < 32 && node.length >= 12 && !be16(node, 0); depth++) {
         if (be16(node, 2) == 0)
             return;
@@ -132,8 +132,8 @@ static const uint32_t CharonCatalogScale = 12;
     for (int hops = 0; hops < 1000000 && node.length >= 12 && be16(node, 0); hops++) {
         uint16_t count = be16(node, 2);
         for (uint16_t index = 0; index < count && 12 + 8 * (size_t)(index + 1) <= node.length; index++) {
-            CharonSpan value = [self block:be32(node, 12 + 8 * (size_t)index)];
-            CharonSpan key = [self block:be32(node, 16 + 8 * (size_t)index)];
+            RevenantSpan value = [self block:be32(node, 12 + 8 * (size_t)index)];
+            RevenantSpan key = [self block:be32(node, 16 + 8 * (size_t)index)];
             if (!block(value, key))
                 return;
         }
@@ -148,24 +148,24 @@ static const uint32_t CharonCatalogScale = 12;
 {
     NSData *wanted = [name dataUsingEncoding:NSUTF8StringEncoding];
     __block NSNumber *identifier = nil;
-    [self enumerateTree:[_variables[@"FACETKEYS"] unsignedIntValue] usingBlock:^BOOL(CharonSpan token, CharonSpan key) {
+    [self enumerateTree:[_variables[@"FACETKEYS"] unsignedIntValue] usingBlock:^BOOL(RevenantSpan token, RevenantSpan key) {
         if (key.length != wanted.length || memcmp(key.bytes, wanted.bytes, key.length))
             return YES;
         uint16_t attributes = le16(token, 4);
         for (uint16_t index = 0; index < attributes && 6 + 4 * (size_t)(index + 1) <= token.length; index++)
-            if (le16(token, 6 + 4 * (size_t)index) == CharonCatalogIdentifier)
+            if (le16(token, 6 + 4 * (size_t)index) == RevenantCatalogIdentifier)
                 identifier = @(le16(token, 8 + 4 * (size_t)index));
         return NO;
     }];
-    NSUInteger position = [_keyFormat indexOfObject:@(CharonCatalogIdentifier)];
+    NSUInteger position = [_keyFormat indexOfObject:@(RevenantCatalogIdentifier)];
     if (!identifier || position == NSNotFound)
         return nil;
-    NSUInteger idiomPosition = [_keyFormat indexOfObject:@(CharonCatalogIdiom)], scalePosition = [_keyFormat indexOfObject:@(CharonCatalogScale)];
+    NSUInteger idiomPosition = [_keyFormat indexOfObject:@(RevenantCatalogIdiom)], scalePosition = [_keyFormat indexOfObject:@(RevenantCatalogScale)];
     uint16_t idiom = UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad ? 2 : 1;
     uint16_t scale = (uint16_t)[UIScreen mainScreen].scale;
-    __block CharonSpan best = {NULL, 0};
+    __block RevenantSpan best = {NULL, 0};
     __block int bestScore = -1;
-    [self enumerateTree:[_variables[@"RENDITIONS"] unsignedIntValue] usingBlock:^BOOL(CharonSpan value, CharonSpan key) {
+    [self enumerateTree:[_variables[@"RENDITIONS"] unsignedIntValue] usingBlock:^BOOL(RevenantSpan value, RevenantSpan key) {
         if (key.length < 2 * (position + 1) || le16(key, 2 * position) != identifier.unsignedShortValue)
             return YES;
         int score = 1;
@@ -234,7 +234,7 @@ static const uint32_t CharonCatalogScale = 12;
     if (!name)
         [NSException raise:NSInternalInconsistencyException format:@"You cannot create an instance of NSDataAsset with a nil name."];
     NSString *path = [bundle pathForResource:@"Assets" ofType:@"car"];
-    CharonAssetCatalog *catalog = path ? [CharonAssetCatalog catalogAtPath:path] : nil;
+    RevenantAssetCatalog *catalog = path ? [RevenantAssetCatalog catalogAtPath:path] : nil;
     NSString *type = nil;
     NSData *data = name.length ? [catalog dataNamed:name typeIdentifier:&type] : nil;
     if (!data)

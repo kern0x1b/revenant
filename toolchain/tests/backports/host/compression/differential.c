@@ -4,13 +4,13 @@
 #include <stdlib.h>
 #include <string.h>
 
-size_t charon_host_compression_encode_buffer(uint8_t *, size_t, const uint8_t *, size_t, void *, compression_algorithm);
-size_t charon_host_compression_decode_buffer(uint8_t *, size_t, const uint8_t *, size_t, void *, compression_algorithm);
-size_t charon_host_compression_encode_scratch_buffer_size(compression_algorithm);
-size_t charon_host_compression_decode_scratch_buffer_size(compression_algorithm);
-compression_status charon_host_compression_stream_init(compression_stream *, compression_stream_operation, compression_algorithm);
-compression_status charon_host_compression_stream_process(compression_stream *, int);
-compression_status charon_host_compression_stream_destroy(compression_stream *);
+size_t revenant_host_compression_encode_buffer(uint8_t *, size_t, const uint8_t *, size_t, void *, compression_algorithm);
+size_t revenant_host_compression_decode_buffer(uint8_t *, size_t, const uint8_t *, size_t, void *, compression_algorithm);
+size_t revenant_host_compression_encode_scratch_buffer_size(compression_algorithm);
+size_t revenant_host_compression_decode_scratch_buffer_size(compression_algorithm);
+compression_status revenant_host_compression_stream_init(compression_stream *, compression_stream_operation, compression_algorithm);
+compression_status revenant_host_compression_stream_process(compression_stream *, int);
+compression_status revenant_host_compression_stream_destroy(compression_stream *);
 
 static const compression_algorithm kAlgorithms[] = {COMPRESSION_LZFSE, COMPRESSION_ZLIB, COMPRESSION_LZ4, COMPRESSION_LZ4_RAW, COMPRESSION_LZMA};
 static const char *kNames[] = {"LZFSE", "ZLIB", "LZ4", "LZ4_RAW", "LZMA"};
@@ -22,7 +22,7 @@ static int equal_bytes[5];
 static unsigned long long state;
 
 enum { kKnownZLIBTruncation, kKnownRows };
-static const char *kKnownNames[kKnownRows] = {"charon: ZLIB truncated streams"};
+static const char *kKnownNames[kKnownRows] = {"revenant: ZLIB truncated streams"};
 static int known[kKnownRows];
 
 static unsigned next_random(void)
@@ -81,8 +81,8 @@ typedef struct {
     compression_status (*destroy)(compression_stream *);
 } stream_api;
 static const stream_api kHostStream = {compression_stream_init, compression_stream_process, compression_stream_destroy};
-static const stream_api kPortStream = {charon_host_compression_stream_init, charon_host_compression_stream_process,
-                                       charon_host_compression_stream_destroy};
+static const stream_api kPortStream = {revenant_host_compression_stream_init, revenant_host_compression_stream_process,
+                                       revenant_host_compression_stream_destroy};
 
 #define NO_OUTPUT ((size_t)-1)
 
@@ -221,7 +221,7 @@ static void stream_all(uint8_t *input, uint8_t *host_out, uint8_t *port_out, uin
     }
     compression_stream r;
     check(compression_stream_init(&r, COMPRESSION_STREAM_ENCODE, COMPRESSION_LZ4_RAW) == COMPRESSION_STATUS_ERROR
-          && charon_host_compression_stream_init(&r, COMPRESSION_STREAM_ENCODE, COMPRESSION_LZ4_RAW) == COMPRESSION_STATUS_ERROR,
+          && revenant_host_compression_stream_init(&r, COMPRESSION_STREAM_ENCODE, COMPRESSION_LZ4_RAW) == COMPRESSION_STATUS_ERROR,
           "LZ4_RAW stream init: the port refuses what the host refuses", 0, 0);
 }
 
@@ -270,7 +270,7 @@ static void lz4_short(const uint8_t *block, size_t len, size_t n, size_t dst, ui
                       const char *what)
 {
     size_t host_n = compression_decode_buffer(back, dst, block, len, host_work, COMPRESSION_LZ4_RAW);
-    size_t port_n = charon_host_compression_decode_buffer(back, dst, block, len, port_work, COMPRESSION_LZ4_RAW);
+    size_t port_n = revenant_host_compression_decode_buffer(back, dst, block, len, port_work, COMPRESSION_LZ4_RAW);
     snprintf(where, sizeof where, "LZ4_RAW %s, n=%zu dst=%zu", what, n, dst);
     check(port_n == host_n, "a short decode destination of a cut or corrupt block", (int)port_n, (int)host_n);
 }
@@ -329,8 +329,8 @@ int main(int argc, char **argv)
     uint8_t *input = malloc(300000), *packed = malloc(cap), *ours = malloc(cap), *back = malloc(cap), *nulls = malloc(cap);
     for (size_t a = 0; a < sizeof kAlgorithms / sizeof *kAlgorithms; a++) {
         compression_algorithm algorithm = kAlgorithms[a];
-        size_t scratch_e = charon_host_compression_encode_scratch_buffer_size(algorithm);
-        size_t scratch_d = charon_host_compression_decode_scratch_buffer_size(algorithm);
+        size_t scratch_e = revenant_host_compression_encode_scratch_buffer_size(algorithm);
+        size_t scratch_d = revenant_host_compression_decode_scratch_buffer_size(algorithm);
         size_t host_e = compression_encode_scratch_buffer_size(algorithm);
         size_t host_d = compression_decode_scratch_buffer_size(algorithm);
         printf("%s scratch encode host=%zu port=%zu decode host=%zu port=%zu\n", kNames[a], host_e, scratch_e, host_d, scratch_d);
@@ -342,12 +342,12 @@ int main(int argc, char **argv)
                 snprintf(where, sizeof where, "%s n=%zu content=%d", kNames[a], n, content);
                 fill(input, n, content);
                 size_t host_n = compression_encode_buffer(packed, cap, input, n, host_work_e, algorithm);
-                size_t port_n = charon_host_compression_encode_buffer(ours, cap, input, n, work_e, algorithm);
+                size_t port_n = revenant_host_compression_encode_buffer(ours, cap, input, n, work_e, algorithm);
                 encoded_cases++;
                 if (host_n) {
                     check(port_n != 0, "port encodes what the host encodes", (int)port_n, (int)host_n);
                     if (port_n) {
-                        size_t decoded = charon_host_compression_decode_buffer(back, cap, packed, host_n, work_d, algorithm);
+                        size_t decoded = revenant_host_compression_decode_buffer(back, cap, packed, host_n, work_d, algorithm);
                         check(decoded == n && (n == 0 || memcmp(back, input, n) == 0), "port decodes the host's output", (int)decoded, (int)n);
                         size_t host_back = compression_decode_buffer(back, cap, ours, port_n, host_work_d, algorithm);
                         check(host_back == n && (n == 0 || memcmp(back, input, n) == 0), "host decodes the port's output", (int)host_back, (int)n);
@@ -360,20 +360,20 @@ int main(int argc, char **argv)
                     check(port_n == host_n && memcmp(ours, packed, host_n) == 0, "LZMA encodes the host's bytes", (int)port_n, (int)host_n);
                 }
                 size_t null_host = compression_encode_buffer(nulls, cap, input, n, NULL, algorithm);
-                size_t null_port = charon_host_compression_encode_buffer(ours, cap, input, n, NULL, algorithm);
+                size_t null_port = revenant_host_compression_encode_buffer(ours, cap, input, n, NULL, algorithm);
                 check((null_port != 0) == (null_host != 0), "NULL scratch: port encodes when the host does", (int)null_port, (int)null_host);
                 if (null_port) {
-                    size_t null_back = charon_host_compression_decode_buffer(back, cap, ours, null_port, NULL, algorithm);
+                    size_t null_back = revenant_host_compression_decode_buffer(back, cap, ours, null_port, NULL, algorithm);
                     check(null_back == n && (n == 0 || memcmp(back, input, n) == 0), "NULL scratch: port decodes its output", (int)null_back, (int)n);
                 }
                 if (host_n) {
-                    size_t null_back = charon_host_compression_decode_buffer(back, cap, packed, host_n, NULL, algorithm);
+                    size_t null_back = revenant_host_compression_decode_buffer(back, cap, packed, host_n, NULL, algorithm);
                     check(null_back == n && (n == 0 || memcmp(back, input, n) == 0), "NULL scratch: port decodes the host's output", (int)null_back, (int)n);
                 }
                 if (port_n) {
-                    size_t fit = charon_host_compression_encode_buffer(ours, port_n, input, n, work_e, algorithm);
+                    size_t fit = revenant_host_compression_encode_buffer(ours, port_n, input, n, work_e, algorithm);
                     check(fit == port_n, "port encode fits its own size", (int)fit, (int)port_n);
-                    size_t short_port = charon_host_compression_encode_buffer(ours, port_n - 1, input, n, work_e, algorithm);
+                    size_t short_port = revenant_host_compression_encode_buffer(ours, port_n - 1, input, n, work_e, algorithm);
                     check(short_port == 0 || short_port < port_n && decodes(short_port, ours, n, input, back, cap, host_work_d, algorithm),
                           "port encode one byte short", (int)short_port, 0);
                 }
@@ -385,7 +385,7 @@ int main(int argc, char **argv)
                     for (size_t k = 0; k < host_n; k += step) {
                         snprintf(where, sizeof where, "%s n=%zu content=%d truncated=%zu", kNames[a], n, content, k);
                         size_t trunc_host = compression_decode_buffer(back, cap, packed, k, host_work_d, algorithm);
-                        size_t trunc_port = charon_host_compression_decode_buffer(back, cap, packed, k, work_d, algorithm);
+                        size_t trunc_port = revenant_host_compression_decode_buffer(back, cap, packed, k, work_d, algorithm);
                         check_known(trunc_port == trunc_host, kKnownZLIBTruncation,
                                     algorithm == COMPRESSION_ZLIB && trunc_port == 0 && trunc_host != 0,
                                     "a truncated stream", (int)trunc_port, (int)trunc_host);
@@ -396,7 +396,7 @@ int main(int argc, char **argv)
                     size_t dsts[] = {0, 1, n / 3, n / 2, n - 1};
                     for (size_t d = 0; d < sizeof dsts / sizeof *dsts; d++) {
                         size_t small_host = compression_decode_buffer(back, dsts[d], packed, host_n, host_work_d, algorithm);
-                        size_t small_port = charon_host_compression_decode_buffer(back, dsts[d], packed, host_n, work_d, algorithm);
+                        size_t small_port = revenant_host_compression_decode_buffer(back, dsts[d], packed, host_n, work_d, algorithm);
                         check(small_port == small_host, "a short decode destination", (int)small_port, (int)small_host);
                     }
                 }
@@ -408,10 +408,10 @@ int main(int argc, char **argv)
         uint8_t junk[64];
         for (int i = 0; i < 64; i++) junk[i] = (uint8_t)next_random();
         size_t junk_host = compression_decode_buffer(back, cap, junk, sizeof junk, host_work_d, algorithm);
-        size_t junk_port = charon_host_compression_decode_buffer(back, cap, junk, sizeof junk, work_d, algorithm);
+        size_t junk_port = revenant_host_compression_decode_buffer(back, cap, junk, sizeof junk, work_d, algorithm);
         check(junk_port == junk_host, "corrupt input", (int)junk_port, (int)junk_host);
         size_t unknown_host = compression_encode_buffer(packed, cap, input, 4, host_work_e, (compression_algorithm)0xFFF);
-        size_t unknown_port = charon_host_compression_encode_buffer(ours, cap, input, 4, work_e, (compression_algorithm)0xFFF);
+        size_t unknown_port = revenant_host_compression_encode_buffer(ours, cap, input, 4, work_e, (compression_algorithm)0xFFF);
         check(unknown_host == 0 && unknown_port == 0, "unknown algorithm", (int)unknown_port, (int)unknown_host);
         free(work_e); free(work_d); free(host_work_e); free(host_work_d);
     }

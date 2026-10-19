@@ -3,24 +3,24 @@
 
 #pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
 
-static const char CharonTablePrefetchDataSourceKey;
-static const char CharonTablePrefetchAskedKey;
-static const NSInteger CharonTablePrefetchDistance = 3;
+static const char RevenantTablePrefetchDataSourceKey;
+static const char RevenantTablePrefetchAskedKey;
+static const NSInteger RevenantTablePrefetchDistance = 3;
 
-@interface UITableView (CharonPrefetching10)
-- (void)charon_prefetchRows;
+@interface UITableView (RevenantPrefetching10)
+- (void)revenant_prefetchRows;
 @end
 
-@interface UITableView (CharonEstimatedHeights7)
-- (CGFloat)charon_estimatedHeightForRowAtIndexPath:(NSIndexPath *)indexPath;
-- (CGFloat)charon_estimatedHeightForHeaderInSection:(NSInteger)section;
-- (CGFloat)charon_estimatedHeightForFooterInSection:(NSInteger)section;
+@interface UITableView (RevenantEstimatedHeights7)
+- (CGFloat)revenant_estimatedHeightForRowAtIndexPath:(NSIndexPath *)indexPath;
+- (CGFloat)revenant_estimatedHeightForHeaderInSection:(NSInteger)section;
+- (CGFloat)revenant_estimatedHeightForFooterInSection:(NSInteger)section;
 @end
 
-@interface CharonTablePrefetchInstaller : NSObject
+@interface RevenantTablePrefetchInstaller : NSObject
 @end
 
-@implementation CharonTablePrefetchInstaller
+@implementation RevenantTablePrefetchInstaller
 
 + (void)load
 {
@@ -32,34 +32,34 @@ static const NSInteger CharonTablePrefetchDistance = 3;
         return;
     class_replaceMethod(table, @selector(layoutSubviews), imp_implementationWithBlock(^(UITableView *self_) {
         ((void (*)(id, SEL))original)(self_, @selector(layoutSubviews));
-        [self_ charon_prefetchRows];
-    }), "ccharon_layoutSubviews");
+        [self_ revenant_prefetchRows];
+    }), "crevenant_layoutSubviews");
 }
 
 @end
 
-@implementation UITableView (CharonPrefetching10)
+@implementation UITableView (RevenantPrefetching10)
 
 - (id<UITableViewDataSourcePrefetching>)prefetchDataSource
 {
-    return objc_getAssociatedObject(self, &CharonTablePrefetchDataSourceKey);
+    return objc_getAssociatedObject(self, &RevenantTablePrefetchDataSourceKey);
 }
 
 - (void)setPrefetchDataSource:(id<UITableViewDataSourcePrefetching>)prefetchDataSource
 {
-    objc_setAssociatedObject(self, &CharonTablePrefetchDataSourceKey, prefetchDataSource, OBJC_ASSOCIATION_ASSIGN);
+    objc_setAssociatedObject(self, &RevenantTablePrefetchDataSourceKey, prefetchDataSource, OBJC_ASSOCIATION_ASSIGN);
 }
 
-- (NSArray<NSIndexPath *> *)charon_prefetchRowCandidates
+- (NSArray<NSIndexPath *> *)revenant_prefetchRowCandidates
 {
     NSArray<NSIndexPath *> *visible = self.indexPathsForVisibleRows;
     if (!visible.count)
         return @[];
-    CGFloat rowHeight = [self charon_estimatedHeightForRowAtIndexPath:visible.firstObject];
+    CGFloat rowHeight = [self revenant_estimatedHeightForRowAtIndexPath:visible.firstObject];
     if (rowHeight <= 0)
         rowHeight = self.rowHeight;
     CGFloat ahead = self.bounds.size.height;
-    NSInteger reach = rowHeight > 0 ? (NSInteger)ceil(ahead / rowHeight) : CharonTablePrefetchDistance;
+    NSInteger reach = rowHeight > 0 ? (NSInteger)ceil(ahead / rowHeight) : RevenantTablePrefetchDistance;
     reach = MAX(1, MIN(reach, 20));
     NSMutableArray<NSIndexPath *> *candidates = [NSMutableArray array];
     NSMutableSet<NSNumber *> *seen = [NSMutableSet set];
@@ -90,17 +90,17 @@ static const NSInteger CharonTablePrefetchDistance = 3;
     }];
 }
 
-- (void)charon_prefetchRows
+- (void)revenant_prefetchRows
 {
     id<UITableViewDataSourcePrefetching> source = self.prefetchDataSource;
     if (!source)
         return;
-    NSArray<NSIndexPath *> *candidates = [self charon_prefetchRowCandidates];
+    NSArray<NSIndexPath *> *candidates = [self revenant_prefetchRowCandidates];
     NSMutableSet<NSIndexPath *> *wants = [NSMutableSet setWithArray:candidates];
-    NSMutableSet<NSIndexPath *> *asked = objc_getAssociatedObject(self, &CharonTablePrefetchAskedKey);
+    NSMutableSet<NSIndexPath *> *asked = objc_getAssociatedObject(self, &RevenantTablePrefetchAskedKey);
     if (!asked) {
         asked = [NSMutableSet set];
-        objc_setAssociatedObject(self, &CharonTablePrefetchAskedKey, asked, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+        objc_setAssociatedObject(self, &RevenantTablePrefetchAskedKey, asked, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     }
     NSArray<NSIndexPath *> *cancelled = [asked.allObjects filteredArrayUsingPredicate:
                                          [NSPredicate predicateWithBlock:^BOOL(NSIndexPath *path, NSDictionary *bindings) {

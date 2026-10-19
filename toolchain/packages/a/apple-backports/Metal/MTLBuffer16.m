@@ -1,6 +1,6 @@
-#import "CharonMetal.h"
+#import "RevenantMetal.h"
 
-@implementation CharonMetalBuffer (Address16)
+@implementation RevenantMetalBuffer (Address16)
 
 - (uint64_t)gpuAddress
 {

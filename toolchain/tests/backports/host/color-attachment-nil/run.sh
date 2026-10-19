@@ -3,7 +3,7 @@
 # object in one process: a nil store resets the slot in place, a stored attachment is a copy, and an index of 8 or
 # more asserts on the store and on the read (cases.m).
 #
-# The port's file is built for macOS beside Apple's Metal, with every class it defines renamed CharonHost<Name>, so
+# The port's file is built for macOS beside Apple's Metal, with every class it defines renamed RevenantHost<Name>, so
 # Apple's classes and the port's coexist.
 #
 # A MUTANT runs last: a nil store allocates a new attachment instead of resetting the slot, in a copy of the port
@@ -27,7 +27,7 @@ xcrun clang $target -fobjc-arc -fvisibility=hidden $quiet $gl -I"$PORT" -c "$POR
 xcrun nm -gU "$BUILD/plain/$source.o" | awk 'NF == 3 {print $3}' | grep -E '^_OBJC_CLASS_\$_' | sed -e 's/^_OBJC_CLASS_\$_//' >> "$BUILD/classes.txt"
 renames=""
 for name in $(sort -u "$BUILD/classes.txt"); do
-    renames="$renames -D$name=CharonHost$name"
+    renames="$renames -D$name=RevenantHost$name"
 done
 
 xcrun clang $target -fobjc-arc -fvisibility=hidden $quiet $gl $renames -I"$PORT" -c "$PORT/$source" -o "$BUILD/renamed/$source.o"
@@ -37,7 +37,7 @@ xcrun clang $target -fobjc-arc $quiet -I"$here" "$here/cases.m" "$BUILD/renamed/
 "$BUILD/cases"
 
 echo "the mutant: a nil store allocates a new attachment instead of resetting the slot"
-sed 's/CharonResetColorAttachment(_items\[attachmentIndex\]);/_items[attachmentIndex] = [[MTLRenderPipelineColorAttachmentDescriptor alloc] init];/' \
+sed 's/RevenantResetColorAttachment(_items\[attachmentIndex\]);/_items[attachmentIndex] = [[MTLRenderPipelineColorAttachmentDescriptor alloc] init];/' \
     "$PORT/$source" > "$BUILD/mutant-src/$source"
 if cmp -s "$PORT/$source" "$BUILD/mutant-src/$source"; then
     echo "RUN FAILED: the mutation did not change the source" >&2

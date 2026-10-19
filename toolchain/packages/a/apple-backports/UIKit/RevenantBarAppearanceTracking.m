@@ -1,22 +1,22 @@
-#import "CharonBarAppearance.h"
+#import "RevenantBarAppearance.h"
 #import <dlfcn.h>
 #import <objc/message.h>
 #import <objc/runtime.h>
 
-static const void *CharonWatcherKey = &CharonWatcherKey;
-static const void *CharonSignatureKey = &CharonSignatureKey;
+static const void *RevenantWatcherKey = &RevenantWatcherKey;
+static const void *RevenantSignatureKey = &RevenantSignatureKey;
 
-id charon_first_appearance(id first, id second, id third, id fourth, id fifth, id sixth)
+id revenant_first_appearance(id first, id second, id third, id fourth, id fifth, id sixth)
 {
     return first ?: second ?: third ?: fourth ?: fifth ?: sixth;
 }
 
-void charon_appearance_store_observed(id owner, const void *key, id appearance, SEL changed)
+void revenant_appearance_store_observed(id owner, const void *key, id appearance, SEL changed)
 {
     id stored = [appearance copy];
     if (stored) {
         __weak id weak = owner;
-        [stored charon_setChangeObserver:^{
+        [stored revenant_setChangeObserver:^{
             id strong = weak;
             if (strong)
                 ((void (*)(id, SEL))objc_msgSend)(strong, changed);
@@ -25,7 +25,7 @@ void charon_appearance_store_observed(id owner, const void *key, id appearance, 
     objc_setAssociatedObject(owner, key, stored, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
-static BOOL charon_scroll_at_edge(UIScrollView *scroll, BOOL bottom)
+static BOOL revenant_scroll_at_edge(UIScrollView *scroll, BOOL bottom)
 {
     UIEdgeInsets inset = [scroll respondsToSelector:@selector(adjustedContentInset)] ? [scroll adjustedContentInset] : scroll.contentInset;
     if (!bottom)
@@ -33,7 +33,7 @@ static BOOL charon_scroll_at_edge(UIScrollView *scroll, BOOL bottom)
     return scroll.contentOffset.y + scroll.bounds.size.height - inset.bottom >= scroll.contentSize.height - 0.5;
 }
 
-static UIScrollView *charon_find_scroll_view(UIView *root)
+static UIScrollView *revenant_find_scroll_view(UIView *root)
 {
     NSMutableArray *queue = [NSMutableArray arrayWithObject:root];
     for (NSUInteger index = 0; index < queue.count && index < 200; index++) {
@@ -47,7 +47,7 @@ static UIScrollView *charon_find_scroll_view(UIView *root)
     return nil;
 }
 
-UIScrollView *charon_bar_scroll_view(UIView *bar)
+UIScrollView *revenant_bar_scroll_view(UIView *bar)
 {
     UIResponder *responder = bar.nextResponder;
     while (responder && ![responder isKindOfClass:[UIViewController class]])
@@ -61,17 +61,17 @@ UIScrollView *charon_bar_scroll_view(UIView *bar)
         else
             break;
     }
-    return controller && controller.isViewLoaded ? charon_find_scroll_view(controller.view) : nil;
+    return controller && controller.isViewLoaded ? revenant_find_scroll_view(controller.view) : nil;
 }
 
-@interface CharonScrollWatcher : NSObject
+@interface RevenantScrollWatcher : NSObject
 - (instancetype)initWithBar:(UIView *)bar scrollView:(UIScrollView *)scroll bottom:(BOOL)bottom;
 - (UIScrollView *)scrollView;
 - (BOOL)bottom;
 - (void)stop;
 @end
 
-@implementation CharonScrollWatcher {
+@implementation RevenantScrollWatcher {
     __weak UIView *_bar;
     __weak UIScrollView *_scroll;
     BOOL _bottom;
@@ -85,7 +85,7 @@ UIScrollView *charon_bar_scroll_view(UIView *bar)
         _bar = bar;
         _scroll = scroll;
         _bottom = bottom;
-        _edge = charon_scroll_at_edge(scroll, bottom);
+        _edge = revenant_scroll_at_edge(scroll, bottom);
         for (NSString *path in @[@"contentOffset", @"contentSize", @"contentInset"])
             [scroll addObserver:self forKeyPath:path options:0 context:(__bridge void *)self];
         _running = YES;
@@ -117,13 +117,13 @@ UIScrollView *charon_bar_scroll_view(UIView *bar)
 {
     if (context != (__bridge void *)self)
         return;
-    BOOL edge = charon_scroll_at_edge(object, _bottom);
+    BOOL edge = revenant_scroll_at_edge(object, _bottom);
     if (edge == _edge)
         return;
     _edge = edge;
     UIView *bar = _bar;
-    if ([bar respondsToSelector:@selector(charon_refreshForced:)])
-        [(id)bar charon_refreshForced:NO];
+    if ([bar respondsToSelector:@selector(revenant_refreshForced:)])
+        [(id)bar revenant_refreshForced:NO];
 }
 
 - (void)dealloc
@@ -133,30 +133,30 @@ UIScrollView *charon_bar_scroll_view(UIView *bar)
 
 @end
 
-BOOL charon_bar_at_edge(UIView *bar, BOOL bottom)
+BOOL revenant_bar_at_edge(UIView *bar, BOOL bottom)
 {
-    UIScrollView *scroll = charon_bar_scroll_view(bar);
-    CharonScrollWatcher *watcher = objc_getAssociatedObject(bar, CharonWatcherKey);
+    UIScrollView *scroll = revenant_bar_scroll_view(bar);
+    RevenantScrollWatcher *watcher = objc_getAssociatedObject(bar, RevenantWatcherKey);
     if (watcher && (watcher.scrollView != scroll || watcher.bottom != bottom)) {
         [watcher stop];
         watcher = nil;
-        objc_setAssociatedObject(bar, CharonWatcherKey, nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+        objc_setAssociatedObject(bar, RevenantWatcherKey, nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     }
     if (scroll && !watcher)
-        objc_setAssociatedObject(bar, CharonWatcherKey, [[CharonScrollWatcher alloc] initWithBar:bar scrollView:scroll bottom:bottom], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-    return scroll ? charon_scroll_at_edge(scroll, bottom) : YES;
+        objc_setAssociatedObject(bar, RevenantWatcherKey, [[RevenantScrollWatcher alloc] initWithBar:bar scrollView:scroll bottom:bottom], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    return scroll ? revenant_scroll_at_edge(scroll, bottom) : YES;
 }
 
-BOOL charon_bar_needs_refresh(UIView *bar, NSString *signature)
+BOOL revenant_bar_needs_refresh(UIView *bar, NSString *signature)
 {
-    NSString *last = objc_getAssociatedObject(bar, CharonSignatureKey);
+    NSString *last = objc_getAssociatedObject(bar, RevenantSignatureKey);
     if ([last isEqual:signature])
         return NO;
-    objc_setAssociatedObject(bar, CharonSignatureKey, signature, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(bar, RevenantSignatureKey, signature, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     return YES;
 }
 
-static NSHashTable *charon_tracked(void)
+static NSHashTable *revenant_tracked(void)
 {
     static NSHashTable *table;
     static dispatch_once_t once;
@@ -166,44 +166,44 @@ static NSHashTable *charon_tracked(void)
     return table;
 }
 
-void charon_track_bar(UIView *bar)
+void revenant_track_bar(UIView *bar)
 {
-    @synchronized (charon_tracked()) {
-        [charon_tracked() addObject:bar];
+    @synchronized (revenant_tracked()) {
+        [revenant_tracked() addObject:bar];
     }
 }
 
-void charon_refresh_bars_showing(id item)
+void revenant_refresh_bars_showing(id item)
 {
     NSArray *bars;
-    @synchronized (charon_tracked()) {
-        bars = charon_tracked().allObjects;
+    @synchronized (revenant_tracked()) {
+        bars = revenant_tracked().allObjects;
     }
     for (UIView *bar in bars) {
         BOOL shows = ([bar isKindOfClass:[UINavigationBar class]] && [(UINavigationBar *)bar topItem] == item) || ([bar isKindOfClass:[UITabBar class]] && [(UITabBar *)bar selectedItem] == item);
-        if (shows && [bar respondsToSelector:@selector(charon_refreshForced:)])
-            [(id)bar charon_refreshForced:YES];
+        if (shows && [bar respondsToSelector:@selector(revenant_refreshForced:)])
+            [(id)bar revenant_refreshForced:YES];
     }
 }
 
-static void charon_bar_changed(UIView *bar, BOOL later)
+static void revenant_bar_changed(UIView *bar, BOOL later)
 {
-    charon_track_bar(bar);
-    [(id)bar charon_refreshForced:NO];
+    revenant_track_bar(bar);
+    [(id)bar revenant_refreshForced:NO];
     if (!later)
         return;
     __weak UIView *weak = bar;
     dispatch_async(dispatch_get_main_queue(), ^{
         UIView *strong = weak;
         if (strong)
-            [(id)strong charon_refreshForced:NO];
+            [(id)strong revenant_refreshForced:NO];
     });
 }
 
-@interface CharonBarAppearanceInstaller : NSObject
+@interface RevenantBarAppearanceInstaller : NSObject
 @end
 
-@implementation CharonBarAppearanceInstaller
+@implementation RevenantBarAppearanceInstaller
 
 + (void)load
 {
@@ -213,68 +213,68 @@ static void charon_bar_changed(UIView *bar, BOOL later)
     [self hook:[UINavigationBar class] selector:@selector(layoutSubviews) make:^IMP(IMP original, SEL selector) {
         return imp_implementationWithBlock(^(UIView *bar) {
             ((void (*)(id, SEL))original)(bar, selector);
-            charon_bar_changed(bar, NO);
+            revenant_bar_changed(bar, NO);
         });
     }];
     [self hook:[UINavigationBar class] selector:@selector(didMoveToWindow) make:^IMP(IMP original, SEL selector) {
         return imp_implementationWithBlock(^(UIView *bar) {
             ((void (*)(id, SEL))original)(bar, selector);
-            charon_bar_changed(bar, YES);
+            revenant_bar_changed(bar, YES);
         });
     }];
     [self hook:[UINavigationBar class] selector:@selector(pushNavigationItem:animated:) make:^IMP(IMP original, SEL selector) {
         return imp_implementationWithBlock(^(UIView *bar, id item, BOOL animated) {
             ((void (*)(id, SEL, id, BOOL))original)(bar, selector, item, animated);
-            charon_bar_changed(bar, YES);
+            revenant_bar_changed(bar, YES);
         });
     }];
     [self hook:[UINavigationBar class] selector:@selector(popNavigationItemAnimated:) make:^IMP(IMP original, SEL selector) {
         return imp_implementationWithBlock(^id(UIView *bar, BOOL animated) {
             id popped = ((id (*)(id, SEL, BOOL))original)(bar, selector, animated);
-            charon_bar_changed(bar, YES);
+            revenant_bar_changed(bar, YES);
             return popped;
         });
     }];
     [self hook:[UINavigationBar class] selector:@selector(setItems:animated:) make:^IMP(IMP original, SEL selector) {
         return imp_implementationWithBlock(^(UIView *bar, NSArray *items, BOOL animated) {
             ((void (*)(id, SEL, id, BOOL))original)(bar, selector, items, animated);
-            charon_bar_changed(bar, YES);
+            revenant_bar_changed(bar, YES);
         });
     }];
     [self hook:[UITabBar class] selector:@selector(layoutSubviews) make:^IMP(IMP original, SEL selector) {
         return imp_implementationWithBlock(^(UIView *bar) {
             ((void (*)(id, SEL))original)(bar, selector);
-            charon_bar_changed(bar, NO);
+            revenant_bar_changed(bar, NO);
         });
     }];
     [self hook:[UITabBar class] selector:@selector(didMoveToWindow) make:^IMP(IMP original, SEL selector) {
         return imp_implementationWithBlock(^(UIView *bar) {
             ((void (*)(id, SEL))original)(bar, selector);
-            charon_bar_changed(bar, YES);
+            revenant_bar_changed(bar, YES);
         });
     }];
     [self hook:[UITabBar class] selector:@selector(setSelectedItem:) make:^IMP(IMP original, SEL selector) {
         return imp_implementationWithBlock(^(UIView *bar, id item) {
             ((void (*)(id, SEL, id))original)(bar, selector, item);
-            charon_bar_changed(bar, YES);
+            revenant_bar_changed(bar, YES);
         });
     }];
     [self hook:[UITabBar class] selector:@selector(setItems:animated:) make:^IMP(IMP original, SEL selector) {
         return imp_implementationWithBlock(^(UIView *bar, NSArray *items, BOOL animated) {
             ((void (*)(id, SEL, id, BOOL))original)(bar, selector, items, animated);
-            charon_bar_changed(bar, YES);
+            revenant_bar_changed(bar, YES);
         });
     }];
     [self hook:[UIToolbar class] selector:@selector(layoutSubviews) make:^IMP(IMP original, SEL selector) {
         return imp_implementationWithBlock(^(UIView *bar) {
             ((void (*)(id, SEL))original)(bar, selector);
-            charon_bar_changed(bar, NO);
+            revenant_bar_changed(bar, NO);
         });
     }];
     [self hook:[UIToolbar class] selector:@selector(didMoveToWindow) make:^IMP(IMP original, SEL selector) {
         return imp_implementationWithBlock(^(UIView *bar) {
             ((void (*)(id, SEL))original)(bar, selector);
-            charon_bar_changed(bar, YES);
+            revenant_bar_changed(bar, YES);
         });
     }];
 }

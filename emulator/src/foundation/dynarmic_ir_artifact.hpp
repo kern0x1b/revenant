@@ -14,7 +14,7 @@
 
 #include <dynarmic/ir/basic_block.h>
 
-namespace shade {
+namespace emulator {
 
 [[nodiscard]] std::optional<std::vector<std::byte>> serialize_dynarmic_ir(
     const Dynarmic::IR::Block& block);

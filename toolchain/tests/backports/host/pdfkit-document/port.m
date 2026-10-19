@@ -1,6 +1,6 @@
 #import <Foundation/Foundation.h>
 #import <CoreGraphics/CoreGraphics.h>
-#import "CharonPDFKit.h"
+#import "RevenantPDFKit.h"
 #import <objc/runtime.h>
 #import <dlfcn.h>
 #include <stdio.h>
@@ -163,7 +163,7 @@ static void printOutlineWalk(const char *name, PDFOutline *outline, int depth)
 }
 
 
-static BOOL charonFixtureNamesItsWidgets(const char *name)
+static BOOL revenantFixtureNamesItsWidgets(const char *name)
 {
     static const char *const named[] = {
         "widget-t-literal", "widget-t-empty", "widget-t-merged", "widget-t-mergedname",
@@ -185,7 +185,7 @@ static void printAnnotationFlagFacts(const char *prefix, PDFAnnotation *annotati
     printf("%s.flags.listChoice=%d\n", prefix, (int)[annotation isListChoice]);
     printf("%s.flags.widgetControlType=%ld\n", prefix, (long)[annotation widgetControlType]);
     printf("%s.flags.activatableTextField=%d\n", prefix, (int)[annotation isActivatableTextField]);
-    if (charonFixtureNamesItsWidgets(prefix))
+    if (revenantFixtureNamesItsWidgets(prefix))
         printf("%s.flags.fieldName=%s\n", prefix,
                [annotation fieldName] ? [[annotation fieldName] UTF8String] : "(nil)");
     printf("%s.state.onName=%s\n", prefix, [[annotation buttonWidgetStateString] UTF8String]);

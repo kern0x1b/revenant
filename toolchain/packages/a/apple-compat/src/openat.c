@@ -6,7 +6,7 @@
 #include <sys/stat.h>
 
 __attribute__((visibility("hidden")))
-int charon_resolve_at(int directory, const char *path, char *resolved)
+int revenant_resolve_at(int directory, const char *path, char *resolved)
 {
     if (path[0] == '\0') {
         struct stat info;
@@ -36,7 +36,7 @@ int charon_resolve_at(int directory, const char *path, char *resolved)
 }
 
 __attribute__((visibility("hidden")))
-int charon_openat(int directory, const char *path, int flags, ...)
+int revenant_openat(int directory, const char *path, int flags, ...)
 {
     int mode = 0;
     if (flags & O_CREAT) {
@@ -46,7 +46,7 @@ int charon_openat(int directory, const char *path, int flags, ...)
         va_end(arguments);
     }
     char resolved[MAXPATHLEN];
-    if (charon_resolve_at(directory, path, resolved) == -1) {
+    if (revenant_resolve_at(directory, path, resolved) == -1) {
         return -1;
     }
     return open(resolved, flags, mode);

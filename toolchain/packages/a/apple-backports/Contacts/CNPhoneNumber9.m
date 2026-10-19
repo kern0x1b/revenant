@@ -1,9 +1,9 @@
-#import "CharonContacts.h"
+#import "RevenantContacts.h"
 
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
 
 @implementation CNPhoneNumber {
-    NSString *_charonStringValue;
+    NSString *_revenantStringValue;
 }
 
 @dynamic stringValue;
@@ -19,13 +19,13 @@
         return nil;
     self = [super init];
     if (self)
-        _charonStringValue = [string copy];
+        _revenantStringValue = [string copy];
     return self;
 }
 
 - (NSString *)stringValue
 {
-    return _charonStringValue;
+    return _revenantStringValue;
 }
 
 - (id)copyWithZone:(NSZone *)zone
@@ -40,30 +40,30 @@
 
 - (void)encodeWithCoder:(NSCoder *)coder
 {
-    [coder encodeObject:_charonStringValue forKey:@"stringValue"];
+    [coder encodeObject:_revenantStringValue forKey:@"stringValue"];
 }
 
 - (instancetype)initWithCoder:(NSCoder *)coder
 {
     self = [super init];
     if (self)
-        _charonStringValue = [[coder decodeObjectOfClass:[NSString class] forKey:@"stringValue"] copy];
+        _revenantStringValue = [[coder decodeObjectOfClass:[NSString class] forKey:@"stringValue"] copy];
     return self;
 }
 
 - (BOOL)isEqual:(id)object
 {
-    return self == object || ([object isKindOfClass:[CNPhoneNumber class]] && [_charonStringValue isEqualToString:[object stringValue]]);
+    return self == object || ([object isKindOfClass:[CNPhoneNumber class]] && [_revenantStringValue isEqualToString:[object stringValue]]);
 }
 
 - (NSUInteger)hash
 {
-    return _charonStringValue.hash;
+    return _revenantStringValue.hash;
 }
 
 - (NSString *)description
 {
-    return [NSString stringWithFormat:@"<%@: %p: stringValue=%@>", NSStringFromClass([self class]), self, _charonStringValue];
+    return [NSString stringWithFormat:@"<%@: %p: stringValue=%@>", NSStringFromClass([self class]), self, _revenantStringValue];
 }
 
 @end

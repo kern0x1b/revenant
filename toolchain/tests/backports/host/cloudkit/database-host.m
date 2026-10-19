@@ -5,9 +5,9 @@
 
 #import "database-cases.h"
 
-static NSUInteger CharonDatabaseCalls = 0;
+static NSUInteger RevenantDatabaseCalls = 0;
 
-static NSArray<NSString *> *CharonNetworkSelectors(void)
+static NSArray<NSString *> *RevenantNetworkSelectors(void)
 {
     return @[@"addOperation:", @"deleteRecordWithID:completionHandler:",
              @"deleteRecordZoneWithID:completionHandler:",
@@ -31,7 +31,7 @@ int main(void)
                                                    encoding:NSUTF8StringEncoding
                                                       error:NULL] ?: @"";
         NSMutableArray *named = [NSMutableArray array];
-        for (NSString *selector in CharonNetworkSelectors()) {
+        for (NSString *selector in RevenantNetworkSelectors()) {
             NSString *name = [selector stringByReplacingOccurrencesOfString:@":"
                                                                   withString:@""];
             if ([cases containsString:selector] || [cases containsString:name]) {
@@ -45,13 +45,13 @@ int main(void)
                                                       (unsigned long)named.count,
                                                       [named componentsJoinedByString:@", "]];
             out[@"cases"] = [NSNull null];
-            out[@"databaseCalls"] = @(CharonDatabaseCalls);
+            out[@"databaseCalls"] = @(RevenantDatabaseCalls);
             out[@"assertion"] = @"refused: the cases name a network operation";
         } else {
             out[@"assertion"] = @"these cases mention no network operation selector, so every answer"
                                  @" below is an in-memory one";
             @try {
-                CharonDatabaseCases(out);
+                RevenantDatabaseCases(out);
             } @catch (NSException *raised) {
                 out[@"raisedDuring"] = @{@"name": raised.name ?: @"(unnamed)",
                                          @"reason": raised.reason ?: @"(no reason)"};

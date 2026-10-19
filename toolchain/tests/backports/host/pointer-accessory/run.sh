@@ -5,7 +5,7 @@ set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 uikit=$here/../../../../packages/a/apple-backports/UIKit
-build=${POINTER_ACCESSORY_BUILD:-$(runs_fresh charon-pointer-accessory)}
+build=${POINTER_ACCESSORY_BUILD:-$(runs_fresh revenant-pointer-accessory)}
 . "$here/../../common/twoprocess.sh"
 if [ -n "${POINTER_ACCESSORY_PORT_SOURCES:-}" ]; then
     set -- $POINTER_ACCESSORY_PORT_SOURCES

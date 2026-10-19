@@ -19,12 +19,12 @@
 #include "foundation/host_file_watcher.hpp"
 #include "foundation/host_resource_controller.hpp"
 
-namespace shade {
+namespace emulator {
 class CompatibilityKernel;
 class Output;
 }
 
-namespace shade::runtime_detail {
+namespace emulator::runtime_detail {
 
 class SessionCatalog {
 public:

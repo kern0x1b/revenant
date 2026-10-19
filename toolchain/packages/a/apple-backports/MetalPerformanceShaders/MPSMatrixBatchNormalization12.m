@@ -1,16 +1,16 @@
-#ifndef CHARON_BN_CANDIDATE
-#define CHARON_BN_CANDIDATE 0
+#ifndef REVENANT_BN_CANDIDATE
+#define REVENANT_BN_CANDIDATE 0
 #endif
 
-#define CHARON_MPS_NEURON_IVARS \
+#define REVENANT_MPS_NEURON_IVARS \
     MPSCNNNeuronType _neuronType; \
     float _neuronParameterA, _neuronParameterB, _neuronParameterC; \
     NSData *_neuronPrelu;
 
-#define CHARON_MPS_NEURON_COMMON \
-    - (CharonMPSNeuron)charon_mps_neuron \
+#define REVENANT_MPS_NEURON_COMMON \
+    - (RevenantMPSNeuron)revenant_mps_neuron \
     { \
-        CharonMPSNeuron neuron; \
+        RevenantMPSNeuron neuron; \
         neuron.type = _neuronType; \
         neuron.a = _neuronParameterA; \
         neuron.b = _neuronParameterB; \
@@ -49,11 +49,11 @@
     }
 
 
-#import "CharonMPS.h"
+#import "RevenantMPS.h"
 
 
 @implementation MPSMatrixBatchNormalization {
-    CHARON_MPS_NEURON_IVARS
+    REVENANT_MPS_NEURON_IVARS
     NSUInteger _sourceNumberOfFeatureVectors, _sourceInputFeatureChannels;
     float _epsilon;
     BOOL _computeStatistics;
@@ -61,7 +61,7 @@
     NSUInteger _batchStart, _batchSize;
 }
 
-CHARON_MPS_NEURON_COMMON
+REVENANT_MPS_NEURON_COMMON
 
 - (instancetype)initWithDevice:(id<MTLDevice>)device
 {
@@ -92,76 +92,76 @@ CHARON_MPS_NEURON_COMMON
                    betaVector:(MPSVector *)betaVector
                  resultMatrix:(MPSMatrix *)resultMatrix
 {
-    if (!CharonMPSCommandBufferPermits(commandBuffer))
+    if (!RevenantMPSCommandBufferPermits(commandBuffer))
         return;
-    CharonMPSMatrixView in = CharonMPSMatrixViewOf(inputMatrix), out = CharonMPSMatrixViewOf(resultMatrix);
-    if (!CharonMPSDataTypeIsElement(in.dataType) || !CharonMPSDataTypeIsElement(out.dataType)) {
-        CharonMPSRefuse(@"MPSMatrixBatchNormalization: a matrix of a data type that is not one of the eight element types was given");
+    RevenantMPSMatrixView in = RevenantMPSMatrixViewOf(inputMatrix), out = RevenantMPSMatrixViewOf(resultMatrix);
+    if (!RevenantMPSDataTypeIsElement(in.dataType) || !RevenantMPSDataTypeIsElement(out.dataType)) {
+        RevenantMPSRefuse(@"MPSMatrixBatchNormalization: a matrix of a data type that is not one of the eight element types was given");
         return;
     }
     NSUInteger available = in.rows - _sourceMatrixOrigin.x;
     NSUInteger vectors = _sourceNumberOfFeatureVectors < available ? _sourceNumberOfFeatureVectors : available;
     NSUInteger columns = in.columns - _sourceMatrixOrigin.y;
     NSUInteger channels = _sourceInputFeatureChannels < columns ? _sourceInputFeatureChannels : columns;
-    CharonMPSVectorView mean = CharonMPSVectorViewOf(meanVector), variance = CharonMPSVectorViewOf(varianceVector);
-    CharonMPSVectorView gamma = {0, 0, 0, 0, 0, 0}, beta = {0, 0, 0, 0, 0, 0};
+    RevenantMPSVectorView mean = RevenantMPSVectorViewOf(meanVector), variance = RevenantMPSVectorViewOf(varianceVector);
+    RevenantMPSVectorView gamma = {0, 0, 0, 0, 0, 0}, beta = {0, 0, 0, 0, 0, 0};
     if (gammaVector)
-        gamma = CharonMPSVectorViewOf(gammaVector);
+        gamma = RevenantMPSVectorViewOf(gammaVector);
     if (betaVector)
-        beta = CharonMPSVectorViewOf(betaVector);
+        beta = RevenantMPSVectorViewOf(betaVector);
     NSUInteger start, count;
-    CharonMPSBatch(_batchStart, _batchSize, in.matrices, &start, &count);
+    RevenantMPSBatch(_batchStart, _batchSize, in.matrices, &start, &count);
     count = count < out.matrices ? count : out.matrices;
     for (NSUInteger b = start; b < start + count; b++) {
-        if (!CharonMPSMatrixHolds(&in, b, _sourceMatrixOrigin.x, _sourceMatrixOrigin.y, vectors, channels) ||
-            !CharonMPSMatrixHolds(&out, b, _resultMatrixOrigin.x, _resultMatrixOrigin.y, vectors, channels)) {
-            CharonMPSRefuse(@"MPSMatrixBatchNormalization: a matrix of the batch [%lu, %lu) does not hold the %lux%lu region its origin names", (unsigned long)start, (unsigned long)(start + count), (unsigned long)vectors, (unsigned long)channels);
+        if (!RevenantMPSMatrixHolds(&in, b, _sourceMatrixOrigin.x, _sourceMatrixOrigin.y, vectors, channels) ||
+            !RevenantMPSMatrixHolds(&out, b, _resultMatrixOrigin.x, _resultMatrixOrigin.y, vectors, channels)) {
+            RevenantMPSRefuse(@"MPSMatrixBatchNormalization: a matrix of the batch [%lu, %lu) does not hold the %lux%lu region its origin names", (unsigned long)start, (unsigned long)(start + count), (unsigned long)vectors, (unsigned long)channels);
             return;
         }
     }
-    CharonMPSNeuron neuron = [self charon_mps_neuron];
+    RevenantMPSNeuron neuron = [self revenant_mps_neuron];
     for (NSUInteger b = start; b < start + count; b++) {
         for (NSUInteger column = 0; column < channels; column++) {
             double total = 0.0, squares = 0.0;
             for (NSUInteger row = 0; row < vectors; row++) {
-                double x = CharonMPSLoad(CharonMPSMatrixElement(&in, b, _sourceMatrixOrigin.x + row, _sourceMatrixOrigin.y + column), in.dataType, 0);
+                double x = RevenantMPSLoad(RevenantMPSMatrixElement(&in, b, _sourceMatrixOrigin.x + row, _sourceMatrixOrigin.y + column), in.dataType, 0);
                 total += x;
                 squares += x * x;
             }
             double m = vectors ? total / (double)vectors : 0.0;
             double v = vectors ? squares / (double)vectors - m * m : 0.0;
             if (_computeStatistics && mean.length > column)
-                CharonMPSStore(CharonMPSVectorElement(&mean, 0, column), mean.dataType, 0, m);
+                RevenantMPSStore(RevenantMPSVectorElement(&mean, 0, column), mean.dataType, 0, m);
             if (_computeStatistics && variance.length > column)
-                CharonMPSStore(CharonMPSVectorElement(&variance, 0, column), variance.dataType, 0, v);
-            double given = variance.length > column ? CharonMPSLoad(CharonMPSVectorElement(&variance, 0, column), variance.dataType, 0) : v;
-            double mu = mean.length > column ? CharonMPSLoad(CharonMPSVectorElement(&mean, 0, column), mean.dataType, 0) : m;
-            double g = gamma.length > column ? CharonMPSLoad(CharonMPSVectorElement(&gamma, 0, column), gamma.dataType, 0) : 1.0;
-            double b0 = beta.length > column ? CharonMPSLoad(CharonMPSVectorElement(&beta, 0, column), beta.dataType, 0) : 0.0;
+                RevenantMPSStore(RevenantMPSVectorElement(&variance, 0, column), variance.dataType, 0, v);
+            double given = variance.length > column ? RevenantMPSLoad(RevenantMPSVectorElement(&variance, 0, column), variance.dataType, 0) : v;
+            double mu = mean.length > column ? RevenantMPSLoad(RevenantMPSVectorElement(&mean, 0, column), mean.dataType, 0) : m;
+            double g = gamma.length > column ? RevenantMPSLoad(RevenantMPSVectorElement(&gamma, 0, column), gamma.dataType, 0) : 1.0;
+            double b0 = beta.length > column ? RevenantMPSLoad(RevenantMPSVectorElement(&beta, 0, column), beta.dataType, 0) : 0.0;
             for (NSUInteger row = 0; row < vectors; row++) {
-                double x = CharonMPSLoad(CharonMPSMatrixElement(&in, b, _sourceMatrixOrigin.x + row, _sourceMatrixOrigin.y + column), in.dataType, 0);
-#if CHARON_BN_CANDIDATE % 2 == 0
+                double x = RevenantMPSLoad(RevenantMPSMatrixElement(&in, b, _sourceMatrixOrigin.x + row, _sourceMatrixOrigin.y + column), in.dataType, 0);
+#if REVENANT_BN_CANDIDATE % 2 == 0
                 float root = 1.0f / sqrtf((float)given + _epsilon);
 #else
                 float root = rsqrtf((float)given + _epsilon);
 #endif
                 float centred = (float)x - (float)mu;
-#if (CHARON_BN_CANDIDATE / 2) % 2 == 0
+#if (REVENANT_BN_CANDIDATE / 2) % 2 == 0
                 float scaled = g * centred;
 #else
                 float scaled = centred * g;
 #endif
-#if (CHARON_BN_CANDIDATE / 4) % 2 == 0
+#if (REVENANT_BN_CANDIDATE / 4) % 2 == 0
                 float quotient = scaled * root;
 #else
                 float quotient = fmaf(scaled, root, 0.0f);
 #endif
-                double y = CharonMPSApplyNeuron(neuron.type, (double)quotient + b0, neuron.a, neuron.b, neuron.c, CharonMPSNeuronA(&neuron, column));
-                CharonMPSStore(CharonMPSMatrixElement(&out, b, _resultMatrixOrigin.x + row, _resultMatrixOrigin.y + column), out.dataType, 0, y);
+                double y = RevenantMPSApplyNeuron(neuron.type, (double)quotient + b0, neuron.a, neuron.b, neuron.c, RevenantMPSNeuronA(&neuron, column));
+                RevenantMPSStore(RevenantMPSMatrixElement(&out, b, _resultMatrixOrigin.x + row, _resultMatrixOrigin.y + column), out.dataType, 0, y);
             }
         }
     }
-    CharonMPSConsumeReadCount(inputMatrix);
+    RevenantMPSConsumeReadCount(inputMatrix);
 }
 
 - (instancetype)initWithCoder:(NSCoder *)aDecoder device:(id<MTLDevice>)device

@@ -468,7 +468,7 @@ end
 ]]
 
 local function verify(files, rev)
-    local scratch = path.join(os.getenv("HOME"), ".cache", "hades", "comments-verify")
+    local scratch = path.join(os.getenv("HOME"), ".revenant", "cache", "comments-verify")
     os.tryrm(scratch)
     local differ = {}
     local luapairs = {}

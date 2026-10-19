@@ -3,7 +3,7 @@
 #import <string.h>
 #import "check.h"
 
-#define P(name) charonhost_##name
+#define P(name) revenanthost_##name
 extern nw_endpoint_t P(nw_endpoint_create_host)(const char *, const char *);
 extern nw_endpoint_t P(nw_endpoint_create_url)(const char *);
 extern id P(nw_relay_hop_create)(nw_endpoint_t, nw_endpoint_t, nw_protocol_options_t);
@@ -75,7 +75,7 @@ int main(void)
         P(nw_privacy_context_clear_proxies)(privacy);
         CHECK(privacy != NULL, "and its proxies can be put on it and taken off it");
 
-        printf("checks=%d failures=%d\n", charon_checks, charon_failures);
+        printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
     }
-    return charon_failures ? 1 : 0;
+    return revenant_failures ? 1 : 0;
 }

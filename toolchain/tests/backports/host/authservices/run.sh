@@ -25,11 +25,11 @@
 #   sh run.sh --mutate       remove one method from the port and require exactly that case red
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
-charon=${CHARON:-$here/../../../..}
-package="$charon/packages/a/apple-backports/AuthenticationServices"
-registry="$charon/packages/a/apple-backports/registry/AuthenticationServices"
+revenant=${REVENANT:-$here/../../../..}
+package="$revenant/packages/a/apple-backports/AuthenticationServices"
+registry="$revenant/packages/a/apple-backports/registry/AuthenticationServices"
 framework=${AS_FRAMEWORK:-AuthenticationServices}
-build=${BUILD:-$charon/.agent-work/runs/authservices-shape}
+build=${BUILD:-$revenant/.agent-work/runs/authservices-shape}
 mkdir -p "$build"
 
 # The SDK the port is compiled against: the headers are where the member list comes from and the SDK is
@@ -64,7 +64,7 @@ build_library() {
     for source in $sources; do
         name=$(basename "$source" .m)
         "$AS_CLANG" -target armv7-apple-ios6.1.3 -isysroot "$sdk" -fobjc-arc -Os -g0 -fPIC \
-            -I"$package" -I"$charon/packages/a/apple-backports/HomeKit" -I"$monocypher" \
+            -I"$package" -I"$revenant/packages/a/apple-backports/HomeKit" -I"$monocypher" \
             -c "$source" -o "$objdir/$name.o" 2>"$build/$name.log" || {
                 echo "FAIL: $source did not compile"; head -5 "$build/$name.log"; return 1; }
         objects="$objects $objdir/$name.o"
@@ -77,11 +77,11 @@ export AS_CLANG=${AS_CLANG:-$HOME/.xmake/packages/l/llvm/23.1.1/6a8c97aaa69241df
 monocypher=$(ls -d "$HOME"/.xmake/packages/m/monocypher/*/*/include 2>/dev/null | head -1)
 [ -x "$AS_CLANG" ] || { echo "FAIL: no compiler at $AS_CLANG; set AS_CLANG to the llvm package's clang"; exit 1; }
 
-# The sources: every .m in the framework's own directory, and HomeKit's CharonHomeKitModel.m, which
+# The sources: every .m in the framework's own directory, and HomeKit's RevenantHomeKitModel.m, which
 # the construction header reaches. A class whose source is not here is a class the check cannot see, so
 # the list is what is on disk rather than a list kept here.
 sources=$(ls "$package"/*.m)
-shared=$(ls "$charon/packages/a/apple-backports/HomeKit"/Charon*.m 2>/dev/null || true)
+shared=$(ls "$revenant/packages/a/apple-backports/HomeKit"/Revenant*.m 2>/dev/null || true)
 build_library "$sources $shared" "$build/libAuthenticationServicesBackports.dylib"
 echo "built:    $(ls "$package"/*.m | wc -l | tr -d ' ') AuthenticationServices sources, $(echo $shared | wc -w | tr -d ' ') shared"
 

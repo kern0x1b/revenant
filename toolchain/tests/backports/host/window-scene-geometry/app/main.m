@@ -25,7 +25,7 @@ static NSString *yes_no(BOOL answer)
 static NSString *class_name(id object)
 {
     NSString *name = NSStringFromClass([object class]);
-    return [name hasPrefix:@"CharonPort"] ? [name substringFromIndex:10] : name;
+    return [name hasPrefix:@"RevenantPort"] ? [name substringFromIndex:12] : name;
 }
 
 static void geometry_checks(id scene, UIWindowSceneGeometryPreferencesIOS *preferences)
@@ -68,10 +68,10 @@ static void checks(id scene)
     windowing_checks();
 }
 
-@interface CharonAppDelegate : UIResponder <UIApplicationDelegate>
+@interface RevenantAppDelegate : UIResponder <UIApplicationDelegate>
 @end
 
-@implementation CharonAppDelegate
+@implementation RevenantAppDelegate
 
 - (UISceneConfiguration *)application:(UIApplication *)application configurationForConnectingSceneSession:(UISceneSession *)session options:(UISceneConnectionOptions *)options
 {
@@ -80,24 +80,24 @@ static void checks(id scene)
 
 @end
 
-@interface CharonSceneDelegate : UIResponder <UIWindowSceneDelegate>
+@interface RevenantSceneDelegate : UIResponder <UIWindowSceneDelegate>
 @property (nonatomic, strong) UIWindow *window;
 @end
 
-@implementation CharonSceneDelegate
+@implementation RevenantSceneDelegate
 
 - (void)scene:(UIScene *)scene willConnectToSession:(UISceneSession *)session options:(UISceneConnectionOptions *)connectionOptions
 {
-    const char *path = getenv("CHARON_SCENE_OUT");
+    const char *path = getenv("REVENANT_SCENE_OUT");
     out = fopen(path ? path : "/dev/stdout", "w");
     self.window = [[UIWindow alloc] initWithWindowScene:(UIWindowScene *)scene];
     [self.window makeKeyAndVisible];
-#ifdef CHARON_PORT_SIDE
+#ifdef REVENANT_PORT_SIDE
     side = "port";
     checks([[UIWindowScene alloc] initWithSession:nil connectionOptions:nil]);
 #else
     side = "host";
-    const char *extra = getenv("CHARON_HOST_ONLY_OUT");
+    const char *extra = getenv("REVENANT_HOST_ONLY_OUT");
     hostOnly = extra ? fopen(extra, "w") : NULL;
     checks(scene);
     report_host("scene-windowing-behaviors", self.window.windowScene.windowingBehaviors ? class_name(self.window.windowScene.windowingBehaviors) : @"nil");
@@ -113,6 +113,6 @@ static void checks(id scene)
 int main(int argc, char *argv[])
 {
     @autoreleasepool {
-        return UIApplicationMain(argc, argv, nil, NSStringFromClass([CharonAppDelegate class]));
+        return UIApplicationMain(argc, argv, nil, NSStringFromClass([RevenantAppDelegate class]));
     }
 }

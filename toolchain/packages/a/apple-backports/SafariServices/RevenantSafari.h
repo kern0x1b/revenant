@@ -1,6 +1,6 @@
 #import <SafariServices/SafariServices.h>
 
-@protocol CharonWebView <NSObject>
+@protocol RevenantWebView <NSObject>
 @property (nonatomic, assign) id delegate;
 @property (nonatomic) BOOL scalesPageToFit;
 @property (nonatomic, readonly) BOOL canGoBack;
@@ -15,7 +15,7 @@
 - (void)stopLoading;
 @end
 
-@interface CharonSafariPage : UIViewController
+@interface RevenantSafariPage : UIViewController
 - (instancetype)initWithURL:(NSURL *)URL;
 @property (nonatomic, readonly) NSURL *initialURL;
 @property (nonatomic, weak) id<SFSafariViewControllerDelegate> delegate;
@@ -28,5 +28,5 @@
 @end
 
 @interface SFAuthenticationSession ()
-@property (nonatomic, weak) UIWindow *charon_presentationWindow;
+@property (nonatomic, weak) UIWindow *revenant_presentationWindow;
 @end

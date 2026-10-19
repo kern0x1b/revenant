@@ -2,7 +2,7 @@
 #import <objc/runtime.h>
 #import <string.h>
 
-static NSString *charon_metadata_key_string(id key)
+static NSString *revenant_metadata_key_string(id key)
 {
     if ([key isKindOfClass:[NSString class]])
         return key;
@@ -19,7 +19,7 @@ static NSString *charon_metadata_key_string(id key)
     return nil;
 }
 
-static NSString *charon_metadata_data_type(id value)
+static NSString *revenant_metadata_data_type(id value)
 {
     if ([value isKindOfClass:[NSString class]])
         return @"com.apple.metadata.datatype.UTF-8";
@@ -61,11 +61,11 @@ static NSString *charon_metadata_data_type(id value)
     return nil;
 }
 
-@implementation AVMetadataItem (CharonIdentifiers8)
+@implementation AVMetadataItem (RevenantIdentifiers8)
 
 + (AVMetadataIdentifier)identifierForKey:(id)key keySpace:(AVMetadataKeySpace)keySpace
 {
-    NSString *keyString = charon_metadata_key_string(key);
+    NSString *keyString = revenant_metadata_key_string(key);
     return (keySpace.length && keyString.length) ? [NSString stringWithFormat:@"%@/%@", keySpace, keyString] : nil;
 }
 
@@ -93,12 +93,12 @@ static NSString *charon_metadata_data_type(id value)
 
 - (NSString *)dataType
 {
-    return charon_metadata_data_type(self.value);
+    return revenant_metadata_data_type(self.value);
 }
 
 @end
 
-@implementation AVMutableMetadataItem (CharonIdentifiers8)
+@implementation AVMutableMetadataItem (RevenantIdentifiers8)
 
 - (void)setIdentifier:(AVMetadataIdentifier)identifier
 {
@@ -114,7 +114,7 @@ static NSString *charon_metadata_data_type(id value)
 - (NSString *)dataType
 {
     NSString *stored = objc_getAssociatedObject(self, @selector(dataType));
-    return stored ?: charon_metadata_data_type(self.value);
+    return stored ?: revenant_metadata_data_type(self.value);
 }
 
 - (void)setDataType:(NSString *)dataType

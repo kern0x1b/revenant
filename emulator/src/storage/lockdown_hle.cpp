@@ -16,7 +16,7 @@
 #include "foundation/cpu.hpp"
 #include "foundation/userland_hle.hpp"
 
-namespace shade {
+namespace emulator {
 namespace {
 
     constexpr std::string_view lockdown_image { "/usr/lib/liblockdown.dylib" };

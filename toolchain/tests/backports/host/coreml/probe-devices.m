@@ -15,7 +15,7 @@ static NSString *kindOf(id object)
         return @"(nil)";
     }
     NSString *name = NSStringFromClass([object class]);
-    return [name hasPrefix:@"Charon"] ? [name substringFromIndex:@"Charon".length] : name;
+    return [name hasPrefix:@"Revenant"] ? [name substringFromIndex:@"Revenant".length] : name;
 }
 
 int main(void)

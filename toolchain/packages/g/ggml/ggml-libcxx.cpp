@@ -148,7 +148,7 @@ uint16_t __truncsfhf2(float value)
 }
 
 
-int charon_ggml_clock_gettime(clockid_t clock, struct timespec *out) {
+int revenant_ggml_clock_gettime(clockid_t clock, struct timespec *out) {
     if (clock == CLOCK_REALTIME) {
         struct timeval now;
         if (gettimeofday(&now, NULL) != 0) {

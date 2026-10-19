@@ -270,7 +270,7 @@
             "status": "owed",
             "reason": "build the property -[NSFileProviderDomain disconnected]",
             "effect": "until built: respondsToSelector: answers NO",
-            "source": "the declaration is `@property (readonly, getter=isDisconnected) BOOL disconnected FILEPROVIDER_API_AVAILABILITY_V3;` at NSFileProviderDomain.h:158 of the FileProvider.framework headers in the iPhoneOS16.4 SDK, and it arrived at FILEPROVIDER_API_AVAILABILITY_V3, iOS 16.0. What is absent is measured on the armv7 shared caches of iOS 6.1.3 (244881694 bytes) and 4.3 (153152518 bytes) through the class and selector lists modules/apple/objc.lua's inventory holds under $CHARON_HOME/dyld: NSFileProviderDomain and NSFileProviderManager are 0 entries of 4.3's 7187 class names, and isDisconnected, setDisconnected: and disconnected are in none of the 113981 selectors of 6.1.3 nor of the 70062 of 4.3"
+            "source": "the declaration is `@property (readonly, getter=isDisconnected) BOOL disconnected FILEPROVIDER_API_AVAILABILITY_V3;` at NSFileProviderDomain.h:158 of the FileProvider.framework headers in the iPhoneOS16.4 SDK, and it arrived at FILEPROVIDER_API_AVAILABILITY_V3, iOS 16.0. What is absent is measured on the armv7 shared caches of iOS 6.1.3 (244881694 bytes) and 4.3 (153152518 bytes) through the class and selector lists modules/apple/objc.lua's inventory holds under $REVENANT_HOME/dyld: NSFileProviderDomain and NSFileProviderManager are 0 entries of 4.3's 7187 class names, and isDisconnected, setDisconnected: and disconnected are in none of the 113981 selectors of 6.1.3 nor of the 70062 of 4.3"
         },
         {
             "api": "-[NSFileProviderDomain testingModes]",
@@ -280,7 +280,7 @@
             "status": "owed",
             "reason": "build the property -[NSFileProviderDomain testingModes]",
             "effect": "until built: respondsToSelector: answers NO",
-            "source": "the declaration is `@property (readwrite, assign) NSFileProviderDomainTestingModes testingModes FILEPROVIDER_API_AVAILABILITY_V3_1_IOS;` at NSFileProviderDomain.h:195 of the FileProvider.framework headers in the iPhoneOS16.4 SDK, and the type it is declared with, NSFileProviderDomainTestingModes, is an option set at the same line of the same header. What is absent is measured on the armv7 shared caches of iOS 6.1.3 (244881694 bytes) and 4.3 (153152518 bytes) through the class and selector lists modules/apple/objc.lua's inventory holds under $CHARON_HOME/dyld"
+            "source": "the declaration is `@property (readwrite, assign) NSFileProviderDomainTestingModes testingModes FILEPROVIDER_API_AVAILABILITY_V3_1_IOS;` at NSFileProviderDomain.h:195 of the FileProvider.framework headers in the iPhoneOS16.4 SDK, and the type it is declared with, NSFileProviderDomainTestingModes, is an option set at the same line of the same header. What is absent is measured on the armv7 shared caches of iOS 6.1.3 (244881694 bytes) and 4.3 (153152518 bytes) through the class and selector lists modules/apple/objc.lua's inventory holds under $REVENANT_HOME/dyld"
         },
         {
             "api": "-[NSFileProviderDomain supportsSyncingTrash]",
@@ -301,7 +301,7 @@
             "status": "owed",
             "reason": "build the property -[NSFileProviderDomain backingStoreIdentity]",
             "effect": "until built: respondsToSelector: answers NO",
-            "source": "the declaration is `@property (nonatomic, readonly, nullable) NSData *backingStoreIdentity FILEPROVIDER_API_AVAILABILITY_V4_0_IOS;` at NSFileProviderDomain.h:215 of the FileProvider.framework headers in the iPhoneOS16.4 SDK, and it arrived at FILEPROVIDER_API_AVAILABILITY_V4_0_IOS, iOS 16.0. What is absent is measured on the armv7 shared caches of iOS 6.1.3 (244881694 bytes) and 4.3 (153152518 bytes) through the class and selector lists modules/apple/objc.lua's inventory holds under $CHARON_HOME/dyld"
+            "source": "the declaration is `@property (nonatomic, readonly, nullable) NSData *backingStoreIdentity FILEPROVIDER_API_AVAILABILITY_V4_0_IOS;` at NSFileProviderDomain.h:215 of the FileProvider.framework headers in the iPhoneOS16.4 SDK, and it arrived at FILEPROVIDER_API_AVAILABILITY_V4_0_IOS, iOS 16.0. What is absent is measured on the armv7 shared caches of iOS 6.1.3 (244881694 bytes) and 4.3 (153152518 bytes) through the class and selector lists modules/apple/objc.lua's inventory holds under $REVENANT_HOME/dyld"
         }
     ]
 }

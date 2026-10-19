@@ -4,23 +4,23 @@
 
 const CFStringRef kCGColorSpaceGenericLab = CFSTR("kCGColorSpaceGenericLab");
 
-static pthread_mutex_t charon_names_lock = PTHREAD_MUTEX_INITIALIZER;
-static CFMutableSetRef charon_names;
+static pthread_mutex_t revenant_names_lock = PTHREAD_MUTEX_INITIALIZER;
+static CFMutableSetRef revenant_names;
 
 CFStringRef CGColorSpaceGetName(CGColorSpaceRef space)
 {
     CFStringRef copy = space ? CGColorSpaceCopyName(space) : NULL;
     if (!copy)
         return NULL;
-    pthread_mutex_lock(&charon_names_lock);
-    if (!charon_names)
-        charon_names = CFSetCreateMutable(kCFAllocatorDefault, 0, &kCFTypeSetCallBacks);
-    CFStringRef interned = (CFStringRef)CFSetGetValue(charon_names, copy);
+    pthread_mutex_lock(&revenant_names_lock);
+    if (!revenant_names)
+        revenant_names = CFSetCreateMutable(kCFAllocatorDefault, 0, &kCFTypeSetCallBacks);
+    CFStringRef interned = (CFStringRef)CFSetGetValue(revenant_names, copy);
     if (!interned) {
-        CFSetAddValue(charon_names, copy);
+        CFSetAddValue(revenant_names, copy);
         interned = copy;
     }
-    pthread_mutex_unlock(&charon_names_lock);
+    pthread_mutex_unlock(&revenant_names_lock);
     CFRelease(copy);
     return interned;
 }

@@ -9,7 +9,7 @@
 	<key>CFBundleExecutable</key>
 	<string>invalidation</string>
 	<key>CFBundleIdentifier</key>
-	<string>local.charon.backports.invalidation</string>
+	<string>local.revenant.backports.invalidation</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>

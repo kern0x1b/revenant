@@ -1,21 +1,21 @@
-#import "CharonMenus.h"
+#import "RevenantMenus.h"
 #import <objc/runtime.h>
 
-static const char charon_previewing_key;
+static const char revenant_previewing_key;
 
-static void charon_say_previewing(void)
+static void revenant_say_previewing(void)
 {
-    charon_menus_say_once(@"previewing", @"UIViewController.registerForPreviewingWithDelegate:sourceView:: iOS 6 runs on screens that do not measure force, so the context is registered and the delegate is never asked for a preview, which is what a release whose force touch capability is unavailable does");
+    revenant_menus_say_once(@"previewing", @"UIViewController.registerForPreviewingWithDelegate:sourceView:: iOS 6 runs on screens that do not measure force, so the context is registered and the delegate is never asked for a preview, which is what a release whose force touch capability is unavailable does");
 }
 
-@interface CharonPreviewingContext : NSObject <UIViewControllerPreviewing>
+@interface RevenantPreviewingContext : NSObject <UIViewControllerPreviewing>
 @property (nonatomic, weak, readonly) id<UIViewControllerPreviewingDelegate> delegate;
 @property (nonatomic, strong, readonly) UIView *sourceView;
 @property (nonatomic, assign) CGRect sourceRect;
 - (instancetype)initWithDelegate:(id<UIViewControllerPreviewingDelegate>)delegate sourceView:(UIView *)sourceView;
 @end
 
-@implementation CharonPreviewingContext {
+@implementation RevenantPreviewingContext {
     UIGestureRecognizer *_recognizer;
 }
 
@@ -40,28 +40,28 @@ static void charon_say_previewing(void)
 
 @end
 
-@implementation UIViewController (CharonPreviewing)
+@implementation UIViewController (RevenantPreviewing)
 
 - (id<UIViewControllerPreviewing>)registerForPreviewingWithDelegate:(id<UIViewControllerPreviewingDelegate>)delegate sourceView:(UIView *)sourceView
 {
-    charon_say_previewing();
-    NSMutableArray *registered = objc_getAssociatedObject(self, &charon_previewing_key);
+    revenant_say_previewing();
+    NSMutableArray *registered = objc_getAssociatedObject(self, &revenant_previewing_key);
     if (!registered) {
         registered = [NSMutableArray array];
-        objc_setAssociatedObject(self, &charon_previewing_key, registered, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+        objc_setAssociatedObject(self, &revenant_previewing_key, registered, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     }
-    for (CharonPreviewingContext *found in registered) {
+    for (RevenantPreviewingContext *found in registered) {
         if (found.sourceView == sourceView)
             return found;
     }
-    CharonPreviewingContext *context = [[CharonPreviewingContext alloc] initWithDelegate:delegate sourceView:sourceView];
+    RevenantPreviewingContext *context = [[RevenantPreviewingContext alloc] initWithDelegate:delegate sourceView:sourceView];
     [registered addObject:context];
     return context;
 }
 
 - (void)unregisterForPreviewingWithContext:(id<UIViewControllerPreviewing>)previewing
 {
-    NSMutableArray *registered = objc_getAssociatedObject(self, &charon_previewing_key);
+    NSMutableArray *registered = objc_getAssociatedObject(self, &revenant_previewing_key);
     if (previewing)
         [registered removeObjectIdenticalTo:previewing];
 }

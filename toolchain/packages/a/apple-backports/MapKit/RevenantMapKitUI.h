@@ -1,13 +1,13 @@
-#ifndef CHARON_MAPKIT_UI_H
-#define CHARON_MAPKIT_UI_H
+#ifndef REVENANT_MAPKIT_UI_H
+#define REVENANT_MAPKIT_UI_H
 #import <UIKit/UIKit.h>
 #import <QuartzCore/QuartzCore.h>
 #import <MapKit/MapKit.h>
-#import "CharonMapKit.h"
+#import "RevenantMapKit.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
-@protocol CharonOverlayView <NSObject>
+@protocol RevenantOverlayView <NSObject>
 - (instancetype)initWithFrame:(CGRect)frame;
 - (instancetype)initWithCoder:(NSCoder *)coder;
 - (void)setFrame:(CGRect)frame;

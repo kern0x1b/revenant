@@ -1,6 +1,6 @@
 import("core.base.json")
 import("core.project.project")
-local backports = import("apple.backports", {rootdir = path.join(os.getenv("CHARON_ROOT"), "modules"), anonymous = true})
+local backports = import("apple.backports", {rootdir = path.join(os.getenv("REVENANT_ROOT"), "modules"), anonymous = true})
 import("byteorder", {rootdir = path.join(os.scriptdir(), "..", "..", "modules")})
 
 local function rev(checkout, ref)
@@ -9,9 +9,9 @@ local function rev(checkout, ref)
 end
 
 function main(folder, objects, release)
-    local checkout = os.getenv("CHARON_ROOT")
-    local file = os.getenv("CHARON_RESOLVE")
-                 or path.join(os.getenv("HOME"), ".charon", "cache", "gate-resolve",
+    local checkout = os.getenv("REVENANT_ROOT")
+    local file = os.getenv("REVENANT_RESOLVE")
+                 or path.join(os.getenv("HOME"), ".revenant", "cache", "gate-resolve",
                               rev(checkout, "HEAD:packages") .. "-" .. rev(checkout, "HEAD:addons") .. "-" .. release .. ".lua")
     local resolve = assert(io.load(file), "no resolve at " .. file)
     print("resolve: " .. file)
@@ -27,7 +27,7 @@ function main(folder, objects, release)
                  ld = resolve.ld,
                  cc = resolve.cc,
                  archives = resolve.archives,
-                 store = path.join(os.getenv("HOME"), ".charon", "cache", "objects"),
+                 store = path.join(os.getenv("HOME"), ".revenant", "cache", "objects"),
                  includes = {root, base}}
     local sources = table.join(os.files(path.join(base, "*.m")), os.files(path.join(base, "*.c")))
     assert(#sources > 0, base .. " holds no source to compile")

@@ -11,11 +11,11 @@ typedef void (*group_async_f)(dispatch_group_t, dispatch_queue_t, dispatch_block
 typedef void (*after_f)(dispatch_time_t, dispatch_queue_t, dispatch_block_t);
 
 dispatch_block_t dispatch_block_create(unsigned long, dispatch_block_t);
-void charon_dispatch_async(dispatch_queue_t, dispatch_block_t);
-void charon_dispatch_sync(dispatch_queue_t, dispatch_block_t);
-void charon_dispatch_group_async(dispatch_group_t, dispatch_queue_t, dispatch_block_t);
-void charon_dispatch_group_notify(dispatch_group_t, dispatch_queue_t, dispatch_block_t);
-void charon_dispatch_after(dispatch_time_t, dispatch_queue_t, dispatch_block_t);
+void revenant_dispatch_async(dispatch_queue_t, dispatch_block_t);
+void revenant_dispatch_sync(dispatch_queue_t, dispatch_block_t);
+void revenant_dispatch_group_async(dispatch_group_t, dispatch_queue_t, dispatch_block_t);
+void revenant_dispatch_group_notify(dispatch_group_t, dispatch_queue_t, dispatch_block_t);
+void revenant_dispatch_after(dispatch_time_t, dispatch_queue_t, dispatch_block_t);
 
 struct api {
     create_f create; async_f async; async_f sync; group_async_f group_async; group_async_f group_notify; after_f after;
@@ -151,8 +151,8 @@ int main(void)
 #ifdef SUBMIT_PLAIN
     struct api ours = {dispatch_block_create, dispatch_async, dispatch_sync, dispatch_group_async, dispatch_group_notify, dispatch_after};
 #else
-    struct api ours = {dispatch_block_create, charon_dispatch_async, charon_dispatch_sync, charon_dispatch_group_async,
-                       charon_dispatch_group_notify, charon_dispatch_after};
+    struct api ours = {dispatch_block_create, revenant_dispatch_async, revenant_dispatch_sync, revenant_dispatch_group_async,
+                       revenant_dispatch_group_notify, revenant_dispatch_after};
 #endif
     void *libdispatch = dlopen("/usr/lib/system/libdispatch.dylib", RTLD_LAZY | RTLD_LOCAL);
     expect(libdispatch != NULL, "the test reaches Darwin's libdispatch beside the shim");

@@ -1,38 +1,38 @@
-#import "CharonMenus.h"
+#import "RevenantMenus.h"
 #import <objc/runtime.h>
 
 #pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
 
-@interface UITraitCollection (CharonTraitDelivery)
-+ (void)charon_deliverChangesInEnvironments:(NSArray *)environments change:(void (^)(void))change;
+@interface UITraitCollection (RevenantTraitDelivery)
++ (void)revenant_deliverChangesInEnvironments:(NSArray *)environments change:(void (^)(void))change;
 @end
 
-static const char charon_style_key, charon_modal_key;
+static const char revenant_style_key, revenant_modal_key;
 
-@implementation UIViewController (CharonThirteen)
+@implementation UIViewController (RevenantThirteen)
 
 - (UIUserInterfaceStyle)overrideUserInterfaceStyle
 {
-    return (UIUserInterfaceStyle)[objc_getAssociatedObject(self, &charon_style_key) integerValue];
+    return (UIUserInterfaceStyle)[objc_getAssociatedObject(self, &revenant_style_key) integerValue];
 }
 
 - (void)setOverrideUserInterfaceStyle:(UIUserInterfaceStyle)overrideUserInterfaceStyle
 {
     if (overrideUserInterfaceStyle == UIUserInterfaceStyleDark)
-        charon_menus_say_once(@"dark-override", @"overrideUserInterfaceStyle: iOS 6 has no dark appearance to draw, so the trait says dark and the system's controls keep their light drawing");
-    [UITraitCollection charon_deliverChangesInEnvironments:@[self] change:^{
-        objc_setAssociatedObject(self, &charon_style_key, @(overrideUserInterfaceStyle), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+        revenant_menus_say_once(@"dark-override", @"overrideUserInterfaceStyle: iOS 6 has no dark appearance to draw, so the trait says dark and the system's controls keep their light drawing");
+    [UITraitCollection revenant_deliverChangesInEnvironments:@[self] change:^{
+        objc_setAssociatedObject(self, &revenant_style_key, @(overrideUserInterfaceStyle), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     }];
 }
 
 - (BOOL)isModalInPresentation
 {
-    return [objc_getAssociatedObject(self, &charon_modal_key) boolValue];
+    return [objc_getAssociatedObject(self, &revenant_modal_key) boolValue];
 }
 
 - (void)setModalInPresentation:(BOOL)modalInPresentation
 {
-    objc_setAssociatedObject(self, &charon_modal_key, @(modalInPresentation), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, &revenant_modal_key, @(modalInPresentation), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
 - (BOOL)performsActionsWhilePresentingModally

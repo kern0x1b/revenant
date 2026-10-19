@@ -4,50 +4,50 @@ local function one_minimum_step(backports, root, found)
     local tool = import("registry-one-minimum", {rootdir = path.join(root, "..", "..", "..", "tools")})
     local work = path.join(fixtures.scratch(), "one-minimum")
     os.rm(work)
-    os.mkdir(path.join(work, "registry", "CharonThing"))
-    os.mkdir(path.join(work, "CharonThing"))
-    io.writefile(path.join(work, "CharonThing", "CharonMixedA.m"),
+    os.mkdir(path.join(work, "registry", "RevenantThing"))
+    os.mkdir(path.join(work, "RevenantThing"))
+    io.writefile(path.join(work, "RevenantThing", "RevenantMixedA.m"),
         "#import <Foundation/Foundation.h>\n"
-        .. "@implementation CharonMixedOne\n@end\n"
-        .. "@implementation CharonMixedTwo\n@end\n")
-    io.writefile(path.join(work, "CharonThing", "CharonMixedB.m"),
+        .. "@implementation RevenantMixedOne\n@end\n"
+        .. "@implementation RevenantMixedTwo\n@end\n")
+    io.writefile(path.join(work, "RevenantThing", "RevenantMixedB.m"),
         "#import <Foundation/Foundation.h>\n"
-        .. "@implementation CharonMixedThree\n@end\n"
-        .. "@implementation CharonMixedFour\n@end\n")
-    io.writefile(path.join(work, "CharonThing", "CharonClean.m"),
+        .. "@implementation RevenantMixedThree\n@end\n"
+        .. "@implementation RevenantMixedFour\n@end\n")
+    io.writefile(path.join(work, "RevenantThing", "RevenantClean.m"),
         "#import <Foundation/Foundation.h>\n"
-        .. "@implementation CharonCleanOne\n@end\n")
+        .. "@implementation RevenantCleanOne\n@end\n")
     local entries = {}
-    for _, row in ipairs({{"CharonMixedOne", ""}, {"CharonMixedTwo", "6.0"},
-                           {"CharonMixedThree", "7.0"}, {"CharonMixedFour", "6.0"},
-                           {"CharonCleanOne", "6.0"}}) do
+    for _, row in ipairs({{"RevenantMixedOne", ""}, {"RevenantMixedTwo", "6.0"},
+                           {"RevenantMixedThree", "7.0"}, {"RevenantMixedFour", "6.0"},
+                           {"RevenantCleanOne", "6.0"}}) do
         table.insert(entries, string.format('{"api": "%s", "kind": "class", "introduced": "9.0",'
             .. ' "status": "implemented", "reason": "a fixture", "effect": "a fixture",'
             .. ' "minimum": "%s"}', row[1], row[2]))
     end
-    io.writefile(path.join(work, "registry", "CharonThing", "values.json"),
-        '{"framework": "CharonThing", "entries": [' .. table.concat(entries, ",") .. "]}")
+    io.writefile(path.join(work, "registry", "RevenantThing", "values.json"),
+        '{"framework": "RevenantThing", "entries": [' .. table.concat(entries, ",") .. "]}")
     local mixed = tool.offenders(work)
     local by_object, objects = {}, 0
     for _, one in ipairs(mixed) do
         by_object[path.filename(one.object)] = one
         objects = objects + 1
     end
-    if not by_object["CharonMixedA.m"] then
-        table.insert(found, "one minimum per object: CharonMixedA.m holds a row with no minimum beside"
+    if not by_object["RevenantMixedA.m"] then
+        table.insert(found, "one minimum per object: RevenantMixedA.m holds a row with no minimum beside"
             .. " one at 6.0 and must be refused, and the rule did not name it")
     else
-        if #by_object["CharonMixedA.m"].minimums ~= 2 then
-            table.insert(found, "one minimum per object: CharonMixedA.m must be named as holding none"
-                .. " and 6.0, and it names " .. table.concat(by_object["CharonMixedA.m"].minimums, " and "))
+        if #by_object["RevenantMixedA.m"].minimums ~= 2 then
+            table.insert(found, "one minimum per object: RevenantMixedA.m must be named as holding none"
+                .. " and 6.0, and it names " .. table.concat(by_object["RevenantMixedA.m"].minimums, " and "))
         end
     end
-    if not by_object["CharonMixedB.m"] then
-        table.insert(found, "one minimum per object: CharonMixedB.m holds 6.0 and 7.0, two values, and"
+    if not by_object["RevenantMixedB.m"] then
+        table.insert(found, "one minimum per object: RevenantMixedB.m holds 6.0 and 7.0, two values, and"
             .. " must be refused, and the rule did not name it")
     end
-    if by_object["CharonClean.m"] then
-        table.insert(found, "one minimum per object: CharonClean.m holds every row at 6.0 and must not"
+    if by_object["RevenantClean.m"] then
+        table.insert(found, "one minimum per object: RevenantClean.m holds every row at 6.0 and must not"
             .. " be named, and the rule named it")
     end
     if objects ~= 2 then
@@ -139,9 +139,9 @@ local function type_rows(backports, found)
     local root = fixtures.scratch()
     os.tryrm(root)
     os.mkdir(root)
-    os.mkdir(path.join(root, "Charon"))
+    os.mkdir(path.join(root, "Revenant"))
     os.mkdir(path.join(root, "registry"))
-    io.writefile(path.join(root, "Charon", "CharonFixture.h"),
+    io.writefile(path.join(root, "Revenant", "RevenantFixture.h"),
                  "#import <Foundation/Foundation.h>\n// key pairs\ntypedef NSUInteger FixturedType;\ntypedef NS_ENUM(NSInteger, FixturedKind) {\n    FixturedCaseOne = 1,\n    FixturedCaseTwo = 2,\n};\n")
     local function told(rows)
         io.writefile(path.join(root, "registry", "Fix.json"), string.format('{"framework": "Fix", "entries": [%s]}', table.concat(rows, ", ")))
@@ -157,7 +157,7 @@ local function type_rows(backports, found)
     end
     local refused = told({row("FixturedType", "type"), row("FixturedKind", "type"), row("FixturedCaseOne", "case")})
     if refused ~= "the check passed, nothing was held unbuilt" then
-        table.insert(found, "a type and an enumeration case a Charon header declares must not be held unbuilt: " .. refused)
+        table.insert(found, "a type and an enumeration case a Revenant header declares must not be held unbuilt: " .. refused)
     end
     local sdk = path.join(root, "fake-sdk")
     os.mkdir(path.join(sdk, "usr"))
@@ -261,18 +261,18 @@ local function member_and_protocol_rows(backports, found)
     end
     inventory.classes.FixCategory = nil
     rows(protocol)
-    io.writefile(path.join(root, "CharonFixture.h"), "#import <Foundation/Foundation.h>\n@protocol FixProtocol <NSObject>\n- (void)fixIt;\n@end\n")
+    io.writefile(path.join(root, "RevenantFixture.h"), "#import <Foundation/Foundation.h>\n@protocol FixProtocol <NSObject>\n- (void)fixIt;\n@end\n")
     local declared = backports.declared_protocols(root)
     if not declared.FixProtocol then
         table.insert(found, "a protocol a header the package installs declares with a body must be implemented, and it is not")
     end
-    os.tryrm(path.join(root, "CharonFixture.h"))
-    io.writefile(path.join(root, "CharonFixture.h"), "#import <Foundation/Foundation.h>\n@protocol FixProtocol;\n")
+    os.tryrm(path.join(root, "RevenantFixture.h"))
+    io.writefile(path.join(root, "RevenantFixture.h"), "#import <Foundation/Foundation.h>\n@protocol FixProtocol;\n")
     declared = backports.declared_protocols(root)
     if declared.FixProtocol then
         table.insert(found, "a forward declaration is not a declaration: @protocol FixProtocol; must not answer the row")
     end
-    os.tryrm(path.join(root, "CharonFixture.h"))
+    os.tryrm(path.join(root, "RevenantFixture.h"))
     said = asked({}, {})
     if not said:find("FixProtocol", 1, true) then
         table.insert(found, "a protocol row no header declares must be red, and it is not: " .. said)
@@ -285,17 +285,17 @@ local function two_readers(backports, found)
     local inventory = {classes = {
         FixDefined = {image = true, instance = {["-definedOne"] = true}, ["+"] = {}},
         FixCarried = {image = true, instance = {["-carriedOne"] = true}, ["+"] = {}},
-        CharonHelper = {image = false, instance = {["-helperOne"] = true}, ["+"] = {}}}}
+        RevenantHelper = {image = false, instance = {["-helperOne"] = true}, ["+"] = {}}}}
     local function read(list)
         table.sort(list)
         return table.concat(list, " ")
     end
     local band = read(backports.added_members(inventory, {FixDefined = true, FixCarried = true}))
-    if band ~= "-[CharonHelper helperOne]" then
+    if band ~= "-[RevenantHelper helperOne]" then
         table.insert(found, "the band reader must return only what the object defines, not a member a category adds to a class the release carries, and it says: " .. band)
     end
     local api = read(backports.carried_api(inventory))
-    if not api:find("%-%[FixCarried carriedOne%]", 1, false) or api:find("CharonHelper", 1, true) or not api:find("FixDefined", 1, true) then
+    if not api:find("%-%[FixCarried carriedOne%]", 1, false) or api:find("RevenantHelper", 1, true) or not api:find("FixDefined", 1, true) then
         table.insert(found, "the API reader must return the members of every class but the port's own, and it says: " .. api)
     end
 end
@@ -352,7 +352,7 @@ local function protocol_headers(backports, root, found)
         local tree = path.join(root, "..", "..", "..")
         local rendered = import("gen.protocol_headers", {rootdir = path.join(tree, "tools"), anonymous = true})
         if #written > 0 and rendered.header_text(tree, library.folder) == nil then
-            table.insert(found, string.format("%s has %d generated protocol sources and no Charon%sProtocols.h for them to import: "
+            table.insert(found, string.format("%s has %d generated protocol sources and no Revenant%sProtocols.h for them to import: "
                                               .. "spec/protocol-headers.tsv has no rows for %s",
                                               library.name, #written, library.folder, library.folder))
         end
@@ -538,7 +538,7 @@ local function protocol_owner_step(backports, opt, found)
     if not said:find("ARKitShapedDelegate shaped", 1, true) then
         table.insert(found, "a member of a protocol that neither a port header nor the SDK declares must be reported, and it is not: " .. said:gsub("\n", " | "):sub(1, 120))
     end
-    io.writefile(path.join(root, "CharonFixture.h"), "#import <Foundation/Foundation.h>\n@protocol ARKitShapedDelegate <NSObject>\n- (void)shaped;\n@end\n")
+    io.writefile(path.join(root, "RevenantFixture.h"), "#import <Foundation/Foundation.h>\n@protocol ARKitShapedDelegate <NSObject>\n- (void)shaped;\n@end\n")
     local function ask(n, a, b, c, d)
         local value
         local ok = try {
@@ -550,11 +550,11 @@ local function protocol_owner_step(backports, opt, found)
     if ask(1, root, "ARKitShapedDelayed", inventory, nil) then
         table.insert(found, "a protocol no header declares yet must not be answered from one")
     end
-    io.writefile(path.join(root, "CharonDelayed.h"), "@protocol ARKitShapedDelayed <NSObject>\n@end\n")
+    io.writefile(path.join(root, "RevenantDelayed.h"), "@protocol ARKitShapedDelayed <NSObject>\n@end\n")
     if not ask(2, root, "ARKitShapedDelayed", inventory, nil) then
         table.insert(found, "a protocol a header declares after the first answer is not seen: what protocol_declared memoises is keyed on the folder, not on what is in it")
     end
-    os.tryrm(path.join(root, "CharonDelayed.h"))
+    os.tryrm(path.join(root, "RevenantDelayed.h"))
     os.mkdir(mutant_root)
     os.mkdir(path.join(mutant_root, "apple"))
     for _, name in ipairs(os.files(path.join(opt.modules, "apple", "*.lua"))) do
@@ -617,7 +617,7 @@ end
     if said:find("ARKitShapedDelegate shaped", 1, true) then
         table.insert(found, "a member of a protocol a port header declares must pass, and it is red: " .. said:gsub("\n", " | "):sub(1, 120))
     end
-    os.tryrm(path.join(root, "CharonFixture.h"))
+    os.tryrm(path.join(root, "RevenantFixture.h"))
     local cryptex = path.join(root, "Cryptexes", "OS", "test-uuid", "System", "Library", "Frameworks")
     os.mkdir(path.join(cryptex, "X.framework", "Headers"))
     io.writefile(path.join(cryptex, "X.framework", "Headers", "X.h"),
@@ -645,10 +645,10 @@ end
 local function inline_rows_step(backports, opt, found)
     local counter = 0
     local header_path = path.join(opt.modules, "..", "packages", "a", "apple-backports", "AVFoundation",
-                                 "CharonCMTag26.h")
+                                 "RevenantCMTag26.h")
     local header = io.readfile(header_path)
     if not header then
-        table.insert(found, "the port's CharonCMTag26.h is not in this tree, so the inline fixtures cannot be the port's own: " .. header_path)
+        table.insert(found, "the port's RevenantCMTag26.h is not in this tree, so the inline fixtures cannot be the port's own: " .. header_path)
         return
     end
     local function asked(name, text)
@@ -679,7 +679,7 @@ local function inline_rows_step(backports, opt, found)
     end
     table.sort(green)
     if #green == 0 then
-        table.insert(found, "the port's CharonCMTag26.h defines no inline the fixtures can name")
+        table.insert(found, "the port's RevenantCMTag26.h defines no inline the fixtures can name")
     end
     for _, name in ipairs(green) do
         if asked(name):find(name, 1, true) then

@@ -1,7 +1,7 @@
 #import <Foundation/Foundation.h>
 #import <Metal/Metal.h>
 
-@interface charonHost_MTL4RenderPassDescriptor : NSObject <NSCopying>
+@interface revenantHost_MTL4RenderPassDescriptor : NSObject <NSCopying>
 @property (readonly) MTLRenderPassColorAttachmentDescriptorArray *colorAttachments;
 @property (nonatomic, copy) MTLRenderPassDepthAttachmentDescriptor *depthAttachment;
 @property (nonatomic, copy) MTLRenderPassStencilAttachmentDescriptor *stencilAttachment;
@@ -20,7 +20,7 @@
 - (void)setSamplePositions:(const MTLSamplePosition *)positions count:(NSUInteger)count;
 - (NSUInteger)getSamplePositions:(MTLSamplePosition *)positions count:(NSUInteger)count;
 @end
-@interface charonHost_MTL4AccelerationStructureGeometryDescriptor : NSObject <NSCopying>
+@interface revenantHost_MTL4AccelerationStructureGeometryDescriptor : NSObject <NSCopying>
 @property (nonatomic) NSUInteger intersectionFunctionTableOffset;
 @property (nonatomic) BOOL opaque;
 @property (nonatomic) BOOL allowDuplicateIntersectionFunctionInvocation;
@@ -28,18 +28,18 @@
 @property (nonatomic) NSUInteger primitiveDataStride;
 @property (nonatomic) NSUInteger primitiveDataElementSize;
 @end
-@interface charonHost_MTL4AccelerationStructureTriangleGeometryDescriptor : charonHost_MTL4AccelerationStructureGeometryDescriptor
+@interface revenantHost_MTL4AccelerationStructureTriangleGeometryDescriptor : revenantHost_MTL4AccelerationStructureGeometryDescriptor
 @property (nonatomic) MTLAttributeFormat vertexFormat;
 @property (nonatomic) NSUInteger vertexStride;
 @property (nonatomic) MTLIndexType indexType;
 @property (nonatomic) NSUInteger triangleCount;
 @property (nonatomic) MTLMatrixLayout transformationMatrixLayout;
 @end
-@interface charonHost_MTL4AccelerationStructureBoundingBoxGeometryDescriptor : charonHost_MTL4AccelerationStructureGeometryDescriptor
+@interface revenantHost_MTL4AccelerationStructureBoundingBoxGeometryDescriptor : revenantHost_MTL4AccelerationStructureGeometryDescriptor
 @property (nonatomic) NSUInteger boundingBoxStride;
 @property (nonatomic) NSUInteger boundingBoxCount;
 @end
-@interface charonHost_MTL4AccelerationStructureCurveGeometryDescriptor : charonHost_MTL4AccelerationStructureGeometryDescriptor
+@interface revenantHost_MTL4AccelerationStructureCurveGeometryDescriptor : revenantHost_MTL4AccelerationStructureGeometryDescriptor
 @property (nonatomic) MTLAttributeFormat controlPointFormat;
 @property (nonatomic) MTLAttributeFormat radiusFormat;
 @property (nonatomic) NSUInteger segmentCount;
@@ -47,54 +47,54 @@
 @property (nonatomic) MTLCurveBasis curveBasis;
 @property (nonatomic) MTLCurveEndCaps curveEndCaps;
 @end
-@interface charonHost_MTL4AccelerationStructureMotionTriangleGeometryDescriptor : charonHost_MTL4AccelerationStructureGeometryDescriptor
+@interface revenantHost_MTL4AccelerationStructureMotionTriangleGeometryDescriptor : revenantHost_MTL4AccelerationStructureGeometryDescriptor
 @property (nonatomic) MTLAttributeFormat vertexFormat;
 @property (nonatomic) MTLIndexType indexType;
 @end
-@interface charonHost_MTL4AccelerationStructureMotionBoundingBoxGeometryDescriptor : charonHost_MTL4AccelerationStructureGeometryDescriptor
+@interface revenantHost_MTL4AccelerationStructureMotionBoundingBoxGeometryDescriptor : revenantHost_MTL4AccelerationStructureGeometryDescriptor
 @property (nonatomic) NSUInteger boundingBoxStride;
 @end
-@interface charonHost_MTL4AccelerationStructureMotionCurveGeometryDescriptor : charonHost_MTL4AccelerationStructureGeometryDescriptor
+@interface revenantHost_MTL4AccelerationStructureMotionCurveGeometryDescriptor : revenantHost_MTL4AccelerationStructureGeometryDescriptor
 @property (nonatomic) MTLAttributeFormat controlPointFormat;
 @property (nonatomic) MTLAttributeFormat radiusFormat;
 @end
-@interface charonHost_MTL4FunctionDescriptor : NSObject <NSCopying>
+@interface revenantHost_MTL4FunctionDescriptor : NSObject <NSCopying>
 @end
-@interface charonHost_MTL4SpecializedFunctionDescriptor : charonHost_MTL4FunctionDescriptor
+@interface revenantHost_MTL4SpecializedFunctionDescriptor : revenantHost_MTL4FunctionDescriptor
 @property (nonatomic, copy) id functionDescriptor;
 @property (nonatomic, copy) id specializedName;
 @property (nonatomic, copy) id constantValues;
 @end
-@interface charonHost_MTL4StitchedFunctionDescriptor : charonHost_MTL4FunctionDescriptor
+@interface revenantHost_MTL4StitchedFunctionDescriptor : revenantHost_MTL4FunctionDescriptor
 @property (nonatomic, copy) id functionGraph;
 @property (nonatomic, copy) NSArray *functionDescriptors;
 @end
-@interface charonHost_MTL4LibraryFunctionDescriptor : charonHost_MTL4FunctionDescriptor
+@interface revenantHost_MTL4LibraryFunctionDescriptor : revenantHost_MTL4FunctionDescriptor
 @property (nonatomic, copy) id name;
 @property (nonatomic, retain) id library;
 @end
-@interface charonHost_MTL4PipelineOptions : NSObject
+@interface revenantHost_MTL4PipelineOptions : NSObject
 @property (nonatomic) MTLShaderValidation shaderValidation;
 @property (nonatomic) MTL4ShaderReflection shaderReflection;
 @end
-@interface charonHost_MTL4StaticLinkingDescriptor : NSObject
+@interface revenantHost_MTL4StaticLinkingDescriptor : NSObject
 @property (nonatomic, copy) NSArray *functionDescriptors;
 @property (nonatomic, copy) NSArray *privateFunctionDescriptors;
 @property (nonatomic, copy) NSDictionary *groups;
 @end
-@interface charonHost_MTL4PipelineStageDynamicLinkingDescriptor : NSObject
+@interface revenantHost_MTL4PipelineStageDynamicLinkingDescriptor : NSObject
 @property (nonatomic) NSUInteger maxCallStackDepth;
 @property (nonatomic, copy) NSArray *binaryLinkedFunctions;
 @property (nonatomic, copy) NSArray *preloadedLibraries;
 @end
-@interface charonHost_MTL4RenderPipelineDynamicLinkingDescriptor : NSObject
-@property (readonly) charonHost_MTL4PipelineStageDynamicLinkingDescriptor *vertexLinkingDescriptor;
-@property (readonly) charonHost_MTL4PipelineStageDynamicLinkingDescriptor *fragmentLinkingDescriptor;
-@property (readonly) charonHost_MTL4PipelineStageDynamicLinkingDescriptor *tileLinkingDescriptor;
-@property (readonly) charonHost_MTL4PipelineStageDynamicLinkingDescriptor *objectLinkingDescriptor;
-@property (readonly) charonHost_MTL4PipelineStageDynamicLinkingDescriptor *meshLinkingDescriptor;
+@interface revenantHost_MTL4RenderPipelineDynamicLinkingDescriptor : NSObject
+@property (readonly) revenantHost_MTL4PipelineStageDynamicLinkingDescriptor *vertexLinkingDescriptor;
+@property (readonly) revenantHost_MTL4PipelineStageDynamicLinkingDescriptor *fragmentLinkingDescriptor;
+@property (readonly) revenantHost_MTL4PipelineStageDynamicLinkingDescriptor *tileLinkingDescriptor;
+@property (readonly) revenantHost_MTL4PipelineStageDynamicLinkingDescriptor *objectLinkingDescriptor;
+@property (readonly) revenantHost_MTL4PipelineStageDynamicLinkingDescriptor *meshLinkingDescriptor;
 @end
-@interface charonHost_MTL4RenderPipelineBinaryFunctionsDescriptor : NSObject
+@interface revenantHost_MTL4RenderPipelineBinaryFunctionsDescriptor : NSObject
 @property (nonatomic, copy) NSArray *vertexAdditionalBinaryFunctions;
 @property (nonatomic, copy) NSArray *fragmentAdditionalBinaryFunctions;
 @property (nonatomic, copy) NSArray *tileAdditionalBinaryFunctions;
@@ -102,7 +102,7 @@
 @property (nonatomic, copy) NSArray *meshAdditionalBinaryFunctions;
 - (void)reset;
 @end
-@interface charonHost_MTL4RenderPipelineColorAttachmentDescriptor : NSObject
+@interface revenantHost_MTL4RenderPipelineColorAttachmentDescriptor : NSObject
 @property (nonatomic) MTLPixelFormat pixelFormat;
 @property (nonatomic) MTL4BlendState blendingState;
 @property (nonatomic) MTLBlendFactor sourceRGBBlendFactor;
@@ -114,16 +114,16 @@
 @property (nonatomic) MTLColorWriteMask writeMask;
 - (void)reset;
 @end
-@interface charonHost_MTL4RenderPipelineColorAttachmentDescriptorArray : NSObject
-- (charonHost_MTL4RenderPipelineColorAttachmentDescriptor *)objectAtIndexedSubscript:(NSUInteger)index;
-- (void)setObject:(charonHost_MTL4RenderPipelineColorAttachmentDescriptor *)attachment atIndexedSubscript:(NSUInteger)index;
+@interface revenantHost_MTL4RenderPipelineColorAttachmentDescriptorArray : NSObject
+- (revenantHost_MTL4RenderPipelineColorAttachmentDescriptor *)objectAtIndexedSubscript:(NSUInteger)index;
+- (void)setObject:(revenantHost_MTL4RenderPipelineColorAttachmentDescriptor *)attachment atIndexedSubscript:(NSUInteger)index;
 - (void)reset;
 @end
-@interface charonHost_MTL4PipelineDescriptor : NSObject
+@interface revenantHost_MTL4PipelineDescriptor : NSObject
 @property (nonatomic, copy) NSString *label;
 @property (nonatomic, retain) id options;
 @end
-@interface charonHost_MTL4RenderPipelineDescriptor : charonHost_MTL4PipelineDescriptor
+@interface revenantHost_MTL4RenderPipelineDescriptor : revenantHost_MTL4PipelineDescriptor
 @property (nonatomic, copy) id vertexFunctionDescriptor;
 @property (nonatomic, copy) id fragmentFunctionDescriptor;
 @property (nonatomic, copy) id vertexDescriptor;
@@ -132,7 +132,7 @@
 @property (nonatomic) MTL4AlphaToOneState alphaToOneState;
 @property (nonatomic, getter=isRasterizationEnabled) BOOL rasterizationEnabled;
 @property (nonatomic) NSUInteger maxVertexAmplificationCount;
-@property (readonly) charonHost_MTL4RenderPipelineColorAttachmentDescriptorArray *colorAttachments;
+@property (readonly) revenantHost_MTL4RenderPipelineColorAttachmentDescriptorArray *colorAttachments;
 @property (nonatomic) MTLPrimitiveTopologyClass inputPrimitiveTopology;
 @property (nonatomic, copy) id vertexStaticLinkingDescriptor;
 @property (nonatomic, copy) id fragmentStaticLinkingDescriptor;
@@ -142,7 +142,7 @@
 @property (nonatomic) MTL4IndirectCommandBufferSupportState supportIndirectCommandBuffers;
 - (void)reset;
 @end
-@interface charonHost_MTL4ComputePipelineDescriptor : charonHost_MTL4PipelineDescriptor
+@interface revenantHost_MTL4ComputePipelineDescriptor : revenantHost_MTL4PipelineDescriptor
 @property (nonatomic, copy) id computeFunctionDescriptor;
 @property (nonatomic) BOOL threadGroupSizeIsMultipleOfThreadExecutionWidth;
 @property (nonatomic) NSUInteger maxTotalThreadsPerThreadgroup;
@@ -152,7 +152,7 @@
 @property (nonatomic) MTL4IndirectCommandBufferSupportState supportIndirectCommandBuffers;
 - (void)reset;
 @end
-@interface charonHost_MTL4TileRenderPipelineDescriptor : charonHost_MTL4PipelineDescriptor
+@interface revenantHost_MTL4TileRenderPipelineDescriptor : revenantHost_MTL4PipelineDescriptor
 @property (nonatomic, copy) id tileFunctionDescriptor;
 @property (nonatomic) NSUInteger rasterSampleCount;
 @property (readonly) MTLTileRenderPipelineColorAttachmentDescriptorArray *colorAttachments;
@@ -163,7 +163,7 @@
 @property (nonatomic) BOOL supportBinaryLinking;
 - (void)reset;
 @end
-@interface charonHost_MTL4MeshRenderPipelineDescriptor : charonHost_MTL4PipelineDescriptor
+@interface revenantHost_MTL4MeshRenderPipelineDescriptor : revenantHost_MTL4PipelineDescriptor
 @property (nonatomic, copy) id objectFunctionDescriptor;
 @property (nonatomic, copy) id meshFunctionDescriptor;
 @property (nonatomic, copy) id fragmentFunctionDescriptor;
@@ -180,7 +180,7 @@
 @property (nonatomic) MTL4AlphaToOneState alphaToOneState;
 @property (nonatomic, getter=isRasterizationEnabled) BOOL rasterizationEnabled;
 @property (nonatomic) NSUInteger maxVertexAmplificationCount;
-@property (readonly) charonHost_MTL4RenderPipelineColorAttachmentDescriptorArray *colorAttachments;
+@property (readonly) revenantHost_MTL4RenderPipelineColorAttachmentDescriptorArray *colorAttachments;
 @property (nonatomic, copy) id objectStaticLinkingDescriptor;
 @property (nonatomic, copy) id meshStaticLinkingDescriptor;
 @property (nonatomic, copy) id fragmentStaticLinkingDescriptor;
@@ -222,7 +222,7 @@ static id hostSlot(id array, NSUInteger index)
 
 static id portSlot(id array, NSUInteger index)
 {
-    @try { return [(charonHost_MTL4RenderPipelineColorAttachmentDescriptorArray *)array objectAtIndexedSubscript:index]; }
+    @try { return [(revenantHost_MTL4RenderPipelineColorAttachmentDescriptorArray *)array objectAtIndexedSubscript:index]; }
     @catch (NSException *why) { printf("       the port raised at %lu: %s\n", (unsigned long)index, [[why reason] UTF8String]); return nil; }
 }
 
@@ -240,17 +240,17 @@ int main(void)
     @autoreleasepool {
         printf("no device is created: a descriptor asks for none, and both sides are [[X alloc] init]\n");
         checks++;
-        if (NSClassFromString(@"ZZZNoSuchNameCharonR16") == nil)
-            printf("  ok   the control: ZZZNoSuchNameCharonR16 is not a class of this framework\n");
+        if (NSClassFromString(@"ZZZNoSuchNameRevenantR16") == nil)
+            printf("  ok   the control: ZZZNoSuchNameRevenantR16 is not a class of this framework\n");
         else {
-            printf("  FAIL the control: ZZZNoSuchNameCharonR16 exists, so this harness's answers mean nothing\n");
+            printf("  FAIL the control: ZZZNoSuchNameRevenantR16 exists, so this harness's answers mean nothing\n");
             failures++;
         }
 
         printf("MTL4PipelineOptions\n");
         {
             MTL4PipelineOptions *host = [[MTL4PipelineOptions alloc] init];
-            charonHost_MTL4PipelineOptions *port = [[charonHost_MTL4PipelineOptions alloc] init];
+            revenantHost_MTL4PipelineOptions *port = [[revenantHost_MTL4PipelineOptions alloc] init];
             same_l((long)port.shaderValidation, (long)host.shaderValidation, @"fresh: shaderValidation");
             same_u((unsigned long)port.shaderReflection, (unsigned long)host.shaderReflection, @"fresh: shaderReflection");
             [host setShaderValidation:MTLShaderValidationDisabled];
@@ -260,7 +260,7 @@ int main(void)
             same_l((long)port.shaderValidation, (long)host.shaderValidation, @"after a set: shaderValidation");
             same_u((unsigned long)port.shaderReflection, (unsigned long)host.shaderReflection, @"after a set: shaderReflection");
             MTL4PipelineOptions *hostCopy = [host copy];
-            charonHost_MTL4PipelineOptions *portCopy = [port copy];
+            revenantHost_MTL4PipelineOptions *portCopy = [port copy];
             same_l((long)portCopy.shaderValidation, (long)hostCopy.shaderValidation, @"copy of a changed one: shaderValidation");
             same_u((unsigned long)portCopy.shaderReflection, (unsigned long)hostCopy.shaderReflection, @"copy of a changed one: shaderReflection");
         }
@@ -268,7 +268,7 @@ int main(void)
         printf("MTL4StaticLinkingDescriptor\n");
         {
             MTL4StaticLinkingDescriptor *host = [[MTL4StaticLinkingDescriptor alloc] init];
-            charonHost_MTL4StaticLinkingDescriptor *port = [[charonHost_MTL4StaticLinkingDescriptor alloc] init];
+            revenantHost_MTL4StaticLinkingDescriptor *port = [[revenantHost_MTL4StaticLinkingDescriptor alloc] init];
             check(host.functionDescriptors == nil && port.functionDescriptors == nil, @"fresh: functionDescriptors is nil on both sides");
             check(host.privateFunctionDescriptors == nil && port.privateFunctionDescriptors == nil, @"fresh: privateFunctionDescriptors is nil on both sides");
             check(host.groups == nil && port.groups == nil, @"fresh: groups is nil on both sides");
@@ -277,20 +277,20 @@ int main(void)
         printf("MTL4PipelineStageDynamicLinkingDescriptor\n");
         {
             MTL4PipelineStageDynamicLinkingDescriptor *host = [[MTL4PipelineStageDynamicLinkingDescriptor alloc] init];
-            charonHost_MTL4PipelineStageDynamicLinkingDescriptor *port = [[charonHost_MTL4PipelineStageDynamicLinkingDescriptor alloc] init];
+            revenantHost_MTL4PipelineStageDynamicLinkingDescriptor *port = [[revenantHost_MTL4PipelineStageDynamicLinkingDescriptor alloc] init];
             same_u((unsigned long)port.maxCallStackDepth, (unsigned long)host.maxCallStackDepth,
                    @"fresh: maxCallStackDepth, and it is Apple's own 1 and not a zero");
             check(host.binaryLinkedFunctions == nil && port.binaryLinkedFunctions == nil, @"fresh: binaryLinkedFunctions is nil on both sides");
             check(host.preloadedLibraries == nil && port.preloadedLibraries == nil, @"fresh: preloadedLibraries is nil on both sides");
             MTL4PipelineStageDynamicLinkingDescriptor *hostCopy = [host copy];
-            charonHost_MTL4PipelineStageDynamicLinkingDescriptor *portCopy = [port copy];
+            revenantHost_MTL4PipelineStageDynamicLinkingDescriptor *portCopy = [port copy];
             same_u((unsigned long)portCopy.maxCallStackDepth, (unsigned long)hostCopy.maxCallStackDepth, @"copy: maxCallStackDepth");
         }
 
         printf("MTL4RenderPipelineDynamicLinkingDescriptor\n");
         {
             MTL4RenderPipelineDynamicLinkingDescriptor *host = [[MTL4RenderPipelineDynamicLinkingDescriptor alloc] init];
-            charonHost_MTL4RenderPipelineDynamicLinkingDescriptor *port = [[charonHost_MTL4RenderPipelineDynamicLinkingDescriptor alloc] init];
+            revenantHost_MTL4RenderPipelineDynamicLinkingDescriptor *port = [[revenantHost_MTL4RenderPipelineDynamicLinkingDescriptor alloc] init];
             check(host.vertexLinkingDescriptor != nil && port.vertexLinkingDescriptor != nil, @"fresh: vertexLinkingDescriptor is an object on both sides");
             check(host.fragmentLinkingDescriptor != nil && port.fragmentLinkingDescriptor != nil, @"fresh: fragmentLinkingDescriptor is an object on both sides");
             check(host.tileLinkingDescriptor != nil && port.tileLinkingDescriptor != nil, @"fresh: tileLinkingDescriptor is an object on both sides");
@@ -301,7 +301,7 @@ int main(void)
         printf("MTL4RenderPipelineBinaryFunctionsDescriptor\n");
         {
             MTL4RenderPipelineBinaryFunctionsDescriptor *host = [[MTL4RenderPipelineBinaryFunctionsDescriptor alloc] init];
-            charonHost_MTL4RenderPipelineBinaryFunctionsDescriptor *port = [[charonHost_MTL4RenderPipelineBinaryFunctionsDescriptor alloc] init];
+            revenantHost_MTL4RenderPipelineBinaryFunctionsDescriptor *port = [[revenantHost_MTL4RenderPipelineBinaryFunctionsDescriptor alloc] init];
             check(host.vertexAdditionalBinaryFunctions == nil && port.vertexAdditionalBinaryFunctions == nil, @"fresh: vertex is nil on both sides");
             check(host.fragmentAdditionalBinaryFunctions == nil && port.fragmentAdditionalBinaryFunctions == nil, @"fresh: fragment is nil on both sides");
             check(host.tileAdditionalBinaryFunctions == nil && port.tileAdditionalBinaryFunctions == nil, @"fresh: tile is nil on both sides");
@@ -310,7 +310,7 @@ int main(void)
             [host setVertexAdditionalBinaryFunctions:@[@"a"]];
             [port setVertexAdditionalBinaryFunctions:@[@"a"]];
             check([(MTL4RenderPipelineBinaryFunctionsDescriptor *)[host copy] vertexAdditionalBinaryFunctions].count ==
-                  [(charonHost_MTL4RenderPipelineBinaryFunctionsDescriptor *)[port copy] vertexAdditionalBinaryFunctions].count,
+                  [(revenantHost_MTL4RenderPipelineBinaryFunctionsDescriptor *)[port copy] vertexAdditionalBinaryFunctions].count,
                   @"after a set: a copy carries the vertex array on both sides");
             [host reset]; [port reset];
             check(host.vertexAdditionalBinaryFunctions == nil && port.vertexAdditionalBinaryFunctions == nil,
@@ -320,7 +320,7 @@ int main(void)
         printf("MTL4RenderPipelineColorAttachmentDescriptor\n");
         {
             MTL4RenderPipelineColorAttachmentDescriptor *host = [[MTL4RenderPipelineColorAttachmentDescriptor alloc] init];
-            charonHost_MTL4RenderPipelineColorAttachmentDescriptor *port = [[charonHost_MTL4RenderPipelineColorAttachmentDescriptor alloc] init];
+            revenantHost_MTL4RenderPipelineColorAttachmentDescriptor *port = [[revenantHost_MTL4RenderPipelineColorAttachmentDescriptor alloc] init];
             same_l((long)port.pixelFormat, (long)host.pixelFormat, @"fresh: pixelFormat, and it is MTLPixelFormatInvalid");
             same_l((long)port.blendingState, (long)host.blendingState, @"fresh: blendingState");
             same_l((long)port.sourceRGBBlendFactor, (long)host.sourceRGBBlendFactor, @"fresh: sourceRGBBlendFactor, and it is One");
@@ -344,12 +344,12 @@ int main(void)
         printf("MTL4RenderPipelineColorAttachmentDescriptorArray\n");
         {
             MTL4RenderPipelineColorAttachmentDescriptorArray *host = [[MTL4RenderPipelineColorAttachmentDescriptorArray alloc] init];
-            charonHost_MTL4RenderPipelineColorAttachmentDescriptorArray *port = [[charonHost_MTL4RenderPipelineColorAttachmentDescriptorArray alloc] init];
+            revenantHost_MTL4RenderPipelineColorAttachmentDescriptorArray *port = [[revenantHost_MTL4RenderPipelineColorAttachmentDescriptorArray alloc] init];
             for (NSUInteger index = 0; index < 8; index++)
                 check(hostSlot(host, index) != nil && portSlot(port, index) != nil,
                       ([NSString stringWithFormat:@"read %lu: both sides answer a descriptor", (unsigned long)index]));
             MTL4RenderPipelineColorAttachmentDescriptor *hostAttachment = [[MTL4RenderPipelineColorAttachmentDescriptor alloc] init];
-            charonHost_MTL4RenderPipelineColorAttachmentDescriptor *portAttachment = [[charonHost_MTL4RenderPipelineColorAttachmentDescriptor alloc] init];
+            revenantHost_MTL4RenderPipelineColorAttachmentDescriptor *portAttachment = [[revenantHost_MTL4RenderPipelineColorAttachmentDescriptor alloc] init];
             hostAttachment.pixelFormat = MTLPixelFormatRGBA8Unorm;
             portAttachment.pixelFormat = MTLPixelFormatRGBA8Unorm;
             [host setObject:hostAttachment atIndexedSubscript:2];
@@ -357,12 +357,12 @@ int main(void)
             check(hostSlot(host, 2) != hostAttachment && portSlot(port, 2) != portAttachment,
                   @"a write copies: the slot holds a copy on both sides, not the object handed in");
             same_l((long)((MTL4RenderPipelineColorAttachmentDescriptor *)hostSlot(host, 2)).pixelFormat,
-                   (long)((charonHost_MTL4RenderPipelineColorAttachmentDescriptor *)portSlot(port, 2)).pixelFormat,
+                   (long)((revenantHost_MTL4RenderPipelineColorAttachmentDescriptor *)portSlot(port, 2)).pixelFormat,
                    @"a write copies: the copy carries the format");
             [host setObject:nil atIndexedSubscript:2];
             [port setObject:nil atIndexedSubscript:2];
             same_l((long)((MTL4RenderPipelineColorAttachmentDescriptor *)hostSlot(host, 2)).pixelFormat,
-                   (long)((charonHost_MTL4RenderPipelineColorAttachmentDescriptor *)portSlot(port, 2)).pixelFormat,
+                   (long)((revenantHost_MTL4RenderPipelineColorAttachmentDescriptor *)portSlot(port, 2)).pixelFormat,
                    @"a nil empties the slot: the format is the default on both sides");
             [host reset]; [port reset];
             check(hostSlot(host, 2) != nil && portSlot(port, 2) != nil, @"after -reset: both sides still answer a descriptor");
@@ -371,7 +371,7 @@ int main(void)
         printf("MTL4PipelineDescriptor\n");
         {
             MTL4PipelineDescriptor *host = [[MTL4PipelineDescriptor alloc] init];
-            charonHost_MTL4PipelineDescriptor *port = [[charonHost_MTL4PipelineDescriptor alloc] init];
+            revenantHost_MTL4PipelineDescriptor *port = [[revenantHost_MTL4PipelineDescriptor alloc] init];
             check(host.label == nil && port.label == nil, @"fresh: label is nil on both sides");
             check(host.options == nil && port.options == nil,
                   @"fresh: options is nil on both sides, and NOT a fresh MTL4PipelineOptions");
@@ -382,7 +382,7 @@ int main(void)
         printf("MTL4RenderPipelineDescriptor\n");
         {
             MTL4RenderPipelineDescriptor *host = [[MTL4RenderPipelineDescriptor alloc] init];
-            charonHost_MTL4RenderPipelineDescriptor *port = [[charonHost_MTL4RenderPipelineDescriptor alloc] init];
+            revenantHost_MTL4RenderPipelineDescriptor *port = [[revenantHost_MTL4RenderPipelineDescriptor alloc] init];
             check(host.vertexFunctionDescriptor == nil && port.vertexFunctionDescriptor == nil, @"fresh: vertexFunctionDescriptor is nil on both sides");
             check(host.fragmentFunctionDescriptor == nil && port.fragmentFunctionDescriptor == nil, @"fresh: fragmentFunctionDescriptor is nil on both sides");
             check(host.vertexDescriptor != nil && port.vertexDescriptor != nil,
@@ -427,7 +427,7 @@ int main(void)
         printf("MTL4ComputePipelineDescriptor\n");
         {
             MTL4ComputePipelineDescriptor *host = [[MTL4ComputePipelineDescriptor alloc] init];
-            charonHost_MTL4ComputePipelineDescriptor *port = [[charonHost_MTL4ComputePipelineDescriptor alloc] init];
+            revenantHost_MTL4ComputePipelineDescriptor *port = [[revenantHost_MTL4ComputePipelineDescriptor alloc] init];
             check(host.computeFunctionDescriptor == nil && port.computeFunctionDescriptor == nil, @"fresh: computeFunctionDescriptor is nil on both sides");
             check(host.threadGroupSizeIsMultipleOfThreadExecutionWidth == port.threadGroupSizeIsMultipleOfThreadExecutionWidth, @"fresh: threadGroupSizeIsMultipleOfThreadExecutionWidth");
             same_u((unsigned long)port.maxTotalThreadsPerThreadgroup, (unsigned long)host.maxTotalThreadsPerThreadgroup, @"fresh: maxTotalThreadsPerThreadgroup");
@@ -440,7 +440,7 @@ int main(void)
         printf("MTL4TileRenderPipelineDescriptor\n");
         {
             MTL4TileRenderPipelineDescriptor *host = [[MTL4TileRenderPipelineDescriptor alloc] init];
-            charonHost_MTL4TileRenderPipelineDescriptor *port = [[charonHost_MTL4TileRenderPipelineDescriptor alloc] init];
+            revenantHost_MTL4TileRenderPipelineDescriptor *port = [[revenantHost_MTL4TileRenderPipelineDescriptor alloc] init];
             check(host.tileFunctionDescriptor == nil && port.tileFunctionDescriptor == nil, @"fresh: tileFunctionDescriptor is nil on both sides");
             same_u((unsigned long)port.rasterSampleCount, (unsigned long)host.rasterSampleCount, @"fresh: rasterSampleCount");
             check(host.colorAttachments != nil && port.colorAttachments != nil, @"fresh: colorAttachments is an object on both sides");
@@ -458,7 +458,7 @@ int main(void)
         printf("MTL4MeshRenderPipelineDescriptor\n");
         {
             MTL4MeshRenderPipelineDescriptor *host = [[MTL4MeshRenderPipelineDescriptor alloc] init];
-            charonHost_MTL4MeshRenderPipelineDescriptor *port = [[charonHost_MTL4MeshRenderPipelineDescriptor alloc] init];
+            revenantHost_MTL4MeshRenderPipelineDescriptor *port = [[revenantHost_MTL4MeshRenderPipelineDescriptor alloc] init];
             check(host.objectFunctionDescriptor == nil && port.objectFunctionDescriptor == nil, @"fresh: objectFunctionDescriptor is nil on both sides");
             check(host.meshFunctionDescriptor == nil && port.meshFunctionDescriptor == nil, @"fresh: meshFunctionDescriptor is nil on both sides");
             check(host.fragmentFunctionDescriptor == nil && port.fragmentFunctionDescriptor == nil, @"fresh: fragmentFunctionDescriptor is nil on both sides");
@@ -496,7 +496,7 @@ int main(void)
         printf("the acceleration structure geometry descriptors\n");
         {
             MTL4AccelerationStructureGeometryDescriptor *host = [[MTL4AccelerationStructureGeometryDescriptor alloc] init];
-            charonHost_MTL4AccelerationStructureGeometryDescriptor *port = [[charonHost_MTL4AccelerationStructureGeometryDescriptor alloc] init];
+            revenantHost_MTL4AccelerationStructureGeometryDescriptor *port = [[revenantHost_MTL4AccelerationStructureGeometryDescriptor alloc] init];
             same_u((unsigned long)port.intersectionFunctionTableOffset, (unsigned long)host.intersectionFunctionTableOffset, @"fresh: intersectionFunctionTableOffset");
             check(host.opaque == port.opaque, @"fresh: opaque");
             check(host.allowDuplicateIntersectionFunctionInvocation == port.allowDuplicateIntersectionFunctionInvocation &&
@@ -508,7 +508,7 @@ int main(void)
         }
         {
             MTL4AccelerationStructureTriangleGeometryDescriptor *host = [[MTL4AccelerationStructureTriangleGeometryDescriptor alloc] init];
-            charonHost_MTL4AccelerationStructureTriangleGeometryDescriptor *port = [[charonHost_MTL4AccelerationStructureTriangleGeometryDescriptor alloc] init];
+            revenantHost_MTL4AccelerationStructureTriangleGeometryDescriptor *port = [[revenantHost_MTL4AccelerationStructureTriangleGeometryDescriptor alloc] init];
             same_l((long)port.vertexFormat, (long)host.vertexFormat, @"fresh: vertexFormat, and it is Apple's own Float3");
             check(host.vertexFormat == MTLVertexFormatFloat3, @"that format is MTLVertexFormatFloat3, the enumeration's 30");
             same_u((unsigned long)port.vertexStride, (unsigned long)host.vertexStride, @"fresh: vertexStride");
@@ -519,14 +519,14 @@ int main(void)
         }
         {
             MTL4AccelerationStructureBoundingBoxGeometryDescriptor *host = [[MTL4AccelerationStructureBoundingBoxGeometryDescriptor alloc] init];
-            charonHost_MTL4AccelerationStructureBoundingBoxGeometryDescriptor *port = [[charonHost_MTL4AccelerationStructureBoundingBoxGeometryDescriptor alloc] init];
+            revenantHost_MTL4AccelerationStructureBoundingBoxGeometryDescriptor *port = [[revenantHost_MTL4AccelerationStructureBoundingBoxGeometryDescriptor alloc] init];
             same_u((unsigned long)port.boundingBoxStride, (unsigned long)host.boundingBoxStride, @"fresh: boundingBoxStride, and it is Apple's own 24");
             check(host.boundingBoxStride == 24, @"that stride is 24, three float32s");
             same_u((unsigned long)port.boundingBoxCount, (unsigned long)host.boundingBoxCount, @"fresh: boundingBoxCount");
         }
         {
             MTL4AccelerationStructureCurveGeometryDescriptor *host = [[MTL4AccelerationStructureCurveGeometryDescriptor alloc] init];
-            charonHost_MTL4AccelerationStructureCurveGeometryDescriptor *port = [[charonHost_MTL4AccelerationStructureCurveGeometryDescriptor alloc] init];
+            revenantHost_MTL4AccelerationStructureCurveGeometryDescriptor *port = [[revenantHost_MTL4AccelerationStructureCurveGeometryDescriptor alloc] init];
             same_l((long)port.controlPointFormat, (long)host.controlPointFormat, @"fresh: controlPointFormat");
             check(host.controlPointFormat == MTLVertexFormatFloat3, @"a curve's control point format is MTLVertexFormatFloat3");
             same_l((long)port.radiusFormat, (long)host.radiusFormat, @"fresh: radiusFormat, and it is NOT the control point's");
@@ -539,18 +539,18 @@ int main(void)
         }
         {
             MTL4AccelerationStructureMotionTriangleGeometryDescriptor *host = [[MTL4AccelerationStructureMotionTriangleGeometryDescriptor alloc] init];
-            charonHost_MTL4AccelerationStructureMotionTriangleGeometryDescriptor *port = [[charonHost_MTL4AccelerationStructureMotionTriangleGeometryDescriptor alloc] init];
+            revenantHost_MTL4AccelerationStructureMotionTriangleGeometryDescriptor *port = [[revenantHost_MTL4AccelerationStructureMotionTriangleGeometryDescriptor alloc] init];
             same_l((long)port.vertexFormat, (long)host.vertexFormat, @"fresh motion triangle: vertexFormat");
             same_l((long)port.indexType, (long)host.indexType, @"fresh motion triangle: indexType");
         }
         {
             MTL4AccelerationStructureMotionBoundingBoxGeometryDescriptor *host = [[MTL4AccelerationStructureMotionBoundingBoxGeometryDescriptor alloc] init];
-            charonHost_MTL4AccelerationStructureMotionBoundingBoxGeometryDescriptor *port = [[charonHost_MTL4AccelerationStructureMotionBoundingBoxGeometryDescriptor alloc] init];
+            revenantHost_MTL4AccelerationStructureMotionBoundingBoxGeometryDescriptor *port = [[revenantHost_MTL4AccelerationStructureMotionBoundingBoxGeometryDescriptor alloc] init];
             same_u((unsigned long)port.boundingBoxStride, (unsigned long)host.boundingBoxStride, @"fresh motion bounding box: boundingBoxStride");
         }
         {
             MTL4AccelerationStructureMotionCurveGeometryDescriptor *host = [[MTL4AccelerationStructureMotionCurveGeometryDescriptor alloc] init];
-            charonHost_MTL4AccelerationStructureMotionCurveGeometryDescriptor *port = [[charonHost_MTL4AccelerationStructureMotionCurveGeometryDescriptor alloc] init];
+            revenantHost_MTL4AccelerationStructureMotionCurveGeometryDescriptor *port = [[revenantHost_MTL4AccelerationStructureMotionCurveGeometryDescriptor alloc] init];
             same_l((long)port.controlPointFormat, (long)host.controlPointFormat, @"fresh motion curve: controlPointFormat");
             same_l((long)port.radiusFormat, (long)host.radiusFormat, @"fresh motion curve: radiusFormat");
         }
@@ -558,7 +558,7 @@ int main(void)
         printf("MTL4RenderPassDescriptor\n");
         {
             MTL4RenderPassDescriptor *host = [[MTL4RenderPassDescriptor alloc] init];
-            charonHost_MTL4RenderPassDescriptor *port = [[charonHost_MTL4RenderPassDescriptor alloc] init];
+            revenantHost_MTL4RenderPassDescriptor *port = [[revenantHost_MTL4RenderPassDescriptor alloc] init];
             check(host.colorAttachments != nil && port.colorAttachments != nil, @"fresh: colorAttachments is an object on both sides");
             for (NSUInteger index = 0; index < 8; index++)
                 check([host.colorAttachments objectAtIndexedSubscript:index] != nil &&

@@ -48,7 +48,7 @@ local OBJECT = [[#import <CoreImage/CoreImage.h>
 //
 // The port carries CIFilter's constructors and not CIFilter: the class is the release's own from
 // iOS 5.0 (tools/cache-index/first-rung.lua _OBJC_CLASS_$_CIFilter -> 5.0), so these are a category
-// on it, and charon_collect installs a category method only where the class does not answer the
+// on it, and revenant_collect installs a category method only where the class does not answer the
 // selector, which is exactly the band this object is for.
 
 @implementation CIFilter ({category})
@@ -123,7 +123,7 @@ function objects(tree, fw)
         local example = band_rows[1]
         local values = {
             version = band.version, count = #band_rows, total = #rows, why = band.why, example = example.selector,
-            examplename = example["filter-name"], category = "CharonFilterBuiltins" .. tag, checked = counts["fields-compared"],
+            examplename = example["filter-name"], category = "RevenantFilterBuiltins" .. tag, checked = counts["fields-compared"],
             rendered = counts.rendered, different = counts.different,
         }
         local parts = {fill(OBJECT, values)}

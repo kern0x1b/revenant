@@ -1,31 +1,31 @@
 #import <Foundation/Foundation.h>
 #import <MetricKit/MetricKit.h>
 #import "metricvalue-cases.h"
-#if defined(CHARON_METRICVALUE_PORT)
-#import "CharonMetricValue.h"
+#if defined(REVENANT_METRICVALUE_PORT)
+#import "RevenantMetricValue.h"
 
-@interface MXCPUMetric (CharonMetricValueCases)
-- (void)charon_setValue:(id)value forKey:(NSString *)key;
-@end
-
-@interface MXAnimationMetric (CharonMetricValueCases)
-- (void)charon_setValue:(id)value forKey:(NSString *)key;
-@end
-@interface MXMetaData (CharonMetricValueCases)
-- (void)charon_setValue:(id)value forKey:(NSString *)key;
-@end
-@interface MXMetricPayload (CharonMetricValueCases)
-- (void)charon_setValue:(id)value forKey:(NSString *)key;
-@end
-@interface MXCrashDiagnostic (CharonMetricValueCases)
-- (void)charon_setValue:(id)value forKey:(NSString *)key;
-@end
-@interface MXDiagnostic (CharonMetricValueCases)
-- (void)charon_setValue:(id)value forKey:(NSString *)key;
+@interface MXCPUMetric (RevenantMetricValueCases)
+- (void)revenant_setValue:(id)value forKey:(NSString *)key;
 @end
 
-@interface MXDiagnosticPayload (CharonMetricValueCases)
-- (void)charon_setValue:(id)value forKey:(NSString *)key;
+@interface MXAnimationMetric (RevenantMetricValueCases)
+- (void)revenant_setValue:(id)value forKey:(NSString *)key;
+@end
+@interface MXMetaData (RevenantMetricValueCases)
+- (void)revenant_setValue:(id)value forKey:(NSString *)key;
+@end
+@interface MXMetricPayload (RevenantMetricValueCases)
+- (void)revenant_setValue:(id)value forKey:(NSString *)key;
+@end
+@interface MXCrashDiagnostic (RevenantMetricValueCases)
+- (void)revenant_setValue:(id)value forKey:(NSString *)key;
+@end
+@interface MXDiagnostic (RevenantMetricValueCases)
+- (void)revenant_setValue:(id)value forKey:(NSString *)key;
+@end
+
+@interface MXDiagnosticPayload (RevenantMetricValueCases)
+- (void)revenant_setValue:(id)value forKey:(NSString *)key;
 @end
 #endif
 
@@ -44,12 +44,12 @@ void metricvalue_run(CertificateRecorder record)
     recordRepresentation(record, [[MXCPUMetric alloc] init]);
     recordRepresentation(record, [[MXMetricPayload alloc] init]);
 
-#ifdef CHARON_METRICVALUE_PORT
+#ifdef REVENANT_METRICVALUE_PORT
 
     MXCPUMetric *cpu = [[MXCPUMetric alloc] init];
     NSMeasurement *duration = [[NSMeasurement alloc] initWithDoubleValue:1.5
                                                                   unit:[NSUnitDuration seconds]];
-    [cpu charon_setValue:duration forKey:@"cumulativeCPUTime"];
+    [cpu revenant_setValue:duration forKey:@"cumulativeCPUTime"];
     NSDictionary *filled = [cpu dictionaryRepresentation];
     record(@"filled.keyCount", [NSString stringWithFormat:@"%lu", (unsigned long)filled.count]);
     record(@"filled.hasCumulativeCPUTime", (filled[@"cumulativeCPUTime"] ? @"1" : @"0"));
@@ -62,7 +62,7 @@ void metricvalue_run(CertificateRecorder record)
 
     MXDiagnosticPayload *payload = [[MXDiagnosticPayload alloc] init];
     NSDate *when = [NSDate dateWithTimeIntervalSinceReferenceDate:1000.5];
-    [payload charon_setValue:when forKey:@"timeStampBegin"];
+    [payload revenant_setValue:when forKey:@"timeStampBegin"];
     NSDictionary *payloadDictionary = [payload dictionaryRepresentation];
     record(@"date.value", ([payloadDictionary[@"timeStampBegin"] description] ?: @"(none)"));
     record(@"date.endAbsent", (payloadDictionary[@"timeStampEnd"] ? @"1" : @"0"));
@@ -92,7 +92,7 @@ void metricvalue_run(CertificateRecorder record)
            ([[read dictionaryRepresentation] isEqualToDictionary:[cpu dictionaryRepresentation]] ? @"1" : @"0"));
 
     NSArray *pairs = @[
-#ifdef CHARON_METRICVALUE_PORT
+#ifdef REVENANT_METRICVALUE_PORT
         @[[MXAnimationMetric class], @"hitchTimeRatio", @"sentinel-measurement"],
         @[[MXMetaData class], @"bundleIdentifier", @"sentinel-bundle"],
         @[[MXMetaData class], @"lowPowerModeEnabled", @YES],
@@ -119,7 +119,7 @@ void metricvalue_run(CertificateRecorder record)
         (void)[instance valueForKey:key];
         record(([NSString stringWithFormat:@"kvc.%@.%@.read", who, key]), (instance ? @"1" : @"0"));
 
-        [instance charon_setValue:sentinel forKey:key];
+        [instance revenant_setValue:sentinel forKey:key];
         id back = [instance valueForKey:key];
         BOOL same = [back isKindOfClass:[NSString class]] ? [back isEqualToString:sentinel]
                                                           : [back isEqual:sentinel];

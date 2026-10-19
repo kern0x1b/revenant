@@ -1,4 +1,4 @@
-#import "CharonGK.h"
+#import "RevenantGK.h"
 
 @implementation GKRule {
     NSInteger _salience;
@@ -48,14 +48,14 @@
 + (instancetype)ruleWithPredicate:(NSPredicate *)predicate assertingFact:(id<NSObject>)fact grade:(float)grade
 {
     GKNSPredicateRule *rule = [[GKNSPredicateRule alloc] initWithPredicate:predicate];
-    [rule charon_grade:grade asserting:YES fact:fact];
+    [rule revenant_grade:grade asserting:YES fact:fact];
     return rule;
 }
 
 + (instancetype)ruleWithPredicate:(NSPredicate *)predicate retractingFact:(id<NSObject>)fact grade:(float)grade
 {
     GKNSPredicateRule *rule = [[GKNSPredicateRule alloc] initWithPredicate:predicate];
-    [rule charon_grade:grade asserting:NO fact:fact];
+    [rule revenant_grade:grade asserting:NO fact:fact];
     return rule;
 }
 
@@ -65,16 +65,16 @@
         return predicate((GKRuleSystem *)object);
     }] : nil;
     GKNSPredicateRule *rule = [[GKNSPredicateRule alloc] initWithPredicate:wrapped];
-    [rule charon_setAction:action];
+    [rule revenant_setAction:action];
     return rule;
 }
 
-- (void)charon_setAction:(void (^)(GKRuleSystem *))action
+- (void)revenant_setAction:(void (^)(GKRuleSystem *))action
 {
     _action = [action copy];
 }
 
-- (void)charon_grade:(float)grade asserting:(BOOL)asserts fact:(id<NSObject>)fact
+- (void)revenant_grade:(float)grade asserting:(BOOL)asserts fact:(id<NSObject>)fact
 {
     _grade = grade;
     _asserts = asserts;
@@ -157,7 +157,7 @@
     return [_grades allKeys];
 }
 
-- (NSArray<GKRule *> *)charon_rankedRules
+- (NSArray<GKRule *> *)revenant_rankedRules
 {
     return [_rules sortedArrayUsingComparator:^NSComparisonResult(GKRule *left, GKRule *right) {
         if (left.salience == right.salience) {
@@ -167,7 +167,7 @@
     }];
 }
 
-- (NSUInteger)charon_placeInAgendaFor:(GKRule *)rule
+- (NSUInteger)revenant_placeInAgendaFor:(GKRule *)rule
 {
     NSUInteger index = 0;
     while (index < [_agenda count] && [_agenda[index] salience] >= [rule salience]) {
@@ -180,7 +180,7 @@
 {
     if (rule) {
         [_rules addObject:rule];
-        [_agenda insertObject:rule atIndex:[self charon_placeInAgendaFor:rule]];
+        [_agenda insertObject:rule atIndex:[self revenant_placeInAgendaFor:rule]];
     }
 }
 
@@ -242,7 +242,7 @@
 
 - (void)assertFact:(id<NSObject>)fact grade:(float)grade
 {
-    [self charon_moveFact:fact by:grade];
+    [self revenant_moveFact:fact by:grade];
 }
 
 - (void)retractFact:(id<NSObject>)fact
@@ -252,10 +252,10 @@
 
 - (void)retractFact:(id<NSObject>)fact grade:(float)grade
 {
-    [self charon_moveFact:fact by:-grade];
+    [self revenant_moveFact:fact by:-grade];
 }
 
-- (void)charon_moveFact:(id<NSObject>)fact by:(float)delta
+- (void)revenant_moveFact:(id<NSObject>)fact by:(float)delta
 {
     if (!fact) {
         return;
@@ -272,7 +272,7 @@
 
 - (void)reset
 {
-    [_agenda setArray:[self charon_rankedRules]];
+    [_agenda setArray:[self revenant_rankedRules]];
     [_executed removeAllObjects];
     [_grades removeAllObjects];
     [_state removeAllObjects];

@@ -2,27 +2,27 @@
 #import <objc/runtime.h>
 #include <dlfcn.h>
 
-typedef void CharonICURegex;
+typedef void RevenantICURegex;
 
 enum {
-    CharonICUUnixLines = 1,
-    CharonICUCaseInsensitive = 2,
-    CharonICUComments = 4,
-    CharonICUMultiline = 8,
-    CharonICULiteral = 16,
-    CharonICUDotAll = 32,
-    CharonICUWordBoundaries = 256
+    RevenantICUUnixLines = 1,
+    RevenantICUCaseInsensitive = 2,
+    RevenantICUComments = 4,
+    RevenantICUMultiline = 8,
+    RevenantICULiteral = 16,
+    RevenantICUDotAll = 32,
+    RevenantICUWordBoundaries = 256
 };
 
 typedef struct {
-    CharonICURegex *(*open)(const unichar *pattern, int32_t length, uint32_t flags, void *parseError, int32_t *status);
-    void (*close)(CharonICURegex *regex);
-    int32_t (*groupNumberFromName)(CharonICURegex *regex, const unichar *name, int32_t length, int32_t *status);
-} CharonICURegexFunctions;
+    RevenantICURegex *(*open)(const unichar *pattern, int32_t length, uint32_t flags, void *parseError, int32_t *status);
+    void (*close)(RevenantICURegex *regex);
+    int32_t (*groupNumberFromName)(RevenantICURegex *regex, const unichar *name, int32_t length, int32_t *status);
+} RevenantICURegexFunctions;
 
-static const CharonICURegexFunctions *charon_icu_regex(void)
+static const RevenantICURegexFunctions *revenant_icu_regex(void)
 {
-    static CharonICURegexFunctions functions;
+    static RevenantICURegexFunctions functions;
     static BOOL loaded;
     static dispatch_once_t once;
     dispatch_once(&once, ^{
@@ -37,34 +37,34 @@ static const CharonICURegexFunctions *charon_icu_regex(void)
     return loaded ? &functions : NULL;
 }
 
-static uint32_t charon_icu_flags(NSRegularExpressionOptions options)
+static uint32_t revenant_icu_flags(NSRegularExpressionOptions options)
 {
     uint32_t flags = 0;
     if (options & NSRegularExpressionCaseInsensitive)
-        flags |= CharonICUCaseInsensitive;
+        flags |= RevenantICUCaseInsensitive;
     if (options & NSRegularExpressionAllowCommentsAndWhitespace)
-        flags |= CharonICUComments;
+        flags |= RevenantICUComments;
     if (options & NSRegularExpressionIgnoreMetacharacters)
-        flags |= CharonICULiteral;
+        flags |= RevenantICULiteral;
     if (options & NSRegularExpressionDotMatchesLineSeparators)
-        flags |= CharonICUDotAll;
+        flags |= RevenantICUDotAll;
     if (options & NSRegularExpressionAnchorsMatchLines)
-        flags |= CharonICUMultiline;
+        flags |= RevenantICUMultiline;
     if (options & NSRegularExpressionUseUnixLineSeparators)
-        flags |= CharonICUUnixLines;
+        flags |= RevenantICUUnixLines;
     if (options & NSRegularExpressionUseUnicodeWordBoundaries)
-        flags |= CharonICUWordBoundaries;
+        flags |= RevenantICUWordBoundaries;
     return flags;
 }
 
-static NSInteger charon_group_number(NSRegularExpression *expression, NSString *name, const CharonICURegexFunctions *icu)
+static NSInteger revenant_group_number(NSRegularExpression *expression, NSString *name, const RevenantICURegexFunctions *icu)
 {
     NSString *pattern = expression.pattern;
     NSUInteger length = pattern.length;
     unichar *characters = malloc((length ? length : 1) * sizeof(unichar));
     [pattern getCharacters:characters range:NSMakeRange(0, length)];
     int32_t status = 0;
-    CharonICURegex *regex = icu->open(characters, (int32_t)length, charon_icu_flags(expression.options), NULL, &status);
+    RevenantICURegex *regex = icu->open(characters, (int32_t)length, revenant_icu_flags(expression.options), NULL, &status);
     free(characters);
     if (status > 0) {
         if (regex)
@@ -80,26 +80,26 @@ static NSInteger charon_group_number(NSRegularExpression *expression, NSString *
     return status > 0 ? NSNotFound : number;
 }
 
-static char CharonGroupNumbersKey;
+static char RevenantGroupNumbersKey;
 
-@implementation NSTextCheckingResult (CharonNamedCaptures)
+@implementation NSTextCheckingResult (RevenantNamedCaptures)
 
 - (NSRange)rangeWithName:(NSString *)name
 {
     NSRegularExpression *expression = self.regularExpression;
-    const CharonICURegexFunctions *icu = charon_icu_regex();
+    const RevenantICURegexFunctions *icu = revenant_icu_regex();
     if (!expression || !name || !icu)
         return NSMakeRange(NSNotFound, 0);
     NSNumber *number;
     @synchronized (expression) {
-        NSMutableDictionary *numbers = objc_getAssociatedObject(expression, &CharonGroupNumbersKey);
+        NSMutableDictionary *numbers = objc_getAssociatedObject(expression, &RevenantGroupNumbersKey);
         if (!numbers) {
             numbers = [NSMutableDictionary dictionary];
-            objc_setAssociatedObject(expression, &CharonGroupNumbersKey, numbers, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+            objc_setAssociatedObject(expression, &RevenantGroupNumbersKey, numbers, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
         }
         number = numbers[name];
         if (!number) {
-            number = @(charon_group_number(expression, name, icu));
+            number = @(revenant_group_number(expression, name, icu));
             numbers[[name copy]] = number;
         }
     }

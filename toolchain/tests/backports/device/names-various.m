@@ -24,7 +24,7 @@ int main(int argc, char **argv)
 {
     @autoreleasepool {
         if (argc > 1)
-            charon_log_to(@(argv[1]));
+            revenant_log_to(@(argv[1]));
         elsewhere = [NSMutableArray array];
         different = [NSMutableArray array];
 #define NAME_STRING(name, value) \
@@ -43,7 +43,7 @@ int main(int argc, char **argv)
         CHECK(![session canSetSessionPreset:AVCaptureSessionPresetInputPriority] && ![session canSetSessionPreset:AVCaptureSessionPreset3840x2160], "no session accepts the input priority or the 4K preset");
         AVCaptureMetadataOutput *output = [[AVCaptureMetadataOutput alloc] init];
         CHECK(![output.availableMetadataObjectTypes containsObject:AVMetadataObjectTypeQRCode], "the metadata output does not list the QR code among its available types");
-        printf("%d checks, %d failures\n", charon_checks, charon_failures);
-        return charon_failures;
+        printf("%d checks, %d failures\n", revenant_checks, revenant_failures);
+        return revenant_failures;
     }
 }

@@ -1,13 +1,13 @@
 #import <HealthKit/HealthKit.h>
 
-#import "CharonHKStore.h"
+#import "RevenantHKStore.h"
 
-@interface HKHealthStore (CharonIOS120Internal)
+@interface HKHealthStore (RevenantIOS120Internal)
 - (void)saveObjects:(NSArray<HKObject *> *)objects withCompletion:(void (^)(BOOL success, NSError *_Nullable error))completion;
 @end
 
-@interface HKQuantity (CharonIOS120Internal)
-- (HKUnit *)charon_unit;
+@interface HKQuantity (RevenantIOS120Internal)
+- (HKUnit *)revenant_unit;
 @end
 
 @implementation HKQuantitySeriesSampleBuilder {
@@ -19,7 +19,7 @@
     BOOL _finished;
     BOOL _discarded;
 }
-CHARON_HEALTHKIT_UNCREATABLE_INIT
+REVENANT_HEALTHKIT_UNCREATABLE_INIT
 
 - (instancetype)initWithHealthStore:(HKHealthStore *)healthStore
                        quantityType:(HKQuantityType *)quantityType
@@ -64,21 +64,21 @@ CHARON_HEALTHKIT_UNCREATABLE_INIT
         [NSException raise:NSGenericException
                     format:@"HKQuantitySeriesSampleBuilder already discarded."];
     if (_finished) {
-        [self charon_fail:error
+        [self revenant_fail:error
                   reason:@"Quantity series sample builder already finished"
                     code:3];
         return NO;
     }
-    if (!quantity || ![_quantityType isCompatibleWithUnit:[quantity charon_unit]]) {
-        [self charon_fail:error
+    if (!quantity || ![_quantityType isCompatibleWithUnit:[quantity revenant_unit]]) {
+        [self revenant_fail:error
                   reason:[NSString stringWithFormat:@"Quantity (%@) does not have a unit compatible with "
                                                      "quantity series builder quantity type %@",
-                                                     [self charon_describe:quantity], _quantityType.identifier]
+                                                     [self revenant_describe:quantity], _quantityType.identifier]
                     code:3];
         return NO;
     }
     if ([date compare:_startDate] == NSOrderedAscending) {
-        [self charon_fail:error
+        [self revenant_fail:error
                   reason:[NSString stringWithFormat:@"Date interval (Start Date %@) is before builder's "
                                                      "start date %@", date, _startDate]
                     code:3];
@@ -98,7 +98,7 @@ CHARON_HEALTHKIT_UNCREATABLE_INIT
                     format:@"HKQuantitySeriesSampleBuilder already discarded."];
     if (_finished) {
         if (completion)
-            completion(nil, [self charon_errorWithReason:@"Quantity series sample builder already finished" code:3]);
+            completion(nil, [self revenant_errorWithReason:@"Quantity series sample builder already finished" code:3]);
         return;
     }
 
@@ -115,7 +115,7 @@ CHARON_HEALTHKIT_UNCREATABLE_INIT
     }
     if (!samples.count) {
         if (completion)
-            completion(nil, [self charon_errorWithReason:@"Quantity series sample builder has nothing inserted" code:3]);
+            completion(nil, [self revenant_errorWithReason:@"Quantity series sample builder has nothing inserted" code:3]);
         return;
     }
 
@@ -123,7 +123,7 @@ CHARON_HEALTHKIT_UNCREATABLE_INIT
     [_healthStore saveObjects:samples withCompletion:^(BOOL success, NSError *_Nullable error) {
         if (completion)
             completion(success ? samples : nil,
-                       success ? nil : (error ?: [self charon_errorWithReason:@"Quantity series samples could not be saved" code:0]));
+                       success ? nil : (error ?: [self revenant_errorWithReason:@"Quantity series samples could not be saved" code:0]));
     }];
 }
 
@@ -136,24 +136,24 @@ CHARON_HEALTHKIT_UNCREATABLE_INIT
 
 #pragma mark - what the refusals say
 
-- (void)charon_fail:(NSError **)error reason:(NSString *)reason code:(NSInteger)code
+- (void)revenant_fail:(NSError **)error reason:(NSString *)reason code:(NSInteger)code
 {
     if (error)
-        *error = [self charon_errorWithReason:reason code:code];
+        *error = [self revenant_errorWithReason:reason code:code];
 }
 
-- (NSError *)charon_errorWithReason:(NSString *)reason code:(NSInteger)code
+- (NSError *)revenant_errorWithReason:(NSString *)reason code:(NSInteger)code
 {
     return [NSError errorWithDomain:HKErrorDomain code:code userInfo:@{
         NSLocalizedDescriptionKey: reason
     }];
 }
 
-- (NSString *)charon_describe:(HKQuantity *)quantity
+- (NSString *)revenant_describe:(HKQuantity *)quantity
 {
     if (!quantity)
         return @"nil";
-    HKUnit *unit = [quantity charon_unit];
+    HKUnit *unit = [quantity revenant_unit];
     return [NSString stringWithFormat:@"%g %@", [quantity doubleValueForUnit:unit], unit.unitString];
 }
 

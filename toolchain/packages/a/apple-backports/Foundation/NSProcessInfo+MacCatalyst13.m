@@ -1,6 +1,6 @@
 #import <Foundation/Foundation.h>
 
-@implementation NSProcessInfo (CharonMacCatalyst)
+@implementation NSProcessInfo (RevenantMacCatalyst)
 
 - (BOOL)isMacCatalystApp
 {

@@ -161,7 +161,7 @@ function main(systemFile, oursFile, expectations, limit)
             end
         end
         local handle = assert(io.open(expectations, "wb"))
-        handle:write("static const struct {\n    int index;\n    const char *text;\n} charon_oslog_expected[] = {\n"
+        handle:write("static const struct {\n    int index;\n    const char *text;\n} revenant_oslog_expected[] = {\n"
             .. table.concat(rows, "\n") .. "\n};\n")
         handle:close()
     end

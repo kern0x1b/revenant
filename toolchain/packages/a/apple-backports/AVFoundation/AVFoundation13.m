@@ -1,6 +1,6 @@
 #import <AVFoundation/AVFoundation.h>
 
-@implementation AVMutableVideoComposition (CharonAVFoundation13)
+@implementation AVMutableVideoComposition (RevenantAVFoundation13)
 
 + (AVMutableVideoComposition *)videoCompositionWithPropertiesOfAsset:(AVAsset *)asset
                                               prototypeInstruction:(AVVideoCompositionInstruction *)prototypeInstruction
@@ -24,7 +24,7 @@
 
 @end
 
-@implementation AVCaptureVideoPreviewLayer (CharonAVFoundation13)
+@implementation AVCaptureVideoPreviewLayer (RevenantAVFoundation13)
 
 - (BOOL)isPreviewing
 {

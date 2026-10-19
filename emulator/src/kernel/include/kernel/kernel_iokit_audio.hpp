@@ -13,7 +13,7 @@
 #include <span>
 #include <vector>
 
-namespace shade {
+namespace emulator {
 
 class AddressSpace;
 class Output;

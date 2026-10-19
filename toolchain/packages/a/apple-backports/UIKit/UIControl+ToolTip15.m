@@ -1,24 +1,24 @@
 #import <UIKit/UIKit.h>
 #import <objc/runtime.h>
 
-static const char CharonToolTipKey;
-static const char CharonToolTipInteractionKey;
+static const char RevenantToolTipKey;
+static const char RevenantToolTipInteractionKey;
 
-@implementation UIControl (CharonToolTip15)
+@implementation UIControl (RevenantToolTip15)
 
 - (NSString *)toolTip
 {
-    return objc_getAssociatedObject(self, &CharonToolTipKey);
+    return objc_getAssociatedObject(self, &RevenantToolTipKey);
 }
 
 - (void)setToolTip:(NSString *)toolTip
 {
-    objc_setAssociatedObject(self, &CharonToolTipKey, toolTip, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-    UIToolTipInteraction *held = objc_getAssociatedObject(self, &CharonToolTipInteractionKey);
+    objc_setAssociatedObject(self, &RevenantToolTipKey, toolTip, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    UIToolTipInteraction *held = objc_getAssociatedObject(self, &RevenantToolTipInteractionKey);
     if (!toolTip) {
         if (held) {
             [self removeInteraction:held];
-            objc_setAssociatedObject(self, &CharonToolTipInteractionKey, nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+            objc_setAssociatedObject(self, &RevenantToolTipInteractionKey, nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
         }
         return;
     }
@@ -27,13 +27,13 @@ static const char CharonToolTipInteractionKey;
         return;
     }
     UIToolTipInteraction *interaction = [[UIToolTipInteraction alloc] initWithDefaultToolTip:toolTip];
-    objc_setAssociatedObject(self, &CharonToolTipInteractionKey, interaction, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, &RevenantToolTipInteractionKey, interaction, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     [self addInteraction:interaction];
 }
 
 - (UIToolTipInteraction *)toolTipInteraction
 {
-    return objc_getAssociatedObject(self, &CharonToolTipInteractionKey);
+    return objc_getAssociatedObject(self, &RevenantToolTipInteractionKey);
 }
 
 @end

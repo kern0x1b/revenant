@@ -1,7 +1,7 @@
 #import <Foundation/Foundation.h>
 #import <CoreGraphics/CoreGraphics.h>
 
-CGColorRef CharonHostCGColorCreateCopyByMatchingToColorSpace(CGColorSpaceRef, CGColorRenderingIntent, CGColorRef, CFDictionaryRef);
+CGColorRef RevenantHostCGColorCreateCopyByMatchingToColorSpace(CGColorSpaceRef, CGColorRenderingIntent, CGColorRef, CFDictionaryRef);
 
 static long checks, different;
 
@@ -46,19 +46,19 @@ int main(void)
                 char what[96];
                 snprintf(what, sizeof what, "colour %d of model %d to target %zu, intent %d", n, CGColorSpaceGetModel(source), t, intent);
                 compare(what, CGColorCreateCopyByMatchingToColorSpace(targets[t], intent, colour, NULL),
-                        CharonHostCGColorCreateCopyByMatchingToColorSpace(targets[t], intent, colour, NULL));
+                        RevenantHostCGColorCreateCopyByMatchingToColorSpace(targets[t], intent, colour, NULL));
             }
             CGColorRelease(colour);
         }
         CGFloat red[] = {1, 0, 0, 1};
         CGColorRef colour = CGColorCreate(targets[1], red);
         compare("NULL space", CGColorCreateCopyByMatchingToColorSpace(NULL, kCGRenderingIntentDefault, colour, NULL),
-                CharonHostCGColorCreateCopyByMatchingToColorSpace(NULL, kCGRenderingIntentDefault, colour, NULL));
+                RevenantHostCGColorCreateCopyByMatchingToColorSpace(NULL, kCGRenderingIntentDefault, colour, NULL));
         compare("NULL colour", CGColorCreateCopyByMatchingToColorSpace(targets[0], kCGRenderingIntentDefault, NULL, NULL),
-                CharonHostCGColorCreateCopyByMatchingToColorSpace(targets[0], kCGRenderingIntentDefault, NULL, NULL));
+                RevenantHostCGColorCreateCopyByMatchingToColorSpace(targets[0], kCGRenderingIntentDefault, NULL, NULL));
         CGColorSpaceRef pattern = CGColorSpaceCreatePattern(NULL);
         compare("to a pattern space", CGColorCreateCopyByMatchingToColorSpace(pattern, kCGRenderingIntentDefault, colour, NULL),
-                CharonHostCGColorCreateCopyByMatchingToColorSpace(pattern, kCGRenderingIntentDefault, colour, NULL));
+                RevenantHostCGColorCreateCopyByMatchingToColorSpace(pattern, kCGRenderingIntentDefault, colour, NULL));
         printf("cgmatch: %ld checks, %ld different\n", checks, different);
         return different ? 1 : 0;
     }

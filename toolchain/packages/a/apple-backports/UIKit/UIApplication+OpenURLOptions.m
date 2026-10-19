@@ -6,7 +6,7 @@
 
 UIApplicationOpenExternalURLOptionsKey const UIApplicationOpenURLOptionUniversalLinksOnly = @"UIApplicationOpenURLOptionUniversalLinksOnly";
 
-@implementation UIApplication (CharonOpenURLOptions)
+@implementation UIApplication (RevenantOpenURLOptions)
 
 - (void)openURL:(NSURL *)url options:(NSDictionary<UIApplicationOpenExternalURLOptionsKey, id> *)options completionHandler:(void (^)(BOOL success))completion
 {

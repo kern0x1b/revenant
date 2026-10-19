@@ -3,7 +3,7 @@
 #import <objc/message.h>
 #import <objc/runtime.h>
 
-static BOOL charon_countsOnly;
+static BOOL revenant_countsOnly;
 
 static NSArray *items(void)
 {
@@ -35,7 +35,7 @@ static void probe(NSString *name, NSArray *input)
     id results = ((id (*)(id, SEL, id))objc_msgSend)(cls, factory, input);
     printf("  %-42s count=%lu %s\n", [name UTF8String], (unsigned long)[results count],
            input ? "" : "(nil input)");
-    if (charon_countsOnly) {
+    if (revenant_countsOnly) {
         return;
     }
     for (id element in results) {
@@ -48,9 +48,9 @@ static void probe(NSString *name, NSArray *input)
 int main(int argc, const char *argv[])
 {
     @autoreleasepool {
-        charon_countsOnly = argc > 1 && strcmp(argv[1], "counts") == 0;
+        revenant_countsOnly = argc > 1 && strcmp(argv[1], "counts") == 0;
         const char *title = "the port's own body";
-        if (charon_countsOnly) {
+        if (revenant_countsOnly) {
             title = "counts";
         } else if (argc > 1) {
             title = argv[1];

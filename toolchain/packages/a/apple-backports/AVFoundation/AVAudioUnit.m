@@ -1,46 +1,46 @@
-#import "CharonAVAudioUnit.h"
+#import "RevenantAVAudioUnit.h"
 
 @implementation AVAudioUnit {
-    AudioComponentDescription _charon_desc;
-    NSString *_charon_name;
-    NSString *_charon_manufacturerName;
-    NSUInteger _charon_version;
+    AudioComponentDescription _revenant_desc;
+    NSString *_revenant_name;
+    NSString *_revenant_manufacturerName;
+    NSUInteger _revenant_version;
 }
 
-- (instancetype)initWithCharonComponentDescription:(AudioComponentDescription)description name:(NSString *)name manufacturerName:(NSString *)manufacturerName version:(NSUInteger)version
+- (instancetype)initWithRevenantComponentDescription:(AudioComponentDescription)description name:(NSString *)name manufacturerName:(NSString *)manufacturerName version:(NSUInteger)version
 {
     if ((self = [super init])) {
-        _charon_desc = description;
-        _charon_name = [name copy];
-        _charon_manufacturerName = [manufacturerName copy];
-        _charon_version = version;
+        _revenant_desc = description;
+        _revenant_name = [name copy];
+        _revenant_manufacturerName = [manufacturerName copy];
+        _revenant_version = version;
     }
     return self;
 }
 
 - (AudioComponentDescription)audioComponentDescription
 {
-    return _charon_desc;
+    return _revenant_desc;
 }
 
 - (AudioUnit)audioUnit
 {
-    return [self charon_impl]->audioUnit;
+    return [self revenant_impl]->audioUnit;
 }
 
 - (NSString *)name
 {
-    return _charon_name;
+    return _revenant_name;
 }
 
 - (NSString *)manufacturerName
 {
-    return _charon_manufacturerName;
+    return _revenant_manufacturerName;
 }
 
 - (NSUInteger)version
 {
-    return _charon_version;
+    return _revenant_version;
 }
 
 - (BOOL)loadAudioUnitPresetAtURL:(NSURL *)url error:(NSError **)outError
@@ -50,39 +50,39 @@
     return NO;
 }
 
-- (void)charon_applyPendingParameters
+- (void)revenant_applyPendingParameters
 {
 }
 
 @end
 
 @implementation AVAudioUnitEffect {
-    BOOL _charon_bypass;
+    BOOL _revenant_bypass;
 }
 
 - (instancetype)initWithAudioComponentDescription:(AudioComponentDescription)description
 {
-    return [self initWithCharonComponentDescription:description name:@"AUEffect" manufacturerName:@"Apple" version:0];
+    return [self initWithRevenantComponentDescription:description name:@"AUEffect" manufacturerName:@"Apple" version:0];
 }
 
 - (BOOL)bypass
 {
-    return _charon_bypass;
+    return _revenant_bypass;
 }
 
 - (void)setBypass:(BOOL)bypass
 {
-    _charon_bypass = bypass;
-    AudioUnit unit = [self charon_impl]->audioUnit;
+    _revenant_bypass = bypass;
+    AudioUnit unit = [self revenant_impl]->audioUnit;
     if (unit) {
         UInt32 flag = bypass ? 1 : 0;
         AudioUnitSetProperty(unit, kAudioUnitProperty_BypassEffect, kAudioUnitScope_Global, 0, &flag, sizeof(flag));
     }
 }
 
-- (void)charon_applyPendingParameters
+- (void)revenant_applyPendingParameters
 {
-    self.bypass = _charon_bypass;
+    self.bypass = _revenant_bypass;
 }
 
 @end

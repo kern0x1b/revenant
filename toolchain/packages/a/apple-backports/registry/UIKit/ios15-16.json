@@ -9,7 +9,7 @@
       "status": "owed",
       "reason": "build +[NSTextAttachment registerTextAttachmentViewProviderClass:forFileType:]",
       "effect": "until built: respondsToSelector: answers NO",
-      "source": "SDK 16.4, UIKit; the selector is in no cache this band's registry check reads, and the 6.1.3 deployment carries 0 of the 105 rows: 6.1.3, 4.3 and 12.0 by CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, read class-scoped the way backports.lua:1631 carried_by_release reads it, with 8/8 selector controls and 18/18 positive controls through the property path on 6.1.3 - facts/UIKit/UIKit15Absence.md"
+      "source": "SDK 16.4, UIKit; the selector is in no cache this band's registry check reads, and the 6.1.3 deployment carries 0 of the 105 rows: 6.1.3, 4.3 and 12.0 by REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, read class-scoped the way backports.lua:1631 carried_by_release reads it, with 8/8 selector controls and 18/18 positive controls through the property path on 6.1.3 - facts/UIKit/UIKit15Absence.md"
     },
     {
       "api": "+[NSTextAttachment textAttachmentViewProviderClassForFileType:]",
@@ -19,7 +19,7 @@
       "status": "owed",
       "reason": "build +[NSTextAttachment textAttachmentViewProviderClassForFileType:]",
       "effect": "until built: respondsToSelector: answers NO",
-      "source": "SDK 16.4, UIKit; the selector is in no cache this band's registry check reads, and the 6.1.3 deployment carries 0 of the 105 rows: 6.1.3, 4.3 and 12.0 by CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, read class-scoped the way backports.lua:1631 carried_by_release reads it, with 8/8 selector controls and 18/18 positive controls through the property path on 6.1.3 - facts/UIKit/UIKit15Absence.md"
+      "source": "SDK 16.4, UIKit; the selector is in no cache this band's registry check reads, and the 6.1.3 deployment carries 0 of the 105 rows: 6.1.3, 4.3 and 12.0 by REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, read class-scoped the way backports.lua:1631 carried_by_release reads it, with 8/8 selector controls and 18/18 positive controls through the property path on 6.1.3 - facts/UIKit/UIKit15Absence.md"
     },
     {
       "api": "+[UIAction captureTextFromCameraActionForResponder:identifier:]",
@@ -29,7 +29,7 @@
       "status": "owed",
       "reason": "build +[UIAction captureTextFromCameraActionForResponder:identifier:]",
       "effect": "until built: respondsToSelector: answers NO",
-      "source": "SDK 16.4, UIKit; carried by 0 of 6.1.3, 4.3 and 12.0 (CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, class-scoped as backports.lua:1631 carried_by_release reads it). The port DEFINES its owner class, so entry_of (backports.lua:1673) would let a class row answer for this member - and the reason it still cannot is that the substrate the member names is absent from the release, measured in the same run: no SF Symbols at all on 6.1.3 (UIImageSymbolConfiguration, UIImageConfiguration and UIFontTextStyle all absent, UIImage carries no symbol or configuration selector), no pointer (UIPointerStyle, UIPointerInteraction, UIPointerRegion, UIHoverGestureRecognizer all absent) - facts/UIKit/UIKit15Absence.md"
+      "source": "SDK 16.4, UIKit; carried by 0 of 6.1.3, 4.3 and 12.0 (REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, class-scoped as backports.lua:1631 carried_by_release reads it). The port DEFINES its owner class, so entry_of (backports.lua:1673) would let a class row answer for this member - and the reason it still cannot is that the substrate the member names is absent from the release, measured in the same run: no SF Symbols at all on 6.1.3 (UIImageSymbolConfiguration, UIImageConfiguration and UIFontTextStyle all absent, UIImage carries no symbol or configuration selector), no pointer (UIPointerStyle, UIPointerInteraction, UIPointerRegion, UIHoverGestureRecognizer all absent) - facts/UIKit/UIKit15Absence.md"
     },
     {
       "api": "+[UIButton buttonWithConfiguration:primaryAction:]",
@@ -59,7 +59,7 @@
       "status": "owed",
       "reason": "build +[UIImageSymbolConfiguration configurationPreferringMulticolor]",
       "effect": "until built: respondsToSelector: answers NO",
-      "source": "SDK 16.4, UIKit; carried by 0 of 6.1.3, 4.3 and 12.0 (CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, class-scoped as backports.lua:1631 carried_by_release reads it). The port DEFINES its owner class, so entry_of (backports.lua:1673) would let a class row answer for this member - and the reason it still cannot is that the substrate the member names is absent from the release, measured in the same run: no SF Symbols at all on 6.1.3 (UIImageSymbolConfiguration, UIImageConfiguration and UIFontTextStyle all absent, UIImage carries no symbol or configuration selector), no pointer (UIPointerStyle, UIPointerInteraction, UIPointerRegion, UIHoverGestureRecognizer all absent) - facts/UIKit/UIKit15Absence.md"
+      "source": "SDK 16.4, UIKit; carried by 0 of 6.1.3, 4.3 and 12.0 (REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, class-scoped as backports.lua:1631 carried_by_release reads it). The port DEFINES its owner class, so entry_of (backports.lua:1673) would let a class row answer for this member - and the reason it still cannot is that the substrate the member names is absent from the release, measured in the same run: no SF Symbols at all on 6.1.3 (UIImageSymbolConfiguration, UIImageConfiguration and UIFontTextStyle all absent, UIImage carries no symbol or configuration selector), no pointer (UIPointerStyle, UIPointerInteraction, UIPointerRegion, UIHoverGestureRecognizer all absent) - facts/UIKit/UIKit15Absence.md"
     },
     {
       "api": "+[UIImageSymbolConfiguration configurationWithHierarchicalColor:]",
@@ -69,7 +69,7 @@
       "status": "owed",
       "reason": "build +[UIImageSymbolConfiguration configurationWithHierarchicalColor:]",
       "effect": "until built: respondsToSelector: answers NO",
-      "source": "SDK 16.4, UIKit; carried by 0 of 6.1.3, 4.3 and 12.0 (CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, class-scoped as backports.lua:1631 carried_by_release reads it). The port DEFINES its owner class, so entry_of (backports.lua:1673) would let a class row answer for this member - and the reason it still cannot is that the substrate the member names is absent from the release, measured in the same run: no SF Symbols at all on 6.1.3 (UIImageSymbolConfiguration, UIImageConfiguration and UIFontTextStyle all absent, UIImage carries no symbol or configuration selector), no pointer (UIPointerStyle, UIPointerInteraction, UIPointerRegion, UIHoverGestureRecognizer all absent) - facts/UIKit/UIKit15Absence.md"
+      "source": "SDK 16.4, UIKit; carried by 0 of 6.1.3, 4.3 and 12.0 (REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, class-scoped as backports.lua:1631 carried_by_release reads it). The port DEFINES its owner class, so entry_of (backports.lua:1673) would let a class row answer for this member - and the reason it still cannot is that the substrate the member names is absent from the release, measured in the same run: no SF Symbols at all on 6.1.3 (UIImageSymbolConfiguration, UIImageConfiguration and UIFontTextStyle all absent, UIImage carries no symbol or configuration selector), no pointer (UIPointerStyle, UIPointerInteraction, UIPointerRegion, UIHoverGestureRecognizer all absent) - facts/UIKit/UIKit15Absence.md"
     },
     {
       "api": "+[UIImageSymbolConfiguration configurationWithPaletteColors:]",
@@ -79,7 +79,7 @@
       "status": "owed",
       "reason": "build +[UIImageSymbolConfiguration configurationWithPaletteColors:]",
       "effect": "until built: respondsToSelector: answers NO",
-      "source": "SDK 16.4, UIKit; carried by 0 of 6.1.3, 4.3 and 12.0 (CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, class-scoped as backports.lua:1631 carried_by_release reads it). The port DEFINES its owner class, so entry_of (backports.lua:1673) would let a class row answer for this member - and the reason it still cannot is that the substrate the member names is absent from the release, measured in the same run: no SF Symbols at all on 6.1.3 (UIImageSymbolConfiguration, UIImageConfiguration and UIFontTextStyle all absent, UIImage carries no symbol or configuration selector), no pointer (UIPointerStyle, UIPointerInteraction, UIPointerRegion, UIHoverGestureRecognizer all absent) - facts/UIKit/UIKit15Absence.md"
+      "source": "SDK 16.4, UIKit; carried by 0 of 6.1.3, 4.3 and 12.0 (REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, class-scoped as backports.lua:1631 carried_by_release reads it). The port DEFINES its owner class, so entry_of (backports.lua:1673) would let a class row answer for this member - and the reason it still cannot is that the substrate the member names is absent from the release, measured in the same run: no SF Symbols at all on 6.1.3 (UIImageSymbolConfiguration, UIImageConfiguration and UIFontTextStyle all absent, UIImage carries no symbol or configuration selector), no pointer (UIPointerStyle, UIPointerInteraction, UIPointerRegion, UIHoverGestureRecognizer all absent) - facts/UIKit/UIKit15Absence.md"
     },
     {
       "api": "+[UIListContentConfiguration extraProminentInsetGroupedHeaderConfiguration]",
@@ -89,7 +89,7 @@
       "status": "owed",
       "reason": "build +[UIListContentConfiguration extraProminentInsetGroupedHeaderConfiguration]",
       "effect": "until built: respondsToSelector: answers NO",
-      "source": "SDK 16.4, UIKit; carried by 0 of 6.1.3, 4.3 and 12.0 (CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, class-scoped as backports.lua:1631 carried_by_release reads it). The port DEFINES its owner class, so entry_of (backports.lua:1673) would let a class row answer for this member - and the reason it still cannot is that the substrate the member names is absent from the release, measured in the same run: no SF Symbols at all on 6.1.3 (UIImageSymbolConfiguration, UIImageConfiguration and UIFontTextStyle all absent, UIImage carries no symbol or configuration selector), no pointer (UIPointerStyle, UIPointerInteraction, UIPointerRegion, UIHoverGestureRecognizer all absent) - facts/UIKit/UIKit15Absence.md"
+      "source": "SDK 16.4, UIKit; carried by 0 of 6.1.3, 4.3 and 12.0 (REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, class-scoped as backports.lua:1631 carried_by_release reads it). The port DEFINES its owner class, so entry_of (backports.lua:1673) would let a class row answer for this member - and the reason it still cannot is that the substrate the member names is absent from the release, measured in the same run: no SF Symbols at all on 6.1.3 (UIImageSymbolConfiguration, UIImageConfiguration and UIFontTextStyle all absent, UIImage carries no symbol or configuration selector), no pointer (UIPointerStyle, UIPointerInteraction, UIPointerRegion, UIHoverGestureRecognizer all absent) - facts/UIKit/UIKit15Absence.md"
     },
     {
       "api": "+[UIListContentConfiguration prominentInsetGroupedHeaderConfiguration]",
@@ -99,7 +99,7 @@
       "status": "owed",
       "reason": "build +[UIListContentConfiguration prominentInsetGroupedHeaderConfiguration]",
       "effect": "until built: respondsToSelector: answers NO",
-      "source": "SDK 16.4, UIKit; carried by 0 of 6.1.3, 4.3 and 12.0 (CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, class-scoped as backports.lua:1631 carried_by_release reads it). The port DEFINES its owner class, so entry_of (backports.lua:1673) would let a class row answer for this member - and the reason it still cannot is that the substrate the member names is absent from the release, measured in the same run: no SF Symbols at all on 6.1.3 (UIImageSymbolConfiguration, UIImageConfiguration and UIFontTextStyle all absent, UIImage carries no symbol or configuration selector), no pointer (UIPointerStyle, UIPointerInteraction, UIPointerRegion, UIHoverGestureRecognizer all absent) - facts/UIKit/UIKit15Absence.md"
+      "source": "SDK 16.4, UIKit; carried by 0 of 6.1.3, 4.3 and 12.0 (REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, class-scoped as backports.lua:1631 carried_by_release reads it). The port DEFINES its owner class, so entry_of (backports.lua:1673) would let a class row answer for this member - and the reason it still cannot is that the substrate the member names is absent from the release, measured in the same run: no SF Symbols at all on 6.1.3 (UIImageSymbolConfiguration, UIImageConfiguration and UIFontTextStyle all absent, UIImage carries no symbol or configuration selector), no pointer (UIPointerStyle, UIPointerInteraction, UIPointerRegion, UIHoverGestureRecognizer all absent) - facts/UIKit/UIKit15Absence.md"
     },
     {
       "api": "+[UIPointerStyle systemPointerStyle]",
@@ -109,7 +109,7 @@
       "status": "owed",
       "reason": "build +[UIPointerStyle systemPointerStyle]; where the device lacks the part, answer as the system's availability query does",
       "effect": "until built: respondsToSelector: answers NO",
-      "source": "SDK 16.4, UIKit; carried by 0 of 6.1.3, 4.3 and 12.0 (CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, class-scoped as backports.lua:1631 carried_by_release reads it). The port DEFINES its owner class, so entry_of (backports.lua:1673) would let a class row answer for this member - and the reason it still cannot is that the substrate the member names is absent from the release, measured in the same run: no SF Symbols at all on 6.1.3 (UIImageSymbolConfiguration, UIImageConfiguration and UIFontTextStyle all absent, UIImage carries no symbol or configuration selector), no pointer (UIPointerStyle, UIPointerInteraction, UIPointerRegion, UIHoverGestureRecognizer all absent) - facts/UIKit/UIKit15Absence.md"
+      "source": "SDK 16.4, UIKit; carried by 0 of 6.1.3, 4.3 and 12.0 (REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, class-scoped as backports.lua:1631 carried_by_release reads it). The port DEFINES its owner class, so entry_of (backports.lua:1673) would let a class row answer for this member - and the reason it still cannot is that the substrate the member names is absent from the release, measured in the same run: no SF Symbols at all on 6.1.3 (UIImageSymbolConfiguration, UIImageConfiguration and UIFontTextStyle all absent, UIImage carries no symbol or configuration selector), no pointer (UIPointerStyle, UIPointerInteraction, UIPointerRegion, UIHoverGestureRecognizer all absent) - facts/UIKit/UIKit15Absence.md"
     },
     {
       "api": "-[NSDiffableDataSourceSnapshot reconfigureItemsWithIdentifiers:]",
@@ -130,7 +130,7 @@
       "status": "owed",
       "reason": "build -[NSTextAttachmentLayout attachmentBoundsForAttributes:location:textContainer:proposedLineFragment:position:]",
       "effect": "until built: respondsToSelector: answers NO",
-      "source": "SDK 16.4, UIKit; the selector is in no cache this band's registry check reads, and the 6.1.3 deployment carries 0 of the 105 rows: 6.1.3, 4.3 and 12.0 by CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, read class-scoped the way backports.lua:1631 carried_by_release reads it, with 8/8 selector controls and 18/18 positive controls through the property path on 6.1.3 - facts/UIKit/UIKit15Absence.md"
+      "source": "SDK 16.4, UIKit; the selector is in no cache this band's registry check reads, and the 6.1.3 deployment carries 0 of the 105 rows: 6.1.3, 4.3 and 12.0 by REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, read class-scoped the way backports.lua:1631 carried_by_release reads it, with 8/8 selector controls and 18/18 positive controls through the property path on 6.1.3 - facts/UIKit/UIKit15Absence.md"
     },
     {
       "api": "-[NSTextAttachmentLayout imageForBounds:attributes:location:textContainer:]",
@@ -140,7 +140,7 @@
       "status": "owed",
       "reason": "build -[NSTextAttachmentLayout imageForBounds:attributes:location:textContainer:]",
       "effect": "until built: respondsToSelector: answers NO",
-      "source": "SDK 16.4, UIKit; the selector is in no cache this band's registry check reads, and the 6.1.3 deployment carries 0 of the 105 rows: 6.1.3, 4.3 and 12.0 by CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, read class-scoped the way backports.lua:1631 carried_by_release reads it, with 8/8 selector controls and 18/18 positive controls through the property path on 6.1.3 - facts/UIKit/UIKit15Absence.md"
+      "source": "SDK 16.4, UIKit; the selector is in no cache this band's registry check reads, and the 6.1.3 deployment carries 0 of the 105 rows: 6.1.3, 4.3 and 12.0 by REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, read class-scoped the way backports.lua:1631 carried_by_release reads it, with 8/8 selector controls and 18/18 positive controls through the property path on 6.1.3 - facts/UIKit/UIKit15Absence.md"
     },
     {
       "api": "-[NSTextAttachmentLayout viewProviderForParentView:location:textContainer:]",
@@ -150,7 +150,7 @@
       "status": "owed",
       "reason": "build -[NSTextAttachmentLayout viewProviderForParentView:location:textContainer:]",
       "effect": "until built: respondsToSelector: answers NO",
-      "source": "SDK 16.4, UIKit; the selector is in no cache this band's registry check reads, and the 6.1.3 deployment carries 0 of the 105 rows: 6.1.3, 4.3 and 12.0 by CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, read class-scoped the way backports.lua:1631 carried_by_release reads it, with 8/8 selector controls and 18/18 positive controls through the property path on 6.1.3 - facts/UIKit/UIKit15Absence.md"
+      "source": "SDK 16.4, UIKit; the selector is in no cache this band's registry check reads, and the 6.1.3 deployment carries 0 of the 105 rows: 6.1.3, 4.3 and 12.0 by REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, read class-scoped the way backports.lua:1631 carried_by_release reads it, with 8/8 selector controls and 18/18 positive controls through the property path on 6.1.3 - facts/UIKit/UIKit15Absence.md"
     },
     {
       "api": "-[UIAdaptivePresentationControllerDelegate presentationController:prepareAdaptivePresentationController:]",
@@ -160,7 +160,7 @@
       "status": "owed",
       "reason": "build -[UIAdaptivePresentationControllerDelegate presentationController:prepareAdaptivePresentationController:]",
       "effect": "until built: respondsToSelector: answers NO",
-      "source": "SDK 16.4, UIKit; the selector is in no cache this band's registry check reads, and the 6.1.3 deployment carries 0 of the 105 rows: 6.1.3, 4.3 and 12.0 by CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, read class-scoped the way backports.lua:1631 carried_by_release reads it, with 8/8 selector controls and 18/18 positive controls through the property path on 6.1.3 - facts/UIKit/UIKit15Absence.md"
+      "source": "SDK 16.4, UIKit; the selector is in no cache this band's registry check reads, and the 6.1.3 deployment carries 0 of the 105 rows: 6.1.3, 4.3 and 12.0 by REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, read class-scoped the way backports.lua:1631 carried_by_release reads it, with 8/8 selector controls and 18/18 positive controls through the property path on 6.1.3 - facts/UIKit/UIKit15Absence.md"
     },
     {
       "api": "-[UIApplicationDelegate applicationShouldAutomaticallyLocalizeKeyCommands:]",
@@ -170,7 +170,7 @@
       "status": "owed",
       "reason": "build -[UIApplicationDelegate applicationShouldAutomaticallyLocalizeKeyCommands:]",
       "effect": "until built: respondsToSelector: answers NO",
-      "source": "SDK 16.4, UIKit; the selector is in no cache this band's registry check reads, and the 6.1.3 deployment carries 0 of the 105 rows: 6.1.3, 4.3 and 12.0 by CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, read class-scoped the way backports.lua:1631 carried_by_release reads it, with 8/8 selector controls and 18/18 positive controls through the property path on 6.1.3 - facts/UIKit/UIKit15Absence.md"
+      "source": "SDK 16.4, UIKit; the selector is in no cache this band's registry check reads, and the 6.1.3 deployment carries 0 of the 105 rows: 6.1.3, 4.3 and 12.0 by REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, read class-scoped the way backports.lua:1631 carried_by_release reads it, with 8/8 selector controls and 18/18 positive controls through the property path on 6.1.3 - facts/UIKit/UIKit15Absence.md"
     },
     {
       "api": "-[UIButton setNeedsUpdateConfiguration]",
@@ -213,7 +213,7 @@
       "status": "owed",
       "reason": "build -[UICollectionViewDelegate collectionView:sceneActivationConfigurationForItemAtIndexPath:point:]",
       "effect": "until built: respondsToSelector: answers NO",
-      "source": "SDK 16.4, UIKit; the selector is in no cache this band's registry check reads, and the 6.1.3 deployment carries 0 of the 105 rows: 6.1.3, 4.3 and 12.0 by CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, read class-scoped the way backports.lua:1631 carried_by_release reads it, with 8/8 selector controls and 18/18 positive controls through the property path on 6.1.3 - facts/UIKit/UIKit15Absence.md"
+      "source": "SDK 16.4, UIKit; the selector is in no cache this band's registry check reads, and the 6.1.3 deployment carries 0 of the 105 rows: 6.1.3, 4.3 and 12.0 by REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, read class-scoped the way backports.lua:1631 carried_by_release reads it, with 8/8 selector controls and 18/18 positive controls through the property path on 6.1.3 - facts/UIKit/UIKit15Absence.md"
     },
     {
       "api": "-[UICollectionViewDelegate collectionView:selectionFollowsFocusForItemAtIndexPath:]",
@@ -223,7 +223,7 @@
       "status": "owed",
       "reason": "build -[UICollectionViewDelegate collectionView:selectionFollowsFocusForItemAtIndexPath:]",
       "effect": "until built: respondsToSelector: answers NO",
-      "source": "SDK 16.4, UIKit; the selector is in no cache this band's registry check reads, and the 6.1.3 deployment carries 0 of the 105 rows: 6.1.3, 4.3 and 12.0 by CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, read class-scoped the way backports.lua:1631 carried_by_release reads it, with 8/8 selector controls and 18/18 positive controls through the property path on 6.1.3 - facts/UIKit/UIKit15Absence.md"
+      "source": "SDK 16.4, UIKit; the selector is in no cache this band's registry check reads, and the 6.1.3 deployment carries 0 of the 105 rows: 6.1.3, 4.3 and 12.0 by REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, read class-scoped the way backports.lua:1631 carried_by_release reads it, with 8/8 selector controls and 18/18 positive controls through the property path on 6.1.3 - facts/UIKit/UIKit15Absence.md"
     },
     {
       "api": "-[UICollectionViewDelegate collectionView:targetIndexPathForMoveOfItemFromOriginalIndexPath:atCurrentIndexPath:toProposedIndexPath:]",
@@ -233,7 +233,7 @@
       "status": "owed",
       "reason": "build -[UICollectionViewDelegate collectionView:targetIndexPathForMoveOfItemFromOriginalIndexPath:atCurrentIndexPath:toProposedIndexPath:]",
       "effect": "until built: respondsToSelector: answers NO",
-      "source": "SDK 16.4, UIKit; the selector is in no cache this band's registry check reads, and the 6.1.3 deployment carries 0 of the 105 rows: 6.1.3, 4.3 and 12.0 by CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, read class-scoped the way backports.lua:1631 carried_by_release reads it, with 8/8 selector controls and 18/18 positive controls through the property path on 6.1.3 - facts/UIKit/UIKit15Absence.md"
+      "source": "SDK 16.4, UIKit; the selector is in no cache this band's registry check reads, and the 6.1.3 deployment carries 0 of the 105 rows: 6.1.3, 4.3 and 12.0 by REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, read class-scoped the way backports.lua:1631 carried_by_release reads it, with 8/8 selector controls and 18/18 positive controls through the property path on 6.1.3 - facts/UIKit/UIKit15Absence.md"
     },
     {
       "api": "-[UICollectionViewDiffableDataSource applySnapshotUsingReloadData:]",
@@ -283,7 +283,7 @@
       "status": "implemented",
       "effect": "sent for every choice on the grid or the slider, with continuously YES while a finger is down on the grid or the slider tracks, and NO when it lifts; a delegate that has it hears it instead of colorPickerViewControllerDidSelectColor:",
       "facts": "facts/UIKit/UIColorWell.md",
-      "source": "UIKit/UIColorPickerViewController.m (charon_pickColor:continuously:); the header of SDK 16.4"
+      "source": "UIKit/UIColorPickerViewController.m (revenant_pickColor:continuously:); the header of SDK 16.4"
     },
     {
       "api": "-[UIImage imageByPreparingForDisplay]",
@@ -332,7 +332,7 @@
       "status": "owed",
       "reason": "build -[UIResponder captureTextFromCamera:]",
       "effect": "until built: respondsToSelector: answers NO",
-      "source": "SDK 16.4, UIKit; the selector is in no cache this band's registry check reads, and the 6.1.3 deployment carries 0 of the 105 rows: 6.1.3, 4.3 and 12.0 by CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, read class-scoped the way backports.lua:1631 carried_by_release reads it, with 8/8 selector controls and 18/18 positive controls through the property path on 6.1.3 - facts/UIKit/UIKit15Absence.md"
+      "source": "SDK 16.4, UIKit; the selector is in no cache this band's registry check reads, and the 6.1.3 deployment carries 0 of the 105 rows: 6.1.3, 4.3 and 12.0 by REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, read class-scoped the way backports.lua:1631 carried_by_release reads it, with 8/8 selector controls and 18/18 positive controls through the property path on 6.1.3 - facts/UIKit/UIKit15Absence.md"
     },
     {
       "api": "-[UIResponderStandardEditActions pasteAndGo:]",
@@ -342,7 +342,7 @@
       "status": "owed",
       "reason": "build -[UIResponderStandardEditActions pasteAndGo:]",
       "effect": "until built: respondsToSelector: answers NO",
-      "source": "SDK 16.4, UIKit; the selector is in no cache this band's registry check reads, and the 6.1.3 deployment carries 0 of the 105 rows: 6.1.3, 4.3 and 12.0 by CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, read class-scoped the way backports.lua:1631 carried_by_release reads it, with 8/8 selector controls and 18/18 positive controls through the property path on 6.1.3 - facts/UIKit/UIKit15Absence.md"
+      "source": "SDK 16.4, UIKit; the selector is in no cache this band's registry check reads, and the 6.1.3 deployment carries 0 of the 105 rows: 6.1.3, 4.3 and 12.0 by REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, read class-scoped the way backports.lua:1631 carried_by_release reads it, with 8/8 selector controls and 18/18 positive controls through the property path on 6.1.3 - facts/UIKit/UIKit15Absence.md"
     },
     {
       "api": "-[UIResponderStandardEditActions pasteAndMatchStyle:]",
@@ -352,7 +352,7 @@
       "status": "owed",
       "reason": "build -[UIResponderStandardEditActions pasteAndMatchStyle:]",
       "effect": "until built: respondsToSelector: answers NO",
-      "source": "SDK 16.4, UIKit; the selector is in no cache this band's registry check reads, and the 6.1.3 deployment carries 0 of the 105 rows: 6.1.3, 4.3 and 12.0 by CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, read class-scoped the way backports.lua:1631 carried_by_release reads it, with 8/8 selector controls and 18/18 positive controls through the property path on 6.1.3 - facts/UIKit/UIKit15Absence.md"
+      "source": "SDK 16.4, UIKit; the selector is in no cache this band's registry check reads, and the 6.1.3 deployment carries 0 of the 105 rows: 6.1.3, 4.3 and 12.0 by REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, read class-scoped the way backports.lua:1631 carried_by_release reads it, with 8/8 selector controls and 18/18 positive controls through the property path on 6.1.3 - facts/UIKit/UIKit15Absence.md"
     },
     {
       "api": "-[UIResponderStandardEditActions pasteAndSearch:]",
@@ -362,7 +362,7 @@
       "status": "owed",
       "reason": "build -[UIResponderStandardEditActions pasteAndSearch:]",
       "effect": "until built: respondsToSelector: answers NO",
-      "source": "SDK 16.4, UIKit; the selector is in no cache this band's registry check reads, and the 6.1.3 deployment carries 0 of the 105 rows: 6.1.3, 4.3 and 12.0 by CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, read class-scoped the way backports.lua:1631 carried_by_release reads it, with 8/8 selector controls and 18/18 positive controls through the property path on 6.1.3 - facts/UIKit/UIKit15Absence.md"
+      "source": "SDK 16.4, UIKit; the selector is in no cache this band's registry check reads, and the 6.1.3 deployment carries 0 of the 105 rows: 6.1.3, 4.3 and 12.0 by REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, read class-scoped the way backports.lua:1631 carried_by_release reads it, with 8/8 selector controls and 18/18 positive controls through the property path on 6.1.3 - facts/UIKit/UIKit15Absence.md"
     },
     {
       "api": "-[UIResponderStandardEditActions print:]",
@@ -372,7 +372,7 @@
       "status": "owed",
       "reason": "build -[UIResponderStandardEditActions print:]",
       "effect": "until built: respondsToSelector: answers NO",
-      "source": "SDK 16.4, UIKit; the selector is in no cache this band's registry check reads, and the 6.1.3 deployment carries 0 of the 105 rows: 6.1.3, 4.3 and 12.0 by CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, read class-scoped the way backports.lua:1631 carried_by_release reads it, with 8/8 selector controls and 18/18 positive controls through the property path on 6.1.3 - facts/UIKit/UIKit15Absence.md"
+      "source": "SDK 16.4, UIKit; the selector is in no cache this band's registry check reads, and the 6.1.3 deployment carries 0 of the 105 rows: 6.1.3, 4.3 and 12.0 by REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, read class-scoped the way backports.lua:1631 carried_by_release reads it, with 8/8 selector controls and 18/18 positive controls through the property path on 6.1.3 - facts/UIKit/UIKit15Absence.md"
     },
     {
       "api": "-[UITableView reconfigureRowsAtIndexPaths:]",
@@ -393,7 +393,7 @@
       "status": "owed",
       "reason": "build -[UITableViewDelegate tableView:selectionFollowsFocusForRowAtIndexPath:]",
       "effect": "until built: respondsToSelector: answers NO",
-      "source": "SDK 16.4, UIKit; the selector is in no cache this band's registry check reads, and the 6.1.3 deployment carries 0 of the 105 rows: 6.1.3, 4.3 and 12.0 by CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, read class-scoped the way backports.lua:1631 carried_by_release reads it, with 8/8 selector controls and 18/18 positive controls through the property path on 6.1.3 - facts/UIKit/UIKit15Absence.md"
+      "source": "SDK 16.4, UIKit; the selector is in no cache this band's registry check reads, and the 6.1.3 deployment carries 0 of the 105 rows: 6.1.3, 4.3 and 12.0 by REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, read class-scoped the way backports.lua:1631 carried_by_release reads it, with 8/8 selector controls and 18/18 positive controls through the property path on 6.1.3 - facts/UIKit/UIKit15Absence.md"
     },
     {
       "api": "-[UITableViewDiffableDataSource applySnapshotUsingReloadData:]",
@@ -443,7 +443,7 @@
       "status": "owed",
       "reason": "build -[UIViewController contentScrollViewForEdge:]",
       "effect": "until built: respondsToSelector: answers NO",
-      "source": "SDK 16.4, UIKit; the selector is in no cache this band's registry check reads, and the 6.1.3 deployment carries 0 of the 105 rows: 6.1.3, 4.3 and 12.0 by CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, read class-scoped the way backports.lua:1631 carried_by_release reads it, with 8/8 selector controls and 18/18 positive controls through the property path on 6.1.3 - facts/UIKit/UIKit15Absence.md"
+      "source": "SDK 16.4, UIKit; the selector is in no cache this band's registry check reads, and the 6.1.3 deployment carries 0 of the 105 rows: 6.1.3, 4.3 and 12.0 by REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, read class-scoped the way backports.lua:1631 carried_by_release reads it, with 8/8 selector controls and 18/18 positive controls through the property path on 6.1.3 - facts/UIKit/UIKit15Absence.md"
     },
     {
       "api": "-[UIViewController setContentScrollView:forEdge:]",
@@ -453,7 +453,7 @@
       "status": "owed",
       "reason": "build -[UIViewController setContentScrollView:forEdge:]",
       "effect": "until built: respondsToSelector: answers NO",
-      "source": "SDK 16.4, UIKit; the selector is in no cache this band's registry check reads, and the 6.1.3 deployment carries 0 of the 105 rows: 6.1.3, 4.3 and 12.0 by CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, read class-scoped the way backports.lua:1631 carried_by_release reads it, with 8/8 selector controls and 18/18 positive controls through the property path on 6.1.3 - facts/UIKit/UIKit15Absence.md"
+      "source": "SDK 16.4, UIKit; the selector is in no cache this band's registry check reads, and the 6.1.3 deployment carries 0 of the 105 rows: 6.1.3, 4.3 and 12.0 by REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, read class-scoped the way backports.lua:1631 carried_by_release reads it, with 8/8 selector controls and 18/18 positive controls through the property path on 6.1.3 - facts/UIKit/UIKit15Absence.md"
     },
     {
       "api": "NSDiffableDataSourceSnapshot.reconfiguredItemIdentifiers",
@@ -516,7 +516,7 @@
       "status": "owed",
       "reason": "build the property NSTextAttachment.allowsTextAttachmentView",
       "effect": "until built: respondsToSelector: answers NO",
-      "source": "SDK 16.4, UIKit; the selector is in no cache this band's registry check reads, and the 6.1.3 deployment carries 0 of the 105 rows: 6.1.3, 4.3 and 12.0 by CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, read class-scoped the way backports.lua:1631 carried_by_release reads it, with 8/8 selector controls and 18/18 positive controls through the property path on 6.1.3 - facts/UIKit/UIKit15Absence.md"
+      "source": "SDK 16.4, UIKit; the selector is in no cache this band's registry check reads, and the 6.1.3 deployment carries 0 of the 105 rows: 6.1.3, 4.3 and 12.0 by REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, read class-scoped the way backports.lua:1631 carried_by_release reads it, with 8/8 selector controls and 18/18 positive controls through the property path on 6.1.3 - facts/UIKit/UIKit15Absence.md"
     },
     {
       "api": "NSTextAttachment.lineLayoutPadding",
@@ -526,7 +526,7 @@
       "status": "owed",
       "reason": "build the property NSTextAttachment.lineLayoutPadding",
       "effect": "until built: respondsToSelector: answers NO",
-      "source": "SDK 16.4, UIKit; the selector is in no cache this band's registry check reads, and the 6.1.3 deployment carries 0 of the 105 rows: 6.1.3, 4.3 and 12.0 by CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, read class-scoped the way backports.lua:1631 carried_by_release reads it, with 8/8 selector controls and 18/18 positive controls through the property path on 6.1.3 - facts/UIKit/UIKit15Absence.md"
+      "source": "SDK 16.4, UIKit; the selector is in no cache this band's registry check reads, and the 6.1.3 deployment carries 0 of the 105 rows: 6.1.3, 4.3 and 12.0 by REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, read class-scoped the way backports.lua:1631 carried_by_release reads it, with 8/8 selector controls and 18/18 positive controls through the property path on 6.1.3 - facts/UIKit/UIKit15Absence.md"
     },
     {
       "api": "NSTextAttachment.usesTextAttachmentView",
@@ -536,7 +536,7 @@
       "status": "owed",
       "reason": "build the property NSTextAttachment.usesTextAttachmentView",
       "effect": "until built: respondsToSelector: answers NO",
-      "source": "carried by 0 of 6.1.3, 4.3 and 12.0 (CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, class-scoped as backports.lua:1631 carried_by_release reads it, the getter and the is-getter and the setter all checked). It is the getter-only half of the pair 12.0 does carry (-usesTextAttachmentView with no setter in UIFoundation), and the substrate is TextKit 2: 6.1.3 and 4.3 have NSTextAttachment but neither has NSTextLayoutFragment or NSTextLineFragment, and the port's UITextView lays its text out in a WebKit body - facts/UIKit/UIKit15Absence.md"
+      "source": "carried by 0 of 6.1.3, 4.3 and 12.0 (REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, class-scoped as backports.lua:1631 carried_by_release reads it, the getter and the is-getter and the setter all checked). It is the getter-only half of the pair 12.0 does carry (-usesTextAttachmentView with no setter in UIFoundation), and the substrate is TextKit 2: 6.1.3 and 4.3 have NSTextAttachment but neither has NSTextLayoutFragment or NSTextLineFragment, and the port's UITextView lays its text out in a WebKit body - facts/UIKit/UIKit15Absence.md"
     },
     {
       "api": "NSTextAttachmentViewProvider",
@@ -546,7 +546,7 @@
       "status": "owed",
       "reason": "build the class NSTextAttachmentViewProvider",
       "effect": "until built: NSClassFromString answers nil",
-      "source": "SDK 16.4, UIKit; no cache this band's registry check reads carries the class - 6.1.3 and 4.3 by CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, whose own run certifies the reader (11378 classes of which UI* 705 on 6.1.3, 7187 of which UI* 597 on 4.3); 12.0 was read too and carries six of this release's rows, named in the facts page - facts/UIKit/UIKit15Absence.md"
+      "source": "SDK 16.4, UIKit; no cache this band's registry check reads carries the class - 6.1.3 and 4.3 by REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, whose own run certifies the reader (11378 classes of which UI* 705 on 6.1.3, 7187 of which UI* 597 on 4.3); 12.0 was read too and carries six of this release's rows, named in the facts page - facts/UIKit/UIKit15Absence.md"
     },
     {
       "api": "NSTextContainer.textLayoutManager",
@@ -556,7 +556,7 @@
       "status": "owed",
       "reason": "owed: the host's text containers answer the view's manager by default (measured, facts/UIKit/TextLayoutManager16.md); the port's text stack is TextKit 1 and answers none",
       "effect": "until built: respondsToSelector: answers NO",
-      "source": "carried by 0 of 6.1.3, 4.3 and 12.0 (CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, class-scoped as backports.lua:1631 carried_by_release reads it, the getter and the is-getter and the setter all checked). The minimum on this row is 7.0, the only row of this release above 6.0, so it is left out of the 6.x band by band() and read at 7.0; the manager it would answer for is TextKit 2, which arrived in 11.0 - facts/UIKit/UIKit15Absence.md",
+      "source": "carried by 0 of 6.1.3, 4.3 and 12.0 (REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, class-scoped as backports.lua:1631 carried_by_release reads it, the getter and the is-getter and the setter all checked). The minimum on this row is 7.0, the only row of this release above 6.0, so it is left out of the 6.x band by band() and read at 7.0; the manager it would answer for is TextKit 2, which arrived in 11.0 - facts/UIKit/UIKit15Absence.md",
       "note": "the object holds API of a class that arrived in iOS 7.0 or stores its data in one, so a band below that release must leave it out"
     },
     {
@@ -567,7 +567,7 @@
       "status": "owed",
       "reason": "owed: the host lays two paragraphs out as two fragments (measured, facts/UIKit/TextLayoutManager16.md); the port's layout is TextKit 1 and makes no fragment",
       "effect": "until built: NSClassFromString answers nil",
-      "source": "SDK 16.4, UIKit; no cache this band's registry check reads carries the class - 6.1.3 and 4.3 by CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, whose own run certifies the reader (11378 classes of which UI* 705 on 6.1.3, 7187 of which UI* 597 on 4.3); 12.0 was read too and carries six of this release's rows, named in the facts page - facts/UIKit/UIKit15Absence.md"
+      "source": "SDK 16.4, UIKit; no cache this band's registry check reads carries the class - 6.1.3 and 4.3 by REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, whose own run certifies the reader (11378 classes of which UI* 705 on 6.1.3, 7187 of which UI* 597 on 4.3); 12.0 was read too and carries six of this release's rows, named in the facts page - facts/UIKit/UIKit15Absence.md"
     },
     {
       "api": "NSTextLayoutManager",
@@ -577,7 +577,7 @@
       "status": "owed",
       "reason": "owed: the host's plain UITextView answers a manager by default (measured, facts/UIKit/TextLayoutManager16.md); the port's text stack is TextKit 1 and has none",
       "effect": "until built: NSClassFromString answers nil",
-      "source": "SDK 16.4, UIKit; no cache this band's registry check reads carries the class - 6.1.3 and 4.3 by CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, whose own run certifies the reader (11378 classes of which UI* 705 on 6.1.3, 7187 of which UI* 597 on 4.3); 12.0 was read too and carries six of this release's rows, named in the facts page - facts/UIKit/UIKit15Absence.md"
+      "source": "SDK 16.4, UIKit; no cache this band's registry check reads carries the class - 6.1.3 and 4.3 by REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, whose own run certifies the reader (11378 classes of which UI* 705 on 6.1.3, 7187 of which UI* 597 on 4.3); 12.0 was read too and carries six of this release's rows, named in the facts page - facts/UIKit/UIKit15Absence.md"
     },
     {
       "api": "NSTextLayoutManagerDelegate",
@@ -587,7 +587,7 @@
       "status": "owed",
       "reason": "owed: the host calls the delegate's fragment callback twice for two paragraphs (measured, facts/UIKit/TextLayoutManager16.md); the port has no layout manager to call it",
       "effect": "until built: NSProtocolFromString answers nil",
-      "source": "SDK 16.4, UIKit; no cache this band's registry check reads declares the protocol: 6.1.3, 4.3 and 12.0 by CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache> (1171 protocols on 6.1.3, 564 on 4.3, 11426 on 12.0), whose own run certifies the reader - facts/UIKit/UIKit15Absence.md"
+      "source": "SDK 16.4, UIKit; no cache this band's registry check reads declares the protocol: 6.1.3, 4.3 and 12.0 by REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache> (1171 protocols on 6.1.3, 564 on 4.3, 11426 on 12.0), whose own run certifies the reader - facts/UIKit/UIKit15Absence.md"
     },
     {
       "api": "NSTextLineFragment",
@@ -597,7 +597,7 @@
       "status": "owed",
       "reason": "owed: the host's fragments hold two line fragments for two paragraphs (measured, facts/UIKit/TextLayoutManager16.md); the port makes no fragment",
       "effect": "until built: NSClassFromString answers nil",
-      "source": "SDK 16.4, UIKit; no cache this band's registry check reads carries the class - 6.1.3 and 4.3 by CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, whose own run certifies the reader (11378 classes of which UI* 705 on 6.1.3, 7187 of which UI* 597 on 4.3); 12.0 was read too and carries six of this release's rows, named in the facts page - facts/UIKit/UIKit15Absence.md"
+      "source": "SDK 16.4, UIKit; no cache this band's registry check reads carries the class - 6.1.3 and 4.3 by REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, whose own run certifies the reader (11378 classes of which UI* 705 on 6.1.3, 7187 of which UI* 597 on 4.3); 12.0 was read too and carries six of this release's rows, named in the facts page - facts/UIKit/UIKit15Absence.md"
     },
     {
       "api": "NSTextStorage.textStorageObserver",
@@ -607,7 +607,7 @@
       "status": "owed",
       "reason": "build the property NSTextStorage.textStorageObserver",
       "effect": "until built: respondsToSelector: answers NO",
-      "source": "carried by 0 of 6.1.3, 4.3 and 12.0 (CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, class-scoped as backports.lua:1631 carried_by_release reads it, the getter and the is-getter and the setter all checked). 6.1.3 has NSTextStorage and NSLayoutManager (TextKit 1) and neither has NSTextLayoutManager, so the observer a TextKit 2 storage notifies has no counterpart to observe - facts/UIKit/UIKit15Absence.md"
+      "source": "carried by 0 of 6.1.3, 4.3 and 12.0 (REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, class-scoped as backports.lua:1631 carried_by_release reads it, the getter and the is-getter and the setter all checked). 6.1.3 has NSTextStorage and NSLayoutManager (TextKit 1) and neither has NSTextLayoutManager, so the observer a TextKit 2 storage notifies has no counterpart to observe - facts/UIKit/UIKit15Absence.md"
     },
     {
       "api": "NSTextViewportLayoutController",
@@ -617,7 +617,7 @@
       "status": "owed",
       "reason": "owed: the host's manager answers a viewport controller by default (measured, facts/UIKit/TextLayoutManager16.md); the port has no manager to answer one",
       "effect": "until built: NSClassFromString answers nil",
-      "source": "SDK 16.4, UIKit; no cache this band's registry check reads carries the class - 6.1.3 and 4.3 by CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, whose own run certifies the reader (11378 classes of which UI* 705 on 6.1.3, 7187 of which UI* 597 on 4.3); 12.0 was read too and carries six of this release's rows, named in the facts page - facts/UIKit/UIKit15Absence.md"
+      "source": "SDK 16.4, UIKit; no cache this band's registry check reads carries the class - 6.1.3 and 4.3 by REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, whose own run certifies the reader (11378 classes of which UI* 705 on 6.1.3, 7187 of which UI* 597 on 4.3); 12.0 was read too and carries six of this release's rows, named in the facts page - facts/UIKit/UIKit15Absence.md"
     },
     {
       "api": "NSTextViewportLayoutControllerDelegate",
@@ -627,7 +627,7 @@
       "status": "owed",
       "reason": "owed: the host's viewport delegate is the text view by default (measured, facts/UIKit/TextLayoutManager16.md); the port has no viewport controller",
       "effect": "until built: NSProtocolFromString answers nil",
-      "source": "SDK 16.4, UIKit; no cache this band's registry check reads declares the protocol: 6.1.3, 4.3 and 12.0 by CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache> (1171 protocols on 6.1.3, 564 on 4.3, 11426 on 12.0), whose own run certifies the reader - facts/UIKit/UIKit15Absence.md"
+      "source": "SDK 16.4, UIKit; no cache this band's registry check reads declares the protocol: 6.1.3, 4.3 and 12.0 by REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache> (1171 protocols on 6.1.3, 564 on 4.3, 11426 on 12.0), whose own run certifies the reader - facts/UIKit/UIKit15Absence.md"
     },
     {
       "api": "UIActivityItemsConfigurationProviding",
@@ -637,7 +637,7 @@
       "status": "owed",
       "reason": "build the protocol UIActivityItemsConfigurationProviding",
       "effect": "until built: NSProtocolFromString answers nil",
-      "source": "SDK 16.4, UIKit; no cache this band's registry check reads declares the protocol: 6.1.3, 4.3 and 12.0 by CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache> (1171 protocols on 6.1.3, 564 on 4.3, 11426 on 12.0), whose own run certifies the reader - facts/UIKit/UIKit15Absence.md"
+      "source": "SDK 16.4, UIKit; no cache this band's registry check reads declares the protocol: 6.1.3, 4.3 and 12.0 by REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache> (1171 protocols on 6.1.3, 564 on 4.3, 11426 on 12.0), whose own run certifies the reader - facts/UIKit/UIKit15Absence.md"
     },
     {
       "api": "UIBackgroundConfiguration.image",
@@ -669,7 +669,7 @@
       "status": "owed",
       "reason": "build the class UIBandSelectionInteraction",
       "effect": "until built: NSClassFromString answers nil",
-      "source": "SDK 16.4, UIKit; no cache this band's registry check reads carries the class - 6.1.3 and 4.3 by CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, whose own run certifies the reader (11378 classes of which UI* 705 on 6.1.3, 7187 of which UI* 597 on 4.3); 12.0 was read too and carries six of this release's rows, named in the facts page - facts/UIKit/UIKit15Absence.md"
+      "source": "SDK 16.4, UIKit; no cache this band's registry check reads carries the class - 6.1.3 and 4.3 by REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, whose own run certifies the reader (11378 classes of which UI* 705 on 6.1.3, 7187 of which UI* 597 on 4.3); 12.0 was read too and carries six of this release's rows, named in the facts page - facts/UIKit/UIKit15Absence.md"
     },
     {
       "api": "UIBarButtonItem.changesSelectionAsPrimaryAction",
@@ -679,7 +679,7 @@
       "status": "owed",
       "reason": "build the property UIBarButtonItem.changesSelectionAsPrimaryAction",
       "effect": "until built: respondsToSelector: answers NO",
-      "source": "carried by 0 of 6.1.3, 4.3 and 12.0 (CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, class-scoped as backports.lua:1631 carried_by_release reads it, the getter and the is-getter and the setter all checked). Same flag as UIButton.changesSelectionAsPrimaryAction, which this band carries as inert in UIButton+Configuration15.m, and the same reason: a bar button item on this release has no selection to treat as primary - facts/UIKit/UIKit15Absence.md"
+      "source": "carried by 0 of 6.1.3, 4.3 and 12.0 (REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, class-scoped as backports.lua:1631 carried_by_release reads it, the getter and the is-getter and the setter all checked). Same flag as UIButton.changesSelectionAsPrimaryAction, which this band carries as inert in UIButton+Configuration15.m, and the same reason: a bar button item on this release has no selection to treat as primary - facts/UIKit/UIKit15Absence.md"
     },
     {
       "api": "UIButton.automaticallyUpdatesConfiguration",
@@ -732,7 +732,7 @@
       "status": "implemented",
       "reason": "the block -updateConfiguration calls after applying the automatic update; moot without the UIButtonConfiguration cycle this port does not carry - no demand",
       "effect": "the handler is kept per button, copied on set, and setting it asks for a configuration update; the update then calls it with the button and the button's configuration, through the same seam the 15.0 cell rows use",
-      "source": "SDK 16.4, UIKit; not in UIButton's methods in the 6.1.3, 4.3 or 12.0 cache (objc-inventory, class-scoped as backports.lua:1631 carried_by_release reads it); delivered on the cell rows' own seam - charon_host_update_handler and charon_host_set_update_handler from CharonConfigurationHost.m, which take a UIView and are reused here rather than remade, and the 15.0 cell rows are the precedent - packages/a/apple-backports/UIKit/UIButton+Configuration15.m",
+      "source": "SDK 16.4, UIKit; not in UIButton's methods in the 6.1.3, 4.3 or 12.0 cache (objc-inventory, class-scoped as backports.lua:1631 carried_by_release reads it); delivered on the cell rows' own seam - revenant_host_update_handler and revenant_host_set_update_handler from RevenantConfigurationHost.m, which take a UIView and are reused here rather than remade, and the 15.0 cell rows are the precedent - packages/a/apple-backports/UIKit/UIButton+Configuration15.m",
       "facts": "facts/UIKit/UIButtonConfiguration15Wiring.md"
     },
     {
@@ -743,7 +743,7 @@
       "status": "owed",
       "reason": "build the property UIButton.held",
       "effect": "until built: respondsToSelector: answers NO",
-      "source": "carried by 0 of 6.1.3, 4.3 and 12.0 (CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, class-scoped as backports.lua:1631 carried_by_release reads it, the getter and the is-getter and the setter all checked). It reports a button held between touch-down and touch-up, and the port has no pressed-state seam to read it from - no port file overrides -isHighlighted on a button, so there is no held state to answer - facts/UIKit/UIKit15Absence.md"
+      "source": "carried by 0 of 6.1.3, 4.3 and 12.0 (REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, class-scoped as backports.lua:1631 carried_by_release reads it, the getter and the is-getter and the setter all checked). It reports a button held between touch-down and touch-up, and the port has no pressed-state seam to read it from - no port file overrides -isHighlighted on a button, so there is no held state to answer - facts/UIKit/UIKit15Absence.md"
     },
     {
       "api": "-[UIButton isHovered]",
@@ -784,7 +784,7 @@
       "status": "implemented",
       "reason": "",
       "effect": "the port's own copy of the class, and the case in tests/backports/host/uikit2/buttonconfig_test.m holds the eight constructors, the twenty-five properties, -copy and the archive against the system's",
-      "source": "SDK 16.4, UIKit; no cache this band's registry check reads carries the class - 6.1.3 and 4.3 by CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, whose own run certifies the reader (11378 classes of which UI* 705 on 6.1.3, 7187 of which UI* 597 on 4.3); 12.0 was read too and carries six of this release's rows, named in the facts page - facts/UIKit/UIKit15Absence.md",
+      "source": "SDK 16.4, UIKit; no cache this band's registry check reads carries the class - 6.1.3 and 4.3 by REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, whose own run certifies the reader (11378 classes of which UI* 705 on 6.1.3, 7187 of which UI* 597 on 4.3); 12.0 was read too and carries six of this release's rows, named in the facts page - facts/UIKit/UIKit15Absence.md",
       "facts": "facts/UIKit/UIButtonConfiguration15.md"
     },
     {
@@ -806,7 +806,7 @@
       "status": "owed",
       "reason": "build the property UICollectionView.allowsFocus",
       "effect": "until built: respondsToSelector: answers NO",
-      "source": "carried by 0 of 6.1.3, 4.3 and 12.0 (CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, class-scoped as backports.lua:1631 carried_by_release reads it, the getter and the is-getter and the setter all checked). A collection view participates in full-screen focus only where a focus engine exists, and UIFocusEffect and UIFocusHaloEffect are absent rows of this same release and nothing in the port ever begins a focus update - facts/UIKit/UIKit15Absence.md"
+      "source": "carried by 0 of 6.1.3, 4.3 and 12.0 (REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, class-scoped as backports.lua:1631 carried_by_release reads it, the getter and the is-getter and the setter all checked). A collection view participates in full-screen focus only where a focus engine exists, and UIFocusEffect and UIFocusHaloEffect are absent rows of this same release and nothing in the port ever begins a focus update - facts/UIKit/UIKit15Absence.md"
     },
     {
       "api": "UICollectionView.allowsFocusDuringEditing",
@@ -816,7 +816,7 @@
       "status": "owed",
       "reason": "build the property UICollectionView.allowsFocusDuringEditing",
       "effect": "until built: respondsToSelector: answers NO",
-      "source": "carried by 0 of 6.1.3, 4.3 and 12.0 (CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, class-scoped as backports.lua:1631 carried_by_release reads it, the getter and the is-getter and the setter all checked). The editing variant of the flag above, and the same missing focus engine; it also wants the focus update context an editing collection view would be given - facts/UIKit/UIKit15Absence.md"
+      "source": "carried by 0 of 6.1.3, 4.3 and 12.0 (REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, class-scoped as backports.lua:1631 carried_by_release reads it, the getter and the is-getter and the setter all checked). The editing variant of the flag above, and the same missing focus engine; it also wants the focus update context an editing collection view would be given - facts/UIKit/UIKit15Absence.md"
     },
     {
       "api": "UICollectionViewCell.configurationUpdateHandler",
@@ -856,7 +856,7 @@
       "status": "owed",
       "reason": "build the property UIColor.tintColor",
       "effect": "until built: respondsToSelector: answers NO",
-      "source": "carried by 0 of 6.1.3, 4.3 and 12.0 (CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, class-scoped as backports.lua:1631 carried_by_release reads it, the getter and the is-getter and the setter all checked). A class property whose value would have to be a chosen colour: the port carries UIColor+SystemColors.m and UIColor+SystemPurpleColor.m, so the system colours exist, but no release states what the default tint is and the view-level -[UIView tintColor] of 7.0 is a view's own colour, not a class-wide one. A value written here would be a literal standing in for a measurement nobody made - facts/UIKit/UIKit15Absence.md"
+      "source": "carried by 0 of 6.1.3, 4.3 and 12.0 (REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, class-scoped as backports.lua:1631 carried_by_release reads it, the getter and the is-getter and the setter all checked). A class property whose value would have to be a chosen colour: the port carries UIColor+SystemColors.m and UIColor+SystemPurpleColor.m, so the system colours exist, but no release states what the default tint is and the view-level -[UIView tintColor] of 7.0 is a view's own colour, not a class-wide one. A value written here would be a literal standing in for a measurement nobody made - facts/UIKit/UIKit15Absence.md"
     },
     {
       "api": "UIControl.toolTip",
@@ -888,7 +888,7 @@
       "status": "owed",
       "reason": "build the property UIDatePicker.roundsToMinuteInterval",
       "effect": "until built: respondsToSelector: answers NO",
-      "source": "carried by 0 of 6.1.3, 4.3 and 12.0 (CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, class-scoped as backports.lua:1631 carried_by_release reads it, the getter and the is-getter and the setter all checked). It snaps a date picker to whole minutes; the release's UIDatePicker has minute wheels and no rounding step, and the port rounds nothing - facts/UIKit/UIKit15Absence.md"
+      "source": "carried by 0 of 6.1.3, 4.3 and 12.0 (REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, class-scoped as backports.lua:1631 carried_by_release reads it, the getter and the is-getter and the setter all checked). It snaps a date picker to whole minutes; the release's UIDatePicker has minute wheels and no rounding step, and the port rounds nothing - facts/UIKit/UIKit15Absence.md"
     },
     {
       "api": "UIFocusEffect",
@@ -942,7 +942,7 @@
       "status": "owed",
       "reason": "build the property UIFocusItem.isTransparentFocusItem",
       "effect": "until built: respondsToSelector: answers NO",
-      "source": "carried by 0 of 6.1.3, 4.3 and 12.0 (CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, class-scoped as backports.lua:1631 carried_by_release reads it, the getter and the is-getter and the setter all checked). It marks an item the focus engine moves through without resting on, which is a statement about that engine's traversal, and the release has no focus engine: UIFocusEffect and UIFocusHaloEffect are absent rows of this same release, UICollectionView.allowsFocus and UITableView.allowsFocus are absent rows of it too, and nothing in the port ever begins a focus update - facts/UIKit/UIKit15Absence.md"
+      "source": "carried by 0 of 6.1.3, 4.3 and 12.0 (REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, class-scoped as backports.lua:1631 carried_by_release reads it, the getter and the is-getter and the setter all checked). It marks an item the focus engine moves through without resting on, which is a statement about that engine's traversal, and the release has no focus engine: UIFocusEffect and UIFocusHaloEffect are absent rows of this same release, UICollectionView.allowsFocus and UITableView.allowsFocus are absent rows of it too, and nothing in the port ever begins a focus update - facts/UIKit/UIKit15Absence.md"
     },
     {
       "api": "UIKeyboardLayoutGuide",
@@ -963,7 +963,7 @@
       "status": "implemented",
       "reason": "`visualEffect` is 15.0 and Apple's own class answers it: the arm64e cache of iOS 18.0 carries -visualEffect and -setVisualEffect: in UIListSeparatorConfiguration's own instance list, among its 37, and the host's own class answers both. The row used to say `absent` with the reason \"the port does not carry UIListSeparatorConfiguration\", which this band's own class made stale - and the port was answering the property anyway, because the 16.4 build SDK declares it on the class and clang auto-synthesised the pair into the 14.5 object (nm on that object showed -visualEffect, -setVisualEffect: and _OBJC_IVAR_$_UIListSeparatorConfiguration._visualEffect). The pair now lives in UIListSeparatorConfiguration+VisualEffect15.m and the 14.5 object declares the property @dynamic, so nm on it shows nothing for this member. Measured on the host's own UIKitCore under Mac Catalyst (facts/UIKit/UIListSeparatorConfiguration145.md, M4, the probe in .agent-work/runs/fix/effect-probe.m): nil until written; after -setVisualEffect: a UIBlurEffect and NOT the instance that was set, so the header's `copy` is applied; -copyWithZone: carries it and the copy's effect is again not the receiver's instance; a copy of a fresh configuration is nil; -isEqual: is 1 for two configurations written alike and 0 once one of them has an effect, while -hash answers alike either way, so the effect joins the equality and not the hash; and the archive writes SEVEN keys whose seventh is `visualEffect`, the property's own name, and reads back a UIBlurEffect",
       "effect": "the vibrancy effect a list separator is drawn with, read and written with copy semantics: nil until written, never the instance the caller set, carried by -copyWithZone: as another copy, and archived under the property's own name so a configuration reads back with it. What the release's list layout does with it: nothing, because 6.1.3 has no UICollectionView list and so no separator to draw behind - the value round trip is the whole of the property here, as it is for every other member of this class, and the row says so rather than claiming a separator this release does not have",
-      "source": "UIListSeparatorConfiguration.h:60 of the 16.4 build SDK (byte for byte the 26.2 one after the comments and the availability macros) declares the property. The port's own objects are packages/a/apple-backports/UIKit/UIListSeparatorConfiguration+VisualEffect15.m, which defines the pair and holds the storage as one associated object per configuration with the copy made on the way in, and packages/a/apple-backports/UIKit/UIListSeparatorConfiguration145.m, whose @dynamic and whose three seams in CharonLists.h are how a 14.5 object reaches a 15.0 member. Measured on the host's own UIKitCore under Mac Catalyst (facts/UIKit/UIListSeparatorConfiguration145.md, M4, the probe in .agent-work/runs/fix/effect-probe.m): nil until written; after -setVisualEffect: a UIBlurEffect and NOT the instance that was set, so the header's `copy` is applied; -copyWithZone: carries it and the copy's effect is again not the receiver's instance; a copy of a fresh configuration is nil; -isEqual: is 1 for two configurations written alike and 0 once one of them has an effect, while -hash answers alike either way, so the effect joins the equality and not the hash; and the archive writes SEVEN keys whose seventh is `visualEffect`, the property's own name, and reads back a UIBlurEffect. Held to the host by the case in tests/backports/host/uikit2/listseparator_test.m, which asks all seven reads on both sides - nil until written, the class of the effect, copied on the way in, carried and re-copied by -copyWithZone:, and back from the archive - 166 checks, 0 failures; and it responds to a wrong answer: a plant that stops the archive writing the key turns exactly the archived-effect rows red on both sides"
+      "source": "UIListSeparatorConfiguration.h:60 of the 16.4 build SDK (byte for byte the 26.2 one after the comments and the availability macros) declares the property. The port's own objects are packages/a/apple-backports/UIKit/UIListSeparatorConfiguration+VisualEffect15.m, which defines the pair and holds the storage as one associated object per configuration with the copy made on the way in, and packages/a/apple-backports/UIKit/UIListSeparatorConfiguration145.m, whose @dynamic and whose three seams in RevenantLists.h are how a 14.5 object reaches a 15.0 member. Measured on the host's own UIKitCore under Mac Catalyst (facts/UIKit/UIListSeparatorConfiguration145.md, M4, the probe in .agent-work/runs/fix/effect-probe.m): nil until written; after -setVisualEffect: a UIBlurEffect and NOT the instance that was set, so the header's `copy` is applied; -copyWithZone: carries it and the copy's effect is again not the receiver's instance; a copy of a fresh configuration is nil; -isEqual: is 1 for two configurations written alike and 0 once one of them has an effect, while -hash answers alike either way, so the effect joins the equality and not the hash; and the archive writes SEVEN keys whose seventh is `visualEffect`, the property's own name, and reads back a UIBlurEffect. Held to the host by the case in tests/backports/host/uikit2/listseparator_test.m, which asks all seven reads on both sides - nil until written, the class of the effect, copied on the way in, carried and re-copied by -copyWithZone:, and back from the archive - 166 checks, 0 failures; and it responds to a wrong answer: a plant that stops the archive writing the key turns exactly the archived-effect rows red on both sides"
     },
     {
       "api": "UIMenu.selectedElements",
@@ -1038,7 +1038,7 @@
       "status": "owed",
       "reason": "build the property UIPrintInteractionController.showsPaperOrientation",
       "effect": "until built: respondsToSelector: answers NO",
-      "source": "carried by 0 of 6.1.3, 4.3 and 12.0 (CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, class-scoped as backports.lua:1631 carried_by_release reads it, the getter and the is-getter and the setter all checked). The class itself IS present - 6.1.3's UIPrintInteractionController carries 58 instance selectors and -printInfo among them - so this is a member the release's own print controller does not have, not a missing framework: the paper-orientation control is a later addition to a panel that exists. The port implements no print controller of its own, so there is no paper orientation for it to show - facts/UIKit/UIKit15Absence.md"
+      "source": "carried by 0 of 6.1.3, 4.3 and 12.0 (REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, class-scoped as backports.lua:1631 carried_by_release reads it, the getter and the is-getter and the setter all checked). The class itself IS present - 6.1.3's UIPrintInteractionController carries 58 instance selectors and -printInfo among them - so this is a member the release's own print controller does not have, not a missing framework: the paper-orientation control is a later addition to a panel that exists. The port implements no print controller of its own, so there is no paper orientation for it to show - facts/UIKit/UIKit15Absence.md"
     },
     {
       "api": "UIScene.subtitle",
@@ -1149,7 +1149,7 @@
       "status": "owed",
       "reason": "build the property UITableView.allowsFocus",
       "effect": "until built: respondsToSelector: answers NO",
-      "source": "carried by 0 of 6.1.3, 4.3 and 12.0 (CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, class-scoped as backports.lua:1631 carried_by_release reads it, the getter and the is-getter and the setter all checked). the release has no focus engine: UIFocusEffect and UIFocusHaloEffect are absent rows of this same release, UICollectionView.allowsFocus and UITableView.allowsFocus are absent rows of it too, and nothing in the port ever begins a focus update - facts/UIKit/UIKit15Absence.md"
+      "source": "carried by 0 of 6.1.3, 4.3 and 12.0 (REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, class-scoped as backports.lua:1631 carried_by_release reads it, the getter and the is-getter and the setter all checked). the release has no focus engine: UIFocusEffect and UIFocusHaloEffect are absent rows of this same release, UICollectionView.allowsFocus and UITableView.allowsFocus are absent rows of it too, and nothing in the port ever begins a focus update - facts/UIKit/UIKit15Absence.md"
     },
     {
       "api": "UITableView.allowsFocusDuringEditing",
@@ -1159,7 +1159,7 @@
       "status": "owed",
       "reason": "build the property UITableView.allowsFocusDuringEditing",
       "effect": "until built: respondsToSelector: answers NO",
-      "source": "carried by 0 of 6.1.3, 4.3 and 12.0 (CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, class-scoped as backports.lua:1631 carried_by_release reads it, the getter and the is-getter and the setter all checked). The editing variant of the flag above, and the release has no focus engine: UIFocusEffect and UIFocusHaloEffect are absent rows of this same release, UICollectionView.allowsFocus and UITableView.allowsFocus are absent rows of it too, and nothing in the port ever begins a focus update - facts/UIKit/UIKit15Absence.md"
+      "source": "carried by 0 of 6.1.3, 4.3 and 12.0 (REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, class-scoped as backports.lua:1631 carried_by_release reads it, the getter and the is-getter and the setter all checked). The editing variant of the flag above, and the release has no focus engine: UIFocusEffect and UIFocusHaloEffect are absent rows of this same release, UICollectionView.allowsFocus and UITableView.allowsFocus are absent rows of it too, and nothing in the port ever begins a focus update - facts/UIKit/UIKit15Absence.md"
     },
     {
       "api": "UITableView.fillerRowHeight",
@@ -1169,7 +1169,7 @@
       "status": "owed",
       "reason": "build the property UITableView.fillerRowHeight",
       "effect": "until built: respondsToSelector: answers NO",
-      "source": "carried by 0 of 6.1.3, 4.3 and 12.0 (CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, class-scoped as backports.lua:1631 carried_by_release reads it, the getter and the is-getter and the setter all checked). A filler row is the blank row a grouped table shows under its last section, which is a layout the release's grouped tables do not have - facts/UIKit/UIKit15Absence.md"
+      "source": "carried by 0 of 6.1.3, 4.3 and 12.0 (REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, class-scoped as backports.lua:1631 carried_by_release reads it, the getter and the is-getter and the setter all checked). A filler row is the blank row a grouped table shows under its last section, which is a layout the release's grouped tables do not have - facts/UIKit/UIKit15Absence.md"
     },
     {
       "api": "UITableView.prefetchingEnabled",
@@ -1210,7 +1210,7 @@
       "status": "owed",
       "reason": "build the property UITextField.interactionState",
       "effect": "until built: respondsToSelector: answers NO",
-      "source": "carried by 0 of 6.1.3, 4.3 and 12.0 (CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, class-scoped as backports.lua:1631 carried_by_release reads it, the getter and the is-getter and the setter all checked). It reports the text input interaction in progress - the floating callout, the dictation, the editing state - and the release's UITextField has no such state object; the sibling UIPageControl.interactionState is carried as inert at 14.0 for the same reason - facts/UIKit/UIKit15Absence.md"
+      "source": "carried by 0 of 6.1.3, 4.3 and 12.0 (REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, class-scoped as backports.lua:1631 carried_by_release reads it, the getter and the is-getter and the setter all checked). It reports the text input interaction in progress - the floating callout, the dictation, the editing state - and the release's UITextField has no such state object; the sibling UIPageControl.interactionState is carried as inert at 14.0 for the same reason - facts/UIKit/UIKit15Absence.md"
     },
     {
       "api": "UITextView.interactionState",
@@ -1220,7 +1220,7 @@
       "status": "owed",
       "reason": "build the property UITextView.interactionState",
       "effect": "until built: respondsToSelector: answers NO",
-      "source": "carried by 0 of 6.1.3, 4.3 and 12.0 (CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, class-scoped as backports.lua:1631 carried_by_release reads it, the getter and the is-getter and the setter all checked). As above, for the text view; the port's UITextView lays its text out in a WebKit body and has no input-interaction state of its own - facts/UIKit/UIKit15Absence.md"
+      "source": "carried by 0 of 6.1.3, 4.3 and 12.0 (REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, class-scoped as backports.lua:1631 carried_by_release reads it, the getter and the is-getter and the setter all checked). As above, for the text view; the port's UITextView lays its text out in a WebKit body and has no input-interaction state of its own - facts/UIKit/UIKit15Absence.md"
     },
     {
       "api": "UIToolTipConfiguration",
@@ -1263,7 +1263,7 @@
       "status": "owed",
       "reason": "owed: the sets are stored per edge and cleared as the host clears them, but the constraints are not activated as the guide moves near or away from an edge; the host did not reduce to a position rule in the measurement (facts/UIKit/UIKeyboardLayoutGuide.md)",
       "effect": "until built: NSClassFromString answers nil",
-      "source": "SDK 16.4, UIKit; no cache this band's registry check reads carries the class - 6.1.3 and 4.3 by CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, whose own run certifies the reader (11378 classes of which UI* 705 on 6.1.3, 7187 of which UI* 597 on 4.3); 12.0 was read too and carries six of this release's rows, named in the facts page - facts/UIKit/UIKit15Absence.md"
+      "source": "SDK 16.4, UIKit; no cache this band's registry check reads carries the class - 6.1.3 and 4.3 by REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, whose own run certifies the reader (11378 classes of which UI* 705 on 6.1.3, 7187 of which UI* 597 on 4.3); 12.0 was read too and carries six of this release's rows, named in the facts page - facts/UIKit/UIKit15Absence.md"
     },
     {
       "api": "UIView.appliedContentSizeCategoryLimitsDescription",
@@ -1273,7 +1273,7 @@
       "status": "owed",
       "reason": "build the property UIView.appliedContentSizeCategoryLimitsDescription",
       "effect": "until built: respondsToSelector: answers NO",
-      "source": "carried by 0 of 6.1.3, 4.3 and 12.0 (CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, class-scoped as backports.lua:1631 carried_by_release reads it, the getter and the is-getter and the setter all checked). It describes the category limits a view is actually under, which are the two rows below; with neither limit carried there is nothing to describe, and the port's own dynamic-type work is UIContentSizeCategoryAdjusting - facts/UIKit/UIKit15Absence.md"
+      "source": "carried by 0 of 6.1.3, 4.3 and 12.0 (REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, class-scoped as backports.lua:1631 carried_by_release reads it, the getter and the is-getter and the setter all checked). It describes the category limits a view is actually under, which are the two rows below; with neither limit carried there is nothing to describe, and the port's own dynamic-type work is UIContentSizeCategoryAdjusting - facts/UIKit/UIKit15Absence.md"
     },
     {
       "api": "UIView.focusEffect",
@@ -1316,7 +1316,7 @@
       "status": "owed",
       "reason": "build the property UIView.maximumContentSizeCategory",
       "effect": "until built: respondsToSelector: answers NO",
-      "source": "carried by 0 of 6.1.3, 4.3 and 12.0 (CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, class-scoped as backports.lua:1631 carried_by_release reads it, the getter and the is-getter and the setter all checked). It clamps a view's largest Dynamic Type size; 6.1.3 has Dynamic Type and the port scales text for it, but a per-view clamp is a layout feature rather than something the release's text sizing has a place for - facts/UIKit/UIKit15Absence.md"
+      "source": "carried by 0 of 6.1.3, 4.3 and 12.0 (REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, class-scoped as backports.lua:1631 carried_by_release reads it, the getter and the is-getter and the setter all checked). It clamps a view's largest Dynamic Type size; 6.1.3 has Dynamic Type and the port scales text for it, but a per-view clamp is a layout feature rather than something the release's text sizing has a place for - facts/UIKit/UIKit15Absence.md"
     },
     {
       "api": "UIView.minimumContentSizeCategory",
@@ -1326,7 +1326,7 @@
       "status": "owed",
       "reason": "build the property UIView.minimumContentSizeCategory",
       "effect": "until built: respondsToSelector: answers NO",
-      "source": "carried by 0 of 6.1.3, 4.3 and 12.0 (CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, class-scoped as backports.lua:1631 carried_by_release reads it, the getter and the is-getter and the setter all checked). The smallest-size half of the pair above, and the same measurement - facts/UIKit/UIKit15Absence.md"
+      "source": "carried by 0 of 6.1.3, 4.3 and 12.0 (REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, class-scoped as backports.lua:1631 carried_by_release reads it, the getter and the is-getter and the setter all checked). The smallest-size half of the pair above, and the same measurement - facts/UIKit/UIKit15Absence.md"
     },
     {
       "api": "UIViewConfigurationState.pinned",
@@ -1368,7 +1368,7 @@
       "status": "owed",
       "reason": "owed: the getter is YES for a plain window, but the host never makes a subclass key that answers NO (a probe, not the differential), and the port's key-window path does not consult that override yet (facts/UIKit/UIWindowSceneWindowing16.md)",
       "effect": "until built: respondsToSelector: answers NO",
-      "source": "carried by 0 of 6.1.3, 4.3 and 12.0 (CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, class-scoped as backports.lua:1631 carried_by_release reads it, the getter and the is-getter and the setter all checked). It answers whether a window may take key: on the host a plain window answers YES and an override answering NO is honoured, so the override is the behaviour to carry, not a settable flag; the release's UIWindow is present on 6.1.3 while carrying no such accessor - facts/UIKit/UIKit15Absence.md, facts/UIKit/UIWindowSceneWindowing16.md"
+      "source": "carried by 0 of 6.1.3, 4.3 and 12.0 (REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, class-scoped as backports.lua:1631 carried_by_release reads it, the getter and the is-getter and the setter all checked). It answers whether a window may take key: on the host a plain window answers YES and an override answering NO is honoured, so the override is the behaviour to carry, not a settable flag; the release's UIWindow is present on 6.1.3 while carrying no such accessor - facts/UIKit/UIKit15Absence.md, facts/UIKit/UIWindowSceneWindowing16.md"
     },
     {
       "api": "UIWindowScene.activityItemsConfigurationSource",
@@ -1389,7 +1389,7 @@
       "status": "owed",
       "reason": "build the property UIWindowScene.focusSystem",
       "effect": "until built: respondsToSelector: answers NO",
-      "source": "SDK 16.4, UIKit; carried by 0 of 6.1.3, 4.3 and 12.0 (CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, class-scoped as backports.lua:1631 carried_by_release reads it). UIWindowScene is absent from the 6.1.3 cache and the release has no focus engine to be a system of: UIFocusEffect and UIFocusHaloEffect are absent rows of this same release, and nothing in the port ever begins a focus update - facts/UIKit/UIKit15Absence.md"
+      "source": "SDK 16.4, UIKit; carried by 0 of 6.1.3, 4.3 and 12.0 (REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, class-scoped as backports.lua:1631 carried_by_release reads it). UIWindowScene is absent from the 6.1.3 cache and the release has no focus engine to be a system of: UIFocusEffect and UIFocusHaloEffect are absent rows of this same release, and nothing in the port ever begins a focus update - facts/UIKit/UIKit15Absence.md"
     },
     {
       "api": "UIWindowScene.keyWindow",
@@ -1431,7 +1431,7 @@
       "status": "owed",
       "reason": "build the class UIWindowSceneActivationInteraction",
       "effect": "until built: NSClassFromString answers nil",
-      "source": "SDK 16.4, UIKit; no cache this band's registry check reads carries the class - 6.1.3 and 4.3 by CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, whose own run certifies the reader (11378 classes of which UI* 705 on 6.1.3, 7187 of which UI* 597 on 4.3); 12.0 was read too and carries six of this release's rows, named in the facts page - facts/UIKit/UIKit15Absence.md"
+      "source": "SDK 16.4, UIKit; no cache this band's registry check reads carries the class - 6.1.3 and 4.3 by REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, whose own run certifies the reader (11378 classes of which UI* 705 on 6.1.3, 7187 of which UI* 597 on 4.3); 12.0 was read too and carries six of this release's rows, named in the facts page - facts/UIKit/UIKit15Absence.md"
     },
     {
       "api": "UIWindowSceneActivationRequestOptions",
@@ -1452,7 +1452,7 @@
       "status": "owed",
       "reason": "build the property UIActivityViewController.allowsProminentActivity",
       "effect": "until built: respondsToSelector: answers NO",
-      "source": "carried by 0 of 6.1.3, 4.3 and 12.0 (CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, class-scoped as backports.lua:1631 carried_by_release reads it, the getter and the is-getter and the setter all checked). It promotes an activity in the share sheet, and the port's own share path is a pasteboard (UIPasteboard+Items10.m) with no activity list to promote an entry in - facts/UIKit/UIKit15Absence.md"
+      "source": "carried by 0 of 6.1.3, 4.3 and 12.0 (REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, class-scoped as backports.lua:1631 carried_by_release reads it, the getter and the is-getter and the setter all checked). It promotes an activity in the share sheet, and the port's own share path is a pasteboard (UIPasteboard+Items10.m) with no activity list to promote an entry in - facts/UIKit/UIKit15Absence.md"
     },
     {
       "api": "UIApplicationOpenNotificationSettingsURLString",
@@ -1472,7 +1472,7 @@
       "status": "owed",
       "reason": "build the class UICellAccessoryDetail",
       "effect": "until built: NSClassFromString answers nil",
-      "source": "SDK 16.4, UIKit; no cache this band's registry check reads carries the class - 6.1.3 and 4.3 by CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, whose own run certifies the reader (11378 classes of which UI* 705 on 6.1.3, 7187 of which UI* 597 on 4.3); 12.0 was read too and carries six of this release's rows, named in the facts page - facts/UIKit/UIKit15Absence.md"
+      "source": "SDK 16.4, UIKit; no cache this band's registry check reads carries the class - 6.1.3 and 4.3 by REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua <cache>, whose own run certifies the reader (11378 classes of which UI* 705 on 6.1.3, 7187 of which UI* 597 on 4.3); 12.0 was read too and carries six of this release's rows, named in the facts page - facts/UIKit/UIKit15Absence.md"
     },
     {
       "api": "UIPrintFormatter.requiresMainThread",
@@ -1710,7 +1710,7 @@
       "introduced": "16.0",
       "minimum": "6.0",
       "status": "implemented",
-      "effect": "YES when the configuration would install this kind of view, which is the header's own rule for a view that does not implement the method, and the test the port's install path already makes (CharonConfigurationHost.m reuses the installed view when the new configuration makes the same kind); in this port that is YES for every UIListContentConfiguration and NO for a configuration of any other kind",
+      "effect": "YES when the configuration would install this kind of view, which is the header's own rule for a view that does not implement the method, and the test the port's install path already makes (RevenantConfigurationHost.m reuses the installed view when the new configuration makes the same kind); in this port that is YES for every UIListContentConfiguration and NO for a configuration of any other kind",
       "source": "SDK 16.4, UIKit; UIView, the protocol's only implementer, carries none of supportsConfiguration's spellings in the 6.1.3 and 12.0 caches (0 of 663 and 2156 selectors) while the 16.0 cache's own UIListContentView carries -supportsConfiguration:, read class-scoped by xmake l tools/corpus/objc-inventory.lua over each cache - facts/UIKit/ContentViewSupportsConfiguration16.md",
       "facts": "facts/UIKit/ContentViewSupportsConfiguration16.md"
     },
@@ -2986,7 +2986,7 @@
       "introduced": "16.0",
       "minimum": "6.0",
       "status": "implemented",
-      "reason": "device-unverified: the port has not run on a device; the guide's class is named CharonAspectFitLayoutGuide where the host's is private (facts/UIKit/UIKeyboardLayoutGuide.md)",
+      "reason": "device-unverified: the port has not run on a device; the guide's class is named RevenantAspectFitLayoutGuide where the host's is private (facts/UIKit/UIKeyboardLayoutGuide.md)",
       "effect": "a guide owned by the window, centred in the safe area, the largest rectangle of aspectRatio that fits; aspectRatio defaults to 1 and keeps the value set",
       "facts": "facts/UIKit/UIKeyboardLayoutGuide.md",
       "source": "the host's own UIKit under Mac Catalyst, measured by tests/backports/host/layout-guides (the frames at ratios 1 and 2); the header of SDK 16.4 (UIWindow.h); the protocol UILayoutGuideAspectFitting has no registry row"
@@ -3017,7 +3017,7 @@
       "introduced": "16.0",
       "minimum": "6.0",
       "status": "implemented",
-      "effect": "allocatable and answers the one value the header carries on iOS, interfaceOrientation, readonly as the header says; -init and +new are unavailable, a value is made through the port's own -initCharonWithOrientation:, and -copyWithZone: answers the same resolved orientation",
+      "effect": "allocatable and answers the one value the header carries on iOS, interfaceOrientation, readonly as the header says; -init and +new are unavailable, a value is made through the port's own -initRevenantWithOrientation:, and -copyWithZone: answers the same resolved orientation",
       "source": "SDK 16.4, UIKit; UIWindowSceneGeometry and -effectiveGeometry are 16.0 names: neither band end has the class nor UIWindowScene at all (6.1.3 and 12.0 read class-scoped by xmake l tools/corpus/objc-inventory.lua, which holds 705 and 1741 UI* classes respectively and the classes this port already builds on, UIWindow and UIViewController among them), while the 16.0 cache carries both - facts/UIKit/SceneGeometry16.md",
       "facts": "facts/UIKit/SceneGeometry16.md"
     },
@@ -3051,7 +3051,7 @@
       "introduced": "16.0",
       "status": "owed",
       "facts": "facts/UIKit/UICommand.md",
-      "source": "the SDK that declares the names, charon/.agent-work/sdk-26.2's iPhoneOS26.2.sdk System/Library/Frameworks/UIKit.framework/Headers UIMenuLeaf.h:41 and UIMenuElement.h:32, against which the 16.4 build SDK carries neither the property nor the type. Measured on: the arm64e shared cache of iOS 18.0 read with modules/apple/objc.lua's inventory, one pass for all three rows: the own instance lists of UIAction and of UICommand each carry -selectedImage and -setSelectedImage:, and none of UIMenuElement's, UIAction's or UICommand's carries a method named repeatBehavior",
+      "source": "the SDK that declares the names, toolchain/.agent-work/sdk-26.2's iPhoneOS26.2.sdk System/Library/Frameworks/UIKit.framework/Headers UIMenuLeaf.h:41 and UIMenuElement.h:32, against which the 16.4 build SDK carries neither the property nor the type. Measured on: the arm64e shared cache of iOS 18.0 read with modules/apple/objc.lua's inventory, one pass for all three rows: the own instance lists of UIAction and of UICommand each carry -selectedImage and -setSelectedImage:, and none of UIMenuElement's, UIAction's or UICommand's carries a method named repeatBehavior",
       "minimum": "6.0",
       "reason": "build the property UIMenuLeaf.repeatBehavior",
       "effect": "until built: respondsToSelector: answers NO"

@@ -5,7 +5,7 @@
 
 @synthesize items = _items;
 
-- (instancetype)initWithCharonItems:(NSArray<MPMediaItem *> *)items {
+- (instancetype)initWithRevenantItems:(NSArray<MPMediaItem *> *)items {
     self = [super init];
     if (self) {
         _items = [items copy];
@@ -21,20 +21,20 @@
         return nil;
     }
 
-    return [self initWithCharonItems:nil];
+    return [self initWithRevenantItems:nil];
 }
 
 - (NSArray<MPMediaItem *> *)items { return _items; }
 
-- (void)charonSetItems:(NSArray<MPMediaItem *> *)items {
+- (void)revenantSetItems:(NSArray<MPMediaItem *> *)items {
     _items = [items copy];
 }
 
 @end
 
-@interface MPMusicPlayerControllerQueue (CharonSubclassInit)
-- (void)charonSetItems:(NSArray<MPMediaItem *> *)items;
-- (instancetype)initWithCharonItems:(NSArray<MPMediaItem *> *)items;
+@interface MPMusicPlayerControllerQueue (RevenantSubclassInit)
+- (void)revenantSetItems:(NSArray<MPMediaItem *> *)items;
+- (instancetype)initWithRevenantItems:(NSArray<MPMediaItem *> *)items;
 @end
 
 @implementation MPMusicPlayerControllerMutableQueue
@@ -42,7 +42,7 @@
 - (void)insertQueueDescriptor:(MPMusicPlayerQueueDescriptor *)queueDescriptor
                   afterItem:(MPMediaItem *)afterItem {
     if (!queueDescriptor) { return; }
-    NSArray<MPMediaItem *> *incoming = [self charonItemsNamedBy:queueDescriptor];
+    NSArray<MPMediaItem *> *incoming = [self revenantItemsNamedBy:queueDescriptor];
     if (!incoming || incoming.count == 0) {
         return;
     }
@@ -54,7 +54,7 @@
     }
     NSIndexSet *paths = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(at, incoming.count)];
     [items insertObjects:incoming atIndexes:paths];
-    [self charonSetItems:items];
+    [self revenantSetItems:items];
 }
 
 - (void)removeItem:(MPMediaItem *)item {
@@ -62,11 +62,11 @@
     NSMutableArray<MPMediaItem *> *items = [self.items mutableCopy];
     if ([items containsObject:item]) {
         [items removeObject:item];
-        [self charonSetItems:items];
+        [self revenantSetItems:items];
     }
 }
 
-- (NSArray<MPMediaItem *> *)charonItemsNamedBy:(MPMusicPlayerQueueDescriptor *)queueDescriptor {
+- (NSArray<MPMediaItem *> *)revenantItemsNamedBy:(MPMusicPlayerQueueDescriptor *)queueDescriptor {
     if (![queueDescriptor isKindOfClass:[MPMusicPlayerMediaItemQueueDescriptor class]]) {
         return nil;
     }
@@ -91,12 +91,12 @@
 - (void)performQueueTransaction:(void (^)(MPMusicPlayerControllerMutableQueue *))queueTransaction
              completionHandler:(void (^)(MPMusicPlayerControllerQueue *, NSError *))completionHandler {
     MPMusicPlayerControllerMutableQueue *mutable =
-        [[MPMusicPlayerControllerMutableQueue alloc] initWithCharonItems:_queue ? _queue.items : nil];
+        [[MPMusicPlayerControllerMutableQueue alloc] initWithRevenantItems:_queue ? _queue.items : nil];
     if (queueTransaction) {
         queueTransaction(mutable);
     }
     MPMusicPlayerControllerQueue *result =
-        [[MPMusicPlayerControllerQueue alloc] initWithCharonItems:mutable ? mutable.items : nil];
+        [[MPMusicPlayerControllerQueue alloc] initWithRevenantItems:mutable ? mutable.items : nil];
     _queue = result;
     if (completionHandler) {
         completionHandler(result, nil);
@@ -105,7 +105,7 @@
 
 @end
 
-@implementation MPMusicPlayerController (CharonApplicationQueuePlayer103)
+@implementation MPMusicPlayerController (RevenantApplicationQueuePlayer103)
 
 + (MPMusicPlayerApplicationController *)applicationQueuePlayer {
     static MPMusicPlayerApplicationController *shared;

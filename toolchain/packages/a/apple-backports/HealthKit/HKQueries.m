@@ -1,6 +1,6 @@
 #import <HealthKit/HealthKit.h>
 
-#import "CharonHKStore.h"
+#import "RevenantHKStore.h"
 
 #pragma mark - HKSampleQuery
 
@@ -16,9 +16,9 @@
                   sortDescriptors:(nullable NSArray<NSSortDescriptor *> *)sortDescriptors
                      resultsHandler:(void (^)(HKSampleQuery *query, NSArray<HKSample *> *_Nullable results, NSError *_Nullable error))resultsHandler
 {
-    self = [super initWithCharonSampleType:sampleType];
+    self = [super initWithRevenantSampleType:sampleType];
     if (self) {
-        [self charon_setPredicate:predicate];
+        [self revenant_setPredicate:predicate];
         _limit = limit;
         _sortDescriptors = [sortDescriptors copy];
         _resultsHandler = [resultsHandler copy];
@@ -26,12 +26,12 @@
     return self;
 }
 
-- (void)charon_run
+- (void)revenant_run
 {
-    CharonHKStore *store = [CharonHKStore sharedStore];
+    RevenantHKStore *store = [RevenantHKStore sharedStore];
     NSError *error = nil;
     NSArray *found = [store objectsOfType:self.sampleType
-                                 predicate:self.charon_predicate
+                                 predicate:self.revenant_predicate
                                  startDate:nil
                                    endDate:nil
                          strictStartDate:NO
@@ -40,7 +40,7 @@
                           sortDescriptors:_sortDescriptors
                             fromSequence:0
                                    error:&error];
-    [self charon_perform:^{
+    [self revenant_perform:^{
         if (self->_resultsHandler)
             self->_resultsHandler(self, found, error);
     }];
@@ -60,21 +60,21 @@
                              options:(HKStatisticsOptions)options
                     completionHandler:(void (^)(HKStatistics *_Nullable result, NSError *_Nullable error))completionHandler
 {
-    self = [super initWithCharonSampleType:quantityType];
+    self = [super initWithRevenantSampleType:quantityType];
     if (self) {
-        [self charon_setPredicate:quantitySamplePredicate];
+        [self revenant_setPredicate:quantitySamplePredicate];
         _options = options;
         _completionHandler = [completionHandler copy];
     }
     return self;
 }
 
-- (void)charon_run
+- (void)revenant_run
 {
-    CharonHKStore *store = [CharonHKStore sharedStore];
+    RevenantHKStore *store = [RevenantHKStore sharedStore];
     NSError *error = nil;
     NSArray<HKQuantitySample *> *found = [store objectsOfType:self.sampleType
-                                                    predicate:self.charon_predicate
+                                                    predicate:self.revenant_predicate
                                                     startDate:nil
                                                       endDate:nil
                                             strictStartDate:NO
@@ -84,14 +84,14 @@
                                                fromSequence:0
                                                       error:&error];
     if (!found) {
-        [self charon_perform:^{
+        [self revenant_perform:^{
             if (self->_completionHandler)
                 self->_completionHandler(nil, error);
         }];
         return;
     }
-    HKStatistics *statistics = [HKStatistics charon_statisticsForSamples:found options:self->_options];
-    [self charon_perform:^{
+    HKStatistics *statistics = [HKStatistics revenant_statisticsForSamples:found options:self->_options];
+    [self revenant_perform:^{
         if (self->_completionHandler)
             self->_completionHandler(statistics, nil);
     }];
@@ -117,12 +117,12 @@
                           anchorDate:(NSDate *)anchorDate
                   intervalComponents:(NSDateComponents *)intervalComponents
 {
-    self = [super initWithCharonSampleType:quantityType];
+    self = [super initWithRevenantSampleType:quantityType];
     if (self) {
-        [self charon_setPredicate:quantitySamplePredicate];
+        [self revenant_setPredicate:quantitySamplePredicate];
         _options = options;
         _anchorDate = [anchorDate copy];
-        _intervalComponents = [HKStatisticsCollection charon_normalizedIntervalComponents:intervalComponents];
+        _intervalComponents = [HKStatisticsCollection revenant_normalizedIntervalComponents:intervalComponents];
     }
     return self;
 }
@@ -138,22 +138,22 @@
     return _intervalComponents;
 }
 
-- (nullable HKStatisticsCollection *)charon_statisticsCollection
+- (nullable HKStatisticsCollection *)revenant_statisticsCollection
 {
     return _statisticsCollection;
 }
 
-- (void)charon_setStatisticsCollection:(nullable HKStatisticsCollection *)statisticsCollection
+- (void)revenant_setStatisticsCollection:(nullable HKStatisticsCollection *)statisticsCollection
 {
     _statisticsCollection = statisticsCollection;
 }
 
-- (nullable NSDate *)charon_lastAnchor
+- (nullable NSDate *)revenant_lastAnchor
 {
     return _lastAnchor;
 }
 
-- (void)charon_setLastAnchor:(nullable NSDate *)lastAnchor
+- (void)revenant_setLastAnchor:(nullable NSDate *)lastAnchor
 {
     _lastAnchor = [lastAnchor copy];
 }
@@ -178,12 +178,12 @@
     _statisticsUpdateHandler = [statisticsUpdateHandler copy];
 }
 
-- (void)charon_run
+- (void)revenant_run
 {
-    CharonHKStore *store = [CharonHKStore sharedStore];
+    RevenantHKStore *store = [RevenantHKStore sharedStore];
     NSError *error = nil;
     NSArray<HKQuantitySample *> *found = [store objectsOfType:self.sampleType
-                                                    predicate:self.charon_predicate
+                                                    predicate:self.revenant_predicate
                                                     startDate:nil
                                                       endDate:nil
                                             strictStartDate:NO
@@ -193,7 +193,7 @@
                                                fromSequence:0
                                                       error:&error];
     if (!found) {
-        [self charon_perform:^{
+        [self revenant_perform:^{
             if (self->_initialResultsHandler)
                 self->_initialResultsHandler(nil, error);
         }];
@@ -203,13 +203,13 @@
     NSDate *first = found.firstObject.startDate;
     NSDate *last = found.lastObject.endDate;
     NSDate *anchor = _anchorDate ?: first;
-    HKStatisticsCollection *collection = [HKStatisticsCollection charon_collectionWithAnchorDate:anchor
+    HKStatisticsCollection *collection = [HKStatisticsCollection revenant_collectionWithAnchorDate:anchor
                                                                                         options:_options
                                                                             intervalComponents:_intervalComponents
                                                                                           samples:found
                                                                                           calendar:calendar];
     _statisticsCollection = collection;
-    [self charon_perform:^{
+    [self revenant_perform:^{
         if (self->_initialResultsHandler)
             self->_initialResultsHandler(collection, nil);
     }];
@@ -227,26 +227,26 @@
                     samplePredicate:(nullable NSPredicate *)predicate
                   completionHandler:(void (^)(NSArray<HKSource *> *sources, NSError *_Nullable error))completionHandler
 {
-    self = [super initWithCharonSampleType:sampleType];
+    self = [super initWithRevenantSampleType:sampleType];
     if (self) {
-        [self charon_setPredicate:predicate];
+        [self revenant_setPredicate:predicate];
         _completionHandler = [completionHandler copy];
     }
     return self;
 }
 
-- (void)charon_run
+- (void)revenant_run
 {
-    CharonHKStore *store = [CharonHKStore sharedStore];
+    RevenantHKStore *store = [RevenantHKStore sharedStore];
     NSArray<HKSource *> *sources = self.sampleType ? [store sourcesForType:self.sampleType] : [store allSources];
     NSMutableArray *found = [NSMutableArray array];
     for (HKSource *source in sources) {
-        NSPredicate *wanted = self.charon_predicate;
+        NSPredicate *wanted = self.revenant_predicate;
         if (wanted && ![wanted evaluateWithObject:source])
             continue;
         [found addObject:source];
     }
-    [self charon_perform:^{
+    [self revenant_perform:^{
         if (self->_completionHandler)
             self->_completionHandler(found, nil);
     }];
@@ -267,12 +267,12 @@
             samplePredicates:(nullable NSArray<NSPredicate *> *)samplePredicates
                  completion:(void (^)(NSArray<HKCorrelation *> *_Nullable results, NSError *_Nullable error))completion
 {
-    self = [super initWithCharonSampleType:correlationType];
+    self = [super initWithRevenantSampleType:correlationType];
     if (self) {
         _correlationType = correlationType;
         _samplePredicates = [samplePredicates copy];
         _resultsHandler = [completion copy];
-        [self charon_setPredicate:predicate];
+        [self revenant_setPredicate:predicate];
         (void)samplePredicates;
     }
     return self;
@@ -288,12 +288,12 @@
     return _samplePredicates;
 }
 
-- (void)charon_run
+- (void)revenant_run
 {
-    CharonHKStore *store = [CharonHKStore sharedStore];
+    RevenantHKStore *store = [RevenantHKStore sharedStore];
     NSError *error = nil;
     NSArray<HKCorrelation *> *found = [store objectsOfType:self.sampleType
-                                                 predicate:self.charon_predicate
+                                                 predicate:self.revenant_predicate
                                                  startDate:nil
                                                    endDate:nil
                                          strictStartDate:NO
@@ -303,13 +303,13 @@
                                             fromSequence:0
                                                    error:&error];
     if (!found) {
-        [self charon_perform:^{
+        [self revenant_perform:^{
             if (self->_resultsHandler)
                 self->_resultsHandler(@[], error);
         }];
         return;
     }
-    [self charon_perform:^{
+    [self revenant_perform:^{
         if (self->_resultsHandler)
             self->_resultsHandler(found, nil);
     }];
@@ -329,33 +329,33 @@
                     updateHandler:(void (^)(HKObserverQuery *query, HKQueryAnchor *_Nullable anchor,
                                             void (^_Nullable completion)(void), NSError *_Nullable error))updateHandler
 {
-    self = [super initWithCharonSampleType:sampleType];
+    self = [super initWithRevenantSampleType:sampleType];
     if (self) {
-        [self charon_setPredicate:predicate];
+        [self revenant_setPredicate:predicate];
         _updateHandler = [updateHandler copy];
     }
     return self;
 }
 
-- (void)charon_run
+- (void)revenant_run
 {
-    CharonHKStore *store = [CharonHKStore sharedStore];
-    _anchor = [HKQueryAnchor charon_anchorWithSequence:store.highestSequence];
+    RevenantHKStore *store = [RevenantHKStore sharedStore];
+    _anchor = [HKQueryAnchor revenant_anchorWithSequence:store.highestSequence];
     [store addObserver:self forTypes:self.sampleType ? [NSSet setWithObject:self.sampleType] : nil];
 }
 
-- (void)charon_stop
+- (void)revenant_stop
 {
-    [[CharonHKStore sharedStore] removeObserver:self];
+    [[RevenantHKStore sharedStore] removeObserver:self];
 }
 
-- (void)charon_storeDidChange:(NSArray<NSUUID *> *)identifiers
+- (void)revenant_storeDidChange:(NSArray<NSUUID *> *)identifiers
 {
-    CharonHKStore *store = [CharonHKStore sharedStore];
+    RevenantHKStore *store = [RevenantHKStore sharedStore];
     NSInteger sequence = store.highestSequence;
-    HKQueryAnchor *anchor = [HKQueryAnchor charon_anchorWithSequence:sequence];
+    HKQueryAnchor *anchor = [HKQueryAnchor revenant_anchorWithSequence:sequence];
     _anchor = anchor;
-    [self charon_perform:^{
+    [self revenant_perform:^{
         if (!self->_updateHandler)
             return;
         __block BOOL caughtUp = NO;
@@ -373,18 +373,18 @@
 #pragma mark - HKAnchoredObjectQuery
 
 @interface HKAnchoredObjectQuery ()
-@property (nonatomic) NSUInteger charon_limit;
+@property (nonatomic) NSUInteger revenant_limit;
 @end
 
 @implementation HKAnchoredObjectQuery {
     HKQueryAnchor *_anchor;
     void (^_resultsHandler)(HKAnchoredObjectQuery *query, NSArray<HKSample *> *_Nullable results, NSUInteger newAnchor,
                             NSError *_Nullable error);
-    void (^_charonResultsHandler9)(HKAnchoredObjectQuery *query, NSArray<HKSample *> *_Nullable sampleObjects,
+    void (^_revenantResultsHandler9)(HKAnchoredObjectQuery *query, NSArray<HKSample *> *_Nullable sampleObjects,
                                    NSArray<HKDeletedObject *> *_Nullable deletedObjects, HKQueryAnchor *_Nullable newAnchor,
                                    NSError *_Nullable error);
 }
-@synthesize charon_limit = _charonLimit;
+@synthesize revenant_limit = _revenantLimit;
 
 - (instancetype)initWithType:(HKSampleType *)type
                    predicate:(nullable NSPredicate *)predicate
@@ -393,80 +393,80 @@
            completionHandler:(void (^)(HKAnchoredObjectQuery *query, NSArray<HKSample *> *_Nullable results,
                                        NSUInteger newAnchor, NSError *_Nullable error))completionHandler
 {
-    HKAnchoredObjectQuery *fresh = [super initWithCharonObjectType:type];
+    HKAnchoredObjectQuery *fresh = [super initWithRevenantObjectType:type];
     if (fresh) {
-        [fresh charon_setPredicate:predicate];
+        [fresh revenant_setPredicate:predicate];
         fresh->_anchor = [HKQueryAnchor anchorFromValue:anchor];
-        fresh.charon_limit = limit;
+        fresh.revenant_limit = limit;
         fresh->_resultsHandler = [completionHandler copy];
-        fresh.charon_stopsAfterResults = YES;
+        fresh.revenant_stopsAfterResults = YES;
     }
     return fresh;
 }
 
-- (void)charon_setResultsHandler:(void (^)(HKAnchoredObjectQuery *query, NSArray<HKSample *> *_Nullable sampleObjects,
+- (void)revenant_setResultsHandler:(void (^)(HKAnchoredObjectQuery *query, NSArray<HKSample *> *_Nullable sampleObjects,
                                            NSArray<HKDeletedObject *> *_Nullable deletedObjects, HKQueryAnchor *_Nullable newAnchor,
                                            NSError *_Nullable error))handler
 {
     _resultsHandler = nil;
-    _charonResultsHandler9 = [handler copy];
+    _revenantResultsHandler9 = [handler copy];
 }
 
-- (void)charon_storeDidChange:(NSArray<NSUUID *> *)identifiers
+- (void)revenant_storeDidChange:(NSArray<NSUUID *> *)identifiers
 {
     void (^update)(HKAnchoredObjectQuery *, NSArray<HKSample *> *_Nullable, NSArray<HKDeletedObject *> *_Nullable,
-                   HKQueryAnchor *_Nullable, NSError *_Nullable) = self.charon_updateHandler;
+                   HKQueryAnchor *_Nullable, NSError *_Nullable) = self.revenant_updateHandler;
     if (!update)
         return;
-    CharonHKStore *store = [CharonHKStore sharedStore];
+    RevenantHKStore *store = [RevenantHKStore sharedStore];
     NSError *error = nil;
     NSArray *added = [store objectsWithUUIDs:identifiers ofType:self.sampleType error:&error];
     if (!added)
         return;
-    HKQueryAnchor *anchor = [HKQueryAnchor charon_anchorWithSequence:store.highestSequence];
-    [self charon_perform:^{
+    HKQueryAnchor *anchor = [HKQueryAnchor revenant_anchorWithSequence:store.highestSequence];
+    [self revenant_perform:^{
         update(self, added, nil, anchor, nil);
     }];
 }
 
-- (void)charon_run
+- (void)revenant_run
 {
-    CharonHKStore *store = [CharonHKStore sharedStore];
+    RevenantHKStore *store = [RevenantHKStore sharedStore];
     NSError *error = nil;
-    NSInteger from = _anchor ? _anchor.charon_sequence : 0;
+    NSInteger from = _anchor ? _anchor.revenant_sequence : 0;
     NSArray *added = [store objectsOfType:self.sampleType
-                                predicate:self.charon_predicate
+                                predicate:self.revenant_predicate
                                 startDate:nil
                                   endDate:nil
                         strictStartDate:NO
                           strictEndDate:NO
-                                 limit:self.charon_limit
+                                 limit:self.revenant_limit
                          sortDescriptors:nil
                            fromSequence:from
                                   error:&error];
     if (!added) {
-        [self charon_perform:^{
+        [self revenant_perform:^{
             if (self->_resultsHandler)
                 self->_resultsHandler(self, @[], 0, error);
-            else if (self->_charonResultsHandler9)
-                self->_charonResultsHandler9(self, @[], @[], nil, error);
+            else if (self->_revenantResultsHandler9)
+                self->_revenantResultsHandler9(self, @[], @[], nil, error);
         }];
         return;
     }
     NSArray *deleted = [store deletedObjectsSinceSequence:from];
-    HKQueryAnchor *anchor = [HKQueryAnchor charon_anchorWithSequence:store.highestSequence];
-    [self charon_perform:^{
+    HKQueryAnchor *anchor = [HKQueryAnchor revenant_anchorWithSequence:store.highestSequence];
+    [self revenant_perform:^{
         if (self->_resultsHandler) {
             self->_resultsHandler(self, added, (NSUInteger)deleted.count, error);
-        } else if (self->_charonResultsHandler9) {
-            self->_charonResultsHandler9(self, added, deleted, anchor, error);
+        } else if (self->_revenantResultsHandler9) {
+            self->_revenantResultsHandler9(self, added, deleted, anchor, error);
         }
     }];
 }
 
-- (void)charon_stop
+- (void)revenant_stop
 {
-    _charonResultsHandler9 = nil;
+    _revenantResultsHandler9 = nil;
     _resultsHandler = nil;
 }
 

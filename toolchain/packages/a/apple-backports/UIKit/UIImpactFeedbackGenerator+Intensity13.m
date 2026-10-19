@@ -1,14 +1,14 @@
-#import "CharonFeedbackGenerator.h"
+#import "RevenantFeedbackGenerator.h"
 
-@interface UIImpactFeedbackGenerator (CharonIntensity)
-- (void)charon_impactScaledBy:(float)scale;
+@interface UIImpactFeedbackGenerator (RevenantIntensity)
+- (void)revenant_impactScaledBy:(float)scale;
 @end
 
-@implementation UIImpactFeedbackGenerator (CharonThirteen)
+@implementation UIImpactFeedbackGenerator (RevenantThirteen)
 
 - (void)impactOccurredWithIntensity:(CGFloat)intensity
 {
-    [self charon_impactScaledBy:(float)intensity];
+    [self revenant_impactScaledBy:(float)intensity];
 }
 
 @end

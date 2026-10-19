@@ -53,7 +53,7 @@ static void check_availability(void)
     CHECK([manager.rangedRegions isKindOfClass:[NSSet class]] && manager.rangedRegions.count == 0, "no region is ranged");
 }
 
-@interface CharonLocationProbe : NSObject <CLLocationManagerDelegate>
+@interface RevenantLocationProbe : NSObject <CLLocationManagerDelegate>
 @property (nonatomic) int updates, failures, states;
 @property (nonatomic) NSInteger lastErrorCode;
 @property (nonatomic, copy) NSString *lastErrorDomain;
@@ -63,7 +63,7 @@ static void check_availability(void)
 @property (nonatomic, strong) CLBeaconRegion *rangingRegion;
 @end
 
-@implementation CharonLocationProbe
+@implementation RevenantLocationProbe
 - (void)locationManager:(CLLocationManager *)manager rangingBeaconsDidFailForRegion:(CLBeaconRegion *)region withError:(NSError *)error
 {
     self.ranging++;
@@ -89,10 +89,10 @@ static void check_availability(void)
 }
 @end
 
-@interface CharonSilentDelegate : NSObject <CLLocationManagerDelegate>
+@interface RevenantSilentDelegate : NSObject <CLLocationManagerDelegate>
 @end
 
-@implementation CharonSilentDelegate
+@implementation RevenantSilentDelegate
 @end
 
 static void spin_until(BOOL (^done)(void), NSTimeInterval seconds)
@@ -115,12 +115,12 @@ static NSString *raised(void (^block)(void))
 static void check_single_location(void)
 {
     CLLocationManager *bare = [[CLLocationManager alloc] init];
-    CharonSilentDelegate *silent = [[CharonSilentDelegate alloc] init];
+    RevenantSilentDelegate *silent = [[RevenantSilentDelegate alloc] init];
     bare.delegate = silent;
     NSString *without = raised(^{ [bare requestLocation]; });
     CHECK([without hasPrefix:@"NSInternalInconsistencyException"] && [without containsString:@"locationManager:didUpdateLocations:"],
           "a delegate that cannot take a location is refused");
-    CharonLocationProbe *probe = [[CharonLocationProbe alloc] init];
+    RevenantLocationProbe *probe = [[RevenantLocationProbe alloc] init];
     CLLocationManager *manager = [[CLLocationManager alloc] init];
     manager.delegate = probe;
     manager.desiredAccuracy = kCLLocationAccuracyKilometer;
@@ -141,7 +141,7 @@ static void check_region_state(void)
 {
     CLLocationCoordinate2D center = {37.33, -122.03};
     CLRegion *region = [[CLRegion alloc] initCircularRegionWithCenter:center radius:100 identifier:@"state"];
-    CharonLocationProbe *probe = [[CharonLocationProbe alloc] init];
+    RevenantLocationProbe *probe = [[RevenantLocationProbe alloc] init];
     CLLocationManager *manager = [[CLLocationManager alloc] init];
     manager.delegate = probe;
     manager.desiredAccuracy = kCLLocationAccuracyKilometer;
@@ -192,7 +192,7 @@ static void check_beacons(void)
     CHECK(beacon.proximity == CLProximityUnknown && beacon.accuracy == -1 && beacon.rssi == 0 && beacon.proximityUUID == nil,
           "a beacon with nothing ranged is unknown, of no accuracy and no signal");
     CHECK([[beacon copy] isKindOfClass:beacons], "a beacon copies");
-    CharonLocationProbe *probe = [[CharonLocationProbe alloc] init];
+    RevenantLocationProbe *probe = [[RevenantLocationProbe alloc] init];
     CLLocationManager *manager = [[CLLocationManager alloc] init];
     manager.delegate = probe;
     CHECK(![CLLocationManager isMonitoringAvailableForClass:regions], "a beacon region cannot be monitored");
@@ -207,7 +207,7 @@ static void check_beacons(void)
     CHECK([raised(^{ [manager startRangingBeaconsInRegion:missing]; }) hasPrefix:@"NSInternalInconsistencyException"], "no region is refused");
     CHECK(manager.rangedRegions.count == 0, "no region is ranged");
     CLRegionState state = 99;
-    CharonLocationProbe *statePart = [[CharonLocationProbe alloc] init];
+    RevenantLocationProbe *statePart = [[RevenantLocationProbe alloc] init];
     manager.delegate = statePart;
     [manager requestStateForRegion:exact];
     spin_until(^BOOL { return statePart.states > 0; }, 5);
@@ -232,7 +232,7 @@ static void check_floor_and_visits(void)
     NSData *archive = [NSKeyedArchiver archivedDataWithRootObject:visit];
     CLVisit *decoded = [NSKeyedUnarchiver unarchiveObjectWithData:archive];
     CHECK([decoded isKindOfClass:visits] && [decoded.departureDate isEqual:visit.departureDate], "a visit survives archiving");
-    CharonLocationProbe *probe = [[CharonLocationProbe alloc] init];
+    RevenantLocationProbe *probe = [[RevenantLocationProbe alloc] init];
     CLLocationManager *manager = [[CLLocationManager alloc] init];
     manager.delegate = probe;
     CHECK([raised(^{ [manager startMonitoringVisits]; [manager stopMonitoringVisits]; }) isEqualToString:@"nothing"],
@@ -263,7 +263,7 @@ int main(int argc, char **argv)
 {
     @autoreleasepool {
         if (argc > 1)
-            charon_log_to(@(argv[1]));
+            revenant_log_to(@(argv[1]));
         check_regions();
         check_availability();
         check_single_location();
@@ -271,7 +271,7 @@ int main(int argc, char **argv)
         check_beacons();
         check_floor_and_visits();
         check_geocoder_and_background();
-        printf("%d checks, %d failed\n", charon_checks, charon_failures);
+        printf("%d checks, %d failed\n", revenant_checks, revenant_failures);
     }
-    return charon_failures;
+    return revenant_failures;
 }

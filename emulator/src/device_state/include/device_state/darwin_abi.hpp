@@ -15,7 +15,7 @@
 #include "foundation/darwin_address_layout.hpp"
 #include "foundation/device_identity.hpp"
 
-namespace shade {
+namespace emulator {
 
 enum class DarwinPthreadAbi : std::uint8_t {
     LegacyMachThreads,

@@ -11,7 +11,7 @@
 #include <cmath>
 #include <utility>
 
-namespace shade {
+namespace emulator {
 
 std::pair<float, float> SceneTransform::map(float x, float y) const
 {

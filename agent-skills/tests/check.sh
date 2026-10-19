@@ -51,13 +51,13 @@ else
 fi
 
 # 5. The emulator ran on the scenario's device and release, and passed.
-#    Until charon can launch an app through SpringBoard, the pass line proves the image booted
+#    Until revenant can launch an app through SpringBoard, the pass line proves the image booted
 #    with the app installed and the checked command exited 0, not that the app's screen worked.
 if cat .logs/* 2>/dev/null | perl -pe 's/\e\[[0-9;]*m//g' | grep -qE "^pass on ${DEVICE} ${RELEASE//./\\.} "; then ok "emulator: pass on $DEVICE $RELEASE"
 else fail "emulator: no 'pass on $DEVICE $RELEASE' line in .logs/"; fi
 
 # 6. A .deb of the app, for iphoneos-arm, carrying the bundle.
-deb=$(find build -maxdepth 3 -name '*.deb' -not -name 'org.charon.*' 2>/dev/null | head -1)
+deb=$(find build -maxdepth 3 -name '*.deb' -not -name 'org.revenant.*' 2>/dev/null | head -1)
 if [ -z "$deb" ]; then fail "no app .deb under build/"
 else
   a=$(dpkg-deb -f "$deb" Architecture 2>/dev/null)

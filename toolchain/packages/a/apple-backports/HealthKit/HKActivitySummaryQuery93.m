@@ -1,11 +1,11 @@
 #import <HealthKit/HealthKit.h>
 
-#import "CharonHKStore.h"
+#import "RevenantHKStore.h"
 
 #pragma mark - HKActivitySummaryQuery
 
 @implementation HKActivitySummaryQuery {
-    void (^_charonResultsHandler)(HKActivitySummaryQuery *query, NSArray<HKActivitySummary *> *_Nullable summaries,
+    void (^_revenantResultsHandler)(HKActivitySummaryQuery *query, NSArray<HKActivitySummary *> *_Nullable summaries,
                                    NSError *_Nullable error);
 }
 
@@ -13,65 +13,65 @@
                    resultsHandler:(void (^)(HKActivitySummaryQuery *query, NSArray<HKActivitySummary *> *_Nullable activitySummaries,
                                             NSError *_Nullable error))handler
 {
-    HKActivitySummaryQuery *query = [super initWithCharonObjectType:[HKObjectType activitySummaryType]];
+    HKActivitySummaryQuery *query = [super initWithRevenantObjectType:[HKObjectType activitySummaryType]];
     if (query) {
-        [query charon_setPredicate:predicate];
-        query->_charonResultsHandler = [handler copy];
-        query.charon_stopsAfterResults = YES;
+        [query revenant_setPredicate:predicate];
+        query->_revenantResultsHandler = [handler copy];
+        query.revenant_stopsAfterResults = YES;
     }
     return query;
 }
 
 - (nullable void (^)(HKActivitySummaryQuery *, NSArray<HKActivitySummary *> *_Nullable, NSError *_Nullable))updateHandler
 {
-    return self.charon_updateHandlerForSummaries;
+    return self.revenant_updateHandlerForSummaries;
 }
 
 - (void)setUpdateHandler:(nullable void (^)(HKActivitySummaryQuery *, NSArray<HKActivitySummary *> *_Nullable,
                                             NSError *_Nullable))updateHandler
 {
-    if (self.charon_hasBeenExecuted) {
+    if (self.revenant_hasBeenExecuted) {
         [NSException raise:NSInvalidArgumentException
                     format:@"The updateHandler of an HKActivitySummaryQuery may not be modified once the query has been executed."];
         return;
     }
-    self.charon_updateHandlerForSummaries = updateHandler;
+    self.revenant_updateHandlerForSummaries = updateHandler;
 }
 
-- (void)charon_run
+- (void)revenant_run
 {
-    CharonHKStore *store = [CharonHKStore sharedStore];
-    NSArray<HKActivitySummary *> *summaries = [store activitySummariesMatching:self.charon_predicate error:NULL];
+    RevenantHKStore *store = [RevenantHKStore sharedStore];
+    NSArray<HKActivitySummary *> *summaries = [store activitySummariesMatching:self.revenant_predicate error:NULL];
     if (!summaries.count)
-        charon_hk_say_once(@"activity-summary-empty",
+        revenant_hk_say_once(@"activity-summary-empty",
                            @"HealthKit: an activity summary query answers an empty array. The rings are counted by the phone and "
                            @"recorded by the Activity application, and this release has no Activity application and no health store of "
                            @"Apple's, so the table of the summaries this library keeps is empty. A query is asked of the store and the "
                            @"store has none to give.");
-    [self charon_perform:^{
-        if (self->_charonResultsHandler)
-            self->_charonResultsHandler(self, summaries, nil);
+    [self revenant_perform:^{
+        if (self->_revenantResultsHandler)
+            self->_revenantResultsHandler(self, summaries, nil);
     }];
 }
 
-- (void)charon_stop
+- (void)revenant_stop
 {
-    _charonResultsHandler = nil;
-    self.charon_updateHandlerForSummaries = nil;
+    _revenantResultsHandler = nil;
+    self.revenant_updateHandlerForSummaries = nil;
 }
 
 @end
 
 #pragma mark - HKObjectType
 
-@implementation HKObjectType (CharonIOS93)
+@implementation HKObjectType (RevenantIOS93)
 
 + (HKActivitySummaryType *)activitySummaryType
 {
     static HKActivitySummaryType *type;
     static dispatch_once_t once;
     dispatch_once(&once, ^{
-        type = [HKActivitySummaryType charon_typeWithIdentifier:@"HKActivitySummaryType"];
+        type = [HKActivitySummaryType revenant_typeWithIdentifier:@"HKActivitySummaryType"];
     });
     return type;
 }
@@ -80,11 +80,11 @@
 
 #pragma mark - HKQuery
 
-@implementation HKQuery (CharonIOS93)
+@implementation HKQuery (RevenantIOS93)
 
 - (nullable HKObjectType *)objectType
 {
-    return self.charon_objectType;
+    return self.revenant_objectType;
 }
 
 + (NSPredicate *)predicateForActivitySummaryWithDateComponents:(NSDateComponents *)dateComponents

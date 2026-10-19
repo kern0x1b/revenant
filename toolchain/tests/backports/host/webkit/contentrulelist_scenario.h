@@ -3,8 +3,8 @@
 
 static NSURL *rule_store(void)
 {
-    const char *given = getenv("CHARON_RULE_STORE");
-    NSString *path = given ? @(given) : [NSTemporaryDirectory() stringByAppendingPathComponent:@"charon-rule-store"];
+    const char *given = getenv("REVENANT_RULE_STORE");
+    NSString *path = given ? @(given) : [NSTemporaryDirectory() stringByAppendingPathComponent:@"revenant-rule-store"];
     return [NSURL fileURLWithPath:path isDirectory:YES];
 }
 

@@ -1,59 +1,59 @@
-#import "CharonTraits17.h"
+#import "RevenantTraits17.h"
 
-CHARON_TRAIT(18, UITraitHDRHeadroomUsageLimit, @"HDRHeadroomUsageLimit", CharonTraitValueNSInteger, CharonTraitHomeExtras, @(-1), NO)
-CHARON_TRAIT(19, UITraitResolvesNaturalAlignmentWithBaseWritingDirection, @"ResolvesNaturalAlignmentWithBaseWritingDirection",
-             CharonTraitValueObject, CharonTraitHomeExtras, nil, NO)
-CHARON_TRAIT(20, UITraitTabAccessoryEnvironment, @"TabAccessoryEnvironment", CharonTraitValueNSInteger, CharonTraitHomeExtras, @(0), NO)
-CHARON_TRAIT(21, UITraitSplitViewControllerLayoutEnvironment, @"SplitViewControllerLayoutEnvironment", CharonTraitValueNSInteger,
-             CharonTraitHomeExtras, @(0), NO)
+REVENANT_TRAIT(18, UITraitHDRHeadroomUsageLimit, @"HDRHeadroomUsageLimit", RevenantTraitValueNSInteger, RevenantTraitHomeExtras, @(-1), NO)
+REVENANT_TRAIT(19, UITraitResolvesNaturalAlignmentWithBaseWritingDirection, @"ResolvesNaturalAlignmentWithBaseWritingDirection",
+             RevenantTraitValueObject, RevenantTraitHomeExtras, nil, NO)
+REVENANT_TRAIT(20, UITraitTabAccessoryEnvironment, @"TabAccessoryEnvironment", RevenantTraitValueNSInteger, RevenantTraitHomeExtras, @(0), NO)
+REVENANT_TRAIT(21, UITraitSplitViewControllerLayoutEnvironment, @"SplitViewControllerLayoutEnvironment", RevenantTraitValueNSInteger,
+             RevenantTraitHomeExtras, @(0), NO)
 
-@interface CharonTraitClasses26 : NSObject
+@interface RevenantTraitClasses26 : NSObject
 @end
 
-@implementation CharonTraitClasses26
+@implementation RevenantTraitClasses26
 
 + (void)load
 {
-    charon_define_UITraitHDRHeadroomUsageLimit();
-    charon_define_UITraitResolvesNaturalAlignmentWithBaseWritingDirection();
-    charon_define_UITraitTabAccessoryEnvironment();
-    charon_define_UITraitSplitViewControllerLayoutEnvironment();
+    revenant_define_UITraitHDRHeadroomUsageLimit();
+    revenant_define_UITraitResolvesNaturalAlignmentWithBaseWritingDirection();
+    revenant_define_UITraitTabAccessoryEnvironment();
+    revenant_define_UITraitSplitViewControllerLayoutEnvironment();
 }
 
 @end
 
 @implementation UITraitHDRHeadroomUsageLimit
 
-+ (NSString *)identifier { return charon_identifier_of(self); }
-+ (NSString *)name { return charon_trait_name_of(self); }
-+ (BOOL)affectsColorAppearance { return charon_appearance_of(self); }
-+ (NSInteger)defaultValue { return charon_integer_default_of(self); }
++ (NSString *)identifier { return revenant_identifier_of(self); }
++ (NSString *)name { return revenant_trait_name_of(self); }
++ (BOOL)affectsColorAppearance { return revenant_appearance_of(self); }
++ (NSInteger)defaultValue { return revenant_integer_default_of(self); }
 
 @end
 
 @implementation UITraitResolvesNaturalAlignmentWithBaseWritingDirection
 
-+ (NSString *)identifier { return charon_identifier_of(self); }
-+ (NSString *)name { return charon_trait_name_of(self); }
-+ (BOOL)affectsColorAppearance { return charon_appearance_of(self); }
-+ (id)defaultValue { return charon_object_default_of(self); }
++ (NSString *)identifier { return revenant_identifier_of(self); }
++ (NSString *)name { return revenant_trait_name_of(self); }
++ (BOOL)affectsColorAppearance { return revenant_appearance_of(self); }
++ (id)defaultValue { return revenant_object_default_of(self); }
 
 @end
 
 @implementation UITraitTabAccessoryEnvironment
 
-+ (NSString *)identifier { return charon_identifier_of(self); }
-+ (NSString *)name { return charon_trait_name_of(self); }
-+ (BOOL)affectsColorAppearance { return charon_appearance_of(self); }
-+ (NSInteger)defaultValue { return charon_integer_default_of(self); }
++ (NSString *)identifier { return revenant_identifier_of(self); }
++ (NSString *)name { return revenant_trait_name_of(self); }
++ (BOOL)affectsColorAppearance { return revenant_appearance_of(self); }
++ (NSInteger)defaultValue { return revenant_integer_default_of(self); }
 
 @end
 
 @implementation UITraitSplitViewControllerLayoutEnvironment
 
-+ (NSString *)identifier { return charon_identifier_of(self); }
-+ (NSString *)name { return charon_trait_name_of(self); }
-+ (BOOL)affectsColorAppearance { return charon_appearance_of(self); }
-+ (NSInteger)defaultValue { return charon_integer_default_of(self); }
++ (NSString *)identifier { return revenant_identifier_of(self); }
++ (NSString *)name { return revenant_trait_name_of(self); }
++ (BOOL)affectsColorAppearance { return revenant_appearance_of(self); }
++ (NSInteger)defaultValue { return revenant_integer_default_of(self); }
 
 @end

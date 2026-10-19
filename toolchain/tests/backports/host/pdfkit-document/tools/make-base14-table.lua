@@ -255,7 +255,7 @@ local function emit(widths, spaces, descents)
     add("    //    0.0002pt - which is the difference between 717.2400 and the host's 717.2402 on every")
     add("    //    fixture make-object-fixtures.py writes.")
     add("    float descent;")
-    add("} CharonBase14Face;")
+    add("} RevenantBase14Face;")
     add("")
     for _, face in ipairs(FACES) do
         local stem = face:lower()
@@ -277,7 +277,7 @@ local function emit(widths, spaces, descents)
         if descents[stem] == nil then
             raise(face .. ": no -descent fixture in the run output")
         end
-        add(string.format('static const CharonBase14Face kCharonBase14_%s = { "%s", {',
+        add(string.format('static const RevenantBase14Face kRevenantBase14_%s = { "%s", {',
             stem:gsub("%-", "_"), face))
         for i = 1, #values, 16 do
             local chunk = {}
@@ -289,9 +289,9 @@ local function emit(widths, spaces, descents)
         add(string.format("}, %.4f };", descents[stem]))
         add("")
     end
-    add("static const CharonBase14Face *const kCharonBase14[] = {")
+    add("static const RevenantBase14Face *const kRevenantBase14[] = {")
     for _, face in ipairs(FACES) do
-        add(string.format("    &kCharonBase14_%s,", (face:lower():gsub("%-", "_"))))
+        add(string.format("    &kRevenantBase14_%s,", (face:lower():gsub("%-", "_"))))
     end
     add("};")
     add("")

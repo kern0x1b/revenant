@@ -1,11 +1,11 @@
 #import <Foundation/Foundation.h>
 #import <objc/runtime.h>
 
-NSQualityOfService charon_quality_of_service(NSInteger quality);
+NSQualityOfService revenant_quality_of_service(NSInteger quality);
 
-static char CharonQueueQualityKey;
+static char RevenantQueueQualityKey;
 
-static void charon_note_queue_scheduling(void)
+static void revenant_note_queue_scheduling(void)
 {
     static dispatch_once_t once;
     dispatch_once(&once, ^{
@@ -13,11 +13,11 @@ static void charon_note_queue_scheduling(void)
     });
 }
 
-@implementation NSOperationQueue (CharonQualityOfService)
+@implementation NSOperationQueue (RevenantQualityOfService)
 
 - (NSQualityOfService)qualityOfService
 {
-    NSNumber *quality = objc_getAssociatedObject(self, &CharonQueueQualityKey);
+    NSNumber *quality = objc_getAssociatedObject(self, &RevenantQueueQualityKey);
     if (quality)
         return (NSQualityOfService)quality.integerValue;
     return self == [NSOperationQueue mainQueue] ? NSQualityOfServiceUserInteractive : NSQualityOfServiceDefault;
@@ -25,8 +25,8 @@ static void charon_note_queue_scheduling(void)
 
 - (void)setQualityOfService:(NSQualityOfService)qualityOfService
 {
-    charon_note_queue_scheduling();
-    objc_setAssociatedObject(self, &CharonQueueQualityKey, @(charon_quality_of_service(qualityOfService)), OBJC_ASSOCIATION_RETAIN);
+    revenant_note_queue_scheduling();
+    objc_setAssociatedObject(self, &RevenantQueueQualityKey, @(revenant_quality_of_service(qualityOfService)), OBJC_ASSOCIATION_RETAIN);
 }
 
 @end

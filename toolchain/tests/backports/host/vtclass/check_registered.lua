@@ -232,7 +232,7 @@ function main(...)
         end
     end
 
-    local header = read_checked(M.VT_DIR() .. "/CharonVideoToolbox.h")
+    local header = read_checked(M.VT_DIR() .. "/RevenantVideoToolbox.h")
     local grepped = initialiser_count(header)
     local declared = V.count_entries(registry.method)
     print(string.format("  initialisers: the header says %d, the registry records %d", grepped, declared))

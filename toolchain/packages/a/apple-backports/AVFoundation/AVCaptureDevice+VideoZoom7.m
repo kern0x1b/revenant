@@ -1,21 +1,21 @@
-#import "CharonAVCapture.h"
+#import "RevenantAVCapture.h"
 #import <Accelerate/Accelerate.h>
 #import <QuartzCore/QuartzCore.h>
 #import <objc/runtime.h>
 
 #pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
 
-@interface AVCaptureDevice (CharonReleaseLock)
+@interface AVCaptureDevice (RevenantReleaseLock)
 - (BOOL)isLockedForConfiguration;
 @end
 
-static const char charon_zoom_key;
-static const char charon_ramp_key;
+static const char revenant_zoom_key;
+static const char revenant_ramp_key;
 
-static NSString *const CharonZoomRangeReason = @"videoZoomFactor out of range";
-static NSString *const CharonZoomLockReason = @"You must call lockForConfiguration and successfully obtain the configuration lock before modifying zoom factor";
+static NSString *const RevenantZoomRangeReason = @"videoZoomFactor out of range";
+static NSString *const RevenantZoomLockReason = @"You must call lockForConfiguration and successfully obtain the configuration lock before modifying zoom factor";
 
-@interface CharonZoomRamp : NSObject
+@interface RevenantZoomRamp : NSObject
 @property (nonatomic) CGFloat target;
 @property (nonatomic) float rate;
 @property (nonatomic) CFTimeInterval last;
@@ -24,13 +24,13 @@ static NSString *const CharonZoomLockReason = @"You must call lockForConfigurati
 - (void)step;
 @end
 
-static CGFloat charon_zoom_of(AVCaptureDevice *device)
+static CGFloat revenant_zoom_of(AVCaptureDevice *device)
 {
-    NSNumber *stored = device ? objc_getAssociatedObject(device, &charon_zoom_key) : nil;
+    NSNumber *stored = device ? objc_getAssociatedObject(device, &revenant_zoom_key) : nil;
     return stored ? (CGFloat)stored.doubleValue : 1;
 }
 
-static AVCaptureDevice *charon_video_device_of(AVCaptureConnection *connection)
+static AVCaptureDevice *revenant_video_device_of(AVCaptureConnection *connection)
 {
     for (AVCaptureInputPort *port in connection.inputPorts) {
         if ([port.mediaType isEqualToString:AVMediaTypeVideo] && [port.input isKindOfClass:[AVCaptureDeviceInput class]])
@@ -39,7 +39,7 @@ static AVCaptureDevice *charon_video_device_of(AVCaptureConnection *connection)
     return nil;
 }
 
-static AVCaptureDevice *charon_video_device_of_session(AVCaptureSession *session)
+static AVCaptureDevice *revenant_video_device_of_session(AVCaptureSession *session)
 {
     for (AVCaptureInput *input in session.inputs) {
         if ([input isKindOfClass:[AVCaptureDeviceInput class]] && [((AVCaptureDeviceInput *)input).device hasMediaType:AVMediaTypeVideo])
@@ -48,17 +48,17 @@ static AVCaptureDevice *charon_video_device_of_session(AVCaptureSession *session
     return nil;
 }
 
-static void charon_apply_zoom_to_session(AVCaptureSession *session)
+static void revenant_apply_zoom_to_session(AVCaptureSession *session)
 {
     for (AVCaptureOutput *output in session.outputs) {
         for (AVCaptureConnection *connection in output.connections) {
-            AVCaptureDevice *device = charon_video_device_of(connection);
+            AVCaptureDevice *device = revenant_video_device_of(connection);
             if (device && connection.videoMaxScaleAndCropFactor > 1)
-                connection.videoScaleAndCropFactor = (CGFloat)MIN(charon_zoom_of(device), connection.videoMaxScaleAndCropFactor);
+                connection.videoScaleAndCropFactor = (CGFloat)MIN(revenant_zoom_of(device), connection.videoMaxScaleAndCropFactor);
         }
     }
-    CGFloat factor = charon_zoom_of(charon_video_device_of_session(session));
-    NSArray *layers = [session charon_previewLayers];
+    CGFloat factor = revenant_zoom_of(revenant_video_device_of_session(session));
+    NSArray *layers = [session revenant_previewLayers];
     void (^transform)(void) = ^{
         [CATransaction begin];
         [CATransaction setDisableActions:YES];
@@ -72,41 +72,41 @@ static void charon_apply_zoom_to_session(AVCaptureSession *session)
         dispatch_async(dispatch_get_main_queue(), transform);
 }
 
-static void charon_apply_zoom(AVCaptureDevice *device)
+static void revenant_apply_zoom(AVCaptureDevice *device)
 {
-    for (AVCaptureSession *session in [device charon_captureSessions])
-        charon_apply_zoom_to_session(session);
+    for (AVCaptureSession *session in [device revenant_captureSessions])
+        revenant_apply_zoom_to_session(session);
 }
 
-static void charon_store_zoom(AVCaptureDevice *device, CGFloat factor)
+static void revenant_store_zoom(AVCaptureDevice *device, CGFloat factor)
 {
     [device willChangeValueForKey:@"videoZoomFactor"];
-    objc_setAssociatedObject(device, &charon_zoom_key, @(factor), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(device, &revenant_zoom_key, @(factor), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     [device didChangeValueForKey:@"videoZoomFactor"];
-    charon_apply_zoom(device);
+    revenant_apply_zoom(device);
 }
 
-static void charon_check_zoom(AVCaptureDevice *device, CGFloat factor)
+static void revenant_check_zoom(AVCaptureDevice *device, CGFloat factor)
 {
     CGFloat maximum = device.activeFormat ? device.activeFormat.videoMaxZoomFactor : 1;
     if (!(factor >= 1) || factor > maximum)
-        @throw [NSException exceptionWithName:NSRangeException reason:CharonZoomRangeReason userInfo:nil];
+        @throw [NSException exceptionWithName:NSRangeException reason:RevenantZoomRangeReason userInfo:nil];
     if (![device isLockedForConfiguration])
-        @throw [NSException exceptionWithName:NSGenericException reason:CharonZoomLockReason userInfo:nil];
+        @throw [NSException exceptionWithName:NSGenericException reason:RevenantZoomLockReason userInfo:nil];
 }
 
-static void charon_end_ramp(AVCaptureDevice *device)
+static void revenant_end_ramp(AVCaptureDevice *device)
 {
-    CharonZoomRamp *ramp = objc_getAssociatedObject(device, &charon_ramp_key);
+    RevenantZoomRamp *ramp = objc_getAssociatedObject(device, &revenant_ramp_key);
     if (!ramp)
         return;
     dispatch_source_cancel(ramp.timer);
     [device willChangeValueForKey:@"rampingVideoZoom"];
-    objc_setAssociatedObject(device, &charon_ramp_key, nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(device, &revenant_ramp_key, nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     [device didChangeValueForKey:@"rampingVideoZoom"];
 }
 
-@implementation CharonZoomRamp
+@implementation RevenantZoomRamp
 
 @synthesize target = _target, rate = _rate, last = _last, timer = _timer, device = _device;
 
@@ -120,50 +120,50 @@ static void charon_end_ramp(AVCaptureDevice *device)
     CFTimeInterval now = CACurrentMediaTime();
     CFTimeInterval elapsed = now - self.last;
     self.last = now;
-    CGFloat current = charon_zoom_of(device), target = self.target;
+    CGFloat current = revenant_zoom_of(device), target = self.target;
     CGFloat step = (CGFloat)pow(2.0, fabs(self.rate) * elapsed);
     CGFloat next = target > current ? MIN(target, current * step) : MAX(target, current / step);
-    charon_store_zoom(device, next);
+    revenant_store_zoom(device, next);
     if (next == target)
-        charon_end_ramp(device);
+        revenant_end_ramp(device);
 }
 
 @end
 
-@implementation AVCaptureDevice (CharonVideoZoom)
+@implementation AVCaptureDevice (RevenantVideoZoom)
 
 - (CGFloat)videoZoomFactor
 {
-    return charon_zoom_of(self);
+    return revenant_zoom_of(self);
 }
 
 - (void)setVideoZoomFactor:(CGFloat)videoZoomFactor
 {
-    charon_check_zoom(self, videoZoomFactor);
-    charon_end_ramp(self);
-    charon_store_zoom(self, videoZoomFactor);
+    revenant_check_zoom(self, videoZoomFactor);
+    revenant_end_ramp(self);
+    revenant_store_zoom(self, videoZoomFactor);
 }
 
 - (void)rampToVideoZoomFactor:(CGFloat)factor withRate:(float)rate
 {
-    charon_check_zoom(self, factor);
+    revenant_check_zoom(self, factor);
     if (rate == 0) {
-        charon_end_ramp(self);
+        revenant_end_ramp(self);
         return;
     }
-    CharonZoomRamp *ramp = objc_getAssociatedObject(self, &charon_ramp_key);
+    RevenantZoomRamp *ramp = objc_getAssociatedObject(self, &revenant_ramp_key);
     if (!ramp) {
-        ramp = [[CharonZoomRamp alloc] init];
+        ramp = [[RevenantZoomRamp alloc] init];
         ramp.device = self;
         ramp.last = CACurrentMediaTime();
         ramp.timer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, dispatch_get_main_queue());
         dispatch_source_set_timer(ramp.timer, dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_SEC / 60), NSEC_PER_SEC / 60, NSEC_PER_SEC / 240);
-        __weak CharonZoomRamp *weakRamp = ramp;
+        __weak RevenantZoomRamp *weakRamp = ramp;
         dispatch_source_set_event_handler(ramp.timer, ^{
             [weakRamp step];
         });
         [self willChangeValueForKey:@"rampingVideoZoom"];
-        objc_setAssociatedObject(self, &charon_ramp_key, ramp, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+        objc_setAssociatedObject(self, &revenant_ramp_key, ramp, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
         [self didChangeValueForKey:@"rampingVideoZoom"];
         dispatch_resume(ramp.timer);
     }
@@ -173,19 +173,19 @@ static void charon_end_ramp(AVCaptureDevice *device)
 
 - (BOOL)isRampingVideoZoom
 {
-    return objc_getAssociatedObject(self, &charon_ramp_key) != nil;
+    return objc_getAssociatedObject(self, &revenant_ramp_key) != nil;
 }
 
 - (void)cancelVideoZoomRamp
 {
     if (![self isLockedForConfiguration])
-        @throw [NSException exceptionWithName:NSGenericException reason:CharonZoomLockReason userInfo:nil];
-    charon_end_ramp(self);
+        @throw [NSException exceptionWithName:NSGenericException reason:RevenantZoomLockReason userInfo:nil];
+    revenant_end_ramp(self);
 }
 
 @end
 
-@implementation AVCaptureDeviceFormat (CharonVideoZoom)
+@implementation AVCaptureDeviceFormat (RevenantVideoZoom)
 
 - (CGFloat)videoMaxZoomFactor
 {
@@ -202,7 +202,7 @@ static void charon_end_ramp(AVCaptureDevice *device)
 
 #pragma mark - Video data output
 
-static BOOL charon_crop_plane(vImage_Buffer source, vImage_Buffer destination, CGFloat factor, size_t bytesPerPixel)
+static BOOL revenant_crop_plane(vImage_Buffer source, vImage_Buffer destination, CGFloat factor, size_t bytesPerPixel)
 {
     size_t width = (size_t)MAX(1.0, round(source.width / factor)), height = (size_t)MAX(1.0, round(source.height / factor));
     size_t left = (source.width - width) / 2, top = (source.height - height) / 2;
@@ -240,7 +240,7 @@ static BOOL charon_crop_plane(vImage_Buffer source, vImage_Buffer destination, C
     return error == kvImageNoError;
 }
 
-static CVPixelBufferRef charon_create_cropped(CVPixelBufferRef source, CGFloat factor)
+static CVPixelBufferRef revenant_create_cropped(CVPixelBufferRef source, CGFloat factor)
 {
     OSType format = CVPixelBufferGetPixelFormatType(source);
     BOOL planar = format == kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange || format == kCVPixelFormatType_420YpCbCr8BiPlanarFullRange;
@@ -267,7 +267,7 @@ static CVPixelBufferRef charon_create_cropped(CVPixelBufferRef source, CGFloat f
             out = (vImage_Buffer){CVPixelBufferGetBaseAddress(destination), CVPixelBufferGetHeight(destination), CVPixelBufferGetWidth(destination),
                                   CVPixelBufferGetBytesPerRow(destination)};
         }
-        cropped = charon_crop_plane(in, out, factor, planar ? (plane == 0 ? 1 : 2) : 4);
+        cropped = revenant_crop_plane(in, out, factor, planar ? (plane == 0 ? 1 : 2) : 4);
     }
     CVPixelBufferUnlockBaseAddress(destination, 0);
     CVPixelBufferUnlockBaseAddress(source, kCVPixelBufferLock_ReadOnly);
@@ -279,12 +279,12 @@ static CVPixelBufferRef charon_create_cropped(CVPixelBufferRef source, CGFloat f
     return destination;
 }
 
-CMSampleBufferRef charon_create_zoomed_sample(CMSampleBufferRef sample, CGFloat factor);
+CMSampleBufferRef revenant_create_zoomed_sample(CMSampleBufferRef sample, CGFloat factor);
 
-CMSampleBufferRef charon_create_zoomed_sample(CMSampleBufferRef sample, CGFloat factor)
+CMSampleBufferRef revenant_create_zoomed_sample(CMSampleBufferRef sample, CGFloat factor)
 {
     CVImageBufferRef source = CMSampleBufferGetImageBuffer(sample);
-    CVPixelBufferRef pixels = source ? charon_create_cropped(source, factor) : NULL;
+    CVPixelBufferRef pixels = source ? revenant_create_cropped(source, factor) : NULL;
     if (!pixels)
         return NULL;
     CMSampleTimingInfo timing;
@@ -300,12 +300,12 @@ CMSampleBufferRef charon_create_zoomed_sample(CMSampleBufferRef sample, CGFloat 
     return zoomed;
 }
 
-@interface CharonZoomSampleRelay : NSProxy <AVCaptureVideoDataOutputSampleBufferDelegate>
+@interface RevenantZoomSampleRelay : NSProxy <AVCaptureVideoDataOutputSampleBufferDelegate>
 @property (nonatomic, weak) id<AVCaptureVideoDataOutputSampleBufferDelegate> delegate;
 @property (atomic) BOOL refusalLogged;
 @end
 
-@implementation CharonZoomSampleRelay
+@implementation RevenantZoomSampleRelay
 
 @synthesize delegate = _delegate, refusalLogged = _refusalLogged;
 
@@ -320,8 +320,8 @@ CMSampleBufferRef charon_create_zoomed_sample(CMSampleBufferRef sample, CGFloat 
     id<AVCaptureVideoDataOutputSampleBufferDelegate> delegate = self.delegate;
     if (![delegate respondsToSelector:_cmd])
         return;
-    CGFloat factor = charon_zoom_of(charon_video_device_of(connection));
-    CMSampleBufferRef zoomed = factor > 1 ? charon_create_zoomed_sample(sampleBuffer, factor) : NULL;
+    CGFloat factor = revenant_zoom_of(revenant_video_device_of(connection));
+    CMSampleBufferRef zoomed = factor > 1 ? revenant_create_zoomed_sample(sampleBuffer, factor) : NULL;
     if (factor > 1 && !zoomed && !self.refusalLogged) {
         self.refusalLogged = YES;
         CMFormatDescriptionRef format = CMSampleBufferGetFormatDescription(sampleBuffer);
@@ -386,17 +386,17 @@ CMSampleBufferRef charon_create_zoomed_sample(CMSampleBufferRef sample, CGFloat 
 
 @end
 
-static const char charon_relay_key;
+static const char revenant_relay_key;
 
-@interface CharonVideoZoomInstaller : NSObject
+@interface RevenantVideoZoomInstaller : NSObject
 @end
 
-@implementation CharonVideoZoomInstaller
+@implementation RevenantVideoZoomInstaller
 
 + (void)load
 {
-    [[NSNotificationCenter defaultCenter] addObserverForName:CHARON_CAPTURE_SESSION_CHANGED object:nil queue:nil usingBlock:^(NSNotification *note) {
-        charon_apply_zoom_to_session(note.object);
+    [[NSNotificationCenter defaultCenter] addObserverForName:REVENANT_CAPTURE_SESSION_CHANGED object:nil queue:nil usingBlock:^(NSNotification *note) {
+        revenant_apply_zoom_to_session(note.object);
     }];
 
     Class data = [AVCaptureVideoDataOutput class];
@@ -404,8 +404,8 @@ static const char charon_relay_key;
     Method setMethod = class_getInstanceMethod(data, setDelegate);
     IMP originalSet = method_getImplementation(setMethod);
     method_setImplementation(setMethod, imp_implementationWithBlock(^(AVCaptureVideoDataOutput *self, id delegate, dispatch_queue_t queue) {
-        CharonZoomSampleRelay *relay = delegate ? [[CharonZoomSampleRelay alloc] initWithDelegate:delegate] : nil;
-        objc_setAssociatedObject(self, &charon_relay_key, relay, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+        RevenantZoomSampleRelay *relay = delegate ? [[RevenantZoomSampleRelay alloc] initWithDelegate:delegate] : nil;
+        objc_setAssociatedObject(self, &revenant_relay_key, relay, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
         ((void (*)(id, SEL, id, dispatch_queue_t))originalSet)(self, setDelegate, relay, queue);
     }));
 
@@ -414,7 +414,7 @@ static const char charon_relay_key;
     Method toDeviceMethod = class_getInstanceMethod(preview, toDevice);
     IMP originalToDevice = method_getImplementation(toDeviceMethod);
     method_setImplementation(toDeviceMethod, imp_implementationWithBlock(^CGPoint(AVCaptureVideoPreviewLayer *self, CGPoint point) {
-        CGFloat factor = charon_zoom_of(charon_video_device_of_session(self.session));
+        CGFloat factor = revenant_zoom_of(revenant_video_device_of_session(self.session));
         CGPoint centre = CGPointMake(CGRectGetMidX(self.bounds), CGRectGetMidY(self.bounds));
         CGPoint unzoomed = CGPointMake(centre.x + (point.x - centre.x) / factor, centre.y + (point.y - centre.y) / factor);
         return ((CGPoint (*)(id, SEL, CGPoint))originalToDevice)(self, toDevice, unzoomed);
@@ -423,7 +423,7 @@ static const char charon_relay_key;
     Method toLayerMethod = class_getInstanceMethod(preview, toLayer);
     IMP originalToLayer = method_getImplementation(toLayerMethod);
     method_setImplementation(toLayerMethod, imp_implementationWithBlock(^CGPoint(AVCaptureVideoPreviewLayer *self, CGPoint point) {
-        CGFloat factor = charon_zoom_of(charon_video_device_of_session(self.session));
+        CGFloat factor = revenant_zoom_of(revenant_video_device_of_session(self.session));
         CGPoint centre = CGPointMake(CGRectGetMidX(self.bounds), CGRectGetMidY(self.bounds));
         CGPoint unzoomed = ((CGPoint (*)(id, SEL, CGPoint))originalToLayer)(self, toLayer, point);
         return CGPointMake(centre.x + (unzoomed.x - centre.x) * factor, centre.y + (unzoomed.y - centre.y) * factor);

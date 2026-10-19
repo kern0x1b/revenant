@@ -11,7 +11,7 @@
 #import <dlfcn.h>
 #import "check.h"
 
-#define P(name) charonhost_##name
+#define P(name) revenanthost_##name
 extern nw_parameters_t P(nw_parameters_create)(void);
 extern nw_parameters_t P(nw_parameters_create_secure_tcp)(nw_parameters_configure_protocol_block_t, nw_parameters_configure_protocol_block_t);
 extern nw_connection_t P(nw_connection_create)(nw_endpoint_t, nw_parameters_t);
@@ -28,10 +28,10 @@ extern void P(nw_listener_set_new_connection_handler)(nw_listener_t, nw_listener
 extern void P(nw_listener_start)(nw_listener_t);
 extern void P(nw_listener_cancel)(nw_listener_t);
 extern uint16_t P(nw_listener_get_port)(nw_listener_t);
-extern const nw_parameters_configure_protocol_block_t charonhost__nw_parameters_configure_protocol_default_configuration;
-extern const nw_parameters_configure_protocol_block_t charonhost__nw_parameters_configure_protocol_disable;
-#define PORT_DEFAULT ((nw_parameters_configure_protocol_block_t)charonhost__nw_parameters_configure_protocol_default_configuration)
-#define PORT_DISABLE ((nw_parameters_configure_protocol_block_t)charonhost__nw_parameters_configure_protocol_disable)
+extern const nw_parameters_configure_protocol_block_t revenanthost__nw_parameters_configure_protocol_default_configuration;
+extern const nw_parameters_configure_protocol_block_t revenanthost__nw_parameters_configure_protocol_disable;
+#define PORT_DEFAULT ((nw_parameters_configure_protocol_block_t)revenanthost__nw_parameters_configure_protocol_default_configuration)
+#define PORT_DISABLE ((nw_parameters_configure_protocol_block_t)revenanthost__nw_parameters_configure_protocol_disable)
 
 static NSData *bytes_of(dispatch_data_t payload)
 {
@@ -75,7 +75,7 @@ int main(void)
         if (dladdr((void *)(uintptr_t)nw_connection_create, &where) && where.dli_fname)
             printf("  the host's side, nw_connection_create, binds to %s\n", where.dli_fname);
         if (dladdr((void *)(uintptr_t)P(nw_connection_create), &where) && where.dli_fname)
-            printf("  the port's side, charonhost_nw_connection_create, binds to %s\n", where.dli_fname);
+            printf("  the port's side, revenanthost_nw_connection_create, binds to %s\n", where.dli_fname);
         int probe = socket(AF_INET, SOCK_STREAM, 0);
         struct sockaddr_in address;
         memset(&address, 0, sizeof address);
@@ -93,7 +93,7 @@ int main(void)
         nw_parameters_t parameters = P(nw_parameters_create_secure_tcp)(PORT_DISABLE, PORT_DEFAULT);
         nw_listener_t listener = P(nw_listener_create_with_port)(wanted_text, parameters);
         check(listener != NULL, @"the port's listener is made");
-        dispatch_queue_t queue = dispatch_queue_create("charon.listener", DISPATCH_QUEUE_SERIAL);
+        dispatch_queue_t queue = dispatch_queue_create("revenant.listener", DISPATCH_QUEUE_SERIAL);
         P(nw_listener_set_queue)(listener, queue);
         __block int ready = 0, cancelled = 0;
         P(nw_listener_set_state_changed_handler)(listener, ^(nw_listener_state_t state, nw_error_t error) {

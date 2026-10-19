@@ -33,7 +33,7 @@ int main(int argc, char **argv)
                 fields[mangle(names[next() % names.count])] = next() % 6 == 0 ? @"" : [NSString stringWithFormat:@"v%u", next() % 100];
             NSHTTPURLResponse *response = [[NSHTTPURLResponse alloc] initWithURL:[NSURL URLWithString:@"http://example.com"] statusCode:200 HTTPVersion:@"HTTP/1.1" headerFields:next() % 9 == 0 ? nil : fields];
             NSString *asked = mangle(names[next() % names.count]);
-            NSString *a = ((id (*)(id, SEL, id))objc_msgSend)(response, NSSelectorFromString(@"charonHostValueForHTTPHeaderField:"), asked);
+            NSString *a = ((id (*)(id, SEL, id))objc_msgSend)(response, NSSelectorFromString(@"revenantHostValueForHTTPHeaderField:"), asked);
             NSString *b = [response valueForHTTPHeaderField:asked];
             if (!(a == b || [a isEqualToString:b])) {
                 wrong++;
@@ -43,10 +43,10 @@ int main(int argc, char **argv)
         }
         for (NSString *sample in samples)
             printf("  %s\n", sample.UTF8String);
-        charon_check(wrong == 0, "a header is found under any spelling of its name as the system finds it", [NSString stringWithFormat:@"%lu of %lu differ", (unsigned long)wrong, (unsigned long)cases]);
+        revenant_check(wrong == 0, "a header is found under any spelling of its name as the system finds it", [NSString stringWithFormat:@"%lu of %lu differ", (unsigned long)wrong, (unsigned long)cases]);
         NSHTTPURLResponse *response = [[NSHTTPURLResponse alloc] initWithURL:[NSURL URLWithString:@"http://example.com"] statusCode:200 HTTPVersion:nil headerFields:@{@"A": @"1"}];
-        CHECK(((id (*)(id, SEL, id))objc_msgSend)(response, NSSelectorFromString(@"charonHostValueForHTTPHeaderField:"), nil) == nil, "no name has no value, where the system crashes");
+        CHECK(((id (*)(id, SEL, id))objc_msgSend)(response, NSSelectorFromString(@"revenantHostValueForHTTPHeaderField:"), nil) == nil, "no name has no value, where the system crashes");
     }
-    printf("checks=%d failures=%d\n", charon_checks, charon_failures);
-    return charon_failures;
+    printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
+    return revenant_failures;
 }

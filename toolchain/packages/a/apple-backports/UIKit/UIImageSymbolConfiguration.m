@@ -1,17 +1,17 @@
-#import "CharonSymbols.h"
+#import "RevenantSymbols.h"
 #import <dlfcn.h>
 
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
 #pragma clang diagnostic ignored "-Wobjc-designated-initializers"
 
-static NSString *const CharonPointSizeKey = @"UIPointSize";
-static NSString *const CharonWeightKey = @"UISymbolWeight";
-static NSString *const CharonScaleKey = @"UISymbolScale";
-static NSString *const CharonTextStyleKey = @"UITextStyle";
+static NSString *const RevenantPointSizeKey = @"UIPointSize";
+static NSString *const RevenantWeightKey = @"UISymbolWeight";
+static NSString *const RevenantScaleKey = @"UISymbolScale";
+static NSString *const RevenantTextStyleKey = @"UITextStyle";
 
-static const double CharonDefaultPointSize = 17;
+static const double RevenantDefaultPointSize = 17;
 
-static double charon_text_style_size(NSString *style)
+static double revenant_text_style_size(NSString *style)
 {
     static NSDictionary *sizes;
     static dispatch_once_t once;
@@ -24,7 +24,7 @@ static double charon_text_style_size(NSString *style)
     return [sizes[style] doubleValue];
 }
 
-static BOOL charon_traits_resolve_text_size(UITraitCollection *traits)
+static BOOL revenant_traits_resolve_text_size(UITraitCollection *traits)
 {
     if (!traits)
         return YES;
@@ -34,7 +34,7 @@ static BOOL charon_traits_resolve_text_size(UITraitCollection *traits)
     return category.length && ![category isEqualToString:UIContentSizeCategoryUnspecified];
 }
 
-static double charon_font_weight_trait(UIFont *font)
+static double revenant_font_weight_trait(UIFont *font)
 {
     typedef CFTypeRef (*CreateWithName)(CFStringRef, CGFloat, const CGAffineTransform *);
     typedef CFDictionaryRef (*CopyTraits)(CFTypeRef);
@@ -59,13 +59,13 @@ static double charon_font_weight_trait(UIFont *font)
     return [traits[(__bridge id)*weightKey] doubleValue];
 }
 
-static NSString *charon_weight_name(NSInteger weight)
+static NSString *revenant_weight_name(NSInteger weight)
 {
     static NSString *const names[] = {nil, @"Ultra Light", @"Thin", @"Light", @"Regular", @"Medium", @"Semibold", @"Bold", @"Heavy", @"Black"};
     return weight >= 1 && weight <= 9 ? names[weight] : nil;
 }
 
-static NSString *charon_scale_name(NSInteger scale)
+static NSString *revenant_scale_name(NSInteger scale)
 {
     switch (scale) {
     case -1: return @"Default";
@@ -95,20 +95,20 @@ static NSString *charon_scale_name(NSInteger scale)
     static UIImageSymbolConfiguration *unspecified;
     static dispatch_once_t once;
     dispatch_once(&once, ^{
-        unspecified = [[UIImageSymbolConfiguration alloc] initCharonWithPointSize:0 hasPointSize:NO weight:0 scale:0 textStyle:nil traitCollection:nil];
+        unspecified = [[UIImageSymbolConfiguration alloc] initRevenantWithPointSize:0 hasPointSize:NO weight:0 scale:0 textStyle:nil traitCollection:nil];
     });
     return unspecified;
 }
 
-+ (instancetype)charon_configurationWithPointSize:(double)pointSize hasPointSize:(BOOL)hasPointSize weight:(NSInteger)weight scale:(NSInteger)scale
++ (instancetype)revenant_configurationWithPointSize:(double)pointSize hasPointSize:(BOOL)hasPointSize weight:(NSInteger)weight scale:(NSInteger)scale
                                         textStyle:(NSString *)textStyle
 {
-    return [[UIImageSymbolConfiguration alloc] initCharonWithPointSize:pointSize hasPointSize:hasPointSize weight:weight scale:scale textStyle:textStyle traitCollection:nil];
+    return [[UIImageSymbolConfiguration alloc] initRevenantWithPointSize:pointSize hasPointSize:hasPointSize weight:weight scale:scale textStyle:textStyle traitCollection:nil];
 }
 
 + (instancetype)configurationWithScale:(UIImageSymbolScale)scale
 {
-    return [self charon_configurationWithPointSize:0 hasPointSize:NO weight:0 scale:scale textStyle:nil];
+    return [self revenant_configurationWithPointSize:0 hasPointSize:NO weight:0 scale:scale textStyle:nil];
 }
 
 + (instancetype)configurationWithPointSize:(CGFloat)pointSize
@@ -118,7 +118,7 @@ static NSString *charon_scale_name(NSInteger scale)
 
 + (instancetype)configurationWithWeight:(UIImageSymbolWeight)weight
 {
-    return [self charon_configurationWithPointSize:0 hasPointSize:NO weight:weight scale:0 textStyle:nil];
+    return [self revenant_configurationWithPointSize:0 hasPointSize:NO weight:weight scale:0 textStyle:nil];
 }
 
 + (instancetype)configurationWithPointSize:(CGFloat)pointSize weight:(UIImageSymbolWeight)weight
@@ -128,8 +128,8 @@ static NSString *charon_scale_name(NSInteger scale)
 
 + (instancetype)configurationWithPointSize:(CGFloat)pointSize weight:(UIImageSymbolWeight)weight scale:(UIImageSymbolScale)scale
 {
-    double size = pointSize > 0 ? pointSize : CharonDefaultPointSize;
-    return [self charon_configurationWithPointSize:size hasPointSize:YES weight:weight scale:scale textStyle:nil];
+    double size = pointSize > 0 ? pointSize : RevenantDefaultPointSize;
+    return [self revenant_configurationWithPointSize:size hasPointSize:YES weight:weight scale:scale textStyle:nil];
 }
 
 + (instancetype)configurationWithTextStyle:(UIFontTextStyle)textStyle
@@ -139,7 +139,7 @@ static NSString *charon_scale_name(NSInteger scale)
 
 + (instancetype)configurationWithTextStyle:(UIFontTextStyle)textStyle scale:(UIImageSymbolScale)scale
 {
-    return [self charon_configurationWithPointSize:0 hasPointSize:NO weight:0 scale:scale textStyle:textStyle];
+    return [self revenant_configurationWithPointSize:0 hasPointSize:NO weight:0 scale:scale textStyle:textStyle];
 }
 
 + (instancetype)configurationWithFont:(UIFont *)font
@@ -149,14 +149,14 @@ static NSString *charon_scale_name(NSInteger scale)
 
 + (instancetype)configurationWithFont:(UIFont *)font scale:(UIImageSymbolScale)scale
 {
-    NSInteger weight = UIImageSymbolWeightForFontWeight(charon_font_weight_trait(font));
-    return [self charon_configurationWithPointSize:font.pointSize hasPointSize:YES weight:weight scale:scale textStyle:nil];
+    NSInteger weight = UIImageSymbolWeightForFontWeight(revenant_font_weight_trait(font));
+    return [self revenant_configurationWithPointSize:font.pointSize hasPointSize:YES weight:weight scale:scale textStyle:nil];
 }
 
-- (instancetype)initCharonWithPointSize:(double)pointSize hasPointSize:(BOOL)hasPointSize weight:(NSInteger)weight scale:(NSInteger)scale
+- (instancetype)initRevenantWithPointSize:(double)pointSize hasPointSize:(BOOL)hasPointSize weight:(NSInteger)weight scale:(NSInteger)scale
                                textStyle:(NSString *)textStyle traitCollection:(UITraitCollection *)traits
 {
-    if ((self = [super initCharonWithTraitCollection:traits])) {
+    if ((self = [super initRevenantWithTraitCollection:traits])) {
         _pointSize = pointSize;
         _hasPointSize = hasPointSize;
         _weight = weight;
@@ -169,11 +169,11 @@ static NSString *charon_scale_name(NSInteger scale)
 - (instancetype)initWithCoder:(NSCoder *)coder
 {
     if ((self = [super initWithCoder:coder])) {
-        _hasPointSize = [coder containsValueForKey:CharonPointSizeKey];
-        _pointSize = fmax(0, [coder decodeDoubleForKey:CharonPointSizeKey]);
-        _weight = [coder decodeIntegerForKey:CharonWeightKey];
-        _scale = [coder decodeIntegerForKey:CharonScaleKey];
-        _textStyle = [coder decodeObjectOfClass:[NSString class] forKey:CharonTextStyleKey];
+        _hasPointSize = [coder containsValueForKey:RevenantPointSizeKey];
+        _pointSize = fmax(0, [coder decodeDoubleForKey:RevenantPointSizeKey]);
+        _weight = [coder decodeIntegerForKey:RevenantWeightKey];
+        _scale = [coder decodeIntegerForKey:RevenantScaleKey];
+        _textStyle = [coder decodeObjectOfClass:[NSString class] forKey:RevenantTextStyleKey];
     }
     return self;
 }
@@ -182,13 +182,13 @@ static NSString *charon_scale_name(NSInteger scale)
 {
     [super encodeWithCoder:coder];
     if (_hasPointSize && _pointSize != 0)
-        [coder encodeDouble:_pointSize forKey:CharonPointSizeKey];
+        [coder encodeDouble:_pointSize forKey:RevenantPointSizeKey];
     if (_weight)
-        [coder encodeInteger:_weight forKey:CharonWeightKey];
+        [coder encodeInteger:_weight forKey:RevenantWeightKey];
     if (_scale)
-        [coder encodeInteger:_scale forKey:CharonScaleKey];
+        [coder encodeInteger:_scale forKey:RevenantScaleKey];
     if (_textStyle)
-        [coder encodeObject:_textStyle forKey:CharonTextStyleKey];
+        [coder encodeObject:_textStyle forKey:RevenantTextStyleKey];
 }
 
 - (id)copyWithZone:(NSZone *)zone
@@ -202,12 +202,12 @@ static NSString *charon_scale_name(NSInteger scale)
     return copy;
 }
 
-- (BOOL)charon_isUnspecified
+- (BOOL)revenant_isUnspecified
 {
-    return [super charon_isUnspecified] && !_hasPointSize && !_weight && !_scale && !_textStyle;
+    return [super revenant_isUnspecified] && !_hasPointSize && !_weight && !_scale && !_textStyle;
 }
 
-- (void)charon_applyFieldsOfConfiguration:(UIImageConfiguration *)other
+- (void)revenant_applyFieldsOfConfiguration:(UIImageConfiguration *)other
 {
     if (![other isKindOfClass:[UIImageSymbolConfiguration class]])
         return;
@@ -234,18 +234,18 @@ static NSString *charon_scale_name(NSInteger scale)
     return [super configurationByApplyingConfiguration:otherConfiguration];
 }
 
-- (double)charon_symbolPointSize
+- (double)revenant_symbolPointSize
 {
-    double size = _hasPointSize ? _pointSize : _textStyle ? charon_text_style_size(_textStyle) : CharonDefaultPointSize;
-    return size > 0 ? size : CharonDefaultPointSize;
+    double size = _hasPointSize ? _pointSize : _textStyle ? revenant_text_style_size(_textStyle) : RevenantDefaultPointSize;
+    return size > 0 ? size : RevenantDefaultPointSize;
 }
 
-- (NSInteger)charon_symbolWeight
+- (NSInteger)revenant_symbolWeight
 {
     return _weight >= 1 && _weight <= 9 ? _weight : 4;
 }
 
-- (NSInteger)charon_symbolScale
+- (NSInteger)revenant_symbolScale
 {
     return _scale >= 1 && _scale <= 3 ? _scale : 2;
 }
@@ -256,8 +256,8 @@ static NSString *charon_scale_name(NSInteger scale)
         return self;
     UIImageSymbolConfiguration *copy = [self copy];
     copy->_textStyle = nil;
-    copy->_hasPointSize = charon_traits_resolve_text_size(self.traitCollection);
-    copy->_pointSize = copy->_hasPointSize ? charon_text_style_size(_textStyle) : 0;
+    copy->_hasPointSize = revenant_traits_resolve_text_size(self.traitCollection);
+    copy->_pointSize = copy->_hasPointSize ? revenant_text_style_size(_textStyle) : 0;
     return copy;
 }
 
@@ -295,12 +295,12 @@ static NSString *charon_scale_name(NSInteger scale)
     if (otherConfiguration == self)
         return YES;
     if (!otherConfiguration)
-        return [self charon_isUnspecified];
+        return [self revenant_isUnspecified];
     if (![otherConfiguration isKindOfClass:[UIImageSymbolConfiguration class]])
         return NO;
     return _hasPointSize == otherConfiguration->_hasPointSize && _pointSize == otherConfiguration->_pointSize && _weight == otherConfiguration->_weight &&
            _scale == otherConfiguration->_scale && (_textStyle == otherConfiguration->_textStyle || [_textStyle isEqual:otherConfiguration->_textStyle]) &&
-           [self charon_hasTraitsOfConfiguration:otherConfiguration];
+           [self revenant_hasTraitsOfConfiguration:otherConfiguration];
 }
 
 - (NSUInteger)hash
@@ -310,17 +310,17 @@ static NSString *charon_scale_name(NSInteger scale)
     return size ^ (NSUInteger)_weight ^ (NSUInteger)_scale ^ _textStyle.hash ^ [super hash];
 }
 
-- (NSMutableArray<NSString *> *)charon_fieldDescriptions
+- (NSMutableArray<NSString *> *)revenant_fieldDescriptions
 {
-    NSMutableArray *fields = [super charon_fieldDescriptions];
+    NSMutableArray *fields = [super revenant_fieldDescriptions];
     if (_hasPointSize)
         [fields addObject:[NSString stringWithFormat:@"pointSize=%g", _pointSize]];
     if (_textStyle)
         [fields addObject:[@"textStyle=" stringByAppendingString:_textStyle]];
     if (_weight)
-        [fields addObject:[NSString stringWithFormat:@"weight=%@", charon_weight_name(_weight)]];
+        [fields addObject:[NSString stringWithFormat:@"weight=%@", revenant_weight_name(_weight)]];
     if (_scale)
-        [fields addObject:[@"scale=" stringByAppendingString:charon_scale_name(_scale)]];
+        [fields addObject:[@"scale=" stringByAppendingString:revenant_scale_name(_scale)]];
     return fields;
 }
 

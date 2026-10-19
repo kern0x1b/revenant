@@ -1,9 +1,9 @@
 import Foundation
 import UIKit
-#if CHARON_CARRIES_LOCALIZED_STRING
+#if REVENANT_CARRIES_LOCALIZED_STRING
 import AppIntents
 #endif
-#if CHARON_CARRIES_LOCALIZED_STRING
+#if REVENANT_CARRIES_LOCALIZED_STRING
 import AppIntents
 #endif
 
@@ -39,7 +39,7 @@ public struct MiniTipViewStyle: TipViewStyle {
     public init() {}
 
     public func makeBody(configuration: TipViewStyleConfiguration) -> TipUIView {
-        return TipUIView(AnyTip(CharonMiniTip(tip: configuration.tip)), arrowEdge: .top, actionHandler: nil)
+        return TipUIView(AnyTip(RevenantMiniTip(tip: configuration.tip)), arrowEdge: .top, actionHandler: nil)
     }
 }
 
@@ -223,12 +223,12 @@ open class TipUIPopoverViewController: UIViewController {
     }
 
     public var backgroundColor: UIColor? {
-        get { CharonPopover.background(for: backgroundStyle) }
+        get { RevenantPopover.background(for: backgroundStyle) }
         set { }
     }
 
     public var tipBackgroundColor: UIColor? {
-        return CharonPopover.background(for: backgroundStyle)
+        return RevenantPopover.background(for: backgroundStyle)
     }
 }
 
@@ -276,13 +276,13 @@ extension Tips {
     struct EmptyTip: Tip {
         init() {}
 
-        var title: LocalizedStringResource { return CharonEmptyTip.title }
+        var title: LocalizedStringResource { return RevenantEmptyTip.title }
         var message: LocalizedStringResource? { return nil }
         var image: LocalizedStringResource? { return nil }
         var actions: [Tips.Action] { return [] }
         var rules: [Tips.Rule] { return [] }
         var options: [Tips.TipOption] { return [] }
-        var id: String { return "charon.tipkit.empty" }
+        var id: String { return "revenant.tipkit.empty" }
         var status: Tips.Status { return .pending }
         var statusUpdates: AsyncStream<Tips.Status> { return Tips.statusStream(for: id) }
         var shouldDisplay: Bool { return false }
@@ -292,13 +292,13 @@ extension Tips {
     }
 }
 
-enum CharonEmptyTip {
-    static let title = CharonTipText.empty
+enum RevenantEmptyTip {
+    static let title = RevenantTipText.empty
 }
 
-enum CharonTipText {
+enum RevenantTipText {
     static var empty: LocalizedStringResource {
-        #if CHARON_CARRIES_LOCALIZED_STRING
+        #if REVENANT_CARRIES_LOCALIZED_STRING
         return LocalizedStringResource(stringLiteral: "")
         #else
         return LocalizedStringResource(stringLiteral: "")
@@ -306,13 +306,13 @@ enum CharonTipText {
     }
 }
 
-enum CharonPopover {
+enum RevenantPopover {
     static func background(for style: TipUIView.BackgroundStyle) -> UIColor? {
         return UIColor(white: 1, alpha: style == .dimmed ? 0.92 : 1)
     }
 }
 
-struct CharonMiniTip: Tip {
+struct RevenantMiniTip: Tip {
         let tip: AnyTip
 
         var title: LocalizedStringResource { return tip.title }

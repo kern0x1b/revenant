@@ -1,8 +1,8 @@
-#import "CharonAVSampleBufferRender.h"
+#import "RevenantAVSampleBufferRender.h"
 
 #import <CoreMedia/CoreMedia.h>
 
-@interface CharonAVSampleBufferTimeObserver : NSObject
+@interface RevenantAVSampleBufferTimeObserver : NSObject
 {
 @public
     AVSampleBufferRenderSynchronizer *owner;
@@ -20,27 +20,27 @@
                         queue:(dispatch_queue_t)queue
                         times:(NSArray *)aTimes
                      boundary:(void (^)(void))aBlock;
-- (void)charon_armAt:(CMTime)time;
-- (void)charon_cancel;
-- (void)charon_fire;
+- (void)revenant_armAt:(CMTime)time;
+- (void)revenant_cancel;
+- (void)revenant_fire;
 @end
 
-@interface CharonAVScheduledRemoval : NSObject
+@interface RevenantAVScheduledRemoval : NSObject
 {
 @public
     AVSampleBufferRenderSynchronizer *owner;
     id <AVQueuedSampleBufferRendering> renderer;
-    CharonAVSampleBufferTimeObserver *token;
+    RevenantAVSampleBufferTimeObserver *token;
     void (^handler)(BOOL didRemoveRenderer);
 }
-- (void)charon_finishWithRemoved:(BOOL)removed;
+- (void)revenant_finishWithRemoved:(BOOL)removed;
 @end
 
-@implementation CharonAVScheduledRemoval
+@implementation RevenantAVScheduledRemoval
 
-- (void)charon_finishWithRemoved:(BOOL)removed
+- (void)revenant_finishWithRemoved:(BOOL)removed
 {
-    [owner charon_forgetRemoval:self];
+    [owner revenant_forgetRemoval:self];
     if (handler)
         handler(removed);
     owner = nil;
@@ -73,15 +73,15 @@
     _renderers = [[NSMutableArray alloc] init];
     _observers = [[NSMutableArray alloc] init];
     _removals = [[NSMutableArray alloc] init];
-    _observerQueue = dispatch_queue_create("charon.samplebuffer.observer", DISPATCH_QUEUE_SERIAL);
-    _anchorQueue = dispatch_queue_create("charon.samplebuffer.anchor", DISPATCH_QUEUE_SERIAL);
+    _observerQueue = dispatch_queue_create("revenant.samplebuffer.observer", DISPATCH_QUEUE_SERIAL);
+    _anchorQueue = dispatch_queue_create("revenant.samplebuffer.anchor", DISPATCH_QUEUE_SERIAL);
     return self;
 }
 
 - (void)dealloc
 {
-    for (CharonAVSampleBufferTimeObserver *observer in _observers)
-        [observer charon_cancel];
+    for (RevenantAVSampleBufferTimeObserver *observer in _observers)
+        [observer revenant_cancel];
 }
 
 @dynamic delaysRateChangeUntilHasSufficientMediaData;
@@ -103,7 +103,7 @@
     if (rate < 0.0f)
         [NSException raise:NSInvalidArgumentException
                     format:@"-[AVSampleBufferRenderSynchronizer setRate:] was given %f, and a rate must be greater than or equal to 0.0", (double)rate];
-    [self charon_setRate:rate time:kCMTimeInvalid hostTime:kCMTimeInvalid];
+    [self revenant_setRate:rate time:kCMTimeInvalid hostTime:kCMTimeInvalid];
 }
 
 - (void)setRate:(float)rate time:(CMTime)time
@@ -111,10 +111,10 @@
     if (rate < 0.0f)
         [NSException raise:NSInvalidArgumentException
                     format:@"-[AVSampleBufferRenderSynchronizer setRate:time:] was given %f, and a rate must be greater than or equal to 0.0", (double)rate];
-    [self charon_setRate:rate time:time hostTime:kCMTimeInvalid];
+    [self revenant_setRate:rate time:time hostTime:kCMTimeInvalid];
 }
 
-- (void)charon_setRate:(float)rate time:(CMTime)time hostTime:(CMTime)hostTime
+- (void)revenant_setRate:(float)rate time:(CMTime)time hostTime:(CMTime)hostTime
 {
     if (CMTIME_IS_VALID(time))
         CMTimebaseSetTime(_timebase, time);
@@ -128,7 +128,7 @@
         dispatch_time_t when = dispatch_time(DISPATCH_TIME_NOW, (int64_t)(delay * (double)NSEC_PER_SEC));
         dispatch_after(when, _anchorQueue, ^{
             CMTimebaseSetRate(self->_timebase, rate);
-            [self charon_clocksDidChange];
+            [self revenant_clocksDidChange];
         });
         return;
     }
@@ -142,18 +142,18 @@
         CMTimebaseSetRate(_timebase, rate);
     }
     _rate = rate;
-    [self charon_clocksDidChange];
+    [self revenant_clocksDidChange];
 }
 
-- (void)charon_clocksDidChange
+- (void)revenant_clocksDidChange
 {
     double rate = CMTimebaseGetRate(_timebase);
     CMTime time = CMTimebaseGetTime(_timebase);
     for (id <AVQueuedSampleBufferRendering> renderer in [_renderers copy]) {
         CMTimebaseSetTime(renderer.timebase, time);
         CMTimebaseSetRate(renderer.timebase, rate);
-        if ([renderer respondsToSelector:@selector(charon_renderSynchronizerDidChangeRate)])
-            [(id)renderer charon_renderSynchronizerDidChangeRate];
+        if ([renderer respondsToSelector:@selector(revenant_renderSynchronizerDidChangeRate)])
+            [(id)renderer revenant_renderSynchronizerDidChangeRate];
     }
 }
 
@@ -172,8 +172,8 @@
     [_renderers addObject:renderer];
     CMTimebaseSetMasterTimebase(renderer.timebase, _timebase);
     CMTimebaseSetRate(renderer.timebase, CMTimebaseGetRate(_timebase));
-    if ([renderer respondsToSelector:@selector(charon_renderSynchronizerDidChangeRate)])
-        [(id)renderer charon_renderSynchronizerDidChangeRate];
+    if ([renderer respondsToSelector:@selector(revenant_renderSynchronizerDidChangeRate)])
+        [(id)renderer revenant_renderSynchronizerDidChangeRate];
 }
 
 - (void)removeRenderer:(id <AVQueuedSampleBufferRendering>)renderer
@@ -186,34 +186,34 @@
         return;
     }
     if (!CMTIME_IS_NUMERIC(time) || CMTimeCompare(time, CMTimebaseGetTime(_timebase)) <= 0) {
-        [self charon_removeRenderer:renderer];
+        [self revenant_removeRenderer:renderer];
         if (completionHandler)
             completionHandler(YES);
         return;
     }
-    CharonAVScheduledRemoval *removal = [[CharonAVScheduledRemoval alloc] init];
+    RevenantAVScheduledRemoval *removal = [[RevenantAVScheduledRemoval alloc] init];
     removal->owner = self;
     removal->renderer = renderer;
     removal->handler = completionHandler;
     [_removals addObject:removal];
-    for (CharonAVScheduledRemoval *earlier in [_removals copy]) {
+    for (RevenantAVScheduledRemoval *earlier in [_removals copy]) {
         if (earlier == removal || earlier->renderer != renderer)
             continue;
-        [earlier->token charon_cancel];
-        [earlier charon_finishWithRemoved:NO];
+        [earlier->token revenant_cancel];
+        [earlier revenant_finishWithRemoved:NO];
     }
-    CharonAVSampleBufferTimeObserver *token = [[CharonAVSampleBufferTimeObserver alloc] initWithOwner:self
+    RevenantAVSampleBufferTimeObserver *token = [[RevenantAVSampleBufferTimeObserver alloc] initWithOwner:self
                                                                                                 queue:nil
                                                                                                 times:@[ [NSValue valueWithCMTime:time] ]
                                                                                              boundary:^{
-        [self charon_removeRenderer:renderer];
-        [removal charon_finishWithRemoved:YES];
+        [self revenant_removeRenderer:renderer];
+        [removal revenant_finishWithRemoved:YES];
     }];
     removal->token = token;
-    [token charon_armAt:time];
+    [token revenant_armAt:time];
 }
 
-- (void)charon_removeRenderer:(id <AVQueuedSampleBufferRendering>)renderer
+- (void)revenant_removeRenderer:(id <AVQueuedSampleBufferRendering>)renderer
 {
     if (![_renderers containsObject:renderer])
         return;
@@ -232,11 +232,11 @@
                                   queue:(dispatch_queue_t)queue
                               usingBlock:(void (^)(CMTime time))block
 {
-    CharonAVSampleBufferTimeObserver *token = [[CharonAVSampleBufferTimeObserver alloc] initWithOwner:self
+    RevenantAVSampleBufferTimeObserver *token = [[RevenantAVSampleBufferTimeObserver alloc] initWithOwner:self
                                                                                                 queue:queue
                                                                                             interval:interval
                                                                                             periodic:block];
-    [token charon_armAt:CMTimebaseGetTime(_timebase)];
+    [token revenant_armAt:CMTimebaseGetTime(_timebase)];
     return token;
 }
 
@@ -258,37 +258,37 @@
         if (!CMTIME_IS_VALID(first) || CMTimeCompare(time, first) < 0)
             first = time;
     }
-    CharonAVSampleBufferTimeObserver *token = [[CharonAVSampleBufferTimeObserver alloc] initWithOwner:self
+    RevenantAVSampleBufferTimeObserver *token = [[RevenantAVSampleBufferTimeObserver alloc] initWithOwner:self
                                                                                                 queue:queue
                                                                                                 times:ahead
                                                                                              boundary:block];
     if (CMTIME_IS_VALID(first))
-        [token charon_armAt:first];
+        [token revenant_armAt:first];
     return token;
 }
 
 - (void)removeTimeObserver:(id)observer
 {
-    if (![observer isKindOfClass:[CharonAVSampleBufferTimeObserver class]])
+    if (![observer isKindOfClass:[RevenantAVSampleBufferTimeObserver class]])
         [NSException raise:NSInvalidArgumentException
                     format:@"-[AVSampleBufferRenderSynchronizer removeTimeObserver:] was given %@, which is not a time observer", observer];
     if (![_observers containsObject:observer])
         return;
     [_observers removeObject:observer];
-    [(CharonAVSampleBufferTimeObserver *)observer charon_cancel];
+    [(RevenantAVSampleBufferTimeObserver *)observer revenant_cancel];
 }
 
-- (void)charon_addObserver:(id)observer
+- (void)revenant_addObserver:(id)observer
 {
     [_observers addObject:observer];
 }
 
-- (void)charon_forgetRemoval:(id)removal
+- (void)revenant_forgetRemoval:(id)removal
 {
     [_removals removeObject:removal];
 }
 
-- (dispatch_queue_t)charon_queueFor:(dispatch_queue_t)queue
+- (dispatch_queue_t)revenant_queueFor:(dispatch_queue_t)queue
 {
     return queue ? queue : _observerQueue;
 }
@@ -297,7 +297,7 @@
 
 #pragma mark - the observer
 
-@implementation CharonAVSampleBufferTimeObserver
+@implementation RevenantAVSampleBufferTimeObserver
 
 - (instancetype)initWithOwner:(AVSampleBufferRenderSynchronizer *)aSynchronizer
                         queue:(dispatch_queue_t)queue
@@ -309,13 +309,13 @@
     self->owner = aSynchronizer;
     self->interval = aInterval;
     self->periodic = aBlock;
-    self->source = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, [aSynchronizer charon_queueFor:queue]);
+    self->source = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, [aSynchronizer revenant_queueFor:queue]);
     dispatch_resume(self->source);
     dispatch_source_set_event_handler(self->source, ^{
-        [self charon_fire];
+        [self revenant_fire];
     });
     CMTimebaseAddTimerDispatchSource(aSynchronizer.timebase, self->source);
-    [aSynchronizer charon_addObserver:self];
+    [aSynchronizer revenant_addObserver:self];
     return self;
 }
 
@@ -330,22 +330,22 @@
     self->interval = kCMTimeInvalid;
     self->times = [aTimes mutableCopy];
     self->boundary = aBlock;
-    self->source = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, [aSynchronizer charon_queueFor:queue]);
+    self->source = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, [aSynchronizer revenant_queueFor:queue]);
     dispatch_resume(self->source);
     dispatch_source_set_event_handler(self->source, ^{
-        [self charon_fire];
+        [self revenant_fire];
     });
     CMTimebaseAddTimerDispatchSource(aSynchronizer.timebase, self->source);
-    [aSynchronizer charon_addObserver:self];
+    [aSynchronizer revenant_addObserver:self];
     return self;
 }
 
-- (void)charon_armAt:(CMTime)time
+- (void)revenant_armAt:(CMTime)time
 {
     CMTimebaseSetTimerDispatchSourceNextFireTime(self->owner.timebase, self->source, time, 0);
 }
 
-- (void)charon_cancel
+- (void)revenant_cancel
 {
     if (!self->source)
         return;
@@ -360,7 +360,7 @@
     self->times = nil;
 }
 
-- (void)charon_fire
+- (void)revenant_fire
 {
     AVSampleBufferRenderSynchronizer *clock = self->owner;
     if (!clock)
@@ -369,7 +369,7 @@
     if (CMTIME_IS_VALID(self->interval)) {
         if (self->periodic)
             self->periodic(now);
-        [self charon_armAt:CMTimeAdd(now, self->interval)];
+        [self revenant_armAt:CMTimeAdd(now, self->interval)];
         return;
     }
     if (self->boundary) {
@@ -384,7 +384,7 @@
             next = time;
     }
     if (CMTIME_IS_VALID(next))
-        [self charon_armAt:next];
+        [self revenant_armAt:next];
 }
 
 @end

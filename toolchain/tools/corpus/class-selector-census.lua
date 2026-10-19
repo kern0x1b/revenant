@@ -5,7 +5,7 @@ local objc_module = "apple.objc"
 function main(cachefile, selector, image)
     assert(cachefile and selector,
            "usage: class-selector-census.lua <cache> <selector-as-objc.lua-stores-it> [image substring]")
-    local objc = import(objc_module, {rootdir = path.join(os.getenv("CHARON_ROOT"), "modules"), anonymous = true})
+    local objc = import(objc_module, {rootdir = path.join(os.getenv("REVENANT_ROOT"), "modules"), anonymous = true})
     local found = objc.inventory(cachefile)
     assert(found, cachefile .. " holds no readable Objective-C metadata")
     print(string.format("#cache %s", found.architecture))

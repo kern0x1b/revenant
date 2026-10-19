@@ -13,7 +13,7 @@
 #include <cstddef>
 #include <cstdint>
 
-namespace shade::darwin::arm_thread {
+namespace emulator::darwin::arm_thread {
 
 inline constexpr std::uint32_t general_state_flavor = 1;
 inline constexpr std::size_t general_register_count = 16;

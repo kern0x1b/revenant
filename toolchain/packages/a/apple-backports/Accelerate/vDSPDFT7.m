@@ -12,19 +12,19 @@
 #define M_PI 3.14159265358979323846
 #endif
 
-typedef enum { CharonDFTComplex = 0, CharonDFTReal = 1 } CharonDFTKind;
+typedef enum { RevenantDFTComplex = 0, RevenantDFTReal = 1 } RevenantDFTKind;
 
 struct vDSP_DFT_SetupStructD {
     vDSP_Length length;
     double sign;
-    CharonDFTKind kind;
+    RevenantDFTKind kind;
 };
 
-static int CharonDFTHasImplementation(vDSP_Length length, CharonDFTKind kind)
+static int RevenantDFTHasImplementation(vDSP_Length length, RevenantDFTKind kind)
 {
     int power = 0;
-    int floor = kind == CharonDFTReal ? 4 : 3;
-    if (length == 0 || (kind == CharonDFTReal && length < 2)) {
+    int floor = kind == RevenantDFTReal ? 4 : 3;
+    if (length == 0 || (kind == RevenantDFTReal && length < 2)) {
         return 0;
     }
     while ((length & 1) == 0) {
@@ -37,10 +37,10 @@ static int CharonDFTHasImplementation(vDSP_Length length, CharonDFTKind kind)
     return power >= floor && (length == 3 || length == 5 || length == 15);
 }
 
-static vDSP_DFT_SetupD CharonDFTCreateSetup(vDSP_Length length, vDSP_DFT_Direction direction, CharonDFTKind kind)
+static vDSP_DFT_SetupD RevenantDFTCreateSetup(vDSP_Length length, vDSP_DFT_Direction direction, RevenantDFTKind kind)
 {
     struct vDSP_DFT_SetupStructD *setup;
-    if (!CharonDFTHasImplementation(length, kind)) {
+    if (!RevenantDFTHasImplementation(length, kind)) {
         return NULL;
     }
     setup = (struct vDSP_DFT_SetupStructD *)calloc(1, sizeof(*setup));
@@ -57,14 +57,14 @@ vDSP_DFT_SetupD vDSP_DFT_zop_CreateSetupD(vDSP_DFT_SetupD __Previous, vDSP_Lengt
                                           vDSP_DFT_Direction __Direction)
 {
     (void)__Previous;
-    return CharonDFTCreateSetup(__Length, __Direction, CharonDFTComplex);
+    return RevenantDFTCreateSetup(__Length, __Direction, RevenantDFTComplex);
 }
 
 vDSP_DFT_SetupD vDSP_DFT_zrop_CreateSetupD(vDSP_DFT_SetupD __Previous, vDSP_Length __Length,
                                            vDSP_DFT_Direction __Direction)
 {
     (void)__Previous;
-    return CharonDFTCreateSetup(__Length, __Direction, CharonDFTReal);
+    return RevenantDFTCreateSetup(__Length, __Direction, RevenantDFTReal);
 }
 
 void vDSP_DFT_DestroySetupD(vDSP_DFT_SetupD __Setup)
@@ -72,7 +72,7 @@ void vDSP_DFT_DestroySetupD(vDSP_DFT_SetupD __Setup)
     free(__Setup);
 }
 
-static void CharonDFTBin(const double *real, const double *imaginary, vDSP_Length count, vDSP_Length length,
+static void RevenantDFTBin(const double *real, const double *imaginary, vDSP_Length count, vDSP_Length length,
                          vDSP_Length bin, double sign, double *out_real, double *out_imaginary)
 {
     double sum_real = 0.0, sum_imaginary = 0.0;
@@ -105,12 +105,12 @@ void vDSP_DFT_ExecuteD(const struct vDSP_DFT_SetupStructD *__Setup, const double
         free(imaginary);
         return;
     }
-    if (setup->kind == CharonDFTComplex) {
+    if (setup->kind == RevenantDFTComplex) {
         memcpy(real, __Ir, length * sizeof(double));
         memcpy(imaginary, __Ii, length * sizeof(double));
         for (vDSP_Length k = 0; k < length; k++) {
             double out_real, out_imaginary;
-            CharonDFTBin(real, imaginary, length, length, k, sign, &out_real, &out_imaginary);
+            RevenantDFTBin(real, imaginary, length, length, k, sign, &out_real, &out_imaginary);
             __Or[k] = out_real;
             __Oi[k] = out_imaginary;
         }
@@ -125,13 +125,13 @@ void vDSP_DFT_ExecuteD(const struct vDSP_DFT_SetupStructD *__Setup, const double
         }
         for (vDSP_Length k = 0; k < half; k++) {
             double out_real, out_imaginary;
-            CharonDFTBin(real, imaginary, length, length, k, sign, &out_real, &out_imaginary);
+            RevenantDFTBin(real, imaginary, length, length, k, sign, &out_real, &out_imaginary);
             __Or[k] = 2.0 * out_real;
             __Oi[k] = 2.0 * out_imaginary;
         }
         {
             double out_real, out_imaginary;
-            CharonDFTBin(real, imaginary, length, length, half, sign, &out_real, &out_imaginary);
+            RevenantDFTBin(real, imaginary, length, length, half, sign, &out_real, &out_imaginary);
             __Oi[0] = 2.0 * out_real;
         }
         free(real);
@@ -154,7 +154,7 @@ void vDSP_DFT_ExecuteD(const struct vDSP_DFT_SetupStructD *__Setup, const double
         double *even = (double *)__Or, *odd = (double *)__Oi;
         for (vDSP_Length j = 0; j < length; j++) {
             double out_real, out_imaginary;
-            CharonDFTBin(real, imaginary, length, length, j, sign, &out_real, &out_imaginary);
+            RevenantDFTBin(real, imaginary, length, length, j, sign, &out_real, &out_imaginary);
             if (j & 1) {
                 odd[j / 2] = out_real;
             } else {

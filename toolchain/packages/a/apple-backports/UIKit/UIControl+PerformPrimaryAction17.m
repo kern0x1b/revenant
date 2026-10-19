@@ -1,7 +1,7 @@
 #import <UIKit/UIKit.h>
-#import "CharonMenus.h"
+#import "RevenantMenus.h"
 
-@implementation UIControl (CharonPerformPrimaryAction17)
+@implementation UIControl (RevenantPerformPrimaryAction17)
 
 - (void)performPrimaryAction
 {

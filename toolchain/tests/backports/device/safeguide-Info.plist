@@ -9,7 +9,7 @@
 	<key>CFBundleExecutable</key>
 	<string>safeguide</string>
 	<key>CFBundleIdentifier</key>
-	<string>local.charon.backports.safeguide</string>
+	<string>local.revenant.backports.safeguide</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>

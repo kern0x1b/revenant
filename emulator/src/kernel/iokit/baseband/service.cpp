@@ -15,7 +15,7 @@
 #include <mutex>
 #include <string>
 
-namespace shade::kernel_iokit::baseband {
+namespace emulator::kernel_iokit::baseband {
 
 namespace {
 

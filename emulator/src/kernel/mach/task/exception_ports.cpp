@@ -26,7 +26,7 @@
 
 #include "../support.hpp"
 
-namespace shade {
+namespace emulator {
 namespace {
 
     using namespace mach_support;

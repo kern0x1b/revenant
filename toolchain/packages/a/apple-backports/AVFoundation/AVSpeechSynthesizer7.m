@@ -1,7 +1,7 @@
 #import <AVFAudio/AVSpeechSynthesis.h>
 #include <dlfcn.h>
 
-@protocol CharonVoiceServicesSpeaking <NSObject>
+@protocol RevenantVoiceServicesSpeaking <NSObject>
 - (id)startSpeakingString:(NSString *)string;
 - (id)stopSpeakingAtNextBoundary:(int)boundary;
 - (id)pauseSpeakingAtNextBoundary:(int)boundary;
@@ -17,14 +17,14 @@
 - (float)maximumRate;
 @end
 
-static NSString *const CharonVoiceServicesPath = @"/System/Library/PrivateFrameworks/VoiceServices.framework/VoiceServices";
+static NSString *const RevenantVoiceServicesPath = @"/System/Library/PrivateFrameworks/VoiceServices.framework/VoiceServices";
 
-static int CharonVSBoundary(AVSpeechBoundary boundary)
+static int RevenantVSBoundary(AVSpeechBoundary boundary)
 {
     return boundary == AVSpeechBoundaryImmediate ? 0 : 1;
 }
 
-static float CharonVSRate(float rate, float vsMinimum, float vsDefault, float vsMaximum)
+static float RevenantVSRate(float rate, float vsMinimum, float vsDefault, float vsMaximum)
 {
     if (rate <= AVSpeechUtteranceMinimumSpeechRate) return vsMinimum;
     if (rate >= AVSpeechUtteranceMaximumSpeechRate) return vsMaximum;
@@ -36,7 +36,7 @@ static float CharonVSRate(float rate, float vsMinimum, float vsDefault, float vs
            (AVSpeechUtteranceMaximumSpeechRate - AVSpeechUtteranceDefaultSpeechRate);
 }
 
-@interface CharonSpeechEngine : NSObject
+@interface RevenantSpeechEngine : NSObject
 - (instancetype)initWithSynthesizer:(AVSpeechSynthesizer *)synthesizer;
 - (void)speakUtterance:(AVSpeechUtterance *)utterance;
 - (BOOL)stopAtBoundary:(AVSpeechBoundary)boundary;
@@ -46,9 +46,9 @@ static float CharonVSRate(float rate, float vsMinimum, float vsDefault, float vs
 - (BOOL)isPaused;
 @end
 
-@implementation CharonSpeechEngine {
+@implementation RevenantSpeechEngine {
     __weak AVSpeechSynthesizer *_synthesizer;
-    id<CharonVoiceServicesSpeaking> _voiceServices;
+    id<RevenantVoiceServicesSpeaking> _voiceServices;
     NSMutableArray *_queue;
     BOOL _inVoiceServices;
     BOOL _speaking;
@@ -64,7 +64,7 @@ static float CharonVSRate(float rate, float vsMinimum, float vsDefault, float vs
     if ((self = [super init])) {
         _synthesizer = synthesizer;
         _queue = [NSMutableArray array];
-        dlopen([CharonVoiceServicesPath UTF8String], RTLD_LAZY);
+        dlopen([RevenantVoiceServicesPath UTF8String], RTLD_LAZY);
         Class cls = NSClassFromString(@"VSSpeechSynthesizer");
         if (cls) {
             _voiceServices = [[cls alloc] init];
@@ -88,7 +88,7 @@ static float CharonVSRate(float rate, float vsMinimum, float vsDefault, float vs
 {
     if (!_speaking || _stopping) return NO;
     _stopping = YES;
-    [_voiceServices stopSpeakingAtNextBoundary:CharonVSBoundary(boundary)];
+    [_voiceServices stopSpeakingAtNextBoundary:RevenantVSBoundary(boundary)];
     return YES;
 }
 
@@ -97,7 +97,7 @@ static float CharonVSRate(float rate, float vsMinimum, float vsDefault, float vs
     if (!_speaking || _stopping) return NO;
     if (_paused || _pausing) return YES;
     _pausing = YES;
-    [_voiceServices pauseSpeakingAtNextBoundary:CharonVSBoundary(boundary)];
+    [_voiceServices pauseSpeakingAtNextBoundary:RevenantVSBoundary(boundary)];
     return YES;
 }
 
@@ -124,7 +124,7 @@ static float CharonVSRate(float rate, float vsMinimum, float vsDefault, float vs
     if (!utterance || !_voiceServices) return;
     AVSpeechSynthesisVoice *voice = utterance.voice ?: [AVSpeechSynthesisVoice voiceWithLanguage:nil];
     if (voice.name) [_voiceServices setVoice:voice.name];
-    [_voiceServices setRate:CharonVSRate(utterance.rate, [_voiceServices minimumRate], _defaultRate,
+    [_voiceServices setRate:RevenantVSRate(utterance.rate, [_voiceServices minimumRate], _defaultRate,
                                          [_voiceServices maximumRate])];
     [_voiceServices setPitch:_defaultPitch * utterance.pitchMultiplier];
     [_voiceServices setVolume:MIN(utterance.volume, 1.0f)];
@@ -221,7 +221,7 @@ static float CharonVSRate(float rate, float vsMinimum, float vsDefault, float vs
 @end
 
 @implementation AVSpeechSynthesizer {
-    CharonSpeechEngine *_engine;
+    RevenantSpeechEngine *_engine;
 }
 
 @synthesize delegate = _delegate;
@@ -229,7 +229,7 @@ static float CharonVSRate(float rate, float vsMinimum, float vsDefault, float vs
 - (instancetype)init
 {
     if ((self = [super init])) {
-        _engine = [[CharonSpeechEngine alloc] initWithSynthesizer:self];
+        _engine = [[RevenantSpeechEngine alloc] initWithSynthesizer:self];
     }
     return self;
 }

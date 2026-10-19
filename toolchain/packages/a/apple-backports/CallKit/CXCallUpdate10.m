@@ -1,4 +1,4 @@
-#import "CharonCallKit.h"
+#import "RevenantCallKit.h"
 
 @implementation CXCallUpdate {
     CXHandle *_remoteHandle;
@@ -95,7 +95,7 @@
     return copy;
 }
 
-- (void)charon_applyOver:(CXCallUpdate *)previous
+- (void)revenant_applyOver:(CXCallUpdate *)previous
 {
     if (!previous)
         return;

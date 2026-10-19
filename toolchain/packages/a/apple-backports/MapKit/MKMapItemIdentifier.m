@@ -1,6 +1,6 @@
 #import <MapKit/MapKit.h>
 #import <objc/message.h>
-#import "CharonMapKit.h"
+#import "RevenantMapKit.h"
 
 @implementation MKMapItemIdentifier {
     NSString *_identifierString;

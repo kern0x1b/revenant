@@ -145,7 +145,7 @@ rm -rf "$sp"; mkdir -p "$sp"
 base=$(cat "$build/names.txt" | head -1)
 cat > "$sp/ImageIONamesSpelling.m" <<SP
 #import <ImageIO/ImageIO.h>
-const CFStringRef $base = CFSTR("charon-spelling-plant");
+const CFStringRef $base = CFSTR("revenant-spelling-plant");
 SP
 # the same constant, spelled the other way round, in a band of its own
 # the plant is a DEFINITIONS-ONLY band, which is the form the port's own const-first files use: all 11 of
@@ -165,9 +165,9 @@ echo "  SPELLING: a definitions-only band written const CFStringRef is counted (
 pdir=$build/plants
 rm -rf "$pdir"; mkdir -p "$pdir/all" "$pdir/one"
 for f in $files; do b=$(basename "$f"); cp "$f" "$pdir/all/$b"; cp "$f" "$pdir/one/$b"; done
-sed -i '' 's%CFSTR("\([^"]*\)")%CFSTR("charon-plant-all")%g' "$pdir"/all/*.m
+sed -i '' 's%CFSTR("\([^"]*\)")%CFSTR("revenant-plant-all")%g' "$pdir"/all/*.m
 first=$(cat "$build/names.txt" | head -1)
-sed -i '' "s%^CFStringRef const $first = CFSTR(\"[^\"]*\");%CFStringRef const $first = CFSTR(\"charon-plant-one\");%" "$pdir"/one/*.m
+sed -i '' "s%^CFStringRef const $first = CFSTR(\"[^\"]*\");%CFStringRef const $first = CFSTR(\"revenant-plant-one\");%" "$pdir"/one/*.m
 plant_objs() {  # $1 = dir: compile every planted source apart and return the object list
   local o=""
   for f in "$1"/*.m; do
@@ -206,7 +206,7 @@ while read -r name <&3; do
   # copy carries 0 mutant markers". That is the same defect as the count, in a second place - a pattern
   # that assumes one spelling of the thing it is looking at.
   for f in "$build/m$i"/src/*.m; do
-    sed -E "s%^(CFStringRef[[:space:]]+const|const[[:space:]]+CFStringRef)[[:space:]]+$name[[:space:]]*=[[:space:]]*CFSTR\\(\"[^\"]*\"\\);%\\1 $name = CFSTR(\"charon-mutant-$i\");%" \
+    sed -E "s%^(CFStringRef[[:space:]]+const|const[[:space:]]+CFStringRef)[[:space:]]+$name[[:space:]]*=[[:space:]]*CFSTR\\(\"[^\"]*\"\\);%\\1 $name = CFSTR(\"revenant-mutant-$i\");%" \
       "$f" > "$f.tmp" && mv "$f.tmp" "$f"
   done
   # The two counts below use $def_re, not a narrow literal. They guard the mutation against losing a
@@ -221,7 +221,7 @@ while read -r name <&3; do
   # it did no harm and earned nothing, and a second copy of the mutation is a second place to be wrong.
   c=$(cat "$build/m$i"/src/*.m | grep -hcE "$def_re" | awk '{s+=$1} END{print s+0}')
   [ "$c" -eq "$before" ] || { echo "FAIL  mutant $i: a definition was lost"; exit 1; }
-  hit=$(cat "$build/m$i"/src/*.m | grep -c "charon-mutant-$i" || true)
+  hit=$(cat "$build/m$i"/src/*.m | grep -c "revenant-mutant-$i" || true)
   [ "$hit" -eq 1 ] || { echo "FAIL  mutant $i: the copy carries $hit mutant markers, not 1"; exit 1; }
   held=""
   for f in "$build/m$i"/src/*.m; do

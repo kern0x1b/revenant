@@ -5,25 +5,25 @@
 # The host's list of classes is the input: the probe's list mode names them, and each class is probed in its own
 # process, so a factory that crashes one process is named and does not hide the others. The host build links the
 # system's Intents and nothing of the port. The port build (-DPORT) links the port's objects, the sources listed below,
-# compiled with CHARON_HOST_BUILD and their classes renamed (CharonHostINIntentResolutionResult and so on), because two
+# compiled with REVENANT_HOST_BUILD and their classes renamed (RevenantHostINIntentResolutionResult and so on), because two
 # Intents classes of one name in one process answer for each other.
 #
 # The verdict is the diff: every in-scope line the port prints must be the host's line. A class whose probe exits non-zero is a
-# FAIL on both sides' lines, and says so. The plant is a copy of the port in which charon_resolutionWithStatus: answers
+# FAIL on both sides' lines, and says so. The plant is a copy of the port in which revenant_resolutionWithStatus: answers
 # an object for an empty disambiguation: its diff must be non-empty, or the comparison cannot fail.
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 P=${PORT_DIR:-$here/../../../../packages/a/apple-backports}
-CODING=$P/../../c/charon-coding/files
-build=${RESOLUTION_FACTORIES_BUILD:-$(runs_fresh charon-resolution-factories)}
+CODING=$P/../../c/revenant-coding/files
+build=${RESOLUTION_FACTORIES_BUILD:-$(runs_fresh revenant-resolution-factories)}
 sdk=$(xcrun --show-sdk-path)
 target="-target arm64-apple-ios15.0-macabi -isysroot $sdk -iframework $sdk/System/iOSSupport/System/Library/Frameworks"
-flags="$target -fobjc-arc -fvisibility=hidden -w -DCHARON_HOST_BUILD"
+flags="$target -fobjc-arc -fvisibility=hidden -w -DREVENANT_HOST_BUILD"
 probe_flags="$target -fno-objc-arc -fvisibility=hidden -w"
 frameworks="-framework Foundation -framework UIKit -framework CoreGraphics -framework EventKit -framework Intents"
 includes="-I$P/Intents -I$CODING"
-sources="$CODING/CharonCoding.m $P/Intents/CharonIntentsStore.m $P/Intents/CharonIntents100.m $P/Intents/CharonIntents110.m $P/Intents/CharonIntents180.m $P/Intents/IN10_0_1.m $P/Intents/IN10_3.m $P/Intents/IN11_0.m $P/Intents/IN12_0.m $P/Intents/IN13_4.m $P/Intents/IN16_0.m $P/Intents/IN17_0.m $P/Intents/IN18_0.m $P/Intents/INPaymentMethodResolutionResult10.3.m"
+sources="$CODING/RevenantCoding.m $P/Intents/RevenantIntentsStore.m $P/Intents/RevenantIntents100.m $P/Intents/RevenantIntents110.m $P/Intents/RevenantIntents180.m $P/Intents/IN10_0_1.m $P/Intents/IN10_3.m $P/Intents/IN11_0.m $P/Intents/IN12_0.m $P/Intents/IN13_4.m $P/Intents/IN16_0.m $P/Intents/IN17_0.m $P/Intents/IN18_0.m $P/Intents/INPaymentMethodResolutionResult10.3.m"
 
 mkdir -p "$build/plain" "$build/port" "$build/host" "$build/hostout" "$build/portout" "$build/plant"
 
@@ -53,7 +53,7 @@ for source in $sources; do
 done
 renames=""
 for name in $(xcrun nm -gU "$build"/plain/*.o | awk 'NF == 3 {print $3}' | grep -E '^_OBJC_CLASS_\$_' | sed -e 's/^_OBJC_CLASS_\$_//' | sort -u); do
-    renames="$renames -D$name=CharonHost$name"
+    renames="$renames -D$name=RevenantHost$name"
 done
 for source in $sources; do
     xcrun clang $flags $renames $includes -c "$source" -o "$build/port/$(basename "$source" .m).o"
@@ -100,14 +100,14 @@ if ! diff -u "$build/host-cmp.txt" "$build/port-cmp.txt" > "$build/diff.txt"; th
 fi
 echo "PASS: $(wc -l < "$build/port-cmp.txt" | tr -d ' ') in-scope port lines, port and host alike"
 
-# The plant: the port's charon_resolutionWithStatus: built without the empty-disambiguation rule, if the rule is there.
-# A copy of CharonIntents100.m is compiled in place of the port's, and its diff must be non-empty.
-if grep -q 'CharonIntentsResolutionDisambiguation && valuesToDisambiguate.count == 0' "$P/Intents/CharonIntents100.m"; then
-    sed 's/CharonIntentsResolutionDisambiguation \&\& valuesToDisambiguate.count == 0/CharonIntentsResolutionNeedsValue \&\& valuesToDisambiguate.count == 0/' \
-        "$P/Intents/CharonIntents100.m" > "$build/plant/CharonIntents100.src.m"
+# The plant: the port's revenant_resolutionWithStatus: built without the empty-disambiguation rule, if the rule is there.
+# A copy of RevenantIntents100.m is compiled in place of the port's, and its diff must be non-empty.
+if grep -q 'RevenantIntentsResolutionDisambiguation && valuesToDisambiguate.count == 0' "$P/Intents/RevenantIntents100.m"; then
+    sed 's/RevenantIntentsResolutionDisambiguation \&\& valuesToDisambiguate.count == 0/RevenantIntentsResolutionNeedsValue \&\& valuesToDisambiguate.count == 0/' \
+        "$P/Intents/RevenantIntents100.m" > "$build/plant/RevenantIntents100.src.m"
     cp "$build"/port/*.o "$build/plant/"
-    rm -f "$build/plant/CharonIntents100.o"
-    xcrun clang $flags $renames $includes -c "$build/plant/CharonIntents100.src.m" -o "$build/plant/CharonIntents100.o"
+    rm -f "$build/plant/RevenantIntents100.o"
+    xcrun clang $flags $renames $includes -c "$build/plant/RevenantIntents100.src.m" -o "$build/plant/RevenantIntents100.o"
     xcrun clang $probe_flags -DPORT "$here/probe.m" "$build"/plant/*.o $frameworks -o "$build/plant-probe"
     status=0
     : > "$build/plant.txt"
@@ -122,6 +122,6 @@ if grep -q 'CharonIntentsResolutionDisambiguation && valuesToDisambiguate.count 
     fi
     echo "PLANT: the planted port differs from the host, as it must"
 else
-    echo "FAIL: the empty-disambiguation rule is not in CharonIntents100.m, so the plant has nothing to remove"
+    echo "FAIL: the empty-disambiguation rule is not in RevenantIntents100.m, so the plant has nothing to remove"
     exit 1
 fi

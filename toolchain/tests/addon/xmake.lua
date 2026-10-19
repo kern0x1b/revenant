@@ -1,4 +1,4 @@
-add_repositories("charon ../..")
+add_repositories("revenant ../..")
 add_requires("ld64 956.6", "ldid 2.1.5-procursus7+23.gaf86971", "iphoneos-sdk 16.4", "llvm 23.1.1")
 add_requires("swift 6.4.0", {system = false})
 

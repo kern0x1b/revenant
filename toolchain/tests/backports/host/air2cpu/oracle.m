@@ -26,7 +26,7 @@ static BOOL writeLibraries(NSURL *metallib)
            (unsigned long)[[compiled functionNames] count]);
     MTLCompileOptions *options = [MTLCompileOptions new];
     options.libraryType = MTLLibraryTypeDynamic;
-    options.installName = @"charon.air2cpu.oracle";
+    options.installName = @"revenant.air2cpu.oracle";
     options.languageVersion = (MTLLanguageVersion)(4 << 16) + 1;
     id<MTLLibrary> library = [device newLibraryWithSource:source options:options error:&error];
     if (library == nil) {

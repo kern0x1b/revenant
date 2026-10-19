@@ -41,7 +41,7 @@ int main(int argc, char **argv)
     @autoreleasepool {
         stackClass = argc > 1 ? NSClassFromString(@(argv[1])) : [UIStackView class];
         NSInteger alignments[] = {UIStackViewAlignmentFill, UIStackViewAlignmentLeading, UIStackViewAlignmentCenter, UIStackViewAlignmentTrailing};
-        printf("static const struct charon_stack_case charon_stack_cases[] = {\n");
+        printf("static const struct revenant_stack_case revenant_stack_cases[] = {\n");
         for (NSInteger nested = 0; nested < 2; nested++)
         for (NSInteger margins = 0; margins < 2; margins++)
         for (NSInteger axis = 0; axis < 2; axis++)
@@ -73,7 +73,7 @@ int main(int argc, char **argv)
                 if (margins) {
                     stack.layoutMarginsRelativeArrangement = YES;
                     stack.layoutMargins = UIEdgeInsetsMake(3, 5, 7, 11);
-                    SEL renamed = NSSelectorFromString(@"setCharonHostLayoutMargins:");
+                    SEL renamed = NSSelectorFromString(@"setRevenantHostLayoutMargins:");
                     if ([stack respondsToSelector:renamed])
                         ((void (*)(id, SEL, UIEdgeInsets))[stack methodForSelector:renamed])(stack, renamed, UIEdgeInsetsMake(3, 5, 7, 11));
                 }

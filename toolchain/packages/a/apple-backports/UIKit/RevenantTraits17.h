@@ -1,8 +1,8 @@
-#ifndef CHARON_TRAITS17_H
-#define CHARON_TRAITS17_H
+#ifndef REVENANT_TRAITS17_H
+#define REVENANT_TRAITS17_H
 
 #import <UIKit/UIKit.h>
-#import "../CharonSayOnce.h"
+#import "../RevenantSayOnce.h"
 
 #if !__has_include(<UIKit/UITrait.h>)
 
@@ -169,7 +169,7 @@ typedef void (^UITraitChangeHandler)(__kindof id<UITraitEnvironment> traitEnviro
 - (void)unregisterForTraitChanges:(id<UITraitChangeRegistration>)registration;
 @end
 
-@interface UITraitCollection (CharonTraits)
+@interface UITraitCollection (RevenantTraits)
 + (UITraitCollection *)traitCollectionWithTraits:(UITraitMutations NS_NOESCAPE)mutations;
 - (UITraitCollection *)traitCollectionByModifyingTraits:(UITraitMutations NS_NOESCAPE)mutations;
 + (UITraitCollection *)traitCollectionWithCGFloatValue:(CGFloat)value forTrait:(UICGFloatTrait)trait;
@@ -193,7 +193,7 @@ typedef void (^UITraitChangeHandler)(__kindof id<UITraitEnvironment> traitEnviro
 @protocol UITraitChangeRegistration;
 @protocol UITraitChangeObservable;
 
-@interface UITraitCollection (CharonTraits)
+@interface UITraitCollection (RevenantTraits)
 + (UITraitCollection *)traitCollectionWithTraits:(UITraitMutations NS_NOESCAPE)mutations;
 - (UITraitCollection *)traitCollectionByModifyingTraits:(UITraitMutations NS_NOESCAPE)mutations;
 + (UITraitCollection *)traitCollectionWithCGFloatValue:(CGFloat)value forTrait:(UICGFloatTrait)trait;
@@ -212,58 +212,58 @@ typedef void (^UITraitChangeHandler)(__kindof id<UITraitEnvironment> traitEnviro
 
 #endif
 
-typedef NS_ENUM(NSInteger, CharonTraitValue) {
-    CharonTraitValueCGFloat = 0,
-    CharonTraitValueNSInteger = 1,
-    CharonTraitValueObject = 2
+typedef NS_ENUM(NSInteger, RevenantTraitValue) {
+    RevenantTraitValueCGFloat = 0,
+    RevenantTraitValueNSInteger = 1,
+    RevenantTraitValueObject = 2
 };
 
-typedef NS_ENUM(NSInteger, CharonTraitHome) {
-    CharonTraitHomeExtras = 0,
-    CharonTraitHomeIvar = 1,
-    CharonTraitHomeStyle = 2,
-    CharonTraitHomeForceTouch = 3
+typedef NS_ENUM(NSInteger, RevenantTraitHome) {
+    RevenantTraitHomeExtras = 0,
+    RevenantTraitHomeIvar = 1,
+    RevenantTraitHomeStyle = 2,
+    RevenantTraitHomeForceTouch = 3
 };
 
-#define CHARON_TRAIT(Index, ClassName, StoredName, ValueKind, Home, Default, Appearance)                                                 \
-    static CharonTraitDefinition charon_held_##ClassName;                                                                               \
-    static void charon_define_##ClassName(void)                                                                                        \
+#define REVENANT_TRAIT(Index, ClassName, StoredName, ValueKind, Home, Default, Appearance)                                                 \
+    static RevenantTraitDefinition revenant_held_##ClassName;                                                                               \
+    static void revenant_define_##ClassName(void)                                                                                        \
     {                                                                                                                                   \
-        charon_held_##ClassName.trait = [ClassName class];                                                                             \
-        charon_held_##ClassName.name = StoredName;                                                                                     \
-        charon_held_##ClassName.kind = ValueKind;                                                                                      \
-        charon_held_##ClassName.home = Home;                                                                                           \
-        charon_held_##ClassName.defaultValue = Default;                                                                                \
-        charon_held_##ClassName.affectsColorAppearance = Appearance;                                                                   \
-        charon_register_trait_definition(Index, &charon_held_##ClassName);                                                             \
+        revenant_held_##ClassName.trait = [ClassName class];                                                                             \
+        revenant_held_##ClassName.name = StoredName;                                                                                     \
+        revenant_held_##ClassName.kind = ValueKind;                                                                                      \
+        revenant_held_##ClassName.home = Home;                                                                                           \
+        revenant_held_##ClassName.defaultValue = Default;                                                                                \
+        revenant_held_##ClassName.affectsColorAppearance = Appearance;                                                                   \
+        revenant_register_trait_definition(Index, &revenant_held_##ClassName);                                                             \
     }
 
 typedef struct {
     __unsafe_unretained Class trait;
     __unsafe_unretained NSString *name;
-    CharonTraitValue kind;
-    CharonTraitHome home;
+    RevenantTraitValue kind;
+    RevenantTraitHome home;
     __unsafe_unretained id defaultValue;
     BOOL affectsColorAppearance;
-} CharonTraitDefinition;
+} RevenantTraitDefinition;
 
-typedef NSString *(*CharonTraitValueReader)(UITraitCollection *collection, NSString *name, BOOL *known,
+typedef NSString *(*RevenantTraitValueReader)(UITraitCollection *collection, NSString *name, BOOL *known,
                                             BOOL *isDefault);
-void charon_add_trait_value_reader(CharonTraitValueReader reader);
+void revenant_add_trait_value_reader(RevenantTraitValueReader reader);
 
-NSString *charon_read_trait_value(UITraitCollection *collection, NSString *name, BOOL *known, BOOL *isDefault);
+NSString *revenant_read_trait_value(UITraitCollection *collection, NSString *name, BOOL *known, BOOL *isDefault);
 
-#define CHARON_TRAIT_COUNT 22
+#define REVENANT_TRAIT_COUNT 22
 
-void charon_register_trait_definition(int index, const CharonTraitDefinition *definition);
+void revenant_register_trait_definition(int index, const RevenantTraitDefinition *definition);
 
-const CharonTraitDefinition *charon_trait_definition(Class trait);
+const RevenantTraitDefinition *revenant_trait_definition(Class trait);
 
-NSArray *charon_trait_classes(void);
+NSArray *revenant_trait_classes(void);
 
-const CharonTraitDefinition *charon_trait_definition_for_name(NSString *name);
+const RevenantTraitDefinition *revenant_trait_definition_for_name(NSString *name);
 
-static inline NSString *charon_trait_public_name(const CharonTraitDefinition *definition)
+static inline NSString *revenant_trait_public_name(const RevenantTraitDefinition *definition)
 {
     NSString *identifier = NSStringFromClass(definition->trait);
     NSRange prefix = [identifier rangeOfString:@"UITrait"];
@@ -272,68 +272,68 @@ static inline NSString *charon_trait_public_name(const CharonTraitDefinition *de
     return [identifier substringFromIndex:NSMaxRange(prefix)];
 }
 
-static inline NSString *charon_identifier_of(Class trait)
+static inline NSString *revenant_identifier_of(Class trait)
 {
     return NSStringFromClass(trait);
 }
 
-static inline NSString *charon_trait_name_of(Class trait)
+static inline NSString *revenant_trait_name_of(Class trait)
 {
-    const CharonTraitDefinition *definition = charon_trait_definition(trait);
-    return definition ? charon_trait_public_name(definition) : NSStringFromClass(trait);
+    const RevenantTraitDefinition *definition = revenant_trait_definition(trait);
+    return definition ? revenant_trait_public_name(definition) : NSStringFromClass(trait);
 }
 
-static inline BOOL charon_appearance_of(Class trait)
+static inline BOOL revenant_appearance_of(Class trait)
 {
-    const CharonTraitDefinition *definition = charon_trait_definition(trait);
+    const RevenantTraitDefinition *definition = revenant_trait_definition(trait);
     return definition ? definition->affectsColorAppearance : NO;
 }
 
-static inline NSInteger charon_integer_default_of(Class trait)
+static inline NSInteger revenant_integer_default_of(Class trait)
 {
-    const CharonTraitDefinition *definition = charon_trait_definition(trait);
+    const RevenantTraitDefinition *definition = revenant_trait_definition(trait);
     if (!definition || !definition->defaultValue)
         return -1;
     return [definition->defaultValue integerValue];
 }
 
-static inline CGFloat charon_cgfloat_default_of(Class trait)
+static inline CGFloat revenant_cgfloat_default_of(Class trait)
 {
-    const CharonTraitDefinition *definition = charon_trait_definition(trait);
+    const RevenantTraitDefinition *definition = revenant_trait_definition(trait);
     return definition && definition->defaultValue ? (CGFloat)[definition->defaultValue doubleValue] : 0;
 }
 
-static inline id charon_object_default_of(Class trait)
+static inline id revenant_object_default_of(Class trait)
 {
-    const CharonTraitDefinition *definition = charon_trait_definition(trait);
+    const RevenantTraitDefinition *definition = revenant_trait_definition(trait);
     return definition ? definition->defaultValue : nil;
 }
 
-BOOL charon_trait_is_default(UITraitCollection *collection, const CharonTraitDefinition *definition);
+BOOL revenant_trait_is_default(UITraitCollection *collection, const RevenantTraitDefinition *definition);
 
-id charon_trait_value(UITraitCollection *collection, const CharonTraitDefinition *definition);
+id revenant_trait_value(UITraitCollection *collection, const RevenantTraitDefinition *definition);
 
-NSString *charon_trait_value_text(const CharonTraitDefinition *definition, id value);
+NSString *revenant_trait_value_text(const RevenantTraitDefinition *definition, id value);
 
-UITraitCollection *charon_trait_collection_with(UITraitCollection *collection, const CharonTraitDefinition *definition, id value);
+UITraitCollection *revenant_trait_collection_with(UITraitCollection *collection, const RevenantTraitDefinition *definition, id value);
 
-id charon_trait_extra_object(UITraitCollection *collection, NSString *name);
-void charon_set_trait_extra_object(UITraitCollection *collection, NSString *name, id value);
+id revenant_trait_extra_object(UITraitCollection *collection, NSString *name);
+void revenant_set_trait_extra_object(UITraitCollection *collection, NSString *name, id value);
 
-void charon_set_trait_force_touch(UITraitCollection *collection, UIForceTouchCapability capability);
+void revenant_set_trait_force_touch(UITraitCollection *collection, UIForceTouchCapability capability);
 
-@interface UITraitCollection (CharonTraitStorage)
-- (void)charon_setUserInterfaceIdiom:(UIUserInterfaceIdiom)idiom;
-- (void)charon_setDisplayScale:(CGFloat)scale;
-- (void)charon_setHorizontalSizeClass:(UIUserInterfaceSizeClass)sizeClass;
-- (void)charon_setVerticalSizeClass:(UIUserInterfaceSizeClass)sizeClass;
+@interface UITraitCollection (RevenantTraitStorage)
+- (void)revenant_setUserInterfaceIdiom:(UIUserInterfaceIdiom)idiom;
+- (void)revenant_setDisplayScale:(CGFloat)scale;
+- (void)revenant_setHorizontalSizeClass:(UIUserInterfaceSizeClass)sizeClass;
+- (void)revenant_setVerticalSizeClass:(UIUserInterfaceSizeClass)sizeClass;
 @end
 
-@interface CharonTraitMutations : NSObject <UIMutableTraits> {
+@interface RevenantTraitMutations : NSObject <UIMutableTraits> {
     UITraitCollection *_collection;
 }
 - (instancetype)initWithCollection:(UITraitCollection *)collection;
-- (UITraitCollection *)charon_collection;
+- (UITraitCollection *)revenant_collection;
 - (void)setCGFloatValue:(CGFloat)value forTrait:(UICGFloatTrait)trait;
 - (CGFloat)valueForCGFloatTrait:(UICGFloatTrait)trait;
 - (void)setNSIntegerValue:(NSInteger)value forTrait:(UINSIntegerTrait)trait;
@@ -342,9 +342,9 @@ void charon_set_trait_force_touch(UITraitCollection *collection, UIForceTouchCap
 - (nullable __kindof id<NSObject>)objectForTrait:(UIObjectTrait)trait;
 @end
 
-static inline void charon_traits_say_once(NSString *key, NSString *text)
+static inline void revenant_traits_say_once(NSString *key, NSString *text)
 {
-    charon_say_once_for(key, text);
+    revenant_say_once_for(key, text);
 }
 
 #endif

@@ -1,9 +1,9 @@
 #include <CoreFoundation/CoreFoundation.h>
 #include <IOKit/IOKitLib.h>
 
-#define CHARON_IOKIT_EXPORT __attribute__((visibility("default")))
+#define REVENANT_IOKIT_EXPORT __attribute__((visibility("default")))
 
-CHARON_IOKIT_EXPORT CFStringRef IORegistryEntryCopyPath(io_registry_entry_t entry, const io_name_t plane)
+REVENANT_IOKIT_EXPORT CFStringRef IORegistryEntryCopyPath(io_registry_entry_t entry, const io_name_t plane)
 {
     io_string_t path;
 
@@ -13,7 +13,7 @@ CHARON_IOKIT_EXPORT CFStringRef IORegistryEntryCopyPath(io_registry_entry_t entr
     return CFStringCreateWithCString(0, path, kCFStringEncodingUTF8);
 }
 
-CHARON_IOKIT_EXPORT io_registry_entry_t IORegistryEntryCopyFromPath(mach_port_t mainPort, CFStringRef path)
+REVENANT_IOKIT_EXPORT io_registry_entry_t IORegistryEntryCopyFromPath(mach_port_t mainPort, CFStringRef path)
 {
     io_string_t buffer;
 

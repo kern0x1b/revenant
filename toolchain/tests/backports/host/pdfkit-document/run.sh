@@ -8,7 +8,7 @@
 #
 #   host-side  the host's PDFKit and nothing else, no port object in the process
 #   port-side  the port's objects and nothing else, no macOS PDFKit imported or linked - it builds
-#              against the port's CharonPDFKit.h, which needs only Foundation and CoreGraphics
+#              against the port's RevenantPDFKit.h, which needs only Foundation and CoreGraphics
 #
 # There is no -D rename anywhere, so the two sets of ivars cannot meet.  Each side prints one
 # key=value line per fact and the image dladdr names for the classes it used, and this script diffs the
@@ -81,10 +81,10 @@ xcrun clang -fobjc-arc -Wall "$here/host.m" -framework Foundation -framework App
     echo "BUILD the host side did not compile:"; head -8 "$build/host.log" | sed 's/^/    /'; exit 1; }
 # side B: the port only, with no macOS PDFKit anywhere
 # -Werror=incomplete-implementation makes the COMPILER the completeness check: a selector
-# CharonPDFKit.h declares with no body fails this build and the compiler names it.  That is the check.
+# RevenantPDFKit.h declares with no body fails this build and the compiler names it.  That is the check.
 # A hand-written metadata parser here once reported 23 missing bodies when only two were, and a check
 # that cries wolf is worse than no check.  -respondsToSelector: is no use either: it answers YES for a
-# declared method with no body, which is how a missing -charon_readAttributes and a missing
+# declared method with no body, which is how a missing -revenant_readAttributes and a missing
 # -pageAtIndex: both reached a differential that printed "the port has it=1".
 # -Wall and NOT -w: -w switches the warning off, and -Werror does not switch a disabled warning
 # back on, so with -w the completeness check was decorative - it said nothing while a body was missing.

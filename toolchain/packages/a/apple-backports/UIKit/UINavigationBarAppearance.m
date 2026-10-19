@@ -1,10 +1,10 @@
-#import "CharonBarAppearance.h"
+#import "RevenantBarAppearance.h"
 
-static NSString *const CharonTitle = @"title";
-static NSString *const CharonLargeTitle = @"largeTitle";
-static NSString *const CharonTitleOffset = @"titleOffset";
+static NSString *const RevenantTitle = @"title";
+static NSString *const RevenantLargeTitle = @"largeTitle";
+static NSString *const RevenantTitleOffset = @"titleOffset";
 
-static void charon_require_appearance(id appearance)
+static void revenant_require_appearance(id appearance)
 {
     if (!appearance)
         [NSException raise:NSInternalInconsistencyException format:@"use -[UIBarButtonItemAppearance configureWithDefaultForStyle:] to reset appearance values"];
@@ -18,26 +18,26 @@ static void charon_require_appearance(id appearance)
     UIBarButtonItemAppearance *_backButtonAppearance;
 }
 
-- (void)charon_setUp
+- (void)revenant_setUp
 {
-    [super charon_setUp];
+    [super revenant_setUp];
     _custom = [[NSMutableDictionary alloc] init];
-    _buttonAppearance = [[UIBarButtonItemAppearance alloc] initCharonWithStyle:0];
-    _doneButtonAppearance = [[UIBarButtonItemAppearance alloc] initCharonWithStyle:2];
-    _backButtonAppearance = [[UIBarButtonItemAppearance alloc] initCharonWithStyle:3];
-    [_backButtonAppearance charon_becomeBackButtonBasedOn:_buttonAppearance];
-    [self charon_adoptChildren];
-    [self charon_configureTransparent];
+    _buttonAppearance = [[UIBarButtonItemAppearance alloc] initRevenantWithStyle:0];
+    _doneButtonAppearance = [[UIBarButtonItemAppearance alloc] initRevenantWithStyle:2];
+    _backButtonAppearance = [[UIBarButtonItemAppearance alloc] initRevenantWithStyle:3];
+    [_backButtonAppearance revenant_becomeBackButtonBasedOn:_buttonAppearance];
+    [self revenant_adoptChildren];
+    [self revenant_configureTransparent];
 }
 
-- (void)charon_adoptChildren
+- (void)revenant_adoptChildren
 {
-    charon_adopt_child(self, _buttonAppearance);
-    charon_adopt_child(self, _doneButtonAppearance);
-    charon_adopt_child(self, _backButtonAppearance);
+    revenant_adopt_child(self, _buttonAppearance);
+    revenant_adopt_child(self, _doneButtonAppearance);
+    revenant_adopt_child(self, _backButtonAppearance);
 }
 
-- (void)charon_copyExtrasFrom:(UIBarAppearance *)source
+- (void)revenant_copyExtrasFrom:(UIBarAppearance *)source
 {
     if (![source isKindOfClass:[UINavigationBarAppearance class]])
         return;
@@ -46,74 +46,74 @@ static void charon_require_appearance(id appearance)
     _buttonAppearance = [other->_buttonAppearance copy];
     _doneButtonAppearance = [other->_doneButtonAppearance copy];
     _backButtonAppearance = [other->_backButtonAppearance copy];
-    [_backButtonAppearance charon_becomeBackButtonBasedOn:_buttonAppearance];
-    [self charon_adoptChildren];
+    [_backButtonAppearance revenant_becomeBackButtonBasedOn:_buttonAppearance];
+    [self revenant_adoptChildren];
 }
 
-- (void)charon_encodeExtrasWithCoder:(NSCoder *)coder
+- (void)revenant_encodeExtrasWithCoder:(NSCoder *)coder
 {
-    [coder encodeObject:charon_plist_pack(_custom) forKey:@"navigation"];
+    [coder encodeObject:revenant_plist_pack(_custom) forKey:@"navigation"];
     [coder encodeObject:_buttonAppearance forKey:@"button"];
     [coder encodeObject:_doneButtonAppearance forKey:@"done"];
     [coder encodeObject:_backButtonAppearance forKey:@"back"];
 }
 
-- (void)charon_decodeExtrasWithCoder:(NSCoder *)coder
+- (void)revenant_decodeExtrasWithCoder:(NSCoder *)coder
 {
-    NSDictionary *classes = @{CharonTitle: [NSDictionary class], CharonLargeTitle: [NSDictionary class], CharonTitleOffset: [NSArray class]};
-    [_custom setDictionary:charon_sanitised(charon_plist_unpack([coder decodeObjectOfClasses:charon_plist_classes() forKey:@"navigation"]), classes, nil)];
+    NSDictionary *classes = @{RevenantTitle: [NSDictionary class], RevenantLargeTitle: [NSDictionary class], RevenantTitleOffset: [NSArray class]};
+    [_custom setDictionary:revenant_sanitised(revenant_plist_unpack([coder decodeObjectOfClasses:revenant_plist_classes() forKey:@"navigation"]), classes, nil)];
     _buttonAppearance = [coder decodeObjectOfClass:[UIBarButtonItemAppearance class] forKey:@"button"] ?: _buttonAppearance;
     _doneButtonAppearance = [coder decodeObjectOfClass:[UIBarButtonItemAppearance class] forKey:@"done"] ?: _doneButtonAppearance;
     _backButtonAppearance = [coder decodeObjectOfClass:[UIBarButtonItemAppearance class] forKey:@"back"] ?: _backButtonAppearance;
-    [_backButtonAppearance charon_becomeBackButtonBasedOn:_buttonAppearance];
-    [self charon_adoptChildren];
+    [_backButtonAppearance revenant_becomeBackButtonBasedOn:_buttonAppearance];
+    [self revenant_adoptChildren];
 }
 
-- (NSDictionary *)charon_titleCustom
+- (NSDictionary *)revenant_titleCustom
 {
     return _custom;
 }
 
 - (NSDictionary *)titleTextAttributes
 {
-    return charon_attributes_merge(@{NSForegroundColorAttributeName: charon_label_colour(), NSFontAttributeName: charon_font(17, UIFontWeightSemibold)}, _custom[CharonTitle]);
+    return revenant_attributes_merge(@{NSForegroundColorAttributeName: revenant_label_colour(), NSFontAttributeName: revenant_font(17, UIFontWeightSemibold)}, _custom[RevenantTitle]);
 }
 
 - (void)setTitleTextAttributes:(NSDictionary *)titleTextAttributes
 {
     if (titleTextAttributes)
-        _custom[CharonTitle] = [titleTextAttributes copy];
+        _custom[RevenantTitle] = [titleTextAttributes copy];
     else
-        [_custom removeObjectForKey:CharonTitle];
-    [self charon_notify];
+        [_custom removeObjectForKey:RevenantTitle];
+    [self revenant_notify];
 }
 
 - (NSDictionary *)largeTitleTextAttributes
 {
-    return charon_attributes_merge(@{NSForegroundColorAttributeName: charon_label_colour(), NSFontAttributeName: charon_font(34, UIFontWeightBold)}, _custom[CharonLargeTitle]);
+    return revenant_attributes_merge(@{NSForegroundColorAttributeName: revenant_label_colour(), NSFontAttributeName: revenant_font(34, UIFontWeightBold)}, _custom[RevenantLargeTitle]);
 }
 
 - (void)setLargeTitleTextAttributes:(NSDictionary *)largeTitleTextAttributes
 {
     if (largeTitleTextAttributes)
-        _custom[CharonLargeTitle] = [largeTitleTextAttributes copy];
+        _custom[RevenantLargeTitle] = [largeTitleTextAttributes copy];
     else
-        [_custom removeObjectForKey:CharonLargeTitle];
-    [self charon_notify];
+        [_custom removeObjectForKey:RevenantLargeTitle];
+    [self revenant_notify];
 }
 
 - (UIOffset)titlePositionAdjustment
 {
-    return charon_offset_unpack(_custom[CharonTitleOffset]);
+    return revenant_offset_unpack(_custom[RevenantTitleOffset]);
 }
 
 - (void)setTitlePositionAdjustment:(UIOffset)titlePositionAdjustment
 {
     if (UIOffsetEqualToOffset(titlePositionAdjustment, UIOffsetZero))
-        [_custom removeObjectForKey:CharonTitleOffset];
+        [_custom removeObjectForKey:RevenantTitleOffset];
     else
-        _custom[CharonTitleOffset] = charon_offset_pack(titlePositionAdjustment);
-    [self charon_notify];
+        _custom[RevenantTitleOffset] = revenant_offset_pack(titlePositionAdjustment);
+    [self revenant_notify];
 }
 
 - (UIBarButtonItemAppearance *)buttonAppearance
@@ -123,11 +123,11 @@ static void charon_require_appearance(id appearance)
 
 - (void)setButtonAppearance:(UIBarButtonItemAppearance *)buttonAppearance
 {
-    charon_require_appearance(buttonAppearance);
+    revenant_require_appearance(buttonAppearance);
     _buttonAppearance = [buttonAppearance copy];
-    [_backButtonAppearance charon_becomeBackButtonBasedOn:_buttonAppearance];
-    [self charon_adoptChildren];
-    [self charon_notify];
+    [_backButtonAppearance revenant_becomeBackButtonBasedOn:_buttonAppearance];
+    [self revenant_adoptChildren];
+    [self revenant_notify];
 }
 
 - (UIBarButtonItemAppearance *)doneButtonAppearance
@@ -137,10 +137,10 @@ static void charon_require_appearance(id appearance)
 
 - (void)setDoneButtonAppearance:(UIBarButtonItemAppearance *)doneButtonAppearance
 {
-    charon_require_appearance(doneButtonAppearance);
+    revenant_require_appearance(doneButtonAppearance);
     _doneButtonAppearance = [doneButtonAppearance copy];
-    [self charon_adoptChildren];
-    [self charon_notify];
+    [self revenant_adoptChildren];
+    [self revenant_notify];
 }
 
 - (UIBarButtonItemAppearance *)backButtonAppearance
@@ -150,50 +150,50 @@ static void charon_require_appearance(id appearance)
 
 - (void)setBackButtonAppearance:(UIBarButtonItemAppearance *)backButtonAppearance
 {
-    charon_require_appearance(backButtonAppearance);
-    UIImage *image = [_backButtonAppearance charon_backIndicator], *mask = [_backButtonAppearance charon_backMask];
+    revenant_require_appearance(backButtonAppearance);
+    UIImage *image = [_backButtonAppearance revenant_backIndicator], *mask = [_backButtonAppearance revenant_backMask];
     _backButtonAppearance = [backButtonAppearance copy];
-    [_backButtonAppearance charon_setBackIndicator:image mask:mask];
-    [_backButtonAppearance charon_becomeBackButtonBasedOn:_buttonAppearance];
-    [self charon_adoptChildren];
-    [self charon_notify];
+    [_backButtonAppearance revenant_setBackIndicator:image mask:mask];
+    [_backButtonAppearance revenant_becomeBackButtonBasedOn:_buttonAppearance];
+    [self revenant_adoptChildren];
+    [self revenant_notify];
 }
 
 - (UIImage *)backIndicatorImage
 {
-    return [_backButtonAppearance charon_backIndicator] && [_backButtonAppearance charon_backMask] ? [_backButtonAppearance charon_backIndicator] : nil;
+    return [_backButtonAppearance revenant_backIndicator] && [_backButtonAppearance revenant_backMask] ? [_backButtonAppearance revenant_backIndicator] : nil;
 }
 
 - (UIImage *)backIndicatorTransitionMaskImage
 {
-    return [_backButtonAppearance charon_backIndicator] && [_backButtonAppearance charon_backMask] ? [_backButtonAppearance charon_backMask] : nil;
+    return [_backButtonAppearance revenant_backIndicator] && [_backButtonAppearance revenant_backMask] ? [_backButtonAppearance revenant_backMask] : nil;
 }
 
 - (void)setBackIndicatorImage:(UIImage *)backIndicatorImage transitionMaskImage:(UIImage *)backIndicatorTransitionMaskImage
 {
-    [_backButtonAppearance charon_setBackIndicator:backIndicatorImage mask:backIndicatorTransitionMaskImage];
+    [_backButtonAppearance revenant_setBackIndicator:backIndicatorImage mask:backIndicatorTransitionMaskImage];
 }
 
 - (void)configureWithDefaultBackground
 {
-    [self charon_configureTransparent];
+    [self revenant_configureTransparent];
 }
 
-- (NSArray *)charon_lines
+- (NSArray *)revenant_lines
 {
-    NSMutableString *title = [NSMutableString stringWithFormat:@"Title(%p): titleTextAttributes=%@", _custom, charon_attributes_text(_custom[CharonTitle] ? self.titleTextAttributes : nil)];
-    if (_custom[CharonTitleOffset])
-        [title appendFormat:@" titlePositionAdjustment=%@", charon_offset_text(_custom[CharonTitleOffset])];
-    [title appendFormat:@" largeTitleTextAttributes=%@", charon_attributes_text(_custom[CharonLargeTitle] ? self.largeTitleTextAttributes : nil)];
-    return [[super charon_lines] arrayByAddingObjectsFromArray:@[title,
-        [NSString stringWithFormat:@"Plain BarButtonItems(%p): %@", _buttonAppearance, [_buttonAppearance charon_text]],
-        [NSString stringWithFormat:@"Prominent BarButtonItems(%p): %@", _doneButtonAppearance, [_doneButtonAppearance charon_text]],
-        [NSString stringWithFormat:@"Back Buttons(%p): %@", _backButtonAppearance, [_backButtonAppearance charon_text]]]];
+    NSMutableString *title = [NSMutableString stringWithFormat:@"Title(%p): titleTextAttributes=%@", _custom, revenant_attributes_text(_custom[RevenantTitle] ? self.titleTextAttributes : nil)];
+    if (_custom[RevenantTitleOffset])
+        [title appendFormat:@" titlePositionAdjustment=%@", revenant_offset_text(_custom[RevenantTitleOffset])];
+    [title appendFormat:@" largeTitleTextAttributes=%@", revenant_attributes_text(_custom[RevenantLargeTitle] ? self.largeTitleTextAttributes : nil)];
+    return [[super revenant_lines] arrayByAddingObjectsFromArray:@[title,
+        [NSString stringWithFormat:@"Plain BarButtonItems(%p): %@", _buttonAppearance, [_buttonAppearance revenant_text]],
+        [NSString stringWithFormat:@"Prominent BarButtonItems(%p): %@", _doneButtonAppearance, [_doneButtonAppearance revenant_text]],
+        [NSString stringWithFormat:@"Back Buttons(%p): %@", _backButtonAppearance, [_backButtonAppearance revenant_text]]]];
 }
 
-- (NSArray *)charon_signature
+- (NSArray *)revenant_signature
 {
-    return [[super charon_signature] arrayByAddingObjectsFromArray:@[_custom, [_buttonAppearance charon_signature], [_doneButtonAppearance charon_signature], [_backButtonAppearance charon_signature]]];
+    return [[super revenant_signature] arrayByAddingObjectsFromArray:@[_custom, [_buttonAppearance revenant_signature], [_doneButtonAppearance revenant_signature], [_backButtonAppearance revenant_signature]]];
 }
 
 @end

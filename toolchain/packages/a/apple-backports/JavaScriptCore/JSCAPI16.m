@@ -1,5 +1,5 @@
 #import "JSInternal.h"
-#import "../CharonSayOnce.h"
+#import "../RevenantSayOnce.h"
 
 
 static JSStringRef PropertyName(JSContextRef context, JSValueRef key, JSValueRef *exception)

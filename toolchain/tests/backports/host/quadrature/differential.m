@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-double charon_host_quadrature_integrate(const quadrature_integrate_function *f, double a, double b,
+double revenant_host_quadrature_integrate(const quadrature_integrate_function *f, double a, double b,
                                         const quadrature_integrate_options *options, quadrature_status *status,
                                         double *abs_error, size_t workspace_size, void *workspace);
 
@@ -114,7 +114,7 @@ static void one(const char *name, int integrand, double a, double b, quadrature_
     quadrature_status myStatus = QUADRATURE_SUCCESS, theirStatus = QUADRATURE_SUCCESS;
     double myError = -1.0, theirError = -1.0;
     points = batches = batch_count = 0;
-    double mine = charon_host_quadrature_integrate(&theFunction, a, b, &o, &myStatus, &myError, workspace_size,
+    double mine = revenant_host_quadrature_integrate(&theFunction, a, b, &o, &myStatus, &myError, workspace_size,
                                                   mine_workspace);
     long myPoints = points;
     long myBatches = batches;
@@ -246,7 +246,7 @@ int main(void)
         which = SQUARE;
         const quadrature_integrate_function *noFunction = NULL;
         const quadrature_integrate_options *noOptions = NULL;
-        double mine = charon_host_quadrature_integrate(noFunction, 0.0, 1.0, &o, &myStatus, &myError, 0, NULL);
+        double mine = revenant_host_quadrature_integrate(noFunction, 0.0, 1.0, &o, &myStatus, &myError, 0, NULL);
         double theirs = quadrature_integrate(noFunction, 0.0, 1.0, &o, &theirStatus, &theirError, 0, NULL);
         snprintf(detail, sizeof detail, "port %.17g status %d error %.3g | host %.17g status %d error %.3g", mine,
                  (int)myStatus, myError, theirs, (int)theirStatus, theirError);
@@ -258,7 +258,7 @@ int main(void)
         o.rel_tolerance = 1e-10;
         myStatus = theirStatus = QUADRATURE_SUCCESS;
         myError = theirError = -7.0;
-        mine = charon_host_quadrature_integrate(&theFunction, 0.0, 1.0, noOptions, &myStatus, &myError, 0, NULL);
+        mine = revenant_host_quadrature_integrate(&theFunction, 0.0, 1.0, noOptions, &myStatus, &myError, 0, NULL);
         theirs = quadrature_integrate(&theFunction, 0.0, 1.0, noOptions, &theirStatus, &theirError, 0, NULL);
         snprintf(detail, sizeof detail, "port %.17g status %d error %.3g | host %.17g status %d error %.3g", mine,
                  (int)myStatus, myError, theirs, (int)theirStatus, theirError);

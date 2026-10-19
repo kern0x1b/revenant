@@ -20,7 +20,7 @@ int main(int argc, char **argv)
             return 2;
         }
         Class system = [AVCaptureResolvedPhotoSettings class];
-        Class ours = NSClassFromString(@"CharonHostAVCaptureResolvedPhotoSettings");
+        Class ours = NSClassFromString(@"RevenantHostAVCaptureResolvedPhotoSettings");
         check(system != Nil && ours != Nil && system != ours, @"the host's class and the port's are both here, apart");
         NSString *list = [NSString stringWithContentsOfFile:@(argv[1]) encoding:NSUTF8StringEncoding error:NULL];
         NSMutableArray *declared = [NSMutableArray array];
@@ -65,7 +65,7 @@ int main(int argc, char **argv)
             NSString *bare = [ivar substringFromIndex:1];
             NSString *getter = [@"is" stringByAppendingString:[[bare substringToIndex:1].uppercaseString stringByAppendingString:[bare substringFromIndex:1]]];
             BOOL synthesized = [declared containsObject:bare] || [declared containsObject:getter];
-            BOOL own = [ivar hasPrefix:@"_charon"] || [ivar isEqualToString:@"_internal"];
+            BOOL own = [ivar hasPrefix:@"_revenant"] || [ivar isEqualToString:@"_internal"];
             if (!synthesized && !own) {
                 printf("note the port's ivar %s is synthesized for a property the SDK header does not declare\n", ivar.UTF8String);
                 continue;

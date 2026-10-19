@@ -192,7 +192,7 @@ int main(void)
             CHECK(why.userInfo[NSDebugDescriptionErrorKey] != nil, "the refusal says what was wrong");
         }
 
-        NSString *path = @"/tmp/charon-json1.json";
+        NSString *path = @"/tmp/revenant-json1.json";
         [[NSFileManager defaultManager] removeItemAtPath:path error:NULL];
         NSOutputStream *out = [NSOutputStream outputStreamToFileAtPath:path append:NO];
         [out open];
@@ -208,13 +208,13 @@ int main(void)
         CHECK_EQUAL([NSJSONSerialization JSONObjectWithStream:in options:0 error:&readError], object, "a stream reads back");
         [in close];
         CHECK(readError == nil, "reading the stream has no error");
-        NSInputStream *missing = [NSInputStream inputStreamWithFileAtPath:@"/tmp/charon-json1-absent.json"];
+        NSInputStream *missing = [NSInputStream inputStreamWithFileAtPath:@"/tmp/revenant-json1-absent.json"];
         [missing open];
         NSError *missingError = nil;
         CHECK([NSJSONSerialization JSONObjectWithStream:missing options:0 error:&missingError] == nil, "a stream of nothing is refused");
         [missing close];
         [[NSFileManager defaultManager] removeItemAtPath:path error:NULL];
     }
-    printf("checks=%d failures=%d\n", charon_checks, charon_failures);
-    return charon_failures;
+    printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
+    return revenant_failures;
 }

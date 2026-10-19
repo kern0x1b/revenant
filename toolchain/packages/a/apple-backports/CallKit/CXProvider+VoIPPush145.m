@@ -1,6 +1,6 @@
 #import <CallKit/CallKit.h>
 
-@implementation CXProvider (CharonVoIPPush)
+@implementation CXProvider (RevenantVoIPPush)
 
 + (void)reportNewIncomingVoIPPushPayload:(NSDictionary *)dictionaryPayload completion:(void (^)(NSError *error))completion
 {

@@ -5,13 +5,13 @@
 #include <unistd.h>
 #import "check.h"
 
-typedef id (*CharonSend0)(id, SEL);
-typedef id (*CharonSend1)(id, SEL, id);
-typedef id (*CharonSend2)(id, SEL, id, id);
+typedef id (*RevenantSend0)(id, SEL);
+typedef id (*RevenantSend1)(id, SEL, id);
+typedef id (*RevenantSend2)(id, SEL, id, id);
 
 void host_attach_prefixed(const char *prefix);
 
-static void charon_on_alarm(int number)
+static void revenant_on_alarm(int number)
 {
     fprintf(stderr, "\nFAIL the test ran past its thirty second bound\n");
     _exit(1);
@@ -26,23 +26,23 @@ static Class systemClass;
 
 static id system_term(const char *factory)
 {
-    return ((CharonSend0)objc_msgSend)(systemClass, NSSelectorFromString([NSString stringWithFormat:@"%s", factory]));
+    return ((RevenantSend0)objc_msgSend)(systemClass, NSSelectorFromString([NSString stringWithFormat:@"%s", factory]));
 }
 
 static id our_term(const char *factory)
 {
-    return ((CharonSend0)objc_msgSend)(ourClass, NSSelectorFromString([NSString stringWithFormat:@"%s", factory]));
+    return ((RevenantSend0)objc_msgSend)(ourClass, NSSelectorFromString([NSString stringWithFormat:@"%s", factory]));
 }
 
 static id our_localized(NSString *language, id pronouns)
 {
-    return ((CharonSend2)objc_msgSend)(ourClass, NSSelectorFromString(@"localizedForLanguageIdentifier:withPronouns:"),
+    return ((RevenantSend2)objc_msgSend)(ourClass, NSSelectorFromString(@"localizedForLanguageIdentifier:withPronouns:"),
                                         language, pronouns);
 }
 
 static id system_localized(NSString *language, id pronouns)
 {
-    return ((CharonSend2)objc_msgSend)(systemClass, NSSelectorFromString(@"localizedForLanguageIdentifier:withPronouns:"),
+    return ((RevenantSend2)objc_msgSend)(systemClass, NSSelectorFromString(@"localizedForLanguageIdentifier:withPronouns:"),
                                         language, pronouns);
 }
 
@@ -51,13 +51,13 @@ static id our_term_with_language(NSString *language)
     SEL factory = NSSelectorFromString(@"termWithLanguageIdentifier:");
     if (![ourClass respondsToSelector:factory])
         return nil;
-    return ((CharonSend1)objc_msgSend)(ourClass, factory, language);
+    return ((RevenantSend1)objc_msgSend)(ourClass, factory, language);
 }
 
 static id system_term_with_language(NSString *language)
 {
     SEL factory = NSSelectorFromString(@"localizedForLanguageIdentifier:withPronouns:");
-    return ((CharonSend2)objc_msgSend)(systemClass, factory, language, (id)nil);
+    return ((RevenantSend2)objc_msgSend)(systemClass, factory, language, (id)nil);
 }
 
 static void expect(NSString *label, BOOL system, BOOL ours)
@@ -74,11 +74,11 @@ static void expect(NSString *label, BOOL system, BOOL ours)
 int main(void)
 {
     @autoreleasepool {
-        signal(SIGALRM, charon_on_alarm);
+        signal(SIGALRM, revenant_on_alarm);
         alarm(30);
-        ourClass = NSClassFromString(@"CharonHostNSTermOfAddress");
+        ourClass = NSClassFromString(@"RevenantHostNSTermOfAddress");
         systemClass = NSClassFromString(@"NSTermOfAddress");
-        charon_check(ourClass != Nil, "the port defines NSTermOfAddress under its own name", @"no such class");
+        revenant_check(ourClass != Nil, "the port defines NSTermOfAddress under its own name", @"no such class");
         if (!ourClass)
             return 1;
 
@@ -98,15 +98,15 @@ int main(void)
         id theirCurrentAgain = system_term("currentUser");
         expect(@"the current user's term equals itself",
                [theirCurrent isEqual:theirCurrentAgain],
-               [ourCurrent isEqual:((CharonSend0)objc_msgSend)(ourClass, NSSelectorFromString(@"currentUser"))]);
+               [ourCurrent isEqual:((RevenantSend0)objc_msgSend)(ourClass, NSSelectorFromString(@"currentUser"))]);
 
         for (NSString *factory in @[@"neutral", @"feminine", @"masculine", @"currentUser"]) {
-            id theirs = ((CharonSend0)objc_msgSend)(systemClass, NSSelectorFromString(factory));
-            id ours = ((CharonSend0)objc_msgSend)(ourClass, NSSelectorFromString(factory));
-            id theirLanguage = ((CharonSend0)objc_msgSend)(theirs, @selector(languageIdentifier));
-            id ourLanguage = ((CharonSend0)objc_msgSend)(ours, @selector(languageIdentifier));
-            id theirPronouns = ((CharonSend0)objc_msgSend)(theirs, @selector(pronouns));
-            id ourPronouns = ((CharonSend0)objc_msgSend)(ours, @selector(pronouns));
+            id theirs = ((RevenantSend0)objc_msgSend)(systemClass, NSSelectorFromString(factory));
+            id ours = ((RevenantSend0)objc_msgSend)(ourClass, NSSelectorFromString(factory));
+            id theirLanguage = ((RevenantSend0)objc_msgSend)(theirs, @selector(languageIdentifier));
+            id ourLanguage = ((RevenantSend0)objc_msgSend)(ours, @selector(languageIdentifier));
+            id theirPronouns = ((RevenantSend0)objc_msgSend)(theirs, @selector(pronouns));
+            id ourPronouns = ((RevenantSend0)objc_msgSend)(ours, @selector(pronouns));
             expect([@"the language of " stringByAppendingString:factory],
                    [theirLanguage length] == 0, [ourLanguage length] == 0);
             expect([@"the pronouns of " stringByAppendingString:factory],
@@ -118,10 +118,10 @@ int main(void)
                 id pronouns = variant ? @[] : nil;
                 id theirs = system_localized(language, pronouns);
                 id ours = our_localized(language, (id)pronouns);
-                id ourLanguage = ((CharonSend0)objc_msgSend)(ours, @selector(languageIdentifier));
+                id ourLanguage = ((RevenantSend0)objc_msgSend)(ours, @selector(languageIdentifier));
                 expect([NSString stringWithFormat:@"a term for %@ keeps its language (%@)", language,
                         variant ? @"an empty array" : @"nil"],
-                       [((CharonSend0)objc_msgSend)(theirs, @selector(languageIdentifier)) isEqualToString:language],
+                       [((RevenantSend0)objc_msgSend)(theirs, @selector(languageIdentifier)) isEqualToString:language],
                        [ourLanguage isEqualToString:language]);
                 expect([NSString stringWithFormat:@"a term for %@ equals another like it (%@)", language,
                         variant ? @"an empty array" : @"nil"],
@@ -146,7 +146,7 @@ int main(void)
 
         id ourEnglish = our_term_with_language(@"en"), ourGerman = our_term_with_language(@"de");
         id theirEnglish = system_term_with_language(@"en"), theirGerman = system_term_with_language(@"de");
-        charon_check(ourEnglish != nil, "the port has the +termWithLanguageIdentifier: fixture",
+        revenant_check(ourEnglish != nil, "the port has the +termWithLanguageIdentifier: fixture",
                      @"the fixture is not there, so neither comparison below is exercised");
         if (ourEnglish) {
             id ourEnglishAgain = our_term_with_language(@"en");

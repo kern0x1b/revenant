@@ -1,43 +1,43 @@
-#import "CharonSafari.h"
+#import "RevenantSafari.h"
 
-extern SFSafariViewControllerPrewarmingToken *charon_prewarmingToken(void);
+extern SFSafariViewControllerPrewarmingToken *revenant_prewarmingToken(void);
 
-static NSString *const CharonMisuse = @"Misuse of SFSafariViewController interface. Use -initWithURL: or -initWithURL:configuration: instead.";
-static NSString *const CharonScheme = @"The specified URL has an unsupported scheme. Only HTTP and HTTPS URLs are supported.";
+static NSString *const RevenantMisuse = @"Misuse of SFSafariViewController interface. Use -initWithURL: or -initWithURL:configuration: instead.";
+static NSString *const RevenantScheme = @"The specified URL has an unsupported scheme. Only HTTP and HTTPS URLs are supported.";
 
 @implementation SFSafariViewController {
     NSURL *_initialURL;
     SFSafariViewControllerConfiguration *_configuration;
-    CharonSafariPage *_page;
+    RevenantSafariPage *_page;
 }
 
 + (SFSafariViewControllerPrewarmingToken *)prewarmConnectionsToURLs:(NSArray<NSURL *> *)URLs
 {
-    return charon_prewarmingToken();
+    return revenant_prewarmingToken();
 }
 
-+ (void)charon_requireWebURL:(NSURL *)URL
++ (void)revenant_requireWebURL:(NSURL *)URL
 {
     NSString *scheme = URL.scheme.lowercaseString;
     if (![scheme isEqualToString:@"http"] && ![scheme isEqualToString:@"https"])
-        [NSException raise:NSInvalidArgumentException format:@"%@", CharonScheme];
+        [NSException raise:NSInvalidArgumentException format:@"%@", RevenantScheme];
 }
 
 - (instancetype)init
 {
-    [NSException raise:NSGenericException format:@"%@", CharonMisuse];
+    [NSException raise:NSGenericException format:@"%@", RevenantMisuse];
     return nil;
 }
 
 - (instancetype)initWithCoder:(NSCoder *)coder
 {
-    [NSException raise:NSGenericException format:@"%@", CharonMisuse];
+    [NSException raise:NSGenericException format:@"%@", RevenantMisuse];
     return nil;
 }
 
 - (instancetype)initWithNibName:(NSString *)nibName bundle:(NSBundle *)bundle
 {
-    [NSException raise:NSGenericException format:@"%@", CharonMisuse];
+    [NSException raise:NSGenericException format:@"%@", RevenantMisuse];
     return nil;
 }
 
@@ -55,12 +55,12 @@ static NSString *const CharonScheme = @"The specified URL has an unsupported sch
 
 - (instancetype)initWithURL:(NSURL *)URL configuration:(SFSafariViewControllerConfiguration *)configuration
 {
-    [SFSafariViewController charon_requireWebURL:URL];
+    [SFSafariViewController revenant_requireWebURL:URL];
     self = [super initWithNibName:nil bundle:nil];
     if (self) {
         _initialURL = [URL copy];
         _configuration = [configuration copy];
-        _page = [[CharonSafariPage alloc] initWithURL:URL];
+        _page = [[RevenantSafariPage alloc] initWithURL:URL];
         _page.owner = self;
         self.modalPresentationStyle = UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad ? UIModalPresentationFormSheet : UIModalPresentationFullScreen;
     }

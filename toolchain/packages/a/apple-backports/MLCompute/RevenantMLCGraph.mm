@@ -1,5 +1,5 @@
-#import "CharonMLCompute.h"
-#import "CharonMLCGraph.h"
+#import "RevenantMLCompute.h"
+#import "RevenantMLCGraph.h"
 
 #include <ggml/ggml.h>
 #include <ggml/ggml-cpu.h>
@@ -9,9 +9,9 @@
 
 #pragma clang diagnostic ignored "-Wnullability-completeness"
 
-#define CHARON_MLC_MAX_FORMULAS 512
+#define REVENANT_MLC_MAX_FORMULAS 512
 
-struct CharonMLCFormula {
+struct RevenantMLCFormula {
     int activationType;
     float a;
     float b;
@@ -21,13 +21,13 @@ struct CharonMLCFormula {
 typedef struct {
     struct ggml_context *context;
     struct ggml_cgraph *graph;
-    struct CharonMLCFormula *formulas;
+    struct RevenantMLCFormula *formulas;
     int formulasUsed;
     size_t bytes;
     int nodes;
-} CharonMLCEngine;
+} RevenantMLCEngine;
 
-static void CharonMLCEngineOpen(CharonMLCEngine *engine, int nodes)
+static void RevenantMLCEngineOpen(RevenantMLCEngine *engine, int nodes)
 {
     engine->nodes = nodes;
     engine->bytes = (size_t)(16 * 1024 * 1024) + (size_t)nodes * 4096;
@@ -38,11 +38,11 @@ static void CharonMLCEngineOpen(CharonMLCEngine *engine, int nodes)
     };
     engine->context = ggml_init(params);
     engine->graph = engine->context ? ggml_new_graph_custom(engine->context, (size_t)nodes * 8, false) : NULL;
-    engine->formulas = (CharonMLCFormula *)calloc(CHARON_MLC_MAX_FORMULAS, sizeof(CharonMLCFormula));
+    engine->formulas = (RevenantMLCFormula *)calloc(REVENANT_MLC_MAX_FORMULAS, sizeof(RevenantMLCFormula));
     engine->formulasUsed = 0;
 }
 
-static void CharonMLCEngineClose(CharonMLCEngine *engine)
+static void RevenantMLCEngineClose(RevenantMLCEngine *engine)
 {
     if (engine->context) {
         ggml_free(engine->context);
@@ -54,7 +54,7 @@ static void CharonMLCEngineClose(CharonMLCEngine *engine)
     engine->formulasUsed = 0;
 }
 
-static float CharonMLCActivate(const CharonMLCFormula *formula, float x)
+static float RevenantMLCActivate(const RevenantMLCFormula *formula, float x)
 {
     float a = formula->a, b = formula->b;
     switch ((MLCActivationType)formula->activationType) {
@@ -106,19 +106,19 @@ static float CharonMLCActivate(const CharonMLCFormula *formula, float x)
     }
 }
 
-static void CharonMLCActivationCallback(struct ggml_tensor *out, const struct ggml_tensor *in, int thread, int threads, void *userdata)
+static void RevenantMLCActivationCallback(struct ggml_tensor *out, const struct ggml_tensor *in, int thread, int threads, void *userdata)
 {
-    const CharonMLCFormula *formula = (const CharonMLCFormula *)userdata;
+    const RevenantMLCFormula *formula = (const RevenantMLCFormula *)userdata;
     const float *from = (const float *)in->data;
     float *to = (float *)out->data;
     (void)thread;
     (void)threads;
     for (int64_t index = 0; index < (int64_t)ggml_nelements(in); index++) {
-        to[index] = CharonMLCActivate(formula, from[index]);
+        to[index] = RevenantMLCActivate(formula, from[index]);
     }
 }
 
-static struct ggml_tensor *CharonMLCActivationOn(CharonMLCEngine *engine, struct ggml_tensor *input, MLCActivationDescriptor *descriptor)
+static struct ggml_tensor *RevenantMLCActivationOn(RevenantMLCEngine *engine, struct ggml_tensor *input, MLCActivationDescriptor *descriptor)
 {
     struct ggml_context *context = engine->context;
     switch (descriptor.activationType) {
@@ -137,18 +137,18 @@ static struct ggml_tensor *CharonMLCActivationOn(CharonMLCEngine *engine, struct
         default:
             break;
     }
-    if (!engine->formulas || engine->formulasUsed >= CHARON_MLC_MAX_FORMULAS) {
+    if (!engine->formulas || engine->formulasUsed >= REVENANT_MLC_MAX_FORMULAS) {
         return NULL;
     }
-    CharonMLCFormula *formula = &engine->formulas[engine->formulasUsed++];
+    RevenantMLCFormula *formula = &engine->formulas[engine->formulasUsed++];
     formula->activationType = (int)descriptor.activationType;
     formula->a = descriptor.a;
     formula->b = descriptor.b;
     formula->c = descriptor.c;
-    return ggml_map_custom1(context, input, CharonMLCActivationCallback, 1, formula);
+    return ggml_map_custom1(context, input, RevenantMLCActivationCallback, 1, formula);
 }
 
-static struct ggml_tensor *CharonMLCImport(struct ggml_context *context, MLCTensor *tensor)
+static struct ggml_tensor *RevenantMLCImport(struct ggml_context *context, MLCTensor *tensor)
 {
     if (!tensor || !tensor.descriptor || !tensor.data) {
         return NULL;
@@ -169,18 +169,18 @@ static struct ggml_tensor *CharonMLCImport(struct ggml_context *context, MLCTens
     return imported;
 }
 
-BOOL CharonMLCElementwise(MLCLayer *layer, MLCTensor *input, MLCTensor *output)
+BOOL RevenantMLCElementwise(MLCLayer *layer, MLCTensor *input, MLCTensor *output)
 {
     if (![layer isKindOfClass:[MLCActivationLayer class]] || !input || !output || !output.descriptor) {
         return NO;
     }
-    CharonMLCEngine engine;
+    RevenantMLCEngine engine;
     memset(&engine, 0, sizeof(engine));
-    CharonMLCEngineOpen(&engine, 64);
+    RevenantMLCEngineOpen(&engine, 64);
     BOOL done = NO;
     if (engine.context) {
-        struct ggml_tensor *from = CharonMLCImport(engine.context, input);
-        struct ggml_tensor *result = from ? CharonMLCActivationOn(&engine, from, ((MLCActivationLayer *)layer).descriptor) : NULL;
+        struct ggml_tensor *from = RevenantMLCImport(engine.context, input);
+        struct ggml_tensor *result = from ? RevenantMLCActivationOn(&engine, from, ((MLCActivationLayer *)layer).descriptor) : NULL;
         if (result) {
             ggml_build_forward_expand(engine.graph, result);
             if (ggml_graph_compute_with_ctx(engine.context, engine.graph, 1) == GGML_STATUS_SUCCESS) {
@@ -193,6 +193,6 @@ BOOL CharonMLCElementwise(MLCLayer *layer, MLCTensor *input, MLCTensor *output)
             }
         }
     }
-    CharonMLCEngineClose(&engine);
+    RevenantMLCEngineClose(&engine);
     return done;
 }

@@ -44,13 +44,13 @@ static NSString *describe_id(id value)
     return [value description];
 }
 
-@interface CharonUndoTarget : NSObject
+@interface RevenantUndoTarget : NSObject
 @property (nonatomic, assign) NSUInteger fired;
 @property (nonatomic, weak) NSUndoManager *manager;
 @property (nonatomic, copy) NSString *inverseName;
 @end
 
-@implementation CharonUndoTarget
+@implementation RevenantUndoTarget
 @synthesize fired = _fired;
 @synthesize manager = _manager;
 @synthesize inverseName = _inverseName;
@@ -121,7 +121,7 @@ int main(void)
     SEL nameAction = [undo respondsToSelector:NSSelectorFromString(@"setUndoActionName:")]
                    ? NSSelectorFromString(@"setUndoActionName:") : NSSelectorFromString(@"setActionName:");
 
-    CharonUndoTarget *target = [CharonUndoTarget new];
+    RevenantUndoTarget *target = [RevenantUndoTarget new];
     target.manager = undo;
     target.inverseName = @"inverse-of-second";
     [undo beginUndoGrouping];
@@ -166,7 +166,7 @@ int main(void)
     printf("after-redo.fired\t%lu\n", (unsigned long)target.fired);
 
     printf("before-new-registration.redoCount\t%llu\n", send_count(undo, redoCount));
-    CharonUndoTarget *later = [CharonUndoTarget new];
+    RevenantUndoTarget *later = [RevenantUndoTarget new];
     later.manager = nil;
     [undo beginUndoGrouping];
     [undo registerUndoWithTarget:later selector:@selector(note:) object:later];
@@ -176,7 +176,7 @@ int main(void)
 
     NSUndoManager *plain = [NSUndoManager new];
     [plain setGroupsByEvent:NO];
-    CharonUndoTarget *plainTarget = [CharonUndoTarget new];
+    RevenantUndoTarget *plainTarget = [RevenantUndoTarget new];
     plainTarget.manager = nil;
     [plain beginUndoGrouping];
     [plain registerUndoWithTarget:plainTarget selector:@selector(note:) object:plainTarget];

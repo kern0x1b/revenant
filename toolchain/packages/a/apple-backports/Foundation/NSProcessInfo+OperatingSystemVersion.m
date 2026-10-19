@@ -1,6 +1,6 @@
 #import <Foundation/Foundation.h>
 
-static NSOperatingSystemVersion charon_parse_version(NSString *string)
+static NSOperatingSystemVersion revenant_parse_version(NSString *string)
 {
     NSOperatingSystemVersion version = {0, 0, 0};
     NSArray *parts = [string componentsSeparatedByString:@"."];
@@ -13,7 +13,7 @@ static NSOperatingSystemVersion charon_parse_version(NSString *string)
     return version;
 }
 
-static NSOperatingSystemVersion charon_system_version(void)
+static NSOperatingSystemVersion revenant_system_version(void)
 {
     static NSOperatingSystemVersion version;
     static dispatch_once_t once;
@@ -21,21 +21,21 @@ static NSOperatingSystemVersion charon_system_version(void)
         NSDictionary *system = [NSDictionary dictionaryWithContentsOfFile:@"/System/Library/CoreServices/SystemVersion.plist"];
         id product = system[@"ProductVersion"];
         if ([product isKindOfClass:[NSString class]])
-            version = charon_parse_version(product);
+            version = revenant_parse_version(product);
     });
     return version;
 }
 
-@implementation NSProcessInfo (CharonOperatingSystemVersion)
+@implementation NSProcessInfo (RevenantOperatingSystemVersion)
 
 - (NSOperatingSystemVersion)operatingSystemVersion
 {
-    return charon_system_version();
+    return revenant_system_version();
 }
 
 - (BOOL)isOperatingSystemAtLeastVersion:(NSOperatingSystemVersion)version
 {
-    NSOperatingSystemVersion current = charon_system_version();
+    NSOperatingSystemVersion current = revenant_system_version();
     if (current.majorVersion != version.majorVersion)
         return current.majorVersion > version.majorVersion;
     if (current.minorVersion != version.minorVersion)

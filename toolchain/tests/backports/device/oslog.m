@@ -101,16 +101,16 @@ int main(void)
         os_log(OS_LOG_DEFAULT, "a message of the default log");
         os_log(NULL, "a message of no log");
 
-        NSUInteger expected = sizeof charon_oslog_expected / sizeof charon_oslog_expected[0];
+        NSUInteger expected = sizeof revenant_oslog_expected / sizeof revenant_oslog_expected[0];
         NSDictionary *found = messages_from_asl(15, expected + 3);
         NSUInteger matching = 0;
         for (NSUInteger row = 0; row < expected; row++) {
-            NSString *want = [NSString stringWithFormat:@"[c%d] %@", charon_oslog_expected[row].index, @(charon_oslog_expected[row].text)];
+            NSString *want = [NSString stringWithFormat:@"[c%d] %@", revenant_oslog_expected[row].index, @(revenant_oslog_expected[row].text)];
             NSString *got = nil;
             for (NSString *text in found)
                 if ([text isEqual:want])
                     got = text;
-            CHECK_EQUAL(got, want, ([[NSString stringWithFormat:@"case %d is written as the release's own formatter writes it", charon_oslog_expected[row].index] UTF8String]));
+            CHECK_EQUAL(got, want, ([[NSString stringWithFormat:@"case %d is written as the release's own formatter writes it", revenant_oslog_expected[row].index] UTF8String]));
             matching += got != nil;
         }
         CHECK(matching == expected, "every case of the battery arrived in the system log");
@@ -121,7 +121,7 @@ int main(void)
         CHECK(found[@"[one] info that is not written"] == nil && found[@"[one] debug that is not written"] == nil && found[@"a message of no log"] == nil,
               "what is not enabled is not written, and no log writes nothing");
 
-        printf("%d checks, %d failures\n", charon_checks, charon_failures);
-        return charon_failures;
+        printf("%d checks, %d failures\n", revenant_checks, revenant_failures);
+        return revenant_failures;
     }
 }

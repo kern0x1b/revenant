@@ -1,6 +1,6 @@
 #import <UIKit/UIKit.h>
 
-@implementation UICollectionViewCell (CharonDragState)
+@implementation UICollectionViewCell (RevenantDragState)
 
 - (void)dragStateDidChange:(UICollectionViewCellDragState)dragState
 {

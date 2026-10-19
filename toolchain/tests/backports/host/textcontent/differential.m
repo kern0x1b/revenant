@@ -3,33 +3,33 @@
 
 void host_attach_prefixed(const char *prefix);
 
-extern UITextContentType const CharonHostUITextContentTypeName;
-extern UITextContentType const CharonHostUITextContentTypeNamePrefix;
-extern UITextContentType const CharonHostUITextContentTypeGivenName;
-extern UITextContentType const CharonHostUITextContentTypeMiddleName;
-extern UITextContentType const CharonHostUITextContentTypeFamilyName;
-extern UITextContentType const CharonHostUITextContentTypeNameSuffix;
-extern UITextContentType const CharonHostUITextContentTypeNickname;
-extern UITextContentType const CharonHostUITextContentTypeJobTitle;
-extern UITextContentType const CharonHostUITextContentTypeOrganizationName;
-extern UITextContentType const CharonHostUITextContentTypeLocation;
-extern UITextContentType const CharonHostUITextContentTypeFullStreetAddress;
-extern UITextContentType const CharonHostUITextContentTypeStreetAddressLine1;
-extern UITextContentType const CharonHostUITextContentTypeStreetAddressLine2;
-extern UITextContentType const CharonHostUITextContentTypeAddressCity;
-extern UITextContentType const CharonHostUITextContentTypeAddressState;
-extern UITextContentType const CharonHostUITextContentTypeAddressCityAndState;
-extern UITextContentType const CharonHostUITextContentTypeSublocality;
-extern UITextContentType const CharonHostUITextContentTypeCountryName;
-extern UITextContentType const CharonHostUITextContentTypePostalCode;
-extern UITextContentType const CharonHostUITextContentTypeTelephoneNumber;
-extern UITextContentType const CharonHostUITextContentTypeEmailAddress;
-extern UITextContentType const CharonHostUITextContentTypeURL;
-extern UITextContentType const CharonHostUITextContentTypeCreditCardNumber;
-extern UITextContentType const CharonHostUITextContentTypeUsername;
-extern UITextContentType const CharonHostUITextContentTypePassword;
-extern UITextContentType const CharonHostUITextContentTypeNewPassword;
-extern UITextContentType const CharonHostUITextContentTypeOneTimeCode;
+extern UITextContentType const RevenantHostUITextContentTypeName;
+extern UITextContentType const RevenantHostUITextContentTypeNamePrefix;
+extern UITextContentType const RevenantHostUITextContentTypeGivenName;
+extern UITextContentType const RevenantHostUITextContentTypeMiddleName;
+extern UITextContentType const RevenantHostUITextContentTypeFamilyName;
+extern UITextContentType const RevenantHostUITextContentTypeNameSuffix;
+extern UITextContentType const RevenantHostUITextContentTypeNickname;
+extern UITextContentType const RevenantHostUITextContentTypeJobTitle;
+extern UITextContentType const RevenantHostUITextContentTypeOrganizationName;
+extern UITextContentType const RevenantHostUITextContentTypeLocation;
+extern UITextContentType const RevenantHostUITextContentTypeFullStreetAddress;
+extern UITextContentType const RevenantHostUITextContentTypeStreetAddressLine1;
+extern UITextContentType const RevenantHostUITextContentTypeStreetAddressLine2;
+extern UITextContentType const RevenantHostUITextContentTypeAddressCity;
+extern UITextContentType const RevenantHostUITextContentTypeAddressState;
+extern UITextContentType const RevenantHostUITextContentTypeAddressCityAndState;
+extern UITextContentType const RevenantHostUITextContentTypeSublocality;
+extern UITextContentType const RevenantHostUITextContentTypeCountryName;
+extern UITextContentType const RevenantHostUITextContentTypePostalCode;
+extern UITextContentType const RevenantHostUITextContentTypeTelephoneNumber;
+extern UITextContentType const RevenantHostUITextContentTypeEmailAddress;
+extern UITextContentType const RevenantHostUITextContentTypeURL;
+extern UITextContentType const RevenantHostUITextContentTypeCreditCardNumber;
+extern UITextContentType const RevenantHostUITextContentTypeUsername;
+extern UITextContentType const RevenantHostUITextContentTypePassword;
+extern UITextContentType const RevenantHostUITextContentTypeNewPassword;
+extern UITextContentType const RevenantHostUITextContentTypeOneTimeCode;
 
 static int failures, checks;
 
@@ -48,9 +48,9 @@ static NSString *(*getter)(id, SEL) = (NSString * (*)(id, SEL))objc_msgSend;
 static void (*setter)(id, SEL, NSString *) = (void (*)(id, SEL, NSString *))objc_msgSend;
 
 static NSString *system_get(id object) { return getter(object, @selector(textContentType)); }
-static NSString *ours_get(id object) { return getter(object, NSSelectorFromString(@"charonHost_textContentType")); }
+static NSString *ours_get(id object) { return getter(object, NSSelectorFromString(@"revenantHost_textContentType")); }
 static void system_set(id object, NSString *value) { setter(object, @selector(setTextContentType:), value); }
-static void ours_set(id object, NSString *value) { setter(object, NSSelectorFromString(@"charonHost_setTextContentType:"), value); }
+static void ours_set(id object, NSString *value) { setter(object, NSSelectorFromString(@"revenantHost_setTextContentType:"), value); }
 
 static NSString *shown(NSString *text)
 {
@@ -62,33 +62,33 @@ int main(void)
     @autoreleasepool {
         host_attach_prefixed("");
         for (NSArray *pair in @[
-        @[@"Name", UITextContentTypeName, CharonHostUITextContentTypeName],
-        @[@"NamePrefix", UITextContentTypeNamePrefix, CharonHostUITextContentTypeNamePrefix],
-        @[@"GivenName", UITextContentTypeGivenName, CharonHostUITextContentTypeGivenName],
-        @[@"MiddleName", UITextContentTypeMiddleName, CharonHostUITextContentTypeMiddleName],
-        @[@"FamilyName", UITextContentTypeFamilyName, CharonHostUITextContentTypeFamilyName],
-        @[@"NameSuffix", UITextContentTypeNameSuffix, CharonHostUITextContentTypeNameSuffix],
-        @[@"Nickname", UITextContentTypeNickname, CharonHostUITextContentTypeNickname],
-        @[@"JobTitle", UITextContentTypeJobTitle, CharonHostUITextContentTypeJobTitle],
-        @[@"OrganizationName", UITextContentTypeOrganizationName, CharonHostUITextContentTypeOrganizationName],
-        @[@"Location", UITextContentTypeLocation, CharonHostUITextContentTypeLocation],
-        @[@"FullStreetAddress", UITextContentTypeFullStreetAddress, CharonHostUITextContentTypeFullStreetAddress],
-        @[@"StreetAddressLine1", UITextContentTypeStreetAddressLine1, CharonHostUITextContentTypeStreetAddressLine1],
-        @[@"StreetAddressLine2", UITextContentTypeStreetAddressLine2, CharonHostUITextContentTypeStreetAddressLine2],
-        @[@"AddressCity", UITextContentTypeAddressCity, CharonHostUITextContentTypeAddressCity],
-        @[@"AddressState", UITextContentTypeAddressState, CharonHostUITextContentTypeAddressState],
-        @[@"AddressCityAndState", UITextContentTypeAddressCityAndState, CharonHostUITextContentTypeAddressCityAndState],
-        @[@"Sublocality", UITextContentTypeSublocality, CharonHostUITextContentTypeSublocality],
-        @[@"CountryName", UITextContentTypeCountryName, CharonHostUITextContentTypeCountryName],
-        @[@"PostalCode", UITextContentTypePostalCode, CharonHostUITextContentTypePostalCode],
-        @[@"TelephoneNumber", UITextContentTypeTelephoneNumber, CharonHostUITextContentTypeTelephoneNumber],
-        @[@"EmailAddress", UITextContentTypeEmailAddress, CharonHostUITextContentTypeEmailAddress],
-        @[@"URL", UITextContentTypeURL, CharonHostUITextContentTypeURL],
-        @[@"CreditCardNumber", UITextContentTypeCreditCardNumber, CharonHostUITextContentTypeCreditCardNumber],
-        @[@"Username", UITextContentTypeUsername, CharonHostUITextContentTypeUsername],
-        @[@"Password", UITextContentTypePassword, CharonHostUITextContentTypePassword],
-        @[@"NewPassword", UITextContentTypeNewPassword, CharonHostUITextContentTypeNewPassword],
-        @[@"OneTimeCode", UITextContentTypeOneTimeCode, CharonHostUITextContentTypeOneTimeCode]
+        @[@"Name", UITextContentTypeName, RevenantHostUITextContentTypeName],
+        @[@"NamePrefix", UITextContentTypeNamePrefix, RevenantHostUITextContentTypeNamePrefix],
+        @[@"GivenName", UITextContentTypeGivenName, RevenantHostUITextContentTypeGivenName],
+        @[@"MiddleName", UITextContentTypeMiddleName, RevenantHostUITextContentTypeMiddleName],
+        @[@"FamilyName", UITextContentTypeFamilyName, RevenantHostUITextContentTypeFamilyName],
+        @[@"NameSuffix", UITextContentTypeNameSuffix, RevenantHostUITextContentTypeNameSuffix],
+        @[@"Nickname", UITextContentTypeNickname, RevenantHostUITextContentTypeNickname],
+        @[@"JobTitle", UITextContentTypeJobTitle, RevenantHostUITextContentTypeJobTitle],
+        @[@"OrganizationName", UITextContentTypeOrganizationName, RevenantHostUITextContentTypeOrganizationName],
+        @[@"Location", UITextContentTypeLocation, RevenantHostUITextContentTypeLocation],
+        @[@"FullStreetAddress", UITextContentTypeFullStreetAddress, RevenantHostUITextContentTypeFullStreetAddress],
+        @[@"StreetAddressLine1", UITextContentTypeStreetAddressLine1, RevenantHostUITextContentTypeStreetAddressLine1],
+        @[@"StreetAddressLine2", UITextContentTypeStreetAddressLine2, RevenantHostUITextContentTypeStreetAddressLine2],
+        @[@"AddressCity", UITextContentTypeAddressCity, RevenantHostUITextContentTypeAddressCity],
+        @[@"AddressState", UITextContentTypeAddressState, RevenantHostUITextContentTypeAddressState],
+        @[@"AddressCityAndState", UITextContentTypeAddressCityAndState, RevenantHostUITextContentTypeAddressCityAndState],
+        @[@"Sublocality", UITextContentTypeSublocality, RevenantHostUITextContentTypeSublocality],
+        @[@"CountryName", UITextContentTypeCountryName, RevenantHostUITextContentTypeCountryName],
+        @[@"PostalCode", UITextContentTypePostalCode, RevenantHostUITextContentTypePostalCode],
+        @[@"TelephoneNumber", UITextContentTypeTelephoneNumber, RevenantHostUITextContentTypeTelephoneNumber],
+        @[@"EmailAddress", UITextContentTypeEmailAddress, RevenantHostUITextContentTypeEmailAddress],
+        @[@"URL", UITextContentTypeURL, RevenantHostUITextContentTypeURL],
+        @[@"CreditCardNumber", UITextContentTypeCreditCardNumber, RevenantHostUITextContentTypeCreditCardNumber],
+        @[@"Username", UITextContentTypeUsername, RevenantHostUITextContentTypeUsername],
+        @[@"Password", UITextContentTypePassword, RevenantHostUITextContentTypePassword],
+        @[@"NewPassword", UITextContentTypeNewPassword, RevenantHostUITextContentTypeNewPassword],
+        @[@"OneTimeCode", UITextContentTypeOneTimeCode, RevenantHostUITextContentTypeOneTimeCode]
         ])
             compare([@"the constant " stringByAppendingString:pair[0]], pair[1], pair[2]);
 

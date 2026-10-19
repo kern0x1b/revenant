@@ -5,11 +5,11 @@
 #pragma clang diagnostic ignored "-Wobjc-property-implementation"
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
 
-@interface UIPreviewAction (CharonPreviewAction)
+@interface UIPreviewAction (RevenantPreviewAction)
 @property (nonatomic, readonly) UIPreviewActionStyle style;
 @end
 
-@interface UIPreviewActionGroup (CharonPreviewAction)
+@interface UIPreviewActionGroup (RevenantPreviewAction)
 @property (nonatomic, readonly) UIPreviewActionStyle style;
 @property (nonatomic, readonly, copy) NSArray<UIPreviewAction *> *actions;
 @end
@@ -98,10 +98,10 @@
 
 @end
 
-@interface UIViewController (CharonPreviewActionItems)
+@interface UIViewController (RevenantPreviewActionItems)
 @end
 
-@implementation UIViewController (CharonPreviewActionItems)
+@implementation UIViewController (RevenantPreviewActionItems)
 
 - (NSArray<id<UIPreviewActionItem>> *)previewActionItems
 {

@@ -32,7 +32,7 @@
 #define st_ctim st_ctimespec
 #endif
 
-namespace shade {
+namespace emulator {
 namespace {
 
     constexpr std::uint32_t mh_magic = 0xfeedfaceU;

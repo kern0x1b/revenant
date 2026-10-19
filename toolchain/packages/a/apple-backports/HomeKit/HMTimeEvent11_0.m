@@ -1,12 +1,12 @@
-#import "CharonHomeKitInternal.h"
+#import "RevenantHomeKitInternal.h"
 
 #pragma mark - HMTimeEvent
 
 @implementation HMTimeEvent
 
-- (instancetype)charon_initWithStore:(CharonHomeKitStore *)store identifier:(NSUUID *)identifier __attribute__((objc_method_family(init)))
+- (instancetype)revenant_initWithStore:(RevenantHomeKitStore *)store identifier:(NSUUID *)identifier __attribute__((objc_method_family(init)))
 {
-    return [super charon_initWithStore:store identifier:identifier];
+    return [super revenant_initWithStore:store identifier:identifier];
 }
 
 @end
@@ -15,24 +15,24 @@
 
 @implementation HMDurationEvent
 
-@synthesize charon_duration = _charon_duration;
+@synthesize revenant_duration = _revenant_duration;
 
-- (instancetype)charon_initWithStore:(CharonHomeKitStore *)store identifier:(NSUUID *)identifier __attribute__((objc_method_family(init)))
+- (instancetype)revenant_initWithStore:(RevenantHomeKitStore *)store identifier:(NSUUID *)identifier __attribute__((objc_method_family(init)))
 {
-    return [super charon_initWithStore:store identifier:identifier];
+    return [super revenant_initWithStore:store identifier:identifier];
 }
 
 - (instancetype)initWithDuration:(NSTimeInterval)duration
 {
     self = [super init];
     if (self)
-        _charon_duration = @(duration);
+        _revenant_duration = @(duration);
     return self;
 }
 
 - (NSTimeInterval)duration
 {
-    return [_charon_duration doubleValue];
+    return [_revenant_duration doubleValue];
 }
 
 @end
@@ -41,7 +41,7 @@
 
 - (void)setDuration:(NSTimeInterval)duration
 {
-    self.charon_duration = @(duration);
+    self.revenant_duration = @(duration);
 }
 
 @end
@@ -50,24 +50,24 @@
 
 @implementation HMCalendarEvent
 
-@synthesize charon_fireDateComponents = _charon_fireDateComponents;
+@synthesize revenant_fireDateComponents = _revenant_fireDateComponents;
 
-- (instancetype)charon_initWithStore:(CharonHomeKitStore *)store identifier:(NSUUID *)identifier __attribute__((objc_method_family(init)))
+- (instancetype)revenant_initWithStore:(RevenantHomeKitStore *)store identifier:(NSUUID *)identifier __attribute__((objc_method_family(init)))
 {
-    return [super charon_initWithStore:store identifier:identifier];
+    return [super revenant_initWithStore:store identifier:identifier];
 }
 
 - (instancetype)initWithFireDateComponents:(NSDateComponents *)fireDateComponents
 {
     self = [super init];
     if (self)
-        _charon_fireDateComponents = [fireDateComponents copy];
+        _revenant_fireDateComponents = [fireDateComponents copy];
     return self;
 }
 
 - (NSDateComponents *)fireDateComponents
 {
-    return [_charon_fireDateComponents copy];
+    return [_revenant_fireDateComponents copy];
 }
 
 @end
@@ -76,7 +76,7 @@
 
 - (void)setFireDateComponents:(NSDateComponents *)fireDateComponents
 {
-    self.charon_fireDateComponents = fireDateComponents;
+    self.revenant_fireDateComponents = fireDateComponents;
 }
 
 @end
@@ -85,31 +85,31 @@
 
 @implementation HMSignificantTimeEvent
 
-@synthesize charon_significantEvent = _charon_significantEvent, charon_offset = _charon_offset;
+@synthesize revenant_significantEvent = _revenant_significantEvent, revenant_offset = _revenant_offset;
 
-- (instancetype)charon_initWithStore:(CharonHomeKitStore *)store identifier:(NSUUID *)identifier __attribute__((objc_method_family(init)))
+- (instancetype)revenant_initWithStore:(RevenantHomeKitStore *)store identifier:(NSUUID *)identifier __attribute__((objc_method_family(init)))
 {
-    return [super charon_initWithStore:store identifier:identifier];
+    return [super revenant_initWithStore:store identifier:identifier];
 }
 
 - (instancetype)initWithSignificantEvent:(HMSignificantEvent)significantEvent offset:(NSTimeInterval)offset
 {
     self = [super init];
     if (self) {
-        _charon_significantEvent = [significantEvent copy];
-        _charon_offset = @(offset);
+        _revenant_significantEvent = [significantEvent copy];
+        _revenant_offset = @(offset);
     }
     return self;
 }
 
 - (HMSignificantEvent)significantEvent
 {
-    return [self.charon_significantEvent copy];
+    return [self.revenant_significantEvent copy];
 }
 
 - (NSTimeInterval)offset
 {
-    return [_charon_offset doubleValue];
+    return [_revenant_offset doubleValue];
 }
 
 @end
@@ -118,12 +118,12 @@
 
 - (void)setSignificantEvent:(HMSignificantEvent)significantEvent
 {
-    self.charon_significantEvent = significantEvent;
+    self.revenant_significantEvent = significantEvent;
 }
 
 - (void)setOffset:(NSTimeInterval)offset
 {
-    self.charon_offset = @(offset);
+    self.revenant_offset = @(offset);
 }
 
 @end
@@ -132,11 +132,11 @@
 
 @implementation HMPresenceEvent
 
-@synthesize charon_presenceEventType = _charon_presenceEventType, charon_presenceUserType = _charon_presenceUserType;
+@synthesize revenant_presenceEventType = _revenant_presenceEventType, revenant_presenceUserType = _revenant_presenceUserType;
 
-- (instancetype)charon_initWithStore:(CharonHomeKitStore *)store identifier:(NSUUID *)identifier __attribute__((objc_method_family(init)))
+- (instancetype)revenant_initWithStore:(RevenantHomeKitStore *)store identifier:(NSUUID *)identifier __attribute__((objc_method_family(init)))
 {
-    return [super charon_initWithStore:store identifier:identifier];
+    return [super revenant_initWithStore:store identifier:identifier];
 }
 
 - (instancetype)initWithPresenceEventType:(HMPresenceEventType)presenceEventType
@@ -144,20 +144,20 @@
 {
     self = [super init];
     if (self) {
-        _charon_presenceEventType = @(presenceEventType);
-        _charon_presenceUserType = @(presenceUserType);
+        _revenant_presenceEventType = @(presenceEventType);
+        _revenant_presenceUserType = @(presenceUserType);
     }
     return self;
 }
 
 - (HMPresenceEventType)presenceEventType
 {
-    return (HMPresenceEventType)[self.charon_presenceEventType unsignedIntegerValue];
+    return (HMPresenceEventType)[self.revenant_presenceEventType unsignedIntegerValue];
 }
 
 - (HMPresenceEventUserType)presenceUserType
 {
-    return (HMPresenceEventUserType)[self.charon_presenceUserType unsignedIntegerValue];
+    return (HMPresenceEventUserType)[self.revenant_presenceUserType unsignedIntegerValue];
 }
 
 @end
@@ -166,12 +166,12 @@
 
 - (void)setPresenceEventType:(HMPresenceEventType)presenceEventType
 {
-    self.charon_presenceEventType = @(presenceEventType);
+    self.revenant_presenceEventType = @(presenceEventType);
 }
 
 - (void)setPresenceUserType:(HMPresenceEventUserType)presenceUserType
 {
-    self.charon_presenceUserType = @(presenceUserType);
+    self.revenant_presenceUserType = @(presenceUserType);
 }
 
 @end
@@ -182,12 +182,12 @@
 
 - (void)setCharacteristic:(HMCharacteristic *)characteristic
 {
-    self.charon_characteristic = characteristic;
+    self.revenant_characteristic = characteristic;
 }
 
 - (void)setTriggerValue:(id)triggerValue
 {
-    self.charon_triggerValue = triggerValue;
+    self.revenant_triggerValue = triggerValue;
 }
 
 @end
@@ -196,31 +196,31 @@
 
 @implementation HMCharacteristicThresholdRangeEvent
 
-@synthesize charon_characteristic = _charon_characteristic, charon_thresholdRange = _charon_thresholdRange;
+@synthesize revenant_characteristic = _revenant_characteristic, revenant_thresholdRange = _revenant_thresholdRange;
 
-- (instancetype)charon_initWithStore:(CharonHomeKitStore *)store identifier:(NSUUID *)identifier __attribute__((objc_method_family(init)))
+- (instancetype)revenant_initWithStore:(RevenantHomeKitStore *)store identifier:(NSUUID *)identifier __attribute__((objc_method_family(init)))
 {
-    return [super charon_initWithStore:store identifier:identifier];
+    return [super revenant_initWithStore:store identifier:identifier];
 }
 
 - (instancetype)initWithCharacteristic:(HMCharacteristic *)characteristic thresholdRange:(HMNumberRange *)thresholdRange
 {
     self = [super init];
     if (self) {
-        _charon_characteristic = characteristic;
-        _charon_thresholdRange = thresholdRange;
+        _revenant_characteristic = characteristic;
+        _revenant_thresholdRange = thresholdRange;
     }
     return self;
 }
 
 - (HMCharacteristic *)characteristic
 {
-    return self.charon_characteristic;
+    return self.revenant_characteristic;
 }
 
 - (HMNumberRange *)thresholdRange
 {
-    return self.charon_thresholdRange;
+    return self.revenant_thresholdRange;
 }
 
 @end
@@ -229,12 +229,12 @@
 
 - (void)setCharacteristic:(HMCharacteristic *)characteristic
 {
-    self.charon_characteristic = characteristic;
+    self.revenant_characteristic = characteristic;
 }
 
 - (void)setThresholdRange:(HMNumberRange *)thresholdRange
 {
-    self.charon_thresholdRange = thresholdRange;
+    self.revenant_thresholdRange = thresholdRange;
 }
 
 @end

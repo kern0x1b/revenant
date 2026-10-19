@@ -36,8 +36,8 @@ local DECLARED_KEYS_LIST = {
 }
 
 local MACRO_TYPEDEFS_MAP = {
-    ["NSDictionary<NSString *, id> *"] = "CharonVTFrameAttributes",
-    ["NSArray<NSString *, id> *"] = "CharonVTFrameAttributeList",
+    ["NSDictionary<NSString *, id> *"] = "RevenantVTFrameAttributes",
+    ["NSArray<NSString *, id> *"] = "RevenantVTFrameAttributeList",
 }
 
 local CASTS = {BOOL = "BOOL", NSInteger = "NSInteger", float = "float"}
@@ -458,7 +458,7 @@ function probe_types(sdk, types, workdir)
     local lines = {"#import <VideoToolbox/VideoToolbox.h>", "#import <CoreMedia/CoreMedia.h>",
                    "#import <CoreVideo/CoreVideo.h>", "#import <CoreFoundation/CoreFoundation.h>", ""}
     for index, type_name in ipairs(types) do
-        lines[#lines + 1] = "typedef " .. type_name .. " charon_probe_" .. (index - 1) .. ";"
+        lines[#lines + 1] = "typedef " .. type_name .. " revenant_probe_" .. (index - 1) .. ";"
     end
     V.write_file(source, table.concat(lines, "\n") .. "\n")
 
@@ -467,7 +467,7 @@ function probe_types(sdk, types, workdir)
                   "clang", "-fsyntax-only", "-isysroot", sdk,
                   "-F", path_join(sdk, "System/Library/Frameworks"),
                   "-isystem", path_join(sdk, "usr/include"),
-                  "-Xclang", "-ast-dump=json", "-Xclang", "-ast-dump-filter=charon_probe_", source}
+                  "-Xclang", "-ast-dump=json", "-Xclang", "-ast-dump-filter=revenant_probe_", source}
     local stdout = nil
     try {
         function()
@@ -484,7 +484,7 @@ function probe_types(sdk, types, workdir)
     }
     if os.isfile(err_path) then os.rm(err_path) end
 
-    local prefix = "charon_probe_"
+    local prefix = "revenant_probe_"
     local found = {}
     local function visit(node)
         if is_odict(node) then
@@ -1072,12 +1072,12 @@ function init_body(selector, arguments, properties, class_name)
             end
         elseif branch == "struct" then
             lines[#lines + 1] = string.format("    { %s boxed = %s;", type_name, keyword)
-            lines[#lines + 1] = string.format("      CharonValueSet(self, [NSValue valueWithBytes:&boxed objCType:@encode(%s)], @\"%s\"); }",
+            lines[#lines + 1] = string.format("      RevenantValueSet(self, [NSValue valueWithBytes:&boxed objCType:@encode(%s)], @\"%s\"); }",
                 type_name, key)
         elseif branch == "object" then
-            lines[#lines + 1] = string.format("    CharonValueSet(self, %s, @\"%s\");", keyword, key)
+            lines[#lines + 1] = string.format("    RevenantValueSet(self, %s, @\"%s\");", keyword, key)
         else
-            lines[#lines + 1] = string.format("    CharonValueSet(self, @(%s), @\"%s\");", keyword, key)
+            lines[#lines + 1] = string.format("    RevenantValueSet(self, @(%s), @\"%s\");", keyword, key)
         end
     end
     lines[#lines + 1] = "    return self;"
@@ -1096,7 +1096,7 @@ function macro_typedefs(type_names)
     local lines = {"",
         "// A file-local spelling for the types the property macros cannot take. Each of these carries a",
         "// comma, and the preprocessor counts arguments rather than template parameters, so the macro",
-        "// would be handed three arguments for one type. The declaration in CharonVideoToolbox.h keeps",
+        "// would be handed three arguments for one type. The declaration in RevenantVideoToolbox.h keeps",
         "// the SDK's own spelling: this is the same type, named once so the macro has one argument."}
     local emitted = {}
     local emitted_set = {}
@@ -1139,7 +1139,7 @@ local function cast_of(typ)
 end
 
 function body(n, p)
-    local store = p.class and "CharonValueStoreOfClass([self class])" or "CharonValueStore(self)"
+    local store = p.class and "RevenantValueStoreOfClass([self class])" or "RevenantValueStore(self)"
     local ret = p.type .. (p.obj and " *" or "")
     local sig = (p.class and "+ " or "- ") .. string.format("(%s)%s", ret, p.getter or n)
     local key = '@"' .. n .. '"'
@@ -1162,10 +1162,10 @@ function body(n, p)
         return string.format("%s\n{\n    return (%s)[%s[%s] longLongValue];\n}\n", sig, cast_of(p.type), store, key)
     end
     if p.obj then
-        return string.format("CHARON_VALUE_PROPERTY(%s, %s)\n", macro_type(ret), n)
+        return string.format("REVENANT_VALUE_PROPERTY(%s, %s)\n", macro_type(ret), n)
     end
     if (not STRUCTS_SET[p.type]) and p.type ~= "CVPixelBufferRef" then
-        local macro = (p.type == "float") and "CHARON_DOUBLE_PROPERTY" or "CHARON_SCALAR_PROPERTY"
+        local macro = (p.type == "float") and "REVENANT_DOUBLE_PROPERTY" or "REVENANT_SCALAR_PROPERTY"
         return string.format("%s(%s, %s)\n", macro, p.type, n)
     end
     if STRUCTS_SET[p.type] then return struct_accessor(sig, p.type, store, key) end

@@ -1,20 +1,20 @@
-#import "CharonDocumentBrowser.h"
+#import "RevenantDocumentBrowser.h"
 
-@interface CharonFileEntry : NSObject
+@interface RevenantFileEntry : NSObject
 @property (nonatomic, copy) NSString *name;
 @property (nonatomic, copy) NSString *path;
 @property (nonatomic) BOOL directory;
 @property (nonatomic) unsigned long long size;
 @end
 
-@implementation CharonFileEntry
+@implementation RevenantFileEntry
 @synthesize name = _name;
 @synthesize path = _path;
 @synthesize directory = _directory;
 @synthesize size = _size;
 @end
 
-@implementation CharonFileLocationsController {
+@implementation RevenantFileLocationsController {
     __weak UIDocumentPickerViewController *_picker;
     NSArray<NSDictionary *> *_locations;
 }
@@ -24,7 +24,7 @@
     if ((self = [super initWithStyle:UITableViewStylePlain])) {
         _picker = picker;
         self.title = NSLocalizedStringFromTableInBundle(@"Locations", @"Localizable", [NSBundle bundleForClass:[UIView class]], nil);
-        _locations = [picker charon_locations];
+        _locations = [picker revenant_locations];
     }
     return self;
 }
@@ -33,7 +33,7 @@
 {
     [super viewDidLoad];
     UIDocumentPickerViewController *picker = _picker;
-    self.navigationItem.rightBarButtonItem = [picker charon_cancelItem];
+    self.navigationItem.rightBarButtonItem = [picker revenant_cancelItem];
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
@@ -56,17 +56,17 @@
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
     NSDictionary *location = _locations[indexPath.row];
-    CharonFileFolderController *folder = [[CharonFileFolderController alloc] initWithPath:location[@"path"] title:location[@"title"] picker:_picker];
+    RevenantFileFolderController *folder = [[RevenantFileFolderController alloc] initWithPath:location[@"path"] title:location[@"title"] picker:_picker];
     [self.navigationController pushViewController:folder animated:YES];
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
 }
 
 @end
 
-@implementation CharonFileFolderController {
+@implementation RevenantFileFolderController {
     __weak UIDocumentPickerViewController *_picker;
     NSString *_path;
-    NSArray<CharonFileEntry *> *_entries;
+    NSArray<RevenantFileEntry *> *_entries;
     NSMutableOrderedSet<NSString *> *_selected;
     UIBarButtonItem *_commit;
 }
@@ -89,19 +89,19 @@
 {
     [super viewDidLoad];
     UIDocumentPickerViewController *picker = _picker;
-    self.navigationItem.rightBarButtonItem = [picker charon_cancelItem];
-    if (![picker charon_choosesFiles]) {
-        _commit = [[UIBarButtonItem alloc] initWithTitle:[picker charon_destinationTitle] style:UIBarButtonItemStyleDone target:self action:@selector(commit)];
+    self.navigationItem.rightBarButtonItem = [picker revenant_cancelItem];
+    if (![picker revenant_choosesFiles]) {
+        _commit = [[UIBarButtonItem alloc] initWithTitle:[picker revenant_destinationTitle] style:UIBarButtonItemStyleDone target:self action:@selector(commit)];
         self.navigationItem.rightBarButtonItems = nil;
         self.navigationItem.rightBarButtonItem = _commit;
         self.navigationItem.leftItemsSupplementBackButton = YES;
-        self.navigationItem.leftBarButtonItem = [picker charon_cancelItem];
-    } else if ([picker charon_allowsMultiple]) {
+        self.navigationItem.leftBarButtonItem = [picker revenant_cancelItem];
+    } else if ([picker revenant_allowsMultiple]) {
         _commit = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:self action:@selector(commit)];
         _commit.enabled = NO;
         self.navigationItem.rightBarButtonItem = _commit;
         self.navigationItem.leftItemsSupplementBackButton = YES;
-        self.navigationItem.leftBarButtonItem = [picker charon_cancelItem];
+        self.navigationItem.leftBarButtonItem = [picker revenant_cancelItem];
     }
     [self reload];
 }
@@ -118,7 +118,7 @@
         BOOL directory = NO;
         if (![manager fileExistsAtPath:full isDirectory:&directory])
             continue;
-        CharonFileEntry *entry = [[CharonFileEntry alloc] init];
+        RevenantFileEntry *entry = [[RevenantFileEntry alloc] init];
         entry.name = name;
         entry.path = full;
         entry.directory = directory;
@@ -126,7 +126,7 @@
             entry.size = [[manager attributesOfItemAtPath:full error:NULL] fileSize];
         [found addObject:entry];
     }
-    [found sortUsingComparator:^NSComparisonResult(CharonFileEntry *left, CharonFileEntry *right) {
+    [found sortUsingComparator:^NSComparisonResult(RevenantFileEntry *left, RevenantFileEntry *right) {
         if (left.directory != right.directory)
             return left.directory ? NSOrderedAscending : NSOrderedDescending;
         return [left.name localizedCaseInsensitiveCompare:right.name];
@@ -135,10 +135,10 @@
     [self.tableView reloadData];
 }
 
-- (BOOL)selectable:(CharonFileEntry *)entry
+- (BOOL)selectable:(RevenantFileEntry *)entry
 {
     UIDocumentPickerViewController *picker = _picker;
-    return entry.directory || ([picker charon_choosesFiles] && [picker charon_acceptsPath:entry.path]);
+    return entry.directory || ([picker revenant_choosesFiles] && [picker revenant_acceptsPath:entry.path]);
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
@@ -151,10 +151,10 @@
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"entry"];
     if (!cell)
         cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"entry"];
-    CharonFileEntry *entry = _entries[indexPath.row];
+    RevenantFileEntry *entry = _entries[indexPath.row];
     UIDocumentPickerViewController *picker = _picker;
     NSString *shown = entry.name;
-    if (!entry.directory && ![picker charon_showsExtensions] && entry.name.pathExtension.length && entry.name.stringByDeletingPathExtension.length)
+    if (!entry.directory && ![picker revenant_showsExtensions] && entry.name.pathExtension.length && entry.name.stringByDeletingPathExtension.length)
         shown = entry.name.stringByDeletingPathExtension;
     cell.textLabel.text = shown;
     BOOL enabled = [self selectable:entry];
@@ -172,17 +172,17 @@
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    CharonFileEntry *entry = _entries[indexPath.row];
+    RevenantFileEntry *entry = _entries[indexPath.row];
     UIDocumentPickerViewController *picker = _picker;
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
     if (entry.directory) {
-        CharonFileFolderController *folder = [[CharonFileFolderController alloc] initWithPath:entry.path title:entry.name picker:picker];
+        RevenantFileFolderController *folder = [[RevenantFileFolderController alloc] initWithPath:entry.path title:entry.name picker:picker];
         [self.navigationController pushViewController:folder animated:YES];
         return;
     }
     if (![self selectable:entry])
         return;
-    if ([picker charon_allowsMultiple]) {
+    if ([picker revenant_allowsMultiple]) {
         if ([_selected containsObject:entry.path])
             [_selected removeObject:entry.path];
         else
@@ -191,16 +191,16 @@
         [tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
         return;
     }
-    [picker charon_pickPaths:@[entry.path]];
+    [picker revenant_pickPaths:@[entry.path]];
 }
 
 - (void)commit
 {
     UIDocumentPickerViewController *picker = _picker;
-    if ([picker charon_choosesFiles])
-        [picker charon_pickPaths:_selected.array];
+    if ([picker revenant_choosesFiles])
+        [picker revenant_pickPaths:_selected.array];
     else
-        [picker charon_chooseFolder:_path];
+        [picker revenant_chooseFolder:_path];
 }
 
 @end

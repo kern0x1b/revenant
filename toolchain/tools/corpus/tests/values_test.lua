@@ -1,12 +1,12 @@
 import("core.base.json")
 
 local TOOLS = path.join(os.scriptdir(), "..")
-local CHARON = path.join(TOOLS, "..", "..")
+local REVENANT = path.join(TOOLS, "..", "..")
 local swift = import("values_swift", {rootdir = TOOLS, anonymous = true})
 local values_const = import("values_const", {rootdir = TOOLS, anonymous = true})
 local common = import("values_common", {rootdir = TOOLS, anonymous = true})
-local workspace = import("workspace", {rootdir = path.join(CHARON, "modules"), anonymous = true})
-local byteorder = import("byteorder", {rootdir = path.join(CHARON, "modules"), anonymous = true})
+local workspace = import("workspace", {rootdir = path.join(REVENANT, "modules"), anonymous = true})
+local byteorder = import("byteorder", {rootdir = path.join(REVENANT, "modules"), anonymous = true})
 
 local checks, failures = 0, {}
 
@@ -42,12 +42,12 @@ local function test_pointer_width_round_trip(scratch)
         check(pattern:find("%S+", 1, true) or pattern:find("%a+", 1, true) or pattern:find("([^\\t]*)", 1, true),
               "the reader's pattern accepts a non-numeric width (" .. pattern .. ")")
     end
-    local cachefile = path.join(os.getenv("HOME"), ".charon", "dyld", "6.1.3", "dyld_shared_cache_armv7")
+    local cachefile = path.join(os.getenv("HOME"), ".revenant", "dyld", "6.1.3", "dyld_shared_cache_armv7")
     if not os.isfile(cachefile) then
         skip("the round trip through cache-value.lua: no 6.1.3 armv7 cache at " .. cachefile)
         return
     end
-    local values = values_const.read_cache(cachefile, {{"NSDefaultRunLoopMode", width, pointer, text}}, scratch, CHARON)
+    local values = values_const.read_cache(cachefile, {{"NSDefaultRunLoopMode", width, pointer, text}}, scratch, REVENANT)
     local got = values.NSDefaultRunLoopMode
     check(got ~= nil, "the reader returned a row for NSDefaultRunLoopMode (none means the width contract is broken again)")
     if got then
@@ -63,9 +63,9 @@ local function test_empty_module_is_a_failed_read()
     check(names == nil and failure, "a 0-declaration dump is refused, not indexed as an empty module")
     check(failure and failure:find("FoundationEssentials", 1, true) and failure:find("not an empty one", 1, true),
           "and the refusal names the module and says what it is not: " .. tostring(failure))
-    local canned = "<unknown>:0: error: missing required modules: 'CharonFormat', 'CharonPlatform', CharonSysdir\n"
+    local canned = "<unknown>:0: error: missing required modules: 'RevenantFormat', 'RevenantPlatform', RevenantSysdir\n"
     names, _, failure = swift.read_declarations(empty, "FoundationEssentials", {canned})
-    check(failure and failure:find("CharonFormat", 1, true) and failure:find("CharonSysdir", 1, true),
+    check(failure and failure:find("RevenantFormat", 1, true) and failure:find("RevenantSysdir", 1, true),
           "the refusal carries the digester's own line, naming the missing modules: " .. tostring(failure))
     names, _, failure = swift.read_declarations(empty, "FoundationEssentials", {""})
     check(failure and failure:find("not an empty one", 1, true), "and with no stderr it still says what it is refusing and why: " .. tostring(failure))

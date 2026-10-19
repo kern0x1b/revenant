@@ -2,20 +2,20 @@
 #import <Security/Security.h>
 #import <CommonCrypto/CommonDigest.h>
 #import "check.h"
-#import "CharonCKWebAuth.h"
+#import "RevenantCKWebAuth.h"
 
-extern void *charonHost_SecKeyCreateSignature(SecKeyRef, SecKeyAlgorithm, CFDataRef, CFErrorRef *);
-extern bool charonHost_SecKeyVerifySignature(SecKeyRef, SecKeyAlgorithm, CFDataRef, CFDataRef, CFErrorRef *);
-extern CFDataRef charonHost_SecKeyCopyKeyExchangeResult(SecKeyRef, SecKeyAlgorithm, SecKeyRef, CFDictionaryRef, CFErrorRef *);
-extern bool charonHost_SecKeyIsAlgorithmSupported(SecKeyRef, SecKeyOperationType, SecKeyAlgorithm);
+extern void *revenantHost_SecKeyCreateSignature(SecKeyRef, SecKeyAlgorithm, CFDataRef, CFErrorRef *);
+extern bool revenantHost_SecKeyVerifySignature(SecKeyRef, SecKeyAlgorithm, CFDataRef, CFDataRef, CFErrorRef *);
+extern CFDataRef revenantHost_SecKeyCopyKeyExchangeResult(SecKeyRef, SecKeyAlgorithm, SecKeyRef, CFDictionaryRef, CFErrorRef *);
+extern bool revenantHost_SecKeyIsAlgorithmSupported(SecKeyRef, SecKeyOperationType, SecKeyAlgorithm);
 
-extern void CharonShimMarkPortKey(SecKeyRef, const uint8_t *, size_t);
-extern void CharonShimMarkPortPublicKey(SecKeyRef);
-extern void CharonShimMarkReleaseKey(SecKeyRef, CFStringRef);
+extern void RevenantShimMarkPortKey(SecKeyRef, const uint8_t *, size_t);
+extern void RevenantShimMarkPortPublicKey(SecKeyRef);
+extern void RevenantShimMarkReleaseKey(SecKeyRef, CFStringRef);
 
 static void check_named(BOOL passed, NSString *name, NSString *detail)
 {
-    charon_check(passed, [name UTF8String], detail);
+    revenant_check(passed, [name UTF8String], detail);
 }
 
 static NSData *digestOf(NSData *message)
@@ -64,7 +64,7 @@ static NSData *scalarOf(SecKeyRef privateKey, SecKeyRef publicKey)
     const uint8_t *bytes = blob.bytes;
     for (NSUInteger offset = 0; offset + 32 <= blob.length; offset++) {
         uint8_t derived[65];
-        if (CharonCKPublicKeyES256(bytes + offset, derived) == 65 && memcmp(derived, point.bytes, 65) == 0) {
+        if (RevenantCKPublicKeyES256(bytes + offset, derived) == 65 && memcmp(derived, point.bytes, 65) == 0) {
             return [NSData dataWithBytes:bytes + offset length:32];
         }
     }
@@ -186,7 +186,7 @@ int main(int argc, char **argv)
     NSString *folder = argc > 1 ? @(argv[1]) : @".";
     setvbuf(stdout, NULL, _IOLBF, 0);
 
-    SecKeyAlgorithm charonHostECDH = (SecKeyAlgorithm)CFSTR("ECDH.standardX963");
+    SecKeyAlgorithm revenantHostECDH = (SecKeyAlgorithm)CFSTR("ECDH.standardX963");
     SecKeyAlgorithm hashedECDH = (SecKeyAlgorithm)CFSTR("ECDH.standardX963SHA256");
     SecKeyAlgorithm digestAlgorithm = kSecKeyAlgorithmECDSASignatureDigestX962SHA256;
 
@@ -196,17 +196,17 @@ int main(int argc, char **argv)
         printf("FAIL the host made no P-256 key pair: nothing to compare against\n");
         return 1;
     }
-    CharonShimMarkReleaseKey(hostPrivate, kSecAttrKeyTypeECSECPrimeRandom);
-    CharonShimMarkReleaseKey(hostPrivatePublic, kSecAttrKeyTypeECSECPrimeRandom);
+    RevenantShimMarkReleaseKey(hostPrivate, kSecAttrKeyTypeECSECPrimeRandom);
+    RevenantShimMarkReleaseKey(hostPrivatePublic, kSecAttrKeyTypeECSECPrimeRandom);
     NSData *hostScalar = scalarOf(hostPrivate, hostPrivatePublic);
     NSData *hostPoint = pointOf(hostPrivatePublic);
-    charon_check(hostScalar.length == 32, @"the host's private key exports a 32 byte scalar",
+    revenant_check(hostScalar.length == 32, @"the host's private key exports a 32 byte scalar",
                      [NSString stringWithFormat:@"%lu bytes", (unsigned long)hostScalar.length]);
     check_named(hostPoint.length == 65 && ((const uint8_t *)hostPoint.bytes)[0] == 0x04,
                  @"and its public key an uncompressed 65 byte point",
                      [NSString stringWithFormat:@"%lu bytes", (unsigned long)hostPoint.length]);
     if (hostScalar.length != 32 || hostPoint.length != 65) {
-        return charon_failures == 0 ? 0 : 1;
+        return revenant_failures == 0 ? 0 : 1;
     }
 
     SecKeyAlgorithm ecdsa = kSecKeyAlgorithmECDSASignatureDigestX962SHA256;
@@ -219,7 +219,7 @@ int main(int argc, char **argv)
         }
         NSData *digest = digestOf(message);
         uint8_t der[72];
-        int written = CharonCKDigestSignES256(hostScalar.bytes, digest.bytes, der, sizeof der);
+        int written = RevenantCKDigestSignES256(hostScalar.bytes, digest.bytes, der, sizeof der);
         check_named(written > 0,
                      [NSString stringWithFormat:@"the port signs a %lu byte message", (unsigned long)length],
                      [NSString stringWithFormat:@"the port wrote %d bytes", written]);
@@ -248,13 +248,13 @@ int main(int argc, char **argv)
         if (signature.length == 0) {
             continue;
         }
-        check_named(CharonCKDigestVerifyES256(hostPoint.bytes, hostPoint.length, digest.bytes,
+        check_named(RevenantCKDigestVerifyES256(hostPoint.bytes, hostPoint.length, digest.bytes,
                                                signature.bytes, signature.length),
                      [NSString stringWithFormat:@"and the port accepts that signature, for a %lu byte message", (unsigned long)length],
                      @"the port refused a signature the host made");
         uint8_t other[CC_SHA256_DIGEST_LENGTH];
         memset(other, length == 0 ? 0x5a : 0xa5, sizeof other);
-        check_named(!CharonCKDigestVerifyES256(hostPoint.bytes, hostPoint.length, other,
+        check_named(!RevenantCKDigestVerifyES256(hostPoint.bytes, hostPoint.length, other,
                                                 signature.bytes, signature.length),
                      [NSString stringWithFormat:@"and refuses it for another message, for a %lu byte message", (unsigned long)length],
                      @"the port accepted a signature of a different message");
@@ -291,7 +291,7 @@ int main(int argc, char **argv)
             }
         }
         uint8_t der[72];
-        if (CharonCKDigestSignES256(hostScalar.bytes, digest.bytes, der, sizeof der) > 8) {
+        if (RevenantCKDigestSignES256(hostScalar.bytes, digest.bytes, der, sizeof der) > 8) {
             size_t firstSize = der[3];
             const uint8_t *second = der + 4 + firstSize;
             if (second[0] == 0x02 && second[1] <= 33) {
@@ -331,39 +331,39 @@ int main(int argc, char **argv)
         if (oneScalar.length == 32 && twoPoint.length == 65 && openssl.length == 32) {
             uint8_t theirs[32];
             uint8_t derivedPoint[65], derivedOther[65];
-            check_named(CharonCKPublicKeyES256(oneScalar.bytes, derivedPoint) == 65, @"OpenSSL's first private scalar derives a public point",
+            check_named(RevenantCKPublicKeyES256(oneScalar.bytes, derivedPoint) == 65, @"OpenSSL's first private scalar derives a public point",
                         @"micro-ecc refused the scalar OpenSSL printed");
             check_named(onePoint.length == 65 && memcmp(derivedPoint, onePoint.bytes, 65) == 0,
                         @"and it is the point OpenSSL published for that same key, so the two files are one key",
                         [NSString stringWithFormat:@"derived %02x..%02x, published %lu bytes", derivedPoint[0], derivedPoint[64], (unsigned long)onePoint.length]);
             check_named(memcmp(derivedPoint, twoPoint.bytes, 65) != 0, @"and not the point of the other key",
                         @"the two keys have the same public point");
-            charon_check(CharonCKSharedSecretES256(oneScalar.bytes, twoPoint.bytes, twoPoint.length, mine) == 1,
+            revenant_check(RevenantCKSharedSecretES256(oneScalar.bytes, twoPoint.bytes, twoPoint.length, mine) == 1,
                          @"the port derives a shared secret from OpenSSL's keys", @"micro-ecc refused");
             memcpy(theirs, openssl.bytes, 32);
             check_named(memcmp(mine, theirs, 32) == 0, @"and it is the same secret OpenSSL derives, byte for byte",
                         [NSString stringWithFormat:@"port %02x.., openssl %02x..", mine[0], theirs[0]]);
             printf("openssl secret: %s\n", [[[openssl description] substringToIndex:16] UTF8String]);
         }
-        charon_check(CharonCKSharedSecretES256(portScalar.bytes, peerPoint.bytes, peerPoint.length, mine) == 1,
+        revenant_check(RevenantCKSharedSecretES256(portScalar.bytes, peerPoint.bytes, peerPoint.length, mine) == 1,
                      "the port makes a shared secret with the peer's point", @"micro-ecc refused");
         CFErrorRef error = NULL;
-        charon_check(SecKeyCopyKeyExchangeResult != NULL, "the host has its own SecKeyCopyKeyExchangeResult, which is not the oracle here",
+        revenant_check(SecKeyCopyKeyExchangeResult != NULL, "the host has its own SecKeyCopyKeyExchangeResult, which is not the oracle here",
                      @"the host has no such function");
         if (error) {
             CFRelease(error);
         }
         uint8_t reverse[32];
-        charon_check(CharonCKSharedSecretES256(peerScalar.bytes, portPoint.bytes, portPoint.length, reverse) == 1,
+        revenant_check(RevenantCKSharedSecretES256(peerScalar.bytes, portPoint.bytes, portPoint.length, reverse) == 1,
                      "the exchange is the same from the other side", @"micro-ecc refused");
-        charon_check(memcmp(mine, reverse, 32) == 0, @"and both sides reach one secret",
+        revenant_check(memcmp(mine, reverse, 32) == 0, @"and both sides reach one secret",
                      @"the two directions differ");
         SecKeyRef otherPrivatePublic = NULL;
         SecKeyRef otherPrivate = randomKey((__bridge id)kSecAttrKeyTypeECSECPrimeRandom, &otherPrivatePublic);
         NSData *otherPoint = pointOf(otherPrivatePublic);
         uint8_t withOther[32];
-        if (otherPoint.length == 65 && CharonCKSharedSecretES256(portScalar.bytes, otherPoint.bytes, otherPoint.length, withOther)) {
-            charon_check(memcmp(mine, withOther, 32) != 0, @"a point of another pair gives another secret",
+        if (otherPoint.length == 65 && RevenantCKSharedSecretES256(portScalar.bytes, otherPoint.bytes, otherPoint.length, withOther)) {
+            revenant_check(memcmp(mine, withOther, 32) != 0, @"a point of another pair gives another secret",
                          @"two different pairs gave the same secret");
         }
         if (otherPrivate) {
@@ -386,22 +386,22 @@ int main(int argc, char **argv)
         check_named(rsaPrivate != NULL && rsaPublic != NULL, @"the host made an RSA key pair",
                     @"the host's SecKeyCreateRandomKey made no RSA key");
         if (rsaPrivate && rsaPublic) {
-            CharonShimMarkReleaseKey(rsaPrivate, kSecAttrKeyTypeRSA);
-            CharonShimMarkReleaseKey(rsaPublic, kSecAttrKeyTypeRSA);
+            RevenantShimMarkReleaseKey(rsaPrivate, kSecAttrKeyTypeRSA);
+            RevenantShimMarkReleaseKey(rsaPublic, kSecAttrKeyTypeRSA);
             SecKeyAlgorithm rsaAlgorithm = kSecKeyAlgorithmRSASignatureMessagePKCS1v15SHA256;
-            check_named(charonHost_SecKeyIsAlgorithmSupported(rsaPrivate, kSecKeyOperationTypeSign, rsaAlgorithm),
+            check_named(revenantHost_SecKeyIsAlgorithmSupported(rsaPrivate, kSecKeyOperationTypeSign, rsaAlgorithm),
                         @"the port says an RSA key signs with PKCS1 v1.5 over a digest",
                         @"the port says it cannot sign an RSA key it is handed");
-            check_named(!charonHost_SecKeyIsAlgorithmSupported(rsaPrivate, kSecKeyOperationTypeKeyExchange, charonHostECDH),
+            check_named(!revenantHost_SecKeyIsAlgorithmSupported(rsaPrivate, kSecKeyOperationTypeKeyExchange, revenantHostECDH),
                         @"and that it cannot exchange an RSA key either, which the release has no primitive for",
                         @"the port claims an RSA exchange");
-            check_named(charonHost_SecKeyCopyKeyExchangeResult(rsaPrivate, charonHostECDH, rsaPublic,
+            check_named(revenantHost_SecKeyCopyKeyExchangeResult(rsaPrivate, revenantHostECDH, rsaPublic,
                                                                 NULL, NULL) == NULL,
                         @"and the exchange for that RSA key answers no secret",
                         @"it answered a secret for an RSA key");
             NSData *rsaDigest = digestOf([NSData dataWithBytes:"the RSA cell of the matrix" length:19]);
             CFErrorRef rsaSignError = NULL;
-            CFDataRef rsaSignature = charonHost_SecKeyCreateSignature(rsaPrivate, rsaAlgorithm,
+            CFDataRef rsaSignature = revenantHost_SecKeyCreateSignature(rsaPrivate, rsaAlgorithm,
                                                                     (__bridge CFDataRef)rsaDigest, &rsaSignError);
             if (rsaSignError) { CFRelease(rsaSignError); }
             check_named(rsaSignature != NULL, @"and it signs an RSA key with the release's own SecKeyRawSign",
@@ -412,14 +412,14 @@ int main(int argc, char **argv)
                                          kSecKeyAlgorithmRSASignatureDigestPKCS1v15SHA256),
                             @"and the host's own SecKeyVerifySignature accepts that signature",
                             @"the host refused the RSA signature the port made");
-                check_named(charonHost_SecKeyVerifySignature(rsaPublic, rsaAlgorithm,
+                check_named(revenantHost_SecKeyVerifySignature(rsaPublic, rsaAlgorithm,
                                                             (__bridge CFDataRef)rsaDigest,
                                                             (__bridge CFDataRef)made, NULL),
                             @"and the port's own reader verifies it too",
                             @"the port refused its own RSA signature");
                 uint8_t otherDigest[CC_SHA256_DIGEST_LENGTH];
                 memset(otherDigest, 0x2b, sizeof otherDigest);
-                check_named(!charonHost_SecKeyVerifySignature(rsaPublic, rsaAlgorithm,
+                check_named(!revenantHost_SecKeyVerifySignature(rsaPublic, rsaAlgorithm,
                                                              (__bridge CFDataRef)[NSData dataWithBytes:otherDigest
                                                                                               length:sizeof otherDigest],
                                                              (__bridge CFDataRef)made, NULL),
@@ -435,17 +435,17 @@ int main(int argc, char **argv)
             check_named(otherKey != NULL, @"the host made a key of a class the release cannot sign with",
                         @"the host's SecKeyCreateRandomKey made no such key");
             if (otherKey) {
-                CharonShimMarkReleaseKey(otherKey, kSecAttrKeyTypeAES);
-                check_named(!charonHost_SecKeyIsAlgorithmSupported(otherKey, kSecKeyOperationTypeSign, digestAlgorithm),
+                RevenantShimMarkReleaseKey(otherKey, kSecAttrKeyTypeAES);
+                check_named(!revenantHost_SecKeyIsAlgorithmSupported(otherKey, kSecKeyOperationTypeSign, digestAlgorithm),
                             @"and the port says such a key signs nothing",
                             @"the port claims a signature for a key class it does not carry");
                 CFErrorRef otherSignError = NULL;
-                check_named(charonHost_SecKeyCreateSignature(otherKey, digestAlgorithm,
+                check_named(revenantHost_SecKeyCreateSignature(otherKey, digestAlgorithm,
                                                             (__bridge CFDataRef)digestOf([NSData data]), &otherSignError) == NULL,
                             @"and refuses to sign with it",
                             @"the port signed with a key of a class it does not carry");
                 if (otherSignError) { CFRelease(otherSignError); }
-                check_named(charonHost_SecKeyCopyKeyExchangeResult(otherKey, charonHostECDH, otherKey,
+                check_named(revenantHost_SecKeyCopyKeyExchangeResult(otherKey, revenantHostECDH, otherKey,
                                                                     NULL, NULL) == NULL,
                             @"and exchanges nothing with it",
                             @"the port answered a secret for a key class it does not carry");
@@ -464,7 +464,7 @@ int main(int argc, char **argv)
         }
         NSData *digest = digestOf(message);
         CFErrorRef portError = NULL;
-        CFDataRef made = charonHost_SecKeyCreateSignature(hostPrivate, digestAlgorithm, (__bridge CFDataRef)digest, &portError);
+        CFDataRef made = revenantHost_SecKeyCreateSignature(hostPrivate, digestAlgorithm, (__bridge CFDataRef)digest, &portError);
         if (portError) {
             CFRelease(portError);
         }
@@ -476,7 +476,7 @@ int main(int argc, char **argv)
                         [NSString stringWithFormat:@"and the host's own SecKeyVerifySignature accepts the port's signature, for a %lu byte message", (unsigned long)length],
                         @"the host refused a signature the port made");
             CFErrorRef verifyError = NULL;
-            bool verified = charonHost_SecKeyVerifySignature(hostPrivatePublic, digestAlgorithm, (__bridge CFDataRef)digest,
+            bool verified = revenantHost_SecKeyVerifySignature(hostPrivatePublic, digestAlgorithm, (__bridge CFDataRef)digest,
                                                             (__bridge CFDataRef)signature, &verifyError);
             if (verifyError) {
                 CFRelease(verifyError);
@@ -487,7 +487,7 @@ int main(int argc, char **argv)
             memset(other, 0x3c, sizeof other);
             NSData *otherDigest = [NSData dataWithBytes:other length:sizeof other];
             CFErrorRef wrongError = NULL;
-            bool wrong = charonHost_SecKeyVerifySignature(hostPrivatePublic, digestAlgorithm,
+            bool wrong = revenantHost_SecKeyVerifySignature(hostPrivatePublic, digestAlgorithm,
                                                          (__bridge CFDataRef)otherDigest,
                                                          (__bridge CFDataRef)signature, &wrongError);
             if (wrongError) {
@@ -521,9 +521,9 @@ int main(int argc, char **argv)
                     [NSString stringWithFormat:@"%lu bytes", (unsigned long)madePeer.length]);
     }
     if (curvePrivate && curvePublic && peerOfTwoPublic) {
-        CharonShimMarkPortKey(curvePrivate, oneKeyScalar.bytes, oneKeyScalar.length);
-        CharonShimMarkPortPublicKey(curvePublic);
-        check_named(charonHost_SecKeyIsAlgorithmSupported(curvePrivate, kSecKeyOperationTypeKeyExchange, charonHostECDH),
+        RevenantShimMarkPortKey(curvePrivate, oneKeyScalar.bytes, oneKeyScalar.length);
+        RevenantShimMarkPortPublicKey(curvePublic);
+        check_named(revenantHost_SecKeyIsAlgorithmSupported(curvePrivate, kSecKeyOperationTypeKeyExchange, revenantHostECDH),
                     @"a key of the port's own kind says it exchanges, where the release's key said it cannot",
                     @"the port refuses the exchange for a key it made");
         for (NSUInteger length = 0; length <= 130; length += 65) {
@@ -533,7 +533,7 @@ int main(int argc, char **argv)
             }
             NSData *digest = digestOf(message);
             CFErrorRef portError = NULL;
-            CFDataRef made = charonHost_SecKeyCreateSignature(curvePrivate, digestAlgorithm,
+            CFDataRef made = revenantHost_SecKeyCreateSignature(curvePrivate, digestAlgorithm,
                                                               (__bridge CFDataRef)digest, &portError);
             if (portError) {
                 CFRelease(portError);
@@ -550,7 +550,7 @@ int main(int argc, char **argv)
                             @"the host's SecKeyCreateSignature made nothing");
                 if (hostMade) {
                     CFErrorRef verifyError = NULL;
-                    bool verified = charonHost_SecKeyVerifySignature(curvePublic, digestAlgorithm,
+                    bool verified = revenantHost_SecKeyVerifySignature(curvePublic, digestAlgorithm,
                                                                     (__bridge CFDataRef)digest,
                                                                     (__bridge CFDataRef)hostMade, &verifyError);
                     if (verifyError) {
@@ -562,7 +562,7 @@ int main(int argc, char **argv)
                 uint8_t anotherDigest[CC_SHA256_DIGEST_LENGTH];
                 memset(anotherDigest, 0x5b, sizeof anotherDigest);
                 CFErrorRef otherError = NULL;
-                bool wrong = charonHost_SecKeyVerifySignature(curvePublic, digestAlgorithm,
+                bool wrong = revenantHost_SecKeyVerifySignature(curvePublic, digestAlgorithm,
                                                              (__bridge CFDataRef)[NSData dataWithBytes:anotherDigest
                                                                                               length:sizeof anotherDigest],
                                                              (__bridge CFDataRef)hostMade, &otherError);
@@ -575,7 +575,7 @@ int main(int argc, char **argv)
         }
         SecKeyAlgorithm standardECDH = (SecKeyAlgorithm)CFSTR("ECDH.standardX963");
         CFErrorRef curveError = NULL;
-        CFDataRef portSecret = charonHost_SecKeyCopyKeyExchangeResult(curvePrivate, standardECDH,
+        CFDataRef portSecret = revenantHost_SecKeyCopyKeyExchangeResult(curvePrivate, standardECDH,
                                                                       peerOfTwoPublic, NULL, &curveError);
         if (curveError) {
             CFRelease(curveError);
@@ -597,7 +597,7 @@ int main(int argc, char **argv)
             }
         }
         CFErrorRef hashedError = NULL;
-        CFDataRef hashedSecret = charonHost_SecKeyCopyKeyExchangeResult(curvePrivate, hashedECDH,
+        CFDataRef hashedSecret = revenantHost_SecKeyCopyKeyExchangeResult(curvePrivate, hashedECDH,
                                                                        peerOfTwoPublic, NULL, &hashedError);
         if (hashedError) {
             CFRelease(hashedError);
@@ -616,7 +616,7 @@ int main(int argc, char **argv)
             CFRelease(hashedSecret);
         }
         CFErrorRef refusedError = NULL;
-        CFDataRef refused = charonHost_SecKeyCopyKeyExchangeResult(hostPrivate, charonHostECDH,
+        CFDataRef refused = revenantHost_SecKeyCopyKeyExchangeResult(hostPrivate, revenantHostECDH,
                                                                    curvePublic, NULL, &refusedError);
         check_named(refused == NULL, @"a key of the release's own kind is still refused for the same exchange",
                     @"it answered one");
@@ -631,18 +631,18 @@ int main(int argc, char **argv)
         CFRelease(curvePrivate);
     }
 
-    check_named(charonHost_SecKeyIsAlgorithmSupported(hostPrivate, kSecKeyOperationTypeSign, digestAlgorithm),
+    check_named(revenantHost_SecKeyIsAlgorithmSupported(hostPrivate, kSecKeyOperationTypeSign, digestAlgorithm),
                 @"the port says a key signs", @"the port says it cannot sign a key it is asked about");
-    check_named(charonHost_SecKeyIsAlgorithmSupported(hostPrivate, kSecKeyOperationTypeVerify, digestAlgorithm),
+    check_named(revenantHost_SecKeyIsAlgorithmSupported(hostPrivate, kSecKeyOperationTypeVerify, digestAlgorithm),
                 @"and that it verifies", @"the port says it cannot verify");
-    check_named(!charonHost_SecKeyIsAlgorithmSupported(hostPrivate, kSecKeyOperationTypeKeyExchange,
-                                                       charonHostECDH),
+    check_named(!revenantHost_SecKeyIsAlgorithmSupported(hostPrivate, kSecKeyOperationTypeKeyExchange,
+                                                       revenantHostECDH),
                 @"and that it cannot exchange, which is the measured answer for this release", @"the port claims an exchange");
-    check_named(!charonHost_SecKeyIsAlgorithmSupported(hostPrivate, kSecKeyOperationTypeEncrypt, digestAlgorithm),
+    check_named(!revenantHost_SecKeyIsAlgorithmSupported(hostPrivate, kSecKeyOperationTypeEncrypt, digestAlgorithm),
                 @"nor encrypt, which P-256 has no vocabulary for in Security", @"the port claims an encryption");
     CFErrorRef exchangeError = NULL;
-    CFDataRef secret = charonHost_SecKeyCopyKeyExchangeResult(hostPrivate,
-                                                               charonHostECDH,
+    CFDataRef secret = revenantHost_SecKeyCopyKeyExchangeResult(hostPrivate,
+                                                               revenantHostECDH,
                                                                hostPrivatePublic, NULL, &exchangeError);
     check_named(secret == NULL, @"the port's own SecKeyCopyKeyExchangeResult answers no secret", @"it answered one");
     if (secret) {
@@ -659,7 +659,7 @@ int main(int argc, char **argv)
         CFRelease(exchangeError);
     }
     CFErrorRef nilKeyError = NULL;
-    CFDataRef noKey = charonHost_SecKeyCopyKeyExchangeResult(NULL, charonHostECDH,
+    CFDataRef noKey = revenantHost_SecKeyCopyKeyExchangeResult(NULL, revenantHostECDH,
                                                              hostPrivatePublic, NULL, &nilKeyError);
     check_named(noKey == NULL, @"and a nil key is the same refusal", @"it answered one");
     if (noKey) {
@@ -669,6 +669,6 @@ int main(int argc, char **argv)
         CFRelease(nilKeyError);
     }
 
-    printf("checks=%d failures=%d\n", charon_checks, charon_failures);
-    return charon_failures == 0 ? 0 : 1;
+    printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
+    return revenant_failures == 0 ? 0 : 1;
 }

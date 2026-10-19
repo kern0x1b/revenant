@@ -111,7 +111,7 @@ EMITTED = {
     {by = "libBlocksRuntime, which the toolchain links below 3.2",
      symbols = {"_Block_copy", "_Block_release", "_Block_object_assign", "_Block_object_dispose",
                 "_NSConcreteStackBlock", "_NSConcreteGlobalBlock", "_NSConcreteMallocBlock"}},
-    {by = "the libc++abi of charon@libcxx, which an image that uses them links",
+    {by = "the libc++abi of revenant@libcxx, which an image that uses them links",
      symbols = {"__emutls_get_address", "__cxa_thread_atexit", "__atomic_load", "__atomic_store", "__atomic_exchange",
                 "__atomic_compare_exchange", "__atomic_is_lock_free"}},
     {by = "dyld from 9.0 on, and below it by the -femulated-tls the toolchain compiles with",
@@ -175,13 +175,13 @@ function force_includes(package, symbols)
     local flags = {}
     for _, symbol in ipairs(table.wrap(symbols)) do
         if PROCESS_WIDE[symbol] then
-            raise("%s is exported once for the process by the libc++abi of charon@libcxx, so no image renames it", symbol)
+            raise("%s is exported once for the process by the libc++abi of revenant@libcxx, so no image renames it", symbol)
         end
         if not ARRIVED[symbol] and not CHANGED[symbol] then
             raise("apple-compat provides nothing named %s; it knows %s", symbol, table.concat(table.orderkeys(table.join(ARRIVED, CHANGED)), ", "))
         end
         for _, folder in ipairs(folders) do
-            local header = path.join(folder, "charon", symbol .. ".h")
+            local header = path.join(folder, "revenant", symbol .. ".h")
             if os.isfile(header) then
                 table.insert(flags, "-include" .. header)
                 break

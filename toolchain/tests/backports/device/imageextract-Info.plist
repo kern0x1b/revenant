@@ -9,7 +9,7 @@
 	<key>CFBundleExecutable</key>
 	<string>imageextract</string>
 	<key>CFBundleIdentifier</key>
-	<string>local.charon.backports.imageextract</string>
+	<string>local.revenant.backports.imageextract</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>

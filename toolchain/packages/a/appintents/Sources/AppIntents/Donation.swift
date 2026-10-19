@@ -90,7 +90,7 @@ public struct IntentDonationManager {
     @discardableResult
     public func donate<Intent: AppIntent>(intent: Intent, result: some IntentResult) -> IntentDonationIdentifier {
         let identifier = IntentDonationIdentifier(intentType: Intent.persistentIdentifier)
-        let value = CharonIntentResultText.write(result)
+        let value = RevenantIntentResultText.write(result)
         lock.lock()
         store.add(IntentDonation(identifier: identifier, timestamp: Date(), value: value))
         lock.unlock()
@@ -127,7 +127,7 @@ final class IntentDonationStore {
     init() {
         let support = (NSSearchPathForDirectoriesInDomains(.applicationSupportDirectory, .userDomainMask, true)
             .first ?? NSTemporaryDirectory())
-        let folder = (support as NSString).appendingPathComponent("charon-appintents")
+        let folder = (support as NSString).appendingPathComponent("revenant-appintents")
         try? FileManager.default.createDirectory(atPath: folder, withIntermediateDirectories: true)
         path = (folder as NSString).appendingPathComponent("donations.plist")
     }
@@ -168,10 +168,10 @@ final class IntentDonationStore {
     }
 }
 
-enum CharonIntentResultText {
+enum RevenantIntentResultText {
     static func write(_ result: some IntentResult) -> String? {
         if let dialog = result as? IntentResultContainer<Never, Never, Never, IntentDialog> {
-            return dialog.dialog.map { CharonLocalized.string(of: $0.full) }
+            return dialog.dialog.map { RevenantLocalized.string(of: $0.full) }
         }
         return nil
     }
@@ -377,7 +377,7 @@ final class RelevantIntentStore {
     init() {
         let support = (NSSearchPathForDirectoriesInDomains(.applicationSupportDirectory, .userDomainMask, true)
             .first ?? NSTemporaryDirectory())
-        let folder = (support as NSString).appendingPathComponent("charon-appintents")
+        let folder = (support as NSString).appendingPathComponent("revenant-appintents")
         try? FileManager.default.createDirectory(atPath: folder, withIntermediateDirectories: true)
         path = (folder as NSString).appendingPathComponent("relevant-intents.plist")
     }
@@ -385,7 +385,7 @@ final class RelevantIntentStore {
     func write(_ intents: [RelevantIntent]) {
         let entries: [[String: Any]] = intents.map { intent in
             return ["relevance": intent.relevance, "widgetKind": String(describing: intent.widgetKind),
-                    "displayName": (intent.intent as? _DisplayedPrediction)?.displayRepresentation.map { CharonLocalized.string(of: $0.title) } ?? ""]
+                    "displayName": (intent.intent as? _DisplayedPrediction)?.displayRepresentation.map { RevenantLocalized.string(of: $0.title) } ?? ""]
         }
         guard let data = try? PropertyListSerialization.data(fromPropertyList: entries, format: .xml, options: 0) else {
             return

@@ -2,15 +2,15 @@
 #import <QuartzCore/QuartzCore.h>
 #include <string.h>
 
-static NSString *const CharonKeyPathKey = @"_keyPath";
-static NSString *const CharonTypeKey = @"_type";
-static NSString *const CharonMinimumKey = @"_minimumRelativeValue";
-static NSString *const CharonMaximumKey = @"_maximumRelativeValue";
-static NSString *const CharonEffectsKey = @"_motionEffects";
+static NSString *const RevenantKeyPathKey = @"_keyPath";
+static NSString *const RevenantTypeKey = @"_type";
+static NSString *const RevenantMinimumKey = @"_minimumRelativeValue";
+static NSString *const RevenantMaximumKey = @"_maximumRelativeValue";
+static NSString *const RevenantEffectsKey = @"_motionEffects";
 
-enum { charon_max_components = 16 };
+enum { revenant_max_components = 16 };
 
-static NSUInteger charon_components(id value, CGFloat *components)
+static NSUInteger revenant_components(id value, CGFloat *components)
 {
     if ([value isKindOfClass:[NSNumber class]]) {
         components[0] = (CGFloat)[value doubleValue];
@@ -30,18 +30,18 @@ static NSUInteger charon_components(id value, CGFloat *components)
     return 0;
 }
 
-static id charon_value_like(id model, const CGFloat *components)
+static id revenant_value_like(id model, const CGFloat *components)
 {
     if ([model isKindOfClass:[NSNumber class]])
         return [NSNumber numberWithDouble:components[0]];
     return [NSValue valueWithBytes:components objCType:[model objCType]];
 }
 
-static id charon_combine(id first, id second, CGFloat firstWeight, CGFloat secondWeight)
+static id revenant_combine(id first, id second, CGFloat firstWeight, CGFloat secondWeight)
 {
-    CGFloat left[charon_max_components], right[charon_max_components], result[charon_max_components];
-    NSUInteger count = charon_components(first, left);
-    if (!count || charon_components(second, right) != count)
+    CGFloat left[revenant_max_components], right[revenant_max_components], result[revenant_max_components];
+    NSUInteger count = revenant_components(first, left);
+    if (!count || revenant_components(second, right) != count)
         return nil;
     if ([first isKindOfClass:[NSNumber class]] != [second isKindOfClass:[NSNumber class]])
         return nil;
@@ -49,19 +49,19 @@ static id charon_combine(id first, id second, CGFloat firstWeight, CGFloat secon
         return nil;
     for (NSUInteger index = 0; index < count; index++)
         result[index] = left[index] * firstWeight + right[index] * secondWeight;
-    return charon_value_like(first, result);
+    return revenant_value_like(first, result);
 }
 
 @implementation UIMotionEffect
 
-+ (id)charon_sumOfRelativeValue:(id)first andRelativeValue:(id)second
++ (id)revenant_sumOfRelativeValue:(id)first andRelativeValue:(id)second
 {
-    return charon_combine(first, second, 1, 1);
+    return revenant_combine(first, second, 1, 1);
 }
 
-+ (id)charon_relativeValue:(id)value scaledBy:(CGFloat)factor
++ (id)revenant_relativeValue:(id)value scaledBy:(CGFloat)factor
 {
-    return charon_combine(value, value, factor, 0);
+    return revenant_combine(value, value, factor, 0);
 }
 
 - (instancetype)init
@@ -115,10 +115,10 @@ static id charon_combine(id first, id second, CGFloat firstWeight, CGFloat secon
 - (instancetype)initWithCoder:(NSCoder *)coder
 {
     if ((self = [super initWithCoder:coder])) {
-        _keyPath = [[coder decodeObjectForKey:CharonKeyPathKey] copy];
-        _type = (UIInterpolatingMotionEffectType)[coder decodeIntegerForKey:CharonTypeKey];
-        _minimumRelativeValue = [coder decodeObjectForKey:CharonMinimumKey];
-        _maximumRelativeValue = [coder decodeObjectForKey:CharonMaximumKey];
+        _keyPath = [[coder decodeObjectForKey:RevenantKeyPathKey] copy];
+        _type = (UIInterpolatingMotionEffectType)[coder decodeIntegerForKey:RevenantTypeKey];
+        _minimumRelativeValue = [coder decodeObjectForKey:RevenantMinimumKey];
+        _maximumRelativeValue = [coder decodeObjectForKey:RevenantMaximumKey];
     }
     return self;
 }
@@ -126,10 +126,10 @@ static id charon_combine(id first, id second, CGFloat firstWeight, CGFloat secon
 - (void)encodeWithCoder:(NSCoder *)coder
 {
     [super encodeWithCoder:coder];
-    [coder encodeObject:_keyPath forKey:CharonKeyPathKey];
-    [coder encodeInteger:_type forKey:CharonTypeKey];
-    [coder encodeObject:_minimumRelativeValue forKey:CharonMinimumKey];
-    [coder encodeObject:_maximumRelativeValue forKey:CharonMaximumKey];
+    [coder encodeObject:_keyPath forKey:RevenantKeyPathKey];
+    [coder encodeInteger:_type forKey:RevenantTypeKey];
+    [coder encodeObject:_minimumRelativeValue forKey:RevenantMinimumKey];
+    [coder encodeObject:_maximumRelativeValue forKey:RevenantMaximumKey];
 }
 
 - (id)copyWithZone:(NSZone *)zone
@@ -177,7 +177,7 @@ static id charon_combine(id first, id second, CGFloat firstWeight, CGFloat secon
     CGFloat offset = _type == UIInterpolatingMotionEffectTypeTiltAlongHorizontalAxis ? viewerOffset.horizontal : -viewerOffset.vertical;
     offset = MAX(-1, MIN(1, offset));
     CGFloat progress = (offset + 1) / 2;
-    id value = charon_combine(_minimumRelativeValue, _maximumRelativeValue, 1 - progress, progress);
+    id value = revenant_combine(_minimumRelativeValue, _maximumRelativeValue, 1 - progress, progress);
     return value ? [NSDictionary dictionaryWithObject:value forKey:_keyPath] : nil;
 }
 
@@ -196,14 +196,14 @@ static id charon_combine(id first, id second, CGFloat firstWeight, CGFloat secon
 - (instancetype)initWithCoder:(NSCoder *)coder
 {
     if ((self = [super initWithCoder:coder]))
-        _motionEffects = [[coder decodeObjectForKey:CharonEffectsKey] copy];
+        _motionEffects = [[coder decodeObjectForKey:RevenantEffectsKey] copy];
     return self;
 }
 
 - (void)encodeWithCoder:(NSCoder *)coder
 {
     [super encodeWithCoder:coder];
-    [coder encodeObject:_motionEffects forKey:CharonEffectsKey];
+    [coder encodeObject:_motionEffects forKey:RevenantEffectsKey];
 }
 
 - (id)copyWithZone:(NSZone *)zone
@@ -231,7 +231,7 @@ static id charon_combine(id first, id second, CGFloat firstWeight, CGFloat secon
         for (NSString *keyPath in values) {
             id value = [values objectForKey:keyPath];
             id existing = [merged objectForKey:keyPath];
-            id combined = existing ? charon_combine(existing, value, 1, 1) : value;
+            id combined = existing ? revenant_combine(existing, value, 1, 1) : value;
             if (combined)
                 [merged setObject:combined forKey:keyPath];
         }

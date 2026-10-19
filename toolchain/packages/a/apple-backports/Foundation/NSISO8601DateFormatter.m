@@ -1,6 +1,6 @@
 #import <Foundation/Foundation.h>
 
-static NSString *charon_without_offset_colon(NSString *written)
+static NSString *revenant_without_offset_colon(NSString *written)
 {
     NSUInteger length = written.length;
     if (length < 6)
@@ -13,7 +13,7 @@ static NSString *charon_without_offset_colon(NSString *written)
                stringByAppendingFormat:@"%@%@", [tail substringToIndex:3], [tail substringFromIndex:4]];
 }
 
-static NSString *charon_with_offset_colon(NSString *written)
+static NSString *revenant_with_offset_colon(NSString *written)
 {
     NSUInteger length = written.length;
     if (length < 5)
@@ -29,7 +29,7 @@ static NSString *charon_with_offset_colon(NSString *written)
                stringByAppendingFormat:@"%@:%@", [tail substringToIndex:3], [tail substringFromIndex:3]];
 }
 
-static NSString *charon_iso_date_pattern(NSISO8601DateFormatOptions options)
+static NSString *revenant_iso_date_pattern(NSISO8601DateFormatOptions options)
 {
     BOOL year = (options & NSISO8601DateFormatWithYear) != 0;
     BOOL month = (options & NSISO8601DateFormatWithMonth) != 0;
@@ -49,7 +49,7 @@ static NSString *charon_iso_date_pattern(NSISO8601DateFormatOptions options)
     return [pieces componentsJoinedByString:dashes ? @"-" : @""];
 }
 
-static BOOL charon_icu_writes_offsets(void)
+static BOOL revenant_icu_writes_offsets(void)
 {
     static BOOL known;
     static dispatch_once_t once;
@@ -71,7 +71,7 @@ static BOOL charon_icu_writes_offsets(void)
     return known;
 }
 
-static NSString *charon_iso_time_pattern(NSISO8601DateFormatOptions options)
+static NSString *revenant_iso_time_pattern(NSISO8601DateFormatOptions options)
 {
     NSMutableString *pattern = [[NSMutableString alloc] init];
     if (options & NSISO8601DateFormatWithTime) {
@@ -80,7 +80,7 @@ static NSString *charon_iso_time_pattern(NSISO8601DateFormatOptions options)
             [pattern appendString:@".SSS"];
     }
     if (options & NSISO8601DateFormatWithTimeZone) {
-        if (charon_icu_writes_offsets())
+        if (revenant_icu_writes_offsets())
             [pattern appendString:(options & NSISO8601DateFormatWithColonSeparatorInTimeZone) ? @"XXXXX" : @"XXXX"];
         else
             [pattern appendString:@"ZZZZZ"];
@@ -88,7 +88,7 @@ static NSString *charon_iso_time_pattern(NSISO8601DateFormatOptions options)
     return pattern;
 }
 
-NSString *charon_iso8601_pattern(NSISO8601DateFormatOptions options)
+NSString *revenant_iso8601_pattern(NSISO8601DateFormatOptions options)
 {
     NSUInteger asked = 0;
     for (NSISO8601DateFormatOptions bit = 1; bit; bit <<= 1)
@@ -96,7 +96,7 @@ NSString *charon_iso8601_pattern(NSISO8601DateFormatOptions options)
             asked++;
     if (asked < 2)
         return @"";
-    NSString *date = charon_iso_date_pattern(options), *time = charon_iso_time_pattern(options);
+    NSString *date = revenant_iso_date_pattern(options), *time = revenant_iso_time_pattern(options);
     if (!date.length)
         return time;
     if (!time.length)
@@ -129,7 +129,7 @@ NSString *charon_iso8601_pattern(NSISO8601DateFormatOptions options)
     if ((self = [super init])) {
         _formatOptions = NSISO8601DateFormatWithInternetDateTime;
         _timeZone = [NSTimeZone timeZoneWithName:@"GMT"];
-        [self charon_updateFormatter];
+        [self revenant_updateFormatter];
     }
     return self;
 }
@@ -152,7 +152,7 @@ NSString *charon_iso8601_pattern(NSISO8601DateFormatOptions options)
         } else {
             _timeZone = [NSTimeZone timeZoneWithName:@"GMT"];
         }
-        [self charon_updateFormatter];
+        [self revenant_updateFormatter];
     }
     return self;
 }
@@ -173,7 +173,7 @@ NSString *charon_iso8601_pattern(NSISO8601DateFormatOptions options)
         CFRelease(_formatter);
 }
 
-- (void)charon_updateFormatter
+- (void)revenant_updateFormatter
 {
     if (_formatter)
         CFRelease(_formatter);
@@ -182,7 +182,7 @@ NSString *charon_iso8601_pattern(NSISO8601DateFormatOptions options)
                                        kCFDateFormatterNoStyle, kCFDateFormatterNoStyle);
     if (locale)
         CFRelease(locale);
-    CFDateFormatterSetFormat(_formatter, (__bridge CFStringRef)charon_iso8601_pattern(_formatOptions));
+    CFDateFormatterSetFormat(_formatter, (__bridge CFStringRef)revenant_iso8601_pattern(_formatOptions));
     CFDateFormatterSetProperty(_formatter, kCFDateFormatterTimeZone, (__bridge CFTypeRef)_timeZone);
 }
 
@@ -207,7 +207,7 @@ NSString *charon_iso8601_pattern(NSISO8601DateFormatOptions options)
              @" | NSISO8601DateFormatWithColonSeparatorInTimeZone | NSISO8601DateFormatWithFractionalSeconds"
              @" | NSISO8601DateFormatWithFullDate | NSISO8601DateFormatWithFullTime | NSISO8601DateFormatWithInternetDateTime))");
     _formatOptions = formatOptions;
-    [self charon_updateFormatter];
+    [self revenant_updateFormatter];
 }
 
 - (NSTimeZone *)timeZone
@@ -220,7 +220,7 @@ NSString *charon_iso8601_pattern(NSISO8601DateFormatOptions options)
     if ([_timeZone isEqualToTimeZone:timeZone])
         return;
     _timeZone = timeZone ? [timeZone copy] : [NSTimeZone timeZoneWithName:@"GMT"];
-    [self charon_updateFormatter];
+    [self revenant_updateFormatter];
 }
 
 - (NSString *)stringFromDate:(NSDate *)date
@@ -237,14 +237,14 @@ NSString *charon_iso8601_pattern(NSISO8601DateFormatOptions options)
     if (!made)
         return nil;
     NSString *written = (__bridge_transfer NSString *)made;
-    return [self charon_basicZoneWanted] ? charon_without_offset_colon(written) : written;
+    return [self revenant_basicZoneWanted] ? revenant_without_offset_colon(written) : written;
 }
 
-- (BOOL)charon_basicZoneWanted
+- (BOOL)revenant_basicZoneWanted
 {
     return (_formatOptions & NSISO8601DateFormatWithTimeZone)
         && !(_formatOptions & NSISO8601DateFormatWithColonSeparatorInTimeZone)
-        && !charon_icu_writes_offsets();
+        && !revenant_icu_writes_offsets();
 }
 
 - (NSDate *)dateFromString:(NSString *)string
@@ -261,7 +261,7 @@ NSString *charon_iso8601_pattern(NSISO8601DateFormatOptions options)
                                      userInfo:@{NSLocalizedDescriptionKey: @"The value is not a valid ISO 8601 date."}];
         return NO;
     }
-    NSString *text = [self charon_basicZoneWanted] ? charon_with_offset_colon(string) : string;
+    NSString *text = [self revenant_basicZoneWanted] ? revenant_with_offset_colon(string) : string;
     CFAbsoluteTime when = 0;
     CFRange whole = CFRangeMake(0, (CFIndex)text.length);
     NSDate *date = CFDateFormatterGetAbsoluteTimeFromString(_formatter, (__bridge CFStringRef)text, &whole, &when)

@@ -1,4 +1,4 @@
-#import "CharonMPSGraph.h"
+#import "RevenantMPSGraph.h"
 
 @implementation MPSGraphOperation {
     MPSGraph *_graph;
@@ -6,12 +6,12 @@
     NSArray<MPSGraphTensor *> *_inputTensors;
     NSArray<MPSGraphTensor *> *_outputTensors;
     NSArray<MPSGraphOperation *> *_controlDependencies;
-    CharonMPSGraphOperationKind _kind;
+    RevenantMPSGraphOperationKind _kind;
     NSDictionary *_parameters;
 }
 
 - (instancetype)initWithGraph:(MPSGraph *)graph
-                         kind:(CharonMPSGraphOperationKind)kind
+                         kind:(RevenantMPSGraphOperationKind)kind
                          name:(NSString *)name
                         inputs:(NSArray<MPSGraphTensor *> *)inputs
                        outputs:(NSArray<MPSGraphTensor *> *)outputs
@@ -58,22 +58,22 @@
     return _name;
 }
 
-- (CharonMPSGraphOperationKind)charon_mps_kind
+- (RevenantMPSGraphOperationKind)revenant_mps_kind
 {
     return _kind;
 }
 
-- (NSDictionary *)charon_mps_parameters
+- (NSDictionary *)revenant_mps_parameters
 {
     return _parameters;
 }
 
-- (void)charon_mps_setParameters:(NSDictionary *)parameters
+- (void)revenant_mps_setParameters:(NSDictionary *)parameters
 {
     _parameters = [parameters copy];
 }
 
-- (void)charon_mps_setOutputTensors:(NSArray<MPSGraphTensor *> *)outputs
+- (void)revenant_mps_setOutputTensors:(NSArray<MPSGraphTensor *> *)outputs
 {
     _outputTensors = [outputs copy];
 }

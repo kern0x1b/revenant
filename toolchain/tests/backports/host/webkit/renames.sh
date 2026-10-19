@@ -1,12 +1,12 @@
 # renames.sh — sourced, not run: renames() prints the -D flags that give the port's own classes and C symbols a
-# CharonHost prefix, so the port and the system's WebKit can live side by side in one process. This is
+# RevenantHost prefix, so the port and the system's WebKit can live side by side in one process. This is
 # uikit2's renames.sh, kept beside the test that uses it, with one thing changed and the change forced by
 # measurement.
 #
 # uikit2's version reads the class names out of the compiled objects, from _OBJC_CLASS_$_ symbols. That
 # works there because those sources ADD categories to classes the system owns, so the port defines nothing.
 # This family's sources do the opposite: each of them IMPLEMENTS a class the system also declares, so with
-# -DCHARON_HOST_DIFFERENTIAL the port's own header steps aside and clang matches the SDK's @interface.
+# -DREVENANT_HOST_DIFFERENTIAL the port's own header steps aside and clang matches the SDK's @interface.
 # Measured over the objects run.sh itself builds: pass one emits eight _OBJC_CLASS_$_ symbols, and they are the
 # eight classes the flags rename, so the earlier claim of exactly one was wrong. The names still come from the
 # port's own sources rather than from a symbol scan: every class its headers declare and every class its
@@ -23,9 +23,9 @@ renames() {
     # $2: the object files, for the C symbols they export
     grep -hE '^[[:space:]]*@(interface|implementation)[[:space:]]+[A-Za-z_]' $1 |
         sed -E 's/^[[:space:]]*@(interface|implementation)[[:space:]]+([A-Za-z_][A-Za-z0-9_]*).*/\2/' | sort -u |
-        awk '{ print "-D" $0 "=CharonHost" $0 }'
+        awk '{ print "-D" $0 "=RevenantHost" $0 }'
     defined=$(nm -m $2 | grep -v '(undefined)')
     printf '%s\n' "$defined" | sed -n 's/.* external _\([A-Za-z_][A-Za-z0-9_]*\)$/\1/p' |
         grep -vE '^(OBJC_|__copy_helper_block_|__destroy_helper_block_|__block_|__NSGlobal)' | sort -u |
-        awk '{ print "-D" $0 "=CharonHost" $0 }'
+        awk '{ print "-D" $0 "=RevenantHost" $0 }'
 }

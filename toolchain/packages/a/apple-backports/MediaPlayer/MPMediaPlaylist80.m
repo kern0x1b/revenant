@@ -1,22 +1,22 @@
 #import <Foundation/Foundation.h>
-#if defined(CHARON_MEDIAPLAYER_STANDIN)
+#if defined(REVENANT_MEDIAPLAYER_STANDIN)
 #import "MPMediaItemStandin.h"
 #else
 #import <MediaPlayer/MediaPlayer.h>
 #endif
 
-#if defined(CHARON_MEDIAPLAYER_STANDIN)
+#if defined(REVENANT_MEDIAPLAYER_STANDIN)
 @interface MPMediaPlaylist : NSObject
 - (id)valueForProperty:(NSString *)property;
 @end
-@interface MPMediaPlaylist (Charon80)
+@interface MPMediaPlaylist (Revenant80)
 @property (nonatomic, readonly, nullable) NSArray<MPMediaItem *> *seedItems;
 @end
 #endif
 
 extern NSString *const MPMediaPlaylistPropertySeedItems;
 
-@implementation MPMediaPlaylist (Charon80)
+@implementation MPMediaPlaylist (Revenant80)
 
 - (nullable NSArray<MPMediaItem *> *)seedItems {
     id value = [self valueForProperty:MPMediaPlaylistPropertySeedItems];

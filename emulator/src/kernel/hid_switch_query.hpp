@@ -4,7 +4,7 @@
 
 #pragma once
 
-namespace shade {
+namespace emulator {
 class UserlandHleRegistry;
 void register_hid_switch_queries(UserlandHleRegistry& registry);
 }

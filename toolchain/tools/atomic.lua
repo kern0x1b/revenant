@@ -13,7 +13,7 @@ end
 local function sibling_of(filepath)
     while true do
         counter = counter + 1
-        local sibling = string.format("%s.charon-new.%d.%d", filepath, os.getpid(), counter)
+        local sibling = string.format("%s.revenant-new.%d.%d", filepath, os.getpid(), counter)
         if not os.exists(sibling) then
             return sibling
         end

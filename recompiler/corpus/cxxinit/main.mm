@@ -5,7 +5,7 @@
 
 static void Mark(const char *event)
 {
-    FILE *f = fopen("/private/var/charon/cxxinit.log", "a");
+    FILE *f = fopen("/private/var/revenant/cxxinit.log", "a");
     if (f) { fprintf(f, "CXXINIT %s\n", event); fclose(f); }
     fprintf(stderr, "CXXINIT %s\n", event);
 }

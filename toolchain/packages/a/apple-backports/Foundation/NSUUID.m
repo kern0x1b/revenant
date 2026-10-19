@@ -5,7 +5,7 @@ __attribute__((visibility("hidden")))
 @interface __NSConcreteUUID : NSUUID
 @end
 
-static NSUInteger charon_uuid_hash(const uint8_t *bytes)
+static NSUInteger revenant_uuid_hash(const uint8_t *bytes)
 {
     uint32_t hash = 0;
     for (int index = 0; index < 16; index++) {
@@ -18,7 +18,7 @@ static NSUInteger charon_uuid_hash(const uint8_t *bytes)
     return hash;
 }
 
-static NSException *charon_uuid_unreadable(NSString *reason)
+static NSException *revenant_uuid_unreadable(NSString *reason)
 {
     return [NSException exceptionWithName:NSInvalidUnarchiveOperationException reason:reason userInfo:nil];
 }
@@ -71,7 +71,7 @@ static NSException *charon_uuid_unreadable(NSString *reason)
 {
     uuid_t bytes;
     [self getUUIDBytes:bytes];
-    return charon_uuid_hash(bytes);
+    return revenant_uuid_hash(bytes);
 }
 
 - (BOOL)isEqual:(id)other
@@ -103,9 +103,9 @@ static NSException *charon_uuid_unreadable(NSString *reason)
     NSUInteger length = 0;
     const uint8_t *bytes = [coder decodeBytesForKey:@"NS.uuidbytes" returnedLength:&length];
     if (!bytes)
-        [charon_uuid_unreadable(@"The data couldn’t be read because it is missing.") raise];
+        [revenant_uuid_unreadable(@"The data couldn’t be read because it is missing.") raise];
     if (length != sizeof(uuid_t))
-        [charon_uuid_unreadable(@"The data couldn’t be read because it isn’t in the correct format.") raise];
+        [revenant_uuid_unreadable(@"The data couldn’t be read because it isn’t in the correct format.") raise];
     return [self initWithUUIDBytes:bytes];
 }
 

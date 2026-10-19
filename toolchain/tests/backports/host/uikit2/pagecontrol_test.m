@@ -32,7 +32,7 @@ static BOOL is_blue(const uint8_t *pixel)
     return pixel[0] < 60 && pixel[1] < 60 && pixel[2] > 200;
 }
 
-void charon_windowed_run(UIWindow *window)
+void revenant_windowed_run(UIWindow *window)
 {
     @autoreleasepool {
         UIPageControl *control = [[UIPageControl alloc] initWithFrame:CGRectMake(0, 0, 120, 30)];
@@ -48,22 +48,22 @@ void charon_windowed_run(UIWindow *window)
 
         [control layoutSubviews];
         pixel_at(control.layer, width, height, first_x, centre_y, pixel);
-        charon_check(!is_red(pixel) && !is_blue(pixel), "a page with no image keeps the release's dot",
+        revenant_check(!is_red(pixel) && !is_blue(pixel), "a page with no image keeps the release's dot",
                      [NSString stringWithFormat:@"pixel %d %d %d", pixel[0], pixel[1], pixel[2]]);
 
         [control setIndicatorImage:solid_image([UIColor blueColor]) forPage:1];
         [control layoutSubviews];
         pixel_at(control.layer, width, height, middle_x, centre_y, pixel);
-        charon_check(is_blue(pixel), "a page's own image is drawn at its dot's centre",
+        revenant_check(is_blue(pixel), "a page's own image is drawn at its dot's centre",
                      [NSString stringWithFormat:@"pixel %d %d %d", pixel[0], pixel[1], pixel[2]]);
 
         control.preferredIndicatorImage = solid_image([UIColor redColor]);
         [control layoutSubviews];
         pixel_at(control.layer, width, height, first_x, centre_y, pixel);
-        charon_check(is_red(pixel), "the preferred image shows on the first page", [NSString stringWithFormat:@"pixel %d %d %d", pixel[0], pixel[1], pixel[2]]);
+        revenant_check(is_red(pixel), "the preferred image shows on the first page", [NSString stringWithFormat:@"pixel %d %d %d", pixel[0], pixel[1], pixel[2]]);
         pixel_at(control.layer, width, height, last_x, centre_y, pixel);
-        charon_check(is_red(pixel), "the preferred image shows on the last page", [NSString stringWithFormat:@"pixel %d %d %d", pixel[0], pixel[1], pixel[2]]);
+        revenant_check(is_red(pixel), "the preferred image shows on the last page", [NSString stringWithFormat:@"pixel %d %d %d", pixel[0], pixel[1], pixel[2]]);
         pixel_at(control.layer, width, height, middle_x, centre_y, pixel);
-        charon_check(is_blue(pixel), "a page's own image wins over the preferred one", [NSString stringWithFormat:@"pixel %d %d %d", pixel[0], pixel[1], pixel[2]]);
+        revenant_check(is_blue(pixel), "a page's own image wins over the preferred one", [NSString stringWithFormat:@"pixel %d %d %d", pixel[0], pixel[1], pixel[2]]);
     }
 }

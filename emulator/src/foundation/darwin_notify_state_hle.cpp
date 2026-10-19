@@ -13,7 +13,7 @@
 #include "foundation/address_space.hpp"
 #include "foundation/userland_hle.hpp"
 
-namespace shade {
+namespace emulator {
 namespace {
 
     constexpr std::string_view libsystem_image { "/usr/lib/libSystem.B.dylib" };

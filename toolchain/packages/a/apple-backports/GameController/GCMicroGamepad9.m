@@ -1,4 +1,4 @@
-#import "CharonGC.h"
+#import "RevenantGC.h"
 
 #pragma clang diagnostic ignored "-Wobjc-missing-property-synthesis"
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
@@ -13,10 +13,10 @@
 
 - (instancetype)init
 {
-    return [self initWithCharonSpecs:[CharonGCTables microSpecs]];
+    return [self initWithRevenantSpecs:[RevenantGCTables microSpecs]];
 }
 
-- (void)charon_setController:(GCController *)controller
+- (void)revenant_setController:(GCController *)controller
 {
     _controller = controller;
 }
@@ -33,22 +33,22 @@
 
 - (GCControllerDirectionPad *)dpad
 {
-    return (id)[self charon_elementNamed:@"Direction Pad"];
+    return (id)[self revenant_elementNamed:@"Direction Pad"];
 }
 
 - (GCControllerButtonInput *)buttonA
 {
-    return (id)[self charon_elementNamed:@"Button A"];
+    return (id)[self revenant_elementNamed:@"Button A"];
 }
 
 - (GCControllerButtonInput *)buttonX
 {
-    return (id)[self charon_elementNamed:@"Button X"];
+    return (id)[self revenant_elementNamed:@"Button X"];
 }
 
 - (GCControllerButtonInput *)buttonMenu
 {
-    return (id)[self charon_elementNamed:@"Button Menu"];
+    return (id)[self revenant_elementNamed:@"Button Menu"];
 }
 
 @end

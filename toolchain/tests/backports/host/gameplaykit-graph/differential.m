@@ -33,7 +33,7 @@ static void contract(BOOL ok, NSString *what)
     }
 }
 
-@interface CharonHostPoint : NSObject {
+@interface RevenantHostPoint : NSObject {
 @public
     float px;
     float py;
@@ -41,10 +41,10 @@ static void contract(BOOL ok, NSString *what)
 + (instancetype)atX:(float)x y:(float)y;
 @end
 
-@implementation CharonHostPoint
+@implementation RevenantHostPoint
 + (instancetype)atX:(float)x y:(float)y
 {
-    CharonHostPoint *answer = [[CharonHostPoint alloc] init];
+    RevenantHostPoint *answer = [[RevenantHostPoint alloc] init];
     answer->px = x;
     answer->py = y;
     return answer;
@@ -53,24 +53,24 @@ static void contract(BOOL ok, NSString *what)
 
 static NSArray *one(vector_float2 a)
 {
-    return [NSArray arrayWithObject:[CharonHostPoint atX:a.x y:a.y]];
+    return [NSArray arrayWithObject:[RevenantHostPoint atX:a.x y:a.y]];
 }
 
 static NSArray *two(vector_float2 a, vector_float2 b)
 {
-    return [NSArray arrayWithObjects:[CharonHostPoint atX:a.x y:a.y], [CharonHostPoint atX:b.x y:b.y], nil];
+    return [NSArray arrayWithObjects:[RevenantHostPoint atX:a.x y:a.y], [RevenantHostPoint atX:b.x y:b.y], nil];
 }
 
 static NSArray *four(vector_float2 a, vector_float2 b, vector_float2 c, vector_float2 d)
 {
-    return [NSArray arrayWithObjects:[CharonHostPoint atX:a.x y:a.y], [CharonHostPoint atX:b.x y:b.y],
-                                    [CharonHostPoint atX:c.x y:c.y], [CharonHostPoint atX:d.x y:d.y], nil];
+    return [NSArray arrayWithObjects:[RevenantHostPoint atX:a.x y:a.y], [RevenantHostPoint atX:b.x y:b.y],
+                                    [RevenantHostPoint atX:c.x y:c.y], [RevenantHostPoint atX:d.x y:d.y], nil];
 }
 
 static NSString *printed(NSArray *boxes)
 {
     NSMutableString *answer = [NSMutableString string];
-    for (CharonHostPoint *box in boxes) {
+    for (RevenantHostPoint *box in boxes) {
         [answer appendFormat:@" (%g,%g)", box->px, box->py];
     }
     return answer;

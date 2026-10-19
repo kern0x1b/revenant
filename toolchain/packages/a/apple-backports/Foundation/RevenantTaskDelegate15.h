@@ -1,5 +1,5 @@
 #import <Foundation/Foundation.h>
 
-@interface NSURLSessionTask (CharonTaskDelegateReset)
-- (void)charon_resetTaskDelegate;
+@interface NSURLSessionTask (RevenantTaskDelegateReset)
+- (void)revenant_resetTaskDelegate;
 @end

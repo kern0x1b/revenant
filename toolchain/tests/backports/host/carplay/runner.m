@@ -3,52 +3,52 @@
 #import <objc/message.h>
 #import <CarPlay/CarPlay.h>
 
-@interface charonHost_CPVoiceControlTemplate (CharonHarness)
-- (UIViewController *)charon_viewControllerForInterfaceController:(id)controller;
+@interface revenantHost_CPVoiceControlTemplate (RevenantHarness)
+- (UIViewController *)revenant_viewControllerForInterfaceController:(id)controller;
 @end
 
-@interface charonHost_CPTrip (CharonHarness)
-- (instancetype)initCharonTrip;
+@interface revenantHost_CPTrip (RevenantHarness)
+- (instancetype)initRevenantTrip;
 @end
 
-@interface charonHost_CPManeuver (CharonHarness)
-- (instancetype)initCharonManeuver;
+@interface revenantHost_CPManeuver (RevenantHarness)
+- (instancetype)initRevenantManeuver;
 @end
 
-@interface charonHost_CPMapTemplate (CharonHarness)
-- (id)charon_navigationSession;
-- (void)charon_setNavigationSession:(id)session;
-- (UIView *)charon_mapView;
-- (void)charon_setMapView:(UIView *)view;
+@interface revenantHost_CPMapTemplate (RevenantHarness)
+- (id)revenant_navigationSession;
+- (void)revenant_setNavigationSession:(id)session;
+- (UIView *)revenant_mapView;
+- (void)revenant_setMapView:(UIView *)view;
 @end
 
-@interface charonHost_CPTravelEstimates (CharonHarness)
-- (instancetype)initCharonWithTimeRemaining:(NSTimeInterval)time;
+@interface revenantHost_CPTravelEstimates (RevenantHarness)
+- (instancetype)initRevenantWithTimeRemaining:(NSTimeInterval)time;
 @end
 
-@interface charonHost_CPLane (CharonHarness)
+@interface revenantHost_CPLane (RevenantHarness)
 - (instancetype)init;
 @end
 
-@interface charonHost_CPLaneGuidance (CharonHarness)
+@interface revenantHost_CPLaneGuidance (RevenantHarness)
 - (instancetype)init;
 @end
 
-@interface charonHost_CPSessionConfiguration (CharonHarness)
+@interface revenantHost_CPSessionConfiguration (RevenantHarness)
 - (instancetype)initWithDelegate:(id)delegate;
 @end
 
-@protocol charonHost_CPSessionConfigurationDelegate <NSObject>
+@protocol revenantHost_CPSessionConfigurationDelegate <NSObject>
 @optional
 - (void)sessionConfiguration:(id)sessionConfiguration
     limitedUserInterfacesChanged:(NSUInteger)limitedUserInterfaces;
 - (void)sessionConfiguration:(id)sessionConfiguration contentStyleChanged:(NSUInteger)contentStyle;
 @end
 
-@interface charonHost_TestSessionConfigurationDelegate : NSObject <charonHost_CPSessionConfigurationDelegate>
+@interface revenantHost_TestSessionConfigurationDelegate : NSObject <revenantHost_CPSessionConfigurationDelegate>
 @end
 
-@implementation charonHost_TestSessionConfigurationDelegate
+@implementation revenantHost_TestSessionConfigurationDelegate
 @end
 
 static int gChecks = 0;
@@ -130,27 +130,27 @@ int main(int argc, const char *argv[])
         }
 
         printf("# the port's own voice control, on this Mac, through the runtime\n");
-        printf("# every name is charonHost_-prefixed, so Apple's CarPlay is not reachable here\n\n");
+        printf("# every name is revenantHost_-prefixed, so Apple's CarPlay is not reachable here\n\n");
 
         printf("== CPVoiceControlState ==\n");
-        charonHost_CPVoiceControlState *state = [[charonHost_CPVoiceControlState alloc]
-            initWithIdentifier:@"charon.listening"
+        revenantHost_CPVoiceControlState *state = [[revenantHost_CPVoiceControlState alloc]
+            initWithIdentifier:@"revenant.listening"
                   titleVariants:@[@"Listening", @"Listen"]
                           image:nil
                         repeats:YES];
         check(@"identifier answers what the initialiser was given",
-              [state.identifier isEqualToString:@"charon.listening"], describe(state.identifier));
+              [state.identifier isEqualToString:@"revenant.listening"], describe(state.identifier));
         check(@"titleVariants answers the array it was given", state.titleVariants.count == 2,
               describe(state.titleVariants));
         check(@"repeats answers YES", state.repeats == YES,
               [NSString stringWithFormat:@"%d", (int)state.repeats]);
         check(@"image answers nil when none was given", state.image == nil, describe(state.image));
         check(@"+supportsSecureCoding is YES (NSSecureCoding is in the header)",
-              [charonHost_CPVoiceControlState supportsSecureCoding] ? @"YES" : @"NO",
-              [charonHost_CPVoiceControlState supportsSecureCoding] ? @"YES" : @"NO");
+              [revenantHost_CPVoiceControlState supportsSecureCoding] ? @"YES" : @"NO",
+              [revenantHost_CPVoiceControlState supportsSecureCoding] ? @"YES" : @"NO");
 
-        charonHost_CPVoiceControlState *bare = [[charonHost_CPVoiceControlState alloc]
-            initWithIdentifier:@"charon.bare" titleVariants:nil image:nil repeats:NO];
+        revenantHost_CPVoiceControlState *bare = [[revenantHost_CPVoiceControlState alloc]
+            initWithIdentifier:@"revenant.bare" titleVariants:nil image:nil repeats:NO];
         check(@"titleVariants answers nil when it was given nil", bare.titleVariants == nil,
               describe(bare.titleVariants));
 
@@ -159,8 +159,8 @@ int main(int argc, const char *argv[])
         UIRectFill(CGRectMake(0.0, 0.0, 300.0, 300.0));
         UIImage *large = UIGraphicsGetImageFromCurrentImageContext();
         UIGraphicsEndImageContext();
-        charonHost_CPVoiceControlState *scaled = [[charonHost_CPVoiceControlState alloc]
-            initWithIdentifier:@"charon.scaled" titleVariants:@[@"Scaled"] image:large repeats:NO];
+        revenantHost_CPVoiceControlState *scaled = [[revenantHost_CPVoiceControlState alloc]
+            initWithIdentifier:@"revenant.scaled" titleVariants:@[@"Scaled"] image:large repeats:NO];
         check(@"an image over 150 points a side comes back 150 by 150",
               scaled.image != nil && scaled.image.size.width <= 150.0 && scaled.image.size.height <= 150.0,
               [NSString stringWithFormat:@"%g by %g", scaled.image.size.width, scaled.image.size.height]);
@@ -168,50 +168,50 @@ int main(int argc, const char *argv[])
         NSError *error = nil;
         NSData *coded = [NSKeyedArchiver archivedDataWithRootObject:state requiringSecureCoding:YES
                                                                 error:&error];
-        charonHost_CPVoiceControlState *back = coded == nil ? nil
+        revenantHost_CPVoiceControlState *back = coded == nil ? nil
             : [NSKeyedUnarchiver unarchivedObjectOfClasses:
-                   [NSSet setWithObjects:[charonHost_CPVoiceControlState class], [NSString class],
+                   [NSSet setWithObjects:[revenantHost_CPVoiceControlState class], [NSString class],
                                          [NSArray class], [UIImage class], nil]
                                               fromData:coded
                                                  error:&error];
         check(@"a state survives an NSSecureCoding round trip with its identifier",
-              back != nil && [back.identifier isEqualToString:@"charon.listening"],
+              back != nil && [back.identifier isEqualToString:@"revenant.listening"],
               back ? describe(back.identifier) : [NSString stringWithFormat:@"nil (%@)",
                                                     error.localizedDescription ?: @"no error"]);
 
         printf("\n== CPVoiceControlTemplate ==\n");
         NSMutableArray *states = [NSMutableArray array];
         for (int i = 0; i < 6; i++) {
-            [states addObject:[[charonHost_CPVoiceControlState alloc]
-                initWithIdentifier:[NSString stringWithFormat:@"charon.state%d", i]
+            [states addObject:[[revenantHost_CPVoiceControlState alloc]
+                initWithIdentifier:[NSString stringWithFormat:@"revenant.state%d", i]
                       titleVariants:@[[NSString stringWithFormat:@"State %d", i]]
                               image:nil
                             repeats:NO]];
         }
-        charonHost_CPVoiceControlTemplate *voice =
-            [[charonHost_CPVoiceControlTemplate alloc] initWithVoiceControlStates:states];
+        revenantHost_CPVoiceControlTemplate *voice =
+            [[revenantHost_CPVoiceControlTemplate alloc] initWithVoiceControlStates:states];
         check(@"the template keeps the five states the header's limit allows",
               voice.voiceControlStates.count == 5,
               [NSString stringWithFormat:@"%lu of %lu", (unsigned long)voice.voiceControlStates.count,
                   (unsigned long)states.count]);
         check(@"the first of the states it was given is the active one",
-              [voice.activeStateIdentifier isEqualToString:@"charon.state0"],
+              [voice.activeStateIdentifier isEqualToString:@"revenant.state0"],
               describe(voice.activeStateIdentifier));
 
-        [voice activateVoiceControlStateWithIdentifier:@"charon.state3"];
+        [voice activateVoiceControlStateWithIdentifier:@"revenant.state3"];
         check(@"activating switches the active state with no car attached (measured)",
-              [voice.activeStateIdentifier isEqualToString:@"charon.state3"],
+              [voice.activeStateIdentifier isEqualToString:@"revenant.state3"],
               [NSString stringWithFormat:@"active is now %@", describe(voice.activeStateIdentifier)]);
 
-        [voice activateVoiceControlStateWithIdentifier:@"charon.state99"];
+        [voice activateVoiceControlStateWithIdentifier:@"revenant.state99"];
         check(@"an identifier no state carries becomes the active one anyway (measured)",
-              [voice.activeStateIdentifier isEqualToString:@"charon.state99"],
+              [voice.activeStateIdentifier isEqualToString:@"revenant.state99"],
               [NSString stringWithFormat:@"active is now %@", describe(voice.activeStateIdentifier)]);
 
         NSUInteger effective = 0;
         const NSUInteger rounds = 12;
         for (NSUInteger round = 0; round < rounds; round++) {
-            NSString *wanted = [NSString stringWithFormat:@"charon.state%lu", (unsigned long)(round % 5)];
+            NSString *wanted = [NSString stringWithFormat:@"revenant.state%lu", (unsigned long)(round % 5)];
             [voice activateVoiceControlStateWithIdentifier:wanted];
             if ([voice.activeStateIdentifier isEqualToString:wanted]) {
                 effective++;
@@ -221,21 +221,21 @@ int main(int argc, const char *argv[])
               effective == rounds,
               [NSString stringWithFormat:@"%lu of %lu", (unsigned long)effective, (unsigned long)rounds]);
 
-        charonHost_CPVoiceControlTemplate *empty =
-            [[charonHost_CPVoiceControlTemplate alloc] initWithVoiceControlStates:@[]];
+        revenantHost_CPVoiceControlTemplate *empty =
+            [[revenantHost_CPVoiceControlTemplate alloc] initWithVoiceControlStates:@[]];
         check(@"an empty array of states keeps an empty array and no active state",
               empty.voiceControlStates.count == 0 && empty.activeStateIdentifier == nil,
               [NSString stringWithFormat:@"%lu states, active %@", (unsigned long)empty.voiceControlStates.count,
                   describe(empty.activeStateIdentifier)]);
-        charonHost_CPVoiceControlTemplate *none =
-            [[charonHost_CPVoiceControlTemplate alloc] initWithVoiceControlStates:nil];
+        revenantHost_CPVoiceControlTemplate *none =
+            [[revenantHost_CPVoiceControlTemplate alloc] initWithVoiceControlStates:nil];
         check(@"a nil array of states answers nil for both, as the framework does",
               none.voiceControlStates == nil && none.activeStateIdentifier == nil,
               [NSString stringWithFormat:@"states %@, active %@", describe(none.voiceControlStates),
                   describe(none.activeStateIdentifier)]);
 
         printf("\n== the template's own view ==\n");
-        UIViewController *view = [voice charon_viewControllerForInterfaceController:nil];
+        UIViewController *view = [voice revenant_viewControllerForInterfaceController:nil];
         view.view.frame = CGRectMake(0.0, 0.0, 800.0, 480.0);
         [view.view setNeedsLayout];
         [view.view layoutIfNeeded];
@@ -266,16 +266,16 @@ int main(int argc, const char *argv[])
             ((void (*)(id, SEL, id))objc_msgSend)(target, action, plate);
         }
         check(@"tapping a plate switches the state to the one that plate names",
-              [voice.activeStateIdentifier isEqualToString:@"charon.state4"],
+              [voice.activeStateIdentifier isEqualToString:@"revenant.state4"],
               [NSString stringWithFormat:@"active is now %@", describe(voice.activeStateIdentifier)]);
-        charonHost_CPVoiceControlState *twoVariants = [[charonHost_CPVoiceControlState alloc]
-            initWithIdentifier:@"charon.two"
+        revenantHost_CPVoiceControlState *twoVariants = [[revenantHost_CPVoiceControlState alloc]
+            initWithIdentifier:@"revenant.two"
               titleVariants:@[@"Listening to the voice control of the car", @"Listen"]
                       image:nil
                     repeats:NO];
-        charonHost_CPVoiceControlTemplate *narrow =
-            [[charonHost_CPVoiceControlTemplate alloc] initWithVoiceControlStates:@[twoVariants]];
-        UIViewController *narrowView = [narrow charon_viewControllerForInterfaceController:nil];
+        revenantHost_CPVoiceControlTemplate *narrow =
+            [[revenantHost_CPVoiceControlTemplate alloc] initWithVoiceControlStates:@[twoVariants]];
+        UIViewController *narrowView = [narrow revenant_viewControllerForInterfaceController:nil];
         narrowView.view.frame = CGRectMake(0.0, 0.0, 220.0, 480.0);
         [narrowView.view setNeedsLayout];
         [narrowView.view layoutIfNeeded];
@@ -289,11 +289,11 @@ int main(int argc, const char *argv[])
         }
 
         printf("\n== the navigation session, begun by the map template ==\n");
-        charonHost_CPMapTemplate *map = [[charonHost_CPMapTemplate alloc] init];
+        revenantHost_CPMapTemplate *map = [[revenantHost_CPMapTemplate alloc] init];
         UIView *canvas = [[UIView alloc] initWithFrame:CGRectMake(0.0, 0.0, 800.0, 480.0)];
-        [map charon_setMapView:canvas];
-        charonHost_CPTrip *trip = [[charonHost_CPTrip alloc] initCharonTrip];
-        charonHost_CPNavigationSession *session = [map startNavigationSessionForTrip:trip];
+        [map revenant_setMapView:canvas];
+        revenantHost_CPTrip *trip = [[revenantHost_CPTrip alloc] initRevenantTrip];
+        revenantHost_CPNavigationSession *session = [map startNavigationSessionForTrip:trip];
         check(@"the map template's own method hands back a session", session != nil,
               session ? describe(session) : @"nil");
         check(@"the session answers the trip it was begun for", session.trip == trip,
@@ -302,18 +302,18 @@ int main(int argc, const char *argv[])
               [map startNavigationSessionForTrip:trip] == session,
               describe([map startNavigationSessionForTrip:trip]));
 
-        charonHost_CPManeuver *next = [[charonHost_CPManeuver alloc] initCharonManeuver];
+        revenantHost_CPManeuver *next = [[revenantHost_CPManeuver alloc] initRevenantManeuver];
         session.upcomingManeuvers = @[next];
         check(@"the session keeps the maneuvers a program set", session.upcomingManeuvers.count == 1,
               describe(session.upcomingManeuvers));
-        charonHost_CPTravelEstimates *estimates =
-            [[charonHost_CPTravelEstimates alloc] initCharonWithTimeRemaining:125.0];
+        revenantHost_CPTravelEstimates *estimates =
+            [[revenantHost_CPTravelEstimates alloc] initRevenantWithTimeRemaining:125.0];
         [session updateTravelEstimates:estimates forManeuver:next];
         check(@"the estimates land in the map template's own guidance card",
               [guidanceText(canvas) isEqualToString:@"2 min 05 sec"], describe(guidanceText(canvas)));
 
-        charonHost_CPTravelEstimates *unknown =
-            [[charonHost_CPTravelEstimates alloc] initCharonWithTimeRemaining:-1.0];
+        revenantHost_CPTravelEstimates *unknown =
+            [[revenantHost_CPTravelEstimates alloc] initRevenantWithTimeRemaining:-1.0];
         [session updateTravelEstimates:unknown forManeuver:next];
         check(@"a negative time remaining renders as the header's own \"--\"",
               [guidanceText(canvas) isEqualToString:@"--"], describe(guidanceText(canvas)));
@@ -345,20 +345,20 @@ int main(int argc, const char *argv[])
         check(@"a cancelled trip says so", [guidanceText(canvas) isEqualToString:@"Trip cancelled"],
               describe(guidanceText(canvas)));
 
-        charonHost_CPMapTemplate *unpushed = [[charonHost_CPMapTemplate alloc] init];
-        charonHost_CPNavigationSession *pending = [unpushed startNavigationSessionForTrip:trip];
+        revenantHost_CPMapTemplate *unpushed = [[revenantHost_CPMapTemplate alloc] init];
+        revenantHost_CPNavigationSession *pending = [unpushed startNavigationSessionForTrip:trip];
         [pending updateTravelEstimates:estimates forManeuver:next];
         check(@"guidance asked for before the template is pushed draws nothing and loses nothing",
-              pending != nil && unpushed.charon_mapView == nil,
+              pending != nil && unpushed.revenant_mapView == nil,
               describe(pending));
 
         printf("\n== the 17.4 members, on a session the program holds ==\n");
         {
-            charonHost_CPMapTemplate *laneMap = [[charonHost_CPMapTemplate alloc] init];
+            revenantHost_CPMapTemplate *laneMap = [[revenantHost_CPMapTemplate alloc] init];
             UIView *laneCanvas = [[UIView alloc] initWithFrame:CGRectMake(0.0, 0.0, 800.0, 480.0)];
-            [laneMap charon_setMapView:laneCanvas];
-            charonHost_CPNavigationSession *held =
-                [laneMap startNavigationSessionForTrip:[[charonHost_CPTrip alloc] initCharonTrip]];
+            [laneMap revenant_setMapView:laneCanvas];
+            revenantHost_CPNavigationSession *held =
+                [laneMap startNavigationSessionForTrip:[[revenantHost_CPTrip alloc] initRevenantTrip]];
 
             check(@"the port's own upcomingManeuvers with nothing set is an empty array",
                   held.upcomingManeuvers != nil && held.upcomingManeuvers.count == 0,
@@ -370,21 +370,21 @@ int main(int argc, const char *argv[])
             check(@"maneuverState answers 0 before anything is set",
                   held.maneuverState == 0, [NSString stringWithFormat:@"%lu", (unsigned long)held.maneuverState]);
             check(@"CPLaneGuidance is the class currentLaneGuidance's value is",
-                  NSClassFromString(@"charonHost_CPLaneGuidance") != nil, @"present");
+                  NSClassFromString(@"revenantHost_CPLaneGuidance") != nil, @"present");
             check(@"CPRouteInformation is the class resumeTrip takes",
-                  NSClassFromString(@"charonHost_CPRouteInformation") != nil, @"present");
+                  NSClassFromString(@"revenantHost_CPRouteInformation") != nil, @"present");
 
-            charonHost_CPLaneGuidance *guidance = [[charonHost_CPLaneGuidance alloc] init];
+            revenantHost_CPLaneGuidance *guidance = [[revenantHost_CPLaneGuidance alloc] init];
             check(@"a fresh lane guidance's lanes answer nil, not an empty array (measured)",
                   guidance.lanes == nil, describe(guidance.lanes));
             check(@"a fresh lane guidance's instructionVariants answer nil, not an empty array (measured)",
                   guidance.instructionVariants == nil, describe(guidance.instructionVariants));
             check(@"+supportsSecureCoding is YES (NSSecureCoding is in the header, CPLaneGuidance.h:17)",
-                  [charonHost_CPLaneGuidance supportsSecureCoding] ? @"YES" : @"NO",
-                  [charonHost_CPLaneGuidance supportsSecureCoding] ? @"YES" : @"NO");
+                  [revenantHost_CPLaneGuidance supportsSecureCoding] ? @"YES" : @"NO",
+                  [revenantHost_CPLaneGuidance supportsSecureCoding] ? @"YES" : @"NO");
 
-            charonHost_CPRouteInformation *route =
-                [[charonHost_CPRouteInformation alloc] initWithManeuvers:nil laneGuidances:nil
+            revenantHost_CPRouteInformation *route =
+                [[revenantHost_CPRouteInformation alloc] initWithManeuvers:nil laneGuidances:nil
                                                         currentManeuvers:nil currentLaneGuidance:nil
                                                   tripTravelEstimates:nil maneuverTravelEstimates:nil];
             check(@"route information from nil in every slot: maneuvers answers nil",
@@ -403,8 +403,8 @@ int main(int argc, const char *argv[])
 
         printf("\n== the session configuration, with no head unit ==\n");
         {
-            charonHost_CPSessionConfiguration *configuration =
-                [[charonHost_CPSessionConfiguration alloc] initWithDelegate:nil];
+            revenantHost_CPSessionConfiguration *configuration =
+                [[revenantHost_CPSessionConfiguration alloc] initWithDelegate:nil];
             check(@"the designated initialiser makes a configuration", configuration != nil,
                   @"a configuration");
             check(@"delegate answers the delegate it was given (nil here)", configuration.delegate == nil,
@@ -422,12 +422,12 @@ int main(int argc, const char *argv[])
                       && ![configuration respondsToSelector:@selector(setLimitedUserInterfaces:)],
                   @"neither setter is answered");
 
-            charonHost_TestSessionConfigurationDelegate *delegate =
-                [[charonHost_TestSessionConfigurationDelegate alloc] init];
+            revenantHost_TestSessionConfigurationDelegate *delegate =
+                [[revenantHost_TestSessionConfigurationDelegate alloc] init];
             configuration.delegate = delegate;
             check(@"the delegate answers the delegate a caller set", configuration.delegate == delegate,
                   describe(configuration.delegate));
-            __weak charonHost_TestSessionConfigurationDelegate *weakDelegate = configuration.delegate;
+            __weak revenantHost_TestSessionConfigurationDelegate *weakDelegate = configuration.delegate;
             (void)weakDelegate;
         }
 

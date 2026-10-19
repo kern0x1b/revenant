@@ -6,9 +6,9 @@ NSAttributedStringKey const UIAccessibilitySpeechAttributeIPANotation = @"UIAcce
 NSAttributedStringKey const UIAccessibilityTextAttributeHeadingLevel = @"UIAccessibilityTextAttributeHeadingLevel";
 NSAttributedStringKey const UIAccessibilityTextAttributeCustom = @"UIAccessibilityTextAttributeCustom";
 
-static const char CharonAttributedLabelKey, CharonAttributedHintKey, CharonAttributedValueKey;
+static const char RevenantAttributedLabelKey, RevenantAttributedHintKey, RevenantAttributedValueKey;
 
-static NSAttributedString *charon_attributed(id object, const void *key, NSString *plain)
+static NSAttributedString *revenant_attributed(id object, const void *key, NSString *plain)
 {
     NSAttributedString *held = objc_getAssociatedObject(object, key);
     if (held && plain && [held.string isEqualToString:plain])
@@ -18,43 +18,43 @@ static NSAttributedString *charon_attributed(id object, const void *key, NSStrin
     return [[NSAttributedString alloc] initWithString:plain];
 }
 
-static void charon_set_attributed(id object, const void *key, NSAttributedString *attributed)
+static void revenant_set_attributed(id object, const void *key, NSAttributedString *attributed)
 {
     objc_setAssociatedObject(object, key, attributed, OBJC_ASSOCIATION_COPY_NONATOMIC);
 }
 
-@implementation NSObject (CharonAccessibilityAttributedStrings)
+@implementation NSObject (RevenantAccessibilityAttributedStrings)
 
 - (NSAttributedString *)accessibilityAttributedLabel
 {
-    return charon_attributed(self, &CharonAttributedLabelKey, self.accessibilityLabel);
+    return revenant_attributed(self, &RevenantAttributedLabelKey, self.accessibilityLabel);
 }
 
 - (void)setAccessibilityAttributedLabel:(NSAttributedString *)accessibilityAttributedLabel
 {
-    charon_set_attributed(self, &CharonAttributedLabelKey, accessibilityAttributedLabel);
+    revenant_set_attributed(self, &RevenantAttributedLabelKey, accessibilityAttributedLabel);
     self.accessibilityLabel = accessibilityAttributedLabel.string;
 }
 
 - (NSAttributedString *)accessibilityAttributedHint
 {
-    return charon_attributed(self, &CharonAttributedHintKey, self.accessibilityHint);
+    return revenant_attributed(self, &RevenantAttributedHintKey, self.accessibilityHint);
 }
 
 - (void)setAccessibilityAttributedHint:(NSAttributedString *)accessibilityAttributedHint
 {
-    charon_set_attributed(self, &CharonAttributedHintKey, accessibilityAttributedHint);
+    revenant_set_attributed(self, &RevenantAttributedHintKey, accessibilityAttributedHint);
     self.accessibilityHint = accessibilityAttributedHint.string;
 }
 
 - (NSAttributedString *)accessibilityAttributedValue
 {
-    return charon_attributed(self, &CharonAttributedValueKey, self.accessibilityValue);
+    return revenant_attributed(self, &RevenantAttributedValueKey, self.accessibilityValue);
 }
 
 - (void)setAccessibilityAttributedValue:(NSAttributedString *)accessibilityAttributedValue
 {
-    charon_set_attributed(self, &CharonAttributedValueKey, accessibilityAttributedValue);
+    revenant_set_attributed(self, &RevenantAttributedValueKey, accessibilityAttributedValue);
     self.accessibilityValue = accessibilityAttributedValue.string;
 }
 

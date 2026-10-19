@@ -1,35 +1,35 @@
-#import "CharonDragDrop.h"
+#import "RevenantDragDrop.h"
 
-@implementation UICollectionView (CharonDragDrop)
+@implementation UICollectionView (RevenantDragDrop)
 
 - (id<UICollectionViewDragDelegate>)dragDelegate
 {
-    return charon_drag_drop_box(self)->dragDelegate;
+    return revenant_drag_drop_box(self)->dragDelegate;
 }
 
 - (void)setDragDelegate:(id<UICollectionViewDragDelegate>)delegate
 {
-    charon_drag_drop_box(self)->dragDelegate = delegate;
+    revenant_drag_drop_box(self)->dragDelegate = delegate;
 }
 
 - (id<UICollectionViewDropDelegate>)dropDelegate
 {
-    return charon_drag_drop_box(self)->dropDelegate;
+    return revenant_drag_drop_box(self)->dropDelegate;
 }
 
 - (void)setDropDelegate:(id<UICollectionViewDropDelegate>)delegate
 {
-    charon_drag_drop_box(self)->dropDelegate = delegate;
+    revenant_drag_drop_box(self)->dropDelegate = delegate;
 }
 
 - (BOOL)dragInteractionEnabled
 {
-    return charon_drag_interaction_enabled(self);
+    return revenant_drag_interaction_enabled(self);
 }
 
 - (void)setDragInteractionEnabled:(BOOL)enabled
 {
-    charon_set_drag_interaction_enabled(self, enabled);
+    revenant_set_drag_interaction_enabled(self, enabled);
 }
 
 - (BOOL)hasActiveDrag

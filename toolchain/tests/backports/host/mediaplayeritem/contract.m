@@ -17,11 +17,11 @@ static char *const members103[][3] = {
 {
     NSDictionary *properties;
 }
-- (void)charon_set_properties:(NSDictionary *)properties { self->properties = properties; }
+- (void)revenant_set_properties:(NSDictionary *)properties { self->properties = properties; }
 - (id)valueForProperty:(NSString *)property { return self->properties[property]; }
 @end
 
-#define CHARON_MEDIAPLAYER_STANDIN 1
+#define REVENANT_MEDIAPLAYER_STANDIN 1
 #include "MPMediaItem70.m"
 #include "MPMediaItem80.m"
 #include "MPMediaItem92.m"
@@ -53,7 +53,7 @@ int main(void) {
                             @"dateAdded": added, @"isExplicit": @YES, @"playbackStoreID": @"store",
                             @"isPreorder": @YES};
     MPMediaItem *item = [[MPMediaItem alloc] init];
-    [item charon_set_properties:given];
+    [item revenant_set_properties:given];
     check("albumTrackNumber", item.albumTrackNumber == 7, "7", number(item.albumTrackNumber, 1));
     check("discNumber", item.discNumber == 2, "2", number(item.discNumber, 1));
     check("albumPersistentID", [item.albumPersistentID isEqual:@11], "11", text(item.albumPersistentID));
@@ -71,7 +71,7 @@ int main(void) {
     check("playbackStoreID", [item.playbackStoreID isEqual:@"store"], "store", text(item.playbackStoreID));
     check("isPreorder", item.isPreorder == YES, "1", item.isPreorder ? "1" : "0");
     MPMediaItem *empty = [[MPMediaItem alloc] init];
-    [empty charon_set_properties:@{}];
+    [empty revenant_set_properties:@{}];
     check("a missing key answers zero or nil",
           empty.albumTrackCount == 0 && empty.hasProtectedAsset == NO && empty.dateAdded == nil
           && empty.playbackStoreID == nil && empty.albumPersistentID == nil,

@@ -1,15 +1,15 @@
 #import <AVFoundation/AVFoundation.h>
 #import <CoreMedia/CoreMedia.h>
 
-@interface NSObject (CharonAVSampleBufferRenderInternal)
-- (void)charon_renderSynchronizerDidChangeRate;
+@interface NSObject (RevenantAVSampleBufferRenderInternal)
+- (void)revenant_renderSynchronizerDidChangeRate;
 @end
 
-@interface AVSampleBufferRenderSynchronizer (CharonAVSampleBufferRenderSynchronizerInternal)
-- (void)charon_setRate:(float)rate time:(CMTime)time hostTime:(CMTime)hostTime;
-- (void)charon_clocksDidChange;
-- (void)charon_removeRenderer:(id <AVQueuedSampleBufferRendering>)renderer;
-- (dispatch_queue_t)charon_queueFor:(dispatch_queue_t)queue;
-- (void)charon_addObserver:(id)observer;
-- (void)charon_forgetRemoval:(id)removal;
+@interface AVSampleBufferRenderSynchronizer (RevenantAVSampleBufferRenderSynchronizerInternal)
+- (void)revenant_setRate:(float)rate time:(CMTime)time hostTime:(CMTime)hostTime;
+- (void)revenant_clocksDidChange;
+- (void)revenant_removeRenderer:(id <AVQueuedSampleBufferRendering>)renderer;
+- (dispatch_queue_t)revenant_queueFor:(dispatch_queue_t)queue;
+- (void)revenant_addObserver:(id)observer;
+- (void)revenant_forgetRemoval:(id)removal;
 @end

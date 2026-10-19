@@ -1,10 +1,10 @@
-#import "CharonLists.h"
+#import "RevenantLists.h"
 
 #pragma clang diagnostic ignored "-Wobjc-designated-initializers"
 
 const CGFloat UICellAccessoryStandardDimension = -CGFLOAT_MAX;
 
-static NSUInteger (^charon_default_position(void))(NSArray *)
+static NSUInteger (^revenant_default_position(void))(NSArray *)
 {
     static NSUInteger (^block)(NSArray *);
     static dispatch_once_t once;
@@ -36,10 +36,10 @@ UICellAccessoryPosition UICellAccessoryPositionAfterAccessoryOfClass(Class acces
     } copy];
 }
 
-@interface CharonChevronView : UIView
+@interface RevenantChevronView : UIView
 @end
 
-@implementation CharonChevronView
+@implementation RevenantChevronView
 
 - (void)tintColorDidChange
 {
@@ -63,21 +63,21 @@ UICellAccessoryPosition UICellAccessoryPositionAfterAccessoryOfClass(Class acces
 
 @end
 
-@interface CharonAccessoryView : UIControl
+@interface RevenantAccessoryView : UIControl
 @property (nonatomic) NSInteger kind;
-@property (nonatomic, copy) void (^charon_handler)(void);
+@property (nonatomic, copy) void (^revenant_handler)(void);
 @property (nonatomic, strong) UIColor *fill;
 @property (nonatomic) BOOL expanded;
 @property (nonatomic) BOOL marked;
 @end
 
-@implementation CharonAccessoryView {
+@implementation RevenantAccessoryView {
     NSInteger _kind;
     void (^_handler)(void);
     UIColor *_fill;
     BOOL _expanded;
     BOOL _marked;
-    CharonChevronView *_chevron;
+    RevenantChevronView *_chevron;
     UILongPressGestureRecognizer *_grip;
     BOOL _wired;
 }
@@ -92,17 +92,17 @@ UICellAccessoryPosition UICellAccessoryPositionAfterAccessoryOfClass(Class acces
     _kind = kind;
     if (!_wired) {
         _wired = YES;
-        [self addTarget:self action:@selector(charon_fire) forControlEvents:UIControlEventTouchUpInside];
+        [self addTarget:self action:@selector(revenant_fire) forControlEvents:UIControlEventTouchUpInside];
     }
     if (kind == 6 && !_chevron) {
-        _chevron = [[CharonChevronView alloc] initWithFrame:CGRectMake(0, 0, 14, 14)];
+        _chevron = [[RevenantChevronView alloc] initWithFrame:CGRectMake(0, 0, 14, 14)];
         _chevron.backgroundColor = [UIColor clearColor];
         _chevron.opaque = NO;
         _chevron.userInteractionEnabled = NO;
         [self addSubview:_chevron];
     }
     if (kind == 4 && !_grip) {
-        _grip = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(charon_gripped:)];
+        _grip = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(revenant_gripped:)];
         _grip.minimumPressDuration = 0;
         _grip.allowableMovement = CGFLOAT_MAX;
         [self addGestureRecognizer:_grip];
@@ -118,7 +118,7 @@ UICellAccessoryPosition UICellAccessoryPositionAfterAccessoryOfClass(Class acces
     }
 }
 
-- (UICollectionViewCell *)charon_cell
+- (UICollectionViewCell *)revenant_cell
 {
     UIView *view = self.superview;
     while (view && ![view isKindOfClass:[UICollectionViewCell class]])
@@ -126,9 +126,9 @@ UICellAccessoryPosition UICellAccessoryPositionAfterAccessoryOfClass(Class acces
     return (UICollectionViewCell *)view;
 }
 
-- (void)charon_gripped:(UILongPressGestureRecognizer *)recognizer
+- (void)revenant_gripped:(UILongPressGestureRecognizer *)recognizer
 {
-    UICollectionViewCell *cell = [self charon_cell];
+    UICollectionViewCell *cell = [self revenant_cell];
     UIView *candidate = cell.superview;
     while (candidate && ![candidate isKindOfClass:[UICollectionView class]])
         candidate = candidate.superview;
@@ -163,25 +163,25 @@ UICellAccessoryPosition UICellAccessoryPositionAfterAccessoryOfClass(Class acces
     }
 }
 
-- (void (^)(void))charon_handler
+- (void (^)(void))revenant_handler
 {
     return _handler;
 }
 
-- (void)setCharon_handler:(void (^)(void))charon_handler
+- (void)setRevenant_handler:(void (^)(void))revenant_handler
 {
-    _handler = [charon_handler copy];
+    _handler = [revenant_handler copy];
 }
 
-- (void)charon_fire
+- (void)revenant_fire
 {
     if (_handler) {
         _handler();
         return;
     }
-    UICollectionViewCell *cell = _kind == 6 ? [self charon_cell] : nil;
-    if ([cell respondsToSelector:@selector(charon_toggleExpansion)])
-        [(UICollectionViewListCell *)cell charon_toggleExpansion];
+    UICollectionViewCell *cell = _kind == 6 ? [self revenant_cell] : nil;
+    if ([cell respondsToSelector:@selector(revenant_toggleExpansion)])
+        [(UICollectionViewListCell *)cell revenant_toggleExpansion];
 }
 
 - (UIColor *)fill
@@ -202,10 +202,10 @@ UICellAccessoryPosition UICellAccessoryPositionAfterAccessoryOfClass(Class acces
 
 - (void)setExpanded:(BOOL)expanded
 {
-    [self charon_setExpanded:expanded animated:NO];
+    [self revenant_setExpanded:expanded animated:NO];
 }
 
-- (void)charon_setExpanded:(BOOL)expanded animated:(BOOL)animated
+- (void)revenant_setExpanded:(BOOL)expanded animated:(BOOL)animated
 {
     _expanded = expanded;
     if (_chevron) {
@@ -241,7 +241,7 @@ UICellAccessoryPosition UICellAccessoryPositionAfterAccessoryOfClass(Class acces
 {
     CGRect bounds = self.bounds;
     UIColor *tint = self.tintColor ?: [UIColor blueColor];
-    UIColor *gray = charon_semantic_color(CharonSemanticColorTertiaryLabel);
+    UIColor *gray = revenant_semantic_color(RevenantSemanticColorTertiaryLabel);
     UIBezierPath *path = [UIBezierPath bezierPath];
     path.lineCapStyle = kCGLineCapRound;
     path.lineJoinStyle = kCGLineJoinRound;
@@ -328,18 +328,18 @@ UICellAccessoryPosition UICellAccessoryPositionAfterAccessoryOfClass(Class acces
 - (instancetype)init
 {
     if ((self = [super init])) {
-        _reservedLayoutWidth = [self charon_defaultReservedWidth];
-        _displayedState = [self charon_defaultDisplayedState];
+        _reservedLayoutWidth = [self revenant_defaultReservedWidth];
+        _displayedState = [self revenant_defaultDisplayedState];
     }
     return self;
 }
 
-- (CGFloat)charon_defaultReservedWidth
+- (CGFloat)revenant_defaultReservedWidth
 {
     return UICellAccessoryStandardDimension;
 }
 
-- (UICellAccessoryDisplayedState)charon_defaultDisplayedState
+- (UICellAccessoryDisplayedState)revenant_defaultDisplayedState
 {
     return UICellAccessoryDisplayedAlways;
 }
@@ -429,29 +429,29 @@ UICellAccessoryPosition UICellAccessoryPositionAfterAccessoryOfClass(Class acces
     return [NSStringFromClass([self class]) hash] ^ ((NSUInteger)_displayedState << 4) ^ (_hidden ? 8u : 0u) ^ (NSUInteger)_reservedLayoutWidth;
 }
 
-- (NSInteger)charon_order
+- (NSInteger)revenant_order
 {
     return 0;
 }
 
-- (BOOL)charon_isLeading
+- (BOOL)revenant_isLeading
 {
     return NO;
 }
 
-- (CGFloat)charon_naturalWidth
+- (CGFloat)revenant_naturalWidth
 {
     return 24;
 }
 
-- (CGFloat)charon_width
+- (CGFloat)revenant_width
 {
-    return _reservedLayoutWidth == UICellAccessoryStandardDimension ? [self charon_naturalWidth] : _reservedLayoutWidth > 0 ? _reservedLayoutWidth : [self charon_naturalWidth];
+    return _reservedLayoutWidth == UICellAccessoryStandardDimension ? [self revenant_naturalWidth] : _reservedLayoutWidth > 0 ? _reservedLayoutWidth : [self revenant_naturalWidth];
 }
 
-- (CharonAccessoryView *)charon_baseViewOfKind:(NSInteger)kind size:(CGSize)size
+- (RevenantAccessoryView *)revenant_baseViewOfKind:(NSInteger)kind size:(CGSize)size
 {
-    CharonAccessoryView *view = [[CharonAccessoryView alloc] initWithFrame:CGRectMake(0, 0, size.width, size.height)];
+    RevenantAccessoryView *view = [[RevenantAccessoryView alloc] initWithFrame:CGRectMake(0, 0, size.width, size.height)];
     view.kind = kind;
     view.backgroundColor = [UIColor clearColor];
     view.opaque = NO;
@@ -460,7 +460,7 @@ UICellAccessoryPosition UICellAccessoryPositionAfterAccessoryOfClass(Class acces
     return view;
 }
 
-- (UIView *)charon_makeView
+- (UIView *)revenant_makeView
 {
     return nil;
 }
@@ -469,22 +469,22 @@ UICellAccessoryPosition UICellAccessoryPositionAfterAccessoryOfClass(Class acces
 
 @implementation UICellAccessoryDisclosureIndicator
 
-- (CGFloat)charon_defaultReservedWidth
+- (CGFloat)revenant_defaultReservedWidth
 {
     return 0;
 }
 
-- (CGFloat)charon_naturalWidth
+- (CGFloat)revenant_naturalWidth
 {
     return 14;
 }
 
-- (UIView *)charon_makeView
+- (UIView *)revenant_makeView
 {
-    return [self charon_baseViewOfKind:1 size:CGSizeMake(14, 14)];
+    return [self revenant_baseViewOfKind:1 size:CGSizeMake(14, 14)];
 }
 
-- (NSInteger)charon_order
+- (NSInteger)revenant_order
 {
     return 3;
 }
@@ -493,12 +493,12 @@ UICellAccessoryPosition UICellAccessoryPositionAfterAccessoryOfClass(Class acces
 
 @implementation UICellAccessoryCheckmark
 
-- (UIView *)charon_makeView
+- (UIView *)revenant_makeView
 {
-    return [self charon_baseViewOfKind:0 size:CGSizeMake(19, 18)];
+    return [self revenant_baseViewOfKind:0 size:CGSizeMake(19, 18)];
 }
 
-- (NSInteger)charon_order
+- (NSInteger)revenant_order
 {
     return 2;
 }
@@ -511,7 +511,7 @@ UICellAccessoryPosition UICellAccessoryPositionAfterAccessoryOfClass(Class acces
     void (^_actionHandler)(void);
 }
 
-- (UICellAccessoryDisplayedState)charon_defaultDisplayedState
+- (UICellAccessoryDisplayedState)revenant_defaultDisplayedState
 {
     return UICellAccessoryDisplayedWhenEditing;
 }
@@ -562,12 +562,12 @@ UICellAccessoryPosition UICellAccessoryPositionAfterAccessoryOfClass(Class acces
     _actionHandler = [actionHandler copy];
 }
 
-- (BOOL)charon_isLeading
+- (BOOL)revenant_isLeading
 {
     return YES;
 }
 
-- (NSInteger)charon_order
+- (NSInteger)revenant_order
 {
     return 1;
 }
@@ -578,11 +578,11 @@ UICellAccessoryPosition UICellAccessoryPositionAfterAccessoryOfClass(Class acces
            _actionHandler == ((UICellAccessoryDelete *)object)->_actionHandler;
 }
 
-- (UIView *)charon_makeView
+- (UIView *)revenant_makeView
 {
-    CharonAccessoryView *view = [self charon_baseViewOfKind:2 size:CGSizeMake(26, 26)];
+    RevenantAccessoryView *view = [self revenant_baseViewOfKind:2 size:CGSizeMake(26, 26)];
     view.fill = _backgroundColor;
-    view.charon_handler = _actionHandler;
+    view.revenant_handler = _actionHandler;
     return view;
 }
 
@@ -594,7 +594,7 @@ UICellAccessoryPosition UICellAccessoryPositionAfterAccessoryOfClass(Class acces
     void (^_actionHandler)(void);
 }
 
-- (UICellAccessoryDisplayedState)charon_defaultDisplayedState
+- (UICellAccessoryDisplayedState)revenant_defaultDisplayedState
 {
     return UICellAccessoryDisplayedWhenEditing;
 }
@@ -645,12 +645,12 @@ UICellAccessoryPosition UICellAccessoryPositionAfterAccessoryOfClass(Class acces
     _actionHandler = [actionHandler copy];
 }
 
-- (BOOL)charon_isLeading
+- (BOOL)revenant_isLeading
 {
     return YES;
 }
 
-- (NSInteger)charon_order
+- (NSInteger)revenant_order
 {
     return 1;
 }
@@ -661,11 +661,11 @@ UICellAccessoryPosition UICellAccessoryPositionAfterAccessoryOfClass(Class acces
            _actionHandler == ((UICellAccessoryInsert *)object)->_actionHandler;
 }
 
-- (UIView *)charon_makeView
+- (UIView *)revenant_makeView
 {
-    CharonAccessoryView *view = [self charon_baseViewOfKind:3 size:CGSizeMake(26, 26)];
+    RevenantAccessoryView *view = [self revenant_baseViewOfKind:3 size:CGSizeMake(26, 26)];
     view.fill = _backgroundColor;
-    view.charon_handler = _actionHandler;
+    view.revenant_handler = _actionHandler;
     return view;
 }
 
@@ -681,7 +681,7 @@ UICellAccessoryPosition UICellAccessoryPositionAfterAccessoryOfClass(Class acces
     return YES;
 }
 
-- (UICellAccessoryDisplayedState)charon_defaultDisplayedState
+- (UICellAccessoryDisplayedState)revenant_defaultDisplayedState
 {
     return UICellAccessoryDisplayedWhenEditing;
 }
@@ -728,12 +728,12 @@ UICellAccessoryPosition UICellAccessoryPositionAfterAccessoryOfClass(Class acces
     return [super isEqual:object] && _showsVerticalSeparator == ((UICellAccessoryReorder *)object)->_showsVerticalSeparator;
 }
 
-- (UIView *)charon_makeView
+- (UIView *)revenant_makeView
 {
-    return [self charon_baseViewOfKind:4 size:CGSizeMake(27, 15)];
+    return [self revenant_baseViewOfKind:4 size:CGSizeMake(27, 15)];
 }
 
-- (NSInteger)charon_order
+- (NSInteger)revenant_order
 {
     return 4;
 }
@@ -745,7 +745,7 @@ UICellAccessoryPosition UICellAccessoryPositionAfterAccessoryOfClass(Class acces
     UIColor *_backgroundColor;
 }
 
-- (UICellAccessoryDisplayedState)charon_defaultDisplayedState
+- (UICellAccessoryDisplayedState)revenant_defaultDisplayedState
 {
     return UICellAccessoryDisplayedWhenEditing;
 }
@@ -785,12 +785,12 @@ UICellAccessoryPosition UICellAccessoryPositionAfterAccessoryOfClass(Class acces
     _backgroundColor = backgroundColor;
 }
 
-- (BOOL)charon_isLeading
+- (BOOL)revenant_isLeading
 {
     return YES;
 }
 
-- (NSInteger)charon_order
+- (NSInteger)revenant_order
 {
     return 1;
 }
@@ -800,9 +800,9 @@ UICellAccessoryPosition UICellAccessoryPositionAfterAccessoryOfClass(Class acces
     return [super isEqual:object] && ((_backgroundColor == ((UICellAccessoryMultiselect *)object)->_backgroundColor) || [_backgroundColor isEqual:((UICellAccessoryMultiselect *)object)->_backgroundColor]);
 }
 
-- (UIView *)charon_makeView
+- (UIView *)revenant_makeView
 {
-    CharonAccessoryView *view = [self charon_baseViewOfKind:5 size:CGSizeMake(26, 26)];
+    RevenantAccessoryView *view = [self revenant_baseViewOfKind:5 size:CGSizeMake(26, 26)];
     view.fill = _backgroundColor;
     return view;
 }
@@ -820,7 +820,7 @@ UICellAccessoryPosition UICellAccessoryPositionAfterAccessoryOfClass(Class acces
     return YES;
 }
 
-- (CGFloat)charon_defaultReservedWidth
+- (CGFloat)revenant_defaultReservedWidth
 {
     return 0;
 }
@@ -866,17 +866,17 @@ UICellAccessoryPosition UICellAccessoryPositionAfterAccessoryOfClass(Class acces
     _actionHandler = [actionHandler copy];
 }
 
-- (CGFloat)charon_naturalWidth
+- (CGFloat)revenant_naturalWidth
 {
     return 14;
 }
 
-- (BOOL)charon_isLeading
+- (BOOL)revenant_isLeading
 {
     return YES;
 }
 
-- (NSInteger)charon_order
+- (NSInteger)revenant_order
 {
     return 2;
 }
@@ -886,10 +886,10 @@ UICellAccessoryPosition UICellAccessoryPositionAfterAccessoryOfClass(Class acces
     return [super isEqual:object] && _style == ((UICellAccessoryOutlineDisclosure *)object)->_style && _actionHandler == ((UICellAccessoryOutlineDisclosure *)object)->_actionHandler;
 }
 
-- (UIView *)charon_makeView
+- (UIView *)revenant_makeView
 {
-    CharonAccessoryView *view = [self charon_baseViewOfKind:6 size:CGSizeMake(14, 14)];
-    view.charon_handler = _actionHandler;
+    RevenantAccessoryView *view = [self revenant_baseViewOfKind:6 size:CGSizeMake(14, 14)];
+    view.revenant_handler = _actionHandler;
     return view;
 }
 
@@ -907,7 +907,7 @@ UICellAccessoryPosition UICellAccessoryPositionAfterAccessoryOfClass(Class acces
     return YES;
 }
 
-- (CGFloat)charon_defaultReservedWidth
+- (CGFloat)revenant_defaultReservedWidth
 {
     return 0;
 }
@@ -988,19 +988,19 @@ UICellAccessoryPosition UICellAccessoryPositionAfterAccessoryOfClass(Class acces
     _adjustsFontForContentSizeCategory = adjustsFontForContentSizeCategory;
 }
 
-- (CGSize)charon_labelSize
+- (CGSize)revenant_labelSize
 {
     UILabel *label = [[UILabel alloc] init];
     label.font = _font;
     label.text = _text;
     CGSize size = [label sizeThatFits:CGSizeMake(10000, 10000)];
-    CGFloat scale = charon_screen_scale();
-    return CGSizeMake(charon_pixel_ceil(size.width, scale), charon_pixel_ceil(size.height, scale) + 0.5);
+    CGFloat scale = revenant_screen_scale();
+    return CGSizeMake(revenant_pixel_ceil(size.width, scale), revenant_pixel_ceil(size.height, scale) + 0.5);
 }
 
-- (CGFloat)charon_naturalWidth
+- (CGFloat)revenant_naturalWidth
 {
-    return [self charon_labelSize].width;
+    return [self revenant_labelSize].width;
 }
 
 - (BOOL)isEqual:(id)object
@@ -1009,19 +1009,19 @@ UICellAccessoryPosition UICellAccessoryPositionAfterAccessoryOfClass(Class acces
     return [super isEqual:object] && [_text isEqual:other->_text] && _font == other->_font && _adjustsFontForContentSizeCategory == other->_adjustsFontForContentSizeCategory;
 }
 
-- (UIView *)charon_makeView
+- (UIView *)revenant_makeView
 {
     UILabel *label = [[UILabel alloc] init];
     label.font = _font;
     label.text = _text;
     label.textAlignment = NSTextAlignmentCenter;
     label.backgroundColor = [UIColor clearColor];
-    label.textColor = [self tintColor] ?: charon_semantic_color(CharonSemanticColorSecondaryLabel);
-    label.frame = CGRectMake(0, 0, [self charon_labelSize].width, [self charon_labelSize].height);
+    label.textColor = [self tintColor] ?: revenant_semantic_color(RevenantSemanticColorSecondaryLabel);
+    label.frame = CGRectMake(0, 0, [self revenant_labelSize].width, [self revenant_labelSize].height);
     return label;
 }
 
-- (NSInteger)charon_order
+- (NSInteger)revenant_order
 {
     return 1;
 }
@@ -1046,7 +1046,7 @@ UICellAccessoryPosition UICellAccessoryPositionAfterAccessoryOfClass(Class acces
     if ((self = [super init])) {
         _customView = customView;
         _placement = placement;
-        _position = charon_default_position();
+        _position = revenant_default_position();
     }
     return self;
 }
@@ -1116,20 +1116,20 @@ UICellAccessoryPosition UICellAccessoryPositionAfterAccessoryOfClass(Class acces
 - (void)setPosition:(UICellAccessoryPosition)position
 {
     UICellAccessoryPosition copied = [position copy];
-    _position = copied ?: charon_default_position();
+    _position = copied ?: revenant_default_position();
 }
 
-- (BOOL)charon_isLeading
+- (BOOL)revenant_isLeading
 {
     return _placement == UICellAccessoryPlacementLeading;
 }
 
-- (BOOL)charon_hasDefaultPosition
+- (BOOL)revenant_hasDefaultPosition
 {
-    return _position == charon_default_position();
+    return _position == revenant_default_position();
 }
 
-- (NSInteger)charon_order
+- (NSInteger)revenant_order
 {
     return _placement == UICellAccessoryPlacementLeading ? 3 : 0;
 }
@@ -1140,7 +1140,7 @@ UICellAccessoryPosition UICellAccessoryPositionAfterAccessoryOfClass(Class acces
     return [super isEqual:object] && _customView == other->_customView && _placement == other->_placement && _maintainsFixedSize == other->_maintainsFixedSize && _position == other->_position;
 }
 
-- (UIView *)charon_makeView
+- (UIView *)revenant_makeView
 {
     return _customView;
 }

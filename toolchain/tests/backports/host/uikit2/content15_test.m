@@ -5,7 +5,7 @@
 
 #import "check.h"
 
-@interface CharonHostNSTextContentManager : NSObject
+@interface RevenantHostNSTextContentManager : NSObject
 - (instancetype)init;
 + (BOOL)supportsSecureCoding;
 @property (nonatomic, readonly, copy) NSArray *textLayoutManagers;
@@ -23,7 +23,7 @@
 - (NSString *)description;
 @end
 
-@interface CharonHostNSTextContentStorage : CharonHostNSTextContentManager
+@interface RevenantHostNSTextContentStorage : RevenantHostNSTextContentManager
 - (instancetype)initWithTextStorage:(NSTextStorage *)textStorage;
 @property (nonatomic, strong, nullable) NSTextStorage *textStorage;
 @property (nonatomic, copy, nullable) NSAttributedString *attributedString;
@@ -34,7 +34,7 @@
 - (NSString *)description;
 @end
 
-@interface CharonHostNSTextListElement : NSObject
+@interface RevenantHostNSTextListElement : NSObject
 + (nullable instancetype)textListElementWithContents:(NSAttributedString *)contents
                                   markerAttributes:(NSDictionary *)markerAttributes
                                           textList:(NSTextList *)textList
@@ -50,7 +50,7 @@
 - (NSString *)description;
 @end
 
-@interface CharonHostNSTextParagraph : NSObject
+@interface RevenantHostNSTextParagraph : NSObject
 - (instancetype)initWithAttributedString:(NSAttributedString *)attributedString;
 @property (nonatomic, strong, nullable) id textContentManager;
 @property (nullable, strong) NSTextRange *elementRange;
@@ -58,21 +58,21 @@
 @property (nullable, strong, readonly) NSTextRange *paragraphSeparatorRange;
 @end
 
-@interface CharonHostCharonTextLocation : NSObject <NSTextLocation>
+@interface RevenantHostRevenantTextLocation : NSObject <NSTextLocation>
 + (instancetype)locationWithTextContentStorage:(id)textContentStorage offset:(NSInteger)offset;
 @property (nonatomic, readonly, weak) id textContentStorage;
 @property (nonatomic, readonly) NSInteger offset;
 @end
 
-static Class port_manager_class(void) { return NSClassFromString(@"CharonHostNSTextContentManager"); }
-static Class port_storage_class(void) { return NSClassFromString(@"CharonHostNSTextContentStorage"); }
-static Class port_element_class(void) { return NSClassFromString(@"CharonHostNSTextListElement"); }
+static Class port_manager_class(void) { return NSClassFromString(@"RevenantHostNSTextContentManager"); }
+static Class port_storage_class(void) { return NSClassFromString(@"RevenantHostNSTextContentStorage"); }
+static Class port_element_class(void) { return NSClassFromString(@"RevenantHostNSTextListElement"); }
 
 static NSString *described(id object)
 {
     if (!object)
         return @"(nil)";
-    NSString *text = [[object description] stringByReplacingOccurrencesOfString:@"CharonHost" withString:@""];
+    NSString *text = [[object description] stringByReplacingOccurrencesOfString:@"RevenantHost" withString:@""];
     NSRegularExpression *addresses = [NSRegularExpression regularExpressionWithPattern:@"0x[0-9a-fA-F]+"
                                                                               options:0
                                                                                 error:NULL];
@@ -84,34 +84,34 @@ static NSString *described(id object)
 
 static void compare_text(NSString *system, NSString *port, NSString *name)
 {
-    charon_check([system isEqualToString:port], name.UTF8String,
+    revenant_check([system isEqualToString:port], name.UTF8String,
                  [NSString stringWithFormat:@"system %@ != port %@", described(system), described(port)]);
 }
 
 static void compare_manager(void)
 {
     NSTextContentManager *system = [[NSTextContentManager alloc] init];
-    CharonHostNSTextContentManager *port = [[port_manager_class() alloc] init];
-    charon_check(system != nil && port != nil, "both sides make a bare manager", @"one side does not");
-    charon_check(system.textLayoutManagers.count == 0 && [port textLayoutManagers].count == 0,
+    RevenantHostNSTextContentManager *port = [[port_manager_class() alloc] init];
+    revenant_check(system != nil && port != nil, "both sides make a bare manager", @"one side does not");
+    revenant_check(system.textLayoutManagers.count == 0 && [port textLayoutManagers].count == 0,
                  "a bare manager holds no layout manager on either side", @"one side holds some");
-    charon_check(!system.hasEditingTransaction && !([port hasEditingTransaction]),
+    revenant_check(!system.hasEditingTransaction && !([port hasEditingTransaction]),
                  "and is in no transaction on either side", @"one side is");
-    charon_check(system.automaticallySynchronizesTextLayoutManagers &&
+    revenant_check(system.automaticallySynchronizesTextLayoutManagers &&
                      [port automaticallySynchronizesTextLayoutManagers],
                  "both sides synchronize the layout managers by default", @"one side does not");
-    charon_check(!system.automaticallySynchronizesToBackingStore && !([port automaticallySynchronizesToBackingStore]),
+    revenant_check(!system.automaticallySynchronizesToBackingStore && !([port automaticallySynchronizesToBackingStore]),
                  "and neither synchronizes the backing store by default", @"one side does");
-    charon_check(system.delegate == nil && [port delegate] == nil, "and neither holds a delegate",
+    revenant_check(system.delegate == nil && [port delegate] == nil, "and neither holds a delegate",
                  @"one side holds one");
     id notInTheList = @"a manager that was never added";
     [system setPrimaryTextLayoutManager:notInTheList];
     [port setPrimaryTextLayoutManager:notInTheList];
-    charon_check(system.primaryTextLayoutManager == nil && [port primaryTextLayoutManager] == nil,
+    revenant_check(system.primaryTextLayoutManager == nil && [port primaryTextLayoutManager] == nil,
                  "a primary that is not in the list is nil on both sides", @"one side kept it");
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wnonnull"
-    charon_check([system textElementsForRange:nil].count == 0 && [[port textElementsForRange:nil] count] == 0,
+    revenant_check([system textElementsForRange:nil].count == 0 && [[port textElementsForRange:nil] count] == 0,
                  "a manager with no document has no elements on either side", @"one side has some");
 #pragma clang diagnostic pop
     compare_text(described(system), described(port), @"a bare manager, described");
@@ -142,10 +142,10 @@ static void compare_manager(void)
     } @catch (NSException *exception) {
         portRaised = YES;
     }
-    charon_check(inside && portInside, "a transaction is open inside the block on both sides", @"one side is not");
-    charon_check(!system.hasEditingTransaction && !([port hasEditingTransaction]),
+    revenant_check(inside && portInside, "a transaction is open inside the block on both sides", @"one side is not");
+    revenant_check(!system.hasEditingTransaction && !([port hasEditingTransaction]),
                  "and closed after it on both sides", @"one side is still in one");
-    charon_check(!raised && !portRaised,
+    revenant_check(!raised && !portRaised,
                  "and a synchronization inside it raises on neither side, as M11 records", @"one side raises");
     __block NSInteger depth = 0;
     [port performEditingTransactionUsingBlock:^{
@@ -153,7 +153,7 @@ static void compare_manager(void)
             depth = [port hasEditingTransaction] ? 2 : 0;
         }];
     }];
-    charon_check(depth == 2 && !([port hasEditingTransaction]),
+    revenant_check(depth == 2 && !([port hasEditingTransaction]),
                  "a nested transaction nests and unwinds on the port", @"the depth is not two, or it is still open");
     BOOL systemRecorded = YES, portRecorded = YES;
 #pragma clang diagnostic push
@@ -169,9 +169,9 @@ static void compare_manager(void)
     } @catch (NSException *exception) {
         portRecorded = NO;
     }
-    charon_check(systemRecorded == portRecorded, "recording nothing answers the same on both sides",
+    revenant_check(systemRecorded == portRecorded, "recording nothing answers the same on both sides",
                  @"one side refused it and the other did not");
-    charon_check([[NSTextContentManager class] supportsSecureCoding] == [port_manager_class() supportsSecureCoding],
+    revenant_check([[NSTextContentManager class] supportsSecureCoding] == [port_manager_class() supportsSecureCoding],
                  "both sides say a manager supports secure coding", @"one side does not");
 }
 
@@ -179,36 +179,36 @@ static void compare_list_element(void)
 {
     NSTextList *list = [[NSTextList alloc] initWithMarkerFormat:NSTextListMarkerDecimal options:0
                                               startingItemNumber:1];
-    charon_check([list markerForItemNumber:1] != nil, "the carried NSTextList answers a marker", @"it does not");
+    revenant_check([list markerForItemNumber:1] != nil, "the carried NSTextList answers a marker", @"it does not");
     NSAttributedString *one = [[NSAttributedString alloc] initWithString:@"one"];
     NSTextListElement *systemItem = [NSTextListElement textListElementWithContents:one
                                                                   markerAttributes:nil
                                                                           textList:list
                                                                      childElements:nil];
-    CharonHostNSTextListElement *portItem = [port_element_class() textListElementWithContents:one
+    RevenantHostNSTextListElement *portItem = [port_element_class() textListElementWithContents:one
                                                                 markerAttributes:nil
                                                                         textList:list
                                                                    childElements:nil];
-    charon_check(systemItem != nil && portItem != nil, "both sides make a list item", @"one side does not");
-    charon_check([systemItem.contents length] == [portItem contents].length &&
+    revenant_check(systemItem != nil && portItem != nil, "both sides make a list item", @"one side does not");
+    revenant_check([systemItem.contents length] == [portItem contents].length &&
                      [portItem contents].length == one.length,
                  "and it keeps its contents", @"one side does not");
-    charon_check(systemItem.childElements.count == 0 && [portItem childElements].count == 0,
+    revenant_check(systemItem.childElements.count == 0 && [portItem childElements].count == 0,
                  "with no children on either side", @"one side has some");
     NSString *systemText = [systemItem.attributedString string];
     NSString *portText = [portItem attributedString].string;
-    charon_check([systemText rangeOfString:@"one"].location != NSNotFound &&
+    revenant_check([systemText rangeOfString:@"one"].location != NSNotFound &&
                      [portText rangeOfString:@"one"].location != NSNotFound &&
                      [portText rangeOfString:@"one"].location > 0 && [systemText rangeOfString:@"one"].location > 0,
                  "the displayed string is the contents behind something on both sides",
                  [NSString stringWithFormat:@"system %@ / port %@", systemText, portText]);
-    charon_check([systemText hasSuffix:@"one\n"],
+    revenant_check([systemText hasSuffix:@"one\n"],
                  "and the host's ends with the element's paragraph separator after them", systemText);
-    charon_check([systemText rangeOfString:@"\t0\t"].location == 0,
+    revenant_check([systemText rangeOfString:@"\t0\t"].location == 0,
                  "the host's item marker is still tab-delimited and zero-based", systemText);
-    charon_check([portText isEqualToString:[[list markerForItemNumber:0] stringByAppendingString:@"one"]],
+    revenant_check([portText isEqualToString:[[list markerForItemNumber:0] stringByAppendingString:@"one"]],
                  "and the port's is that list's answer for zero, without the host's tabs", portText);
-    charon_check([NSTextListElement textListElementWithChildElements:@[] textList:list nestingLevel:0] == nil &&
+    revenant_check([NSTextListElement textListElementWithChildElements:@[] textList:list nestingLevel:0] == nil &&
                      [port_element_class() textListElementWithChildElements:@[] textList:list nestingLevel:0] == nil,
                  "a nesting parent of no children is nil on both sides", @"one side made one");
     BOOL systemRefused = NO, portRefused = NO;
@@ -226,7 +226,7 @@ static void compare_list_element(void)
     } @catch (NSException *exception) {
         portRefused = YES;
     }
-    charon_check(systemRefused && portRefused, "a negative nesting level is refused on both sides",
+    revenant_check(systemRefused && portRefused, "a negative nesting level is refused on both sides",
                  @"one side made one");
     BOOL systemInit = NO, portInit = NO;
     @try {
@@ -239,64 +239,64 @@ static void compare_list_element(void)
     } @catch (NSException *exception) {
         portInit = YES;
     }
-    charon_check(systemInit == portInit, "an element made with -initWithAttributedString: answers the same on both sides",
+    revenant_check(systemInit == portInit, "an element made with -initWithAttributedString: answers the same on both sides",
                  @"one side refused it and the other did not");
 }
 
 static void compare_storage(void)
 {
-    charon_check(![NSTextContentManager instancesRespondToSelector:@selector(initWithTextStorage:)] ||
+    revenant_check(![NSTextContentManager instancesRespondToSelector:@selector(initWithTextStorage:)] ||
                      [port_storage_class() instancesRespondToSelector:@selector(initWithTextStorage:)],
                  "the port's content storage is constructible, which the host's is not on the measured build",
                  @"the port cannot make one either");
     NSTextStorage *backing =
         [[NSTextStorage alloc] initWithAttributedString:[[NSAttributedString alloc] initWithString:@"one\ntwo\nthree"]];
-    CharonHostNSTextContentStorage *port = [[port_storage_class() alloc] initWithTextStorage:backing];
-    charon_check(port != nil, "the port makes a content storage over a text storage", @"it does not");
-    charon_check([port textStorage] == backing, "which is the storage it is given", @"it is not");
-    charon_check(backing.textStorageObserver == (id)port, "and the storage observes it, which is how a range stays true",
+    RevenantHostNSTextContentStorage *port = [[port_storage_class() alloc] initWithTextStorage:backing];
+    revenant_check(port != nil, "the port makes a content storage over a text storage", @"it does not");
+    revenant_check([port textStorage] == backing, "which is the storage it is given", @"it is not");
+    revenant_check(backing.textStorageObserver == (id)port, "and the storage observes it, which is how a range stays true",
                  @"the storage observes nothing");
-    charon_check([[[port attributedString] string] isEqualToString:@"one\ntwo\nthree"],
+    revenant_check([[[port attributedString] string] isEqualToString:@"one\ntwo\nthree"],
                  "the document is the storage's string", [[[port attributedString] string] description]);
-    charon_check(described([port documentRange]) != nil, "and its document range is a range", @"it is not");
-    CharonHostNSTextParagraph *paragraph =
-        [[CharonHostNSTextParagraph alloc] initWithAttributedString:[[NSAttributedString alloc] initWithString:@"one\n"]];
+    revenant_check(described([port documentRange]) != nil, "and its document range is a range", @"it is not");
+    RevenantHostNSTextParagraph *paragraph =
+        [[RevenantHostNSTextParagraph alloc] initWithAttributedString:[[NSAttributedString alloc] initWithString:@"one\n"]];
     paragraph.textContentManager = (id)port;
-    charon_check(paragraph.paragraphContentRange == nil,
+    revenant_check(paragraph.paragraphContentRange == nil,
                  "a paragraph with no element range derives none, as the range layer's group measured", @"one derives one");
     id documentRange = [port documentRange];
-    CharonHostCharonTextLocation *documentStart = (CharonHostCharonTextLocation *)[documentRange valueForKey:@"location"];
-    CharonHostCharonTextLocation *documentEnd = (CharonHostCharonTextLocation *)[documentRange valueForKey:@"endLocation"];
+    RevenantHostRevenantTextLocation *documentStart = (RevenantHostRevenantTextLocation *)[documentRange valueForKey:@"location"];
+    RevenantHostRevenantTextLocation *documentEnd = (RevenantHostRevenantTextLocation *)[documentRange valueForKey:@"endLocation"];
     paragraph.elementRange = [[NSTextRange alloc] initWithLocation:documentStart endLocation:documentEnd];
-    charon_check(paragraph.paragraphContentRange != nil && paragraph.paragraphSeparatorRange != nil,
+    revenant_check(paragraph.paragraphContentRange != nil && paragraph.paragraphSeparatorRange != nil,
                  "a paragraph in the port's document derives its content and separator ranges", @"it derives none");
     NSTextRange *content = paragraph.paragraphContentRange;
     NSTextRange *separator = paragraph.paragraphSeparatorRange;
-    NSInteger contentStart = (NSInteger)[(CharonHostCharonTextLocation *)content.location offset];
-    NSInteger contentEnd = (NSInteger)[(CharonHostCharonTextLocation *)content.endLocation offset];
-    NSInteger separatorStart = (NSInteger)[(CharonHostCharonTextLocation *)separator.location offset];
-    NSInteger separatorEnd = (NSInteger)[(CharonHostCharonTextLocation *)separator.endLocation offset];
-    charon_check(contentStart == 0 && contentEnd - contentStart == 3,
+    NSInteger contentStart = (NSInteger)[(RevenantHostRevenantTextLocation *)content.location offset];
+    NSInteger contentEnd = (NSInteger)[(RevenantHostRevenantTextLocation *)content.endLocation offset];
+    NSInteger separatorStart = (NSInteger)[(RevenantHostRevenantTextLocation *)separator.location offset];
+    NSInteger separatorEnd = (NSInteger)[(RevenantHostRevenantTextLocation *)separator.endLocation offset];
+    revenant_check(contentStart == 0 && contentEnd - contentStart == 3,
                  "the content range is the three characters without the newline",
                  [NSString stringWithFormat:@"%ld...%ld", (long)contentStart, (long)contentEnd]);
-    charon_check(separatorStart == 3 && separatorEnd - separatorStart == 1,
+    revenant_check(separatorStart == 3 && separatorEnd - separatorStart == 1,
                  "and the separator range is that one newline",
                  [NSString stringWithFormat:@"%ld...%ld", (long)separatorStart, (long)separatorEnd]);
-    CharonHostCharonTextLocation *before = [[port documentRange] endLocation];
+    RevenantHostRevenantTextLocation *before = [[port documentRange] endLocation];
     [backing replaceCharactersInRange:NSMakeRange(0, 0) withString:@"x"];
-    CharonHostCharonTextLocation *after = [[port documentRange] endLocation];
-    charon_check(after.offset == before.offset + 1, "an edit to the document lengthens its range",
+    RevenantHostRevenantTextLocation *after = [[port documentRange] endLocation];
+    revenant_check(after.offset == before.offset + 1, "an edit to the document lengthens its range",
                  [NSString stringWithFormat:@"%ld then %ld", (long)before.offset, (long)after.offset]);
-    charon_check([described(port) rangeOfString:@"NSTextContentStorage:"].location != NSNotFound,
+    revenant_check([described(port) rangeOfString:@"NSTextContentStorage:"].location != NSNotFound,
                  "a content storage describes itself with its class and its document", described(port));
 }
 
 static NSString *paragraph_bounds(NSArray *elements)
 {
     NSMutableArray *parts = [NSMutableArray array];
-    for (CharonHostNSTextParagraph *element in elements) {
-        CharonHostCharonTextLocation *from = (CharonHostCharonTextLocation *)[element.elementRange valueForKey:@"location"];
-        CharonHostCharonTextLocation *to = (CharonHostCharonTextLocation *)[element.elementRange valueForKey:@"endLocation"];
+    for (RevenantHostNSTextParagraph *element in elements) {
+        RevenantHostRevenantTextLocation *from = (RevenantHostRevenantTextLocation *)[element.elementRange valueForKey:@"location"];
+        RevenantHostRevenantTextLocation *to = (RevenantHostRevenantTextLocation *)[element.elementRange valueForKey:@"endLocation"];
         [parts addObject:[NSString stringWithFormat:@"[%ld,%ld)", (long)from.offset, (long)to.offset]];
     }
     return [parts componentsJoinedByString:@" "];
@@ -306,9 +306,9 @@ static void check_paragraphs(NSString *text, NSString *expected, NSString *name)
 {
     NSTextStorage *backing = [[NSTextStorage alloc] initWithAttributedString:
                               [[NSAttributedString alloc] initWithString:text]];
-    CharonHostNSTextContentStorage *port = [[port_storage_class() alloc] initWithTextStorage:backing];
+    RevenantHostNSTextContentStorage *port = [[port_storage_class() alloc] initWithTextStorage:backing];
     NSArray *elements = [port textElementsForRange:[port documentRange]];
-    charon_check([paragraph_bounds(elements) isEqualToString:expected], name.UTF8String,
+    revenant_check([paragraph_bounds(elements) isEqualToString:expected], name.UTF8String,
                  [NSString stringWithFormat:@"port %@", paragraph_bounds(elements)]);
 }
 
@@ -324,16 +324,16 @@ static void compare_paragraphs(void)
 
     NSTextStorage *backing = [[NSTextStorage alloc] initWithAttributedString:
                               [[NSAttributedString alloc] initWithString:@"one\ntwo\nthree"]];
-    CharonHostNSTextContentStorage *port = [[port_storage_class() alloc] initWithTextStorage:backing];
-    CharonHostCharonTextLocation *at4 = [CharonHostCharonTextLocation locationWithTextContentStorage:port offset:4];
-    CharonHostCharonTextLocation *at8 = [CharonHostCharonTextLocation locationWithTextContentStorage:port offset:8];
-    CharonHostCharonTextLocation *at12 = [CharonHostCharonTextLocation locationWithTextContentStorage:port offset:12];
+    RevenantHostNSTextContentStorage *port = [[port_storage_class() alloc] initWithTextStorage:backing];
+    RevenantHostRevenantTextLocation *at4 = [RevenantHostRevenantTextLocation locationWithTextContentStorage:port offset:4];
+    RevenantHostRevenantTextLocation *at8 = [RevenantHostRevenantTextLocation locationWithTextContentStorage:port offset:8];
+    RevenantHostRevenantTextLocation *at12 = [RevenantHostRevenantTextLocation locationWithTextContentStorage:port offset:12];
     NSTextRange *second = [[NSTextRange alloc] initWithLocation:at4 endLocation:at8];
     NSTextRange *firstTwo = [[NSTextRange alloc] initWithLocation:at4 endLocation:at12];
-    charon_check([paragraph_bounds([port textElementsForRange:second]) isEqualToString:@"[4,8)"],
+    revenant_check([paragraph_bounds([port textElementsForRange:second]) isEqualToString:@"[4,8)"],
                  "a range over one paragraph returns that paragraph and no other",
                  paragraph_bounds([port textElementsForRange:second]));
-    charon_check([paragraph_bounds([port textElementsForRange:firstTwo]) isEqualToString:@"[4,8) [8,13)"],
+    revenant_check([paragraph_bounds([port textElementsForRange:firstTwo]) isEqualToString:@"[4,8) [8,13)"],
                  "and a range over two returns both, the one that meets its end included",
                  paragraph_bounds([port textElementsForRange:firstTwo]));
     NSMutableArray *backward = [NSMutableArray array];
@@ -343,7 +343,7 @@ static void compare_paragraphs(void)
                                      [backward addObject:element];
                                      return YES;
                                  }];
-    charon_check([paragraph_bounds(backward) isEqualToString:@"[8,13) [4,8) [0,4)"],
+    revenant_check([paragraph_bounds(backward) isEqualToString:@"[8,13) [4,8) [0,4)"],
                  "a backward enumeration with no location walks the paragraphs from the end of the document",
                  paragraph_bounds(backward));
     NSMutableArray *backwardAtTen = [NSMutableArray array];
@@ -353,7 +353,7 @@ static void compare_paragraphs(void)
                                      [backwardAtTen addObject:element];
                                      return YES;
                                  }];
-    charon_check([paragraph_bounds(backwardAtTen) isEqualToString:@"[4,8) [0,4)"],
+    revenant_check([paragraph_bounds(backwardAtTen) isEqualToString:@"[4,8) [0,4)"],
                  "and from a location it starts with the element before the one holding it",
                  paragraph_bounds(backwardAtTen));
     NSMutableArray *backwardInside = [NSMutableArray array];
@@ -363,12 +363,12 @@ static void compare_paragraphs(void)
                                      [backwardInside addObject:element];
                                      return YES;
                                  }];
-    charon_check([paragraph_bounds(backwardInside) isEqualToString:@"[0,4)"],
+    revenant_check([paragraph_bounds(backwardInside) isEqualToString:@"[0,4)"],
                  "so a location at a paragraph's start enumerates the one before it, not its own",
                  paragraph_bounds(backwardInside));
     NSTextStorage *crlf = [[NSTextStorage alloc] initWithAttributedString:
                            [[NSAttributedString alloc] initWithString:@"one\r\ntwo\r\nthree"]];
-    CharonHostNSTextContentStorage *crlfPort = [[port_storage_class() alloc] initWithTextStorage:crlf];
+    RevenantHostNSTextContentStorage *crlfPort = [[port_storage_class() alloc] initWithTextStorage:crlf];
     NSMutableArray *crlfBackward = [NSMutableArray array];
     [crlfPort enumerateTextElementsFromLocation:nil
                                        options:NSTextContentManagerEnumerationOptionsReverse
@@ -376,13 +376,13 @@ static void compare_paragraphs(void)
                                         [crlfBackward addObject:element];
                                         return YES;
                                     }];
-    charon_check([paragraph_bounds(crlfBackward) isEqualToString:@"[10,15) [5,10) [0,5)"],
+    revenant_check([paragraph_bounds(crlfBackward) isEqualToString:@"[10,15) [5,10) [0,5)"],
                  "a backward walk over a carriage-return-and-line-feed document cuts the same three paragraphs",
                  paragraph_bounds(crlfBackward));
 
-    CharonHostCharonTextLocation *elsewhere =
-        [CharonHostCharonTextLocation locationWithTextContentStorage:nil offset:4];
-    charon_check([port textElementsForRange:[[NSTextRange alloc] initWithLocation:elsewhere endLocation:at8]].count == 0,
+    RevenantHostRevenantTextLocation *elsewhere =
+        [RevenantHostRevenantTextLocation locationWithTextContentStorage:nil offset:4];
+    revenant_check([port textElementsForRange:[[NSTextRange alloc] initWithLocation:elsewhere endLocation:at8]].count == 0,
                  "a range whose start is not this document's intersects nothing",
                  paragraph_bounds([port textElementsForRange:[[NSTextRange alloc] initWithLocation:elsewhere
                                                                             endLocation:at8]]));
@@ -404,12 +404,12 @@ static BOOL class_adports(Class cls, Protocol *wanted)
 
 static void check_declared_protocol(void)
 {
-    Class location = NSClassFromString(@"CharonHostCharonTextLocation");
-    Class storage = NSClassFromString(@"CharonHostNSTextContentStorage");
-    charon_check(location != nil && storage != nil, "the port's own location type and its storage are both in the process, renamed as the harness renames them" ,
+    Class location = NSClassFromString(@"RevenantHostRevenantTextLocation");
+    Class storage = NSClassFromString(@"RevenantHostNSTextContentStorage");
+    revenant_check(location != nil && storage != nil, "the port's own location type and its storage are both in the process, renamed as the harness renames them" ,
                  @"one of the two is not");
-    charon_check(location != nil && class_adports(location, @protocol(NSTextLocation)), "the port's own location type adopts the location protocol its header names" , @"it adopts none");
-    charon_check(storage != nil && !class_adports(storage, @protocol(NSTextLocation)), "and the storage beside it, which is not a location, answers no - which is what makes that a reading and not a lookup" ,
+    revenant_check(location != nil && class_adports(location, @protocol(NSTextLocation)), "the port's own location type adopts the location protocol its header names" , @"it adopts none");
+    revenant_check(storage != nil && !class_adports(storage, @protocol(NSTextLocation)), "and the storage beside it, which is not a location, answers no - which is what makes that a reading and not a lookup" ,
                  @"a class that is not a location answers yes");
 }
 int main(void)
@@ -420,7 +420,7 @@ int main(void)
         compare_list_element();
         compare_storage();
         compare_paragraphs();
-        printf("checks=%d failures=%d\n", charon_checks, charon_failures);
+        printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
     }
-    return charon_failures;
+    return revenant_failures;
 }

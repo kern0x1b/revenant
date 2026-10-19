@@ -5,7 +5,7 @@
 #pragma clang diagnostic ignored "-Wunguarded-availability-new"
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 
-@interface CharonPhotosStore : NSObject
+@interface RevenantPhotosStore : NSObject
 + (BOOL)findAlbumWithName:(NSString *)name found:(BOOL *)found error:(NSError **)error;
 @end
 
@@ -13,7 +13,7 @@ int main(int argc, char **argv)
 {
     @autoreleasepool {
         if (argc > 1)
-            charon_log_to(@(argv[1]));
+            revenant_log_to(@(argv[1]));
         ALAssetsLibrary *library = [[ALAssetsLibrary alloc] init];
         __block BOOL answered = NO;
         __block NSError *refusal = nil;
@@ -28,7 +28,7 @@ int main(int argc, char **argv)
             [[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.02]];
         printf("the release's enumeration: %s\n", refusal.description.UTF8String ?: "listed");
 
-        if (![CharonPhotosStore respondsToSelector:@selector(findAlbumWithName:found:error:)]) {
+        if (![RevenantPhotosStore respondsToSelector:@selector(findAlbumWithName:found:error:)]) {
             printf("FAIL the control needs the port's album check, and this binary has none\n");
             printf("1 checks, 1 failed\n");
             return 1;
@@ -36,11 +36,11 @@ int main(int argc, char **argv)
 
         BOOL found = NO;
         NSError *error = nil;
-        BOOL listed = [CharonPhotosStore findAlbumWithName:@"CharonPhotosProbe" found:&found error:&error];
+        BOOL listed = [RevenantPhotosStore findAlbumWithName:@"RevenantPhotosProbe" found:&found error:&error];
         NSString *answer = error ? error.description : (listed ? @"listed" : @"not listed");
         printf("the port's album check: %s\n", answer.UTF8String);
         CHECK(listed && found == NO, "CONTROL: the check answers \"no such album\" instead of the release's refusal");
-        printf("%d checks, %d failed\n", charon_checks, charon_failures);
+        printf("%d checks, %d failed\n", revenant_checks, revenant_failures);
     }
-    return charon_failures;
+    return revenant_failures;
 }

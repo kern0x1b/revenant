@@ -3,37 +3,37 @@
 #import <objc/message.h>
 #import <objc/runtime.h>
 
-#import "CharonAVMetadataConstruction.h"
+#import "RevenantAVMetadataConstruction.h"
 
 @interface AVMetadataGroup ()
-@property (nonatomic, copy) NSArray<AVMetadataItem *> *charonItems;
-@property (nonatomic) CMTimeRange charonTimeRange;
+@property (nonatomic, copy) NSArray<AVMetadataItem *> *revenantItems;
+@property (nonatomic) CMTimeRange revenantTimeRange;
 @end
 
 @implementation AVMetadataGroup
 
-@synthesize charonItems = _charonItems;
-@synthesize charonTimeRange = _charonTimeRange;
+@synthesize revenantItems = _revenantItems;
+@synthesize revenantTimeRange = _revenantTimeRange;
 
-- (instancetype)charon_initWithItems:(NSArray<AVMetadataItem *> *)items
+- (instancetype)revenant_initWithItems:(NSArray<AVMetadataItem *> *)items
                            timeRange:(CMTimeRange)timeRange
 {
     self = ((id (*)(id, SEL))objc_msgSend)(self, sel_registerName("init"));
     if (self) {
-        _charonItems = [items copy] ?: @[];
-        _charonTimeRange = timeRange;
+        _revenantItems = [items copy] ?: @[];
+        _revenantTimeRange = timeRange;
     }
     return self;
 }
 
 - (NSArray<AVMetadataItem *> *)items
 {
-    return self.charonItems ?: @[];
+    return self.revenantItems ?: @[];
 }
 
 - (CMTimeRange)timeRange
 {
-    return self.charonTimeRange;
+    return self.revenantTimeRange;
 }
 
 - (NSString *)classifyingLabel
@@ -48,7 +48,7 @@
 
 - (id)copyWithZone:(NSZone *)zone
 {
-    return [[[self class] alloc] charon_initWithItems:self.charonItems timeRange:self.charonTimeRange];
+    return [[[self class] alloc] revenant_initWithItems:self.revenantItems timeRange:self.revenantTimeRange];
 }
 
 - (BOOL)isEqual:(id)other
@@ -71,48 +71,48 @@
 @end
 
 @interface AVDateRangeMetadataGroup ()
-@property (nonatomic, copy) NSDate *charonStartDate;
-@property (nonatomic, copy) NSDate *charonEndDate;
+@property (nonatomic, copy) NSDate *revenantStartDate;
+@property (nonatomic, copy) NSDate *revenantEndDate;
 @end
 
 @implementation AVDateRangeMetadataGroup
 
-@synthesize charonStartDate = _charonStartDate;
-@synthesize charonEndDate = _charonEndDate;
+@synthesize revenantStartDate = _revenantStartDate;
+@synthesize revenantEndDate = _revenantEndDate;
 
-- (instancetype)charon_initWithItems:(NSArray<AVMetadataItem *> *)items
+- (instancetype)revenant_initWithItems:(NSArray<AVMetadataItem *> *)items
                            startDate:(NSDate *)startDate
                              endDate:(NSDate *)endDate
 {
     self = ((id (*)(id, SEL))objc_msgSend)(self, sel_registerName("init"));
     if (self) {
-        self.charonItems = items;
-        _charonStartDate = [startDate copy];
-        _charonEndDate = [endDate copy];
+        self.revenantItems = items;
+        _revenantStartDate = [startDate copy];
+        _revenantEndDate = [endDate copy];
     }
     return self;
 }
 
 + (instancetype)dateRangeGroupWithItems:(NSArray<AVMetadataItem *> *)items
 {
-    return [[self alloc] charon_initWithItems:items startDate:nil endDate:nil];
+    return [[self alloc] revenant_initWithItems:items startDate:nil endDate:nil];
 }
 
 - (NSDate *)startDate
 {
-    return self.charonStartDate;
+    return self.revenantStartDate;
 }
 
 - (NSDate *)endDate
 {
-    return self.charonEndDate;
+    return self.revenantEndDate;
 }
 
 - (id)copyWithZone:(NSZone *)zone
 {
-    return [[[self class] alloc] charon_initWithItems:self.charonItems
-                                            startDate:self.charonStartDate
-                                              endDate:self.charonEndDate];
+    return [[[self class] alloc] revenant_initWithItems:self.revenantItems
+                                            startDate:self.revenantStartDate
+                                              endDate:self.revenantEndDate];
 }
 
 - (BOOL)isEqual:(id)other
@@ -140,32 +140,32 @@
 
 - (void)setStartDate:(NSDate *)startDate
 {
-    self.charonStartDate = startDate;
+    self.revenantStartDate = startDate;
 }
 
 - (NSDate *)startDate
 {
-    return self.charonStartDate;
+    return self.revenantStartDate;
 }
 
 - (void)setEndDate:(NSDate *)endDate
 {
-    self.charonEndDate = endDate;
+    self.revenantEndDate = endDate;
 }
 
 - (NSDate *)endDate
 {
-    return self.charonEndDate;
+    return self.revenantEndDate;
 }
 
 - (void)setItems:(NSArray<AVMetadataItem *> *)items
 {
-    self.charonItems = items;
+    self.revenantItems = items;
 }
 
 - (NSArray<AVMetadataItem *> *)items
 {
-    return self.charonItems ?: @[];
+    return self.revenantItems ?: @[];
 }
 
 @end

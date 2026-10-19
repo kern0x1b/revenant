@@ -1,11 +1,11 @@
-#import "CharonSpriteKit.h"
+#import "RevenantSpriteKit.h"
 #if !TARGET_OS_IPHONE
 #import <AppKit/AppKit.h>
 #endif
 
-static NSString *const CharonSKDefaultLabelFont = @"HelveticaNeue-UltraLight";
+static NSString *const RevenantSKDefaultLabelFont = @"HelveticaNeue-UltraLight";
 
-static CharonSKColor *CharonSKLabelFontColor(void)
+static RevenantSKColor *RevenantSKLabelFontColor(void)
 {
 #if TARGET_OS_IPHONE
     return [UIColor whiteColor];
@@ -14,7 +14,7 @@ static CharonSKColor *CharonSKLabelFontColor(void)
 #endif
 }
 
-static CharonSKColor *CharonSKLabelColor(void)
+static RevenantSKColor *RevenantSKLabelColor(void)
 {
 #if TARGET_OS_IPHONE
     return [UIColor colorWithRed:1 green:1 blue:1 alpha:1];
@@ -23,7 +23,7 @@ static CharonSKColor *CharonSKLabelColor(void)
 #endif
 }
 
-static CharonSKColor *CharonSKLabelSRGBColor(CharonSKColor *colour)
+static RevenantSKColor *RevenantSKLabelSRGBColor(RevenantSKColor *colour)
 {
 #if TARGET_OS_IPHONE
     return colour;
@@ -37,8 +37,8 @@ static CharonSKColor *CharonSKLabelSRGBColor(CharonSKColor *colour)
     NSString *_text;
     NSString *_fontName;
     CGFloat _fontSize;
-    CharonSKColor *_fontColor;
-    CharonSKColor *_color;
+    RevenantSKColor *_fontColor;
+    RevenantSKColor *_color;
     CGFloat _colorBlendFactor;
     SKBlendMode _blendMode;
     SKLabelHorizontalAlignmentMode _horizontalAlignmentMode;
@@ -61,9 +61,9 @@ static CharonSKColor *CharonSKLabelSRGBColor(CharonSKColor *colour)
 @synthesize lineBreakMode = _lineBreakMode;
 @synthesize preferredMaxLayoutWidth = _preferredMaxLayoutWidth;
 
-- (void)setFontColor:(CharonSKColor *)fontColor
+- (void)setFontColor:(RevenantSKColor *)fontColor
 {
-    _fontColor = CharonSKLabelSRGBColor(fontColor);
+    _fontColor = RevenantSKLabelSRGBColor(fontColor);
 }
 
 - (instancetype)initWithFontNamed:(NSString *)fontName
@@ -72,8 +72,8 @@ static CharonSKColor *CharonSKLabelSRGBColor(CharonSKColor *colour)
     if (self) {
         _fontName = [fontName copy];
         _fontSize = 32;
-        _fontColor = CharonSKLabelFontColor();
-        _color = CharonSKLabelColor();
+        _fontColor = RevenantSKLabelFontColor();
+        _color = RevenantSKLabelColor();
         _horizontalAlignmentMode = SKLabelHorizontalAlignmentModeCenter;
         _verticalAlignmentMode = SKLabelVerticalAlignmentModeBaseline;
         _numberOfLines = 1;
@@ -84,7 +84,7 @@ static CharonSKColor *CharonSKLabelSRGBColor(CharonSKColor *colour)
 
 + (instancetype)labelNodeWithText:(NSString *)text
 {
-    SKLabelNode *node = [[self alloc] initWithFontNamed:CharonSKDefaultLabelFont];
+    SKLabelNode *node = [[self alloc] initWithFontNamed:RevenantSKDefaultLabelFont];
     node.text = text;
     return node;
 }

@@ -1,6 +1,6 @@
 #import <UIKit/UIKit.h>
 #include <stdio.h>
-#include "CharonCalendar.h"
+#include "RevenantCalendar.h"
 
 typedef id (*PlainFn)(id, SEL);
 
@@ -33,14 +33,14 @@ static NSString *days_text(NSArray *days)
     return [parts componentsJoinedByString:@","];
 }
 
-@interface CharonMultiProbe : NSObject <UICalendarSelectionMultiDateDelegate>
+@interface RevenantMultiProbe : NSObject <UICalendarSelectionMultiDateDelegate>
 @property (nonatomic) NSInteger selectedCalls;
 @property (nonatomic) NSInteger deselectedCalls;
 @property (nonatomic) NSInteger refusedSelectDay;
 @property (nonatomic) NSInteger refusedDeselectDay;
 @end
 
-@implementation CharonMultiProbe
+@implementation RevenantMultiProbe
 - (void)multiDateSelection:(UICalendarSelectionMultiDate *)selection didSelectDate:(NSDateComponents *)dateComponents
 {
     self.selectedCalls++;
@@ -71,7 +71,7 @@ static id plain_init(id object)
 static void run(const char *side, Class baseClass, Class multiClass)
 {
     report(side, "multi-superclass-is-base", yes_no([multiClass superclass] == baseClass));
-    CharonMultiProbe *probe = [[CharonMultiProbe alloc] init];
+    RevenantMultiProbe *probe = [[RevenantMultiProbe alloc] init];
     id multi = [[multiClass alloc] initWithDelegate:probe];
     report(side, "multi-delegate-reads-back", [multi delegate] == probe ? @"yes" : @"no");
     report(side, "multi-default-count", [NSString stringWithFormat:@"%lu", (unsigned long)[[multi selectedDates] count]]);
@@ -96,27 +96,27 @@ static void run(const char *side, Class baseClass, Class multiClass)
 
 static void runPortOnly(void)
 {
-    CharonMultiProbe *probe = [[CharonMultiProbe alloc] init];
+    RevenantMultiProbe *probe = [[RevenantMultiProbe alloc] init];
     probe.refusedSelectDay = 7;
     UICalendarSelectionMultiDate *multi = [[UICalendarSelectionMultiDate alloc] initWithDelegate:probe];
 
-    [multi charon_didTapDay:day(2024, 5, 6)];
+    [multi revenant_didTapDay:day(2024, 5, 6)];
     report("only", "tap-adds-allowed-day", yes_no([multi selectedDates].count == 1 && probe.selectedCalls == 1));
-    [multi charon_didTapDay:day(2024, 5, 8)];
+    [multi revenant_didTapDay:day(2024, 5, 8)];
     report("only", "tap-keeps-order-of-days", yes_no([days_text([multi selectedDates]) isEqualToString:@"6,8"]));
-    [multi charon_didTapDay:day(2024, 5, 7)];
+    [multi revenant_didTapDay:day(2024, 5, 7)];
     report("only", "tap-refused-day-not-added", yes_no([multi selectedDates].count == 2 && probe.selectedCalls == 2));
-    report("only", "is-selected-the-chosen-days", yes_no([multi charon_isSelected:day(2024, 5, 8)] && ![multi charon_isSelected:day(2024, 5, 7)]));
+    report("only", "is-selected-the-chosen-days", yes_no([multi revenant_isSelected:day(2024, 5, 8)] && ![multi revenant_isSelected:day(2024, 5, 7)]));
 
-    [multi charon_didTapDay:day(2024, 5, 6)];
+    [multi revenant_didTapDay:day(2024, 5, 6)];
     report("only", "tap-takes-chosen-day-out", yes_no([days_text([multi selectedDates]) isEqualToString:@"8"] && probe.deselectedCalls == 1));
 
     probe.refusedDeselectDay = 8;
-    [multi charon_didTapDay:day(2024, 5, 8)];
+    [multi revenant_didTapDay:day(2024, 5, 8)];
     report("only", "refused-deselect-keeps-day", yes_no([multi selectedDates].count == 1 && probe.deselectedCalls == 1));
 
     UICalendarSelectionMultiDate *bare = [[UICalendarSelectionMultiDate alloc] initWithDelegate:nil];
-    [bare charon_didTapDay:day(2024, 5, 20)];
+    [bare revenant_didTapDay:day(2024, 5, 20)];
     report("only", "tap-without-delegate-adds", yes_no([bare selectedDates].count == 1));
 }
 

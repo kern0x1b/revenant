@@ -1,7 +1,7 @@
-#import "CharonAccessibility.h"
+#import "RevenantAccessibility.h"
 
 @interface AXBrailleTranslationResult ()
 
-- (NSUInteger)charon_unmappedCount;
+- (NSUInteger)revenant_unmappedCount;
 
 @end

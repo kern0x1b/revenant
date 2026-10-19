@@ -10,7 +10,7 @@
 #include "foundation/arm_cpu_model.hpp"
 #include "foundation/guest_cpu_topology.hpp"
 
-namespace shade {
+namespace emulator {
 
 struct DeviceProcessorProfile {
     std::string_view soc;

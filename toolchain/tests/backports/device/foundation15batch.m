@@ -85,7 +85,7 @@ static void url_encoding_and_promised(void)
                                                         encodingInvalidCharacters:YES];
     CHECK_EQUAL(spacedComponents.URL.absoluteString, @"https://example.com/a%20b", "and so is a string with one");
 
-    NSString *path = [NSTemporaryDirectory() stringByAppendingPathComponent:@"charon-promised.txt"];
+    NSString *path = [NSTemporaryDirectory() stringByAppendingPathComponent:@"revenant-promised.txt"];
     [@"hello" writeToFile:path atomically:YES encoding:NSUTF8StringEncoding error:NULL];
     NSURL *file = [NSURL fileURLWithPath:path];
     id value = nil;
@@ -106,13 +106,13 @@ static void url_encoding_and_promised(void)
 
 static void cache_and_credentials(void)
 {
-    NSURL *url = [NSURL URLWithString:@"https://charon-probe.invalid/resource"];
+    NSURL *url = [NSURL URLWithString:@"https://revenant-probe.invalid/resource"];
     NSURLRequest *request = [NSURLRequest requestWithURL:url];
     NSURLResponse *response = [[NSURLResponse alloc] initWithURL:url MIMEType:@"text/plain" expectedContentLength:5
                                                    textEncodingName:@"utf-8"];
     NSCachedURLResponse *cached = [[NSCachedURLResponse alloc] initWithResponse:response
                                                                             data:[@"hello" dataUsingEncoding:NSUTF8StringEncoding]];
-    NSURLCache *cache = [[NSURLCache alloc] initWithMemoryCapacity:1024 diskCapacity:1024 diskPath:@"charon-probe"];
+    NSURLCache *cache = [[NSURLCache alloc] initWithMemoryCapacity:1024 diskCapacity:1024 diskPath:@"revenant-probe"];
     SEL store = NSSelectorFromString(@"storeCachedResponse:forDataTask:");
     SEL read = NSSelectorFromString(@"getCachedResponseForDataTask:completionHandler:");
     SEL remove = NSSelectorFromString(@"removeCachedResponseForDataTask:");
@@ -136,7 +136,7 @@ static void cache_and_credentials(void)
     CHECK(answered == nil, "and the task's response can be taken away again");
 
     NSURLCredentialStorage *storage = [NSURLCredentialStorage sharedCredentialStorage];
-    NSURLProtectionSpace *space = [[NSURLProtectionSpace alloc] initWithHost:@"charon-probe.invalid" port:443
+    NSURLProtectionSpace *space = [[NSURLProtectionSpace alloc] initWithHost:@"revenant-probe.invalid" port:443
                                                                       protocol:NSURLProtectionSpaceHTTPS realm:@"probe"
                                                          authenticationMethod:NSURLAuthenticationMethodServerTrust];
     NSURLCredential *credential = [NSURLCredential credentialWithUser:@"u" password:@"p"
@@ -236,7 +236,7 @@ static void term_and_activity(void)
     CHECK_EQUAL(NSPersonNameComponentNickname, @"nickname", "the nickname's is nickname");
     CHECK_EQUAL(NSPersonNameComponentDelimiter, @"delimiter", "and the separator's is delimiter");
 
-    NSUserActivity *activity = [[NSUserActivity alloc] initWithActivityType:@"charon.probe"];
+    NSUserActivity *activity = [[NSUserActivity alloc] initWithActivityType:@"revenant.probe"];
     CHECK(activity.referrerURL == nil && activity.persistentIdentifier == nil, "a fresh activity has neither");
     activity.referrerURL = [NSURL URLWithString:@"https://example.com/"];
     activity.persistentIdentifier = @"an-identifier";
@@ -287,7 +287,7 @@ int main(int argc, char **argv)
 {
     @autoreleasepool {
         if (argc > 1)
-            charon_log_to(@(argv[1]));
+            revenant_log_to(@(argv[1]));
         progress_state();
         number_formatter();
         request_flags();
@@ -297,7 +297,7 @@ int main(int argc, char **argv)
         term_and_activity();
         orthographies();
         absences();
-        printf("checks=%d failures=%d\n", charon_checks, charon_failures);
-        return charon_failures;
+        printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
+        return revenant_failures;
     }
 }

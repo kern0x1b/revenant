@@ -52,9 +52,9 @@ static void compare(void)
     for (NSString *name in [expected.allKeys sortedArrayUsingSelector:@selector(compare:)]) {
         BOOL floats = [name isEqualToString:@"geometry"] || [name isEqualToString:@"faces"];
         if (floats ? close_enough(expected[name], records[name], 0.001) : [expected[name] isEqualToString:records[name]])
-            charon_check(YES, name.UTF8String, nil);
+            revenant_check(YES, name.UTF8String, nil);
         else
-            charon_check(NO, name.UTF8String, [NSString stringWithFormat:@"\n    device %@\n    host   %@", records[name], expected[name]]);
+            revenant_check(NO, name.UTF8String, [NSString stringWithFormat:@"\n    device %@\n    host   %@", records[name], expected[name]]);
     }
     CHECK(records.count == expected.count, "the device answers every record the host did and no other");
 }
@@ -161,7 +161,7 @@ int main(int argc, char **argv)
         compare();
         release_values();
         performing();
-        printf("checks=%d failures=%d\n", charon_checks, charon_failures);
+        printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
     }
-    return charon_failures ? 1 : 0;
+    return revenant_failures ? 1 : 0;
 }

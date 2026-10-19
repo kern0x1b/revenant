@@ -33,7 +33,7 @@ static const char itemprovider_expectations[] =
     "main/-1200 id=NSString(hello)\",\"matrix.textData\":\" String=NSString(abc) URL=NSItemProviderErrorDomain/-1100 Data=NSData(3) Image=NSItemProviderErrorDomain/-1100"
     " Attr=NSAttributedString(3) Number=NSItemProviderErrorDomain/-1200 Dict=NSItemProviderErrorDomain/-1200 Array=NSItemProviderErrorDomain/-1200 id=NSData(3)\",\"mat"
     "rix.webURL\":\" String=NSString(https://a.b/c) URL=NSURL(web) Number=NSItemProviderErrorDomain/-1200 Dict=NSItemProviderErrorDomain/-1200 Array=NSItemProviderErro"
-    "rDomain/-1200 id=NSURL(web)\",\"object.load\":\"com.charon.note:body\",\"object.types\":\"public.utf8-plain-text,com.charon.note | 1 1\",\"order.load\":\"NSString(public.pl"
+    "rDomain/-1200 id=NSURL(web)\",\"object.load\":\"com.revenant.note:body\",\"object.types\":\"public.utf8-plain-text,com.revenant.note | 1 1\",\"order.load\":\"NSString(public.pl"
     "ain-text)\",\"order.registered\":\"public.plain-text,public.utf8-plain-text\",\"preview\":\"UIImage | NSItemProviderErrorDomain/-1000\",\"representations.has\":\"1 1 1\",\"re"
     "presentations.load\":\"bogus=NSItemProviderErrorDomain/-1000 | data=NSData(5) | file=source.txt same=0 exists=1 body=source body | inplace2=0 | inplace=source.txt"
     " 1 1\",\"representations.types\":\"public.plain-text,public.data,public.png | public.plain-text,public.data,public.png | public.png\",\"types.conformance\":\"public.pla"

@@ -5,7 +5,7 @@
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 #pragma clang diagnostic ignored "-Wunguarded-availability-new"
 
-@implementation CTTelephonyNetworkInfo (CharonRadioAccess)
+@implementation CTTelephonyNetworkInfo (RevenantRadioAccess)
 
 - (NSString *)currentRadioAccessTechnology
 {

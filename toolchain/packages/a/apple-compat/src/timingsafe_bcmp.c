@@ -1,18 +1,18 @@
 #include <stddef.h>
 #include "system_function.h"
 
-static _Atomic(uintptr_t) charon_system_timingsafe_bcmp;
+static _Atomic(uintptr_t) revenant_system_timingsafe_bcmp;
 
 __attribute__((constructor))
-static void charon_resolve_timingsafe_bcmp(void)
+static void revenant_resolve_timingsafe_bcmp(void)
 {
-    charon_system_function(&charon_system_timingsafe_bcmp, CHARON_LIBSYSTEM, "timingsafe_bcmp");
+    revenant_system_function(&revenant_system_timingsafe_bcmp, REVENANT_LIBSYSTEM, "timingsafe_bcmp");
 }
 
 __attribute__((visibility("default")))
 int timingsafe_bcmp(const void *b1, const void *b2, size_t len)
 {
-    int (*system)(const void *, const void *, size_t) = charon_system_function(&charon_system_timingsafe_bcmp, CHARON_LIBSYSTEM, "timingsafe_bcmp");
+    int (*system)(const void *, const void *, size_t) = revenant_system_function(&revenant_system_timingsafe_bcmp, REVENANT_LIBSYSTEM, "timingsafe_bcmp");
     if (system)
         return system(b1, b2, len);
     const unsigned char *p = b1, *q = b2;

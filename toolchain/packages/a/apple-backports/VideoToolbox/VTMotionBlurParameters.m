@@ -1,32 +1,32 @@
-#import "CharonVideoToolbox.h"
+#import "RevenantVideoToolbox.h"
 #import "VideoToolboxValueStore.h"
 
-CHARON_VIDEO_TOOLBOX_VALUE_STORE(VTMotionBlurParameters)
+REVENANT_VIDEO_TOOLBOX_VALUE_STORE(VTMotionBlurParameters)
 
 @implementation VTMotionBlurParameters
 
 #pragma mark - The protocol's own properties, implemented for this class
 
-CHARON_VALUE_PROPERTY(VTFrameProcessorFrame *, sourceFrame)
+REVENANT_VALUE_PROPERTY(VTFrameProcessorFrame *, sourceFrame)
 
-CHARON_VALUE_PROPERTY(VTFrameProcessorFrame *, destinationFrame)
+REVENANT_VALUE_PROPERTY(VTFrameProcessorFrame *, destinationFrame)
 
-CHARON_VALUE_PROPERTY(NSArray<VTFrameProcessorFrame *> *, destinationFrames)
+REVENANT_VALUE_PROPERTY(NSArray<VTFrameProcessorFrame *> *, destinationFrames)
 
 
 #pragma mark - This class's own properties
 
-CHARON_VALUE_PROPERTY(VTFrameProcessorFrame *, nextFrame)
+REVENANT_VALUE_PROPERTY(VTFrameProcessorFrame *, nextFrame)
 
-CHARON_VALUE_PROPERTY(VTFrameProcessorFrame *, previousFrame)
+REVENANT_VALUE_PROPERTY(VTFrameProcessorFrame *, previousFrame)
 
-CHARON_VALUE_PROPERTY(VTFrameProcessorOpticalFlow *, nextOpticalFlow)
+REVENANT_VALUE_PROPERTY(VTFrameProcessorOpticalFlow *, nextOpticalFlow)
 
-CHARON_VALUE_PROPERTY(VTFrameProcessorOpticalFlow *, previousOpticalFlow)
+REVENANT_VALUE_PROPERTY(VTFrameProcessorOpticalFlow *, previousOpticalFlow)
 
-CHARON_SCALAR_PROPERTY(NSInteger, motionBlurStrength)
+REVENANT_SCALAR_PROPERTY(NSInteger, motionBlurStrength)
 
-CHARON_SCALAR_PROPERTY(VTMotionBlurParametersSubmissionMode, submissionMode)
+REVENANT_SCALAR_PROPERTY(VTMotionBlurParametersSubmissionMode, submissionMode)
 
 
 #pragma mark - The SDK's designated initialisers
@@ -41,14 +41,14 @@ CHARON_SCALAR_PROPERTY(VTMotionBlurParametersSubmissionMode, submissionMode)
                         destinationFrame:(VTFrameProcessorFrame *)destinationFrame
 {
     self = [super init];
-    CharonValueSet(self, sourceFrame, @"sourceFrame");
-    CharonValueSet(self, nextFrame, @"nextFrame");
-    CharonValueSet(self, previousFrame, @"previousFrame");
-    CharonValueSet(self, nextOpticalFlow, @"nextOpticalFlow");
-    CharonValueSet(self, previousOpticalFlow, @"previousOpticalFlow");
-    CharonValueSet(self, @(motionBlurStrength), @"motionBlurStrength");
-    CharonValueSet(self, @(submissionMode), @"submissionMode");
-    CharonValueSet(self, destinationFrame, @"destinationFrame");
+    RevenantValueSet(self, sourceFrame, @"sourceFrame");
+    RevenantValueSet(self, nextFrame, @"nextFrame");
+    RevenantValueSet(self, previousFrame, @"previousFrame");
+    RevenantValueSet(self, nextOpticalFlow, @"nextOpticalFlow");
+    RevenantValueSet(self, previousOpticalFlow, @"previousOpticalFlow");
+    RevenantValueSet(self, @(motionBlurStrength), @"motionBlurStrength");
+    RevenantValueSet(self, @(submissionMode), @"submissionMode");
+    RevenantValueSet(self, destinationFrame, @"destinationFrame");
     return self;
 }
 

@@ -6,7 +6,7 @@
     NSArray *_preferredFocusEnvironments;
 }
 
-- (void)charon_setDefaults
+- (void)revenant_setDefaults
 {
     _enabled = YES;
     _preferredFocusedView = nil;
@@ -16,14 +16,14 @@
 - (instancetype)init
 {
     if ((self = [super init]))
-        [self charon_setDefaults];
+        [self revenant_setDefaults];
     return self;
 }
 
 - (instancetype)initWithCoder:(NSCoder *)coder
 {
     if ((self = [super initWithCoder:coder]))
-        [self charon_setDefaults];
+        [self revenant_setDefaults];
     return self;
 }
 

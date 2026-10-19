@@ -1,10 +1,10 @@
 #import <CoreSpotlight/CoreSpotlight.h>
 #import <objc/runtime.h>
-#import "CharonSpotlightStore.h"
+#import "RevenantSpotlightStore.h"
 
-typedef BOOL (^CharonSearchPredicate)(CSSearchableItem *item);
+typedef BOOL (^RevenantSearchPredicate)(CSSearchableItem *item);
 
-static BOOL CharonSearchGlob(NSString *pattern, NSString *text)
+static BOOL RevenantSearchGlob(NSString *pattern, NSString *text)
 {
     NSArray<NSString *> *parts = [pattern componentsSeparatedByString:@"*"];
     if (parts.count == 1)
@@ -26,7 +26,7 @@ static BOOL CharonSearchGlob(NSString *pattern, NSString *text)
     return text.length >= position + last.length && (last.length == 0 || [text hasSuffix:last]);
 }
 
-static NSString *CharonSearchAttribute(CSSearchableItem *item, NSString *name)
+static NSString *RevenantSearchAttribute(CSSearchableItem *item, NSString *name)
 {
     if (!class_getProperty([CSSearchableItemAttributeSet class], name.UTF8String))
         return nil;
@@ -34,7 +34,7 @@ static NSString *CharonSearchAttribute(CSSearchableItem *item, NSString *name)
     return [value isKindOfClass:[NSString class]] ? value : nil;
 }
 
-static NSArray<NSArray<NSString *> *> *CharonSearchTokens(NSString *query)
+static NSArray<NSArray<NSString *> *> *RevenantSearchTokens(NSString *query)
 {
     NSMutableArray<NSArray<NSString *> *> *tokens = [NSMutableArray array];
     NSUInteger i = 0, n = query.length;
@@ -73,12 +73,12 @@ static NSArray<NSArray<NSString *> *> *CharonSearchTokens(NSString *query)
     return tokens;
 }
 
-@interface CharonSearchParser : NSObject
+@interface RevenantSearchParser : NSObject
 - (instancetype)initWithTokens:(NSArray<NSArray<NSString *> *> *)tokens;
-- (CharonSearchPredicate)parse;
+- (RevenantSearchPredicate)parse;
 @end
 
-@implementation CharonSearchParser
+@implementation RevenantSearchParser
 {
     NSArray<NSArray<NSString *> *> *_tokens;
     NSUInteger _position;
@@ -107,48 +107,48 @@ static NSArray<NSArray<NSString *> *> *CharonSearchTokens(NSString *query)
     return _tokens[_position++][1];
 }
 
-- (CharonSearchPredicate)parse
+- (RevenantSearchPredicate)parse
 {
-    CharonSearchPredicate predicate = [self parseOr];
+    RevenantSearchPredicate predicate = [self parseOr];
     if (_failed || _position != _tokens.count)
         return nil;
     return predicate;
 }
 
-- (CharonSearchPredicate)parseOr
+- (RevenantSearchPredicate)parseOr
 {
-    CharonSearchPredicate left = [self parseAnd];
+    RevenantSearchPredicate left = [self parseAnd];
     while (!_failed && [[self peekKind] isEqualToString:@"||"]) {
         [self takeKind:@"||"];
-        CharonSearchPredicate l = left, r = [self parseAnd];
+        RevenantSearchPredicate l = left, r = [self parseAnd];
         left = ^BOOL(CSSearchableItem *item) { return l(item) || r(item); };
     }
     return left;
 }
 
-- (CharonSearchPredicate)parseAnd
+- (RevenantSearchPredicate)parseAnd
 {
-    CharonSearchPredicate left = [self parsePrimary];
+    RevenantSearchPredicate left = [self parsePrimary];
     while (!_failed && [[self peekKind] isEqualToString:@"&&"]) {
         [self takeKind:@"&&"];
-        CharonSearchPredicate l = left, r = [self parsePrimary];
+        RevenantSearchPredicate l = left, r = [self parsePrimary];
         left = ^BOOL(CSSearchableItem *item) { return l(item) && r(item); };
     }
     return left;
 }
 
-- (CharonSearchPredicate)parsePrimary
+- (RevenantSearchPredicate)parsePrimary
 {
     if ([[self peekKind] isEqualToString:@"("]) {
         [self takeKind:@"("];
-        CharonSearchPredicate inner = [self parseOr];
+        RevenantSearchPredicate inner = [self parseOr];
         [self takeKind:@")"];
         return inner;
     }
     return [self parseComparison];
 }
 
-- (CharonSearchPredicate)parseComparison
+- (RevenantSearchPredicate)parseComparison
 {
     NSString *name = [self takeKind:@"id"];
     NSString *op = [self peekKind];
@@ -162,15 +162,15 @@ static NSArray<NSArray<NSString *> *> *CharonSearchTokens(NSString *query)
         return nil;
     BOOL equal = [op isEqualToString:@"=="];
     return ^BOOL(CSSearchableItem *item) {
-        NSString *value = CharonSearchAttribute(item, name);
-        BOOL matches = value != nil && CharonSearchGlob(pattern, value);
+        NSString *value = RevenantSearchAttribute(item, name);
+        BOOL matches = value != nil && RevenantSearchGlob(pattern, value);
         return equal ? matches : !matches;
     };
 }
 
 @end
 
-static CSSearchableItem *CharonSearchFetchedCopy(CSSearchableItem *item, NSArray<NSString *> *attributes)
+static CSSearchableItem *RevenantSearchFetchedCopy(CSSearchableItem *item, NSArray<NSString *> *attributes)
 {
     CSSearchableItemAttributeSet *set = [[CSSearchableItemAttributeSet alloc] initWithItemContentType:@"public.item"];
     [set setValue:nil forKey:@"contentType"];
@@ -233,19 +233,19 @@ static CSSearchableItem *CharonSearchFetchedCopy(CSSearchableItem *item, NSArray
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         NSError *error = nil;
         NSMutableArray<CSSearchableItem *> *found = [NSMutableArray array];
-        CharonSearchPredicate predicate = nil;
+        RevenantSearchPredicate predicate = nil;
         if (_queryString.length == 0) {
             predicate = ^BOOL(CSSearchableItem *item) { return YES; };
         } else {
-            NSArray<NSArray<NSString *> *> *tokens = CharonSearchTokens(_queryString);
-            predicate = tokens ? [[[CharonSearchParser alloc] initWithTokens:tokens] parse] : nil;
+            NSArray<NSArray<NSString *> *> *tokens = RevenantSearchTokens(_queryString);
+            predicate = tokens ? [[[RevenantSearchParser alloc] initWithTokens:tokens] parse] : nil;
             if (!predicate)
                 error = [NSError errorWithDomain:CSSearchQueryErrorDomain code:CSSearchQueryErrorCodeInvalidQuery userInfo:nil];
         }
         if (predicate && !self.isCancelled) {
-            for (CSSearchableItem *item in CharonSpotlightDefaultItems()) {
+            for (CSSearchableItem *item in RevenantSpotlightDefaultItems()) {
                 if (predicate(item))
-                    [found addObject:CharonSearchFetchedCopy(item, _fetchAttributes)];
+                    [found addObject:RevenantSearchFetchedCopy(item, _fetchAttributes)];
             }
         }
         if (!error && self.isCancelled)

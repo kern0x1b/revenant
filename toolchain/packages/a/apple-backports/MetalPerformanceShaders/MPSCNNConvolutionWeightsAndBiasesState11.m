@@ -1,4 +1,4 @@
-#import "CharonMPSCnn.h"
+#import "RevenantMPSCnn.h"
 
 #pragma clang diagnostic ignored "-Wprotocol"
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
@@ -18,14 +18,14 @@
                          descriptor.inputFeatureChannels * descriptor.outputFeatureChannels * element;
     NSUInteger biases = descriptor.outputFeatureChannels * element;
     if ((self = [super initWithDevice:device resourceList:
-                 [self charon_mps_listOfBufferSizes:weights, biases, nil]])) {
+                 [self revenant_mps_listOfBufferSizes:weights, biases, nil]])) {
         _weights = [self resourceAtIndex:0 allocateMemory:YES];
         _biases = [self resourceAtIndex:1 allocateMemory:YES];
     }
     return self;
 }
 
-- (MPSStateResourceList *)charon_mps_listOfBufferSizes:(NSUInteger)first, ...
+- (MPSStateResourceList *)revenant_mps_listOfBufferSizes:(NSUInteger)first, ...
 {
     NSMutableArray<NSNumber *> *sizes = [NSMutableArray array];
     va_list arguments;

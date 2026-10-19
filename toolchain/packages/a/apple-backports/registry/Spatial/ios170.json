@@ -8,7 +8,7 @@
       "kind": "function",
       "minimum": "6.0",
       "reason": "build the function SPAffineTransform3DMakeWithTruncatedProjective()",
-      "source": "the 26.2 SDK's usr/include/Spatial, transcribed from the SDK on this machine: Base.h:34 is `#define SPATIAL_INLINE static inline` and Base.h:29 `#define SPATIAL_OVERLOADABLE __attribute__((__overloadable__))`, so every function is declared and DEFINED in the same header and no Apple binary exports it - usr/lib/libSpatial.tbd is an 8-line stub with no exports. The port's build SDK is charon@iphoneos-sdk 16.4, which predates Spatial, so the headers come over the lift's vfs overlay",
+      "source": "the 26.2 SDK's usr/include/Spatial, transcribed from the SDK on this machine: Base.h:34 is `#define SPATIAL_INLINE static inline` and Base.h:29 `#define SPATIAL_OVERLOADABLE __attribute__((__overloadable__))`, so every function is declared and DEFINED in the same header and no Apple binary exports it - usr/lib/libSpatial.tbd is an 8-line stub with no exports. The port's build SDK is revenant@iphoneos-sdk 16.4, which predates Spatial, so the headers come over the lift's vfs overlay",
       "status": "owed"
     },
     {
@@ -19,7 +19,7 @@
       "kind": "function",
       "minimum": "6.0",
       "reason": "build the function SPAngleAcos()",
-      "source": "the 26.2 SDK's usr/include/Spatial, transcribed from the SDK on this machine: Base.h:34 is `#define SPATIAL_INLINE static inline` and Base.h:29 `#define SPATIAL_OVERLOADABLE __attribute__((__overloadable__))`, so every function is declared and DEFINED in the same header and no Apple binary exports it - usr/lib/libSpatial.tbd is an 8-line stub with no exports. The port's build SDK is charon@iphoneos-sdk 16.4, which predates Spatial, so the headers come over the lift's vfs overlay",
+      "source": "the 26.2 SDK's usr/include/Spatial, transcribed from the SDK on this machine: Base.h:34 is `#define SPATIAL_INLINE static inline` and Base.h:29 `#define SPATIAL_OVERLOADABLE __attribute__((__overloadable__))`, so every function is declared and DEFINED in the same header and no Apple binary exports it - usr/lib/libSpatial.tbd is an 8-line stub with no exports. The port's build SDK is revenant@iphoneos-sdk 16.4, which predates Spatial, so the headers come over the lift's vfs overlay",
       "status": "owed"
     },
     {
@@ -30,7 +30,7 @@
       "kind": "function",
       "minimum": "6.0",
       "reason": "build the function SPAngleAcosh()",
-      "source": "the 26.2 SDK's usr/include/Spatial, transcribed from the SDK on this machine: Base.h:34 is `#define SPATIAL_INLINE static inline` and Base.h:29 `#define SPATIAL_OVERLOADABLE __attribute__((__overloadable__))`, so every function is declared and DEFINED in the same header and no Apple binary exports it - usr/lib/libSpatial.tbd is an 8-line stub with no exports. The port's build SDK is charon@iphoneos-sdk 16.4, which predates Spatial, so the headers come over the lift's vfs overlay",
+      "source": "the 26.2 SDK's usr/include/Spatial, transcribed from the SDK on this machine: Base.h:34 is `#define SPATIAL_INLINE static inline` and Base.h:29 `#define SPATIAL_OVERLOADABLE __attribute__((__overloadable__))`, so every function is declared and DEFINED in the same header and no Apple binary exports it - usr/lib/libSpatial.tbd is an 8-line stub with no exports. The port's build SDK is revenant@iphoneos-sdk 16.4, which predates Spatial, so the headers come over the lift's vfs overlay",
       "status": "owed"
     },
     {
@@ -41,7 +41,7 @@
       "kind": "function",
       "minimum": "6.0",
       "reason": "build the function SPAngleAsin()",
-      "source": "the 26.2 SDK's usr/include/Spatial, transcribed from the SDK on this machine: Base.h:34 is `#define SPATIAL_INLINE static inline` and Base.h:29 `#define SPATIAL_OVERLOADABLE __attribute__((__overloadable__))`, so every function is declared and DEFINED in the same header and no Apple binary exports it - usr/lib/libSpatial.tbd is an 8-line stub with no exports. The port's build SDK is charon@iphoneos-sdk 16.4, which predates Spatial, so the headers come over the lift's vfs overlay",
+      "source": "the 26.2 SDK's usr/include/Spatial, transcribed from the SDK on this machine: Base.h:34 is `#define SPATIAL_INLINE static inline` and Base.h:29 `#define SPATIAL_OVERLOADABLE __attribute__((__overloadable__))`, so every function is declared and DEFINED in the same header and no Apple binary exports it - usr/lib/libSpatial.tbd is an 8-line stub with no exports. The port's build SDK is revenant@iphoneos-sdk 16.4, which predates Spatial, so the headers come over the lift's vfs overlay",
       "status": "owed"
     },
     {
@@ -52,7 +52,7 @@
       "kind": "function",
       "minimum": "6.0",
       "reason": "build the function SPAngleAsinh()",
-      "source": "the 26.2 SDK's usr/include/Spatial, transcribed from the SDK on this machine: Base.h:34 is `#define SPATIAL_INLINE static inline` and Base.h:29 `#define SPATIAL_OVERLOADABLE __attribute__((__overloadable__))`, so every function is declared and DEFINED in the same header and no Apple binary exports it - usr/lib/libSpatial.tbd is an 8-line stub with no exports. The port's build SDK is charon@iphoneos-sdk 16.4, which predates Spatial, so the headers come over the lift's vfs overlay",
+      "source": "the 26.2 SDK's usr/include/Spatial, transcribed from the SDK on this machine: Base.h:34 is `#define SPATIAL_INLINE static inline` and Base.h:29 `#define SPATIAL_OVERLOADABLE __attribute__((__overloadable__))`, so every function is declared and DEFINED in the same header and no Apple binary exports it - usr/lib/libSpatial.tbd is an 8-line stub with no exports. The port's build SDK is revenant@iphoneos-sdk 16.4, which predates Spatial, so the headers come over the lift's vfs overlay",
       "status": "owed"
     },
     {
@@ -63,7 +63,7 @@
       "kind": "function",
       "minimum": "6.0",
       "reason": "build the function SPAngleAtan()",
-      "source": "the 26.2 SDK's usr/include/Spatial, transcribed from the SDK on this machine: Base.h:34 is `#define SPATIAL_INLINE static inline` and Base.h:29 `#define SPATIAL_OVERLOADABLE __attribute__((__overloadable__))`, so every function is declared and DEFINED in the same header and no Apple binary exports it - usr/lib/libSpatial.tbd is an 8-line stub with no exports. The port's build SDK is charon@iphoneos-sdk 16.4, which predates Spatial, so the headers come over the lift's vfs overlay",
+      "source": "the 26.2 SDK's usr/include/Spatial, transcribed from the SDK on this machine: Base.h:34 is `#define SPATIAL_INLINE static inline` and Base.h:29 `#define SPATIAL_OVERLOADABLE __attribute__((__overloadable__))`, so every function is declared and DEFINED in the same header and no Apple binary exports it - usr/lib/libSpatial.tbd is an 8-line stub with no exports. The port's build SDK is revenant@iphoneos-sdk 16.4, which predates Spatial, so the headers come over the lift's vfs overlay",
       "status": "owed"
     },
     {
@@ -74,7 +74,7 @@
       "kind": "function",
       "minimum": "6.0",
       "reason": "build the function SPAngleAtan2()",
-      "source": "the 26.2 SDK's usr/include/Spatial, transcribed from the SDK on this machine: Base.h:34 is `#define SPATIAL_INLINE static inline` and Base.h:29 `#define SPATIAL_OVERLOADABLE __attribute__((__overloadable__))`, so every function is declared and DEFINED in the same header and no Apple binary exports it - usr/lib/libSpatial.tbd is an 8-line stub with no exports. The port's build SDK is charon@iphoneos-sdk 16.4, which predates Spatial, so the headers come over the lift's vfs overlay",
+      "source": "the 26.2 SDK's usr/include/Spatial, transcribed from the SDK on this machine: Base.h:34 is `#define SPATIAL_INLINE static inline` and Base.h:29 `#define SPATIAL_OVERLOADABLE __attribute__((__overloadable__))`, so every function is declared and DEFINED in the same header and no Apple binary exports it - usr/lib/libSpatial.tbd is an 8-line stub with no exports. The port's build SDK is revenant@iphoneos-sdk 16.4, which predates Spatial, so the headers come over the lift's vfs overlay",
       "status": "owed"
     },
     {
@@ -85,7 +85,7 @@
       "kind": "function",
       "minimum": "6.0",
       "reason": "build the function SPAngleAtanh()",
-      "source": "the 26.2 SDK's usr/include/Spatial, transcribed from the SDK on this machine: Base.h:34 is `#define SPATIAL_INLINE static inline` and Base.h:29 `#define SPATIAL_OVERLOADABLE __attribute__((__overloadable__))`, so every function is declared and DEFINED in the same header and no Apple binary exports it - usr/lib/libSpatial.tbd is an 8-line stub with no exports. The port's build SDK is charon@iphoneos-sdk 16.4, which predates Spatial, so the headers come over the lift's vfs overlay",
+      "source": "the 26.2 SDK's usr/include/Spatial, transcribed from the SDK on this machine: Base.h:34 is `#define SPATIAL_INLINE static inline` and Base.h:29 `#define SPATIAL_OVERLOADABLE __attribute__((__overloadable__))`, so every function is declared and DEFINED in the same header and no Apple binary exports it - usr/lib/libSpatial.tbd is an 8-line stub with no exports. The port's build SDK is revenant@iphoneos-sdk 16.4, which predates Spatial, so the headers come over the lift's vfs overlay",
       "status": "owed"
     },
     {
@@ -96,7 +96,7 @@
       "kind": "function",
       "minimum": "6.0",
       "reason": "build the function SPAngleCos()",
-      "source": "the 26.2 SDK's usr/include/Spatial, transcribed from the SDK on this machine: Base.h:34 is `#define SPATIAL_INLINE static inline` and Base.h:29 `#define SPATIAL_OVERLOADABLE __attribute__((__overloadable__))`, so every function is declared and DEFINED in the same header and no Apple binary exports it - usr/lib/libSpatial.tbd is an 8-line stub with no exports. The port's build SDK is charon@iphoneos-sdk 16.4, which predates Spatial, so the headers come over the lift's vfs overlay",
+      "source": "the 26.2 SDK's usr/include/Spatial, transcribed from the SDK on this machine: Base.h:34 is `#define SPATIAL_INLINE static inline` and Base.h:29 `#define SPATIAL_OVERLOADABLE __attribute__((__overloadable__))`, so every function is declared and DEFINED in the same header and no Apple binary exports it - usr/lib/libSpatial.tbd is an 8-line stub with no exports. The port's build SDK is revenant@iphoneos-sdk 16.4, which predates Spatial, so the headers come over the lift's vfs overlay",
       "status": "owed"
     },
     {
@@ -107,7 +107,7 @@
       "kind": "function",
       "minimum": "6.0",
       "reason": "build the function SPAngleCosh()",
-      "source": "the 26.2 SDK's usr/include/Spatial, transcribed from the SDK on this machine: Base.h:34 is `#define SPATIAL_INLINE static inline` and Base.h:29 `#define SPATIAL_OVERLOADABLE __attribute__((__overloadable__))`, so every function is declared and DEFINED in the same header and no Apple binary exports it - usr/lib/libSpatial.tbd is an 8-line stub with no exports. The port's build SDK is charon@iphoneos-sdk 16.4, which predates Spatial, so the headers come over the lift's vfs overlay",
+      "source": "the 26.2 SDK's usr/include/Spatial, transcribed from the SDK on this machine: Base.h:34 is `#define SPATIAL_INLINE static inline` and Base.h:29 `#define SPATIAL_OVERLOADABLE __attribute__((__overloadable__))`, so every function is declared and DEFINED in the same header and no Apple binary exports it - usr/lib/libSpatial.tbd is an 8-line stub with no exports. The port's build SDK is revenant@iphoneos-sdk 16.4, which predates Spatial, so the headers come over the lift's vfs overlay",
       "status": "owed"
     },
     {
@@ -118,7 +118,7 @@
       "kind": "function",
       "minimum": "6.0",
       "reason": "build the function SPAngleNegate()",
-      "source": "the 26.2 SDK's usr/include/Spatial, transcribed from the SDK on this machine: Base.h:34 is `#define SPATIAL_INLINE static inline` and Base.h:29 `#define SPATIAL_OVERLOADABLE __attribute__((__overloadable__))`, so every function is declared and DEFINED in the same header and no Apple binary exports it - usr/lib/libSpatial.tbd is an 8-line stub with no exports. The port's build SDK is charon@iphoneos-sdk 16.4, which predates Spatial, so the headers come over the lift's vfs overlay",
+      "source": "the 26.2 SDK's usr/include/Spatial, transcribed from the SDK on this machine: Base.h:34 is `#define SPATIAL_INLINE static inline` and Base.h:29 `#define SPATIAL_OVERLOADABLE __attribute__((__overloadable__))`, so every function is declared and DEFINED in the same header and no Apple binary exports it - usr/lib/libSpatial.tbd is an 8-line stub with no exports. The port's build SDK is revenant@iphoneos-sdk 16.4, which predates Spatial, so the headers come over the lift's vfs overlay",
       "status": "owed"
     },
     {
@@ -129,7 +129,7 @@
       "kind": "function",
       "minimum": "6.0",
       "reason": "build the function SPAngleNormalize()",
-      "source": "the 26.2 SDK's usr/include/Spatial, transcribed from the SDK on this machine: Base.h:34 is `#define SPATIAL_INLINE static inline` and Base.h:29 `#define SPATIAL_OVERLOADABLE __attribute__((__overloadable__))`, so every function is declared and DEFINED in the same header and no Apple binary exports it - usr/lib/libSpatial.tbd is an 8-line stub with no exports. The port's build SDK is charon@iphoneos-sdk 16.4, which predates Spatial, so the headers come over the lift's vfs overlay",
+      "source": "the 26.2 SDK's usr/include/Spatial, transcribed from the SDK on this machine: Base.h:34 is `#define SPATIAL_INLINE static inline` and Base.h:29 `#define SPATIAL_OVERLOADABLE __attribute__((__overloadable__))`, so every function is declared and DEFINED in the same header and no Apple binary exports it - usr/lib/libSpatial.tbd is an 8-line stub with no exports. The port's build SDK is revenant@iphoneos-sdk 16.4, which predates Spatial, so the headers come over the lift's vfs overlay",
       "status": "owed"
     },
     {
@@ -140,7 +140,7 @@
       "kind": "function",
       "minimum": "6.0",
       "reason": "build the function SPAngleSin()",
-      "source": "the 26.2 SDK's usr/include/Spatial, transcribed from the SDK on this machine: Base.h:34 is `#define SPATIAL_INLINE static inline` and Base.h:29 `#define SPATIAL_OVERLOADABLE __attribute__((__overloadable__))`, so every function is declared and DEFINED in the same header and no Apple binary exports it - usr/lib/libSpatial.tbd is an 8-line stub with no exports. The port's build SDK is charon@iphoneos-sdk 16.4, which predates Spatial, so the headers come over the lift's vfs overlay",
+      "source": "the 26.2 SDK's usr/include/Spatial, transcribed from the SDK on this machine: Base.h:34 is `#define SPATIAL_INLINE static inline` and Base.h:29 `#define SPATIAL_OVERLOADABLE __attribute__((__overloadable__))`, so every function is declared and DEFINED in the same header and no Apple binary exports it - usr/lib/libSpatial.tbd is an 8-line stub with no exports. The port's build SDK is revenant@iphoneos-sdk 16.4, which predates Spatial, so the headers come over the lift's vfs overlay",
       "status": "owed"
     },
     {
@@ -151,7 +151,7 @@
       "kind": "function",
       "minimum": "6.0",
       "reason": "build the function SPAngleSinh()",
-      "source": "the 26.2 SDK's usr/include/Spatial, transcribed from the SDK on this machine: Base.h:34 is `#define SPATIAL_INLINE static inline` and Base.h:29 `#define SPATIAL_OVERLOADABLE __attribute__((__overloadable__))`, so every function is declared and DEFINED in the same header and no Apple binary exports it - usr/lib/libSpatial.tbd is an 8-line stub with no exports. The port's build SDK is charon@iphoneos-sdk 16.4, which predates Spatial, so the headers come over the lift's vfs overlay",
+      "source": "the 26.2 SDK's usr/include/Spatial, transcribed from the SDK on this machine: Base.h:34 is `#define SPATIAL_INLINE static inline` and Base.h:29 `#define SPATIAL_OVERLOADABLE __attribute__((__overloadable__))`, so every function is declared and DEFINED in the same header and no Apple binary exports it - usr/lib/libSpatial.tbd is an 8-line stub with no exports. The port's build SDK is revenant@iphoneos-sdk 16.4, which predates Spatial, so the headers come over the lift's vfs overlay",
       "status": "owed"
     },
     {
@@ -162,7 +162,7 @@
       "kind": "function",
       "minimum": "6.0",
       "reason": "build the function SPAngleTan()",
-      "source": "the 26.2 SDK's usr/include/Spatial, transcribed from the SDK on this machine: Base.h:34 is `#define SPATIAL_INLINE static inline` and Base.h:29 `#define SPATIAL_OVERLOADABLE __attribute__((__overloadable__))`, so every function is declared and DEFINED in the same header and no Apple binary exports it - usr/lib/libSpatial.tbd is an 8-line stub with no exports. The port's build SDK is charon@iphoneos-sdk 16.4, which predates Spatial, so the headers come over the lift's vfs overlay",
+      "source": "the 26.2 SDK's usr/include/Spatial, transcribed from the SDK on this machine: Base.h:34 is `#define SPATIAL_INLINE static inline` and Base.h:29 `#define SPATIAL_OVERLOADABLE __attribute__((__overloadable__))`, so every function is declared and DEFINED in the same header and no Apple binary exports it - usr/lib/libSpatial.tbd is an 8-line stub with no exports. The port's build SDK is revenant@iphoneos-sdk 16.4, which predates Spatial, so the headers come over the lift's vfs overlay",
       "status": "owed"
     },
     {
@@ -173,7 +173,7 @@
       "kind": "function",
       "minimum": "6.0",
       "reason": "build the function SPAngleTanh()",
-      "source": "the 26.2 SDK's usr/include/Spatial, transcribed from the SDK on this machine: Base.h:34 is `#define SPATIAL_INLINE static inline` and Base.h:29 `#define SPATIAL_OVERLOADABLE __attribute__((__overloadable__))`, so every function is declared and DEFINED in the same header and no Apple binary exports it - usr/lib/libSpatial.tbd is an 8-line stub with no exports. The port's build SDK is charon@iphoneos-sdk 16.4, which predates Spatial, so the headers come over the lift's vfs overlay",
+      "source": "the 26.2 SDK's usr/include/Spatial, transcribed from the SDK on this machine: Base.h:34 is `#define SPATIAL_INLINE static inline` and Base.h:29 `#define SPATIAL_OVERLOADABLE __attribute__((__overloadable__))`, so every function is declared and DEFINED in the same header and no Apple binary exports it - usr/lib/libSpatial.tbd is an 8-line stub with no exports. The port's build SDK is revenant@iphoneos-sdk 16.4, which predates Spatial, so the headers come over the lift's vfs overlay",
       "status": "owed"
     },
     {
@@ -184,7 +184,7 @@
       "kind": "function",
       "minimum": "6.0",
       "reason": "build the function SPEulerXYZ",
-      "source": "the 26.2 SDK's usr/include/Spatial, transcribed from the SDK on this machine: Base.h:34 is `#define SPATIAL_INLINE static inline` and Base.h:29 `#define SPATIAL_OVERLOADABLE __attribute__((__overloadable__))`, so every function is declared and DEFINED in the same header and no Apple binary exports it - usr/lib/libSpatial.tbd is an 8-line stub with no exports. The port's build SDK is charon@iphoneos-sdk 16.4, which predates Spatial, so the headers come over the lift's vfs overlay",
+      "source": "the 26.2 SDK's usr/include/Spatial, transcribed from the SDK on this machine: Base.h:34 is `#define SPATIAL_INLINE static inline` and Base.h:29 `#define SPATIAL_OVERLOADABLE __attribute__((__overloadable__))`, so every function is declared and DEFINED in the same header and no Apple binary exports it - usr/lib/libSpatial.tbd is an 8-line stub with no exports. The port's build SDK is revenant@iphoneos-sdk 16.4, which predates Spatial, so the headers come over the lift's vfs overlay",
       "status": "owed"
     },
     {
@@ -195,7 +195,7 @@
       "kind": "function",
       "minimum": "6.0",
       "reason": "build the function SPEulerZXY",
-      "source": "the 26.2 SDK's usr/include/Spatial, transcribed from the SDK on this machine: Base.h:34 is `#define SPATIAL_INLINE static inline` and Base.h:29 `#define SPATIAL_OVERLOADABLE __attribute__((__overloadable__))`, so every function is declared and DEFINED in the same header and no Apple binary exports it - usr/lib/libSpatial.tbd is an 8-line stub with no exports. The port's build SDK is charon@iphoneos-sdk 16.4, which predates Spatial, so the headers come over the lift's vfs overlay",
+      "source": "the 26.2 SDK's usr/include/Spatial, transcribed from the SDK on this machine: Base.h:34 is `#define SPATIAL_INLINE static inline` and Base.h:29 `#define SPATIAL_OVERLOADABLE __attribute__((__overloadable__))`, so every function is declared and DEFINED in the same header and no Apple binary exports it - usr/lib/libSpatial.tbd is an 8-line stub with no exports. The port's build SDK is revenant@iphoneos-sdk 16.4, which predates Spatial, so the headers come over the lift's vfs overlay",
       "status": "owed"
     },
     {
@@ -206,7 +206,7 @@
       "kind": "function",
       "minimum": "6.0",
       "reason": "build the function SPRay3DApplyAffineTransform()",
-      "source": "the 26.2 SDK's usr/include/Spatial, transcribed from the SDK on this machine: Base.h:34 is `#define SPATIAL_INLINE static inline` and Base.h:29 `#define SPATIAL_OVERLOADABLE __attribute__((__overloadable__))`, so every function is declared and DEFINED in the same header and no Apple binary exports it - usr/lib/libSpatial.tbd is an 8-line stub with no exports. The port's build SDK is charon@iphoneos-sdk 16.4, which predates Spatial, so the headers come over the lift's vfs overlay",
+      "source": "the 26.2 SDK's usr/include/Spatial, transcribed from the SDK on this machine: Base.h:34 is `#define SPATIAL_INLINE static inline` and Base.h:29 `#define SPATIAL_OVERLOADABLE __attribute__((__overloadable__))`, so every function is declared and DEFINED in the same header and no Apple binary exports it - usr/lib/libSpatial.tbd is an 8-line stub with no exports. The port's build SDK is revenant@iphoneos-sdk 16.4, which predates Spatial, so the headers come over the lift's vfs overlay",
       "status": "owed"
     },
     {
@@ -217,7 +217,7 @@
       "kind": "function",
       "minimum": "6.0",
       "reason": "build the function SPRay3DApplyProjectiveTransform()",
-      "source": "the 26.2 SDK's usr/include/Spatial, transcribed from the SDK on this machine: Base.h:34 is `#define SPATIAL_INLINE static inline` and Base.h:29 `#define SPATIAL_OVERLOADABLE __attribute__((__overloadable__))`, so every function is declared and DEFINED in the same header and no Apple binary exports it - usr/lib/libSpatial.tbd is an 8-line stub with no exports. The port's build SDK is charon@iphoneos-sdk 16.4, which predates Spatial, so the headers come over the lift's vfs overlay",
+      "source": "the 26.2 SDK's usr/include/Spatial, transcribed from the SDK on this machine: Base.h:34 is `#define SPATIAL_INLINE static inline` and Base.h:29 `#define SPATIAL_OVERLOADABLE __attribute__((__overloadable__))`, so every function is declared and DEFINED in the same header and no Apple binary exports it - usr/lib/libSpatial.tbd is an 8-line stub with no exports. The port's build SDK is revenant@iphoneos-sdk 16.4, which predates Spatial, so the headers come over the lift's vfs overlay",
       "status": "owed"
     },
     {
@@ -228,7 +228,7 @@
       "kind": "function",
       "minimum": "6.0",
       "reason": "build the function SPRay3DIsFinite()",
-      "source": "the 26.2 SDK's usr/include/Spatial, transcribed from the SDK on this machine: Base.h:34 is `#define SPATIAL_INLINE static inline` and Base.h:29 `#define SPATIAL_OVERLOADABLE __attribute__((__overloadable__))`, so every function is declared and DEFINED in the same header and no Apple binary exports it - usr/lib/libSpatial.tbd is an 8-line stub with no exports. The port's build SDK is charon@iphoneos-sdk 16.4, which predates Spatial, so the headers come over the lift's vfs overlay",
+      "source": "the 26.2 SDK's usr/include/Spatial, transcribed from the SDK on this machine: Base.h:34 is `#define SPATIAL_INLINE static inline` and Base.h:29 `#define SPATIAL_OVERLOADABLE __attribute__((__overloadable__))`, so every function is declared and DEFINED in the same header and no Apple binary exports it - usr/lib/libSpatial.tbd is an 8-line stub with no exports. The port's build SDK is revenant@iphoneos-sdk 16.4, which predates Spatial, so the headers come over the lift's vfs overlay",
       "status": "owed"
     },
     {
@@ -239,7 +239,7 @@
       "kind": "function",
       "minimum": "6.0",
       "reason": "build the function SPRay3DIsNaN()",
-      "source": "the 26.2 SDK's usr/include/Spatial, transcribed from the SDK on this machine: Base.h:34 is `#define SPATIAL_INLINE static inline` and Base.h:29 `#define SPATIAL_OVERLOADABLE __attribute__((__overloadable__))`, so every function is declared and DEFINED in the same header and no Apple binary exports it - usr/lib/libSpatial.tbd is an 8-line stub with no exports. The port's build SDK is charon@iphoneos-sdk 16.4, which predates Spatial, so the headers come over the lift's vfs overlay",
+      "source": "the 26.2 SDK's usr/include/Spatial, transcribed from the SDK on this machine: Base.h:34 is `#define SPATIAL_INLINE static inline` and Base.h:29 `#define SPATIAL_OVERLOADABLE __attribute__((__overloadable__))`, so every function is declared and DEFINED in the same header and no Apple binary exports it - usr/lib/libSpatial.tbd is an 8-line stub with no exports. The port's build SDK is revenant@iphoneos-sdk 16.4, which predates Spatial, so the headers come over the lift's vfs overlay",
       "status": "owed"
     },
     {
@@ -250,7 +250,7 @@
       "kind": "function",
       "minimum": "6.0",
       "reason": "build the function SPRay3DIsZero()",
-      "source": "the 26.2 SDK's usr/include/Spatial, transcribed from the SDK on this machine: Base.h:34 is `#define SPATIAL_INLINE static inline` and Base.h:29 `#define SPATIAL_OVERLOADABLE __attribute__((__overloadable__))`, so every function is declared and DEFINED in the same header and no Apple binary exports it - usr/lib/libSpatial.tbd is an 8-line stub with no exports. The port's build SDK is charon@iphoneos-sdk 16.4, which predates Spatial, so the headers come over the lift's vfs overlay",
+      "source": "the 26.2 SDK's usr/include/Spatial, transcribed from the SDK on this machine: Base.h:34 is `#define SPATIAL_INLINE static inline` and Base.h:29 `#define SPATIAL_OVERLOADABLE __attribute__((__overloadable__))`, so every function is declared and DEFINED in the same header and no Apple binary exports it - usr/lib/libSpatial.tbd is an 8-line stub with no exports. The port's build SDK is revenant@iphoneos-sdk 16.4, which predates Spatial, so the headers come over the lift's vfs overlay",
       "status": "owed"
     },
     {
@@ -261,7 +261,7 @@
       "kind": "function",
       "minimum": "6.0",
       "reason": "build the function SPRay3DRotateAroundPoint()",
-      "source": "the 26.2 SDK's usr/include/Spatial, transcribed from the SDK on this machine: Base.h:34 is `#define SPATIAL_INLINE static inline` and Base.h:29 `#define SPATIAL_OVERLOADABLE __attribute__((__overloadable__))`, so every function is declared and DEFINED in the same header and no Apple binary exports it - usr/lib/libSpatial.tbd is an 8-line stub with no exports. The port's build SDK is charon@iphoneos-sdk 16.4, which predates Spatial, so the headers come over the lift's vfs overlay",
+      "source": "the 26.2 SDK's usr/include/Spatial, transcribed from the SDK on this machine: Base.h:34 is `#define SPATIAL_INLINE static inline` and Base.h:29 `#define SPATIAL_OVERLOADABLE __attribute__((__overloadable__))`, so every function is declared and DEFINED in the same header and no Apple binary exports it - usr/lib/libSpatial.tbd is an 8-line stub with no exports. The port's build SDK is revenant@iphoneos-sdk 16.4, which predates Spatial, so the headers come over the lift's vfs overlay",
       "status": "owed"
     },
     {
@@ -272,7 +272,7 @@
       "kind": "function",
       "minimum": "6.0",
       "reason": "build the function SPRay3DRotateByQuaternionAroundPoint()",
-      "source": "the 26.2 SDK's usr/include/Spatial, transcribed from the SDK on this machine: Base.h:34 is `#define SPATIAL_INLINE static inline` and Base.h:29 `#define SPATIAL_OVERLOADABLE __attribute__((__overloadable__))`, so every function is declared and DEFINED in the same header and no Apple binary exports it - usr/lib/libSpatial.tbd is an 8-line stub with no exports. The port's build SDK is charon@iphoneos-sdk 16.4, which predates Spatial, so the headers come over the lift's vfs overlay",
+      "source": "the 26.2 SDK's usr/include/Spatial, transcribed from the SDK on this machine: Base.h:34 is `#define SPATIAL_INLINE static inline` and Base.h:29 `#define SPATIAL_OVERLOADABLE __attribute__((__overloadable__))`, so every function is declared and DEFINED in the same header and no Apple binary exports it - usr/lib/libSpatial.tbd is an 8-line stub with no exports. The port's build SDK is revenant@iphoneos-sdk 16.4, which predates Spatial, so the headers come over the lift's vfs overlay",
       "status": "owed"
     },
     {
@@ -283,7 +283,7 @@
       "kind": "function",
       "minimum": "6.0",
       "reason": "build the function SPRay3DUnapplyAffineTransform()",
-      "source": "the 26.2 SDK's usr/include/Spatial, transcribed from the SDK on this machine: Base.h:34 is `#define SPATIAL_INLINE static inline` and Base.h:29 `#define SPATIAL_OVERLOADABLE __attribute__((__overloadable__))`, so every function is declared and DEFINED in the same header and no Apple binary exports it - usr/lib/libSpatial.tbd is an 8-line stub with no exports. The port's build SDK is charon@iphoneos-sdk 16.4, which predates Spatial, so the headers come over the lift's vfs overlay",
+      "source": "the 26.2 SDK's usr/include/Spatial, transcribed from the SDK on this machine: Base.h:34 is `#define SPATIAL_INLINE static inline` and Base.h:29 `#define SPATIAL_OVERLOADABLE __attribute__((__overloadable__))`, so every function is declared and DEFINED in the same header and no Apple binary exports it - usr/lib/libSpatial.tbd is an 8-line stub with no exports. The port's build SDK is revenant@iphoneos-sdk 16.4, which predates Spatial, so the headers come over the lift's vfs overlay",
       "status": "owed"
     },
     {
@@ -294,7 +294,7 @@
       "kind": "function",
       "minimum": "6.0",
       "reason": "build the function SPRay3DUnapplyPose()",
-      "source": "the 26.2 SDK's usr/include/Spatial, transcribed from the SDK on this machine: Base.h:34 is `#define SPATIAL_INLINE static inline` and Base.h:29 `#define SPATIAL_OVERLOADABLE __attribute__((__overloadable__))`, so every function is declared and DEFINED in the same header and no Apple binary exports it - usr/lib/libSpatial.tbd is an 8-line stub with no exports. The port's build SDK is charon@iphoneos-sdk 16.4, which predates Spatial, so the headers come over the lift's vfs overlay",
+      "source": "the 26.2 SDK's usr/include/Spatial, transcribed from the SDK on this machine: Base.h:34 is `#define SPATIAL_INLINE static inline` and Base.h:29 `#define SPATIAL_OVERLOADABLE __attribute__((__overloadable__))`, so every function is declared and DEFINED in the same header and no Apple binary exports it - usr/lib/libSpatial.tbd is an 8-line stub with no exports. The port's build SDK is revenant@iphoneos-sdk 16.4, which predates Spatial, so the headers come over the lift's vfs overlay",
       "status": "owed"
     },
     {
@@ -305,7 +305,7 @@
       "kind": "function",
       "minimum": "6.0",
       "reason": "build the function SPRay3DUnapplyProjectiveTransform()",
-      "source": "the 26.2 SDK's usr/include/Spatial, transcribed from the SDK on this machine: Base.h:34 is `#define SPATIAL_INLINE static inline` and Base.h:29 `#define SPATIAL_OVERLOADABLE __attribute__((__overloadable__))`, so every function is declared and DEFINED in the same header and no Apple binary exports it - usr/lib/libSpatial.tbd is an 8-line stub with no exports. The port's build SDK is charon@iphoneos-sdk 16.4, which predates Spatial, so the headers come over the lift's vfs overlay",
+      "source": "the 26.2 SDK's usr/include/Spatial, transcribed from the SDK on this machine: Base.h:34 is `#define SPATIAL_INLINE static inline` and Base.h:29 `#define SPATIAL_OVERLOADABLE __attribute__((__overloadable__))`, so every function is declared and DEFINED in the same header and no Apple binary exports it - usr/lib/libSpatial.tbd is an 8-line stub with no exports. The port's build SDK is revenant@iphoneos-sdk 16.4, which predates Spatial, so the headers come over the lift's vfs overlay",
       "status": "owed"
     },
     {
@@ -316,7 +316,7 @@
       "kind": "function",
       "minimum": "6.0",
       "reason": "build the function SPRotation3DInverse()",
-      "source": "the 26.2 SDK's usr/include/Spatial, transcribed from the SDK on this machine: Base.h:34 is `#define SPATIAL_INLINE static inline` and Base.h:29 `#define SPATIAL_OVERLOADABLE __attribute__((__overloadable__))`, so every function is declared and DEFINED in the same header and no Apple binary exports it - usr/lib/libSpatial.tbd is an 8-line stub with no exports. The port's build SDK is charon@iphoneos-sdk 16.4, which predates Spatial, so the headers come over the lift's vfs overlay",
+      "source": "the 26.2 SDK's usr/include/Spatial, transcribed from the SDK on this machine: Base.h:34 is `#define SPATIAL_INLINE static inline` and Base.h:29 `#define SPATIAL_OVERLOADABLE __attribute__((__overloadable__))`, so every function is declared and DEFINED in the same header and no Apple binary exports it - usr/lib/libSpatial.tbd is an 8-line stub with no exports. The port's build SDK is revenant@iphoneos-sdk 16.4, which predates Spatial, so the headers come over the lift's vfs overlay",
       "status": "owed"
     },
     {
@@ -327,7 +327,7 @@
       "kind": "function",
       "minimum": "6.0",
       "reason": "build the function SPRotation3DIsIdentity()",
-      "source": "the 26.2 SDK's usr/include/Spatial, transcribed from the SDK on this machine: Base.h:34 is `#define SPATIAL_INLINE static inline` and Base.h:29 `#define SPATIAL_OVERLOADABLE __attribute__((__overloadable__))`, so every function is declared and DEFINED in the same header and no Apple binary exports it - usr/lib/libSpatial.tbd is an 8-line stub with no exports. The port's build SDK is charon@iphoneos-sdk 16.4, which predates Spatial, so the headers come over the lift's vfs overlay",
+      "source": "the 26.2 SDK's usr/include/Spatial, transcribed from the SDK on this machine: Base.h:34 is `#define SPATIAL_INLINE static inline` and Base.h:29 `#define SPATIAL_OVERLOADABLE __attribute__((__overloadable__))`, so every function is declared and DEFINED in the same header and no Apple binary exports it - usr/lib/libSpatial.tbd is an 8-line stub with no exports. The port's build SDK is revenant@iphoneos-sdk 16.4, which predates Spatial, so the headers come over the lift's vfs overlay",
       "status": "owed"
     },
     {
@@ -338,7 +338,7 @@
       "kind": "function",
       "minimum": "6.0",
       "reason": "build the function SPRotation3DSlerp()",
-      "source": "the 26.2 SDK's usr/include/Spatial, transcribed from the SDK on this machine: Base.h:34 is `#define SPATIAL_INLINE static inline` and Base.h:29 `#define SPATIAL_OVERLOADABLE __attribute__((__overloadable__))`, so every function is declared and DEFINED in the same header and no Apple binary exports it - usr/lib/libSpatial.tbd is an 8-line stub with no exports. The port's build SDK is charon@iphoneos-sdk 16.4, which predates Spatial, so the headers come over the lift's vfs overlay",
+      "source": "the 26.2 SDK's usr/include/Spatial, transcribed from the SDK on this machine: Base.h:34 is `#define SPATIAL_INLINE static inline` and Base.h:29 `#define SPATIAL_OVERLOADABLE __attribute__((__overloadable__))`, so every function is declared and DEFINED in the same header and no Apple binary exports it - usr/lib/libSpatial.tbd is an 8-line stub with no exports. The port's build SDK is revenant@iphoneos-sdk 16.4, which predates Spatial, so the headers come over the lift's vfs overlay",
       "status": "owed"
     },
     {
@@ -349,7 +349,7 @@
       "kind": "function",
       "minimum": "6.0",
       "reason": "build the function SPRotation3DSlerpLongest()",
-      "source": "the 26.2 SDK's usr/include/Spatial, transcribed from the SDK on this machine: Base.h:34 is `#define SPATIAL_INLINE static inline` and Base.h:29 `#define SPATIAL_OVERLOADABLE __attribute__((__overloadable__))`, so every function is declared and DEFINED in the same header and no Apple binary exports it - usr/lib/libSpatial.tbd is an 8-line stub with no exports. The port's build SDK is charon@iphoneos-sdk 16.4, which predates Spatial, so the headers come over the lift's vfs overlay",
+      "source": "the 26.2 SDK's usr/include/Spatial, transcribed from the SDK on this machine: Base.h:34 is `#define SPATIAL_INLINE static inline` and Base.h:29 `#define SPATIAL_OVERLOADABLE __attribute__((__overloadable__))`, so every function is declared and DEFINED in the same header and no Apple binary exports it - usr/lib/libSpatial.tbd is an 8-line stub with no exports. The port's build SDK is revenant@iphoneos-sdk 16.4, which predates Spatial, so the headers come over the lift's vfs overlay",
       "status": "owed"
     },
     {
@@ -360,7 +360,7 @@
       "kind": "function",
       "minimum": "6.0",
       "reason": "build the function SPRotation3DSwing()",
-      "source": "the 26.2 SDK's usr/include/Spatial, transcribed from the SDK on this machine: Base.h:34 is `#define SPATIAL_INLINE static inline` and Base.h:29 `#define SPATIAL_OVERLOADABLE __attribute__((__overloadable__))`, so every function is declared and DEFINED in the same header and no Apple binary exports it - usr/lib/libSpatial.tbd is an 8-line stub with no exports. The port's build SDK is charon@iphoneos-sdk 16.4, which predates Spatial, so the headers come over the lift's vfs overlay",
+      "source": "the 26.2 SDK's usr/include/Spatial, transcribed from the SDK on this machine: Base.h:34 is `#define SPATIAL_INLINE static inline` and Base.h:29 `#define SPATIAL_OVERLOADABLE __attribute__((__overloadable__))`, so every function is declared and DEFINED in the same header and no Apple binary exports it - usr/lib/libSpatial.tbd is an 8-line stub with no exports. The port's build SDK is revenant@iphoneos-sdk 16.4, which predates Spatial, so the headers come over the lift's vfs overlay",
       "status": "owed"
     },
     {
@@ -371,7 +371,7 @@
       "kind": "function",
       "minimum": "6.0",
       "reason": "build the function SPRotation3DTwist()",
-      "source": "the 26.2 SDK's usr/include/Spatial, transcribed from the SDK on this machine: Base.h:34 is `#define SPATIAL_INLINE static inline` and Base.h:29 `#define SPATIAL_OVERLOADABLE __attribute__((__overloadable__))`, so every function is declared and DEFINED in the same header and no Apple binary exports it - usr/lib/libSpatial.tbd is an 8-line stub with no exports. The port's build SDK is charon@iphoneos-sdk 16.4, which predates Spatial, so the headers come over the lift's vfs overlay",
+      "source": "the 26.2 SDK's usr/include/Spatial, transcribed from the SDK on this machine: Base.h:34 is `#define SPATIAL_INLINE static inline` and Base.h:29 `#define SPATIAL_OVERLOADABLE __attribute__((__overloadable__))`, so every function is declared and DEFINED in the same header and no Apple binary exports it - usr/lib/libSpatial.tbd is an 8-line stub with no exports. The port's build SDK is revenant@iphoneos-sdk 16.4, which predates Spatial, so the headers come over the lift's vfs overlay",
       "status": "owed"
     }
   ],

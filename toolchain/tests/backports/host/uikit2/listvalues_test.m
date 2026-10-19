@@ -1,9 +1,9 @@
 #import "listops.h"
 
-extern UICellAccessoryPosition CharonHostUICellAccessoryPositionBeforeAccessoryOfClass(Class accessoryClass);
-extern UICellAccessoryPosition CharonHostUICellAccessoryPositionAfterAccessoryOfClass(Class accessoryClass);
-extern const CGFloat CharonHostUICellAccessoryStandardDimension;
-extern const CGFloat CharonHostUIListContentImageStandardDimension;
+extern UICellAccessoryPosition RevenantHostUICellAccessoryPositionBeforeAccessoryOfClass(Class accessoryClass);
+extern UICellAccessoryPosition RevenantHostUICellAccessoryPositionAfterAccessoryOfClass(Class accessoryClass);
+extern const CGFloat RevenantHostUICellAccessoryStandardDimension;
+extern const CGFloat RevenantHostUIListContentImageStandardDimension;
 
 static id make_state(int side, NSString *name, UITraitCollection *traits)
 {
@@ -36,7 +36,7 @@ static NSString *dump_state(id state)
     return text;
 }
 
-void charon_run_listvalues(void)
+void revenant_run_listvalues(void)
 {
     images[0] = square(20);
     images[1] = square(29);
@@ -95,11 +95,11 @@ void charon_run_listvalues(void)
         }
         NSString *da = dump_config(a), *db = dump_config(b);
         if (![da isEqual:db]) {
-            charon_check(NO, [NSString stringWithFormat:@"config fuzz %d values", round].UTF8String, [NSString stringWithFormat:@"%@\n  system %@\n  port   %@", history, da, db]);
+            revenant_check(NO, [NSString stringWithFormat:@"config fuzz %d values", round].UTF8String, [NSString stringWithFormat:@"%@\n  system %@\n  port   %@", history, da, db]);
         } else if (![normalised(a) isEqual:normalised(b)]) {
-            charon_check(NO, [NSString stringWithFormat:@"config fuzz %d description", round].UTF8String, [NSString stringWithFormat:@"%@\n  system %@\n  port   %@", history, normalised(a), normalised(b)]);
+            revenant_check(NO, [NSString stringWithFormat:@"config fuzz %d description", round].UTF8String, [NSString stringWithFormat:@"%@\n  system %@\n  port   %@", history, normalised(a), normalised(b)]);
         } else {
-            charon_check(YES, "config fuzz", nil);
+            revenant_check(YES, "config fuzz", nil);
         }
         id ac = [a copy], bc = [b copy];
         same(@"config copy equal", [NSString stringWithFormat:@"%d %d", [ac isEqual:a], [ac hash] == [a hash]], [NSString stringWithFormat:@"%d %d", [bc isEqual:b], [bc hash] == [b hash]]);
@@ -115,7 +115,7 @@ void charon_run_listvalues(void)
         UIListContentConfiguration *plainB = b;
         BOOL transformers = plainB.textProperties.colorTransformer || plainB.secondaryTextProperties.colorTransformer || plainB.imageProperties.tintColorTransformer;
         if (round % 25 == 0 && !transformers)
-            charon_check(decoded != nil && [dump_config(decoded) isEqual:dump_config(b)], "config coding round trip", [NSString stringWithFormat:@"%@\n%@\n%@", error, decoded ? dump_config(decoded) : nil, dump_config(b)]);
+            revenant_check(decoded != nil && [dump_config(decoded) isEqual:dump_config(b)], "config coding round trip", [NSString stringWithFormat:@"%@\n%@\n%@", error, decoded ? dump_config(decoded) : nil, dump_config(b)]);
     }
 
     for (int round = 0; round < 3000; round++) {
@@ -140,11 +140,11 @@ void charon_run_listvalues(void)
         id ua = [a updatedConfigurationForState:sa], ub = [b updatedConfigurationForState:sb];
         NSString *da = dump_config(ua), *db = dump_config(ub);
         if (![da isEqual:db])
-            charon_check(NO, [NSString stringWithFormat:@"config update %@ %d values", factory, round].UTF8String, [NSString stringWithFormat:@"%@\n  system %@\n  port   %@", dump_state(sa), da, db]);
+            revenant_check(NO, [NSString stringWithFormat:@"config update %@ %d values", factory, round].UTF8String, [NSString stringWithFormat:@"%@\n  system %@\n  port   %@", dump_state(sa), da, db]);
         else if (![normalised(ua) isEqual:normalised(ub)])
-            charon_check(NO, [NSString stringWithFormat:@"config update %@ %d description", factory, round].UTF8String, [NSString stringWithFormat:@"%@\n  system %@\n  port   %@", dump_state(sa), normalised(ua), normalised(ub)]);
+            revenant_check(NO, [NSString stringWithFormat:@"config update %@ %d description", factory, round].UTF8String, [NSString stringWithFormat:@"%@\n  system %@\n  port   %@", dump_state(sa), normalised(ua), normalised(ub)]);
         else
-            charon_check(YES, "config update", nil);
+            revenant_check(YES, "config update", nil);
         same([NSString stringWithFormat:@"config update equals %@ %@", factory, dump_state(sa)], [NSString stringWithFormat:@"%d %d", [ua isEqual:a], [ua isEqual:[a updatedConfigurationForState:sa]]], [NSString stringWithFormat:@"%d %d", [ub isEqual:b], [ub isEqual:[b updatedConfigurationForState:sb]]]);
     }
 
@@ -176,11 +176,11 @@ void charon_run_listvalues(void)
         }
         NSString *da = dump_background(a), *db = dump_background(b);
         if (![da isEqual:db])
-            charon_check(NO, [NSString stringWithFormat:@"background fuzz %d values", round].UTF8String, [NSString stringWithFormat:@"%@\n  system %@\n  port   %@", factory, da, db]);
+            revenant_check(NO, [NSString stringWithFormat:@"background fuzz %d values", round].UTF8String, [NSString stringWithFormat:@"%@\n  system %@\n  port   %@", factory, da, db]);
         else if (![normalised(a) isEqual:normalised(b)])
-            charon_check(NO, [NSString stringWithFormat:@"background fuzz %d description", round].UTF8String, [NSString stringWithFormat:@"%@\n  system %@\n  port   %@", factory, normalised(a), normalised(b)]);
+            revenant_check(NO, [NSString stringWithFormat:@"background fuzz %d description", round].UTF8String, [NSString stringWithFormat:@"%@\n  system %@\n  port   %@", factory, normalised(a), normalised(b)]);
         else
-            charon_check(YES, "background fuzz", nil);
+            revenant_check(YES, "background fuzz", nil);
         id ac = [a copy], bc = [b copy];
         same(@"background copy equal", [NSString stringWithFormat:@"%d %d", [ac isEqual:a], [ac hash] == [a hash]], [NSString stringWithFormat:@"%d %d", [bc isEqual:b], [bc hash] == [b hash]]);
         BOOL cell = chance(80);
@@ -194,11 +194,11 @@ void charon_run_listvalues(void)
         da = dump_background(ua);
         db = dump_background(ub);
         if (![da isEqual:db])
-            charon_check(NO, [NSString stringWithFormat:@"background update %@ %d values", factory, round].UTF8String, [NSString stringWithFormat:@"%@\n  before %@\n  system %@\n  port   %@", dump_state(sa), dump_background(a), da, db]);
+            revenant_check(NO, [NSString stringWithFormat:@"background update %@ %d values", factory, round].UTF8String, [NSString stringWithFormat:@"%@\n  before %@\n  system %@\n  port   %@", dump_state(sa), dump_background(a), da, db]);
         else if (![normalised(ua) isEqual:normalised(ub)])
-            charon_check(NO, [NSString stringWithFormat:@"background update %@ %d description", factory, round].UTF8String, [NSString stringWithFormat:@"%@\n  system %@\n  port   %@", dump_state(sa), normalised(ua), normalised(ub)]);
+            revenant_check(NO, [NSString stringWithFormat:@"background update %@ %d description", factory, round].UTF8String, [NSString stringWithFormat:@"%@\n  system %@\n  port   %@", dump_state(sa), normalised(ua), normalised(ub)]);
         else
-            charon_check(YES, "background update", nil);
+            revenant_check(YES, "background update", nil);
         same([NSString stringWithFormat:@"background update equals %@ %@", factory, dump_state(sa)], [NSString stringWithFormat:@"%d", [ua isEqual:a]], [NSString stringWithFormat:@"%d", [ub isEqual:b]]);
     }
 
@@ -227,7 +227,7 @@ void charon_run_listvalues(void)
         }
         same(@"state description", normalised(a), normalised(b));
         id ac = [a copy], bc = [b copy];
-        same(@"state copy", [NSString stringWithFormat:@"%d %d %@ %d", [ac isEqual:a], [ac hash] == [a hash], NSStringFromClass([ac class]), ac != a], [NSString stringWithFormat:@"%d %d %@ %d", [bc isEqual:b], [bc hash] == [b hash], [NSStringFromClass([bc class]) stringByReplacingOccurrencesOfString:@"CharonHost" withString:@""], bc != b]);
+        same(@"state copy", [NSString stringWithFormat:@"%d %d %@ %d", [ac isEqual:a], [ac hash] == [a hash], NSStringFromClass([ac class]), ac != a], [NSString stringWithFormat:@"%d %d %@ %d", [bc isEqual:b], [bc hash] == [b hash], [NSStringFromClass([bc class]) stringByReplacingOccurrencesOfString:@"RevenantHost" withString:@""], bc != b]);
         [ac setSelected:![ac isSelected]];
         [bc setSelected:![bc isSelected]];
         same(@"state copy differs", [NSString stringWithFormat:@"%d", [ac isEqual:a]], [NSString stringWithFormat:@"%d", [bc isEqual:b]]);
@@ -236,7 +236,7 @@ void charon_run_listvalues(void)
         NSError *error = nil;
         NSData *data = [NSKeyedArchiver archivedDataWithRootObject:b requiringSecureCoding:YES error:&error];
         id decoded = data ? [NSKeyedUnarchiver unarchivedObjectOfClass:named(1, class_) fromData:data error:&error] : nil;
-        charon_check(decoded && [decoded isEqual:b], "state coding round trip", [NSString stringWithFormat:@"%@ | %@ | %@", error, normalised(b), normalised(decoded)]);
+        revenant_check(decoded && [decoded isEqual:b], "state coding round trip", [NSString stringWithFormat:@"%@ | %@ | %@", error, normalised(b), normalised(decoded)]);
         same(@"state custom lookup", [NSString stringWithFormat:@"%@ %@", [a customStateForKey:@"k"], a[@"n"]], [NSString stringWithFormat:@"%@ %@", [b customStateForKey:@"k"], b[@"n"]]);
     }
     id v1 = make_state(0, @"UIViewConfigurationState", traits), v2 = make_state(1, @"UIViewConfigurationState", traits);
@@ -342,7 +342,7 @@ static void accessory_checks(void)
             NSData *data = [NSKeyedArchiver archivedDataWithRootObject:b requiringSecureCoding:YES error:NULL];
             id decoded = data ? [NSKeyedUnarchiver unarchivedObjectOfClass:named(1, NSStringFromClass([[make_accessory(0, kind, view) class] class])) fromData:data error:NULL] : nil;
             NSString *expected = [dump_accessory(b, sample) stringByReplacingOccurrencesOfString:@" handler=1" withString:@" handler=0"];
-            charon_check(decoded && [dump_accessory(decoded, sample) isEqual:expected], "accessory coding round trip", [NSString stringWithFormat:@"%ld %@ %@", (long)kind, expected, decoded ? dump_accessory(decoded, sample) : @"nil"]);
+            revenant_check(decoded && [dump_accessory(decoded, sample) isEqual:expected], "accessory coding round trip", [NSString stringWithFormat:@"%ld %@ %@", (long)kind, expected, decoded ? dump_accessory(decoded, sample) : @"nil"]);
         }
     }
     NSArray *classes = @[@"UICellAccessoryCheckmark", @"UICellAccessoryDelete", @"UICellAccessoryLabel", @"UICellAccessoryOutlineDisclosure"];
@@ -367,7 +367,7 @@ static void accessory_checks(void)
         NSMutableString *system = [NSMutableString string], *port = [NSMutableString string];
         for (NSString *name in names) {
             [system appendFormat:@"%lu %lu ", (unsigned long)UICellAccessoryPositionBeforeAccessoryOfClass(NSClassFromString(name))(pool[index]), (unsigned long)UICellAccessoryPositionAfterAccessoryOfClass(NSClassFromString(name))(pool[index])];
-            [port appendFormat:@"%lu %lu ", (unsigned long)CharonHostUICellAccessoryPositionBeforeAccessoryOfClass(named(1, name))(portPool[index]), (unsigned long)CharonHostUICellAccessoryPositionAfterAccessoryOfClass(named(1, name))(portPool[index])];
+            [port appendFormat:@"%lu %lu ", (unsigned long)RevenantHostUICellAccessoryPositionBeforeAccessoryOfClass(named(1, name))(portPool[index]), (unsigned long)RevenantHostUICellAccessoryPositionAfterAccessoryOfClass(named(1, name))(portPool[index])];
         }
         same(@"accessory position blocks", system, port);
     }
@@ -384,16 +384,16 @@ static void accessory_checks(void)
         else
             same(@"accessory label nil text", first, reason);
     }
-    same(@"accessory standard dimension", [NSString stringWithFormat:@"%g", UICellAccessoryStandardDimension], [NSString stringWithFormat:@"%g", CharonHostUICellAccessoryStandardDimension]);
-    same(@"list image standard dimension", [NSString stringWithFormat:@"%g", UIListContentImageStandardDimension], [NSString stringWithFormat:@"%g", CharonHostUIListContentImageStandardDimension]);
+    same(@"accessory standard dimension", [NSString stringWithFormat:@"%g", UICellAccessoryStandardDimension], [NSString stringWithFormat:@"%g", RevenantHostUICellAccessoryStandardDimension]);
+    same(@"list image standard dimension", [NSString stringWithFormat:@"%g", UIListContentImageStandardDimension], [NSString stringWithFormat:@"%g", RevenantHostUIListContentImageStandardDimension]);
 }
 
 int main(void)
 {
     @autoreleasepool {
-        charon_run_listvalues();
+        revenant_run_listvalues();
         accessory_checks();
-        printf("checks=%d failures=%d\n", charon_checks, charon_failures);
-        return charon_failures ? 1 : 0;
+        printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
+        return revenant_failures ? 1 : 0;
     }
 }

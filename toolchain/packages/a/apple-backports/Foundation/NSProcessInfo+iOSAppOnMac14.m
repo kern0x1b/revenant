@@ -1,6 +1,6 @@
 #import <Foundation/Foundation.h>
 
-@implementation NSProcessInfo (CharonIOSAppOnMac)
+@implementation NSProcessInfo (RevenantIOSAppOnMac)
 
 - (BOOL)isiOSAppOnMac
 {

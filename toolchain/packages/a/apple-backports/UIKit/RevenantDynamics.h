@@ -1,28 +1,28 @@
 #import <UIKit/UIKit.h>
 #include <Box2D/Box2D.h>
 
-#define CHARON_DYNAMICS_PTM 100.0f
-#define CHARON_DYNAMICS_INVERSE_PTM 0.01f
+#define REVENANT_DYNAMICS_PTM 100.0f
+#define REVENANT_DYNAMICS_INVERSE_PTM 0.01f
 
-static inline b2Vec2 charon_metres(CGPoint point)
+static inline b2Vec2 revenant_metres(CGPoint point)
 {
-    return b2Vec2((float)((double)CHARON_DYNAMICS_INVERSE_PTM * point.x), (float)((double)CHARON_DYNAMICS_INVERSE_PTM * point.y));
+    return b2Vec2((float)((double)REVENANT_DYNAMICS_INVERSE_PTM * point.x), (float)((double)REVENANT_DYNAMICS_INVERSE_PTM * point.y));
 }
 
-static inline CGPoint charon_points(b2Vec2 vector)
+static inline CGPoint revenant_points(b2Vec2 vector)
 {
-    return CGPointMake((double)(CHARON_DYNAMICS_PTM * vector.x), (double)(CHARON_DYNAMICS_PTM * vector.y));
+    return CGPointMake((double)(REVENANT_DYNAMICS_PTM * vector.x), (double)(REVENANT_DYNAMICS_PTM * vector.y));
 }
 
-typedef NS_ENUM(NSInteger, CharonDynamicsShape) {
-    CharonDynamicsShapeNone,
-    CharonDynamicsShapeBox,
-    CharonDynamicsShapeCircle,
-    CharonDynamicsShapeEdge,
-    CharonDynamicsShapeLoop,
+typedef NS_ENUM(NSInteger, RevenantDynamicsShape) {
+    RevenantDynamicsShapeNone,
+    RevenantDynamicsShapeBox,
+    RevenantDynamicsShapeCircle,
+    RevenantDynamicsShapeEdge,
+    RevenantDynamicsShapeLoop,
 };
 
-@interface CharonDynamicsBody : NSObject
+@interface RevenantDynamicsBody : NSObject
 @property (nonatomic, readonly) b2Body *b2Body;
 @property (nonatomic, strong) id representedObject;
 @property (nonatomic) NSInteger associations;
@@ -50,58 +50,58 @@ typedef NS_ENUM(NSInteger, CharonDynamicsShape) {
 - (void)applyImpulse:(CGVector)impulse atPoint:(CGPoint)point;
 @end
 
-@interface CharonDynamicsContact : NSObject
-@property (nonatomic, readonly) CharonDynamicsBody *bodyA;
-@property (nonatomic, readonly) CharonDynamicsBody *bodyB;
+@interface RevenantDynamicsContact : NSObject
+@property (nonatomic, readonly) RevenantDynamicsBody *bodyA;
+@property (nonatomic, readonly) RevenantDynamicsBody *bodyB;
 @property (nonatomic, readonly) CGPoint contactPoint;
 @end
 
-@interface UIDynamicAnimator (CharonDynamics)
-- (b2World *)charon_world;
-- (CharonDynamicsBody *)charon_registerBodyForItem:(id<UIDynamicItem>)item shape:(CharonDynamicsShape)shape;
-- (void)charon_unregisterBodyForItem:(id<UIDynamicItem>)item action:(void (^)(CharonDynamicsBody *body))action;
-- (CharonDynamicsBody *)charon_bodyForItem:(id<UIDynamicItem>)item;
-- (CharonDynamicsBody *)charon_anchorBodyAtPoint:(CGPoint)point;
-- (CharonDynamicsBody *)charon_boundaryBodyFromPoint:(CGPoint)first toPoint:(CGPoint)second;
-- (CharonDynamicsBody *)charon_boundaryBodyWithLoop:(const b2Vec2 *)vertices count:(int32)count;
-- (void)charon_addBody:(CharonDynamicsBody *)body;
-- (void)charon_removeBody:(CharonDynamicsBody *)body;
-- (void)charon_tickle;
-- (void)charon_checkBehavior:(UIDynamicBehavior *)behavior;
-- (void)charon_registerBehavior:(UIDynamicBehavior *)behavior;
-- (void)charon_unregisterBehavior:(UIDynamicBehavior *)behavior;
-- (void)charon_runBlockPostSolverIfNeeded:(dispatch_block_t)block;
-- (void)charon_shouldReevaluateLocalBehaviors;
-- (void)charon_traverseBehaviorHierarchy:(void (^)(UIDynamicBehavior *behavior))block;
-- (int)charon_registerCollisionGroup;
-- (void)charon_unregisterCollisionGroup;
-- (void)charon_registerImplicitBounds;
-- (void)charon_unregisterImplicitBounds;
-- (CGRect)charon_referenceSystemBounds;
-- (void)charon_setWorldGravity:(CGVector)gravity;
+@interface UIDynamicAnimator (RevenantDynamics)
+- (b2World *)revenant_world;
+- (RevenantDynamicsBody *)revenant_registerBodyForItem:(id<UIDynamicItem>)item shape:(RevenantDynamicsShape)shape;
+- (void)revenant_unregisterBodyForItem:(id<UIDynamicItem>)item action:(void (^)(RevenantDynamicsBody *body))action;
+- (RevenantDynamicsBody *)revenant_bodyForItem:(id<UIDynamicItem>)item;
+- (RevenantDynamicsBody *)revenant_anchorBodyAtPoint:(CGPoint)point;
+- (RevenantDynamicsBody *)revenant_boundaryBodyFromPoint:(CGPoint)first toPoint:(CGPoint)second;
+- (RevenantDynamicsBody *)revenant_boundaryBodyWithLoop:(const b2Vec2 *)vertices count:(int32)count;
+- (void)revenant_addBody:(RevenantDynamicsBody *)body;
+- (void)revenant_removeBody:(RevenantDynamicsBody *)body;
+- (void)revenant_tickle;
+- (void)revenant_checkBehavior:(UIDynamicBehavior *)behavior;
+- (void)revenant_registerBehavior:(UIDynamicBehavior *)behavior;
+- (void)revenant_unregisterBehavior:(UIDynamicBehavior *)behavior;
+- (void)revenant_runBlockPostSolverIfNeeded:(dispatch_block_t)block;
+- (void)revenant_shouldReevaluateLocalBehaviors;
+- (void)revenant_traverseBehaviorHierarchy:(void (^)(UIDynamicBehavior *behavior))block;
+- (int)revenant_registerCollisionGroup;
+- (void)revenant_unregisterCollisionGroup;
+- (void)revenant_registerImplicitBounds;
+- (void)revenant_unregisterImplicitBounds;
+- (CGRect)revenant_referenceSystemBounds;
+- (void)revenant_setWorldGravity:(CGVector)gravity;
 @end
 
-@interface UIDynamicBehavior (CharonDynamics)
-- (instancetype)charon_initPrimitive:(BOOL)primitive __attribute__((objc_method_family(init)));
-- (NSMutableArray *)charon_items;
-- (UIDynamicAnimator *)charon_context;
-- (BOOL)charon_isAssociated;
-- (void)charon_setContext:(UIDynamicAnimator *)animator;
-- (void)charon_associate;
-- (void)charon_dissociate;
-- (void)charon_step;
-- (void)charon_reevaluate:(NSInteger)mode;
-- (BOOL)charon_allowsAnimatorToStop;
-- (void)charon_changedParameterForBody:(CharonDynamicsBody *)body;
+@interface UIDynamicBehavior (RevenantDynamics)
+- (instancetype)revenant_initPrimitive:(BOOL)primitive __attribute__((objc_method_family(init)));
+- (NSMutableArray *)revenant_items;
+- (UIDynamicAnimator *)revenant_context;
+- (BOOL)revenant_isAssociated;
+- (void)revenant_setContext:(UIDynamicAnimator *)animator;
+- (void)revenant_associate;
+- (void)revenant_dissociate;
+- (void)revenant_step;
+- (void)revenant_reevaluate:(NSInteger)mode;
+- (BOOL)revenant_allowsAnimatorToStop;
+- (void)revenant_changedParameterForBody:(RevenantDynamicsBody *)body;
 @end
 
-@interface UIDynamicItemBehavior (CharonDynamics)
-- (void)charon_configureBody:(CharonDynamicsBody *)body;
+@interface UIDynamicItemBehavior (RevenantDynamics)
+- (void)revenant_configureBody:(RevenantDynamicsBody *)body;
 @end
 
-@interface UICollisionBehavior (CharonDynamics)
-- (void)charon_didBeginContact:(CharonDynamicsContact *)contact;
-- (void)charon_didEndContact:(CharonDynamicsContact *)contact;
-- (void)charon_reevaluateImplicitBounds;
-- (BOOL)charon_usesImplicitBounds;
+@interface UICollisionBehavior (RevenantDynamics)
+- (void)revenant_didBeginContact:(RevenantDynamicsContact *)contact;
+- (void)revenant_didEndContact:(RevenantDynamicsContact *)contact;
+- (void)revenant_reevaluateImplicitBounds;
+- (BOOL)revenant_usesImplicitBounds;
 @end

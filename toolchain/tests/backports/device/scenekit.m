@@ -41,7 +41,7 @@ static void check_floats(NSString *name, NSArray *actual)
         double a = [actual[i] doubleValue], b = [want[i] doubleValue];
         same = fabs(a - b) <= 1e-5 * fmax(1, fabs(b));
     }
-    charon_check(same, name.UTF8String, [NSString stringWithFormat:@"%@ != %@", actual, want]);
+    revenant_check(same, name.UTF8String, [NSString stringWithFormat:@"%@ != %@", actual, want]);
 }
 
 static void check_value(NSString *name, id actual)
@@ -199,7 +199,7 @@ int main(void)
         check_matrices();
         check_nodes();
         check_view();
-        printf("%d of %d checks failed\n", charon_failures, charon_checks);
-        return charon_failures;
+        printf("%d of %d checks failed\n", revenant_failures, revenant_checks);
+        return revenant_failures;
     }
 }

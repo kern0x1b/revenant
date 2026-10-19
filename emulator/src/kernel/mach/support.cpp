@@ -49,7 +49,7 @@
 
 #include "support.hpp"
 
-namespace shade {
+namespace emulator {
 
 namespace mach_support {
 

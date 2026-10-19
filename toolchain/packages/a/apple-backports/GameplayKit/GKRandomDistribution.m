@@ -1,4 +1,4 @@
-#import "CharonGK.h"
+#import "RevenantGK.h"
 
 @implementation GKRandomDistribution {
     id<GKRandom> _source;
@@ -67,7 +67,7 @@
     return [_source nextBool];
 }
 
-- (id<GKRandom>)charon_source
+- (id<GKRandom>)revenant_source
 {
     return _source;
 }
@@ -133,7 +133,7 @@
 
 - (NSInteger)nextInt
 {
-    id<GKRandom> source = [self charon_source];
+    id<GKRandom> source = [self revenant_source];
     float first = [source nextUniform];
     float second = [source nextUniform];
     if (first < 1.0e-7f) {
@@ -177,7 +177,7 @@
             [_bag addObject:@(value)];
         }
         for (NSUInteger index = 0; index < [_bag count]; index++) {
-            NSUInteger other = [[self charon_source] nextIntWithUpperBound:index + 1];
+            NSUInteger other = [[self revenant_source] nextIntWithUpperBound:index + 1];
             [_bag exchangeObjectAtIndex:index withObjectAtIndex:other];
         }
     }

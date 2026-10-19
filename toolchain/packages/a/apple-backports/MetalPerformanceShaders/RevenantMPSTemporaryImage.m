@@ -1,9 +1,9 @@
-#import "CharonMPSTemporaryImage.h"
+#import "RevenantMPSTemporaryImage.h"
 
-@interface CharonMPSTemporaryImageAllocator : NSObject <MPSImageAllocator>
+@interface RevenantMPSTemporaryImageAllocator : NSObject <MPSImageAllocator>
 @end
 
-@implementation CharonMPSTemporaryImageAllocator
+@implementation RevenantMPSTemporaryImageAllocator
 
 + (BOOL)supportsSecureCoding
 {
@@ -31,10 +31,10 @@
 
 @end
 
-id<MPSImageAllocator> CharonMPSTemporaryImageDefaultAllocator(void)
+id<MPSImageAllocator> RevenantMPSTemporaryImageDefaultAllocator(void)
 {
     static id<MPSImageAllocator> shared = nil;
     if (!shared)
-        shared = [[CharonMPSTemporaryImageAllocator alloc] init];
+        shared = [[RevenantMPSTemporaryImageAllocator alloc] init];
     return shared;
 }

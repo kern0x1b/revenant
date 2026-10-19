@@ -3,7 +3,7 @@
 #
 # probe.m runs five steps on a one-second movie made by the host's AVAssetWriter (see probe.m). It is built twice:
 #   host  plain, against Apple's AVPlayerItem;
-#   port  with CHARON_PORT_BUILD=1, against CharonStandInPlayerItem (standin/), where the port's category
+#   port  with REVENANT_PORT_BUILD=1, against RevenantStandInPlayerItem (standin/), where the port's category
 #         AVFoundation/AVPlayerItemAutomaticKeys7.m is compiled from a scratch copy whose class is the stand-in.
 #
 # The join is row by row, and every row must be equal with ONE allowance, written in the port's facts file:
@@ -38,10 +38,10 @@ timeout 120 "$build/host" "$run" > "$build/host.table" 2> "$build/host.err" || {
 # 2. the port's category, from a scratch copy: its class is the stand-in, with the stand-in's header imported
 port_src=$build/src/AVPlayerItemAutomaticKeys7.m
 {
-    echo '#import "CharonStandInPlayerItem.h"'
-    sed -e 's/AVPlayerItem/CharonStandInPlayerItem/g' "$src"
+    echo '#import "RevenantStandInPlayerItem.h"'
+    sed -e 's/AVPlayerItem/RevenantStandInPlayerItem/g' "$src"
 } > "$port_src"
-[ "$(grep -c '@implementation CharonStandInPlayerItem (CharonAutomaticallyLoadedAssetKeys7)' "$port_src")" = 1 ] || {
+[ "$(grep -c '@implementation RevenantStandInPlayerItem (RevenantAutomaticallyLoadedAssetKeys7)' "$port_src")" = 1 ] || {
     echo "RUN FAILED: the scratch copy does not carry the category on the stand-in, so this run proves nothing"; exit 1; }
 if [ "$mutant" != 0 ]; then
     before='return @\[@"duration", @"availableMediaCharacteristicsWithMediaSelectionOptions"\];'
@@ -53,7 +53,7 @@ if [ "$mutant" != 0 ]; then
     echo "# the mutation applied: the release's default key list is duration and tracks"
 fi
 # shellcheck disable=SC2086
-xcrun clang $flags -fobjc-arc -I "$here/standin" -c "$here/standin/CharonStandInPlayerItem.m" -o "$build/standin.o" > "$build/standin.log" 2>&1 || {
+xcrun clang $flags -fobjc-arc -I "$here/standin" -c "$here/standin/RevenantStandInPlayerItem.m" -o "$build/standin.o" > "$build/standin.log" 2>&1 || {
     echo "RUN FAILED: the stand-in did not compile"; head -8 "$build/standin.log"; exit 1; }
 # shellcheck disable=SC2086
 xcrun clang $flags -I "$here/standin" -c "$port_src" -o "$build/keys.o" > "$build/keys.log" 2>&1 || {
@@ -61,7 +61,7 @@ xcrun clang $flags -I "$here/standin" -c "$port_src" -o "$build/keys.o" > "$buil
 
 # 3. the port table: the same probe, the stand-in and the category in place of Apple's class
 # shellcheck disable=SC2086
-xcrun clang $flags -DCHARON_PORT_BUILD=1 -I "$here/standin" "$here/probe.m" "$build/keys.o" "$build/standin.o" -o "$build/port" > "$build/port.log" 2>&1 || {
+xcrun clang $flags -DREVENANT_PORT_BUILD=1 -I "$here/standin" "$here/probe.m" "$build/keys.o" "$build/standin.o" -o "$build/port" > "$build/port.log" 2>&1 || {
     echo "RUN FAILED: the port probe did not link"; head -8 "$build/port.log"; exit 1; }
 timeout 120 "$build/port" "$run" > "$build/port.table" 2> "$build/port.err" || {
     echo "RUN FAILED: the port probe stopped (exit $?)"; head -5 "$build/port.err"; exit 1; }

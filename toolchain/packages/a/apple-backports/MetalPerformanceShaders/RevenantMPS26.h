@@ -1,12 +1,12 @@
-#ifndef MPS_CHARON_26_H
-#define MPS_CHARON_26_H
+#ifndef MPS_REVENANT_26_H
+#define MPS_REVENANT_26_H
 
-#import "CharonMPS.h"
+#import "RevenantMPS.h"
 
-@interface MPSCNNConvolutionDescriptor (CharonMPS26)
-- (float)charon_mps_neuronParameterC;
-- (void)charon_mps_setNeuronParameterC:(float)value;
-- (BOOL)charon_mps_hasBatchNormalization;
+@interface MPSCNNConvolutionDescriptor (RevenantMPS26)
+- (float)revenant_mps_neuronParameterC;
+- (void)revenant_mps_setNeuronParameterC:(float)value;
+- (BOOL)revenant_mps_hasBatchNormalization;
 @end
 
 #if !defined(__MAC_OS_X_VERSION_MAX_ALLOWED) || __MAC_OS_X_VERSION_MAX_ALLOWED < 260000

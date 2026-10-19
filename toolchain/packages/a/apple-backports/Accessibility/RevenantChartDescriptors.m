@@ -1,7 +1,7 @@
 #import <Foundation/Foundation.h>
 #import <Accessibility/Accessibility.h>
 
-#import "../CharonSayOnce.h"
+#import "../RevenantSayOnce.h"
 
 #pragma mark - AXDataPointValue
 
@@ -626,21 +626,21 @@
 
 + (void)start
 {
-    charon_say_once_for(@"AXLiveAudioGraph.start",
+    revenant_say_once_for(@"AXLiveAudioGraph.start",
                         @"AXLiveAudioGraph +start: this release runs no assistive technology that draws "
                         @"a live audio graph, so no graph is published");
 }
 
 + (void)updateValue:(double)value
 {
-    charon_say_once_for(@"AXLiveAudioGraph.updateValue",
+    revenant_say_once_for(@"AXLiveAudioGraph.updateValue",
                         @"AXLiveAudioGraph +updateValue: this release runs no assistive technology that "
                         @"draws a live audio graph, so the value is not published");
 }
 
 + (void)stop
 {
-    charon_say_once_for(@"AXLiveAudioGraph.stop",
+    revenant_say_once_for(@"AXLiveAudioGraph.stop",
                         @"AXLiveAudioGraph +stop: this release runs no assistive technology that draws a "
                         @"live audio graph, so there is no graph to stop");
 }

@@ -1,7 +1,7 @@
 #import <Foundation/Foundation.h>
 #import <Security/Security.h>
 
-static NSString *charon_trust_summary(SecTrustRef trust)
+static NSString *revenant_trust_summary(SecTrustRef trust)
 {
     if (SecTrustGetCertificateCount(trust) < 1)
         return @"";
@@ -10,7 +10,7 @@ static NSString *charon_trust_summary(SecTrustRef trust)
     return summary ? CFBridgingRelease(summary) : @"";
 }
 
-static BOOL charon_trust_has(NSArray *problems, NSString *text)
+static BOOL revenant_trust_has(NSArray *problems, NSString *text)
 {
     for (NSDictionary *problem in problems)
         if ([problem[@"type"] isEqual:@"error"] && [problem[@"value"] isEqual:text])
@@ -18,16 +18,16 @@ static BOOL charon_trust_has(NSArray *problems, NSString *text)
     return NO;
 }
 
-static NSError *charon_trust_error(SecTrustRef trust, OSStatus status)
+static NSError *revenant_trust_error(SecTrustRef trust, OSStatus status)
 {
-    NSString *summary = charon_trust_summary(trust);
+    NSString *summary = revenant_trust_summary(trust);
     if (status != errSecSuccess)
         return [NSError errorWithDomain:NSOSStatusErrorDomain code:status userInfo:nil];
     CFArrayRef properties = SecTrustCopyProperties(trust);
     NSArray *problems = CFBridgingRelease(properties);
-    BOOL untrusted = charon_trust_has(problems, @"Root certificate is not trusted.");
-    BOOL mismatch = charon_trust_has(problems, @"Hostname mismatch.");
-    BOOL expired = charon_trust_has(problems, @"One or more certificates have expired or are not valid yet.");
+    BOOL untrusted = revenant_trust_has(problems, @"Root certificate is not trusted.");
+    BOOL mismatch = revenant_trust_has(problems, @"Hostname mismatch.");
+    BOOL expired = revenant_trust_has(problems, @"One or more certificates have expired or are not valid yet.");
     OSStatus code = errSecNotTrusted;
     NSString *reason = @"is not trusted";
     if (!untrusted && mismatch) {
@@ -63,7 +63,7 @@ bool SecTrustEvaluateWithError(SecTrustRef trust, CFErrorRef *error)
         return true;
     }
     if (error)
-        *error = (CFErrorRef)CFBridgingRetain(charon_trust_error(trust, status));
+        *error = (CFErrorRef)CFBridgingRetain(revenant_trust_error(trust, status));
     return false;
 }
 

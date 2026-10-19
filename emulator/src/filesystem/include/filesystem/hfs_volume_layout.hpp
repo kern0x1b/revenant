@@ -15,7 +15,7 @@
 
 #include "filesystem/hfs_metadata.hpp"
 
-namespace shade::hfs {
+namespace emulator::hfs {
 
 class VolumeLayout {
 public:

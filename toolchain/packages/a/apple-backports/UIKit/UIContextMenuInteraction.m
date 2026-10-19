@@ -1,14 +1,14 @@
-#import "CharonMenus.h"
+#import "RevenantMenus.h"
 #import <objc/runtime.h>
 
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 
-@interface CharonContextMenuAnimator : NSObject <UIContextMenuInteractionAnimating>
+@interface RevenantContextMenuAnimator : NSObject <UIContextMenuInteractionAnimating>
 - (void)finish;
 @end
 
-@implementation CharonContextMenuAnimator {
+@implementation RevenantContextMenuAnimator {
 @private
     NSMutableArray *_completions;
     BOOL _finished;
@@ -51,22 +51,22 @@
 
 @end
 
-@class CharonContextMenuSheet;
+@class RevenantContextMenuSheet;
 
-@interface UIContextMenuInteraction (CharonSheet)
-- (void)charon_pressed:(UILongPressGestureRecognizer *)recognizer;
-- (void)charon_sheetPresented;
-- (void)charon_sheetWillDismissWithIndex:(NSInteger)index;
-- (void)charon_sheetDidDismissWithIndex:(NSInteger)index;
+@interface UIContextMenuInteraction (RevenantSheet)
+- (void)revenant_pressed:(UILongPressGestureRecognizer *)recognizer;
+- (void)revenant_sheetPresented;
+- (void)revenant_sheetWillDismissWithIndex:(NSInteger)index;
+- (void)revenant_sheetDidDismissWithIndex:(NSInteger)index;
 @end
 
-static const char charon_sheet_delegate_key;
+static const char revenant_sheet_delegate_key;
 
-@interface CharonContextMenuSheet : NSObject <UIActionSheetDelegate>
+@interface RevenantContextMenuSheet : NSObject <UIActionSheetDelegate>
 @property (nonatomic, weak) UIContextMenuInteraction *interaction;
 @end
 
-@implementation CharonContextMenuSheet {
+@implementation RevenantContextMenuSheet {
 @private
     __weak UIContextMenuInteraction *_interaction;
 }
@@ -85,54 +85,54 @@ static const char charon_sheet_delegate_key;
 
 - (void)didPresentActionSheet:(UIActionSheet *)actionSheet
 {
-    [_interaction charon_sheetPresented];
+    [_interaction revenant_sheetPresented];
 }
 
 - (void)actionSheet:(UIActionSheet *)actionSheet willDismissWithButtonIndex:(NSInteger)buttonIndex
 {
-    [_interaction charon_sheetWillDismissWithIndex:buttonIndex];
+    [_interaction revenant_sheetWillDismissWithIndex:buttonIndex];
 }
 
 - (void)actionSheet:(UIActionSheet *)actionSheet didDismissWithButtonIndex:(NSInteger)buttonIndex
 {
-    [_interaction charon_sheetDidDismissWithIndex:buttonIndex];
+    [_interaction revenant_sheetDidDismissWithIndex:buttonIndex];
 }
 
 @end
 
-static BOOL charon_leaf(UIMenuElement *element)
+static BOOL revenant_leaf(UIMenuElement *element)
 {
     return [element isKindOfClass:[UIAction class]] || [element isKindOfClass:[UICommand class]];
 }
 
-static UIMenuElementAttributes charon_attributes(UIMenuElement *element)
+static UIMenuElementAttributes revenant_attributes(UIMenuElement *element)
 {
     return [element isKindOfClass:[UIAction class]] ? ((UIAction *)element).attributes : ((UICommand *)element).attributes;
 }
 
-static UIMenuElementState charon_state(UIMenuElement *element)
+static UIMenuElementState revenant_state(UIMenuElement *element)
 {
     return [element isKindOfClass:[UIAction class]] ? ((UIAction *)element).state : ((UICommand *)element).state;
 }
 
-static void charon_collect_deferred(NSArray *elements, NSMutableArray *found)
+static void revenant_collect_deferred(NSArray *elements, NSMutableArray *found)
 {
     for (UIMenuElement *element in elements) {
         if ([element isKindOfClass:[UIDeferredMenuElement class]])
             [found addObject:element];
         else if ([element isKindOfClass:[UIMenu class]] && (((UIMenu *)element).options & UIMenuOptionsDisplayInline))
-            charon_collect_deferred(((UIMenu *)element).children, found);
+            revenant_collect_deferred(((UIMenu *)element).children, found);
     }
 }
 
-static BOOL charon_menu_has_content(UIMenu *menu, NSDictionary *resolved)
+static BOOL revenant_menu_has_content(UIMenu *menu, NSDictionary *resolved)
 {
     for (UIMenuElement *child in menu.children) {
-        if (charon_leaf(child)) {
-            if (!(charon_attributes(child) & (UIMenuElementAttributesDisabled | UIMenuElementAttributesHidden)))
+        if (revenant_leaf(child)) {
+            if (!(revenant_attributes(child) & (UIMenuElementAttributesDisabled | UIMenuElementAttributesHidden)))
                 return YES;
         } else if ([child isKindOfClass:[UIMenu class]]) {
-            if (charon_menu_has_content((UIMenu *)child, resolved))
+            if (revenant_menu_has_content((UIMenu *)child, resolved))
                 return YES;
         } else if ([child isKindOfClass:[UIDeferredMenuElement class]]) {
             if ([resolved[child] count])
@@ -142,17 +142,17 @@ static BOOL charon_menu_has_content(UIMenu *menu, NSDictionary *resolved)
     return NO;
 }
 
-static void charon_flatten(NSArray *elements, NSDictionary *resolved, NSMutableArray *out)
+static void revenant_flatten(NSArray *elements, NSDictionary *resolved, NSMutableArray *out)
 {
     for (UIMenuElement *element in elements) {
-        if (charon_leaf(element)) {
-            if (!(charon_attributes(element) & (UIMenuElementAttributesDisabled | UIMenuElementAttributesHidden)))
+        if (revenant_leaf(element)) {
+            if (!(revenant_attributes(element) & (UIMenuElementAttributesDisabled | UIMenuElementAttributesHidden)))
                 [out addObject:element];
         } else if ([element isKindOfClass:[UIMenu class]]) {
             UIMenu *menu = (UIMenu *)element;
             if (menu.options & UIMenuOptionsDisplayInline)
-                charon_flatten(menu.children, resolved, out);
-            else if (charon_menu_has_content(menu, resolved))
+                revenant_flatten(menu.children, resolved, out);
+            else if (revenant_menu_has_content(menu, resolved))
                 [out addObject:menu];
         } else if ([element isKindOfClass:[UIDeferredMenuElement class]]) {
             NSArray *items = resolved[element];
@@ -161,12 +161,12 @@ static void charon_flatten(NSArray *elements, NSDictionary *resolved, NSMutableA
                 if (![item isKindOfClass:[UIDeferredMenuElement class]])
                     [plain addObject:item];
             }
-            charon_flatten(plain, resolved, out);
+            revenant_flatten(plain, resolved, out);
         }
     }
 }
 
-static NSString *charon_button_title(UIMenuElement *element)
+static NSString *revenant_button_title(UIMenuElement *element)
 {
     NSString *title = element.title;
     if (!title.length && [element isKindOfClass:[UIAction class]])
@@ -175,7 +175,7 @@ static NSString *charon_button_title(UIMenuElement *element)
         return nil;
     if ([element isKindOfClass:[UIMenu class]])
         return [title stringByAppendingString:@" ›"];
-    UIMenuElementState state = charon_state(element);
+    UIMenuElementState state = revenant_state(element);
     if (state == UIMenuElementStateOn)
         return [@"✓ " stringByAppendingString:title];
     if (state == UIMenuElementStateMixed)
@@ -183,11 +183,11 @@ static NSString *charon_button_title(UIMenuElement *element)
     return title;
 }
 
-static BOOL charon_destructive(UIMenuElement *element)
+static BOOL revenant_destructive(UIMenuElement *element)
 {
     if ([element isKindOfClass:[UIMenu class]])
         return (((UIMenu *)element).options & UIMenuOptionsDestructive) != 0;
-    return (charon_attributes(element) & UIMenuElementAttributesDestructive) != 0;
+    return (revenant_attributes(element) & UIMenuElementAttributesDestructive) != 0;
 }
 
 @implementation UIContextMenuInteraction {
@@ -200,10 +200,10 @@ static BOOL charon_destructive(UIMenuElement *element)
     UIMenu *_pendingSubmenu;
     UIMenuElement *_chosen;
     UIActionSheet *_sheet;
-    CharonContextMenuSheet *_sheetDelegate;
+    RevenantContextMenuSheet *_sheetDelegate;
     NSArray *_entries;
-    CharonContextMenuAnimator *_displayAnimator;
-    CharonContextMenuAnimator *_endAnimator;
+    RevenantContextMenuAnimator *_displayAnimator;
+    RevenantContextMenuAnimator *_endAnimator;
     CGPoint _location;
     BOOL _locationKnown;
     BOOL _busy;
@@ -246,7 +246,7 @@ static BOOL charon_destructive(UIMenuElement *element)
     }
     _view = view;
     if (view) {
-        _recognizer = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(charon_pressed:)];
+        _recognizer = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(revenant_pressed:)];
         [view addGestureRecognizer:_recognizer];
     }
 }
@@ -265,13 +265,13 @@ static BOOL charon_destructive(UIMenuElement *element)
         [_sheet dismissWithClickedButtonIndex:_sheet.cancelButtonIndex animated:YES];
 }
 
-- (void)charon_pressed:(UILongPressGestureRecognizer *)recognizer
+- (void)revenant_pressed:(UILongPressGestureRecognizer *)recognizer
 {
     if (recognizer.state == UIGestureRecognizerStateBegan)
-        [self charon_beginAtLocation:[recognizer locationInView:_view]];
+        [self revenant_beginAtLocation:[recognizer locationInView:_view]];
 }
 
-- (void)charon_beginAtLocation:(CGPoint)location
+- (void)revenant_beginAtLocation:(CGPoint)location
 {
     id<UIContextMenuInteractionDelegate> delegate = _delegate;
     if (!_view.window || _busy || _sheet || !delegate)
@@ -279,26 +279,26 @@ static BOOL charon_destructive(UIMenuElement *element)
     UIContextMenuConfiguration *configuration = [delegate contextMenuInteraction:self configurationForMenuAtLocation:location];
     if (!configuration)
         return;
-    UIContextMenuActionProvider provider = [configuration charon_actionProvider];
+    UIContextMenuActionProvider provider = [configuration revenant_actionProvider];
     UIMenu *menu = provider ? provider(@[]) : nil;
     if (![menu isKindOfClass:[UIMenu class]])
         return;
-    charon_menus_say_once(@"sheet", [NSString stringWithFormat:@"UIContextMenuInteraction: iOS %@ draws no menu preview, highlight or morph, so the menu is shown as an action sheet; the preview provider and the preview delegate methods are never called",
+    revenant_menus_say_once(@"sheet", [NSString stringWithFormat:@"UIContextMenuInteraction: iOS %@ draws no menu preview, highlight or morph, so the menu is shown as an action sheet; the preview provider and the preview delegate methods are never called",
                                                                [UIDevice currentDevice].systemVersion]);
     _busy = YES;
     _configuration = configuration;
     _location = location;
     _locationKnown = YES;
     _first = YES;
-    [self charon_show:menu];
+    [self revenant_show:menu];
 }
 
-- (void)charon_show:(UIMenu *)menu
+- (void)revenant_show:(UIMenu *)menu
 {
     NSMutableArray *deferred = [NSMutableArray array];
-    charon_collect_deferred(menu.children, deferred);
+    revenant_collect_deferred(menu.children, deferred);
     if (!deferred.count) {
-        [self charon_show:menu resolved:@{}];
+        [self revenant_show:menu resolved:@{}];
         return;
     }
     NSMutableDictionary *resolved = [NSMutableDictionary dictionary];
@@ -308,10 +308,10 @@ static BOOL charon_destructive(UIMenuElement *element)
         if (shown)
             return;
         shown = YES;
-        [self charon_show:menu resolved:resolved];
+        [self revenant_show:menu resolved:resolved];
     };
     for (UIDeferredMenuElement *element in deferred) {
-        [element charon_fulfillWithCompletion:^(NSArray<UIMenuElement *> *elements) {
+        [element revenant_fulfillWithCompletion:^(NSArray<UIMenuElement *> *elements) {
             if (shown)
                 return;
             resolved[element] = elements;
@@ -322,20 +322,20 @@ static BOOL charon_destructive(UIMenuElement *element)
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.5 * NSEC_PER_SEC)), dispatch_get_main_queue(), show);
 }
 
-- (void)charon_show:(UIMenu *)menu resolved:(NSDictionary *)resolved
+- (void)revenant_show:(UIMenu *)menu resolved:(NSDictionary *)resolved
 {
     UIView *view = _view;
     NSMutableArray *elements = [NSMutableArray array];
-    charon_flatten(menu.children, resolved, elements);
+    revenant_flatten(menu.children, resolved, elements);
     NSMutableArray *entries = [NSMutableArray array];
     NSMutableArray *titles = [NSMutableArray array];
     UIMenuElement *destructive = nil;
     NSString *destructiveTitle = nil;
     for (UIMenuElement *element in elements) {
-        NSString *title = charon_button_title(element);
+        NSString *title = revenant_button_title(element);
         if (!title)
             continue;
-        if (!destructive && charon_destructive(element)) {
+        if (!destructive && revenant_destructive(element)) {
             destructive = element;
             destructiveTitle = title;
             continue;
@@ -346,23 +346,23 @@ static BOOL charon_destructive(UIMenuElement *element)
     if (destructive)
         [entries insertObject:destructive atIndex:0];
     if (!view.window || !entries.count) {
-        [self charon_reset];
+        [self revenant_reset];
         return;
     }
     _visibleMenu = menu;
     _entries = entries;
-    _sheetDelegate = [[CharonContextMenuSheet alloc] init];
+    _sheetDelegate = [[RevenantContextMenuSheet alloc] init];
     _sheetDelegate.interaction = self;
     UIActionSheet *sheet = [[UIActionSheet alloc] initWithTitle:menu.title.length ? menu.title : nil delegate:_sheetDelegate cancelButtonTitle:nil
                                          destructiveButtonTitle:destructiveTitle otherButtonTitles:nil];
-    objc_setAssociatedObject(sheet, &charon_sheet_delegate_key, _sheetDelegate, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(sheet, &revenant_sheet_delegate_key, _sheetDelegate, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     for (NSString *title in titles)
         [sheet addButtonWithTitle:title];
     NSString *cancel = [[NSBundle bundleForClass:[UIApplication class]] localizedStringForKey:@"Cancel" value:@"Cancel" table:nil];
     sheet.cancelButtonIndex = [sheet addButtonWithTitle:cancel];
     _sheet = sheet;
     if (_first) {
-        _displayAnimator = [[CharonContextMenuAnimator alloc] init];
+        _displayAnimator = [[RevenantContextMenuAnimator alloc] init];
         id<UIContextMenuInteractionDelegate> delegate = _delegate;
         if ([delegate respondsToSelector:@selector(contextMenuInteraction:willDisplayMenuForConfiguration:animator:)])
             [delegate contextMenuInteraction:self willDisplayMenuForConfiguration:_configuration animator:_displayAnimator];
@@ -373,7 +373,7 @@ static BOOL charon_destructive(UIMenuElement *element)
         [sheet showInView:view.window];
 }
 
-- (void)charon_reset
+- (void)revenant_reset
 {
     _sheet = nil;
     _sheetDelegate = nil;
@@ -389,15 +389,15 @@ static BOOL charon_destructive(UIMenuElement *element)
     _first = NO;
 }
 
-- (void)charon_sheetPresented
+- (void)revenant_sheetPresented
 {
-    CharonContextMenuAnimator *animator = _displayAnimator;
+    RevenantContextMenuAnimator *animator = _displayAnimator;
     _displayAnimator = nil;
     _first = NO;
     [animator finish];
 }
 
-- (void)charon_sheetWillDismissWithIndex:(NSInteger)index
+- (void)revenant_sheetWillDismissWithIndex:(NSInteger)index
 {
     if (_replacing)
         return;
@@ -407,13 +407,13 @@ static BOOL charon_destructive(UIMenuElement *element)
         return;
     }
     _chosen = element;
-    _endAnimator = [[CharonContextMenuAnimator alloc] init];
+    _endAnimator = [[RevenantContextMenuAnimator alloc] init];
     id<UIContextMenuInteractionDelegate> delegate = _delegate;
     if ([delegate respondsToSelector:@selector(contextMenuInteraction:willEndForConfiguration:animator:)])
         [delegate contextMenuInteraction:self willEndForConfiguration:_configuration animator:_endAnimator];
 }
 
-- (void)charon_sheetDidDismissWithIndex:(NSInteger)index
+- (void)revenant_sheetDidDismissWithIndex:(NSInteger)index
 {
     if (_replacing)
         return;
@@ -423,27 +423,27 @@ static BOOL charon_destructive(UIMenuElement *element)
         _sheet = nil;
         _sheetDelegate = nil;
         dispatch_async(dispatch_get_main_queue(), ^{
-            [self charon_show:submenu];
+            [self revenant_show:submenu];
         });
         return;
     }
-    CharonContextMenuAnimator *animator = _endAnimator;
+    RevenantContextMenuAnimator *animator = _endAnimator;
     UIMenuElement *chosen = _chosen;
     UIView *view = _view;
-    [self charon_reset];
+    [self revenant_reset];
     [animator finish];
     if ([chosen isKindOfClass:[UIAction class]])
-        [(UIAction *)chosen charon_performWithSender:view];
+        [(UIAction *)chosen revenant_performWithSender:view];
     else if ([chosen isKindOfClass:[UICommand class]])
-        [(UICommand *)chosen charon_performWithSender:view target:nil];
+        [(UICommand *)chosen revenant_performWithSender:view target:nil];
 }
 
-- (UIMenu *)charon_visibleMenu
+- (UIMenu *)revenant_visibleMenu
 {
     return _visibleMenu;
 }
 
-- (void)charon_replaceVisibleMenu:(UIMenu *)menu
+- (void)revenant_replaceVisibleMenu:(UIMenu *)menu
 {
     if (!_sheet || !menu)
         return;
@@ -452,7 +452,7 @@ static BOOL charon_destructive(UIMenuElement *element)
     _replacing = NO;
     _sheet = nil;
     _sheetDelegate = nil;
-    [self charon_show:menu];
+    [self revenant_show:menu];
 }
 
 @end

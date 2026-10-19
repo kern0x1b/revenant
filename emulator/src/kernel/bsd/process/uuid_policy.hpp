@@ -6,7 +6,7 @@
 
 #include <cstdint>
 
-namespace shade {
+namespace emulator {
 class AddressSpace;
 struct ProcessContext;
 

@@ -16,7 +16,7 @@ int main(void)
     setvbuf(stdout, NULL, _IONBF, 0);
     __weak id weakA = nil, weakB = nil;
     @autoreleasepool {
-        Class cls = NSClassFromString(@"CharonSecProtocolMetadata");
+        Class cls = NSClassFromString(@"RevenantSecProtocolMetadata");
         printf("port-class\t%s\n", cls ? "found" : "MISSING");
         if (!cls) return 1;
         sec_protocol_metadata_t m = (sec_protocol_metadata_t)[[cls alloc] init];

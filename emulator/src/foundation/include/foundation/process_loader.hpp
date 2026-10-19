@@ -18,7 +18,7 @@
 #include "foundation/darwin_address_layout.hpp"
 #include "foundation/macho.hpp"
 
-namespace shade {
+namespace emulator {
 
 class ExecutableCatalog;
 

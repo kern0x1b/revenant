@@ -1,9 +1,9 @@
 #import <Foundation/Foundation.h>
 #import <objc/runtime.h>
 
-typedef id (^CharonUserInfoValueProvider)(NSError *error, NSErrorUserInfoKey key);
+typedef id (^RevenantUserInfoValueProvider)(NSError *error, NSErrorUserInfoKey key);
 
-static NSMutableDictionary *charon_providers(void)
+static NSMutableDictionary *revenant_providers(void)
 {
     static NSMutableDictionary *providers;
     static dispatch_once_t once;
@@ -11,28 +11,28 @@ static NSMutableDictionary *charon_providers(void)
     return providers;
 }
 
-static id charon_provided(NSError *error, NSErrorUserInfoKey key)
+static id revenant_provided(NSError *error, NSErrorUserInfoKey key)
 {
     if ([error.userInfo objectForKey:key])
         return nil;
-    CharonUserInfoValueProvider provider;
-    @synchronized(charon_providers()) {
-        provider = charon_providers()[error.domain];
+    RevenantUserInfoValueProvider provider;
+    @synchronized(revenant_providers()) {
+        provider = revenant_providers()[error.domain];
     }
     return provider ? provider(error, key) : nil;
 }
 
-@implementation NSError (CharonUserInfoValueProvider)
+@implementation NSError (RevenantUserInfoValueProvider)
 
 + (void)setUserInfoValueProviderForDomain:(NSErrorDomain)errorDomain provider:(id (^)(NSError *err, NSErrorUserInfoKey userInfoKey))provider
 {
     if (!errorDomain)
         return;
-    @synchronized(charon_providers()) {
+    @synchronized(revenant_providers()) {
         if (provider)
-            charon_providers()[errorDomain] = [provider copy];
+            revenant_providers()[errorDomain] = [provider copy];
         else
-            [charon_providers() removeObjectForKey:errorDomain];
+            [revenant_providers() removeObjectForKey:errorDomain];
     }
 }
 
@@ -41,45 +41,45 @@ static id charon_provided(NSError *error, NSErrorUserInfoKey key)
     if (!errorDomain)
         return nil;
     id provider;
-    @synchronized(charon_providers()) {
-        provider = charon_providers()[errorDomain];
+    @synchronized(revenant_providers()) {
+        provider = revenant_providers()[errorDomain];
     }
     return provider;
 }
 
 - (NSString *)localizedDescription
 {
-    return charon_provided(self, NSLocalizedDescriptionKey) ?: [NSString stringWithFormat:@"%@ %ld", self.domain, (long)self.code];
+    return revenant_provided(self, NSLocalizedDescriptionKey) ?: [NSString stringWithFormat:@"%@ %ld", self.domain, (long)self.code];
 }
 
 - (NSString *)localizedFailureReason
 {
-    return charon_provided(self, NSLocalizedFailureReasonErrorKey);
+    return revenant_provided(self, NSLocalizedFailureReasonErrorKey);
 }
 
 - (NSString *)localizedRecoverySuggestion
 {
-    return charon_provided(self, NSLocalizedRecoverySuggestionErrorKey);
+    return revenant_provided(self, NSLocalizedRecoverySuggestionErrorKey);
 }
 
 - (NSArray *)localizedRecoveryOptions
 {
-    return charon_provided(self, NSLocalizedRecoveryOptionsErrorKey);
+    return revenant_provided(self, NSLocalizedRecoveryOptionsErrorKey);
 }
 
 - (id)recoveryAttempter
 {
-    return charon_provided(self, NSRecoveryAttempterErrorKey);
+    return revenant_provided(self, NSRecoveryAttempterErrorKey);
 }
 
 - (NSString *)helpAnchor
 {
-    return charon_provided(self, NSHelpAnchorErrorKey);
+    return revenant_provided(self, NSHelpAnchorErrorKey);
 }
 
 @end
 
-void charon_install_user_info_value_provider(Class cls)
+void revenant_install_user_info_value_provider(Class cls)
 {
     NSDictionary *keys = @{
         @"localizedDescription": NSLocalizedDescriptionKey,
@@ -98,11 +98,11 @@ void charon_install_user_info_value_provider(Class cls)
         id (*original)(id, SEL) = (id (*)(id, SEL))method_getImplementation(method);
         BOOL description = [name isEqualToString:@"localizedDescription"];
         class_replaceMethod(cls, selector, imp_implementationWithBlock(^id(NSError *self_) {
-            id value = charon_provided(self_, key);
+            id value = revenant_provided(self_, key);
             if (value)
                 return value;
             if (description && ![self_.userInfo objectForKey:NSLocalizedFailureReasonErrorKey]) {
-                NSString *reason = charon_provided(self_, NSLocalizedFailureReasonErrorKey);
+                NSString *reason = revenant_provided(self_, NSLocalizedFailureReasonErrorKey);
                 if (reason) {
                     NSError *composed = [NSError errorWithDomain:self_.domain code:self_.code userInfo:@{NSLocalizedFailureReasonErrorKey: reason}];
                     return original(composed, selector);
@@ -113,16 +113,16 @@ void charon_install_user_info_value_provider(Class cls)
     }
 }
 
-@interface CharonErrorProviderInstaller : NSObject
+@interface RevenantErrorProviderInstaller : NSObject
 @end
 
-@implementation CharonErrorProviderInstaller
+@implementation RevenantErrorProviderInstaller
 
 + (void)load
 {
     if ([NSError respondsToSelector:@selector(setUserInfoValueProviderForDomain:provider:)])
         return;
-    charon_install_user_info_value_provider([NSError class]);
+    revenant_install_user_info_value_provider([NSError class]);
 }
 
 @end

@@ -66,8 +66,8 @@ Metal	46	forward	MTLLibrary
 UIKit	1	line	#import <UIKit/UIKit.h>	
 UIKit	2	line	#import <Foundation/Foundation.h>	
 UIKit	3	line	#import <objc/NSObject.h>	
-UIKit	4	line	#import "CharonTraits17.h"	
-UIKit	5	line	#import "CharonUIKit18.h"	
+UIKit	4	line	#import "RevenantTraits17.h"	
+UIKit	5	line	#import "RevenantUIKit18.h"	
 UIKit	6	forward	NSCollectionLayoutContainer	
 UIKit	7	forward	NSCollectionLayoutEnvironment	
 UIKit	8	forward	NSCollectionLayoutVisibleItem	
@@ -186,7 +186,7 @@ Vision	6	forward	VNRequestRevisionProviding
 AVFoundation	1	line	#import <AVFoundation/AVFoundation.h>	
 AVFoundation	2	line	#import <Foundation/Foundation.h>	
 AVFoundation	3	line	#import <objc/NSObject.h>	
-AVFoundation	4	line	#import "CharonAVMetrics18.h"	
+AVFoundation	4	line	#import "RevenantAVMetrics18.h"	
 AVFoundation	5	forward	AVCaptureDataOutputSynchronizerDelegate	
 AVFoundation	6	forward	AVQueuedSampleBufferRendering	
 AVFoundation	7	forward	AVMetricEventStreamSubscriber	
@@ -219,7 +219,7 @@ LocalAuthentication	5	body-keep	LAEnvironmentObserver
 CoreML	1	line	#import <CoreML/CoreML.h>	
 CoreML	2	line	#import <Foundation/Foundation.h>	
 CoreML	3	line	#import <objc/NSObject.h>	
-CoreML	4	line	#import "CharonCoreMLComputeDevices.h"	
+CoreML	4	line	#import "RevenantCoreMLComputeDevices.h"	
 CoreML	5	forward	MLCustomLayer	
 CoreML	6	forward	MLCustomModel	
 CoreML	7	forward	MLBatchProvider	
@@ -229,11 +229,11 @@ MapKit	1	line	#import <MapKit/MapKit.h>
 MapKit	2	line	#import <Foundation/Foundation.h>	
 MapKit	3	line	#import <objc/NSObject.h>	
 MapKit	4	forward	MKLocalSearchCompleterDelegate	
-CoreMIDI	1	line	#ifndef CharonCoreMIDIProtocols_h	
-CoreMIDI	2	line	#define CharonCoreMIDIProtocols_h	
+CoreMIDI	1	line	#ifndef RevenantCoreMIDIProtocols_h	
+CoreMIDI	2	line	#define RevenantCoreMIDIProtocols_h	
 CoreMIDI	3	line	#import <Foundation/Foundation.h>	
 CoreMIDI	4	line	#import <CoreMIDI/MIDIServices.h>	
-CoreMIDI	5	line	#import "CharonMIDIUMP18.h"	
+CoreMIDI	5	line	#import "RevenantMIDIUMP18.h"	
 CoreMIDI	6	line	@class MIDICIDeviceInfo, MIDICIProfile;	
 CoreMIDI	7	line	typedef NSNumber *MIDICIInitiatiorMUID;	
 CoreMIDI	8	line	NS_ASSUME_NONNULL_BEGIN	
@@ -268,7 +268,7 @@ MetalKit	4	forward	MTKViewDelegate
 VideoToolbox	1	line	#import <VideoToolbox/VideoToolbox.h>	
 VideoToolbox	2	line	#import <Foundation/Foundation.h>	
 VideoToolbox	3	line	#import <objc/NSObject.h>	
-VideoToolbox	4	line	#import "CharonVideoToolbox.h"	
+VideoToolbox	4	line	#import "RevenantVideoToolbox.h"	
 VideoToolbox	5	forward	VTFrameProcessorConfiguration	
 VideoToolbox	6	forward	VTFrameProcessorParameters	
 SafariServices	1	line	#import <SafariServices/SafariServices.h>	
@@ -278,7 +278,7 @@ SafariServices	4	forward	SFSafariViewControllerDelegate
 Intents	1	line	#import <Intents/Intents.h>	
 Intents	2	line	#import <Foundation/Foundation.h>	
 Intents	3	line	#import <objc/NSObject.h>	
-Intents	4	line	#import "CharonIntents262.h"	
+Intents	4	line	#import "RevenantIntents262.h"	
 Intents	5	forward	INActivateCarSignalIntentHandling	
 Intents	6	forward	INAddMediaIntentHandling	
 Intents	7	forward	INAddTasksIntentHandling	

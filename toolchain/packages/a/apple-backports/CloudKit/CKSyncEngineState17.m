@@ -1,7 +1,7 @@
-#import "CharonCloudKit.h"
-#import "CharonCKConstants.h"
-#import "CharonCKSubscription.h"
-#import "CharonCKSyncEngine26.h"
+#import "RevenantCloudKit.h"
+#import "RevenantCKConstants.h"
+#import "RevenantCKSubscription.h"
+#import "RevenantCKSyncEngine26.h"
 
 #pragma mark - CKSyncEngineFetchChangesScope
 
@@ -222,7 +222,7 @@
 @synthesize reason = _reason;
 @synthesize options = _options;
 
-- (instancetype)charon_contextWithReason:(CKSyncEngineSyncReason)reason
+- (instancetype)revenant_contextWithReason:(CKSyncEngineSyncReason)reason
                                   options:(CKSyncEngineFetchChangesOptions *)options
 {
     CKSyncEngineFetchChangesContext *made = [[CKSyncEngineFetchChangesContext alloc] init];
@@ -258,7 +258,7 @@
 @synthesize reason = _reason;
 @synthesize options = _options;
 
-- (instancetype)charon_contextWithReason:(CKSyncEngineSyncReason)reason
+- (instancetype)revenant_contextWithReason:(CKSyncEngineSyncReason)reason
                                  options:(CKSyncEngineSendChangesOptions *)options
 {
     CKSyncEngineSendChangesContext *made = [[CKSyncEngineSendChangesContext alloc] init];
@@ -361,7 +361,7 @@
     return [_zoneIDsWithUnfetchedServerChanges copy];
 }
 
-- (void)charon_setZoneIDsWithUnfetchedServerChanges:(NSArray<CKRecordZoneID *> *)zoneIDs
+- (void)revenant_setZoneIDsWithUnfetchedServerChanges:(NSArray<CKRecordZoneID *> *)zoneIDs
 {
     [_zoneIDsWithUnfetchedServerChanges removeAllObjects];
     if (zoneIDs) {

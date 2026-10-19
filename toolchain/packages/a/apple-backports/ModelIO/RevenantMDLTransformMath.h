@@ -1,7 +1,7 @@
 #import <Foundation/Foundation.h>
 #import <simd/simd.h>
 
-static inline matrix_double4x4 CharonMDLDouble4x4Identity(void)
+static inline matrix_double4x4 RevenantMDLDouble4x4Identity(void)
 {
     matrix_double4x4 identity;
     identity.columns[0] = (vector_double4){1, 0, 0, 0};
@@ -11,7 +11,7 @@ static inline matrix_double4x4 CharonMDLDouble4x4Identity(void)
     return identity;
 }
 
-static inline matrix_float4x4 CharonMDLFloat4x4(matrix_double4x4 value)
+static inline matrix_float4x4 RevenantMDLFloat4x4(matrix_double4x4 value)
 {
     matrix_float4x4 result;
     for (size_t c = 0; c < 4; c++)
@@ -20,7 +20,7 @@ static inline matrix_float4x4 CharonMDLFloat4x4(matrix_double4x4 value)
     return result;
 }
 
-static inline matrix_double4x4 CharonMDLDouble4x4(matrix_float4x4 value)
+static inline matrix_double4x4 RevenantMDLDouble4x4(matrix_float4x4 value)
 {
     matrix_double4x4 result;
     for (size_t c = 0; c < 4; c++)
@@ -29,14 +29,14 @@ static inline matrix_double4x4 CharonMDLDouble4x4(matrix_float4x4 value)
     return result;
 }
 
-static inline matrix_double4x4 CharonMDLTranslation(vector_double3 translation)
+static inline matrix_double4x4 RevenantMDLTranslation(vector_double3 translation)
 {
-    matrix_double4x4 result = CharonMDLDouble4x4Identity();
+    matrix_double4x4 result = RevenantMDLDouble4x4Identity();
     result.columns[3] = (vector_double4){translation.x, translation.y, translation.z, 1};
     return result;
 }
 
-static inline matrix_double4x4 CharonMDLScale(vector_double3 scale)
+static inline matrix_double4x4 RevenantMDLScale(vector_double3 scale)
 {
     matrix_double4x4 result;
     result.columns[0] = (vector_double4){scale.x, 0, 0, 0};
@@ -46,10 +46,10 @@ static inline matrix_double4x4 CharonMDLScale(vector_double3 scale)
     return result;
 }
 
-static inline matrix_double4x4 CharonMDLAxisRotation(int axis, double angle)
+static inline matrix_double4x4 RevenantMDLAxisRotation(int axis, double angle)
 {
     double c = cos(angle), s = sin(angle);
-    matrix_double4x4 result = CharonMDLDouble4x4Identity();
+    matrix_double4x4 result = RevenantMDLDouble4x4Identity();
     int next = (axis + 1) % 3, far = (axis + 2) % 3;
     vector_double4 movedNext = {0, 0, 0, 0}, movedFar = {0, 0, 0, 0};
     movedNext[next] = c;
@@ -61,7 +61,7 @@ static inline matrix_double4x4 CharonMDLAxisRotation(int axis, double angle)
     return result;
 }
 
-static inline matrix_double4x4 CharonMDLAngleRotation(vector_double3 angles, MDLTransformOpRotationOrder order)
+static inline matrix_double4x4 RevenantMDLAngleRotation(vector_double3 angles, MDLTransformOpRotationOrder order)
 {
     static const int axes[6] = {0, 1, 2, 0, 1, 2};
     static const int orderOf[6] = {0, 1, 2, 1, 0, 2};
@@ -72,13 +72,13 @@ static inline matrix_double4x4 CharonMDLAngleRotation(vector_double3 angles, MDL
     if (index < 0 || index > 5)
         index = 0;
     double values[3] = {angles.x, angles.y, angles.z};
-    matrix_double4x4 result = CharonMDLAxisRotation(axes[index], values[orderOf[index]]);
+    matrix_double4x4 result = RevenantMDLAxisRotation(axes[index], values[orderOf[index]]);
     for (int k = index + 1; k < 3; k++)
-        result = simd_mul(result, CharonMDLAxisRotation(axes[k], values[orderOf[k]]));
+        result = simd_mul(result, RevenantMDLAxisRotation(axes[k], values[orderOf[k]]));
     return result;
 }
 
-static inline matrix_double4x4 CharonMDLQuaternionMatrix(simd_quatd rotation)
+static inline matrix_double4x4 RevenantMDLQuaternionMatrix(simd_quatd rotation)
 {
     double x = rotation.vector.x, y = rotation.vector.y, z = rotation.vector.z, w = rotation.vector.w;
     matrix_double4x4 result;

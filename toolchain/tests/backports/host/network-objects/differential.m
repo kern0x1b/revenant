@@ -11,45 +11,45 @@
 #import <string.h>
 #import "check.h"
 
-#define P(name) charonhost_##name
+#define P(name) revenanthost_##name
 
 typedef id P(nw_proxy_config_t);
 typedef id P(nw_relay_hop_t);
 typedef enum { P(nw_link_quality_t) } P(nw_link_quality_e);
-extern id charonhost_nw_relay_hop_create(nw_endpoint_t, nw_endpoint_t, nw_protocol_options_t);
-extern void charonhost_nw_relay_hop_add_additional_http_header_field(id, const char *, const char *);
-extern id charonhost_nw_proxy_config_create_http_connect(nw_endpoint_t, nw_protocol_options_t);
-extern id charonhost_nw_proxy_config_create_socksv5(nw_endpoint_t);
-extern id charonhost_nw_proxy_config_create_relay(id, id);
-extern id charonhost_nw_proxy_config_create_oblivious_http(id, const char *, const uint8_t *, size_t);
-extern void charonhost_nw_proxy_config_set_username_and_password(id, const char *, const char *);
-extern void charonhost_nw_proxy_config_set_failover_allowed(id, bool);
-extern bool charonhost_nw_proxy_config_get_failover_allowed(id);
-extern void charonhost_nw_proxy_config_add_match_domain(id, const char *);
-extern void charonhost_nw_proxy_config_add_excluded_domain(id, const char *);
-extern void charonhost_nw_proxy_config_clear_match_domains(id);
-extern void charonhost_nw_proxy_config_clear_excluded_domains(id);
-extern void charonhost_nw_proxy_config_enumerate_match_domains(id, void (^)(const char *));
-extern void charonhost_nw_proxy_config_enumerate_excluded_domains(id, void (^)(const char *));
-extern void charonhost_nw_privacy_context_add_proxy(nw_privacy_context_t, id);
-extern void charonhost_nw_privacy_context_clear_proxies(nw_privacy_context_t);
-extern void charonhost_nw_parameters_prohibit_interface(nw_parameters_t, nw_interface_t);
-extern void charonhost_nw_parameters_clear_prohibited_interfaces(nw_parameters_t);
-extern void charonhost_nw_parameters_iterate_prohibited_interfaces(nw_parameters_t, nw_parameters_iterate_interfaces_block_t);
-extern nw_path_monitor_t charonhost_nw_path_monitor_create(void);
-extern void charonhost_nw_path_monitor_set_queue(nw_path_monitor_t, dispatch_queue_t);
-extern void charonhost_nw_path_monitor_set_update_handler(nw_path_monitor_t, nw_path_monitor_update_handler_t);
-extern void charonhost_nw_path_monitor_start(nw_path_monitor_t);
-extern void charonhost_nw_path_monitor_cancel(nw_path_monitor_t);
-extern bool charonhost_nw_path_is_constrained(nw_path_t);
-extern void charonhost_nw_path_enumerate_gateways(nw_path_t, void (^)(nw_endpoint_t));
-extern nw_path_unsatisfied_reason_t charonhost_nw_path_get_unsatisfied_reason(nw_path_t);
-extern bool charon_path_wants_interface(nw_interface_type_t required, nw_interface_type_t type, bool reachable,
+extern id revenanthost_nw_relay_hop_create(nw_endpoint_t, nw_endpoint_t, nw_protocol_options_t);
+extern void revenanthost_nw_relay_hop_add_additional_http_header_field(id, const char *, const char *);
+extern id revenanthost_nw_proxy_config_create_http_connect(nw_endpoint_t, nw_protocol_options_t);
+extern id revenanthost_nw_proxy_config_create_socksv5(nw_endpoint_t);
+extern id revenanthost_nw_proxy_config_create_relay(id, id);
+extern id revenanthost_nw_proxy_config_create_oblivious_http(id, const char *, const uint8_t *, size_t);
+extern void revenanthost_nw_proxy_config_set_username_and_password(id, const char *, const char *);
+extern void revenanthost_nw_proxy_config_set_failover_allowed(id, bool);
+extern bool revenanthost_nw_proxy_config_get_failover_allowed(id);
+extern void revenanthost_nw_proxy_config_add_match_domain(id, const char *);
+extern void revenanthost_nw_proxy_config_add_excluded_domain(id, const char *);
+extern void revenanthost_nw_proxy_config_clear_match_domains(id);
+extern void revenanthost_nw_proxy_config_clear_excluded_domains(id);
+extern void revenanthost_nw_proxy_config_enumerate_match_domains(id, void (^)(const char *));
+extern void revenanthost_nw_proxy_config_enumerate_excluded_domains(id, void (^)(const char *));
+extern void revenanthost_nw_privacy_context_add_proxy(nw_privacy_context_t, id);
+extern void revenanthost_nw_privacy_context_clear_proxies(nw_privacy_context_t);
+extern void revenanthost_nw_parameters_prohibit_interface(nw_parameters_t, nw_interface_t);
+extern void revenanthost_nw_parameters_clear_prohibited_interfaces(nw_parameters_t);
+extern void revenanthost_nw_parameters_iterate_prohibited_interfaces(nw_parameters_t, nw_parameters_iterate_interfaces_block_t);
+extern nw_path_monitor_t revenanthost_nw_path_monitor_create(void);
+extern void revenanthost_nw_path_monitor_set_queue(nw_path_monitor_t, dispatch_queue_t);
+extern void revenanthost_nw_path_monitor_set_update_handler(nw_path_monitor_t, nw_path_monitor_update_handler_t);
+extern void revenanthost_nw_path_monitor_start(nw_path_monitor_t);
+extern void revenanthost_nw_path_monitor_cancel(nw_path_monitor_t);
+extern bool revenanthost_nw_path_is_constrained(nw_path_t);
+extern void revenanthost_nw_path_enumerate_gateways(nw_path_t, void (^)(nw_endpoint_t));
+extern nw_path_unsatisfied_reason_t revenanthost_nw_path_get_unsatisfied_reason(nw_path_t);
+extern bool revenant_path_wants_interface(nw_interface_type_t required, nw_interface_type_t type, bool reachable,
                                         bool cellular, bool hasAddress);
-extern int charonhost_nw_path_get_link_quality(nw_path_t);
-extern nw_interface_type_t charon_path_interface_type(const struct ifaddrs *item);
-extern int charonhost_nw_path_get_link_quality(nw_path_t);
-extern bool charonhost_nw_path_is_ultra_constrained(nw_path_t);
+extern int revenanthost_nw_path_get_link_quality(nw_path_t);
+extern nw_interface_type_t revenant_path_interface_type(const struct ifaddrs *item);
+extern int revenanthost_nw_path_get_link_quality(nw_path_t);
+extern bool revenanthost_nw_path_is_ultra_constrained(nw_path_t);
 extern void *P(nw_retain)(void *);
 extern void P(nw_release)(void *);
 extern nw_error_domain_t P(nw_error_get_error_domain)(nw_error_t);
@@ -320,12 +320,12 @@ extern uint64_t P(nw_data_transfer_report_get_transport_rtt_variance)(nw_data_tr
 extern nw_interface_t P(nw_data_transfer_report_copy_path_interface)(nw_data_transfer_report_t, uint32_t);
 extern nw_interface_radio_type_t P(nw_data_transfer_report_get_path_radio_type)(nw_data_transfer_report_t, uint32_t);
 
-extern const nw_parameters_configure_protocol_block_t charonhost__nw_parameters_configure_protocol_default_configuration;
-extern const nw_parameters_configure_protocol_block_t charonhost__nw_parameters_configure_protocol_disable;
+extern const nw_parameters_configure_protocol_block_t revenanthost__nw_parameters_configure_protocol_default_configuration;
+extern const nw_parameters_configure_protocol_block_t revenanthost__nw_parameters_configure_protocol_disable;
 #define SYSTEM_DEFAULT NW_PARAMETERS_DEFAULT_CONFIGURATION
 #define SYSTEM_DISABLE NW_PARAMETERS_DISABLE_PROTOCOL
-#define PORT_DEFAULT ((nw_parameters_configure_protocol_block_t)charonhost__nw_parameters_configure_protocol_default_configuration)
-#define PORT_DISABLE ((nw_parameters_configure_protocol_block_t)charonhost__nw_parameters_configure_protocol_disable)
+#define PORT_DEFAULT ((nw_parameters_configure_protocol_block_t)revenanthost__nw_parameters_configure_protocol_default_configuration)
+#define PORT_DISABLE ((nw_parameters_configure_protocol_block_t)revenanthost__nw_parameters_configure_protocol_disable)
 
 typedef struct {
     nw_endpoint_t (*endpoint_host)(const char *, const char *);
@@ -957,303 +957,303 @@ static API port_api(void)
     memset(&api, 0, sizeof api);
     void **fields = (void **)&api;
     void *values[] = {
-        (void *)charonhost_nw_endpoint_create_host,
-        (void *)charonhost_nw_endpoint_create_address,
-        (void *)charonhost_nw_endpoint_create_bonjour_service,
-        (void *)charonhost_nw_endpoint_create_url,
-        (void *)charonhost_nw_endpoint_get_type,
-        (void *)charonhost_nw_endpoint_get_hostname,
-        (void *)charonhost_nw_endpoint_get_port,
-        (void *)charonhost_nw_endpoint_get_address,
-        (void *)charonhost_nw_endpoint_get_bonjour_service_name,
-        (void *)charonhost_nw_endpoint_get_bonjour_service_type,
-        (void *)charonhost_nw_endpoint_get_bonjour_service_domain,
-        (void *)charonhost_nw_endpoint_get_url,
-        (void *)charonhost_nw_endpoint_copy_address_string,
-        (void *)charonhost_nw_endpoint_copy_port_string,
-        (void *)charonhost_nw_endpoint_copy_txt_record,
-        (void *)charonhost_nw_endpoint_get_signature,
-        (void *)charonhost_nw_parameters_create,
-        (void *)charonhost_nw_parameters_create_secure_tcp,
-        (void *)charonhost_nw_parameters_create_secure_udp,
-        (void *)charonhost_nw_parameters_create_quic,
-        (void *)charonhost_nw_parameters_create_application_service,
-        (void *)charonhost_nw_parameters_copy,
-        (void *)charonhost_nw_parameters_copy_default_protocol_stack,
-        (void *)charonhost_nw_parameters_copy_local_endpoint,
-        (void *)charonhost_nw_parameters_set_local_endpoint,
-        (void *)charonhost_nw_parameters_get_prohibit_expensive,
-        (void *)charonhost_nw_parameters_set_prohibit_expensive,
-        (void *)charonhost_nw_parameters_get_prohibit_constrained,
-        (void *)charonhost_nw_parameters_set_prohibit_constrained,
-        (void *)charonhost_nw_parameters_get_local_only,
-        (void *)charonhost_nw_parameters_set_local_only,
-        (void *)charonhost_nw_parameters_get_fast_open_enabled,
-        (void *)charonhost_nw_parameters_set_fast_open_enabled,
-        (void *)charonhost_nw_parameters_get_include_peer_to_peer,
-        (void *)charonhost_nw_parameters_set_include_peer_to_peer,
-        (void *)charonhost_nw_parameters_get_reuse_local_address,
-        (void *)charonhost_nw_parameters_set_reuse_local_address,
-        (void *)charonhost_nw_parameters_get_prefer_no_proxy,
-        (void *)charonhost_nw_parameters_set_prefer_no_proxy,
-        (void *)charonhost_nw_parameters_get_allow_ultra_constrained,
-        (void *)charonhost_nw_parameters_set_allow_ultra_constrained,
-        (void *)charonhost_nw_parameters_requires_dnssec_validation,
-        (void *)charonhost_nw_parameters_set_requires_dnssec_validation,
-        (void *)charonhost_nw_parameters_get_service_class,
-        (void *)charonhost_nw_parameters_set_service_class,
-        (void *)charonhost_nw_parameters_get_multipath_service,
-        (void *)charonhost_nw_parameters_set_multipath_service,
-        (void *)charonhost_nw_parameters_get_expired_dns_behavior,
-        (void *)charonhost_nw_parameters_set_expired_dns_behavior,
-        (void *)charonhost_nw_parameters_get_attribution,
-        (void *)charonhost_nw_parameters_set_attribution,
-        (void *)charonhost_nw_parameters_get_required_interface_type,
-        (void *)charonhost_nw_parameters_set_required_interface_type,
-        (void *)charonhost_nw_parameters_copy_required_interface,
-        (void *)charonhost_nw_parameters_require_interface,
-        (void *)charonhost_nw_parameters_prohibit_interface_type,
-        (void *)charonhost_nw_parameters_clear_prohibited_interface_types,
-        (void *)charonhost_nw_parameters_iterate_prohibited_interface_types,
-        (void *)charonhost_nw_parameters_set_privacy_context,
-        (void *)charonhost_nw_protocol_stack_copy_internet_protocol,
-        (void *)charonhost_nw_protocol_stack_copy_transport_protocol,
-        (void *)charonhost_nw_protocol_stack_set_transport_protocol,
-        (void *)charonhost_nw_protocol_stack_prepend_application_protocol,
-        (void *)charonhost_nw_protocol_stack_clear_application_protocols,
-        (void *)charonhost_nw_protocol_stack_iterate_application_protocols,
-        (void *)charonhost_nw_protocol_definition_is_equal,
-        (void *)charonhost_nw_protocol_options_copy_definition,
-        (void *)charonhost_nw_protocol_metadata_copy_definition,
-        (void *)charonhost_nw_protocol_copy_tcp_definition,
-        (void *)charonhost_nw_protocol_copy_udp_definition,
-        (void *)charonhost_nw_protocol_copy_ip_definition,
-        (void *)charonhost_nw_protocol_copy_tls_definition,
-        (void *)charonhost_nw_protocol_copy_ws_definition,
-        (void *)charonhost_nw_protocol_copy_quic_definition,
-        (void *)charonhost_nw_protocol_metadata_is_tcp,
-        (void *)charonhost_nw_protocol_metadata_is_udp,
-        (void *)charonhost_nw_protocol_metadata_is_ip,
-        (void *)charonhost_nw_protocol_metadata_is_tls,
-        (void *)charonhost_nw_protocol_metadata_is_ws,
-        (void *)charonhost_nw_protocol_metadata_is_quic,
-        (void *)charonhost_nw_protocol_options_is_quic,
-        (void *)charonhost_nw_tcp_create_options,
-        (void *)charonhost_nw_udp_create_options,
-        (void *)charonhost_nw_tls_create_options,
-        (void *)charonhost_nw_quic_create_options,
-        (void *)charonhost_nw_ws_create_options,
-        (void *)charonhost_nw_ip_create_metadata,
-        (void *)charonhost_nw_udp_create_metadata,
-        (void *)charonhost_nw_ws_create_metadata,
-        (void *)charonhost_nw_tcp_options_set_no_delay,
-        (void *)charonhost_nw_tcp_options_set_no_options,
-        (void *)charonhost_nw_tcp_options_set_no_push,
-        (void *)charonhost_nw_tcp_options_set_disable_ecn,
-        (void *)charonhost_nw_tcp_options_set_disable_ack_stretching,
-        (void *)charonhost_nw_tcp_options_set_retransmit_fin_drop,
-        (void *)charonhost_nw_tcp_options_set_enable_fast_open,
-        (void *)charonhost_nw_tcp_options_set_enable_keepalive,
-        (void *)charonhost_nw_tcp_options_set_connection_timeout,
-        (void *)charonhost_nw_tcp_options_set_keepalive_count,
-        (void *)charonhost_nw_tcp_options_set_keepalive_idle_time,
-        (void *)charonhost_nw_tcp_options_set_keepalive_interval,
-        (void *)charonhost_nw_tcp_options_set_maximum_segment_size,
-        (void *)charonhost_nw_tcp_options_set_persist_timeout,
-        (void *)charonhost_nw_tcp_options_set_retransmit_connection_drop_time,
-        (void *)charonhost_nw_tcp_options_set_multipath_force_version,
-        (void *)charonhost_nw_udp_options_set_prefer_no_checksum,
-        (void *)charonhost_nw_ip_options_set_version,
-        (void *)charonhost_nw_ip_options_set_hop_limit,
-        (void *)charonhost_nw_ip_options_set_calculate_receive_time,
-        (void *)charonhost_nw_ip_options_set_disable_fragmentation,
-        (void *)charonhost_nw_ip_options_set_use_minimum_mtu,
-        (void *)charonhost_nw_ip_options_set_local_address_preference,
-        (void *)charonhost_nw_ip_options_set_disable_multicast_loopback,
-        (void *)charonhost_nw_ip_metadata_get_service_class,
-        (void *)charonhost_nw_ip_metadata_set_service_class,
-        (void *)charonhost_nw_ip_metadata_get_ecn_flag,
-        (void *)charonhost_nw_ip_metadata_set_ecn_flag,
-        (void *)charonhost_nw_ip_metadata_get_receive_time,
-        (void *)charonhost_nw_tcp_get_available_send_buffer,
-        (void *)charonhost_nw_tcp_get_available_receive_buffer,
-        (void *)charonhost_nw_tls_copy_sec_protocol_options,
-        (void *)charonhost_nw_tls_copy_sec_protocol_metadata,
-        (void *)charonhost_nw_quic_copy_sec_protocol_options,
-        (void *)charonhost_nw_quic_copy_sec_protocol_metadata,
-        (void *)charonhost_nw_content_context_create,
-        (void *)charonhost_nw_content_context_get_identifier,
-        (void *)charonhost_nw_content_context_get_relative_priority,
-        (void *)charonhost_nw_content_context_set_relative_priority,
-        (void *)charonhost_nw_content_context_get_expiration_milliseconds,
-        (void *)charonhost_nw_content_context_set_expiration_milliseconds,
-        (void *)charonhost_nw_content_context_get_is_final,
-        (void *)charonhost_nw_content_context_set_is_final,
-        (void *)charonhost_nw_content_context_copy_antecedent,
-        (void *)charonhost_nw_content_context_set_antecedent,
-        (void *)charonhost_nw_content_context_copy_protocol_metadata,
-        (void *)charonhost_nw_content_context_set_metadata_for_protocol,
-        (void *)charonhost_nw_content_context_foreach_protocol_metadata,
-        (void *)charonhost_nw_txt_record_create_dictionary,
-        (void *)charonhost_nw_txt_record_create_with_bytes,
-        (void *)charonhost_nw_txt_record_copy,
-        (void *)charonhost_nw_txt_record_get_key_count,
-        (void *)charonhost_nw_txt_record_is_dictionary,
-        (void *)charonhost_nw_txt_record_is_equal,
-        (void *)charonhost_nw_txt_record_find_key,
-        (void *)charonhost_nw_txt_record_set_key,
-        (void *)charonhost_nw_txt_record_remove_key,
-        (void *)charonhost_nw_txt_record_access_key,
-        (void *)charonhost_nw_txt_record_apply,
-        (void *)charonhost_nw_txt_record_access_bytes,
-        (void *)charonhost_nw_ws_metadata_get_opcode,
-        (void *)charonhost_nw_ws_metadata_get_close_code,
-        (void *)charonhost_nw_ws_metadata_set_close_code,
-        (void *)charonhost_nw_ws_metadata_copy_server_response,
-        (void *)charonhost_nw_ws_metadata_set_pong_handler,
-        (void *)charonhost_nw_ws_options_add_subprotocol,
-        (void *)charonhost_nw_ws_options_add_additional_header,
-        (void *)charonhost_nw_ws_options_set_auto_reply_ping,
-        (void *)charonhost_nw_ws_options_set_maximum_message_size,
-        (void *)charonhost_nw_ws_options_set_skip_handshake,
-        (void *)charonhost_nw_ws_options_set_client_request_handler,
-        (void *)charonhost_nw_ws_response_create,
-        (void *)charonhost_nw_ws_response_get_status,
-        (void *)charonhost_nw_ws_response_get_selected_subprotocol,
-        (void *)charonhost_nw_ws_response_add_additional_header,
-        (void *)charonhost_nw_ws_response_enumerate_additional_headers,
-        (void *)charonhost_nw_ws_request_enumerate_subprotocols,
-        (void *)charonhost_nw_ws_request_enumerate_additional_headers,
-        (void *)charonhost_nw_framer_create_definition,
-        (void *)charonhost_nw_framer_create_options,
-        (void *)charonhost_nw_framer_options_set_object_value,
-        (void *)charonhost_nw_framer_options_copy_object_value,
-        (void *)charonhost_nw_framer_protocol_create_message,
-        (void *)charonhost_nw_framer_message_set_value,
-        (void *)charonhost_nw_framer_message_access_value,
-        (void *)charonhost_nw_framer_message_set_object_value,
-        (void *)charonhost_nw_framer_message_copy_object_value,
-        (void *)charonhost_nw_protocol_metadata_is_framer_message,
-        (void *)charonhost_nw_quic_set_idle_timeout,
-        (void *)charonhost_nw_quic_get_idle_timeout,
-        (void *)charonhost_nw_quic_set_max_udp_payload_size,
-        (void *)charonhost_nw_quic_get_max_udp_payload_size,
-        (void *)charonhost_nw_quic_set_initial_max_data,
-        (void *)charonhost_nw_quic_get_initial_max_data,
-        (void *)charonhost_nw_quic_set_initial_max_stream_data_bidirectional_local,
-        (void *)charonhost_nw_quic_get_initial_max_stream_data_bidirectional_local,
-        (void *)charonhost_nw_quic_set_initial_max_stream_data_bidirectional_remote,
-        (void *)charonhost_nw_quic_get_initial_max_stream_data_bidirectional_remote,
-        (void *)charonhost_nw_quic_set_initial_max_stream_data_unidirectional,
-        (void *)charonhost_nw_quic_get_initial_max_stream_data_unidirectional,
-        (void *)charonhost_nw_quic_set_initial_max_streams_bidirectional,
-        (void *)charonhost_nw_quic_get_initial_max_streams_bidirectional,
-        (void *)charonhost_nw_quic_set_initial_max_streams_unidirectional,
-        (void *)charonhost_nw_quic_get_initial_max_streams_unidirectional,
-        (void *)charonhost_nw_quic_set_stream_is_unidirectional,
-        (void *)charonhost_nw_quic_get_stream_is_unidirectional,
-        (void *)charonhost_nw_quic_set_stream_is_datagram,
-        (void *)charonhost_nw_quic_get_stream_is_datagram,
-        (void *)charonhost_nw_quic_set_max_datagram_frame_size,
-        (void *)charonhost_nw_quic_get_max_datagram_frame_size,
-        (void *)charonhost_nw_quic_add_tls_application_protocol,
-        (void *)charonhost_nw_quic_set_keepalive_interval,
-        (void *)charonhost_nw_quic_get_keepalive_interval,
-        (void *)charonhost_nw_quic_set_local_max_streams_bidirectional,
-        (void *)charonhost_nw_quic_get_local_max_streams_bidirectional,
-        (void *)charonhost_nw_quic_set_local_max_streams_unidirectional,
-        (void *)charonhost_nw_quic_get_local_max_streams_unidirectional,
-        (void *)charonhost_nw_quic_get_remote_idle_timeout,
-        (void *)charonhost_nw_quic_get_remote_max_streams_bidirectional,
-        (void *)charonhost_nw_quic_get_remote_max_streams_unidirectional,
-        (void *)charonhost_nw_quic_set_application_error,
-        (void *)charonhost_nw_quic_get_application_error,
-        (void *)charonhost_nw_quic_get_application_error_reason,
-        (void *)charonhost_nw_quic_set_stream_application_error,
-        (void *)charonhost_nw_quic_get_stream_application_error,
-        (void *)charonhost_nw_quic_get_stream_id,
-        (void *)charonhost_nw_quic_get_stream_type,
-        (void *)charonhost_nw_quic_get_stream_usable_datagram_frame_size,
-        (void *)charonhost_nw_browse_descriptor_create_bonjour_service,
-        (void *)charonhost_nw_browse_descriptor_get_bonjour_service_type,
-        (void *)charonhost_nw_browse_descriptor_get_bonjour_service_domain,
-        (void *)charonhost_nw_browse_descriptor_get_include_txt_record,
-        (void *)charonhost_nw_browse_descriptor_set_include_txt_record,
-        (void *)charonhost_nw_browse_descriptor_create_application_service,
-        (void *)charonhost_nw_browse_descriptor_get_application_service_name,
-        (void *)charonhost_nw_advertise_descriptor_create_bonjour_service,
-        (void *)charonhost_nw_advertise_descriptor_get_no_auto_rename,
-        (void *)charonhost_nw_advertise_descriptor_set_no_auto_rename,
-        (void *)charonhost_nw_advertise_descriptor_set_txt_record,
-        (void *)charonhost_nw_advertise_descriptor_set_txt_record_object,
-        (void *)charonhost_nw_advertise_descriptor_copy_txt_record_object,
-        (void *)charonhost_nw_advertise_descriptor_create_application_service,
-        (void *)charonhost_nw_advertise_descriptor_get_application_service_name,
-        (void *)charonhost_nw_group_descriptor_create_multicast,
-        (void *)charonhost_nw_group_descriptor_add_endpoint,
-        (void *)charonhost_nw_group_descriptor_enumerate_endpoints,
-        (void *)charonhost_nw_multicast_group_descriptor_set_specific_source,
-        (void *)charonhost_nw_multicast_group_descriptor_set_disable_unicast_traffic,
-        (void *)charonhost_nw_multicast_group_descriptor_get_disable_unicast_traffic,
-        (void *)charonhost_nw_group_descriptor_create_multiplex,
-        (void *)charonhost_nw_privacy_context_create,
-        (void *)charonhost_nw_privacy_context_disable_logging,
-        (void *)charonhost_nw_privacy_context_require_encrypted_name_resolution,
-        (void *)charonhost_nw_privacy_context_flush_cache,
-        (void *)charonhost_nw_resolver_config_create_tls,
-        (void *)charonhost_nw_resolver_config_create_https,
-        (void *)charonhost_nw_resolver_config_add_server_address,
-        (void *)charonhost_nw_data_transfer_report_get_state,
-        (void *)charonhost_nw_data_transfer_report_collect,
-        (void *)charonhost_nw_data_transfer_report_get_duration_milliseconds,
-        (void *)charonhost_nw_data_transfer_report_get_path_count,
-        (void *)charonhost_nw_data_transfer_report_get_sent_application_byte_count,
-        (void *)charonhost_nw_data_transfer_report_get_received_application_byte_count,
-        (void *)charonhost_nw_data_transfer_report_get_sent_transport_byte_count,
-        (void *)charonhost_nw_data_transfer_report_get_received_transport_byte_count,
-        (void *)charonhost_nw_data_transfer_report_get_sent_transport_retransmitted_byte_count,
-        (void *)charonhost_nw_data_transfer_report_get_received_transport_duplicate_byte_count,
-        (void *)charonhost_nw_data_transfer_report_get_received_transport_out_of_order_byte_count,
-        (void *)charonhost_nw_data_transfer_report_get_sent_ip_packet_count,
-        (void *)charonhost_nw_data_transfer_report_get_received_ip_packet_count,
-        (void *)charonhost_nw_data_transfer_report_get_transport_smoothed_rtt_milliseconds,
-        (void *)charonhost_nw_data_transfer_report_get_transport_minimum_rtt_milliseconds,
-        (void *)charonhost_nw_data_transfer_report_get_transport_rtt_variance,
-        (void *)charonhost_nw_data_transfer_report_copy_path_interface,
-        (void *)charonhost_nw_data_transfer_report_get_path_radio_type,
-        (void *)charonhost_nw_relay_hop_create,
-        (void *)charonhost_nw_relay_hop_add_additional_http_header_field,
-        (void *)charonhost_nw_proxy_config_create_http_connect,
-        (void *)charonhost_nw_proxy_config_create_socksv5,
-        (void *)charonhost_nw_proxy_config_create_relay,
-        (void *)charonhost_nw_proxy_config_create_oblivious_http,
-        (void *)charonhost_nw_proxy_config_set_username_and_password,
-        (void *)charonhost_nw_proxy_config_set_failover_allowed,
-        (void *)charonhost_nw_proxy_config_get_failover_allowed,
-        (void *)charonhost_nw_proxy_config_add_match_domain,
-        (void *)charonhost_nw_proxy_config_add_excluded_domain,
-        (void *)charonhost_nw_proxy_config_clear_match_domains,
-        (void *)charonhost_nw_proxy_config_clear_excluded_domains,
-        (void *)charonhost_nw_proxy_config_enumerate_match_domains,
-        (void *)charonhost_nw_proxy_config_enumerate_excluded_domains,
-        (void *)charonhost_nw_privacy_context_add_proxy,
-        (void *)charonhost_nw_privacy_context_clear_proxies,
-        (void *)charonhost_nw_parameters_prohibit_interface,
-        (void *)charonhost_nw_parameters_clear_prohibited_interfaces,
-        (void *)charonhost_nw_parameters_iterate_prohibited_interfaces,
-        (void *)charonhost_nw_path_monitor_create,
-        (void *)charonhost_nw_path_monitor_set_queue,
-        (void *)charonhost_nw_path_monitor_set_update_handler,
-        (void *)charonhost_nw_path_monitor_start,
-        (void *)charonhost_nw_path_monitor_cancel,
-        (void *)charonhost_nw_path_is_constrained,
-        (void *)charonhost_nw_path_enumerate_gateways,
-        (void *)charonhost_nw_path_get_unsatisfied_reason,
-        (void *)charonhost_nw_path_get_link_quality,
-        (void *)charonhost_nw_path_is_ultra_constrained,
-        (void *)charonhost_nw_error_get_error_domain,
-        (void *)charonhost_nw_error_get_error_code,
-        (void *)charonhost_nw_error_copy_cf_error,
+        (void *)revenanthost_nw_endpoint_create_host,
+        (void *)revenanthost_nw_endpoint_create_address,
+        (void *)revenanthost_nw_endpoint_create_bonjour_service,
+        (void *)revenanthost_nw_endpoint_create_url,
+        (void *)revenanthost_nw_endpoint_get_type,
+        (void *)revenanthost_nw_endpoint_get_hostname,
+        (void *)revenanthost_nw_endpoint_get_port,
+        (void *)revenanthost_nw_endpoint_get_address,
+        (void *)revenanthost_nw_endpoint_get_bonjour_service_name,
+        (void *)revenanthost_nw_endpoint_get_bonjour_service_type,
+        (void *)revenanthost_nw_endpoint_get_bonjour_service_domain,
+        (void *)revenanthost_nw_endpoint_get_url,
+        (void *)revenanthost_nw_endpoint_copy_address_string,
+        (void *)revenanthost_nw_endpoint_copy_port_string,
+        (void *)revenanthost_nw_endpoint_copy_txt_record,
+        (void *)revenanthost_nw_endpoint_get_signature,
+        (void *)revenanthost_nw_parameters_create,
+        (void *)revenanthost_nw_parameters_create_secure_tcp,
+        (void *)revenanthost_nw_parameters_create_secure_udp,
+        (void *)revenanthost_nw_parameters_create_quic,
+        (void *)revenanthost_nw_parameters_create_application_service,
+        (void *)revenanthost_nw_parameters_copy,
+        (void *)revenanthost_nw_parameters_copy_default_protocol_stack,
+        (void *)revenanthost_nw_parameters_copy_local_endpoint,
+        (void *)revenanthost_nw_parameters_set_local_endpoint,
+        (void *)revenanthost_nw_parameters_get_prohibit_expensive,
+        (void *)revenanthost_nw_parameters_set_prohibit_expensive,
+        (void *)revenanthost_nw_parameters_get_prohibit_constrained,
+        (void *)revenanthost_nw_parameters_set_prohibit_constrained,
+        (void *)revenanthost_nw_parameters_get_local_only,
+        (void *)revenanthost_nw_parameters_set_local_only,
+        (void *)revenanthost_nw_parameters_get_fast_open_enabled,
+        (void *)revenanthost_nw_parameters_set_fast_open_enabled,
+        (void *)revenanthost_nw_parameters_get_include_peer_to_peer,
+        (void *)revenanthost_nw_parameters_set_include_peer_to_peer,
+        (void *)revenanthost_nw_parameters_get_reuse_local_address,
+        (void *)revenanthost_nw_parameters_set_reuse_local_address,
+        (void *)revenanthost_nw_parameters_get_prefer_no_proxy,
+        (void *)revenanthost_nw_parameters_set_prefer_no_proxy,
+        (void *)revenanthost_nw_parameters_get_allow_ultra_constrained,
+        (void *)revenanthost_nw_parameters_set_allow_ultra_constrained,
+        (void *)revenanthost_nw_parameters_requires_dnssec_validation,
+        (void *)revenanthost_nw_parameters_set_requires_dnssec_validation,
+        (void *)revenanthost_nw_parameters_get_service_class,
+        (void *)revenanthost_nw_parameters_set_service_class,
+        (void *)revenanthost_nw_parameters_get_multipath_service,
+        (void *)revenanthost_nw_parameters_set_multipath_service,
+        (void *)revenanthost_nw_parameters_get_expired_dns_behavior,
+        (void *)revenanthost_nw_parameters_set_expired_dns_behavior,
+        (void *)revenanthost_nw_parameters_get_attribution,
+        (void *)revenanthost_nw_parameters_set_attribution,
+        (void *)revenanthost_nw_parameters_get_required_interface_type,
+        (void *)revenanthost_nw_parameters_set_required_interface_type,
+        (void *)revenanthost_nw_parameters_copy_required_interface,
+        (void *)revenanthost_nw_parameters_require_interface,
+        (void *)revenanthost_nw_parameters_prohibit_interface_type,
+        (void *)revenanthost_nw_parameters_clear_prohibited_interface_types,
+        (void *)revenanthost_nw_parameters_iterate_prohibited_interface_types,
+        (void *)revenanthost_nw_parameters_set_privacy_context,
+        (void *)revenanthost_nw_protocol_stack_copy_internet_protocol,
+        (void *)revenanthost_nw_protocol_stack_copy_transport_protocol,
+        (void *)revenanthost_nw_protocol_stack_set_transport_protocol,
+        (void *)revenanthost_nw_protocol_stack_prepend_application_protocol,
+        (void *)revenanthost_nw_protocol_stack_clear_application_protocols,
+        (void *)revenanthost_nw_protocol_stack_iterate_application_protocols,
+        (void *)revenanthost_nw_protocol_definition_is_equal,
+        (void *)revenanthost_nw_protocol_options_copy_definition,
+        (void *)revenanthost_nw_protocol_metadata_copy_definition,
+        (void *)revenanthost_nw_protocol_copy_tcp_definition,
+        (void *)revenanthost_nw_protocol_copy_udp_definition,
+        (void *)revenanthost_nw_protocol_copy_ip_definition,
+        (void *)revenanthost_nw_protocol_copy_tls_definition,
+        (void *)revenanthost_nw_protocol_copy_ws_definition,
+        (void *)revenanthost_nw_protocol_copy_quic_definition,
+        (void *)revenanthost_nw_protocol_metadata_is_tcp,
+        (void *)revenanthost_nw_protocol_metadata_is_udp,
+        (void *)revenanthost_nw_protocol_metadata_is_ip,
+        (void *)revenanthost_nw_protocol_metadata_is_tls,
+        (void *)revenanthost_nw_protocol_metadata_is_ws,
+        (void *)revenanthost_nw_protocol_metadata_is_quic,
+        (void *)revenanthost_nw_protocol_options_is_quic,
+        (void *)revenanthost_nw_tcp_create_options,
+        (void *)revenanthost_nw_udp_create_options,
+        (void *)revenanthost_nw_tls_create_options,
+        (void *)revenanthost_nw_quic_create_options,
+        (void *)revenanthost_nw_ws_create_options,
+        (void *)revenanthost_nw_ip_create_metadata,
+        (void *)revenanthost_nw_udp_create_metadata,
+        (void *)revenanthost_nw_ws_create_metadata,
+        (void *)revenanthost_nw_tcp_options_set_no_delay,
+        (void *)revenanthost_nw_tcp_options_set_no_options,
+        (void *)revenanthost_nw_tcp_options_set_no_push,
+        (void *)revenanthost_nw_tcp_options_set_disable_ecn,
+        (void *)revenanthost_nw_tcp_options_set_disable_ack_stretching,
+        (void *)revenanthost_nw_tcp_options_set_retransmit_fin_drop,
+        (void *)revenanthost_nw_tcp_options_set_enable_fast_open,
+        (void *)revenanthost_nw_tcp_options_set_enable_keepalive,
+        (void *)revenanthost_nw_tcp_options_set_connection_timeout,
+        (void *)revenanthost_nw_tcp_options_set_keepalive_count,
+        (void *)revenanthost_nw_tcp_options_set_keepalive_idle_time,
+        (void *)revenanthost_nw_tcp_options_set_keepalive_interval,
+        (void *)revenanthost_nw_tcp_options_set_maximum_segment_size,
+        (void *)revenanthost_nw_tcp_options_set_persist_timeout,
+        (void *)revenanthost_nw_tcp_options_set_retransmit_connection_drop_time,
+        (void *)revenanthost_nw_tcp_options_set_multipath_force_version,
+        (void *)revenanthost_nw_udp_options_set_prefer_no_checksum,
+        (void *)revenanthost_nw_ip_options_set_version,
+        (void *)revenanthost_nw_ip_options_set_hop_limit,
+        (void *)revenanthost_nw_ip_options_set_calculate_receive_time,
+        (void *)revenanthost_nw_ip_options_set_disable_fragmentation,
+        (void *)revenanthost_nw_ip_options_set_use_minimum_mtu,
+        (void *)revenanthost_nw_ip_options_set_local_address_preference,
+        (void *)revenanthost_nw_ip_options_set_disable_multicast_loopback,
+        (void *)revenanthost_nw_ip_metadata_get_service_class,
+        (void *)revenanthost_nw_ip_metadata_set_service_class,
+        (void *)revenanthost_nw_ip_metadata_get_ecn_flag,
+        (void *)revenanthost_nw_ip_metadata_set_ecn_flag,
+        (void *)revenanthost_nw_ip_metadata_get_receive_time,
+        (void *)revenanthost_nw_tcp_get_available_send_buffer,
+        (void *)revenanthost_nw_tcp_get_available_receive_buffer,
+        (void *)revenanthost_nw_tls_copy_sec_protocol_options,
+        (void *)revenanthost_nw_tls_copy_sec_protocol_metadata,
+        (void *)revenanthost_nw_quic_copy_sec_protocol_options,
+        (void *)revenanthost_nw_quic_copy_sec_protocol_metadata,
+        (void *)revenanthost_nw_content_context_create,
+        (void *)revenanthost_nw_content_context_get_identifier,
+        (void *)revenanthost_nw_content_context_get_relative_priority,
+        (void *)revenanthost_nw_content_context_set_relative_priority,
+        (void *)revenanthost_nw_content_context_get_expiration_milliseconds,
+        (void *)revenanthost_nw_content_context_set_expiration_milliseconds,
+        (void *)revenanthost_nw_content_context_get_is_final,
+        (void *)revenanthost_nw_content_context_set_is_final,
+        (void *)revenanthost_nw_content_context_copy_antecedent,
+        (void *)revenanthost_nw_content_context_set_antecedent,
+        (void *)revenanthost_nw_content_context_copy_protocol_metadata,
+        (void *)revenanthost_nw_content_context_set_metadata_for_protocol,
+        (void *)revenanthost_nw_content_context_foreach_protocol_metadata,
+        (void *)revenanthost_nw_txt_record_create_dictionary,
+        (void *)revenanthost_nw_txt_record_create_with_bytes,
+        (void *)revenanthost_nw_txt_record_copy,
+        (void *)revenanthost_nw_txt_record_get_key_count,
+        (void *)revenanthost_nw_txt_record_is_dictionary,
+        (void *)revenanthost_nw_txt_record_is_equal,
+        (void *)revenanthost_nw_txt_record_find_key,
+        (void *)revenanthost_nw_txt_record_set_key,
+        (void *)revenanthost_nw_txt_record_remove_key,
+        (void *)revenanthost_nw_txt_record_access_key,
+        (void *)revenanthost_nw_txt_record_apply,
+        (void *)revenanthost_nw_txt_record_access_bytes,
+        (void *)revenanthost_nw_ws_metadata_get_opcode,
+        (void *)revenanthost_nw_ws_metadata_get_close_code,
+        (void *)revenanthost_nw_ws_metadata_set_close_code,
+        (void *)revenanthost_nw_ws_metadata_copy_server_response,
+        (void *)revenanthost_nw_ws_metadata_set_pong_handler,
+        (void *)revenanthost_nw_ws_options_add_subprotocol,
+        (void *)revenanthost_nw_ws_options_add_additional_header,
+        (void *)revenanthost_nw_ws_options_set_auto_reply_ping,
+        (void *)revenanthost_nw_ws_options_set_maximum_message_size,
+        (void *)revenanthost_nw_ws_options_set_skip_handshake,
+        (void *)revenanthost_nw_ws_options_set_client_request_handler,
+        (void *)revenanthost_nw_ws_response_create,
+        (void *)revenanthost_nw_ws_response_get_status,
+        (void *)revenanthost_nw_ws_response_get_selected_subprotocol,
+        (void *)revenanthost_nw_ws_response_add_additional_header,
+        (void *)revenanthost_nw_ws_response_enumerate_additional_headers,
+        (void *)revenanthost_nw_ws_request_enumerate_subprotocols,
+        (void *)revenanthost_nw_ws_request_enumerate_additional_headers,
+        (void *)revenanthost_nw_framer_create_definition,
+        (void *)revenanthost_nw_framer_create_options,
+        (void *)revenanthost_nw_framer_options_set_object_value,
+        (void *)revenanthost_nw_framer_options_copy_object_value,
+        (void *)revenanthost_nw_framer_protocol_create_message,
+        (void *)revenanthost_nw_framer_message_set_value,
+        (void *)revenanthost_nw_framer_message_access_value,
+        (void *)revenanthost_nw_framer_message_set_object_value,
+        (void *)revenanthost_nw_framer_message_copy_object_value,
+        (void *)revenanthost_nw_protocol_metadata_is_framer_message,
+        (void *)revenanthost_nw_quic_set_idle_timeout,
+        (void *)revenanthost_nw_quic_get_idle_timeout,
+        (void *)revenanthost_nw_quic_set_max_udp_payload_size,
+        (void *)revenanthost_nw_quic_get_max_udp_payload_size,
+        (void *)revenanthost_nw_quic_set_initial_max_data,
+        (void *)revenanthost_nw_quic_get_initial_max_data,
+        (void *)revenanthost_nw_quic_set_initial_max_stream_data_bidirectional_local,
+        (void *)revenanthost_nw_quic_get_initial_max_stream_data_bidirectional_local,
+        (void *)revenanthost_nw_quic_set_initial_max_stream_data_bidirectional_remote,
+        (void *)revenanthost_nw_quic_get_initial_max_stream_data_bidirectional_remote,
+        (void *)revenanthost_nw_quic_set_initial_max_stream_data_unidirectional,
+        (void *)revenanthost_nw_quic_get_initial_max_stream_data_unidirectional,
+        (void *)revenanthost_nw_quic_set_initial_max_streams_bidirectional,
+        (void *)revenanthost_nw_quic_get_initial_max_streams_bidirectional,
+        (void *)revenanthost_nw_quic_set_initial_max_streams_unidirectional,
+        (void *)revenanthost_nw_quic_get_initial_max_streams_unidirectional,
+        (void *)revenanthost_nw_quic_set_stream_is_unidirectional,
+        (void *)revenanthost_nw_quic_get_stream_is_unidirectional,
+        (void *)revenanthost_nw_quic_set_stream_is_datagram,
+        (void *)revenanthost_nw_quic_get_stream_is_datagram,
+        (void *)revenanthost_nw_quic_set_max_datagram_frame_size,
+        (void *)revenanthost_nw_quic_get_max_datagram_frame_size,
+        (void *)revenanthost_nw_quic_add_tls_application_protocol,
+        (void *)revenanthost_nw_quic_set_keepalive_interval,
+        (void *)revenanthost_nw_quic_get_keepalive_interval,
+        (void *)revenanthost_nw_quic_set_local_max_streams_bidirectional,
+        (void *)revenanthost_nw_quic_get_local_max_streams_bidirectional,
+        (void *)revenanthost_nw_quic_set_local_max_streams_unidirectional,
+        (void *)revenanthost_nw_quic_get_local_max_streams_unidirectional,
+        (void *)revenanthost_nw_quic_get_remote_idle_timeout,
+        (void *)revenanthost_nw_quic_get_remote_max_streams_bidirectional,
+        (void *)revenanthost_nw_quic_get_remote_max_streams_unidirectional,
+        (void *)revenanthost_nw_quic_set_application_error,
+        (void *)revenanthost_nw_quic_get_application_error,
+        (void *)revenanthost_nw_quic_get_application_error_reason,
+        (void *)revenanthost_nw_quic_set_stream_application_error,
+        (void *)revenanthost_nw_quic_get_stream_application_error,
+        (void *)revenanthost_nw_quic_get_stream_id,
+        (void *)revenanthost_nw_quic_get_stream_type,
+        (void *)revenanthost_nw_quic_get_stream_usable_datagram_frame_size,
+        (void *)revenanthost_nw_browse_descriptor_create_bonjour_service,
+        (void *)revenanthost_nw_browse_descriptor_get_bonjour_service_type,
+        (void *)revenanthost_nw_browse_descriptor_get_bonjour_service_domain,
+        (void *)revenanthost_nw_browse_descriptor_get_include_txt_record,
+        (void *)revenanthost_nw_browse_descriptor_set_include_txt_record,
+        (void *)revenanthost_nw_browse_descriptor_create_application_service,
+        (void *)revenanthost_nw_browse_descriptor_get_application_service_name,
+        (void *)revenanthost_nw_advertise_descriptor_create_bonjour_service,
+        (void *)revenanthost_nw_advertise_descriptor_get_no_auto_rename,
+        (void *)revenanthost_nw_advertise_descriptor_set_no_auto_rename,
+        (void *)revenanthost_nw_advertise_descriptor_set_txt_record,
+        (void *)revenanthost_nw_advertise_descriptor_set_txt_record_object,
+        (void *)revenanthost_nw_advertise_descriptor_copy_txt_record_object,
+        (void *)revenanthost_nw_advertise_descriptor_create_application_service,
+        (void *)revenanthost_nw_advertise_descriptor_get_application_service_name,
+        (void *)revenanthost_nw_group_descriptor_create_multicast,
+        (void *)revenanthost_nw_group_descriptor_add_endpoint,
+        (void *)revenanthost_nw_group_descriptor_enumerate_endpoints,
+        (void *)revenanthost_nw_multicast_group_descriptor_set_specific_source,
+        (void *)revenanthost_nw_multicast_group_descriptor_set_disable_unicast_traffic,
+        (void *)revenanthost_nw_multicast_group_descriptor_get_disable_unicast_traffic,
+        (void *)revenanthost_nw_group_descriptor_create_multiplex,
+        (void *)revenanthost_nw_privacy_context_create,
+        (void *)revenanthost_nw_privacy_context_disable_logging,
+        (void *)revenanthost_nw_privacy_context_require_encrypted_name_resolution,
+        (void *)revenanthost_nw_privacy_context_flush_cache,
+        (void *)revenanthost_nw_resolver_config_create_tls,
+        (void *)revenanthost_nw_resolver_config_create_https,
+        (void *)revenanthost_nw_resolver_config_add_server_address,
+        (void *)revenanthost_nw_data_transfer_report_get_state,
+        (void *)revenanthost_nw_data_transfer_report_collect,
+        (void *)revenanthost_nw_data_transfer_report_get_duration_milliseconds,
+        (void *)revenanthost_nw_data_transfer_report_get_path_count,
+        (void *)revenanthost_nw_data_transfer_report_get_sent_application_byte_count,
+        (void *)revenanthost_nw_data_transfer_report_get_received_application_byte_count,
+        (void *)revenanthost_nw_data_transfer_report_get_sent_transport_byte_count,
+        (void *)revenanthost_nw_data_transfer_report_get_received_transport_byte_count,
+        (void *)revenanthost_nw_data_transfer_report_get_sent_transport_retransmitted_byte_count,
+        (void *)revenanthost_nw_data_transfer_report_get_received_transport_duplicate_byte_count,
+        (void *)revenanthost_nw_data_transfer_report_get_received_transport_out_of_order_byte_count,
+        (void *)revenanthost_nw_data_transfer_report_get_sent_ip_packet_count,
+        (void *)revenanthost_nw_data_transfer_report_get_received_ip_packet_count,
+        (void *)revenanthost_nw_data_transfer_report_get_transport_smoothed_rtt_milliseconds,
+        (void *)revenanthost_nw_data_transfer_report_get_transport_minimum_rtt_milliseconds,
+        (void *)revenanthost_nw_data_transfer_report_get_transport_rtt_variance,
+        (void *)revenanthost_nw_data_transfer_report_copy_path_interface,
+        (void *)revenanthost_nw_data_transfer_report_get_path_radio_type,
+        (void *)revenanthost_nw_relay_hop_create,
+        (void *)revenanthost_nw_relay_hop_add_additional_http_header_field,
+        (void *)revenanthost_nw_proxy_config_create_http_connect,
+        (void *)revenanthost_nw_proxy_config_create_socksv5,
+        (void *)revenanthost_nw_proxy_config_create_relay,
+        (void *)revenanthost_nw_proxy_config_create_oblivious_http,
+        (void *)revenanthost_nw_proxy_config_set_username_and_password,
+        (void *)revenanthost_nw_proxy_config_set_failover_allowed,
+        (void *)revenanthost_nw_proxy_config_get_failover_allowed,
+        (void *)revenanthost_nw_proxy_config_add_match_domain,
+        (void *)revenanthost_nw_proxy_config_add_excluded_domain,
+        (void *)revenanthost_nw_proxy_config_clear_match_domains,
+        (void *)revenanthost_nw_proxy_config_clear_excluded_domains,
+        (void *)revenanthost_nw_proxy_config_enumerate_match_domains,
+        (void *)revenanthost_nw_proxy_config_enumerate_excluded_domains,
+        (void *)revenanthost_nw_privacy_context_add_proxy,
+        (void *)revenanthost_nw_privacy_context_clear_proxies,
+        (void *)revenanthost_nw_parameters_prohibit_interface,
+        (void *)revenanthost_nw_parameters_clear_prohibited_interfaces,
+        (void *)revenanthost_nw_parameters_iterate_prohibited_interfaces,
+        (void *)revenanthost_nw_path_monitor_create,
+        (void *)revenanthost_nw_path_monitor_set_queue,
+        (void *)revenanthost_nw_path_monitor_set_update_handler,
+        (void *)revenanthost_nw_path_monitor_start,
+        (void *)revenanthost_nw_path_monitor_cancel,
+        (void *)revenanthost_nw_path_is_constrained,
+        (void *)revenanthost_nw_path_enumerate_gateways,
+        (void *)revenanthost_nw_path_get_unsatisfied_reason,
+        (void *)revenanthost_nw_path_get_link_quality,
+        (void *)revenanthost_nw_path_is_ultra_constrained,
+        (void *)revenanthost_nw_error_get_error_domain,
+        (void *)revenanthost_nw_error_get_error_code,
+        (void *)revenanthost_nw_error_copy_cf_error,
     };
     for (size_t index = 0; index < sizeof values / sizeof values[0]; index++)
         fields[index] = values[index];
@@ -1263,7 +1263,7 @@ static API port_api(void)
 static void compare(NSString *name, id system, id port)
 {
     NSString *left = [NSString stringWithFormat:@"%@", system], *right = [NSString stringWithFormat:@"%@", port];
-    charon_check([left isEqualToString:right], name.UTF8String,
+    revenant_check([left isEqualToString:right], name.UTF8String,
                  [NSString stringWithFormat:@"system %@ != port %@", left, right]);
 }
 
@@ -2049,50 +2049,50 @@ int main(void)
             info.ifi_type = 24;
             entry.ifa_name = "lo0";
             entry.ifa_flags |= IFF_LOOPBACK;
-            compare(@"path: the loopback number types the loopback", @(charon_path_interface_type(&entry)),
+            compare(@"path: the loopback number types the loopback", @(revenant_path_interface_type(&entry)),
                     @(nw_interface_type_loopback));
             info.ifi_type = 6;
             entry.ifa_name = "en0";
             entry.ifa_flags = IFF_UP | IFF_RUNNING | IFF_BROADCAST;
-            compare(@"path: the ethernet number types Wi-Fi", @(charon_path_interface_type(&entry)),
+            compare(@"path: the ethernet number types Wi-Fi", @(revenant_path_interface_type(&entry)),
                     @(nw_interface_type_wifi));
             info.ifi_type = 0xff;
             entry.ifa_name = "pdp_ip0";
             entry.ifa_flags = IFF_UP | IFF_RUNNING | IFF_POINTOPOINT;
-            compare(@"path: the cellular number types cellular", @(charon_path_interface_type(&entry)),
+            compare(@"path: the cellular number types cellular", @(revenant_path_interface_type(&entry)),
                     @(nw_interface_type_cellular));
             info.ifi_type = 1;
             entry.ifa_name = "utun0";
             entry.ifa_flags = IFF_UP | IFF_RUNNING | IFF_POINTOPOINT;
-            compare(@"path: a tunnel keeps its own kind and is other", @(charon_path_interface_type(&entry)),
+            compare(@"path: a tunnel keeps its own kind and is other", @(revenant_path_interface_type(&entry)),
                     @(nw_interface_type_other));
             info.ifi_type = 209;
             entry.ifa_name = "bridge100";
             entry.ifa_flags = IFF_UP | IFF_RUNNING | IFF_BROADCAST;
-            compare(@"path: a bridge is other too", @(charon_path_interface_type(&entry)),
+            compare(@"path: a bridge is other too", @(revenant_path_interface_type(&entry)),
                     @(nw_interface_type_other));
             info.ifi_type = 0;
             entry.ifa_name = "pdp_ip1";
             compare(@"path: an unclassified point-to-point link is other without a gateway",
-                    @(charon_path_interface_type(&entry)), @(nw_interface_type_other));
+                    @(revenant_path_interface_type(&entry)), @(nw_interface_type_other));
             compare(@"path: a tunnel with an address is on the path, as the release puts it",
-                    @(charon_path_wants_interface(nw_interface_type_other, nw_interface_type_other, true, false, true)), @YES);
+                    @(revenant_path_wants_interface(nw_interface_type_other, nw_interface_type_other, true, false, true)), @YES);
             compare(@"path: a bridge with no address is not on it",
-                    @(charon_path_wants_interface(nw_interface_type_other, nw_interface_type_other, true, false, false)), @NO);
+                    @(revenant_path_wants_interface(nw_interface_type_other, nw_interface_type_other, true, false, false)), @NO);
             compare(@"path: the loopback is not on the path either",
-                    @(charon_path_wants_interface(nw_interface_type_other, nw_interface_type_loopback, true, false, true)), @NO);
+                    @(revenant_path_wants_interface(nw_interface_type_other, nw_interface_type_loopback, true, false, true)), @NO);
             compare(@"path: Wi-Fi is on the path when there is a route",
-                    @(charon_path_wants_interface(nw_interface_type_other, nw_interface_type_wifi, true, false, true)), @YES);
+                    @(revenant_path_wants_interface(nw_interface_type_other, nw_interface_type_wifi, true, false, true)), @YES);
             compare(@"path: the cellular radio is on it when the route is cellular",
-                    @(charon_path_wants_interface(nw_interface_type_other, nw_interface_type_cellular, true, true, true)), @YES);
+                    @(revenant_path_wants_interface(nw_interface_type_other, nw_interface_type_cellular, true, true, true)), @YES);
             compare(@"path: the cellular radio is not on it when the route is Wi-Fi",
-                    @(charon_path_wants_interface(nw_interface_type_other, nw_interface_type_cellular, true, false, true)), @NO);
+                    @(revenant_path_wants_interface(nw_interface_type_other, nw_interface_type_cellular, true, false, true)), @NO);
             compare(@"path: nothing is on a path with no route",
-                    @(charon_path_wants_interface(nw_interface_type_other, nw_interface_type_wifi, false, false, true)), @NO);
+                    @(revenant_path_wants_interface(nw_interface_type_other, nw_interface_type_wifi, false, false, true)), @NO);
             compare(@"path: a monitor asked for Wi-Fi takes only Wi-Fi",
-                    @(charon_path_wants_interface(nw_interface_type_wifi, nw_interface_type_cellular, true, false, true)), @NO);
+                    @(revenant_path_wants_interface(nw_interface_type_wifi, nw_interface_type_cellular, true, false, true)), @NO);
             compare(@"path: and a monitor asked for the cellular radio takes that",
-                    @(charon_path_wants_interface(nw_interface_type_cellular, nw_interface_type_cellular, true, true, true)), @YES);
+                    @(revenant_path_wants_interface(nw_interface_type_cellular, nw_interface_type_cellular, true, true, true)), @YES);
         }
 
         {
@@ -2103,7 +2103,7 @@ int main(void)
             compare(@"error: and no CFError either", @(system_error != NULL), @(port_error != NULL));
         }
 
-        printf("checks=%d failures=%d\n", charon_checks, charon_failures);
+        printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
     }
-    return charon_failures ? 1 : 0;
+    return revenant_failures ? 1 : 0;
 }

@@ -1,6 +1,6 @@
 #import <Foundation/Foundation.h>
 
-@implementation NSURLSession (CharonAllTasks)
+@implementation NSURLSession (RevenantAllTasks)
 
 - (void)getAllTasksWithCompletionHandler:(void (^)(NSArray *))completionHandler
 {

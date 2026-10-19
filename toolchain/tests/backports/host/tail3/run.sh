@@ -5,7 +5,7 @@ set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 device=${DEVICE:-$here/../../device}
-build=${BUILD:-$(runs_fresh charon-tail3)}
+build=${BUILD:-$(runs_fresh revenant-tail3)}
 sdk=$(xcrun --show-sdk-path)
 app="$build/record.app"
 mkdir -p "$app/Contents/MacOS"

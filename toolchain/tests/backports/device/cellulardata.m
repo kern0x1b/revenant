@@ -14,8 +14,8 @@ typedef struct {
     void (*release)(const void *info);
     CFStringRef (*copyDescription)(const void *info);
 } CTServerConnectionContext;
-typedef CTServerConnectionRef (*CharonCTServerConnectionCreate)(CFAllocatorRef allocator, CTServerConnectionCallback callback, CTServerConnectionContext *context);
-typedef CTError (*CharonCTServerConnectionGetCellularDataIsDisallowed)(CTServerConnectionRef connection, Boolean *disallowed);
+typedef CTServerConnectionRef (*RevenantCTServerConnectionCreate)(CFAllocatorRef allocator, CTServerConnectionCallback callback, CTServerConnectionContext *context);
+typedef CTError (*RevenantCTServerConnectionGetCellularDataIsDisallowed)(CTServerConnectionRef connection, Boolean *disallowed);
 
 static NSString *state_name(CTCellularDataRestrictedState state)
 {
@@ -33,7 +33,7 @@ static void noop_callback(CTServerConnectionRef connection, CFStringRef notifica
     fflush(stdout);
 }
 
-static CTServerConnectionRef try_create(CharonCTServerConnectionCreate create, const char *label, CTServerConnectionCallback callback, CTServerConnectionContext *context)
+static CTServerConnectionRef try_create(RevenantCTServerConnectionCreate create, const char *label, CTServerConnectionCallback callback, CTServerConnectionContext *context)
 {
     CTServerConnectionRef connection = create(NULL, callback, context);
     printf("diagnose: CTServerConnectionCreate(%s) -> %p\n", label, connection);
@@ -48,7 +48,7 @@ static void diagnose_bridge(void)
     fflush(stdout);
     if (!handle)
         return;
-    CharonCTServerConnectionCreate create = (CharonCTServerConnectionCreate)dlsym(handle, "_CTServerConnectionCreate");
+    RevenantCTServerConnectionCreate create = (RevenantCTServerConnectionCreate)dlsym(handle, "_CTServerConnectionCreate");
     printf("diagnose: dlsym _CTServerConnectionCreate -> %p\n", (void *)create);
     fflush(stdout);
     if (!create)
@@ -72,8 +72,8 @@ static void diagnose_bridge(void)
 
     if (!connection)
         return;
-    CharonCTServerConnectionGetCellularDataIsDisallowed get =
-        (CharonCTServerConnectionGetCellularDataIsDisallowed)dlsym(handle, "_CTServerConnectionGetCellularDataIsDisallowed");
+    RevenantCTServerConnectionGetCellularDataIsDisallowed get =
+        (RevenantCTServerConnectionGetCellularDataIsDisallowed)dlsym(handle, "_CTServerConnectionGetCellularDataIsDisallowed");
     printf("diagnose: dlsym _CTServerConnectionGetCellularDataIsDisallowed -> %p\n", (void *)get);
     fflush(stdout);
     if (!get)
@@ -85,14 +85,14 @@ static void diagnose_bridge(void)
     fflush(stdout);
 }
 
-typedef CTError (*CharonCTServerConnectionSetCellularDataIsDisallowed)(CTServerConnectionRef connection, Boolean disallowed);
+typedef CTError (*RevenantCTServerConnectionSetCellularDataIsDisallowed)(CTServerConnectionRef connection, Boolean disallowed);
 
 static void toggle_real_state(CTCellularData *data)
 {
     void *handle = dlopen("/System/Library/Frameworks/CoreTelephony.framework/CoreTelephony", RTLD_LAZY);
-    CharonCTServerConnectionCreate create = (CharonCTServerConnectionCreate)dlsym(handle, "_CTServerConnectionCreate");
-    CharonCTServerConnectionSetCellularDataIsDisallowed set =
-        (CharonCTServerConnectionSetCellularDataIsDisallowed)dlsym(handle, "_CTServerConnectionSetCellularDataIsDisallowed");
+    RevenantCTServerConnectionCreate create = (RevenantCTServerConnectionCreate)dlsym(handle, "_CTServerConnectionCreate");
+    RevenantCTServerConnectionSetCellularDataIsDisallowed set =
+        (RevenantCTServerConnectionSetCellularDataIsDisallowed)dlsym(handle, "_CTServerConnectionSetCellularDataIsDisallowed");
     printf("toggle: dlsym _CTServerConnectionSetCellularDataIsDisallowed -> %p\n", (void *)set);
     fflush(stdout);
     if (!create || !set)
@@ -103,8 +103,8 @@ static void toggle_real_state(CTCellularData *data)
     if (!connection)
         return;
 
-    CharonCTServerConnectionGetCellularDataIsDisallowed get =
-        (CharonCTServerConnectionGetCellularDataIsDisallowed)dlsym(handle, "_CTServerConnectionGetCellularDataIsDisallowed");
+    RevenantCTServerConnectionGetCellularDataIsDisallowed get =
+        (RevenantCTServerConnectionGetCellularDataIsDisallowed)dlsym(handle, "_CTServerConnectionGetCellularDataIsDisallowed");
 
     CTError error = set(connection, true);
     printf("toggle: SetCellularDataIsDisallowed(true) -> domain=%d error=%d\n", (int)error.domain, (int)error.error);
@@ -140,7 +140,7 @@ static NSString *image_of_method(Class class, SEL selector)
 int main(int argc, char *argv[])
 {
     @autoreleasepool {
-        charon_log_to(@"/private/var/backports/cellulardata.log");
+        revenant_log_to(@"/private/var/backports/cellulardata.log");
 
         diagnose_bridge();
 
@@ -180,7 +180,7 @@ int main(int argc, char *argv[])
             CHECK(lastNotified == data.restrictedState, "the immediate notifier call carries the same state a direct read gives");
         }
 
-        printf("checks=%d failures=%d\n", charon_checks, charon_failures);
+        printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
         fflush(stdout);
 
         int callsBeforeToggle = notifierCalls;
@@ -198,9 +198,9 @@ int main(int argc, char *argv[])
         }
         CHECK(data.restrictedState == kCTCellularDataNotRestricted, "the flag reads not-restricted after the toggle attempt, matching its value before");
 
-        printf("checks=%d failures=%d\n", charon_checks, charon_failures);
+        printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
         fflush(stdout);
 
-        return charon_failures == 0 ? 0 : 1;
+        return revenant_failures == 0 ? 0 : 1;
     }
 }

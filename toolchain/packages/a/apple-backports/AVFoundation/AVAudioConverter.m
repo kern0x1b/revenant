@@ -3,17 +3,17 @@
 #import <AVFAudio/AVAudioBuffer.h>
 #import <AudioToolbox/AudioToolbox.h>
 
-static const OSStatus kCharonConverterNoDataNow = 'noda';
+static const OSStatus kRevenantConverterNoDataNow = 'noda';
 
 typedef struct {
     __unsafe_unretained AVAudioConverterInputBlock block;
     BOOL reachedEnd;
-} CharonConverterInputContext;
+} RevenantConverterInputContext;
 
-static OSStatus CharonConverterInputProc(AudioConverterRef inConverter, UInt32 *ioNumberDataPackets, AudioBufferList *ioData,
+static OSStatus RevenantConverterInputProc(AudioConverterRef inConverter, UInt32 *ioNumberDataPackets, AudioBufferList *ioData,
                                           AudioStreamPacketDescription **outDataPacketDescription, void *inUserData)
 {
-    CharonConverterInputContext *ctx = (CharonConverterInputContext *)inUserData;
+    RevenantConverterInputContext *ctx = (RevenantConverterInputContext *)inUserData;
     if (ctx->reachedEnd) {
         *ioNumberDataPackets = 0;
         return noErr;
@@ -31,23 +31,23 @@ static OSStatus CharonConverterInputProc(AudioConverterRef inConverter, UInt32 *
         ctx->reachedEnd = YES;
         return noErr;
     }
-    return kCharonConverterNoDataNow;
+    return kRevenantConverterNoDataNow;
 }
 
 @implementation AVAudioConverter {
-    AudioConverterRef _charon_converter;
-    AVAudioFormat *_charon_inputFormat;
-    AVAudioFormat *_charon_outputFormat;
-    NSArray<NSNumber *> *_charon_channelMap;
-    NSData *_charon_magicCookie;
-    BOOL _charon_downmix;
-    BOOL _charon_dither;
-    NSInteger _charon_sampleRateConverterQuality;
-    NSString *_charon_sampleRateConverterAlgorithm;
-    AVAudioConverterPrimeMethod _charon_primeMethod;
-    AVAudioConverterPrimeInfo _charon_primeInfo;
-    NSInteger _charon_bitRate;
-    NSString *_charon_bitRateStrategy;
+    AudioConverterRef _revenant_converter;
+    AVAudioFormat *_revenant_inputFormat;
+    AVAudioFormat *_revenant_outputFormat;
+    NSArray<NSNumber *> *_revenant_channelMap;
+    NSData *_revenant_magicCookie;
+    BOOL _revenant_downmix;
+    BOOL _revenant_dither;
+    NSInteger _revenant_sampleRateConverterQuality;
+    NSString *_revenant_sampleRateConverterAlgorithm;
+    AVAudioConverterPrimeMethod _revenant_primeMethod;
+    AVAudioConverterPrimeInfo _revenant_primeInfo;
+    NSInteger _revenant_bitRate;
+    NSString *_revenant_bitRateStrategy;
 }
 
 - (instancetype)initFromFormat:(AVAudioFormat *)fromFormat toFormat:(AVAudioFormat *)toFormat
@@ -57,133 +57,133 @@ static OSStatus CharonConverterInputProc(AudioConverterRef inConverter, UInt32 *
         OSStatus status = AudioConverterNew([fromFormat streamDescription], [toFormat streamDescription], &converter);
         if (status != noErr)
             return nil;
-        _charon_converter = converter;
-        _charon_inputFormat = fromFormat;
-        _charon_outputFormat = toFormat;
-        _charon_primeMethod = AVAudioConverterPrimeMethod_Normal;
+        _revenant_converter = converter;
+        _revenant_inputFormat = fromFormat;
+        _revenant_outputFormat = toFormat;
+        _revenant_primeMethod = AVAudioConverterPrimeMethod_Normal;
     }
     return self;
 }
 
 - (void)dealloc
 {
-    if (_charon_converter)
-        AudioConverterDispose(_charon_converter);
+    if (_revenant_converter)
+        AudioConverterDispose(_revenant_converter);
 }
 
 - (void)reset
 {
-    AudioConverterReset(_charon_converter);
+    AudioConverterReset(_revenant_converter);
 }
 
 - (AVAudioFormat *)inputFormat
 {
-    return _charon_inputFormat;
+    return _revenant_inputFormat;
 }
 
 - (AVAudioFormat *)outputFormat
 {
-    return _charon_outputFormat;
+    return _revenant_outputFormat;
 }
 
 - (NSArray<NSNumber *> *)channelMap
 {
-    return _charon_channelMap;
+    return _revenant_channelMap;
 }
 
 - (void)setChannelMap:(NSArray<NSNumber *> *)channelMap
 {
-    _charon_channelMap = [channelMap copy];
+    _revenant_channelMap = [channelMap copy];
     NSUInteger count = channelMap.count;
     SInt32 *map = malloc(count * sizeof(SInt32));
     for (NSUInteger i = 0; i < count; i++)
         map[i] = [channelMap[i] intValue];
-    AudioConverterSetProperty(_charon_converter, kAudioConverterChannelMap, (UInt32)(count * sizeof(SInt32)), map);
+    AudioConverterSetProperty(_revenant_converter, kAudioConverterChannelMap, (UInt32)(count * sizeof(SInt32)), map);
     free(map);
 }
 
 - (NSData *)magicCookie
 {
-    return _charon_magicCookie;
+    return _revenant_magicCookie;
 }
 
 - (void)setMagicCookie:(NSData *)magicCookie
 {
-    _charon_magicCookie = [magicCookie copy];
+    _revenant_magicCookie = [magicCookie copy];
 }
 
 - (BOOL)downmix
 {
-    return _charon_downmix;
+    return _revenant_downmix;
 }
 
 - (void)setDownmix:(BOOL)downmix
 {
-    _charon_downmix = downmix;
+    _revenant_downmix = downmix;
 }
 
 - (BOOL)dither
 {
-    return _charon_dither;
+    return _revenant_dither;
 }
 
 - (void)setDither:(BOOL)dither
 {
-    _charon_dither = dither;
+    _revenant_dither = dither;
 }
 
 - (NSInteger)sampleRateConverterQuality
 {
-    return _charon_sampleRateConverterQuality;
+    return _revenant_sampleRateConverterQuality;
 }
 
 - (void)setSampleRateConverterQuality:(NSInteger)sampleRateConverterQuality
 {
-    _charon_sampleRateConverterQuality = sampleRateConverterQuality;
+    _revenant_sampleRateConverterQuality = sampleRateConverterQuality;
     UInt32 value = (UInt32)sampleRateConverterQuality;
-    AudioConverterSetProperty(_charon_converter, kAudioConverterSampleRateConverterQuality, sizeof(value), &value);
+    AudioConverterSetProperty(_revenant_converter, kAudioConverterSampleRateConverterQuality, sizeof(value), &value);
 }
 
 - (NSString *)sampleRateConverterAlgorithm
 {
-    return _charon_sampleRateConverterAlgorithm;
+    return _revenant_sampleRateConverterAlgorithm;
 }
 
 - (void)setSampleRateConverterAlgorithm:(NSString *)sampleRateConverterAlgorithm
 {
-    _charon_sampleRateConverterAlgorithm = [sampleRateConverterAlgorithm copy];
+    _revenant_sampleRateConverterAlgorithm = [sampleRateConverterAlgorithm copy];
     if (sampleRateConverterAlgorithm)
-        AudioConverterSetProperty(_charon_converter, kAudioConverterSampleRateConverterAlgorithm, sizeof(CFStringRef), (__bridge const void *)sampleRateConverterAlgorithm);
+        AudioConverterSetProperty(_revenant_converter, kAudioConverterSampleRateConverterAlgorithm, sizeof(CFStringRef), (__bridge const void *)sampleRateConverterAlgorithm);
 }
 
 - (AVAudioConverterPrimeMethod)primeMethod
 {
-    return _charon_primeMethod;
+    return _revenant_primeMethod;
 }
 
 - (void)setPrimeMethod:(AVAudioConverterPrimeMethod)primeMethod
 {
-    _charon_primeMethod = primeMethod;
+    _revenant_primeMethod = primeMethod;
     UInt32 value = (UInt32)primeMethod;
-    AudioConverterSetProperty(_charon_converter, kAudioConverterPrimeMethod, sizeof(value), &value);
+    AudioConverterSetProperty(_revenant_converter, kAudioConverterPrimeMethod, sizeof(value), &value);
 }
 
 - (AVAudioConverterPrimeInfo)primeInfo
 {
-    return _charon_primeInfo;
+    return _revenant_primeInfo;
 }
 
 - (void)setPrimeInfo:(AVAudioConverterPrimeInfo)primeInfo
 {
-    _charon_primeInfo = primeInfo;
+    _revenant_primeInfo = primeInfo;
     AudioConverterPrimeInfo real = {.leadingFrames = primeInfo.leadingFrames, .trailingFrames = primeInfo.trailingFrames};
-    AudioConverterSetProperty(_charon_converter, kAudioConverterPrimeInfo, sizeof(real), &real);
+    AudioConverterSetProperty(_revenant_converter, kAudioConverterPrimeInfo, sizeof(real), &real);
 }
 
 - (BOOL)convertToBuffer:(AVAudioPCMBuffer *)outputBuffer fromBuffer:(const AVAudioPCMBuffer *)inputBuffer error:(NSError **)outError
 {
     [outputBuffer setFrameLength:[inputBuffer frameLength]];
-    OSStatus status = AudioConverterConvertComplexBuffer(_charon_converter, [inputBuffer frameLength],
+    OSStatus status = AudioConverterConvertComplexBuffer(_revenant_converter, [inputBuffer frameLength],
                                                           [inputBuffer audioBufferList], [outputBuffer mutableAudioBufferList]);
     if (status != noErr) {
         if (outError)
@@ -196,20 +196,20 @@ static OSStatus CharonConverterInputProc(AudioConverterRef inConverter, UInt32 *
 - (AVAudioConverterOutputStatus)convertToBuffer:(AVAudioBuffer *)outputBuffer error:(NSError **)outError withInputFromBlock:(AVAudioConverterInputBlock)inputBlock
 {
     AVAudioPCMBuffer *pcmOutput = (AVAudioPCMBuffer *)outputBuffer;
-    CharonConverterInputContext ctx = {.block = inputBlock, .reachedEnd = NO};
+    RevenantConverterInputContext ctx = {.block = inputBlock, .reachedEnd = NO};
     UInt32 packetCount = [pcmOutput frameCapacity];
     [pcmOutput setFrameLength:packetCount];
-    OSStatus status = AudioConverterFillComplexBuffer(_charon_converter, CharonConverterInputProc, &ctx, &packetCount,
+    OSStatus status = AudioConverterFillComplexBuffer(_revenant_converter, RevenantConverterInputProc, &ctx, &packetCount,
                                                        [pcmOutput mutableAudioBufferList], NULL);
     [pcmOutput setFrameLength:packetCount];
-    if (status != noErr && status != kCharonConverterNoDataNow) {
+    if (status != noErr && status != kRevenantConverterNoDataNow) {
         if (outError)
             *outError = [NSError errorWithDomain:NSOSStatusErrorDomain code:status userInfo:nil];
         return AVAudioConverterOutputStatus_Error;
     }
     if (ctx.reachedEnd && packetCount == 0)
         return AVAudioConverterOutputStatus_EndOfStream;
-    if (status == kCharonConverterNoDataNow)
+    if (status == kRevenantConverterNoDataNow)
         return AVAudioConverterOutputStatus_InputRanDry;
     return AVAudioConverterOutputStatus_HaveData;
 }
@@ -220,24 +220,24 @@ static OSStatus CharonConverterInputProc(AudioConverterRef inConverter, UInt32 *
 
 - (NSInteger)bitRate
 {
-    return _charon_bitRate;
+    return _revenant_bitRate;
 }
 
 - (void)setBitRate:(NSInteger)bitRate
 {
-    _charon_bitRate = bitRate;
+    _revenant_bitRate = bitRate;
     UInt32 value = (UInt32)bitRate;
-    AudioConverterSetProperty(_charon_converter, kAudioConverterEncodeBitRate, sizeof(value), &value);
+    AudioConverterSetProperty(_revenant_converter, kAudioConverterEncodeBitRate, sizeof(value), &value);
 }
 
 - (NSString *)bitRateStrategy
 {
-    return _charon_bitRateStrategy;
+    return _revenant_bitRateStrategy;
 }
 
 - (void)setBitRateStrategy:(NSString *)bitRateStrategy
 {
-    _charon_bitRateStrategy = [bitRateStrategy copy];
+    _revenant_bitRateStrategy = [bitRateStrategy copy];
 }
 
 - (NSInteger)maximumOutputPacketSize

@@ -12,7 +12,7 @@
 
 #include "graphics/gles_abi.hpp"
 
-namespace shade {
+namespace emulator {
 
 class DisplayState;
 class GlesResourceStore;

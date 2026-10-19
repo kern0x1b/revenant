@@ -1,17 +1,17 @@
 #import <Foundation/Foundation.h>
 #import <MLCompute/MLCompute.h>
 
-static id CharonNew(Class cls)
+static id RevenantNew(Class cls)
 {
     return [[cls alloc] init];
 }
 
-static id CharonNewOf(NSString *name)
+static id RevenantNewOf(NSString *name)
 {
-    return CharonNew(NSClassFromString(name));
+    return RevenantNew(NSClassFromString(name));
 }
 
-@interface MLCMultiheadAttentionLayer (CharonSixteen)
+@interface MLCMultiheadAttentionLayer (RevenantSixteen)
 + (instancetype)layerWithDescriptor:(MLCMultiheadAttentionDescriptor *)descriptor
                              weights:(NSArray<MLCTensor *> *)weights
                               biases:(NSArray<MLCTensor *> *)biases

@@ -6,7 +6,7 @@
 #pragma clang diagnostic ignored "-Wpointer-bool-conversion"
 #pragma clang diagnostic ignored "-Wnonnull"
 
-static inline vImage_Error charon_fixed_ready(const vImage_Buffer *src, const vImage_Buffer *dest, vImage_Flags flags)
+static inline vImage_Error revenant_fixed_ready(const vImage_Buffer *src, const vImage_Buffer *dest, vImage_Flags flags)
 {
     const vImage_Flags allowed = kvImageDoNotTile | kvImageGetTempBufferSize | kvImagePrintDiagnosticsToConsole;
     if (flags & ~allowed)
@@ -20,7 +20,7 @@ static inline vImage_Error charon_fixed_ready(const vImage_Buffer *src, const vI
     return kvImageNoError;
 }
 
-static inline int32_t charon_sat(double value, int32_t low, int32_t high)
+static inline int32_t revenant_sat(double value, int32_t low, int32_t high)
 {
     double rounded = floor(value + 0.5);
     if (rounded < (double)low)
@@ -30,7 +30,7 @@ static inline int32_t charon_sat(double value, int32_t low, int32_t high)
     return (int32_t)rounded;
 }
 
-static inline uint16_t charon_float_to_half(float value)
+static inline uint16_t revenant_float_to_half(float value)
 {
     uint32_t bits;
     uint32_t sign, exponent, mantissa;
@@ -76,7 +76,7 @@ static inline uint16_t charon_float_to_half(float value)
     }
 }
 
-static inline float charon_half_to_float(uint16_t half)
+static inline float revenant_half_to_float(uint16_t half)
 {
     uint32_t sign = (uint32_t)(half & 0x8000u) << 16;
     uint32_t exponent = (uint32_t)(half >> 10) & 0x1Fu;

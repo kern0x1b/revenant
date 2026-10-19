@@ -5,11 +5,11 @@
 #include <string.h>
 
 enum {
-    CharonYpCbCrToARGBMagic = 0x43597041,
-    CharonARGBToYpCbCrMagic = 0x43597042
+    RevenantYpCbCrToARGBMagic = 0x43597041,
+    RevenantARGBToYpCbCrMagic = 0x43597042
 };
 
-static inline float charon_argb_scale(vImageARGBType type)
+static inline float revenant_argb_scale(vImageARGBType type)
 {
     switch (type) {
     case kvImageARGB8888:
@@ -23,40 +23,40 @@ static inline float charon_argb_scale(vImageARGBType type)
     }
 }
 
-typedef struct CharonToARGB {
+typedef struct RevenantToARGB {
     uint32_t magic;
     float Yp, Cr_R, Cr_G, Cb_G, Cb_B;
     float yScale, cScale;
     float Yp_bias, CbCr_bias;
     float YpMin, YpMax, CbCrMin, CbCrMax;
-} CharonToARGB;
+} RevenantToARGB;
 
-typedef struct CharonToYpCbCr {
+typedef struct RevenantToYpCbCr {
     uint32_t magic;
     float R_Yp, G_Yp, B_Yp, R_Cb, G_Cb, B_Cb_R_Cr, G_Cr, B_Cr;
     float yScale, cScale;
     float Yp_bias, CbCr_bias;
     float YpMin, YpMax, CbCrMin, CbCrMax;
-} CharonToYpCbCr;
+} RevenantToYpCbCr;
 
-static inline const CharonToARGB *charon_to_argb(const vImage_YpCbCrToARGB *info)
+static inline const RevenantToARGB *revenant_to_argb(const vImage_YpCbCrToARGB *info)
 {
-    const CharonToARGB *found = (const CharonToARGB *)info;
-    return found && found->magic == CharonYpCbCrToARGBMagic ? found : NULL;
+    const RevenantToARGB *found = (const RevenantToARGB *)info;
+    return found && found->magic == RevenantYpCbCrToARGBMagic ? found : NULL;
 }
 
-static inline const CharonToYpCbCr *charon_to_ypcbcr(const vImage_ARGBToYpCbCr *info)
+static inline const RevenantToYpCbCr *revenant_to_ypcbcr(const vImage_ARGBToYpCbCr *info)
 {
-    const CharonToYpCbCr *found = (const CharonToYpCbCr *)info;
-    return found && found->magic == CharonARGBToYpCbCrMagic ? found : NULL;
+    const RevenantToYpCbCr *found = (const RevenantToYpCbCr *)info;
+    return found && found->magic == RevenantARGBToYpCbCrMagic ? found : NULL;
 }
 
-static inline float charon_clamp(float value, float low, float high)
+static inline float revenant_clamp(float value, float low, float high)
 {
     return value < low ? low : (value > high ? high : value);
 }
 
-static inline BOOL charon_permutation(const uint8_t permuteMap[4])
+static inline BOOL revenant_permutation(const uint8_t permuteMap[4])
 {
     uint8_t seen[4] = {0, 0, 0, 0};
     if (!permuteMap)
@@ -69,29 +69,29 @@ static inline BOOL charon_permutation(const uint8_t permuteMap[4])
     return YES;
 }
 
-static inline float charon_ypcbcr_luma_of(const CharonToYpCbCr *conversion, float red, float green, float blue)
+static inline float revenant_ypcbcr_luma_of(const RevenantToYpCbCr *conversion, float red, float green, float blue)
 {
     return conversion->Yp_bias
         + (red * conversion->R_Yp + green * conversion->G_Yp + blue * conversion->B_Yp) * conversion->yScale;
 }
 
-static inline void charon_ypcbcr_chroma_of(const CharonToYpCbCr *conversion, float red, float green, float blue,
+static inline void revenant_ypcbcr_chroma_of(const RevenantToYpCbCr *conversion, float red, float green, float blue,
                                            float *Cb, float *Cr)
 {
     *Cb = red * conversion->R_Cb + green * conversion->G_Cb + blue * conversion->B_Cb_R_Cr;
     *Cr = red * conversion->B_Cb_R_Cr + green * conversion->G_Cr + blue * conversion->B_Cr;
 }
 
-static inline void charon_ypcbcr_of(const CharonToYpCbCr *conversion, float red, float green, float blue,
+static inline void revenant_ypcbcr_of(const RevenantToYpCbCr *conversion, float red, float green, float blue,
                                     float *Yp, float *Cb, float *Cr)
 {
-    *Yp = charon_ypcbcr_luma_of(conversion, red, green, blue);
-    charon_ypcbcr_chroma_of(conversion, red, green, blue, Cb, Cr);
+    *Yp = revenant_ypcbcr_luma_of(conversion, red, green, blue);
+    revenant_ypcbcr_chroma_of(conversion, red, green, blue, Cb, Cr);
     *Cb = conversion->CbCr_bias + *Cb * conversion->cScale;
     *Cr = conversion->CbCr_bias + *Cr * conversion->cScale;
 }
 
-static inline void charon_argb_of(const CharonToARGB *conversion, float luma, float cb, float cr,
+static inline void revenant_argb_of(const RevenantToARGB *conversion, float luma, float cb, float cr,
                                   float *red, float *green, float *blue)
 {
     float y = (luma - conversion->Yp_bias) * conversion->yScale * conversion->Yp;
@@ -102,13 +102,13 @@ static inline void charon_argb_of(const CharonToARGB *conversion, float luma, fl
     *blue = y + b * conversion->Cb_B;
 }
 
-static inline uint32_t charon_grade(float value, float high)
+static inline uint32_t revenant_grade(float value, float high)
 {
     float rounded = roundf(value);
-    return (uint32_t)charon_clamp(rounded, 0.0f, high);
+    return (uint32_t)revenant_clamp(rounded, 0.0f, high);
 }
 
-static inline uint32_t charon_encode(float value, float low, float high)
+static inline uint32_t revenant_encode(float value, float low, float high)
 {
-    return (uint32_t)charon_clamp(roundf(value), charon_clamp(low, 0.0f, 65535.0f), charon_clamp(high, 0.0f, 65535.0f));
+    return (uint32_t)revenant_clamp(roundf(value), revenant_clamp(low, 0.0f, 65535.0f), revenant_clamp(high, 0.0f, 65535.0f));
 }

@@ -1,4 +1,4 @@
-#import "CharonGC.h"
+#import "RevenantGC.h"
 
 #pragma clang diagnostic ignored "-Wobjc-missing-property-synthesis"
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
@@ -13,7 +13,7 @@
 
 @end
 
-static NSArray *CharonDualShockSpecs(void)
+static NSArray *RevenantDualShockSpecs(void)
 {
     static NSArray *specs;
     static dispatch_once_t once;
@@ -51,22 +51,22 @@ static NSArray *CharonDualShockSpecs(void)
 
 - (instancetype)init
 {
-    return [self initWithCharonSpecs:CharonDualShockSpecs()];
+    return [self initWithRevenantSpecs:RevenantDualShockSpecs()];
 }
 
 - (GCControllerButtonInput *)touchpadButton
 {
-    return (id)[self charon_elementNamed:@"Touchpad Button"];
+    return (id)[self revenant_elementNamed:@"Touchpad Button"];
 }
 
 - (GCControllerDirectionPad *)touchpadPrimary
 {
-    return (id)[self charon_elementNamed:@"Touchpad Primary"];
+    return (id)[self revenant_elementNamed:@"Touchpad Primary"];
 }
 
 - (GCControllerDirectionPad *)touchpadSecondary
 {
-    return (id)[self charon_elementNamed:@"Touchpad Secondary"];
+    return (id)[self revenant_elementNamed:@"Touchpad Secondary"];
 }
 
 @end
@@ -75,37 +75,37 @@ static NSArray *CharonDualShockSpecs(void)
 
 - (instancetype)init
 {
-    NSMutableArray *specs = [CharonDualShockSpecs() mutableCopy];
+    NSMutableArray *specs = [RevenantDualShockSpecs() mutableCopy];
     [specs addObject:@{@"kind": @"trigger", @"aliases": @[@"Left Trigger"], @"local": @"L2 Trigger", @"unmappedLocal": @"L2 Trigger",
                        @"sf": [NSNull null], @"unmappedSf": [NSNull null], @"analog": @1, @"system": @0, @"collection": [NSNull null], @"order": @3}];
     [specs addObject:@{@"kind": @"trigger", @"aliases": @[@"Right Trigger"], @"local": @"R2 Trigger", @"unmappedLocal": @"R2 Trigger",
                        @"sf": [NSNull null], @"unmappedSf": [NSNull null], @"analog": @1, @"system": @0, @"collection": [NSNull null], @"order": @4}];
-    return [self initWithCharonSpecs:specs];
+    return [self initWithRevenantSpecs:specs];
 }
 
 - (GCControllerButtonInput *)touchpadButton
 {
-    return (id)[self charon_elementNamed:@"Touchpad Button"];
+    return (id)[self revenant_elementNamed:@"Touchpad Button"];
 }
 
 - (GCControllerDirectionPad *)touchpadPrimary
 {
-    return (id)[self charon_elementNamed:@"Touchpad Primary"];
+    return (id)[self revenant_elementNamed:@"Touchpad Primary"];
 }
 
 - (GCControllerDirectionPad *)touchpadSecondary
 {
-    return (id)[self charon_elementNamed:@"Touchpad Secondary"];
+    return (id)[self revenant_elementNamed:@"Touchpad Secondary"];
 }
 
 - (GCDualSenseAdaptiveTrigger *)leftTrigger
 {
-    return (id)[self charon_elementNamed:@"Left Trigger"];
+    return (id)[self revenant_elementNamed:@"Left Trigger"];
 }
 
 - (GCDualSenseAdaptiveTrigger *)rightTrigger
 {
-    return (id)[self charon_elementNamed:@"Right Trigger"];
+    return (id)[self revenant_elementNamed:@"Right Trigger"];
 }
 
 @end

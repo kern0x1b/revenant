@@ -1,6 +1,6 @@
 #import <Foundation/Foundation.h>
 
-@implementation NSBundle (CharonLocalizedAttributed15)
+@implementation NSBundle (RevenantLocalizedAttributed15)
 
 - (NSAttributedString *)localizedAttributedStringForKey:(NSString *)key value:(NSString *)value table:(NSString *)tableName
 {

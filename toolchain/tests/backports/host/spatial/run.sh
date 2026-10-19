@@ -17,7 +17,7 @@
 # build. A compiler error is a build failure and proves nothing, which is how the first attempt at
 # this was measured.
 #
-# The compiler is the Swift 6.4.0 the package builds with (charon@swift 6.4.0), named rather than
+# The compiler is the Swift 6.4.0 the package builds with (revenant@swift 6.4.0), named rather than
 # taken from PATH: SPATIAL_SWIFTC overrides it. The templates are rendered by modules/gyb and the comparison and
 # the control run in Lua (xmake l), so nothing here runs python.
 #

@@ -11,7 +11,7 @@
 #include <map>
 #include <utility>
 
-namespace shade {
+namespace emulator {
 namespace {
 
     std::string hex32(std::uint32_t value)

@@ -1,4 +1,4 @@
-#import "CharonGC.h"
+#import "RevenantGC.h"
 
 #pragma clang diagnostic ignored "-Wobjc-missing-property-synthesis"
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
@@ -33,17 +33,17 @@
     return _armPosition;
 }
 
-- (GCDualSenseAdaptiveTriggerMode)charon_requestedMode
+- (GCDualSenseAdaptiveTriggerMode)revenant_requestedMode
 {
     return _requestedMode;
 }
 
-- (void)charon_setArmPosition:(float)armPosition
+- (void)revenant_setArmPosition:(float)armPosition
 {
     _armPosition = fmaxf(0.0f, fminf(1.0f, armPosition));
 }
 
-- (void)charon_setRequestedMode:(GCDualSenseAdaptiveTriggerMode)mode
+- (void)revenant_setRequestedMode:(GCDualSenseAdaptiveTriggerMode)mode
 {
     _requestedMode = mode;
 }

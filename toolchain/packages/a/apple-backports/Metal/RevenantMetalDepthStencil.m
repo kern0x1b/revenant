@@ -1,4 +1,4 @@
-#import "CharonMetal.h"
+#import "RevenantMetal.h"
 
 
 static GLenum compareFunction(MTLCompareFunction f)
@@ -29,9 +29,9 @@ static GLenum stencilOperation(MTLStencilOperation o)
     }
 }
 
-static CharonStencil stencilOf(MTLStencilDescriptor *d)
+static RevenantStencil stencilOf(MTLStencilDescriptor *d)
 {
-    return (CharonStencil){compareFunction(d.stencilCompareFunction), stencilOperation(d.stencilFailureOperation), stencilOperation(d.depthFailureOperation),
+    return (RevenantStencil){compareFunction(d.stencilCompareFunction), stencilOperation(d.stencilFailureOperation), stencilOperation(d.depthFailureOperation),
                            stencilOperation(d.depthStencilPassOperation), d.readMask, d.writeMask};
 }
 
@@ -41,8 +41,8 @@ static BOOL active(MTLStencilDescriptor *d)
            d.depthStencilPassOperation != MTLStencilOperationKeep;
 }
 
-@implementation CharonMetalDepthStencil {
-    CharonDepthStencil _state;
+@implementation RevenantMetalDepthStencil {
+    RevenantDepthStencil _state;
 }
 
 @synthesize label;
@@ -59,14 +59,14 @@ static BOOL active(MTLStencilDescriptor *d)
     return self;
 }
 
-- (const CharonDepthStencil *)state
+- (const RevenantDepthStencil *)state
 {
     return &_state;
 }
 
 - (id<MTLDevice>)device
 {
-    return [CharonMetalDevice shared];
+    return [RevenantMetalDevice shared];
 }
 
 @end

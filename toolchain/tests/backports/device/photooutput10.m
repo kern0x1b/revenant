@@ -7,7 +7,7 @@
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 #pragma clang diagnostic ignored "-Wunguarded-availability-new"
 
-@interface CharonPhotoCatcher : NSObject <AVCapturePhotoCaptureDelegate>
+@interface RevenantPhotoCatcher : NSObject <AVCapturePhotoCaptureDelegate>
 @property (atomic) BOOL finished;
 @property (atomic) size_t photoWidth, photoHeight, previewWidth, previewHeight;
 @property (atomic) OSType previewFormat;
@@ -24,7 +24,7 @@
 @property (atomic) long cameraFlashAtCapture;
 @end
 
-static AVCaptureDevice *charon_camera;
+static AVCaptureDevice *revenant_camera;
 
 static CGImageRef create_photo_image(CMSampleBufferRef photo, BOOL *jpeg, BOOL *bgra)
 {
@@ -114,7 +114,7 @@ static double spread(CVPixelBufferRef preview)
     return total / (width * height * 3);
 }
 
-@implementation CharonPhotoCatcher
+@implementation RevenantPhotoCatcher
 
 - (instancetype)init
 {
@@ -138,7 +138,7 @@ static double spread(CVPixelBufferRef preview)
 {
     [self.resolvedSeen addObject:resolved];
     [self.callbacks addObject:@"willCapture"];
-    self.cameraFlashAtCapture = charon_camera.flashMode;
+    self.cameraFlashAtCapture = revenant_camera.flashMode;
 }
 
 - (void)captureOutput:(AVCapturePhotoOutput *)output didCapturePhotoForResolvedSettings:(AVCaptureResolvedPhotoSettings *)resolved
@@ -223,7 +223,7 @@ static BOOL same_dimensions(CMVideoDimensions a, CMVideoDimensions b)
     return a.width == b.width && a.height == b.height;
 }
 
-static void check_resolved(CharonPhotoCatcher *c, AVCapturePhotoSettings *settings)
+static void check_resolved(RevenantPhotoCatcher *c, AVCapturePhotoSettings *settings)
 {
     AVCaptureResolvedPhotoSettings *first = c.resolvedSeen.firstObject;
     BOOL one = c.resolvedSeen.count == 5;
@@ -244,10 +244,10 @@ static void check_resolved(CharonPhotoCatcher *c, AVCapturePhotoSettings *settin
     CHECK(settings.flashMode != AVCaptureFlashModeOff || !c.resolvedFlash, "the flash is not enabled when it is asked Off");
 }
 
-static CharonPhotoCatcher *capture_with(AVCapturePhotoOutput *output, AVCapturePhotoSettings *settings, NSDictionary *preview)
+static RevenantPhotoCatcher *capture_with(AVCapturePhotoOutput *output, AVCapturePhotoSettings *settings, NSDictionary *preview)
 {
     settings.previewPhotoFormat = preview;
-    CharonPhotoCatcher *catcher = [[CharonPhotoCatcher alloc] init];
+    RevenantPhotoCatcher *catcher = [[RevenantPhotoCatcher alloc] init];
     AVCaptureInputPort *port = [output connectionWithMediaType:AVMediaTypeVideo].inputPorts.firstObject;
     CMVideoDimensions portDimensions = port.formatDescription ? CMVideoFormatDescriptionGetDimensions(port.formatDescription) : (CMVideoDimensions){0, 0};
     printf("port before the capture: %s %dx%d\n", port.formatDescription ? "format" : "no format", portDimensions.width, portDimensions.height);
@@ -261,12 +261,12 @@ static CharonPhotoCatcher *capture_with(AVCapturePhotoOutput *output, AVCaptureP
     return catcher;
 }
 
-static CharonPhotoCatcher *capture(AVCapturePhotoOutput *output, NSDictionary *preview)
+static RevenantPhotoCatcher *capture(AVCapturePhotoOutput *output, NSDictionary *preview)
 {
     return capture_with(output, [AVCapturePhotoSettings photoSettings], preview);
 }
 
-static BOOL drawn_from_photo(CharonPhotoCatcher *c)
+static BOOL drawn_from_photo(RevenantPhotoCatcher *c)
 {
     return c.hadPreview && c.previewDifference < 6 && c.flippedDifference > c.previewDifference;
 }
@@ -307,7 +307,7 @@ static BOOL bare_capture(AVCaptureStillImageOutput *still, const char *label)
     return finished && !failure && width > 0;
 }
 
-static BOOL same_aspect(CharonPhotoCatcher *c)
+static BOOL same_aspect(RevenantPhotoCatcher *c)
 {
     double photo = (double)c.photoWidth / c.photoHeight, preview = (double)c.previewWidth / c.previewHeight;
     return fabs(photo * c.previewHeight - c.previewWidth) <= 1 || fabs(preview - photo) < 0.01;
@@ -317,7 +317,7 @@ int main(int argc, char **argv)
 {
     @autoreleasepool {
         if (argc > 1)
-            charon_log_to(@(argv[1]));
+            revenant_log_to(@(argv[1]));
         AVCapturePhotoSettings *probe = [AVCapturePhotoSettings photoSettings];
         NSArray *previewFormats = @[@(kCVPixelFormatType_420YpCbCr8BiPlanarFullRange), @(kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange), @(kCVPixelFormatType_32BGRA)];
         CHECK_EQUAL(probe.availablePreviewPhotoPixelFormatTypes, previewFormats, "the preview formats offered are the host's: 420f, 420v, 32BGRA");
@@ -328,7 +328,7 @@ int main(int argc, char **argv)
         [session addInput:input];
         AVCaptureDevice *camera = input.device;
         AVCaptureFlashMode cameraFlash = camera.flashMode;
-        charon_camera = camera;
+        revenant_camera = camera;
         BOOL flashOn = argc > 2 && strcmp(argv[2], "flash-on") == 0, flashAuto = argc > 2 && strcmp(argv[2], "flash-auto") == 0;
         BOOL flashScene = flashOn || flashAuto || (argc > 2 && strcmp(argv[2], "flash-scene") == 0);
         if (camera.hasFlash && [camera lockForConfiguration:NULL]) {
@@ -362,12 +362,12 @@ int main(int argc, char **argv)
                                                          (__bridge NSString *)kCVPixelBufferWidthKey: @160}); });
         CHECK([halfSize hasPrefix:@"NSInvalidArgumentException"], "a width without a height raises");
 
-        CharonPhotoCatcher *none = capture(output, nil);
+        RevenantPhotoCatcher *none = capture(output, nil);
         CHECK(none.finished && none.photoIsJPEG && !none.hadPreview, "without a preview format the photo comes alone");
 
         UIScreen *screen = [UIScreen mainScreen];
         size_t display = (size_t)(MAX(screen.bounds.size.width, screen.bounds.size.height) * screen.scale);
-        CharonPhotoCatcher *full = capture(output, @{(__bridge NSString *)kCVPixelBufferPixelFormatTypeKey: @(kCVPixelFormatType_32BGRA)});
+        RevenantPhotoCatcher *full = capture(output, @{(__bridge NSString *)kCVPixelBufferPixelFormatTypeKey: @(kCVPixelFormatType_32BGRA)});
         printf("photo %zux%zu, display longest %zu, preview %zux%zu format %08x\n", full.photoWidth, full.photoHeight, display, full.previewWidth, full.previewHeight,
                (unsigned)full.previewFormat);
         CHECK(full.finished && full.error == nil && full.hadPreview, "a preview comes with the photo");
@@ -376,7 +376,7 @@ int main(int argc, char **argv)
         CHECK(same_aspect(full), "with the photo's aspect ratio");
         CHECK(drawn_from_photo(full), "and it is the photo, drawn the right way up");
 
-        CharonPhotoCatcher *asked = capture(output, @{(__bridge NSString *)kCVPixelBufferPixelFormatTypeKey: @(kCVPixelFormatType_32BGRA),
+        RevenantPhotoCatcher *asked = capture(output, @{(__bridge NSString *)kCVPixelBufferPixelFormatTypeKey: @(kCVPixelFormatType_32BGRA),
                                                       (__bridge NSString *)kCVPixelBufferWidthKey: @160, (__bridge NSString *)kCVPixelBufferHeightKey: @160});
         printf("asked 160x160: preview %zux%zu\n", asked.previewWidth, asked.previewHeight);
         CHECK(asked.hadPreview && MAX(asked.previewWidth, asked.previewHeight) == 160, "a size asked for sets the longest side");
@@ -384,7 +384,7 @@ int main(int argc, char **argv)
         CHECK(drawn_from_photo(asked), "and it is the photo at that size");
 
         for (NSNumber *format in @[@(kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange), @(kCVPixelFormatType_420YpCbCr8BiPlanarFullRange)]) {
-            CharonPhotoCatcher *ycbcr = capture(output, @{(__bridge NSString *)kCVPixelBufferPixelFormatTypeKey: format});
+            RevenantPhotoCatcher *ycbcr = capture(output, @{(__bridge NSString *)kCVPixelBufferPixelFormatTypeKey: format});
             printf("preview %08x: %zux%zu format %08x, luma against the photo %.2f, upside down %.2f\n", format.unsignedIntValue, ycbcr.previewWidth,
                    ycbcr.previewHeight, (unsigned)ycbcr.previewFormat, ycbcr.previewDifference, ycbcr.flippedDifference);
             CHECK(ycbcr.finished && ycbcr.error == nil && ycbcr.hadPreview && ycbcr.previewFormat == format.unsignedIntValue, "a 4:2:0 preview comes in the format asked");
@@ -392,7 +392,7 @@ int main(int argc, char **argv)
             CHECK(drawn_from_photo(ycbcr), "and its luma is the photo's, the right way up");
         }
 
-        CharonPhotoCatcher *huge = capture(output, @{(__bridge NSString *)kCVPixelBufferPixelFormatTypeKey: @(kCVPixelFormatType_32BGRA),
+        RevenantPhotoCatcher *huge = capture(output, @{(__bridge NSString *)kCVPixelBufferPixelFormatTypeKey: @(kCVPixelFormatType_32BGRA),
                                                      (__bridge NSString *)kCVPixelBufferWidthKey: @100000, (__bridge NSString *)kCVPixelBufferHeightKey: @100000});
         CHECK(huge.hadPreview && MAX(huge.previewWidth, huge.previewHeight) == MAX(full.previewWidth, full.previewHeight), "a size past the display is held to it");
 
@@ -403,12 +403,12 @@ int main(int argc, char **argv)
         printf("\n");
         CHECK([formats containsObject:@(kCVPixelFormatType_32BGRA)], "the photo output offers the release's uncompressed 32BGRA");
         AVCapturePhotoSettings *uncompressed = [AVCapturePhotoSettings photoSettingsWithFormat:@{(__bridge NSString *)kCVPixelBufferPixelFormatTypeKey: @(kCVPixelFormatType_32BGRA)}];
-        CharonPhotoCatcher *raw = capture_with(output, uncompressed, @{(__bridge NSString *)kCVPixelBufferPixelFormatTypeKey: @(kCVPixelFormatType_32BGRA),
+        RevenantPhotoCatcher *raw = capture_with(output, uncompressed, @{(__bridge NSString *)kCVPixelBufferPixelFormatTypeKey: @(kCVPixelFormatType_32BGRA),
                                                                         (__bridge NSString *)kCVPixelBufferWidthKey: @320, (__bridge NSString *)kCVPixelBufferHeightKey: @320});
         printf("uncompressed: photo %zux%zu bgra %d, preview %zux%zu\n", raw.photoWidth, raw.photoHeight, raw.photoIsBGRA, raw.previewWidth, raw.previewHeight);
         CHECK(raw.finished && raw.error == nil && raw.photoIsBGRA, "a format asked for gives an uncompressed photo");
         CHECK(MAX(raw.previewWidth, raw.previewHeight) == 320 && same_aspect(raw) && drawn_from_photo(raw), "whose preview is the photo at the size asked");
-        CharonPhotoCatcher *again = capture(output, nil);
+        RevenantPhotoCatcher *again = capture(output, nil);
         CHECK(again.finished && again.photoIsJPEG, "the next settings without a format take a JPEG again");
 
         CHECK_EQUAL([probe availableEmbeddedThumbnailPhotoCodecTypes], @[AVVideoCodecJPEG], "a JPEG photo offers a JPEG thumbnail");
@@ -422,7 +422,7 @@ int main(int argc, char **argv)
             AVCapturePhotoSettings *thumbnailed = [AVCapturePhotoSettings photoSettings];
             thumbnailed.embeddedThumbnailPhotoFormat = thumbnailFormat;
             thumbnailed.metadata = @{(__bridge NSString *)kCGImagePropertyExifDictionary: @{(__bridge NSString *)kCGImagePropertyExifUserComment: @"photooutput10"}};
-            CharonPhotoCatcher *t = capture_with(output, thumbnailed, @{(__bridge NSString *)kCVPixelBufferPixelFormatTypeKey: @(kCVPixelFormatType_32BGRA)});
+            RevenantPhotoCatcher *t = capture_with(output, thumbnailed, @{(__bridge NSString *)kCVPixelBufferPixelFormatTypeKey: @(kCVPixelFormatType_32BGRA)});
             captured = thumbnailed;
             CMVideoDimensions dimensions = t.resolvedThumbnail;
             size_t longest = thumbnailFormat[AVVideoWidthKey] ? 320 : 160;
@@ -447,11 +447,11 @@ int main(int argc, char **argv)
 
         {
             NSString *maker = (__bridge NSString *)kCGImagePropertyMakerAppleDictionary;
-            CharonPhotoCatcher *plain = capture_with(output, [AVCapturePhotoSettings photoSettings], nil);
+            RevenantPhotoCatcher *plain = capture_with(output, [AVCapturePhotoSettings photoSettings], nil);
             AVCapturePhotoSettings *marked = [AVCapturePhotoSettings photoSettings];
             NSString *taken = raised(^{ marked.metadata = @{maker: @{@"1": @77}}; });
             CHECK([taken isEqualToString:@"nothing"] && [marked.metadata[maker][@"1"] isEqual:@77], "the settings take {MakerApple}");
-            CharonPhotoCatcher *m = capture_with(output, marked, nil);
+            RevenantPhotoCatcher *m = capture_with(output, marked, nil);
             CHECK(plain.finished && m.finished && m.error == nil && m.photoIsJPEG, "a photo with {MakerApple} in its metadata comes");
             CHECK(plain.attachedMaker == nil && [m.attachedMaker[@"1"] isEqual:@77], "the capture merges it into the still's attachments, and only when asked");
             printf("MakerApple: without: release's JPEG %s, MakerNote %d; with 1=77: release's JPEG %s, MakerNote %d; port's JPEG %s, MakerNote %d\n",
@@ -462,24 +462,24 @@ int main(int argc, char **argv)
 
         NSDictionary *refusals = @{
             @"a RAW photo": ^{ [output capturePhotoWithSettings:[AVCapturePhotoSettings photoSettingsWithRawPixelFormatType:kCVPixelFormatType_14Bayer_RGGB]
-                                                       delegate:[CharonPhotoCatcher new]]; },
+                                                       delegate:[RevenantPhotoCatcher new]]; },
             @"a Live Photo movie": ^{
                 AVCapturePhotoSettings *live = [AVCapturePhotoSettings photoSettings];
                 live.livePhotoMovieFileURL = [NSURL fileURLWithPath:@"/var/tmp/photooutput10-live.mov"];
-                [output capturePhotoWithSettings:live delegate:[CharonPhotoCatcher new]]; },
+                [output capturePhotoWithSettings:live delegate:[RevenantPhotoCatcher new]]; },
             @"depth data": ^{
                 AVCapturePhotoSettings *depth = [AVCapturePhotoSettings photoSettings];
                 depth.depthDataDeliveryEnabled = YES;
-                [output capturePhotoWithSettings:depth delegate:[CharonPhotoCatcher new]]; },
+                [output capturePhotoWithSettings:depth delegate:[RevenantPhotoCatcher new]]; },
             @"a quality above the output's": ^{
                 AVCapturePhotoSettings *quality = [AVCapturePhotoSettings photoSettings];
                 quality.photoQualityPrioritization = AVCapturePhotoQualityPrioritizationQuality;
-                [output capturePhotoWithSettings:quality delegate:[CharonPhotoCatcher new]]; },
-            @"a settings object used twice": ^{ [output capturePhotoWithSettings:captured delegate:[CharonPhotoCatcher new]]; },
+                [output capturePhotoWithSettings:quality delegate:[RevenantPhotoCatcher new]]; },
+            @"a settings object used twice": ^{ [output capturePhotoWithSettings:captured delegate:[RevenantPhotoCatcher new]]; },
             @"a thumbnail width without a height": ^{
                 AVCapturePhotoSettings *half = [AVCapturePhotoSettings photoSettings];
                 half.embeddedThumbnailPhotoFormat = @{AVVideoCodecKey: AVVideoCodecJPEG, AVVideoWidthKey: @320};
-                [output capturePhotoWithSettings:half delegate:[CharonPhotoCatcher new]]; },
+                [output capturePhotoWithSettings:half delegate:[RevenantPhotoCatcher new]]; },
             @"a delegate without the photo callback": ^{ [output capturePhotoWithSettings:[AVCapturePhotoSettings photoSettings] delegate:(id)[NSObject new]]; },
         };
         for (NSString *refusal in refusals) {
@@ -506,7 +506,7 @@ int main(int argc, char **argv)
         if (zoom > 1 && [camera lockForConfiguration:NULL]) {
             camera.videoZoomFactor = zoom;
             [camera unlockForConfiguration];
-            CharonPhotoCatcher *zoomed = capture(output, @{(__bridge NSString *)kCVPixelBufferPixelFormatTypeKey: @(kCVPixelFormatType_32BGRA)});
+            RevenantPhotoCatcher *zoomed = capture(output, @{(__bridge NSString *)kCVPixelBufferPixelFormatTypeKey: @(kCVPixelFormatType_32BGRA)});
             printf("zoomed %.2f: connection %.2f, photo %zux%zu, preview %zux%zu\n", zoom, connection.videoScaleAndCropFactor, zoomed.photoWidth, zoomed.photoHeight,
                    zoomed.previewWidth, zoomed.previewHeight);
             CHECK(connection.videoScaleAndCropFactor == zoom, "the zoom sets the photo output's scale and crop");
@@ -528,7 +528,7 @@ int main(int argc, char **argv)
             AVCaptureFlashMode autoMode = camera.flashMode;
             AVCapturePhotoSettings *unlit = [AVCapturePhotoSettings photoSettings];
             unlit.flashMode = AVCaptureFlashModeOff;
-            CharonPhotoCatcher *between = capture_with(output, unlit, nil);
+            RevenantPhotoCatcher *between = capture_with(output, unlit, nil);
             AVCaptureFlashMode afterCapture = camera.flashMode;
             output.photoSettingsForSceneMonitoring = nil;
             AVCaptureFlashMode unmonitored = camera.flashMode;
@@ -559,7 +559,7 @@ int main(int argc, char **argv)
             for (NSNumber *mode in modes) {
                 AVCapturePhotoSettings *flash = [AVCapturePhotoSettings photoSettings];
                 flash.flashMode = mode.integerValue;
-                CharonPhotoCatcher *lit = capture_with(output, flash, nil);
+                RevenantPhotoCatcher *lit = capture_with(output, flash, nil);
                 printf("flash %ld: camera mode at the capture %ld, after it %ld, available %d, photo %zux%zu, resolved flash %d, Exif Flash %ld\n",
                        (long)mode.integerValue, lit.cameraFlashAtCapture, (long)camera.flashMode, camera.flashAvailable, lit.photoWidth,
                        lit.photoHeight, lit.resolvedFlash, lit.stillFlash);
@@ -584,7 +584,7 @@ int main(int argc, char **argv)
             camera.flashMode = cameraFlash;
             [camera unlockForConfiguration];
         }
-        printf("%d checks, %d failed\n", charon_checks, charon_failures);
+        printf("%d checks, %d failed\n", revenant_checks, revenant_failures);
     }
-    return charon_failures;
+    return revenant_failures;
 }

@@ -3,7 +3,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
-#include "CharonSpatial.h"
+#include "RevenantSpatial.h"
 
 double host_angle_make_degrees(double degrees);
 double host_angle_make_radians(double radians);

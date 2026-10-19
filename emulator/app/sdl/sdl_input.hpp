@@ -19,7 +19,7 @@
 struct SDL_Window;
 union SDL_Event;
 
-namespace shade {
+namespace emulator {
 
 class SdlInput {
 public:

@@ -20,7 +20,7 @@ export VDSPPROBE_ROOT="$root"
 
 # **iPhone3,1 is the device this run uses, and it is asked for.** The default device of the emulate command is
 # the first catalog device of the architecture, an iPhone2,1, and this project's image for it no longer
-# installs; iPhone3,1 at 6.1.3 has a golden image in ~/.charon/emulator today. Both the install and the run
+# installs; iPhone3,1 at 6.1.3 has a golden image in ~/.revenant/emulator today. Both the install and the run
 # take the same -d and -r, or the program is installed into one image and run in another.
 device=${VDSPPROBE_DEVICE:-iPhone3,1}
 release=${VDSPPROBE_RELEASE:-6.1.3}
@@ -30,7 +30,7 @@ release=${VDSPPROBE_RELEASE:-6.1.3}
 
 program=vdsp-biquad-probe
 built=$(find "$here/build" -name "$program" -type f 2>/dev/null | head -1)
-image=$(ls -d "$HOME"/.charon/emulator/images.noindex/vdspprobe-* 2>/dev/null | head -1)
+image=$(ls -d "$HOME"/.revenant/emulator/images.noindex/vdspprobe-* 2>/dev/null | head -1)
 # The image directory is named for the device and its build, so it is globbed rather than spelled: a spelled
 # one that names another device would compare this build against a program that was never installed here.
 installed=$(ls "$image"/${device}_*/rootfs/usr/libexec/$program 2>/dev/null | head -1)
@@ -38,7 +38,7 @@ installed=$(ls "$image"/${device}_*/rootfs/usr/libexec/$program 2>/dev/null | he
 # **LC_UUID, not a byte hash, and that is 7e035ac0's rule rather than mine.** A hash of the bytes before the
 # code signature cannot prove provenance: strip rewrites those bytes, and an unsigned build has no bytes there
 # at all, so the "before" region of one is empty. Neither strip nor ldid -S changes LC_UUID, so the UUID is
-# what identifies a build. It is read through `otool -l` rather than parsed by hand, because Charon's ld64
+# what identifies a build. It is read through `otool -l` rather than parsed by hand, because Revenant's ld64
 # writes the magic byte-swapped and a hand-rolled reader would have to know that.
 uuid_of() {
   [ -f "$1" ] || { echo "(no file)"; return; }

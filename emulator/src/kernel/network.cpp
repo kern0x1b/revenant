@@ -33,7 +33,7 @@
 
 #include "bsd/support.hpp"
 
-namespace shade {
+namespace emulator {
 namespace {
 
     constexpr std::uint32_t ebadf = 9;

@@ -1,4 +1,4 @@
-#import "CharonMenus.h"
+#import "RevenantMenus.h"
 
 @implementation UIContextMenuConfiguration {
 @private
@@ -65,7 +65,7 @@
     return _identifier;
 }
 
-- (UIContextMenuActionProvider)charon_actionProvider
+- (UIContextMenuActionProvider)revenant_actionProvider
 {
     return _actionProvider;
 }

@@ -4,11 +4,11 @@ here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 UIKIT=${UIKIT:-$here/../../../../packages/a/apple-backports/UIKit}
 harness=${SWIPEACTIONS_HARNESS:-$here/../../device}
-build=${SWIPEACTIONS_BUILD:-$(runs_folder charon-swipeactions-host)}
+build=${SWIPEACTIONS_BUILD:-$(runs_folder revenant-swipeactions-host)}
 sources="UIContextualAction.m UISwipeActionsConfiguration.m"
 sdk=$(xcrun --show-sdk-path)
 target="-target arm64-apple-ios15.0-macabi -isysroot $sdk -iframework $sdk/System/iOSSupport/System/Library/Frameworks"
-renames="-DUIContextualAction=CharonHostUIContextualAction -DUISwipeActionsConfiguration=CharonHostUISwipeActionsConfiguration"
+renames="-DUIContextualAction=RevenantHostUIContextualAction -DUISwipeActionsConfiguration=RevenantHostUISwipeActionsConfiguration"
 rm -rf "$build"
 mkdir -p "$build"
 objects=""

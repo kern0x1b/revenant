@@ -33,7 +33,7 @@
 #include <utility>
 #include <vector>
 
-namespace shade::kernel_iokit::audio {
+namespace emulator::kernel_iokit::audio {
 namespace {
 
     namespace device_mig = xnu::mig::device;

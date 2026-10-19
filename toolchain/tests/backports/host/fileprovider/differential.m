@@ -1,16 +1,16 @@
 #import <Foundation/Foundation.h>
 
-#ifdef CHARON_PORT
+#ifdef REVENANT_PORT
 #import <FileProvider/FileProvider.h>
-#define MGR CharonFPManager
-#define ERRDOMAIN CharonFPErrorDomain
-@interface CharonFPManager : NSObject
+#define MGR RevenantFPManager
+#define ERRDOMAIN RevenantFPErrorDomain
+@interface RevenantFPManager : NSObject
 + (void)getDomainsWithCompletionHandler:(void (^)(NSArray *domains, NSError *error))completionHandler;
 + (instancetype)managerForDomain:(NSFileProviderDomain *)domain;
 - (void)getUserVisibleURLForItemIdentifier:(NSFileProviderItemIdentifier)itemIdentifier
                          completionHandler:(void (^)(NSURL *url, NSError *error))completionHandler;
 @end
-extern NSString *const CharonFPErrorDomain;
+extern NSString *const RevenantFPErrorDomain;
 #else
 #import <FileProvider/FileProvider.h>
 #define MGR NSFileProviderManager
@@ -35,14 +35,14 @@ int main(void) { @autoreleasepool {
     printf("getDomains.error.code\t%ld\n", domainError ? (long)domainError.code : 0L);
 
     NSFileProviderDomain *unregistered = [[NSFileProviderDomain alloc]
-        initWithIdentifier:@"charon.probe.unregistered" displayName:@"charon probe"];
+        initWithIdentifier:@"revenant.probe.unregistered" displayName:@"revenant probe"];
     printf("managerForDomain.isNil\t%s\n", [MGR managerForDomain:unregistered] ? "false" : "true");
 
     {
         MGR *m = [MGR managerForDomain:unregistered];
         dispatch_semaphore_t itemDone = dispatch_semaphore_create(0);
         __block BOOL hasURL = NO;
-        [m getUserVisibleURLForItemIdentifier:@"charon.probe"
+        [m getUserVisibleURLForItemIdentifier:@"revenant.probe"
                            completionHandler:^(NSURL *url, NSError *error) {
             hasURL = (url != nil); dispatch_semaphore_signal(itemDone);
         }];

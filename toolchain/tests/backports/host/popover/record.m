@@ -1,9 +1,9 @@
 #import <UIKit/UIKit.h>
 #import "popover-cases.h"
 
-void charon_windowed_run(UIWindow *window);
+void revenant_windowed_run(UIWindow *window);
 
-void charon_windowed_run(UIWindow *window)
+void revenant_windowed_run(UIWindow *window)
 {
     NSMutableDictionary *records = [NSMutableDictionary dictionary];
     popover_defaults(window, ^(NSString *name, NSString *value) {

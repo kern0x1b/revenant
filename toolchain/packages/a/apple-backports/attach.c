@@ -5,17 +5,17 @@
 #include <objc/runtime.h>
 #include <stdlib.h>
 #include <string.h>
-#include "charon_alias.h"
+#include "revenant_alias.h"
 
 #ifdef __LP64__
-typedef struct mach_header_64 charon_header;
+typedef struct mach_header_64 revenant_header;
 #else
-typedef struct mach_header charon_header;
+typedef struct mach_header revenant_header;
 #endif
 
-extern const charon_header __dso_handle;
+extern const revenant_header __dso_handle;
 
-static intptr_t charon_slide(void)
+static intptr_t revenant_slide(void)
 {
     for (uint32_t index = 0; index < _dyld_image_count(); index++) {
         if ((const void *)_dyld_get_image_header(index) == (const void *)&__dso_handle)
@@ -24,7 +24,7 @@ static intptr_t charon_slide(void)
     return 0;
 }
 
-static const void *charon_section(const charon_header *header, intptr_t slide, const char *segment, const char *section, unsigned long *size)
+static const void *revenant_section(const revenant_header *header, intptr_t slide, const char *segment, const char *section, unsigned long *size)
 {
 #ifdef __LP64__
     const struct section_64 *found = getsectbynamefromheader_64(header, segment, section);
@@ -37,25 +37,25 @@ static const void *charon_section(const charon_header *header, intptr_t slide, c
     return (const void *)((uintptr_t)found->addr + slide);
 }
 
-static const struct charon_alias *charon_image_aliases(uint32_t image, size_t *count)
+static const struct revenant_alias *revenant_image_aliases(uint32_t image, size_t *count)
 {
     unsigned long size = 0;
-    const struct charon_alias *aliases = charon_section((const charon_header *)_dyld_get_image_header(image), _dyld_get_image_vmaddr_slide(image), "__DATA", "__charon_alias", &size);
+    const struct revenant_alias *aliases = revenant_section((const revenant_header *)_dyld_get_image_header(image), _dyld_get_image_vmaddr_slide(image), "__DATA", "__revenant_alias", &size);
     *count = aliases ? size / sizeof *aliases : 0;
     return aliases;
 }
 
-static struct charon_alias *charon_aliases(size_t *count)
+static struct revenant_alias *revenant_aliases(size_t *count)
 {
     size_t total = 0, held;
     for (uint32_t index = 0; index < _dyld_image_count(); index++) {
-        charon_image_aliases(index, &held);
+        revenant_image_aliases(index, &held);
         total += held;
     }
-    struct charon_alias *found = calloc(total ? total : 1, sizeof *found);
+    struct revenant_alias *found = calloc(total ? total : 1, sizeof *found);
     *count = 0;
     for (uint32_t index = 0; index < _dyld_image_count() && *count < total; index++) {
-        const struct charon_alias *aliases = charon_image_aliases(index, &held);
+        const struct revenant_alias *aliases = revenant_image_aliases(index, &held);
         held = held < total - *count ? held : total - *count;
         if (held)
             memcpy(found + *count, aliases, held * sizeof *found);
@@ -64,7 +64,7 @@ static struct charon_alias *charon_aliases(size_t *count)
     return found;
 }
 
-static Class charon_release_class(Class cls, const struct charon_alias *aliases, size_t count)
+static Class revenant_release_class(Class cls, const struct revenant_alias *aliases, size_t count)
 {
     for (size_t index = 0; index < count; index++) {
         if (aliases[index].proxy == (const void *)cls) {
@@ -75,59 +75,59 @@ static Class charon_release_class(Class cls, const struct charon_alias *aliases,
     return cls;
 }
 
-struct charon_list {
+struct revenant_list {
     uint32_t flags;
     uint32_t count;
 };
 
-struct charon_category {
+struct revenant_category {
     const char *name;
     Class cls;
-    struct charon_list *instance_methods;
-    struct charon_list *class_methods;
-    struct charon_protocols *protocols;
-    struct charon_list *instance_properties;
+    struct revenant_list *instance_methods;
+    struct revenant_list *class_methods;
+    struct revenant_protocols *protocols;
+    struct revenant_list *instance_properties;
 };
 
-struct charon_protocols {
+struct revenant_protocols {
     uintptr_t count;
-    const struct charon_protocol *list[];
+    const struct revenant_protocol *list[];
 };
 
-struct charon_protocol {
+struct revenant_protocol {
     Class isa;
     const char *name;
 };
 
-struct charon_pending {
+struct revenant_pending {
     Class cls;
     SEL name;
     IMP implementation;
     const char *types;
 };
 
-static const uint32_t charon_relative_methods = 0x80000000;
+static const uint32_t revenant_relative_methods = 0x80000000;
 
-static int32_t charon_offset(const struct charon_list *list, uint32_t index, uint32_t field)
+static int32_t revenant_offset(const struct revenant_list *list, uint32_t index, uint32_t field)
 {
     uint32_t size = list->flags & 0xFFFC;
     const int32_t *at = (const int32_t *)((const char *)(list + 1) + index * size + field * sizeof(int32_t));
     return *at;
 }
 
-static const char *charon_relative(const struct charon_list *list, uint32_t index, uint32_t field)
+static const char *revenant_relative(const struct revenant_list *list, uint32_t index, uint32_t field)
 {
     uint32_t size = list->flags & 0xFFFC;
     const char *at = (const char *)(list + 1) + index * size + field * sizeof(int32_t);
-    return at + charon_offset(list, index, field);
+    return at + revenant_offset(list, index, field);
 }
 
-static void charon_method(const struct charon_list *list, uint32_t index, const char **name, const char **types, IMP *implementation)
+static void revenant_method(const struct revenant_list *list, uint32_t index, const char **name, const char **types, IMP *implementation)
 {
-    if (list->flags & charon_relative_methods) {
-        *name = *(const char *const *)charon_relative(list, index, 0);
-        *types = charon_relative(list, index, 1);
-        *implementation = (IMP)charon_relative(list, index, 2);
+    if (list->flags & revenant_relative_methods) {
+        *name = *(const char *const *)revenant_relative(list, index, 0);
+        *types = revenant_relative(list, index, 1);
+        *implementation = (IMP)revenant_relative(list, index, 2);
         return;
     }
     uint32_t size = list->flags & 0xFFFC;
@@ -137,53 +137,53 @@ static void charon_method(const struct charon_list *list, uint32_t index, const 
     *implementation = (IMP)entry[2];
 }
 
-struct charon_snapshot {
+struct revenant_snapshot {
     Class cls;
     SEL *selectors;
     unsigned count;
 };
 
-static struct charon_snapshot *charon_snapshots;
-static size_t charon_snapshot_slots, charon_snapshot_used;
+static struct revenant_snapshot *revenant_snapshots;
+static size_t revenant_snapshot_slots, revenant_snapshot_used;
 
-static int charon_sel_order(const void *left, const void *right)
+static int revenant_sel_order(const void *left, const void *right)
 {
     uintptr_t a = (uintptr_t)*(SEL const *)left, b = (uintptr_t)*(SEL const *)right;
     return (a > b) - (a < b);
 }
 
-static size_t charon_snapshot_slot(Class cls, size_t slots)
+static size_t revenant_snapshot_slot(Class cls, size_t slots)
 {
     return ((uintptr_t)cls >> 4) & (slots - 1);
 }
 
-static void charon_grow_snapshots(void)
+static void revenant_grow_snapshots(void)
 {
-    size_t slots = charon_snapshot_slots ? charon_snapshot_slots * 2 : 256;
-    struct charon_snapshot *old = charon_snapshots;
-    size_t old_slots = charon_snapshot_slots;
-    charon_snapshots = calloc(slots, sizeof *charon_snapshots);
-    charon_snapshot_slots = slots;
+    size_t slots = revenant_snapshot_slots ? revenant_snapshot_slots * 2 : 256;
+    struct revenant_snapshot *old = revenant_snapshots;
+    size_t old_slots = revenant_snapshot_slots;
+    revenant_snapshots = calloc(slots, sizeof *revenant_snapshots);
+    revenant_snapshot_slots = slots;
     for (size_t index = 0; index < old_slots; index++) {
         if (!old[index].cls)
             continue;
-        size_t slot = charon_snapshot_slot(old[index].cls, slots);
-        while (charon_snapshots[slot].cls)
+        size_t slot = revenant_snapshot_slot(old[index].cls, slots);
+        while (revenant_snapshots[slot].cls)
             slot = (slot + 1) & (slots - 1);
-        charon_snapshots[slot] = old[index];
+        revenant_snapshots[slot] = old[index];
     }
     free(old);
 }
 
-static const struct charon_snapshot *charon_snapshot_of(Class cls)
+static const struct revenant_snapshot *revenant_snapshot_of(Class cls)
 {
-    if (!charon_snapshot_slots || charon_snapshot_used * 2 >= charon_snapshot_slots)
-        charon_grow_snapshots();
-    size_t slot = charon_snapshot_slot(cls, charon_snapshot_slots);
-    while (charon_snapshots[slot].cls) {
-        if (charon_snapshots[slot].cls == cls)
-            return &charon_snapshots[slot];
-        slot = (slot + 1) & (charon_snapshot_slots - 1);
+    if (!revenant_snapshot_slots || revenant_snapshot_used * 2 >= revenant_snapshot_slots)
+        revenant_grow_snapshots();
+    size_t slot = revenant_snapshot_slot(cls, revenant_snapshot_slots);
+    while (revenant_snapshots[slot].cls) {
+        if (revenant_snapshots[slot].cls == cls)
+            return &revenant_snapshots[slot];
+        slot = (slot + 1) & (revenant_snapshot_slots - 1);
     }
     unsigned count = 0;
     Method *methods = class_copyMethodList(cls, &count);
@@ -191,47 +191,47 @@ static const struct charon_snapshot *charon_snapshot_of(Class cls)
     for (unsigned index = 0; index < count; index++)
         selectors[index] = method_getName(methods[index]);
     free(methods);
-    qsort(selectors, count, sizeof *selectors, charon_sel_order);
-    charon_snapshots[slot] = (struct charon_snapshot){cls, selectors, count};
-    charon_snapshot_used++;
-    return &charon_snapshots[slot];
+    qsort(selectors, count, sizeof *selectors, revenant_sel_order);
+    revenant_snapshots[slot] = (struct revenant_snapshot){cls, selectors, count};
+    revenant_snapshot_used++;
+    return &revenant_snapshots[slot];
 }
 
-static void charon_free_snapshots(void)
+static void revenant_free_snapshots(void)
 {
-    for (size_t index = 0; index < charon_snapshot_slots; index++)
-        free(charon_snapshots[index].selectors);
-    free(charon_snapshots);
-    charon_snapshots = NULL;
-    charon_snapshot_slots = charon_snapshot_used = 0;
+    for (size_t index = 0; index < revenant_snapshot_slots; index++)
+        free(revenant_snapshots[index].selectors);
+    free(revenant_snapshots);
+    revenant_snapshots = NULL;
+    revenant_snapshot_slots = revenant_snapshot_used = 0;
 }
 
-static int charon_implements(Class cls, SEL selector)
+static int revenant_implements(Class cls, SEL selector)
 {
     for (Class current = cls; current; current = class_getSuperclass(current)) {
-        const struct charon_snapshot *snapshot = charon_snapshot_of(current);
-        if (snapshot->count && bsearch(&selector, snapshot->selectors, snapshot->count, sizeof selector, charon_sel_order))
+        const struct revenant_snapshot *snapshot = revenant_snapshot_of(current);
+        if (snapshot->count && bsearch(&selector, snapshot->selectors, snapshot->count, sizeof selector, revenant_sel_order))
             return 1;
     }
     return 0;
 }
 
-static size_t charon_collect(Class cls, const struct charon_list *list, struct charon_pending *pending, size_t used)
+static size_t revenant_collect(Class cls, const struct revenant_list *list, struct revenant_pending *pending, size_t used)
 {
     if (!list)
         return used;
     for (uint32_t index = 0; index < list->count; index++) {
         const char *name, *types;
         IMP implementation;
-        charon_method(list, index, &name, &types, &implementation);
+        revenant_method(list, index, &name, &types, &implementation);
         SEL selector = sel_registerName(name);
-        if (!charon_implements(cls, selector))
-            pending[used++] = (struct charon_pending){cls, selector, implementation, types};
+        if (!revenant_implements(cls, selector))
+            pending[used++] = (struct revenant_pending){cls, selector, implementation, types};
     }
     return used;
 }
 
-static void charon_add_properties(Class cls, const struct charon_list *list)
+static void revenant_add_properties(Class cls, const struct revenant_list *list)
 {
     if (!list || !class_addProperty)
         return;
@@ -259,7 +259,7 @@ static void charon_add_properties(Class cls, const struct charon_list *list)
     }
 }
 
-static void charon_reparent(Class proxy, Class release)
+static void revenant_reparent(Class proxy, Class release)
 {
     Class *words = (Class *)(void *)proxy;
     Class *meta = (Class *)(void *)object_getClass((id)proxy);
@@ -275,29 +275,29 @@ static void charon_reparent(Class proxy, Class release)
             class_getName(proxy), class_getName(release), class_getName(release));
 }
 
-static unsigned charon_method_count(Class cls)
+static unsigned revenant_method_count(Class cls)
 {
     unsigned count = 0;
     free(class_copyMethodList(cls, &count));
     return count;
 }
 
-static size_t charon_adopt_methods(Class release, Class proxy, Class own, struct charon_pending *pending, size_t used)
+static size_t revenant_adopt_methods(Class release, Class proxy, Class own, struct revenant_pending *pending, size_t used)
 {
     unsigned count = 0;
     Method *methods = class_copyMethodList(proxy, &count);
     for (unsigned index = 0; index < count; index++) {
         SEL selector = method_getName(methods[index]);
-        if (!charon_implements(release, selector))
-            pending[used++] = (struct charon_pending){release, selector, method_getImplementation(methods[index]), method_getTypeEncoding(methods[index])};
-        else if (!own || !charon_implements(own, selector))
+        if (!revenant_implements(release, selector))
+            pending[used++] = (struct revenant_pending){release, selector, method_getImplementation(methods[index]), method_getTypeEncoding(methods[index])};
+        else if (!own || !revenant_implements(own, selector))
             method_setImplementation(methods[index], class_getMethodImplementation(release, selector));
     }
     free(methods);
     return used;
 }
 
-static void charon_adopt_declarations(Class release, Class proxy)
+static void revenant_adopt_declarations(Class release, Class proxy)
 {
     unsigned count = 0;
     Protocol **protocols = class_copyProtocolList(proxy, &count);
@@ -321,63 +321,63 @@ static void charon_adopt_declarations(Class release, Class proxy)
     free(properties);
 }
 
-__attribute__((constructor)) static void charon_backports_attach(void)
+__attribute__((constructor)) static void revenant_backports_attach(void)
 {
     unsigned long size;
-    const struct charon_category *const *categories = (const struct charon_category *const *)charon_section(&__dso_handle, charon_slide(), "__DATA", "__charon_catlist", &size);
+    const struct revenant_category *const *categories = (const struct revenant_category *const *)revenant_section(&__dso_handle, revenant_slide(), "__DATA", "__revenant_catlist", &size);
     size_t count = categories ? size / sizeof(void *) : 0;
     size_t capacity = 0;
     for (size_t index = 0; index < count; index++) {
-        const struct charon_category *category = categories[index];
+        const struct revenant_category *category = categories[index];
         capacity += (category->instance_methods ? category->instance_methods->count : 0) + (category->class_methods ? category->class_methods->count : 0);
     }
     unsigned long own_size = 0;
-    const struct charon_alias *own = charon_section(&__dso_handle, charon_slide(), "__DATA", "__charon_alias", &own_size);
+    const struct revenant_alias *own = revenant_section(&__dso_handle, revenant_slide(), "__DATA", "__revenant_alias", &own_size);
     size_t own_count = own ? own_size / sizeof *own : 0;
     Class *releases = calloc(own_count ? own_count : 1, sizeof *releases);
     for (size_t index = 0; index < own_count; index++) {
         releases[index] = objc_getClass(own[index].name);
         if (!releases[index])
             continue;
-        charon_reparent((Class)own[index].proxy, releases[index]);
-        capacity += charon_method_count((Class)own[index].proxy) + charon_method_count(object_getClass((id)own[index].proxy));
+        revenant_reparent((Class)own[index].proxy, releases[index]);
+        capacity += revenant_method_count((Class)own[index].proxy) + revenant_method_count(object_getClass((id)own[index].proxy));
     }
     size_t alias_count;
-    struct charon_alias *aliases = charon_aliases(&alias_count);
+    struct revenant_alias *aliases = revenant_aliases(&alias_count);
     Class *classes = calloc(count ? count : 1, sizeof *classes);
     for (size_t index = 0; index < count; index++) {
         Class cls = categories[index]->cls;
-        classes[index] = cls ? charon_release_class(cls, aliases, alias_count) : Nil;
+        classes[index] = cls ? revenant_release_class(cls, aliases, alias_count) : Nil;
     }
     free(aliases);
-    struct charon_pending *pending = calloc(capacity ? capacity : 1, sizeof *pending);
+    struct revenant_pending *pending = calloc(capacity ? capacity : 1, sizeof *pending);
     size_t used = 0;
     for (size_t index = 0; index < count; index++) {
-        const struct charon_category *category = categories[index];
+        const struct revenant_category *category = categories[index];
         Class cls = classes[index];
         if (!cls)
             continue;
         objc_lookUpClass(class_getName(cls));
-        used = charon_collect(cls, category->instance_methods, pending, used);
-        used = charon_collect(object_getClass((id)cls), category->class_methods, pending, used);
+        used = revenant_collect(cls, category->instance_methods, pending, used);
+        used = revenant_collect(object_getClass((id)cls), category->class_methods, pending, used);
     }
     for (size_t index = 0; index < own_count; index++) {
         if (!releases[index])
             continue;
         Class proxy = (Class)own[index].proxy;
-        used = charon_adopt_methods(releases[index], proxy, Nil, pending, used);
-        used = charon_adopt_methods(object_getClass((id)releases[index]), object_getClass((id)proxy), object_getClass((id)objc_getClass("NSObject")), pending, used);
+        used = revenant_adopt_methods(releases[index], proxy, Nil, pending, used);
+        used = revenant_adopt_methods(object_getClass((id)releases[index]), object_getClass((id)proxy), object_getClass((id)objc_getClass("NSObject")), pending, used);
     }
     for (size_t index = 0; index < used; index++)
         class_addMethod(pending[index].cls, pending[index].name, pending[index].implementation, pending[index].types);
     free(pending);
     for (size_t index = 0; index < own_count; index++) {
         if (releases[index])
-            charon_adopt_declarations(releases[index], (Class)own[index].proxy);
+            revenant_adopt_declarations(releases[index], (Class)own[index].proxy);
     }
     free(releases);
     for (size_t index = 0; index < count; index++) {
-        const struct charon_category *category = categories[index];
+        const struct revenant_category *category = categories[index];
         Class cls = classes[index];
         if (!cls)
             continue;
@@ -386,8 +386,8 @@ __attribute__((constructor)) static void charon_backports_attach(void)
             if (found && !class_conformsToProtocol(cls, found))
                 class_addProtocol(cls, found);
         }
-        charon_add_properties(cls, category->instance_properties);
+        revenant_add_properties(cls, category->instance_properties);
     }
     free(classes);
-    charon_free_snapshots();
+    revenant_free_snapshots();
 }

@@ -1,4 +1,4 @@
-#import "CharonMenus.h"
+#import "RevenantMenus.h"
 #import <UIKit/UIGestureRecognizerSubclass.h>
 
 @implementation UIHoverGestureRecognizer
@@ -11,7 +11,7 @@
 - (instancetype)initWithTarget:(id)target action:(SEL)action
 {
     if ((self = [super initWithTarget:target action:action]))
-        charon_menus_say_once(@"hover-recognizer", @"UIHoverGestureRecognizer: this release has no pointing device, so the recognizer never leaves the possible state");
+        revenant_menus_say_once(@"hover-recognizer", @"UIHoverGestureRecognizer: this release has no pointing device, so the recognizer never leaves the possible state");
     return self;
 }
 

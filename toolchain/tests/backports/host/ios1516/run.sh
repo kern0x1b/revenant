@@ -3,8 +3,8 @@ set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 FOUNDATION=${FOUNDATION:-$here/../../../../packages/a/apple-backports/Foundation}
-BUILD=${BUILD:-$(runs_fresh charon-ios1516)}
-sed 's/^- (NSComparisonResult)compare:/- (NSComparisonResult)charonHostCompare:/' "$FOUNDATION/NSUUID+Compare.m" > "$BUILD/NSUUID+Compare.m"
+BUILD=${BUILD:-$(runs_fresh revenant-ios1516)}
+sed 's/^- (NSComparisonResult)compare:/- (NSComparisonResult)revenantHostCompare:/' "$FOUNDATION/NSUUID+Compare.m" > "$BUILD/NSUUID+Compare.m"
 xcrun clang -fobjc-arc -mmacosx-version-min=10.11 -w "$here/differential.m" "$BUILD/NSUUID+Compare.m" -framework Foundation -o "$BUILD/differential"
 "$BUILD/differential" "$BUILD/expectations.h"
 # The routine check above already failed (via `set -eu`) if the port disagreed with the system

@@ -10,7 +10,7 @@
 #include <cstdint>
 #include <optional>
 
-namespace shade {
+namespace emulator {
 
 class AddressSpace;
 

@@ -35,7 +35,7 @@ LIBRARIES = {
     {name = "SQLite3Backports", folder = "SQLite3", frameworks = {}, libraries = {"sqlite3"}},
     {name = "SpriteKitBackports", folder = "SpriteKit", frameworks = {"Foundation", "CoreGraphics", "UIKit", "QuartzCore", "OpenGLES"}, libraries = {}},
     {name = "AccelerateBackports", folder = "Accelerate", frameworks = {"Accelerate", "CoreGraphics", "Foundation"}, libraries = {"FoundationBackports"}, archives = {"suitesparse-ordering"}, c_archives = {"suitesparse-ordering"}},
-    {name = "AVFoundationBackports", folder = "AVFoundation", frameworks = {"AVFoundation", "CoreMedia", "CoreVideo", "AudioToolbox", "CoreImage", "ImageIO", "CoreGraphics", "QuartzCore", "Accelerate", "UIKit", "Foundation"}, libraries = {"FoundationBackports", "GraphicsBackports", "AccelerateBackports"}, archives = {"charon-coding"}, c_archives = {"charon-coding"}},
+    {name = "AVFoundationBackports", folder = "AVFoundation", frameworks = {"AVFoundation", "CoreMedia", "CoreVideo", "AudioToolbox", "CoreImage", "ImageIO", "CoreGraphics", "QuartzCore", "Accelerate", "UIKit", "Foundation"}, libraries = {"FoundationBackports", "GraphicsBackports", "AccelerateBackports"}, archives = {"revenant-coding"}, c_archives = {"revenant-coding"}},
     {name = "AVFAudioBackports", folder = "AVFAudio", frameworks = {"AudioToolbox", "CoreAudio", "AVFoundation", "UIKit", "Foundation", "Accelerate", "QuartzCore"}, libraries = {"FoundationBackports", "GraphicsBackports", "AccelerateBackports", "AVFoundationBackports"}},
     {name = "WebKitBackports", folder = "WebKit", frameworks = {"UIKit", "Foundation"}, libraries = {"FoundationBackports", "UIKitBackports"}},
     {name = "LocalAuthenticationBackports", folder = "LocalAuthentication", frameworks = {"Foundation"}, libraries = {"FoundationBackports"}},
@@ -83,8 +83,8 @@ LIBRARIES = {
     {name = "CarPlayBackports", folder = "CarPlay", frameworks = {"CarPlay", "MapKit", "UIKit", "CoreGraphics", "CoreTelephony", "Foundation"}, libraries = {"FoundationBackports"}},
     {name = "FileProviderBackports", folder = "FileProvider", frameworks = {"FileProvider", "Foundation"}, libraries = {"FoundationBackports"}},
     {name = "NetworkBackports", folder = "Network", frameworks = {"Network", "Foundation", "Security"}, libraries = {"FoundationBackports"}},
-    {name = "IntentsBackports", folder = "Intents", frameworks = {"Intents", "UIKit", "CoreLocation", "EventKit", "Foundation"}, libraries = {"FoundationBackports", "UIKitBackports"}, archives = {"charon-coding"}, c_archives = {"charon-coding"}},
-    {name = "AccessibilityBackports", folder = "Accessibility", frameworks = {"Accessibility", "Foundation", "CoreGraphics"}, libraries = {"FoundationBackports"}, archives = {"charon-coding"}, c_archives = {"charon-coding"}},
+    {name = "IntentsBackports", folder = "Intents", frameworks = {"Intents", "UIKit", "CoreLocation", "EventKit", "Foundation"}, libraries = {"FoundationBackports", "UIKitBackports"}, archives = {"revenant-coding"}, c_archives = {"revenant-coding"}},
+    {name = "AccessibilityBackports", folder = "Accessibility", frameworks = {"Accessibility", "Foundation", "CoreGraphics"}, libraries = {"FoundationBackports"}, archives = {"revenant-coding"}, c_archives = {"revenant-coding"}},
     {name = "IntentsUIBackports", folder = "IntentsUI", frameworks = {"IntentsUI", "Intents", "UIKit", "Foundation", "CoreGraphics"}, libraries = {"FoundationBackports", "IntentsBackports"}},
     {name = "ARKitBackports", folder = "ARKit", frameworks = {"ARKit", "AVFoundation", "CoreMotion", "CoreLocation", "CoreMedia", "CoreVideo", "CoreGraphics", "ImageIO", "QuartzCore", "OpenGLES", "UIKit", "Foundation"}, libraries = {"FoundationBackports", "AVFoundationBackports", "SceneKitBackports"}},
     {name = "HealthKitBackports", folder = "HealthKit", frameworks = {"UIKit", "Foundation"}, libraries = {"FoundationBackports"}, system = {"sqlite3"}},
@@ -95,8 +95,8 @@ LIBRARIES = {
     {name = "PDFKitBackports", folder = "PDFKit", frameworks = {"PDFKit", "UIKit", "CoreGraphics", "Foundation"}, libraries = {"FoundationBackports"}},
     {name = "NetworkExtensionBackports", folder = "NetworkExtension", frameworks = {"NetworkExtension", "Foundation", "SystemConfiguration"}, libraries = {"FoundationBackports"}},
 }
-PACKAGE = "org.charon.apple-backports"
-INSTALL_FOLDER = "/usr/lib/charon/" .. PACKAGE
+PACKAGE = "org.revenant.apple-backports"
+INSTALL_FOLDER = "/usr/lib/revenant/" .. PACKAGE
 COMPATIBLE = {armv7 = {"armv7", "armv7s"}, armv7s = {"armv7s"}, arm64 = {"arm64"}}
 NOT_ENCRYPTED = "-Wl,-no_encryption"
 
@@ -142,7 +142,7 @@ local function internal_symbol(name)
         return true
     end
     local bare = name:match("^_OBJC_%u*CLASS_%$_(.+)$") or name:match("^_(.+)$") or name
-    return bare:startswith("charon_") or bare:startswith("Charon")
+    return bare:startswith("revenant_") or bare:startswith("Revenant")
 end
 
 local function symbols_where(file, wanted, kind)
@@ -204,7 +204,7 @@ function seam_symbols(root, library)
     for _, file in ipairs(os.files(path.join(folder, "*"))) do
         if file:endswith(".h") or file:endswith(".m") or file:endswith(".mm") or file:endswith(".c") then
             for line in io.lines(file) do
-                local rest = line:match("^%s*CHARON_SEAM(.*)")
+                local rest = line:match("^%s*REVENANT_SEAM(.*)")
                 local name = rest and rest:match("([%a_][%w_]*)%s*%(")
                 if name then
                     found["_" .. name] = true
@@ -223,7 +223,7 @@ function archive_of(archives, name)
         return archives[name]
     end
     for key, archive in pairs(archives) do
-        if (key:match("^(%S+)") or key) == "charon@" .. name then
+        if (key:match("^(%S+)") or key) == "revenant@" .. name then
             return archive
         end
     end
@@ -349,7 +349,7 @@ function object_key(opt, program, arguments, source, object)
     if not headers then
         return nil
     end
-    local parts = {"charon-object-2", program, environment()}
+    local parts = {"revenant-object-2", program, environment()}
     for _, argument in ipairs(arguments) do
         table.insert(parts, argument == object and "@object" or portable(argument))
     end
@@ -534,9 +534,9 @@ function generate(root, sdkdir)
     end
     generated[root] = true
     local tree = path.absolute(path.join(root, "..", "..", ".."))
-    local sdk = os.getenv("CHARON_GEN_SDK")
+    local sdk = os.getenv("REVENANT_GEN_SDK")
     if not sdk or sdk == "" then
-        raise("the generated layer needs CHARON_GEN_SDK: the iPhoneOS SDK whose release the spec snapshot is measured on (gen --sdk)")
+        raise("the generated layer needs REVENANT_GEN_SDK: the iPhoneOS SDK whose release the spec snapshot is measured on (gen --sdk)")
     end
     os.runv(os.programfile(), {"l", path.join(tree, "tools", "gen.lua"), "gen", "--tree", tree, "--all", "--sdk", sdk})
     if os.isdir(path.join(root, "Intents")) then
@@ -640,10 +640,10 @@ function protocol_sources(opt, library, folder, umbrella)
 // arrived in, so every symbol here first appears in one release and release-split is clean.
 // A protocol this library's own sources already emit is NOT named here, and the comment says which file
 // emits it: naming it in both places is what two definers of one symbol meant.
-#import "Charon%sProtocols.h"
+#import "Revenant%sProtocols.h"
 
-static void charon_%s_protocols(void) __attribute__((used));
-static void charon_%s_protocols(void)
+static void revenant_%s_protocols(void) __attribute__((used));
+static void revenant_%s_protocols(void)
 {
 ]], library.name, introduced, library.name, library.folder, library.name, library.name)
         for _, name in ipairs(names) do
@@ -878,7 +878,7 @@ local INVENTORY_STORE
 
 local function release_inventory(cache)
     if not INVENTORIES[cache] and INVENTORY_STORE and os.isfile(cache) then
-        local parts = {"charon-inventory-1", cache, tostring(os.filesize(cache)), tostring(os.mtime(cache))}
+        local parts = {"revenant-inventory-1", cache, tostring(os.filesize(cache)), tostring(os.mtime(cache))}
         for _, name in ipairs({"objc.lua", "dyld.lua", "macho.lua"}) do
             table.insert(parts, hash.strhash128(io.readfile(path.join(os.scriptdir(), name))))
         end
@@ -928,7 +928,7 @@ function linked_key(opt, program, arguments, real_paths, outputdir, output)
     if not opt.store then
         return nil
     end
-    local parts = {"charon-link-2", program, environment(), own_text()}
+    local parts = {"revenant-link-2", program, environment(), own_text()}
     local folders = {{outputdir, "@outputdir"}, {opt.builddir, "@builddir"}}
     for _, argument in ipairs(arguments) do
         local text = argument
@@ -975,7 +975,7 @@ local function link(opt, library, attach, objects, releases, outputdir, checked)
     if checked then
         local told = duplicated(kept, carried_classes(checked.cache))
         if #told > 0 then
-            raise("the band for iOS %s keeps %s, which the release has and does not export: the band cannot leave a class out that nothing says is there, and a process would hold two classes of that name, one of which the runtime picks. Ask the release for the class where it has one, or carry it under a name of Charon's own.",
+            raise("the band for iOS %s keeps %s, which the release has and does not export: the band cannot leave a class out that nothing says is there, and a process would hold two classes of that name, one of which the runtime picks. Ask the release for the class where it has one, or carry it under a name of Revenant's own.",
                   checked.release, table.concat(told, " "))
         end
     end
@@ -984,7 +984,7 @@ local function link(opt, library, attach, objects, releases, outputdir, checked)
     local arguments = {"-target", opt.triple, "-isysroot", opt.sdkdir, "-fuse-ld=" .. opt.ld, "-fobjc-arc",
                        "-dynamiclib", "-Wno-incompatible-sysroot", NOT_ENCRYPTED,
                        "-install_name", path.join(INSTALL_FOLDER, path.filename(output)),
-                       "-Wl,-rename_section,__DATA,__objc_catlist,__DATA,__charon_catlist", "-o", output, attach}
+                       "-Wl,-rename_section,__DATA,__objc_catlist,__DATA,__revenant_catlist", "-o", output, attach}
     table.join2(arguments, kept)
     if #reexported > 0 then
         local folder = path.join(opt.builddir, "stubs", path.filename(outputdir), library.name)
@@ -1172,7 +1172,7 @@ function unattached_categories(release, inventory, binaries, architecture)
                                             table.concat(members, " "), path.filename(binary))
                 local carried = class and inventory.classes[class]
                 if carried and carried.image then
-                    table.insert(found, string.format("%s (the release carries %s in %s without exporting it: alias it through charon_alias.h)",
+                    table.insert(found, string.format("%s (the release carries %s in %s without exporting it: alias it through revenant_alias.h)",
                                                       named, class, carried.image))
                 else
                     table.insert(found, named)
@@ -1222,12 +1222,12 @@ end
 
 function carried_api(inventory, declared, documented)
     local found = members_of(inventory, function (name)
-        return not name:startswith("Charon")
+        return not name:startswith("Revenant")
     end)
     declared = declared or {}
     documented = documented or {}
     for name, protocol in pairs(inventory and inventory.protocols or {}) do
-        if declared[name] and not name:startswith("Charon") then
+        if declared[name] and not name:startswith("Revenant") then
             for kind, sign in pairs({instance = "-", class = "+"}) do
                 for selector in pairs(protocol[kind] or {}) do
                     local plain = selector:sub(2)
@@ -1266,18 +1266,18 @@ function surface(binaries, architecture, declared, documented)
         local inventory = objc.binary_inventory(binary, architecture)
         for symbol in pairs(found.defined) do
             local proto = symbol:match("^_OBJC_PROTOCOL_%$_(.+)$") or symbol:match("^_OBJC_LABEL_PROTOCOL_%$_(.+)$")
-            if proto and not proto:startswith("Charon") then
+            if proto and not proto:startswith("Revenant") then
                 found.protocols[proto] = true
             end
         end
         for name, class in pairs(inventory and inventory.classes or {}) do
-            if class.image and not name:startswith("Charon") then
+            if class.image and not name:startswith("Revenant") then
                 found.classes[name] = true
             end
-            if (class.image or (found.protocols or {})[name]) and not name:startswith("Charon") then
+            if (class.image or (found.protocols or {})[name]) and not name:startswith("Revenant") then
                 found.classes[name] = true
             end
-            if not name:startswith("Charon") then
+            if not name:startswith("Revenant") then
                 for kind, sign in pairs({instance = "-", class = "+"}) do
                     for selector in pairs(class[kind]) do
                         found.answered[string.format("%s[%s %s]", sign, name, selector:sub(2))] = true
@@ -2243,7 +2243,7 @@ local function measured_names(opt, source, object)
         for _, step in ipairs(ladder(opt.architecture)) do
             table.insert(signature, step.release .. "=" .. step.architecture .. "=" .. step.source)
         end
-        local key = hash.strhash128("charon-releases-2\n" .. KEYS[object] .. "\n" .. opt.sdkdir .. "\n" .. table.concat(signature, "\n")
+        local key = hash.strhash128("revenant-releases-2\n" .. KEYS[object] .. "\n" .. opt.sdkdir .. "\n" .. table.concat(signature, "\n")
                                     .. "\n" .. dyld.first_release_key(ladder(opt.architecture), opt.sdkdir) .. "\n" .. own_text())
         file = path.join(opt.store, "releases", key:sub(1, 2), key .. ".lua")
         local saved = os.isfile(file) and io.load(file)
@@ -2384,7 +2384,7 @@ function duplicated(objects, classes)
         end
         for _, symbol in ipairs(exported_symbols(object)) do
             local class = symbol:match("^_OBJC_CLASS_%$_(.+)$")
-            if class and classes[class] and not defined["_OBJC_CLASS_$_Charon" .. class] then
+            if class and classes[class] and not defined["_OBJC_CLASS_$_Revenant" .. class] then
                 found[class] = path.filename(object)
             end
         end
@@ -2600,19 +2600,19 @@ function write_searchbundle(opt)
     if not corespotlight_staged(opt) then
         return
     end
-    local folder = path.join(opt.builddir, "searchbundle", "org.charon.corespotlight.searchBundle")
+    local folder = path.join(opt.builddir, "searchbundle", "org.revenant.corespotlight.searchBundle")
     os.tryrm(folder)
     os.mkdir(folder)
-    local source = path.join(opt.root, "CoreSpotlight", "SearchBundle", "CharonSearchDatastore.m")
-    local output = path.join(folder, "org.charon.corespotlight")
+    local source = path.join(opt.root, "CoreSpotlight", "SearchBundle", "RevenantSearchDatastore.m")
+    local output = path.join(folder, "org.revenant.corespotlight")
     local triple = opt.architecture .. "-apple-ios" .. opt.deployment
     os.vrunv(driver(opt, {"-target", triple, "-isysroot", opt.sdkdir, "-fuse-ld=" .. opt.ld, "-fobjc-arc",
                           "-bundle", "-Os", "-g0", "-Wall", NOT_ENCRYPTED,
-                          "-DCHARON_BACKPORTS_INSTALL_FOLDER=\"" .. INSTALL_FOLDER .. "\"", "-o", output, source, "-framework", "Foundation"}))
+                          "-DREVENANT_BACKPORTS_INSTALL_FOLDER=\"" .. INSTALL_FOLDER .. "\"", "-o", output, source, "-framework", "Foundation"}))
     os.vrunv("xcrun", {"strip", "-x", output})
     signing.sign(opt.ldid, output)
     os.cp(path.join(opt.root, "CoreSpotlight", "SearchBundle", "Info.plist"), path.join(folder, "Info.plist"))
-    cprint("${color.warning}withheld:${clear} org.charon.corespotlight.searchBundle is built at %s but not packaged: %s", folder, SEARCHBUNDLE_WITHHELD)
+    cprint("${color.warning}withheld:${clear} org.revenant.corespotlight.searchBundle is built at %s but not packaged: %s", folder, SEARCHBUNDLE_WITHHELD)
 end
 
 function write_deb(opt)
@@ -2631,7 +2631,7 @@ function write_deb(opt)
         "Name: Apple API backports",
         "Architecture: iphoneos-arm",
         "Section: System",
-        "Description: Objective-C classes and methods of later iOS releases for the releases that lack them, as the libraries ports built with Charon load from " .. INSTALL_FOLDER .. "; libraries built and checked for iOS " .. table.concat(covered, ", ")
+        "Description: Objective-C classes and methods of later iOS releases for the releases that lack them, as the libraries ports built with Revenant load from " .. INSTALL_FOLDER .. "; libraries built and checked for iOS " .. table.concat(covered, ", ")
     }, "\n") .. "\n")
     local scripts = path.join(opt.builddir, "scripts")
     write_scripts(scripts)

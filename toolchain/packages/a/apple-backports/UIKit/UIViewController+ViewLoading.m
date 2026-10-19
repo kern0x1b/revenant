@@ -1,6 +1,6 @@
 #import <UIKit/UIKit.h>
 
-@implementation UIViewController (CharonViewLoading)
+@implementation UIViewController (RevenantViewLoading)
 
 - (void)loadViewIfNeeded
 {

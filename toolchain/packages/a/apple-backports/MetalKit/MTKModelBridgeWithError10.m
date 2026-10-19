@@ -1,7 +1,7 @@
 #import <MetalKit/MetalKit.h>
 #import <ModelIO/ModelIO.h>
 
-MDLVertexFormat CharonMDLFormatFromMetal(MTLVertexFormat format)
+MDLVertexFormat RevenantMDLFormatFromMetal(MTLVertexFormat format)
 {
     switch (format) {
         case MTLVertexFormatFloat: return MDLVertexFormatFloat;
@@ -27,7 +27,7 @@ MDLVertexFormat CharonMDLFormatFromMetal(MTLVertexFormat format)
     }
 }
 
-MTLVertexFormat CharonMetalFormatFromMDL(MDLVertexFormat format)
+MTLVertexFormat RevenantMetalFormatFromMDL(MDLVertexFormat format)
 {
     switch (format) {
         case MDLVertexFormatFloat: return MTLVertexFormatFloat;
@@ -60,7 +60,7 @@ MDLVertexDescriptor *MTKModelIOVertexDescriptorFromMetalWithError(MTLVertexDescr
         MTLVertexAttributeDescriptor *attribute = metalDescriptor.attributes[index];
         if (attribute.format == MTLVertexFormatInvalid)
             continue;
-        MDLVertexFormat format = CharonMDLFormatFromMetal(attribute.format);
+        MDLVertexFormat format = RevenantMDLFormatFromMetal(attribute.format);
         if (format == MDLVertexFormatInvalid) {
             if (error)
                 *error = [NSError errorWithDomain:MTKModelErrorDomain code:1 userInfo:@{MTKModelErrorKey: @(index), NSLocalizedDescriptionKey: @"this port does not map every MTLVertexFormat to a Model I/O vertex format"}];
@@ -85,7 +85,7 @@ MTLVertexDescriptor *MTKMetalVertexDescriptorFromModelIOWithError(MDLVertexDescr
             index++;
             continue;
         }
-        MTLVertexFormat format = CharonMetalFormatFromMDL(attribute.format);
+        MTLVertexFormat format = RevenantMetalFormatFromMDL(attribute.format);
         if (format == MTLVertexFormatInvalid) {
             if (error)
                 *error = [NSError errorWithDomain:MTKModelErrorDomain code:2 userInfo:@{MTKModelErrorKey: @(index), NSLocalizedDescriptionKey: @"this port does not map every Model I/O vertex format to an MTLVertexFormat"}];

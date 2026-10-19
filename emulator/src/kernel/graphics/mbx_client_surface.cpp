@@ -15,7 +15,7 @@
 #include "graphics/gles_renderer.hpp"
 #include "foundation/userland_hle.hpp"
 
-namespace shade {
+namespace emulator {
 
 std::uint32_t Mbx2dHle::allocate_client_surface(
     std::uint32_t base, std::uint32_t allocation_size, std::uint32_t width)

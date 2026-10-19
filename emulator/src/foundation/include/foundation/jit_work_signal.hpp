@@ -12,7 +12,7 @@
 #include <cstdint>
 #include <memory>
 
-namespace shade {
+namespace emulator {
 
 enum class JitWorkActivityKind : std::uint8_t {
     Activation,

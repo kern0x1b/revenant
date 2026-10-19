@@ -1,6 +1,6 @@
-#import "CharonGC.h"
+#import "RevenantGC.h"
 
-@implementation CharonGCTables
+@implementation RevenantGCTables
 
 + (NSArray *)extendedSpecs
 {

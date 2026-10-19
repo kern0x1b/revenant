@@ -1,10 +1,10 @@
-#import "CharonMetal.h"
+#import "RevenantMetal.h"
 
-@implementation CharonMetalLibrary (Descriptors14)
+@implementation RevenantMetalLibrary (Descriptors14)
 
 - (id<MTLFunction>)newFunctionWithDescriptor:(MTLFunctionDescriptor *)descriptor error:(NSError **)error
 {
-    return [self charonFunctionNamed:descriptor.name specializedName:descriptor.specializedName options:descriptor.options constantValues:descriptor.constantValues error:error];
+    return [self revenantFunctionNamed:descriptor.name specializedName:descriptor.specializedName options:descriptor.options constantValues:descriptor.constantValues error:error];
 }
 
 - (void)newFunctionWithDescriptor:(MTLFunctionDescriptor *)descriptor completionHandler:(void (^)(id<MTLFunction> function, NSError *error))completionHandler
@@ -17,7 +17,7 @@
 - (id<MTLFunction>)newIntersectionFunctionWithDescriptor:(MTLIntersectionFunctionDescriptor *)descriptor error:(NSError **)error
 {
     if (error)
-        *error = CharonMetalError(22, @"this device has no ray tracing, so a library of it holds no intersection function");
+        *error = RevenantMetalError(22, @"this device has no ray tracing, so a library of it holds no intersection function");
     return nil;
 }
 
@@ -35,7 +35,7 @@
 
 - (NSString *)installName
 {
-    return [self charonInstallName];
+    return [self revenantInstallName];
 }
 
 @end

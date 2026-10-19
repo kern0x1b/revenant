@@ -1,6 +1,6 @@
-#import "CharonMPSGraph.h"
+#import "RevenantMPSGraph.h"
 
-@implementation MPSGraph (CharonMPSGraphTensorShape161)
+@implementation MPSGraph (RevenantMPSGraphTensorShape161)
 
 - (MPSGraphTensor *)spaceToBatchTensor:(MPSGraphTensor *)tensor
                           spatialAxes:(NSArray<NSNumber *> *)spatialAxes
@@ -9,7 +9,7 @@
                  usePixelShuffleOrder:(BOOL)usePixelShuffleOrder
                                  name:(NSString *)name
 {
-    return [self charon_mps_blockShuffle:tensor
+    return [self revenant_mps_blockShuffle:tensor
                                   spatial:spatialAxes ?: @[]
                                     batch:batchAxis
                                     block:blockDimensions ?: @[]
@@ -25,7 +25,7 @@
                  usePixelShuffleOrder:(BOOL)usePixelShuffleOrder
                                  name:(NSString *)name
 {
-    return [self charon_mps_blockShuffle:tensor
+    return [self revenant_mps_blockShuffle:tensor
                                   spatial:spatialAxes ?: @[]
                                     batch:batchAxis
                                     block:blockDimensions ?: @[]
@@ -41,7 +41,7 @@
                  usePixelShuffleOrder:(BOOL)usePixelShuffleOrder
                                  name:(NSString *)name
 {
-    return [self charon_mps_fedBlockShuffle:tensor
+    return [self revenant_mps_fedBlockShuffle:tensor
                                      spatial:spatialAxesTensor
                                        batch:batchAxisTensor
                                        block:blockDimensionsTensor
@@ -57,7 +57,7 @@
                  usePixelShuffleOrder:(BOOL)usePixelShuffleOrder
                                  name:(NSString *)name
 {
-    return [self charon_mps_fedBlockShuffle:tensor
+    return [self revenant_mps_fedBlockShuffle:tensor
                                      spatial:spatialAxesTensor
                                        batch:batchAxisTensor
                                        block:blockDimensionsTensor

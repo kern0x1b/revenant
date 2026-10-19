@@ -1,43 +1,43 @@
 #define DNSServiceBrowse DNSServiceBrowseAsThisSDKDeclaresIt
-#import "CharonNW.h"
-#import "CharonNWSupport.h"
+#import "RevenantNW.h"
+#import "RevenantNWSupport.h"
 
 #include <arpa/inet.h>
 #include <dns_sd.h>
 #include <string.h>
 #undef DNSServiceBrowse
 
-typedef void (*CharonDNSServiceBrowseReply)(DNSServiceRef, DNSServiceFlags, uint32_t, DNSServiceErrorType,
+typedef void (*RevenantDNSServiceBrowseReply)(DNSServiceRef, DNSServiceFlags, uint32_t, DNSServiceErrorType,
                                             const char *);
 
 extern DNSServiceErrorType DNSServiceBrowse(DNSServiceRef *, DNSServiceFlags, uint32_t, const char *,
-                                            const char *, CharonDNSServiceBrowseReply, void *);
+                                            const char *, RevenantDNSServiceBrowseReply, void *);
 extern DNSServiceErrorType DNSServiceResolve(DNSServiceRef *, DNSServiceFlags, uint32_t, const char *,
                                             const char *, const char *, DNSServiceResolveReply, void *);
 extern void DNSServiceRefDeallocate(DNSServiceRef);
 extern int DNSServiceProcessResult(DNSServiceRef);
 extern int DNSServiceRefSockFD(DNSServiceRef);
 
-@class CharonNWBrowser;
+@class RevenantNWBrowser;
 
-@interface CharonNWBrowserLookup : NSObject {
+@interface RevenantNWBrowserLookup : NSObject {
 @public
     NSString *_key;
     NSString *_name;
     NSString *_type;
     NSString *_domain;
     NSMutableArray *_interfaceIndexes;
-    __weak CharonNWBrowser *_browser;
+    __weak RevenantNWBrowser *_browser;
     DNSServiceRef _resolve;
     dispatch_source_t _source;
-    CharonNWTxtRecord *_txt;
+    RevenantNWTxtRecord *_txt;
     BOOL _resolved;
     BOOL _reported;
     BOOL _wantRecord;
 }
 @end
 
-@implementation CharonNWBrowserLookup
+@implementation RevenantNWBrowserLookup
 
 - (void)close
 {
@@ -53,10 +53,10 @@ extern int DNSServiceRefSockFD(DNSServiceRef);
 
 @end
 
-@interface CharonNWBrowser : NSObject <OS_nw_browser> {
+@interface RevenantNWBrowser : NSObject <OS_nw_browser> {
 @public
-    CharonNWBrowseDescriptor *_descriptor;
-    CharonNWParameters *_parameters;
+    RevenantNWBrowseDescriptor *_descriptor;
+    RevenantNWParameters *_parameters;
     dispatch_queue_t _queue;
     nw_browser_state_changed_handler_t _state;
     nw_browser_browse_results_changed_handler_t _results;
@@ -75,10 +75,10 @@ extern int DNSServiceRefSockFD(DNSServiceRef);
 }
 @end
 
-@implementation CharonNWBrowser
+@implementation RevenantNWBrowser
 @end
 
-static void charon_browser_report(CharonNWBrowser *browser, nw_browser_state_t state, CharonNWError *error)
+static void revenant_browser_report(RevenantNWBrowser *browser, nw_browser_state_t state, RevenantNWError *error)
 {
     @synchronized(browser) {
         if (browser->_cancelled && state != nw_browser_state_cancelled)
@@ -92,15 +92,15 @@ static void charon_browser_report(CharonNWBrowser *browser, nw_browser_state_t s
         handler(state, (nw_error_t)error);
 }
 
-static CharonNWError *charon_browser_error(nw_error_domain_t domain, int code)
+static RevenantNWError *revenant_browser_error(nw_error_domain_t domain, int code)
 {
-    CharonNWError *error = [[CharonNWError alloc] init];
+    RevenantNWError *error = [[RevenantNWError alloc] init];
     error->_domain = domain;
     error->_code = code;
     return error;
 }
 
-static dispatch_source_t charon_browser_source(int handle, dispatch_queue_t queue)
+static dispatch_source_t revenant_browser_source(int handle, dispatch_queue_t queue)
 {
     dispatch_source_t source = dispatch_source_create(DISPATCH_SOURCE_TYPE_READ, (uintptr_t)handle, 0, queue);
     if (source)
@@ -108,26 +108,26 @@ static dispatch_source_t charon_browser_source(int handle, dispatch_queue_t queu
     return source;
 }
 
-static nw_interface_t charon_browser_interface(CharonNWBrowser *browser, NSNumber *index)
+static nw_interface_t revenant_browser_interface(RevenantNWBrowser *browser, NSNumber *index)
 {
     return (nw_interface_t)browser->_interfaces[index];
 }
 
-static CharonNWBrowseResult *charon_browser_result(CharonNWBrowser *browser, CharonNWBrowserLookup *lookup)
+static RevenantNWBrowseResult *revenant_browser_result(RevenantNWBrowser *browser, RevenantNWBrowserLookup *lookup)
 {
-    CharonNWBrowseResult *result = [[CharonNWBrowseResult alloc] init];
+    RevenantNWBrowseResult *result = [[RevenantNWBrowseResult alloc] init];
     result->_name = lookup->_name;
     result->_type = lookup->_type;
     result->_domain = lookup->_domain;
     result->_txtRecord = lookup->_txt;
     NSMutableArray *interfaces = [NSMutableArray array];
     for (NSNumber *index in lookup->_interfaceIndexes) {
-        nw_interface_t interface = charon_browser_interface(browser, index);
+        nw_interface_t interface = revenant_browser_interface(browser, index);
         if (interface)
             [interfaces addObject:(id)interface];
     }
     result->_interfaces = interfaces;
-    CharonNWEndpoint *endpoint = [[CharonNWEndpoint alloc] init];
+    RevenantNWEndpoint *endpoint = [[RevenantNWEndpoint alloc] init];
     endpoint->_type = nw_endpoint_type_bonjour_service;
     endpoint->_bonjourName = lookup->_name;
     endpoint->_bonjourType = lookup->_type;
@@ -137,13 +137,13 @@ static CharonNWBrowseResult *charon_browser_result(CharonNWBrowser *browser, Cha
     return result;
 }
 
-static void charon_browser_enqueue(CharonNWBrowser *browser, CharonNWBrowseResult *old, CharonNWBrowseResult *fresh)
+static void revenant_browser_enqueue(RevenantNWBrowser *browser, RevenantNWBrowseResult *old, RevenantNWBrowseResult *fresh)
 {
     [browser->_batch addObject:[NSArray arrayWithObjects:(id)(old ?: [NSNull null]),
                                                    (id)(fresh ?: [NSNull null]), nil]];
 }
 
-static void charon_browser_drain(CharonNWBrowser *browser)
+static void revenant_browser_drain(RevenantNWBrowser *browser)
 {
     if (!browser->_batch.count)
         return;
@@ -159,30 +159,30 @@ static void charon_browser_drain(CharonNWBrowser *browser)
     }
 }
 
-static void charon_browser_pump(DNSServiceRef reference, CharonNWBrowser *browser)
+static void revenant_browser_pump(DNSServiceRef reference, RevenantNWBrowser *browser)
 {
     if (reference)
         DNSServiceProcessResult(reference);
-    charon_browser_drain(browser);
+    revenant_browser_drain(browser);
 }
 
-static void charon_browser_gone(CharonNWBrowser *browser, CharonNWBrowserLookup *lookup)
+static void revenant_browser_gone(RevenantNWBrowser *browser, RevenantNWBrowserLookup *lookup)
 {
-    CharonNWBrowseResult *reported = browser->_reported[lookup->_key];
+    RevenantNWBrowseResult *reported = browser->_reported[lookup->_key];
     [lookup close];
     [browser->_lookups removeObjectForKey:lookup->_key];
     if (!reported)
         return;
     [browser->_reported removeObjectForKey:lookup->_key];
-    charon_browser_enqueue(browser, reported, nil);
+    revenant_browser_enqueue(browser, reported, nil);
 }
 
-static void charon_browser_resolved(DNSServiceRef sdRef, DNSServiceFlags flags, uint32_t interfaceIndex,
+static void revenant_browser_resolved(DNSServiceRef sdRef, DNSServiceFlags flags, uint32_t interfaceIndex,
                                     DNSServiceErrorType errorCode, const char *fullname, const char *hosttarget,
                                     uint16_t port, uint16_t txtLen, const unsigned char *txtRecord, void *context)
 {
-    CharonNWBrowserLookup *lookup = (__bridge CharonNWBrowserLookup *)context;
-    CharonNWBrowser *browser = lookup->_browser;
+    RevenantNWBrowserLookup *lookup = (__bridge RevenantNWBrowserLookup *)context;
+    RevenantNWBrowser *browser = lookup->_browser;
     (void)sdRef;
     (void)flags;
     (void)interfaceIndex;
@@ -195,21 +195,21 @@ static void charon_browser_resolved(DNSServiceRef sdRef, DNSServiceFlags flags, 
     if (errorCode != kDNSServiceErr_NoError)
         return;
     if (lookup->_wantRecord && txtLen)
-        lookup->_txt = (CharonNWTxtRecord *)nw_txt_record_create_with_bytes(txtRecord, txtLen);
+        lookup->_txt = (RevenantNWTxtRecord *)nw_txt_record_create_with_bytes(txtRecord, txtLen);
     lookup->_resolved = YES;
-    CharonNWBrowseResult *old = browser->_reported[lookup->_key];
-    CharonNWBrowseResult *fresh = charon_browser_result(browser, lookup);
+    RevenantNWBrowseResult *old = browser->_reported[lookup->_key];
+    RevenantNWBrowseResult *fresh = revenant_browser_result(browser, lookup);
     lookup->_reported = YES;
     browser->_reported[lookup->_key] = fresh;
     if (old && nw_txt_record_is_equal((nw_txt_record_t)old->_txtRecord, (nw_txt_record_t)fresh->_txtRecord))
         return;
-    charon_browser_enqueue(browser, old, fresh);
+    revenant_browser_enqueue(browser, old, fresh);
 }
 
-static CharonNWBrowserLookup *charon_browser_lookup(CharonNWBrowser *browser, NSString *name, NSString *type,
+static RevenantNWBrowserLookup *revenant_browser_lookup(RevenantNWBrowser *browser, NSString *name, NSString *type,
                                                     NSString *domain)
 {
-    CharonNWBrowserLookup *lookup = [[CharonNWBrowserLookup alloc] init];
+    RevenantNWBrowserLookup *lookup = [[RevenantNWBrowserLookup alloc] init];
     lookup->_key = name;
     lookup->_name = name;
     lookup->_type = type;
@@ -221,31 +221,31 @@ static CharonNWBrowserLookup *charon_browser_lookup(CharonNWBrowser *browser, NS
     return lookup;
 }
 
-static void charon_browser_resolve(CharonNWBrowser *browser, CharonNWBrowserLookup *lookup)
+static void revenant_browser_resolve(RevenantNWBrowser *browser, RevenantNWBrowserLookup *lookup)
 {
     DNSServiceRef resolve = NULL;
     if (DNSServiceResolve(&resolve, 0, kDNSServiceInterfaceIndexAny, lookup->_name.UTF8String,
-                          lookup->_type.UTF8String, lookup->_domain.UTF8String, charon_browser_resolved,
+                          lookup->_type.UTF8String, lookup->_domain.UTF8String, revenant_browser_resolved,
                           (__bridge void *)lookup) != kDNSServiceErr_NoError || !resolve)
         return;
     lookup->_resolve = resolve;
-    lookup->_source = charon_browser_source(DNSServiceRefSockFD(resolve), browser->_queue);
+    lookup->_source = revenant_browser_source(DNSServiceRefSockFD(resolve), browser->_queue);
     if (!lookup->_source) {
         [lookup close];
         return;
     }
-    __weak CharonNWBrowser *weak = browser;
+    __weak RevenantNWBrowser *weak = browser;
     dispatch_source_set_event_handler(lookup->_source, ^{
-        CharonNWBrowser *strong = weak;
+        RevenantNWBrowser *strong = weak;
         if (strong && !strong->_cancelled)
-            charon_browser_pump(lookup->_resolve, strong);
+            revenant_browser_pump(lookup->_resolve, strong);
     });
 }
 
-static void charon_browser_browsed(DNSServiceRef sdRef, DNSServiceFlags flags, uint32_t interfaceIndex,
+static void revenant_browser_browsed(DNSServiceRef sdRef, DNSServiceFlags flags, uint32_t interfaceIndex,
                                    DNSServiceErrorType errorCode, const char *name)
 {
-    CharonNWBrowser *browser = (__bridge CharonNWBrowser *)dispatch_get_specific((const void *)sdRef);
+    RevenantNWBrowser *browser = (__bridge RevenantNWBrowser *)dispatch_get_specific((const void *)sdRef);
     if (!browser || browser->_cancelled || errorCode != kDNSServiceErr_NoError)
         return;
     if (!name || !name[0])
@@ -254,11 +254,11 @@ static void charon_browser_browsed(DNSServiceRef sdRef, DNSServiceFlags flags, u
     if (!instance.length)
         return;
     BOOL added = (flags & kDNSServiceFlagsAdd) != 0;
-    CharonNWBrowserLookup *lookup = browser->_lookups[instance];
+    RevenantNWBrowserLookup *lookup = browser->_lookups[instance];
     if (!lookup) {
         if (!added)
             return;
-        lookup = charon_browser_lookup(browser, instance, browser->_type, browser->_domain);
+        lookup = revenant_browser_lookup(browser, instance, browser->_type, browser->_domain);
     }
     NSNumber *index = @(interfaceIndex);
     if (added == (BOOL)[lookup->_interfaceIndexes containsObject:index])
@@ -268,23 +268,23 @@ static void charon_browser_browsed(DNSServiceRef sdRef, DNSServiceFlags flags, u
     else
         [lookup->_interfaceIndexes removeObject:index];
     if (!lookup->_interfaceIndexes.count) {
-        charon_browser_gone(browser, lookup);
-        charon_browser_drain(browser);
+        revenant_browser_gone(browser, lookup);
+        revenant_browser_drain(browser);
         return;
     }
     if (!lookup->_resolve && !lookup->_resolved) {
-        charon_browser_resolve(browser, lookup);
+        revenant_browser_resolve(browser, lookup);
         return;
     }
-    CharonNWBrowseResult *old = browser->_reported[lookup->_key];
+    RevenantNWBrowseResult *old = browser->_reported[lookup->_key];
     if (!old)
         return;
-    CharonNWBrowseResult *fresh = charon_browser_result(browser, lookup);
+    RevenantNWBrowseResult *fresh = revenant_browser_result(browser, lookup);
     browser->_reported[lookup->_key] = fresh;
-    charon_browser_enqueue(browser, old, fresh);
+    revenant_browser_enqueue(browser, old, fresh);
 }
 
-static void charon_browser_interfaces(CharonNWBrowser *browser, nw_path_t path)
+static void revenant_browser_interfaces(RevenantNWBrowser *browser, nw_path_t path)
 {
     NSMutableDictionary *interfaces = [NSMutableDictionary dictionary];
     nw_path_enumerate_interfaces_block_t each = ^(nw_interface_t interface) {
@@ -295,7 +295,7 @@ static void charon_browser_interfaces(CharonNWBrowser *browser, nw_path_t path)
     browser->_interfaces = interfaces;
 }
 
-static BOOL charon_browser_target(CharonNWBrowser *browser, NSString **out_type, NSString **out_domain)
+static BOOL revenant_browser_target(RevenantNWBrowser *browser, NSString **out_type, NSString **out_domain)
 {
     NSString *application = browser->_descriptor->_applicationService;
     if (application.length) {
@@ -310,17 +310,17 @@ static BOOL charon_browser_target(CharonNWBrowser *browser, NSString **out_type,
     return YES;
 }
 
-static void charon_browser_begin(nw_browser_t browser)
+static void revenant_browser_begin(nw_browser_t browser)
 {
-    CharonNWBrowser *self = (CharonNWBrowser *)browser;
+    RevenantNWBrowser *self = (RevenantNWBrowser *)browser;
     dispatch_async(self->_queue, ^{
         if (self->_cancelled)
             return;
-        charon_browser_report(self, nw_browser_state_waiting, nil);
+        revenant_browser_report(self, nw_browser_state_waiting, nil);
         NSString *type = nil, *domain = nil;
-        if (!charon_browser_target(self, &type, &domain)) {
-            charon_browser_report(self, nw_browser_state_failed,
-                                  charon_browser_error(nw_error_domain_dns, kDNSServiceErr_BadParam));
+        if (!revenant_browser_target(self, &type, &domain)) {
+            revenant_browser_report(self, nw_browser_state_failed,
+                                  revenant_browser_error(nw_error_domain_dns, kDNSServiceErr_BadParam));
             return;
         }
         self->_type = type;
@@ -328,46 +328,46 @@ static void charon_browser_begin(nw_browser_t browser)
         DNSServiceRef browse = NULL;
         DNSServiceErrorType failure = DNSServiceBrowse(&browse, 0, kDNSServiceInterfaceIndexAny,
                                                        type.UTF8String, domain.UTF8String,
-                                                       charon_browser_browsed, (__bridge void *)self);
+                                                       revenant_browser_browsed, (__bridge void *)self);
         int descriptor = browse ? DNSServiceRefSockFD(browse) : -1;
         if (failure != kDNSServiceErr_NoError || !browse || descriptor < 0) {
             if (browse)
                 DNSServiceRefDeallocate(browse);
-            charon_browser_report(self, nw_browser_state_failed,
-                                  charon_browser_error(nw_error_domain_dns,
+            revenant_browser_report(self, nw_browser_state_failed,
+                                  revenant_browser_error(nw_error_domain_dns,
                                                        (int)(failure != kDNSServiceErr_NoError ? failure
                                                                                           : kDNSServiceErr_Unknown)));
             return;
         }
         self->_browse = browse;
         dispatch_queue_set_specific(self->_queue, (const void *)browse, (__bridge void *)self, NULL);
-        self->_source = charon_browser_source(descriptor, self->_queue);
+        self->_source = revenant_browser_source(descriptor, self->_queue);
         if (!self->_source) {
-            charon_browser_report(self, nw_browser_state_failed,
-                                  charon_browser_error(nw_error_domain_dns, kDNSServiceErr_Unknown));
+            revenant_browser_report(self, nw_browser_state_failed,
+                                  revenant_browser_error(nw_error_domain_dns, kDNSServiceErr_Unknown));
             return;
         }
-        __weak CharonNWBrowser *weak = self;
+        __weak RevenantNWBrowser *weak = self;
         dispatch_source_set_event_handler(self->_source, ^{
-            CharonNWBrowser *strong = weak;
+            RevenantNWBrowser *strong = weak;
             if (strong && !strong->_cancelled)
-                charon_browser_pump(strong->_browse, strong);
+                revenant_browser_pump(strong->_browse, strong);
         });
         self->_monitor = nw_path_monitor_create();
         nw_path_monitor_set_queue(self->_monitor, self->_queue);
         nw_path_monitor_set_update_handler(self->_monitor, ^(nw_path_t path) {
-            CharonNWBrowser *strong = weak;
+            RevenantNWBrowser *strong = weak;
             if (strong && !strong->_cancelled)
-                charon_browser_interfaces(strong, path);
+                revenant_browser_interfaces(strong, path);
         });
         nw_path_monitor_start(self->_monitor);
-        charon_browser_report(self, nw_browser_state_ready, nil);
+        revenant_browser_report(self, nw_browser_state_ready, nil);
     });
 }
 
-static void charon_browser_stop(nw_browser_t browser)
+static void revenant_browser_stop(nw_browser_t browser)
 {
-    CharonNWBrowser *self = (CharonNWBrowser *)browser;
+    RevenantNWBrowser *self = (RevenantNWBrowser *)browser;
     dispatch_block_t stop = ^{
         @synchronized(self) {
             if (self->_cancelled)
@@ -383,7 +383,7 @@ static void charon_browser_stop(nw_browser_t browser)
             DNSServiceRefDeallocate(self->_browse);
             self->_browse = NULL;
         }
-        for (CharonNWBrowserLookup *lookup in [self->_lookups allValues]) {
+        for (RevenantNWBrowserLookup *lookup in [self->_lookups allValues]) {
             [lookup close];
         }
         [self->_lookups removeAllObjects];
@@ -395,7 +395,7 @@ static void charon_browser_stop(nw_browser_t browser)
         }
         self->_state = nil;
         self->_results = nil;
-        charon_browser_report(self, nw_browser_state_cancelled, nil);
+        revenant_browser_report(self, nw_browser_state_cancelled, nil);
     };
     if (self->_queue)
         dispatch_async(self->_queue, stop);
@@ -403,54 +403,54 @@ static void charon_browser_stop(nw_browser_t browser)
         stop();
 }
 
-void CharonNWBrowserSetQueue(nw_browser_t browser, dispatch_queue_t queue)
+void RevenantNWBrowserSetQueue(nw_browser_t browser, dispatch_queue_t queue)
 {
     if (browser)
-        ((CharonNWBrowser *)browser)->_queue = queue;
+        ((RevenantNWBrowser *)browser)->_queue = queue;
 }
 
-void CharonNWBrowserSetStateHandler(nw_browser_t browser, nw_browser_state_changed_handler_t handler)
+void RevenantNWBrowserSetStateHandler(nw_browser_t browser, nw_browser_state_changed_handler_t handler)
 {
     if (browser)
-        ((CharonNWBrowser *)browser)->_state = [handler copy];
+        ((RevenantNWBrowser *)browser)->_state = [handler copy];
 }
 
-void CharonNWBrowserSetResultsHandler(nw_browser_t browser, nw_browser_browse_results_changed_handler_t handler)
+void RevenantNWBrowserSetResultsHandler(nw_browser_t browser, nw_browser_browse_results_changed_handler_t handler)
 {
     if (browser)
-        ((CharonNWBrowser *)browser)->_results = [handler copy];
+        ((RevenantNWBrowser *)browser)->_results = [handler copy];
 }
 
-nw_browse_descriptor_t CharonNWBrowserCopyBrowseDescriptor(nw_browser_t browser)
+nw_browse_descriptor_t RevenantNWBrowserCopyBrowseDescriptor(nw_browser_t browser)
 {
-    return browser ? (nw_browse_descriptor_t)((CharonNWBrowser *)browser)->_descriptor : NULL;
+    return browser ? (nw_browse_descriptor_t)((RevenantNWBrowser *)browser)->_descriptor : NULL;
 }
 
-nw_parameters_t CharonNWBrowserCopyParameters(nw_browser_t browser)
+nw_parameters_t RevenantNWBrowserCopyParameters(nw_browser_t browser)
 {
-    return browser ? (nw_parameters_t)((CharonNWBrowser *)browser)->_parameters : NULL;
+    return browser ? (nw_parameters_t)((RevenantNWBrowser *)browser)->_parameters : NULL;
 }
 
-void CharonNWBrowserStart(nw_browser_t browser)
+void RevenantNWBrowserStart(nw_browser_t browser)
 {
     if (!browser)
         return;
-    CharonNWBrowser *self = (CharonNWBrowser *)browser;
+    RevenantNWBrowser *self = (RevenantNWBrowser *)browser;
     @synchronized(self) {
         if (self->_started || self->_cancelled || !self->_queue)
             return;
         self->_started = YES;
     }
-    charon_browser_begin(browser);
+    revenant_browser_begin(browser);
 }
 
 nw_browser_t nw_browser_create(nw_browse_descriptor_t descriptor, nw_parameters_t parameters)
 {
     if (!descriptor)
         return NULL;
-    CharonNWBrowser *browser = [[CharonNWBrowser alloc] init];
-    browser->_descriptor = (CharonNWBrowseDescriptor *)descriptor;
-    browser->_parameters = parameters ? (CharonNWParameters *)parameters : (CharonNWParameters *)nw_parameters_create();
+    RevenantNWBrowser *browser = [[RevenantNWBrowser alloc] init];
+    browser->_descriptor = (RevenantNWBrowseDescriptor *)descriptor;
+    browser->_parameters = parameters ? (RevenantNWParameters *)parameters : (RevenantNWParameters *)nw_parameters_create();
     browser->_reported = [NSMutableDictionary dictionary];
     browser->_lookups = [NSMutableDictionary dictionary];
     browser->_batch = [NSMutableArray array];
@@ -463,5 +463,5 @@ void nw_browser_cancel(nw_browser_t browser)
 {
     if (!browser)
         return;
-    charon_browser_stop(browser);
+    revenant_browser_stop(browser);
 }

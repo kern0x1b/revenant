@@ -1,14 +1,14 @@
-#import "CharonContacts.h"
+#import "RevenantContacts.h"
 
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
 #pragma clang diagnostic ignored "-Wobjc-designated-initializers"
 
 @implementation CNContactFetchRequest {
-    NSPredicate *_charonPredicate;
-    NSArray *_charonKeysToFetch;
-    BOOL _charonMutableObjects;
-    BOOL _charonUnifyResults;
-    CNContactSortOrder _charonSortOrder;
+    NSPredicate *_revenantPredicate;
+    NSArray *_revenantKeysToFetch;
+    BOOL _revenantMutableObjects;
+    BOOL _revenantUnifyResults;
+    CNContactSortOrder _revenantSortOrder;
 }
 
 @dynamic predicate, keysToFetch, mutableObjects, unifyResults, sortOrder;
@@ -17,23 +17,23 @@
 {
     self = [super init];
     if (self) {
-        _charonKeysToFetch = [keysToFetch copy];
-        _charonUnifyResults = YES;
-        _charonSortOrder = CNContactSortOrderNone;
+        _revenantKeysToFetch = [keysToFetch copy];
+        _revenantUnifyResults = YES;
+        _revenantSortOrder = CNContactSortOrderNone;
     }
     return self;
 }
 
-- (NSPredicate *)predicate { return _charonPredicate; }
-- (void)setPredicate:(NSPredicate *)predicate { _charonPredicate = [predicate copy]; }
-- (NSArray *)keysToFetch { return _charonKeysToFetch ?: @[]; }
-- (void)setKeysToFetch:(NSArray *)keys { _charonKeysToFetch = [keys copy]; }
-- (BOOL)mutableObjects { return _charonMutableObjects; }
-- (void)setMutableObjects:(BOOL)mutableObjects { _charonMutableObjects = mutableObjects; }
-- (BOOL)unifyResults { return _charonUnifyResults; }
-- (void)setUnifyResults:(BOOL)unifyResults { _charonUnifyResults = unifyResults; }
-- (CNContactSortOrder)sortOrder { return _charonSortOrder; }
-- (void)setSortOrder:(CNContactSortOrder)sortOrder { _charonSortOrder = sortOrder; }
+- (NSPredicate *)predicate { return _revenantPredicate; }
+- (void)setPredicate:(NSPredicate *)predicate { _revenantPredicate = [predicate copy]; }
+- (NSArray *)keysToFetch { return _revenantKeysToFetch ?: @[]; }
+- (void)setKeysToFetch:(NSArray *)keys { _revenantKeysToFetch = [keys copy]; }
+- (BOOL)mutableObjects { return _revenantMutableObjects; }
+- (void)setMutableObjects:(BOOL)mutableObjects { _revenantMutableObjects = mutableObjects; }
+- (BOOL)unifyResults { return _revenantUnifyResults; }
+- (void)setUnifyResults:(BOOL)unifyResults { _revenantUnifyResults = unifyResults; }
+- (CNContactSortOrder)sortOrder { return _revenantSortOrder; }
+- (void)setSortOrder:(CNContactSortOrder)sortOrder { _revenantSortOrder = sortOrder; }
 
 + (BOOL)supportsSecureCoding
 {
@@ -42,21 +42,21 @@
 
 - (void)encodeWithCoder:(NSCoder *)coder
 {
-    [coder encodeObject:_charonPredicate forKey:@"predicate"];
-    [coder encodeObject:_charonKeysToFetch forKey:@"keysToFetch"];
-    [coder encodeBool:_charonMutableObjects forKey:@"mutableObjects"];
-    [coder encodeBool:_charonUnifyResults forKey:@"unifyResults"];
-    [coder encodeInteger:_charonSortOrder forKey:@"sortOrder"];
+    [coder encodeObject:_revenantPredicate forKey:@"predicate"];
+    [coder encodeObject:_revenantKeysToFetch forKey:@"keysToFetch"];
+    [coder encodeBool:_revenantMutableObjects forKey:@"mutableObjects"];
+    [coder encodeBool:_revenantUnifyResults forKey:@"unifyResults"];
+    [coder encodeInteger:_revenantSortOrder forKey:@"sortOrder"];
 }
 
 - (instancetype)initWithCoder:(NSCoder *)coder
 {
     self = [self initWithKeysToFetch:[coder decodeObjectOfClass:[NSArray class] forKey:@"keysToFetch"]];
     if (self) {
-        _charonPredicate = [coder decodeObjectOfClass:[NSPredicate class] forKey:@"predicate"];
-        _charonMutableObjects = [coder decodeBoolForKey:@"mutableObjects"];
-        _charonUnifyResults = [coder decodeBoolForKey:@"unifyResults"];
-        _charonSortOrder = (CNContactSortOrder)[coder decodeIntegerForKey:@"sortOrder"];
+        _revenantPredicate = [coder decodeObjectOfClass:[NSPredicate class] forKey:@"predicate"];
+        _revenantMutableObjects = [coder decodeBoolForKey:@"mutableObjects"];
+        _revenantUnifyResults = [coder decodeBoolForKey:@"unifyResults"];
+        _revenantSortOrder = (CNContactSortOrder)[coder decodeIntegerForKey:@"sortOrder"];
     }
     return self;
 }

@@ -4,7 +4,7 @@
 <dict>
 	<key>CFBundleDevelopmentRegion</key><string>en</string>
 	<key>CFBundleExecutable</key><string>CxxInit</string>
-	<key>CFBundleIdentifier</key><string>org.charon.xlate.cxxinit</string>
+	<key>CFBundleIdentifier</key><string>org.revenant.xlate.cxxinit</string>
 	<key>CFBundleInfoDictionaryVersion</key><string>6.0</string>
 	<key>CFBundleName</key><string>CxxInit</string>
 	<key>CFBundlePackageType</key><string>APPL</string>

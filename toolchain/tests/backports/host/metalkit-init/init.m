@@ -3,10 +3,10 @@
 #import <objc/runtime.h>
 #import <objc/message.h>
 
-@interface CharonInitOverrider : NSObject
+@interface RevenantInitOverrider : NSObject
 @end
 
-@implementation CharonInitOverrider
+@implementation RevenantInitOverrider
 - (instancetype)init { return [super init]; }
 @end
 
@@ -59,10 +59,10 @@ int main(void)
     @autoreleasepool {
         printf("does -init on each MetalKit class answer NSObject's own, on Apple's and on the port's?\n");
 
-        IMP overrider = initOf([CharonInitOverrider class]);
-        check(overrider != NULL && overrider != initOf([NSObject class]) && definesInit([CharonInitOverrider class]),
+        IMP overrider = initOf([RevenantInitOverrider class]);
+        check(overrider != NULL && overrider != initOf([NSObject class]) && definesInit([RevenantInitOverrider class]),
               @"control: a class that overrides -init differs from NSObject's IMP");
-        check(NSClassFromString(@"ZZZNoSuchNameCharonR16") == nil,
+        check(NSClassFromString(@"ZZZNoSuchNameRevenantR16") == nil,
               @"control: a name no framework has is not a class");
 
         printf("Apple's MetalKit (the host framework)\n");
@@ -72,12 +72,12 @@ int main(void)
         expectInheritsInit(@"MTKMeshBufferAllocator", @"apple MTKMeshBufferAllocator");
         expectInheritsInit(@"MTKTextureLoader", @"apple MTKTextureLoader");
 
-        printf("the port's classes (renamed CharonHost<Name> in this process)\n");
-        expectInheritsInit(@"CharonHostMTKMesh", @"port MTKMesh");
-        expectInheritsInit(@"CharonHostMTKSubmesh", @"port MTKSubmesh");
-        expectInheritsInit(@"CharonHostMTKMeshBuffer", @"port MTKMeshBuffer");
-        expectInheritsInit(@"CharonHostMTKMeshBufferAllocator", @"port MTKMeshBufferAllocator");
-        expectInheritsInit(@"CharonHostMTKTextureLoader", @"port MTKTextureLoader");
+        printf("the port's classes (renamed RevenantHost<Name> in this process)\n");
+        expectInheritsInit(@"RevenantHostMTKMesh", @"port MTKMesh");
+        expectInheritsInit(@"RevenantHostMTKSubmesh", @"port MTKSubmesh");
+        expectInheritsInit(@"RevenantHostMTKMeshBuffer", @"port MTKMeshBuffer");
+        expectInheritsInit(@"RevenantHostMTKMeshBufferAllocator", @"port MTKMeshBufferAllocator");
+        expectInheritsInit(@"RevenantHostMTKTextureLoader", @"port MTKTextureLoader");
     }
     printf("checks=%d failures=%d\n", checks, failures);
     return failures ? 1 : 0;

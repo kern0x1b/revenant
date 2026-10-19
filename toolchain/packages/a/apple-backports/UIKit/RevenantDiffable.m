@@ -1,6 +1,6 @@
-#import "CharonDiffable.h"
+#import "RevenantDiffable.h"
 
-static void charon_script(NSArray *old, NSArray *current, NSMutableIndexSet *removed, NSMutableIndexSet *inserted)
+static void revenant_script(NSArray *old, NSArray *current, NSMutableIndexSet *removed, NSMutableIndexSet *inserted)
 {
     NSMapTable *codes = [NSMapTable strongToStrongObjectsMapTable];
     NSInteger n = (NSInteger)old.count, m = (NSInteger)current.count, limit = n + m;
@@ -58,21 +58,21 @@ static void charon_script(NSArray *old, NSArray *current, NSMutableIndexSet *rem
     free(to);
 }
 
-static NSIndexPath *charon_path(NSUInteger section, NSUInteger item)
+static NSIndexPath *revenant_path(NSUInteger section, NSUInteger item)
 {
     return [NSIndexPath indexPathForRow:(NSInteger)item inSection:(NSInteger)section];
 }
 
-NSDictionary *charon_diffable_changes(NSDiffableDataSourceSnapshot *old, NSDiffableDataSourceSnapshot *current, BOOL table)
+NSDictionary *revenant_diffable_changes(NSDiffableDataSourceSnapshot *old, NSDiffableDataSourceSnapshot *current, BOOL table)
 {
-    NSArray *oldSections = [old charon_sections], *newSections = [current charon_sections];
+    NSArray *oldSections = [old revenant_sections], *newSections = [current revenant_sections];
     NSMapTable *oldIndex = [NSMapTable strongToStrongObjectsMapTable], *newIndex = [NSMapTable strongToStrongObjectsMapTable];
     for (NSUInteger index = 0; index < oldSections.count; index++)
         [oldIndex setObject:@(index) forKey:oldSections[index]];
     for (NSUInteger index = 0; index < newSections.count; index++)
         [newIndex setObject:@(index) forKey:newSections[index]];
     NSMutableIndexSet *removedSections = [NSMutableIndexSet indexSet], *insertedSections = [NSMutableIndexSet indexSet];
-    charon_script(oldSections, newSections, removedSections, insertedSections);
+    revenant_script(oldSections, newSections, removedSections, insertedSections);
     NSMutableIndexSet *deleteSections = [NSMutableIndexSet indexSet], *insertSections = [NSMutableIndexSet indexSet];
     NSMutableArray *moveSections = [NSMutableArray array];
     for (NSUInteger index = 0; index < oldSections.count; index++)
@@ -87,28 +87,28 @@ NSDictionary *charon_diffable_changes(NSDiffableDataSourceSnapshot *old, NSDiffa
     }
     NSMapTable *oldPaths = [NSMapTable strongToStrongObjectsMapTable], *newPaths = [NSMapTable strongToStrongObjectsMapTable];
     for (NSUInteger section = 0; section < oldSections.count; section++) {
-        NSArray *items = [old charon_itemsInSectionAtIndex:section];
+        NSArray *items = [old revenant_itemsInSectionAtIndex:section];
         for (NSUInteger item = 0; item < items.count; item++)
-            [oldPaths setObject:charon_path(section, item) forKey:items[item]];
+            [oldPaths setObject:revenant_path(section, item) forKey:items[item]];
     }
     for (NSUInteger section = 0; section < newSections.count; section++) {
-        NSArray *items = [current charon_itemsInSectionAtIndex:section];
+        NSArray *items = [current revenant_itemsInSectionAtIndex:section];
         for (NSUInteger item = 0; item < items.count; item++)
-            [newPaths setObject:charon_path(section, item) forKey:items[item]];
+            [newPaths setObject:revenant_path(section, item) forKey:items[item]];
     }
     NSMutableArray *deleteItems = [NSMutableArray array], *insertItems = [NSMutableArray array], *moveItems = [NSMutableArray array];
     __block BOOL fallback = NO;
     for (NSUInteger oldSection = 0; oldSection < oldSections.count; oldSection++) {
-        NSArray *oldItems = [old charon_itemsInSectionAtIndex:oldSection];
+        NSArray *oldItems = [old revenant_itemsInSectionAtIndex:oldSection];
         NSNumber *counterpart = [newIndex objectForKey:oldSections[oldSection]];
-        NSArray *newItems = counterpart ? [current charon_itemsInSectionAtIndex:counterpart.unsignedIntegerValue] : @[];
+        NSArray *newItems = counterpart ? [current revenant_itemsInSectionAtIndex:counterpart.unsignedIntegerValue] : @[];
         NSMutableIndexSet *removed = [NSMutableIndexSet indexSet], *inserted = [NSMutableIndexSet indexSet];
         if (counterpart)
-            charon_script(oldItems, newItems, removed, inserted);
+            revenant_script(oldItems, newItems, removed, inserted);
         else
             [removed addIndexesInRange:NSMakeRange(0, oldItems.count)];
         [removed enumerateIndexesUsingBlock:^(NSUInteger index, BOOL *stop) {
-            NSIndexPath *target = [newPaths objectForKey:oldItems[index]], *source = charon_path(oldSection, index);
+            NSIndexPath *target = [newPaths objectForKey:oldItems[index]], *source = revenant_path(oldSection, index);
             if (!counterpart) {
                 if (target)
                     fallback = YES;
@@ -127,7 +127,7 @@ NSDictionary *charon_diffable_changes(NSDiffableDataSourceSnapshot *old, NSDiffa
         }];
     }
     for (NSUInteger newSection = 0; newSection < newSections.count; newSection++) {
-        NSArray *newItems = [current charon_itemsInSectionAtIndex:newSection];
+        NSArray *newItems = [current revenant_itemsInSectionAtIndex:newSection];
         NSNumber *counterpart = [oldIndex objectForKey:newSections[newSection]];
         if (!counterpart)
             continue;
@@ -137,7 +137,7 @@ NSDictionary *charon_diffable_changes(NSDiffableDataSourceSnapshot *old, NSDiffa
                 continue;
             if (source)
                 fallback = YES;
-            [insertItems addObject:charon_path(newSection, index)];
+            [insertItems addObject:revenant_path(newSection, index)];
         }
     }
     if (table && moveSections.count > 1)
@@ -154,7 +154,7 @@ NSDictionary *charon_diffable_changes(NSDiffableDataSourceSnapshot *old, NSDiffa
         NSNumber *before = [oldIndex objectForKey:newSections[newSection]];
         if (!before)
             continue;
-        NSInteger count = (NSInteger)[old charon_countInSectionAtIndex:before.unsignedIntegerValue];
+        NSInteger count = (NSInteger)[old revenant_countInSectionAtIndex:before.unsignedIntegerValue];
         for (NSIndexPath *path in deleteItems)
             count -= (NSUInteger)path.section == before.unsignedIntegerValue;
         for (NSArray *pair in moveItems) {
@@ -163,17 +163,17 @@ NSDictionary *charon_diffable_changes(NSDiffableDataSourceSnapshot *old, NSDiffa
         }
         for (NSIndexPath *path in insertItems)
             count += (NSUInteger)path.section == newSection;
-        if (count != (NSInteger)[current charon_countInSectionAtIndex:newSection])
+        if (count != (NSInteger)[current revenant_countInSectionAtIndex:newSection])
             fallback = YES;
     }
     NSMutableIndexSet *reloadSections = [NSMutableIndexSet indexSet];
     NSMutableArray *reloadItems = [NSMutableArray array];
-    for (id section in [current charon_reloadedSections]) {
+    for (id section in [current revenant_reloadedSections]) {
         NSNumber *index = [newIndex objectForKey:section];
         if (index)
             [reloadSections addIndex:index.unsignedIntegerValue];
     }
-    for (id item in [current charon_reloadedItems]) {
+    for (id item in [current revenant_reloadedItems]) {
         NSIndexPath *path = [newPaths objectForKey:item];
         if (path)
             [reloadItems addObject:path];
@@ -181,16 +181,16 @@ NSDictionary *charon_diffable_changes(NSDiffableDataSourceSnapshot *old, NSDiffa
     return @{@"deleteSections": deleteSections, @"insertSections": insertSections, @"moveSections": moveSections, @"deleteItems": deleteItems, @"insertItems": insertItems, @"moveItems": moveItems, @"reloadSections": reloadSections, @"reloadItems": reloadItems, @"fallback": @(fallback)};
 }
 
-NSString *charon_diffable_source_description(NSDiffableDataSourceSnapshot *snapshot)
+NSString *revenant_diffable_source_description(NSDiffableDataSourceSnapshot *snapshot)
 {
     NSMutableArray *counts = [NSMutableArray array];
     for (NSUInteger index = 0; index < snapshot.numberOfSections; index++)
-        [counts addObject:[NSString stringWithFormat:@"%lu", (unsigned long)[snapshot charon_countInSectionAtIndex:index]]];
+        [counts addObject:[NSString stringWithFormat:@"%lu", (unsigned long)[snapshot revenant_countInSectionAtIndex:index]]];
     NSUInteger sections = (NSUInteger)snapshot.numberOfSections;
-    return [NSString stringWithFormat:@"<__UIDiffableDataSource %p: sectionCounts=<_UIDataSourceSnapshotter: %p; %lu section%@ with item counts: [%@] >; sections=[%p]; identifiers=[%p]>", (__bridge void *)snapshot, (__bridge void *)counts, (unsigned long)sections, sections == 1 ? @"" : @"s", [counts componentsJoinedByString:@", "], (__bridge void *)[snapshot charon_sections], (__bridge void *)[snapshot itemIdentifiers]];
+    return [NSString stringWithFormat:@"<__UIDiffableDataSource %p: sectionCounts=<_UIDataSourceSnapshotter: %p; %lu section%@ with item counts: [%@] >; sections=[%p]; identifiers=[%p]>", (__bridge void *)snapshot, (__bridge void *)counts, (unsigned long)sections, sections == 1 ? @"" : @"s", [counts componentsJoinedByString:@", "], (__bridge void *)[snapshot revenant_sections], (__bridge void *)[snapshot itemIdentifiers]];
 }
 
-void charon_diffable_finish(void (^completion)(void))
+void revenant_diffable_finish(void (^completion)(void))
 {
     if (!completion)
         return;

@@ -2,52 +2,52 @@
 #import <UIKit/UIKit.h>
 #import <objc/message.h>
 
-@interface CharonCarPlayInterface : NSObject
+@interface RevenantCarPlayInterface : NSObject
 + (instancetype)current;
 @property (nonatomic, weak) CPInterfaceController *controller;
 @end
 
-@implementation CharonCarPlayInterface
+@implementation RevenantCarPlayInterface
 
 @synthesize controller = _controller;
 
 + (instancetype)current
 {
-    static CharonCarPlayInterface *shared;
+    static RevenantCarPlayInterface *shared;
     static dispatch_once_t once;
     dispatch_once(&once, ^{
-        shared = [[CharonCarPlayInterface alloc] init];
+        shared = [[RevenantCarPlayInterface alloc] init];
     });
     return shared;
 }
 
 @end
 
-@interface CharonCarPlayCard : UIView
-- (void)charon_showTitle:(NSString *)title
+@interface RevenantCarPlayCard : UIView
+- (void)revenant_showTitle:(NSString *)title
                  message:(NSString *)message
                   actions:(NSArray<CPAlertAction *> *)actions;
 @end
 
-@implementation CharonCarPlayCard {
-    NSArray<CPAlertAction *> *_charon_actions;
+@implementation RevenantCarPlayCard {
+    NSArray<CPAlertAction *> *_revenant_actions;
 }
 
-- (void)charon_buttonTapped:(UIButton *)button
+- (void)revenant_buttonTapped:(UIButton *)button
 {
     NSInteger tag = button.tag;
-    if (tag < 0 || (NSUInteger)tag >= _charon_actions.count) {
+    if (tag < 0 || (NSUInteger)tag >= _revenant_actions.count) {
         return;
     }
-    CPAlertAction *action = _charon_actions[(NSUInteger)tag];
+    CPAlertAction *action = _revenant_actions[(NSUInteger)tag];
     if (action.handler) {
         action.handler(action);
     }
 }
 
-- (void)charon_showTitle:(NSString *)title message:(NSString *)message actions:(NSArray<CPAlertAction *> *)actions
+- (void)revenant_showTitle:(NSString *)title message:(NSString *)message actions:(NSArray<CPAlertAction *> *)actions
 {
-    _charon_actions = [actions copy] ?: @[];
+    _revenant_actions = [actions copy] ?: @[];
     for (UIView *view in self.subviews) {
         [view removeFromSuperview];
     }
@@ -56,26 +56,26 @@
     label.numberOfLines = 3;
     label.textColor = [UIColor whiteColor];
     [self addSubview:label];
-    CGFloat width = CGRectGetWidth(self.bounds) / (CGFloat)MAX(_charon_actions.count, 1U);
+    CGFloat width = CGRectGetWidth(self.bounds) / (CGFloat)MAX(_revenant_actions.count, 1U);
     CGFloat at = 0.0;
-    for (CPAlertAction *action in _charon_actions) {
+    for (CPAlertAction *action in _revenant_actions) {
         UIButton *button = [UIButton buttonWithType:UIButtonTypeSystem];
         button.frame = CGRectMake(at, CGRectGetMaxY(self.bounds) - 56.0, width, 44.0);
         [button setTitle:action.title forState:UIControlStateNormal];
         [button setTitleColor:[UIColor colorWithRed:0.0 green:0.48 blue:1.0 alpha:1.0] forState:UIControlStateNormal];
-        button.tag = (NSInteger)[_charon_actions indexOfObject:action];
-        [button addTarget:self action:@selector(charon_buttonTapped:) forControlEvents:UIControlEventTouchUpInside];
+        button.tag = (NSInteger)[_revenant_actions indexOfObject:action];
+        [button addTarget:self action:@selector(revenant_buttonTapped:) forControlEvents:UIControlEventTouchUpInside];
         [self addSubview:button];
         at += width;
     }
 }
 
-- (void)charon_tappedButtonWithTag:(NSInteger)tag
+- (void)revenant_tappedButtonWithTag:(NSInteger)tag
 {
-    if (tag < 0 || (NSUInteger)tag >= _charon_actions.count) {
+    if (tag < 0 || (NSUInteger)tag >= _revenant_actions.count) {
         return;
     }
-    CPAlertAction *action = _charon_actions[(NSUInteger)tag];
+    CPAlertAction *action = _revenant_actions[(NSUInteger)tag];
     if (action.handler) {
         action.handler(action);
     }
@@ -87,7 +87,7 @@
     NSString *_title;
     NSString *_message;
     NSArray<CPAlertAction *> *_actions;
-    CharonCarPlayCard *_charon_card;
+    RevenantCarPlayCard *_revenant_card;
 }
 
 @synthesize title = _title;
@@ -106,16 +106,16 @@
     return self;
 }
 
-- (UIViewController *)charon_viewControllerForInterfaceController:(CPInterfaceController *)controller
+- (UIViewController *)revenant_viewControllerForInterfaceController:(CPInterfaceController *)controller
 {
     UIViewController *host = [[UIViewController alloc] init];
     host.view.backgroundColor = [UIColor blackColor];
-    CharonCarPlayCard *card = [[CharonCarPlayCard alloc] initWithFrame:CGRectMake(40.0, 40.0, 600.0, 300.0)];
+    RevenantCarPlayCard *card = [[RevenantCarPlayCard alloc] initWithFrame:CGRectMake(40.0, 40.0, 600.0, 300.0)];
     card.backgroundColor = [UIColor colorWithWhite:0.0 alpha:0.85];
     card.layer.cornerRadius = 14.0;
     [host.view addSubview:card];
-    [card charon_showTitle:_title message:_message actions:_actions];
-    _charon_card = card;
+    [card revenant_showTitle:_title message:_message actions:_actions];
+    _revenant_card = card;
     return host;
 }
 
@@ -124,7 +124,7 @@
 @implementation CPAlertTemplate {
     NSArray<NSString *> *_titleVariants;
     NSArray<CPAlertAction *> *_actions;
-    CharonCarPlayCard *_charon_card;
+    RevenantCarPlayCard *_revenant_card;
 }
 
 @synthesize titleVariants = _titleVariants;
@@ -147,14 +147,14 @@
     return 3;
 }
 
-- (void)charon_dismiss
+- (void)revenant_dismiss
 {
-    [self charon_dismissThroughInterfaceController];
+    [self revenant_dismissThroughInterfaceController];
 }
 
-- (void)charon_dismissThroughInterfaceController
+- (void)revenant_dismissThroughInterfaceController
 {
-    id controller = [[CharonCarPlayInterface current] controller];
+    id controller = [[RevenantCarPlayInterface current] controller];
     if (controller) {
         SEL dismiss = NSSelectorFromString(@"dismissTemplateAnimated:completion:");
         if ([controller respondsToSelector:dismiss]) {
@@ -164,16 +164,16 @@
     }
 }
 
-- (UIViewController *)charon_viewControllerForInterfaceController:(CPInterfaceController *)controller
+- (UIViewController *)revenant_viewControllerForInterfaceController:(CPInterfaceController *)controller
 {
     UIViewController *host = [[UIViewController alloc] init];
     host.view.backgroundColor = [UIColor blackColor];
-    CharonCarPlayCard *card = [[CharonCarPlayCard alloc] initWithFrame:CGRectMake(40.0, 40.0, 600.0, 280.0)];
+    RevenantCarPlayCard *card = [[RevenantCarPlayCard alloc] initWithFrame:CGRectMake(40.0, 40.0, 600.0, 280.0)];
     card.backgroundColor = [UIColor colorWithWhite:0.0 alpha:0.85];
     card.layer.cornerRadius = 14.0;
     [host.view addSubview:card];
-    [card charon_showTitle:_titleVariants.firstObject message:@"" actions:_actions];
-    _charon_card = card;
+    [card revenant_showTitle:_titleVariants.firstObject message:@"" actions:_actions];
+    _revenant_card = card;
     return host;
 }
 
@@ -209,12 +209,12 @@
 @synthesize lightContentImage = _lightContentImage;
 @synthesize darkContentImage = _darkContentImage;
 
-- (UIImage *)charon_imageForCurrentAppearance
+- (UIImage *)revenant_imageForCurrentAppearance
 {
     return _lightContentImage ?: _darkContentImage;
 }
 
-- (void)charon_setLightContentImage:(UIImage *)lightImage darkContentImage:(UIImage *)darkImage
+- (void)revenant_setLightContentImage:(UIImage *)lightImage darkContentImage:(UIImage *)darkImage
 {
     _lightContentImage = lightImage;
     _darkContentImage = darkImage;
@@ -307,8 +307,8 @@
     MKMapItem *_destination;
     NSArray<CPRouteChoice *> *_routeChoices;
     id _userInfo;
-    NSArray<CPBarButton *> *_charon_bar_buttons;
-    NSArray<NSString *> *_charon_destinationNameVariants;
+    NSArray<CPBarButton *> *_revenant_bar_buttons;
+    NSArray<NSString *> *_revenant_destinationNameVariants;
 }
 
 @synthesize origin = _origin;
@@ -344,14 +344,14 @@
                   routeChoices:[coder decodeObjectForKey:@"CPTripRouteChoices"] ?: @[]];
 }
 
-- (NSArray<NSString *> *)charon_destinationNameVariants
+- (NSArray<NSString *> *)revenant_destinationNameVariants
 {
-    return _charon_destinationNameVariants;
+    return _revenant_destinationNameVariants;
 }
 
-- (void)charon_setDestinationNameVariants:(NSArray<NSString *> *)variants
+- (void)revenant_setDestinationNameVariants:(NSArray<NSString *> *)variants
 {
-    _charon_destinationNameVariants = [variants copy];
+    _revenant_destinationNameVariants = [variants copy];
 }
 
 + (BOOL)supportsSecureCoding
@@ -411,18 +411,18 @@
 
 @implementation CPSearchTemplate {
     __weak id<CPSearchTemplateDelegate> _delegate;
-    UISearchBar *_charon_search_bar;
+    UISearchBar *_revenant_search_bar;
 }
 
 @synthesize delegate = _delegate;
 
-- (UIViewController *)charon_viewControllerForInterfaceController:(CPInterfaceController *)controller
+- (UIViewController *)revenant_viewControllerForInterfaceController:(CPInterfaceController *)controller
 {
     UIViewController *host = [[UIViewController alloc] init];
     host.view.backgroundColor = [UIColor blackColor];
-    _charon_search_bar = [[UISearchBar alloc] initWithFrame:CGRectMake(0.0, 0.0, 1024.0, 60.0)];
-    _charon_search_bar.delegate = (id<UISearchBarDelegate>)self;
-    [host.view addSubview:_charon_search_bar];
+    _revenant_search_bar = [[UISearchBar alloc] initWithFrame:CGRectMake(0.0, 0.0, 1024.0, 60.0)];
+    _revenant_search_bar.delegate = (id<UISearchBarDelegate>)self;
+    [host.view addSubview:_revenant_search_bar];
     return host;
 }
 

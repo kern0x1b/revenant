@@ -1,13 +1,13 @@
-#import "CharonMenus.h"
+#import "RevenantMenus.h"
 #import <objc/runtime.h>
 
 #pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
 
-@implementation UIAction (CharonFourteen)
+@implementation UIAction (RevenantFourteen)
 
 + (instancetype)actionWithHandler:(UIActionHandler)handler
 {
-    return [[self alloc] initCharonWithTitle:@"" image:nil identifier:nil handler:handler];
+    return [[self alloc] initRevenantWithTitle:@"" image:nil identifier:nil handler:handler];
 }
 
 - (id)sender

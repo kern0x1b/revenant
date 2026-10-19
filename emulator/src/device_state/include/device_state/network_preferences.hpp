@@ -15,7 +15,7 @@
 #include <string_view>
 #include <vector>
 
-namespace shade {
+namespace emulator {
 
 struct NetworkPreferencesResult {
     std::filesystem::path path;

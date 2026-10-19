@@ -58,10 +58,10 @@ echo "  COVERAGE: an object on disk and not in objects.txt is detected, and is n
 # for the namespace constants iOS 6 does export. A definition in an object wins over one in a dylib, which
 # is what the port relies on at run time, and cases.m proves it with dladdr.
 # shellcheck disable=SC2086  # $files is a LIST and must word-split
-xcrun clang -w -DCHARON_PORT -fobjc-arc -I"$port" $files "$here/cases.m" \
+xcrun clang -w -DREVENANT_PORT -fobjc-arc -I"$port" $files "$here/cases.m" \
   -framework Foundation -framework CoreFoundation -framework ImageIO -o "$build/port" 2>"$build/port.log" || {
   echo "BUILD  port"; head -5 "$build/port.log" | sed 's/^/    /'; exit 1; }
-xcrun clang -w -DCHARON_HOST -fobjc-arc "$here/cases.m" \
+xcrun clang -w -DREVENANT_HOST -fobjc-arc "$here/cases.m" \
   -framework Foundation -framework CoreFoundation -framework ImageIO -o "$build/host" 2>"$build/host.log" || {
   echo "BUILD  host"; head -5 "$build/host.log" | sed 's/^/    /'; exit 1; }
 
@@ -135,11 +135,11 @@ build_plant() {  # $1 = label; echoes the object list of the planted sources
   objs=""
   for f in "$plant"/*.m; do
     [ "$f" = "$plant/cases.m" ] && continue
-    xcrun clang -w -DCHARON_PORT -fobjc-arc -I"$port" -c "$f" -o "$f.o" 2>"$build/plant.log" || {
+    xcrun clang -w -DREVENANT_PORT -fobjc-arc -I"$port" -c "$f" -o "$f.o" 2>"$build/plant.log" || {
       echo "BUILD  the mutated port ($f)"; head -3 "$build/plant.log" | sed 's/^/    /'; exit 1; }
     objs="$objs $f.o"
   done
-  xcrun clang -w -DCHARON_PORT -fobjc-arc -I"$port" $objs "$plant/cases.m" \
+  xcrun clang -w -DREVENANT_PORT -fobjc-arc -I"$port" $objs "$plant/cases.m" \
     -framework Foundation -framework CoreFoundation -framework ImageIO -o "$build/plantbin" 2>"$build/plant.log" || {
     echo "BUILD  the mutated port ($1)"; head -3 "$build/plant.log" | sed 's/^/    /'; exit 1; }
   printf '%s' "${objs# }"
@@ -147,8 +147,8 @@ build_plant() {  # $1 = label; echoes the object list of the planted sources
 
 # 1. a namespace's default prefix: a case answer must move
 metadata_file=$plant/ImageIOMetadata7.m
-sed -i '' "s/table\[7\].prefix = kCGImageMetadataPrefixTIFF;/table[7].prefix = CFSTR(\"charon-plant\");/" "$metadata_file"
-hit=$(grep -c "charon-plant" "$metadata_file" || true)
+sed -i '' "s/table\[7\].prefix = kCGImageMetadataPrefixTIFF;/table[7].prefix = CFSTR(\"revenant-plant\");/" "$metadata_file"
+hit=$(grep -c "revenant-plant" "$metadata_file" || true)
 [ "$hit" -eq 1 ] || { echo "FAIL  the first mutation changed nothing (the pattern is stale)"; exit 1; }
 build_plant "default prefix" > /dev/null
 "$build/plantbin" > "$build/plant.out" 2>"$build/plant.err" || { echo "FAIL  the mutated port build raised"; exit 1; }
@@ -161,8 +161,8 @@ echo "  MUTATION 1: a changed default prefix moves a case answer, so the compari
 # 2. the one-time log line of the inert row: the count must move
 git_dir=$plant/ImageIOSourceState7.m
 [ -f "$git_dir" ] && {
-  sed -i '' "s/the decoded image cache belongs/charon-plant-belongs/" "$git_dir"
-  hit=$(grep -c "charon-plant-belongs" "$git_dir" || true)
+  sed -i '' "s/the decoded image cache belongs/revenant-plant-belongs/" "$git_dir"
+  hit=$(grep -c "revenant-plant-belongs" "$git_dir" || true)
   [ "$hit" -eq 1 ] || { echo "FAIL  the second mutation changed nothing (the pattern is stale)"; exit 1; }
   cp "$here/cases.m" "$plant/cases.m"
   build_plant "log line" > /dev/null
@@ -173,8 +173,8 @@ git_dir=$plant/ImageIOSourceState7.m
 }
 # 3. the property table's own rows: a name changed in one row must move a case answer
 metadata_table=$plant/ImageIOMetadata7.m
-sed -i '' 's|"photoshop", "DateCreated" },  // kCGImagePropertyExifDateTimeOriginal|"photoshop", "DateCreatedCharonPlant" },  // kCGImagePropertyExifDateTimeOriginal|' "$metadata_table"
-hit=$(grep -c "DateCreatedCharonPlant" "$metadata_table" || true)
+sed -i '' 's|"photoshop", "DateCreated" },  // kCGImagePropertyExifDateTimeOriginal|"photoshop", "DateCreatedRevenantPlant" },  // kCGImagePropertyExifDateTimeOriginal|' "$metadata_table"
+hit=$(grep -c "DateCreatedRevenantPlant" "$metadata_table" || true)
 [ "$hit" -eq 1 ] || { echo "FAIL  the third mutation changed nothing (the pattern is stale)"; exit 1; }
 build_plant "property table row" > /dev/null
 "$build/plantbin" > "$build/plant.out" 2>"$build/plant.err" || { echo "FAIL  the mutated port build raised"; exit 1; }

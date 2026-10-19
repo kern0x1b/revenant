@@ -1,12 +1,12 @@
 #import <BackgroundTasks/BackgroundTasks.h>
-#import "CharonBackgroundTasks.h"
+#import "RevenantBackgroundTasks.h"
 
 @implementation BGTaskRequest {
     NSString *_identifier;
     NSDate *_earliestBeginDate;
 }
 
-- (instancetype)initCharonWithIdentifier:(NSString *)identifier
+- (instancetype)initRevenantWithIdentifier:(NSString *)identifier
 {
     if ((self = [super init]))
         _identifier = [identifier copy];
@@ -30,7 +30,7 @@
 
 - (id)copyWithZone:(NSZone *)zone
 {
-    BGTaskRequest *copy = [[[self class] allocWithZone:zone] initCharonWithIdentifier:_identifier];
+    BGTaskRequest *copy = [[[self class] allocWithZone:zone] initRevenantWithIdentifier:_identifier];
     copy->_earliestBeginDate = [_earliestBeginDate copy];
     return copy;
 }
@@ -41,7 +41,7 @@
 
 - (instancetype)initWithIdentifier:(NSString *)identifier
 {
-    return [super initCharonWithIdentifier:identifier];
+    return [super initRevenantWithIdentifier:identifier];
 }
 
 @end
@@ -53,7 +53,7 @@
 
 - (instancetype)initWithIdentifier:(NSString *)identifier
 {
-    return [super initCharonWithIdentifier:identifier];
+    return [super initRevenantWithIdentifier:identifier];
 }
 
 - (BOOL)requiresNetworkConnectivity

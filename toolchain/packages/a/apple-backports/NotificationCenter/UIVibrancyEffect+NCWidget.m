@@ -1,7 +1,7 @@
 #import <UIKit/UIKit.h>
 #import <NotificationCenter/NotificationCenter.h>
 
-@interface UIVibrancyEffect (CharonStyle13)
+@interface UIVibrancyEffect (RevenantStyle13)
 + (UIVibrancyEffect *)effectForBlurEffect:(UIBlurEffect *)blurEffect style:(UIVibrancyEffectStyle)style;
 @end
 

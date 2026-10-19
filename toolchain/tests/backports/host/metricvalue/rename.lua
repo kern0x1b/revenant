@@ -34,7 +34,7 @@ function main(...)
     table.sort(names, byte_less)
     local handle = assert(io.open(out, "wb"))
     for _, name in ipairs(names) do
-        handle:write(string.format("#define %s Charon%s\n", name, name))
+        handle:write(string.format("#define %s Revenant%s\n", name, name))
     end
     handle:close()
 end

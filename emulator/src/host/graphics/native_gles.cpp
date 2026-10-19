@@ -8,15 +8,15 @@
 
 #include "graphics/gles_renderer.hpp"
 
-#if defined(SHADE_HAS_VULKAN)
+#if defined(REVENANT_EMULATOR_HAS_VULKAN)
 #include "vulkan_gles_renderer.hpp"
 #endif
 
-namespace shade {
+namespace emulator {
 
 void register_native_gles_renderer()
 {
-#if defined(SHADE_HAS_VULKAN)
+#if defined(REVENANT_EMULATOR_HAS_VULKAN)
     configure_gles_accelerated_factory(create_vulkan_gles_renderer);
 #else
     configure_gles_accelerated_factory(nullptr);

@@ -1,12 +1,12 @@
 #import <HealthKit/HealthKit.h>
 
-#import "CharonHKStore.h"
+#import "RevenantHKStore.h"
 
 @implementation HKQuantity {
     HKUnit *_unit;
     double _value;
 }
-CHARON_HEALTHKIT_UNCREATABLE_INIT
+REVENANT_HEALTHKIT_UNCREATABLE_INIT
 
 + (BOOL)supportsSecureCoding
 {
@@ -15,11 +15,11 @@ CHARON_HEALTHKIT_UNCREATABLE_INIT
 
 + (instancetype)quantityWithUnit:(HKUnit *)unit doubleValue:(double)value
 {
-    HKQuantity *quantity = [[HKQuantity alloc] charon_initWithUnit:unit value:value];
+    HKQuantity *quantity = [[HKQuantity alloc] revenant_initWithUnit:unit value:value];
     return quantity;
 }
 
-- (instancetype)charon_initWithUnit:(HKUnit *)unit value:(double)value
+- (instancetype)revenant_initWithUnit:(HKUnit *)unit value:(double)value
 {
     HKQuantity *fresh = [super init];
     if (fresh) {
@@ -52,17 +52,17 @@ CHARON_HEALTHKIT_UNCREATABLE_INIT
 
 #pragma mark Reading a quantity
 
-- (HKUnit *)charon_unit
+- (HKUnit *)revenant_unit
 {
     return _unit;
 }
 
-- (double)charon_rawValue
+- (double)revenant_rawValue
 {
     return _value;
 }
 
-+ (instancetype)charon_quantityWithUnit:(HKUnit *)unit value:(double)value
++ (instancetype)revenant_quantityWithUnit:(HKUnit *)unit value:(double)value
 {
     return [self quantityWithUnit:unit doubleValue:value];
 }
@@ -71,34 +71,34 @@ CHARON_HEALTHKIT_UNCREATABLE_INIT
 {
     if (![unit isKindOfClass:[HKUnit class]])
         [NSException raise:NSInvalidArgumentException format:@"%@ is not a unit.", unit];
-    if (![_unit charon_isCompatibleWithUnit:unit]) {
+    if (![_unit revenant_isCompatibleWithUnit:unit]) {
         [NSException raise:NSInvalidArgumentException
                     format:@"The unit %@ is not of the same dimension as the unit %@ of this quantity.", unit.unitString,
                            _unit.unitString];
         return 0.0;
     }
-    return [_unit charon_value:_value inUnit:unit];
+    return [_unit revenant_value:_value inUnit:unit];
 }
 
 - (BOOL)isCompatibleWithUnit:(HKUnit *)unit
 {
     if (![unit isKindOfClass:[HKUnit class]])
         return NO;
-    return [_unit charon_isCompatibleWithUnit:unit];
+    return [_unit revenant_isCompatibleWithUnit:unit];
 }
 
 - (NSComparisonResult)compare:(HKQuantity *)quantity
 {
     if (![quantity isKindOfClass:[HKQuantity class]])
         return NSOrderedSame;
-    if (![_unit charon_isCompatibleWithUnit:((HKQuantity *)quantity).charon_unit]) {
+    if (![_unit revenant_isCompatibleWithUnit:((HKQuantity *)quantity).revenant_unit]) {
         [NSException raise:NSInvalidArgumentException
                     format:@"The unit %@ of the given quantity is not of the same dimension as the unit %@ of this one.",
-                           ((HKQuantity *)quantity).charon_unit.unitString, _unit.unitString];
+                           ((HKQuantity *)quantity).revenant_unit.unitString, _unit.unitString];
         return NSOrderedSame;
     }
-    double mine = [_unit charon_value:_value inUnit:_unit];
-    double theirs = [((HKQuantity *)quantity).charon_unit charon_value:((HKQuantity *)quantity).charon_rawValue
+    double mine = [_unit revenant_value:_value inUnit:_unit];
+    double theirs = [((HKQuantity *)quantity).revenant_unit revenant_value:((HKQuantity *)quantity).revenant_rawValue
                                                                 inUnit:_unit];
     if (mine < theirs)
         return NSOrderedAscending;
@@ -111,7 +111,7 @@ CHARON_HEALTHKIT_UNCREATABLE_INIT
         return YES;
     if (![other isKindOfClass:[HKQuantity class]])
         return NO;
-    if (![_unit charon_isCompatibleWithUnit:((HKQuantity *)other).charon_unit])
+    if (![_unit revenant_isCompatibleWithUnit:((HKQuantity *)other).revenant_unit])
         return NO;
     return [self compare:other] == NSOrderedSame;
 }

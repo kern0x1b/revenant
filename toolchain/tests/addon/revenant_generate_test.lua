@@ -31,7 +31,7 @@ function failures(opts)
     end
 
     local function loaded(folder, text)
-        io.writefile(path.join(folder, "charon.toml"), text)
+        io.writefile(path.join(folder, "revenant.toml"), text)
         return spec.spec_load(folder)
     end
 
@@ -120,7 +120,7 @@ os-version = "6.0"
 name = "tweak"
 sources = ["a.c"]
 ]==]},
-        {"a source whose language Charon cannot name", [==[
+        {"a source whose language Revenant cannot name", [==[
 [platform]
 use = "apple-ios"
 arch = "armv7"
@@ -161,45 +161,45 @@ resources = [{ from = "images/" }]
         check(not contains(static, "find_package"), "a target that declares no package must get no find_package, and the engine list must not leak into a port project")
         check(contains(static, "CXX_STANDARD 23"), "a declared standard must be set on the target")
         check(not contains(static, "install("), "a static library is consumed by the build, so it must not be installed")
-        check(contains(static, "${CHARON_PORT}/compat/a.c"), "a declared source must be written against the port")
-        check(not contains(static, "${CHARON_PORT}/${LIBCXX_DIR}"), "a value that already starts at a cmake variable must be left exactly as declared")
-        check(contains(static, "if (NOT CHARON_PORT)"), "a generated project must refuse to configure when nothing told it where the port is")
+        check(contains(static, "${REVENANT_PORT}/compat/a.c"), "a declared source must be written against the port")
+        check(not contains(static, "${REVENANT_PORT}/${LIBCXX_DIR}"), "a value that already starts at a cmake variable must be left exactly as declared")
+        check(contains(static, "if (NOT REVENANT_PORT)"), "a generated project must refuse to configure when nothing told it where the port is")
         check(contains(static, "foreach (variable LIBCXX_DIR PSL_INCLUDE_DIR)"), "every cache variable a target names must be guarded: got " .. static)
         check(contains(static, "target_compile_definitions(compat PRIVATE"), "declared definitions must reach the target")
-        check(contains(static, 'set_source_files_properties(${CHARON_PORT}/compat/a.c PROPERTIES INCLUDE_DIRECTORIES "${PSL_INCLUDE_DIR}")'),
+        check(contains(static, 'set_source_files_properties(${REVENANT_PORT}/compat/a.c PROPERTIES INCLUDE_DIRECTORIES "${PSL_INCLUDE_DIR}")'),
               "a per-source include must be set on that source and on no other")
 
         local device = written["device-library/CMakeLists.txt"]
         check(contains(device, "add_library(tweak SHARED"), "a device library must be SHARED, because a MODULE bypasses the linker we require")
         check(contains(device, "INSTALL_NAME_DIR /Library/MobileSubstrate/DynamicLibraries"), "a device library must record the path it is deployed to")
         check(contains(device, '"-framework CoreFoundation"') and contains(device, "objc"), "frameworks and libraries must both reach target_link_libraries")
-        check(contains(device, 'include("${CHARON_PACKAGES}")'), "a package declared on a target must reach that project")
+        check(contains(device, 'include("${REVENANT_PACKAGES}")'), "a package declared on a target must reach that project")
         check(contains(device, "RENAME Tweak.plist"), "a renamed resource must keep its new name")
         check(not contains(device, "prefs"), "a target with cmake= must not be generated at all")
 
         local application = written["application/CMakeLists.txt"]
         check(contains(application, "add_executable(Host"), "an application must be an executable")
         check(contains(application, "install(TARGETS Host RUNTIME DESTINATION .)"), "an application must install its binary")
-        check(contains(application, "install(FILES ${CHARON_PORT}/app/cacert.pem DESTINATION .)"), "an application must install its declared resources")
-        check(contains(application, "install(DIRECTORY ${CHARON_PORT}/app/Localization/ DESTINATION .)"),
+        check(contains(application, "install(FILES ${REVENANT_PORT}/app/cacert.pem DESTINATION .)"), "an application must install its declared resources")
+        check(contains(application, "install(DIRECTORY ${REVENANT_PORT}/app/Localization/ DESTINATION .)"),
               "an application must install a declared resource folder, not drop it")
 
         local cross = written["cross-toolchain.cmake"]
-        for _, expected in ipairs({"set(CMAKE_OSX_ARCHITECTURES ${CHARON_ARCHITECTURE})",
-                                   "-target ${CHARON_TRIPLE} -isysroot ${CHARON_SYSROOT}",
+        for _, expected in ipairs({"set(CMAKE_OSX_ARCHITECTURES ${REVENANT_ARCHITECTURE})",
+                                   "-target ${REVENANT_TRIPLE} -isysroot ${REVENANT_SYSROOT}",
                                    "set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)",
                                    "set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)",
                                    "-DEXAMPLE_PORT"}) do
             check(contains(cross, expected), "the cross toolchain must carry " .. expected)
         end
-        check(contains(cross, "CACHE PATH") and contains(cross, "CHARON_SDK"),
+        check(contains(cross, "CACHE PATH") and contains(cross, "REVENANT_SDK"),
               "the SDK must be remembered in the cache, because ninja re-runs cmake without the shell that configured it")
 
         local applied = written["project-include.cmake"]
         check(contains(applied, "find_package(LibXml2 REQUIRED CONFIG)") and contains(applied, "find_package(LibXslt REQUIRED CONFIG)"),
               "a package declared under config-packages must be found by config")
-        check(contains(applied, "# Written by Charon from charon.toml"), "the applied file must say it is generated")
-        check(contains(static, "# Written by Charon from charon.toml"), "a generated file must say it is generated")
+        check(contains(applied, "# Written by Revenant from revenant.toml"), "the applied file must say it is generated")
+        check(contains(static, "# Written by Revenant from revenant.toml"), "a generated file must say it is generated")
         check(written["tests/host/conanfile.py"] == nil and written["tests/gate/conanfile.py"] == nil,
               "tier recipes are Conan's and are not written any more")
     end
@@ -227,7 +227,7 @@ exclude = ["compat/skip/**"]
 ]==]
         local static = G.generate_written(loaded(folder, globbed))["static-library/CMakeLists.txt"]
         for _, expected in ipairs({"compat/a.c", "compat/deep/b.c", "compat/c.m"}) do
-            check(contains(static, "${CHARON_PORT}/" .. expected), "a source matched by a pattern must be built: " .. expected)
+            check(contains(static, "${REVENANT_PORT}/" .. expected), "a source matched by a pattern must be built: " .. expected)
         end
         check(not contains(static, "compat/skip/d.c"), "a source under an exclude pattern must not be built")
         check(contains(static, "project(port-static C OBJC)"), "languages must come from the files a pattern matched")
@@ -277,8 +277,8 @@ exclude = ["compat/skip/**"]
     do
         local folder = case_folder()
         local text = G.generate_cross_toolchain(loaded(folder, '[platform]\nuse = "apple-ios"\narch = "armv8"\nos-version = "7.0"\n'))
-        for _, expected in ipairs({"set(CMAKE_OSX_ARCHITECTURES ${CHARON_ARCHITECTURE})", "-target ${CHARON_TRIPLE}",
-                                   "NOT CHARON_ARCHITECTURE OR NOT CHARON_TRIPLE"}) do
+        for _, expected in ipairs({"set(CMAKE_OSX_ARCHITECTURES ${REVENANT_ARCHITECTURE})", "-target ${REVENANT_TRIPLE}",
+                                   "NOT REVENANT_ARCHITECTURE OR NOT REVENANT_TRIPLE"}) do
             check(contains(text, expected), "the cross toolchain must take the architecture and target from the build: " .. expected .. " is missing")
         end
         check(not contains(text, "armv8"), "the cross toolchain must not spell the declared architecture name clang does not know")
@@ -289,7 +289,7 @@ exclude = ["compat/skip/**"]
         write_file(folder, "main.m")
         local application = G.generate_written(loaded(folder, '[platform]\nuse = "apple-ios"\narch = "armv7"\nos-version = "6.0"\n'
                                               .. '[application]\nname = "Host"\nsources = ["main.m"]\npackages = ["openssl"]\n'))["application/CMakeLists.txt"]
-        check(not contains(application, "find_package(") and contains(application, 'include("${CHARON_PACKAGES}")'),
+        check(not contains(application, "find_package(") and contains(application, 'include("${REVENANT_PACKAGES}")'),
               "a generated project must find its packages through the file the build writes from the graph")
     end
 
@@ -342,7 +342,7 @@ objcxx = ["${CXX_STDLIB}"]
 ]==]
         local application = G.generate_written(loaded(folder, layered))["application/CMakeLists.txt"]
         for _, folder_name in ipairs({"src", "src/App", "src/Screens", "src/Screens/Chat", "src/Screens/Chat/Cells", "src/Calls"}) do
-            check(contains(application, "${CHARON_PORT}/" .. folder_name .. "\n") or contains(application, "${CHARON_PORT}/" .. folder_name .. ")"),
+            check(contains(application, "${REVENANT_PORT}/" .. folder_name .. "\n") or contains(application, "${REVENANT_PORT}/" .. folder_name .. ")"),
                   "an include pattern must reach " .. folder_name)
         end
         check(not contains(application, "src/Resources"), "a folder under include-exclude, and its sources, must not be used")

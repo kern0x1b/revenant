@@ -15,7 +15,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)animateTransition:(id<UIViewControllerContextTransitioning>)transitionContext;
 @end
 
-void CharonAnimate(NSTimeInterval duration, void (^animations)(void), void (^completion)(BOOL));
-NSTimeInterval CharonLastAnimationDuration(void);
+void RevenantAnimate(NSTimeInterval duration, void (^animations)(void), void (^completion)(BOOL));
+NSTimeInterval RevenantLastAnimationDuration(void);
 
 NS_ASSUME_NONNULL_END

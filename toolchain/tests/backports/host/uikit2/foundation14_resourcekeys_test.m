@@ -3,7 +3,7 @@
 #include <unistd.h>
 #import "check.h"
 
-extern id CharonHostcharon_resource_value(NSString *path, NSString *key);
+extern id RevenantHostrevenant_resource_value(NSString *path, NSString *key);
 
 static uint64_t state = 0x7E50C0ull;
 
@@ -46,7 +46,7 @@ int main(int argc, char **argv)
             for (NSString *key in keys) {
                 id theirs = nil;
                 [URL getResourceValue:&theirs forKey:key error:NULL];
-                id ours = CharonHostcharon_resource_value(path, key);
+                id ours = RevenantHostrevenant_resource_value(path, key);
                 if (!(ours == theirs || [ours isEqual:theirs])) {
                     wrong++;
                     if (samples.count < 8)
@@ -57,8 +57,8 @@ int main(int argc, char **argv)
         for (NSString *sample in samples)
             printf("  %s\n", sample.UTF8String);
         [manager removeItemAtPath:base error:NULL];
-        charon_check(wrong == 0, "the values of the new resource keys are the system's for files, folders and links", [NSString stringWithFormat:@"%lu differ", (unsigned long)wrong]);
+        revenant_check(wrong == 0, "the values of the new resource keys are the system's for files, folders and links", [NSString stringWithFormat:@"%lu differ", (unsigned long)wrong]);
     }
-    printf("checks=%d failures=%d\n", charon_checks, charon_failures);
-    return charon_failures;
+    printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
+    return revenant_failures;
 }

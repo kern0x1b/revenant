@@ -10,7 +10,7 @@
 #include <system_error>
 #include <vector>
 
-namespace shade {
+namespace emulator {
 namespace {
 
     std::filesystem::path normalize_inside_root(

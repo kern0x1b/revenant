@@ -1,6 +1,6 @@
-#import "CharonPassKit.h"
+#import "RevenantPassKit.h"
 
-@implementation PKPassLibrary (CharonWallet)
+@implementation PKPassLibrary (RevenantWallet)
 
 + (NSArray *)passesOfType:(NSString *)passType
 {
@@ -12,7 +12,7 @@
 {
     (void)passes;
     if (completionHandler) {
-        completionHandler(NO, CharonPassKitNoHardwareError());
+        completionHandler(NO, RevenantPassKitNoHardwareError());
     }
 }
 
@@ -25,7 +25,7 @@
     (void (^)(id suppressionToken, NSError *error))responseHandler
 {
     if (responseHandler) {
-        responseHandler(nil, CharonPassKitNoHardwareError());
+        responseHandler(nil, RevenantPassKitNoHardwareError());
     }
 }
 
@@ -66,7 +66,7 @@
 
 @end
 
-@implementation PKAddPassesViewController (CharonWallet)
+@implementation PKAddPassesViewController (RevenantWallet)
 
 + (BOOL)canAddPasses
 {
@@ -86,7 +86,7 @@
     (void)issuerData;
     (void)signature;
     if (error) {
-        *error = CharonPassKitNoHardwareError();
+        *error = RevenantPassKitNoHardwareError();
     }
     return nil;
 }

@@ -1,7 +1,7 @@
 #import <AudioToolbox/AudioToolbox.h>
 #import <stdlib.h>
 #import <string.h>
-#import "CharonAudioToolboxDeclarations.h"
+#import "RevenantAudioToolboxDeclarations.h"
 
 OSStatus AudioFileGetUserDataSize64(AudioFileID inAudioFile, UInt32 inUserDataID, UInt32 inIndex, UInt64 *outUserDataSize)
 {

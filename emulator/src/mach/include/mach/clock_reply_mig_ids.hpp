@@ -18,7 +18,7 @@
 
 #include "mach/xnu_mig_adapter.hpp"
 
-namespace shade::xnu::mig::clock_reply {
+namespace emulator::xnu::mig::clock_reply {
 
 inline constexpr std::string_view subsystem_name{"clock_reply"};
 inline constexpr std::uint32_t subsystem_base = 3125107U;

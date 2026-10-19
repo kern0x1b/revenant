@@ -1,6 +1,6 @@
 #import <Foundation/Foundation.h>
 
-#import "CharonUnitFormat.h"
+#import "RevenantUnitFormat.h"
 
 @implementation NSMassFormatter {
     NSNumberFormatter *_numbers;
@@ -80,31 +80,31 @@
 - (NSString *)stringFromValue:(double)value unit:(NSMassFormatterUnit)unit
 {
     if (unit == NSMassFormatterUnitStone)
-        return charon_unit_stone(charon_unit_system([NSLocale currentLocale]), value, _unitStyle, self.numberFormatter);
-    return charon_unit_given(@"mass", charon_unit_system([NSLocale currentLocale]), value, unit, _unitStyle, self.numberFormatter);
+        return revenant_unit_stone(revenant_unit_system([NSLocale currentLocale]), value, _unitStyle, self.numberFormatter);
+    return revenant_unit_given(@"mass", revenant_unit_system([NSLocale currentLocale]), value, unit, _unitStyle, self.numberFormatter);
 }
 
 - (NSString *)stringFromKilograms:(double)numberInKilograms
 {
-    CharonUnitSystem system = charon_unit_system([NSLocale currentLocale]);
+    RevenantUnitSystem system = revenant_unit_system([NSLocale currentLocale]);
     double inUnit = 0;
-    NSInteger unit = charon_unit_chosen(@"mass", system, NO, numberInKilograms, &inUnit);
-    return charon_unit_written(@"mass", system, NO, numberInKilograms, unit, _unitStyle, self.numberFormatter);
+    NSInteger unit = revenant_unit_chosen(@"mass", system, NO, numberInKilograms, &inUnit);
+    return revenant_unit_written(@"mass", system, NO, numberInKilograms, unit, _unitStyle, self.numberFormatter);
 }
 
 - (NSString *)unitStringFromValue:(double)value unit:(NSMassFormatterUnit)unit
 {
-    return charon_unit_name(@"mass", charon_unit_system([NSLocale currentLocale]), unit, _unitStyle, value);
+    return revenant_unit_name(@"mass", revenant_unit_system([NSLocale currentLocale]), unit, _unitStyle, value);
 }
 
 - (NSString *)unitStringFromKilograms:(double)numberInKilograms usedUnit:(NSMassFormatterUnit *)unitp
 {
-    CharonUnitSystem system = charon_unit_system([NSLocale currentLocale]);
+    RevenantUnitSystem system = revenant_unit_system([NSLocale currentLocale]);
     double inUnit = 0;
-    NSInteger unit = charon_unit_chosen(@"mass", system, NO, numberInKilograms, &inUnit);
+    NSInteger unit = revenant_unit_chosen(@"mass", system, NO, numberInKilograms, &inUnit);
     if (unitp)
         *unitp = (NSMassFormatterUnit)unit;
-    return charon_unit_name(@"mass", system, unit, _unitStyle, inUnit);
+    return revenant_unit_name(@"mass", system, unit, _unitStyle, inUnit);
 }
 
 - (BOOL)getObjectValue:(id *)obj forString:(NSString *)string errorDescription:(NSString **)error

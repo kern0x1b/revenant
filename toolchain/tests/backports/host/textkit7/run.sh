@@ -5,7 +5,7 @@ set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 device=${DEVICE:-$here/../../device}
-build=${BUILD:-$(runs_fresh charon-textkit7)}
+build=${BUILD:-$(runs_fresh revenant-textkit7)}
 sdk=$(xcrun --show-sdk-path)
 xcrun clang -target arm64-apple-ios15.0-macabi -isysroot "$sdk" -iframework "$sdk/System/iOSSupport/System/Library/Frameworks" -fobjc-arc -w -I"$device" \
     "$here/record.m" "$device/textkit7-cases.m" -framework UIKit -framework Foundation -o "$build/record"

@@ -1,4 +1,4 @@
-#import "CharonMPSGraph.h"
+#import "RevenantMPSGraph.h"
 
 @implementation MPSGraphType
 

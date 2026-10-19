@@ -13,7 +13,7 @@
 #include <string_view>
 #include <vector>
 
-namespace shade::media_library_service {
+namespace emulator::media_library_service {
 
 inline constexpr std::string_view bootstrap_name { "com.apple.musicplayer" };
 

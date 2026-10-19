@@ -18,7 +18,7 @@
 
 namespace {
 
-using shade::hfs::GuestIdTable;
+using emulator::hfs::GuestIdTable;
 
 int failures = 0;
 

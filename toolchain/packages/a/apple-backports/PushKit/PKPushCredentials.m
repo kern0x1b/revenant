@@ -12,7 +12,7 @@
 @synthesize type = _type;
 @synthesize token = _token;
 
-- (instancetype)initWithCharonType:(PKPushType)type token:(NSData *)token
+- (instancetype)initWithRevenantType:(PKPushType)type token:(NSData *)token
 {
     if ((self = [super init])) {
         _type = [type copy];

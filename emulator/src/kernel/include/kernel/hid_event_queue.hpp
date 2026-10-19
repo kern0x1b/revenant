@@ -16,7 +16,7 @@
 #include <optional>
 #include <variant>
 
-namespace shade {
+namespace emulator {
 
 class HidEventQueue {
 public:

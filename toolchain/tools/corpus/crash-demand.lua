@@ -250,8 +250,8 @@ function main()
     local store = aggregate.load_store(false)
 
     local tree_candidates = {path.join(workspace.root(), "packages", "a", "apple-backports")}
-    if os.getenv("CHARON_TREE_DIR") then
-        table.insert(tree_candidates, 1, os.getenv("CHARON_TREE_DIR"))
+    if os.getenv("REVENANT_TREE_DIR") then
+        table.insert(tree_candidates, 1, os.getenv("REVENANT_TREE_DIR"))
     end
     local tree = nil
     for _, candidate in ipairs(tree_candidates) do
@@ -260,7 +260,7 @@ function main()
         end
     end
     if tree == nil then
-        raise("crash-demand.lua: no tree directory found (looked in %s). Set CHARON_TREE_DIR to the current "
+        raise("crash-demand.lua: no tree directory found (looked in %s). Set REVENANT_TREE_DIR to the current "
             .. "worktree's packages/a/apple-backports -- without it protocol_member_in_tree() silently scans an empty "
             .. "blob and every protocol-owner row (e.g. GCDevice.vendorName) reports a false gap.",
             table.concat(tree_candidates, ", "))
@@ -409,8 +409,8 @@ function main()
     end
 
     local caches_candidates = {path.join(corpus, "caches")}
-    if os.getenv("CHARON_CACHES_DIR") then
-        table.insert(caches_candidates, 1, os.getenv("CHARON_CACHES_DIR"))
+    if os.getenv("REVENANT_CACHES_DIR") then
+        table.insert(caches_candidates, 1, os.getenv("REVENANT_CACHES_DIR"))
     end
     local caches_sel = nil
     for _, candidate in ipairs(caches_candidates) do
@@ -422,7 +422,7 @@ function main()
         raise("crash-demand.lua: no caches/sel/ directory found (looked in %s). This holds "
             .. "caches/sel/{7.0.1,10.3.4,12.0}.strings, ~870 MB, carried from the prior wave's scratchpad -- without it "
             .. "every selector missing from sdk-introduced.json is silently dropped instead of ranked. Set "
-            .. "CHARON_CACHES_DIR to the directory that contains sel/, or restore coordination/corpus/caches/sel/.",
+            .. "REVENANT_CACHES_DIR to the directory that contains sel/, or restore coordination/corpus/caches/sel/.",
             table.concat(caches_candidates, ", "))
     end
     local caches_root = path.directory(caches_sel)

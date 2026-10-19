@@ -4,10 +4,10 @@
 
 #pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
 
-@interface CharonNavigationOrientationInstaller : NSObject
+@interface RevenantNavigationOrientationInstaller : NSObject
 @end
 
-@implementation CharonNavigationOrientationInstaller
+@implementation RevenantNavigationOrientationInstaller
 
 + (void)load
 {

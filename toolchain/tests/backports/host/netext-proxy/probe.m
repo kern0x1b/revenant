@@ -6,7 +6,7 @@
 #ifdef HOST_SIDE
 #import <NetworkExtension/NetworkExtension.h>
 #else
-#import "CharonNetworkExtensionSettings.h"
+#import "RevenantNetworkExtensionSettings.h"
 #endif
 
 static void emit(const char *name, const char *value)

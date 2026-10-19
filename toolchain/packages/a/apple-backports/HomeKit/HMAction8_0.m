@@ -1,28 +1,28 @@
-#import "CharonHomeKitInternal.h"
+#import "RevenantHomeKitInternal.h"
 
 @implementation HMAction
-@synthesize charon_identifier = _charon_identifier;
+@synthesize revenant_identifier = _revenant_identifier;
 
 - (instancetype)init
 {
     self = [super init];
     if (self) {
-        _charon_identifier = [CharonHomeKitNewIdentifier() copy];
-        CharonHomeKitRecord(@"actions", _charon_identifier);
+        _revenant_identifier = [RevenantHomeKitNewIdentifier() copy];
+        RevenantHomeKitRecord(@"actions", _revenant_identifier);
     }
     return self;
 }
 
 - (NSString *)uniqueIdentifier
 {
-    return _charon_identifier;
+    return _revenant_identifier;
 }
 
 @end
 
-HMAction *CharonHomeKitAction(NSString *identifier, NSString *homeIdentifier)
+HMAction *RevenantHomeKitAction(NSString *identifier, NSString *homeIdentifier)
 {
     HMAction *action = [[HMAction alloc] init];
-    action.charon_identifier = identifier;
+    action.revenant_identifier = identifier;
     return action;
 }

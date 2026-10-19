@@ -3,36 +3,36 @@
 #import <objc/message.h>
 #import <objc/runtime.h>
 
-#import "CharonAVMetadataConstruction.h"
+#import "RevenantAVMetadataConstruction.h"
 
 @interface AVMetadataItemFilter ()
-- (void)charon_setIdentifiers:(NSArray<AVMetadataIdentifier> *)identifiers;
-- (NSArray<AVMetadataIdentifier> *)charon_storedIdentifiers;
+- (void)revenant_setIdentifiers:(NSArray<AVMetadataIdentifier> *)identifiers;
+- (NSArray<AVMetadataIdentifier> *)revenant_storedIdentifiers;
 @end
 
 @implementation AVMetadataItemFilter
 
 + (instancetype)metadataItemFilterForSharing
 {
-    return [[self alloc] charon_initWithIdentifiers:@[]];
+    return [[self alloc] revenant_initWithIdentifiers:@[]];
 }
 
 - (NSArray<AVMetadataIdentifier> *)allowList
 {
-    NSArray<AVMetadataIdentifier> *stored = objc_getAssociatedObject(self, @"charon.avf.metadatafilter.list");
+    NSArray<AVMetadataIdentifier> *stored = objc_getAssociatedObject(self, @"revenant.avf.metadatafilter.list");
     return stored ?: @[];
 }
 
-- (void)charon_setIdentifiers:(NSArray<AVMetadataIdentifier> *)identifiers
+- (void)revenant_setIdentifiers:(NSArray<AVMetadataIdentifier> *)identifiers
 {
-    objc_setAssociatedObject(self, @"charon.avf.metadatafilter.list",
+    objc_setAssociatedObject(self, @"revenant.avf.metadatafilter.list",
                              identifiers ? [identifiers copy] : @[],
                              OBJC_ASSOCIATION_COPY);
 }
 
-- (NSArray<AVMetadataIdentifier> *)charon_storedIdentifiers
+- (NSArray<AVMetadataIdentifier> *)revenant_storedIdentifiers
 {
-    NSArray<AVMetadataIdentifier> *stored = objc_getAssociatedObject(self, @"charon.avf.metadatafilter.list");
+    NSArray<AVMetadataIdentifier> *stored = objc_getAssociatedObject(self, @"revenant.avf.metadatafilter.list");
     return stored ?: @[];
 }
 

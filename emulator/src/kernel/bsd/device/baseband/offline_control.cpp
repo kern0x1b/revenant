@@ -11,7 +11,7 @@
 #include <cctype>
 #include <string_view>
 
-namespace shade::bsd::baseband_device {
+namespace emulator::bsd::baseband_device {
 namespace {
 
     constexpr std::size_t maximum_command_size = 256U;

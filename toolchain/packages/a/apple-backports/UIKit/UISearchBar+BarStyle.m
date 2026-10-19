@@ -1,11 +1,11 @@
 #import <UIKit/UIKit.h>
 #import <objc/runtime.h>
 
-static char charon_search_bar_style_key;
-static char charon_bar_tint_key;
-static char charon_minimal_background_key;
+static char revenant_search_bar_style_key;
+static char revenant_bar_tint_key;
+static char revenant_minimal_background_key;
 
-static UIImage *charon_clear_image(void)
+static UIImage *revenant_clear_image(void)
 {
     static UIImage *image;
     if (!image) {
@@ -16,39 +16,39 @@ static UIImage *charon_clear_image(void)
     return image;
 }
 
-@implementation UISearchBar (CharonBarStyle)
+@implementation UISearchBar (RevenantBarStyle)
 
 - (UISearchBarStyle)searchBarStyle
 {
-    return (UISearchBarStyle)[objc_getAssociatedObject(self, &charon_search_bar_style_key) unsignedIntegerValue];
+    return (UISearchBarStyle)[objc_getAssociatedObject(self, &revenant_search_bar_style_key) unsignedIntegerValue];
 }
 
 - (void)setSearchBarStyle:(UISearchBarStyle)searchBarStyle
 {
     searchBarStyle = (UISearchBarStyle)((NSUInteger)searchBarStyle & 7);
-    objc_setAssociatedObject(self, &charon_search_bar_style_key, @(searchBarStyle), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-    UIImage *ours = objc_getAssociatedObject(self, &charon_minimal_background_key);
+    objc_setAssociatedObject(self, &revenant_search_bar_style_key, @(searchBarStyle), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    UIImage *ours = objc_getAssociatedObject(self, &revenant_minimal_background_key);
     if (searchBarStyle == UISearchBarStyleMinimal) {
         if (!self.backgroundImage) {
-            UIImage *clear = charon_clear_image();
-            objc_setAssociatedObject(self, &charon_minimal_background_key, clear, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+            UIImage *clear = revenant_clear_image();
+            objc_setAssociatedObject(self, &revenant_minimal_background_key, clear, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
             self.backgroundImage = clear;
         }
     } else if (ours) {
         if (self.backgroundImage == ours)
             self.backgroundImage = nil;
-        objc_setAssociatedObject(self, &charon_minimal_background_key, nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+        objc_setAssociatedObject(self, &revenant_minimal_background_key, nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     }
 }
 
 - (UIColor *)barTintColor
 {
-    return objc_getAssociatedObject(self, &charon_bar_tint_key);
+    return objc_getAssociatedObject(self, &revenant_bar_tint_key);
 }
 
 - (void)setBarTintColor:(UIColor *)barTintColor
 {
-    objc_setAssociatedObject(self, &charon_bar_tint_key, barTintColor, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, &revenant_bar_tint_key, barTintColor, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     self.tintColor = barTintColor;
 }
 

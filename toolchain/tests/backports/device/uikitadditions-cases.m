@@ -32,10 +32,10 @@ void uikitadditions_run(UIKitAdditionsRecorder record)
                 (int)lround(b * 255), (int)lround(a * 255)]);
     }
 
-    record(@"UIColor.colorNamed.missing", [UIColor colorNamed:@"charon-no-such-colour"] ? @"set" : @"nil");
+    record(@"UIColor.colorNamed.missing", [UIColor colorNamed:@"revenant-no-such-colour"] ? @"set" : @"nil");
     record(@"UIColor.colorNamed.empty", [UIColor colorNamed:@""] ? @"set" : @"nil");
     record(@"UIColor.colorNamed.inBundle.missing",
-           [UIColor colorNamed:@"charon-no-such-colour" inBundle:[NSBundle mainBundle]
+           [UIColor colorNamed:@"revenant-no-such-colour" inBundle:[NSBundle mainBundle]
  compatibleWithTraitCollection:nil] ? @"set" : @"nil");
 
     NSArray *attributes = @[@(UISemanticContentAttributeUnspecified),

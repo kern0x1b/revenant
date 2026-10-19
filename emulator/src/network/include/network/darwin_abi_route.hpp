@@ -13,7 +13,7 @@
 
 #include <cstdint>
 
-namespace shade {
+namespace emulator {
 
 enum class DarwinAbiEpoch {
     Unknown,

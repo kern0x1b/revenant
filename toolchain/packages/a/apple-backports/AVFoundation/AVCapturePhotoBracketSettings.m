@@ -1,13 +1,13 @@
-#import "CharonAVCapturePhoto.h"
+#import "RevenantAVCapturePhoto.h"
 #import <AVFoundation/AVFoundation.h>
 #import <Foundation/Foundation.h>
 
 @implementation AVCapturePhotoBracketSettings {
-    NSArray<AVCaptureBracketedStillImageSettings *> *_charonBracketedSettings;
-    BOOL _charonLensStabilizationEnabled;
+    NSArray<AVCaptureBracketedStillImageSettings *> *_revenantBracketedSettings;
+    BOOL _revenantLensStabilizationEnabled;
 }
 
-static NSArray<AVCaptureBracketedStillImageSettings *> *CharonCheckedBracketedSettings(NSArray<AVCaptureBracketedStillImageSettings *> *bracketedSettings,
+static NSArray<AVCaptureBracketedStillImageSettings *> *RevenantCheckedBracketedSettings(NSArray<AVCaptureBracketedStillImageSettings *> *bracketedSettings,
                                                                                        NSString *method)
 {
     if (!bracketedSettings || bracketedSettings.count == 0)
@@ -20,21 +20,21 @@ static NSArray<AVCaptureBracketedStillImageSettings *> *CharonCheckedBracketedSe
     return [bracketedSettings copy];
 }
 
-+ (instancetype)charon_bracketSettingsWithRaw:(OSType)raw rawFileType:(NSString *)rawFileType format:(NSDictionary *)format
++ (instancetype)revenant_bracketSettingsWithRaw:(OSType)raw rawFileType:(NSString *)rawFileType format:(NSDictionary *)format
                             processedFileType:(NSString *)processedFileType bracketedSettings:(NSArray<AVCaptureBracketedStillImageSettings *> *)bracketedSettings
                                        method:(NSString *)method
 {
-    NSArray<AVCaptureBracketedStillImageSettings *> *checked = CharonCheckedBracketedSettings(bracketedSettings, method);
-    AVCapturePhotoBracketSettings *settings = [self charon_settingsWithRaw:raw rawFileType:rawFileType format:format
+    NSArray<AVCaptureBracketedStillImageSettings *> *checked = RevenantCheckedBracketedSettings(bracketedSettings, method);
+    AVCapturePhotoBracketSettings *settings = [self revenant_settingsWithRaw:raw rawFileType:rawFileType format:format
                                                          processedFileType:processedFileType method:method];
-    settings->_charonBracketedSettings = checked;
+    settings->_revenantBracketedSettings = checked;
     return settings;
 }
 
 + (instancetype)photoBracketSettingsWithRawPixelFormatType:(OSType)rawPixelFormatType processedFormat:(NSDictionary<NSString *, id> *)processedFormat
                                          bracketedSettings:(NSArray<__kindof AVCaptureBracketedStillImageSettings *> *)bracketedSettings
 {
-    return [self charon_bracketSettingsWithRaw:rawPixelFormatType rawFileType:nil format:processedFormat processedFileType:nil
+    return [self revenant_bracketSettingsWithRaw:rawPixelFormatType rawFileType:nil format:processedFormat processedFileType:nil
                              bracketedSettings:bracketedSettings
                                         method:@"+[AVCapturePhotoBracketSettings photoBracketSettingsWithRawPixelFormatType:processedFormat:bracketedSettings:]"];
 }
@@ -43,31 +43,31 @@ static NSArray<AVCaptureBracketedStillImageSettings *> *CharonCheckedBracketedSe
                                            processedFormat:(NSDictionary<NSString *, id> *)processedFormat processedFileType:(AVFileType)processedFileType
                                          bracketedSettings:(NSArray<AVCaptureBracketedStillImageSettings *> *)bracketedSettings
 {
-    return [self charon_bracketSettingsWithRaw:rawPixelFormatType rawFileType:rawFileType format:processedFormat
+    return [self revenant_bracketSettingsWithRaw:rawPixelFormatType rawFileType:rawFileType format:processedFormat
                              processedFileType:processedFileType bracketedSettings:bracketedSettings
                                         method:@"+[AVCapturePhotoBracketSettings photoBracketSettingsWithRawPixelFormatType:rawFileType:processedFormat:processedFileType:bracketedSettings:]"];
 }
 
 - (NSArray<__kindof AVCaptureBracketedStillImageSettings *> *)bracketedSettings
 {
-    return _charonBracketedSettings ?: @[];
+    return _revenantBracketedSettings ?: @[];
 }
 
 - (BOOL)isLensStabilizationEnabled
 {
-    return _charonLensStabilizationEnabled;
+    return _revenantLensStabilizationEnabled;
 }
 
 - (void)setLensStabilizationEnabled:(BOOL)lensStabilizationEnabled
 {
-    _charonLensStabilizationEnabled = lensStabilizationEnabled;
+    _revenantLensStabilizationEnabled = lensStabilizationEnabled;
 }
 
 - (id)copyWithZone:(NSZone *)zone
 {
     AVCapturePhotoBracketSettings *copy = [super copyWithZone:zone];
-    copy->_charonBracketedSettings = _charonBracketedSettings;
-    copy->_charonLensStabilizationEnabled = _charonLensStabilizationEnabled;
+    copy->_revenantBracketedSettings = _revenantBracketedSettings;
+    copy->_revenantLensStabilizationEnabled = _revenantLensStabilizationEnabled;
     return copy;
 }
 

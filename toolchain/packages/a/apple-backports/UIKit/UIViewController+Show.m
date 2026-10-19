@@ -1,20 +1,20 @@
 #import <UIKit/UIKit.h>
 #import <objc/runtime.h>
 
-static BOOL charon_overrides(UIViewController *controller, SEL action)
+static BOOL revenant_overrides(UIViewController *controller, SEL action)
 {
     Method own = class_getInstanceMethod([controller class], action);
     Method base = class_getInstanceMethod([UIViewController class], action);
     return own && (!base || method_getImplementation(own) != method_getImplementation(base));
 }
 
-@implementation UIViewController (CharonShow)
+@implementation UIViewController (RevenantShow)
 
 - (UIViewController *)targetViewControllerForAction:(SEL)action sender:(id)sender
 {
     BOOL baseHas = class_getInstanceMethod([UIViewController class], action) != NULL;
     for (UIViewController *controller = self; controller; controller = controller.parentViewController) {
-        if ([controller canPerformAction:action withSender:sender] && (!baseHas || charon_overrides(controller, action)))
+        if ([controller canPerformAction:action withSender:sender] && (!baseHas || revenant_overrides(controller, action)))
             return controller;
     }
     return nil;
@@ -40,7 +40,7 @@ static BOOL charon_overrides(UIViewController *controller, SEL action)
 
 @end
 
-@implementation UINavigationController (CharonShow)
+@implementation UINavigationController (RevenantShow)
 
 - (void)showViewController:(UIViewController *)controller sender:(id)sender
 {

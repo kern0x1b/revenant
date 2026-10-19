@@ -1,4 +1,4 @@
-#import "CharonMLCompute.h"
+#import "RevenantMLCompute.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
@@ -102,8 +102,8 @@
 - (BOOL)addInputs:(NSDictionary<NSString *, MLCTensor *> *)inputs
        lossLabels:(NSDictionary<NSString *, MLCTensor *> *)lossLabels
 {
-    [self charon_mlc_take:inputs into:_inputs];
-    [self charon_mlc_take:lossLabels into:_lossLabels];
+    [self revenant_mlc_take:inputs into:_inputs];
+    [self revenant_mlc_take:lossLabels into:_lossLabels];
     return YES;
 }
 
@@ -111,19 +111,19 @@
        lossLabels:(NSDictionary<NSString *, MLCTensor *> *)lossLabels
  lossLabelWeights:(NSDictionary<NSString *, MLCTensor *> *)lossLabelWeights
 {
-    [self charon_mlc_take:inputs into:_inputs];
-    [self charon_mlc_take:lossLabels into:_lossLabels];
-    [self charon_mlc_take:lossLabelWeights into:_lossLabelWeights];
+    [self revenant_mlc_take:inputs into:_inputs];
+    [self revenant_mlc_take:lossLabels into:_lossLabels];
+    [self revenant_mlc_take:lossLabelWeights into:_lossLabelWeights];
     return YES;
 }
 
 - (BOOL)addOutputs:(NSDictionary<NSString *, MLCTensor *> *)outputs
 {
-    [self charon_mlc_take:outputs into:_outputs];
+    [self revenant_mlc_take:outputs into:_outputs];
     return YES;
 }
 
-- (void)charon_mlc_take:(NSDictionary<NSString *, MLCTensor *> *)tensors
+- (void)revenant_mlc_take:(NSDictionary<NSString *, MLCTensor *> *)tensors
                    into:(NSMutableDictionary<NSString *, MLCTensor *> *)bindings
 {
     if (!tensors) {

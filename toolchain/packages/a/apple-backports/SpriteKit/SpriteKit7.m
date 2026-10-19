@@ -1,15 +1,15 @@
-#import "CharonSpriteKit.h"
+#import "RevenantSpriteKit.h"
 #include <fnmatch.h>
 
-static NSString *const CharonSKInvalidArgument = @"NSInvalidArgumentException";
-static NSString *const CharonSKNilNode = @"Attemped to add nil node";
+static NSString *const RevenantSKInvalidArgument = @"NSInvalidArgumentException";
+static NSString *const RevenantSKNilNode = @"Attemped to add nil node";
 
-static BOOL CharonSKNameMatches(NSString *name, NSString *pattern)
+static BOOL RevenantSKNameMatches(NSString *name, NSString *pattern)
 {
     return name != nil && fnmatch([pattern UTF8String], [name UTF8String], 0) == 0;
 }
 
-static CGAffineTransform CharonSKLocalTransform(SKNode *node)
+static CGAffineTransform RevenantSKLocalTransform(SKNode *node)
 {
     CGAffineTransform scale = CGAffineTransformMakeScale(node.xScale, node.yScale);
     CGAffineTransform rotation = CGAffineTransformMakeRotation(node.zRotation);
@@ -17,18 +17,18 @@ static CGAffineTransform CharonSKLocalTransform(SKNode *node)
     return CGAffineTransformConcat(CGAffineTransformConcat(scale, rotation), place);
 }
 
-static CGAffineTransform CharonSKAbsoluteTransform(SKNode *node)
+static CGAffineTransform RevenantSKAbsoluteTransform(SKNode *node)
 {
     CGAffineTransform transform = CGAffineTransformIdentity;
     for (SKNode *current = node; current != nil; current = current.parent) {
-        transform = CGAffineTransformConcat(transform, CharonSKLocalTransform(current));
+        transform = CGAffineTransformConcat(transform, RevenantSKLocalTransform(current));
     }
     return transform;
 }
 
-static CGAffineTransform CharonSKParentTransform(SKNode *node)
+static CGAffineTransform RevenantSKParentTransform(SKNode *node)
 {
-    return node.parent != nil ? CharonSKAbsoluteTransform(node.parent) : CGAffineTransformIdentity;
+    return node.parent != nil ? RevenantSKAbsoluteTransform(node.parent) : CGAffineTransformIdentity;
 }
 
 @implementation SKNode {
@@ -210,7 +210,7 @@ static CGAffineTransform CharonSKParentTransform(SKNode *node)
 - (CGRect)calculateAccumulatedFrame
 {
     CGRect accumulated = self.frame;
-    CGAffineTransform local = CharonSKLocalTransform(self);
+    CGAffineTransform local = RevenantSKLocalTransform(self);
     for (SKNode *child in _children) {
         CGRect childFrame = CGRectApplyAffineTransform([child calculateAccumulatedFrame], local);
         if (CGRectIsEmpty(childFrame)) {
@@ -221,7 +221,7 @@ static CGAffineTransform CharonSKParentTransform(SKNode *node)
     return accumulated;
 }
 
-- (NSString *)charon_describe
+- (NSString *)revenant_describe
 {
     CGRect accumulated = [self calculateAccumulatedFrame];
     return [NSString stringWithFormat:@"<%@> name:'%@' position:{%g, %g} scale:{%.2f, %.2f} accumulatedFrame:{{%g, %g}, {%g, %g}}",
@@ -232,15 +232,15 @@ static CGAffineTransform CharonSKParentTransform(SKNode *node)
 - (void)insertChild:(SKNode *)node atIndex:(NSUInteger)index
 {
     if (node == nil) {
-        NSString *reason = [NSString stringWithFormat:@"Attemped to add nil node to parent: %@", [self charon_describe]];
-        [[NSException exceptionWithName:CharonSKNilNode reason:reason userInfo:nil] raise];
+        NSString *reason = [NSString stringWithFormat:@"Attemped to add nil node to parent: %@", [self revenant_describe]];
+        [[NSException exceptionWithName:RevenantSKNilNode reason:reason userInfo:nil] raise];
     }
     if (node.parent != nil) {
-        [NSException raise:CharonSKInvalidArgument format:@"Attempted to add a SKNode which already has a parent"];
+        [NSException raise:RevenantSKInvalidArgument format:@"Attempted to add a SKNode which already has a parent"];
     }
     for (SKNode *ancestor = self; ancestor != nil; ancestor = ancestor.parent) {
         if (ancestor == node) {
-            [NSException raise:CharonSKInvalidArgument format:@"Attempted to add a SKNode that is this node or one of its ancestors"];
+            [NSException raise:RevenantSKInvalidArgument format:@"Attempted to add a SKNode that is this node or one of its ancestors"];
         }
     }
     [_children insertObject:node atIndex:index];
@@ -278,7 +278,7 @@ static CGAffineTransform CharonSKParentTransform(SKNode *node)
     }
 }
 
-- (NSArray *)charon_nodesMatchingPath:(NSString *)path
+- (NSArray *)revenant_nodesMatchingPath:(NSString *)path
 {
     if (path == nil) {
         return @[];
@@ -308,14 +308,14 @@ static CGAffineTransform CharonSKParentTransform(SKNode *node)
                 NSMutableArray *queue = [NSMutableArray arrayWithArray:node->_children];
                 for (NSUInteger q = 0; q < queue.count; q++) {
                     SKNode *candidate = queue[q];
-                    if (CharonSKNameMatches(candidate.name, component)) {
+                    if (RevenantSKNameMatches(candidate.name, component)) {
                         [next addObject:candidate];
                     }
                     [queue addObjectsFromArray:candidate->_children];
                 }
             } else {
                 for (SKNode *child in node->_children) {
-                    if (CharonSKNameMatches(child.name, component)) {
+                    if (RevenantSKNameMatches(child.name, component)) {
                         [next addObject:child];
                     }
                 }
@@ -332,14 +332,14 @@ static CGAffineTransform CharonSKParentTransform(SKNode *node)
 
 - (SKNode *)childNodeWithName:(NSString *)name
 {
-    NSArray *matches = [self charon_nodesMatchingPath:name];
+    NSArray *matches = [self revenant_nodesMatchingPath:name];
     return matches.count > 0 ? matches[0] : nil;
 }
 
 - (void)enumerateChildNodesWithName:(NSString *)name usingBlock:(void (^)(SKNode *node, BOOL *stop))block
 {
     BOOL stop = NO;
-    for (SKNode *node in [self charon_nodesMatchingPath:name]) {
+    for (SKNode *node in [self revenant_nodesMatchingPath:name]) {
         block(node, &stop);
         if (stop) {
             break;
@@ -367,12 +367,12 @@ static CGAffineTransform CharonSKParentTransform(SKNode *node)
 
 - (NSArray *)nodesAtPoint:(CGPoint)point
 {
-    CGPoint absolute = CGPointApplyAffineTransform(point, CharonSKAbsoluteTransform(self));
+    CGPoint absolute = CGPointApplyAffineTransform(point, RevenantSKAbsoluteTransform(self));
     NSMutableArray *hits = [NSMutableArray array];
     NSMutableArray *queue = [NSMutableArray arrayWithArray:_children];
     for (NSUInteger q = 0; q < queue.count; q++) {
         SKNode *candidate = queue[q];
-        CGPoint local = CGPointApplyAffineTransform(absolute, CGAffineTransformInvert(CharonSKParentTransform(candidate)));
+        CGPoint local = CGPointApplyAffineTransform(absolute, CGAffineTransformInvert(RevenantSKParentTransform(candidate)));
         if ([candidate containsPoint:local]) {
             [hits addObject:candidate];
         }
@@ -389,8 +389,8 @@ static CGAffineTransform CharonSKParentTransform(SKNode *node)
 
 - (CGPoint)convertPoint:(CGPoint)point fromNode:(SKNode *)node
 {
-    CGPoint absolute = CGPointApplyAffineTransform(point, CharonSKAbsoluteTransform(node));
-    return CGPointApplyAffineTransform(absolute, CGAffineTransformInvert(CharonSKAbsoluteTransform(self)));
+    CGPoint absolute = CGPointApplyAffineTransform(point, RevenantSKAbsoluteTransform(node));
+    return CGPointApplyAffineTransform(absolute, CGAffineTransformInvert(RevenantSKAbsoluteTransform(self)));
 }
 
 - (CGPoint)convertPoint:(CGPoint)point toNode:(SKNode *)node
@@ -400,8 +400,8 @@ static CGAffineTransform CharonSKParentTransform(SKNode *node)
 
 - (BOOL)intersectsNode:(SKNode *)node
 {
-    CGRect mine = CGRectApplyAffineTransform([self calculateAccumulatedFrame], CharonSKParentTransform(self));
-    CGRect theirs = CGRectApplyAffineTransform([node calculateAccumulatedFrame], CharonSKParentTransform(node));
+    CGRect mine = CGRectApplyAffineTransform([self calculateAccumulatedFrame], RevenantSKParentTransform(self));
+    CGRect theirs = CGRectApplyAffineTransform([node calculateAccumulatedFrame], RevenantSKParentTransform(node));
     if (CGRectIsEmpty(mine) || CGRectIsEmpty(theirs)) {
         return NO;
     }

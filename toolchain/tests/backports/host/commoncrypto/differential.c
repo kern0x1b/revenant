@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-extern CCRNGStatus charon_host_CCRandomGenerateBytes(void *bytes, size_t count);
+extern CCRNGStatus revenant_host_CCRandomGenerateBytes(void *bytes, size_t count);
 
 static CCRNGStatus always_ok(void *bytes, size_t count)
 {
@@ -64,8 +64,8 @@ int main(void)
     size_t i;
     setvbuf(stdout, NULL, _IONBF, 0);
     for (i = 0; i < sizeof(counts) / sizeof(counts[0]); i++) {
-        failures += !check("port", charon_host_CCRandomGenerateBytes, CCRandomGenerateBytes, counts[i], 0);
-        failures += !check("port", charon_host_CCRandomGenerateBytes, CCRandomGenerateBytes, counts[i], 1);
+        failures += !check("port", revenant_host_CCRandomGenerateBytes, CCRandomGenerateBytes, counts[i], 0);
+        failures += !check("port", revenant_host_CCRandomGenerateBytes, CCRandomGenerateBytes, counts[i], 1);
     }
     if (check("control", always_ok, CCRandomGenerateBytes, 1, 1)) {
         printf("CONTROL NOT NOTICED: the comparison cannot fail on the NULL class\n");

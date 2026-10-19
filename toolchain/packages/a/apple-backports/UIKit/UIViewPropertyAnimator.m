@@ -1,11 +1,11 @@
-#import "CharonTimingParameters.h"
+#import "RevenantTimingParameters.h"
 #include <math.h>
-#include "../CharonBezier.h"
+#include "../RevenantBezier.h"
 
-@interface CharonAnimatorDriver : NSObject
+@interface RevenantAnimatorDriver : NSObject
 @end
 
-@implementation CharonAnimatorDriver {
+@implementation RevenantAnimatorDriver {
 @private
     CADisplayLink *_link;
     __weak UIViewPropertyAnimator *_animator;
@@ -59,7 +59,7 @@
     NSMutableArray *_animations;
     NSMutableArray *_completions;
     NSMutableArray *_layers;
-    CharonAnimatorDriver *_driver;
+    RevenantAnimatorDriver *_driver;
     CFTimeInterval _startedAt;
 }
 
@@ -88,7 +88,7 @@
 - (instancetype)initWithDuration:(NSTimeInterval)duration timingParameters:(id <UITimingCurveProvider>)parameters
 {
     if ((self = [super init]))
-        [self charon_setUpWithDuration:duration timingParameters:parameters animations:nil];
+        [self revenant_setUpWithDuration:duration timingParameters:parameters animations:nil];
     return self;
 }
 
@@ -123,7 +123,7 @@
     return self;
 }
 
-- (void)charon_setUpWithDuration:(NSTimeInterval)duration timingParameters:(id <UITimingCurveProvider>)parameters
+- (void)revenant_setUpWithDuration:(NSTimeInterval)duration timingParameters:(id <UITimingCurveProvider>)parameters
                       animations:(void (^)(void))animations
 {
     _duration = duration;
@@ -143,7 +143,7 @@
 
 #pragma mark - Driving the layers
 
-static double charon_curve_at(id <UITimingCurveProvider> parameters, double fraction)
+static double revenant_curve_at(id <UITimingCurveProvider> parameters, double fraction)
 {
     if (fraction <= 0)
         return 0;
@@ -152,27 +152,27 @@ static double charon_curve_at(id <UITimingCurveProvider> parameters, double frac
     if (parameters.timingCurveType == UITimingCurveTypeSpring) {
         UISpringTimingParameters *spring = parameters.springTimingParameters;
         double ratio = spring.dampingRatio, velocity = spring.initialVelocity.dy;
-        double omega = charon_spring_frequency(1, ratio, velocity);
-        return charon_spring_progress(omega, ratio, velocity, fraction);
+        double omega = revenant_spring_frequency(1, ratio, velocity);
+        return revenant_spring_progress(omega, ratio, velocity, fraction);
     }
     UICubicTimingParameters *cubic = parameters.cubicTimingParameters;
     CGPoint first = cubic.controlPoint1, second = cubic.controlPoint2;
-    return charon_bezier_progress(first.x, first.y, second.x, second.y, fraction);
+    return revenant_bezier_progress(first.x, first.y, second.x, second.y, fraction);
 }
 
-static void charon_walk(CALayer *layer, void (^visit)(CALayer *))
+static void revenant_walk(CALayer *layer, void (^visit)(CALayer *))
 {
     visit(layer);
     for (CALayer *sublayer in layer.sublayers)
-        charon_walk(sublayer, visit);
+        revenant_walk(sublayer, visit);
 }
 
-static NSMapTable *charon_animation_keys(void)
+static NSMapTable *revenant_animation_keys(void)
 {
     NSMapTable *keys = [NSMapTable mapTableWithKeyOptions:NSPointerFunctionsObjectPointerPersonality
                                              valueOptions:NSPointerFunctionsStrongMemory];
     for (UIWindow *window in [UIApplication sharedApplication].windows)
-        charon_walk(window.layer, ^(CALayer *layer) {
+        revenant_walk(window.layer, ^(CALayer *layer) {
             NSArray *animations = layer.animationKeys;
             if (animations.count)
                 [keys setObject:[NSSet setWithArray:animations] forKey:layer];
@@ -286,7 +286,7 @@ static NSMapTable *charon_animation_keys(void)
         return;
     [_animations addObject:@[[animation copy], @(delayFactor)]];
     if (_state == UIViewAnimatingStateActive)
-        [self charon_runBlock:animation afterFactor:delayFactor];
+        [self revenant_runBlock:animation afterFactor:delayFactor];
     else if (_state == UIViewAnimatingStateInactive)
         _blocksWaiting = YES;
 }
@@ -307,12 +307,12 @@ static NSMapTable *charon_animation_keys(void)
     NSAssert(_animations.count > 0, @"An animator (%@) must have at least one animation block to start!", self);
     if (_state == UIViewAnimatingStateActive && !_running) {
         NSAssert(_interruptible, @"An animator (%@) can be only started in the paused state if it is interruptible!", self);
-        [self charon_resume];
+        [self revenant_resume];
         return;
     }
     if (_state != UIViewAnimatingStateInactive)
         return;
-    [self charon_start];
+    [self revenant_start];
 }
 
 - (void)startAnimationAfterDelay:(NSTimeInterval)delay
@@ -331,11 +331,11 @@ static NSMapTable *charon_animation_keys(void)
 {
     NSAssert(_interruptible, @"An animator %@ that is not interruptible cannot be paused!", self);
     if (_state == UIViewAnimatingStateInactive)
-        [self charon_start];
+        [self revenant_start];
     [self willChangeValueForKey:@"fractionComplete"];
-    [self charon_pause];
+    [self revenant_pause];
     [self didChangeValueForKey:@"fractionComplete"];
-    [self charon_setRunning:NO];
+    [self revenant_setRunning:NO];
 }
 
 - (void)stopAnimation:(BOOL)withoutFinishing
@@ -344,17 +344,17 @@ static NSMapTable *charon_animation_keys(void)
     NSAssert(_state != UIViewAnimatingStateStopped, @"Animator %@ is already stopped!", self);
     if (_state == UIViewAnimatingStateInactive)
         return;
-    [self charon_settleAtCurrentPosition];
-    [self charon_setRunning:NO];
-    [self charon_setReversed:NO];
+    [self revenant_settleAtCurrentPosition];
+    [self revenant_setRunning:NO];
+    [self revenant_setReversed:NO];
     if (!withoutFinishing) {
-        [self charon_setState:UIViewAnimatingStateStopped];
+        [self revenant_setState:UIViewAnimatingStateStopped];
         return;
     }
     _completions = nil;
     _finishingPosition = UIViewAnimatingPositionCurrent;
-    [self charon_runCompletions];
-    [self charon_setState:UIViewAnimatingStateInactive];
+    [self revenant_runCompletions];
+    [self revenant_setState:UIViewAnimatingStateInactive];
 }
 
 - (void)finishAnimationAtPosition:(UIViewAnimatingPosition)finalPosition
@@ -365,9 +365,9 @@ static NSMapTable *charon_animation_keys(void)
         return;
     _finishingPosition = finalPosition;
     if (finalPosition != UIViewAnimatingPositionCurrent)
-        [self charon_setFraction:finalPosition == UIViewAnimatingPositionEnd ? 1 : 0];
-    [self charon_runCompletions];
-    [self charon_setState:UIViewAnimatingStateInactive];
+        [self revenant_setFraction:finalPosition == UIViewAnimatingPositionEnd ? 1 : 0];
+    [self revenant_runCompletions];
+    [self revenant_setState:UIViewAnimatingStateInactive];
 }
 
 - (void)continueAnimationWithTimingParameters:(id <UITimingCurveProvider>)parameters durationFactor:(CGFloat)durationFactor
@@ -379,7 +379,7 @@ static NSMapTable *charon_animation_keys(void)
         _timingParameters = [(NSObject *)parameters copy];
     if (durationFactor > 0)
         _internalDuration = _duration * durationFactor;
-    [self charon_resume];
+    [self revenant_resume];
 }
 
 #pragma mark - Scrubbing
@@ -403,12 +403,12 @@ static NSMapTable *charon_animation_keys(void)
     }
     BOOL wasRunning = _running;
     if (wasRunning)
-        [self charon_pause];
+        [self revenant_pause];
     [self willChangeValueForKey:@"fractionComplete"];
-    [self charon_setFraction:fractionComplete];
+    [self revenant_setFraction:fractionComplete];
     [self didChangeValueForKey:@"fractionComplete"];
     if (wasRunning)
-        [self charon_resume];
+        [self revenant_resume];
 }
 
 - (BOOL)isReversed
@@ -422,16 +422,16 @@ static NSMapTable *charon_animation_keys(void)
         return;
     BOOL wasRunning = _running;
     if (wasRunning)
-        [self charon_pause];
-    [self charon_setReversed:reversed];
+        [self revenant_pause];
+    [self revenant_setReversed:reversed];
     if (wasRunning)
-        [self charon_resume];
+        [self revenant_resume];
 }
 
 
 #pragma mark - The private half
 
-- (void)charon_setState:(UIViewAnimatingState)state
+- (void)revenant_setState:(UIViewAnimatingState)state
 {
     if (_state == state)
         return;
@@ -440,7 +440,7 @@ static NSMapTable *charon_animation_keys(void)
     [self didChangeValueForKey:@"state"];
 }
 
-- (void)charon_setRunning:(BOOL)running
+- (void)revenant_setRunning:(BOOL)running
 {
     if (_running == running)
         return;
@@ -449,7 +449,7 @@ static NSMapTable *charon_animation_keys(void)
     [self didChangeValueForKey:@"running"];
 }
 
-- (void)charon_setReversed:(BOOL)reversed
+- (void)revenant_setReversed:(BOOL)reversed
 {
     if (_reversed == reversed)
         return;
@@ -458,7 +458,7 @@ static NSMapTable *charon_animation_keys(void)
     [self didChangeValueForKey:@"reversed"];
 }
 
-- (void)charon_runBlock:(void (^)(void))block afterFactor:(CGFloat)delayFactor
+- (void)revenant_runBlock:(void (^)(void))block afterFactor:(CGFloat)delayFactor
 {
     [UIView animateWithDuration:_internalDuration * (1 - delayFactor)
                           delay:_delay + _internalDuration * delayFactor
@@ -467,53 +467,53 @@ static NSMapTable *charon_animation_keys(void)
                      completion:nil];
 }
 
-- (void)charon_start
+- (void)revenant_start
 {
     _blocksWaiting = NO;
-    [self charon_setState:UIViewAnimatingStateActive];
+    [self revenant_setState:UIViewAnimatingStateActive];
     _finishingPosition = UIViewAnimatingPositionEnd;
     [_layers removeAllObjects];
-    NSMapTable *before = charon_animation_keys();
+    NSMapTable *before = revenant_animation_keys();
     for (NSArray *entry in _animations)
-        [self charon_runBlock:entry[0] afterFactor:[entry[1] doubleValue]];
+        [self revenant_runBlock:entry[0] afterFactor:[entry[1] doubleValue]];
     for (UIWindow *window in [UIApplication sharedApplication].windows)
-        charon_walk(window.layer, ^(CALayer *layer) {
+        revenant_walk(window.layer, ^(CALayer *layer) {
             NSSet *was = [before objectForKey:layer];
             for (NSString *key in layer.animationKeys)
                 if (![was containsObject:key])
                     [self->_layers addObject:@[layer, key]];
         });
     _startedAt = CACurrentMediaTime();
-    [self charon_setRunning:YES];
+    [self revenant_setRunning:YES];
     if (!_interruptible)
         return;
-    [self charon_setFraction:0];
-    _driver = [[CharonAnimatorDriver alloc] initWithAnimator:self];
+    [self revenant_setFraction:0];
+    _driver = [[RevenantAnimatorDriver alloc] initWithAnimator:self];
 }
 
-- (void)charon_pause
+- (void)revenant_pause
 {
     [_driver invalidate];
     _driver = nil;
 }
 
-- (void)charon_resume
+- (void)revenant_resume
 {
     if (_state != UIViewAnimatingStateActive)
         return;
     _startedAt = CACurrentMediaTime() - (_reversed ? (1 - _fractionComplete) : _fractionComplete) * _internalDuration;
-    [self charon_setRunning:YES];
+    [self revenant_setRunning:YES];
     if (!_driver)
-        _driver = [[CharonAnimatorDriver alloc] initWithAnimator:self];
+        _driver = [[RevenantAnimatorDriver alloc] initWithAnimator:self];
 }
 
-- (void)charon_setFraction:(CGFloat)fraction
+- (void)revenant_setFraction:(CGFloat)fraction
 {
     _fractionComplete = MIN(MAX(fraction, 0), 1);
-    [self charon_show:_scrubsLinearly ? _fractionComplete : charon_curve_at(_timingParameters, _fractionComplete)];
+    [self revenant_show:_scrubsLinearly ? _fractionComplete : revenant_curve_at(_timingParameters, _fractionComplete)];
 }
 
-- (void)charon_show:(CGFloat)progress
+- (void)revenant_show:(CGFloat)progress
 {
     for (NSArray *tracked in _layers) {
         CALayer *layer = tracked[0];
@@ -535,23 +535,23 @@ static NSMapTable *charon_animation_keys(void)
     if (_reversed)
         elapsed = 1 - elapsed;
     double bounded = MIN(MAX(elapsed, 0.0), 1.0);
-    double progress = charon_curve_at(_timingParameters, bounded);
+    double progress = revenant_curve_at(_timingParameters, bounded);
     _fractionComplete = _scrubsLinearly ? progress : bounded;
-    [self charon_show:progress];
+    [self revenant_show:progress];
     if ((!_reversed && elapsed < 1) || (_reversed && elapsed > 0))
         return;
-    [self charon_setRunning:NO];
+    [self revenant_setRunning:NO];
     [_driver invalidate];
     _driver = nil;
     if (_pausesOnCompletion)
         return;
     _finishingPosition = _reversed ? UIViewAnimatingPositionStart : UIViewAnimatingPositionEnd;
-    [self charon_settleAtCurrentPosition];
-    [self charon_runCompletions];
-    [self charon_setState:UIViewAnimatingStateInactive];
+    [self revenant_settleAtCurrentPosition];
+    [self revenant_runCompletions];
+    [self revenant_setState:UIViewAnimatingStateInactive];
 }
 
-- (void)charon_settleAtCurrentPosition
+- (void)revenant_settleAtCurrentPosition
 {
     [_driver invalidate];
     _driver = nil;
@@ -559,7 +559,7 @@ static NSMapTable *charon_animation_keys(void)
         [tracked[0] removeAnimationForKey:tracked[1]];
 }
 
-- (void)charon_runCompletions
+- (void)revenant_runCompletions
 {
     NSArray *completions = _completions;
     _completions = nil;
@@ -571,7 +571,7 @@ static NSMapTable *charon_animation_keys(void)
 - (id)copyWithZone:(NSZone *)zone
 {
     UIViewPropertyAnimator *copy = [[[self class] allocWithZone:zone] init];
-    [copy charon_setUpWithDuration:self.duration timingParameters:self.timingParameters animations:nil];
+    [copy revenant_setUpWithDuration:self.duration timingParameters:self.timingParameters animations:nil];
     copy.userInteractionEnabled = self.isUserInteractionEnabled;
     copy.interruptible = self.isInterruptible;
     return copy;

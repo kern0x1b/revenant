@@ -70,8 +70,8 @@ int main(int argc, char **argv)
             }
         }
 
-        printf("control: INCharonNoSuchClassForThisHarness reads %s\n",
-               NSClassFromString(@"INCharonNoSuchClassForThisHarness") ? "PRESENT, which is wrong"
+        printf("control: INRevenantNoSuchClassForThisHarness reads %s\n",
+               NSClassFromString(@"INRevenantNoSuchClassForThisHarness") ? "PRESENT, which is wrong"
                                                                         : "absent, as it must");
         IMP plain = class_getMethodImplementation([NSObject class], @selector(init));
         id plainObject = plain ? ((id (*)(id, SEL))plain)([NSObject class], @selector(init)) : nil;

@@ -226,7 +226,7 @@ public struct EmptySnippetIntent: SnippetIntent {
 
     public init() {}
 
-    public static var title: LocalizedStringResource { return CharonLocalized.resource("Empty") }
+    public static var title: LocalizedStringResource { return RevenantLocalized.resource("Empty") }
     public static var isDiscoverable: Bool { return false }
     public static var parameterSummary: SummaryContent { return SummaryContent("") }
 
@@ -333,7 +333,7 @@ extension AppIntentError.PermissionRequired: CustomStringConvertible, LocalizedE
 
 extension AppIntentError: CustomStringConvertible {
     public var description: String {
-        if let title = parameterTitle { return "AppIntentError: \(CharonLocalized.string(of: title))" }
+        if let title = parameterTitle { return "AppIntentError: \(RevenantLocalized.string(of: title))" }
         return "AppIntent encountered an error."
     }
 }
@@ -358,7 +358,7 @@ public struct ConfirmationActionName: Sendable {
     public static func custom(acceptLabel: LocalizedStringResource, acceptAlternatives: [LocalizedStringResource] = [],
                               denyLabel: LocalizedStringResource, denyAlternatives: [LocalizedStringResource] = [],
                               destructive: Bool = false) -> ConfirmationActionName {
-        return ConfirmationActionName("custom:\(CharonLocalized.string(of: acceptLabel))|\(CharonLocalized.string(of: denyLabel))|\(destructive)")
+        return ConfirmationActionName("custom:\(RevenantLocalized.string(of: acceptLabel))|\(RevenantLocalized.string(of: denyLabel))|\(destructive)")
     }
 
     public static var add: ConfirmationActionName { return ConfirmationActionName("add") }
@@ -471,7 +471,7 @@ public struct IntentDialog: ExpressibleByStringInterpolation, Sendable {
 
         public init(literalCapacity: Int, interpolationCount: Int) {
             literal.reserveCapacity(literalCapacity)
-            value = IntentDialog(CharonLocalized.resource(""))
+            value = IntentDialog(RevenantLocalized.resource(""))
         }
 
         public mutating func appendLiteral(_ literal: String) {
@@ -480,12 +480,12 @@ public struct IntentDialog: ExpressibleByStringInterpolation, Sendable {
         }
 
         public mutating func appendInterpolation(_ resource: LocalizedStringResource) {
-            literal += CharonLocalized.string(of: resource)
+            literal += RevenantLocalized.string(of: resource)
             flush()
         }
 
         public mutating func appendInterpolation(_ value: any CustomLocalizedStringResourceConvertible) {
-            literal += CharonLocalized.string(of: value.localizedStringResource)
+            literal += RevenantLocalized.string(of: value.localizedStringResource)
             flush()
         }
 
@@ -496,18 +496,18 @@ public struct IntentDialog: ExpressibleByStringInterpolation, Sendable {
 
         private func resource<T>(_ value: T) -> LocalizedStringResource {
             let text = String(describing: value)
-            #if CHARON_APPINTENTS_CARRIES_LOCALIZED_STRING
+            #if REVENANT_APPINTENTS_CARRIES_LOCALIZED_STRING
             return LocalizedStringResource(stringLiteral: text)
             #else
-            return CharonLocalized.resource(text, defaultValue: text)
+            return RevenantLocalized.resource(text, defaultValue: text)
             #endif
         }
 
         private mutating func flush() {
-            #if CHARON_APPINTENTS_CARRIES_LOCALIZED_STRING
+            #if REVENANT_APPINTENTS_CARRIES_LOCALIZED_STRING
             value = IntentDialog(LocalizedStringResource(stringLiteral: literal))
             #else
-            value = IntentDialog(CharonLocalized.resource(literal, defaultValue: literal))
+            value = IntentDialog(RevenantLocalized.resource(literal, defaultValue: literal))
             #endif
         }
     }
@@ -550,5 +550,5 @@ public struct IntentSystemContext {
         self.preciseTimestamp = preciseTimestamp
     }
 
-    public var currentMode: IntentModes.Current { return CharonForeground.mode }
+    public var currentMode: IntentModes.Current { return RevenantForeground.mode }
 }

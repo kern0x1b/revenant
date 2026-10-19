@@ -16,9 +16,9 @@ static NSString *answering_image(Class cls, SEL selector)
 int main(void)
 {
     @autoreleasepool {
-        const char *path = getenv("CHARON_EXPECTED");
+        const char *path = getenv("REVENANT_EXPECTED");
         if (path == NULL) {
-            fprintf(stderr, "CHARON_EXPECTED is not set: this program compares against nothing\n");
+            fprintf(stderr, "REVENANT_EXPECTED is not set: this program compares against nothing\n");
             return 2;
         }
         NSString *recorded = [NSString stringWithContentsOfFile:@(path) encoding:NSUTF8StringEncoding error:NULL];
@@ -44,6 +44,6 @@ int main(void)
         NSArray *contents = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:url.path error:NULL];
         CHECK(contents.count == 1, "the store's directory holds exactly one file of its own");
 
-        return charon_failures ? 1 : 0;
+        return revenant_failures ? 1 : 0;
     }
 }

@@ -1,9 +1,9 @@
-#import "CharonAVFAudio.h"
+#import "RevenantAVFAudio.h"
 
 @implementation AVAudioChannelLayout {
-    AudioChannelLayoutTag _charon_tag;
-    AudioChannelLayout *_charon_layout;
-    NSUInteger _charon_length;
+    AudioChannelLayoutTag _revenant_tag;
+    AudioChannelLayout *_revenant_layout;
+    NSUInteger _revenant_length;
 }
 
 - (instancetype)initWithLayoutTag:(AudioChannelLayoutTag)layoutTag
@@ -25,38 +25,38 @@
     self = [super init];
     AudioChannelLayoutTag tag = layout->mChannelLayoutTag;
     if (tag == kAudioChannelLayoutTag_UseChannelDescriptions) {
-        AudioChannelLayoutTag specific = CharonTagForChannelCount(layout->mNumberChannelDescriptions);
+        AudioChannelLayoutTag specific = RevenantTagForChannelCount(layout->mNumberChannelDescriptions);
         if (specific != kAudioChannelLayoutTag_UseChannelDescriptions) {
             tag = specific;
         }
     }
     if (tag == kAudioChannelLayoutTag_UseChannelBitmap) {
         NSUInteger channels = (NSUInteger)__builtin_popcount(layout->mChannelBitmap);
-        AudioChannelLayoutTag specific = CharonTagForChannelCount(channels);
+        AudioChannelLayoutTag specific = RevenantTagForChannelCount(channels);
         if (specific != kAudioChannelLayoutTag_UseChannelBitmap) {
             tag = specific;
         }
     }
-    _charon_tag = tag;
-    _charon_length = sizeof(AudioChannelLayout) + (layout->mNumberChannelDescriptions > 0 ? (layout->mNumberChannelDescriptions - 1) * sizeof(AudioChannelDescription) : 0);
-    _charon_layout = calloc(1, _charon_length);
-    if (!_charon_layout) {
+    _revenant_tag = tag;
+    _revenant_length = sizeof(AudioChannelLayout) + (layout->mNumberChannelDescriptions > 0 ? (layout->mNumberChannelDescriptions - 1) * sizeof(AudioChannelDescription) : 0);
+    _revenant_layout = calloc(1, _revenant_length);
+    if (!_revenant_layout) {
         abort();
     }
-    _charon_layout->mChannelLayoutTag = tag;
+    _revenant_layout->mChannelLayoutTag = tag;
     if (layout->mNumberChannelDescriptions > 0) {
-        _charon_layout->mNumberChannelDescriptions = layout->mNumberChannelDescriptions;
-        memcpy(_charon_layout->mChannelDescriptions, layout->mChannelDescriptions,
+        _revenant_layout->mNumberChannelDescriptions = layout->mNumberChannelDescriptions;
+        memcpy(_revenant_layout->mChannelDescriptions, layout->mChannelDescriptions,
                layout->mNumberChannelDescriptions * sizeof(AudioChannelDescription));
     } else {
-        _charon_layout->mChannelBitmap = layout->mChannelBitmap;
+        _revenant_layout->mChannelBitmap = layout->mChannelBitmap;
     }
     return self;
 }
 
 - (void)dealloc
 {
-    free(_charon_layout);
+    free(_revenant_layout);
 }
 
 + (instancetype)layoutWithLayoutTag:(AudioChannelLayoutTag)layoutTag
@@ -78,39 +78,39 @@
         return NO;
     }
     AVAudioChannelLayout *other = object;
-    if (_charon_tag != other->_charon_tag) {
+    if (_revenant_tag != other->_revenant_tag) {
         return NO;
     }
-    if (_charon_layout->mChannelLayoutTag == kAudioChannelLayoutTag_UseChannelBitmap) {
-        return _charon_layout->mChannelBitmap == other->_charon_layout->mChannelBitmap;
+    if (_revenant_layout->mChannelLayoutTag == kAudioChannelLayoutTag_UseChannelBitmap) {
+        return _revenant_layout->mChannelBitmap == other->_revenant_layout->mChannelBitmap;
     }
-    if (_charon_layout->mNumberChannelDescriptions != other->_charon_layout->mNumberChannelDescriptions) {
+    if (_revenant_layout->mNumberChannelDescriptions != other->_revenant_layout->mNumberChannelDescriptions) {
         return NO;
     }
-    return memcmp(_charon_layout->mChannelDescriptions, other->_charon_layout->mChannelDescriptions,
-                  _charon_layout->mNumberChannelDescriptions * sizeof(AudioChannelDescription)) == 0;
+    return memcmp(_revenant_layout->mChannelDescriptions, other->_revenant_layout->mChannelDescriptions,
+                  _revenant_layout->mNumberChannelDescriptions * sizeof(AudioChannelDescription)) == 0;
 }
 
 - (AudioChannelLayoutTag)layoutTag
 {
-    return _charon_tag;
+    return _revenant_tag;
 }
 
 - (const AudioChannelLayout *)layout
 {
-    return _charon_layout;
+    return _revenant_layout;
 }
 
 - (AVAudioChannelCount)channelCount
 {
-    if (_charon_layout->mChannelLayoutTag == kAudioChannelLayoutTag_UseChannelBitmap) {
-        return (AVAudioChannelCount)__builtin_popcount(_charon_layout->mChannelBitmap);
+    if (_revenant_layout->mChannelLayoutTag == kAudioChannelLayoutTag_UseChannelBitmap) {
+        return (AVAudioChannelCount)__builtin_popcount(_revenant_layout->mChannelBitmap);
     }
-    if (_charon_layout->mNumberChannelDescriptions > 0) {
-        return _charon_layout->mNumberChannelDescriptions;
+    if (_revenant_layout->mNumberChannelDescriptions > 0) {
+        return _revenant_layout->mNumberChannelDescriptions;
     }
-    NSUInteger channels = CharonChannelsForLayoutTag(_charon_tag);
-    return (AVAudioChannelCount)(channels != 0 ? channels : (_charon_tag & 0x0000FFFF));
+    NSUInteger channels = RevenantChannelsForLayoutTag(_revenant_tag);
+    return (AVAudioChannelCount)(channels != 0 ? channels : (_revenant_tag & 0x0000FFFF));
 }
 
 #pragma mark NSSecureCoding
@@ -122,13 +122,13 @@
 
 - (void)encodeWithCoder:(NSCoder *)coder
 {
-    [coder encodeInteger:(NSInteger)_charon_tag forKey:@"tag"];
+    [coder encodeInteger:(NSInteger)_revenant_tag forKey:@"tag"];
     [coder encodeInteger:(NSInteger)self.channelCount forKey:@"channels"];
-    UInt32 descriptions = _charon_layout->mNumberChannelDescriptions;
+    UInt32 descriptions = _revenant_layout->mNumberChannelDescriptions;
     [coder encodeInteger:(NSInteger)descriptions forKey:@"descriptions"];
     for (UInt32 index = 0; index < descriptions; index++) {
         NSString *key = [NSString stringWithFormat:@"%u", (unsigned)index];
-        AudioChannelDescription description = _charon_layout->mChannelDescriptions[index];
+        AudioChannelDescription description = _revenant_layout->mChannelDescriptions[index];
         [coder encodeInteger:(NSInteger)description.mChannelLabel forKey:[key stringByAppendingString:@".label"]];
         [coder encodeInteger:(NSInteger)description.mChannelFlags forKey:[key stringByAppendingString:@".flags"]];
         [coder encodeInteger:(NSInteger)description.mChannelFlags forKey:[key stringByAppendingString:@".spatial"]];

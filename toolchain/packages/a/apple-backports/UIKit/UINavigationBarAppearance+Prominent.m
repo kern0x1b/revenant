@@ -1,6 +1,6 @@
-#import "CharonBarAppearance.h"
+#import "RevenantBarAppearance.h"
 
-@implementation UINavigationBarAppearance (CharonProminent)
+@implementation UINavigationBarAppearance (RevenantProminent)
 
 - (UIBarButtonItemAppearance *)prominentButtonAppearance
 {
@@ -14,7 +14,7 @@
 
 @end
 
-@implementation UIToolbarAppearance (CharonProminent)
+@implementation UIToolbarAppearance (RevenantProminent)
 
 - (UIBarButtonItemAppearance *)prominentButtonAppearance
 {

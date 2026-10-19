@@ -1,7 +1,7 @@
 package("blocksruntime")
     set_kind("library", {headeronly = true})
     set_homepage("https://github.com/mackyle/blocksruntime")
-    set_description("The Blocks runtime of compiler-rt as mackyle packages it, its sources only: katabasis compiles them into every translated app's guest library")
+    set_description("The Blocks runtime of compiler-rt as mackyle packages it, its sources only: recompiler compiles them into every translated app's guest library")
     set_license("MIT")
 
     add_urls("https://github.com/mackyle/blocksruntime.git")

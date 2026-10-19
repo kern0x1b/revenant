@@ -5,7 +5,7 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-build=${COREML_IMAGE_BUILD:-$(runs_folder charon-coreml-image-host)}
+build=${COREML_IMAGE_BUILD:-$(runs_folder revenant-coreml-image-host)}
 rm -rf "$build"
 mkdir -p "$build"
 xcrun clang -fobjc-arc -Wall -Wno-deprecated-declarations "$here/probe.m" \

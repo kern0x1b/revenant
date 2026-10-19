@@ -1,4 +1,4 @@
-#import "CharonGC.h"
+#import "RevenantGC.h"
 
 #pragma clang diagnostic ignored "-Wobjc-missing-property-synthesis"
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
@@ -29,17 +29,17 @@
                  @"sf": [NSNull null], @"unmappedSf": [NSNull null], @"analog": @(analog), @"system": @0,
                  @"collection": parent, @"order": @(-1)};
     };
-    _touchSurface = [[GCControllerDirectionPad alloc] initWithCharonSpec:surface];
-    _button = [[GCControllerButtonInput alloc] initWithCharonSpec:button];
-    GCControllerAxisInput *x = [[GCControllerAxisInput alloc] initWithCharonSpec:child(@"Direction Pad X Axis", @"Touch Surface (Horizontal)", @"Touch Surface", YES)];
-    GCControllerAxisInput *y = [[GCControllerAxisInput alloc] initWithCharonSpec:child(@"Direction Pad Y Axis", @"Touch Surface (Vertical)", @"Touch Surface", YES)];
-    GCControllerButtonInput *up = [[GCControllerButtonInput alloc] initWithCharonSpec:child(@"Direction Pad Up", @"Touch Surface (Up)", @"Touch Surface", NO)];
-    GCControllerButtonInput *down = [[GCControllerButtonInput alloc] initWithCharonSpec:child(@"Direction Pad Down", @"Touch Surface (Down)", @"Touch Surface", NO)];
-    GCControllerButtonInput *left = [[GCControllerButtonInput alloc] initWithCharonSpec:child(@"Direction Pad Left", @"Touch Surface (Left)", @"Touch Surface", NO)];
-    GCControllerButtonInput *right = [[GCControllerButtonInput alloc] initWithCharonSpec:child(@"Direction Pad Right", @"Touch Surface (Right)", @"Touch Surface", NO)];
-    [_touchSurface charon_linkXAxis:x yAxis:y up:up down:down left:left right:right];
-    [x charon_linkPositive:right negative:left dpad:_touchSurface];
-    [y charon_linkPositive:up negative:down dpad:_touchSurface];
+    _touchSurface = [[GCControllerDirectionPad alloc] initWithRevenantSpec:surface];
+    _button = [[GCControllerButtonInput alloc] initWithRevenantSpec:button];
+    GCControllerAxisInput *x = [[GCControllerAxisInput alloc] initWithRevenantSpec:child(@"Direction Pad X Axis", @"Touch Surface (Horizontal)", @"Touch Surface", YES)];
+    GCControllerAxisInput *y = [[GCControllerAxisInput alloc] initWithRevenantSpec:child(@"Direction Pad Y Axis", @"Touch Surface (Vertical)", @"Touch Surface", YES)];
+    GCControllerButtonInput *up = [[GCControllerButtonInput alloc] initWithRevenantSpec:child(@"Direction Pad Up", @"Touch Surface (Up)", @"Touch Surface", NO)];
+    GCControllerButtonInput *down = [[GCControllerButtonInput alloc] initWithRevenantSpec:child(@"Direction Pad Down", @"Touch Surface (Down)", @"Touch Surface", NO)];
+    GCControllerButtonInput *left = [[GCControllerButtonInput alloc] initWithRevenantSpec:child(@"Direction Pad Left", @"Touch Surface (Left)", @"Touch Surface", NO)];
+    GCControllerButtonInput *right = [[GCControllerButtonInput alloc] initWithRevenantSpec:child(@"Direction Pad Right", @"Touch Surface (Right)", @"Touch Surface", NO)];
+    [_touchSurface revenant_linkXAxis:x yAxis:y up:up down:down left:left right:right];
+    [x revenant_linkPositive:right negative:left dpad:_touchSurface];
+    [y revenant_linkPositive:up negative:down dpad:_touchSurface];
     _touchState = GCTouchStateUp;
     _reportsAbsoluteTouchSurfaceValues = NO;
     return self;
@@ -119,7 +119,7 @@
         return;
     float button = _button.value;
     BOOL pressed = _button.isPressed;
-    [self charon_enqueue:^{
+    [self revenant_enqueue:^{
         handler(self, x, y, button, pressed);
     }];
 }

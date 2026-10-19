@@ -2,7 +2,7 @@ import("core.base.option")
 
 function main(cachefile, first, count, longest)
     assert(cachefile and first and count, "usage: cfstring-run.lua <cache file> <first address> <count> [max length]")
-    local dyld = import("apple.dyld", {rootdir = path.join(os.getenv("CHARON_ROOT"), "modules"), anonymous = true})
+    local dyld = import("apple.dyld", {rootdir = path.join(os.getenv("REVENANT_ROOT"), "modules"), anonymous = true})
     local cache = dyld.open_cache(cachefile)
     local base = tonumber(first, 16)
     local total = tonumber(count)

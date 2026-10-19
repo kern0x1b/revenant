@@ -7,26 +7,26 @@
 #pragma clang diagnostic ignored "-Wunguarded-availability-new"
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 
-typedef int (*CharonSetThreading)(unsigned int);
-typedef unsigned int (*CharonGetThreading)(void);
+typedef int (*RevenantSetThreading)(unsigned int);
+typedef unsigned int (*RevenantGetThreading)(void);
 enum {
-    kCharonThreadingMulti = 0,
-    kCharonThreadingSingle = 1,
-    kCharonThreadingNone = 99
+    kRevenantThreadingMulti = 0,
+    kRevenantThreadingSingle = 1,
+    kRevenantThreadingNone = 99
 };
 
-static int charon_handed_back[3];
-static void *charon_watched[3];
+static int revenant_handed_back[3];
+static void *revenant_watched[3];
 
-static void charon_watch(void *given, int which)
+static void revenant_watch(void *given, int which)
 {
-    charon_handed_back[which] += (given == charon_watched[which]);
+    revenant_handed_back[which] += (given == revenant_watched[which]);
     free(given);
 }
 
-static void charon_deallocator0(void *given) { charon_watch(given, 0); }
-static void charon_deallocator1(void *given) { charon_watch(given, 1); }
-static void charon_deallocator2(void *given) { charon_watch(given, 2); }
+static void revenant_deallocator0(void *given) { revenant_watch(given, 0); }
+static void revenant_deallocator1(void *given) { revenant_watch(given, 1); }
+static void revenant_deallocator2(void *given) { revenant_watch(given, 2); }
 
 static BOOL fromBackports(const char *name)
 {
@@ -64,7 +64,7 @@ int main(int argc, char **argv)
 {
     @autoreleasepool {
         if (argc > 1)
-            charon_log_to(@(argv[1]));
+            revenant_log_to(@(argv[1]));
 
         CHECK(fromBackports("la_solve"), "la_solve comes from the backports");
         CHECK(fromBackports("appleblas_sgeadd"), "appleblas_sgeadd comes from the backports");
@@ -131,46 +131,46 @@ int main(int argc, char **argv)
         }
 
         {
-            memset(charon_handed_back, 0, sizeof charon_handed_back);
-            memset(charon_watched, 0, sizeof charon_watched);
+            memset(revenant_handed_back, 0, sizeof revenant_handed_back);
+            memset(revenant_watched, 0, sizeof revenant_watched);
             float *block = malloc(3 * sizeof(float));
             block[0] = 1;
             block[1] = 2;
             block[2] = 3;
-            charon_watched[0] = block;
-            la_object_t taken = la_matrix_from_float_buffer_nocopy(block, 3, 1, 1, LA_NO_HINT, charon_deallocator0,
+            revenant_watched[0] = block;
+            la_object_t taken = la_matrix_from_float_buffer_nocopy(block, 3, 1, 1, LA_NO_HINT, revenant_deallocator0,
                                                                     LA_DEFAULT_ATTRIBUTES);
             float readone[3] = {0};
             CHECK(la_matrix_to_float_buffer(readone, 1, taken) == LA_SUCCESS && readone[2] == 3,
                   "an object over the caller's own block reads what was there");
-            CHECK(charon_handed_back[0] == 0, "and has not given the block back yet");
+            CHECK(revenant_handed_back[0] == 0, "and has not given the block back yet");
 
             float *padded = malloc(4 * sizeof(float));
             padded[0] = 4;
             padded[1] = 5;
             padded[2] = 6;
             padded[3] = 0;
-            charon_watched[1] = padded;
+            revenant_watched[1] = padded;
             la_object_t given_back = la_matrix_from_float_buffer_nocopy(padded, 3, 1, 2, LA_NO_HINT,
-                                                                        charon_deallocator1, LA_DEFAULT_ATTRIBUTES);
+                                                                        revenant_deallocator1, LA_DEFAULT_ATTRIBUTES);
             float readpadded[3] = {0};
             CHECK(la_matrix_to_float_buffer(readpadded, 1, given_back) == LA_SUCCESS && readpadded[2] == 6,
                   "a block with a padded row stride is read at that stride");
-            CHECK(charon_handed_back[1] == 1, "and handed straight back, because the object cannot own its layout");
+            CHECK(revenant_handed_back[1] == 1, "and handed straight back, because the object cannot own its layout");
 
             double *dblock = malloc(2 * sizeof(double));
             dblock[0] = 1.5;
             dblock[1] = 2.5;
-            charon_watched[2] = dblock;
-            la_object_t dtaken = la_matrix_from_double_buffer_nocopy(dblock, 2, 1, 1, LA_NO_HINT, charon_deallocator2,
+            revenant_watched[2] = dblock;
+            la_object_t dtaken = la_matrix_from_double_buffer_nocopy(dblock, 2, 1, 1, LA_NO_HINT, revenant_deallocator2,
                                                                       LA_DEFAULT_ATTRIBUTES);
             double readdouble[2] = {0};
             CHECK(la_vector_to_double_buffer(readdouble, 1, dtaken) == LA_SUCCESS && readdouble[1] == 2.5,
                   "the same in double");
         }
-        CHECK(charon_handed_back[0] == 1, "a block an object kept comes back to the deallocator when it goes");
-        CHECK(charon_handed_back[1] == 1, "and a block it handed back at once comes back once, not twice");
-        CHECK(charon_handed_back[2] == 1, "for the double constructor as well");
+        CHECK(revenant_handed_back[0] == 1, "a block an object kept comes back to the deallocator when it goes");
+        CHECK(revenant_handed_back[1] == 1, "and a block it handed back at once comes back once, not twice");
+        CHECK(revenant_handed_back[2] == 1, "for the double constructor as well");
 
         ANSWER("la_sum of two vectors", la_sum(v6, w6), LA_SUCCESS, 6, 1, 11, 22, 33, 44, 55, 66);
         ANSWER("la_difference of two vectors", la_difference(v6, w6), LA_SUCCESS, 6, 1, -9, -18, -27, -36, -45, -54);
@@ -273,10 +273,10 @@ int main(int argc, char **argv)
         la_remove_attributes(v6, LA_ATTRIBUTE_ENABLE_LOGGING);
         CHECK(la_status(v6) == LA_SUCCESS, "an attribute is carried and inherited and changes no answer");
         {
-            typedef la_object_t (*CharonRetain)(la_object_t);
-            typedef void (*CharonRelease)(la_object_t);
-            CharonRetain retain = (CharonRetain)dlsym(RTLD_DEFAULT, "la_retain");
-            CharonRelease release = (CharonRelease)dlsym(RTLD_DEFAULT, "la_release");
+            typedef la_object_t (*RevenantRetain)(la_object_t);
+            typedef void (*RevenantRelease)(la_object_t);
+            RevenantRetain retain = (RevenantRetain)dlsym(RTLD_DEFAULT, "la_retain");
+            RevenantRelease release = (RevenantRelease)dlsym(RTLD_DEFAULT, "la_release");
             CHECK(retain != NULL && release != NULL, "la_retain and la_release are in the library");
             CHECK(retain((la_object_t)v6) == (la_object_t)v6, "la_retain answers the object");
             release((la_object_t)v6);
@@ -322,16 +322,16 @@ int main(int argc, char **argv)
         }
 
         {
-            CharonSetThreading set = (CharonSetThreading)dlsym(RTLD_DEFAULT, "BLASSetThreading");
-            CharonGetThreading get = (CharonGetThreading)dlsym(RTLD_DEFAULT, "BLASGetThreading");
+            RevenantSetThreading set = (RevenantSetThreading)dlsym(RTLD_DEFAULT, "BLASSetThreading");
+            RevenantGetThreading get = (RevenantGetThreading)dlsym(RTLD_DEFAULT, "BLASGetThreading");
             CHECK(set != NULL && get != NULL, "the two entry points of the threading model are in the library");
-            CHECK(get() == kCharonThreadingMulti, "a thread that has set none is BLAS_THREADING_MULTI_THREADED");
-            CHECK(set(kCharonThreadingSingle) == 0, "setting the single-threaded model succeeds");
-            CHECK(get() == kCharonThreadingSingle, "and it is what the thread then answers");
-            CHECK(set(kCharonThreadingMulti) == 0, "setting the multi-threaded model succeeds");
-            CHECK(get() == kCharonThreadingMulti, "and it is what the thread then answers");
-            CHECK(set(kCharonThreadingNone) == -1, "a model the library does not have is refused");
-            CHECK(get() == kCharonThreadingMulti, "and the setting is left as it was");
+            CHECK(get() == kRevenantThreadingMulti, "a thread that has set none is BLAS_THREADING_MULTI_THREADED");
+            CHECK(set(kRevenantThreadingSingle) == 0, "setting the single-threaded model succeeds");
+            CHECK(get() == kRevenantThreadingSingle, "and it is what the thread then answers");
+            CHECK(set(kRevenantThreadingMulti) == 0, "setting the multi-threaded model succeeds");
+            CHECK(get() == kRevenantThreadingMulti, "and it is what the thread then answers");
+            CHECK(set(kRevenantThreadingNone) == -1, "a model the library does not have is refused");
+            CHECK(get() == kRevenantThreadingMulti, "and the setting is left as it was");
         }
 
         {
@@ -356,7 +356,7 @@ int main(int argc, char **argv)
             CHECK(gcd[0] == 8 && gcd[1] == 16 && gcd[2] == 24 && gcd[3] == 32, "3*A + 0.5*B, in double");
         }
 
-        printf("%d checks, %d failures\n", charon_checks, charon_failures);
-        return charon_failures == 0 ? 0 : 1;
+        printf("%d checks, %d failures\n", revenant_checks, revenant_failures);
+        return revenant_failures == 0 ? 0 : 1;
     }
 }

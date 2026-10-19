@@ -1,5 +1,5 @@
-#ifndef CHARON_MAPKIT_H
-#define CHARON_MAPKIT_H
+#ifndef REVENANT_MAPKIT_H
+#define REVENANT_MAPKIT_H
 #import <Foundation/Foundation.h>
 #import <CoreLocation/CoreLocation.h>
 #import <CoreGraphics/CoreGraphics.h>
@@ -14,32 +14,32 @@ NS_ASSUME_NONNULL_BEGIN
 @class MKLocalSearchCompleter;
 @class MKLocalSearchCompletion;
 
-#if !CHARON_HOST_PROBE
+#if !REVENANT_HOST_PROBE
 typedef NSInteger MKLocalSearchRegionPriority;
 #endif
 
-@interface MKLocalSearchCompleter (CharonDelegate)
-- (void)charon_delegateDidUpdate;
-- (void)charon_delegateDidFail:(nullable NSError *)error;
+@interface MKLocalSearchCompleter (RevenantDelegate)
+- (void)revenant_delegateDidUpdate;
+- (void)revenant_delegateDidFail:(nullable NSError *)error;
 @end
 
-@interface CharonMapKit : NSObject
+@interface RevenantMapKit : NSObject
 
-+ (MKMapSize)charon_mapSizeAtZoomScale:(MKZoomScale)zoomScale;
-+ (MKZoomScale)charon_zoomScaleForMapSize:(MKMapSize)mapSize;
++ (MKMapSize)revenant_mapSizeAtZoomScale:(MKZoomScale)zoomScale;
++ (MKZoomScale)revenant_zoomScaleForMapSize:(MKMapSize)mapSize;
 
-+ (CLLocationDistance)charon_metersPerMapPointAtZoomScale:(MKZoomScale)zoomScale forMapRect:(MKMapRect)mapRect;
++ (CLLocationDistance)revenant_metersPerMapPointAtZoomScale:(MKZoomScale)zoomScale forMapRect:(MKMapRect)mapRect;
 
-+ (CLLocationDirection)charon_bearingFromCoordinate:(CLLocationCoordinate2D)from toCoordinate:(CLLocationCoordinate2D)to;
-+ (CLLocationDirection)charon_arrivalBearingFromCoordinate:(CLLocationCoordinate2D)from toCoordinate:(CLLocationCoordinate2D)to;
++ (CLLocationDirection)revenant_bearingFromCoordinate:(CLLocationCoordinate2D)from toCoordinate:(CLLocationCoordinate2D)to;
++ (CLLocationDirection)revenant_arrivalBearingFromCoordinate:(CLLocationCoordinate2D)from toCoordinate:(CLLocationCoordinate2D)to;
 
-+ (MKMapRect)charon_mapRectForRegion:(MKCoordinateRegion)region;
++ (MKMapRect)revenant_mapRectForRegion:(MKCoordinateRegion)region;
 
 @end
 
-void charon_sayOnce(NSString *api, NSString *why);
+void revenant_sayOnce(NSString *api, NSString *why);
 
-@interface MKMultiPoint (CharonPoints)
+@interface MKMultiPoint (RevenantPoints)
 - (void)getCoordinates:(CLLocationCoordinate2D *)coords range:(NSRange)range;
 @end
 
@@ -47,7 +47,7 @@ void charon_sayOnce(NSString *api, NSString *why);
 @property (nonatomic, readwrite) id <MKOverlay> overlay;
 @end
 
-#if !CHARON_HOST_PROBE
+#if !REVENANT_HOST_PROBE
 typedef NS_OPTIONS(NSUInteger, MKAddressFilterOption) {
     MKAddressFilterOptionCountry          = 1 << 0,
     MKAddressFilterOptionPostalCode       = 1 << 1,
@@ -66,13 +66,13 @@ typedef NS_OPTIONS(NSUInteger, MKAddressFilterOption) {
 - (BOOL)excludesOptions:(MKAddressFilterOption)options;
 @end
 
-@interface MKLocalSearchCompleter (CharonPriority)
+@interface MKLocalSearchCompleter (RevenantPriority)
 @property (nonatomic, assign) NSInteger regionPriority;
 @property (nonatomic, copy) MKAddressFilter *addressFilter;
 @end
 #endif
 
-#if !CHARON_HOST_PROBE
+#if !REVENANT_HOST_PROBE
 @interface MKAddressRepresentations : NSObject
 - (instancetype)initWithFullAddress:(NSString *)fullAddress;
 @end
@@ -85,28 +85,28 @@ typedef NS_OPTIONS(NSUInteger, MKAddressFilterOption) {
 @end
 #endif
 
-#if !CHARON_HOST_PROBE
+#if !REVENANT_HOST_PROBE
 @interface MKMapItemIdentifier : NSObject
 - (nullable NSString *)identifierString;
 - (instancetype)initWithMapItem:(MKMapItem *)mapItem;
 @end
 #endif
 
-@interface MKCompassButton (CharonCompass)
+@interface MKCompassButton (RevenantCompass)
 - (void)setCompassHeading:(CLLocationDirection)heading;
 @end
 
-@interface MKOverlayPathRenderer (CharonDrawing)
-- (CGFloat)charon_lineWidthAtZoomScale:(MKZoomScale)zoomScale;
+@interface MKOverlayPathRenderer (RevenantDrawing)
+- (CGFloat)revenant_lineWidthAtZoomScale:(MKZoomScale)zoomScale;
 @end
 
-@interface MKPolylineRenderer (CharonDrawing)
-- (CGFloat)charon_lineWidthAtZoomScale:(MKZoomScale)zoomScale;
+@interface MKPolylineRenderer (RevenantDrawing)
+- (CGFloat)revenant_lineWidthAtZoomScale:(MKZoomScale)zoomScale;
 @end
 
-@interface MKOverlayRenderer (CharonDrawing)
-- (void)charon_drawInContext:(CGContextRef)context zoomScale:(MKZoomScale)zoomScale mapRect:(MKMapRect)mapRect;
-- (MKZoomScale)charon_zoomScale;
+@interface MKOverlayRenderer (RevenantDrawing)
+- (void)revenant_drawInContext:(CGContextRef)context zoomScale:(MKZoomScale)zoomScale mapRect:(MKMapRect)mapRect;
+- (MKZoomScale)revenant_zoomScale;
 @end
 
 NS_ASSUME_NONNULL_END

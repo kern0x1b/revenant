@@ -2,7 +2,7 @@ import("core.base.option")
 import("lib.detect.find_tool")
 import("byteorder")
 
-CHOSEN = "CHARON_DEVICE"
+CHOSEN = "REVENANT_DEVICE"
 
 local defaults = {host = "127.0.0.1", port = "2222", password = "", udid = ""}
 
@@ -13,7 +13,7 @@ local ssh_options = {
     "-o", "KexAlgorithms=+diffie-hellman-group1-sha1,diffie-hellman-group14-sha1",
     "-o", "Ciphers=+aes128-cbc,3des-cbc",
     "-o", "ControlMaster=auto", "-o", "ControlPersist=60",
-    "-o", "ControlPath=/tmp/charon-ssh-%h-%p"
+    "-o", "ControlPath=/tmp/revenant-ssh-%h-%p"
 }
 
 function read_env_file(file)
@@ -82,11 +82,11 @@ function where(settings)
 end
 
 local function leases()
-    return path.join(os.getenv("CHARON_HOME") or path.join(os.getenv("HOME"), ".charon"), "devices")
+    return path.join(os.getenv("REVENANT_HOME") or path.join(os.getenv("HOME"), ".revenant"), "devices")
 end
 
 function holder_name(given)
-    return given or os.getenv("CHARON_DEVICE_HOLDER")
+    return given or os.getenv("REVENANT_DEVICE_HOLDER")
 end
 
 local function lease_of(udid)
@@ -123,7 +123,7 @@ end
 function claim(settings, holder, minutes)
     local udid = identified(settings)
     if not holder or holder == "" then
-        raise("a claim names who holds the device: --holder=NAME or CHARON_DEVICE_HOLDER")
+        raise("a claim names who holds the device: --holder=NAME or REVENANT_DEVICE_HOLDER")
     end
     os.mkdir(leases())
     local folder = path.join(leases(), udid .. ".lease")
@@ -163,7 +163,7 @@ local function admitted(settings)
     local current = lease(key)
     local holder = holder_name()
     if current and current.holder ~= holder then
-        raise("%s is held by %s until %s; this process runs as %s. Wait for the release, or claim it after that", key, current.holder, os.date("%H:%M:%S", current.expires), holder or "no holder (CHARON_DEVICE_HOLDER is unset)")
+        raise("%s is held by %s until %s; this process runs as %s. Wait for the release, or claim it after that", key, current.holder, os.date("%H:%M:%S", current.expires), holder or "no holder (REVENANT_DEVICE_HOLDER is unset)")
     end
 end
 
@@ -240,10 +240,10 @@ function tunnel(settings)
 end
 
 local function askpass()
-    local helper = path.join(os.tmpdir(), "charon-askpass")
+    local helper = path.join(os.tmpdir(), "revenant-askpass")
     if not os.isfile(helper) then
         local staged = helper .. "." .. os.getpid()
-        io.writefile(staged, "#!/bin/sh\nprintf '%s\\n' \"$CHARON_DEVICE_SECRET\"\n")
+        io.writefile(staged, "#!/bin/sh\nprintf '%s\\n' \"$REVENANT_DEVICE_SECRET\"\n")
         os.runv("chmod", {"700", staged})
         os.mv(staged, helper)
     end
@@ -255,7 +255,7 @@ local function authenticated(settings, program, argv)
         return program, argv, nil
     end
     return program, table.join({"-o", "PubkeyAuthentication=no", "-o", "PreferredAuthentications=keyboard-interactive,password"}, argv),
-           {SSH_ASKPASS = askpass(), SSH_ASKPASS_REQUIRE = "force", CHARON_DEVICE_SECRET = settings.password}
+           {SSH_ASKPASS = askpass(), SSH_ASKPASS_REQUIRE = "force", REVENANT_DEVICE_SECRET = settings.password}
 end
 
 function run(settings, command, opt)
@@ -299,7 +299,7 @@ function uninstall_command(packages, opt)
     return removal .. [[ && while :; do
 state=$(dpkg-query -W -f='${Package}|${Status}|${Depends}\n' 2>/dev/null | grep '|install ok installed|')
 removed=
-for p in $(echo "$state" | sed 's/|.*//' | grep -e '^org\.charon\.libcxx-' -e '^org\.charon\.swift-runtime-'); do
+for p in $(echo "$state" | sed 's/|.*//' | grep -e '^org\.revenant\.libcxx-' -e '^org\.revenant\.swift-runtime-'); do
 if ! echo "$state" | grep -q "$p ("; then dpkg -r $p && removed=1; fi
 done
 [ -z "$removed" ] && break

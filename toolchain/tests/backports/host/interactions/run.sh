@@ -11,7 +11,7 @@ source_of() {
     if [ -f "$sources/$1" ]; then printf "%s\n" "$sources/$1"; else printf "%s\n" "$generated/$1"; fi
 }
 harness=${INTERACTIONS_HARNESS:-$here/../../device}
-build=${INTERACTIONS_BUILD:-$(runs_folder charon-interactions-host)}
+build=${INTERACTIONS_BUILD:-$(runs_folder revenant-interactions-host)}
 sdk=$(xcrun --show-sdk-path)
 target="-target arm64-apple-ios15.0-macabi -isysroot $sdk -iframework $sdk/System/iOSSupport/System/Library/Frameworks"
 # UIKitConstants110.m, and the name it is called here was stale: the constants were split by the release the
@@ -32,12 +32,12 @@ for file in $files; do plain="$plain $build/plain/$file.o"; done
 rename() {
     awk '{
         t = $0
-        if (t ~ /^set[A-Z]/) { rest = substr(t, 4); print "-D" t "=setCharonHost" rest; print "-D" tolower(substr(rest, 1, 1)) substr(rest, 2) "=charonHost" rest }
-        else print "-D" t "=charonHost" toupper(substr(t, 1, 1)) substr(t, 2)
+        if (t ~ /^set[A-Z]/) { rest = substr(t, 4); print "-D" t "=setRevenantHost" rest; print "-D" tolower(substr(rest, 1, 1)) substr(rest, 2) "=revenantHost" rest }
+        else print "-D" t "=revenantHost" toupper(substr(t, 1, 1)) substr(t, 2)
     }' | sort -u
 }
-selectors=$(nm $plain | sed -n 's/.*[-+]\[[A-Za-z_]*([A-Za-z]*) \([A-Za-z_]*\).*\]$/\1/p' | grep -v '^charon_' | rename)
-for constant in $constants; do selectors="$selectors -D$constant=CharonHost$constant"; done
+selectors=$(nm $plain | sed -n 's/.*[-+]\[[A-Za-z_]*([A-Za-z]*) \([A-Za-z_]*\).*\]$/\1/p' | grep -v '^revenant_' | rename)
+for constant in $constants; do selectors="$selectors -D$constant=RevenantHost$constant"; done
 printf '%s\n' $selectors > "$build/flags"
 objects=""
 for file in $files; do

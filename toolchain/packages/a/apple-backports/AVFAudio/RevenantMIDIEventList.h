@@ -1,7 +1,7 @@
 #import <CoreMIDI/MIDIServices.h>
 #import <Foundation/Foundation.h>
 
-static inline void CharonForEachMIDIMessage(const MIDIEventList *list, void (^send)(const uint8_t *bytes, UInt32 length))
+static inline void RevenantForEachMIDIMessage(const MIDIEventList *list, void (^send)(const uint8_t *bytes, UInt32 length))
 {
     if (list == NULL || send == nil) {
         return;

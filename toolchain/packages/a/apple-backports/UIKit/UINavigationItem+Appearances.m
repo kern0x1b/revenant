@@ -1,47 +1,47 @@
-#import "CharonBarAppearance.h"
+#import "RevenantBarAppearance.h"
 
-static const void *CharonStandardAppearanceKey = &CharonStandardAppearanceKey;
-static const void *CharonCompactAppearanceKey = &CharonCompactAppearanceKey;
-static const void *CharonScrollEdgeAppearanceKey = &CharonScrollEdgeAppearanceKey;
+static const void *RevenantStandardAppearanceKey = &RevenantStandardAppearanceKey;
+static const void *RevenantCompactAppearanceKey = &RevenantCompactAppearanceKey;
+static const void *RevenantScrollEdgeAppearanceKey = &RevenantScrollEdgeAppearanceKey;
 
-@implementation UINavigationItem (CharonAppearances)
+@implementation UINavigationItem (RevenantAppearances)
 
 - (UINavigationBarAppearance *)standardAppearance
 {
-    return charon_appearance_peek(self, CharonStandardAppearanceKey);
+    return revenant_appearance_peek(self, RevenantStandardAppearanceKey);
 }
 
 - (void)setStandardAppearance:(UINavigationBarAppearance *)standardAppearance
 {
-    charon_appearance_store_observed(self, CharonStandardAppearanceKey, standardAppearance, @selector(charon_appearanceChanged));
-    charon_refresh_bars_showing(self);
+    revenant_appearance_store_observed(self, RevenantStandardAppearanceKey, standardAppearance, @selector(revenant_appearanceChanged));
+    revenant_refresh_bars_showing(self);
 }
 
 - (UINavigationBarAppearance *)compactAppearance
 {
-    return charon_appearance_peek(self, CharonCompactAppearanceKey);
+    return revenant_appearance_peek(self, RevenantCompactAppearanceKey);
 }
 
 - (void)setCompactAppearance:(UINavigationBarAppearance *)compactAppearance
 {
-    charon_appearance_store_observed(self, CharonCompactAppearanceKey, compactAppearance, @selector(charon_appearanceChanged));
-    charon_refresh_bars_showing(self);
+    revenant_appearance_store_observed(self, RevenantCompactAppearanceKey, compactAppearance, @selector(revenant_appearanceChanged));
+    revenant_refresh_bars_showing(self);
 }
 
 - (UINavigationBarAppearance *)scrollEdgeAppearance
 {
-    return charon_appearance_peek(self, CharonScrollEdgeAppearanceKey);
+    return revenant_appearance_peek(self, RevenantScrollEdgeAppearanceKey);
 }
 
 - (void)setScrollEdgeAppearance:(UINavigationBarAppearance *)scrollEdgeAppearance
 {
-    charon_appearance_store_observed(self, CharonScrollEdgeAppearanceKey, scrollEdgeAppearance, @selector(charon_appearanceChanged));
-    charon_refresh_bars_showing(self);
+    revenant_appearance_store_observed(self, RevenantScrollEdgeAppearanceKey, scrollEdgeAppearance, @selector(revenant_appearanceChanged));
+    revenant_refresh_bars_showing(self);
 }
 
-- (void)charon_appearanceChanged
+- (void)revenant_appearanceChanged
 {
-    charon_refresh_bars_showing(self);
+    revenant_refresh_bars_showing(self);
 }
 
 @end

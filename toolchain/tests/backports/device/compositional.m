@@ -10,7 +10,7 @@
 
 static NSString *const results_folder = @"/private/var/backports";
 
-@interface CharonCompositionalDelegate : UIResponder <UIApplicationDelegate>
+@interface RevenantCompositionalDelegate : UIResponder <UIApplicationDelegate>
 @property (nonatomic, strong) UIWindow *window;
 @end
 
@@ -44,11 +44,11 @@ static BOOL same_to_printed_digits(NSString *actual, NSString *expected)
     return YES;
 }
 
-@implementation CharonCompositionalDelegate
+@implementation RevenantCompositionalDelegate
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)options
 {
-    charon_log_to([results_folder stringByAppendingPathComponent:@"compositional.log"]);
+    revenant_log_to([results_folder stringByAppendingPathComponent:@"compositional.log"]);
     self.window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
     self.window.rootViewController = [[UIViewController alloc] init];
     [self.window makeKeyAndVisible];
@@ -63,14 +63,14 @@ static BOOL same_to_printed_digits(NSString *actual, NSString *expected)
         [self runGestures:^{ [self report]; }];
         return;
     } @catch (NSException *exception) {
-        charon_check(NO, "the checks raise no exception", [NSString stringWithFormat:@"%@: %@", exception.name, exception.reason]);
+        revenant_check(NO, "the checks raise no exception", [NSString stringWithFormat:@"%@: %@", exception.name, exception.reason]);
     }
     [self report];
 }
 
 - (void)report
 {
-    NSString *summary = [NSString stringWithFormat:@"%@ checks=%d failures=%d\n", charon_failures ? @"FAIL" : @"ok", charon_checks, charon_failures];
+    NSString *summary = [NSString stringWithFormat:@"%@ checks=%d failures=%d\n", revenant_failures ? @"FAIL" : @"ok", revenant_checks, revenant_failures];
     [summary writeToFile:[results_folder stringByAppendingPathComponent:@"compositional.done"] atomically:YES encoding:NSUTF8StringEncoding error:NULL];
 }
 
@@ -103,7 +103,7 @@ static BOOL same_to_printed_digits(NSString *actual, NSString *expected)
                 [detail appendFormat:@"\n    device %@\n    system %@", left, right];
         }
         NSString *name = [NSString stringWithFormat:@"layout %@ lays out as the system does", compositional_case_name(index)];
-        charon_check(NO, name.UTF8String, detail);
+        revenant_check(NO, name.UTF8String, detail);
     }
     CHECK(wrong == 0, "all recorded layouts are laid out as the system does");
     [self checkSized:recorded kit:kit];
@@ -128,7 +128,7 @@ static BOOL same_to_printed_digits(NSString *actual, NSString *expected)
             continue;
         wrong++;
         NSString *name = [NSString stringWithFormat:@"self-sizing %@ is laid out as the system does, with the heights the device's font gives its text", compositional_sized_name(index)];
-        charon_check(NO, name.UTF8String, [NSString stringWithFormat:@"\n    device %@\n    system %@\n    recorded %@", actual, expected, system]);
+        revenant_check(NO, name.UTF8String, [NSString stringWithFormat:@"\n    device %@\n    system %@\n    recorded %@", actual, expected, system]);
     }
     CHECK(wrong == 0, "all estimated dimensions are measured from the cells as the system measures them");
     CHECK(compositional_release_while_pending(kit, self.window), "a layout and a data source released while a measurement is waiting are not touched");
@@ -145,7 +145,7 @@ static BOOL same_to_printed_digits(NSString *actual, NSString *expected)
             continue;
         wrong++;
         NSString *name = [NSString stringWithFormat:@"orthogonal %@ is as the system's", [expected substringToIndex:MIN(40u, (unsigned)expected.length)]];
-        charon_check(NO, name.UTF8String, [NSString stringWithFormat:@"\n    device %@\n    system %@", actual[index], expected]);
+        revenant_check(NO, name.UTF8String, [NSString stringWithFormat:@"\n    device %@\n    system %@", actual[index], expected]);
     }
     CHECK(wrong == 0, "every behavior of a section that scrolls the other way shows, at every scripted offset, the cells and the handler arguments the system shows");
 }
@@ -211,7 +211,7 @@ static NSMutableArray *drag_keep;
 
 static CGFloat drag_section(NSInteger section)
 {
-    return ((CGFloat (*)(id, SEL, NSInteger))objc_msgSend)(drag_layout, NSSelectorFromString(@"charon_offsetOfSection:"), section);
+    return ((CGFloat (*)(id, SEL, NSInteger))objc_msgSend)(drag_layout, NSSelectorFromString(@"revenant_offsetOfSection:"), section);
 }
 
 - (void)useDragView:(NSInteger)behavior
@@ -358,6 +358,6 @@ int main(int argc, char *argv[])
 {
     @autoreleasepool {
         [[NSFileManager defaultManager] createDirectoryAtPath:results_folder withIntermediateDirectories:YES attributes:nil error:NULL];
-        return UIApplicationMain(argc, argv, nil, @"CharonCompositionalDelegate");
+        return UIApplicationMain(argc, argv, nil, @"RevenantCompositionalDelegate");
     }
 }

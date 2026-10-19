@@ -96,7 +96,7 @@ function failures(opt)
     end
     io.writefile(path.join(folder, "provider.c"), "int arrived(void) { return 1; }\n")
     local provider = fixtures.link(folder, opt.ld64, "libprovider.dylib", "armv7-apple-ios6.0", "provider.c",
-                                   {"-dynamiclib", "-install_name", "/usr/lib/charon/libprovider.dylib"})
+                                   {"-dynamiclib", "-install_name", "/usr/lib/revenant/libprovider.dylib"})
     io.writefile(path.join(folder, "weak.c"), "extern int arrived(void) __attribute__((weak_import));\nint use(void) { return arrived ? arrived() : 0; }\n")
     local system_first = fixtures.link(folder, opt.ld64, "system-first.dylib", "armv7-apple-ios6.0", "weak.c", {"-dynamiclib", "-lprovider"})
     fixtures.run(folder, "xcrun", {"clang", "-target", "armv7-apple-ios6.0", "-Wno-incompatible-sysroot", "-fuse-ld=" .. opt.ld64, "-nostdlib", "-L.",
@@ -104,7 +104,7 @@ function failures(opt)
     local provider_first = path.join(folder, "provider-first.dylib")
     local unprovided = fixtures.link(folder, opt.ld64, "unprovided.dylib", "armv7-apple-ios6.0", "weak.c", {"-dynamiclib"})
     local weak = fixtures.refusal(function () dyld.check(armv7, {system_first, provider}) end) or ""
-    if not weak:find("_arrived (weakly bound to /usr/lib/libSystem.B.dylib, which does not export it, while /usr/lib/charon/libprovider.dylib does", 1, true) then
+    if not weak:find("_arrived (weakly bound to /usr/lib/libSystem.B.dylib, which does not export it, while /usr/lib/revenant/libprovider.dylib does", 1, true) then
         table.insert(found, "a weak import bound to a system library that lacks it, while a library of the build provides it, must be refused: " .. weak)
     end
     local recorded = {[path.filename(system_first)] = {_arrived = "weak.c's own test of the pointer"}}
@@ -148,7 +148,7 @@ function failures(opt)
         table.insert(found, "a weak import a version check can stand in front of must be reported and pass")
     end
     local released = fixtures.refusal(function () dyld.check(armv7, {unprovided}, nil, {release = true}) end) or ""
-    if not released:find("_arrived", 1, true) or not released:find("charon.waive.weak-imports", 1, true) then
+    if not released:find("_arrived", 1, true) or not released:find("revenant.waive.weak-imports", 1, true) then
         table.insert(found, "a released image that weakly imports a symbol the release lacks must be refused, naming the symbol and the waiver: " .. released)
     end
     if fixtures.refusal(function () dyld.check(armv7, {unprovided}, nil, {release = true, waived = "each call is behind a check"}) end) then
@@ -236,10 +236,10 @@ function failures(opt)
     if not own_unrecorded:find("_arrived", 1, true) or not own_unrecorded:find("records no guard", 1, true) then
         table.insert(found, "a weak import a package's rows do not record must be refused as the program's own: " .. own_unrecorded)
     end
-    local problems = table.concat(guards.compare({["libswiftCore.dylib"] = {"__availability_version_check", "_charon_never_recorded"}},
-        {imports = {["libswiftCore.dylib"] = {__availability_version_check = true, _charon_never_recorded = true}}, exported = {},
+    local problems = table.concat(guards.compare({["libswiftCore.dylib"] = {"__availability_version_check", "_revenant_never_recorded"}},
+        {imports = {["libswiftCore.dylib"] = {__availability_version_check = true, _revenant_never_recorded = true}}, exported = {},
          minimum = "6.1.3", backports = true}), "\n")
-    if not problems:find("_charon_never_recorded", 1, true) or problems:find("__availability_version_check", 1, true) then
+    if not problems:find("_revenant_never_recorded", 1, true) or problems:find("__availability_version_check", 1, true) then
         table.insert(found, "the guard table must refuse an unrecorded weak import and leave the toolchain's own guard to apple.compat: " .. problems)
     end
 
@@ -323,12 +323,12 @@ function failures(opt)
         {identifier = "iPhone3,1", platform = "s5l8930x", firmwares = {release("2.2.1", "5H11"), release("4.3.5", "8L1"), release("4.1", "8B117")}},
         {identifier = "iPhone5,1", platform = "s5l8950x", firmwares = {release("6.0", "10A405")}}
     }})
-    local home = os.getenv("CHARON_HOME")
-    os.setenv("CHARON_HOME", path.join(folder, "home"))
+    local home = os.getenv("REVENANT_HOME")
+    os.setenv("REVENANT_HOME", path.join(folder, "home"))
     local held = firmware.source("armv7", "2.0")
     local absent, absent_release = firmware.source("armv7", "4.0")
     local later = firmware.release_for("armv7s", "5.0")
-    os.setenv("CHARON_HOME", home or "")
+    os.setenv("REVENANT_HOME", home or "")
     if held ~= libraries then
         table.insert(found, "a 2.0 port must be checked against the libraries of 2.2.1, the earliest release not older than it, not " .. tostring(held))
     end
@@ -365,9 +365,9 @@ function failures(opt)
                               source = cache(path.join(folder, "rungs", rung[1], "dyld_shared_cache_armv7"), "armv7", rung[2])})
     end
     io.writefile(path.join(folder, "sdk", "usr", "lib", "libSystem.tbd"), fixtures.system_stub("_returned, _arrived, _removed, _never"))
-    os.setenv("CHARON_HOME", path.join(folder, "home"))
+    os.setenv("REVENANT_HOME", path.join(folder, "home"))
     local first = dyld.first_releases(ladder, path.join(folder, "sdk"), {"_returned", "_arrived", "_removed", "_never"})
-    os.setenv("CHARON_HOME", home or "")
+    os.setenv("REVENANT_HOME", home or "")
     if first._returned ~= "5.0" then
         table.insert(found, "a symbol 4.0 exports and 4.3 does not is the release's own from 5.0, where it is exported again, not " .. tostring(first._returned))
     end

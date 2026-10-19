@@ -3,7 +3,7 @@
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 #pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
 
-@implementation CLGeocoder (CharonPreferredLocale)
+@implementation CLGeocoder (RevenantPreferredLocale)
 
 - (void)geocodeAddressString:(NSString *)addressString inRegion:(CLRegion *)region preferredLocale:(NSLocale *)locale completionHandler:(CLGeocodeCompletionHandler)completionHandler
 {

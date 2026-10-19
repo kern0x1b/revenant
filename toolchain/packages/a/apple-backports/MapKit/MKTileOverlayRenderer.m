@@ -1,17 +1,17 @@
 #import <MapKit/MKTileOverlayRenderer.h>
 #import <UIKit/UIKit.h>
 #import <math.h>
-#import "CharonMapKit.h"
+#import "RevenantMapKit.h"
 
 @implementation MKTileOverlayRenderer {
-    NSMutableDictionary *_charon_tiles;
+    NSMutableDictionary *_revenant_tiles;
 }
 
 - (instancetype)initWithOverlay:(id <MKOverlay>)overlay
 {
     self = [super initWithOverlay:overlay];
     if (self) {
-        _charon_tiles = [[NSMutableDictionary alloc] init];
+        _revenant_tiles = [[NSMutableDictionary alloc] init];
     }
     return self;
 }
@@ -28,10 +28,10 @@
 
 - (void)reloadData
 {
-    [_charon_tiles removeAllObjects];
+    [_revenant_tiles removeAllObjects];
 }
 
-- (UIImage *)charon_imageForPath:(MKTileOverlayPath)path
+- (UIImage *)revenant_imageForPath:(MKTileOverlayPath)path
 {
     MKTileOverlay *overlay = self.tileOverlay;
     if (!overlay) {
@@ -39,7 +39,7 @@
     }
     NSString *key = [NSString stringWithFormat:@"%ld/%ld/%ld/%.0f", (long)path.z, (long)path.x, (long)path.y,
                      (double)path.contentScaleFactor];
-    id cached = [_charon_tiles objectForKey:key];
+    id cached = [_revenant_tiles objectForKey:key];
     if (cached) {
         return cached == [NSNull null] ? nil : (UIImage *)cached;
     }
@@ -49,7 +49,7 @@
             image = [UIImage imageWithData:data];
         }
     }];
-    [_charon_tiles setObject:image ?: (id)[NSNull null] forKey:key];
+    [_revenant_tiles setObject:image ?: (id)[NSNull null] forKey:key];
     return image;
 }
 
@@ -95,7 +95,7 @@
             path.y = y;
             path.z = zoom;
             path.contentScaleFactor = contentScale;
-            UIImage *image = [self charon_imageForPath:path];
+            UIImage *image = [self revenant_imageForPath:path];
             if (!image) {
                 continue;
             }

@@ -1,6 +1,6 @@
 #import <Foundation/Foundation.h>
 
-#import "CharonDocumentBrowserTypes.h"
+#import "RevenantDocumentBrowserTypes.h"
 
 NS_HEADER_AUDIT_BEGIN(nullability, sendability)
 

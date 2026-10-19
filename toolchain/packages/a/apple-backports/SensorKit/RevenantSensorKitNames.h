@@ -1,36 +1,36 @@
-#ifndef CHARON_SENSORKIT_NAMES_H
-#define CHARON_SENSORKIT_NAMES_H
+#ifndef REVENANT_SENSORKIT_NAMES_H
+#define REVENANT_SENSORKIT_NAMES_H
 
 #import <Foundation/Foundation.h>
 #import <CoreFoundation/CoreFoundation.h>
 
-#ifdef CHARON_SENSORKIT_NAMES_15_0
+#ifdef REVENANT_SENSORKIT_NAMES_15_0
 
 NSString * const SRSensorSiriSpeechMetrics = (NSString *)CFSTR("com.apple.SensorKit.speechMetrics.siri");
 NSString * const SRSensorTelephonySpeechMetrics = (NSString *)CFSTR("com.apple.SensorKit.speechMetrics.telephony");
 
 #endif
 
-#ifdef CHARON_SENSORKIT_NAMES_15_4
+#ifdef REVENANT_SENSORKIT_NAMES_15_4
 
 NSString * const SRSensorAmbientPressure = (NSString *)CFSTR("com.apple.SensorKit.ambientPressure");
 
 #endif
 
-#ifdef CHARON_SENSORKIT_NAMES_16_4
+#ifdef REVENANT_SENSORKIT_NAMES_16_4
 
 NSString * const SRSensorMediaEvents = (NSString *)CFSTR("com.apple.SensorKit.mediaEvents");
 
 #endif
 
-#ifdef CHARON_SENSORKIT_NAMES_16_0
+#ifdef REVENANT_SENSORKIT_NAMES_16_0
 
 NSString * const SRSensorHeartRate = (NSString *)CFSTR("com.apple.SensorKit.heart.rate");
 NSString * const SRSensorOdometer = (NSString *)CFSTR("com.apple.SensorKit.odometer");
 
 #endif
 
-#ifdef CHARON_SENSORKIT_NAMES_17_4
+#ifdef REVENANT_SENSORKIT_NAMES_17_4
 
 NSString * const SRPhotoplethysmogramOpticalSampleConditionSignalSaturation = (NSString *)CFSTR("SignalSaturation");
 NSString * const SRPhotoplethysmogramOpticalSampleConditionUnreliableNoise = (NSString *)CFSTR("UnreliableNoise");
@@ -41,7 +41,7 @@ NSString * const SRPhotoplethysmogramSampleUsageBackgroundSystem = (NSString *)C
 
 #endif
 
-#ifdef CHARON_SENSORKIT_NAMES_18_0
+#ifdef REVENANT_SENSORKIT_NAMES_18_0
 
 NSString * const SRSensorFaceMetrics = (NSString *)CFSTR("com.apple.SensorKit.faceMetrics");
 NSString * const SRSensorWristTemperature = (NSString *)CFSTR("com.apple.SensorKit.wristTemperature");
@@ -50,7 +50,7 @@ NSString * const SRSensorPhotoplethysmogram = (NSString *)CFSTR("com.apple.Senso
 
 #endif
 
-#ifdef CHARON_SENSORKIT_NAMES_26_0
+#ifdef REVENANT_SENSORKIT_NAMES_26_0
 
 NSString * const SRSensorAcousticSettings = (NSString *)CFSTR("com.apple.SensorKit.hearing.acousticSettings");
 NSString * const SRSensorSleepSessions = (NSString *)CFSTR("com.apple.SensorKit.sleep.sessions");

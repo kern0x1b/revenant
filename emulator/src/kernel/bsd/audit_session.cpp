@@ -19,7 +19,7 @@
 #include <optional>
 #include <span>
 
-namespace shade {
+namespace emulator {
 namespace {
 
     constexpr auto send_right =

@@ -1,4 +1,4 @@
-#include "CharonMLProto.h"
+#include "RevenantMLProto.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -51,31 +51,31 @@ static void print_string(const char *bytes, size_t length)
     putchar('\'');
 }
 
-static int is_number(const charon_ml_node *node)
+static int is_number(const revenant_ml_node *node)
 {
-    return node->field != NULL && node->field->kind != CHARON_ML_KIND_STRING &&
-           node->field->kind != CHARON_ML_KIND_BYTES && node->field->kind != CHARON_ML_KIND_MESSAGE;
+    return node->field != NULL && node->field->kind != REVENANT_ML_KIND_STRING &&
+           node->field->kind != REVENANT_ML_KIND_BYTES && node->field->kind != REVENANT_ML_KIND_MESSAGE;
 }
 
-static void print_value(const charon_ml_node *node)
+static void print_value(const revenant_ml_node *node)
 {
-    if (node->field->kind == CHARON_ML_KIND_STRING) {
+    if (node->field->kind == REVENANT_ML_KIND_STRING) {
         print_string(node->value.text.bytes, node->value.text.length);
-    } else if (node->field->kind == CHARON_ML_KIND_BYTES) {
+    } else if (node->field->kind == REVENANT_ML_KIND_BYTES) {
         printf("<%lu bytes>", (unsigned long)node->value.text.length);
     } else if (is_number(node)) {
         switch (node->field->kind) {
-        case CHARON_ML_KIND_DOUBLE:
-        case CHARON_ML_KIND_FLOAT:
+        case REVENANT_ML_KIND_DOUBLE:
+        case REVENANT_ML_KIND_FLOAT:
             print_double(node->value.number);
             break;
-        case CHARON_ML_KIND_BOOL:
+        case REVENANT_ML_KIND_BOOL:
             fputs(node->value.unsigned_integer ? "True" : "False", stdout);
             break;
-        case CHARON_ML_KIND_UINT64:
-        case CHARON_ML_KIND_FIXED64:
-        case CHARON_ML_KIND_UINT32:
-        case CHARON_ML_KIND_FIXED32:
+        case REVENANT_ML_KIND_UINT64:
+        case REVENANT_ML_KIND_FIXED64:
+        case REVENANT_ML_KIND_UINT32:
+        case REVENANT_ML_KIND_FIXED32:
             printf("%llu", (unsigned long long)node->value.unsigned_integer);
             break;
         default:
@@ -87,7 +87,7 @@ static void print_value(const charon_ml_node *node)
     }
 }
 
-static void print_repeated(const charon_ml_node *node, const char *name, size_t total, int indent)
+static void print_repeated(const revenant_ml_node *node, const char *name, size_t total, int indent)
 {
     size_t index;
     printf("%*s%s = [", indent * 2, "", name);
@@ -95,26 +95,26 @@ static void print_repeated(const charon_ml_node *node, const char *name, size_t 
         if (index > 0) {
             fputs(", ", stdout);
         }
-        print_value(charon_ml_node_at_field(node, name, index));
+        print_value(revenant_ml_node_at_field(node, name, index));
     }
     fputs("]\n", stdout);
 }
 
-static void walk(const charon_ml_node *node, int indent)
+static void walk(const revenant_ml_node *node, int indent)
 {
-    size_t total = charon_ml_count(node), index = 0;
+    size_t total = revenant_ml_count(node), index = 0;
     while (index < total) {
-        const charon_ml_node *entry = charon_ml_at(node, index);
-        const charon_ml_field *field = entry->field;
+        const revenant_ml_node *entry = revenant_ml_at(node, index);
+        const revenant_ml_field *field = entry->field;
         const char *name = field->name;
-        int repeated = (field->flags & CHARON_ML_REPEATED) != 0;
+        int repeated = (field->flags & REVENANT_ML_REPEATED) != 0;
         size_t members = 0, scan = index;
 
-        while (scan < total && charon_ml_at(node, scan)->field == field) {
+        while (scan < total && revenant_ml_at(node, scan)->field == field) {
             members++;
             scan++;
         }
-        if (field->kind == CHARON_ML_KIND_MESSAGE) {
+        if (field->kind == REVENANT_ML_KIND_MESSAGE) {
             size_t seen;
             for (seen = 0; seen < members; seen++) {
                 printf("%*s%s", indent * 2, "", name);
@@ -123,7 +123,7 @@ static void walk(const charon_ml_node *node, int indent)
                 } else {
                     printf(" {\n");
                 }
-                walk(charon_ml_at(node, index + seen), indent + 1);
+                walk(revenant_ml_at(node, index + seen), indent + 1);
                 printf("%*s}\n", indent * 2, "");
             }
         } else if (repeated) {
@@ -148,11 +148,11 @@ static const char *MODEL_KINDS[] = {
     "visionFeaturePrint", "soundAnalysisPreprocessing", "gazetteer", "wordEmbedding",
     "audioFeaturePrint", "serializedModel", NULL};
 
-static void print_model_kind(const charon_ml_node *model)
+static void print_model_kind(const revenant_ml_node *model)
 {
     int index;
     for (index = 0; MODEL_KINDS[index] != NULL; index++) {
-        if (charon_ml_get(model, MODEL_KINDS[index]) != NULL) {
+        if (revenant_ml_get(model, MODEL_KINDS[index]) != NULL) {
             puts(MODEL_KINDS[index]);
             return;
         }
@@ -160,41 +160,41 @@ static void print_model_kind(const charon_ml_node *model)
     puts("(none)");
 }
 
-static void print_feature(const charon_ml_node *model, const char *which, const char *wanted)
+static void print_feature(const revenant_ml_node *model, const char *which, const char *wanted)
 {
-    const charon_ml_node *description = charon_ml_get(model, "description");
-    const charon_ml_node *list;
+    const revenant_ml_node *description = revenant_ml_get(model, "description");
+    const revenant_ml_node *list;
     char text[512];
     size_t index, total;
     if (description == NULL) {
         printf("(no description)\n");
         return;
     }
-    list = charon_ml_get(description, which);
-    total = charon_ml_count(list);
+    list = revenant_ml_get(description, which);
+    total = revenant_ml_count(list);
     for (index = 0; index < total; index++) {
-        const charon_ml_node *feature = charon_ml_node_at_field(description, which, index);
-        const char *name = charon_ml_text(charon_ml_get(feature, "name"), text, sizeof text);
+        const revenant_ml_node *feature = revenant_ml_node_at_field(description, which, index);
+        const char *name = revenant_ml_text(revenant_ml_get(feature, "name"), text, sizeof text);
         if (name != NULL && strcmp(name, wanted) == 0) {
             char line[4096];
             size_t length = 0;
-            const charon_ml_node *type = charon_ml_get(feature, "type");
-            const charon_ml_node *array = charon_ml_get(type, "multiArrayType");
+            const revenant_ml_node *type = revenant_ml_get(feature, "type");
+            const revenant_ml_node *array = revenant_ml_get(type, "multiArrayType");
             if (array != NULL) {
-                const charon_ml_node *shape = charon_ml_get(array, "shape");
+                const revenant_ml_node *shape = revenant_ml_get(array, "shape");
                 size_t at;
                 length += (size_t)snprintf(line + length, sizeof line - length, "%s shape =", name);
-                for (at = 0; at < charon_ml_count(shape); at++) {
+                for (at = 0; at < revenant_ml_count(shape); at++) {
                     length += (size_t)snprintf(line + length, sizeof line - length, "%s%d",
-                                               at > 0 ? "," : "", charon_ml_int(charon_ml_at(shape, at), 0));
+                                               at > 0 ? "," : "", revenant_ml_int(revenant_ml_at(shape, at), 0));
                 }
                 length += (size_t)snprintf(line + length, sizeof line - length, " dataType = %d",
-                                           charon_ml_int(charon_ml_get(array, "dataType"), 0));
+                                           revenant_ml_int(revenant_ml_get(array, "dataType"), 0));
             } else {
-                const charon_ml_node *oneof = NULL;
+                const revenant_ml_node *oneof = NULL;
                 size_t at;
-                for (at = 0; at < charon_ml_count(type); at++) {
-                    oneof = charon_ml_at(type, at);
+                for (at = 0; at < revenant_ml_count(type); at++) {
+                    oneof = revenant_ml_at(type, at);
                     break;
                 }
                 length += (size_t)snprintf(line + length, sizeof line - length, "%s type = %s", name,
@@ -237,7 +237,7 @@ int main(int argc, char **argv)
 {
     char *bytes;
     size_t length = 0;
-    charon_ml_node model;
+    revenant_ml_node model;
     const char *path = NULL;
     const char *mode = "tree";
     const char *which = NULL;
@@ -267,7 +267,7 @@ int main(int argc, char **argv)
     if (bytes == NULL) {
         return 1;
     }
-    if (!charon_ml_read(&model, bytes, length, "CoreML.Specification.Model")) {
+    if (!revenant_ml_read(&model, bytes, length, "CoreML.Specification.Model")) {
         fprintf(stderr, "ml-dump: %s is not a Core ML model this specification describes\n", path);
         free(bytes);
         return 1;
@@ -279,7 +279,7 @@ int main(int argc, char **argv)
     } else {
         walk(&model, 0);
     }
-    charon_ml_free(&model);
+    revenant_ml_free(&model);
     free(bytes);
     return 0;
 }

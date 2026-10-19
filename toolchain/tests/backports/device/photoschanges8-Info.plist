@@ -9,7 +9,7 @@
 	<key>CFBundleExecutable</key>
 	<string>photoschanges</string>
 	<key>CFBundleIdentifier</key>
-	<string>local.charon.backports.photoschanges</string>
+	<string>local.revenant.backports.photoschanges</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>

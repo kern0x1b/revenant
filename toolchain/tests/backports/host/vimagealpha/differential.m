@@ -4,17 +4,17 @@
 #include <stdio.h>
 #include <string.h>
 
-#define PORT(name) charon_host_##name
+#define PORT(name) revenant_host_##name
 #define HOST(name) name
 
-vImage_Error charon_host_vImageConvert_RGB16UtoARGB16U(const vImage_Buffer *, const vImage_Buffer *, Pixel_16U,
+vImage_Error revenant_host_vImageConvert_RGB16UtoARGB16U(const vImage_Buffer *, const vImage_Buffer *, Pixel_16U,
                                                        const vImage_Buffer *, bool, vImage_Flags);
-vImage_Error charon_host_vImageConvert_RGB16UtoRGBA16U(const vImage_Buffer *, const vImage_Buffer *, Pixel_16U,
+vImage_Error revenant_host_vImageConvert_RGB16UtoRGBA16U(const vImage_Buffer *, const vImage_Buffer *, Pixel_16U,
                                                        const vImage_Buffer *, bool, vImage_Flags);
-vImage_Error charon_host_vImageConvert_RGB16UtoBGRA16U(const vImage_Buffer *, const vImage_Buffer *, Pixel_16U,
+vImage_Error revenant_host_vImageConvert_RGB16UtoBGRA16U(const vImage_Buffer *, const vImage_Buffer *, Pixel_16U,
                                                        const vImage_Buffer *, bool, vImage_Flags);
-vImage_Error charon_host_vImageConvert_RGBA16UtoRGB16U(const vImage_Buffer *, const vImage_Buffer *, vImage_Flags);
-vImage_Error charon_host_vImageConvert_BGRA16UtoRGB16U(const vImage_Buffer *, const vImage_Buffer *, vImage_Flags);
+vImage_Error revenant_host_vImageConvert_RGBA16UtoRGB16U(const vImage_Buffer *, const vImage_Buffer *, vImage_Flags);
+vImage_Error revenant_host_vImageConvert_BGRA16UtoRGB16U(const vImage_Buffer *, const vImage_Buffer *, vImage_Flags);
 
 #define WIDTH ((vImagePixelCount)7)
 #define ROWS ((vImagePixelCount)2)
@@ -135,7 +135,7 @@ static void run_rounding(void)
             src_buffer.data = src;      src_buffer.width = 1; src_buffer.height = 1; src_buffer.rowBytes = 6;
             plane_buffer.data = plane;  plane_buffer.width = 1; plane_buffer.height = 1; plane_buffer.rowBytes = 2;
             dest.data = mine_out;       dest.width = 1;       dest.height = 1;       dest.rowBytes = 8;
-            charon_host_vImageConvert_RGB16UtoARGB16U(&src_buffer, &plane_buffer, 0, &dest, true, 0);
+            revenant_host_vImageConvert_RGB16UtoARGB16U(&src_buffer, &plane_buffer, 0, &dest, true, 0);
             dest.data = their_out;
             vImageConvert_RGB16UtoARGB16U(&src_buffer, &plane_buffer, 0, &dest, true, 0);
             uint16_t mine_value, their_value;
@@ -159,9 +159,9 @@ int main(void)
     setbuf(stdout, NULL);
     @autoreleasepool {
         static const struct { const char *name; widen_fn mine; widen_fn theirs; } widen[3] = {
-            { "vImageConvert_RGB16UtoARGB16U", charon_host_vImageConvert_RGB16UtoARGB16U, vImageConvert_RGB16UtoARGB16U },
-            { "vImageConvert_RGB16UtoRGBA16U", charon_host_vImageConvert_RGB16UtoRGBA16U, vImageConvert_RGB16UtoRGBA16U },
-            { "vImageConvert_RGB16UtoBGRA16U", charon_host_vImageConvert_RGB16UtoBGRA16U, vImageConvert_RGB16UtoBGRA16U },
+            { "vImageConvert_RGB16UtoARGB16U", revenant_host_vImageConvert_RGB16UtoARGB16U, vImageConvert_RGB16UtoARGB16U },
+            { "vImageConvert_RGB16UtoRGBA16U", revenant_host_vImageConvert_RGB16UtoRGBA16U, vImageConvert_RGB16UtoRGBA16U },
+            { "vImageConvert_RGB16UtoBGRA16U", revenant_host_vImageConvert_RGB16UtoBGRA16U, vImageConvert_RGB16UtoBGRA16U },
         };
         for (int i = 0; i < 3; i++) {
             run_widen(widen[i].name, widen[i].mine, widen[i].theirs, true, false, 0x1234);
@@ -169,8 +169,8 @@ int main(void)
             run_widen(widen[i].name, widen[i].mine, widen[i].theirs, true, true, 0x1234);
         }
         static const struct { const char *name; narrow_fn mine; narrow_fn theirs; } narrow[2] = {
-            { "vImageConvert_RGBA16UtoRGB16U", charon_host_vImageConvert_RGBA16UtoRGB16U, vImageConvert_RGBA16UtoRGB16U },
-            { "vImageConvert_BGRA16UtoRGB16U", charon_host_vImageConvert_BGRA16UtoRGB16U, vImageConvert_BGRA16UtoRGB16U },
+            { "vImageConvert_RGBA16UtoRGB16U", revenant_host_vImageConvert_RGBA16UtoRGB16U, vImageConvert_RGBA16UtoRGB16U },
+            { "vImageConvert_BGRA16UtoRGB16U", revenant_host_vImageConvert_BGRA16UtoRGB16U, vImageConvert_BGRA16UtoRGB16U },
         };
         for (int i = 0; i < 2; i++)
             run_narrow(narrow[i].name, narrow[i].mine, narrow[i].theirs);

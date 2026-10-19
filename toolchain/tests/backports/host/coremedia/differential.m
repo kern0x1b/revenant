@@ -1,7 +1,7 @@
 #import <CoreMedia/CoreMedia.h>
 #import <Foundation/Foundation.h>
 
-OSStatus CharonHostCMVideoFormatDescriptionGetH264ParameterSetAtIndex(CMFormatDescriptionRef, size_t, const uint8_t **, size_t *, size_t *, int *);
+OSStatus RevenantHostCMVideoFormatDescriptionGetH264ParameterSetAtIndex(CMFormatDescriptionRef, size_t, const uint8_t **, size_t *, size_t *, int *);
 
 static int failures, checks;
 
@@ -10,7 +10,7 @@ static NSString *answer(BOOL host, CMFormatDescriptionRef desc, size_t index, in
     const uint8_t *pointer = (const uint8_t *)0x1;
     size_t size = 99, count = 99;
     int length = 99;
-    OSStatus (*function)(CMFormatDescriptionRef, size_t, const uint8_t **, size_t *, size_t *, int *) = host ? CharonHostCMVideoFormatDescriptionGetH264ParameterSetAtIndex : CMVideoFormatDescriptionGetH264ParameterSetAtIndex;
+    OSStatus (*function)(CMFormatDescriptionRef, size_t, const uint8_t **, size_t *, size_t *, int *) = host ? RevenantHostCMVideoFormatDescriptionGetH264ParameterSetAtIndex : CMVideoFormatDescriptionGetH264ParameterSetAtIndex;
     OSStatus status = function(desc, index, (mask & 1) ? &pointer : NULL, (mask & 2) ? &size : NULL, (mask & 4) ? &count : NULL, (mask & 8) ? &length : NULL);
     NSData *content = pointer > (const uint8_t *)1 && (mask & 2) ? [NSData dataWithBytes:pointer length:size] : nil;
     return [NSString stringWithFormat:@"%d %d %zu %zu %d %@", (int)status, pointer == NULL, size, count, length, content];

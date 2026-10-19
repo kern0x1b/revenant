@@ -3,9 +3,9 @@
 
 #pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
 
-static const char charon_preferred_key;
+static const char revenant_preferred_key;
 
-@implementation UIDatePicker (CharonStyle134)
+@implementation UIDatePicker (RevenantStyle134)
 
 - (UIDatePickerStyle)datePickerStyle
 {
@@ -14,12 +14,12 @@ static const char charon_preferred_key;
 
 - (UIDatePickerStyle)preferredDatePickerStyle
 {
-    return (UIDatePickerStyle)[objc_getAssociatedObject(self, &charon_preferred_key) integerValue];
+    return (UIDatePickerStyle)[objc_getAssociatedObject(self, &revenant_preferred_key) integerValue];
 }
 
 - (void)setPreferredDatePickerStyle:(UIDatePickerStyle)preferredDatePickerStyle
 {
-    objc_setAssociatedObject(self, &charon_preferred_key, @(preferredDatePickerStyle), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, &revenant_preferred_key, @(preferredDatePickerStyle), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
 @end

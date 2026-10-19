@@ -1,6 +1,6 @@
-#import "CharonMetal.h"
+#import "RevenantMetal.h"
 
-static void CharonResetColorAttachment(MTLRenderPipelineColorAttachmentDescriptor *d)
+static void RevenantResetColorAttachment(MTLRenderPipelineColorAttachmentDescriptor *d)
 {
     d.pixelFormat = MTLPixelFormatInvalid;
     d.blendingEnabled = NO;
@@ -18,7 +18,7 @@ static void CharonResetColorAttachment(MTLRenderPipelineColorAttachmentDescripto
 - (instancetype)init
 {
     if ((self = [super init]))
-        CharonResetColorAttachment(self);
+        RevenantResetColorAttachment(self);
     return self;
 }
 
@@ -67,7 +67,7 @@ static void CharonResetColorAttachment(MTLRenderPipelineColorAttachmentDescripto
         [NSException raise:NSInternalInconsistencyException format:@"attachmentIndex(%lu) must be < 8",
                                                                    (unsigned long)attachmentIndex];
     if (!attachment) {
-        CharonResetColorAttachment(_items[attachmentIndex]);
+        RevenantResetColorAttachment(_items[attachmentIndex]);
         return;
     }
     _items[attachmentIndex] = [attachment copy];
@@ -75,7 +75,7 @@ static void CharonResetColorAttachment(MTLRenderPipelineColorAttachmentDescripto
 
 @end
 
-static MTLLinkedFunctions *CharonCopyLinkedFunctions(MTLLinkedFunctions *source)
+static MTLLinkedFunctions *RevenantCopyLinkedFunctions(MTLLinkedFunctions *source)
 {
     MTLLinkedFunctions *copy = [[MTLLinkedFunctions alloc] init];
     copy.functions = source.functions;
@@ -115,7 +115,7 @@ static MTLLinkedFunctions *CharonCopyLinkedFunctions(MTLLinkedFunctions *source)
 
 - (void)setVertexLinkedFunctions:(MTLLinkedFunctions *)linkedFunctions
 {
-    _vertexLinkedFunctions = linkedFunctions ? CharonCopyLinkedFunctions(linkedFunctions)
+    _vertexLinkedFunctions = linkedFunctions ? RevenantCopyLinkedFunctions(linkedFunctions)
                                              : [[MTLLinkedFunctions alloc] init];
 }
 
@@ -126,7 +126,7 @@ static MTLLinkedFunctions *CharonCopyLinkedFunctions(MTLLinkedFunctions *source)
 
 - (void)setFragmentLinkedFunctions:(MTLLinkedFunctions *)linkedFunctions
 {
-    _fragmentLinkedFunctions = linkedFunctions ? CharonCopyLinkedFunctions(linkedFunctions)
+    _fragmentLinkedFunctions = linkedFunctions ? RevenantCopyLinkedFunctions(linkedFunctions)
                                                : [[MTLLinkedFunctions alloc] init];
 }
 

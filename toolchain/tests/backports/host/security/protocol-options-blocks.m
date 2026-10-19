@@ -4,10 +4,10 @@
 #import <dispatch/dispatch.h>
 #import <stdio.h>
 
-@interface CharonSecProtocolBlocks : NSObject <OS_sec_protocol_options>
-- (BOOL)charonHasKeyUpdate;
-- (BOOL)charonHasChallenge;
-- (BOOL)charonHasVerify;
+@interface RevenantSecProtocolBlocks : NSObject <OS_sec_protocol_options>
+- (BOOL)revenantHasKeyUpdate;
+- (BOOL)revenantHasChallenge;
+- (BOOL)revenantHasVerify;
 @end
 
 static int failures = 0;
@@ -22,7 +22,7 @@ int main(void)
     setvbuf(stdout, NULL, _IONBF, 0);
     __weak id weakOptions = nil;
     @autoreleasepool {
-        Class cls = NSClassFromString(@"CharonSecProtocolBlocks");
+        Class cls = NSClassFromString(@"RevenantSecProtocolBlocks");
         printf("port-class\t%s\n", cls ? "found" : "MISSING");
         if (!cls) return 1;
         sec_protocol_options_t o = (sec_protocol_options_t)[[cls alloc] init];
@@ -30,26 +30,26 @@ int main(void)
 
         sec_protocol_options_set_key_update_block(o,
             ^(sec_protocol_metadata_t m, sec_protocol_key_update_complete_t c) { (void)m; (void)c; }, NULL);
-        want("key-update-alone", [(id)o charonHasKeyUpdate] ? 1 : 0, 1);
-        want("challenge-still-unset", [(id)o charonHasChallenge] ? 1 : 0, 0);
-        want("verify-still-unset", [(id)o charonHasVerify] ? 1 : 0, 0);
+        want("key-update-alone", [(id)o revenantHasKeyUpdate] ? 1 : 0, 1);
+        want("challenge-still-unset", [(id)o revenantHasChallenge] ? 1 : 0, 0);
+        want("verify-still-unset", [(id)o revenantHasVerify] ? 1 : 0, 0);
 
         sec_protocol_options_set_challenge_block(o,
             ^(sec_protocol_metadata_t m, sec_protocol_challenge_complete_t c) { (void)m; (void)c; }, NULL);
         sec_protocol_options_set_verify_block(o,
             ^(sec_protocol_metadata_t m, sec_trust_t t, sec_protocol_verify_complete_t c) { (void)m; (void)t; (void)c; }, NULL);
-        want("all-three-set", [(id)o charonHasKeyUpdate] + [(id)o charonHasChallenge] + [(id)o charonHasVerify], 3);
+        want("all-three-set", [(id)o revenantHasKeyUpdate] + [(id)o revenantHasChallenge] + [(id)o revenantHasVerify], 3);
 
-        dispatch_queue_t q = dispatch_queue_create("charon.blocks", DISPATCH_QUEUE_SERIAL);
+        dispatch_queue_t q = dispatch_queue_create("revenant.blocks", DISPATCH_QUEUE_SERIAL);
         sec_protocol_options_set_verify_block(p,
             ^(sec_protocol_metadata_t m, sec_trust_t t, sec_protocol_verify_complete_t c) { (void)m; (void)t; (void)c; }, q);
-        want("p-has-verify", [(id)p charonHasVerify] ? 1 : 0, 1);
-        want("p-has-no-key-update", [(id)p charonHasKeyUpdate] ? 1 : 0, 0);
-        want("p-has-no-challenge", [(id)p charonHasChallenge] ? 1 : 0, 0);
+        want("p-has-verify", [(id)p revenantHasVerify] ? 1 : 0, 1);
+        want("p-has-no-key-update", [(id)p revenantHasKeyUpdate] ? 1 : 0, 0);
+        want("p-has-no-challenge", [(id)p revenantHasChallenge] ? 1 : 0, 0);
 
         sec_protocol_options_set_verify_block(o, NULL, NULL);
-        want("after-null-verify", [(id)o charonHasVerify] ? 1 : 0, 0);
-        want("neighbors-untouched", [(id)o charonHasKeyUpdate] + [(id)o charonHasChallenge], 2);
+        want("after-null-verify", [(id)o revenantHasVerify] ? 1 : 0, 0);
+        want("neighbors-untouched", [(id)o revenantHasKeyUpdate] + [(id)o revenantHasChallenge], 2);
 
         sec_protocol_options_set_key_update_block(NULL, NULL, NULL);
         sec_protocol_options_set_challenge_block(NULL, NULL, NULL);

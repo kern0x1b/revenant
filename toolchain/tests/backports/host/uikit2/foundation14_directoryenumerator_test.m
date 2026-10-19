@@ -72,7 +72,7 @@ static NSString *walk(id enumerator, BOOL port, NSString *root, uint64_t skips)
 int main(int argc, char **argv)
 {
     @autoreleasepool {
-        Class wrapper = NSClassFromString(@"CharonHostCharonPostOrderEnumerator");
+        Class wrapper = NSClassFromString(@"RevenantHostRevenantPostOrderEnumerator");
         CHECK(wrapper != Nil, "the port defines the enumerator");
         NSFileManager *manager = [NSFileManager defaultManager];
         NSString *base = [NSTemporaryDirectory() stringByAppendingPathComponent:@"f14-tree"];
@@ -99,10 +99,10 @@ int main(int argc, char **argv)
         for (NSString *sample in samples)
             printf("  %s\n", sample.UTF8String);
         [manager removeItemAtPath:base error:NULL];
-        charon_check(wrong == 0, "directories are visited again after their contents, as the system's enumerator visits them", [NSString stringWithFormat:@"%lu of %lu trees differ", (unsigned long)wrong, (unsigned long)trees]);
+        revenant_check(wrong == 0, "directories are visited again after their contents, as the system's enumerator visits them", [NSString stringWithFormat:@"%lu of %lu trees differ", (unsigned long)wrong, (unsigned long)trees]);
         NSDirectoryEnumerator *plain = [manager enumeratorAtPath:NSTemporaryDirectory()];
-        CHECK(!((BOOL (*)(id, SEL))objc_msgSend)(plain, NSSelectorFromString(@"charonHostIsEnumeratingDirectoryPostOrder")), "an enumerator made without the option is never in post order");
+        CHECK(!((BOOL (*)(id, SEL))objc_msgSend)(plain, NSSelectorFromString(@"revenantHostIsEnumeratingDirectoryPostOrder")), "an enumerator made without the option is never in post order");
     }
-    printf("checks=%d failures=%d\n", charon_checks, charon_failures);
-    return charon_failures;
+    printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
+    return revenant_failures;
 }

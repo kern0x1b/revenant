@@ -37,7 +37,7 @@ function run(opt)
     local out = opt.out or steps.env("UIKITPRINTER_APP_BUILD")
                 or steps.workspace().run("uikitprinter-app", minimum .. "-" .. steps.stamp())
     steps.copy(path.join(HERE, "app"), {"xmake.lua", "control", "Info.plist"}, out)
-    local envs = {CHARUIKITPRINTER_ROOT = steps.charon(), CHARUIKITPRINTER_MINIMUM = minimum}
+    local envs = {CHARUIKITPRINTER_ROOT = steps.revenant(), CHARUIKITPRINTER_MINIMUM = minimum}
     local device = {"emulate", "-d", "iPhone4,1", "-r", minimum}
     steps.required({what = "the application", verb = "configure", curdir = out, envs = envs,
                     argv = {"f", "-p", "iphoneos", "-a", "armv7", "-y"}, log = path.join(out, "configure.log")})
@@ -46,7 +46,7 @@ function run(opt)
     local log = path.join(out, "launch.log")
     local launch_status = steps.spawn({curdir = out, envs = envs, log = log,
                                        argv = table.join(device, {"-s", "120", "launch",
-                                                         "local.charon.backports.uikitprinterapp", "until-exit"})})
+                                                         "local.revenant.backports.uikitprinterapp", "until-exit"})})
     steps.spawn({curdir = out, envs = envs, argv = table.join(device, {"log"}), log = path.join(out, "emulate.log")})
     local launch = steps.read(log)
     io.write(launch)

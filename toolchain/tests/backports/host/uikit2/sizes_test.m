@@ -3,29 +3,29 @@
 
 #define NAMED(...) ([NSString stringWithFormat:__VA_ARGS__].UTF8String)
 
-extern UIContentSizeCategory const CharonHostUIContentSizeCategoryExtraSmall;
-extern UIContentSizeCategory const CharonHostUIContentSizeCategorySmall;
-extern UIContentSizeCategory const CharonHostUIContentSizeCategoryMedium;
-extern UIContentSizeCategory const CharonHostUIContentSizeCategoryLarge;
-extern UIContentSizeCategory const CharonHostUIContentSizeCategoryExtraLarge;
-extern UIContentSizeCategory const CharonHostUIContentSizeCategoryExtraExtraLarge;
-extern UIContentSizeCategory const CharonHostUIContentSizeCategoryExtraExtraExtraLarge;
-extern UIContentSizeCategory const CharonHostUIContentSizeCategoryAccessibilityMedium;
-extern UIContentSizeCategory const CharonHostUIContentSizeCategoryAccessibilityLarge;
-extern UIContentSizeCategory const CharonHostUIContentSizeCategoryAccessibilityExtraLarge;
-extern UIContentSizeCategory const CharonHostUIContentSizeCategoryAccessibilityExtraExtraLarge;
-extern UIContentSizeCategory const CharonHostUIContentSizeCategoryAccessibilityExtraExtraExtraLarge;
-extern UIContentSizeCategory const CharonHostUIContentSizeCategoryUnspecified;
+extern UIContentSizeCategory const RevenantHostUIContentSizeCategoryExtraSmall;
+extern UIContentSizeCategory const RevenantHostUIContentSizeCategorySmall;
+extern UIContentSizeCategory const RevenantHostUIContentSizeCategoryMedium;
+extern UIContentSizeCategory const RevenantHostUIContentSizeCategoryLarge;
+extern UIContentSizeCategory const RevenantHostUIContentSizeCategoryExtraLarge;
+extern UIContentSizeCategory const RevenantHostUIContentSizeCategoryExtraExtraLarge;
+extern UIContentSizeCategory const RevenantHostUIContentSizeCategoryExtraExtraExtraLarge;
+extern UIContentSizeCategory const RevenantHostUIContentSizeCategoryAccessibilityMedium;
+extern UIContentSizeCategory const RevenantHostUIContentSizeCategoryAccessibilityLarge;
+extern UIContentSizeCategory const RevenantHostUIContentSizeCategoryAccessibilityExtraLarge;
+extern UIContentSizeCategory const RevenantHostUIContentSizeCategoryAccessibilityExtraExtraLarge;
+extern UIContentSizeCategory const RevenantHostUIContentSizeCategoryAccessibilityExtraExtraExtraLarge;
+extern UIContentSizeCategory const RevenantHostUIContentSizeCategoryUnspecified;
 
 int main(void)
 {
     @autoreleasepool {
-        NSArray *ours = @[CharonHostUIContentSizeCategoryExtraSmall, CharonHostUIContentSizeCategorySmall, CharonHostUIContentSizeCategoryMedium,
-                          CharonHostUIContentSizeCategoryLarge, CharonHostUIContentSizeCategoryExtraLarge, CharonHostUIContentSizeCategoryExtraExtraLarge,
-                          CharonHostUIContentSizeCategoryExtraExtraExtraLarge, CharonHostUIContentSizeCategoryAccessibilityMedium,
-                          CharonHostUIContentSizeCategoryAccessibilityLarge, CharonHostUIContentSizeCategoryAccessibilityExtraLarge,
-                          CharonHostUIContentSizeCategoryAccessibilityExtraExtraLarge, CharonHostUIContentSizeCategoryAccessibilityExtraExtraExtraLarge,
-                          CharonHostUIContentSizeCategoryUnspecified];
+        NSArray *ours = @[RevenantHostUIContentSizeCategoryExtraSmall, RevenantHostUIContentSizeCategorySmall, RevenantHostUIContentSizeCategoryMedium,
+                          RevenantHostUIContentSizeCategoryLarge, RevenantHostUIContentSizeCategoryExtraLarge, RevenantHostUIContentSizeCategoryExtraExtraLarge,
+                          RevenantHostUIContentSizeCategoryExtraExtraExtraLarge, RevenantHostUIContentSizeCategoryAccessibilityMedium,
+                          RevenantHostUIContentSizeCategoryAccessibilityLarge, RevenantHostUIContentSizeCategoryAccessibilityExtraLarge,
+                          RevenantHostUIContentSizeCategoryAccessibilityExtraExtraLarge, RevenantHostUIContentSizeCategoryAccessibilityExtraExtraExtraLarge,
+                          RevenantHostUIContentSizeCategoryUnspecified];
         NSArray *system = @[UIContentSizeCategoryExtraSmall, UIContentSizeCategorySmall, UIContentSizeCategoryMedium,
                             UIContentSizeCategoryLarge, UIContentSizeCategoryExtraLarge, UIContentSizeCategoryExtraExtraLarge,
                             UIContentSizeCategoryExtraExtraExtraLarge, UIContentSizeCategoryAccessibilityMedium,
@@ -36,7 +36,7 @@ int main(void)
             CHECK_EQUAL(ours[index], system[index], NAMED(@"the content size category %@ is the string the system holds", system[index]));
         NSMutableSet *distinct = [NSMutableSet setWithArray:ours];
         CHECK(distinct.count == ours.count, "no two categories share a string");
-        printf("checks=%d failures=%d\n", charon_checks, charon_failures);
+        printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
     }
-    return charon_failures;
+    return revenant_failures;
 }

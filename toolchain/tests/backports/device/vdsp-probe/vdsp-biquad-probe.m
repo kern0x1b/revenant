@@ -9,13 +9,13 @@
 
 #pragma clang diagnostic ignored "-Wunguarded-availability-new"
 
-vDSP_biquad_Setup charon_probe_vDSP_biquad_CreateSetup(const double *coeffs, vDSP_Length m);
-vDSP_biquad_SetupD charon_probe_vDSP_biquad_CreateSetupD(const double *coeffs, vDSP_Length m);
-void charon_probe_vDSP_biquad_DestroySetup(vDSP_biquad_Setup setup);
-void charon_probe_vDSP_biquad_DestroySetupD(vDSP_biquad_SetupD setup);
-void charon_probe_vDSP_biquad(const struct vDSP_biquad_SetupStruct *setup, float *delay, const float *x,
+vDSP_biquad_Setup revenant_probe_vDSP_biquad_CreateSetup(const double *coeffs, vDSP_Length m);
+vDSP_biquad_SetupD revenant_probe_vDSP_biquad_CreateSetupD(const double *coeffs, vDSP_Length m);
+void revenant_probe_vDSP_biquad_DestroySetup(vDSP_biquad_Setup setup);
+void revenant_probe_vDSP_biquad_DestroySetupD(vDSP_biquad_SetupD setup);
+void revenant_probe_vDSP_biquad(const struct vDSP_biquad_SetupStruct *setup, float *delay, const float *x,
                               vDSP_Stride ix, float *y, vDSP_Stride iy, vDSP_Length n);
-void charon_probe_vDSP_biquadD(const struct vDSP_biquad_SetupStructD *setup, double *delay, const double *x,
+void revenant_probe_vDSP_biquadD(const struct vDSP_biquad_SetupStructD *setup, double *delay, const double *x,
                                vDSP_Stride ix, double *y, vDSP_Stride iy, vDSP_Length n);
 
 static int checks, failures;
@@ -71,8 +71,8 @@ static void maybe_plant_ulp(float *y, size_t count)
     plant_applied = 1;
 }
 
-void charon_probe_vDSP_sve_svesq(const float *a, vDSP_Stride ia, float *sum, float *sumsquares, vDSP_Length n);
-void charon_probe_vDSP_sve_svesqD(const double *a, vDSP_Stride ia, double *sum, double *sumsquares, vDSP_Length n);
+void revenant_probe_vDSP_sve_svesq(const float *a, vDSP_Stride ia, float *sum, float *sumsquares, vDSP_Length n);
+void revenant_probe_vDSP_sve_svesqD(const double *a, vDSP_Stride ia, double *sum, double *sumsquares, vDSP_Length n);
 
 #define SAMPLES 32
 
@@ -91,19 +91,19 @@ static void run_float(const char *label, const double *coeffs, vDSP_Length secti
     for (int i = 0; i < 2 * 9; i++) { host_delay[i] = 0.0f; port_delay[i] = 0.0f; }
 
     vDSP_biquad_Setup host = vDSP_biquad_CreateSetup(all, sections);
-    vDSP_biquad_Setup port = charon_probe_vDSP_biquad_CreateSetup(all, sections);
+    vDSP_biquad_Setup port = revenant_probe_vDSP_biquad_CreateSetup(all, sections);
     if (!host || !port) {
         printf("note %s: the release's setup %s, the port's %s\n", label, host ? "exists" : "is NULL",
                port ? "exists" : "is NULL");
         if (host) vDSP_biquad_DestroySetup(host);
-        if (port) charon_probe_vDSP_biquad_DestroySetup(port);
+        if (port) revenant_probe_vDSP_biquad_DestroySetup(port);
         return;
     }
     for (int call = 0; call < 2; call++) {
         memset(host_y, 0, sizeof host_y);
         memset(port_y, 0, sizeof port_y);
         vDSP_biquad((const struct vDSP_biquad_SetupStruct *)host, host_delay, x, stride, host_y, 1, SAMPLES);
-        charon_probe_vDSP_biquad((const struct vDSP_biquad_SetupStruct *)port, port_delay, x, stride, port_y, 1, SAMPLES);
+        revenant_probe_vDSP_biquad((const struct vDSP_biquad_SetupStruct *)port, port_delay, x, stride, port_y, 1, SAMPLES);
         maybe_plant_ulp(port_y, SAMPLES);
         char note[80];
         snprintf(note, sizeof note, "%s, %d sections, stride %ld, call %d", label, (int)sections, (long)stride, call);
@@ -118,7 +118,7 @@ static void run_float(const char *label, const double *coeffs, vDSP_Length secti
                (2 * (sections + 1)) * sizeof(float), "the Delay the call left behind, bit for bit", sizeof(float));
     }
     vDSP_biquad_DestroySetup(host);
-    charon_probe_vDSP_biquad_DestroySetup(port);
+    revenant_probe_vDSP_biquad_DestroySetup(port);
 }
 
 static void run_double(const char *label, const double *coeffs, vDSP_Length sections)
@@ -131,19 +131,19 @@ static void run_double(const char *label, const double *coeffs, vDSP_Length sect
     double host_delay[2 * 9], port_delay[2 * 9];
     for (int i = 0; i < 2 * 9; i++) { host_delay[i] = 0.0; port_delay[i] = 0.0; }
     vDSP_biquad_SetupD host = vDSP_biquad_CreateSetupD(all, sections);
-    vDSP_biquad_SetupD port = charon_probe_vDSP_biquad_CreateSetupD(all, sections);
+    vDSP_biquad_SetupD port = revenant_probe_vDSP_biquad_CreateSetupD(all, sections);
     if (!host || !port) {
         printf("note %s: the release's setup %s, the port's %s\n", label, host ? "exists" : "is NULL",
                port ? "exists" : "is NULL");
         if (host) vDSP_biquad_DestroySetupD(host);
-        if (port) charon_probe_vDSP_biquad_DestroySetupD(port);
+        if (port) revenant_probe_vDSP_biquad_DestroySetupD(port);
         return;
     }
     for (int call = 0; call < 2; call++) {
         memset(host_y, 0, sizeof host_y);
         memset(port_y, 0, sizeof port_y);
         vDSP_biquadD((const struct vDSP_biquad_SetupStructD *)host, host_delay, x, 1, host_y, 1, SAMPLES);
-        charon_probe_vDSP_biquadD((const struct vDSP_biquad_SetupStructD *)port, port_delay, x, 1, port_y, 1, SAMPLES);
+        revenant_probe_vDSP_biquadD((const struct vDSP_biquad_SetupStructD *)port, port_delay, x, 1, port_y, 1, SAMPLES);
         char note[80];
         snprintf(note, sizeof note, "%s, %d sections, call %d", label, (int)sections, call);
         report(note, host_y, sizeof host_y, port_y, sizeof port_y, "the samples, bit for bit", sizeof(double));
@@ -153,7 +153,7 @@ static void run_double(const char *label, const double *coeffs, vDSP_Length sect
                (2 * (sections + 1)) * sizeof(double), "the Delay the call left behind, bit for bit", sizeof(double));
     }
     vDSP_biquad_DestroySetupD(host);
-    charon_probe_vDSP_biquad_DestroySetupD(port);
+    revenant_probe_vDSP_biquad_DestroySetupD(port);
 }
 
 static void run_specials(void)
@@ -163,17 +163,17 @@ static void run_specials(void)
     memcpy(x, values, sizeof x);
     for (int i = 0; i < 4; i++) { host_delay[i] = 0.0f; port_delay[i] = 0.0f; }
     vDSP_biquad_Setup host = vDSP_biquad_CreateSetup(kUnstable, 1);
-    vDSP_biquad_Setup port = charon_probe_vDSP_biquad_CreateSetup(kUnstable, 1);
+    vDSP_biquad_Setup port = revenant_probe_vDSP_biquad_CreateSetup(kUnstable, 1);
     memset(host_y, 0, sizeof host_y);
     memset(port_y, 0, sizeof port_y);
     vDSP_biquad((const struct vDSP_biquad_SetupStruct *)host, host_delay, x, 1, host_y, 1, 8);
-    charon_probe_vDSP_biquad((const struct vDSP_biquad_SetupStruct *)port, port_delay, x, 1, port_y, 1, 8);
+    revenant_probe_vDSP_biquad((const struct vDSP_biquad_SetupStruct *)port, port_delay, x, 1, port_y, 1, 8);
     report("a NaN and signed zeroes, one section", host_y, sizeof host_y, port_y, sizeof port_y,
            "by bit pattern, because NaN never equals NaN and -0 equals +0", sizeof(float));
     report("the same call's Delay", host_delay, sizeof host_delay, port_delay, sizeof port_delay, "by bit pattern",
            sizeof(float));
     vDSP_biquad_DestroySetup(host);
-    charon_probe_vDSP_biquad_DestroySetup(port);
+    revenant_probe_vDSP_biquad_DestroySetup(port);
 }
 
 #define SEARCH_LEAVES 5
@@ -486,10 +486,10 @@ static void run_search(const char *label, const double *coeffs, vDSP_Length sect
     vDSP_biquad_DestroySetupD(hd);
 
     float port_f[SEARCH_SAMPLES], port_fd[4] = {0, 0, 0, 0};
-    vDSP_biquad_Setup pf = charon_probe_vDSP_biquad_CreateSetup(all, sections);
-    charon_probe_vDSP_biquad((const struct vDSP_biquad_SetupStruct *)pf, port_fd, x, 1, port_f, 1,
+    vDSP_biquad_Setup pf = revenant_probe_vDSP_biquad_CreateSetup(all, sections);
+    revenant_probe_vDSP_biquad((const struct vDSP_biquad_SetupStruct *)pf, port_fd, x, 1, port_f, 1,
                              SEARCH_SAMPLES);
-    charon_probe_vDSP_biquad_DestroySetup(pf);
+    revenant_probe_vDSP_biquad_DestroySetup(pf);
 
     int leaves[SEARCH_LEAVES] = {0, 1, 2, 3, 4};
     search_forest.count = 1;
@@ -514,13 +514,13 @@ static void run_search(const char *label, const double *coeffs, vDSP_Length sect
         printf("    the port's own answer to one sample with a zero delay, both forms:\n");
         {
             float pf_delay[4] = {0, 0, 0, 0}, pf_y = 0.0f, pf_x = x[0];
-            vDSP_biquad_Setup psf = charon_probe_vDSP_biquad_CreateSetup(all, sections);
-            charon_probe_vDSP_biquad((const struct vDSP_biquad_SetupStruct *)psf, pf_delay, &pf_x, 1, &pf_y, 1, 2);
-            charon_probe_vDSP_biquad_DestroySetup(psf);
+            vDSP_biquad_Setup psf = revenant_probe_vDSP_biquad_CreateSetup(all, sections);
+            revenant_probe_vDSP_biquad((const struct vDSP_biquad_SetupStruct *)psf, pf_delay, &pf_x, 1, &pf_y, 1, 2);
+            revenant_probe_vDSP_biquad_DestroySetup(psf);
             double pd_delay[4] = {0, 0, 0, 0}, pd_y = 0.0;
-            vDSP_biquad_SetupD psd = charon_probe_vDSP_biquad_CreateSetupD(all, sections);
-            charon_probe_vDSP_biquadD((const struct vDSP_biquad_SetupStructD *)psd, pd_delay, xd, 1, &pd_y, 1, 2);
-            charon_probe_vDSP_biquad_DestroySetupD(psd);
+            vDSP_biquad_SetupD psd = revenant_probe_vDSP_biquad_CreateSetupD(all, sections);
+            revenant_probe_vDSP_biquadD((const struct vDSP_biquad_SetupStructD *)psd, pd_delay, xd, 1, &pd_y, 1, 2);
+            revenant_probe_vDSP_biquad_DestroySetupD(psd);
             printf("      float: b0 * x[0] would be %.9g, the port answers %.9g, %s\n", (double)((float)all[0] * x[0]),
                    (double)pf_y, ((float)all[0] * x[0]) == pf_y ? "the same" : "DIFFERENT");
             printf("      double: b0 * x[0] would be %.17g, the port answers %.17g, %s\n", all[0] * xd[0], pd_y,
@@ -540,8 +540,8 @@ static void run_search(const char *label, const double *coeffs, vDSP_Length sect
         double delay_p[4] = {0, 0, 0, 0}, delay_e[4] = {0, 0, 0, 0};
         double port0 = 0, release0 = 0;
         vDSP_biquad_SetupD ps0 = vDSP_biquad_CreateSetupD(all, sections);
-        charon_probe_vDSP_biquadD((const struct vDSP_biquad_SetupStructD *)ps0, delay_p, xd, 1, &port0, 1, 1);
-        charon_probe_vDSP_biquad_DestroySetupD(ps0);
+        revenant_probe_vDSP_biquadD((const struct vDSP_biquad_SetupStructD *)ps0, delay_p, xd, 1, &port0, 1, 1);
+        revenant_probe_vDSP_biquad_DestroySetupD(ps0);
         vDSP_biquad_SetupD rs0 = vDSP_biquad_CreateSetupD(all, sections);
         vDSP_biquadD((const struct vDSP_biquad_SetupStructD *)rs0, delay_e, xd, 1, &release0, 1, 1);
         vDSP_biquad_DestroySetupD(rs0);
@@ -562,10 +562,10 @@ static void run_search(const char *label, const double *coeffs, vDSP_Length sect
 
     {
         double port_d[SEARCH_SAMPLES], port_dd[4] = {0, 0, 0, 0};
-        vDSP_biquad_SetupD ps = charon_probe_vDSP_biquad_CreateSetupD(all, sections);
-        charon_probe_vDSP_biquadD((const struct vDSP_biquad_SetupStructD *)ps, port_dd, xd, 1, port_d, 1,
+        vDSP_biquad_SetupD ps = revenant_probe_vDSP_biquad_CreateSetupD(all, sections);
+        revenant_probe_vDSP_biquadD((const struct vDSP_biquad_SetupStructD *)ps, port_dd, xd, 1, port_d, 1,
                                    SEARCH_SAMPLES);
-        charon_probe_vDSP_biquad_DestroySetupD(ps);
+        revenant_probe_vDSP_biquad_DestroySetupD(ps);
         int found_tree = -1, found_code = -1, best = -1;
         char shape[256] = {0};
         if (!search_find(&search_forest, all, x, port_d, sizeof(double), &found_tree, &found_code, shape,
@@ -750,7 +750,7 @@ static int sve_control(void)
 {
     float in[4] = {1.0f, 2.0f, 3.0f, 4.0f};
     float s = -1.0f, q = -1.0f;
-    charon_probe_vDSP_sve_svesq(in, 1, &s, &q, 4);
+    revenant_probe_vDSP_sve_svesq(in, 1, &s, &q, 4);
     const float want_s = 10.0f, want_q = 30.0f;
     int ok = memcmp(&s, &want_s, sizeof s) == 0 && memcmp(&q, &want_q, sizeof q) == 0;
     sve_report("CONTROL: the port gives 10 and 30 for 1, 2, 3, 4", ok, "which is the hand value, exact in float");
@@ -779,7 +779,7 @@ static void sve_search_reductions(void)
     for (int c = 0; c < 4; c++) {
         float hs = 0, hq = 0, ps = 0, pq = 0;
         vDSP_sve_svesq(cases[c], 1, &hs, &hq, 6);
-        charon_probe_vDSP_sve_svesq(cases[c], 1, &ps, &pq, 6);
+        revenant_probe_vDSP_sve_svesq(cases[c], 1, &ps, &pq, 6);
         char note[120];
         snprintf(note, sizeof note, "case %d, %s", c, names[c]);
         int agrees = memcmp(&hs, &ps, sizeof hs) == 0 && memcmp(&hq, &pq, sizeof hq) == 0;

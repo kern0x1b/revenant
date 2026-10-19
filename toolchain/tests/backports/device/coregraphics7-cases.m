@@ -32,7 +32,7 @@ static NSString *colour_digest(CGColorRef color)
     return digest;
 }
 
-void charon_cg7_cases(void (^emit)(NSString *name, NSString *value))
+void revenant_cg7_cases(void (^emit)(NSString *name, NSString *value))
 {
     CGRect rects[] = {{{0, 0}, {100, 50}}, {{10, 20}, {30, 30}}, {{-5, -5}, {40, 10}}, {{100, 100}, {-60, -40}}, {{3.5, 7.25}, {12.5, 80}}};
     CGSize corners[] = {{0, 0}, {5, 5}, {25, 10}, {50, 25}, {10, 0}, {0, 10}, {1.5, 2.5}};

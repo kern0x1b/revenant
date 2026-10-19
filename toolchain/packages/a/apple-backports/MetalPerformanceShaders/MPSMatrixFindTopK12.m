@@ -1,4 +1,4 @@
-#import "CharonMPS.h"
+#import "RevenantMPS.h"
 
 
 @implementation MPSMatrixFindTopK {
@@ -63,25 +63,25 @@
 
 - (void)encodeToCommandBuffer:(id<MTLCommandBuffer>)commandBuffer inputMatrix:(MPSMatrix *)inputMatrix resultIndexMatrix:(MPSMatrix *)resultIndexMatrix resultValueMatrix:(MPSMatrix *)resultValueMatrix
 {
-    if (!CharonMPSCommandBufferPermits(commandBuffer))
+    if (!RevenantMPSCommandBufferPermits(commandBuffer))
         return;
-    CharonMPSMatrixView in = CharonMPSMatrixViewOf(inputMatrix), indices = CharonMPSMatrixViewOf(resultIndexMatrix), values = CharonMPSMatrixViewOf(resultValueMatrix);
-    if (!CharonMPSDataTypeIsElement(in.dataType) || !CharonMPSDataTypeIsElement(indices.dataType) || !CharonMPSDataTypeIsElement(values.dataType)) {
-        CharonMPSRefuse(@"MPSMatrixFindTopK: a matrix of a data type that is not one of the eight element types was given");
+    RevenantMPSMatrixView in = RevenantMPSMatrixViewOf(inputMatrix), indices = RevenantMPSMatrixViewOf(resultIndexMatrix), values = RevenantMPSMatrixViewOf(resultValueMatrix);
+    if (!RevenantMPSDataTypeIsElement(in.dataType) || !RevenantMPSDataTypeIsElement(indices.dataType) || !RevenantMPSDataTypeIsElement(values.dataType)) {
+        RevenantMPSRefuse(@"MPSMatrixFindTopK: a matrix of a data type that is not one of the eight element types was given");
         return;
     }
     NSUInteger rows = _sourceRows == NSUIntegerMax ? in.rows : _sourceRows;
     NSUInteger columns = _sourceColumns == NSUIntegerMax ? in.columns : _sourceColumns;
     NSUInteger wanted = _numberOfTopKValues < columns ? _numberOfTopKValues : columns;
     NSUInteger start, count;
-    CharonMPSBatch(_batchStart, _batchSize, in.matrices, &start, &count);
+    RevenantMPSBatch(_batchStart, _batchSize, in.matrices, &start, &count);
     count = count < indices.matrices ? count : indices.matrices;
     count = count < values.matrices ? count : values.matrices;
     for (NSUInteger b = 0; b < count; b++) {
-        if (!CharonMPSMatrixHolds(&in, b, _sourceMatrixOrigin.x, _sourceMatrixOrigin.y, rows, columns) ||
-            !CharonMPSMatrixHolds(&indices, b, _resultMatrixOrigin.x, _resultMatrixOrigin.y, rows, wanted) ||
-            !CharonMPSMatrixHolds(&values, b, _resultMatrixOrigin.x, _resultMatrixOrigin.y, rows, wanted)) {
-            CharonMPSRefuse(@"MPSMatrixFindTopK: a matrix of the batch [%lu, %lu) does not hold the region its origin names", (unsigned long)start, (unsigned long)(start + count));
+        if (!RevenantMPSMatrixHolds(&in, b, _sourceMatrixOrigin.x, _sourceMatrixOrigin.y, rows, columns) ||
+            !RevenantMPSMatrixHolds(&indices, b, _resultMatrixOrigin.x, _resultMatrixOrigin.y, rows, wanted) ||
+            !RevenantMPSMatrixHolds(&values, b, _resultMatrixOrigin.x, _resultMatrixOrigin.y, rows, wanted)) {
+            RevenantMPSRefuse(@"MPSMatrixFindTopK: a matrix of the batch [%lu, %lu) does not hold the region its origin names", (unsigned long)start, (unsigned long)(start + count));
             return;
         }
     }
@@ -91,7 +91,7 @@
             double *best = (double *)calloc(wanted ? wanted : 1, sizeof(double));
             NSUInteger filled = 0;
             for (NSUInteger column = 0; column < columns; column++) {
-                double v = CharonMPSLoad(CharonMPSMatrixElement(&in, b, _sourceMatrixOrigin.x + row, _sourceMatrixOrigin.y + column), in.dataType, 0);
+                double v = RevenantMPSLoad(RevenantMPSMatrixElement(&in, b, _sourceMatrixOrigin.x + row, _sourceMatrixOrigin.y + column), in.dataType, 0);
                 NSUInteger place = filled < wanted ? filled : wanted - 1;
                 NSUInteger last = place;
                 while (last > 0 && best[last - 1] < v) {
@@ -105,14 +105,14 @@
                     filled++;
             }
             for (NSUInteger place = 0; place < filled; place++) {
-                CharonMPSStore(CharonMPSMatrixElement(&indices, b, _resultMatrixOrigin.x + row, _resultMatrixOrigin.y + place), indices.dataType, 0, (double)(order[place] + _indexOffset));
-                CharonMPSStore(CharonMPSMatrixElement(&values, b, _resultMatrixOrigin.x + row, _resultMatrixOrigin.y + place), values.dataType, 0, best[place]);
+                RevenantMPSStore(RevenantMPSMatrixElement(&indices, b, _resultMatrixOrigin.x + row, _resultMatrixOrigin.y + place), indices.dataType, 0, (double)(order[place] + _indexOffset));
+                RevenantMPSStore(RevenantMPSMatrixElement(&values, b, _resultMatrixOrigin.x + row, _resultMatrixOrigin.y + place), values.dataType, 0, best[place]);
             }
             free(order);
             free(best);
         }
     }
-    CharonMPSConsumeReadCount(inputMatrix);
+    RevenantMPSConsumeReadCount(inputMatrix);
 }
 
 - (instancetype)initWithCoder:(NSCoder *)aDecoder device:(id<MTLDevice>)device

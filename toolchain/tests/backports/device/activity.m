@@ -50,8 +50,8 @@ static void run_checks(void)
         [info endActivity:other];
         dispatch_async(dispatch_get_main_queue(), ^{
             CHECK(!application.idleTimerDisabled, "and ending it there turns it back on");
-            printf("checks=%d failures=%d\n", charon_checks, charon_failures);
-            NSString *summary = [NSString stringWithFormat:@"%@ checks=%d failures=%d\n", charon_failures ? @"FAIL" : @"ok", charon_checks, charon_failures];
+            printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
+            NSString *summary = [NSString stringWithFormat:@"%@ checks=%d failures=%d\n", revenant_failures ? @"FAIL" : @"ok", revenant_checks, revenant_failures];
             [summary writeToFile:[results_folder stringByAppendingPathComponent:@"activity.done"] atomically:YES encoding:NSUTF8StringEncoding error:NULL];
         });
     });
@@ -67,7 +67,7 @@ static void run_checks(void)
 {
     [[NSFileManager defaultManager] createDirectoryAtPath:results_folder withIntermediateDirectories:YES attributes:nil error:NULL];
     [[NSFileManager defaultManager] removeItemAtPath:[results_folder stringByAppendingPathComponent:@"activity.done"] error:NULL];
-    charon_log_to([results_folder stringByAppendingPathComponent:@"activity.log"]);
+    revenant_log_to([results_folder stringByAppendingPathComponent:@"activity.log"]);
     self.window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
     self.window.rootViewController = [[UIViewController alloc] init];
     [self.window makeKeyAndVisible];

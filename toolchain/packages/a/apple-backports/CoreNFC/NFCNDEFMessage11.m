@@ -1,5 +1,5 @@
 #import <CoreNFC/CoreNFC.h>
-#import "CharonNDEF.h"
+#import "RevenantNDEF.h"
 
 @interface NFCNDEFPayload ()
 @property (nonatomic, copy) NSData *chunkSize;
@@ -71,12 +71,12 @@
 @end
 
 @interface NFCNDEFMessage ()
-@property (nonatomic, retain) NSMutableData *charonEncoded;
+@property (nonatomic, retain) NSMutableData *revenantEncoded;
 @end
 
 @implementation NFCNDEFMessage
 
-@synthesize records = _records, charonEncoded = _charonEncoded;
+@synthesize records = _records, revenantEncoded = _revenantEncoded;
 
 + (BOOL)supportsSecureCoding
 {

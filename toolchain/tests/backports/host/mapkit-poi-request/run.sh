@@ -15,7 +15,7 @@ set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 port=${PORT:-$here/../../../../packages/a/apple-backports/MapKit}
-build=${MAPKIT_POI_BUILD:-$(runs_folder charon-mapkit-poi-request)}
+build=${MAPKIT_POI_BUILD:-$(runs_folder revenant-mapkit-poi-request)}
 rm -rf "$build"
 mkdir -p "$build"
 # CATALYST, because the port's own request imports MapKit, whose headers reach UIKit, and macOS has no
@@ -23,23 +23,23 @@ mkdir -p "$build"
 # still Apple's framework.
 MACOSX_SDK=$(xcrun --sdk macosx --show-sdk-path)
 TARGET="-target arm64-apple-ios17.0-macabi -isysroot $MACOSX_SDK -isystem $MACOSX_SDK/System/iOSSupport/usr/include -F $MACOSX_SDK/System/iOSSupport/System/Library/Frameworks"
-# CHARON_HOST_PROBE: the host's own MapKit declares the class the port also declares.
-# AND ONLY THE REQUEST is renamed: MKPointOfInterestFilter is the host's own class and CharonMapKit is
-# this port's own, so neither collides. CharonMapKit.m is in the build because the port's own
-# charon_sayOnce lives there, which the request's initialisers and its filter call.
-xcrun clang -fobjc-arc -Wall -Wno-unguarded-availability-new -fPIC -dynamiclib $TARGET -DCHARON_HOST_PROBE=1 \
-    -DMKLocalPointsOfInterestRequest=charonHost_MKLocalPointsOfInterestRequest \
+# REVENANT_HOST_PROBE: the host's own MapKit declares the class the port also declares.
+# AND ONLY THE REQUEST is renamed: MKPointOfInterestFilter is the host's own class and RevenantMapKit is
+# this port's own, so neither collides. RevenantMapKit.m is in the build because the port's own
+# revenant_sayOnce lives there, which the request's initialisers and its filter call.
+xcrun clang -fobjc-arc -Wall -Wno-unguarded-availability-new -fPIC -dynamiclib $TARGET -DREVENANT_HOST_PROBE=1 \
+    -DMKLocalPointsOfInterestRequest=revenantHost_MKLocalPointsOfInterestRequest \
     -I"$port" -framework Foundation -framework MapKit -framework CoreLocation -framework UIKit \
-    "$port/MKLocalPointsOfInterestRequest14.m" "$port/CharonMapKit.m" -o "$build/libport.dylib" 2> "$build/cc.log" \
+    "$port/MKLocalPointsOfInterestRequest14.m" "$port/RevenantMapKit.m" -o "$build/libport.dylib" 2> "$build/cc.log" \
     || { grep -m5 ': error:' "$build/cc.log" || true; exit 1; }
 xcrun clang -fobjc-arc -Wall -Wno-unguarded-availability-new $TARGET -framework Foundation -framework MapKit \
     -framework CoreLocation "$here/runner.m" -o "$build/runner" 2> "$build/runner.log" \
     || { grep -m5 ': error:' "$build/runner.log" || true; exit 1; }
 
-CHARON_PORT_DYLIB="$build/libport.dylib" "$build/runner" > "$build/port.txt" 2>&1 && status=0 || status=$?
+REVENANT_PORT_DYLIB="$build/libport.dylib" "$build/runner" > "$build/port.txt" 2>&1 && status=0 || status=$?
 # The MUTANT run is EXPECTED to exit non-zero -- the mutant is what makes the comparison fail -- so its
 # status is read and reported rather than swallowed, and what the probe judges is its TRANSCRIPT.
-if CHARON_PORT_DYLIB="$build/libport.dylib" CHARON_MUTANT=1 "$build/runner" > "$build/mutant.txt" 2>&1; then
+if REVENANT_PORT_DYLIB="$build/libport.dylib" REVENANT_MUTANT=1 "$build/runner" > "$build/mutant.txt" 2>&1; then
     mutant_status=0
 else
     mutant_status=$?

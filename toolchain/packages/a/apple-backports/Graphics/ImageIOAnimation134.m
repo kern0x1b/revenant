@@ -1,18 +1,18 @@
 #import <Foundation/Foundation.h>
 #import <ImageIO/ImageIO.h>
 
-#define CHARON_ANIMATION_PARAM_ERR (-50)
+#define REVENANT_ANIMATION_PARAM_ERR (-50)
 
 extern CFStringRef const kCGImageAnimationStartIndex;
 extern CFStringRef const kCGImageAnimationDelayTime;
 extern CFStringRef const kCGImageAnimationLoopCount;
 
-@interface CharonImageAnimation : NSObject
+@interface RevenantImageAnimation : NSObject
 - (instancetype)initWithSource:(CGImageSourceRef)source block:(CGImageSourceAnimationBlock)block;
 - (OSStatus)runWithOptions:(CFDictionaryRef)options;
 @end
 
-@implementation CharonImageAnimation {
+@implementation RevenantImageAnimation {
 @private
     CGImageSourceRef _source;
     CGImageSourceAnimationBlock _block;
@@ -38,7 +38,7 @@ extern CFStringRef const kCGImageAnimationLoopCount;
         CFRelease(_source);
 }
 
-static double charon_frame_delay(CGImageSourceRef source, size_t index)
+static double revenant_frame_delay(CGImageSourceRef source, size_t index)
 {
     NSDictionary *properties =
         (__bridge_transfer NSDictionary *)CGImageSourceCopyPropertiesAtIndex(source, index, NULL);
@@ -47,7 +47,7 @@ static double charon_frame_delay(CGImageSourceRef source, size_t index)
     return delay ? [delay doubleValue] : 0.1;
 }
 
-static BOOL charon_is_animation(CGImageSourceRef source)
+static BOOL revenant_is_animation(CGImageSourceRef source)
 {
     if (!source || CGImageSourceGetCount(source) == 0)
         return NO;
@@ -60,7 +60,7 @@ static BOOL charon_is_animation(CGImageSourceRef source)
 - (void)drawFrameAtIndex:(size_t)index
 {
     CGImageRef image = CGImageSourceCreateImageAtIndex(_source, index, NULL);
-    double delay = charon_frame_delay(_source, index);
+    double delay = revenant_frame_delay(_source, index);
     if (!image) {
         [self stop];
         return;
@@ -86,7 +86,7 @@ static BOOL charon_is_animation(CGImageSourceRef source)
 
 - (void)step:(NSTimer *)timer
 {
-    CharonImageAnimation *alive = self;
+    RevenantImageAnimation *alive = self;
     [self drawFrameAtIndex:_index];
     (void)alive;
 }
@@ -110,7 +110,7 @@ static BOOL charon_is_animation(CGImageSourceRef source)
 
 - (OSStatus)runWithOptions:(CFDictionaryRef)options
 {
-    if (!charon_is_animation(_source))
+    if (!revenant_is_animation(_source))
         return kCGImageAnimationStatus_CorruptInputImage;
     _count = CGImageSourceGetCount(_source);
 
@@ -136,15 +136,15 @@ static BOOL charon_is_animation(CGImageSourceRef source)
 
 @end
 
-static OSStatus charon_animate(CGImageSourceRef source, CFDictionaryRef options, CGImageSourceAnimationBlock block)
+static OSStatus revenant_animate(CGImageSourceRef source, CFDictionaryRef options, CGImageSourceAnimationBlock block)
 {
     if (!source)
-        return CHARON_ANIMATION_PARAM_ERR;
+        return REVENANT_ANIMATION_PARAM_ERR;
     if (!block) {
         CFRelease(source);
         return 0;
     }
-    CharonImageAnimation *animation = [[CharonImageAnimation alloc] initWithSource:source block:block];
+    RevenantImageAnimation *animation = [[RevenantImageAnimation alloc] initWithSource:source block:block];
     CFRelease(source);
     return [animation runWithOptions:options];
 }
@@ -152,13 +152,13 @@ static OSStatus charon_animate(CGImageSourceRef source, CFDictionaryRef options,
 OSStatus CGAnimateImageAtURLWithBlock(CFURLRef url, CFDictionaryRef options, CGImageSourceAnimationBlock block)
 {
     if (!url)
-        return CHARON_ANIMATION_PARAM_ERR;
-    return charon_animate(CGImageSourceCreateWithURL(url, NULL), options, block);
+        return REVENANT_ANIMATION_PARAM_ERR;
+    return revenant_animate(CGImageSourceCreateWithURL(url, NULL), options, block);
 }
 
 OSStatus CGAnimateImageDataWithBlock(CFDataRef data, CFDictionaryRef options, CGImageSourceAnimationBlock block)
 {
     if (!data)
-        return CHARON_ANIMATION_PARAM_ERR;
-    return charon_animate(CGImageSourceCreateWithData(data, NULL), options, block);
+        return REVENANT_ANIMATION_PARAM_ERR;
+    return revenant_animate(CGImageSourceCreateWithData(data, NULL), options, block);
 }

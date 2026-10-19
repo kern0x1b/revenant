@@ -18,7 +18,7 @@
 
 #include "mach/xnu_mig_adapter.hpp"
 
-namespace shade::xnu::mig::system_configuration {
+namespace emulator::xnu::mig::system_configuration {
 
 inline constexpr std::string_view subsystem_name{"config"};
 inline constexpr std::uint32_t subsystem_base = 20000U;

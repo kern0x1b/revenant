@@ -1,7 +1,7 @@
 #import <UIKit/UIKit.h>
 #import <objc/message.h>
 
-static id charon_appearance(Class owner, NSArray *containers)
+static id revenant_appearance(Class owner, NSArray *containers)
 {
     id (*send)(id, SEL, id, ...) = (id (*)(id, SEL, id, ...))objc_msgSend;
     SEL selector = @selector(appearanceWhenContainedIn:);
@@ -31,20 +31,20 @@ static id charon_appearance(Class owner, NSArray *containers)
     }
 }
 
-@implementation UIView (CharonAppearanceInstances)
+@implementation UIView (RevenantAppearanceInstances)
 
 + (instancetype)appearanceWhenContainedInInstancesOfClasses:(NSArray<Class<UIAppearanceContainer>> *)containerTypes
 {
-    return charon_appearance(self, containerTypes);
+    return revenant_appearance(self, containerTypes);
 }
 
 @end
 
-@implementation UIBarItem (CharonAppearanceInstances)
+@implementation UIBarItem (RevenantAppearanceInstances)
 
 + (instancetype)appearanceWhenContainedInInstancesOfClasses:(NSArray<Class<UIAppearanceContainer>> *)containerTypes
 {
-    return charon_appearance(self, containerTypes);
+    return revenant_appearance(self, containerTypes);
 }
 
 @end

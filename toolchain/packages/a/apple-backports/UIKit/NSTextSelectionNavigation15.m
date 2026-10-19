@@ -27,7 +27,7 @@
 {
 }
 
-- (NSTextRange *)charon_range_enclosing:(NSTextSelectionGranularity)granularity at:(id<NSTextLocation>)location
+- (NSTextRange *)revenant_range_enclosing:(NSTextSelectionGranularity)granularity at:(id<NSTextLocation>)location
 {
     id<NSTextSelectionDataSource> dataSource = _textSelectionDataSource;
     if (!dataSource)
@@ -35,7 +35,7 @@
     return [dataSource textRangeForSelectionGranularity:granularity enclosingLocation:location];
 }
 
-- (id<NSTextLocation>)charon_location_after:(NSTextSelection *)textSelection
+- (id<NSTextLocation>)revenant_location_after:(NSTextSelection *)textSelection
 {
     NSTextRange *last = [textSelection.textRanges lastObject];
     return last.endLocation ? last.endLocation : last.location;
@@ -55,7 +55,7 @@
     NSTextRange *document = dataSource.documentRange;
     if (!document || document.isEmpty)
         return nil;
-    id<NSTextLocation> from = [self charon_location_after:textSelection];
+    id<NSTextLocation> from = [self revenant_location_after:textSelection];
     id<NSTextLocation> target = nil;
     switch (destination) {
     case NSTextSelectionNavigationDestinationCharacter:
@@ -75,7 +75,7 @@
             granularity = NSTextSelectionGranularityParagraph;
         else
             granularity = NSTextSelectionGranularityLine;
-        NSTextRange *enclosing = [self charon_range_enclosing:granularity at:from];
+        NSTextRange *enclosing = [self revenant_range_enclosing:granularity at:from];
         if (enclosing)
             target = direction == NSTextSelectionNavigationDirectionBackward ? enclosing.location : enclosing.endLocation;
         break;
@@ -132,7 +132,7 @@
         return nil;
     NSMutableArray *ranges = [NSMutableArray array];
     for (NSTextRange *range in textSelection.textRanges) {
-        NSTextRange *enclosing = [self charon_range_enclosing:selectionGranularity at:range.location];
+        NSTextRange *enclosing = [self revenant_range_enclosing:selectionGranularity at:range.location];
         if (enclosing)
             [ranges addObject:enclosing];
     }
@@ -153,7 +153,7 @@
     NSTextRange *line = [dataSource lineFragmentRangeForPoint:point inContainerAtLocation:location];
     if (!line)
         return nil;
-    NSTextRange *enclosing = [self charon_range_enclosing:selectionGranularity at:line.location];
+    NSTextRange *enclosing = [self revenant_range_enclosing:selectionGranularity at:line.location];
     if (!enclosing)
         return nil;
     return [[NSTextSelection alloc] initWithRange:enclosing

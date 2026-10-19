@@ -1,4 +1,4 @@
-#import "CharonCallKit.h"
+#import "RevenantCallKit.h"
 
 #pragma clang diagnostic ignored "-Wobjc-designated-initializers"
 
@@ -8,7 +8,7 @@
 }
 
 @dynamic UUID, complete, actions;
-@synthesize charon_provider = _charon_provider;
+@synthesize revenant_provider = _revenant_provider;
 
 - (instancetype)initWithActions:(NSArray<CXAction *> *)actions
 {
@@ -54,16 +54,16 @@
 {
     if (!action)
         return;
-    action.charon_transaction = self;
+    action.revenant_transaction = self;
     [_actions addObject:action];
 }
 
-- (void)charon_actionCompleted:(CXAction *)action
+- (void)revenant_actionCompleted:(CXAction *)action
 {
     (void)action;
     if (!self.isComplete)
         return;
-    [_charon_provider charon_removeTransaction:self];
+    [_revenant_provider revenant_removeTransaction:self];
 }
 
 - (id)copyWithZone:(NSZone *)zone

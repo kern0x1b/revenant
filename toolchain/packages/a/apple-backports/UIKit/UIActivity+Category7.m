@@ -1,6 +1,6 @@
 #import <UIKit/UIKit.h>
 
-@implementation UIActivity (CharonCategory7)
+@implementation UIActivity (RevenantCategory7)
 
 + (UIActivityCategory)activityCategory
 {

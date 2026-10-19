@@ -1,4 +1,4 @@
-#import "CharonAVContentKey.h"
+#import "RevenantAVContentKey.h"
 #import <AVFoundation/AVContentKeySession.h>
 #import <CommonCrypto/CommonCryptor.h>
 #import <Foundation/Foundation.h>
@@ -9,7 +9,7 @@
     NSData *_initializationVector;
 }
 
-+ (instancetype)charon_contentKeyWithSpecifier:(AVContentKeySpecifier *)specifier keyData:(NSData *)keyData
++ (instancetype)revenant_contentKeyWithSpecifier:(AVContentKeySpecifier *)specifier keyData:(NSData *)keyData
                           initializationVector:(NSData *)initializationVector
 {
     AVContentKey *key = [[self alloc] init];
@@ -33,7 +33,7 @@
 {
 }
 
-- (NSData *)charon_decryptSampleData:(NSData *)sampleData error:(NSError **)error
+- (NSData *)revenant_decryptSampleData:(NSData *)sampleData error:(NSError **)error
 {
     if (_keyData.length != kCCKeySizeAES128) {
         if (error) *error = [NSError errorWithDomain:NSOSStatusErrorDomain code:kCCParamError userInfo:nil];

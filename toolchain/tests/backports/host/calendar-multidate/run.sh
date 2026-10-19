@@ -1,7 +1,7 @@
 #!/bin/sh
 # run.sh: a differential of UICalendarSelection and UICalendarSelectionMultiDate, the port against the Mac Catalyst host's own classes, in one
 # process. The port's UIKit/UICalendarSelection.m and UIKit/UICalendarSelectionMultiDate.m and test.m are compiled with the classes renamed to
-# CharonPort..., so the port's classes have their own names and the host's are still reached by name at run time. test.m prints the shared
+# RevenantPort..., so the port's classes have their own names and the host's are still reached by name at run time. test.m prints the shared
 # checks for both sides and the port-only tap checks; the run passes when the shared lines agree, every port-only check holds, and the output
 # is complete. MULTIDATE_PORT_SOURCE replaces the port's multi-date source, so a planted wrong port can be run as a control: it must fail.
 set -eu
@@ -9,12 +9,12 @@ here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 uikit=$here/../../../../packages/a/apple-backports/UIKit
 multi=${MULTIDATE_PORT_SOURCE:-$uikit/UICalendarSelectionMultiDate.m}
-build=${MULTIDATE_BUILD:-$(runs_fresh charon-calendar-multidate)}
+build=${MULTIDATE_BUILD:-$(runs_fresh revenant-calendar-multidate)}
 sdk=$(xcrun --show-sdk-path)
 app="$build/calendar-multidate"
 xcrun clang -target arm64-apple-ios15.0-macabi -isysroot "$sdk" -iframework "$sdk/System/iOSSupport/System/Library/Frameworks" \
     -fobjc-arc -w -I "$uikit" \
-    -DUICalendarSelection=CharonPortUICalendarSelection -DUICalendarSelectionMultiDate=CharonPortUICalendarSelectionMultiDate \
+    -DUICalendarSelection=RevenantPortUICalendarSelection -DUICalendarSelectionMultiDate=RevenantPortUICalendarSelectionMultiDate \
     "$uikit/UICalendarSelection.m" "$multi" "$here/test.m" -framework UIKit -framework Foundation -framework CoreGraphics -o "$app"
 codesign -s - --force "$app" > /dev/null 2>&1
 "$app" > "$build/calendar-multidate.txt"

@@ -13,7 +13,7 @@
 #include <memory>
 #include <optional>
 
-namespace shade {
+namespace emulator {
 
 class Cpu;
 class UserlandHleCall;

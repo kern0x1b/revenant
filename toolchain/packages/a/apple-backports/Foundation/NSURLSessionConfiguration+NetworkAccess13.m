@@ -1,10 +1,10 @@
 #import <Foundation/Foundation.h>
 #import <objc/runtime.h>
 
-static char CharonConfigurationExpensiveKey;
-static char CharonConfigurationConstrainedKey;
+static char RevenantConfigurationExpensiveKey;
+static char RevenantConfigurationConstrainedKey;
 
-static void charon_configuration_install(void)
+static void revenant_configuration_install(void)
 {
     static dispatch_once_t once;
     dispatch_once(&once, ^{
@@ -15,7 +15,7 @@ static void charon_configuration_install(void)
         IMP original = method_getImplementation(method);
         class_replaceMethod([NSURLSessionConfiguration class], selector, imp_implementationWithBlock(^id(NSURLSessionConfiguration *configuration, NSZone *zone) {
             id copy = ((id (*)(id, SEL, NSZone *))original)(configuration, selector, zone);
-            const void *keys[2] = {&CharonConfigurationExpensiveKey, &CharonConfigurationConstrainedKey};
+            const void *keys[2] = {&RevenantConfigurationExpensiveKey, &RevenantConfigurationConstrainedKey};
             for (int index = 0; index < 2; index++) {
                 id value = objc_getAssociatedObject(configuration, keys[index]);
                 if (value && copy != configuration)
@@ -26,32 +26,32 @@ static void charon_configuration_install(void)
     });
 }
 
-@implementation NSURLSessionConfiguration (CharonNetworkAccess)
+@implementation NSURLSessionConfiguration (RevenantNetworkAccess)
 
 - (BOOL)allowsExpensiveNetworkAccess
 {
-    NSNumber *value = objc_getAssociatedObject(self, &CharonConfigurationExpensiveKey);
+    NSNumber *value = objc_getAssociatedObject(self, &RevenantConfigurationExpensiveKey);
     return value ? value.boolValue : YES;
 }
 
 - (void)setAllowsExpensiveNetworkAccess:(BOOL)allows
 {
     if (!allows)
-        charon_configuration_install();
-    objc_setAssociatedObject(self, &CharonConfigurationExpensiveKey, allows ? nil : @NO, OBJC_ASSOCIATION_RETAIN);
+        revenant_configuration_install();
+    objc_setAssociatedObject(self, &RevenantConfigurationExpensiveKey, allows ? nil : @NO, OBJC_ASSOCIATION_RETAIN);
 }
 
 - (BOOL)allowsConstrainedNetworkAccess
 {
-    NSNumber *value = objc_getAssociatedObject(self, &CharonConfigurationConstrainedKey);
+    NSNumber *value = objc_getAssociatedObject(self, &RevenantConfigurationConstrainedKey);
     return value ? value.boolValue : YES;
 }
 
 - (void)setAllowsConstrainedNetworkAccess:(BOOL)allows
 {
     if (!allows)
-        charon_configuration_install();
-    objc_setAssociatedObject(self, &CharonConfigurationConstrainedKey, allows ? nil : @NO, OBJC_ASSOCIATION_RETAIN);
+        revenant_configuration_install();
+    objc_setAssociatedObject(self, &RevenantConfigurationConstrainedKey, allows ? nil : @NO, OBJC_ASSOCIATION_RETAIN);
 }
 
 @end

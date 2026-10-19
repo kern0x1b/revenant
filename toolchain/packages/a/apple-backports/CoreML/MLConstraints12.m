@@ -1,13 +1,13 @@
 #import <CoreML/CoreML.h>
 
-#include "CharonMLConstraints.h"
+#include "RevenantMLConstraints.h"
 
 @interface MLMultiArrayShapeConstraint () {
     MLMultiArrayShapeConstraintType _type;
     NSArray<NSValue *> *_sizeRangeForDimension;
     NSArray<NSArray<NSNumber *> *> *_enumeratedShapes;
 }
-- (instancetype)charon_initWithType:(MLMultiArrayShapeConstraintType)type
+- (instancetype)revenant_initWithType:(MLMultiArrayShapeConstraintType)type
                   sizeRanges:(NSArray<NSValue *> *)sizeRanges
            enumeratedShapes:(NSArray<NSArray<NSNumber *> *> *)enumeratedShapes;
 @end
@@ -16,7 +16,7 @@
     NSInteger _pixelsWide;
     NSInteger _pixelsHigh;
 }
-- (instancetype)charon_initWithPixelsWide:(NSInteger)pixelsWide pixelsHigh:(NSInteger)pixelsHigh;
+- (instancetype)revenant_initWithPixelsWide:(NSInteger)pixelsWide pixelsHigh:(NSInteger)pixelsHigh;
 @end
 
 @interface MLImageSizeConstraint () {
@@ -25,7 +25,7 @@
     NSRange _pixelsHighRange;
     NSArray<MLImageSize *> *_enumeratedImageSizes;
 }
-- (instancetype)charon_initWithType:(MLImageSizeConstraintType)type
+- (instancetype)revenant_initWithType:(MLImageSizeConstraintType)type
               pixelsWideRange:(NSRange)pixelsWideRange
              pixelsHighRange:(NSRange)pixelsHighRange
         enumeratedImageSizes:(NSArray<MLImageSize *> *)enumeratedImageSizes;
@@ -35,14 +35,14 @@
     MLFeatureDescription *_valueDescription;
     NSRange _countRange;
 }
-- (instancetype)charon_initWithValueDescription:(MLFeatureDescription *)valueDescription
+- (instancetype)revenant_initWithValueDescription:(MLFeatureDescription *)valueDescription
                               countRange:(NSRange)countRange;
 @end
 
 
 @implementation MLMultiArrayShapeConstraint
 
-- (instancetype)charon_initWithType:(MLMultiArrayShapeConstraintType)type
+- (instancetype)revenant_initWithType:(MLMultiArrayShapeConstraintType)type
                   sizeRanges:(NSArray<NSValue *> *)sizeRanges
            enumeratedShapes:(NSArray<NSArray<NSNumber *> *> *)enumeratedShapes
 {
@@ -61,7 +61,7 @@
 }
 - (id)copyWithZone:(NSZone *)zone
 {
-    return [[[self class] allocWithZone:zone] charon_initWithType:_type
+    return [[[self class] allocWithZone:zone] revenant_initWithType:_type
                                                       sizeRanges:_sizeRangeForDimension
                                                enumeratedShapes:_enumeratedShapes];
 }
@@ -106,7 +106,7 @@
 
 @implementation MLImageSize
 
-- (instancetype)charon_initWithPixelsWide:(NSInteger)pixelsWide pixelsHigh:(NSInteger)pixelsHigh
+- (instancetype)revenant_initWithPixelsWide:(NSInteger)pixelsWide pixelsHigh:(NSInteger)pixelsHigh
 {
     MLImageSize *built = [super init];
     if (built != nil) {
@@ -122,7 +122,7 @@
 }
 - (id)copyWithZone:(NSZone *)zone
 {
-    return [[[self class] allocWithZone:zone] charon_initWithPixelsWide:_pixelsWide pixelsHigh:_pixelsHigh];
+    return [[[self class] allocWithZone:zone] revenant_initWithPixelsWide:_pixelsWide pixelsHigh:_pixelsHigh];
 }
 
 
@@ -175,7 +175,7 @@
 
 @implementation MLImageSizeConstraint
 
-- (instancetype)charon_initWithType:(MLImageSizeConstraintType)type
+- (instancetype)revenant_initWithType:(MLImageSizeConstraintType)type
               pixelsWideRange:(NSRange)pixelsWideRange
              pixelsHighRange:(NSRange)pixelsHighRange
         enumeratedImageSizes:(NSArray<MLImageSize *> *)enumeratedImageSizes
@@ -201,7 +201,7 @@
 }
 - (id)copyWithZone:(NSZone *)zone
 {
-    return [[[self class] allocWithZone:zone] charon_initWithType:_type
+    return [[[self class] allocWithZone:zone] revenant_initWithType:_type
                                               pixelsWideRange:_pixelsWideRange
                                              pixelsHighRange:_pixelsHighRange
                                         enumeratedImageSizes:_enumeratedImageSizes];
@@ -248,7 +248,7 @@
 
 @implementation MLSequenceConstraint
 
-- (instancetype)charon_initWithValueDescription:(MLFeatureDescription *)valueDescription
+- (instancetype)revenant_initWithValueDescription:(MLFeatureDescription *)valueDescription
                               countRange:(NSRange)countRange
 {
     MLSequenceConstraint *built = [super init];
@@ -270,7 +270,7 @@
 }
 - (id)copyWithZone:(NSZone *)zone
 {
-    return [[[self class] allocWithZone:zone] charon_initWithValueDescription:[_valueDescription copy]
+    return [[[self class] allocWithZone:zone] revenant_initWithValueDescription:[_valueDescription copy]
                               countRange:_countRange];
 }
 

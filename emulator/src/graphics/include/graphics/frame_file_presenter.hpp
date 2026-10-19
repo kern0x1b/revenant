@@ -10,7 +10,7 @@
 #include <filesystem>
 #include <mutex>
 
-namespace shade {
+namespace emulator {
 
 struct DisplayFrame;
 

@@ -4,7 +4,7 @@
 
 #import "mlcompute-16.h"
 
-void charon_mlcompute_graph_cases(void);
+void revenant_mlcompute_graph_cases(void);
 
 static MLCDevice *device;
 
@@ -44,9 +44,9 @@ static void shapes(NSString *name, NSArray<MLCTensor *> *list)
     key(name, ([NSString stringWithFormat:@"%lu %@", (unsigned long)list.count, text]));
 }
 
-void charon_mlcompute_graph_cases(void);
+void revenant_mlcompute_graph_cases(void);
 
-void charon_mlcompute_graph_cases(void)
+void revenant_mlcompute_graph_cases(void)
 {
     @autoreleasepool {
         device = [MLCDevice cpuDevice];

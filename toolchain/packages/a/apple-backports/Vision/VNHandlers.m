@@ -1,39 +1,39 @@
-#import "CharonVision.h"
-#import "CharonVisionImage.h"
+#import "RevenantVision.h"
+#import "RevenantVisionImage.h"
 #import <ImageIO/ImageIO.h>
 
-@interface VNClassificationObservation (CharonCoreml)
-- (instancetype)charon_initWithIdentifier:(NSString *)identifier confidence:(float)confidence;
+@interface VNClassificationObservation (RevenantCoreml)
+- (instancetype)revenant_initWithIdentifier:(NSString *)identifier confidence:(float)confidence;
 @end
 
-@interface VNCoreMLFeatureValueObservation (CharonCoreml)
-- (instancetype)charon_initWithFeatureValue:(MLFeatureValue *)featureValue featureName:(NSString *)featureName;
+@interface VNCoreMLFeatureValueObservation (RevenantCoreml)
+- (instancetype)revenant_initWithFeatureValue:(MLFeatureValue *)featureValue featureName:(NSString *)featureName;
 @end
 
-@interface VNPixelBufferObservation (CharonCoreml)
-- (instancetype)charon_initWithPixelBuffer:(CVPixelBufferRef)pixelBuffer featureName:(NSString *)featureName;
+@interface VNPixelBufferObservation (RevenantCoreml)
+- (instancetype)revenant_initWithPixelBuffer:(CVPixelBufferRef)pixelBuffer featureName:(NSString *)featureName;
 @end
 
-@interface VNRequest (CharonResults)
-- (void)charon_setResults:(NSArray *)results;
+@interface VNRequest (RevenantResults)
+- (void)revenant_setResults:(NSArray *)results;
 @end
 
-@interface VNCoreMLModel (CharonRequest)
-- (MLModel *)charon_coreml_model;
-- (NSString *)charon_coreml_image_feature;
+@interface VNCoreMLModel (RevenantRequest)
+- (MLModel *)revenant_coreml_model;
+- (NSString *)revenant_coreml_image_feature;
 @end
 
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
 #pragma clang diagnostic ignored "-Wobjc-designated-initializers"
 
-#import "CharonVisionImage.h"
+#import "RevenantVisionImage.h"
 
 
 
-static NSArray *charon_vision_coreml(VNCoreMLRequest *request, id image, NSError **error)
+static NSArray *revenant_vision_coreml(VNCoreMLRequest *request, id image, NSError **error)
 {
     VNCoreMLModel *wrapper = request.model;
-    MLModel *model = wrapper != nil ? [wrapper charon_coreml_model] : nil;
+    MLModel *model = wrapper != nil ? [wrapper revenant_coreml_model] : nil;
     MLFeatureDescription *described = nil;
     NSDictionary<NSString *, MLFeatureDescription *> *inputs;
     NSMutableDictionary *values;
@@ -47,15 +47,15 @@ static NSArray *charon_vision_coreml(VNCoreMLRequest *request, id image, NSError
 
     if (model == nil) {
         if (error)
-            *error = charon_vision_error(VNErrorInvalidModel, @"there is no Core ML model in the request");
+            *error = revenant_vision_error(VNErrorInvalidModel, @"there is no Core ML model in the request");
         return nil;
     }
     inputs = model.modelDescription.inputDescriptionsByName;
-    name = [wrapper charon_coreml_image_feature];
+    name = [wrapper revenant_coreml_image_feature];
     described = name != nil ? inputs[name] : nil;
     if (described == nil || described.type != MLFeatureTypeImage) {
         if (error)
-            *error = charon_vision_error(VNErrorInvalidModel,
+            *error = revenant_vision_error(VNErrorInvalidModel,
                                          @"the model does not have an input feature of type image");
         return nil;
     }
@@ -67,18 +67,18 @@ static NSArray *charon_vision_coreml(VNCoreMLRequest *request, id image, NSError
             wide = CVPixelBufferGetWidth(given);
             high = CVPixelBufferGetHeight(given);
         }
-        pixels = charon_vision_pixels(given, wide, high, request.imageCropAndScaleOption);
+        pixels = revenant_vision_pixels(given, wide, high, request.imageCropAndScaleOption);
     } else if (image != NULL && CFGetTypeID((__bridge CFTypeRef)image) == CGImageGetTypeID()) {
         if (wide == 0 || high == 0) {
             wide = CGImageGetWidth((__bridge CGImageRef)image);
             high = CGImageGetHeight((__bridge CGImageRef)image);
         }
-        pixels = charon_vision_pixels(charon_vision_buffer_of_image((__bridge CGImageRef)image), wide, high,
+        pixels = revenant_vision_pixels(revenant_vision_buffer_of_image((__bridge CGImageRef)image), wide, high,
                                       request.imageCropAndScaleOption);
     }
     if (pixels == NULL) {
         if (error)
-            *error = charon_vision_error(VNErrorInvalidImage,
+            *error = revenant_vision_error(VNErrorInvalidImage,
                                          @"the image could not be brought to the size the model wants");
         return nil;
     }
@@ -100,7 +100,7 @@ static NSArray *charon_vision_coreml(VNCoreMLRequest *request, id image, NSError
     CVPixelBufferRelease(pixels);
     if (answer == nil) {
         if (error)
-            *error = charon_vision_error(VNErrorOperationFailed,
+            *error = revenant_vision_error(VNErrorOperationFailed,
                                          failure.localizedDescription ?: @"the model could not be run");
         return nil;
     }
@@ -130,54 +130,54 @@ static NSArray *charon_vision_coreml(VNCoreMLRequest *request, id image, NSError
                 NSUInteger index;
                 for (index = 0; index < classes.count; index++) {
                     [observations addObject:[[VNClassificationObservation alloc]
-                        charon_initWithIdentifier:classes[index]
+                        revenant_initWithIdentifier:classes[index]
                                       confidence:(float)[scores[classes[index]] doubleValue]]];
                 }
                 if (identifier.length > 0 && classes.count == 0) {
                     [observations addObject:[[VNClassificationObservation alloc]
-                        charon_initWithIdentifier:identifier
+                        revenant_initWithIdentifier:identifier
                                       confidence:1.0f]];
                 }
                 continue;
             }
             if (outputs[name].type == MLFeatureTypeImage && value.imageBufferValue != NULL) {
                 [observations addObject:[[VNPixelBufferObservation alloc]
-                    charon_initWithPixelBuffer:value.imageBufferValue
+                    revenant_initWithPixelBuffer:value.imageBufferValue
                                   featureName:name]];
                 continue;
             }
-            [observations addObject:[[VNCoreMLFeatureValueObservation alloc] charon_initWithFeatureValue:value
+            [observations addObject:[[VNCoreMLFeatureValueObservation alloc] revenant_initWithFeatureValue:value
                                                                                             featureName:name]];
         }
     }
     return observations;
 }
 
-static NSError *charon_vision_failure(VNRequest *request)
+static NSError *revenant_vision_failure(VNRequest *request)
 {
     Class cls = [request class];
     if (![[cls supportedRevisions] containsIndex:request.revision])
-        return charon_vision_error(VNErrorUnsupportedRevision, [NSString stringWithFormat:@"%@ does not support %@Revision%lu", NSStringFromClass(cls), NSStringFromClass(cls), (unsigned long)request.revision]);
+        return revenant_vision_error(VNErrorUnsupportedRevision, [NSString stringWithFormat:@"%@ does not support %@Revision%lu", NSStringFromClass(cls), NSStringFromClass(cls), (unsigned long)request.revision]);
     if ([request isKindOfClass:[VNDetectContoursRequest class]])
         return nil;
     if ([request isKindOfClass:[VNCoreMLRequest class]] && ![(VNCoreMLRequest *)request model])
-        return charon_vision_error(VNErrorOperationFailed, @"The model does not have a valid input feature of type image");
-    return charon_vision_error(VNErrorNotImplemented, [NSString stringWithFormat:@"%@ is not implemented on this release", NSStringFromClass(cls)]);
+        return revenant_vision_error(VNErrorOperationFailed, @"The model does not have a valid input feature of type image");
+    return revenant_vision_error(VNErrorNotImplemented, [NSString stringWithFormat:@"%@ is not implemented on this release", NSStringFromClass(cls)]);
 }
 
-static BOOL charon_vision_perform(id image, NSArray<VNRequest *> *requests, NSError **error)
+static BOOL revenant_vision_perform(id image, NSArray<VNRequest *> *requests, NSError **error)
 {
     BOOL succeeded = YES;
     NSError *first = nil;
     for (VNRequest *request in requests) {
-        NSError *failure = charon_vision_failure(request);
+        NSError *failure = revenant_vision_failure(request);
         if (!failure && [request isKindOfClass:[VNCoreMLRequest class]]) {
-            NSArray *observations = charon_vision_coreml((VNCoreMLRequest *)request, image, &failure);
+            NSArray *observations = revenant_vision_coreml((VNCoreMLRequest *)request, image, &failure);
             if (failure) {
                 succeeded = NO;
                 first = first ?: failure;
             } else {
-                [(VNRequest *)request charon_setResults:observations];
+                [(VNRequest *)request revenant_setResults:observations];
             }
             if (request.completionHandler) {
                 request.completionHandler(request, failure);
@@ -185,12 +185,12 @@ static BOOL charon_vision_perform(id image, NSArray<VNRequest *> *requests, NSEr
             continue;
         }
         if (!failure && [request isKindOfClass:[VNDetectContoursRequest class]]) {
-            NSArray *observations = [(VNDetectContoursRequest *)request charon_observationsOnImage:image error:&failure];
+            NSArray *observations = [(VNDetectContoursRequest *)request revenant_observationsOnImage:image error:&failure];
             if (failure) {
                 succeeded = NO;
                 first = first ?: failure;
             } else {
-                [(VNRequest *)request charon_setResults:observations];
+                [(VNRequest *)request revenant_setResults:observations];
             }
             if (request.completionHandler)
                 request.completionHandler(request, failure);
@@ -277,7 +277,7 @@ static BOOL charon_vision_perform(id image, NSArray<VNRequest *> *requests, NSEr
 
 - (BOOL)performRequests:(NSArray<VNRequest *> *)requests error:(NSError **)error
 {
-    return charon_vision_perform(self->_image, requests, error);
+    return revenant_vision_perform(self->_image, requests, error);
 }
 
 @end
@@ -286,52 +286,52 @@ static BOOL charon_vision_perform(id image, NSArray<VNRequest *> *requests, NSEr
 
 - (BOOL)performRequests:(NSArray<VNRequest *> *)requests onCVPixelBuffer:(CVPixelBufferRef)pixelBuffer error:(NSError **)error
 {
-    return charon_vision_perform((__bridge id)pixelBuffer, requests, error);
+    return revenant_vision_perform((__bridge id)pixelBuffer, requests, error);
 }
 
 - (BOOL)performRequests:(NSArray<VNRequest *> *)requests onCVPixelBuffer:(CVPixelBufferRef)pixelBuffer orientation:(CGImagePropertyOrientation)orientation error:(NSError **)error
 {
-    return charon_vision_perform((__bridge id)pixelBuffer, requests, error);
+    return revenant_vision_perform((__bridge id)pixelBuffer, requests, error);
 }
 
 - (BOOL)performRequests:(NSArray<VNRequest *> *)requests onCGImage:(CGImageRef)image error:(NSError **)error
 {
-    return charon_vision_perform((__bridge id)image, requests, error);
+    return revenant_vision_perform((__bridge id)image, requests, error);
 }
 
 - (BOOL)performRequests:(NSArray<VNRequest *> *)requests onCGImage:(CGImageRef)image orientation:(CGImagePropertyOrientation)orientation error:(NSError **)error
 {
-    return charon_vision_perform((__bridge id)image, requests, error);
+    return revenant_vision_perform((__bridge id)image, requests, error);
 }
 
 - (BOOL)performRequests:(NSArray<VNRequest *> *)requests onCIImage:(CIImage *)image error:(NSError **)error
 {
-    return charon_vision_perform(nil, requests, error);
+    return revenant_vision_perform(nil, requests, error);
 }
 
 - (BOOL)performRequests:(NSArray<VNRequest *> *)requests onCIImage:(CIImage *)image orientation:(CGImagePropertyOrientation)orientation error:(NSError **)error
 {
-    return charon_vision_perform(nil, requests, error);
+    return revenant_vision_perform(nil, requests, error);
 }
 
 - (BOOL)performRequests:(NSArray<VNRequest *> *)requests onImageURL:(NSURL *)imageURL error:(NSError **)error
 {
-    return charon_vision_perform(nil, requests, error);
+    return revenant_vision_perform(nil, requests, error);
 }
 
 - (BOOL)performRequests:(NSArray<VNRequest *> *)requests onImageURL:(NSURL *)imageURL orientation:(CGImagePropertyOrientation)orientation error:(NSError **)error
 {
-    return charon_vision_perform(nil, requests, error);
+    return revenant_vision_perform(nil, requests, error);
 }
 
 - (BOOL)performRequests:(NSArray<VNRequest *> *)requests onImageData:(NSData *)imageData error:(NSError **)error
 {
-    return charon_vision_perform(nil, requests, error);
+    return revenant_vision_perform(nil, requests, error);
 }
 
 - (BOOL)performRequests:(NSArray<VNRequest *> *)requests onImageData:(NSData *)imageData orientation:(CGImagePropertyOrientation)orientation error:(NSError **)error
 {
-    return charon_vision_perform(nil, requests, error);
+    return revenant_vision_perform(nil, requests, error);
 }
 
 @end

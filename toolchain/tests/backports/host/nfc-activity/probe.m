@@ -16,12 +16,12 @@ int main(void)
 {
     setvbuf(stdout, NULL, _IONBF, 0);
     @autoreleasepool {
-        show("activity", [[NSUserActivity alloc] initWithActivityType:@"org.charon.nfc.probe"]);
+        show("activity", [[NSUserActivity alloc] initWithActivityType:@"org.revenant.nfc.probe"]);
         show("other type", [[NSUserActivity alloc] initWithActivityType:@"com.example.other"]);
-        NSUserActivity *withInfo = [[NSUserActivity alloc] initWithActivityType:@"org.charon.nfc.probe"];
+        NSUserActivity *withInfo = [[NSUserActivity alloc] initWithActivityType:@"org.revenant.nfc.probe"];
         withInfo.userInfo = @{@"key": @"value"};
         show("with user info", withInfo);
-        NSUserActivity *activity = [[NSUserActivity alloc] initWithActivityType:@"org.charon.nfc.probe"];
+        NSUserActivity *activity = [[NSUserActivity alloc] initWithActivityType:@"org.revenant.nfc.probe"];
         printf("each read is a message of its own: %d\n", activity.ndefMessagePayload != activity.ndefMessagePayload);
     }
     return 0;

@@ -1,5 +1,5 @@
-#ifndef CHARON_DISPATCH_ASYNC_H
-#define CHARON_DISPATCH_ASYNC_H
+#ifndef REVENANT_DISPATCH_ASYNC_H
+#define REVENANT_DISPATCH_ASYNC_H
 
 #include <dispatch/dispatch.h>
 
@@ -7,12 +7,12 @@
 extern "C" {
 #endif
 
-void charon_dispatch_async(dispatch_queue_t queue, dispatch_block_t block);
+void revenant_dispatch_async(dispatch_queue_t queue, dispatch_block_t block);
 
 #ifdef __cplusplus
 }
 #endif
 
-#define dispatch_async charon_dispatch_async
+#define dispatch_async revenant_dispatch_async
 
 #endif

@@ -2,24 +2,24 @@
 #import <QuartzCore/QuartzCore.h>
 #include <notify.h>
 
-static NSString *const charon_call_screen_folder = @"/var/mobile/Library/Caches/org.charon.callkit";
-static const char *const charon_call_incoming = "org.charon.callkit.incoming";
-static const char *const charon_call_ended = "org.charon.callkit.ended";
-static const char *const charon_call_answered = "org.charon.callkit.answered";
-static const char *const charon_call_declined = "org.charon.callkit.declined";
+static NSString *const revenant_call_screen_folder = @"/var/mobile/Library/Caches/org.revenant.callkit";
+static const char *const revenant_call_incoming = "org.revenant.callkit.incoming";
+static const char *const revenant_call_ended = "org.revenant.callkit.ended";
+static const char *const revenant_call_answered = "org.revenant.callkit.answered";
+static const char *const revenant_call_declined = "org.revenant.callkit.declined";
 
-static NSString *charon_call_file(NSString *name)
+static NSString *revenant_call_file(NSString *name)
 {
-    return [charon_call_screen_folder stringByAppendingPathComponent:name];
+    return [revenant_call_screen_folder stringByAppendingPathComponent:name];
 }
 
-@interface CharonCallScreenTweak : NSObject
+@interface RevenantCallScreenTweak : NSObject
 + (instancetype)shared;
 - (void)incoming;
 - (void)ended;
 @end
 
-@implementation CharonCallScreenTweak {
+@implementation RevenantCallScreenTweak {
     UIWindow *_window;
     UILabel *_name;
     UILabel *_handle;
@@ -28,10 +28,10 @@ static NSString *charon_call_file(NSString *name)
 
 + (instancetype)shared
 {
-    static CharonCallScreenTweak *shared;
+    static RevenantCallScreenTweak *shared;
     static dispatch_once_t once;
     dispatch_once(&once, ^{
-        shared = [[CharonCallScreenTweak alloc] init];
+        shared = [[RevenantCallScreenTweak alloc] init];
     });
     return shared;
 }
@@ -82,7 +82,7 @@ static NSString *charon_call_file(NSString *name)
 
 - (void)incoming
 {
-    NSDictionary *payload = [NSDictionary dictionaryWithContentsOfFile:charon_call_file(@"incoming")];
+    NSDictionary *payload = [NSDictionary dictionaryWithContentsOfFile:revenant_call_file(@"incoming")];
     NSString *UUID = payload[@"UUID"];
     if (!UUID.length)
         return;
@@ -107,9 +107,9 @@ static NSString *charon_call_file(NSString *name)
     NSString *identifier = _UUID;
     _UUID = nil;
     _window.hidden = YES;
-    [identifier writeToFile:charon_call_file(answered ? @"answered" : @"declined") atomically:YES
+    [identifier writeToFile:revenant_call_file(answered ? @"answered" : @"declined") atomically:YES
                     encoding:NSUTF8StringEncoding error:NULL];
-    notify_post(answered ? charon_call_answered : charon_call_declined);
+    notify_post(answered ? revenant_call_answered : revenant_call_declined);
 }
 
 - (void)answer { [self respond:YES]; }
@@ -118,21 +118,21 @@ static NSString *charon_call_file(NSString *name)
 @end
 
 __attribute__((constructor))
-static void charon_callkit_screen_load(void)
+static void revenant_callkit_screen_load(void)
 {
-    [[NSFileManager defaultManager] createDirectoryAtPath:charon_call_screen_folder withIntermediateDirectories:YES
+    [[NSFileManager defaultManager] createDirectoryAtPath:revenant_call_screen_folder withIntermediateDirectories:YES
                                                 attributes:@{NSFilePosixPermissions: @(0777)} error:NULL];
     NSString *marker = [NSString stringWithFormat:@"pid=%d\n", getpid()];
-    [marker writeToFile:charon_call_file(@"loaded") atomically:YES encoding:NSUTF8StringEncoding error:NULL];
-    notify_post("org.charon.callkit.screen-loaded");
+    [marker writeToFile:revenant_call_file(@"loaded") atomically:YES encoding:NSUTF8StringEncoding error:NULL];
+    notify_post("org.revenant.callkit.screen-loaded");
 
     static int incoming = NOTIFY_TOKEN_INVALID, ended = NOTIFY_TOKEN_INVALID;
-    notify_register_dispatch(charon_call_incoming, &incoming, dispatch_get_main_queue(), ^(int token) {
+    notify_register_dispatch(revenant_call_incoming, &incoming, dispatch_get_main_queue(), ^(int token) {
         (void)token;
-        [[CharonCallScreenTweak shared] incoming];
+        [[RevenantCallScreenTweak shared] incoming];
     });
-    notify_register_dispatch(charon_call_ended, &ended, dispatch_get_main_queue(), ^(int token) {
+    notify_register_dispatch(revenant_call_ended, &ended, dispatch_get_main_queue(), ^(int token) {
         (void)token;
-        [[CharonCallScreenTweak shared] ended];
+        [[RevenantCallScreenTweak shared] ended];
     });
 }

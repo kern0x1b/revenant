@@ -11,7 +11,7 @@
 #include <span>
 #include <string_view>
 
-namespace shade {
+namespace emulator {
 
 struct KernelSharedState;
 

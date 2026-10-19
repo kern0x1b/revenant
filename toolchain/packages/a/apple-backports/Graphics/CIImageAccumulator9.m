@@ -4,7 +4,7 @@
 #import <CoreGraphics/CoreGraphics.h>
 #import <objc/runtime.h>
 
-static const void *kCharonCIAccumulatorBufferKey = &kCharonCIAccumulatorBufferKey;
+static const void *kRevenantCIAccumulatorBufferKey = &kRevenantCIAccumulatorBufferKey;
 
 #pragma clang diagnostic ignored "-Wobjc-missing-property-synthesis"
 
@@ -21,7 +21,7 @@ static const void *kCharonCIAccumulatorBufferKey = &kCharonCIAccumulatorBufferKe
 @synthesize extent = _extent;
 @synthesize format = _format;
 
-static NSUInteger CharonCIAccumulatorBytesPerPixel(CIFormat format)
+static NSUInteger RevenantCIAccumulatorBytesPerPixel(CIFormat format)
 {
     if (format == kCIFormatA8 || format == kCIFormatL8 || format == kCIFormatR8)
         return 1;
@@ -33,7 +33,7 @@ static NSUInteger CharonCIAccumulatorBytesPerPixel(CIFormat format)
     return 4;
 }
 
-static BOOL CharonCIAccumulatorIsBlueFirst(CIFormat format)
+static BOOL RevenantCIAccumulatorIsBlueFirst(CIFormat format)
 {
     return format == kCIFormatBGRA8;
 }
@@ -45,14 +45,14 @@ static BOOL CharonCIAccumulatorIsBlueFirst(CIFormat format)
 
 - (instancetype)initWithExtent:(CGRect)extent format:(CIFormat)format colorSpace:(CGColorSpaceRef)colorSpace
 {
-    format = CharonCIAccumulatorStoredFormat();
+    format = RevenantCIAccumulatorStoredFormat();
     if ((self = [super init])) {
         _extent = extent;
         _format = format;
         _colorSpace = colorSpace;
         _pixelWidth = (NSUInteger)floor(extent.size.width);
         _pixelHeight = (NSUInteger)floor(extent.size.height);
-        _rowBytes = (NSInteger)(_pixelWidth * CharonCIAccumulatorBytesPerPixel(format));
+        _rowBytes = (NSInteger)(_pixelWidth * RevenantCIAccumulatorBytesPerPixel(format));
         _pixels = [NSMutableData dataWithLength:(NSUInteger)(_rowBytes * _pixelHeight)];
     }
     return self;
@@ -73,7 +73,7 @@ static BOOL CharonCIAccumulatorIsBlueFirst(CIFormat format)
     return [[CIImageAccumulator alloc] initWithExtent:extent format:format colorSpace:colorSpace];
 }
 
-static CIFormat CharonCIAccumulatorStoredFormat(void)
+static CIFormat RevenantCIAccumulatorStoredFormat(void)
 {
     return kCIFormatBGRA8;
 }
@@ -92,7 +92,7 @@ static CIFormat CharonCIAccumulatorStoredFormat(void)
         if (made) {
             image = [CIImage imageWithCGImage:made];
             CGImageRelease(made);
-            objc_setAssociatedObject(image, kCharonCIAccumulatorBufferKey, (__bridge id)context, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+            objc_setAssociatedObject(image, kRevenantCIAccumulatorBufferKey, (__bridge id)context, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
         }
         CGContextRelease(context);
     }
@@ -101,7 +101,7 @@ static CIFormat CharonCIAccumulatorStoredFormat(void)
     return image;
 }
 
-- (CIContext *)charon_context
+- (CIContext *)revenant_context
 {
     if (!_context) {
         NSMutableDictionary *options = [NSMutableDictionary dictionary];
@@ -126,7 +126,7 @@ static CIFormat CharonCIAccumulatorStoredFormat(void)
     CGRect rect = CGRectIntersection(dirtyRect, _extent);
     if (CGRectIsNull(rect) || CGRectIsEmpty(rect))
         return;
-    CIContext *context = [self charon_context];
+    CIContext *context = [self revenant_context];
     if (!context)
         return;
     NSMutableData *row = [NSMutableData dataWithLength:(NSUInteger)(_rowBytes * _pixelHeight)];
@@ -164,9 +164,9 @@ static CIFormat CharonCIAccumulatorStoredFormat(void)
 
 @end
 
-@implementation CIImageAccumulator (CharonPixels)
+@implementation CIImageAccumulator (RevenantPixels)
 
-- (void)charon_setTexels:(NSData *)texels
+- (void)revenant_setTexels:(NSData *)texels
 {
     if (!_pixels || texels.length != _pixels.length)
         return;

@@ -3,8 +3,8 @@
 #include <math.h>
 #include <stdio.h>
 
-void charon_host_vvcbrt(double *y, const double *x, const int *n);
-void charon_host_vvcbrtf(float *y, const float *x, const int *n);
+void revenant_host_vvcbrt(double *y, const double *x, const int *n);
+void revenant_host_vvcbrtf(float *y, const float *x, const int *n);
 
 static int checks;
 static int failures;
@@ -44,9 +44,9 @@ int main(void)
             theirs[at] = theirsf[at] = 1234.5;
         }
         vvcbrt(mine, x, &count);
-        charon_host_vvcbrt(theirs, x, &count);
+        revenant_host_vvcbrt(theirs, x, &count);
         vvcbrtf(minef, xf, &count);
-        charon_host_vvcbrtf(theirsf, xf, &count);
+        revenant_host_vvcbrtf(theirsf, xf, &count);
         for (int at = 0; at < INPUTS; at++) {
             double mine_answer = mine[at], host_answer = theirs[at];
             char label[96];
@@ -68,12 +68,12 @@ int main(void)
             int none = 0, one = 1;
             double out = 1234.5, in = 27.0, host = 1234.5;
             vvcbrt(&out, &in, &none);
-            charon_host_vvcbrt(&host, &in, &none);
+            revenant_host_vvcbrt(&host, &in, &none);
             report(out == 1234.5 && host == 1234.5, "a length of zero writes nothing on either side", "");
             out = 1234.5;
             host = 1234.5;
             vvcbrt(&out, &in, &one);
-            charon_host_vvcbrt(&host, &in, &one);
+            revenant_host_vvcbrt(&host, &in, &one);
             report(out == host && out == 3.0, "a length of one answers 3 for 27 on both sides", "");
         }
         printf("%d checks, %d failures\n", checks, failures);

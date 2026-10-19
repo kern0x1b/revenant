@@ -5,33 +5,33 @@
 #include <dlfcn.h>
 #include <math.h>
 
-@interface UIMotionEffect (CharonViewMotionEffects)
-+ (id)charon_sumOfRelativeValue:(id)first andRelativeValue:(id)second;
-+ (id)charon_relativeValue:(id)value scaledBy:(CGFloat)factor;
+@interface UIMotionEffect (RevenantViewMotionEffects)
++ (id)revenant_sumOfRelativeValue:(id)first andRelativeValue:(id)second;
++ (id)revenant_relativeValue:(id)value scaledBy:(CGFloat)factor;
 @end
 
-@interface UIView (CharonMotionEngine)
-- (void)charon_applyMotionEffectsForViewerOffset:(UIOffset)offset duration:(NSTimeInterval)duration;
+@interface UIView (RevenantMotionEngine)
+- (void)revenant_applyMotionEffectsForViewerOffset:(UIOffset)offset duration:(NSTimeInterval)duration;
 @end
 
-static const NSTimeInterval charon_motion_interval = 1.0 / 30;
-static const NSTimeInterval charon_motion_removal_duration = 0.25;
-static const double charon_motion_full_tilt = 0.35;
-static const double charon_motion_recentering = 2.0;
-static NSString *const CharonMotionAnimationPrefix = @"charon.motionEffect.";
+static const NSTimeInterval revenant_motion_interval = 1.0 / 30;
+static const NSTimeInterval revenant_motion_removal_duration = 0.25;
+static const double revenant_motion_full_tilt = 0.35;
+static const double revenant_motion_recentering = 2.0;
+static NSString *const RevenantMotionAnimationPrefix = @"revenant.motionEffect.";
 
-static char charon_effects_key;
-static char charon_applied_key;
+static char revenant_effects_key;
+static char revenant_applied_key;
 
-static NSHashTable *charon_motion_views;
-static CMMotionManager *charon_motion_manager;
-static BOOL charon_motion_running;
-static NSTimeInterval charon_motion_timestamp;
-static double charon_tilt_x;
-static double charon_tilt_y;
-static UIOffset charon_viewer_offset;
+static NSHashTable *revenant_motion_views;
+static CMMotionManager *revenant_motion_manager;
+static BOOL revenant_motion_running;
+static NSTimeInterval revenant_motion_timestamp;
+static double revenant_tilt_x;
+static double revenant_tilt_y;
+static UIOffset revenant_viewer_offset;
 
-static NSString *charon_layer_key_path(NSString *keyPath)
+static NSString *revenant_layer_key_path(NSString *keyPath)
 {
     if ([keyPath isEqualToString:@"center"])
         return @"position";
@@ -46,15 +46,15 @@ static NSString *charon_layer_key_path(NSString *keyPath)
     return nil;
 }
 
-static NSDictionary *charon_layer_values(UIView *view, UIOffset offset)
+static NSDictionary *revenant_layer_values(UIView *view, UIOffset offset)
 {
     NSMutableDictionary *values = [NSMutableDictionary dictionary];
-    for (UIMotionEffect *effect in objc_getAssociatedObject(view, &charon_effects_key)) {
+    for (UIMotionEffect *effect in objc_getAssociatedObject(view, &revenant_effects_key)) {
         if (![effect respondsToSelector:@selector(keyPathsAndRelativeValuesForViewerOffset:)])
             continue;
         NSDictionary *emitted = [effect keyPathsAndRelativeValuesForViewerOffset:offset];
         for (NSString *keyPath in emitted) {
-            NSString *layerKeyPath = charon_layer_key_path(keyPath);
+            NSString *layerKeyPath = revenant_layer_key_path(keyPath);
             if (!layerKeyPath) {
                 static NSMutableSet *reported;
                 if (!reported)
@@ -67,7 +67,7 @@ static NSDictionary *charon_layer_values(UIView *view, UIOffset offset)
             }
             id value = [emitted objectForKey:keyPath];
             id existing = [values objectForKey:layerKeyPath];
-            id combined = existing ? [UIMotionEffect charon_sumOfRelativeValue:existing andRelativeValue:value] : value;
+            id combined = existing ? [UIMotionEffect revenant_sumOfRelativeValue:existing andRelativeValue:value] : value;
             if (combined)
                 [values setObject:combined forKey:layerKeyPath];
         }
@@ -75,13 +75,13 @@ static NSDictionary *charon_layer_values(UIView *view, UIOffset offset)
     return values;
 }
 
-static UIInterfaceOrientation charon_motion_orientation(void)
+static UIInterfaceOrientation revenant_motion_orientation(void)
 {
     UIApplication *application = [UIApplication sharedApplication];
     return application ? application.statusBarOrientation : UIInterfaceOrientationPortrait;
 }
 
-static UIOffset charon_offset_from_tilt(double x, double y, UIInterfaceOrientation orientation)
+static UIOffset revenant_offset_from_tilt(double x, double y, UIInterfaceOrientation orientation)
 {
     double horizontal = y, vertical = x;
     switch (orientation) {
@@ -100,94 +100,94 @@ static UIOffset charon_offset_from_tilt(double x, double y, UIInterfaceOrientati
     default:
         break;
     }
-    horizontal = MAX(-1, MIN(1, horizontal / charon_motion_full_tilt));
-    vertical = MAX(-1, MIN(1, vertical / charon_motion_full_tilt));
+    horizontal = MAX(-1, MIN(1, horizontal / revenant_motion_full_tilt));
+    vertical = MAX(-1, MIN(1, vertical / revenant_motion_full_tilt));
     return UIOffsetMake((CGFloat)horizontal, (CGFloat)vertical);
 }
 
-static void charon_motion_update(CMDeviceMotion *motion)
+static void revenant_motion_update(CMDeviceMotion *motion)
 {
-    NSTimeInterval elapsed = charon_motion_timestamp ? motion.timestamp - charon_motion_timestamp : charon_motion_interval;
-    charon_motion_timestamp = motion.timestamp;
+    NSTimeInterval elapsed = revenant_motion_timestamp ? motion.timestamp - revenant_motion_timestamp : revenant_motion_interval;
+    revenant_motion_timestamp = motion.timestamp;
     elapsed = MAX(0, MIN(elapsed, 0.1));
     CMRotationRate rate = motion.rotationRate;
-    double leak = exp(-elapsed / charon_motion_recentering);
-    charon_tilt_x = (charon_tilt_x + rate.x * elapsed) * leak;
-    charon_tilt_y = (charon_tilt_y + rate.y * elapsed) * leak;
-    charon_viewer_offset = charon_offset_from_tilt(charon_tilt_x, charon_tilt_y, charon_motion_orientation());
-    for (UIView *view in charon_motion_views.allObjects) {
+    double leak = exp(-elapsed / revenant_motion_recentering);
+    revenant_tilt_x = (revenant_tilt_x + rate.x * elapsed) * leak;
+    revenant_tilt_y = (revenant_tilt_y + rate.y * elapsed) * leak;
+    revenant_viewer_offset = revenant_offset_from_tilt(revenant_tilt_x, revenant_tilt_y, revenant_motion_orientation());
+    for (UIView *view in revenant_motion_views.allObjects) {
         if (view.window)
-            [view charon_applyMotionEffectsForViewerOffset:charon_viewer_offset duration:charon_motion_interval];
+            [view revenant_applyMotionEffectsForViewerOffset:revenant_viewer_offset duration:revenant_motion_interval];
     }
 }
 
-static void charon_motion_stop(void)
+static void revenant_motion_stop(void)
 {
-    if (!charon_motion_running)
+    if (!revenant_motion_running)
         return;
-    [charon_motion_manager stopDeviceMotionUpdates];
-    charon_motion_running = NO;
-    charon_motion_timestamp = 0;
-    charon_tilt_x = 0;
-    charon_tilt_y = 0;
-    charon_viewer_offset = (UIOffset){0, 0};
-    for (UIView *view in charon_motion_views.allObjects)
-        [view charon_applyMotionEffectsForViewerOffset:(UIOffset){0, 0} duration:charon_motion_removal_duration];
+    [revenant_motion_manager stopDeviceMotionUpdates];
+    revenant_motion_running = NO;
+    revenant_motion_timestamp = 0;
+    revenant_tilt_x = 0;
+    revenant_tilt_y = 0;
+    revenant_viewer_offset = (UIOffset){0, 0};
+    for (UIView *view in revenant_motion_views.allObjects)
+        [view revenant_applyMotionEffectsForViewerOffset:(UIOffset){0, 0} duration:revenant_motion_removal_duration];
 }
 
-static void charon_motion_refresh(void)
+static void revenant_motion_refresh(void)
 {
     UIApplication *application = [UIApplication sharedApplication];
-    BOOL wanted = charon_motion_views.allObjects.count > 0 && (!application || application.applicationState != UIApplicationStateBackground);
+    BOOL wanted = revenant_motion_views.allObjects.count > 0 && (!application || application.applicationState != UIApplicationStateBackground);
     if (!wanted) {
-        charon_motion_stop();
+        revenant_motion_stop();
         return;
     }
-    if (charon_motion_running)
+    if (revenant_motion_running)
         return;
-    if (!charon_motion_manager) {
+    if (!revenant_motion_manager) {
         Class manager = NSClassFromString(@"CMMotionManager");
         if (!manager && dlopen("/System/Library/Frameworks/CoreMotion.framework/CoreMotion", RTLD_LAZY))
             manager = NSClassFromString(@"CMMotionManager");
-        charon_motion_manager = [[manager alloc] init];
+        revenant_motion_manager = [[manager alloc] init];
     }
-    if (!charon_motion_manager.deviceMotionAvailable)
+    if (!revenant_motion_manager.deviceMotionAvailable)
         return;
-    charon_motion_manager.deviceMotionUpdateInterval = charon_motion_interval;
-    charon_motion_running = YES;
-    [charon_motion_manager startDeviceMotionUpdatesToQueue:[NSOperationQueue mainQueue] withHandler:^(CMDeviceMotion *motion, NSError *error) {
-        if (motion && charon_motion_running)
-            charon_motion_update(motion);
+    revenant_motion_manager.deviceMotionUpdateInterval = revenant_motion_interval;
+    revenant_motion_running = YES;
+    [revenant_motion_manager startDeviceMotionUpdatesToQueue:[NSOperationQueue mainQueue] withHandler:^(CMDeviceMotion *motion, NSError *error) {
+        if (motion && revenant_motion_running)
+            revenant_motion_update(motion);
     }];
 }
 
-static void charon_motion_track(UIView *view)
+static void revenant_motion_track(UIView *view)
 {
     static dispatch_once_t once;
     dispatch_once(&once, ^{
-        charon_motion_views = [NSHashTable weakObjectsHashTable];
+        revenant_motion_views = [NSHashTable weakObjectsHashTable];
         NSNotificationCenter *center = [NSNotificationCenter defaultCenter];
         [center addObserverForName:UIApplicationDidEnterBackgroundNotification object:nil queue:[NSOperationQueue mainQueue] usingBlock:^(NSNotification *notification) {
-            charon_motion_stop();
+            revenant_motion_stop();
         }];
         [center addObserverForName:UIApplicationWillEnterForegroundNotification object:nil queue:[NSOperationQueue mainQueue] usingBlock:^(NSNotification *notification) {
-            charon_motion_refresh();
+            revenant_motion_refresh();
         }];
     });
-    if ([objc_getAssociatedObject(view, &charon_effects_key) count])
-        [charon_motion_views addObject:view];
+    if ([objc_getAssociatedObject(view, &revenant_effects_key) count])
+        [revenant_motion_views addObject:view];
     else
-        [charon_motion_views removeObject:view];
-    if (charon_motion_running && view.window)
-        [view charon_applyMotionEffectsForViewerOffset:charon_viewer_offset duration:charon_motion_removal_duration];
-    charon_motion_refresh();
+        [revenant_motion_views removeObject:view];
+    if (revenant_motion_running && view.window)
+        [view revenant_applyMotionEffectsForViewerOffset:revenant_viewer_offset duration:revenant_motion_removal_duration];
+    revenant_motion_refresh();
 }
 
-@implementation UIView (CharonMotionEffects)
+@implementation UIView (RevenantMotionEffects)
 
 - (NSArray *)motionEffects
 {
-    NSArray *effects = objc_getAssociatedObject(self, &charon_effects_key);
+    NSArray *effects = objc_getAssociatedObject(self, &revenant_effects_key);
     return effects ? [effects copy] : [NSArray array];
 }
 
@@ -198,39 +198,39 @@ static void charon_motion_track(UIView *view)
         if ([effects indexOfObjectIdenticalTo:effect] == NSNotFound)
             [effects addObject:effect];
     }
-    objc_setAssociatedObject(self, &charon_effects_key, effects, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-    charon_motion_track(self);
+    objc_setAssociatedObject(self, &revenant_effects_key, effects, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    revenant_motion_track(self);
 }
 
 - (void)addMotionEffect:(UIMotionEffect *)effect
 {
     if (!effect)
         return;
-    NSMutableArray *effects = objc_getAssociatedObject(self, &charon_effects_key);
+    NSMutableArray *effects = objc_getAssociatedObject(self, &revenant_effects_key);
     if (effects && [effects indexOfObjectIdenticalTo:effect] != NSNotFound)
         return;
     if (!effects) {
         effects = [NSMutableArray array];
-        objc_setAssociatedObject(self, &charon_effects_key, effects, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+        objc_setAssociatedObject(self, &revenant_effects_key, effects, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     }
     [effects addObject:effect];
-    charon_motion_track(self);
+    revenant_motion_track(self);
 }
 
 - (void)removeMotionEffect:(UIMotionEffect *)effect
 {
-    NSMutableArray *effects = objc_getAssociatedObject(self, &charon_effects_key);
+    NSMutableArray *effects = objc_getAssociatedObject(self, &revenant_effects_key);
     NSUInteger index = effects ? [effects indexOfObjectIdenticalTo:effect] : NSNotFound;
     if (index == NSNotFound)
         return;
     [effects removeObjectAtIndex:index];
-    charon_motion_track(self);
+    revenant_motion_track(self);
 }
 
-- (void)charon_applyMotionEffectsForViewerOffset:(UIOffset)offset duration:(NSTimeInterval)duration
+- (void)revenant_applyMotionEffectsForViewerOffset:(UIOffset)offset duration:(NSTimeInterval)duration
 {
-    NSDictionary *applied = objc_getAssociatedObject(self, &charon_applied_key);
-    NSDictionary *values = charon_layer_values(self, offset);
+    NSDictionary *applied = objc_getAssociatedObject(self, &revenant_applied_key);
+    NSDictionary *values = revenant_layer_values(self, offset);
     CALayer *layer = self.layer;
     NSMutableSet *keyPaths = [NSMutableSet setWithArray:applied.allKeys];
     [keyPaths addObjectsFromArray:values.allKeys];
@@ -238,11 +238,11 @@ static void charon_motion_track(UIView *view)
         id from = [applied objectForKey:keyPath];
         id to = [values objectForKey:keyPath];
         if (!from)
-            from = [UIMotionEffect charon_relativeValue:to scaledBy:0];
+            from = [UIMotionEffect revenant_relativeValue:to scaledBy:0];
         BOOL removing = !to;
         if (removing)
-            to = [UIMotionEffect charon_relativeValue:from scaledBy:0];
-        NSString *key = [CharonMotionAnimationPrefix stringByAppendingString:keyPath];
+            to = [UIMotionEffect revenant_relativeValue:from scaledBy:0];
+        NSString *key = [RevenantMotionAnimationPrefix stringByAppendingString:keyPath];
         if (!from || !to) {
             [layer removeAnimationForKey:key];
             continue;
@@ -257,7 +257,7 @@ static void charon_motion_track(UIView *view)
         animation.removedOnCompletion = removing;
         [layer addAnimation:animation forKey:key];
     }
-    objc_setAssociatedObject(self, &charon_applied_key, values.count ? values : nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, &revenant_applied_key, values.count ? values : nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
 @end

@@ -2,7 +2,7 @@
 #import <Photos/Photos.h>
 #import <UIKit/UIKit.h>
 
-@interface CharonPhotosStore : NSObject
+@interface RevenantPhotosStore : NSObject
 + (ALAssetsLibrary *)library;
 + (BOOL)canRead;
 + (BOOL)canWrite;
@@ -23,8 +23,8 @@
 + (BOOL)addAsset:(ALAsset *)asset toGroupWithURL:(NSURL *)url error:(NSError **)error;
 @end
 
-@interface CharonPhotosTransaction : NSObject
-+ (CharonPhotosTransaction *)current;
+@interface RevenantPhotosTransaction : NSObject
++ (RevenantPhotosTransaction *)current;
 + (void)run:(dispatch_block_t)changes then:(void (^)(BOOL success, NSError *error))completion;
 + (BOOL)runAndWait:(dispatch_block_t)changes error:(NSError **)error;
 - (void)addChange:(id)change;
@@ -39,42 +39,42 @@
 }
 @end
 
-@interface PHObject (Charon)
-- (instancetype)initWithCharonLocalIdentifier:(NSString *)identifier;
+@interface PHObject (Revenant)
+- (instancetype)initWithRevenantLocalIdentifier:(NSString *)identifier;
 @end
 
-@interface PHFetchResult (Charon)
-- (instancetype)initWithCharonObjects:(NSArray *)objects;
-- (instancetype)initWithCharonQuery:(NSArray *(^)(void))query options:(PHFetchOptions *)options;
-- (PHFetchResult *)charon_refetched;
-- (BOOL)charon_wantsIncrementalChangeDetails;
+@interface PHFetchResult (Revenant)
+- (instancetype)initWithRevenantObjects:(NSArray *)objects;
+- (instancetype)initWithRevenantQuery:(NSArray *(^)(void))query options:(PHFetchOptions *)options;
+- (PHFetchResult *)revenant_refetched;
+- (BOOL)revenant_wantsIncrementalChangeDetails;
 @end
 
-@interface PHObject (CharonChange)
-- (PHObject *)charon_refetched;
-- (BOOL)charon_sameStateAs:(PHObject *)other;
+@interface PHObject (RevenantChange)
+- (PHObject *)revenant_refetched;
+- (BOOL)revenant_sameStateAs:(PHObject *)other;
 @end
 
-@interface PHChange (Charon)
-- (instancetype)initWithCharonUserInfo:(NSDictionary *)userInfo;
+@interface PHChange (Revenant)
+- (instancetype)initWithRevenantUserInfo:(NSDictionary *)userInfo;
 @end
 
-@interface PHFetchOptions (Charon)
-- (NSArray *)charon_apply:(NSArray *)objects;
+@interface PHFetchOptions (Revenant)
+- (NSArray *)revenant_apply:(NSArray *)objects;
 @end
 
-@interface PHAsset (Charon)
-- (instancetype)initWithCharonAsset:(ALAsset *)asset sourceType:(PHAssetSourceType)sourceType;
-- (ALAsset *)charon_asset;
+@interface PHAsset (Revenant)
+- (instancetype)initWithRevenantAsset:(ALAsset *)asset sourceType:(PHAssetSourceType)sourceType;
+- (ALAsset *)revenant_asset;
 @end
 
-@interface PHAssetCollection (Charon)
-- (instancetype)initWithCharonGroup:(ALAssetsGroup *)group;
-- (instancetype)initWithCharonSmartSubtype:(PHAssetCollectionSubtype)subtype;
-- (NSArray<PHAsset *> *)charon_assets;
-- (ALAssetsGroup *)charon_group;
+@interface PHAssetCollection (Revenant)
+- (instancetype)initWithRevenantGroup:(ALAssetsGroup *)group;
+- (instancetype)initWithRevenantSmartSubtype:(PHAssetCollectionSubtype)subtype;
+- (NSArray<PHAsset *> *)revenant_assets;
+- (ALAssetsGroup *)revenant_group;
 @end
 
-@interface PHAssetChangeRequest (Charon)
-- (NSDictionary *)charon_metadata;
+@interface PHAssetChangeRequest (Revenant)
+- (NSDictionary *)revenant_metadata;
 @end

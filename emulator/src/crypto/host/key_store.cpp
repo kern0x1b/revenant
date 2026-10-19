@@ -18,7 +18,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-namespace shade {
+namespace emulator {
 namespace {
 
     struct Secret {

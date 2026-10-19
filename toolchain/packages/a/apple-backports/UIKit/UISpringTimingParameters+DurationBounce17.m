@@ -2,7 +2,7 @@
 #import <QuartzCore/QuartzCore.h>
 #include <math.h>
 
-static void charon_bounce_spring(NSTimeInterval duration, CGFloat bounce,
+static void revenant_bounce_spring(NSTimeInterval duration, CGFloat bounce,
                                  CGFloat *mass, CGFloat *stiffness, CGFloat *damping)
 {
     const double m = 1.0;
@@ -20,7 +20,7 @@ static void charon_bounce_spring(NSTimeInterval duration, CGFloat bounce,
     if (damping) *damping = (CGFloat)(critical * ratio);
 }
 
-@implementation UISpringTimingParameters (CharonDurationBounce17)
+@implementation UISpringTimingParameters (RevenantDurationBounce17)
 
 - (instancetype)initWithDuration:(NSTimeInterval)duration bounce:(CGFloat)bounce
 {
@@ -31,7 +31,7 @@ static void charon_bounce_spring(NSTimeInterval duration, CGFloat bounce,
                   initialVelocity:(CGVector)initialVelocity
 {
     CGFloat mass, stiffness, damping;
-    charon_bounce_spring(duration, bounce, &mass, &stiffness, &damping);
+    revenant_bounce_spring(duration, bounce, &mass, &stiffness, &damping);
     return [self initWithMass:mass stiffness:stiffness damping:damping initialVelocity:initialVelocity];
 }
 

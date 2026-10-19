@@ -56,8 +56,8 @@
     _nowPlayingIdentifiers = [nowPlayingIdentifiers copy];
 }
 
-- (NSUInteger)charonUpdateDepth { return _updateDepth; }
-- (NSUInteger)charonReloadCount { return _reloadCount; }
+- (NSUInteger)revenantUpdateDepth { return _updateDepth; }
+- (NSUInteger)revenantReloadCount { return _reloadCount; }
 
 - (void)reloadData {
     _reloadCount++;

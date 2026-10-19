@@ -1,4 +1,4 @@
-#import "CharonNetworkExtensionSettings.h"
+#import "RevenantNetworkExtensionSettings.h"
 
 @implementation NEIPv4Settings {
     NSArray<NSString *> *_addresses;

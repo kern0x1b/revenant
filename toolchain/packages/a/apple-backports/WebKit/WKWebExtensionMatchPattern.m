@@ -1,14 +1,14 @@
 #pragma clang diagnostic ignored "-Wnullability-completeness"
-#import "CharonWebExtension.h"
+#import "RevenantWebExtension.h"
 
-@interface WKWebExtensionMatchPattern (CharonMatch)
-- (BOOL)charon_matchesPattern:(WKWebExtensionMatchPattern *)pattern
+@interface WKWebExtensionMatchPattern (RevenantMatch)
+- (BOOL)revenant_matchesPattern:(WKWebExtensionMatchPattern *)pattern
                       options:(WKWebExtensionMatchPatternOptions)options;
 @end
 
 NSString *const WKWebExtensionMatchPatternErrorDomain = @"WKWebExtensionMatchPatternErrorDomain";
 
-static BOOL charon_glob(NSString *pattern, NSString *text)
+static BOOL revenant_glob(NSString *pattern, NSString *text)
 {
     if ([pattern isEqualToString:@"*"])
         return YES;
@@ -50,7 +50,7 @@ static BOOL charon_glob(NSString *pattern, NSString *text)
 {
     if (![string isKindOfClass:[NSString class]] || string.length == 0) {
         if (error)
-            *error = [self charon_error:WKWebExtensionMatchPatternErrorInvalidScheme];
+            *error = [self revenant_error:WKWebExtensionMatchPatternErrorInvalidScheme];
         return nil;
     }
     if ([string isEqualToString:@"<all_urls>"]) {
@@ -64,27 +64,27 @@ static BOOL charon_glob(NSString *pattern, NSString *text)
     NSRange schemeEnd = [string rangeOfString:@"://"];
     if (schemeEnd.location == NSNotFound || schemeEnd.location == 0) {
         if (error)
-            *error = [self charon_error:WKWebExtensionMatchPatternErrorInvalidScheme];
+            *error = [self revenant_error:WKWebExtensionMatchPatternErrorInvalidScheme];
         return nil;
     }
     NSString *scheme = [string substringToIndex:schemeEnd.location];
     NSString *rest = [string substringFromIndex:NSMaxRange(schemeEnd)];
     if ([rest containsString:@":"]) {
         if (error)
-            *error = [self charon_error:WKWebExtensionMatchPatternErrorInvalidHost];
+            *error = [self revenant_error:WKWebExtensionMatchPatternErrorInvalidHost];
         return nil;
     }
     NSRange slash = [rest rangeOfString:@"/"];
     if (slash.location == NSNotFound) {
         if (error)
-            *error = [self charon_error:WKWebExtensionMatchPatternErrorInvalidPath];
+            *error = [self revenant_error:WKWebExtensionMatchPatternErrorInvalidPath];
         return nil;
     }
     NSString *host = [rest substringToIndex:slash.location];
     NSString *path = [rest substringFromIndex:slash.location];
     if (host.length == 0 || path.length == 0) {
         if (error)
-            *error = [self charon_error:WKWebExtensionMatchPatternErrorInvalidHost];
+            *error = [self revenant_error:WKWebExtensionMatchPatternErrorInvalidHost];
         return nil;
     }
     if ((self = [super init])) {
@@ -102,7 +102,7 @@ static BOOL charon_glob(NSString *pattern, NSString *text)
     return [self initWithString:[NSString stringWithFormat:@"%@://%@%@", scheme, host, path] error:error];
 }
 
-- (NSError *)charon_error:(NSInteger)code
+- (NSError *)revenant_error:(NSInteger)code
 {
     return [NSError errorWithDomain:WKWebExtensionMatchPatternErrorDomain code:code userInfo:nil];
 }
@@ -137,7 +137,7 @@ static BOOL charon_glob(NSString *pattern, NSString *text)
     return _matchesAllURLs;
 }
 
-- (BOOL)charon_matchesURL:(NSURL *)url options:(WKWebExtensionMatchPatternOptions)options
+- (BOOL)revenant_matchesURL:(NSURL *)url options:(WKWebExtensionMatchPatternOptions)options
 {
     if (url == nil)
         return NO;
@@ -162,17 +162,17 @@ static BOOL charon_glob(NSString *pattern, NSString *text)
         }
     }
     NSString *path = url.path.length == 0 ? @"/" : url.path;
-    return charon_glob(_path, path);
+    return revenant_glob(_path, path);
 }
 
 - (BOOL)matchesURL:(NSURL *)url
 {
-    return [self charon_matchesURL:url options:WKWebExtensionMatchPatternOptionsNone];
+    return [self revenant_matchesURL:url options:WKWebExtensionMatchPatternOptionsNone];
 }
 
 - (BOOL)matchesURL:(NSURL *)url options:(WKWebExtensionMatchPatternOptions)options
 {
-    return [self charon_matchesURL:url options:options];
+    return [self revenant_matchesURL:url options:options];
 }
 
 - (BOOL)matchesPattern:(WKWebExtensionMatchPattern *)pattern
@@ -186,7 +186,7 @@ static BOOL charon_glob(NSString *pattern, NSString *text)
         return NO;
     BOOL bidirectional = (options & WKWebExtensionMatchPatternOptionsMatchBidirectionally) != 0;
     if (bidirectional)
-        return [pattern charon_matchesPattern:self options:(options & ~WKWebExtensionMatchPatternOptionsMatchBidirectionally)];
+        return [pattern revenant_matchesPattern:self options:(options & ~WKWebExtensionMatchPatternOptionsMatchBidirectionally)];
     NSString *url = _string;
     if (_matchesAllURLs)
         url = @"*://*/*";
@@ -194,7 +194,7 @@ static BOOL charon_glob(NSString *pattern, NSString *text)
     WKWebExtensionMatchPattern *asURL = [[WKWebExtensionMatchPattern alloc] initWithString:url error:&error];
     if (asURL == nil)
         return NO;
-    return [asURL charon_matchesURL:[NSURL URLWithString:_string] options:options];
+    return [asURL revenant_matchesURL:[NSURL URLWithString:_string] options:options];
 }
 
 - (id)copyWithZone:(NSZone *)zone

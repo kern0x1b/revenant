@@ -8,18 +8,18 @@
 #import <stdio.h>
 #import <string.h>
 
-@interface CharonSecIdentity : NSObject <OS_sec_identity>
-- (void)charonSetCertificates:(CFArrayRef)certificates;
-- (CFArrayRef)charonCertificates;
+@interface RevenantSecIdentity : NSObject <OS_sec_identity>
+- (void)revenantSetCertificates:(CFArrayRef)certificates;
+- (CFArrayRef)revenantCertificates;
 @end
 
-@interface CharonSecProtocolLocalIdentity : NSObject <OS_sec_protocol_options>
-- (sec_identity_t)charonLocalIdentity;
+@interface RevenantSecProtocolLocalIdentity : NSObject <OS_sec_protocol_options>
+- (sec_identity_t)revenantLocalIdentity;
 @end
 
-@interface CharonSecIdentity (CharonProbe)
-- (void)charonSetCertificates:(CFArrayRef)certificates;
-- (CFArrayRef)charonCertificates;
+@interface RevenantSecIdentity (RevenantProbe)
+- (void)revenantSetCertificates:(CFArrayRef)certificates;
+- (CFArrayRef)revenantCertificates;
 @end
 
 static int failures = 0;
@@ -73,12 +73,12 @@ int main(void)
         want("copy_ref-of-nil", fromNil ? 1 : 0, 0);
         if (fromNil) CFRelease(fromNil);
 
-        Class holder = NSClassFromString(@"CharonSecProtocolLocalIdentity");
+        Class holder = NSClassFromString(@"RevenantSecProtocolLocalIdentity");
         printf("holder-class\t%s\n", holder ? "found" : "MISSING");
         if (holder) {
             sec_protocol_options_t options = (sec_protocol_options_t)[[holder alloc] init];
             sec_protocol_options_set_local_identity(options, identity);
-            sec_identity_t readBack = [(CharonSecProtocolLocalIdentity *)options charonLocalIdentity];
+            sec_identity_t readBack = [(RevenantSecProtocolLocalIdentity *)options revenantLocalIdentity];
             if (readBack == identity) printf("local-identity-holds\t1\n");
             else { printf("WRONG\tlocal-identity: the port did not hold the identity it was given\n"); failures++; }
             want("local-identity-present", readBack ? 1 : 0, 1);

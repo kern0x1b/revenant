@@ -2,9 +2,9 @@
 #import <UIKit/UIKit.h>
 #import <objc/message.h>
 #import <objc/runtime.h>
-#import "CharonMapKit.h"
+#import "RevenantMapKit.h"
 
-static const NSTimeInterval MKCharonCompleterPause = 0.35;
+static const NSTimeInterval MKRevenantCompleterPause = 0.35;
 
 @implementation MKLocalSearchCompleter {
     NSString *_queryFragment;
@@ -43,10 +43,10 @@ static const NSTimeInterval MKCharonCompleterPause = 0.35;
 - (void)setQueryFragment:(NSString *)queryFragment
 {
     _queryFragment = [queryFragment copy];
-    [self charon_schedule];
+    [self revenant_schedule];
 }
 
-- (void)charon_schedule
+- (void)revenant_schedule
 {
     [_pause invalidate];
     _pause = nil;
@@ -54,17 +54,17 @@ static const NSTimeInterval MKCharonCompleterPause = 0.35;
     _search = nil;
     NSString *fragment = [_queryFragment stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
     if (fragment.length == 0) {
-        [self charon_finishWithResults:@[]];
+        [self revenant_finishWithResults:@[]];
         return;
     }
-    _pause = [NSTimer scheduledTimerWithTimeInterval:MKCharonCompleterPause
+    _pause = [NSTimer scheduledTimerWithTimeInterval:MKRevenantCompleterPause
                                               target:self
-                                            selector:@selector(charon_search)
+                                            selector:@selector(revenant_search)
                                             userInfo:fragment
                                              repeats:NO];
 }
 
-- (void)charon_search
+- (void)revenant_search
 {
     NSString *fragment = [_pause userInfo];
     _pause = nil;
@@ -89,21 +89,21 @@ static const NSTimeInterval MKCharonCompleterPause = 0.35;
         if (error) {
             (void)error;
             strong->_searching = NO;
-            [strong charon_finishWithResults:@[]];
+            [strong revenant_finishWithResults:@[]];
             return;
         }
-        [strong charon_finishWithResults:[strong charon_completionsOf:response forFragment:fragment]];
+        [strong revenant_finishWithResults:[strong revenant_completionsOf:response forFragment:fragment]];
     }];
 }
 
-- (NSArray<MKLocalSearchCompletion *> *)charon_completionsOf:(MKLocalSearchResponse *)response
+- (NSArray<MKLocalSearchCompletion *> *)revenant_completionsOf:(MKLocalSearchResponse *)response
                                                 forFragment:(NSString *)fragment
 {
     NSMutableArray *made = [NSMutableArray array];
     for (MKMapItem *item in response.mapItems) {
         MKLocalSearchCompletion *completion = [[MKLocalSearchCompletion alloc] init];
-        NSString *title = [self charon_titleOf:item];
-        NSString *subtitle = [self charon_subtitleOf:item];
+        NSString *title = [self revenant_titleOf:item];
+        NSString *subtitle = [self revenant_subtitleOf:item];
         [completion setValue:title forKey:@"title"];
         [completion setValue:subtitle forKey:@"subtitle"];
         NSRange found = [title rangeOfString:fragment options:NSCaseInsensitiveSearch];
@@ -116,7 +116,7 @@ static const NSTimeInterval MKCharonCompleterPause = 0.35;
     return made;
 }
 
-- (NSString *)charon_titleOf:(MKMapItem *)item
+- (NSString *)revenant_titleOf:(MKMapItem *)item
 {
     NSString *named = [item name];
     if (named.length > 0) {
@@ -137,7 +137,7 @@ static const NSTimeInterval MKCharonCompleterPause = 0.35;
     return placemark.name ?: @"";
 }
 
-- (NSString *)charon_subtitleOf:(MKMapItem *)item
+- (NSString *)revenant_subtitleOf:(MKMapItem *)item
 {
     MKPlacemark *placemark = [item placemark];
     NSMutableArray *lines = [NSMutableArray array];
@@ -157,13 +157,13 @@ static const NSTimeInterval MKCharonCompleterPause = 0.35;
     return locality.length > 0 ? locality : (country ?: @"");
 }
 
-- (void)charon_finishWithResults:(NSArray<MKLocalSearchCompletion *> *)results
+- (void)revenant_finishWithResults:(NSArray<MKLocalSearchCompletion *> *)results
 {
     _results = [results copy];
-    [self charon_delegateDidUpdate];
+    [self revenant_delegateDidUpdate];
 }
 
-- (void)charon_delegateDidUpdate
+- (void)revenant_delegateDidUpdate
 {
     id delegate = self.delegate;
     SEL updated = NSSelectorFromString(@"completerDidUpdateResults:");
@@ -173,7 +173,7 @@ static const NSTimeInterval MKCharonCompleterPause = 0.35;
     }
 }
 
-- (void)charon_delegateDidFail:(NSError *)error
+- (void)revenant_delegateDidFail:(NSError *)error
 {
     id delegate = self.delegate;
     SEL failed = NSSelectorFromString(@"completer:didFailWithError:");
@@ -200,7 +200,7 @@ static const NSTimeInterval MKCharonCompleterPause = 0.35;
     [_search cancel];
     _search = nil;
     _searching = NO;
-    [self charon_finishWithResults:@[]];
+    [self revenant_finishWithResults:@[]];
 }
 
 - (MKCoordinateRegion)region
@@ -211,7 +211,7 @@ static const NSTimeInterval MKCharonCompleterPause = 0.35;
 - (void)setRegion:(MKCoordinateRegion)region
 {
     _region = region;
-    [self charon_schedule];
+    [self revenant_schedule];
 }
 
 - (MKLocalSearchCompleterResultType)resultTypes
@@ -222,13 +222,13 @@ static const NSTimeInterval MKCharonCompleterPause = 0.35;
 - (void)setResultTypes:(MKLocalSearchCompleterResultType)resultTypes
 {
     _resultTypes = resultTypes;
-    [self charon_schedule];
+    [self revenant_schedule];
 }
 
 - (void)setPointOfInterestFilter:(MKPointOfInterestFilter *)pointOfInterestFilter
 {
     _pointOfInterestFilter = [pointOfInterestFilter copy];
-    [self charon_schedule];
+    [self revenant_schedule];
 }
 
 - (MKPointOfInterestFilter *)pointOfInterestFilter
@@ -253,40 +253,40 @@ static const NSTimeInterval MKCharonCompleterPause = 0.35;
 
 @end
 
-@implementation MKLocalSearchCompleter (CharonPriority)
+@implementation MKLocalSearchCompleter (RevenantPriority)
 
-- (NSInteger)charon_priority
+- (NSInteger)revenant_priority
 {
-    return [[objc_getAssociatedObject(self, (const void *)"charonPriority") description] intValue];
+    return [[objc_getAssociatedObject(self, (const void *)"revenantPriority") description] intValue];
 }
 
-- (void)charon_setPriority:(NSInteger)priority
+- (void)revenant_setPriority:(NSInteger)priority
 {
-    objc_setAssociatedObject(self, (const void *)"charonPriority", [NSNumber numberWithInteger:priority],
+    objc_setAssociatedObject(self, (const void *)"revenantPriority", [NSNumber numberWithInteger:priority],
                              OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
 - (NSInteger)regionPriority
 {
-    return [self charon_priority];
+    return [self revenant_priority];
 }
 
 - (void)setRegionPriority:(NSInteger)regionPriority
 {
-    [self charon_setPriority:regionPriority];
-    [self charon_schedule];
+    [self revenant_setPriority:regionPriority];
+    [self revenant_schedule];
 }
 
 - (MKAddressFilter *)addressFilter
 {
-    return objc_getAssociatedObject(self, (const void *)"charonAddressFilter");
+    return objc_getAssociatedObject(self, (const void *)"revenantAddressFilter");
 }
 
 - (void)setAddressFilter:(MKAddressFilter *)addressFilter
 {
-    objc_setAssociatedObject(self, (const void *)"charonAddressFilter", [addressFilter copy],
+    objc_setAssociatedObject(self, (const void *)"revenantAddressFilter", [addressFilter copy],
                              OBJC_ASSOCIATION_COPY_NONATOMIC);
-    [self charon_schedule];
+    [self revenant_schedule];
 }
 
 @end

@@ -1,24 +1,24 @@
 #import <Foundation/Foundation.h>
-#import "CharonMetal.h"
+#import "RevenantMetal.h"
 
 static int failures;
 
-@interface CharonMetalBinding : NSObject <MTLBinding>
+@interface RevenantMetalBinding : NSObject <MTLBinding>
 @end
 
-@interface CharonMetalBufferBinding : CharonMetalBinding <MTLBufferBinding>
+@interface RevenantMetalBufferBinding : RevenantMetalBinding <MTLBufferBinding>
 @end
 
-@interface CharonMetalTextureBinding : CharonMetalBinding <MTLTextureBinding>
+@interface RevenantMetalTextureBinding : RevenantMetalBinding <MTLTextureBinding>
 @end
 
-@interface CharonMetalThreadgroupBinding : CharonMetalBinding <MTLThreadgroupBinding>
+@interface RevenantMetalThreadgroupBinding : RevenantMetalBinding <MTLThreadgroupBinding>
 @end
 
-@interface CharonMetalObjectPayloadBinding : CharonMetalBinding <MTLObjectPayloadBinding>
+@interface RevenantMetalObjectPayloadBinding : RevenantMetalBinding <MTLObjectPayloadBinding>
 @end
 
-extern CharonMetalBinding *CharonMakeBinding(Class kind, NSString *name, NSUInteger index,
+extern RevenantMetalBinding *RevenantMakeBinding(Class kind, NSString *name, NSUInteger index,
                                              MTLArgumentAccess access, BOOL argument, BOOL used);
 
 static void check(BOOL ok, NSString *what)
@@ -30,44 +30,44 @@ static void check(BOOL ok, NSString *what)
 int main(void)
 {
     @autoreleasepool {
-        CharonMetalBufferBinding *buffer = (CharonMetalBufferBinding *)
-            CharonMakeBinding(CharonMetalBufferBinding.class, @"charonBuffer", 3,
+        RevenantMetalBufferBinding *buffer = (RevenantMetalBufferBinding *)
+            RevenantMakeBinding(RevenantMetalBufferBinding.class, @"revenantBuffer", 3,
                               MTLArgumentAccessReadWrite, YES, YES);
-        CharonMetalTextureBinding *texture = (CharonMetalTextureBinding *)
-            CharonMakeBinding(CharonMetalTextureBinding.class, @"charonTexture", 4,
+        RevenantMetalTextureBinding *texture = (RevenantMetalTextureBinding *)
+            RevenantMakeBinding(RevenantMetalTextureBinding.class, @"revenantTexture", 4,
                               MTLArgumentAccessReadOnly, NO, YES);
-        CharonMetalThreadgroupBinding *group = (CharonMetalThreadgroupBinding *)
-            CharonMakeBinding(CharonMetalThreadgroupBinding.class, @"charonGroup", 5,
+        RevenantMetalThreadgroupBinding *group = (RevenantMetalThreadgroupBinding *)
+            RevenantMakeBinding(RevenantMetalThreadgroupBinding.class, @"revenantGroup", 5,
                               MTLArgumentAccessReadWrite, NO, YES);
-        CharonMetalObjectPayloadBinding *payload = (CharonMetalObjectPayloadBinding *)
-            CharonMakeBinding(CharonMetalObjectPayloadBinding.class, @"charonPayload", 6,
+        RevenantMetalObjectPayloadBinding *payload = (RevenantMetalObjectPayloadBinding *)
+            RevenantMakeBinding(RevenantMetalObjectPayloadBinding.class, @"revenantPayload", 6,
                               MTLArgumentAccessReadOnly, NO, YES);
 
-        CharonMetalBinding *base = (CharonMetalBinding *)
-            CharonMakeBinding(CharonMetalBinding.class, @"charonBase", 2,
+        RevenantMetalBinding *base = (RevenantMetalBinding *)
+            RevenantMakeBinding(RevenantMetalBinding.class, @"revenantBase", 2,
                               MTLArgumentAccessReadWrite, YES, NO);
 
         check(base.type == MTLBindingTypeBuffer,
               @"MTLBinding: the base answers the kind it was built as");
-        check([base.name isEqualToString:@"charonBase"] && base.index == 2 &&
+        check([base.name isEqualToString:@"revenantBase"] && base.index == 2 &&
               base.access == MTLArgumentAccessReadWrite && base.isUsed == NO && base.isArgument == YES,
               @"MTLBinding: it reads back its name, index, access and both flags");
 
         check(buffer.type == MTLBindingTypeBuffer, @"MTLBufferBinding: its type is MTLBindingTypeBuffer");
-        check([buffer.name isEqualToString:@"charonBuffer"] && buffer.index == 3 &&
+        check([buffer.name isEqualToString:@"revenantBuffer"] && buffer.index == 3 &&
               buffer.access == MTLArgumentAccessReadWrite && buffer.isUsed == YES &&
               buffer.isArgument == YES,
               @"MTLBufferBinding: it reads back its name, index, access and both flags");
 
         check(texture.type == MTLBindingTypeTexture, @"MTLTextureBinding: its type is MTLBindingTypeTexture");
-        check([texture.name isEqualToString:@"charonTexture"] && texture.index == 4 &&
+        check([texture.name isEqualToString:@"revenantTexture"] && texture.index == 4 &&
               texture.access == MTLArgumentAccessReadOnly && texture.isUsed == YES &&
               texture.isArgument == NO,
               @"MTLTextureBinding: it reads back its name, index, access and both flags");
 
         check(group.type == MTLBindingTypeThreadgroupMemory,
               @"MTLThreadgroupBinding: its type is MTLBindingTypeThreadgroupMemory");
-        check([group.name isEqualToString:@"charonGroup"] && group.index == 5 &&
+        check([group.name isEqualToString:@"revenantGroup"] && group.index == 5 &&
               group.isUsed == YES && group.isArgument == NO,
               @"MTLThreadgroupBinding: it reads back its name, index and both flags");
 
@@ -75,7 +75,7 @@ int main(void)
               @"MTLObjectPayloadBinding: its type is MTLBindingTypeObjectPayload (34)");
         check(payload.index == 6 && payload.access == MTLArgumentAccessReadOnly,
               @"MTLObjectPayloadBinding: it reads back its index and access");
-        check([payload.name isEqualToString:@"charonPayload"] && payload.isUsed == YES &&
+        check([payload.name isEqualToString:@"revenantPayload"] && payload.isUsed == YES &&
               payload.isArgument == NO,
               @"MTLObjectPayloadBinding: it reads back its name and both flags");
 

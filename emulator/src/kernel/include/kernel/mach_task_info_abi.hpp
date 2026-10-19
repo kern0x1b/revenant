@@ -12,7 +12,7 @@
 #include <cstddef>
 #include <cstdint>
 
-namespace shade::darwin::mach::task_info {
+namespace emulator::darwin::mach::task_info {
 
 inline constexpr std::uint32_t absolute_time_flavor = 1;
 inline constexpr std::size_t absolute_time_word_count = 8;

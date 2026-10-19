@@ -1,6 +1,6 @@
 #import <UIKit/UIKit.h>
 
-@implementation UIListContentView (CharonSupportsConfiguration16)
+@implementation UIListContentView (RevenantSupportsConfiguration16)
 
 - (BOOL)supportsConfiguration:(id<UIContentConfiguration>)configuration
 {

@@ -1,6 +1,6 @@
-#import "CharonMPSGraph.h"
+#import "RevenantMPSGraph.h"
 
-@implementation MPSGraph (CharonMPSGraphTensorShapeOps174)
+@implementation MPSGraph (RevenantMPSGraphTensorShapeOps174)
 
 - (MPSGraphTensor *)sliceUpdateDataTensor:(MPSGraphTensor *)dataTensor
                              updateTensor:(MPSGraphTensor *)updateTensor
@@ -12,7 +12,7 @@
                               squeezeMask:(uint32_t)squeezeMask
                                      name:(NSString *)name
 {
-    return [self charon_mps_slice:CharonMPSGraphOperationKindSlice
+    return [self revenant_mps_slice:RevenantMPSGraphOperationKindSlice
                           inputs:@[dataTensor, updateTensor]
                       parameters:@{@"gather": @"sliceUpdate",
                                    @"sliceStarts": starts ?: @[], @"sliceEnds": ends ?: @[],
@@ -43,7 +43,7 @@
                              name, (unsigned)type];
         }
     }
-    return [self charon_mps_slice:CharonMPSGraphOperationKindSlice
+    return [self revenant_mps_slice:RevenantMPSGraphOperationKindSlice
                           inputs:@[dataTensor, updateTensor, startsTensor, endsTensor, stridesTensor]
                       parameters:@{@"gather": @"sliceUpdate",
                                    @"sliceStartMask": @(startMask), @"sliceEndMask": @(endMask),

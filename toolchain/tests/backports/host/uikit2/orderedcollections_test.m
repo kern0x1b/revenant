@@ -29,7 +29,7 @@ static NSString *safely(Body body, BOOL exact)
 static NSString *normalized(NSString *text)
 {
     NSMutableString *result = [text mutableCopy];
-    [result replaceOccurrencesOfString:@"CharonHost" withString:@"" options:0 range:NSMakeRange(0, result.length)];
+    [result replaceOccurrencesOfString:@"RevenantHost" withString:@"" options:0 range:NSMakeRange(0, result.length)];
     NSRegularExpression *expression = [NSRegularExpression regularExpressionWithPattern:@"0x[0-9a-f]+" options:0 error:NULL];
     return [expression stringByReplacingMatchesInString:result options:0 range:NSMakeRange(0, result.length) withTemplate:@"0x"];
 }
@@ -60,8 +60,8 @@ static id diffArrays(BOOL port, NSArray *current, NSArray *other, NSUInteger opt
     if (!port)
         return test ? [current differenceFromArray:other withOptions:options usingEquivalenceTest:test] : [current differenceFromArray:other withOptions:options];
     if (test)
-        return ((id (*)(id, SEL, id, NSUInteger, id))objc_msgSend)(current, NSSelectorFromString(@"charonHostDifferenceFromArray:withOptions:usingEquivalenceTest:"), other, options, test);
-    return ((id (*)(id, SEL, id, NSUInteger))objc_msgSend)(current, NSSelectorFromString(@"charonHostDifferenceFromArray:withOptions:"), other, options);
+        return ((id (*)(id, SEL, id, NSUInteger, id))objc_msgSend)(current, NSSelectorFromString(@"revenantHostDifferenceFromArray:withOptions:usingEquivalenceTest:"), other, options, test);
+    return ((id (*)(id, SEL, id, NSUInteger))objc_msgSend)(current, NSSelectorFromString(@"revenantHostDifferenceFromArray:withOptions:"), other, options);
 }
 
 static id diffSets(BOOL port, NSOrderedSet *current, NSOrderedSet *other, NSUInteger options, BOOL (^test)(id, id))
@@ -69,22 +69,22 @@ static id diffSets(BOOL port, NSOrderedSet *current, NSOrderedSet *other, NSUInt
     if (!port)
         return test ? [current differenceFromOrderedSet:other withOptions:options usingEquivalenceTest:test] : [current differenceFromOrderedSet:other withOptions:options];
     if (test)
-        return ((id (*)(id, SEL, id, NSUInteger, id))objc_msgSend)(current, NSSelectorFromString(@"charonHostDifferenceFromOrderedSet:withOptions:usingEquivalenceTest:"), other, options, test);
-    return ((id (*)(id, SEL, id, NSUInteger))objc_msgSend)(current, NSSelectorFromString(@"charonHostDifferenceFromOrderedSet:withOptions:"), other, options);
+        return ((id (*)(id, SEL, id, NSUInteger, id))objc_msgSend)(current, NSSelectorFromString(@"revenantHostDifferenceFromOrderedSet:withOptions:usingEquivalenceTest:"), other, options, test);
+    return ((id (*)(id, SEL, id, NSUInteger))objc_msgSend)(current, NSSelectorFromString(@"revenantHostDifferenceFromOrderedSet:withOptions:"), other, options);
 }
 
 static id applyArray(BOOL port, NSArray *array, id difference)
 {
     if (!port)
         return [array arrayByApplyingDifference:difference];
-    return ((id (*)(id, SEL, id))objc_msgSend)(array, NSSelectorFromString(@"charonHostArrayByApplyingDifference:"), difference);
+    return ((id (*)(id, SEL, id))objc_msgSend)(array, NSSelectorFromString(@"revenantHostArrayByApplyingDifference:"), difference);
 }
 
 static id applySet(BOOL port, NSOrderedSet *set, id difference)
 {
     if (!port)
         return [set orderedSetByApplyingDifference:difference];
-    return ((id (*)(id, SEL, id))objc_msgSend)(set, NSSelectorFromString(@"charonHostOrderedSetByApplyingDifference:"), difference);
+    return ((id (*)(id, SEL, id))objc_msgSend)(set, NSSelectorFromString(@"revenantHostOrderedSetByApplyingDifference:"), difference);
 }
 
 static void applyMutable(BOOL port, id collection, id difference)
@@ -92,7 +92,7 @@ static void applyMutable(BOOL port, id collection, id difference)
     if (!port)
         [collection applyDifference:difference];
     else
-        ((void (*)(id, SEL, id))objc_msgSend)(collection, NSSelectorFromString(@"charonHostApplyDifference:"), difference);
+        ((void (*)(id, SEL, id))objc_msgSend)(collection, NSSelectorFromString(@"revenantHostApplyDifference:"), difference);
 }
 
 static NSArray *randomArray(NSUInteger maxLength, NSUInteger alphabet, BOOL strings, BOOL unique)
@@ -197,8 +197,8 @@ static NSDictionary *randomSpec(void)
 int main(int argc, char **argv)
 {
     @autoreleasepool {
-        portChange = NSClassFromString(@"CharonHostNSOrderedCollectionChange");
-        portDifference = NSClassFromString(@"CharonHostNSOrderedCollectionDifference");
+        portChange = NSClassFromString(@"RevenantHostNSOrderedCollectionChange");
+        portDifference = NSClassFromString(@"RevenantHostNSOrderedCollectionDifference");
         CHECK(portChange != Nil && portDifference != Nil, "the port defines both classes");
         CHECK([portChange superclass] == [NSObject class] && [portDifference superclass] == [NSObject class], "both classes are direct subclasses of NSObject");
         CHECK([portDifference conformsToProtocol:@protocol(NSFastEnumeration)] == [NSOrderedCollectionDifference conformsToProtocol:@protocol(NSFastEnumeration)], "the difference is fast enumerable");
@@ -267,7 +267,7 @@ int main(int argc, char **argv)
         printf("algorithm: compared %lu, differing %lu\n", (unsigned long)total, (unsigned long)wrong);
         for (NSString *sample in samples)
             printf("  %s\n", sample.UTF8String);
-        charon_check(wrong == 0, "differences, their descriptions, inverses, moves, equivalence calls and application agree with the system's on random arrays", [NSString stringWithFormat:@"%lu of %lu differ", (unsigned long)wrong, (unsigned long)total]);
+        revenant_check(wrong == 0, "differences, their descriptions, inverses, moves, equivalence calls and application agree with the system's on random arrays", [NSString stringWithFormat:@"%lu of %lu differ", (unsigned long)wrong, (unsigned long)total]);
 
         [samples removeAllObjects];
         total = wrong = 0;
@@ -301,7 +301,7 @@ int main(int argc, char **argv)
         printf("construction: compared %lu, differing %lu\n", (unsigned long)total, (unsigned long)wrong);
         for (NSString *sample in samples)
             printf("  %s\n", sample.UTF8String);
-        charon_check(wrong == 0, "differences built from changes and index sets accept, refuse and describe as the system's do", [NSString stringWithFormat:@"%lu of %lu differ", (unsigned long)wrong, (unsigned long)total]);
+        revenant_check(wrong == 0, "differences built from changes and index sets accept, refuse and describe as the system's do", [NSString stringWithFormat:@"%lu of %lu differ", (unsigned long)wrong, (unsigned long)total]);
 
         [samples removeAllObjects];
         total = wrong = 0;
@@ -360,8 +360,8 @@ int main(int argc, char **argv)
         printf("direct: compared %lu, differing %lu\n", (unsigned long)total, (unsigned long)wrong);
         for (NSString *sample in samples)
             printf("  %s\n", sample.UTF8String);
-        charon_check(wrong == 0, "changes and the exceptions of both classes agree with the system's", [NSString stringWithFormat:@"%lu of %lu differ", (unsigned long)wrong, (unsigned long)total]);
+        revenant_check(wrong == 0, "changes and the exceptions of both classes agree with the system's", [NSString stringWithFormat:@"%lu of %lu differ", (unsigned long)wrong, (unsigned long)total]);
     }
-    printf("checks=%d failures=%d\n", charon_checks, charon_failures);
-    return charon_failures;
+    printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
+    return revenant_failures;
 }

@@ -9,7 +9,7 @@
 
 #include <cstdint>
 
-namespace shade {
+namespace emulator {
 
 enum class DarwinInitialAppleVectorAbi : std::uint8_t {
     KeyedExecutablePath,

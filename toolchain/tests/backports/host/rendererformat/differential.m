@@ -4,10 +4,10 @@
 
 static Class base, image;
 
-@interface CharonGamutlessTraits : NSObject
+@interface RevenantGamutlessTraits : NSObject
 @end
 
-@implementation CharonGamutlessTraits
+@implementation RevenantGamutlessTraits
 
 - (CGFloat)displayScale
 {
@@ -89,8 +89,8 @@ int main(void)
         image = [UIGraphicsImageRendererFormat class];
         script(system);
 
-        base = NSClassFromString(@"CharonHostUIGraphicsRendererFormat");
-        image = NSClassFromString(@"CharonHostUIGraphicsImageRendererFormat");
+        base = NSClassFromString(@"RevenantHostUIGraphicsRendererFormat");
+        image = NSClassFromString(@"RevenantHostUIGraphicsImageRendererFormat");
         BOOL carried = base != Nil && image != Nil;
         CHECK(carried, "the port carries the formats to ask");
         if (carried)
@@ -99,17 +99,17 @@ int main(void)
             NSArray *mine = index < port.count ? port[index] : nil;
             NSString *expected = system[index][1], *actual = mine ? mine[1] : @"nothing";
             printf("  %s: %s\n", [system[index][0] UTF8String], expected.UTF8String);
-            charon_check([expected isEqual:actual], [system[index][0] UTF8String],
+            revenant_check([expected isEqual:actual], [system[index][0] UTF8String],
                          [NSString stringWithFormat:@"%@ != %@", actual, expected]);
         }
         if (carried) {
-            NSString *gamutless = for_traits((UITraitCollection *)[[CharonGamutlessTraits alloc] init]);
+            NSString *gamutless = for_traits((UITraitCollection *)[[RevenantGamutlessTraits alloc] init]);
             NSString *wanted = system[6][1];
             printf("  for traits of a release that has no gamut: %s\n", gamutless.UTF8String);
-            charon_check([gamutless isEqual:wanted], "for traits of a release that has no gamut",
+            revenant_check([gamutless isEqual:wanted], "for traits of a release that has no gamut",
                          [NSString stringWithFormat:@"%@ != %@", gamutless, wanted]);
         }
     }
-    printf("checks=%d failures=%d\n", charon_checks, charon_failures);
-    return charon_failures;
+    printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
+    return revenant_failures;
 }

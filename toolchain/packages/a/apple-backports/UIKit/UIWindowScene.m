@@ -1,9 +1,9 @@
-#import "CharonScenes.h"
+#import "RevenantScenes.h"
 
-@interface CharonScreenCoordinateSpace : NSObject <UICoordinateSpace>
+@interface RevenantScreenCoordinateSpace : NSObject <UICoordinateSpace>
 @end
 
-@implementation CharonScreenCoordinateSpace
+@implementation RevenantScreenCoordinateSpace
 
 - (CGRect)bounds
 {
@@ -35,7 +35,7 @@
 
 @implementation UIStatusBarManager
 
-- (instancetype)initCharon
+- (instancetype)initRevenant
 {
     return [super init];
 }
@@ -59,7 +59,7 @@
 
 @implementation UIWindowScene {
     UIStatusBarManager *_statusBarManager;
-    CharonScreenCoordinateSpace *_coordinateSpace;
+    RevenantScreenCoordinateSpace *_coordinateSpace;
     __weak id<UIActivityItemsConfigurationProviding> _activityItemsConfigurationSource;
 }
 
@@ -78,8 +78,8 @@
 - (instancetype)initWithSession:(UISceneSession *)session connectionOptions:(UISceneConnectionOptions *)connectionOptions
 {
     if ((self = [super initWithSession:session connectionOptions:connectionOptions])) {
-        _statusBarManager = [[UIStatusBarManager alloc] initCharon];
-        _coordinateSpace = [[CharonScreenCoordinateSpace alloc] init];
+        _statusBarManager = [[UIStatusBarManager alloc] initRevenant];
+        _coordinateSpace = [[RevenantScreenCoordinateSpace alloc] init];
     }
     return self;
 }

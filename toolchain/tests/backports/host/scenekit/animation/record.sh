@@ -5,7 +5,7 @@ set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../../common/runs.sh" "$here"
 OUT=$1
-BUILD=${BUILD:-$(runs_fresh charon-animation)}
+BUILD=${BUILD:-$(runs_fresh revenant-animation)}
 mkdir -p "$OUT"
 cp "$here/series.swift" "$BUILD/main.swift"
 xcrun swiftc -O "$BUILD/main.swift" "$here/srgblevels.swift" -o "$BUILD/series"

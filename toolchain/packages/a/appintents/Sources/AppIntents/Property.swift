@@ -5,7 +5,7 @@ public final class EntityProperty<Value>: @unchecked Sendable where Value: _Inte
     public var wrappedValue: Value {
         get {
             guard let held = value else {
-                CharonUnset.fatal("the property \(indexingKey) holds no value")
+                RevenantUnset.fatal("the property \(indexingKey) holds no value")
             }
             return held
         }
@@ -31,7 +31,7 @@ public final class EntityProperty<Value>: @unchecked Sendable where Value: _Inte
     public init() {
         self.value = nil
         self.indexingKey = ""
-        self.title = CharonLocalized.resource("")
+        self.title = RevenantLocalized.resource("")
         self.isOptional = true
         self.identifier = ""
         self.modifiers = []
@@ -43,7 +43,7 @@ public final class EntityProperty<Value>: @unchecked Sendable where Value: _Inte
     public convenience init(title: LocalizedStringResource) {
         self.init()
         self.title = title
-        self.indexingKey = CharonLocalized.string(of: title)
+        self.indexingKey = RevenantLocalized.string(of: title)
         self.isOptional = false
     }
 
@@ -236,14 +236,14 @@ public final class EntityProperty<Value>: @unchecked Sendable where Value: _Inte
     public convenience init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         self.init(identifier: try container.decode(String.self, forKey: .identifier))
-        if let title = try container.decodeIfPresent(String.self, forKey: .title) { self.title = CharonLocalized.resource(title) }
+        if let title = try container.decodeIfPresent(String.self, forKey: .title) { self.title = RevenantLocalized.resource(title) }
         if let key = try container.decodeIfPresent(String.self, forKey: .indexingKey) { self.indexingKey = key }
     }
 
     public func encode(to encoder: any Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(identifier, forKey: .identifier)
-        try container.encode(CharonLocalized.string(of: title), forKey: .title)
+        try container.encode(RevenantLocalized.string(of: title), forKey: .title)
         try container.encode(indexingKey, forKey: .indexingKey)
     }
 
@@ -255,7 +255,7 @@ public final class EntityProperty<Value>: @unchecked Sendable where Value: _Inte
 }
 
 extension EntityProperty: CustomStringConvertible {
-    public var description: String { return CharonLocalized.string(of: title) }
+    public var description: String { return RevenantLocalized.string(of: title) }
 }
 
 public struct EntityPropertyModifiers: OptionSet {

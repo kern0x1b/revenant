@@ -1,6 +1,6 @@
-#import "CharonTextLocation.h"
+#import "RevenantTextLocation.h"
 
-@implementation CharonTextLocation
+@implementation RevenantTextLocation
 
 @synthesize textContentStorage = _textContentStorage;
 @synthesize offset = _offset;
@@ -21,7 +21,7 @@
 
 - (NSComparisonResult)compare:(id<NSTextLocation>)location
 {
-    NSInteger other = [location respondsToSelector:@selector(offset)] ? [(CharonTextLocation *)location offset] : 0;
+    NSInteger other = [location respondsToSelector:@selector(offset)] ? [(RevenantTextLocation *)location offset] : 0;
     if (_offset == other)
         return NSOrderedSame;
     return _offset < other ? NSOrderedAscending : NSOrderedDescending;
@@ -31,9 +31,9 @@
 {
     if (object == self)
         return YES;
-    if (![object isKindOfClass:[CharonTextLocation class]])
+    if (![object isKindOfClass:[RevenantTextLocation class]])
         return NO;
-    CharonTextLocation *other = object;
+    RevenantTextLocation *other = object;
     return _offset == other.offset && _textContentStorage == other.textContentStorage;
 }
 

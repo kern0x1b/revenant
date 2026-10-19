@@ -25,7 +25,7 @@ function band_route(band)
     return BAND_ROUTE[band]
 end
 
-CACHES = os.getenv("CHARON_CACHES_DIR") or path.join(CORPUS, "caches")
+CACHES = os.getenv("REVENANT_CACHES_DIR") or path.join(CORPUS, "caches")
 STORE = path.join(CORPUS, "store.json")
 LADDER = {{band = "7", stem = "7.0.1"}, {band = "8-10", stem = "10.3.4"}, {band = "11-12", stem = "12.0"}, {band = "13+", stem = "18.0"}}
 BAND_ORDER = {"7", "8-10", "11-12", "13+"}
@@ -38,9 +38,9 @@ CAT_ORDER = {FRAMEWORK = 0, SYSCALL = 1, SYSLIB = 2, RUNTIME = 3}
 GAP_STATUS = {["gap?"] = true, owed = true, absent = true}
 STATUS_RANK = {implemented = 0, inert = 1, ignored = 2, owed = 3, absent = 4}
 A5_UNREACHABLE = {Metal = true, MetalKit = true, MetalPerformanceShaders = true, MetalPerformanceShadersGraph = true}
-BUILT_EXPORTS = os.getenv("CHARON_BUILT_EXPORTS") or path.join(CORPUS, "built-exports-6.1.3.txt")
+BUILT_EXPORTS = os.getenv("REVENANT_BUILT_EXPORTS") or path.join(CORPUS, "built-exports-6.1.3.txt")
 BUILT_EXPORTS_HEADER = "# canon "
-REGISTRY_TSV = os.getenv("CHARON_REGISTRY_TSV") or path.join(workspace.run("registry-export"), "carried-registry.tsv")
+REGISTRY_TSV = os.getenv("REVENANT_REGISTRY_TSV") or path.join(workspace.run("registry-export"), "carried-registry.tsv")
 
 function registry_export()
     return REGISTRY_TSV
@@ -244,7 +244,7 @@ end
 
 function load_registry()
     if not os.isfile(REGISTRY_TSV) then
-        raise("aggregate.lua: registry export not found at %s (CHARON_REGISTRY_TSV). Every row would "
+        raise("aggregate.lua: registry export not found at %s (REVENANT_REGISTRY_TSV). Every row would "
             .. "silently read as undecided instead of raising.", REGISTRY_TSV)
     end
     local reg = {}
@@ -271,7 +271,7 @@ end
 
 function load_reg_kinds()
     if not os.isfile(REGISTRY_TSV) then
-        raise("aggregate.lua: registry export not found at %s (CHARON_REGISTRY_TSV). load_reg_kinds() has "
+        raise("aggregate.lua: registry export not found at %s (REVENANT_REGISTRY_TSV). load_reg_kinds() has "
             .. "nothing to read.", REGISTRY_TSV)
     end
     local kinds = {}
@@ -312,7 +312,7 @@ end
 
 function load_built_exports()
     if not os.isfile(BUILT_EXPORTS) then
-        raise("aggregate.lua: export list of the 6.1.3 band not found at %s (CHARON_BUILT_EXPORTS); make it "
+        raise("aggregate.lua: export list of the 6.1.3 band not found at %s (REVENANT_BUILT_EXPORTS); make it "
             .. "with built-exports.lua <canon-run> (README, 'Built exports').", BUILT_EXPORTS)
     end
     local lines = io.lines(BUILT_EXPORTS)

@@ -1,23 +1,23 @@
 package("apple-backports")
-    set_homepage("https://github.com/kern0x1b/charon")
-    set_description("Objective-C classes, methods and constants later iOS releases added, for a minimum release that lacks them, as libFoundationBackports.dylib and libUIKitBackports.dylib in /usr/lib/charon/org.charon.apple-backports, which re-export whatever the release already has")
+    set_homepage("https://github.com/kern0x1b/revenant/tree/main/toolchain")
+    set_description("Objective-C classes, methods and constants later iOS releases added, for a minimum release that lacks them, as libFoundationBackports.dylib and libUIKitBackports.dylib in /usr/lib/revenant/org.revenant.apple-backports, which re-export whatever the release already has")
     set_license("MIT")
     set_policy("package.strict_compatibility", true)
 
-    add_deps("charon@firmware-tools", {alias = "firmware-tools"})
-    add_deps("charon@charon-coding", {alias = "charon-coding"})
+    add_deps("revenant@firmware-tools", {alias = "firmware-tools"})
+    add_deps("revenant@revenant-coding", {alias = "revenant-coding"})
 
-    add_deps("charon@ldid 2.1.5-procursus7+23.gaf86971", {alias = "ldid"})
-    add_deps("charon@box2d 2.2.1", {alias = "box2d"})
-    add_deps("charon@suitesparse-ordering v7.12.2", {alias = "suitesparse-ordering"})
-    add_deps("charon@ggml 0.25.3", {alias = "ggml"})
-    add_deps("charon@monocypher 4.0.2", {alias = "monocypher"})
-    add_deps("charon@micro-ecc", {alias = "micro-ecc"})
-    add_deps("charon@lzfse lzfse-1.0", {alias = "lzfse"})
-    add_deps("charon@zlib v1.3.2", {alias = "zlib"})
-    add_deps("charon@lz4 v1.9.2", {alias = "lz4"})
-    add_deps("charon@xz v5.8.4", {alias = "xz"})
-    add_deps("charon@apple-compat", {alias = "apple-compat"})
+    add_deps("revenant@ldid 2.1.5-procursus7+23.gaf86971", {alias = "ldid"})
+    add_deps("revenant@box2d 2.2.1", {alias = "box2d"})
+    add_deps("revenant@suitesparse-ordering v7.12.2", {alias = "suitesparse-ordering"})
+    add_deps("revenant@ggml 0.25.3", {alias = "ggml"})
+    add_deps("revenant@monocypher 4.0.2", {alias = "monocypher"})
+    add_deps("revenant@micro-ecc", {alias = "micro-ecc"})
+    add_deps("revenant@lzfse lzfse-1.0", {alias = "lzfse"})
+    add_deps("revenant@zlib v1.3.2", {alias = "zlib"})
+    add_deps("revenant@lz4 v1.9.2", {alias = "lz4"})
+    add_deps("revenant@xz v5.8.4", {alias = "xz"})
+    add_deps("revenant@apple-compat", {alias = "apple-compat"})
 
     local add_configs = add_configs
     local modules = path.join(os.scriptdir(), "..", "..", "..", "modules")
@@ -34,8 +34,8 @@ package("apple-backports")
     table.insert(inputs, path.join(repo, "modules", "apple", "dyld.lua"))
     table.insert(inputs, path.join(repo, "tools", "corpus", "uikit-constants.tsv"))
     table.insert(inputs, path.join(repo, "tools", "corpus", "uikit-extras-13.4.txt"))
-    table.insert(inputs, path.join(os.scriptdir(), "..", "..", "..", "addons", "c", "charon", "xmake.lua"))
-    for _, header in ipairs(os.files(path.join(os.scriptdir(), "..", "..", "c", "charon-coding", "files", "*.h"))) do
+    table.insert(inputs, path.join(os.scriptdir(), "..", "..", "..", "addons", "r", "revenant", "xmake.lua"))
+    for _, header in ipairs(os.files(path.join(os.scriptdir(), "..", "..", "c", "revenant-coding", "files", "*.h"))) do
         table.insert(inputs, header)
     end
     table.sort(inputs)
@@ -44,7 +44,7 @@ package("apple-backports")
         table.insert(digests, path.filename(file) .. "=" .. hash.sha256(file))
     end
     local digest = hash.strhash128(table.concat(digests, ";"))
-    add_configs("sources", {description = "The digest of the sources, their headers, the build module and the Charon releases, so a changed backport or a new release is a different package.", default = digest, type = "string", readonly = true})
+    add_configs("sources", {description = "The digest of the sources, their headers, the build module and the Revenant releases, so a changed backport or a new release is a different package.", default = digest, type = "string", readonly = true})
 
     add_configs("uikit", {description = "Build libUIKitBackports.dylib beside libFoundationBackports.dylib, for an application; a daemon or a tool leaves UIKit out of its process.", default = false, type = "boolean"})
     add_configs("homekit", {description = "Build libHomeKitBackports.dylib, for an application that reads or writes a home graph with HomeKit: the accessory, service and characteristic types, the service and accessory category identifiers, the metadata formats and units and the key paths, each with the value a real HomeKit.framework gives it, re-measurable with tools/corpus/host-probe.c; and the home graph itself -- homes, rooms, zones, users, service groups, accessories, triggers, action sets, the events an event trigger fires on and the home hub states -- over a store in the application's own Application Support directory, with an accessory's own values answering the error the release documents for an accessory it cannot reach, since this port carries no HAP transport and pairs with no accessory. It builds the graph and reads and writes it across launches; it does not discover or pair.", default = false, type = "boolean"})
@@ -117,7 +117,7 @@ package("apple-backports")
 
     add_configs("pushkit", {description = "Build libPushKitBackports.dylib, for an application that places or takes VoIP calls through PKPushRegistry; the release's own apsd hands out a real device token, so a registry that shares a UIUserNotificationType already registered by the application receives one exactly as PushKit promises. apsd on this release ties every token to a user-facing Badge/Sound/Alert prompt, with no silent registration path, so a registry with no such prior registration never receives one - the one seam this port cannot reach, since only Apple's own service issues the token.", default = false, type = "boolean"})
 
-    add_configs("intents", {description = "Build libIntentsBackports.dylib, for an application that donates an interaction, offers a vocabulary or resolves and handles an intent in process; iOS 6 runs no assistant daemon and no intent extension host, so a donation and the phrases an application offers are kept in the application's own store and read back, and every value a resolution result carries is read through the accessors of CharonIntentsResolution.h; it loads UIKit, whose asset catalogue is where an Intents image comes from", default = false, type = "boolean"})
+    add_configs("intents", {description = "Build libIntentsBackports.dylib, for an application that donates an interaction, offers a vocabulary or resolves and handles an intent in process; iOS 6 runs no assistant daemon and no intent extension host, so a donation and the phrases an application offers are kept in the application's own store and read back, and every value a resolution result carries is read through the accessors of RevenantIntentsResolution.h; it loads UIKit, whose asset catalogue is where an Intents image comes from", default = false, type = "boolean"})
 
     add_configs("intentsui", {description = "Build libIntentsUIBackports.dylib, for an application that shows the button and the two view controllers which add or edit a shortcut; iOS 6 runs no Siri, no Shortcuts database and no extension host, so a controller here shows the shortcut and asks the application's own delegate - and a voice shortcut is the system's own object, which this release cannot make, so the flow ends the way the header's own signature has for one that added nothing", default = false, type = "boolean"})
 
@@ -132,7 +132,7 @@ package("apple-backports")
     add_configs("mediaplayer", {description = "Build libMediaPlayerBackports.dylib, for an application that answers lock-screen and headset remote-control commands through MPRemoteCommandCenter; the release has no MediaPlayer.framework command surface, but it has the older mechanism the new one is documented to sit above - UIEventTypeRemoteControl, delivered to the responder chain with a UIEventSubtypeRemoteControl* subtype since iOS 4.0 - so play/pause/stop/toggle/next/previous/seek map to their old-style subtypes for real. changePlaybackPositionCommand and the feedback/rating/language-option commands have no old-style event to answer to, so they are real, addressable command objects that never fire, honestly, not fabricated ones. It loads AVFoundation into the process, for AVPlayerItem.nowPlayingInfo alone, whose owner class AVPlayerItem is that framework's; the release's own MediaPlayer already loads AVFoundation, so the declaration adds no image - facts/MediaPlayer/WholeCacheRead.md.", default = false, type = "boolean"})
 
     add_configs("network", {description = "Build libNetworkBackports.dylib beside libFoundationBackports.dylib, for a port that asks Network for a connection, a listener or a browser; iOS 6 has no Network.framework, so these are the port's own objects over BSD sockets, the release's SecureTransport and Foundation's own reachability. The whole API is OS_OBJECT types, so nothing of it is built below iOS 6.0 (facts/Network/NWFloor.md). It is what the Matter framework's device browser needs.", default = false, type = "boolean"})
-    add_configs("avkit", {description = "Build libAVKitBackports.dylib, for an application that plays video in an AVPlayerViewController, an AVPlayerLayer with controls of the port's own that writes the now playing information through MediaPlayer, or floats a video mini-player through AVPictureInPictureController; AVKit.framework does not exist at all on this release, and neither does any cross-app window-compositing surface a third-party dylib could draw into, so this is an in-app floating window only - the real AVPlayerLayer is reparented into a draggable window above the host app's own view hierarchy, keeps playing for real, and is reparented back on -stopPictureInPicture. It does not persist once the host app leaves the foreground, the one dimension a real SpringBoard-side companion (the kind CallKitBackports' CharonCallScreen already models for its own call screen) would be needed for and this port does not build. It builds libUIKitBackports.dylib as well, whose transition coordinator the full screen presentation hands to the delegate.", default = false, type = "boolean"})
+    add_configs("avkit", {description = "Build libAVKitBackports.dylib, for an application that plays video in an AVPlayerViewController, an AVPlayerLayer with controls of the port's own that writes the now playing information through MediaPlayer, or floats a video mini-player through AVPictureInPictureController; AVKit.framework does not exist at all on this release, and neither does any cross-app window-compositing surface a third-party dylib could draw into, so this is an in-app floating window only - the real AVPlayerLayer is reparented into a draggable window above the host app's own view hierarchy, keeps playing for real, and is reparented back on -stopPictureInPicture. It does not persist once the host app leaves the foreground, the one dimension a real SpringBoard-side companion (the kind CallKitBackports' RevenantCallScreen already models for its own call screen) would be needed for and this port does not build. It builds libUIKitBackports.dylib as well, whose transition coordinator the full screen presentation hands to the delegate.", default = false, type = "boolean"})
     add_configs("healthkit", {description = "Build libHealthKitBackports.dylib, for an application that reads or writes the user's health data through HKHealthStore; the store is a real SQLite database under Application Support, over the device's own libsqlite3, so a sample an application saves is there for the next launch of it. It loads UIKit, because +[HKDevice localDevice] answers the host's own name and model and the release's own UIDevice is where those are. iOS 6 runs no healthd, so there is no health store of Apple's to read and no health application to put the authorization sheet up; the sheet is the one seam, and the store enforces the answer the request records.", default = false, type = "boolean"})
 
     add_configs("messageui", {description = "Build libMessageUIBackports.dylib, for an application that composes a message or a mail through MessageUI; what the release's own compose controller can carry is read off its metadata, so +canSendSubject and +canSendAttachments answer for this release rather than for a constant, and the two collaboration factories answer NO because the release's composers have no row to insert one into.", default = false, type = "boolean"})
@@ -166,7 +166,7 @@ package("apple-backports")
     add_configs("mps", {description = "Build libMPSBackports.dylib, and libMetalBackports.dylib beside it if metal was not asked for on its own, since every MPS kernel stands on Metal's, for an application that names Metal Performance Shaders: its kernels, its states and its matrix and vector containers, over the OpenGL ES 2.0 bridge Metal itself uses, with a matrix or vector kernel reading and writing the host memory behind an MTLBuffer and doing its arithmetic on the CPU, which is exact for the eight element data types an MPSMatrix holds.", default = false, type = "boolean"})
 
     add_configs("mpsgraph", {description = "Build libMPSGraphBackports.dylib, and libMPSBackports.dylib and libMetalBackports.dylib beside it if mps or metal was not asked for on its own, since the graph dylib hard-links the first and both hard-link the second, for an application that names MetalPerformanceShadersGraph: the graph, its tensors, its operations and the executable that runs it, over the same OpenGL ES 2.0 bridge Metal itself uses, with a tensor's values in the host memory behind an MTLBuffer.", default = false, type = "boolean"})
-    add_configs("cloudkit", {description = "Build libCloudKitBackports.dylib, for an application that keeps its data with CloudKit: the records, zones, queries, subscriptions, shares, the constants, and the ES256 signature a CloudKit Web Services authentication key takes, which is made by charon@micro-ecc because iOS 6 has no Security framework key. It loads CoreLocation and CoreGraphics into the process, for a location field and a point."; default = false, type = "boolean"})
+    add_configs("cloudkit", {description = "Build libCloudKitBackports.dylib, for an application that keeps its data with CloudKit: the records, zones, queries, subscriptions, shares, the constants, and the ES256 signature a CloudKit Web Services authentication key takes, which is made by revenant@micro-ecc because iOS 6 has no Security framework key. It loads CoreLocation and CoreGraphics into the process, for a location field and a point."; default = false, type = "boolean"})
 
     on_load("iphoneos", function (package)
         package:add("links", table.join((package:config("uikit") or package:config("webkit") or package:config("avkit") or package:config("usernotificationsui") or package:config("notificationcenter") or package:config("intents") or package:config("intentsui")) and {"UIKitBackports"} or {}, (package:config("corelocation") or package:config("arkit")) and {"CoreLocationBackports"} or {}, package:config("coredata") and {"CoreDataBackports"} or {}, package:config("security") and {"SecurityBackports"} or {}, package:config("commoncrypto") and {"CommonCryptoBackports"} or {}, package:config("corebluetooth") and {"CoreBluetoothBackports"} or {}, package:config("compression") and {"CompressionBackports"} or {}, package:config("spatial") and {"SpatialBackports"} or {}, package:config("sqlite3") and {"SQLite3Backports"} or {}, package:config("spritekit") and {"SpriteKitBackports"} or {},(package:config("avfoundation") or package:config("arkit") or package:config("speech")) and {"AVFoundationBackports"} or {}, package:config("avfaudio") and {"AVFAudioBackports"} or {}, package:config("webkit") and {"WebKitBackports"} or {}, (package:config("graphics") or package:config("webkit") or package:config("avfoundation") or package:config("speech") or package:config("intents") or package:config("intentsui")) and {"GraphicsBackports"} or {}, package:config("localauthentication") and {"LocalAuthenticationBackports"} or {}, (package:config("safariservices") or package:config("authenticationservices")) and {"SafariServicesBackports"} or {}, package:config("authenticationservices") and {"AuthenticationServicesBackports"} or {}, package:config("backgroundtasks") and {"BackgroundTasksBackports"} or {}, package:config("photos") and {"PhotosBackports"} or {}, package:config("gamecontroller") and {"GameControllerBackports"} or {}, (package:config("coreml") or package:config("vision")) and {"CoreMLBackports"} or {}, package:config("vision") and {"VisionBackports"} or {}, package:config("cloudkit") and {"CloudKitBackports"} or {},
@@ -193,7 +193,7 @@ package("apple-backports")
             linker = flag:match("^%-fuse%-ld=(.+)$") or linker
         end
         local deployment = toolchain:config("deployment")
-        local tool = path.join(package:dep("firmware-tools"):installdir(), "bin", "charon-firmware")
+        local tool = path.join(package:dep("firmware-tools"):installdir(), "bin", "revenant-firmware")
         local cache = firmware.ensure(package:arch(), deployment, {tool = tool})
         local libraries = table.join((package:config("mps") or package:config("mpsgraph")) and {"MPSBackports"} or {}, package:config("mpsgraph") and {"MPSGraphBackports"} or {}, package:config("network") and {"NetworkBackports"} or {}, {"FoundationBackports"}, (package:config("uikit") or package:config("webkit") or package:config("avkit") or package:config("usernotificationsui") or package:config("notificationcenter") or package:config("intents") or package:config("intentsui")) and {"UIKitBackports"} or {},
                                      package:config("sensorkit") and {"SensorKitBackports"} or {},
@@ -283,14 +283,14 @@ package("apple-backports")
                         archives = archives}
         backports.build(table.join(common, {cache = cache, builddir = path.absolute("link"), outputdir = package:installdir("lib")}))
         local released
-        for version in io.readfile(path.join(package:scriptdir(), "..", "..", "..", "addons", "c", "charon", "xmake.lua")):gmatch('add_versions%("v(%d[%d%.]*)"') do
+        for version in io.readfile(path.join(package:scriptdir(), "..", "..", "..", "addons", "r", "revenant", "xmake.lua")):gmatch('add_versions%("v(%d[%d%.]*)"') do
             if not released or dyld.compare_versions(version, released) > 0 then
                 released = version
             end
         end
         backports.write_deb(table.join(common, {tool = tool, builddir = path.absolute("bands"),
                                                 ldid = path.join(package:dep("ldid"):installdir(), "bin", "ldid"),
-                                                version = assert(released, "the addon recipe names no Charon release") .. "+" .. package:config("sources"):sub(1, 8),
+                                                version = assert(released, "the addon recipe names no Revenant release") .. "+" .. package:config("sources"):sub(1, 8),
                                                 outputdir = package:installdir("share")}))
         os.vcp(path.join(package:scriptdir(), "registry"), package:installdir("share"))
         os.vcp(path.join(package:scriptdir(), "..", "..", "..", "LICENSE"), package:installdir("licenses"))
@@ -300,5 +300,5 @@ package("apple-backports")
         for _, name in ipairs(package:get("links")) do
             assert(os.isfile(path.join(package:installdir("lib"), "lib" .. name .. ".dylib")), name)
         end
-        assert(#os.files(path.join(package:installdir("share"), "org.charon.apple-backports_*.deb")) == 1)
+        assert(#os.files(path.join(package:installdir("share"), "org.revenant.apple-backports_*.deb")) == 1)
     end)

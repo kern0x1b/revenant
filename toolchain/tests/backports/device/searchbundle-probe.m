@@ -3,13 +3,13 @@
 #import <objc/message.h>
 #import <dlfcn.h>
 
-static NSString *const CharonSpotlightSharedRoot = @"/var/mobile/Library/Caches/org.charon.corespotlight";
-static NSString *const kProbeBundleID = @"org.charon.corespotlight.probe";
-static NSString *const kProbeMarker = @"CharonProbeXyzzyPlugh19640523";
+static NSString *const RevenantSpotlightSharedRoot = @"/var/mobile/Library/Caches/org.revenant.corespotlight";
+static NSString *const kProbeBundleID = @"org.revenant.corespotlight.probe";
+static NSString *const kProbeMarker = @"RevenantProbeXyzzyPlugh19640523";
 
 static void writeSyntheticItem(void)
 {
-    void *csHandle = dlopen("/usr/lib/charon/org.charon.apple-backports/libCoreSpotlightBackports.dylib", RTLD_LAZY);
+    void *csHandle = dlopen("/usr/lib/revenant/org.revenant.apple-backports/libCoreSpotlightBackports.dylib", RTLD_LAZY);
     printf("probe: dlopen libCoreSpotlightBackports.dylib -> %p\n", csHandle);
     fflush(stdout);
     Class attrClass = NSClassFromString(@"CSSearchableItemAttributeSet");
@@ -24,29 +24,29 @@ static void writeSyntheticItem(void)
 
     id item = ((id (*)(id, SEL, id, id, id))objc_msgSend)(
         ((id (*)(id, SEL))objc_msgSend)((id)itemClass, sel_registerName("alloc")), sel_registerName("initWithUniqueIdentifier:domainIdentifier:attributeSet:"),
-        @"org.charon.corespotlight.probe.item1", @"org.charon.corespotlight.probe", attrs);
+        @"org.revenant.corespotlight.probe.item1", @"org.revenant.corespotlight.probe", attrs);
     printf("probe: built synthetic item -> %p\n", item);
     fflush(stdout);
     if (!item)
         return;
 
-    NSString *directory = [CharonSpotlightSharedRoot stringByAppendingPathComponent:kProbeBundleID];
+    NSString *directory = [RevenantSpotlightSharedRoot stringByAppendingPathComponent:kProbeBundleID];
     [[NSFileManager defaultManager] createDirectoryAtPath:directory withIntermediateDirectories:YES
                                                 attributes:@{NSFilePosixPermissions: @(0777)} error:NULL];
     NSData *archived = [NSKeyedArchiver archivedDataWithRootObject:item];
-    NSDictionary *disk = @{@"entries": @{@"org.charon.corespotlight.probe.item1": archived}};
+    NSDictionary *disk = @{@"entries": @{@"org.revenant.corespotlight.probe.item1": archived}};
     NSString *path = [directory stringByAppendingPathComponent:@"probe.plist"];
     BOOL wrote = [disk writeToFile:path atomically:YES];
     printf("probe: wrote %s -> %d\n", path.UTF8String, wrote);
     fflush(stdout);
 }
 
-@interface CharonProbeDelegate : NSObject
+@interface RevenantProbeDelegate : NSObject
 @property (nonatomic, strong) NSMutableArray *seenResults;
 @property (nonatomic) BOOL completed;
 @end
 
-@implementation CharonProbeDelegate
+@implementation RevenantProbeDelegate
 - (instancetype)init { if ((self = [super init])) { _seenResults = [NSMutableArray array]; } return self; }
 
 - (void)searchDaemonQuery:(id)query addedResults:(id)results
@@ -102,7 +102,7 @@ int main(int argc, char *argv[])
         if (!agent)
             return 1;
 
-        CharonProbeDelegate *delegate = ((id (*)(id, SEL))objc_msgSend)(((id (*)(id, SEL))objc_msgSend)((id)[CharonProbeDelegate class], sel_registerName("alloc")), sel_registerName("init"));
+        RevenantProbeDelegate *delegate = ((id (*)(id, SEL))objc_msgSend)(((id (*)(id, SEL))objc_msgSend)((id)[RevenantProbeDelegate class], sel_registerName("alloc")), sel_registerName("init"));
         NSArray *domains = ((id (*)(id, SEL))objc_msgSend)(agent, sel_registerName("searchDomains"));
         NSArray *withOurs = [domains arrayByAddingObject:@999];
         ((void (*)(id, SEL, id))objc_msgSend)(agent, sel_registerName("setSearchDomains:"), withOurs);
@@ -112,7 +112,7 @@ int main(int argc, char *argv[])
         printf("probe: objc_getProtocol(SPDaemonQueryDelegate) -> %p\n", daemonProtocol);
         fflush(stdout);
         if (daemonProtocol) {
-            BOOL added = class_addProtocol([CharonProbeDelegate class], daemonProtocol);
+            BOOL added = class_addProtocol([RevenantProbeDelegate class], daemonProtocol);
             printf("probe: class_addProtocol -> %d, now conforms=%d\n", added, [delegate conformsToProtocol:daemonProtocol]);
             fflush(stdout);
         }

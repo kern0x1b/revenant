@@ -4,7 +4,7 @@ set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 host=$here/../../host
-work=$(runs_fresh charon-uikit11-expectations)
+work=$(runs_fresh revenant-uikit11-expectations)
 rm -rf "$work"
 mkdir -p "$work"
 for test in interactions systemspacing gesturename batchupdates contentsize; do

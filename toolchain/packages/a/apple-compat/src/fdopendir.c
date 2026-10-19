@@ -4,7 +4,7 @@
 #include <unistd.h>
 
 __attribute__((visibility("hidden")))
-DIR *charon_fdopendir(int descriptor)
+DIR *revenant_fdopendir(int descriptor)
 {
     char path[MAXPATHLEN];
     if (fcntl(descriptor, F_GETPATH, path) == -1) {

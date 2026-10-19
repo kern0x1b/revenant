@@ -4,12 +4,12 @@
 #import <objc/runtime.h>
 #include <stdio.h>
 
-#if CHARON_PORT_BUILD
-#define MOVIE_CLASS_NAME @"charon_host_AVMovie"
+#if REVENANT_PORT_BUILD
+#define MOVIE_CLASS_NAME @"revenant_host_AVMovie"
 #else
 #define MOVIE_CLASS_NAME @"AVMovie"
 #endif
-#define PORT_PREFIX @"charon_host_"
+#define PORT_PREFIX @"revenant_host_"
 
 @protocol ProbeFactory
 + (id)movieWithURL:(NSURL *)URL options:(NSDictionary *)options;
@@ -36,8 +36,8 @@
 - (NSArray *)tracksWithMediaCharacteristic:(NSString *)characteristic;
 @end
 
-#ifdef CHARON_AVMOVIE_APP
-#define PROBE_MAIN charon_avmovie_probe_main
+#ifdef REVENANT_AVMOVIE_APP
+#define PROBE_MAIN revenant_avmovie_probe_main
 #else
 #define PROBE_MAIN main
 #endif

@@ -8,7 +8,7 @@
 
 #include <array>
 
-namespace shade {
+namespace emulator {
 
 class GlesMatrix {
 public:

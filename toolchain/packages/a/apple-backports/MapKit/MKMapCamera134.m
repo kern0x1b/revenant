@@ -1,7 +1,7 @@
 #import <MapKit/MapKit.h>
 #import <MapKit/MKMapCameraBoundary.h>
 #import <MapKit/MKMapCameraZoomRange.h>
-#import "CharonMapKit.h"
+#import "RevenantMapKit.h"
 
 @implementation MKMapCameraBoundary
 
@@ -23,7 +23,7 @@
     self = [super init];
     if (self) {
         _region = region;
-        _mapRect = [CharonMapKit charon_mapRectForRegion:region];
+        _mapRect = [RevenantMapKit revenant_mapRectForRegion:region];
     }
     return self;
 }

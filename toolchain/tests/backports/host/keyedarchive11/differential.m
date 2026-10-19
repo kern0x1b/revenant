@@ -15,7 +15,7 @@ int main(int argc, char **argv)
         KeyedArchive11Recorder *system = [KeyedArchive11Recorder new];
         keyedarchive11_run(@"", system);
         KeyedArchive11Recorder *ours = [KeyedArchive11Recorder new];
-        keyedarchive11_run(@"charonHost_", ours);
+        keyedarchive11_run(@"revenantHost_", ours);
 
         int failures = 0;
         for (NSString *name in [system.records.allKeys sortedArrayUsingSelector:@selector(compare:)]) {

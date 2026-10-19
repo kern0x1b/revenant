@@ -150,7 +150,7 @@ local function member_selectors(block)
 end
 
 local function class_of(block)
-    local name, rest = string.match(block, "^@implementation%s+CHARON_ALIAS_CLASS%(%s*([A-Za-z_][A-Za-z0-9_]*)%s*%)(.*)")
+    local name, rest = string.match(block, "^@implementation%s+REVENANT_ALIAS_CLASS%(%s*([A-Za-z_][A-Za-z0-9_]*)%s*%)(.*)")
     if not name then
         name, rest = string.match(block, "^@implementation%s+([A-Za-z_][A-Za-z0-9_]*)(.*)")
     end
@@ -172,7 +172,7 @@ local function defined_in_tree(folder)
     byteorder.sort(names)
     for _, name in ipairs(names) do
         local text = without_comments(read_bytes(path.join(folder, name)))
-        for alias in string.gmatch("\n" .. text, "\nCHARON_ALIAS%(%s*([A-Za-z_][A-Za-z0-9_]*)%s*%)") do
+        for alias in string.gmatch("\n" .. text, "\nREVENANT_ALIAS%(%s*([A-Za-z_][A-Za-z0-9_]*)%s*%)") do
             owned[alias] = true
         end
         for _, block in ipairs(blocks_of(text)) do
@@ -394,7 +394,7 @@ function plan(tree, fw, sdk_release)
                 table.insert(body, "#import <ModelIO/" .. header .. ">")
             end
             if unknown then
-                table.insert(body, '#import "CharonModelIO.h"')
+                table.insert(body, '#import "RevenantModelIO.h"')
             end
             for _, line in ipairs({
                 "#import <objc/runtime.h>", "",
@@ -421,7 +421,7 @@ function plan(tree, fw, sdk_release)
                 if not is_own[cls] then
                     table.insert(body, "// " .. cls .. " arrived at " .. band .. ", so its later members are a CATEGORY: two objects cannot both hold")
                     table.insert(body, "// @implementation " .. cls .. ", and release-split wants one release per object.")
-                    table.insert(body, "@implementation " .. cls .. " (Charon" .. tag .. ")")
+                    table.insert(body, "@implementation " .. cls .. " (Revenant" .. tag .. ")")
                     for _, stub in ipairs(stubs_of(cls, ordered)) do
                         table.insert(body, stub)
                     end

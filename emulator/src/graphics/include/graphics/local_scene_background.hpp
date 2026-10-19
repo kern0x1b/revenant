@@ -17,7 +17,7 @@
 #include "graphics/gles_renderer.hpp"
 #include "graphics/gles_resources.hpp"
 
-namespace shade {
+namespace emulator {
 
 class LocalSceneBackground {
 public:

@@ -1,4 +1,4 @@
-#import "CharonNEDNSSettings.h"
+#import "RevenantNEDNSSettings.h"
 
 @implementation NEDNSSettings {
     NSArray<NSString *> *_servers;

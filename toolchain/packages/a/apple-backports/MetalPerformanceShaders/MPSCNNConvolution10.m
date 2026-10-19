@@ -1,6 +1,6 @@
-#import "CharonMPSCnn.h"
-#import "CharonMPS.h"
-#import "CharonMPS26.h"
+#import "RevenantMPSCnn.h"
+#import "RevenantMPS.h"
+#import "RevenantMPS26.h"
 
 #pragma clang diagnostic ignored "-Wprotocol"
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
@@ -78,11 +78,11 @@
                   sourceImage:(MPSImage *)sourceImage
                destinationImage:(MPSImage *)destinationImage
 {
-    if (!CharonMPSCommandBufferPermits(commandBuffer))
+    if (!RevenantMPSCommandBufferPermits(commandBuffer))
         return;
     MPSCNNConvolutionDescriptor *d = _descriptor;
     if (!d || !_weights) {
-        CharonMPSRefuse(@"MPSCNNConvolution: the kernel has no descriptor or no weights, so nothing was written");
+        RevenantMPSRefuse(@"MPSCNNConvolution: the kernel has no descriptor or no weights, so nothing was written");
         return;
     }
     NSUInteger kernelWidth = d.kernelWidth, kernelHeight = d.kernelHeight;
@@ -92,7 +92,7 @@
     NSUInteger dilationX = d.dilationRateX ? d.dilationRateX : 1;
     NSUInteger dilationY = d.dilationRateY ? d.dilationRateY : 1;
     if (d.groups != 1) {
-        CharonMPSRefuse(@"MPSCNNConvolution: %lu groups is not carried yet, so nothing was written", (unsigned long)d.groups);
+        RevenantMPSRefuse(@"MPSCNNConvolution: %lu groups is not carried yet, so nothing was written", (unsigned long)d.groups);
         return;
     }
     NSUInteger leftPad = (kernelWidth - 1) * dilationX / 2;
@@ -103,12 +103,12 @@
     size_t sourceWidth = sourceImage.width, sourceHeight = sourceImage.height;
     size_t destWidth = destinationImage.width, destHeight = destinationImage.height;
     if (sourceImage.featureChannels != inChannels) {
-        CharonMPSRefuse(@"MPSCNNConvolution: the source has %lu feature channels and the descriptor names %lu",
+        RevenantMPSRefuse(@"MPSCNNConvolution: the source has %lu feature channels and the descriptor names %lu",
                         (unsigned long)sourceImage.featureChannels, (unsigned long)inChannels);
         return;
     }
     if (destinationImage.featureChannels != outChannels) {
-        CharonMPSRefuse(@"MPSCNNConvolution: the destination has %lu feature channels and the descriptor names %lu",
+        RevenantMPSRefuse(@"MPSCNNConvolution: the destination has %lu feature channels and the descriptor names %lu",
                         (unsigned long)destinationImage.featureChannels, (unsigned long)outChannels);
         return;
     }
@@ -118,7 +118,7 @@
     void *destination = calloc(destBytes ? destBytes : 1, 1);
     if (sourceImage.featureChannelFormat != MPSImageFeatureChannelFormatFloat32 ||
         destinationImage.featureChannelFormat != MPSImageFeatureChannelFormatFloat32) {
-        CharonMPSRefuse(@"MPSCNNConvolution: only single precision images are carried, so nothing was written");
+        RevenantMPSRefuse(@"MPSCNNConvolution: only single precision images are carried, so nothing was written");
         free(source);
         free(destination);
         return;
@@ -135,36 +135,36 @@
                           region:MTLRegionMake3D(0, 0, 0, destWidth, destHeight, outChannels)
                 featureChannelInfo:(MPSImageReadWriteParams){0, 0}
                         imageIndex:0];
-    CharonMPSCnnPlane from = {source, sourceWidth, sourceHeight, inChannels, sourceWidth * element};
-    CharonMPSCnnPlane to = {destination, destWidth, destHeight, outChannels, destWidth * element};
+    RevenantMPSCnnPlane from = {source, sourceWidth, sourceHeight, inChannels, sourceWidth * element};
+    RevenantMPSCnnPlane to = {destination, destWidth, destHeight, outChannels, destWidth * element};
 
     NSUInteger tapCount = kernelWidth * kernelHeight;
-    CharonMPSCnnTap *taps = (CharonMPSCnnTap *)calloc(tapCount ? tapCount : 1, sizeof(CharonMPSCnnTap));
-    CharonMPSCnnTaps(kernelWidth, kernelHeight, strideX, strideY, taps);
+    RevenantMPSCnnTap *taps = (RevenantMPSCnnTap *)calloc(tapCount ? tapCount : 1, sizeof(RevenantMPSCnnTap));
+    RevenantMPSCnnTaps(kernelWidth, kernelHeight, strideX, strideY, taps);
 
     MPSCNNNeuronType neuronType = d.neuronType;
-    float neuronA = d.neuronParameterA, neuronB = d.neuronParameterB, neuronC = [d charon_mps_neuronParameterC];
+    float neuronA = d.neuronParameterA, neuronB = d.neuronParameterB, neuronC = [d revenant_mps_neuronParameterC];
     for (NSUInteger oc = 0; oc < outChannels; oc++) {
-        float bias = _biases ? (float)CharonMPSLoad((const char *)[_biases contents] + _biasesOffset + oc * sizeof(float), MPSDataTypeFloat32, 0) : 0.0f;
+        float bias = _biases ? (float)RevenantMPSLoad((const char *)[_biases contents] + _biasesOffset + oc * sizeof(float), MPSDataTypeFloat32, 0) : 0.0f;
         for (NSUInteger oy = 0; oy < destHeight; oy++) {
             for (NSUInteger ox = 0; ox < destWidth; ox++) {
                 float sum = bias;
                 for (NSUInteger ic = 0; ic < inChannels; ic++) {
                     for (NSUInteger k = 0; k < tapCount; k++) {
                         NSUInteger sx, sy;
-                        if (!CharonMPSCnnSourceFor(ox, oy, taps[k].x, taps[k].y, strideX, strideY,
+                        if (!RevenantMPSCnnSourceFor(ox, oy, taps[k].x, taps[k].y, strideX, strideY,
                                                     dilationX, dilationY, sourceWidth, sourceHeight,
                                                     leftPad, topPad, &sx, &sy))
                             continue;
-                        float value = (float)CharonMPSLoad(CharonMPSCnnPixel(&from, sx, sy, ic), MPSDataTypeFloat32, 0);
+                        float value = (float)RevenantMPSLoad(RevenantMPSCnnPixel(&from, sx, sy, ic), MPSDataTypeFloat32, 0);
                         size_t weightIndex = ((oc * kernelHeight + taps[k].y) * kernelWidth + taps[k].x) * inChannels + ic;
-                        float weight = (float)CharonMPSLoad((const char *)[_weights contents] + _weightsOffset,
+                        float weight = (float)RevenantMPSLoad((const char *)[_weights contents] + _weightsOffset,
                                                               MPSDataTypeFloat32, weightIndex);
                         sum += value * weight;
                     }
                 }
-                float y = (float)CharonMPSApplyNeuron(neuronType, sum, neuronA, neuronB, neuronC, neuronA);
-                CharonMPSStore(CharonMPSCnnPixelMutable(&to, ox, oy, oc), MPSDataTypeFloat32, 0, y);
+                float y = (float)RevenantMPSApplyNeuron(neuronType, sum, neuronA, neuronB, neuronC, neuronA);
+                RevenantMPSStore(RevenantMPSCnnPixelMutable(&to, ox, oy, oc), MPSDataTypeFloat32, 0, y);
             }
         }
     }
@@ -177,7 +177,7 @@
                       imageIndex:0];
     free(source);
     free(destination);
-    CharonMPSConsumeReadCount(sourceImage);
+    RevenantMPSConsumeReadCount(sourceImage);
 }
 
 @end

@@ -1,6 +1,6 @@
 #import <UIKit/UIKit.h>
 
-@implementation UIViewController (CharonExtensionContext)
+@implementation UIViewController (RevenantExtensionContext)
 
 - (NSExtensionContext *)extensionContext
 {

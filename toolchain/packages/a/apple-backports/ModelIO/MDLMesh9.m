@@ -7,9 +7,9 @@ typedef struct {
     vector_float3 position;
     vector_float3 normal;
     vector_float2 uv;
-} CharonMDLVertex;
+} RevenantMDLVertex;
 
-static NSUInteger CharonMDLVertexComponentSize(MDLVertexFormat format)
+static NSUInteger RevenantMDLVertexComponentSize(MDLVertexFormat format)
 {
     switch (format & 0xFF0000) {
         case MDLVertexFormatUCharBits:
@@ -28,7 +28,7 @@ static NSUInteger CharonMDLVertexComponentSize(MDLVertexFormat format)
     }
 }
 
-static void CharonMDLBounds(MDLAxisAlignedBoundingBox *box, vector_float3 point)
+static void RevenantMDLBounds(MDLAxisAlignedBoundingBox *box, vector_float3 point)
 {
     float low[3], high[3], p[3];
     low[0] = box->minBounds.x, low[1] = box->minBounds.y, low[2] = box->minBounds.z;
@@ -125,7 +125,7 @@ static void CharonMDLBounds(MDLAxisAlignedBoundingBox *box, vector_float3 point)
     uint8_t *base = map.bytes;
     if (!base)
         return nil;
-    NSUInteger to = CharonMDLVertexComponentSize(format) * (format & 0x1F);
+    NSUInteger to = RevenantMDLVertexComponentSize(format) * (format & 0x1F);
     if (!layoutStride)
         return nil;
     MDLVertexAttributeData *data = [[MDLVertexAttributeData alloc] init];
@@ -143,7 +143,7 @@ static void CharonMDLBounds(MDLAxisAlignedBoundingBox *box, vector_float3 point)
         uint8_t *target = out.mutableBytes + vertex * data.stride;
         for (NSUInteger component = 0; component < (attribute.format & 0x1F); component++) {
             float value = 0;
-            switch (CharonMDLVertexComponentSize(attribute.format)) {
+            switch (RevenantMDLVertexComponentSize(attribute.format)) {
                 case 1: {
                     uint8_t raw = source[component];
                     value = (attribute.format & 0xF0000) == MDLVertexFormatUCharNormalizedBits ? raw / 255.0f : (float)raw;
@@ -162,7 +162,7 @@ static void CharonMDLBounds(MDLAxisAlignedBoundingBox *box, vector_float3 point)
                     break;
                 }
             }
-            memcpy(target + component * CharonMDLVertexComponentSize(format), &value, CharonMDLVertexComponentSize(format));
+            memcpy(target + component * RevenantMDLVertexComponentSize(format), &value, RevenantMDLVertexComponentSize(format));
         }
     }
     data.map = [[MDLMeshBufferMap alloc] initWithBytes:out.mutableBytes deallocator:nil];
@@ -184,7 +184,7 @@ static void CharonMDLBounds(MDLAxisAlignedBoundingBox *box, vector_float3 point)
     if (positions) {
         for (NSUInteger vertex = 0; vertex < _vertexCount; vertex++) {
             vector_float3 position = *(vector_float3 *)((uint8_t *)positions.dataStart + vertex * positions.stride);
-            CharonMDLBounds(&box, position);
+            RevenantMDLBounds(&box, position);
         }
     }
     if (box.minBounds[0] > box.maxBounds[0]) {

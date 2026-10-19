@@ -25,7 +25,7 @@ static NSString *const results_folder = @"/private/var/backports";
 - (NSArray<UIDragItem *> *)textDraggableView:(UIView<UITextDraggable> *)view itemsForDrag:(id<UITextDragRequest>)request
 {
     [self note:[NSString stringWithFormat:@"%@.itemsForDrag", self.host]];
-    NSItemProvider *provider = [[NSItemProvider alloc] initWithObject:@"charon text"];
+    NSItemProvider *provider = [[NSItemProvider alloc] initWithObject:@"revenant text"];
     return @[[[UIDragItem alloc] initWithItemProvider:provider]];
 }
 
@@ -119,7 +119,7 @@ NSArray *textdragdrop_documented_order(NSString *host)
              [NSString stringWithFormat:@"%@.dropSessionDidEnd", host]];
 }
 
-static int gCharonExit = 0;
+static int gRevenantExit = 0;
 static NSMutableArray<NSString *> *_asked = nil;
 
 @interface TextDriver : NSObject
@@ -135,10 +135,10 @@ static NSMutableArray<NSString *> *_asked = nil;
     [asked writeToFile:[results_folder stringByAppendingPathComponent:@"textdragdrop.asked"]
            atomically:YES encoding:NSUTF8StringEncoding error:NULL];
     NSString *summary = [NSString stringWithFormat:@"%@ checks=%d failures=%d\n",
-                         charon_failures ? @"FAIL" : @"ok", charon_checks, charon_failures];
+                         revenant_failures ? @"FAIL" : @"ok", revenant_checks, revenant_failures];
     [summary writeToFile:[results_folder stringByAppendingPathComponent:@"textdragdrop.done"]
               atomically:YES encoding:NSUTF8StringEncoding error:NULL];
-    gCharonExit = charon_failures ? 1 : 0;
+    gRevenantExit = revenant_failures ? 1 : 0;
 }
 
 - (void)run
@@ -157,30 +157,30 @@ static NSMutableArray<NSString *> *_asked = nil;
     control.textDropDelegate = probe;
     control.textDragOptions = UITextDragOptionsNone;
 
-    charon_check(control.textDragInteraction != nil,
+    revenant_check(control.textDragInteraction != nil,
                  "a text control has the drag interaction the header describes", nil);
-    charon_check(control.textDropInteraction != nil,
+    revenant_check(control.textDropInteraction != nil,
                  "a text control has the drop interaction the header describes", nil);
-    charon_check(!control.isTextDragActive, "no drag is under way before one is begun", nil);
-    charon_check(!control.isTextDropActive, "no drop is under way before one arrives", nil);
+    revenant_check(!control.isTextDragActive, "no drag is under way before one is begun", nil);
+    revenant_check(!control.isTextDropActive, "no drop is under way before one arrives", nil);
 
-    CharonTextDragAdaptor *dragAdaptor = [control charon_textDragDelegateAdaptor];
-    CharonTextDropAdaptor *dropAdaptor = [control charon_textDropDelegateAdaptor];
-    CharonTestDropSession *session = [[CharonTestDropSession alloc] initWithPoint:CGPointMake(20, 20)];
+    RevenantTextDragAdaptor *dragAdaptor = [control revenant_textDragDelegateAdaptor];
+    RevenantTextDropAdaptor *dropAdaptor = [control revenant_textDropDelegateAdaptor];
+    RevenantTestDropSession *session = [[RevenantTestDropSession alloc] initWithPoint:CGPointMake(20, 20)];
 
-    [dragAdaptor charon_itemsForDragSession:nil];
-    [dragAdaptor charon_willAnimateLiftWithSession:nil];
-    [dragAdaptor charon_dragSessionDidEnd:nil withOperation:UIDropOperationMove];
+    [dragAdaptor revenant_itemsForDragSession:nil];
+    [dragAdaptor revenant_willAnimateLiftWithSession:nil];
+    [dragAdaptor revenant_dragSessionDidEnd:nil withOperation:UIDropOperationMove];
 
-    [dropAdaptor charon_canHandleSession:session];
-    [dropAdaptor charon_updateForSession:session];
-    [dropAdaptor charon_sessionDidEnter:session];
-    [dropAdaptor charon_sessionDidExit:session];
-    [dropAdaptor charon_sessionDidEnd:session];
+    [dropAdaptor revenant_canHandleSession:session];
+    [dropAdaptor revenant_updateForSession:session];
+    [dropAdaptor revenant_sessionDidEnter:session];
+    [dropAdaptor revenant_sessionDidExit:session];
+    [dropAdaptor revenant_sessionDidEnd:session];
 
     NSArray *asked = probe.log;
     NSArray *expected = textdragdrop_documented_order(@"text");
-    charon_check([asked isEqualToArray:expected],
+    revenant_check([asked isEqualToArray:expected],
                  "a text control asks its two delegates in the order their headers give",
                  [NSString stringWithFormat:@"\n    asked   %@\n    expect  %@", asked, expected]);
     printf("asked %lu, expected %lu\n", (unsigned long)asked.count, (unsigned long)expected.count);
@@ -197,5 +197,5 @@ int main(int argc, char **argv)
         TextDriver *driver = [[TextDriver alloc] init];
         [driver run];
     }
-    return gCharonExit;
+    return gRevenantExit;
 }

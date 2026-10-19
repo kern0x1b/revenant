@@ -14,12 +14,12 @@
 set -euo pipefail
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-charon=$(cd "$here/../../../.." && pwd)
-files="$charon/packages/c/createml/files"
-out=$(runs_fresh charon-createml)
+revenant=$(cd "$here/../../../.." && pwd)
+files="$revenant/packages/c/createml/files"
+out=$(runs_fresh revenant-createml)
 # `KEEP=1` leaves the build directory behind, so a suite that dies can be run again under a debugger:
 #
-#     KEEP=1 ./run.sh && lldb --batch -o run -o bt "$charon"/.agent-work/runs/charon-createml.*/tabularframe
+#     KEEP=1 ./run.sh && lldb --batch -o run -o bt "$revenant"/.agent-work/runs/revenant-createml.*/tabularframe
 #
 # The reason it is an option rather than a habit: Swift's `print` buffers when stdout is a pipe, and a
 # `precondition` or a bounds trap kills the process before the buffer is flushed - so a suite that
@@ -73,7 +73,7 @@ xcrun swiftc -swift-version 5 -wmo -parse-as-library -O -enable-testing \
 # separate `PortProto` module, which is why `CreateMLComponents` could not see it.
 xcrun swiftc -swift-version 5 -wmo -parse-as-library -O \
     -module-name PortCoreML \
-    -import-objc-header "$out"/files/CoreML/CharonCoreML.h \
+    -import-objc-header "$out"/files/CoreML/RevenantCoreML.h \
     -emit-module -emit-module-path "$out/modules/PortCoreML.swiftmodule" \
     -c -o "$out/coreml.o" "$out"/files/CoreML/ShapedArray.swift \
     "$out"/files/CoreML/Codec.swift "$out"/files/CoreML/ModelWriter.swift

@@ -50,7 +50,7 @@ public struct TypeDisplayRepresentation: ExpressibleByStringLiteral {
     }
 
     public init(stringLiteral value: String) {
-        self.init(name: CharonLocalized.resource(value))
+        self.init(name: RevenantLocalized.resource(value))
     }
 
     public typealias StringLiteralType = String
@@ -80,7 +80,7 @@ public struct DisplayRepresentation: ExpressibleByStringLiteral, Equatable {
     }
 
     public init(stringLiteral value: String) {
-        self.init(title: CharonLocalized.resource(value))
+        self.init(title: RevenantLocalized.resource(value))
     }
 
     public struct Image: Equatable {
@@ -204,16 +204,16 @@ public struct DisplayRepresentation: ExpressibleByStringLiteral, Equatable {
 
 extension TypeDisplayRepresentable {
     public static var typeDisplayRepresentation: TypeDisplayRepresentation {
-        return TypeDisplayRepresentation(name: CharonLocalized.resource(CharonNames.simple(Self.self)))
+        return TypeDisplayRepresentation(name: RevenantLocalized.resource(RevenantNames.simple(Self.self)))
     }
 }
 
 extension CaseDisplayRepresentable {
     public var localizedStringResource: LocalizedStringResource {
-        return CharonLocalized.resource(String(describing: self))
+        return RevenantLocalized.resource(String(describing: self))
     }
 
     public static var caseDisplayRepresentations: [DisplayRepresentation] {
-        return allCases.map { DisplayRepresentation(title: CharonLocalized.resource(String(describing: $0))) }
+        return allCases.map { DisplayRepresentation(title: RevenantLocalized.resource(String(describing: $0))) }
     }
 }

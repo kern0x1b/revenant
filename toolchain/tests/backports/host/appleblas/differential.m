@@ -8,10 +8,10 @@
 
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 
-void charon_host_appleblas_sgeadd(const enum CBLAS_ORDER order, const enum CBLAS_TRANSPOSE transA,
+void revenant_host_appleblas_sgeadd(const enum CBLAS_ORDER order, const enum CBLAS_TRANSPOSE transA,
                                   const enum CBLAS_TRANSPOSE transB, int m, int n, float alpha, const float *A, int lda,
                                   float beta, const float *B, int ldb, float *C, int ldc);
-void charon_host_appleblas_dgeadd(const enum CBLAS_ORDER order, const enum CBLAS_TRANSPOSE transA,
+void revenant_host_appleblas_dgeadd(const enum CBLAS_ORDER order, const enum CBLAS_TRANSPOSE transA,
                                   const enum CBLAS_TRANSPOSE transB, int m, int n, double alpha, const double *A, int lda,
                                   double beta, const double *B, int ldb, double *C, int ldc);
 
@@ -54,12 +54,12 @@ static void same(const char *name, int is_double, int order, int trans_a, int tr
         copied = 1;
     }
     if (is_double) {
-        charon_host_appleblas_dgeadd((enum CBLAS_ORDER)order, (enum CBLAS_TRANSPOSE)trans_a, (enum CBLAS_TRANSPOSE)trans_b,
+        revenant_host_appleblas_dgeadd((enum CBLAS_ORDER)order, (enum CBLAS_TRANSPOSE)trans_a, (enum CBLAS_TRANSPOSE)trans_b,
                                      m, n, alpha, a, lda, beta, b, ldb, mine, ldc);
         appleblas_dgeadd((enum CBLAS_ORDER)order, (enum CBLAS_TRANSPOSE)trans_a, (enum CBLAS_TRANSPOSE)trans_b, m, n, alpha,
                          a, lda, beta, b, ldb, theirs, ldc);
     } else {
-        charon_host_appleblas_sgeadd((enum CBLAS_ORDER)order, (enum CBLAS_TRANSPOSE)trans_a, (enum CBLAS_TRANSPOSE)trans_b,
+        revenant_host_appleblas_sgeadd((enum CBLAS_ORDER)order, (enum CBLAS_TRANSPOSE)trans_a, (enum CBLAS_TRANSPOSE)trans_b,
                                      m, n, (float)alpha, a, lda, (float)beta, b, ldb, mine, ldc);
         appleblas_sgeadd((enum CBLAS_ORDER)order, (enum CBLAS_TRANSPOSE)trans_a, (enum CBLAS_TRANSPOSE)trans_b, m, n,
                          (float)alpha, a, lda, (float)beta, b, ldb, theirs, ldc);
@@ -123,7 +123,7 @@ static const float *bad_b;
 static void port_bad_lda(void)
 {
     float c[6] = {0, 0, 0, 0, 0, 0};
-    charon_host_appleblas_sgeadd(CblasRowMajor, CblasNoTrans, CblasNoTrans, 2, 3, 1.0f, bad_a, 1, 1.0f, bad_b, 3, c, 3);
+    revenant_host_appleblas_sgeadd(CblasRowMajor, CblasNoTrans, CblasNoTrans, 2, 3, 1.0f, bad_a, 1, 1.0f, bad_b, 3, c, 3);
 }
 
 static void host_bad_lda(void)
@@ -135,7 +135,7 @@ static void host_bad_lda(void)
 static void port_bad_trans(void)
 {
     float c[6] = {0, 0, 0, 0, 0, 0};
-    charon_host_appleblas_sgeadd(CblasRowMajor, (enum CBLAS_TRANSPOSE)999, CblasNoTrans, 2, 3, 1.0f, bad_a, 3, 1.0f,
+    revenant_host_appleblas_sgeadd(CblasRowMajor, (enum CBLAS_TRANSPOSE)999, CblasNoTrans, 2, 3, 1.0f, bad_a, 3, 1.0f,
                                  bad_b, 3, c, 3);
 }
 
@@ -148,7 +148,7 @@ static void host_bad_trans(void)
 static void port_bad_ldb(void)
 {
     float c[6] = {0, 0, 0, 0, 0, 0};
-    charon_host_appleblas_sgeadd(CblasColMajor, CblasNoTrans, CblasNoTrans, 3, 2, 1.0f, bad_a, 3, 1.0f, bad_b, 2, c, 3);
+    revenant_host_appleblas_sgeadd(CblasColMajor, CblasNoTrans, CblasNoTrans, 3, 2, 1.0f, bad_a, 3, 1.0f, bad_b, 2, c, 3);
 }
 
 static void host_bad_ldb(void)
@@ -160,7 +160,7 @@ static void host_bad_ldb(void)
 static void port_bad_ldc(void)
 {
     float c[6] = {0, 0, 0, 0, 0, 0};
-    charon_host_appleblas_sgeadd(CblasRowMajor, CblasNoTrans, CblasNoTrans, 2, 3, 1.0f, bad_a, 3, 1.0f, bad_b, 3, c, 2);
+    revenant_host_appleblas_sgeadd(CblasRowMajor, CblasNoTrans, CblasNoTrans, 2, 3, 1.0f, bad_a, 3, 1.0f, bad_b, 3, c, 2);
 }
 
 static void host_bad_ldc(void)

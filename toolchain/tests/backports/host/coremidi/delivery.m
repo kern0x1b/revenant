@@ -6,7 +6,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-#import "CharonCoreMIDI.h"
+#import "RevenantCoreMIDI.h"
 
 static int gFailures;
 static MIDIClientRef gClient;
@@ -92,7 +92,7 @@ static MIDIEventList *note(uint8_t *storage, size_t size)
     MIDIEventList *list = (MIDIEventList *)storage;
     MIDIEventPacket *end = MIDIEventListInit(list, kMIDIProtocol_2_0);
     UInt32 words[2] = {0x40903C00u, 0xFFFF0000u};
-    CharonMIDIEventListAdd(list, size, end, 0, 2, words);
+    RevenantMIDIEventListAdd(list, size, end, 0, 2, words);
     return list;
 }
 
@@ -107,7 +107,7 @@ static void reset_probe(void)
 
 static int drain_queue(void)
 {
-    CharonMIDISend(gOut, gSentinel, gSentinelList);
+    RevenantMIDISend(gOut, gSentinel, gSentinelList);
     if (dispatch_semaphore_wait(gSentinelSeen, dispatch_time(DISPATCH_TIME_NOW, 5LL * NSEC_PER_SEC)) == 0)
         return 1;
     expect(0, "the queue is served: the sentinel is called within five seconds", 0);
@@ -131,7 +131,7 @@ static int hold_round(int queued, long *started, long *afterDispose)
     gP.go = dispatch_semaphore_create(0);
     gP.armed = 1;
     MIDIEndpointRef dest = 0;
-    OSStatus made = CharonMIDIDestination(gClient, CFSTR("delivery-hold"), kMIDIProtocol_2_0, &dest, ^(const MIDIEventList *list, void *refCon) {
+    OSStatus made = RevenantMIDIDestination(gClient, CFSTR("delivery-hold"), kMIDIProtocol_2_0, &dest, ^(const MIDIEventList *list, void *refCon) {
         library_receive(list, refCon);
     });
     if (made != noErr) {
@@ -141,7 +141,7 @@ static int hold_round(int queued, long *started, long *afterDispose)
     uint8_t storage[64] __attribute__((aligned(8)));
     MIDIEventList *list = note(storage, sizeof(storage));
     for (int i = 0; i < 1 + queued; i++)
-        CharonMIDISend(gOut, dest, list);
+        RevenantMIDISend(gOut, dest, list);
     if (dispatch_semaphore_wait(gP.entered, dispatch_time(DISPATCH_TIME_NOW, 5LL * NSEC_PER_SEC)) != 0) {
         expect(0, "hold: the first delivery is inside its call", 0);
         return 0;
@@ -246,7 +246,7 @@ static void test_race(void)
     for (int trial = 0; trial < 200; trial++) {
         reset_probe();
         MIDIEndpointRef dest = 0;
-        if (CharonMIDIDestination(gClient, CFSTR("delivery-race"), kMIDIProtocol_2_0, &dest, ^(const MIDIEventList *list, void *refCon) {
+        if (RevenantMIDIDestination(gClient, CFSTR("delivery-race"), kMIDIProtocol_2_0, &dest, ^(const MIDIEventList *list, void *refCon) {
                 library_receive(list, refCon);
             }) != noErr) {
             expect(0, "race: the library's destination is made", trial);
@@ -255,7 +255,7 @@ static void test_race(void)
         uint8_t storage[64] __attribute__((aligned(8)));
         MIDIEventList *list = note(storage, sizeof(storage));
         for (int i = 0; i < 32; i++)
-            CharonMIDISend(gOut, dest, list);
+            RevenantMIDISend(gOut, dest, list);
         began += wait_started();
         disposer d = {dest, noErr, NULL};
         dispose_thread(&d);
@@ -296,7 +296,7 @@ static int compare_double(const void *a, const void *b)
 static void test_drain_cost(void)
 {
     MIDIEndpointRef dest = 0;
-    if (CharonMIDIDestination(gClient, CFSTR("delivery-bench"), kMIDIProtocol_2_0, &dest, ^(const MIDIEventList *list, void *refCon) {
+    if (RevenantMIDIDestination(gClient, CFSTR("delivery-bench"), kMIDIProtocol_2_0, &dest, ^(const MIDIEventList *list, void *refCon) {
             (void)list;
             (void)refCon;
             bench_receive();
@@ -310,7 +310,7 @@ static void test_drain_cost(void)
     for (int run = 0; run < BENCH_RUNS; run++) {
         gBenchCount = 0;
         for (int i = 0; i < BENCH_MESSAGES; i++)
-            CharonMIDISend(gOut, dest, list);
+            RevenantMIDISend(gOut, dest, list);
         if (!drain_queue())
             return;
         expect(gBenchCount == BENCH_MESSAGES, "bench: every message of the run is called", gBenchCount);
@@ -336,7 +336,7 @@ int main(void)
         return 1;
     }
     gSentinelSeen = dispatch_semaphore_create(0);
-    OSStatus sentinelStatus = CharonMIDIDestination(gClient, CFSTR("delivery-sentinel"), kMIDIProtocol_2_0, &gSentinel,
+    OSStatus sentinelStatus = RevenantMIDIDestination(gClient, CFSTR("delivery-sentinel"), kMIDIProtocol_2_0, &gSentinel,
                                                     ^(const MIDIEventList *list, void *refCon) {
         dispatch_semaphore_signal(gSentinelSeen);
     });

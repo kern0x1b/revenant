@@ -16,7 +16,7 @@
 #include <cmath>
 #include <string>
 
-namespace shade {
+namespace emulator {
 namespace {
     constexpr std::uint32_t parameter_error = 0xffffffce;
     constexpr std::uint32_t unsupported_format = 0x666d743f;

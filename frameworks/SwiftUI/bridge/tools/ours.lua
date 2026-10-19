@@ -254,7 +254,7 @@ local function scan(file, out)
 end
 
 function collect(root)
-    local files = os.files(path.join(root, "eidolon", "Sources", "SwiftUI", "*.swift"))
+    local files = os.files(path.join(root, "SwiftUI", "Sources", "SwiftUI", "*.swift"))
     table.sort(files)
     local out = {}
     for _, file in ipairs(files) do

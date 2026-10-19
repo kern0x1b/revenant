@@ -1,6 +1,6 @@
 #import <UIKit/UIKit.h>
 
-static NSArray *charon_content_size_categories(void)
+static NSArray *revenant_content_size_categories(void)
 {
     static NSArray *ordered;
     static dispatch_once_t once;
@@ -21,7 +21,7 @@ BOOL UIContentSizeCategoryIsAccessibilityCategory(UIContentSizeCategory category
 
 NSComparisonResult UIContentSizeCategoryCompareToCategory(UIContentSizeCategory lhs, UIContentSizeCategory rhs)
 {
-    NSArray *ordered = charon_content_size_categories();
+    NSArray *ordered = revenant_content_size_categories();
     NSUInteger left = lhs ? [ordered indexOfObject:lhs] : NSNotFound;
     NSUInteger right = rhs ? [ordered indexOfObject:rhs] : NSNotFound;
     BOOL leftUnspecified = !lhs || [lhs isEqualToString:UIContentSizeCategoryUnspecified];

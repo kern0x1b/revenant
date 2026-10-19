@@ -1,6 +1,6 @@
 import("core.base.option")
 
-local modules = path.join(assert(os.getenv("CHARON_ROOT") or ".", "CHARON_ROOT must name the worktree"), "modules")
+local modules = path.join(assert(os.getenv("REVENANT_ROOT") or ".", "REVENANT_ROOT must name the worktree"), "modules")
 local objc = import("apple.objc", {rootdir = modules, anonymous = true})
 local dyld = import("apple.dyld", {rootdir = modules, anonymous = true})
 import("byteorder", {rootdir = path.join(os.scriptdir(), "..", "modules")})

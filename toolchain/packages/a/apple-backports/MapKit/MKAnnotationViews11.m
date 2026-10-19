@@ -4,7 +4,7 @@
 #import <MapKit/MKMapView.h>
 #import <UIKit/UIKit.h>
 #import <objc/message.h>
-#import "CharonMapKit.h"
+#import "RevenantMapKit.h"
 
 @implementation MKMarkerAnnotationView {
     UIColor *_markerTintColor;
@@ -146,16 +146,16 @@
 
 @end
 
-@implementation MKMapView (CharonAnnotationViews)
+@implementation MKMapView (RevenantAnnotationViews)
 
 - (void)registerClass:(Class)annotationViewClass forAnnotationViewWithReuseIdentifier:(NSString *)identifier
 {
-    NSMutableDictionary *registered = [[self charon_registeredClasses] mutableCopy];
+    NSMutableDictionary *registered = [[self revenant_registeredClasses] mutableCopy];
     registered[identifier] = annotationViewClass;
-    [self charon_setRegisteredClasses:registered];
+    [self revenant_setRegisteredClasses:registered];
 }
 
-- (NSMutableDictionary *)charon_registeredClasses
+- (NSMutableDictionary *)revenant_registeredClasses
 {
     static NSMutableDictionary *registered;
     static dispatch_once_t once;
@@ -166,9 +166,9 @@
 }
 
 
-- (void)charon_setRegisteredClasses:(NSDictionary *)classes
+- (void)revenant_setRegisteredClasses:(NSDictionary *)classes
 {
-    NSMutableDictionary *registered = (NSMutableDictionary *)[self charon_registeredClasses];
+    NSMutableDictionary *registered = (NSMutableDictionary *)[self revenant_registeredClasses];
     [registered removeAllObjects];
     [registered addEntriesFromDictionary:classes ?: @{}];
 }
@@ -179,7 +179,7 @@
     if (identifier.length == 0 || !annotation) {
         return nil;
     }
-    Class viewClass = [self charon_registeredClasses][identifier];
+    Class viewClass = [self revenant_registeredClasses][identifier];
     if (!viewClass) {
         if ([annotation isKindOfClass:[MKClusterAnnotation class]]) {
             viewClass = [MKMarkerAnnotationView class];

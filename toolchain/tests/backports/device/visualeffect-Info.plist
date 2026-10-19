@@ -9,7 +9,7 @@
 	<key>CFBundleExecutable</key>
 	<string>visualeffect</string>
 	<key>CFBundleIdentifier</key>
-	<string>local.charon.backports.visualeffect</string>
+	<string>local.revenant.backports.visualeffect</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>

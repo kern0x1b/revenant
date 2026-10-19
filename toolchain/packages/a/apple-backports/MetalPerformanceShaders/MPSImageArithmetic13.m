@@ -21,36 +21,36 @@
 // names, and nothing is copied from it. The arithmetic here is MPSImageMath.h's, and the file is a fresh
 // implementation with no third-party licence to carry.
 
-#import "CharonMPS.h"
-#import "CharonMPSImage.h"
+#import "RevenantMPS.h"
+#import "RevenantMPSImage.h"
 
 #import <objc/message.h>
 #import <objc/runtime.h>
 
 
 typedef enum {
-    CharonMPSImageArithmeticOperationAdd,
-    CharonMPSImageArithmeticOperationSubtract,
-    CharonMPSImageArithmeticOperationMultiply,
-    CharonMPSImageArithmeticOperationDivide,
-} CharonMPSImageArithmeticOperation;
+    RevenantMPSImageArithmeticOperationAdd,
+    RevenantMPSImageArithmeticOperationSubtract,
+    RevenantMPSImageArithmeticOperationMultiply,
+    RevenantMPSImageArithmeticOperationDivide,
+} RevenantMPSImageArithmeticOperation;
 
-static id CharonMPSImageBinaryInitWithDevice(id object, Class superclass, id<MTLDevice> device)
+static id RevenantMPSImageBinaryInitWithDevice(id object, Class superclass, id<MTLDevice> device)
 {
     struct objc_super parent = { object, superclass };
     return ((id (*)(struct objc_super *, SEL, id<MTLDevice>))objc_msgSendSuper)(
         &parent, @selector(initWithDevice:), device);
 }
 
-@interface MPSImageArithmetic (CharonOperation)
-+ (CharonMPSImageArithmeticOperation)charon_mps_operation;
+@interface MPSImageArithmetic (RevenantOperation)
++ (RevenantMPSImageArithmeticOperation)revenant_mps_operation;
 @end
 
 @implementation MPSImageArithmetic
 
-+ (CharonMPSImageArithmeticOperation)charon_mps_operation
++ (RevenantMPSImageArithmeticOperation)revenant_mps_operation
 {
-    return CharonMPSImageArithmeticOperationAdd;
+    return RevenantMPSImageArithmeticOperationAdd;
 }
 
 - (instancetype)initWithDevice:(id<MTLDevice>)device
@@ -67,22 +67,22 @@ static id CharonMPSImageBinaryInitWithDevice(id object, Class superclass, id<MTL
     return self;
 }
 
-- (double)CharonMPSApplyOperation:(double)primary secondary:(double)secondary
+- (double)RevenantMPSApplyOperation:(double)primary secondary:(double)secondary
 {
-    switch ([[self class] charon_mps_operation]) {
-    case CharonMPSImageArithmeticOperationAdd: return primary + secondary;
-    case CharonMPSImageArithmeticOperationSubtract: return primary - secondary;
-    case CharonMPSImageArithmeticOperationMultiply: return primary * secondary;
-    case CharonMPSImageArithmeticOperationDivide: return secondary == 0.0 ? 0.0 : primary / secondary;
+    switch ([[self class] revenant_mps_operation]) {
+    case RevenantMPSImageArithmeticOperationAdd: return primary + secondary;
+    case RevenantMPSImageArithmeticOperationSubtract: return primary - secondary;
+    case RevenantMPSImageArithmeticOperationMultiply: return primary * secondary;
+    case RevenantMPSImageArithmeticOperationDivide: return secondary == 0.0 ? 0.0 : primary / secondary;
     }
     return primary + secondary;
 }
 
-- (double)CharonMPSCombine:(double)primary with:(double)secondary
+- (double)RevenantMPSCombine:(double)primary with:(double)secondary
 {
     double a = primary * (double)self.primaryScale;
     double b = secondary * (double)self.secondaryScale;
-    double result = [self CharonMPSApplyOperation:a secondary:b] + (double)self.bias;
+    double result = [self RevenantMPSApplyOperation:a secondary:b] + (double)self.bias;
     if (result < (double)self.minimumValue)
         result = (double)self.minimumValue;
     if (result > (double)self.maximumValue)
@@ -97,65 +97,65 @@ static id CharonMPSImageBinaryInitWithDevice(id object, Class superclass, id<MTL
 {
     NSString *what = NSStringFromClass([self class]);
     if (!commandBuffer) {
-        CharonMPSRefuse(@"%@: no command buffer, so nothing was written", what);
+        RevenantMPSRefuse(@"%@: no command buffer, so nothing was written", what);
         return;
     }
     MPSImageArithmetic *self_ = self;
-    CharonMPSImageMapBinary(primaryImage, secondaryImage, destinationImage, self.clipRect,
+    RevenantMPSImageMapBinary(primaryImage, secondaryImage, destinationImage, self.clipRect,
                             ^double(NSUInteger pixel, NSUInteger channel, double a, double b) {
-        return [self_ CharonMPSCombine:a with:b];
+        return [self_ RevenantMPSCombine:a with:b];
     }, what);
 }
 
 @end
 
 @implementation MPSImageAdd
-+ (CharonMPSImageArithmeticOperation)charon_mps_operation
++ (RevenantMPSImageArithmeticOperation)revenant_mps_operation
 {
-    return CharonMPSImageArithmeticOperationAdd;
+    return RevenantMPSImageArithmeticOperationAdd;
 }
 
 - (instancetype)initWithDevice:(id<MTLDevice>)device
 {
-    return CharonMPSImageBinaryInitWithDevice(self, [MPSImageArithmetic class], device);
+    return RevenantMPSImageBinaryInitWithDevice(self, [MPSImageArithmetic class], device);
 }
 @end
 
 
 @implementation MPSImageSubtract
-+ (CharonMPSImageArithmeticOperation)charon_mps_operation
++ (RevenantMPSImageArithmeticOperation)revenant_mps_operation
 {
-    return CharonMPSImageArithmeticOperationSubtract;
+    return RevenantMPSImageArithmeticOperationSubtract;
 }
 
 - (instancetype)initWithDevice:(id<MTLDevice>)device
 {
-    return CharonMPSImageBinaryInitWithDevice(self, [MPSImageArithmetic class], device);
+    return RevenantMPSImageBinaryInitWithDevice(self, [MPSImageArithmetic class], device);
 }
 @end
 
 
 @implementation MPSImageMultiply
-+ (CharonMPSImageArithmeticOperation)charon_mps_operation
++ (RevenantMPSImageArithmeticOperation)revenant_mps_operation
 {
-    return CharonMPSImageArithmeticOperationMultiply;
+    return RevenantMPSImageArithmeticOperationMultiply;
 }
 
 - (instancetype)initWithDevice:(id<MTLDevice>)device
 {
-    return CharonMPSImageBinaryInitWithDevice(self, [MPSImageArithmetic class], device);
+    return RevenantMPSImageBinaryInitWithDevice(self, [MPSImageArithmetic class], device);
 }
 @end
 
 
 @implementation MPSImageDivide
-+ (CharonMPSImageArithmeticOperation)charon_mps_operation
++ (RevenantMPSImageArithmeticOperation)revenant_mps_operation
 {
-    return CharonMPSImageArithmeticOperationDivide;
+    return RevenantMPSImageArithmeticOperationDivide;
 }
 
 - (instancetype)initWithDevice:(id<MTLDevice>)device
 {
-    return CharonMPSImageBinaryInitWithDevice(self, [MPSImageArithmetic class], device);
+    return RevenantMPSImageBinaryInitWithDevice(self, [MPSImageArithmetic class], device);
 }
 @end

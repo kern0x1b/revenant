@@ -14,7 +14,7 @@ static void probe(id<MTLDevice> device, NSString *path)
     }
     MTLCompileOptions *options = [MTLCompileOptions new];
     options.libraryType = MTLLibraryTypeDynamic;
-    options.installName = @"charon.air2cpu.oracle";
+    options.installName = @"revenant.air2cpu.oracle";
     id<MTLLibrary> library = [device newLibraryWithSource:source options:options error:&error];
     if (library == nil) {
         printf("FAIL %s compile: %s\n", path.lastPathComponent.UTF8String,

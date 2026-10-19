@@ -313,7 +313,7 @@ public final class EntityQueryProperty<Entity, Subject, Property, PropertyType, 
 
     public convenience init(_ keyPath: KeyPath<Subject, Property>, comparators: @escaping () -> QueryComparators) {
         self.init(keyPath, entityProvider: { _ in
-            CharonUnset.fatal("an entity-property query that names no provider has no entity to read")
+            RevenantUnset.fatal("an entity-property query that names no provider has no entity to read")
         }, comparators: comparators)
     }
 }
@@ -474,11 +474,11 @@ public enum StringSearchScope: String, AppEnum {
     case freeformVideo
 
     public static var typeDisplayRepresentation: TypeDisplayRepresentation {
-        return TypeDisplayRepresentation(name: CharonLocalized.resource("Search Scope"))
+        return TypeDisplayRepresentation(name: RevenantLocalized.resource("Search Scope"))
     }
 
     public static var caseDisplayRepresentations: [DisplayRepresentation] {
-        return allCases.map { DisplayRepresentation(title: CharonLocalized.resource($0.rawValue)) }
+        return allCases.map { DisplayRepresentation(title: RevenantLocalized.resource($0.rawValue)) }
     }
 }
 
@@ -504,15 +504,15 @@ public enum VideoCategory: String, AppEnum {
     case freeform
 
     public static var typeDisplayRepresentation: TypeDisplayRepresentation {
-        return TypeDisplayRepresentation(name: CharonLocalized.resource("Video Category"))
+        return TypeDisplayRepresentation(name: RevenantLocalized.resource("Video Category"))
     }
 
     public static var caseDisplayRepresentations: [DisplayRepresentation] {
-        return allCases.map { DisplayRepresentation(title: CharonLocalized.resource($0.rawValue)) }
+        return allCases.map { DisplayRepresentation(title: RevenantLocalized.resource($0.rawValue)) }
     }
 }
 
-public enum CharonUnset {
+public enum RevenantUnset {
     public static func fatal(_ what: String) -> Never {
         fatalError("AppIntents: \(what)")
     }

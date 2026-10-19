@@ -1,15 +1,15 @@
-#import "CharonLists.h"
+#import "RevenantLists.h"
 
 #pragma clang diagnostic ignored "-Wobjc-designated-initializers"
 
-static NSString *charon_background_style_name(NSInteger style)
+static NSString *revenant_background_style_name(NSInteger style)
 {
     static NSString *const names[] = {@"Custom", @"List Plain Cell", @"List Plain Header/Footer", @"List Grouped Cell", @"List Grouped Header/Footer", @"List Grouped Header/Footer",
                                       @"List Sidebar Cell", @"List Accompanied Sidebar Cell", @"List Cell"};
     return style >= 0 && style < 9 ? names[style] : @"Custom";
 }
 
-static NSString *charon_edges_text(NSDirectionalRectEdge edges)
+static NSString *revenant_edges_text(NSDirectionalRectEdge edges)
 {
     if (edges == NSDirectionalRectEdgeAll)
         return @"All";
@@ -25,13 +25,13 @@ static NSString *charon_edges_text(NSDirectionalRectEdge edges)
     return [NSString stringWithFormat:@"[%@]", [names componentsJoinedByString:@", "]];
 }
 
-static BOOL charon_is_clear(UIColor *color)
+static BOOL revenant_is_clear(UIColor *color)
 {
     CGFloat white = 0, alpha = 1;
     return [color getWhite:&white alpha:&alpha] && white == 0 && alpha == 0;
 }
 
-static UIConfigurationColorTransformer charon_alpha_block(CGFloat alpha)
+static UIConfigurationColorTransformer revenant_alpha_block(CGFloat alpha)
 {
     return ^UIColor *(UIColor *color) {
         return [color colorWithAlphaComponent:CGColorGetAlpha(color.CGColor) * alpha];
@@ -86,79 +86,79 @@ static UIConfigurationColorTransformer charon_alpha_block(CGFloat alpha)
     return YES;
 }
 
-+ (instancetype)charon_configurationWithStyle:(NSInteger)style
++ (instancetype)revenant_configurationWithStyle:(NSInteger)style
 {
-    return [[UIBackgroundConfiguration alloc] initCharonWithStyle:style];
+    return [[UIBackgroundConfiguration alloc] initRevenantWithStyle:style];
 }
 
 + (instancetype)clearConfiguration
 {
-    return [self charon_configurationWithStyle:CharonBackgroundStyleCustom];
+    return [self revenant_configurationWithStyle:RevenantBackgroundStyleCustom];
 }
 
 + (instancetype)listPlainCellConfiguration
 {
-    return [self charon_configurationWithStyle:CharonBackgroundStyleListPlainCell];
+    return [self revenant_configurationWithStyle:RevenantBackgroundStyleListPlainCell];
 }
 
 + (instancetype)listCellConfiguration
 {
-    return [self charon_configurationWithStyle:CharonBackgroundStyleListCell];
+    return [self revenant_configurationWithStyle:RevenantBackgroundStyleListCell];
 }
 
 + (instancetype)listHeaderConfiguration
 {
-    return [self charon_configurationWithStyle:CharonBackgroundStyleListPlainHeaderFooter];
+    return [self revenant_configurationWithStyle:RevenantBackgroundStyleListPlainHeaderFooter];
 }
 
 + (instancetype)listPlainHeaderFooterConfiguration
 {
-    return [self charon_configurationWithStyle:CharonBackgroundStyleListPlainHeaderFooter];
+    return [self revenant_configurationWithStyle:RevenantBackgroundStyleListPlainHeaderFooter];
 }
 
 + (instancetype)listGroupedCellConfiguration
 {
-    return [self charon_configurationWithStyle:CharonBackgroundStyleListGroupedCell];
+    return [self revenant_configurationWithStyle:RevenantBackgroundStyleListGroupedCell];
 }
 
 + (instancetype)listGroupedHeaderFooterConfiguration
 {
-    return [self charon_configurationWithStyle:CharonBackgroundStyleListGroupedHeaderFooter];
+    return [self revenant_configurationWithStyle:RevenantBackgroundStyleListGroupedHeaderFooter];
 }
 
 + (instancetype)listSidebarHeaderConfiguration
 {
-    return [self charon_configurationWithStyle:CharonBackgroundStyleListSidebarHeader];
+    return [self revenant_configurationWithStyle:RevenantBackgroundStyleListSidebarHeader];
 }
 
 + (instancetype)listSidebarCellConfiguration
 {
-    return [self charon_configurationWithStyle:CharonBackgroundStyleListSidebarCell];
+    return [self revenant_configurationWithStyle:RevenantBackgroundStyleListSidebarCell];
 }
 
 + (instancetype)listAccompaniedSidebarCellConfiguration
 {
-    return [self charon_configurationWithStyle:CharonBackgroundStyleListAccompaniedSidebarCell];
+    return [self revenant_configurationWithStyle:RevenantBackgroundStyleListAccompaniedSidebarCell];
 }
 
-- (instancetype)initCharonWithStyle:(NSInteger)style
+- (instancetype)initRevenantWithStyle:(NSInteger)style
 {
     if ((self = [super init])) {
         _style = style;
         _strokeColor = [UIColor clearColor];
         _backgroundColor = [UIColor clearColor];
         switch (style) {
-        case CharonBackgroundStyleListPlainCell:
-        case CharonBackgroundStyleListCell:
-            _backgroundColor = charon_semantic_color(CharonSemanticColorSystemBackground);
+        case RevenantBackgroundStyleListPlainCell:
+        case RevenantBackgroundStyleListCell:
+            _backgroundColor = revenant_semantic_color(RevenantSemanticColorSystemBackground);
             break;
-        case CharonBackgroundStyleListGroupedCell:
-            _backgroundColor = charon_semantic_color(CharonSemanticColorSecondarySystemGroupedBackground);
+        case RevenantBackgroundStyleListGroupedCell:
+            _backgroundColor = revenant_semantic_color(RevenantSemanticColorSecondarySystemGroupedBackground);
             break;
-        case CharonBackgroundStyleListGroupedHeaderFooter:
-        case CharonBackgroundStyleListSidebarHeader:
-        case CharonBackgroundStyleListSidebarCell:
-        case CharonBackgroundStyleListAccompaniedSidebarCell:
+        case RevenantBackgroundStyleListGroupedHeaderFooter:
+        case RevenantBackgroundStyleListSidebarHeader:
+        case RevenantBackgroundStyleListSidebarCell:
+        case RevenantBackgroundStyleListAccompaniedSidebarCell:
             _cornerRadius = 26;
             break;
         }
@@ -168,7 +168,7 @@ static UIConfigurationColorTransformer charon_alpha_block(CGFloat alpha)
 
 - (instancetype)init
 {
-    if ((self = [self initCharonWithStyle:CharonBackgroundStyleCustom])) {
+    if ((self = [self initRevenantWithStyle:RevenantBackgroundStyleCustom])) {
         _backgroundColor = nil;
         _strokeColor = nil;
         _colorCustomized = YES;
@@ -178,7 +178,7 @@ static UIConfigurationColorTransformer charon_alpha_block(CGFloat alpha)
 
 - (instancetype)initWithCoder:(NSCoder *)coder
 {
-    if ((self = [self initCharonWithStyle:(NSInteger)[coder decodeIntegerForKey:@"style"]])) {
+    if ((self = [self initRevenantWithStyle:(NSInteger)[coder decodeIntegerForKey:@"style"]])) {
         _customView = [coder decodeObjectOfClass:[UIView class] forKey:@"customView"];
         _cornerRadius = (CGFloat)[coder decodeDoubleForKey:@"cornerRadius"];
         _backgroundInsets = NSDirectionalEdgeInsetsMake([coder decodeDoubleForKey:@"insetTop"], [coder decodeDoubleForKey:@"insetLeading"], [coder decodeDoubleForKey:@"insetBottom"],
@@ -215,7 +215,7 @@ static UIConfigurationColorTransformer charon_alpha_block(CGFloat alpha)
 
 - (id)copyWithZone:(NSZone *)zone
 {
-    UIBackgroundConfiguration *copy = [[[self class] allocWithZone:zone] initCharonWithStyle:_style];
+    UIBackgroundConfiguration *copy = [[[self class] allocWithZone:zone] initRevenantWithStyle:_style];
     copy->_customView = _customView;
     copy->_cornerRadius = _cornerRadius;
     copy->_backgroundInsets = _backgroundInsets;
@@ -237,7 +237,7 @@ static UIConfigurationColorTransformer charon_alpha_block(CGFloat alpha)
     return copy;
 }
 
-- (NSInteger)charon_style
+- (NSInteger)revenant_style
 {
     return _style;
 }
@@ -369,14 +369,14 @@ static UIConfigurationColorTransformer charon_alpha_block(CGFloat alpha)
     _strokeOutset = strokeOutset;
 }
 
-- (UIColor *)charon_styleColor
+- (UIColor *)revenant_styleColor
 {
     switch (_style) {
-    case CharonBackgroundStyleListPlainCell:
-    case CharonBackgroundStyleListCell:
-        return charon_semantic_color(CharonSemanticColorSystemBackground);
-    case CharonBackgroundStyleListGroupedCell:
-        return charon_semantic_color(CharonSemanticColorSecondarySystemGroupedBackground);
+    case RevenantBackgroundStyleListPlainCell:
+    case RevenantBackgroundStyleListCell:
+        return revenant_semantic_color(RevenantSemanticColorSystemBackground);
+    case RevenantBackgroundStyleListGroupedCell:
+        return revenant_semantic_color(RevenantSemanticColorSecondarySystemGroupedBackground);
     }
     return [UIColor clearColor];
 }
@@ -388,10 +388,10 @@ static UIConfigurationColorTransformer charon_alpha_block(CGFloat alpha)
         return updated;
     UIViewConfigurationState *view = (UIViewConfigurationState *)state;
     UICellConfigurationState *cell = [view isKindOfClass:[UICellConfigurationState class]] ? (UICellConfigurationState *)view : nil;
-    BOOL plain = _style == CharonBackgroundStyleListPlainCell || _style == CharonBackgroundStyleListCell;
-    BOOL grouped = _style == CharonBackgroundStyleListGroupedCell;
-    BOOL sidebar = _style == CharonBackgroundStyleListSidebarCell || _style == CharonBackgroundStyleListAccompaniedSidebarCell;
-    BOOL header = _style == CharonBackgroundStyleListGroupedHeaderFooter || _style == CharonBackgroundStyleListSidebarHeader;
+    BOOL plain = _style == RevenantBackgroundStyleListPlainCell || _style == RevenantBackgroundStyleListCell;
+    BOOL grouped = _style == RevenantBackgroundStyleListGroupedCell;
+    BOOL sidebar = _style == RevenantBackgroundStyleListSidebarCell || _style == RevenantBackgroundStyleListAccompaniedSidebarCell;
+    BOOL header = _style == RevenantBackgroundStyleListGroupedHeaderFooter || _style == RevenantBackgroundStyleListSidebarHeader;
     if (!(plain || grouped || sidebar || header))
         return updated;
     BOOL selected = view.selected, highlighted = view.highlighted, focused = view.focused, swiped = cell.swiped, editing = cell.editing;
@@ -399,7 +399,7 @@ static UIConfigurationColorTransformer charon_alpha_block(CGFloat alpha)
     BOOL faded = view.disabled && !swiped;
     UIColor *gray5 = [UIColor colorWithRed:229.0 / 255 green:229.0 / 255 blue:234.0 / 255 alpha:1];
     UIColor *gray2 = [UIColor colorWithRed:174.0 / 255 green:174.0 / 255 blue:178.0 / 255 alpha:1];
-    UIColor *color = [self charon_styleColor];
+    UIColor *color = [self revenant_styleColor];
     CGFloat alpha = 0;
     NSString *name = nil;
     if (plain || grouped) {
@@ -427,7 +427,7 @@ static UIConfigurationColorTransformer charon_alpha_block(CGFloat alpha)
     } else if (sidebar) {
         BOOL like = (selected && !editing) || targeted;
         if (like)
-            color = charon_semantic_color(CharonSemanticColorQuaternarySystemFill);
+            color = revenant_semantic_color(RevenantSemanticColorQuaternarySystemFill);
         else if (swiped)
             color = gray5;
         if (focused && !(selected && (faded || editing) && !targeted))
@@ -449,7 +449,7 @@ static UIConfigurationColorTransformer charon_alpha_block(CGFloat alpha)
     if (!_colorCustomized)
         updated->_backgroundColor = color;
     if (!_transformerCustomized) {
-        updated->_backgroundColorTransformer = alpha ? [charon_alpha_block(alpha) copy] : nil;
+        updated->_backgroundColorTransformer = alpha ? [revenant_alpha_block(alpha) copy] : nil;
         updated->_backgroundTransformerName = alpha ? name : nil;
     }
     return updated;
@@ -477,14 +477,14 @@ static UIConfigurationColorTransformer charon_alpha_block(CGFloat alpha)
 
 - (NSString *)description
 {
-    NSMutableString *text = [NSMutableString stringWithFormat:@"<%@: %p; Base Style = %@", [self class], self, charon_background_style_name(_style)];
+    NSMutableString *text = [NSMutableString stringWithFormat:@"<%@: %p; Base Style = %@", [self class], self, revenant_background_style_name(_style)];
     if (_cornerRadius)
         [text appendFormat:@"; cornerRadius = %g", _cornerRadius];
     if (!NSDirectionalEdgeInsetsEqualToDirectionalEdgeInsets(_backgroundInsets, NSDirectionalEdgeInsetsZero))
         [text appendFormat:@"; backgroundInsets = %@", NSStringFromDirectionalEdgeInsets(_backgroundInsets)];
     if (_edges)
-        [text appendFormat:@"; edgesAddingLayoutMarginsToBackgroundInsets = %@", charon_edges_text(_edges)];
-    BOOL showsColor = _backgroundColor ? !charon_is_clear(_backgroundColor) : YES;
+        [text appendFormat:@"; edgesAddingLayoutMarginsToBackgroundInsets = %@", revenant_edges_text(_edges)];
+    BOOL showsColor = _backgroundColor ? !revenant_is_clear(_backgroundColor) : YES;
     if (_backgroundColor && showsColor)
         [text appendFormat:@"; backgroundColor = %@", _backgroundColor];
     else if (showsColor)
@@ -495,7 +495,7 @@ static UIConfigurationColorTransformer charon_alpha_block(CGFloat alpha)
         [text appendString:@"; backgroundColorTransformer = Custom"];
     if (_visualEffect)
         [text appendFormat:@"; visualEffect = %@", _visualEffect];
-    if (_strokeWidth > 0 && (!_strokeColor || !charon_is_clear(_strokeColor))) {
+    if (_strokeWidth > 0 && (!_strokeColor || !revenant_is_clear(_strokeColor))) {
         [text appendFormat:@"; strokeColor = %@", _strokeColor ?: @"Inherited Tint Color"];
         if (_strokeColorTransformer)
             [text appendString:@"; strokeColorTransformer = Custom"];

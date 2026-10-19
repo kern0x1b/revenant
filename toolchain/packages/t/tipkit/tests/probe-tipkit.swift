@@ -1,6 +1,6 @@
 import Foundation
 #if PORT
-import CharonTipKit
+import RevenantTipKit
 #else
 import TipKit
 #endif

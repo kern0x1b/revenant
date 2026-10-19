@@ -6,7 +6,7 @@
     UIInterfaceOrientation _orientation;
 }
 
-- (instancetype)initCharonWithOrientation:(UIInterfaceOrientation)orientation
+- (instancetype)initRevenantWithOrientation:(UIInterfaceOrientation)orientation
 {
     struct objc_super parent = {self, class_getSuperclass([UIWindowSceneGeometry class])};
     if ((self = ((id (*)(struct objc_super *, SEL))objc_msgSendSuper)(&parent, @selector(init))))
@@ -21,7 +21,7 @@
 
 - (id)copyWithZone:(NSZone *)zone
 {
-    return [[[self class] allocWithZone:zone] initCharonWithOrientation:_orientation];
+    return [[[self class] allocWithZone:zone] initRevenantWithOrientation:_orientation];
 }
 
 - (NSString *)description
@@ -31,11 +31,11 @@
 
 @end
 
-@implementation UIWindowScene (CharonSceneGeometry16)
+@implementation UIWindowScene (RevenantSceneGeometry16)
 
 - (UIWindowSceneGeometry *)effectiveGeometry
 {
-    return [[UIWindowSceneGeometry alloc] initCharonWithOrientation:self.interfaceOrientation];
+    return [[UIWindowSceneGeometry alloc] initRevenantWithOrientation:self.interfaceOrientation];
 }
 
 @end

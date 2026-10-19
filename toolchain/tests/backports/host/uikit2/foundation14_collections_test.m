@@ -12,7 +12,7 @@ static uint32_t next(void)
 
 static NSString *host_selector(NSString *name)
 {
-    return [@"charonHost" stringByAppendingString:[[name substringToIndex:1].uppercaseString stringByAppendingString:[name substringFromIndex:1]]];
+    return [@"revenantHost" stringByAppendingString:[[name substringToIndex:1].uppercaseString stringByAppendingString:[name substringFromIndex:1]]];
 }
 
 static NSString *normalized(NSString *text)
@@ -20,13 +20,13 @@ static NSString *normalized(NSString *text)
     if (!text)
         return @"-";
     NSMutableString *result = [text mutableCopy];
-    NSRegularExpression *expression = [NSRegularExpression regularExpressionWithPattern:@"charonHost([A-Za-z])" options:0 error:NULL];
+    NSRegularExpression *expression = [NSRegularExpression regularExpressionWithPattern:@"revenantHost([A-Za-z])" options:0 error:NULL];
     NSArray *matches = [expression matchesInString:result options:0 range:NSMakeRange(0, result.length)];
     for (NSTextCheckingResult *match in [matches reverseObjectEnumerator]) {
         NSString *letter = [result substringWithRange:[match rangeAtIndex:1]];
         [result replaceCharactersInRange:match.range withString:letter.lowercaseString];
     }
-    for (NSString *pattern in @[@"\\(0x[0-9a-fA-F]+\\)", @"0x[0-9a-fA-F]+", @"\\[/[^\\]]*\\]", @"CharonHost"])
+    for (NSString *pattern in @[@"\\(0x[0-9a-fA-F]+\\)", @"0x[0-9a-fA-F]+", @"\\[/[^\\]]*\\]", @"RevenantHost"])
         [result replaceOccurrencesOfString:pattern withString:@"" options:NSRegularExpressionSearch range:NSMakeRange(0, result.length)];
     NSRange allowed = [result rangeOfString:@"Allowed classes are"];
     if (allowed.location != NSNotFound)
@@ -171,8 +171,8 @@ int main(int argc, char **argv)
         for (NSString *sample in samples)
             printf("  %s\n", sample.UTF8String);
         printf("info: %lu dictionaries with two faults name the other one, for the archive lists them in an order a decoded dictionary has lost\n", (unsigned long)unordered);
-        charon_check(wrong == 0, "arrays and dictionaries decode, or fail, as the system's coder decodes them", [NSString stringWithFormat:@"%lu of %lu differ", (unsigned long)wrong, (unsigned long)cases]);
+        revenant_check(wrong == 0, "arrays and dictionaries decode, or fail, as the system's coder decodes them", [NSString stringWithFormat:@"%lu of %lu differ", (unsigned long)wrong, (unsigned long)cases]);
     }
-    printf("checks=%d failures=%d\n", charon_checks, charon_failures);
-    return charon_failures;
+    printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
+    return revenant_failures;
 }

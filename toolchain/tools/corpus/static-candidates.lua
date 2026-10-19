@@ -143,7 +143,7 @@ function main(list, out_override)
     local ordered = aggregate.ranked(rows, function (row) return row.crash * 100 + row.apps end,
                                      function (row) return row.api end)
 
-    local dest = out_override or os.getenv("CHARON_STATIC_CANDIDATES_OUT")
+    local dest = out_override or os.getenv("REVENANT_STATIC_CANDIDATES_OUT")
         or path.join(aggregate.corpus_dir(), "static-candidates-demand.tsv")
     local file = assert(io.open(dest, "w"))
     file:write("unguarded_callers\tapps\tframework\tintroduced\tkind\tapi\tsenders\n")

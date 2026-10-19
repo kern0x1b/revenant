@@ -1,6 +1,6 @@
-#import "CharonSensorKit.h"
-#import "CharonSensorKitValue.h"
-#import "../CharonValueStore.h"
+#import "RevenantSensorKit.h"
+#import "RevenantSensorKitValue.h"
+#import "../RevenantValueStore.h"
 
-#define CHARON_SENSORKIT_NAMES_15_4
-#import "CharonSensorKitNames.h"
+#define REVENANT_SENSORKIT_NAMES_15_4
+#import "RevenantSensorKitNames.h"

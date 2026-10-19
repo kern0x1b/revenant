@@ -1,18 +1,18 @@
-#import "CharonBackdrop.h"
-#import "CharonBlur.h"
+#import "RevenantBackdrop.h"
+#import "RevenantBlur.h"
 #import <QuartzCore/QuartzCore.h>
 
-static NSString *const CharonEffectKey = @"UIVisualEffectViewEffect";
-static NSString *const CharonContentViewKey = @"UIVisualEffectViewContentView";
+static NSString *const RevenantEffectKey = @"UIVisualEffectViewEffect";
+static NSString *const RevenantContentViewKey = @"UIVisualEffectViewContentView";
 
-static void charon_free_pixels(void *info, const void *data, size_t size)
+static void revenant_free_pixels(void *info, const void *data, size_t size)
 {
     free((void *)data);
 }
 
-static const CGFloat CharonMaximumScale = 0.25;
+static const CGFloat RevenantMaximumScale = 0.25;
 
-@interface UIVisualEffectView () <CharonBackdropClient>
+@interface UIVisualEffectView () <RevenantBackdropClient>
 @end
 
 @implementation UIVisualEffectView {
@@ -20,47 +20,47 @@ static const CGFloat CharonMaximumScale = 0.25;
     UIView *_contentView;
     BOOL _installing;
     CALayer *_backdrop;
-    CharonBackdrop *_reader;
+    RevenantBackdrop *_reader;
     dispatch_queue_t _shadeQueue;
     BOOL _shading;
 }
 
-- (CharonBackdrop *)charon_reader
+- (RevenantBackdrop *)revenant_reader
 {
     if (!_reader) {
-        _reader = [[CharonBackdrop alloc] initWithView:self client:self];
-        _reader.scale = CharonMaximumScale;
-        _shadeQueue = dispatch_queue_create("org.charon.visualeffect.shade", DISPATCH_QUEUE_SERIAL);
+        _reader = [[RevenantBackdrop alloc] initWithView:self client:self];
+        _reader.scale = RevenantMaximumScale;
+        _shadeQueue = dispatch_queue_create("org.revenant.visualeffect.shade", DISPATCH_QUEUE_SERIAL);
     }
     return _reader;
 }
 
-- (void)charon_refresh
+- (void)revenant_refresh
 {
-    [[self charon_reader] refresh];
+    [[self revenant_reader] refresh];
 }
 
-- (void)charon_removeBackdrop
+- (void)revenant_removeBackdrop
 {
     [_backdrop removeFromSuperlayer];
     _backdrop = nil;
     [_reader invalidate];
 }
 
-- (BOOL)backdropIsWanted:(CharonBackdrop *)backdrop
+- (BOOL)backdropIsWanted:(RevenantBackdrop *)backdrop
 {
     return [_effect isKindOfClass:[UIBlurEffect class]] && !self.hidden && self.alpha > 0.01 && self.bounds.size.width > 0 && self.bounds.size.height > 0 && !_shading;
 }
 
-- (CGRect)backdropRegion:(CharonBackdrop *)backdrop
+- (CGRect)backdropRegion:(RevenantBackdrop *)backdrop
 {
-    CGFloat radius = charon_blur_parameters([(UIBlurEffect *)_effect charon_style]).radius;
+    CGFloat radius = revenant_blur_parameters([(UIBlurEffect *)_effect revenant_style]).radius;
     return CGRectInset(self.bounds, -radius, -radius);
 }
 
-- (void)backdrop:(CharonBackdrop *)backdrop captured:(uint8_t *)pixels width:(size_t)width height:(size_t)height rowBytes:(size_t)rowBytes rect:(CGRect)captured
+- (void)backdrop:(RevenantBackdrop *)backdrop captured:(uint8_t *)pixels width:(size_t)width height:(size_t)height rowBytes:(size_t)rowBytes rect:(CGRect)captured
 {
-    CharonBlurParameters parameters = charon_blur_parameters([(UIBlurEffect *)_effect charon_style]);
+    RevenantBlurParameters parameters = revenant_blur_parameters([(UIBlurEffect *)_effect revenant_style]);
     CGFloat sx = width / captured.size.width, sy = height / captured.size.height;
 
     if (!_backdrop) {
@@ -76,9 +76,9 @@ static const CGFloat CharonMaximumScale = 0.25;
 
     _shading = YES;
     dispatch_async(_shadeQueue, ^{
-        charon_blur_pixels(pixels, width, height, rowBytes, parameters.radius * sx, parameters.saturation, parameters.tintRed, parameters.tintGreen, parameters.tintBlue, parameters.tintAlpha);
+        revenant_blur_pixels(pixels, width, height, rowBytes, parameters.radius * sx, parameters.saturation, parameters.tintRed, parameters.tintGreen, parameters.tintBlue, parameters.tintAlpha);
         CGColorSpaceRef output = CGColorSpaceCreateDeviceRGB();
-        CGDataProviderRef provider = CGDataProviderCreateWithData(NULL, pixels, bytes, charon_free_pixels);
+        CGDataProviderRef provider = CGDataProviderCreateWithData(NULL, pixels, bytes, revenant_free_pixels);
         CGImageRef image = CGImageCreate(width, height, 8, 32, rowBytes, output, kCGImageAlphaPremultipliedLast | kCGBitmapByteOrderDefault, provider, NULL, true, kCGRenderingIntentDefault);
         CGDataProviderRelease(provider);
         CGColorSpaceRelease(output);
@@ -104,13 +104,13 @@ static const CGFloat CharonMaximumScale = 0.25;
 {
     [super didMoveToWindow];
     if (self.window) {
-        [[self charon_reader] start];
+        [[self revenant_reader] start];
         dispatch_async(dispatch_get_main_queue(), ^{
-            [self charon_refresh];
+            [self revenant_refresh];
         });
     } else {
         [_reader stop];
-        [self charon_removeBackdrop];
+        [self revenant_removeBackdrop];
     }
 }
 
@@ -121,7 +121,7 @@ static const CGFloat CharonMaximumScale = 0.25;
     [_reader setNeedsRefresh];
 }
 
-- (void)charon_install
+- (void)revenant_install
 {
     _installing = YES;
     if (!_contentView) {
@@ -143,7 +143,7 @@ static const CGFloat CharonMaximumScale = 0.25;
     self = [super initWithFrame:CGRectZero];
     if (self) {
         _effect = [effect copy];
-        [self charon_install];
+        [self revenant_install];
     }
     return self;
 }
@@ -152,7 +152,7 @@ static const CGFloat CharonMaximumScale = 0.25;
 {
     self = [super initWithFrame:frame];
     if (self)
-        [self charon_install];
+        [self revenant_install];
     return self;
 }
 
@@ -161,9 +161,9 @@ static const CGFloat CharonMaximumScale = 0.25;
     _installing = YES;
     self = [super initWithCoder:coder];
     if (self) {
-        _effect = [coder decodeObjectOfClass:[UIVisualEffect class] forKey:CharonEffectKey];
-        _contentView = [coder decodeObjectOfClass:[UIView class] forKey:CharonContentViewKey];
-        [self charon_install];
+        _effect = [coder decodeObjectOfClass:[UIVisualEffect class] forKey:RevenantEffectKey];
+        _contentView = [coder decodeObjectOfClass:[UIView class] forKey:RevenantContentViewKey];
+        [self revenant_install];
     }
     return self;
 }
@@ -171,8 +171,8 @@ static const CGFloat CharonMaximumScale = 0.25;
 - (void)encodeWithCoder:(NSCoder *)coder
 {
     [super encodeWithCoder:coder];
-    [coder encodeObject:_effect forKey:CharonEffectKey];
-    [coder encodeObject:_contentView forKey:CharonContentViewKey];
+    [coder encodeObject:_effect forKey:RevenantEffectKey];
+    [coder encodeObject:_contentView forKey:RevenantContentViewKey];
 }
 
 - (UIVisualEffect *)effect
@@ -185,9 +185,9 @@ static const CGFloat CharonMaximumScale = 0.25;
     _effect = [effect copy];
     [_reader invalidate];
     if (![_effect isKindOfClass:[UIBlurEffect class]])
-        [self charon_removeBackdrop];
+        [self revenant_removeBackdrop];
     else if (self.window)
-        [[self charon_reader] start];
+        [[self revenant_reader] start];
 }
 
 - (UIView *)contentView
@@ -195,7 +195,7 @@ static const CGFloat CharonMaximumScale = 0.25;
     return _contentView;
 }
 
-- (void)charon_refuse:(UIView *)view
+- (void)revenant_refuse:(UIView *)view
 {
     if (_installing)
         return;
@@ -204,25 +204,25 @@ static const CGFloat CharonMaximumScale = 0.25;
 
 - (void)addSubview:(UIView *)view
 {
-    [self charon_refuse:view];
+    [self revenant_refuse:view];
     [super addSubview:view];
 }
 
 - (void)insertSubview:(UIView *)view atIndex:(NSInteger)index
 {
-    [self charon_refuse:view];
+    [self revenant_refuse:view];
     [super insertSubview:view atIndex:index];
 }
 
 - (void)insertSubview:(UIView *)view aboveSubview:(UIView *)sibling
 {
-    [self charon_refuse:view];
+    [self revenant_refuse:view];
     [super insertSubview:view aboveSubview:sibling];
 }
 
 - (void)insertSubview:(UIView *)view belowSubview:(UIView *)sibling
 {
-    [self charon_refuse:view];
+    [self revenant_refuse:view];
     [super insertSubview:view belowSubview:sibling];
 }
 

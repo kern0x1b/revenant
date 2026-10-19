@@ -1,19 +1,19 @@
 #import <Foundation/Foundation.h>
 #import <objc/runtime.h>
 
-typedef void (^CharonDataDeallocator)(void *bytes, NSUInteger length);
+typedef void (^RevenantDataDeallocator)(void *bytes, NSUInteger length);
 
-@interface CharonDataDeallocation : NSObject
-- (instancetype)initWithBytes:(void *)bytes length:(NSUInteger)length deallocator:(CharonDataDeallocator)deallocator;
+@interface RevenantDataDeallocation : NSObject
+- (instancetype)initWithBytes:(void *)bytes length:(NSUInteger)length deallocator:(RevenantDataDeallocator)deallocator;
 @end
 
-@implementation CharonDataDeallocation {
+@implementation RevenantDataDeallocation {
     void *_bytes;
     NSUInteger _length;
-    CharonDataDeallocator _deallocator;
+    RevenantDataDeallocator _deallocator;
 }
 
-- (instancetype)initWithBytes:(void *)bytes length:(NSUInteger)length deallocator:(CharonDataDeallocator)deallocator
+- (instancetype)initWithBytes:(void *)bytes length:(NSUInteger)length deallocator:(RevenantDataDeallocator)deallocator
 {
     if ((self = [super init])) {
         _bytes = bytes;
@@ -30,11 +30,11 @@ typedef void (^CharonDataDeallocator)(void *bytes, NSUInteger length);
 
 @end
 
-static char CharonDeallocationKey;
+static char RevenantDeallocationKey;
 
-@implementation NSData (CharonDeallocator)
+@implementation NSData (RevenantDeallocator)
 
-- (instancetype)initWithBytesNoCopy:(void *)bytes length:(NSUInteger)length deallocator:(CharonDataDeallocator)deallocator
+- (instancetype)initWithBytesNoCopy:(void *)bytes length:(NSUInteger)length deallocator:(RevenantDataDeallocator)deallocator
 {
     if (!deallocator)
         return [self initWithBytesNoCopy:bytes length:length freeWhenDone:NO];
@@ -45,7 +45,7 @@ static char CharonDeallocationKey;
     }
     self = [self initWithBytesNoCopy:bytes length:length freeWhenDone:NO];
     if (self)
-        objc_setAssociatedObject(self, &CharonDeallocationKey, [[CharonDataDeallocation alloc] initWithBytes:bytes length:length deallocator:deallocator], OBJC_ASSOCIATION_RETAIN);
+        objc_setAssociatedObject(self, &RevenantDeallocationKey, [[RevenantDataDeallocation alloc] initWithBytes:bytes length:length deallocator:deallocator], OBJC_ASSOCIATION_RETAIN);
     else
         deallocator(bytes, length);
     return self;

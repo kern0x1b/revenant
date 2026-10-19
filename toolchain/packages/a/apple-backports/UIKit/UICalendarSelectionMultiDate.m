@@ -1,13 +1,13 @@
 #import <UIKit/UIKit.h>
-#import "CharonCalendar.h"
+#import "RevenantCalendar.h"
 
-static Protocol *charon_multiDateSelectionDelegateProtocol(void) __attribute__((used));
-static Protocol *charon_multiDateSelectionDelegateProtocol(void)
+static Protocol *revenant_multiDateSelectionDelegateProtocol(void) __attribute__((used));
+static Protocol *revenant_multiDateSelectionDelegateProtocol(void)
 {
     return @protocol(UICalendarSelectionMultiDateDelegate);
 }
 
-static BOOL charon_sameMultiDay(NSDateComponents *first, NSDateComponents *second)
+static BOOL revenant_sameMultiDay(NSDateComponents *first, NSDateComponents *second)
 {
     return first && second && first.year == second.year && first.month == second.month && first.day == second.day;
 }
@@ -20,7 +20,7 @@ static BOOL charon_sameMultiDay(NSDateComponents *first, NSDateComponents *secon
 
 - (instancetype)initWithDelegate:(id<UICalendarSelectionMultiDateDelegate>)delegate
 {
-    if ((self = [self charon_init])) {
+    if ((self = [self revenant_init])) {
         _delegate = delegate;
         _selectedDates = [NSArray array];
     }
@@ -45,7 +45,7 @@ static BOOL charon_sameMultiDay(NSDateComponents *first, NSDateComponents *secon
 - (void)setSelectedDates:(NSArray<NSDateComponents *> *)selectedDates
 {
     _selectedDates = [selectedDates copy];
-    [self charon_redraw];
+    [self revenant_redraw];
 }
 
 - (void)setSelectedDates:(NSArray<NSDateComponents *> *)selectedDates animated:(BOOL)animated
@@ -53,16 +53,16 @@ static BOOL charon_sameMultiDay(NSDateComponents *first, NSDateComponents *secon
     [self setSelectedDates:selectedDates];
 }
 
-- (BOOL)charon_isSelected:(NSDateComponents *)day
+- (BOOL)revenant_isSelected:(NSDateComponents *)day
 {
     for (NSDateComponents *chosen in _selectedDates) {
-        if (charon_sameMultiDay(chosen, day))
+        if (revenant_sameMultiDay(chosen, day))
             return YES;
     }
     return NO;
 }
 
-- (BOOL)charon_delegateAllows:(SEL)question day:(NSDateComponents *)day
+- (BOOL)revenant_delegateAllows:(SEL)question day:(NSDateComponents *)day
 {
     if (![_delegate respondsToSelector:question])
         return YES;
@@ -70,30 +70,30 @@ static BOOL charon_sameMultiDay(NSDateComponents *first, NSDateComponents *secon
     return answer(_delegate, question, self, day);
 }
 
-- (BOOL)charon_canSelect:(NSDateComponents *)day
+- (BOOL)revenant_canSelect:(NSDateComponents *)day
 {
-    return [self charon_delegateAllows:@selector(multiDateSelection:canSelectDate:) day:day];
+    return [self revenant_delegateAllows:@selector(multiDateSelection:canSelectDate:) day:day];
 }
 
-- (void)charon_didTapDay:(NSDateComponents *)day
+- (void)revenant_didTapDay:(NSDateComponents *)day
 {
-    if ([self charon_isSelected:day]) {
-        if (![self charon_delegateAllows:@selector(multiDateSelection:canDeselectDate:) day:day])
+    if ([self revenant_isSelected:day]) {
+        if (![self revenant_delegateAllows:@selector(multiDateSelection:canDeselectDate:) day:day])
             return;
         NSMutableArray *kept = [NSMutableArray array];
         for (NSDateComponents *chosen in _selectedDates) {
-            if (!charon_sameMultiDay(chosen, day))
+            if (!revenant_sameMultiDay(chosen, day))
                 [kept addObject:chosen];
         }
         _selectedDates = [kept copy];
-        [self charon_redraw];
+        [self revenant_redraw];
         [_delegate multiDateSelection:self didDeselectDate:day];
         return;
     }
-    if (![self charon_canSelect:day])
+    if (![self revenant_canSelect:day])
         return;
     _selectedDates = [[_selectedDates arrayByAddingObject:[day copy]] copy];
-    [self charon_redraw];
+    [self revenant_redraw];
     [_delegate multiDateSelection:self didSelectDate:day];
 }
 

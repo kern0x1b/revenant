@@ -4,7 +4,7 @@ here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 UIKIT=${UIKIT:-$here/../../../../packages/a/apple-backports/UIKit}
 harness=${ANIMATORSCRUB_HARNESS:-$here/../../device}
-build=${ANIMATORSCRUB_BUILD:-$(runs_folder charon-animatorscrub-host)}
+build=${ANIMATORSCRUB_BUILD:-$(runs_folder revenant-animatorscrub-host)}
 sources=${SOURCES:-$(cat "$here/sources.txt")}
 sdk=$(xcrun --show-sdk-path)
 target="-target arm64-apple-ios15.0-macabi -isysroot $sdk -iframework $sdk/System/iOSSupport/System/Library/Frameworks"
@@ -16,7 +16,7 @@ for source in $sources; do
 done
 renames=""
 for name in $(xcrun nm -gU "$build"/plain/*.o | awk 'NF == 3 {print $3}' | grep -E '^_OBJC_CLASS_\$_' | sed -e 's/^_OBJC_CLASS_\$_//' | sort -u); do
-    renames="$renames -D$name=CharonHost$name"
+    renames="$renames -D$name=RevenantHost$name"
 done
 for source in $sources; do
     xcrun clang $target -fobjc-arc -fvisibility=hidden $quiet $renames -I"$UIKIT" -c "$UIKIT/$source" -o "$build/renamed/$source.o"

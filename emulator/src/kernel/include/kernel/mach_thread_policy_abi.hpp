@@ -13,7 +13,7 @@
 #include <cstddef>
 #include <cstdint>
 
-namespace shade::darwin::mach::thread_policy {
+namespace emulator::darwin::mach::thread_policy {
 
 constexpr std::uint32_t subsystem_base = 3600;
 constexpr std::uint32_t legacy_policy_message = subsystem_base + 16;

@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include "CharonHAPBignum.h"
+#include "RevenantHAPBignum.h"
 
 static int hex_digit(char c)
 {
@@ -23,7 +23,7 @@ static int read_value(BigNum *out, const char *text)
             return 0;
         bytes[i] = (uint8_t)((high << 4) | low);
     }
-    charon_bn_from_bytes_be(out, bytes, length / 2);
+    revenant_bn_from_bytes_be(out, bytes, length / 2);
     return 1;
 }
 
@@ -55,14 +55,14 @@ int main(void)
             printf("-\n");
             continue;
         }
-        charon_bn_mont_prepare(&mont, &n);
+        revenant_bn_mont_prepare(&mont, &n);
         if (strcmp(fields[0], "pow") == 0)
-            charon_bn_mont_pow(&mont, &out, &a, &b);
+            revenant_bn_mont_pow(&mont, &out, &a, &b);
         else
-            charon_bn_mont_mul(&mont, &out, &a, &b);
-        size_t needed = charon_bn_byte_length(&out);
+            revenant_bn_mont_mul(&mont, &out, &a, &b);
+        size_t needed = revenant_bn_byte_length(&out);
         uint8_t bytes[BN_LIMBS * 4];
-        charon_bn_to_bytes_be(bytes, needed ? needed : 1, &out);
+        revenant_bn_to_bytes_be(bytes, needed ? needed : 1, &out);
         for (size_t i = 0; i < (needed ? needed : 1); ++i)
             printf("%02X", bytes[i]);
         printf("\n");

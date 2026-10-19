@@ -12,7 +12,7 @@
 #include <map>
 #include <utility>
 
-namespace shade {
+namespace emulator {
 
 std::uint64_t PresentationTracker::record(std::uint32_t submitting_process_id,
     std::vector<PresentationLayer> layers,

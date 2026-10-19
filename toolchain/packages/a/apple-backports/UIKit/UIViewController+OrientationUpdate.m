@@ -1,6 +1,6 @@
 #import <UIKit/UIKit.h>
 
-@implementation UIViewController (CharonOrientationUpdate)
+@implementation UIViewController (RevenantOrientationUpdate)
 
 - (void)setNeedsUpdateOfSupportedInterfaceOrientations
 {

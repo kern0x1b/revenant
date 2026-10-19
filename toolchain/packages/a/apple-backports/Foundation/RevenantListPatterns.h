@@ -1,9 +1,9 @@
 typedef struct {
     const char *identifier;
     NSString *two, *start, *middle, *end;
-} CharonListPattern;
+} RevenantListPattern;
 
-static const CharonListPattern charon_list_patterns[] = {
+static const RevenantListPattern revenant_list_patterns[] = {
     {"acf", @"{0}, {1}", @"{0}, {1}", @"{0}, {1}", @"{0}, {1}"},
     {"af", @"{0} en {1}", @"{0}, {1}", @"{0}, {1}", @"{0} en {1}"},
     {"agq", @"{0}, {1}", @"{0}, {1}", @"{0}, {1}", @"{0}, {1}"},

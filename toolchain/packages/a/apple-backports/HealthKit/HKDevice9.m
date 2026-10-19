@@ -1,7 +1,7 @@
 #import <UIKit/UIKit.h>
 #import <HealthKit/HealthKit.h>
 
-#import "CharonHKStore.h"
+#import "RevenantHKStore.h"
 
 @implementation HKDevice {
     NSString *_name;
@@ -13,7 +13,7 @@
     NSString *_localIdentifier;
     NSString *_UDIDeviceIdentifier;
 }
-CHARON_HEALTHKIT_UNCREATABLE_INIT
+REVENANT_HEALTHKIT_UNCREATABLE_INIT
 
 + (BOOL)supportsSecureCoding
 {
@@ -144,15 +144,15 @@ CHARON_HEALTHKIT_UNCREATABLE_INIT
     if (![other isKindOfClass:[HKDevice class]])
         return NO;
     HKDevice *that = other;
-    return [self charon_isSameString:_name to:that.name] && [self charon_isSameString:_manufacturer to:that.manufacturer]
-           && [self charon_isSameString:_model to:that.model] && [self charon_isSameString:_hardwareVersion to:that.hardwareVersion]
-           && [self charon_isSameString:_firmwareVersion to:that.firmwareVersion]
-           && [self charon_isSameString:_softwareVersion to:that.softwareVersion]
-           && [self charon_isSameString:_localIdentifier to:that.localIdentifier]
-           && [self charon_isSameString:_UDIDeviceIdentifier to:that.UDIDeviceIdentifier];
+    return [self revenant_isSameString:_name to:that.name] && [self revenant_isSameString:_manufacturer to:that.manufacturer]
+           && [self revenant_isSameString:_model to:that.model] && [self revenant_isSameString:_hardwareVersion to:that.hardwareVersion]
+           && [self revenant_isSameString:_firmwareVersion to:that.firmwareVersion]
+           && [self revenant_isSameString:_softwareVersion to:that.softwareVersion]
+           && [self revenant_isSameString:_localIdentifier to:that.localIdentifier]
+           && [self revenant_isSameString:_UDIDeviceIdentifier to:that.UDIDeviceIdentifier];
 }
 
-- (BOOL)charon_isSameString:(nullable NSString *)mine to:(nullable NSString *)theirs
+- (BOOL)revenant_isSameString:(nullable NSString *)mine to:(nullable NSString *)theirs
 {
     return mine == theirs || [mine isEqualToString:theirs];
 }

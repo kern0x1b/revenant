@@ -1,20 +1,20 @@
 #import <CoreML/CoreML.h>
 
-#include "CharonMLBridge.h"
-#include "CharonMLTensor.h"
+#include "RevenantMLBridge.h"
+#include "RevenantMLTensor.h"
 
 @interface MLMultiArray () {
 @public
-    charon_ml_array _array;
+    revenant_ml_array _array;
     void (^_deallocator)(void *);
     CVPixelBufferRef _pixelBuffer;
 }
-- (charon_ml_array *)charonArray;
+- (revenant_ml_array *)revenantArray;
 @end
 
 @implementation MLMultiArray
 
-- (charon_ml_array *)charonArray
+- (revenant_ml_array *)revenantArray
 {
     return &_array;
 }
@@ -34,7 +34,7 @@
         _deallocator((void *)_array.data);
         _deallocator = nil;
     } else {
-        charon_ml_array_free(&_array);
+        revenant_ml_array_free(&_array);
     }
 }
 
@@ -42,14 +42,14 @@
                      dataType:(MLMultiArrayDataType)dataType
                         error:(NSError **)error
 {
-    int64_t dimensions[CHARON_ML_MAX_RANK];
+    int64_t dimensions[REVENANT_ML_MAX_RANK];
     int rank = 0;
     self = [super init];
     if (self == nil) {
         return nil;
     }
-    if (!charon_ml_shape_from_array(shape, dimensions, CHARON_ML_MAX_RANK, &rank)) {
-        charon_ml_error(error, CHARON_ML_ERROR_GENERIC,
+    if (!revenant_ml_shape_from_array(shape, dimensions, REVENANT_ML_MAX_RANK, &rank)) {
+        revenant_ml_error(error, REVENANT_ML_ERROR_GENERIC,
                         @"the shape of a multi array is one number per dimension, and there are more than eight");
         return nil;
     }
@@ -57,7 +57,7 @@
         int axis;
         for (axis = 0; axis < rank; axis++) {
             if (dimensions[axis] < 0) {
-                charon_ml_error(error, CHARON_ML_ERROR_GENERIC,
+                revenant_ml_error(error, REVENANT_ML_ERROR_GENERIC,
                                 @"a dimension of a multi array cannot be of negative length");
                 return nil;
             }
@@ -67,9 +67,9 @@
             rank = 1;
         }
     }
-    _array = charon_ml_array_alloc(charon_ml_type_of_array(dataType), dimensions, rank);
+    _array = revenant_ml_array_alloc(revenant_ml_type_of_array(dataType), dimensions, rank);
     if (_array.data == NULL) {
-        charon_ml_error(error, CHARON_ML_ERROR_GENERIC,
+        revenant_ml_error(error, REVENANT_ML_ERROR_GENERIC,
                         @"the multi array of that shape and type has no room for it on this device");
         return nil;
     }
@@ -80,14 +80,14 @@
                      dataType:(MLMultiArrayDataType)dataType
                       strides:(NSArray<NSNumber *> *)strides
 {
-    int64_t dimensions[CHARON_ML_MAX_RANK];
-    int64_t steps[CHARON_ML_MAX_RANK];
+    int64_t dimensions[REVENANT_ML_MAX_RANK];
+    int64_t steps[REVENANT_ML_MAX_RANK];
     int rank = 0, stride_rank = 0, index;
     self = [self initWithShape:shape dataType:dataType error:NULL];
     if (self == nil) {
         return nil;
     }
-    if (!charon_ml_shape_from_array(strides, steps, CHARON_ML_MAX_RANK, &stride_rank) || stride_rank != rank) {
+    if (!revenant_ml_shape_from_array(strides, steps, REVENANT_ML_MAX_RANK, &stride_rank) || stride_rank != rank) {
         return nil;
     }
     for (index = 0; index < rank; index++) {
@@ -123,26 +123,26 @@
                         deallocator:(void (^)(void *))deallocator
                               error:(NSError **)error
 {
-    int64_t dimensions[CHARON_ML_MAX_RANK];
+    int64_t dimensions[REVENANT_ML_MAX_RANK];
     int rank = 0;
     self = [self initWithShape:shape dataType:dataType error:error];
     if (self == nil) {
         return nil;
     }
-    if (!charon_ml_shape_from_array(strides, dimensions, CHARON_ML_MAX_RANK, &rank)) {
-        charon_ml_error(error, CHARON_ML_ERROR_GENERIC,
+    if (!revenant_ml_shape_from_array(strides, dimensions, REVENANT_ML_MAX_RANK, &rank)) {
+        revenant_ml_error(error, REVENANT_ML_ERROR_GENERIC,
                         @"the strides of a multi array are one number per dimension of its shape");
         return nil;
     }
     free(_array.data);
-    _array = charon_ml_array_make(charon_ml_type_of_array(dataType), _array.shape, _array.rank, dataPointer);
+    _array = revenant_ml_array_make(revenant_ml_type_of_array(dataType), _array.shape, _array.rank, dataPointer);
     _deallocator = deallocator;
     return self;
 }
 
 - (instancetype)initWithPixelBuffer:(CVPixelBufferRef)pixelBuffer shape:(NSArray<NSNumber *> *)shape
 {
-    int64_t dimensions[CHARON_ML_MAX_RANK];
+    int64_t dimensions[REVENANT_ML_MAX_RANK];
     int rank = 0;
     void *bytes = NULL;
     OSType format;
@@ -152,7 +152,7 @@
     if (self == nil || pixelBuffer == NULL) {
         return nil;
     }
-    if (!charon_ml_shape_from_array(shape, dimensions, CHARON_ML_MAX_RANK, &rank) ||
+    if (!revenant_ml_shape_from_array(shape, dimensions, REVENANT_ML_MAX_RANK, &rank) ||
         CVPixelBufferLockBaseAddress(pixelBuffer, 0) != kCVReturnSuccess) {
         return nil;
     }
@@ -160,7 +160,7 @@
     switch (format) {
     case kCVPixelFormatType_32BGRA:
     case kCVPixelFormatType_32ARGB:
-        data_type = CHARON_ML_ARRAY_FLOAT32;
+        data_type = REVENANT_ML_ARRAY_FLOAT32;
         break;
     default:
         CVPixelBufferUnlockBaseAddress(pixelBuffer, 0);
@@ -168,12 +168,12 @@
     }
     bytes = CVPixelBufferGetBaseAddress(pixelBuffer);
     free(_array.data);
-    _array = charon_ml_array_make(data_type, _array.shape, _array.rank, bytes);
+    _array = revenant_ml_array_make(data_type, _array.shape, _array.rank, bytes);
     _pixelBuffer = (CVPixelBufferRef)CVPixelBufferRetain(pixelBuffer);
     return self;
 }
 
-- (instancetype)initWithWindowOf:(charon_ml_array)array
+- (instancetype)initWithWindowOf:(revenant_ml_array)array
 {
     self = [super init];
     if (self == nil) {
@@ -193,17 +193,17 @@
 
 - (MLMultiArrayDataType)dataType
 {
-    return charon_ml_array_type(_array.data_type);
+    return revenant_ml_array_type(_array.data_type);
 }
 
 - (NSArray<NSNumber *> *)shape
 {
-    return charon_ml_shape_to_array(_array.shape, _array.rank);
+    return revenant_ml_shape_to_array(_array.shape, _array.rank);
 }
 
 - (NSArray<NSNumber *> *)strides
 {
-    return charon_ml_shape_to_array(_array.strides, _array.rank);
+    return revenant_ml_shape_to_array(_array.strides, _array.rank);
 }
 
 - (NSInteger)count
@@ -221,7 +221,7 @@
     if (idx < 0 || (size_t)idx >= _array.count) {
         return nil;
     }
-    return @(charon_ml_array_get(&_array, (int64_t)idx));
+    return @(revenant_ml_array_get(&_array, (int64_t)idx));
 }
 
 - (void)getBytesWithHandler:(void (NS_NOESCAPE ^)(const void *bytes, NSInteger size))handler
@@ -233,7 +233,7 @@
     if (_pixelBuffer != NULL) {
         locked = CVPixelBufferLockBaseAddress(_pixelBuffer, kCVPixelBufferLock_ReadOnly) == kCVReturnSuccess;
     }
-    handler(_array.data, (NSInteger)(_array.count * charon_ml_type_size(_array.data_type)));
+    handler(_array.data, (NSInteger)(_array.count * revenant_ml_type_size(_array.data_type)));
     if (locked) {
         CVPixelBufferUnlockBaseAddress(_pixelBuffer, kCVPixelBufferLock_ReadOnly);
     }
@@ -248,7 +248,7 @@
     if (_pixelBuffer != NULL) {
         locked = CVPixelBufferLockBaseAddress(_pixelBuffer, 0) == kCVReturnSuccess;
     }
-    handler(_array.data, (NSInteger)(_array.count * charon_ml_type_size(_array.data_type)), self.strides);
+    handler(_array.data, (NSInteger)(_array.count * revenant_ml_type_size(_array.data_type)), self.strides);
     if (locked) {
         CVPixelBufferUnlockBaseAddress(_pixelBuffer, 0);
     }
@@ -259,38 +259,38 @@
     if (object == nil || idx < 0 || (size_t)idx >= _array.count) {
         return;
     }
-    charon_ml_array_set(&_array, (int64_t)idx, object.doubleValue);
+    revenant_ml_array_set(&_array, (int64_t)idx, object.doubleValue);
 }
 
 - (NSNumber *)objectForKeyedSubscript:(NSArray<NSNumber *> *)key
 {
-    int64_t position[CHARON_ML_MAX_RANK];
+    int64_t position[REVENANT_ML_MAX_RANK];
     int rank = 0;
     int64_t offset;
-    if (!charon_ml_shape_from_array(key, position, CHARON_ML_MAX_RANK, &rank) || rank != _array.rank) {
+    if (!revenant_ml_shape_from_array(key, position, REVENANT_ML_MAX_RANK, &rank) || rank != _array.rank) {
         return nil;
     }
-    offset = charon_ml_array_offset(&_array, position, rank);
+    offset = revenant_ml_array_offset(&_array, position, rank);
     if (offset < 0) {
         return nil;
     }
-    return @(charon_ml_array_get(&_array, offset));
+    return @(revenant_ml_array_get(&_array, offset));
 }
 
 - (void)setObject:(NSNumber *)object forKeyedSubscript:(NSArray<NSNumber *> *)key
 {
-    int64_t position[CHARON_ML_MAX_RANK];
+    int64_t position[REVENANT_ML_MAX_RANK];
     int rank = 0;
     int64_t offset;
-    if (object == nil || !charon_ml_shape_from_array(key, position, CHARON_ML_MAX_RANK, &rank) ||
+    if (object == nil || !revenant_ml_shape_from_array(key, position, REVENANT_ML_MAX_RANK, &rank) ||
         rank != _array.rank) {
         return;
     }
-    offset = charon_ml_array_offset(&_array, position, rank);
+    offset = revenant_ml_array_offset(&_array, position, rank);
     if (offset < 0) {
         return;
     }
-    charon_ml_array_set(&_array, offset, object.doubleValue);
+    revenant_ml_array_set(&_array, offset, object.doubleValue);
 }
 
 + (MLMultiArray *)multiArrayByConcatenatingMultiArrays:(NSArray<MLMultiArray *> *)arrays
@@ -298,21 +298,21 @@
                                               dataType:(MLMultiArrayDataType)dataType
 {
     NSUInteger count = arrays.count, index;
-    int64_t shape[CHARON_ML_MAX_RANK];
-    int64_t strides[CHARON_ML_MAX_RANK];
+    int64_t shape[REVENANT_ML_MAX_RANK];
+    int64_t strides[REVENANT_ML_MAX_RANK];
     int rank = 0, axis_index;
     int64_t total = 0, at_axis = 0;
     MLMultiArray *joined;
-    charon_ml_array *out;
+    revenant_ml_array *out;
 
-    if (count == 0 || charon_ml_type_size(charon_ml_type_of_array(dataType)) == 0) {
+    if (count == 0 || revenant_ml_type_size(revenant_ml_type_of_array(dataType)) == 0) {
         return nil;
     }
     for (index = 0; index < count; index++) {
-        int64_t one[CHARON_ML_MAX_RANK];
+        int64_t one[REVENANT_ML_MAX_RANK];
         int one_rank = 0;
-        if (!charon_ml_shape_from_array(arrays[index].shape, one, CHARON_ML_MAX_RANK, &one_rank) ||
-            one_rank > CHARON_ML_MAX_RANK) {
+        if (!revenant_ml_shape_from_array(arrays[index].shape, one, REVENANT_ML_MAX_RANK, &one_rank) ||
+            one_rank > REVENANT_ML_MAX_RANK) {
             return nil;
         }
         if (axis < 0 || axis >= one_rank) {
@@ -332,21 +332,21 @@
         total += one[axis];
     }
     shape[axis] = total;
-    joined = [[MLMultiArray alloc] initWithShape:charon_ml_shape_to_array(shape, rank) dataType:dataType error:NULL];
+    joined = [[MLMultiArray alloc] initWithShape:revenant_ml_shape_to_array(shape, rank) dataType:dataType error:NULL];
     if (joined == nil) {
         return nil;
     }
-    out = [joined charonArray];
+    out = [joined revenantArray];
     for (index = 0; index < count; index++) {
-        charon_ml_array *one = [arrays[index] charonArray];
+        revenant_ml_array *one = [arrays[index] revenantArray];
         size_t element;
         for (element = 0; element < one->count; element++) {
-            int64_t position[CHARON_ML_MAX_RANK];
+            int64_t position[REVENANT_ML_MAX_RANK];
             int64_t destination;
-            charon_ml_unravel((int64_t)element, one->rank, one->shape, position);
-            destination = charon_ml_ravel(position, out->rank, out->strides);
+            revenant_ml_unravel((int64_t)element, one->rank, one->shape, position);
+            destination = revenant_ml_ravel(position, out->rank, out->strides);
             destination += (at_axis + position[axis] - position[axis]) * out->strides[axis];
-            charon_ml_array_set(out, destination, charon_ml_array_get(one, (int64_t)element));
+            revenant_ml_array_set(out, destination, revenant_ml_array_get(one, (int64_t)element));
         }
         at_axis += one->shape[axis];
     }
@@ -367,14 +367,14 @@
         return nil;
     }
     if (strides != nil) {
-        int64_t steps[CHARON_ML_MAX_RANK];
+        int64_t steps[REVENANT_ML_MAX_RANK];
         int rank = 0;
-        if (charon_ml_shape_from_array(strides, steps, CHARON_ML_MAX_RANK, &rank)) {
+        if (revenant_ml_shape_from_array(strides, steps, REVENANT_ML_MAX_RANK, &rank)) {
             memcpy(_array.strides, steps, (size_t)MIN(rank, _array.rank) * sizeof *steps);
         }
     }
     if (bytes != nil) {
-        size_t width = charon_ml_type_size(_array.data_type);
+        size_t width = revenant_ml_type_size(_array.data_type);
         size_t room = _array.count * width;
         [bytes getBytes:_array.data length:MIN(room, bytes.length)];
     }
@@ -386,7 +386,7 @@
     [coder encodeObject:self.shape forKey:@"shape"];
     [coder encodeObject:self.strides forKey:@"strides"];
     [coder encodeObject:@(_array.data_type) forKey:@"dataType"];
-    [coder encodeObject:[NSData dataWithBytes:_array.data length:_array.count * charon_ml_type_size(_array.data_type)]
+    [coder encodeObject:[NSData dataWithBytes:_array.data length:_array.count * revenant_ml_type_size(_array.data_type)]
                  forKey:@"data"];
 }
 

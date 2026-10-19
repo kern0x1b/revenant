@@ -335,7 +335,7 @@ function main(out)
     end
     out = path.absolute(out)
     print("interpreter check -> " .. out)
-    local harness = prepare(out, {name = "ml-predict", sources = {{"tools", "predict-main.c"}}, glob = "CharonML*.c"})
+    local harness = prepare(out, {name = "ml-predict", sources = {{"tools", "predict-main.c"}}, glob = "RevenantML*.c"})
     for _, case in ipairs(CASES) do
         local name = case[1]
         local actual = path.join(out, name .. ".actual")

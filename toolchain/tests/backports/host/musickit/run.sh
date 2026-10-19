@@ -18,20 +18,20 @@ here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 # Four levels up is the repository root, as in every other suite under tests/backports/host: five is
 # its parent, and the run as written looked for packages/m/musickit there and found the worktrees
-# directory - "clang: error: no such file or directory: '.../worktrees/packages/m/musickit/files/CharonC.c'".
+# directory - "clang: error: no such file or directory: '.../worktrees/packages/m/musickit/files/RevenantC.c'".
 root=$(cd "$here/../../../../" && pwd)
-musickit=${CHARON_ROOT:-$root}/packages/m/musickit
-charon=${CHARON_ROOT:-$root}
+musickit=${REVENANT_ROOT:-$root}/packages/m/musickit
+revenant=${REVENANT_ROOT:-$root}
 openssl=${OPENSSL:-openssl}
-work=$(runs_fresh charon-musickit-jose)
+work=$(runs_fresh revenant-musickit-jose)
 mkdir -p "$work"
 trap 'rm -rf "$work"' EXIT
 
-# uECC's headers, from the package the recipe installs: that is what CharonCKWebAuth.h and uECC.h are
+# uECC's headers, from the package the recipe installs: that is what RevenantCKWebAuth.h and uECC.h are
 # included against, and the installed include/ is exactly the set the recipe chose to install.
 uecc=$(ls -d "$HOME"/.xmake/packages/m/micro-ecc/*/* 2>/dev/null | head -1)
 if [ -z "$uecc" ]; then
-    echo "SKIP: charon@micro-ecc is not installed; build it once and this runs"
+    echo "SKIP: revenant@micro-ecc is not installed; build it once and this runs"
     exit 0
 fi
 swiftc=${SWIFTC:-}
@@ -73,14 +73,14 @@ fi
 "$openssl" ecparam -name prime256v1 -genkey -noout -out "$work/key.pem" 2>/dev/null
 "$openssl" pkcs8 -topk8 -nocrypt -in "$work/key.pem" -out "$work/key8.pem" 2>/dev/null
 
-xcrun -sdk macosx clang -O1 -w -I "$musickit/files/include" -I "$charon/packages/m/micro-ecc/files" \
-     -I "$uecc/include" -c "$musickit/files/CharonC.c" -o "$work/shim.o"
-xcrun -sdk macosx clang -O1 -w -I "$charon/packages/m/micro-ecc/files" -I "$uecc/include" \
-     -c "$charon/packages/m/micro-ecc/files/CharonCKWebAuth.c" -o "$work/web.o"
+xcrun -sdk macosx clang -O1 -w -I "$musickit/files/include" -I "$revenant/packages/m/micro-ecc/files" \
+     -I "$uecc/include" -c "$musickit/files/RevenantC.c" -o "$work/shim.o"
+xcrun -sdk macosx clang -O1 -w -I "$revenant/packages/m/micro-ecc/files" -I "$uecc/include" \
+     -c "$revenant/packages/m/micro-ecc/files/RevenantCKWebAuth.c" -o "$work/web.o"
 xcrun -sdk macosx clang -O1 -w -I "$work/uECC" -c "$work/uECC/uECC.c" -o "$work/u.o"
 
 "$swiftc" -O -module-name M -import-objc-header "$musickit/files/include/MusicKitC.h" \
-     -I "$musickit/files/include" -Xcc -I"$uecc/include" -Xcc -I"$charon/packages/m/micro-ecc/files" \
+     -I "$musickit/files/include" -Xcc -I"$uecc/include" -Xcc -I"$revenant/packages/m/micro-ecc/files" \
      -o "$work/mint" "$here/main.swift" "$musickit/files/MusicKit/Authorization.swift" \
      "$work/shim.o" "$work/u.o" "$work/web.o"
 

@@ -3,7 +3,7 @@
 #pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
 #pragma clang diagnostic ignored "-Wnonnull"
 
-@implementation UIAccessibilityCustomAction (CharonAttributedNameImage14)
+@implementation UIAccessibilityCustomAction (RevenantAttributedNameImage14)
 
 - (instancetype)initWithAttributedName:(NSAttributedString *)attributedName image:(UIImage *)image target:(id)target selector:(SEL)selector
 {

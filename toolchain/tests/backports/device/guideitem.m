@@ -14,7 +14,7 @@ static NSString *const results_folder = @"/private/var/backports";
 {
     [[NSFileManager defaultManager] createDirectoryAtPath:results_folder withIntermediateDirectories:YES attributes:nil error:NULL];
     [[NSFileManager defaultManager] removeItemAtPath:[results_folder stringByAppendingPathComponent:@"guideitem.done"] error:NULL];
-    charon_log_to([results_folder stringByAppendingPathComponent:@"guideitem.log"]);
+    revenant_log_to([results_folder stringByAppendingPathComponent:@"guideitem.log"]);
     self.window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
     self.window.rootViewController = [[UIViewController alloc] init];
     [self.window makeKeyAndVisible];
@@ -69,7 +69,7 @@ static NSString *const results_folder = @"/private/var/backports";
                     why = [NSString stringWithFormat:@"raised on use: %@", e.reason];
                 }
             }
-            charon_check(why == nil, [[NSString stringWithFormat:@"a guide as an item through +%@", name] UTF8String], why);
+            revenant_check(why == nil, [[NSString stringWithFormat:@"a guide as an item through +%@", name] UTF8String], why);
         }
         {
             UIView *host = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 200, 100)];
@@ -94,7 +94,7 @@ static NSString *const results_folder = @"/private/var/backports";
             } @catch (NSException *e) {
                 why = [NSString stringWithFormat:@"raised: %@", e.reason];
             }
-            charon_check(why == nil, "a guide in the views of a visual format", why);
+            revenant_check(why == nil, "a guide in the views of a visual format", why);
         }
         {
             UIView *host = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 200, 100)];
@@ -114,7 +114,7 @@ static NSString *const results_folder = @"/private/var/backports";
             } @catch (NSException *e) {
                 why = [NSString stringWithFormat:@"raised: %@", e.reason];
             }
-            charon_check(why == nil, "anchors of a guide", why);
+            revenant_check(why == nil, "anchors of a guide", why);
         }
         {
             UIView *host = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 200, 100)];
@@ -126,7 +126,7 @@ static NSString *const results_folder = @"/private/var/backports";
             [host addSubview:other];
             NSString *why = nil;
             @try {
-                NSLayoutConstraint *made = [NSLayoutConstraint constraintWithItem:[guide valueForKey:@"charon_view"] attribute:NSLayoutAttributeLeft relatedBy:NSLayoutRelationEqual toItem:host attribute:NSLayoutAttributeLeft multiplier:1 constant:7];
+                NSLayoutConstraint *made = [NSLayoutConstraint constraintWithItem:[guide valueForKey:@"revenant_view"] attribute:NSLayoutAttributeLeft relatedBy:NSLayoutRelationEqual toItem:host attribute:NSLayoutAttributeLeft multiplier:1 constant:7];
                 NSLayoutConstraint *direct = made;
                 ((void (*)(id, SEL, id))objc_msgSend)(direct, NSSelectorFromString(@"_setFirstItem:"), guide);
                 if (direct.firstItem != guide)
@@ -147,7 +147,7 @@ static NSString *const results_folder = @"/private/var/backports";
             } @catch (NSException *e) {
                 why = [NSString stringWithFormat:@"raised: %@", e.reason];
             }
-            charon_check(why == nil, "a constraint that holds the guide itself, made past the constructors, is solved by the engine", why);
+            revenant_check(why == nil, "a constraint that holds the guide itself, made past the constructors, is solved by the engine", why);
         }
         {
             UILayoutGuide *guide = [[UILayoutGuide alloc] init];
@@ -163,14 +163,14 @@ static NSString *const results_folder = @"/private/var/backports";
                         why = [NSString stringWithFormat:@"a view answers %@ and a guide does not", name];
                 }
             }
-            charon_check(why == nil, "a guide answers the engine's item selectors that a view answers", why);
+            revenant_check(why == nil, "a guide answers the engine's item selectors that a view answers", why);
             NSString *described = nil;
             @try { described = [(id)guide performSelector:NSSelectorFromString(@"nsli_description")]; } @catch (NSException *e) { described = [NSString stringWithFormat:@"raised: %@", e.reason]; }
-            charon_check([described isKindOfClass:[NSString class]] && ![described hasPrefix:@"raised"], "and answers them as the view behind it does", described);
+            revenant_check([described isKindOfClass:[NSString class]] && ![described hasPrefix:@"raised"], "and answers them as the view behind it does", described);
             printf("view answers %lu of the probed selectors\n", (unsigned long)engine);
         }
-        printf("checks=%d failures=%d\n", charon_checks, charon_failures);
-        NSString *summary = [NSString stringWithFormat:@"%@ checks=%d failures=%d\n", charon_failures ? @"FAIL" : @"ok", charon_checks, charon_failures];
+        printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
+        NSString *summary = [NSString stringWithFormat:@"%@ checks=%d failures=%d\n", revenant_failures ? @"FAIL" : @"ok", revenant_checks, revenant_failures];
         [summary writeToFile:[results_folder stringByAppendingPathComponent:@"guideitem.done"] atomically:YES encoding:NSUTF8StringEncoding error:NULL];
     });
     return YES;

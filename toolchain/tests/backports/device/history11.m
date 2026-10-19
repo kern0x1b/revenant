@@ -36,7 +36,7 @@ int main(int argc, char **argv)
 {
     @autoreleasepool {
         if (argc > 1)
-            charon_log_to(@(argv[1]));
+            revenant_log_to(@(argv[1]));
         CHECK_EQUAL(NSPersistentHistoryTrackingKey, @"NSPersistentHistoryTrackingKey", "constant tracking key");
         CHECK_EQUAL(NSBinaryStoreSecureDecodingClasses, @"NSBinaryStoreSecureDecodingClasses", "constant secure decoding classes");
         CHECK_EQUAL(NSBinaryStoreInsecureDecodingCompatibilityOption, @"_NSBinaryStoreInsecureDecodingCompatibilityOption", "constant insecure decoding option");
@@ -103,7 +103,7 @@ int main(int argc, char **argv)
         CHECK(context.transactionAuthor == nil, "and cleared");
         CHECK([coordinator currentPersistentHistoryTokenFromStores:nil] == nil, "no store keeps a history, so there is no token");
         CHECK([coordinator currentPersistentHistoryTokenFromStores:coordinator.persistentStores] == nil, "not for the stores that are given either");
-        printf("checks=%d failures=%d\n", charon_checks, charon_failures);
+        printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
     }
-    return charon_failures ? 1 : 0;
+    return revenant_failures ? 1 : 0;
 }

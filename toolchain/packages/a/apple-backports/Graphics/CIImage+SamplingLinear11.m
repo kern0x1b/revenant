@@ -2,7 +2,7 @@
 
 #pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
 
-@implementation CIImage (CharonSamplingLinear)
+@implementation CIImage (RevenantSamplingLinear)
 
 - (CIImage *)imageBySamplingLinear
 {

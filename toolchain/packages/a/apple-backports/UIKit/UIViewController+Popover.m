@@ -1,31 +1,31 @@
 #import <UIKit/UIKit.h>
 #import <objc/runtime.h>
-#import "CharonCustomTransition.h"
+#import "RevenantCustomTransition.h"
 
-static const char charon_popover_presented_key;
-static const char charon_popover_presenting_key;
+static const char revenant_popover_presented_key;
+static const char revenant_popover_presenting_key;
 
 @interface UIPopoverPresentationController ()
-- (void)charon_setPresenting:(UIViewController *)presenting arrowDirection:(UIPopoverArrowDirection)direction;
+- (void)revenant_setPresenting:(UIViewController *)presenting arrowDirection:(UIPopoverArrowDirection)direction;
 @end
 
-@interface CharonPopoverState : NSObject <UIPopoverControllerDelegate>
+@interface RevenantPopoverState : NSObject <UIPopoverControllerDelegate>
 @property (nonatomic, strong) UIPopoverController *popover;
 @property (nonatomic, strong) UIViewController *presented;
 @property (nonatomic, strong) UIViewController *presenting;
 @property (nonatomic, strong) UIPopoverPresentationController *presentation;
 @end
 
-static void charon_popover_clear(CharonPopoverState *state)
+static void revenant_popover_clear(RevenantPopoverState *state)
 {
-    if (objc_getAssociatedObject(state.presented, &charon_popover_presented_key) == state)
-        objc_setAssociatedObject(state.presented, &charon_popover_presented_key, nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-    if (objc_getAssociatedObject(state.presenting, &charon_popover_presenting_key) == state)
-        objc_setAssociatedObject(state.presenting, &charon_popover_presenting_key, nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-    [state.presentation charon_setPresenting:nil arrowDirection:(UIPopoverArrowDirection)NSUIntegerMax];
+    if (objc_getAssociatedObject(state.presented, &revenant_popover_presented_key) == state)
+        objc_setAssociatedObject(state.presented, &revenant_popover_presented_key, nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    if (objc_getAssociatedObject(state.presenting, &revenant_popover_presenting_key) == state)
+        objc_setAssociatedObject(state.presenting, &revenant_popover_presenting_key, nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    [state.presentation revenant_setPresenting:nil arrowDirection:(UIPopoverArrowDirection)NSUIntegerMax];
 }
 
-@implementation CharonPopoverState
+@implementation RevenantPopoverState
 
 @synthesize popover, presented, presenting, presentation;
 
@@ -40,7 +40,7 @@ static void charon_popover_clear(CharonPopoverState *state)
 - (void)popoverControllerDidDismissPopover:(UIPopoverController *)popoverController
 {
     UIPopoverPresentationController *presentation = self.presentation;
-    charon_popover_clear(self);
+    revenant_popover_clear(self);
     id<UIPopoverPresentationControllerDelegate> delegate = presentation.delegate;
     if ([delegate respondsToSelector:@selector(popoverPresentationControllerDidDismissPopover:)])
         [delegate popoverPresentationControllerDidDismissPopover:presentation];
@@ -55,17 +55,17 @@ static void charon_popover_clear(CharonPopoverState *state)
 
 @end
 
-static CharonPopoverState *charon_popover_state_for(UIViewController *controller)
+static RevenantPopoverState *revenant_popover_state_for(UIViewController *controller)
 {
     for (UIViewController *walk = controller; walk; walk = walk.parentViewController) {
-        CharonPopoverState *state = objc_getAssociatedObject(walk, &charon_popover_presented_key);
+        RevenantPopoverState *state = objc_getAssociatedObject(walk, &revenant_popover_presented_key);
         if (state)
             return state;
     }
-    return objc_getAssociatedObject(controller, &charon_popover_presenting_key);
+    return objc_getAssociatedObject(controller, &revenant_popover_presenting_key);
 }
 
-static void charon_popover_install_getters(void)
+static void revenant_popover_install_getters(void)
 {
     static dispatch_once_t once;
     dispatch_once(&once, ^{
@@ -73,19 +73,19 @@ static void charon_popover_install_getters(void)
         Method presented = class_getInstanceMethod(controller, @selector(presentedViewController));
         UIViewController *(*presentedOriginal)(id, SEL) = (UIViewController * (*)(id, SEL))method_getImplementation(presented);
         class_replaceMethod(controller, @selector(presentedViewController), imp_implementationWithBlock(^UIViewController *(UIViewController *self_) {
-            CharonPopoverState *state = objc_getAssociatedObject(self_, &charon_popover_presenting_key);
+            RevenantPopoverState *state = objc_getAssociatedObject(self_, &revenant_popover_presenting_key);
             return state ? state.presented : presentedOriginal(self_, @selector(presentedViewController));
         }), method_getTypeEncoding(presented));
         Method presenting = class_getInstanceMethod(controller, @selector(presentingViewController));
         UIViewController *(*presentingOriginal)(id, SEL) = (UIViewController * (*)(id, SEL))method_getImplementation(presenting);
         class_replaceMethod(controller, @selector(presentingViewController), imp_implementationWithBlock(^UIViewController *(UIViewController *self_) {
-            CharonPopoverState *state = objc_getAssociatedObject(self_, &charon_popover_presented_key);
+            RevenantPopoverState *state = objc_getAssociatedObject(self_, &revenant_popover_presented_key);
             return state ? state.presenting : presentingOriginal(self_, @selector(presentingViewController));
         }), method_getTypeEncoding(presenting));
     });
 }
 
-BOOL charon_popover_present(UIViewController *presenting, UIViewController *presented, BOOL animated, void (^completion)(void))
+BOOL revenant_popover_present(UIViewController *presenting, UIViewController *presented, BOOL animated, void (^completion)(void))
 {
     if (presented.modalPresentationStyle != (UIModalPresentationStyle)7)
         return NO;
@@ -110,11 +110,11 @@ BOOL charon_popover_present(UIViewController *presenting, UIViewController *pres
     }
     if (!presentation.sourceView && !presentation.barButtonItem)
         [NSException raise:NSGenericException format:@"UIPopoverPresentationController (%@) should have a non-nil sourceView or barButtonItem set before the presentation occurs.", presentation];
-    charon_popover_install_getters();
-    CharonPopoverState *old = objc_getAssociatedObject(presenting, &charon_popover_presenting_key);
+    revenant_popover_install_getters();
+    RevenantPopoverState *old = objc_getAssociatedObject(presenting, &revenant_popover_presenting_key);
     if (old) {
         [old.popover dismissPopoverAnimated:NO];
-        charon_popover_clear(old);
+        revenant_popover_clear(old);
     }
     UIPopoverController *popover = [[UIPopoverController alloc] initWithContentViewController:presented];
     CGSize size = presented.preferredContentSize;
@@ -124,14 +124,14 @@ BOOL charon_popover_present(UIViewController *presenting, UIViewController *pres
         popover.popoverLayoutMargins = presentation.popoverLayoutMargins;
     if (presentation.popoverBackgroundViewClass)
         popover.popoverBackgroundViewClass = presentation.popoverBackgroundViewClass;
-    CharonPopoverState *state = [[CharonPopoverState alloc] init];
+    RevenantPopoverState *state = [[RevenantPopoverState alloc] init];
     state.popover = popover;
     state.presented = presented;
     state.presenting = presenting;
     state.presentation = presentation;
     popover.delegate = state;
-    objc_setAssociatedObject(presented, &charon_popover_presented_key, state, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-    objc_setAssociatedObject(presenting, &charon_popover_presenting_key, state, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(presented, &revenant_popover_presented_key, state, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(presenting, &revenant_popover_presenting_key, state, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     UIPopoverArrowDirection permitted = presentation.permittedArrowDirections;
     if (presentation.barButtonItem) {
         [popover presentPopoverFromBarButtonItem:presentation.barButtonItem permittedArrowDirections:permitted animated:animated];
@@ -143,35 +143,35 @@ BOOL charon_popover_present(UIViewController *presenting, UIViewController *pres
     }
     if (presentation.passthroughViews)
         popover.passthroughViews = presentation.passthroughViews;
-    [presentation charon_setPresenting:presenting arrowDirection:popover.popoverArrowDirection];
+    [presentation revenant_setPresenting:presenting arrowDirection:popover.popoverArrowDirection];
     if (completion)
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)((animated ? 0.4 : 0.01) * NSEC_PER_SEC)), dispatch_get_main_queue(), completion);
     return YES;
 }
 
-BOOL charon_popover_dismiss(UIViewController *controller, BOOL animated, void (^completion)(void))
+BOOL revenant_popover_dismiss(UIViewController *controller, BOOL animated, void (^completion)(void))
 {
-    CharonPopoverState *state = charon_popover_state_for(controller);
+    RevenantPopoverState *state = revenant_popover_state_for(controller);
     if (!state)
         return NO;
     [state.popover dismissPopoverAnimated:animated];
-    charon_popover_clear(state);
+    revenant_popover_clear(state);
     if (completion)
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)((animated ? 0.4 : 0.01) * NSEC_PER_SEC)), dispatch_get_main_queue(), completion);
     return YES;
 }
 
-@implementation UIViewController (CharonPopover)
+@implementation UIViewController (RevenantPopover)
 
 - (UIPopoverPresentationController *)popoverPresentationController
 {
     if (self.modalPresentationStyle != (UIModalPresentationStyle)7)
         return nil;
-    UIPresentationController *existing = charon_presentation_controller_of(self);
+    UIPresentationController *existing = revenant_presentation_controller_of(self);
     if ([existing isKindOfClass:[UIPopoverPresentationController class]])
         return (UIPopoverPresentationController *)existing;
     UIPopoverPresentationController *presentation = [[UIPopoverPresentationController alloc] initWithPresentedViewController:self presentingViewController:nil];
-    charon_set_presentation_controller(self, presentation);
+    revenant_set_presentation_controller(self, presentation);
     return presentation;
 }
 

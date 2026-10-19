@@ -63,6 +63,6 @@ int main(void)
         CHECK_EQUAL(style_of([[UISplitViewController alloc] init]), @(UIModalPresentationCustom), "a split view controller");
 #endif
     }
-    printf("checks=%d failures=%d\n", charon_checks, charon_failures);
-    return charon_failures;
+    printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
+    return revenant_failures;
 }

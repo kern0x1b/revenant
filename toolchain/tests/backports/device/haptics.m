@@ -76,7 +76,7 @@ int main(int argc, char *argv[])
 {
     @autoreleasepool {
         run_checks();
-        printf("%s checks=%d failures=%d\n", charon_failures ? "FAIL" : "ok", charon_checks, charon_failures);
-        return charon_failures;
+        printf("%s checks=%d failures=%d\n", revenant_failures ? "FAIL" : "ok", revenant_checks, revenant_failures);
+        return revenant_failures;
     }
 }

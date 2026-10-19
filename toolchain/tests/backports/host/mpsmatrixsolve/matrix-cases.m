@@ -1,5 +1,5 @@
 #import <MetalPerformanceShaders/MetalPerformanceShaders.h>
-#import "CharonMPSMatrixSolveReference.h"
+#import "RevenantMPSMatrixSolveReference.h"
 #include <stdio.h>
 #include <string.h>
 
@@ -8,7 +8,7 @@ NSUInteger gMismatches = 0;
 
 static id<MTLDevice> gDevice = nil;
 
-static MPSMatrix *CharonMakeMatrix(NSUInteger order, NSUInteger columns, MPSDataType dataType, const void *values)
+static MPSMatrix *RevenantMakeMatrix(NSUInteger order, NSUInteger columns, MPSDataType dataType, const void *values)
 {
     size_t element = MPSSizeofMPSDataType(dataType);
     size_t rowBytes = columns * element, matrixBytes = order * columns * element;
@@ -20,21 +20,21 @@ static MPSMatrix *CharonMakeMatrix(NSUInteger order, NSUInteger columns, MPSData
     return [[MPSMatrix alloc] initWithBuffer:buffer descriptor:descriptor];
 }
 
-static MPSMatrix *CharonZeros(NSUInteger order, NSUInteger columns, MPSDataType dataType)
+static MPSMatrix *RevenantZeros(NSUInteger order, NSUInteger columns, MPSDataType dataType)
 {
     size_t bytes = order * columns * MPSSizeofMPSDataType(dataType);
     void *zeroed = calloc(bytes ? bytes : 1, 1);
-    MPSMatrix *made = CharonMakeMatrix(order, columns, dataType, zeroed);
+    MPSMatrix *made = RevenantMakeMatrix(order, columns, dataType, zeroed);
     free(zeroed);
     return made;
 }
 
-static id CharonBuffer(void)
+static id RevenantBuffer(void)
 {
     return [gDevice newCommandBuffer];
 }
 
-static id<MTLBuffer> CharonMakeStatusBuffer(void)
+static id<MTLBuffer> RevenantMakeStatusBuffer(void)
 {
     return [gDevice newBufferWithLength:sizeof(MPSMatrixDecompositionStatus) options:MTLResourceStorageModeShared];
 }
@@ -64,16 +64,16 @@ int main(void)
     for (int upperTriangle = 0; upperTriangle < 2; upperTriangle++) {
         MPSMatrixDecompositionCholesky *kernel =
             [[MPSMatrixDecompositionCholesky alloc] initWithDevice:gDevice lower:!upperTriangle order:3];
-        MPSMatrix *source = CharonMakeMatrix(3, 3, MPSDataTypeFloat32, spd);
-        MPSMatrix *result = CharonZeros(3, 3, MPSDataTypeFloat32);
+        MPSMatrix *source = RevenantMakeMatrix(3, 3, MPSDataTypeFloat32, spd);
+        MPSMatrix *result = RevenantZeros(3, 3, MPSDataTypeFloat32);
         MPSMatrixDecompositionStatus status = MPSMatrixDecompositionStatusFailure;
-        id<MTLBuffer> statusBuffer = CharonMakeStatusBuffer();
-        [kernel encodeToCommandBuffer:CharonBuffer() sourceMatrix:source resultMatrix:result
+        id<MTLBuffer> statusBuffer = RevenantMakeStatusBuffer();
+        [kernel encodeToCommandBuffer:RevenantBuffer() sourceMatrix:source resultMatrix:result
                               status:statusBuffer];
         status = *(MPSMatrixDecompositionStatus *)[statusBuffer contents];
         float factor[9];
         memcpy(factor, [result.data contents], sizeof factor);
-        CharonMPSMatrixSolveCholeskyCheck(upperTriangle ? "cholesky-upper" : "cholesky-lower",
+        RevenantMPSMatrixSolveCholeskyCheck(upperTriangle ? "cholesky-upper" : "cholesky-lower",
                                           spd, factor, 3, !upperTriangle, (int)status);
     }
 
@@ -83,24 +83,24 @@ int main(void)
                                    1, 1, 1};
         MPSMatrixDecompositionCholesky *kernel =
             [[MPSMatrixDecompositionCholesky alloc] initWithDevice:gDevice lower:YES order:3];
-        MPSMatrix *source = CharonMakeMatrix(3, 3, MPSDataTypeFloat32, singular);
-        MPSMatrix *result = CharonZeros(3, 3, MPSDataTypeFloat32);
+        MPSMatrix *source = RevenantMakeMatrix(3, 3, MPSDataTypeFloat32, singular);
+        MPSMatrix *result = RevenantZeros(3, 3, MPSDataTypeFloat32);
         MPSMatrixDecompositionStatus status = 0;
-        id<MTLBuffer> statusBuffer = CharonMakeStatusBuffer();
-        [kernel encodeToCommandBuffer:CharonBuffer() sourceMatrix:source resultMatrix:result
+        id<MTLBuffer> statusBuffer = RevenantMakeStatusBuffer();
+        [kernel encodeToCommandBuffer:RevenantBuffer() sourceMatrix:source resultMatrix:result
                               status:statusBuffer];
         status = *(MPSMatrixDecompositionStatus *)[statusBuffer contents];
-        CharonMPSMatrixSolveCholeskyCheck("cholesky-not-positive-definite", singular, singular, 3, YES, (int)status);
+        RevenantMPSMatrixSolveCholeskyCheck("cholesky-not-positive-definite", singular, singular, 3, YES, (int)status);
     }
 
     {
         MPSMatrixDecompositionLU *kernel = [[MPSMatrixDecompositionLU alloc] initWithDevice:gDevice rows:3 columns:3];
-        MPSMatrix *source = CharonMakeMatrix(3, 3, MPSDataTypeFloat32, spd);
-        MPSMatrix *result = CharonZeros(3, 3, MPSDataTypeFloat32);
-        MPSMatrix *pivots = CharonZeros(1, 3, MPSDataTypeUInt32);
+        MPSMatrix *source = RevenantMakeMatrix(3, 3, MPSDataTypeFloat32, spd);
+        MPSMatrix *result = RevenantZeros(3, 3, MPSDataTypeFloat32);
+        MPSMatrix *pivots = RevenantZeros(1, 3, MPSDataTypeUInt32);
         MPSMatrixDecompositionStatus status = MPSMatrixDecompositionStatusFailure;
-        id<MTLBuffer> statusBuffer = CharonMakeStatusBuffer();
-        [kernel encodeToCommandBuffer:CharonBuffer() sourceMatrix:source resultMatrix:result
+        id<MTLBuffer> statusBuffer = RevenantMakeStatusBuffer();
+        [kernel encodeToCommandBuffer:RevenantBuffer() sourceMatrix:source resultMatrix:result
                        pivotIndices:pivots status:statusBuffer];
         status = *(MPSMatrixDecompositionStatus *)[statusBuffer contents];
         float factor[9];
@@ -114,62 +114,62 @@ int main(void)
         float pivot[3];
         for (int i = 0; i < 3; i++)
             pivot[i] = (float)pivotBits[i];
-        CharonMPSMatrixSolveLUCheck("lu", spd, factor, pivot, 3, (int)status);
+        RevenantMPSMatrixSolveLUCheck("lu", spd, factor, pivot, 3, (int)status);
     }
     {
         const float rankTwo[9] = {1, 2, 3,
                                   2, 4, 6,
                                   3, 6, 9};
         MPSMatrixDecompositionLU *kernel = [[MPSMatrixDecompositionLU alloc] initWithDevice:gDevice rows:3 columns:3];
-        MPSMatrix *source = CharonMakeMatrix(3, 3, MPSDataTypeFloat32, rankTwo);
-        MPSMatrix *result = CharonZeros(3, 3, MPSDataTypeFloat32);
-        MPSMatrix *pivots = CharonZeros(1, 3, MPSDataTypeUInt32);
+        MPSMatrix *source = RevenantMakeMatrix(3, 3, MPSDataTypeFloat32, rankTwo);
+        MPSMatrix *result = RevenantZeros(3, 3, MPSDataTypeFloat32);
+        MPSMatrix *pivots = RevenantZeros(1, 3, MPSDataTypeUInt32);
         MPSMatrixDecompositionStatus status = 0;
-        id<MTLBuffer> statusBuffer = CharonMakeStatusBuffer();
-        [kernel encodeToCommandBuffer:CharonBuffer() sourceMatrix:source resultMatrix:result
+        id<MTLBuffer> statusBuffer = RevenantMakeStatusBuffer();
+        [kernel encodeToCommandBuffer:RevenantBuffer() sourceMatrix:source resultMatrix:result
                        pivotIndices:pivots status:statusBuffer];
         status = *(MPSMatrixDecompositionStatus *)[statusBuffer contents];
-        CharonMPSMatrixSolveLUCheck("lu-singular", rankTwo, rankTwo, rankTwo, 3, (int)status);
+        RevenantMPSMatrixSolveLUCheck("lu-singular", rankTwo, rankTwo, rankTwo, 3, (int)status);
     }
 
     {
         MPSMatrixSolveTriangular *kernel =
             [[MPSMatrixSolveTriangular alloc] initWithDevice:gDevice right:NO upper:NO transpose:NO unit:NO
                                                         order:3 numberOfRightHandSides:2 alpha:1.0];
-        MPSMatrix *a = CharonMakeMatrix(3, 3, MPSDataTypeFloat32, lower);
-        MPSMatrix *b = CharonMakeMatrix(3, 2, MPSDataTypeFloat32, rhs);
-        MPSMatrix *x = CharonZeros(3, 2, MPSDataTypeFloat32);
-        [kernel encodeToCommandBuffer:CharonBuffer() sourceMatrix:a rightHandSideMatrix:b
+        MPSMatrix *a = RevenantMakeMatrix(3, 3, MPSDataTypeFloat32, lower);
+        MPSMatrix *b = RevenantMakeMatrix(3, 2, MPSDataTypeFloat32, rhs);
+        MPSMatrix *x = RevenantZeros(3, 2, MPSDataTypeFloat32);
+        [kernel encodeToCommandBuffer:RevenantBuffer() sourceMatrix:a rightHandSideMatrix:b
                       solutionMatrix:x];
         float answer[6];
         memcpy(answer, [x.data contents], sizeof answer);
-        CharonMPSMatrixSolveSystemCheck("triangular-lower", lower, rhs, answer, 3, 2, 1.0);
+        RevenantMPSMatrixSolveSystemCheck("triangular-lower", lower, rhs, answer, 3, 2, 1.0);
     }
     {
         MPSMatrixSolveTriangular *kernel =
             [[MPSMatrixSolveTriangular alloc] initWithDevice:gDevice right:NO upper:YES transpose:NO unit:NO
                                                         order:3 numberOfRightHandSides:1 alpha:1.0];
-        MPSMatrix *a = CharonMakeMatrix(3, 3, MPSDataTypeFloat32, upper);
-        MPSMatrix *b = CharonMakeMatrix(3, 1, MPSDataTypeFloat32, upperRhs);
-        MPSMatrix *x = CharonZeros(3, 1, MPSDataTypeFloat32);
-        [kernel encodeToCommandBuffer:CharonBuffer() sourceMatrix:a rightHandSideMatrix:b
+        MPSMatrix *a = RevenantMakeMatrix(3, 3, MPSDataTypeFloat32, upper);
+        MPSMatrix *b = RevenantMakeMatrix(3, 1, MPSDataTypeFloat32, upperRhs);
+        MPSMatrix *x = RevenantZeros(3, 1, MPSDataTypeFloat32);
+        [kernel encodeToCommandBuffer:RevenantBuffer() sourceMatrix:a rightHandSideMatrix:b
                       solutionMatrix:x];
         float answer[3];
         memcpy(answer, [x.data contents], sizeof answer);
-        CharonMPSMatrixSolveSystemCheck("triangular-upper", upper, upperRhs, answer, 3, 1, 1.0);
+        RevenantMPSMatrixSolveSystemCheck("triangular-upper", upper, upperRhs, answer, 3, 1, 1.0);
     }
     {
         MPSMatrixSolveTriangular *kernel =
             [[MPSMatrixSolveTriangular alloc] initWithDevice:gDevice right:NO upper:NO transpose:NO unit:NO
                                                         order:3 numberOfRightHandSides:1 alpha:2.0];
-        MPSMatrix *a = CharonMakeMatrix(3, 3, MPSDataTypeFloat32, lower);
-        MPSMatrix *b = CharonMakeMatrix(3, 1, MPSDataTypeFloat32, upperRhs);
-        MPSMatrix *x = CharonZeros(3, 1, MPSDataTypeFloat32);
-        [kernel encodeToCommandBuffer:CharonBuffer() sourceMatrix:a rightHandSideMatrix:b
+        MPSMatrix *a = RevenantMakeMatrix(3, 3, MPSDataTypeFloat32, lower);
+        MPSMatrix *b = RevenantMakeMatrix(3, 1, MPSDataTypeFloat32, upperRhs);
+        MPSMatrix *x = RevenantZeros(3, 1, MPSDataTypeFloat32);
+        [kernel encodeToCommandBuffer:RevenantBuffer() sourceMatrix:a rightHandSideMatrix:b
                       solutionMatrix:x];
         float answer[3];
         memcpy(answer, [x.data contents], sizeof answer);
-        CharonMPSMatrixSolveSystemCheck("triangular-alpha", lower, upperRhs, answer, 3, 1, 2.0);
+        RevenantMPSMatrixSolveSystemCheck("triangular-alpha", lower, upperRhs, answer, 3, 1, 2.0);
     }
 
     {
@@ -178,33 +178,33 @@ int main(void)
                                       1, 0, 2.236067977499790f};
         MPSMatrixSolveCholesky *kernel =
             [[MPSMatrixSolveCholesky alloc] initWithDevice:gDevice upper:NO order:3 numberOfRightHandSides:2];
-        MPSMatrix *factor = CharonMakeMatrix(3, 3, MPSDataTypeFloat32, factorOfSpd);
+        MPSMatrix *factor = RevenantMakeMatrix(3, 3, MPSDataTypeFloat32, factorOfSpd);
         const float choleskyRhs[6] = {4, 3, 5, 7, 9, 6};
-        MPSMatrix *b = CharonMakeMatrix(3, 2, MPSDataTypeFloat32, choleskyRhs);
-        MPSMatrix *x = CharonZeros(3, 2, MPSDataTypeFloat32);
-        [kernel encodeToCommandBuffer:CharonBuffer() sourceMatrix:factor rightHandSideMatrix:b
+        MPSMatrix *b = RevenantMakeMatrix(3, 2, MPSDataTypeFloat32, choleskyRhs);
+        MPSMatrix *x = RevenantZeros(3, 2, MPSDataTypeFloat32);
+        [kernel encodeToCommandBuffer:RevenantBuffer() sourceMatrix:factor rightHandSideMatrix:b
                       solutionMatrix:x];
         float answer[6];
         memcpy(answer, [x.data contents], sizeof answer);
-        CharonMPSMatrixSolveSystemCheck("cholesky-solve", spd, choleskyRhs, answer, 3, 2, 1.0);
+        RevenantMPSMatrixSolveSystemCheck("cholesky-solve", spd, choleskyRhs, answer, 3, 2, 1.0);
     }
 
     {
         MPSMatrixDecompositionLU *decompose = [[MPSMatrixDecompositionLU alloc] initWithDevice:gDevice rows:3 columns:3];
-        MPSMatrix *source = CharonMakeMatrix(3, 3, MPSDataTypeFloat32, spd);
-        MPSMatrix *factors = CharonZeros(3, 3, MPSDataTypeFloat32);
-        MPSMatrix *pivots = CharonZeros(1, 3, MPSDataTypeUInt32);
+        MPSMatrix *source = RevenantMakeMatrix(3, 3, MPSDataTypeFloat32, spd);
+        MPSMatrix *factors = RevenantZeros(3, 3, MPSDataTypeFloat32);
+        MPSMatrix *pivots = RevenantZeros(1, 3, MPSDataTypeUInt32);
         MPSMatrixDecompositionStatus status = MPSMatrixDecompositionStatusFailure;
-        id<MTLBuffer> statusBuffer = CharonMakeStatusBuffer();
-        [decompose encodeToCommandBuffer:CharonBuffer() sourceMatrix:source resultMatrix:factors
+        id<MTLBuffer> statusBuffer = RevenantMakeStatusBuffer();
+        [decompose encodeToCommandBuffer:RevenantBuffer() sourceMatrix:source resultMatrix:factors
                            pivotIndices:pivots status:statusBuffer];
         status = *(MPSMatrixDecompositionStatus *)[statusBuffer contents];
 
         MPSMatrixSolveLU *solve = [[MPSMatrixSolveLU alloc] initWithDevice:gDevice];
         const float luRhs[6] = {4, 3, 5, 7, 9, 6};
-        MPSMatrix *b = CharonMakeMatrix(3, 2, MPSDataTypeFloat32, luRhs);
-        MPSMatrix *x = CharonZeros(3, 2, MPSDataTypeFloat32);
-        [solve encodeToCommandBuffer:CharonBuffer() sourceMatrix:factors rightHandSideMatrix:b
+        MPSMatrix *b = RevenantMakeMatrix(3, 2, MPSDataTypeFloat32, luRhs);
+        MPSMatrix *x = RevenantZeros(3, 2, MPSDataTypeFloat32);
+        [solve encodeToCommandBuffer:RevenantBuffer() sourceMatrix:factors rightHandSideMatrix:b
                       pivotIndices:pivots solutionMatrix:x];
         float answer[6];
         memcpy(answer, [x.data contents], sizeof answer);
@@ -213,7 +213,7 @@ int main(void)
         float pivotValues[3];
         memcpy(pivotValues, [pivots.data contents], sizeof pivotValues);
         if (status == 0) {
-            CharonMPSMatrixSolveSystemCheck("lu-solve-system", spd, luRhs, answer, 3, 2, 1.0);
+            RevenantMPSMatrixSolveSystemCheck("lu-solve-system", spd, luRhs, answer, 3, 2, 1.0);
         }
     }
 

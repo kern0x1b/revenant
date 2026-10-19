@@ -9,7 +9,7 @@ static NSString *flag(BOOL value)
 static NSString *named(Class cls)
 {
     NSString *name = NSStringFromClass(cls);
-    return [name hasPrefix:@"Charon"] ? [name substringFromIndex:6] : name;
+    return [name hasPrefix:@"Revenant"] ? [name substringFromIndex:8] : name;
 }
 
 static void phoneNumbers(ContactsRecorder record)

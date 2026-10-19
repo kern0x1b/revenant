@@ -1,11 +1,11 @@
 #import <Foundation/Foundation.h>
-#import "CharonCoreMIDI.h"
-#import "CharonMIDICI.h"
-#import "CharonMIDIUMP18.h"
+#import "RevenantCoreMIDI.h"
+#import "RevenantMIDICI.h"
+#import "RevenantMIDIUMP18.h"
 
 #include <pthread.h>
 
-static MIDIClientRef charon_client(OSStatus *outStatus)
+static MIDIClientRef revenant_client(OSStatus *outStatus)
 {
     static MIDIClientRef client = 0;
     static OSStatus lastRefusal = noErr;
@@ -14,12 +14,12 @@ static MIDIClientRef charon_client(OSStatus *outStatus)
     pthread_mutex_lock(&lock);
     if (client == 0) {
         MIDIClientRef made = 0;
-        status = MIDIClientCreate(CFSTR("charon-ump"), NULL, NULL, &made);
+        status = MIDIClientCreate(CFSTR("revenant-ump"), NULL, NULL, &made);
         if (status == noErr) {
             client = made;
         } else if (status != lastRefusal) {
             lastRefusal = status;
-            NSLog(@"charon: the release would not make the MIDI client of the UMP endpoints (status %d); an endpoint cannot be made", (int)status);
+            NSLog(@"revenant: the release would not make the MIDI client of the UMP endpoints (status %d); an endpoint cannot be made", (int)status);
         }
     }
     MIDIClientRef result = client;
@@ -28,7 +28,7 @@ static MIDIClientRef charon_client(OSStatus *outStatus)
     return result;
 }
 
-static NSMutableArray *charon_endpoints(void)
+static NSMutableArray *revenant_endpoints(void)
 {
     static NSMutableArray *endpoints;
     static dispatch_once_t once;
@@ -66,8 +66,8 @@ static NSMutableArray *charon_endpoints(void)
 @end
 
 @interface MIDIUMPMutableFunctionBlock ()
-- (void)charon_registeredWith:(MIDIUMPEndpoint *)endpoint;
-- (void)charon_setFunctionBlockID:(MIDIUMPFunctionBlockID)identifier;
+- (void)revenant_registeredWith:(MIDIUMPEndpoint *)endpoint;
+- (void)revenant_setFunctionBlockID:(MIDIUMPFunctionBlockID)identifier;
 @end
 
 @implementation MIDIUMPFunctionBlock {
@@ -151,12 +151,12 @@ static NSMutableArray *charon_endpoints(void)
     return YES;
 }
 
-- (void)charon_registeredWith:(MIDIUMPEndpoint *)endpoint
+- (void)revenant_registeredWith:(MIDIUMPEndpoint *)endpoint
 {
     _endpoint = endpoint;
 }
 
-- (void)charon_setFunctionBlockID:(MIDIUMPFunctionBlockID)identifier
+- (void)revenant_setFunctionBlockID:(MIDIUMPFunctionBlockID)identifier
 {
     _functionBlockID = identifier;
 }
@@ -218,22 +218,22 @@ static NSMutableArray *charon_endpoints(void)
     _functionBlocks = @[];
     MIDIEndpointRef destination = 0, source = 0;
     OSStatus status = noErr;
-    MIDIClientRef client = charon_client(&status);
+    MIDIClientRef client = revenant_client(&status);
     if (status != noErr)
         return nil;
-    status = CharonMIDIDestination(client, (__bridge CFStringRef)name, MIDIProtocol, &destination, _callback);
+    status = RevenantMIDIDestination(client, (__bridge CFStringRef)name, MIDIProtocol, &destination, _callback);
     if (status != noErr)
         return nil;
-    status = CharonMIDISource(client, (__bridge CFStringRef)name, MIDIProtocol, &source);
+    status = RevenantMIDISource(client, (__bridge CFStringRef)name, MIDIProtocol, &source);
     if (status != noErr) {
         if (MIDIEndpointDispose(destination) != noErr)
-            NSLog(@"charon: the destination of a UMP endpoint whose source was refused could not be disposed");
+            NSLog(@"revenant: the destination of a UMP endpoint whose source was refused could not be disposed");
         return nil;
     }
     _MIDIDestination = destination;
     _MIDISource = source;
-    @synchronized (charon_endpoints()) {
-        [charon_endpoints() addObject:self];
+    @synchronized (revenant_endpoints()) {
+        [revenant_endpoints() addObject:self];
     }
     return self;
 }
@@ -260,8 +260,8 @@ static NSMutableArray *charon_endpoints(void)
 {
     MIDIUMPFunctionBlockID identifier = 1;
     for (MIDIUMPMutableFunctionBlock *block in functionBlocks) {
-        [block charon_registeredWith:self];
-        [block charon_setFunctionBlockID:identifier++];
+        [block revenant_registeredWith:self];
+        [block revenant_setFunctionBlockID:identifier++];
     }
     _mutableBlocks = [functionBlocks copy];
     _functionBlocks = [functionBlocks copy];
@@ -291,8 +291,8 @@ static NSMutableArray *charon_endpoints(void)
 
 - (NSArray<MIDIUMPEndpoint *> *)UMPEndpoints
 {
-    @synchronized (charon_endpoints()) {
-        return [charon_endpoints() copy];
+    @synchronized (revenant_endpoints()) {
+        return [revenant_endpoints() copy];
     }
 }
 
@@ -326,7 +326,7 @@ static NSMutableArray *charon_endpoints(void)
 
 - (BOOL)setProfileState:(BOOL)isEnabled enabledChannelCount:(MIDIUInteger14)enabledChannelCount error:(NSError **)error
 {
-    charon_ci_inert(__PRETTY_FUNCTION__);
+    revenant_ci_inert(__PRETTY_FUNCTION__);
     return NO;
 }
 

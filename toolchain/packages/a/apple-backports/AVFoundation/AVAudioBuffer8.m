@@ -1,54 +1,54 @@
-#import "CharonAVAudioBuffer.h"
+#import "RevenantAVAudioBuffer.h"
 
-@implementation CharonAudioBuffer {
+@implementation RevenantAudioBuffer {
 @private
-    CharonAudioBufferImpl *_charon;
-    AVAudioFormat *_charon_format;
+    RevenantAudioBufferImpl *_revenant;
+    AVAudioFormat *_revenant_format;
 }
 
-- (CharonAudioBufferImpl *)charon_impl
+- (RevenantAudioBufferImpl *)revenant_impl
 {
-    return _charon;
+    return _revenant;
 }
 
-- (void)charon_setFormat:(AVAudioFormat *)format
+- (void)revenant_setFormat:(AVAudioFormat *)format
 {
-    _charon_format = format;
+    _revenant_format = format;
 }
 
-- (CharonAudioBufferImpl *)charon_allocate
+- (RevenantAudioBufferImpl *)revenant_allocate
 {
-    if (!_charon)
-        _charon = calloc(1, sizeof(CharonAudioBufferImpl));
-    return _charon;
+    if (!_revenant)
+        _revenant = calloc(1, sizeof(RevenantAudioBufferImpl));
+    return _revenant;
 }
 
 - (void)dealloc
 {
-    if (_charon) {
-        if (_charon->bufferList) {
-            for (UInt32 i = 0; i < _charon->bufferList->mNumberBuffers; i++)
-                free(_charon->bufferList->mBuffers[i].mData);
-            free(_charon->bufferList);
+    if (_revenant) {
+        if (_revenant->bufferList) {
+            for (UInt32 i = 0; i < _revenant->bufferList->mNumberBuffers; i++)
+                free(_revenant->bufferList->mBuffers[i].mData);
+            free(_revenant->bufferList);
         }
-        free(_charon->channelPointers);
-        free(_charon);
+        free(_revenant->channelPointers);
+        free(_revenant);
     }
 }
 
 - (AVAudioFormat *)format
 {
-    return _charon_format;
+    return _revenant_format;
 }
 
 - (const AudioBufferList *)audioBufferList
 {
-    return _charon ? _charon->bufferList : NULL;
+    return _revenant ? _revenant->bufferList : NULL;
 }
 
 - (AudioBufferList *)mutableAudioBufferList
 {
-    return _charon ? _charon->bufferList : NULL;
+    return _revenant ? _revenant->bufferList : NULL;
 }
 
 - (id)copyWithZone:(NSZone *)zone

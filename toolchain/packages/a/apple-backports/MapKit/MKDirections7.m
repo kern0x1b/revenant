@@ -1,18 +1,18 @@
 #import <MapKit/MapKit.h>
 #import <CoreLocation/CoreLocation.h>
 #import <objc/message.h>
-#import "CharonMapKit.h"
+#import "RevenantMapKit.h"
 
 enum { MKDirectionsTransportTypeCycling = 1 << 3 };
 
-static NSString *MKCharonOSRMBase(void)
+static NSString *MKRevenantOSRMBase(void)
 {
-    NSString *fromEnvironment = [[[NSProcessInfo processInfo] environment] objectForKey:@"MKCHARON_OSRM_BASE"];
+    NSString *fromEnvironment = [[[NSProcessInfo processInfo] environment] objectForKey:@"MKREVENANT_OSRM_BASE"];
     return fromEnvironment.length > 0 ? fromEnvironment : @"https://router.project-osrm.org";
 }
 
-static NSString *const MKCharonOSRMProfileWalking = @"foot";
-static NSString *const MKCharonOSRMProfileCycling = @"bike";
+static NSString *const MKRevenantOSRMProfileWalking = @"foot";
+static NSString *const MKRevenantOSRMProfileCycling = @"bike";
 
 @implementation MKRouteStep {
     MKPolyline *_polyline;
@@ -102,7 +102,7 @@ static NSString *const MKCharonOSRMProfileCycling = @"bike";
 @end
 
 @implementation MKETAResponse {
-    NSDateComponentsFormatter *_charon_duration;
+    NSDateComponentsFormatter *_revenant_duration;
     NSDate *_expectedDepartureDate;
     NSDate *_expectedArrivalDate;
     NSTimeInterval _expectedTravelTime;
@@ -145,12 +145,12 @@ static NSString *const MKCharonOSRMProfileCycling = @"bike";
 {
     NSTimeInterval remaining = _expectedArrivalDate ? [_expectedArrivalDate timeIntervalSinceDate:_expectedDepartureDate]
                                                     : _expectedTravelTime;
-    if (!_charon_duration) {
-        _charon_duration = [[NSDateComponentsFormatter alloc] init];
-        _charon_duration.unitsStyle = NSDateComponentsFormatterUnitsStyleFull;
-        _charon_duration.allowedUnits = NSCalendarUnitHour | NSCalendarUnitMinute;
+    if (!_revenant_duration) {
+        _revenant_duration = [[NSDateComponentsFormatter alloc] init];
+        _revenant_duration.unitsStyle = NSDateComponentsFormatterUnitsStyleFull;
+        _revenant_duration.allowedUnits = NSCalendarUnitHour | NSCalendarUnitMinute;
     }
-    NSString *text = [_charon_duration stringFromTimeInterval:remaining];
+    NSString *text = [_revenant_duration stringFromTimeInterval:remaining];
     return text.length > 0 ? text : [NSString stringWithFormat:@"%.0f s", remaining];
 }
 
@@ -205,10 +205,10 @@ static NSString *const MKCharonOSRMProfileCycling = @"bike";
     if (!completionHandler) {
         return;
     }
-    NSURL *url = [self charon_routeURL];
+    NSURL *url = [self revenant_routeURL];
     if (!url) {
         dispatch_async(dispatch_get_main_queue(), ^{
-            completionHandler(nil, [self charon_error]);
+            completionHandler(nil, [self revenant_error]);
         });
         return;
     }
@@ -222,18 +222,18 @@ static NSString *const MKCharonOSRMProfileCycling = @"bike";
         dispatch_async(dispatch_get_main_queue(), ^{
             MKDirections *strong = weak;
             if (!strong) {
-                completionHandler(nil, [[MKDirections class] charon_abandonedError]);
+                completionHandler(nil, [[MKDirections class] revenant_abandonedError]);
                 return;
             }
             strong->_calculating = NO;
-            NSArray<MKRoute *> *routes = [strong charon_routesOf:json request:strong->_request];
+            NSArray<MKRoute *> *routes = [strong revenant_routesOf:json request:strong->_request];
             if (routes.count == 0) {
                 NSString *code = [json isKindOfClass:[NSDictionary class]] ? [json objectForKey:@"code"] : nil;
                 NSString *why = [json isKindOfClass:[NSDictionary class]] ? [json objectForKey:@"message"] : nil;
                 NSString *reason = [NSString stringWithFormat:
                                    @"OSRM answered no route: %@ %@",
                                    code ?: @"(nothing)", why ?: @"(no message)"];
-                completionHandler(nil, [strong charon_errorWithReason:reason]);
+                completionHandler(nil, [strong revenant_errorWithReason:reason]);
                 return;
             }
             completionHandler([[MKDirectionsResponse alloc] initWithRoutes:routes
@@ -248,10 +248,10 @@ static NSString *const MKCharonOSRMProfileCycling = @"bike";
     if (!completionHandler) {
         return;
     }
-    NSURL *url = [self charon_routeURL];
+    NSURL *url = [self revenant_routeURL];
     if (!url) {
         dispatch_async(dispatch_get_main_queue(), ^{
-            completionHandler(nil, [self charon_error]);
+            completionHandler(nil, [self revenant_error]);
         });
         return;
     }
@@ -265,14 +265,14 @@ static NSString *const MKCharonOSRMProfileCycling = @"bike";
         dispatch_async(dispatch_get_main_queue(), ^{
             MKDirections *strong = weak;
             if (!strong) {
-                completionHandler(nil, [[MKDirections class] charon_abandonedError]);
+                completionHandler(nil, [[MKDirections class] revenant_abandonedError]);
                 return;
             }
             strong->_calculating = NO;
-            NSArray<MKRoute *> *routes = [strong charon_routesOf:json request:strong->_request];
+            NSArray<MKRoute *> *routes = [strong revenant_routesOf:json request:strong->_request];
             MKRoute *route = routes.firstObject;
             if (!route) {
-                completionHandler(nil, [strong charon_errorWithReason:@"OSRM answered no route, so there is no arrival to calculate"]);
+                completionHandler(nil, [strong revenant_errorWithReason:@"OSRM answered no route, so there is no arrival to calculate"]);
                 return;
             }
             NSDate *departure = strong->_request.departureDate ?: [NSDate date];
@@ -294,49 +294,49 @@ static NSString *const MKCharonOSRMProfileCycling = @"bike";
     _calculating = NO;
 }
 
-+ (NSError *)charon_abandonedError
++ (NSError *)revenant_abandonedError
 {
     return [NSError errorWithDomain:MKErrorDomain code:MKErrorDirectionsNotFound
                            userInfo:@{NSLocalizedDescriptionKey:
                                           @"the MKDirections that asked was released before the routing provider answered"}];
 }
 
-- (NSURL *)charon_routeURL
+- (NSURL *)revenant_routeURL
 {
     MKMapItem *source = _request.source;
     MKMapItem *destination = _request.destination;
     if (!source || !destination) {
         return nil;
     }
-    CLLocationCoordinate2D from = [self charon_coordinateOf:source];
-    CLLocationCoordinate2D to = [self charon_coordinateOf:destination];
+    CLLocationCoordinate2D from = [self revenant_coordinateOf:source];
+    CLLocationCoordinate2D to = [self revenant_coordinateOf:destination];
     if (!CLLocationCoordinate2DIsValid(from) || !CLLocationCoordinate2DIsValid(to)) {
         return nil;
     }
-    NSString *profile = [self charon_profileForTransportType:_request.transportType];
+    NSString *profile = [self revenant_profileForTransportType:_request.transportType];
     if (!profile) {
         return nil;
     }
     NSString *format = @"%@/route/v1/%@/%.6f,%.6f;%.6f,%.6f?overview=full&geometries=polyline&steps=true&alternatives=true";
-    NSString *text = [NSString stringWithFormat:format, MKCharonOSRMBase(), profile,
+    NSString *text = [NSString stringWithFormat:format, MKRevenantOSRMBase(), profile,
                       from.latitude, from.longitude, to.latitude, to.longitude];
     return [NSURL URLWithString:text];
 }
 
-- (CLLocationCoordinate2D)charon_coordinateOf:(MKMapItem *)item
+- (CLLocationCoordinate2D)revenant_coordinateOf:(MKMapItem *)item
 {
     id place = [item placemark];
     CLLocationCoordinate2D (*coordinate)(id, SEL) = (CLLocationCoordinate2D (*)(id, SEL))objc_msgSend;
     return place ? coordinate(place, @selector(coordinate)) : kCLLocationCoordinate2DInvalid;
 }
 
-- (NSString *)charon_profileForTransportType:(MKDirectionsTransportType)transportType
+- (NSString *)revenant_profileForTransportType:(MKDirectionsTransportType)transportType
 {
     switch (transportType) {
         case MKDirectionsTransportTypeWalking:
-            return MKCharonOSRMProfileWalking;
+            return MKRevenantOSRMProfileWalking;
         case MKDirectionsTransportTypeCycling:
-            return MKCharonOSRMProfileCycling;
+            return MKRevenantOSRMProfileCycling;
         case MKDirectionsTransportTypeTransit:
             return nil;
         case MKDirectionsTransportTypeAutomobile:
@@ -347,7 +347,7 @@ static NSString *const MKCharonOSRMProfileCycling = @"bike";
     }
 }
 
-- (NSArray<MKRoute *> *)charon_routesOf:(id)json request:(MKDirectionsRequest *)request
+- (NSArray<MKRoute *> *)revenant_routesOf:(id)json request:(MKDirectionsRequest *)request
 {
     if (![json isKindOfClass:[NSDictionary class]]) {
         return @[];
@@ -361,7 +361,7 @@ static NSString *const MKCharonOSRMProfileCycling = @"bike";
         if (![entry isKindOfClass:[NSDictionary class]]) {
             continue;
         }
-        MKPolyline *whole = [self charon_polylineOf:[entry objectForKey:@"geometry"]];
+        MKPolyline *whole = [self revenant_polylineOf:[entry objectForKey:@"geometry"]];
         NSMutableArray *steps = [NSMutableArray array];
         NSArray *legs = [entry objectForKey:@"legs"];
         if ([legs isKindOfClass:[NSArray class]]) {
@@ -371,7 +371,7 @@ static NSString *const MKCharonOSRMProfileCycling = @"bike";
                     continue;
                 }
                 for (NSDictionary *step in legSteps) {
-                    MKPolyline *path = [self charon_polylineOf:[step objectForKey:@"geometry"]];
+                    MKPolyline *path = [self revenant_polylineOf:[step objectForKey:@"geometry"]];
                     NSString *notice = [step objectForKey:@"name"];
                     NSString *maneuver = [step objectForKey:@"maneuver"];
                     NSString *text = maneuver.length > 0 ? [NSString stringWithFormat:@"%@ %@", maneuver, notice ?: @""] : (notice ?: @"");
@@ -395,7 +395,7 @@ static NSString *const MKCharonOSRMProfileCycling = @"bike";
     return made;
 }
 
-- (MKPolyline *)charon_polylineOf:(NSString *)encoded
+- (MKPolyline *)revenant_polylineOf:(NSString *)encoded
 {
     if (![encoded isKindOfClass:[NSString class]] || encoded.length == 0) {
         return nil;
@@ -420,7 +420,7 @@ static NSString *const MKCharonOSRMProfileCycling = @"bike";
     return line;
 }
 
-- (NSError *)charon_error
+- (NSError *)revenant_error
 {
     NSString *reason = nil;
     if (_request.transportType == MKDirectionsTransportTypeTransit) {
@@ -434,7 +434,7 @@ static NSString *const MKCharonOSRMProfileCycling = @"bike";
                            userInfo:@{NSLocalizedDescriptionKey: reason}];
 }
 
-- (NSError *)charon_errorWithReason:(NSString *)reason
+- (NSError *)revenant_errorWithReason:(NSString *)reason
 {
     return [NSError errorWithDomain:MKErrorDomain code:MKErrorDirectionsNotFound
                            userInfo:@{NSLocalizedDescriptionKey: reason}];

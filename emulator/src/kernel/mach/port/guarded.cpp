@@ -12,7 +12,7 @@
 
 #include <bit>
 
-namespace shade {
+namespace emulator {
 
 std::uint32_t dispatch_guarded_port_trap(KernelSharedState& state,
     AddressSpace& memory, std::uint32_t task,

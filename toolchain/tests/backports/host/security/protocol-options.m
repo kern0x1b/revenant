@@ -11,8 +11,8 @@ static void want(const char *what, long got, long expect)
 }
 
 @interface Options : NSObject
-- (void)charonSetMinTLS:(tls_protocol_version_t)v;
-- (void)charonSetMaxTLS:(tls_protocol_version_t)v;
+- (void)revenantSetMinTLS:(tls_protocol_version_t)v;
+- (void)revenantSetMaxTLS:(tls_protocol_version_t)v;
 @end
 
 int main(void)
@@ -20,7 +20,7 @@ int main(void)
     setvbuf(stdout, NULL, _IONBF, 0);
     __weak id weakA = nil, weakB = nil;
     @autoreleasepool {
-        Class cls = NSClassFromString(@"CharonSecProtocolOptions");
+        Class cls = NSClassFromString(@"RevenantSecProtocolOptions");
         printf("port-class\t%s\n", cls ? "found" : "MISSING");
         if (!cls) return 1;
         want("default-min-tls",  sec_protocol_options_get_default_min_tls_protocol_version(),  0x0301);
@@ -33,12 +33,12 @@ int main(void)
         sec_protocol_options_t a = (sec_protocol_options_t)[[cls alloc] init];
         sec_protocol_options_t b = (sec_protocol_options_t)[[cls alloc] init];
         printf("both-empty-equal\t%d\n", sec_protocol_options_are_equal(a, b) ? 1 : 0);
-        [(Options *)a charonSetMinTLS:tls_protocol_version_TLSv10];
-        [(Options *)b charonSetMinTLS:tls_protocol_version_TLSv10];
-        [(Options *)a charonSetMaxTLS:tls_protocol_version_TLSv12];
-        [(Options *)b charonSetMaxTLS:tls_protocol_version_TLSv12];
+        [(Options *)a revenantSetMinTLS:tls_protocol_version_TLSv10];
+        [(Options *)b revenantSetMinTLS:tls_protocol_version_TLSv10];
+        [(Options *)a revenantSetMaxTLS:tls_protocol_version_TLSv12];
+        [(Options *)b revenantSetMaxTLS:tls_protocol_version_TLSv12];
         want("same-range-equal", sec_protocol_options_are_equal(a, b) ? 1 : 0, 1);
-        [(Options *)b charonSetMaxTLS:tls_protocol_version_TLSv10];
+        [(Options *)b revenantSetMaxTLS:tls_protocol_version_TLSv10];
         want("different-range", sec_protocol_options_are_equal(a, b) ? 1 : 0, 0);
         want("same-object", sec_protocol_options_are_equal(a, a) ? 1 : 0, 1);
         want("null-a", sec_protocol_options_are_equal(NULL, b) ? 1 : 0, 0);

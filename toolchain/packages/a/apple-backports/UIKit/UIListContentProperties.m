@@ -1,42 +1,42 @@
-#import "CharonLists.h"
+#import "RevenantLists.h"
 
 #pragma clang diagnostic ignored "-Wobjc-designated-initializers"
 
 const CGFloat UIListContentImageStandardDimension = -CGFLOAT_MAX;
 
-static UIFont *charon_private_style_font(NSString *style, UIFontTextStyle fallback, CGFloat size)
+static UIFont *revenant_private_style_font(NSString *style, UIFontTextStyle fallback, CGFloat size)
 {
     UIFont *font = [UIFont preferredFontForTextStyle:style];
     return font && font.pointSize == size ? font : [UIFont preferredFontForTextStyle:fallback];
 }
 
-static UIFont *charon_list_font(NSInteger kind)
+static UIFont *revenant_list_font(NSInteger kind)
 {
     switch (kind) {
     case 1:
         return [UIFont preferredFontForTextStyle:UIFontTextStyleSubheadline];
     case 2:
-        return charon_private_style_font(@"UICTFontTextStyleShortFootnote", UIFontTextStyleFootnote, 13);
+        return revenant_private_style_font(@"UICTFontTextStyleShortFootnote", UIFontTextStyleFootnote, 13);
     case 3:
-        return charon_private_style_font(@"UICTFontTextStyleEmphasizedBody", UIFontTextStyleHeadline, 17);
+        return revenant_private_style_font(@"UICTFontTextStyleEmphasizedBody", UIFontTextStyleHeadline, 17);
     case 4:
-        return charon_medium_body_font();
+        return revenant_medium_body_font();
     }
     return [UIFont preferredFontForTextStyle:UIFontTextStyleBody];
 }
 
-static NSString *charon_alignment_name(UIListContentTextAlignment alignment)
+static NSString *revenant_alignment_name(UIListContentTextAlignment alignment)
 {
     return alignment == UIListContentTextAlignmentCenter ? @"center" : alignment == UIListContentTextAlignmentJustified ? @"justified" : @"natural";
 }
 
-static NSString *charon_transform_name(UIListContentTextTransform transform)
+static NSString *revenant_transform_name(UIListContentTextTransform transform)
 {
     static NSString *const names[] = {@"none", @"uppercase", @"lowercase", @"capitalized"};
     return transform >= 0 && transform < 4 ? names[transform] : @"none";
 }
 
-static NSString *charon_yes(BOOL value)
+static NSString *revenant_yes(BOOL value)
 {
     return value ? @"YES" : @"NO";
 }
@@ -67,73 +67,73 @@ static NSString *charon_yes(BOOL value)
     return YES;
 }
 
-- (instancetype)initCharonWithStyle:(NSInteger)style secondary:(BOOL)secondary
+- (instancetype)initRevenantWithStyle:(NSInteger)style secondary:(BOOL)secondary
 {
     if ((self = [super init])) {
         NSInteger fontKind = 0;
-        CharonSemanticColor color = CharonSemanticColorLabel;
+        RevenantSemanticColor color = RevenantSemanticColorLabel;
         _lineBreakMode = NSLineBreakByTruncatingTail;
         _numberOfLines = 1;
         switch (style) {
-        case CharonListStyleCell:
-        case CharonListStyleSubtitle:
+        case RevenantListStyleCell:
+        case RevenantListStyleSubtitle:
             _numberOfLines = 0;
             _adjustsFontForContentSizeCategory = YES;
             if (secondary) {
                 fontKind = 1;
-                color = CharonSemanticColorSecondaryLabel;
+                color = RevenantSemanticColorSecondaryLabel;
             }
             break;
-        case CharonListStyleValue:
+        case RevenantListStyleValue:
             _numberOfLines = 0;
             _adjustsFontForContentSizeCategory = YES;
-            color = secondary ? CharonSemanticColorSecondaryLabel : CharonSemanticColorLabel;
+            color = secondary ? RevenantSemanticColorSecondaryLabel : RevenantSemanticColorLabel;
             break;
-        case CharonListStylePlainHeader:
-        case CharonListStyleGroupedHeader:
-        case CharonListStyleHeader:
+        case RevenantListStylePlainHeader:
+        case RevenantListStyleGroupedHeader:
+        case RevenantListStyleHeader:
             _numberOfLines = 0;
             _adjustsFontForContentSizeCategory = YES;
             fontKind = 3;
-            color = CharonSemanticColorSecondaryLabel;
+            color = RevenantSemanticColorSecondaryLabel;
             break;
-        case CharonListStylePlainFooter:
-        case CharonListStyleGroupedFooter:
-        case CharonListStyleFooter:
+        case RevenantListStylePlainFooter:
+        case RevenantListStyleGroupedFooter:
+        case RevenantListStyleFooter:
             _numberOfLines = 0;
             _adjustsFontForContentSizeCategory = YES;
             fontKind = 2;
-            color = CharonSemanticColorSecondaryLabel;
+            color = RevenantSemanticColorSecondaryLabel;
             break;
-        case CharonListStyleSidebarCell:
-        case CharonListStyleSidebarSubtitle:
-        case CharonListStyleAccompaniedSidebar:
-        case CharonListStyleAccompaniedSidebarSubtitle:
-        case CharonListStyleSidebarHeader:
+        case RevenantListStyleSidebarCell:
+        case RevenantListStyleSidebarSubtitle:
+        case RevenantListStyleAccompaniedSidebar:
+        case RevenantListStyleAccompaniedSidebarSubtitle:
+        case RevenantListStyleSidebarHeader:
             _adjustsFontForContentSizeCategory = YES;
             _adjustsFontSizeToFitWidth = YES;
             _minimumScaleFactor = 0.9;
             _allowsDefaultTighteningForTruncation = YES;
-            fontKind = secondary ? 2 : style == CharonListStyleSidebarHeader ? 4 : 0;
-            color = (secondary || style == CharonListStyleSidebarHeader) ? CharonSemanticColorSecondaryLabel : CharonSemanticColorLabel;
+            fontKind = secondary ? 2 : style == RevenantListStyleSidebarHeader ? 4 : 0;
+            color = (secondary || style == RevenantListStyleSidebarHeader) ? RevenantSemanticColorSecondaryLabel : RevenantSemanticColorLabel;
             break;
         default:
             break;
         }
-        if (style == CharonListStyleBare - 1) {
+        if (style == RevenantListStyleBare - 1) {
             _lineBreakMode = NSLineBreakByWordWrapping;
             _numberOfLines = 0;
             return self;
         }
-        _font = charon_list_font(fontKind);
-        _color = charon_semantic_color(color);
+        _font = revenant_list_font(fontKind);
+        _color = revenant_semantic_color(color);
     }
     return self;
 }
 
 - (instancetype)init
 {
-    return [self initCharonWithStyle:CharonListStyleBare secondary:NO];
+    return [self initRevenantWithStyle:RevenantListStyleBare secondary:NO];
 }
 
 - (instancetype)initWithCoder:(NSCoder *)coder
@@ -325,37 +325,37 @@ static NSString *charon_yes(BOOL value)
     _transform = transform;
 }
 
-- (void)charon_setOwnerText:(NSString *)text
+- (void)revenant_setOwnerText:(NSString *)text
 {
     _ownerText = text;
 }
 
-- (NSString *)charon_ownerText
+- (NSString *)revenant_ownerText
 {
     return _ownerText;
 }
 
-- (BOOL)charon_fontCustomized
+- (BOOL)revenant_fontCustomized
 {
     return _fontCustomized;
 }
 
-- (BOOL)charon_colorCustomized
+- (BOOL)revenant_colorCustomized
 {
     return _colorCustomized;
 }
 
-- (void)charon_setDefaultFont:(UIFont *)font
+- (void)revenant_setDefaultFont:(UIFont *)font
 {
     _font = font;
 }
 
-- (void)charon_setDefaultColor:(UIColor *)color
+- (void)revenant_setDefaultColor:(UIColor *)color
 {
     _color = color;
 }
 
-- (void)charon_setTransformerNamed:(NSString *)name block:(UIConfigurationColorTransformer)block
+- (void)revenant_setTransformerNamed:(NSString *)name block:(UIConfigurationColorTransformer)block
 {
     if (_transformerCustomized)
         return;
@@ -388,7 +388,7 @@ static NSString *charon_yes(BOOL value)
 {
     NSMutableString *text = [NSMutableString stringWithFormat:@"<%@: %p", [self class], self];
     if (_ownerText)
-        [text appendFormat:@"; text = %@", charon_elided_text(_ownerText)];
+        [text appendFormat:@"; text = %@", revenant_elided_text(_ownerText)];
     if (_font)
         [text appendFormat:@"; font = %@", _font];
     if (_color)
@@ -396,7 +396,7 @@ static NSString *charon_yes(BOOL value)
     if (_colorTransformer)
         [text appendFormat:@"; colorTransformer = %@", _transformerName ?: @"Custom"];
     if (_alignment)
-        [text appendFormat:@"; alignment = %@", charon_alignment_name(_alignment)];
+        [text appendFormat:@"; alignment = %@", revenant_alignment_name(_alignment)];
     [text appendFormat:@"; numberOfLines = %ld", (long)_numberOfLines];
     if (_adjustsFontSizeToFitWidth)
         [text appendString:@"; adjustsFontSizeToFitWidth = YES"];
@@ -405,9 +405,9 @@ static NSString *charon_yes(BOOL value)
     if (_allowsDefaultTighteningForTruncation)
         [text appendString:@"; allowsDefaultTighteningForTruncation = YES"];
     if (_adjustsFontForContentSizeCategory)
-        [text appendFormat:@"; adjustsFontForContentSizeCategory = %@", charon_yes(YES)];
+        [text appendFormat:@"; adjustsFontForContentSizeCategory = %@", revenant_yes(YES)];
     if (_transform)
-        [text appendFormat:@"; transform = %@", charon_transform_name(_transform)];
+        [text appendFormat:@"; transform = %@", revenant_transform_name(_transform)];
     [text appendString:@">"];
     return text;
 }
@@ -443,14 +443,14 @@ static NSString *charon_yes(BOOL value)
     return self;
 }
 
-- (instancetype)initCharonBare
+- (instancetype)initRevenantBare
 {
     if ((self = [self init]))
         _bare = YES;
     return self;
 }
 
-- (instancetype)initCharonDefault
+- (instancetype)initRevenantDefault
 {
     if ((self = [super init]))
         _preferredSymbolConfiguration = [UIImageSymbolConfiguration configurationWithTextStyle:UIFontTextStyleBody scale:UIImageSymbolScaleLarge];
@@ -459,7 +459,7 @@ static NSString *charon_yes(BOOL value)
 
 - (instancetype)initWithCoder:(NSCoder *)coder
 {
-    if ((self = [self initCharonDefault])) {
+    if ((self = [self initRevenantDefault])) {
         if ([coder containsValueForKey:@"preferredSymbolConfiguration"])
             _preferredSymbolConfiguration = [coder decodeObjectOfClass:[UIImageSymbolConfiguration class] forKey:@"preferredSymbolConfiguration"];
         else if ([coder decodeBoolForKey:@"noSymbolConfiguration"])
@@ -492,7 +492,7 @@ static NSString *charon_yes(BOOL value)
 
 - (id)copyWithZone:(NSZone *)zone
 {
-    UIListContentImageProperties *copy = [[[self class] allocWithZone:zone] initCharonDefault];
+    UIListContentImageProperties *copy = [[[self class] allocWithZone:zone] initRevenantDefault];
     copy->_preferredSymbolConfiguration = [_preferredSymbolConfiguration copy];
     copy->_tintColor = _tintColor;
     copy->_tintColorTransformer = [_tintColorTransformer copy];
@@ -590,22 +590,22 @@ static NSString *charon_yes(BOOL value)
     _accessibilityIgnoresInvertColors = accessibilityIgnoresInvertColors;
 }
 
-- (void)charon_setOwnerImage:(UIImage *)image
+- (void)revenant_setOwnerImage:(UIImage *)image
 {
     _ownerImage = image;
 }
 
-- (BOOL)charon_tintCustomized
+- (BOOL)revenant_tintCustomized
 {
     return _tintCustomized;
 }
 
-- (void)charon_setDefaultTintColor:(UIColor *)color
+- (void)revenant_setDefaultTintColor:(UIColor *)color
 {
     _tintColor = color;
 }
 
-- (void)charon_setTransformerNamed:(NSString *)name block:(UIConfigurationColorTransformer)block
+- (void)revenant_setTransformerNamed:(NSString *)name block:(UIConfigurationColorTransformer)block
 {
     if (_transformerCustomized)
         return;

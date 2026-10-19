@@ -1,4 +1,4 @@
-#import "CharonUserNotifications.h"
+#import "RevenantUserNotifications.h"
 
 @implementation UNNotificationServiceExtension
 

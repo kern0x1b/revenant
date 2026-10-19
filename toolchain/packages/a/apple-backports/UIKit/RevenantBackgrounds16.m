@@ -1,9 +1,9 @@
 #import <UIKit/UIKit.h>
-#import "CharonLists.h"
+#import "RevenantLists.h"
 
 #pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
 
-static UITableView *CharonTableOfView(UIView *view)
+static UITableView *RevenantTableOfView(UIView *view)
 {
     for (UIView *candidate = view.superview; candidate; candidate = candidate.superview)
         if ([candidate isKindOfClass:[UITableView class]])
@@ -11,7 +11,7 @@ static UITableView *CharonTableOfView(UIView *view)
     return nil;
 }
 
-static UIBackgroundConfiguration *CharonBackgroundForTable(UITableViewStyle style, BOOL headerFooter)
+static UIBackgroundConfiguration *RevenantBackgroundForTable(UITableViewStyle style, BOOL headerFooter)
 {
     switch (style) {
     case UITableViewStylePlain:
@@ -23,14 +23,14 @@ static UIBackgroundConfiguration *CharonBackgroundForTable(UITableViewStyle styl
     return nil;
 }
 
-@implementation UICollectionViewCell (CharonBackgroundConfiguration16)
+@implementation UICollectionViewCell (RevenantBackgroundConfiguration16)
 
 - (UIBackgroundConfiguration *)defaultBackgroundConfiguration
 {
-    UICollectionLayoutListConfiguration *list = [self charon_layoutListConfiguration];
+    UICollectionLayoutListConfiguration *list = [self revenant_layoutListConfiguration];
     if (!list)
         return nil;
-    switch ([list charon_appearance]) {
+    switch ([list revenant_appearance]) {
     case UICollectionLayoutListAppearanceGrouped:
     case UICollectionLayoutListAppearanceInsetGrouped:
         return [UIBackgroundConfiguration listGroupedCellConfiguration];
@@ -45,22 +45,22 @@ static UIBackgroundConfiguration *CharonBackgroundForTable(UITableViewStyle styl
 
 @end
 
-@implementation UITableViewCell (CharonBackgroundConfiguration16)
+@implementation UITableViewCell (RevenantBackgroundConfiguration16)
 
 - (UIBackgroundConfiguration *)defaultBackgroundConfiguration
 {
-    UITableView *table = CharonTableOfView(self);
-    return table ? CharonBackgroundForTable(table.style, NO) : nil;
+    UITableView *table = RevenantTableOfView(self);
+    return table ? RevenantBackgroundForTable(table.style, NO) : nil;
 }
 
 @end
 
-@implementation UITableViewHeaderFooterView (CharonBackgroundConfiguration16)
+@implementation UITableViewHeaderFooterView (RevenantBackgroundConfiguration16)
 
 - (UIBackgroundConfiguration *)defaultBackgroundConfiguration
 {
-    UITableView *table = CharonTableOfView(self);
-    return table ? CharonBackgroundForTable(table.style, YES) : nil;
+    UITableView *table = RevenantTableOfView(self);
+    return table ? RevenantBackgroundForTable(table.style, YES) : nil;
 }
 
 @end

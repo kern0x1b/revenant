@@ -1,7 +1,7 @@
 #import <Foundation/Foundation.h>
 #import <Accessibility/Accessibility.h>
 
-#import "CharonAccessibility.h"
+#import "RevenantAccessibility.h"
 
 #pragma mark - AXFeatureOverrideSessionManager
 

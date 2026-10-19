@@ -1,9 +1,9 @@
-#import "CharonDynamics.h"
+#import "RevenantDynamics.h"
 
 @implementation UICollisionBehavior {
     BOOL _usesImplicitBounds;
     UIEdgeInsets _implicitBoundsInsets;
-    CharonDynamicsBody *_implicitBoundsBody;
+    RevenantDynamicsBody *_implicitBoundsBody;
     NSMutableDictionary *_boundaryBodies;
     NSMutableDictionary *_boundaryPaths;
     UICollisionBehaviorMode _collisionMode;
@@ -20,9 +20,9 @@
 
 - (instancetype)initWithItems:(NSArray *)items
 {
-    if (!(self = [super charon_initPrimitive:YES]))
+    if (!(self = [super revenant_initPrimitive:YES]))
         return nil;
-    [[self charon_items] addObjectsFromArray:items ?: @[]];
+    [[self revenant_items] addObjectsFromArray:items ?: @[]];
     _collisionMode = UICollisionBehaviorModeEverything;
     _boundaryBodies = [NSMutableDictionary new];
     _boundaryPaths = [NSMutableDictionary new];
@@ -31,7 +31,7 @@
 
 - (NSArray *)items
 {
-    return [NSArray arrayWithArray:[self charon_items]];
+    return [NSArray arrayWithArray:[self revenant_items]];
 }
 
 - (id<UICollisionBehaviorDelegate>)collisionDelegate
@@ -56,18 +56,18 @@
 - (void)setCollisionMode:(UICollisionBehaviorMode)mode
 {
     _collisionMode = mode;
-    if (![self charon_isAssociated])
+    if (![self revenant_isAssociated])
         return;
-    UIDynamicAnimator *context = [self charon_context];
-    for (id<UIDynamicItem> item in [self charon_items])
-        [self charon_setCollisions:YES forBody:[context charon_bodyForItem:item] isEdge:NO];
+    UIDynamicAnimator *context = [self revenant_context];
+    for (id<UIDynamicItem> item in [self revenant_items])
+        [self revenant_setCollisions:YES forBody:[context revenant_bodyForItem:item] isEdge:NO];
     if (_implicitBoundsBody)
-        [self charon_setCollisions:YES forBody:_implicitBoundsBody isEdge:YES];
-    for (CharonDynamicsBody *body in _boundaryBodies.allValues)
-        [self charon_setCollisions:YES forBody:body isEdge:YES];
+        [self revenant_setCollisions:YES forBody:_implicitBoundsBody isEdge:YES];
+    for (RevenantDynamicsBody *body in _boundaryBodies.allValues)
+        [self revenant_setCollisions:YES forBody:body isEdge:YES];
 }
 
-- (void)charon_setCollisions:(BOOL)on forBody:(CharonDynamicsBody *)body isEdge:(BOOL)edge
+- (void)revenant_setCollisions:(BOOL)on forBody:(RevenantDynamicsBody *)body isEdge:(BOOL)edge
 {
     if (!body)
         return;
@@ -84,99 +84,99 @@
         body.categoryBitMask = body.categoryBitMask & ~both;
     }
     body.contactTestBitMask = collision;
-    [self charon_changedParameterForBody:body];
+    [self revenant_changedParameterForBody:body];
 }
 
-- (void)charon_addItem:(id<UIDynamicItem>)item
+- (void)revenant_addItem:(id<UIDynamicItem>)item
 {
-    [self charon_setCollisions:YES forBody:[[self charon_context] charon_registerBodyForItem:item shape:CharonDynamicsShapeBox] isEdge:NO];
+    [self revenant_setCollisions:YES forBody:[[self revenant_context] revenant_registerBodyForItem:item shape:RevenantDynamicsShapeBox] isEdge:NO];
 }
 
-- (void)charon_removeBodyOfItem:(id<UIDynamicItem>)item
+- (void)revenant_removeBodyOfItem:(id<UIDynamicItem>)item
 {
-    [[self charon_context] charon_unregisterBodyForItem:item action:^(CharonDynamicsBody *body) {
-        [self charon_setCollisions:NO forBody:body isEdge:NO];
+    [[self revenant_context] revenant_unregisterBodyForItem:item action:^(RevenantDynamicsBody *body) {
+        [self revenant_setCollisions:NO forBody:body isEdge:NO];
     }];
 }
 
 - (void)addItem:(id<UIDynamicItem>)item
 {
-    if ([[self charon_items] containsObject:item])
+    if ([[self revenant_items] containsObject:item])
         return;
-    [[self charon_items] addObject:item];
-    if ([self charon_isAssociated])
-        [self charon_addItem:item];
+    [[self revenant_items] addObject:item];
+    if ([self revenant_isAssociated])
+        [self revenant_addItem:item];
 }
 
 - (void)removeItem:(id<UIDynamicItem>)item
 {
-    if (![[self charon_items] containsObject:item])
+    if (![[self revenant_items] containsObject:item])
         return;
-    [self charon_removeBodyOfItem:item];
-    [[self charon_items] removeObject:item];
+    [self revenant_removeBodyOfItem:item];
+    [[self revenant_items] removeObject:item];
 }
 
-- (void)charon_associate
+- (void)revenant_associate
 {
-    [super charon_associate];
-    UIDynamicAnimator *context = [self charon_context];
-    int group = [context charon_registerCollisionGroup];
+    [super revenant_associate];
+    UIDynamicAnimator *context = [self revenant_context];
+    int group = [context revenant_registerCollisionGroup];
     _groupVID = 1u << ((2 * group) & 31);
     _groupBID = 1u << ((2 * group + 1) & 31);
     if (_usesImplicitBounds)
-        [context charon_registerImplicitBounds];
-    for (id<UIDynamicItem> item in [self charon_items])
-        [self charon_addItem:item];
-    [self charon_setupImplicitBoundaries];
+        [context revenant_registerImplicitBounds];
+    for (id<UIDynamicItem> item in [self revenant_items])
+        [self revenant_addItem:item];
+    [self revenant_setupImplicitBoundaries];
     for (id identifier in _boundaryPaths) {
-        CharonDynamicsBody *body = [self charon_bodyForBoundary:_boundaryPaths[identifier]];
+        RevenantDynamicsBody *body = [self revenant_bodyForBoundary:_boundaryPaths[identifier]];
         _boundaryBodies[identifier] = body;
-        [context charon_addBody:body];
-        [self charon_setCollisions:YES forBody:body isEdge:YES];
+        [context revenant_addBody:body];
+        [self revenant_setCollisions:YES forBody:body isEdge:YES];
     }
 }
 
-- (void)charon_dissociate
+- (void)revenant_dissociate
 {
-    UIDynamicAnimator *context = [self charon_context];
-    [context charon_unregisterCollisionGroup];
+    UIDynamicAnimator *context = [self revenant_context];
+    [context revenant_unregisterCollisionGroup];
     if (_usesImplicitBounds)
-        [context charon_unregisterImplicitBounds];
+        [context revenant_unregisterImplicitBounds];
     if (_implicitBoundsBody) {
-        [context charon_removeBody:_implicitBoundsBody];
+        [context revenant_removeBody:_implicitBoundsBody];
         _implicitBoundsBody = nil;
     }
-    for (CharonDynamicsBody *body in _boundaryBodies.allValues)
-        [context charon_removeBody:body];
+    for (RevenantDynamicsBody *body in _boundaryBodies.allValues)
+        [context revenant_removeBody:body];
     [_boundaryBodies removeAllObjects];
-    for (id<UIDynamicItem> item in [self charon_items])
-        [self charon_removeBodyOfItem:item];
-    [super charon_dissociate];
+    for (id<UIDynamicItem> item in [self revenant_items])
+        [self revenant_removeBodyOfItem:item];
+    [super revenant_dissociate];
 }
 
 #pragma mark Boundaries
 
-struct CharonFlattening {
+struct RevenantFlattening {
     BOOL stop;
     CFMutableDataRef points;
 };
 
-static NSUInteger charon_count(CharonFlattening *state)
+static NSUInteger revenant_count(RevenantFlattening *state)
 {
     return CFDataGetLength(state->points) / sizeof(CGPoint);
 }
 
-static CGPoint charon_point(CharonFlattening *state, NSUInteger index)
+static CGPoint revenant_point(RevenantFlattening *state, NSUInteger index)
 {
     return ((const CGPoint *)CFDataGetBytePtr(state->points))[index];
 }
 
-static void charon_append(CharonFlattening *state, CGPoint point)
+static void revenant_append(RevenantFlattening *state, CGPoint point)
 {
     CFDataAppendBytes(state->points, (const UInt8 *)&point, sizeof point);
 }
 
-static CGPoint charon_bezier(const CGPoint *controls, int count, float t)
+static CGPoint revenant_bezier(const CGPoint *controls, int count, float t)
 {
     float u = 1.0f - t;
     if (count == 3)
@@ -186,66 +186,66 @@ static CGPoint charon_bezier(const CGPoint *controls, int count, float t)
                        u * u * u * (float)controls[0].y + 3 * u * u * t * (float)controls[1].y + 3 * u * t * t * (float)controls[2].y + t * t * t * (float)controls[3].y);
 }
 
-static void charon_flatten_curve(CharonFlattening *state, const CGPoint *controls, int count)
+static void revenant_flatten_curve(RevenantFlattening *state, const CGPoint *controls, int count)
 {
     float length = 0;
     CGPoint previous = controls[0];
     for (int index = 1; index <= 10; index++) {
-        CGPoint point = charon_bezier(controls, count, index / 10.0f);
+        CGPoint point = revenant_bezier(controls, count, index / 10.0f);
         length += hypotf((float)(point.x - previous.x), (float)(point.y - previous.y));
         previous = point;
     }
     int chords = MAX((int)(length / 10.0f), 1);
     for (int index = 0; index <= chords; index++)
-        charon_append(state, charon_bezier(controls, count, MIN(MAX(index / (float)chords, 0.0f), 1.0f)));
+        revenant_append(state, revenant_bezier(controls, count, MIN(MAX(index / (float)chords, 0.0f), 1.0f)));
 }
 
-static void charon_flatten_element(void *info, const CGPathElement *element)
+static void revenant_flatten_element(void *info, const CGPathElement *element)
 {
-    CharonFlattening *state = (CharonFlattening *)info;
+    RevenantFlattening *state = (RevenantFlattening *)info;
     if (state->stop)
         return;
     CGPoint controls[4];
     switch (element->type) {
     case kCGPathElementMoveToPoint:
-        if (charon_count(state))
+        if (revenant_count(state))
             state->stop = YES;
         else
-            charon_append(state, element->points[0]);
+            revenant_append(state, element->points[0]);
         break;
     case kCGPathElementAddLineToPoint:
-        charon_append(state, element->points[0]);
+        revenant_append(state, element->points[0]);
         break;
     case kCGPathElementAddQuadCurveToPoint:
-        controls[0] = charon_count(state) ? charon_point(state, charon_count(state) - 1) : CGPointZero;
+        controls[0] = revenant_count(state) ? revenant_point(state, revenant_count(state) - 1) : CGPointZero;
         controls[1] = element->points[0];
         controls[2] = element->points[1];
-        charon_flatten_curve(state, controls, 3);
+        revenant_flatten_curve(state, controls, 3);
         break;
     case kCGPathElementAddCurveToPoint:
-        controls[0] = charon_count(state) ? charon_point(state, charon_count(state) - 1) : CGPointZero;
+        controls[0] = revenant_count(state) ? revenant_point(state, revenant_count(state) - 1) : CGPointZero;
         controls[1] = element->points[0];
         controls[2] = element->points[1];
         controls[3] = element->points[2];
-        charon_flatten_curve(state, controls, 4);
+        revenant_flatten_curve(state, controls, 4);
         break;
     case kCGPathElementCloseSubpath:
-        if (charon_count(state))
-            charon_append(state, charon_point(state, 0));
+        if (revenant_count(state))
+            revenant_append(state, revenant_point(state, 0));
         state->stop = YES;
         break;
     }
 }
 
-static NSData *charon_loop_vertices(CGPathRef path)
+static NSData *revenant_loop_vertices(CGPathRef path)
 {
-    CharonFlattening state = {NO, CFDataCreateMutable(NULL, 0)};
-    CGPathApply(path, &state, charon_flatten_element);
+    RevenantFlattening state = {NO, CFDataCreateMutable(NULL, 0)};
+    CGPathApply(path, &state, revenant_flatten_element);
     NSMutableData *vertices = [NSMutableData data];
     NSUInteger kept = 0;
-    for (NSUInteger index = 0; index < charon_count(&state); index++) {
-        CGPoint point = charon_point(&state, index);
-        b2Vec2 vertex((float)point.x * CHARON_DYNAMICS_INVERSE_PTM, (float)point.y * CHARON_DYNAMICS_INVERSE_PTM);
+    for (NSUInteger index = 0; index < revenant_count(&state); index++) {
+        CGPoint point = revenant_point(&state, index);
+        b2Vec2 vertex((float)point.x * REVENANT_DYNAMICS_INVERSE_PTM, (float)point.y * REVENANT_DYNAMICS_INVERSE_PTM);
         if (kept && b2DistanceSquared(vertex, ((const b2Vec2 *)vertices.bytes)[kept - 1]) <= 1.42108547e-14f)
             continue;
         [vertices appendBytes:&vertex length:sizeof vertex];
@@ -261,19 +261,19 @@ static NSData *charon_loop_vertices(CGPathRef path)
     return vertices;
 }
 
-static CharonDynamicsBody *charon_loop_body(UIDynamicAnimator *context, NSData *vertices)
+static RevenantDynamicsBody *revenant_loop_body(UIDynamicAnimator *context, NSData *vertices)
 {
     if (vertices.length == 0)
         [NSException raise:NSInternalInconsistencyException format:@"invalid path for collision boundary"];
-    return [context charon_boundaryBodyWithLoop:(const b2Vec2 *)vertices.bytes count:(int32)(vertices.length / sizeof(b2Vec2))];
+    return [context revenant_boundaryBodyWithLoop:(const b2Vec2 *)vertices.bytes count:(int32)(vertices.length / sizeof(b2Vec2))];
 }
 
-- (CharonDynamicsBody *)charon_bodyForBoundary:(id)description
+- (RevenantDynamicsBody *)revenant_bodyForBoundary:(id)description
 {
-    UIDynamicAnimator *context = [self charon_context];
+    UIDynamicAnimator *context = [self revenant_context];
     if ([description isKindOfClass:[UIBezierPath class]])
-        return charon_loop_body(context, charon_loop_vertices([description CGPath]));
-    return [context charon_boundaryBodyFromPoint:[description[0] CGPointValue] toPoint:[description[1] CGPointValue]];
+        return revenant_loop_body(context, revenant_loop_vertices([description CGPath]));
+    return [context revenant_boundaryBodyFromPoint:[description[0] CGPointValue] toPoint:[description[1] CGPointValue]];
 }
 
 - (BOOL)translatesReferenceBoundsIntoBoundary
@@ -283,87 +283,87 @@ static CharonDynamicsBody *charon_loop_body(UIDynamicAnimator *context, NSData *
 
 - (void)setTranslatesReferenceBoundsIntoBoundary:(BOOL)translates
 {
-    [self charon_setTranslates:translates insets:UIEdgeInsetsZero];
+    [self revenant_setTranslates:translates insets:UIEdgeInsetsZero];
 }
 
 - (void)setTranslatesReferenceBoundsIntoBoundaryWithInsets:(UIEdgeInsets)insets
 {
-    [self charon_setTranslates:YES insets:insets];
+    [self revenant_setTranslates:YES insets:insets];
 }
 
-- (void)charon_setTranslates:(BOOL)translates insets:(UIEdgeInsets)insets
+- (void)revenant_setTranslates:(BOOL)translates insets:(UIEdgeInsets)insets
 {
     BOOL changed = translates != _usesImplicitBounds;
     _usesImplicitBounds = translates;
     _implicitBoundsInsets = insets;
-    if (![self charon_isAssociated])
+    if (![self revenant_isAssociated])
         return;
-    UIDynamicAnimator *context = [self charon_context];
+    UIDynamicAnimator *context = [self revenant_context];
     if (changed) {
         if (translates)
-            [context charon_registerImplicitBounds];
+            [context revenant_registerImplicitBounds];
         else
-            [context charon_unregisterImplicitBounds];
+            [context revenant_unregisterImplicitBounds];
     }
-    [self charon_setupImplicitBoundaries];
+    [self revenant_setupImplicitBoundaries];
 }
 
-- (BOOL)charon_usesImplicitBounds
+- (BOOL)revenant_usesImplicitBounds
 {
     return _usesImplicitBounds;
 }
 
-- (void)charon_reevaluateImplicitBounds
+- (void)revenant_reevaluateImplicitBounds
 {
-    [self charon_setupImplicitBoundaries];
+    [self revenant_setupImplicitBoundaries];
 }
 
-- (void)charon_setupImplicitBoundaries
+- (void)revenant_setupImplicitBoundaries
 {
-    UIDynamicAnimator *context = [self charon_context];
-    CGRect bounds = [context charon_referenceSystemBounds];
+    UIDynamicAnimator *context = [self revenant_context];
+    CGRect bounds = [context revenant_referenceSystemBounds];
     if (CGRectIsNull(bounds))
         return;
     if (_implicitBoundsBody) {
-        [context charon_removeBody:_implicitBoundsBody];
+        [context revenant_removeBody:_implicitBoundsBody];
         _implicitBoundsBody = nil;
     }
     if (!_usesImplicitBounds)
         return;
     CGRect inset = UIEdgeInsetsInsetRect(bounds, _implicitBoundsInsets);
     CGPathRef path = CGPathCreateWithRect(CGRectMake(inset.origin.x - 1, inset.origin.y - 1, inset.size.width + 2, inset.size.height + 2), NULL);
-    _implicitBoundsBody = charon_loop_body(context, charon_loop_vertices(path));
+    _implicitBoundsBody = revenant_loop_body(context, revenant_loop_vertices(path));
     CGPathRelease(path);
-    [context charon_addBody:_implicitBoundsBody];
-    [self charon_setCollisions:YES forBody:_implicitBoundsBody isEdge:YES];
-    [context charon_tickle];
+    [context revenant_addBody:_implicitBoundsBody];
+    [self revenant_setCollisions:YES forBody:_implicitBoundsBody isEdge:YES];
+    [context revenant_tickle];
 }
 
-- (void)charon_addBoundary:(id)description identifier:(id<NSCopying>)identifier
+- (void)revenant_addBoundary:(id)description identifier:(id<NSCopying>)identifier
 {
     _boundaryPaths[identifier] = description;
-    if (![self charon_isAssociated])
+    if (![self revenant_isAssociated])
         return;
-    UIDynamicAnimator *context = [self charon_context];
-    CharonDynamicsBody *body = [self charon_bodyForBoundary:description];
+    UIDynamicAnimator *context = [self revenant_context];
+    RevenantDynamicsBody *body = [self revenant_bodyForBoundary:description];
     _boundaryBodies[identifier] = body;
-    [context charon_addBody:body];
-    [self charon_setCollisions:YES forBody:body isEdge:YES];
-    [context charon_tickle];
+    [context revenant_addBody:body];
+    [self revenant_setCollisions:YES forBody:body isEdge:YES];
+    [context revenant_tickle];
 }
 
 - (void)addBoundaryWithIdentifier:(id<NSCopying>)identifier forPath:(UIBezierPath *)path
 {
     if (!identifier || !path)
         return;
-    [self charon_addBoundary:[path copy] identifier:identifier];
+    [self revenant_addBoundary:[path copy] identifier:identifier];
 }
 
 - (void)addBoundaryWithIdentifier:(id<NSCopying>)identifier fromPoint:(CGPoint)first toPoint:(CGPoint)second
 {
     if (!identifier)
         return;
-    [self charon_addBoundary:@[[NSValue valueWithCGPoint:first], [NSValue valueWithCGPoint:second]] identifier:identifier];
+    [self revenant_addBoundary:@[[NSValue valueWithCGPoint:first], [NSValue valueWithCGPoint:second]] identifier:identifier];
 }
 
 - (UIBezierPath *)boundaryWithIdentifier:(id<NSCopying>)identifier
@@ -388,15 +388,15 @@ static CharonDynamicsBody *charon_loop_body(UIDynamicAnimator *context, NSData *
 {
     if (!identifier)
         return;
-    CharonDynamicsBody *body = _boundaryBodies[identifier];
-    UIDynamicAnimator *context = [self charon_context];
+    RevenantDynamicsBody *body = _boundaryBodies[identifier];
+    UIDynamicAnimator *context = [self revenant_context];
     if (body) {
-        [self charon_setCollisions:NO forBody:body isEdge:YES];
-        [context charon_removeBody:body];
+        [self revenant_setCollisions:NO forBody:body isEdge:YES];
+        [context revenant_removeBody:body];
         [_boundaryBodies removeObjectForKey:identifier];
     }
     [_boundaryPaths removeObjectForKey:identifier];
-    [context charon_tickle];
+    [context revenant_tickle];
 }
 
 - (void)removeAllBoundaries
@@ -407,7 +407,7 @@ static CharonDynamicsBody *charon_loop_body(UIDynamicAnimator *context, NSData *
 
 #pragma mark Contacts
 
-- (id)charon_boundaryIdentifierOfBody:(CharonDynamicsBody *)body found:(BOOL *)found
+- (id)revenant_boundaryIdentifierOfBody:(RevenantDynamicsBody *)body found:(BOOL *)found
 {
     *found = YES;
     if (body == _implicitBoundsBody)
@@ -420,9 +420,9 @@ static CharonDynamicsBody *charon_loop_body(UIDynamicAnimator *context, NSData *
     return nil;
 }
 
-- (void)charon_report:(CharonDynamicsContact *)contact began:(BOOL)began
+- (void)revenant_report:(RevenantDynamicsContact *)contact began:(BOOL)began
 {
-    NSArray *items = [self charon_items];
+    NSArray *items = [self revenant_items];
     id a = contact.bodyA.representedObject, b = contact.bodyB.representedObject;
     BOOL ownA = a && [items containsObject:a], ownB = b && [items containsObject:b];
     id<UICollisionBehaviorDelegate> delegate = _collisionDelegate;
@@ -437,7 +437,7 @@ static CharonDynamicsBody *charon_loop_body(UIDynamicAnimator *context, NSData *
         return;
     id item = ownA ? a : b;
     BOOL found;
-    id identifier = [self charon_boundaryIdentifierOfBody:ownA ? contact.bodyB : contact.bodyA found:&found];
+    id identifier = [self revenant_boundaryIdentifierOfBody:ownA ? contact.bodyB : contact.bodyA found:&found];
     if (!found)
         return;
     if (began && _delegateBeganBoundary)
@@ -446,14 +446,14 @@ static CharonDynamicsBody *charon_loop_body(UIDynamicAnimator *context, NSData *
         [delegate collisionBehavior:self endedContactForItem:item withBoundaryIdentifier:identifier];
 }
 
-- (void)charon_didBeginContact:(CharonDynamicsContact *)contact
+- (void)revenant_didBeginContact:(RevenantDynamicsContact *)contact
 {
-    [self charon_report:contact began:YES];
+    [self revenant_report:contact began:YES];
 }
 
-- (void)charon_didEndContact:(CharonDynamicsContact *)contact
+- (void)revenant_didEndContact:(RevenantDynamicsContact *)contact
 {
-    [self charon_report:contact began:NO];
+    [self revenant_report:contact began:NO];
 }
 
 @end

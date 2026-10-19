@@ -1,7 +1,7 @@
 #!/bin/sh
 # The SQLite3 backport's functions against the HOST's own libsqlite3, in one process each: the string builder (sqlite3_str_*,
 # differential-str.c) and the keyword functions (sqlite3_keyword_*, differential-keywords.c). The port is compiled with each of
-# its names renamed to charon_port_*, so the host's function and the port's are both callable. Each family has a planted control
+# its names renamed to revenant_port_*, so the host's function and the port's are both callable. Each family has a planted control
 # that changes the port, and the differential must fail on it: a differential that cannot fail proves nothing.
 # Usage: run.sh   (the build area is .agent-work/runs/sqlite3-host under the checkout)
 set -eu
@@ -14,9 +14,9 @@ mkdir -p "$build/planted"
 names="new finish append appendall appendchar vappendf appendf reset errcode length value"
 renames=""
 for name in $names; do
-    renames="$renames -Dsqlite3_str_$name=charon_port_sqlite3_str_$name"
+    renames="$renames -Dsqlite3_str_$name=revenant_port_sqlite3_str_$name"
 done
-keyword_renames="-Dsqlite3_keyword_count=charon_port_sqlite3_keyword_count -Dsqlite3_keyword_name=charon_port_sqlite3_keyword_name -Dsqlite3_keyword_check=charon_port_sqlite3_keyword_check"
+keyword_renames="-Dsqlite3_keyword_count=revenant_port_sqlite3_keyword_count -Dsqlite3_keyword_name=revenant_port_sqlite3_keyword_name -Dsqlite3_keyword_check=revenant_port_sqlite3_keyword_check"
 
 xcrun clang -O2 -w $renames -c "$src/StringBuilder.c" -o "$build/StringBuilder.o"
 xcrun clang -O2 -w $keyword_renames -c "$src/Keywords.c" -o "$build/Keywords.o"

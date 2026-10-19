@@ -14,7 +14,7 @@
 #include <string>
 #include <vector>
 
-namespace shade {
+namespace emulator {
 namespace {
 
     void greatest_common_divisor(UserlandHleCall& call)

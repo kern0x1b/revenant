@@ -1,7 +1,7 @@
-Shade
-=====
+Revenant emulator
+=================
 
-Shade is Charon's emulator for legacy iPhone OS and iOS userlands on macOS
+The emulator is Revenant's emulator for legacy iPhone OS and iOS userlands on macOS
 arm64 hosts. It is licensed under the Mozilla Public License 2.0; see LICENSE.
 
 The JIT core, Dynarmic (Copyright (c) MerryMage and its contributors), is

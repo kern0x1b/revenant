@@ -1,4 +1,4 @@
-local STAMP = "charon-sources.txt"
+local STAMP = "revenant-sources.txt"
 
 local function described(repositories)
     local lines = {}

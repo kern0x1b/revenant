@@ -15,7 +15,7 @@ static void check_system(void *handle, const char *symbol)
 int main(int argc, char **argv)
 {
     @autoreleasepool {
-        charon_log_to(argc > 1 ? @(argv[1]) : nil);
+        revenant_log_to(argc > 1 ? @(argv[1]) : nil);
 
         void *system = dlopen("/System/Library/Frameworks/Accessibility.framework/Accessibility", RTLD_LAZY);
         check_system(system, "AXMFiHearingDevicePairedUUIDs");
@@ -34,7 +34,7 @@ int main(int argc, char **argv)
         CHECK_EQUAL(@(AXSupportsBidirectionalAXMFiHearingDeviceStreaming()), @(0),
                     "bidirectional streaming is not supported, because there is no hearing device");
 
-        printf("hearing\tchecks run: %d, failed: %d\n", charon_checks, charon_failures);
+        printf("hearing\tchecks run: %d, failed: %d\n", revenant_checks, revenant_failures);
     }
-    return charon_failures == 0 ? 0 : 1;
+    return revenant_failures == 0 ? 0 : 1;
 }

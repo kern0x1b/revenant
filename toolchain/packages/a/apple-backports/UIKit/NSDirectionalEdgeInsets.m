@@ -13,7 +13,7 @@ NSDirectionalEdgeInsets NSDirectionalEdgeInsetsFromString(NSString *string)
     return NSDirectionalEdgeInsetsMake(edges.top, edges.left, edges.bottom, edges.right);
 }
 
-@implementation NSValue (CharonDirectionalEdgeInsets)
+@implementation NSValue (RevenantDirectionalEdgeInsets)
 
 + (NSValue *)valueWithDirectionalEdgeInsets:(NSDirectionalEdgeInsets)insets
 {
@@ -39,7 +39,7 @@ NSDirectionalEdgeInsets NSDirectionalEdgeInsetsFromString(NSString *string)
 
 @end
 
-@implementation NSCoder (CharonDirectionalEdgeInsets)
+@implementation NSCoder (RevenantDirectionalEdgeInsets)
 
 - (void)encodeDirectionalEdgeInsets:(NSDirectionalEdgeInsets)insets forKey:(NSString *)key
 {

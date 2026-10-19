@@ -1,14 +1,14 @@
 #import <Foundation/Foundation.h>
 #import <ctype.h>
 
-#import "CharonMorphology.h"
+#import "RevenantMorphology.h"
 
 typedef struct {
     const char *one;
     const char *other;
-} CharonNoun;
+} RevenantNoun;
 
-static const CharonNoun CharonNouns[] = {
+static const RevenantNoun RevenantNouns[] = {
     { "mouse", "mice" }, { "foot", "feet" }, { "tooth", "teeth" }, { "goose", "geese" },
     { "ox", "oxen" }, { "person", "people" }, { "child", "children" }, { "man", "men" },
     { "woman", "women" },
@@ -18,23 +18,23 @@ static const CharonNoun CharonNouns[] = {
     { "the", "the" },
 };
 
-static const CharonNoun CharonFToV[] = {
+static const RevenantNoun RevenantFToV[] = {
     { "knife", "knives" }, { "leaf", "leaves" }, { "life", "lives" }, { "wife", "wives" },
     { "half", "halves" }, { "loaf", "loaves" }, { "self", "selves" }, { "thief", "thieves" },
     { "wolf", "wolves" }, { "shelf", "shelves" }, { "calf", "calves" }, { "elf", "elves" },
     { "scarf", "scarves" },
 };
 
-static const CharonNoun CharonLatinPlurals[] = {
+static const RevenantNoun RevenantLatinPlurals[] = {
     { "cactus", "cacti" }, { "focus", "foci" }, { "nucleus", "nuclei" },
     { "data", "data" }, { "sheep", "sheep" },
 };
 
-static const char *const CharonOToEs[] = {
+static const char *const RevenantOToEs[] = {
     "echo", "veto", "torpedo", "volcano", "mosquito", "embargo", "tornado", "hero", "potato", "tomato",
 };
 
-static NSString *CharonLookup(NSString *lower, const CharonNoun *table, size_t count, BOOL plural)
+static NSString *RevenantLookup(NSString *lower, const RevenantNoun *table, size_t count, BOOL plural)
 {
     size_t i;
     for (i = 0; i < count; i++) {
@@ -45,7 +45,7 @@ static NSString *CharonLookup(NSString *lower, const CharonNoun *table, size_t c
     return nil;
 }
 
-static NSString *CharonSpelling(NSString *word, NSString *replacement)
+static NSString *RevenantSpelling(NSString *word, NSString *replacement)
 {
     NSString *first;
     if (word.length == 0 || replacement.length == 0)
@@ -58,68 +58,68 @@ static NSString *CharonSpelling(NSString *word, NSString *replacement)
     return replacement;
 }
 
-static NSString *CharonPlural(NSString *word)
+static NSString *RevenantPlural(NSString *word)
 {
     NSString *lower = word.lowercaseString, *found;
     unichar last, before;
     size_t i;
-    if ((found = CharonLookup(lower, CharonNouns, sizeof CharonNouns / sizeof *CharonNouns, YES)))
-        return CharonSpelling(word, found);
-    if ((found = CharonLookup(lower, CharonFToV, sizeof CharonFToV / sizeof *CharonFToV, YES)))
-        return CharonSpelling(word, found);
+    if ((found = RevenantLookup(lower, RevenantNouns, sizeof RevenantNouns / sizeof *RevenantNouns, YES)))
+        return RevenantSpelling(word, found);
+    if ((found = RevenantLookup(lower, RevenantFToV, sizeof RevenantFToV / sizeof *RevenantFToV, YES)))
+        return RevenantSpelling(word, found);
     last = (unichar)tolower((unsigned char)[lower characterAtIndex:lower.length - 1]);
     before = lower.length >= 2 ? (unichar)tolower((unsigned char)[lower characterAtIndex:lower.length - 2]) : 0;
-    for (i = 0; i < sizeof CharonOToEs / sizeof *CharonOToEs; i++)
-        if ([lower isEqualToString:@(CharonOToEs[i])])
-            return CharonSpelling(word, [lower stringByAppendingString:@"es"]);
+    for (i = 0; i < sizeof RevenantOToEs / sizeof *RevenantOToEs; i++)
+        if ([lower isEqualToString:@(RevenantOToEs[i])])
+            return RevenantSpelling(word, [lower stringByAppendingString:@"es"]);
     if ([lower hasSuffix:@"is"])
-        return CharonSpelling(word, [[lower substringToIndex:lower.length - 2] stringByAppendingString:@"es"]);
+        return RevenantSpelling(word, [[lower substringToIndex:lower.length - 2] stringByAppendingString:@"es"]);
     if (last == 's' || last == 'x' || last == 'z' ||
         (last == 'h' && (before == 'c' || before == 's'))) {
         if (last == 'z' && before != 0 && strchr("aeiou", (int)before) != NULL)
-            return CharonSpelling(word, [lower stringByAppendingString:
+            return RevenantSpelling(word, [lower stringByAppendingString:
                                          [[NSString stringWithFormat:@"%C", last] stringByAppendingString:@"es"]]);
-        return CharonSpelling(word, [lower stringByAppendingString:@"es"]);
+        return RevenantSpelling(word, [lower stringByAppendingString:@"es"]);
     }
     if (last == 'y' && before != 0 && !strchr("aeiou", (int)before))
-        return CharonSpelling(word, [[lower substringToIndex:lower.length - 1] stringByAppendingString:@"ies"]);
-    return CharonSpelling(word, [lower stringByAppendingString:@"s"]);
+        return RevenantSpelling(word, [[lower substringToIndex:lower.length - 1] stringByAppendingString:@"ies"]);
+    return RevenantSpelling(word, [lower stringByAppendingString:@"s"]);
 }
 
-static NSString *CharonSingular(NSString *word)
+static NSString *RevenantSingular(NSString *word)
 {
     NSString *lower = word.lowercaseString, *found;
     if ([lower isEqualToString:@"leaves"])
-        return CharonSpelling(word, @"leave");
-    if ((found = CharonLookup(lower, CharonLatinPlurals, sizeof CharonLatinPlurals / sizeof *CharonLatinPlurals, NO)))
-        return CharonSpelling(word, found);
-    if ((found = CharonLookup(lower, CharonNouns, sizeof CharonNouns / sizeof *CharonNouns, NO)))
-        return CharonSpelling(word, found);
-    if ((found = CharonLookup(lower, CharonFToV, sizeof CharonFToV / sizeof *CharonFToV, NO)))
-        return CharonSpelling(word, found);
+        return RevenantSpelling(word, @"leave");
+    if ((found = RevenantLookup(lower, RevenantLatinPlurals, sizeof RevenantLatinPlurals / sizeof *RevenantLatinPlurals, NO)))
+        return RevenantSpelling(word, found);
+    if ((found = RevenantLookup(lower, RevenantNouns, sizeof RevenantNouns / sizeof *RevenantNouns, NO)))
+        return RevenantSpelling(word, found);
+    if ((found = RevenantLookup(lower, RevenantFToV, sizeof RevenantFToV / sizeof *RevenantFToV, NO)))
+        return RevenantSpelling(word, found);
     {
         static const char *const keepsItsE[] = { "houses", "shoes", "canoes", "safes", "sieves", "axes" };
         size_t i;
         for (i = 0; i < sizeof keepsItsE / sizeof *keepsItsE; i++)
             if ([lower isEqualToString:@(keepsItsE[i])])
-                return CharonSpelling(word, [lower substringToIndex:lower.length - 1]);
+                return RevenantSpelling(word, [lower substringToIndex:lower.length - 1]);
     }
     if ([lower hasSuffix:@"as"] || [lower hasSuffix:@"us"] || [lower hasSuffix:@"is"])
         return word;
     if (lower.length > 4 && ([lower hasSuffix:@"ises"] || [lower hasSuffix:@"yses"] || [lower hasSuffix:@"eses"]))
-        return CharonSpelling(word, [[lower substringToIndex:lower.length - 2] stringByAppendingString:@"is"]);
+        return RevenantSpelling(word, [[lower substringToIndex:lower.length - 2] stringByAppendingString:@"is"]);
     if (lower.length > 4 && [lower hasSuffix:@"zzes"])
-        return CharonSpelling(word, [lower substringToIndex:lower.length - 3]);
+        return RevenantSpelling(word, [lower substringToIndex:lower.length - 3]);
     if (lower.length > 3 && [lower hasSuffix:@"ies"])
-        return CharonSpelling(word, [[lower substringToIndex:lower.length - 3] stringByAppendingString:@"y"]);
+        return RevenantSpelling(word, [[lower substringToIndex:lower.length - 3] stringByAppendingString:@"y"]);
     if (lower.length > 2 && [lower hasSuffix:@"es"])
-        return CharonSpelling(word, [lower substringToIndex:lower.length - 2]);
+        return RevenantSpelling(word, [lower substringToIndex:lower.length - 2]);
     if (lower.length > 1 && [lower hasSuffix:@"s"] && ![lower hasSuffix:@"ss"])
-        return CharonSpelling(word, [lower substringToIndex:lower.length - 1]);
+        return RevenantSpelling(word, [lower substringToIndex:lower.length - 1]);
     return word;
 }
 
-static NSString *CharonLanguage(NSAttributedString *source, NSRange range)
+static NSString *RevenantLanguage(NSAttributedString *source, NSRange range)
 {
     id tag = [source attribute:NSLanguageIdentifierAttributeName atIndex:range.location effectiveRange:NULL];
     NSCharacterSet *letters = [NSCharacterSet letterCharacterSet];
@@ -137,7 +137,7 @@ static NSString *CharonLanguage(NSAttributedString *source, NSRange range)
     return subtag.length ? subtag : nil;
 }
 
-static BOOL CharonWordAt(NSAttributedString *source, NSRange range, NSRange *word, NSCharacterSet *letters)
+static BOOL RevenantWordAt(NSAttributedString *source, NSRange range, NSRange *word, NSCharacterSet *letters)
 {
     NSString *text = source.string;
     NSUInteger stop = NSMaxRange(range), at = stop;
@@ -150,7 +150,7 @@ static BOOL CharonWordAt(NSAttributedString *source, NSRange range, NSRange *wor
     return YES;
 }
 
-static NSString *CharonFollow(NSAttributedString *source, NSRange range, id rule, NSRange *whole)
+static NSString *RevenantFollow(NSAttributedString *source, NSRange range, id rule, NSRange *whole)
 {
     NSMorphology *morphology;
     NSCharacterSet *letters = [NSCharacterSet letterCharacterSet];
@@ -164,10 +164,10 @@ static NSString *CharonFollow(NSAttributedString *source, NSRange range, id rule
         partOfSpeech == NSGrammaticalPartOfSpeechNumeral || partOfSpeech == NSGrammaticalPartOfSpeechPreposition)
         return nil;
     {
-        NSString *language = CharonLanguage(source, range);
+        NSString *language = RevenantLanguage(source, range);
         if (language && [language caseInsensitiveCompare:@"en"] != NSOrderedSame)
             return nil;
-        if (!CharonWordAt(source, range, whole, letters))
+        if (!RevenantWordAt(source, range, whole, letters))
             return nil;
     }
     if ([[source.string substringWithRange:range] rangeOfString:@"%"].location != NSNotFound)
@@ -182,29 +182,29 @@ static NSString *CharonFollow(NSAttributedString *source, NSRange range, id rule
                 return nil;
     }
     if (morphology.number == NSGrammaticalNumberSingular)
-        return CharonSingular(word);
+        return RevenantSingular(word);
     if (morphology.number == NSGrammaticalNumberPlural || morphology.number == NSGrammaticalNumberPluralFew ||
         morphology.number == NSGrammaticalNumberPluralMany)
-        return CharonPlural(word);
+        return RevenantPlural(word);
     return nil;
 }
 
-@interface CharonInflectedRun : NSObject
+@interface RevenantInflectedRun : NSObject
 @property (nonatomic) NSRange range;
 @property (nonatomic, copy) NSString *text;
 @end
 
-@implementation CharonInflectedRun
+@implementation RevenantInflectedRun
 @synthesize range = _range;
 @synthesize text = _text;
 @end
 
-@implementation NSAttributedString (CharonInflection15)
+@implementation NSAttributedString (RevenantInflection15)
 
 - (NSAttributedString *)attributedStringByInflectingString
 {
     NSMutableAttributedString *result = [self mutableCopy];
-    NSMutableArray<CharonInflectedRun *> *answered = [NSMutableArray array];
+    NSMutableArray<RevenantInflectedRun *> *answered = [NSMutableArray array];
     [self enumerateAttributesInRange:NSMakeRange(0, self.length) options:0
                           usingBlock:^(NSDictionary *attributes, NSRange range, BOOL *stop) {
         NSAttributedString *alternative = attributes[NSInflectionAlternativeAttributeName];
@@ -217,19 +217,19 @@ static NSString *CharonFollow(NSAttributedString *source, NSRange range, id rule
         if ([alternative isKindOfClass:[NSAttributedString class]]) {
             answer = [alternative string];
         } else {
-            answer = CharonFollow(self, tagged, rule, &whole);
+            answer = RevenantFollow(self, tagged, rule, &whole);
         }
         if (!answer)
             return;
         {
-            CharonInflectedRun *run = [[CharonInflectedRun alloc] init];
+            RevenantInflectedRun *run = [[RevenantInflectedRun alloc] init];
             run.range = whole;
             run.text = answer;
             [answered addObject:run];
         }
     }];
     for (NSInteger i = (NSInteger)answered.count - 1; i >= 0; i--) {
-        CharonInflectedRun *run = answered[(NSUInteger)i];
+        RevenantInflectedRun *run = answered[(NSUInteger)i];
         [result replaceCharactersInRange:run.range
                       withAttributedString:[[NSAttributedString alloc] initWithString:run.text
                                                                            attributes:[self attributesAtIndex:run.range.location

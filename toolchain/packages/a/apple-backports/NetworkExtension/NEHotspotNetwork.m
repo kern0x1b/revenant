@@ -1,4 +1,4 @@
-#import "CharonNEHotspot.h"
+#import "RevenantNEHotspot.h"
 
 extern CFArrayRef CNCopySupportedInterfaces(void);
 extern CFDictionaryRef CNCopyCurrentNetworkInfo(CFStringRef interfaceName);

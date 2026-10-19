@@ -1,4 +1,4 @@
-#import "CharonMPSGraph.h"
+#import "RevenantMPSGraph.h"
 
 @implementation MPSGraphTensor {
     NSArray<NSNumber *> *_shape;
@@ -37,7 +37,7 @@
     return _dataType;
 }
 
-- (void)charon_mps_setShape:(NSArray<NSNumber *> *)shape
+- (void)revenant_mps_setShape:(NSArray<NSNumber *> *)shape
 {
     _shape = [shape copy];
 }
@@ -47,19 +47,19 @@
     return _operation;
 }
 
-- (NSUInteger)charon_mps_index
+- (NSUInteger)revenant_mps_index
 {
     return _index;
 }
 
-- (NSUInteger)charon_mps_elementCount
+- (NSUInteger)revenant_mps_elementCount
 {
-    return CharonMPSGraphElementCount(_shape);
+    return RevenantMPSGraphElementCount(_shape);
 }
 
 - (MPSGraphDevice *)device
 {
-    return [_operation graph].charon_mps_device;
+    return [_operation graph].revenant_mps_device;
 }
 
 - (BOOL)isEqualToTensor:(MPSGraphTensor *)tensor
@@ -68,7 +68,7 @@
         return YES;
     if (![tensor isKindOfClass:[MPSGraphTensor class]])
         return NO;
-    return _operation == tensor.operation && _index == tensor.charon_mps_index;
+    return _operation == tensor.operation && _index == tensor.revenant_mps_index;
 }
 
 - (id)copyWithZone:(NSZone *)zone

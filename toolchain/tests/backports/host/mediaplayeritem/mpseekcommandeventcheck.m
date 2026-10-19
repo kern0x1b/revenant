@@ -10,7 +10,7 @@
 @implementation MPChangePlaybackPositionCommand
 @end
 
-#define CHARON_MEDIAPLAYER_STANDIN 1
+#define REVENANT_MEDIAPLAYER_STANDIN 1
 #include "MPRemoteCommandCenter71.m"
 
 static int failures = 0;

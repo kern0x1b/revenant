@@ -11,7 +11,7 @@
 #include <array>
 #include <string_view>
 
-namespace shade {
+namespace emulator {
 
 struct GlesProgramInterfaceProfile {
     std::string_view color_attribute { "vertex_color" };

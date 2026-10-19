@@ -1,18 +1,18 @@
 #import <UIKit/UIKit.h>
 #import <objc/runtime.h>
-#import "CharonCustomTransition.h"
+#import "RevenantCustomTransition.h"
 
 #pragma clang diagnostic ignored "-Wobjc-designated-initializers"
 #pragma clang diagnostic ignored "-Wobjc-property-implementation"
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
 
-@interface CharonDocumentMenuOption : NSObject
+@interface RevenantDocumentMenuOption : NSObject
 @property (nonatomic, copy) NSString *title;
 @property (nonatomic, copy) void (^handler)(void);
 @property (nonatomic, assign) UIDocumentMenuOrder order;
 @end
 
-@implementation CharonDocumentMenuOption
+@implementation RevenantDocumentMenuOption
 @synthesize title, handler, order;
 @end
 
@@ -20,7 +20,7 @@
     NSArray *_types;
     NSURL *_url;
     UIDocumentPickerMode _mode;
-    NSMutableArray<CharonDocumentMenuOption *> *_options;
+    NSMutableArray<RevenantDocumentMenuOption *> *_options;
     __weak id<UIDocumentMenuDelegate> _delegate;
     UIAlertController *_alert;
     UIPopoverPresentationController *_popover;
@@ -78,7 +78,7 @@
 
 - (void)addOptionWithTitle:(NSString *)title image:(UIImage *)image order:(UIDocumentMenuOrder)order handler:(void (^)(void))handler
 {
-    CharonDocumentMenuOption *option = [[CharonDocumentMenuOption alloc] init];
+    RevenantDocumentMenuOption *option = [[RevenantDocumentMenuOption alloc] init];
     option.title = title;
     option.order = order;
     option.handler = handler;
@@ -89,22 +89,22 @@
 {
     if (!_popover) {
         _popover = [[UIPopoverPresentationController alloc] initWithPresentedViewController:self presentingViewController:nil];
-        charon_set_presentation_controller(self, _popover);
+        revenant_set_presentation_controller(self, _popover);
     }
     return _popover;
 }
 
-- (UIAlertController *)charon_alertForPresenter:(UIViewController *)presenter
+- (UIAlertController *)revenant_alertForPresenter:(UIViewController *)presenter
 {
     __weak UIDocumentMenuViewController *weak = self;
     UIAlertController *alert = [UIAlertController alertControllerWithTitle:nil message:nil preferredStyle:UIAlertControllerStyleActionSheet];
-    void (^addOption)(CharonDocumentMenuOption *) = ^(CharonDocumentMenuOption *option) {
+    void (^addOption)(RevenantDocumentMenuOption *) = ^(RevenantDocumentMenuOption *option) {
         [alert addAction:[UIAlertAction actionWithTitle:option.title style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
             if (option.handler)
                 option.handler();
         }]];
     };
-    for (CharonDocumentMenuOption *option in _options)
+    for (RevenantDocumentMenuOption *option in _options)
         if (option.order == UIDocumentMenuOrderFirst)
             addOption(option);
     [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Browse", nil) style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
@@ -115,7 +115,7 @@
                                                               : [[UIDocumentPickerViewController alloc] initWithDocumentTypes:strong->_types inMode:strong->_mode];
         [strong->_delegate documentMenu:strong didPickDocumentPicker:picker];
     }]];
-    for (CharonDocumentMenuOption *option in _options)
+    for (RevenantDocumentMenuOption *option in _options)
         if (option.order == UIDocumentMenuOrderLast)
             addOption(option);
     [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Cancel", nil) style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {

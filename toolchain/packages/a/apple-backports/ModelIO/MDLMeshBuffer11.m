@@ -1,52 +1,52 @@
 #import <ModelIO/ModelIO.h>
 #import <objc/runtime.h>
-#import "../charon_alias.h"
+#import "../revenant_alias.h"
 
-@interface CharonMeshBufferZoneState : NSObject
+@interface RevenantMeshBufferZoneState : NSObject
 @property (nonatomic, assign) NSUInteger capacity;
 @property (nonatomic, strong) id<MDLMeshBufferAllocator> allocator;
 @end
 
-@implementation CharonMeshBufferZoneState
+@implementation RevenantMeshBufferZoneState
 
 @synthesize capacity = _capacity;
 @synthesize allocator = _allocator;
 
 @end
 
-CHARON_ALIAS(MDLMeshBufferZoneDefault)
+REVENANT_ALIAS(MDLMeshBufferZoneDefault)
 
-@interface CHARON_ALIAS_CLASS(MDLMeshBufferZoneDefault) (CharonZone)
-- (void)charon_setCapacity:(NSUInteger)capacity allocator:(id<MDLMeshBufferAllocator>)allocator;
+@interface REVENANT_ALIAS_CLASS(MDLMeshBufferZoneDefault) (RevenantZone)
+- (void)revenant_setCapacity:(NSUInteger)capacity allocator:(id<MDLMeshBufferAllocator>)allocator;
 @end
 
-@implementation CHARON_ALIAS_CLASS(MDLMeshBufferZoneDefault) (CharonZone)
+@implementation REVENANT_ALIAS_CLASS(MDLMeshBufferZoneDefault) (RevenantZone)
 
-static const void *CharonMeshBufferZoneStateKey = &CharonMeshBufferZoneStateKey;
+static const void *RevenantMeshBufferZoneStateKey = &RevenantMeshBufferZoneStateKey;
 
-- (CharonMeshBufferZoneState *)charon_zoneState
+- (RevenantMeshBufferZoneState *)revenant_zoneState
 {
-    CharonMeshBufferZoneState *state = objc_getAssociatedObject(self, CharonMeshBufferZoneStateKey);
+    RevenantMeshBufferZoneState *state = objc_getAssociatedObject(self, RevenantMeshBufferZoneStateKey);
     if (!state) {
-        state = [[CharonMeshBufferZoneState alloc] init];
-        objc_setAssociatedObject(self, CharonMeshBufferZoneStateKey, state, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+        state = [[RevenantMeshBufferZoneState alloc] init];
+        objc_setAssociatedObject(self, RevenantMeshBufferZoneStateKey, state, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     }
     return state;
 }
 
 - (NSUInteger)capacity
 {
-    return [self charon_zoneState].capacity;
+    return [self revenant_zoneState].capacity;
 }
 
 - (id<MDLMeshBufferAllocator>)allocator
 {
-    return [self charon_zoneState].allocator;
+    return [self revenant_zoneState].allocator;
 }
 
-- (void)charon_setCapacity:(NSUInteger)capacity allocator:(id<MDLMeshBufferAllocator>)allocator
+- (void)revenant_setCapacity:(NSUInteger)capacity allocator:(id<MDLMeshBufferAllocator>)allocator
 {
-    CharonMeshBufferZoneState *state = [self charon_zoneState];
+    RevenantMeshBufferZoneState *state = [self revenant_zoneState];
     state.capacity = capacity;
     state.allocator = allocator;
 }

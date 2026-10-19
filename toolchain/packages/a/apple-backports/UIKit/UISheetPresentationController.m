@@ -3,10 +3,10 @@
 #import <objc/runtime.h>
 #import <objc/message.h>
 #include <math.h>
-#import "CharonBackdrop.h"
-#import "CharonCustomTransition.h"
-#import "CharonSheet.h"
-#include "CharonSheetShadow.h"
+#import "RevenantBackdrop.h"
+#import "RevenantCustomTransition.h"
+#import "RevenantSheet.h"
+#include "RevenantSheetShadow.h"
 
 #pragma clang diagnostic ignored "-Wobjc-designated-initializers"
 #pragma clang diagnostic ignored "-Wobjc-property-implementation"
@@ -16,78 +16,78 @@ NSString *const UISheetPresentationControllerDetentIdentifierMedium = @"com.appl
 NSString *const UISheetPresentationControllerDetentIdentifierLarge = @"com.apple.UIKit.large";
 const CGFloat UISheetPresentationControllerAutomaticDimension = CGFLOAT_MAX;
 
-static const CGFloat charon_sheet_corner_radius = 10;
-static const CGFloat charon_sheet_top_offset = 10;
-static const CGFloat charon_sheet_top_offset_compact_height = 8;
-static const CGFloat charon_sheet_maximum_depth = 2;
-static const NSTimeInterval charon_sheet_transition_duration = 0.4;
-static const CGFloat charon_sheet_spring_response = 0.3441442326;
-static const CGFloat charon_sheet_spring_damping = 1;
-static const CGFloat charon_sheet_medium_threshold = 568;
-static const CGFloat charon_sheet_medium_small = 0.63;
-static const CGFloat charon_sheet_medium_large = 0.56;
-static const CGFloat charon_sheet_grabber_width = 36;
-static const CGFloat charon_sheet_grabber_height = 5;
-static const CGFloat charon_sheet_grabber_spacing = 5;
-static const CGFloat charon_sheet_rubber_band_coefficient = 0.55;
-static const CGFloat charon_sheet_deceleration_rate = 0.99;
-static const CGFloat charon_sheet_flick_speed = 1000;
-static const CGFloat charon_sheet_top_extent = 100;
-static const CGFloat charon_sheet_bottom_extent = 200;
-static const CGFloat charon_sheet_bottom_extent_fraction = 0.25;
-static const CGFloat charon_sheet_spring_damping_fast = 0.8;
-static const CGFloat charon_sheet_minimum_speed = 250;
-static const NSTimeInterval charon_sheet_swipe_interval = 0.4;
+static const CGFloat revenant_sheet_corner_radius = 10;
+static const CGFloat revenant_sheet_top_offset = 10;
+static const CGFloat revenant_sheet_top_offset_compact_height = 8;
+static const CGFloat revenant_sheet_maximum_depth = 2;
+static const NSTimeInterval revenant_sheet_transition_duration = 0.4;
+static const CGFloat revenant_sheet_spring_response = 0.3441442326;
+static const CGFloat revenant_sheet_spring_damping = 1;
+static const CGFloat revenant_sheet_medium_threshold = 568;
+static const CGFloat revenant_sheet_medium_small = 0.63;
+static const CGFloat revenant_sheet_medium_large = 0.56;
+static const CGFloat revenant_sheet_grabber_width = 36;
+static const CGFloat revenant_sheet_grabber_height = 5;
+static const CGFloat revenant_sheet_grabber_spacing = 5;
+static const CGFloat revenant_sheet_rubber_band_coefficient = 0.55;
+static const CGFloat revenant_sheet_deceleration_rate = 0.99;
+static const CGFloat revenant_sheet_flick_speed = 1000;
+static const CGFloat revenant_sheet_top_extent = 100;
+static const CGFloat revenant_sheet_bottom_extent = 200;
+static const CGFloat revenant_sheet_bottom_extent_fraction = 0.25;
+static const CGFloat revenant_sheet_spring_damping_fast = 0.8;
+static const CGFloat revenant_sheet_minimum_speed = 250;
+static const NSTimeInterval revenant_sheet_swipe_interval = 0.4;
 
-static CGFloat charon_clamp01(CGFloat value)
+static CGFloat revenant_clamp01(CGFloat value)
 {
     return value < 0 ? 0 : value > 1 ? 1 : value;
 }
 
-static CGFloat charon_sheet_content_margin(UIWindow *window, CGFloat width)
+static CGFloat revenant_sheet_content_margin(UIWindow *window, CGFloat width)
 {
     UIEdgeInsets insets = window ? window.safeAreaInsets : UIEdgeInsetsZero;
     BOOL both = insets.left > 0 && insets.right > 0;
     return width > 393 && !both ? 20 : 16;
 }
 
-static BOOL charon_sheet_has_home_button(UIWindow *window)
+static BOOL revenant_sheet_has_home_button(UIWindow *window)
 {
     return !(window && window.safeAreaInsets.bottom > 0);
 }
 
-static CGFloat charon_sheet_display_corner_radius(UIWindow *window)
+static CGFloat revenant_sheet_display_corner_radius(UIWindow *window)
 {
-    if (charon_sheet_has_home_button(window))
+    if (revenant_sheet_has_home_button(window))
         return 0;
     UIScreen *screen = window.screen;
     SEL selector = NSSelectorFromString(@"_displayCornerRadius");
     return [screen respondsToSelector:selector] ? ((CGFloat (*)(id, SEL))objc_msgSend)(screen, selector) : 0;
 }
 
-static UIColor *charon_sheet_dimming_color(UITraitCollection *traits)
+static UIColor *revenant_sheet_dimming_color(UITraitCollection *traits)
 {
     return [UIColor colorWithWhite:0 alpha:traits.userInterfaceStyle == UIUserInterfaceStyleDark ? 0.48 : 0.2];
 }
 
-static UIColor *charon_sheet_grabber_color(void)
+static UIColor *revenant_sheet_grabber_color(void)
 {
     return [UIColor tertiaryLabelColor];
 }
 
-static CGFloat charon_sheet_rubber_band(CGFloat overshoot, CGFloat extent)
+static CGFloat revenant_sheet_rubber_band(CGFloat overshoot, CGFloat extent)
 {
     if (extent <= 0 || overshoot <= 0)
         return 0;
-    return extent * (1 - 1 / (overshoot * charon_sheet_rubber_band_coefficient / extent + 1));
+    return extent * (1 - 1 / (overshoot * revenant_sheet_rubber_band_coefficient / extent + 1));
 }
 
-static CGFloat charon_sheet_effective_velocity(CGFloat velocity)
+static CGFloat revenant_sheet_effective_velocity(CGFloat velocity)
 {
-    return fabs(velocity) < charon_sheet_minimum_speed ? 0 : velocity;
+    return fabs(velocity) < revenant_sheet_minimum_speed ? 0 : velocity;
 }
 
-static UIColor *charon_sheet_dimming_background(UITraitCollection *traits, CGFloat displayed, CGFloat lightened)
+static UIColor *revenant_sheet_dimming_background(UITraitCollection *traits, CGFloat displayed, CGFloat lightened)
 {
     CGFloat dimAlpha = (traits.userInterfaceStyle == UIUserInterfaceStyleDark ? 0.48 : 0.2) * displayed;
     if (lightened <= 0)
@@ -109,32 +109,32 @@ static UIColor *charon_sheet_dimming_background(UITraitCollection *traits, CGFlo
 }
 
 
-static UIView *charon_sheet_first_responder(UIView *view)
+static UIView *revenant_sheet_first_responder(UIView *view)
 {
     if (view.isFirstResponder)
         return view;
     for (UIView *subview in view.subviews) {
-        UIView *found = charon_sheet_first_responder(subview);
+        UIView *found = revenant_sheet_first_responder(subview);
         if (found)
             return found;
     }
     return nil;
 }
 
-static BOOL charon_sheet_first_responder_in(UIView *view)
+static BOOL revenant_sheet_first_responder_in(UIView *view)
 {
-    return charon_sheet_first_responder(view) != nil;
+    return revenant_sheet_first_responder(view) != nil;
 }
 
 #pragma mark - Detents
 
-typedef NS_ENUM(NSInteger, CharonDetentType) {
-    CharonDetentCustom,
-    CharonDetentLarge,
-    CharonDetentMedium
+typedef NS_ENUM(NSInteger, RevenantDetentType) {
+    RevenantDetentCustom,
+    RevenantDetentLarge,
+    RevenantDetentMedium
 };
 
-@implementation CharonSheetDetentContext {
+@implementation RevenantSheetDetentContext {
     UITraitCollection *_traits;
     CGFloat _maximum;
     CGRect _bounds;
@@ -157,12 +157,12 @@ typedef NS_ENUM(NSInteger, CharonDetentType) {
 @end
 
 @implementation UISheetPresentationControllerDetent {
-    CharonDetentType _type;
+    RevenantDetentType _type;
     NSString *_identifier;
     CGFloat (^_resolver)(id context);
 }
 
-- (instancetype)initWithCharonType:(CharonDetentType)type identifier:(NSString *)identifier resolver:(CGFloat (^)(id context))resolver
+- (instancetype)initWithRevenantType:(RevenantDetentType)type identifier:(NSString *)identifier resolver:(CGFloat (^)(id context))resolver
 {
     if ((self = [super init])) {
         _type = type;
@@ -174,38 +174,38 @@ typedef NS_ENUM(NSInteger, CharonDetentType) {
 
 + (instancetype)mediumDetent
 {
-    return [[self alloc] initWithCharonType:CharonDetentMedium identifier:UISheetPresentationControllerDetentIdentifierMedium resolver:nil];
+    return [[self alloc] initWithRevenantType:RevenantDetentMedium identifier:UISheetPresentationControllerDetentIdentifierMedium resolver:nil];
 }
 
 + (instancetype)largeDetent
 {
-    return [[self alloc] initWithCharonType:CharonDetentLarge identifier:UISheetPresentationControllerDetentIdentifierLarge resolver:nil];
+    return [[self alloc] initWithRevenantType:RevenantDetentLarge identifier:UISheetPresentationControllerDetentIdentifierLarge resolver:nil];
 }
 
-+ (instancetype)charon_customDetentWithIdentifier:(NSString *)identifier resolver:(CGFloat (^)(id context))resolver
++ (instancetype)revenant_customDetentWithIdentifier:(NSString *)identifier resolver:(CGFloat (^)(id context))resolver
 {
     NSString *name = identifier ?: [@"com.apple.UIKit.dynamic." stringByAppendingString:[[NSUUID UUID] UUIDString]];
-    return [[self alloc] initWithCharonType:CharonDetentCustom identifier:name resolver:resolver];
+    return [[self alloc] initWithRevenantType:RevenantDetentCustom identifier:name resolver:resolver];
 }
 
-- (NSString *)charon_identifier
+- (NSString *)revenant_identifier
 {
     return _identifier;
 }
 
-- (CGFloat)charon_resolvedValueInContext:(id)context
+- (CGFloat)revenant_resolvedValueInContext:(id)context
 {
-    CharonSheetDetentContext *known = context;
+    RevenantSheetDetentContext *known = context;
     switch (_type) {
-    case CharonDetentLarge:
+    case RevenantDetentLarge:
         return known.maximumDetentValue;
-    case CharonDetentMedium: {
+    case RevenantDetentMedium: {
         if (known.containerTraitCollection.verticalSizeClass == UIUserInterfaceSizeClassCompact)
             return CGFLOAT_MAX;
         CGRect bounds = [known _containerBounds];
-        return known.maximumDetentValue * (CGRectGetHeight(bounds) > charon_sheet_medium_threshold ? charon_sheet_medium_large : charon_sheet_medium_small);
+        return known.maximumDetentValue * (CGRectGetHeight(bounds) > revenant_sheet_medium_threshold ? revenant_sheet_medium_large : revenant_sheet_medium_small);
     }
-    case CharonDetentCustom:
+    case RevenantDetentCustom:
         return _resolver ? _resolver(context) : CGFLOAT_MAX;
     }
     return CGFLOAT_MAX;
@@ -218,7 +218,7 @@ typedef NS_ENUM(NSInteger, CharonDetentType) {
     if (![object isKindOfClass:[UISheetPresentationControllerDetent class]])
         return NO;
     UISheetPresentationControllerDetent *other = object;
-    return _type != CharonDetentCustom && other->_type == _type && [other->_identifier isEqualToString:_identifier];
+    return _type != RevenantDetentCustom && other->_type == _type && [other->_identifier isEqualToString:_identifier];
 }
 
 - (NSString *)description
@@ -231,9 +231,9 @@ typedef NS_ENUM(NSInteger, CharonDetentType) {
 
 #pragma mark - Layout
 
-@interface CharonSheetLayoutInfo : NSObject
-@property (nonatomic, weak) CharonSheetLayoutInfo *parent;
-@property (nonatomic, weak) CharonSheetLayoutInfo *child;
+@interface RevenantSheetLayoutInfo : NSObject
+@property (nonatomic, weak) RevenantSheetLayoutInfo *parent;
+@property (nonatomic, weak) RevenantSheetLayoutInfo *child;
 @property (nonatomic, weak) UIView *container;
 @property (nonatomic, weak) UIView *view;
 @property (nonatomic, weak) UISheetPresentationController *sheet;
@@ -253,7 +253,7 @@ typedef NS_ENUM(NSInteger, CharonDetentType) {
 @property (nonatomic, assign) BOOL savedMasksToBounds;
 @end
 
-@implementation CharonSheetLayoutInfo
+@implementation RevenantSheetLayoutInfo
 
 @synthesize parent = _parent;
 @synthesize child = _child;
@@ -304,8 +304,8 @@ typedef NS_ENUM(NSInteger, CharonDetentType) {
 {
     UIEdgeInsets insets = [self safeInsets];
     BOOL phone = [UIDevice currentDevice].userInterfaceIdiom == UIUserInterfaceIdiomPhone;
-    BOOL single = phone && !charon_sheet_has_home_button(_container.window) && [self traits].horizontalSizeClass == UIUserInterfaceSizeClassCompact;
-    CGFloat vertical = [self verticallyCompact] ? charon_sheet_top_offset_compact_height : (single ? 1 : 2) * charon_sheet_top_offset;
+    BOOL single = phone && !revenant_sheet_has_home_button(_container.window) && [self traits].horizontalSizeClass == UIUserInterfaceSizeClassCompact;
+    CGFloat vertical = [self verticallyCompact] ? revenant_sheet_top_offset_compact_height : (single ? 1 : 2) * revenant_sheet_top_offset;
     insets.top += vertical;
     insets.bottom += vertical;
     return insets;
@@ -381,7 +381,7 @@ typedef NS_ENUM(NSInteger, CharonDetentType) {
     CGFloat next = detents.count > 1 ? [detents[1] doubleValue] : [self dismissOffset];
     if (full == next)
         return 1;
-    return charon_clamp01(([self currentOffset] - next) / (full - next));
+    return revenant_clamp01(([self currentOffset] - next) / (full - next));
 }
 
 - (CGFloat)percentPresented
@@ -391,7 +391,7 @@ typedef NS_ENUM(NSInteger, CharonDetentType) {
     CGFloat dismiss = [self dismissOffset];
     if (smallest == dismiss)
         return 1;
-    return charon_clamp01(([self currentOffset] - dismiss) / (smallest - dismiss));
+    return revenant_clamp01(([self currentOffset] - dismiss) / (smallest - dismiss));
 }
 
 - (BOOL)stacksWithChild
@@ -427,7 +427,7 @@ typedef NS_ENUM(NSInteger, CharonDetentType) {
 {
     if ([self forcedFullScreen])
         return 1;
-    return _root ? charon_clamp01(1 - [self depthLevel]) : 0;
+    return _root ? revenant_clamp01(1 - [self depthLevel]) : 0;
 }
 
 - (CGRect)fullHeightUntransformedFrameForDepthLevel
@@ -444,12 +444,12 @@ typedef NS_ENUM(NSInteger, CharonDetentType) {
         return CGAffineTransformIdentity;
     CGRect a = [self untransformedFrame];
     CGRect b = [self fullHeightUntransformedFrameForDepthLevel];
-    CGFloat margin = charon_sheet_content_margin(_container.window, CGRectGetWidth(a));
-    CGFloat k = 2 * (1 - exp2(-MIN(depth, charon_sheet_maximum_depth - 1)));
+    CGFloat margin = revenant_sheet_content_margin(_container.window, CGRectGetWidth(a));
+    CGFloat k = 2 * (1 - exp2(-MIN(depth, revenant_sheet_maximum_depth - 1)));
     CGFloat scale = CGRectGetWidth(b) == 0 ? 1 : 1 - 2 * margin * k / CGRectGetWidth(b);
     CGFloat sum = CGRectGetHeight(a) * (1 - scale) / 2 + (CGRectGetMinY(a) - CGRectGetMinY(b)) * (1 - scale)
-                + charon_sheet_top_offset * k * charon_clamp01(charon_sheet_maximum_depth - depth)
-                + charon_clamp01(depth) * (CGRectGetMinY(b) - CGRectGetMinY([self stackAlignmentFrame]));
+                + revenant_sheet_top_offset * k * revenant_clamp01(revenant_sheet_maximum_depth - depth)
+                + revenant_clamp01(depth) * (CGRectGetMinY(b) - CGRectGetMinY([self stackAlignmentFrame]));
     return CGAffineTransformConcat(CGAffineTransformMakeTranslation(0, -sum / scale), CGAffineTransformMakeScale(scale, scale));
 }
 
@@ -461,7 +461,7 @@ typedef NS_ENUM(NSInteger, CharonDetentType) {
     if (index != NSNotFound && index < detents.count) {
         CGFloat dimmed = [detents[index] doubleValue];
         CGFloat next = index + 1 < detents.count ? [detents[index + 1] doubleValue] : [self dismissOffset];
-        own = dimmed == next ? 1 : charon_clamp01(([self currentOffset] - next) / (dimmed - next));
+        own = dimmed == next ? 1 : revenant_clamp01(([self currentOffset] - next) / (dimmed - next));
     }
     CGFloat child = _child ? [_child percentDimmedFromOffset] : 0;
     return own < child ? child : own;
@@ -508,12 +508,12 @@ typedef NS_ENUM(NSInteger, CharonDetentType) {
 
 - (void)getTopCornerRadius:(CGFloat *)top bottomCornerRadius:(CGFloat *)bottom
 {
-    CGFloat automatic = UISheetPresentationControllerAutomaticDimension, display = charon_sheet_display_corner_radius(_container.window);
-    CGFloat dismiss = charon_sheet_corner_radius;
-    CGFloat own = _root || _preferredCornerRadius == automatic ? charon_sheet_corner_radius : _preferredCornerRadius;
-    CGFloat childRadius = _child ? (_child.preferredCornerRadius == automatic ? charon_sheet_corner_radius : _child.preferredCornerRadius) : own;
-    childRadius = 0.5 * childRadius + 0.5 * charon_sheet_corner_radius;
-    CGFloat depth = [self depthLevel], dd = charon_clamp01(depth);
+    CGFloat automatic = UISheetPresentationControllerAutomaticDimension, display = revenant_sheet_display_corner_radius(_container.window);
+    CGFloat dismiss = revenant_sheet_corner_radius;
+    CGFloat own = _root || _preferredCornerRadius == automatic ? revenant_sheet_corner_radius : _preferredCornerRadius;
+    CGFloat childRadius = _child ? (_child.preferredCornerRadius == automatic ? revenant_sheet_corner_radius : _child.preferredCornerRadius) : own;
+    childRadius = 0.5 * childRadius + 0.5 * revenant_sheet_corner_radius;
+    CGFloat depth = [self depthLevel], dd = revenant_clamp01(depth);
     CGFloat bases[2];
     bases[0] = (1 - dd) * own + dd * childRadius;
     bases[1] = depth == 0 ? (CGRectGetWidth([self untransformedFrame]) == CGRectGetWidth(_container.bounds) ? automatic : 0) : bases[0];
@@ -530,10 +530,10 @@ typedef NS_ENUM(NSInteger, CharonDetentType) {
 
 #pragma mark - The sheet's view
 
-@interface CharonSheetGrabber : UIControl
+@interface RevenantSheetGrabber : UIControl
 @end
 
-@implementation CharonSheetGrabber
+@implementation RevenantSheetGrabber
 
 - (BOOL)pointInside:(CGPoint)point withEvent:(UIEvent *)event
 {
@@ -544,22 +544,22 @@ typedef NS_ENUM(NSInteger, CharonDetentType) {
 
 @end
 
-static const CGFloat charon_sheet_magic_shadow_outset = 150;
-static const CGFloat charon_sheet_magic_shadow_radius = 10;
+static const CGFloat revenant_sheet_magic_shadow_outset = 150;
+static const CGFloat revenant_sheet_magic_shadow_radius = 10;
 
-@interface CharonSheetView : UIView <CharonBackdropClient>
+@interface RevenantSheetView : UIView <RevenantBackdropClient>
 @property (nonatomic, readonly) UIView *clippingView;
 @property (nonatomic, readonly) UIControl *grabber;
 - (void)setTopCornerRadius:(CGFloat)top bottomCornerRadius:(CGFloat)bottom;
 - (void)setMagicShadowAlpha:(CGFloat)alpha;
 @end
 
-static void charon_sheet_free_pixels(void *info, const void *data, size_t size)
+static void revenant_sheet_free_pixels(void *info, const void *data, size_t size)
 {
     free((void *)data);
 }
 
-@implementation CharonSheetView {
+@implementation RevenantSheetView {
     UIView *_clippingView;
     UIControl *_grabber;
     CAShapeLayer *_mask;
@@ -567,7 +567,7 @@ static void charon_sheet_free_pixels(void *info, const void *data, size_t size)
     CGFloat _bottomCornerRadius;
     UIView *_magicShadowView;
     CALayer *_magicShadowLayer;
-    CharonBackdrop *_magicShadowReader;
+    RevenantBackdrop *_magicShadowReader;
     dispatch_queue_t _magicShadowQueue;
     BOOL _magicShadowShading;
 }
@@ -584,9 +584,9 @@ static void charon_sheet_free_pixels(void *info, const void *data, size_t size)
         _mask = [CAShapeLayer layer];
         _clippingView.layer.mask = _mask;
         [self addSubview:_clippingView];
-        _grabber = [[CharonSheetGrabber alloc] initWithFrame:CGRectMake(0, 0, charon_sheet_grabber_width, charon_sheet_grabber_height)];
-        _grabber.layer.cornerRadius = charon_sheet_grabber_height / 2;
-        _grabber.backgroundColor = charon_sheet_grabber_color();
+        _grabber = [[RevenantSheetGrabber alloc] initWithFrame:CGRectMake(0, 0, revenant_sheet_grabber_width, revenant_sheet_grabber_height)];
+        _grabber.layer.cornerRadius = revenant_sheet_grabber_height / 2;
+        _grabber.backgroundColor = revenant_sheet_grabber_color();
         _grabber.hidden = YES;
         [self addSubview:_grabber];
     }
@@ -624,7 +624,7 @@ static void charon_sheet_free_pixels(void *info, const void *data, size_t size)
     _mask.path = path.CGPath;
     self.layer.shadowPath = [path CGPath];
     [CATransaction commit];
-    _grabber.center = CGPointMake(CGRectGetMidX(self.bounds), charon_sheet_grabber_spacing + charon_sheet_grabber_height / 2);
+    _grabber.center = CGPointMake(CGRectGetMidX(self.bounds), revenant_sheet_grabber_spacing + revenant_sheet_grabber_height / 2);
 }
 
 - (UIView *)hitTest:(CGPoint)point withEvent:(UIEvent *)event
@@ -641,20 +641,20 @@ static void charon_sheet_free_pixels(void *info, const void *data, size_t size)
     if (!_magicShadowView && alpha <= 0)
         return;
     if (!_magicShadowView) {
-        _magicShadowView = [[UIView alloc] initWithFrame:CGRectInset(self.bounds, -charon_sheet_magic_shadow_outset, -charon_sheet_magic_shadow_outset)];
+        _magicShadowView = [[UIView alloc] initWithFrame:CGRectInset(self.bounds, -revenant_sheet_magic_shadow_outset, -revenant_sheet_magic_shadow_outset)];
         _magicShadowView.userInteractionEnabled = NO;
         _magicShadowView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
         _magicShadowLayer = [CALayer layer];
         [_magicShadowView.layer addSublayer:_magicShadowLayer];
         [self insertSubview:_magicShadowView atIndex:0];
-        _magicShadowReader = [[CharonBackdrop alloc] initWithView:self client:self];
-        _magicShadowQueue = dispatch_queue_create("org.charon.sheet.shadow", DISPATCH_QUEUE_SERIAL);
+        _magicShadowReader = [[RevenantBackdrop alloc] initWithView:self client:self];
+        _magicShadowQueue = dispatch_queue_create("org.revenant.sheet.shadow", DISPATCH_QUEUE_SERIAL);
     }
     _magicShadowView.alpha = alpha;
-    [self charon_updateMagicShadowReader];
+    [self revenant_updateMagicShadowReader];
 }
 
-- (void)charon_updateMagicShadowReader
+- (void)revenant_updateMagicShadowReader
 {
     if (self.window && _magicShadowView.alpha > 0) {
         _magicShadowReader.scale = self.window.screen.scale;
@@ -667,24 +667,24 @@ static void charon_sheet_free_pixels(void *info, const void *data, size_t size)
 - (void)didMoveToWindow
 {
     [super didMoveToWindow];
-    [self charon_updateMagicShadowReader];
+    [self revenant_updateMagicShadowReader];
 }
 
-- (BOOL)backdropIsWanted:(CharonBackdrop *)backdrop
+- (BOOL)backdropIsWanted:(RevenantBackdrop *)backdrop
 {
     return !self.hidden && _magicShadowView.alpha > 0 && !_magicShadowShading;
 }
 
-- (CGRect)backdropRegion:(CharonBackdrop *)backdrop
+- (CGRect)backdropRegion:(RevenantBackdrop *)backdrop
 {
     return _magicShadowView.frame;
 }
 
-- (void)backdrop:(CharonBackdrop *)backdrop captured:(uint8_t *)pixels width:(size_t)width height:(size_t)height rowBytes:(size_t)rowBytes rect:(CGRect)captured
+- (void)backdrop:(RevenantBackdrop *)backdrop captured:(uint8_t *)pixels width:(size_t)width height:(size_t)height rowBytes:(size_t)rowBytes rect:(CGRect)captured
 {
     CGRect frame = _magicShadowView.frame;
     CGFloat scale = self.window.screen.scale;
-    double cap = charon_sheet_shadow_cap(CGRectGetWidth(frame), CGRectGetHeight(frame), charon_sheet_magic_shadow_radius, scale);
+    double cap = revenant_sheet_shadow_cap(CGRectGetWidth(frame), CGRectGetHeight(frame), revenant_sheet_magic_shadow_radius, scale);
     double x = CGRectGetMinX(captured) - CGRectGetMinX(frame), y = CGRectGetMinY(captured) - CGRectGetMinY(frame);
     double dx = CGRectGetWidth(captured) / width, dy = CGRectGetHeight(captured) / height;
     CGSize size = frame.size;
@@ -692,9 +692,9 @@ static void charon_sheet_free_pixels(void *info, const void *data, size_t size)
     _magicShadowShading = YES;
     dispatch_async(_magicShadowQueue, ^{
         CGImageRef image = NULL;
-        if (charon_sheet_shadow_shade(pixels, width, height, rowBytes, x, y, dx, dy, size.width, size.height, cap, shadowScale)) {
+        if (revenant_sheet_shadow_emulator(pixels, width, height, rowBytes, x, y, dx, dy, size.width, size.height, cap, shadowScale)) {
             CGColorSpaceRef space = CGColorSpaceCreateDeviceRGB();
-            CGDataProviderRef provider = CGDataProviderCreateWithData(NULL, pixels, rowBytes * height, charon_sheet_free_pixels);
+            CGDataProviderRef provider = CGDataProviderCreateWithData(NULL, pixels, rowBytes * height, revenant_sheet_free_pixels);
             image = CGImageCreate(width, height, 8, 32, rowBytes, space, kCGImageAlphaPremultipliedLast | kCGBitmapByteOrderDefault, provider, NULL, false, kCGRenderingIntentDefault);
             CGDataProviderRelease(provider);
             CGColorSpaceRelease(space);
@@ -718,48 +718,48 @@ static void charon_sheet_free_pixels(void *info, const void *data, size_t size)
 #pragma mark - The sheet
 
 @interface UISheetPresentationController () <UIGestureRecognizerDelegate>
-- (void)charon_animateToOffset:(CGFloat)offset velocity:(CGFloat)velocity completion:(void (^)(void))completion;
-- (void)charon_embedContent;
-- (CGFloat)charon_dismissOffset;
-- (CGFloat)charon_selectedOffset;
-- (void)charon_setOffset:(CGFloat)offset;
-- (void)charon_applyLayout;
-- (void)charon_linkParent;
-- (BOOL)charon_shouldDismiss;
-- (BOOL)charon_takeInteractiveDismissal:(id<UIViewControllerContextTransitioning>)context;
+- (void)revenant_animateToOffset:(CGFloat)offset velocity:(CGFloat)velocity completion:(void (^)(void))completion;
+- (void)revenant_embedContent;
+- (CGFloat)revenant_dismissOffset;
+- (CGFloat)revenant_selectedOffset;
+- (void)revenant_setOffset:(CGFloat)offset;
+- (void)revenant_applyLayout;
+- (void)revenant_linkParent;
+- (BOOL)revenant_shouldDismiss;
+- (BOOL)revenant_takeInteractiveDismissal:(id<UIViewControllerContextTransitioning>)context;
 @end
 
-@interface CharonSheetAnimator : NSObject <UIViewControllerAnimatedTransitioning>
+@interface RevenantSheetAnimator : NSObject <UIViewControllerAnimatedTransitioning>
 @property (nonatomic, weak) UISheetPresentationController *sheet;
 @end
 
-@implementation CharonSheetAnimator
+@implementation RevenantSheetAnimator
 @synthesize sheet = _sheet;
 
 - (NSTimeInterval)transitionDuration:(id<UIViewControllerContextTransitioning>)context
 {
-    return context.isAnimated ? charon_sheet_transition_duration : 0;
+    return context.isAnimated ? revenant_sheet_transition_duration : 0;
 }
 
 - (void)animateTransition:(id<UIViewControllerContextTransitioning>)context
 {
     UISheetPresentationController *sheet = _sheet;
     BOOL presenting = [context viewControllerForKey:UITransitionContextToViewControllerKey] == sheet.presentedViewController;
-    if (!presenting && [sheet charon_takeInteractiveDismissal:context])
+    if (!presenting && [sheet revenant_takeInteractiveDismissal:context])
         return;
     if (presenting) {
-        [sheet charon_linkParent];
-        [sheet charon_embedContent];
-        [sheet charon_setOffset:[sheet charon_dismissOffset]];
+        [sheet revenant_linkParent];
+        [sheet revenant_embedContent];
+        [sheet revenant_setOffset:[sheet revenant_dismissOffset]];
     }
-    [sheet charon_animateToOffset:presenting ? [sheet charon_selectedOffset] : [sheet charon_dismissOffset] velocity:0 completion:^{
+    [sheet revenant_animateToOffset:presenting ? [sheet revenant_selectedOffset] : [sheet revenant_dismissOffset] velocity:0 completion:^{
         [context completeTransition:![context transitionWasCancelled]];
     }];
 }
 
 @end
 
-static void charon_sheet_apply_stack(CharonSheetLayoutInfo *node)
+static void revenant_sheet_apply_stack(RevenantSheetLayoutInfo *node)
 {
     for (; node; node = node.child) {
         if (node.root) {
@@ -770,7 +770,7 @@ static void charon_sheet_apply_stack(CharonSheetLayoutInfo *node)
             view.layer.cornerRadius = radius > 0 ? radius : node.savedCornerRadius;
             view.layer.masksToBounds = radius > 0 || node.savedMasksToBounds;
         } else {
-            [node.sheet charon_applyLayout];
+            [node.sheet revenant_applyLayout];
         }
     }
 }
@@ -786,17 +786,17 @@ static void charon_sheet_apply_stack(CharonSheetLayoutInfo *node)
     NSString *_selectedDetentIdentifier;
     NSString *_largestUndimmedDetentIdentifier;
 
-    CharonSheetLayoutInfo *_layout;
-    CharonSheetLayoutInfo *_rootLayout;
-    CharonSheetView *_sheetView;
+    RevenantSheetLayoutInfo *_layout;
+    RevenantSheetLayoutInfo *_rootLayout;
+    RevenantSheetView *_sheetView;
     UIView *_dimmingView;
-    CharonSheetView *_confinedDimmingView;
+    RevenantSheetView *_confinedDimmingView;
     NSArray *_resolvedOffsets;
     NSArray *_resolvedIdentifiers;
     CGRect _resolvedBounds;
     NSInteger _changing;
     UIViewPropertyAnimator *_animator;
-    CharonSheetAnimator *_transitionAnimator;
+    RevenantSheetAnimator *_transitionAnimator;
     UIPanGestureRecognizer *_pan;
     CGFloat _dragStart;
     BOOL _dismissalDecided;
@@ -821,7 +821,7 @@ static void charon_sheet_apply_stack(CharonSheetLayoutInfo *node)
         _preferredCornerRadius = UISheetPresentationControllerAutomaticDimension;
         _prefersScrollingExpandsWhenScrolledToEdge = YES;
         _detents = @[ [UISheetPresentationControllerDetent largeDetent] ];
-        _layout = [[CharonSheetLayoutInfo alloc] init];
+        _layout = [[RevenantSheetLayoutInfo alloc] init];
         _layout.sheet = self;
         _keyboardFrame = CGRectNull;
     }
@@ -850,44 +850,44 @@ static void charon_sheet_apply_stack(CharonSheetLayoutInfo *node)
 - (void)setPrefersEdgeAttachedInCompactHeight:(BOOL)value
 {
     _prefersEdgeAttachedInCompactHeight = value;
-    [self charon_invalidateDetents];
+    [self revenant_invalidateDetents];
 }
 
 - (void)setWidthFollowsPreferredContentSizeWhenEdgeAttached:(BOOL)value
 {
     _widthFollowsPreferredContentSizeWhenEdgeAttached = value;
-    [self charon_invalidateDetents];
+    [self revenant_invalidateDetents];
 }
 
 - (void)setPrefersGrabberVisible:(BOOL)value
 {
     _prefersGrabberVisible = value;
-    [self charon_changed];
+    [self revenant_changed];
 }
 
 - (void)setPreferredCornerRadius:(CGFloat)value
 {
     _preferredCornerRadius = value;
-    [self charon_changed];
+    [self revenant_changed];
 }
 
 - (void)setDetents:(NSArray *)detents
 {
     _detents = [detents copy];
-    [self charon_invalidateDetents];
+    [self revenant_invalidateDetents];
 }
 
 - (void)setSelectedDetentIdentifier:(NSString *)identifier
 {
     _selectedDetentIdentifier = [identifier copy];
-    [self charon_moveToSelectedDetent];
+    [self revenant_moveToSelectedDetent];
 }
 
 - (void)setLargestUndimmedDetentIdentifier:(NSString *)identifier
 {
     _largestUndimmedDetentIdentifier = [identifier copy];
     _resolvedOffsets = nil;
-    [self charon_changed];
+    [self revenant_changed];
 }
 
 - (void)animateChanges:(void (NS_NOESCAPE ^)(void))changes
@@ -897,27 +897,27 @@ static void charon_sheet_apply_stack(CharonSheetLayoutInfo *node)
         changes();
     _changing--;
     if (_changing == 0 && self.containerView)
-        [self charon_animateToOffset:[self charon_selectedOffset] velocity:0 completion:nil];
+        [self revenant_animateToOffset:[self revenant_selectedOffset] velocity:0 completion:nil];
 }
 
-- (void)charon_invalidateDetents
+- (void)revenant_invalidateDetents
 {
     _resolvedOffsets = nil;
     _resolvedIdentifiers = nil;
-    [self charon_moveToSelectedDetent];
+    [self revenant_moveToSelectedDetent];
 }
 
-- (void)charon_changed
+- (void)revenant_changed
 {
     if (_changing == 0 && self.containerView)
-        [self charon_layoutStack];
+        [self revenant_layoutStack];
 }
 
-- (void)charon_moveToSelectedDetent
+- (void)revenant_moveToSelectedDetent
 {
     if (_changing == 0 && self.containerView && !_animator) {
-        _layout.offset = [self charon_selectedOffset];
-        [self charon_layoutStack];
+        _layout.offset = [self revenant_selectedOffset];
+        [self revenant_layoutStack];
     }
 }
 
@@ -942,18 +942,18 @@ static void charon_sheet_apply_stack(CharonSheetLayoutInfo *node)
 {
     if (!self.containerView)
         return CGRectZero;
-    [self charon_updateLayoutInputs];
+    [self revenant_updateLayoutInputs];
     CGFloat offset = _layout.offset;
-    _layout.offset = [self charon_selectedOffset];
+    _layout.offset = [self revenant_selectedOffset];
     CGRect frame = [_layout untransformedFrame];
     _layout.offset = offset;
     return frame;
 }
 
-- (id<UIViewControllerAnimatedTransitioning>)charon_transitionAnimator
+- (id<UIViewControllerAnimatedTransitioning>)revenant_transitionAnimator
 {
     if (!_transitionAnimator) {
-        _transitionAnimator = [[CharonSheetAnimator alloc] init];
+        _transitionAnimator = [[RevenantSheetAnimator alloc] init];
         _transitionAnimator.sheet = self;
     }
     return _transitionAnimator;
@@ -968,47 +968,47 @@ static void charon_sheet_apply_stack(CharonSheetLayoutInfo *node)
 
     _dimmingView = [[UIView alloc] initWithFrame:container.bounds];
     _dimmingView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-    [_dimmingView addGestureRecognizer:[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(charon_dimmingTapped:)]];
+    [_dimmingView addGestureRecognizer:[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(revenant_dimmingTapped:)]];
     [container addSubview:_dimmingView];
-    _confinedDimmingView = [[CharonSheetView alloc] initWithFrame:CGRectZero];
+    _confinedDimmingView = [[RevenantSheetView alloc] initWithFrame:CGRectZero];
     _confinedDimmingView.hidden = YES;
-    [_confinedDimmingView addGestureRecognizer:[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(charon_dimmingTapped:)]];
+    [_confinedDimmingView addGestureRecognizer:[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(revenant_dimmingTapped:)]];
     [container addSubview:_confinedDimmingView];
 
-    _sheetView = [[CharonSheetView alloc] initWithFrame:CGRectZero];
+    _sheetView = [[RevenantSheetView alloc] initWithFrame:CGRectZero];
     _sheetView.layer.shadowRadius = 2;
     _sheetView.layer.shadowOffset = CGSizeZero;
-    _sheetView.layer.shadowColor = charon_sheet_dimming_color(container.traitCollection).CGColor;
+    _sheetView.layer.shadowColor = revenant_sheet_dimming_color(container.traitCollection).CGColor;
     _layout.view = _sheetView;
-    _pan = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(charon_handlePan:)];
+    _pan = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(revenant_handlePan:)];
     _pan.enabled = NO;
     _pan.delegate = self;
     [_sheetView addGestureRecognizer:_pan];
-    [_sheetView.grabber addTarget:self action:@selector(charon_grabberTapped) forControlEvents:UIControlEventTouchUpInside];
+    [_sheetView.grabber addTarget:self action:@selector(revenant_grabberTapped) forControlEvents:UIControlEventTouchUpInside];
     [container addSubview:_sheetView];
-    [self charon_updateLayoutInputs];
-    _layout.offset = [self charon_dismissOffset];
-    [self charon_layoutStack];
+    [self revenant_updateLayoutInputs];
+    _layout.offset = [self revenant_dismissOffset];
+    [self revenant_layoutStack];
 
     NSNotificationCenter *center = [NSNotificationCenter defaultCenter];
-    [center addObserver:self selector:@selector(charon_keyboardWillShow:) name:UIKeyboardWillShowNotification object:nil];
-    [center addObserver:self selector:@selector(charon_keyboardWillHide:) name:UIKeyboardWillHideNotification object:nil];
-    [center addObserver:self selector:@selector(charon_keyboardWillChangeFrame:) name:UIKeyboardWillChangeFrameNotification object:nil];
+    [center addObserver:self selector:@selector(revenant_keyboardWillShow:) name:UIKeyboardWillShowNotification object:nil];
+    [center addObserver:self selector:@selector(revenant_keyboardWillHide:) name:UIKeyboardWillHideNotification object:nil];
+    [center addObserver:self selector:@selector(revenant_keyboardWillChangeFrame:) name:UIKeyboardWillChangeFrameNotification object:nil];
 }
 
 - (void)presentationTransitionDidEnd:(BOOL)completed
 {
     [super presentationTransitionDidEnd:completed];
     if (!completed) {
-        [self charon_tearDownRemovingViews:YES];
+        [self revenant_tearDownRemovingViews:YES];
         return;
     }
-    [self charon_linkParent];
-    [self charon_embedContent];
+    [self revenant_linkParent];
+    [self revenant_embedContent];
     _pan.enabled = YES;
     if (!_animator) {
-        _layout.offset = [self charon_selectedOffset];
-        [self charon_layoutStack];
+        _layout.offset = [self revenant_selectedOffset];
+        [self revenant_layoutStack];
     }
 }
 
@@ -1026,7 +1026,7 @@ static void charon_sheet_apply_stack(CharonSheetLayoutInfo *node)
     _pan.enabled = YES;
     if (!completed)
         return;
-    [self charon_tearDownRemovingViews:NO];
+    [self revenant_tearDownRemovingViews:NO];
     if (_userDismissed) {
         _userDismissed = NO;
         __weak UISheetPresentationController *weakSelf = self;
@@ -1038,7 +1038,7 @@ static void charon_sheet_apply_stack(CharonSheetLayoutInfo *node)
         });
     }
     UIPresentationController *sheet = self;
-    [self.presentedViewController charon_sheetDidDismiss:self];
+    [self.presentedViewController revenant_sheetDidDismiss:self];
     dispatch_async(dispatch_get_main_queue(), ^{
         (void)sheet;
     });
@@ -1048,7 +1048,7 @@ static void charon_sheet_apply_stack(CharonSheetLayoutInfo *node)
 {
     [super containerViewWillLayoutSubviews];
     if (!CGRectEqualToRect(self.containerView.bounds, _resolvedBounds))
-        [self charon_invalidateDetents];
+        [self revenant_invalidateDetents];
 }
 
 - (UIViewController *)presentingViewController
@@ -1056,16 +1056,16 @@ static void charon_sheet_apply_stack(CharonSheetLayoutInfo *node)
     return [super presentingViewController] ?: self.presentedViewController.presentingViewController;
 }
 
-- (void)charon_linkParent
+- (void)revenant_linkParent
 {
     if (_layout.parent || !self.containerView)
         return;
     UIViewController *top = self.presentingViewController;
     while (top.parentViewController)
         top = top.parentViewController;
-    UIPresentationController *parent = charon_presentation_controller_of(top);
+    UIPresentationController *parent = revenant_presentation_controller_of(top);
     if ([parent isKindOfClass:[UISheetPresentationController class]] && parent.containerView) {
-        CharonSheetLayoutInfo *parentLayout = ((UISheetPresentationController *)parent)->_layout;
+        RevenantSheetLayoutInfo *parentLayout = ((UISheetPresentationController *)parent)->_layout;
         _layout.parent = parentLayout;
         parentLayout.child = _layout;
         return;
@@ -1074,7 +1074,7 @@ static void charon_sheet_apply_stack(CharonSheetLayoutInfo *node)
     if (parent || !top || window.rootViewController != top)
         return;
     UIView *rootView = top.view;
-    _rootLayout = [[CharonSheetLayoutInfo alloc] init];
+    _rootLayout = [[RevenantSheetLayoutInfo alloc] init];
     _rootLayout.root = YES;
     _rootLayout.presented = YES;
     _rootLayout.container = self.containerView;
@@ -1089,11 +1089,11 @@ static void charon_sheet_apply_stack(CharonSheetLayoutInfo *node)
     _layout.parent = _rootLayout;
 }
 
-- (void)charon_tearDownRemovingViews:(BOOL)removesViews
+- (void)revenant_tearDownRemovingViews:(BOOL)removesViews
 {
     [_animator stopAnimation:YES];
     _animator = nil;
-    CharonSheetLayoutInfo *parent = _layout.parent;
+    RevenantSheetLayoutInfo *parent = _layout.parent;
     _layout.presented = NO;
     if (parent.child == _layout)
         parent.child = nil;
@@ -1105,10 +1105,10 @@ static void charon_sheet_apply_stack(CharonSheetLayoutInfo *node)
         rootView.layer.masksToBounds = _rootLayout.savedMasksToBounds;
         _rootLayout = nil;
     } else if (parent) {
-        CharonSheetLayoutInfo *bottom = parent;
+        RevenantSheetLayoutInfo *bottom = parent;
         while (bottom.parent)
             bottom = bottom.parent;
-        charon_sheet_apply_stack(bottom);
+        revenant_sheet_apply_stack(bottom);
     }
     [_dimmingView removeFromSuperview];
     _dimmingView = nil;
@@ -1134,7 +1134,7 @@ static void charon_sheet_apply_stack(CharonSheetLayoutInfo *node)
     _resolvedIdentifiers = nil;
 }
 
-- (void)charon_embedContent
+- (void)revenant_embedContent
 {
     UIView *content = self.presentedViewController.view;
     if (!_sheetView || content.superview == _sheetView.clippingView)
@@ -1148,7 +1148,7 @@ static void charon_sheet_apply_stack(CharonSheetLayoutInfo *node)
 
 #pragma mark Detents and layout
 
-- (void)charon_updateLayoutInputs
+- (void)revenant_updateLayoutInputs
 {
     _layout.container = self.containerView;
     _layout.edgeAttachedInCompactHeight = _prefersEdgeAttachedInCompactHeight;
@@ -1157,20 +1157,20 @@ static void charon_sheet_apply_stack(CharonSheetLayoutInfo *node)
     _layout.preferredCornerRadius = _preferredCornerRadius;
     _layout.wantsGrabber = _prefersGrabberVisible;
     if (!_resolvedOffsets)
-        [self charon_resolveDetents];
+        [self revenant_resolveDetents];
     _layout.detentOffsets = _resolvedOffsets;
 }
 
-- (void)charon_resolveDetents
+- (void)revenant_resolveDetents
 {
     UIView *container = self.containerView;
-    CharonSheetDetentContext *context = [[CharonSheetDetentContext alloc] initWithTraitCollection:container.traitCollection maximumDetentValue:[_layout maximumDetentValue] containerBounds:container.bounds];
+    RevenantSheetDetentContext *context = [[RevenantSheetDetentContext alloc] initWithTraitCollection:container.traitCollection maximumDetentValue:[_layout maximumDetentValue] containerBounds:container.bounds];
     NSMutableArray *entries = [NSMutableArray array];
     for (UISheetPresentationControllerDetent *detent in _detents) {
-        CGFloat value = [detent charon_resolvedValueInContext:context];
+        CGFloat value = [detent revenant_resolvedValueInContext:context];
         if (value == CGFLOAT_MAX)
             continue;
-        [entries addObject:@[ @([_layout offsetForDetentValue:value]), [detent charon_identifier] ]];
+        [entries addObject:@[ @([_layout offsetForDetentValue:value]), [detent revenant_identifier] ]];
     }
     [entries sortWithOptions:NSSortStable usingComparator:^NSComparisonResult(NSArray *a, NSArray *b) {
         return [a[0] compare:b[0]];
@@ -1188,9 +1188,9 @@ static void charon_sheet_apply_stack(CharonSheetLayoutInfo *node)
     }
     CGRect keyboard = CGRectIntersection(_keyboardFrame, [_layout fullHeightFrame]);
     _keyboardAdjusted = _firstResponderRequiresKeyboard && offsets.count && !CGRectIsNull(keyboard)
-        && charon_sheet_first_responder_in(self.presentedViewController.view);
+        && revenant_sheet_first_responder_in(self.presentedViewController.view);
     if (_keyboardAdjusted) {
-        CGFloat large = [_layout offsetForDetentValue:[[UISheetPresentationControllerDetent largeDetent] charon_resolvedValueInContext:context]];
+        CGFloat large = [_layout offsetForDetentValue:[[UISheetPresentationControllerDetent largeDetent] revenant_resolvedValueInContext:context]];
         CGFloat first = [offsets[0] doubleValue];
         if (first > large) {
             [offsets insertObject:@(MAX(first - CGRectGetHeight(keyboard), large)) atIndex:0];
@@ -1204,20 +1204,20 @@ static void charon_sheet_apply_stack(CharonSheetLayoutInfo *node)
     _resolvedBounds = container.bounds;
 }
 
-- (CGFloat)charon_dismissOffset
+- (CGFloat)revenant_dismissOffset
 {
     return [_layout dismissOffset];
 }
 
-- (CGFloat)charon_selectedOffset
+- (CGFloat)revenant_selectedOffset
 {
-    [self charon_updateLayoutInputs];
+    [self revenant_updateLayoutInputs];
     if (!_resolvedOffsets.count)
         return CGRectGetMinY([_layout stackAlignmentFrame]);
-    return [_resolvedOffsets[[self charon_indexOfCurrentDetent]] doubleValue];
+    return [_resolvedOffsets[[self revenant_indexOfCurrentDetent]] doubleValue];
 }
 
-- (NSUInteger)charon_indexOfCurrentDetent
+- (NSUInteger)revenant_indexOfCurrentDetent
 {
     if (_keyboardAdjusted)
         return 0;
@@ -1225,24 +1225,24 @@ static void charon_sheet_apply_stack(CharonSheetLayoutInfo *node)
     return index != NSNotFound ? index : _resolvedOffsets.count - 1;
 }
 
-- (void)charon_setOffset:(CGFloat)offset
+- (void)revenant_setOffset:(CGFloat)offset
 {
     _layout.offset = offset;
-    [self charon_layoutStack];
+    [self revenant_layoutStack];
 }
 
-- (void)charon_layoutStack
+- (void)revenant_layoutStack
 {
     if (!self.containerView)
         return;
-    [self charon_updateLayoutInputs];
-    CharonSheetLayoutInfo *bottom = _layout;
+    [self revenant_updateLayoutInputs];
+    RevenantSheetLayoutInfo *bottom = _layout;
     while (bottom.parent)
         bottom = bottom.parent;
-    charon_sheet_apply_stack(bottom);
+    revenant_sheet_apply_stack(bottom);
 }
 
-- (void)charon_applyLayout
+- (void)revenant_applyLayout
 {
     CGRect frame = [_layout untransformedFrame];
     _sheetView.bounds = CGRectMake(0, 0, CGRectGetWidth(frame), CGRectGetHeight(frame));
@@ -1256,14 +1256,14 @@ static void charon_sheet_apply_stack(CharonSheetLayoutInfo *node)
     _sheetView.layer.shadowOpacity = [_layout shadowOpacity];
     [_sheetView setMagicShadowAlpha:[_layout magicShadowOpacity]];
     UITraitCollection *traits = self.containerView.traitCollection;
-    _sheetView.grabber.backgroundColor = [charon_sheet_grabber_color() resolvedColorWithTraitCollection:traits];
+    _sheetView.grabber.backgroundColor = [revenant_sheet_grabber_color() resolvedColorWithTraitCollection:traits];
 
     BOOL enabled = [_layout percentDimmedFromOffset] > 0;
     _dimmingView.frame = self.containerView.bounds;
-    _dimmingView.backgroundColor = charon_sheet_dimming_background(traits, [_layout percentDimmed], 0);
+    _dimmingView.backgroundColor = revenant_sheet_dimming_background(traits, [_layout percentDimmed], 0);
     _dimmingView.userInteractionEnabled = enabled;
 
-    CharonSheetLayoutInfo *parent = _layout.parent;
+    RevenantSheetLayoutInfo *parent = _layout.parent;
     _confinedDimmingView.hidden = !parent;
     _confinedDimmingView.userInteractionEnabled = enabled;
     if (parent) {
@@ -1275,27 +1275,27 @@ static void charon_sheet_apply_stack(CharonSheetLayoutInfo *node)
         [_confinedDimmingView setTopCornerRadius:top bottomCornerRadius:bottom];
         UITraitCollection *parentTraits = parent.root ? parent.view.traitCollection : parent.sheet.presentedViewController.traitCollection;
         CGFloat lightened = parentTraits.userInterfaceStyle == UIUserInterfaceStyleDark && parentTraits.userInterfaceLevel == UIUserInterfaceLevelBase ? 1 - [parent percentFullScreen] : 0;
-        _confinedDimmingView.clippingView.backgroundColor = charon_sheet_dimming_background(traits, [_layout confinedPercentDimmed], lightened);
+        _confinedDimmingView.clippingView.backgroundColor = revenant_sheet_dimming_background(traits, [_layout confinedPercentDimmed], lightened);
     }
 }
 
-- (BOOL)charon_dimmingIgnoresTouches
+- (BOOL)revenant_dimmingIgnoresTouches
 {
     if (_layout.offset > [_layout margins].top)
         return _pan.state == UIGestureRecognizerStateBegan || _pan.state == UIGestureRecognizerStateChanged;
     return YES;
 }
 
-- (void)charon_dimmingTapped:(UITapGestureRecognizer *)tap
+- (void)revenant_dimmingTapped:(UITapGestureRecognizer *)tap
 {
-    if (tap.state != UIGestureRecognizerStateEnded || [self charon_dimmingIgnoresTouches] || _interactiveDismissal)
+    if (tap.state != UIGestureRecognizerStateEnded || [self revenant_dimmingIgnoresTouches] || _interactiveDismissal)
         return;
-    [self charon_dismissFromGrabberOrDimmingViewIfPossible];
+    [self revenant_dismissFromGrabberOrDimmingViewIfPossible];
 }
 
-- (void)charon_dismissFromGrabberOrDimmingViewIfPossible
+- (void)revenant_dismissFromGrabberOrDimmingViewIfPossible
 {
-    if ([self charon_shouldDismiss]) {
+    if ([self revenant_shouldDismiss]) {
         _userDismissed = YES;
         id<UISheetPresentationControllerDelegate> delegate = self.delegate;
         if ([delegate respondsToSelector:@selector(presentationControllerWillDismiss:)])
@@ -1314,7 +1314,7 @@ static void charon_sheet_apply_stack(CharonSheetLayoutInfo *node)
         [delegate sheetPresentationControllerDidChangeSelectedDetentIdentifier:self];
 }
 
-- (void)charon_grabberTapped
+- (void)revenant_grabberTapped
 {
     if (_interactiveDismissal || !_resolvedOffsets.count)
         return;
@@ -1322,10 +1322,10 @@ static void charon_sheet_apply_stack(CharonSheetLayoutInfo *node)
         [self.presentedViewController.view endEditing:YES];
         return;
     }
-    NSUInteger count = _resolvedOffsets.count, current = [self charon_indexOfCurrentDetent];
+    NSUInteger count = _resolvedOffsets.count, current = [self revenant_indexOfCurrentDetent];
     NSUInteger target = (count + current - 1) % count;
     if (target == current) {
-        [self charon_dismissFromGrabberOrDimmingViewIfPossible];
+        [self revenant_dismissFromGrabberOrDimmingViewIfPossible];
         return;
     }
     NSString *identifier = _resolvedIdentifiers[target];
@@ -1339,25 +1339,25 @@ static void charon_sheet_apply_stack(CharonSheetLayoutInfo *node)
 
 #pragma mark The keyboard
 
-- (void)charon_keyboardWillShow:(NSNotification *)notification
+- (void)revenant_keyboardWillShow:(NSNotification *)notification
 {
     _keyboardShown = YES;
-    [self charon_keyboardChanged:notification hiding:NO];
+    [self revenant_keyboardChanged:notification hiding:NO];
 }
 
-- (void)charon_keyboardWillHide:(NSNotification *)notification
+- (void)revenant_keyboardWillHide:(NSNotification *)notification
 {
     _keyboardShown = NO;
-    [self charon_keyboardChanged:notification hiding:YES];
+    [self revenant_keyboardChanged:notification hiding:YES];
 }
 
-- (void)charon_keyboardWillChangeFrame:(NSNotification *)notification
+- (void)revenant_keyboardWillChangeFrame:(NSNotification *)notification
 {
     if (_keyboardShown)
-        [self charon_keyboardChanged:notification hiding:NO];
+        [self revenant_keyboardChanged:notification hiding:NO];
 }
 
-- (void)charon_keyboardChanged:(NSNotification *)notification hiding:(BOOL)hiding
+- (void)revenant_keyboardChanged:(NSNotification *)notification hiding:(BOOL)hiding
 {
     UIView *container = self.containerView;
     if (!container)
@@ -1366,7 +1366,7 @@ static void charon_sheet_apply_stack(CharonSheetLayoutInfo *node)
     UIWindow *window = container.window;
     CGRect end = [info[UIKeyboardFrameEndUserInfoKey] CGRectValue];
     _keyboardFrame = hiding || !window ? CGRectNull : [container convertRect:[window convertRect:end fromWindow:nil] fromView:window];
-    UIResponder *responder = charon_sheet_first_responder(window);
+    UIResponder *responder = revenant_sheet_first_responder(window);
     _firstResponderRequiresKeyboard = [responder conformsToProtocol:@protocol(UIKeyInput)] && (![responder respondsToSelector:@selector(isEditable)] || [(id)responder isEditable]);
     _resolvedOffsets = nil;
     if (_animator || _interactiveDismissal || _pan.state == UIGestureRecognizerStateBegan || _pan.state == UIGestureRecognizerStateChanged)
@@ -1374,20 +1374,20 @@ static void charon_sheet_apply_stack(CharonSheetLayoutInfo *node)
     NSTimeInterval duration = [info[UIKeyboardAnimationDurationUserInfoKey] doubleValue];
     UIViewAnimationCurve curve = [info[UIKeyboardAnimationCurveUserInfoKey] integerValue];
     [UIView animateWithDuration:duration delay:0 options:(UIViewAnimationOptions)curve << 16 animations:^{
-        [self charon_updateLayoutInputs];
-        self->_layout.offset = [self charon_selectedOffset];
-        [self charon_layoutStack];
+        [self revenant_updateLayoutInputs];
+        self->_layout.offset = [self revenant_selectedOffset];
+        [self revenant_layoutStack];
     } completion:nil];
 }
 
-- (BOOL)charon_containerIgnoresDirectTouches
+- (BOOL)revenant_containerIgnoresDirectTouches
 {
     return YES;
 }
 
 #pragma mark The drag
 
-- (BOOL)charon_shouldDismiss
+- (BOOL)revenant_shouldDismiss
 {
     UIViewController *presented = self.presentedViewController;
     if (presented.presentedViewController || presented.isModalInPresentation)
@@ -1398,40 +1398,40 @@ static void charon_sheet_apply_stack(CharonSheetLayoutInfo *node)
     return YES;
 }
 
-- (CGFloat)charon_displayedOffset
+- (CGFloat)revenant_displayedOffset
 {
     CALayer *layer = (CALayer *)_sheetView.layer.presentationLayer ?: _sheetView.layer;
     return layer.position.y - CGRectGetHeight(_sheetView.bounds) / 2;
 }
 
-- (CGFloat)charon_bottomExtent
+- (CGFloat)revenant_bottomExtent
 {
-    return MIN(MAX(charon_sheet_bottom_extent_fraction * CGRectGetHeight([_layout fullHeightFrame]), 0), charon_sheet_bottom_extent);
+    return MIN(MAX(revenant_sheet_bottom_extent_fraction * CGRectGetHeight([_layout fullHeightFrame]), 0), revenant_sheet_bottom_extent);
 }
 
-- (CGFloat)charon_constrainedOffset:(CGFloat)offset
+- (CGFloat)revenant_constrainedOffset:(CGFloat)offset
 {
     CGFloat top = [_resolvedOffsets.firstObject doubleValue], bottom = [_resolvedOffsets.lastObject doubleValue];
     if (offset < top) {
-        CGFloat extent = MIN(MAX(CGRectGetMinY(self.containerView.bounds) + top - self.containerView.safeAreaInsets.top, 0), charon_sheet_top_extent);
-        return top - charon_sheet_rubber_band(top - offset, extent);
+        CGFloat extent = MIN(MAX(CGRectGetMinY(self.containerView.bounds) + top - self.containerView.safeAreaInsets.top, 0), revenant_sheet_top_extent);
+        return top - revenant_sheet_rubber_band(top - offset, extent);
     }
     if (offset > bottom && !(_dismissalDecided && _dismissible))
-        return bottom + charon_sheet_rubber_band(offset - bottom, [self charon_bottomExtent]);
+        return bottom + revenant_sheet_rubber_band(offset - bottom, [self revenant_bottomExtent]);
     return offset;
 }
 
-- (void)charon_handlePan:(UIPanGestureRecognizer *)pan
+- (void)revenant_handlePan:(UIPanGestureRecognizer *)pan
 {
     UIView *container = self.containerView;
     if (!container || !_resolvedOffsets.count)
         return;
     switch (pan.state) {
     case UIGestureRecognizerStateBegan: {
-        CGFloat shown = [self charon_displayedOffset];
+        CGFloat shown = [self revenant_displayedOffset];
         [_animator stopAnimation:YES];
         _animator = nil;
-        [self charon_setOffset:shown];
+        [self revenant_setOffset:shown];
         _dragStart = shown;
         _dismissalDecided = _interactiveDismissal;
         _dismissible = _interactiveDismissal;
@@ -1443,12 +1443,12 @@ static void charon_sheet_apply_stack(CharonSheetLayoutInfo *node)
         CGFloat bottom = [_resolvedOffsets.lastObject doubleValue];
         if (unconstrained > bottom && !_dismissalDecided) {
             _dismissalDecided = YES;
-            _dismissible = [self charon_shouldDismiss];
+            _dismissible = [self revenant_shouldDismiss];
             if (_dismissible)
-                [self charon_beginInteractiveDismissal];
+                [self revenant_beginInteractiveDismissal];
         }
-        CGFloat offset = [self charon_constrainedOffset:unconstrained];
-        if (_dismissalDecided && !_dismissible && !_attemptSent && offset - bottom > 0.25 * [self charon_bottomExtent]) {
+        CGFloat offset = [self revenant_constrainedOffset:unconstrained];
+        if (_dismissalDecided && !_dismissible && !_attemptSent && offset - bottom > 0.25 * [self revenant_bottomExtent]) {
             _attemptSent = YES;
             __weak UISheetPresentationController *weakSelf = self;
             dispatch_async(dispatch_get_main_queue(), ^{
@@ -1458,8 +1458,8 @@ static void charon_sheet_apply_stack(CharonSheetLayoutInfo *node)
                     [delegate presentationControllerDidAttemptToDismiss:strongSelf];
             });
         }
-        [self charon_holdTrackedScrollView];
-        [self charon_setOffset:offset];
+        [self revenant_holdTrackedScrollView];
+        [self revenant_setOffset:offset];
         break;
     }
     case UIGestureRecognizerStateEnded:
@@ -1467,10 +1467,10 @@ static void charon_sheet_apply_stack(CharonSheetLayoutInfo *node)
     case UIGestureRecognizerStateFailed: {
         CGFloat unconstrained = _dragStart + [pan translationInView:container].y;
         CGFloat velocity = pan.state == UIGestureRecognizerStateEnded ? [pan velocityInView:container].y : 0;
-        [self charon_holdTrackedScrollView];
+        [self revenant_holdTrackedScrollView];
         _trackedScrollView = nil;
         _lastPanEnd = CFAbsoluteTimeGetCurrent();
-        [self charon_endDragAt:unconstrained velocity:velocity];
+        [self revenant_endDragAt:unconstrained velocity:velocity];
         break;
     }
     default:
@@ -1478,7 +1478,7 @@ static void charon_sheet_apply_stack(CharonSheetLayoutInfo *node)
     }
 }
 
-- (BOOL)charon_takesPanFromScrollView:(UIScrollView *)scrollView velocity:(CGPoint)velocity
+- (BOOL)revenant_takesPanFromScrollView:(UIScrollView *)scrollView velocity:(CGPoint)velocity
 {
     UIEdgeInsets inset = scrollView.adjustedContentInset;
     if (scrollView.contentOffset.y > -inset.top)
@@ -1487,9 +1487,9 @@ static void charon_sheet_apply_stack(CharonSheetLayoutInfo *node)
         return NO;
     if (scrollView.contentSize.width > CGRectGetWidth(scrollView.bounds) - inset.left - inset.right)
         return NO;
-    if ([scrollView respondsToSelector:@selector(keyboardDismissMode)] && scrollView.keyboardDismissMode == UIScrollViewKeyboardDismissModeInteractive && charon_sheet_first_responder_in(scrollView))
+    if ([scrollView respondsToSelector:@selector(keyboardDismissMode)] && scrollView.keyboardDismissMode == UIScrollViewKeyboardDismissModeInteractive && revenant_sheet_first_responder_in(scrollView))
         return NO;
-    if (CFAbsoluteTimeGetCurrent() - _lastPanEnd < charon_sheet_swipe_interval && !_animator)
+    if (CFAbsoluteTimeGetCurrent() - _lastPanEnd < revenant_sheet_swipe_interval && !_animator)
         return NO;
     if (velocity.y > 0)
         return YES;
@@ -1510,7 +1510,7 @@ static void charon_sheet_apply_stack(CharonSheetLayoutInfo *node)
     _trackedScrollView = nil;
     if (!scrollView)
         return YES;
-    if (![self charon_takesPanFromScrollView:scrollView velocity:[_pan velocityInView:_sheetView]])
+    if (![self revenant_takesPanFromScrollView:scrollView velocity:[_pan velocityInView:_sheetView]])
         return NO;
     _trackedScrollView = scrollView;
     return YES;
@@ -1521,14 +1521,14 @@ static void charon_sheet_apply_stack(CharonSheetLayoutInfo *node)
     return gesture == _pan && [other.view isKindOfClass:[UIScrollView class]] && [other.view isDescendantOfView:_sheetView];
 }
 
-- (void)charon_holdTrackedScrollView
+- (void)revenant_holdTrackedScrollView
 {
     UIScrollView *scrollView = _trackedScrollView;
     if (scrollView)
         scrollView.contentOffset = CGPointMake(scrollView.contentOffset.x, -scrollView.adjustedContentInset.top);
 }
 
-static NSUInteger charon_sheet_closest(NSArray *offsets, CGFloat offset)
+static NSUInteger revenant_sheet_closest(NSArray *offsets, CGFloat offset)
 {
     NSUInteger best = 0;
     for (NSUInteger i = 1; i < offsets.count; i++)
@@ -1537,26 +1537,26 @@ static NSUInteger charon_sheet_closest(NSArray *offsets, CGFloat offset)
     return best;
 }
 
-- (void)charon_endDragAt:(CGFloat)unconstrained velocity:(CGFloat)velocity
+- (void)revenant_endDragAt:(CGFloat)unconstrained velocity:(CGFloat)velocity
 {
     NSMutableArray *regions = [_resolvedOffsets mutableCopy];
     BOOL dismissible = _interactiveDismissal;
     if (dismissible)
-        [regions addObject:@([self charon_dismissOffset])];
-    CGFloat effective = charon_sheet_effective_velocity(velocity);
-    CGFloat projected = unconstrained + effective * (charon_sheet_deceleration_rate / (1 - charon_sheet_deceleration_rate)) / 1000;
-    NSUInteger c = charon_sheet_closest(regions, unconstrained), p = charon_sheet_closest(regions, projected);
-    BOOL fast = fabs(velocity) >= charon_sheet_flick_speed;
+        [regions addObject:@([self revenant_dismissOffset])];
+    CGFloat effective = revenant_sheet_effective_velocity(velocity);
+    CGFloat projected = unconstrained + effective * (revenant_sheet_deceleration_rate / (1 - revenant_sheet_deceleration_rate)) / 1000;
+    NSUInteger c = revenant_sheet_closest(regions, unconstrained), p = revenant_sheet_closest(regions, projected);
+    BOOL fast = fabs(velocity) >= revenant_sheet_flick_speed;
     NSInteger step = regions.count > 1 && [regions[0] doubleValue] > [regions[1] doubleValue] ? -1 : 1;
     NSInteger index = (NSInteger)p;
     if (fast && c == p && (velocity < 0) == (unconstrained < [regions[c] doubleValue]))
         index = MIN(MAX((NSInteger)c + (velocity < 0 ? -step : step), 0), (NSInteger)regions.count - 1);
-    CGFloat damping = fast ? charon_sheet_spring_damping_fast : charon_sheet_spring_damping;
+    CGFloat damping = fast ? revenant_sheet_spring_damping_fast : revenant_sheet_spring_damping;
     CGFloat target = [regions[index] doubleValue];
     if (dismissible && (NSUInteger)index == regions.count - 1) {
         id<UIViewControllerContextTransitioning> context = _dismissalContext;
         _userDismissed = YES;
-        [self charon_animateToOffset:target velocity:velocity damping:damping completion:^{
+        [self revenant_animateToOffset:target velocity:velocity damping:damping completion:^{
             [context completeTransition:YES];
         }];
         return;
@@ -1568,7 +1568,7 @@ static NSUInteger charon_sheet_closest(NSArray *offsets, CGFloat offset)
     if (!keyboardDetent)
         _selectedDetentIdentifier = [identifier copy];
     id<UIViewControllerContextTransitioning> context = _interactiveDismissal ? _dismissalContext : nil;
-    [self charon_animateToOffset:target velocity:velocity damping:damping completion:^{
+    [self revenant_animateToOffset:target velocity:velocity damping:damping completion:^{
         if (context) {
             [context cancelInteractiveTransition];
             [context completeTransition:NO];
@@ -1579,7 +1579,7 @@ static NSUInteger charon_sheet_closest(NSArray *offsets, CGFloat offset)
         [delegate sheetPresentationControllerDidChangeSelectedDetentIdentifier:self];
 }
 
-- (void)charon_beginInteractiveDismissal
+- (void)revenant_beginInteractiveDismissal
 {
     _interactiveDismissal = YES;
     _userDismissed = NO;
@@ -1589,7 +1589,7 @@ static NSUInteger charon_sheet_closest(NSArray *offsets, CGFloat offset)
     [self.presentedViewController dismissViewControllerAnimated:YES completion:nil];
 }
 
-- (BOOL)charon_takeInteractiveDismissal:(id<UIViewControllerContextTransitioning>)context
+- (BOOL)revenant_takeInteractiveDismissal:(id<UIViewControllerContextTransitioning>)context
 {
     if (!_interactiveDismissal)
         return NO;
@@ -1597,21 +1597,21 @@ static NSUInteger charon_sheet_closest(NSArray *offsets, CGFloat offset)
     return YES;
 }
 
-- (void)charon_animateToOffset:(CGFloat)offset velocity:(CGFloat)velocity completion:(void (^)(void))completion
+- (void)revenant_animateToOffset:(CGFloat)offset velocity:(CGFloat)velocity completion:(void (^)(void))completion
 {
-    [self charon_animateToOffset:offset velocity:velocity damping:charon_sheet_spring_damping completion:completion];
+    [self revenant_animateToOffset:offset velocity:velocity damping:revenant_sheet_spring_damping completion:completion];
 }
 
-- (void)charon_animateToOffset:(CGFloat)offset velocity:(CGFloat)velocity damping:(CGFloat)damping completion:(void (^)(void))completion
+- (void)revenant_animateToOffset:(CGFloat)offset velocity:(CGFloat)velocity damping:(CGFloat)damping completion:(void (^)(void))completion
 {
     [_animator stopAnimation:YES];
-    CGFloat omega = 2 * M_PI / charon_sheet_spring_response;
+    CGFloat omega = 2 * M_PI / revenant_sheet_spring_response;
     CGFloat distance = offset - _layout.offset;
     UISpringTimingParameters *spring = [[UISpringTimingParameters alloc] initWithMass:1 stiffness:omega * omega damping:2 * damping * omega initialVelocity:CGVectorMake(0, distance != 0 ? velocity / distance : 0)];
-    UIViewPropertyAnimator *animator = [[UIViewPropertyAnimator alloc] initWithDuration:charon_sheet_transition_duration timingParameters:spring];
+    UIViewPropertyAnimator *animator = [[UIViewPropertyAnimator alloc] initWithDuration:revenant_sheet_transition_duration timingParameters:spring];
     __weak UISheetPresentationController *weakSelf = self;
     [animator addAnimations:^{
-        [weakSelf charon_setOffset:offset];
+        [weakSelf revenant_setOffset:offset];
     }];
     [animator addCompletion:^(UIViewAnimatingPosition position) {
         UISheetPresentationController *strongSelf = weakSelf;
@@ -1626,20 +1626,20 @@ static NSUInteger charon_sheet_closest(NSArray *offsets, CGFloat offset)
 
 @end
 
-@interface UIViewController (CharonSheetPresentation)
+@interface UIViewController (RevenantSheetPresentation)
 @end
 
-@implementation UIViewController (CharonSheetPresentation)
+@implementation UIViewController (RevenantSheetPresentation)
 
 - (UISheetPresentationController *)sheetPresentationController
 {
-    UIPresentationController *current = charon_presentation_controller_of(self);
-    if ([current isKindOfClass:[UISheetPresentationController class]] && (current.containerView || charon_sheet_style(self.modalPresentationStyle)))
+    UIPresentationController *current = revenant_presentation_controller_of(self);
+    if ([current isKindOfClass:[UISheetPresentationController class]] && (current.containerView || revenant_sheet_style(self.modalPresentationStyle)))
         return (UISheetPresentationController *)current;
-    if (current || !charon_sheet_style(self.modalPresentationStyle))
+    if (current || !revenant_sheet_style(self.modalPresentationStyle))
         return nil;
     UISheetPresentationController *sheet = [[UISheetPresentationController alloc] initWithPresentedViewController:self presentingViewController:nil];
-    charon_set_presentation_controller(self, sheet);
+    revenant_set_presentation_controller(self, sheet);
     return sheet;
 }
 

@@ -1,5 +1,5 @@
 #import <QuartzCore/CAMetalLayer.h>
-#import "CharonMetal.h"
+#import "RevenantMetal.h"
 
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
 #pragma clang diagnostic ignored "-Wobjc-property-implementation"
@@ -99,7 +99,7 @@
 
 - (id<CAMetalDrawable>)nextDrawable
 {
-    return CharonMetalNextDrawable(self);
+    return RevenantMetalNextDrawable(self);
 }
 
 @end

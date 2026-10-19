@@ -1,6 +1,6 @@
 #import <Foundation/Foundation.h>
 
-static inline void charon_say_once_for(NSString *key, NSString *text)
+static inline void revenant_say_once_for(NSString *key, NSString *text)
 {
     static NSMutableSet *said;
     static dispatch_once_t once;

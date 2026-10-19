@@ -20,7 +20,7 @@ local HAND_WRITTEN_EFFECT = {
         .. "the three answers a typed resolution result is built from - a "
         .. "resolved value, values to disambiguate, a value to confirm - are "
         .. "read back through the four accessors of "
-        .. "CharonIntentsResolution.h, which is where a port reads what it "
+        .. "RevenantIntentsResolution.h, which is where a port reads what it "
         .. "resolved, because on a release with Siri the system is the reader",
     INInteraction = "initWithIntent:response: copies the intent and the response and makes a "
         .. "UUID string identifier, and the direction is outgoing; "
@@ -29,7 +29,7 @@ local HAND_WRITTEN_EFFECT = {
         .. "under Application Support and calls the handler with nil, or with the error "
         .. "the write failed with; the three deletion methods remove by identifier, by "
         .. "group identifier and all of them, and say so the same way; the two "
-        .. "charon_interactions accessors read the store back, newest last",
+        .. "revenant_interactions accessors read the store back, newest last",
     INImage = "imageNamed: resolves the name in the app's own asset catalogue through UIKit and "
         .. "carries the image's data, and answers no image for a name the app has none of; "
         .. "systemImageNamed: answers the names +[UIImage systemImageNamed:] answers, through the "
@@ -49,7 +49,7 @@ local HAND_WRITTEN_EFFECT = {
         .. "replaces the phrases of that type in this application's own store, in the "
         .. "order they were offered; setVocabulary:ofType: keeps the spoken phrase of "
         .. "each speakable value it is given; removeAllVocabularyStrings empties the "
-        .. "store; charon_vocabularyStringsOfType: reads a type back, which is where a "
+        .. "store; revenant_vocabularyStringsOfType: reads a type back, which is where a "
         .. "port reads what it offered, because on a release with Siri the system is the "
         .. "reader",
     INPreferences = "siriAuthorizationStatus answers INSiriAuthorizationStatusRestricted, which "
@@ -89,7 +89,7 @@ local HAND_WRITTEN_EFFECT = {
 }
 
 local HAND_WRITTEN_REASON = "behaviour that is more than the class's own storage, written by hand in "
-    .. "packages/a/apple-backports/Intents/CharonIntents100.m"
+    .. "packages/a/apple-backports/Intents/RevenantIntents100.m"
 
 local GENERATED_REASON = "a data class of the framework: every property the SDK's header declares is kept in the "
     .. "class's own state with the ownership the header gives it, the initialisers the header "
@@ -105,17 +105,17 @@ local STORE_EFFECT = {
     INRelevantShortcutStore = "defaultStore is one instance for the process, which is what the header's own note asks "
         .. "for; setRelevantShortcuts:completionHandler: replaces the whole set rather than adding to "
         .. "it, as the header's note says, keeps it in the class's own state and answers the handler "
-        .. "with no error; charon_relevantShortcuts reads the set back, which is where a port reads "
+        .. "with no error; revenant_relevantShortcuts reads the set back, which is where a port reads "
         .. "what it offered, because on a release with Siri the system is the reader",
     INUpcomingMediaManager = "sharedManager is one instance for the process; setSuggestedMediaIntents: keeps the intents "
         .. "it is given in the order they were given; setPredictionMode:forType: keeps one mode per "
         .. "media item type and removes the entry for the enumeration own zero case; "
-        .. "charon_suggestedMediaIntents and charon_predictionModeForType: read both back",
+        .. "revenant_suggestedMediaIntents and revenant_predictionModeForType: read both back",
     INVoiceShortcutCenter = "sharedCenter is one instance for the process; setShortcutSuggestions: keeps the suggestions "
         .. "it is given in the order they were given; getAllVoiceShortcutsWithCompletion: answers an "
         .. "empty array and no error, and getVoiceShortcutWithIdentifier:completion: nil and no error, "
         .. "because this release runs no assistant daemon and has no Shortcuts app, so no shortcut was "
-        .. "ever added to Siri; charon_shortcutSuggestions reads the suggestions back",
+        .. "ever added to Siri; revenant_shortcutSuggestions reads the suggestions back",
 }
 
 local NOT_ANSWERED = {}
@@ -150,7 +150,7 @@ local HAND_WRITTEN_SOURCE = {
         .. "compile-time call cannot be made; it answers mediaDestinationType 1 and no playlist "
         .. "name, and a second call is isEqual to the first. For the absence at the band ends: no "
         .. "release this package is gated for carries any Intents class at all, read with "
-        .. "CHARON_ROOT=$PWD xmake l tools/corpus/cache-census.lua IN 6.1.3 4.3 11.0 12.0 - the "
+        .. "REVENANT_ROOT=$PWD xmake l tools/corpus/cache-census.lua IN 6.1.3 4.3 11.0 12.0 - the "
         .. "armv7 caches of 6.1.3 and 4.3 hold 0 of the 11378 and 7187 classes under the IN prefix, "
         .. "in a census whose own control found 1039 IN names on 11.0 and 12.0 (239 and 411 of "
         .. "them), so a zero is the release's and not the reader's. The framework arrived with "
@@ -207,7 +207,7 @@ local ABSENT_EFFECT = "the class is there and does not implement this: respondsT
 local INIT_FALLBACK = "the header marks the class's -init unavailable, so a port cannot call it and the class answers "
     .. "the initialiser the header does declare"
 
-local function charon_root()
+local function revenant_root()
     return path.absolute(path.join(os.scriptdir(), "..", ".."))
 end
 
@@ -629,7 +629,7 @@ local function init_golden()
     if INIT_GOLDEN then
         return INIT_GOLDEN
     end
-    local file = path.join(charon_root(), "tests", "backports", "host", "intents-init", "expected.txt")
+    local file = path.join(revenant_root(), "tests", "backports", "host", "intents-init", "expected.txt")
     if not os.isfile(file) then
         raise("gen-registry: no host measurement to cite for a -init row: %s is missing. Run "
               .. "sh tests/backports/host/intents-init/run.sh", file)
@@ -791,7 +791,7 @@ end
 
 local function read_hand_written(answered, group, hand_written)
     local generator = import("gen-intents", {rootdir = os.scriptdir(), anonymous = true})
-    local file = path.join(charon_root(), "packages", "a", "apple-backports", "Intents", hand_written)
+    local file = path.join(revenant_root(), "packages", "a", "apple-backports", "Intents", hand_written)
     local lines = lines_of(file)
     local names = {}
     for name in pairs(group) do
@@ -1099,7 +1099,7 @@ local USAGE = "usage: xmake l tools/intents/gen-registry.lua --corpus <surface.t
     .. "[--merge-into <file>] [--constants-facts <page>]"
 
 function options_of(arguments)
-    local options = {framework = "Intents", ["hand-written"] = "CharonIntents100.m",
+    local options = {framework = "Intents", ["hand-written"] = "RevenantIntents100.m",
                      ["constants-facts"] = "facts/Intents/Constants.md", report = {}}
     local index = 1
     while index <= #arguments do

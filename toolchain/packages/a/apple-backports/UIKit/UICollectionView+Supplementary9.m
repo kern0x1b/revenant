@@ -1,6 +1,6 @@
 #import <UIKit/UIKit.h>
 
-@implementation UICollectionView (CharonSupplementary9)
+@implementation UICollectionView (RevenantSupplementary9)
 
 - (NSArray<NSIndexPath *> *)indexPathsForVisibleSupplementaryElementsOfKind:(NSString *)elementKind
 {

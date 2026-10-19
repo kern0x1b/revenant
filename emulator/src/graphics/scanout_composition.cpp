@@ -16,7 +16,7 @@
 
 #include "graphics/gles_abi.hpp"
 
-namespace shade {
+namespace emulator {
 namespace {
 
     constexpr std::uint64_t scanout_background_namespace = 2ULL << 32U;

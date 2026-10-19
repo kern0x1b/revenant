@@ -17,7 +17,7 @@ static void expect(int holds, const char *what)
     }
 }
 
-static charon_unfair_lock shared;
+static revenant_unfair_lock shared;
 static uint32_t owners[2];
 static _Atomic int held;
 static _Atomic(uint32_t) seen;
@@ -25,22 +25,22 @@ static _Atomic long counter;
 
 static void *hold(void *which)
 {
-    uint32_t self = charon_unfair_owner(owners[(intptr_t)which]);
-    charon_unfair_lock_lock(&shared, self);
+    uint32_t self = revenant_unfair_owner(owners[(intptr_t)which]);
+    revenant_unfair_lock_lock(&shared, self);
     atomic_store(&held, 1);
     usleep(150000);
     atomic_store(&seen, atomic_load(&shared.value));
-    charon_unfair_unlock(&shared, self);
+    revenant_unfair_unlock(&shared, self);
     return NULL;
 }
 
 static void *wait_for_it(void *which)
 {
-    uint32_t self = charon_unfair_owner(owners[(intptr_t)which]);
+    uint32_t self = revenant_unfair_owner(owners[(intptr_t)which]);
     for (int round = 0; round < 200; round++) {
-        charon_unfair_lock_lock(&shared, self);
+        revenant_unfair_lock_lock(&shared, self);
         atomic_fetch_add(&counter, 1);
-        charon_unfair_unlock(&shared, self);
+        revenant_unfair_unlock(&shared, self);
     }
     return NULL;
 }
@@ -63,7 +63,7 @@ static void names(uint32_t first, uint32_t second, const char *what)
     snprintf(said, sizeof said, "a lock whose owners have %s port names hands over to a waiter", what);
     expect(atomic_load(&counter) == 200 && atomic_load(&shared.value) == 0, said);
     snprintf(said, sizeof said, "a waiter on %s port names clears the low bit of the owner's word", what);
-    expect((atomic_load(&seen) & CHARON_UNFAIR_NO_WAITERS) == 0 && atomic_load(&seen) != 0, said);
+    expect((atomic_load(&seen) & REVENANT_UNFAIR_NO_WAITERS) == 0 && atomic_load(&seen) != 0, said);
 }
 
 static void stalled(int signal)
@@ -80,10 +80,10 @@ int main(void)
     alarm(30);
     names(0x1e03, 0x1e17, "the odd");
     names(0x10c00, 0x11e00, "the even");
-    uint32_t self = charon_unfair_self();
-    expect((self & CHARON_UNFAIR_NO_WAITERS) != 0 && (self | CHARON_UNFAIR_NO_WAITERS) == self,
+    uint32_t self = revenant_unfair_self();
+    expect((self & REVENANT_UNFAIR_NO_WAITERS) != 0 && (self | REVENANT_UNFAIR_NO_WAITERS) == self,
            "the owner a thread records always carries the no-waiters bit, whichever name the kernel gave it");
-    expect(self == (pthread_mach_thread_np(pthread_self()) | CHARON_UNFAIR_NO_WAITERS),
+    expect(self == (pthread_mach_thread_np(pthread_self()) | REVENANT_UNFAIR_NO_WAITERS),
            "the owner is this thread's Mach port name with that bit set");
     return fails != 0;
 }

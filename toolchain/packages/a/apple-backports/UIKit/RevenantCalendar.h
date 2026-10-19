@@ -1,19 +1,19 @@
 #import <UIKit/UIKit.h>
 
-@interface UICalendarView (CharonParts)
-- (NSCalendar *)charon_calendarForDates;
-- (NSDateComponents *)charon_dateAtPoint:(CGPoint)point;
+@interface UICalendarView (RevenantParts)
+- (NSCalendar *)revenant_calendarForDates;
+- (NSDateComponents *)revenant_dateAtPoint:(CGPoint)point;
 @end
 
-@interface UICalendarViewDecoration (CharonParts)
-- (void)charon_drawInRect:(CGRect)rect;
+@interface UICalendarViewDecoration (RevenantParts)
+- (void)revenant_drawInRect:(CGRect)rect;
 @end
 
-@interface UICalendarSelection (CharonParts)
-- (void)charon_attachToView:(UICalendarView *)view;
-- (void)charon_redraw;
-- (instancetype)charon_init;
-- (BOOL)charon_isSelected:(NSDateComponents *)day;
-- (BOOL)charon_canSelect:(NSDateComponents *)day;
-- (void)charon_didTapDay:(NSDateComponents *)day;
+@interface UICalendarSelection (RevenantParts)
+- (void)revenant_attachToView:(UICalendarView *)view;
+- (void)revenant_redraw;
+- (instancetype)revenant_init;
+- (BOOL)revenant_isSelected:(NSDateComponents *)day;
+- (BOOL)revenant_canSelect:(NSDateComponents *)day;
+- (void)revenant_didTapDay:(NSDateComponents *)day;
 @end

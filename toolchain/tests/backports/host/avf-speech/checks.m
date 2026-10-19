@@ -2,7 +2,7 @@
 #import <AVFAudio/AVFAudio.h>
 #include <math.h>
 
-@interface charon_host_AVSpeechUtterance : NSObject <NSCopying, NSSecureCoding>
+@interface revenant_host_AVSpeechUtterance : NSObject <NSCopying, NSSecureCoding>
 + (instancetype)speechUtteranceWithString:(NSString *)string;
 - (instancetype)initWithString:(NSString *)string;
 @property (nonatomic, readonly) NSString *speechString;
@@ -14,9 +14,9 @@
 @property (nonatomic) NSTimeInterval postUtteranceDelay;
 @end
 
-extern const float charon_host_AVSpeechUtteranceMinimumSpeechRate;
-extern const float charon_host_AVSpeechUtteranceMaximumSpeechRate;
-extern const float charon_host_AVSpeechUtteranceDefaultSpeechRate;
+extern const float revenant_host_AVSpeechUtteranceMinimumSpeechRate;
+extern const float revenant_host_AVSpeechUtteranceMaximumSpeechRate;
+extern const float revenant_host_AVSpeechUtteranceDefaultSpeechRate;
 
 static int checks = 0;
 static int failures = 0;
@@ -31,7 +31,7 @@ static void verdict(const char *what, BOOL held)
 static BOOL same_f(float a, float b) { return (isnan(a) && isnan(b)) || a == b; }
 static BOOL same_d(double a, double b) { return (isnan(a) && isnan(b)) || a == b; }
 
-static void compare_state(const char *label, AVSpeechUtterance *h, charon_host_AVSpeechUtterance *p)
+static void compare_state(const char *label, AVSpeechUtterance *h, revenant_host_AVSpeechUtterance *p)
 {
     char what[256];
     snprintf(what, sizeof what, "%s rate %g vs %g", label, h.rate, p.rate);
@@ -56,29 +56,29 @@ int main(void)
     @autoreleasepool {
         verdict("control: host default rate is 0.5", AVSpeechUtteranceDefaultSpeechRate == 0.5f);
 
-        verdict("constant minimum rate", AVSpeechUtteranceMinimumSpeechRate == charon_host_AVSpeechUtteranceMinimumSpeechRate);
-        verdict("constant maximum rate", AVSpeechUtteranceMaximumSpeechRate == charon_host_AVSpeechUtteranceMaximumSpeechRate);
-        verdict("constant default rate", AVSpeechUtteranceDefaultSpeechRate == charon_host_AVSpeechUtteranceDefaultSpeechRate);
+        verdict("constant minimum rate", AVSpeechUtteranceMinimumSpeechRate == revenant_host_AVSpeechUtteranceMinimumSpeechRate);
+        verdict("constant maximum rate", AVSpeechUtteranceMaximumSpeechRate == revenant_host_AVSpeechUtteranceMaximumSpeechRate);
+        verdict("constant default rate", AVSpeechUtteranceDefaultSpeechRate == revenant_host_AVSpeechUtteranceDefaultSpeechRate);
 
         AVSpeechUtterance *h = [AVSpeechUtterance speechUtteranceWithString:@"hello"];
-        charon_host_AVSpeechUtterance *p = [charon_host_AVSpeechUtterance speechUtteranceWithString:@"hello"];
+        revenant_host_AVSpeechUtterance *p = [revenant_host_AVSpeechUtterance speechUtteranceWithString:@"hello"];
         compare_state("factory", h, p);
         verdict("factory default rate is the default constant", h.rate == AVSpeechUtteranceDefaultSpeechRate);
 
         verdict("port does not answer attributedSpeechString (iOS 10)",
-                ![charon_host_AVSpeechUtterance instancesRespondToSelector:@selector(attributedSpeechString)]);
+                ![revenant_host_AVSpeechUtterance instancesRespondToSelector:@selector(attributedSpeechString)]);
         verdict("port does not answer prefersAssistiveTechnologySettings (iOS 14)",
-                ![charon_host_AVSpeechUtterance instancesRespondToSelector:@selector(prefersAssistiveTechnologySettings)] &&
-                ![charon_host_AVSpeechUtterance instancesRespondToSelector:@selector(setPrefersAssistiveTechnologySettings:)]);
+                ![revenant_host_AVSpeechUtterance instancesRespondToSelector:@selector(prefersAssistiveTechnologySettings)] &&
+                ![revenant_host_AVSpeechUtterance instancesRespondToSelector:@selector(setPrefersAssistiveTechnologySettings:)]);
         verdict("host answers attributedSpeechString (control for the port-only check above)",
                 [AVSpeechUtterance instancesRespondToSelector:@selector(attributedSpeechString)]);
 
         AVSpeechUtterance *hi = [[AVSpeechUtterance alloc] init];
-        charon_host_AVSpeechUtterance *pi = [[charon_host_AVSpeechUtterance alloc] init];
+        revenant_host_AVSpeechUtterance *pi = [[revenant_host_AVSpeechUtterance alloc] init];
         compare_state("plain init", hi, pi);
 
         AVSpeechUtterance *hn = [[AVSpeechUtterance alloc] initWithString:nil];
-        charon_host_AVSpeechUtterance *pn = [[charon_host_AVSpeechUtterance alloc] initWithString:nil];
+        revenant_host_AVSpeechUtterance *pn = [[revenant_host_AVSpeechUtterance alloc] initWithString:nil];
         compare_state("nil string", hn, pn);
 
         float rates[] = {-1, -0.0f, 0, 0.25f, 0.5f, 1, 1.5f, 2, INFINITY, NAN};
@@ -120,7 +120,7 @@ int main(void)
 
         NSMutableString *ms = [NSMutableString stringWithString:@"abc"];
         AVSpeechUtterance *hm = [AVSpeechUtterance speechUtteranceWithString:ms];
-        charon_host_AVSpeechUtterance *pm = [charon_host_AVSpeechUtterance speechUtteranceWithString:ms];
+        revenant_host_AVSpeechUtterance *pm = [revenant_host_AVSpeechUtterance speechUtteranceWithString:ms];
         [ms appendString:@"def"];
         verdict("host string retained, not copied", [hm.speechString isEqualToString:@"abcdef"]);
         verdict("port string retained, not copied", [pm.speechString isEqualToString:@"abcdef"]);
@@ -132,7 +132,7 @@ int main(void)
         h.postUtteranceDelay = 2.5; p.postUtteranceDelay = 2.5;
         h.voice = voice; p.voice = voice;
         AVSpeechUtterance *hc = [h copy];
-        charon_host_AVSpeechUtterance *pc = [p copy];
+        revenant_host_AVSpeechUtterance *pc = [p copy];
         verdict("host copy is a new object", hc != h);
         verdict("port copy is a new object", pc != p);
         compare_state("copy", hc, pc);
@@ -140,7 +140,7 @@ int main(void)
         verdict("port copy keeps the voice object", pc.voice == voice);
 
         verdict("host supports secure coding", [AVSpeechUtterance supportsSecureCoding]);
-        verdict("port supports secure coding", [charon_host_AVSpeechUtterance supportsSecureCoding]);
+        verdict("port supports secure coding", [revenant_host_AVSpeechUtterance supportsSecureCoding]);
         AVSpeechSynthesisVoice *sv = [AVSpeechSynthesisVoice voiceWithLanguage:@"en-US"];
         h.voice = sv; p.voice = sv;
         NSData *hd = [NSKeyedArchiver archivedDataWithRootObject:h];
@@ -150,7 +150,7 @@ int main(void)
         AVSpeechUtterance *hr = [hu decodeObjectOfClass:[AVSpeechUtterance class] forKey:NSKeyedArchiveRootObjectKey];
         NSKeyedUnarchiver *pu = [[NSKeyedUnarchiver alloc] initForReadingFromData:pd error:nil];
         pu.requiresSecureCoding = YES;
-        charon_host_AVSpeechUtterance *pr = [pu decodeObjectOfClass:[charon_host_AVSpeechUtterance class] forKey:NSKeyedArchiveRootObjectKey];
+        revenant_host_AVSpeechUtterance *pr = [pu decodeObjectOfClass:[revenant_host_AVSpeechUtterance class] forKey:NSKeyedArchiveRootObjectKey];
         verdict("host secure decode yields an utterance", hr != nil);
         verdict("port secure decode yields an utterance", pr != nil);
         verdict("secure decode rate", hr != nil && pr != nil && same_f(hr.rate, pr.rate));

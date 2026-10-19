@@ -31,7 +31,7 @@
 #include "graphics/glsl_es.hpp"
 #include "graphics/scanout_composition.hpp"
 
-namespace shade {
+namespace emulator {
 
 class UserlandHleCall;
 class UserlandHleRegistry;
@@ -208,7 +208,7 @@ private:
         std::vector<GlesShadedVarying> varyings;
         std::unique_ptr<glsl::Instance> fragment;
     };
-    [[nodiscard]] std::optional<ShadedDraw> shade_vertices(
+    [[nodiscard]] std::optional<ShadedDraw> emulator_vertices(
         UserlandHleCall& call, const ContextState& context,
         const GlesProgramState::Program& program,
         std::span<const std::uint32_t> indices, std::string& error) const;

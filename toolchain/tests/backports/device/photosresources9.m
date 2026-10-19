@@ -6,13 +6,13 @@
 #pragma clang diagnostic ignored "-Wunguarded-availability-new"
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 
-@interface CharonRequestRecord : NSObject
+@interface RevenantRequestRecord : NSObject
 @property (atomic) int completions, deliveries;
 @property (atomic) BOOL completedBeforeCancel;
 @property (atomic, strong) NSError *error;
 @end
 
-@implementation CharonRequestRecord
+@implementation RevenantRequestRecord
 @end
 
 static BOOL wait_for(BOOL (^done)(void))
@@ -26,12 +26,12 @@ int main(int argc, char **argv)
 {
     @autoreleasepool {
         if (argc > 1)
-            charon_log_to(@(argv[1]));
+            revenant_log_to(@(argv[1]));
         printf("AssetsLibrary authorization %ld\n", (long)[ALAssetsLibrary authorizationStatus]);
         PHAssetResourceManager *manager = [PHAssetResourceManager defaultManager];
         PHAssetResource *resource = ((id (*)(id, SEL))objc_msgSend)([PHAssetResource alloc], @selector(init));
 
-        CharonRequestRecord *plain = [[CharonRequestRecord alloc] init];
+        RevenantRequestRecord *plain = [[RevenantRequestRecord alloc] init];
         [manager requestDataForAssetResource:resource options:nil dataReceivedHandler:^(NSData *data) {
             plain.deliveries++;
         } completionHandler:^(NSError *error) {
@@ -42,9 +42,9 @@ int main(int argc, char **argv)
         printf("not cancelled: %s\n", plain.error.description.UTF8String ?: "no error");
         CHECK(plain.error && plain.error.code != PHPhotosErrorUserCancelled && plain.deliveries == 0, "with the asset's error and no data");
 
-        NSMutableArray<CharonRequestRecord *> *records = [NSMutableArray array];
+        NSMutableArray<RevenantRequestRecord *> *records = [NSMutableArray array];
         for (int i = 0; i < 50; i++) {
-            CharonRequestRecord *record = [[CharonRequestRecord alloc] init];
+            RevenantRequestRecord *record = [[RevenantRequestRecord alloc] init];
             PHAssetResourceDataRequestID requestID = [manager requestDataForAssetResource:resource options:nil dataReceivedHandler:^(NSData *data) {
                 record.deliveries++;
             } completionHandler:^(NSError *error) {
@@ -58,7 +58,7 @@ int main(int argc, char **argv)
         CHECK(wait_for(^{ return (BOOL)([[records valueForKeyPath:@"@min.completions"] intValue] > 0); }), "every cancelled request completes");
         [[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.5]];
         int cancelled = 0, late = 0, wrong = 0;
-        for (CharonRequestRecord *record in records) {
+        for (RevenantRequestRecord *record in records) {
             if (record.completions != 1 || record.deliveries != 0)
                 wrong++;
             else if (record.completedBeforeCancel)
@@ -72,21 +72,21 @@ int main(int argc, char **argv)
         CHECK(wrong == 0, "each completes once, with no data, cancelled unless it had completed before the cancel");
         CHECK(cancelled > 0, "and the cancel reaches a request in flight");
         NSError *error = nil;
-        for (CharonRequestRecord *record in records)
+        for (RevenantRequestRecord *record in records)
             if (record.error.code == PHPhotosErrorUserCancelled)
                 error = record.error;
         printf("cancelled: %s\n", error.description.UTF8String ?: "none");
 
         [manager cancelDataRequest:plain.completions ? 1 : 0];
         [manager cancelDataRequest:-5];
-        CharonRequestRecord *after = [[CharonRequestRecord alloc] init];
+        RevenantRequestRecord *after = [[RevenantRequestRecord alloc] init];
         [manager requestDataForAssetResource:resource options:nil dataReceivedHandler:nil completionHandler:^(NSError *e) {
             after.error = e;
             after.completions++;
         }];
         CHECK(wait_for(^{ return (BOOL)(after.completions > 0); }) && after.error.code != PHPhotosErrorUserCancelled,
               "a later request is not cancelled by a cancel of another");
-        printf("%d checks, %d failed\n", charon_checks, charon_failures);
+        printf("%d checks, %d failed\n", revenant_checks, revenant_failures);
     }
-    return charon_failures;
+    return revenant_failures;
 }

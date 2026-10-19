@@ -1,4 +1,4 @@
-#import "CharonMPS.h"
+#import "RevenantMPS.h"
 
 
 @implementation MPSPredicate {
@@ -40,7 +40,7 @@
     return _offset;
 }
 
-- (BOOL)charon_mps_permitsExecution
+- (BOOL)revenant_mps_permitsExecution
 {
     if (!_buffer)
         return YES;

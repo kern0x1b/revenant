@@ -44,7 +44,7 @@
 namespace {
 
 constexpr auto wifi_scan_completion_delay =
-    10U * shade::darwin::mach::scheduler::nanoseconds_per_millisecond;
+    10U * emulator::darwin::mach::scheduler::nanoseconds_per_millisecond;
 
 [[nodiscard]] bool is_printable_ascii(std::byte value)
 {
@@ -87,7 +87,7 @@ constexpr auto wifi_scan_completion_delay =
 }
 
 [[nodiscard]] std::optional<std::string> extract_mux_channel_name(
-    const shade::AddressSpace& memory, std::uint32_t base_address,
+    const emulator::AddressSpace& memory, std::uint32_t base_address,
     std::span<const std::byte> bytes)
 {
     if (const auto inline_name = extract_inline_ascii_string(bytes);
@@ -113,7 +113,7 @@ constexpr auto wifi_scan_completion_delay =
 
 }
 
-namespace shade {
+namespace emulator {
 
 void CompatibilityKernel::dispatch_bsd_events(Cpu& cpu, std::uint32_t number)
 {

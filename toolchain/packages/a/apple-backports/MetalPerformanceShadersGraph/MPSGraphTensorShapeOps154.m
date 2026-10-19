@@ -1,12 +1,12 @@
-#import "CharonMPSGraph.h"
+#import "RevenantMPSGraph.h"
 
-@implementation MPSGraph (CharonMPSGraphTensorShape154)
+@implementation MPSGraph (RevenantMPSGraphTensorShape154)
 
 - (MPSGraphTensor *)stackTensors:(NSArray<MPSGraphTensor *> *)inputTensors
                             axis:(NSInteger)axis
                             name:(NSString *)name
 {
-    return [self charon_mps_concat:CharonMPSGraphOperationKindStack
+    return [self revenant_mps_concat:RevenantMPSGraphOperationKindStack
                             tensors:inputTensors ?: @[]
                                axis:axis
                          interleave:NO
@@ -20,7 +20,7 @@
     for (NSUInteger axis = 0; axis < rank; axis++)
         if (tensor.shape[axis].integerValue == 1)
             [unit addObject:@(axis)];
-    return [self charon_mps_gather:CharonMPSGraphOperationKindSqueeze
+    return [self revenant_mps_gather:RevenantMPSGraphOperationKindSqueeze
                              tensor:tensor
                         parameters:@{@"gather": @"squeeze", @"gatherDrop": unit}
                                name:name];
@@ -30,7 +30,7 @@
                               axis:(NSInteger)axis
                               name:(NSString *)name
 {
-    return [self charon_mps_gather:CharonMPSGraphOperationKindSqueeze
+    return [self revenant_mps_gather:RevenantMPSGraphOperationKindSqueeze
                              tensor:tensor
                         parameters:@{@"gather": @"squeeze", @"gatherDrop": @[@(axis)]}
                                name:name];
@@ -40,7 +40,7 @@
                               axes:(NSArray<NSNumber *> *)axes
                               name:(NSString *)name
 {
-    return [self charon_mps_gather:CharonMPSGraphOperationKindSqueeze
+    return [self revenant_mps_gather:RevenantMPSGraphOperationKindSqueeze
                              tensor:tensor
                         parameters:@{@"gather": @"squeeze", @"gatherDrop": axes ?: @[]}
                                name:name];
@@ -50,7 +50,7 @@
                         axesTensor:(MPSGraphTensor *)axesTensor
                               name:(NSString *)name
 {
-    return [self charon_mps_gather:CharonMPSGraphOperationKindSqueeze
+    return [self revenant_mps_gather:RevenantMPSGraphOperationKindSqueeze
                              tensor:tensor
                       fedParameter:axesTensor
                         parameters:@{@"gather": @"squeeze", @"gatherOperand": @"axes"}
@@ -61,7 +61,7 @@
                                   axis:(NSInteger)axis
                                   name:(NSString *)name
 {
-    return [self charon_mps_gather:CharonMPSGraphOperationKindExpandDims
+    return [self revenant_mps_gather:RevenantMPSGraphOperationKindExpandDims
                              tensor:tensor
                         parameters:@{@"gather": @"expand", @"gatherAdd": @[@(axis)]}
                                name:name];
@@ -71,7 +71,7 @@
                                   axes:(NSArray<NSNumber *> *)axes
                                   name:(NSString *)name
 {
-    return [self charon_mps_gather:CharonMPSGraphOperationKindExpandDims
+    return [self revenant_mps_gather:RevenantMPSGraphOperationKindExpandDims
                              tensor:tensor
                         parameters:@{@"gather": @"expand", @"gatherAdd": axes ?: @[]}
                                name:name];
@@ -81,7 +81,7 @@
                             axesTensor:(MPSGraphTensor *)axesTensor
                                   name:(NSString *)name
 {
-    return [self charon_mps_gather:CharonMPSGraphOperationKindExpandDims
+    return [self revenant_mps_gather:RevenantMPSGraphOperationKindExpandDims
                              tensor:tensor
                       fedParameter:axesTensor
                         parameters:@{@"gather": @"expand", @"gatherOperand": @"axes"}
@@ -96,7 +96,7 @@
                                        axis:(NSInteger)axis
                                        name:(NSString *)name
 {
-    return [self charon_mps_split:inputTensor axis:axis sizes:splitSizes numSplits:0 name:name];
+    return [self revenant_mps_split:inputTensor axis:axis sizes:splitSizes numSplits:0 name:name];
 }
 
 - (NSArray<MPSGraphTensor *> *)splitTensor:(MPSGraphTensor *)inputTensor
@@ -104,7 +104,7 @@
                                        axis:(NSInteger)axis
                                        name:(NSString *)name
 {
-    return [self charon_mps_split:inputTensor axis:axis sizes:nil numSplits:numSplits name:name];
+    return [self revenant_mps_split:inputTensor axis:axis sizes:nil numSplits:numSplits name:name];
 }
 
 - (NSArray<MPSGraphTensor *> *)splitTensor:(MPSGraphTensor *)inputTensor
@@ -112,8 +112,8 @@
                                        axis:(NSInteger)axis
                                        name:(NSString *)name
 {
-    return [self charon_mps_split:inputTensor axis:axis
-                           sizes:[self charon_mps_constantShapeOfTensor:splitSizesTensor]
+    return [self revenant_mps_split:inputTensor axis:axis
+                           sizes:[self revenant_mps_constantShapeOfTensor:splitSizesTensor]
                       numSplits:0
                             name:name];
 }
@@ -122,28 +122,28 @@
                               withShape:(NSArray<NSNumber *> *)withShape
                                    name:(NSString *)name
 {
-    return [self charon_mps_coordinates:axis fedAxis:nil shape:withShape fedShape:nil name:name];
+    return [self revenant_mps_coordinates:axis fedAxis:nil shape:withShape fedShape:nil name:name];
 }
 
 - (MPSGraphTensor *)coordinateAlongAxis:(NSInteger)axis
                          withShapeTensor:(MPSGraphTensor *)withShapeTensor
                                    name:(NSString *)name
 {
-    return [self charon_mps_coordinates:axis fedAxis:nil shape:nil fedShape:withShapeTensor name:name];
+    return [self revenant_mps_coordinates:axis fedAxis:nil shape:nil fedShape:withShapeTensor name:name];
 }
 
 - (MPSGraphTensor *)coordinateAlongAxisTensor:(MPSGraphTensor *)axisTensor
                                     withShape:(NSArray<NSNumber *> *)withShape
                                          name:(NSString *)name
 {
-    return [self charon_mps_coordinates:0 fedAxis:axisTensor shape:withShape fedShape:nil name:name];
+    return [self revenant_mps_coordinates:0 fedAxis:axisTensor shape:withShape fedShape:nil name:name];
 }
 
 - (MPSGraphTensor *)coordinateAlongAxisTensor:(MPSGraphTensor *)axisTensor
                              withShapeTensor:(MPSGraphTensor *)withShapeTensor
                                          name:(NSString *)name
 {
-    return [self charon_mps_coordinates:0 fedAxis:axisTensor shape:nil fedShape:withShapeTensor name:name];
+    return [self revenant_mps_coordinates:0 fedAxis:axisTensor shape:nil fedShape:withShapeTensor name:name];
 }
 
 @end

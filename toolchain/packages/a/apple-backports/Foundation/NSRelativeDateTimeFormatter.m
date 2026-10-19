@@ -8,9 +8,9 @@ typedef struct {
     const char *shortSingular;
     const char *shortPlural;
     const char *abbreviated;
-} CharonRelativeUnit;
+} RevenantRelativeUnit;
 
-static const CharonRelativeUnit charon_relative_units[] = {
+static const RevenantRelativeUnit revenant_relative_units[] = {
     {NSCalendarUnitYear, "year", "years", "yr.", "yr.", "y"},
     {NSCalendarUnitMonth, "month", "months", "mo.", "mo.", "mo"},
     {NSCalendarUnitWeekOfMonth, "week", "weeks", "wk.", "wk.", "w"},
@@ -20,11 +20,11 @@ static const CharonRelativeUnit charon_relative_units[] = {
     {NSCalendarUnitSecond, "second", "seconds", "sec.", "sec.", "s"},
 };
 
-static const NSUInteger charon_relative_unit_count = sizeof(charon_relative_units) / sizeof(charon_relative_units[0]);
+static const NSUInteger revenant_relative_unit_count = sizeof(revenant_relative_units) / sizeof(revenant_relative_units[0]);
 
-static const NSCalendarUnit charon_relative_units_asked = NSCalendarUnitYear | NSCalendarUnitMonth | NSCalendarUnitWeekOfMonth | NSCalendarUnitDay | NSCalendarUnitHour | NSCalendarUnitMinute | NSCalendarUnitSecond;
+static const NSCalendarUnit revenant_relative_units_asked = NSCalendarUnitYear | NSCalendarUnitMonth | NSCalendarUnitWeekOfMonth | NSCalendarUnitDay | NSCalendarUnitHour | NSCalendarUnitMinute | NSCalendarUnitSecond;
 
-static NSInteger charon_relative_value(NSDateComponents *components, NSUInteger index)
+static NSInteger revenant_relative_value(NSDateComponents *components, NSUInteger index)
 {
     switch (index) {
     case 0: return components.year;
@@ -37,7 +37,7 @@ static NSInteger charon_relative_value(NSDateComponents *components, NSUInteger 
     }
 }
 
-static NSString *charon_relative_capitalized(NSString *text, NSLocale *locale)
+static NSString *revenant_relative_capitalized(NSString *text, NSLocale *locale)
 {
     if (!text.length)
         return text;
@@ -114,7 +114,7 @@ static NSString *charon_relative_capitalized(NSString *text, NSLocale *locale)
     return copy;
 }
 
-- (NSString *)charon_number:(NSInteger)value
+- (NSString *)revenant_number:(NSInteger)value
 {
     NSNumberFormatter *formatter = [[NSNumberFormatter alloc] init];
     formatter.locale = self.locale;
@@ -122,9 +122,9 @@ static NSString *charon_relative_capitalized(NSString *text, NSLocale *locale)
     return [formatter stringFromNumber:@(value)];
 }
 
-- (NSString *)charon_unit:(NSUInteger)index plural:(BOOL)plural
+- (NSString *)revenant_unit:(NSUInteger)index plural:(BOOL)plural
 {
-    const CharonRelativeUnit *unit = &charon_relative_units[index];
+    const RevenantRelativeUnit *unit = &revenant_relative_units[index];
     switch (_unitsStyle) {
     case NSRelativeDateTimeFormatterUnitsStyleShort: return @(plural ? unit->shortPlural : unit->shortSingular);
     case NSRelativeDateTimeFormatterUnitsStyleAbbreviated: return @(unit->abbreviated);
@@ -132,60 +132,60 @@ static NSString *charon_relative_capitalized(NSString *text, NSLocale *locale)
     }
 }
 
-- (NSString *)charon_named:(NSUInteger)index value:(NSInteger)value
+- (NSString *)revenant_named:(NSUInteger)index value:(NSInteger)value
 {
     if (index == 3)
         return value == 0 ? @"today" : value > 0 ? @"tomorrow" : @"yesterday";
     if (index == 6)
         return @"now";
-    NSString *name = index > 3 ? @(charon_relative_units[index].fullSingular) : [self charon_named_unit:index];
+    NSString *name = index > 3 ? @(revenant_relative_units[index].fullSingular) : [self revenant_named_unit:index];
     return value == 0 ? [@"this " stringByAppendingString:name] : value > 0 ? [@"next " stringByAppendingString:name] : [@"last " stringByAppendingString:name];
 }
 
-- (NSString *)charon_named_unit:(NSUInteger)index
+- (NSString *)revenant_named_unit:(NSUInteger)index
 {
-    const CharonRelativeUnit *unit = &charon_relative_units[index];
+    const RevenantRelativeUnit *unit = &revenant_relative_units[index];
     return @(_unitsStyle == NSRelativeDateTimeFormatterUnitsStyleShort || _unitsStyle == NSRelativeDateTimeFormatterUnitsStyleAbbreviated ? unit->shortSingular : unit->fullSingular);
 }
 
-- (NSString *)charon_phrase:(NSUInteger)index value:(NSInteger)value
+- (NSString *)revenant_phrase:(NSUInteger)index value:(NSInteger)value
 {
     if (_dateTimeStyle == NSRelativeDateTimeFormatterStyleNamed && (value == 0 || ((value == 1 || value == -1) && index < 4)))
-        return [self charon_named:index value:value];
+        return [self revenant_named:index value:value];
     NSInteger magnitude = value < 0 ? -value : value;
     NSString *separator = _unitsStyle == NSRelativeDateTimeFormatterUnitsStyleAbbreviated ? @"" : @" ";
-    NSString *amount = [NSString stringWithFormat:@"%@%@%@", [self charon_number:magnitude], separator, [self charon_unit:index plural:magnitude != 1]];
+    NSString *amount = [NSString stringWithFormat:@"%@%@%@", [self revenant_number:magnitude], separator, [self revenant_unit:index plural:magnitude != 1]];
     return value < 0 ? [amount stringByAppendingString:@" ago"] : [@"in " stringByAppendingString:amount];
 }
 
-- (NSString *)charon_finish:(NSString *)text
+- (NSString *)revenant_finish:(NSString *)text
 {
-    return _formattingContext == NSFormattingContextBeginningOfSentence ? charon_relative_capitalized(text, self.locale) : text;
+    return _formattingContext == NSFormattingContextBeginningOfSentence ? revenant_relative_capitalized(text, self.locale) : text;
 }
 
 - (NSString *)localizedStringFromDateComponents:(NSDateComponents *)components
 {
     NSInteger values[7];
     NSInteger smallest = -1;
-    for (NSUInteger index = 0; index < charon_relative_unit_count; index++) {
-        values[index] = charon_relative_value(components, index);
+    for (NSUInteger index = 0; index < revenant_relative_unit_count; index++) {
+        values[index] = revenant_relative_value(components, index);
         if (values[index] != NSDateComponentUndefined)
             smallest = index;
     }
     if (smallest < 0)
         return nil;
-    for (NSUInteger index = 0; index < charon_relative_unit_count; index++) {
+    for (NSUInteger index = 0; index < revenant_relative_unit_count; index++) {
         if (values[index] != NSDateComponentUndefined && values[index] != 0)
-            return [self charon_finish:[self charon_phrase:index value:values[index]]];
+            return [self revenant_finish:[self revenant_phrase:index value:values[index]]];
     }
-    return [self charon_finish:[self charon_phrase:smallest value:0]];
+    return [self revenant_finish:[self revenant_phrase:smallest value:0]];
 }
 
 - (NSString *)localizedStringForDate:(NSDate *)date relativeToDate:(NSDate *)referenceDate
 {
     NSTimeInterval difference = [date timeIntervalSinceDate:referenceDate];
     NSDate *whole = [referenceDate dateByAddingTimeInterval:difference < 0 ? ceil(difference) : floor(difference)];
-    NSDateComponents *components = [self.calendar components:charon_relative_units_asked fromDate:referenceDate toDate:whole options:0];
+    NSDateComponents *components = [self.calendar components:revenant_relative_units_asked fromDate:referenceDate toDate:whole options:0];
     return [self localizedStringFromDateComponents:components];
 }
 

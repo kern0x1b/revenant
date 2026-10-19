@@ -3,7 +3,7 @@
 
 #pragma clang diagnostic ignored "-Wobjc-designated-initializers"
 
-static NSURL *charon_url_from_bytes(NSData *data, NSURL *baseURL, BOOL absolute)
+static NSURL *revenant_url_from_bytes(NSData *data, NSURL *baseURL, BOOL absolute)
 {
     if (!data.length) {
         NSURL *empty = [[NSURL alloc] initWithString:@"" relativeToURL:baseURL];
@@ -17,7 +17,7 @@ static NSURL *charon_url_from_bytes(NSData *data, NSURL *baseURL, BOOL absolute)
     return CFBridgingRelease(url);
 }
 
-@implementation NSURL (CharonRelativePath)
+@implementation NSURL (RevenantRelativePath)
 
 + (NSURL *)fileURLWithPath:(NSString *)path isDirectory:(BOOL)isDir relativeToURL:(NSURL *)baseURL
 {
@@ -50,7 +50,7 @@ static NSURL *charon_url_from_bytes(NSData *data, NSURL *baseURL, BOOL absolute)
 
 - (instancetype)initWithDataRepresentation:(NSData *)data relativeToURL:(NSURL *)baseURL
 {
-    NSURL *url = charon_url_from_bytes(data, baseURL, NO);
+    NSURL *url = revenant_url_from_bytes(data, baseURL, NO);
     if (!url || object_getClass(self) == [NSURL class])
         return url;
     return [self initWithString:url.relativeString relativeToURL:url.baseURL];
@@ -58,7 +58,7 @@ static NSURL *charon_url_from_bytes(NSData *data, NSURL *baseURL, BOOL absolute)
 
 - (instancetype)initAbsoluteURLWithDataRepresentation:(NSData *)data relativeToURL:(NSURL *)baseURL
 {
-    NSURL *url = charon_url_from_bytes(data, baseURL, YES);
+    NSURL *url = revenant_url_from_bytes(data, baseURL, YES);
     if (!url || object_getClass(self) == [NSURL class])
         return url;
     return [self initWithString:url.relativeString relativeToURL:url.baseURL];

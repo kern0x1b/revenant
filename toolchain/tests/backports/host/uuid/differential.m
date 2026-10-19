@@ -2,7 +2,7 @@
 #import <objc/runtime.h>
 #include <uuid/uuid.h>
 
-@interface CharonHostNSUUID : NSObject <NSCopying, NSSecureCoding>
+@interface RevenantHostNSUUID : NSObject <NSCopying, NSSecureCoding>
 + (instancetype)UUID;
 - (instancetype)initWithUUIDString:(NSString *)string;
 - (instancetype)initWithUUIDBytes:(const uuid_t)bytes;
@@ -35,12 +35,12 @@ static NSString *hex(const uuid_t bytes)
     return text;
 }
 
-@interface Plain : CharonHostNSUUID
+@interface Plain : RevenantHostNSUUID
 @end
 @implementation Plain
 @end
 
-@interface Overriding : CharonHostNSUUID
+@interface Overriding : RevenantHostNSUUID
 @end
 @implementation Overriding
 - (void)getUUIDBytes:(uuid_t)bytes
@@ -103,7 +103,7 @@ static NSString *decoded(NSData *data, Class named, BOOL secure)
 int main(void)
 {
     @autoreleasepool {
-        Class ours = [CharonHostNSUUID class];
+        Class ours = [RevenantHostNSUUID class];
         Class theirs = [NSUUID class];
         expect(ours != theirs, @"the classes are two", @"one class");
         const uuid_t known = {0x12,0x3E,0x45,0x67,0xE8,0x9B,0x12,0xD3,0xA4,0x56,0x42,0x66,0x14,0x17,0x40,0x00};
@@ -183,7 +183,7 @@ int main(void)
         same(@(hashMismatches), @0, @"hash of 2000 random UUIDs is NSData's");
         same(@([[[ours UUID] UUIDString] length]), @36, @"a random UUID's string length");
 
-        same(NSStringFromClass([[ours alloc] class]), @"CharonHostConcreteUUID", @"alloc gives the concrete class");
+        same(NSStringFromClass([[ours alloc] class]), @"RevenantHostConcreteUUID", @"alloc gives the concrete class");
         same(NSStringFromClass([NSUUID alloc].class), NSStringFromClass([[theirs alloc] class]), @"the host's alloc is a concrete class too");
         same(@([ours supportsSecureCoding]), @([theirs supportsSecureCoding]), @"supportsSecureCoding");
         same(@([ours conformsToProtocol:@protocol(NSCopying)]), @YES, @"NSCopying");
@@ -217,7 +217,7 @@ int main(void)
         id oKnown = ourObjects[0], tKnown = theirObjects[0];
         NSString *ourXML = [[NSString alloc] initWithData:archived(oKnown, YES) encoding:NSUTF8StringEncoding];
         NSString *theirXML = [[NSString alloc] initWithData:archived(tKnown, YES) encoding:NSUTF8StringEncoding];
-        same([ourXML stringByReplacingOccurrencesOfString:@"CharonHostNSUUID" withString:@"NSUUID"], theirXML, @"the archive of a UUID, class names aside");
+        same([ourXML stringByReplacingOccurrencesOfString:@"RevenantHostNSUUID" withString:@"NSUUID"], theirXML, @"the archive of a UUID, class names aside");
         NSData *hostArchive = archived(tKnown, NO);
         same(decoded(hostArchive, ours, NO), decoded(hostArchive, nil, NO), @"decoding the host's archive");
         same(decoded(hostArchive, ours, YES), decoded(hostArchive, nil, YES), @"decoding the host's archive securely");

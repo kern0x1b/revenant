@@ -17,11 +17,11 @@ typedef struct {
     bool (^block)(const char *key, CGPDFObjectRef value, void *info);
     void *info;
     bool stopped;
-} charon_dictionary_context;
+} revenant_dictionary_context;
 
-static void charon_dictionary_apply(const char *key, CGPDFObjectRef value, void *info)
+static void revenant_dictionary_apply(const char *key, CGPDFObjectRef value, void *info)
 {
-    charon_dictionary_context *context = info;
+    revenant_dictionary_context *context = info;
     if (!context->stopped && !context->block(key, value, context->info))
         context->stopped = true;
 }
@@ -30,6 +30,6 @@ void CGPDFDictionaryApplyBlock(CGPDFDictionaryRef dict, bool (^block)(const char
 {
     if (!dict || !block)
         return;
-    charon_dictionary_context context = {block, info, false};
-    CGPDFDictionaryApplyFunction(dict, charon_dictionary_apply, &context);
+    revenant_dictionary_context context = {block, info, false};
+    CGPDFDictionaryApplyFunction(dict, revenant_dictionary_apply, &context);
 }

@@ -1,7 +1,7 @@
 #import <Foundation/Foundation.h>
 #import <objc/runtime.h>
 
-@interface CharonHostNSJSONSerialization : NSObject
+@interface RevenantHostNSJSONSerialization : NSObject
 + (BOOL)isValidJSONObject:(id)obj;
 + (nullable NSData *)dataWithJSONObject:(id)obj options:(NSJSONWritingOptions)opt error:(NSError **)error;
 + (nullable id)JSONObjectWithData:(NSData *)data options:(NSJSONReadingOptions)opt error:(NSError **)error;
@@ -61,7 +61,7 @@ static void expectSameNumbers(id ours, id theirs, NSString *what);
 static void sameReadIn(NSString *what, NSData *data, NSJSONReadingOptions opt, BOOL comparePosition, BOOL compareIndex)
 {
     NSError *ours = nil, *theirs = nil;
-    id mine = [CharonHostNSJSONSerialization JSONObjectWithData:data options:opt error:&ours];
+    id mine = [RevenantHostNSJSONSerialization JSONObjectWithData:data options:opt error:&ours];
     id host = [NSJSONSerialization JSONObjectWithData:data options:opt error:&theirs];
     if (!compareIndex) {
         ours = withoutIndex(ours);
@@ -259,7 +259,7 @@ int main(void)
     for (NSString *t in @[@"a=1", @"a=1;b=2", @"a=\"x\"", @"/*c*/a=1", @"//c\na=1"]) {
         NSData *data = text(t);
         NSError *ours = nil, *theirs = nil;
-        id mine = [CharonHostNSJSONSerialization JSONObjectWithData:data
+        id mine = [RevenantHostNSJSONSerialization JSONObjectWithData:data
                                                              options:NSJSONReadingJSON5Allowed | NSJSONReadingTopLevelDictionaryAssumed
                                                                error:&ours];
         id host = [NSJSONSerialization JSONObjectWithData:data
@@ -323,7 +323,7 @@ int main(void)
                    @[[NSObject new]], @[@{@"a": [NSObject new]}], @[@[[NSObject new]]],
                    [NSDecimalNumber decimalNumberWithString:@"1.5"], @[@(YES)], @[@(1.0)], @[@"x"]])
     {
-        BOOL ours = [CharonHostNSJSONSerialization isValidJSONObject:v];
+        BOOL ours = [RevenantHostNSJSONSerialization isValidJSONObject:v];
         BOOL theirs = [NSJSONSerialization isValidJSONObject:v];
         expect(ours == theirs, [NSString stringWithFormat:@"isValidJSONObject %@", v],
                [NSString stringWithFormat:@"ours %d, host %d", ours, theirs]);
@@ -355,7 +355,7 @@ int main(void)
             NSError *ours = nil, *theirs = nil;
             NSData *mine = nil, *host = nil;
             NSString *ourThrow = nil, *theirThrow = nil;
-            @try { mine = [CharonHostNSJSONSerialization dataWithJSONObject:v options:o error:&ours]; }
+            @try { mine = [RevenantHostNSJSONSerialization dataWithJSONObject:v options:o error:&ours]; }
             @catch (NSException *e) { ourThrow = [NSString stringWithFormat:@"%@ %@", e.name, e.reason]; }
             @try { host = [NSJSONSerialization dataWithJSONObject:v options:o error:&theirs]; }
             @catch (NSException *e) { theirThrow = [NSString stringWithFormat:@"%@ %@", e.name, e.reason]; }
@@ -373,7 +373,7 @@ int main(void)
                 expect([ourText isEqualToString:theirText], what,
                        [NSString stringWithFormat:@"ours %@, host %@", ourText, theirText]);
             NSError *a = nil, *b = nil;
-            id back1 = [CharonHostNSJSONSerialization JSONObjectWithData:mine options:0 error:&a];
+            id back1 = [RevenantHostNSJSONSerialization JSONObjectWithData:mine options:0 error:&a];
             id back2 = [NSJSONSerialization JSONObjectWithData:host options:0 error:&b];
             expect(sameText(reason(a), reason(b)) && (a == nil) == (b == nil) &&
                    (a != nil || [back1 isEqual:back2]), what,
@@ -383,7 +383,7 @@ int main(void)
     {
         NSDictionary *mixed = @{@"B": @1, @"a": @2, @"A": @3, @"b": @4, @"é": @5, @"1": @6, @"_": @7};
         NSError *ours = nil, *theirs = nil;
-        NSString *a = [[NSString alloc] initWithData:[CharonHostNSJSONSerialization dataWithJSONObject:mixed options:NSJSONWritingSortedKeys error:&ours] encoding:NSUTF8StringEncoding];
+        NSString *a = [[NSString alloc] initWithData:[RevenantHostNSJSONSerialization dataWithJSONObject:mixed options:NSJSONWritingSortedKeys error:&ours] encoding:NSUTF8StringEncoding];
         NSString *b = [[NSString alloc] initWithData:[NSJSONSerialization dataWithJSONObject:mixed options:NSJSONWritingSortedKeys error:&theirs] encoding:NSUTF8StringEncoding];
         expect([a isEqualToString:b], @"sorted keys", [NSString stringWithFormat:@"ours %@, host %@", a, b]);
     }
@@ -394,7 +394,7 @@ int main(void)
                    @[@[[NSDecimalNumber notANumber]]], [NSDecimalNumber notANumber]]) {
         NSString *what = [NSString stringWithFormat:@"throw %@", v];
         NSString *ourName = nil, *ourReason = nil, *theirName = nil, *theirReason = nil;
-        @try { [CharonHostNSJSONSerialization dataWithJSONObject:v options:NSJSONWritingFragmentsAllowed error:NULL]; }
+        @try { [RevenantHostNSJSONSerialization dataWithJSONObject:v options:NSJSONWritingFragmentsAllowed error:NULL]; }
         @catch (NSException *e) { ourName = e.name; ourReason = e.reason; }
         @try { [NSJSONSerialization dataWithJSONObject:v options:NSJSONWritingFragmentsAllowed error:NULL]; }
         @catch (NSException *e) { theirName = e.name; theirReason = e.reason; }
@@ -404,7 +404,7 @@ int main(void)
     for (id v in @[@"str", @1, [NSNull null], @(42)]) {
         NSString *what = [NSString stringWithFormat:@"throw top level %@", v];
         NSString *ourName = nil, *ourReason = nil, *theirName = nil, *theirReason = nil;
-        @try { [CharonHostNSJSONSerialization dataWithJSONObject:v options:0 error:NULL]; }
+        @try { [RevenantHostNSJSONSerialization dataWithJSONObject:v options:0 error:NULL]; }
         @catch (NSException *e) { ourName = e.name; ourReason = e.reason; }
         @try { [NSJSONSerialization dataWithJSONObject:v options:0 error:NULL]; }
         @catch (NSException *e) { theirName = e.name; theirReason = e.reason; }
@@ -414,7 +414,7 @@ int main(void)
     {
         NSString *ourName = nil, *ourReason = nil, *theirName = nil, *theirReason = nil;
         NSJSONReadingOptions both = NSJSONReadingTopLevelDictionaryAssumed | NSJSONReadingFragmentsAllowed;
-        @try { [CharonHostNSJSONSerialization JSONObjectWithData:text(@"[1]") options:both error:NULL]; }
+        @try { [RevenantHostNSJSONSerialization JSONObjectWithData:text(@"[1]") options:both error:NULL]; }
         @catch (NSException *e) { ourName = e.name; ourReason = e.reason; }
         @try { [NSJSONSerialization JSONObjectWithData:text(@"[1]") options:both error:NULL]; }
         @catch (NSException *e) { theirName = e.name; theirReason = e.reason; }
@@ -424,14 +424,14 @@ int main(void)
     }
 
     {
-        NSString *path = @"/tmp/charon-json1-stream.json";
+        NSString *path = @"/tmp/revenant-json1-stream.json";
         [[NSFileManager defaultManager] removeItemAtPath:path error:NULL];
         NSError *ours = nil, *theirs = nil;
         NSOutputStream *ourOut = [NSOutputStream outputStreamToFileAtPath:path append:NO];
         NSOutputStream *theirOut = [NSOutputStream outputStreamToFileAtPath:path append:NO];
         [ourOut open];
         [theirOut open];
-        NSInteger a = [CharonHostNSJSONSerialization writeJSONObject:@{@"a": @1} toStream:ourOut options:0 error:&ours];
+        NSInteger a = [RevenantHostNSJSONSerialization writeJSONObject:@{@"a": @1} toStream:ourOut options:0 error:&ours];
         NSInteger b = [NSJSONSerialization writeJSONObject:@{@"a": @1} toStream:theirOut options:0 error:&theirs];
         [ourOut close];
         [theirOut close];
@@ -442,7 +442,7 @@ int main(void)
         [ourIn open];
         [theirIn open];
         NSError *e1 = nil, *e2 = nil;
-        id mine = [CharonHostNSJSONSerialization JSONObjectWithStream:ourIn options:0 error:&e1];
+        id mine = [RevenantHostNSJSONSerialization JSONObjectWithStream:ourIn options:0 error:&e1];
         id host = [NSJSONSerialization JSONObjectWithStream:theirIn options:0 error:&e2];
         [ourIn close];
         [theirIn close];
@@ -450,24 +450,24 @@ int main(void)
                (e1 != nil || [mine isEqual:host]), @"JSONObjectWithStream:",
                [NSString stringWithFormat:@"ours %@ %@, host %@ %@", mine, e1, host, e2]);
 
-        NSString *missing = @"/tmp/charon-json1-absent.json";
+        NSString *missing = @"/tmp/revenant-json1-absent.json";
         [[NSFileManager defaultManager] removeItemAtPath:missing error:NULL];
         NSInputStream *ourMiss = [NSInputStream inputStreamWithFileAtPath:missing];
         NSInputStream *theirMiss = [NSInputStream inputStreamWithFileAtPath:missing];
         [ourMiss open];
         [theirMiss open];
         NSError *f1 = nil, *f2 = nil;
-        id m1 = [CharonHostNSJSONSerialization JSONObjectWithStream:ourMiss options:0 error:&f1];
+        id m1 = [RevenantHostNSJSONSerialization JSONObjectWithStream:ourMiss options:0 error:&f1];
         id m2 = [NSJSONSerialization JSONObjectWithStream:theirMiss options:0 error:&f2];
         expect(m1 == nil && m2 == nil && sameText(reason(f1), reason(f2)), @"JSONObjectWithStream: of nothing",
                [NSString stringWithFormat:@"ours %@ %@, host %@ %@", m1, reason(f1), m2, reason(f2)]);
 
-        NSOutputStream *ourBad = [NSOutputStream outputStreamToFileAtPath:@"/nonexistent-charon-dir/x.json" append:NO];
-        NSOutputStream *theirBad = [NSOutputStream outputStreamToFileAtPath:@"/nonexistent-charon-dir/x.json" append:NO];
+        NSOutputStream *ourBad = [NSOutputStream outputStreamToFileAtPath:@"/nonexistent-revenant-dir/x.json" append:NO];
+        NSOutputStream *theirBad = [NSOutputStream outputStreamToFileAtPath:@"/nonexistent-revenant-dir/x.json" append:NO];
         [ourBad open];
         [theirBad open];
         NSError *g1 = nil, *g2 = nil;
-        NSInteger c = [CharonHostNSJSONSerialization writeJSONObject:@{@"a": @1} toStream:ourBad options:0 error:&g1];
+        NSInteger c = [RevenantHostNSJSONSerialization writeJSONObject:@{@"a": @1} toStream:ourBad options:0 error:&g1];
         NSInteger d = [NSJSONSerialization writeJSONObject:@{@"a": @1} toStream:theirBad options:0 error:&g2];
         expect(c == d, @"writeJSONObject:toStream: of nowhere",
                [NSString stringWithFormat:@"ours %ld %@, host %ld %@", (long)c, g1, (long)d, g2]);

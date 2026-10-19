@@ -19,7 +19,7 @@
 #include "graphics/display.hpp"
 #include "foundation/performance.hpp"
 
-namespace shade {
+namespace emulator {
 
 struct HostSurfaceKey {
     std::uint64_t owner { };

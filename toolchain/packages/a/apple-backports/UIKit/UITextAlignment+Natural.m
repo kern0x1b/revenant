@@ -1,9 +1,9 @@
 #import <UIKit/UIKit.h>
 #import <objc/runtime.h>
 
-static char charon_natural_key;
+static char revenant_natural_key;
 
-static NSTextAlignment charon_natural_for(id view, BOOL byText)
+static NSTextAlignment revenant_natural_for(id view, BOOL byText)
 {
     NSLocaleLanguageDirection direction = NSLocaleLanguageDirectionLeftToRight;
     NSString *text = byText ? [view text] : nil;
@@ -21,17 +21,17 @@ static NSTextAlignment charon_natural_for(id view, BOOL byText)
     return direction == NSLocaleLanguageDirectionRightToLeft ? NSTextAlignmentRight : NSTextAlignmentLeft;
 }
 
-static void charon_hook_alignment(Class cls, BOOL byText)
+static void revenant_hook_alignment(Class cls, BOOL byText)
 {
     SEL setter = @selector(setTextAlignment:);
     Method setterMethod = class_getInstanceMethod(cls, setter);
     void (*setterOriginal)(id, SEL, NSTextAlignment) = (void (*)(id, SEL, NSTextAlignment))method_getImplementation(setterMethod);
     class_replaceMethod(cls, setter, imp_implementationWithBlock(^(id self, NSTextAlignment alignment) {
         if (alignment == NSTextAlignmentNatural) {
-            objc_setAssociatedObject(self, &charon_natural_key, @YES, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-            setterOriginal(self, setter, charon_natural_for(self, byText));
+            objc_setAssociatedObject(self, &revenant_natural_key, @YES, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+            setterOriginal(self, setter, revenant_natural_for(self, byText));
         } else {
-            objc_setAssociatedObject(self, &charon_natural_key, nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+            objc_setAssociatedObject(self, &revenant_natural_key, nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
             setterOriginal(self, setter, alignment);
         }
     }), method_getTypeEncoding(setterMethod));
@@ -39,7 +39,7 @@ static void charon_hook_alignment(Class cls, BOOL byText)
     Method getterMethod = class_getInstanceMethod(cls, getter);
     NSTextAlignment (*getterOriginal)(id, SEL) = (NSTextAlignment (*)(id, SEL))method_getImplementation(getterMethod);
     class_replaceMethod(cls, getter, imp_implementationWithBlock(^NSTextAlignment(id self) {
-        return objc_getAssociatedObject(self, &charon_natural_key) ? NSTextAlignmentNatural : getterOriginal(self, getter);
+        return objc_getAssociatedObject(self, &revenant_natural_key) ? NSTextAlignmentNatural : getterOriginal(self, getter);
     }), method_getTypeEncoding(getterMethod));
     if (!byText)
         return;
@@ -48,30 +48,30 @@ static void charon_hook_alignment(Class cls, BOOL byText)
     void (*textOriginal)(id, SEL, NSString *) = (void (*)(id, SEL, NSString *))method_getImplementation(textMethod);
     class_replaceMethod(cls, text, imp_implementationWithBlock(^(id self, NSString *string) {
         textOriginal(self, text, string);
-        if (objc_getAssociatedObject(self, &charon_natural_key))
-            setterOriginal(self, setter, charon_natural_for(self, YES));
+        if (objc_getAssociatedObject(self, &revenant_natural_key))
+            setterOriginal(self, setter, revenant_natural_for(self, YES));
     }), method_getTypeEncoding(textMethod));
 }
 
-@interface CharonNaturalAlignmentInstaller : NSObject
+@interface RevenantNaturalAlignmentInstaller : NSObject
 @end
 
-@implementation CharonNaturalAlignmentInstaller
+@implementation RevenantNaturalAlignmentInstaller
 
 + (void)load
 {
-    charon_hook_alignment([UILabel class], NO);
-    charon_hook_alignment([UITextField class], YES);
-    charon_hook_alignment([UITextView class], YES);
+    revenant_hook_alignment([UILabel class], NO);
+    revenant_hook_alignment([UITextField class], YES);
+    revenant_hook_alignment([UITextView class], YES);
     NSNotificationCenter *center = [NSNotificationCenter defaultCenter];
     for (NSString *name in @[UITextFieldTextDidChangeNotification, UITextViewTextDidChangeNotification]) {
         [center addObserverForName:name object:nil queue:nil usingBlock:^(NSNotification *note) {
             id view = note.object;
-            if (view && objc_getAssociatedObject(view, &charon_natural_key)) {
-                NSTextAlignment resolved = charon_natural_for(view, YES);
-                objc_setAssociatedObject(view, &charon_natural_key, nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+            if (view && objc_getAssociatedObject(view, &revenant_natural_key)) {
+                NSTextAlignment resolved = revenant_natural_for(view, YES);
+                objc_setAssociatedObject(view, &revenant_natural_key, nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
                 [view setTextAlignment:resolved];
-                objc_setAssociatedObject(view, &charon_natural_key, @YES, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+                objc_setAssociatedObject(view, &revenant_natural_key, @YES, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
             }
         }];
     }

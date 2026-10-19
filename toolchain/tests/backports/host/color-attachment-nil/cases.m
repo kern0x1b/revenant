@@ -4,16 +4,16 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
-@protocol CharonSlots
+@protocol RevenantSlots
 - (void)setObject:(id)attachment atIndexedSubscript:(NSUInteger)index;
 - (id)objectAtIndexedSubscript:(NSUInteger)index;
 @end
 
-@protocol CharonDesc
+@protocol RevenantDesc
 - (id)colorAttachments;
 @end
 
-@protocol CharonLinked
+@protocol RevenantLinked
 - (id)vertexLinkedFunctions;
 - (void)setVertexLinkedFunctions:(id)functions;
 - (id)fragmentLinkedFunctions;
@@ -52,7 +52,7 @@ static void nilSequence(Class cls, Class attachmentClass, NSString *name, NSStri
 {
     checks++;
     id desc = NewDescriptor(cls);
-    id<CharonSlots> slots = (id<CharonSlots>)[(id<CharonDesc>)desc colorAttachments];
+    id<RevenantSlots> slots = (id<RevenantSlots>)[(id<RevenantDesc>)desc colorAttachments];
     id custom = [[attachmentClass alloc] init];
     [custom setValue:@(MTLPixelFormatBGRA8Unorm) forKey:@"pixelFormat"];
     [custom setValue:@YES forKey:@"blendingEnabled"];
@@ -78,7 +78,7 @@ static void nilSequence(Class cls, Class attachmentClass, NSString *name, NSStri
         fail([NSString stringWithFormat:@"%@: slot 0, never touched, does not hold the defaults", name]);
     id copy = [(id<NSCopying>)desc copyWithZone:nil];
     checks++;
-    if (![Snapshot([(id<CharonSlots>)[(id<CharonDesc>)copy colorAttachments] objectAtIndexedSubscript:2]) isEqualToString:defaults])
+    if (![Snapshot([(id<RevenantSlots>)[(id<RevenantDesc>)copy colorAttachments] objectAtIndexedSubscript:2]) isEqualToString:defaults])
         fail([NSString stringWithFormat:@"%@: the copy of a descriptor with a reset slot differs", name]);
     *outSnapshot = Snapshot(after);
 }
@@ -86,7 +86,7 @@ static void nilSequence(Class cls, Class attachmentClass, NSString *name, NSStri
 static void linkedSequence(Class cls, Class linkedClass, NSString *name)
 {
     checks++;
-    id<CharonLinked> desc = (id<CharonLinked>)NewDescriptor(cls);
+    id<RevenantLinked> desc = (id<RevenantLinked>)NewDescriptor(cls);
     id fresh = [desc vertexLinkedFunctions];
     checks++;
     if (!fresh || [desc vertexLinkedFunctions] != fresh)
@@ -110,7 +110,7 @@ static void linkedSequence(Class cls, Class linkedClass, NSString *name)
         fail([NSString stringWithFormat:@"% the object after a nil store is not empty", name]);
     id copy = [(id<NSCopying>)desc copyWithZone:nil];
     checks++;
-    if (![(id<CharonLinked>)copy vertexLinkedFunctions] || [(id<CharonLinked>)copy vertexLinkedFunctions] == reset)
+    if (![(id<RevenantLinked>)copy vertexLinkedFunctions] || [(id<RevenantLinked>)copy vertexLinkedFunctions] == reset)
         fail([NSString stringWithFormat:@"% the copy's linked-functions object is nil or the same object", name]);
 }
 
@@ -120,7 +120,7 @@ static int childStatus(Class cls, BOOL store)
     pid_t child = fork();
     if (child == 0) {
         id desc = NewDescriptor(cls);
-        id<CharonSlots> slots = (id<CharonSlots>)[(id<CharonDesc>)desc colorAttachments];
+        id<RevenantSlots> slots = (id<RevenantSlots>)[(id<RevenantDesc>)desc colorAttachments];
         if (store)
             [slots setObject:nil atIndexedSubscript:8];
         else
@@ -136,9 +136,9 @@ int main(void)
 {
     @autoreleasepool {
         Class apple = [MTLRenderPipelineDescriptor class];
-        Class port = NSClassFromString(@"CharonHostMTLRenderPipelineDescriptor");
+        Class port = NSClassFromString(@"RevenantHostMTLRenderPipelineDescriptor");
         Class apple_attachment = [MTLRenderPipelineColorAttachmentDescriptor class];
-        Class port_attachment = NSClassFromString(@"CharonHostMTLRenderPipelineColorAttachmentDescriptor");
+        Class port_attachment = NSClassFromString(@"RevenantHostMTLRenderPipelineColorAttachmentDescriptor");
         Class apple_linked = [MTLLinkedFunctions class];
         Class port_linked = [MTLLinkedFunctions class];
         if (!port) {

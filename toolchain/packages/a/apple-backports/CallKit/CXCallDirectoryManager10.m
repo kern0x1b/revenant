@@ -1,4 +1,4 @@
-#import "CharonCallKit.h"
+#import "RevenantCallKit.h"
 
 @implementation CXCallDirectoryManager
 
@@ -12,7 +12,7 @@
     return shared;
 }
 
-static NSError *charon_no_extension(void)
+static NSError *revenant_no_extension(void)
 {
     return [NSError errorWithDomain:CXErrorDomainCallDirectoryManager code:CXErrorCodeCallDirectoryManagerErrorNoExtensionFound userInfo:nil];
 }
@@ -22,7 +22,7 @@ static NSError *charon_no_extension(void)
     if (!completion)
         return;
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-        completion(charon_no_extension());
+        completion(revenant_no_extension());
     });
 }
 
@@ -32,7 +32,7 @@ static NSError *charon_no_extension(void)
     if (!completion)
         return;
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-        completion(CXCallDirectoryEnabledStatusUnknown, charon_no_extension());
+        completion(CXCallDirectoryEnabledStatusUnknown, revenant_no_extension());
     });
 }
 

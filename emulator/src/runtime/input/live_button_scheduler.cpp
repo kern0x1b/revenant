@@ -9,7 +9,7 @@
 
 #include <algorithm>
 
-namespace shade {
+namespace emulator {
 
 void LiveButtonScheduler::schedule(
     SystemButtonInput down, std::chrono::milliseconds hold)

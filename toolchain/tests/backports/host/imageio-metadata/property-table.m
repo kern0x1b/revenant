@@ -2,14 +2,14 @@
 #import <ImageIO/ImageIO.h>
 #import <CoreServices/CoreServices.h>
 
-#define CHARON_S_BUFFERS 4
+#define REVENANT_S_BUFFERS 4
 static const char *S(CFStringRef s)
 {
-    static char buffers[CHARON_S_BUFFERS][1024];
+    static char buffers[REVENANT_S_BUFFERS][1024];
     static unsigned next = 0;
     if (!s)
         return "(nil)";
-    char *buffer = buffers[next++ % CHARON_S_BUFFERS];
+    char *buffer = buffers[next++ % REVENANT_S_BUFFERS];
     if (!CFStringGetCString(s, buffer, sizeof buffers[0], kCFStringEncodingUTF8))
         return "(unprintable)";
     return buffer;
@@ -68,8 +68,8 @@ int main(int argc, const char **argv)
 {
     @autoreleasepool {
         setvbuf(stdout, NULL, _IOLBF, 0);
-        static charon_pair pairs[600];
-        size_t npairs = charon_pairs(pairs);
+        static revenant_pair pairs[600];
+        size_t npairs = revenant_pairs(pairs);
         if (argc < 2)
             return 2;
         size_t index = (size_t)atoi(argv[1]);

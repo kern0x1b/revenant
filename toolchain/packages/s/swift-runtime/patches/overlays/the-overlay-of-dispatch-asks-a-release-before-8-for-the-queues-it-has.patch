@@ -155,11 +155,11 @@ index d49e9ad..947d83d 100644
 +/* The global queue of a class of service. dispatch_get_global_queue took a class in place of a priority from iOS 8;
 +   apple-compat's function hands a release before it the priority each class stands for, and is the call itself where
 +   the release has classes. */
-+dispatch_queue_t charon_dispatch_get_global_queue(long identifier, unsigned long flags);
++dispatch_queue_t revenant_dispatch_get_global_queue(long identifier, unsigned long flags);
 +
 +static inline dispatch_queue_t
 +_swift_dispatch_get_global_queue(long identifier, unsigned long flags) {
-+  return charon_dispatch_get_global_queue(identifier, flags);
++  return revenant_dispatch_get_global_queue(identifier, flags);
 +}
 +
  static inline dispatch_queue_t

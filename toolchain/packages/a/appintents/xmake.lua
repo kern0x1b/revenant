@@ -1,6 +1,6 @@
 package("appintents")
-    set_homepage("https://github.com/kern0x1b/charon")
-    set_description("The AppIntents framework of iOS 16, as one Swift module a port writes `import AppIntents` for, built against the charon@swift-runtime a port carries. The API, the protocols, the parameters, the entities, the queries, the results and in-process `perform` are the port's own; what the framework leaves to a system service - Siri, Shortcuts, Spotlight, a widget, a live activity - is the seam this README and facts/AppIntents say it is, and the API surface for it exists either way")
+    set_homepage("https://github.com/kern0x1b/revenant/tree/main/toolchain")
+    set_description("The AppIntents framework of iOS 16, as one Swift module a port writes `import AppIntents` for, built against the revenant@swift-runtime a port carries. The API, the protocols, the parameters, the entities, the queries, the results and in-process `perform` are the port's own; what the framework leaves to a system service - Siri, Shortcuts, Spotlight, a widget, a live activity - is the seam this README and facts/AppIntents say it is, and the API surface for it exists either way")
     set_license("MIT")
     set_policy("package.strict_compatibility", true)
 
@@ -17,7 +17,7 @@ package("appintents")
     add_configs("backports_uikit", {description = "With backports: the runtime whose UIKit overlay is linked to the UIKit backports, for an application.", default = false, type = "boolean"})
 
     on_load("iphoneos", function (package)
-        package:add("deps", "charon@swift-runtime", {alias = "swift-runtime", configs = {shared = package:config("shared") or nil,
+        package:add("deps", "revenant@swift-runtime", {alias = "swift-runtime", configs = {shared = package:config("shared") or nil,
                     backports = package:config("backports") or nil, backports_uikit = package:config("backports_uikit") or nil}})
         package:add("links", "AppIntents")
         package:add("frameworks", "Foundation", "CoreFoundation")
@@ -28,7 +28,7 @@ package("appintents")
         local swift = import("apple.swift", {rootdir = modules, anonymous = true})
         local toolchain = assert(package:toolchains(), "AppIntents is built with the apple-ios toolchain")[1]
         toolchain:load()
-        local runtime = assert(package:dep("swift-runtime"), "AppIntents is compiled against charon@swift-runtime")
+        local runtime = assert(package:dep("swift-runtime"), "AppIntents is compiled against revenant@swift-runtime")
         local swiftc = assert(table.wrap((runtime:envs() or {}).SWIFT_EXEC)[1], "swift-runtime names no compiler; reinstall it")
         local minimum = toolchain:config("deployment")
         local sdk = toolchain:config("sdkdir")
@@ -40,10 +40,10 @@ package("appintents")
         os.mkdir(probe_dir)
 
         local overlays, defs = {}, {}
-        local port_headers = table.wrap((runtime:envs() or {}).CHARON_SWIFT_PORT_HEADERS)[1]
+        local port_headers = table.wrap((runtime:envs() or {}).REVENANT_SWIFT_PORT_HEADERS)[1]
         if port_headers then
             table.insert(overlays, port_headers)
-            table.insert(defs, "-DCHARON_APPINTENTS_PORT_HEADERS")
+            table.insert(defs, "-DREVENANT_APPINTENTS_PORT_HEADERS")
         end
         local overlay_flags = {}
         for _, overlay in ipairs(overlays) do
@@ -66,14 +66,14 @@ package("appintents")
                 architecture = package:arch(), deployment = minimum, sdk = sdk,
                 resources = path.join(runtime:installdir(), "lib", "swift"),
                 plugins = table.wrap((runtime:envs() or {}).SWIFT_PLUGIN_PATH)[1],
-                module = "CharonAppIntentsProbe", optimize = "none", prefix_map = os.curdir() .. "=/appintents"}),
+                module = "RevenantAppIntentsProbe", optimize = "none", prefix_map = os.curdir() .. "=/appintents"}),
                 {"-I", path.join(runtime:installdir(), "lib", "swift", "iphoneos"), "-typecheck", platform_resource}))
             return true
         end}
         os.tryrm(platform_resource)
         if has then
             carries = true
-            table.insert(defs, "-DCHARON_APPINTENTS_CARRIES_LOCALIZED_STRING")
+            table.insert(defs, "-DREVENANT_APPINTENTS_CARRIES_LOCALIZED_STRING")
             print("%s: this runtime's Foundation has LocalizedStringResource, the module uses the platform's and carries none",
                   package:name())
         else
@@ -83,11 +83,11 @@ package("appintents")
         end
 
         local probes = {
-            {flag = "CHARON_APPINTENTS_ATTRIBUTED_STRING", name = "AttributedString",
+            {flag = "REVENANT_APPINTENTS_ATTRIBUTED_STRING", name = "AttributedString",
              body = "import Foundation\npublic func probe() -> AttributedString { return AttributedString(\"x\") }"},
-            {flag = "CHARON_APPINTENTS_MEASUREMENT", name = "Measurement",
+            {flag = "REVENANT_APPINTENTS_MEASUREMENT", name = "Measurement",
              body = "import Foundation\npublic func probe() -> Measurement { return Measurement(value: 1, unit: UnitLength.meters) }"},
-            {flag = "CHARON_APPINTENTS_RECURRENCE_RULE", name = "Calendar.RecurrenceRule",
+            {flag = "REVENANT_APPINTENTS_RECURRENCE_RULE", name = "Calendar.RecurrenceRule",
              body = "import Foundation\npublic func probe() -> Calendar.RecurrenceRule { return Calendar.RecurrenceRule(weekOfMonth: 1, weekOfYear: 2, month: 3, dayOfWeek: 4) }"}}
         for _, probe in ipairs(probes) do
             local source = path.join(probe_dir, "probe.swift")
@@ -97,7 +97,7 @@ package("appintents")
                     architecture = package:arch(), deployment = minimum, sdk = sdk,
                     resources = path.join(runtime:installdir(), "lib", "swift"),
                     plugins = table.wrap((runtime:envs() or {}).SWIFT_PLUGIN_PATH)[1],
-                    module = "CharonAppIntentsProbe", optimize = "none", prefix_map = os.curdir() .. "=/appintents"}),
+                    module = "RevenantAppIntentsProbe", optimize = "none", prefix_map = os.curdir() .. "=/appintents"}),
                     {"-I", path.join(runtime:installdir(), "lib", "swift", "iphoneos"), "-typecheck", source}))
                 return true
             end}
@@ -120,13 +120,13 @@ package("appintents")
                 architecture = package:arch(), deployment = minimum, sdk = sdk,
                 resources = path.join(runtime:installdir(), "lib", "swift"),
                 plugins = table.wrap((runtime:envs() or {}).SWIFT_PLUGIN_PATH)[1],
-                module = "CharonAppIntentsProbe", optimize = "none", prefix_map = os.curdir() .. "=/appintents"}),
+                module = "RevenantAppIntentsProbe", optimize = "none", prefix_map = os.curdir() .. "=/appintents"}),
                 overlay_flags, {"-I", path.join(runtime:installdir(), "lib", "swift", "iphoneos"), "-typecheck", spotlight_source}))
             return true
         end}
         os.tryrm(spotlight_source)
         if spotlight then
-            table.insert(defs, "-DCHARON_APPINTENTS_CORESPOTLIGHT")
+            table.insert(defs, "-DREVENANT_APPINTENTS_CORESPOTLIGHT")
             print("%s: CoreSpotlight's classes are available at %s, their AppIntents extensions are in the module", package:name(), minimum)
         else
             print("%s: CoreSpotlight has no CSSearchableItem at %s, its AppIntents rows are left out of the module", package:name(), minimum)
@@ -146,7 +146,7 @@ package("appintents")
         os.vrunv(toolchain:tool("ar"), {"-rcs", path.join(package:installdir("lib"), "libAppIntents.a"), path.join(objects, "AppIntents.o")})
 
         os.tryrm(probe_dir)
-        package:setenv("CHARON_SWIFT_MODULES", swiftdir)
+        package:setenv("REVENANT_SWIFT_MODULES", swiftdir)
         os.cp(path.join(os.scriptdir(), "..", "..", "..", "LICENSE"), path.join(package:installdir("licenses")))
         os.cp("README.md", package:installdir("share"))
     end)

@@ -2,7 +2,7 @@
 #import <UIKit/UIKit.h>
 #import <objc/message.h>
 #import <math.h>
-#import "CharonMapKit.h"
+#import "RevenantMapKit.h"
 
 @interface MKCompassButton ()
 @property (nonatomic) CLLocationDirection compassHeading;
@@ -22,7 +22,7 @@
         button.backgroundColor = [UIColor colorWithWhite:1.0 alpha:0.75];
         button.layer.cornerRadius = 22.0;
         button.accessibilityLabel = @" compass";
-        [(UIControl *)button addTarget:button action:@selector(charon_faceNorth)
+        [(UIControl *)button addTarget:button action:@selector(revenant_faceNorth)
                      forControlEvents:UIControlEventTouchUpInside];
     }
     return button;
@@ -43,10 +43,10 @@
 - (void)setCompassVisibility:(MKFeatureVisibility)compassVisibility
 {
     _compassVisibility = compassVisibility;
-    [self charon_updateVisibility];
+    [self revenant_updateVisibility];
 }
 
-- (void)charon_updateVisibility
+- (void)revenant_updateVisibility
 {
     switch (_compassVisibility) {
         case MKFeatureVisibilityHidden:
@@ -88,7 +88,7 @@
     [@"N" drawAtPoint:CGPointMake(CGRectGetMidX(box) - 3.0, CGRectGetMinY(box)) withAttributes:attributes];
 }
 
-- (void)charon_faceNorth
+- (void)revenant_faceNorth
 {
     MKMapView *mapView = self.mapView;
     SEL animate = NSSelectorFromString(@"setCamera:animated:");
@@ -96,10 +96,10 @@
         return;
     }
     id (*send)(id, SEL, id, BOOL) = (id (*)(id, SEL, id, BOOL))objc_msgSend;
-    send(mapView, animate, [self charon_cameraFacingNorth], YES);
+    send(mapView, animate, [self revenant_cameraFacingNorth], YES);
 }
 
-- (MKMapCamera *)charon_cameraFacingNorth
+- (MKMapCamera *)revenant_cameraFacingNorth
 {
     MKMapCamera *camera = [MKMapCamera camera];
     camera.centerCoordinate = self.mapView ? self.mapView.centerCoordinate : CLLocationCoordinate2DMake(0.0, 0.0);
@@ -127,9 +127,9 @@
         button.backgroundColor = [UIColor colorWithWhite:1.0 alpha:0.75];
         button.layer.cornerRadius = 22.0;
         button.accessibilityLabel = @" tracking";
-        [(UIControl *)button addTarget:button action:@selector(charon_toggle)
+        [(UIControl *)button addTarget:button action:@selector(revenant_toggle)
                      forControlEvents:UIControlEventTouchUpInside];
-        [button charon_update];
+        [button revenant_update];
     }
     return button;
 }
@@ -137,10 +137,10 @@
 - (void)setMapView:(MKMapView *)mapView
 {
     _mapView = mapView;
-    [self charon_update];
+    [self revenant_update];
 }
 
-- (BOOL)charon_tracking
+- (BOOL)revenant_tracking
 {
     if (self.mapView) {
         return self.mapView.userTrackingMode == MKUserTrackingModeFollow;
@@ -155,23 +155,23 @@
     if (mapView) {
         [mapView setUserTrackingMode:trackingMode animated:animated];
     }
-    [self charon_update];
+    [self revenant_update];
 }
 
-- (void)charon_toggle
+- (void)revenant_toggle
 {
     MKMapView *mapView = self.mapView;
     if (!mapView) {
         return;
     }
-    BOOL following = [self charon_tracking];
+    BOOL following = [self revenant_tracking];
     [mapView setUserTrackingMode:following ? MKUserTrackingModeNone : MKUserTrackingModeFollow animated:YES];
-    [self charon_update];
+    [self revenant_update];
 }
 
-- (void)charon_update
+- (void)revenant_update
 {
-    BOOL tracking = [self charon_tracking];
+    BOOL tracking = [self revenant_tracking];
     self.layer.borderWidth = tracking ? 2.0 : 0.0;
     self.layer.borderColor = [UIColor blueColor].CGColor;
     [self setNeedsDisplay];
@@ -179,7 +179,7 @@
 
 - (void)drawRect:(CGRect)rect
 {
-    if (![self charon_tracking]) {
+    if (![self revenant_tracking]) {
         return;
     }
     CGRect box = CGRectInset(self.bounds, 10.0, 10.0);

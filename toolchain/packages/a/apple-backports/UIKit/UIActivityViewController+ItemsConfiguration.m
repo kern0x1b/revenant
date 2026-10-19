@@ -1,10 +1,10 @@
-#import "CharonMenus.h"
+#import "RevenantMenus.h"
 
-@interface CharonProviderItem : NSObject <UIActivityItemSource>
+@interface RevenantProviderItem : NSObject <UIActivityItemSource>
 - (instancetype)initWithProvider:(NSItemProvider *)provider;
 @end
 
-@implementation CharonProviderItem {
+@implementation RevenantProviderItem {
 @private
     NSItemProvider *_provider;
 }
@@ -16,7 +16,7 @@
     return self;
 }
 
-- (Class)charon_class
+- (Class)revenant_class
 {
     for (Class candidate in @[[NSURL class], [NSString class]]) {
         if ([_provider canLoadObjectOfClass:candidate])
@@ -27,7 +27,7 @@
 
 - (id)activityViewControllerPlaceholderItem:(UIActivityViewController *)activityViewController
 {
-    Class kind = [self charon_class];
+    Class kind = [self revenant_class];
     if (kind == [NSURL class])
         return [NSURL URLWithString:@"about:blank"];
     return @"";
@@ -35,7 +35,7 @@
 
 - (id)activityViewController:(UIActivityViewController *)activityViewController itemForActivityType:(NSString *)activityType
 {
-    Class kind = [self charon_class];
+    Class kind = [self revenant_class];
     if (!kind)
         return nil;
     __block id loaded = nil;
@@ -52,13 +52,13 @@
 
 @end
 
-@implementation UIActivityViewController (CharonItemsConfiguration)
+@implementation UIActivityViewController (RevenantItemsConfiguration)
 
 - (instancetype)initWithActivityItemsConfiguration:(id<UIActivityItemsConfigurationReading>)activityItemsConfiguration
 {
     NSMutableArray *items = [NSMutableArray array];
     for (NSItemProvider *provider in activityItemsConfiguration.itemProvidersForActivityItemsConfiguration)
-        [items addObject:[[CharonProviderItem alloc] initWithProvider:provider]];
+        [items addObject:[[RevenantProviderItem alloc] initWithProvider:provider]];
     NSArray *activities = nil;
     if ([activityItemsConfiguration respondsToSelector:@selector(applicationActivitiesForActivityItemsConfiguration)])
         activities = activityItemsConfiguration.applicationActivitiesForActivityItemsConfiguration;

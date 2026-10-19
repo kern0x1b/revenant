@@ -7,7 +7,7 @@ package("picotls")
     add_urls("https://github.com/h2o/picotls.git")
     add_versions("2026.09.24", "d6c3da61b47cc3ccecaf9aa093c24e4aafebd52a")
 
-    add_deps("charon@apple-compat", {alias = "apple-compat"})
+    add_deps("revenant@apple-compat", {alias = "apple-compat"})
 
     add_configs("recipe", {description = "The digest of this recipe, so a changed flag is a different pair of archives.", default = hash.strhash128(hash.sha256(path.join(os.scriptdir(), "xmake.lua"))), type = "string", readonly = true})
 

@@ -1,11 +1,11 @@
 #import <Foundation/Foundation.h>
 #import <objc/runtime.h>
 
-static char charon_tolerance_key;
+static char revenant_tolerance_key;
 
 CFTimeInterval CFRunLoopTimerGetTolerance(CFRunLoopTimerRef timer)
 {
-    NSNumber *tolerance = objc_getAssociatedObject((__bridge id)timer, &charon_tolerance_key);
+    NSNumber *tolerance = objc_getAssociatedObject((__bridge id)timer, &revenant_tolerance_key);
     return tolerance.doubleValue;
 }
 
@@ -18,10 +18,10 @@ void CFRunLoopTimerSetTolerance(CFRunLoopTimerRef timer, CFTimeInterval toleranc
     } else if (tolerance < 0) {
         tolerance = 0;
     }
-    objc_setAssociatedObject((__bridge id)timer, &charon_tolerance_key, @(tolerance), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject((__bridge id)timer, &revenant_tolerance_key, @(tolerance), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
-@implementation NSTimer (CharonTolerance)
+@implementation NSTimer (RevenantTolerance)
 
 - (NSTimeInterval)tolerance
 {

@@ -9,7 +9,7 @@
 	<key>CFBundleExecutable</key>
 	<string>textkit7</string>
 	<key>CFBundleIdentifier</key>
-	<string>local.charon.backports.textkit7</string>
+	<string>local.revenant.backports.textkit7</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>

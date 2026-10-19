@@ -23,7 +23,7 @@ static NSString *errText(NSError *error)
 
 static NSString *plain(NSString *name)
 {
-    return [name hasPrefix:@"Charon"] ? [name substringFromIndex:6] : name;
+    return [name hasPrefix:@"Revenant"] ? [name substringFromIndex:8] : name;
 }
 
 static NSString *className(id object)
@@ -226,14 +226,14 @@ static void casePreview(void)
           className(p.previewControllerDelegate), p.isViewLoaded]);
 }
 
-void charon_windowed_run(UIWindow *window)
+void revenant_windowed_run(UIWindow *window)
 {
     const char *name = getenv("DIFF_CASE");
     NSString *which = name ? [NSString stringWithUTF8String:name] : @"constants";
     line([NSString stringWithFormat:@"case=%@", which]);
     if ([which isEqualToString:@"constants"]) caseConstants();
     else if ([which isEqualToString:@"activity-nil"]) caseActivity(nil);
-    else if ([which isEqualToString:@"activity-named"]) caseActivity(@"local.charon.nonexistent");
+    else if ([which isEqualToString:@"activity-named"]) caseActivity(@"local.revenant.nonexistent");
     else if ([which isEqualToString:@"controller"]) caseController();
     else if ([which isEqualToString:@"configuration"]) caseConfiguration();
     else if ([which isEqualToString:@"configuration-copy"]) caseConfigurationCopy();

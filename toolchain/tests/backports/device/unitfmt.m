@@ -10,7 +10,7 @@ static BOOL has_class(const char *name)
     return NSClassFromString([NSString stringWithUTF8String:name]) != Nil;
 }
 
-static id charon_invoke(id target, SEL selector, double *value, NSInteger *which, BOOL wantId)
+static id revenant_invoke(id target, SEL selector, double *value, NSInteger *which, BOOL wantId)
 {
     NSMethodSignature *signature = [target methodSignatureForSelector:selector];
     if (!signature)
@@ -33,7 +33,7 @@ static id charon_invoke(id target, SEL selector, double *value, NSInteger *which
 int main(int argc, char **argv)
 {
     @autoreleasepool {
-        charon_log_to(argc > 1 ? [NSString stringWithUTF8String:argv[1]] : nil);
+        revenant_log_to(argc > 1 ? [NSString stringWithUTF8String:argv[1]] : nil);
 
         NSLocale *locale = [NSLocale currentLocale];
         NSString *system = [[locale objectForKey:NSLocaleMeasurementSystem] description];
@@ -76,8 +76,8 @@ int main(int argc, char **argv)
                     for (NSNumber *value in @[@1, @0, @(-1), @2.5]) {
                         double scalar = value.doubleValue;
                         NSInteger which = unit.integerValue;
-                        id written = charon_invoke(fresh, NSSelectorFromString(@"stringFromValue:unit:"), &scalar, &which, YES);
-                        id named = charon_invoke(fresh, NSSelectorFromString(@"unitStringFromValue:unit:"), &scalar, &which, YES);
+                        id written = revenant_invoke(fresh, NSSelectorFromString(@"stringFromValue:unit:"), &scalar, &which, YES);
+                        id named = revenant_invoke(fresh, NSSelectorFromString(@"unitStringFromValue:unit:"), &scalar, &which, YES);
                         CHECK([written isKindOfClass:[NSString class]] && [written length] > 0, "a value and a unit write something");
                         CHECK([named isKindOfClass:[NSString class]] && [named length] > 0, "and name something");
                         CHECK(![named hasSuffix:@"_UNKNOWN"] && ![named isEqualToString:@"(null)"],
@@ -94,7 +94,7 @@ int main(int argc, char **argv)
                 for (unsigned index = 0; index < sizeof(scales) / sizeof(*scales); index++) {
                     double value = scales[index];
                     double scalar = value;
-                    id form = charon_invoke(fresh, scaled, &scalar, NULL, YES);
+                    id form = revenant_invoke(fresh, scaled, &scalar, NULL, YES);
                     NSInteger reported = -1;
                     NSMethodSignature *signature = [formatter instanceMethodSignatureForSelector:withUnit];
                     NSInvocation *call = [NSInvocation invocationWithMethodSignature:signature];
@@ -151,7 +151,7 @@ int main(int argc, char **argv)
                 CHECK([a canBeConvertedToUnit:b], "and converts between them");
         }
 
-        printf("checks=%d failures=%d\n", charon_checks, charon_failures);
-        return charon_failures;
+        printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
+        return revenant_failures;
     }
 }

@@ -6,7 +6,7 @@
 #include <math.h>
 #include <stdio.h>
 
-@protocol CharonPointsOfInterestRequest <NSObject>
+@protocol RevenantPointsOfInterestRequest <NSObject>
 - (instancetype)initWithCenterCoordinate:(CLLocationCoordinate2D)coordinate radius:(CLLocationDistance)radius;
 - (instancetype)initWithCoordinateRegion:(MKCoordinateRegion)region;
 - (CLLocationCoordinate2D)coordinate;
@@ -15,9 +15,9 @@
 - (id)copy;
 @end
 
-static Class CharonInstallMutant(Class port)
+static Class RevenantInstallMutant(Class port)
 {
-    Class mutant = objc_allocateClassPair(port, "CharonPOIMutantRequest", 0);
+    Class mutant = objc_allocateClassPair(port, "RevenantPOIMutantRequest", 0);
     if (mutant == Nil) {
         fprintf(stderr, "cannot make a subclass of the port's request\n");
         return Nil;
@@ -25,7 +25,7 @@ static Class CharonInstallMutant(Class port)
     objc_registerClassPair(mutant);
     Method original = class_getInstanceMethod(port, @selector(radius));
     double (^diagonal)(id) = ^double (id self) {
-        MKCoordinateRegion region = ((id<CharonPointsOfInterestRequest>)self).region;
+        MKCoordinateRegion region = ((id<RevenantPointsOfInterestRequest>)self).region;
         double perMetre = MKMapPointsPerMeterAtLatitude(region.center.latitude);
         double halfWidth = (double)MKMapSizeWorld.width * region.span.longitudeDelta / 360.0 / 2.0 / perMetre;
         CLLocationCoordinate2D north = region.center;
@@ -40,12 +40,12 @@ static Class CharonInstallMutant(Class port)
     return mutant;
 }
 
-static const double CharonRadiusBand = 0.01;
-static const double CharonRadiusRelative = 0.01;
+static const double RevenantRadiusBand = 0.01;
+static const double RevenantRadiusRelative = 0.01;
 
-static int CharonFailed = 0;
+static int RevenantFailed = 0;
 
-static void print_case(const char *label, id<CharonPointsOfInterestRequest> request)
+static void print_case(const char *label, id<RevenantPointsOfInterestRequest> request)
 {
     MKCoordinateRegion region = request.region;
     printf("  %s coord=%.6f,%.6f radius=%.3f region=%.6f,%.6f %.6f,%.6f\n", label,
@@ -55,7 +55,7 @@ static void print_case(const char *label, id<CharonPointsOfInterestRequest> requ
 }
 
 static void compare_one(const char *name, const char *direction,
-                        id<CharonPointsOfInterestRequest> host, id<CharonPointsOfInterestRequest> port,
+                        id<RevenantPointsOfInterestRequest> host, id<RevenantPointsOfInterestRequest> port,
                         CLLocationDistance expectedRadius)
 {
     MKCoordinateRegion hostRegion = host.region;
@@ -68,20 +68,20 @@ static void compare_one(const char *name, const char *direction,
                 hostRegion.span.longitudeDelta == portRegion.span.longitudeDelta;
     double difference = fabs(host.radius - port.radius);
     double scale = fabs(host.radius) > 1.0 ? fabs(host.radius) : 1.0;
-    BOOL nearRadius = difference / scale <= CharonRadiusBand;
-    BOOL roundTrip = expectedRadius <= 0.0 || fabs(port.radius - expectedRadius) <= expectedRadius * CharonRadiusRelative;
+    BOOL nearRadius = difference / scale <= RevenantRadiusBand;
+    BOOL roundTrip = expectedRadius <= 0.0 || fabs(port.radius - expectedRadius) <= expectedRadius * RevenantRadiusRelative;
     if (same && nearRadius && roundTrip) {
         printf("compare %-18s %-6s ok (radius %.3f vs %.3f, %.3f%% apart)\n", name, direction,
                host.radius, port.radius, 100.0 * difference / scale);
         return;
     }
-    CharonFailed = 1;
+    RevenantFailed = 1;
     if (!same) {
         printf("compare %-18s %-6s MISMATCH, the port's coordinate or region differs from the host's\n", name, direction);
     }
     if (!nearRadius) {
         printf("compare %-18s %-6s MISMATCH, radius %.3f against the host's %.3f is %.3f%% apart, over the %.1f%% band\n",
-               name, direction, port.radius, host.radius, 100.0 * difference / scale, 100.0 * CharonRadiusBand);
+               name, direction, port.radius, host.radius, 100.0 * difference / scale, 100.0 * RevenantRadiusBand);
     }
     if (!roundTrip) {
         printf("compare %-18s %-6s MISMATCH, the port's own round trip answers %.3f for a circle of %.3f\n",
@@ -93,15 +93,15 @@ int main(int argc, char **argv)
 {
     @autoreleasepool {
         const char *which = argc > 1 ? argv[1] : "both";
-        const char *dylib = getenv("CHARON_PORT_DYLIB");
+        const char *dylib = getenv("REVENANT_PORT_DYLIB");
         if (dylib && dlopen(dylib, RTLD_LOCAL) == NULL) {
             fprintf(stderr, "cannot load %s: %s\n", dylib, dlerror());
             return 2;
         }
         Class host = NSClassFromString(@"MKLocalPointsOfInterestRequest");
-        Class port = NSClassFromString(@"charonHost_MKLocalPointsOfInterestRequest");
-        if (getenv("CHARON_MUTANT") != NULL) {
-            port = CharonInstallMutant(port);
+        Class port = NSClassFromString(@"revenantHost_MKLocalPointsOfInterestRequest");
+        if (getenv("REVENANT_MUTANT") != NULL) {
+            port = RevenantInstallMutant(port);
         }
         if (host == Nil || port == Nil) {
             fprintf(stderr, "which=%s host=%s port=%s: the comparison needs both classes live\n", which,
@@ -122,36 +122,36 @@ int main(int argc, char **argv)
                                                                                           cases[i].lonSpan));
             printf("case %s circle %.3f m, region %.4f,%.4f deg\n", cases[i].name, cases[i].radius,
                    cases[i].latSpan, cases[i].lonSpan);
-            id<CharonPointsOfInterestRequest> hostCircle = [[host alloc] initWithCenterCoordinate:centre
+            id<RevenantPointsOfInterestRequest> hostCircle = [[host alloc] initWithCenterCoordinate:centre
                                                                                             radius:cases[i].radius];
-            id<CharonPointsOfInterestRequest> portCircle = [[port alloc] initWithCenterCoordinate:centre
+            id<RevenantPointsOfInterestRequest> portCircle = [[port alloc] initWithCenterCoordinate:centre
                                                                                             radius:cases[i].radius];
             print_case("host", hostCircle);
             print_case("port", portCircle);
             compare_one(cases[i].name, "circle", hostCircle, portCircle, cases[i].radius);
 
-            id<CharonPointsOfInterestRequest> hostRegion = [[host alloc] initWithCoordinateRegion:region];
-            id<CharonPointsOfInterestRequest> portRegion = [[port alloc] initWithCoordinateRegion:region];
+            id<RevenantPointsOfInterestRequest> hostRegion = [[host alloc] initWithCoordinateRegion:region];
+            id<RevenantPointsOfInterestRequest> portRegion = [[port alloc] initWithCoordinateRegion:region];
             print_case("host", hostRegion);
             print_case("port", portRegion);
             compare_one(cases[i].name, "region", hostRegion, portRegion, 0.0);
 
-            id<CharonPointsOfInterestRequest> hostBack = [[host alloc] initWithCoordinateRegion:hostCircle.region];
-            id<CharonPointsOfInterestRequest> portBack = [[port alloc] initWithCoordinateRegion:portCircle.region];
+            id<RevenantPointsOfInterestRequest> hostBack = [[host alloc] initWithCoordinateRegion:hostCircle.region];
+            id<RevenantPointsOfInterestRequest> portBack = [[port alloc] initWithCoordinateRegion:portCircle.region];
             print_case("host-back", hostBack);
             print_case("port-back", portBack);
             compare_one(cases[i].name, "back", hostBack, portBack, cases[i].radius);
 
-            id<CharonPointsOfInterestRequest> copied = [portCircle copy];
+            id<RevenantPointsOfInterestRequest> copied = [portCircle copy];
             printf("  copy  radius=%.3f coord=%.6f,%.6f %s\n", copied.radius, copied.coordinate.latitude,
                    copied.coordinate.longitude, copied == portCircle ? "SHARED" : "distinct");
             if (copied == portCircle || copied.radius != portCircle.radius) {
-                CharonFailed = 1;
+                RevenantFailed = 1;
                 printf("compare %-18s copy    MISMATCH, the copy is not the same circle\n", cases[i].name);
             }
         }
-        printf("%s\n", CharonFailed == 0 ? "VERDICT: the port's request answers the host's own values"
+        printf("%s\n", RevenantFailed == 0 ? "VERDICT: the port's request answers the host's own values"
                                         : "VERDICT: FAILED");
     }
-    return CharonFailed;
+    return RevenantFailed;
 }

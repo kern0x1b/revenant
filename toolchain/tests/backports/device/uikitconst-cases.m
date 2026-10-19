@@ -53,7 +53,7 @@ void uikitconst_run(UIKitConstantsRecorder record)
     record(@"UIActivityTypeAirDrop.isKindOfString", [UIActivityTypeAirDrop isKindOfClass:[NSString class]] ? @"yes" : @"no");
 }
 
-static UIAccessibilityCustomRotorItemResult *CharonRotorResult(id element)
+static UIAccessibilityCustomRotorItemResult *RevenantRotorResult(id element)
 {
     return [[UIAccessibilityCustomRotorItemResult alloc] initWithTargetElement:element targetRange:nil];
 }
@@ -99,7 +99,7 @@ void uikitrotor_run(UIKitConstantsRecorder record)
     record(@"rotor.plainSystemRotorType", plain.systemRotorType == UIAccessibilityCustomSystemRotorTypeNone ? @"none" : @"other");
 
     NSObject *target = [[NSObject alloc] init];
-    UIAccessibilityCustomRotorItemResult *result = CharonRotorResult(target);
+    UIAccessibilityCustomRotorItemResult *result = RevenantRotorResult(target);
     record(@"result.targetElementIsSame", result.targetElement == target ? @"same" : @"other");
     record(@"result.targetRange", result.targetRange ? @"set" : @"nil");
     result.targetElement = nil;

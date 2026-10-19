@@ -18,7 +18,7 @@ public struct WidgetInfo: Hashable, Identifiable, CustomStringConvertible, Custo
 
     public func widgetConfigurationIntent<Intent>(of type: Intent.Type = Intent.self) -> Intent?
         where Intent: WidgetConfigurationIntent {
-        return CharonWidgetRegistry.shared.intent(for: type, kind: kind, configuration: configuration)
+        return RevenantWidgetRegistry.shared.intent(for: type, kind: kind, configuration: configuration)
     }
 
     public var description: String { return "\(kind)@\(id)" }
@@ -40,7 +40,7 @@ public struct ControlInfo: Identifiable {
 
     public func configurationIntent<Intent>(of type: Intent.Type = Intent.self) -> Intent?
         where Intent: WidgetConfigurationIntent {
-        return CharonWidgetRegistry.shared.intent(for: type, kind: kind, configuration: nil)
+        return RevenantWidgetRegistry.shared.intent(for: type, kind: kind, configuration: nil)
     }
 }
 
@@ -55,32 +55,32 @@ public final class WidgetCenter {
         public init() {}
     }
 
-    public var currentPushInfo: WidgetPushInfo? { return CharonWidgetRegistry.shared.currentPushInfo }
+    public var currentPushInfo: WidgetPushInfo? { return RevenantWidgetRegistry.shared.currentPushInfo }
 
     public init() {}
 
     public func reloadAllTimelines() {
-        CharonWidgetRegistry.shared.reloadAll()
+        RevenantWidgetRegistry.shared.reloadAll()
     }
 
     public func reloadTimelines(ofKind kind: String) {
-        CharonWidgetRegistry.shared.reload(kind: kind)
+        RevenantWidgetRegistry.shared.reload(kind: kind)
     }
 
     public func currentConfigurations() async throws -> [WidgetInfo] {
-        return CharonWidgetRegistry.shared.configurations()
+        return RevenantWidgetRegistry.shared.configurations()
     }
 
     public func getCurrentConfigurations(_ completion: @escaping @Sendable (Result<[WidgetInfo], any Error>) -> Void) {
-        completion(.success(CharonWidgetRegistry.shared.configurations()))
+        completion(.success(RevenantWidgetRegistry.shared.configurations()))
     }
 
     public func invalidateConfigurationRecommendations() {
-        CharonWidgetRegistry.shared.invalidateRecommendations()
+        RevenantWidgetRegistry.shared.invalidateRecommendations()
     }
 
     public func invalidateRelevance(ofKind kind: String) {
-        CharonWidgetRegistry.shared.invalidateRelevance(ofKind: kind)
+        RevenantWidgetRegistry.shared.invalidateRelevance(ofKind: kind)
     }
 }
 
@@ -89,9 +89,9 @@ public final class ControlCenter {
 
     private init() {}
 
-    public static func currentControls() -> [ControlInfo] { return CharonWidgetRegistry.shared.controls() }
+    public static func currentControls() -> [ControlInfo] { return RevenantWidgetRegistry.shared.controls() }
 
-    public static func reloadAllControls() { CharonWidgetRegistry.shared.reloadAll() }
+    public static func reloadAllControls() { RevenantWidgetRegistry.shared.reloadAll() }
 
-    public static func reloadControls(ofKind kind: String) { CharonWidgetRegistry.shared.reload(kind: kind) }
+    public static func reloadControls(ofKind kind: String) { RevenantWidgetRegistry.shared.reload(kind: kind) }
 }

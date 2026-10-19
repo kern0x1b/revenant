@@ -16,7 +16,7 @@
 #include <cstdint>
 #include <string_view>
 
-namespace shade::protocol_vproc {
+namespace emulator::protocol_vproc {
 
 struct Contract {
     std::string_view name;

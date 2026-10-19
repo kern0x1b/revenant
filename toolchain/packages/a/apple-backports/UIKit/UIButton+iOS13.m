@@ -1,11 +1,11 @@
-#import "CharonSymbols.h"
+#import "RevenantSymbols.h"
 #import <objc/runtime.h>
 
 #pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
 
-static const char charon_configurations_key;
+static const char revenant_configurations_key;
 
-@implementation UIButton (CharonThirteen)
+@implementation UIButton (RevenantThirteen)
 
 + (instancetype)systemButtonWithImage:(UIImage *)image target:(id)target action:(SEL)action
 {
@@ -17,15 +17,15 @@ static const char charon_configurations_key;
 
 - (UIImageSymbolConfiguration *)preferredSymbolConfigurationForImageInState:(UIControlState)state
 {
-    return [objc_getAssociatedObject(self, &charon_configurations_key) objectForKey:@(state)];
+    return [objc_getAssociatedObject(self, &revenant_configurations_key) objectForKey:@(state)];
 }
 
 - (void)setPreferredSymbolConfiguration:(UIImageSymbolConfiguration *)configuration forImageInState:(UIControlState)state
 {
-    NSMutableDictionary *held = objc_getAssociatedObject(self, &charon_configurations_key);
+    NSMutableDictionary *held = objc_getAssociatedObject(self, &revenant_configurations_key);
     if (!held) {
         held = [NSMutableDictionary dictionary];
-        objc_setAssociatedObject(self, &charon_configurations_key, held, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+        objc_setAssociatedObject(self, &revenant_configurations_key, held, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     }
     if (configuration)
         held[@(state)] = configuration;

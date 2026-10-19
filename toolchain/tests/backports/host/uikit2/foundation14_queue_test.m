@@ -4,7 +4,7 @@
 
 static NSString *host_selector(NSString *name)
 {
-    return [@"charonHost" stringByAppendingString:[[name substringToIndex:1].uppercaseString stringByAppendingString:[name substringFromIndex:1]]];
+    return [@"revenantHost" stringByAppendingString:[[name substringToIndex:1].uppercaseString stringByAppendingString:[name substringFromIndex:1]]];
 }
 
 static NSMutableArray *events;
@@ -190,9 +190,9 @@ int main(int argc, char **argv)
             }
             if (!same)
                 printf("  scenario %d\n     port   %s\n     system %s\n", which, a.UTF8String, b.UTF8String);
-            charon_check(same, [names[which] UTF8String], [NSString stringWithFormat:@"port [%@] system [%@]", a, b]);
+            revenant_check(same, [names[which] UTF8String], [NSString stringWithFormat:@"port [%@] system [%@]", a, b]);
         }
     }
-    printf("checks=%d failures=%d\n", charon_checks, charon_failures);
-    return charon_failures;
+    printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
+    return revenant_failures;
 }

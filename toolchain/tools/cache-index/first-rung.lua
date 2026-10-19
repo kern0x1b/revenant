@@ -5,7 +5,7 @@ local byteorder = import("byteorder", {rootdir = MODULES, anonymous = true})
 local MERGED = "first-rung.tsv.gz"
 
 local function index_dir()
-    return path.join(os.getenv("CHARON_HOME") or path.join(os.getenv("HOME"), ".charon"), "cache-index")
+    return path.join(os.getenv("REVENANT_HOME") or path.join(os.getenv("HOME"), ".revenant"), "cache-index")
 end
 
 local function index_file(release)
@@ -184,7 +184,7 @@ local function self_test()
     check("positive control: a later-rung class", "MTKTextureLoader", "9.0")
     check("positive control: the oldest of two carriers", "PKShippingMethod", "8.0")
     check("positive control: first carried after 10.x", "CIQRCodeDescriptor", "11.0")
-    check("negative control: a nonsense name", "CharonNoSuchNameEverExisted", "NONE")
+    check("negative control: a nonsense name", "RevenantNoSuchNameEverExisted", "NONE")
     local spellings = 0
     for _, name in ipairs({"NSFileManager", "_OBJC_CLASS_$_NSFileManager"}) do
         if have[name] then

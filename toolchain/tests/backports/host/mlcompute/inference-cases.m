@@ -4,7 +4,7 @@
 
 #import "mlcompute-16.h"
 
-void charon_mlcompute_inference_cases(void);
+void revenant_mlcompute_inference_cases(void);
 
 static MLCDevice *inferenceDevice;
 
@@ -77,9 +77,9 @@ static NSString *valuesIn(MLCTensorData *data)
     return [NSString stringWithFormat:@"%g %g %g %g", values[0], values[1], values[2], values[3]];
 }
 
-void charon_mlcompute_inference_cases(void);
+void revenant_mlcompute_inference_cases(void);
 
-void charon_mlcompute_inference_cases(void)
+void revenant_mlcompute_inference_cases(void)
 {
     @autoreleasepool {
         inferenceDevice = [MLCDevice cpuDevice];
@@ -236,11 +236,11 @@ void charon_mlcompute_inference_cases(void)
         [training synchronizeUpdates];
         key(@"training synchronizeUpdates", @"called");
 
-        MLCGraph *freshInference = (MLCGraph *)CharonNew([MLCInferenceGraph class]);
+        MLCGraph *freshInference = (MLCGraph *)RevenantNew([MLCInferenceGraph class]);
         key(@"inference init", freshInference ? @"an object" : @"(nil)");
         key(@"inference init layers", [NSString stringWithFormat:@"%lu", (unsigned long)freshInference.layers.count]);
         key(@"inference init device", freshInference.device ? @"a device" : @"(nil)");
-        MLCGraph *freshTraining = (MLCGraph *)CharonNew([MLCTrainingGraph class]);
+        MLCGraph *freshTraining = (MLCGraph *)RevenantNew([MLCTrainingGraph class]);
         key(@"training init", freshTraining ? @"an object" : @"(nil)");
         key(@"training init layers", [NSString stringWithFormat:@"%lu", (unsigned long)freshTraining.layers.count]);
         key(@"training init device", freshTraining.device ? @"a device" : @"(nil)");

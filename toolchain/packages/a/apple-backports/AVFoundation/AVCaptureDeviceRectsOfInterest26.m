@@ -1,23 +1,23 @@
-#import "CharonAVCaptureDeviceRectsOfInterest26.h"
+#import "RevenantAVCaptureDeviceRectsOfInterest26.h"
 
-@interface AVCaptureDevice (CharonReleaseLock)
+@interface AVCaptureDevice (RevenantReleaseLock)
 - (BOOL)isLockedForConfiguration;
 @end
 
-static void charon_rect_refused_without_lock(NSString *name)
+static void revenant_rect_refused_without_lock(NSString *name)
 {
     [NSException raise:NSGenericException
                 format:@"%@ cannot be set without first successfully gaining exclusive ownership of the device"
                        @" using -lockForConfiguration:", name];
 }
 
-static void charon_rect_refused_unsupported(NSString *property, NSString *support)
+static void revenant_rect_refused_unsupported(NSString *property, NSString *support)
 {
     [NSException raise:NSInvalidArgumentException
                 format:@"*** -[AVCaptureDevice set%@:] Not supported - use -is%@", property, support];
 }
 
-@implementation AVCaptureDevice (CharonCaptureDeviceRectsOfInterest26)
+@implementation AVCaptureDevice (RevenantCaptureDeviceRectsOfInterest26)
 
 - (BOOL)isFocusRectOfInterestSupported
 {
@@ -42,8 +42,8 @@ static void charon_rect_refused_unsupported(NSString *property, NSString *suppor
 - (void)setFocusRectOfInterest:(CGRect)focusRectOfInterest
 {
     if (![self isLockedForConfiguration])
-        charon_rect_refused_without_lock(@"focusRectOfInterest");
-    charon_rect_refused_unsupported(@"FocusRectOfInterest", @"FocusRectOfInterestSupported");
+        revenant_rect_refused_without_lock(@"focusRectOfInterest");
+    revenant_rect_refused_unsupported(@"FocusRectOfInterest", @"FocusRectOfInterestSupported");
 }
 
 - (BOOL)isExposureRectOfInterestSupported
@@ -69,8 +69,8 @@ static void charon_rect_refused_unsupported(NSString *property, NSString *suppor
 - (void)setExposureRectOfInterest:(CGRect)exposureRectOfInterest
 {
     if (![self isLockedForConfiguration])
-        charon_rect_refused_without_lock(@"exposureRectOfInterest");
-    charon_rect_refused_unsupported(@"ExposureRectOfInterest", @"ExposureRectOfInterestSupported");
+        revenant_rect_refused_without_lock(@"exposureRectOfInterest");
+    revenant_rect_refused_unsupported(@"ExposureRectOfInterest", @"ExposureRectOfInterestSupported");
 }
 
 @end

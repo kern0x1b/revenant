@@ -8,7 +8,7 @@ local LOGS = {
     springboard = {
         "[control] ready; use help for commands",
         "[display] frame=1 visible-pixels=11404",
-        "[process] spawn-setexec pid=11 parent=1 suspended=0 /usr/libexec/charon-runner argv=\"/usr/libexec/charon-runner\",\"30\",\"/usr/libexec/tool\"",
+        "[process] spawn-setexec pid=11 parent=1 suspended=0 /usr/libexec/revenant-runner argv=\"/usr/libexec/revenant-runner\",\"30\",\"/usr/libexec/tool\"",
         "[process] spawn-setexec pid=63 parent=1 suspended=0 /System/Library/CoreServices/SpringBoard.app/SpringBoard argv=\"/System/Library/CoreServices/SpringBoard.app/SpringBoard\"",
         "[process] spawn parent=11 child=68 suspended=0 /usr/libexec/tool argv=\"/usr/libexec/tool\"",
         "[cpu] fatal pid=68 cpu=0 pc=0x2f10 lr=0x2f01 fault=0x0 access=0x1 size=0x4 sp=0x2fffef00 cpsr=0x30",
@@ -256,7 +256,7 @@ local function runner_job(emulator, folder, found)
         table.insert(found, "the runner's job holds the deadline and every argument verbatim, each ended by a NUL")
     end
     local launch = emulator.runner_launch()
-    if launch ~= "bsexec .. /usr/libexec/charon-runner --job /private/var/charon/job\n" then
+    if launch ~= "bsexec .. /usr/libexec/revenant-runner --job /private/var/revenant/job\n" then
         table.insert(found, "launchd.conf starts the runner on its job file, in words launchctl splits on whitespace: " .. launch)
     end
     local job = path.join(folder, "job.plist")
@@ -266,21 +266,21 @@ local function runner_job(emulator, folder, found)
         return
     end
     local listed = os.iorunv("plutil", {"-convert", "json", "-o", "-", job})
-    if not listed:find('"--job"', 1, true) or not listed:find("private\\/var\\/charon\\/job", 1, true) then
+    if not listed:find('"--job"', 1, true) or not listed:find("private\\/var\\/revenant\\/job", 1, true) then
         table.insert(found, "the runner's plist starts it on its job file: " .. listed)
     end
     for _, case in ipairs({{release = "6.1.3", conf = true}, {release = "3.0", conf = true}, {release = "7.1.2", conf = false}}) do
         local rootfs = path.join(folder, "rootfs-" .. case.release)
         local guest = path.join(folder, "guest")
         os.mkdir(path.join(guest, "usr", "libexec"))
-        io.writefile(path.join(guest, "usr", "libexec", "charon-runner"), "")
+        io.writefile(path.join(guest, "usr", "libexec", "revenant-runner"), "")
         os.mkdir(path.join(rootfs, "private", "etc"))
         os.mkdir(path.join(rootfs, "System", "Library", "LaunchDaemons"))
         io.writefile(path.join(rootfs, "private", "etc", "launchd.conf"), "setenv TZ UTC")
         emulator.install_runner(rootfs, guest, {"/bin/true"}, 30, case.release)
         emulator.install_runner(rootfs, guest, {"/bin/true"}, 30, case.release)
         local conf = io.readfile(path.join(rootfs, "private", "etc", "launchd.conf"))
-        local plist = os.isfile(path.join(rootfs, "System", "Library", "LaunchDaemons", "org.charon.emulator.runner.plist"))
+        local plist = os.isfile(path.join(rootfs, "System", "Library", "LaunchDaemons", "org.revenant.emulator.runner.plist"))
         local expected = case.conf and "setenv TZ UTC\n" .. emulator.runner_launch() or "setenv TZ UTC"
         if conf ~= expected or plist == case.conf then
             table.insert(found, "iOS " .. case.release .. " starts the runner from " .. (case.conf and "launchd.conf, once, keeping what it held" or "its plist") .. ": " .. conf)
@@ -306,7 +306,7 @@ local function choice(emulator, found)
     end
     local refused = fixtures.refusal(function () emulator.choose(devices, emulated, {device = "iPad3,1", architecture = "armv7", release = "6.0"}) end)
     if not refused or not refused:find("no profile for iPad3,1", 1, true) then
-        table.insert(found, "a device Shade has no profile for must be refused, not replaced by another: " .. tostring(refused))
+        table.insert(found, "a device the emulator has no profile for must be refused, not replaced by another: " .. tostring(refused))
     end
     refused = fixtures.refusal(function () emulator.choose(devices, emulated, {architecture = "armv7", release = "8.0"}) end)
     if not refused or not refused:find("release 8.0 or later", 1, true) then
@@ -362,7 +362,7 @@ local function load_step(emulator, found)
             table.insert(found, string.format("%s %s runs in a slot as %s, not %s", case[1][1], table.concat(case[1][2], " "), case[2], given))
         end
     end
-    local slot = emulator.acquire({folder = path.join(os.tmpdir(), "charon-slot-test-" .. os.getpid()), count = 1, patience = 0})
+    local slot = emulator.acquire({folder = path.join(os.tmpdir(), "revenant-slot-test-" .. os.getpid()), count = 1, patience = 0})
     if not slot then
         table.insert(found, "a run with no patience still takes a slot")
     else
@@ -377,7 +377,7 @@ local function concurrency(folder, modules, found)
     io.writefile(path.join(firmware, "System", "Library", "CoreServices", "SystemVersion.plist"), "firmware")
     os.mkdir(path.join(firmware, "private", "var", "mobile"))
     local golden = script(folder, "golden", [[
-    local rootfs = emulator.golden({root = root, identifier = "iPhone3,1", version = "6.0", build = "10A403", shade_hash = "fixture", deadline = 30,
+    local rootfs = emulator.golden({root = root, identifier = "iPhone3,1", version = "6.0", build = "10A403", emulator_hash = "fixture", deadline = 30,
                                     firmware = extra, boot = function (opt)
         io.writefile(path.join(root, "boot-" .. os.getpid()), "booted")
         os.sleep(3000)
@@ -479,7 +479,7 @@ end
 
 local function queue_step(emulator, folder, opt, found)
     local work = path.join(folder, "queue")
-    local envs = {XMAKE_GLOBALDIR = path.join(work, "store"), CHARON_HOME = path.join(work, "home")}
+    local envs = {XMAKE_GLOBALDIR = path.join(work, "store"), REVENANT_HOME = path.join(work, "home")}
     os.mkdir(work)
     local shared = path.join(os.getenv("HOME"), ".xmake", "addons")
     local before = os.exists(shared) and os.files(shared) or {}
@@ -523,7 +523,7 @@ local function naming_step(emulator, found)
 end
 
 local function runner_source(opt, found)
-    local source = io.readfile(path.join(opt.modules, "..", "packages", "e", "emulator-guest", "src", "charon-runner.c"))
+    local source = io.readfile(path.join(opt.modules, "..", "packages", "e", "emulator-guest", "src", "revenant-runner.c"))
     if source:find("CFPropertyListCreateWithStream", 1, true) then
         table.insert(found, "the runner reads SystemVersion.plist with a function iOS 3 does not have: CFPropertyListCreateWithStream arrived in 4.0, CFPropertyListCreateFromStream is there from 2.0")
     end
@@ -778,8 +778,8 @@ local function launch_step(emulator, folder, found)
         end
     end
     local command = table.concat(emulator.launch_command("org.example.probe", 90), " ")
-    if command ~= "/usr/libexec/charon-sblaunch --wait 90 --stdout /private/var/charon/app.stdout --stderr /private/var/charon/app.stderr org.example.probe" then
-        table.insert(found, "launch has charon-sblaunch wait and keep the application's output beside the verdict: " .. command)
+    if command ~= "/usr/libexec/revenant-sblaunch --wait 90 --stdout /private/var/revenant/app.stdout --stderr /private/var/revenant/app.stderr org.example.probe" then
+        table.insert(found, "launch has revenant-sblaunch wait and keep the application's output beside the verdict: " .. command)
     end
     local scanned = {}
     for _, line in ipairs({"[control] snapshot=/run/app-0.png frame=12", "[transition] input-complete id=3 kind=gesture completed-ns=1",
@@ -807,7 +807,7 @@ local function launch_step(emulator, folder, found)
         local _, sent, tick = driven()
         local state = {}
         tick(state)
-        io.writefile(path.join(results, "test.stdout"), "charon-sblaunch: 21.5 s: SpringBoard refused with 3 (device locked), screen=passcode\n")
+        io.writefile(path.join(results, "test.stdout"), "revenant-sblaunch: 21.5 s: SpringBoard refused with 3 (device locked), screen=passcode\n")
         tick(state)
         state.ready = true
         tick(state)
@@ -818,7 +818,7 @@ local function launch_step(emulator, folder, found)
     local driver, sent, tick = driven()
     local state = {}
     tick(state)
-    io.writefile(path.join(results, "test.stdout"), "charon-sblaunch: 0.0 s: waiting for SpringBoard\ncharon-sblaunch: 21.5 s: SpringBoard refused with 3 (device locked), screen=locked\n")
+    io.writefile(path.join(results, "test.stdout"), "revenant-sblaunch: 0.0 s: waiting for SpringBoard\nrevenant-sblaunch: 21.5 s: SpringBoard refused with 3 (device locked), screen=locked\n")
     tick(state)
     state.ready = true
     tick(state)
@@ -878,7 +878,7 @@ local function launch_step(emulator, folder, found)
     driver, sent, tick = driven()
     json.savefile(path.join(results, "verdict.json"), {test = {spawned = 1, exit = 4}})
     if not tick({ready = true}) or driver.failure ~= "refused" then
-        table.insert(found, "a launch charon-sblaunch could not finish ends the run as refused")
+        table.insert(found, "a launch revenant-sblaunch could not finish ends the run as refused")
     end
     driver, sent, tick = driven()
     json.savefile(path.join(results, "verdict.json"), {test = {spawned = 1, exit = 0}})
@@ -903,7 +903,7 @@ local function launch_step(emulator, folder, found)
         end
         json.savefile(path.join(results, "verdict.json"),
                       {machine = "iPhone4,1", system = "6.1.3 (10B329)", uikit = 1, UIApplication = 1, runner_seconds = 17.924,
-                       test = {path = "/usr/libexec/charon-sblaunch", spawned = 1, spawn_error = 0, timed_out = 0, output = 1,
+                       test = {path = "/usr/libexec/revenant-sblaunch", spawned = 1, spawn_error = 0, timed_out = 0, output = 1,
                                seconds = 17.843, exit = 0}})
         local state = {ready = true, programs = {["90"] = "/Applications/Probe.app/Probe"}}
         tick(state)

@@ -1,6 +1,6 @@
 import Foundation
 
-public final class Activity<Attributes>: Identifiable, CharonRegisteredActivity where Attributes: ActivityAttributes {
+public final class Activity<Attributes>: Identifiable, RevenantRegisteredActivity where Attributes: ActivityAttributes {
     public typealias ContentState = Attributes.ContentState
     public typealias ID = String
 
@@ -12,7 +12,7 @@ public final class Activity<Attributes>: Identifiable, CharonRegisteredActivity 
     private var storedContent: ActivityContent<ContentState>
     public private(set) var pushToken: Data?
 
-    public static var activities: [Activity<Attributes>] { return CharonActivityRegistry.shared.activities(of: Attributes.self) }
+    public static var activities: [Activity<Attributes>] { return RevenantActivityRegistry.shared.activities(of: Attributes.self) }
 
     public static var activityUpdates: ActivityUpdates { return ActivityUpdates() }
 
@@ -31,16 +31,16 @@ public final class Activity<Attributes>: Identifiable, CharonRegisteredActivity 
 
     public static func request(attributes: Attributes, content: ActivityContent<ContentState>,
                                pushType: PushType? = nil) throws -> Activity<Attributes> {
-        guard CharonActivitySupport.shared.areActivitiesEnabled else {
+        guard RevenantActivitySupport.shared.areActivitiesEnabled else {
             throw ActivityAuthorizationError.unsupported
         }
-        return try CharonActivityRegistry.shared.register(attributes: attributes, content: content)
+        return try RevenantActivityRegistry.shared.register(attributes: attributes, content: content)
     }
 
     public static func request(attributes: Attributes, content: ActivityContent<ContentState>,
                                pushType: PushType? = nil, style: ActivityStyle) throws -> Activity<Attributes> {
         let activity = try request(attributes: attributes, content: content, pushType: pushType)
-        CharonActivityRegistry.shared.setStyle(style, for: activity)
+        RevenantActivityRegistry.shared.setStyle(style, for: activity)
         return activity
     }
 
@@ -48,7 +48,7 @@ public final class Activity<Attributes>: Identifiable, CharonRegisteredActivity 
                                pushType: PushType? = nil, style: ActivityStyle,
                                alertConfiguration: AlertConfiguration, start: Date) throws -> Activity<Attributes> {
         let activity = try request(attributes: attributes, content: content, pushType: pushType, style: style)
-        CharonActivityRegistry.shared.setAlert(alertConfiguration, starting: start, for: activity)
+        RevenantActivityRegistry.shared.setAlert(alertConfiguration, starting: start, for: activity)
         return activity
     }
 
@@ -59,7 +59,7 @@ public final class Activity<Attributes>: Identifiable, CharonRegisteredActivity 
                             alertConfiguration: alertConfiguration, start: startDate)
     }
 
-    public var charonActivityState: ActivityState { return storedState_ }
+    public var revenantActivityState: ActivityState { return storedState_ }
 
     public var activityState: ActivityState {
         guard storedState_ != .ended && storedState_ != .dismissed else { return storedState_ }
@@ -79,7 +79,7 @@ public final class Activity<Attributes>: Identifiable, CharonRegisteredActivity 
 
     public var pushTokenUpdates: PushTokenUpdates { return PushTokenUpdates(activity: self, startToken: false) }
 
-    public static var pushToStartToken: Data? { return CharonActivityRegistry.shared.pushToStartToken(of: Attributes.self) }
+    public static var pushToStartToken: Data? { return RevenantActivityRegistry.shared.pushToStartToken(of: Attributes.self) }
 
     public static var pushToStartTokenUpdates: PushTokenUpdates {
         return PushTokenUpdates(activity: nil, startToken: true)
@@ -93,7 +93,7 @@ public final class Activity<Attributes>: Identifiable, CharonRegisteredActivity 
         storedContent = content
         storedState = content.state
         if storedState_ == .pending { storedState_ = .active }
-        CharonActivityRegistry.shared.didUpdate(activity: self)
+        RevenantActivityRegistry.shared.didUpdate(activity: self)
     }
 
     public func update(using contentState: ContentState, alertConfiguration: AlertConfiguration? = nil) async {
@@ -103,14 +103,14 @@ public final class Activity<Attributes>: Identifiable, CharonRegisteredActivity 
     public func update(_ content: ActivityContent<ContentState>, alertConfiguration: AlertConfiguration? = nil) async {
         await update(content)
         if let alertConfiguration = alertConfiguration {
-            CharonActivityRegistry.shared.setAlert(alertConfiguration, starting: Date(), for: self)
+            RevenantActivityRegistry.shared.setAlert(alertConfiguration, starting: Date(), for: self)
         }
     }
 
     public func update(_ content: ActivityContent<ContentState>, alertConfiguration: AlertConfiguration? = nil,
                        timestamp: Date) async {
         await update(content, alertConfiguration: alertConfiguration)
-        CharonActivityRegistry.shared.didPush(self, at: timestamp)
+        RevenantActivityRegistry.shared.didPush(self, at: timestamp)
     }
 
     public func end(using contentState: ContentState? = nil,
@@ -122,13 +122,13 @@ public final class Activity<Attributes>: Identifiable, CharonRegisteredActivity 
                      dismissalPolicy: ActivityUIDismissalPolicy = .default) async {
         if let content = content { await update(content) }
         storedState_ = .ended
-        CharonActivityRegistry.shared.didEnd(activity: self, dismissalPolicy: dismissalPolicy)
+        RevenantActivityRegistry.shared.didEnd(activity: self, dismissalPolicy: dismissalPolicy)
     }
 
     public func end(_ content: ActivityContent<ContentState>?, dismissalPolicy: ActivityUIDismissalPolicy = .default,
                      timestamp: Date) async {
         await end(content, dismissalPolicy: dismissalPolicy)
-        CharonActivityRegistry.shared.didEnd(activity: self, dismissalPolicy: dismissalPolicy, at: timestamp)
+        RevenantActivityRegistry.shared.didEnd(activity: self, dismissalPolicy: dismissalPolicy, at: timestamp)
     }
 
     public struct ActivityUpdates: AsyncSequence {
@@ -233,7 +233,7 @@ public final class Activity<Attributes>: Identifiable, CharonRegisteredActivity 
             public mutating func next() async -> Data? {
                 guard !sent else { return nil }
                 sent = true
-                return startToken ? CharonActivityRegistry.shared.pushToStartToken(of: Attributes.self) : activity?.pushToken
+                return startToken ? RevenantActivityRegistry.shared.pushToStartToken(of: Attributes.self) : activity?.pushToken
             }
         }
 

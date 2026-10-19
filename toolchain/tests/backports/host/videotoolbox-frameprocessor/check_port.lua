@@ -192,12 +192,12 @@ function main(...)
         fail(failures, string.format("the host printed %d error codes, and SDK 26.2 enumerates 14", code_count))
     end
 
-    local header = path.join(backports, "VideoToolbox", "CharonVideoToolbox.h")
+    local header = path.join(backports, "VideoToolbox", "RevenantVideoToolbox.h")
     local port_codes = numbers_in_header(header)
     for _, name in ipairs(sorted_keys(codes)) do
         local value = codes[name]
         if port_codes[name] ~= value then
-            fail(failures, string.format("%s is %s on the host and %s in CharonVideoToolbox.h",
+            fail(failures, string.format("%s is %s on the host and %s in RevenantVideoToolbox.h",
                 name, tostring(value), tostring(port_codes[name])))
         end
     end
@@ -209,7 +209,7 @@ function main(...)
     end
     if #missing_codes > 0 then
         table.sort(missing_codes)
-        fail(failures, "CharonVideoToolbox.h enumerates none of " .. join(missing_codes))
+        fail(failures, "RevenantVideoToolbox.h enumerates none of " .. join(missing_codes))
     end
 
     local domain_object = path.join(build, "VTFrameProcessorErrors26_0.o")

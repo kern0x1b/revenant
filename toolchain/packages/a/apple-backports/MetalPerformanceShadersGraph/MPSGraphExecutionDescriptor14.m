@@ -1,6 +1,6 @@
-#import "CharonMPSGraph.h"
+#import "RevenantMPSGraph.h"
 
-static void CharonMPSGraphDescriptorWait(NSMutableArray *waited, id<MTLSharedEvent> event, uint64_t value,
+static void RevenantMPSGraphDescriptorWait(NSMutableArray *waited, id<MTLSharedEvent> event, uint64_t value,
                                          NSString *what)
 {
     if (event == nil) {
@@ -11,7 +11,7 @@ static void CharonMPSGraphDescriptorWait(NSMutableArray *waited, id<MTLSharedEve
     [waited addObject:@[event, @(value)]];
 }
 
-static void CharonMPSGraphDescriptorSignal(NSMutableArray *signalled, id<MTLSharedEvent> event,
+static void RevenantMPSGraphDescriptorSignal(NSMutableArray *signalled, id<MTLSharedEvent> event,
                                            MPSGraphExecutionStage stage, uint64_t value, NSString *what)
 {
     if (event == nil) {
@@ -22,7 +22,7 @@ static void CharonMPSGraphDescriptorSignal(NSMutableArray *signalled, id<MTLShar
     [signalled addObject:@[event, @(stage), @(value)]];
 }
 
-static void CharonMPSGraphDescriptorApply(NSMutableArray *waited, NSMutableArray *signalled,
+static void RevenantMPSGraphDescriptorApply(NSMutableArray *waited, NSMutableArray *signalled,
                                           MPSGraphExecutionStage stage, NSString *name)
 {
     for (NSArray *pair in waited) {
@@ -74,19 +74,19 @@ static void CharonMPSGraphDescriptorApply(NSMutableArray *waited, NSMutableArray
 
 - (void)waitForEvent:(id<MTLSharedEvent>)event value:(uint64_t)value
 {
-    CharonMPSGraphDescriptorWait(_waitedEvents, event, value, @"an execution descriptor");
+    RevenantMPSGraphDescriptorWait(_waitedEvents, event, value, @"an execution descriptor");
 }
 
 - (void)signalEvent:(id<MTLSharedEvent>)event
    atExecutionEvent:(MPSGraphExecutionStage)executionStage
               value:(uint64_t)value
 {
-    CharonMPSGraphDescriptorSignal(_signalledEvents, event, executionStage, value, @"an execution descriptor");
+    RevenantMPSGraphDescriptorSignal(_signalledEvents, event, executionStage, value, @"an execution descriptor");
 }
 
-- (void)charon_mps_applyEventsAtStage:(MPSGraphExecutionStage)stage named:(NSString *)name
+- (void)revenant_mps_applyEventsAtStage:(MPSGraphExecutionStage)stage named:(NSString *)name
 {
-    CharonMPSGraphDescriptorApply(_waitedEvents, _signalledEvents, stage, name);
+    RevenantMPSGraphDescriptorApply(_waitedEvents, _signalledEvents, stage, name);
 }
 
 - (NSUInteger)maximumCommandsPerBuffer
@@ -131,20 +131,20 @@ static void CharonMPSGraphDescriptorApply(NSMutableArray *waited, NSMutableArray
 
 - (void)waitForEvent:(id<MTLSharedEvent>)event value:(uint64_t)value
 {
-    CharonMPSGraphDescriptorWait(_waitedEvents, event, value, @"an executable execution descriptor");
+    RevenantMPSGraphDescriptorWait(_waitedEvents, event, value, @"an executable execution descriptor");
 }
 
 - (void)signalEvent:(id<MTLSharedEvent>)event
    atExecutionEvent:(MPSGraphExecutionStage)executionStage
               value:(uint64_t)value
 {
-    CharonMPSGraphDescriptorSignal(_signalledEvents, event, executionStage, value,
+    RevenantMPSGraphDescriptorSignal(_signalledEvents, event, executionStage, value,
                                    @"an executable execution descriptor");
 }
 
-- (void)charon_mps_applyEventsAtStage:(MPSGraphExecutionStage)stage named:(NSString *)name
+- (void)revenant_mps_applyEventsAtStage:(MPSGraphExecutionStage)stage named:(NSString *)name
 {
-    CharonMPSGraphDescriptorApply(_waitedEvents, _signalledEvents, stage, name);
+    RevenantMPSGraphDescriptorApply(_waitedEvents, _signalledEvents, stage, name);
 }
 
 - (id)copyWithZone:(NSZone *)zone

@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-OSStatus CharonHostCMVideoFormatDescriptionGetHEVCParameterSetAtIndex(CMFormatDescriptionRef videoDesc, size_t parameterSetIndex,
+OSStatus RevenantHostCMVideoFormatDescriptionGetHEVCParameterSetAtIndex(CMFormatDescriptionRef videoDesc, size_t parameterSetIndex,
                                                                        const uint8_t **parameterSetPointerOut, size_t *parameterSetSizeOut,
                                                                        size_t *parameterSetCountOut, int *NALUnitHeaderLengthOut);
 
@@ -38,7 +38,7 @@ static void compare(const char *label, CMFormatDescriptionRef description, size_
     int myHeader = 99, theirHeader = 99;
     OSStatus a = CMVideoFormatDescriptionGetHEVCParameterSetAtIndex(description, index,
         (mask & 1) ? &mine : NULL, (mask & 2) ? &mySize : NULL, (mask & 4) ? &myCount : NULL, (mask & 8) ? &myHeader : NULL);
-    OSStatus b = CharonHostCMVideoFormatDescriptionGetHEVCParameterSetAtIndex(description, index,
+    OSStatus b = RevenantHostCMVideoFormatDescriptionGetHEVCParameterSetAtIndex(description, index,
         (mask & 1) ? &theirs : NULL, (mask & 2) ? &theirSize : NULL, (mask & 4) ? &theirCount : NULL, (mask & 8) ? &theirHeader : NULL);
     checks++;
     if (a != b || mySize != theirSize || myCount != theirCount || myHeader != theirHeader || (mine == NULL) != (theirs == NULL)) {

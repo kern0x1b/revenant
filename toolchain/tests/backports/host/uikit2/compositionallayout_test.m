@@ -2,11 +2,11 @@
 #import "check.h"
 #import "compositional-cases.m"
 
-void charon_windowed_run(UIWindow *window);
+void revenant_windowed_run(UIWindow *window);
 
 static void record_expectations(NSArray *answers)
 {
-    const char *path = getenv("CHARON_COMPOSITIONAL_EXPECTATIONS");
+    const char *path = getenv("REVENANT_COMPOSITIONAL_EXPECTATIONS");
     if (!path)
         return;
     NSMutableString *out = [NSMutableString stringWithString:@"static const char *const compositional_expectations[] = {\n"];
@@ -310,9 +310,9 @@ static NSArray *environment_answers(CompositionalKit kit, UIWindow *window)
              @([flat rangeOfString:@"0 - 0.2 0 40 160 40"].location != NSNotFound), @(handled)];
 }
 
-void charon_windowed_run(UIWindow *window)
+void revenant_windowed_run(UIWindow *window)
 {
-    CompositionalKit system = compositional_kit(@""), port = compositional_kit(@"CharonHost");
+    CompositionalKit system = compositional_kit(@""), port = compositional_kit(@"RevenantHost");
     CHECK(port.layout != nil && port.section != nil && port.layout != system.layout, "the port's classes are linked under their host names");
     NSArray *portEnvironment = environment_answers(port, window), *systemEnvironment = environment_answers(system, window);
     NSString *(^head)(NSArray *) = ^NSString *(NSArray *answers) { return [[answers subarrayWithRange:NSMakeRange(0, 4)] componentsJoinedByString:@"|"]; };
@@ -329,12 +329,12 @@ void charon_windowed_run(UIWindow *window)
         NSString *name = [NSString stringWithFormat:@"layout %@", compositional_case_name(index)];
         BOOL same = [actual isEqual:expected];
         all = all && same;
-        charon_check(same, name.UTF8String, first_difference(actual, expected));
+        revenant_check(same, name.UTF8String, first_difference(actual, expected));
     }
-    if (getenv("CHARON_FUZZ_MASK"))
-        fuzz_mask = (unsigned)strtoul(getenv("CHARON_FUZZ_MASK"), NULL, 0);
-    NSUInteger fuzz = getenv("CHARON_FUZZ_ROUNDS") ? (NSUInteger)atoi(getenv("CHARON_FUZZ_ROUNDS")) : 0;
-    NSUInteger only = getenv("CHARON_FUZZ_ONLY") ? (NSUInteger)atoi(getenv("CHARON_FUZZ_ONLY")) : 0;
+    if (getenv("REVENANT_FUZZ_MASK"))
+        fuzz_mask = (unsigned)strtoul(getenv("REVENANT_FUZZ_MASK"), NULL, 0);
+    NSUInteger fuzz = getenv("REVENANT_FUZZ_ROUNDS") ? (NSUInteger)atoi(getenv("REVENANT_FUZZ_ROUNDS")) : 0;
+    NSUInteger only = getenv("REVENANT_FUZZ_ONLY") ? (NSUInteger)atoi(getenv("REVENANT_FUZZ_ONLY")) : 0;
     for (NSUInteger round = only ? only - 1 : 0; round < (only ? only : fuzz); round++) {
         K = system;
         NSString *expected = nil, *actual = nil;
@@ -358,7 +358,7 @@ void charon_windowed_run(UIWindow *window)
             compositional_dump(fuzz_case(round + 1), window);
             name = [NSString stringWithFormat:@"%@ %@ sizes %@ counts %@", name, fuzz_text, NSStringFromCGSize(fuzz_case(round + 1).size), [fuzz_case(round + 1).counts componentsJoinedByString:@","]];
         }
-        charon_check(same, name.UTF8String, first_difference(actual, expected));
+        revenant_check(same, name.UTF8String, first_difference(actual, expected));
     }
     if (all)
         record_expectations(answers);

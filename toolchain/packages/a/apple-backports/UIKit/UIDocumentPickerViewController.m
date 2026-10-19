@@ -1,7 +1,7 @@
 #import <UIKit/UIKit.h>
 #import <MobileCoreServices/MobileCoreServices.h>
-#import "CharonDocumentBrowser.h"
-#import "CharonUTType.h"
+#import "RevenantDocumentBrowser.h"
+#import "RevenantUTType.h"
 
 @implementation UIDocumentPickerViewController {
     UIDocumentPickerMode _documentPickerMode;
@@ -155,12 +155,12 @@
     [super viewDidLoad];
     if (_browser)
         return;
-    UIViewController *root = [[CharonFileLocationsController alloc] initWithPicker:self];
+    UIViewController *root = [[RevenantFileLocationsController alloc] initWithPicker:self];
     _browser = [[UINavigationController alloc] initWithRootViewController:root];
-    NSString *start = [self charon_startFolder];
+    NSString *start = [self revenant_startFolder];
     if (start) {
         NSDictionary *base = nil;
-        for (NSDictionary *location in [self charon_locations]) {
+        for (NSDictionary *location in [self revenant_locations]) {
             NSString *path = location[@"path"];
             BOOL inside = [start isEqualToString:path] || [start hasPrefix:[path hasSuffix:@"/"] ? path : [path stringByAppendingString:@"/"]];
             if (inside && [path length] > [base[@"path"] length])
@@ -177,7 +177,7 @@
             [chain insertObject:floor atIndex:0];
         NSMutableArray *stack = [NSMutableArray arrayWithObject:root];
         for (NSString *path in chain)
-            [stack addObject:[[CharonFileFolderController alloc] initWithPath:path title:[path isEqualToString:floor] ? base[@"title"] : nil picker:self]];
+            [stack addObject:[[RevenantFileFolderController alloc] initWithPath:path title:[path isEqualToString:floor] ? base[@"title"] : nil picker:self]];
         _browser.viewControllers = stack;
     }
     [self addChildViewController:_browser];
@@ -199,27 +199,27 @@
     return [UIDevice currentDevice].userInterfaceIdiom == UIUserInterfaceIdiomPad ? UIModalPresentationFormSheet : UIModalPresentationFullScreen;
 }
 
-- (BOOL)charon_choosesFiles
+- (BOOL)revenant_choosesFiles
 {
     return _documentPickerMode == UIDocumentPickerModeImport || _documentPickerMode == UIDocumentPickerModeOpen;
 }
 
-- (BOOL)charon_allowsMultiple
+- (BOOL)revenant_allowsMultiple
 {
-    return _allowsMultipleSelection && [self charon_choosesFiles];
+    return _allowsMultipleSelection && [self revenant_choosesFiles];
 }
 
-- (BOOL)charon_showsExtensions
+- (BOOL)revenant_showsExtensions
 {
     return _shouldShowFileExtensions;
 }
 
-- (NSString *)charon_destinationTitle
+- (NSString *)revenant_destinationTitle
 {
     return _documentPickerMode == UIDocumentPickerModeMoveToService ? @"Move" : @"Copy";
 }
 
-- (BOOL)charon_acceptsPath:(NSString *)path
+- (BOOL)revenant_acceptsPath:(NSString *)path
 {
     if (!_documentTypes.count)
         return YES;
@@ -234,7 +234,7 @@
     return NO;
 }
 
-- (NSArray<NSDictionary *> *)charon_locations
+- (NSArray<NSDictionary *> *)revenant_locations
 {
     NSMutableArray *locations = [NSMutableArray array];
     NSString *home = NSHomeDirectory();
@@ -254,7 +254,7 @@
     return locations;
 }
 
-- (NSString *)charon_startFolder
+- (NSString *)revenant_startFolder
 {
     NSString *path = _directoryURL.isFileURL ? _directoryURL.path : nil;
     BOOL directory = NO;
@@ -263,12 +263,12 @@
     return nil;
 }
 
-- (UIBarButtonItem *)charon_cancelItem
+- (UIBarButtonItem *)revenant_cancelItem
 {
-    return [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCancel target:self action:@selector(charon_cancel)];
+    return [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCancel target:self action:@selector(revenant_cancel)];
 }
 
-- (void)charon_finish:(NSArray<NSURL *> *)urls
+- (void)revenant_finish:(NSArray<NSURL *> *)urls
 {
     id<UIDocumentPickerDelegate> delegate = _delegate;
     void (^report)(void) = ^{
@@ -283,7 +283,7 @@
         report();
 }
 
-- (void)charon_pickPaths:(NSArray<NSString *> *)paths
+- (void)revenant_pickPaths:(NSArray<NSString *> *)paths
 {
     NSMutableArray *urls = [NSMutableArray array];
     NSFileManager *manager = [NSFileManager defaultManager];
@@ -298,10 +298,10 @@
             [urls addObject:[NSURL fileURLWithPath:path]];
         }
     }
-    [self charon_finish:urls];
+    [self revenant_finish:urls];
 }
 
-- (void)charon_chooseFolder:(NSString *)folder
+- (void)revenant_chooseFolder:(NSString *)folder
 {
     NSMutableArray *urls = [NSMutableArray array];
     NSFileManager *manager = [NSFileManager defaultManager];
@@ -315,10 +315,10 @@
         if (ok)
             [urls addObject:[NSURL fileURLWithPath:target]];
     }
-    [self charon_finish:urls];
+    [self revenant_finish:urls];
 }
 
-- (void)charon_cancel
+- (void)revenant_cancel
 {
     id<UIDocumentPickerDelegate> delegate = _delegate;
     void (^report)(void) = ^{

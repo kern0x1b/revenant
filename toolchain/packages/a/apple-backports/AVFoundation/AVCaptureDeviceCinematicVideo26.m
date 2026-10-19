@@ -1,9 +1,9 @@
-#import "CharonAVCaptureDeviceCinematicVideo26.h"
+#import "RevenantAVCaptureDeviceCinematicVideo26.h"
 #import <objc/runtime.h>
 
-static const char charon_cinematic_video_enabled_key;
+static const char revenant_cinematic_video_enabled_key;
 
-static void charon_cinematic_focus_refused(SEL selector)
+static void revenant_cinematic_focus_refused(SEL selector)
 {
     [NSException raise:NSInvalidArgumentException
                 format:@"*** -[AVCaptureDevice %@] Not supported - use"
@@ -11,21 +11,21 @@ static void charon_cinematic_focus_refused(SEL selector)
                        NSStringFromSelector(selector)];
 }
 
-@implementation AVCaptureDevice (CharonCaptureDeviceCinematicVideo26)
+@implementation AVCaptureDevice (RevenantCaptureDeviceCinematicVideo26)
 
 - (NSSet<AVCaptureSceneMonitoringStatus> *)cinematicVideoCaptureSceneMonitoringStatuses
 {
     return [NSSet set];
 }
 
-#define CHARON_CINEMATIC_VIDEO_FORMAT_SUPPORTS(device) \
+#define REVENANT_CINEMATIC_VIDEO_FORMAT_SUPPORTS(device) \
     ({ id format = [(device) activeFormat]; format ? [format isCinematicVideoCaptureSupported] : NO; })
 
 - (void)setCinematicVideoTrackingFocusWithDetectedObjectID:(NSInteger)detectedObjectID
                                                 focusMode:(AVCaptureCinematicVideoFocusMode)focusMode API_AVAILABLE(ios(26.0))
 {
-    if (!CHARON_CINEMATIC_VIDEO_FORMAT_SUPPORTS(self)) {
-        charon_cinematic_focus_refused(_cmd);
+    if (!REVENANT_CINEMATIC_VIDEO_FORMAT_SUPPORTS(self)) {
+        revenant_cinematic_focus_refused(_cmd);
         return;
     }
 }
@@ -33,8 +33,8 @@ static void charon_cinematic_focus_refused(SEL selector)
 - (void)setCinematicVideoTrackingFocusAtPoint:(CGPoint)point
                                     focusMode:(AVCaptureCinematicVideoFocusMode)focusMode API_AVAILABLE(ios(26.0))
 {
-    if (!CHARON_CINEMATIC_VIDEO_FORMAT_SUPPORTS(self)) {
-        charon_cinematic_focus_refused(_cmd);
+    if (!REVENANT_CINEMATIC_VIDEO_FORMAT_SUPPORTS(self)) {
+        revenant_cinematic_focus_refused(_cmd);
         return;
     }
 }
@@ -42,15 +42,15 @@ static void charon_cinematic_focus_refused(SEL selector)
 - (void)setCinematicVideoFixedFocusAtPoint:(CGPoint)point
                                  focusMode:(AVCaptureCinematicVideoFocusMode)focusMode API_AVAILABLE(ios(26.0))
 {
-    if (!CHARON_CINEMATIC_VIDEO_FORMAT_SUPPORTS(self)) {
-        charon_cinematic_focus_refused(_cmd);
+    if (!REVENANT_CINEMATIC_VIDEO_FORMAT_SUPPORTS(self)) {
+        revenant_cinematic_focus_refused(_cmd);
         return;
     }
 }
 
 @end
 
-@implementation AVCaptureDeviceFormat (CharonCaptureDeviceFormatCinematicVideo26)
+@implementation AVCaptureDeviceFormat (RevenantCaptureDeviceFormatCinematicVideo26)
 
 - (BOOL)isCinematicVideoCaptureSupported
 {
@@ -74,16 +74,16 @@ static void charon_cinematic_focus_refused(SEL selector)
 
 @end
 
-@implementation AVCaptureDeviceInput (CharonCaptureDeviceInputCinematicVideo26)
+@implementation AVCaptureDeviceInput (RevenantCaptureDeviceInputCinematicVideo26)
 
 - (BOOL)isCinematicVideoCaptureSupported API_AVAILABLE(ios(26.0))
 {
-    return CHARON_CINEMATIC_VIDEO_FORMAT_SUPPORTS(self.device);
+    return REVENANT_CINEMATIC_VIDEO_FORMAT_SUPPORTS(self.device);
 }
 
 - (BOOL)isCinematicVideoCaptureEnabled
 {
-    id stored = objc_getAssociatedObject(self, &charon_cinematic_video_enabled_key);
+    id stored = objc_getAssociatedObject(self, &revenant_cinematic_video_enabled_key);
     return stored ? [stored boolValue] : NO;
 }
 
@@ -96,7 +96,7 @@ static void charon_cinematic_focus_refused(SEL selector)
                            NSStringFromSelector(_cmd)];
         return;
     }
-    objc_setAssociatedObject(self, &charon_cinematic_video_enabled_key, @(cinematicVideoCaptureEnabled),
+    objc_setAssociatedObject(self, &revenant_cinematic_video_enabled_key, @(cinematicVideoCaptureEnabled),
                              OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 

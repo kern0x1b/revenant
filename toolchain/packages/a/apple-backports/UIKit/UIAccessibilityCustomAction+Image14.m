@@ -3,9 +3,9 @@
 
 #pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
 
-static const char charon_image_key;
+static const char revenant_image_key;
 
-@implementation UIAccessibilityCustomAction (CharonImage14)
+@implementation UIAccessibilityCustomAction (RevenantImage14)
 
 - (instancetype)initWithName:(NSString *)name image:(UIImage *)image actionHandler:(UIAccessibilityCustomActionHandler)actionHandler
 {
@@ -23,12 +23,12 @@ static const char charon_image_key;
 
 - (UIImage *)image
 {
-    return objc_getAssociatedObject(self, &charon_image_key);
+    return objc_getAssociatedObject(self, &revenant_image_key);
 }
 
 - (void)setImage:(UIImage *)image
 {
-    objc_setAssociatedObject(self, &charon_image_key, image, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, &revenant_image_key, image, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
 @end

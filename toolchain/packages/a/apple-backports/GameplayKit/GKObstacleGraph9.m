@@ -1,15 +1,15 @@
 #import <Foundation/Foundation.h>
 #import <GameplayKit/GameplayKit.h>
 
-#import "CharonGKGraph.h"
+#import "RevenantGKGraph.h"
 
 @implementation GKObstacleGraph {
-    float _charonBufferRadius;
-    Class _charonNodeClass;
-    NSMutableArray *_charonObstacles;
-    NSMutableArray *_charonCorners;
-    NSMutableArray *_charonOwnedCorners;
-    NSMutableArray *_charonLocks;
+    float _revenantBufferRadius;
+    Class _revenantNodeClass;
+    NSMutableArray *_revenantObstacles;
+    NSMutableArray *_revenantCorners;
+    NSMutableArray *_revenantOwnedCorners;
+    NSMutableArray *_revenantLocks;
 }
 
 - (instancetype)initWithObstacles:(NSArray *)obstacles bufferRadius:(float)bufferRadius
@@ -28,18 +28,18 @@
     }
     self = [super initWithNodes:@[]];
     if (self) {
-        _charonNodeClass = nodeClass ?: [GKGraphNode2D class];
-        _charonBufferRadius = bufferRadius;
-        _charonObstacles = [NSMutableArray array];
-        _charonCorners = [NSMutableArray array];
-        _charonOwnedCorners = [NSMutableArray array];
-        _charonLocks = [NSMutableArray array];
+        _revenantNodeClass = nodeClass ?: [GKGraphNode2D class];
+        _revenantBufferRadius = bufferRadius;
+        _revenantObstacles = [NSMutableArray array];
+        _revenantCorners = [NSMutableArray array];
+        _revenantOwnedCorners = [NSMutableArray array];
+        _revenantLocks = [NSMutableArray array];
         for (id obstacle in obstacles) {
             if (obstacle != nil) {
-                [_charonObstacles addObject:obstacle];
+                [_revenantObstacles addObject:obstacle];
             }
         }
-        [self charon_rescan];
+        [self revenant_rescan];
     }
     return self;
 }
@@ -55,16 +55,16 @@
     return [[self alloc] initWithObstacles:obstacles bufferRadius:bufferRadius nodeClass:nodeClass];
 }
 
-- (NSArray *)obstacles { return [_charonObstacles copy]; }
-- (float)bufferRadius { return _charonBufferRadius; }
-- (Class)classForGenericArgumentAtIndex:(NSUInteger)index { (void)index; return _charonNodeClass; }
+- (NSArray *)obstacles { return [_revenantObstacles copy]; }
+- (float)bufferRadius { return _revenantBufferRadius; }
+- (Class)classForGenericArgumentAtIndex:(NSUInteger)index { (void)index; return _revenantNodeClass; }
 
-- (NSArray *)charon_cornerNodes
+- (NSArray *)revenant_cornerNodes
 {
     NSMutableArray *corners = [NSMutableArray array];
-    for (NSArray *mine in _charonOwnedCorners) {
-        for (CharonGKPoint2 *corner in mine) {
-            id node = CharonGKPointNodeWithClass(_charonNodeClass, [corner vector]);
+    for (NSArray *mine in _revenantOwnedCorners) {
+        for (RevenantGKPoint2 *corner in mine) {
+            id node = RevenantGKPointNodeWithClass(_revenantNodeClass, [corner vector]);
             if (node != nil) {
                 [corners addObject:node];
             }
@@ -77,62 +77,62 @@
 {
     for (id obstacle in obstacles) {
         if (obstacle != nil) {
-            [_charonObstacles addObject:obstacle];
+            [_revenantObstacles addObject:obstacle];
         }
     }
-    [self charon_rescan];
+    [self revenant_rescan];
 }
 
 - (void)removeObstacles:(NSArray *)obstacles
 {
     for (id obstacle in obstacles) {
-        [_charonObstacles removeObjectIdenticalTo:obstacle];
+        [_revenantObstacles removeObjectIdenticalTo:obstacle];
     }
-    [self charon_rescan];
+    [self revenant_rescan];
 }
 
-- (void)charon_rescan
+- (void)revenant_rescan
 {
     NSArray *before = [self nodes];
     for (GKGraphNode *node in before) {
         [node removeConnectionsToNodes:before bidirectional:NO];
     }
     [self removeNodes:before];
-    [_charonOwnedCorners removeAllObjects];
-    [_charonCorners removeAllObjects];
-    [_charonCorners addObjectsFromArray:CharonGKBufferedCorners(_charonObstacles, _charonBufferRadius,
-                                                                 _charonOwnedCorners)];
-    NSArray *nodes = [self charon_cornerNodes];
+    [_revenantOwnedCorners removeAllObjects];
+    [_revenantCorners removeAllObjects];
+    [_revenantCorners addObjectsFromArray:RevenantGKBufferedCorners(_revenantObstacles, _revenantBufferRadius,
+                                                                 _revenantOwnedCorners)];
+    NSArray *nodes = [self revenant_cornerNodes];
     [self addNodes:nodes];
-    [self charon_connect:nodes obstacles:_charonObstacles];
+    [self revenant_connect:nodes obstacles:_revenantObstacles];
 }
 
 - (void)removeAllObstacles
 {
-    [_charonObstacles removeAllObjects];
-    [self charon_rescan];
+    [_revenantObstacles removeAllObjects];
+    [self revenant_rescan];
 }
 
-- (void)charon_connect:(NSArray *)nodes obstacles:(NSArray *)obstacles
+- (void)revenant_connect:(NSArray *)nodes obstacles:(NSArray *)obstacles
 {
     for (NSUInteger first = 0; first < [nodes count]; first++) {
         for (NSUInteger second = first + 1; second < [nodes count]; second++) {
-            [self charon_join:[nodes objectAtIndex:first] to:[nodes objectAtIndex:second] obstacles:obstacles];
+            [self revenant_join:[nodes objectAtIndex:first] to:[nodes objectAtIndex:second] obstacles:obstacles];
         }
     }
 }
 
-- (void)charon_connectNode:(GKGraphNode *)node obstacles:(NSArray *)obstacles
+- (void)revenant_connectNode:(GKGraphNode *)node obstacles:(NSArray *)obstacles
 {
     if (node == nil) {
         return;
     }
     for (GKGraphNode *other in [self nodes]) {
-        [self charon_join:node to:other obstacles:obstacles];
+        [self revenant_join:node to:other obstacles:obstacles];
     }
 }
 
-- (void)charon_join:(GKGraphNode *)from to:(GKGraphNode *)to obstacles:(NSArray *)obstacles
+- (void)revenant_join:(GKGraphNode *)from to:(GKGraphNode *)to obstacles:(NSArray *)obstacles
 {
     if (from == nil || to == nil || from == to) {
         return;
@@ -142,16 +142,16 @@
     }
     vector_float2 line[2] = {[(GKGraphNode2D *)from position], [(GKGraphNode2D *)to position]};
     for (id obstacle in obstacles) {
-        NSArray *vertices = CharonGKVerticesOfObstacle(obstacle);
+        NSArray *vertices = RevenantGKVerticesOfObstacle(obstacle);
         if ([vertices count] < 3) {
             continue;
         }
         vector_float2 held[64];
         NSUInteger count = [vertices count] < 64 ? [vertices count] : 64;
         for (NSUInteger index = 0; index < count; index++) {
-            held[index] = [(CharonGKPoint2 *)[vertices objectAtIndex:index] vector];
+            held[index] = [(RevenantGKPoint2 *)[vertices objectAtIndex:index] vector];
         }
-        if (CharonGKSegmentCrossesPolygon(line[0], line[1], held, count, _charonBufferRadius)) {
+        if (RevenantGKSegmentCrossesPolygon(line[0], line[1], held, count, _revenantBufferRadius)) {
             return;
         }
     }
@@ -160,56 +160,56 @@
 
 - (void)connectNodeUsingObstacles:(GKGraphNode *)node
 {
-    [self charon_connectNode:node obstacles:_charonObstacles];
+    [self revenant_connectNode:node obstacles:_revenantObstacles];
 }
 
 - (void)connectNodeUsingObstacles:(GKGraphNode *)node
             ignoringObstacles:(NSArray *)obstaclesToIgnore
 {
     NSMutableArray *kept = [NSMutableArray array];
-    for (id obstacle in _charonObstacles) {
+    for (id obstacle in _revenantObstacles) {
         if ([obstaclesToIgnore indexOfObjectIdenticalTo:obstacle] == NSNotFound) {
             [kept addObject:obstacle];
         }
     }
-    [self charon_connectNode:node obstacles:kept];
+    [self revenant_connectNode:node obstacles:kept];
 }
 
 - (void)connectNodeUsingObstacles:(GKGraphNode *)node
     ignoringBufferRadiusOfObstacles:(NSArray *)obstaclesBufferRadiusToIgnore
 {
     NSMutableArray *corners = [NSMutableArray array];
-    for (NSUInteger index = 0; index < _charonObstacles.count; index++) {
-        id obstacle = [_charonObstacles objectAtIndex:index];
+    for (NSUInteger index = 0; index < _revenantObstacles.count; index++) {
+        id obstacle = [_revenantObstacles objectAtIndex:index];
         BOOL named = [obstaclesBufferRadiusToIgnore indexOfObjectIdenticalTo:obstacle] != NSNotFound;
-        NSArray *vertices = CharonGKVerticesOfObstacle(obstacle);
+        NSArray *vertices = RevenantGKVerticesOfObstacle(obstacle);
         if (vertices == nil || [vertices count] < 3) {
             continue;
         }
-        for (CharonGKPoint2 *corner in CharonGKBufferedCorners(@[obstacle], named ? 0 : _charonBufferRadius,
+        for (RevenantGKPoint2 *corner in RevenantGKBufferedCorners(@[obstacle], named ? 0 : _revenantBufferRadius,
                                                                nil)) {
-            id cornerNode = CharonGKPointNodeWithClass(_charonNodeClass, [corner vector]);
+            id cornerNode = RevenantGKPointNodeWithClass(_revenantNodeClass, [corner vector]);
             if (cornerNode != nil) {
                 [corners addObject:cornerNode];
             }
         }
     }
     for (id corner in corners) {
-        [self charon_join:node to:corner obstacles:_charonObstacles];
+        [self revenant_join:node to:corner obstacles:_revenantObstacles];
     }
 }
 
 - (NSArray *)nodesForObstacle:(GKPolygonObstacle *)obstacle
 {
-    NSUInteger index = [_charonObstacles indexOfObjectIdenticalTo:obstacle];
-    if (index == NSNotFound || index >= [_charonOwnedCorners count]) {
+    NSUInteger index = [_revenantObstacles indexOfObjectIdenticalTo:obstacle];
+    if (index == NSNotFound || index >= [_revenantOwnedCorners count]) {
         return [NSArray array];
     }
-    NSArray *mine = [_charonOwnedCorners objectAtIndex:index];
+    NSArray *mine = [_revenantOwnedCorners objectAtIndex:index];
     NSMutableArray *answer = [NSMutableArray arrayWithCapacity:[mine count]];
     NSUInteger at = 0;
-    for (NSUInteger corner = 0; corner < [_charonOwnedCorners count]; corner++) {
-        NSUInteger width = [[_charonOwnedCorners objectAtIndex:corner] count];
+    for (NSUInteger corner = 0; corner < [_revenantOwnedCorners count]; corner++) {
+        NSUInteger width = [[_revenantOwnedCorners objectAtIndex:corner] count];
         if (corner == index) {
             for (NSUInteger offset = 0; offset < width; offset++) {
                 NSUInteger node = at + offset;
@@ -231,8 +231,8 @@
     }
     NSString *pair = [NSString stringWithFormat:@"%p,%p", (__bridge void *)startNode,
                                                 (__bridge void *)endNode];
-    if ([_charonLocks indexOfObject:pair] == NSNotFound) {
-        [_charonLocks addObject:pair];
+    if ([_revenantLocks indexOfObject:pair] == NSNotFound) {
+        [_revenantLocks addObject:pair];
     }
     [startNode removeConnectionsToNodes:@[endNode] bidirectional:YES];
 }
@@ -244,7 +244,7 @@
     }
     NSString *pair = [NSString stringWithFormat:@"%p,%p", (__bridge void *)startNode,
                                                 (__bridge void *)endNode];
-    [_charonLocks removeObject:pair];
+    [_revenantLocks removeObject:pair];
     [startNode addConnectionsToNodes:@[endNode] bidirectional:YES];
 }
 
@@ -252,7 +252,7 @@
 {
     NSString *pair = [NSString stringWithFormat:@"%p,%p", (__bridge void *)startNode,
                                                 (__bridge void *)endNode];
-    return [_charonLocks indexOfObject:pair] != NSNotFound;
+    return [_revenantLocks indexOfObject:pair] != NSNotFound;
 }
 
 @end

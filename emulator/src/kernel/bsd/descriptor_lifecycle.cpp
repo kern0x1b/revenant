@@ -13,7 +13,7 @@
 #include <string>
 #include <vector>
 
-namespace shade {
+namespace emulator {
 
 bool CompatibilityKernel::release_file_descriptor(std::uint32_t descriptor)
 {

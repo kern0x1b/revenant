@@ -1,7 +1,7 @@
 #import <Foundation/Foundation.h>
 #import <Intents/Intents.h>
 
-#ifndef CHARON_HOST_BUILD
+#ifndef REVENANT_HOST_BUILD
 
 NS_ASSUME_NONNULL_BEGIN
 

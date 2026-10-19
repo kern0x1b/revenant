@@ -10,7 +10,7 @@
 
 #include "media/audio.hpp"
 
-namespace shade {
+namespace emulator {
 
 class FfmpegAudioDecoder final : public AudioDecoder {
 public:

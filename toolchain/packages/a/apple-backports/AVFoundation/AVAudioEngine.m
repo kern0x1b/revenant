@@ -1,37 +1,37 @@
-#import "CharonAVAudioEngine.h"
-#import "CharonAVAudioEngineManual.h"
-#import "CharonAVAudioBuffer.h"
-#import "CharonAVAudioUnit.h"
+#import "RevenantAVAudioEngine.h"
+#import "RevenantAVAudioEngineManual.h"
+#import "RevenantAVAudioBuffer.h"
+#import "RevenantAVAudioUnit.h"
 #import <AVFAudio/AVAudioConnectionPoint.h>
 
-extern OSStatus CharonPlayerRenderCallback(void *inRefCon, AudioUnitRenderActionFlags *ioActionFlags, const AudioTimeStamp *inTimeStamp,
+extern OSStatus RevenantPlayerRenderCallback(void *inRefCon, AudioUnitRenderActionFlags *ioActionFlags, const AudioTimeStamp *inTimeStamp,
                                            UInt32 inBusNumber, UInt32 inNumberFrames, AudioBufferList *ioData);
 
-static BOOL CharonOfflineOutput = NO;
+static BOOL RevenantOfflineOutput = NO;
 
 @implementation AVAudioEngine {
-    AUGraph _charon_graph;
-    BOOL _charon_initialized;
-    BOOL _charon_running;
-    BOOL _charon_autoShutdown;
-    AVAudioMixerNode *_charon_mainMixer;
-    AVAudioOutputNode *_charon_output;
-    AVAudioInputNode *_charon_input;
-    NSMutableSet<AVAudioNode *> *_charon_attached;
-    NSMutableDictionary<NSValue *, NSArray *> *_charon_playerRoutes;
-    BOOL _charon_offline;
-    AUNode _charon_outputAUNode;
-    AUNode _charon_mainMixerAUNode;
-    AudioUnit _charon_outputUnit;
-    BOOL _charon_manualRendering;
-    AVAudioEngineManualRenderingMode _charon_manualMode;
-    AVAudioFormat *_charon_manualFormat;
-    AVAudioFrameCount _charon_manualMaximumFrameCount;
-    AVAudioEngineManualRenderingBlock _charon_manualBlock;
-    AVAudioFramePosition _charon_manualSampleTime;
+    AUGraph _revenant_graph;
+    BOOL _revenant_initialized;
+    BOOL _revenant_running;
+    BOOL _revenant_autoShutdown;
+    AVAudioMixerNode *_revenant_mainMixer;
+    AVAudioOutputNode *_revenant_output;
+    AVAudioInputNode *_revenant_input;
+    NSMutableSet<AVAudioNode *> *_revenant_attached;
+    NSMutableDictionary<NSValue *, NSArray *> *_revenant_playerRoutes;
+    BOOL _revenant_offline;
+    AUNode _revenant_outputAUNode;
+    AUNode _revenant_mainMixerAUNode;
+    AudioUnit _revenant_outputUnit;
+    BOOL _revenant_manualRendering;
+    AVAudioEngineManualRenderingMode _revenant_manualMode;
+    AVAudioFormat *_revenant_manualFormat;
+    AVAudioFrameCount _revenant_manualMaximumFrameCount;
+    AVAudioEngineManualRenderingBlock _revenant_manualBlock;
+    AVAudioFramePosition _revenant_manualSampleTime;
 }
 
-static OSStatus CharonAddUnit(AUGraph graph, OSType type, OSType subtype, AUNode *outNode)
+static OSStatus RevenantAddUnit(AUGraph graph, OSType type, OSType subtype, AUNode *outNode)
 {
     AudioComponentDescription desc = {.componentType = type, .componentSubType = subtype, .componentManufacturer = kAudioUnitManufacturer_Apple};
     return AUGraphAddNode(graph, &desc, outNode);
@@ -40,25 +40,25 @@ static OSStatus CharonAddUnit(AUGraph graph, OSType type, OSType subtype, AUNode
 - (instancetype)init
 {
     if ((self = [super init])) {
-        _charon_attached = [NSMutableSet set];
-        _charon_playerRoutes = [NSMutableDictionary dictionary];
-        _charon_offline = CharonOfflineOutput;
+        _revenant_attached = [NSMutableSet set];
+        _revenant_playerRoutes = [NSMutableDictionary dictionary];
+        _revenant_offline = RevenantOfflineOutput;
 
         AUGraph graph = NULL;
         NewAUGraph(&graph);
         AUGraphOpen(graph);
-        _charon_graph = graph;
+        _revenant_graph = graph;
 
         AUNode outputAUNode = 0, mixerAUNode = 0;
-    _charon_outputAUNode = 0;
-    _charon_outputUnit = NULL;
-    _charon_mainMixerAUNode = 0;
-        CharonAddUnit(graph, kAudioUnitType_Output, CharonOfflineOutput ? kAudioUnitSubType_GenericOutput : kAudioUnitSubType_RemoteIO, &outputAUNode);
-        CharonAddUnit(graph, kAudioUnitType_Mixer, kAudioUnitSubType_MultiChannelMixer, &mixerAUNode);
+    _revenant_outputAUNode = 0;
+    _revenant_outputUnit = NULL;
+    _revenant_mainMixerAUNode = 0;
+        RevenantAddUnit(graph, kAudioUnitType_Output, RevenantOfflineOutput ? kAudioUnitSubType_GenericOutput : kAudioUnitSubType_RemoteIO, &outputAUNode);
+        RevenantAddUnit(graph, kAudioUnitType_Mixer, kAudioUnitSubType_MultiChannelMixer, &mixerAUNode);
         AUGraphConnectNodeInput(graph, mixerAUNode, 0, outputAUNode, 0);
 
-        _charon_outputAUNode = outputAUNode;
-        _charon_mainMixerAUNode = mixerAUNode;
+        _revenant_outputAUNode = outputAUNode;
+        _revenant_mainMixerAUNode = mixerAUNode;
         AudioUnit outputUnit = NULL, mixerUnit = NULL;
         AUGraphNodeInfo(graph, outputAUNode, NULL, &outputUnit);
         AUGraphNodeInfo(graph, mixerAUNode, NULL, &mixerUnit);
@@ -66,45 +66,45 @@ static OSStatus CharonAddUnit(AUGraph graph, OSType type, OSType subtype, AUNode
         UInt32 maxFrames = 4096;
         AudioUnitSetProperty(outputUnit, kAudioUnitProperty_MaximumFramesPerSlice, kAudioUnitScope_Global, 0, &maxFrames, sizeof(maxFrames));
 
-        _charon_output = [AVAudioOutputNode new];
-        [_charon_output charon_setEngine:self auNode:outputAUNode audioUnit:outputUnit];
+        _revenant_output = [AVAudioOutputNode new];
+        [_revenant_output revenant_setEngine:self auNode:outputAUNode audioUnit:outputUnit];
 
-        _charon_mainMixer = [AVAudioMixerNode new];
-        [_charon_mainMixer charon_setEngine:self auNode:mixerAUNode audioUnit:mixerUnit];
+        _revenant_mainMixer = [AVAudioMixerNode new];
+        [_revenant_mainMixer revenant_setEngine:self auNode:mixerAUNode audioUnit:mixerUnit];
 
-        _charon_input = [AVAudioInputNode new];
+        _revenant_input = [AVAudioInputNode new];
     }
     return self;
 }
 
 - (void)dealloc
 {
-    if (_charon_graph) {
-        AUGraphStop(_charon_graph);
-        AUGraphClose(_charon_graph);
-        DisposeAUGraph(_charon_graph);
+    if (_revenant_graph) {
+        AUGraphStop(_revenant_graph);
+        AUGraphClose(_revenant_graph);
+        DisposeAUGraph(_revenant_graph);
     }
 }
 
 - (void)attachNode:(AVAudioNode *)node
 {
     if ([node isKindOfClass:[AVAudioPlayerNode class]]) {
-        [node charon_setEngine:self auNode:-1 audioUnit:NULL];
-        [_charon_attached addObject:node];
+        [node revenant_setEngine:self auNode:-1 audioUnit:NULL];
+        [_revenant_attached addObject:node];
         return;
     }
     if ([node isKindOfClass:[AVAudioUnit class]]) {
         AudioComponentDescription desc = [(AVAudioUnit *)node audioComponentDescription];
         AUNode auNode = 0;
-        CharonAddUnit(_charon_graph, desc.componentType, desc.componentSubType, &auNode);
+        RevenantAddUnit(_revenant_graph, desc.componentType, desc.componentSubType, &auNode);
         AudioUnit audioUnit = NULL;
-        AUGraphNodeInfo(_charon_graph, auNode, NULL, &audioUnit);
-        [node charon_setEngine:self auNode:auNode audioUnit:audioUnit];
-        [(AVAudioUnit *)node charon_applyPendingParameters];
-        [_charon_attached addObject:node];
+        AUGraphNodeInfo(_revenant_graph, auNode, NULL, &audioUnit);
+        [node revenant_setEngine:self auNode:auNode audioUnit:audioUnit];
+        [(AVAudioUnit *)node revenant_applyPendingParameters];
+        [_revenant_attached addObject:node];
         return;
     }
-    [_charon_attached addObject:node];
+    [_revenant_attached addObject:node];
 }
 
 - (void)detachNode:(AVAudioNode *)node
@@ -112,42 +112,42 @@ static OSStatus CharonAddUnit(AUGraph graph, OSType type, OSType subtype, AUNode
     [self disconnectNodeOutput:node];
     [self disconnectNodeInput:node];
     if ([node isKindOfClass:[AVAudioUnit class]])
-        AUGraphRemoveNode(_charon_graph, [node charon_impl]->auNode);
-    [node charon_setEngine:nil auNode:0 audioUnit:NULL];
-    [_charon_attached removeObject:node];
+        AUGraphRemoveNode(_revenant_graph, [node revenant_impl]->auNode);
+    [node revenant_setEngine:nil auNode:0 audioUnit:NULL];
+    [_revenant_attached removeObject:node];
 }
 
 - (void)connect:(AVAudioNode *)node1 to:(AVAudioNode *)node2 fromBus:(AVAudioNodeBus)bus1 toBus:(AVAudioNodeBus)bus2 format:(AVAudioFormat *)format
 {
     AVAudioFormat *useFormat = format ?: [node1 outputFormatForBus:bus1];
-    [node1 charon_setFormat:useFormat];
-    [node2 charon_setFormat:useFormat];
+    [node1 revenant_setFormat:useFormat];
+    [node2 revenant_setFormat:useFormat];
 
-    CharonAudioNodeImpl *destImpl = [node2 charon_impl];
+    RevenantAudioNodeImpl *destImpl = [node2 revenant_impl];
     if (useFormat && destImpl->audioUnit)
         AudioUnitSetProperty(destImpl->audioUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Input, bus2, [useFormat streamDescription], sizeof(AudioStreamBasicDescription));
 
-    if (node2 == _charon_mainMixer && useFormat) {
+    if (node2 == _revenant_mainMixer && useFormat) {
         AudioUnitSetProperty(destImpl->audioUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Output, 0, [useFormat streamDescription], sizeof(AudioStreamBasicDescription));
-        CharonAudioNodeImpl *outImpl = [_charon_output charon_impl];
+        RevenantAudioNodeImpl *outImpl = [_revenant_output revenant_impl];
         if (outImpl->audioUnit) {
             AudioUnitSetProperty(outImpl->audioUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Input, 0, [useFormat streamDescription], sizeof(AudioStreamBasicDescription));
             AudioUnitSetProperty(outImpl->audioUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Output, 0, [useFormat streamDescription], sizeof(AudioStreamBasicDescription));
         }
-        [_charon_output charon_setFormat:useFormat];
+        [_revenant_output revenant_setFormat:useFormat];
     }
 
     if ([node1 isKindOfClass:[AVAudioPlayerNode class]]) {
-        AURenderCallbackStruct callback = {.inputProc = CharonPlayerRenderCallback, .inputProcRefCon = (__bridge void *)node1};
-        AUGraphSetNodeInputCallback(_charon_graph, destImpl->auNode, bus2, &callback);
-        _charon_playerRoutes[[NSValue valueWithNonretainedObject:node1]] = @[node2, @(bus2)];
+        AURenderCallbackStruct callback = {.inputProc = RevenantPlayerRenderCallback, .inputProcRefCon = (__bridge void *)node1};
+        AUGraphSetNodeInputCallback(_revenant_graph, destImpl->auNode, bus2, &callback);
+        _revenant_playerRoutes[[NSValue valueWithNonretainedObject:node1]] = @[node2, @(bus2)];
         return;
     }
 
-    CharonAudioNodeImpl *srcImpl = [node1 charon_impl];
+    RevenantAudioNodeImpl *srcImpl = [node1 revenant_impl];
     if (srcImpl->audioUnit)
         AudioUnitSetProperty(srcImpl->audioUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Output, bus1, [useFormat streamDescription], sizeof(AudioStreamBasicDescription));
-    AUGraphConnectNodeInput(_charon_graph, srcImpl->auNode, bus1, destImpl->auNode, bus2);
+    AUGraphConnectNodeInput(_revenant_graph, srcImpl->auNode, bus1, destImpl->auNode, bus2);
 }
 
 - (void)connect:(AVAudioNode *)node1 to:(AVAudioNode *)node2 format:(AVAudioFormat *)format
@@ -157,9 +157,9 @@ static OSStatus CharonAddUnit(AUGraph graph, OSType type, OSType subtype, AUNode
 
 - (void)disconnectNodeInput:(AVAudioNode *)node bus:(AVAudioNodeBus)bus
 {
-    CharonAudioNodeImpl *impl = [node charon_impl];
+    RevenantAudioNodeImpl *impl = [node revenant_impl];
     if (impl->auNode)
-        AUGraphDisconnectNodeInput(_charon_graph, impl->auNode, bus);
+        AUGraphDisconnectNodeInput(_revenant_graph, impl->auNode, bus);
 }
 
 - (void)disconnectNodeInput:(AVAudioNode *)node
@@ -171,13 +171,13 @@ static OSStatus CharonAddUnit(AUGraph graph, OSType type, OSType subtype, AUNode
 {
     if ([node isKindOfClass:[AVAudioPlayerNode class]]) {
         NSValue *key = [NSValue valueWithNonretainedObject:node];
-        NSArray *route = _charon_playerRoutes[key];
+        NSArray *route = _revenant_playerRoutes[key];
         if (route) {
             AVAudioNode *dest = route[0];
             AVAudioNodeBus destBus = [route[1] unsignedIntValue];
             AURenderCallbackStruct empty = {.inputProc = NULL, .inputProcRefCon = NULL};
-            AUGraphSetNodeInputCallback(_charon_graph, [dest charon_impl]->auNode, destBus, &empty);
-            [_charon_playerRoutes removeObjectForKey:key];
+            AUGraphSetNodeInputCallback(_revenant_graph, [dest revenant_impl]->auNode, destBus, &empty);
+            [_revenant_playerRoutes removeObjectForKey:key];
         }
         return;
     }
@@ -191,33 +191,33 @@ static OSStatus CharonAddUnit(AUGraph graph, OSType type, OSType subtype, AUNode
 - (NSArray<AVAudioConnectionPoint *> *)outputConnectionPointsForNode:(AVAudioNode *)node outputBus:(AVAudioNodeBus)bus
 {
     if ([node isKindOfClass:[AVAudioPlayerNode class]]) {
-        NSArray *route = _charon_playerRoutes[[NSValue valueWithNonretainedObject:node]];
+        NSArray *route = _revenant_playerRoutes[[NSValue valueWithNonretainedObject:node]];
         if (!route)
             return @[];
         return @[[[AVAudioConnectionPoint alloc] initWithNode:route[0] bus:[route[1] unsignedIntValue]]];
     }
-    if (node == _charon_mainMixer)
-        return @[[[AVAudioConnectionPoint alloc] initWithNode:_charon_output bus:0]];
+    if (node == _revenant_mainMixer)
+        return @[[[AVAudioConnectionPoint alloc] initWithNode:_revenant_output bus:0]];
     return @[];
 }
 
 - (void)prepare
 {
-    if (!_charon_initialized) {
-        AUGraphInitialize(_charon_graph);
-        _charon_initialized = YES;
+    if (!_revenant_initialized) {
+        AUGraphInitialize(_revenant_graph);
+        _revenant_initialized = YES;
     }
 }
 
 - (BOOL)startAndReturnError:(NSError **)outError
 {
     [self prepare];
-    if (_charon_offline) {
-        _charon_running = YES;
+    if (_revenant_offline) {
+        _revenant_running = YES;
         return YES;
     }
-    OSStatus status = AUGraphStart(_charon_graph);
-    _charon_running = status == noErr;
+    OSStatus status = AUGraphStart(_revenant_graph);
+    _revenant_running = status == noErr;
     if (status != noErr && outError)
         *outError = [NSError errorWithDomain:NSOSStatusErrorDomain code:status userInfo:nil];
     return status == noErr;
@@ -225,84 +225,84 @@ static OSStatus CharonAddUnit(AUGraph graph, OSType type, OSType subtype, AUNode
 
 - (void)pause
 {
-    if (!_charon_offline)
-        AUGraphStop(_charon_graph);
-    _charon_running = NO;
+    if (!_revenant_offline)
+        AUGraphStop(_revenant_graph);
+    _revenant_running = NO;
 }
 
 - (void)stop
 {
-    if (!_charon_offline)
-        AUGraphStop(_charon_graph);
-    _charon_running = NO;
+    if (!_revenant_offline)
+        AUGraphStop(_revenant_graph);
+    _revenant_running = NO;
 }
 
 - (void)reset
 {
-    for (AVAudioNode *node in _charon_attached)
+    for (AVAudioNode *node in _revenant_attached)
         [node reset];
 }
 
 - (AVAudioOutputNode *)outputNode
 {
-    return _charon_output;
+    return _revenant_output;
 }
 
 - (AVAudioInputNode *)inputNode
 {
-    return _charon_input;
+    return _revenant_input;
 }
 
 - (AVAudioMixerNode *)mainMixerNode
 {
-    return _charon_mainMixer;
+    return _revenant_mainMixer;
 }
 
 - (BOOL)isRunning
 {
-    return _charon_running;
+    return _revenant_running;
 }
 
 - (BOOL)isAutoShutdownEnabled
 {
-    return _charon_autoShutdown;
+    return _revenant_autoShutdown;
 }
 
 - (void)setAutoShutdownEnabled:(BOOL)autoShutdownEnabled
 {
-    _charon_autoShutdown = autoShutdownEnabled;
+    _revenant_autoShutdown = autoShutdownEnabled;
 }
 
 
-- (BOOL)charon_replaceOutputWithGeneric
+- (BOOL)revenant_replaceOutputWithGeneric
 {
-    if (_charon_outputAUNode == 0) {
+    if (_revenant_outputAUNode == 0) {
         return NO;
     }
-    AUNode previous = _charon_outputAUNode;
-    AUGraphDisconnectNodeInput(_charon_graph, _charon_mainMixerAUNode, 0);
-    AUGraphRemoveNode(_charon_graph, previous);
+    AUNode previous = _revenant_outputAUNode;
+    AUGraphDisconnectNodeInput(_revenant_graph, _revenant_mainMixerAUNode, 0);
+    AUGraphRemoveNode(_revenant_graph, previous);
     AUNode output = 0;
     AudioComponentDescription description = {0};
     description.componentType = kAudioUnitType_Output;
     description.componentSubType = kAudioUnitSubType_GenericOutput;
     description.componentManufacturer = kAudioUnitManufacturer_Apple;
-    if (AUGraphAddNode(_charon_graph, &description, &output) != noErr || output == 0) {
+    if (AUGraphAddNode(_revenant_graph, &description, &output) != noErr || output == 0) {
         return NO;
     }
-    AUGraphConnectNodeInput(_charon_graph, _charon_mainMixerAUNode, 0, output, 0);
+    AUGraphConnectNodeInput(_revenant_graph, _revenant_mainMixerAUNode, 0, output, 0);
     AudioUnit unit = NULL;
-    AUGraphNodeInfo(_charon_graph, output, NULL, &unit);
-    _charon_outputAUNode = output;
-    _charon_outputUnit = unit;
+    AUGraphNodeInfo(_revenant_graph, output, NULL, &unit);
+    _revenant_outputAUNode = output;
+    _revenant_outputUnit = unit;
     UInt32 maxFrames = 1024;
     AudioUnitSetProperty(unit, kAudioUnitProperty_MaximumFramesPerSlice, kAudioUnitScope_Global, 0, &maxFrames, sizeof(maxFrames));
-    AVAudioFormat *carried = [_charon_mainMixer outputFormatForBus:0];
+    AVAudioFormat *carried = [_revenant_mainMixer outputFormatForBus:0];
     if (carried != nil) {
         AudioStreamBasicDescription described = *carried.streamDescription;
-        AudioUnitSetProperty(_charon_outputUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Input, 0,
+        AudioUnitSetProperty(_revenant_outputUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Input, 0,
                              &described, sizeof(described));
-        AudioUnitSetProperty(_charon_outputUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Output, 0,
+        AudioUnitSetProperty(_revenant_outputUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Output, 0,
                              &described, sizeof(described));
     }
     return YES;
@@ -319,72 +319,72 @@ static OSStatus CharonAddUnit(AUGraph graph, OSType type, OSType subtype, AUNode
         }
         return NO;
     }
-    if (!_charon_manualRendering) {
+    if (!_revenant_manualRendering) {
         [self prepare];
-        if (![self charon_replaceOutputWithGeneric]) {
+        if (![self revenant_replaceOutputWithGeneric]) {
             if (outError) {
                 *outError = [NSError errorWithDomain:NSOSStatusErrorDomain code:kAudioUnitErr_FailedInitialization userInfo:nil];
             }
             return NO;
         }
     }
-    _charon_manualRendering = YES;
-    _charon_manualMode = mode;
-    _charon_manualFormat = pcmFormat;
-    _charon_manualMaximumFrameCount = maximumFrameCount;
-    _charon_manualSampleTime = 0;
+    _revenant_manualRendering = YES;
+    _revenant_manualMode = mode;
+    _revenant_manualFormat = pcmFormat;
+    _revenant_manualMaximumFrameCount = maximumFrameCount;
+    _revenant_manualSampleTime = 0;
     return YES;
 }
 
 - (void)disableManualRenderingMode
 {
-    _charon_manualRendering = NO;
-    _charon_manualFormat = nil;
-    _charon_manualBlock = nil;
-    _charon_manualSampleTime = 0;
+    _revenant_manualRendering = NO;
+    _revenant_manualFormat = nil;
+    _revenant_manualBlock = nil;
+    _revenant_manualSampleTime = 0;
 }
 
 - (AVAudioEngineManualRenderingMode)manualRenderingMode
 {
-    return _charon_manualMode;
+    return _revenant_manualMode;
 }
 
 - (AVAudioFormat *)manualRenderingFormat
 {
-    return _charon_manualFormat;
+    return _revenant_manualFormat;
 }
 
 - (AVAudioFrameCount)manualRenderingMaximumFrameCount
 {
-    return _charon_manualMaximumFrameCount;
+    return _revenant_manualMaximumFrameCount;
 }
 
 - (AVAudioFramePosition)manualRenderingSampleTime
 {
-    return _charon_manualSampleTime;
+    return _revenant_manualSampleTime;
 }
 
 - (AVAudioEngineManualRenderingBlock)manualRenderingBlock
 {
-    return _charon_manualBlock;
+    return _revenant_manualBlock;
 }
 
 - (void)setManualRenderingBlock:(AVAudioEngineManualRenderingBlock)manualRenderingBlock
 {
-    _charon_manualBlock = [manualRenderingBlock copy];
+    _revenant_manualBlock = [manualRenderingBlock copy];
 }
 
 - (AVAudioEngineManualRenderingStatus)renderOffline:(AVAudioFrameCount)numberOfFrames
                                           toBuffer:(AVAudioPCMBuffer *)buffer
                                              error:(NSError **)outError
 {
-    if (!_charon_manualRendering) {
+    if (!_revenant_manualRendering) {
         if (outError) {
             *outError = [NSError errorWithDomain:NSOSStatusErrorDomain code:kAudioUnitErr_InvalidPropertyValue userInfo:nil];
         }
         return AVAudioEngineManualRenderingStatusError;
     }
-    if (buffer == nil || numberOfFrames == 0 || numberOfFrames > _charon_manualMaximumFrameCount) {
+    if (buffer == nil || numberOfFrames == 0 || numberOfFrames > _revenant_manualMaximumFrameCount) {
         if (outError) {
             *outError = [NSError errorWithDomain:NSOSStatusErrorDomain code:kAudioUnitErr_InvalidPropertyValue userInfo:nil];
         }
@@ -394,11 +394,11 @@ static OSStatus CharonAddUnit(AUGraph graph, OSType type, OSType subtype, AUNode
     if (destination == NULL) {
         return AVAudioEngineManualRenderingStatusError;
     }
-    if (_charon_manualBlock != nil) {
+    if (_revenant_manualBlock != nil) {
         OSStatus blockError = noErr;
-        AVAudioEngineManualRenderingStatus status = _charon_manualBlock(numberOfFrames, destination, &blockError);
+        AVAudioEngineManualRenderingStatus status = _revenant_manualBlock(numberOfFrames, destination, &blockError);
         if (status == AVAudioEngineManualRenderingStatusSuccess) {
-            _charon_manualSampleTime += numberOfFrames;
+            _revenant_manualSampleTime += numberOfFrames;
             buffer.frameLength = numberOfFrames;
         } else if (outError) {
             *outError = [NSError errorWithDomain:NSOSStatusErrorDomain code:blockError userInfo:nil];
@@ -408,31 +408,31 @@ static OSStatus CharonAddUnit(AUGraph graph, OSType type, OSType subtype, AUNode
     AudioUnitRenderActionFlags flags = 0;
     AudioTimeStamp timestamp = {0};
     timestamp.mFlags = kAudioTimeStampSampleTimeValid;
-    timestamp.mSampleTime = _charon_manualSampleTime;
-    OSStatus status = AudioUnitRender(_charon_outputUnit, &flags, &timestamp, 0, numberOfFrames, destination);
+    timestamp.mSampleTime = _revenant_manualSampleTime;
+    OSStatus status = AudioUnitRender(_revenant_outputUnit, &flags, &timestamp, 0, numberOfFrames, destination);
     if (status != noErr) {
         if (outError) {
             *outError = [NSError errorWithDomain:NSOSStatusErrorDomain code:status userInfo:nil];
         }
         return AVAudioEngineManualRenderingStatusError;
     }
-    _charon_manualSampleTime += numberOfFrames;
+    _revenant_manualSampleTime += numberOfFrames;
     buffer.frameLength = numberOfFrames;
     return AVAudioEngineManualRenderingStatusSuccess;
 }
 
 @end
 
-@implementation CharonAudioEngineTestSupport
+@implementation RevenantAudioEngineTestSupport
 
 + (void)setForcedOfflineOutput:(BOOL)offline
 {
-    CharonOfflineOutput = offline;
+    RevenantOfflineOutput = offline;
 }
 
 + (OSStatus)pullOutput:(AudioBufferList *)ioData frames:(AVAudioFrameCount)frames fromEngine:(AVAudioEngine *)engine
 {
-    CharonAudioNodeImpl *impl = [[engine outputNode] charon_impl];
+    RevenantAudioNodeImpl *impl = [[engine outputNode] revenant_impl];
     AudioUnitRenderActionFlags flags = 0;
     AudioTimeStamp timestamp = {0};
     timestamp.mSampleTime = 0;

@@ -19,7 +19,7 @@
 #include "graphics/mbx2d_abi.hpp"
 #include "graphics/surface_store.hpp"
 
-namespace shade {
+namespace emulator {
 
 class UserlandHleCall;
 class UserlandHleRegistry;

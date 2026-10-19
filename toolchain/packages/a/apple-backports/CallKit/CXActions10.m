@@ -1,8 +1,8 @@
-#import "CharonCallKit.h"
+#import "RevenantCallKit.h"
 
 #pragma clang diagnostic ignored "-Wobjc-designated-initializers"
 
-NSError *charon_callkit_error(NSString *domain, NSInteger code)
+NSError *revenant_callkit_error(NSString *domain, NSInteger code)
 {
     return [NSError errorWithDomain:domain code:code userInfo:nil];
 }
@@ -10,31 +10,31 @@ NSError *charon_callkit_error(NSString *domain, NSInteger code)
 @implementation CXAction {
     NSUUID *_UUID;
     BOOL _complete;
-    BOOL _charon_fulfilled;
+    BOOL _revenant_fulfilled;
     NSDate *_timeoutDate;
 }
 
-@dynamic UUID, complete, timeoutDate, charon_fulfilled;
-@synthesize charon_provider = _charon_provider;
-@synthesize charon_transaction = _charon_transaction;
+@dynamic UUID, complete, timeoutDate, revenant_fulfilled;
+@synthesize revenant_provider = _revenant_provider;
+@synthesize revenant_transaction = _revenant_transaction;
 
-+ (NSTimeInterval)charon_timeout
++ (NSTimeInterval)revenant_timeout
 {
     return 5.0;
 }
 
-- (instancetype)charon_initWithUUID:(NSUUID *)UUID
+- (instancetype)revenant_initWithUUID:(NSUUID *)UUID
 {
     if ((self = [super init])) {
         _UUID = [UUID copy];
-        _timeoutDate = [NSDate dateWithTimeIntervalSinceNow:[[self class] charon_timeout]];
+        _timeoutDate = [NSDate dateWithTimeIntervalSinceNow:[[self class] revenant_timeout]];
     }
     return self;
 }
 
 - (instancetype)init
 {
-    return [self charon_initWithUUID:[NSUUID UUID]];
+    return [self revenant_initWithUUID:[NSUUID UUID]];
 }
 
 - (NSUUID *)UUID
@@ -52,48 +52,48 @@ NSError *charon_callkit_error(NSString *domain, NSInteger code)
     return _timeoutDate;
 }
 
-- (void)charon_setComplete:(BOOL)complete
+- (void)revenant_setComplete:(BOOL)complete
 {
     _complete = complete;
 }
 
-- (SEL)charon_performSelector
+- (SEL)revenant_performSelector
 {
     return NULL;
 }
 
-- (BOOL)charon_fulfilled
+- (BOOL)revenant_fulfilled
 {
-    return _charon_fulfilled;
+    return _revenant_fulfilled;
 }
 
-- (void)charon_finish:(BOOL)fulfilled
+- (void)revenant_finish:(BOOL)fulfilled
 {
-    if (_complete || !_charon_provider)
+    if (_complete || !_revenant_provider)
         return;
     _complete = YES;
-    _charon_fulfilled = fulfilled;
-    [[CharonCallBroker shared] applyAction:self];
-    [_charon_transaction charon_actionCompleted:self];
+    _revenant_fulfilled = fulfilled;
+    [[RevenantCallBroker shared] applyAction:self];
+    [_revenant_transaction revenant_actionCompleted:self];
 }
 
-- (void)charon_timedOut
+- (void)revenant_timedOut
 {
     if (_complete)
         return;
-    CXProvider *provider = _charon_provider;
-    [self charon_finish:NO];
-    [provider charon_actionTimedOut:self];
+    CXProvider *provider = _revenant_provider;
+    [self revenant_finish:NO];
+    [provider revenant_actionTimedOut:self];
 }
 
 - (void)fulfill
 {
-    [self charon_finish:YES];
+    [self revenant_finish:YES];
 }
 
 - (void)fail
 {
-    [self charon_finish:NO];
+    [self revenant_finish:NO];
 }
 
 - (NSString *)description
@@ -103,7 +103,7 @@ NSError *charon_callkit_error(NSString *domain, NSInteger code)
 
 - (id)copyWithZone:(NSZone *)zone
 {
-    CXAction *copy = [[[self class] allocWithZone:zone] charon_initWithUUID:_UUID];
+    CXAction *copy = [[[self class] allocWithZone:zone] revenant_initWithUUID:_UUID];
     copy->_complete = _complete;
     copy->_timeoutDate = _timeoutDate;
     return copy;
@@ -126,7 +126,7 @@ NSError *charon_callkit_error(NSString *domain, NSInteger code)
     NSUUID *UUID = [coder decodeObjectOfClass:[NSUUID class] forKey:@"UUID"];
     if (!UUID)
         return nil;
-    if ((self = [self charon_initWithUUID:UUID])) {
+    if ((self = [self revenant_initWithUUID:UUID])) {
         _complete = [coder decodeBoolForKey:@"complete"];
         _timeoutDate = [coder decodeObjectOfClass:[NSDate class] forKey:@"timeoutDate"];
     }
@@ -140,11 +140,11 @@ NSError *charon_callkit_error(NSString *domain, NSInteger code)
 }
 
 @dynamic callUUID;
-@synthesize charon_date = _charon_date;
+@synthesize revenant_date = _revenant_date;
 
 - (instancetype)initWithCallUUID:(NSUUID *)callUUID
 {
-    if ((self = [self charon_initWithUUID:[NSUUID UUID]]))
+    if ((self = [self revenant_initWithUUID:[NSUUID UUID]]))
         _callUUID = [callUUID copy];
     return self;
 }
@@ -154,11 +154,11 @@ NSError *charon_callkit_error(NSString *domain, NSInteger code)
     return _callUUID;
 }
 
-- (void)charon_completeWithDate:(NSDate *)date
+- (void)revenant_completeWithDate:(NSDate *)date
 {
     if (self.isComplete)
         return;
-    _charon_date = date ?: [NSDate date];
+    _revenant_date = date ?: [NSDate date];
     [self fulfill];
 }
 
@@ -166,7 +166,7 @@ NSError *charon_callkit_error(NSString *domain, NSInteger code)
 {
     CXCallAction *copy = [super copyWithZone:zone];
     copy->_callUUID = [_callUUID copy];
-    copy->_charon_date = _charon_date;
+    copy->_revenant_date = _revenant_date;
     return copy;
 }
 
@@ -239,19 +239,19 @@ NSError *charon_callkit_error(NSString *domain, NSInteger code)
     _video = video;
 }
 
-+ (NSTimeInterval)charon_timeout
++ (NSTimeInterval)revenant_timeout
 {
     return 600.0;
 }
 
-- (SEL)charon_performSelector
+- (SEL)revenant_performSelector
 {
     return @selector(provider:performStartCallAction:);
 }
 
 - (void)fulfillWithDateStarted:(NSDate *)dateStarted
 {
-    [self charon_completeWithDate:dateStarted];
+    [self revenant_completeWithDate:dateStarted];
 }
 
 - (id)copyWithZone:(NSZone *)zone
@@ -285,33 +285,33 @@ NSError *charon_callkit_error(NSString *domain, NSInteger code)
 
 @implementation CXAnswerCallAction
 
-+ (NSTimeInterval)charon_timeout
++ (NSTimeInterval)revenant_timeout
 {
     return 60.0;
 }
 
-- (SEL)charon_performSelector
+- (SEL)revenant_performSelector
 {
     return @selector(provider:performAnswerCallAction:);
 }
 
 - (void)fulfillWithDateConnected:(NSDate *)dateConnected
 {
-    [self charon_completeWithDate:dateConnected];
+    [self revenant_completeWithDate:dateConnected];
 }
 
 @end
 
 @implementation CXEndCallAction
 
-- (SEL)charon_performSelector
+- (SEL)revenant_performSelector
 {
     return @selector(provider:performEndCallAction:);
 }
 
 - (void)fulfillWithDateEnded:(NSDate *)dateEnded
 {
-    [self charon_completeWithDate:dateEnded];
+    [self revenant_completeWithDate:dateEnded];
 }
 
 @end
@@ -339,7 +339,7 @@ NSError *charon_callkit_error(NSString *domain, NSInteger code)
     _onHold = onHold;
 }
 
-- (SEL)charon_performSelector
+- (SEL)revenant_performSelector
 {
     return @selector(provider:performSetHeldCallAction:);
 }
@@ -389,7 +389,7 @@ NSError *charon_callkit_error(NSString *domain, NSInteger code)
     _muted = muted;
 }
 
-- (SEL)charon_performSelector
+- (SEL)revenant_performSelector
 {
     return @selector(provider:performSetMutedCallAction:);
 }
@@ -439,7 +439,7 @@ NSError *charon_callkit_error(NSString *domain, NSInteger code)
     _callUUIDToGroupWith = [callUUIDToGroupWith copy];
 }
 
-- (SEL)charon_performSelector
+- (SEL)revenant_performSelector
 {
     return @selector(provider:performSetGroupCallAction:);
 }
@@ -502,7 +502,7 @@ NSError *charon_callkit_error(NSString *domain, NSInteger code)
     _type = type;
 }
 
-- (SEL)charon_performSelector
+- (SEL)revenant_performSelector
 {
     return @selector(provider:performPlayDTMFCallAction:);
 }

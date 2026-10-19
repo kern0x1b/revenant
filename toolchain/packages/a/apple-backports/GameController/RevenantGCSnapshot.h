@@ -4,9 +4,9 @@
 
 #pragma once
 
-#define CHARON_GCGAMEPAD_SNAPSHOT_VERSION_V100 0x0100
+#define REVENANT_GCGAMEPAD_SNAPSHOT_VERSION_V100 0x0100
 
-static inline NSData *charon_gc_snapshot_data(const void *bytes, size_t length, uint16_t version)
+static inline NSData *revenant_gc_snapshot_data(const void *bytes, size_t length, uint16_t version)
 {
     if (bytes == NULL)
         return nil;
@@ -24,7 +24,7 @@ static inline NSData *charon_gc_snapshot_data(const void *bytes, size_t length, 
     return [NSData dataWithBytesNoCopy:copy length:length freeWhenDone:YES];
 }
 
-static inline BOOL charon_gc_accept_whole_structure(NSData *data, size_t length)
+static inline BOOL revenant_gc_accept_whole_structure(NSData *data, size_t length)
 {
     if (data.length < 4)
         return NO;
@@ -33,7 +33,7 @@ static inline BOOL charon_gc_accept_whole_structure(NSData *data, size_t length)
     return data.length >= length && header[0] != 0;
 }
 
-static inline BOOL charon_gc_accept_declared_size(NSData *data, size_t length)
+static inline BOOL revenant_gc_accept_declared_size(NSData *data, size_t length)
 {
     if (data.length < 4)
         return YES;
@@ -42,7 +42,7 @@ static inline BOOL charon_gc_accept_declared_size(NSData *data, size_t length)
     return header[1] <= length;
 }
 
-static inline BOOL charon_gc_snapshot_read(void *out, NSData *data, size_t length, BOOL (*accepts)(NSData *, size_t))
+static inline BOOL revenant_gc_snapshot_read(void *out, NSData *data, size_t length, BOOL (*accepts)(NSData *, size_t))
 {
     if (out == NULL || data == nil)
         return NO;
@@ -55,7 +55,7 @@ static inline BOOL charon_gc_snapshot_read(void *out, NSData *data, size_t lengt
     return YES;
 }
 
-static inline float charon_gc_read_float(id element, SEL which)
+static inline float revenant_gc_read_float(id element, SEL which)
 {
     if (element == nil || ![element respondsToSelector:which])
         return 0.0f;
@@ -63,15 +63,15 @@ static inline float charon_gc_read_float(id element, SEL which)
     return read(element, which);
 }
 
-static inline float charon_gc_button_value(id element)
+static inline float revenant_gc_button_value(id element)
 {
-    return charon_gc_read_float(element, @selector(value));
+    return revenant_gc_read_float(element, @selector(value));
 }
 
-static inline float charon_gc_pad_axis(id pad, SEL axis)
+static inline float revenant_gc_pad_axis(id pad, SEL axis)
 {
     if (pad == nil || ![pad respondsToSelector:axis])
         return 0.0f;
     id element = ((id (*)(id, SEL))objc_msgSend)(pad, axis);
-    return charon_gc_read_float(element, @selector(value));
+    return revenant_gc_read_float(element, @selector(value));
 }

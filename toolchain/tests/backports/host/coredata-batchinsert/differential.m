@@ -2,12 +2,12 @@
 #import <CoreData/CoreData.h>
 
 @interface NSBatchInsertRequest () {
-    NSString *_charonEntityName;
-    NSEntityDescription *_charonEntity;
-    NSArray<NSDictionary<NSString *, id> *> *_charonObjectsToInsert;
-    BOOL (^_charonDictionaryHandler)(NSMutableDictionary<NSString *, id> *);
-    BOOL (^_charonManagedObjectHandler)(NSManagedObject *);
-    NSBatchInsertRequestResultType _charonResultType;
+    NSString *_revenantEntityName;
+    NSEntityDescription *_revenantEntity;
+    NSArray<NSDictionary<NSString *, id> *> *_revenantObjectsToInsert;
+    BOOL (^_revenantDictionaryHandler)(NSMutableDictionary<NSString *, id> *);
+    BOOL (^_revenantManagedObjectHandler)(NSManagedObject *);
+    NSBatchInsertRequestResultType _revenantResultType;
 }
 @end
 

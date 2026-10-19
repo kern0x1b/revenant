@@ -20,16 +20,16 @@ static void expect(int ok, const char *line)
     printf("%s %s\n", ok ? "ok  " : "FAIL", line);
 }
 
-int charon_roundtrip_run(void)
+int revenant_roundtrip_run(void)
 {
     @autoreleasepool {
         MIDIClientRef client = 0;
-        OSStatus status = MIDIClientCreateWithBlock(CFSTR("charon-roundtrip"), &client, ^(const MIDINotification *message) {});
+        OSStatus status = MIDIClientCreateWithBlock(CFSTR("revenant-roundtrip"), &client, ^(const MIDINotification *message) {});
         printf("client          %s\n", status == noErr ? "noErr" : "error");
         expect(status == noErr, "MIDIClientCreateWithBlock returned noErr");
 
         MIDIEndpointRef destination = 0;
-        status = MIDIDestinationCreateWithProtocol(client, CFSTR("charon-destination"), kMIDIProtocol_2_0, &destination,
+        status = MIDIDestinationCreateWithProtocol(client, CFSTR("revenant-destination"), kMIDIProtocol_2_0, &destination,
             ^(const MIDIEventList *list, void *srcConnRefCon) {
                 const MIDIEventPacket *packet = &list->packet[0];
                 gDestinationCount = (int)list->numPackets;
@@ -43,12 +43,12 @@ int charon_roundtrip_run(void)
         expect(status == noErr, "MIDIDestinationCreateWithProtocol returned noErr");
 
         MIDIEndpointRef source = 0;
-        status = MIDISourceCreateWithProtocol(client, CFSTR("charon-source"), kMIDIProtocol_2_0, &source);
+        status = MIDISourceCreateWithProtocol(client, CFSTR("revenant-source"), kMIDIProtocol_2_0, &source);
         printf("source status   %d\n", (int)status);
         expect(status == noErr, "MIDISourceCreateWithProtocol returned noErr");
 
         MIDIEndpointRef plainSource = 0;
-        OSStatus plain = MIDISourceCreate(client, CFSTR("charon-plain-source"), &plainSource);
+        OSStatus plain = MIDISourceCreate(client, CFSTR("revenant-plain-source"), &plainSource);
         printf("control status  %d (release MIDISourceCreate)\n", (int)plain);
 
         SInt32 protocol = 0;
@@ -61,7 +61,7 @@ int charon_roundtrip_run(void)
         expect(protocol == kMIDIProtocol_2_0, "the source's protocol property reads 2.0");
 
         MIDIPortRef input = 0;
-        status = MIDIInputPortCreateWithProtocol(client, CFSTR("charon-input"), kMIDIProtocol_1_0, &input,
+        status = MIDIInputPortCreateWithProtocol(client, CFSTR("revenant-input"), kMIDIProtocol_1_0, &input,
             ^(const MIDIEventList *list, void *srcConnRefCon) {
                 const MIDIEventPacket *packet = &list->packet[0];
                 gInputCount = (int)list->numPackets;
@@ -74,7 +74,7 @@ int charon_roundtrip_run(void)
         expect(status == noErr, "MIDIPortConnectSource returned noErr");
 
         MIDIPortRef output = 0;
-        status = MIDIOutputPortCreate(client, CFSTR("charon-output"), &output);
+        status = MIDIOutputPortCreate(client, CFSTR("revenant-output"), &output);
         expect(status == noErr, "MIDIOutputPortCreate returned noErr");
 
         Byte buffer[256];

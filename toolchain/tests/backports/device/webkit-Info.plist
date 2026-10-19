@@ -9,7 +9,7 @@
 	<key>CFBundleExecutable</key>
 	<string>webkit</string>
 	<key>CFBundleIdentifier</key>
-	<string>local.charon.backports.webkit</string>
+	<string>local.revenant.backports.webkit</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
@@ -26,10 +26,10 @@
 	<array>
 		<dict>
 			<key>CFBundleURLName</key>
-			<string>local.charon.backports.webkit</string>
+			<string>local.revenant.backports.webkit</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>charon-backports-webkit</string>
+				<string>revenant-backports-webkit</string>
 			</array>
 		</dict>
 	</array>

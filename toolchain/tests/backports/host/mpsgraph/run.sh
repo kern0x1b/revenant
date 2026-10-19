@@ -2,7 +2,7 @@
 # run.sh - is this port's MPSGraph the same arithmetic as the system's own?
 #
 # graph-cases.m is compiled twice: once against the system's own MPSGraph, and once against this port's
-# classes with the MPSGraph names mapped to Charon names and their selectors prefixed, so the port's
+# classes with the MPSGraph names mapped to Revenant names and their selectors prefixed, so the port's
 # implementations are reached under names of their own and cannot replace the system's. Each of the two is
 # run ONCE PER FAMILY, one process each, and every case prints the bytes of a buffer the case owns, so the
 # two runs of a family are compared exactly.
@@ -19,7 +19,7 @@ set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 graph=${GRAPH:-$here/../../../../packages/a/apple-backports/MetalPerformanceShadersGraph}
-build=${BUILD:-$(runs_fresh charon-mpsgraph)}
+build=${BUILD:-$(runs_fresh revenant-mpsgraph)}
 sdk=$(xcrun --show-sdk-path)
 target="-target arm64-apple-macos13.0 -isysroot $sdk"
 quiet="-Wno-deprecated-declarations -Wno-unguarded-availability-new -Wno-unguarded-availability -Wno-incomplete-implementation -Wno-nullability-completeness -Wno-objc-protocol-method-implementation"
@@ -77,13 +77,13 @@ for entry in sorted(os.listdir(sys.argv[1])):
             names.add(m.group(1))
 with open(sys.argv[2], 'w') as out:
     for name in sorted(names):
-        out.write("#define %s Charon%s\n" % (name, name))
+        out.write("#define %s Revenant%s\n" % (name, name))
 PY
 echo "renamed: $(grep -c define "$build/rename.h") classes"
 
-printf '#import <MetalPerformanceShadersGraph/MetalPerformanceShadersGraph.h>\n#import "CharonMPSGraph.h"\n' > "$build/declarations.h"
-# The plant has to reach the objects, not only the case file. CharonMPSStore in ../MetalPerformanceShaders/
-# CharonMPS.h is where CHARON_PLANT is compiled in, and it is on the way out of every element the graph's
+printf '#import <MetalPerformanceShadersGraph/MetalPerformanceShadersGraph.h>\n#import "RevenantMPSGraph.h"\n' > "$build/declarations.h"
+# The plant has to reach the objects, not only the case file. RevenantMPSStore in ../MetalPerformanceShaders/
+# RevenantMPS.h is where REVENANT_PLANT is compiled in, and it is on the way out of every element the graph's
 # interpreter writes, so a planted build has to be compiled with the flag like any other source: passed on
 # the case file's line alone it would arm nothing and both builds would print the same correct bytes.
 # Each build gets its own object directory, so a planted object cannot be handed back to the plain run.
@@ -95,12 +95,12 @@ build_objects() {
     _objects=""
     for source in "$graph"/*.m; do
         _s=$(basename "$source" .m)
-        xcrun clang -fobjc-arc -fvisibility=hidden $target $quiet -DCHARON_PLANT=$_plant \
+        xcrun clang -fobjc-arc -fvisibility=hidden $target $quiet -DREVENANT_PLANT=$_plant \
             -c "$source" -o "$_objdir/$_s.plain.o"
         python3 "$here/../prefix_selectors.py" "$source" "$_objdir/$_s.m" ccharonHost_ \
-            --declarations="$build/declarations.h" -fobjc-arc $target $quiet -DCHARON_PLANT=$_plant \
+            --declarations="$build/declarations.h" -fobjc-arc $target $quiet -DREVENANT_PLANT=$_plant \
             -I"$graph" -include "$build/rename.h" -- "$_objdir/$_s.plain.o"
-        xcrun clang -fobjc-arc -fvisibility=hidden $target $quiet -DCHARON_PLANT=$_plant \
+        xcrun clang -fobjc-arc -fvisibility=hidden $target $quiet -DREVENANT_PLANT=$_plant \
             -I"$graph" -include "$build/rename.h" \
             -include "$build/declarations.h" -c "$_objdir/$_s.m" -o "$_objdir/$_s.o"
         _objects="$_objects $_objdir/$_s.o"

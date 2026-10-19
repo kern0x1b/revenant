@@ -24,11 +24,11 @@ static NSString *raised(void (^block)(void))
     return @"nothing";
 }
 
-@interface CharonPartialArchive : NSObject <NSCoding>
+@interface RevenantPartialArchive : NSObject <NSCoding>
 @property (nonatomic, copy) NSDictionary *keys;
 @end
 
-@implementation CharonPartialArchive
+@implementation RevenantPartialArchive
 
 - (instancetype)initWithCoder:(NSCoder *)coder
 {
@@ -52,8 +52,8 @@ static id decode_as(NSString *className, NSDictionary *keys, NSError **error)
 {
     NSMutableData *data = [NSMutableData data];
     NSKeyedArchiver *archiver = [[NSKeyedArchiver alloc] initForWritingWithMutableData:data];
-    [archiver setClassName:className forClass:[CharonPartialArchive class]];
-    CharonPartialArchive *partial = [[CharonPartialArchive alloc] init];
+    [archiver setClassName:className forClass:[RevenantPartialArchive class]];
+    RevenantPartialArchive *partial = [[RevenantPartialArchive alloc] init];
     partial.keys = keys;
     [archiver encodeObject:partial forKey:@"root"];
     [archiver finishEncoding];
@@ -184,7 +184,7 @@ int main(void)
         id noSymbol = decode_as(@"NSUnit", @{}, &error);
         CHECK(noSymbol == nil && error.code == 4865, "a unit archived with no symbol fails the coder with 4865");
 
-        printf("%d checks, %d failures\n", charon_checks, charon_failures);
-        return charon_failures;
+        printf("%d checks, %d failures\n", revenant_checks, revenant_failures);
+        return revenant_failures;
     }
 }

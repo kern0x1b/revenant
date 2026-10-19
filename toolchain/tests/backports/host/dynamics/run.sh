@@ -1,8 +1,8 @@
 #!/bin/sh
 # run.sh — differential host tests for UIKit Dynamics. The backport's Dynamics sources are compiled for Mac
-# Catalyst with their classes and exported symbols renamed (CharonHost…), so each test drives the host's own
+# Catalyst with their classes and exported symbols renamed (RevenantHost…), so each test drives the host's own
 # UIDynamicAnimator (the oracle, PhysicsKit) and ours side by side in one process, over the unmodified Box2D
-# 2.2.1 the recipe builds. The sources are built twice: with CHARON_HOST_DIFFERENTIAL, which runs the host's
+# 2.2.1 the recipe builds. The sources are built twice: with REVENANT_HOST_DIFFERENTIAL, which runs the host's
 # integrator (sub-step (float)1/120, box without inset or skin), for every comparison with the host; and as
 # shipped (iOS 7.0's integrator), for the rows facts/UIKit/UIDynamicAnimator.md §12 gives only as 7.0 predictions.
 # A test whose name ends in _ios70_test.m links the second build, every other *_test.m the first. Each test is its
@@ -12,7 +12,7 @@ here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 sources=${DYNAMICS_SOURCES:-$here/../../../../packages/a/apple-backports/UIKit}
 harness=$here/../../device
-build=${DYNAMICS_BUILD:-$(runs_folder charon-dynamics-host)}
+build=${DYNAMICS_BUILD:-$(runs_folder revenant-dynamics-host)}
 sdk=$(xcrun --show-sdk-path)
 target="-target arm64-apple-ios15.0-macabi -isysroot $sdk -iframework $sdk/System/iOSSupport/System/Library/Frameworks"
 frameworks="-framework UIKit -framework QuartzCore -framework CoreGraphics -framework Foundation -lc++"
@@ -52,13 +52,13 @@ flags_of() {
     case $1 in *.mm) echo "$code $objcxx" ;; *) echo "$code" ;; esac
 }
 for file in $files; do
-    xcrun clang $target $(flags_of "$file") -DCHARON_HOST_DIFFERENTIAL=1 -w -c "$file" -o "$build/plain/$(basename "$file").o"
+    xcrun clang $target $(flags_of "$file") -DREVENANT_HOST_DIFFERENTIAL=1 -w -c "$file" -o "$build/plain/$(basename "$file").o"
 done
 renames "$(ls "$build"/plain/*.o)" > "$build/renames.flags"
 host=""
 ios70=""
 for file in $files; do
-    xcrun clang $target $(flags_of "$file") -DCHARON_HOST_DIFFERENTIAL=1 $(cat "$build/renames.flags") -c "$file" -o "$build/host/$(basename "$file").o"
+    xcrun clang $target $(flags_of "$file") -DREVENANT_HOST_DIFFERENTIAL=1 $(cat "$build/renames.flags") -c "$file" -o "$build/host/$(basename "$file").o"
     xcrun clang $target $(flags_of "$file") $(cat "$build/renames.flags") -c "$file" -o "$build/ios70/$(basename "$file").o"
     host="$host $build/host/$(basename "$file").o"
     ios70="$ios70 $build/ios70/$(basename "$file").o"

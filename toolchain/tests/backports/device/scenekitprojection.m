@@ -77,7 +77,7 @@ int main(int argc, char **argv)
 {
     @autoreleasepool {
         if (argc > 1) {
-            charon_log_to(@(argv[1]));
+            revenant_log_to(@(argv[1]));
         }
         recorded = [NSMutableDictionary dictionary];
         for (size_t i = 0; i < sizeof(expectations) / sizeof(*expectations); i++) {
@@ -87,7 +87,7 @@ int main(int argc, char **argv)
         SCNView *view = rendered_view();
         if (view == nil) {
             printf("skip the projection: no OpenGL ES 2.0 context here\n");
-            printf("%d checks, %d failed\n", charon_checks, charon_failures);
+            printf("%d checks, %d failed\n", revenant_checks, revenant_failures);
             return 0;
         }
         CHECK([recorded count] == 2 * case_count, "every recorded answer is here");
@@ -103,7 +103,7 @@ int main(int argc, char **argv)
             if (ok) {
                 agreed++;
             }
-            charon_check(ok, name.UTF8String,
+            revenant_check(ok, name.UTF8String,
                          [NSString stringWithFormat:@"%@ != %@", answer, recorded[name] ?: @"nothing recorded"]);
 
             NSString *mirrored = spelling(SCNVector3Make(projected.x, viewport_height - projected.y, projected.z));
@@ -119,12 +119,12 @@ int main(int argc, char **argv)
             if (backOk) {
                 agreed++;
             }
-            charon_check(backOk, backName.UTF8String,
+            revenant_check(backOk, backName.UTF8String,
                          [NSString stringWithFormat:@"%@ != %@", backAnswer, recorded[backName] ?: @"nothing recorded"]);
         }
         CHECK(asked == 2 * case_count && agreed == 2 * case_count, "every point was asked both ways and agreed");
         CHECK(mutant_rejected == case_count, "a mirrored y is rejected for every point");
-        printf("%d checks, %d failed\n", charon_checks, charon_failures);
-        return charon_failures;
+        printf("%d checks, %d failed\n", revenant_checks, revenant_failures);
+        return revenant_failures;
     }
 }

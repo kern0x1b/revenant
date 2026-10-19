@@ -25,7 +25,7 @@
 #include <utility>
 #include <vector>
 
-namespace shade {
+namespace emulator {
 
 struct GuestImage {
     std::string path;
@@ -99,7 +99,7 @@ struct MappedCallerRow {
     std::uint32_t caller_offset { };
 };
 
-inline constexpr std::string_view own_image_prefix { "/usr/lib/charon/" };
+inline constexpr std::string_view own_image_prefix { "/usr/lib/revenant/" };
 
 using AddressRanges = std::vector<std::pair<std::uint32_t, std::uint32_t>>;
 [[nodiscard]] AddressRanges own_text_ranges(const GuestImageTable& images);

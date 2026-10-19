@@ -1,14 +1,14 @@
-#import "CharonMetal.h"
+#import "RevenantMetal.h"
 
 
-@implementation CharonMetalBlitEncoder (Surfaces)
+@implementation RevenantMetalBlitEncoder (Surfaces)
 
 - (void)copyFromTexture:(id<MTLTexture>)sourceTexture sourceSlice:(NSUInteger)sourceSlice sourceLevel:(NSUInteger)sourceLevel toTexture:(id<MTLTexture>)destinationTexture destinationSlice:(NSUInteger)destinationSlice destinationLevel:(NSUInteger)destinationLevel sliceCount:(NSUInteger)sliceCount levelCount:(NSUInteger)levelCount
 {
-    if (![sourceTexture isKindOfClass:[CharonMetalTexture class]] || ![destinationTexture isKindOfClass:[CharonMetalTexture class]])
+    if (![sourceTexture isKindOfClass:[RevenantMetalTexture class]] || ![destinationTexture isKindOfClass:[RevenantMetalTexture class]])
         return;
-    CharonMetalTexture *source = (CharonMetalTexture *)sourceTexture;
-    CharonMetalTexture *destination = (CharonMetalTexture *)destinationTexture;
+    RevenantMetalTexture *source = (RevenantMetalTexture *)sourceTexture;
+    RevenantMetalTexture *destination = (RevenantMetalTexture *)destinationTexture;
     if (source.pixelFormat != destination.pixelFormat) {
         NSLog(@"Metal: a blit of %d whole surfaces between pixel formats %d and %d is refused: Metal asks for the same format at both ends",
               (int)(levelCount * sliceCount), (int)source.pixelFormat, (int)destination.pixelFormat);
@@ -36,17 +36,17 @@
                   (unsigned long)toRegion.size.width, (unsigned long)toRegion.size.height);
             return;
         }
-        if (![self charonBlitTexture:source from:fromRegion level:from to:destination region:toRegion level:to])
+        if (![self revenantBlitTexture:source from:fromRegion level:from to:destination region:toRegion level:to])
             return;
     }
 }
 
 - (void)copyFromTexture:(id<MTLTexture>)sourceTexture toTexture:(id<MTLTexture>)destinationTexture
 {
-    if (![sourceTexture isKindOfClass:[CharonMetalTexture class]] || ![destinationTexture isKindOfClass:[CharonMetalTexture class]])
+    if (![sourceTexture isKindOfClass:[RevenantMetalTexture class]] || ![destinationTexture isKindOfClass:[RevenantMetalTexture class]])
         return;
-    CharonMetalTexture *source = (CharonMetalTexture *)sourceTexture;
-    CharonMetalTexture *destination = (CharonMetalTexture *)destinationTexture;
+    RevenantMetalTexture *source = (RevenantMetalTexture *)sourceTexture;
+    RevenantMetalTexture *destination = (RevenantMetalTexture *)destinationTexture;
     NSUInteger sourceLevel = 0, destinationLevel = 0;
     if (source.width == destination.width && source.height == destination.height) {
         sourceLevel = 0;

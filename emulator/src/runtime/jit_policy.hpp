@@ -10,7 +10,7 @@
 #include "foundation/cpu.hpp"
 #include "runtime/boot_options.hpp"
 
-namespace shade::runtime_detail {
+namespace emulator::runtime_detail {
 
 [[nodiscard]] inline std::string_view jit_precompile_source_name(
     JitPrecompileSource source) noexcept

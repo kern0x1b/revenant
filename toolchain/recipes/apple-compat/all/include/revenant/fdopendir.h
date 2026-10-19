@@ -1,5 +1,5 @@
-#ifndef CHARON_FDOPENDIR_H
-#define CHARON_FDOPENDIR_H
+#ifndef REVENANT_FDOPENDIR_H
+#define REVENANT_FDOPENDIR_H
 
 #include <dirent.h>
 
@@ -7,12 +7,12 @@
 extern "C" {
 #endif
 
-DIR *charon_fdopendir(int descriptor);
+DIR *revenant_fdopendir(int descriptor);
 
 #ifdef __cplusplus
 }
 #endif
 
-#define fdopendir charon_fdopendir
+#define fdopendir revenant_fdopendir
 
 #endif

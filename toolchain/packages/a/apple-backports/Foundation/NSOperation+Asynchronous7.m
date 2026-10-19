@@ -2,24 +2,24 @@
 #import <objc/message.h>
 #import <objc/runtime.h>
 
-static char CharonOperationNameKey;
-static char CharonOperationAsynchronousKey;
+static char RevenantOperationNameKey;
+static char RevenantOperationAsynchronousKey;
 
-@implementation NSOperation (CharonAsynchronous)
+@implementation NSOperation (RevenantAsynchronous)
 
 - (NSString *)name
 {
-    return objc_getAssociatedObject(self, &CharonOperationNameKey);
+    return objc_getAssociatedObject(self, &RevenantOperationNameKey);
 }
 
 - (void)setName:(NSString *)name
 {
-    objc_setAssociatedObject(self, &CharonOperationNameKey, [name copy], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, &RevenantOperationNameKey, [name copy], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
 - (BOOL)isAsynchronous
 {
-    NSNumber *stored = objc_getAssociatedObject(self, &CharonOperationAsynchronousKey);
+    NSNumber *stored = objc_getAssociatedObject(self, &RevenantOperationAsynchronousKey);
     if (stored)
         return stored.boolValue;
     struct objc_super super = { .receiver = self, .super_class = [NSObject class] };
@@ -28,7 +28,7 @@ static char CharonOperationAsynchronousKey;
 
 - (void)setAsynchronous:(BOOL)asynchronous
 {
-    objc_setAssociatedObject(self, &CharonOperationAsynchronousKey, @(asynchronous), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, &RevenantOperationAsynchronousKey, @(asynchronous), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
 @end

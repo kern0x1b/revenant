@@ -1,26 +1,26 @@
-#import "CharonMLCompute.h"
+#import "RevenantMLCompute.h"
 
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
 #pragma clang diagnostic ignored "-Wobjc-designated-initializers"
 #pragma clang diagnostic ignored "-Wnullability-completeness"
 
-@interface MLCTensor (CharonStorage)
+@interface MLCTensor (RevenantStorage)
 - (void)fillWithScalar:(float)value;
-- (void)charon_writeBytes:(const void *)bytes length:(NSUInteger)length;
+- (void)revenant_writeBytes:(const void *)bytes length:(NSUInteger)length;
 - (void)fillWithRandomInitializerType:(MLCRandomInitializerType)randomInitializerType;
-- (MLCTensor *)charon_tensorQuantizedToType:(MLCDataType)type scale:(float)scale bias:(NSInteger)bias;
-- (MLCTensor *)charon_tensorDequantizedToType:(MLCDataType)type scale:(float)scale bias:(NSInteger)bias;
-- (double)charon_scalarOfTensor:(MLCTensor *)tensor inType:(MLCDataType)type;
+- (MLCTensor *)revenant_tensorQuantizedToType:(MLCDataType)type scale:(float)scale bias:(NSInteger)bias;
+- (MLCTensor *)revenant_tensorDequantizedToType:(MLCDataType)type scale:(float)scale bias:(NSInteger)bias;
+- (double)revenant_scalarOfTensor:(MLCTensor *)tensor inType:(MLCDataType)type;
 @end
 
-@interface MLCTensor (CharonSequences)
-+ (instancetype)charon_tensorWithSequenceLength:(NSUInteger)sequenceLength
+@interface MLCTensor (RevenantSequences)
++ (instancetype)revenant_tensorWithSequenceLength:(NSUInteger)sequenceLength
                             featureChannelCount:(NSUInteger)featureChannelCount
                                       batchSize:(NSUInteger)batchSize
                                          filled:(BOOL)filled;
 @end
 
-NSUInteger CharonMLCWidthOfDataType(MLCDataType dataType)
+NSUInteger RevenantMLCWidthOfDataType(MLCDataType dataType)
 {
     switch (dataType) {
         case MLCDataTypeFloat32:
@@ -45,7 +45,7 @@ NSUInteger CharonMLCWidthOfDataType(MLCDataType dataType)
     return 0;
 }
 
-NSUInteger CharonMLCElementCount(NSArray<NSNumber *> *shape)
+NSUInteger RevenantMLCElementCount(NSArray<NSNumber *> *shape)
 {
     if (shape.count == 0) {
         return 0;
@@ -61,9 +61,9 @@ NSUInteger CharonMLCElementCount(NSArray<NSNumber *> *shape)
     return count;
 }
 
-NSArray<NSNumber *> *CharonMLCStrideOfShape(NSArray<NSNumber *> *shape, MLCDataType dataType)
+NSArray<NSNumber *> *RevenantMLCStrideOfShape(NSArray<NSNumber *> *shape, MLCDataType dataType)
 {
-    NSUInteger width = CharonMLCWidthOfDataType(dataType);
+    NSUInteger width = RevenantMLCWidthOfDataType(dataType);
     NSMutableArray *stride = [NSMutableArray arrayWithCapacity:shape.count];
     NSUInteger running = width;
     for (NSUInteger index = shape.count; index > 0; index--) {
@@ -73,11 +73,11 @@ NSArray<NSNumber *> *CharonMLCStrideOfShape(NSArray<NSNumber *> *shape, MLCDataT
     return stride;
 }
 
-static NSUInteger CharonMLCTensorCounter = 0;
+static NSUInteger RevenantMLCTensorCounter = 0;
 
-NSUInteger CharonMLCNextTensorID(void)
+NSUInteger RevenantMLCNextTensorID(void)
 {
-    return CharonMLCTensorCounter++;
+    return RevenantMLCTensorCounter++;
 }
 
 #pragma mark - MLCTensorDescriptor
@@ -110,7 +110,7 @@ NSUInteger CharonMLCNextTensorID(void)
 
 + (NSUInteger)maxTensorDimensions
 {
-    return CHARON_MLC_MAX_DIMENSIONS;
+    return REVENANT_MLC_MAX_DIMENSIONS;
 }
 
 + (instancetype)descriptorWithShape:(NSArray<NSNumber *> *)shape dataType:(MLCDataType)dataType
@@ -122,7 +122,7 @@ NSUInteger CharonMLCNextTensorID(void)
         [NSException raise:NSRangeException
                     format:@"*** -[__NSArray0 objectAtIndex:]: index 0 beyond bounds for empty array"];
     }
-    if (shape.count > CHARON_MLC_MAX_DIMENSIONS) {
+    if (shape.count > REVENANT_MLC_MAX_DIMENSIONS) {
         return nil;
     }
     for (NSNumber *dimension in shape) {
@@ -130,15 +130,15 @@ NSUInteger CharonMLCNextTensorID(void)
             return nil;
         }
     }
-    if (CharonMLCWidthOfDataType(dataType) == 0) {
+    if (RevenantMLCWidthOfDataType(dataType) == 0) {
         return nil;
     }
     MLCTensorDescriptor *descriptor = [[MLCTensorDescriptor alloc] init];
     descriptor->_dataType = dataType;
     descriptor->_dimensionCount = shape.count;
     descriptor->_shape = [shape copy];
-    descriptor->_stride = CharonMLCStrideOfShape(shape, dataType);
-    descriptor->_allocationSize = CharonMLCElementCount(shape) * CharonMLCWidthOfDataType(dataType);
+    descriptor->_stride = RevenantMLCStrideOfShape(shape, dataType);
+    descriptor->_allocationSize = RevenantMLCElementCount(shape) * RevenantMLCWidthOfDataType(dataType);
     return descriptor;
 }
 
@@ -150,7 +150,7 @@ NSUInteger CharonMLCNextTensorID(void)
     return nil;
 }
 
-+ (instancetype)charon_descriptorWithSequenceLengths:(NSArray<NSNumber *> *)sequenceLengths
++ (instancetype)revenant_descriptorWithSequenceLengths:(NSArray<NSNumber *> *)sequenceLengths
                                     featureChannelCount:(NSUInteger)featureChannelCount
                                               batchSize:(NSUInteger)batchSize
                                      sortedSequences:(BOOL)sortedSequences
@@ -352,9 +352,9 @@ NSUInteger CharonMLCNextTensorID(void)
 
 typedef struct {
     uint64_t state;
-} CharonMLCRandom;
+} RevenantMLCRandom;
 
-static uint32_t CharonMLCRandomNext(CharonMLCRandom *random)
+static uint32_t RevenantMLCRandomNext(RevenantMLCRandom *random)
 {
     random->state ^= random->state >> 12;
     random->state ^= random->state << 25;
@@ -362,22 +362,22 @@ static uint32_t CharonMLCRandomNext(CharonMLCRandom *random)
     return (uint32_t)((random->state * 2685821657736338717ULL) >> 32);
 }
 
-static double CharonMLCRandomUnit(CharonMLCRandom *random)
+static double RevenantMLCRandomUnit(RevenantMLCRandom *random)
 {
-    return (double)CharonMLCRandomNext(random) / 4294967296.0;
+    return (double)RevenantMLCRandomNext(random) / 4294967296.0;
 }
 
-static uint32_t CharonMLCSeedState(void)
+static uint32_t RevenantMLCSeedState(void)
 {
     NSNumber *seed = [MLCPlatform getRNGseed];
     uint32_t state = seed ? (uint32_t)(seed.longLongValue & 0xffffffff) : 0x9e3779b9u;
     return state ? state : 0x6d2b79f5u;
 }
 
-#define CHARON_MLC_GLOROT_LIMIT 1.7320508075688772
-#define CHARON_MLC_XAVIER_DEVIATION 0.5
+#define REVENANT_MLC_GLOROT_LIMIT 1.7320508075688772
+#define REVENANT_MLC_XAVIER_DEVIATION 0.5
 
-static double CharonMLCRandomNormal(CharonMLCRandom *random, double *spare)
+static double RevenantMLCRandomNormal(RevenantMLCRandom *random, double *spare)
 {
     if (*spare != 0.0) {
         double held = *spare;
@@ -386,8 +386,8 @@ static double CharonMLCRandomNormal(CharonMLCRandom *random, double *spare)
     }
     double first, second, square;
     do {
-        first = 2.0 * CharonMLCRandomUnit(random) - 1.0;
-        second = 2.0 * CharonMLCRandomUnit(random) - 1.0;
+        first = 2.0 * RevenantMLCRandomUnit(random) - 1.0;
+        second = 2.0 * RevenantMLCRandomUnit(random) - 1.0;
         square = first * first + second * second;
     } while (square >= 1.0 || square == 0.0);
     double factor = sqrt(-2.0 * log(square) / square);
@@ -418,7 +418,7 @@ static double CharonMLCRandomNormal(CharonMLCRandom *random, double *spare)
 + (instancetype)tensorWithDescriptor:(MLCTensorDescriptor *)tensorDescriptor
 {
     MLCTensor *tensor = [[MLCTensor alloc] init];
-    tensor->_tensorID = CharonMLCNextTensorID();
+    tensor->_tensorID = RevenantMLCNextTensorID();
     tensor->_descriptor = tensorDescriptor;
     tensor->_label = [NSString stringWithFormat:@"data%lu", (unsigned long)tensor->_tensorID];
     return tensor;
@@ -451,7 +451,7 @@ static double CharonMLCRandomNormal(CharonMLCRandom *random, double *spare)
     if (!tensor || !data || !data.bytes) {
         return tensor;
     }
-    [tensor charon_writeBytes:data.bytes length:data.length];
+    [tensor revenant_writeBytes:data.bytes length:data.length];
     return tensor;
 }
 
@@ -559,7 +559,7 @@ static double CharonMLCRandomNormal(CharonMLCRandom *random, double *spare)
                     featureChannelCount:(NSUInteger)featureChannelCount
                               batchSize:(NSUInteger)batchSize
 {
-    MLCTensor *tensor = [self charon_tensorWithSequenceLength:sequenceLength
+    MLCTensor *tensor = [self revenant_tensorWithSequenceLength:sequenceLength
                                           featureChannelCount:featureChannelCount
                                                     batchSize:batchSize
                                                          filled:YES];
@@ -581,12 +581,12 @@ static double CharonMLCRandomNormal(CharonMLCRandom *random, double *spare)
                               batchSize:(NSUInteger)batchSize
                                    data:(MLCTensorData *)data
 {
-    MLCTensor *tensor = [self charon_tensorWithSequenceLength:sequenceLength
+    MLCTensor *tensor = [self revenant_tensorWithSequenceLength:sequenceLength
                                           featureChannelCount:featureChannelCount
                                                     batchSize:batchSize
                                                          filled:NO];
     if (tensor) {
-        [tensor charon_writeBytes:data.bytes length:data.length];
+        [tensor revenant_writeBytes:data.bytes length:data.length];
     }
     return tensor;
 }
@@ -597,7 +597,7 @@ static double CharonMLCRandomNormal(CharonMLCRandom *random, double *spare)
                                batchSize:(NSUInteger)batchSize
                    randomInitializerType:(MLCRandomInitializerType)randomInitializerType
 {
-    MLCTensor *tensor = [self tensorWithDescriptor:[MLCTensorDescriptor charon_descriptorWithSequenceLengths:sequenceLengths
+    MLCTensor *tensor = [self tensorWithDescriptor:[MLCTensorDescriptor revenant_descriptorWithSequenceLengths:sequenceLengths
                                                                             featureChannelCount:featureChannelCount
                                                                                       batchSize:batchSize
                                                                                  sortedSequences:sortedSequences
@@ -612,13 +612,13 @@ static double CharonMLCRandomNormal(CharonMLCRandom *random, double *spare)
                                batchSize:(NSUInteger)batchSize
                                     data:(MLCTensorData *)data
 {
-    MLCTensor *tensor = [self tensorWithDescriptor:[MLCTensorDescriptor charon_descriptorWithSequenceLengths:sequenceLengths
+    MLCTensor *tensor = [self tensorWithDescriptor:[MLCTensorDescriptor revenant_descriptorWithSequenceLengths:sequenceLengths
                                                                             featureChannelCount:featureChannelCount
                                                                                       batchSize:batchSize
                                                                                  sortedSequences:sortedSequences
                                                                                         dataType:MLCDataTypeFloat32]];
     if (tensor) {
-        [tensor charon_writeBytes:data.bytes length:data.length];
+        [tensor revenant_writeBytes:data.bytes length:data.length];
     }
     return tensor;
 }
@@ -726,7 +726,7 @@ static double CharonMLCRandomNormal(CharonMLCRandom *random, double *spare)
     if (type != MLCDataTypeInt8 && type != MLCDataTypeUInt8 && type != MLCDataTypeInt32) {
         return nil;
     }
-    return [self charon_tensorQuantizedToType:type scale:scale bias:bias];
+    return [self revenant_tensorQuantizedToType:type scale:scale bias:bias];
 }
 
 - (MLCTensor *)tensorByQuantizingToType:(MLCDataType)type scale:(MLCTensor *)scale bias:(MLCTensor *)bias axis:(NSInteger)axis
@@ -734,9 +734,9 @@ static double CharonMLCRandomNormal(CharonMLCRandom *random, double *spare)
     if (type != MLCDataTypeInt8 && type != MLCDataTypeUInt8 && type != MLCDataTypeInt32) {
         return nil;
     }
-    return [self charon_tensorQuantizedToType:type
-                                       scale:[self charon_scalarOfTensor:scale inType:MLCDataTypeFloat32]
-                                        bias:[self charon_scalarOfTensor:bias inType:MLCDataTypeInt32]];
+    return [self revenant_tensorQuantizedToType:type
+                                       scale:[self revenant_scalarOfTensor:scale inType:MLCDataTypeFloat32]
+                                        bias:[self revenant_scalarOfTensor:bias inType:MLCDataTypeInt32]];
 }
 
 - (MLCTensor *)tensorByDequantizingToType:(MLCDataType)type scale:(MLCTensor *)scale bias:(MLCTensor *)bias
@@ -744,9 +744,9 @@ static double CharonMLCRandomNormal(CharonMLCRandom *random, double *spare)
     if (type != MLCDataTypeFloat32) {
         return nil;
     }
-    return [self charon_tensorDequantizedToType:type
-                                         scale:[self charon_scalarOfTensor:scale inType:MLCDataTypeFloat32]
-                                          bias:[self charon_scalarOfTensor:bias inType:MLCDataTypeInt32]];
+    return [self revenant_tensorDequantizedToType:type
+                                         scale:[self revenant_scalarOfTensor:scale inType:MLCDataTypeFloat32]
+                                          bias:[self revenant_scalarOfTensor:bias inType:MLCDataTypeInt32]];
 }
 
 - (MLCTensor *)tensorByDequantizingToType:(MLCDataType)type scale:(MLCTensor *)scale bias:(MLCTensor *)bias axis:(NSInteger)axis
@@ -754,15 +754,15 @@ static double CharonMLCRandomNormal(CharonMLCRandom *random, double *spare)
     if (type != MLCDataTypeFloat32) {
         return nil;
     }
-    return [self charon_tensorDequantizedToType:type
-                                         scale:[self charon_scalarOfTensor:scale inType:MLCDataTypeFloat32]
-                                          bias:[self charon_scalarOfTensor:bias inType:MLCDataTypeInt32]];
+    return [self revenant_tensorDequantizedToType:type
+                                         scale:[self revenant_scalarOfTensor:scale inType:MLCDataTypeFloat32]
+                                          bias:[self revenant_scalarOfTensor:bias inType:MLCDataTypeInt32]];
 }
 
 - (id)copyWithZone:(NSZone *)zone
 {
     MLCTensor *copy = [[[self class] allocWithZone:zone] init];
-    copy->_tensorID = CharonMLCNextTensorID();
+    copy->_tensorID = RevenantMLCNextTensorID();
     copy->_descriptor = [_descriptor copy];
     copy->_data = _data;
     copy->_label = [NSString stringWithFormat:@"data%lu", (unsigned long)copy->_tensorID];
@@ -772,7 +772,7 @@ static double CharonMLCRandomNormal(CharonMLCRandom *random, double *spare)
 
 #pragma mark the storage the factories above fill and read
 
-- (void)charon_writeBytes:(const void *)bytes length:(NSUInteger)length
+- (void)revenant_writeBytes:(const void *)bytes length:(NSUInteger)length
 {
     if (!bytes || length == 0) {
         return;
@@ -784,7 +784,7 @@ static double CharonMLCRandomNormal(CharonMLCRandom *random, double *spare)
     [_data replaceBytesInRange:NSMakeRange(0, wanted) withBytes:bytes];
 }
 
-- (void)charon_fillWithZeroes
+- (void)revenant_fillWithZeroes
 {
     if (!_descriptor) {
         return;
@@ -852,28 +852,28 @@ static double CharonMLCRandomNormal(CharonMLCRandom *random, double *spare)
     if (!_descriptor || _descriptor.dataType != MLCDataTypeFloat32) {
         return;
     }
-    CharonMLCRandom random = { CharonMLCSeedState() };
+    RevenantMLCRandom random = { RevenantMLCSeedState() };
     double spare = 0.0;
     NSUInteger count = _descriptor.tensorAllocationSizeInBytes / sizeof(float);
     float low = 0.0f, span = 1.0f;
     if (randomInitializerType == MLCRandomInitializerTypeGlorotUniform) {
-        low = (float)-CHARON_MLC_GLOROT_LIMIT;
-        span = (float)(2.0 * CHARON_MLC_GLOROT_LIMIT);
+        low = (float)-REVENANT_MLC_GLOROT_LIMIT;
+        span = (float)(2.0 * REVENANT_MLC_GLOROT_LIMIT);
     }
     BOOL normal = randomInitializerType == MLCRandomInitializerTypeXavier;
     NSMutableData *storage = [NSMutableData dataWithLength:count * sizeof(float)];
     float *values = storage.mutableBytes;
     for (NSUInteger index = 0; index < count; index++) {
         if (normal) {
-            values[index] = (float)(CHARON_MLC_XAVIER_DEVIATION * CharonMLCRandomNormal(&random, &spare));
+            values[index] = (float)(REVENANT_MLC_XAVIER_DEVIATION * RevenantMLCRandomNormal(&random, &spare));
         } else {
-            values[index] = (float)(low + span * CharonMLCRandomUnit(&random));
+            values[index] = (float)(low + span * RevenantMLCRandomUnit(&random));
         }
     }
     _data = storage;
 }
 
-- (MLCTensor *)charon_tensorQuantizedToType:(MLCDataType)type scale:(float)scale bias:(NSInteger)bias
+- (MLCTensor *)revenant_tensorQuantizedToType:(MLCDataType)type scale:(float)scale bias:(NSInteger)bias
 {
     if (!_descriptor || !_data || _descriptor.dataType != MLCDataTypeFloat32) {
         return nil;
@@ -885,11 +885,11 @@ static double CharonMLCRandomNormal(CharonMLCRandom *random, double *spare)
     (void)scale;
     (void)bias;
     MLCTensor *quantized = [MLCTensor tensorWithDescriptor:descriptor];
-    [quantized charon_fillWithZeroes];
+    [quantized revenant_fillWithZeroes];
     return quantized;
 }
 
-- (MLCTensor *)charon_tensorDequantizedToType:(MLCDataType)type scale:(float)scale bias:(NSInteger)bias
+- (MLCTensor *)revenant_tensorDequantizedToType:(MLCDataType)type scale:(float)scale bias:(NSInteger)bias
 {
     if (!_descriptor || !_data || type != MLCDataTypeFloat32) {
         return nil;
@@ -901,11 +901,11 @@ static double CharonMLCRandomNormal(CharonMLCRandom *random, double *spare)
     (void)scale;
     (void)bias;
     MLCTensor *dequantized = [MLCTensor tensorWithDescriptor:descriptor];
-    [dequantized charon_fillWithZeroes];
+    [dequantized revenant_fillWithZeroes];
     return dequantized;
 }
 
-- (double)charon_scalarOfTensor:(MLCTensor *)tensor inType:(MLCDataType)type
+- (double)revenant_scalarOfTensor:(MLCTensor *)tensor inType:(MLCDataType)type
 {
     if (!tensor.data || tensor.data.length == 0) {
         return type == MLCDataTypeInt32 ? 0.0 : 1.0;
@@ -918,9 +918,9 @@ static double CharonMLCRandomNormal(CharonMLCRandom *random, double *spare)
 
 @end
 
-@implementation MLCTensor (CharonSequences)
+@implementation MLCTensor (RevenantSequences)
 
-+ (instancetype)charon_tensorWithSequenceLength:(NSUInteger)sequenceLength
++ (instancetype)revenant_tensorWithSequenceLength:(NSUInteger)sequenceLength
                             featureChannelCount:(NSUInteger)featureChannelCount
                                       batchSize:(NSUInteger)batchSize
                                          filled:(BOOL)filled
@@ -929,7 +929,7 @@ static double CharonMLCRandomNormal(CharonMLCRandom *random, double *spare)
     for (NSUInteger index = 0; index < batchSize; index++) {
         [lengths addObject:@(sequenceLength)];
     }
-    MLCTensor *tensor = [self tensorWithDescriptor:[MLCTensorDescriptor charon_descriptorWithSequenceLengths:lengths
+    MLCTensor *tensor = [self tensorWithDescriptor:[MLCTensorDescriptor revenant_descriptorWithSequenceLengths:lengths
                                                                             featureChannelCount:featureChannelCount
                                                                                       batchSize:batchSize
                                                                                  sortedSequences:YES
@@ -1001,19 +1001,19 @@ static double CharonMLCRandomNormal(CharonMLCRandom *random, double *spare)
 
 #pragma mark - MLCLayer
 
-@interface MLCLayer (CharonFactory)
-- (instancetype)charon_init;
-- (instancetype)charon_label:(NSString *)name;
+@interface MLCLayer (RevenantFactory)
+- (instancetype)revenant_init;
+- (instancetype)revenant_label:(NSString *)name;
 @end
 
-@implementation MLCLayer (CharonFactory)
+@implementation MLCLayer (RevenantFactory)
 
-- (instancetype)charon_init
+- (instancetype)revenant_init
 {
     return [super init];
 }
 
-- (instancetype)charon_label:(NSString *)name
+- (instancetype)revenant_label:(NSString *)name
 {
     self.label = name;
     return self;
@@ -1021,11 +1021,11 @@ static double CharonMLCRandomNormal(CharonMLCRandom *random, double *spare)
 
 @end
 
-static NSUInteger CharonMLCLayerCounter = 0;
+static NSUInteger RevenantMLCLayerCounter = 0;
 
-NSUInteger CharonMLCNextLayerID(void)
+NSUInteger RevenantMLCNextLayerID(void)
 {
-    return CharonMLCLayerCounter++;
+    return RevenantMLCLayerCounter++;
 }
 
 @implementation MLCLayer {

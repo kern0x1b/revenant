@@ -1,12 +1,12 @@
-#import "CharonTransitionCoordinator.h"
+#import "RevenantTransitionCoordinator.h"
 #import <objc/runtime.h>
 
-NSTimeInterval charon_default_duration(BOOL modal)
+NSTimeInterval revenant_default_duration(BOOL modal)
 {
     return modal ? 0.4 : 0.35;
 }
 
-@implementation CharonTransitionCoordinator {
+@implementation RevenantTransitionCoordinator {
     __weak UIViewController *_from;
     __weak UIViewController *_to;
     UIView *_container;
@@ -96,23 +96,23 @@ NSTimeInterval charon_default_duration(BOOL modal)
     [_interactionHandlers addObject:[handler copy]];
 }
 
-- (void)charon_setInteractive:(BOOL)interactive
+- (void)revenant_setInteractive:(BOOL)interactive
 {
     _interactive = interactive;
     _initiallyInteractive = interactive;
 }
 
-- (void)charon_setCancelled:(BOOL)cancelled
+- (void)revenant_setCancelled:(BOOL)cancelled
 {
     _cancelled = cancelled;
 }
 
-- (void)charon_setPercent:(CGFloat)percent
+- (void)revenant_setPercent:(CGFloat)percent
 {
     _percent = percent;
 }
 
-- (void)charon_interactionEndedCancelled:(BOOL)cancelled
+- (void)revenant_interactionEndedCancelled:(BOOL)cancelled
 {
     _interactive = NO;
     _cancelled = cancelled;

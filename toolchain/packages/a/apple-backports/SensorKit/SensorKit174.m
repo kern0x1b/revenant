@@ -1,86 +1,86 @@
-#import "CharonSensorKit.h"
-#import "CharonSensorKitValue.h"
-#import "../CharonValueStore.h"
+#import "RevenantSensorKit.h"
+#import "RevenantSensorKitValue.h"
+#import "../RevenantValueStore.h"
 
 @implementation SRElectrocardiogramData
-CHARON_SENSORKIT_UNCREATABLE_NEW_AND_INIT(@"")
+REVENANT_SENSORKIT_UNCREATABLE_NEW_AND_INIT(@"")
 @dynamic flags, value;
-CHARON_SCALAR_PROPERTY(SRElectrocardiogramDataFlags, flags)
-CHARON_VALUE_PROPERTY(NSMeasurement *, value)
+REVENANT_SCALAR_PROPERTY(SRElectrocardiogramDataFlags, flags)
+REVENANT_VALUE_PROPERTY(NSMeasurement *, value)
 @end
-@implementation SRElectrocardiogramData (CharonSensorKitValue)
-CHARON_SENSORKIT_VALUE_STORE_IMPLEMENTATION
+@implementation SRElectrocardiogramData (RevenantSensorKitValue)
+REVENANT_SENSORKIT_VALUE_STORE_IMPLEMENTATION
 @end
 @implementation SRElectrocardiogramSample
-CHARON_SENSORKIT_UNCREATABLE_NEW_AND_INIT(@"")
+REVENANT_SENSORKIT_UNCREATABLE_NEW_AND_INIT(@"")
 @dynamic date, frequency, session, lead, data;
-CHARON_VALUE_PROPERTY(NSDate *, date)
-CHARON_VALUE_PROPERTY(NSMeasurement *, frequency)
-CHARON_VALUE_PROPERTY(SRElectrocardiogramSession *, session)
-CHARON_SCALAR_PROPERTY(SRElectrocardiogramLead, lead)
-CHARON_VALUE_PROPERTY(NSArray *, data)
+REVENANT_VALUE_PROPERTY(NSDate *, date)
+REVENANT_VALUE_PROPERTY(NSMeasurement *, frequency)
+REVENANT_VALUE_PROPERTY(SRElectrocardiogramSession *, session)
+REVENANT_SCALAR_PROPERTY(SRElectrocardiogramLead, lead)
+REVENANT_VALUE_PROPERTY(NSArray *, data)
 @end
-@implementation SRElectrocardiogramSample (CharonSensorKitValue)
-CHARON_SENSORKIT_VALUE_STORE_IMPLEMENTATION
+@implementation SRElectrocardiogramSample (RevenantSensorKitValue)
+REVENANT_SENSORKIT_VALUE_STORE_IMPLEMENTATION
 @end
 @implementation SRElectrocardiogramSession
-CHARON_SENSORKIT_UNCREATABLE_NEW_AND_INIT(@"")
+REVENANT_SENSORKIT_UNCREATABLE_NEW_AND_INIT(@"")
 @dynamic state, sessionGuidance, identifier;
-CHARON_SCALAR_PROPERTY(SRElectrocardiogramSessionState, state)
-CHARON_SCALAR_PROPERTY(SRElectrocardiogramSessionGuidance, sessionGuidance)
-CHARON_VALUE_PROPERTY(NSString *, identifier)
+REVENANT_SCALAR_PROPERTY(SRElectrocardiogramSessionState, state)
+REVENANT_SCALAR_PROPERTY(SRElectrocardiogramSessionGuidance, sessionGuidance)
+REVENANT_VALUE_PROPERTY(NSString *, identifier)
 @end
-@implementation SRElectrocardiogramSession (CharonSensorKitValue)
-CHARON_SENSORKIT_VALUE_STORE_IMPLEMENTATION
+@implementation SRElectrocardiogramSession (RevenantSensorKitValue)
+REVENANT_SENSORKIT_VALUE_STORE_IMPLEMENTATION
 @end
 @implementation SRPhotoplethysmogramAccelerometerSample
 @dynamic nanosecondsSinceStart, samplingFrequency, x, y, z;
-CHARON_SCALAR_PROPERTY(int64_t, nanosecondsSinceStart)
-CHARON_VALUE_PROPERTY(NSMeasurement *, samplingFrequency)
-CHARON_VALUE_PROPERTY(NSMeasurement *, x)
-CHARON_VALUE_PROPERTY(NSMeasurement *, y)
-CHARON_VALUE_PROPERTY(NSMeasurement *, z)
+REVENANT_SCALAR_PROPERTY(int64_t, nanosecondsSinceStart)
+REVENANT_VALUE_PROPERTY(NSMeasurement *, samplingFrequency)
+REVENANT_VALUE_PROPERTY(NSMeasurement *, x)
+REVENANT_VALUE_PROPERTY(NSMeasurement *, y)
+REVENANT_VALUE_PROPERTY(NSMeasurement *, z)
 @end
-@implementation SRPhotoplethysmogramAccelerometerSample (CharonSensorKitValue)
-CHARON_SENSORKIT_VALUE_STORE_IMPLEMENTATION
+@implementation SRPhotoplethysmogramAccelerometerSample (RevenantSensorKitValue)
+REVENANT_SENSORKIT_VALUE_STORE_IMPLEMENTATION
 @end
 @implementation SRPhotoplethysmogramOpticalSample
 @dynamic emitter, activePhotodiodeIndexes, signalIdentifier, nominalWavelength, effectiveWavelength, samplingFrequency, nanosecondsSinceStart, backgroundNoiseOffset, conditions;
-CHARON_SCALAR_PROPERTY(NSInteger, emitter)
-CHARON_VALUE_PROPERTY(NSIndexSet *, activePhotodiodeIndexes)
-CHARON_SCALAR_PROPERTY(NSInteger, signalIdentifier)
-CHARON_VALUE_PROPERTY(NSMeasurement *, nominalWavelength)
-CHARON_VALUE_PROPERTY(NSMeasurement *, effectiveWavelength)
-CHARON_VALUE_PROPERTY(NSMeasurement *, samplingFrequency)
-CHARON_SCALAR_PROPERTY(int64_t, nanosecondsSinceStart)
-CHARON_VALUE_PROPERTY(NSNumber *, backgroundNoiseOffset)
-CHARON_VALUE_PROPERTY(NSArray *, conditions)
--(NSNumber *)backgroundNoise { return (NSNumber *)[self charon_valueForKey:@"backgroundNoise"]; }
--(void)charon_setBackgroundNoise:(NSNumber *)value { [self charon_setValue:value forKey:@"backgroundNoise"]; }
--(NSNumber *)normalizedReflectance { return (NSNumber *)[self charon_valueForKey:@"normalizedReflectance"]; }
--(void)charon_setNormalizedReflectance:(NSNumber *)value { [self charon_setValue:value forKey:@"normalizedReflectance"]; }
--(NSNumber *)pinkNoise { return (NSNumber *)[self charon_valueForKey:@"pinkNoise"]; }
--(void)charon_setPinkNoise:(NSNumber *)value { [self charon_setValue:value forKey:@"pinkNoise"]; }
--(NSNumber *)whiteNoise { return (NSNumber *)[self charon_valueForKey:@"whiteNoise"]; }
--(void)charon_setWhiteNoise:(NSNumber *)value { [self charon_setValue:value forKey:@"whiteNoise"]; }
+REVENANT_SCALAR_PROPERTY(NSInteger, emitter)
+REVENANT_VALUE_PROPERTY(NSIndexSet *, activePhotodiodeIndexes)
+REVENANT_SCALAR_PROPERTY(NSInteger, signalIdentifier)
+REVENANT_VALUE_PROPERTY(NSMeasurement *, nominalWavelength)
+REVENANT_VALUE_PROPERTY(NSMeasurement *, effectiveWavelength)
+REVENANT_VALUE_PROPERTY(NSMeasurement *, samplingFrequency)
+REVENANT_SCALAR_PROPERTY(int64_t, nanosecondsSinceStart)
+REVENANT_VALUE_PROPERTY(NSNumber *, backgroundNoiseOffset)
+REVENANT_VALUE_PROPERTY(NSArray *, conditions)
+-(NSNumber *)backgroundNoise { return (NSNumber *)[self revenant_valueForKey:@"backgroundNoise"]; }
+-(void)revenant_setBackgroundNoise:(NSNumber *)value { [self revenant_setValue:value forKey:@"backgroundNoise"]; }
+-(NSNumber *)normalizedReflectance { return (NSNumber *)[self revenant_valueForKey:@"normalizedReflectance"]; }
+-(void)revenant_setNormalizedReflectance:(NSNumber *)value { [self revenant_setValue:value forKey:@"normalizedReflectance"]; }
+-(NSNumber *)pinkNoise { return (NSNumber *)[self revenant_valueForKey:@"pinkNoise"]; }
+-(void)revenant_setPinkNoise:(NSNumber *)value { [self revenant_setValue:value forKey:@"pinkNoise"]; }
+-(NSNumber *)whiteNoise { return (NSNumber *)[self revenant_valueForKey:@"whiteNoise"]; }
+-(void)revenant_setWhiteNoise:(NSNumber *)value { [self revenant_setValue:value forKey:@"whiteNoise"]; }
 
 @end
-@implementation SRPhotoplethysmogramOpticalSample (CharonSensorKitValue)
-CHARON_SENSORKIT_VALUE_STORE_IMPLEMENTATION
+@implementation SRPhotoplethysmogramOpticalSample (RevenantSensorKitValue)
+REVENANT_SENSORKIT_VALUE_STORE_IMPLEMENTATION
 @end
 @implementation SRPhotoplethysmogramSample
-CHARON_SENSORKIT_UNCREATABLE_NEW_AND_INIT(@"")
+REVENANT_SENSORKIT_UNCREATABLE_NEW_AND_INIT(@"")
 @dynamic startDate, nanosecondsSinceStart, usage, opticalSamples, accelerometerSamples, temperature;
-CHARON_VALUE_PROPERTY(NSDate *, startDate)
-CHARON_SCALAR_PROPERTY(int64_t, nanosecondsSinceStart)
-CHARON_VALUE_PROPERTY(NSArray *, usage)
-CHARON_VALUE_PROPERTY(NSArray *, opticalSamples)
-CHARON_VALUE_PROPERTY(NSArray *, accelerometerSamples)
-CHARON_VALUE_PROPERTY(NSMeasurement *, temperature)
+REVENANT_VALUE_PROPERTY(NSDate *, startDate)
+REVENANT_SCALAR_PROPERTY(int64_t, nanosecondsSinceStart)
+REVENANT_VALUE_PROPERTY(NSArray *, usage)
+REVENANT_VALUE_PROPERTY(NSArray *, opticalSamples)
+REVENANT_VALUE_PROPERTY(NSArray *, accelerometerSamples)
+REVENANT_VALUE_PROPERTY(NSMeasurement *, temperature)
 @end
-@implementation SRPhotoplethysmogramSample (CharonSensorKitValue)
-CHARON_SENSORKIT_VALUE_STORE_IMPLEMENTATION
+@implementation SRPhotoplethysmogramSample (RevenantSensorKitValue)
+REVENANT_SENSORKIT_VALUE_STORE_IMPLEMENTATION
 @end
 
-#define CHARON_SENSORKIT_NAMES_17_4
-#import "CharonSensorKitNames.h"
+#define REVENANT_SENSORKIT_NAMES_17_4
+#import "RevenantSensorKitNames.h"

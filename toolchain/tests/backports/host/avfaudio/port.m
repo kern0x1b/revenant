@@ -2,7 +2,7 @@
 #import <AudioToolbox/AudioToolbox.h>
 #import <AVFAudio/AVFAudio.h>
 
-@interface charon_host_AUAudioUnit : NSObject
+@interface revenant_host_AUAudioUnit : NSObject
 @property (readonly) id inputBusses;
 @property (readonly) id outputBusses;
 - (instancetype)initWithComponentDescription:(AudioComponentDescription)description error:(NSError **)error;
@@ -17,24 +17,24 @@
 - (AudioUnit)audioUnit;
 @end
 
-@interface charon_host_AUAudioUnitBus : NSObject
+@interface revenant_host_AUAudioUnitBus : NSObject
 @property (readonly) NSArray<NSNumber *> *supportedChannelLayoutTags;
 @property (readonly) double latency;
 @property (readonly, copy) AVAudioFormat *format;
 - (BOOL)setFormat:(AVAudioFormat *)format error:(NSError **)error;
 @end
 
-@interface charon_host_AUAudioUnitBusArray : NSObject
+@interface revenant_host_AUAudioUnitBusArray : NSObject
 - (id)objectAtIndexedSubscript:(NSUInteger)index;
 - (NSUInteger)count;
 @end
 
-@interface charon_host_AUParameterTree : NSObject
+@interface revenant_host_AUParameterTree : NSObject
 @property (readonly) NSArray *allParameters;
 - (id)parameterWithAddress:(AUParameterAddress)address;
 @end
 
-@interface charon_host_AVAudioChannelLayout : NSObject
+@interface revenant_host_AVAudioChannelLayout : NSObject
 - (instancetype)initWithLayout:(const AudioChannelLayout *)layout;
 @property (readonly) AudioChannelLayoutTag layoutTag;
 @property (readonly) AVAudioChannelCount channelCount;
@@ -50,7 +50,7 @@ static void check(NSString *what, BOOL held)
     else { failures++; printf("FAIL %s\n", what.UTF8String); }
 }
 
-static AudioComponentDescription CharonFirstComponentOfType(OSType type)
+static AudioComponentDescription RevenantFirstComponentOfType(OSType type)
 {
     AudioComponentDescription any = {0};
     any.componentType = type;
@@ -66,11 +66,11 @@ typedef struct {
     BOOL raised;
     AudioChannelLayoutTag tag;
     AVAudioChannelCount channels;
-} CharonLayoutAnswer;
+} RevenantLayoutAnswer;
 
-static CharonLayoutAnswer CharonHostLayoutAnswer(const AudioChannelLayout *input)
+static RevenantLayoutAnswer RevenantHostLayoutAnswer(const AudioChannelLayout *input)
 {
-    CharonLayoutAnswer answer = {0};
+    RevenantLayoutAnswer answer = {0};
     @try {
         AVAudioChannelLayout *object = [[AVAudioChannelLayout alloc] initWithLayout:input];
         if (object != nil) {
@@ -84,11 +84,11 @@ static CharonLayoutAnswer CharonHostLayoutAnswer(const AudioChannelLayout *input
     return answer;
 }
 
-static CharonLayoutAnswer CharonPortLayoutAnswer(const AudioChannelLayout *input)
+static RevenantLayoutAnswer RevenantPortLayoutAnswer(const AudioChannelLayout *input)
 {
-    CharonLayoutAnswer answer = {0};
+    RevenantLayoutAnswer answer = {0};
     @try {
-        charon_host_AVAudioChannelLayout *object = [[charon_host_AVAudioChannelLayout alloc] initWithLayout:input];
+        revenant_host_AVAudioChannelLayout *object = [[revenant_host_AVAudioChannelLayout alloc] initWithLayout:input];
         if (object != nil) {
             answer.answered = YES;
             answer.tag = object.layoutTag;
@@ -100,19 +100,19 @@ static CharonLayoutAnswer CharonPortLayoutAnswer(const AudioChannelLayout *input
     return answer;
 }
 
-static NSString *CharonDescribeLayoutAnswer(CharonLayoutAnswer answer)
+static NSString *RevenantDescribeLayoutAnswer(RevenantLayoutAnswer answer)
 {
     if (answer.raised) { return @"raised"; }
     if (!answer.answered) { return @"nil"; }
     return [NSString stringWithFormat:@"object tag 0x%08x channels %u", (unsigned)answer.tag, (unsigned)answer.channels];
 }
 
-static void CharonCompareLayout(NSString *name, const AudioChannelLayout *input)
+static void RevenantCompareLayout(NSString *name, const AudioChannelLayout *input)
 {
-    CharonLayoutAnswer host = CharonHostLayoutAnswer(input);
-    CharonLayoutAnswer port = CharonPortLayoutAnswer(input);
+    RevenantLayoutAnswer host = RevenantHostLayoutAnswer(input);
+    RevenantLayoutAnswer port = RevenantPortLayoutAnswer(input);
     printf("stage -initWithLayout: %s: host %s; port %s\n", name.UTF8String,
-           CharonDescribeLayoutAnswer(host).UTF8String, CharonDescribeLayoutAnswer(port).UTF8String);
+           RevenantDescribeLayoutAnswer(host).UTF8String, RevenantDescribeLayoutAnswer(port).UTF8String);
     if (input == NULL) {
         check([NSString stringWithFormat:@"-initWithLayout: %@: the port answers nil, and the host does too", name],
               !port.answered && !port.raised && !host.answered && !host.raised);
@@ -129,9 +129,9 @@ static void CharonCompareLayout(NSString *name, const AudioChannelLayout *input)
 int main(void)
 {
     @autoreleasepool {
-        AudioComponentDescription described = CharonFirstComponentOfType(kAudioUnitType_Effect);
+        AudioComponentDescription described = RevenantFirstComponentOfType(kAudioUnitType_Effect);
         if (described.componentType == 0) {
-            described = CharonFirstComponentOfType(kAudioUnitType_FormatConverter);
+            described = RevenantFirstComponentOfType(kAudioUnitType_FormatConverter);
         }
         AudioComponentDescription mixer = {0};
         {
@@ -172,9 +172,9 @@ int main(void)
         memcpy(sub, &subtype, 4);
         printf("stage both are asked about type 'xfua' subtype '%s'\n", sub);
 
-        charon_host_AUAudioUnit *port = [[charon_host_AUAudioUnit alloc] initWithComponentDescription:described error:NULL];
-        charon_host_AUAudioUnit *portOnMixer = mixer.componentType != 0
-            ? [[charon_host_AUAudioUnit alloc] initWithComponentDescription:mixer error:NULL] : nil;
+        revenant_host_AUAudioUnit *port = [[revenant_host_AUAudioUnit alloc] initWithComponentDescription:described error:NULL];
+        revenant_host_AUAudioUnit *portOnMixer = mixer.componentType != 0
+            ? [[revenant_host_AUAudioUnit alloc] initWithComponentDescription:mixer error:NULL] : nil;
         check(@"the port instantiates a real effect", port != nil);
         check(@"the port instantiates a real mixer for the channel pair", mixer.componentType == 0 || portOnMixer != nil);
         AUAudioUnit *host = [[AUAudioUnit alloc] initWithComponentDescription:described error:NULL];
@@ -184,7 +184,7 @@ int main(void)
             return 1;
         }
 
-        charon_host_AUAudioUnit *channelUnit = portOnMixer != nil ? portOnMixer : port;
+        revenant_host_AUAudioUnit *channelUnit = portOnMixer != nil ? portOnMixer : port;
         SInt32 pair[2] = {0, 0};
         UInt32 pairSize = sizeof(pair);
         OSStatus pairStatus = AudioUnitGetProperty(channelUnit.audioUnit,
@@ -255,9 +255,9 @@ int main(void)
         AVAudioFormat *portFormat = [[AVAudioFormat alloc] initStandardFormatWithSampleRate:44100.0 channels:2];
         NSUInteger bussesSet = 0;
         for (id array in @[port.inputBusses, port.outputBusses]) {
-            charon_host_AUAudioUnitBusArray *list = array;
+            revenant_host_AUAudioUnitBusArray *list = array;
             for (NSUInteger index = 0; index < list.count; index++) {
-                charon_host_AUAudioUnitBus *bus = [list objectAtIndexedSubscript:index];
+                revenant_host_AUAudioUnitBus *bus = [list objectAtIndexedSubscript:index];
                 if (bus == nil) { continue; }
                 NSError *formatError = nil;
                 if ([bus setFormat:portFormat error:&formatError]) { bussesSet++; }
@@ -351,10 +351,10 @@ int main(void)
         AudioChannelLayout stereo;
         memset(&stereo, 0, sizeof(stereo));
         stereo.mChannelLayoutTag = kAudioChannelLayoutTag_Stereo;
-        CharonCompareLayout(@"NULL layout", NULL);
-        CharonCompareLayout(@"tag 0 (UseChannelDescriptions, no descriptions)", &tagZero);
-        CharonCompareLayout(@"unknown tag 0xFFFF0003", &unknownTag);
-        CharonCompareLayout(@"Stereo (control)", &stereo);
+        RevenantCompareLayout(@"NULL layout", NULL);
+        RevenantCompareLayout(@"tag 0 (UseChannelDescriptions, no descriptions)", &tagZero);
+        RevenantCompareLayout(@"unknown tag 0xFFFF0003", &unknownTag);
+        RevenantCompareLayout(@"Stereo (control)", &stereo);
 
         printf("checks=%d failures=%d\n", checks, failures);
     }

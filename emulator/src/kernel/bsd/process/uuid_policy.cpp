@@ -13,7 +13,7 @@
 
 #include <algorithm>
 
-namespace shade::kernel_bsd::uuid_policy {
+namespace emulator::kernel_bsd::uuid_policy {
 
 std::uint32_t control(AddressSpace& memory, const ProcessContext& caller,
     std::uint32_t operation, std::uint32_t uuid_address,

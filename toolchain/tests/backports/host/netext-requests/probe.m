@@ -50,13 +50,13 @@ static void object(const char *name, const char *getter, const char *setter)
     id value = sendId(make_request(), g);
     printf("fresh.%s\t%s\n", name, value ? "an object" : "(nil)");
     NSMutableURLRequest *mutable = [make_request() mutableCopy];
-    sendIdSet(mutable, s, @"charon-probe");
+    sendIdSet(mutable, s, @"revenant-probe");
     id after = sendId(mutable, g);
-    printf("roundtrip.%s\t%s\n", name, [after isEqual:@"charon-probe"] ? "read back" : "LOST");
-    printf("copy.%s\t%s\n", name, [sendId([mutable copy], g) isEqual:@"charon-probe"] ? "carried" : "LOST");
+    printf("roundtrip.%s\t%s\n", name, [after isEqual:@"revenant-probe"] ? "read back" : "LOST");
+    printf("copy.%s\t%s\n", name, [sendId([mutable copy], g) isEqual:@"revenant-probe"] ? "carried" : "LOST");
     NSMutableURLRequest *handed = [make_request() mutableCopy];
-    sendIdSet(handed, s, @"charon-probe");
-    printf("mutablecopy.%s\t%s\n", name, [sendId([handed copy], g) isEqual:@"charon-probe"] ? "carried" : "LOST");
+    sendIdSet(handed, s, @"revenant-probe");
+    printf("mutablecopy.%s\t%s\n", name, [sendId([handed copy], g) isEqual:@"revenant-probe"] ? "carried" : "LOST");
     printf("image.%s.get\t%s\n", name, image_of(g));
     printf("image.%s.set\t%s\n", name, image_of(s));
 }

@@ -1,17 +1,17 @@
 #include "system_function.h"
 
-static _Atomic(uintptr_t) charon_system_flsll;
+static _Atomic(uintptr_t) revenant_system_flsll;
 
 __attribute__((constructor))
-static void charon_resolve_flsll(void)
+static void revenant_resolve_flsll(void)
 {
-    charon_system_function(&charon_system_flsll, CHARON_LIBSYSTEM_PLATFORM, "flsll");
+    revenant_system_function(&revenant_system_flsll, REVENANT_LIBSYSTEM_PLATFORM, "flsll");
 }
 
 __attribute__((visibility("default")))
 int flsll(long long mask)
 {
-    int (*system)(long long) = charon_system_function(&charon_system_flsll, CHARON_LIBSYSTEM_PLATFORM, "flsll");
+    int (*system)(long long) = revenant_system_function(&revenant_system_flsll, REVENANT_LIBSYSTEM_PLATFORM, "flsll");
     if (system)
         return system(mask);
     unsigned long long bits = (unsigned long long)mask;

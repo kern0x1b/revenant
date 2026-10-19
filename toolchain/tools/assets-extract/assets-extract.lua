@@ -1,7 +1,7 @@
 function tool()
     local source = path.join(os.scriptdir(), "assets-extract.m")
     local workspace = import("workspace", {rootdir = path.join(os.scriptdir(), "..", "..", "modules"), anonymous = true})
-    local cache = os.getenv("CHARON_ASSETS_EXTRACT_CACHE")
+    local cache = os.getenv("REVENANT_ASSETS_EXTRACT_CACHE")
     if not cache or cache == "" then
         cache = workspace.run("assets-extract")
     end

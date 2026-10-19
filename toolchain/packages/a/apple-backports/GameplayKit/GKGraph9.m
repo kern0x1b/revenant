@@ -1,14 +1,14 @@
 #import <Foundation/Foundation.h>
 #import <GameplayKit/GameplayKit.h>
 
-#import "CharonGKGraph.h"
+#import "RevenantGKGraph.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
 #pragma clang diagnostic ignored "-Wobjc-designated-initializers"
 
 @implementation GKGraphNode {
-    NSMutableArray *_charonEdges;
+    NSMutableArray *_revenantEdges;
 }
 
 - (id)copyWithZone:(NSZone *)zone
@@ -17,19 +17,19 @@
     return [[self class] alloc];
 }
 
-- (vector_float2)charon_positionToCopy { return (vector_float2){0, 0}; }
+- (vector_float2)revenant_positionToCopy { return (vector_float2){0, 0}; }
 
-- (NSMutableArray *)charon_edges
+- (NSMutableArray *)revenant_edges
 {
-    if (_charonEdges == nil) {
-        _charonEdges = [NSMutableArray array];
+    if (_revenantEdges == nil) {
+        _revenantEdges = [NSMutableArray array];
     }
-    return _charonEdges;
+    return _revenantEdges;
 }
 
-- (NSArray *)connectedNodes { return [[self charon_edges] copy]; }
+- (NSArray *)connectedNodes { return [[self revenant_edges] copy]; }
 
-- (void)charon_setEdges:(NSArray *)edges { _charonEdges = [edges mutableCopy]; }
+- (void)revenant_setEdges:(NSArray *)edges { _revenantEdges = [edges mutableCopy]; }
 
 - (void)addConnectionsToNodes:(NSArray *)nodes bidirectional:(BOOL)bidirectional
 {
@@ -37,7 +37,7 @@
         if (node == nil) {
             continue;
         }
-        [[self charon_edges] addObject:node];
+        [[self revenant_edges] addObject:node];
         if (bidirectional) {
             [node addConnectionsToNodes:@[self] bidirectional:NO];
         }
@@ -46,7 +46,7 @@
 
 - (void)removeConnectionsToNodes:(NSArray *)nodes bidirectional:(BOOL)bidirectional
 {
-    NSMutableArray *edges = [self charon_edges];
+    NSMutableArray *edges = [self revenant_edges];
     for (GKGraphNode *node in nodes) {
         NSUInteger index = [edges indexOfObjectIdenticalTo:node];
         while (index != NSNotFound) {
@@ -67,18 +67,18 @@
     if (goalNode == nil) {
         return nil;
     }
-    NSArray *path = CharonGKFindPath([self charon_searchableNodes], self, goalNode);
+    NSArray *path = RevenantGKFindPath([self revenant_searchableNodes], self, goalNode);
     return path == nil ? [NSArray array] : path;
 }
 
-- (NSArray *)charon_searchableNodes
+- (NSArray *)revenant_searchableNodes
 {
     NSMutableArray *seen = [NSMutableArray arrayWithObject:self];
     NSMutableArray *queue = [NSMutableArray arrayWithObject:self];
     while ([queue count] > 0) {
         GKGraphNode *current = [queue objectAtIndex:0];
         [queue removeObjectAtIndex:0];
-        for (GKGraphNode *next in [current charon_edges]) {
+        for (GKGraphNode *next in [current revenant_edges]) {
             if (next != nil && [seen indexOfObjectIdenticalTo:next] == NSNotFound) {
                 [seen addObject:next];
                 [queue addObject:next];
@@ -93,7 +93,7 @@
     if (startNode == nil) {
         return nil;
     }
-    NSArray *path = CharonGKFindPath([self charon_searchableNodes], startNode, self);
+    NSArray *path = RevenantGKFindPath([self revenant_searchableNodes], startNode, self);
     return path == nil ? [NSArray array] : path;
 }
 
@@ -102,10 +102,10 @@
     self = [super init];
     if (self) {
         NSSet *classes = [NSSet setWithObjects:[NSArray class], [NSObject class], nil];
-        NSArray *decoded = [coder decodeObjectOfClasses:classes forKey:CharonGKGraphNodesKey];
+        NSArray *decoded = [coder decodeObjectOfClasses:classes forKey:RevenantGKGraphNodesKey];
         for (id node in decoded) {
             if ([node isKindOfClass:[GKGraphNode class]]) {
-                [[self charon_edges] addObject:node];
+                [[self revenant_edges] addObject:node];
             }
         }
     }
@@ -114,7 +114,7 @@
 
 - (void)encodeWithCoder:(NSCoder *)coder
 {
-    [coder encodeObject:[self charon_edges] forKey:CharonGKGraphNodesKey];
+    [coder encodeObject:[self revenant_edges] forKey:RevenantGKGraphNodesKey];
 }
 
 + (BOOL)supportsSecureCoding { return YES; }
@@ -139,7 +139,7 @@
 - (vector_float2)position { return _position; }
 - (void)setPosition:(vector_float2)position { _position = position; }
 
-- (vector_float2)charon_positionToCopy { return _position; }
+- (vector_float2)revenant_positionToCopy { return _position; }
 
 - (id)copyWithZone:(NSZone *)zone
 {
@@ -153,7 +153,7 @@
     if (![node isKindOfClass:[GKGraphNode2D class]]) {
         return [super costToNode:node];
     }
-    return CharonGKLength2(_position, ((GKGraphNode2D *)node).position);
+    return RevenantGKLength2(_position, ((GKGraphNode2D *)node).position);
 }
 
 - (float)estimatedCostToNode:(GKGraphNode *)node { return [self costToNode:node]; }
@@ -164,7 +164,7 @@
     if (self) {
         _position = (vector_float2){0, 0};
         NSSet *classes = [NSSet setWithObjects:[NSArray class], [NSNumber class], nil];
-        NSArray *held = [coder decodeObjectOfClasses:classes forKey:CharonGKGraphNodePositionKey];
+        NSArray *held = [coder decodeObjectOfClasses:classes forKey:RevenantGKGraphNodePositionKey];
         if ([held count] == 2) {
             _position = (vector_float2){[[held objectAtIndex:0] floatValue],
                                         [[held objectAtIndex:1] floatValue]};
@@ -177,7 +177,7 @@
 {
     [super encodeWithCoder:coder];
     [coder encodeObject:@[[NSNumber numberWithFloat:_position.x], [NSNumber numberWithFloat:_position.y]]
-                 forKey:CharonGKGraphNodePositionKey];
+                 forKey:RevenantGKGraphNodePositionKey];
 }
 
 + (BOOL)supportsSecureCoding { return YES; }
@@ -216,7 +216,7 @@
     if (![node isKindOfClass:[GKGridGraphNode class]]) {
         return [super costToNode:node];
     }
-    return CharonGKCellDistance(_gridPosition, ((GKGridGraphNode *)node).gridPosition);
+    return RevenantGKCellDistance(_gridPosition, ((GKGridGraphNode *)node).gridPosition);
 }
 
 - (float)estimatedCostToNode:(GKGraphNode *)node { return [self costToNode:node]; }
@@ -227,7 +227,7 @@
     if (self) {
         _gridPosition = (vector_int2){0, 0};
         NSSet *classes = [NSSet setWithObjects:[NSArray class], [NSNumber class], nil];
-        NSArray *held = [coder decodeObjectOfClasses:classes forKey:CharonGKGraphNodePositionKey];
+        NSArray *held = [coder decodeObjectOfClasses:classes forKey:RevenantGKGraphNodePositionKey];
         if ([held count] == 2) {
             _gridPosition = (vector_int2){[[held objectAtIndex:0] intValue],
                                           [[held objectAtIndex:1] intValue]};
@@ -240,7 +240,7 @@
 {
     [super encodeWithCoder:coder];
     [coder encodeObject:@[[NSNumber numberWithInt:_gridPosition.x], [NSNumber numberWithInt:_gridPosition.y]]
-                 forKey:CharonGKGraphNodePositionKey];
+                 forKey:RevenantGKGraphNodePositionKey];
 }
 
 + (BOOL)supportsSecureCoding { return YES; }
@@ -248,27 +248,27 @@
 @end
 
 @implementation GKGraph {
-    NSMutableArray *_charonNodes;
+    NSMutableArray *_revenantNodes;
 }
 
 - (instancetype)initWithNodes:(NSArray *)nodes
 {
     self = [super init];
     if (self) {
-        _charonNodes = [nodes mutableCopy] ?: [NSMutableArray array];
+        _revenantNodes = [nodes mutableCopy] ?: [NSMutableArray array];
     }
     return self;
 }
 
 + (instancetype)graphWithNodes:(NSArray *)nodes { return [[self alloc] initWithNodes:nodes]; }
 
-- (NSArray *)nodes { return [_charonNodes copy]; }
+- (NSArray *)nodes { return [_revenantNodes copy]; }
 
 - (void)addNodes:(NSArray *)nodes
 {
     for (GKGraphNode *node in nodes) {
         if (node != nil) {
-            [_charonNodes addObject:node];
+            [_revenantNodes addObject:node];
         }
     }
 }
@@ -276,11 +276,11 @@
 - (void)removeNodes:(NSArray *)nodes
 {
     for (GKGraphNode *node in nodes) {
-        if ([_charonNodes indexOfObjectIdenticalTo:node] == NSNotFound) {
+        if ([_revenantNodes indexOfObjectIdenticalTo:node] == NSNotFound) {
             continue;
         }
-        [_charonNodes removeObjectIdenticalTo:node];
-        for (GKGraphNode *other in [_charonNodes copy]) {
+        [_revenantNodes removeObjectIdenticalTo:node];
+        for (GKGraphNode *other in [_revenantNodes copy]) {
             [other removeConnectionsToNodes:@[node] bidirectional:NO];
         }
     }
@@ -291,18 +291,18 @@
     if (startNode == nil || endNode == nil) {
         return nil;
     }
-    NSArray *path = CharonGKFindPath([self charon_reachableNodes], startNode, endNode);
+    NSArray *path = RevenantGKFindPath([self revenant_reachableNodes], startNode, endNode);
     return path == nil ? [NSArray array] : path;
 }
 
 - (void)connectNodeToLowestCostNode:(GKGraphNode *)node bidirectional:(BOOL)bidirectional
 {
-    if (node == nil || [_charonNodes indexOfObjectIdenticalTo:node] == NSNotFound) {
+    if (node == nil || [_revenantNodes indexOfObjectIdenticalTo:node] == NSNotFound) {
         return;
     }
     GKGraphNode *lowest = nil;
     float lowestCost = INFINITY;
-    for (GKGraphNode *other in _charonNodes) {
+    for (GKGraphNode *other in _revenantNodes) {
         float cost = [node costToNode:other];
         if (lowest == nil || cost < lowestCost) {
             lowest = other;
@@ -317,7 +317,7 @@
 - (id)copyWithZone:(NSZone *)zone
 {
     (void)zone;
-    NSArray *reached = [self charon_reachableNodes];
+    NSArray *reached = [self revenant_reachableNodes];
     NSMutableDictionary *copies = [NSMutableDictionary dictionaryWithCapacity:[reached count]];
     for (GKGraphNode *node in reached) {
         id copied = [node copy];
@@ -327,7 +327,7 @@
     }
 
     NSMutableArray *nodes = [NSMutableArray array];
-    for (GKGraphNode *node in _charonNodes) {
+    for (GKGraphNode *node in _revenantNodes) {
         id copied = [copies objectForKey:[NSValue valueWithPointer:(__bridge const void *)node]];
         [nodes addObject:copied ?: node];
     }
@@ -335,23 +335,23 @@
     for (GKGraphNode *node in reached) {
         id copied = [copies objectForKey:[NSValue valueWithPointer:(__bridge const void *)node]];
         NSMutableArray *edges = [NSMutableArray array];
-        for (GKGraphNode *other in [node charon_edges]) {
+        for (GKGraphNode *other in [node revenant_edges]) {
             id copiedOther = [copies objectForKey:[NSValue valueWithPointer:(__bridge const void *)other]];
             if (copiedOther != nil) {
                 [edges addObject:copiedOther];
             }
         }
         if ([edges count] > 0) {
-            [copied charon_setEdges:edges];
+            [copied revenant_setEdges:edges];
         }
     }
     return answer;
 }
 
-- (NSArray *)charon_reachableNodes
+- (NSArray *)revenant_reachableNodes
 {
     NSMutableArray *seen = [NSMutableArray array];
-    NSMutableArray *queue = [NSMutableArray arrayWithArray:_charonNodes];
+    NSMutableArray *queue = [NSMutableArray arrayWithArray:_revenantNodes];
     while ([queue count] > 0) {
         GKGraphNode *current = [queue objectAtIndex:0];
         [queue removeObjectAtIndex:0];
@@ -359,7 +359,7 @@
             continue;
         }
         [seen addObject:current];
-        for (GKGraphNode *next in [current charon_edges]) {
+        for (GKGraphNode *next in [current revenant_edges]) {
             if (next != nil && [seen indexOfObjectIdenticalTo:next] == NSNotFound) {
                 [queue addObject:next];
             }
@@ -372,12 +372,12 @@
 {
     self = [super init];
     if (self) {
-        _charonNodes = [NSMutableArray array];
+        _revenantNodes = [NSMutableArray array];
         NSSet *classes = [NSSet setWithObjects:[NSArray class], [NSObject class], nil];
-        NSArray *decoded = [coder decodeObjectOfClasses:classes forKey:CharonGKGraphNodesKey];
+        NSArray *decoded = [coder decodeObjectOfClasses:classes forKey:RevenantGKGraphNodesKey];
         for (id node in decoded) {
             if ([node isKindOfClass:[GKGraphNode class]]) {
-                [_charonNodes addObject:node];
+                [_revenantNodes addObject:node];
             }
         }
     }
@@ -386,7 +386,7 @@
 
 - (void)encodeWithCoder:(NSCoder *)coder
 {
-    [coder encodeObject:_charonNodes forKey:CharonGKGraphNodesKey];
+    [coder encodeObject:_revenantNodes forKey:RevenantGKGraphNodesKey];
 }
 
 + (BOOL)supportsSecureCoding { return YES; }
@@ -398,8 +398,8 @@
     NSUInteger _gridWidth;
     NSUInteger _gridHeight;
     BOOL _diagonalsAllowed;
-    Class _charonNodeClass;
-    NSMutableDictionary *_charonCells;
+    Class _revenantNodeClass;
+    NSMutableDictionary *_revenantCells;
 }
 
 - (instancetype)initFromGridStartingAt:(vector_int2)position width:(int)width height:(int)height
@@ -418,14 +418,14 @@
         _gridWidth = width > 0 ? (NSUInteger)width : 0;
         _gridHeight = height > 0 ? (NSUInteger)height : 0;
         _diagonalsAllowed = diagonalsAllowed;
-        _charonNodeClass = nodeClass ?: [GKGridGraphNode class];
-        _charonCells = [NSMutableDictionary dictionaryWithCapacity:_gridWidth * _gridHeight];
+        _revenantNodeClass = nodeClass ?: [GKGridGraphNode class];
+        _revenantCells = [NSMutableDictionary dictionaryWithCapacity:_gridWidth * _gridHeight];
         NSMutableArray *nodes = [NSMutableArray arrayWithCapacity:_gridWidth * _gridHeight];
         for (NSUInteger y = 0; y < _gridHeight; y++) {
             for (NSUInteger x = 0; x < _gridWidth; x++) {
                 vector_int2 cell = (vector_int2){_gridOrigin.x + (int)x, _gridOrigin.y + (int)y};
-                GKGridGraphNode *node = [[_charonNodeClass alloc] initWithGridPosition:cell];
-                _charonCells[[self charon_keyForCell:cell]] = node;
+                GKGridGraphNode *node = [[_revenantNodeClass alloc] initWithGridPosition:cell];
+                _revenantCells[[self revenant_keyForCell:cell]] = node;
                 [nodes addObject:node];
             }
         }
@@ -481,14 +481,14 @@
                               diagonalsAllowed:diagonalsAllowed nodeClass:nodeClass];
 }
 
-- (NSString *)charon_keyForCell:(vector_int2)cell
+- (NSString *)revenant_keyForCell:(vector_int2)cell
 {
     return [NSString stringWithFormat:@"%d,%d", cell.x, cell.y];
 }
 
 - (GKGridGraphNode *)nodeAtGridPosition:(vector_int2)position
 {
-    GKGridGraphNode *node = [_charonCells objectForKey:[self charon_keyForCell:position]];
+    GKGridGraphNode *node = [_revenantCells objectForKey:[self revenant_keyForCell:position]];
     if (node == nil || ![node isKindOfClass:[GKGridGraphNode class]]) {
         return nil;
     }
@@ -528,15 +528,15 @@
 - (Class)classForGenericArgumentAtIndex:(NSUInteger)index
 {
     (void)index;
-    return _charonNodeClass;
+    return _revenantNodeClass;
 }
 
 - (instancetype)initWithCoder:(NSCoder *)coder
 {
     self = [super initWithCoder:coder];
     if (self) {
-        _charonNodeClass = [GKGridGraphNode class];
-        _charonCells = [NSMutableDictionary dictionary];
+        _revenantNodeClass = [GKGridGraphNode class];
+        _revenantCells = [NSMutableDictionary dictionary];
         _gridWidth = 0;
         _gridHeight = 0;
         NSInteger lowestX = 0;
@@ -547,7 +547,7 @@
                 continue;
             }
             vector_int2 cell = ((GKGridGraphNode *)node).gridPosition;
-            _charonCells[[self charon_keyForCell:cell]] = (GKGridGraphNode *)node;
+            _revenantCells[[self revenant_keyForCell:cell]] = (GKGridGraphNode *)node;
             NSInteger x = cell.x;
             NSInteger y = cell.y;
             if (first) {
@@ -640,8 +640,8 @@
 @end
 
 @implementation GKPolygonObstacle {
-    vector_float2 *_charonVertices;
-    NSUInteger _charonVertexCount;
+    vector_float2 *_revenantVertices;
+    NSUInteger _revenantVertexCount;
 }
 
 - (instancetype)init
@@ -656,13 +656,13 @@
 {
     self = [super init];
     if (self) {
-        _charonVertexCount = count;
+        _revenantVertexCount = count;
         if (count > 0 && points != NULL) {
-            _charonVertices = malloc(count * sizeof(vector_float2));
-            if (_charonVertices != NULL) {
-                memcpy(_charonVertices, points, count * sizeof(vector_float2));
+            _revenantVertices = malloc(count * sizeof(vector_float2));
+            if (_revenantVertices != NULL) {
+                memcpy(_revenantVertices, points, count * sizeof(vector_float2));
             } else {
-                _charonVertexCount = 0;
+                _revenantVertexCount = 0;
             }
         }
     }
@@ -676,23 +676,23 @@
 
 - (void)dealloc
 {
-    free(_charonVertices);
+    free(_revenantVertices);
 }
 
-- (NSUInteger)vertexCount { return _charonVertexCount; }
+- (NSUInteger)vertexCount { return _revenantVertexCount; }
 
 - (vector_float2)vertexAtIndex:(NSUInteger)index
 {
-    if (_charonVertices == NULL || index >= _charonVertexCount) {
+    if (_revenantVertices == NULL || index >= _revenantVertexCount) {
         return (vector_float2){0, 0};
     }
-    return _charonVertices[index];
+    return _revenantVertices[index];
 }
 
 - (instancetype)initWithCoder:(NSCoder *)coder
 {
     NSSet *classes = [NSSet setWithObjects:[NSArray class], [NSNumber class], nil];
-    NSArray *held = [coder decodeObjectOfClasses:classes forKey:CharonGKObstacleVerticesKey];
+    NSArray *held = [coder decodeObjectOfClasses:classes forKey:RevenantGKObstacleVerticesKey];
     size_t count = held == nil ? 0 : [held count];
     vector_float2 *points = count > 0 ? malloc(count * sizeof(vector_float2)) : NULL;
     for (size_t index = 0; index < count; index++) {
@@ -711,12 +711,12 @@
 
 - (void)encodeWithCoder:(NSCoder *)coder
 {
-    NSMutableArray *held = [NSMutableArray arrayWithCapacity:_charonVertexCount];
-    for (NSUInteger index = 0; index < _charonVertexCount; index++) {
-        [held addObject:@[[NSNumber numberWithFloat:_charonVertices[index].x],
-                          [NSNumber numberWithFloat:_charonVertices[index].y]]];
+    NSMutableArray *held = [NSMutableArray arrayWithCapacity:_revenantVertexCount];
+    for (NSUInteger index = 0; index < _revenantVertexCount; index++) {
+        [held addObject:@[[NSNumber numberWithFloat:_revenantVertices[index].x],
+                          [NSNumber numberWithFloat:_revenantVertices[index].y]]];
     }
-    [coder encodeObject:held forKey:CharonGKObstacleVerticesKey];
+    [coder encodeObject:held forKey:RevenantGKObstacleVerticesKey];
 }
 
 + (BOOL)supportsSecureCoding { return YES; }
@@ -726,12 +726,12 @@
 @implementation GKPath {
     float _radius;
     BOOL _cyclical;
-    vector_float3 *_charonPoints3;
-    vector_float2 *_charonPoints2;
-    NSUInteger _charonPointCount;
+    vector_float3 *_revenantPoints3;
+    vector_float2 *_revenantPoints2;
+    NSUInteger _revenantPointCount;
 }
 
-- (void)charon_raiseLessThanTwoPoints:(NSString *)reason
+- (void)revenant_raiseLessThanTwoPoints:(NSString *)reason
 {
     [NSException raise:NSInternalInconsistencyException format:@"%@", reason];
 }
@@ -740,7 +740,7 @@
                     cyclical:(BOOL)cyclical
 {
     if (count < 2) {
-        [self charon_raiseLessThanTwoPoints:@"GKPathLessThanTwoPointsException: GKPaths MUST be "
+        [self revenant_raiseLessThanTwoPoints:@"GKPathLessThanTwoPointsException: GKPaths MUST be "
                                             @"initialized with 2 or more points.  Single point paths "
                                             @"are not allowed"];
         return nil;
@@ -749,14 +749,14 @@
     if (self) {
         _radius = radius;
         _cyclical = cyclical;
-        _charonPointCount = count;
-        _charonPoints2 = malloc(count * sizeof(vector_float2));
-        if (_charonPoints2 == NULL) {
-            _charonPointCount = 0;
+        _revenantPointCount = count;
+        _revenantPoints2 = malloc(count * sizeof(vector_float2));
+        if (_revenantPoints2 == NULL) {
+            _revenantPointCount = 0;
             return self;
         }
         for (size_t index = 0; index < count; index++) {
-            _charonPoints2[index] = points[index];
+            _revenantPoints2[index] = points[index];
         }
     }
     return self;
@@ -772,7 +772,7 @@
 {
     NSUInteger count = graphNodes == nil ? 0 : [graphNodes count];
     if (count < 2) {
-        [self charon_raiseLessThanTwoPoints:@"GKPath: must be initialized with 2 or more graph nodes.  "
+        [self revenant_raiseLessThanTwoPoints:@"GKPath: must be initialized with 2 or more graph nodes.  "
                                             @"Single node paths are not allowed"];
         return nil;
     }
@@ -794,40 +794,40 @@
 
 - (float)radius { return _radius; }
 - (void)setRadius:(float)radius { _radius = radius; }
-- (NSUInteger)numPoints { return _charonPointCount; }
+- (NSUInteger)numPoints { return _revenantPointCount; }
 - (BOOL)isCyclical { return _cyclical; }
 - (void)setCyclical:(BOOL)cyclical { _cyclical = cyclical; }
 
 - (vector_float2)pointAtIndex:(NSUInteger)index
 {
-    if (_charonPoints2 != NULL && index < _charonPointCount) {
-        return _charonPoints2[index];
+    if (_revenantPoints2 != NULL && index < _revenantPointCount) {
+        return _revenantPoints2[index];
     }
-    if (_charonPoints3 != NULL && index < _charonPointCount) {
-        vector_float3 held = _charonPoints3[index];
+    if (_revenantPoints3 != NULL && index < _revenantPointCount) {
+        vector_float3 held = _revenantPoints3[index];
         return (vector_float2){held.x, held.z};
     }
     return (vector_float2){0, 0};
 }
 
-- (vector_float3)charon_float3AtIndex:(NSUInteger)index
+- (vector_float3)revenant_float3AtIndex:(NSUInteger)index
 {
-    if (_charonPoints3 != NULL && index < _charonPointCount) {
-        return _charonPoints3[index];
+    if (_revenantPoints3 != NULL && index < _revenantPointCount) {
+        return _revenantPoints3[index];
     }
-    if (_charonPoints2 != NULL && index < _charonPointCount) {
-        return (vector_float3){_charonPoints2[index].x, 0, _charonPoints2[index].y};
+    if (_revenantPoints2 != NULL && index < _revenantPointCount) {
+        return (vector_float3){_revenantPoints2[index].x, 0, _revenantPoints2[index].y};
     }
     return (vector_float3){0, 0, 0};
 }
 
-- (instancetype)charon_initWithFloat3Points:(vector_float3 *)points count:(size_t)count radius:(float)radius
+- (instancetype)revenant_initWithFloat3Points:(vector_float3 *)points count:(size_t)count radius:(float)radius
                                   cyclical:(BOOL)cyclical
 {
-    return [self initWithCharonFloat3Points:points count:count radius:radius cyclical:cyclical];
+    return [self initWithRevenantFloat3Points:points count:count radius:radius cyclical:cyclical];
 }
 
-- (instancetype)initWithCharonFloat3Points:(vector_float3 *)points count:(size_t)count radius:(float)radius
+- (instancetype)initWithRevenantFloat3Points:(vector_float3 *)points count:(size_t)count radius:(float)radius
                                   cyclical:(BOOL)cyclical
 {
     if (count < 2) {
@@ -839,22 +839,22 @@
     vector_float2 placeholders[2] = {{0, 0}, {0, 0}};
     self = [self initWithPoints:placeholders count:2 radius:radius cyclical:cyclical];
     if (self) {
-        free(_charonPoints2);
-        _charonPoints2 = NULL;
-        _charonPoints3 = malloc(count * sizeof(vector_float3));
-        if (_charonPoints3 != NULL) {
+        free(_revenantPoints2);
+        _revenantPoints2 = NULL;
+        _revenantPoints3 = malloc(count * sizeof(vector_float3));
+        if (_revenantPoints3 != NULL) {
             for (size_t index = 0; index < count; index++) {
-                _charonPoints3[index] = points[index];
+                _revenantPoints3[index] = points[index];
             }
-            _charonPointCount = count;
+            _revenantPointCount = count;
         } else {
-            _charonPointCount = 0;
+            _revenantPointCount = 0;
         }
     }
     return self;
 }
 
-+ (instancetype)charon_pathWithFloat3Points:(vector_float3 *)points count:(size_t)count radius:(float)radius
++ (instancetype)revenant_pathWithFloat3Points:(vector_float3 *)points count:(size_t)count radius:(float)radius
                                   cyclical:(BOOL)cyclical
 {
     return [[self alloc] initWithFloat3Points:points count:count radius:radius cyclical:cyclical];
@@ -862,8 +862,8 @@
 
 - (void)dealloc
 {
-    free(_charonPoints2);
-    free(_charonPoints3);
+    free(_revenantPoints2);
+    free(_revenantPoints3);
 }
 
 @end

@@ -1,11 +1,11 @@
-#import "CharonHomeKitInternal.h"
+#import "RevenantHomeKitInternal.h"
 
 @implementation HMAccessorySetupResult
 
 @synthesize homeUniqueIdentifier = _homeUniqueIdentifier,
           accessoryUniqueIdentifiers = _accessoryUniqueIdentifiers;
 
-- (instancetype)charon_initWithHomeIdentifier:(NSUUID *)homeIdentifier
+- (instancetype)revenant_initWithHomeIdentifier:(NSUUID *)homeIdentifier
                        accessoryIdentifiers:(NSArray<NSUUID *> *)accessoryIdentifiers
     __attribute__((objc_method_family(init)))
 {

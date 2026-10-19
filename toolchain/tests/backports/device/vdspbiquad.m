@@ -34,7 +34,7 @@ int main(int argc, char **argv)
 {
     @autoreleasepool {
         if (argc > 1)
-            charon_log_to(@(argv[1]));
+            revenant_log_to(@(argv[1]));
 
         CHECK(fromBackports("vDSP_biquadm_CreateSetup"), "vDSP_biquadm_CreateSetup comes from the backports");
         CHECK(fromBackports("vDSP_biquadmD"), "vDSP_biquadmD comes from the backports");

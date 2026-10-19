@@ -1,6 +1,6 @@
 #import <UIKit/UIKit.h>
 
-@implementation UIHoverGestureRecognizer (CharonHover16)
+@implementation UIHoverGestureRecognizer (RevenantHover16)
 
 - (CGFloat)zOffset
 {

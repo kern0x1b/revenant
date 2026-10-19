@@ -5,7 +5,7 @@
 #include <string.h>
 #include <math.h>
 
-#include "CharonResampling.h"
+#include "RevenantResampling.h"
 
 static int checks, failures;
 static int loopMisses;
@@ -33,10 +33,10 @@ typedef struct {
     static vImage_Error port_##NAME(const vImage_Buffer *s, const vImage_Buffer *d, vImagePixelCount ox, \
                                     vImagePixelCount oy, double t, double m, ResamplingFilter f,       \
                                     const void *back, vImage_Flags fl)                              \
-    { return charon_host_##NAME(s, d, ox, oy, (T)t, (T)m, f, BACK, fl); }
+    { return revenant_host_##NAME(s, d, ox, oy, (T)t, (T)m, f, BACK, fl); }
 
 #define DECLARE(NAME, PIXEL, BACK, T) \
-    vImage_Error charon_host_##NAME(const vImage_Buffer *, const vImage_Buffer *, vImagePixelCount, \
+    vImage_Error revenant_host_##NAME(const vImage_Buffer *, const vImage_Buffer *, vImagePixelCount, \
                                     vImagePixelCount, T, T, ResamplingFilter, const PIXEL, vImage_Flags)
 
 DECLARE(vImageHorizontalShearD_ARGB16S, Pixel_ARGB_16S, , double);

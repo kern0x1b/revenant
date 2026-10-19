@@ -4,12 +4,12 @@
 #include <string.h>
 #include <CoreFoundation/CoreFoundation.h>
 
-int charon_network_cellular_override = -1;
+int revenant_network_cellular_override = -1;
 
-bool charon_network_cellular(void)
+bool revenant_network_cellular(void)
 {
-    if (charon_network_cellular_override >= 0)
-        return charon_network_cellular_override != 0;
+    if (revenant_network_cellular_override >= 0)
+        return revenant_network_cellular_override != 0;
     static void *(*create)(void *, const struct sockaddr *);
     static bool (*flags)(void *, uint32_t *);
     static dispatch_once_t once;

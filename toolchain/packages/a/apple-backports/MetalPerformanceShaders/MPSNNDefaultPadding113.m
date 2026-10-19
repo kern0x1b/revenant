@@ -1,13 +1,13 @@
-#import "CharonMPSNN.h"
+#import "RevenantMPSNN.h"
 
 #pragma clang diagnostic ignored "-Wprotocol"
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
 #pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
 
-@interface CharonMPSNNTensorflowAveragePoolingValidOnlyPadding : MPSNNDefaultPadding
+@interface RevenantMPSNNTensorflowAveragePoolingValidOnlyPadding : MPSNNDefaultPadding
 @end
 
-@implementation CharonMPSNNTensorflowAveragePoolingValidOnlyPadding
+@implementation RevenantMPSNNTensorflowAveragePoolingValidOnlyPadding
 
 - (NSString *)label
 {
@@ -26,14 +26,14 @@
 
 @end
 
-@implementation MPSNNDefaultPadding (CharonMPSNNTensorflowAveragePoolingValidOnly)
+@implementation MPSNNDefaultPadding (RevenantMPSNNTensorflowAveragePoolingValidOnly)
 
 + (instancetype)paddingForTensorflowAveragePoolingValidOnly
 {
-    static CharonMPSNNTensorflowAveragePoolingValidOnlyPadding *policy;
+    static RevenantMPSNNTensorflowAveragePoolingValidOnlyPadding *policy;
     static dispatch_once_t once;
     dispatch_once(&once, ^{
-        policy = [CharonMPSNNTensorflowAveragePoolingValidOnlyPadding paddingWithMethod:(MPSNNPaddingMethodCustom |
+        policy = [RevenantMPSNNTensorflowAveragePoolingValidOnlyPadding paddingWithMethod:(MPSNNPaddingMethodCustom |
                                                                                         MPSNNPaddingMethodSizeValidOnly |
                                                                                         MPSNNPaddingMethodAlignTopLeft |
                                                                                         MPSNNPaddingMethodAddRemainderToBottomRight)];

@@ -15,7 +15,7 @@ here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 SCENES=$1
 FRAMES=$2
-BUILD=${BUILD:-$(runs_fresh charon-scenekit)}
+BUILD=${BUILD:-$(runs_fresh revenant-scenekit)}
 undrawn="nosubdiv noclearcoat nonormal"
 xcrun swiftc -O "$here/render.swift" -o "$BUILD/render"
 status=0

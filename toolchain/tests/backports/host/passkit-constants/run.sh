@@ -6,13 +6,13 @@
 # pass.
 #
 # The probe is generated from the port's own constant files, so it covers exactly what the port
-# carries: the port's objects are compiled with each name renamed to charonHost_*, and Apple's own
+# carries: the port's objects are compiled with each name renamed to revenantHost_*, and Apple's own
 # PassKit answers for the unrenamed name beside it.
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 port=${PORT:-$here/../../../../packages/a/apple-backports/PassKit}
-build=${PASSKIT_CONSTANTS_BUILD:-$(runs_folder charon-passkit-constants)}
+build=${PASSKIT_CONSTANTS_BUILD:-$(runs_folder revenant-passkit-constants)}
 sources="PKPassConstants9 PKPassConstants16"
 rm -rf "$build"
 mkdir -p "$build"
@@ -27,11 +27,11 @@ grep -h '^extern const double ' $files | sed 's/^extern const double //; s/;$//'
 renames=""
 while read -r name; do
     [ -n "$name" ] || continue
-    renames="$renames -D$name=charonHost_$name"
+    renames="$renames -D$name=revenantHost_$name"
 done < "$build/strings.txt"
 while read -r name; do
     [ -n "$name" ] || continue
-    renames="$renames -D$name=charonHost_$name"
+    renames="$renames -D$name=revenantHost_$name"
 done < "$build/numbers.txt"
 objects=""
 for source in $sources; do
@@ -42,18 +42,18 @@ done
 {
     echo '#import <Foundation/Foundation.h>'
     echo '#import <stdio.h>'
-    echo 'extern void charonCompareString(NSString *symbol, NSString *ours, NSString *theirs);'
-    echo 'extern void charonCompareNumber(NSString *symbol, double ours, double theirs);'
+    echo 'extern void revenantCompareString(NSString *symbol, NSString *ours, NSString *theirs);'
+    echo 'extern void revenantCompareNumber(NSString *symbol, double ours, double theirs);'
     awk '{printf "extern NSString *const %s;%c", $0, 10}' "$build/strings.txt"
-    awk '{printf "extern NSString *const charonHost_%s;%c", $0, 10}' "$build/strings.txt"
+    awk '{printf "extern NSString *const revenantHost_%s;%c", $0, 10}' "$build/strings.txt"
     awk '{printf "extern const double %s;%c", $0, 10}' "$build/numbers.txt"
-    awk '{printf "extern const double charonHost_%s;%c", $0, 10}' "$build/numbers.txt"
-    sed 's/.*/static void charonCheck_&(void) { charonCompareString(@"&", charonHost_&, &); }/' "$build/strings.txt"
-    sed 's/.*/static void charonCheck_&(void) { charonCompareNumber(@"&", charonHost_&, &); }/' "$build/numbers.txt"
-    echo 'static void (*const charonChecks[])(void) = {'
-    awk '{printf "    charonCheck_%s,\n", $0}' "$build/strings.txt" "$build/numbers.txt"
+    awk '{printf "extern const double revenantHost_%s;%c", $0, 10}' "$build/numbers.txt"
+    sed 's/.*/static void revenantCheck_&(void) { revenantCompareString(@"&", revenantHost_&, &); }/' "$build/strings.txt"
+    sed 's/.*/static void revenantCheck_&(void) { revenantCompareNumber(@"&", revenantHost_&, &); }/' "$build/numbers.txt"
+    echo 'static void (*const revenantChecks[])(void) = {'
+    awk '{printf "    revenantCheck_%s,\n", $0}' "$build/strings.txt" "$build/numbers.txt"
     echo '};'
-    echo 'static const unsigned charonCount = sizeof(charonChecks) / sizeof(charonChecks[0]);'
+    echo 'static const unsigned revenantCount = sizeof(revenantChecks) / sizeof(revenantChecks[0]);'
 } > "$build/probe.h"
 # shellcheck disable=SC2086
 xcrun clang -fobjc-arc -Wall -framework Foundation -framework PassKit \

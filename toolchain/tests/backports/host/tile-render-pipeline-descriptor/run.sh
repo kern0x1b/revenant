@@ -2,7 +2,7 @@
 # run.sh - MTLTileRenderPipelineDescriptor (iOS 11.0) against Apple's own object, property by property.
 #
 # The port's tile descriptor is built for Catalyst beside Apple's Metal in one process, with every class the three
-# source files define renamed CharonHost<Name>: the descriptor, the colour attachment array (11.0) and the pipeline
+# source files define renamed RevenantHost<Name>: the descriptor, the colour attachment array (11.0) and the pipeline
 # buffer descriptor array (11.0), which its members are made of. MTLLinkedFunctions (14.0) stays Apple's class, for
 # the reason compute-pipeline-descriptor/run.sh gives.
 #
@@ -12,7 +12,7 @@ set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 METAL=${METAL:-$here/../../../../packages/a/apple-backports/Metal}
-BUILD=${BUILD:-$(runs_fresh charon-tile-render-pipeline-descriptor)}
+BUILD=${BUILD:-$(runs_fresh revenant-tile-render-pipeline-descriptor)}
 sdk=$(xcrun --show-sdk-path)
 target="-target arm64-apple-ios16.0-macabi -isysroot $sdk -iframework $sdk/System/iOSSupport/System/Library/Frameworks"
 quiet="-Wno-deprecated-declarations -Wno-unguarded-availability-new -Wno-objc-designated-initializers -Wno-incomplete-implementation -Wno-objc-protocol-method-implementation"
@@ -26,7 +26,7 @@ for source in $sources; do
 done
 renames=""
 for name in $(xcrun nm -gU "$BUILD"/plain/*.o | awk 'NF == 3 {print $3}' | grep -E '^_OBJC_CLASS_\$_' | sed -e 's/^_OBJC_CLASS_\$_//' | sort -u); do
-    renames="$renames -D$name=CharonHost$name"
+    renames="$renames -D$name=RevenantHost$name"
 done
 echo "renamed:$renames"
 for source in $sources; do

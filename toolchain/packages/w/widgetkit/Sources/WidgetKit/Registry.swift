@@ -1,8 +1,8 @@
 import Foundation
 import AppIntents
 
-public final class CharonWidgetRegistry {
-    public static let shared = CharonWidgetRegistry()
+public final class RevenantWidgetRegistry {
+    public static let shared = RevenantWidgetRegistry()
 
     private var infos: [WidgetInfo] = []
     private var installedControls: [ControlInfo] = []
@@ -48,7 +48,7 @@ public final class CharonWidgetRegistry {
     public func register<Intent: WidgetConfigurationIntent>(_ intent: Intent, for kind: String,
                                                             configuration: String? = nil) {
         lock.lock()
-        intents[CharonWidgetRegistry.key(for: kind, configuration: configuration)] = AnyWidgetConfigurationIntent(intent)
+        intents[RevenantWidgetRegistry.key(for: kind, configuration: configuration)] = AnyWidgetConfigurationIntent(intent)
         lock.unlock()
     }
 
@@ -56,7 +56,7 @@ public final class CharonWidgetRegistry {
                                                    configuration: String?) -> Intent? {
         lock.lock()
         defer { lock.unlock() }
-        return intents[CharonWidgetRegistry.key(for: kind, configuration: configuration)]?.value as? Intent
+        return intents[RevenantWidgetRegistry.key(for: kind, configuration: configuration)]?.value as? Intent
     }
 
     public func setCurrentPushInfo(_ info: WidgetPushInfo?) {

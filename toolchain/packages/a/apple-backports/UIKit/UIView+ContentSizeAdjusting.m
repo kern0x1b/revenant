@@ -1,74 +1,74 @@
-#import "CharonMenus.h"
+#import "RevenantMenus.h"
 #import <objc/runtime.h>
 
 #pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
 
-static const char charon_adjusts_key;
+static const char revenant_adjusts_key;
 
-static void charon_say_adjusting(BOOL adjusts)
+static void revenant_say_adjusting(BOOL adjusts)
 {
     if (adjusts)
-        charon_menus_say_once(@"content-size-adjusting", @"adjustsFontForContentSizeCategory: iOS 6 has one content size category and never changes it, so the flag is kept and read back and the font is left as it was set");
+        revenant_menus_say_once(@"content-size-adjusting", @"adjustsFontForContentSizeCategory: iOS 6 has one content size category and never changes it, so the flag is kept and read back and the font is left as it was set");
 }
 
-static BOOL charon_adjusts(id object)
+static BOOL revenant_adjusts(id object)
 {
-    return [objc_getAssociatedObject(object, &charon_adjusts_key) boolValue];
+    return [objc_getAssociatedObject(object, &revenant_adjusts_key) boolValue];
 }
 
-static void charon_set_adjusts(id object, BOOL adjusts)
+static void revenant_set_adjusts(id object, BOOL adjusts)
 {
-    charon_say_adjusting(adjusts);
-    objc_setAssociatedObject(object, &charon_adjusts_key, adjusts ? @YES : nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    revenant_say_adjusting(adjusts);
+    objc_setAssociatedObject(object, &revenant_adjusts_key, adjusts ? @YES : nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
-@interface UILabel (CharonContentSizeAdjusting) <UIContentSizeCategoryAdjusting>
+@interface UILabel (RevenantContentSizeAdjusting) <UIContentSizeCategoryAdjusting>
 @end
 
-@interface UITextField (CharonContentSizeAdjusting) <UIContentSizeCategoryAdjusting>
+@interface UITextField (RevenantContentSizeAdjusting) <UIContentSizeCategoryAdjusting>
 @end
 
-@interface UITextView (CharonContentSizeAdjusting) <UIContentSizeCategoryAdjusting>
+@interface UITextView (RevenantContentSizeAdjusting) <UIContentSizeCategoryAdjusting>
 @end
 
-@implementation UILabel (CharonContentSizeAdjusting)
+@implementation UILabel (RevenantContentSizeAdjusting)
 
 - (BOOL)adjustsFontForContentSizeCategory
 {
-    return charon_adjusts(self);
+    return revenant_adjusts(self);
 }
 
 - (void)setAdjustsFontForContentSizeCategory:(BOOL)adjusts
 {
-    charon_set_adjusts(self, adjusts);
+    revenant_set_adjusts(self, adjusts);
 }
 
 @end
 
-@implementation UITextField (CharonContentSizeAdjusting)
+@implementation UITextField (RevenantContentSizeAdjusting)
 
 - (BOOL)adjustsFontForContentSizeCategory
 {
-    return charon_adjusts(self);
+    return revenant_adjusts(self);
 }
 
 - (void)setAdjustsFontForContentSizeCategory:(BOOL)adjusts
 {
-    charon_set_adjusts(self, adjusts);
+    revenant_set_adjusts(self, adjusts);
 }
 
 @end
 
-@implementation UITextView (CharonContentSizeAdjusting)
+@implementation UITextView (RevenantContentSizeAdjusting)
 
 - (BOOL)adjustsFontForContentSizeCategory
 {
-    return charon_adjusts(self);
+    return revenant_adjusts(self);
 }
 
 - (void)setAdjustsFontForContentSizeCategory:(BOOL)adjusts
 {
-    charon_set_adjusts(self, adjusts);
+    revenant_set_adjusts(self, adjusts);
 }
 
 @end

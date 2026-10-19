@@ -4,14 +4,14 @@
 @interface SCNPhysicsRadialGravityField : SCNPhysicsField <NSSecureCoding>
 @end
 
-@interface SCNMaterialProperty (CharonSCNCoding)
-@property (nonatomic, readonly) BOOL charonColorNotRead;
-+ (instancetype)charonDefaultWithContents:(id)contents;
-@property (nonatomic, readonly) BOOL charonHoldsDefault;
-- (void)charonKeepDefaultOf:(SCNMaterialProperty *)fallback;
+@interface SCNMaterialProperty (RevenantSCNCoding)
+@property (nonatomic, readonly) BOOL revenantColorNotRead;
++ (instancetype)revenantDefaultWithContents:(id)contents;
+@property (nonatomic, readonly) BOOL revenantHoldsDefault;
+- (void)revenantKeepDefaultOf:(SCNMaterialProperty *)fallback;
 @end
 
-@interface CharonSCNCoding : NSObject
+@interface RevenantSCNCoding : NSObject
 + (SCNVector3)decodeVector3:(NSCoder *)coder forKey:(NSString *)key;
 + (void)encodeVector3:(SCNVector3)vector coder:(NSCoder *)coder forKey:(NSString *)key;
 + (SCNVector4)decodeVector4:(NSCoder *)coder forKey:(NSString *)key;
@@ -34,18 +34,18 @@
 + (BOOL)wasFound:(NSString *)key onObject:(id)object;
 @end
 
-@interface SCNScene (CharonSCNSource)
-- (NSURL *)charonSourceURL;
+@interface SCNScene (RevenantSCNSource)
+- (NSURL *)revenantSourceURL;
 @end
 
 @class EAGLContext;
 
-SCNMatrix4 CharonSCNProjectionMatrix(SCNNode *pointOfView, int width, int height);
+SCNMatrix4 RevenantSCNProjectionMatrix(SCNNode *pointOfView, int width, int height);
 
-SCNVector3 CharonSCNProjectPoint(SCNNode *pointOfView, int width, int height, SCNVector3 point);
-SCNVector3 CharonSCNUnprojectPoint(SCNNode *pointOfView, int width, int height, SCNVector3 point);
+SCNVector3 RevenantSCNProjectPoint(SCNNode *pointOfView, int width, int height, SCNVector3 point);
+SCNVector3 RevenantSCNUnprojectPoint(SCNNode *pointOfView, int width, int height, SCNVector3 point);
 
-@interface CharonSCNRenderer : NSObject
+@interface RevenantSCNRenderer : NSObject
 - (instancetype)initWithContext:(EAGLContext *)context;
 @property (nonatomic, strong) SCNNode *lastRenderPointOfView;
 @property (nonatomic, assign) int lastRenderWidth;
@@ -54,11 +54,11 @@ SCNVector3 CharonSCNUnprojectPoint(SCNNode *pointOfView, int width, int height, 
 + (SCNNode *)defaultPointOfViewInScene:(SCNScene *)scene;
 @end
 
-@protocol CharonSCNAnimatable <NSObject>
-- (NSValue *)charonModelValueForKeyPath:(NSString *)keyPath;
+@protocol RevenantSCNAnimatable <NSObject>
+- (NSValue *)revenantModelValueForKeyPath:(NSString *)keyPath;
 @end
 
-@interface CharonSCNAnimations : NSObject
+@interface RevenantSCNAnimations : NSObject
 - (void)addAnimation:(id)animation forKey:(NSString *)key;
 - (void)removeAnimationForKey:(NSString *)key;
 - (void)removeAllAnimations;
@@ -68,24 +68,24 @@ SCNVector3 CharonSCNUnprojectPoint(SCNNode *pointOfView, int width, int height, 
 - (void)resumeAnimationForKey:(NSString *)key;
 - (BOOL)isAnimationForKeyPaused:(NSString *)key;
 - (NSDictionary<NSString *, NSValue *> *)presented;
-- (CharonSCNAnimations *)charonCopy;
-- (void)evaluateAtTime:(CFTimeInterval)now model:(id<CharonSCNAnimatable>)model;
+- (RevenantSCNAnimations *)revenantCopy;
+- (void)evaluateAtTime:(CFTimeInterval)now model:(id<RevenantSCNAnimatable>)model;
 + (void)evaluateScene:(SCNScene *)scene atTime:(CFTimeInterval)now;
 @end
 
-@interface SCNNode (CharonSCNAnimation) <CharonSCNAnimatable>
-- (CharonSCNAnimations *)charonAnimations;
-- (SCNMatrix4)charonPresentedTransform;
-- (SCNMatrix4)charonPresentedWorldTransform;
-- (CGFloat)charonPresentedOpacity;
+@interface SCNNode (RevenantSCNAnimation) <RevenantSCNAnimatable>
+- (RevenantSCNAnimations *)revenantAnimations;
+- (SCNMatrix4)revenantPresentedTransform;
+- (SCNMatrix4)revenantPresentedWorldTransform;
+- (CGFloat)revenantPresentedOpacity;
 @end
 
-@interface SCNMaterialProperty (CharonSCNAnimation) <CharonSCNAnimatable>
-- (CharonSCNAnimations *)charonAnimations;
-- (SCNMatrix4)charonPresentedContentsTransform;
+@interface SCNMaterialProperty (RevenantSCNAnimation) <RevenantSCNAnimatable>
+- (RevenantSCNAnimations *)revenantAnimations;
+- (SCNMatrix4)revenantPresentedContentsTransform;
 @end
 
-@interface SCNGeometry (CharonReplace)
-- (void)charon_replaceSources:(NSArray<SCNGeometrySource *> *)sources
+@interface SCNGeometry (RevenantReplace)
+- (void)revenant_replaceSources:(NSArray<SCNGeometrySource *> *)sources
                      elements:(NSArray<SCNGeometryElement *> *)elements;
 @end

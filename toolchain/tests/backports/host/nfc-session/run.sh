@@ -1,6 +1,6 @@
 #!/bin/sh
 # run.sh - the CoreNFC reader sessions, asked the same questions on the host (Catalyst's CoreNFC) and on the port's classes, from one
-# probe source (probe.m). The port's objects are CoreNFC/NFCReaderSession.m, built here with its classes renamed CharonHost<Name>
+# probe source (probe.m). The port's objects are CoreNFC/NFCReaderSession.m, built here with its classes renamed RevenantHost<Name>
 # so they link beside nothing; the probe finds them by that prefix.
 #
 # The host is held to expected.txt, the golden answer. The port must answer every line the host does. The plant: a port whose
@@ -10,10 +10,10 @@ set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 P=${PORT_DIR:-$here/../../../../packages/a/apple-backports}
-build=${NFC_SESSION_BUILD:-$(runs_fresh charon-nfc-session)}
+build=${NFC_SESSION_BUILD:-$(runs_fresh revenant-nfc-session)}
 sdk=$(xcrun --show-sdk-path)
 target="-target arm64-apple-ios15.0-macabi -isysroot $sdk -iframework $sdk/System/iOSSupport/System/Library/Frameworks"
-flags="$target -fobjc-arc -fvisibility=hidden -w -DCHARON_HOST_BUILD"
+flags="$target -fobjc-arc -fvisibility=hidden -w -DREVENANT_HOST_BUILD"
 probe_flags="$target -fobjc-arc -fvisibility=hidden -w"
 frameworks="-framework Foundation -framework CoreNFC"
 source="$P/CoreNFC/NFCReaderSession.m"
@@ -31,7 +31,7 @@ echo "PASS: $(wc -l < "$build/host.txt" | tr -d ' ') host lines, the golden answ
 xcrun clang $flags -c "$source" -o "$build/plain/NFCReaderSession.o"
 renames=""
 for name in $(xcrun nm -gU "$build/plain/NFCReaderSession.o" | awk 'NF == 3 {print $3}' | grep -E '^_OBJC_CLASS_\$_' | sed -e 's/^_OBJC_CLASS_\$_//' | sort -u); do
-    renames="$renames -D$name=CharonHost$name"
+    renames="$renames -D$name=RevenantHost$name"
 done
 xcrun clang $flags $renames -c "$source" -o "$build/port/NFCReaderSession.o"
 xcrun clang $probe_flags -DPORT "$here/probe.m" "$build/port/NFCReaderSession.o" -framework Foundation -o "$build/port-probe"

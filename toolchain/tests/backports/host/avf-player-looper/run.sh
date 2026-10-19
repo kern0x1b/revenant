@@ -3,8 +3,8 @@
 #
 # probe.m makes a one-second movie with the host's AVAssetWriter and loops it on an AVQueuePlayer, reading the
 # looper's answers in three sections (the default range, a sweep of time-range lengths, and a template that fails).
-# It is built twice: plain, against Apple's AVPlayerLooper; and with CHARON_PORT_BUILD=1, against the port's
-# CharonPlayerLooper, whose .m is compiled from a scratch copy that changes only its runtime name (so the two
+# It is built twice: plain, against Apple's AVPlayerLooper; and with REVENANT_PORT_BUILD=1, against the port's
+# RevenantPlayerLooper, whose .m is compiled from a scratch copy that changes only its runtime name (so the two
 # classes do not clash in one process), as tests/backports/host/avf-movie4/run.sh does.
 #
 # Run DIRECTLY, not through heavy.sh: a few compiles and a few short runs of about 25 seconds each.
@@ -37,13 +37,13 @@ timeout 120 "$build/host" "$run" > "$build/host.table" 2> "$build/host.err" || {
 
 # 2. the port's AVPlayerLooper10.m, from a scratch copy: the runtime name, and for the planted mutant one changed constant
 port_src=$build/src/AVPlayerLooper10.m
-sed -e 's/objc_runtime_name("AVPlayerLooper")/objc_runtime_name("charon_host_AVPlayerLooper")/' \
+sed -e 's/objc_runtime_name("AVPlayerLooper")/objc_runtime_name("revenant_host_AVPlayerLooper")/' \
     "$avf/AVPlayerLooper10.m" > "$port_src"
-[ "$(grep -c 'charon_host_AVPlayerLooper' "$port_src")" = 1 ] || {
+[ "$(grep -c 'revenant_host_AVPlayerLooper' "$port_src")" = 1 ] || {
     echo "RUN FAILED: the scratch copy lost its runtime name, so this run proves nothing"; exit 1; }
 if [ "$mutant" != 0 ]; then
-    before='static const double charonLooperQueuedSeconds = 10.0;'
-    after='static const double charonLooperQueuedSeconds = 9.0;'
+    before='static const double revenantLooperQueuedSeconds = 10.0;'
+    after='static const double revenantLooperQueuedSeconds = 9.0;'
     [ "$(grep -cF "$before" "$port_src")" = 1 ] || { echo "RUN FAILED: the mutant target is not unique, so this run proves nothing"; exit 1; }
     sed -e "s/$before/$after/" "$port_src" > "$port_src.mutant" && mv "$port_src.mutant" "$port_src"
     [ "$(grep -cF "$before" "$port_src")" = 0 ] && [ "$(grep -cF "$after" "$port_src")" = 1 ] || {
@@ -56,7 +56,7 @@ xcrun clang -fobjc-arc -w -c "$port_src" -o "$build/AVPlayerLooper10.o" > "$buil
 
 # 3. the port table: the same probe, linked with the port's object in place of the framework's class
 # shellcheck disable=SC2086
-xcrun clang $flags -DCHARON_PORT_BUILD=1 "$here/probe.m" "$build/AVPlayerLooper10.o" -o "$build/port" > "$build/port.log" 2>&1 || {
+xcrun clang $flags -DREVENANT_PORT_BUILD=1 "$here/probe.m" "$build/AVPlayerLooper10.o" -o "$build/port" > "$build/port.log" 2>&1 || {
     echo "RUN FAILED: the port probe did not link"; head -8 "$build/port.log"; exit 1; }
 timeout 120 "$build/port" "$run" > "$build/port.table" 2> "$build/port.err" || {
     echo "RUN FAILED: the port probe stopped (exit $?)"; head -5 "$build/port.err"; tail -2 "$build/port.table"; exit 1; }

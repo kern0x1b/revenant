@@ -91,7 +91,7 @@ int main(int argc, char **argv)
 {
     @autoreleasepool {
         if (argc > 1)
-            charon_log_to(@(argv[1]));
+            revenant_log_to(@(argv[1]));
         if (argc < 3) {
             printf("usage: waitsconnectivity <log> <http://host:port> [on|off]\n");
             return 2;
@@ -127,7 +127,7 @@ int main(int argc, char **argv)
         NSURLSessionConfiguration *waitsDown = [NSURLSessionConfiguration defaultSessionConfiguration];
         waitsDown.waitsForConnectivity = YES;
         Watcher *waits = run(waitsDown, url, NO, NULL);
-        NSURLSessionConfiguration *background = [NSURLSessionConfiguration backgroundSessionConfigurationWithIdentifier:@"org.charon.waits.background"];
+        NSURLSessionConfiguration *background = [NSURLSessionConfiguration backgroundSessionConfigurationWithIdentifier:@"org.revenant.waits.background"];
         Watcher *backgrounded = run(background, url, YES, NULL);
         NSURLSessionConfiguration *shortResource = [NSURLSessionConfiguration defaultSessionConfiguration];
         shortResource.waitsForConnectivity = YES;
@@ -166,7 +166,7 @@ int main(int argc, char **argv)
                 completedRaces++;
         }
         CHECK(completedRaces == 6, "a task that waits, and has the network taken away as it begins, ends with its answer once it is back");
-        printf("checks=%d failures=%d\n", charon_checks, charon_failures);
+        printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
     }
-    return charon_failures ? 1 : 0;
+    return revenant_failures ? 1 : 0;
 }

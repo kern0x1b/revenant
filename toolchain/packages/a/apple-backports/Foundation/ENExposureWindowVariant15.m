@@ -2,19 +2,19 @@
 #import <ExposureNotification/ExposureNotification.h>
 #import <objc/runtime.h>
 
-static const char charon_variantOfConcernTypeKey;
+static const char revenant_variantOfConcernTypeKey;
 
-@implementation ENExposureWindow (CharonVariant15)
+@implementation ENExposureWindow (RevenantVariant15)
 
 - (ENVariantOfConcernType)variantOfConcernType
 {
-    NSNumber *stored = objc_getAssociatedObject(self, &charon_variantOfConcernTypeKey);
+    NSNumber *stored = objc_getAssociatedObject(self, &revenant_variantOfConcernTypeKey);
     return stored ? (ENVariantOfConcernType)stored.unsignedIntValue : ENVariantOfConcernTypeUnknown;
 }
 
-- (void)charon_setVariantOfConcernType:(ENVariantOfConcernType)variantOfConcernType
+- (void)revenant_setVariantOfConcernType:(ENVariantOfConcernType)variantOfConcernType
 {
-    objc_setAssociatedObject(self, &charon_variantOfConcernTypeKey,
+    objc_setAssociatedObject(self, &revenant_variantOfConcernTypeKey,
                              @(variantOfConcernType), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 

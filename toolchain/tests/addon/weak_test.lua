@@ -6,7 +6,7 @@ function failures(opt)
     local arclite = path.join(opt.modules, "..", "packages", "i", "iphoneos-sdk", "arclite")
     local probe = path.join(os.scriptdir(), "weak", "weak_probe.m")
     local modes = {
-        {"without a system weak reference runtime", {"-DCHARON_WITHOUT_NATIVE", "-Ddlsym=charon_test_dlsym"}},
+        {"without a system weak reference runtime", {"-DREVENANT_WITHOUT_NATIVE", "-Ddlsym=revenant_test_dlsym"}},
         {"forwarding to the system weak reference runtime", {}}
     }
     for index, mode in ipairs(modes) do

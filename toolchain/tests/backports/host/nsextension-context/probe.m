@@ -5,7 +5,7 @@
 #include <stdio.h>
 
 #ifdef PORT
-#define PREFIX "CharonHost"
+#define PREFIX "RevenantHost"
 #else
 #define PREFIX ""
 #endif

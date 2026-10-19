@@ -1,4 +1,4 @@
-#import "CharonMetal.h"
+#import "RevenantMetal.h"
 
 
 NSString *const MTLCaptureErrorDomain = @"MTLCaptureErrorDomain";
@@ -16,7 +16,7 @@ NSString *const MTLCaptureErrorDomain = @"MTLCaptureErrorDomain";
 
 @end
 
-@implementation MTLCaptureManager (CharonCaptureDescriptor13)
+@implementation MTLCaptureManager (RevenantCaptureDescriptor13)
 
 - (BOOL)supportsDestination:(MTLCaptureDestination)destination
 {

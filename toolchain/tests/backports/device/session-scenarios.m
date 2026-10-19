@@ -302,14 +302,14 @@ static NSInteger status_of(NSURLResponse *response)
 
 @end
 
-@interface CharonTestProtocol : NSURLProtocol
+@interface RevenantTestProtocol : NSURLProtocol
 @end
 
-@implementation CharonTestProtocol
+@implementation RevenantTestProtocol
 
 + (BOOL)canInitWithRequest:(NSURLRequest *)request
 {
-    return [request.URL.scheme isEqualToString:@"charontest"];
+    return [request.URL.scheme isEqualToString:@"revenanttest"];
 }
 
 + (NSURLRequest *)canonicalRequestForRequest:(NSURLRequest *)request
@@ -319,7 +319,7 @@ static NSInteger status_of(NSURLResponse *response)
 
 - (void)startLoading
 {
-    NSHTTPURLResponse *response = [[NSHTTPURLResponse alloc] initWithURL:self.request.URL statusCode:203 HTTPVersion:@"HTTP/1.1" headerFields:@{@"X-Protocol": @"charon"}];
+    NSHTTPURLResponse *response = [[NSHTTPURLResponse alloc] initWithURL:self.request.URL statusCode:203 HTTPVersion:@"HTTP/1.1" headerFields:@{@"X-Protocol": @"revenant"}];
     [self.client URLProtocol:self didReceiveResponse:response cacheStoragePolicy:NSURLCacheStorageNotAllowed];
     [self.client URLProtocol:self didLoadData:[@"from protocol" dataUsingEncoding:NSUTF8StringEncoding]];
     [self.client URLProtocolDidFinishLoading:self];
@@ -430,8 +430,8 @@ static NSArray *scenario_configuration(SessionHarness *harness)
     NSURLSessionConfiguration *defaults = [configurations defaultSessionConfiguration];
     [transcript addObject:configuration_text(@"default", defaults)];
     [transcript addObject:configuration_text(@"ephemeral", [configurations ephemeralSessionConfiguration])];
-    [transcript addObject:configuration_text(@"background", [configurations backgroundSessionConfigurationWithIdentifier:@"org.charon.test"])];
-    [transcript addObject:configuration_text(@"background7", [configurations backgroundSessionConfiguration:@"org.charon.legacy"])];
+    [transcript addObject:configuration_text(@"background", [configurations backgroundSessionConfigurationWithIdentifier:@"org.revenant.test"])];
+    [transcript addObject:configuration_text(@"background7", [configurations backgroundSessionConfiguration:@"org.revenant.legacy"])];
     NSURLSessionConfiguration *ephemeral = [configurations ephemeralSessionConfiguration];
     [transcript addObject:[NSString stringWithFormat:@"ephemeral stores differ per configuration: cookies=%d cache=%d", ephemeral.HTTPCookieStorage != [configurations ephemeralSessionConfiguration].HTTPCookieStorage, ephemeral.URLCache != [configurations ephemeralSessionConfiguration].URLCache]];
     [transcript addObject:[NSString stringWithFormat:@"default configurations are new objects: %d", defaults != [configurations defaultSessionConfiguration]]];
@@ -483,7 +483,7 @@ static NSArray *scenario_configuration(SessionHarness *harness)
     [transcript addObject:[NSString stringWithFormat:@"nil request exception=%@", exception_name(^{
         [session dataTaskWithRequest:nothing];
     })]];
-    NSURLSession *background = [harness.sessionClass sessionWithConfiguration:[configurations backgroundSessionConfigurationWithIdentifier:[@"org.charon.background." stringByAppendingString:harness.tag]] delegate:nil delegateQueue:nil];
+    NSURLSession *background = [harness.sessionClass sessionWithConfiguration:[configurations backgroundSessionConfigurationWithIdentifier:[@"org.revenant.background." stringByAppendingString:harness.tag]] delegate:nil delegateQueue:nil];
     [transcript addObject:[NSString stringWithFormat:@"background completion handler exception=%@", exception_name(^{
         [background dataTaskWithURL:url completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
         }];
@@ -553,10 +553,10 @@ static NSArray *scenario_upload(SessionHarness *harness)
     wait_for(harness, recorder.completed);
     [recorder record:echo_text(recorder.body, headers)];
     recorder.body = [NSMutableData data];
-    NSString *file = [NSTemporaryDirectory() stringByAppendingPathComponent:[NSString stringWithFormat:@"charon-upload-%@.txt", harness.tag]];
+    NSString *file = [NSTemporaryDirectory() stringByAppendingPathComponent:[NSString stringWithFormat:@"revenant-upload-%@.txt", harness.tag]];
     NSMutableString *text = [NSMutableString string];
     while (text.length < 20000)
-        [text appendString:@"charon-upload-"];
+        [text appendString:@"revenant-upload-"];
     [text writeToFile:file atomically:YES encoding:NSUTF8StringEncoding error:NULL];
     [[session uploadTaskWithRequest:request fromFile:[NSURL fileURLWithPath:file]] resume];
     wait_for(harness, recorder.completed);
@@ -1018,14 +1018,14 @@ static NSArray *scenario_tasks(SessionHarness *harness)
     [headersSession finishTasksAndInvalidate];
 
     NSURLSessionConfiguration *protocols = [configurations defaultSessionConfiguration];
-    protocols.protocolClasses = [@[[CharonTestProtocol class]] arrayByAddingObjectsFromArray:protocols.protocolClasses];
+    protocols.protocolClasses = [@[[RevenantTestProtocol class]] arrayByAddingObjectsFromArray:protocols.protocolClasses];
     NSURLSession *protocolSession = [harness.sessionClass sessionWithConfiguration:protocols];
     NSURLResponse *response = nil;
-    NSString *handled = run_data_handler(harness, protocolSession, [NSURLRequest requestWithURL:[NSURL URLWithString:@"charontest://host/path"]], &body, &response);
+    NSString *handled = run_data_handler(harness, protocolSession, [NSURLRequest requestWithURL:[NSURL URLWithString:@"revenanttest://host/path"]], &body, &response);
     [transcript addObject:[NSString stringWithFormat:@"protocol %@ body=%@ header=%@", handled, text_of(body), [(NSHTTPURLResponse *)response allHeaderFields][@"X-Protocol"]]];
     [transcript addObject:[@"protocol through network " stringByAppendingString:run_data_handler(harness, protocolSession, [NSURLRequest requestWithURL:url_for(harness, @"/bytes?n=5")], &body, NULL)]];
     NSURLSession *withoutProtocol = [harness.sessionClass sessionWithConfiguration:[configurations defaultSessionConfiguration]];
-    [transcript addObject:[@"without protocol " stringByAppendingString:run_data_handler(harness, withoutProtocol, [NSURLRequest requestWithURL:[NSURL URLWithString:@"charontest://host/path"]], &body, NULL)]];
+    [transcript addObject:[@"without protocol " stringByAppendingString:run_data_handler(harness, withoutProtocol, [NSURLRequest requestWithURL:[NSURL URLWithString:@"revenanttest://host/path"]], &body, NULL)]];
     [protocolSession finishTasksAndInvalidate];
     [withoutProtocol finishTasksAndInvalidate];
     return transcript;
@@ -1103,7 +1103,7 @@ static NSArray *delayed_run(SessionHarness *harness, BOOL background, NSTimeInte
     recorder.base = harness.base;
     recorder.minimumWait = setDate && offset > 0 ? offset - 0.15 : 0;
     Class configurations = harness.configurationClass;
-    NSURLSessionConfiguration *configuration = background ? [configurations backgroundSessionConfigurationWithIdentifier:[NSString stringWithFormat:@"org.charon.delayed.%@.%@", label, harness.tag]] : [configurations defaultSessionConfiguration];
+    NSURLSessionConfiguration *configuration = background ? [configurations backgroundSessionConfigurationWithIdentifier:[NSString stringWithFormat:@"org.revenant.delayed.%@.%@", label, harness.tag]] : [configurations defaultSessionConfiguration];
     NSURLSession *session = session_with(harness, configuration, recorder);
     NSURLSessionDownloadTask *task = [session downloadTaskWithURL:url_for(harness, @"/bytes?n=2000")];
     if (setDate)
@@ -1145,7 +1145,7 @@ static NSArray *scenario_delayed(SessionHarness *harness)
     NSString *before = [NSString stringWithFormat:@"%d", configuration.waitsForConnectivity];
     configuration.waitsForConnectivity = YES;
     [properties addObject:[NSString stringWithFormat:@"configuration waits before=%@ after=%d copy=%d background=%d ephemeral=%d", before, configuration.waitsForConnectivity, [(NSURLSessionConfiguration *)[configuration copy] waitsForConnectivity],
-                           [[configurations backgroundSessionConfigurationWithIdentifier:@"org.charon.waits"] waitsForConnectivity], [[configurations ephemeralSessionConfiguration] waitsForConnectivity]]];
+                           [[configurations backgroundSessionConfigurationWithIdentifier:@"org.revenant.waits"] waitsForConnectivity], [[configurations ephemeralSessionConfiguration] waitsForConnectivity]]];
     [transcript addObjectsFromArray:properties];
     return transcript;
 }
@@ -1156,7 +1156,7 @@ static NSArray *scenario_background(SessionHarness *harness)
     Class configurations = harness.configurationClass;
     SessionRecorder *recorder = [[SessionRecorder alloc] init];
     recorder.implemented = [NSSet setWithArray:@[@"URLSession:didBecomeInvalidWithError:", @"URLSession:task:didCompleteWithError:", @"URLSession:downloadTask:didFinishDownloadingToURL:", @"URLSessionDidFinishEventsForBackgroundURLSession:"]];
-    NSURLSessionConfiguration *configuration = [configurations backgroundSessionConfigurationWithIdentifier:[@"org.charon.inprocess." stringByAppendingString:harness.tag]];
+    NSURLSessionConfiguration *configuration = [configurations backgroundSessionConfigurationWithIdentifier:[@"org.revenant.inprocess." stringByAppendingString:harness.tag]];
     NSURLSession *session = session_with(harness, configuration, recorder);
     [[session downloadTaskWithURL:url_for(harness, @"/bytes?n=5000")] resume];
     wait_for(harness, recorder.completed);
@@ -1200,8 +1200,8 @@ NSDictionary *session_expected_transcripts(void)
         @"configuration": @[
             @"default identifier=- policy=0 request=60 resource=604800 service=0 cellular=1 discretionary=0 launch=0 proxy=- pipelining=0 set-cookies=1 accept=2 headers=- cookies=shared credentials=shared cache=shared protocols=array",
             @"ephemeral identifier=- policy=0 request=60 resource=604800 service=0 cellular=1 discretionary=0 launch=0 proxy=- pipelining=0 set-cookies=1 accept=2 headers=- cookies=own credentials=own cache=own(disk=0) protocols=array",
-            @"background identifier=org.charon.test policy=0 request=60 resource=604800 service=0 cellular=1 discretionary=0 launch=1 proxy=- pipelining=0 set-cookies=1 accept=2 headers=- cookies=shared credentials=shared cache=nil protocols=array",
-            @"background7 identifier=org.charon.legacy policy=0 request=60 resource=604800 service=0 cellular=1 discretionary=0 launch=1 proxy=- pipelining=0 set-cookies=1 accept=2 headers=- cookies=shared credentials=shared cache=nil protocols=array",
+            @"background identifier=org.revenant.test policy=0 request=60 resource=604800 service=0 cellular=1 discretionary=0 launch=1 proxy=- pipelining=0 set-cookies=1 accept=2 headers=- cookies=shared credentials=shared cache=nil protocols=array",
+            @"background7 identifier=org.revenant.legacy policy=0 request=60 resource=604800 service=0 cellular=1 discretionary=0 launch=1 proxy=- pipelining=0 set-cookies=1 accept=2 headers=- cookies=shared credentials=shared cache=nil protocols=array",
             @"ephemeral stores differ per configuration: cookies=1 cache=1",
             @"default configurations are new objects: 1",
             @"copy is independent: 1 request=60 headers=-",
@@ -1453,7 +1453,7 @@ NSDictionary *session_expected_transcripts(void)
             @"states after cancel 3 3 3",
             @"highest concurrency with limit 2=2",
             @"echo GET /echo length=0 body= x-extra=session x-custom=request",
-            @"protocol handler status=203 length=13 error=nil data=yes body=from protocol header=charon",
+            @"protocol handler status=203 length=13 error=nil data=yes body=from protocol header=revenant",
             @"protocol through network handler status=200 length=5 error=nil data=yes",
             @"without protocol handler status=0 length=0 error=NSURLErrorDomain/-1002 data=no",
         ],

@@ -32,7 +32,7 @@
 #include "graphics/presentation_tracker.hpp"
 #include "foundation/userland_hle.hpp"
 
-namespace shade {
+namespace emulator {
 namespace {
 
     constexpr std::string_view mbx2d_image { "/MBX2D.framework/MBX2D" };

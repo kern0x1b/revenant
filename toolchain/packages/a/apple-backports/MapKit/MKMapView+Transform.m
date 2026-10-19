@@ -2,9 +2,9 @@
 #import <UIKit/UIKit.h>
 #import <objc/message.h>
 #import <objc/runtime.h>
-#import "CharonMapKit.h"
+#import "RevenantMapKit.h"
 
-@interface CharonMapViewState : NSObject
+@interface RevenantMapViewState : NSObject
 @property (nonatomic) BOOL rotateEnabled;
 @property (nonatomic) BOOL pitchEnabled;
 @property (nonatomic) CGFloat heading;
@@ -27,7 +27,7 @@
 @property (nonatomic) MKPointOfInterestFilter *pointOfInterestFilter;
 @end
 
-@implementation CharonMapViewState
+@implementation RevenantMapViewState
 @synthesize rotateEnabled = _rotateEnabled;
 @synthesize pitchEnabled = _pitchEnabled;
 @synthesize heading = _heading;
@@ -49,58 +49,58 @@
 @synthesize showsPointsOfInterest = _showsPointsOfInterest;
 @synthesize pointOfInterestFilter = _pointOfInterestFilter;
 
-- (CGFloat)charon_contentRotation
+- (CGFloat)revenant_contentRotation
 {
     return -_heading * (CGFloat)M_PI / 180.0;
 }
 
-- (CGFloat)charon_contentPitch
+- (CGFloat)revenant_contentPitch
 {
     return -_pitch * (CGFloat)M_PI / 180.0;
 }
 @end
 
-@interface MKMapView (CharonCamera)
-- (CharonMapViewState *)charon_state;
-- (void)charon_startFollowingBounds;
-- (void)charon_applyTransform;
-- (void)charon_updateControls;
-- (MKCoordinateRegion)charon_clampRegion:(MKCoordinateRegion)region;
-- (void)charon_applyCameraAnimated:(BOOL)animated;
-- (CGFloat)charon_metresAcross;
-- (void)charon_inert:(NSString *)api why:(NSString *)why;
-- (void)charon_installGesture;
-- (void)charon_setHeading:(CLLocationDirection)heading pitch:(CGFloat)pitch;
+@interface MKMapView (RevenantCamera)
+- (RevenantMapViewState *)revenant_state;
+- (void)revenant_startFollowingBounds;
+- (void)revenant_applyTransform;
+- (void)revenant_updateControls;
+- (MKCoordinateRegion)revenant_clampRegion:(MKCoordinateRegion)region;
+- (void)revenant_applyCameraAnimated:(BOOL)animated;
+- (CGFloat)revenant_metresAcross;
+- (void)revenant_inert:(NSString *)api why:(NSString *)why;
+- (void)revenant_installGesture;
+- (void)revenant_setHeading:(CLLocationDirection)heading pitch:(CGFloat)pitch;
 @end
 
-@implementation MKMapView (CharonCamera)
+@implementation MKMapView (RevenantCamera)
 
-- (CADisplayLink *)charon_link
+- (CADisplayLink *)revenant_link
 {
-    return objc_getAssociatedObject(self, (const void *)"charonMapLink");
+    return objc_getAssociatedObject(self, (const void *)"revenantMapLink");
 }
 
-- (void)charon_setLink:(CADisplayLink *)link
+- (void)revenant_setLink:(CADisplayLink *)link
 {
-    objc_setAssociatedObject(self, (const void *)"charonMapLink", link, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, (const void *)"revenantMapLink", link, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
-- (CharonMapViewState *)charon_state
+- (RevenantMapViewState *)revenant_state
 {
     static const void *key = &key;
-    CharonMapViewState *state = objc_getAssociatedObject(self, key);
+    RevenantMapViewState *state = objc_getAssociatedObject(self, key);
     if (!state) {
-        state = [[CharonMapViewState alloc] init];
+        state = [[RevenantMapViewState alloc] init];
         objc_setAssociatedObject(self, key, state, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     }
     return state;
 }
 
-- (void)charon_applyTransform
+- (void)revenant_applyTransform
 {
-    CharonMapViewState *state = [self charon_state];
-    CGFloat rotation = state.rotateEnabled ? [state charon_contentRotation] : 0.0;
-    CGFloat pitch = state.pitchEnabled ? [state charon_contentPitch] : 0.0;
+    RevenantMapViewState *state = [self revenant_state];
+    CGFloat rotation = state.rotateEnabled ? [state revenant_contentRotation] : 0.0;
+    CGFloat pitch = state.pitchEnabled ? [state revenant_contentPitch] : 0.0;
     CGSize size = self.bounds.size;
     CGFloat distance = state.eyeDistance > 0.0 ? state.eyeDistance : 1000.0;
     CALayer *layer = self.layer;
@@ -122,56 +122,56 @@
         }
     }
     [(MKCompassButton *)state.compass setCompassHeading:state.heading];
-    [self charon_updateControls];
+    [self revenant_updateControls];
 }
 
-- (void)charon_startFollowingBounds
+- (void)revenant_startFollowingBounds
 {
-    if ([self charon_link]) {
+    if ([self revenant_link]) {
         return;
     }
-    CADisplayLink *link = [CADisplayLink displayLinkWithTarget:self selector:@selector(charon_followBounds:)];
-    [self charon_setLink:link];
+    CADisplayLink *link = [CADisplayLink displayLinkWithTarget:self selector:@selector(revenant_followBounds:)];
+    [self revenant_setLink:link];
     [link addToRunLoop:[NSRunLoop mainRunLoop] forMode:NSRunLoopCommonModes];
 }
 
-- (void)charon_followBounds:(CADisplayLink *)link
+- (void)revenant_followBounds:(CADisplayLink *)link
 {
-    CharonMapViewState *state = [self charon_state];
+    RevenantMapViewState *state = [self revenant_state];
     if (state.rotateEnabled || state.pitchEnabled) {
-        [self charon_applyTransform];
-        [self charon_updateControls];
+        [self revenant_applyTransform];
+        [self revenant_updateControls];
     }
 }
 
 #pragma mark - The rotation gesture
 
-- (void)charon_installGesture
+- (void)revenant_installGesture
 {
-    UIRotationGestureRecognizer *gesture = objc_getAssociatedObject(self, (const void *)"charonRotationGesture");
+    UIRotationGestureRecognizer *gesture = objc_getAssociatedObject(self, (const void *)"revenantRotationGesture");
     if (gesture) {
         return;
     }
-    gesture = [[UIRotationGestureRecognizer alloc] initWithTarget:self action:@selector(charon_rotate:)];
+    gesture = [[UIRotationGestureRecognizer alloc] initWithTarget:self action:@selector(revenant_rotate:)];
     gesture.delegate = (id<UIGestureRecognizerDelegate>)self;
     [self addGestureRecognizer:gesture];
-    objc_setAssociatedObject(self, (const void *)"charonRotationGesture", gesture, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, (const void *)"revenantRotationGesture", gesture, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
-- (void)charon_rotate:(UIRotationGestureRecognizer *)gesture
+- (void)revenant_rotate:(UIRotationGestureRecognizer *)gesture
 {
-    CharonMapViewState *state = [self charon_state];
+    RevenantMapViewState *state = [self revenant_state];
     if (gesture.state == UIGestureRecognizerStateChanged) {
         state.heading = (CGFloat)fmod((double)state.heading - (double)gesture.rotation * 180.0 / M_PI + 360.0, 360.0);
         gesture.rotation = 0.0;
-        [self charon_applyTransform];
+        [self revenant_applyTransform];
     }
 }
 
 - (BOOL)gestureRecognizerShouldBegin:(UIGestureRecognizer *)gesture
 {
     if ([gesture isKindOfClass:[UIRotationGestureRecognizer class]]) {
-        return [self charon_state].rotateEnabled;
+        return [self revenant_state].rotateEnabled;
     }
     return YES;
 }
@@ -186,62 +186,62 @@
 
 - (BOOL)rotateEnabled
 {
-    return [self charon_state].rotateEnabled;
+    return [self revenant_state].rotateEnabled;
 }
 
 - (void)setRotateEnabled:(BOOL)rotateEnabled
 {
-    [self charon_state].rotateEnabled = rotateEnabled;
+    [self revenant_state].rotateEnabled = rotateEnabled;
     if (rotateEnabled) {
-        [self charon_installGesture];
+        [self revenant_installGesture];
     }
-    [self charon_applyTransform];
+    [self revenant_applyTransform];
 }
 
 - (BOOL)pitchEnabled
 {
-    return [self charon_state].pitchEnabled;
+    return [self revenant_state].pitchEnabled;
 }
 
 - (void)setPitchEnabled:(BOOL)pitchEnabled
 {
-    CharonMapViewState *state = [self charon_state];
+    RevenantMapViewState *state = [self revenant_state];
     state.pitchEnabled = pitchEnabled;
     if (pitchEnabled && state.eyeDistance <= 0.0) {
-        state.eyeDistance = MAX(400.0, [self charon_metresAcross]);
+        state.eyeDistance = MAX(400.0, [self revenant_metresAcross]);
     }
     if (pitchEnabled) {
-        [self charon_startFollowingBounds];
+        [self revenant_startFollowingBounds];
     }
-    [self charon_applyTransform];
+    [self revenant_applyTransform];
 }
 
-- (CLLocationDirection)charon_heading
+- (CLLocationDirection)revenant_heading
 {
-    return (CLLocationDirection)[self charon_state].heading;
+    return (CLLocationDirection)[self revenant_state].heading;
 }
 
-- (CGFloat)charon_pitch
+- (CGFloat)revenant_pitch
 {
-    return [self charon_state].pitch;
+    return [self revenant_state].pitch;
 }
 
-- (void)charon_setHeading:(CLLocationDirection)heading pitch:(CGFloat)pitch
+- (void)revenant_setHeading:(CLLocationDirection)heading pitch:(CGFloat)pitch
 {
-    CharonMapViewState *state = [self charon_state];
+    RevenantMapViewState *state = [self revenant_state];
     state.heading = (CGFloat)fmod((double)heading, 360.0);
     state.pitch = MAX(0.0, MIN(90.0, (CGFloat)pitch));
     if (state.pitch > 0.0) {
         state.pitchEnabled = YES;
         if (state.eyeDistance <= 0.0) {
-            state.eyeDistance = MAX(400.0, [self charon_metresAcross]);
+            state.eyeDistance = MAX(400.0, [self revenant_metresAcross]);
         }
-        [self charon_startFollowingBounds];
+        [self revenant_startFollowingBounds];
     }
-    [self charon_applyTransform];
+    [self revenant_applyTransform];
 }
 
-- (CGFloat)charon_metresAcross
+- (CGFloat)revenant_metresAcross
 {
     MKMapRect visible = self.visibleMapRect;
     if (visible.size.width <= 0.0) {
@@ -252,113 +252,113 @@
 
 - (BOOL)showsCompass
 {
-    return [self charon_state].showsCompass;
+    return [self revenant_state].showsCompass;
 }
 
 - (void)setShowsCompass:(BOOL)showsCompass
 {
-    CharonMapViewState *state = [self charon_state];
+    RevenantMapViewState *state = [self revenant_state];
     state.showsCompass = showsCompass;
-    [self charon_updateControls];
+    [self revenant_updateControls];
 }
 
 - (BOOL)showsScale
 {
-    return [self charon_state].showsScale;
+    return [self revenant_state].showsScale;
 }
 
 - (void)setShowsScale:(BOOL)showsScale
 {
-    CharonMapViewState *state = [self charon_state];
+    RevenantMapViewState *state = [self revenant_state];
     state.showsScale = showsScale;
-    [self charon_updateControls];
+    [self revenant_updateControls];
 }
 
 - (BOOL)showsUserTrackingButton
 {
-    return [self charon_state].showsUserTrackingButton;
+    return [self revenant_state].showsUserTrackingButton;
 }
 
 - (void)setShowsUserTrackingButton:(BOOL)showsUserTrackingButton
 {
-    CharonMapViewState *state = [self charon_state];
+    RevenantMapViewState *state = [self revenant_state];
     state.showsUserTrackingButton = showsUserTrackingButton;
-    [self charon_updateControls];
+    [self revenant_updateControls];
 }
 
 - (MKFeatureVisibility)pitchButtonVisibility
 {
-    return (MKFeatureVisibility)[self charon_state].pitchButtonVisibility;
+    return (MKFeatureVisibility)[self revenant_state].pitchButtonVisibility;
 }
 
 - (void)setPitchButtonVisibility:(MKFeatureVisibility)pitchButtonVisibility
 {
-    [self charon_state].pitchButtonVisibility = pitchButtonVisibility;
-    [self charon_inert:@"MKMapView.pitchButtonVisibility"
+    [self revenant_state].pitchButtonVisibility = pitchButtonVisibility;
+    [self revenant_inert:@"MKMapView.pitchButtonVisibility"
                   why:@"the release's map view has no pitch button: its own public surface (228 methods, measured) is a region, a map type and the user location"];
 }
 
 - (BOOL)selectableMapFeatures
 {
-    return [self charon_state].selectableMapFeatures;
+    return [self revenant_state].selectableMapFeatures;
 }
 
 - (void)setSelectableMapFeatures:(BOOL)selectableMapFeatures
 {
-    [self charon_state].selectableMapFeatures = selectableMapFeatures;
-    [self charon_inert:@"MKMapView.selectableMapFeatures"
+    [self revenant_state].selectableMapFeatures = selectableMapFeatures;
+    [self revenant_inert:@"MKMapView.selectableMapFeatures"
                   why:@"the release's map view has no selectable features at all: it has no selection of its own, and the features a selection would choose between arrive with a map the release does not have"];
 }
 
 - (BOOL)showsTraffic
 {
-    return [self charon_state].showsTraffic != 0;
+    return [self revenant_state].showsTraffic != 0;
 }
 
 - (void)setShowsTraffic:(BOOL)showsTraffic
 {
-    [self charon_state].showsTraffic = showsTraffic ? 1 : 0;
-    [self charon_inert:@"MKMapView.showsTraffic"
+    [self revenant_state].showsTraffic = showsTraffic ? 1 : 0;
+    [self revenant_inert:@"MKMapView.showsTraffic"
                   why:@"the release's map draws one fixed tile style and has no traffic layer to draw or not: -showsTraffic is not in its 228 public methods (measured) and its own trafficEnabled spelling belongs to another class"];
 }
 
 - (BOOL)showsBuildings
 {
-    return [self charon_state].showsBuildings != 0;
+    return [self revenant_state].showsBuildings != 0;
 }
 
 - (void)setShowsBuildings:(BOOL)showsBuildings
 {
-    [self charon_state].showsBuildings = showsBuildings ? 1 : 0;
-    [self charon_inert:@"MKMapView.showsBuildings"
+    [self revenant_state].showsBuildings = showsBuildings ? 1 : 0;
+    [self revenant_inert:@"MKMapView.showsBuildings"
                   why:@"the release's map draws its buildings inside its own vector tiles, and there is no way to ask it for a style without them: the tile style is the release's own and this port has no way to vary it"];
 }
 
 - (BOOL)showsPointsOfInterest
 {
-    return [self charon_state].showsPointsOfInterest != 0;
+    return [self revenant_state].showsPointsOfInterest != 0;
 }
 
 - (void)setShowsPointsOfInterest:(BOOL)showsPointsOfInterest
 {
-    [self charon_state].showsPointsOfInterest = showsPointsOfInterest ? 1 : 0;
-    [self charon_inert:@"MKMapView.showsPointsOfInterest"
+    [self revenant_state].showsPointsOfInterest = showsPointsOfInterest ? 1 : 0;
+    [self revenant_inert:@"MKMapView.showsPointsOfInterest"
                   why:@"the release's map draws its points of interest inside its own vector tiles, and there is no way to ask it for a style without them"];
 }
 
 - (MKPointOfInterestFilter *)pointOfInterestFilter
 {
-    return [self charon_state].pointOfInterestFilter;
+    return [self revenant_state].pointOfInterestFilter;
 }
 
 - (void)setPointOfInterestFilter:(MKPointOfInterestFilter *)filter
 {
-    [self charon_state].pointOfInterestFilter = filter;
-    [self charon_inert:@"MKMapView.pointOfInterestFilter"
+    [self revenant_state].pointOfInterestFilter = filter;
+    [self revenant_inert:@"MKMapView.pointOfInterestFilter"
                   why:@"the release's map draws its points of interest from its own tiles and takes no filter, so there is nothing for a filter to act on"];
 }
 
-- (void)charon_inert:(NSString *)api why:(NSString *)why
+- (void)revenant_inert:(NSString *)api why:(NSString *)why
 {
     static NSMutableSet *told;
     static dispatch_once_t once;
@@ -374,9 +374,9 @@
     }
 }
 
-- (void)charon_updateControls
+- (void)revenant_updateControls
 {
-    CharonMapViewState *state = [self charon_state];
+    RevenantMapViewState *state = [self revenant_state];
     CGSize size = self.bounds.size;
     CGFloat margin = 8.0;
     if (state.showsCompass) {
@@ -424,46 +424,46 @@
 
 - (MKMapCameraBoundary *)cameraBoundary
 {
-    return [self charon_state].cameraBoundary;
+    return [self revenant_state].cameraBoundary;
 }
 
-- (MKCoordinateRegion)charon_boundedRegion
+- (MKCoordinateRegion)revenant_boundedRegion
 {
-    MKMapCameraBoundary *boundary = [self charon_state].cameraBoundary;
+    MKMapCameraBoundary *boundary = [self revenant_state].cameraBoundary;
     MKMapRect rect = boundary ? boundary.mapRect : MKMapRectWorld;
     return MKCoordinateRegionForMapRect(rect);
 }
 
 - (void)setCameraBoundary:(MKMapCameraBoundary *)cameraBoundary
 {
-    [self charon_state].cameraBoundary = cameraBoundary;
+    [self revenant_state].cameraBoundary = cameraBoundary;
 }
 
 - (void)setCameraBoundary:(MKMapCameraBoundary *)cameraBoundary animated:(BOOL)animated
 {
     [self setCameraBoundary:cameraBoundary];
-    [self charon_applyCameraAnimated:animated];
+    [self revenant_applyCameraAnimated:animated];
 }
 
 - (MKMapCameraZoomRange *)cameraZoomRange
 {
-    return [self charon_state].cameraZoomRange;
+    return [self revenant_state].cameraZoomRange;
 }
 
 - (void)setCameraZoomRange:(MKMapCameraZoomRange *)cameraZoomRange
 {
-    [self charon_state].cameraZoomRange = cameraZoomRange;
+    [self revenant_state].cameraZoomRange = cameraZoomRange;
 }
 
 - (void)setCameraZoomRange:(MKMapCameraZoomRange *)cameraZoomRange animated:(BOOL)animated
 {
     [self setCameraZoomRange:cameraZoomRange];
-    [self charon_applyCameraAnimated:animated];
+    [self revenant_applyCameraAnimated:animated];
 }
 
-- (MKCoordinateRegion)charon_clampRegion:(MKCoordinateRegion)region
+- (MKCoordinateRegion)revenant_clampRegion:(MKCoordinateRegion)region
 {
-    MKCoordinateRegion bounded = [self charon_boundedRegion];
+    MKCoordinateRegion bounded = [self revenant_boundedRegion];
     double centreLat = MAX(CLLocationCoordinate2DIsValid(bounded.center) ? bounded.center.latitude : -90.0,
                            MIN(90.0, region.center.latitude));
     double centreLon = region.center.longitude;
@@ -481,9 +481,9 @@
             longitudeDelta = MIN(longitudeDelta, bounded.span.longitudeDelta);
         }
     }
-    MKMapCameraZoomRange *zoom = [self charon_state].cameraZoomRange;
+    MKMapCameraZoomRange *zoom = [self revenant_state].cameraZoomRange;
     if (zoom) {
-        double metresAcross = (double)[self charon_metresAcross];
+        double metresAcross = (double)[self revenant_metresAcross];
         double lowest = zoom.minCenterCoordinateDistance > 0.0 ? zoom.minCenterCoordinateDistance : 0.0;
         double highest = zoom.maxCenterCoordinateDistance > 0.0 ? zoom.maxCenterCoordinateDistance : 0.0;
         if (metresAcross > 0.0) {
@@ -507,7 +507,7 @@
     return region;
 }
 
-- (void)charon_applyCameraAnimated:(BOOL)animated
+- (void)revenant_applyCameraAnimated:(BOOL)animated
 {
     MKMapCamera *camera = self.camera;
     if (!camera) {
@@ -518,14 +518,14 @@
     double distance = camera.centerCoordinateDistance > 0.0 ? camera.centerCoordinateDistance : 1000.0;
     MKMapRect rect = MKMapRectMake(centre.x, centre.y, metresPerPoint > 0.0 ? distance / metresPerPoint : 0.0,
                                    metresPerPoint > 0.0 ? distance / metresPerPoint : 0.0);
-    [self setRegion:[self charon_clampRegion:MKCoordinateRegionForMapRect(rect)] animated:animated];
+    [self setRegion:[self revenant_clampRegion:MKCoordinateRegionForMapRect(rect)] animated:animated];
 }
 
 #pragma mark - The configuration and the map type
 
 - (MKMapConfiguration *)preferredConfiguration
 {
-    MKMapConfiguration *configuration = [self charon_state].preferredConfiguration;
+    MKMapConfiguration *configuration = [self revenant_state].preferredConfiguration;
     if (!configuration) {
         switch (self.mapType) {
             case MKMapTypeSatellite:
@@ -538,14 +538,14 @@
                 configuration = [[MKStandardMapConfiguration alloc] init];
                 break;
         }
-        [self charon_state].preferredConfiguration = configuration;
+        [self revenant_state].preferredConfiguration = configuration;
     }
     return configuration;
 }
 
 - (void)setPreferredConfiguration:(MKMapConfiguration *)preferredConfiguration
 {
-    [self charon_state].preferredConfiguration = preferredConfiguration;
+    [self revenant_state].preferredConfiguration = preferredConfiguration;
     if ([preferredConfiguration isKindOfClass:[MKHybridMapConfiguration class]]) {
         self.mapType = MKMapTypeHybrid;
     } else if ([preferredConfiguration isKindOfClass:[MKImageryMapConfiguration class]]) {

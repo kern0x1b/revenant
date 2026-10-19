@@ -8,7 +8,7 @@
 
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 
-@interface CharonPhotosStore : NSObject
+@interface RevenantPhotosStore : NSObject
 + (NSError *)errorWithCode:(NSInteger)code reason:(NSString *)reason;
 + (NSString *)writeImageData:(NSData *)data metadata:(NSDictionary *)metadata error:(NSError **)error;
 + (NSString *)writeImage:(UIImage *)image error:(NSError **)error;
@@ -16,21 +16,21 @@
 + (void)bindPlaceholderIdentifier:(NSString *)token toIdentifier:(NSString *)identifier;
 @end
 
-@interface CharonPhotosTransaction : NSObject
-+ (CharonPhotosTransaction *)current;
+@interface RevenantPhotosTransaction : NSObject
++ (RevenantPhotosTransaction *)current;
 - (void)addChange:(id)change;
 - (void)refuseWithReason:(NSString *)reason;
 @end
 
 @interface PHObjectPlaceholder : NSObject
-- (instancetype)initWithCharonLocalIdentifier:(NSString *)identifier;
+- (instancetype)initWithRevenantLocalIdentifier:(NSString *)identifier;
 @end
 
-typedef NS_ENUM(NSInteger, CharonChangeKind) {
-    CharonChangeImage,
-    CharonChangeImageFile,
-    CharonChangeVideoFile,
-    CharonChangeEdit
+typedef NS_ENUM(NSInteger, RevenantChangeKind) {
+    RevenantChangeImage,
+    RevenantChangeImageFile,
+    RevenantChangeVideoFile,
+    RevenantChangeEdit
 };
 
 @interface PHAssetChangeRequest : NSObject
@@ -46,16 +46,16 @@ typedef NS_ENUM(NSInteger, CharonChangeKind) {
 @property (nonatomic, assign, getter=isHidden) BOOL hidden;
 @end
 
-static CharonPhotosTransaction *charon_transaction(void)
+static RevenantPhotosTransaction *revenant_transaction(void)
 {
-    CharonPhotosTransaction *transaction = [CharonPhotosTransaction current];
+    RevenantPhotosTransaction *transaction = [RevenantPhotosTransaction current];
     if (!transaction)
         [NSException raise:NSInternalInconsistencyException format:@"This method can only be called from inside of -[PHPhotoLibrary performChanges:completionHandler:] or -[PHPhotoLibrary performChangesAndWait:error:]"];
     return transaction;
 }
 
 @implementation PHAssetChangeRequest {
-    CharonChangeKind _kind;
+    RevenantChangeKind _kind;
     id _source;
     NSString *_token;
     PHObjectPlaceholder *_placeholder;
@@ -65,15 +65,15 @@ static CharonPhotosTransaction *charon_transaction(void)
     BOOL _hidden;
 }
 
-+ (instancetype)charon_requestOfKind:(CharonChangeKind)kind source:(id)source
++ (instancetype)revenant_requestOfKind:(RevenantChangeKind)kind source:(id)source
 {
-    CharonPhotosTransaction *transaction = charon_transaction();
+    RevenantPhotosTransaction *transaction = revenant_transaction();
     PHAssetChangeRequest *request = [[self alloc] init];
     request->_kind = kind;
     request->_source = source;
-    if (kind != CharonChangeEdit) {
+    if (kind != RevenantChangeEdit) {
         request->_token = [[NSUUID UUID].UUIDString stringByAppendingString:@"/L0/001"];
-        request->_placeholder = [[PHObjectPlaceholder alloc] initWithCharonLocalIdentifier:request->_token];
+        request->_placeholder = [[PHObjectPlaceholder alloc] initWithRevenantLocalIdentifier:request->_token];
     }
     [transaction addChange:request];
     return request;
@@ -81,33 +81,33 @@ static CharonPhotosTransaction *charon_transaction(void)
 
 + (instancetype)creationRequestForAssetFromImage:(UIImage *)image
 {
-    return [self charon_requestOfKind:CharonChangeImage source:image];
+    return [self revenant_requestOfKind:RevenantChangeImage source:image];
 }
 
 + (instancetype)creationRequestForAssetFromImageAtFileURL:(NSURL *)fileURL
 {
-    charon_transaction();
+    revenant_transaction();
     if (!fileURL.isFileURL || ![UIImage imageWithContentsOfFile:fileURL.path])
         return nil;
-    return [self charon_requestOfKind:CharonChangeImageFile source:fileURL];
+    return [self revenant_requestOfKind:RevenantChangeImageFile source:fileURL];
 }
 
 + (instancetype)creationRequestForAssetFromVideoAtFileURL:(NSURL *)fileURL
 {
-    charon_transaction();
+    revenant_transaction();
     if (!fileURL.isFileURL || !UIVideoAtPathIsCompatibleWithSavedPhotosAlbum(fileURL.path))
         return nil;
-    return [self charon_requestOfKind:CharonChangeVideoFile source:fileURL];
+    return [self revenant_requestOfKind:RevenantChangeVideoFile source:fileURL];
 }
 
 + (void)deleteAssets:(id<NSFastEnumeration>)assets
 {
-    [charon_transaction() refuseWithReason:@"iOS 6 lets an application add to the photo library and read it, not delete from it"];
+    [revenant_transaction() refuseWithReason:@"iOS 6 lets an application add to the photo library and read it, not delete from it"];
 }
 
 + (instancetype)changeRequestForAsset:(id)asset
 {
-    return [self charon_requestOfKind:CharonChangeEdit source:asset];
+    return [self revenant_requestOfKind:RevenantChangeEdit source:asset];
 }
 
 - (PHObjectPlaceholder *)placeholderForCreatedAsset
@@ -123,8 +123,8 @@ static CharonPhotosTransaction *charon_transaction(void)
 - (void)setCreationDate:(NSDate *)date
 {
     _creationDate = date;
-    if (_kind == CharonChangeEdit)
-        [charon_transaction() refuseWithReason:@"iOS 6 does not let an application change the date of an asset that is in the photo library"];
+    if (_kind == RevenantChangeEdit)
+        [revenant_transaction() refuseWithReason:@"iOS 6 does not let an application change the date of an asset that is in the photo library"];
 }
 
 - (CLLocation *)location
@@ -135,8 +135,8 @@ static CharonPhotosTransaction *charon_transaction(void)
 - (void)setLocation:(CLLocation *)location
 {
     _location = location;
-    if (_kind == CharonChangeEdit)
-        [charon_transaction() refuseWithReason:@"iOS 6 does not let an application change the location of an asset that is in the photo library"];
+    if (_kind == RevenantChangeEdit)
+        [revenant_transaction() refuseWithReason:@"iOS 6 does not let an application change the location of an asset that is in the photo library"];
 }
 
 - (BOOL)isFavorite
@@ -147,8 +147,8 @@ static CharonPhotosTransaction *charon_transaction(void)
 - (void)setFavorite:(BOOL)favorite
 {
     _favorite = favorite;
-    if (favorite || _kind == CharonChangeEdit)
-        [charon_transaction() refuseWithReason:@"iOS 6 has no favorites"];
+    if (favorite || _kind == RevenantChangeEdit)
+        [revenant_transaction() refuseWithReason:@"iOS 6 has no favorites"];
 }
 
 - (BOOL)isHidden
@@ -159,11 +159,11 @@ static CharonPhotosTransaction *charon_transaction(void)
 - (void)setHidden:(BOOL)hidden
 {
     _hidden = hidden;
-    if (hidden || _kind == CharonChangeEdit)
-        [charon_transaction() refuseWithReason:@"iOS 6 cannot hide an asset"];
+    if (hidden || _kind == RevenantChangeEdit)
+        [revenant_transaction() refuseWithReason:@"iOS 6 cannot hide an asset"];
 }
 
-- (NSDictionary *)charon_metadata
+- (NSDictionary *)revenant_metadata
 {
     NSMutableDictionary *metadata = [NSMutableDictionary dictionary];
     if (_creationDate) {
@@ -197,41 +197,41 @@ static CharonPhotosTransaction *charon_transaction(void)
     return metadata.count ? metadata : nil;
 }
 
-- (BOOL)charon_validate:(NSError **)error
+- (BOOL)revenant_validate:(NSError **)error
 {
-    if (_kind == CharonChangeImage && [_source CGImage] == NULL) {
+    if (_kind == RevenantChangeImage && [_source CGImage] == NULL) {
         if (error)
-            *error = [CharonPhotosStore errorWithCode:PHPhotosErrorInvalidResource reason:@"the image has no pixels to add"];
+            *error = [RevenantPhotosStore errorWithCode:PHPhotosErrorInvalidResource reason:@"the image has no pixels to add"];
         return NO;
     }
     return YES;
 }
 
-- (BOOL)charon_commit:(NSError **)error
+- (BOOL)revenant_commit:(NSError **)error
 {
-    NSDictionary *metadata = [self charon_metadata];
+    NSDictionary *metadata = [self revenant_metadata];
     NSString *identifier = nil;
     switch (_kind) {
-    case CharonChangeImage:
+    case RevenantChangeImage:
         if (metadata) {
             NSData *data = UIImageJPEGRepresentation(_source, 1);
-            identifier = [CharonPhotosStore writeImageData:data metadata:metadata error:error];
+            identifier = [RevenantPhotosStore writeImageData:data metadata:metadata error:error];
         } else {
-            identifier = [CharonPhotosStore writeImage:_source error:error];
+            identifier = [RevenantPhotosStore writeImage:_source error:error];
         }
         break;
-    case CharonChangeImageFile:
-        identifier = [CharonPhotosStore writeImageData:[NSData dataWithContentsOfURL:_source] metadata:metadata error:error];
+    case RevenantChangeImageFile:
+        identifier = [RevenantPhotosStore writeImageData:[NSData dataWithContentsOfURL:_source] metadata:metadata error:error];
         break;
-    case CharonChangeVideoFile:
-        identifier = [CharonPhotosStore writeVideoAtURL:_source error:error];
+    case RevenantChangeVideoFile:
+        identifier = [RevenantPhotosStore writeVideoAtURL:_source error:error];
         break;
-    case CharonChangeEdit:
+    case RevenantChangeEdit:
         return YES;
     }
     if (!identifier)
         return NO;
-    [CharonPhotosStore bindPlaceholderIdentifier:_token toIdentifier:identifier];
+    [RevenantPhotosStore bindPlaceholderIdentifier:_token toIdentifier:identifier];
     return YES;
 }
 

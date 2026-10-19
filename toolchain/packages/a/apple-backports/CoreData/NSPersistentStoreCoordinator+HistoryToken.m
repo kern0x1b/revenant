@@ -1,6 +1,6 @@
 #import <CoreData/CoreData.h>
 
-@implementation NSPersistentStoreCoordinator (CharonHistoryToken)
+@implementation NSPersistentStoreCoordinator (RevenantHistoryToken)
 
 - (NSPersistentHistoryToken *)currentPersistentHistoryTokenFromStores:(NSArray *)stores
 {

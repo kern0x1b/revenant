@@ -1,4 +1,4 @@
-#import "CharonMPS.h"
+#import "RevenantMPS.h"
 
 
 @implementation MPSMatrixCopyDescriptor {
@@ -14,7 +14,7 @@
     return nil;
 }
 
-- (id)charon_mps_withCount:(NSUInteger)count
+- (id)revenant_mps_withCount:(NSUInteger)count
 {
     _sources = [NSMutableArray array];
     _destinations = [NSMutableArray array];
@@ -26,12 +26,12 @@
 - (instancetype)initWithDevice:(id<MTLDevice>)device count:(NSUInteger)count
 {
     (void)device;
-    return [[[self class] alloc] charon_mps_withCount:count];
+    return [[[self class] alloc] revenant_mps_withCount:count];
 }
 
 + (instancetype)descriptorWithSourceMatrix:(MPSMatrix *)sourceMatrix destinationMatrix:(MPSMatrix *)destinationMatrix offsets:(MPSMatrixCopyOffsets)offsets
 {
-    MPSMatrixCopyDescriptor *descriptor = [[[self class] alloc] charon_mps_withCount:1];
+    MPSMatrixCopyDescriptor *descriptor = [[[self class] alloc] revenant_mps_withCount:1];
     [descriptor setCopyOperationAtIndex:0 sourceMatrix:sourceMatrix destinationMatrix:destinationMatrix offsets:offsets];
     return descriptor;
 }
@@ -39,7 +39,7 @@
 - (void)setCopyOperationAtIndex:(NSUInteger)index sourceMatrix:(MPSMatrix *)sourceMatrix destinationMatrix:(MPSMatrix *)destinationMatrix offsets:(MPSMatrixCopyOffsets)offsets
 {
     if (index >= _count) {
-        CharonMPSRefuse(@"MPSMatrixCopy: a copy descriptor of %lu operations has no operation %lu", (unsigned long)_count, (unsigned long)index);
+        RevenantMPSRefuse(@"MPSMatrixCopy: a copy descriptor of %lu operations has no operation %lu", (unsigned long)_count, (unsigned long)index);
         return;
     }
     while (_sources.count <= index) {
@@ -59,7 +59,7 @@
                                 offset:(NSUInteger)byteOffset
 {
     NSUInteger count = sourceMatrices.count < destinationMatrices.count ? sourceMatrices.count : destinationMatrices.count;
-    MPSMatrixCopyDescriptor *descriptor = [[[self class] alloc] charon_mps_withCount:count];
+    MPSMatrixCopyDescriptor *descriptor = [[[self class] alloc] revenant_mps_withCount:count];
     for (NSUInteger index = 0; index < count; index++) {
         MPSMatrixCopyOffsets zero = {0, 0, 0, 0};
         if (offsets) {
@@ -72,22 +72,22 @@
     return descriptor;
 }
 
-- (NSUInteger)charon_mps_count
+- (NSUInteger)revenant_mps_count
 {
     return _count;
 }
 
-- (MPSMatrix *)charon_mps_sourceAtIndex:(NSUInteger)index
+- (MPSMatrix *)revenant_mps_sourceAtIndex:(NSUInteger)index
 {
     return _sources[index];
 }
 
-- (MPSMatrix *)charon_mps_destinationAtIndex:(NSUInteger)index
+- (MPSMatrix *)revenant_mps_destinationAtIndex:(NSUInteger)index
 {
     return _destinations[index];
 }
 
-- (MPSMatrixCopyOffsets)charon_mps_offsetsAtIndex:(NSUInteger)index
+- (MPSMatrixCopyOffsets)revenant_mps_offsetsAtIndex:(NSUInteger)index
 {
     MPSMatrixCopyOffsets offsets = {0, 0, 0, 0};
     [_offsets[index] getValue:&offsets];

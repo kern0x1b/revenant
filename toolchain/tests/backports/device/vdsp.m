@@ -16,7 +16,7 @@ static BOOL fromBackports(const char *name)
         isEqualToString:@"libAccelerateBackports.dylib"];
 }
 
-static vDSP_int24 charon_int24(int value)
+static vDSP_int24 revenant_int24(int value)
 {
     vDSP_int24 out;
     out.bytes[0] = (unsigned char)(value & 0xff);
@@ -25,7 +25,7 @@ static vDSP_int24 charon_int24(int value)
     return out;
 }
 
-static vDSP_uint24 charon_uint24(unsigned value)
+static vDSP_uint24 revenant_uint24(unsigned value)
 {
     vDSP_uint24 out;
     out.bytes[0] = (unsigned char)(value & 0xff);
@@ -34,13 +34,13 @@ static vDSP_uint24 charon_uint24(unsigned value)
     return out;
 }
 
-static int charon_read_int24(const vDSP_int24 *value, int at)
+static int revenant_read_int24(const vDSP_int24 *value, int at)
 {
     int raw = value[at].bytes[0] | (value[at].bytes[1] << 8) | (value[at].bytes[2] << 16);
     return (raw & 0x800000) ? raw | ~0xffffff : raw;
 }
 
-static unsigned charon_read_uint24(const vDSP_uint24 *value, int at)
+static unsigned revenant_read_uint24(const vDSP_uint24 *value, int at)
 {
     return (unsigned)(value[at].bytes[0] | (value[at].bytes[1] << 8) | (value[at].bytes[2] << 16));
 }
@@ -72,7 +72,7 @@ int main(int argc, char **argv)
 {
     @autoreleasepool {
         if (argc > 1)
-            charon_log_to(@(argv[1]));
+            revenant_log_to(@(argv[1]));
 
         CHECK(fromBackports("vDSP_vflt24"), "vDSP_vflt24 comes from the backports");
         CHECK(fromBackports("vDSP_zvma"), "vDSP_zvma comes from the backports");
@@ -85,8 +85,8 @@ int main(int argc, char **argv)
             vDSP_int24 signed24[6];
             vDSP_uint24 unsigned24[6];
             for (int at = 0; at < 6; at++) {
-                signed24[at] = charon_int24(signed_values[at]);
-                unsigned24[at] = charon_uint24(unsigned_values[at]);
+                signed24[at] = revenant_int24(signed_values[at]);
+                unsigned24[at] = revenant_uint24(unsigned_values[at]);
             }
             float out[8];
             for (int at = 0; at < 8; at++)
@@ -126,7 +126,7 @@ int main(int argc, char **argv)
             const int want[6] = {8388607, -8388608, 4194304, -4194304, 5592405, 8388607};
             BOOL right = YES;
             for (int at = 0; at < 6; at++)
-                right = right && charon_read_int24(out24, at) == want[at];
+                right = right && revenant_read_int24(out24, at) == want[at];
             CHECK(right, "vDSP_vsmfix24 truncates toward zero and clamps to [-8388608, 8388607]");
             vDSP_uint24 outu24[8];
             memset(outu24, 0x5a, sizeof outu24);
@@ -134,7 +134,7 @@ int main(int argc, char **argv)
             const unsigned wantu[6] = {8388608, 0, 4194304, 0, 5592405, 16777215};
             right = YES;
             for (int at = 0; at < 6; at++)
-                right = right && charon_read_uint24(outu24, at) == wantu[at];
+                right = right && revenant_read_uint24(outu24, at) == wantu[at];
             CHECK(right, "vDSP_vsmfixu24 clamps to [0, 16777215], and a negative result becomes 0");
         }
 
@@ -271,7 +271,7 @@ int main(int argc, char **argv)
             CHECK(distance == 25.0, "vDSP_distancesqD is the sum of the squares of the differences");
         }
 
-        printf("%d checks, %d failures\n", charon_checks, charon_failures);
-        return charon_failures == 0 ? 0 : 1;
+        printf("%d checks, %d failures\n", revenant_checks, revenant_failures);
+        return revenant_failures == 0 ? 0 : 1;
     }
 }

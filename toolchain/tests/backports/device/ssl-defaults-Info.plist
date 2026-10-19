@@ -9,7 +9,7 @@
 	<key>CFBundleExecutable</key>
 	<string>ssl-defaults-probe</string>
 	<key>CFBundleIdentifier</key>
-	<string>local.charon.backports.ssldefaults</string>
+	<string>local.revenant.backports.ssldefaults</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>

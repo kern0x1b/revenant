@@ -49,7 +49,7 @@ static void same_string(NSString *ours, NSString *theirs, NSString *what)
         fail(@"%@: the port says |%@|, Foundation |%@|", what, ours ?: @"(nil)", theirs ?: @"(nil)");
 }
 
-static NSString *charon_run_path(void)
+static NSString *revenant_run_path(void)
 {
     const char *fromEnvironment = getenv("BUILD");
     if (fromEnvironment != NULL && fromEnvironment[0] != '\0')
@@ -57,14 +57,14 @@ static NSString *charon_run_path(void)
     return @".agent-work/runs/bundlerequest/fresh";
 }
 
-static NSString *charon_bundlePath(id self, SEL selector)
+static NSString *revenant_bundlePath(id self, SEL selector)
 {
     (void)self;
     (void)selector;
-    return charon_run_path();
+    return revenant_run_path();
 }
 
-@interface CharonHostNSBundleResourceRequest : NSObject <NSProgressReporting>
+@interface RevenantHostNSBundleResourceRequest : NSObject <NSProgressReporting>
 - (instancetype)init;
 - (instancetype)initWithTags:(NSSet<NSString *> *)tags;
 - (instancetype)initWithTags:(NSSet<NSString *> *)tags bundle:(NSBundle *)bundle;
@@ -77,9 +77,9 @@ static NSString *charon_bundlePath(id self, SEL selector)
 - (void)endAccessingResources;
 @end
 
-extern double const CharonHostNSBundleResourceRequestLoadingPriorityUrgent;
-extern void CharonInstallNSBundleAdditions(Class bundle);
-extern NSString *const CharonHostNSBundleResourceRequestLowDiskSpaceNotification;
+extern double const RevenantHostNSBundleResourceRequestLoadingPriorityUrgent;
+extern void RevenantInstallNSBundleAdditions(Class bundle);
+extern NSString *const RevenantHostNSBundleResourceRequestLowDiskSpaceNotification;
 
 static id host_initWithTag(Class subject, NSString *tag)
 {
@@ -129,14 +129,14 @@ static NSBundle *makeBundle(NSString *name, BOOL withManifest)
 int main(void)
 {
     @autoreleasepool {
-        Class ours = NSClassFromString(@"CharonHostNSBundleResourceRequest");
+        Class ours = NSClassFromString(@"RevenantHostNSBundleResourceRequest");
         Class theirs = NSClassFromString(@"NSBundleResourceRequest");
         if (!ours || !theirs) {
             printf("FAIL the backport does not define NSBundleResourceRequest: %d\n", ours != Nil);
             return 1;
         }
-        NSBundle *withManifest = makeBundle(@"charon-brr-with", YES);
-        NSBundle *withoutManifest = makeBundle(@"charon-brr-without", NO);
+        NSBundle *withManifest = makeBundle(@"revenant-brr-with", YES);
+        NSBundle *withoutManifest = makeBundle(@"revenant-brr-without", NO);
         NSSet *known = [NSSet setWithObjects:@"level1", @"level2", nil];
         NSSet *unknown = [NSSet setWithObject:@"level9"];
 
@@ -268,10 +268,10 @@ int main(void)
             printf("note: %s - a refusal: %s, level1 reads %g, an unnamed tag reads %g\n",
                    [what UTF8String], reason ? [reason UTF8String] : "(none)", level1, level9);
         }
-        Class fresh = objc_allocateClassPair([NSObject class], "CharonHostFreshBundle", 0);
-        class_addMethod(fresh, NSSelectorFromString(@"bundlePath"), (IMP)charon_bundlePath, "@@:");
+        Class fresh = objc_allocateClassPair([NSObject class], "RevenantHostFreshBundle", 0);
+        class_addMethod(fresh, NSSelectorFromString(@"bundlePath"), (IMP)revenant_bundlePath, "@@:");
         objc_registerClassPair(fresh);
-        CharonInstallNSBundleAdditions(fresh);
+        RevenantInstallNSBundleAdditions(fresh);
         SEL installedSet = NSSelectorFromString(@"setPreservationPriority:forTags:");
         SEL installedGet = NSSelectorFromString(@"preservationPriorityForTag:");
         same_bool(class_getInstanceMethod(fresh, installedSet) != NULL, YES,
@@ -292,13 +292,13 @@ int main(void)
                         @"the installed getter reads 0 for a tag that was never set");
         }
 
-        printf("note: the fresh class the install was exercised on carries %s\n", [charon_run_path() UTF8String]);
+        printf("note: the fresh class the install was exercised on carries %s\n", [revenant_run_path() UTF8String]);
         printf("note: the host's two NSBundle additions are the same selectors on the same class and read back 0,\n"
                "  so the port's two are held to the header and differ from macOS on purpose.\n");
 
-        same_double(CharonHostNSBundleResourceRequestLoadingPriorityUrgent, 1.0,
+        same_double(RevenantHostNSBundleResourceRequestLoadingPriorityUrgent, 1.0,
                     @"NSBundleResourceRequestLoadingPriorityUrgent");
-        same_string(CharonHostNSBundleResourceRequestLowDiskSpaceNotification,
+        same_string(RevenantHostNSBundleResourceRequestLowDiskSpaceNotification,
                     @"NSBundleResourceRequestLowDiskSpaceNotification",
                     @"NSBundleResourceRequestLowDiskSpaceNotification");
         void *urgent = dlsym(RTLD_DEFAULT, "_NSBundleResourceRequestLoadingPriorityUrgent");

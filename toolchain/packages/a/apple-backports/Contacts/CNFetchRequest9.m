@@ -1,4 +1,4 @@
-#import "CharonContacts.h"
+#import "RevenantContacts.h"
 
 @implementation CNFetchRequest
 @end

@@ -53,7 +53,7 @@
     _selector = selector;
 }
 
-- (BOOL)charonPerform
+- (BOOL)revenantPerform
 {
     UIAccessibilityCustomActionHandler handler = self.actionHandler;
     if (handler)
@@ -68,91 +68,91 @@
 
 @end
 
-static const void *CharonCustomActionsKey = &CharonCustomActionsKey;
-static const void *CharonElementsKey = &CharonElementsKey;
-static const void *CharonNavigationStyleKey = &CharonNavigationStyleKey;
+static const void *RevenantCustomActionsKey = &RevenantCustomActionsKey;
+static const void *RevenantElementsKey = &RevenantElementsKey;
+static const void *RevenantNavigationStyleKey = &RevenantNavigationStyleKey;
 
-static IMP CharonCustomActionsGetter;
-static IMP CharonCustomActionsSetter;
-static BOOL CharonCustomActionsArmed;
+static IMP RevenantCustomActionsGetter;
+static IMP RevenantCustomActionsSetter;
+static BOOL RevenantCustomActionsArmed;
 
-static void CharonReassertCustomActions(void);
+static void RevenantReassertCustomActions(void);
 
-@implementation NSObject (CharonAccessibilityElements)
+@implementation NSObject (RevenantAccessibilityElements)
 
 - (NSArray<UIAccessibilityCustomAction *> *)accessibilityCustomActions
 {
-    return objc_getAssociatedObject(self, CharonCustomActionsKey);
+    return objc_getAssociatedObject(self, RevenantCustomActionsKey);
 }
 
 - (void)setAccessibilityCustomActions:(NSArray<UIAccessibilityCustomAction *> *)actions
 {
-    CharonReassertCustomActions();
-    objc_setAssociatedObject(self, CharonCustomActionsKey, [actions copy], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    RevenantReassertCustomActions();
+    objc_setAssociatedObject(self, RevenantCustomActionsKey, [actions copy], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
 - (NSArray *)accessibilityElements
 {
-    return objc_getAssociatedObject(self, CharonElementsKey);
+    return objc_getAssociatedObject(self, RevenantElementsKey);
 }
 
 - (void)setAccessibilityElements:(NSArray *)elements
 {
-    objc_setAssociatedObject(self, CharonElementsKey, [elements copy], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, RevenantElementsKey, [elements copy], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
 - (UIAccessibilityNavigationStyle)accessibilityNavigationStyle
 {
-    return (UIAccessibilityNavigationStyle)[objc_getAssociatedObject(self, CharonNavigationStyleKey) integerValue];
+    return (UIAccessibilityNavigationStyle)[objc_getAssociatedObject(self, RevenantNavigationStyleKey) integerValue];
 }
 
 - (void)setAccessibilityNavigationStyle:(UIAccessibilityNavigationStyle)style
 {
-    objc_setAssociatedObject(self, CharonNavigationStyleKey, @(style), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, RevenantNavigationStyleKey, @(style), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
 @end
 
-static BOOL CharonInThisImage(const void *address)
+static BOOL RevenantInThisImage(const void *address)
 {
     Dl_info here, there;
-    if (dladdr(address, &there) == 0 || there.dli_fname == NULL || dladdr((const void *)CharonInThisImage, &here) == 0
+    if (dladdr(address, &there) == 0 || there.dli_fname == NULL || dladdr((const void *)RevenantInThisImage, &here) == 0
         || here.dli_fname == NULL) {
         return NO;
     }
     return strcmp(here.dli_fname, there.dli_fname) == 0;
 }
 
-static void CharonReassertCustomActions(void)
+static void RevenantReassertCustomActions(void)
 {
-    if (!CharonCustomActionsArmed) {
+    if (!RevenantCustomActionsArmed) {
         return;
     }
     Method visible = class_getInstanceMethod([NSObject class], @selector(accessibilityCustomActions));
-    if (visible != NULL && method_getImplementation(visible) == CharonCustomActionsGetter) {
+    if (visible != NULL && method_getImplementation(visible) == RevenantCustomActionsGetter) {
         return;
     }
-    class_replaceMethod([NSObject class], @selector(accessibilityCustomActions), CharonCustomActionsGetter, "@@:");
-    class_replaceMethod([NSObject class], @selector(setAccessibilityCustomActions:), CharonCustomActionsSetter, "v@:@");
+    class_replaceMethod([NSObject class], @selector(accessibilityCustomActions), RevenantCustomActionsGetter, "@@:");
+    class_replaceMethod([NSObject class], @selector(setAccessibilityCustomActions:), RevenantCustomActionsSetter, "v@:@");
 }
 
-static void CharonQueueReassertCustomActions(const struct mach_header *header, intptr_t slide)
+static void RevenantQueueReassertCustomActions(const struct mach_header *header, intptr_t slide)
 {
     Dl_info info;
-    if (!CharonCustomActionsArmed || dladdr(header, &info) == 0 || info.dli_fname == NULL
+    if (!RevenantCustomActionsArmed || dladdr(header, &info) == 0 || info.dli_fname == NULL
         || strstr(info.dli_fname, "/UIAccessibility.framework/UIAccessibility") == NULL) {
         return;
     }
     dispatch_async(dispatch_get_main_queue(), ^{
-        CharonReassertCustomActions();
+        RevenantReassertCustomActions();
     });
 }
 
-__attribute__((constructor)) static void CharonArmCustomActions(void)
+__attribute__((constructor)) static void RevenantArmCustomActions(void)
 {
-    CharonCustomActionsGetter = class_getMethodImplementation([NSObject class], @selector(accessibilityCustomActions));
-    CharonCustomActionsSetter = class_getMethodImplementation([NSObject class], @selector(setAccessibilityCustomActions:));
-    CharonCustomActionsArmed = CharonInThisImage((const void *)CharonCustomActionsGetter)
-        && CharonInThisImage((const void *)CharonCustomActionsSetter);
-    _dyld_register_func_for_add_image(CharonQueueReassertCustomActions);
+    RevenantCustomActionsGetter = class_getMethodImplementation([NSObject class], @selector(accessibilityCustomActions));
+    RevenantCustomActionsSetter = class_getMethodImplementation([NSObject class], @selector(setAccessibilityCustomActions:));
+    RevenantCustomActionsArmed = RevenantInThisImage((const void *)RevenantCustomActionsGetter)
+        && RevenantInThisImage((const void *)RevenantCustomActionsSetter);
+    _dyld_register_func_for_add_image(RevenantQueueReassertCustomActions);
 }

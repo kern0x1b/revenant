@@ -3,17 +3,17 @@
 
 typedef struct {
     CGPathApplyBlock block;
-} charon_path_context;
+} revenant_path_context;
 
-static void charon_path_apply(void *info, const CGPathElement *element)
+static void revenant_path_apply(void *info, const CGPathElement *element)
 {
-    ((charon_path_context *)info)->block(element);
+    ((revenant_path_context *)info)->block(element);
 }
 
 void CGPathApplyWithBlock(CGPathRef path, CGPathApplyBlock block)
 {
     if (!path || !block)
         return;
-    charon_path_context context = {block};
-    CGPathApply(path, &context, charon_path_apply);
+    revenant_path_context context = {block};
+    CGPathApply(path, &context, revenant_path_apply);
 }

@@ -1,14 +1,14 @@
 #import <UIKit/UIKit.h>
 #import <objc/message.h>
 
-#import "CharonDragSession.h"
+#import "RevenantDragSession.h"
 #import <UIKit/UICollectionView.h>
 #import <UIKit/UITableView.h>
 #import "UIDropCoordinators.h"
 
 #pragma clang diagnostic ignored "-Wobjc-property-implementation"
 
-@implementation CharonCollectionPlaceholderContext {
+@implementation RevenantCollectionPlaceholderContext {
 @private
     UICollectionViewDropPlaceholder *_placeholder;
     UIDragItem *_item;
@@ -98,11 +98,11 @@
 
 @end
 
-@interface CharonTablePlaceholderContext ()
+@interface RevenantTablePlaceholderContext ()
 - (NSIndexPath *)insertionIndexPath;
 @end
 
-@implementation CharonTablePlaceholderContext {
+@implementation RevenantTablePlaceholderContext {
 @private
     UITableViewDropPlaceholder *_placeholder;
     UIDragItem *_item;
@@ -162,7 +162,7 @@
 
 @end
 
-@implementation CharonCollectionDropCoordinator
+@implementation RevenantCollectionDropCoordinator
 @synthesize dropItems = _dropItems;
 @synthesize destination = _destination;
 @synthesize dropProposal = _dropProposal;
@@ -243,7 +243,7 @@
 
 @end
 
-@implementation CharonTableDropCoordinator
+@implementation RevenantTableDropCoordinator
 @synthesize dropItems = _dropItems;
 @synthesize destination = _destination;
 @synthesize dropProposal = _dropProposal;

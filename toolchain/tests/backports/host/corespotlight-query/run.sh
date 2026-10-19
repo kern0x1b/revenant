@@ -1,14 +1,14 @@
 #!/bin/sh
 # run.sh - the host differential of CSSearchQuery. differential.m is built once against the host's CoreSpotlight.framework, which
 # searches the host's own index, and once against the port's sources, which search the port's store. The port's store is under
-# CHARON_SPOTLIGHT_SHARED_ROOT, a path under /var/mobile that this host cannot write, so the port is built from a copy in which
+# REVENANT_SPOTLIGHT_SHARED_ROOT, a path under /var/mobile that this host cannot write, so the port is built from a copy in which
 # only that one path is replaced by a folder of the run. Every query's line must then be the same on both sides, after object
 # addresses are replaced. A planted control makes != answer like == in a scratch copy, and the comparison must tell it apart.
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 spotlight=${SPOTLIGHT:-$here/../../../../packages/a/apple-backports/CoreSpotlight}
-build=${CORESPOTLIGHT_QUERY_BUILD:-$(runs_folder charon-corespotlight-query-host)}
+build=${CORESPOTLIGHT_QUERY_BUILD:-$(runs_folder revenant-corespotlight-query-host)}
 rm -rf "$build"
 mkdir -p "$build/host" "$build/port/src" "$build/port/store" "$build/control/src"
 
@@ -25,11 +25,11 @@ normalise "$build/host.txt"
 # The port side: the port's sources, with the store path of the copy pointed at a folder of this run.
 copy_port() {
     dir=$1
-    for file in CSSearchQuery.m CSSearchableIndex.m CSSearchableItem.m CSSearchableItemAttributeSet.m CSSearchQueryContext.m CharonSpotlightStore.h; do
+    for file in CSSearchQuery.m CSSearchableIndex.m CSSearchableItem.m CSSearchableItemAttributeSet.m CSSearchQueryContext.m RevenantSpotlightStore.h; do
         cp "$spotlight/$file" "$dir/"
     done
-    sed -i '' "s|#define CHARON_SPOTLIGHT_SHARED_ROOT @\"/var/mobile/Library/Caches/org.charon.corespotlight\"|#define CHARON_SPOTLIGHT_SHARED_ROOT @\"$build/port/store\"|" "$dir/CharonSpotlightStore.h"
-    grep -q "$build/port/store" "$dir/CharonSpotlightStore.h"
+    sed -i '' "s|#define REVENANT_SPOTLIGHT_SHARED_ROOT @\"/var/mobile/Library/Caches/org.revenant.corespotlight\"|#define REVENANT_SPOTLIGHT_SHARED_ROOT @\"$build/port/store\"|" "$dir/RevenantSpotlightStore.h"
+    grep -q "$build/port/store" "$dir/RevenantSpotlightStore.h"
 }
 port() {
     dir=$1

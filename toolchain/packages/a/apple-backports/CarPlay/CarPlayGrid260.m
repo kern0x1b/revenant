@@ -1,8 +1,8 @@
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
 #import <CarPlay/CarPlay.h>
-#import "CharonCarPlay260.h"
-#import "CharonCarPlayTemplate.h"
+#import "RevenantCarPlay260.h"
+#import "RevenantCarPlayTemplate.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -30,16 +30,16 @@ NS_ASSUME_NONNULL_BEGIN
 
 @end
 
-@implementation CPListTemplate (CharonGrid260)
+@implementation CPListTemplate (RevenantGrid260)
 
 - (NSArray<CPGridButton *> *)headerGridButtons
 {
-    return [self charon_headerGridButtons];
+    return [self revenant_headerGridButtons];
 }
 
 - (void)setHeaderGridButtons:(NSArray<CPGridButton *> *)headerGridButtons
 {
-    [self charon_setHeaderGridButtons:headerGridButtons];
+    [self revenant_setHeaderGridButtons:headerGridButtons];
 }
 
 - (instancetype)initWithTitle:(NSString *)title
@@ -51,14 +51,14 @@ NS_ASSUME_NONNULL_BEGIN
                      sections:sections
    assistantCellConfiguration:assistantCellConfiguration];
     if (self) {
-        [self charon_setHeaderGridButtons:headerGridButtons];
+        [self revenant_setHeaderGridButtons:headerGridButtons];
     }
     return self;
 }
 
 @end
 
-@implementation CPGridButton (CharonGrid260)
+@implementation CPGridButton (RevenantGrid260)
 
 - (instancetype)initWithTitleVariants:(NSArray<NSString *> *)titleVariants
                                 image:(UIImage *)image
@@ -67,24 +67,24 @@ NS_ASSUME_NONNULL_BEGIN
 {
     self = [self initWithTitleVariants:titleVariants image:image handler:handler];
     if (self) {
-        [self charon_setMessageConfiguration:messageConfiguration];
+        [self revenant_setMessageConfiguration:messageConfiguration];
     }
     return self;
 }
 
 - (CPMessageGridItemConfiguration *)messageConfiguration
 {
-    return [self charon_messageConfiguration];
+    return [self revenant_messageConfiguration];
 }
 
 - (void)updateTitleVariants:(NSArray<NSString *> *)titleVariants
 {
-    [self charon_setTitleVariants:titleVariants];
+    [self revenant_setTitleVariants:titleVariants];
 }
 
 - (void)updateImage:(UIImage *)image
 {
-    [self charon_setImage:image];
+    [self revenant_setImage:image];
 }
 
 @end

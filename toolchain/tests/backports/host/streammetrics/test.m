@@ -15,7 +15,7 @@ void host_attach_prefixed(const char *prefix);
 size_t host_attach_members(Class from, Class to);
 BOOL host_alloc_from(Class from, Class to);
 
-@interface CharonMetricsCollector : NSObject <NSURLSessionDelegate, NSURLSessionStreamDelegate>
+@interface RevenantMetricsCollector : NSObject <NSURLSessionDelegate, NSURLSessionStreamDelegate>
 @property NSURLSessionTaskMetrics *metrics;
 @property int read_closed;
 @property int write_closed;
@@ -23,7 +23,7 @@ BOOL host_alloc_from(Class from, Class to);
 @property NSError *error;
 @end
 
-@implementation CharonMetricsCollector
+@implementation RevenantMetricsCollector
 
 - (void)URLSession:(NSURLSession *)session
                     task:(NSURLSessionTask *)task
@@ -54,7 +54,7 @@ static int failures;
 static int checks;
 static int divergences;
 
-static int charon_listener(void)
+static int revenant_listener(void)
 {
     int listener = socket(AF_INET, SOCK_STREAM, 0);
     if (listener < 0)
@@ -75,7 +75,7 @@ static int charon_listener(void)
     return listener;
 }
 
-static NSUInteger charon_port_of(int descriptor)
+static NSUInteger revenant_port_of(int descriptor)
 {
     struct sockaddr_in address;
     socklen_t length = sizeof(address);
@@ -84,7 +84,7 @@ static NSUInteger charon_port_of(int descriptor)
     return ntohs(address.sin_port);
 }
 
-static void charon_names_of(int descriptor, char *text, size_t size)
+static void revenant_names_of(int descriptor, char *text, size_t size)
 {
     struct sockaddr_in address;
     socklen_t length = sizeof(address);
@@ -97,14 +97,14 @@ static void charon_names_of(int descriptor, char *text, size_t size)
     snprintf(text, size, "%s:%d", host, ntohs(address.sin_port));
 }
 
-#define CHARON_MAX_CONNECTIONS 8
-static NSString *charon_peer_address[CHARON_MAX_CONNECTIONS];
-static NSUInteger charon_peer_port[CHARON_MAX_CONNECTIONS];
-static const char *charon_peer_answer[CHARON_MAX_CONNECTIONS];
-static int charon_connections;
-static int charon_expected_connections;
+#define REVENANT_MAX_CONNECTIONS 8
+static NSString *revenant_peer_address[REVENANT_MAX_CONNECTIONS];
+static NSUInteger revenant_peer_port[REVENANT_MAX_CONNECTIONS];
+static const char *revenant_peer_answer[REVENANT_MAX_CONNECTIONS];
+static int revenant_connections;
+static int revenant_expected_connections;
 
-static int charon_says_http(int connection)
+static int revenant_says_http(int connection)
 {
     struct pollfd waiting;
     waiting.fd = connection;
@@ -118,9 +118,9 @@ static int charon_says_http(int connection)
                        strncmp(first, "POST ", 5) == 0);
 }
 
-static void charon_accept_connections(int listener)
+static void revenant_accept_connections(int listener)
 {
-    for (int index = 0; index < charon_expected_connections; index++) {
+    for (int index = 0; index < revenant_expected_connections; index++) {
         int connection = accept(listener, NULL, NULL);
         if (connection < 0)
             return;
@@ -129,32 +129,32 @@ static void charon_accept_connections(int listener)
         char text[INET_ADDRSTRLEN] = {0};
         if (getpeername(connection, (struct sockaddr *)&peer, &length) == 0)
             inet_ntop(AF_INET, &peer.sin_addr, text, sizeof(text));
-        charon_peer_address[charon_connections] = @(text);
-        charon_peer_port[charon_connections] = ntohs(peer.sin_port);
-        if (charon_says_http(connection)) {
+        revenant_peer_address[revenant_connections] = @(text);
+        revenant_peer_port[revenant_connections] = ntohs(peer.sin_port);
+        if (revenant_says_http(connection)) {
             static const char response[] = "HTTP/1.1 200 OK\r\nContent-Length: 1\r\nConnection: close\r\n\r\nk";
             write(connection, response, sizeof(response) - 1);
-            charon_peer_answer[charon_connections] = "was answered HTTP/1.1 200 and closed";
+            revenant_peer_answer[revenant_connections] = "was answered HTTP/1.1 200 and closed";
             close(connection);
         } else {
             const char greeting = 'k';
             write(connection, &greeting, 1);
-            charon_peer_answer[charon_connections] = "was given one byte and held open";
+            revenant_peer_answer[revenant_connections] = "was given one byte and held open";
         }
-        charon_connections++;
+        revenant_connections++;
     }
 }
 
-static void charon_on_alarm(int number)
+static void revenant_on_alarm(int number)
 {
     (void)number;
     fprintf(stderr, "\nFAIL the test ran past its thirty second bound\n");
     _exit(1);
 }
 
-static void charon_bound_the_run(void)
+static void revenant_bound_the_run(void)
 {
-    signal(SIGALRM, charon_on_alarm);
+    signal(SIGALRM, revenant_on_alarm);
     alarm(30);
 }
 
@@ -225,31 +225,31 @@ static void compare_port(const char *label, id system_value, NSUInteger system_e
 int main(void)
 {
     @autoreleasepool {
-        charon_bound_the_run();
+        revenant_bound_the_run();
 
-        int listener = charon_listener();
-        charon_check(listener >= 0, "the test opens its own listener", @"no socket");
+        int listener = revenant_listener();
+        revenant_check(listener >= 0, "the test opens its own listener", @"no socket");
         if (listener < 0)
             return 1;
-        NSUInteger port = charon_port_of(listener);
+        NSUInteger port = revenant_port_of(listener);
         printf("note the listener is on the loopback at port %lu\n", (unsigned long)port);
 
-        Class ourTaskClass = NSClassFromString(@"CharonHostNSURLSessionStreamTask");
-        charon_check(ourTaskClass != Nil, "the port defines a stream task", @"no such class");
+        Class ourTaskClass = NSClassFromString(@"RevenantHostNSURLSessionStreamTask");
+        revenant_check(ourTaskClass != Nil, "the port defines a stream task", @"no such class");
 
-        charon_expected_connections = 3;
+        revenant_expected_connections = 3;
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-            charon_accept_connections(listener);
+            revenant_accept_connections(listener);
         });
 
-        CharonMetricsCollector *systemDelegate = [[CharonMetricsCollector alloc] init];
+        RevenantMetricsCollector *systemDelegate = [[RevenantMetricsCollector alloc] init];
         NSURLSession *systemSession = [NSURLSession sessionWithConfiguration:
             [NSURLSessionConfiguration ephemeralSessionConfiguration]
                                                                      delegate:systemDelegate
                                                                 delegateQueue:nil];
         NSURLSessionTask *systemTask = [systemSession streamTaskWithHostName:@"127.0.0.1" port:(NSInteger)port];
-        charon_check(systemTask != nil, "the host makes a stream task", @"nil");
-        charon_check(systemTask && ourTaskClass && ![systemTask isKindOfClass:ourTaskClass],
+        revenant_check(systemTask != nil, "the host makes a stream task", @"nil");
+        revenant_check(systemTask && ourTaskClass && ![systemTask isKindOfClass:ourTaskClass],
                      "the host's own stream task is not the port's", @"the port's factory answered it");
         [systemTask resume];
         [[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:1]];
@@ -262,7 +262,7 @@ int main(void)
                systemDelegate.completed, systemDelegate.error ? "yes" : "(none)",
                systemDelegate.metrics ? "yes" : "none - the system delivers none for a stream task");
 
-        CharonMetricsCollector *oracleDelegate = [[CharonMetricsCollector alloc] init];
+        RevenantMetricsCollector *oracleDelegate = [[RevenantMetricsCollector alloc] init];
         NSURLSession *oracleSession = [NSURLSession sessionWithConfiguration:
             [NSURLSessionConfiguration ephemeralSessionConfiguration]
                                                                     delegate:oracleDelegate
@@ -272,7 +272,7 @@ int main(void)
         [oracleTask resume];
         [[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:2]];
         id systemTransaction = first_transaction(oracleDelegate.metrics);
-        charon_check(systemTransaction != nil,
+        revenant_check(systemTransaction != nil,
                      "the system hands its delegate a transaction over this listener",
                      systemDelegate.metrics ? @"that was the stream task's" : @"no metrics arrived at all");
 
@@ -280,35 +280,35 @@ int main(void)
             [NSURLSessionConfiguration ephemeralSessionConfiguration]];
         NSURLSessionTask *probeTask = [probeSession streamTaskWithHostName:@"127.0.0.1" port:9];
         Class released = probeTask ? (Class)[probeTask class] : Nil;
-        charon_check(released != Nil && ![released isSubclassOfClass:ourTaskClass] && released != ourTaskClass,
+        revenant_check(released != Nil && ![released isSubclassOfClass:ourTaskClass] && released != ourTaskClass,
                      "the class of the host's own stream task is not the port's",
                      [NSString stringWithFormat:@"both are %s", class_getName(released)]);
         size_t moved = host_attach_members(ourTaskClass, released);
-        charon_check(moved > 0, "the port's members go on the host's own stream task class",
+        revenant_check(moved > 0, "the port's members go on the host's own stream task class",
                      [NSString stringWithFormat:@"%lu of them", (unsigned long)moved]);
         Method ownAlloc = class_getClassMethod(ourTaskClass, sel_registerName("alloc"));
         printf("note the port's own +alloc is typed %s on this host\n",
                ownAlloc ? method_getTypeEncoding(ownAlloc) : "(the port's class has no +alloc to read)");
-        charon_check(host_alloc_from(ourTaskClass, released),
+        revenant_check(host_alloc_from(ourTaskClass, released),
                      "the port's factory hands out one of the host's own",
                      @"+alloc is the port's own");
         host_attach_prefixed("");
-        charon_check([NSURLSession instancesRespondToSelector:NSSelectorFromString(@"charonHost_streamTaskWithHostName:port:")],
+        revenant_check([NSURLSession instancesRespondToSelector:NSSelectorFromString(@"revenantHost_streamTaskWithHostName:port:")],
                      "the port's factory is attached to the session", @"the category is not attached");
 
-        SEL ourFactory = NSSelectorFromString(@"charonHost_streamTaskWithHostName:port:");
+        SEL ourFactory = NSSelectorFromString(@"revenantHost_streamTaskWithHostName:port:");
         if (!ourTaskClass)
             return 1;
 
-        CharonMetricsCollector *ourDelegate = [[CharonMetricsCollector alloc] init];
+        RevenantMetricsCollector *ourDelegate = [[RevenantMetricsCollector alloc] init];
         NSURLSession *ourSession = [NSURLSession sessionWithConfiguration:
             [NSURLSessionConfiguration ephemeralSessionConfiguration]
                                                                      delegate:ourDelegate
                                                                 delegateQueue:nil];
-        charon_check(ourSession != nil, "a session with the collecting delegate", @"nil");
+        revenant_check(ourSession != nil, "a session with the collecting delegate", @"nil");
         NSURLSessionTask *ourTask = ((id (*)(id, SEL, id, NSInteger))objc_msgSend)(ourSession,
             ourFactory, @"127.0.0.1", (NSInteger)port);
-        charon_check(ourTask != nil, "and a stream task to the same port", @"nil");
+        revenant_check(ourTask != nil, "and a stream task to the same port", @"nil");
         ((void (*)(id, SEL))objc_msgSend)(ourTask, @selector(resume));
         [[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:1]];
         ((void (*)(id, SEL))objc_msgSend)(ourTask, @selector(closeRead));
@@ -321,15 +321,15 @@ int main(void)
             printf("FAIL the port handed no transaction to its delegate\n");
         }
 
-        for (int waited = 0; waited < 3 && charon_connections < charon_expected_connections; waited++)
+        for (int waited = 0; waited < 3 && revenant_connections < revenant_expected_connections; waited++)
             [[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:1]];
-        charon_check(charon_connections == charon_expected_connections,
+        revenant_check(revenant_connections == revenant_expected_connections,
                      "the listener took one connection for each of the three tasks",
-                     [NSString stringWithFormat:@"%d of %d", charon_connections, charon_expected_connections]);
-        for (int index = 0; index < charon_connections; index++)
+                     [NSString stringWithFormat:@"%d of %d", revenant_connections, revenant_expected_connections]);
+        for (int index = 0; index < revenant_connections; index++)
             printf("note connection %d from %s:%lu - the listener %s\n", index,
-                   [charon_peer_address[index] UTF8String], (unsigned long)charon_peer_port[index],
-                   charon_peer_answer[index]);
+                   [revenant_peer_address[index] UTF8String], (unsigned long)revenant_peer_port[index],
+                   revenant_peer_answer[index]);
 
         {
             NSInputStream *input = nil;
@@ -349,8 +349,8 @@ int main(void)
                     char cast_names[96], read_names[96];
                     if (CFDataGetLength((CFDataRef)handle) >= (CFIndex)sizeof(read))
                         memcpy(&read, CFDataGetBytePtr((CFDataRef)handle), sizeof(read));
-                    charon_names_of(cast, cast_names, sizeof(cast_names));
-                    charon_names_of(read, read_names, sizeof(read_names));
+                    revenant_names_of(cast, cast_names, sizeof(cast_names));
+                    revenant_names_of(read, read_names, sizeof(read_names));
                     printf("note this host's own CFStream pair: kCFStreamPropertySocketNativeHandle is a "
                            "CFData of %lu bytes; the value cast to an int is %d (%s) and the bytes in it are "
                            "%d (%s)\n", (unsigned long)CFDataGetLength((CFDataRef)handle), cast,
@@ -372,9 +372,9 @@ int main(void)
         compare_port("remotePort", property_value(systemTransaction, "remotePort"), port,
                      property_value(ourTransaction, "remotePort"), port, "this listener's own port");
         compare_port("localPort", property_value(systemTransaction, "localPort"),
-                     charon_connections > 1 ? charon_peer_port[1] : 0,
+                     revenant_connections > 1 ? revenant_peer_port[1] : 0,
                      property_value(ourTransaction, "localPort"),
-                     charon_connections > 2 ? charon_peer_port[2] : 0,
+                     revenant_connections > 2 ? revenant_peer_port[2] : 0,
                      "the local port the listener read for that side's own connection");
 
         printf("checks=%d failures=%d divergences=%d\n", checks, failures, divergences);

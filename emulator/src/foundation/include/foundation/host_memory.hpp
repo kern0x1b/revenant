@@ -11,7 +11,7 @@
 #include <optional>
 #include <string_view>
 
-namespace shade {
+namespace emulator {
 
 struct HostMemorySnapshot {
     std::uint64_t rss_bytes { };

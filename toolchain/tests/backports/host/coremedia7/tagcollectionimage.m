@@ -6,7 +6,7 @@
 #import <dlfcn.h>
 #import <string.h>
 #import <objc/runtime.h>
-#import "CharonCMTaggedBufferGroup26.h"
+#import "RevenantCMTaggedBufferGroup26.h"
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -62,21 +62,21 @@ static void same(const char *name, NSString *system, NSString *ported)
     }
 }
 
-static NSMutableString *charonSeen;
+static NSMutableString *revenantSeen;
 
-static void charonAppend(CMTag value, void *context)
+static void revenantAppend(CMTag value, void *context)
 {
     (void)context;
-    [charonSeen appendFormat:@"%d/%u/%llu;", (int)value.category, (unsigned)value.dataType, (unsigned long long)value.value];
+    [revenantSeen appendFormat:@"%d/%u/%llu;", (int)value.category, (unsigned)value.dataType, (unsigned long long)value.value];
 }
 
-static Boolean charonStopAtTrackID(CMTag value, void *context)
+static Boolean revenantStopAtTrackID(CMTag value, void *context)
 {
     (void)context;
     return value.category == kCMTagCategory_TrackID ? true : false;
 }
 
-static Boolean charonNever(CMTag value, void *context)
+static Boolean revenantNever(CMTag value, void *context)
 {
     (void)value; (void)context;
     return false;
@@ -93,7 +93,7 @@ int main(int argc, char **argv)
     setvbuf(stdout, NULL, _IONBF, 0);
     @autoreleasepool {
         printf("probing %s\n", argv[1]);
-        port = dlopen(argc > 1 ? argv[1] : "libCharonCMTag.dylib", RTLD_LOCAL | RTLD_FIRST);
+        port = dlopen(argc > 1 ? argv[1] : "libRevenantCMTag.dylib", RTLD_LOCAL | RTLD_FIRST);
         if (!port) {
             printf("dlopen failed: %s\n", dlerror());
             return 2;
@@ -518,16 +518,16 @@ int main(int argc, char **argv)
                 }
 
                 {
-                    charonSeen = [NSMutableString string];
-                    CMTagCollectionApply(systemLeft, charonAppend, NULL);
-                    NSString *systemSeen = charonSeen;
-                    charonSeen = [NSMutableString string];
-                    port_CMTagCollectionApply(portLeft, charonAppend, NULL);
-                    same("Apply", systemSeen, charonSeen);
-                    same("ApplyUntil found", shown(CMTagCollectionApplyUntil(systemLeft, charonStopAtTrackID, NULL)),
-                         shown(port_CMTagCollectionApplyUntil(portLeft, charonStopAtTrackID, NULL)));
-                    same("ApplyUntil missed", shown(CMTagCollectionApplyUntil(systemLeft, charonNever, NULL)),
-                         shown(port_CMTagCollectionApplyUntil(portLeft, charonNever, NULL)));
+                    revenantSeen = [NSMutableString string];
+                    CMTagCollectionApply(systemLeft, revenantAppend, NULL);
+                    NSString *systemSeen = revenantSeen;
+                    revenantSeen = [NSMutableString string];
+                    port_CMTagCollectionApply(portLeft, revenantAppend, NULL);
+                    same("Apply", systemSeen, revenantSeen);
+                    same("ApplyUntil found", shown(CMTagCollectionApplyUntil(systemLeft, revenantStopAtTrackID, NULL)),
+                         shown(port_CMTagCollectionApplyUntil(portLeft, revenantStopAtTrackID, NULL)));
+                    same("ApplyUntil missed", shown(CMTagCollectionApplyUntil(systemLeft, revenantNever, NULL)),
+                         shown(port_CMTagCollectionApplyUntil(portLeft, revenantNever, NULL)));
                 }
                 {
                     CFDictionaryRef systemDict = CMTagCollectionCopyAsDictionary(systemLeft, NULL);

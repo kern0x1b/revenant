@@ -16,13 +16,13 @@ set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 P=${PORT_DIR:-$here/../../../../packages/a/apple-backports}
-build=${NSEXTENSION_BUILD:-$(runs_fresh charon-nsextension-context)}
+build=${NSEXTENSION_BUILD:-$(runs_fresh revenant-nsextension-context)}
 sdk=$(xcrun --show-sdk-path)
 target="-target arm64-apple-ios15.0-macabi -isysroot $sdk -iframework $sdk/System/iOSSupport/System/Library/Frameworks"
-flags="$target -fobjc-arc -fvisibility=hidden -w -DCHARON_HOST_BUILD"
+flags="$target -fobjc-arc -fvisibility=hidden -w -DREVENANT_HOST_BUILD"
 probe_flags="$target -fno-objc-arc -fvisibility=hidden -w"
 frameworks="-framework Foundation -framework UIKit -framework CoreGraphics"
-sources="$P/Foundation/NSExtensionContext.m $P/IntentsUI/CharonNSExtensionContext+IntentsUI.m $P/NotificationCenter/CharonNSExtensionContext+NotificationCenter.m"
+sources="$P/Foundation/NSExtensionContext.m $P/IntentsUI/RevenantNSExtensionContext+IntentsUI.m $P/NotificationCenter/RevenantNSExtensionContext+NotificationCenter.m"
 mkdir -p "$build/plain" "$build/port" "$build/plant"
 
 xcrun clang $probe_flags "$here/probe.m" $frameworks -o "$build/host"
@@ -39,7 +39,7 @@ for source in $sources; do
     xcrun clang $flags -c "$source" -o "$build/plain/$(basename "$source" .m).o"
 done
 for name in $(xcrun nm -gU "$build"/plain/*.o | awk 'NF == 3 {print $3}' | grep -E '^_OBJC_CLASS_\$_' | sed -e 's/^_OBJC_CLASS_\$_//' | sort -u); do
-    renames="$renames -D$name=CharonHost$name"
+    renames="$renames -D$name=RevenantHost$name"
 done
 for source in $sources; do
     xcrun clang $flags $renames -c "$source" -o "$build/port/$(basename "$source" .m).o"
@@ -72,14 +72,14 @@ echo "PASS: $(wc -l < "$build/port-cmp.txt" | tr -d ' ') lines alike; the comple
 
 # The plant: the port's minimum size answers 1 by 1, in the first of the two CGSizeMake(0, 0) returns (IntentsUI's category).
 awk 'BEGIN { done = 0 } /return CGSizeMake\(0, 0\);/ && !done { sub(/return CGSizeMake\(0, 0\);/, "return CGSizeMake(1, 1);"); done = 1 } { print }' \
-    "$P/IntentsUI/CharonNSExtensionContext+IntentsUI.m" > "$build/plant/plant-intentsui.m"
-if cmp -s "$P/IntentsUI/CharonNSExtensionContext+IntentsUI.m" "$build/plant/plant-intentsui.m"; then
+    "$P/IntentsUI/RevenantNSExtensionContext+IntentsUI.m" > "$build/plant/plant-intentsui.m"
+if cmp -s "$P/IntentsUI/RevenantNSExtensionContext+IntentsUI.m" "$build/plant/plant-intentsui.m"; then
     echo "FAIL: the plant edit changed nothing, so the plant is not a plant"
     exit 1
 fi
 cp "$build"/port/*.o "$build/plant/"
-rm -f "$build/plant/CharonNSExtensionContext+IntentsUI.o"
-xcrun clang $flags $renames -c "$build/plant/plant-intentsui.m" -o "$build/plant/CharonNSExtensionContext+IntentsUI.o"
+rm -f "$build/plant/RevenantNSExtensionContext+IntentsUI.o"
+xcrun clang $flags $renames -c "$build/plant/plant-intentsui.m" -o "$build/plant/RevenantNSExtensionContext+IntentsUI.o"
 xcrun clang $probe_flags -DPORT "$here/probe.m" "$build"/plant/*.o $frameworks -o "$build/plant-probe"
 status=0
 "$build/plant-probe" > "$build/plant.txt" || status=$?

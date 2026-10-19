@@ -11,7 +11,7 @@
 
 #include "device_state/lockdown_state.hpp"
 
-namespace shade {
+namespace emulator {
 
 class UserlandHleRegistry;
 

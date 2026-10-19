@@ -4,21 +4,21 @@
 #import <objc/message.h>
 #import <objc/runtime.h>
 
-#import "CharonAVMetadataConstruction.h"
+#import "RevenantAVMetadataConstruction.h"
 
-const void *CharonAVMetadataTimedItemsKey = &CharonAVMetadataTimedItemsKey;
-const void *CharonAVMetadataTimedRangeKey = &CharonAVMetadataTimedRangeKey;
+const void *RevenantAVMetadataTimedItemsKey = &RevenantAVMetadataTimedItemsKey;
+const void *RevenantAVMetadataTimedRangeKey = &RevenantAVMetadataTimedRangeKey;
 
-@implementation AVTimedMetadataGroup (CharonAVMetadataTimed4)
+@implementation AVTimedMetadataGroup (RevenantAVMetadataTimed4)
 
-- (instancetype)charon_initWithItems:(NSArray<AVMetadataItem *> *)items
+- (instancetype)revenant_initWithItems:(NSArray<AVMetadataItem *> *)items
                            timeRange:(CMTimeRange)timeRange
 {
     self = ((id (*)(id, SEL))objc_msgSend)(self, sel_registerName("init"));
     if (self) {
-        objc_setAssociatedObject(self, CharonAVMetadataTimedItemsKey, items ? [items copy] : @[],
+        objc_setAssociatedObject(self, RevenantAVMetadataTimedItemsKey, items ? [items copy] : @[],
                                  OBJC_ASSOCIATION_COPY);
-        objc_setAssociatedObject(self, CharonAVMetadataTimedRangeKey,
+        objc_setAssociatedObject(self, RevenantAVMetadataTimedRangeKey,
                                  [NSValue valueWithCMTimeRange:timeRange], OBJC_ASSOCIATION_RETAIN);
     }
     return self;
@@ -27,9 +27,9 @@ const void *CharonAVMetadataTimedRangeKey = &CharonAVMetadataTimedRangeKey;
 - (instancetype)initWithSampleBuffer:(CMSampleBufferRef)sampleBuffer
 {
     if (!sampleBuffer) {
-        return [self charon_initWithItems:@[] timeRange:kCMTimeRangeInvalid];
+        return [self revenant_initWithItems:@[] timeRange:kCMTimeRangeInvalid];
     }
-    return [self charon_initWithItems:@[]
+    return [self revenant_initWithItems:@[]
                             timeRange:CMTimeRangeMake(CMSampleBufferGetPresentationTimeStamp(sampleBuffer),
                                                      kCMTimeInvalid)];
 }

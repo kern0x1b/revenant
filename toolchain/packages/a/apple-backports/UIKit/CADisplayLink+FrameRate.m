@@ -2,28 +2,28 @@
 #import <objc/runtime.h>
 #include <math.h>
 
-static const double CharonDisplayLinkFramesPerSecond = 60.0;
+static const double RevenantDisplayLinkFramesPerSecond = 60.0;
 
-static const char CharonDisplayLinkRateKey;
-static const char CharonDisplayLinkFrameRateRangeKey;
+static const char RevenantDisplayLinkRateKey;
+static const char RevenantDisplayLinkFrameRateRangeKey;
 
-@interface CharonDisplayLinkRate : NSObject {
+@interface RevenantDisplayLinkRate : NSObject {
 @public
     NSInteger frames;
     NSInteger interval;
 }
 @end
 
-@implementation CharonDisplayLinkRate
+@implementation RevenantDisplayLinkRate
 @end
 
-static double charon_display_link_refresh(CADisplayLink *link)
+static double revenant_display_link_refresh(CADisplayLink *link)
 {
     CFTimeInterval duration = [link duration];
-    return duration > 0 ? (double)duration : 1.0 / CharonDisplayLinkFramesPerSecond;
+    return duration > 0 ? (double)duration : 1.0 / RevenantDisplayLinkFramesPerSecond;
 }
 
-@implementation CADisplayLink (CharonFrameRate)
+@implementation CADisplayLink (RevenantFrameRate)
 
 - (CFTimeInterval)targetTimestamp
 {
@@ -32,32 +32,32 @@ static double charon_display_link_refresh(CADisplayLink *link)
 
 - (NSInteger)preferredFramesPerSecond
 {
-    CharonDisplayLinkRate *rate = objc_getAssociatedObject(self, &CharonDisplayLinkRateKey);
+    RevenantDisplayLinkRate *rate = objc_getAssociatedObject(self, &RevenantDisplayLinkRateKey);
     NSInteger interval = [self frameInterval];
     if (rate && rate->interval == interval)
         return rate->frames;
     if (!rate && interval == 1)
         return 0;
-    return (NSInteger)(CharonDisplayLinkFramesPerSecond / (double)(interval > 1 ? interval : 1));
+    return (NSInteger)(RevenantDisplayLinkFramesPerSecond / (double)(interval > 1 ? interval : 1));
 }
 
 - (void)setPreferredFramesPerSecond:(NSInteger)preferredFramesPerSecond
 {
     NSInteger interval = 1;
     if (preferredFramesPerSecond != 0) {
-        long rounded = lroundf((float)(1.0 / (charon_display_link_refresh(self) * (double)preferredFramesPerSecond)));
+        long rounded = lroundf((float)(1.0 / (revenant_display_link_refresh(self) * (double)preferredFramesPerSecond)));
         interval = rounded > 1 ? (NSInteger)rounded : 1;
     }
     [self setFrameInterval:interval];
-    CharonDisplayLinkRate *rate = [[CharonDisplayLinkRate alloc] init];
+    RevenantDisplayLinkRate *rate = [[RevenantDisplayLinkRate alloc] init];
     rate->frames = preferredFramesPerSecond;
     rate->interval = [self frameInterval];
-    objc_setAssociatedObject(self, &CharonDisplayLinkRateKey, rate, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, &RevenantDisplayLinkRateKey, rate, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
 - (CAFrameRateRange)preferredFrameRateRange
 {
-    NSValue *boxed = objc_getAssociatedObject(self, &CharonDisplayLinkFrameRateRangeKey);
+    NSValue *boxed = objc_getAssociatedObject(self, &RevenantDisplayLinkFrameRateRangeKey);
     CAFrameRateRange range = CAFrameRateRangeDefault;
     if (boxed)
         [boxed getValue:&range];
@@ -67,7 +67,7 @@ static double charon_display_link_refresh(CADisplayLink *link)
 - (void)setPreferredFrameRateRange:(CAFrameRateRange)preferredFrameRateRange
 {
     NSValue *boxed = [NSValue valueWithBytes:&preferredFrameRateRange objCType:@encode(CAFrameRateRange)];
-    objc_setAssociatedObject(self, &CharonDisplayLinkFrameRateRangeKey, boxed, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, &RevenantDisplayLinkFrameRateRangeKey, boxed, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     float target = preferredFrameRateRange.preferred > 0 ? preferredFrameRateRange.preferred : preferredFrameRateRange.maximum;
     if (target <= 0) {
         [self setPreferredFramesPerSecond:0];

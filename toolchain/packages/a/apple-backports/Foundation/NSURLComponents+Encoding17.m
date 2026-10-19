@@ -1,13 +1,13 @@
 #import <Foundation/Foundation.h>
 #import <objc/runtime.h>
 
-extern BOOL charon_url_parse(NSString *string, NSRange *ranges);
-extern BOOL charon_url_valid(int part, NSString *string);
-extern NSString *charon_url_compose(NSURLComponents *components, NSRange *ranges);
+extern BOOL revenant_url_parse(NSString *string, NSRange *ranges);
+extern BOOL revenant_url_valid(int part, NSString *string);
+extern NSString *revenant_url_compose(NSURLComponents *components, NSRange *ranges);
 
-static char CharonURLComponentsRawKey;
+static char RevenantURLComponentsRawKey;
 
-static NSString *charon_escaped(NSString *text)
+static NSString *revenant_escaped(NSString *text)
 {
     NSMutableString *out = [NSMutableString stringWithCapacity:text.length];
     NSCharacterSet *allowed = [NSCharacterSet URLUserAllowedCharacterSet];
@@ -22,7 +22,7 @@ static NSString *charon_escaped(NSString *text)
     return out;
 }
 
-static NSString *charon_whole_escaped(NSString *text)
+static NSString *revenant_whole_escaped(NSString *text)
 {
     NSMutableString *out = [NSMutableString stringWithCapacity:text.length];
     for (NSUInteger index = 0; index < text.length; index++) {
@@ -42,24 +42,24 @@ static NSString *charon_whole_escaped(NSString *text)
     return out;
 }
 
-@implementation NSURLComponents (CharonEncoding)
+@implementation NSURLComponents (RevenantEncoding)
 
 + (NSURLComponents *)componentsWithString:(NSString *)string encodingInvalidCharacters:(BOOL)encoding
 {
-    NSURLComponents *components = encoding ? [self componentsWithString:charon_whole_escaped(string)] : [self componentsWithString:string];
+    NSURLComponents *components = encoding ? [self componentsWithString:revenant_whole_escaped(string)] : [self componentsWithString:string];
     if (components)
-        objc_setAssociatedObject(components, &CharonURLComponentsRawKey, [string copy], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+        objc_setAssociatedObject(components, &RevenantURLComponentsRawKey, [string copy], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     return components;
 }
 
 - (instancetype)initWithString:(NSString *)string encodingInvalidCharacters:(BOOL)encoding
 {
-    NSURLComponents *components = encoding ? [[NSURLComponents alloc] initWithString:charon_whole_escaped(string)]
+    NSURLComponents *components = encoding ? [[NSURLComponents alloc] initWithString:revenant_whole_escaped(string)]
                                            : [[NSURLComponents alloc] initWithString:string];
     if (components && components != self)
-        objc_setAssociatedObject(components, &CharonURLComponentsRawKey, [string copy], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+        objc_setAssociatedObject(components, &RevenantURLComponentsRawKey, [string copy], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     if (components)
-        objc_setAssociatedObject(self, &CharonURLComponentsRawKey, [string copy], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+        objc_setAssociatedObject(self, &RevenantURLComponentsRawKey, [string copy], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     return components == self ? self : components;
 }
 
@@ -68,7 +68,7 @@ static NSString *charon_whole_escaped(NSString *text)
     NSString *host = self.host;
     if (!host)
         return nil;
-    NSString *raw = objc_getAssociatedObject(self, &CharonURLComponentsRawKey);
+    NSString *raw = objc_getAssociatedObject(self, &RevenantURLComponentsRawKey);
     if (raw) {
         NSRange schemeRange = [raw rangeOfString:@"://"];
         if (schemeRange.location != NSNotFound) {
@@ -83,7 +83,7 @@ static NSString *charon_whole_escaped(NSString *text)
                 return rest;
         }
     }
-    return charon_escaped(host);
+    return revenant_escaped(host);
 }
 
 @end

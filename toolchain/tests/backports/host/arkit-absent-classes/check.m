@@ -64,7 +64,7 @@ int main(void)
         NSDictionary *face = shapesOf(NSClassFromString(@"ARFaceGeometry"));
         check(camera.count > 0 && face.count > 0 && ![camera isEqualToDictionary:face],
               @"two different classes have different property shapes, so the comparison can fail");
-        check(NSClassFromString(@"ZZZNoSuchNameCharonR16") == nil, @"a name no framework has is not a class");
+        check(NSClassFromString(@"ZZZNoSuchNameRevenantR16") == nil, @"a name no framework has is not a class");
 
         printf("the thirteen classes\n");
         for (size_t i = 0; i < sizeof entries / sizeof entries[0]; i++) {
@@ -72,7 +72,7 @@ int main(void)
             NSMutableArray *expected = [[[NSString stringWithUTF8String:entries[i].properties]
                 componentsSeparatedByString:@" "] mutableCopy];
             [expected removeObject:@""];
-            Class host = NSClassFromString(name), port = NSClassFromString([@"CharonPort" stringByAppendingString:name]);
+            Class host = NSClassFromString(name), port = NSClassFromString([@"RevenantPort" stringByAppendingString:name]);
             check(host != nil, [name stringByAppendingString:@": the host has the class"]);
             check(port != nil, [name stringByAppendingString:@": the port has the class"]);
             if (!host || !port) continue;

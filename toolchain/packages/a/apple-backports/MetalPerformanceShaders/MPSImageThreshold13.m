@@ -1,15 +1,15 @@
-#import "CharonMPS.h"
-#import "CharonMPSImage.h"
+#import "RevenantMPS.h"
+#import "RevenantMPSImage.h"
 
-@protocol CharonMPSImageThresholdHooks <NSObject>
-- (float)charon_mps_thresholdValue;
-- (float)charon_mps_maximumValue;
-- (const float *)charon_mps_transform;
-- (BOOL)charon_mps_hasThreshold;
-- (double)CharonMPSThreshold:(double)value;
+@protocol RevenantMPSImageThresholdHooks <NSObject>
+- (float)revenant_mps_thresholdValue;
+- (float)revenant_mps_maximumValue;
+- (const float *)revenant_mps_transform;
+- (BOOL)revenant_mps_hasThreshold;
+- (double)RevenantMPSThreshold:(double)value;
 @end
 
-static void CharonMPSFillTransform(float *out, const float *transform)
+static void RevenantMPSFillTransform(float *out, const float *transform)
 {
     out[0] = 0.299f; out[1] = 0.587f; out[2] = 0.114f;
     if (transform)
@@ -17,21 +17,21 @@ static void CharonMPSFillTransform(float *out, const float *transform)
             out[i] = transform[i];
 }
 
-static BOOL CharonMPSIsSingleChannel(MPSImage *image)
+static BOOL RevenantMPSIsSingleChannel(MPSImage *image)
 {
     return image.featureChannels <= 1;
 }
 
-@implementation MPSUnaryImageKernel (CharonImageThreshold)
+@implementation MPSUnaryImageKernel (RevenantImageThreshold)
 
 - (void)encodeToCommandBuffer:(id<MTLCommandBuffer>)commandBuffer
                  sourceImage:(MPSImage *)sourceImage
             destinationImage:(MPSImage *)destinationImage
 {
     NSString *what = NSStringFromClass([self class]);
-    id<CharonMPSImageThresholdHooks> kernel = (id<CharonMPSImageThresholdHooks>)self;
-    if (!CharonMPSIsSingleChannel(sourceImage)) {
-        CharonMPSRefuse(@"%@: the image has %lu feature channels. The filter converts a "
+    id<RevenantMPSImageThresholdHooks> kernel = (id<RevenantMPSImageThresholdHooks>)self;
+    if (!RevenantMPSIsSingleChannel(sourceImage)) {
+        RevenantMPSRefuse(@"%@: the image has %lu feature channels. The filter converts a "
                         "multi channel image to ONE scalar luminance with the linearGrayColorTransform "
                         "and then thresholds that, which this port does not implement, so nothing was "
                         "written. The path is owed; a one channel image is answered.",
@@ -39,44 +39,44 @@ static BOOL CharonMPSIsSingleChannel(MPSImage *image)
         return;
     }
     if (!commandBuffer) {
-        CharonMPSRefuse(@"%@: no command buffer, so nothing was written", what);
+        RevenantMPSRefuse(@"%@: no command buffer, so nothing was written", what);
         return;
     }
-    if (!kernel.charon_mps_hasThreshold) {
-        CharonMPSRefuse(@"%@: the kernel carries no threshold value. Every one of the five declares "
+    if (!kernel.revenant_mps_hasThreshold) {
+        RevenantMPSRefuse(@"%@: the kernel carries no threshold value. Every one of the five declares "
                         "-initWithDevice: as NS_UNAVAILABLE and says the initializer carrying the value "
                         "is the one to use, so a kernel that did not get one is not a kernel a caller can "
                         "have, and nothing is written", what);
         return;
     }
-    CharonMPSImageMapUnary(sourceImage, destinationImage, self.clipRect, ^double(NSUInteger pixel,
+    RevenantMPSImageMapUnary(sourceImage, destinationImage, self.clipRect, ^double(NSUInteger pixel,
                                                                                   NSUInteger channel,
                                                                                   double value) {
         (void)pixel; (void)channel;
-        return [kernel CharonMPSThreshold:value];
+        return [kernel RevenantMPSThreshold:value];
     }, what);
 }
 
 @end
 
-#define CHARON_MPS_IMAGE_THRESHOLD_STATE                                        \
+#define REVENANT_MPS_IMAGE_THRESHOLD_STATE                                        \
     float _thresholdValue;                                                      \
     float _maximumValue;                                                        \
-    float _charonTransform[3];                                                  \
+    float _revenantTransform[3];                                                  \
     BOOL _hasThreshold;
 
-#define CHARON_MPS_IMAGE_THRESHOLD_ACCESSORS                                    \
-    - (float)charon_mps_thresholdValue { return _thresholdValue; }             \
-    - (float)charon_mps_maximumValue { return _maximumValue; }                 \
-    - (const float *)charon_mps_transform { return _charonTransform; }                \
-    - (BOOL)charon_mps_hasThreshold { return _hasThreshold; }
+#define REVENANT_MPS_IMAGE_THRESHOLD_ACCESSORS                                    \
+    - (float)revenant_mps_thresholdValue { return _thresholdValue; }             \
+    - (float)revenant_mps_maximumValue { return _maximumValue; }                 \
+    - (const float *)revenant_mps_transform { return _revenantTransform; }                \
+    - (BOOL)revenant_mps_hasThreshold { return _hasThreshold; }
 
-@interface MPSImageThresholdToZero (CharonThresholdHooks) <CharonMPSImageThresholdHooks> @end
+@interface MPSImageThresholdToZero (RevenantThresholdHooks) <RevenantMPSImageThresholdHooks> @end
 
 @implementation MPSImageThresholdToZero {
-CHARON_MPS_IMAGE_THRESHOLD_STATE
+REVENANT_MPS_IMAGE_THRESHOLD_STATE
 }
-CHARON_MPS_IMAGE_THRESHOLD_ACCESSORS
+REVENANT_MPS_IMAGE_THRESHOLD_ACCESSORS
 
 - (instancetype)initWithDevice:(id<MTLDevice>)device
                 thresholdValue:(float)thresholdValue
@@ -86,23 +86,23 @@ CHARON_MPS_IMAGE_THRESHOLD_ACCESSORS
         _thresholdValue = thresholdValue;
         _maximumValue = 1.0f;
         _hasThreshold = YES;
-        CharonMPSFillTransform(_charonTransform, transform);
+        RevenantMPSFillTransform(_revenantTransform, transform);
     }
     return self;
 }
 
-- (double)CharonMPSThreshold:(double)value
+- (double)RevenantMPSThreshold:(double)value
 {
     return value > (double)_thresholdValue ? value : 0.0;
 }
 @end
 
-@interface MPSImageThresholdToZeroInverse (CharonThresholdHooks) <CharonMPSImageThresholdHooks> @end
+@interface MPSImageThresholdToZeroInverse (RevenantThresholdHooks) <RevenantMPSImageThresholdHooks> @end
 
 @implementation MPSImageThresholdToZeroInverse {
-CHARON_MPS_IMAGE_THRESHOLD_STATE
+REVENANT_MPS_IMAGE_THRESHOLD_STATE
 }
-CHARON_MPS_IMAGE_THRESHOLD_ACCESSORS
+REVENANT_MPS_IMAGE_THRESHOLD_ACCESSORS
 
 - (instancetype)initWithDevice:(id<MTLDevice>)device
                 thresholdValue:(float)thresholdValue
@@ -112,23 +112,23 @@ CHARON_MPS_IMAGE_THRESHOLD_ACCESSORS
         _thresholdValue = thresholdValue;
         _maximumValue = 1.0f;
         _hasThreshold = YES;
-        CharonMPSFillTransform(_charonTransform, transform);
+        RevenantMPSFillTransform(_revenantTransform, transform);
     }
     return self;
 }
 
-- (double)CharonMPSThreshold:(double)value
+- (double)RevenantMPSThreshold:(double)value
 {
     return value > (double)_thresholdValue ? 0.0 : value;
 }
 @end
 
-@interface MPSImageThresholdTruncate (CharonThresholdHooks) <CharonMPSImageThresholdHooks> @end
+@interface MPSImageThresholdTruncate (RevenantThresholdHooks) <RevenantMPSImageThresholdHooks> @end
 
 @implementation MPSImageThresholdTruncate {
-CHARON_MPS_IMAGE_THRESHOLD_STATE
+REVENANT_MPS_IMAGE_THRESHOLD_STATE
 }
-CHARON_MPS_IMAGE_THRESHOLD_ACCESSORS
+REVENANT_MPS_IMAGE_THRESHOLD_ACCESSORS
 
 - (instancetype)initWithDevice:(id<MTLDevice>)device
                 thresholdValue:(float)thresholdValue
@@ -138,23 +138,23 @@ CHARON_MPS_IMAGE_THRESHOLD_ACCESSORS
         _thresholdValue = thresholdValue;
         _maximumValue = 1.0f;
         _hasThreshold = YES;
-        CharonMPSFillTransform(_charonTransform, transform);
+        RevenantMPSFillTransform(_revenantTransform, transform);
     }
     return self;
 }
 
-- (double)CharonMPSThreshold:(double)value
+- (double)RevenantMPSThreshold:(double)value
 {
     return value > (double)_thresholdValue ? (double)_thresholdValue : value;
 }
 @end
 
-@interface MPSImageThresholdBinary (CharonThresholdHooks) <CharonMPSImageThresholdHooks> @end
+@interface MPSImageThresholdBinary (RevenantThresholdHooks) <RevenantMPSImageThresholdHooks> @end
 
 @implementation MPSImageThresholdBinary {
-CHARON_MPS_IMAGE_THRESHOLD_STATE
+REVENANT_MPS_IMAGE_THRESHOLD_STATE
 }
-CHARON_MPS_IMAGE_THRESHOLD_ACCESSORS
+REVENANT_MPS_IMAGE_THRESHOLD_ACCESSORS
 
 - (instancetype)initWithDevice:(id<MTLDevice>)device
                 thresholdValue:(float)thresholdValue
@@ -173,23 +173,23 @@ CHARON_MPS_IMAGE_THRESHOLD_ACCESSORS
         _thresholdValue = thresholdValue;
         _maximumValue = maximumValue;
         _hasThreshold = YES;
-        CharonMPSFillTransform(_charonTransform, transform);
+        RevenantMPSFillTransform(_revenantTransform, transform);
     }
     return self;
 }
 
-- (double)CharonMPSThreshold:(double)value
+- (double)RevenantMPSThreshold:(double)value
 {
     return value > (double)_thresholdValue ? (double)_maximumValue : 0.0;
 }
 @end
 
-@interface MPSImageThresholdBinaryInverse (CharonThresholdHooks) <CharonMPSImageThresholdHooks> @end
+@interface MPSImageThresholdBinaryInverse (RevenantThresholdHooks) <RevenantMPSImageThresholdHooks> @end
 
 @implementation MPSImageThresholdBinaryInverse {
-CHARON_MPS_IMAGE_THRESHOLD_STATE
+REVENANT_MPS_IMAGE_THRESHOLD_STATE
 }
-CHARON_MPS_IMAGE_THRESHOLD_ACCESSORS
+REVENANT_MPS_IMAGE_THRESHOLD_ACCESSORS
 
 - (instancetype)initWithDevice:(id<MTLDevice>)device
                 thresholdValue:(float)thresholdValue
@@ -208,12 +208,12 @@ CHARON_MPS_IMAGE_THRESHOLD_ACCESSORS
         _thresholdValue = thresholdValue;
         _maximumValue = maximumValue;
         _hasThreshold = YES;
-        CharonMPSFillTransform(_charonTransform, transform);
+        RevenantMPSFillTransform(_revenantTransform, transform);
     }
     return self;
 }
 
-- (double)CharonMPSThreshold:(double)value
+- (double)RevenantMPSThreshold:(double)value
 {
     return value > (double)_thresholdValue ? 0.0 : (double)_maximumValue;
 }

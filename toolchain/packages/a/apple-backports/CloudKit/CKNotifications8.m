@@ -1,7 +1,7 @@
 #import <Foundation/Foundation.h>
 #import <CloudKit/CloudKit.h>
 
-#import "CharonCKValue.h"
+#import "RevenantCKValue.h"
 
 #pragma mark - CKNotificationID
 
@@ -61,7 +61,7 @@
     if (![other isKindOfClass:[CKNotificationID class]]) {
         return NO;
     }
-    return CharonCKSameObject(_name, ((CKNotificationID *)other)->_name);
+    return RevenantCKSameObject(_name, ((CKNotificationID *)other)->_name);
 }
 
 - (NSUInteger)hash
@@ -132,7 +132,7 @@
     return notification;
 }
 
-+ (NSString *)CharonCKIdentifierInUserInfo:(NSDictionary *)userInfo
++ (NSString *)RevenantCKIdentifierInUserInfo:(NSDictionary *)userInfo
 {
     NSDictionary *notification = [userInfo[@"ck-notification"] isKindOfClass:[NSDictionary class]] ? userInfo[@"ck-notification"] : nil;
     return [notification[@"ck-notification-id"] isKindOfClass:[NSString class]] ? notification[@"ck-notification-id"] : nil;
@@ -177,7 +177,7 @@
     NSDictionary *aps = [userInfo[@"aps"] isKindOfClass:[NSDictionary class]] ? userInfo[@"aps"] : nil;
     _containerIdentifier = [userInfo[@"ck-container"] copy];
     NSDictionary *notification = [userInfo[@"ck-notification"] isKindOfClass:[NSDictionary class]] ? userInfo[@"ck-notification"] : nil;
-    NSString *identifier = [CKNotification CharonCKIdentifierInUserInfo:userInfo];
+    NSString *identifier = [CKNotification RevenantCKIdentifierInUserInfo:userInfo];
     if (identifier) {
         self.notificationID = [[CKNotificationID alloc] initWithNotificationName:identifier object:nil];
     }

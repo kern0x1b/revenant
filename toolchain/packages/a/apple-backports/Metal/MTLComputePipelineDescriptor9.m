@@ -1,8 +1,8 @@
 #import <Foundation/Foundation.h>
 #import <Metal/Metal.h>
-#import "CharonMetal26Types.h"
+#import "RevenantMetal26Types.h"
 
-static const NSUInteger CharonComputeBufferSlots = 31;
+static const NSUInteger RevenantComputeBufferSlots = 31;
 
 @implementation MTLComputePipelineDescriptor {
     NSString *_label;
@@ -92,7 +92,7 @@ static const NSUInteger CharonComputeBufferSlots = 31;
     copy.maxTotalThreadsPerThreadgroup = _maxTotalThreadsPerThreadgroup;
     copy->_stageInputDescriptor = [_stageInputDescriptor copy];
     copy->_buffers = [[MTLPipelineBufferDescriptorArray alloc] init];
-    for (NSUInteger slot = 0; slot < CharonComputeBufferSlots; slot++)
+    for (NSUInteger slot = 0; slot < RevenantComputeBufferSlots; slot++)
         copy->_buffers[slot] = _buffers[slot];
     copy.supportIndirectCommandBuffers = _supportIndirectCommandBuffers;
     copy.insertLibraries = _insertLibraries;

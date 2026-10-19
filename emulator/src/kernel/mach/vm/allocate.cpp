@@ -22,7 +22,7 @@
 #include "../support.hpp"
 #include "wire_reply.hpp"
 
-namespace shade {
+namespace emulator {
 namespace {
 
     constexpr std::uint32_t mach_vm_allocate_identifier = 4800U;

@@ -1,6 +1,6 @@
 #import <UIKit/UIKit.h>
 
-@implementation NSTextAttachment (CharonImage13)
+@implementation NSTextAttachment (RevenantImage13)
 
 + (NSTextAttachment *)textAttachmentWithImage:(UIImage *)image
 {

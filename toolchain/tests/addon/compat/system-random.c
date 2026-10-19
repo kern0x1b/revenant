@@ -2,7 +2,7 @@
 #include <stdint.h>
 #include <string.h>
 
-void charon_arc4random_buf(void *, size_t);
+void revenant_arc4random_buf(void *, size_t);
 void arc4random_buf(void *, size_t);
 
 uint32_t arc4random(void)
@@ -14,7 +14,7 @@ int main(void)
 {
     unsigned char bytes[32];
     memset(bytes, 0xaa, sizeof bytes);
-    charon_arc4random_buf(bytes, sizeof bytes);
+    revenant_arc4random_buf(bytes, sizeof bytes);
     int ours = 1;
     for (size_t at = 0; at < sizeof bytes; at++) {
         if (bytes[at] != 0x5c)

@@ -1,18 +1,18 @@
 #import <AVFoundation/AVFoundation.h>
 
-static const CGFloat CharonVideoZoomRangeFloor = 1;
+static const CGFloat RevenantVideoZoomRangeFloor = 1;
 
-@implementation AVCaptureDevice (CharonVideoZoomRange)
+@implementation AVCaptureDevice (RevenantVideoZoomRange)
 
 - (CGFloat)maxAvailableVideoZoomFactor
 {
     AVCaptureDeviceFormat *format = self.activeFormat;
-    return format ? format.videoMaxZoomFactor : CharonVideoZoomRangeFloor;
+    return format ? format.videoMaxZoomFactor : RevenantVideoZoomRangeFloor;
 }
 
 - (CGFloat)minAvailableVideoZoomFactor
 {
-    return CharonVideoZoomRangeFloor;
+    return RevenantVideoZoomRangeFloor;
 }
 
 @end

@@ -9,10 +9,10 @@
 
 + (instancetype)configurationWithIdentifier:(id<NSCopying>)identifier sourcePoint:(CGPoint)sourcePoint
 {
-    return [[self alloc] charon_initWithIdentifier:identifier sourcePoint:sourcePoint];
+    return [[self alloc] revenant_initWithIdentifier:identifier sourcePoint:sourcePoint];
 }
 
-- (instancetype)charon_initWithIdentifier:(id<NSCopying>)identifier sourcePoint:(CGPoint)sourcePoint
+- (instancetype)revenant_initWithIdentifier:(id<NSCopying>)identifier sourcePoint:(CGPoint)sourcePoint
 {
     [super init];
     _identifier = identifier ? [(id)identifier copy] : [NSUUID UUID];

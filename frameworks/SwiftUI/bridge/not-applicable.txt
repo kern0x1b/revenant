@@ -1,4 +1,4 @@
-# The closed list of Apple's SwiftUI types that Eidolon does not implement, and why. One line per type: the type as
+# The closed list of Apple's SwiftUI types that Revenant's SwiftUI does not implement, and why. One line per type: the type as
 # swift-api-digester names it, a tab, the reason. Every declaration of such a type that is absent is left out of the
 # work queue and counted apart; a type is added here only with a reason that is about iOS 6 or about what a phone
 # cannot do, never because it is hard.

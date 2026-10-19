@@ -1,17 +1,17 @@
-#import "CharonMenus.h"
+#import "RevenantMenus.h"
 #import <objc/runtime.h>
 
 #pragma clang diagnostic ignored "-Wobjc-designated-initializers"
 #pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
 
-static const char charon_action_key, charon_menu_key, charon_proxy_key;
+static const char revenant_action_key, revenant_menu_key, revenant_proxy_key;
 
-@interface CharonItemProxy : NSObject
+@interface RevenantItemProxy : NSObject
 - (instancetype)initWithItem:(UIBarButtonItem *)item;
-- (void)charon_tapped:(id)sender;
+- (void)revenant_tapped:(id)sender;
 @end
 
-@implementation CharonItemProxy {
+@implementation RevenantItemProxy {
 @private
     __weak UIBarButtonItem *_item;
 }
@@ -23,38 +23,38 @@ static const char charon_action_key, charon_menu_key, charon_proxy_key;
     return self;
 }
 
-- (void)charon_tapped:(id)sender
+- (void)revenant_tapped:(id)sender
 {
     UIBarButtonItem *item = _item;
     UIAction *action = item.primaryAction;
     if (action)
-        [action charon_performWithSender:item];
+        [action revenant_performWithSender:item];
     else if (item.menu)
-        charon_show_menu(item.menu);
+        revenant_show_menu(item.menu);
 }
 
 @end
 
-static void charon_wire(UIBarButtonItem *item)
+static void revenant_wire(UIBarButtonItem *item)
 {
-    CharonItemProxy *proxy = objc_getAssociatedObject(item, &charon_proxy_key);
+    RevenantItemProxy *proxy = objc_getAssociatedObject(item, &revenant_proxy_key);
     BOOL own = item.action != NULL && !(proxy && item.target == proxy);
     BOOL wanted = item.primaryAction != nil || (item.menu != nil && !own);
     if (wanted && !proxy) {
-        proxy = [[CharonItemProxy alloc] initWithItem:item];
-        objc_setAssociatedObject(item, &charon_proxy_key, proxy, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+        proxy = [[RevenantItemProxy alloc] initWithItem:item];
+        objc_setAssociatedObject(item, &revenant_proxy_key, proxy, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
         item.target = proxy;
-        item.action = @selector(charon_tapped:);
+        item.action = @selector(revenant_tapped:);
     } else if (!wanted && proxy) {
         if (item.target == proxy) {
             item.target = nil;
             item.action = NULL;
         }
-        objc_setAssociatedObject(item, &charon_proxy_key, nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+        objc_setAssociatedObject(item, &revenant_proxy_key, nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     }
 }
 
-@implementation UIBarButtonItem (CharonActions14)
+@implementation UIBarButtonItem (RevenantActions14)
 
 + (instancetype)fixedSpaceItemOfWidth:(CGFloat)width
 {
@@ -108,30 +108,30 @@ static void charon_wire(UIBarButtonItem *item)
 
 - (UIAction *)primaryAction
 {
-    return objc_getAssociatedObject(self, &charon_action_key);
+    return objc_getAssociatedObject(self, &revenant_action_key);
 }
 
 - (void)setPrimaryAction:(UIAction *)primaryAction
 {
-    objc_setAssociatedObject(self, &charon_action_key, [primaryAction copy], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, &revenant_action_key, [primaryAction copy], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     if (primaryAction) {
         if (primaryAction.title.length)
             self.title = primaryAction.title;
         if (primaryAction.image)
             self.image = primaryAction.image;
     }
-    charon_wire(self);
+    revenant_wire(self);
 }
 
 - (UIMenu *)menu
 {
-    return objc_getAssociatedObject(self, &charon_menu_key);
+    return objc_getAssociatedObject(self, &revenant_menu_key);
 }
 
 - (void)setMenu:(UIMenu *)menu
 {
-    objc_setAssociatedObject(self, &charon_menu_key, [menu copy], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-    charon_wire(self);
+    objc_setAssociatedObject(self, &revenant_menu_key, [menu copy], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    revenant_wire(self);
 }
 
 @end

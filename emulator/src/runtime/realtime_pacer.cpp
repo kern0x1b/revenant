@@ -12,7 +12,7 @@
 #include <cstdint>
 #include <limits>
 
-namespace shade {
+namespace emulator {
 
 RealtimePacer::RealtimePacer(
     DeviceMonotonicTime initial_device_monotonic_time, double time_scale)

@@ -123,7 +123,7 @@ int main(int argc, char **argv)
 {
     @autoreleasepool {
         if (argc > 1)
-            charon_log_to(@(argv[1]));
+            revenant_log_to(@(argv[1]));
         check_sources();
         check_system();
         NSDictionary *expected = [NSJSONSerialization JSONObjectWithData:[NSData dataWithBytes:foundation2_expectations length:strlen(foundation2_expectations)] options:0 error:NULL];
@@ -169,7 +169,7 @@ int main(int argc, char **argv)
                 continue;
             }
             mismatched++;
-            charon_check(NO, name.UTF8String, [NSString stringWithFormat:@"device %@ != host %@", text(got), text(want)]);
+            revenant_check(NO, name.UTF8String, [NSString stringWithFormat:@"device %@ != host %@", text(got), text(want)]);
         }
         NSCalendar *gregorian = [[NSCalendar alloc] initWithCalendarIdentifier:NSCalendarIdentifierGregorian];
         gregorian.timeZone = [NSTimeZone timeZoneWithName:@"UTC"];
@@ -187,8 +187,8 @@ int main(int argc, char **argv)
         CHECK(emptyDictionary != nil && [emptyDictionary isKindOfClass:[NSDictionary class]] && emptyDictionary.count == 0 && ![emptyDictionary respondsToSelector:@selector(setObject:forKey:)], "__NSDictionary0__ holds an empty immutable dictionary");
         CHECK([[emptyArray arrayByAddingObject:@1] isEqual:@[@1]] && [emptyDictionary objectForKey:@"a"] == nil, "the empty collections answer as the release's own");
         {
-            NSUserActivity *activity = [[NSUserActivity alloc] initWithActivityType:@"com.charon.test"];
-            CHECK([activity.activityType isEqualToString:@"com.charon.test"] && activity.userInfo.count == 0 && activity.needsSave && activity.eligibleForHandoff && !activity.eligibleForSearch, "a new activity has the system's defaults");
+            NSUserActivity *activity = [[NSUserActivity alloc] initWithActivityType:@"com.revenant.test"];
+            CHECK([activity.activityType isEqualToString:@"com.revenant.test"] && activity.userInfo.count == 0 && activity.needsSave && activity.eligibleForHandoff && !activity.eligibleForSearch, "a new activity has the system's defaults");
             [activity addUserInfoEntriesFromDictionary:@{@"k": @1}];
             CHECK([activity.userInfo isEqual:@{@"k": @1}], "user info can be added to");
             NSString *raised = @"none";
@@ -200,7 +200,7 @@ int main(int argc, char **argv)
             CHECK([raised isEqualToString:NSInvalidArgumentException], "a web page URL of another scheme is refused");
             __block int saved = 0;
             __block BOOL needsSaveWhenAsked = YES;
-            Class delegateClass = objc_allocateClassPair([NSObject class], "CharonActivityDelegate", 0);
+            Class delegateClass = objc_allocateClassPair([NSObject class], "RevenantActivityDelegate", 0);
             class_addMethod(delegateClass, @selector(userActivityWillSave:), imp_implementationWithBlock(^(id self_, NSUserActivity *a) { saved++; needsSaveWhenAsked = a.needsSave; }), "v@:@");
             objc_registerClassPair(delegateClass);
             id delegate = [[delegateClass alloc] init];
@@ -220,6 +220,6 @@ int main(int argc, char **argv)
             printf("tolerated %lu records: %s\n", (unsigned long)[tolerated countForObject:tolerance], tolerance.UTF8String);
         printf("records matched=%d mismatched=%d\n", matched, mismatched);
     }
-    printf("checks=%d failures=%d\n", charon_checks, charon_failures);
-    return charon_failures;
+    printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
+    return revenant_failures;
 }

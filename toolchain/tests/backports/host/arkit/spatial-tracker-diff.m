@@ -1,4 +1,4 @@
-#import "CharonARTracker.h"
+#import "RevenantARTracker.h"
 
 #import <CoreVideo/CoreVideo.h>
 #import <simd/simd.h>
@@ -8,7 +8,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-static simd_float3x3 CharonSyntheticIntrinsics(NSUInteger width, NSUInteger height)
+static simd_float3x3 RevenantSyntheticIntrinsics(NSUInteger width, NSUInteger height)
 {
     const float halfAngleTangent = 0.5773502692f;
     float focal = ((float)width / 2.0f) / halfAngleTangent;
@@ -25,11 +25,11 @@ static simd_float3x3 CharonSyntheticIntrinsics(NSUInteger width, NSUInteger heig
 typedef struct {
     simd_quatf rotation;
     simd_float3 translation;
-} CharonTruth;
+} RevenantTruth;
 
-static CharonTruth CharonTruthAt(int i, float stepAngle, float stepLength)
+static RevenantTruth RevenantTruthAt(int i, float stepAngle, float stepLength)
 {
-    CharonTruth truth;
+    RevenantTruth truth;
     float angle = (float)i * stepAngle;
     float x = 0.0f, z = 0.0f;
     int step;
@@ -42,23 +42,23 @@ static CharonTruth CharonTruthAt(int i, float stepAngle, float stepLength)
     return truth;
 }
 
-static simd_float3 CharonSpecificForceAt(int i, float stepAngle, float stepLength, float dt)
+static simd_float3 RevenantSpecificForceAt(int i, float stepAngle, float stepLength, float dt)
 {
-    CharonTruth before = CharonTruthAt(i - 1 >= 0 ? i - 1 : 0, stepAngle, stepLength);
-    CharonTruth after = CharonTruthAt(i, stepAngle, stepLength);
+    RevenantTruth before = RevenantTruthAt(i - 1 >= 0 ? i - 1 : 0, stepAngle, stepLength);
+    RevenantTruth after = RevenantTruthAt(i, stepAngle, stepLength);
     simd_float3 step = { after.translation.x - before.translation.x,
                          after.translation.y - before.translation.y,
                          after.translation.z - before.translation.z };
     simd_float3 earlier = { 0, 0, 0 };
     if (i >= 2) {
-        CharonTruth back = CharonTruthAt(i - 2, stepAngle, stepLength);
+        RevenantTruth back = RevenantTruthAt(i - 2, stepAngle, stepLength);
         earlier = (simd_float3){ step.x - (before.translation.x - back.translation.x),
                                  step.y - (before.translation.y - back.translation.y),
                                  step.z - (before.translation.z - back.translation.z) };
     }
     simd_float3 worldAcceleration = { (step.x - earlier.x) / (dt * dt), (step.y - earlier.y) / (dt * dt),
                                       (step.z - earlier.z) / (dt * dt) };
-    simd_float4x4 worldFromDevice = CharonQuaternionMatrix(after.rotation);
+    simd_float4x4 worldFromDevice = RevenantQuaternionMatrix(after.rotation);
     simd_float3 inWorld = { worldAcceleration.x, worldAcceleration.y, worldAcceleration.z + 9.80665f };
     return simd_make_float3(
             worldFromDevice.columns[0][0] * inWorld.x + worldFromDevice.columns[1][0] * inWorld.y +
@@ -75,7 +75,7 @@ static float clampf(float value, float low, float high)
     return value < low ? low : (value > high ? high : value);
 }
 
-static simd_float3 CharonRotated(simd_float3 v, simd_quatf q)
+static simd_float3 RevenantRotated(simd_float3 v, simd_quatf q)
 {
     simd_float3 u = (simd_float3){q.vector.x, q.vector.y, q.vector.z};
     simd_float3 t = 2.0f * simd_cross(u, v);
@@ -84,8 +84,8 @@ static simd_float3 CharonRotated(simd_float3 v, simd_quatf q)
 
 #pragma mark - The frame the camera would see
 
-static void CharonRenderFrame(uint8_t *luma, NSUInteger width, NSUInteger height,
-                              CharonTruth truth, float rotationNoise)
+static void RevenantRenderFrame(uint8_t *luma, NSUInteger width, NSUInteger height,
+                              RevenantTruth truth, float rotationNoise)
 {
     NSUInteger x, y;
     for (y = 0; y < height; y++) {
@@ -98,7 +98,7 @@ static void CharonRenderFrame(uint8_t *luma, NSUInteger width, NSUInteger height
                                                    truth.rotation.vector.y,
                                                    truth.rotation.vector.z,
                                                    truth.rotation.vector.w + rotationNoise);
-            simd_float3 turned = CharonRotated(direction, attitude);
+            simd_float3 turned = RevenantRotated(direction, attitude);
             float distance = 2.0f / (turned.z < -0.01f ? -turned.z : 0.01f);
             simd_float3 hit = turned * distance + truth.translation;
             float value = 0.6f * sinf(hit.x * 25.0f) + 0.5f * cosf(hit.y * 25.0f)
@@ -110,14 +110,14 @@ static void CharonRenderFrame(uint8_t *luma, NSUInteger width, NSUInteger height
 
 #pragma mark - The comparison
 
-static float CharonAngleBetween(simd_quatf a, simd_quatf b)
+static float RevenantAngleBetween(simd_quatf a, simd_quatf b)
 {
     float dot = fabsf(a.vector.x * b.vector.x + a.vector.y * b.vector.y +
                       a.vector.z * b.vector.z + a.vector.w * b.vector.w);
     return 2.0f * acosf(fminf(1.0f, dot));
 }
 
-static simd_quatf CharonAttitudeOf(simd_float4x4 pose)
+static simd_quatf RevenantAttitudeOf(simd_float4x4 pose)
 {
     float trace = pose.columns[0][0] + pose.columns[1][1] + pose.columns[2][2];
     if (trace > 0.0f) {
@@ -163,14 +163,14 @@ int main(void)
         }
     }
     for (int step = 0; step < count; step++)
-        CharonRenderFrame(planes[step], width, height, CharonTruthAt(step, stepAngle, stepLength), rotationNoise);
+        RevenantRenderFrame(planes[step], width, height, RevenantTruthAt(step, stepAngle, stepLength), rotationNoise);
 
-    CharonARTracker *tracker = [[CharonARTracker alloc] init];
-    [CharonARTracker useCameraIntrinsics:CharonSyntheticIntrinsics(width, height)];
+    RevenantARTracker *tracker = [[RevenantARTracker alloc] init];
+    [RevenantARTracker useCameraIntrinsics:RevenantSyntheticIntrinsics(width, height)];
     double sumRotation = 0, sumDistance = 0, worstRotation = 0, worstDistance = 0;
     int measured = 0;
     for (int step = 0; step < count; step++) {
-        CharonTruth truth = CharonTruthAt(step, stepAngle, stepLength);
+        RevenantTruth truth = RevenantTruthAt(step, stepAngle, stepLength);
         truth.translation.x += translationNoise;
 
         CVPixelBufferRef buffer = NULL;
@@ -186,14 +186,14 @@ int main(void)
             memcpy(base + y * stride, planes[step] + y * width, width);
         CVPixelBufferUnlockBaseAddress(buffer, 0);
 
-        tracker.measuredAcceleration = CharonSpecificForceAt(step, stepAngle, stepLength, 1.0 / 30.0);
+        tracker.measuredAcceleration = RevenantSpecificForceAt(step, stepAngle, stepLength, 1.0 / 30.0);
         simd_float4x4 got = [tracker processPixelBuffer:buffer
                                  captureTime:(double)step / 30.0
                              deviceRotation:truth.rotation];
         CVPixelBufferRelease(buffer);
 
         simd_float3 walked = (simd_float3){got.columns[3].x, got.columns[3].y, got.columns[3].z};
-        double rotation = CharonAngleBetween(CharonAttitudeOf(got), truth.rotation);
+        double rotation = RevenantAngleBetween(RevenantAttitudeOf(got), truth.rotation);
         if (step < 4 || step == count - 1)
             printf("  step %2d: pose rotation error %8.3f deg   distance error %8.4f m\n", step,
                    rotation * 180.0 / M_PI, simd_length(walked - truth.translation));

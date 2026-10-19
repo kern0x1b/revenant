@@ -1,6 +1,6 @@
 #import <CoreData/CoreData.h>
 
-@interface NSFetchRequest (CharonInUse)
+@interface NSFetchRequest (RevenantInUse)
 - (void)_incrementInUseCounter;
 @end
 

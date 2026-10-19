@@ -14,7 +14,7 @@
 #include <string>
 #include <vector>
 
-namespace shade::bsd::baseband_device {
+namespace emulator::bsd::baseband_device {
 
 class OfflineControlPlane {
 public:

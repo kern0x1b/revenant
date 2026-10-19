@@ -1,33 +1,33 @@
-#import "CharonTraitStyle.h"
+#import "RevenantTraitStyle.h"
 
 #pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
 
-static NSString *const CharonActiveAppearance = @"ActiveAppearance";
+static NSString *const RevenantActiveAppearance = @"ActiveAppearance";
 
-@interface CharonTraitKinds14 : NSObject
+@interface RevenantTraitKinds14 : NSObject
 @end
 
-@implementation CharonTraitKinds14
+@implementation RevenantTraitKinds14
 
 + (void)load
 {
-    charon_register_trait_kind((CharonTraitKind){CharonActiveAppearance, 1, NO, @"Inactive", @"Active"});
+    revenant_register_trait_kind((RevenantTraitKind){RevenantActiveAppearance, 1, NO, @"Inactive", @"Active"});
 }
 
 @end
 
-@implementation UITraitCollection (CharonAppearance14)
+@implementation UITraitCollection (RevenantAppearance14)
 
 + (UITraitCollection *)traitCollectionWithActiveAppearance:(UIUserInterfaceActiveAppearance)userInterfaceActiveAppearance
 {
     UITraitCollection *collection = [UITraitCollection traitCollectionWithTraitsFromCollections:@[]];
-    charon_set_trait_extra(collection, CharonActiveAppearance, userInterfaceActiveAppearance);
+    revenant_set_trait_extra(collection, RevenantActiveAppearance, userInterfaceActiveAppearance);
     return collection;
 }
 
 - (UIUserInterfaceActiveAppearance)activeAppearance
 {
-    return (UIUserInterfaceActiveAppearance)charon_trait_extra(self, CharonActiveAppearance);
+    return (UIUserInterfaceActiveAppearance)revenant_trait_extra(self, RevenantActiveAppearance);
 }
 
 @end

@@ -1,7 +1,7 @@
 #!/bin/sh
 # run.sh — holds the port's HealthKit arithmetic against the host's own, in one process.
 #
-# The port's classes are compiled under names of their own (CharonHostHKUnit and so on) so that the
+# The port's classes are compiled under names of their own (RevenantHostHKUnit and so on) so that the
 # system's HealthKit and the port's run side by side and the two can be asked the same question. What
 # is compared is the arithmetic a host answers without asking anybody for anything: a unit converts, a
 # unit multiplies and divides and is raised to a power, a quantity compares, a quantity type says
@@ -9,7 +9,7 @@
 # queries are not in here — a host keeps its data in a healthd behind an entitlement, and this port's
 # is a SQLite database of its own, so neither side is an oracle for the other's.
 #
-# The port's constants are compiled in under names of their own (CharonHK120_HKErrorDomain and so on):
+# The port's constants are compiled in under names of their own (RevenantHK120_HKErrorDomain and so on):
 # the host's HealthKit exports the same symbols, so the port's definitions and the host's cannot both be
 # linked under one name. That is also the better arrangement for this test - each of the twenty-one
 # constants of 12.0 is read out of the port's own object and out of the host's and the two values are
@@ -20,16 +20,16 @@ set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 healthkit=${HEALTHKIT:-$here/../../../../packages/a/apple-backports/HealthKit}
-BUILD=${BUILD:-$(runs_fresh charon-healthkit)}
+BUILD=${BUILD:-$(runs_fresh revenant-healthkit)}
 sdk=$(xcrun --show-sdk-path)
-# CHARON_HOST_BUILD: this is a host differential - the port's process links no framework of the name it
-# measures, so there is no release class for a charon_alias.h proxy to stand in for, nothing for the
+# REVENANT_HOST_BUILD: this is a host differential - the port's process links no framework of the name it
+# measures, so there is no release class for a revenant_alias.h proxy to stand in for, nothing for the
 # library's loader to re-parent and no name to export. The header's own comment gives the two
 # measurements: the macOS linker refuses the metaclass alias ("ld: null objc class data for
-# '_OBJC_METACLASS_$_Charon<Name>'", from the smallest file that carries nothing but CHARON_ALIAS), and
+# '_OBJC_METACLASS_$_Revenant<Name>'", from the smallest file that carries nothing but REVENANT_ALIAS), and
 # a name built by ## cannot be renamed the way this harness renames classes. What the alias is FOR is a
 # device band; here the class of the release's name is the class and every member of it is measured.
-quiet="-w -DCHARON_HOST_BUILD"
+quiet="-w -DREVENANT_HOST_BUILD"
 # The whole build directory goes and not only its two object subdirectories. A run that fails to link
 # then leaves no differential at all, where before it left the one the previous run built, and the line
 # after this one ran that: a stale binary answering for a fixed source. The mutant step below, which
@@ -41,7 +41,7 @@ mkdir -p "$BUILD/plain" "$BUILD/renamed"
 # are compiled from is the committed one with those objects laid beside it. set -e stops the run when gen has not written them.
 staged="$BUILD/layout"
 mkdir -p "$staged/HealthKit"
-# the package root's headers come along too: a source of the folder includes one of them by "../" (HKCDADocument11.m, "../charon_alias.h")
+# the package root's headers come along too: a source of the folder includes one of them by "../" (HKCDADocument11.m, "../revenant_alias.h")
 cp "$healthkit"/../*.h "$staged/"
 cp "$healthkit"/*.m "$healthkit"/*.h "$staged/HealthKit/"
 cp "$healthkit/../.gen/HealthKit"/HKConstants*.m "$staged/HealthKit/"
@@ -51,7 +51,7 @@ healthkit=$staged/HealthKit
 # live (the error it answers with and the line it says once in the log) and which is the only file that
 # defines them. Nothing in this test opens a database: the store is compiled so that what the unit and
 # quantity code calls exists, not so that the store is measured.
-sources="HKUnit.m HKQuantity.m HKQuantityType.m HKQuantityTypes.m HKObjectType.m HKObject.m HKSource.m HKSample.m HKWorkout.m HKStatistics.m HKQuery.m HKQueries.m HKQueryAnchor9.m HKSourceRevision9.m HKSamples.m HKWorkoutRoute110.m HKWorkoutRouteQuery110.m HKCDADocument11.m HKClinicalRecord120.m HKWorkoutBuilder120.m HKQuantitySeriesSampleBuilder120.m HKQuantitySeriesSampleQuery120.m HKCumulativeQuantitySample130.m HKCumulativeQuantitySeriesSample120.m HKDocument10.m HKObject9.m HKSource9.m HKHealthStore.m CharonHKStore.m HKConstants120.m HKConstants134.m HKConstants160.m HKConstants180.m HKConstants182.m HKConstants260.m HKConstants262.m"
+sources="HKUnit.m HKQuantity.m HKQuantityType.m HKQuantityTypes.m HKObjectType.m HKObject.m HKSource.m HKSample.m HKWorkout.m HKStatistics.m HKQuery.m HKQueries.m HKQueryAnchor9.m HKSourceRevision9.m HKSamples.m HKWorkoutRoute110.m HKWorkoutRouteQuery110.m HKCDADocument11.m HKClinicalRecord120.m HKWorkoutBuilder120.m HKQuantitySeriesSampleBuilder120.m HKQuantitySeriesSampleQuery120.m HKCumulativeQuantitySample130.m HKCumulativeQuantitySeriesSample120.m HKDocument10.m HKObject9.m HKSource9.m HKHealthStore.m RevenantHKStore.m HKConstants120.m HKConstants134.m HKConstants160.m HKConstants180.m HKConstants182.m HKConstants260.m HKConstants262.m"
 
 for source in $sources; do
     xcrun clang -fobjc-arc $quiet -I"$healthkit" -c "$healthkit/$source" -o "$BUILD/plain/$source.o"
@@ -61,7 +61,7 @@ done
 renames=""
 for name in $(xcrun nm -gU "$BUILD"/plain/*.o | awk 'NF == 3 {print $3}' | grep -E '^_OBJC_CLASS_\$_' \
               | sed -e 's/^_OBJC_CLASS_\$_//' | sort -u); do
-    renames="$renames -D$name=CharonHost$name"
+    renames="$renames -D$name=RevenantHost$name"
 done
 echo "renamed:$renames"
 
@@ -69,7 +69,7 @@ echo "renamed:$renames"
 # exports those symbols too, so the port's definitions and the host's cannot both be linked under one
 # name. The list is written out rather than taken from the plain objects' symbol list, because that
 # list holds the port's C functions as well and renaming one would answer to a name nothing declares -
-# this file declares CharonHKClassForObjectKind and CharonHKSetClassResolver itself, and it is
+# this file declares RevenantHKClassForObjectKind and RevenantHKSetClassResolver itself, and it is
 # compiled without these flags.
 constants=""
 for name in HKFHIRResourceTypeAllergyIntolerance HKFHIRResourceTypeCondition HKFHIRResourceTypeImmunization \
@@ -82,13 +82,13 @@ for name in HKFHIRResourceTypeAllergyIntolerance HKFHIRResourceTypeCondition HKF
             HKMetadataKeyCrossTrainerDistance HKMetadataKeyFitnessMachineDuration HKMetadataKeyIndoorBikeDistance \
             HKPredicateKeyPathClinicalRecordFHIRResourceIdentifier HKPredicateKeyPathClinicalRecordFHIRResourceType \
             HKPredicateKeyPathSum; do
-    constants="$constants -D$name=CharonHK120_$name"
+    constants="$constants -D$name=RevenantHK120_$name"
 done
 # The six of 11.2 that join HKConstants120.m take the prefix its twenty-one already take.
 for name in HKMetadataKeyAlpineSlopeGrade HKMetadataKeyAverageSpeed HKMetadataKeyElevationAscended \
             HKMetadataKeyElevationDescended HKMetadataKeyMaximumSpeed \
             HKQuantityTypeIdentifierDistanceDownhillSnowSports; do
-    constants="$constants -D$name=CharonHK120_$name"
+    constants="$constants -D$name=RevenantHK120_$name"
 done
 # The other 187 of the measured group, renamed for the same reason the twenty-one above are: the
 # host's HealthKit exports those symbols too, so the port's definitions and the host's cannot both
@@ -100,7 +100,7 @@ measured=""
 for name in $(xcrun nm -gU "$BUILD"/plain/*.o | awk 'NF == 3 {print $3}' | grep -E '^_HK' \
               | sed -e 's/^_//' | sort -u); do
     case " $constants " in *" -D$name="*) continue ;; esac
-    measured="$measured -D$name=CharonHKMeasured_$name"
+    measured="$measured -D$name=RevenantHKMeasured_$name"
 done
 constants="$constants$measured"
 
@@ -154,7 +154,7 @@ mutant() {
     # nothing of a previous run's may be here: the binary is only run if this step builds it
     rm -f "$BUILD/mutant/differential"
     cp "$healthkit"/*.m "$healthkit"/*.h "$BUILD/mutant/HealthKit/"
-    cp "$here/../../../../packages/a/apple-backports/CharonSayOnce.h" "$BUILD/mutant/"
+    cp "$here/../../../../packages/a/apple-backports/RevenantSayOnce.h" "$BUILD/mutant/"
     python3 "$here/mutate.py" "$BUILD/mutant/HealthKit/$file" "$from" "$to"
     for source in $sources; do
         xcrun clang -fobjc-arc $quiet $renames $constants -I"$BUILD/mutant/HealthKit" -c "$BUILD/mutant/HealthKit/$source" \
@@ -166,9 +166,9 @@ mutant() {
         echo "MUTANT SURVIVED: $file $from -> $to"; survived=$((survived + 1))
     fi
 }
-mutant HKUnit.m '{@"mmHg", CharonHKDimensionPressure, 133.32236842105263, 0.0},' '{@"mmHg", CharonHKDimensionPressure, 133.322387415, 0.0},'
+mutant HKUnit.m '{@"mmHg", RevenantHKDimensionPressure, 133.32236842105263, 0.0},' '{@"mmHg", RevenantHKDimensionPressure, 133.322387415, 0.0},'
 mutant HKUnit.m 'return @"mc";' 'return @"u";'
-mutant HKUnit.m '@"appleEffortScore", CharonHKDimensionEffortScore, 1.0, 0.0},' '@"appleEffortScore2", CharonHKDimensionEffortScore, 1.0, 0.0},'
+mutant HKUnit.m '@"appleEffortScore", RevenantHKDimensionEffortScore, 1.0, 0.0},' '@"appleEffortScore2", RevenantHKDimensionEffortScore, 1.0, 0.0},'
 # A mutant of the 12.0 builder: the elapsed time a begun period answers, which the differential
 # compares twice, and the refusal a second begin answers, which it compares once.
 mutant HKWorkoutBuilder120.m 'return [date timeIntervalSinceDate:_startDate];' 'return [date timeIntervalSinceDate:_startDate] + 1.0;'
@@ -180,13 +180,13 @@ echo "mutants surviving: $survived"
 # A mutant of the 12.0 series builder: the date refusal, which the differential compares against the
 # host's own answer for a date before the builder's start.
 mutant HKQuantitySeriesSampleBuilder120.m 'if ([date compare:_startDate] == NSOrderedAscending) {' 'if (NO) {'
-# A mutant of the store's gate: one class's adoption of CharonHKStorable removed, which must turn the
+# A mutant of the store's gate: one class's adoption of RevenantHKStorable removed, which must turn the
 # round trip red - the store refuses that class again, and a save that is not checked would pass.
-mutant HKSamples.m '@interface HKQuantitySample (CharonHKStorable) <CharonHKStorable>' '@interface HKQuantitySample (CharonHKStorableNotAdopted)'
+mutant HKSamples.m '@interface HKQuantitySample (RevenantHKStorable) <RevenantHKStorable>' '@interface HKQuantitySample (RevenantHKStorableNotAdopted)'
 # A mutant of the 12.0 series query: the date a delivered quantity is reported at. The differential
 # saves a sample over a real period and compares the date the query delivers against the start date it
 # built the sample with, so a query answering the end date instead, or none at all, is a difference.
-mutant HKQuantitySeriesSampleQuery120.m 'charon_deliverQuantity:quantitySample.quantity date:quantitySample.startDate done:NO error:nil' 'charon_deliverQuantity:quantitySample.quantity date:quantitySample.endDate done:NO error:nil'
+mutant HKQuantitySeriesSampleQuery120.m 'revenant_deliverQuantity:quantitySample.quantity date:quantitySample.startDate done:NO error:nil' 'revenant_deliverQuantity:quantitySample.quantity date:quantitySample.endDate done:NO error:nil'
 # A mutant of the four most-recent members: the comparison that decides which sample is the most recent.
 # The differential asks for the most recent over samples whose dates are chosen so that the strict
 # comparison and a non-strict one answer differently, so a mutant that compares the wrong way is caught.

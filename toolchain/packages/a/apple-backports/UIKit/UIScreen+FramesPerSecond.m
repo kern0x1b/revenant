@@ -1,10 +1,10 @@
 #import <UIKit/UIKit.h>
 
-@interface UIScreen (CharonPrivate)
+@interface UIScreen (RevenantPrivate)
 - (double)_refreshRate;
 @end
 
-@implementation UIScreen (CharonFramesPerSecond)
+@implementation UIScreen (RevenantFramesPerSecond)
 
 - (NSInteger)maximumFramesPerSecond
 {

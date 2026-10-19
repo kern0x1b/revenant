@@ -14,7 +14,7 @@
 
 #include "mach/xnu_scheduler.hpp"
 
-namespace shade {
+namespace emulator {
 
 struct GuestDispatchObservation {
     std::chrono::steady_clock::time_point now;

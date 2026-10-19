@@ -10,7 +10,7 @@
 #include <string>
 #include <string_view>
 
-namespace shade {
+namespace emulator {
 
 struct DarwinKernelIdentity {
     explicit DarwinKernelIdentity(std::string_view darwin_release = "9.0.0d1",

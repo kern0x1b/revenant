@@ -42,11 +42,11 @@ int main(void)
         CHECK_EQUAL(plain, @"3x2 255,0,0,255", "an image is decoded without options");
         CHECK_EQUAL(decoded(@{(__bridge id)kCGImageSourceShouldCacheImmediately: @YES}), plain, "an image is decoded the same with the option set");
         CHECK_EQUAL(decoded(@{(__bridge id)kCGImageSourceShouldCacheImmediately: @NO, (__bridge id)kCGImageSourceShouldCache: @YES}), plain, "and with the option cleared beside another");
-#ifndef CHARON_HOST
+#ifndef REVENANT_HOST
         Dl_info info;
         CHECK(dladdr(&kCGImageSourceShouldCacheImmediately, &info) && info.dli_fname && strstr(info.dli_fname, "GraphicsBackports"), "the key comes from the backports library on a release that lacks it");
 #endif
-        printf("checks=%d failures=%d\n", charon_checks, charon_failures);
-        return charon_failures;
+        printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
+        return revenant_failures;
     }
 }

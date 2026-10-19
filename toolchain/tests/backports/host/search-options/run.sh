@@ -1,6 +1,6 @@
 #!/bin/sh
 # run.sh: a differential of UITextSearchOptions, the port against the Mac Catalyst host's own class, in one process.
-# The port's UIKit/UITextSearchOptions.m and test.m are compiled with -DUITextSearchOptions=CharonPortUITextSearchOptions, so the
+# The port's UIKit/UITextSearchOptions.m and test.m are compiled with -DUITextSearchOptions=RevenantPortUITextSearchOptions, so the
 # port's class has its own name and the host's class is still reached by name at run time. test.m prints the same checks for both;
 # the run passes when the two sides print the same values, and fails on any difference or on no output.
 # SEARCH_PORT_SOURCE replaces the port's source, so a planted wrong port can be run as a control: it must fail.
@@ -8,11 +8,11 @@ set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 port=${SEARCH_PORT_SOURCE:-$here/../../../../packages/a/apple-backports/UIKit/UITextSearchOptions.m}
-build=${SEARCH_BUILD:-$(runs_fresh charon-search-options)}
+build=${SEARCH_BUILD:-$(runs_fresh revenant-search-options)}
 sdk=$(xcrun --show-sdk-path)
 app="$build/search-options"
 xcrun clang -target arm64-apple-ios15.0-macabi -isysroot "$sdk" -iframework "$sdk/System/iOSSupport/System/Library/Frameworks" \
-    -fobjc-arc -w -DUITextSearchOptions=CharonPortUITextSearchOptions \
+    -fobjc-arc -w -DUITextSearchOptions=RevenantPortUITextSearchOptions \
     "$port" "$here/test.m" -framework UIKit -framework Foundation -framework CoreGraphics -o "$app"
 codesign -s - --force "$app" > /dev/null 2>&1
 "$app" > "$build/search-options.txt"

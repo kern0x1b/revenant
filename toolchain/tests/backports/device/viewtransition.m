@@ -47,7 +47,7 @@ static NSString *const results_folder = @"/private/var/backports";
 {
     [[NSFileManager defaultManager] createDirectoryAtPath:results_folder withIntermediateDirectories:YES attributes:nil error:NULL];
     [[NSFileManager defaultManager] removeItemAtPath:[results_folder stringByAppendingPathComponent:@"viewtransition.done"] error:NULL];
-    charon_log_to([results_folder stringByAppendingPathComponent:@"viewtransition.log"]);
+    revenant_log_to([results_folder stringByAppendingPathComponent:@"viewtransition.log"]);
     self.window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
     [[NSNotificationCenter defaultCenter] addObserverForName:UIApplicationWillChangeStatusBarOrientationNotification object:nil queue:nil usingBlock:^(NSNotification *note) {
         printf("will change %ld\n", (long)[note.userInfo[UIApplicationStatusBarOrientationUserInfoKey] integerValue]);
@@ -64,20 +64,20 @@ static NSString *const results_folder = @"/private/var/backports";
         CGSize landscape = CGSizeMake(portrait.height, portrait.width);
         [self turn:UIInterfaceOrientationLandscapeLeft];
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.5 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-            charon_check(root.sizes.count == 1, "the root is told once", [NSString stringWithFormat:@"%@", root.sizes]);
-            charon_check([root.sizes.firstObject isEqualToString:NSStringFromCGSize(landscape)], "the root is told the new size", [NSString stringWithFormat:@"%@ want %@", root.sizes.firstObject, NSStringFromCGSize(landscape)]);
-            charon_check(child.sizes.count == 1 && [child.sizes.firstObject isEqualToString:NSStringFromCGSize(landscape)], "a child is told the new size", [NSString stringWithFormat:@"%@", child.sizes]);
+            revenant_check(root.sizes.count == 1, "the root is told once", [NSString stringWithFormat:@"%@", root.sizes]);
+            revenant_check([root.sizes.firstObject isEqualToString:NSStringFromCGSize(landscape)], "the root is told the new size", [NSString stringWithFormat:@"%@ want %@", root.sizes.firstObject, NSStringFromCGSize(landscape)]);
+            revenant_check(child.sizes.count == 1 && [child.sizes.firstObject isEqualToString:NSStringFromCGSize(landscape)], "a child is told the new size", [NSString stringWithFormat:@"%@", child.sizes]);
             CGFloat angle = atan2(root.transform.b, root.transform.a);
-            charon_check(fabs(fabs(angle) - M_PI_2) < 0.01, "the coordinator carries the quarter turn", [NSString stringWithFormat:@"%f", angle]);
-            charon_check(root.alongside == 1 && root.completions == 1, "the alongside block and the completion run once", [NSString stringWithFormat:@"%ld %ld", (long)root.alongside, (long)root.completions]);
+            revenant_check(fabs(fabs(angle) - M_PI_2) < 0.01, "the coordinator carries the quarter turn", [NSString stringWithFormat:@"%f", angle]);
+            revenant_check(root.alongside == 1 && root.completions == 1, "the alongside block and the completion run once", [NSString stringWithFormat:@"%ld %ld", (long)root.alongside, (long)root.completions]);
             [self turn:UIInterfaceOrientationLandscapeLeft];
-            charon_check(root.sizes.count == 1, "the same orientation is not a transition", nil);
+            revenant_check(root.sizes.count == 1, "the same orientation is not a transition", nil);
             [self turn:UIInterfaceOrientationPortrait];
             dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.5 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-                charon_check(root.sizes.count == 2 && [root.sizes.lastObject isEqualToString:NSStringFromCGSize(portrait)], "turning back tells the old size", [NSString stringWithFormat:@"%@", root.sizes]);
-                charon_check(child.sizes.count == 2, "the child hears it too", nil);
-                printf("checks=%d failures=%d\n", charon_checks, charon_failures);
-                NSString *summary = [NSString stringWithFormat:@"%@ checks=%d failures=%d\n", charon_failures ? @"FAIL" : @"ok", charon_checks, charon_failures];
+                revenant_check(root.sizes.count == 2 && [root.sizes.lastObject isEqualToString:NSStringFromCGSize(portrait)], "turning back tells the old size", [NSString stringWithFormat:@"%@", root.sizes]);
+                revenant_check(child.sizes.count == 2, "the child hears it too", nil);
+                printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
+                NSString *summary = [NSString stringWithFormat:@"%@ checks=%d failures=%d\n", revenant_failures ? @"FAIL" : @"ok", revenant_checks, revenant_failures];
                 [summary writeToFile:[results_folder stringByAppendingPathComponent:@"viewtransition.done"] atomically:YES encoding:NSUTF8StringEncoding error:NULL];
             });
         });

@@ -10,7 +10,7 @@
 #include <array>
 #include <string_view>
 
-namespace shade::bsd::null_device {
+namespace emulator::bsd::null_device {
 
 inline constexpr std::string_view descriptor_kind { "null" };
 inline constexpr unsigned device_minor = 5;

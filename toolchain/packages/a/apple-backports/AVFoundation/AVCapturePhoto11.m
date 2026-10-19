@@ -1,8 +1,8 @@
-#import "CharonAVCapturePhoto.h"
+#import "RevenantAVCapturePhoto.h"
 #import <CoreImage/CoreImage.h>
 #import <ImageIO/ImageIO.h>
 
-CGImageRef CharonCreatePhotoImage(CMSampleBufferRef photo, size_t longest)
+CGImageRef RevenantCreatePhotoImage(CMSampleBufferRef photo, size_t longest)
 {
     CMFormatDescriptionRef format = CMSampleBufferGetFormatDescription(photo);
     if (format && CMFormatDescriptionGetMediaSubType(format) == kCMVideoCodecType_JPEG) {
@@ -31,49 +31,49 @@ CGImageRef CharonCreatePhotoImage(CMSampleBufferRef photo, size_t longest)
 
 @implementation AVCapturePhoto
 {
-    CMSampleBufferRef _charonPhoto;
-    CMSampleBufferRef _charonPreview;
-    AVCaptureResolvedPhotoSettings *_charonResolvedSettings;
-    AVCaptureBracketedStillImageSettings *_charonBracketSettings;
-    NSInteger _charonPhotoCount;
-    NSDictionary *_charonEmbeddedThumbnailPhotoFormat;
-    AVCaptureDeviceType _charonSourceDeviceType;
+    CMSampleBufferRef _revenantPhoto;
+    CMSampleBufferRef _revenantPreview;
+    AVCaptureResolvedPhotoSettings *_revenantResolvedSettings;
+    AVCaptureBracketedStillImageSettings *_revenantBracketSettings;
+    NSInteger _revenantPhotoCount;
+    NSDictionary *_revenantEmbeddedThumbnailPhotoFormat;
+    AVCaptureDeviceType _revenantSourceDeviceType;
 }
 
-- (instancetype)initCharonWithSampleBuffer:(CMSampleBufferRef)photo previewSampleBuffer:(CMSampleBufferRef)preview
+- (instancetype)initRevenantWithSampleBuffer:(CMSampleBufferRef)photo previewSampleBuffer:(CMSampleBufferRef)preview
                           resolvedSettings:(AVCaptureResolvedPhotoSettings *)resolvedSettings
                            bracketSettings:(AVCaptureBracketedStillImageSettings *)bracketSettings photoCount:(NSInteger)photoCount
               embeddedThumbnailPhotoFormat:(NSDictionary *)thumbnailFormat sourceDeviceType:(AVCaptureDeviceType)sourceDeviceType
 {
     if ((self = [super init])) {
-        _charonPhoto = photo ? (CMSampleBufferRef)CFRetain(photo) : NULL;
-        _charonPreview = preview ? (CMSampleBufferRef)CFRetain(preview) : NULL;
-        _charonResolvedSettings = resolvedSettings;
-        _charonBracketSettings = bracketSettings;
-        _charonPhotoCount = photoCount;
-        _charonEmbeddedThumbnailPhotoFormat = thumbnailFormat;
-        _charonSourceDeviceType = sourceDeviceType;
+        _revenantPhoto = photo ? (CMSampleBufferRef)CFRetain(photo) : NULL;
+        _revenantPreview = preview ? (CMSampleBufferRef)CFRetain(preview) : NULL;
+        _revenantResolvedSettings = resolvedSettings;
+        _revenantBracketSettings = bracketSettings;
+        _revenantPhotoCount = photoCount;
+        _revenantEmbeddedThumbnailPhotoFormat = thumbnailFormat;
+        _revenantSourceDeviceType = sourceDeviceType;
     }
     return self;
 }
 
 - (void)dealloc
 {
-    if (_charonPhoto)
-        CFRelease(_charonPhoto);
-    if (_charonPreview)
-        CFRelease(_charonPreview);
+    if (_revenantPhoto)
+        CFRelease(_revenantPhoto);
+    if (_revenantPreview)
+        CFRelease(_revenantPreview);
 }
 
-- (BOOL)charon_isCompressed
+- (BOOL)revenant_isCompressed
 {
-    CMFormatDescriptionRef format = _charonPhoto ? CMSampleBufferGetFormatDescription(_charonPhoto) : NULL;
+    CMFormatDescriptionRef format = _revenantPhoto ? CMSampleBufferGetFormatDescription(_revenantPhoto) : NULL;
     return format && CMFormatDescriptionGetMediaSubType(format) == kCMVideoCodecType_JPEG;
 }
 
 - (CMTime)timestamp
 {
-    return _charonPhoto ? CMSampleBufferGetPresentationTimeStamp(_charonPhoto) : kCMTimeInvalid;
+    return _revenantPhoto ? CMSampleBufferGetPresentationTimeStamp(_revenantPhoto) : kCMTimeInvalid;
 }
 
 - (BOOL)isRawPhoto
@@ -83,19 +83,19 @@ CGImageRef CharonCreatePhotoImage(CMSampleBufferRef photo, size_t longest)
 
 - (CVPixelBufferRef)pixelBuffer
 {
-    if (!_charonPhoto || [self charon_isCompressed])
+    if (!_revenantPhoto || [self revenant_isCompressed])
         return NULL;
-    return CMSampleBufferGetImageBuffer(_charonPhoto);
+    return CMSampleBufferGetImageBuffer(_revenantPhoto);
 }
 
 - (CVPixelBufferRef)previewPixelBuffer
 {
-    return _charonPreview ? CMSampleBufferGetImageBuffer(_charonPreview) : NULL;
+    return _revenantPreview ? CMSampleBufferGetImageBuffer(_revenantPreview) : NULL;
 }
 
 - (NSDictionary<NSString *, id> *)embeddedThumbnailPhotoFormat
 {
-    return _charonEmbeddedThumbnailPhotoFormat;
+    return _revenantEmbeddedThumbnailPhotoFormat;
 }
 
 - (AVDepthData *)depthData
@@ -121,7 +121,7 @@ CGImageRef CharonCreatePhotoImage(CMSampleBufferRef photo, size_t longest)
 - (NSDictionary<NSString *, id> *)metadata
 {
     NSDictionary *metadata = nil;
-    NSData *data = _charonPhoto && [self charon_isCompressed] ? [AVCaptureStillImageOutput jpegStillImageNSDataRepresentation:_charonPhoto] : nil;
+    NSData *data = _revenantPhoto && [self revenant_isCompressed] ? [AVCaptureStillImageOutput jpegStillImageNSDataRepresentation:_revenantPhoto] : nil;
     CGImageSourceRef source = data ? CGImageSourceCreateWithData((__bridge CFDataRef)data, NULL) : NULL;
     if (source) {
         metadata = (__bridge_transfer NSDictionary *)CGImageSourceCopyPropertiesAtIndex(source, 0, NULL);
@@ -132,40 +132,40 @@ CGImageRef CharonCreatePhotoImage(CMSampleBufferRef photo, size_t longest)
 
 - (AVCaptureResolvedPhotoSettings *)resolvedSettings
 {
-    return _charonResolvedSettings;
+    return _revenantResolvedSettings;
 }
 
 - (NSInteger)photoCount
 {
-    return _charonPhotoCount;
+    return _revenantPhotoCount;
 }
 
 - (AVCaptureDeviceType)sourceDeviceType
 {
-    return _charonSourceDeviceType;
+    return _revenantSourceDeviceType;
 }
 
 - (AVCaptureBracketedStillImageSettings *)bracketSettings
 {
-    return _charonBracketSettings;
+    return _revenantBracketSettings;
 }
 
 - (NSData *)fileDataRepresentation
 {
-    if (!_charonPhoto || ![self charon_isCompressed])
+    if (!_revenantPhoto || ![self revenant_isCompressed])
         return nil;
-    return [AVCaptureStillImageOutput jpegStillImageNSDataRepresentation:_charonPhoto];
+    return [AVCaptureStillImageOutput jpegStillImageNSDataRepresentation:_revenantPhoto];
 }
 
 - (CGImageRef)CGImageRepresentation
 {
-    CGImageRef image = _charonPhoto ? CharonCreatePhotoImage(_charonPhoto, SIZE_MAX) : NULL;
+    CGImageRef image = _revenantPhoto ? RevenantCreatePhotoImage(_revenantPhoto, SIZE_MAX) : NULL;
     return image ? (CGImageRef)CFAutorelease(image) : NULL;
 }
 
 - (CGImageRef)previewCGImageRepresentation
 {
-    CGImageRef image = _charonPreview ? CharonCreatePhotoImage(_charonPreview, SIZE_MAX) : NULL;
+    CGImageRef image = _revenantPreview ? RevenantCreatePhotoImage(_revenantPreview, SIZE_MAX) : NULL;
     return image ? (CGImageRef)CFAutorelease(image) : NULL;
 }
 

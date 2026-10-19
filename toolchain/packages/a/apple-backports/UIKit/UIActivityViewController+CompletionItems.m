@@ -1,18 +1,18 @@
 #import <UIKit/UIKit.h>
 #import <objc/runtime.h>
 
-static const char charon_items_handler_key;
+static const char revenant_items_handler_key;
 
-@implementation UIActivityViewController (CharonCompletionItems)
+@implementation UIActivityViewController (RevenantCompletionItems)
 
 - (UIActivityViewControllerCompletionWithItemsHandler)completionWithItemsHandler
 {
-    return objc_getAssociatedObject(self, &charon_items_handler_key);
+    return objc_getAssociatedObject(self, &revenant_items_handler_key);
 }
 
 - (void)setCompletionWithItemsHandler:(UIActivityViewControllerCompletionWithItemsHandler)completionWithItemsHandler
 {
-    objc_setAssociatedObject(self, &charon_items_handler_key, completionWithItemsHandler, OBJC_ASSOCIATION_COPY_NONATOMIC);
+    objc_setAssociatedObject(self, &revenant_items_handler_key, completionWithItemsHandler, OBJC_ASSOCIATION_COPY_NONATOMIC);
     if (!completionWithItemsHandler) {
         self.completionHandler = nil;
         return;

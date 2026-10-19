@@ -282,7 +282,7 @@
       "introduced": "18.0",
       "minimum": "6.0",
       "status": "implemented",
-      "reason": "the 16.4 headers do not declare this class at all, so it is declared under Apple's own name in CharonMapKit.h and defined here, in the object of its own measured release",
+      "reason": "the 16.4 headers do not declare this class at all, so it is declared under Apple's own name in RevenantMapKit.h and defined here, in the object of its own measured release",
       "effect": "a place, named the way the release's own map names one: -initWithMapItem: takes the release's own MKMapItem and keeps its -placeID, and -identifierString gives it back. Where the place has no placeID the identifier is nil, because the release does not put one on every map item and inventing a string the release would not recognise is worse than saying there is none",
       "facts": "facts/MapKit/MapKit.md",
       "source": "apple.objc.inventory against the armv7 dyld shared cache of 6.1.3: the release's own MKMapItem carries -placeID, -placemark, -initWithPlacemark: and -openInMapsWithLaunchOptions:, and apple.dyld's first_releases, which puts the class at 18.0"

@@ -1,6 +1,6 @@
 #import <UIKit/UIKit.h>
 
-@implementation UIView (CharonPerformWithoutAnimation)
+@implementation UIView (RevenantPerformWithoutAnimation)
 
 + (void)performWithoutAnimation:(void (^)(void))actionsWithoutAnimation
 {

@@ -9,7 +9,7 @@
 #include <cstdint>
 #include "device_state/darwin_abi.hpp"
 
-namespace shade {
+namespace emulator {
 
 class AddressSpace;
 

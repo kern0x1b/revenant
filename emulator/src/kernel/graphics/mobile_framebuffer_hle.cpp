@@ -39,7 +39,7 @@
 #include "foundation/userland_hle.hpp"
 #include "surface_transport_hle.hpp"
 
-namespace shade {
+namespace emulator {
 namespace {
 
     constexpr std::string_view framebuffer_image {

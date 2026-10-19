@@ -56,7 +56,7 @@ static MLCTensor *vector(NSUInteger count, float value)
     return [MLCTensor tensorWithDescriptor:shape_(@[ @(count) ]) fillWithData:@(value)];
 }
 
-void charon_mlcompute_layer_cases(void)
+void revenant_mlcompute_layer_cases(void)
 {
     @autoreleasepool {
         MLCConvolutionDescriptor *convolution = [MLCConvolutionDescriptor descriptorWithKernelWidth:3 kernelHeight:3 inputFeatureChannelCount:4 outputFeatureChannelCount:5];

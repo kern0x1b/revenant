@@ -1,33 +1,33 @@
-#import "CharonCMTaggedBufferGroup26.h"
-#import "CharonCMTagSupport.h"
+#import "RevenantCMTaggedBufferGroup26.h"
+#import "RevenantCMTagSupport.h"
 #import <CoreMedia/CoreMedia.h>
 #import <CoreFoundation/CoreFoundation.h>
 #import <objc/runtime.h>
 #import <stdlib.h>
 #import <string.h>
 
-@implementation CharonCMTaggedBufferGroup {
+@implementation RevenantCMTaggedBufferGroup {
     CMTag *_tags;
     CMItemCount *_offsets;
     NSUInteger _entries;
 }
 
-@synthesize charon_collections = _charon_collections;
-@synthesize charon_buffers = _charon_buffers;
+@synthesize revenant_collections = _revenant_collections;
+@synthesize revenant_buffers = _revenant_buffers;
 
-- (instancetype)charon_initWithCollections:(NSArray *)collections buffers:(NSArray *)buffers
+- (instancetype)revenant_initWithCollections:(NSArray *)collections buffers:(NSArray *)buffers
 {
     self = [super init];
     if (!self)
         return nil;
-    _charon_collections = [collections copy];
-    _charon_buffers = [buffers copy];
-    _entries = _charon_collections.count;
+    _revenant_collections = [collections copy];
+    _revenant_buffers = [buffers copy];
+    _entries = _revenant_collections.count;
     if (_entries) {
         _offsets = calloc(_entries + 1, sizeof *_offsets);
         for (NSUInteger index = 0; index < _entries; index++) {
             CMItemCount held = 0;
-            CMTag *run = charon_copy_all_tags((CMTagCollectionRef)(__bridge void *)[collections objectAtIndex:index], &held);
+            CMTag *run = revenant_copy_all_tags((CMTagCollectionRef)(__bridge void *)[collections objectAtIndex:index], &held);
             size_t room = (size_t)(_offsets[index] + held) * sizeof *_tags;
             CMTag *grown = realloc(_tags, room ? room : 1);
             if (!grown) {
@@ -53,12 +53,12 @@
     _entries = 0;
 }
 
-- (const CMTag *)charon_tags
+- (const CMTag *)revenant_tags
 {
     return _tags;
 }
 
-- (CMItemCount)charon_tagCount
+- (CMItemCount)revenant_tagCount
 {
     CMItemCount total = 0;
     for (NSUInteger index = 0; index < _entries; index++)
@@ -66,43 +66,43 @@
     return total;
 }
 
-- (CMItemCount)charon_tagOffsetAtIndex:(NSInteger)index
+- (CMItemCount)revenant_tagOffsetAtIndex:(NSInteger)index
 {
     if (index < 0 || index >= (NSInteger)_entries)
         return -1;
     return _offsets[index];
 }
 
-- (NSInteger)charon_count
+- (NSInteger)revenant_count
 {
-    return (NSInteger)MIN(_entries, _charon_buffers.count);
+    return (NSInteger)MIN(_entries, _revenant_buffers.count);
 }
 
-- (CMTagCollectionRef)charon_collectionAtIndex:(NSInteger)index
+- (CMTagCollectionRef)revenant_collectionAtIndex:(NSInteger)index
 {
     if (index < 0 || index >= (NSInteger)_entries)
         return NULL;
-    return (__bridge CMTagCollectionRef)_charon_collections[(NSUInteger)index];
+    return (__bridge CMTagCollectionRef)_revenant_collections[(NSUInteger)index];
 }
 
-- (CVBufferRef)charon_bufferAtIndex:(NSInteger)index
+- (CVBufferRef)revenant_bufferAtIndex:(NSInteger)index
 {
-    if (index < 0 || index >= (NSInteger)_charon_buffers.count)
+    if (index < 0 || index >= (NSInteger)_revenant_buffers.count)
         return NULL;
-    return (__bridge CVBufferRef)_charon_buffers[(NSUInteger)index];
+    return (__bridge CVBufferRef)_revenant_buffers[(NSUInteger)index];
 }
 
-- (CVBufferRef)charon_bufferForTags:(const CMTag *)tags count:(CMItemCount)count index:(NSInteger *)index
+- (CVBufferRef)revenant_bufferForTags:(const CMTag *)tags count:(CMItemCount)count index:(NSInteger *)index
 {
     if (!tags || !count)
         return NULL;
-    const CMTag *all = [self charon_tags];
+    const CMTag *all = [self revenant_tags];
     if (!all)
         return NULL;
     NSInteger found = -1, seen = 0;
-    for (NSInteger entry = 0; entry < [self charon_count]; entry++) {
+    for (NSInteger entry = 0; entry < [self revenant_count]; entry++) {
         CMItemCount at = _offsets[entry], held = _offsets[entry + 1] - _offsets[entry];
-        if (charon_tag_carries(all + at, held, tags, count)) {
+        if (revenant_tag_carries(all + at, held, tags, count)) {
             found = entry;
             seen++;
         }
@@ -111,16 +111,16 @@
         return NULL;
     if (index)
         *index = found;
-    return [self charon_bufferAtIndex:found];
+    return [self revenant_bufferAtIndex:found];
 }
 
-- (NSInteger)charon_matchesForTags:(const CMTag *)tags count:(CMItemCount)count
+- (NSInteger)revenant_matchesForTags:(const CMTag *)tags count:(CMItemCount)count
 {
-    const CMTag *all = [self charon_tags];
+    const CMTag *all = [self revenant_tags];
     NSInteger matches = 0;
-    for (NSInteger entry = 0; entry < [self charon_count]; entry++) {
+    for (NSInteger entry = 0; entry < [self revenant_count]; entry++) {
         CMItemCount at = _offsets[entry], held = _offsets[entry + 1] - at;
-        if (charon_tag_carries(all ? all + at : NULL, held, tags, count))
+        if (revenant_tag_carries(all ? all + at : NULL, held, tags, count))
             matches++;
     }
     return matches;
@@ -128,37 +128,37 @@
 
 @end
 
-static CMTaggedBufferGroupRef charon_from(CharonCMTaggedBufferGroup *group)
+static CMTaggedBufferGroupRef revenant_from(RevenantCMTaggedBufferGroup *group)
 {
     return (__bridge_retained CMTaggedBufferGroupRef)group;
 }
 
-static CharonCMTaggedBufferGroup *charon_to(CMTaggedBufferGroupRef group)
+static RevenantCMTaggedBufferGroup *revenant_to(CMTaggedBufferGroupRef group)
 {
-    return (__bridge CharonCMTaggedBufferGroup *)group;
+    return (__bridge RevenantCMTaggedBufferGroup *)group;
 }
 
-static CMTag *charon_copy_tags(CMTagCollectionRef collection, CMItemCount *countOut)
+static CMTag *revenant_copy_tags(CMTagCollectionRef collection, CMItemCount *countOut)
 {
-    return charon_copy_all_tags(collection, countOut);
+    return revenant_copy_all_tags(collection, countOut);
 }
 
-#define charon_param_err ((OSStatus)-15780)
+#define revenant_param_err ((OSStatus)-15780)
 
 CFTypeID CMTaggedBufferGroupGetTypeID(void)
 {
-    return (CFTypeID)objc_getClass("CharonCMTaggedBufferGroup");
+    return (CFTypeID)objc_getClass("RevenantCMTaggedBufferGroup");
 }
 
 OSStatus CMTaggedBufferGroupCreate(CFAllocatorRef allocator, CFArrayRef tagCollections, CFArrayRef buffers, CMTaggedBufferGroupRef *out)
 {
     (void)allocator;
     if (!tagCollections || !buffers || !out)
-        return charon_param_err;
+        return revenant_param_err;
     *out = NULL;
     CFIndex collections = CFArrayGetCount(tagCollections), count = CFArrayGetCount(buffers);
     if (collections != count)
-        return charon_param_err;
+        return revenant_param_err;
     NSMutableArray *made = [NSMutableArray arrayWithCapacity:(NSUInteger)count];
     NSMutableArray *held = [NSMutableArray arrayWithCapacity:(NSUInteger)count];
     for (CFIndex index = 0; index < count; index++) {
@@ -169,7 +169,7 @@ OSStatus CMTaggedBufferGroupCreate(CFAllocatorRef allocator, CFArrayRef tagColle
         if (buffer)
             [held addObject:(__bridge id)buffer];
     }
-    *out = charon_from([[CharonCMTaggedBufferGroup alloc] charon_initWithCollections:made buffers:held]);
+    *out = revenant_from([[RevenantCMTaggedBufferGroup alloc] revenant_initWithCollections:made buffers:held]);
     return *out ? 0 : -15782;
 }
 
@@ -177,46 +177,46 @@ OSStatus CMTaggedBufferGroupCreateCombined(CFAllocatorRef allocator, CFArrayRef 
 {
     (void)allocator;
     if (!groups || !out)
-        return charon_param_err;
+        return revenant_param_err;
     *out = NULL;
     NSMutableArray *collections = [NSMutableArray array], *buffers = [NSMutableArray array];
     for (CFIndex index = 0; index < CFArrayGetCount(groups); index++) {
-        CharonCMTaggedBufferGroup *one = charon_to((CMTaggedBufferGroupRef)CFArrayGetValueAtIndex(groups, index));
+        RevenantCMTaggedBufferGroup *one = revenant_to((CMTaggedBufferGroupRef)CFArrayGetValueAtIndex(groups, index));
         if (!one)
             continue;
-        [collections addObjectsFromArray:one.charon_collections];
-        [buffers addObjectsFromArray:one.charon_buffers];
+        [collections addObjectsFromArray:one.revenant_collections];
+        [buffers addObjectsFromArray:one.revenant_buffers];
     }
-    *out = charon_from([[CharonCMTaggedBufferGroup alloc] charon_initWithCollections:collections buffers:buffers]);
+    *out = revenant_from([[RevenantCMTaggedBufferGroup alloc] revenant_initWithCollections:collections buffers:buffers]);
     return *out ? 0 : -15782;
 }
 
 CMItemCount CMTaggedBufferGroupGetCount(CMTaggedBufferGroupRef group)
 {
-    return (CMItemCount)[charon_to(group) charon_count];
+    return (CMItemCount)[revenant_to(group) revenant_count];
 }
 
 CMTagCollectionRef CMTaggedBufferGroupGetTagCollectionAtIndex(CMTaggedBufferGroupRef group, CFIndex index)
 {
-    return [charon_to(group) charon_collectionAtIndex:index];
+    return [revenant_to(group) revenant_collectionAtIndex:index];
 }
 
 CVPixelBufferRef CMTaggedBufferGroupGetCVPixelBufferAtIndex(CMTaggedBufferGroupRef group, CFIndex index)
 {
-    CVBufferRef buffer = [charon_to(group) charon_bufferAtIndex:index];
+    CVBufferRef buffer = [revenant_to(group) revenant_bufferAtIndex:index];
     return buffer && CFGetTypeID(buffer) == CVPixelBufferGetTypeID() ? (CVPixelBufferRef)buffer : NULL;
 }
 
 CMSampleBufferRef CMTaggedBufferGroupGetCMSampleBufferAtIndex(CMTaggedBufferGroupRef group, CFIndex index)
 {
-    CVBufferRef buffer = [charon_to(group) charon_bufferAtIndex:index];
+    CVBufferRef buffer = [revenant_to(group) revenant_bufferAtIndex:index];
     return buffer && CFGetTypeID(buffer) == CMSampleBufferGetTypeID() ? (CMSampleBufferRef)buffer : NULL;
 }
 
 CVPixelBufferRef CMTaggedBufferGroupGetCVPixelBufferForTag(CMTaggedBufferGroupRef group, CMTag tag, CFIndex *indexOut)
 {
     NSInteger index = 0;
-    CVBufferRef found = [charon_to(group) charon_bufferForTags:&tag count:1 index:&index];
+    CVBufferRef found = [revenant_to(group) revenant_bufferForTags:&tag count:1 index:&index];
     if (!found)
         return NULL;
     if (indexOut)
@@ -227,7 +227,7 @@ CVPixelBufferRef CMTaggedBufferGroupGetCVPixelBufferForTag(CMTaggedBufferGroupRe
 CMSampleBufferRef CMTaggedBufferGroupGetCMSampleBufferForTag(CMTaggedBufferGroupRef group, CMTag tag, CFIndex *indexOut)
 {
     NSInteger index = 0;
-    CVBufferRef found = [charon_to(group) charon_bufferForTags:&tag count:1 index:&index];
+    CVBufferRef found = [revenant_to(group) revenant_bufferForTags:&tag count:1 index:&index];
     if (!found)
         return NULL;
     if (indexOut)
@@ -238,11 +238,11 @@ CMSampleBufferRef CMTaggedBufferGroupGetCMSampleBufferForTag(CMTaggedBufferGroup
 CVPixelBufferRef CMTaggedBufferGroupGetCVPixelBufferForTagCollection(CMTaggedBufferGroupRef group, CMTagCollectionRef tagCollection, CFIndex *indexOut)
 {
     CMItemCount count = 0;
-    CMTag *tags = charon_copy_tags(tagCollection, &count);
+    CMTag *tags = revenant_copy_tags(tagCollection, &count);
     if (!tags)
         return NULL;
     NSInteger index = 0;
-    CVBufferRef found = [charon_to(group) charon_bufferForTags:tags count:count index:&index];
+    CVBufferRef found = [revenant_to(group) revenant_bufferForTags:tags count:count index:&index];
     free(tags);
     if (!found)
         return NULL;
@@ -254,11 +254,11 @@ CVPixelBufferRef CMTaggedBufferGroupGetCVPixelBufferForTagCollection(CMTaggedBuf
 CMSampleBufferRef CMTaggedBufferGroupGetCMSampleBufferForTagCollection(CMTaggedBufferGroupRef group, CMTagCollectionRef tagCollection, CFIndex *indexOut)
 {
     CMItemCount count = 0;
-    CMTag *tags = charon_copy_tags(tagCollection, &count);
+    CMTag *tags = revenant_copy_tags(tagCollection, &count);
     if (!tags)
         return NULL;
     NSInteger index = 0;
-    CVBufferRef found = [charon_to(group) charon_bufferForTags:tags count:count index:&index];
+    CVBufferRef found = [revenant_to(group) revenant_bufferForTags:tags count:count index:&index];
     free(tags);
     if (!found)
         return NULL;
@@ -270,8 +270,8 @@ CMSampleBufferRef CMTaggedBufferGroupGetCMSampleBufferForTagCollection(CMTaggedB
 CMItemCount CMTaggedBufferGroupGetNumberOfMatchesForTagCollection(CMTaggedBufferGroupRef group, CMTagCollectionRef tagCollection)
 {
     CMItemCount count = 0;
-    CMTag *tags = charon_copy_tags(tagCollection, &count);
-    CMItemCount matches = (CMItemCount)[charon_to(group) charon_matchesForTags:tags count:count];
+    CMTag *tags = revenant_copy_tags(tagCollection, &count);
+    CMItemCount matches = (CMItemCount)[revenant_to(group) revenant_matchesForTags:tags count:count];
     free(tags);
     return matches;
 }

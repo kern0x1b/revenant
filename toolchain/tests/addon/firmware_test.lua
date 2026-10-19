@@ -9,8 +9,8 @@ end
 function failures(opt)
     local found = {}
     local folder = fixtures.scratch()
-    local home = os.getenv("CHARON_HOME")
-    os.setenv("CHARON_HOME", path.join(folder, "home"))
+    local home = os.getenv("REVENANT_HOME")
+    os.setenv("REVENANT_HOME", path.join(folder, "home"))
     local firmware = import("apple.firmware", {rootdir = opt.modules, anonymous = true})
     local dyld = import("apple.dyld", {rootdir = opt.modules, anonymous = true})
     local held = path.join(dyld.root(), "9.9", "dyld_shared_cache_armv7")
@@ -91,7 +91,7 @@ function failures(opt)
     local plain = path.join(folder, "libLarge.dylib")
     io.writefile(plain, library, {encoding = "binary"})
     local hfs, volume = path.join(folder, "hfs.dmg"), path.join(folder, "hfs")
-    os.vrunv("hdiutil", {"create", "-quiet", "-size", "40m", "-fs", "HFS+", "-volname", "charon", "-type", "UDIF", hfs})
+    os.vrunv("hdiutil", {"create", "-quiet", "-size", "40m", "-fs", "HFS+", "-volname", "revenant", "-type", "UDIF", hfs})
     os.mkdir(volume)
     os.vrunv("hdiutil", {"attach", "-quiet", "-nobrowse", "-mountpoint", volume, hfs})
     try {
@@ -158,7 +158,7 @@ function failures(opt)
         table.insert(found, "the libraries of a held cache come from the firmware of any architecture that carries it: " .. tostring(errors))
     end
 
-    os.setenv("CHARON_HOME", home or nil)
+    os.setenv("REVENANT_HOME", home or nil)
     os.tryrm(folder)
     return found
 end

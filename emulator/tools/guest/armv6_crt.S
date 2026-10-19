@@ -23,7 +23,7 @@ _start:
     add r2, r0, #1
     add r2, r1, r2, lsl #2
     bic sp, sp, #7
-    bl _shade_guest_start
+    bl _emulator_guest_start
     bkpt #0
 
 .align 2
@@ -44,8 +44,8 @@ Llazy_binder_slot:
 .align 2
 dyld_lazy_symbol_binding_entry_point:
     .long 0
-.globl _shade_dyld_function_lookup_pointer
-_shade_dyld_function_lookup_pointer:
+.globl _emulator_dyld_function_lookup_pointer
+_emulator_dyld_function_lookup_pointer:
     .long 0
     .long 0
     .long 0

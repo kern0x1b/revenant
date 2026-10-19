@@ -37,7 +37,7 @@
 
 #include "support.hpp"
 
-namespace shade {
+namespace emulator {
 
 void CompatibilityKernel::dispatch_bsd_socket(Cpu& cpu, std::uint32_t number)
 {

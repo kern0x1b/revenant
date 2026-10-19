@@ -18,7 +18,7 @@
 
 #include "mach/xnu_mig_adapter.hpp"
 
-namespace shade::xnu::mig::task {
+namespace emulator::xnu::mig::task {
 
 inline constexpr std::string_view subsystem_name{"task"};
 inline constexpr std::uint32_t subsystem_base = 3400U;

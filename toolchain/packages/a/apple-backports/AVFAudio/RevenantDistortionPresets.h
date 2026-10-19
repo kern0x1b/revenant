@@ -2,9 +2,9 @@
 #import <AudioToolbox/AudioUnitParameters.h>
 #import <AudioToolbox/AudioUnit.h>
 
-#define CharonDistortionPresetCount 22
-#define CharonDistortionParameterCount 16
-static const float CharonDistortionPresets[CharonDistortionPresetCount][CharonDistortionParameterCount] = {
+#define RevenantDistortionPresetCount 22
+#define RevenantDistortionParameterCount 16
+static const float RevenantDistortionPresets[RevenantDistortionPresetCount][RevenantDistortionParameterCount] = {
     { 4.5999999f, 9.72999954f, 3.4000001f, 0.5f, 65.1999969f, 100.0f, 0.0f, 18.1100006f, 0.0f, 100.0f, 44.0f, 1147.0f, 50.0f, 0.0f, -0.899999976f, 44.5999985f },
     { 15.5f, 35.7000008f, 75.6999969f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 15.0f, 82.4000015f, 324.5f, 303.899994f, 52.0f, 16.8999996f, -0.300000012f, 100.0f },
     { 1.60000002f, 0.680000007f, 84.5f, 12.0f, 18.7000008f, 0.0f, 0.0f, 0.949999988f, 8.0f, 100.0f, 4000.0f, 5000.0f, 50.0f, 13.5f, 20.0f, 100.0f },
@@ -29,12 +29,12 @@ static const float CharonDistortionPresets[CharonDistortionPresetCount][CharonDi
     { 0.100000001f, 0.100000001f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 44.0f, 48.0f, 50.0f, 100.0f, 16.6000004f, 100.0f },
 };
 
-static inline void CharonApplyDistortionPreset(AudioUnit unit, NSInteger preset)
+static inline void RevenantApplyDistortionPreset(AudioUnit unit, NSInteger preset)
 {
-    if (unit == NULL || preset < 0 || preset >= CharonDistortionPresetCount) {
+    if (unit == NULL || preset < 0 || preset >= RevenantDistortionPresetCount) {
         return;
     }
-    for (AudioUnitParameterID identifier = 0; identifier < CharonDistortionParameterCount; identifier++) {
-        AudioUnitSetParameter(unit, identifier, kAudioUnitScope_Global, 0, CharonDistortionPresets[preset][identifier], 0);
+    for (AudioUnitParameterID identifier = 0; identifier < RevenantDistortionParameterCount; identifier++) {
+        AudioUnitSetParameter(unit, identifier, kAudioUnitScope_Global, 0, RevenantDistortionPresets[preset][identifier], 0);
     }
 }

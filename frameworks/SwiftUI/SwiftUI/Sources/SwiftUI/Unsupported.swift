@@ -11,8 +11,8 @@ import Foundation
     nonisolated(unsafe) static var reasons: [String: String] = [:]
 
     public static var reportPath: String? {
-        if let path = ProcessInfo.processInfo.environment["EIDOLON_REPORT"] { return path }
-        if FileManager.default.fileExists(atPath: "/var/charon") { return "/var/charon/swiftui-ignored.txt" }
+        if let path = ProcessInfo.processInfo.environment["REVENANT_SWIFTUI_REPORT"] { return path }
+        if FileManager.default.fileExists(atPath: "/var/revenant") { return "/var/revenant/swiftui-ignored.txt" }
         return nil
     }
 
@@ -38,7 +38,7 @@ import Foundation
     public static func writeReport() {
         guard let path = reportPath else { return }
         var lines = used.map { "ignored\t\($0)\t\(reasons[$0] ?? "")" }
-        lines += notImplemented.map { "unimplemented\t\($0)\tnot implemented in Eidolon yet" }
+        lines += notImplemented.map { "unimplemented\t\($0)\tnot implemented in Revenant's SwiftUI yet" }
         try? (lines.joined(separator: "\n") + "\n").write(toFile: path, atomically: true, encoding: .utf8)
     }
 }

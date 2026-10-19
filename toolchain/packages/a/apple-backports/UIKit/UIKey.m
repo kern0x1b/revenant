@@ -1,7 +1,7 @@
-#import "CharonMenus.h"
+#import "RevenantMenus.h"
 
-@interface UIKey (CharonKey)
-- (instancetype)initCharonWithCharacters:(NSString *)characters unmodified:(NSString *)unmodified keyCode:(UIKeyboardHIDUsage)keyCode modifierFlags:(UIKeyModifierFlags)modifierFlags;
+@interface UIKey (RevenantKey)
+- (instancetype)initRevenantWithCharacters:(NSString *)characters unmodified:(NSString *)unmodified keyCode:(UIKeyboardHIDUsage)keyCode modifierFlags:(UIKeyModifierFlags)modifierFlags;
 @end
 
 @implementation UIKey {
@@ -12,7 +12,7 @@
     UIKeyModifierFlags _modifierFlags;
 }
 
-- (instancetype)initCharonWithCharacters:(NSString *)characters unmodified:(NSString *)unmodified keyCode:(UIKeyboardHIDUsage)keyCode modifierFlags:(UIKeyModifierFlags)modifierFlags
+- (instancetype)initRevenantWithCharacters:(NSString *)characters unmodified:(NSString *)unmodified keyCode:(UIKeyboardHIDUsage)keyCode modifierFlags:(UIKeyModifierFlags)modifierFlags
 {
     if ((self = [super init])) {
         _modifiedInput = [characters copy];
@@ -25,7 +25,7 @@
 
 - (instancetype)initWithCoder:(NSCoder *)coder
 {
-    return [self initCharonWithCharacters:[coder decodeObjectForKey:@"_modifiedInput"] unmodified:[coder decodeObjectForKey:@"_unmodifiedInput"]
+    return [self initRevenantWithCharacters:[coder decodeObjectForKey:@"_modifiedInput"] unmodified:[coder decodeObjectForKey:@"_unmodifiedInput"]
                                   keyCode:(UIKeyboardHIDUsage)[coder decodeIntegerForKey:@"_keyCode"] modifierFlags:(UIKeyModifierFlags)[coder decodeIntegerForKey:@"_modifierFlags"]];
 }
 
@@ -39,7 +39,7 @@
 
 - (id)copyWithZone:(NSZone *)zone
 {
-    return [[[self class] allocWithZone:zone] initCharonWithCharacters:_modifiedInput unmodified:_unmodifiedInput keyCode:_keyCode modifierFlags:_modifierFlags];
+    return [[[self class] allocWithZone:zone] initRevenantWithCharacters:_modifiedInput unmodified:_unmodifiedInput keyCode:_keyCode modifierFlags:_modifierFlags];
 }
 
 - (NSString *)characters

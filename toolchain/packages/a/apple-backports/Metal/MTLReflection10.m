@@ -25,7 +25,7 @@
 
 - (MTLDataType)attributeType
 {
-    return CharonDataTypeFromScalar(_node[@"scalar"]);
+    return RevenantDataTypeFromScalar(_node[@"scalar"]);
 }
 
 - (BOOL)isActive
@@ -65,7 +65,7 @@
 
 - (MTLDataType)type
 {
-    return CharonDataTypeFromScalar(_node[@"scalar"]);
+    return RevenantDataTypeFromScalar(_node[@"scalar"]);
 }
 
 - (NSUInteger)index

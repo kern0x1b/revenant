@@ -1,21 +1,21 @@
-#import "CharonMPSCnn.h"
-#import "CharonMPS.h"
-#import "CharonMPSImage.h"
+#import "RevenantMPSCnn.h"
+#import "RevenantMPS.h"
+#import "RevenantMPSImage.h"
 
 #pragma clang diagnostic ignored "-Wprotocol"
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
 #pragma clang diagnostic ignored "-Wobjc-designated-initializers"
 
-static BOOL CharonMPSCnnPairIsFloat32(MPSImage *source, MPSImage *destination, NSString *what)
+static BOOL RevenantMPSCnnPairIsFloat32(MPSImage *source, MPSImage *destination, NSString *what)
 {
     if (source.featureChannelFormat != MPSImageFeatureChannelFormatFloat32 ||
         destination.featureChannelFormat != MPSImageFeatureChannelFormatFloat32) {
-        CharonMPSRefuse(@"%@: only single precision images are carried, so nothing was written", what);
+        RevenantMPSRefuse(@"%@: only single precision images are carried, so nothing was written", what);
         return NO;
     }
     if (!source.width || !source.height || !source.featureChannels ||
         !destination.width || !destination.height || !destination.featureChannels) {
-        CharonMPSRefuse(@"%@: an image of the pair has no shape or no feature channels, so nothing was written",
+        RevenantMPSRefuse(@"%@: an image of the pair has no shape or no feature channels, so nothing was written",
                         what);
         return NO;
     }
@@ -26,11 +26,11 @@ typedef struct {
     const void *base;
     size_t width, height, channels;
     size_t valuesPerPixel;
-} CharonMPSCnnInterleaved;
+} RevenantMPSCnnInterleaved;
 
-static BOOL CharonMPSCnnRead(MPSImage *image, CharonMPSCnnInterleaved *out)
+static BOOL RevenantMPSCnnRead(MPSImage *image, RevenantMPSCnnInterleaved *out)
 {
-    CharonMPSImageLayout layout = CharonMPSImageLayoutOf(image);
+    RevenantMPSImageLayout layout = RevenantMPSImageLayoutOf(image);
     memset(out, 0, sizeof(*out));
     out->width = layout.width;
     out->height = layout.height;
@@ -39,71 +39,71 @@ static BOOL CharonMPSCnnRead(MPSImage *image, CharonMPSCnnInterleaved *out)
     if (!out->width || !out->height || !out->channels || !out->valuesPerPixel)
         return NO;
     layout.count = out->width * out->height * out->channels;
-    out->base = CharonMPSImageReadRegion(image, &layout,
+    out->base = RevenantMPSImageReadRegion(image, &layout,
                                          MTLRegionMake2D(0, 0, out->width, out->height),
                                          @"MPSCNNElements10");
     return out->base != NULL;
 }
 
-static void CharonMPSCnnWrite(MPSImage *image, CharonMPSCnnInterleaved *view)
+static void RevenantMPSCnnWrite(MPSImage *image, RevenantMPSCnnInterleaved *view)
 {
     if (!view->base)
         return;
-    CharonMPSImageLayout layout = CharonMPSImageLayoutOf(image);
+    RevenantMPSImageLayout layout = RevenantMPSImageLayoutOf(image);
     layout.count = view->width * view->height * view->channels;
-    CharonMPSImageWriteRegion(image, &layout, MTLRegionMake2D(0, 0, view->width, view->height),
+    RevenantMPSImageWriteRegion(image, &layout, MTLRegionMake2D(0, 0, view->width, view->height),
                               view->base, @"MPSCNNElements10");
     view->base = NULL;
 }
 
-static double CharonMPSCnnValue(const CharonMPSCnnInterleaved *view, size_t x, size_t y, size_t channel)
+static double RevenantMPSCnnValue(const RevenantMPSCnnInterleaved *view, size_t x, size_t y, size_t channel)
 {
     if (!view->base || x >= view->width || y >= view->height || channel >= view->channels)
         return 0.0;
-    return CharonMPSLoad((const char *)view->base +
+    return RevenantMPSLoad((const char *)view->base +
                          (y * view->width * view->valuesPerPixel + x * view->valuesPerPixel + channel) *
                          sizeof(float),
                          MPSDataTypeFloat32, 0);
 }
 
-static void CharonMPSCnnStore(CharonMPSCnnInterleaved *view, size_t x, size_t y, size_t channel, double value)
+static void RevenantMPSCnnStore(RevenantMPSCnnInterleaved *view, size_t x, size_t y, size_t channel, double value)
 {
     if (!view->base || x >= view->width || y >= view->height || channel >= view->channels)
         return;
-    CharonMPSStore((char *)view->base +
+    RevenantMPSStore((char *)view->base +
                    (y * view->width * view->valuesPerPixel + x * view->valuesPerPixel + channel) *
                    sizeof(float),
                    MPSDataTypeFloat32, 0, value);
 }
 
-static double CharonMPSCnnWindowSquares(const CharonMPSCnnInterleaved *view, size_t channel,
+static double RevenantMPSCnnWindowSquares(const RevenantMPSCnnInterleaved *view, size_t channel,
                                         size_t x, size_t y, NSUInteger kernel)
 {
     long first = -(long)(kernel / 2);
     double total = 0.0;
     for (NSUInteger ky = 0; ky < kernel; ky++)
         for (NSUInteger kx = 0; kx < kernel; kx++) {
-            double value = CharonMPSCnnValue(view, (size_t)((long)x + first + (long)kx),
+            double value = RevenantMPSCnnValue(view, (size_t)((long)x + first + (long)kx),
                                              (size_t)((long)y + first + (long)ky), channel);
             total += value * value;
         }
     return total;
 }
 
-static double CharonMPSCnnWindowSum(const CharonMPSCnnInterleaved *view, size_t channel,
+static double RevenantMPSCnnWindowSum(const RevenantMPSCnnInterleaved *view, size_t channel,
                                     size_t x, size_t y, NSUInteger kernel)
 {
     long first = -(long)(kernel / 2);
     double total = 0.0;
     for (NSUInteger ky = 0; ky < kernel; ky++)
         for (NSUInteger kx = 0; kx < kernel; kx++)
-            total += CharonMPSCnnValue(view, (size_t)((long)x + first + (long)kx),
+            total += RevenantMPSCnnValue(view, (size_t)((long)x + first + (long)kx),
                                        (size_t)((long)y + first + (long)ky), channel);
     return total;
 }
 
 @implementation MPSCNNNeuron {
-    MPSCNNNeuronType _charonType;
+    MPSCNNNeuronType _revenantType;
     float _a, _b, _c;
     const float *_prelu;
     NSUInteger _preluCount;
@@ -113,10 +113,10 @@ static double CharonMPSCnnWindowSum(const CharonMPSCnnInterleaved *view, size_t 
 @synthesize b = _b;
 @synthesize c = _c;
 
-- (instancetype)initCharonMPSWithDevice:(id<MTLDevice>)device
+- (instancetype)initRevenantMPSWithDevice:(id<MTLDevice>)device
 {
     if ((self = [super initWithDevice:device])) {
-        _charonType = MPSCNNNeuronTypeReLU;
+        _revenantType = MPSCNNNeuronTypeReLU;
         _a = 0.0f;
         _b = 0.0f;
         _c = 0.0f;
@@ -128,7 +128,7 @@ static double CharonMPSCnnWindowSum(const CharonMPSCnnInterleaved *view, size_t 
 
 - (instancetype)initWithDevice:(id<MTLDevice>)device
 {
-    CharonMPSRefuse(@"MPSCNNNeuron: at 10.0 this class has no initialiser of its own - its designated "
+    RevenantMPSRefuse(@"MPSCNNNeuron: at 10.0 this class has no initialiser of its own - its designated "
                     @"one takes an MPSNNNeuronDescriptor, which arrived in 11.3 - so use one of "
                     @"MPSCNNNeuronLinear, MPSCNNNeuronReLU, MPSCNNNeuronSigmoid, MPSCNNNeuronTanH "
                     @"or MPSCNNNeuronAbsolute");
@@ -137,17 +137,17 @@ static double CharonMPSCnnWindowSum(const CharonMPSCnnInterleaved *view, size_t 
 
 - (instancetype)initWithCoder:(NSCoder *)aDecoder device:(id<MTLDevice>)device
 {
-    return [self initCharonMPSWithDevice:device];
+    return [self initRevenantMPSWithDevice:device];
 }
 
-- (MPSCNNNeuronType)charon_mps_neuronType { return _charonType; }
+- (MPSCNNNeuronType)revenant_mps_neuronType { return _revenantType; }
 
-- (void)charon_mps_setNeuron:(MPSCNNNeuronType)type
+- (void)revenant_mps_setNeuron:(MPSCNNNeuronType)type
                             a:(float)a
                             b:(float)b
                             c:(float)c
 {
-    _charonType = type;
+    _revenantType = type;
     _a = a;
     _b = b;
     _c = c;
@@ -157,34 +157,34 @@ static double CharonMPSCnnWindowSum(const CharonMPSCnnInterleaved *view, size_t 
                   sourceImage:(MPSImage *)sourceImage
                destinationImage:(MPSImage *)destinationImage
 {
-    if (!CharonMPSCommandBufferPermits(commandBuffer))
+    if (!RevenantMPSCommandBufferPermits(commandBuffer))
         return;
-    if (!CharonMPSCnnPairIsFloat32(sourceImage, destinationImage, @"MPSCNNNeuron"))
+    if (!RevenantMPSCnnPairIsFloat32(sourceImage, destinationImage, @"MPSCNNNeuron"))
         return;
 
-    CharonMPSCnnInterleaved from, to;
-    if (!CharonMPSCnnRead(sourceImage, &from) || !CharonMPSCnnRead(destinationImage, &to)) {
-        CharonMPSCnnWrite(destinationImage, &to);
-        CharonMPSCnnWrite(sourceImage, &from);
+    RevenantMPSCnnInterleaved from, to;
+    if (!RevenantMPSCnnRead(sourceImage, &from) || !RevenantMPSCnnRead(destinationImage, &to)) {
+        RevenantMPSCnnWrite(destinationImage, &to);
+        RevenantMPSCnnWrite(sourceImage, &from);
         return;
     }
     size_t inChannels = from.channels, outWidth = to.width, outHeight = to.height, outChannels = to.channels;
 
-    MPSCNNNeuronType type = _charonType;
+    MPSCNNNeuronType type = _revenantType;
     double a = (double)_a, b = (double)_b, c = (double)_c;
     for (size_t channel = 0; channel < outChannels; channel++) {
         double perChannel = _prelu && channel < _preluCount ? (double)_prelu[channel] : a;
         size_t source = channel < inChannels ? channel : inChannels - 1;
         for (size_t y = 0; y < outHeight; y++)
             for (size_t x = 0; x < outWidth; x++) {
-                double value = CharonMPSCnnValue(&from, x, y, source);
-                double result = CharonMPSApplyNeuron(type, value, a, b, c, perChannel);
-                CharonMPSCnnStore(&to, x, y, channel, result);
+                double value = RevenantMPSCnnValue(&from, x, y, source);
+                double result = RevenantMPSApplyNeuron(type, value, a, b, c, perChannel);
+                RevenantMPSCnnStore(&to, x, y, channel, result);
             }
     }
-    CharonMPSCnnWrite(destinationImage, &to);
-    CharonMPSCnnWrite(sourceImage, &from);
-    CharonMPSConsumeReadCount(sourceImage);
+    RevenantMPSCnnWrite(destinationImage, &to);
+    RevenantMPSCnnWrite(sourceImage, &from);
+    RevenantMPSConsumeReadCount(sourceImage);
 }
 
 - (id)copyWithZone:(NSZone *)zone
@@ -197,8 +197,8 @@ static double CharonMPSCnnWindowSum(const CharonMPSCnnInterleaved *view, size_t 
 @implementation MPSCNNNeuronLinear
 - (instancetype)initWithDevice:(id<MTLDevice>)device a:(float)a b:(float)b
 {
-    if ((self = [self initCharonMPSWithDevice:device]))
-        [self charon_mps_setNeuron:MPSCNNNeuronTypeLinear a:a b:b c:1.0f];
+    if ((self = [self initRevenantMPSWithDevice:device]))
+        [self revenant_mps_setNeuron:MPSCNNNeuronTypeLinear a:a b:b c:1.0f];
     return self;
 }
 @end
@@ -206,8 +206,8 @@ static double CharonMPSCnnWindowSum(const CharonMPSCnnInterleaved *view, size_t 
 @implementation MPSCNNNeuronReLU
 - (instancetype)initWithDevice:(id<MTLDevice>)device a:(float)a
 {
-    if ((self = [self initCharonMPSWithDevice:device]))
-        [self charon_mps_setNeuron:MPSCNNNeuronTypeReLU a:a b:0.0f c:0.0f];
+    if ((self = [self initRevenantMPSWithDevice:device]))
+        [self revenant_mps_setNeuron:MPSCNNNeuronTypeReLU a:a b:0.0f c:0.0f];
     return self;
 }
 @end
@@ -215,8 +215,8 @@ static double CharonMPSCnnWindowSum(const CharonMPSCnnInterleaved *view, size_t 
 @implementation MPSCNNNeuronSigmoid
 - (instancetype)initWithDevice:(id<MTLDevice>)device
 {
-    if ((self = [self initCharonMPSWithDevice:device]))
-        [self charon_mps_setNeuron:MPSCNNNeuronTypeSigmoid a:1.0f b:1.0f c:1.0f];
+    if ((self = [self initRevenantMPSWithDevice:device]))
+        [self revenant_mps_setNeuron:MPSCNNNeuronTypeSigmoid a:1.0f b:1.0f c:1.0f];
     return self;
 }
 @end
@@ -224,8 +224,8 @@ static double CharonMPSCnnWindowSum(const CharonMPSCnnInterleaved *view, size_t 
 @implementation MPSCNNNeuronTanH
 - (instancetype)initWithDevice:(id<MTLDevice>)device a:(float)a b:(float)b
 {
-    if ((self = [self initCharonMPSWithDevice:device]))
-        [self charon_mps_setNeuron:MPSCNNNeuronTypeTanH a:a b:b c:1.0f];
+    if ((self = [self initRevenantMPSWithDevice:device]))
+        [self revenant_mps_setNeuron:MPSCNNNeuronTypeTanH a:a b:b c:1.0f];
     return self;
 }
 @end
@@ -233,25 +233,25 @@ static double CharonMPSCnnWindowSum(const CharonMPSCnnInterleaved *view, size_t 
 @implementation MPSCNNNeuronAbsolute
 - (instancetype)initWithDevice:(id<MTLDevice>)device
 {
-    if ((self = [self initCharonMPSWithDevice:device]))
-        [self charon_mps_setNeuron:MPSCNNNeuronTypeAbsolute a:1.0f b:1.0f c:1.0f];
+    if ((self = [self initRevenantMPSWithDevice:device]))
+        [self revenant_mps_setNeuron:MPSCNNNeuronTypeAbsolute a:1.0f b:1.0f c:1.0f];
     return self;
 }
 @end
 
-static void CharonMPSCnnSoftMaxWalk(MPSCNNKernel *owner, id<MTLCommandBuffer> commandBuffer,
+static void RevenantMPSCnnSoftMaxWalk(MPSCNNKernel *owner, id<MTLCommandBuffer> commandBuffer,
                                     MPSImage *sourceImage, MPSImage *destinationImage, BOOL logarithmic)
 {
-    if (!CharonMPSCommandBufferPermits(commandBuffer))
+    if (!RevenantMPSCommandBufferPermits(commandBuffer))
         return;
-    if (!CharonMPSCnnPairIsFloat32(sourceImage, destinationImage,
+    if (!RevenantMPSCnnPairIsFloat32(sourceImage, destinationImage,
                                    logarithmic ? @"MPSCNNLogSoftMax" : @"MPSCNNSoftMax"))
         return;
 
-    CharonMPSCnnInterleaved from, to;
-    if (!CharonMPSCnnRead(sourceImage, &from) || !CharonMPSCnnRead(destinationImage, &to)) {
-        CharonMPSCnnWrite(destinationImage, &to);
-        CharonMPSCnnWrite(sourceImage, &from);
+    RevenantMPSCnnInterleaved from, to;
+    if (!RevenantMPSCnnRead(sourceImage, &from) || !RevenantMPSCnnRead(destinationImage, &to)) {
+        RevenantMPSCnnWrite(destinationImage, &to);
+        RevenantMPSCnnWrite(sourceImage, &from);
         return;
     }
     size_t inChannels = from.channels, outWidth = to.width, outHeight = to.height, outChannels = to.channels;
@@ -263,7 +263,7 @@ static void CharonMPSCnnSoftMaxWalk(MPSCNNKernel *owner, id<MTLCommandBuffer> co
         for (size_t x = 0; x < outWidth; x++) {
             double sum = 0.0;
             for (size_t channel = 0; channel < channels; channel++) {
-                double value = CharonMPSCnnValue(&from, x, y, channel);
+                double value = RevenantMPSCnnValue(&from, x, y, channel);
                 values[channel] = value;
                 exponentials[channel] = exp(value);
                 sum += exponentials[channel];
@@ -274,21 +274,21 @@ static void CharonMPSCnnSoftMaxWalk(MPSCNNKernel *owner, id<MTLCommandBuffer> co
             for (size_t channel = 0; channel < channels; channel++) {
                 double result = logarithmic ? (values[channel] - logarithm)
                                             : (exponentials[channel] / sum);
-                CharonMPSCnnStore(&to, x, y, channel, result);
+                RevenantMPSCnnStore(&to, x, y, channel, result);
             }
         }
     }
     free(exponentials);
     free(values);
-    CharonMPSCnnWrite(destinationImage, &to);
-    CharonMPSCnnWrite(sourceImage, &from);
-    CharonMPSConsumeReadCount(sourceImage);
+    RevenantMPSCnnWrite(destinationImage, &to);
+    RevenantMPSCnnWrite(sourceImage, &from);
+    RevenantMPSConsumeReadCount(sourceImage);
     (void)owner;
 }
 
 @implementation MPSCNNSoftMax
 
-+ (BOOL)charon_mps_isLogarithmic
++ (BOOL)revenant_mps_isLogarithmic
 {
     return NO;
 }
@@ -297,14 +297,14 @@ static void CharonMPSCnnSoftMaxWalk(MPSCNNKernel *owner, id<MTLCommandBuffer> co
                   sourceImage:(MPSImage *)sourceImage
                destinationImage:(MPSImage *)destinationImage
 {
-    CharonMPSCnnSoftMaxWalk(self, commandBuffer, sourceImage, destinationImage,
-                            [[self class] charon_mps_isLogarithmic]);
+    RevenantMPSCnnSoftMaxWalk(self, commandBuffer, sourceImage, destinationImage,
+                            [[self class] revenant_mps_isLogarithmic]);
 }
 
 @end
 
 @implementation MPSCNNLogSoftMax
-+ (BOOL)charon_mps_isLogarithmic
++ (BOOL)revenant_mps_isLogarithmic
 {
     return YES;
 }
@@ -313,8 +313,8 @@ static void CharonMPSCnnSoftMaxWalk(MPSCNNKernel *owner, id<MTLCommandBuffer> co
                   sourceImage:(MPSImage *)sourceImage
                destinationImage:(MPSImage *)destinationImage
 {
-    CharonMPSCnnSoftMaxWalk(self, commandBuffer, sourceImage, destinationImage,
-                            [[self class] charon_mps_isLogarithmic]);
+    RevenantMPSCnnSoftMaxWalk(self, commandBuffer, sourceImage, destinationImage,
+                            [[self class] revenant_mps_isLogarithmic]);
 }
 @end
 
@@ -334,7 +334,7 @@ static void CharonMPSCnnSoftMaxWalk(MPSCNNKernel *owner, id<MTLCommandBuffer> co
         _alpha = 1.0f;
         _beta = 5.0f;
         _delta = 1.0f;
-        [self charon_mps_setWindowWidth:kernelWidth height:kernelHeight
+        [self revenant_mps_setWindowWidth:kernelWidth height:kernelHeight
                         strideInPixelsX:1 strideInPixelsY:1 dilationRateX:1 dilationRateY:1];
     }
     return self;
@@ -344,15 +344,15 @@ static void CharonMPSCnnSoftMaxWalk(MPSCNNKernel *owner, id<MTLCommandBuffer> co
                   sourceImage:(MPSImage *)sourceImage
                destinationImage:(MPSImage *)destinationImage
 {
-    if (!CharonMPSCommandBufferPermits(commandBuffer))
+    if (!RevenantMPSCommandBufferPermits(commandBuffer))
         return;
-    if (!CharonMPSCnnPairIsFloat32(sourceImage, destinationImage, @"MPSCNNSpatialNormalization"))
+    if (!RevenantMPSCnnPairIsFloat32(sourceImage, destinationImage, @"MPSCNNSpatialNormalization"))
         return;
 
-    CharonMPSCnnInterleaved from, to;
-    if (!CharonMPSCnnRead(sourceImage, &from) || !CharonMPSCnnRead(destinationImage, &to)) {
-        CharonMPSCnnWrite(destinationImage, &to);
-        CharonMPSCnnWrite(sourceImage, &from);
+    RevenantMPSCnnInterleaved from, to;
+    if (!RevenantMPSCnnRead(sourceImage, &from) || !RevenantMPSCnnRead(destinationImage, &to)) {
+        RevenantMPSCnnWrite(destinationImage, &to);
+        RevenantMPSCnnWrite(sourceImage, &from);
         return;
     }
     size_t inChannels = from.channels, outWidth = to.width, outHeight = to.height, outChannels = to.channels;
@@ -364,16 +364,16 @@ static void CharonMPSCnnSoftMaxWalk(MPSCNNKernel *owner, id<MTLCommandBuffer> co
         size_t source = channel < inChannels ? channel : inChannels - 1;
         for (size_t y = 0; y < outHeight; y++)
             for (size_t x = 0; x < outWidth; x++) {
-                double n2 = CharonMPSCnnWindowSquares(&from, source, x, y, kernel);
-                double value = CharonMPSCnnValue(&from, x, y, source);
+                double n2 = RevenantMPSCnnWindowSquares(&from, source, x, y, kernel);
+                double value = RevenantMPSCnnValue(&from, x, y, source);
                 double denominator = pow(delta + alpha / area * n2, beta);
                 double result = denominator == 0.0 ? 0.0 : value / denominator;
-                CharonMPSCnnStore(&to, x, y, channel, result);
+                RevenantMPSCnnStore(&to, x, y, channel, result);
             }
     }
-    CharonMPSCnnWrite(destinationImage, &to);
-    CharonMPSCnnWrite(sourceImage, &from);
-    CharonMPSConsumeReadCount(sourceImage);
+    RevenantMPSCnnWrite(destinationImage, &to);
+    RevenantMPSCnnWrite(sourceImage, &from);
+    RevenantMPSConsumeReadCount(sourceImage);
 }
 
 @end
@@ -400,7 +400,7 @@ static void CharonMPSCnnSoftMaxWalk(MPSCNNKernel *owner, id<MTLCommandBuffer> co
         _p0 = 1.0f;
         _pm = 0.0f;
         _ps = 1.0f;
-        [self charon_mps_setWindowWidth:kernelWidth height:kernelHeight
+        [self revenant_mps_setWindowWidth:kernelWidth height:kernelHeight
                         strideInPixelsX:1 strideInPixelsY:1 dilationRateX:1 dilationRateY:1];
     }
     return self;
@@ -410,15 +410,15 @@ static void CharonMPSCnnSoftMaxWalk(MPSCNNKernel *owner, id<MTLCommandBuffer> co
                   sourceImage:(MPSImage *)sourceImage
                destinationImage:(MPSImage *)destinationImage
 {
-    if (!CharonMPSCommandBufferPermits(commandBuffer))
+    if (!RevenantMPSCommandBufferPermits(commandBuffer))
         return;
-    if (!CharonMPSCnnPairIsFloat32(sourceImage, destinationImage, @"MPSCNNLocalContrastNormalization"))
+    if (!RevenantMPSCnnPairIsFloat32(sourceImage, destinationImage, @"MPSCNNLocalContrastNormalization"))
         return;
 
-    CharonMPSCnnInterleaved from, to;
-    if (!CharonMPSCnnRead(sourceImage, &from) || !CharonMPSCnnRead(destinationImage, &to)) {
-        CharonMPSCnnWrite(destinationImage, &to);
-        CharonMPSCnnWrite(sourceImage, &from);
+    RevenantMPSCnnInterleaved from, to;
+    if (!RevenantMPSCnnRead(sourceImage, &from) || !RevenantMPSCnnRead(destinationImage, &to)) {
+        RevenantMPSCnnWrite(destinationImage, &to);
+        RevenantMPSCnnWrite(sourceImage, &from);
         return;
     }
     size_t inChannels = from.channels, outWidth = to.width, outHeight = to.height, outChannels = to.channels;
@@ -431,19 +431,19 @@ static void CharonMPSCnnSoftMaxWalk(MPSCNNKernel *owner, id<MTLCommandBuffer> co
         size_t source = channel < inChannels ? channel : inChannels - 1;
         for (size_t y = 0; y < outHeight; y++)
             for (size_t x = 0; x < outWidth; x++) {
-                double sum = CharonMPSCnnWindowSum(&from, source, x, y, kernel);
-                double squares = CharonMPSCnnWindowSquares(&from, source, x, y, kernel);
+                double sum = RevenantMPSCnnWindowSum(&from, source, x, y, kernel);
+                double squares = RevenantMPSCnnWindowSquares(&from, source, x, y, kernel);
                 double mean = sum / count;
                 double variance = squares / count - mean * mean;
-                double value = CharonMPSCnnValue(&from, x, y, source);
+                double value = RevenantMPSCnnValue(&from, x, y, source);
                 double denominator = pow(delta + alpha * variance, beta);
                 double result = denominator == 0.0 ? pm : pm + ps * (value - p0 * mean) / denominator;
-                CharonMPSCnnStore(&to, x, y, channel, result);
+                RevenantMPSCnnStore(&to, x, y, channel, result);
             }
     }
-    CharonMPSCnnWrite(destinationImage, &to);
-    CharonMPSCnnWrite(sourceImage, &from);
-    CharonMPSConsumeReadCount(sourceImage);
+    RevenantMPSCnnWrite(destinationImage, &to);
+    RevenantMPSCnnWrite(sourceImage, &from);
+    RevenantMPSConsumeReadCount(sourceImage);
 }
 
 @end
@@ -473,15 +473,15 @@ static void CharonMPSCnnSoftMaxWalk(MPSCNNKernel *owner, id<MTLCommandBuffer> co
                   sourceImage:(MPSImage *)sourceImage
                destinationImage:(MPSImage *)destinationImage
 {
-    if (!CharonMPSCommandBufferPermits(commandBuffer))
+    if (!RevenantMPSCommandBufferPermits(commandBuffer))
         return;
-    if (!CharonMPSCnnPairIsFloat32(sourceImage, destinationImage, @"MPSCNNCrossChannelNormalization"))
+    if (!RevenantMPSCnnPairIsFloat32(sourceImage, destinationImage, @"MPSCNNCrossChannelNormalization"))
         return;
 
-    CharonMPSCnnInterleaved from, to;
-    if (!CharonMPSCnnRead(sourceImage, &from) || !CharonMPSCnnRead(destinationImage, &to)) {
-        CharonMPSCnnWrite(destinationImage, &to);
-        CharonMPSCnnWrite(sourceImage, &from);
+    RevenantMPSCnnInterleaved from, to;
+    if (!RevenantMPSCnnRead(sourceImage, &from) || !RevenantMPSCnnRead(destinationImage, &to)) {
+        RevenantMPSCnnWrite(destinationImage, &to);
+        RevenantMPSCnnWrite(sourceImage, &from);
         return;
     }
     size_t inChannels = from.channels, outWidth = to.width, outHeight = to.height, outChannels = to.channels;
@@ -501,19 +501,19 @@ static void CharonMPSCnnSoftMaxWalk(MPSCNNKernel *owner, id<MTLCommandBuffer> co
                     last = (long)channels - 1;
                 double squares = 0.0;
                 for (long q = first; q <= last; q++) {
-                    double value = CharonMPSCnnValue(&from, x, y, (size_t)q);
+                    double value = RevenantMPSCnnValue(&from, x, y, (size_t)q);
                     squares += value * value;
                 }
-                double value = CharonMPSCnnValue(&from, x, y, channel);
+                double value = RevenantMPSCnnValue(&from, x, y, channel);
                 double denominator = pow(delta + alpha / divisor * squares, beta);
                 double result = denominator == 0.0 ? 0.0 : value / denominator;
-                CharonMPSCnnStore(&to, x, y, channel, result);
+                RevenantMPSCnnStore(&to, x, y, channel, result);
             }
         }
     }
-    CharonMPSCnnWrite(destinationImage, &to);
-    CharonMPSCnnWrite(sourceImage, &from);
-    CharonMPSConsumeReadCount(sourceImage);
+    RevenantMPSCnnWrite(destinationImage, &to);
+    RevenantMPSCnnWrite(sourceImage, &from);
+    RevenantMPSConsumeReadCount(sourceImage);
 }
 
 @end

@@ -13,10 +13,10 @@ static void check(BOOL ok, NSString *line)
     else { printf("  FAIL %s\n", line.UTF8String); failures++; }
 }
 
-@interface CharonInitOverrider : NSObject
+@interface RevenantInitOverrider : NSObject
 @end
 
-@implementation CharonInitOverrider
+@implementation RevenantInitOverrider
 - (instancetype)init { return [super init]; }
 @end
 
@@ -49,11 +49,11 @@ int main(void)
     setvbuf(stdout, NULL, _IONBF, 0);
     @autoreleasepool {
         printf("controls\n");
-        Class over = [CharonInitOverrider class];
+        Class over = [RevenantInitOverrider class];
         check(impOf(over, @selector(init), NO) != impOf(class_getSuperclass(over), @selector(init), NO)
               && definesOwn(over, @selector(init), NO),
               @"an overriding class has its own IMP, which differs from the superclass's");
-        check(NSClassFromString(@"ZZZNoSuchNameCharonR16") == nil, @"a name no framework has is not a class");
+        check(NSClassFromString(@"ZZZNoSuchNameRevenantR16") == nil, @"a name no framework has is not a class");
 
         printf("the rows, on the host\n");
         for (size_t i = 0; i < sizeof rows / sizeof rows[0]; i++) {

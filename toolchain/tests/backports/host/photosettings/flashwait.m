@@ -1,5 +1,5 @@
 #import <Foundation/Foundation.h>
-#import "CharonAVCapturePhoto.h"
+#import "RevenantAVCapturePhoto.h"
 
 static int checks, failures;
 
@@ -11,20 +11,20 @@ static void check(BOOL passed, NSString *what)
     printf("%s %s\n", passed ? "ok  " : "FAIL", what.UTF8String);
 }
 
-@interface CharonTestCamera : NSObject
+@interface RevenantTestCamera : NSObject
 @property (atomic, getter=isFlashActive) BOOL flashActive;
 @end
 
-@implementation CharonTestCamera
+@implementation RevenantTestCamera
 @end
 
 static void wait_case(NSString *what, NSTimeInterval bound, NSTimeInterval change, NSTimeInterval earliest, NSTimeInterval latest)
 {
-    CharonTestCamera *camera = [CharonTestCamera new];
+    RevenantTestCamera *camera = [RevenantTestCamera new];
     __block int runs = 0;
     __block CFAbsoluteTime ran = 0;
     CFAbsoluteTime started = CFAbsoluteTimeGetCurrent();
-    CharonAfterFlashActiveChanges(camera, bound, ^{
+    RevenantAfterFlashActiveChanges(camera, bound, ^{
         @synchronized (camera) {
             if (runs++ == 0)
                 ran = CFAbsoluteTimeGetCurrent() - started;

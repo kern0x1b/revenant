@@ -7,7 +7,7 @@
 #include <cstdint>
 #include <string_view>
 
-namespace shade {
+namespace emulator {
 struct KernelSharedState;
 
 namespace kernel_iokit {

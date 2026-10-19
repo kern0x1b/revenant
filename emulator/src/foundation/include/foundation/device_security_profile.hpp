@@ -7,7 +7,7 @@
 #include <array>
 #include <cstddef>
 
-namespace shade {
+namespace emulator {
 
 inline constexpr std::array<std::byte, 52>
     default_virtual_effaceable_storage_blob {

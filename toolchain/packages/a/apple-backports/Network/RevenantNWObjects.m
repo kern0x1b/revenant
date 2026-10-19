@@ -1,73 +1,73 @@
-#import "CharonNW.h"
+#import "RevenantNW.h"
 
-@implementation CharonNWAdvertiseDescriptor
+@implementation RevenantNWAdvertiseDescriptor
 @end
 
-@implementation CharonNWBrowseDescriptor
+@implementation RevenantNWBrowseDescriptor
 @end
 
-@implementation CharonNWBrowseResult
+@implementation RevenantNWBrowseResult
 @end
 
-@implementation CharonNWContentContext
+@implementation RevenantNWContentContext
 @end
 
-@implementation CharonNWDataTransferReport
+@implementation RevenantNWDataTransferReport
 @end
 
-@implementation CharonNWEndpoint
+@implementation RevenantNWEndpoint
 @end
 
-@implementation CharonNWError
+@implementation RevenantNWError
 @end
 
-@implementation CharonNWEstablishmentReport
+@implementation RevenantNWEstablishmentReport
 @end
 
-@implementation CharonNWFramer
+@implementation RevenantNWFramer
 @end
 
-@implementation CharonNWGroupDescriptor
+@implementation RevenantNWGroupDescriptor
 @end
 
-@implementation CharonNWParameters
+@implementation RevenantNWParameters
 @end
 
-@implementation CharonNWPrivacyContext
+@implementation RevenantNWPrivacyContext
 @end
 
-@implementation CharonNWProtocolDefinition
+@implementation RevenantNWProtocolDefinition
 @end
 
-@implementation CharonNWProtocolMetadata
+@implementation RevenantNWProtocolMetadata
 @end
 
-@implementation CharonNWProtocolOptions
+@implementation RevenantNWProtocolOptions
 @end
 
-@implementation CharonNWProtocolStack
+@implementation RevenantNWProtocolStack
 @end
 
-@implementation CharonNWProxyConfig
+@implementation RevenantNWProxyConfig
 @end
 
-@implementation CharonNWRelayHop
+@implementation RevenantNWRelayHop
 @end
 
-@implementation CharonNWResolutionReport
+@implementation RevenantNWResolutionReport
 @end
 
-@implementation CharonNWResolverConfig
+@implementation RevenantNWResolverConfig
 @end
 
-@implementation CharonNWSecProtocol
+@implementation RevenantNWSecProtocol
 @end
 
-@implementation CharonNWTxtRecord
+@implementation RevenantNWTxtRecord
 @end
 
-@implementation CharonNWWebSocketRequest
+@implementation RevenantNWWebSocketRequest
 @end
 
-@implementation CharonNWWebSocketResponse
+@implementation RevenantNWWebSocketResponse
 @end

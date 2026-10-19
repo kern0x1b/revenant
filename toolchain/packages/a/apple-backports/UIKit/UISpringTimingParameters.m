@@ -1,16 +1,16 @@
-#import "CharonTimingParameters.h"
+#import "RevenantTimingParameters.h"
 #include <math.h>
 
 #if CGFLOAT_IS_DOUBLE
-#define charon_encode_scalar(coder, value, key) [(coder) encodeDouble:(value) forKey:(key)]
-#define charon_decode_scalar(coder, key) ((CGFloat)[(coder) decodeDoubleForKey:(key)])
+#define revenant_encode_scalar(coder, value, key) [(coder) encodeDouble:(value) forKey:(key)]
+#define revenant_decode_scalar(coder, key) ((CGFloat)[(coder) decodeDoubleForKey:(key)])
 #else
-#define charon_encode_scalar(coder, value, key) [(coder) encodeFloat:(value) forKey:(key)]
-#define charon_decode_scalar(coder, key) ((CGFloat)[(coder) decodeFloatForKey:(key)])
+#define revenant_encode_scalar(coder, value, key) [(coder) encodeFloat:(value) forKey:(key)]
+#define revenant_decode_scalar(coder, key) ((CGFloat)[(coder) decodeFloatForKey:(key)])
 #endif
 
 
-static double charon_settling(double mass, double stiffness, double damping, double velocity)
+static double revenant_settling(double mass, double stiffness, double damping, double velocity)
 {
     double zeta = damping / (2 * sqrt(mass * stiffness));
     zeta = MIN(MAX(zeta, 0.0), 1.0);
@@ -86,11 +86,11 @@ static double charon_settling(double mass, double stiffness, double damping, dou
     }
     if ((self = [super init])) {
         if ([coder decodeBoolForKey:@"implicitDuration"]) {
-            [self setMass:charon_decode_scalar(coder, @"mass")];
-            [self setStiffness:charon_decode_scalar(coder, @"stiffness")];
-            [self setDamping:charon_decode_scalar(coder, @"damping")];
+            [self setMass:revenant_decode_scalar(coder, @"mass")];
+            [self setStiffness:revenant_decode_scalar(coder, @"stiffness")];
+            [self setDamping:revenant_decode_scalar(coder, @"damping")];
         } else {
-            _dampingRatio = charon_decode_scalar(coder, @"dampingRatio");
+            _dampingRatio = revenant_decode_scalar(coder, @"dampingRatio");
         }
         _initialVelocity = [coder decodeCGVectorForKey:@"velocity"];
     }
@@ -101,11 +101,11 @@ static double charon_settling(double mass, double stiffness, double damping, dou
 {
     [coder encodeBool:_implicitDuration forKey:@"implicitDuration"];
     if (_implicitDuration) {
-        charon_encode_scalar(coder, _mass, @"mass");
-        charon_encode_scalar(coder, _stiffness, @"stiffness");
-        charon_encode_scalar(coder, _damping, @"damping");
+        revenant_encode_scalar(coder, _mass, @"mass");
+        revenant_encode_scalar(coder, _stiffness, @"stiffness");
+        revenant_encode_scalar(coder, _damping, @"damping");
     } else {
-        charon_encode_scalar(coder, _dampingRatio, @"dampingRatio");
+        revenant_encode_scalar(coder, _dampingRatio, @"dampingRatio");
     }
     [coder encodeCGVector:_initialVelocity forKey:@"velocity"];
 }
@@ -180,8 +180,8 @@ static double charon_settling(double mass, double stiffness, double damping, dou
 {
     if (!_implicitDuration)
         return 0;
-    double along = charon_settling(_mass, _stiffness, _damping, _initialVelocity.dx);
-    double across = charon_settling(_mass, _stiffness, _damping, _initialVelocity.dy);
+    double along = revenant_settling(_mass, _stiffness, _damping, _initialVelocity.dx);
+    double across = revenant_settling(_mass, _stiffness, _damping, _initialVelocity.dy);
     return MAX(isnan(along) ? 0 : along, isnan(across) ? 0 : across);
 }
 

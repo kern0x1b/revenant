@@ -1,77 +1,77 @@
-#import "CharonTraitStyle.h"
+#import "RevenantTraitStyle.h"
 
-static NSString *const CharonLayoutDirection = @"UserInterfaceLayoutDirection";
-static NSString *const CharonDisplayGamut = @"DisplayGamut";
-static NSString *const CharonContentSize = @"PreferredContentSizeCategory";
+static NSString *const RevenantLayoutDirection = @"UserInterfaceLayoutDirection";
+static NSString *const RevenantDisplayGamut = @"DisplayGamut";
+static NSString *const RevenantContentSize = @"PreferredContentSizeCategory";
 
-static NSArray *charon_categories(void)
+static NSArray *revenant_categories(void)
 {
     return @[UIContentSizeCategoryExtraSmall, UIContentSizeCategorySmall, UIContentSizeCategoryMedium, UIContentSizeCategoryLarge, UIContentSizeCategoryExtraLarge,
              UIContentSizeCategoryExtraExtraLarge, UIContentSizeCategoryExtraExtraExtraLarge, UIContentSizeCategoryAccessibilityMedium, UIContentSizeCategoryAccessibilityLarge,
              UIContentSizeCategoryAccessibilityExtraLarge, UIContentSizeCategoryAccessibilityExtraExtraLarge, UIContentSizeCategoryAccessibilityExtraExtraExtraLarge];
 }
 
-static void charon_register_ten(void)
+static void revenant_register_ten(void)
 {
     NSString *language = [[[NSBundle mainBundle] preferredLocalizations] firstObject];
     NSInteger direction = language && [NSLocale characterDirectionForLanguage:language] == NSLocaleLanguageDirectionRightToLeft ? 1 : 0;
-    charon_register_trait_kind((CharonTraitKind){CharonDisplayGamut, 0, YES, @"SRGB", @"P3"});
-    charon_register_trait_kind((CharonTraitKind){CharonLayoutDirection, direction, YES, @"LTR", @"RTL"});
-    charon_register_trait_kind((CharonTraitKind){CharonContentSize, 3, 2, @"XS,S,M,L,XL,XXL,XXXL,AccessibilityM,AccessibilityL,AccessibilityXL,AccessibilityXXL,AccessibilityXXXL", nil});
+    revenant_register_trait_kind((RevenantTraitKind){RevenantDisplayGamut, 0, YES, @"SRGB", @"P3"});
+    revenant_register_trait_kind((RevenantTraitKind){RevenantLayoutDirection, direction, YES, @"LTR", @"RTL"});
+    revenant_register_trait_kind((RevenantTraitKind){RevenantContentSize, 3, 2, @"XS,S,M,L,XL,XXL,XXXL,AccessibilityM,AccessibilityL,AccessibilityXL,AccessibilityXXL,AccessibilityXXXL", nil});
 }
 
-static UITraitCollection *charon_with(NSString *name, NSInteger value)
+static UITraitCollection *revenant_with(NSString *name, NSInteger value)
 {
-    charon_register_ten();
+    revenant_register_ten();
     UITraitCollection *collection = [UITraitCollection traitCollectionWithTraitsFromCollections:@[]];
-    charon_set_trait_extra(collection, name, value);
+    revenant_set_trait_extra(collection, name, value);
     return collection;
 }
 
-@interface CharonTraitKinds10 : NSObject
+@interface RevenantTraitKinds10 : NSObject
 @end
 
-@implementation CharonTraitKinds10
+@implementation RevenantTraitKinds10
 
 + (void)load
 {
-    charon_register_ten();
+    revenant_register_ten();
 }
 
 @end
 
-@implementation UITraitCollection (CharonTraits10)
+@implementation UITraitCollection (RevenantTraits10)
 
 + (UITraitCollection *)traitCollectionWithLayoutDirection:(UITraitEnvironmentLayoutDirection)layoutDirection
 {
-    return charon_with(CharonLayoutDirection, layoutDirection);
+    return revenant_with(RevenantLayoutDirection, layoutDirection);
 }
 
 + (UITraitCollection *)traitCollectionWithDisplayGamut:(UIDisplayGamut)displayGamut
 {
-    return charon_with(CharonDisplayGamut, displayGamut);
+    return revenant_with(RevenantDisplayGamut, displayGamut);
 }
 
 + (UITraitCollection *)traitCollectionWithPreferredContentSizeCategory:(UIContentSizeCategory)preferredContentSizeCategory
 {
-    NSUInteger index = preferredContentSizeCategory ? [charon_categories() indexOfObject:preferredContentSizeCategory] : NSNotFound;
-    return charon_with(CharonContentSize, index == NSNotFound ? -1 : (NSInteger)index);
+    NSUInteger index = preferredContentSizeCategory ? [revenant_categories() indexOfObject:preferredContentSizeCategory] : NSNotFound;
+    return revenant_with(RevenantContentSize, index == NSNotFound ? -1 : (NSInteger)index);
 }
 
 - (UITraitEnvironmentLayoutDirection)layoutDirection
 {
-    return (UITraitEnvironmentLayoutDirection)charon_trait_extra(self, CharonLayoutDirection);
+    return (UITraitEnvironmentLayoutDirection)revenant_trait_extra(self, RevenantLayoutDirection);
 }
 
 - (UIDisplayGamut)displayGamut
 {
-    return (UIDisplayGamut)charon_trait_extra(self, CharonDisplayGamut);
+    return (UIDisplayGamut)revenant_trait_extra(self, RevenantDisplayGamut);
 }
 
 - (UIContentSizeCategory)preferredContentSizeCategory
 {
-    NSInteger index = charon_trait_extra(self, CharonContentSize);
-    NSArray *categories = charon_categories();
+    NSInteger index = revenant_trait_extra(self, RevenantContentSize);
+    NSArray *categories = revenant_categories();
     return index >= 0 && index < (NSInteger)categories.count ? categories[index] : UIContentSizeCategoryUnspecified;
 }
 

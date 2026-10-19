@@ -1,30 +1,30 @@
-#ifndef CHARON_QR_DECODE_H
-#define CHARON_QR_DECODE_H
+#ifndef REVENANT_QR_DECODE_H
+#define REVENANT_QR_DECODE_H
 
 #include <stddef.h>
 #include <stdint.h>
 
 enum {
-    CharonQRModeNone = 0,
-    CharonQRModeNumeric = 1,
-    CharonQRModeAlphanumeric = 2,
-    CharonQRModeByte = 4,
-    CharonQRModeMixed = 8,
+    RevenantQRModeNone = 0,
+    RevenantQRModeNumeric = 1,
+    RevenantQRModeAlphanumeric = 2,
+    RevenantQRModeByte = 4,
+    RevenantQRModeMixed = 8,
 };
 
 enum {
-    CharonQRDecodeOK = 0,
-    CharonQRDecodeBadArgument = -1,
-    CharonQRDecodeBadSize = -2,
-    CharonQRDecodeBadFormat = -3,
-    CharonQRDecodeBadVersion = -4,
-    CharonQRDecodeLayout = -5,
-    CharonQRDecodeUncorrectable = -6,
-    CharonQRDecodeUnsupported = -7,
-    CharonQRDecodeMalformed = -8,
-    CharonQRDecodeTooLong = -9,
+    RevenantQRDecodeOK = 0,
+    RevenantQRDecodeBadArgument = -1,
+    RevenantQRDecodeBadSize = -2,
+    RevenantQRDecodeBadFormat = -3,
+    RevenantQRDecodeBadVersion = -4,
+    RevenantQRDecodeLayout = -5,
+    RevenantQRDecodeUncorrectable = -6,
+    RevenantQRDecodeUnsupported = -7,
+    RevenantQRDecodeMalformed = -8,
+    RevenantQRDecodeTooLong = -9,
 };
 
-int CharonQRDecode(const uint8_t *modules, int size, uint8_t *out, size_t capacity, size_t *length, int *mode);
+int RevenantQRDecode(const uint8_t *modules, int size, uint8_t *out, size_t capacity, size_t *length, int *mode);
 
 #endif

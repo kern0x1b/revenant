@@ -155,7 +155,7 @@ static NSString *joined(void)
 static NSArray *buttons_of(NSInteger row)
 {
     for (UIView *view in cell_at(row).subviews)
-        if (strstr(class_getName([view class]), "CharonSwipeContainer"))
+        if (strstr(class_getName([view class]), "RevenantSwipeContainer"))
             return view.subviews;
     return nil;
 }
@@ -422,7 +422,7 @@ static void configuration_scenario(void)
 {
     [[NSFileManager defaultManager] createDirectoryAtPath:results_folder withIntermediateDirectories:YES attributes:nil error:NULL];
     [[NSFileManager defaultManager] removeItemAtPath:[results_folder stringByAppendingPathComponent:@"swipeui.done"] error:NULL];
-    charon_log_to([results_folder stringByAppendingPathComponent:@"swipeui.log"]);
+    revenant_log_to([results_folder stringByAppendingPathComponent:@"swipeui.log"]);
     self.window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
     self.window.rootViewController = [[UIViewController alloc] init];
     [self.window makeKeyAndVisible];
@@ -435,8 +435,8 @@ static void configuration_scenario(void)
         edges_scenario();
         configuration_scenario();
         gesture_run(^{
-            printf("checks=%d failures=%d\n", charon_checks, charon_failures);
-            NSString *summary = [NSString stringWithFormat:@"%@ checks=%d failures=%d\n", charon_failures ? @"FAIL" : @"ok", charon_checks, charon_failures];
+            printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
+            NSString *summary = [NSString stringWithFormat:@"%@ checks=%d failures=%d\n", revenant_failures ? @"FAIL" : @"ok", revenant_checks, revenant_failures];
             [summary writeToFile:[results_folder stringByAppendingPathComponent:@"swipeui.done"] atomically:YES encoding:NSUTF8StringEncoding error:NULL];
         });
     });

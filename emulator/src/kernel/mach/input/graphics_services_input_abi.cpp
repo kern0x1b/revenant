@@ -13,7 +13,7 @@
 
 #include "foundation/macho.hpp"
 
-namespace shade {
+namespace emulator {
 namespace {
 
     constexpr GraphicsServicesInputAbi darwin9_0_abi{

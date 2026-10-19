@@ -167,12 +167,12 @@ int main(int argc, const char *argv[])
         printf("== 3. CPVoiceControlState ==\n");
         {
             CPVoiceControlState *state = [[CPVoiceControlState alloc]
-                initWithIdentifier:@"charon.listening"
+                initWithIdentifier:@"revenant.listening"
                       titleVariants:@[@"Listening", @"Listen"]
                               image:nil
                             repeats:YES];
             check(@"identifier answers what the initialiser was given",
-                  [state.identifier isEqualToString:@"charon.listening"], describe(state.identifier));
+                  [state.identifier isEqualToString:@"revenant.listening"], describe(state.identifier));
             check(@"titleVariants answers the array it was given", [state.titleVariants count] == 2,
                   describe(state.titleVariants));
             check(@"repeats answers YES", state.repeats == YES,
@@ -181,7 +181,7 @@ int main(int argc, const char *argv[])
             check(@"+supportsSecureCoding is YES (NSSecureCoding is in the header)",
                   [CPVoiceControlState supportsSecureCoding] ? @"YES" : @"NO",
                   [CPVoiceControlState supportsSecureCoding] ? @"YES" : @"NO");
-            CPVoiceControlState *bare = [[CPVoiceControlState alloc] initWithIdentifier:@"charon.bare"
+            CPVoiceControlState *bare = [[CPVoiceControlState alloc] initWithIdentifier:@"revenant.bare"
                                                                           titleVariants:nil
                                                                                   image:nil
                                                                                 repeats:NO];
@@ -192,7 +192,7 @@ int main(int argc, const char *argv[])
             UIRectFill(CGRectMake(0.0, 0.0, 300.0, 300.0));
             UIImage *large = UIGraphicsGetImageFromCurrentImageContext();
             UIGraphicsEndImageContext();
-            CPVoiceControlState *scaled = [[CPVoiceControlState alloc] initWithIdentifier:@"charon.scaled"
+            CPVoiceControlState *scaled = [[CPVoiceControlState alloc] initWithIdentifier:@"revenant.scaled"
                                                                              titleVariants:@[@"Scaled"]
                                                                                      image:large
                                                                                    repeats:NO];
@@ -209,7 +209,7 @@ int main(int argc, const char *argv[])
                                                   fromData:coded
                                                      error:&error];
             check(@"a state survives an NSSecureCoding round trip with its identifier",
-                  back != nil && [back.identifier isEqualToString:@"charon.listening"],
+                  back != nil && [back.identifier isEqualToString:@"revenant.listening"],
                   back ? describe(back.identifier) : [NSString stringWithFormat:@"nil (%@)",
                                                         error.localizedDescription ?: @"no error"]);
         }
@@ -220,7 +220,7 @@ int main(int argc, const char *argv[])
             NSMutableArray<CPVoiceControlState *> *states = [NSMutableArray array];
             for (int i = 0; i < 6; i++) {
                 [states addObject:[[CPVoiceControlState alloc]
-                    initWithIdentifier:[NSString stringWithFormat:@"charon.state%d", i]
+                    initWithIdentifier:[NSString stringWithFormat:@"revenant.state%d", i]
                           titleVariants:@[[NSString stringWithFormat:@"State %d", i]]
                                   image:nil
                                 repeats:NO]];
@@ -232,20 +232,20 @@ int main(int argc, const char *argv[])
                   [NSString stringWithFormat:@"%lu of %lu", (unsigned long)[voice.voiceControlStates count],
                       (unsigned long)states.count]);
             check(@"the first of the states it was given is the active one",
-                  [voice.activeStateIdentifier isEqualToString:@"charon.state0"],
+                  [voice.activeStateIdentifier isEqualToString:@"revenant.state0"],
                   describe(voice.activeStateIdentifier));
-            [voice activateVoiceControlStateWithIdentifier:@"charon.state3"];
+            [voice activateVoiceControlStateWithIdentifier:@"revenant.state3"];
             check(@"activating switches the active state with no car attached (measured)",
-                  [voice.activeStateIdentifier isEqualToString:@"charon.state3"],
+                  [voice.activeStateIdentifier isEqualToString:@"revenant.state3"],
                   [NSString stringWithFormat:@"active is now %@", describe(voice.activeStateIdentifier)]);
-            [voice activateVoiceControlStateWithIdentifier:@"charon.state99"];
+            [voice activateVoiceControlStateWithIdentifier:@"revenant.state99"];
             check(@"an identifier no state carries becomes the active one anyway (measured)",
-                  [voice.activeStateIdentifier isEqualToString:@"charon.state99"],
+                  [voice.activeStateIdentifier isEqualToString:@"revenant.state99"],
                   [NSString stringWithFormat:@"active is now %@", describe(voice.activeStateIdentifier)]);
             NSUInteger effective = 0;
             const NSUInteger rounds = 12;
             for (NSUInteger round = 0; round < rounds; round++) {
-                NSString *wanted = [NSString stringWithFormat:@"charon.state%lu", (unsigned long)(round % 5)];
+                NSString *wanted = [NSString stringWithFormat:@"revenant.state%lu", (unsigned long)(round % 5)];
                 [voice activateVoiceControlStateWithIdentifier:wanted];
                 if ([voice.activeStateIdentifier isEqualToString:wanted]) {
                     effective++;

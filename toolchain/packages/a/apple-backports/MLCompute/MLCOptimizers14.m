@@ -1,8 +1,8 @@
-#import "CharonMLCompute.h"
+#import "RevenantMLCompute.h"
 
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
 
-@implementation CharonMLCOptimizerState
+@implementation RevenantMLCOptimizerState
 {
 @protected
     float _learningRate;
@@ -48,8 +48,8 @@
         _beta2 = 0.999f;
         _epsilon = 1e-8f;
         _timeStep = 1;
-#if defined(CHARON_MLC_PLANT)
-#if CHARON_MLC_PLANT == 1
+#if defined(REVENANT_MLC_PLANT)
+#if REVENANT_MLC_PLANT == 1
         _gradientClipMax = 0.0f;
         _gradientClipMin = 0.0f;
         _gradientClippingType = MLCGradientClippingTypeByNorm;
@@ -70,7 +70,7 @@
 
 - (id)copyWithZone:(NSZone *)zone
 {
-    CharonMLCOptimizerState *copy = [[CharonMLCOptimizerState allocWithZone:zone] init];
+    RevenantMLCOptimizerState *copy = [[RevenantMLCOptimizerState allocWithZone:zone] init];
     copy->_learningRate = _learningRate;
     copy->_gradientRescale = _gradientRescale;
     copy->_appliesGradientClipping = _appliesGradientClipping;
@@ -95,27 +95,27 @@
 @end
 
 @interface MLCOptimizer () {
-    CharonMLCOptimizerState *_state;
+    RevenantMLCOptimizerState *_state;
 }
 @end
 
 @implementation MLCOptimizer
 
-- (CharonMLCOptimizerState *)charon_mlc_state
+- (RevenantMLCOptimizerState *)revenant_mlc_state
 {
     if (!_state)
-        _state = [[CharonMLCOptimizerState alloc] init];
+        _state = [[RevenantMLCOptimizerState alloc] init];
     return _state;
 }
 
-- (void)charon_mlc_setState:(CharonMLCOptimizerState *)state
+- (void)revenant_mlc_setState:(RevenantMLCOptimizerState *)state
 {
     _state = state;
 }
 
-- (void)charon_mlc_takeStateFrom:(MLCOptimizerDescriptor *)descriptor
+- (void)revenant_mlc_takeStateFrom:(MLCOptimizerDescriptor *)descriptor
 {
-    _state = [[CharonMLCOptimizerState alloc] init];
+    _state = [[RevenantMLCOptimizerState alloc] init];
     if (!descriptor)
         return;
     _state.learningRate = descriptor.learningRate;
@@ -133,7 +133,7 @@
 - (instancetype)init
 {
     if ((self = [super init]))
-        [self charon_mlc_takeStateFrom:nil];
+        [self revenant_mlc_takeStateFrom:nil];
     return self;
 }
 
@@ -144,54 +144,54 @@
 
 - (float)learningRate
 {
-    return [self charon_mlc_state].learningRate;
+    return [self revenant_mlc_state].learningRate;
 }
 
 - (void)setLearningRate:(float)learningRate
 {
-    [self charon_mlc_state].learningRate = learningRate;
+    [self revenant_mlc_state].learningRate = learningRate;
 }
 
 - (float)gradientRescale
 {
-    return [self charon_mlc_state].gradientRescale;
+    return [self revenant_mlc_state].gradientRescale;
 }
 
 - (BOOL)appliesGradientClipping
 {
-    return [self charon_mlc_state].appliesGradientClipping;
+    return [self revenant_mlc_state].appliesGradientClipping;
 }
 
 - (void)setAppliesGradientClipping:(BOOL)appliesGradientClipping
 {
-    [self charon_mlc_state].appliesGradientClipping = appliesGradientClipping;
+    [self revenant_mlc_state].appliesGradientClipping = appliesGradientClipping;
 }
 
 - (float)gradientClipMax
 {
-    return [self charon_mlc_state].gradientClipMax;
+    return [self revenant_mlc_state].gradientClipMax;
 }
 
 - (float)gradientClipMin
 {
-    return [self charon_mlc_state].gradientClipMin;
+    return [self revenant_mlc_state].gradientClipMin;
 }
 
 - (float)regularizationScale
 {
-    return [self charon_mlc_state].regularizationScale;
+    return [self revenant_mlc_state].regularizationScale;
 }
 
 - (MLCRegularizationType)regularizationType
 {
-    return [self charon_mlc_state].regularizationType;
+    return [self revenant_mlc_state].regularizationType;
 }
 
-+ (instancetype)charon_mlc_optimizerOfClass:(Class)cls copying:(MLCOptimizer *)other
++ (instancetype)revenant_mlc_optimizerOfClass:(Class)cls copying:(MLCOptimizer *)other
 {
     MLCOptimizer *copy = [cls allocWithZone:NSDefaultMallocZone()];
-    CharonMLCOptimizerState *from = [other charon_mlc_state];
-    CharonMLCOptimizerState *into = [CharonMLCOptimizerState new];
+    RevenantMLCOptimizerState *from = [other revenant_mlc_state];
+    RevenantMLCOptimizerState *into = [RevenantMLCOptimizerState new];
     into.learningRate = from.learningRate;
     into.gradientRescale = from.gradientRescale;
     into.appliesGradientClipping = from.appliesGradientClipping;
@@ -209,13 +209,13 @@
     into.epsilon = from.epsilon;
     into.usesAMSGrad = from.usesAMSGrad;
     into.timeStep = from.timeStep;
-    [copy charon_mlc_setState:into];
+    [copy revenant_mlc_setState:into];
     return copy;
 }
 
 - (id)copyWithZone:(NSZone *)zone
 {
-    return [[self class] charon_mlc_optimizerOfClass:[self class] copying:self];
+    return [[self class] revenant_mlc_optimizerOfClass:[self class] copying:self];
 }
 
 @end
@@ -225,7 +225,7 @@
 + (instancetype)optimizerWithDescriptor:(MLCOptimizerDescriptor *)optimizerDescriptor
 {
     MLCSGDOptimizer *optimizer = [self alloc];
-    [optimizer charon_mlc_takeStateFrom:optimizerDescriptor];
+    [optimizer revenant_mlc_takeStateFrom:optimizerDescriptor];
     return optimizer;
 }
 
@@ -234,19 +234,19 @@
                      usesNesterovMomentum:(BOOL)usesNesterovMomentum
 {
     MLCSGDOptimizer *optimizer = [self optimizerWithDescriptor:optimizerDescriptor];
-    [optimizer charon_mlc_state].momentumScale = momentumScale;
-    [optimizer charon_mlc_state].usesNesterovMomentum = usesNesterovMomentum;
+    [optimizer revenant_mlc_state].momentumScale = momentumScale;
+    [optimizer revenant_mlc_state].usesNesterovMomentum = usesNesterovMomentum;
     return optimizer;
 }
 
 - (float)momentumScale
 {
-    return [self charon_mlc_state].momentumScale;
+    return [self revenant_mlc_state].momentumScale;
 }
 
 - (BOOL)usesNesterovMomentum
 {
-    return [self charon_mlc_state].usesNesterovMomentum;
+    return [self revenant_mlc_state].usesNesterovMomentum;
 }
 
 @end
@@ -256,7 +256,7 @@
 + (instancetype)optimizerWithDescriptor:(MLCOptimizerDescriptor *)optimizerDescriptor
 {
     MLCAdamOptimizer *optimizer = [self alloc];
-    [optimizer charon_mlc_takeStateFrom:optimizerDescriptor];
+    [optimizer revenant_mlc_takeStateFrom:optimizerDescriptor];
     return optimizer;
 }
 
@@ -267,36 +267,36 @@
                                timeStep:(NSUInteger)timeStep
 {
     MLCAdamOptimizer *optimizer = [self optimizerWithDescriptor:optimizerDescriptor];
-    [optimizer charon_mlc_state].beta1 = beta1;
-    [optimizer charon_mlc_state].beta2 = beta2;
-    [optimizer charon_mlc_state].epsilon = epsilon;
-    [optimizer charon_mlc_state].timeStep = timeStep;
+    [optimizer revenant_mlc_state].beta1 = beta1;
+    [optimizer revenant_mlc_state].beta2 = beta2;
+    [optimizer revenant_mlc_state].epsilon = epsilon;
+    [optimizer revenant_mlc_state].timeStep = timeStep;
     return optimizer;
 }
 
 - (float)beta1
 {
-    return [self charon_mlc_state].beta1;
+    return [self revenant_mlc_state].beta1;
 }
 
 - (float)beta2
 {
-    return [self charon_mlc_state].beta2;
+    return [self revenant_mlc_state].beta2;
 }
 
 - (float)epsilon
 {
-    return [self charon_mlc_state].epsilon;
+    return [self revenant_mlc_state].epsilon;
 }
 
 - (BOOL)usesAMSGrad
 {
-    return [self charon_mlc_state].usesAMSGrad;
+    return [self revenant_mlc_state].usesAMSGrad;
 }
 
 - (NSUInteger)timeStep
 {
-    return [self charon_mlc_state].timeStep;
+    return [self revenant_mlc_state].timeStep;
 }
 
 @end

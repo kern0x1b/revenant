@@ -1,14 +1,14 @@
 #import <AVFoundation/AVFoundation.h>
 #import <objc/runtime.h>
 
-static const char charonAutomaticallyLoadedKeys;
+static const char revenantAutomaticallyLoadedKeys;
 
-static NSArray<NSString *> *charonDefaultAutomaticallyLoadedAssetKeys(void)
+static NSArray<NSString *> *revenantDefaultAutomaticallyLoadedAssetKeys(void)
 {
     return @[@"duration", @"availableMediaCharacteristicsWithMediaSelectionOptions"];
 }
 
-@implementation AVPlayerItem (CharonAutomaticallyLoadedAssetKeys7)
+@implementation AVPlayerItem (RevenantAutomaticallyLoadedAssetKeys7)
 
 + (instancetype)playerItemWithAsset:(AVAsset *)asset automaticallyLoadedAssetKeys:(NSArray<NSString *> *)automaticallyLoadedAssetKeys
 {
@@ -20,7 +20,7 @@ static NSArray<NSString *> *charonDefaultAutomaticallyLoadedAssetKeys(void)
     self = [self initWithAsset:asset];
     if (!self)
         return nil;
-    objc_setAssociatedObject(self, &charonAutomaticallyLoadedKeys, [automaticallyLoadedAssetKeys copy],
+    objc_setAssociatedObject(self, &revenantAutomaticallyLoadedKeys, [automaticallyLoadedAssetKeys copy],
                              OBJC_ASSOCIATION_COPY_NONATOMIC);
     if (automaticallyLoadedAssetKeys.count > 0)
         [asset loadValuesAsynchronouslyForKeys:automaticallyLoadedAssetKeys completionHandler:nil];
@@ -29,8 +29,8 @@ static NSArray<NSString *> *charonDefaultAutomaticallyLoadedAssetKeys(void)
 
 - (NSArray<NSString *> *)automaticallyLoadedAssetKeys
 {
-    NSArray<NSString *> *keys = objc_getAssociatedObject(self, &charonAutomaticallyLoadedKeys);
-    return keys ?: charonDefaultAutomaticallyLoadedAssetKeys();
+    NSArray<NSString *> *keys = objc_getAssociatedObject(self, &revenantAutomaticallyLoadedKeys);
+    return keys ?: revenantDefaultAutomaticallyLoadedAssetKeys();
 }
 
 @end

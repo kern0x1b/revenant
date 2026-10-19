@@ -21,7 +21,7 @@
 
 #include "../support.hpp"
 
-namespace shade {
+namespace emulator {
 namespace {
 
     constexpr std::uint32_t posix_spawn_syscall = 244U;

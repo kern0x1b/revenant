@@ -15,7 +15,7 @@
 # The reference is reference-host.tsv, generated on the host at build time and committed with the
 # versions it came from (reference-host.OS.txt).
 #
-# THE PORT BINARY RENAMES THE CLASS, with -DNSBatchInsertRequest=CharonBatchInsertRequest, because it
+# THE PORT BINARY RENAMES THE CLASS, with -DNSBatchInsertRequest=RevenantBatchInsertRequest, because it
 # links -framework CoreData and the runtime answers "Class NSBatchInsertRequest is implemented in
 # both CoreData and .../port" otherwise - a real collision for anything that links both. That is also
 # why -init's reason text is the LITERAL and not NSStringFromClass: a class-name substitution would
@@ -27,17 +27,17 @@ build=${COREDATA_CHECK:-$here/../../../../.agent-work/runs/coredata-check}
 rm -rf "$build"; mkdir -p "$build"
 
 cp "$FP/CoreData/NSBatchInsertRequest.m" "$build/port.m"
-grep -v '#import "CharonCoreData.h"' "$build/port.m" > "$build/port.buildable.m"
+grep -v '#import "RevenantCoreData.h"' "$build/port.m" > "$build/port.buildable.m"
 mv "$build/port.buildable.m" "$build/port.m"
 
 echo "=== the port builds"
-xcrun clang -fobjc-arc -w -DNSBatchInsertRequest=CharonBatchInsertRequest \
+xcrun clang -fobjc-arc -w -DNSBatchInsertRequest=RevenantBatchInsertRequest \
     -I"$FP/CoreData" -c "$build/port.m" -o "$build/port.o"
 
 echo "=== the host and the port, as two processes"
 xcrun clang -fobjc-arc -w "$here/per-initializer.m" \
     -framework Foundation -framework CoreData -o "$build/host"
-xcrun clang -fobjc-arc -w -DNSBatchInsertRequest=CharonBatchInsertRequest \
+xcrun clang -fobjc-arc -w -DNSBatchInsertRequest=RevenantBatchInsertRequest \
     "$here/per-initializer.m" "$build/port.o" \
     -framework Foundation -framework CoreData -o "$build/port"
 
@@ -64,11 +64,11 @@ if [ "${1:-}" = "mutant" ]; then
     echo
     echo "=== MUTANT 2: the handler cross-assignment is back"
     python3 "$here/mutant-ivar.py" "$FP/CoreData/NSBatchInsertRequest.m" "$build/port.m"
-    grep -v '#import "CharonCoreData.h"' "$build/port.m" > "$build/port.buildable.m"
+    grep -v '#import "RevenantCoreData.h"' "$build/port.m" > "$build/port.buildable.m"
     mv "$build/port.buildable.m" "$build/port.m"
-    xcrun clang -fobjc-arc -w -DNSBatchInsertRequest=CharonBatchInsertRequest \
+    xcrun clang -fobjc-arc -w -DNSBatchInsertRequest=RevenantBatchInsertRequest \
         -I"$FP/CoreData" -c "$build/port.m" -o "$build/port.o"
-    xcrun clang -fobjc-arc -w -DNSBatchInsertRequest=CharonBatchInsertRequest \
+    xcrun clang -fobjc-arc -w -DNSBatchInsertRequest=RevenantBatchInsertRequest \
         "$here/per-initializer.m" "$build/port.o" \
         -framework Foundation -framework CoreData -o "$build/port"
     "$build/port" > "$build/port.txt" 2>/dev/null || true

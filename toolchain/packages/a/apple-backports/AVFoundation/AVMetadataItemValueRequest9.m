@@ -3,44 +3,44 @@
 #import <objc/message.h>
 #import <objc/runtime.h>
 
-#import "CharonAVMetadataConstruction.h"
+#import "RevenantAVMetadataConstruction.h"
 
 @interface AVMetadataItemValueRequest ()
-@property (nonatomic, strong) id charonSpecifier;
-@property (nonatomic, weak) AVMetadataItem *charonMetadataItem;
-@property (nonatomic, strong) id charonResponseValue;
-@property (nonatomic, strong) NSError *charonResponseError;
+@property (nonatomic, strong) id revenantSpecifier;
+@property (nonatomic, weak) AVMetadataItem *revenantMetadataItem;
+@property (nonatomic, strong) id revenantResponseValue;
+@property (nonatomic, strong) NSError *revenantResponseError;
 @end
 
 @implementation AVMetadataItemValueRequest
 
-@synthesize charonSpecifier = _charonSpecifier;
-@synthesize charonMetadataItem = _charonMetadataItem;
-@synthesize charonResponseValue = _charonResponseValue;
-@synthesize charonResponseError = _charonResponseError;
+@synthesize revenantSpecifier = _revenantSpecifier;
+@synthesize revenantMetadataItem = _revenantMetadataItem;
+@synthesize revenantResponseValue = _revenantResponseValue;
+@synthesize revenantResponseError = _revenantResponseError;
 
-- (instancetype)charon_initWithSpecifier:(id)specifier
+- (instancetype)revenant_initWithSpecifier:(id)specifier
 {
     self = ((id (*)(id, SEL))objc_msgSend)(self, sel_registerName("init"));
     if (self) {
-        _charonSpecifier = specifier;
+        _revenantSpecifier = specifier;
     }
     return self;
 }
 
 - (id)specifier
 {
-    return self.charonSpecifier;
+    return self.revenantSpecifier;
 }
 
 - (AVMetadataItem *)metadataItem
 {
-    return self.charonMetadataItem;
+    return self.revenantMetadataItem;
 }
 
 - (void)setMetadataItem:(AVMetadataItem *)metadataItem
 {
-    self.charonMetadataItem = metadataItem;
+    self.revenantMetadataItem = metadataItem;
 }
 
 - (void)loadValuesAsynchronouslyForKeys:(NSArray<NSString *> *)keys
@@ -53,24 +53,24 @@
 
 - (void)respondWithValue:(id<NSCopying>)value
 {
-    self.charonResponseValue = value ? ((id (*)(id, SEL))objc_msgSend)(value, @selector(copy)) : nil;
-    self.charonResponseError = nil;
+    self.revenantResponseValue = value ? ((id (*)(id, SEL))objc_msgSend)(value, @selector(copy)) : nil;
+    self.revenantResponseError = nil;
 }
 
 - (void)respondWithError:(NSError *)error
 {
-    self.charonResponseError = error;
-    self.charonResponseValue = nil;
+    self.revenantResponseError = error;
+    self.revenantResponseValue = nil;
 }
 
-- (id)charon_responseValue
+- (id)revenant_responseValue
 {
-    return self.charonResponseValue;
+    return self.revenantResponseValue;
 }
 
-- (NSError *)charon_responseError
+- (NSError *)revenant_responseError
 {
-    return self.charonResponseError;
+    return self.revenantResponseError;
 }
 
 @end

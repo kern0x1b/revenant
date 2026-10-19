@@ -1,7 +1,7 @@
 #import <Foundation/Foundation.h>
 #include <math.h>
 
-static NSUnitInformationStorage *charon_unit(BOOL binary, NSUInteger index)
+static NSUnitInformationStorage *revenant_unit(BOOL binary, NSUInteger index)
 {
     switch (index) {
     case 0: return [NSUnitInformationStorage bytes];
@@ -16,9 +16,9 @@ static NSUnitInformationStorage *charon_unit(BOOL binary, NSUInteger index)
     }
 }
 
-static NSString *charon_byte_units[] = {@"bytes", @"KB", @"MB", @"GB", @"TB", @"PB", @"EB", @"ZB", @"YB"};
+static NSString *revenant_byte_units[] = {@"bytes", @"KB", @"MB", @"GB", @"TB", @"PB", @"EB", @"ZB", @"YB"};
 
-static NSString *charon_whole(NSNumberFormatter *number, double value, BOOL integer)
+static NSString *revenant_whole(NSNumberFormatter *number, double value, BOOL integer)
 {
     if (fabs(value) < 9007199254740992.0)
         return [number stringFromNumber:@(value)];
@@ -50,7 +50,7 @@ static NSString *charon_whole(NSNumberFormatter *number, double value, BOOL inte
     return value < 0 ? [@"-" stringByAppendingString:grouped] : grouped;
 }
 
-static NSString *charon_big_count(NSByteCountFormatter *formatter, NSMeasurement *measurement, double bytes)
+static NSString *revenant_big_count(NSByteCountFormatter *formatter, NSMeasurement *measurement, double bytes)
 {
     BOOL binary = formatter.countStyle == NSByteCountFormatterCountStyleMemory || formatter.countStyle == NSByteCountFormatterCountStyleBinary;
     double base = binary ? 1024 : 1000;
@@ -66,12 +66,12 @@ static NSString *charon_big_count(NSByteCountFormatter *formatter, NSMeasurement
     }
     if (unit == NSNotFound)
         unit = 8;
-    double scaled = [[measurement measurementByConvertingToUnit:charon_unit(binary, unit)] doubleValue];
+    double scaled = [[measurement measurementByConvertingToUnit:revenant_unit(binary, unit)] doubleValue];
     if (!formatter.isAdaptive && unit < 8 && fabs(scaled) >= base - 0.5 && fabs(scaled) < base) {
         for (NSUInteger next = unit + 1; next < 9; next++) {
             if (mask & (1u << next)) {
                 unit = next;
-                scaled = [[measurement measurementByConvertingToUnit:charon_unit(binary, unit)] doubleValue];
+                scaled = [[measurement measurementByConvertingToUnit:revenant_unit(binary, unit)] doubleValue];
                 break;
             }
         }
@@ -94,7 +94,7 @@ static NSString *charon_big_count(NSByteCountFormatter *formatter, NSMeasurement
         number.maximumFractionDigits = digits;
         number.minimumFractionDigits = formatter.zeroPadsFractionDigits ? digits : 0;
     }
-    NSString *count = number.maximumFractionDigits == 0 && !number.usesSignificantDigits ? charon_whole(number, scaled, unit == 0) : [number stringFromNumber:@(scaled)];
+    NSString *count = number.maximumFractionDigits == 0 && !number.usesSignificantDigits ? revenant_whole(number, scaled, unit == 0) : [number stringFromNumber:@(scaled)];
     BOOL includesCount = formatter.includesCount, includesUnit = formatter.includesUnit;
     if (!includesCount && !includesUnit)
         includesCount = includesUnit = YES;
@@ -104,18 +104,18 @@ static NSString *charon_big_count(NSByteCountFormatter *formatter, NSMeasurement
     if (includesUnit) {
         if (text.length)
             [text appendString:@" "];
-        [text appendString:charon_byte_units[unit]];
+        [text appendString:revenant_byte_units[unit]];
     }
     if (formatter.includesActualByteCount && includesCount && includesUnit && unit > 0) {
         number.usesSignificantDigits = NO;
         number.maximumFractionDigits = 0;
         number.minimumFractionDigits = 0;
-        [text appendFormat:@" (%@ bytes)", charon_whole(number, bytes, YES)];
+        [text appendFormat:@" (%@ bytes)", revenant_whole(number, bytes, YES)];
     }
     return text;
 }
 
-@implementation NSByteCountFormatter (CharonMeasurement)
+@implementation NSByteCountFormatter (RevenantMeasurement)
 
 + (NSString *)stringFromMeasurement:(NSMeasurement *)measurement countStyle:(NSByteCountFormatterCountStyle)countStyle
 {
@@ -150,7 +150,7 @@ static NSString *charon_big_count(NSByteCountFormatter *formatter, NSMeasurement
         NSRegularExpression *padded = [NSRegularExpression regularExpressionWithPattern:[NSString stringWithFormat:@"(^|[^0-9.,])([0-9]+)%@0+( bytes%@)", decimal, smallCount ? @"|$" : @""] options:0 error:NULL];
         return [padded stringByReplacingMatchesInString:text options:0 range:NSMakeRange(0, text.length) withTemplate:@"$1$2$3"];
     }
-    return charon_big_count(self, measurement, bytes);
+    return revenant_big_count(self, measurement, bytes);
 }
 
 @end

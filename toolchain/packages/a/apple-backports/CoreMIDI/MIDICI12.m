@@ -1,4 +1,4 @@
-#import "CharonMIDICI.h"
+#import "RevenantMIDICI.h"
 
 @implementation MIDICIProfile {
     NSString *_name;
@@ -81,7 +81,7 @@
     return [[MIDICIProfileState alloc] initWithChannel:channel enabledProfiles:@[] disabledProfiles:@[]];
 }
 
-- (BOOL)enableProfile:(MIDICIProfile *)profile onChannel:(MIDIChannelNumber)channel error:(NSError **)outError { charon_ci_inert(__PRETTY_FUNCTION__); return NO; }
-- (BOOL)disableProfile:(MIDICIProfile *)profile onChannel:(MIDIChannelNumber)channel error:(NSError **)outError { charon_ci_inert(__PRETTY_FUNCTION__); return NO; }
+- (BOOL)enableProfile:(MIDICIProfile *)profile onChannel:(MIDIChannelNumber)channel error:(NSError **)outError { revenant_ci_inert(__PRETTY_FUNCTION__); return NO; }
+- (BOOL)disableProfile:(MIDICIProfile *)profile onChannel:(MIDIChannelNumber)channel error:(NSError **)outError { revenant_ci_inert(__PRETTY_FUNCTION__); return NO; }
 
 @end

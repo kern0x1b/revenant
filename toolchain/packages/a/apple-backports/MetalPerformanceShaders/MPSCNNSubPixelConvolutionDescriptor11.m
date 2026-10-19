@@ -1,5 +1,5 @@
-#import "CharonMPS.h"
-#import "CharonMPS26.h"
+#import "RevenantMPS.h"
+#import "RevenantMPS26.h"
 
 #pragma clang diagnostic ignored "-Wprotocol"
 #pragma clang diagnostic ignored "-Wincomplete-implementation"

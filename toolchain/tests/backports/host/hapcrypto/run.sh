@@ -16,10 +16,10 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-charon=${CHARON:-$here/../../../..}
-crypto="$charon/packages/a/apple-backports/HomeKit/CharonHapCrypto.m"
-recipe="$charon/packages/m/monocypher/xmake.lua"
-build=${BUILD:-$(runs_fresh charon-hapcrypto)}
+revenant=${REVENANT:-$here/../../../..}
+crypto="$revenant/packages/a/apple-backports/HomeKit/RevenantHapCrypto.m"
+recipe="$revenant/packages/m/monocypher/xmake.lua"
+build=${BUILD:-$(runs_fresh revenant-hapcrypto)}
 mkdir -p "$build/monocypher"
 
 # The pin, read out of the recipe rather than written down here: the version and the sha256 both come
@@ -66,7 +66,7 @@ cp "$build/monocypher-$version/src/monocypher.c" "$build/monocypher-$version/src
    "$build/monocypher-$version/src/optional/monocypher-ed25519.c" "$build/monocypher-$version/src/optional/monocypher-ed25519.h" \
    "$build/monocypher/"
 
-cc -O2 -I"$build" -I"$charon/packages/a/apple-backports/HomeKit" \
+cc -O2 -I"$build" -I"$revenant/packages/a/apple-backports/HomeKit" \
    -o "$build/vectors" "$here/vectors.c" "$crypto" \
    "$build/monocypher/monocypher.c" "$build/monocypher/monocypher-ed25519.c"
 

@@ -25,7 +25,7 @@ set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 appledir=${APPLEDIR:-$here/../../../../packages/a/apple-backports}
-build=${BUILD:-$(runs_fresh charon-videotoolbox-frameprocessor)}
+build=${BUILD:-$(runs_fresh revenant-videotoolbox-frameprocessor)}
 mkdir -p "$build"
 
 cc=$(ls -d "$HOME"/.xmake/packages/l/llvm/*/*/bin/clang 2>/dev/null | head -1)
@@ -86,8 +86,8 @@ plant() {
         *)   unit=; header=$which ;;
     esac
     rm -rf "$build/mutant"; mkdir -p "$build/mutant/VideoToolbox" "$build/mutant/registry/VideoToolbox"
-    cp "$appledir/CharonValueStore.h" "$build/mutant/CharonValueStore.h"
-    cp "$appledir/VideoToolbox/CharonVideoToolbox.h" "$build/mutant/VideoToolbox/CharonVideoToolbox.h"
+    cp "$appledir/RevenantValueStore.h" "$build/mutant/RevenantValueStore.h"
+    cp "$appledir/VideoToolbox/RevenantVideoToolbox.h" "$build/mutant/VideoToolbox/RevenantVideoToolbox.h"
     cp "$appledir/VideoToolbox/VideoToolboxValueStore.h" "$build/mutant/VideoToolbox/VideoToolboxValueStore.h"
     cp "$appledir/registry/VideoToolbox/ios26.json" "$build/mutant/registry/VideoToolbox/ios26.json"
     for name in $UNITS; do
@@ -126,7 +126,7 @@ plant() {
 
 echo "--- the plants"
 
-plant "an error code mistyped by one digit" CharonVideoToolbox.h \
+plant "an error code mistyped by one digit" RevenantVideoToolbox.h \
     "VTFrameProcessorRevisionNotSupported = -19739," \
     "VTFrameProcessorRevisionNotSupported = -19738,"
 

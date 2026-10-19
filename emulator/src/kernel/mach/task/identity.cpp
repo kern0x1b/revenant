@@ -15,7 +15,7 @@
 #include <array>
 #include <optional>
 
-namespace shade::mach_task_identity {
+namespace emulator::mach_task_identity {
 namespace {
 
     using xnu::ipc::Right;

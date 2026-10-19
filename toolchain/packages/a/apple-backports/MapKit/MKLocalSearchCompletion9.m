@@ -1,5 +1,5 @@
 #import <MapKit/MapKit.h>
-#import "CharonMapKit.h"
+#import "RevenantMapKit.h"
 
 @implementation MKLocalSearchCompletion {
     NSString *_title;

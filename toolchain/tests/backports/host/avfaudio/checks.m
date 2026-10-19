@@ -27,7 +27,7 @@ static void checkClose(NSString *what, double got, double want, double tolerance
     }
 }
 
-static NSArray *CharonHostComponents(void)
+static NSArray *RevenantHostComponents(void)
 {
     OSType types[] = {kAudioUnitType_Effect, kAudioUnitType_MusicDevice, kAudioUnitType_Output, kAudioUnitType_Mixer};
     NSMutableArray *found = [NSMutableArray array];
@@ -44,7 +44,7 @@ static NSArray *CharonHostComponents(void)
 }
 
 
-static AudioComponentDescription CharonFirstComponentOfType(OSType type)
+static AudioComponentDescription RevenantFirstComponentOfType(OSType type)
 {
     AudioComponentDescription any = {0};
     any.componentType = type;
@@ -60,7 +60,7 @@ static AudioComponentDescription CharonFirstComponentOfType(OSType type)
 int main(void)
 {
     @autoreleasepool {
-        NSArray *components = CharonHostComponents();
+        NSArray *components = RevenantHostComponents();
         printf("stage host components: %lu\n", (unsigned long)components.count);
         if (components.count == 0) {
             printf("FAIL no host audio component was found: every check below would pass without testing anything\n");
@@ -160,9 +160,9 @@ int main(void)
               AudioComponentFindNext(NULL, &absent) == NULL);
 
         AVAudioUnitTimeEffect *timeEffect = [[AVAudioUnitTimeEffect alloc] initWithAudioComponentDescription:
-                                             CharonFirstComponentOfType(kAudioUnitType_FormatConverter)];
+                                             RevenantFirstComponentOfType(kAudioUnitType_FormatConverter)];
         AVAudioUnitGenerator *generator = [[AVAudioUnitGenerator alloc] initWithAudioComponentDescription:
-                                          CharonFirstComponentOfType(kAudioUnitType_Generator)];
+                                          RevenantFirstComponentOfType(kAudioUnitType_Generator)];
         check(@"AVAudioUnitTimeEffect answers bypass", [timeEffect respondsToSelector:NSSelectorFromString(@"setBypass:")]);
         check(@"AVAudioUnitGenerator answers bypass", [generator respondsToSelector:NSSelectorFromString(@"setBypass:")]);
 
@@ -215,7 +215,7 @@ int main(void)
         pitch.pitch = -1;
         checkClose(@"a pitch of -1 set before attach reads back as -1", pitch.pitch, -1, 0.0);
         AVAudioUnitDelay *delay = [[AVAudioUnitDelay alloc] initWithAudioComponentDescription:
-                                   CharonFirstComponentOfType(kAudioUnitType_Effect)];
+                                   RevenantFirstComponentOfType(kAudioUnitType_Effect)];
         delay.feedback = -1;
         printf("stage a delay's feedback of -1 on the host reads back %g\n", (double)delay.feedback);
         check(@"a delay's feedback is answered, and the host's own number is reported above", !isnan((double)delay.feedback));

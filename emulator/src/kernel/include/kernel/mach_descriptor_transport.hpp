@@ -16,7 +16,7 @@
 #include <span>
 #include <vector>
 
-namespace shade::mach_transport {
+namespace emulator::mach_transport {
 
 enum class DescriptorKind : std::uint8_t {
     Port,

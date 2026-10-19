@@ -5,7 +5,7 @@ task("emulate")
         usage = "xmake emulate [options] install|run|launch|debug|log|shot|clean [arguments]",
         description = "Reach an emulated device: install the packages into its image, run a command in a fresh clone of it, launch an application through SpringBoard and snapshot it, debug the one that crashes, read what the run left, take its last frame, or remove what emulation left on disk. Every run first removes the images and root filesystems nothing has used for --prune-hours.",
         options = {
-            {"d", "device", "kv", nil, "The device to emulate, e.g. iPhone3,1 (default: the first device of the configured architecture Shade emulates that runs the release)."},
+            {"d", "device", "kv", nil, "The device to emulate, e.g. iPhone3,1 (default: the first device of the configured architecture the emulator emulates that runs the release)."},
             {"r", "release", "kv", nil, "The iOS release, the earliest firmware not older than it (default: apple_minimum)."},
             {"s", "seconds", "kv", "60", "How long the command run starts may take, or how long launch waits for SpringBoard to accept the launch and, with until-exit, how long the application may then run from the moment it is frontmost (guest seconds)."},
             {"t", "timeout", "kv", "900", "The wall-clock limit of a whole boot, after which the emulator is told to quit and then killed."},

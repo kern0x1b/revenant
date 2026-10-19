@@ -1,4 +1,4 @@
-local MANIFEST = "charon.toml"
+local MANIFEST = "revenant.toml"
 local PATHS = {
     sources = ".", engine = "", build = "build", tasks = "tasks", package = "packaging", profiles = "",
     recipe = "", tests = "tests",
@@ -210,7 +210,7 @@ end
 
 function decl_path(declared, name)
     if PATHS[name] == nil then
-        raise("%s is not a path Charon knows; known: %s", name, joined(sorted_names(PATHS), ""))
+        raise("%s is not a path Revenant knows; known: %s", name, joined(sorted_names(PATHS), ""))
     end
     local declaredPath = decl_get(declared, "paths", name, PATHS[name])
     if not truthy(declaredPath) then
@@ -317,7 +317,7 @@ local function platform_file(declared, name)
             end
         end
     end
-    raise("%s uses the platform %s, which neither the port nor Charon defines (%s)", manifest_of(declared.root),
+    raise("%s uses the platform %s, which neither the port nor Revenant defines (%s)", manifest_of(declared.root),
           name, joined(sorted_names(known), "none"))
 end
 
@@ -380,7 +380,7 @@ function decl_platform(declared)
     end
     if #unknown > 0 then
         table.sort(unknown)
-        raise("%s says %s under [platform], which Charon does not read", manifest_of(declared.root),
+        raise("%s says %s under [platform], which Revenant does not read", manifest_of(declared.root),
               table.concat(unknown, ", "))
     end
 

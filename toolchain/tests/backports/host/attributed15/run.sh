@@ -4,7 +4,7 @@
 # The port's four objects on classes the host declares are compiled with their selectors prefixed
 # (tests/backports/host/prefix_selectors.py, the mechanism appgroup and uikit2 use) and attached at run
 # time by tests/backports/host/foundation2/host-attach.c, so [s localizedAttributedStringWithFormat:...]
-# is the system's answer and [s charonHost_localizedAttributedStringWithFormat:...] is the port's, in
+# is the system's answer and [s revenantHost_localizedAttributedStringWithFormat:...] is the port's, in
 # one process and side by side. The Markdown object also defines a class, and a class cannot be prefixed:
 # it is renamed with the -D that its own object's symbols name (tests/backports/host/uikit2/renames.sh,
 # the mechanism presentationintent uses), which the same pass carries.
@@ -33,7 +33,7 @@ for file in NSAttributedStringLocalizedFormat15.m NSBundle+LocalizedAttributed15
     # shellcheck disable=SC2086
     xcrun clang -fobjc-arc -fvisibility=hidden $target $quiet -I"$SOURCES" \
         -c "$BUILD/ported/$file" -o "$BUILD/ported/$file.o"
-    perl -0777 -pi -e 's/__objc_catlist\0\0/__charon_catlist/g' "$BUILD/ported/$file.o"
+    perl -0777 -pi -e 's/__objc_catlist\0\0/__revenant_catlist/g' "$BUILD/ported/$file.o"
 done
 
 # The Markdown object: its class is the port's own and is renamed, its three initialisers are members of
@@ -48,7 +48,7 @@ python3 "$here/../prefix_selectors.py" "$SOURCES/$markdown" "$BUILD/ported/$mark
 # shellcheck disable=SC2046
 xcrun clang -fobjc-arc -fvisibility=hidden $target $quiet -I"$SOURCES" $(cat "$BUILD/renames") \
     -c "$BUILD/ported/$markdown" -o "$BUILD/ported/$markdown.o"
-perl -0777 -pi -e 's/__objc_catlist\0\0/__charon_catlist/g' "$BUILD/ported/$markdown.o"
+perl -0777 -pi -e 's/__objc_catlist\0\0/__revenant_catlist/g' "$BUILD/ported/$markdown.o"
 
 # The keys are constants, not selectors: the port's definitions are what the test reads, and the
 # system's own are read beside them through a second handle on the image, so both values are in one
@@ -65,10 +65,10 @@ xcrun clang -fobjc-arc -Wall $target $quiet -I"$HARNESS" \
     -F "$sdk/System/iOSSupport/System/Library/Frameworks" -framework Foundation -framework UIKit -o "$BUILD/differential"
 # The test's own copy of the prefixed declarations and the tool's must agree, so a rename the tool does
 # differently is a failure here and not a silent "unrecognised selector" in the middle of a comparison.
-for selector in charonHost_localizedAttributedStringWithFormat \
-                initCharonHostWithFormat charonHost_appendLocalizedFormat charonHost_localizedAttributedStringForKey \
-                charonHost_attributedStringByInflectingString charonHost_delegate charonHost_setDelegate \
-                initCharonHostWithMarkdown initCharonHostWithMarkdownString initCharonHostWithContentsOfMarkdownFileAtURL; do
+for selector in revenantHost_localizedAttributedStringWithFormat \
+                initRevenantHostWithFormat revenantHost_appendLocalizedFormat revenantHost_localizedAttributedStringForKey \
+                revenantHost_attributedStringByInflectingString revenantHost_delegate revenantHost_setDelegate \
+                initRevenantHostWithMarkdown initRevenantHostWithMarkdownString initRevenantHostWithContentsOfMarkdownFileAtURL; do
     grep -q "$selector" "$BUILD/declarations.h" || { echo "ported.h names $selector and the tool's declarations header does not" >&2; exit 1; }
 done
 [ -x "$BUILD/differential" ] || { echo "no binary at $BUILD/differential" >&2; exit 1; }

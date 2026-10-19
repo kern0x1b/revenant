@@ -14,7 +14,7 @@
 #
 # WHY THERE IS NO DIFFERENTIAL, and this is measured rather than assumed. SRKeyboardMetrics,
 # SRSpeechMetrics and SRFaceMetrics are all API_UNAVAILABLE(macos) in the host's SDK, so a typed call
-# cannot name them, and the port's CharonSensorKit.h cannot be compiled against that SDK at all - clang
+# cannot name them, and the port's RevenantSensorKit.h cannot be compiled against that SDK at all - clang
 # answers "typedef redefinition with different types ('NSInteger' vs
 # 'enum SRAcousticSettingsSampleLifetime')" for its fifteen redeclared enumerations. What the host
 # answers is therefore measured once, in step 1, and the port is held to it; and the port's own half is
@@ -24,7 +24,7 @@ set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 appledir=${APPLEDIR:-$here/../../../../packages/a/apple-backports}
-build=${BUILD:-$(runs_fresh charon-sensorkit-value)}
+build=${BUILD:-$(runs_fresh revenant-sensorkit-value)}
 mkdir -p "$build"
 
 cc=$(ls -d "$HOME"/.xmake/packages/l/llvm/*/*/bin/clang 2>/dev/null | head -1)
@@ -63,12 +63,12 @@ survived=0
 plant() {
     label=$1; which=$2; from=$3; to=$4
     rm -rf "$build/mutant"; mkdir -p "$build/mutant/SensorKit"
-    # CharonValueStore.h beside the mutated file, so its quoted #import resolves inside the mutant rather
+    # RevenantValueStore.h beside the mutated file, so its quoted #import resolves inside the mutant rather
     # than back to the port's own tree. No "|| true" here: a copy that does not happen is a plant that
     # would be measuring the unmutated header, and the earlier version of this line had
-    # CharonValueStore.m in it, which does not exist, so the failure was invisible by construction.
-    cp "$appledir/CharonValueStore.h" "$build/mutant/CharonValueStore.h"
-    cp "$appledir/SensorKit/CharonSensorKit.h" "$build/mutant/CharonSensorKit.h"
+    # RevenantValueStore.m in it, which does not exist, so the failure was invisible by construction.
+    cp "$appledir/RevenantValueStore.h" "$build/mutant/RevenantValueStore.h"
+    cp "$appledir/SensorKit/RevenantSensorKit.h" "$build/mutant/RevenantSensorKit.h"
     cp "$src170" "$src150" "$build/mutant/SensorKit/"
     target=$build/mutant/SensorKit/$which
     if ! xmake l "$here/../../common/replace.lua" "$target" "$target" "$from" "$to"; then
@@ -98,13 +98,13 @@ plant() {
 echo "--- the plants"
 
 plant "a property answers a constant instead of the store" SensorKit170.m \
-    "CHARON_VALUE_PROPERTY(id, faceAnchor)" \
-    "CHARON_VALUE_PROPERTY(NSString *, unusedFaceAnchor)"
+    "REVENANT_VALUE_PROPERTY(id, faceAnchor)" \
+    "REVENANT_VALUE_PROPERTY(NSString *, unusedFaceAnchor)"
 
 plant "a count answers a constant" SensorKit150.m \
     "-(NSInteger)wordCountForSentimentCategory:(NSInteger)category
 {
-    return [[self charon_valueForKey:CharonKeyboardSentimentKey(@\"wordCountForSentimentCategory:\", category)]
+    return [[self revenant_valueForKey:RevenantKeyboardSentimentKey(@\"wordCountForSentimentCategory:\", category)]
             longLongValue];
 }" \
     "-(NSInteger)wordCountForSentimentCategory:(NSInteger)category
@@ -118,7 +118,7 @@ plant "a count drops the category from its key, so all ten answer the same numbe
     "return selector;"
 
 plant "an accessor deleted outright" SensorKit170.m \
-    "CHARON_VALUE_PROPERTY(id, soundClassification)" \
+    "REVENANT_VALUE_PROPERTY(id, soundClassification)" \
     ""
 
 echo "--- the check's own control: an object carrying none of the five must not look green"

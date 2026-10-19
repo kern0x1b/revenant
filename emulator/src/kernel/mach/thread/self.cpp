@@ -16,7 +16,7 @@
 #include <cstdint>
 #include <mutex>
 
-namespace shade {
+namespace emulator {
 
 void CompatibilityKernel::dispatch_mach_thread_self_trap(Cpu& cpu)
 {

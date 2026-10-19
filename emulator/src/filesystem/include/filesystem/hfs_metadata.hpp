@@ -24,9 +24,9 @@
 #include <system_error>
 #include <vector>
 
-namespace shade::hfs {
+namespace emulator::hfs {
 
-inline constexpr std::string_view resource_sidecar_suffix { ".shade-rsrc" };
+inline constexpr std::string_view resource_sidecar_suffix { ".emulator-rsrc" };
 inline constexpr std::uint32_t allocation_block_size = 4096;
 
 namespace attribute {

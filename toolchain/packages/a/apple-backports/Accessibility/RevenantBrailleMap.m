@@ -1,13 +1,13 @@
-#import "CharonBrailleMap.h"
+#import "RevenantBrailleMap.h"
 
-#import "../CharonSayOnce.h"
+#import "../RevenantSayOnce.h"
 
-static NSString *CharonBrailleMapKey(CGPoint point)
+static NSString *RevenantBrailleMapKey(CGPoint point)
 {
     return [NSString stringWithFormat:@"%g,%g", point.x, point.y];
 }
 
-@protocol CharonBrailleMapPinStore <NSObject>
+@protocol RevenantBrailleMapPinStore <NSObject>
 
 - (NSNumber *)objectForKey:(NSString *)key;
 - (void)setObject:(NSNumber *)value forKey:(NSString *)key;
@@ -15,11 +15,11 @@ static NSString *CharonBrailleMapKey(CGPoint point)
 @end
 
 @implementation AXBrailleMap {
-    id<CharonBrailleMapPinStore> _pins;
+    id<RevenantBrailleMapPinStore> _pins;
     CGSize _size;
 }
 
-+ (instancetype)charon_mapWithDimensions:(CGSize)dimensions
++ (instancetype)revenant_mapWithDimensions:(CGSize)dimensions
 {
     AXBrailleMap *map = [[AXBrailleMap alloc] init];
     map->_size = dimensions;
@@ -29,14 +29,14 @@ static NSString *CharonBrailleMapKey(CGPoint point)
 - (void)setHeight:(float)height atPoint:(CGPoint)point
 {
     if (!_pins) {
-        _pins = (id<CharonBrailleMapPinStore>)[NSMutableDictionary dictionary];
+        _pins = (id<RevenantBrailleMapPinStore>)[NSMutableDictionary dictionary];
     }
-    [_pins setObject:@(height) forKey:CharonBrailleMapKey(point)];
+    [_pins setObject:@(height) forKey:RevenantBrailleMapKey(point)];
 }
 
 - (float)heightAtPoint:(CGPoint)point
 {
-    return [_pins objectForKey:CharonBrailleMapKey(point)].floatValue;
+    return [_pins objectForKey:RevenantBrailleMapKey(point)].floatValue;
 }
 
 - (CGSize)dimensions
@@ -47,7 +47,7 @@ static NSString *CharonBrailleMapKey(CGPoint point)
 - (void)presentImage:(CGImageRef)image
 {
     (void)image;
-    charon_say_once_for(@"AXBrailleMap.presentImage",
+    revenant_say_once_for(@"AXBrailleMap.presentImage",
                         @"AXBrailleMap -presentImage: this release has no braille display to show an image "
                         @"on, so the image is not presented");
 }
@@ -58,7 +58,7 @@ static NSString *CharonBrailleMapKey(CGPoint point)
 {
     AXBrailleMap *copy = [[AXBrailleMap allocWithZone:zone] init];
     copy->_size = _size;
-    copy->_pins = _pins ? (id<CharonBrailleMapPinStore>)[NSDictionary dictionaryWithDictionary:(NSDictionary *)_pins] : nil;
+    copy->_pins = _pins ? (id<RevenantBrailleMapPinStore>)[NSDictionary dictionaryWithDictionary:(NSDictionary *)_pins] : nil;
     return copy;
 }
 

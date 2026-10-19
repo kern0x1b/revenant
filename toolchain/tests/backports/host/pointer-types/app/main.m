@@ -20,18 +20,18 @@ static NSString *class_name(id object)
     if (!object)
         return @"nil";
     NSString *name = NSStringFromClass([object class]);
-    return [name hasPrefix:@"CharonPort"] ? [name substringFromIndex:10] : name;
+    return [name hasPrefix:@"RevenantPort"] ? [name substringFromIndex:12] : name;
 }
 
-@interface CharonPointerDelegate : NSObject <UIPointerInteractionDelegate>
+@interface RevenantPointerDelegate : NSObject <UIPointerInteractionDelegate>
 @end
 
-@implementation CharonPointerDelegate
+@implementation RevenantPointerDelegate
 @end
 
 static void interaction_checks(UIView *view)
 {
-    CharonPointerDelegate *delegate = [[CharonPointerDelegate alloc] init];
+    RevenantPointerDelegate *delegate = [[RevenantPointerDelegate alloc] init];
     UIPointerInteraction *interaction = [[UIPointerInteraction alloc] initWithDelegate:delegate];
     report("interaction-class", class_name(interaction));
     report("interaction-enabled-default", yes_no(interaction.enabled));
@@ -48,7 +48,7 @@ static void interaction_checks(UIView *view)
     report("interaction-view-after-remove", interaction.view ? @"set" : @"nil");
     report("interaction-listed-after-remove", yes_no([view.interactions containsObject:interaction]));
     @autoreleasepool {
-        CharonPointerDelegate *lone = [[CharonPointerDelegate alloc] init];
+        RevenantPointerDelegate *lone = [[RevenantPointerDelegate alloc] init];
         UIPointerInteraction *held = [[UIPointerInteraction alloc] initWithDelegate:lone];
         lone = nil;
         report("interaction-delegate-weak", held.delegate ? @"held" : @"nil");
@@ -92,10 +92,10 @@ static void lock_checks(UIViewController *root)
     report("scene-lock-locked-after-update", yes_no(state.locked));
 }
 
-@interface CharonAppDelegate : UIResponder <UIApplicationDelegate>
+@interface RevenantAppDelegate : UIResponder <UIApplicationDelegate>
 @end
 
-@implementation CharonAppDelegate
+@implementation RevenantAppDelegate
 
 - (UISceneConfiguration *)application:(UIApplication *)application configurationForConnectingSceneSession:(UISceneSession *)session options:(UISceneConnectionOptions *)options
 {
@@ -104,21 +104,21 @@ static void lock_checks(UIViewController *root)
 
 @end
 
-@interface CharonSceneDelegate : UIResponder <UIWindowSceneDelegate>
+@interface RevenantSceneDelegate : UIResponder <UIWindowSceneDelegate>
 @property (nonatomic, strong) UIWindow *window;
 @end
 
-@implementation CharonSceneDelegate
+@implementation RevenantSceneDelegate
 
 - (void)scene:(UIScene *)scene willConnectToSession:(UISceneSession *)session options:(UISceneConnectionOptions *)connectionOptions
 {
-    const char *path = getenv("CHARON_SCENE_OUT");
+    const char *path = getenv("REVENANT_SCENE_OUT");
     out = fopen(path ? path : "/dev/stdout", "w");
     UIViewController *root = [[UIViewController alloc] init];
     self.window = [[UIWindow alloc] initWithWindowScene:(UIWindowScene *)scene];
     self.window.rootViewController = root;
     [self.window makeKeyAndVisible];
-#ifdef CHARON_PORT_SIDE
+#ifdef REVENANT_PORT_SIDE
     side = "port";
 #else
     side = "host";
@@ -136,6 +136,6 @@ static void lock_checks(UIViewController *root)
 int main(int argc, char *argv[])
 {
     @autoreleasepool {
-        return UIApplicationMain(argc, argv, nil, NSStringFromClass([CharonAppDelegate class]));
+        return UIApplicationMain(argc, argv, nil, NSStringFromClass([RevenantAppDelegate class]));
     }
 }

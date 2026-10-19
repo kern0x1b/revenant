@@ -53,7 +53,7 @@ local CLASS = [==[// {klass}, the {release} command event, and the one property 
 // rather than only the bytes.
 
 #import <Foundation/Foundation.h>
-#if defined(CHARON_MEDIAPLAYER_STANDIN)
+#if defined(REVENANT_MEDIAPLAYER_STANDIN)
 #import "MPMediaItemStandin.h"
 #else
 #import <MediaPlayer/MediaPlayer.h>
@@ -99,7 +99,7 @@ local CHECK = [==[// {klass}'s contract: the class is a kind of the base the por
 @implementation MPNowPlayingInfoLanguageOption
 @end
 
-#define CHARON_MEDIAPLAYER_STANDIN 1
+#define REVENANT_MEDIAPLAYER_STANDIN 1
 #include "{source}"
 
 static int failures = 0;

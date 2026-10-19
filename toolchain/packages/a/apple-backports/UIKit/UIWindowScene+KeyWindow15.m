@@ -2,7 +2,7 @@
 
 #pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
 
-@implementation UIWindowScene (CharonKeyWindow15)
+@implementation UIWindowScene (RevenantKeyWindow15)
 
 - (UIWindow *)keyWindow
 {

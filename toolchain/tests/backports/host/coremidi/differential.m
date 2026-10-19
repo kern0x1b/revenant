@@ -5,7 +5,7 @@
 #include <time.h>
 
 #include <CoreMIDI/MIDIMessages.h>
-#include "CharonCoreMIDI.h"
+#include "RevenantCoreMIDI.h"
 
 static int gChecks = 0;
 static int gFailures = 0;
@@ -44,7 +44,7 @@ static size_t bytes_of_word(uint32_t word, uint8_t *bytes)
     return (bytes[0] & 0xF0) == 0xC0 || (bytes[0] & 0xF0) == 0xD0 ? 2 : 3;
 }
 
-static size_t words_of_bytes(const CharonMIDIBytes *bytes, uint32_t *words)
+static size_t words_of_bytes(const RevenantMIDIBytes *bytes, uint32_t *words)
 {
     size_t count = 0;
     for (size_t i = 0; i < bytes->count;) {
@@ -63,29 +63,29 @@ static size_t words_of_bytes(const CharonMIDIBytes *bytes, uint32_t *words)
 
 static void check_scaling_laws(void)
 {
-    check(CharonMIDIUp16From7(0) == 0 && CharonMIDIUp16From7(127) == 0xFFFF, "scaling: 16-bit ends", "");
-    check(CharonMIDIUp32From7(0) == 0 && CharonMIDIUp32From7(127) == 0xFFFFFFFFu, "scaling: 32-bit ends", "");
-    check(CharonMIDIUp32From7(64) == 0x80000000u, "scaling: 32-bit centre", "");
+    check(RevenantMIDIUp16From7(0) == 0 && RevenantMIDIUp16From7(127) == 0xFFFF, "scaling: 16-bit ends", "");
+    check(RevenantMIDIUp32From7(0) == 0 && RevenantMIDIUp32From7(127) == 0xFFFFFFFFu, "scaling: 32-bit ends", "");
+    check(RevenantMIDIUp32From7(64) == 0x80000000u, "scaling: 32-bit centre", "");
     int differing = 0;
     for (uint64_t value = 0; value < 128; value++) {
         uint64_t rule = value <= 64 ? value << 25 : 0x80000000ull + (2 * (value - 64) * 0x7FFFFFFFull + 63) / 126;
-        if (CharonMIDIUp32From7((UInt32)value) != (UInt32)rule)
+        if (RevenantMIDIUp32From7((UInt32)value) != (UInt32)rule)
             differing++;
     }
     check(differing == 0, "scaling: the 32-bit rule in 32-bit arithmetic is the 64-bit rule at all 128 inputs", "");
-    check(CharonMIDIUp32From14(0) == 0 && CharonMIDIUp32From14(16383) == 0xFFFFFFFFu, "scaling: 14-bit ends", "");
-    check(CharonMIDIUp32From14(8192) == 0x80000000u, "scaling: 14-bit centre", "");
-    check(CharonMIDIUMPWordCount(0x20000000u) == 1 && CharonMIDIUMPWordCount(0x40000000u) == 2 && CharonMIDIUMPWordCount(0x50000000u) == 4,
+    check(RevenantMIDIUp32From14(0) == 0 && RevenantMIDIUp32From14(16383) == 0xFFFFFFFFu, "scaling: 14-bit ends", "");
+    check(RevenantMIDIUp32From14(8192) == 0x80000000u, "scaling: 14-bit centre", "");
+    check(RevenantMIDIUMPWordCount(0x20000000u) == 1 && RevenantMIDIUMPWordCount(0x40000000u) == 2 && RevenantMIDIUMPWordCount(0x50000000u) == 4,
           "word counts: one, two and four words by type", "");
 }
 
-typedef struct charon_expect {
+typedef struct revenant_expect {
     char tag[40];
     unsigned int in[4];
     int inCount;
     unsigned int out[8];
     int outCount;
-} charon_expect;
+} revenant_expect;
 
 static const char *gOracleDir;
 
@@ -115,7 +115,7 @@ static int parse_words(const char *text, size_t length, unsigned int *out, int m
     return count;
 }
 
-static charon_expect *load_rows(const char *name, size_t *count)
+static revenant_expect *load_rows(const char *name, size_t *count)
 {
     char path[1024];
     snprintf(path, sizeof(path), "%s/%s", gOracleDir ? gOracleDir : ".", name);
@@ -124,7 +124,7 @@ static charon_expect *load_rows(const char *name, size_t *count)
     if (!file)
         return NULL;
     size_t capacity = 1024, used = 0;
-    charon_expect *rows = malloc(capacity * sizeof(charon_expect));
+    revenant_expect *rows = malloc(capacity * sizeof(revenant_expect));
     char line[512];
     int bad = 0;
     while (rows && fgets(line, sizeof(line), file)) {
@@ -138,14 +138,14 @@ static charon_expect *load_rows(const char *name, size_t *count)
         }
         if (used == capacity) {
             capacity *= 2;
-            charon_expect *grown = realloc(rows, capacity * sizeof(charon_expect));
+            revenant_expect *grown = realloc(rows, capacity * sizeof(revenant_expect));
             if (!grown) {
                 bad++;
                 break;
             }
             rows = grown;
         }
-        charon_expect *row = &rows[used];
+        revenant_expect *row = &rows[used];
         memcpy(row->tag, line, (size_t)(inMark - line));
         row->tag[inMark - line] = 0;
         char *inWords = inMark + 5;
@@ -174,18 +174,18 @@ static charon_expect *load_rows(const char *name, size_t *count)
 static void check_up_rows(void)
 {
     size_t count = 0;
-    charon_expect *rows = load_rows("batch-up.txt", &count);
+    revenant_expect *rows = load_rows("batch-up.txt", &count);
     int failed = 0;
     char detail[160];
     for (size_t i = 0; i < count; i++) {
-        const charon_expect *row = &rows[i];
+        const revenant_expect *row = &rows[i];
         uint8_t bytes[3];
         size_t size = bytes_of_word(row->in[0], bytes);
-        CharonMIDIParser parser;
+        RevenantMIDIParser parser;
         memset(&parser, 0, sizeof(parser));
-        CharonMIDIWords words;
+        RevenantMIDIWords words;
         memset(&words, 0, sizeof(words));
-        CharonMIDIParseBytes(&parser, bytes, size, 2, 0, &words);
+        RevenantMIDIParseBytes(&parser, bytes, size, 2, 0, &words);
         if (!same_words(words.words, words.count, row->out, row->outCount, detail, sizeof(detail))) {
             if (failed < 5)
                 printf("    %s (in %08X): %s\n", row->tag, row->in[0], detail);
@@ -203,16 +203,16 @@ static void check_up_rows(void)
 static void check_down_rows(void)
 {
     size_t count = 0;
-    charon_expect *rows = load_rows("batch-down.txt", &count);
+    revenant_expect *rows = load_rows("batch-down.txt", &count);
     int failed = 0;
     char detail[160];
     for (size_t i = 0; i < count; i++) {
-        const charon_expect *row = &rows[i];
-        CharonMIDIRPN rpn[16];
+        const revenant_expect *row = &rows[i];
+        RevenantMIDIRPN rpn[16];
         memset(rpn, 0, sizeof(rpn));
-        CharonMIDIBytes bytes;
+        RevenantMIDIBytes bytes;
         memset(&bytes, 0, sizeof(bytes));
-        CharonMIDIUMPToBytes(row->in, (size_t)row->inCount, rpn, &bytes);
+        RevenantMIDIUMPToBytes(row->in, (size_t)row->inCount, rpn, &bytes);
         uint32_t words[16];
         size_t produced = words_of_bytes(&bytes, words);
         if (!same_words(words, produced, row->out, row->outCount, detail, sizeof(detail))) {
@@ -247,11 +247,11 @@ static void check_bytes_to_ump(void)
         {"F0 01 02 03 F7", {0xF0, 0x01, 0x02, 0x03, 0xF7}, 5, {0x30030102u, 0x03000000u}, 2},
     };
     for (size_t c = 0; c < sizeof(cases) / sizeof(cases[0]); c++) {
-        CharonMIDIParser parser;
+        RevenantMIDIParser parser;
         memset(&parser, 0, sizeof(parser));
-        CharonMIDIWords words;
+        RevenantMIDIWords words;
         memset(&words, 0, sizeof(words));
-        CharonMIDIParseBytes(&parser, cases[c].bytes, (size_t)cases[c].count, 1, 0, &words);
+        RevenantMIDIParseBytes(&parser, cases[c].bytes, (size_t)cases[c].count, 1, 0, &words);
         char detail[160];
         int passed = same_words(words.words, words.count, cases[c].want, cases[c].wantCount, detail, sizeof(detail));
         char name[96];
@@ -263,7 +263,7 @@ static void check_bytes_to_ump(void)
 
 static void check_rpn_sequence(void)
 {
-    CharonMIDIRPN rpn[16];
+    RevenantMIDIRPN rpn[16];
     memset(rpn, 0, sizeof(rpn));
     struct {
         const char *name;
@@ -279,9 +279,9 @@ static void check_rpn_sequence(void)
     };
     for (size_t c = 0; c < sizeof(cases) / sizeof(cases[0]); c++) {
         uint32_t words[2] = {cases[c].word0, cases[c].word1};
-        CharonMIDIBytes bytes;
+        RevenantMIDIBytes bytes;
         memset(&bytes, 0, sizeof(bytes));
-        CharonMIDIUMPToBytes(words, 2, rpn, &bytes);
+        RevenantMIDIUMPToBytes(words, 2, rpn, &bytes);
         int passed = bytes.count == (size_t)cases[c].wantCount && memcmp(bytes.bytes, cases[c].want, bytes.count) == 0;
         char name[96], detail[64];
         snprintf(name, sizeof(name), "2.0 -> 1.0 %s", cases[c].name);
@@ -295,11 +295,11 @@ static void check_dropped_messages(void)
 {
     uint32_t words[][2] = {{0x40603C00u, 0x40000000u}, {0x40F03C00u, 0x00000001u}, {0x40103C00u, 0x40000000u}, {0x40400000u, 0x00400000u}};
     for (size_t c = 0; c < sizeof(words) / sizeof(words[0]); c++) {
-        CharonMIDIRPN rpn[16];
+        RevenantMIDIRPN rpn[16];
         memset(rpn, 0, sizeof(rpn));
-        CharonMIDIBytes bytes;
+        RevenantMIDIBytes bytes;
         memset(&bytes, 0, sizeof(bytes));
-        CharonMIDIUMPToBytes(words[c], 2, rpn, &bytes);
+        RevenantMIDIUMPToBytes(words[c], 2, rpn, &bytes);
         char name[96];
         snprintf(name, sizeof(name), "2.0 %08X dropped, as macOS drops it", words[c][0]);
         check(bytes.count == 0, name, "produced bytes");
@@ -328,12 +328,12 @@ static void check_sysex_chunks(void)
          {0x30010100u, 0x00000000u, 0x10F80000u, 0x30300000u, 0x00000000u}, 5},
     };
     for (size_t c = 0; c < sizeof(cases) / sizeof(cases[0]); c++) {
-        CharonMIDIParser parser;
+        RevenantMIDIParser parser;
         memset(&parser, 0, sizeof(parser));
-        CharonMIDIWords words;
+        RevenantMIDIWords words;
         memset(&words, 0, sizeof(words));
-        CharonMIDIParseBytes(&parser, cases[c].bytes, (size_t)cases[c].count, 2, 0, &words);
-        CharonMIDIParseFlush(&parser, 0, &words);
+        RevenantMIDIParseBytes(&parser, cases[c].bytes, (size_t)cases[c].count, 2, 0, &words);
+        RevenantMIDIParseFlush(&parser, 0, &words);
         char detail[160], name[96];
         int passed = same_words(words.words, words.count, cases[c].want, cases[c].wantCount, detail, sizeof(detail));
         snprintf(name, sizeof(name), "SysEx %s -> UMP", cases[c].name);
@@ -344,14 +344,14 @@ static void check_sysex_chunks(void)
 
 static void check_sysex_split(void)
 {
-    CharonMIDIParser parser;
+    RevenantMIDIParser parser;
     memset(&parser, 0, sizeof(parser));
-    CharonMIDIWords words;
+    RevenantMIDIWords words;
     memset(&words, 0, sizeof(words));
     uint8_t first[3] = {0xF0, 1, 2}, second[3] = {3, 4, 0xF7};
-    CharonMIDIParseBytes(&parser, first, 3, 2, 0, &words);
-    CharonMIDIParseBytes(&parser, second, 3, 2, 0, &words);
-    CharonMIDIParseFlush(&parser, 0, &words);
+    RevenantMIDIParseBytes(&parser, first, 3, 2, 0, &words);
+    RevenantMIDIParseBytes(&parser, second, 3, 2, 0, &words);
+    RevenantMIDIParseFlush(&parser, 0, &words);
     const uint32_t want[2] = {0x30040102u, 0x03040000u};
     char detail[160];
     check(same_words(words.words, words.count, want, 2, detail, sizeof(detail)), "SysEx split over two packets of one list", detail);
@@ -369,28 +369,28 @@ static void check_event_list_rules(void)
     list->protocol = 1;
     list->numPackets = 0;
     MIDIEventPacket *end = &list->packet[0];
-    end = CharonMIDIEventListAdd(list, sizeof(buffer), end, 7, 2, words);
-    end = CharonMIDIEventListAdd(list, sizeof(buffer), end, 7, 2, words + 2);
+    end = RevenantMIDIEventListAdd(list, sizeof(buffer), end, 7, 2, words);
+    end = RevenantMIDIEventListAdd(list, sizeof(buffer), end, 7, 2, words + 2);
     check(list->numPackets == 1 && list->packet[0].wordCount == 4 && list->packet[0].timeStamp == 7 &&
           list->packet[0].words[3] == 0x20900003u, "event list: same time stamp merges (macOS probe3 A)", "");
 
     list->numPackets = 0;
     end = &list->packet[0];
-    end = CharonMIDIEventListAdd(list, sizeof(buffer), end, 7, 1, words);
-    end = CharonMIDIEventListAdd(list, sizeof(buffer), end, 8, 1, words + 1);
-    end = CharonMIDIEventListAdd(list, sizeof(buffer), end, 8, 1, words + 2);
+    end = RevenantMIDIEventListAdd(list, sizeof(buffer), end, 7, 1, words);
+    end = RevenantMIDIEventListAdd(list, sizeof(buffer), end, 8, 1, words + 1);
+    end = RevenantMIDIEventListAdd(list, sizeof(buffer), end, 8, 1, words + 2);
     MIDIEventPacket *second = MIDIEventPacketNext(&list->packet[0]);
     check(list->numPackets == 2 && list->packet[0].wordCount == 1 && second->wordCount == 2 &&
           second->timeStamp == 8, "event list: new time stamp starts a packet (macOS probe3 B)", "");
 
     list->numPackets = 0;
     end = &list->packet[0];
-    check(CharonMIDIEventListAdd(list, sizeof(buffer), end, 7, 0, words) == end && list->numPackets == 0,
+    check(RevenantMIDIEventListAdd(list, sizeof(buffer), end, 7, 0, words) == end && list->numPackets == 0,
           "event list: zero words adds nothing (macOS probe3 G)", "");
 
     list->numPackets = 0;
     end = &list->packet[0];
-    end = CharonMIDIEventListAdd(list, sizeof(buffer), end, 7, 65, words);
+    end = RevenantMIDIEventListAdd(list, sizeof(buffer), end, 7, 65, words);
     check(end != NULL && list->numPackets == 1 && list->packet[0].wordCount == 65,
           "event list: 65 words kept whole (macOS probe3 D)", "");
 
@@ -401,7 +401,7 @@ static void check_event_list_rules(void)
     MIDIEventPacket *at = &tiny->packet[0];
     int merged = 0;
     while (at) {
-        MIDIEventPacket *next = CharonMIDIEventListAdd(tiny, sizeof(small), at, 5, 1, words);
+        MIDIEventPacket *next = RevenantMIDIEventListAdd(tiny, sizeof(small), at, 5, 1, words);
         if (!next)
             break;
         at = next;
@@ -417,7 +417,7 @@ static void check_event_list_rules(void)
     shortList->numPackets = 0;
     end = &shortList->packet[0];
     while (end) {
-        MIDIEventPacket *next = CharonMIDIEventListAdd(shortList, sizeof(sixty), end, (MIDITimeStamp)packets, 1, words);
+        MIDIEventPacket *next = RevenantMIDIEventListAdd(shortList, sizeof(sixty), end, (MIDITimeStamp)packets, 1, words);
         if (!next)
             break;
         end = next;
@@ -495,43 +495,43 @@ static void check_event_list_linear(void)
     check(small > 0 && large < 8 * small, "event list: building by MIDIEventListAdd is linear in its packets", detail);
 }
 
-extern const CFStringRef charon_host_kMIDIPropertyUMPActiveGroupBitmap;
-extern const CFStringRef charon_host_kMIDIPropertyUMPCanTransmitGroupless;
-extern const CFStringRef charon_host_kMIDIPropertyAssociatedEndpoint;
-extern NSString *const charon_host_MIDICIDeviceObjectKey;
-extern NSString *const charon_host_MIDICIProfileObjectKey;
-extern NSString *const charon_host_MIDIUMPEndpointObjectKey;
-extern NSString *const charon_host_MIDIUMPFunctionBlockObjectKey;
-extern NSString *const charon_host_MIDICIDeviceWasAddedNotification;
-extern NSString *const charon_host_MIDICIDeviceWasRemovedNotification;
-extern NSString *const charon_host_MIDICIProfileWasRemovedNotification;
-extern NSString *const charon_host_MIDICIProfileWasUpdatedNotification;
-extern NSString *const charon_host_MIDIUMPEndpointWasAddedNotification;
-extern NSString *const charon_host_MIDIUMPEndpointWasRemovedNotification;
-extern NSString *const charon_host_MIDIUMPEndpointWasUpdatedNotification;
-extern NSString *const charon_host_MIDIUMPFunctionBlockWasUpdatedNotification;
+extern const CFStringRef revenant_host_kMIDIPropertyUMPActiveGroupBitmap;
+extern const CFStringRef revenant_host_kMIDIPropertyUMPCanTransmitGroupless;
+extern const CFStringRef revenant_host_kMIDIPropertyAssociatedEndpoint;
+extern NSString *const revenant_host_MIDICIDeviceObjectKey;
+extern NSString *const revenant_host_MIDICIProfileObjectKey;
+extern NSString *const revenant_host_MIDIUMPEndpointObjectKey;
+extern NSString *const revenant_host_MIDIUMPFunctionBlockObjectKey;
+extern NSString *const revenant_host_MIDICIDeviceWasAddedNotification;
+extern NSString *const revenant_host_MIDICIDeviceWasRemovedNotification;
+extern NSString *const revenant_host_MIDICIProfileWasRemovedNotification;
+extern NSString *const revenant_host_MIDICIProfileWasUpdatedNotification;
+extern NSString *const revenant_host_MIDIUMPEndpointWasAddedNotification;
+extern NSString *const revenant_host_MIDIUMPEndpointWasRemovedNotification;
+extern NSString *const revenant_host_MIDIUMPEndpointWasUpdatedNotification;
+extern NSString *const revenant_host_MIDIUMPFunctionBlockWasUpdatedNotification;
 
 static void check_constants(void)
 {
-    check([(__bridge NSString *)charon_host_kMIDIPropertyUMPActiveGroupBitmap isEqualToString:@"active group bitmap"],
+    check([(__bridge NSString *)revenant_host_kMIDIPropertyUMPActiveGroupBitmap isEqualToString:@"active group bitmap"],
           "constant kMIDIPropertyUMPActiveGroupBitmap is \"active group bitmap\", as on macOS after MIDIClientCreate", "");
-    check([(__bridge NSString *)charon_host_kMIDIPropertyUMPCanTransmitGroupless isEqualToString:@"ump endpoint"],
+    check([(__bridge NSString *)revenant_host_kMIDIPropertyUMPCanTransmitGroupless isEqualToString:@"ump endpoint"],
           "constant kMIDIPropertyUMPCanTransmitGroupless is \"ump endpoint\", as on macOS after MIDIClientCreate", "");
-    check([(__bridge NSString *)charon_host_kMIDIPropertyAssociatedEndpoint isEqualToString:@"associated endpoint"],
+    check([(__bridge NSString *)revenant_host_kMIDIPropertyAssociatedEndpoint isEqualToString:@"associated endpoint"],
           "constant kMIDIPropertyAssociatedEndpoint is \"associated endpoint\", as on macOS after MIDIClientCreate", "");
     NSDictionary *names = @{
-        @"MIDICIDeviceObjectKey": charon_host_MIDICIDeviceObjectKey,
-        @"MIDICIProfileObjectKey": charon_host_MIDICIProfileObjectKey,
-        @"MIDIUMPEndpointObjectKey": charon_host_MIDIUMPEndpointObjectKey,
-        @"MIDIUMPFunctionBlockObjectKey": charon_host_MIDIUMPFunctionBlockObjectKey,
-        @"MIDICIDeviceWasAddedNotification": charon_host_MIDICIDeviceWasAddedNotification,
-        @"MIDICIDeviceWasRemovedNotification": charon_host_MIDICIDeviceWasRemovedNotification,
-        @"MIDICIProfileWasRemovedNotification": charon_host_MIDICIProfileWasRemovedNotification,
-        @"MIDICIProfileWasUpdatedNotification": charon_host_MIDICIProfileWasUpdatedNotification,
-        @"MIDIUMPEndpointWasAddedNotification": charon_host_MIDIUMPEndpointWasAddedNotification,
-        @"MIDIUMPEndpointWasRemovedNotification": charon_host_MIDIUMPEndpointWasRemovedNotification,
-        @"MIDIUMPEndpointWasUpdatedNotification": charon_host_MIDIUMPEndpointWasUpdatedNotification,
-        @"MIDIUMPFunctionBlockWasUpdatedNotification": charon_host_MIDIUMPFunctionBlockWasUpdatedNotification,
+        @"MIDICIDeviceObjectKey": revenant_host_MIDICIDeviceObjectKey,
+        @"MIDICIProfileObjectKey": revenant_host_MIDICIProfileObjectKey,
+        @"MIDIUMPEndpointObjectKey": revenant_host_MIDIUMPEndpointObjectKey,
+        @"MIDIUMPFunctionBlockObjectKey": revenant_host_MIDIUMPFunctionBlockObjectKey,
+        @"MIDICIDeviceWasAddedNotification": revenant_host_MIDICIDeviceWasAddedNotification,
+        @"MIDICIDeviceWasRemovedNotification": revenant_host_MIDICIDeviceWasRemovedNotification,
+        @"MIDICIProfileWasRemovedNotification": revenant_host_MIDICIProfileWasRemovedNotification,
+        @"MIDICIProfileWasUpdatedNotification": revenant_host_MIDICIProfileWasUpdatedNotification,
+        @"MIDIUMPEndpointWasAddedNotification": revenant_host_MIDIUMPEndpointWasAddedNotification,
+        @"MIDIUMPEndpointWasRemovedNotification": revenant_host_MIDIUMPEndpointWasRemovedNotification,
+        @"MIDIUMPEndpointWasUpdatedNotification": revenant_host_MIDIUMPEndpointWasUpdatedNotification,
+        @"MIDIUMPFunctionBlockWasUpdatedNotification": revenant_host_MIDIUMPFunctionBlockWasUpdatedNotification,
     };
     int matched = 0;
     for (NSString *name in names) {
@@ -545,12 +545,12 @@ static void check_constants(void)
 
 #include "visit-expectations.h"
 
-extern void charon_host_MIDIEventListForEachEvent(const MIDIEventList *evtlist, MIDIEventVisitor visitor, void *visitorContext);
+extern void revenant_host_MIDIEventListForEachEvent(const MIDIEventList *evtlist, MIDIEventVisitor visitor, void *visitorContext);
 
 static MIDIUniversalMessage gVisited[4];
 static int gVisitedCount;
 
-static void charon_visit_record(void *context, MIDITimeStamp timeStamp, MIDIUniversalMessage message)
+static void revenant_visit_record(void *context, MIDITimeStamp timeStamp, MIDIUniversalMessage message)
 {
     if (gVisitedCount < 4)
         gVisited[gVisitedCount++] = message;
@@ -559,18 +559,18 @@ static void charon_visit_record(void *context, MIDITimeStamp timeStamp, MIDIUniv
 static void check_visitor(void)
 {
     int failed = 0;
-    size_t total = sizeof(charon_visit_cases) / sizeof(charon_visit_cases[0]);
+    size_t total = sizeof(revenant_visit_cases) / sizeof(revenant_visit_cases[0]);
     for (size_t c = 0; c < total; c++) {
-        const charon_visit_case *row = &charon_visit_cases[c];
+        const revenant_visit_case *row = &revenant_visit_cases[c];
         Byte buffer[256];
         MIDIEventList *list = (MIDIEventList *)buffer;
         UInt32 words[4];
         for (int w = 0; w < row->wordCount; w++)
             words[w] = row->words[w];
         MIDIEventPacket *end = MIDIEventListInit(list, row->wordCount > 1 ? kMIDIProtocol_2_0 : kMIDIProtocol_1_0);
-        CharonMIDIEventListAdd(list, sizeof(buffer), end, 42, (size_t)row->wordCount, words);
+        RevenantMIDIEventListAdd(list, sizeof(buffer), end, 42, (size_t)row->wordCount, words);
         gVisitedCount = 0;
-        charon_host_MIDIEventListForEachEvent(list, charon_visit_record, NULL);
+        revenant_host_MIDIEventListForEachEvent(list, revenant_visit_record, NULL);
         const unsigned char *got = gVisitedCount == 1 ? (const unsigned char *)&gVisited[0] : NULL;
         size_t from = 8, to = 23;
         unsigned int type = row->bytes[0];
@@ -595,8 +595,8 @@ static void check_visitor(void)
     check(failed == 0, name, detail);
 }
 
-extern OSStatus charon_host_MIDIEventPacketSysexBytesForGroup(const MIDIEventPacket *pkt, UInt8 groupIndex, CFDataRef *outData);
-extern OSStatus charon_host_MIDIDeviceNewEntity(MIDIDeviceRef device, CFStringRef name, MIDIProtocolID protocol, Boolean embedded,
+extern OSStatus revenant_host_MIDIEventPacketSysexBytesForGroup(const MIDIEventPacket *pkt, UInt8 groupIndex, CFDataRef *outData);
+extern OSStatus revenant_host_MIDIDeviceNewEntity(MIDIDeviceRef device, CFStringRef name, MIDIProtocolID protocol, Boolean embedded,
                                                 ItemCount numSourceEndpoints, ItemCount numDestinationEndpoints, MIDIEntityRef *newEntity);
 
 static int bytes_equal_hex(CFDataRef data, const char *want)
@@ -637,9 +637,9 @@ static void check_sysex_bytes_for_group(void)
         Byte buffer[256];
         MIDIEventList *list = (MIDIEventList *)buffer;
         MIDIEventPacket *end = MIDIEventListInit(list, kMIDIProtocol_2_0);
-        CharonMIDIEventListAdd(list, sizeof(buffer), end, 0, (size_t)cases[c].wordCount, cases[c].words);
+        RevenantMIDIEventListAdd(list, sizeof(buffer), end, 0, (size_t)cases[c].wordCount, cases[c].words);
         CFDataRef data = NULL;
-        OSStatus status = charon_host_MIDIEventPacketSysexBytesForGroup(&list->packet[0], cases[c].group, &data);
+        OSStatus status = revenant_host_MIDIEventPacketSysexBytesForGroup(&list->packet[0], cases[c].group, &data);
         int same = status == cases[c].status;
         if (cases[c].want)
             same = same && bytes_equal_hex(data, cases[c].want);
@@ -693,9 +693,9 @@ static void check_sysex_long(void)
         Byte buffer[256];
         MIDIEventList *list = (MIDIEventList *)buffer;
         MIDIEventPacket *end = MIDIEventListInit(list, kMIDIProtocol_2_0);
-        CharonMIDIEventListAdd(list, sizeof(buffer), end, 0, 24, words);
+        RevenantMIDIEventListAdd(list, sizeof(buffer), end, 0, 24, words);
         CFDataRef data = NULL;
-        OSStatus status = charon_host_MIDIEventPacketSysexBytesForGroup(&list->packet[0], 0, &data);
+        OSStatus status = revenant_host_MIDIEventPacketSysexBytesForGroup(&list->packet[0], 0, &data);
         int same = status == 0 && bytes_equal_hex(data, cases[c].want);
         if (!same) {
             printf("    sysex long %s: status %d\n", cases[c].name, (int)status);
@@ -717,14 +717,14 @@ static void check_event_list_wrap(void)
     list->protocol = kMIDIProtocol_2_0;
     list->numPackets = 0;
     UInt32 word = 0;
-    MIDIEventPacket *next = CharonMIDIEventListAdd(list, sizeof(buffer), &list->packet[0], 0, SIZE_MAX / 2, &word);
-    check(next == NULL && list->numPackets == 0, "CharonMIDIEventListAdd refuses a word count whose byte size wraps", "");
+    MIDIEventPacket *next = RevenantMIDIEventListAdd(list, sizeof(buffer), &list->packet[0], 0, SIZE_MAX / 2, &word);
+    check(next == NULL && list->numPackets == 0, "RevenantMIDIEventListAdd refuses a word count whose byte size wraps", "");
 }
 
 static void check_new_entity_device_zero(void)
 {
     MIDIEntityRef entity = 99;
-    OSStatus status = charon_host_MIDIDeviceNewEntity(0, CFSTR("x"), kMIDIProtocol_1_0, false, 0, 0, &entity);
+    OSStatus status = revenant_host_MIDIDeviceNewEntity(0, CFSTR("x"), kMIDIProtocol_1_0, false, 0, 0, &entity);
     check(status == -50 && entity == 0, "MIDIDeviceNewEntity on device 0: paramErr and no entity, as macOS", "");
 }
 
@@ -746,14 +746,14 @@ static size_t hex_bytes(const char *text, uint8_t *out)
 
 static void check_ble_case(const char *name, const char *const *packets, int packetCount, const char *want)
 {
-    CharonBLEParser parser;
+    RevenantBLEParser parser;
     memset(&parser, 0, sizeof(parser));
     uint8_t got[1024];
     size_t count = 0;
     for (int p = 0; p < packetCount; p++) {
         uint8_t data[256];
         size_t n = hex_bytes(packets[p], data);
-        count += CharonBLEMIDIParse(&parser, data, n, got + count);
+        count += RevenantBLEMIDIParse(&parser, data, n, got + count);
     }
     uint8_t wantBytes[1024];
     size_t wantCount = hex_bytes(want, wantBytes);
@@ -812,12 +812,12 @@ static void check_system_words(void)
     };
     int failed = 0;
     for (size_t c = 0; c < sizeof(cases) / sizeof(cases[0]); c++) {
-        CharonMIDIRPN rpn[16];
+        RevenantMIDIRPN rpn[16];
         memset(rpn, 0, sizeof(rpn));
-        CharonMIDIBytes bytes;
+        RevenantMIDIBytes bytes;
         memset(&bytes, 0, sizeof(bytes));
         UInt32 word = cases[c].word;
-        CharonMIDIUMPToBytes(&word, 1, rpn, &bytes);
+        RevenantMIDIUMPToBytes(&word, 1, rpn, &bytes);
         uint8_t want[8];
         size_t wantCount = hex_bytes(cases[c].want, want);
         int same = !bytes.failed && bytes.count == wantCount && memcmp(bytes.bytes, want, wantCount) == 0;
@@ -855,9 +855,9 @@ static void check_visit_word_sizes(void)
         MIDIEventList *list = (MIDIEventList *)buffer;
         UInt32 words[4] = {cases[c].head, 0x00000000u, 0x10F80000u, 0x20903C7Fu};
         MIDIEventPacket *end = MIDIEventListInit(list, kMIDIProtocol_2_0);
-        CharonMIDIEventListAdd(list, sizeof(buffer), end, 42, 4, words);
+        RevenantMIDIEventListAdd(list, sizeof(buffer), end, 42, 4, words);
         gVisitedCount = 0;
-        charon_host_MIDIEventListForEachEvent(list, charon_visit_record, NULL);
+        revenant_host_MIDIEventListForEachEvent(list, revenant_visit_record, NULL);
         if (gVisitedCount != cases[c].events) {
             printf("    visitor %s: %d events, macOS %d\n", cases[c].name, gVisitedCount, cases[c].events);
             failed++;
@@ -869,8 +869,8 @@ static void check_visit_word_sizes(void)
     check(failed == 0, name, detail);
 }
 
-extern int charon_ump_classes_run(int *checks);
-extern int charon_ports_run(int *checks);
+extern int revenant_ump_classes_run(int *checks);
+extern int revenant_ports_run(int *checks);
 
 int main(int argc, char **argv)
 {
@@ -893,7 +893,7 @@ int main(int argc, char **argv)
         check_sysex_long();
         {
             int umpChecks = 0;
-            gFailures += charon_ump_classes_run(&umpChecks);
+            gFailures += revenant_ump_classes_run(&umpChecks);
             gChecks += umpChecks;
         }
         check_new_entity_device_zero();
@@ -903,7 +903,7 @@ int main(int argc, char **argv)
         check_visit_word_sizes();
         {
             int portChecks = 0;
-            gFailures += charon_ports_run(&portChecks);
+            gFailures += revenant_ports_run(&portChecks);
             gChecks += portChecks;
         }
         printf("checks=%d failures=%d\n", gChecks, gFailures);

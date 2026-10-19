@@ -83,7 +83,7 @@
     return YES;
 }
 
-static NSSet *CharonStringArrayClasses(void)
+static NSSet *RevenantStringArrayClasses(void)
 {
     return [NSSet setWithObjects:[NSArray class], [NSString class], nil];
 }
@@ -92,7 +92,7 @@ static NSSet *CharonStringArrayClasses(void)
 {
     if ((self = [super init])) {
         self.displayName = [coder decodeObjectOfClass:[NSString class] forKey:@"displayName"];
-        self.alternateNames = [coder decodeObjectOfClasses:CharonStringArrayClasses() forKey:@"alternateNames"];
+        self.alternateNames = [coder decodeObjectOfClasses:RevenantStringArrayClasses() forKey:@"alternateNames"];
         self.path = [coder decodeObjectOfClass:[NSString class] forKey:@"path"];
         self.contentURL = [coder decodeObjectOfClass:[NSURL class] forKey:@"contentURL"];
         self.thumbnailURL = [coder decodeObjectOfClass:[NSURL class] forKey:@"thumbnailURL"];
@@ -100,8 +100,8 @@ static NSSet *CharonStringArrayClasses(void)
         self.relatedUniqueIdentifier = [coder decodeObjectOfClass:[NSString class] forKey:@"relatedUniqueIdentifier"];
         self.metadataModificationDate = [coder decodeObjectOfClass:[NSDate class] forKey:@"metadataModificationDate"];
         self.contentType = [coder decodeObjectOfClass:[NSString class] forKey:@"contentType"];
-        self.contentTypeTree = [coder decodeObjectOfClasses:CharonStringArrayClasses() forKey:@"contentTypeTree"];
-        self.keywords = [coder decodeObjectOfClasses:CharonStringArrayClasses() forKey:@"keywords"];
+        self.contentTypeTree = [coder decodeObjectOfClasses:RevenantStringArrayClasses() forKey:@"contentTypeTree"];
+        self.keywords = [coder decodeObjectOfClasses:RevenantStringArrayClasses() forKey:@"keywords"];
         self.title = [coder decodeObjectOfClass:[NSString class] forKey:@"title"];
         self.version = [coder decodeObjectOfClass:[NSString class] forKey:@"version"];
         self.supportsPhoneCall = [coder decodeObjectOfClass:[NSNumber class] forKey:@"supportsPhoneCall"];

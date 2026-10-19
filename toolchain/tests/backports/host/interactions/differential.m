@@ -10,8 +10,8 @@ static SEL named(NSString *selector)
     if (!ours)
         return NSSelectorFromString(selector);
     if ([selector hasPrefix:@"set"])
-        return NSSelectorFromString([@"setCharonHost" stringByAppendingString:[selector substringFromIndex:3]]);
-    return NSSelectorFromString([@"charonHost" stringByAppendingFormat:@"%@%@",
+        return NSSelectorFromString([@"setRevenantHost" stringByAppendingString:[selector substringFromIndex:3]]);
+    return NSSelectorFromString([@"revenantHost" stringByAppendingFormat:@"%@%@",
                                  [[selector substringToIndex:1] uppercaseString], [selector substringFromIndex:1]]);
 }
 
@@ -206,31 +206,31 @@ static void accessibility_script(NSMutableArray *into)
 
 }
 
-extern NSAttributedStringKey const CharonHostUIAccessibilitySpeechAttributeQueueAnnouncement;
-extern NSAttributedStringKey const CharonHostUIAccessibilitySpeechAttributeIPANotation;
-extern NSAttributedStringKey const CharonHostUIAccessibilityTextAttributeHeadingLevel;
-extern NSAttributedStringKey const CharonHostUIAccessibilityTextAttributeCustom;
-extern UIImagePickerControllerInfoKey const CharonHostUIImagePickerControllerImageURL;
-extern UIActivityType const CharonHostUIActivityTypeMarkupAsPDF;
-extern NSNotificationName const CharonHostUIAccessibilityVoiceOverStatusDidChangeNotification;
+extern NSAttributedStringKey const RevenantHostUIAccessibilitySpeechAttributeQueueAnnouncement;
+extern NSAttributedStringKey const RevenantHostUIAccessibilitySpeechAttributeIPANotation;
+extern NSAttributedStringKey const RevenantHostUIAccessibilityTextAttributeHeadingLevel;
+extern NSAttributedStringKey const RevenantHostUIAccessibilityTextAttributeCustom;
+extern UIImagePickerControllerInfoKey const RevenantHostUIImagePickerControllerImageURL;
+extern UIActivityType const RevenantHostUIActivityTypeMarkupAsPDF;
+extern NSNotificationName const RevenantHostUIAccessibilityVoiceOverStatusDidChangeNotification;
 
 static void keys_of_the_port(void)
 {
-    CHECK([CharonHostUIAccessibilitySpeechAttributeQueueAnnouncement isEqual:UIAccessibilitySpeechAttributeQueueAnnouncement],
+    CHECK([RevenantHostUIAccessibilitySpeechAttributeQueueAnnouncement isEqual:UIAccessibilitySpeechAttributeQueueAnnouncement],
           "the queue announcement key is the string UIKit has");
-    CHECK([CharonHostUIAccessibilitySpeechAttributeIPANotation isEqual:UIAccessibilitySpeechAttributeIPANotation],
+    CHECK([RevenantHostUIAccessibilitySpeechAttributeIPANotation isEqual:UIAccessibilitySpeechAttributeIPANotation],
           "the IPA notation key is the string UIKit has");
-    CHECK([CharonHostUIAccessibilityTextAttributeHeadingLevel isEqual:UIAccessibilityTextAttributeHeadingLevel],
+    CHECK([RevenantHostUIAccessibilityTextAttributeHeadingLevel isEqual:UIAccessibilityTextAttributeHeadingLevel],
           "the heading level key is the string UIKit has");
-    CHECK([CharonHostUIAccessibilityTextAttributeCustom isEqual:UIAccessibilityTextAttributeCustom],
+    CHECK([RevenantHostUIAccessibilityTextAttributeCustom isEqual:UIAccessibilityTextAttributeCustom],
           "the custom text key is the string UIKit has");
-    CHECK([CharonHostUIImagePickerControllerImageURL isEqual:UIImagePickerControllerImageURL],
+    CHECK([RevenantHostUIImagePickerControllerImageURL isEqual:UIImagePickerControllerImageURL],
           "the image picker's URL key is the string UIKit has");
-    CHECK([CharonHostUIActivityTypeMarkupAsPDF isEqual:UIActivityTypeMarkupAsPDF],
+    CHECK([RevenantHostUIActivityTypeMarkupAsPDF isEqual:UIActivityTypeMarkupAsPDF],
           "the markup as PDF activity is the identifier UIKit has");
-    CHECK([CharonHostUIAccessibilityVoiceOverStatusDidChangeNotification isEqual:UIAccessibilityVoiceOverStatusDidChangeNotification],
+    CHECK([RevenantHostUIAccessibilityVoiceOverStatusDidChangeNotification isEqual:UIAccessibilityVoiceOverStatusDidChangeNotification],
           "the VoiceOver notification is the name UIKit has");
-    CHECK([CharonHostUIAccessibilityVoiceOverStatusDidChangeNotification isEqual:UIAccessibilityVoiceOverStatusChanged],
+    CHECK([RevenantHostUIAccessibilityVoiceOverStatusDidChangeNotification isEqual:UIAccessibilityVoiceOverStatusChanged],
           "and it is the same name as the one it replaced, which is why it works on a release that only has the old one");
 }
 
@@ -254,10 +254,10 @@ int main(void)
             NSArray *mine = index < port.count ? port[index] : nil;
             NSString *expected = system[index][1], *actual = mine ? mine[1] : @"nothing";
             printf("  %s: %s\n", [system[index][0] UTF8String], expected.UTF8String);
-            charon_check([expected isEqual:actual], [system[index][0] UTF8String],
+            revenant_check([expected isEqual:actual], [system[index][0] UTF8String],
                          [NSString stringWithFormat:@"%@ != %@", actual, expected]);
         }
     }
-    printf("checks=%d failures=%d\n", charon_checks, charon_failures);
-    return charon_failures;
+    printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
+    return revenant_failures;
 }

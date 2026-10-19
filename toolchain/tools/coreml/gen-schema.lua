@@ -176,7 +176,7 @@ local function emit(messages, source)
         "   coremltools. Do not edit by hand: run the generator and read the diff.",
         "   Source: " .. source .. " */",
         "",
-        "const charon_ml_field charon_ml_fields[] = {",
+        "const revenant_ml_field revenant_ml_fields[] = {",
     }
     local names = {}
     for name in pairs(messages) do
@@ -190,10 +190,10 @@ local function emit(messages, source)
         for _, field in ipairs(fields) do
             local flags = {}
             if field.repeated then
-                table.insert(flags, "CHARON_ML_REPEATED")
+                table.insert(flags, "REVENANT_ML_REPEATED")
             end
             if field.oneof >= 0 then
-                table.insert(flags, string.format("CHARON_ML_ONEOF(%d)", field.oneof))
+                table.insert(flags, string.format("REVENANT_ML_ONEOF(%d)", field.oneof))
             end
             table.insert(lines, string.format("    {%s, %d, %d, %d, %d, %s, %s},", c_string(field.name),
                 field.number, field.wire, field.kind, field.element, c_string(field.type),
@@ -203,14 +203,14 @@ local function emit(messages, source)
     end
     table.insert(lines, "};")
     table.insert(lines, "")
-    table.insert(lines, "const charon_ml_message charon_ml_messages[] = {")
+    table.insert(lines, "const revenant_ml_message revenant_ml_messages[] = {")
     for _, message in ipairs(layout) do
         table.insert(lines, string.format("    {%s, %d, %d},", c_string(message.name), message.first, message.count))
     end
     table.insert(lines, "};")
     table.insert(lines, "")
-    table.insert(lines, string.format("const unsigned charon_ml_message_count = %d;", #layout))
-    table.insert(lines, string.format("const unsigned charon_ml_field_count = %d;", index))
+    table.insert(lines, string.format("const unsigned revenant_ml_message_count = %d;", #layout))
+    table.insert(lines, string.format("const unsigned revenant_ml_field_count = %d;", index))
     return table.concat(lines, "\n") .. "\n", index + #layout
 end
 

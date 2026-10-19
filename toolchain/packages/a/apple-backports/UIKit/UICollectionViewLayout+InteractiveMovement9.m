@@ -3,13 +3,13 @@
 
 #pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
 
-@interface UICollectionViewLayoutInvalidationContext (CharonReordering)
-- (void)charon_setInteractivelyMovingPrevious:(NSArray<NSIndexPath *> *)previous
+@interface UICollectionViewLayoutInvalidationContext (RevenantReordering)
+- (void)revenant_setInteractivelyMovingPrevious:(NSArray<NSIndexPath *> *)previous
                                        target:(NSArray<NSIndexPath *> *)target
                                      atPoint:(CGPoint)position;
 @end
 
-@implementation UICollectionViewLayout (CharonInteractiveMovement9)
+@implementation UICollectionViewLayout (RevenantInteractiveMovement9)
 
 - (NSIndexPath *)targetIndexPathForInteractivelyMovingItem:(NSIndexPath *)previousIndexPath withPosition:(CGPoint)position
 {
@@ -29,7 +29,7 @@
 {
     Class contextClass = [[self class] invalidationContextClass];
     UICollectionViewLayoutInvalidationContext *context = [[contextClass alloc] init];
-    [context charon_setInteractivelyMovingPrevious:previousIndexPaths target:targetIndexPaths atPoint:targetPosition];
+    [context revenant_setInteractivelyMovingPrevious:previousIndexPaths target:targetIndexPaths atPoint:targetPosition];
     return context;
 }
 
@@ -39,13 +39,13 @@
 {
     Class contextClass = [[self class] invalidationContextClass];
     UICollectionViewLayoutInvalidationContext *context = [[contextClass alloc] init];
-    [context charon_setInteractivelyMovingPrevious:previousIndexPaths target:indexPaths atPoint:CGPointZero];
+    [context revenant_setInteractivelyMovingPrevious:previousIndexPaths target:indexPaths atPoint:CGPointZero];
     return context;
 }
 
 @end
 
-@implementation UICollectionViewFlowLayout (CharonInteractiveMovement9)
+@implementation UICollectionViewFlowLayout (RevenantInteractiveMovement9)
 
 - (UICollectionViewLayoutAttributes *)layoutAttributesForInteractivelyMovingItemAtIndexPath:(NSIndexPath *)indexPath
                                                                       withTargetPosition:(CGPoint)position

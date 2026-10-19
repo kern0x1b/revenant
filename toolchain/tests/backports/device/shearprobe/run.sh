@@ -5,7 +5,7 @@
 #
 # WHY THE SPLIT, and it is measured: `coordination/heavy.sh` wraps a job at lowered priority in one of three
 # machine-wide slots, and under it this kind of project's `xmake f` fails with rc=255 and every package
-# reported as not found - shade, swiftshader, emulator-guest, iphoneos-sdk, ld64, ldid, llvm, firmware-tools -
+# reported as not found - emulator, swiftshader, emulator-guest, iphoneos-sdk, ld64, ldid, llvm, firmware-tools -
 # while the identical command run directly configures with rc=0 (v-crutch6, measured). So configure, build and
 # install run directly and only the run takes a slot:
 #
@@ -61,7 +61,7 @@ built=$(find "$here/build" -name "$program" -type f 2>/dev/null | head -1)
 # than the reason, which is the failure this script exists to prevent.
 printf 'print("shearprobe-" .. hash.strhash32(os.projectdir()))\n' > "$out/owner.lua"
 owner=$(cd "$here" && "$xmake" lua "$out/owner.lua" | head -1)
-image=$(ls -d "$HOME"/.charon/emulator/images.noindex/"$owner" 2>/dev/null | head -1)
+image=$(ls -d "$HOME"/.revenant/emulator/images.noindex/"$owner" 2>/dev/null | head -1)
 installed=""
 if [ -n "$image" ]; then
   installed=$(ls "$image"/${device}_*/rootfs/usr/libexec/$program 2>/dev/null | head -1)

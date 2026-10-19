@@ -2,7 +2,7 @@
 #import <Foundation/Foundation.h>
 #import <VideoToolbox/VideoToolbox.h>
 
-OSStatus CharonHostCMVideoFormatDescriptionCreateFromH264ParameterSets(CFAllocatorRef, size_t, const uint8_t *const *, const size_t *, int, CMFormatDescriptionRef *);
+OSStatus RevenantHostCMVideoFormatDescriptionCreateFromH264ParameterSets(CFAllocatorRef, size_t, const uint8_t *const *, const size_t *, int, CMFormatDescriptionRef *);
 
 static int failures, checks;
 typedef struct {
@@ -78,7 +78,7 @@ static NSString *outcome(BOOL port, NSArray<NSData *> *sets, int header, CMForma
         sizes[i] = sets[i].length;
     }
     CMFormatDescriptionRef desc = (CMFormatDescriptionRef)0x1;
-    OSStatus status = (port ? CharonHostCMVideoFormatDescriptionCreateFromH264ParameterSets : CMVideoFormatDescriptionCreateFromH264ParameterSets)(NULL, sets.count, pointers, sizes, header, &desc);
+    OSStatus status = (port ? RevenantHostCMVideoFormatDescriptionCreateFromH264ParameterSets : CMVideoFormatDescriptionCreateFromH264ParameterSets)(NULL, sets.count, pointers, sizes, header, &desc);
     *out = desc == (CMFormatDescriptionRef)0x1 ? NULL : desc;
     return [NSString stringWithFormat:@"%d %s", (int)status, desc == (CMFormatDescriptionRef)0x1 ? "untouched" : desc ? "set" : "null"];
 }

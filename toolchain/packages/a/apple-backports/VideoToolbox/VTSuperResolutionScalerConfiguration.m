@@ -1,10 +1,10 @@
-#import "CharonVideoToolbox.h"
+#import "RevenantVideoToolbox.h"
 #import "VideoToolboxValueStore.h"
 
 
-typedef NSDictionary<NSString *, id> CharonVTFrameAttributes;
+typedef NSDictionary<NSString *, id> RevenantVTFrameAttributes;
 
-CHARON_VIDEO_TOOLBOX_VALUE_STORE(VTSuperResolutionScalerConfiguration)
+REVENANT_VIDEO_TOOLBOX_VALUE_STORE(VTSuperResolutionScalerConfiguration)
 
 @implementation VTSuperResolutionScalerConfiguration
 
@@ -15,20 +15,20 @@ CHARON_VIDEO_TOOLBOX_VALUE_STORE(VTSuperResolutionScalerConfiguration)
     return NO;
 }
 
-CHARON_VALUE_PROPERTY(NSArray<NSNumber *> *, frameSupportedPixelFormats)
+REVENANT_VALUE_PROPERTY(NSArray<NSNumber *> *, frameSupportedPixelFormats)
 
-CHARON_VALUE_PROPERTY(CharonVTFrameAttributes *, sourcePixelBufferAttributes)
+REVENANT_VALUE_PROPERTY(RevenantVTFrameAttributes *, sourcePixelBufferAttributes)
 
-CHARON_VALUE_PROPERTY(CharonVTFrameAttributes *, destinationPixelBufferAttributes)
+REVENANT_VALUE_PROPERTY(RevenantVTFrameAttributes *, destinationPixelBufferAttributes)
 
-CHARON_SCALAR_PROPERTY(NSInteger, nextFrameCount)
+REVENANT_SCALAR_PROPERTY(NSInteger, nextFrameCount)
 
-CHARON_SCALAR_PROPERTY(NSInteger, previousFrameCount)
+REVENANT_SCALAR_PROPERTY(NSInteger, previousFrameCount)
 
 + (CMVideoDimensions)maximumDimensions
 {
     CMVideoDimensions value = {0};
-    NSValue *boxed = CharonValueStoreOfClass([self class])[@"maximumDimensions"];
+    NSValue *boxed = RevenantValueStoreOfClass([self class])[@"maximumDimensions"];
     if (boxed)
         [boxed getValue:&value];
     return value;
@@ -37,7 +37,7 @@ CHARON_SCALAR_PROPERTY(NSInteger, previousFrameCount)
 + (CMVideoDimensions)minimumDimensions
 {
     CMVideoDimensions value = {0};
-    NSValue *boxed = CharonValueStoreOfClass([self class])[@"minimumDimensions"];
+    NSValue *boxed = RevenantValueStoreOfClass([self class])[@"minimumDimensions"];
     if (boxed)
         [boxed getValue:&value];
     return value;
@@ -46,36 +46,36 @@ CHARON_SCALAR_PROPERTY(NSInteger, previousFrameCount)
 
 #pragma mark - This class's own properties
 
-CHARON_SCALAR_PROPERTY(NSInteger, frameWidth)
+REVENANT_SCALAR_PROPERTY(NSInteger, frameWidth)
 
-CHARON_SCALAR_PROPERTY(NSInteger, frameHeight)
+REVENANT_SCALAR_PROPERTY(NSInteger, frameHeight)
 
-CHARON_SCALAR_PROPERTY(VTSuperResolutionScalerConfigurationInputType, inputType)
+REVENANT_SCALAR_PROPERTY(VTSuperResolutionScalerConfigurationInputType, inputType)
 
 - (BOOL)usesPrecomputedFlow
 {
-    return (BOOL)[CharonValueStore(self)[@"precomputedFlow"] longLongValue];
+    return (BOOL)[RevenantValueStore(self)[@"precomputedFlow"] longLongValue];
 }
 
-CHARON_SCALAR_PROPERTY(NSInteger, scaleFactor)
+REVENANT_SCALAR_PROPERTY(NSInteger, scaleFactor)
 
-CHARON_SCALAR_PROPERTY(VTSuperResolutionScalerConfigurationQualityPrioritization, qualityPrioritization)
+REVENANT_SCALAR_PROPERTY(VTSuperResolutionScalerConfigurationQualityPrioritization, qualityPrioritization)
 
-CHARON_SCALAR_PROPERTY(VTSuperResolutionScalerConfigurationRevision, revision)
+REVENANT_SCALAR_PROPERTY(VTSuperResolutionScalerConfigurationRevision, revision)
 
 + (NSIndexSet *)supportedRevisions
 {
-    return (NSIndexSet *)CharonValueStoreOfClass([self class])[@"supportedRevisions"];
+    return (NSIndexSet *)RevenantValueStoreOfClass([self class])[@"supportedRevisions"];
 }
 
 + (VTSuperResolutionScalerConfigurationRevision)defaultRevision
 {
-    return (VTSuperResolutionScalerConfigurationRevision)[CharonValueStoreOfClass([self class])[@"defaultRevision"] longLongValue];
+    return (VTSuperResolutionScalerConfigurationRevision)[RevenantValueStoreOfClass([self class])[@"defaultRevision"] longLongValue];
 }
 
-CHARON_SCALAR_PROPERTY(VTSuperResolutionScalerConfigurationModelStatus, configurationModelStatus)
+REVENANT_SCALAR_PROPERTY(VTSuperResolutionScalerConfigurationModelStatus, configurationModelStatus)
 
-CHARON_DOUBLE_PROPERTY(float, configurationModelPercentageAvailable)
+REVENANT_DOUBLE_PROPERTY(float, configurationModelPercentageAvailable)
 
 + (NSArray<NSNumber*> *)supportedScaleFactors
 {
@@ -104,13 +104,13 @@ CHARON_DOUBLE_PROPERTY(float, configurationModelPercentageAvailable)
                         revision:(VTSuperResolutionScalerConfigurationRevision)revision
 {
     self = [super init];
-    CharonValueSet(self, @(frameWidth), @"frameWidth");
-    CharonValueSet(self, @(frameHeight), @"frameHeight");
-    CharonValueSet(self, @(scaleFactor), @"scaleFactor");
-    CharonValueSet(self, @(inputType), @"inputType");
-    CharonValueSet(self, @(usePrecomputedFlow), @"precomputedFlow");
-    CharonValueSet(self, @(qualityPrioritization), @"qualityPrioritization");
-    CharonValueSet(self, @(revision), @"revision");
+    RevenantValueSet(self, @(frameWidth), @"frameWidth");
+    RevenantValueSet(self, @(frameHeight), @"frameHeight");
+    RevenantValueSet(self, @(scaleFactor), @"scaleFactor");
+    RevenantValueSet(self, @(inputType), @"inputType");
+    RevenantValueSet(self, @(usePrecomputedFlow), @"precomputedFlow");
+    RevenantValueSet(self, @(qualityPrioritization), @"qualityPrioritization");
+    RevenantValueSet(self, @(revision), @"revision");
     return self;
 }
 

@@ -23,7 +23,7 @@
 #include <dynarmic/ir/terminal.h>
 #include <dynarmic/ir/type.h>
 
-namespace shade {
+namespace emulator {
 namespace {
 
     constexpr std::array<std::uint8_t, 8> magic { 'i', 'L', 'I', 'R', 'B', '0',

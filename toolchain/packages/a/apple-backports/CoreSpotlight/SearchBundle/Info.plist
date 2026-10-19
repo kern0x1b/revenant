@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>CFBundleIdentifier</key>
-	<string>org.charon.corespotlight.searchbundle</string>
+	<string>org.revenant.corespotlight.searchbundle</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundlePackageType</key>
@@ -15,9 +15,9 @@
 	<key>MinimumOSVersion</key>
 	<string>6.1</string>
 	<key>NSExecutable</key>
-	<string>org.charon.corespotlight</string>
+	<string>org.revenant.corespotlight</string>
 	<key>NSPrincipalClass</key>
-	<string>CharonSearchDatastore</string>
+	<string>RevenantSearchDatastore</string>
 	<key>UIDeviceFamily</key>
 	<array>
 		<integer>1</integer>

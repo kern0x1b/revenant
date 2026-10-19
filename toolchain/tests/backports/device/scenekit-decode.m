@@ -157,23 +157,23 @@ static void check_single_objects(void)
 {
     NSString *failure = nil;
     SCNNode *node = decode_node(stand_in([StandInNode class], @{@"particleSystem": [SCNParticleSystem particleSystem]}), &failure);
-    charon_check(node != nil && list_count(node.particleSystems) == 1, "a single particle system under particleSystem is one system",
+    revenant_check(node != nil && list_count(node.particleSystems) == 1, "a single particle system under particleSystem is one system",
                  [NSString stringWithFormat:@"node %@, systems %ld, %@", node, (long)list_count(node.particleSystems), failure]);
 
     failure = nil;
     node = decode_node(stand_in([StandInNode class], @{@"particleSystems": [SCNParticleSystem particleSystem]}), &failure);
-    charon_check(node != nil && list_count(node.particleSystems) == 1, "a single particle system under particleSystems is one system",
+    revenant_check(node != nil && list_count(node.particleSystems) == 1, "a single particle system under particleSystems is one system",
                  [NSString stringWithFormat:@"node %@, %@", node, failure]);
 
     failure = nil;
     node = decode_node(stand_in([StandInNode class], @{@"particleSystems": @[[SCNParticleSystem particleSystem], [SCNParticleSystem particleSystem]]}), &failure);
-    charon_check(node != nil && list_count(node.particleSystems) == 2, "an array of two particle systems is two systems (control)",
+    revenant_check(node != nil && list_count(node.particleSystems) == 2, "an array of two particle systems is two systems (control)",
                  [NSString stringWithFormat:@"node %@, %@", node, failure]);
 
     failure = nil;
     StandInNode *child = stand_in([StandInNode class], @{@"name": @"child"});
     node = decode_node(stand_in([StandInNode class], @{@"childNodes": child}), &failure);
-    charon_check(node != nil && list_count(node.childNodes) == 1 && [[node.childNodes.firstObject name] isEqualToString:@"child"],
+    revenant_check(node != nil && list_count(node.childNodes) == 1 && [[node.childNodes.firstObject name] isEqualToString:@"child"],
                  "a single child under childNodes is one child", [NSString stringWithFormat:@"node %@, %@", node, failure]);
 
     failure = nil;
@@ -181,7 +181,7 @@ static void check_single_objects(void)
                                                                   @"elements": [SCNGeometryElement geometryElementWithData:[NSData dataWithBytes:(uint16_t[]){0, 1, 2} length:6]
                                                                                                              primitiveType:SCNGeometryPrimitiveTypeTriangles primitiveCount:1 bytesPerIndex:2]});
     node = decode_node(stand_in([StandInNode class], @{@"geometry": geometry}), &failure);
-    charon_check(list_count(node.geometry.materials) == 1 && list_count(node.geometry.geometryElements) == 1,
+    revenant_check(list_count(node.geometry.materials) == 1 && list_count(node.geometry.geometryElements) == 1,
                  "a single material and a single element are one of each", [NSString stringWithFormat:@"geometry %@, %@", node.geometry, failure]);
 }
 
@@ -192,7 +192,7 @@ static void check_stray_objects(void)
     NSString *log = captured_stderr(^{
         node = decode_root_securely(stand_in([StandInNode class], @{@"particleSystems": @"a string"}), [SCNNode class], NO, &failure);
     });
-    charon_check(node != nil && list_count(node.particleSystems) == 0 && count_lines_containing(log, @"the archive's particleSystems holds a") == 1,
+    revenant_check(node != nil && list_count(node.particleSystems) == 0 && count_lines_containing(log, @"the archive's particleSystems holds a") == 1,
                  "a string under particleSystems is left out and said, and the node loads",
                  [NSString stringWithFormat:@"node %@, systems %ld, log %@, %@", node, (long)list_count(node.particleSystems), log, failure]);
 
@@ -202,7 +202,7 @@ static void check_stray_objects(void)
         node = decode_root_securely(stand_in([StandInNode class], @{@"particleSystems": @[[SCNParticleSystem particleSystem], @"a string"]}),
                                     [SCNNode class], NO, &failure);
     });
-    charon_check(node != nil && list_count(node.particleSystems) == 1 && count_lines_containing(log, @"the archive's particleSystems holds a") == 1,
+    revenant_check(node != nil && list_count(node.particleSystems) == 1 && count_lines_containing(log, @"the archive's particleSystems holds a") == 1,
                  "a string among particle systems is left out and said, and the system loads",
                  [NSString stringWithFormat:@"node %@, systems %ld, log %@, %@", node, (long)list_count(node.particleSystems), log, failure]);
 }
@@ -215,9 +215,9 @@ static void check_colours(void)
     NSString *log = captured_stderr(^{
         property = decode_root(stand_in([StandInMaterialProperty class], @{@"color": catalog}), [SCNMaterialProperty class], &failure);
     });
-    charon_check(property != nil && property.contents == nil, "an unreadable colour leaves the property at its default",
+    revenant_check(property != nil && property.contents == nil, "an unreadable colour leaves the property at its default",
                  [NSString stringWithFormat:@"property %@, contents %@, %@", property, property.contents, failure]);
-    charon_check(log != nil && count_lines_containing(log, @"the colour under color is not read") == 1,
+    revenant_check(log != nil && count_lines_containing(log, @"the colour under color is not read") == 1,
                  "an unreadable colour is said once, naming its key", [NSString stringWithFormat:@"log: %@", log]);
 
     property = nil;
@@ -230,9 +230,9 @@ static void check_colours(void)
     });
     CGFloat r = -1, g = -1, b = -1, a = -1;
     BOOL read = [property.contents isKindOfClass:[UIColor class]] && [(UIColor *)property.contents getRed:&r green:&g blue:&b alpha:&a];
-    charon_check(read && r == 1 && g == 0 && b == 0 && a == 1, "a device RGB colour is read (control)",
+    revenant_check(read && r == 1 && g == 0 && b == 0 && a == 1, "a device RGB colour is read (control)",
                  [NSString stringWithFormat:@"contents %@, %@", property.contents, failure]);
-    charon_check(log != nil && count_lines_containing(log, @"SceneKit:") == 0, "a colour that is read says nothing (control)",
+    revenant_check(log != nil && count_lines_containing(log, @"SceneKit:") == 0, "a colour that is read says nothing (control)",
                  [NSString stringWithFormat:@"log: %@", log]);
 }
 
@@ -275,17 +275,17 @@ static void check_material_colours(void)
     NSString *log = captured_stderr(^{
         material = decode_root(archived, [SCNMaterial class], &failure);
     });
-    charon_check(material != nil && colour_is(material.diffuse.contents, 1, 1, 1, 1),
+    revenant_check(material != nil && colour_is(material.diffuse.contents, 1, 1, 1, 1),
                  "a material's unreadable diffuse colour keeps the slot's default, white",
                  [NSString stringWithFormat:@"material %@, diffuse %@, %@", material, material.diffuse.contents, failure]);
-    charon_check(colour_is(material.specular.contents, 0, 0, 0, 1), "a material's unreadable specular colour keeps the slot's default, black",
+    revenant_check(colour_is(material.specular.contents, 0, 0, 0, 1), "a material's unreadable specular colour keeps the slot's default, black",
                  [NSString stringWithFormat:@"specular %@", material.specular.contents]);
-    charon_check(material != nil && material.emission != nil && material.emission.contents == nil,
+    revenant_check(material != nil && material.emission != nil && material.emission.contents == nil,
                  "a material slot archived with no colour decodes to nil, as on macOS (control)",
                  [NSString stringWithFormat:@"emission %@, contents %@", material.emission, material.emission.contents]);
-    charon_check(colour_is(material.multiply.contents, 1, 0, 0, 1), "a material slot's readable colour is read (control)",
+    revenant_check(colour_is(material.multiply.contents, 1, 0, 0, 1), "a material slot's readable colour is read (control)",
                  [NSString stringWithFormat:@"multiply %@", material.multiply.contents]);
-    charon_check(log != nil && count_lines_containing(log, @"the colour under color is not read, and the property keeps its default") == 2 &&
+    revenant_check(log != nil && count_lines_containing(log, @"the colour under color is not read, and the property keeps its default") == 2 &&
                  count_lines_containing(log, @"SceneKit:") == 2,
                  "each of the two unreadable colours is said once, and nothing else", [NSString stringWithFormat:@"log: %@", log]);
 }
@@ -301,12 +301,12 @@ static void check_physics_world(void)
     NSString *log = captured_stderr(^{
         world = decode_root(archived, [SCNPhysicsWorld class], &failure);
     });
-    charon_check(world != nil && world.gravity.x == 0 && world.gravity.y == 1.75f && world.gravity.z == 0 && world.speed == 2.5 &&
+    revenant_check(world != nil && world.gravity.x == 0 && world.gravity.y == 1.75f && world.gravity.z == 0 && world.speed == 2.5 &&
                      world.timeStep == 0.02,
                  "an archived physics world reads its gravity, speed and time step",
                  [NSString stringWithFormat:@"world %@, gravity (%g, %g, %g), speed %g, time step %g, %@", world, world.gravity.x,
                                             world.gravity.y, world.gravity.z, (double)world.speed, world.timeStep, failure]);
-    charon_check(log != nil && count_lines_containing(log, @"SCNPhysicsWorld:") == 0, "decoding a physics world says nothing",
+    revenant_check(log != nil && count_lines_containing(log, @"SCNPhysicsWorld:") == 0, "decoding a physics world says nothing",
                  [NSString stringWithFormat:@"log: %@", log]);
 
     SCNPhysicsWorld *fresh = [SCNScene scene].physicsWorld;
@@ -315,12 +315,12 @@ static void check_physics_world(void)
         fresh.speed = 0.5;
         fresh.timeStep = 1.0 / 30.0;
     });
-    charon_check(fresh.gravity.y == -1 && fresh.speed == 0.5 && fresh.timeStep == 1.0 / 30.0, "what is set on a physics world reads back",
+    revenant_check(fresh.gravity.y == -1 && fresh.speed == 0.5 && fresh.timeStep == 1.0 / 30.0, "what is set on a physics world reads back",
                  [NSString stringWithFormat:@"gravity y %g, speed %g, time step %g", fresh.gravity.y, (double)fresh.speed, fresh.timeStep]);
-    charon_check(log != nil && count_lines_containing(log, @"SCNPhysicsWorld: nothing is simulated") == 1,
+    revenant_check(log != nil && count_lines_containing(log, @"SCNPhysicsWorld: nothing is simulated") == 1,
                  "setting a physics world says once that nothing is simulated", [NSString stringWithFormat:@"log: %@", log]);
     NSArray *hits = [fresh rayTestWithSegmentFromPoint:SCNVector3Make(0, 10, 0) toPoint:SCNVector3Make(0, -10, 0) options:nil];
-    charon_check(hits != nil && hits.count == 0, "a ray through a world with no body hits nothing", [NSString stringWithFormat:@"%@", hits]);
+    revenant_check(hits != nil && hits.count == 0, "a ray through a world with no body hits nothing", [NSString stringWithFormat:@"%@", hits]);
 }
 
 static void check_flags(void)
@@ -330,9 +330,9 @@ static void check_flags(void)
     NSString *log = captured_stderr(^{
         node = decode_node(stand_in([StandInNode class], @{@"castsShadow": @"no"}), &failure);
     });
-    charon_check(node != nil && node.castsShadow, "a flag stored as a string keeps its default",
+    revenant_check(node != nil && node.castsShadow, "a flag stored as a string keeps its default",
                  [NSString stringWithFormat:@"node %@, castsShadow %d, %@", node, node.castsShadow, failure]);
-    charon_check(log != nil && count_lines_containing(log, @"the flag under castsShadow is neither") == 1,
+    revenant_check(log != nil && count_lines_containing(log, @"the flag under castsShadow is neither") == 1,
                  "a flag stored as a string is said once, naming its key", [NSString stringWithFormat:@"log: %@", log]);
 
     node = nil;
@@ -341,7 +341,7 @@ static void check_flags(void)
     log = captured_stderr(^{
         node = decode_node(integer, &failure);
     });
-    charon_check(node != nil && !node.castsShadow && count_lines_containing(log, @"SceneKit:") == 0,
+    revenant_check(node != nil && !node.castsShadow && count_lines_containing(log, @"SceneKit:") == 0,
                  "a flag stored as the integer 0 is NO, and nothing is said (control)",
                  [NSString stringWithFormat:@"node %@, castsShadow %d, log %@, %@", node, node.castsShadow, log, failure]);
 }
@@ -355,7 +355,7 @@ int main(void)
         check_material_colours();
         check_physics_world();
         check_flags();
-        printf("%d of %d checks failed\n", charon_failures, charon_checks);
-        return charon_failures;
+        printf("%d of %d checks failed\n", revenant_failures, revenant_checks);
+        return revenant_failures;
     }
 }

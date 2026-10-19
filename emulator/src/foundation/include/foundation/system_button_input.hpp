@@ -7,7 +7,7 @@
 
 #pragma once
 
-namespace shade {
+namespace emulator {
 
 enum class SystemButton {
     Home,

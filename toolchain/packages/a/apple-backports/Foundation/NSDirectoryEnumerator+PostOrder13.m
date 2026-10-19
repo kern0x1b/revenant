@@ -1,10 +1,10 @@
 #import <Foundation/Foundation.h>
 #import <objc/runtime.h>
 
-static const NSDirectoryEnumerationOptions charon_post_order_option = 1UL << 3;
+static const NSDirectoryEnumerationOptions revenant_post_order_option = 1UL << 3;
 
 __attribute__((visibility("hidden")))
-@interface CharonPostOrderEnumerator : NSDirectoryEnumerator {
+@interface RevenantPostOrderEnumerator : NSDirectoryEnumerator {
     NSDirectoryEnumerator *_inner;
     NSMutableArray *_stack;
     NSURL *_lookahead;
@@ -15,7 +15,7 @@ __attribute__((visibility("hidden")))
 - (instancetype)initWithEnumerator:(NSDirectoryEnumerator *)inner;
 @end
 
-@implementation CharonPostOrderEnumerator
+@implementation RevenantPostOrderEnumerator
 
 - (instancetype)initWithEnumerator:(NSDirectoryEnumerator *)inner
 {
@@ -89,7 +89,7 @@ __attribute__((visibility("hidden")))
 
 @end
 
-@implementation NSDirectoryEnumerator (CharonPostOrder)
+@implementation NSDirectoryEnumerator (RevenantPostOrder)
 
 - (BOOL)isEnumeratingDirectoryPostOrder
 {
@@ -98,14 +98,14 @@ __attribute__((visibility("hidden")))
 
 @end
 
-@interface CharonPostOrderInstaller : NSObject
+@interface RevenantPostOrderInstaller : NSObject
 @end
 
-@implementation CharonPostOrderInstaller
+@implementation RevenantPostOrderInstaller
 
 + (void)load
 {
-#ifdef CHARON_HOST_DIFFERENTIAL
+#ifdef REVENANT_HOST_DIFFERENTIAL
     return;
 #endif
     SEL selector = @selector(enumeratorAtURL:includingPropertiesForKeys:options:errorHandler:);
@@ -120,8 +120,8 @@ __attribute__((visibility("hidden")))
             continue;
         IMP original = method_getImplementation(method);
         class_replaceMethod(target, selector, imp_implementationWithBlock(^id(NSFileManager *manager, NSURL *url, NSArray *keys, NSDirectoryEnumerationOptions options, BOOL (^handler)(NSURL *, NSError *)) {
-            NSDirectoryEnumerator *inner = ((id (*)(id, SEL, id, id, NSDirectoryEnumerationOptions, id))original)(manager, selector, url, keys, options & ~charon_post_order_option, handler);
-            return inner && (options & charon_post_order_option) ? [[CharonPostOrderEnumerator alloc] initWithEnumerator:inner] : inner;
+            NSDirectoryEnumerator *inner = ((id (*)(id, SEL, id, id, NSDirectoryEnumerationOptions, id))original)(manager, selector, url, keys, options & ~revenant_post_order_option, handler);
+            return inner && (options & revenant_post_order_option) ? [[RevenantPostOrderEnumerator alloc] initWithEnumerator:inner] : inner;
         }), method_getTypeEncoding(method));
     }
 }

@@ -37,22 +37,22 @@ int main(int argc, char **argv)
 {
     @autoreleasepool {
         if (argc > 1) {
-            charon_log_to(@(argv[1]));
+            revenant_log_to(@(argv[1]));
         }
         NSMutableDictionary *expected = [NSMutableDictionary dictionary];
         for (size_t i = 0; i < sizeof(expectations) / sizeof(*expectations); i++) {
             expected[@(expectations[i][0])] = @(expectations[i][1]);
         }
         NSMutableSet *reached = [NSMutableSet set];
-        charon_scenekit_default_cases(^(NSString *name, NSString *value) {
+        revenant_scenekit_default_cases(^(NSString *name, NSString *value) {
             [reached addObject:name];
             NSString *want = expected[name];
-            charon_check(want != nil && agrees(value, want), name.UTF8String,
+            revenant_check(want != nil && agrees(value, want), name.UTF8String,
                          [NSString stringWithFormat:@"port %@, host %@", value, want ?: @"(no expectation)"]);
         });
-        charon_check(reached.count == expected.count, "every expectation is reached",
+        revenant_check(reached.count == expected.count, "every expectation is reached",
                      [NSString stringWithFormat:@"%lu reached of %lu", (unsigned long)reached.count, (unsigned long)expected.count]);
-        printf("%d of %d checks failed\n", charon_failures, charon_checks);
-        return charon_failures;
+        printf("%d of %d checks failed\n", revenant_failures, revenant_checks);
+        return revenant_failures;
     }
 }

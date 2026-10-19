@@ -1,9 +1,9 @@
 #import <UIKit/UIKit.h>
 
-@interface CharonEndEditingReason : NSObject
+@interface RevenantEndEditingReason : NSObject
 @end
 
-@implementation CharonEndEditingReason
+@implementation RevenantEndEditingReason
 
 + (void)load
 {

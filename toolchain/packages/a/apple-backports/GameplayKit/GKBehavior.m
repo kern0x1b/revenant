@@ -1,4 +1,4 @@
-#import "CharonGK.h"
+#import "RevenantGK.h"
 
 @implementation GKBehavior {
     NSMutableArray<GKGoal *> *_goals;
@@ -10,7 +10,7 @@
     return (NSInteger)[_goals count];
 }
 
-- (NSUInteger)charon_indexOfGoal:(GKGoal *)goal
+- (NSUInteger)revenant_indexOfGoal:(GKGoal *)goal
 {
     NSUInteger index = 0;
     for (GKGoal *known in _goals) {
@@ -72,7 +72,7 @@
     if (!goal) {
         return;
     }
-    NSUInteger index = [self charon_indexOfGoal:goal];
+    NSUInteger index = [self revenant_indexOfGoal:goal];
     if (index == NSNotFound) {
         [_goals addObject:goal];
         [_weights addObject:@(weight)];
@@ -83,7 +83,7 @@
 
 - (float)weightForGoal:(GKGoal *)goal
 {
-    NSUInteger index = goal ? [self charon_indexOfGoal:goal] : NSNotFound;
+    NSUInteger index = goal ? [self revenant_indexOfGoal:goal] : NSNotFound;
     return index == NSNotFound ? 0.0f : [_weights[index] floatValue];
 }
 
@@ -92,7 +92,7 @@
     if (!goal) {
         return;
     }
-    NSUInteger index = [self charon_indexOfGoal:goal];
+    NSUInteger index = [self revenant_indexOfGoal:goal];
     if (index != NSNotFound) {
         [_weights removeObjectAtIndex:index];
         [_goals removeObjectAtIndex:index];
@@ -117,7 +117,7 @@
 
 - (NSNumber *)objectForKeyedSubscript:(GKGoal *)goal
 {
-    NSUInteger index = goal ? [self charon_indexOfGoal:goal] : NSNotFound;
+    NSUInteger index = goal ? [self revenant_indexOfGoal:goal] : NSNotFound;
     return index == NSNotFound ? nil : _weights[index];
 }
 

@@ -1,33 +1,33 @@
-#import "CharonHomeKitInternal.h"
-#import "CharonHomeKitModel.h"
-#import "CharonHomeKitStore.h"
+#import "RevenantHomeKitInternal.h"
+#import "RevenantHomeKitModel.h"
+#import "RevenantHomeKitStore.h"
 
 @class HMCameraProfile;
 
-@interface HMAccessoryProfile (CharonHomeKit10Internal)
-+ (instancetype)charon_profileInStore:(CharonHomeKitStore *)store
+@interface HMAccessoryProfile (RevenantHomeKit10Internal)
++ (instancetype)revenant_profileInStore:(RevenantHomeKitStore *)store
                             identifier:(NSUUID *)identifier
                              accessory:(nullable HMAccessory *)accessory;
 @end
 
-@implementation HMAccessory (CharonHome10)
+@implementation HMAccessory (RevenantHome10)
 
 - (HMHome *)home
 {
-    NSString *homeIdentifier = self.charon_homeIdentifier;
+    NSString *homeIdentifier = self.revenant_homeIdentifier;
     if (!homeIdentifier.length)
         return nil;
-    return CharonHomeKitHome(homeIdentifier);
+    return RevenantHomeKitHome(homeIdentifier);
 }
 
 - (NSArray<HMCameraProfile *> *)cameraProfiles
 {
-    CharonHomeKitStore *store = [CharonHomeKitStore shared];
+    RevenantHomeKitStore *store = [RevenantHomeKitStore shared];
     NSMutableArray<HMCameraProfile *> *found = [NSMutableArray array];
-    for (NSString *identifier in CharonHomeKitStringListField(CharonHomeKitRecord(@"accessories", self.charon_identifier),
+    for (NSString *identifier in RevenantHomeKitStringListField(RevenantHomeKitRecord(@"accessories", self.revenant_identifier),
                                                              @"cameraProfiles")) {
-        HMCameraProfile *profile = [HMCameraProfile charon_profileInStore:store
-                                                              identifier:CharonHomeKitUUID(identifier)
+        HMCameraProfile *profile = [HMCameraProfile revenant_profileInStore:store
+                                                              identifier:RevenantHomeKitUUID(identifier)
                                                                accessory:self];
         if (profile)
             [found addObject:profile];

@@ -1,7 +1,7 @@
 #import <Foundation/Foundation.h>
 #import <objc/message.h>
 
-@implementation NSURLCache (CharonDirectoryURL)
+@implementation NSURLCache (RevenantDirectoryURL)
 
 - (instancetype)initWithMemoryCapacity:(NSUInteger)memoryCapacity diskCapacity:(NSUInteger)diskCapacity directoryURL:(NSURL *)directoryURL
 {

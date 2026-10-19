@@ -35,7 +35,7 @@ static NSString *describe(NSArray *values)
     return values.count ? [values componentsJoinedByString:@","] : @"(empty)";
 }
 
-static id charon_audio_settings(AVCaptureAudioDataOutput *output, AVFileType fileType)
+static id revenant_audio_settings(AVCaptureAudioDataOutput *output, AVFileType fileType)
 {
     SEL selector = @selector(recommendedAudioSettingsForAssetWriterWithOutputFileType:);
 #if CHARN_PORT_HALF
@@ -47,7 +47,7 @@ static id charon_audio_settings(AVCaptureAudioDataOutput *output, AVFileType fil
 #endif
 }
 
-static id charon_video_settings(AVCaptureVideoDataOutput *output, AVFileType fileType)
+static id revenant_video_settings(AVCaptureVideoDataOutput *output, AVFileType fileType)
 {
     SEL selector = @selector(recommendedVideoSettingsForAssetWriterWithOutputFileType:);
 #if CHARN_PORT_HALF
@@ -98,8 +98,8 @@ int main(void)
         {
             AVCaptureAudioDataOutput *audio = [[AVCaptureAudioDataOutput alloc] init];
             AVCaptureVideoDataOutput *video = [[AVCaptureVideoDataOutput alloc] init];
-            report(@"audio MPEG-4", charon_audio_settings(audio, AVFileTypeMPEG4));
-            report(@"video MPEG-4", charon_video_settings(video, AVFileTypeMPEG4));
+            report(@"audio MPEG-4", revenant_audio_settings(audio, AVFileTypeMPEG4));
+            report(@"video MPEG-4", revenant_video_settings(video, AVFileTypeMPEG4));
             row(@"audio connections", [NSString stringWithFormat:@"%lu", (unsigned long)audio.connections.count]);
             row(@"video connections", [NSString stringWithFormat:@"%lu", (unsigned long)video.connections.count]);
         }
@@ -134,8 +134,8 @@ int main(void)
             row(@"live channels", asbd ? [NSString stringWithFormat:@"%u", asbd->mChannelsPerFrame] : @"nil");
             row(@"live format ID", asbd ? [NSString stringWithFormat:@"%u", (unsigned)asbd->mFormatID] : @"nil");
 
-            report(@"MPEG-4", charon_audio_settings(output, AVFileTypeMPEG4));
-            report(@"QuickTime", charon_audio_settings(output, AVFileTypeQuickTimeMovie));
+            report(@"MPEG-4", revenant_audio_settings(output, AVFileTypeMPEG4));
+            report(@"QuickTime", revenant_audio_settings(output, AVFileTypeQuickTimeMovie));
             [session stopRunning];
         }
 
@@ -172,8 +172,8 @@ int main(void)
                 row(@"live dimensions", @"nil");
             }
 
-            report(@"MPEG-4", charon_video_settings(output, AVFileTypeMPEG4));
-            report(@"QuickTime", charon_video_settings(output, AVFileTypeQuickTimeMovie));
+            report(@"MPEG-4", revenant_video_settings(output, AVFileTypeMPEG4));
+            report(@"QuickTime", revenant_video_settings(output, AVFileTypeQuickTimeMovie));
             [session stopRunning];
         }
 

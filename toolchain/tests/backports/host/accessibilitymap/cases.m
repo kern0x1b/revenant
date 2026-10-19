@@ -23,9 +23,9 @@ static void num(NSString *label, double value)
 
 static NSString *name(NSString *spelling)
 {
-    if (spelling.length > [@"CharonPort" length] &&
-        [[spelling substringToIndex:[@"CharonPort" length]] isEqualToString:@"CharonPort"]) {
-        return [spelling substringFromIndex:[@"CharonPort" length]];
+    if (spelling.length > [@"RevenantPort" length] &&
+        [[spelling substringToIndex:[@"RevenantPort" length]] isEqualToString:@"RevenantPort"]) {
+        return [spelling substringFromIndex:[@"RevenantPort" length]];
     }
     return spelling;
 }

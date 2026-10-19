@@ -12,14 +12,14 @@ NSURLResourceKey const NSURLIsPurgeableKey = @"NSURLIsPurgeableKey";
 NSURLResourceKey const NSURLIsSparseKey = @"NSURLIsSparseKey";
 NSURLResourceKey const NSURLVolumeSupportsFileProtectionKey = @"NSURLVolumeSupportsFileProtectionKey";
 
-static NSArray *charon_resource_keys(void)
+static NSArray *revenant_resource_keys(void)
 {
     return @[NSURLContentTypeKey, NSURLFileContentIdentifierKey, NSURLMayShareFileContentKey, NSURLMayHaveExtendedAttributesKey, NSURLIsPurgeableKey, NSURLIsSparseKey, NSURLVolumeSupportsFileProtectionKey];
 }
 
-id charon_resource_value(NSString *path, NSString *key);
+id revenant_resource_value(NSString *path, NSString *key);
 
-id charon_resource_value(NSString *path, NSString *key)
+id revenant_resource_value(NSString *path, NSString *key)
 {
     struct stat status;
     if (lstat(path.fileSystemRepresentation, &status) != 0)
@@ -39,10 +39,10 @@ id charon_resource_value(NSString *path, NSString *key)
     return nil;
 }
 
-@interface CharonResourceKeysInstaller : NSObject
+@interface RevenantResourceKeysInstaller : NSObject
 @end
 
-@implementation CharonResourceKeysInstaller
+@implementation RevenantResourceKeysInstaller
 
 + (void)load
 {
@@ -55,14 +55,14 @@ id charon_resource_value(NSString *path, NSString *key)
     if (singleMethod) {
         IMP original = method_getImplementation(singleMethod);
         class_replaceMethod(cls, single, imp_implementationWithBlock(^BOOL(NSURL *URL, id *value, NSString *key, NSError **error) {
-            if (!URL.isFileURL || ![charon_resource_keys() containsObject:key])
+            if (!URL.isFileURL || ![revenant_resource_keys() containsObject:key])
                 return ((BOOL (*)(id, SEL, id *, id, NSError **))original)(URL, single, value, key, error);
             NSString *path = URL.path;
             id existing = nil;
             if (!((BOOL (*)(id, SEL, id *, id, NSError **))original)(URL, single, &existing, NSURLNameKey, error))
                 return NO;
             if (value)
-                *value = charon_resource_value(path, key);
+                *value = revenant_resource_value(path, key);
             return YES;
         }), method_getTypeEncoding(singleMethod));
     }
@@ -73,7 +73,7 @@ id charon_resource_value(NSString *path, NSString *key)
         class_replaceMethod(cls, many, imp_implementationWithBlock(^NSDictionary *(NSURL *URL, NSArray *keys, NSError **error) {
             NSMutableArray *ours = [NSMutableArray array], *theirs = [NSMutableArray array];
             for (NSString *key in keys)
-                [URL.isFileURL && [charon_resource_keys() containsObject:key] ? ours : theirs addObject:key];
+                [URL.isFileURL && [revenant_resource_keys() containsObject:key] ? ours : theirs addObject:key];
             if (!ours.count)
                 return ((id (*)(id, SEL, id, NSError **))original)(URL, many, keys, error);
             NSDictionary *base = ((id (*)(id, SEL, id, NSError **))original)(URL, many, theirs.count ? theirs : @[NSURLNameKey], error);
@@ -86,7 +86,7 @@ id charon_resource_value(NSString *path, NSString *key)
             }
             NSString *path = URL.path;
             for (NSString *key in ours) {
-                id value = charon_resource_value(path, key);
+                id value = revenant_resource_value(path, key);
                 if (value)
                     merged[key] = value;
             }

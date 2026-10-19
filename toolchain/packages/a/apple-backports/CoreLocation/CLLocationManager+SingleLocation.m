@@ -4,25 +4,25 @@
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 #pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
 
-static const char charon_request_key;
-static const NSTimeInterval charon_request_timeout = 10;
+static const char revenant_request_key;
+static const NSTimeInterval revenant_request_timeout = 10;
 
-typedef void (^CharonLocationCompletion)(CLLocation *location, NSError *error);
+typedef void (^RevenantLocationCompletion)(CLLocation *location, NSError *error);
 
-@interface CharonLocationRequest : NSObject <CLLocationManagerDelegate>
-- (instancetype)initWithManager:(CLLocationManager *)manager completion:(CharonLocationCompletion)completion;
+@interface RevenantLocationRequest : NSObject <CLLocationManagerDelegate>
+- (instancetype)initWithManager:(CLLocationManager *)manager completion:(RevenantLocationCompletion)completion;
 - (void)start;
 @end
 
-@implementation CharonLocationRequest {
+@implementation RevenantLocationRequest {
     CLLocationManager *_manager;
     CLLocationManager *_helper;
     CLLocation *_best;
     NSTimer *_timer;
-    CharonLocationCompletion _completion;
+    RevenantLocationCompletion _completion;
 }
 
-- (instancetype)initWithManager:(CLLocationManager *)manager completion:(CharonLocationCompletion)completion
+- (instancetype)initWithManager:(CLLocationManager *)manager completion:(RevenantLocationCompletion)completion
 {
     if ((self = [super init])) {
         _manager = manager;
@@ -37,7 +37,7 @@ typedef void (^CharonLocationCompletion)(CLLocation *location, NSError *error);
     _helper.delegate = self;
     _helper.desiredAccuracy = _manager.desiredAccuracy;
     _helper.distanceFilter = kCLDistanceFilterNone;
-    _timer = [NSTimer scheduledTimerWithTimeInterval:charon_request_timeout target:self selector:@selector(timedOut) userInfo:nil repeats:NO];
+    _timer = [NSTimer scheduledTimerWithTimeInterval:revenant_request_timeout target:self selector:@selector(timedOut) userInfo:nil repeats:NO];
     [_helper startUpdatingLocation];
 }
 
@@ -45,7 +45,7 @@ typedef void (^CharonLocationCompletion)(CLLocation *location, NSError *error);
 {
     if (!_completion)
         return;
-    CharonLocationCompletion completion = _completion;
+    RevenantLocationCompletion completion = _completion;
     _completion = nil;
     [_timer invalidate];
     _timer = nil;
@@ -83,7 +83,7 @@ typedef void (^CharonLocationCompletion)(CLLocation *location, NSError *error);
 
 @end
 
-@implementation CLLocationManager (CharonSingleLocation)
+@implementation CLLocationManager (RevenantSingleLocation)
 
 - (void)requestLocation
 {
@@ -98,18 +98,18 @@ typedef void (^CharonLocationCompletion)(CLLocation *location, NSError *error);
                                                         description:@"Delegate must respond to locationManager:didFailWithError:"];
         return;
     }
-    if (objc_getAssociatedObject(self, &charon_request_key))
+    if (objc_getAssociatedObject(self, &revenant_request_key))
         return;
     __weak CLLocationManager *manager = self;
-    CharonLocationRequest *request = [[CharonLocationRequest alloc] initWithManager:self completion:^(CLLocation *location, NSError *error) {
-        objc_setAssociatedObject(manager, &charon_request_key, nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    RevenantLocationRequest *request = [[RevenantLocationRequest alloc] initWithManager:self completion:^(CLLocation *location, NSError *error) {
+        objc_setAssociatedObject(manager, &revenant_request_key, nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
         id<CLLocationManagerDelegate> current = manager.delegate;
         if (location)
             [current locationManager:manager didUpdateLocations:@[location]];
         else if ([current respondsToSelector:@selector(locationManager:didFailWithError:)])
             [current locationManager:manager didFailWithError:error];
     }];
-    objc_setAssociatedObject(self, &charon_request_key, request, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, &revenant_request_key, request, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     [request start];
 }
 
@@ -127,7 +127,7 @@ typedef void (^CharonLocationCompletion)(CLLocation *location, NSError *error);
         dispatch_async(dispatch_get_main_queue(), ^{ deliver(CLRegionStateUnknown); });
         return;
     }
-    CharonLocationRequest *request = [[CharonLocationRequest alloc] initWithManager:self completion:^(CLLocation *location, NSError *error) {
+    RevenantLocationRequest *request = [[RevenantLocationRequest alloc] initWithManager:self completion:^(CLLocation *location, NSError *error) {
         if (location)
             deliver([region containsCoordinate:location.coordinate] ? CLRegionStateInside : CLRegionStateOutside);
         else

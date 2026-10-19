@@ -1,7 +1,7 @@
 #import <SceneKit/SceneKit.h>
 #include <math.h>
 
-static inline SCNMatrix4 CharonSCNMatrixMultiply(SCNMatrix4 a, SCNMatrix4 b)
+static inline SCNMatrix4 RevenantSCNMatrixMultiply(SCNMatrix4 a, SCNMatrix4 b)
 {
     const float *x = &a.m11, *y = &b.m11;
     SCNMatrix4 result;
@@ -15,7 +15,7 @@ static inline SCNMatrix4 CharonSCNMatrixMultiply(SCNMatrix4 a, SCNMatrix4 b)
     return result;
 }
 
-static inline void CharonSCNMatrixMultiplyVector(SCNMatrix4 matrix, const float *v, float *out)
+static inline void RevenantSCNMatrixMultiplyVector(SCNMatrix4 matrix, const float *v, float *out)
 {
     const float *m = &matrix.m11;
     for (int row = 0; row < 4; row++) {
@@ -23,7 +23,7 @@ static inline void CharonSCNMatrixMultiplyVector(SCNMatrix4 matrix, const float 
     }
 }
 
-static inline SCNMatrix4 CharonSCNMatrixInvert(SCNMatrix4 matrix)
+static inline SCNMatrix4 RevenantSCNMatrixInvert(SCNMatrix4 matrix)
 {
     const float *m = &matrix.m11;
     float inv[16];
@@ -55,7 +55,7 @@ static inline SCNMatrix4 CharonSCNMatrixInvert(SCNMatrix4 matrix)
     return result;
 }
 
-static inline SCNMatrix4 CharonSCNMatrixRotation(float angle, float x, float y, float z)
+static inline SCNMatrix4 RevenantSCNMatrixRotation(float angle, float x, float y, float z)
 {
     float length = sqrtf(x * x + y * y + z * z);
     if (length == 0) {
@@ -72,7 +72,7 @@ static inline SCNMatrix4 CharonSCNMatrixRotation(float angle, float x, float y, 
     return m;
 }
 
-static inline SCNMatrix4 CharonSCNMatrixFromQuaternion(SCNQuaternion q)
+static inline SCNMatrix4 RevenantSCNMatrixFromQuaternion(SCNQuaternion q)
 {
     float x = q.x, y = q.y, z = q.z, w = q.w;
     SCNMatrix4 m = SCNMatrix4Identity;
@@ -82,7 +82,7 @@ static inline SCNMatrix4 CharonSCNMatrixFromQuaternion(SCNQuaternion q)
     return m;
 }
 
-static inline SCNQuaternion CharonSCNQuaternionFromAxisAngle(SCNVector4 rotation)
+static inline SCNQuaternion RevenantSCNQuaternionFromAxisAngle(SCNVector4 rotation)
 {
     float length = sqrtf(rotation.x * rotation.x + rotation.y * rotation.y + rotation.z * rotation.z);
     if (length == 0) {
@@ -92,7 +92,7 @@ static inline SCNQuaternion CharonSCNQuaternionFromAxisAngle(SCNVector4 rotation
     return SCNVector4Make(rotation.x * s, rotation.y * s, rotation.z * s, cosf(rotation.w / 2));
 }
 
-static inline SCNVector4 CharonSCNAxisAngleFromQuaternion(SCNQuaternion q)
+static inline SCNVector4 RevenantSCNAxisAngleFromQuaternion(SCNQuaternion q)
 {
     float s = sqrtf(q.x * q.x + q.y * q.y + q.z * q.z);
     if (s == 0) {
@@ -101,7 +101,7 @@ static inline SCNVector4 CharonSCNAxisAngleFromQuaternion(SCNQuaternion q)
     return SCNVector4Make(q.x / s, q.y / s, q.z / s, 2 * atan2f(s, q.w));
 }
 
-static inline SCNQuaternion CharonSCNQuaternionFromEuler(SCNVector3 euler)
+static inline SCNQuaternion RevenantSCNQuaternionFromEuler(SCNVector3 euler)
 {
     float cx = cosf(euler.x / 2), sx = sinf(euler.x / 2);
     float cy = cosf(euler.y / 2), sy = sinf(euler.y / 2);
@@ -112,9 +112,9 @@ static inline SCNQuaternion CharonSCNQuaternionFromEuler(SCNVector3 euler)
                           cx * cy * cz + sx * sy * sz);
 }
 
-static inline SCNVector3 CharonSCNEulerFromQuaternion(SCNQuaternion q)
+static inline SCNVector3 RevenantSCNEulerFromQuaternion(SCNQuaternion q)
 {
-    SCNMatrix4 m = CharonSCNMatrixFromQuaternion(q);
+    SCNMatrix4 m = RevenantSCNMatrixFromQuaternion(q);
     float sinYaw = -m.m13;
     sinYaw = sinYaw > 1 ? 1 : (sinYaw < -1 ? -1 : sinYaw);
     float yaw = asinf(sinYaw), pitch, roll;
@@ -128,9 +128,9 @@ static inline SCNVector3 CharonSCNEulerFromQuaternion(SCNQuaternion q)
     return SCNVector3Make(pitch, yaw, roll);
 }
 
-static inline SCNMatrix4 CharonSCNMatrixCompose(SCNVector3 position, SCNQuaternion orientation, SCNVector3 scale)
+static inline SCNMatrix4 RevenantSCNMatrixCompose(SCNVector3 position, SCNQuaternion orientation, SCNVector3 scale)
 {
-    SCNMatrix4 m = CharonSCNMatrixFromQuaternion(orientation);
+    SCNMatrix4 m = RevenantSCNMatrixFromQuaternion(orientation);
     m.m11 *= scale.x; m.m12 *= scale.x; m.m13 *= scale.x;
     m.m21 *= scale.y; m.m22 *= scale.y; m.m23 *= scale.y;
     m.m31 *= scale.z; m.m32 *= scale.z; m.m33 *= scale.z;
@@ -140,7 +140,7 @@ static inline SCNMatrix4 CharonSCNMatrixCompose(SCNVector3 position, SCNQuaterni
     return m;
 }
 
-static inline SCNQuaternion CharonSCNQuaternionFromMatrix(SCNMatrix4 m)
+static inline SCNQuaternion RevenantSCNQuaternionFromMatrix(SCNMatrix4 m)
 {
     float trace = m.m11 + m.m22 + m.m33;
     SCNQuaternion q;
@@ -160,7 +160,7 @@ static inline SCNQuaternion CharonSCNQuaternionFromMatrix(SCNMatrix4 m)
     return q;
 }
 
-static inline void CharonSCNMatrixDecompose(SCNMatrix4 m, SCNVector3 *position, SCNQuaternion *orientation, SCNVector3 *scale)
+static inline void RevenantSCNMatrixDecompose(SCNMatrix4 m, SCNVector3 *position, SCNQuaternion *orientation, SCNVector3 *scale)
 {
     float sx = sqrtf(m.m11 * m.m11 + m.m12 * m.m12 + m.m13 * m.m13);
     float sy = sqrtf(m.m21 * m.m21 + m.m22 * m.m22 + m.m23 * m.m23);
@@ -175,5 +175,5 @@ static inline void CharonSCNMatrixDecompose(SCNMatrix4 m, SCNVector3 *position, 
     if (sx != 0) { rotation.m11 = m.m11 / sx; rotation.m12 = m.m12 / sx; rotation.m13 = m.m13 / sx; }
     if (sy != 0) { rotation.m21 = m.m21 / sy; rotation.m22 = m.m22 / sy; rotation.m23 = m.m23 / sy; }
     if (sz != 0) { rotation.m31 = m.m31 / sz; rotation.m32 = m.m32 / sz; rotation.m33 = m.m33 / sz; }
-    *orientation = CharonSCNQuaternionFromMatrix(rotation);
+    *orientation = RevenantSCNQuaternionFromMatrix(rotation);
 }

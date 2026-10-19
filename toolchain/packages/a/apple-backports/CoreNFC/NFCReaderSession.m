@@ -7,7 +7,7 @@ NSErrorDomain const NFCErrorDomain = @"NFCError";
 
 NSString * const NFCISO15693TagResponseErrorKey = @"ISO15693TagResponseErrorCode";
 
-@interface NFCReaderSession (CharonReaderSession)
+@interface NFCReaderSession (RevenantReaderSession)
 - (instancetype)initReaderWithDelegate:(id)delegate queue:(dispatch_queue_t)queue;
 @end
 
@@ -55,7 +55,7 @@ NSString * const NFCISO15693TagResponseErrorKey = @"ISO15693TagResponseErrorCode
         return;
     }
     _begun = YES;
-    [self charon_reportUnsupported];
+    [self revenant_reportUnsupported];
 }
 
 - (void)invalidateSession
@@ -64,10 +64,10 @@ NSString * const NFCISO15693TagResponseErrorKey = @"ISO15693TagResponseErrorCode
         _invalidated = YES;
         return;
     }
-    [self charon_reportUnsupported];
+    [self revenant_reportUnsupported];
 }
 
-- (void)charon_reportUnsupported
+- (void)revenant_reportUnsupported
 {
     dispatch_async(_sessionQueue, ^{
         NSError *error = [NSError errorWithDomain:NFCErrorDomain code:NFCReaderErrorUnsupportedFeature userInfo:nil];
@@ -82,7 +82,7 @@ NSString * const NFCISO15693TagResponseErrorKey = @"ISO15693TagResponseErrorCode
 {
     if ((self = [super init])) {
         _delegate = delegate;
-        _sessionQueue = queue ?: dispatch_queue_create("org.charon.nfc.session", DISPATCH_QUEUE_SERIAL);
+        _sessionQueue = queue ?: dispatch_queue_create("org.revenant.nfc.session", DISPATCH_QUEUE_SERIAL);
     }
     return self;
 }

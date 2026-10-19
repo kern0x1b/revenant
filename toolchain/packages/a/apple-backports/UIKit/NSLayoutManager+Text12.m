@@ -3,7 +3,7 @@
 
 static const void *LimitsKey = &LimitsKey;
 
-@implementation NSLayoutManager (CharonText12)
+@implementation NSLayoutManager (RevenantText12)
 
 - (BOOL)limitsLayoutForSuspiciousContents
 {

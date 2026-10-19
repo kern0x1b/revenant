@@ -1,4 +1,4 @@
-#import "CharonNetworkExtensionSettings.h"
+#import "RevenantNetworkExtensionSettings.h"
 
 @implementation NEProxyServer {
     NSString *_address;

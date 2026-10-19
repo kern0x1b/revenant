@@ -21,7 +21,7 @@
 #include "../support.hpp"
 #include "wire_reply.hpp"
 
-namespace shade {
+namespace emulator {
 namespace {
 
     constexpr std::uint32_t request_size =

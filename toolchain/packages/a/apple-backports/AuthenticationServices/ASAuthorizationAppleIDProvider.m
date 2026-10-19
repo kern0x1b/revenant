@@ -1,9 +1,9 @@
 #import <AuthenticationServices/AuthenticationServices.h>
-#import "CharonASConstruction.h"
+#import "RevenantASConstruction.h"
 
 @implementation ASAuthorizationAppleIDProvider
 
-- (instancetype)charon_initWithCredentialState:(id)store
+- (instancetype)revenant_initWithCredentialState:(id)store
 {
     (void)store;
     self = [super init];
@@ -12,12 +12,12 @@
 
 - (ASAuthorizationAppleIDRequest *)createRequest
 {
-    return [[ASAuthorizationAppleIDRequest alloc] charon_initWithProvider:self];
+    return [[ASAuthorizationAppleIDRequest alloc] revenant_initWithProvider:self];
 }
 
 - (id)copyWithZone:(NSZone *)zone
 {
-    return [[[self class] allocWithZone:zone] charon_initWithCredentialState:nil];
+    return [[[self class] allocWithZone:zone] revenant_initWithCredentialState:nil];
 }
 
 - (void)getCredentialStateForUserID:(NSString *)userID completion:(void (^)(ASAuthorizationAppleIDProviderCredentialState credentialState, NSError * _Nullable error))completion
@@ -44,7 +44,7 @@
 
 - (instancetype)initWithCoder:(NSCoder *)coder
 {
-    return [self charon_initWithCredentialState:nil];
+    return [self revenant_initWithCredentialState:nil];
 }
 
 - (void)encodeWithCoder:(NSCoder *)coder

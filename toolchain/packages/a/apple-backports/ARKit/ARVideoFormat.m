@@ -1,8 +1,8 @@
 #import <ARKit/ARKit.h>
 #import <CoreMedia/CoreMedia.h>
 
-#import "CharonARKitPrivate.h"
-#import "CharonARTracker.h"
+#import "RevenantARKitPrivate.h"
+#import "RevenantARTracker.h"
 
 @interface ARVideoFormat () {
 @public

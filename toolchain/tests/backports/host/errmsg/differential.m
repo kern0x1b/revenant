@@ -2,7 +2,7 @@
 #import <Security/Security.h>
 #import "check.h"
 
-extern CFStringRef charon_host_SecCopyErrorMessageString(OSStatus, void *);
+extern CFStringRef revenant_host_SecCopyErrorMessageString(OSStatus, void *);
 
 static const char *label(NSString *format, ...)
 {
@@ -34,7 +34,7 @@ int main(void)
         NSUInteger known = 0, differing = 0, hostOnlyCount = 0;
         for (NSNumber *number in codes) {
             OSStatus status = number.intValue;
-            NSString *port = taken(charon_host_SecCopyErrorMessageString(status, NULL));
+            NSString *port = taken(revenant_host_SecCopyErrorMessageString(status, NULL));
             NSString *host = taken(SecCopyErrorMessageString(status, NULL));
             if (![port hasPrefix:@"OSStatus "])
                 known++;
@@ -50,11 +50,11 @@ int main(void)
         printf("codes=%lu known=%lu differing=%lu hostOnly=%lu\n", (unsigned long)codes.count, (unsigned long)known, (unsigned long)differing, (unsigned long)hostOnlyCount);
         CHECK(hostOnlyCount == 30, "the host's own extra codes are the only ones the port lacks");
         CHECK(known > 500, "the table answers its codes");
-        CHECK_EQUAL(taken(charon_host_SecCopyErrorMessageString(-25300, NULL)), @"The specified item could not be found in the keychain.", "the not-found text");
-        CHECK_EQUAL(taken(charon_host_SecCopyErrorMessageString(12345, NULL)), @"OSStatus 12345", "an unknown code is named by its number");
-        CHECK_EQUAL(taken(charon_host_SecCopyErrorMessageString(-1, NULL)), @"OSStatus -1", "a negative unknown code too");
-        CHECK_EQUAL(taken(charon_host_SecCopyErrorMessageString(0, NULL)), taken(SecCopyErrorMessageString(0, NULL)), "success reads as the host's does");
-        printf("checks=%d failures=%d\n", charon_checks, charon_failures);
+        CHECK_EQUAL(taken(revenant_host_SecCopyErrorMessageString(-25300, NULL)), @"The specified item could not be found in the keychain.", "the not-found text");
+        CHECK_EQUAL(taken(revenant_host_SecCopyErrorMessageString(12345, NULL)), @"OSStatus 12345", "an unknown code is named by its number");
+        CHECK_EQUAL(taken(revenant_host_SecCopyErrorMessageString(-1, NULL)), @"OSStatus -1", "a negative unknown code too");
+        CHECK_EQUAL(taken(revenant_host_SecCopyErrorMessageString(0, NULL)), taken(SecCopyErrorMessageString(0, NULL)), "success reads as the host's does");
+        printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
     }
-    return charon_failures ? 1 : 0;
+    return revenant_failures ? 1 : 0;
 }

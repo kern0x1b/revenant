@@ -18,17 +18,17 @@
 #include <utility>
 #include <vector>
 
-#if defined(SHADE_HAS_SDL2)
+#if defined(REVENANT_EMULATOR_HAS_SDL2)
 #include <SDL.h>
 #endif
 
-namespace shade {
+namespace emulator {
 
 struct SdlAudioSink::Impl {
     mutable std::mutex control_mutex;
     mutable std::mutex queue_mutex;
     std::string error;
-#if defined(SHADE_HAS_SDL2)
+#if defined(REVENANT_EMULATOR_HAS_SDL2)
     struct QueuedChunk {
         std::vector<std::int16_t> samples;
         std::size_t next_sample { };
@@ -175,7 +175,7 @@ SdlAudioSink::SdlAudioSink()
 
 SdlAudioSink::~SdlAudioSink()
 {
-#if defined(SHADE_HAS_SDL2)
+#if defined(REVENANT_EMULATOR_HAS_SDL2)
     SDL_AudioDeviceID device = 0;
     SDL_AudioStream* streaming_converter = nullptr;
     bool owns_audio_subsystem = false;
@@ -198,7 +198,7 @@ SdlAudioSink::~SdlAudioSink()
 
 bool SdlAudioSink::available()
 {
-#if defined(SHADE_HAS_SDL2)
+#if defined(REVENANT_EMULATOR_HAS_SDL2)
     return true;
 #else
     return false;
@@ -207,7 +207,7 @@ bool SdlAudioSink::available()
 
 bool SdlAudioSink::play(const AudioBuffer& buffer)
 {
-#if defined(SHADE_HAS_SDL2)
+#if defined(REVENANT_EMULATOR_HAS_SDL2)
     std::unique_lock control_lock { impl_->control_mutex };
     if (buffer.sample_rate == 0 || buffer.channel_count == 0 ||
         buffer.empty()) {
@@ -370,7 +370,7 @@ bool SdlAudioSink::play(const AudioBuffer& buffer)
 
 bool SdlAudioSink::has_pending_audio() const
 {
-#if defined(SHADE_HAS_SDL2)
+#if defined(REVENANT_EMULATOR_HAS_SDL2)
     std::lock_guard lock { impl_->queue_mutex };
     return impl_->queued_sample_count != 0;
 #else
@@ -380,7 +380,7 @@ bool SdlAudioSink::has_pending_audio() const
 
 void SdlAudioSink::set_gain(float gain)
 {
-#if defined(SHADE_HAS_SDL2)
+#if defined(REVENANT_EMULATOR_HAS_SDL2)
     std::lock_guard lock { impl_->queue_mutex };
     impl_->gain = std::clamp(gain, 0.0F, 1.0F);
 #else
@@ -390,7 +390,7 @@ void SdlAudioSink::set_gain(float gain)
 
 void SdlAudioSink::stop(AudioStopMode mode)
 {
-#if defined(SHADE_HAS_SDL2)
+#if defined(REVENANT_EMULATOR_HAS_SDL2)
     std::unique_lock control_lock { impl_->control_mutex };
     if (impl_->streaming_converter != nullptr)
         SDL_AudioStreamClear(impl_->streaming_converter);

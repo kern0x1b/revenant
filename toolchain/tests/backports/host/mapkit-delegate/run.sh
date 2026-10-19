@@ -19,16 +19,16 @@ mkdir -p "$build"
 rm -f "$build"/cc.log "$build"/runner.log "$build"/*.txt "$build"/*.body "$build"/*.dylib "$build"/runner
 MACOSX_SDK=$(xcrun --sdk macosx --show-sdk-path)
 TARGET="-target arm64-apple-ios17.0-macabi -isysroot $MACOSX_SDK -isystem $MACOSX_SDK/System/iOSSupport/usr/include -F $MACOSX_SDK/System/iOSSupport/System/Library/Frameworks"
-xcrun clang -fobjc-arc -Wall -fPIC -dynamiclib $TARGET -DCHARON_HOST_PROBE=1 \
-    -DMKMapViewDelegate=charonHost_MKMapViewDelegate \
+xcrun clang -fobjc-arc -Wall -fPIC -dynamiclib $TARGET -DREVENANT_HOST_PROBE=1 \
+    -DMKMapViewDelegate=revenantHost_MKMapViewDelegate \
     -I"$port" -framework Foundation -framework MapKit -framework UIKit -framework CoreLocation \
     "$port/MKMapViewDelegateRenderers.m" -o "$build/libport.dylib" 2> "$build/cc.log" || {
         grep -m5 ': error:' "$build/cc.log" || true; exit 1; }
 xcrun clang -fobjc-arc -Wall $TARGET -ldl -framework Foundation -framework MapKit \
     -framework UIKit -framework CoreLocation -framework CoreGraphics "$here/runner.m" -o "$build/runner" 2> "$build/runner.log" || {
         grep -m5 ': error:' "$build/runner.log" || true; exit 1; }
-CHARON_PORT_DYLIB="$build/libport.dylib" "$build/runner" > "$build/real.txt" 2>&1 && true
-CHARON_PORT_DYLIB="$build/libport.dylib" CHARON_MUTANT=1 "$build/runner" > "$build/mutant.txt" 2>&1 && true
+REVENANT_PORT_DYLIB="$build/libport.dylib" "$build/runner" > "$build/real.txt" 2>&1 && true
+REVENANT_PORT_DYLIB="$build/libport.dylib" REVENANT_MUTANT=1 "$build/runner" > "$build/mutant.txt" 2>&1 && true
 cat "$build/real.txt"; cat "$build/mutant.txt"
 body() { grep -E '^  [a-z]' "$1" | grep -v '^  (a subclass|#)'; }
 body "$build/real.txt" > "$build/real.body"

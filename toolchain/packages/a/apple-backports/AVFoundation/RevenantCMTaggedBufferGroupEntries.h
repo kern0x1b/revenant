@@ -1,35 +1,35 @@
 #import <CoreMedia/CoreMedia.h>
 #import <CoreFoundation/CoreFoundation.h>
 #import <Foundation/Foundation.h>
-#import "CharonCMTag26.h"
-#import "CharonCMTagSupport.h"
-#import "CharonCMTaggedBufferGroup26.h"
+#import "RevenantCMTag26.h"
+#import "RevenantCMTagSupport.h"
+#import "RevenantCMTaggedBufferGroup26.h"
 
-static NSString *const CharonEntriesKeyName = @"charon.taggedbuffergroup.entries";
-static NSString *const CharonGroupKeyName = @"charon.taggedbuffergroup.group";
+static NSString *const RevenantEntriesKeyName = @"revenant.taggedbuffergroup.entries";
+static NSString *const RevenantGroupKeyName = @"revenant.taggedbuffergroup.group";
 
-#define CharonEntriesKey ((__bridge CFStringRef)CharonEntriesKeyName)
-#define CharonGroupKey ((__bridge CFStringRef)CharonGroupKeyName)
+#define RevenantEntriesKey ((__bridge CFStringRef)RevenantEntriesKeyName)
+#define RevenantGroupKey ((__bridge CFStringRef)RevenantGroupKeyName)
 
-static const FourCharCode CharonTaggedBufferGroupSubtype = 'tbgr';
+static const FourCharCode RevenantTaggedBufferGroupSubtype = 'tbgr';
 
-static inline CFDataRef CharonCopyEntriesData(CMTaggedBufferGroupRef group)
+static inline CFDataRef RevenantCopyEntriesData(CMTaggedBufferGroupRef group)
 {
     CFMutableDataRef data = CFDataCreateMutable(kCFAllocatorDefault, 0);
     if (!group)
         return data;
-    NSArray *collections = ((__bridge CharonCMTaggedBufferGroup *)group).charon_collections;
+    NSArray *collections = ((__bridge RevenantCMTaggedBufferGroup *)group).revenant_collections;
     for (id collection in collections) {
-        CharonCMTagCollection *one = (CharonCMTagCollection *)collection;
-        CMItemCount count = (CMItemCount)one.charon_count;
+        RevenantCMTagCollection *one = (RevenantCMTagCollection *)collection;
+        CMItemCount count = (CMItemCount)one.revenant_count;
         CFDataAppendBytes(data, (const UInt8 *)&count, sizeof count);
         if (count)
-            CFDataAppendBytes(data, (const UInt8 *)one.charon_tags, count * sizeof(CMTag));
+            CFDataAppendBytes(data, (const UInt8 *)one.revenant_tags, count * sizeof(CMTag));
     }
     return data;
 }
 
-static inline BOOL CharonEntriesDataAtIndex(CFDataRef data, CFIndex index, CMItemCount *countOut, const CMTag **tagsOut)
+static inline BOOL RevenantEntriesDataAtIndex(CFDataRef data, CFIndex index, CMItemCount *countOut, const CMTag **tagsOut)
 {
     const UInt8 *bytes = (const UInt8 *)CFDataGetBytePtr(data);
     CFIndex length = (CFIndex)CFDataGetLength(data);
@@ -52,7 +52,7 @@ static inline BOOL CharonEntriesDataAtIndex(CFDataRef data, CFIndex index, CMIte
     return NO;
 }
 
-static inline CFIndex CharonEntriesDataCount(CFDataRef data)
+static inline CFIndex RevenantEntriesDataCount(CFDataRef data)
 {
     const UInt8 *bytes = (const UInt8 *)CFDataGetBytePtr(data);
     CFIndex length = (CFIndex)CFDataGetLength(data);

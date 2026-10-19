@@ -2,8 +2,8 @@
 #import <CoreLocation/CoreLocation.h>
 #import <CloudKit/CloudKit.h>
 
-#import "CharonCKConstants.h"
-#import "CharonCKValue.h"
+#import "RevenantCKConstants.h"
+#import "RevenantCKValue.h"
 
 #pragma mark - CKShareParticipant
 

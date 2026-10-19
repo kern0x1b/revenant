@@ -10,7 +10,7 @@
 #include <cstdint>
 #include <memory>
 
-namespace shade {
+namespace emulator {
 
 inline constexpr std::uint32_t arm_mach_cpu_type = 12U;
 

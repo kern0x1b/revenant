@@ -1,11 +1,11 @@
 #import <Foundation/Foundation.h>
 #import <Metal/Metal.h>
-#import "CharonMetal26Types.h"
+#import "RevenantMetal26Types.h"
 
-static const NSUInteger CharonMeshColorSlots = 8;
-static const NSUInteger CharonMeshBufferSlots = 31;
+static const NSUInteger RevenantMeshColorSlots = 8;
+static const NSUInteger RevenantMeshBufferSlots = 31;
 
-static MTLLinkedFunctions *CharonCopyLinkedFunctions(MTLLinkedFunctions *source)
+static MTLLinkedFunctions *RevenantCopyLinkedFunctions(MTLLinkedFunctions *source)
 {
     MTLLinkedFunctions *copy = [[MTLLinkedFunctions alloc] init];
     if (source) {
@@ -17,18 +17,18 @@ static MTLLinkedFunctions *CharonCopyLinkedFunctions(MTLLinkedFunctions *source)
     return copy;
 }
 
-static BOOL CharonSameObject(id a, id b)
+static BOOL RevenantSameObject(id a, id b)
 {
     return a == b || [a isEqual:b];
 }
 
-static BOOL CharonSameLinkedFunctions(MTLLinkedFunctions *a, MTLLinkedFunctions *b)
+static BOOL RevenantSameLinkedFunctions(MTLLinkedFunctions *a, MTLLinkedFunctions *b)
 {
-    return CharonSameObject(a.functions, b.functions) && CharonSameObject(a.binaryFunctions, b.binaryFunctions) &&
-           CharonSameObject(a.groups, b.groups) && CharonSameObject(a.privateFunctions, b.privateFunctions);
+    return RevenantSameObject(a.functions, b.functions) && RevenantSameObject(a.binaryFunctions, b.binaryFunctions) &&
+           RevenantSameObject(a.groups, b.groups) && RevenantSameObject(a.privateFunctions, b.privateFunctions);
 }
 
-static BOOL CharonSameColorSlot(MTLRenderPipelineColorAttachmentDescriptor *a, MTLRenderPipelineColorAttachmentDescriptor *b)
+static BOOL RevenantSameColorSlot(MTLRenderPipelineColorAttachmentDescriptor *a, MTLRenderPipelineColorAttachmentDescriptor *b)
 {
     return a.pixelFormat == b.pixelFormat && a.blendingEnabled == b.blendingEnabled &&
            a.sourceRGBBlendFactor == b.sourceRGBBlendFactor && a.destinationRGBBlendFactor == b.destinationRGBBlendFactor &&
@@ -140,19 +140,19 @@ static BOOL CharonSameColorSlot(MTLRenderPipelineColorAttachmentDescriptor *a, M
 - (MTLLinkedFunctions *)objectLinkedFunctions { return _objectLinkedFunctions; }
 - (void)setObjectLinkedFunctions:(MTLLinkedFunctions *)functions
 {
-    _objectLinkedFunctions = functions ? CharonCopyLinkedFunctions(functions) : [[MTLLinkedFunctions alloc] init];
+    _objectLinkedFunctions = functions ? RevenantCopyLinkedFunctions(functions) : [[MTLLinkedFunctions alloc] init];
 }
 
 - (MTLLinkedFunctions *)meshLinkedFunctions { return _meshLinkedFunctions; }
 - (void)setMeshLinkedFunctions:(MTLLinkedFunctions *)functions
 {
-    _meshLinkedFunctions = functions ? CharonCopyLinkedFunctions(functions) : [[MTLLinkedFunctions alloc] init];
+    _meshLinkedFunctions = functions ? RevenantCopyLinkedFunctions(functions) : [[MTLLinkedFunctions alloc] init];
 }
 
 - (MTLLinkedFunctions *)fragmentLinkedFunctions { return _fragmentLinkedFunctions; }
 - (void)setFragmentLinkedFunctions:(MTLLinkedFunctions *)functions
 {
-    _fragmentLinkedFunctions = functions ? CharonCopyLinkedFunctions(functions) : [[MTLLinkedFunctions alloc] init];
+    _fragmentLinkedFunctions = functions ? RevenantCopyLinkedFunctions(functions) : [[MTLLinkedFunctions alloc] init];
 }
 
 - (MTLShaderValidation)shaderValidation { return _shaderValidation; }
@@ -178,7 +178,7 @@ static BOOL CharonSameColorSlot(MTLRenderPipelineColorAttachmentDescriptor *a, M
     copy.meshThreadgroupSizeIsMultipleOfThreadExecutionWidth = _meshThreadgroupSizeIsMultipleOfThreadExecutionWidth;
     copy.payloadMemoryLength = _payloadMemoryLength;
     copy.maxTotalThreadgroupsPerMeshGrid = _maxTotalThreadgroupsPerMeshGrid;
-    for (NSUInteger slot = 0; slot < CharonMeshBufferSlots; slot++) {
+    for (NSUInteger slot = 0; slot < RevenantMeshBufferSlots; slot++) {
         copy->_objectBuffers[slot] = _objectBuffers[slot];
         copy->_meshBuffers[slot] = _meshBuffers[slot];
         copy->_fragmentBuffers[slot] = _fragmentBuffers[slot];
@@ -188,7 +188,7 @@ static BOOL CharonSameColorSlot(MTLRenderPipelineColorAttachmentDescriptor *a, M
     copy.alphaToOneEnabled = _alphaToOneEnabled;
     copy.rasterizationEnabled = _rasterizationEnabled;
     copy.maxVertexAmplificationCount = _maxVertexAmplificationCount;
-    for (NSUInteger slot = 0; slot < CharonMeshColorSlots; slot++)
+    for (NSUInteger slot = 0; slot < RevenantMeshColorSlots; slot++)
         copy->_colorAttachments[slot] = _colorAttachments[slot];
     copy.depthAttachmentPixelFormat = _depthAttachmentPixelFormat;
     copy.stencilAttachmentPixelFormat = _stencilAttachmentPixelFormat;
@@ -210,8 +210,8 @@ static BOOL CharonSameColorSlot(MTLRenderPipelineColorAttachmentDescriptor *a, M
     if (![object isKindOfClass:[MTLMeshRenderPipelineDescriptor class]])
         return NO;
     MTLMeshRenderPipelineDescriptor *other = object;
-    if (!(CharonSameObject(_label, other->_label) && CharonSameObject(_objectFunction, other->_objectFunction) &&
-          CharonSameObject(_meshFunction, other->_meshFunction) && CharonSameObject(_fragmentFunction, other->_fragmentFunction)))
+    if (!(RevenantSameObject(_label, other->_label) && RevenantSameObject(_objectFunction, other->_objectFunction) &&
+          RevenantSameObject(_meshFunction, other->_meshFunction) && RevenantSameObject(_fragmentFunction, other->_fragmentFunction)))
         return NO;
     if (!(_maxTotalThreadsPerObjectThreadgroup == other->_maxTotalThreadsPerObjectThreadgroup &&
           _maxTotalThreadsPerMeshThreadgroup == other->_maxTotalThreadsPerMeshThreadgroup &&
@@ -220,7 +220,7 @@ static BOOL CharonSameColorSlot(MTLRenderPipelineColorAttachmentDescriptor *a, M
           _payloadMemoryLength == other->_payloadMemoryLength &&
           _maxTotalThreadgroupsPerMeshGrid == other->_maxTotalThreadgroupsPerMeshGrid))
         return NO;
-    for (NSUInteger slot = 0; slot < CharonMeshBufferSlots; slot++) {
+    for (NSUInteger slot = 0; slot < RevenantMeshBufferSlots; slot++) {
         if (_objectBuffers[slot].mutability != other->_objectBuffers[slot].mutability ||
             _meshBuffers[slot].mutability != other->_meshBuffers[slot].mutability ||
             _fragmentBuffers[slot].mutability != other->_fragmentBuffers[slot].mutability)
@@ -230,8 +230,8 @@ static BOOL CharonSameColorSlot(MTLRenderPipelineColorAttachmentDescriptor *a, M
           _alphaToOneEnabled == other->_alphaToOneEnabled && _rasterizationEnabled == other->_rasterizationEnabled &&
           _maxVertexAmplificationCount == other->_maxVertexAmplificationCount))
         return NO;
-    for (NSUInteger slot = 0; slot < CharonMeshColorSlots; slot++) {
-        if (!CharonSameColorSlot(_colorAttachments[slot], other->_colorAttachments[slot]))
+    for (NSUInteger slot = 0; slot < RevenantMeshColorSlots; slot++) {
+        if (!RevenantSameColorSlot(_colorAttachments[slot], other->_colorAttachments[slot]))
             return NO;
     }
     if (!(_depthAttachmentPixelFormat == other->_depthAttachmentPixelFormat &&
@@ -240,9 +240,9 @@ static BOOL CharonSameColorSlot(MTLRenderPipelineColorAttachmentDescriptor *a, M
         return NO;
     if (![(_binaryArchives ?: @[]) isEqualToArray:(other->_binaryArchives ?: @[])])
         return NO;
-    if (!(CharonSameLinkedFunctions(_objectLinkedFunctions, other->_objectLinkedFunctions) &&
-          CharonSameLinkedFunctions(_meshLinkedFunctions, other->_meshLinkedFunctions) &&
-          CharonSameLinkedFunctions(_fragmentLinkedFunctions, other->_fragmentLinkedFunctions)))
+    if (!(RevenantSameLinkedFunctions(_objectLinkedFunctions, other->_objectLinkedFunctions) &&
+          RevenantSameLinkedFunctions(_meshLinkedFunctions, other->_meshLinkedFunctions) &&
+          RevenantSameLinkedFunctions(_fragmentLinkedFunctions, other->_fragmentLinkedFunctions)))
         return NO;
     return _shaderValidation == other->_shaderValidation &&
            _requiredThreadsPerObjectThreadgroup.width == other->_requiredThreadsPerObjectThreadgroup.width &&

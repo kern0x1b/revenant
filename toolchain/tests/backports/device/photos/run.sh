@@ -25,7 +25,7 @@
 #
 # The two applications WRITE to the photo library of the device they run on, and the photo library of
 # a device that is not the iPad 2 is the owner's. So a program that writes is refused unless the
-# device is the iPad 2 (the one that holds the fleet's own fixtures, albums named CharonPhotosProbe)
+# device is the iPad 2 (the one that holds the fleet's own fixtures, albums named RevenantPhotosProbe)
 # or PHOTOS_ALLOW_WRITE=1 says the device's library is a test library. Nothing is read to decide this:
 # the device's name decides, so the check cannot itself touch the owner's data.
 #
@@ -41,10 +41,10 @@
 #   PHOTOS_BUILD                       where the builds and the reports go
 #                                      (default <worktree>/.agent-work/runs/photos-device)
 #
-# The claim is the operator's, not this script's: export CHARON_DEVICE_HOLDER and claim first
+# The claim is the operator's, not this script's: export REVENANT_DEVICE_HOLDER and claim first
 # (`xmake device -d NAME --minutes=30 claim`); this script refuses a device held by someone else and
 # says so. Nothing here installs a package: the port's sources are compiled into each program, so the
-# canon on the device (org.charon.apple-backports), which belongs to everybody, is left alone.
+# canon on the device (org.revenant.apple-backports), which belongs to everybody, is left alone.
 #
 # Exits 0 only when every program that ran reported a figure with no failed check, and, with
 # --control, when the control reported at least one.
@@ -126,7 +126,7 @@ link_one() { # $1 output, rest: objects
     shift
     # shellcheck disable=SC2086
     $PHOTOS_CC -target "$triple" -isysroot "$PHOTOS_SDK" -fuse-ld="$PHOTOS_LD" -fobjc-arc \
-        -Wl,-rename_section,__DATA,__objc_catlist,__DATA,__charon_catlist \
+        -Wl,-rename_section,__DATA,__objc_catlist,__DATA,__revenant_catlist \
         -o "$output" "$@" $frameworks $extra
     # Fatal, like the [ -e "$tool" ] and `command -v ldid` guards above: a binary that could not be
     # signed is a binary that is pushed and launched and then fails somewhere else -- an opaque launch
@@ -199,53 +199,53 @@ done
 # The transport. Every command below goes through the driver's own device module, which checks the
 # claim, the tunnel and the UDID; a raw ssh would check none of them and "permission denied" would
 # then mean the wrong device.
-[ -n "${CHARON_DEVICE_HOLDER:-}" ] || { echo "run.sh: export CHARON_DEVICE_HOLDER=<band> and claim the device first (xmake device ${device_name:+-d $device_name} --minutes=30 claim)" >&2; exit 1; }
+[ -n "${REVENANT_DEVICE_HOLDER:-}" ] || { echo "run.sh: export REVENANT_DEVICE_HOLDER=<band> and claim the device first (xmake device ${device_name:+-d $device_name} --minutes=30 claim)" >&2; exit 1; }
 device_flag=""
 [ -n "$device_name" ] && device_flag="-d $device_name"
 # The transport follows -d, and so must every push and fetch: copy.lua picks its env file from
-# CHARON_DEVICE (modules/device.lua:46, `name or os.getenv(CHOSEN)`), which without this line was unset
+# REVENANT_DEVICE (modules/device.lua:46, `name or os.getenv(CHOSEN)`), which without this line was unset
 # and every file went to device.env -- so `--device ipad2` copied the programs to the 4S and then ran
 # them on the iPad. Found by running on the iPad for the first time; the 4S is the default device, which
 # is why the same run worked there.
-[ -n "$device_name" ] && export CHARON_DEVICE=$device_name
+[ -n "$device_name" ] && export REVENANT_DEVICE=$device_name
 xmake device $device_flag list 2>&1 | sed 's/^/  /'
 
 remote_dir=/private/var/backports
 run_device() { xmake device $device_flag -s 300 run "$1"; }
 
 # The launcher, if the device has not got one. The iPad 2 has no sblaunch -- tests/backports/README.md
-# says so in as many words -- and charon-sblaunch is the tree's own way to start an application on
+# says so in as many words -- and revenant-sblaunch is the tree's own way to start an application on
 # either device, held at /usr/libexec and copied to a device from packages/e/emulator-guest, which is
 # the package that builds it.
 #
 # It is FOUND, not built here, and the reason is measured: the same source compiled with this script's
 # own clang line produces a binary that dies with SIGILL the moment SpringBoard is asked to run it --
 # `Illegal instruction: 4`, exit 132, on the iPad 2 on 2026-10-01 -- while the copy out of the shared
-# store exits 0. packages/e/emulator-guest builds it through @addon/charon/daemon, and installing that
+# store exits 0. packages/e/emulator-guest builds it through @addon/revenant/daemon, and installing that
 # addon is not this script's business; PHOTOS_SBLAUNCH names a copy when the store has none.
-sblaunch=/usr/libexec/charon-sblaunch
+sblaunch=/usr/libexec/revenant-sblaunch
 ensure_sblaunch() {
     if run_device "test -x $sblaunch"; then
         return 0
     fi
-    launcher=${PHOTOS_SBLAUNCH:-$(ls -t "$HOME"/.xmake/packages/e/emulator-guest/latest/*/usr/libexec/charon-sblaunch 2>/dev/null | head -1)}
+    launcher=${PHOTOS_SBLAUNCH:-$(ls -t "$HOME"/.xmake/packages/e/emulator-guest/latest/*/usr/libexec/revenant-sblaunch 2>/dev/null | head -1)}
     if [ ! -f "$launcher" ]; then
-        echo "run.sh: charon-sblaunch is not in the shared store and PHOTOS_SBLAUNCH does not name one;" >&2
-        echo "  it is built by packages/e/emulator-guest, whose install holds it at usr/libexec/charon-sblaunch" >&2
+        echo "run.sh: revenant-sblaunch is not in the shared store and PHOTOS_SBLAUNCH does not name one;" >&2
+        echo "  it is built by packages/e/emulator-guest, whose install holds it at usr/libexec/revenant-sblaunch" >&2
         exit 1
     fi
     run_device "mkdir -p /usr/libexec"
     copy "$launcher" "$sblaunch"
     run_device "chmod 755 $sblaunch"
-    echo "charon-sblaunch: copied to $sblaunch from $(basename "$(dirname "$(dirname "$(dirname "$(dirname "$launcher")")")")")"
+    echo "revenant-sblaunch: copied to $sblaunch from $(basename "$(dirname "$(dirname "$(dirname "$(dirname "$launcher")")")")")"
 }
 
 # A push or a fetch that fails stops the run. It did not: a copy went to the wrong device, the run
 # carried on, and the program's own chmod failure was what finally printed -- which is the shape of a
-# swallowed failure the tree keeps paying for. CHARON_DEVICE is what copy.lua reads, and the export
+# swallowed failure the tree keeps paying for. REVENANT_DEVICE is what copy.lua reads, and the export
 # above it is what makes the push follow -d.
-copy() { CHARON_ROOT=$root xmake l "$here/copy.lua" "$1" "$2" >/dev/null; }
-fetch() { CHARON_ROOT=$root xmake l "$here/copy.lua" "$1" "$2" --fetch >/dev/null; }
+copy() { REVENANT_ROOT=$root xmake l "$here/copy.lua" "$1" "$2" >/dev/null; }
+fetch() { REVENANT_ROOT=$root xmake l "$here/copy.lua" "$1" "$2" --fetch >/dev/null; }
 
 failed=0
 refused=0
@@ -292,7 +292,7 @@ for name in $built; do
             if [ "$allow_write" != 1 ] && [ "$device_name" != ipad2 ]; then
                 which=${device_name:-the default device}
                 echo "$name: REFUSED -- it writes to the photo library, and $which's library is the owner's."
-                echo "  Run it on the iPad 2 (the one holding the fleet's CharonPhotosProbe fixtures), or set PHOTOS_ALLOW_WRITE=1"
+                echo "  Run it on the iPad 2 (the one holding the fleet's RevenantPhotosProbe fixtures), or set PHOTOS_ALLOW_WRITE=1"
                 echo "  if that device's library is a test library. Nothing was pushed and nothing ran."
                 # Counted as refused, not as a failed check: a check did not fail, a program did not
                 # run. The exit status stays non-zero either way, so a partial run is never a pass.
@@ -321,17 +321,17 @@ for name in $built; do
             copy "$out/$executable.app/Info.plist" "/Applications/$executable.app/Info.plist"
             # uicache is a per-user cache and answers "incorrect user" from root: it is run as mobile,
             # which is what tests/backports/README.md says to do. And the iPad 2 has no sblaunch --
-            # the launcher's own line -- so this is packages/e/emulator-guest/src/charon-sblaunch, built
+            # the launcher's own line -- so this is packages/e/emulator-guest/src/revenant-sblaunch, built
             # and signed here with its entitlements and copied to /usr/libexec. Both facts came from
             # the first iPad run: "cannot open cache file. incorrect user?" and "sblaunch: command not
             # found".
             ensure_sblaunch
             run_device "su mobile -c 'uicache -p /Applications/$executable.app'"
             # One argument, no --wait: the copy in the shared store predates that option and answers
-            # "usage: charon-sblaunch <bundle identifier>" with exit 2 (measured on the iPad 2 on
+            # "usage: revenant-sblaunch <bundle identifier>" with exit 2 (measured on the iPad 2 on
             # 2026-10-01), and the wait below -- for the .done marker the program itself writes -- is
             # what waits for the application anyway.
-            run_device "/usr/libexec/charon-sblaunch local.charon.backports.${executable}"
+            run_device "/usr/libexec/revenant-sblaunch local.revenant.backports.${executable}"
             echo "$name: launched; the report is $remote_dir/$stem.log when it writes $remote_dir/$stem.done"
             # The applications write their report to a file, not to the launch's stdout, because a
             # process SpringBoard started has no terminal to print to. Wait for the .done marker the

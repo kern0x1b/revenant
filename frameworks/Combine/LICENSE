@@ -22,14 +22,14 @@ SOFTWARE.
 
 ---
 
-The notice above is OpenCombine's, and it covers the work Styx is built from:
+The notice above is OpenCombine's, and it covers the work Combine is built from:
 <https://github.com/OpenCombine/OpenCombine>, pinned at
-1c6f02c7ed8140c0ba7a783aaddb6e0685a0037b. The `charon@styx` package installs it
+1c6f02c7ed8140c0ba7a783aaddb6e0685a0037b. The `revenant@combine` package installs it
 beside the sources and the libraries it builds from them, and it is the notice a
 copy of this software must carry.
 
-Styx is OpenCombine with a series of patches, the files in
-`charon/packages/s/styx/patches/`, under the same MIT terms and with no other
+Combine is OpenCombine with a series of patches, the files in
+`toolchain/packages/c/combine/patches/`, under the same MIT terms and with no other
 claim over Sergej Jaskiewicz's work. The patches are ours, and they are:
 
 - the core, the Dispatch scheduler and the Foundation integration made one

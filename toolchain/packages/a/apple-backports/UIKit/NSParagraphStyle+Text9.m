@@ -58,10 +58,10 @@ static BOOL is_equal(id self, SEL selector, id other)
     return self == other || ![other isKindOfClass:[NSParagraphStyle class]] || (tightening_of(self) == tightening_of(other) && strategy_of(self) == strategy_of(other));
 }
 
-@interface CharonParagraphStyle9 : NSObject
+@interface RevenantParagraphStyle9 : NSObject
 @end
 
-@implementation CharonParagraphStyle9
+@implementation RevenantParagraphStyle9
 
 + (void)load
 {
@@ -92,7 +92,7 @@ static BOOL is_equal(id self, SEL selector, id other)
 
 @end
 
-@implementation NSParagraphStyle (CharonText9)
+@implementation NSParagraphStyle (RevenantText9)
 
 - (BOOL)allowsDefaultTighteningForTruncation
 {
@@ -106,7 +106,7 @@ static BOOL is_equal(id self, SEL selector, id other)
 
 @end
 
-@implementation NSMutableParagraphStyle (CharonText9)
+@implementation NSMutableParagraphStyle (RevenantText9)
 
 - (void)setAllowsDefaultTighteningForTruncation:(BOOL)allows
 {

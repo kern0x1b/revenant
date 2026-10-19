@@ -189,12 +189,12 @@
       "source": "SDK 16.4, Metal, MTLResource.h"
     },
     {
-      "api": "CharonMetalHeap",
+      "api": "RevenantMetalHeap",
       "kind": "class",
       "introduced": "10.0",
       "minimum": "6.0",
       "status": "owed",
-      "reason": "build the class CharonMetalHeap",
+      "reason": "build the class RevenantMetalHeap",
       "effect": "until built: NSClassFromString answers nil",
       "source": "SDK 16.4, Metal, MTLHeap.h, whose protocol arrived in 10.0",
       "facts": "facts/Metal/PortInternals.md"

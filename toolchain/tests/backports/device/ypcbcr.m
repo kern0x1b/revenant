@@ -105,7 +105,7 @@ int main(void)
                 }
             }
         }
-        charon_check(widest <= 1, "every luma byte is the arithmetic of the header, within the last bit",
+        revenant_check(widest <= 1, "every luma byte is the arithmetic of the header, within the last bit",
                      [NSString stringWithFormat:@"%lu of %lu bytes apart, the widest by %d", apart, counted, widest]);
 
         widest = 0; apart = 0; counted = 0;
@@ -130,7 +130,7 @@ int main(void)
                 if (second) { apart++; if (second > widest) widest = second; }
             }
         }
-        charon_check(widest <= 1, "every chroma byte is the mean of its block, within the last bit",
+        revenant_check(widest <= 1, "every chroma byte is the mean of its block, within the last bit",
                      [NSString stringWithFormat:@"%lu of %lu bytes apart, the widest by %d", apart, counted, widest]);
 
         vImage_Buffer picture = make(width, height, 4);
@@ -263,7 +263,7 @@ int main(void)
 
         free(source.data); free(luma.data); free(chroma.data); free(picture.data);
         free(cb.data); free(cr.data); free(planarLuma.data); free(plane.data); free(bigger.data);
-        printf("%d of %d checks failed\n", charon_failures, charon_checks);
-        return charon_failures;
+        printf("%d of %d checks failed\n", revenant_failures, revenant_checks);
+        return revenant_failures;
     }
 }

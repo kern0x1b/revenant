@@ -1,8 +1,8 @@
 #!/bin/sh
 # run.sh — what tests/backports/host/uikit2/renames.sh is allowed to do. The differential compiles the backport's
 # sources into the same process as the framework they sit beside, so the port's names have to move: renames()
-# gives a CharonHost prefix to the classes and C symbols the objects define, and prefix_selectors.py gives one to
-# the selectors the port's Charon categories carry, whole.
+# gives a RevenantHost prefix to the classes and C symbols the objects define, and prefix_selectors.py gives one to
+# the selectors the port's Revenant categories carry, whole.
 #
 # A -D can only rename a whole identifier, so only a class name and a C symbol may be renamed that way. A selector
 # is not one: setObject:forTrait: is three of them, and a -D for the `object` in it renames every other use of that
@@ -15,10 +15,10 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-build=${RENAMES_BUILD:-$(runs_folder charon-renames-host)}
+build=${RENAMES_BUILD:-$(runs_folder revenant-renames-host)}
 sdk=$(xcrun --show-sdk-path)
 target="-target arm64-apple-ios15.0-macabi -isysroot $sdk -iframework $sdk/System/iOSSupport/System/Library/Frameworks"
-flags="-DCHARON_HOST_DIFFERENTIAL=1 -fobjc-arc -fvisibility=hidden -Wall -Wno-deprecated-declarations -Wno-unguarded-availability-new"
+flags="-DREVENANT_HOST_DIFFERENTIAL=1 -fobjc-arc -fvisibility=hidden -Wall -Wno-deprecated-declarations -Wno-unguarded-availability-new"
 . "$here/../uikit2/renames.sh"
 
 checks=0
@@ -48,8 +48,8 @@ sed -n 's/^-D\([^=]*\)=.*/\1/p' "$build/flags" | sort -u > "$build/renamed"
 check "" "$(comm -12 "$build/pieces" "$build/renamed" | tr '\n' ' ')" "renames() renames no piece of a selector"
 
 # the port's own class and C function are still renamed, or the differential would link against the framework's
-check "CharonHostCharonRenamesProbe" "$(sed -n 's/^-DCharonRenamesProbe=//p' "$build/flags")" "the probe's class is renamed"
-check "CharonHostcharon_renames_probe_value" "$(sed -n 's/^-Dcharon_renames_probe_value=//p' "$build/flags")" "the probe's C function is renamed"
+check "RevenantHostRevenantRenamesProbe" "$(sed -n 's/^-DRevenantRenamesProbe=//p' "$build/flags")" "the probe's class is renamed"
+check "RevenantHostrevenant_renames_probe_value" "$(sed -n 's/^-Drevenant_renames_probe_value=//p' "$build/flags")" "the probe's C function is renamed"
 check "" "$(sed -n 's/^-DNSString=//p' "$build/flags")" "a category does not rename the class it adds to"
 
 # the flags leave a file that includes Foundation and writes a dictionary element compiling
@@ -86,16 +86,16 @@ fi
 python3 "$here/../prefix_selectors.py" "$here/probe.m" "$build/probe.renamed.m" charonHost \
     --declarations="$build/declarations.h" $flags -target arm64-apple-ios15.0-macabi -isysroot "$sdk" \
     -iframework "$sdk/System/iOSSupport/System/Library/Frameworks" -- "$build/probe.o"
-check yes "$(present 'charonHostProbeOf:(id)object forKey:(id)key' "$build/probe.renamed.m")" "the category's two-piece selector is prefixed whole"
-check yes "$(present 'charonHostProbeOf:(__strong id)object forKey:(__strong id)key' "$build/declarations.h")" "and declared prefixed, whole"
+check yes "$(present 'revenantHostProbeOf:(id)object forKey:(id)key' "$build/probe.renamed.m")" "the category's two-piece selector is prefixed whole"
+check yes "$(present 'revenantHostProbeOf:(__strong id)object forKey:(__strong id)key' "$build/declarations.h")" "and declared prefixed, whole"
 check no "$(present '-D' "$build/declarations.h")" "the declarations are method declarations, not -D defines"
 check yes "$(present '(id)setObject:(id)object forTrait:(id)trait' "$build/probe.renamed.m")" "the port class's own selector is left alone, its class is renamed instead"
 check yes "$(present '- (id)extra;' "$build/probe.renamed.m")" "a category on the port class's own member is left alone too"
-check no "$(present 'charonHostExtra' "$build/probe.renamed.m")" "and is not prefixed: the class rename already keeps it apart"
-check no "$(present 'charonHostExtra' "$build/declarations.h")" "so no prefixed declaration of it is emitted"
+check no "$(present 'revenantHostExtra' "$build/probe.renamed.m")" "and is not prefixed: the class rename already keeps it apart"
+check no "$(present 'revenantHostExtra' "$build/declarations.h")" "so no prefixed declaration of it is emitted"
 
 # and the check above has teeth: a -D for the `object` of a selector does break that same file
-if xcrun clang $target $flags -Dobject=charonHostObject -DsetObject=setCharonHostObject -w -c "$build/subscript.m" -o "$build/broken.o" 2> "$build/broken.err"; then
+if xcrun clang $target $flags -Dobject=revenantHostObject -DsetObject=setRevenantHostObject -w -c "$build/subscript.m" -o "$build/broken.o" 2> "$build/broken.err"; then
     check yes no "a -D for a selector piece does break the same file"
     note "the control did not break, so check 5 proves nothing on this SDK"
 else
@@ -107,13 +107,13 @@ fi
 # object defines would be an unrecognized selector at run time, with nothing in the gate to see it
 cat > "$build/undefined.m" <<'EOF'
 #import <UIKit/UIKit.h>
-@interface UIView (CharonUndefined)
-- (NSInteger)charonHostCount;
+@interface UIView (RevenantUndefined)
+- (NSInteger)revenantHostCount;
 @end
 int main(void)
 {
     @autoreleasepool {
-        return (int)[[UIView new] charonHostCount];
+        return (int)[[UIView new] revenantHostCount];
     }
 }
 EOF

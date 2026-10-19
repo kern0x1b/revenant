@@ -3,26 +3,26 @@
 #import <pthread.h>
 #import "check.h"
 
-extern nw_path_monitor_t charonhost_nw_path_monitor_create(void);
-extern nw_path_monitor_t charonhost_nw_path_monitor_create_with_type(nw_interface_type_t);
-extern void charonhost_nw_path_monitor_set_cancel_handler(nw_path_monitor_t, nw_path_monitor_cancel_handler_t);
-extern void charonhost_nw_path_monitor_set_update_handler(nw_path_monitor_t, nw_path_monitor_update_handler_t);
-extern void charonhost_nw_path_monitor_set_queue(nw_path_monitor_t, dispatch_queue_t);
-extern void charonhost_nw_path_monitor_start(nw_path_monitor_t);
-extern void charonhost_nw_path_monitor_cancel(nw_path_monitor_t);
-extern nw_path_status_t charonhost_nw_path_get_status(nw_path_t);
-extern void charonhost_nw_path_enumerate_interfaces(nw_path_t, nw_path_enumerate_interfaces_block_t);
-extern bool charonhost_nw_path_is_equal(nw_path_t, nw_path_t);
-extern bool charonhost_nw_path_is_expensive(nw_path_t);
-extern bool charonhost_nw_path_has_ipv4(nw_path_t);
-extern bool charonhost_nw_path_has_ipv6(nw_path_t);
-extern bool charonhost_nw_path_has_dns(nw_path_t);
-extern bool charonhost_nw_path_uses_interface_type(nw_path_t, nw_interface_type_t);
-extern nw_endpoint_t charonhost_nw_path_copy_effective_local_endpoint(nw_path_t);
-extern nw_endpoint_t charonhost_nw_path_copy_effective_remote_endpoint(nw_path_t);
-extern nw_interface_type_t charonhost_nw_interface_get_type(nw_interface_t);
-extern const char *charonhost_nw_interface_get_name(nw_interface_t);
-extern uint32_t charonhost_nw_interface_get_index(nw_interface_t);
+extern nw_path_monitor_t revenanthost_nw_path_monitor_create(void);
+extern nw_path_monitor_t revenanthost_nw_path_monitor_create_with_type(nw_interface_type_t);
+extern void revenanthost_nw_path_monitor_set_cancel_handler(nw_path_monitor_t, nw_path_monitor_cancel_handler_t);
+extern void revenanthost_nw_path_monitor_set_update_handler(nw_path_monitor_t, nw_path_monitor_update_handler_t);
+extern void revenanthost_nw_path_monitor_set_queue(nw_path_monitor_t, dispatch_queue_t);
+extern void revenanthost_nw_path_monitor_start(nw_path_monitor_t);
+extern void revenanthost_nw_path_monitor_cancel(nw_path_monitor_t);
+extern nw_path_status_t revenanthost_nw_path_get_status(nw_path_t);
+extern void revenanthost_nw_path_enumerate_interfaces(nw_path_t, nw_path_enumerate_interfaces_block_t);
+extern bool revenanthost_nw_path_is_equal(nw_path_t, nw_path_t);
+extern bool revenanthost_nw_path_is_expensive(nw_path_t);
+extern bool revenanthost_nw_path_has_ipv4(nw_path_t);
+extern bool revenanthost_nw_path_has_ipv6(nw_path_t);
+extern bool revenanthost_nw_path_has_dns(nw_path_t);
+extern bool revenanthost_nw_path_uses_interface_type(nw_path_t, nw_interface_type_t);
+extern nw_endpoint_t revenanthost_nw_path_copy_effective_local_endpoint(nw_path_t);
+extern nw_endpoint_t revenanthost_nw_path_copy_effective_remote_endpoint(nw_path_t);
+extern nw_interface_type_t revenanthost_nw_interface_get_type(nw_interface_t);
+extern const char *revenanthost_nw_interface_get_name(nw_interface_t);
+extern uint32_t revenanthost_nw_interface_get_index(nw_interface_t);
 
 static const char *label(NSString *format, ...)
 {
@@ -67,7 +67,7 @@ static API system_api(void)
 
 static API port_api(void)
 {
-    return (API){(void *)charonhost_nw_path_monitor_create, (void *)charonhost_nw_path_monitor_create_with_type, (void *)charonhost_nw_path_monitor_set_cancel_handler, (void *)charonhost_nw_path_monitor_set_update_handler, (void *)charonhost_nw_path_monitor_set_queue, (void *)charonhost_nw_path_monitor_start, (void *)charonhost_nw_path_monitor_cancel, (void *)charonhost_nw_path_get_status, (void *)charonhost_nw_path_enumerate_interfaces, (void *)charonhost_nw_path_is_equal, (void *)charonhost_nw_path_is_expensive, (void *)charonhost_nw_path_has_ipv4, (void *)charonhost_nw_path_has_ipv6, (void *)charonhost_nw_path_has_dns, (void *)charonhost_nw_path_uses_interface_type, (void *)charonhost_nw_path_copy_effective_local_endpoint, (void *)charonhost_nw_path_copy_effective_remote_endpoint, (void *)charonhost_nw_interface_get_type, (void *)charonhost_nw_interface_get_name, (void *)charonhost_nw_interface_get_index};
+    return (API){(void *)revenanthost_nw_path_monitor_create, (void *)revenanthost_nw_path_monitor_create_with_type, (void *)revenanthost_nw_path_monitor_set_cancel_handler, (void *)revenanthost_nw_path_monitor_set_update_handler, (void *)revenanthost_nw_path_monitor_set_queue, (void *)revenanthost_nw_path_monitor_start, (void *)revenanthost_nw_path_monitor_cancel, (void *)revenanthost_nw_path_get_status, (void *)revenanthost_nw_path_enumerate_interfaces, (void *)revenanthost_nw_path_is_equal, (void *)revenanthost_nw_path_is_expensive, (void *)revenanthost_nw_path_has_ipv4, (void *)revenanthost_nw_path_has_ipv6, (void *)revenanthost_nw_path_has_dns, (void *)revenanthost_nw_path_uses_interface_type, (void *)revenanthost_nw_path_copy_effective_local_endpoint, (void *)revenanthost_nw_path_copy_effective_remote_endpoint, (void *)revenanthost_nw_interface_get_type, (void *)revenanthost_nw_interface_get_name, (void *)revenanthost_nw_interface_get_index};
 }
 
 static NSString *describe(API api, nw_path_t path)
@@ -157,35 +157,35 @@ int main(void)
                       label(@"%s: the updates: port %d, host %d, floor %d", cases[index].name, portDelivered, systemDelivered, cases[index].floor));
         }
         {
-            nw_path_monitor_t a = nw_path_monitor_create(), b = charonhost_nw_path_monitor_create();
+            nw_path_monitor_t a = nw_path_monitor_create(), b = revenanthost_nw_path_monitor_create();
             dispatch_queue_t q = dispatch_queue_create("network.equal", DISPATCH_QUEUE_SERIAL);
             __block nw_path_t first = nil, second = nil;
             dispatch_semaphore_t got = dispatch_semaphore_create(0);
-            charonhost_nw_path_monitor_set_update_handler(b, ^(nw_path_t p) { if (!first) first = p; else second = p; dispatch_semaphore_signal(got); });
-            charonhost_nw_path_monitor_set_queue(b, q);
-            charonhost_nw_path_monitor_start(b);
+            revenanthost_nw_path_monitor_set_update_handler(b, ^(nw_path_t p) { if (!first) first = p; else second = p; dispatch_semaphore_signal(got); });
+            revenanthost_nw_path_monitor_set_queue(b, q);
+            revenanthost_nw_path_monitor_start(b);
             dispatch_semaphore_wait(got, dispatch_time(DISPATCH_TIME_NOW, 3 * NSEC_PER_SEC));
-            charonhost_nw_path_monitor_start(b);
+            revenanthost_nw_path_monitor_start(b);
             dispatch_semaphore_wait(got, dispatch_time(DISPATCH_TIME_NOW, 3 * NSEC_PER_SEC));
-            CHECK(first && second && charonhost_nw_path_is_equal(first, second) && charonhost_nw_path_is_equal(first, first), "paths of the same network are equal");
-            CHECK(!charonhost_nw_path_is_equal(first, nil), "and not equal to nothing");
+            CHECK(first && second && revenanthost_nw_path_is_equal(first, second) && revenanthost_nw_path_is_equal(first, first), "paths of the same network are equal");
+            CHECK(!revenanthost_nw_path_is_equal(first, nil), "and not equal to nothing");
             (void)a;
         }
         {
             dispatch_queue_t q = dispatch_queue_create("network.late", DISPATCH_QUEUE_SERIAL);
-            nw_path_monitor_t monitor = charonhost_nw_path_monitor_create();
+            nw_path_monitor_t monitor = revenanthost_nw_path_monitor_create();
             __block int count = 0;
-            charonhost_nw_path_monitor_set_update_handler(monitor, ^(nw_path_t p) { count++; });
-            charonhost_nw_path_monitor_start(monitor);
+            revenanthost_nw_path_monitor_set_update_handler(monitor, ^(nw_path_t p) { count++; });
+            revenanthost_nw_path_monitor_start(monitor);
             usleep(500000);
             CHECK(count == 0, "a monitor with no queue reports nothing");
-            charonhost_nw_path_monitor_set_queue(monitor, q);
-            charonhost_nw_path_monitor_start(monitor);
+            revenanthost_nw_path_monitor_set_queue(monitor, q);
+            revenanthost_nw_path_monitor_start(monitor);
             usleep(1200000);
             CHECK(count == 1, "and starts once it has one");
-            charonhost_nw_path_monitor_cancel(monitor);
+            revenanthost_nw_path_monitor_cancel(monitor);
         }
-        printf("checks=%d failures=%d\n", charon_checks, charon_failures);
+        printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
     }
-    return charon_failures ? 1 : 0;
+    return revenant_failures ? 1 : 0;
 }

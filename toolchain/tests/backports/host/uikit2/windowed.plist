@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>CFBundleIdentifier</key>
-	<string>local.charon.hostwindowed</string>
+	<string>local.revenant.hostwindowed</string>
 	<key>CFBundleExecutable</key>
 	<string>app</string>
 	<key>CFBundleName</key>
@@ -32,7 +32,7 @@
 					<key>UISceneConfigurationName</key>
 					<string>Default</string>
 					<key>UISceneDelegateClassName</key>
-					<string>CharonWindowedScene</string>
+					<string>RevenantWindowedScene</string>
 				</dict>
 			</array>
 		</dict>

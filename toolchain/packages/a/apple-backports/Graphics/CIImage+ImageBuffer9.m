@@ -3,9 +3,9 @@
 
 #pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
 
-@implementation CIImage (CharonImageBuffer)
+@implementation CIImage (RevenantImageBuffer)
 
-static BOOL charon_is_pixel_buffer(CVImageBufferRef buffer)
+static BOOL revenant_is_pixel_buffer(CVImageBufferRef buffer)
 {
     return buffer && CFGetTypeID(buffer) == CVPixelBufferGetTypeID();
 }
@@ -17,7 +17,7 @@ static BOOL charon_is_pixel_buffer(CVImageBufferRef buffer)
 
 - (instancetype)initWithCVImageBuffer:(CVImageBufferRef)imageBuffer options:(NSDictionary<CIImageOption, id> *)options
 {
-    if (!charon_is_pixel_buffer(imageBuffer))
+    if (!revenant_is_pixel_buffer(imageBuffer))
         return nil;
     return [self initWithCVPixelBuffer:imageBuffer options:options];
 }

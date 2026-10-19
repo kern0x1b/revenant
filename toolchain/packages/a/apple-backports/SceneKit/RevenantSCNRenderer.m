@@ -1,50 +1,50 @@
-#import "CharonSCN.h"
-#import "CharonSCNMath.h"
-#import "../CharonSayOnce.h"
-#import "../CharonSRGB.h"
+#import "RevenantSCN.h"
+#import "RevenantSCNMath.h"
+#import "../RevenantSayOnce.h"
+#import "../RevenantSRGB.h"
 #import <OpenGLES/EAGL.h>
 #import <OpenGLES/ES2/gl.h>
 #import <OpenGLES/ES2/glext.h>
 
-typedef NS_ENUM(int, CharonSCNSlot) {
-    CharonSCNSlotDiffuse,
-    CharonSCNSlotAmbient,
-    CharonSCNSlotSpecular,
-    CharonSCNSlotEmission,
-    CharonSCNSlotMultiply,
-    CharonSCNSlotTransparent,
-    CharonSCNSlotSelfIllumination,
-    CharonSCNSlotMetalness,
-    CharonSCNSlotRoughness,
-    CharonSCNSlotCount
+typedef NS_ENUM(int, RevenantSCNSlot) {
+    RevenantSCNSlotDiffuse,
+    RevenantSCNSlotAmbient,
+    RevenantSCNSlotSpecular,
+    RevenantSCNSlotEmission,
+    RevenantSCNSlotMultiply,
+    RevenantSCNSlotTransparent,
+    RevenantSCNSlotSelfIllumination,
+    RevenantSCNSlotMetalness,
+    RevenantSCNSlotRoughness,
+    RevenantSCNSlotCount
 };
 
 static const struct {
     const char *name;
     BOOL sRGB;
-} CharonSCNSlots[CharonSCNSlotCount] = {
+} RevenantSCNSlots[RevenantSCNSlotCount] = {
     {"diffuse", YES}, {"ambient", YES}, {"specular", YES}, {"emission", YES}, {"multiply", YES},
     {"transparent", NO}, {"selfIllumination", YES}, {"metalness", NO}, {"roughness", NO},
 };
 
-static SCNMaterialProperty *CharonSCNSlotProperty(SCNMaterial *material, CharonSCNSlot slot)
+static SCNMaterialProperty *RevenantSCNSlotProperty(SCNMaterial *material, RevenantSCNSlot slot)
 {
     switch (slot) {
-    case CharonSCNSlotDiffuse: return material.diffuse;
-    case CharonSCNSlotAmbient: return material.ambient;
-    case CharonSCNSlotSpecular: return material.specular;
-    case CharonSCNSlotEmission: return material.emission;
-    case CharonSCNSlotMultiply: return material.multiply;
-    case CharonSCNSlotTransparent: return material.transparent;
-    case CharonSCNSlotSelfIllumination: return material.selfIllumination;
-    case CharonSCNSlotMetalness: return material.metalness;
-    case CharonSCNSlotRoughness: return material.roughness;
-    case CharonSCNSlotCount: break;
+    case RevenantSCNSlotDiffuse: return material.diffuse;
+    case RevenantSCNSlotAmbient: return material.ambient;
+    case RevenantSCNSlotSpecular: return material.specular;
+    case RevenantSCNSlotEmission: return material.emission;
+    case RevenantSCNSlotMultiply: return material.multiply;
+    case RevenantSCNSlotTransparent: return material.transparent;
+    case RevenantSCNSlotSelfIllumination: return material.selfIllumination;
+    case RevenantSCNSlotMetalness: return material.metalness;
+    case RevenantSCNSlotRoughness: return material.roughness;
+    case RevenantSCNSlotCount: break;
     }
     return nil;
 }
 
-static uint16_t CharonSCNHalf(float value)
+static uint16_t RevenantSCNHalf(float value)
 {
     if (!(value > 0)) {
         return 0;
@@ -64,22 +64,22 @@ static uint16_t CharonSCNHalf(float value)
     return (uint16_t)((biased << 10) | (n - 1024));
 }
 
-static const double *CharonSCNByteBounds(void)
+static const double *RevenantSCNByteBounds(void)
 {
     static double bounds[256];
     static dispatch_once_t once;
     dispatch_once(&once, ^{
         bounds[0] = -INFINITY;
         for (int b = 1; b < 256; b++) {
-            bounds[b] = charon_srgb_decode((b - 0.5) / 255.0);
+            bounds[b] = revenant_srgb_decode((b - 0.5) / 255.0);
         }
     });
     return bounds;
 }
 
-static uint8_t CharonSCNByteOfLinear(double linear)
+static uint8_t RevenantSCNByteOfLinear(double linear)
 {
-    const double *bounds = CharonSCNByteBounds();
+    const double *bounds = RevenantSCNByteBounds();
     int low = 0, high = 255;
     while (low < high) {
         int mid = (low + high + 1) / 2;
@@ -92,7 +92,7 @@ static uint8_t CharonSCNByteOfLinear(double linear)
     return (uint8_t)low;
 }
 
-static void CharonSCNUploadLinearLevels(const uint8_t *pixels, size_t width, size_t height)
+static void RevenantSCNUploadLinearLevels(const uint8_t *pixels, size_t width, size_t height)
 {
     size_t count = width * height;
     double *level = malloc(count * 4 * sizeof(double));
@@ -100,13 +100,13 @@ static void CharonSCNUploadLinearLevels(const uint8_t *pixels, size_t width, siz
     for (size_t i = 0; i < count; i++) {
         double a = pixels[4 * i + 3] / 255.0;
         for (int k = 0; k < 3; k++) {
-            level[4 * i + k] = a > 0 ? charon_srgb_decode(pixels[4 * i + k] / 255.0 / a) * a : 0;
+            level[4 * i + k] = a > 0 ? revenant_srgb_decode(pixels[4 * i + k] / 255.0 / a) * a : 0;
         }
         level[4 * i + 3] = a;
     }
     for (GLint n = 0;; n++) {
         for (size_t i = 0; i < 4 * width * height; i++) {
-            halves[i] = CharonSCNHalf((float)level[i]);
+            halves[i] = RevenantSCNHalf((float)level[i]);
         }
         glTexImage2D(GL_TEXTURE_2D, n, GL_RGBA, (GLsizei)width, (GLsizei)height, 0, GL_RGBA, GL_HALF_FLOAT_OES, halves);
         if (width == 1 && height == 1) {
@@ -128,7 +128,7 @@ static void CharonSCNUploadLinearLevels(const uint8_t *pixels, size_t width, siz
                 double stored = floor(a * 255 + 0.5) / 255;
                 for (int k = 0; k < 3; k++) {
                     double straight = a > 0 ? sum[k] / (double)(sx * sy) / a : 0;
-                    out[k] = charon_srgb_decode(CharonSCNByteOfLinear(straight) / 255.0) * stored;
+                    out[k] = revenant_srgb_decode(RevenantSCNByteOfLinear(straight) / 255.0) * stored;
                 }
                 out[3] = stored;
             }
@@ -140,7 +140,7 @@ static void CharonSCNUploadLinearLevels(const uint8_t *pixels, size_t width, siz
     free(level);
 }
 
-static BOOL CharonSCNColorComponents(id contents, float out[4])
+static BOOL RevenantSCNColorComponents(id contents, float out[4])
 {
     CGColorRef color = NULL;
     if ([contents isKindOfClass:[UIColor class]]) {
@@ -180,14 +180,14 @@ static BOOL CharonSCNColorComponents(id contents, float out[4])
     return NO;
 }
 
-static void CharonSCNSlotDefault(CharonSCNSlot slot, float out[4])
+static void RevenantSCNSlotDefault(RevenantSCNSlot slot, float out[4])
 {
     static SCNMaterial *fresh;
     static dispatch_once_t once;
     dispatch_once(&once, ^{
         fresh = [SCNMaterial new];
     });
-    if (!CharonSCNColorComponents(CharonSCNSlotProperty(fresh, slot).contents, out)) {
+    if (!RevenantSCNColorComponents(RevenantSCNSlotProperty(fresh, slot).contents, out)) {
         out[0] = out[1] = out[2] = 0;
         out[3] = 1;
     }
@@ -195,7 +195,7 @@ static void CharonSCNSlotDefault(CharonSCNSlot slot, float out[4])
 
 #pragma mark - Images
 
-static NSString *CharonSCNImagePath(id contents, NSURL *sceneURL)
+static NSString *RevenantSCNImagePath(id contents, NSURL *sceneURL)
 {
     if ([contents isKindOfClass:[NSURL class]]) {
         return [(NSURL *)contents path];
@@ -215,7 +215,7 @@ static NSString *CharonSCNImagePath(id contents, NSURL *sceneURL)
     return [[NSBundle mainBundle] pathForResource:[file stringByDeletingPathExtension] ofType:[file pathExtension]];
 }
 
-static CGImageRef CharonSCNCreateImage(id contents, NSString *path)
+static CGImageRef RevenantSCNCreateImage(id contents, NSString *path)
 {
     if ([contents isKindOfClass:[UIImage class]]) {
         return CGImageRetain([(UIImage *)contents CGImage]);
@@ -230,13 +230,13 @@ static CGImageRef CharonSCNCreateImage(id contents, NSString *path)
     return image ? CGImageRetain(image.CGImage) : NULL;
 }
 
-@interface CharonSCNTexture : NSObject
+@interface RevenantSCNTexture : NSObject
 @property (nonatomic) GLuint name;
 @property (nonatomic) BOOL hasAlpha;
 @property (nonatomic) NSUInteger lastFrame;
 @end
 
-@implementation CharonSCNTexture
+@implementation RevenantSCNTexture
 @synthesize name = _name;
 @synthesize hasAlpha = _hasAlpha;
 @synthesize lastFrame = _lastFrame;
@@ -244,14 +244,14 @@ static CGImageRef CharonSCNCreateImage(id contents, NSString *path)
 
 #pragma mark - Geometry
 
-@interface CharonSCNDraw : NSObject
+@interface RevenantSCNDraw : NSObject
 @property (nonatomic) GLenum mode;
 @property (nonatomic) GLuint indexBuffer;
 @property (nonatomic) GLenum indexType;
 @property (nonatomic) GLsizei count;
 @end
 
-@implementation CharonSCNDraw
+@implementation RevenantSCNDraw
 @synthesize mode = _mode;
 @synthesize indexBuffer = _indexBuffer;
 @synthesize indexType = _indexType;
@@ -266,27 +266,27 @@ typedef struct {
     GLsizei stride;
     GLintptr offset;
     BOOL present;
-} CharonSCNAttribute;
+} RevenantSCNAttribute;
 
-enum { CharonSCNAttributePosition, CharonSCNAttributeNormal, CharonSCNAttributeColor, CharonSCNAttributeUV0, CharonSCNAttributeUV1, CharonSCNAttributeCount };
+enum { RevenantSCNAttributePosition, RevenantSCNAttributeNormal, RevenantSCNAttributeColor, RevenantSCNAttributeUV0, RevenantSCNAttributeUV1, RevenantSCNAttributeCount };
 
-@interface CharonSCNMesh : NSObject
+@interface RevenantSCNMesh : NSObject
 {
 @public
-    CharonSCNAttribute _attributes[CharonSCNAttributeCount];
+    RevenantSCNAttribute _attributes[RevenantSCNAttributeCount];
 }
-@property (nonatomic, strong) NSArray<CharonSCNDraw *> *draws;
+@property (nonatomic, strong) NSArray<RevenantSCNDraw *> *draws;
 @property (nonatomic, strong) NSMutableArray<NSNumber *> *buffers;
 @property (nonatomic) NSUInteger lastFrame;
 @end
 
-@implementation CharonSCNMesh
+@implementation RevenantSCNMesh
 @synthesize draws = _draws;
 @synthesize buffers = _buffers;
 @synthesize lastFrame = _lastFrame;
 @end
 
-static BOOL CharonSCNAttributeFor(SCNGeometrySource *source, CharonSCNAttribute *out, NSMutableArray<NSNumber *> *buffers)
+static BOOL RevenantSCNAttributeFor(SCNGeometrySource *source, RevenantSCNAttribute *out, NSMutableArray<NSNumber *> *buffers)
 {
     NSData *data = source.data;
     if (data.length == 0 || source.componentsPerVector < 1 || source.componentsPerVector > 4) {
@@ -320,7 +320,7 @@ static BOOL CharonSCNAttributeFor(SCNGeometrySource *source, CharonSCNAttribute 
     return YES;
 }
 
-static uint32_t CharonSCNIndex(const uint8_t *bytes, NSInteger bytesPerIndex, NSUInteger i)
+static uint32_t RevenantSCNIndex(const uint8_t *bytes, NSInteger bytesPerIndex, NSUInteger i)
 {
     switch (bytesPerIndex) {
     case 1: return bytes[i];
@@ -329,7 +329,7 @@ static uint32_t CharonSCNIndex(const uint8_t *bytes, NSInteger bytesPerIndex, NS
     }
 }
 
-static CharonSCNDraw *CharonSCNDrawFor(SCNGeometryElement *element, NSMutableArray<NSNumber *> *buffers)
+static RevenantSCNDraw *RevenantSCNDrawFor(SCNGeometryElement *element, NSMutableArray<NSNumber *> *buffers)
 {
     NSData *data = element.data;
     const uint8_t *bytes = data.bytes;
@@ -345,28 +345,28 @@ static CharonSCNDraw *CharonSCNDrawFor(SCNGeometryElement *element, NSMutableArr
     case SCNGeometryPrimitiveTypeTriangles:
         mode = GL_TRIANGLES;
         for (NSUInteger i = 0; i < (NSUInteger)primitives * 3 && i < available; i++) {
-            uint32_t v = CharonSCNIndex(bytes, width, i);
+            uint32_t v = RevenantSCNIndex(bytes, width, i);
             [indices appendBytes:&v length:4];
         }
         break;
     case SCNGeometryPrimitiveTypeTriangleStrip:
         mode = GL_TRIANGLE_STRIP;
         for (NSUInteger i = 0; i < (NSUInteger)primitives + 2 && i < available; i++) {
-            uint32_t v = CharonSCNIndex(bytes, width, i);
+            uint32_t v = RevenantSCNIndex(bytes, width, i);
             [indices appendBytes:&v length:4];
         }
         break;
     case SCNGeometryPrimitiveTypeLine:
         mode = GL_LINES;
         for (NSUInteger i = 0; i < (NSUInteger)primitives * 2 && i < available; i++) {
-            uint32_t v = CharonSCNIndex(bytes, width, i);
+            uint32_t v = RevenantSCNIndex(bytes, width, i);
             [indices appendBytes:&v length:4];
         }
         break;
     case SCNGeometryPrimitiveTypePoint:
         mode = GL_POINTS;
         for (NSUInteger i = 0; i < (NSUInteger)primitives && i < available; i++) {
-            uint32_t v = CharonSCNIndex(bytes, width, i);
+            uint32_t v = RevenantSCNIndex(bytes, width, i);
             [indices appendBytes:&v length:4];
         }
         break;
@@ -377,13 +377,13 @@ static CharonSCNDraw *CharonSCNDrawFor(SCNGeometryElement *element, NSMutableArr
         }
         NSUInteger cursor = (NSUInteger)primitives;
         for (NSInteger p = 0; p < primitives; p++) {
-            uint32_t count = CharonSCNIndex(bytes, width, (NSUInteger)p);
+            uint32_t count = RevenantSCNIndex(bytes, width, (NSUInteger)p);
             if (cursor + count > available) {
                 return nil;
             }
-            uint32_t first = CharonSCNIndex(bytes, width, cursor);
+            uint32_t first = RevenantSCNIndex(bytes, width, cursor);
             for (uint32_t k = 1; k + 1 < count; k++) {
-                uint32_t b = CharonSCNIndex(bytes, width, cursor + k), c = CharonSCNIndex(bytes, width, cursor + k + 1);
+                uint32_t b = RevenantSCNIndex(bytes, width, cursor + k), c = RevenantSCNIndex(bytes, width, cursor + k + 1);
                 [indices appendBytes:&first length:4];
                 [indices appendBytes:&b length:4];
                 [indices appendBytes:&c length:4];
@@ -404,7 +404,7 @@ static CharonSCNDraw *CharonSCNDrawFor(SCNGeometryElement *element, NSMutableArr
     for (NSUInteger i = 0; i < count; i++) {
         largest = wide[i] > largest ? wide[i] : largest;
     }
-    CharonSCNDraw *draw = [CharonSCNDraw new];
+    RevenantSCNDraw *draw = [RevenantSCNDraw new];
     draw.mode = mode;
     draw.count = (GLsizei)count;
     GLuint buffer;
@@ -429,26 +429,26 @@ static CharonSCNDraw *CharonSCNDrawFor(SCNGeometryElement *element, NSMutableArr
 
 #pragma mark - Programs
 
-typedef NS_ENUM(int, CharonSCNModel) {
-    CharonSCNModelConstant,
-    CharonSCNModelLambert,
-    CharonSCNModelBlinn,
-    CharonSCNModelPhong,
-    CharonSCNModelPhysicallyBased,
+typedef NS_ENUM(int, RevenantSCNModel) {
+    RevenantSCNModelConstant,
+    RevenantSCNModelLambert,
+    RevenantSCNModelBlinn,
+    RevenantSCNModelPhong,
+    RevenantSCNModelPhysicallyBased,
 };
 
-static CharonSCNModel CharonSCNModelFor(SCNMaterial *material)
+static RevenantSCNModel RevenantSCNModelFor(SCNMaterial *material)
 {
     NSString *name = material.lightingModelName;
-    if ([name isEqualToString:SCNLightingModelConstant]) return CharonSCNModelConstant;
-    if ([name isEqualToString:SCNLightingModelLambert]) return CharonSCNModelLambert;
-    if ([name isEqualToString:SCNLightingModelPhong]) return CharonSCNModelPhong;
-    if ([name isEqualToString:SCNLightingModelPhysicallyBased]) return CharonSCNModelPhysicallyBased;
-    return CharonSCNModelBlinn;
+    if ([name isEqualToString:SCNLightingModelConstant]) return RevenantSCNModelConstant;
+    if ([name isEqualToString:SCNLightingModelLambert]) return RevenantSCNModelLambert;
+    if ([name isEqualToString:SCNLightingModelPhong]) return RevenantSCNModelPhong;
+    if ([name isEqualToString:SCNLightingModelPhysicallyBased]) return RevenantSCNModelPhysicallyBased;
+    return RevenantSCNModelBlinn;
 }
 
-enum { CharonSCNLightDirectional, CharonSCNLightOmni, CharonSCNLightSpot };
-enum { CharonSCNMaxLights = 8 };
+enum { RevenantSCNLightDirectional, RevenantSCNLightOmni, RevenantSCNLightSpot };
+enum { RevenantSCNMaxLights = 8 };
 
 typedef struct {
     int type;
@@ -457,24 +457,24 @@ typedef struct {
     float direction[3];
     float attenuation[3];
     float spot[2];
-} CharonSCNLightState;
+} RevenantSCNLightState;
 
-@interface CharonSCNProgram : NSObject
+@interface RevenantSCNProgram : NSObject
 {
 @public
     GLuint _program;
     GLint _modelViewProjection, _model, _normalMatrix, _cameraPosition, _coatView, _ambientLight, _opacity, _transparency;
-    GLint _slotValue[CharonSCNSlotCount], _slotSampler[CharonSCNSlotCount], _slotTransform[CharonSCNSlotCount];
-    GLint _lightColor[CharonSCNMaxLights], _lightPosition[CharonSCNMaxLights], _lightDirection[CharonSCNMaxLights];
-    GLint _lightAttenuation[CharonSCNMaxLights], _lightSpot[CharonSCNMaxLights];
+    GLint _slotValue[RevenantSCNSlotCount], _slotSampler[RevenantSCNSlotCount], _slotTransform[RevenantSCNSlotCount];
+    GLint _lightColor[RevenantSCNMaxLights], _lightPosition[RevenantSCNMaxLights], _lightDirection[RevenantSCNMaxLights];
+    GLint _lightAttenuation[RevenantSCNMaxLights], _lightSpot[RevenantSCNMaxLights];
     GLint _shininess, _implicitLight;
 }
 @end
 
-@implementation CharonSCNProgram
+@implementation RevenantSCNProgram
 @end
 
-static GLuint CharonSCNCompile(GLenum kind, NSString *source)
+static GLuint RevenantSCNCompile(GLenum kind, NSString *source)
 {
     GLuint shader = glCreateShader(kind);
     const char *text = source.UTF8String;
@@ -492,7 +492,7 @@ static GLuint CharonSCNCompile(GLenum kind, NSString *source)
     return shader;
 }
 
-SCNMatrix4 CharonSCNProjectionMatrix(SCNNode *pointOfView, int width, int height)
+SCNMatrix4 RevenantSCNProjectionMatrix(SCNNode *pointOfView, int width, int height)
 {
     SCNCamera *camera = pointOfView.camera;
     float aspect = (float)width / (float)height;
@@ -518,13 +518,13 @@ SCNMatrix4 CharonSCNProjectionMatrix(SCNNode *pointOfView, int width, int height
     return projection;
 }
 
-@implementation CharonSCNRenderer
+@implementation RevenantSCNRenderer
 {
     EAGLContext *_context;
-    NSMapTable<SCNGeometry *, CharonSCNMesh *> *_meshes;
-    NSMapTable<id, CharonSCNTexture *> *_textures[2];
+    NSMapTable<SCNGeometry *, RevenantSCNMesh *> *_meshes;
+    NSMapTable<id, RevenantSCNTexture *> *_textures[2];
     int _linearTextures;
-    NSMutableDictionary<NSString *, CharonSCNProgram *> *_programs;
+    NSMutableDictionary<NSString *, RevenantSCNProgram *> *_programs;
     NSMutableDictionary<NSString *, id> *_resolvedPaths;
     NSMutableSet<NSString *> *_failedPrograms;
     NSUInteger _frame;
@@ -553,23 +553,23 @@ SCNMatrix4 CharonSCNProjectionMatrix(SCNNode *pointOfView, int width, int height
 {
     EAGLContext *previous = [EAGLContext currentContext];
     if ([EAGLContext setCurrentContext:_context]) {
-        for (CharonSCNMesh *mesh in [_meshes objectEnumerator]) {
+        for (RevenantSCNMesh *mesh in [_meshes objectEnumerator]) {
             [self deleteMesh:mesh];
         }
         for (int sRGB = 0; sRGB < 2; sRGB++) {
-            for (CharonSCNTexture *texture in [_textures[sRGB] objectEnumerator]) {
+            for (RevenantSCNTexture *texture in [_textures[sRGB] objectEnumerator]) {
                 GLuint name = texture.name;
                 glDeleteTextures(1, &name);
             }
         }
-        for (CharonSCNProgram *program in _programs.allValues) {
+        for (RevenantSCNProgram *program in _programs.allValues) {
             glDeleteProgram(program->_program);
         }
     }
     [EAGLContext setCurrentContext:previous];
 }
 
-- (void)deleteMesh:(CharonSCNMesh *)mesh
+- (void)deleteMesh:(RevenantSCNMesh *)mesh
 {
     for (NSNumber *number in mesh.buffers) {
         GLuint buffer = number.unsignedIntValue;
@@ -594,17 +594,17 @@ SCNMatrix4 CharonSCNProjectionMatrix(SCNNode *pointOfView, int width, int height
 
 #pragma mark Resources
 
-- (CharonSCNMesh *)meshFor:(SCNGeometry *)geometry
+- (RevenantSCNMesh *)meshFor:(SCNGeometry *)geometry
 {
-    CharonSCNMesh *mesh = [_meshes objectForKey:geometry];
+    RevenantSCNMesh *mesh = [_meshes objectForKey:geometry];
     if (mesh) {
         mesh.lastFrame = _frame;
         return mesh;
     }
-    mesh = [CharonSCNMesh new];
+    mesh = [RevenantSCNMesh new];
     mesh.buffers = [NSMutableArray array];
     SCNGeometrySource *position = [geometry geometrySourcesForSemantic:SCNGeometrySourceSemanticVertex].firstObject;
-    if (position == nil || !CharonSCNAttributeFor(position, &mesh->_attributes[CharonSCNAttributePosition], mesh.buffers)) {
+    if (position == nil || !RevenantSCNAttributeFor(position, &mesh->_attributes[RevenantSCNAttributePosition], mesh.buffers)) {
         NSLog(@"SceneKit: geometry %@ has no vertex source this renderer can read", geometry.name);
         mesh.draws = @[];
     } else {
@@ -612,21 +612,21 @@ SCNMatrix4 CharonSCNProjectionMatrix(SCNNode *pointOfView, int width, int height
         SCNGeometrySource *color = [geometry geometrySourcesForSemantic:SCNGeometrySourceSemanticColor].firstObject;
         NSArray<SCNGeometrySource *> *texcoords = [geometry geometrySourcesForSemantic:SCNGeometrySourceSemanticTexcoord];
         NSMutableArray *sources = [NSMutableArray array];
-        if (normal) [sources addObject:@[normal, @(CharonSCNAttributeNormal)]];
-        if (color) [sources addObject:@[color, @(CharonSCNAttributeColor)]];
+        if (normal) [sources addObject:@[normal, @(RevenantSCNAttributeNormal)]];
+        if (color) [sources addObject:@[color, @(RevenantSCNAttributeColor)]];
         for (NSUInteger channel = 0; channel < texcoords.count && channel < 2; channel++) {
-            [sources addObject:@[texcoords[channel], @(CharonSCNAttributeUV0 + channel)]];
+            [sources addObject:@[texcoords[channel], @(RevenantSCNAttributeUV0 + channel)]];
         }
         for (NSArray *pair in sources) {
             SCNGeometrySource *source = pair[0];
-            if (!CharonSCNAttributeFor(source, &mesh->_attributes[[pair[1] intValue]], mesh.buffers)) {
+            if (!RevenantSCNAttributeFor(source, &mesh->_attributes[[pair[1] intValue]], mesh.buffers)) {
                 NSLog(@"SceneKit: geometry %@ has a %@ source this renderer cannot read (%ld components of %ld bytes, float %d)",
                       geometry.name, source.semantic, (long)source.componentsPerVector, (long)source.bytesPerComponent, source.floatComponents);
             }
         }
-        NSMutableArray<CharonSCNDraw *> *draws = [NSMutableArray array];
+        NSMutableArray<RevenantSCNDraw *> *draws = [NSMutableArray array];
         for (SCNGeometryElement *element in geometry.geometryElements) {
-            CharonSCNDraw *draw = CharonSCNDrawFor(element, mesh.buffers);
+            RevenantSCNDraw *draw = RevenantSCNDrawFor(element, mesh.buffers);
             if (draw == nil) {
                 NSLog(@"SceneKit: geometry %@ has an element this renderer cannot draw (type %ld, %ld primitives, %ld bytes per index, %lu bytes)",
                       geometry.name, (long)element.primitiveType, (long)element.primitiveCount, (long)element.bytesPerIndex, (unsigned long)element.data.length);
@@ -648,7 +648,7 @@ SCNMatrix4 CharonSCNProjectionMatrix(SCNNode *pointOfView, int width, int height
     NSString *memo = [NSString stringWithFormat:@"%@\n%@", _sceneURL.path ?: @"", contents];
     id path = _resolvedPaths[memo];
     if (path == nil) {
-        path = CharonSCNImagePath(contents, _sceneURL) ?: (id)[NSNull null];
+        path = RevenantSCNImagePath(contents, _sceneURL) ?: (id)[NSNull null];
         _resolvedPaths[memo] = path;
     }
     return path == [NSNull null] ? nil : path;
@@ -656,16 +656,16 @@ SCNMatrix4 CharonSCNProjectionMatrix(SCNNode *pointOfView, int width, int height
 
 - (BOOL)materialBlends:(SCNMaterial *)material
 {
-    if (CharonSCNModelFor(material) != CharonSCNModelPhysicallyBased && material.transparency < 1) {
+    if (RevenantSCNModelFor(material) != RevenantSCNModelPhysicallyBased && material.transparency < 1) {
         return YES;
     }
-    const CharonSCNSlot alphaSlots[] = {CharonSCNSlotDiffuse, CharonSCNSlotTransparent};
+    const RevenantSCNSlot alphaSlots[] = {RevenantSCNSlotDiffuse, RevenantSCNSlotTransparent};
     for (int i = 0; i < 2; i++) {
-        CharonSCNSlot slot = alphaSlots[i];
-        id contents = CharonSCNSlotProperty(material, slot).contents;
+        RevenantSCNSlot slot = alphaSlots[i];
+        id contents = RevenantSCNSlotProperty(material, slot).contents;
         BOOL hasAlpha = NO;
         float colour[4];
-        if ([self textureFor:contents sRGB:CharonSCNSlots[slot].sRGB hasAlpha:&hasAlpha] ? hasAlpha : (CharonSCNColorComponents(contents, colour) && colour[3] < 1)) {
+        if ([self textureFor:contents sRGB:RevenantSCNSlots[slot].sRGB hasAlpha:&hasAlpha] ? hasAlpha : (RevenantSCNColorComponents(contents, colour) && colour[3] < 1)) {
             return YES;
         }
     }
@@ -675,21 +675,21 @@ SCNMatrix4 CharonSCNProjectionMatrix(SCNNode *pointOfView, int width, int height
 - (GLuint)textureFor:(id)contents sRGB:(BOOL)sRGB hasAlpha:(BOOL *)hasAlpha
 {
     *hasAlpha = NO;
-    if (contents == nil || CharonSCNColorComponents(contents, (float[4]){0})) {
+    if (contents == nil || RevenantSCNColorComponents(contents, (float[4]){0})) {
         return 0;
     }
     NSString *path = [self pathForContents:contents];
     id key = path ?: contents;
-    CharonSCNTexture *texture = [_textures[sRGB] objectForKey:key];
+    RevenantSCNTexture *texture = [_textures[sRGB] objectForKey:key];
     if (texture) {
         texture.lastFrame = _frame;
         *hasAlpha = texture.hasAlpha;
         return texture.name;
     }
-    texture = [CharonSCNTexture new];
+    texture = [RevenantSCNTexture new];
     texture.lastFrame = _frame;
     [_textures[sRGB] setObject:texture forKey:key];
-    CGImageRef image = CharonSCNCreateImage(contents, path);
+    CGImageRef image = RevenantSCNCreateImage(contents, path);
     if (image == NULL) {
         NSLog(@"SceneKit: no image for material contents %@", contents);
         return 0;
@@ -713,7 +713,7 @@ SCNMatrix4 CharonSCNProjectionMatrix(SCNNode *pointOfView, int width, int height
     glGenTextures(1, &name);
     glBindTexture(GL_TEXTURE_2D, name);
     if (sRGB && [self linearTextures]) {
-        CharonSCNUploadLinearLevels(pixels.bytes, width, height);
+        RevenantSCNUploadLinearLevels(pixels.bytes, width, height);
     } else {
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, (GLsizei)width, (GLsizei)height, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels.bytes);
         glGenerateMipmap(GL_TEXTURE_2D);
@@ -729,7 +729,7 @@ SCNMatrix4 CharonSCNProjectionMatrix(SCNNode *pointOfView, int width, int height
         NSArray<NSString *> *names = [extensions componentsSeparatedByString:@" "];
         _linearTextures = [names containsObject:@"GL_OES_texture_half_float"] && [names containsObject:@"GL_OES_texture_half_float_linear"];
         if (!_linearTextures) {
-            charon_say_once_for(@"linear textures", @"SceneKit: this GPU filters no half-float texture: images in colour slots are mipmapped and filtered in their sRGB encoding, not in linear light as SceneKit does");
+            revenant_say_once_for(@"linear textures", @"SceneKit: this GPU filters no half-float texture: images in colour slots are mipmapped and filtered in their sRGB encoding, not in linear light as SceneKit does");
         }
     }
     return _linearTextures;
@@ -739,7 +739,7 @@ SCNMatrix4 CharonSCNProjectionMatrix(SCNNode *pointOfView, int width, int height
 {
     for (int sRGB = 0; sRGB < 2; sRGB++) {
         for (id key in [[_textures[sRGB] keyEnumerator] allObjects]) {
-            CharonSCNTexture *texture = [_textures[sRGB] objectForKey:key];
+            RevenantSCNTexture *texture = [_textures[sRGB] objectForKey:key];
             if (texture && _frame - texture.lastFrame > 120) {
                 GLuint name = texture.name;
                 glDeleteTextures(1, &name);
@@ -748,7 +748,7 @@ SCNMatrix4 CharonSCNProjectionMatrix(SCNNode *pointOfView, int width, int height
         }
     }
     for (id key in [[_meshes keyEnumerator] allObjects]) {
-        CharonSCNMesh *mesh = [_meshes objectForKey:key];
+        RevenantSCNMesh *mesh = [_meshes objectForKey:key];
         if (mesh && _frame - mesh.lastFrame > 120) {
             [self deleteMesh:mesh];
             [_meshes removeObjectForKey:key];
@@ -758,16 +758,16 @@ SCNMatrix4 CharonSCNProjectionMatrix(SCNNode *pointOfView, int width, int height
 
 #pragma mark Shaders
 
-- (CharonSCNProgram *)programForModel:(CharonSCNModel)model textured:(unsigned)textured bordered:(unsigned)bordered lockedAmbient:(BOOL)lockedAmbient lights:(const CharonSCNLightState *)lights count:(int)count mesh:(CharonSCNMesh *)mesh
+- (RevenantSCNProgram *)programForModel:(RevenantSCNModel)model textured:(unsigned)textured bordered:(unsigned)bordered lockedAmbient:(BOOL)lockedAmbient lights:(const RevenantSCNLightState *)lights count:(int)count mesh:(RevenantSCNMesh *)mesh
 {
-    BOOL hasNormal = mesh->_attributes[CharonSCNAttributeNormal].present;
-    BOOL hasColor = mesh->_attributes[CharonSCNAttributeColor].present;
-    BOOL hasUV0 = mesh->_attributes[CharonSCNAttributeUV0].present, hasUV1 = mesh->_attributes[CharonSCNAttributeUV1].present;
+    BOOL hasNormal = mesh->_attributes[RevenantSCNAttributeNormal].present;
+    BOOL hasColor = mesh->_attributes[RevenantSCNAttributeColor].present;
+    BOOL hasUV0 = mesh->_attributes[RevenantSCNAttributeUV0].present, hasUV1 = mesh->_attributes[RevenantSCNAttributeUV1].present;
     NSMutableString *key = [NSMutableString stringWithFormat:@"m%d t%x b%x a%d n%d c%d u%d%d l", model, textured, bordered, lockedAmbient, hasNormal, hasColor, hasUV0, hasUV1];
     for (int i = 0; i < count; i++) {
         [key appendFormat:@"%d", lights[i].type];
     }
-    CharonSCNProgram *program = _programs[key];
+    RevenantSCNProgram *program = _programs[key];
     if (program) {
         return program;
     }
@@ -796,13 +796,13 @@ SCNMatrix4 CharonSCNProjectionMatrix(SCNNode *pointOfView, int width, int height
                             "varying highp vec2 v_uv0;\nvarying highp vec2 v_uv1;\n"
                             "uniform vec3 u_cameraPosition;\nuniform vec4 u_coatView;\nuniform vec3 u_ambientLight;\nuniform float u_opacity;\nuniform float u_transparency;\n"
                             "uniform float u_shininess;\nuniform float u_implicitLight;\n"
-                            "vec3 charonLinear(vec3 c) { return mix(c / 12.92, pow((c + 0.055) / 1.055, vec3(2.4)), step(vec3(0.04045), c)); }\n"
-                            "vec3 charonEncode(vec3 l) { l = clamp(l, 0.0, 1.0); return mix(l * 12.92, 1.055 * pow(l, vec3(1.0 / 2.4)) - 0.055, step(vec3(0.0031308), l)); }\n"];
-    for (int slot = 0; slot < CharonSCNSlotCount; slot++) {
-        const char *name = CharonSCNSlots[slot].name;
+                            "vec3 revenantLinear(vec3 c) { return mix(c / 12.92, pow((c + 0.055) / 1.055, vec3(2.4)), step(vec3(0.04045), c)); }\n"
+                            "vec3 revenantEncode(vec3 l) { l = clamp(l, 0.0, 1.0); return mix(l * 12.92, 1.055 * pow(l, vec3(1.0 / 2.4)) - 0.055, step(vec3(0.0031308), l)); }\n"];
+    for (int slot = 0; slot < RevenantSCNSlotCount; slot++) {
+        const char *name = RevenantSCNSlots[slot].name;
         if (textured & (1u << slot)) {
             [fragment appendFormat:@"uniform sampler2D u_%s_sampler;\nuniform vec4 u_%s_value;\nuniform mat3 u_%s_transform;\n", name, name, name];
-            [fragment appendFormat:@"vec4 charon_%s(vec2 uv0, vec2 uv1, float channel) {\n"
+            [fragment appendFormat:@"vec4 revenant_%s(vec2 uv0, vec2 uv1, float channel) {\n"
                                     "  vec2 uv = (u_%s_transform * vec3(channel > 0.5 ? uv1 : uv0, 1.0)).xy;\n", name, name];
             if (bordered & (1u << (2 * slot))) {
                 [fragment appendString:@"  if (uv.x < 0.0 || uv.x > 1.0) return vec4(0.0);\n"];
@@ -812,7 +812,7 @@ SCNMatrix4 CharonSCNProjectionMatrix(SCNNode *pointOfView, int width, int height
             }
             [fragment appendFormat:@"  vec4 t = texture2D(u_%s_sampler, uv);\n"
                                     "  vec3 c = t.a > 0.0 ? t.rgb / t.a : vec3(0.0);\n", name];
-            [fragment appendString:CharonSCNSlots[slot].sRGB && ![self linearTextures] ? @"  c = charonLinear(c);\n" : @""];
+            [fragment appendString:RevenantSCNSlots[slot].sRGB && ![self linearTextures] ? @"  c = revenantLinear(c);\n" : @""];
             [fragment appendFormat:@"  return vec4(c, t.a) * u_%s_value;\n}\n", name];
         } else {
             [fragment appendFormat:@"uniform vec4 u_%s_value;\n", name];
@@ -823,10 +823,10 @@ SCNMatrix4 CharonSCNProjectionMatrix(SCNNode *pointOfView, int width, int height
                                 "uniform vec3 u_light%d_attenuation;\nuniform vec2 u_light%d_spot;\n", i, i, i, i, i];
     }
     [fragment appendString:@"void main() {\n"];
-    for (int slot = 0; slot < CharonSCNSlotCount; slot++) {
-        const char *name = CharonSCNSlots[slot].name;
+    for (int slot = 0; slot < RevenantSCNSlotCount; slot++) {
+        const char *name = RevenantSCNSlots[slot].name;
         if (textured & (1u << slot)) {
-            [fragment appendFormat:@"  vec4 %s = charon_%s(v_uv0, v_uv1, u_%s_transform[2][2]);\n", name, name, name];
+            [fragment appendFormat:@"  vec4 %s = revenant_%s(v_uv0, v_uv1, u_%s_transform[2][2]);\n", name, name, name];
         } else {
             [fragment appendFormat:@"  vec4 %s = u_%s_value;\n", name, name];
         }
@@ -838,7 +838,7 @@ SCNMatrix4 CharonSCNProjectionMatrix(SCNNode *pointOfView, int width, int height
                             "  vec3 N = length(v_normal) > 0.0 ? normalize(v_normal) : vec3(0.0);\n"
                             "  vec3 V = normalize(u_cameraPosition - v_position);\n"
                             "  vec3 color = vec3(0.0);\n"];
-    if (model == CharonSCNModelPhysicallyBased) {
+    if (model == RevenantSCNModelPhysicallyBased) {
         [fragment appendString:@"  float metal = clamp(metalness.r, 0.0, 1.0);\n"
                                 "  float alpha = roughness.r * roughness.r;\n"
                                 "  float a2 = alpha * alpha;\n"
@@ -859,11 +859,11 @@ SCNMatrix4 CharonSCNProjectionMatrix(SCNNode *pointOfView, int width, int height
     for (int i = 0; i < count; i++) {
         int type = lights[i].type;
         [fragment appendString:@"  {\n"];
-        if (type == CharonSCNLightDirectional) {
+        if (type == RevenantSCNLightDirectional) {
             [fragment appendFormat:@"    vec3 L = -u_light%d_direction;\n    vec3 radiance = u_light%d_color;\n", i, i];
         } else {
             [fragment appendFormat:@"    vec3 toLight = u_light%d_position - v_position;\n    float d = length(toLight);\n    vec3 L = toLight / d;\n", i];
-            if (model == CharonSCNModelPhysicallyBased) {
+            if (model == RevenantSCNModelPhysicallyBased) {
                 [fragment appendFormat:@"    vec3 radiance = u_light%d_color / (d * d);\n"
                                         "    if (u_light%d_attenuation.y > 0.0) {\n"
                                         "      float w = clamp(1.0 - pow(d / u_light%d_attenuation.y, 4.0), 0.0, 1.0);\n"
@@ -875,12 +875,12 @@ SCNMatrix4 CharonSCNProjectionMatrix(SCNNode *pointOfView, int width, int height
                                         "      radiance *= pow(clamp((u_light%d_attenuation.y - d) / (u_light%d_attenuation.y - u_light%d_attenuation.x), 0.0, 1.0), u_light%d_attenuation.z);\n"
                                         "    }\n", i, i, i, i, i, i, i];
             }
-            if (type == CharonSCNLightSpot) {
+            if (type == RevenantSCNLightSpot) {
                 [fragment appendFormat:@"    radiance *= clamp((dot(-L, u_light%d_direction) - u_light%d_spot.x) / max(u_light%d_spot.y - u_light%d_spot.x, 0.0001), 0.0, 1.0);\n", i, i, i, i];
             }
         }
         [fragment appendString:@"    float NdotL = max(dot(N, L), 0.0);\n"];
-        if (model == CharonSCNModelPhysicallyBased) {
+        if (model == RevenantSCNModelPhysicallyBased) {
             [fragment appendString:@"    if (NdotL > 0.0) {\n"
                                     "      vec3 H = normalize(L + V);\n"
                                     "      float NdotH = max(dot(N, H), 0.0);\n"
@@ -891,33 +891,33 @@ SCNMatrix4 CharonSCNProjectionMatrix(SCNNode *pointOfView, int width, int height
                                     "      vec3 F = f0 + (1.0 - f0) * pow(1.0 - VdotH, 5.0);\n"
                                     "      color += radiance * NdotL * (diffuseColor + D * visibility * F);\n"
                                     "    }\n"];
-        } else if (model != CharonSCNModelConstant) {
+        } else if (model != RevenantSCNModelConstant) {
             [fragment appendString:@"    lightDiffuse += radiance * NdotL;\n"];
-            if (model == CharonSCNModelBlinn) {
+            if (model == RevenantSCNModelBlinn) {
                 [fragment appendString:@"    if (NdotL > 0.0) lightSpecular += radiance * NdotL * pow(max(dot(N, normalize(L + V)), 0.0), 128.0 * u_shininess);\n"];
-            } else if (model == CharonSCNModelPhong) {
+            } else if (model == RevenantSCNModelPhong) {
                 [fragment appendString:@"    if (NdotL > 0.0) lightSpecular += radiance * NdotL * pow(max(dot(reflect(-L, N), V), 0.0), 128.0 * u_shininess);\n"];
             }
         }
         [fragment appendString:@"  }\n"];
     }
-    if (model == CharonSCNModelConstant) {
+    if (model == RevenantSCNModelConstant) {
         [fragment appendString:@"  color = diffuse.rgb;\n"];
-    } else if (model != CharonSCNModelPhysicallyBased) {
+    } else if (model != RevenantSCNModelPhysicallyBased) {
         [fragment appendString:@"  lightDiffuse += mix(selfIllumination.rgb, vec3(1.0), u_implicitLight);\n"
                                 "  color = ambient.rgb * u_ambientLight + diffuse.rgb * lightDiffuse + specular.rgb * lightSpecular;\n"];
     }
     [fragment appendString:@"  color += emission.rgb;\n"
                             "  color *= multiply.rgb;\n"
                             "  float outAlpha = u_opacity;\n"];
-    if (model == CharonSCNModelPhysicallyBased) {
+    if (model == RevenantSCNModelPhysicallyBased) {
         [fragment appendString:@"  outAlpha *= transparent.a * diffuse.a;\n"];
     } else {
         [fragment appendString:@"  outAlpha *= u_transparency * transparent.a * diffuse.a * diffuse.a;\n"];
     }
-    [fragment appendString:@"  gl_FragColor = vec4(charonEncode(color * outAlpha), outAlpha);\n}\n"];
+    [fragment appendString:@"  gl_FragColor = vec4(revenantEncode(color * outAlpha), outAlpha);\n}\n"];
 
-    GLuint vs = CharonSCNCompile(GL_VERTEX_SHADER, vertex), fs = CharonSCNCompile(GL_FRAGMENT_SHADER, fragment);
+    GLuint vs = RevenantSCNCompile(GL_VERTEX_SHADER, vertex), fs = RevenantSCNCompile(GL_FRAGMENT_SHADER, fragment);
     if (vs == 0 || fs == 0) {
         glDeleteShader(vs);
         glDeleteShader(fs);
@@ -927,11 +927,11 @@ SCNMatrix4 CharonSCNProjectionMatrix(SCNNode *pointOfView, int width, int height
     GLuint handle = glCreateProgram();
     glAttachShader(handle, vs);
     glAttachShader(handle, fs);
-    glBindAttribLocation(handle, CharonSCNAttributePosition, "a_position");
-    glBindAttribLocation(handle, CharonSCNAttributeNormal, "a_normal");
-    glBindAttribLocation(handle, CharonSCNAttributeColor, "a_color");
-    glBindAttribLocation(handle, CharonSCNAttributeUV0, "a_uv0");
-    glBindAttribLocation(handle, CharonSCNAttributeUV1, "a_uv1");
+    glBindAttribLocation(handle, RevenantSCNAttributePosition, "a_position");
+    glBindAttribLocation(handle, RevenantSCNAttributeNormal, "a_normal");
+    glBindAttribLocation(handle, RevenantSCNAttributeColor, "a_color");
+    glBindAttribLocation(handle, RevenantSCNAttributeUV0, "a_uv0");
+    glBindAttribLocation(handle, RevenantSCNAttributeUV1, "a_uv1");
     glLinkProgram(handle);
     glDeleteShader(vs);
     glDeleteShader(fs);
@@ -945,7 +945,7 @@ SCNMatrix4 CharonSCNProjectionMatrix(SCNNode *pointOfView, int width, int height
         [_failedPrograms addObject:key];
         return nil;
     }
-    program = [CharonSCNProgram new];
+    program = [RevenantSCNProgram new];
     program->_program = handle;
     program->_modelViewProjection = glGetUniformLocation(handle, "u_modelViewProjection");
     program->_model = glGetUniformLocation(handle, "u_model");
@@ -957,8 +957,8 @@ SCNMatrix4 CharonSCNProjectionMatrix(SCNNode *pointOfView, int width, int height
     program->_transparency = glGetUniformLocation(handle, "u_transparency");
     program->_shininess = glGetUniformLocation(handle, "u_shininess");
     program->_implicitLight = glGetUniformLocation(handle, "u_implicitLight");
-    for (int slot = 0; slot < CharonSCNSlotCount; slot++) {
-        const char *name = CharonSCNSlots[slot].name;
+    for (int slot = 0; slot < RevenantSCNSlotCount; slot++) {
+        const char *name = RevenantSCNSlots[slot].name;
         program->_slotValue[slot] = glGetUniformLocation(handle, [NSString stringWithFormat:@"u_%s_value", name].UTF8String);
         program->_slotSampler[slot] = glGetUniformLocation(handle, [NSString stringWithFormat:@"u_%s_sampler", name].UTF8String);
         program->_slotTransform[slot] = glGetUniformLocation(handle, [NSString stringWithFormat:@"u_%s_transform", name].UTF8String);
@@ -976,23 +976,23 @@ SCNMatrix4 CharonSCNProjectionMatrix(SCNNode *pointOfView, int width, int height
 
 #pragma mark What is not drawn
 
-static BOOL CharonSCNPropertyShows(SCNMaterialProperty *property, BOOL alphaMatters)
+static BOOL RevenantSCNPropertyShows(SCNMaterialProperty *property, BOOL alphaMatters)
 {
     id contents = property.contents;
     if (contents == nil || property.intensity == 0) {
         return NO;
     }
     float c[4];
-    if (!CharonSCNColorComponents(contents, c)) {
+    if (!RevenantSCNColorComponents(contents, c)) {
         return YES;
     }
     return alphaMatters ? c[3] > 0 : (c[0] > 0 || c[1] > 0 || c[2] > 0);
 }
 
-static BOOL CharonSCNPropertyIsImage(SCNMaterialProperty *property)
+static BOOL RevenantSCNPropertyIsImage(SCNMaterialProperty *property)
 {
     float c[4];
-    return property.contents != nil && !CharonSCNColorComponents(property.contents, c);
+    return property.contents != nil && !RevenantSCNColorComponents(property.contents, c);
 }
 
 - (void)surveyScene:(SCNScene *)scene
@@ -1001,14 +1001,14 @@ static BOOL CharonSCNPropertyIsImage(SCNMaterialProperty *property)
         return;
     }
     [_surveyed addObject:scene];
-    NSString *title = [scene charonSourceURL].lastPathComponent ?: [NSString stringWithFormat:@"%p", scene];
+    NSString *title = [scene revenantSourceURL].lastPathComponent ?: [NSString stringWithFormat:@"%p", scene];
     void (^say)(NSString *, NSString *) = ^(NSString *what, NSString *text) {
-        charon_say_once_for([NSString stringWithFormat:@"scenekit %p %@", scene, what], [NSString stringWithFormat:@"SceneKit: %@: %@", title, text]);
+        revenant_say_once_for([NSString stringWithFormat:@"scenekit %p %@", scene, what], [NSString stringWithFormat:@"SceneKit: %@: %@", title, text]);
     };
-    if (CharonSCNPropertyShows(scene.background, YES)) {
+    if (RevenantSCNPropertyShows(scene.background, YES)) {
         say(@"background", @"the scene's background is not drawn");
     }
-    if (CharonSCNPropertyShows(scene.lightingEnvironment, YES)) {
+    if (RevenantSCNPropertyShows(scene.lightingEnvironment, YES)) {
         say(@"environment", @"the scene's lighting environment is not drawn");
     }
     NSMutableArray<SCNNode *> *queue = [NSMutableArray arrayWithObject:scene.rootNode];
@@ -1051,19 +1051,19 @@ static BOOL CharonSCNPropertyIsImage(SCNMaterialProperty *property)
             if (material.blendMode != SCNBlendModeAlpha) {
                 say([@"blend " stringByAppendingString:where], [NSString stringWithFormat:@"%@: the blend mode %ld is drawn as alpha", where, (long)material.blendMode]);
             }
-            if (CharonSCNPropertyShows(material.clearCoat, NO)) {
+            if (RevenantSCNPropertyShows(material.clearCoat, NO)) {
                 say([@"clearCoat " stringByAppendingString:where], [where stringByAppendingString:@": the clear coat is not drawn"]);
             }
-            if (CharonSCNPropertyIsImage(material.normal)) {
+            if (RevenantSCNPropertyIsImage(material.normal)) {
                 say([@"normal " stringByAppendingString:where], [where stringByAppendingString:@": the normal map is not drawn"]);
             }
-            if (CharonSCNPropertyIsImage(material.ambientOcclusion)) {
+            if (RevenantSCNPropertyIsImage(material.ambientOcclusion)) {
                 say([@"occlusion " stringByAppendingString:where], [where stringByAppendingString:@": the ambient occlusion map is not drawn"]);
             }
-            if (CharonSCNPropertyShows(material.reflective, NO)) {
+            if (RevenantSCNPropertyShows(material.reflective, NO)) {
                 say([@"reflective " stringByAppendingString:where], [where stringByAppendingString:@": the reflective slot is not drawn"]);
             }
-            if (CharonSCNPropertyIsImage(material.displacement)) {
+            if (RevenantSCNPropertyIsImage(material.displacement)) {
                 say([@"displacement " stringByAppendingString:where], [where stringByAppendingString:@": the displacement map is not drawn"]);
             }
         }
@@ -1083,40 +1083,40 @@ typedef struct {
     float opacity;
     float depth;
     BOOL transparent;
-} CharonSCNItem;
+} RevenantSCNItem;
 
-static void CharonSCNCollect(SCNNode *node, SCNMatrix4 parent, float opacity, NSMutableData *items, NSMutableArray<SCNNode *> *lights)
+static void RevenantSCNCollect(SCNNode *node, SCNMatrix4 parent, float opacity, NSMutableData *items, NSMutableArray<SCNNode *> *lights)
 {
     if (node.hidden) {
         return;
     }
-    SCNMatrix4 world = CharonSCNMatrixMultiply([node charonPresentedTransform], parent);
-    opacity *= [node charonPresentedOpacity];
+    SCNMatrix4 world = RevenantSCNMatrixMultiply([node revenantPresentedTransform], parent);
+    opacity *= [node revenantPresentedOpacity];
     if (node.light) {
         [lights addObject:node];
     }
     if (node.geometry) {
-        CharonSCNItem item = {node, node.geometry, world, opacity, 0, NO};
+        RevenantSCNItem item = {node, node.geometry, world, opacity, 0, NO};
         [items appendBytes:&item length:sizeof(item)];
     }
     for (SCNNode *child in node.childNodes) {
-        CharonSCNCollect(child, world, opacity, items, lights);
+        RevenantSCNCollect(child, world, opacity, items, lights);
     }
 }
 
-static void CharonSCNLightColor(SCNLight *light, float scale, float out[3])
+static void RevenantSCNLightColor(SCNLight *light, float scale, float out[3])
 {
     float c[4] = {1, 1, 1, 1};
-    CharonSCNColorComponents(light.color, c);
+    RevenantSCNColorComponents(light.color, c);
     for (int i = 0; i < 3; i++) {
-        out[i] = (float)charon_srgb_decode(c[i]) * scale;
+        out[i] = (float)revenant_srgb_decode(c[i]) * scale;
     }
 }
 
 - (void)renderScene:(SCNScene *)scene pointOfView:(SCNNode *)pointOfView width:(int)width height:(int)height
 {
     _frame++;
-    _sceneURL = [scene charonSourceURL];
+    _sceneURL = [scene revenantSourceURL];
     glViewport(0, 0, width, height);
     if (scene == nil || width <= 0 || height <= 0) {
         return;
@@ -1124,16 +1124,16 @@ static void CharonSCNLightColor(SCNLight *light, float scale, float out[3])
     [self surveyScene:scene];
     NSMutableData *itemData = [NSMutableData data];
     NSMutableArray<SCNNode *> *lightNodes = [NSMutableArray array];
-    CharonSCNCollect(scene.rootNode, SCNMatrix4Identity, 1, itemData, lightNodes);
+    RevenantSCNCollect(scene.rootNode, SCNMatrix4Identity, 1, itemData, lightNodes);
 
-    SCNMatrix4 cameraWorld = pointOfView ? [pointOfView charonPresentedWorldTransform] : SCNMatrix4Identity;
-    SCNMatrix4 view = CharonSCNMatrixInvert(cameraWorld);
+    SCNMatrix4 cameraWorld = pointOfView ? [pointOfView revenantPresentedWorldTransform] : SCNMatrix4Identity;
+    SCNMatrix4 view = RevenantSCNMatrixInvert(cameraWorld);
     SCNCamera *camera = pointOfView.camera;
-    SCNMatrix4 projection = CharonSCNProjectionMatrix(pointOfView, width, height);
+    SCNMatrix4 projection = RevenantSCNProjectionMatrix(pointOfView, width, height);
     self.lastRenderPointOfView = pointOfView;
     self.lastRenderWidth = width;
     self.lastRenderHeight = height;
-    SCNMatrix4 viewProjection = CharonSCNMatrixMultiply(view, projection);
+    SCNMatrix4 viewProjection = RevenantSCNMatrixMultiply(view, projection);
     float cameraPosition[3] = {cameraWorld.m41, cameraWorld.m42, cameraWorld.m43};
     float coatView[4] = {cameraWorld.m41, cameraWorld.m42, cameraWorld.m43, 1};
     if (camera.usesOrthographicProjection) {
@@ -1144,10 +1144,10 @@ static void CharonSCNLightColor(SCNLight *light, float scale, float out[3])
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
 
-    CharonSCNItem *items = itemData.mutableBytes;
-    NSUInteger itemCount = itemData.length / sizeof(CharonSCNItem);
+    RevenantSCNItem *items = itemData.mutableBytes;
+    NSUInteger itemCount = itemData.length / sizeof(RevenantSCNItem);
     for (NSUInteger i = 0; i < itemCount; i++) {
-        SCNMatrix4 clip = CharonSCNMatrixMultiply(items[i].world, viewProjection);
+        SCNMatrix4 clip = RevenantSCNMatrixMultiply(items[i].world, viewProjection);
         items[i].depth = clip.m44 != 0 ? clip.m43 / clip.m44 : clip.m43;
         items[i].transparent = items[i].opacity < 1;
         for (SCNMaterial *material in items[i].geometry.materials) {
@@ -1159,7 +1159,7 @@ static void CharonSCNLightColor(SCNLight *light, float scale, float out[3])
         [order addObject:@(i)];
     }
     [order sortWithOptions:NSSortStable usingComparator:^NSComparisonResult(NSNumber *a, NSNumber *b) {
-        CharonSCNItem *x = &items[a.unsignedIntegerValue], *y = &items[b.unsignedIntegerValue];
+        RevenantSCNItem *x = &items[a.unsignedIntegerValue], *y = &items[b.unsignedIntegerValue];
         if (x->node.renderingOrder != y->node.renderingOrder) {
             return x->node.renderingOrder < y->node.renderingOrder ? NSOrderedAscending : NSOrderedDescending;
         }
@@ -1173,7 +1173,7 @@ static void CharonSCNLightColor(SCNLight *light, float scale, float out[3])
     }];
 
     for (NSNumber *index in order) {
-        CharonSCNItem *item = &items[((NSNumber *)index).unsignedIntegerValue];
+        RevenantSCNItem *item = &items[((NSNumber *)index).unsignedIntegerValue];
         [self drawItem:item viewProjection:viewProjection cameraPosition:cameraPosition coatView:coatView lights:lightNodes];
     }
     glDisable(GL_BLEND);
@@ -1183,22 +1183,22 @@ static void CharonSCNLightColor(SCNLight *light, float scale, float out[3])
     }
 }
 
-- (void)drawItem:(CharonSCNItem *)item viewProjection:(SCNMatrix4)viewProjection cameraPosition:(const float *)cameraPosition coatView:(const float *)coatView lights:(NSArray<SCNNode *> *)lightNodes
+- (void)drawItem:(RevenantSCNItem *)item viewProjection:(SCNMatrix4)viewProjection cameraPosition:(const float *)cameraPosition coatView:(const float *)coatView lights:(NSArray<SCNNode *> *)lightNodes
 {
     SCNGeometry *geometry = item->geometry;
-    CharonSCNMesh *mesh = [self meshFor:geometry];
+    RevenantSCNMesh *mesh = [self meshFor:geometry];
     if (mesh.draws.count == 0) {
         return;
     }
     NSArray<SCNMaterial *> *materials = geometry.materials;
     SCNMatrix4 world = item->world;
-    SCNMatrix4 modelViewProjection = CharonSCNMatrixMultiply(world, viewProjection);
-    SCNMatrix4 inverse = CharonSCNMatrixInvert(world);
+    SCNMatrix4 modelViewProjection = RevenantSCNMatrixMultiply(world, viewProjection);
+    SCNMatrix4 inverse = RevenantSCNMatrixInvert(world);
     float normalMatrix[9] = {inverse.m11, inverse.m21, inverse.m31, inverse.m12, inverse.m22, inverse.m32, inverse.m13, inverse.m23, inverse.m33};
 
     NSUInteger nodeCategory = item->node.categoryBitMask;
     for (NSUInteger e = 0; e < mesh.draws.count; e++) {
-        CharonSCNDraw *draw = (id)mesh.draws[e];
+        RevenantSCNDraw *draw = (id)mesh.draws[e];
         if ((id)draw == [NSNull null]) {
             continue;
         }
@@ -1206,11 +1206,11 @@ static void CharonSCNLightColor(SCNLight *light, float scale, float out[3])
         if (material == nil) {
             material = [SCNMaterial material];
         }
-        CharonSCNModel model = CharonSCNModelFor(material);
-        BOOL physical = model == CharonSCNModelPhysicallyBased;
+        RevenantSCNModel model = RevenantSCNModelFor(material);
+        BOOL physical = model == RevenantSCNModelPhysicallyBased;
 
         float ambient[3] = {0, 0, 0};
-        CharonSCNLightState lights[CharonSCNMaxLights];
+        RevenantSCNLightState lights[RevenantSCNMaxLights];
         int lightCount = 0;
         for (SCNNode *lightNode in lightNodes) {
             SCNLight *light = lightNode.light;
@@ -1220,30 +1220,30 @@ static void CharonSCNLightColor(SCNLight *light, float scale, float out[3])
             NSString *type = light.type;
             if ([type isEqualToString:SCNLightTypeAmbient]) {
                 float c[3];
-                CharonSCNLightColor(light, (float)light.intensity / 1000, c);
+                RevenantSCNLightColor(light, (float)light.intensity / 1000, c);
                 for (int k = 0; k < 3; k++) ambient[k] += c[k];
                 continue;
             }
             int kind;
             if ([type isEqualToString:SCNLightTypeDirectional]) {
-                kind = CharonSCNLightDirectional;
+                kind = RevenantSCNLightDirectional;
             } else if ([type isEqualToString:SCNLightTypeSpot]) {
-                kind = CharonSCNLightSpot;
+                kind = RevenantSCNLightSpot;
             } else if ([type isEqualToString:SCNLightTypeOmni]) {
-                kind = CharonSCNLightOmni;
+                kind = RevenantSCNLightOmni;
             } else {
                 continue;
             }
-            if (lightCount == CharonSCNMaxLights) {
-                charon_say_once_for([NSString stringWithFormat:@"scenekit lights %p", item->node],
-                                    [NSString stringWithFormat:@"SceneKit: node %@ is reached by more than %d lights; %@ and the rest are not drawn", item->node.name, CharonSCNMaxLights, lightNode.name]);
+            if (lightCount == RevenantSCNMaxLights) {
+                revenant_say_once_for([NSString stringWithFormat:@"scenekit lights %p", item->node],
+                                    [NSString stringWithFormat:@"SceneKit: node %@ is reached by more than %d lights; %@ and the rest are not drawn", item->node.name, RevenantSCNMaxLights, lightNode.name]);
                 continue;
             }
-            CharonSCNLightState *state = &lights[lightCount++];
+            RevenantSCNLightState *state = &lights[lightCount++];
             state->type = kind;
-            float scale = (physical && kind != CharonSCNLightDirectional) ? (float)light.intensity / (float)M_PI : (float)light.intensity / 1000;
-            CharonSCNLightColor(light, scale, state->color);
-            SCNMatrix4 lw = [lightNode charonPresentedWorldTransform];
+            float scale = (physical && kind != RevenantSCNLightDirectional) ? (float)light.intensity / (float)M_PI : (float)light.intensity / 1000;
+            RevenantSCNLightColor(light, scale, state->color);
+            SCNMatrix4 lw = [lightNode revenantPresentedWorldTransform];
             state->position[0] = lw.m41; state->position[1] = lw.m42; state->position[2] = lw.m43;
             float dx = -lw.m31, dy = -lw.m32, dz = -lw.m33, length = sqrtf(dx * dx + dy * dy + dz * dz);
             if (length == 0) length = 1;
@@ -1256,11 +1256,11 @@ static void CharonSCNLightColor(SCNLight *light, float scale, float out[3])
         }
 
         unsigned textured = 0, bordered = 0;
-        GLuint textures[CharonSCNSlotCount] = {0};
-        for (int slot = 0; slot < CharonSCNSlotCount; slot++) {
-            SCNMaterialProperty *property = CharonSCNSlotProperty(material, (CharonSCNSlot)slot);
+        GLuint textures[RevenantSCNSlotCount] = {0};
+        for (int slot = 0; slot < RevenantSCNSlotCount; slot++) {
+            SCNMaterialProperty *property = RevenantSCNSlotProperty(material, (RevenantSCNSlot)slot);
             BOOL hasAlpha = NO;
-            textures[slot] = [self textureFor:property.contents sRGB:CharonSCNSlots[slot].sRGB hasAlpha:&hasAlpha];
+            textures[slot] = [self textureFor:property.contents sRGB:RevenantSCNSlots[slot].sRGB hasAlpha:&hasAlpha];
             if (textures[slot]) {
                 textured |= 1u << slot;
                 bordered |= (property.wrapS == SCNWrapModeClampToBorder ? 1u : 0u) << (2 * slot);
@@ -1268,7 +1268,7 @@ static void CharonSCNLightColor(SCNLight *light, float scale, float out[3])
             }
         }
         BOOL lockedAmbient = !physical && material.locksAmbientWithDiffuse;
-        CharonSCNProgram *program = [self programForModel:model textured:textured bordered:bordered lockedAmbient:lockedAmbient lights:lights count:lightCount mesh:mesh];
+        RevenantSCNProgram *program = [self programForModel:model textured:textured bordered:bordered lockedAmbient:lockedAmbient lights:lights count:lightCount mesh:mesh];
         if (program == nil) {
             continue;
         }
@@ -1284,8 +1284,8 @@ static void CharonSCNLightColor(SCNLight *light, float scale, float out[3])
         glUniform1f(program->_shininess, (float)material.shininess);
         glUniform1f(program->_implicitLight, lightCount == 0 ? 1 : 0);
         GLint unit = 0;
-        for (int slot = 0; slot < CharonSCNSlotCount; slot++) {
-            SCNMaterialProperty *property = CharonSCNSlotProperty(material, (CharonSCNSlot)slot);
+        for (int slot = 0; slot < RevenantSCNSlotCount; slot++) {
+            SCNMaterialProperty *property = RevenantSCNSlotProperty(material, (RevenantSCNSlot)slot);
             float value[4];
             float intensity = (float)property.intensity;
             if (textures[slot]) {
@@ -1295,17 +1295,17 @@ static void CharonSCNLightColor(SCNLight *light, float scale, float out[3])
                 glBindTexture(GL_TEXTURE_2D, textures[slot]);
                 [self applySampling:property];
                 glUniform1i(program->_slotSampler[slot], unit++);
-                SCNMatrix4 t = [property charonPresentedContentsTransform];
+                SCNMatrix4 t = [property revenantPresentedContentsTransform];
                 float uv[9] = {t.m11, t.m12, 0, t.m21, t.m22, 0, t.m41, t.m42, property.mappingChannel > 0 ? 1 : 0};
                 glUniformMatrix3fv(program->_slotTransform[slot], 1, GL_FALSE, uv);
             } else {
-                BOOL encoded = CharonSCNSlots[slot].sRGB || property.charonHoldsDefault;
-                if (!CharonSCNColorComponents(property.contents, value)) {
-                    CharonSCNSlotDefault((CharonSCNSlot)slot, value);
+                BOOL encoded = RevenantSCNSlots[slot].sRGB || property.revenantHoldsDefault;
+                if (!RevenantSCNColorComponents(property.contents, value)) {
+                    RevenantSCNSlotDefault((RevenantSCNSlot)slot, value);
                     encoded = YES;
                 }
                 if (encoded) {
-                    for (int k = 0; k < 3; k++) value[k] = (float)charon_srgb_decode(value[k]);
+                    for (int k = 0; k < 3; k++) value[k] = (float)revenant_srgb_decode(value[k]);
                 }
                 for (int k = 0; k < 3; k++) value[k] *= intensity;
             }
@@ -1319,8 +1319,8 @@ static void CharonSCNLightColor(SCNLight *light, float scale, float out[3])
             glUniform2fv(program->_lightSpot[i], 1, lights[i].spot);
         }
 
-        for (int a = 0; a < CharonSCNAttributeCount; a++) {
-            CharonSCNAttribute *attribute = &mesh->_attributes[a];
+        for (int a = 0; a < RevenantSCNAttributeCount; a++) {
+            RevenantSCNAttribute *attribute = &mesh->_attributes[a];
             if (attribute->present) {
                 glBindBuffer(GL_ARRAY_BUFFER, attribute->buffer);
                 glVertexAttribPointer((GLuint)a, attribute->size, attribute->type, attribute->normalized, attribute->stride, (const GLvoid *)attribute->offset);

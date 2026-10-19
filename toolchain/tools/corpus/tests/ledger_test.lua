@@ -126,16 +126,16 @@ local function test_a_row_whose_line_does_not_compile_is_reported_as_failing(fol
     end
     local work = path.join(folder, "named")
     os.mkdir(work)
-    io.writefile(path.join(work, "charon_probe.h"), "#define CHARON_PROBE_TWICE 2\n")
+    io.writefile(path.join(work, "revenant_probe.h"), "#define REVENANT_PROBE_TWICE 2\n")
     local command = table.join(clang, {"-w", "-target", "armv7-apple-ios6.1.3", "-I", work})
-    local out = headers.compile_named_rows({"charon_probe.h"}, command, {{"constant", "CHARON_PROBE_TWICE"}, {"constant", "CHARON_PROBE_MISSING"}},
-                                           work, "charon_probe")
-    check(out.CHARON_PROBE_TWICE == "", "a row whose line compiles comes back clean (got " .. tostring(out.CHARON_PROBE_TWICE) .. ")")
-    local missing = out.CHARON_PROBE_MISSING
+    local out = headers.compile_named_rows({"revenant_probe.h"}, command, {{"constant", "REVENANT_PROBE_TWICE"}, {"constant", "REVENANT_PROBE_MISSING"}},
+                                           work, "revenant_probe")
+    check(out.REVENANT_PROBE_TWICE == "", "a row whose line compiles comes back clean (got " .. tostring(out.REVENANT_PROBE_TWICE) .. ")")
+    local missing = out.REVENANT_PROBE_MISSING
     check(missing ~= nil and missing ~= "", "a row whose line does NOT compile comes back with the diagnostic on it")
     check(contains(missing, "undeclared"), "and the diagnostic is the compiler's own (got " .. tostring(missing) .. ")")
-    check(io.readfile(path.join(work, "named-charon_probe.m")) ==
-          "#import <charon_probe.h>\n\n__typeof__(CHARON_PROBE_TWICE) charonLedger0 = CHARON_PROBE_TWICE;\n__typeof__(CHARON_PROBE_MISSING) charonLedger1 = CHARON_PROBE_MISSING;\n",
+    check(io.readfile(path.join(work, "named-revenant_probe.m")) ==
+          "#import <revenant_probe.h>\n\n__typeof__(REVENANT_PROBE_TWICE) revenantLedger0 = REVENANT_PROBE_TWICE;\n__typeof__(REVENANT_PROBE_MISSING) revenantLedger1 = REVENANT_PROBE_MISSING;\n",
           "the generated unit names every row on a line of its own, after the imports and one blank line")
 end
 
@@ -179,12 +179,12 @@ local function test_static_inline_through_a_macro_is_header_only(folder)
         print("skip: no clang to read the storage class with")
         return
     end
-    local source = "#define CH_M static inline\nCH_M int charon_header_only(int);\nint charon_header_only(int x) { return x; }\n"
-                   .. "extern int charon_extern_function(int);\nextern int charon_extern_variable;\nint main(void) { return charon_extern_function(0); }\n"
+    local source = "#define CH_M static inline\nCH_M int revenant_header_only(int);\nint revenant_header_only(int x) { return x; }\n"
+                   .. "extern int revenant_extern_function(int);\nextern int revenant_extern_variable;\nint main(void) { return revenant_extern_function(0); }\n"
     local lines = dump(source, folder)
     local decl = {}
     for _, line in ipairs(lines) do
-        if line:sub(1, 14) == "|-FunctionDecl" and contains(line, " charon_header_only ") then
+        if line:sub(1, 14) == "|-FunctionDecl" and contains(line, " revenant_header_only ") then
             table.insert(decl, line)
         end
     end
@@ -196,17 +196,17 @@ local function test_static_inline_through_a_macro_is_header_only(folder)
     end
     local flags = {}
     headers.scan_storage(lines, flags)
-    local header_only = flags.charon_header_only or {}
-    flags.CharonInlineMacro = flags.charon_header_only
+    local header_only = flags.revenant_header_only or {}
+    flags.RevenantInlineMacro = flags.revenant_header_only
     check(header_only[2] == true, "a function declared `static inline` through a macro reads static")
     check(header_only[1] == false, "and not extern")
-    check((flags.charon_extern_function or {})[1] == true, "a real extern function still reads extern")
-    check((flags.charon_extern_function or {})[2] == false, "and does not read static")
-    check((flags.charon_extern_variable or {})[1] == true, "a real extern variable still reads extern")
-    local row = {api = "CharonInlineMacro()", kind = "function", lang = "objc", framework = "SomeFramework"}
-    local index = {rows = {["CharonInlineMacro()"] = {"function", nil, nil, false}}, macros = {}, flags = flags, typedefs = {},
-                   compiled = {CharonInlineMacro = ""}, failed = {}}
-    local status, reason = classify.classify_from_headers("CharonInlineMacro()", row, index, "6.1.3", {}, {})
+    check((flags.revenant_extern_function or {})[1] == true, "a real extern function still reads extern")
+    check((flags.revenant_extern_function or {})[2] == false, "and does not read static")
+    check((flags.revenant_extern_variable or {})[1] == true, "a real extern variable still reads extern")
+    local row = {api = "RevenantInlineMacro()", kind = "function", lang = "objc", framework = "SomeFramework"}
+    local index = {rows = {["RevenantInlineMacro()"] = {"function", nil, nil, false}}, macros = {}, flags = flags, typedefs = {},
+                   compiled = {RevenantInlineMacro = ""}, failed = {}}
+    local status, reason = classify.classify_from_headers("RevenantInlineMacro()", row, index, "6.1.3", {}, {})
     check(status == "header-ok", "a function declared `static inline` through a macro is header-ok (got " .. tostring(status) .. ": " .. tostring(reason) .. ")")
     check(contains(reason, "no run-time symbol"), "and the reason says there is no run-time symbol to export")
     every_spatial_function_is_header_only(folder)
@@ -235,11 +235,11 @@ local function test_built_tree_reads_a_real_run_directory(folder)
     os.mkdir(run)
     check(contains(inputs.built_tree(run), "tree not recorded"), "a directory with no tree file says so, with its own age")
     check(contains(inputs.built_tree(nil), "no --gate"), "and no directory at all says so rather than raising")
-    io.writefile(path.join(run, "tree"), "revision\t68befacae0337a1b2c3\ncheckout\t/charon\ndirty\tno\n")
+    io.writefile(path.join(run, "tree"), "revision\t68befacae0337a1b2c3\ncheckout\t/revenant\ndirty\tno\n")
     check(inputs.built_tree(run) == "68befacae033", "a tree file is read and the revision is the short form (" .. inputs.built_tree(run) .. ")")
-    io.writefile(path.join(run, "tree"), "revision\t68befacae0337a1b2c3\ncheckout\t/charon\ndirty\tyes\n")
+    io.writefile(path.join(run, "tree"), "revision\t68befacae0337a1b2c3\ncheckout\t/revenant\ndirty\tyes\n")
     check(contains(inputs.built_tree(run), "dirty"), "a dirty build is marked as one")
-    io.writefile(path.join(run, "tree"), "revision\tunknown\ncheckout\t/charon\n")
+    io.writefile(path.join(run, "tree"), "revision\tunknown\ncheckout\t/revenant\n")
     check(contains(inputs.built_tree(run), "tree not recorded"), "a tree file that says it does not know is treated as not recorded")
 end
 
@@ -573,15 +573,15 @@ local function test_inputs(folder)
     check(contains(raised(function () inputs.load_surface(surface) end), "surface tsv header changed shape"), "a surface of another shape is refused")
     local checkout = path.join(folder, "checkout")
     os.mkdir(path.join(checkout, "packages", "a", "apple-backports", "registry", "UIKit"))
-    os.mkdir(path.join(checkout, "packages", "s", "styx", "registry"))
+    os.mkdir(path.join(checkout, "packages", "c", "combine", "registry"))
     io.writefile(path.join(checkout, "packages", "a", "apple-backports", "registry", "UIKit", "view.json"),
                  '{"entries": [{"api": "UIView.hidden", "status": "absent", "reason": "r"}, {"api": "", "status": "absent"}]}')
-    io.writefile(path.join(checkout, "packages", "s", "styx", "registry", "Swift.json"), '[{"api": "Foo.bar", "status": "implemented"}]')
-    io.writefile(path.join(checkout, "packages", "s", "styx", "registry", "broken.json"), '{')
+    io.writefile(path.join(checkout, "packages", "c", "combine", "registry", "Swift.json"), '[{"api": "Foo.bar", "status": "implemented"}]')
+    io.writefile(path.join(checkout, "packages", "c", "combine", "registry", "broken.json"), '{')
     local read = inputs.read_package_registries(checkout)
     check(read["UIView.hidden"] and read["UIView.hidden"][1] == "absent" and read["UIView.hidden"][3] == "packages/a/apple-backports",
           "a registry nested under a package is read with its package")
-    check(read["Foo.bar"] and read["Foo.bar"][3] == "packages/s/styx" and read["Foo.bar"][2] == "", "a registry that is a bare list is read too")
+    check(read["Foo.bar"] and read["Foo.bar"][3] == "packages/c/combine" and read["Foo.bar"][2] == "", "a registry that is a bare list is read too")
     check(read[""] == nil, "an entry with no api is skipped")
     check(inputs.short((os.getenv("HOME") or "") .. "/x") == "$HOME/x", "a path under the home folder is written with $HOME")
     local text = "@interface A : NSObject\n@interface B\n  : UIView\n@interface C (Cat)\n @interface D : E\n"

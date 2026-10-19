@@ -11,7 +11,7 @@
 #include <cmath>
 #include <limits>
 
-namespace shade {
+namespace emulator {
 namespace {
 
     constexpr std::uint32_t render_type_mask = 0x001f0000U;

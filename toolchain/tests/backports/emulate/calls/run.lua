@@ -5,11 +5,11 @@ local HERE = os.scriptdir()
 
 function run(opt)
     opt = opt or {}
-    local root = steps.charon()
+    local root = steps.revenant()
     local workspace = steps.workspace()
     local minimum = opt.minimum or "6.1.3"
     local package = opt.package ~= false
-    local work = opt.work or steps.env("WORK") or workspace.run("charon-calls")
+    local work = opt.work or steps.env("WORK") or workspace.run("revenant-calls")
     local generated = path.join(work, "generated")
     os.mkdir(generated)
     os.mkdir(path.join(work, "runs"))
@@ -29,7 +29,7 @@ function run(opt)
     local digest = path.join(out, "calls.log")
     local runlog = path.join(out, "run.log")
     local status = steps.spawn({curdir = HERE, envs = envs, log = runlog,
-                                argv = {"emulate", "-r", minimum, "run", "/usr/libexec/charoncalls", "port", digest}})
+                                argv = {"emulate", "-r", minimum, "run", "/usr/libexec/revenantcalls", "port", digest}})
     if status ~= 0 then
         io.stderr:write("the port run has findings; ", digest, " is what it found\n")
     end

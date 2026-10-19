@@ -8,7 +8,7 @@
 # `differing=N of M` per case and the run fails if any N is not zero.
 #
 # The harness compiles the port's function with each of CoreGraphics' interpolation qualities first
-# (the header's CHARON_VISION_INTERPOLATION is the seam), which is how the one the framework uses was
+# (the header's REVENANT_VISION_INTERPOLATION is the seam), which is how the one the framework uses was
 # found: the numbers below are the measurement, and the default in the header is the answer.
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
@@ -18,7 +18,7 @@ vision=${VISION:-$root/packages/a/apple-backports/Vision}
 # The build directory: BUILD if the caller set it, a fresh temporary one otherwise, and made
 # either way, so a caller who points BUILD at a path that is not there yet gets one made rather
 # than a build that fails inside the compiler.
-build=${BUILD:-$(runs_fresh charon-vision)}
+build=${BUILD:-$(runs_fresh revenant-vision)}
 mkdir -p "$build"
 sdk=$(xcrun --show-sdk-path)
 common="-target arm64-apple-ios15.0-macabi -isysroot $sdk -iframework $sdk/System/iOSSupport/System/Library/Frameworks -fobjc-arc -w -Wno-unguarded-availability"
@@ -33,16 +33,16 @@ for path in glob.glob(os.path.join(sys.argv[1], "..", "registry", "Vision", "*.j
             names.add(entry["api"].replace("()", ""))
 with open(sys.argv[2], "w") as out:
     for name in sorted(names):
-        out.write("#define %s Charon%s\n" % (name, name))
+        out.write("#define %s Revenant%s\n" % (name, name))
 PY
 
 xcrun clang $common -I"$here" "$here/crop.m" $libs -o "$build/system" 2>/dev/null ||
     xcrun clang $common -I"$here" "$here/crop.m" $libs -o "$build/system"
 build_port() {
     quality=$1
-    xcrun clang $common -DCHARON_PORT_BUILD=1 \
+    xcrun clang $common -DREVENANT_PORT_BUILD=1 \
         -include "$build/rename.h" -I"$here" -I"$vision" \
-        "$here/crop.m" "$vision/CharonVisionBilinear.c" $libs -o "$build/port-$quality"
+        "$here/crop.m" "$vision/RevenantVisionBilinear.c" $libs -o "$build/port-$quality"
 }
 
 echo "=== the oracle against itself (the program's own two answers are both Core ML's here):"
@@ -81,18 +81,18 @@ import sys
 path = sys.argv[1]
 text = open(path).read()
 before = hashlib.sha256(text.encode()).hexdigest()
-text = text.replace("charon_vision_clamp(((double)y + 0.5) * down",
-                    "charon_vision_clamp(((double)(insetY + y) + 0.5) * down", 1)
-text = text.replace("charon_vision_clamp(((double)x + 0.5) * across",
-                    "charon_vision_clamp(((double)(insetX + x) + 0.5) * across", 1)
+text = text.replace("revenant_vision_clamp(((double)y + 0.5) * down",
+                    "revenant_vision_clamp(((double)(insetY + y) + 0.5) * down", 1)
+text = text.replace("revenant_vision_clamp(((double)x + 0.5) * across",
+                    "revenant_vision_clamp(((double)(insetX + x) + 0.5) * across", 1)
 after = hashlib.sha256(text.encode()).hexdigest()
 if before == after:
     raise SystemExit("the mutant changed nothing: its anchors do not match the library's own text")
 print("the mutant changed the file: %s -> %s" % (before[:12], after[:12]))
 open(path, "w").write(text)
 PY2
-xcrun clang $common -DCHARON_PORT_BUILD=1 -include "$build/rename.h" -I"$here" -I"$build/mutant" \
-    "$here/crop.m" "$build/mutant/CharonVisionBilinear.c" $libs -o "$build/mutant/run"
+xcrun clang $common -DREVENANT_PORT_BUILD=1 -include "$build/rename.h" -I"$here" -I"$build/mutant" \
+    "$here/crop.m" "$build/mutant/RevenantVisionBilinear.c" $libs -o "$build/mutant/run"
 if "$build/mutant/run" > "$build/mutant/record.txt" 2>&1; then
     echo "MUTANT SURVIVED: the inset in the sample position makes no difference, so the check holds nothing"
     mutants=1

@@ -1,17 +1,17 @@
 #import <PassKit/PassKit.h>
 #import <UIKit/UIKit.h>
 
-@interface PKPass (CharonReleaseJSON)
+@interface PKPass (RevenantReleaseJSON)
 - (NSDictionary *)dictionaryRepresentation;
 @end
 
-@interface PKPass (CharonPassMembers)
+@interface PKPass (RevenantPassMembers)
 @property (nonatomic, readonly, copy) NSDictionary *userInfo;
 @property (nonatomic, readonly) PKPassType passType;
 @property (nonatomic, readonly) NSArray<NSDate *> *relevantDates;
 @end
 
-@implementation PKPass (CharonPassMembers)
+@implementation PKPass (RevenantPassMembers)
 
 - (NSDictionary *)userInfo
 {

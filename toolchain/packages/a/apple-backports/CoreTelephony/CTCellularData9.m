@@ -4,10 +4,10 @@
 
 typedef void *CTServerConnectionRef;
 typedef void (*CTServerConnectionCallback)(CTServerConnectionRef connection, CFStringRef notificationType, CFDictionaryRef notificationInfo, void *context);
-typedef CTServerConnectionRef (*CharonCTServerConnectionCreate)(CFAllocatorRef allocator, CTServerConnectionCallback callback, void *context);
-typedef CTError (*CharonCTServerConnectionGetCellularDataIsDisallowed)(CTServerConnectionRef connection, Boolean *disallowed);
+typedef CTServerConnectionRef (*RevenantCTServerConnectionCreate)(CFAllocatorRef allocator, CTServerConnectionCallback callback, void *context);
+typedef CTError (*RevenantCTServerConnectionGetCellularDataIsDisallowed)(CTServerConnectionRef connection, Boolean *disallowed);
 
-static void *CharonCTHandle(void)
+static void *RevenantCTHandle(void)
 {
     static void *handle;
     static dispatch_once_t once;
@@ -17,29 +17,29 @@ static void *CharonCTHandle(void)
     return handle;
 }
 
-static void CharonCTServerConnectionNotified(CTServerConnectionRef connection, CFStringRef notificationType, CFDictionaryRef notificationInfo, void *context)
+static void RevenantCTServerConnectionNotified(CTServerConnectionRef connection, CFStringRef notificationType, CFDictionaryRef notificationInfo, void *context)
 {
 }
 
-static CTServerConnectionRef CharonCTConnection(void)
+static CTServerConnectionRef RevenantCTConnection(void)
 {
     static CTServerConnectionRef connection;
     static dispatch_once_t once;
     dispatch_once(&once, ^{
-        CharonCTServerConnectionCreate create = (CharonCTServerConnectionCreate)dlsym(CharonCTHandle(), "_CTServerConnectionCreate");
+        RevenantCTServerConnectionCreate create = (RevenantCTServerConnectionCreate)dlsym(RevenantCTHandle(), "_CTServerConnectionCreate");
         if (create)
-            connection = create(NULL, CharonCTServerConnectionNotified, NULL);
+            connection = create(NULL, RevenantCTServerConnectionNotified, NULL);
     });
     return connection;
 }
 
-static BOOL CharonCTCellularDataIsDisallowed(BOOL *known)
+static BOOL RevenantCTCellularDataIsDisallowed(BOOL *known)
 {
     *known = NO;
-    CTServerConnectionRef connection = CharonCTConnection();
+    CTServerConnectionRef connection = RevenantCTConnection();
     if (!connection)
         return NO;
-    CharonCTServerConnectionGetCellularDataIsDisallowed get = (CharonCTServerConnectionGetCellularDataIsDisallowed)dlsym(CharonCTHandle(), "_CTServerConnectionGetCellularDataIsDisallowed");
+    RevenantCTServerConnectionGetCellularDataIsDisallowed get = (RevenantCTServerConnectionGetCellularDataIsDisallowed)dlsym(RevenantCTHandle(), "_CTServerConnectionGetCellularDataIsDisallowed");
     if (!get)
         return NO;
     Boolean disallowed = false;
@@ -50,10 +50,10 @@ static BOOL CharonCTCellularDataIsDisallowed(BOOL *known)
     return disallowed;
 }
 
-static void CharonCTCellularDataChanged(CFNotificationCenterRef center, void *observer, CFStringRef name, const void *object, CFDictionaryRef userInfo);
+static void RevenantCTCellularDataChanged(CFNotificationCenterRef center, void *observer, CFStringRef name, const void *object, CFDictionaryRef userInfo);
 
-@interface CTCellularData (CharonPrivate)
-- (void)charon_checkForChange;
+@interface CTCellularData (RevenantPrivate)
+- (void)revenant_checkForChange;
 @end
 
 @implementation CTCellularData
@@ -66,13 +66,13 @@ static void CharonCTCellularDataChanged(CFNotificationCenterRef center, void *ob
 - (CTCellularDataRestrictedState)restrictedState
 {
     BOOL known = NO;
-    BOOL disallowed = CharonCTCellularDataIsDisallowed(&known);
+    BOOL disallowed = RevenantCTCellularDataIsDisallowed(&known);
     if (!known)
         return kCTCellularDataRestrictedStateUnknown;
     return disallowed ? kCTCellularDataRestricted : kCTCellularDataNotRestricted;
 }
 
-- (void)charon_checkForChange
+- (void)revenant_checkForChange
 {
     CTCellularDataRestrictedState state = self.restrictedState;
     if (state == _lastState)
@@ -96,7 +96,7 @@ static void CharonCTCellularDataChanged(CFNotificationCenterRef center, void *ob
     if (notifier && !_observing) {
         _observing = YES;
         _lastState = self.restrictedState;
-        CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(), (__bridge const void *)self, CharonCTCellularDataChanged,
+        CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(), (__bridge const void *)self, RevenantCTCellularDataChanged,
                                          CFSTR("com.apple.coretelephony"), NULL, CFNotificationSuspensionBehaviorDeliverImmediately);
         CTCellularDataRestrictedState initial = _lastState;
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
@@ -116,8 +116,8 @@ static void CharonCTCellularDataChanged(CFNotificationCenterRef center, void *ob
 
 @end
 
-static void CharonCTCellularDataChanged(CFNotificationCenterRef center, void *observer, CFStringRef name, const void *object, CFDictionaryRef userInfo)
+static void RevenantCTCellularDataChanged(CFNotificationCenterRef center, void *observer, CFStringRef name, const void *object, CFDictionaryRef userInfo)
 {
     CTCellularData *data = (__bridge CTCellularData *)observer;
-    [data charon_checkForChange];
+    [data revenant_checkForChange];
 }

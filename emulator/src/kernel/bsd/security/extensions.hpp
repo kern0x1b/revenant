@@ -10,7 +10,7 @@
 #include <map>
 #include <string>
 
-namespace shade::bsd::sandbox {
+namespace emulator::bsd::sandbox {
 
 class Extensions {
 public:

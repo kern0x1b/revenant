@@ -18,7 +18,7 @@ static void spin(NSTimeInterval seconds)
     [[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:seconds]];
 }
 
-@interface CharonCallDelegate : NSObject <CXProviderDelegate, CXCallObserverDelegate>
+@interface RevenantCallDelegate : NSObject <CXProviderDelegate, CXCallObserverDelegate>
 @property (nonatomic) NSMutableArray<NSString *> *log;
 @property (nonatomic) BOOL takesTransactions;
 @property (nonatomic) BOOL failsEverything;
@@ -27,7 +27,7 @@ static void spin(NSTimeInterval seconds)
 @property (nonatomic) AVAudioSession *deactivated;
 @end
 
-@implementation CharonCallDelegate
+@implementation RevenantCallDelegate
 
 - (instancetype)init
 {
@@ -115,9 +115,9 @@ static void compare(void)
     callkit_run(^(NSString *name, NSString *value) { records[name] = value; });
     for (NSString *name in [expected.allKeys sortedArrayUsingSelector:@selector(compare:)]) {
         if ([expected[name] isEqualToString:records[name]])
-            charon_check(YES, name.UTF8String, nil);
+            revenant_check(YES, name.UTF8String, nil);
         else
-            charon_check(NO, name.UTF8String, [NSString stringWithFormat:@"\n    device %@\n    host   %@", records[name], expected[name]]);
+            revenant_check(NO, name.UTF8String, [NSString stringWithFormat:@"\n    device %@\n    host   %@", records[name], expected[name]]);
     }
     CHECK(records.count == expected.count, "the device answers every record the host did and no other");
 }
@@ -138,9 +138,9 @@ static void from_the_backports(void)
           "the iOS 14.5 push report is there, from the backports");
 }
 
-static CXProvider *provider_with(CharonCallDelegate *delegate)
+static CXProvider *provider_with(RevenantCallDelegate *delegate)
 {
-    CXProviderConfiguration *configuration = [[CXProviderConfiguration alloc] initWithLocalizedName:@"Charon"];
+    CXProviderConfiguration *configuration = [[CXProviderConfiguration alloc] initWithLocalizedName:@"Revenant"];
     CXProvider *provider = [[CXProvider alloc] initWithConfiguration:configuration];
     [provider setDelegate:delegate queue:dispatch_get_main_queue()];
     spin(0.1);
@@ -149,7 +149,7 @@ static CXProvider *provider_with(CharonCallDelegate *delegate)
 
 static void an_incoming_call(void)
 {
-    CharonCallDelegate *delegate = [[CharonCallDelegate alloc] init];
+    RevenantCallDelegate *delegate = [[RevenantCallDelegate alloc] init];
     CXProvider *provider = provider_with(delegate);
     CHECK([delegate.log containsObject:@"begin"], "a delegate is told the provider began");
 
@@ -203,7 +203,7 @@ static void an_incoming_call(void)
 
 static void an_outgoing_call(void)
 {
-    CharonCallDelegate *delegate = [[CharonCallDelegate alloc] init];
+    RevenantCallDelegate *delegate = [[RevenantCallDelegate alloc] init];
     CXProvider *provider = provider_with(delegate);
     CXCallController *controller = [[CXCallController alloc] init];
     NSUUID *call = [NSUUID UUID];
@@ -240,7 +240,7 @@ static void an_outgoing_call(void)
 
 static void refusals(void)
 {
-    CharonCallDelegate *delegate = [[CharonCallDelegate alloc] init];
+    RevenantCallDelegate *delegate = [[RevenantCallDelegate alloc] init];
     CXProvider *provider = provider_with(delegate);
     CXCallController *controller = [[CXCallController alloc] init];
 
@@ -278,7 +278,7 @@ static void refusals(void)
 
 static void a_whole_transaction(void)
 {
-    CharonCallDelegate *delegate = [[CharonCallDelegate alloc] init];
+    RevenantCallDelegate *delegate = [[RevenantCallDelegate alloc] init];
     delegate.takesTransactions = YES;
     CXProvider *provider = provider_with(delegate);
     CXCallController *controller = [[CXCallController alloc] init];
@@ -305,7 +305,7 @@ static void a_whole_transaction(void)
 
 static void a_failed_action(void)
 {
-    CharonCallDelegate *delegate = [[CharonCallDelegate alloc] init];
+    RevenantCallDelegate *delegate = [[RevenantCallDelegate alloc] init];
     delegate.failsEverything = YES;
     CXProvider *provider = provider_with(delegate);
     CXCallController *controller = [[CXCallController alloc] init];
@@ -323,7 +323,7 @@ static void a_failed_action(void)
 
 static void an_unanswered_method(void)
 {
-    CharonCallDelegate *delegate = [[CharonCallDelegate alloc] init];
+    RevenantCallDelegate *delegate = [[RevenantCallDelegate alloc] init];
     CXProvider *provider = provider_with(delegate);
     CXCallController *controller = [[CXCallController alloc] init];
     NSUUID *call = [NSUUID UUID];
@@ -343,7 +343,7 @@ static void an_unanswered_method(void)
 
 static void a_timeout(void)
 {
-    CharonCallDelegate *delegate = [[CharonCallDelegate alloc] init];
+    RevenantCallDelegate *delegate = [[RevenantCallDelegate alloc] init];
     delegate.leavesActionsAlone = YES;
     CXProvider *provider = provider_with(delegate);
     CXCallController *controller = [[CXCallController alloc] init];
@@ -369,7 +369,7 @@ static void a_timeout(void)
 
 static void the_audio_session(void)
 {
-    CharonCallDelegate *delegate = [[CharonCallDelegate alloc] init];
+    RevenantCallDelegate *delegate = [[RevenantCallDelegate alloc] init];
     CXProvider *provider = provider_with(delegate);
     CXCallController *controller = [[CXCallController alloc] init];
     AVAudioSession *session = [AVAudioSession sharedInstance];
@@ -408,7 +408,7 @@ static void the_release_own_calls(void)
     NSUInteger cellular = centre.currentCalls.count;
     CHECK(observer.calls.count == cellular, "the observer reports exactly the calls CoreTelephony holds");
     if (cellular == 0)
-        charon_check(YES, "no call is in progress, so the cellular path is only held to being live", nil);
+        revenant_check(YES, "no call is in progress, so the cellular path is only held to being live", nil);
 }
 
 int main(int argc, char **argv)
@@ -425,7 +425,7 @@ int main(int argc, char **argv)
         a_timeout();
         the_audio_session();
         the_release_own_calls();
-        printf("checks=%d failures=%d\n", charon_checks, charon_failures);
+        printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
     }
-    return charon_failures ? 1 : 0;
+    return revenant_failures ? 1 : 0;
 }

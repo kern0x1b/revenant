@@ -1,6 +1,6 @@
 #import <ARKit/ARKit.h>
 
-#import "CharonARKitPrivate.h"
+#import "RevenantARKitPrivate.h"
 
 #pragma clang diagnostic ignored "-Wunguarded-availability-new"
 
@@ -10,7 +10,7 @@
 
 - (instancetype)init
 {
-    self = [super initCharonCommon];
+    self = [super initRevenantCommon];
     return self;
 }
 

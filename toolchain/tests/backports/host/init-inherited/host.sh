@@ -1,7 +1,7 @@
 #!/bin/sh
 # host.sh - what -init and +new answer on the HealthKit classes the port defines, against the host's own.
 #
-# The port's classes are compiled with CHARON_HOST_BUILD and their names renamed (CharonHost<Name>), so the
+# The port's classes are compiled with REVENANT_HOST_BUILD and their names renamed (RevenantHost<Name>), so the
 # system's HealthKit and the port's run in one process and each is asked the same question. probe.m holds
 # the questions. The sources are the arithmetic set of tests/backports/host/healthkit/run.sh, without its
 # constants files: the probe reads no constant, and a constant the sources name still resolves to the host's.
@@ -10,12 +10,12 @@ set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 healthkit=${HEALTHKIT:-$here/../../../../packages/a/apple-backports/HealthKit}
-BUILD=${BUILD:-$(runs_fresh charon-init-inherited)}
-quiet="-w -DCHARON_HOST_BUILD"
+BUILD=${BUILD:-$(runs_fresh revenant-init-inherited)}
+quiet="-w -DREVENANT_HOST_BUILD"
 rm -rf "$BUILD"
 mkdir -p "$BUILD/plain" "$BUILD/renamed"
 
-sources="HKUnit.m HKQuantity.m HKQuantityType.m HKQuantityTypes.m HKObjectType.m HKObject.m HKSource.m HKSample.m HKWorkout.m HKStatistics.m HKQuery.m HKQueries.m HKQueryAnchor9.m HKSourceRevision9.m HKSamples.m HKWorkoutRoute110.m HKWorkoutRouteQuery110.m HKCDADocument11.m HKClinicalRecord120.m HKWorkoutBuilder120.m HKQuantitySeriesSampleBuilder120.m HKQuantitySeriesSampleQuery120.m HKCumulativeQuantitySample130.m HKCumulativeQuantitySeriesSample120.m HKDocument10.m HKObject9.m HKSource9.m HKHealthStore.m CharonHKStore.m"
+sources="HKUnit.m HKQuantity.m HKQuantityType.m HKQuantityTypes.m HKObjectType.m HKObject.m HKSource.m HKSample.m HKWorkout.m HKStatistics.m HKQuery.m HKQueries.m HKQueryAnchor9.m HKSourceRevision9.m HKSamples.m HKWorkoutRoute110.m HKWorkoutRouteQuery110.m HKCDADocument11.m HKClinicalRecord120.m HKWorkoutBuilder120.m HKQuantitySeriesSampleBuilder120.m HKQuantitySeriesSampleQuery120.m HKCumulativeQuantitySample130.m HKCumulativeQuantitySeriesSample120.m HKDocument10.m HKObject9.m HKSource9.m HKHealthStore.m RevenantHKStore.m"
 
 # The first pass names every class the port's own files carry, so the second pass can rename them all.
 for source in $sources; do
@@ -24,7 +24,7 @@ done
 renames=""
 for name in $(xcrun nm -gU "$BUILD"/plain/*.o | awk 'NF == 3 {print $3}' | grep -E '^_OBJC_CLASS_\$_' \
               | sed -e 's/^_OBJC_CLASS_\$_//' | sort -u); do
-    renames="$renames -D$name=CharonHost$name"
+    renames="$renames -D$name=RevenantHost$name"
 done
 for source in $sources; do
     xcrun clang -fobjc-arc $quiet $renames -I"$healthkit" -c "$healthkit/$source" -o "$BUILD/renamed/$source.o"

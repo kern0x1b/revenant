@@ -1,37 +1,37 @@
 #!/bin/sh
 # The iOS 7 to 15 AudioToolbox functions this round carries: functions.m checks each port definition against the host's own
-# function, called through dlsym, for the same inputs. The port sources are compiled to objects under CharonTest names
-# (-D<Name>=CharonTest<Name>), so the host's symbol and the port's can sit in one process; functions.m is compiled without the
+# function, called through dlsym, for the same inputs. The port sources are compiled to objects under RevenantTest names
+# (-D<Name>=RevenantTest<Name>), so the host's symbol and the port's can sit in one process; functions.m is compiled without the
 # renames, because the macOS header marks some of these names unavailable.
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-build=${AUDIOTOOLBOX_FUNCTIONS_BUILD:-$(runs_folder charon-audiotoolbox-functions)}
+build=${AUDIOTOOLBOX_FUNCTIONS_BUILD:-$(runs_folder revenant-audiotoolbox-functions)}
 avfaudio="$here/../../../../packages/a/apple-backports/AVFAudio"
 rm -rf "$build"
 mkdir -p "$build"
 
-renames="-DAudioComponentGetLastActiveTime=CharonTestAudioComponentGetLastActiveTime \
--DAudioComponentInstantiate=CharonTestAudioComponentInstantiate \
--DAudioServicesPlaySystemSoundWithCompletion=CharonTestAudioServicesPlaySystemSoundWithCompletion \
--DAudioServicesPlayAlertSoundWithCompletion=CharonTestAudioServicesPlayAlertSoundWithCompletion \
--DAudioUnitExtensionCopyComponentList=CharonTestAudioUnitExtensionCopyComponentList \
--DAudioUnitExtensionSetComponentList=CharonTestAudioUnitExtensionSetComponentList \
--DMusicDeviceMIDIEventList=CharonTestMusicDeviceMIDIEventList \
--DAudioFileGetUserDataSize64=CharonTestAudioFileGetUserDataSize64 \
--DAudioFileGetUserDataAtOffset=CharonTestAudioFileGetUserDataAtOffset \
--DAudioQueueNewOutputWithDispatchQueue=CharonTestAudioQueueNewOutputWithDispatchQueue \
--DAudioQueueNewInputWithDispatchQueue=CharonTestAudioQueueNewInputWithDispatchQueue \
--DAudioComponentValidate=CharonTestAudioComponentValidate \
--DAudioComponentValidateWithResults=CharonTestAudioComponentValidateWithResults \
--DAudioConverterNewWithOptions=CharonTestAudioConverterNewWithOptions \
--DAudioConverterPrepare=CharonTestAudioConverterPrepare \
--DAudioConverterFillComplexBufferRealtimeSafe=CharonTestAudioConverterFillComplexBufferRealtimeSafe \
--DAudioConverterFillComplexBufferWithPacketDependencies=CharonTestAudioConverterFillComplexBufferWithPacketDependencies \
--DAudioFileWritePacketsWithDependencies=CharonTestAudioFileWritePacketsWithDependencies \
--DAudioOutputUnitPublish=CharonTestAudioOutputUnitPublish \
--DCopyNameFromSoundBank=CharonTestCopyNameFromSoundBank \
--DCopyInstrumentInfoFromSoundBank=CharonTestCopyInstrumentInfoFromSoundBank"
+renames="-DAudioComponentGetLastActiveTime=RevenantTestAudioComponentGetLastActiveTime \
+-DAudioComponentInstantiate=RevenantTestAudioComponentInstantiate \
+-DAudioServicesPlaySystemSoundWithCompletion=RevenantTestAudioServicesPlaySystemSoundWithCompletion \
+-DAudioServicesPlayAlertSoundWithCompletion=RevenantTestAudioServicesPlayAlertSoundWithCompletion \
+-DAudioUnitExtensionCopyComponentList=RevenantTestAudioUnitExtensionCopyComponentList \
+-DAudioUnitExtensionSetComponentList=RevenantTestAudioUnitExtensionSetComponentList \
+-DMusicDeviceMIDIEventList=RevenantTestMusicDeviceMIDIEventList \
+-DAudioFileGetUserDataSize64=RevenantTestAudioFileGetUserDataSize64 \
+-DAudioFileGetUserDataAtOffset=RevenantTestAudioFileGetUserDataAtOffset \
+-DAudioQueueNewOutputWithDispatchQueue=RevenantTestAudioQueueNewOutputWithDispatchQueue \
+-DAudioQueueNewInputWithDispatchQueue=RevenantTestAudioQueueNewInputWithDispatchQueue \
+-DAudioComponentValidate=RevenantTestAudioComponentValidate \
+-DAudioComponentValidateWithResults=RevenantTestAudioComponentValidateWithResults \
+-DAudioConverterNewWithOptions=RevenantTestAudioConverterNewWithOptions \
+-DAudioConverterPrepare=RevenantTestAudioConverterPrepare \
+-DAudioConverterFillComplexBufferRealtimeSafe=RevenantTestAudioConverterFillComplexBufferRealtimeSafe \
+-DAudioConverterFillComplexBufferWithPacketDependencies=RevenantTestAudioConverterFillComplexBufferWithPacketDependencies \
+-DAudioFileWritePacketsWithDependencies=RevenantTestAudioFileWritePacketsWithDependencies \
+-DAudioOutputUnitPublish=RevenantTestAudioOutputUnitPublish \
+-DCopyNameFromSoundBank=RevenantTestCopyNameFromSoundBank \
+-DCopyInstrumentInfoFromSoundBank=RevenantTestCopyInstrumentInfoFromSoundBank"
 
 objects=""
 for file in AudioToolboxFunctions7 AudioToolboxFunctions14 AudioToolboxFunctions9 AudioToolboxFunctions11 AudioToolboxFunctions10 AudioToolboxFunctions15 AudioToolboxFunctions16 AudioToolboxFunctions17 AudioToolboxFunctions18 AudioToolboxFunctions26; do

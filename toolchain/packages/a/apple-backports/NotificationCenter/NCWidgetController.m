@@ -1,8 +1,8 @@
 #import <UIKit/UIKit.h>
 #import <NotificationCenter/NotificationCenter.h>
-#import "../CharonSayOnce.h"
+#import "../RevenantSayOnce.h"
 
-static NSString *const CharonWidgetContentKeyPrefix = @"org.charon.apple-backports.NCWidgetHasContent.";
+static NSString *const RevenantWidgetContentKeyPrefix = @"org.revenant.apple-backports.NCWidgetHasContent.";
 
 @implementation NCWidgetController
 
@@ -19,8 +19,8 @@ static NSString *const CharonWidgetContentKeyPrefix = @"org.charon.apple-backpor
 - (instancetype)init
 {
     if ((self = [super init]))
-        charon_say_once_for(@"NCWidgetController.setHasContent:forWidgetWithBundleIdentifier:",
-                            @"CharonNotificationCenter: widget content flags are recorded per bundle identifier and read "
+        revenant_say_once_for(@"NCWidgetController.setHasContent:forWidgetWithBundleIdentifier:",
+                            @"RevenantNotificationCenter: widget content flags are recorded per bundle identifier and read "
                             @"back, but this release has no Notification Center and no widget host, so nothing asks a "
                             @"widget to refresh because of them.");
     return self;
@@ -30,7 +30,7 @@ static NSString *const CharonWidgetContentKeyPrefix = @"org.charon.apple-backpor
 {
     if (!bundleID.length)
         return;
-    [[NSUserDefaults standardUserDefaults] setBool:flag forKey:[CharonWidgetContentKeyPrefix stringByAppendingString:bundleID]];
+    [[NSUserDefaults standardUserDefaults] setBool:flag forKey:[RevenantWidgetContentKeyPrefix stringByAppendingString:bundleID]];
     [[NSUserDefaults standardUserDefaults] synchronize];
 }
 

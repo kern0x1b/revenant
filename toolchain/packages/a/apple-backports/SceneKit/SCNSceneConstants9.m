@@ -1,3 +1,3 @@
-#import "CharonSCN.h"
+#import "RevenantSCN.h"
 
 NSString *const SCNErrorDomain = @"SCNErrorDomain";

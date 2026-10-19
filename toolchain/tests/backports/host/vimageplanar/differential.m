@@ -4,31 +4,31 @@
 #include <stdio.h>
 #include <string.h>
 
-vImage_Error charon_host_vImageConvert_ARGB16UtoPlanar16U(const vImage_Buffer *, const vImage_Buffer *,
+vImage_Error revenant_host_vImageConvert_ARGB16UtoPlanar16U(const vImage_Buffer *, const vImage_Buffer *,
                                                            const vImage_Buffer *, const vImage_Buffer *,
                                                            const vImage_Buffer *, vImage_Flags);
-vImage_Error charon_host_vImageConvert_RGB16UtoPlanar16U(const vImage_Buffer *, const vImage_Buffer *,
+vImage_Error revenant_host_vImageConvert_RGB16UtoPlanar16U(const vImage_Buffer *, const vImage_Buffer *,
                                                           const vImage_Buffer *, const vImage_Buffer *, vImage_Flags);
-vImage_Error charon_host_vImageConvert_Planar16UtoARGB16U(const vImage_Buffer *, const vImage_Buffer *,
+vImage_Error revenant_host_vImageConvert_Planar16UtoARGB16U(const vImage_Buffer *, const vImage_Buffer *,
                                                             const vImage_Buffer *, const vImage_Buffer *,
                                                             const vImage_Buffer *, vImage_Flags);
-vImage_Error charon_host_vImageConvert_Planar16UtoRGB16U(const vImage_Buffer *, const vImage_Buffer *,
+vImage_Error revenant_host_vImageConvert_Planar16UtoRGB16U(const vImage_Buffer *, const vImage_Buffer *,
                                                            const vImage_Buffer *, const vImage_Buffer *, vImage_Flags);
-vImage_Error charon_host_vImageConvert_ARGB8888toPlanar16Q12(const vImage_Buffer *, const vImage_Buffer *,
+vImage_Error revenant_host_vImageConvert_ARGB8888toPlanar16Q12(const vImage_Buffer *, const vImage_Buffer *,
                                                              const vImage_Buffer *, const vImage_Buffer *,
                                                              const vImage_Buffer *, vImage_Flags);
-vImage_Error charon_host_vImageConvert_RGB888toPlanar16Q12(const vImage_Buffer *, const vImage_Buffer *,
+vImage_Error revenant_host_vImageConvert_RGB888toPlanar16Q12(const vImage_Buffer *, const vImage_Buffer *,
                                                             const vImage_Buffer *, const vImage_Buffer *, vImage_Flags);
-vImage_Error charon_host_vImageConvert_Planar16Q12toARGB8888(const vImage_Buffer *, const vImage_Buffer *,
+vImage_Error revenant_host_vImageConvert_Planar16Q12toARGB8888(const vImage_Buffer *, const vImage_Buffer *,
                                                               const vImage_Buffer *, const vImage_Buffer *,
                                                               const vImage_Buffer *, vImage_Flags);
-vImage_Error charon_host_vImageConvert_Planar16Q12toRGB888(const vImage_Buffer *, const vImage_Buffer *,
+vImage_Error revenant_host_vImageConvert_Planar16Q12toRGB888(const vImage_Buffer *, const vImage_Buffer *,
                                                             const vImage_Buffer *, const vImage_Buffer *, vImage_Flags);
 
 #define W 8
-typedef vImage_Error (*CharonFive)(const vImage_Buffer *, const vImage_Buffer *, const vImage_Buffer *,
+typedef vImage_Error (*RevenantFive)(const vImage_Buffer *, const vImage_Buffer *, const vImage_Buffer *,
                                            const vImage_Buffer *, const vImage_Buffer *, vImage_Flags);
-typedef vImage_Error (*CharonFour)(const vImage_Buffer *, const vImage_Buffer *, const vImage_Buffer *,
+typedef vImage_Error (*RevenantFour)(const vImage_Buffer *, const vImage_Buffer *, const vImage_Buffer *,
                                            const vImage_Buffer *, vImage_Flags);
 
 static const uint8_t kFill8 = 0xA5;
@@ -53,9 +53,9 @@ static void report(int passed, const char *name, const char *why, ...)
     fflush(stdout);
 }
 
-typedef vImage_Error (*CharonFive)(const vImage_Buffer *, const vImage_Buffer *, const vImage_Buffer *,
+typedef vImage_Error (*RevenantFive)(const vImage_Buffer *, const vImage_Buffer *, const vImage_Buffer *,
                                    const vImage_Buffer *, const vImage_Buffer *, vImage_Flags);
-typedef vImage_Error (*CharonFour)(const vImage_Buffer *, const vImage_Buffer *, const vImage_Buffer *,
+typedef vImage_Error (*RevenantFour)(const vImage_Buffer *, const vImage_Buffer *, const vImage_Buffer *,
                                    const vImage_Buffer *, vImage_Flags);
 
 static vImage_Buffer row_of(void *data, vImagePixelCount width, vImagePixelCount height, size_t row_bytes)
@@ -97,11 +97,11 @@ static int spread(const char *name, const void *mine_fn, const void *theirs_fn, 
         theirs_dest[channel] = row_of(theirs_rows[channel], W, 1, W * 2);
     }
     if (channels == 3) {
-        ((CharonFour)mine_fn)(&src, &mine_dest[0], &mine_dest[1], &mine_dest[2], 0);
-        ((CharonFour)theirs_fn)(&src, &theirs_dest[0], &theirs_dest[1], &theirs_dest[2], 0);
+        ((RevenantFour)mine_fn)(&src, &mine_dest[0], &mine_dest[1], &mine_dest[2], 0);
+        ((RevenantFour)theirs_fn)(&src, &theirs_dest[0], &theirs_dest[1], &theirs_dest[2], 0);
     } else {
-        ((CharonFive)mine_fn)(&src, &mine_dest[0], &mine_dest[1], &mine_dest[2], &mine_dest[3], 0);
-        ((CharonFive)theirs_fn)(&src, &theirs_dest[0], &theirs_dest[1], &theirs_dest[2], &theirs_dest[3], 0);
+        ((RevenantFive)mine_fn)(&src, &mine_dest[0], &mine_dest[1], &mine_dest[2], &mine_dest[3], 0);
+        ((RevenantFive)theirs_fn)(&src, &theirs_dest[0], &theirs_dest[1], &theirs_dest[2], &theirs_dest[3], 0);
     }
     for (int channel = 0; channel < channels; channel++) {
         for (int at = 0; at < W * 2; at++) {
@@ -132,11 +132,11 @@ static int gather(const char *name, const void *mine_fn, const void *theirs_fn, 
     mine_dest = row_of(mine_bytes, W, 1, W * channels * out_bytes);
     theirs_dest = row_of(theirs_bytes, W, 1, W * channels * out_bytes);
     if (channels == 3) {
-        ((CharonFour)mine_fn)(&mine_src[0], &mine_src[1], &mine_src[2], &mine_dest, 0);
-        ((CharonFour)theirs_fn)(&theirs_src[0], &theirs_src[1], &theirs_src[2], &theirs_dest, 0);
+        ((RevenantFour)mine_fn)(&mine_src[0], &mine_src[1], &mine_src[2], &mine_dest, 0);
+        ((RevenantFour)theirs_fn)(&theirs_src[0], &theirs_src[1], &theirs_src[2], &theirs_dest, 0);
     } else {
-        ((CharonFive)mine_fn)(&mine_src[0], &mine_src[1], &mine_src[2], &mine_src[3], &mine_dest, 0);
-        ((CharonFive)theirs_fn)(&theirs_src[0], &theirs_src[1], &theirs_src[2], &theirs_src[3], &theirs_dest, 0);
+        ((RevenantFive)mine_fn)(&mine_src[0], &mine_src[1], &mine_src[2], &mine_src[3], &mine_dest, 0);
+        ((RevenantFive)theirs_fn)(&theirs_src[0], &theirs_src[1], &theirs_src[2], &theirs_src[3], &theirs_dest, 0);
     }
     int size = W * channels * out_bytes;
     for (int at = 0; at < size; at++) {
@@ -153,14 +153,14 @@ int main(void)
 {
     setbuf(stdout, NULL);
     @autoreleasepool {
-        report(spread("vImageConvert_ARGB16UtoPlanar16U", vImageConvert_ARGB16UtoPlanar16U, charon_host_vImageConvert_ARGB16UtoPlanar16U, 4, 2), "vImageConvert_ARGB16UtoPlanar16U", "the rows differ", 0);
-        report(spread("vImageConvert_RGB16UtoPlanar16U", vImageConvert_RGB16UtoPlanar16U, charon_host_vImageConvert_RGB16UtoPlanar16U, 3, 2), "vImageConvert_RGB16UtoPlanar16U", "the rows differ", 0);
-        report(spread("vImageConvert_ARGB8888toPlanar16Q12", vImageConvert_ARGB8888toPlanar16Q12, charon_host_vImageConvert_ARGB8888toPlanar16Q12, 4, 1), "vImageConvert_ARGB8888toPlanar16Q12", "the rows differ", 0);
-        report(spread("vImageConvert_RGB888toPlanar16Q12", vImageConvert_RGB888toPlanar16Q12, charon_host_vImageConvert_RGB888toPlanar16Q12, 3, 1), "vImageConvert_RGB888toPlanar16Q12", "the rows differ", 0);
-        report(gather("vImageConvert_Planar16UtoARGB16U", vImageConvert_Planar16UtoARGB16U, charon_host_vImageConvert_Planar16UtoARGB16U, 4, 2), "vImageConvert_Planar16UtoARGB16U", "the rows differ", 0);
-        report(gather("vImageConvert_Planar16UtoRGB16U", vImageConvert_Planar16UtoRGB16U, charon_host_vImageConvert_Planar16UtoRGB16U, 3, 2), "vImageConvert_Planar16UtoRGB16U", "the rows differ", 0);
-        report(gather("vImageConvert_Planar16Q12toARGB8888", vImageConvert_Planar16Q12toARGB8888, charon_host_vImageConvert_Planar16Q12toARGB8888, 4, 1), "vImageConvert_Planar16Q12toARGB8888", "the rows differ", 0);
-        report(gather("vImageConvert_Planar16Q12toRGB888", vImageConvert_Planar16Q12toRGB888, charon_host_vImageConvert_Planar16Q12toRGB888, 3, 1), "vImageConvert_Planar16Q12toRGB888", "the rows differ", 0);
+        report(spread("vImageConvert_ARGB16UtoPlanar16U", vImageConvert_ARGB16UtoPlanar16U, revenant_host_vImageConvert_ARGB16UtoPlanar16U, 4, 2), "vImageConvert_ARGB16UtoPlanar16U", "the rows differ", 0);
+        report(spread("vImageConvert_RGB16UtoPlanar16U", vImageConvert_RGB16UtoPlanar16U, revenant_host_vImageConvert_RGB16UtoPlanar16U, 3, 2), "vImageConvert_RGB16UtoPlanar16U", "the rows differ", 0);
+        report(spread("vImageConvert_ARGB8888toPlanar16Q12", vImageConvert_ARGB8888toPlanar16Q12, revenant_host_vImageConvert_ARGB8888toPlanar16Q12, 4, 1), "vImageConvert_ARGB8888toPlanar16Q12", "the rows differ", 0);
+        report(spread("vImageConvert_RGB888toPlanar16Q12", vImageConvert_RGB888toPlanar16Q12, revenant_host_vImageConvert_RGB888toPlanar16Q12, 3, 1), "vImageConvert_RGB888toPlanar16Q12", "the rows differ", 0);
+        report(gather("vImageConvert_Planar16UtoARGB16U", vImageConvert_Planar16UtoARGB16U, revenant_host_vImageConvert_Planar16UtoARGB16U, 4, 2), "vImageConvert_Planar16UtoARGB16U", "the rows differ", 0);
+        report(gather("vImageConvert_Planar16UtoRGB16U", vImageConvert_Planar16UtoRGB16U, revenant_host_vImageConvert_Planar16UtoRGB16U, 3, 2), "vImageConvert_Planar16UtoRGB16U", "the rows differ", 0);
+        report(gather("vImageConvert_Planar16Q12toARGB8888", vImageConvert_Planar16Q12toARGB8888, revenant_host_vImageConvert_Planar16Q12toARGB8888, 4, 1), "vImageConvert_Planar16Q12toARGB8888", "the rows differ", 0);
+        report(gather("vImageConvert_Planar16Q12toRGB888", vImageConvert_Planar16Q12toRGB888, revenant_host_vImageConvert_Planar16Q12toRGB888, 3, 1), "vImageConvert_Planar16Q12toRGB888", "the rows differ", 0);
         printf("%d checks, %d failures\n", checks, failures);
     }
     return failures == 0 ? 0 : 1;

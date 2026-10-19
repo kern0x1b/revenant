@@ -1,15 +1,15 @@
-#import "CharonMPS.h"
-#import "CharonMPSImage.h"
-#import "CharonMPSTemporaryImage.h"
+#import "RevenantMPS.h"
+#import "RevenantMPSImage.h"
+#import "RevenantMPSTemporaryImage.h"
 
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
 
-static const float kCharonMPSImageLaplacianWeights[9] = { 0.0f, 1.0f, 0.0f,
+static const float kRevenantMPSImageLaplacianWeights[9] = { 0.0f, 1.0f, 0.0f,
                                                            1.0f, -4.0f, 1.0f,
                                                            0.0f, 1.0f, 0.0f };
 
-@interface MPSUnaryImageKernel (CharonMPSConvolutionSeam)
-- (void)charon_mps_convolveRegionWithSource:(MPSImage *)source
+@interface MPSUnaryImageKernel (RevenantMPSConvolutionSeam)
+- (void)revenant_mps_convolveRegionWithSource:(MPSImage *)source
                                 destination:(MPSImage *)destination
                                  kernelWidth:(NSUInteger)kernelWidth
                                 kernelHeight:(NSUInteger)kernelHeight
@@ -36,11 +36,11 @@ static const float kCharonMPSImageLaplacianWeights[9] = { 0.0f, 1.0f, 0.0f,
                   sourceImage:(MPSImage *)sourceImage
                destinationImage:(MPSImage *)destinationImage
 {
-    [self charon_mps_convolveRegionWithSource:sourceImage
+    [self revenant_mps_convolveRegionWithSource:sourceImage
                                   destination:destinationImage
                                    kernelWidth:3
                                   kernelHeight:3
-                                      weights:kCharonMPSImageLaplacianWeights
+                                      weights:kRevenantMPSImageLaplacianWeights
                                           bias:(double)self.bias
                                           what:@"MPSImageLaplacian"];
 }
@@ -55,7 +55,7 @@ static const float kCharonMPSImageLaplacianWeights[9] = { 0.0f, 1.0f, 0.0f,
 {
     static id<MPSImageAllocator> shared = nil;
     if (!shared)
-        shared = CharonMPSTemporaryImageDefaultAllocator();
+        shared = RevenantMPSTemporaryImageDefaultAllocator();
     return shared;
 }
 
@@ -63,14 +63,14 @@ static const float kCharonMPSImageLaplacianWeights[9] = { 0.0f, 1.0f, 0.0f,
                                 imageDescriptor:(MPSImageDescriptor *)imageDescriptor
 {
     if (!commandBuffer) {
-        CharonMPSRefuse(@"MPSTemporaryImage: no command buffer, so no temporary image was made");
+        RevenantMPSRefuse(@"MPSTemporaryImage: no command buffer, so no temporary image was made");
         return nil;
     }
     id<MTLDevice> device = [commandBuffer respondsToSelector:@selector(device)] ? [commandBuffer device] : nil;
     if (!device)
         device = MTLCreateSystemDefaultDevice();
     if (!device || !imageDescriptor) {
-        CharonMPSRefuse(@"MPSTemporaryImage: a temporary image needs a command buffer with a device and a "
+        RevenantMPSRefuse(@"MPSTemporaryImage: a temporary image needs a command buffer with a device and a "
                         @"descriptor, and one of the two was missing");
         return nil;
     }
@@ -83,7 +83,7 @@ static const float kCharonMPSImageLaplacianWeights[9] = { 0.0f, 1.0f, 0.0f,
                               textureDescriptor:(MTLTextureDescriptor *)textureDescriptor
 {
     if (!commandBuffer || !textureDescriptor) {
-        CharonMPSRefuse(@"MPSTemporaryImage: a temporary image needs a command buffer and a texture "
+        RevenantMPSRefuse(@"MPSTemporaryImage: a temporary image needs a command buffer and a texture "
                         @"descriptor, and one of the two was missing");
         return nil;
     }
@@ -114,7 +114,7 @@ static const float kCharonMPSImageLaplacianWeights[9] = { 0.0f, 1.0f, 0.0f,
                                 featureChannels:(NSUInteger)featureChannels
 {
     if (!commandBuffer || !textureDescriptor) {
-        CharonMPSRefuse(@"MPSTemporaryImage: a temporary image needs a command buffer and a texture "
+        RevenantMPSRefuse(@"MPSTemporaryImage: a temporary image needs a command buffer and a texture "
                         @"descriptor, and one of the two was missing");
         return nil;
     }

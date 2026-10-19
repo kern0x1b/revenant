@@ -20,7 +20,7 @@
 #include "kernel/process_snapshot.hpp"
 #include "process.hpp"
 
-namespace shade::runtime_detail {
+namespace emulator::runtime_detail {
 namespace {
 
 bool matches(const ProcessSnapshot& process, std::string_view filter)

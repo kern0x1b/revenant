@@ -12,7 +12,7 @@
 #include <cstdint>
 #include <string_view>
 
-namespace shade::virtual_network {
+namespace emulator::virtual_network {
 
 using Ipv4Address = std::array<std::byte, 4>;
 using MacAddress = std::array<std::byte, 6>;
@@ -25,7 +25,7 @@ struct Ipv4Neighbor {
 inline constexpr MacAddress interface_mac_address { std::byte { 0x02 },
     std::byte { 0x1a }, std::byte { 0x54 }, std::byte { 0x3a },
     std::byte { 0x00 }, std::byte { 0x02 } };
-inline constexpr std::string_view access_point_ssid { "Shade" };
+inline constexpr std::string_view access_point_ssid { "Revenant" };
 inline constexpr std::uint16_t access_point_channel { 6 };
 
 inline constexpr Ipv4Address client_address { std::byte { 10 }, std::byte { 0 },

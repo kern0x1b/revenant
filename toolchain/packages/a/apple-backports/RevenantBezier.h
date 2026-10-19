@@ -1,6 +1,6 @@
 #include <math.h>
 
-static inline double charon_bezier_progress(double x1, double y1, double x2, double y2, double x)
+static inline double revenant_bezier_progress(double x1, double y1, double x2, double y2, double x)
 {
     if (x <= 0) return 0;
     if (x >= 1) return 1;

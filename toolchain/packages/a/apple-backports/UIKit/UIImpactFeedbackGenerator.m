@@ -1,4 +1,4 @@
-#import "CharonFeedbackGenerator.h"
+#import "RevenantFeedbackGenerator.h"
 
 @implementation UIImpactFeedbackGenerator {
 @private
@@ -21,14 +21,14 @@
 
 - (void)impactOccurred
 {
-    [self charon_impactScaledBy:1];
+    [self revenant_impactScaledBy:1];
 }
 
-- (void)charon_impactScaledBy:(float)scale
+- (void)revenant_impactScaledBy:(float)scale
 {
     if (_milliseconds == 0 || scale <= 0)
         return;
-    [self _charonPlayIntensity:_intensity * (scale > 1 ? 1 : scale) milliseconds:&_milliseconds count:1];
+    [self _revenantPlayIntensity:_intensity * (scale > 1 ? 1 : scale) milliseconds:&_milliseconds count:1];
 }
 
 @end

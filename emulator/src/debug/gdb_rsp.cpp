@@ -24,7 +24,7 @@
 #include <sys/socket.h>
 #include <unistd.h>
 
-namespace shade {
+namespace emulator {
 namespace {
 
     constexpr std::size_t maximum_gdb_memory_transfer = 1024U * 1024U;

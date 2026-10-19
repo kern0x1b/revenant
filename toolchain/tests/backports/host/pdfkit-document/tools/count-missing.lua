@@ -14,7 +14,7 @@ the package's surface does not describe, and nothing else in the tree would noti
 It is also the only honest way to size a family.  Counting inert rows measures what a previous series
 already looked at; counting declarations measures what is left, and the two are different numbers.
 
-The port's own members are excluded, on the same reasoning as declared-check.lua: -charon_CGPDFDocument
+The port's own members are excluded, on the same reasoning as declared-check.lua: -revenant_CGPDFDocument
 and the rest are declared in the PORT's header, and a row for one of those is the port's business rather
 than a gap in the package's surface.
 
@@ -31,7 +31,7 @@ local INHERITED = { dealloc = true, init = true, ["copyWithZone:"] = true }
 
 local PROBE = "System/Library/Frameworks/PDFKit.framework/Headers/PDFDocument.h"
 local HEADERS_REL = "System/Library/Frameworks/PDFKit.framework/Headers"
-local OWN_REL = "packages/a/apple-backports/PDFKit/CharonPDFKit.h"
+local OWN_REL = "packages/a/apple-backports/PDFKit/RevenantPDFKit.h"
 local REGISTRY_REL = "packages/a/apple-backports/registry/PDFKit"
 
 local function byte_less(a, b)
@@ -467,8 +467,8 @@ local function find_sdk()
     end
     local home = os.getenv("HOME")
     if home and home ~= "" then
-        roots[#roots + 1] = path.join(home, "charon")
-        roots[#roots + 1] = path.join(home, "charon", ".agent-work", "worktrees")
+        roots[#roots + 1] = path.join(home, "revenant")
+        roots[#roots + 1] = path.join(home, "revenant", ".agent-work", "worktrees")
     end
     local candidates = {}
     for _, root in ipairs(roots) do

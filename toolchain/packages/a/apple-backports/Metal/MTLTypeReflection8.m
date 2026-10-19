@@ -12,56 +12,56 @@
 
 - (NSString *)name
 {
-    return self.charonMemberName;
+    return self.revenantMemberName;
 }
 
 - (NSUInteger)offset
 {
-    return self.charonMemberOffset;
+    return self.revenantMemberOffset;
 }
 
 - (MTLDataType)dataType
 {
-    return self.charonDataType;
+    return self.revenantDataType;
 }
 
 - (MTLStructType *)structType
 {
-    return self.charonStructType;
+    return self.revenantStructType;
 }
 
 - (MTLArrayType *)arrayType
 {
-    return self.charonArrayType;
+    return self.revenantArrayType;
 }
 
 - (MTLTextureReferenceType *)textureReferenceType
 {
-    return self.charonTextureReferenceType;
+    return self.revenantTextureReferenceType;
 }
 
 - (MTLPointerType *)pointerType
 {
-    return self.charonPointerType;
+    return self.revenantPointerType;
 }
 
 @end
 
-@implementation MTLStructMember (CharonTypeTreeStorage)
+@implementation MTLStructMember (RevenantTypeTreeStorage)
 
-- (void)charonSetName:(NSString *)name offset:(NSUInteger)offset node:(NSDictionary *)node
+- (void)revenantSetName:(NSString *)name offset:(NSUInteger)offset node:(NSDictionary *)node
 {
     _memberName = [name copy];
     _memberOffset = offset;
     _memberNode = node;
 }
 
-- (NSDictionary *)charonMemberNode
+- (NSDictionary *)revenantMemberNode
 {
     return _memberNode;
 }
 
-- (NSString *)charonMemberName
+- (NSString *)revenantMemberName
 {
     return _memberName ?: @"";
 }
@@ -78,15 +78,15 @@
 
 - (MTLDataType)dataType
 {
-    return CharonDataTypeFromScalar(_memberNode[@"scalar"]);
+    return RevenantDataTypeFromScalar(_memberNode[@"scalar"]);
 }
 
-- (MTLDataType)charonDataType
+- (MTLDataType)revenantDataType
 {
-    return CharonDataTypeFromScalar(_memberNode[@"scalar"]);
+    return RevenantDataTypeFromScalar(_memberNode[@"scalar"]);
 }
 
-- (NSUInteger)charonMemberOffset
+- (NSUInteger)revenantMemberOffset
 {
     return _memberOffset;
 }
@@ -96,24 +96,24 @@
     return [_memberNode isKindOfClass:[NSDictionary class]] ? [_memberNode[@"index"] unsignedIntegerValue] : 0;
 }
 
-- (MTLStructType *)charonStructType
+- (MTLStructType *)revenantStructType
 {
-    return CharonTypedNode(_memberNode, MTLStructType.class);
+    return RevenantTypedNode(_memberNode, MTLStructType.class);
 }
 
-- (MTLArrayType *)charonArrayType
+- (MTLArrayType *)revenantArrayType
 {
-    return CharonTypedNode(_memberNode, MTLArrayType.class);
+    return RevenantTypedNode(_memberNode, MTLArrayType.class);
 }
 
-- (MTLTextureReferenceType *)charonTextureReferenceType
+- (MTLTextureReferenceType *)revenantTextureReferenceType
 {
-    return CharonTypedNode(_memberNode, MTLTextureReferenceType.class);
+    return RevenantTypedNode(_memberNode, MTLTextureReferenceType.class);
 }
 
-- (MTLPointerType *)charonPointerType
+- (MTLPointerType *)revenantPointerType
 {
-    return CharonTypedNode(_memberNode, MTLPointerType.class);
+    return RevenantTypedNode(_memberNode, MTLPointerType.class);
 }
 @end
 
@@ -121,7 +121,7 @@
 
 - (NSArray<MTLStructMember *> *)members
 {
-    return self.charonMemberList;
+    return self.revenantMemberList;
 }
 
 - (MTLStructMember *)memberByName:(NSString *)name
@@ -138,17 +138,17 @@
 
 - (MTLDataType)elementType
 {
-    return [self charonDataType];
+    return [self revenantDataType];
 }
 
 - (MTLType *)elementTypeObject
 {
-    return self.charonElement;
+    return self.revenantElement;
 }
 
 - (NSUInteger)arrayLength
 {
-    NSDictionary *node = self.charonNode;
+    NSDictionary *node = self.revenantNode;
     return [node[@"length"] unsignedIntegerValue];
 }
 
@@ -169,33 +169,33 @@
 
 - (MTLStructType *)elementStructType
 {
-    return CharonTypedNode(self.charonElement.charonNode, MTLStructType.class);
+    return RevenantTypedNode(self.revenantElement.revenantNode, MTLStructType.class);
 }
 
 - (MTLArrayType *)elementArrayType
 {
-    return CharonTypedNode(self.charonElement.charonNode, MTLArrayType.class);
+    return RevenantTypedNode(self.revenantElement.revenantNode, MTLArrayType.class);
 }
 
 - (MTLTextureReferenceType *)elementTextureReferenceType
 {
-    return CharonTypedNode(self.charonElement.charonNode, MTLTextureReferenceType.class);
+    return RevenantTypedNode(self.revenantElement.revenantNode, MTLTextureReferenceType.class);
 }
 
 - (MTLPointerType *)elementPointerType
 {
-    return CharonTypedNode(self.charonElement.charonNode, MTLPointerType.class);
+    return RevenantTypedNode(self.revenantElement.revenantNode, MTLPointerType.class);
 }
 
 @end
 
-@implementation CharonMetalTypeTree {
+@implementation RevenantMetalTypeTree {
     NSDictionary *_document;
 }
 
 + (instancetype)treeWithContentsOfFile:(NSString *)path
 {
-    CharonMetalTypeTree *tree = [[CharonMetalTypeTree alloc] init];
+    RevenantMetalTypeTree *tree = [[RevenantMetalTypeTree alloc] init];
     NSData *data = [NSData dataWithContentsOfFile:path];
     if (!data)
         return tree;
@@ -250,7 +250,7 @@
     return [_argument[@"index"] unsignedIntegerValue];
 }
 
-- (NSUInteger)charonArgumentIndex
+- (NSUInteger)revenantArgumentIndex
 {
     return [_argument[@"index"] unsignedIntegerValue];
 }
@@ -269,7 +269,7 @@
 
 - (MTLArgumentAccess)access
 {
-    return CharonAccessFromWord(_argument[@"access"]);
+    return RevenantAccessFromWord(_argument[@"access"]);
 }
 
 - (BOOL)isActive
@@ -289,22 +289,22 @@
 
 - (MTLDataType)bufferDataType
 {
-    return CharonDataTypeFromScalar(_argument[@"scalar"]);
+    return RevenantDataTypeFromScalar(_argument[@"scalar"]);
 }
 
 - (MTLStructType *)bufferStructType
 {
-    return CharonTypedNode(_argument, MTLStructType.class);
+    return RevenantTypedNode(_argument, MTLStructType.class);
 }
 
 - (MTLPointerType *)bufferPointerType
 {
-    return CharonTypedNode(_argument, MTLPointerType.class);
+    return RevenantTypedNode(_argument, MTLPointerType.class);
 }
 
 - (MTLArrayType *)bufferArrayType
 {
-    return CharonTypedNode(_argument, MTLArrayType.class);
+    return RevenantTypedNode(_argument, MTLArrayType.class);
 }
 
 - (NSUInteger)threadgroupMemoryAlignment

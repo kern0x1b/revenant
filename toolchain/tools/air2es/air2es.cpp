@@ -350,7 +350,7 @@ struct Translator {
                 vertexIds.insert(&arg);
             } else if (info.kind == "air.instance_id" && vertex) {
                 usesInstanceId = true;
-                r.text = "int(charon_instance)";
+                r.text = "int(revenant_instance)";
                 values[&arg] = r;
                 instanceIds.insert(&arg);
             } else if (info.kind == "air.vertex_input" && vertex) {
@@ -378,15 +378,15 @@ struct Translator {
                 if (written.size() == 1 && *written.begin() == info.location) {
                     r.text = "gl_LastFragData[0]";
                 } else if (!written.count(info.location)) {
-                    std::string name = "charon_attachment" + std::to_string(info.location);
+                    std::string name = "revenant_attachment" + std::to_string(info.location);
                     fetches.insert(info.location);
-                    r.text = "texture2D(" + name + ", gl_FragCoord.xy / charon_target)";
+                    r.text = "texture2D(" + name + ", gl_FragCoord.xy / revenant_target)";
                 } else {
                     fail("reading a colour attachment that the function writes together with others");
                 }
                 values[&arg] = r;
             } else if (info.kind == "air.front_facing" && !vertex) {
-                r.text = "(gl_FrontFacing != (charon_flip < 0.0))";
+                r.text = "(gl_FrontFacing != (revenant_flip < 0.0))";
                 values[&arg] = r;
             } else if (info.kind == "air.point_coord" && !vertex) {
                 r.text = "vec2(gl_PointCoord.x, 1.0 - gl_PointCoord.y)";
@@ -416,7 +416,7 @@ struct Translator {
                 p.binding = info.location;
                 pointers[&arg] = p;
             } else if (info.kind == "air.position") {
-                                r.text = vertex ? "vec4(0.0)" : "vec4(gl_FragCoord.x, (charon_flip < 0.0 ? gl_FragCoord.y : charon_target.y - gl_FragCoord.y), gl_FragCoord.z, gl_FragCoord.w)";
+                                r.text = vertex ? "vec4(0.0)" : "vec4(gl_FragCoord.x, (revenant_flip < 0.0 ? gl_FragCoord.y : revenant_target.y - gl_FragCoord.y), gl_FragCoord.z, gl_FragCoord.w)";
                 values[&arg] = r;
             } else if (info.kind == "air.fragment_input") {
                 std::string name = varyingName(info, position - 1);
@@ -575,7 +575,7 @@ struct Translator {
         std::string name;
         if (!constantOf(pointer, index, name))
             fail("a function constant that is not a global of the library");
-        std::string macro = "charon_fc" + std::to_string(index) + suffix;
+        std::string macro = "revenant_fc" + std::to_string(index) + suffix;
         if (!declared.count(macro)) {
             declared.insert(macro);
             if (!*suffix) {
@@ -1217,7 +1217,7 @@ struct Translator {
                 const ArgInfo &o = outputs[k];
                 if (o.kind == "air.position") {
                     body.push_back(indent + "gl_Position = " + fields[k] + ";");
-                    body.push_back(indent + "gl_Position.y *= charon_flip;");
+                    body.push_back(indent + "gl_Position.y *= revenant_flip;");
                     body.push_back(indent + "gl_Position.z = gl_Position.z * 2.0 - gl_Position.w;");
                 } else if (o.kind == "air.point_size") {
                     body.push_back(indent + "gl_PointSize = " + fields[k] + ";");
@@ -1262,7 +1262,7 @@ struct Translator {
                 auto last = colours.rbegin();
                 std::string chain = last->second;
                 for (++last; last != colours.rend(); ++last)
-                    chain = "(charon_output == " + std::to_string(last->first) + " ? " + last->second + " : " + chain + ")";
+                    chain = "(revenant_output == " + std::to_string(last->first) + " ? " + last->second + " : " + chain + ")";
                 body.push_back(indent + "gl_FragColor = " + chain + ";");
             } else if (any) {
                 body.push_back(indent + "gl_FragColor = " + colours.begin()->second + ";");
@@ -1286,9 +1286,9 @@ struct Translator {
         }
         structure();
         for (auto &line : body) {
-            if (line.find("charon_flip") != std::string::npos && !vertex)
+            if (line.find("revenant_flip") != std::string::npos && !vertex)
                 usesFlip = true;
-            if (line.find("charon_target") != std::string::npos)
+            if (line.find("revenant_target") != std::string::npos)
                 usesTarget = true;
         }
         std::ostringstream out;
@@ -1307,13 +1307,13 @@ struct Translator {
             out << "precision highp int;\n";
         }
         if (vertex || usesFlip)
-            out << "uniform highp float charon_flip;\n";
+            out << "uniform highp float revenant_flip;\n";
         if (usesTarget)
-            out << "uniform highp vec2 charon_target;\n";
+            out << "uniform highp vec2 revenant_target;\n";
         if (usesOutput)
-            out << "uniform highp int charon_output;\n";
+            out << "uniform highp int revenant_output;\n";
         if (usesInstanceId)
-            out << "uniform highp float charon_instance;\n";
+            out << "uniform highp float revenant_instance;\n";
         if (vertex && usesVertexId)
             out << "attribute highp float a_vertex_id;\n";
         for (auto &d : attributeDecls)
@@ -1321,7 +1321,7 @@ struct Translator {
         for (auto &d : uniformDecls)
             out << d << "\n";
         for (int j : fetches)
-            out << "uniform sampler2D charon_attachment" << j << ";\n";
+            out << "uniform sampler2D revenant_attachment" << j << ";\n";
         for (auto &t : textureNames) {
             out << "uniform " << (compareBindings.count(t.first) ? "sampler2DShadow " : "sampler2D ") << t.second << ";\n";
             textureJson.push_back("{\"name\":\"" + t.second + "\",\"index\":" + std::to_string(t.first) + ",\"depth\":" + (depthBindings.count(t.first) ? "true" : "false") +
@@ -1355,7 +1355,7 @@ struct Translator {
     {
         std::string s = "[";
         for (int j : fetches)
-            s += (s.size() > 1 ? "," : "") + std::string("{\"attachment\":") + std::to_string(j) + ",\"name\":\"charon_attachment" + std::to_string(j) + "\"}";
+            s += (s.size() > 1 ? "," : "") + std::string("{\"attachment\":") + std::to_string(j) + ",\"name\":\"revenant_attachment" + std::to_string(j) + "\"}";
         return s + "]";
     }
 

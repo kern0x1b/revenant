@@ -6,18 +6,18 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define CHARON_MLC_MAX_DIMENSIONS 4
+#define REVENANT_MLC_MAX_DIMENSIONS 4
 
-NSUInteger CharonMLCWidthOfDataType(MLCDataType dataType);
+NSUInteger RevenantMLCWidthOfDataType(MLCDataType dataType);
 
-NSUInteger CharonMLCElementCount(NSArray<NSNumber *> *shape);
+NSUInteger RevenantMLCElementCount(NSArray<NSNumber *> *shape);
 
-NSArray<NSNumber *> *CharonMLCStrideOfShape(NSArray<NSNumber *> *shape, MLCDataType dataType);
+NSArray<NSNumber *> *RevenantMLCStrideOfShape(NSArray<NSNumber *> *shape, MLCDataType dataType);
 
-NSUInteger CharonMLCNextTensorID(void);
-NSUInteger CharonMLCNextLayerID(void);
+NSUInteger RevenantMLCNextTensorID(void);
+NSUInteger RevenantMLCNextLayerID(void);
 
-@interface CharonMLCOptimizerState : NSObject
+@interface RevenantMLCOptimizerState : NSObject
 @property (readwrite, nonatomic) float learningRate;
 @property (readwrite, nonatomic) float gradientRescale;
 @property (readwrite, nonatomic) BOOL appliesGradientClipping;
@@ -37,9 +37,9 @@ NSUInteger CharonMLCNextLayerID(void);
 @property (readwrite, nonatomic) NSUInteger timeStep;
 @end
 
-@interface MLCOptimizer (CharonMLCOptimizerState)
-- (CharonMLCOptimizerState *)charon_mlc_state;
-- (void)charon_mlc_takeStateFrom:(MLCOptimizerDescriptor *)descriptor;
-+ (instancetype)charon_mlc_optimizerOfClass:(Class)cls copying:(MLCOptimizer *)other;
-- (void)charon_mlc_setState:(CharonMLCOptimizerState *)state;
+@interface MLCOptimizer (RevenantMLCOptimizerState)
+- (RevenantMLCOptimizerState *)revenant_mlc_state;
+- (void)revenant_mlc_takeStateFrom:(MLCOptimizerDescriptor *)descriptor;
++ (instancetype)revenant_mlc_optimizerOfClass:(Class)cls copying:(MLCOptimizer *)other;
+- (void)revenant_mlc_setState:(RevenantMLCOptimizerState *)state;
 @end

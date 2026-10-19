@@ -1,11 +1,11 @@
-#import "CharonScenes.h"
+#import "RevenantScenes.h"
 
 @implementation UIOpenURLContext {
     NSURL *_URL;
     UISceneOpenURLOptions *_options;
 }
 
-- (instancetype)initCharonWithURL:(NSURL *)URL options:(UISceneOpenURLOptions *)options
+- (instancetype)initRevenantWithURL:(NSURL *)URL options:(UISceneOpenURLOptions *)options
 {
     if ((self = [super init])) {
         _URL = [URL copy];
@@ -38,7 +38,7 @@
     return _eventAttribution;
 }
 
-- (instancetype)initCharonWithSourceApplication:(NSString *)sourceApplication annotation:(id)annotation openInPlace:(BOOL)openInPlace
+- (instancetype)initRevenantWithSourceApplication:(NSString *)sourceApplication annotation:(id)annotation openInPlace:(BOOL)openInPlace
 {
     if ((self = [super init])) {
         _sourceApplication = [sourceApplication copy];
@@ -70,7 +70,7 @@
     NSString *_sourceApplication;
 }
 
-- (instancetype)initCharonWithURLContexts:(NSSet *)URLContexts sourceApplication:(NSString *)sourceApplication
+- (instancetype)initRevenantWithURLContexts:(NSSet *)URLContexts sourceApplication:(NSString *)sourceApplication
 {
     if ((self = [super init])) {
         _URLContexts = [URLContexts copy];
@@ -234,7 +234,7 @@
     return YES;
 }
 
-- (instancetype)initCharonWithRole:(UISceneSessionRole)role configuration:(UISceneConfiguration *)configuration persistentIdentifier:(NSString *)persistentIdentifier
+- (instancetype)initRevenantWithRole:(UISceneSessionRole)role configuration:(UISceneConfiguration *)configuration persistentIdentifier:(NSString *)persistentIdentifier
 {
     if ((self = [super init])) {
         _role = [role copy];
@@ -247,7 +247,7 @@
 - (instancetype)initWithCoder:(NSCoder *)coder
 {
     UISceneConfiguration *configuration = [coder decodeObjectOfClass:[UISceneConfiguration class] forKey:@"configuration"];
-    return [self initCharonWithRole:[coder decodeObjectOfClass:[NSString class] forKey:@"role"] configuration:configuration
+    return [self initRevenantWithRole:[coder decodeObjectOfClass:[NSString class] forKey:@"role"] configuration:configuration
                persistentIdentifier:[coder decodeObjectOfClass:[NSString class] forKey:@"persistentIdentifier"]];
 }
 
@@ -258,7 +258,7 @@
     [coder encodeObject:_persistentIdentifier forKey:@"persistentIdentifier"];
 }
 
-- (void)charon_setScene:(UIScene *)scene
+- (void)revenant_setScene:(UIScene *)scene
 {
     _scene = scene;
 }

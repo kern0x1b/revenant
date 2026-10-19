@@ -2,7 +2,7 @@ local SAMPLES = {
     { name = "kVTAlphaChannelMode_PremultipliedAlpha", wanted = "13.0" },
     { name = "kVTCompressionPropertyKey_PreserveDynamicHDRMetadata", wanted = "14.0" },
 }
-local DECOY = "kVTCharonDecoyNameThatIsNotInAnyHeader"
+local DECOY = "kVTRevenantDecoyNameThatIsNotInAnyHeader"
 local CONSTANT_TYPE = "const CFStringRef"
 local USR_PREFIX = "c:@"
 

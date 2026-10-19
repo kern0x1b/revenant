@@ -15,9 +15,9 @@ function load(file)
     local rows, messages = {}, {}
     local in_fields, in_messages = false, false
     for line in io.lines(file) do
-        if line:find("^const charon_ml_field charon_ml_fields%[%]") then
+        if line:find("^const revenant_ml_field revenant_ml_fields%[%]") then
             in_fields = true
-        elseif line:find("^const charon_ml_message charon_ml_messages%[%]") then
+        elseif line:find("^const revenant_ml_message revenant_ml_messages%[%]") then
             in_fields, in_messages = false, true
         elseif in_fields or in_messages then
             local name, number, wire, kind, element, type_name, flags =
@@ -38,11 +38,11 @@ function load(file)
         local entry = {name = message.name, fields = {}, by_name = {}, by_number = {}}
         for index = message.first + 1, message.first + message.count do
             local row = rows[index]
-            local oneof = row.flags:match("^CHARON_ML_ONEOF%((%d+)%)$")
+            local oneof = row.flags:match("^REVENANT_ML_ONEOF%((%d+)%)$")
             local field = {
                 name = row.name, number = row.number, wire = row.wire, kind = row.kind, element = row.element,
                 type = row.type ~= "" and row.type:gsub("^" .. PREFIX, "") or nil,
-                repeated = row.flags == "CHARON_ML_REPEATED",
+                repeated = row.flags == "REVENANT_ML_REPEATED",
                 oneof = oneof ~= nil,
             }
             table.insert(entry.fields, field)

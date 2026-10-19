@@ -2,7 +2,7 @@
 #import <float.h>
 #import <math.h>
 
-#import "CharonARKitPlaneExtent.h"
+#import "RevenantARKitPlaneExtent.h"
 
 @implementation ARPlaneExtent
 {

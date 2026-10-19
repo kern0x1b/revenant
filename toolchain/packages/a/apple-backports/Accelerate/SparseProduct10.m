@@ -1,17 +1,17 @@
 #import <Accelerate/Accelerate.h>
-#include "CharonSparseBLAS.h"
+#include "RevenantSparseBLAS.h"
 
 #pragma clang diagnostic ignored "-Wunguarded-availability-new"
 #pragma clang diagnostic ignored "-Wunguarded-availability"
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 
-static sparse_status CharonSparseProductSparse(void *A, uint32_t magicA, int order, int transposed, double alpha, void *B,
+static sparse_status RevenantSparseProductSparse(void *A, uint32_t magicA, int order, int transposed, double alpha, void *B,
                                                uint32_t magicB, void *C, sparse_dimension ldc, size_t size)
 {
     if (order != CblasRowMajor && order != CblasColMajor) {
         return SPARSE_ILLEGAL_PARAMETER;
     }
-    if (!CharonSparseIsMatrix(A, magicA) || !CharonSparseIsMatrix(B, magicB)) {
+    if (!RevenantSparseIsMatrix(A, magicA) || !RevenantSparseIsMatrix(B, magicB)) {
         return SPARSE_ILLEGAL_PARAMETER;
     }
     const struct sparse_m_float *asA = (const struct sparse_m_float *)A;
@@ -31,25 +31,25 @@ static sparse_status CharonSparseProductSparse(void *A, uint32_t magicA, int ord
         return SPARSE_SYSTEM_ERROR;
     }
     for (sparse_dimension i = 0; i < m; i++) {
-        const CharonSparseRow *line = transposed ? NULL : &asA->row[i];
+        const RevenantSparseRow *line = transposed ? NULL : &asA->row[i];
         for (sparse_index at = 0; at < (transposed ? (sparse_index)asA->rows : line->count); at++) {
             sparse_index r = transposed ? at : (sparse_index)i;
             sparse_index c = transposed ? (sparse_index)i : line->column[at];
             if (c >= (sparse_index)asA->columns) {
                 continue;
             }
-            double value = CharonSparseElementAt(&asA->row[r], c, size);
+            double value = RevenantSparseElementAt(&asA->row[r], c, size);
             if (value == 0.0) {
                 continue;
             }
             memset(row, 0, (size_t)(n ? n : 1) * sizeof(double));
-            const CharonSparseRow *from = &asB->row[transposed ? r : c];
+            const RevenantSparseRow *from = &asB->row[transposed ? r : c];
             for (sparse_index b = 0; b < from->count; b++) {
                 if (from->column[b] < (sparse_index)n) {
-                    row[from->column[b]] = CharonSparseElementAt(from, from->column[b], size);
+                    row[from->column[b]] = RevenantSparseElementAt(from, from->column[b], size);
                 }
             }
-            long to = CharonSparseDenseAt(order, ldc, i, 0);
+            long to = RevenantSparseDenseAt(order, ldc, i, 0);
             for (sparse_dimension j = 0; j < n; j++) {
                 if (row[j] == 0.0) {
                     continue;
@@ -75,8 +75,8 @@ sparse_status sparse_matrix_product_sparse_float(enum CBLAS_ORDER order, enum CB
     if (transa != CblasNoTrans && transa != CblasTrans) {
         return SPARSE_ILLEGAL_PARAMETER;
     }
-    return CharonSparseProductSparse(A, CHARON_SPARSE_MAGIC_FLOAT, order, transa == CblasTrans, alpha, B,
-                                     CHARON_SPARSE_MAGIC_FLOAT, C, ldc, sizeof(float));
+    return RevenantSparseProductSparse(A, REVENANT_SPARSE_MAGIC_FLOAT, order, transa == CblasTrans, alpha, B,
+                                     REVENANT_SPARSE_MAGIC_FLOAT, C, ldc, sizeof(float));
 }
 
 sparse_status sparse_matrix_product_sparse_double(enum CBLAS_ORDER order, enum CBLAS_TRANSPOSE transa, double alpha,
@@ -86,6 +86,6 @@ sparse_status sparse_matrix_product_sparse_double(enum CBLAS_ORDER order, enum C
     if (transa != CblasNoTrans && transa != CblasTrans) {
         return SPARSE_ILLEGAL_PARAMETER;
     }
-    return CharonSparseProductSparse(A, CHARON_SPARSE_MAGIC_DOUBLE, order, transa == CblasTrans, alpha, B,
-                                     CHARON_SPARSE_MAGIC_DOUBLE, C, ldc, sizeof(double));
+    return RevenantSparseProductSparse(A, REVENANT_SPARSE_MAGIC_DOUBLE, order, transa == CblasTrans, alpha, B,
+                                     REVENANT_SPARSE_MAGIC_DOUBLE, C, ldc, sizeof(double));
 }

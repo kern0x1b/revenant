@@ -1,6 +1,6 @@
-#import "CharonMetal.h"
+#import "RevenantMetal.h"
 
-@interface CharonMetalBinding : NSObject <MTLBinding>
+@interface RevenantMetalBinding : NSObject <MTLBinding>
 {
     NSString *_name;
     NSUInteger _index;
@@ -9,14 +9,14 @@
 }
 @end
 
-@interface CharonMetalBufferBinding : CharonMetalBinding <MTLBufferBinding>
+@interface RevenantMetalBufferBinding : RevenantMetalBinding <MTLBufferBinding>
 {
     NSUInteger _alignment, _dataSize;
     MTLDataType _dataType;
 }
 @end
 
-@interface CharonMetalTextureBinding : CharonMetalBinding <MTLTextureBinding>
+@interface RevenantMetalTextureBinding : RevenantMetalBinding <MTLTextureBinding>
 {
     MTLTextureType _textureType;
     MTLDataType _dataType;
@@ -24,19 +24,19 @@
 }
 @end
 
-@interface CharonMetalThreadgroupBinding : CharonMetalBinding <MTLThreadgroupBinding>
+@interface RevenantMetalThreadgroupBinding : RevenantMetalBinding <MTLThreadgroupBinding>
 {
     NSUInteger _alignment, _dataSize;
 }
 @end
 
-@interface CharonMetalObjectPayloadBinding : CharonMetalBinding <MTLObjectPayloadBinding>
+@interface RevenantMetalObjectPayloadBinding : RevenantMetalBinding <MTLObjectPayloadBinding>
 {
     NSUInteger _alignment, _dataSize;
 }
 @end
 
-@implementation CharonMetalBinding
+@implementation RevenantMetalBinding
 
 @synthesize name = _name;
 @synthesize index = _index;
@@ -51,10 +51,10 @@
 
 @end
 
-CharonMetalBinding *CharonMakeBinding(Class kind, NSString *name, NSUInteger index,
+RevenantMetalBinding *RevenantMakeBinding(Class kind, NSString *name, NSUInteger index,
                                             MTLArgumentAccess access, BOOL argument, BOOL used)
 {
-    CharonMetalBinding *binding = [[kind alloc] init];
+    RevenantMetalBinding *binding = [[kind alloc] init];
     if (!binding)
         return nil;
     [binding setValue:name forKey:@"name"];
@@ -65,7 +65,7 @@ CharonMetalBinding *CharonMakeBinding(Class kind, NSString *name, NSUInteger ind
     return binding;
 }
 
-@implementation CharonMetalBufferBinding
+@implementation RevenantMetalBufferBinding
 
 @synthesize bufferAlignment = _alignment, bufferDataSize = _dataSize, bufferDataType = _dataType;
 
@@ -101,7 +101,7 @@ CharonMetalBinding *CharonMakeBinding(Class kind, NSString *name, NSUInteger ind
 
 @end
 
-@implementation CharonMetalTextureBinding
+@implementation RevenantMetalTextureBinding
 
 @synthesize textureType = _textureType, textureDataType = _dataType, arrayLength = _arrayLength;
 
@@ -132,7 +132,7 @@ CharonMetalBinding *CharonMakeBinding(Class kind, NSString *name, NSUInteger ind
 
 @end
 
-@implementation CharonMetalThreadgroupBinding
+@implementation RevenantMetalThreadgroupBinding
 
 @synthesize threadgroupMemoryAlignment = _alignment, threadgroupMemoryDataSize = _dataSize;
 
@@ -153,7 +153,7 @@ CharonMetalBinding *CharonMakeBinding(Class kind, NSString *name, NSUInteger ind
 
 @end
 
-@implementation CharonMetalObjectPayloadBinding
+@implementation RevenantMetalObjectPayloadBinding
 
 @synthesize objectPayloadAlignment = _alignment, objectPayloadDataSize = _dataSize;
 

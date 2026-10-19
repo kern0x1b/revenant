@@ -1,9 +1,9 @@
-#import "CharonMPS.h"
+#import "RevenantMPS.h"
 
 #pragma clang diagnostic ignored "-Wprotocol"
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
 
-static inline NSUInteger CharonMPSResourceLength(id<MTLResource> resource)
+static inline NSUInteger RevenantMPSResourceLength(id<MTLResource> resource)
 {
     if ([resource conformsToProtocol:@protocol(MTLBuffer)])
         return [(id<MTLBuffer>)resource length];
@@ -35,7 +35,7 @@ static inline NSUInteger CharonMPSResourceLength(id<MTLResource> resource)
         _textures = [NSMutableArray array];
         _readCount = 1;
         if (resource)
-            [self charon_mps_appendResource:resource];
+            [self revenant_mps_appendResource:resource];
     }
     return self;
 }
@@ -49,7 +49,7 @@ static inline NSUInteger CharonMPSResourceLength(id<MTLResource> resource)
         _textures = [NSMutableArray array];
         _readCount = 1;
         for (id<MTLResource> resource in resources)
-            [self charon_mps_appendResource:resource];
+            [self revenant_mps_appendResource:resource];
     }
     return self;
 }
@@ -63,7 +63,7 @@ static inline NSUInteger CharonMPSResourceLength(id<MTLResource> resource)
         _textures = [NSMutableArray array];
         _readCount = 1;
         _device = device;
-        [self charon_mps_appendBuffer:bufferSize];
+        [self revenant_mps_appendBuffer:bufferSize];
     }
     return self;
 }
@@ -77,7 +77,7 @@ static inline NSUInteger CharonMPSResourceLength(id<MTLResource> resource)
         _textures = [NSMutableArray array];
         _readCount = 1;
         _device = device;
-        [self charon_mps_appendTexture:descriptor];
+        [self revenant_mps_appendTexture:descriptor];
     }
     return self;
 }
@@ -91,10 +91,10 @@ static inline NSUInteger CharonMPSResourceLength(id<MTLResource> resource)
         _textures = [NSMutableArray array];
         _readCount = 1;
         _device = device;
-        for (NSNumber *size in [resourceList charon_mps_bufferSizes])
-            [self charon_mps_appendBuffer:[size unsignedIntegerValue]];
-        for (MTLTextureDescriptor *descriptor in [resourceList charon_mps_textureDescriptors])
-            [self charon_mps_appendTexture:descriptor];
+        for (NSNumber *size in [resourceList revenant_mps_bufferSizes])
+            [self revenant_mps_appendBuffer:[size unsignedIntegerValue]];
+        for (MTLTextureDescriptor *descriptor in [resourceList revenant_mps_textureDescriptors])
+            [self revenant_mps_appendTexture:descriptor];
     }
     return self;
 }
@@ -107,33 +107,33 @@ static inline NSUInteger CharonMPSResourceLength(id<MTLResource> resource)
 
 + (instancetype)temporaryStateWithCommandBuffer:(id<MTLCommandBuffer>)cmdBuf bufferSize:(size_t)bufferSize
 {
-    return [self charon_mps_temporaryWithBlock:^MPSState *(id<MTLDevice> device) {
+    return [self revenant_mps_temporaryWithBlock:^MPSState *(id<MTLDevice> device) {
         return [[self alloc] initWithDevice:device bufferSize:bufferSize];
     } commandBuffer:cmdBuf];
 }
 
 + (instancetype)temporaryStateWithCommandBuffer:(id<MTLCommandBuffer>)cmdBuf textureDescriptor:(MTLTextureDescriptor *)descriptor
 {
-    return [self charon_mps_temporaryWithBlock:^MPSState *(id<MTLDevice> device) {
+    return [self revenant_mps_temporaryWithBlock:^MPSState *(id<MTLDevice> device) {
         return [[self alloc] initWithDevice:device textureDescriptor:descriptor];
     } commandBuffer:cmdBuf];
 }
 
 + (instancetype)temporaryStateWithCommandBuffer:(id<MTLCommandBuffer>)cmdBuf resourceList:(MPSStateResourceList *)resourceList
 {
-    return [self charon_mps_temporaryWithBlock:^MPSState *(id<MTLDevice> device) {
+    return [self revenant_mps_temporaryWithBlock:^MPSState *(id<MTLDevice> device) {
         return [[self alloc] initWithDevice:device resourceList:resourceList];
     } commandBuffer:cmdBuf];
 }
 
 + (instancetype)temporaryStateWithCommandBuffer:(id<MTLCommandBuffer>)cmdBuf
 {
-    return [self charon_mps_temporaryWithBlock:^MPSState *(id<MTLDevice> device) {
+    return [self revenant_mps_temporaryWithBlock:^MPSState *(id<MTLDevice> device) {
         return [[self alloc] initWithDevice:device bufferSize:0];
     } commandBuffer:cmdBuf];
 }
 
-+ (instancetype)charon_mps_temporaryWithBlock:(MPSState *(^)(id<MTLDevice>))block commandBuffer:(id<MTLCommandBuffer>)cmdBuf
++ (instancetype)revenant_mps_temporaryWithBlock:(MPSState *(^)(id<MTLDevice>))block commandBuffer:(id<MTLCommandBuffer>)cmdBuf
 {
     id<MTLDevice> device = [cmdBuf respondsToSelector:@selector(device)] ? [cmdBuf device] : MTLCreateSystemDefaultDevice();
     if (!device)
@@ -144,7 +144,7 @@ static inline NSUInteger CharonMPSResourceLength(id<MTLResource> resource)
     return state;
 }
 
-- (void)charon_mps_appendBuffer:(size_t)size
+- (void)revenant_mps_appendBuffer:(size_t)size
 {
     [_sizes addObject:[NSNumber numberWithUnsignedInteger:size]];
     [_types addObject:[NSNumber numberWithUnsignedInteger:MPSStateResourceTypeBuffer]];
@@ -152,7 +152,7 @@ static inline NSUInteger CharonMPSResourceLength(id<MTLResource> resource)
     [_textures addObject:[NSNull null]];
 }
 
-- (void)charon_mps_appendTexture:(MTLTextureDescriptor *)descriptor
+- (void)revenant_mps_appendTexture:(MTLTextureDescriptor *)descriptor
 {
     [_textures addObject:descriptor];
     [_types addObject:[NSNumber numberWithUnsignedInteger:MPSStateResourceTypeTexture]];
@@ -160,7 +160,7 @@ static inline NSUInteger CharonMPSResourceLength(id<MTLResource> resource)
     [_sizes addObject:[NSNumber numberWithUnsignedInteger:0]];
 }
 
-- (void)charon_mps_appendResource:(id<MTLResource>)resource
+- (void)revenant_mps_appendResource:(id<MTLResource>)resource
 {
     [_resources addObject:resource];
     if ([resource conformsToProtocol:@protocol(MTLTexture)]) {
@@ -170,7 +170,7 @@ static inline NSUInteger CharonMPSResourceLength(id<MTLResource> resource)
     } else {
         [_types addObject:[NSNumber numberWithUnsignedInteger:MPSStateResourceTypeBuffer]];
         [_textures addObject:[NSNull null]];
-        [_sizes addObject:[NSNumber numberWithUnsignedInteger:CharonMPSResourceLength(resource)]];
+        [_sizes addObject:[NSNumber numberWithUnsignedInteger:RevenantMPSResourceLength(resource)]];
     }
 }
 
@@ -256,7 +256,7 @@ static inline NSUInteger CharonMPSResourceLength(id<MTLResource> resource)
             MPSStateTextureInfo info = [self textureInfoAtIndex:index];
             id<MTLResource> resource = [_resources objectAtIndex:index];
             if (resource != (id)[NSNull null])
-                total += CharonMPSResourceLength(resource);
+                total += RevenantMPSResourceLength(resource);
             else
                 total += info.width * info.height * (info.depth ? info.depth : 1) * 4;
         }

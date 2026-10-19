@@ -4,8 +4,8 @@
 #import <objc/runtime.h>
 #import "check.h"
 
-@interface NSObject (CharonHostLayoutGuideView)
-- (UIView *)charon_view;
+@interface NSObject (RevenantHostLayoutGuideView)
+- (UIView *)revenant_view;
 @end
 
 #define NAMED(...) ([NSString stringWithFormat:__VA_ARGS__].UTF8String)
@@ -16,13 +16,13 @@ static int degenerate;
 
 static NSString *renamed(NSString *selector)
 {
-    NSString *prefix = @"charonHost";
+    NSString *prefix = @"revenantHost";
     NSString *rest = selector;
     if ([selector hasPrefix:@"set"] && selector.length > 3 && [[NSCharacterSet uppercaseLetterCharacterSet] characterIsMember:[selector characterAtIndex:3]]) {
-        prefix = @"setCharonHost";
+        prefix = @"setRevenantHost";
         rest = [selector substringFromIndex:3];
     } else if ([selector hasPrefix:@"is"] && selector.length > 2 && [[NSCharacterSet uppercaseLetterCharacterSet] characterIsMember:[selector characterAtIndex:2]]) {
-        prefix = @"isCharonHost";
+        prefix = @"isRevenantHost";
         rest = [selector substringFromIndex:2];
     }
     return [prefix stringByAppendingFormat:@"%@%@", [[rest substringToIndex:1] uppercaseString], [rest substringFromIndex:1]];
@@ -92,12 +92,12 @@ static UILabel *label(NSString *text, CGFloat size)
 
 - (Class)stackClass
 {
-    return self.system ? [UIStackView class] : NSClassFromString(@"CharonHostUIStackView");
+    return self.system ? [UIStackView class] : NSClassFromString(@"RevenantHostUIStackView");
 }
 
 - (Class)guideClass
 {
-    return self.system ? [UILayoutGuide class] : NSClassFromString(@"CharonHostUILayoutGuide");
+    return self.system ? [UILayoutGuide class] : NSClassFromString(@"RevenantHostUILayoutGuide");
 }
 
 - (id)anchor:(id)item named:(NSString *)name
@@ -218,7 +218,7 @@ static NSArray *content(Flavor *flavor, NSInteger kind)
 static void collect(UIView *view, NSMutableArray *views)
 {
     [views addObject:view];
-    if ([view isKindOfClass:[UIStackView class]] || [view isKindOfClass:NSClassFromString(@"CharonHostUIStackView")]) {
+    if ([view isKindOfClass:[UIStackView class]] || [view isKindOfClass:NSClassFromString(@"RevenantHostUIStackView")]) {
         for (UIView *arranged in [(UIStackView *)view arrangedSubviews])
             collect(arranged, views);
     }
@@ -307,7 +307,7 @@ static BOOL same_layout(UIView *systemRoot, NSArray *systemViews, UIView *ourRoo
 
 static void compare_layouts(NSString *name, UIView *systemRoot, NSArray *systemViews, UIView *ourRoot, NSArray *ourViews)
 {
-    charon_check(same_layout(systemRoot, systemViews, ourRoot, ourViews), name.UTF8String, [NSString stringWithFormat:@"\n  system %@\n  ours   %@", frames(systemRoot, systemViews), frames(ourRoot, ourViews)]);
+    revenant_check(same_layout(systemRoot, systemViews, ourRoot, ourViews), name.UTF8String, [NSString stringWithFormat:@"\n  system %@\n  ours   %@", frames(systemRoot, systemViews), frames(ourRoot, ourViews)]);
 }
 
 static CGFloat edge(CGRect rect, UILayoutConstraintAxis axis, int which)
@@ -405,7 +405,7 @@ static void test_baseline_relative_matrix(void)
             NSString *name = [@"baseline-relative stack frames " stringByAppendingString:describe(config)];
             compared++;
             if (same_layout(roots[0], systemViews, roots[1], ourViews)) {
-                charon_check(YES, name.UTF8String, nil);
+                revenant_check(YES, name.UTF8String, nil);
                 continue;
             }
             if (legacy && stretched_label(systemViews)) {
@@ -416,7 +416,7 @@ static void test_baseline_relative_matrix(void)
             if (size == 2 || distribution == UIStackViewDistributionFillProportionally) {
                 degenerateBaseline++;
                 printf("info %s\n  system %s\n  ours   %s\n", name.UTF8String, frames(roots[0], systemViews).UTF8String, frames(roots[1], ourViews).UTF8String);
-                charon_check(satisfies_required(ourViews[0], config) || !satisfies_required(systemViews[0], config), [@"degenerate: " stringByAppendingString:name].UTF8String, nil);
+                revenant_check(satisfies_required(ourViews[0], config) || !satisfies_required(systemViews[0], config), [@"degenerate: " stringByAppendingString:name].UTF8String, nil);
                 continue;
             }
             compare_layouts(name, roots[0], systemViews, roots[1], ourViews);
@@ -454,7 +454,7 @@ static void test_stack_matrix(void)
             if ((config.size == 2 || config.distribution == UIStackViewDistributionFillProportionally) && !same_layout(systemRoot, systemViews, ourRoot, ourViews) && satisfies_required(systemViews[0], config)) {
                 degenerate++;
                 printf("info %s\n  system %s\n  ours   %s\n", name.UTF8String, frames(systemRoot, systemViews).UTF8String, frames(ourRoot, ourViews).UTF8String);
-                charon_check(satisfies_required(ourViews[0], config), [@"degenerate: both satisfy required constraints, " stringByAppendingString:name].UTF8String, [NSString stringWithFormat:@"\n  system %@\n  ours   %@", frames(systemRoot, systemViews), frames(ourRoot, ourViews)]);
+                revenant_check(satisfies_required(ourViews[0], config), [@"degenerate: both satisfy required constraints, " stringByAppendingString:name].UTF8String, [NSString stringWithFormat:@"\n  system %@\n  ours   %@", frames(systemRoot, systemViews), frames(ourRoot, ourViews)]);
                 continue;
             }
             compare_layouts(name, systemRoot, systemViews, ourRoot, ourViews);
@@ -523,12 +523,12 @@ static void test_anchors(void)
     UILabel *text = label(@"Anchor", 17);
     [root addSubview:plain];
     [root addSubview:text];
-    NSDictionary *classes = @{@0: @"CharonHostNSLayoutXAxisAnchor", @1: @"CharonHostNSLayoutYAxisAnchor", @2: @"CharonHostNSLayoutDimension"};
+    NSDictionary *classes = @{@0: @"RevenantHostNSLayoutXAxisAnchor", @1: @"RevenantHostNSLayoutYAxisAnchor", @2: @"RevenantHostNSLayoutDimension"};
     for (NSString *name in anchor_names()) {
         id first = [ours anchor:plain named:name];
         CHECK(first == [ours anchor:plain named:name], NAMED(@"%@ is cached on the view", name));
         CHECK([first isKindOfClass:NSClassFromString(classes[@(anchor_kind(name))])], NAMED(@"%@ has the axis class", name));
-        CHECK([first isKindOfClass:NSClassFromString(@"CharonHostNSLayoutAnchor")], NAMED(@"%@ is an NSLayoutAnchor", name));
+        CHECK([first isKindOfClass:NSClassFromString(@"RevenantHostNSLayoutAnchor")], NAMED(@"%@ is an NSLayoutAnchor", name));
         CHECK(first != [ours anchor:text named:name], NAMED(@"%@ differs between views", name));
         CHECK([[first description] containsString:@"UIView"], NAMED(@"%@ description names its item", name));
     }
@@ -744,7 +744,7 @@ static void test_activation(void)
 @end
 
 @implementation MarginsView
-- (void)charonHostLayoutMarginsDidChange
+- (void)revenantHostLayoutMarginsDidChange
 {
     self.changes++;
 }
@@ -870,7 +870,7 @@ static void test_guides(void)
         views[index] = [NSMutableArray arrayWithObjects:a, b, text, nil];
         roots[index] = container;
         if (index) {
-            UIView *helper = [(id)gap charon_view];
+            UIView *helper = [(id)gap revenant_view];
             CHECK(helper.superview == container && helper.hidden && !helper.userInteractionEnabled, "our layout guide is backed by a hidden view that ignores touches");
             CHECK([container hitTest:helper.center withEvent:nil] != helper, "hit testing never returns the guide's view");
             CHECK(close_enough(gap.layoutFrame.origin.x, 50) && close_enough(gap.layoutFrame.size.width, 80) && close_enough(gap.layoutFrame.origin.y, 25) && close_enough(gap.layoutFrame.size.height, 30), "layoutFrame reports the guide's rectangle");
@@ -1024,7 +1024,7 @@ static void test_stack_api(void)
     [archiver finishEncoding];
     unarchiver = [[NSKeyedUnarchiver alloc] initForReadingFromData:archiver.encodedData error:NULL];
     unarchiver.requiresSecureCoding = NO;
-    [unarchiver setClass:[UIStackView class] forClassName:@"CharonHostUIStackView"];
+    [unarchiver setClass:[UIStackView class] forClassName:@"RevenantHostUIStackView"];
     UIStackView *back = [unarchiver decodeObjectForKey:@"root"];
     CHECK([back isKindOfClass:[UIStackView class]] && back.axis == original.axis && back.distribution == original.distribution && back.alignment == original.alignment && back.spacing == original.spacing && back.arrangedSubviews.count == 3, "encodeWithCoder writes an archive the system stack view decodes");
 
@@ -1037,7 +1037,7 @@ static void test_stack_api(void)
 int main(int argc, char **argv)
 {
     @autoreleasepool {
-        legacy = [UIView instancesRespondToSelector:NSSelectorFromString(@"charonHostLayoutMargins")];
+        legacy = [UIView instancesRespondToSelector:NSSelectorFromString(@"revenantHostLayoutMargins")];
         printf("variant %s\n", legacy ? "legacy" : "native");
         test_anchors();
         test_activation();
@@ -1047,6 +1047,6 @@ int main(int argc, char **argv)
         test_baseline_relative_matrix();
         test_stack_matrix();
     }
-    printf("checks=%d failures=%d\n", charon_checks, charon_failures);
-    return charon_failures;
+    printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
+    return revenant_failures;
 }

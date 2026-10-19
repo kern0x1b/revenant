@@ -1,16 +1,16 @@
-#import "CharonCallKit.h"
+#import "RevenantCallKit.h"
 #import <AVFoundation/AVAudioSession.h>
 
-@implementation CharonCallAudio {
+@implementation RevenantCallAudio {
     NSUInteger _connected;
 }
 
 + (instancetype)shared
 {
-    static CharonCallAudio *shared;
+    static RevenantCallAudio *shared;
     static dispatch_once_t once;
     dispatch_once(&once, ^{
-        shared = [[CharonCallAudio alloc] init];
+        shared = [[RevenantCallAudio alloc] init];
     });
     return shared;
 }
@@ -34,7 +34,7 @@
     if (!session)
         return;
     [session setActive:YES error:NULL];
-    [provider charon_audioSessionActivated:session];
+    [provider revenant_audioSessionActivated:session];
 }
 
 - (void)callEndedFor:(CXProvider *)provider
@@ -52,7 +52,7 @@
     if (!session)
         return;
     [session setActive:NO withOptions:AVAudioSessionSetActiveOptionNotifyOthersOnDeactivation error:NULL];
-    [provider charon_audioSessionDeactivated:session];
+    [provider revenant_audioSessionDeactivated:session];
 }
 
 @end

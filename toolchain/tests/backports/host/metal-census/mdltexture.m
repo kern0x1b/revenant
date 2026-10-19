@@ -4,7 +4,7 @@
 #import <ModelIO/ModelIO.h>
 #include <simd/simd.h>
 
-@interface charonHost_MTKTextureLoader : NSObject
+@interface revenantHost_MTKTextureLoader : NSObject
 - (instancetype)initWithDevice:(id<MTLDevice>)device;
 - (id<MTLTexture>)newTextureWithMDLTexture:(MDLTexture *)texture
                                    options:(NSDictionary<MTKTextureLoaderOption, id> *)options
@@ -93,7 +93,7 @@ static void compare(MDLTexture *source, NSDictionary *options, NSString *label)
     if (!device) { check(NO, @"there is a Metal device on this machine"); return; }
 
     MTKTextureLoader *apple = [[MTKTextureLoader alloc] initWithDevice:device];
-    charonHost_MTKTextureLoader *port = [[charonHost_MTKTextureLoader alloc] initWithDevice:device];
+    revenantHost_MTKTextureLoader *port = [[revenantHost_MTKTextureLoader alloc] initWithDevice:device];
 
     NSError *appleError = nil, *portError = nil;
     id<MTLTexture> a = [apple newTextureWithMDLTexture:source options:options error:&appleError];
@@ -124,7 +124,7 @@ static void expectRefusal(MDLTexture *source, NSDictionary *options, NSString *l
     printf("%s\n", [label UTF8String]);
     id<MTLDevice> device = MTLCreateSystemDefaultDevice();
     MTKTextureLoader *apple = [[MTKTextureLoader alloc] initWithDevice:device];
-    charonHost_MTKTextureLoader *port = [[charonHost_MTKTextureLoader alloc] initWithDevice:device];
+    revenantHost_MTKTextureLoader *port = [[revenantHost_MTKTextureLoader alloc] initWithDevice:device];
     NSError *portError = nil, *appleError = nil;
     id<MTLTexture> p = [port newTextureWithMDLTexture:source options:options error:&portError];
     id<MTLTexture> a = [apple newTextureWithMDLTexture:source options:options error:&appleError];
@@ -186,7 +186,7 @@ int main(void)
         printf("a cube MDLTexture, six faces in one texture\n");
         {
             id<MTLDevice> device = MTLCreateSystemDefaultDevice();
-            charonHost_MTKTextureLoader *port = [[charonHost_MTKTextureLoader alloc] initWithDevice:device];
+            revenantHost_MTKTextureLoader *port = [[revenantHost_MTKTextureLoader alloc] initWithDevice:device];
             NSError *portError = nil;
             check([port newTextureWithMDLTexture:cube options:nil error:&portError] == nil &&
                   [portError localizedDescription].length > 0,
@@ -196,7 +196,7 @@ int main(void)
         printf("the completion-handler form\n");
         {
             id<MTLDevice> device = MTLCreateSystemDefaultDevice();
-            charonHost_MTKTextureLoader *port = [[charonHost_MTKTextureLoader alloc] initWithDevice:device];
+            revenantHost_MTKTextureLoader *port = [[revenantHost_MTKTextureLoader alloc] initWithDevice:device];
             __block id<MTLTexture> got = nil; __block NSError *gotError = nil; __block int calls = 0;
             [port newTextureWithMDLTexture:makeTexture(simd_make_int2(4, 3), 4, MDLTextureChannelEncodingUInt8, 0, NO)
                                    options:nil

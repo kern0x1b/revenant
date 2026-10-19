@@ -1,21 +1,21 @@
-#import "CharonAVCaptureDeviceExternalSync26.h"
+#import "RevenantAVCaptureDeviceExternalSync26.h"
 
-@interface AVCaptureDevice (CharonCaptureDeviceExternalSync26Minima)
+@interface AVCaptureDevice (RevenantCaptureDeviceExternalSync26Minima)
 - (CMTime)minSupportedLockedVideoFrameDuration;
 - (CMTime)minSupportedExternalSyncFrameDuration;
 @end
 
-static BOOL charon_device_supports_locked_frame_duration(AVCaptureDevice *device)
+static BOOL revenant_device_supports_locked_frame_duration(AVCaptureDevice *device)
 {
     return device ? !CMTIME_IS_INVALID([device minSupportedLockedVideoFrameDuration]) : NO;
 }
 
-static BOOL charon_device_supports_external_sync(AVCaptureDevice *device)
+static BOOL revenant_device_supports_external_sync(AVCaptureDevice *device)
 {
     return device ? !CMTIME_IS_INVALID([device minSupportedExternalSyncFrameDuration]) : NO;
 }
 
-@implementation AVCaptureDevice (CharonCaptureDeviceExternalSync26)
+@implementation AVCaptureDevice (RevenantCaptureDeviceExternalSync26)
 
 - (BOOL)isVideoFrameDurationLocked
 {
@@ -39,11 +39,11 @@ static BOOL charon_device_supports_external_sync(AVCaptureDevice *device)
 
 @end
 
-@implementation AVCaptureDeviceInput (CharonCaptureDeviceInputExternalSync26)
+@implementation AVCaptureDeviceInput (RevenantCaptureDeviceInputExternalSync26)
 
 - (BOOL)isLockedVideoFrameDurationSupported
 {
-    return charon_device_supports_locked_frame_duration(self.device);
+    return revenant_device_supports_locked_frame_duration(self.device);
 }
 
 - (CMTime)activeLockedVideoFrameDuration
@@ -64,7 +64,7 @@ static BOOL charon_device_supports_external_sync(AVCaptureDevice *device)
 
 - (BOOL)isExternalSyncSupported
 {
-    return charon_device_supports_external_sync(self.device);
+    return revenant_device_supports_external_sync(self.device);
 }
 
 - (CMTime)activeExternalSyncVideoFrameDuration

@@ -1,67 +1,67 @@
 #import <Foundation/Foundation.h>
 
-@interface NSFileAccessIntent (CharonAccess)
-- (BOOL)charon_isRead;
-- (NSFileCoordinatorReadingOptions)charon_readingOptions;
-- (NSFileCoordinatorWritingOptions)charon_writingOptions;
-- (void)charon_setURL:(NSURL *)URL;
+@interface NSFileAccessIntent (RevenantAccess)
+- (BOOL)revenant_isRead;
+- (NSFileCoordinatorReadingOptions)revenant_readingOptions;
+- (NSFileCoordinatorWritingOptions)revenant_writingOptions;
+- (void)revenant_setURL:(NSURL *)URL;
 @end
 
 @implementation NSFileAccessIntent {
 @private
-    NSURL *_charonURL;
-    NSInteger _charonOptions;
-    BOOL _charonIsRead;
+    NSURL *_revenantURL;
+    NSInteger _revenantOptions;
+    BOOL _revenantIsRead;
 }
 
 + (instancetype)readingIntentWithURL:(NSURL *)url options:(NSFileCoordinatorReadingOptions)options
 {
     NSFileAccessIntent *intent = [[self alloc] init];
-    intent->_charonURL = [url copy];
-    intent->_charonOptions = options;
-    intent->_charonIsRead = YES;
+    intent->_revenantURL = [url copy];
+    intent->_revenantOptions = options;
+    intent->_revenantIsRead = YES;
     return intent;
 }
 
 + (instancetype)writingIntentWithURL:(NSURL *)url options:(NSFileCoordinatorWritingOptions)options
 {
     NSFileAccessIntent *intent = [[self alloc] init];
-    intent->_charonURL = [url copy];
-    intent->_charonOptions = options;
-    intent->_charonIsRead = NO;
+    intent->_revenantURL = [url copy];
+    intent->_revenantOptions = options;
+    intent->_revenantIsRead = NO;
     return intent;
 }
 
 - (NSURL *)URL
 {
-    return _charonURL;
+    return _revenantURL;
 }
 
-- (BOOL)charon_isRead
+- (BOOL)revenant_isRead
 {
-    return _charonIsRead;
+    return _revenantIsRead;
 }
 
-- (NSFileCoordinatorReadingOptions)charon_readingOptions
+- (NSFileCoordinatorReadingOptions)revenant_readingOptions
 {
-    return (NSFileCoordinatorReadingOptions)_charonOptions;
+    return (NSFileCoordinatorReadingOptions)_revenantOptions;
 }
 
-- (NSFileCoordinatorWritingOptions)charon_writingOptions
+- (NSFileCoordinatorWritingOptions)revenant_writingOptions
 {
-    return (NSFileCoordinatorWritingOptions)_charonOptions;
+    return (NSFileCoordinatorWritingOptions)_revenantOptions;
 }
 
-- (void)charon_setURL:(NSURL *)URL
+- (void)revenant_setURL:(NSURL *)URL
 {
-    _charonURL = [URL copy];
+    _revenantURL = [URL copy];
 }
 
 @end
 
-@implementation NSFileCoordinator (CharonIntents)
+@implementation NSFileCoordinator (RevenantIntents)
 
-- (void)charon_coordinateIntents:(NSArray<NSFileAccessIntent *> *)intents index:(NSUInteger)index queue:(NSOperationQueue *)queue accessor:(void (^)(NSError *))accessor
+- (void)revenant_coordinateIntents:(NSArray<NSFileAccessIntent *> *)intents index:(NSUInteger)index queue:(NSOperationQueue *)queue accessor:(void (^)(NSError *))accessor
 {
     if (index == intents.count) {
         dispatch_semaphore_t finished = dispatch_semaphore_create(0);
@@ -77,13 +77,13 @@
     __block BOOL entered = NO;
     void (^inner)(NSURL *) = ^(NSURL *coordinated) {
         entered = YES;
-        [intent charon_setURL:coordinated];
-        [self charon_coordinateIntents:intents index:index + 1 queue:queue accessor:accessor];
+        [intent revenant_setURL:coordinated];
+        [self revenant_coordinateIntents:intents index:index + 1 queue:queue accessor:accessor];
     };
-    if ([intent charon_isRead])
-        [self coordinateReadingItemAtURL:intent.URL options:[intent charon_readingOptions] error:&error byAccessor:inner];
+    if ([intent revenant_isRead])
+        [self coordinateReadingItemAtURL:intent.URL options:[intent revenant_readingOptions] error:&error byAccessor:inner];
     else
-        [self coordinateWritingItemAtURL:intent.URL options:[intent charon_writingOptions] error:&error byAccessor:inner];
+        [self coordinateWritingItemAtURL:intent.URL options:[intent revenant_writingOptions] error:&error byAccessor:inner];
     if (!entered) {
         [queue addOperationWithBlock:^{
             accessor(error);
@@ -95,7 +95,7 @@
 {
     NSArray *held = [intents copy];
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-        [self charon_coordinateIntents:held index:0 queue:queue accessor:accessor];
+        [self revenant_coordinateIntents:held index:0 queue:queue accessor:accessor];
     });
 }
 

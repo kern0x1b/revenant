@@ -9,7 +9,7 @@
 
 #include <array>
 
-namespace shade {
+namespace emulator {
 
 namespace {
 

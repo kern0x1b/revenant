@@ -41,11 +41,11 @@ static NSDateComponents *components_of(const char *spec, const char *zone)
 
 static void check_matching(void)
 {
-    NSUInteger count = sizeof(charon_matchings) / sizeof(*charon_matchings), wrong = 0;
+    NSUInteger count = sizeof(revenant_matchings) / sizeof(*revenant_matchings), wrong = 0;
     NSString *first = nil;
     NSMutableDictionary *byZone = [NSMutableDictionary dictionary];
     for (NSUInteger index = 0; index < count; index++) {
-        const struct charon_matching *expected = &charon_matchings[index];
+        const struct revenant_matching *expected = &revenant_matchings[index];
         UNCalendarNotificationTrigger *trigger =
             [UNCalendarNotificationTrigger triggerWithDateMatchingComponents:components_of(expected->spec, expected->zone)
                                                                      repeats:expected->repeats != 0];
@@ -62,7 +62,7 @@ static void check_matching(void)
     }
     if (wrong)
         printf("differing by zone: %s\n", byZone.description.UTF8String);
-    charon_check(wrong == 0,
+    revenant_check(wrong == 0,
                  [NSString stringWithFormat:@"the %lu next dates of calendar triggers are the ones the newest release gives",
                                             (unsigned long)count].UTF8String,
                  [NSString stringWithFormat:@"%lu differ, the first %@", (unsigned long)wrong, first]);
@@ -198,7 +198,7 @@ int main(void)
         CHECK([back isEqual:frozen], "a content survives an archive");
         for (NSString *later in @[@"interruptionLevel", @"relevanceScore", @"targetContentIdentifier", @"summaryArgument",
                                   @"filterCriteria"])
-            charon_check(![frozen respondsToSelector:NSSelectorFromString(later)],
+            revenant_check(![frozen respondsToSelector:NSSelectorFromString(later)],
                          [later stringByAppendingString:@", which iOS 10 has not got, is not answered"].UTF8String, @"it is");
 
         CHECK_EQUAL(raised(^{ [UNNotificationRequest requestWithIdentifier:(id)nil content:frozen trigger:nil]; }),
@@ -209,7 +209,7 @@ int main(void)
                                                  [NSKeyedArchiver archivedDataWithRootObject:request]];
         CHECK([requestBack isEqual:request], "a request survives an archive, trigger and all");
 
-        printf("%d checks, %d failures\n", charon_checks, charon_failures);
-        return charon_failures;
+        printf("%d checks, %d failures\n", revenant_checks, revenant_failures);
+        return revenant_failures;
     }
 }

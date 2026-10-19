@@ -13,7 +13,7 @@
 
 #include <cstdint>
 
-namespace shade::iokit_abi {
+namespace emulator::iokit_abi {
 
 enum class Message : std::uint32_t {
     IteratorNext = 2802,

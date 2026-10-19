@@ -2,19 +2,19 @@
 #import <ExposureNotification/ExposureNotification.h>
 #import <objc/runtime.h>
 
-static const char charon_diagnosisKeysAvailableHandlerKey;
+static const char revenant_diagnosisKeysAvailableHandlerKey;
 
-@implementation ENManager (CharonPreAuthorized14)
+@implementation ENManager (RevenantPreAuthorized14)
 
-- (void)charon_setDiagnosisKeysAvailableHandler:(void (^)(NSArray<ENTemporaryExposureKey *> *diagnosisKeys))diagnosisKeysAvailableHandler
+- (void)revenant_setDiagnosisKeysAvailableHandler:(void (^)(NSArray<ENTemporaryExposureKey *> *diagnosisKeys))diagnosisKeysAvailableHandler
 {
-    objc_setAssociatedObject(self, &charon_diagnosisKeysAvailableHandlerKey,
+    objc_setAssociatedObject(self, &revenant_diagnosisKeysAvailableHandlerKey,
                              [diagnosisKeysAvailableHandler copy], OBJC_ASSOCIATION_COPY_NONATOMIC);
 }
 
 - (void (^)(NSArray<ENTemporaryExposureKey *> *))diagnosisKeysAvailableHandler
 {
-    return objc_getAssociatedObject(self, &charon_diagnosisKeysAvailableHandlerKey);
+    return objc_getAssociatedObject(self, &revenant_diagnosisKeysAvailableHandlerKey);
 }
 
 - (void)preAuthorizeDiagnosisKeysWithCompletionHandler:(void (^)(NSError *_Nullable error))completionHandler

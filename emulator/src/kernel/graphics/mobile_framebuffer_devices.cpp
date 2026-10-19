@@ -17,7 +17,7 @@
 #include <mutex>
 #include <string>
 
-namespace shade {
+namespace emulator {
 
 bool MobileFramebufferHle::is_external_framebuffer(UserlandHleCall& call) const
 {

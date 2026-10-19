@@ -3,22 +3,22 @@
 #include <dlfcn.h>
 #import "check.h"
 
-static NSMutableString *charon_report;
+static NSMutableString *revenant_report;
 
 static void note(NSString *line)
 {
-    [charon_report appendFormat:@"%@\n", line];
-    [charon_report writeToFile:@"/private/var/backports/safearea.log" atomically:YES encoding:NSUTF8StringEncoding error:NULL];
+    [revenant_report appendFormat:@"%@\n", line];
+    [revenant_report writeToFile:@"/private/var/backports/safearea.log" atomically:YES encoding:NSUTF8StringEncoding error:NULL];
 }
 
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 
 #undef CHECK
 #define CHECK(condition, name) do { \
-        BOOL charon_passed = (condition) ? YES : NO; \
-        charon_check(charon_passed, name, @#condition); \
-        note([NSString stringWithFormat:@"%s %s%@", charon_passed ? "ok  " : "FAIL", name, \
-              charon_passed ? @"" : [NSString stringWithFormat:@" (%s)", #condition]]); \
+        BOOL revenant_passed = (condition) ? YES : NO; \
+        revenant_check(revenant_passed, name, @#condition); \
+        note([NSString stringWithFormat:@"%s %s%@", revenant_passed ? "ok  " : "FAIL", name, \
+              revenant_passed ? @"" : [NSString stringWithFormat:@" (%s)", #condition]]); \
     } while (0)
 
 
@@ -35,7 +35,7 @@ static void expect(UIView *view, UIEdgeInsets wanted, const char *name)
     note([NSString stringWithFormat:@"> %s", name]);
     UIEdgeInsets found = view.safeAreaInsets;
     BOOL passed = UIEdgeInsetsEqualToEdgeInsets(found, wanted);
-    charon_check(passed, name, [NSString stringWithFormat:@"%@ != %@", text(found), text(wanted)]);
+    revenant_check(passed, name, [NSString stringWithFormat:@"%@ != %@", text(found), text(wanted)]);
     note([NSString stringWithFormat:@"%@ %s: %@ wanted %@", passed ? @"ok  " : @"FAIL", name, text(found), text(wanted)]);
 }
 
@@ -246,13 +246,13 @@ static void run(void)
 
     window.hidden = YES;
 
-    NSString *summary = [NSString stringWithFormat:@"%@ checks=%d failures=%d\n", charon_failures ? @"FAIL" : @"ok", charon_checks, charon_failures];
+    NSString *summary = [NSString stringWithFormat:@"%@ checks=%d failures=%d\n", revenant_failures ? @"FAIL" : @"ok", revenant_checks, revenant_failures];
     [summary writeToFile:[results_folder stringByAppendingPathComponent:@"safearea.done"] atomically:YES encoding:NSUTF8StringEncoding error:NULL];
 }
 
 __attribute__((constructor)) static void safearea_tweak(void)
 {
-    charon_report = [NSMutableString string];
+    revenant_report = [NSMutableString string];
     [[NSFileManager defaultManager] createDirectoryAtPath:results_folder withIntermediateDirectories:YES attributes:nil error:NULL];
     note(@"loaded");
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
@@ -261,8 +261,8 @@ __attribute__((constructor)) static void safearea_tweak(void)
                 run();
             } @catch (NSException *exception) {
                 note([NSString stringWithFormat:@"raised %@: %@", exception.name, exception.reason]);
-                charon_check(NO, "the run raises no exception", [NSString stringWithFormat:@"%@: %@", exception.name, exception.reason]);
-                NSString *summary = [NSString stringWithFormat:@"FAIL checks=%d failures=%d %@\n", charon_checks, charon_failures, exception.name];
+                revenant_check(NO, "the run raises no exception", [NSString stringWithFormat:@"%@: %@", exception.name, exception.reason]);
+                NSString *summary = [NSString stringWithFormat:@"FAIL checks=%d failures=%d %@\n", revenant_checks, revenant_failures, exception.name];
                 [summary writeToFile:[results_folder stringByAppendingPathComponent:@"safearea.done"] atomically:YES encoding:NSUTF8StringEncoding error:NULL];
             }
         }

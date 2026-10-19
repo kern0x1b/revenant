@@ -35,7 +35,7 @@ int main(void)
     check(appleMetal != NULL, @"Apple's Metal opens by path");
     if (!appleMetal)
         return 1;
-    check(dlsym(appleMetal, "MTLCharonNoSuchErrorDomain") == NULL, @"a planted name is not in Apple's Metal");
+    check(dlsym(appleMetal, "MTLRevenantNoSuchErrorDomain") == NULL, @"a planted name is not in Apple's Metal");
     compare(appleMetal, "MTLCommandBufferErrorDomain", MTLCommandBufferErrorDomain);
     compare(appleMetal, "MTLLibraryErrorDomain", MTLLibraryErrorDomain);
     compare(appleMetal, "MTLIOErrorDomain", MTLIOErrorDomain);

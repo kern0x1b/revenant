@@ -4,7 +4,7 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-build=${AUDIOTOOLBOX_CONSTANTS_BUILD:-$(runs_folder charon-audiotoolbox-constants)}
+build=${AUDIOTOOLBOX_CONSTANTS_BUILD:-$(runs_folder revenant-audiotoolbox-constants)}
 rm -rf "$build"
 mkdir -p "$build"
 

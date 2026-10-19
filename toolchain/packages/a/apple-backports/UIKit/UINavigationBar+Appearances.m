@@ -1,90 +1,90 @@
-#import "CharonBarAppearance.h"
+#import "RevenantBarAppearance.h"
 
-static const void *CharonStandardKey = &CharonStandardKey;
-static const void *CharonCompactKey = &CharonCompactKey;
-static const void *CharonScrollEdgeKey = &CharonScrollEdgeKey;
-static const void *CharonActiveKey = &CharonActiveKey;
-static const void *CharonAppliedKey = &CharonAppliedKey;
-static const void *CharonPendingKey = &CharonPendingKey;
+static const void *RevenantStandardKey = &RevenantStandardKey;
+static const void *RevenantCompactKey = &RevenantCompactKey;
+static const void *RevenantScrollEdgeKey = &RevenantScrollEdgeKey;
+static const void *RevenantActiveKey = &RevenantActiveKey;
+static const void *RevenantAppliedKey = &RevenantAppliedKey;
+static const void *RevenantPendingKey = &RevenantPendingKey;
 
-@interface UINavigationBar (CharonAppearances)
-- (void)charon_standardChanged;
-- (void)charon_applyAppearances;
+@interface UINavigationBar (RevenantAppearances)
+- (void)revenant_standardChanged;
+- (void)revenant_applyAppearances;
 @end
 
-@implementation UINavigationBar (CharonAppearances)
+@implementation UINavigationBar (RevenantAppearances)
 
 - (UINavigationBarAppearance *)standardAppearance
 {
-    return charon_appearance_get(self, CharonStandardKey, [UINavigationBarAppearance class], @selector(charon_standardChanged));
+    return revenant_appearance_get(self, RevenantStandardKey, [UINavigationBarAppearance class], @selector(revenant_standardChanged));
 }
 
 - (void)setStandardAppearance:(UINavigationBarAppearance *)standardAppearance
 {
-    charon_appearance_set(self, CharonStandardKey, standardAppearance, @selector(charon_standardChanged));
-    charon_flag_set(self, CharonActiveKey, standardAppearance != nil);
-    [self charon_refreshForced:YES];
+    revenant_appearance_set(self, RevenantStandardKey, standardAppearance, @selector(revenant_standardChanged));
+    revenant_flag_set(self, RevenantActiveKey, standardAppearance != nil);
+    [self revenant_refreshForced:YES];
 }
 
 - (UINavigationBarAppearance *)compactAppearance
 {
-    return charon_appearance_peek(self, CharonCompactKey);
+    return revenant_appearance_peek(self, RevenantCompactKey);
 }
 
 - (void)setCompactAppearance:(UINavigationBarAppearance *)compactAppearance
 {
-    charon_appearance_set(self, CharonCompactKey, compactAppearance, @selector(charon_otherChanged));
-    [self charon_refreshForced:YES];
+    revenant_appearance_set(self, RevenantCompactKey, compactAppearance, @selector(revenant_otherChanged));
+    [self revenant_refreshForced:YES];
 }
 
 - (UINavigationBarAppearance *)scrollEdgeAppearance
 {
-    return charon_appearance_peek(self, CharonScrollEdgeKey);
+    return revenant_appearance_peek(self, RevenantScrollEdgeKey);
 }
 
 - (void)setScrollEdgeAppearance:(UINavigationBarAppearance *)scrollEdgeAppearance
 {
-    charon_appearance_store_observed(self, CharonScrollEdgeKey, scrollEdgeAppearance, @selector(charon_otherChanged));
-    [self charon_refreshForced:YES];
+    revenant_appearance_store_observed(self, RevenantScrollEdgeKey, scrollEdgeAppearance, @selector(revenant_otherChanged));
+    [self revenant_refreshForced:YES];
 }
 
-- (void)charon_standardChanged
+- (void)revenant_standardChanged
 {
-    charon_flag_set(self, CharonActiveKey, YES);
-    charon_schedule(self, @selector(charon_applyAppearances), CharonPendingKey);
+    revenant_flag_set(self, RevenantActiveKey, YES);
+    revenant_schedule(self, @selector(revenant_applyAppearances), RevenantPendingKey);
 }
 
-- (void)charon_otherChanged
+- (void)revenant_otherChanged
 {
-    charon_schedule(self, @selector(charon_applyAppearances), CharonPendingKey);
+    revenant_schedule(self, @selector(revenant_applyAppearances), RevenantPendingKey);
 }
 
-- (void)charon_applyAppearances
+- (void)revenant_applyAppearances
 {
-    [self charon_refreshForced:YES];
+    [self revenant_refreshForced:YES];
 }
 
-- (void)charon_refreshForced:(BOOL)force
+- (void)revenant_refreshForced:(BOOL)force
 {
-    charon_track_bar(self);
+    revenant_track_bar(self);
     UINavigationItem *item = self.topItem;
-    BOOL edge = charon_bar_at_edge(self, NO);
+    BOOL edge = revenant_bar_at_edge(self, NO);
     BOOL modern = [self respondsToSelector:@selector(scrollEdgeAppearance)];
-    UINavigationBarAppearance *own = charon_flag_get(self, CharonActiveKey) ? charon_appearance_peek(self, CharonStandardKey) : nil;
-    UINavigationBarAppearance *compact = charon_appearance_peek(self, CharonCompactKey);
+    UINavigationBarAppearance *own = revenant_flag_get(self, RevenantActiveKey) ? revenant_appearance_peek(self, RevenantStandardKey) : nil;
+    UINavigationBarAppearance *compact = revenant_appearance_peek(self, RevenantCompactKey);
     UINavigationBarAppearance *scrollEdge = modern ? self.scrollEdgeAppearance : nil;
     UINavigationBarAppearance *compactScrollEdge = modern ? self.compactScrollEdgeAppearance : nil;
     UINavigationBarAppearance *itemStandard = item.standardAppearance, *itemCompact = item.compactAppearance;
     UINavigationBarAppearance *itemScrollEdge = modern ? item.scrollEdgeAppearance : nil, *itemCompactScrollEdge = modern ? item.compactScrollEdgeAppearance : nil;
-    UINavigationBarAppearance *standard = edge ? charon_first_appearance(itemScrollEdge, scrollEdge, itemStandard, own, nil, nil) : charon_first_appearance(itemStandard, own, nil, nil, nil, nil);
-    UINavigationBarAppearance *landscape = edge ? charon_first_appearance(itemCompactScrollEdge, compactScrollEdge, itemScrollEdge, scrollEdge, itemCompact, compact)
-                                                : charon_first_appearance(itemCompact, compact, nil, nil, nil, nil);
-    if (!standard && !landscape && !charon_flag_get(self, CharonAppliedKey))
+    UINavigationBarAppearance *standard = edge ? revenant_first_appearance(itemScrollEdge, scrollEdge, itemStandard, own, nil, nil) : revenant_first_appearance(itemStandard, own, nil, nil, nil, nil);
+    UINavigationBarAppearance *landscape = edge ? revenant_first_appearance(itemCompactScrollEdge, compactScrollEdge, itemScrollEdge, scrollEdge, itemCompact, compact)
+                                                : revenant_first_appearance(itemCompact, compact, nil, nil, nil, nil);
+    if (!standard && !landscape && !revenant_flag_get(self, RevenantAppliedKey))
         return;
-    if (!charon_bar_needs_refresh(self, [NSString stringWithFormat:@"%p %p", standard, landscape]) && !force)
+    if (!revenant_bar_needs_refresh(self, [NSString stringWithFormat:@"%p %p", standard, landscape]) && !force)
         return;
-    charon_apply_navigation_bar(self, standard, landscape);
-    charon_flag_set(self, CharonAppliedKey, standard || landscape);
+    revenant_apply_navigation_bar(self, standard, landscape);
+    revenant_flag_set(self, RevenantAppliedKey, standard || landscape);
 }
 
 @end

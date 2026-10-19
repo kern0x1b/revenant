@@ -6,12 +6,12 @@
 #include <string.h>
 
 #ifdef PORT
-#define PREFIX "CharonHost"
+#define PREFIX "RevenantHost"
 #else
 #define PREFIX ""
 #endif
 
-static Class charonClass(NSString *name)
+static Class revenantClass(NSString *name)
 {
     return NSClassFromString([NSString stringWithFormat:@"%s%@", PREFIX, name]);
 }
@@ -108,7 +108,7 @@ static void readGetter(id range, id rule)
 
 static void rangeCase(const char *name, id rule)
 {
-    Class rangeClass = charonClass(@"INDateComponentsRange");
+    Class rangeClass = revenantClass(@"INDateComponentsRange");
     SEL initSel = NSSelectorFromString(@"initWithEKRecurrenceRule:");
     printf("case\t%s\n", name);
     id range = [[rangeClass alloc] performSelector:initSel withObject:rule];
@@ -128,8 +128,8 @@ static void rangeCase(const char *name, id rule)
 
 static void intentsCase(const char *name, NSInteger frequency, NSInteger interval)
 {
-    Class ruleClass = charonClass(@"INRecurrenceRule");
-    Class rangeClass = charonClass(@"INDateComponentsRange");
+    Class ruleClass = revenantClass(@"INRecurrenceRule");
+    Class rangeClass = revenantClass(@"INDateComponentsRange");
     id rule = ((id (*)(id, SEL, NSUInteger, NSInteger))objc_msgSend)([ruleClass alloc],
                   NSSelectorFromString(@"initWithInterval:frequency:"), (NSUInteger)interval, frequency);
     id range = ((id (*)(id, SEL, id, id, id))objc_msgSend)([rangeClass alloc],
@@ -141,8 +141,8 @@ static void intentsCase(const char *name, NSInteger frequency, NSInteger interva
 
 static void startedCase(const char *name, NSInteger frequency, NSInteger interval, NSInteger weekday)
 {
-    Class ruleClass = charonClass(@"INRecurrenceRule");
-    Class rangeClass = charonClass(@"INDateComponentsRange");
+    Class ruleClass = revenantClass(@"INRecurrenceRule");
+    Class rangeClass = revenantClass(@"INDateComponentsRange");
     id rule = ((id (*)(id, SEL, NSUInteger, NSInteger))objc_msgSend)([ruleClass alloc],
                   NSSelectorFromString(@"initWithInterval:frequency:"), (NSUInteger)interval, frequency);
     NSDateComponents *start = [[NSDateComponents alloc] init];
@@ -157,7 +157,7 @@ static void startedCase(const char *name, NSInteger frequency, NSInteger interva
 int main(void)
 {
     @autoreleasepool {
-        Class rangeClass = charonClass(@"INDateComponentsRange");
+        Class rangeClass = revenantClass(@"INDateComponentsRange");
         printf("responds\tinit %d\tget %d\n", [rangeClass instancesRespondToSelector:NSSelectorFromString(@"initWithEKRecurrenceRule:")],
                [rangeClass instancesRespondToSelector:NSSelectorFromString(@"EKRecurrenceRule")]);
 

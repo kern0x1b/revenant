@@ -1,29 +1,29 @@
-#import "CharonMetal.h"
+#import "RevenantMetal.h"
 
 #pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
 
-@interface CharonMetalHeap (AllocatedSize)
+@interface RevenantMetalHeap (AllocatedSize)
 @end
 
-@implementation CharonMetalHeap (AllocatedSize)
+@implementation RevenantMetalHeap (AllocatedSize)
 
 - (NSUInteger)currentAllocatedSize
 {
-    return [self charonAllocated];
+    return [self revenantAllocated];
 }
 
 @end
 
-@implementation CharonMetalEncoder (Heap)
+@implementation RevenantMetalEncoder (Heap)
 
 - (void)useHeap:(id<MTLHeap>)heap
 {
-    [self charonUseHeaps:&heap count:1];
+    [self revenantUseHeaps:&heap count:1];
 }
 
 - (void)useHeaps:(const id<MTLHeap> __nonnull[])heaps count:(NSUInteger)count
 {
-    [self charonUseHeaps:heaps count:count];
+    [self revenantUseHeaps:heaps count:count];
 }
 
 @end

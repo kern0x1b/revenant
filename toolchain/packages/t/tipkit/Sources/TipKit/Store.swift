@@ -79,7 +79,7 @@ extension Tips {
         public init() {
             let support = (NSSearchPathForDirectoriesInDomains(.applicationSupportDirectory, .userDomainMask, true).first
                            ?? NSTemporaryDirectory())
-            let folder = (support as NSString).appendingPathComponent("charon-tipkit")
+            let folder = (support as NSString).appendingPathComponent("revenant-tipkit")
             try? FileManager.default.createDirectory(atPath: folder, withIntermediateDirectories: true)
             self.defaultURL = URL(fileURLWithPath: folder).appendingPathComponent("tips.plist")
             load()
@@ -99,12 +99,12 @@ extension Tips {
 
         public func shouldDisplay(_ tip: AnyTip) -> Bool {
             if invalidated[tip.id] != nil { return false }
-            if CharonTipRules.hold(tip.rules, store: self) == false { return false }
+            if RevenantTipRules.hold(tip.rules, store: self) == false { return false }
             if let last = shown[tip.id]?.last, tip.options.contains(where: { $0 is Tips.IgnoresDisplayFrequency }) == false {
                 let elapsed = Date().timeIntervalSince(last)
                 if elapsed < displayFrequency.seconds { return false }
             }
-            return CharonTipRules.withinOptions(tip, store: self)
+            return RevenantTipRules.withinOptions(tip, store: self)
         }
 
         public mutating func recordShown(_ tipID: String) {
@@ -149,12 +149,12 @@ extension Tips {
             save()
         }
 
-        public func input() -> CharonRuleInput {
+        public func input() -> RevenantRuleInput {
             var all: [Tips.Event<EmptyDonation>.Donation] = []
             for (_, entries) in donations.sorted(by: { $0.key < $1.key }) {
                 all.append(contentsOf: entries.sorted { $0.date > $1.date })
             }
-            return CharonRuleInput(donations: all)
+            return RevenantRuleInput(donations: all)
         }
 
         public func move(to url: URL) {}
@@ -177,13 +177,13 @@ extension Tips {
                   let propertyList = try? PropertyListSerialization.propertyList(from: data, options: [], format: nil),
                   let entry = propertyList as? [String: Any] else { return }
             invalidated = (entry["invalidated"] as? [String: String] ?? [:]).reduce(into: [:]) {
-                $0[$1.key] = Tips.InvalidationReason(rawCharonValue: $1.value)
+                $0[$1.key] = Tips.InvalidationReason(rawRevenantValue: $1.value)
             }
         }
 
         public mutating func save() {
             let entry: [String: Any] = ["invalidated": invalidated.reduce(into: [String: String]()) {
-                $0[$1.key] = $1.value.rawCharonValue
+                $0[$1.key] = $1.value.rawRevenantValue
             }]
             guard let data = try? PropertyListSerialization.data(fromPropertyList: entry, format: .xml, options: 0) else {
                 return
@@ -192,13 +192,13 @@ extension Tips {
         }
     }
 
-    public struct CharonRuleInput: RuleInput {
+    public struct RevenantRuleInput: RuleInput {
         public let donations: [Tips.Event<EmptyDonation>.Donation]
     }
 }
 
 extension Tips.InvalidationReason {
-    public var rawCharonValue: String {
+    public var rawRevenantValue: String {
         switch self {
         case .actionPerformed: return "actionPerformed"
         case .displayCountExceeded: return "displayCountExceeded"
@@ -207,8 +207,8 @@ extension Tips.InvalidationReason {
         }
     }
 
-    public init?(rawCharonValue: String) {
-        switch rawCharonValue {
+    public init?(rawRevenantValue: String) {
+        switch rawRevenantValue {
         case "actionPerformed": self = .actionPerformed
         case "displayCountExceeded": self = .displayCountExceeded
         case "displayDurationExceeded": self = .displayDurationExceeded
@@ -229,7 +229,7 @@ extension Tips {
     }
 }
 
-enum CharonTipRules {
+enum RevenantTipRules {
     static func hold(_ rules: [Tips.Rule], store: Tips.Store) -> Bool {
         guard !rules.isEmpty else { return true }
         let input = store.input()

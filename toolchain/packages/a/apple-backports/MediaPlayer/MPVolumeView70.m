@@ -2,16 +2,16 @@
 #import <MediaPlayer/MediaPlayer.h>
 #import <objc/runtime.h>
 
-static const char CharonVolumeWarningSliderImageKey;
+static const char RevenantVolumeWarningSliderImageKey;
 
-@implementation MPVolumeView (Charon70)
+@implementation MPVolumeView (Revenant70)
 
 - (nullable UIImage *)volumeWarningSliderImage {
-    return objc_getAssociatedObject(self, &CharonVolumeWarningSliderImageKey);
+    return objc_getAssociatedObject(self, &RevenantVolumeWarningSliderImageKey);
 }
 
 - (void)setVolumeWarningSliderImage:(nullable UIImage *)volumeWarningSliderImage {
-    objc_setAssociatedObject(self, &CharonVolumeWarningSliderImageKey, volumeWarningSliderImage,
+    objc_setAssociatedObject(self, &RevenantVolumeWarningSliderImageKey, volumeWarningSliderImage,
                              OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 

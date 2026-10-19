@@ -1,5 +1,5 @@
-#ifndef CharonSpriteKit_h
-#define CharonSpriteKit_h
+#ifndef RevenantSpriteKit_h
+#define RevenantSpriteKit_h
 
 #import <Foundation/Foundation.h>
 #import <CoreGraphics/CoreGraphics.h>
@@ -16,10 +16,10 @@
 
 #if TARGET_OS_IPHONE
 @class UIColor;
-typedef UIColor CharonSKColor;
+typedef UIColor RevenantSKColor;
 #else
 @class NSColor;
-typedef NSColor CharonSKColor;
+typedef NSColor RevenantSKColor;
 #endif
 
 typedef NS_ENUM(NSInteger, SKUniformType) {
@@ -131,30 +131,30 @@ typedef NS_ENUM(NSInteger, SKBlendMode) {
 
 @end
 
-@interface SKNode (CharonSpriteKitMatching)
-- (NSArray *)charon_nodesMatchingPath:(NSString *)path;
+@interface SKNode (RevenantSpriteKitMatching)
+- (NSArray *)revenant_nodesMatchingPath:(NSString *)path;
 @end
 
-@interface SKNode (CharonSpriteKit8)
+@interface SKNode (RevenantSpriteKit8)
 - (NSArray *)objectForKeyedSubscript:(NSString *)path;
 @end
 
-@interface SKNode (CharonSpriteKit9)
+@interface SKNode (RevenantSpriteKit9)
 - (void)moveToParent:(SKNode *)parent;
 @end
 
 @interface SKSpriteNode : SKNode
 
-+ (instancetype)spriteNodeWithColor:(CharonSKColor *)color size:(CGSize)size;
++ (instancetype)spriteNodeWithColor:(RevenantSKColor *)color size:(CGSize)size;
 + (instancetype)spriteNodeWithTexture:(SKTexture *)texture;
 + (instancetype)spriteNodeWithTexture:(SKTexture *)texture size:(CGSize)size;
 
-- (instancetype)initWithColor:(CharonSKColor *)color size:(CGSize)size;
+- (instancetype)initWithColor:(RevenantSKColor *)color size:(CGSize)size;
 - (instancetype)initWithTexture:(SKTexture *)texture;
-- (instancetype)initWithTexture:(SKTexture *)texture color:(CharonSKColor *)color size:(CGSize)size;
+- (instancetype)initWithTexture:(SKTexture *)texture color:(RevenantSKColor *)color size:(CGSize)size;
 
 @property (nonatomic, retain) SKTexture *texture;
-@property (nonatomic, retain) CharonSKColor *color;
+@property (nonatomic, retain) RevenantSKColor *color;
 @property (nonatomic) CGFloat colorBlendFactor;
 @property (nonatomic) SKBlendMode blendMode;
 @property (nonatomic) CGPoint anchorPoint;
@@ -176,8 +176,8 @@ typedef NS_ENUM(NSInteger, SKBlendMode) {
 + (instancetype)shapeNodeWithEllipseOfSize:(CGSize)size;
 
 @property (nonatomic) CGPathRef path;
-@property (nonatomic, retain) CharonSKColor *strokeColor;
-@property (nonatomic, retain) CharonSKColor *fillColor;
+@property (nonatomic, retain) RevenantSKColor *strokeColor;
+@property (nonatomic, retain) RevenantSKColor *fillColor;
 @property (nonatomic) SKBlendMode blendMode;
 @property (nonatomic, getter=isAntialiased) BOOL antialiased;
 @property (nonatomic) CGFloat lineWidth;
@@ -188,7 +188,7 @@ typedef NS_ENUM(NSInteger, SKBlendMode) {
 
 @end
 
-@interface SKShapeNode (CharonSpriteKitShape8)
+@interface SKShapeNode (RevenantSpriteKitShape8)
 
 + (instancetype)shapeNodeWithPoints:(CGPoint *)points count:(size_t)numPoints;
 + (instancetype)shapeNodeWithSplinePoints:(CGPoint *)points count:(size_t)numPoints;
@@ -220,8 +220,8 @@ typedef NS_ENUM(NSInteger, SKLabelVerticalAlignmentMode) {
 @property (nonatomic, copy) NSString *text;
 @property (nonatomic, copy) NSString *fontName;
 @property (nonatomic) CGFloat fontSize;
-@property (nonatomic, retain) CharonSKColor *fontColor;
-@property (nonatomic, retain) CharonSKColor *color;
+@property (nonatomic, retain) RevenantSKColor *fontColor;
+@property (nonatomic, retain) RevenantSKColor *color;
 @property (nonatomic) CGFloat colorBlendFactor;
 @property (nonatomic) SKBlendMode blendMode;
 @property (nonatomic) SKLabelHorizontalAlignmentMode horizontalAlignmentMode;
@@ -258,7 +258,7 @@ typedef NS_ENUM(NSInteger, SKLabelVerticalAlignmentMode) {
 @property (nonatomic) CGSize size;
 @property (nonatomic) SKSceneScaleMode scaleMode;
 @property (nonatomic) CGPoint anchorPoint;
-@property (nonatomic, retain) CharonSKColor *backgroundColor;
+@property (nonatomic, retain) RevenantSKColor *backgroundColor;
 
 #if TARGET_OS_IPHONE
 @property (nonatomic, weak, readonly) SKView *view;
@@ -273,17 +273,17 @@ typedef NS_ENUM(NSInteger, SKLabelVerticalAlignmentMode) {
 
 @end
 
-@interface SKScene (CharonSpriteKitView)
-- (void)charon_setView:(SKView *)view;
+@interface SKScene (RevenantSpriteKitView)
+- (void)revenant_setView:(SKView *)view;
 @end
 
-@interface SKNode (CharonSpriteKitScene)
+@interface SKNode (RevenantSpriteKitScene)
 @property (nonatomic, readonly) SKScene *scene;
 @end
 
 @protocol SKSceneDelegate;
 
-@interface SKScene (CharonSpriteKitScene8)
+@interface SKScene (RevenantSpriteKitScene8)
 @property (nonatomic, weak) id<SKSceneDelegate> delegate;
 - (void)didApplyConstraints;
 - (void)didFinishUpdate;

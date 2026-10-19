@@ -1,5 +1,5 @@
 package("apple-compat")
-    set_homepage("https://github.com/kern0x1b/charon")
+    set_homepage("https://github.com/kern0x1b/revenant/tree/main/toolchain")
     set_description("What a current library calls and an old Apple system does not have, provided as hidden definitions linked into the image that calls them")
     set_license("MIT")
     set_policy("package.strict_compatibility", true)
@@ -7,7 +7,7 @@ package("apple-compat")
     local digests = {}
     local sources = table.join({path.join(os.scriptdir(), "xmake.lua")},
                                os.files(path.join(os.scriptdir(), "src", "*.c")), os.files(path.join(os.scriptdir(), "src", "*.h")),
-                               os.files(path.join(os.scriptdir(), "include", "charon", "*.h")))
+                               os.files(path.join(os.scriptdir(), "include", "revenant", "*.h")))
     table.sort(sources)
     for _, file in ipairs(sources) do
         table.insert(digests, path.filename(file) .. "=" .. hash.sha256(file))
@@ -45,24 +45,24 @@ package("apple-compat")
             os.vrunv(toolchain:tool("cc"), {"-target", triple, "-miphoneos-version-min=" .. toolchain:config("deployment"), "-isysroot", toolchain:config("sdkdir"), "-Os",
                                "-fno-builtin", "-fvisibility=hidden", "-c", path.join(package:scriptdir(), "src", symbol .. ".c"), "-o", object})
             table.insert(objects, object)
-            local header = path.join(package:scriptdir(), "include", "charon", symbol .. ".h")
+            local header = path.join(package:scriptdir(), "include", "revenant", symbol .. ".h")
             if os.isfile(header) then
-                os.vcp(header, path.join(package:installdir("include"), "charon") .. "/")
+                os.vcp(header, path.join(package:installdir("include"), "revenant") .. "/")
             end
         end
         if #objects > 0 then
             os.vrunv("xcrun", table.join({"libtool", "-static", "-o", path.join(package:installdir("lib"), "libapple-compat.a")}, objects))
         end
-        local module = path.join(package:installdir("include"), "CharonCompat")
+        local module = path.join(package:installdir("include"), "RevenantCompat")
         os.mkdir(module)
-        local lines = {"// Written by charon@apple-compat: the shims this release needs, as one module a Swift file can import."}
+        local lines = {"// Written by revenant@apple-compat: the shims this release needs, as one module a Swift file can import."}
         for _, symbol in ipairs(package:data("provided")) do
-            if os.isfile(path.join(package:installdir("include"), "charon", symbol .. ".h")) then
-                table.insert(lines, "#include <charon/" .. symbol .. ".h>")
+            if os.isfile(path.join(package:installdir("include"), "revenant", symbol .. ".h")) then
+                table.insert(lines, "#include <toolchain/" .. symbol .. ".h>")
             end
         end
         io.writefile(path.join(module, "shims.h"), table.concat(lines, "\n") .. "\n")
-        io.writefile(path.join(module, "module.modulemap"), "module CharonCompat {\n    header \"shims.h\"\n    export *\n}\n")
+        io.writefile(path.join(module, "module.modulemap"), "module RevenantCompat {\n    header \"shims.h\"\n    export *\n}\n")
         local process_wide = package:data("process_wide")
         if #process_wide > 0 then
             local folder = path.join(package:installdir("share"), "apple-compat", "process-wide")

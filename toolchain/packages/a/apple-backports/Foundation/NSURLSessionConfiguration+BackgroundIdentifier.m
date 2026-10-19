@@ -2,7 +2,7 @@
 
 NSString * const NSURLErrorBackgroundTaskCancelledReasonKey = @"NSURLErrorBackgroundTaskCancelledReasonKey";
 
-@implementation NSURLSessionConfiguration (CharonBackgroundIdentifier)
+@implementation NSURLSessionConfiguration (RevenantBackgroundIdentifier)
 
 + (NSURLSessionConfiguration *)backgroundSessionConfigurationWithIdentifier:(NSString *)identifier
 {

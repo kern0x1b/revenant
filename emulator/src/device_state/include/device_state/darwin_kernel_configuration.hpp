@@ -16,7 +16,7 @@
 #include "device_state/darwin_abi.hpp"
 #include "device_state/darwin_kernel_identity.hpp"
 
-namespace shade {
+namespace emulator {
 
 struct DarwinConfigurationEntry {
     std::string_view name;

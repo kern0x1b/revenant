@@ -38,7 +38,7 @@
 # `cc.attr.factory.copies.*`, on both sides, 0 undeclared differences), so the port copies too. The only
 # mutation that breaks it is to store the caller's NSString under the ivar the header types as an
 # NSAttributedString, and that raises in -label rather than printing a different value - measured: the
-# mutant dies with `-[NSObject(NSObject) __retain_OA]` from `-[CharonPortAXCustomContent label] + 36`.
+# mutant dies with `-[NSObject(NSObject) __retain_OA]` from `-[RevenantPortAXCustomContent label] + 36`.
 # This suite counts a mutant that dies any way other than an undeclared difference plus the diff as a
 # mutant that did not die in the required way, which is the rule M13's comment below is about. So the
 # rule is held by the comparison against the host and there is no mutant for it.
@@ -86,26 +86,26 @@ PY
 
 # Each entry: the mutant's number, the file, the line to change, and what it changes to.
 case $mutant in
-1) apply CharonAXMathExpression.m '            _content = [content copy];' '            _content = @"0";' ;;
-2) apply CharonAXMathExpression.m '        return _content;' '        return _content ?: @"";' ;;
-3) apply CharonAXMathExpression.m '        _expressions = expressions;
+1) apply RevenantAXMathExpression.m '            _content = [content copy];' '            _content = @"0";' ;;
+2) apply RevenantAXMathExpression.m '        return _content;' '        return _content ?: @"";' ;;
+3) apply RevenantAXMathExpression.m '        _expressions = expressions;
         _openString = [openString copy];
         _closeString = [closeString copy];' '        _expressions = nil;
         _openString = [openString copy];
         _closeString = [closeString copy];' ;;
-4) apply CharonAXMathExpression.m '        _expressions = expressions;
+4) apply RevenantAXMathExpression.m '        _expressions = expressions;
         _openString = [openString copy];
         _closeString = [closeString copy];' '        _expressions = [expressions copy];
         _openString = [openString copy];
         _closeString = [closeString copy];' ;;
-5) apply CharonAXMathExpression.m '    return (AXMathExpression *)_baseExpression;' '    return (AXMathExpression *)_baseExpression.firstObject;' ;;
-6) apply CharonAXMathExpression.m '    return _denimonatorExpression;' '    return _numeratorExpression;' ;;
-7) apply CharonAXCustomContent.m '    return _charon_attributedLabel.string;' '    return _charon_attributedValue.string;' ;;
-8) apply CharonAXCustomContent.m '    return _charon_importance;' '    return AXCustomContentImportanceHigh;' ;;
-9) apply CharonAXCustomContent.m '        && _charon_importance == content->_charon_importance;' '        && YES;' ;;
-10) apply CharonAXCustomContent.m '    copy->_charon_importance = _charon_importance;' '' ;;
-11) apply CharonAXCustomContent.m '    [coder encodeInteger:(NSInteger)_charon_importance forKey:@"importance"];' '' ;;
-12) apply CharonAXCustomContent.m '    [coder encodeObject:_charon_attributedLabel forKey:@"attributedLabel"];' '' ;;
+5) apply RevenantAXMathExpression.m '    return (AXMathExpression *)_baseExpression;' '    return (AXMathExpression *)_baseExpression.firstObject;' ;;
+6) apply RevenantAXMathExpression.m '    return _denimonatorExpression;' '    return _numeratorExpression;' ;;
+7) apply RevenantAXCustomContent.m '    return _revenant_attributedLabel.string;' '    return _revenant_attributedValue.string;' ;;
+8) apply RevenantAXCustomContent.m '    return _revenant_importance;' '    return AXCustomContentImportanceHigh;' ;;
+9) apply RevenantAXCustomContent.m '        && _revenant_importance == content->_revenant_importance;' '        && YES;' ;;
+10) apply RevenantAXCustomContent.m '    copy->_revenant_importance = _revenant_importance;' '' ;;
+11) apply RevenantAXCustomContent.m '    [coder encodeInteger:(NSInteger)_revenant_importance forKey:@"importance"];' '' ;;
+12) apply RevenantAXCustomContent.m '    [coder encodeObject:_revenant_attributedLabel forKey:@"attributedLabel"];' '' ;;
 # The one this suite found by accident first: -description spelled with %@ on self calls itself, and the
 # case that reads it died on a segfault rather than on a difference. M13 is the rule it must also hold -
 # the two values and nothing else - because a description naming an importance the system does not print
@@ -113,7 +113,7 @@ case $mutant in
 # The first spelling of this mutant added a fifth argument to a four-specifier format, so
 # stringWithFormat ignored it and the description came out unchanged: the case passed with the rule
 # broken. It is written here as one line that changes what the format is given, which is the mistake.
-13) apply CharonAXCustomContent.m '            _charon_attributedLabel.string, _charon_attributedValue.string];' '            _charon_attributedLabel.string, [NSString stringWithFormat:@"%@ importance %d", _charon_attributedValue.string, (int)_charon_importance]];' ;;
+13) apply RevenantAXCustomContent.m '            _revenant_attributedLabel.string, _revenant_attributedValue.string];' '            _revenant_attributedLabel.string, [NSString stringWithFormat:@"%@ importance %d", _revenant_attributedValue.string, (int)_revenant_importance]];' ;;
 all)
     total=13
     killed=0

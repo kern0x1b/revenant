@@ -14,7 +14,7 @@
 
 namespace {
 
-using shade::runtime_detail::InitialProcessFailure;
+using emulator::runtime_detail::InitialProcessFailure;
 using Kind = InitialProcessFailure::Kind;
 
 int failures = 0;
@@ -31,7 +31,7 @@ std::string message_of(Kind kind)
 {
     constexpr std::uint32_t pc = 0x8000;
     constexpr std::uint32_t address = 0x4000;
-    return shade::runtime_detail::initial_process_failure_message(
+    return emulator::runtime_detail::initial_process_failure_message(
         { kind, 1, pc, address });
 }
 
@@ -39,7 +39,7 @@ std::string message_of(Kind kind)
 
 int main()
 {
-    expect(shade::runtime_detail::initial_process_failure_message(
+    expect(emulator::runtime_detail::initial_process_failure_message(
                { Kind::UndefinedInstruction, 1, 0x8000, 0 }) ==
             "pid 1 died of an undefined instruction at 0x8000; the run failed",
         "undefined instruction message");
@@ -58,7 +58,7 @@ int main()
                                                    "at 0x8000; the run failed") !=
             std::string::npos,
         "unclassified stop message");
-    expect(shade::runtime_detail::initial_process_failure_message(
+    expect(emulator::runtime_detail::initial_process_failure_message(
                { Kind::Signal, 1, 0, 9 }) ==
             "pid 1 died of signal 9; the run failed",
         "signal message");

@@ -34,19 +34,19 @@ common="$common -I $S/Metal -I $S -I $S/MetalKit -I $root/tests/backports/host/m
 
 classes="MTLRasterizationRateSampleArray MTLRasterizationRateLayerDescriptor MTLRasterizationRateLayerArray MTLRasterizationRateMapDescriptor"
 renames=""
-for name in $classes; do renames="$renames -D$name=charonHost_$name"; done
+for name in $classes; do renames="$renames -D$name=revenantHost_$name"; done
 
 # THE PORT'S FOUR CLASSES MUST BE DEFINED IN THE BINARY, under the names it renames them to, or the
 # case would be measuring the framework's classes and passing.
 prove_defined() {   # $1 nm output
     missing=""
     for name in $classes; do
-        printf '%s\n' "$1" | awk -v n="charonHost_$name" \
+        printf '%s\n' "$1" | awk -v n="revenantHost_$name" \
             '{ if ($NF == "_OBJC_CLASS_$_" n) f = 1 } END { exit !f }' || missing="$missing $name"
     done
     if [ -n "$missing" ]; then
         echo "FAIL: the binary does not define these under their renamed names:" >&2
-        for name in $missing; do echo "    charonHost_$name" >&2; done
+        for name in $missing; do echo "    revenantHost_$name" >&2; done
         return 1
     fi
     echo "  the port's four classes are DEFINED in the binary under the renamed names: 4 of 4"

@@ -5,14 +5,14 @@
 # be identical. A planted control then changes the fetch's error code in a scratch copy of the port, and the comparison must tell
 # the copy apart: a diff that is empty for a mutant proves nothing about the port.
 #
-# The port's index writes its store under CHARON_SPOTLIGHT_SHARED_ROOT (CharonSpotlightStore.h), a path only root can create, and
+# The port's index writes its store under REVENANT_SPOTLIGHT_SHARED_ROOT (RevenantSpotlightStore.h), a path only root can create, and
 # defaultSearchableIndex asks for the store directory when it is made. The attempt fails silently for an ordinary user, and nothing
 # is written: the program indexes nothing.
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 spotlight=${SPOTLIGHT:-$here/../../../../packages/a/apple-backports/CoreSpotlight}
-build=${CORESPOTLIGHT_INDEX_BUILD:-$(runs_folder charon-corespotlight-index-host)}
+build=${CORESPOTLIGHT_INDEX_BUILD:-$(runs_folder revenant-corespotlight-index-host)}
 rm -rf "$build"
 mkdir -p "$build/host" "$build/port/src" "$build/control/src"
 
@@ -21,7 +21,7 @@ mkdir -p "$build/host" "$build/port/src" "$build/control/src"
 # that one warning and no other.
 sources="CSSearchableIndex.m CSSearchableItem.m CSSearchableItemAttributeSet.m"
 # The store header the index includes, which the port builds beside it.
-headers="CharonSpotlightStore.h"
+headers="RevenantSpotlightStore.h"
 
 normalise() {
     sed -E 's/0x[0-9a-f]+/ADDR/g' "$1" > "$1.norm"

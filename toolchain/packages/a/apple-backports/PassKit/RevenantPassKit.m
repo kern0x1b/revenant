@@ -1,11 +1,11 @@
-#import "CharonPassKit.h"
+#import "RevenantPassKit.h"
 
-NSString *const CharonPassKitNoHardwareReason =
+NSString *const RevenantPassKitNoHardwareReason =
     @"this device has no wallet hardware, so the operation cannot be carried out";
 
-NSError *CharonPassKitNoHardwareError(void)
+NSError *RevenantPassKitNoHardwareError(void)
 {
     return [NSError errorWithDomain:PKPassKitErrorDomain
                                code:PKUnsupportedVersionError
-                           userInfo:@{NSLocalizedDescriptionKey: CharonPassKitNoHardwareReason}];
+                           userInfo:@{NSLocalizedDescriptionKey: RevenantPassKitNoHardwareReason}];
 }

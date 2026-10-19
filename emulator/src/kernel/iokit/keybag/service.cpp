@@ -14,7 +14,7 @@
 #include <mutex>
 #include <string>
 
-namespace shade::kernel_iokit::keybag {
+namespace emulator::kernel_iokit::keybag {
 namespace {
 
     constexpr std::string_view registry_path {

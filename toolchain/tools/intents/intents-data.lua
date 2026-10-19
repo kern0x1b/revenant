@@ -433,7 +433,7 @@ function data()
             "- (void)requestAuthorizationWithCompletionHandler:",
             "    (void (^ __nullable)(INFocusStatusAuthorizationStatus status))completionHandler",
             "{",
-            "    // The same answer packages/a/apple-backports/Intents/CharonIntents100.m gives for",
+            "    // The same answer packages/a/apple-backports/Intents/RevenantIntents100.m gives for",
             "    // +[INPreferences requestSiriAuthorization:]: this release has no Focus setting to ask",
             "    // about and no prompt to show, so it answers the handler with Restricted rather than",
             "    // leaving the handler waiting for a system that will never call it. A nil handler is not",
@@ -496,9 +496,9 @@ function data()
     }
 
 
-    D.charon_readers = {
-        ["INRelevantShortcutStore charon_relevantShortcuts"] = {
-            "- (NSArray *)charon_relevantShortcuts",
+    D.revenant_readers = {
+        ["INRelevantShortcutStore revenant_relevantShortcuts"] = {
+            "- (NSArray *)revenant_relevantShortcuts",
             "{",
             "    // What setRelevantShortcuts:completionHandler: was last given, in the order it was",
             "    // given, or an empty array before anything was. Where a port reads back what it",
@@ -506,24 +506,24 @@ function data()
             "    return _relevantShortcuts ?: [NSArray array];",
             "}",
         },
-        ["INUpcomingMediaManager charon_suggestedMediaIntents"] = {
-            "- (NSOrderedSet *)charon_suggestedMediaIntents",
+        ["INUpcomingMediaManager revenant_suggestedMediaIntents"] = {
+            "- (NSOrderedSet *)revenant_suggestedMediaIntents",
             "{",
             "    // What setSuggestedMediaIntents: was last given, in the order it was given, or an empty",
             "    // ordered set before anything was.",
             "    return _suggestedMediaIntents ?: [NSOrderedSet orderedSet];",
             "}",
         },
-        ["INVoiceShortcutCenter charon_shortcutSuggestions"] = {
-            "- (NSArray *)charon_shortcutSuggestions",
+        ["INVoiceShortcutCenter revenant_shortcutSuggestions"] = {
+            "- (NSArray *)revenant_shortcutSuggestions",
             "{",
             "    // What setShortcutSuggestions: was last given, in the order it was given, or an empty",
             "    // array before anything was.",
             "    return _shortcutSuggestions ?: [NSArray array];",
             "}",
         },
-        ["INUpcomingMediaManager charon_predictionModeForType:"] = {
-            "- (INUpcomingMediaPredictionMode)charon_predictionModeForType:(INMediaItemType)type",
+        ["INUpcomingMediaManager revenant_predictionModeForType:"] = {
+            "- (INUpcomingMediaPredictionMode)revenant_predictionModeForType:(INMediaItemType)type",
             "{",
             "    // What setPredictionMode:forType: recorded for that media item type, and the enumeration",
             "    // own zero case - Default - for a type nothing was set for, which is what a dictionary",

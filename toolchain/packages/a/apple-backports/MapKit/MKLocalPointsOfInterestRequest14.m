@@ -1,9 +1,9 @@
 #import <Foundation/Foundation.h>
 #import <CoreLocation/CoreLocation.h>
 #import <MapKit/MapKit.h>
-#import "CharonMapKit.h"
+#import "RevenantMapKit.h"
 
-static MKCoordinateRegion CharonRegionAroundCoordinate(CLLocationCoordinate2D coordinate, CLLocationDistance radius)
+static MKCoordinateRegion RevenantRegionAroundCoordinate(CLLocationCoordinate2D coordinate, CLLocationDistance radius)
 {
     MKMapPoint centre = MKMapPointForCoordinate(coordinate);
     double reach = MKMapPointsPerMeterAtLatitude(coordinate.latitude) * (double)radius;
@@ -11,7 +11,7 @@ static MKCoordinateRegion CharonRegionAroundCoordinate(CLLocationCoordinate2D co
     return MKCoordinateRegionForMapRect(area);
 }
 
-static CLLocationDistance CharonRadiusAroundRegion(MKCoordinateRegion region)
+static CLLocationDistance RevenantRadiusAroundRegion(MKCoordinateRegion region)
 {
     double perMetre = MKMapPointsPerMeterAtLatitude(region.center.latitude);
     if (!(perMetre > 0.0) || !(region.span.latitudeDelta >= 0.0) || !(region.span.longitudeDelta >= 0.0)) {
@@ -35,7 +35,7 @@ static CLLocationDistance CharonRadiusAroundRegion(MKCoordinateRegion region)
 
 - (instancetype)init
 {
-    charon_sayOnce(@"[MKLocalPointsOfInterestRequest init]",
+    revenant_sayOnce(@"[MKLocalPointsOfInterestRequest init]",
                    @"it answers the whole world, and the release's own search is asked with no query: "
                    @"MKLocalSearchRequest13.m's -initWithPointsOfInterestRequest: drops its argument");
     return [self initWithCoordinateRegion:MKCoordinateRegionMake(CLLocationCoordinate2DMake(0.0, 0.0),
@@ -44,7 +44,7 @@ static CLLocationDistance CharonRadiusAroundRegion(MKCoordinateRegion region)
 
 - (instancetype)initWithCenterCoordinate:(CLLocationCoordinate2D)coordinate radius:(CLLocationDistance)radius
 {
-    charon_sayOnce(@"[MKLocalPointsOfInterestRequest initWithCenterCoordinate:radius:]",
+    revenant_sayOnce(@"[MKLocalPointsOfInterestRequest initWithCenterCoordinate:radius:]",
                    @"the circle is recorded and answered back, and the release's own search is asked "
                    @"with no query: MKLocalSearchRequest13.m's -initWithPointsOfInterestRequest: drops "
                    @"its argument");
@@ -52,14 +52,14 @@ static CLLocationDistance CharonRadiusAroundRegion(MKCoordinateRegion region)
     if (self) {
         _coordinate = coordinate;
         _radius = radius < 0.0 ? 0.0 : radius;
-        _region = CharonRegionAroundCoordinate(coordinate, _radius);
+        _region = RevenantRegionAroundCoordinate(coordinate, _radius);
     }
     return self;
 }
 
 - (instancetype)initWithCoordinateRegion:(MKCoordinateRegion)region
 {
-    charon_sayOnce(@"[MKLocalPointsOfInterestRequest initWithCoordinateRegion:]",
+    revenant_sayOnce(@"[MKLocalPointsOfInterestRequest initWithCoordinateRegion:]",
                    @"the region is recorded and answered back, and the release's own search is asked "
                    @"with no query: MKLocalSearchRequest13.m's -initWithPointsOfInterestRequest: drops "
                    @"its argument");
@@ -67,7 +67,7 @@ static CLLocationDistance CharonRadiusAroundRegion(MKCoordinateRegion region)
     if (self) {
         _region = region;
         _coordinate = region.center;
-        _radius = CharonRadiusAroundRegion(region);
+        _radius = RevenantRadiusAroundRegion(region);
     }
     return self;
 }
@@ -94,7 +94,7 @@ static CLLocationDistance CharonRadiusAroundRegion(MKCoordinateRegion region)
 
 - (void)setPointOfInterestFilter:(nullable MKPointOfInterestFilter *)pointOfInterestFilter
 {
-    charon_sayOnce(@"MKLocalPointsOfInterestRequest.pointOfInterestFilter",
+    revenant_sayOnce(@"MKLocalPointsOfInterestRequest.pointOfInterestFilter",
                    @"the filter is kept and answered back and nothing asks the release's own search "
                    @"with it: the release's own request has no filter member and its own map item has "
                    @"no category, both measured on the armv7 cache of 6.1.3");

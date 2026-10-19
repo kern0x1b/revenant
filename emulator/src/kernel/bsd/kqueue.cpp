@@ -11,7 +11,7 @@
 #include <mutex>
 #include <string>
 
-namespace shade {
+namespace emulator {
 void CompatibilityKernel::dispatch_bsd_kqueue(Cpu& cpu, std::uint32_t number)
 {
     auto& registers = cpu.registers();

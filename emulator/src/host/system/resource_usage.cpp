@@ -17,7 +17,7 @@
 #include <sstream>
 #include <string>
 
-namespace shade {
+namespace emulator {
 namespace {
 
     [[nodiscard]] std::optional<std::uint64_t> read_decimal_file(

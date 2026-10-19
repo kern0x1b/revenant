@@ -18,7 +18,7 @@
 
 #include "graphics/host_graphics.hpp"
 
-namespace shade {
+namespace emulator {
 
 class DisplayState;
 class GlesRenderer;

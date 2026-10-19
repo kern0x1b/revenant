@@ -1,10 +1,10 @@
 #import <AVFoundation/AVFoundation.h>
 
-@interface AVCaptureDeviceFormat (CharonBinnedDictionary)
+@interface AVCaptureDeviceFormat (RevenantBinnedDictionary)
 - (BOOL)isBinned;
 @end
 
-@implementation AVCaptureDeviceFormat (CharonBinnedVideo)
+@implementation AVCaptureDeviceFormat (RevenantBinnedVideo)
 
 - (BOOL)isVideoBinned
 {

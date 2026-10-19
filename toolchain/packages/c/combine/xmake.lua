@@ -1,6 +1,6 @@
-package("styx")
-    set_homepage("https://github.com/kern0x1b/styx")
-    set_description("Styx, Combine for legacy Apple platforms: OpenCombine at a commit with our patches, its core, Dispatch and Foundation sources compiled against the charon@swift-runtime a port carries as one module named Combine, a static library with its module, so a port writes `import Combine`. The URLSession data task publisher is declared from iOS 7, and the run loop timer's tolerance is read and set behind #available")
+package("combine")
+    set_homepage("https://github.com/kern0x1b/revenant/tree/main/frameworks/Combine")
+    set_description("Combine, Combine for legacy Apple platforms: OpenCombine at a commit with our patches, its core, Dispatch and Foundation sources compiled against the revenant@swift-runtime a port carries as one module named Combine, a static library with its module, so a port writes `import Combine`. The URLSession data task publisher is declared from iOS 7, and the run loop timer's tolerance is read and set behind #available")
     set_license("MIT")
     set_policy("package.strict_compatibility", true)
 
@@ -37,9 +37,9 @@ package("styx")
         if package:config("sources") then
             return
         end
-        package:add("deps", "charon@swift-runtime", {alias = "swift-runtime", configs = {shared = package:config("shared") or nil,
+        package:add("deps", "revenant@swift-runtime", {alias = "swift-runtime", configs = {shared = package:config("shared") or nil,
                     backports = package:config("backports") or nil, backports_uikit = package:config("backports_uikit") or nil}})
-        package:add("deps", "charon@libcxx", {alias = "libcxx", configs = {packaged = package:config("shared") or nil}})
+        package:add("deps", "revenant@libcxx", {alias = "libcxx", configs = {packaged = package:config("shared") or nil}})
         for _, library in ipairs(libraries) do
             package:add("links", library)
         end
@@ -67,10 +67,10 @@ package("styx")
 
         local modules = path.join(package:scriptdir(), "..", "..", "..", "modules")
         local swift = import("apple.swift", {rootdir = modules, anonymous = true})
-        local toolchain = assert(package:toolchains(), "Styx is built with the apple-ios toolchain")[1]
+        local toolchain = assert(package:toolchains(), "Combine is built with the apple-ios toolchain")[1]
         toolchain:load()
-        local runtime = assert(package:dep("swift-runtime"), "Styx is compiled against charon@swift-runtime")
-        local libcxx = assert(package:dep("libcxx"), "Styx's C++ helper is compiled against charon@libcxx")
+        local runtime = assert(package:dep("swift-runtime"), "Combine is compiled against revenant@swift-runtime")
+        local libcxx = assert(package:dep("libcxx"), "Combine's C++ helper is compiled against revenant@libcxx")
         local swiftc = assert(table.wrap((runtime:envs() or {}).SWIFT_EXEC)[1], "swift-runtime names no compiler; reinstall it")
         local minimum = toolchain:config("deployment")
         local triple = package:arch() .. "-apple-ios" .. minimum
@@ -95,12 +95,12 @@ package("styx")
             architecture = package:arch(), deployment = minimum, sdk = sdk,
             resources = path.join(runtime:installdir(), "lib", "swift"),
             plugins = table.wrap((runtime:envs() or {}).SWIFT_PLUGIN_PATH)[1],
-            module = "Combine", optimize = "fastest", prefix_map = src .. "=/styx"}),
+            module = "Combine", optimize = "fastest", prefix_map = src .. "=/combine"}),
             {"-I", swiftdir, "-I", path.join(helpers, "include"), "-emit-module", "-emit-module-path",
              path.join(swiftmodule, package:arch() .. "-apple-ios.swiftmodule"), "-c"},
             os.files(path.join(module, "**.swift")), {"-o", path.join(objects, "Combine.o")})
         os.vrunv(swiftc, argv)
         os.vrunv(toolchain:tool("ar"), {"-rcs", path.join(package:installdir("lib"), "libCombine.a"), path.join(objects, "Combine.o")})
 
-        package:setenv("CHARON_SWIFT_MODULES", swiftdir, path.join(package:installdir("include"), "CombineHelpers"))
+        package:setenv("REVENANT_SWIFT_MODULES", swiftdir, path.join(package:installdir("include"), "CombineHelpers"))
     end)

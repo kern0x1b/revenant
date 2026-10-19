@@ -1,5 +1,5 @@
-#ifndef CHARON_DISPATCH_QUEUE_CURRENT_H
-#define CHARON_DISPATCH_QUEUE_CURRENT_H
+#ifndef REVENANT_DISPATCH_QUEUE_CURRENT_H
+#define REVENANT_DISPATCH_QUEUE_CURRENT_H
 
 #include <dispatch/dispatch.h>
 #include <pthread.h>
@@ -7,12 +7,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-static void charon_unmarked(void *unused)
+static void revenant_unmarked(void *unused)
 {
     (void)unused;
 }
 
-static inline int charon_global_priority(dispatch_queue_t queue, long *priority)
+static inline int revenant_global_priority(dispatch_queue_t queue, long *priority)
 {
     static const long priorities[] = {DISPATCH_QUEUE_PRIORITY_HIGH, DISPATCH_QUEUE_PRIORITY_DEFAULT, DISPATCH_QUEUE_PRIORITY_LOW,
                                       DISPATCH_QUEUE_PRIORITY_BACKGROUND};
@@ -26,11 +26,11 @@ static inline int charon_global_priority(dispatch_queue_t queue, long *priority)
     return 0;
 }
 
-static inline int charon_runs_on_queue(dispatch_queue_t queue)
+static inline int revenant_runs_on_queue(dispatch_queue_t queue)
 {
     if (queue == dispatch_get_main_queue())
         return pthread_main_np() != 0;
-    if (charon_global_priority(queue, NULL)) {
+    if (revenant_global_priority(queue, NULL)) {
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
         return dispatch_get_current_queue() == queue;
@@ -38,7 +38,7 @@ static inline int charon_runs_on_queue(dispatch_queue_t queue)
     }
     void *key = (void *)((uintptr_t)queue | 1);
     if (dispatch_queue_get_specific(queue, key) != key)
-        dispatch_queue_set_specific(queue, key, key, charon_unmarked);
+        dispatch_queue_set_specific(queue, key, key, revenant_unmarked);
     return dispatch_get_specific(key) == key;
 }
 

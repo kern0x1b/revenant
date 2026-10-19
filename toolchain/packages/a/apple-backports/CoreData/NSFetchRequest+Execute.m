@@ -1,10 +1,10 @@
-#import "CharonCoreData.h"
+#import "RevenantCoreData.h"
 
-@implementation NSFetchRequest (CharonExecute)
+@implementation NSFetchRequest (RevenantExecute)
 
 - (NSArray *)execute:(NSError **)error
 {
-    NSManagedObjectContext *context = charon_current_context();
+    NSManagedObjectContext *context = revenant_current_context();
     if ([context isKindOfClass:[NSManagedObjectContext class]])
         return [context executeFetchRequest:self error:error];
     if (error)

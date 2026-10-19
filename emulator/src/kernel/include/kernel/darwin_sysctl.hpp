@@ -20,7 +20,7 @@
 #include <string_view>
 #include <vector>
 
-namespace shade::darwin::sysctl {
+namespace emulator::darwin::sysctl {
 
 inline constexpr std::uint32_t control_unspecified = 0;
 inline constexpr std::uint32_t control_kernel = 1;

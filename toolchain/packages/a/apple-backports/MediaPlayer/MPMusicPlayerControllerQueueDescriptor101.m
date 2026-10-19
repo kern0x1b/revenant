@@ -1,7 +1,7 @@
 #import <Foundation/Foundation.h>
 #import <MediaPlayer/MediaPlayer.h>
 
-@implementation MPMusicPlayerController (CharonQueueDescriptor101)
+@implementation MPMusicPlayerController (RevenantQueueDescriptor101)
 
 - (void)setQueueWithDescriptor:(MPMusicPlayerQueueDescriptor *)queueDescriptor {
     if (!queueDescriptor) {
@@ -41,7 +41,7 @@
 @implementation MPSystemMusicPlayerController
 @end
 
-@implementation MPSystemMusicPlayerController (CharonOpenToPlay11)
+@implementation MPSystemMusicPlayerController (RevenantOpenToPlay11)
 
 - (void)openToPlayQueueDescriptor:(MPMusicPlayerQueueDescriptor *)queueDescriptor {
     (void)queueDescriptor;

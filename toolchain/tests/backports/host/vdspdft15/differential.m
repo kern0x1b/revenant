@@ -4,13 +4,13 @@
 #include <math.h>
 #include <stdint.h>
 
-extern vDSP_DFT_Interleaved_Setup charon_host_vDSP_DFT_Interleaved_CreateSetup(vDSP_DFT_Interleaved_Setup Previous,
+extern vDSP_DFT_Interleaved_Setup revenant_host_vDSP_DFT_Interleaved_CreateSetup(vDSP_DFT_Interleaved_Setup Previous,
                                                                              vDSP_Length Length,
                                                                              vDSP_DFT_Direction Direction,
                                                                              vDSP_DFT_RealtoComplex RealtoComplex);
-extern void charon_host_vDSP_DFT_Interleaved_Execute(const vDSP_DFT_Interleaved_Setup Setup, const DSPComplex *Iri,
+extern void revenant_host_vDSP_DFT_Interleaved_Execute(const vDSP_DFT_Interleaved_Setup Setup, const DSPComplex *Iri,
                                                      DSPComplex *Ori);
-extern void charon_host_vDSP_DFT_Interleaved_DestroySetup(vDSP_DFT_Interleaved_Setup Setup);
+extern void revenant_host_vDSP_DFT_Interleaved_DestroySetup(vDSP_DFT_Interleaved_Setup Setup);
 
 typedef struct {
     const char *name;
@@ -22,8 +22,8 @@ typedef struct {
 
 static const Impl kHost = {"the host", vDSP_DFT_Interleaved_CreateSetup, vDSP_DFT_Interleaved_Execute,
                            vDSP_DFT_Interleaved_DestroySetup};
-static const Impl kPort = {"the port", charon_host_vDSP_DFT_Interleaved_CreateSetup,
-                           charon_host_vDSP_DFT_Interleaved_Execute, charon_host_vDSP_DFT_Interleaved_DestroySetup};
+static const Impl kPort = {"the port", revenant_host_vDSP_DFT_Interleaved_CreateSetup,
+                           revenant_host_vDSP_DFT_Interleaved_Execute, revenant_host_vDSP_DFT_Interleaved_DestroySetup};
 
 static const double kK = 1.538;
 

@@ -12,7 +12,7 @@
 #include <string>
 #include <vector>
 
-namespace shade::bsd::baseband_device {
+namespace emulator::bsd::baseband_device {
 
 std::vector<std::byte> load_replay_file(const std::filesystem::path& path)
 {

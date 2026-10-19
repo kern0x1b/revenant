@@ -29,7 +29,7 @@ int main(void)
         CHECK([formatter stringForObjectValue:@5] == nil && [formatter stringForObjectValue:[NSDate date]] != nil, "only a date has a string");
         NSString *soon = [formatter localizedStringFromTimeInterval:7200];
         CHECK_EQUAL(soon, @"in 2 hours", "a time interval is read from now");
-        printf("checks=%d failures=%d\n", charon_checks, charon_failures);
-        return charon_failures;
+        printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
+        return revenant_failures;
     }
 }

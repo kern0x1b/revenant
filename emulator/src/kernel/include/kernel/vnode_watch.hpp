@@ -12,7 +12,7 @@
 #include <cstdint>
 #include <filesystem>
 
-namespace shade {
+namespace emulator {
 
 class VnodeWatch {
 public:

@@ -1,8 +1,8 @@
 #import <CarPlay/CarPlay.h>
 #import <UIKit/UIKit.h>
-#import "CharonCarPlayTemplate.h"
+#import "RevenantCarPlayTemplate.h"
 
-@implementation CPListSection (CharonCarPlay150)
+@implementation CPListSection (RevenantCarPlay150)
 
 - (instancetype)initWithItems:(NSArray<id<CPListTemplateItem>> *)items
                        header:(NSString *)header
@@ -13,16 +13,16 @@
 {
     self = [self initWithItems:items header:header sectionIndexTitle:sectionIndexTitle];
     if (self) {
-        [self charon_setHeaderSubtitle:headerSubtitle];
-        [self charon_setHeaderImage:headerImage];
-        [self charon_setHeaderButton:headerButton];
+        [self revenant_setHeaderSubtitle:headerSubtitle];
+        [self revenant_setHeaderImage:headerImage];
+        [self revenant_setHeaderButton:headerButton];
     }
     return self;
 }
 
 @end
 
-@implementation CPListTemplate (CharonCarPlay150)
+@implementation CPListTemplate (RevenantCarPlay150)
 
 - (instancetype)initWithTitle:(NSString *)title
                      sections:(NSArray<CPListSection *> *)sections

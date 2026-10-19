@@ -1,13 +1,13 @@
-#import "CharonAVCaptureDeferredStart26.h"
-#import "../CharonProgramSDK.h"
+#import "RevenantAVCaptureDeferredStart26.h"
+#import "../RevenantProgramSDK.h"
 
-static void charon_deferred_start_unsupported(NSString *selector)
+static void revenant_deferred_start_unsupported(NSString *selector)
 {
     [NSException raise:NSObjectInaccessibleException
                 format:@"*** -[AVCaptureSession %@] Deferred start not supported", selector];
 }
 
-@implementation AVCaptureSession (CharonCaptureDeferredStart26)
+@implementation AVCaptureSession (RevenantCaptureDeferredStart26)
 
 - (BOOL)isManualDeferredStartSupported
 {
@@ -16,7 +16,7 @@ static void charon_deferred_start_unsupported(NSString *selector)
 
 - (BOOL)automaticallyRunsDeferredStart
 {
-    return charon_program_linked_on_or_after(26.0, 0);
+    return revenant_program_linked_on_or_after(26.0, 0);
 }
 
 - (void)setAutomaticallyRunsDeferredStart:(BOOL)automaticallyRunsDeferredStart
@@ -43,17 +43,17 @@ static void charon_deferred_start_unsupported(NSString *selector)
 - (void)setDeferredStartDelegate:(id<AVCaptureSessionDeferredStartDelegate>)deferredStartDelegate
   deferredStartDelegateCallbackQueue:(dispatch_queue_t)deferredStartDelegateCallbackQueue
 {
-    charon_deferred_start_unsupported(@"setDeferredStartDelegate:deferredStartDelegateCallbackQueue:");
+    revenant_deferred_start_unsupported(@"setDeferredStartDelegate:deferredStartDelegateCallbackQueue:");
 }
 
 - (void)runDeferredStartWhenNeeded
 {
-    charon_deferred_start_unsupported(@"runDeferredStartWhenNeeded");
+    revenant_deferred_start_unsupported(@"runDeferredStartWhenNeeded");
 }
 
 @end
 
-@implementation AVCaptureOutput (CharonCaptureDeferredStart26)
+@implementation AVCaptureOutput (RevenantCaptureDeferredStart26)
 
 - (BOOL)isDeferredStartSupported
 {
@@ -62,7 +62,7 @@ static void charon_deferred_start_unsupported(NSString *selector)
 
 - (BOOL)isDeferredStartEnabled
 {
-    if (!charon_program_linked_on_or_after(26.0, 0))
+    if (!revenant_program_linked_on_or_after(26.0, 0))
         return NO;
     if (!self.isDeferredStartSupported)
         return NO;
@@ -79,7 +79,7 @@ static void charon_deferred_start_unsupported(NSString *selector)
 
 @end
 
-@implementation AVCaptureVideoPreviewLayer (CharonCaptureDeferredStart26)
+@implementation AVCaptureVideoPreviewLayer (RevenantCaptureDeferredStart26)
 
 - (BOOL)isDeferredStartSupported
 {

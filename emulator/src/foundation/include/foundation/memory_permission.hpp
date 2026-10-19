@@ -8,7 +8,7 @@
 
 #include <cstdint>
 
-namespace shade {
+namespace emulator {
 
 enum class MemoryPermission : std::uint8_t {
     None = 0,

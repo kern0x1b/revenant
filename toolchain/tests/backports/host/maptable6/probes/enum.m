@@ -4,18 +4,18 @@
 #import "check.h"
 
 @interface NSMapTable (H)
-+ (instancetype)charonHost_weakToStrongObjectsMapTable;
-+ (instancetype)charonHost_strongToWeakObjectsMapTable;
-+ (instancetype)charonHost_weakToWeakObjectsMapTable;
++ (instancetype)revenantHost_weakToStrongObjectsMapTable;
++ (instancetype)revenantHost_strongToWeakObjectsMapTable;
++ (instancetype)revenantHost_weakToWeakObjectsMapTable;
 @end
 
 int main(void)
 {
     const char *names[] = {"weakToStrong", "strongToWeak", "weakToWeak"};
     NSMapTable *(^makers[])(void) = {
-        ^{ return [NSMapTable charonHost_weakToStrongObjectsMapTable]; },
-        ^{ return [NSMapTable charonHost_strongToWeakObjectsMapTable]; },
-        ^{ return [NSMapTable charonHost_weakToWeakObjectsMapTable]; },
+        ^{ return [NSMapTable revenantHost_weakToStrongObjectsMapTable]; },
+        ^{ return [NSMapTable revenantHost_strongToWeakObjectsMapTable]; },
+        ^{ return [NSMapTable revenantHost_weakToWeakObjectsMapTable]; },
     };
     for (int m = 0; m < 3; m++) {
         NSMapTable *table = makers[m]();
@@ -39,6 +39,6 @@ int main(void)
         fflush(stdout);
         CHECK_EQUAL(@([table count]), @0, names[m]);
     }
-    printf("%d checks, %d failures\n", charon_checks, charon_failures);
-    return charon_failures ? 1 : 0;
+    printf("%d checks, %d failures\n", revenant_checks, revenant_failures);
+    return revenant_failures ? 1 : 0;
 }

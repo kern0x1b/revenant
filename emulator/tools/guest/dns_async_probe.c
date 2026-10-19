@@ -229,13 +229,13 @@ static int probe_main(void)
     DNSServiceRefDeallocate(service);
     if (dnssd_result != 1)
         return 1;
-    if (shade_run_system_configuration_probe(local_hostname) != 0)
+    if (emulator_run_system_configuration_probe(local_hostname) != 0)
         return 1;
     emit(probe_complete, sizeof(probe_complete) - 1);
     return 0;
 }
 
-__attribute__((noreturn)) void shade_guest_start(
+__attribute__((noreturn)) void emulator_guest_start(
     int argc, char** argv, char** environment)
 {
     NXArgc = argc;
@@ -248,6 +248,6 @@ __attribute__((noreturn)) void shade_guest_start(
     if (_cthread_init_routine != (darwin_init_routine)0) {
         _cthread_init_routine();
     }
-    shade_guest_run_runtime_initializers();
+    emulator_guest_run_runtime_initializers();
     _exit(probe_main());
 }

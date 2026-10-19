@@ -1,10 +1,10 @@
 #import <Foundation/Foundation.h>
 #import <Metal/Metal.h>
 #import <objc/runtime.h>
-#import "CharonMetal26Types.h"
-#import "CharonMetalProtocols.h"
+#import "RevenantMetal26Types.h"
+#import "RevenantMetalProtocols.h"
 
-static void CharonMetal4ResetBlendState(MTL4RenderPipelineColorAttachmentDescriptor *attachment);
+static void RevenantMetal4ResetBlendState(MTL4RenderPipelineColorAttachmentDescriptor *attachment);
 
 @implementation MTL4PipelineOptions {
     MTLShaderValidation _shaderValidation;
@@ -294,7 +294,7 @@ static void CharonMetal4ResetBlendState(MTL4RenderPipelineColorAttachmentDescrip
 
 - (void)reset
 {
-    CharonMetal4ResetBlendState(self);
+    RevenantMetal4ResetBlendState(self);
 }
 
 - (id)copyWithZone:(NSZone *)zone
@@ -346,7 +346,7 @@ static void CharonMetal4ResetBlendState(MTL4RenderPipelineColorAttachmentDescrip
 
 @end
 
-static void CharonMetal4ResetBlendState(MTL4RenderPipelineColorAttachmentDescriptor *attachment)
+static void RevenantMetal4ResetBlendState(MTL4RenderPipelineColorAttachmentDescriptor *attachment)
 {
     attachment.pixelFormat = MTLPixelFormatInvalid;
     attachment.blendingState = MTL4BlendStateDisabled;
@@ -359,20 +359,20 @@ static void CharonMetal4ResetBlendState(MTL4RenderPipelineColorAttachmentDescrip
     attachment.writeMask = MTLColorWriteMaskAll;
 }
 
-enum { CharonMetal4ColorAttachmentSlots = 8 };
+enum { RevenantMetal4ColorAttachmentSlots = 8 };
 
-enum { CharonMetal4TileColorAttachmentSlots = 8 };
+enum { RevenantMetal4TileColorAttachmentSlots = 8 };
 
 @implementation MTL4RenderPipelineColorAttachmentDescriptorArray {
-    MTL4RenderPipelineColorAttachmentDescriptor *_slots[CharonMetal4ColorAttachmentSlots];
+    MTL4RenderPipelineColorAttachmentDescriptor *_slots[RevenantMetal4ColorAttachmentSlots];
 }
 
 - (MTL4RenderPipelineColorAttachmentDescriptor *)objectAtIndexedSubscript:(NSUInteger)attachmentIndex
 {
-    if (attachmentIndex >= CharonMetal4ColorAttachmentSlots) {
+    if (attachmentIndex >= RevenantMetal4ColorAttachmentSlots) {
         [NSException raise:NSRangeException
                     format:@"colorAttachments[%lu]: this array has %lu slots",
-                           (unsigned long)attachmentIndex, (unsigned long)CharonMetal4ColorAttachmentSlots];
+                           (unsigned long)attachmentIndex, (unsigned long)RevenantMetal4ColorAttachmentSlots];
         return nil;
     }
     if (!_slots[attachmentIndex])
@@ -383,30 +383,30 @@ enum { CharonMetal4TileColorAttachmentSlots = 8 };
 - (void)setObject:(MTL4RenderPipelineColorAttachmentDescriptor *)attachment
     atIndexedSubscript:(NSUInteger)attachmentIndex
 {
-    if (attachmentIndex >= CharonMetal4ColorAttachmentSlots) {
+    if (attachmentIndex >= RevenantMetal4ColorAttachmentSlots) {
         [NSException raise:NSRangeException
                     format:@"setObject:atIndexedSubscript:%lu: this array has %lu slots",
-                           (unsigned long)attachmentIndex, (unsigned long)CharonMetal4ColorAttachmentSlots];
+                           (unsigned long)attachmentIndex, (unsigned long)RevenantMetal4ColorAttachmentSlots];
         return;
     }
     if (attachment)
         _slots[attachmentIndex] = [attachment copy];
     else {
         _slots[attachmentIndex] = [[MTL4RenderPipelineColorAttachmentDescriptor alloc] init];
-        CharonMetal4ResetBlendState(_slots[attachmentIndex]);
+        RevenantMetal4ResetBlendState(_slots[attachmentIndex]);
     }
 }
 
 - (void)reset
 {
-    for (NSUInteger index = 0; index < CharonMetal4ColorAttachmentSlots; index++)
+    for (NSUInteger index = 0; index < RevenantMetal4ColorAttachmentSlots; index++)
         [self setObject:nil atIndexedSubscript:index];
 }
 
 - (id)copyWithZone:(NSZone *)zone
 {
     MTL4RenderPipelineColorAttachmentDescriptorArray *copy = [[MTL4RenderPipelineColorAttachmentDescriptorArray alloc] init];
-    for (NSUInteger index = 0; index < CharonMetal4ColorAttachmentSlots; index++)
+    for (NSUInteger index = 0; index < RevenantMetal4ColorAttachmentSlots; index++)
         if (_slots[index])
             [copy setObject:_slots[index] atIndexedSubscript:index];
     return copy;
@@ -416,7 +416,7 @@ enum { CharonMetal4TileColorAttachmentSlots = 8 };
 {
     if (self == object) return YES;
     if (![object isKindOfClass:[MTL4RenderPipelineColorAttachmentDescriptorArray class]]) return NO;
-    for (NSUInteger index = 0; index < CharonMetal4ColorAttachmentSlots; index++) {
+    for (NSUInteger index = 0; index < RevenantMetal4ColorAttachmentSlots; index++) {
         id mine = _slots[index];
         id theirs = ((MTL4RenderPipelineColorAttachmentDescriptorArray *)object)->_slots[index];
         if (mine != theirs && ![mine isEqual:theirs]) return NO;
@@ -427,7 +427,7 @@ enum { CharonMetal4TileColorAttachmentSlots = 8 };
 - (NSUInteger)hash
 {
     NSUInteger hash = (NSUInteger)object_getClass(self);
-    for (NSUInteger index = 0; index < CharonMetal4ColorAttachmentSlots; index++)
+    for (NSUInteger index = 0; index < RevenantMetal4ColorAttachmentSlots; index++)
         hash = hash * 31u + (uint32_t)[_slots[index] hash];
     return hash;
 }
@@ -480,7 +480,7 @@ enum { CharonMetal4TileColorAttachmentSlots = 8 };
 
 @end
 
-static MTL4StaticLinkingDescriptor *CharonMetal4NullResettable(MTL4StaticLinkingDescriptor *stored)
+static MTL4StaticLinkingDescriptor *RevenantMetal4NullResettable(MTL4StaticLinkingDescriptor *stored)
 {
     if (!stored)
         stored = [[MTL4StaticLinkingDescriptor alloc] init];
@@ -542,7 +542,7 @@ static MTL4StaticLinkingDescriptor *CharonMetal4NullResettable(MTL4StaticLinking
 
 - (MTL4StaticLinkingDescriptor *)vertexStaticLinkingDescriptor
 {
-    _vertexStaticLinkingDescriptor = CharonMetal4NullResettable(_vertexStaticLinkingDescriptor);
+    _vertexStaticLinkingDescriptor = RevenantMetal4NullResettable(_vertexStaticLinkingDescriptor);
     return _vertexStaticLinkingDescriptor;
 }
 
@@ -553,7 +553,7 @@ static MTL4StaticLinkingDescriptor *CharonMetal4NullResettable(MTL4StaticLinking
 
 - (MTL4StaticLinkingDescriptor *)fragmentStaticLinkingDescriptor
 {
-    _fragmentStaticLinkingDescriptor = CharonMetal4NullResettable(_fragmentStaticLinkingDescriptor);
+    _fragmentStaticLinkingDescriptor = RevenantMetal4NullResettable(_fragmentStaticLinkingDescriptor);
     return _fragmentStaticLinkingDescriptor;
 }
 
@@ -593,7 +593,7 @@ static MTL4StaticLinkingDescriptor *CharonMetal4NullResettable(MTL4StaticLinking
     copy.alphaToOneState = _alphaToOneState;
     copy.rasterizationEnabled = _rasterizationEnabled;
     copy.maxVertexAmplificationCount = _maxVertexAmplificationCount;
-    for (NSUInteger index = 0; index < CharonMetal4ColorAttachmentSlots; index++)
+    for (NSUInteger index = 0; index < RevenantMetal4ColorAttachmentSlots; index++)
         [copy.colorAttachments setObject:[_colorAttachments objectAtIndexedSubscript:index]
                       atIndexedSubscript:index];
     copy.inputPrimitiveTopology = _inputPrimitiveTopology;
@@ -678,7 +678,7 @@ static MTL4StaticLinkingDescriptor *CharonMetal4NullResettable(MTL4StaticLinking
 
 - (MTL4StaticLinkingDescriptor *)staticLinkingDescriptor
 {
-    _staticLinkingDescriptor = CharonMetal4NullResettable(_staticLinkingDescriptor);
+    _staticLinkingDescriptor = RevenantMetal4NullResettable(_staticLinkingDescriptor);
     return _staticLinkingDescriptor;
 }
 
@@ -784,7 +784,7 @@ static MTL4StaticLinkingDescriptor *CharonMetal4NullResettable(MTL4StaticLinking
 
 - (MTL4StaticLinkingDescriptor *)staticLinkingDescriptor
 {
-    _staticLinkingDescriptor = CharonMetal4NullResettable(_staticLinkingDescriptor);
+    _staticLinkingDescriptor = RevenantMetal4NullResettable(_staticLinkingDescriptor);
     return _staticLinkingDescriptor;
 }
 
@@ -823,7 +823,7 @@ static MTL4StaticLinkingDescriptor *CharonMetal4NullResettable(MTL4StaticLinking
 {
     MTL4TileRenderPipelineDescriptor *copy = [[MTL4TileRenderPipelineDescriptor alloc] init];
     copy.tileFunctionDescriptor = _tileFunctionDescriptor;
-    for (NSUInteger index = 0; index < CharonMetal4TileColorAttachmentSlots; index++)
+    for (NSUInteger index = 0; index < RevenantMetal4TileColorAttachmentSlots; index++)
         [copy.colorAttachments setObject:[_colorAttachments objectAtIndexedSubscript:index]
                       atIndexedSubscript:index];
     copy.rasterSampleCount = _rasterSampleCount;
@@ -928,7 +928,7 @@ static MTL4StaticLinkingDescriptor *CharonMetal4NullResettable(MTL4StaticLinking
 
 - (MTL4StaticLinkingDescriptor *)objectStaticLinkingDescriptor
 {
-    _objectStaticLinkingDescriptor = CharonMetal4NullResettable(_objectStaticLinkingDescriptor);
+    _objectStaticLinkingDescriptor = RevenantMetal4NullResettable(_objectStaticLinkingDescriptor);
     return _objectStaticLinkingDescriptor;
 }
 
@@ -939,7 +939,7 @@ static MTL4StaticLinkingDescriptor *CharonMetal4NullResettable(MTL4StaticLinking
 
 - (MTL4StaticLinkingDescriptor *)meshStaticLinkingDescriptor
 {
-    _meshStaticLinkingDescriptor = CharonMetal4NullResettable(_meshStaticLinkingDescriptor);
+    _meshStaticLinkingDescriptor = RevenantMetal4NullResettable(_meshStaticLinkingDescriptor);
     return _meshStaticLinkingDescriptor;
 }
 
@@ -950,7 +950,7 @@ static MTL4StaticLinkingDescriptor *CharonMetal4NullResettable(MTL4StaticLinking
 
 - (MTL4StaticLinkingDescriptor *)fragmentStaticLinkingDescriptor
 {
-    _fragmentStaticLinkingDescriptor = CharonMetal4NullResettable(_fragmentStaticLinkingDescriptor);
+    _fragmentStaticLinkingDescriptor = RevenantMetal4NullResettable(_fragmentStaticLinkingDescriptor);
     return _fragmentStaticLinkingDescriptor;
 }
 
@@ -1024,7 +1024,7 @@ static MTL4StaticLinkingDescriptor *CharonMetal4NullResettable(MTL4StaticLinking
     copy.alphaToOneState = _alphaToOneState;
     copy.rasterizationEnabled = _rasterizationEnabled;
     copy.maxVertexAmplificationCount = _maxVertexAmplificationCount;
-    for (NSUInteger index = 0; index < CharonMetal4ColorAttachmentSlots; index++)
+    for (NSUInteger index = 0; index < RevenantMetal4ColorAttachmentSlots; index++)
         [copy.colorAttachments setObject:[_colorAttachments objectAtIndexedSubscript:index]
                       atIndexedSubscript:index];
     copy.objectStaticLinkingDescriptor = _objectStaticLinkingDescriptor;

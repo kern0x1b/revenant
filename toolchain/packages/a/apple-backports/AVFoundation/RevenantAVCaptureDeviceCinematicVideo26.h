@@ -14,7 +14,7 @@ typedef NS_ENUM(NSInteger, AVCaptureCinematicVideoFocusMode) {
 
 typedef NSString *AVCaptureSceneMonitoringStatus NS_TYPED_ENUM API_AVAILABLE(ios(26.0));
 
-@interface AVCaptureDevice (CharonCaptureDeviceCinematicVideo26)
+@interface AVCaptureDevice (RevenantCaptureDeviceCinematicVideo26)
 
 @property(nonatomic, readonly) NSSet<AVCaptureSceneMonitoringStatus> *cinematicVideoCaptureSceneMonitoringStatuses API_AVAILABLE(ios(26.0));
 
@@ -24,7 +24,7 @@ typedef NSString *AVCaptureSceneMonitoringStatus NS_TYPED_ENUM API_AVAILABLE(ios
 
 @end
 
-@interface AVCaptureDeviceFormat (CharonCaptureDeviceFormatCinematicVideo26)
+@interface AVCaptureDeviceFormat (RevenantCaptureDeviceFormatCinematicVideo26)
 
 @property(nonatomic, readonly, getter=isCinematicVideoCaptureSupported) BOOL cinematicVideoCaptureSupported API_AVAILABLE(ios(26.0));
 @property(nonatomic, readonly) CGFloat videoMinZoomFactorForCinematicVideo API_AVAILABLE(ios(26.0));
@@ -33,7 +33,7 @@ typedef NSString *AVCaptureSceneMonitoringStatus NS_TYPED_ENUM API_AVAILABLE(ios
 
 @end
 
-@interface AVCaptureDeviceInput (CharonCaptureDeviceInputCinematicVideo26)
+@interface AVCaptureDeviceInput (RevenantCaptureDeviceInputCinematicVideo26)
 
 @property(nonatomic, readonly, getter=isCinematicVideoCaptureSupported) BOOL cinematicVideoCaptureSupported API_AVAILABLE(ios(26.0));
 @property(nonatomic, getter=isCinematicVideoCaptureEnabled) BOOL cinematicVideoCaptureEnabled API_AVAILABLE(ios(26.0));

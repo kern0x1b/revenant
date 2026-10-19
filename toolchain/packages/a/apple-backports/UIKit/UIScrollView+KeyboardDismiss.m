@@ -1,22 +1,22 @@
 #import <UIKit/UIKit.h>
 #import <objc/runtime.h>
 
-static const char charon_dismiss_mode_key;
-static const char charon_dismiss_tracker_key;
-static CGRect charon_keyboard_frame;
-static BOOL charon_keyboard_shown;
+static const char revenant_dismiss_mode_key;
+static const char revenant_dismiss_tracker_key;
+static CGRect revenant_keyboard_frame;
+static BOOL revenant_keyboard_shown;
 
-@interface CharonKeyboardDismissTracker : NSObject
+@interface RevenantKeyboardDismissTracker : NSObject
 @property (nonatomic, weak) UIScrollView *scrollView;
 @property (nonatomic, assign) BOOL dismissed;
 @end
 
-@implementation CharonKeyboardDismissTracker
+@implementation RevenantKeyboardDismissTracker
 @synthesize scrollView, dismissed;
 
 - (void)pan:(UIPanGestureRecognizer *)pan
 {
-    NSInteger mode = [objc_getAssociatedObject(self.scrollView, &charon_dismiss_mode_key) integerValue];
+    NSInteger mode = [objc_getAssociatedObject(self.scrollView, &revenant_dismiss_mode_key) integerValue];
     if (pan.state == UIGestureRecognizerStateBegan)
         self.dismissed = NO;
     if (self.dismissed || !mode || pan.state == UIGestureRecognizerStateEnded || pan.state == UIGestureRecognizerStateCancelled)
@@ -24,10 +24,10 @@ static BOOL charon_keyboard_shown;
     BOOL dismiss = NO;
     if (mode == 1) {
         dismiss = pan.state == UIGestureRecognizerStateBegan || pan.state == UIGestureRecognizerStateChanged;
-    } else if (mode == 2 && charon_keyboard_shown) {
+    } else if (mode == 2 && revenant_keyboard_shown) {
         UIWindow *window = self.scrollView.window;
         CGPoint point = [pan locationInView:nil];
-        CGRect keyboard = window ? [window convertRect:charon_keyboard_frame fromWindow:nil] : charon_keyboard_frame;
+        CGRect keyboard = window ? [window convertRect:revenant_keyboard_frame fromWindow:nil] : revenant_keyboard_frame;
         dismiss = point.y >= CGRectGetMinY(keyboard);
     }
     if (!dismiss)
@@ -38,38 +38,38 @@ static BOOL charon_keyboard_shown;
 
 @end
 
-static void charon_observe_keyboard(void)
+static void revenant_observe_keyboard(void)
 {
     static dispatch_once_t once;
     dispatch_once(&once, ^{
         NSNotificationCenter *center = [NSNotificationCenter defaultCenter];
         [center addObserverForName:UIKeyboardDidShowNotification object:nil queue:nil usingBlock:^(NSNotification *note) {
-            charon_keyboard_frame = [note.userInfo[UIKeyboardFrameEndUserInfoKey] CGRectValue];
-            charon_keyboard_shown = YES;
+            revenant_keyboard_frame = [note.userInfo[UIKeyboardFrameEndUserInfoKey] CGRectValue];
+            revenant_keyboard_shown = YES;
         }];
         [center addObserverForName:UIKeyboardWillHideNotification object:nil queue:nil usingBlock:^(NSNotification *note) {
-            charon_keyboard_shown = NO;
+            revenant_keyboard_shown = NO;
         }];
     });
 }
 
-@implementation UIScrollView (CharonKeyboardDismiss)
+@implementation UIScrollView (RevenantKeyboardDismiss)
 
 - (UIScrollViewKeyboardDismissMode)keyboardDismissMode
 {
-    return (UIScrollViewKeyboardDismissMode)[objc_getAssociatedObject(self, &charon_dismiss_mode_key) integerValue];
+    return (UIScrollViewKeyboardDismissMode)[objc_getAssociatedObject(self, &revenant_dismiss_mode_key) integerValue];
 }
 
 - (void)setKeyboardDismissMode:(UIScrollViewKeyboardDismissMode)keyboardDismissMode
 {
-    objc_setAssociatedObject(self, &charon_dismiss_mode_key, @(keyboardDismissMode), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-    if (!keyboardDismissMode || objc_getAssociatedObject(self, &charon_dismiss_tracker_key))
+    objc_setAssociatedObject(self, &revenant_dismiss_mode_key, @(keyboardDismissMode), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    if (!keyboardDismissMode || objc_getAssociatedObject(self, &revenant_dismiss_tracker_key))
         return;
-    charon_observe_keyboard();
-    CharonKeyboardDismissTracker *tracker = [[CharonKeyboardDismissTracker alloc] init];
+    revenant_observe_keyboard();
+    RevenantKeyboardDismissTracker *tracker = [[RevenantKeyboardDismissTracker alloc] init];
     tracker.scrollView = self;
     [self.panGestureRecognizer addTarget:tracker action:@selector(pan:)];
-    objc_setAssociatedObject(self, &charon_dismiss_tracker_key, tracker, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, &revenant_dismiss_tracker_key, tracker, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
 @end

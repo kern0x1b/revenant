@@ -8,7 +8,7 @@
 
 #include "kernel/hid_event_queue.hpp"
 
-namespace shade {
+namespace emulator {
 
 class HidAccelerometer {
 public:

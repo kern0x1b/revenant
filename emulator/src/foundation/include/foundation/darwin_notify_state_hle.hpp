@@ -16,7 +16,7 @@
 #include <string>
 #include <string_view>
 
-namespace shade {
+namespace emulator {
 
 class UserlandHleCall;
 class UserlandHleRegistry;

@@ -8,15 +8,15 @@
 
 #define NAMED(...) ([NSString stringWithFormat:__VA_ARGS__].UTF8String)
 
-@interface CharonHostCharonTraitMutations : NSObject <UIMutableTraits>
-- (UITraitCollection *)charon_collection;
+@interface RevenantHostRevenantTraitMutations : NSObject <UIMutableTraits>
+- (UITraitCollection *)revenant_collection;
 @end
 
-@interface CharonHost_CharonOverrides : CharonHostCharonTraitMutations <UITraitOverrides>
+@interface RevenantHost_RevenantOverrides : RevenantHostRevenantTraitMutations <UITraitOverrides>
 @end
 
 #define PORT_TRAIT(Name)                                                                                                                \
-    @interface CharonHost##Name : NSObject                                                                                             \
+    @interface RevenantHost##Name : NSObject                                                                                             \
     + (NSString *)identifier;                                                                                                          \
     + (NSString *)name;                                                                                                                \
     + (BOOL)affectsColorAppearance;                                                                                                    \
@@ -46,7 +46,7 @@ PORT_TRAIT(UITraitListEnvironment)
 PORT_TRAIT(UITraitTabAccessoryEnvironment)
 PORT_TRAIT(UITraitSplitViewControllerLayoutEnvironment)
 
-@interface CharonHostUITraitCollection : NSObject <NSCopying, NSSecureCoding>
+@interface RevenantHostUITraitCollection : NSObject <NSCopying, NSSecureCoding>
 + (instancetype)traitCollectionWithUserInterfaceIdiom:(UIUserInterfaceIdiom)idiom;
 + (instancetype)traitCollectionWithUserInterfaceStyle:(UIUserInterfaceStyle)style;
 + (instancetype)traitCollectionWithDisplayScale:(CGFloat)scale;
@@ -79,33 +79,33 @@ PORT_TRAIT(UITraitSplitViewControllerLayoutEnvironment)
 + (NSArray *)systemTraitsAffectingImageLookup;
 @end
 
-@interface UITraitCollection (CharonHostTraits17)
+@interface UITraitCollection (RevenantHostTraits17)
 + (UITraitCollection *)traitCollectionWithTraits:(__attribute__((noescape)) UITraitMutations)mutations;
 - (UITraitCollection *)traitCollectionByModifyingTraits:(__attribute__((noescape)) UITraitMutations)mutations;
 - (NSSet *)changedTraitsFromTraitCollection:(UITraitCollection *)traitCollection;
 @end
 
-@interface UIView (CharonHostTraits17)
-- (id<UITraitOverrides>)charonHostTraitOverrides;
-- (void)charonHostUpdateTraitsIfNeeded;
+@interface UIView (RevenantHostTraits17)
+- (id<UITraitOverrides>)revenantHostTraitOverrides;
+- (void)revenantHostUpdateTraitsIfNeeded;
 @end
-@interface UIViewController (CharonHostTraits17)
-- (id<UITraitOverrides>)charonHostTraitOverrides;
-- (void)charonHostUpdateTraitsIfNeeded;
+@interface UIViewController (RevenantHostTraits17)
+- (id<UITraitOverrides>)revenantHostTraitOverrides;
+- (void)revenantHostUpdateTraitsIfNeeded;
 @end
-@interface NSObject (CharonHostTraits17)
-- (id<UITraitChangeRegistration>)charonHostRegisterForTraitChanges:(NSArray *)traits withHandler:(UITraitChangeHandler)handler;
-- (id<UITraitChangeRegistration>)charonHostRegisterForTraitChanges:(NSArray *)traits withTarget:(id)target action:(SEL)action;
-- (id<UITraitChangeRegistration>)charonHostRegisterForTraitChanges:(NSArray *)traits withAction:(SEL)action;
-- (void)charonHostUnregisterForTraitChanges:(id<UITraitChangeRegistration>)registration;
+@interface NSObject (RevenantHostTraits17)
+- (id<UITraitChangeRegistration>)revenantHostRegisterForTraitChanges:(NSArray *)traits withHandler:(UITraitChangeHandler)handler;
+- (id<UITraitChangeRegistration>)revenantHostRegisterForTraitChanges:(NSArray *)traits withTarget:(id)target action:(SEL)action;
+- (id<UITraitChangeRegistration>)revenantHostRegisterForTraitChanges:(NSArray *)traits withAction:(SEL)action;
+- (void)revenantHostUnregisterForTraitChanges:(id<UITraitChangeRegistration>)registration;
 @end
 
 static NSString *unprefix(NSString *text)
 {
     if (!text)
         return text;
-    return [text hasPrefix:@"CharonHost"] ? [text substringFromIndex:10]
-                                           : [text stringByReplacingOccurrencesOfString:@"CharonHost" withString:@""];
+    return [text hasPrefix:@"RevenantHost"] ? [text substringFromIndex:12]
+                                           : [text stringByReplacingOccurrencesOfString:@"RevenantHost" withString:@""];
 }
 
 static NSString *portTraitName(Class trait)
@@ -139,7 +139,7 @@ static NSString *definition_of(Class trait)
 
 static void compare_text(NSString *left, NSString *right, const char *name)
 {
-    charon_check([left isEqualToString:right], name, [NSString stringWithFormat:@"port %@ != system %@", left, right]);
+    revenant_check([left isEqualToString:right], name, [NSString stringWithFormat:@"port %@ != system %@", left, right]);
 }
 
 static void compare_collections(id ours, id system, const char *name);
@@ -170,15 +170,15 @@ static void compare_definitions(void)
     ];
     for (NSString *name in names) {
         Class system = NSClassFromString(name);
-        Class port = NSClassFromString([@"CharonHost" stringByAppendingString:name]);
-        charon_check(system != Nil, NAMED(@"%@ is in the system", name), @"the system has no such trait class");
-        charon_check(port != Nil, NAMED(@"%@ is in the port", name), @"the port has no such trait class");
+        Class port = NSClassFromString([@"RevenantHost" stringByAppendingString:name]);
+        revenant_check(system != Nil, NAMED(@"%@ is in the system", name), @"the system has no such trait class");
+        revenant_check(port != Nil, NAMED(@"%@ is in the port", name), @"the port has no such trait class");
         if (!system || !port)
             continue;
         COMPARE(definition_of(port), definition_of(system), NAMED(@"%@ says about itself", name));
-        charon_check([[port name] isEqualToString:portTraitName(port)], NAMED(@"%@ +name is its class name less UITrait", name),
+        revenant_check([[port name] isEqualToString:portTraitName(port)], NAMED(@"%@ +name is its class name less UITrait", name),
                      [NSString stringWithFormat:@"%@ != %@", [port name], portTraitName(port)]);
-        charon_check([[system name] isEqualToString:portTraitName(system)], NAMED(@"%@ +name on the system", name),
+        revenant_check([[system name] isEqualToString:portTraitName(system)], NAMED(@"%@ +name on the system", name),
                      [NSString stringWithFormat:@"%@ != %@", [system name], portTraitName(system)]);
         COMPARE(unprefix([port identifier]), unprefix([system identifier]), NAMED(@"%@ +identifier", name));
         COMPARE([port superclass] == [NSObject class] ? @"NSObject" : NSStringFromClass([port superclass]),
@@ -203,7 +203,7 @@ static void compare_definitions(void)
         NSArray *systemListed = [[systemNames allObjects] sortedArrayUsingSelector:@selector(compare:)];
         COMPARE([portListed componentsJoinedByString:@","], [systemListed componentsJoinedByString:@","],
                 NAMED(@"%@ class methods", name));
-        charon_check([systemNames containsObject:@"affectsColorAppearance"] == [portNames containsObject:@"affectsColorAppearance"],
+        revenant_check([systemNames containsObject:@"affectsColorAppearance"] == [portNames containsObject:@"affectsColorAppearance"],
                      NAMED(@"%@ has +affectsColorAppearance as the system does", name),
                      @"the two sides disagree about the optional property");
     }
@@ -243,7 +243,7 @@ static void compare_empty(void)
 {
     UITraitCollection *system = [UITraitCollection traitCollectionWithTraits:^(id<UIMutableTraits> traits) {
     }];
-    CharonHostUITraitCollection *port = [CharonHostUITraitCollection traitCollectionWithTraits:^(id<UIMutableTraits> traits) {
+    RevenantHostUITraitCollection *port = [RevenantHostUITraitCollection traitCollectionWithTraits:^(id<UIMutableTraits> traits) {
     }];
     COMPARE_COLLECTIONS(port, system, "a collection that sets no trait");
     COMPARE(of_description([port description]), of_description([system description]),
@@ -252,7 +252,7 @@ static void compare_empty(void)
 
 static Class port_trait(NSString *name)
 {
-    return NSClassFromString([@"CharonHost" stringByAppendingString:name]);
+    return NSClassFromString([@"RevenantHost" stringByAppendingString:name]);
 }
 
 static void compare_values(void)
@@ -269,23 +269,23 @@ static void compare_values(void)
     NSMutableArray *ports = [NSMutableArray array];
     for (Class system in systems)
         [ports addObject:port_trait(NSStringFromClass(system))];
-    charon_check(systems.count == ports.count, "the two trait lists are the same length" , @"the lists differ in length");
+    revenant_check(systems.count == ports.count, "the two trait lists are the same length" , @"the lists differ in length");
     for (NSUInteger index = 0; index < systems.count && index < ports.count; index++) {
         Class system = systems[index], port = [ports objectAtIndex:index];
         NSString *name = NSStringFromClass(system);
-        charon_check(port != Nil, NAMED(@"the port carries %@", name), @"the port has no such trait class");
+        revenant_check(port != Nil, NAMED(@"the port carries %@", name), @"the port has no such trait class");
         if (!port)
             continue;
         NSInteger value = 2;
     (void)value;
         UITraitCollection *systemMade = nil;
-        CharonHostUITraitCollection *portMade = nil;
+        RevenantHostUITraitCollection *portMade = nil;
         if (class_conformsToProtocol(system, @protocol(UICGFloatTraitDefinition))) {
             systemMade = [UITraitCollection traitCollectionWithCGFloatValue:1.5 forTrait:(UICGFloatTrait)system];
-            portMade = [CharonHostUITraitCollection traitCollectionWithCGFloatValue:1.5 forTrait:(UICGFloatTrait)port];
+            portMade = [RevenantHostUITraitCollection traitCollectionWithCGFloatValue:1.5 forTrait:(UICGFloatTrait)port];
         } else {
             systemMade = [UITraitCollection traitCollectionWithNSIntegerValue:value forTrait:(UINSIntegerTrait)system];
-            portMade = [CharonHostUITraitCollection traitCollectionWithNSIntegerValue:value forTrait:(UINSIntegerTrait)port];
+            portMade = [RevenantHostUITraitCollection traitCollectionWithNSIntegerValue:value forTrait:(UINSIntegerTrait)port];
         }
         COMPARE_COLLECTIONS(portMade, systemMade, NAMED(@"%@ set through forTrait:", name));
         if (system != [UITraitUserInterfaceIdiom class])
@@ -294,31 +294,31 @@ static void compare_values(void)
         id portOther = nil, systemOther = nil;
         if (class_conformsToProtocol(system, @protocol(UICGFloatTraitDefinition))) {
             systemOther = [UITraitCollection traitCollectionWithCGFloatValue:1.5 forTrait:(UICGFloatTrait)system];
-            portOther = [CharonHostUITraitCollection traitCollectionWithCGFloatValue:1.5 forTrait:(UICGFloatTrait)port];
+            portOther = [RevenantHostUITraitCollection traitCollectionWithCGFloatValue:1.5 forTrait:(UICGFloatTrait)port];
         } else {
             systemOther = [UITraitCollection traitCollectionWithTraits:^(id<UIMutableTraits> traits) {
                 [traits setNSIntegerValue:value forTrait:(UINSIntegerTrait)system];
             }];
-            portOther = [CharonHostUITraitCollection traitCollectionWithTraits:^(id<UIMutableTraits> traits) {
+            portOther = [RevenantHostUITraitCollection traitCollectionWithTraits:^(id<UIMutableTraits> traits) {
                 [traits setNSIntegerValue:value forTrait:(UINSIntegerTrait)port];
             }];
         }
-        charon_check([portMade isEqual:portOther] == [systemMade isEqual:systemOther],
+        revenant_check([portMade isEqual:portOther] == [systemMade isEqual:systemOther],
                      NAMED(@"%@ built two ways compares as the system does", name),
                      @"the port and the system disagree about whether the two are one collection");
     }
     UITraitCollection *systemLanguage =
         [UITraitCollection traitCollectionWithObject:@"fr-FR" forTrait:[UITraitTypesettingLanguage class]];
-    CharonHostUITraitCollection *portLanguage =
-        [CharonHostUITraitCollection traitCollectionWithObject:@"fr-FR" forTrait:port_trait(@"UITraitTypesettingLanguage")];
+    RevenantHostUITraitCollection *portLanguage =
+        [RevenantHostUITraitCollection traitCollectionWithObject:@"fr-FR" forTrait:port_trait(@"UITraitTypesettingLanguage")];
     COMPARE_COLLECTIONS(portLanguage, systemLanguage, "a typesetting language set through forTrait:");
     COMPARE([[portLanguage objectForTrait:port_trait(@"UITraitTypesettingLanguage")] description],
             [[systemLanguage objectForTrait:[UITraitTypesettingLanguage class]] description],
             "the language reads back");
     UITraitCollection *systemNatural = [UITraitCollection traitCollectionWithObject:@NO
                                                                             forTrait:[UITraitResolvesNaturalAlignmentWithBaseWritingDirection class]];
-    CharonHostUITraitCollection *portNatural =
-        [CharonHostUITraitCollection traitCollectionWithObject:@NO
+    RevenantHostUITraitCollection *portNatural =
+        [RevenantHostUITraitCollection traitCollectionWithObject:@NO
                                                       forTrait:port_trait(@"UITraitResolvesNaturalAlignmentWithBaseWritingDirection")];
     COMPARE_COLLECTIONS(portNatural, systemNatural, "the natural alignment flag set through forTrait:");
 
@@ -327,7 +327,7 @@ static void compare_values(void)
 static void compare_modifying(void)
 {
     UITraitCollection *system = [UITraitCollection traitCollectionWithUserInterfaceIdiom:UIUserInterfaceIdiomPad];
-    CharonHostUITraitCollection *port = [CharonHostUITraitCollection traitCollectionWithUserInterfaceIdiom:UIUserInterfaceIdiomPad];
+    RevenantHostUITraitCollection *port = [RevenantHostUITraitCollection traitCollectionWithUserInterfaceIdiom:UIUserInterfaceIdiomPad];
     COMPARE_COLLECTIONS(port, system, "a base collection of the old constructor");
     COMPARE_COLLECTIONS([port traitCollectionByModifyingTraits:^(id<UIMutableTraits> traits) {
                              traits.userInterfaceStyle = UIUserInterfaceStyleDark;
@@ -352,25 +352,25 @@ static void compare_modifying(void)
                      }];
     COMPARE_COLLECTIONS(portTwice, systemTwice, "modifying twice");
     UITraitCollection *systemStyle = [UITraitCollection traitCollectionWithUserInterfaceStyle:UIUserInterfaceStyleLight];
-    CharonHostUITraitCollection *portStyle = [CharonHostUITraitCollection traitCollectionWithUserInterfaceStyle:UIUserInterfaceStyleLight];
+    RevenantHostUITraitCollection *portStyle = [RevenantHostUITraitCollection traitCollectionWithUserInterfaceStyle:UIUserInterfaceStyleLight];
     COMPARE_COLLECTIONS(portStyle, systemStyle, "a style made by the constructor of iOS 12");
     id portReplaced = [portStyle traitCollectionByReplacingNSIntegerValue:UIUserInterfaceStyleDark
                                                                  forTrait:port_trait(@"UITraitUserInterfaceStyle")];
     id portOther = [portStyle traitCollectionByReplacingNSIntegerValue:UIUserInterfaceStyleDark
                                                               forTrait:port_trait(@"UITraitUserInterfaceStyle")];
-    charon_check([portReplaced isEqual:portOther], "replacing an NSInteger trait through either class is one collection" ,
+    revenant_check([portReplaced isEqual:portOther], "replacing an NSInteger trait through either class is one collection" ,
                  @"the two classes of the same trait give two collections");
-    charon_check([(UITraitCollection *)portReplaced userInterfaceStyle] == UIUserInterfaceStyleDark, "replacing an NSInteger trait changes it" , @"the value did not change");
-    charon_check(portReplaced != portStyle && portStyle.userInterfaceStyle == UIUserInterfaceStyleLight, "replacing leaves the collection it was made from alone" , @"the base changed");
+    revenant_check([(UITraitCollection *)portReplaced userInterfaceStyle] == UIUserInterfaceStyleDark, "replacing an NSInteger trait changes it" , @"the value did not change");
+    revenant_check(portReplaced != portStyle && portStyle.userInterfaceStyle == UIUserInterfaceStyleLight, "replacing leaves the collection it was made from alone" , @"the base changed");
     id portScaleReplaced = [portStyle traitCollectionByReplacingCGFloatValue:2.5 forTrait:port_trait(@"UITraitDisplayScale")];
-    charon_check([(UITraitCollection *)portScaleReplaced displayScale] == 2.5, "replacing a CGFloat trait changes it" ,
+    revenant_check([(UITraitCollection *)portScaleReplaced displayScale] == 2.5, "replacing a CGFloat trait changes it" ,
                  @"the value did not change");
-    charon_check([(UITraitCollection *)portScaleReplaced userInterfaceStyle] == UIUserInterfaceStyleLight, "replacing one trait keeps the others" , @"a trait was lost");
+    revenant_check([(UITraitCollection *)portScaleReplaced userInterfaceStyle] == UIUserInterfaceStyleLight, "replacing one trait keeps the others" , @"a trait was lost");
     id portLanguageReplaced = [portStyle traitCollectionByReplacingObject:@"de-DE"
                                                                   forTrait:port_trait(@"UITraitTypesettingLanguage")];
-    charon_check([[(UITraitCollection *)portLanguageReplaced typesettingLanguage] isEqualToString:@"de-DE"], "replacing an object trait changes it" , @"the value did not change");
-    charon_check([port valueForCGFloatTrait:port_trait(@"UITraitDisplayScale")] == 0, "the port reads an unset CGFloat trait as its class default" , @"it read a value of its own");
-    charon_check([port valueForNSIntegerTrait:port_trait(@"UITraitUserInterfaceStyle")] == 0, "the port reads an unset NSInteger trait as its class default" , @"it read a value of its own");
+    revenant_check([[(UITraitCollection *)portLanguageReplaced typesettingLanguage] isEqualToString:@"de-DE"], "replacing an object trait changes it" , @"the value did not change");
+    revenant_check([port valueForCGFloatTrait:port_trait(@"UITraitDisplayScale")] == 0, "the port reads an unset CGFloat trait as its class default" , @"it read a value of its own");
+    revenant_check([port valueForNSIntegerTrait:port_trait(@"UITraitUserInterfaceStyle")] == 0, "the port reads an unset NSInteger trait as its class default" , @"it read a value of its own");
 }
 
 static void compare_changed(void)
@@ -380,8 +380,8 @@ static void compare_changed(void)
             traits.userInterfaceStyle = UIUserInterfaceStyleLight;
         }];
     };
-    CharonHostUITraitCollection *(^portLight)(void) = ^CharonHostUITraitCollection * {
-        return [CharonHostUITraitCollection traitCollectionWithTraits:^(id<UIMutableTraits> traits) {
+    RevenantHostUITraitCollection *(^portLight)(void) = ^RevenantHostUITraitCollection * {
+        return [RevenantHostUITraitCollection traitCollectionWithTraits:^(id<UIMutableTraits> traits) {
             traits.userInterfaceStyle = UIUserInterfaceStyleLight;
         }];
     };
@@ -390,8 +390,8 @@ static void compare_changed(void)
             traits.userInterfaceStyle = UIUserInterfaceStyleDark;
         }];
     };
-    CharonHostUITraitCollection *(^portDark)(void) = ^CharonHostUITraitCollection * {
-        return [CharonHostUITraitCollection traitCollectionWithTraits:^(id<UIMutableTraits> traits) {
+    RevenantHostUITraitCollection *(^portDark)(void) = ^RevenantHostUITraitCollection * {
+        return [RevenantHostUITraitCollection traitCollectionWithTraits:^(id<UIMutableTraits> traits) {
             traits.userInterfaceStyle = UIUserInterfaceStyleDark;
         }];
     };
@@ -401,8 +401,8 @@ static void compare_changed(void)
             traits.displayScale = 2;
         }];
     };
-    CharonHostUITraitCollection *(^portDarkScale)(void) = ^CharonHostUITraitCollection * {
-        return [CharonHostUITraitCollection traitCollectionWithTraits:^(id<UIMutableTraits> traits) {
+    RevenantHostUITraitCollection *(^portDarkScale)(void) = ^RevenantHostUITraitCollection * {
+        return [RevenantHostUITraitCollection traitCollectionWithTraits:^(id<UIMutableTraits> traits) {
             traits.userInterfaceStyle = UIUserInterfaceStyleDark;
             traits.displayScale = 2;
         }];
@@ -446,17 +446,17 @@ static void compare_lists(void)
     for (Class trait in systemColor)
         if (![privateTraits containsObject:NSStringFromClass(trait)])
             [systemColorNamed addObject:trait];
-    COMPARE(named_list([CharonHostUITraitCollection systemTraitsAffectingColorAppearance]),
+    COMPARE(named_list([RevenantHostUITraitCollection systemTraitsAffectingColorAppearance]),
             named_list(systemColorNamed), "systemTraitsAffectingColorAppearance, without the private traits");
     NSArray *systemImage = [UITraitCollection systemTraitsAffectingImageLookup];
     NSMutableArray *systemImageNamed = [NSMutableArray array];
     for (Class trait in systemImage)
         if (![privateTraits containsObject:NSStringFromClass(trait)])
             [systemImageNamed addObject:trait];
-    COMPARE(named_list([CharonHostUITraitCollection systemTraitsAffectingImageLookup]),
+    COMPARE(named_list([RevenantHostUITraitCollection systemTraitsAffectingImageLookup]),
             named_list(systemImageNamed), "systemTraitsAffectingImageLookup, without the private traits");
     for (NSString *name in privateTraits)
-        charon_check([systemColor containsObject:NSClassFromString(name)] || [systemImage containsObject:NSClassFromString(name)],
+        revenant_check([systemColor containsObject:NSClassFromString(name)] || [systemImage containsObject:NSClassFromString(name)],
                      NAMED(@"the system still names the private trait %@", name),
                      @"the system no longer names it, so the port's list needs no subtraction");
 }
@@ -464,14 +464,14 @@ static void compare_lists(void)
 static void compare_refusals(void)
 {
     COMPARE(reason_of(^{
-             [CharonHostUITraitCollection traitCollectionWithObject:@"x" forTrait:(UIObjectTrait)port_trait(@"UITraitDisplayScale")];
+             [RevenantHostUITraitCollection traitCollectionWithObject:@"x" forTrait:(UIObjectTrait)port_trait(@"UITraitDisplayScale")];
          }),
             reason_of(^{
                 [UITraitCollection traitCollectionWithObject:@"x" forTrait:(UIObjectTrait)[UITraitDisplayScale class]];
             }),
             "a CGFloat trait asked as an object trait");
     COMPARE(reason_of(^{
-             [CharonHostUITraitCollection traitCollectionWithCGFloatValue:1
+             [RevenantHostUITraitCollection traitCollectionWithCGFloatValue:1
                                                                forTrait:(UICGFloatTrait)port_trait(@"UITraitUserInterfaceStyle")];
          }),
             reason_of(^{
@@ -479,7 +479,7 @@ static void compare_refusals(void)
             }),
             "an NSInteger trait asked as a CGFloat trait");
     COMPARE(reason_of(^{
-             [CharonHostUITraitCollection traitCollectionWithNSIntegerValue:1
+             [RevenantHostUITraitCollection traitCollectionWithNSIntegerValue:1
                                                                   forTrait:(UINSIntegerTrait)port_trait(@"UITraitTypesettingLanguage")];
          }),
             reason_of(^{
@@ -487,7 +487,7 @@ static void compare_refusals(void)
             }),
             "an object trait asked as an NSInteger trait");
     COMPARE(reason_of(^{
-             [CharonHostUITraitCollection traitCollectionWithObject:@"x" forTrait:(UIObjectTrait)[NSString class]];
+             [RevenantHostUITraitCollection traitCollectionWithObject:@"x" forTrait:(UIObjectTrait)[NSString class]];
          }),
             reason_of(^{
                 [UITraitCollection traitCollectionWithObject:@"x" forTrait:(UIObjectTrait)[NSString class]];
@@ -543,13 +543,13 @@ static void compare_overrides(void)
     UIView *systemView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 10, 10)];
     UIView *portView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 10, 10)];
     id<UITraitOverrides> system = systemView.traitOverrides;
-    id<UITraitOverrides> port = [portView charonHostTraitOverrides];
-    charon_check(system != nil && port != nil, "both sides have a traitOverrides" , @"one side has none");
+    id<UITraitOverrides> port = [portView revenantHostTraitOverrides];
+    revenant_check(system != nil && port != nil, "both sides have a traitOverrides" , @"one side has none");
     COMPARE(without_class_name(shape_of([port description])), without_class_name(shape_of([system description])),
             "an overrides object with nothing set, its class name aside");
     [system setNSIntegerValue:UIUserInterfaceStyleDark forTrait:[UITraitUserInterfaceStyle class]];
     [port setNSIntegerValue:UIUserInterfaceStyleDark forTrait:port_trait(@"UITraitUserInterfaceStyle")];
-    charon_check([system containsTrait:[UITraitUserInterfaceStyle class]] ==
+    revenant_check([system containsTrait:[UITraitUserInterfaceStyle class]] ==
                       [port containsTrait:port_trait(@"UITraitUserInterfaceStyle")], "containsTrait: answers the same on both sides after a set" , @"the two sides disagree");
     COMPARE(without_class_name(unwrapped_overrides([port description])),
             without_class_name(unwrapped_overrides([system description])),
@@ -567,73 +567,73 @@ static void compare_overrides(void)
             without_class_name(unwrapped_overrides([system description])),
             "an overrides object with a CGFloat and an object, its class name aside");
     UIView *other = [[UIView alloc] init];
-    charon_check(other.traitOverrides != system, "two views have different overrides in the system" , @"the system shares one");
-    charon_check([portView charonHostTraitOverrides] != [other charonHostTraitOverrides], "two views have different overrides in the port" , @"the port shares one");
+    revenant_check(other.traitOverrides != system, "two views have different overrides in the system" , @"the system shares one");
+    revenant_check([portView revenantHostTraitOverrides] != [other revenantHostTraitOverrides], "two views have different overrides in the port" , @"the port shares one");
     UIViewController *controller = [[UIViewController alloc] init];
-    charon_check(controller.traitOverrides != nil, "a controller has overrides in the system" , @"it has none");
-    charon_check([[controller charonHostTraitOverrides] class] == [port class], "a controller's overrides is the same class as a view's" ,
+    revenant_check(controller.traitOverrides != nil, "a controller has overrides in the system" , @"it has none");
+    revenant_check([[controller revenantHostTraitOverrides] class] == [port class], "a controller's overrides is the same class as a view's" ,
                  @"the port gives a controller another class");
 }
 
 static void check_registration(void)
 {
     Class portObject = [NSObject class];
-    charon_check([portObject conformsToProtocol:@protocol(UITraitChangeObservable)],
+    revenant_check([portObject conformsToProtocol:@protocol(UITraitChangeObservable)],
                  "the port's own NSObject adopts the trait-change protocol its registry row names",
                  [NSString stringWithFormat:@"%@ adopts UITraitChangeObservable: %@", NSStringFromClass(portObject),
                                             [portObject conformsToProtocol:@protocol(UITraitChangeObservable)] ? @"yes" : @"no"]);
 
     UIView *view = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 10, 10)];
     __block int calls = 0;
-    id<UITraitChangeRegistration> registration = [view charonHostRegisterForTraitChanges:@[port_trait(@"UITraitUserInterfaceStyle")]
+    id<UITraitChangeRegistration> registration = [view revenantHostRegisterForTraitChanges:@[port_trait(@"UITraitUserInterfaceStyle")]
                                                                                 withHandler:^(id<UITraitEnvironment> environment,
                                                                                               UITraitCollection *previous) {
                                                                                     calls++;
                                                                                 }];
-    charon_check(registration != nil, "the port registers for a trait change" , @"it answered nothing");
-    COMPARE(unprefix(NSStringFromClass([registration class])), @"CharonRegistration",
+    revenant_check(registration != nil, "the port registers for a trait change" , @"it answered nothing");
+    COMPARE(unprefix(NSStringFromClass([registration class])), @"RevenantRegistration",
             "a registration is a class of the port's own, by name");
     id<UITraitChangeRegistration> systemRegistration =
         [view registerForTraitChanges:@[[UITraitUserInterfaceStyle class]]
                            withHandler:^(id<UITraitEnvironment> environment, UITraitCollection *previous) {}];
     COMPARE(systemRegistration != nil ? NSStringFromClass([systemRegistration class]) : nil, @"_UITraitRegistration",
             "and the host's registration is the host's own private class, which this library does not define");
-    charon_check([registration conformsToProtocol:@protocol(UITraitChangeRegistration)], "a registration adopts UITraitChangeRegistration" , @"it does not");
-    charon_check([registration respondsToSelector:@selector(copy)], "a registration is copyable" , @"it is not");
-    COMPARE(shape_of([(id)registration description]), @"<CharonRegistration: >", "a registration, described");
-    [view charonHostUnregisterForTraitChanges:registration];
-    [view charonHostUnregisterForTraitChanges:registration];
-    charon_check(calls == 0, "unregistering calls nothing" , @"a handler ran");
+    revenant_check([registration conformsToProtocol:@protocol(UITraitChangeRegistration)], "a registration adopts UITraitChangeRegistration" , @"it does not");
+    revenant_check([registration respondsToSelector:@selector(copy)], "a registration is copyable" , @"it is not");
+    COMPARE(shape_of([(id)registration description]), @"<RevenantRegistration: >", "a registration, described");
+    [view revenantHostUnregisterForTraitChanges:registration];
+    [view revenantHostUnregisterForTraitChanges:registration];
+    revenant_check(calls == 0, "unregistering calls nothing" , @"a handler ran");
     COMPARE(reason_of(^{
-             [view charonHostUnregisterForTraitChanges:nil];
+             [view revenantHostUnregisterForTraitChanges:nil];
          }),
             @"NSInternalInconsistencyException: Must pass a non-nil registration to unregister",
             "unregistering nothing");
     COMPARE(reason_of(^{
-             [view charonHostRegisterForTraitChanges:@[]
+             [view revenantHostRegisterForTraitChanges:@[]
                                            withHandler:^(id<UITraitEnvironment> e, UITraitCollection *p){
                                            }];
          }),
             @"NSInternalInconsistencyException: Must pass one or more traits to register for",
             "registering for no traits at all");
     COMPARE(reason_of(^{
-             id<UITraitOverrides> overrides = [view charonHostTraitOverrides];
+             id<UITraitOverrides> overrides = [view revenantHostTraitOverrides];
              [overrides valueForNSIntegerTrait:port_trait(@"UITraitUserInterfaceStyle")];
          }),
             @"NSInternalInconsistencyException: Can't return value for trait UserInterfaceStyle that has no override",
             "reading a trait the overrides object does not override");
     calls = 0;
-    id<UITraitChangeRegistration> action = [view charonHostRegisterForTraitChanges:@[port_trait(@"UITraitDisplayScale")]
+    id<UITraitChangeRegistration> action = [view revenantHostRegisterForTraitChanges:@[port_trait(@"UITraitDisplayScale")]
                                                                        withTarget:view
                                                                          action:@selector(setNeedsLayout)];
-    charon_check(action != nil, "withTarget:action: registers" , @"it answered nothing");
-    [view charonHostUnregisterForTraitChanges:action];
-    charon_check([view respondsToSelector:@selector(charonHostUpdateTraitsIfNeeded)], "a view answers updateTraitsIfNeeded" , @"it does not");
-    [view charonHostUpdateTraitsIfNeeded];
+    revenant_check(action != nil, "withTarget:action: registers" , @"it answered nothing");
+    [view revenantHostUnregisterForTraitChanges:action];
+    revenant_check([view respondsToSelector:@selector(revenantHostUpdateTraitsIfNeeded)], "a view answers updateTraitsIfNeeded" , @"it does not");
+    [view revenantHostUpdateTraitsIfNeeded];
     UIViewController *controller = [[UIViewController alloc] init];
-    charon_check([[controller charonHostTraitOverrides] class] == [view charonHostTraitOverrides].class, "a controller's overrides is the same class as a view's" , @"the port gives a controller another class");
-    charon_check(controller.traitOverrides != nil, "a controller has overrides on the system too" , @"it has none");
-    charon_check([controller respondsToSelector:@selector(charonHostUpdateTraitsIfNeeded)], "a controller answers updateTraitsIfNeeded" , @"it does not");
+    revenant_check([[controller revenantHostTraitOverrides] class] == [view revenantHostTraitOverrides].class, "a controller's overrides is the same class as a view's" , @"the port gives a controller another class");
+    revenant_check(controller.traitOverrides != nil, "a controller has overrides on the system too" , @"it has none");
+    revenant_check([controller respondsToSelector:@selector(revenantHostUpdateTraitsIfNeeded)], "a controller answers updateTraitsIfNeeded" , @"it does not");
 }
 
 
@@ -648,10 +648,10 @@ int main(void)
         compare_lists();
         compare_overrides();
         check_registration();
-        printf("checks=%d failures=%d before the refusals\n", charon_checks, charon_failures);
+        printf("checks=%d failures=%d before the refusals\n", revenant_checks, revenant_failures);
         fflush(stdout);
         compare_refusals();
-        printf("checks=%d failures=%d\n", charon_checks, charon_failures);
+        printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
     }
-    return charon_failures;
+    return revenant_failures;
 }

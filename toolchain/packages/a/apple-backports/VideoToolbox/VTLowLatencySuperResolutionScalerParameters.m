@@ -1,17 +1,17 @@
-#import "CharonVideoToolbox.h"
+#import "RevenantVideoToolbox.h"
 #import "VideoToolboxValueStore.h"
 
-CHARON_VIDEO_TOOLBOX_VALUE_STORE(VTLowLatencySuperResolutionScalerParameters)
+REVENANT_VIDEO_TOOLBOX_VALUE_STORE(VTLowLatencySuperResolutionScalerParameters)
 
 @implementation VTLowLatencySuperResolutionScalerParameters
 
 #pragma mark - The protocol's own properties, implemented for this class
 
-CHARON_VALUE_PROPERTY(VTFrameProcessorFrame *, sourceFrame)
+REVENANT_VALUE_PROPERTY(VTFrameProcessorFrame *, sourceFrame)
 
-CHARON_VALUE_PROPERTY(VTFrameProcessorFrame *, destinationFrame)
+REVENANT_VALUE_PROPERTY(VTFrameProcessorFrame *, destinationFrame)
 
-CHARON_VALUE_PROPERTY(NSArray<VTFrameProcessorFrame *> *, destinationFrames)
+REVENANT_VALUE_PROPERTY(NSArray<VTFrameProcessorFrame *> *, destinationFrames)
 
 
 #pragma mark - The SDK's designated initialisers
@@ -20,8 +20,8 @@ CHARON_VALUE_PROPERTY(NSArray<VTFrameProcessorFrame *> *, destinationFrames)
                         destinationFrame:(VTFrameProcessorFrame *)destinationFrame
 {
     self = [super init];
-    CharonValueSet(self, sourceFrame, @"sourceFrame");
-    CharonValueSet(self, destinationFrame, @"destinationFrame");
+    RevenantValueSet(self, sourceFrame, @"sourceFrame");
+    RevenantValueSet(self, destinationFrame, @"destinationFrame");
     return self;
 }
 

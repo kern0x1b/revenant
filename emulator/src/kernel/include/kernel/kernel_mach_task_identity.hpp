@@ -11,7 +11,7 @@
 
 #include <cstdint>
 
-namespace shade {
+namespace emulator {
 
 struct KernelSharedState;
 struct ProcessContext;

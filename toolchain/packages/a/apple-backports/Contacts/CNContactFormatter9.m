@@ -1,10 +1,10 @@
-#import "CharonContacts.h"
+#import "RevenantContacts.h"
 
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 
 @implementation CNContactFormatter {
-    CNContactFormatterStyle _charonStyle;
+    CNContactFormatterStyle _revenantStyle;
 }
 
 @dynamic style;
@@ -14,7 +14,7 @@
     NSArray *keys = @[CNContactNamePrefixKey, CNContactGivenNameKey, CNContactMiddleNameKey, CNContactFamilyNameKey,
                       CNContactNameSuffixKey, CNContactNicknameKey, CNContactOrganizationNameKey, CNContactTypeKey,
                       CNContactPhoneticGivenNameKey, CNContactPhoneticMiddleNameKey, CNContactPhoneticFamilyNameKey];
-    return [CharonContactsKeyDescriptor descriptorWithKeys:keys];
+    return [RevenantContactsKeyDescriptor descriptorWithKeys:keys];
 }
 
 + (id<CNKeyDescriptor>)descriptorForRequiredKeysForNameOrder
@@ -43,7 +43,7 @@
             return nil;
         return [parts componentsJoinedByString:[self delimiterForContact:contact]];
     }
-    NSString *composite = [CharonContactsBook compositeNameOfContact:contact];
+    NSString *composite = [RevenantContactsBook compositeNameOfContact:contact];
     return composite.length > 0 ? composite : nil;
 }
 
@@ -79,7 +79,7 @@
 + (NSString *)delimiterForContact:(CNContact *)contact
 {
     NSString *given = contact.givenName, *family = contact.familyName;
-    NSString *composite = [CharonContactsBook compositeNameOfContact:contact];
+    NSString *composite = [RevenantContactsBook compositeNameOfContact:contact];
     if (given.length > 0 && family.length > 0 && composite.length > 0) {
         NSRange first = [composite rangeOfString:given];
         NSRange second = [composite rangeOfString:family];
@@ -117,22 +117,22 @@
 
 - (CNContactFormatterStyle)style
 {
-    return _charonStyle;
+    return _revenantStyle;
 }
 
 - (void)setStyle:(CNContactFormatterStyle)style
 {
-    _charonStyle = style;
+    _revenantStyle = style;
 }
 
 - (NSString *)stringFromContact:(CNContact *)contact
 {
-    return [[self class] stringFromContact:contact style:_charonStyle];
+    return [[self class] stringFromContact:contact style:_revenantStyle];
 }
 
 - (NSAttributedString *)attributedStringFromContact:(CNContact *)contact defaultAttributes:(NSDictionary *)attributes
 {
-    return [[self class] attributedStringFromContact:contact style:_charonStyle defaultAttributes:attributes];
+    return [[self class] attributedStringFromContact:contact style:_revenantStyle defaultAttributes:attributes];
 }
 
 - (NSString *)stringForObjectValue:(id)object
@@ -148,14 +148,14 @@
 - (void)encodeWithCoder:(NSCoder *)coder
 {
     [super encodeWithCoder:coder];
-    [coder encodeInteger:_charonStyle forKey:@"style"];
+    [coder encodeInteger:_revenantStyle forKey:@"style"];
 }
 
 - (instancetype)initWithCoder:(NSCoder *)coder
 {
     self = [super initWithCoder:coder];
     if (self)
-        _charonStyle = (CNContactFormatterStyle)[coder decodeIntegerForKey:@"style"];
+        _revenantStyle = (CNContactFormatterStyle)[coder decodeIntegerForKey:@"style"];
     return self;
 }
 

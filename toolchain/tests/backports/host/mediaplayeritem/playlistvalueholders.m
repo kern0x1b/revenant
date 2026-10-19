@@ -13,7 +13,7 @@
 @property (null_resettable, nonatomic, copy) NSString *authorDisplayName;
 @property (nonatomic, copy) NSString *descriptionText;
 @end
-@interface MPMediaPlaylist (Charon80Standin)
+@interface MPMediaPlaylist (Revenant80Standin)
 @property (nonatomic, readonly, nullable) NSArray<MPMediaItem *> *seedItems;
 @end
 
@@ -32,10 +32,10 @@ extern NSString *const MPMediaPlaylistPropertySeedItems;
 
 @interface FakePlaylist : MPMediaPlaylist
 { id _value; }
-- (instancetype)initWithCharonValue:(id)value;
+- (instancetype)initWithRevenantValue:(id)value;
 @end
 @implementation FakePlaylist
-- (instancetype)initWithCharonValue:(id)value { self = [super init]; if (self) { _value = value; } return self; }
+- (instancetype)initWithRevenantValue:(id)value { self = [super init]; if (self) { _value = value; } return self; }
 - (id)valueForProperty:(NSString *)property {
     return [property isEqualToString:MPMediaPlaylistPropertySeedItems] ? _value : nil;
 }
@@ -49,16 +49,16 @@ static void check(const char *what, int held, const char *got) {
 
 int main(void) {
     MPMediaItem *a = [[MPMediaItem alloc] init], *b = [[MPMediaItem alloc] init];
-    FakePlaylist *withItems = [[FakePlaylist alloc] initWithCharonValue:@[a, b]];
+    FakePlaylist *withItems = [[FakePlaylist alloc] initWithRevenantValue:@[a, b]];
     check("seedItems answers the array the release holds under the key",
           [(FakePlaylist *)withItems seedItems].count == 2, "2");
-    FakePlaylist *withString = [[FakePlaylist alloc] initWithCharonValue:@"not an array"];
+    FakePlaylist *withString = [[FakePlaylist alloc] initWithRevenantValue:@"not an array"];
     check("a value of the WRONG type is refused as nil, not forwarded under an NSArray declaration",
           [(FakePlaylist *)withString seedItems] == nil, "nil");
-    FakePlaylist *withMixed = [[FakePlaylist alloc] initWithCharonValue:@[a, @"not an item"]];
+    FakePlaylist *withMixed = [[FakePlaylist alloc] initWithRevenantValue:@[a, @"not an item"]];
     check("an array holding one element of the wrong kind is refused WHOLE, not partly",
           [(FakePlaylist *)withMixed seedItems] == nil, "nil");
-    FakePlaylist *empty = [[FakePlaylist alloc] initWithCharonValue:@[]];
+    FakePlaylist *empty = [[FakePlaylist alloc] initWithRevenantValue:@[]];
     check("an empty array is a real answer and is not confused with nil",
           [(FakePlaylist *)empty seedItems] != nil &&
           [(FakePlaylist *)empty seedItems].count == 0, "0 items, not nil");

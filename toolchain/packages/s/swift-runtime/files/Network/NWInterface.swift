@@ -1,4 +1,4 @@
-@_implementationOnly import CharonNetworkSeam
+@_implementationOnly import RevenantNetworkSeam
 
 public struct NWInterface: Hashable, CustomDebugStringConvertible {
     public enum InterfaceType: Hashable {
@@ -16,7 +16,7 @@ public struct NWInterface: Hashable, CustomDebugStringConvertible {
     }
 
     internal init?(named name: String) {
-        guard let interface = name.withCString({ charon_interface_named($0) }) else {
+        guard let interface = name.withCString({ revenant_interface_named($0) }) else {
             return nil
         }
         self.init(interface)

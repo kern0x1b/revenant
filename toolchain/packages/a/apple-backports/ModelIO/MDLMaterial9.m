@@ -70,37 +70,37 @@
 @synthesize float4Value = _float4Value;
 @synthesize matrix4x4 = _matrix4x4;
 
-- (void)charon_setValue:(id)value
+- (void)revenant_setValue:(id)value
 {
     if (!value) {
         _type = MDLMaterialPropertyTypeNone;
     } else if ([value isKindOfClass:[NSString class]]) {
-        [self charon_setString:value];
+        [self revenant_setString:value];
     } else if ([value isKindOfClass:[NSURL class]]) {
-        [self charon_setURL:value];
+        [self revenant_setURL:value];
     } else if ([value isKindOfClass:[MDLTextureSampler class]]) {
-        [self charon_setTextureSampler:value];
+        [self revenant_setTextureSampler:value];
     } else if ([value isKindOfClass:[NSNumber class]]) {
         _floatValue = [value floatValue];
         _type = MDLMaterialPropertyTypeFloat;
     } else if (CFGetTypeID((__bridge CFTypeRef)value) == CGColorGetTypeID()) {
-        [self charon_setColor:(__bridge CGColorRef)value];
+        [self revenant_setColor:(__bridge CGColorRef)value];
     } else if (strncmp([value objCType], @encode(vector_float2), strlen(@encode(vector_float2))) == 0) {
         vector_float2 typed;
         memcpy(&typed, &value, sizeof typed);
-        [self charon_setFloat2:typed];
+        [self revenant_setFloat2:typed];
     } else if (strncmp([value objCType], @encode(vector_float3), strlen(@encode(vector_float3))) == 0) {
         vector_float3 typed;
         memcpy(&typed, &value, sizeof typed);
-        [self charon_setFloat3:typed];
+        [self revenant_setFloat3:typed];
     } else if (strncmp([value objCType], @encode(vector_float4), strlen(@encode(vector_float4))) == 0) {
         vector_float4 typed;
         memcpy(&typed, &value, sizeof typed);
-        [self charon_setFloat4:typed];
+        [self revenant_setFloat4:typed];
     } else if (strncmp([value objCType], @encode(matrix_float4x4), strlen(@encode(matrix_float4x4))) == 0) {
         matrix_float4x4 typed;
         memcpy(&typed, &value, sizeof typed);
-        [self charon_setMatrix4x4:typed];
+        [self revenant_setMatrix4x4:typed];
     } else if ([value isKindOfClass:[NSData class]]) {
         _type = MDLMaterialPropertyTypeBuffer;
     } else {
@@ -108,7 +108,7 @@
     }
 }
 
-- (void)charon_setString:(NSString *)value
+- (void)revenant_setString:(NSString *)value
 {
     if (_stringValue != value) {
         _stringValue = [value copy];
@@ -116,7 +116,7 @@
     _type = MDLMaterialPropertyTypeString;
 }
 
-- (void)charon_setURL:(NSURL *)value
+- (void)revenant_setURL:(NSURL *)value
 {
     if (_URLValue != value) {
         _URLValue = value;
@@ -124,7 +124,7 @@
     _type = MDLMaterialPropertyTypeURL;
 }
 
-- (void)charon_setTextureSampler:(MDLTextureSampler *)value
+- (void)revenant_setTextureSampler:(MDLTextureSampler *)value
 {
     if (_textureSamplerValue != value) {
         _textureSamplerValue = value;
@@ -132,7 +132,7 @@
     _type = MDLMaterialPropertyTypeTexture;
 }
 
-- (void)charon_setColor:(CGColorRef)value
+- (void)revenant_setColor:(CGColorRef)value
 {
     if (_color != value) {
         CGColorRelease(_color);
@@ -141,31 +141,31 @@
     _type = MDLMaterialPropertyTypeColor;
 }
 
-- (void)charon_setFloat:(float)value
+- (void)revenant_setFloat:(float)value
 {
     _floatValue = value;
     _type = MDLMaterialPropertyTypeFloat;
 }
 
-- (void)charon_setFloat2:(vector_float2)value
+- (void)revenant_setFloat2:(vector_float2)value
 {
     _float2Value = value;
     _type = MDLMaterialPropertyTypeFloat2;
 }
 
-- (void)charon_setFloat3:(vector_float3)value
+- (void)revenant_setFloat3:(vector_float3)value
 {
     _float3Value = value;
     _type = MDLMaterialPropertyTypeFloat3;
 }
 
-- (void)charon_setFloat4:(vector_float4)value
+- (void)revenant_setFloat4:(vector_float4)value
 {
     _float4Value = value;
     _type = MDLMaterialPropertyTypeFloat4;
 }
 
-- (void)charon_setMatrix4x4:(matrix_float4x4)value
+- (void)revenant_setMatrix4x4:(matrix_float4x4)value
 {
     _matrix4x4 = value;
     _type = MDLMaterialPropertyTypeMatrix44;
@@ -177,7 +177,7 @@
         _name = [name copy];
         _semantic = semantic;
         _float4Value = (vector_float4){0, 0, 0, 1};
-        [self charon_setValue:value];
+        [self revenant_setValue:value];
     }
     return self;
 }
@@ -213,12 +213,12 @@
 
 - (void)setProperties:(MDLMaterialProperty *)property
 {
-    [self charon_setValue:[property charon_value]];
+    [self revenant_setValue:[property revenant_value]];
     if (property.color)
-        [self charon_setColor:property.color];
+        [self revenant_setColor:property.color];
 }
 
-- (id)charon_value
+- (id)revenant_value
 {
     switch (_type) {
         case MDLMaterialPropertyTypeString:
@@ -249,7 +249,7 @@
 - (id)copyWithZone:(NSZone *)zone
 {
     MDLMaterialProperty *copy = [[[self class] allocWithZone:zone] initWithName:_name semantic:_semantic value:nil];
-    [copy charon_setValue:[self charon_value]];
+    [copy revenant_setValue:[self revenant_value]];
     return copy;
 }
 
@@ -266,19 +266,19 @@
     if ((self = [super init])) {
         _name = @"";
         _properties = [[NSMutableDictionary alloc] init];
-        [self charon_add:@"baseColor" semantic:MDLMaterialSemanticBaseColor type:MDLMaterialPropertyTypeColor value:1];
-        [self charon_add:@"emission" semantic:MDLMaterialSemanticEmission type:MDLMaterialPropertyTypeColor value:0];
-        [self charon_add:@"specular" semantic:MDLMaterialSemanticSpecular type:MDLMaterialPropertyTypeFloat value:0];
-        [self charon_add:@"materialIndexOfRefraction"
+        [self revenant_add:@"baseColor" semantic:MDLMaterialSemanticBaseColor type:MDLMaterialPropertyTypeColor value:1];
+        [self revenant_add:@"emission" semantic:MDLMaterialSemanticEmission type:MDLMaterialPropertyTypeColor value:0];
+        [self revenant_add:@"specular" semantic:MDLMaterialSemanticSpecular type:MDLMaterialPropertyTypeFloat value:0];
+        [self revenant_add:@"materialIndexOfRefraction"
                 semantic:MDLMaterialSemanticMaterialIndexOfRefraction
                     type:MDLMaterialPropertyTypeFloat
                    value:1];
-        [self charon_add:@"interfaceIndexOfRefraction"
+        [self revenant_add:@"interfaceIndexOfRefraction"
                 semantic:MDLMaterialSemanticInterfaceIndexOfRefraction
                     type:MDLMaterialPropertyTypeFloat
                    value:1];
-        [self charon_add:@"ambientOcclusion" semantic:MDLMaterialSemanticAmbientOcclusion type:MDLMaterialPropertyTypeFloat value:0];
-        [self charon_add:@"ambientOcclusionScale"
+        [self revenant_add:@"ambientOcclusion" semantic:MDLMaterialSemanticAmbientOcclusion type:MDLMaterialPropertyTypeFloat value:0];
+        [self revenant_add:@"ambientOcclusionScale"
                 semantic:MDLMaterialSemanticAmbientOcclusionScale
                     type:MDLMaterialPropertyTypeFloat
                    value:1];
@@ -290,7 +290,7 @@
 {
 }
 
-- (void)charon_add:(NSString *)name semantic:(MDLMaterialSemantic)semantic type:(MDLMaterialPropertyType)type
+- (void)revenant_add:(NSString *)name semantic:(MDLMaterialSemantic)semantic type:(MDLMaterialPropertyType)type
 {
     id value = [NSNumber numberWithFloat:0];
     switch (type) {
@@ -310,7 +310,7 @@
     [_properties setObject:property forKey:name];
 }
 
-- (void)charon_add:(NSString *)name
+- (void)revenant_add:(NSString *)name
            semantic:(MDLMaterialSemantic)semantic
                type:(MDLMaterialPropertyType)type
               value:(float)value
@@ -324,12 +324,12 @@
     [_properties setObject:property forKey:name];
 }
 
-- (MDLMaterialProperty *)charon_propertyNamed:(NSString *)name
+- (MDLMaterialProperty *)revenant_propertyNamed:(NSString *)name
 {
     return _properties[name];
 }
 
-- (NSArray<MDLMaterialProperty *> *)charon_allProperties
+- (NSArray<MDLMaterialProperty *> *)revenant_allProperties
 {
     return [_properties.allValues sortedArrayUsingComparator:^NSComparisonResult(MDLMaterialProperty *a, MDLMaterialProperty *b) {
         return (NSComparisonResult)(a.semantic - b.semantic);
@@ -338,42 +338,42 @@
 
 - (MDLMaterialProperty *)baseColor
 {
-    return [self charon_propertyNamed:@"baseColor"];
+    return [self revenant_propertyNamed:@"baseColor"];
 }
 
 - (MDLMaterialProperty *)emission
 {
-    return [self charon_propertyNamed:@"emission"];
+    return [self revenant_propertyNamed:@"emission"];
 }
 
 - (MDLMaterialProperty *)specular
 {
-    return [self charon_propertyNamed:@"specular"];
+    return [self revenant_propertyNamed:@"specular"];
 }
 
 - (MDLMaterialProperty *)materialIndexOfRefraction
 {
-    return [self charon_propertyNamed:@"materialIndexOfRefraction"];
+    return [self revenant_propertyNamed:@"materialIndexOfRefraction"];
 }
 
 - (MDLMaterialProperty *)interfaceIndexOfRefraction
 {
-    return [self charon_propertyNamed:@"interfaceIndexOfRefraction"];
+    return [self revenant_propertyNamed:@"interfaceIndexOfRefraction"];
 }
 
 - (MDLMaterialProperty *)normal
 {
-    return [self charon_propertyNamed:@"normal"];
+    return [self revenant_propertyNamed:@"normal"];
 }
 
 - (MDLMaterialProperty *)ambientOcclusion
 {
-    return [self charon_propertyNamed:@"ambientOcclusion"];
+    return [self revenant_propertyNamed:@"ambientOcclusion"];
 }
 
 - (MDLMaterialProperty *)ambientOcclusionScale
 {
-    return [self charon_propertyNamed:@"ambientOcclusionScale"];
+    return [self revenant_propertyNamed:@"ambientOcclusionScale"];
 }
 
 @end
@@ -382,19 +382,19 @@
 - (instancetype)init
 {
     if ((self = [super init])) {
-        [self charon_add:@"subsurface" semantic:MDLMaterialSemanticSubsurface type:MDLMaterialPropertyTypeFloat value:0];
-        [self charon_add:@"metallic" semantic:MDLMaterialSemanticMetallic type:MDLMaterialPropertyTypeFloat value:0];
-        [self charon_add:@"specular" semantic:MDLMaterialSemanticSpecular type:MDLMaterialPropertyTypeFloat value:0];
-        [self charon_add:@"specularTint" semantic:MDLMaterialSemanticSpecularTint type:MDLMaterialPropertyTypeFloat value:0];
-        [self charon_add:@"roughness" semantic:MDLMaterialSemanticRoughness type:MDLMaterialPropertyTypeFloat value:0.9f];
-        [self charon_add:@"anisotropicRotation"
+        [self revenant_add:@"subsurface" semantic:MDLMaterialSemanticSubsurface type:MDLMaterialPropertyTypeFloat value:0];
+        [self revenant_add:@"metallic" semantic:MDLMaterialSemanticMetallic type:MDLMaterialPropertyTypeFloat value:0];
+        [self revenant_add:@"specular" semantic:MDLMaterialSemanticSpecular type:MDLMaterialPropertyTypeFloat value:0];
+        [self revenant_add:@"specularTint" semantic:MDLMaterialSemanticSpecularTint type:MDLMaterialPropertyTypeFloat value:0];
+        [self revenant_add:@"roughness" semantic:MDLMaterialSemanticRoughness type:MDLMaterialPropertyTypeFloat value:0.9f];
+        [self revenant_add:@"anisotropicRotation"
                 semantic:MDLMaterialSemanticAnisotropicRotation
                     type:MDLMaterialPropertyTypeFloat
                    value:0];
-        [self charon_add:@"sheen" semantic:MDLMaterialSemanticSheen type:MDLMaterialPropertyTypeFloat value:0.05f];
-        [self charon_add:@"sheenTint" semantic:MDLMaterialSemanticSheenTint type:MDLMaterialPropertyTypeFloat value:0];
-        [self charon_add:@"clearcoat" semantic:MDLMaterialSemanticClearcoat type:MDLMaterialPropertyTypeFloat value:0];
-        [self charon_add:@"clearcoatGloss" semantic:MDLMaterialSemanticClearcoatGloss type:MDLMaterialPropertyTypeFloat value:0];
+        [self revenant_add:@"sheen" semantic:MDLMaterialSemanticSheen type:MDLMaterialPropertyTypeFloat value:0.05f];
+        [self revenant_add:@"sheenTint" semantic:MDLMaterialSemanticSheenTint type:MDLMaterialPropertyTypeFloat value:0];
+        [self revenant_add:@"clearcoat" semantic:MDLMaterialSemanticClearcoat type:MDLMaterialPropertyTypeFloat value:0];
+        [self revenant_add:@"clearcoatGloss" semantic:MDLMaterialSemanticClearcoatGloss type:MDLMaterialPropertyTypeFloat value:0];
     }
     return self;
 }
@@ -406,57 +406,57 @@
 
 - (MDLMaterialProperty *)subsurface
 {
-    return [self charon_propertyNamed:@"subsurface"];
+    return [self revenant_propertyNamed:@"subsurface"];
 }
 
 - (MDLMaterialProperty *)metallic
 {
-    return [self charon_propertyNamed:@"metallic"];
+    return [self revenant_propertyNamed:@"metallic"];
 }
 
 - (MDLMaterialProperty *)specularAmount
 {
-    return [self charon_propertyNamed:@"specularAmount"];
+    return [self revenant_propertyNamed:@"specularAmount"];
 }
 
 - (MDLMaterialProperty *)specularTint
 {
-    return [self charon_propertyNamed:@"specularTint"];
+    return [self revenant_propertyNamed:@"specularTint"];
 }
 
 - (MDLMaterialProperty *)roughness
 {
-    return [self charon_propertyNamed:@"roughness"];
+    return [self revenant_propertyNamed:@"roughness"];
 }
 
 - (MDLMaterialProperty *)anisotropic
 {
-    return [self charon_propertyNamed:@"anisotropic"];
+    return [self revenant_propertyNamed:@"anisotropic"];
 }
 
 - (MDLMaterialProperty *)anisotropicRotation
 {
-    return [self charon_propertyNamed:@"anisotropicRotation"];
+    return [self revenant_propertyNamed:@"anisotropicRotation"];
 }
 
 - (MDLMaterialProperty *)sheen
 {
-    return [self charon_propertyNamed:@"sheen"];
+    return [self revenant_propertyNamed:@"sheen"];
 }
 
 - (MDLMaterialProperty *)sheenTint
 {
-    return [self charon_propertyNamed:@"sheenTint"];
+    return [self revenant_propertyNamed:@"sheenTint"];
 }
 
 - (MDLMaterialProperty *)clearcoat
 {
-    return [self charon_propertyNamed:@"clearcoat"];
+    return [self revenant_propertyNamed:@"clearcoat"];
 }
 
 - (MDLMaterialProperty *)clearcoatGloss
 {
-    return [self charon_propertyNamed:@"clearcoatGloss"];
+    return [self revenant_propertyNamed:@"clearcoatGloss"];
 }
 
 @end
@@ -483,7 +483,7 @@
         _bySemantic = [[NSMutableDictionary alloc] init];
         _scatteringFunction = scatteringFunction;
         _materialFace = MDLMaterialFaceFront;
-        for (MDLMaterialProperty *property in [scatteringFunction charon_allProperties])
+        for (MDLMaterialProperty *property in [scatteringFunction revenant_allProperties])
             [self setProperty:property];
     }
     return self;

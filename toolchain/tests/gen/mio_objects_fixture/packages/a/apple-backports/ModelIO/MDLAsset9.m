@@ -6,7 +6,7 @@
 }
 @end
 
-@implementation MDLAsset (CharonReaders)
+@implementation MDLAsset (RevenantReaders)
 - (id)tracked {
     return nil;
 }

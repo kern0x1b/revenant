@@ -15,7 +15,7 @@
 #include "graphics/gles_resources.hpp"
 #include "graphics/glsl_es.hpp"
 
-namespace shade {
+namespace emulator {
 namespace {
 
     using Color = std::array<float, 4>;
@@ -167,7 +167,7 @@ namespace {
         std::string& error;
     };
 
-    bool shade_pixel(Pass& pass, std::size_t offset, const Color& coordinate,
+    bool emulator_pixel(Pass& pass, std::size_t offset, const Color& coordinate,
         bool front_facing, const std::array<float, 3>& weights,
         const std::array<Vertex, 3>& triangle,
         const std::array<float, 3>& perspective)
@@ -342,7 +342,7 @@ namespace {
                 };
                 const auto offset = static_cast<std::size_t>(y) * frame.width +
                                     static_cast<std::size_t>(x);
-                if (!shade_pixel(pass, offset, { sample_x, guest_y, 0.0F, 0.0F },
+                if (!emulator_pixel(pass, offset, { sample_x, guest_y, 0.0F, 0.0F },
                         front_facing, weights, triangle, perspective))
                     return false;
             }

@@ -1,4 +1,4 @@
-#import "CharonMPS.h"
+#import "RevenantMPS.h"
 
 
 @implementation MPSVectorDescriptor {
@@ -16,7 +16,7 @@
 
 + (instancetype)vectorDescriptorWithLength:(NSUInteger)length dataType:(MPSDataType)dataType
 {
-    return [self vectorDescriptorWithLength:length vectors:1 vectorBytes:CharonMPSRowBytesForColumns(length, dataType) dataType:dataType];
+    return [self vectorDescriptorWithLength:length vectors:1 vectorBytes:RevenantMPSRowBytesForColumns(length, dataType) dataType:dataType];
 }
 
 + (instancetype)vectorDescriptorWithLength:(NSUInteger)length vectors:(NSUInteger)vectors vectorBytes:(NSUInteger)vectorBytes dataType:(MPSDataType)dataType
@@ -31,7 +31,7 @@
 
 + (size_t)vectorBytesForLength:(NSUInteger)length dataType:(MPSDataType)dataType
 {
-    return CharonMPSRowBytesForColumns(length, dataType);
+    return RevenantMPSRowBytesForColumns(length, dataType);
 }
 
 - (NSUInteger)length

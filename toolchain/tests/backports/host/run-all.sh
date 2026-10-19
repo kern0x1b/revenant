@@ -9,7 +9,7 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../common/runs.sh" "$here"
-seconds=${CHARON_ALIVE_SECONDS:-90}
+seconds=${REVENANT_ALIVE_SECONDS:-90}
 if [ "${1:-}" = --seconds ]; then
     seconds=$2
     shift 2
@@ -70,7 +70,7 @@ for name in $wanted; do
         printf '%-24s %s\n' "$name" "skipped: it starts a server of its own"
         continue
     esac
-    output=$(mktemp "$(runs_folder charon-run-all)/output.XXXXXX")
+    output=$(mktemp "$(runs_folder revenant-run-all)/output.XXXXXX")
     set +e
     argument=
     for pair in $arguments_for; do

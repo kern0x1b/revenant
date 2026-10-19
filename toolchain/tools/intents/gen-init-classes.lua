@@ -10,8 +10,8 @@ local function sources()
     for _, file in ipairs(os.files(path.join(CLASSES, "IN*.m"))) do
         table.insert(found, file)
     end
-    table.insert(found, path.join(CLASSES, "CharonIntents100.m"))
-    table.insert(found, path.join(CLASSES, "CharonIntents110.m"))
+    table.insert(found, path.join(CLASSES, "RevenantIntents100.m"))
+    table.insert(found, path.join(CLASSES, "RevenantIntents110.m"))
     byteorder.sort(found)
     return found
 end
@@ -25,8 +25,8 @@ local HEADER = [==[
 //   tools/intents/gen-init-classes.lua:
 //
 //   the properties, from the port's own objects - the `@synthesize NAME = _NAME;` lines inside
-//   each class's @implementation in packages/a/apple-backports/Intents/IN*.m, CharonIntents100.m
-//   and CharonIntents110.m, read by synthesised() in the same file:
+//   each class's @implementation in packages/a/apple-backports/Intents/IN*.m, RevenantIntents100.m
+//   and RevenantIntents110.m, read by synthesised() in the same file:
 //
 //     xmake l tools/intents/gen-init-classes.lua -o tests/backports/host/intents-init/init-classes.inc
 //

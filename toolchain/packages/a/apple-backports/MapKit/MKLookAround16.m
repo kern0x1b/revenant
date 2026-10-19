@@ -2,7 +2,7 @@
 #import <UIKit/UIKit.h>
 #import <objc/message.h>
 
-static NSError *MKCharonNoCoverage(NSString *what)
+static NSError *MKRevenantNoCoverage(NSString *what)
 {
     return [NSError errorWithDomain:@"MKErrorDomain" code:1
                            userInfo:@{NSLocalizedDescriptionKey:
@@ -13,7 +13,7 @@ static NSError *MKCharonNoCoverage(NSString *what)
                                            @"that holds a panorama, so there is no scene to give", what]}];
 }
 
-@interface MKLookAroundSceneRequest (CharonCoverage)
+@interface MKLookAroundSceneRequest (RevenantCoverage)
 + (BOOL)isAvailable;
 @end
 
@@ -74,7 +74,7 @@ static NSError *MKCharonNoCoverage(NSString *what)
     }
     _loading = NO;
     dispatch_async(dispatch_get_main_queue(), ^{
-        completionHandler(nil, MKCharonNoCoverage(@"MKLookAroundSceneRequest"));
+        completionHandler(nil, MKRevenantNoCoverage(@"MKLookAroundSceneRequest"));
     });
 }
 
@@ -183,7 +183,7 @@ static NSError *MKCharonNoCoverage(NSString *what)
         return;
     }
     dispatch_async(dispatch_get_main_queue(), ^{
-        completionHandler(nil, MKCharonNoCoverage(@"MKLookAroundSnapshotter"));
+        completionHandler(nil, MKRevenantNoCoverage(@"MKLookAroundSnapshotter"));
     });
 }
 
@@ -214,7 +214,7 @@ static NSError *MKCharonNoCoverage(NSString *what)
     self = [super initWithNibName:nil bundle:nil];
     if (self) {
         _scene = scene;
-        [self charon_reportTheUpdate];
+        [self revenant_reportTheUpdate];
     }
     return self;
 }
@@ -224,7 +224,7 @@ static NSError *MKCharonNoCoverage(NSString *what)
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     if (self) {
         _scene = nil;
-        [self charon_reportTheUpdate];
+        [self revenant_reportTheUpdate];
     }
     return self;
 }
@@ -234,12 +234,12 @@ static NSError *MKCharonNoCoverage(NSString *what)
     self = [super initWithCoder:coder];
     if (self) {
         _scene = nil;
-        [self charon_reportTheUpdate];
+        [self revenant_reportTheUpdate];
     }
     return self;
 }
 
-- (void)charon_reportTheUpdate
+- (void)revenant_reportTheUpdate
 {
     id<MKLookAroundViewControllerDelegate> delegate = _delegate;
     void (*send)(id, SEL, id) = (void (*)(id, SEL, id))objc_msgSend;
@@ -254,13 +254,13 @@ static NSError *MKCharonNoCoverage(NSString *what)
 - (void)setDelegate:(id<MKLookAroundViewControllerDelegate>)delegate
 {
     _delegate = delegate;
-    [self charon_reportTheUpdate];
+    [self revenant_reportTheUpdate];
 }
 
 - (void)viewDidAppear:(BOOL)animated
 {
     [super viewDidAppear:animated];
-    [self charon_reportTheUpdate];
+    [self revenant_reportTheUpdate];
 }
 
 - (void)viewWillDisappear:(BOOL)animated

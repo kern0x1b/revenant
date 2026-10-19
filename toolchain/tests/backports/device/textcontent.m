@@ -67,7 +67,7 @@ int main(void)
             CHECK_EQUAL([view textContentType], @"tel", ([[NSString stringWithFormat:@"%@ keeps a copy of a mutable string", name] UTF8String]));
             CHECK([other textContentType] == nil, ([[NSString stringWithFormat:@"and another %@ is not touched", name] UTF8String]));
         }
-        printf("%d checks, %d failures\n", charon_checks, charon_failures);
-        return charon_failures;
+        printf("%d checks, %d failures\n", revenant_checks, revenant_failures);
+        return revenant_failures;
     }
 }

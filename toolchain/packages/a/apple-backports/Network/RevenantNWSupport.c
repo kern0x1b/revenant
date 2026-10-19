@@ -1,4 +1,4 @@
-#include "CharonNWSupport.h"
+#include "RevenantNWSupport.h"
 
 #include <arpa/inet.h>
 #include <netdb.h>
@@ -14,7 +14,7 @@
 #include <time.h>
 #include <unistd.h>
 
-char *charon_nw_copy_cstring(const char *text)
+char *revenant_nw_copy_cstring(const char *text)
 {
     if (!text)
         return NULL;
@@ -25,21 +25,21 @@ char *charon_nw_copy_cstring(const char *text)
     return copy;
 }
 
-CFStringRef charon_nw_cfstring(const char *text)
+CFStringRef revenant_nw_cfstring(const char *text)
 {
     if (!text)
         return NULL;
     return CFStringCreateWithCString(kCFAllocatorDefault, text, kCFStringEncodingUTF8);
 }
 
-CFDataRef charon_nw_sockaddr_data(const struct sockaddr *address, socklen_t length)
+CFDataRef revenant_nw_sockaddr_data(const struct sockaddr *address, socklen_t length)
 {
     if (!address || !length)
         return NULL;
     return CFDataCreate(kCFAllocatorDefault, (const UInt8 *)address, (CFIndex)length);
 }
 
-const struct sockaddr *charon_nw_sockaddr_of(CFDataRef data, socklen_t *length)
+const struct sockaddr *revenant_nw_sockaddr_of(CFDataRef data, socklen_t *length)
 {
     if (!data)
         return NULL;
@@ -55,7 +55,7 @@ const struct sockaddr *charon_nw_sockaddr_of(CFDataRef data, socklen_t *length)
     return address;
 }
 
-socklen_t charon_nw_sockaddr_length(const struct sockaddr *address)
+socklen_t revenant_nw_sockaddr_length(const struct sockaddr *address)
 {
     if (!address)
         return 0;
@@ -73,7 +73,7 @@ socklen_t charon_nw_sockaddr_length(const struct sockaddr *address)
     }
 }
 
-bool charon_nw_sockaddr_text(const struct sockaddr *address, char *out, size_t size)
+bool revenant_nw_sockaddr_text(const struct sockaddr *address, char *out, size_t size)
 {
     if (!address || !out || !size)
         return false;
@@ -98,7 +98,7 @@ bool charon_nw_sockaddr_text(const struct sockaddr *address, char *out, size_t s
     return false;
 }
 
-uint16_t charon_nw_sockaddr_port(const struct sockaddr *address)
+uint16_t revenant_nw_sockaddr_port(const struct sockaddr *address)
 {
     if (!address)
         return 0;
@@ -109,7 +109,7 @@ uint16_t charon_nw_sockaddr_port(const struct sockaddr *address)
     return 0;
 }
 
-bool charon_nw_host_is_address(const char *host, uint16_t port, CFDataRef *out_address)
+bool revenant_nw_host_is_address(const char *host, uint16_t port, CFDataRef *out_address)
 {
     if (!host || !*host)
         return false;
@@ -122,7 +122,7 @@ bool charon_nw_host_is_address(const char *host, uint16_t port, CFDataRef *out_a
         address.sin_addr = v4;
         address.sin_port = htons(port);
         if (out_address)
-            *out_address = charon_nw_sockaddr_data((const struct sockaddr *)&address, sizeof address);
+            *out_address = revenant_nw_sockaddr_data((const struct sockaddr *)&address, sizeof address);
         return true;
     }
     struct in6_addr v6;
@@ -134,13 +134,13 @@ bool charon_nw_host_is_address(const char *host, uint16_t port, CFDataRef *out_a
         address.sin6_addr = v6;
         address.sin6_port = htons(port);
         if (out_address)
-            *out_address = charon_nw_sockaddr_data((const struct sockaddr *)&address, sizeof address);
+            *out_address = revenant_nw_sockaddr_data((const struct sockaddr *)&address, sizeof address);
         return true;
     }
     return false;
 }
 
-bool charon_nw_split_url(const char *url, CFStringRef *out_host, uint16_t *out_port)
+bool revenant_nw_split_url(const char *url, CFStringRef *out_host, uint16_t *out_port)
 {
     if (!url)
         return false;
@@ -172,7 +172,7 @@ bool charon_nw_split_url(const char *url, CFStringRef *out_host, uint16_t *out_p
     }
     bool ok = host[0] != 0;
     if (ok && out_host) {
-        *out_host = charon_nw_cfstring(host);
+        *out_host = revenant_nw_cfstring(host);
         if (!*out_host)
             ok = false;
     }
@@ -183,23 +183,23 @@ bool charon_nw_split_url(const char *url, CFStringRef *out_host, uint16_t *out_p
     return ok;
 }
 
-CFStringRef charon_nw_url_host(const char *url)
+CFStringRef revenant_nw_url_host(const char *url)
 {
     CFStringRef host = NULL;
-    if (!charon_nw_split_url(url, &host, NULL))
+    if (!revenant_nw_split_url(url, &host, NULL))
         return NULL;
     return host;
 }
 
-uint16_t charon_nw_url_port(const char *url)
+uint16_t revenant_nw_url_port(const char *url)
 {
     uint16_t port = 0;
-    if (!charon_nw_split_url(url, NULL, &port))
+    if (!revenant_nw_split_url(url, NULL, &port))
         return 0;
     return port;
 }
 
-bool charon_nw_resolve_port(const char *text, uint16_t *out)
+bool revenant_nw_resolve_port(const char *text, uint16_t *out)
 {
     if (!text || !*text)
         return false;
@@ -221,7 +221,7 @@ bool charon_nw_resolve_port(const char *text, uint16_t *out)
     return true;
 }
 
-uint16_t charon_nw_default_port_for_scheme(const char *url)
+uint16_t revenant_nw_default_port_for_scheme(const char *url)
 {
     if (!url)
         return 0;
@@ -242,7 +242,7 @@ uint16_t charon_nw_default_port_for_scheme(const char *url)
     return ntohs((uint16_t)service->s_port);
 }
 
-uint64_t charon_nw_uptime_milliseconds(void)
+uint64_t revenant_nw_uptime_milliseconds(void)
 {
     static mach_timebase_info_data_t base;
     static dispatch_once_t once;
@@ -257,22 +257,22 @@ uint64_t charon_nw_uptime_milliseconds(void)
     return nanoseconds / 1000000;
 }
 
-void charon_nw_set_number(CFMutableDictionaryRef values, const char *key, double value)
+void revenant_nw_set_number(CFMutableDictionaryRef values, const char *key, double value)
 {
     if (!values || !key)
         return;
     CFNumberRef number = CFNumberCreate(kCFAllocatorDefault, kCFNumberDoubleType, &value);
     if (!number)
         return;
-    CFDictionarySetValue(values, charon_nw_cfstring(key), number);
+    CFDictionarySetValue(values, revenant_nw_cfstring(key), number);
     CFRelease(number);
 }
 
-double charon_nw_number(CFDictionaryRef values, const char *key, double fallback)
+double revenant_nw_number(CFDictionaryRef values, const char *key, double fallback)
 {
     if (!values || !key)
         return fallback;
-    CFStringRef name = charon_nw_cfstring(key);
+    CFStringRef name = revenant_nw_cfstring(key);
     if (!name)
         return fallback;
     CFTypeRef held = CFDictionaryGetValue(values, name);
@@ -284,32 +284,32 @@ double charon_nw_number(CFDictionaryRef values, const char *key, double fallback
     return value;
 }
 
-void charon_nw_set_flag(CFMutableDictionaryRef values, const char *key, bool value)
+void revenant_nw_set_flag(CFMutableDictionaryRef values, const char *key, bool value)
 {
-    charon_nw_set_number(values, key, value ? 1.0 : 0.0);
+    revenant_nw_set_number(values, key, value ? 1.0 : 0.0);
 }
 
-bool charon_nw_flag(CFDictionaryRef values, const char *key, bool fallback)
+bool revenant_nw_flag(CFDictionaryRef values, const char *key, bool fallback)
 {
-    return charon_nw_number(values, key, fallback ? 1.0 : 0.0) != 0.0;
+    return revenant_nw_number(values, key, fallback ? 1.0 : 0.0) != 0.0;
 }
 
-void charon_nw_set_integer(CFMutableDictionaryRef values, const char *key, int64_t value)
+void revenant_nw_set_integer(CFMutableDictionaryRef values, const char *key, int64_t value)
 {
     if (!values || !key)
         return;
     CFNumberRef number = CFNumberCreate(kCFAllocatorDefault, kCFNumberSInt64Type, &value);
     if (!number)
         return;
-    CFDictionarySetValue(values, charon_nw_cfstring(key), number);
+    CFDictionarySetValue(values, revenant_nw_cfstring(key), number);
     CFRelease(number);
 }
 
-int64_t charon_nw_integer(CFDictionaryRef values, const char *key, int64_t fallback)
+int64_t revenant_nw_integer(CFDictionaryRef values, const char *key, int64_t fallback)
 {
     if (!values || !key)
         return fallback;
-    CFStringRef name = charon_nw_cfstring(key);
+    CFStringRef name = revenant_nw_cfstring(key);
     if (!name)
         return fallback;
     CFTypeRef held = CFDictionaryGetValue(values, name);
@@ -322,7 +322,7 @@ int64_t charon_nw_integer(CFDictionaryRef values, const char *key, int64_t fallb
     return value;
 }
 
-int charon_nw_socket(int family, int type, int protocol)
+int revenant_nw_socket(int family, int type, int protocol)
 {
     int handle = socket(family, type, protocol);
     if (handle < 0)
@@ -339,7 +339,7 @@ int charon_nw_socket(int family, int type, int protocol)
     return handle;
 }
 
-int charon_nw_blocking_socket(int family, int type, int protocol)
+int revenant_nw_blocking_socket(int family, int type, int protocol)
 {
     int handle = socket(family, type, protocol);
     if (handle < 0)
@@ -349,7 +349,7 @@ int charon_nw_blocking_socket(int family, int type, int protocol)
     return handle;
 }
 
-bool charon_nw_set_nonblocking(int handle)
+bool revenant_nw_set_nonblocking(int handle)
 {
     int flags = fcntl(handle, F_GETFL, 0);
     if (flags < 0)
@@ -357,7 +357,7 @@ bool charon_nw_set_nonblocking(int handle)
     return fcntl(handle, F_SETFL, flags | O_NONBLOCK) == 0;
 }
 
-dispatch_source_t charon_nw_read_source(int handle, dispatch_queue_t queue)
+dispatch_source_t revenant_nw_read_source(int handle, dispatch_queue_t queue)
 {
     dispatch_source_t source = dispatch_source_create(DISPATCH_SOURCE_TYPE_READ, (uintptr_t)handle, 0, queue);
     if (!source)
@@ -369,7 +369,7 @@ dispatch_source_t charon_nw_read_source(int handle, dispatch_queue_t queue)
     return source;
 }
 
-dispatch_source_t charon_nw_write_source(int handle, dispatch_queue_t queue)
+dispatch_source_t revenant_nw_write_source(int handle, dispatch_queue_t queue)
 {
     dispatch_source_t source = dispatch_source_create(DISPATCH_SOURCE_TYPE_WRITE, (uintptr_t)handle, 0, queue);
     if (!source)
@@ -378,7 +378,7 @@ dispatch_source_t charon_nw_write_source(int handle, dispatch_queue_t queue)
     return source;
 }
 
-uint32_t charon_nw_available_send_buffer(int handle)
+uint32_t revenant_nw_available_send_buffer(int handle)
 {
     int value = 0;
     socklen_t length = sizeof value;
@@ -387,7 +387,7 @@ uint32_t charon_nw_available_send_buffer(int handle)
     return (uint32_t)(value / 2);
 }
 
-uint32_t charon_nw_available_receive_buffer(int handle)
+uint32_t revenant_nw_available_receive_buffer(int handle)
 {
     int value = 0;
     socklen_t length = sizeof value;
@@ -396,7 +396,7 @@ uint32_t charon_nw_available_receive_buffer(int handle)
     return (uint32_t)(value / 2);
 }
 
-bool charon_nw_tcp_round_trips(int handle, uint64_t *smoothed, uint64_t *minimum, uint64_t *variance)
+bool revenant_nw_tcp_round_trips(int handle, uint64_t *smoothed, uint64_t *minimum, uint64_t *variance)
 {
 #ifdef TCP_CONNECTION_INFO
     struct tcp_connection_info info;

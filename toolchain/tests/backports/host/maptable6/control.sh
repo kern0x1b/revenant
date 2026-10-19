@@ -9,7 +9,7 @@ set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
-build=${MAPTABLE6_BUILD:-$(runs_folder charon-maptable6-control)}
+build=${MAPTABLE6_BUILD:-$(runs_folder revenant-maptable6-control)}
 rm -rf "$build"
 mkdir -p "$build"
 sed 's|dlsym(objc, "objc_loadWeakRetained") != NULL|0|' "$root/packages/a/apple-backports/Foundation/NSMapTable+Objects6.m" > "$build/port.m"

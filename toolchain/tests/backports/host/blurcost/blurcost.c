@@ -1,4 +1,4 @@
-#include "CharonBlur.h"
+#include "RevenantBlur.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -31,14 +31,14 @@ static void measure(const char *label, size_t width, size_t height, int rounds)
 {
     size_t row_bytes = width * 4;
     uint8_t *pixels = filled(row_bytes, height);
-    CharonBlurParameters parameters = {20, 1.8, 0.97, 0.97, 0.97, 0.82};
+    RevenantBlurParameters parameters = {20, 1.8, 0.97, 0.97, 0.97, 0.82};
 
-    charon_blur_pixels(pixels, width, height, row_bytes, parameters.radius, parameters.saturation,
+    revenant_blur_pixels(pixels, width, height, row_bytes, parameters.radius, parameters.saturation,
                        parameters.tintRed, parameters.tintGreen, parameters.tintBlue, parameters.tintAlpha);
     double best = 0.0, total = 0.0;
     for (int round = 0; round < rounds; round++) {
         double started = seconds();
-        charon_blur_pixels(pixels, width, height, row_bytes, parameters.radius, parameters.saturation,
+        revenant_blur_pixels(pixels, width, height, row_bytes, parameters.radius, parameters.saturation,
                            parameters.tintRed, parameters.tintGreen, parameters.tintBlue, parameters.tintAlpha);
         double took = seconds() - started;
         total += took;
@@ -52,7 +52,7 @@ static void measure(const char *label, size_t width, size_t height, int rounds)
 
 int main(void)
 {
-    printf("charon_blur_pixels, one call over a whole buffer, style 0 parameters\n");
+    printf("revenant_blur_pixels, one call over a whole buffer, style 0 parameters\n");
     measure("320x100", 320, 100, 20);
     measure("540x300", 540, 300, 10);
     measure("768x1024", 768, 1024, 5);

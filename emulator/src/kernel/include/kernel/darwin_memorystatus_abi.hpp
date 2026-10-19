@@ -12,7 +12,7 @@
 
 #include "device_state/darwin_abi.hpp"
 
-namespace shade::darwin::memorystatus {
+namespace emulator::darwin::memorystatus {
 
 inline constexpr std::uint32_t syscall_number = 440;
 inline constexpr std::uint32_t get_priority_list = 1;

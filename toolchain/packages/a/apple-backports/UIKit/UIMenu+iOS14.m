@@ -1,12 +1,12 @@
-#import "CharonMenus.h"
+#import "RevenantMenus.h"
 
 #pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
 
-@implementation UIMenu (CharonFourteen)
+@implementation UIMenu (RevenantFourteen)
 
 + (UIMenu *)menuWithChildren:(NSArray<UIMenuElement *> *)children
 {
-    return [[self alloc] initCharonWithTitle:@"" image:nil identifier:nil options:0 children:children];
+    return [[self alloc] initRevenantWithTitle:@"" image:nil identifier:nil options:0 children:children];
 }
 
 @end

@@ -1,4 +1,4 @@
-#import "CharonMenus.h"
+#import "RevenantMenus.h"
 
 @implementation UIEditMenuInteraction {
 @private
@@ -31,12 +31,12 @@
 {
     _view = view;
     if (view)
-        charon_menus_say_once(@"edit-menu", @"UIEditMenuInteraction: the interaction is attached; the menu is not shown and the delegate is never called in this build");
+        revenant_menus_say_once(@"edit-menu", @"UIEditMenuInteraction: the interaction is attached; the menu is not shown and the delegate is never called in this build");
 }
 
 - (void)presentEditMenuWithConfiguration:(UIEditMenuConfiguration *)configuration
 {
-    charon_menus_say_once(@"edit-menu-present", @"UIEditMenuInteraction: presentEditMenuWithConfiguration: shows no menu in this build");
+    revenant_menus_say_once(@"edit-menu-present", @"UIEditMenuInteraction: presentEditMenuWithConfiguration: shows no menu in this build");
 }
 
 - (void)dismissMenu

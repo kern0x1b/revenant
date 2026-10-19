@@ -26,7 +26,7 @@
 - (void)encodeWithCoder:(NSCoder *)coder;
 @end
 
-static NSDictionary *CharonZoneAnswers(NSString *name, CKRecordZone *zone)
+static NSDictionary *RevenantZoneAnswers(NSString *name, CKRecordZone *zone)
 {
     NSMutableDictionary *answer = [NSMutableDictionary dictionary];
     answer[@"zoneID.zoneName"] = zone.zoneID.zoneName ?: @"(nil)";
@@ -41,18 +41,18 @@ static NSDictionary *CharonZoneAnswers(NSString *name, CKRecordZone *zone)
     return answer;
 }
 
-void CharonDatabaseCases(NSMutableDictionary *out)
+void RevenantDatabaseCases(NSMutableDictionary *out)
 {
     NSMutableDictionary *cases = [NSMutableDictionary dictionary];
     out[@"cases"] = cases;
 
-    cases[@"initWithZoneName"] = CharonZoneAnswers(@"initWithZoneName",
+    cases[@"initWithZoneName"] = RevenantZoneAnswers(@"initWithZoneName",
         [[CKRecordZone alloc] initWithZoneName:@"probe"]);
-    cases[@"initWithZoneID"] = CharonZoneAnswers(@"initWithZoneID",
+    cases[@"initWithZoneID"] = RevenantZoneAnswers(@"initWithZoneID",
         [[CKRecordZone alloc] initWithZoneID:[[CKRecordZoneID alloc] initWithZoneName:@"probe"
                                                                                 ownerName:@"__defaultOwner__"]]);
-    cases[@"new"] = CharonZoneAnswers(@"new", [CKRecordZone new]);
-    cases[@"defaultRecordZone"] = CharonZoneAnswers(@"defaultRecordZone", [CKRecordZone defaultRecordZone]);
+    cases[@"new"] = RevenantZoneAnswers(@"new", [CKRecordZone new]);
+    cases[@"defaultRecordZone"] = RevenantZoneAnswers(@"defaultRecordZone", [CKRecordZone defaultRecordZone]);
 
     @try {
         CKRecordZone *made = [[CKRecordZone alloc] init];

@@ -10,11 +10,11 @@ here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 port=${PORT:-$here/../../../../packages/a/apple-backports/CoreNFC}
 harness=${CORENFC_HARNESS:-$here/../../device}
-build=${CORENFC_BUILD:-$(runs_fresh charon-corenfc)}
+build=${CORENFC_BUILD:-$(runs_fresh revenant-corenfc)}
 rm -rf "$build"
 mkdir -p "$build"
 objects=""
-for source in CharonNDEF NFCNDEFMessage11 NFCNDEFMessage13; do
+for source in RevenantNDEF NFCNDEFMessage11 NFCNDEFMessage13; do
     xcrun clang -fobjc-arc -w -I"$here" -I"$port" -c "$port/$source.m" -o "$build/$source.o"
     objects="$objects $build/$source.o"
 done

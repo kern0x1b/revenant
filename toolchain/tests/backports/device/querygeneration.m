@@ -55,7 +55,7 @@ int main(int argc, char **argv)
 {
     @autoreleasepool {
         if (argc > 1)
-            charon_log_to(@(argv[1]));
+            revenant_log_to(@(argv[1]));
         NSQueryGenerationToken *current = [NSQueryGenerationToken currentQueryGenerationToken];
         CHECK_EQUAL(image_of((__bridge void *)[NSQueryGenerationToken class]), @"libCoreDataBackports.dylib", "the token comes from the backports");
         CHECK_EQUAL(image_of((__bridge void *)[NSConstraintConflict class]), @"libCoreDataBackports.dylib", "the conflict comes from the backports");
@@ -120,7 +120,7 @@ int main(int argc, char **argv)
         CHECK([conflict.description hasPrefix:@"NSConstraintConflict (0x"] && [conflict.description rangeOfString:@"for constraint (\n    name,\n    rank\n): database: 0x"].location != NSNotFound && [conflict.description rangeOfString:@"conflictedObjects: ("].location != NSNotFound, "the description");
         NSString *encoding = raised(^{ [(id)conflict encodeWithCoder:[[NSKeyedArchiver alloc] initForWritingWithMutableData:[NSMutableData data]]]; });
         CHECK([encoding hasPrefix:@"NSInvalidArgumentException: CoreData does not support encoding of conflict objects."], "a conflict is not encoded");
-        printf("checks=%d failures=%d\n", charon_checks, charon_failures);
+        printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
     }
-    return charon_failures ? 1 : 0;
+    return revenant_failures ? 1 : 0;
 }

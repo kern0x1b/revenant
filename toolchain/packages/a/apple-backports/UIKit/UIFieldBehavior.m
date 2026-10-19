@@ -5,50 +5,50 @@
 
 #pragma STDC FP_CONTRACT OFF
 
-static const float CharonFieldPTM = 100.0f;
-static const float CharonFieldInversePTM = 0.01f;
+static const float RevenantFieldPTM = 100.0f;
+static const float RevenantFieldInversePTM = 0.01f;
 
-static const float CharonFieldEpsilon = 0x1p-15f;
+static const float RevenantFieldEpsilon = 0x1p-15f;
 
-static const float CharonFieldDefaultMinimumRadius = 0x1p-15f;
+static const float RevenantFieldDefaultMinimumRadius = 0x1p-15f;
 
-static const NSUInteger CharonFieldCategories = 32;
+static const NSUInteger RevenantFieldCategories = 32;
 
-typedef NS_ENUM(NSInteger, CharonFieldKind) {
-    CharonFieldDrag,
-    CharonFieldVortex,
-    CharonFieldRadialGravity,
-    CharonFieldLinearGravity,
-    CharonFieldVelocity,
-    CharonFieldNoise,
-    CharonFieldTurbulence,
-    CharonFieldSpring,
-    CharonFieldElectric,
-    CharonFieldMagnetic,
-    CharonFieldCustom,
+typedef NS_ENUM(NSInteger, RevenantFieldKind) {
+    RevenantFieldDrag,
+    RevenantFieldVortex,
+    RevenantFieldRadialGravity,
+    RevenantFieldLinearGravity,
+    RevenantFieldVelocity,
+    RevenantFieldNoise,
+    RevenantFieldTurbulence,
+    RevenantFieldSpring,
+    RevenantFieldElectric,
+    RevenantFieldMagnetic,
+    RevenantFieldCustom,
 };
 
 typedef struct {
-    CharonFieldKind kind;
+    RevenantFieldKind kind;
     float positionX, positionY;
     float strength, falloff, minimumRadius;
     float directionX, directionY;
     float smoothness, animationSpeed;
-} CharonField;
+} RevenantField;
 
 typedef struct {
     float x, y;
-} CharonFieldForce;
+} RevenantFieldForce;
 
 #pragma mark srdnoise3
 
-#define CharonNoiseA 0x1.a20bd6p-1f
+#define RevenantNoiseA 0x1.a20bd6p-1f
 
 static const struct {
     float u[16][3];
     float v[16][3];
     unsigned char permutation[512];
-} charon_noise_tables = {
+} revenant_noise_tables = {
     {
         {1.0f, 0.0f, 1.0f},
         {0.0f, 1.0f, 1.0f},
@@ -58,24 +58,24 @@ static const struct {
         {0.0f, 1.0f, -1.0f},
         {-1.0f, 0.0f, -1.0f},
         {0.0f, -1.0f, -1.0f},
-        {CharonNoiseA, CharonNoiseA, CharonNoiseA},
-        {-CharonNoiseA, CharonNoiseA, -CharonNoiseA},
-        {-CharonNoiseA, -CharonNoiseA, CharonNoiseA},
-        {CharonNoiseA, -CharonNoiseA, -CharonNoiseA},
-        {-CharonNoiseA, CharonNoiseA, CharonNoiseA},
-        {CharonNoiseA, -CharonNoiseA, CharonNoiseA},
-        {CharonNoiseA, -CharonNoiseA, -CharonNoiseA},
-        {-CharonNoiseA, CharonNoiseA, -CharonNoiseA}
+        {RevenantNoiseA, RevenantNoiseA, RevenantNoiseA},
+        {-RevenantNoiseA, RevenantNoiseA, -RevenantNoiseA},
+        {-RevenantNoiseA, -RevenantNoiseA, RevenantNoiseA},
+        {RevenantNoiseA, -RevenantNoiseA, -RevenantNoiseA},
+        {-RevenantNoiseA, RevenantNoiseA, RevenantNoiseA},
+        {RevenantNoiseA, -RevenantNoiseA, RevenantNoiseA},
+        {RevenantNoiseA, -RevenantNoiseA, -RevenantNoiseA},
+        {-RevenantNoiseA, RevenantNoiseA, -RevenantNoiseA}
     },
     {
-        {-CharonNoiseA, CharonNoiseA, CharonNoiseA},
-        {-CharonNoiseA, -CharonNoiseA, CharonNoiseA},
-        {CharonNoiseA, -CharonNoiseA, CharonNoiseA},
-        {CharonNoiseA, CharonNoiseA, CharonNoiseA},
-        {-CharonNoiseA, -CharonNoiseA, -CharonNoiseA},
-        {CharonNoiseA, -CharonNoiseA, -CharonNoiseA},
-        {CharonNoiseA, CharonNoiseA, -CharonNoiseA},
-        {-CharonNoiseA, CharonNoiseA, -CharonNoiseA},
+        {-RevenantNoiseA, RevenantNoiseA, RevenantNoiseA},
+        {-RevenantNoiseA, -RevenantNoiseA, RevenantNoiseA},
+        {RevenantNoiseA, -RevenantNoiseA, RevenantNoiseA},
+        {RevenantNoiseA, RevenantNoiseA, RevenantNoiseA},
+        {-RevenantNoiseA, -RevenantNoiseA, -RevenantNoiseA},
+        {RevenantNoiseA, -RevenantNoiseA, -RevenantNoiseA},
+        {RevenantNoiseA, RevenantNoiseA, -RevenantNoiseA},
+        {-RevenantNoiseA, RevenantNoiseA, -RevenantNoiseA},
         {1.0f, -1.0f, 0.0f},
         {1.0f, 1.0f, 0.0f},
         {-1.0f, 1.0f, 0.0f},
@@ -121,63 +121,63 @@ static const struct {
     },
 };
 
-static unsigned char charon_noise_permutation(int index)
+static unsigned char revenant_noise_permutation(int index)
 {
-    const unsigned char *base = (const unsigned char *)&charon_noise_tables + offsetof(__typeof__(charon_noise_tables), permutation);
+    const unsigned char *base = (const unsigned char *)&revenant_noise_tables + offsetof(__typeof__(revenant_noise_tables), permutation);
     return base[index];
 }
 
-static int charon_noise_floor(float value)
+static int revenant_noise_floor(float value)
 {
     return value > 0 ? (int)value : (int)value - 1;
 }
 
-static int charon_noise_wrap(int value)
+static int revenant_noise_wrap(int value)
 {
     return (value + 512) % 256;
 }
 
-static float charon_noise_falloff(float x, float y, float z)
+static float revenant_noise_falloff(float x, float y, float z)
 {
     return fmaf(-z, z, fmaf(-y, y, fmaf(-x, x, 0.6f)));
 }
 
-static void charon_noise_gradient(int hash, float sine, float cosine, float *gx, float *gy, float *gz)
+static void revenant_noise_gradient(int hash, float sine, float cosine, float *gx, float *gy, float *gz)
 {
     int h = hash & 15;
-    *gx = fmaf(cosine, charon_noise_tables.u[h][0], sine * charon_noise_tables.v[h][0]);
-    *gy = fmaf(cosine, charon_noise_tables.u[h][1], sine * charon_noise_tables.v[h][1]);
-    *gz = fmaf(cosine, charon_noise_tables.u[h][2], sine * charon_noise_tables.v[h][2]);
+    *gx = fmaf(cosine, revenant_noise_tables.u[h][0], sine * revenant_noise_tables.v[h][0]);
+    *gy = fmaf(cosine, revenant_noise_tables.u[h][1], sine * revenant_noise_tables.v[h][1]);
+    *gz = fmaf(cosine, revenant_noise_tables.u[h][2], sine * revenant_noise_tables.v[h][2]);
 }
 
-static float charon_noise_dot(float gx, float gy, float gz, float x, float y, float z)
+static float revenant_noise_dot(float gx, float gy, float gz, float x, float y, float z)
 {
     return fmaf(gz, z, fmaf(gx, x, gy * y));
 }
 
 typedef struct {
     float t, t2, t4, gx, gy, gz, n;
-} CharonNoiseCorner;
+} RevenantNoiseCorner;
 
-static CharonNoiseCorner charon_noise_corner(float x, float y, float z, int hash, float sine, float cosine)
+static RevenantNoiseCorner revenant_noise_corner(float x, float y, float z, int hash, float sine, float cosine)
 {
-    CharonNoiseCorner corner = {0, 0, 0, 0, 0, 0, 0};
-    float t = charon_noise_falloff(x, y, z);
+    RevenantNoiseCorner corner = {0, 0, 0, 0, 0, 0, 0};
+    float t = revenant_noise_falloff(x, y, z);
     if (t < 0.0f)
         return corner;
-    charon_noise_gradient(hash, sine, cosine, &corner.gx, &corner.gy, &corner.gz);
+    revenant_noise_gradient(hash, sine, cosine, &corner.gx, &corner.gy, &corner.gz);
     corner.t = t;
     corner.t2 = t * t;
     corner.t4 = corner.t2 * corner.t2;
-    corner.n = corner.t4 * charon_noise_dot(corner.gx, corner.gy, corner.gz, x, y, z);
+    corner.n = corner.t4 * revenant_noise_dot(corner.gx, corner.gy, corner.gz, x, y, z);
     return corner;
 }
 
-static float charon_noise(float x, float y, float z, float sine, float cosine, float *dx, float *dy, float *dz)
+static float revenant_noise(float x, float y, float z, float sine, float cosine, float *dx, float *dy, float *dz)
 {
     const float F3 = 0.333333343f, G3 = 0.166666672f;
     float s = (x + y + z) * F3;
-    int i = charon_noise_floor(x + s), j = charon_noise_floor(y + s), k = charon_noise_floor(z + s);
+    int i = revenant_noise_floor(x + s), j = revenant_noise_floor(y + s), k = revenant_noise_floor(z + s);
     float t = (float)(i + j + k) * G3;
     float x0 = x - ((float)i - t), y0 = y - ((float)j - t), z0 = z - ((float)k - t);
 
@@ -204,27 +204,27 @@ static float charon_noise(float x, float y, float z, float sine, float cosine, f
     float x2 = x0 - (float)i2 + 2.0f * G3, y2 = y0 - (float)j2 + 2.0f * G3, z2 = z0 - (float)k2 + 2.0f * G3;
     float x3 = x0 - 1.0f + 3.0f * G3, y3 = y0 - 1.0f + 3.0f * G3, z3 = z0 - 1.0f + 3.0f * G3;
 
-    int ii = charon_noise_wrap(i), jj = charon_noise_wrap(j), kk = charon_noise_wrap(k);
-    CharonNoiseCorner c0 = charon_noise_corner(x0, y0, z0,
-        charon_noise_permutation(ii + charon_noise_permutation(jj + charon_noise_permutation(kk))), sine, cosine);
-    CharonNoiseCorner c1 = charon_noise_corner(x1, y1, z1,
-        charon_noise_permutation(ii + i1 + charon_noise_permutation(jj + j1 + charon_noise_permutation(kk + k1))), sine, cosine);
-    CharonNoiseCorner c2 = charon_noise_corner(x2, y2, z2,
-        charon_noise_permutation(ii + i2 + charon_noise_permutation(jj + j2 + charon_noise_permutation(kk + k2))), sine, cosine);
-    CharonNoiseCorner c3 = charon_noise_corner(x3, y3, z3,
-        charon_noise_permutation(ii + 1 + charon_noise_permutation(jj + 1 + charon_noise_permutation(kk + 1))), sine, cosine);
+    int ii = revenant_noise_wrap(i), jj = revenant_noise_wrap(j), kk = revenant_noise_wrap(k);
+    RevenantNoiseCorner c0 = revenant_noise_corner(x0, y0, z0,
+        revenant_noise_permutation(ii + revenant_noise_permutation(jj + revenant_noise_permutation(kk))), sine, cosine);
+    RevenantNoiseCorner c1 = revenant_noise_corner(x1, y1, z1,
+        revenant_noise_permutation(ii + i1 + revenant_noise_permutation(jj + j1 + revenant_noise_permutation(kk + k1))), sine, cosine);
+    RevenantNoiseCorner c2 = revenant_noise_corner(x2, y2, z2,
+        revenant_noise_permutation(ii + i2 + revenant_noise_permutation(jj + j2 + revenant_noise_permutation(kk + k2))), sine, cosine);
+    RevenantNoiseCorner c3 = revenant_noise_corner(x3, y3, z3,
+        revenant_noise_permutation(ii + 1 + revenant_noise_permutation(jj + 1 + revenant_noise_permutation(kk + 1))), sine, cosine);
 
-    float temp0 = (c0.t2 * c0.t) * charon_noise_dot(c0.gx, c0.gy, c0.gz, x0, y0, z0);
+    float temp0 = (c0.t2 * c0.t) * revenant_noise_dot(c0.gx, c0.gy, c0.gz, x0, y0, z0);
     float gx = temp0 * x0, gy = temp0 * y0, gz = temp0 * z0;
-    float temp1 = charon_noise_dot(c1.gx, c1.gy, c1.gz, x1, y1, z1) * (c1.t * c1.t2);
+    float temp1 = revenant_noise_dot(c1.gx, c1.gy, c1.gz, x1, y1, z1) * (c1.t * c1.t2);
     gx = fmaf(temp1, x1, gx);
     gy = fmaf(temp1, y1, gy);
     gz = fmaf(temp1, z1, gz);
-    float temp2 = charon_noise_dot(c2.gx, c2.gy, c2.gz, x2, y2, z2) * (c2.t * c2.t2);
+    float temp2 = revenant_noise_dot(c2.gx, c2.gy, c2.gz, x2, y2, z2) * (c2.t * c2.t2);
     gx = fmaf(temp2, x2, gx);
     gy = fmaf(temp2, y2, gy);
     gz = fmaf(temp2, z2, gz);
-    float temp3 = charon_noise_dot(c3.gx, c3.gy, c3.gz, x3, y3, z3) * (c3.t * c3.t2);
+    float temp3 = revenant_noise_dot(c3.gx, c3.gy, c3.gz, x3, y3, z3) * (c3.t * c3.t2);
     gx = fmaf(temp3, x3, gx);
     gy = fmaf(temp3, y3, gy);
     gz = fmaf(temp3, z3, gz);
@@ -242,116 +242,116 @@ static float charon_noise(float x, float y, float z, float sine, float cosine, f
 
 #pragma mark Forces
 
-static float charon_field_falloff(const CharonField *field, float r)
+static float revenant_field_falloff(const RevenantField *field, float r)
 {
-    if (fabsf(field->falloff) < CharonFieldEpsilon)
+    if (fabsf(field->falloff) < RevenantFieldEpsilon)
         return 1.0f;
     return powf(r < field->minimumRadius ? field->minimumRadius : r, -field->falloff);
 }
 
-static float charon_field_distance(float dx, float dy)
+static float revenant_field_distance(float dx, float dy)
 {
     return sqrtf(0.0f * 0.0f + (dx * dx + dy * dy));
 }
 
-static CharonFieldForce charon_field_noise(const CharonField *field, float px, float py, double time)
+static RevenantFieldForce revenant_field_noise(const RevenantField *field, float px, float py, double time)
 {
-    CharonFieldForce zero = {0, 0};
-    if (fabsf(field->strength) < CharonFieldEpsilon)
+    RevenantFieldForce zero = {0, 0};
+    if (fabsf(field->strength) < RevenantFieldEpsilon)
         return zero;
     float shift = (float)(time * (double)field->animationSpeed);
     float lx = (px + shift) + -field->positionX, ly = (py + shift) + -field->positionY, lz = 0.0f + shift;
     float frequency = 1.25f / (fmaxf(field->smoothness, 0.0f) + 0.0833333358f) + -1.0f;
     float gx, gy, gz;
-    float n = charon_noise(frequency * lx, frequency * ly, frequency * lz, sinf(shift), cosf(shift), &gx, &gy, &gz);
-    float fall = charon_field_falloff(field, charon_field_distance(px - field->positionX, py - field->positionY));
-    CharonFieldForce force = {((gx * fall) * n) * field->strength, ((gy * fall) * n) * field->strength};
+    float n = revenant_noise(frequency * lx, frequency * ly, frequency * lz, sinf(shift), cosf(shift), &gx, &gy, &gz);
+    float fall = revenant_field_falloff(field, revenant_field_distance(px - field->positionX, py - field->positionY));
+    RevenantFieldForce force = {((gx * fall) * n) * field->strength, ((gy * fall) * n) * field->strength};
     return force;
 }
 
-static CharonFieldForce charon_field_force(const CharonField *field, float px, float py, float vx, float vy, float m, float q, double time)
+static RevenantFieldForce revenant_field_force(const RevenantField *field, float px, float py, float vx, float vy, float m, float q, double time)
 {
-    CharonFieldForce zero = {0, 0};
+    RevenantFieldForce zero = {0, 0};
     float S = field->strength;
     float dx = px - field->positionX, dy = py - field->positionY;
     switch (field->kind) {
-    case CharonFieldLinearGravity: {
-        if (fabsf(m * S) < CharonFieldEpsilon)
+    case RevenantFieldLinearGravity: {
+        if (fabsf(m * S) < RevenantFieldEpsilon)
             return zero;
-        float fall = charon_field_falloff(field, charon_field_distance(dx, dy));
-        CharonFieldForce force = {((field->directionX * S) * m) * fall, ((field->directionY * S) * m) * fall};
+        float fall = revenant_field_falloff(field, revenant_field_distance(dx, dy));
+        RevenantFieldForce force = {((field->directionX * S) * m) * fall, ((field->directionY * S) * m) * fall};
         return force;
     }
-    case CharonFieldRadialGravity: {
-        if (fabsf(m * S) < CharonFieldEpsilon)
+    case RevenantFieldRadialGravity: {
+        if (fabsf(m * S) < RevenantFieldEpsilon)
             return zero;
         float r2 = 0.0f * 0.0f + (dx * dx + dy * dy);
         if (r2 < 1e-5f)
             return zero;
         float r = sqrtf(r2);
-        float scale = (-(m * S)) * charon_field_falloff(field, r);
-        CharonFieldForce force = {(dx / r) * scale, (dy / r) * scale};
+        float scale = (-(m * S)) * revenant_field_falloff(field, r);
+        RevenantFieldForce force = {(dx / r) * scale, (dy / r) * scale};
         return force;
     }
-    case CharonFieldElectric: {
+    case RevenantFieldElectric: {
         float charged = q * S;
-        if (fabsf(charged) < CharonFieldEpsilon)
+        if (fabsf(charged) < RevenantFieldEpsilon)
             return zero;
-        float r = charon_field_distance(dx, dy);
-        float scale = charged * charon_field_falloff(field, r);
-        CharonFieldForce force = {(dx / r) * scale, (dy / r) * scale};
+        float r = revenant_field_distance(dx, dy);
+        float scale = charged * revenant_field_falloff(field, r);
+        RevenantFieldForce force = {(dx / r) * scale, (dy / r) * scale};
         return force;
     }
-    case CharonFieldMagnetic: {
-        if (fabsf(q * S) < CharonFieldEpsilon)
+    case RevenantFieldMagnetic: {
+        if (fabsf(q * S) < RevenantFieldEpsilon)
             return zero;
-        float scale = S * charon_field_falloff(field, charon_field_distance(dx, dy));
-        CharonFieldForce force = {vy * scale, -vx * scale};
+        float scale = S * revenant_field_falloff(field, revenant_field_distance(dx, dy));
+        RevenantFieldForce force = {vy * scale, -vx * scale};
         return force;
     }
-    case CharonFieldSpring: {
-        if (fabsf(S) < CharonFieldEpsilon)
+    case RevenantFieldSpring: {
+        if (fabsf(S) < RevenantFieldEpsilon)
             return zero;
-        float r = charon_field_distance(dx, dy);
+        float r = revenant_field_distance(dx, dy);
         if (r < 1e-5f)
             return zero;
-        float scale = (-S) * charon_field_falloff(field, r);
-        CharonFieldForce force = {(dx / r) * scale, (dy / r) * scale};
+        float scale = (-S) * revenant_field_falloff(field, r);
+        RevenantFieldForce force = {(dx / r) * scale, (dy / r) * scale};
         return force;
     }
-    case CharonFieldVortex: {
-        if (fabsf(m * S) < CharonFieldEpsilon)
+    case RevenantFieldVortex: {
+        if (fabsf(m * S) < RevenantFieldEpsilon)
             return zero;
-        float r = charon_field_distance(dx, dy);
+        float r = revenant_field_distance(dx, dy);
         float ux = dx / r, uy = dy / r;
-        float scale = (-S) * charon_field_falloff(field, r);
-        CharonFieldForce force = {(uy * scale) / m, (-ux * scale) / m};
+        float scale = (-S) * revenant_field_falloff(field, r);
+        RevenantFieldForce force = {(uy * scale) / m, (-ux * scale) / m};
         return force;
     }
-    case CharonFieldDrag: {
-        if (fabsf(S) < CharonFieldEpsilon)
+    case RevenantFieldDrag: {
+        if (fabsf(S) < RevenantFieldEpsilon)
             return zero;
         float ux = vx - field->directionX, uy = vy - field->directionY;
-        float speed = charon_field_distance(ux, uy);
-        if (speed <= CharonFieldEpsilon)
+        float speed = revenant_field_distance(ux, uy);
+        if (speed <= RevenantFieldEpsilon)
             return zero;
-        float fall = charon_field_falloff(field, charon_field_distance(dx, dy));
-        CharonFieldForce force = {((ux * speed) * -S) * fall, ((uy * speed) * -S) * fall};
+        float fall = revenant_field_falloff(field, revenant_field_distance(dx, dy));
+        RevenantFieldForce force = {((ux * speed) * -S) * fall, ((uy * speed) * -S) * fall};
         return force;
     }
-    case CharonFieldNoise:
-        return charon_field_noise(field, px, py, time);
-    case CharonFieldTurbulence: {
-        if (fabsf(S) < CharonFieldEpsilon)
+    case RevenantFieldNoise:
+        return revenant_field_noise(field, px, py, time);
+    case RevenantFieldTurbulence: {
+        if (fabsf(S) < RevenantFieldEpsilon)
             return zero;
-        CharonFieldForce force = charon_field_noise(field, px, py, time);
+        RevenantFieldForce force = revenant_field_noise(field, px, py, time);
         float speed = sqrtf(0.0f * 0.0f + (vx * vx + vy * vy));
         force.x = ((force.x * m) * speed) * speed;
         force.y = ((force.y * m) * speed) * speed;
         return force;
     }
-    case CharonFieldVelocity:
-    case CharonFieldCustom:
+    case RevenantFieldVelocity:
+    case RevenantFieldCustom:
         return zero;
     }
     return zero;
@@ -363,9 +363,9 @@ typedef struct {
     CGFloat density;
     CGFloat charge;
     BOOL anchored;
-} CharonFieldMaterial;
+} RevenantFieldMaterial;
 
-static void charon_field_visit(UIDynamicBehavior *behavior, id<UIDynamicItem> item, CharonFieldMaterial *material)
+static void revenant_field_visit(UIDynamicBehavior *behavior, id<UIDynamicItem> item, RevenantFieldMaterial *material)
 {
     if ([behavior isKindOfClass:[UIDynamicItemBehavior class]] && [[(UIDynamicItemBehavior *)behavior items] containsObject:item]) {
         UIDynamicItemBehavior *properties = (UIDynamicItemBehavior *)behavior;
@@ -377,33 +377,33 @@ static void charon_field_visit(UIDynamicBehavior *behavior, id<UIDynamicItem> it
             material->anchored = YES;
     }
     for (UIDynamicBehavior *child in behavior.childBehaviors)
-        charon_field_visit(child, item, material);
+        revenant_field_visit(child, item, material);
 }
 
-static CharonFieldMaterial charon_field_material(UIDynamicAnimator *animator, id<UIDynamicItem> item)
+static RevenantFieldMaterial revenant_field_material(UIDynamicAnimator *animator, id<UIDynamicItem> item)
 {
-    CharonFieldMaterial material = {1, 0, NO};
+    RevenantFieldMaterial material = {1, 0, NO};
     for (UIDynamicBehavior *behavior in animator.behaviors)
-        charon_field_visit(behavior, item, &material);
+        revenant_field_visit(behavior, item, &material);
     return material;
 }
 
 @interface UIFieldBehavior ()
-- (UIDynamicAnimator *)charon_registeredAnimator;
+- (UIDynamicAnimator *)revenant_registeredAnimator;
 @end
 
-static NSUInteger charon_field_count(UIDynamicBehavior *behavior, UIDynamicAnimator *animator, UIFieldBehavior *except)
+static NSUInteger revenant_field_count(UIDynamicBehavior *behavior, UIDynamicAnimator *animator, UIFieldBehavior *except)
 {
     NSUInteger count = 0;
-    if (behavior != except && [behavior isKindOfClass:[UIFieldBehavior class]] && [(UIFieldBehavior *)behavior charon_registeredAnimator] == animator)
+    if (behavior != except && [behavior isKindOfClass:[UIFieldBehavior class]] && [(UIFieldBehavior *)behavior revenant_registeredAnimator] == animator)
         count += 1;
     for (UIDynamicBehavior *child in behavior.childBehaviors)
-        count += charon_field_count(child, animator, except);
+        count += revenant_field_count(child, animator, except);
     return count;
 }
 
 @implementation UIFieldBehavior {
-    CharonField _field;
+    RevenantField _field;
     UIRegion *_region;
     CGVector (^_evaluator)(UIFieldBehavior *field, CGPoint position, CGVector velocity, CGFloat mass, CGFloat charge, NSTimeInterval deltaTime);
     UIDynamicItemBehavior *_carrier;
@@ -417,57 +417,57 @@ static NSUInteger charon_field_count(UIDynamicBehavior *behavior, UIDynamicAnima
     return nil;
 }
 
-- (instancetype)charon_initWithKind:(CharonFieldKind)kind falloff:(float)falloff __attribute__((objc_method_family(init)))
+- (instancetype)revenant_initWithKind:(RevenantFieldKind)kind falloff:(float)falloff __attribute__((objc_method_family(init)))
 {
     if (!(self = [super init]))
         return nil;
     _field.kind = kind;
     _field.strength = 1;
     _field.falloff = falloff;
-    _field.minimumRadius = CharonFieldDefaultMinimumRadius;
+    _field.minimumRadius = RevenantFieldDefaultMinimumRadius;
     _region = [UIRegion infiniteRegion];
     _carrier = [[UIDynamicItemBehavior alloc] initWithItems:@[]];
     __weak UIFieldBehavior *field = self;
     _carrier.action = ^{
-        [field charon_applyToItems];
+        [field revenant_applyToItems];
     };
     return self;
 }
 
 + (instancetype)dragField
 {
-    return [[self alloc] charon_initWithKind:CharonFieldDrag falloff:0];
+    return [[self alloc] revenant_initWithKind:RevenantFieldDrag falloff:0];
 }
 
 + (instancetype)vortexField
 {
-    return [[self alloc] charon_initWithKind:CharonFieldVortex falloff:0];
+    return [[self alloc] revenant_initWithKind:RevenantFieldVortex falloff:0];
 }
 
 + (instancetype)radialGravityFieldWithPosition:(CGPoint)position
 {
-    UIFieldBehavior *field = [[self alloc] charon_initWithKind:CharonFieldRadialGravity falloff:2];
+    UIFieldBehavior *field = [[self alloc] revenant_initWithKind:RevenantFieldRadialGravity falloff:2];
     field.position = position;
     return field;
 }
 
 + (instancetype)linearGravityFieldWithVector:(CGVector)direction
 {
-    UIFieldBehavior *field = [[self alloc] charon_initWithKind:CharonFieldLinearGravity falloff:0];
+    UIFieldBehavior *field = [[self alloc] revenant_initWithKind:RevenantFieldLinearGravity falloff:0];
     field.direction = direction;
     return field;
 }
 
 + (instancetype)velocityFieldWithVector:(CGVector)direction
 {
-    UIFieldBehavior *field = [[self alloc] charon_initWithKind:CharonFieldVelocity falloff:0];
+    UIFieldBehavior *field = [[self alloc] revenant_initWithKind:RevenantFieldVelocity falloff:0];
     field.direction = direction;
     return field;
 }
 
 + (instancetype)noiseFieldWithSmoothness:(CGFloat)smoothness animationSpeed:(CGFloat)speed
 {
-    UIFieldBehavior *field = [[self alloc] charon_initWithKind:CharonFieldNoise falloff:0];
+    UIFieldBehavior *field = [[self alloc] revenant_initWithKind:RevenantFieldNoise falloff:0];
     field.smoothness = smoothness;
     field.animationSpeed = speed;
     return field;
@@ -475,7 +475,7 @@ static NSUInteger charon_field_count(UIDynamicBehavior *behavior, UIDynamicAnima
 
 + (instancetype)turbulenceFieldWithSmoothness:(CGFloat)smoothness animationSpeed:(CGFloat)speed
 {
-    UIFieldBehavior *field = [[self alloc] charon_initWithKind:CharonFieldTurbulence falloff:0];
+    UIFieldBehavior *field = [[self alloc] revenant_initWithKind:RevenantFieldTurbulence falloff:0];
     field.smoothness = smoothness;
     field.animationSpeed = speed;
     return field;
@@ -483,22 +483,22 @@ static NSUInteger charon_field_count(UIDynamicBehavior *behavior, UIDynamicAnima
 
 + (instancetype)springField
 {
-    return [[self alloc] charon_initWithKind:CharonFieldSpring falloff:-1];
+    return [[self alloc] revenant_initWithKind:RevenantFieldSpring falloff:-1];
 }
 
 + (instancetype)electricField
 {
-    return [[self alloc] charon_initWithKind:CharonFieldElectric falloff:1];
+    return [[self alloc] revenant_initWithKind:RevenantFieldElectric falloff:1];
 }
 
 + (instancetype)magneticField
 {
-    return [[self alloc] charon_initWithKind:CharonFieldMagnetic falloff:1];
+    return [[self alloc] revenant_initWithKind:RevenantFieldMagnetic falloff:1];
 }
 
 + (instancetype)fieldWithEvaluationBlock:(CGVector (^)(UIFieldBehavior *field, CGPoint position, CGVector velocity, CGFloat mass, CGFloat charge, NSTimeInterval deltaTime))block
 {
-    UIFieldBehavior *field = [[self alloc] charon_initWithKind:CharonFieldCustom falloff:0];
+    UIFieldBehavior *field = [[self alloc] revenant_initWithKind:RevenantFieldCustom falloff:0];
     field->_evaluator = [block copy];
     return field;
 }
@@ -538,7 +538,7 @@ static NSUInteger charon_field_count(UIDynamicBehavior *behavior, UIDynamicAnima
 {
 }
 
-- (UIDynamicAnimator *)charon_registeredAnimator
+- (UIDynamicAnimator *)revenant_registeredAnimator
 {
     return _registeredAnimator;
 }
@@ -553,8 +553,8 @@ static NSUInteger charon_field_count(UIDynamicBehavior *behavior, UIDynamicAnima
     }
     NSUInteger fields = 0;
     for (UIDynamicBehavior *behavior in animator.behaviors)
-        fields += charon_field_count(behavior, animator, self);
-    if (fields >= CharonFieldCategories)
+        fields += revenant_field_count(behavior, animator, self);
+    if (fields >= RevenantFieldCategories)
         [[NSException exceptionWithName:@"Invalid Association" reason:@"UIDynamicAnimator supports a maximum of 32 distinct fields" userInfo:nil] raise];
     _registeredAnimator = animator;
     _lastElapsedTime = animator.elapsedTime;
@@ -563,36 +563,36 @@ static NSUInteger charon_field_count(UIDynamicBehavior *behavior, UIDynamicAnima
 
 #pragma mark The step
 
-- (CGVector)charon_accelerationAt:(CGPoint)center velocity:(CGPoint)velocity mass:(CGFloat)mass charge:(CGFloat)charge time:(NSTimeInterval)time
+- (CGVector)revenant_accelerationAt:(CGPoint)center velocity:(CGPoint)velocity mass:(CGFloat)mass charge:(CGFloat)charge time:(NSTimeInterval)time
 {
-    float px = (float)((double)CharonFieldInversePTM * center.x), py = (float)((double)CharonFieldInversePTM * center.y);
-    float vx = (float)((double)CharonFieldInversePTM * velocity.x), vy = (float)((double)CharonFieldInversePTM * velocity.y);
+    float px = (float)((double)RevenantFieldInversePTM * center.x), py = (float)((double)RevenantFieldInversePTM * center.y);
+    float vx = (float)((double)RevenantFieldInversePTM * velocity.x), vy = (float)((double)RevenantFieldInversePTM * velocity.y);
     float m = (float)mass, q = (float)charge;
-    CharonFieldForce force;
-    if (_field.kind == CharonFieldCustom) {
+    RevenantFieldForce force;
+    if (_field.kind == RevenantFieldCustom) {
         force.x = force.y = 0;
-        if (_evaluator && fabsf(_field.strength) >= CharonFieldEpsilon) {
-            CGPoint local = CGPointMake((double)((px - _field.positionX) * CharonFieldPTM), (double)((py - _field.positionY) * CharonFieldPTM));
+        if (_evaluator && fabsf(_field.strength) >= RevenantFieldEpsilon) {
+            CGPoint local = CGPointMake((double)((px - _field.positionX) * RevenantFieldPTM), (double)((py - _field.positionY) * RevenantFieldPTM));
             CGVector answer = _evaluator(self, local, CGVectorMake(vx, vy), m, q, time);
             force.x = (float)answer.dx;
             force.y = (float)answer.dy;
         }
     } else {
-        force = charon_field_force(&_field, px, py, vx, vy, m, q, time);
+        force = revenant_field_force(&_field, px, py, vx, vy, m, q, time);
     }
     float inverseMass = 1.0f / m;
-    return CGVectorMake((double)(inverseMass * force.x) * CharonFieldPTM, (double)(inverseMass * force.y) * CharonFieldPTM);
+    return CGVectorMake((double)(inverseMass * force.x) * RevenantFieldPTM, (double)(inverseMass * force.y) * RevenantFieldPTM);
 }
 
-- (BOOL)charon_regionContains:(CGPoint)center
+- (BOOL)revenant_regionContains:(CGPoint)center
 {
     if (!_region)
         return YES;
-    float px = (float)((double)CharonFieldInversePTM * center.x), py = (float)((double)CharonFieldInversePTM * center.y);
-    return [_region containsPoint:CGPointMake((double)((px - _field.positionX) * CharonFieldPTM), (double)((py - _field.positionY) * CharonFieldPTM))];
+    float px = (float)((double)RevenantFieldInversePTM * center.x), py = (float)((double)RevenantFieldInversePTM * center.y);
+    return [_region containsPoint:CGPointMake((double)((px - _field.positionX) * RevenantFieldPTM), (double)((py - _field.positionY) * RevenantFieldPTM))];
 }
 
-- (void)charon_applyToItems
+- (void)revenant_applyToItems
 {
     UIDynamicAnimator *animator = _registeredAnimator;
     if (!animator)
@@ -605,21 +605,21 @@ static NSUInteger charon_field_count(UIDynamicBehavior *behavior, UIDynamicAnima
         CGPoint center = item.center;
         if (reference && [(id)item isKindOfClass:[UIView class]])
             center = [reference convertPoint:center fromView:[(UIView *)item superview]];
-        if (![self charon_regionContains:center])
+        if (![self revenant_regionContains:center])
             continue;
-        CharonFieldMaterial material = charon_field_material(animator, item);
+        RevenantFieldMaterial material = revenant_field_material(animator, item);
         if (material.anchored)
             continue;
         CGPoint velocity = [_carrier linearVelocityForItem:item];
-        if (_field.kind == CharonFieldVelocity) {
-            [_carrier addLinearVelocity:CGPointMake((double)(_field.directionX * CharonFieldPTM) - velocity.x,
-                                                    (double)(_field.directionY * CharonFieldPTM) - velocity.y)
+        if (_field.kind == RevenantFieldVelocity) {
+            [_carrier addLinearVelocity:CGPointMake((double)(_field.directionX * RevenantFieldPTM) - velocity.x,
+                                                    (double)(_field.directionY * RevenantFieldPTM) - velocity.y)
                                 forItem:item];
             continue;
         }
         CGSize size = item.bounds.size;
-        CGFloat mass = material.density * size.width * size.height / ((double)CharonFieldPTM * (double)CharonFieldPTM);
-        CGVector acceleration = [self charon_accelerationAt:center velocity:velocity mass:mass charge:material.charge time:now];
+        CGFloat mass = material.density * size.width * size.height / ((double)RevenantFieldPTM * (double)RevenantFieldPTM);
+        CGVector acceleration = [self revenant_accelerationAt:center velocity:velocity mass:mass charge:material.charge time:now];
         [_carrier addLinearVelocity:CGPointMake(acceleration.dx * dt, acceleration.dy * dt) forItem:item];
     }
 }
@@ -628,13 +628,13 @@ static NSUInteger charon_field_count(UIDynamicBehavior *behavior, UIDynamicAnima
 
 - (CGPoint)position
 {
-    return CGPointMake((double)_field.positionX * (double)CharonFieldPTM, (double)_field.positionY * (double)CharonFieldPTM);
+    return CGPointMake((double)_field.positionX * (double)RevenantFieldPTM, (double)_field.positionY * (double)RevenantFieldPTM);
 }
 
 - (void)setPosition:(CGPoint)position
 {
-    _field.positionX = (float)position.x * CharonFieldInversePTM;
-    _field.positionY = (float)position.y * CharonFieldInversePTM;
+    _field.positionX = (float)position.x * RevenantFieldInversePTM;
+    _field.positionY = (float)position.y * RevenantFieldInversePTM;
 }
 
 - (UIRegion *)region
@@ -669,12 +669,12 @@ static NSUInteger charon_field_count(UIDynamicBehavior *behavior, UIDynamicAnima
 
 - (CGFloat)minimumRadius
 {
-    return _field.minimumRadius / CharonFieldInversePTM;
+    return _field.minimumRadius / RevenantFieldInversePTM;
 }
 
 - (void)setMinimumRadius:(CGFloat)minimumRadius
 {
-    _field.minimumRadius = (float)minimumRadius * CharonFieldInversePTM;
+    _field.minimumRadius = (float)minimumRadius * RevenantFieldInversePTM;
 }
 
 - (CGVector)direction
@@ -688,30 +688,30 @@ static NSUInteger charon_field_count(UIDynamicBehavior *behavior, UIDynamicAnima
     _field.directionY = (float)direction.dy;
 }
 
-- (BOOL)charon_isNoise
+- (BOOL)revenant_isNoise
 {
-    return _field.kind == CharonFieldNoise || _field.kind == CharonFieldTurbulence;
+    return _field.kind == RevenantFieldNoise || _field.kind == RevenantFieldTurbulence;
 }
 
 - (CGFloat)smoothness
 {
-    return [self charon_isNoise] ? _field.smoothness : 0;
+    return [self revenant_isNoise] ? _field.smoothness : 0;
 }
 
 - (void)setSmoothness:(CGFloat)smoothness
 {
-    if ([self charon_isNoise])
+    if ([self revenant_isNoise])
         _field.smoothness = (float)smoothness;
 }
 
 - (CGFloat)animationSpeed
 {
-    return [self charon_isNoise] ? _field.animationSpeed : 0;
+    return [self revenant_isNoise] ? _field.animationSpeed : 0;
 }
 
 - (void)setAnimationSpeed:(CGFloat)animationSpeed
 {
-    if ([self charon_isNoise])
+    if ([self revenant_isNoise])
         _field.animationSpeed = (float)animationSpeed;
 }
 

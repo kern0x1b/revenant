@@ -6,7 +6,7 @@
 static NSString *const results_folder = @"/private/var/backports";
 
 @interface NSObject (DynamicsPrivate)
-- (BOOL)charon_animatorStep:(double)dt;
+- (BOOL)revenant_animatorStep:(double)dt;
 - (void)_setAlwaysDisableDisplayLink:(BOOL)disable;
 @end
 
@@ -18,7 +18,7 @@ static NSString *image_of(Class cls)
 
 static void check_near(double actual, double expected, double tolerance, const char *name, NSString *what)
 {
-    charon_check(fabs(actual - expected) <= tolerance, name,
+    revenant_check(fabs(actual - expected) <= tolerance, name,
                  [NSString stringWithFormat:@"%@: %.9g, expected %.9g within %g", what, actual, expected, tolerance]);
 }
 
@@ -39,7 +39,7 @@ static void check_integrator(void)
     UIView *item = [[UIView alloc] initWithFrame:CGRectMake(100, 0, 100, 100)];
     [animator addBehavior:[[UIGravityBehavior alloc] initWithItems:@[item]]];
     for (int index = 0; index < 5; index++) {
-        [animator charon_animatorStep:1.0 / 60.0];
+        [animator revenant_animatorStep:1.0 / 60.0];
         check_near(item.center.y, predicted[index], 1e-5, "T1c 7.0's integrator falls as w_sim7 predicts",
                    [NSString stringWithFormat:@"step %d", index]);
     }
@@ -77,10 +77,10 @@ static void check_layout_transform(void)
     CHECK(CGAffineTransformIsIdentity(attributes.transform), "a transform3D that is not affine reads as the identity");
 }
 
-@interface CharonDynamicsDelegate : UIResponder <UIApplicationDelegate, UIDynamicAnimatorDelegate>
+@interface RevenantDynamicsDelegate : UIResponder <UIApplicationDelegate, UIDynamicAnimatorDelegate>
 @end
 
-@implementation CharonDynamicsDelegate {
+@implementation RevenantDynamicsDelegate {
     UIWindow *_window;
     UIDynamicAnimator *_animator;
     UIView *_item;
@@ -133,14 +133,14 @@ static void check_layout_transform(void)
 - (void)finish
 {
     NSString *summary = [NSString stringWithFormat:@"%@ checks=%d failures=%d\n",
-                                                   charon_failures ? @"FAIL" : @"ok", charon_checks, charon_failures];
+                                                   revenant_failures ? @"FAIL" : @"ok", revenant_checks, revenant_failures];
     [summary writeToFile:[results_folder stringByAppendingPathComponent:@"dynamics.done"]
               atomically:YES encoding:NSUTF8StringEncoding error:NULL];
 }
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)options
 {
-    charon_log_to([results_folder stringByAppendingPathComponent:@"dynamics.log"]);
+    revenant_log_to([results_folder stringByAppendingPathComponent:@"dynamics.log"]);
     _window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
     _window.backgroundColor = [UIColor whiteColor];
     _window.rootViewController = [[UIViewController alloc] init];
@@ -152,7 +152,7 @@ static void check_layout_transform(void)
         check_layout_transform();
         [self startLiveRun:_window.rootViewController.view];
     } @catch (NSException *exception) {
-        charon_check(NO, "the checks raise no exception",
+        revenant_check(NO, "the checks raise no exception",
                      [NSString stringWithFormat:@"%@: %@", exception.name, exception.reason]);
         [self finish];
     }
@@ -166,6 +166,6 @@ int main(int argc, char *argv[])
     @autoreleasepool {
         [[NSFileManager defaultManager] createDirectoryAtPath:results_folder
                                   withIntermediateDirectories:YES attributes:nil error:NULL];
-        return UIApplicationMain(argc, argv, nil, @"CharonDynamicsDelegate");
+        return UIApplicationMain(argc, argv, nil, @"RevenantDynamicsDelegate");
     }
 }

@@ -1,4 +1,4 @@
-static const char *const charon_uuid_strings[] = {
+static const char *const revenant_uuid_strings[] = {
     "00000000-0000-0000-0000-000000000000",
     "00000000-0000-0000-0000-000000000001",
     "00000000-0000-0000-0000-000000000100",
@@ -24,8 +24,8 @@ static const char *const charon_uuid_strings[] = {
     "2C04E386-0383-474B-868A-667A7ABA8EE1",
     "FD74B328-7C40-4FF6-8E75-3D47E85317C3",
 };
-static const int charon_uuid_count = 24;
-static const signed char charon_uuid_orders[24][24] = {
+static const int revenant_uuid_count = 24;
+static const signed char revenant_uuid_orders[24][24] = {
     {0,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,},
     {1,0,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,},
     {1,1,0,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,},
@@ -51,4 +51,4 @@ static const signed char charon_uuid_orders[24][24] = {
     {1,1,1,1,-1,-1,-1,-1,-1,-1,1,1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,0,-1,},
     {1,1,1,1,1,1,-1,-1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,},
 };
-static const signed char charon_uuid_against_nil[] = {0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,};
+static const signed char revenant_uuid_against_nil[] = {0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,};

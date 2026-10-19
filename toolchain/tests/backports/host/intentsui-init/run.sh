@@ -3,9 +3,9 @@
 # six, from one probe source (probe.m).
 #
 # The host build links the system's IntentsUI (Catalyst, from iOSSupport) and nothing of the port, and is compared with
-# expected.txt, the golden answer. The port build (-DPORT) links the port's objects: CharonIntentsUI120.m and
-# CharonIntentsUIHostedView.m, with the INImage files and the Intents objects they need. Its classes are compiled under
-# renamed symbols (CharonHostINUIAddVoiceShortcutButton and so on), because two classes of one name in one process answer
+# expected.txt, the golden answer. The port build (-DPORT) links the port's objects: RevenantIntentsUI120.m and
+# RevenantIntentsUIHostedView.m, with the INImage files and the Intents objects they need. Its classes are compiled under
+# renamed symbols (RevenantHostINUIAddVoiceShortcutButton and so on), because two classes of one name in one process answer
 # for each other. The diff of the two is the verdict.
 #
 # The plant: a category on the button that answers nil for -init. Its diff against the host must be non-empty, or the
@@ -14,15 +14,15 @@ set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 P=${PORT_DIR:-$here/../../../../packages/a/apple-backports}
-CODING=$P/../../c/charon-coding/files
-build=${INTENTSUI_INIT_BUILD:-$(runs_fresh charon-intentsui-init)}
+CODING=$P/../../c/revenant-coding/files
+build=${INTENTSUI_INIT_BUILD:-$(runs_fresh revenant-intentsui-init)}
 sdk=$(xcrun --show-sdk-path)
 target="-target arm64-apple-ios15.0-macabi -isysroot $sdk -iframework $sdk/System/iOSSupport/System/Library/Frameworks"
-flags="$target -fobjc-arc -fvisibility=hidden -w -DCHARON_HOST_BUILD"
+flags="$target -fobjc-arc -fvisibility=hidden -w -DREVENANT_HOST_BUILD"
 probe_flags="$target -fno-objc-arc -fvisibility=hidden -w"
 frameworks="-framework Foundation -framework UIKit -framework CoreGraphics -framework EventKit -framework Intents -framework IntentsUI"
 includes="-I$P/Intents -I$P/IntentsUI -I$CODING"
-sources="$CODING/CharonCoding.m $P/Intents/CharonIntentsStore.m $P/Intents/CharonIntents100.m $P/Intents/IN10_0_1.m $P/Intents/IN11_0.m $P/IntentsUI/CharonIntentsUI120.m $P/IntentsUI/CharonIntentsUIHostedView.m $P/IntentsUI/INImage+IntentsUI100.m $P/IntentsUI/INImage+IntentsUI110.m"
+sources="$CODING/RevenantCoding.m $P/Intents/RevenantIntentsStore.m $P/Intents/RevenantIntents100.m $P/Intents/IN10_0_1.m $P/Intents/IN11_0.m $P/IntentsUI/RevenantIntentsUI120.m $P/IntentsUI/RevenantIntentsUIHostedView.m $P/IntentsUI/INImage+IntentsUI100.m $P/IntentsUI/INImage+IntentsUI110.m"
 
 # The host: the system's IntentsUI, nothing of the port, against the golden answer.
 mkdir -p "$build/plain" "$build/port" "$build/plant"
@@ -40,7 +40,7 @@ for source in $sources; do
 done
 renames=""
 for name in $(xcrun nm -gU "$build"/plain/*.o | awk 'NF == 3 {print $3}' | grep -E '^_OBJC_CLASS_\$_' | sed -e 's/^_OBJC_CLASS_\$_//' | sort -u); do
-    renames="$renames -D$name=CharonHost$name"
+    renames="$renames -D$name=RevenantHost$name"
 done
 for source in $sources; do
     xcrun clang $flags $renames $includes -c "$source" -o "$build/port/$(basename "$source" .m).o"
@@ -60,7 +60,7 @@ echo "PASS: $(wc -l < "$build/port.txt") port lines, port and host alike"
 # the renamed class; its diff against the host must be non-empty.
 cat > "$build/plant/plant.m" <<'PLANT'
 #import <IntentsUI/IntentsUI.h>
-@implementation INUIAddVoiceShortcutButton (CharonPlant)
+@implementation INUIAddVoiceShortcutButton (RevenantPlant)
 - (instancetype)init
 {
     return nil;

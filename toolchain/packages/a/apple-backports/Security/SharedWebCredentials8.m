@@ -1,7 +1,7 @@
 #import <Foundation/Foundation.h>
 #import <Security/Security.h>
 
-static void charon_reply(void (^block)(void))
+static void revenant_reply(void (^block)(void))
 {
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), block);
 }
@@ -11,7 +11,7 @@ void SecAddSharedWebCredential(CFStringRef fqdn, CFStringRef username, CFStringR
     void (^handler)(CFErrorRef) = [completionHandler copy];
     if (!handler)
         return;
-    charon_reply(^{
+    revenant_reply(^{
         NSDictionary *info = @{NSLocalizedDescriptionKey: @"Function or operation not implemented."};
         CFErrorRef error = (CFErrorRef)CFBridgingRetain([NSError errorWithDomain:NSOSStatusErrorDomain code:errSecUnimplemented userInfo:info]);
         handler(error);
@@ -24,7 +24,7 @@ void SecRequestSharedWebCredential(CFStringRef fqdn, CFStringRef username, void 
     void (^handler)(CFArrayRef, CFErrorRef) = [completionHandler copy];
     if (!handler)
         return;
-    charon_reply(^{
+    revenant_reply(^{
         CFArrayRef none = CFArrayCreate(kCFAllocatorDefault, NULL, 0, &kCFTypeArrayCallBacks);
         handler(none, NULL);
         CFRelease(none);

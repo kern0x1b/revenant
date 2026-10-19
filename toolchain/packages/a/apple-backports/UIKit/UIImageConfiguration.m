@@ -1,11 +1,11 @@
-#import "CharonSymbols.h"
+#import "RevenantSymbols.h"
 
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
 #pragma clang diagnostic ignored "-Wobjc-designated-initializers"
 
-static NSString *const CharonTraitsKey = @"UITraitCollection";
+static NSString *const RevenantTraitsKey = @"UITraitCollection";
 
-NSString *charon_trait_summary(UITraitCollection *traits)
+NSString *revenant_trait_summary(UITraitCollection *traits)
 {
     NSString *text = [traits description];
     NSRange start = [text rangeOfString:@"; "];
@@ -26,10 +26,10 @@ NSString *charon_trait_summary(UITraitCollection *traits)
 
 - (instancetype)init
 {
-    return [self initCharonWithTraitCollection:nil];
+    return [self initRevenantWithTraitCollection:nil];
 }
 
-- (instancetype)initCharonWithTraitCollection:(UITraitCollection *)traits
+- (instancetype)initRevenantWithTraitCollection:(UITraitCollection *)traits
 {
     if ((self = [super init]))
         _traits = traits;
@@ -39,19 +39,19 @@ NSString *charon_trait_summary(UITraitCollection *traits)
 - (instancetype)initWithCoder:(NSCoder *)coder
 {
     if ((self = [super init]))
-        _traits = [coder decodeObjectOfClass:[UITraitCollection class] forKey:CharonTraitsKey];
+        _traits = [coder decodeObjectOfClass:[UITraitCollection class] forKey:RevenantTraitsKey];
     return self;
 }
 
 - (void)encodeWithCoder:(NSCoder *)coder
 {
     if (_traits)
-        [coder encodeObject:_traits forKey:CharonTraitsKey];
+        [coder encodeObject:_traits forKey:RevenantTraitsKey];
 }
 
 - (id)copyWithZone:(NSZone *)zone
 {
-    return [[[self class] allocWithZone:zone] initCharonWithTraitCollection:_traits];
+    return [[[self class] allocWithZone:zone] initRevenantWithTraitCollection:_traits];
 }
 
 - (UITraitCollection *)traitCollection
@@ -76,7 +76,7 @@ NSString *charon_trait_summary(UITraitCollection *traits)
         return self;
     if (![otherConfiguration isKindOfClass:[UIImageConfiguration class]])
         [NSException raise:NSInvalidArgumentException format:@"-[%@ %@]: unrecognized selector sent to instance %p", [otherConfiguration class], @"_isUnspecified", otherConfiguration];
-    if ([otherConfiguration charon_isUnspecified])
+    if ([otherConfiguration revenant_isUnspecified])
         return self;
     UIImageConfiguration *result = [self copy];
     if (![self isKindOfClass:[otherConfiguration class]])
@@ -84,25 +84,25 @@ NSString *charon_trait_summary(UITraitCollection *traits)
     UITraitCollection *other = otherConfiguration->_traits;
     if (other)
         result->_traits = _traits ? [UITraitCollection traitCollectionWithTraitsFromCollections:@[_traits, other]] : other;
-    [result charon_applyFieldsOfConfiguration:otherConfiguration];
+    [result revenant_applyFieldsOfConfiguration:otherConfiguration];
     return result;
 }
 
-- (BOOL)charon_isUnspecified
+- (BOOL)revenant_isUnspecified
 {
     return !_traits;
 }
 
-- (void)charon_applyFieldsOfConfiguration:(UIImageConfiguration *)other
+- (void)revenant_applyFieldsOfConfiguration:(UIImageConfiguration *)other
 {
 }
 
-- (NSMutableArray<NSString *> *)charon_fieldDescriptions
+- (NSMutableArray<NSString *> *)revenant_fieldDescriptions
 {
     return [NSMutableArray array];
 }
 
-- (BOOL)charon_hasTraitsOfConfiguration:(UIImageConfiguration *)otherConfiguration
+- (BOOL)revenant_hasTraitsOfConfiguration:(UIImageConfiguration *)otherConfiguration
 {
     UITraitCollection *other = otherConfiguration->_traits;
     return other == _traits || [other isEqual:_traits];
@@ -112,7 +112,7 @@ NSString *charon_trait_summary(UITraitCollection *traits)
 {
     if (otherConfiguration == self)
         return YES;
-    return otherConfiguration && [otherConfiguration class] == [self class] && [self charon_hasTraitsOfConfiguration:otherConfiguration];
+    return otherConfiguration && [otherConfiguration class] == [self class] && [self revenant_hasTraitsOfConfiguration:otherConfiguration];
 }
 
 - (BOOL)isEqual:(id)object
@@ -127,9 +127,9 @@ NSString *charon_trait_summary(UITraitCollection *traits)
 
 - (NSString *)description
 {
-    NSMutableArray *fields = [self charon_fieldDescriptions];
+    NSMutableArray *fields = [self revenant_fieldDescriptions];
     if (_traits)
-        [fields addObject:[NSString stringWithFormat:@"traits=(%@)", charon_trait_summary(_traits)]];
+        [fields addObject:[NSString stringWithFormat:@"traits=(%@)", revenant_trait_summary(_traits)]];
     return fields.count ? [fields componentsJoinedByString:@", "] : @"unspecified";
 }
 

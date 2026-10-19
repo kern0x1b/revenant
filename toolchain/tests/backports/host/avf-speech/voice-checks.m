@@ -1,15 +1,15 @@
 #import <Foundation/Foundation.h>
 #import <AVFAudio/AVFAudio.h>
 
-@interface charon_host_AVSpeechSynthesisVoice : NSObject <NSSecureCoding>
+@interface revenant_host_AVSpeechSynthesisVoice : NSObject <NSSecureCoding>
 @property (nonatomic, readonly) NSString *language;
 @property (nonatomic, readonly) NSString *identifier;
 @property (nonatomic, readonly) NSString *name;
 @property (nonatomic, readonly) AVSpeechSynthesisVoiceQuality quality;
 + (NSArray *)speechVoices;
 + (NSString *)currentLanguageCode;
-+ (charon_host_AVSpeechSynthesisVoice *)voiceWithLanguage:(NSString *)languageCode;
-+ (charon_host_AVSpeechSynthesisVoice *)voiceWithIdentifier:(NSString *)identifier;
++ (revenant_host_AVSpeechSynthesisVoice *)voiceWithLanguage:(NSString *)languageCode;
++ (revenant_host_AVSpeechSynthesisVoice *)voiceWithIdentifier:(NSString *)identifier;
 @end
 
 @interface VSSpeechSynthesizer : NSObject
@@ -66,7 +66,7 @@ static NSString *fold(NSString *s)
     return [[plain componentsSeparatedByString:@"-"] componentsJoinedByString:@""];
 }
 
-static BOOL same_voice(charon_host_AVSpeechSynthesisVoice *p, AVSpeechSynthesisVoice *h)
+static BOOL same_voice(revenant_host_AVSpeechSynthesisVoice *p, AVSpeechSynthesisVoice *h)
 {
     if (p == nil || h == nil) return p == nil && h == nil;
     AVSpeechSynthesisVoice *answer = [AVSpeechSynthesisVoice voiceWithLanguage:p.language];
@@ -82,17 +82,17 @@ int main(int argc, char **argv)
         verdict("control: host voiceWithIdentifier answers a known identifier",
                 [AVSpeechSynthesisVoice voiceWithIdentifier:@"com.apple.voice.compact.en-US.Samantha"].name.length > 0);
 
-        NSArray *portVoices = [charon_host_AVSpeechSynthesisVoice speechVoices];
+        NSArray *portVoices = [revenant_host_AVSpeechSynthesisVoice speechVoices];
         verdict("listing: the port lists 36 voices (the release's codes)", portVoices.count == 36);
         BOOL allDefault = YES;
-        for (charon_host_AVSpeechSynthesisVoice *p in portVoices) allDefault &= p.quality == AVSpeechSynthesisVoiceQualityDefault;
+        for (revenant_host_AVSpeechSynthesisVoice *p in portVoices) allDefault &= p.quality == AVSpeechSynthesisVoiceQualityDefault;
         verdict("listing: every port voice is the default quality", allDefault);
         BOOL hostAllDefault = YES;
         for (AVSpeechSynthesisVoice *h in [AVSpeechSynthesisVoice speechVoices]) hostAllDefault &= h.quality == AVSpeechSynthesisVoiceQualityDefault;
         verdict("listing: every host voice is the default quality (the port's quality matches)", hostAllDefault);
 
         int hostAnswers = 0, hostAnswersSame = 0;
-        for (charon_host_AVSpeechSynthesisVoice *p in portVoices) {
+        for (revenant_host_AVSpeechSynthesisVoice *p in portVoices) {
             AVSpeechSynthesisVoice *h = [AVSpeechSynthesisVoice voiceWithIdentifier:p.identifier];
             if (h) {
                 hostAnswers++;
@@ -103,25 +103,25 @@ int main(int argc, char **argv)
         verdict("identifiers: each host answer is the same language and voice", hostAnswers == hostAnswersSame);
 
         int found = 0;
-        for (charon_host_AVSpeechSynthesisVoice *p in portVoices) {
-            if ([[charon_host_AVSpeechSynthesisVoice voiceWithIdentifier:p.identifier].identifier isEqualToString:p.identifier]) found++;
+        for (revenant_host_AVSpeechSynthesisVoice *p in portVoices) {
+            if ([[revenant_host_AVSpeechSynthesisVoice voiceWithIdentifier:p.identifier].identifier isEqualToString:p.identifier]) found++;
         }
         verdict("voiceWithIdentifier: each port identifier finds its own voice", found == 36);
         verdict("voiceWithIdentifier: an unknown identifier is nil (host and port)",
                 [AVSpeechSynthesisVoice voiceWithIdentifier:@"com.example.none"] == nil &&
-                [charon_host_AVSpeechSynthesisVoice voiceWithIdentifier:@"com.example.none"] == nil);
+                [revenant_host_AVSpeechSynthesisVoice voiceWithIdentifier:@"com.example.none"] == nil);
         verdict("voiceWithIdentifier: nil is nil (host and port)",
-                [AVSpeechSynthesisVoice voiceWithIdentifier:nil] == nil && [charon_host_AVSpeechSynthesisVoice voiceWithIdentifier:nil] == nil);
+                [AVSpeechSynthesisVoice voiceWithIdentifier:nil] == nil && [revenant_host_AVSpeechSynthesisVoice voiceWithIdentifier:nil] == nil);
         verdict("voiceWithIdentifier: the release has no AVSpeechSynthesisVoiceIdentifierAlex value (host and port nil)",
                 [AVSpeechSynthesisVoice voiceWithIdentifier:AVSpeechSynthesisVoiceIdentifierAlex] == nil &&
-                [charon_host_AVSpeechSynthesisVoice voiceWithIdentifier:AVSpeechSynthesisVoiceIdentifierAlex] == nil);
+                [revenant_host_AVSpeechSynthesisVoice voiceWithIdentifier:AVSpeechSynthesisVoiceIdentifierAlex] == nil);
 
         NSArray *questions = @[[NSNull null], @"", @"en", @"en-NZ", @"en-US", @"en-GB", @"fr", @"fr-BE", @"fr-FR",
                                @"de", @"zh", @"zh-Hans", @"zh-CN", @"ar", @"ar-SA", @"xx-YY"];
         for (id q in questions) {
             NSString *code = [q isKindOfClass:[NSString class]] ? q : nil;
             AVSpeechSynthesisVoice *h = [AVSpeechSynthesisVoice voiceWithLanguage:code];
-            charon_host_AVSpeechSynthesisVoice *p = [charon_host_AVSpeechSynthesisVoice voiceWithLanguage:code];
+            revenant_host_AVSpeechSynthesisVoice *p = [revenant_host_AVSpeechSynthesisVoice voiceWithLanguage:code];
             char what[160];
             snprintf(what, sizeof what, "voiceWithLanguage:%s host %s port %s", code ? [code UTF8String] : "nil",
                      h ? [h.language UTF8String] : "nil", p ? [p.language UTF8String] : "nil");
@@ -133,7 +133,7 @@ int main(int argc, char **argv)
         }
 
         NSString *hostCurrent = [AVSpeechSynthesisVoice currentLanguageCode];
-        NSString *portCurrent = [charon_host_AVSpeechSynthesisVoice currentLanguageCode];
+        NSString *portCurrent = [revenant_host_AVSpeechSynthesisVoice currentLanguageCode];
         char what[160];
         snprintf(what, sizeof what, "currentLanguageCode host %s port %s", [hostCurrent UTF8String], [portCurrent UTF8String]);
         if ([hostCurrent isEqualToString:@"cmn-CN"]) {
@@ -144,11 +144,11 @@ int main(int argc, char **argv)
             verdict(what, [hostCurrent isEqualToString:portCurrent]);
         }
 
-        charon_host_AVSpeechSynthesisVoice *sample = [charon_host_AVSpeechSynthesisVoice voiceWithLanguage:@"en-US"];
+        revenant_host_AVSpeechSynthesisVoice *sample = [revenant_host_AVSpeechSynthesisVoice voiceWithLanguage:@"en-US"];
         NSData *archive = [NSKeyedArchiver archivedDataWithRootObject:sample];
         NSKeyedUnarchiver *u = [[NSKeyedUnarchiver alloc] initForReadingFromData:archive error:nil];
         u.requiresSecureCoding = YES;
-        charon_host_AVSpeechSynthesisVoice *back = [u decodeObjectOfClass:[charon_host_AVSpeechSynthesisVoice class] forKey:NSKeyedArchiveRootObjectKey];
+        revenant_host_AVSpeechSynthesisVoice *back = [u decodeObjectOfClass:[revenant_host_AVSpeechSynthesisVoice class] forKey:NSKeyedArchiveRootObjectKey];
         verdict("secure decode of a port voice yields a voice", back != nil);
         verdict("secure decode keeps the language, identifier, name and quality",
                 back != nil && [back.language isEqualToString:sample.language] &&

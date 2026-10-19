@@ -4,7 +4,7 @@ local HERE = os.scriptdir()
 
 function run(opt)
     opt = opt or {}
-    local build = opt.build or steps.env("BUILD") or steps.workspace().fresh("charon-uttypetags-host")
+    local build = opt.build or steps.env("BUILD") or steps.workspace().fresh("revenant-uttypetags-host")
     local probe = path.join(build, "probe")
     os.vrunv("xcrun", {"clang", "-fobjc-arc", "-w", "-I" .. HERE, path.join(HERE, "probe.m"), "-framework", "Foundation",
                        "-framework", "CoreServices", "-o", probe})

@@ -9,7 +9,7 @@ static NSString *const CLASS_NAME = @"NEDNSSettings";
 #ifdef HOST_SIDE
 #import <NetworkExtension/NetworkExtension.h>
 #else
-#import "CharonNEDNSSettings.h"
+#import "RevenantNEDNSSettings.h"
 #endif
 
 static void emit(const char *name, const char *value)

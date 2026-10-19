@@ -5,7 +5,7 @@
 #include <string.h>
 #include <unistd.h>
 
-#import "CharonCoreMIDI.h"
+#import "RevenantCoreMIDI.h"
 
 static int gLive;
 static int gFailures;
@@ -33,7 +33,7 @@ static StubObject gObject[OBJECTS];
 
 static int is_owner_key(CFStringRef propertyID)
 {
-    return propertyID && CFEqual(propertyID, CHARON_OWNER_KEY);
+    return propertyID && CFEqual(propertyID, REVENANT_OWNER_KEY);
 }
 
 static MIDIObjectRef gHeldObject = (MIDIObjectRef)-1;
@@ -44,7 +44,7 @@ static int gReads;
 #define kAnyObject ((MIDIObjectRef)0xFFFFFFFEu)
 static __thread MIDIObjectRef tHoldObject = kNoObject;
 
-OSStatus charon_test_MIDIObjectGetIntegerProperty(MIDIObjectRef object, CFStringRef propertyID, SInt32 *outValue)
+OSStatus revenant_test_MIDIObjectGetIntegerProperty(MIDIObjectRef object, CFStringRef propertyID, SInt32 *outValue)
 {
     __atomic_add_fetch(&gReads, 1, __ATOMIC_RELAXED);
     if (tHoldObject != kNoObject && (tHoldObject == kAnyObject || tHoldObject == object)) {
@@ -58,7 +58,7 @@ OSStatus charon_test_MIDIObjectGetIntegerProperty(MIDIObjectRef object, CFString
         dispatch_semaphore_wait(gHeldRelease, DISPATCH_TIME_FOREVER);
     }
     if (object >= OBJECTS || !gObject[object].exists)
-        return charon_paramErr;
+        return revenant_paramErr;
     StubObject *held = &gObject[object];
     if (held->refused != noErr)
         return held->refused;
@@ -74,10 +74,10 @@ OSStatus charon_test_MIDIObjectGetIntegerProperty(MIDIObjectRef object, CFString
     return noErr;
 }
 
-OSStatus charon_test_MIDIObjectSetIntegerProperty(MIDIObjectRef object, CFStringRef propertyID, SInt32 value)
+OSStatus revenant_test_MIDIObjectSetIntegerProperty(MIDIObjectRef object, CFStringRef propertyID, SInt32 value)
 {
     if (object >= OBJECTS || !gObject[object].exists)
-        return charon_paramErr;
+        return revenant_paramErr;
     StubObject *held = &gObject[object];
     if (is_owner_key(propertyID)) {
         if (held->setStatus != noErr)
@@ -95,7 +95,7 @@ static MIDIReadProc gDestinationProc;
 static void *gDestinationRefCon;
 static MIDIObjectRef gNextDestination = 20;
 
-OSStatus charon_test_MIDIDestinationCreate(MIDIClientRef client, CFStringRef name, MIDIReadProc readProc, void *refCon,
+OSStatus revenant_test_MIDIDestinationCreate(MIDIClientRef client, CFStringRef name, MIDIReadProc readProc, void *refCon,
                                            MIDIEndpointRef *outDest)
 {
     gDestinationProc = readProc;
@@ -122,7 +122,7 @@ static void own(MIDIObjectRef object, SInt32 uniqueID)
     gObject[object].uniqueID = uniqueID;
     Token *token = [[Token alloc] init];
     gLive++;
-    CharonMIDIOwnBlock(object, (__bridge_retained void *)token);
+    RevenantMIDIOwnBlock(object, (__bridge_retained void *)token);
 }
 
 static void own_without_uniqueid(MIDIObjectRef object)
@@ -130,14 +130,14 @@ static void own_without_uniqueid(MIDIObjectRef object)
     gObject[object].exists = 1;
     Token *token = [[Token alloc] init];
     gLive++;
-    CharonMIDIOwnBlock(object, (__bridge_retained void *)token);
+    RevenantMIDIOwnBlock(object, (__bridge_retained void *)token);
 }
 
 static void creations(int count)
 {
     gObject[63].exists = 1;
     for (int i = 0; i < count; i++)
-        CharonMIDIOwnBlock(63, (__bridge_retained void *)[[NSObject alloc] init]);
+        RevenantMIDIOwnBlock(63, (__bridge_retained void *)[[NSObject alloc] init]);
 }
 
 static void reuse(MIDIObjectRef object, SInt32 uniqueID)
@@ -153,7 +153,7 @@ static MIDIEndpointRef make_destination_holding_a_token(dispatch_semaphore_t ent
     Token *token = [[Token alloc] init];
     gLive++;
     MIDIEndpointRef destination = 0;
-    OSStatus status = CharonMIDIDestination(0, CFSTR("holding"), kMIDIProtocol_2_0, &destination,
+    OSStatus status = RevenantMIDIDestination(0, CFSTR("holding"), kMIDIProtocol_2_0, &destination,
                                             ^(const MIDIEventList *list, void *ref) {
         (void)token;
         dispatch_semaphore_signal(entered);
@@ -168,7 +168,7 @@ int main(void)
         own(1, 11);
         own(2, 22);
         expect(gLive == 2, "two live objects own two tokens");
-        charon_test_MIDIObjectSetIntegerProperty(1, CFSTR("uniqueID"), 99);
+        revenant_test_MIDIObjectSetIntegerProperty(1, CFSTR("uniqueID"), 99);
         own(3, 33);
         expect(gLive == 3, "an object whose creator set its UniqueID is the same object: its row is kept");
         gObject[2].exists = 0;
@@ -227,7 +227,7 @@ int main(void)
         dispatch_semaphore_t delivered = dispatch_semaphore_create(0);
         __block int deliveries = 0;
         MIDIEndpointRef destination = 0;
-        OSStatus made = CharonMIDIDestination(0, CFSTR("destination"), kMIDIProtocol_2_0, &destination,
+        OSStatus made = RevenantMIDIDestination(0, CFSTR("destination"), kMIDIProtocol_2_0, &destination,
                                               ^(const MIDIEventList *list, void *ref) {
             deliveries++;
             dispatch_semaphore_signal(delivered);
@@ -237,14 +237,14 @@ int main(void)
         __block Boolean firstResult = false;
         dispatch_semaphore_t firstDone = dispatch_semaphore_create(0);
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-            firstResult = CharonMIDIDeliverInProcess(destination, words, 2);
+            firstResult = RevenantMIDIDeliverInProcess(destination, words, 2);
             dispatch_semaphore_signal(firstDone);
         });
         int inRead = dispatch_semaphore_wait(gHeldEntered, dispatch_time(DISPATCH_TIME_NOW, 2 * NSEC_PER_SEC)) == 0;
         __block Boolean otherResult = true;
         dispatch_semaphore_t otherDone = dispatch_semaphore_create(0);
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-            otherResult = CharonMIDIDeliverInProcess(50, words, 2);
+            otherResult = RevenantMIDIDeliverInProcess(50, words, 2);
             dispatch_semaphore_signal(otherDone);
         });
         int otherReturned = dispatch_semaphore_wait(otherDone, dispatch_time(DISPATCH_TIME_NOW, 2 * NSEC_PER_SEC)) == 0;
@@ -262,7 +262,7 @@ int main(void)
         dispatch_semaphore_t blockRelease = dispatch_semaphore_create(0);
         MIDIEndpointRef second = make_destination_holding_a_token(blockEntered, blockRelease);
         expect(second != 0 && gLive == baseline + 1, "a destination whose block holds a token is made");
-        Boolean sent = CharonMIDIDeliverInProcess(second, words, 2);
+        Boolean sent = RevenantMIDIDeliverInProcess(second, words, 2);
         int running = dispatch_semaphore_wait(blockEntered, dispatch_time(DISPATCH_TIME_NOW, 2 * NSEC_PER_SEC)) == 0;
         gObject[second].exists = 0;
         for (int i = 0; i < 24; i++)
@@ -277,10 +277,10 @@ int main(void)
         Byte listBuffer[64];
         MIDIEventList *voiceList = (MIDIEventList *)listBuffer;
         MIDIEventPacket *voiceEnd = MIDIEventListInit(voiceList, kMIDIProtocol_2_0);
-        CharonMIDIEventListAdd(voiceList, sizeof(listBuffer), voiceEnd, 0, 2, voice);
+        RevenantMIDIEventListAdd(voiceList, sizeof(listBuffer), voiceEnd, 0, 2, voice);
         gObject[70].exists = 1;
         gObject[70].hasUniqueID = 1;
-        (void)CharonMIDIReceive(70, voiceList);
+        (void)RevenantMIDIReceive(70, voiceList);
         for (int step = 0; step < 2; step++) {
             own(100, 1000 + step);
             MIDIObjectRef heldObject = step == 0 ? kAnyObject : 70;
@@ -295,8 +295,8 @@ int main(void)
             __block int creationOK = 0;
             dispatch_semaphore_t othersDone = dispatch_semaphore_create(0);
             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-                Boolean ours = CharonMIDIDeliverInProcess(90, voice, 2);
-                (void)CharonMIDIReceive(71, voiceList);
+                Boolean ours = RevenantMIDIDeliverInProcess(90, voice, 2);
+                (void)RevenantMIDIReceive(71, voiceList);
                 sendOK = !ours;
                 own(102, 1020);
                 creationOK = 1;

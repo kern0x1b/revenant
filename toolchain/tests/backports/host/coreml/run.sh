@@ -1,7 +1,7 @@
 #!/bin/sh
 # run.sh — the Core ML host differential: what this host's own Core ML answers for a set of real
 # .mlmodel containers is recorded, the port's classes are then compiled under names of their own
-# (Charon<name>) over the port's own reader and interpreter, held to the same record, and each
+# (Revenant<name>) over the port's own reader and interpreter, held to the same record, and each
 # difference is either fixed in the port or written down. Mutants of the port each have to be
 # caught, so a rule that quietly stops being applied cannot pass.
 #
@@ -16,7 +16,7 @@ root=$(cd "$here/../../../.." && pwd)
 coreml=${COREML:-$root/packages/a/apple-backports/CoreML}
 registry=${REGISTRY:-$root/packages/a/apple-backports/registry/CoreML}
 models=${MODELS:-$(xmake l "$root/modules/workspace.lua" run coreml-predict)/models}
-build=${BUILD:-$(runs_fresh charon-coreml)}
+build=${BUILD:-$(runs_fresh revenant-coreml)}
 sdk=$(xcrun --show-sdk-path)
 common="-target arm64-apple-ios15.0-macabi -isysroot $sdk -fobjc-arc -w -Wno-unguarded-availability"
 libs="-framework Foundation -framework CoreGraphics -framework CoreVideo -framework CoreML"
@@ -56,7 +56,7 @@ fi
 xcrun clang $common -DCOREML_HOST=1 -I"$here" "$here/record.m" "$here/cases.m" "$here/devices-cases.m" $libs -o "$build/system"
 COREML_RECORDS="$build/system.json" "$build/system" "$models"
 
-# 2. the same questions of the port, with every Core ML name it answers behind a Charon prefix so
+# 2. the same questions of the port, with every Core ML name it answers behind a Revenant prefix so
 #    that the two sets of classes can sit in one binary. The registry says which names those are:
 #    the classes and protocols this port carries, and the constants it exports -- a constant the
 #    port also defines would be a duplicate of the framework's own.
@@ -69,7 +69,7 @@ for path in glob.glob(os.path.join(sys.argv[1], "*.json")):
             names.add(entry["api"].replace("()", ""))
 with open(sys.argv[2], "w") as out:
     for name in sorted(names):
-        out.write("#define %s Charon%s\n" % (name, name))
+        out.write("#define %s Revenant%s\n" % (name, name))
 PY
 
 # Compiles the port from the sources in $1 -- the whole package, its C files and the generated
@@ -83,7 +83,7 @@ port() {
     mkdir -p "$dir"
     xcrun clang $common -include "$build/rename.h" -I"$here" -I"$src" \
         "$here/record.m" "$here/cases.m" "$here/devices-cases.m" \
-        "$src"/CharonML*.c "$src"/*.m $libs -o "$dir/run"
+        "$src"/RevenantML*.c "$src"/*.m $libs -o "$dir/run"
 }
 mkdir -p "$build/port"
 port "$coreml" "$build/port"
@@ -259,7 +259,7 @@ mutant() {
     if [ "$expect" = survived ]; then controls=$((controls + 1)); else ran=$((ran + 1)); fi
     rm -rf "$build/mutant"
     mkdir -p "$build/mutant"
-    cp "$coreml"/*.m "$coreml"/*.h "$coreml"/CharonML*.c "$coreml"/*.inc "$build/mutant/" 2>/dev/null || true
+    cp "$coreml"/*.m "$coreml"/*.h "$coreml"/RevenantML*.c "$coreml"/*.inc "$build/mutant/" 2>/dev/null || true
     # The mutation is counted before it is applied: `text.replace` on a needle the file does not
     # hold writes the file back unchanged and prints nothing, and a "planted" run over an
     # unplanted file then reports the mutant as applied (2026-10-03).
@@ -321,29 +321,29 @@ mutant MLFeatureDescription.m "if (value.type != _type) {
         return NO;" "if (value.type == 12345) {
         return NO;" differing
 mutant MLFeatureDescription.m "        if (_multiArrayConstraint.dataType != (MLMultiArrayDataType)0 &&" "        if (0 &&" differing
-mutant CharonMLConstraints.h "            if ([constraint.enumeratedShapes[index] isEqualToArray:shape]) {
+mutant RevenantMLConstraints.h "            if ([constraint.enumeratedShapes[index] isEqualToArray:shape]) {
                 return YES;
             }" "            if (YES) {
                 return YES;
             }" differing
-mutant CharonMLConstraints.h "        return [[MLMultiArrayShapeConstraint alloc] charon_initWithType:MLMultiArrayShapeConstraintTypeEnumerated" "        return [[MLMultiArrayShapeConstraint alloc] charon_initWithType:MLMultiArrayShapeConstraintTypeRange" differing
-mutant MLModel.m "type = charon_ml_feature_type_of(described->type);" "type = MLFeatureTypeDouble;" differing
+mutant RevenantMLConstraints.h "        return [[MLMultiArrayShapeConstraint alloc] revenant_initWithType:MLMultiArrayShapeConstraintTypeEnumerated" "        return [[MLMultiArrayShapeConstraint alloc] revenant_initWithType:MLMultiArrayShapeConstraintTypeRange" differing
+mutant MLModel.m "type = revenant_ml_feature_type_of(described->type);" "type = MLFeatureTypeDouble;" differing
 mutant MLModel.m "answer = [self predictionFromFeatures:one options:options error:error];" "answer = nil;
         (void)options;" differing
-mutant MLModel.m "charon_ml_error(error, CHARON_ML_ERROR_IO,
-                        @\"a model is read from a file" "charon_ml_error(error, CHARON_ML_ERROR_GENERIC,
+mutant MLModel.m "revenant_ml_error(error, REVENANT_ML_ERROR_IO,
+                        @\"a model is read from a file" "revenant_ml_error(error, REVENANT_ML_ERROR_GENERIC,
                         @\"a model is read from a file" differing
-mutant MLParameter.m "return [[[self class] alloc] charon_initWithName:name scope:nil];" "return [[[self class] alloc] charon_initWithName:[name uppercaseString] scope:nil];" differing
+mutant MLParameter.m "return [[[self class] alloc] revenant_initWithName:name scope:nil];" "return [[[self class] alloc] revenant_initWithName:[name uppercaseString] scope:nil];" differing
 mutant MLArrayBatchProvider12.m "        } else if ([dictionary[name] count] != count) {" "        } else if (0) {" differing
 mutant MLFeatureProvider.m "        return [MLFeatureValue featureValueWithInt64:[object longLongValue]];" "        return [MLFeatureValue featureValueWithDouble:[object doubleValue]];" differing
 mutant MLFeatureProvider.m "    if ([object isKindOfClass:[NSArray class]]) {" "    if (0) {" differing
-mutant MLFeatureValue.m "    if (_type != MLFeatureTypeInt64 || _value.kind != CHARON_ML_VALUE_NUMBER) {" "    if (_value.kind != CHARON_ML_VALUE_NUMBER) {" differing
-mutant MLFeatureValue.m "    if (_value.kind != CHARON_ML_VALUE_STRING) {
+mutant MLFeatureValue.m "    if (_type != MLFeatureTypeInt64 || _value.kind != REVENANT_ML_VALUE_NUMBER) {" "    if (_value.kind != REVENANT_ML_VALUE_NUMBER) {" differing
+mutant MLFeatureValue.m "    if (_value.kind != REVENANT_ML_VALUE_STRING) {
         return nil;
-    }" "    if (_value.kind == CHARON_ML_VALUE_NONE) {
+    }" "    if (_value.kind == REVENANT_ML_VALUE_NONE) {
         return nil;
     }" differing
-mutant MLFeatureValue.m "        _value = charon_ml_value_string_copy(text.UTF8String, strlen(text.UTF8String));" "        _value = charon_ml_value_string_copy(\"\", 0);" differing
+mutant MLFeatureValue.m "        _value = revenant_ml_value_string_copy(text.UTF8String, strlen(text.UTF8String));" "        _value = revenant_ml_value_string_copy(\"\", 0);" differing
 mutant MLFeatureValue.m "    [coder encodeObject:self.multiArrayValue forKey:@\"array\"];" "    [coder encodeObject:nil forKey:@\"array\"];" differing
 mutant MLFeatureValue.m "        _multiArray = array;" "        _multiArray = nil;" differing
 mutant MLConstants.m '@"com.apple.CoreML"' '@"CoreML"' differing

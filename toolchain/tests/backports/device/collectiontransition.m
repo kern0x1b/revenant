@@ -43,7 +43,7 @@ static NSString *const results_folder = @"/private/var/backports";
 {
     [[NSFileManager defaultManager] createDirectoryAtPath:results_folder withIntermediateDirectories:YES attributes:nil error:NULL];
     [[NSFileManager defaultManager] removeItemAtPath:[results_folder stringByAppendingPathComponent:@"collectiontransition.done"] error:NULL];
-    charon_log_to([results_folder stringByAppendingPathComponent:@"collectiontransition.log"]);
+    revenant_log_to([results_folder stringByAppendingPathComponent:@"collectiontransition.log"]);
     self.window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
     self.window.rootViewController = [[UIViewController alloc] init];
     [self.window makeKeyAndVisible];
@@ -56,9 +56,9 @@ static NSString *const results_folder = @"/private/var/backports";
         });
         for (NSString *name in [expected.allKeys sortedArrayUsingSelector:@selector(compare:)]) {
             if ([expected[name] isEqualToString:records[name]])
-                charon_check(YES, name.UTF8String, nil);
+                revenant_check(YES, name.UTF8String, nil);
             else
-                charon_check(NO, name.UTF8String, [NSString stringWithFormat:@"\n    device %@\n    host   %@", records[name], expected[name]]]);
+                revenant_check(NO, name.UTF8String, [NSString stringWithFormat:@"\n    device %@\n    host   %@", records[name], expected[name]]]);
         }
         NSDictionary *movementExpected = [NSJSONSerialization JSONObjectWithData:[NSData dataWithBytes:collectionmovement_expectations length:strlen(collectionmovement_expectations)] options:0 error:NULL];
         NSMutableDictionary *movementRecords = [NSMutableDictionary dictionary];
@@ -68,13 +68,13 @@ static NSString *const results_folder = @"/private/var/backports";
         });
         for (NSString *name in [movementExpected.allKeys sortedArrayUsingSelector:@selector(compare:)]) {
             if ([movementExpected[name] isEqualToString:movementRecords[name]])
-                charon_check(YES, name.UTF8String, nil);
+                revenant_check(YES, name.UTF8String, nil);
             else
-                charon_check(NO, name.UTF8String, [NSString stringWithFormat:@"\n    device %@\n    host   %@", movementRecords[name], movementExpected[name]]]);
+                revenant_check(NO, name.UTF8String, [NSString stringWithFormat:@"\n    device %@\n    host   %@", movementRecords[name], movementExpected[name]]]);
         }
         [self run_transition];
-        printf("checks=%d failures=%d\n", charon_checks, charon_failures);
-        NSString *summary = [NSString stringWithFormat:@"%@ checks=%d failures=%d\n", charon_failures ? @"FAIL" : @"ok", charon_checks, charon_failures];
+        printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
+        NSString *summary = [NSString stringWithFormat:@"%@ checks=%d failures=%d\n", revenant_failures ? @"FAIL" : @"ok", revenant_checks, revenant_failures];
         [summary writeToFile:[results_folder stringByAppendingPathComponent:@"collectiontransition.done"] atomically:YES encoding:NSUTF8StringEncoding error:NULL];
     });
     return YES;
@@ -108,21 +108,21 @@ static NSString *const results_folder = @"/private/var/backports";
         completedSeen = completed;
         finishedSeen = finished;
     }];
-    charon_check(transition != nil, @"startInteractiveTransition returns a layout", nil);
-    charon_check(transition.currentLayout == small, @"the transition starts from the layout in place", nil);
-    charon_check(transition.nextLayout == large, @"the transition goes to the layout it was given", nil);
-    charon_check(!called, @"the completion waits for the transition to end", nil);
+    revenant_check(transition != nil, @"startInteractiveTransition returns a layout", nil);
+    revenant_check(transition.currentLayout == small, @"the transition starts from the layout in place", nil);
+    revenant_check(transition.nextLayout == large, @"the transition goes to the layout it was given", nil);
+    revenant_check(!called, @"the completion waits for the transition to end", nil);
     transition.transitionProgress = 0.5;
     CGRect middle = [transition layoutAttributesForItemAtIndexPath:first].frame;
-    charon_check(!CGRectEqualToRect(middle, startFrame), @"half way through, the cell has moved", nil);
+    revenant_check(!CGRectEqualToRect(middle, startFrame), @"half way through, the cell has moved", nil);
     [view finishInteractiveTransition];
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-        charon_check(called, @"finishing calls the completion", nil);
-        charon_check(completedSeen, @"finishing hands a completed completion", nil);
-        charon_check(finishedSeen, @"finishing hands a finished completion", nil);
-        charon_check(view.collectionViewLayout == large, @"finishing settles on the layout it went to", nil);
+        revenant_check(called, @"finishing calls the completion", nil);
+        revenant_check(completedSeen, @"finishing hands a completed completion", nil);
+        revenant_check(finishedSeen, @"finishing hands a finished completion", nil);
+        revenant_check(view.collectionViewLayout == large, @"finishing settles on the layout it went to", nil);
         CGRect endFrame = [view layoutAttributesForItemAtIndexPath:first].frame;
-        charon_check(!CGRectEqualToRect(endFrame, startFrame), @"the cell ends where the new layout puts it", nil);
+        revenant_check(!CGRectEqualToRect(endFrame, startFrame), @"the cell ends where the new layout puts it", nil);
 
         __block BOOL cancelled = NO, completedSeen2 = NO, finishedSeen2 = NO;
         UICollectionViewFlowLayout *third = [[UICollectionViewFlowLayout alloc] init];
@@ -133,13 +133,13 @@ static NSString *const results_folder = @"/private/var/backports";
             completedSeen2 = completed;
             finishedSeen2 = finished;
         }];
-        charon_check(second != nil, @"a second transition starts", nil);
+        revenant_check(second != nil, @"a second transition starts", nil);
         [view cancelInteractiveTransition];
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-            charon_check(cancelled, @"cancelling calls the completion", nil);
-            charon_check(!completedSeen2, @"cancelling hands a completion that did not complete", nil);
-            charon_check(finishedSeen2, @"cancelling hands a finished completion", nil);
-            charon_check(view.collectionViewLayout == large, @"cancelling settles back on the layout it came from", nil);
+            revenant_check(cancelled, @"cancelling calls the completion", nil);
+            revenant_check(!completedSeen2, @"cancelling hands a completion that did not complete", nil);
+            revenant_check(finishedSeen2, @"cancelling hands a finished completion", nil);
+            revenant_check(view.collectionViewLayout == large, @"cancelling settles back on the layout it came from", nil);
 
             __block BOOL setCalled = NO, setFinished = NO;
             UICollectionViewFlowLayout *fourth = [[UICollectionViewFlowLayout alloc] init];
@@ -148,13 +148,13 @@ static NSString *const results_folder = @"/private/var/backports";
                 setCalled = YES;
                 setFinished = finished;
             }];
-            charon_check(view.collectionViewLayout != large, @"an animated layout change is under way at once", nil);
+            revenant_check(view.collectionViewLayout != large, @"an animated layout change is under way at once", nil);
             dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-                charon_check(setCalled, @"an animated layout change calls its completion", nil);
-                charon_check(setFinished, @"an animated layout change hands a finished completion", nil);
-                charon_check(view.collectionViewLayout == fourth, @"an animated layout change settles on the layout asked for", nil);
-                printf("checks=%d failures=%d\n", charon_checks, charon_failures);
-                NSString *summary = [NSString stringWithFormat:@"%@ checks=%d failures=%d\n", charon_failures ? @"FAIL" : @"ok", charon_checks, charon_failures];
+                revenant_check(setCalled, @"an animated layout change calls its completion", nil);
+                revenant_check(setFinished, @"an animated layout change hands a finished completion", nil);
+                revenant_check(view.collectionViewLayout == fourth, @"an animated layout change settles on the layout asked for", nil);
+                printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
+                NSString *summary = [NSString stringWithFormat:@"%@ checks=%d failures=%d\n", revenant_failures ? @"FAIL" : @"ok", revenant_checks, revenant_failures];
                 [summary writeToFile:[results_folder stringByAppendingPathComponent:@"collectiontransition.done"] atomically:YES encoding:NSUTF8StringEncoding error:NULL];
             });
         });

@@ -18,7 +18,7 @@
 
 #include "mach/xnu_mig_adapter.hpp"
 
-namespace shade::xnu::mig::mach_port {
+namespace emulator::xnu::mig::mach_port {
 
 inline constexpr std::string_view subsystem_name{"mach_port"};
 inline constexpr std::uint32_t subsystem_base = 3200U;

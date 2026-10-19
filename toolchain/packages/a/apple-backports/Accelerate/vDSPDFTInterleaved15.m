@@ -24,7 +24,7 @@ struct vDSP_DFT_Interleaved_SetupStructD {
     int real_to_complex;
 };
 
-static int charon_dft_length_supported(vDSP_Length length)
+static int revenant_dft_length_supported(vDSP_Length length)
 {
     static const vDSP_Length factors[5] = {2, 3, 5, 9, 15};
     for (int i = 0; i < (int)(sizeof factors / sizeof *factors); i++) {
@@ -35,7 +35,7 @@ static int charon_dft_length_supported(vDSP_Length length)
     return 0;
 }
 
-static double *charon_dft_twiddles(vDSP_Length length, int forward)
+static double *revenant_dft_twiddles(vDSP_Length length, int forward)
 {
     double *twiddles = (double *)malloc(sizeof(double) * (size_t)(2 * length));
     if (!twiddles)
@@ -49,7 +49,7 @@ static double *charon_dft_twiddles(vDSP_Length length, int forward)
     return twiddles;
 }
 
-static void charon_dft_release(struct vDSP_DFT_Interleaved_SetupStruct *setup)
+static void revenant_dft_release(struct vDSP_DFT_Interleaved_SetupStruct *setup)
 {
     if (!setup)
         return;
@@ -63,7 +63,7 @@ vDSP_DFT_Interleaved_Setup vDSP_DFT_Interleaved_CreateSetup(vDSP_DFT_Interleaved
                                                              vDSP_DFT_Direction Direction,
                                                              vDSP_DFT_RealtoComplex RealtoComplex)
 {
-    if (!charon_dft_length_supported(Length))
+    if (!revenant_dft_length_supported(Length))
         return NULL;
     (void)Previous;
     struct vDSP_DFT_Interleaved_SetupStruct *setup = (struct vDSP_DFT_Interleaved_SetupStruct *)calloc(1, sizeof(*setup));
@@ -73,13 +73,13 @@ vDSP_DFT_Interleaved_Setup vDSP_DFT_Interleaved_CreateSetup(vDSP_DFT_Interleaved
     setup->real_length = RealtoComplex == vDSP_DFT_Interleaved_RealtoComplex ? 2 * Length : 0;
     setup->forward = Direction == vDSP_DFT_FORWARD;
     setup->real_to_complex = RealtoComplex == vDSP_DFT_Interleaved_RealtoComplex;
-    setup->twiddles = charon_dft_twiddles(Length, setup->forward);
+    setup->twiddles = revenant_dft_twiddles(Length, setup->forward);
     if (setup->twiddles && setup->real_to_complex) {
         setup->packed = (DSPDoubleComplex *)calloc(Length, sizeof(DSPDoubleComplex));
         setup->z = (DSPDoubleComplex *)calloc(Length, sizeof(DSPDoubleComplex));
     }
     if (!setup->twiddles || (setup->real_to_complex && (!setup->packed || !setup->z))) {
-        charon_dft_release(setup);
+        revenant_dft_release(setup);
         return NULL;
     }
     return (vDSP_DFT_Interleaved_Setup)setup;
@@ -159,5 +159,5 @@ void vDSP_DFT_Interleaved_Execute(const vDSP_DFT_Interleaved_Setup Setup, const 
 
 void vDSP_DFT_Interleaved_DestroySetup(vDSP_DFT_Interleaved_Setup Setup)
 {
-    charon_dft_release((struct vDSP_DFT_Interleaved_SetupStruct *)Setup);
+    revenant_dft_release((struct vDSP_DFT_Interleaved_SetupStruct *)Setup);
 }

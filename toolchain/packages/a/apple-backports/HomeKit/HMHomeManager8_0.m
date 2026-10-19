@@ -1,52 +1,52 @@
-#import "CharonHomeKitInternal.h"
+#import "RevenantHomeKitInternal.h"
 
 #pragma mark - HMHome
 
 @implementation HMHome
-@synthesize charon_identifier = _charon_identifier, charon_homeIdentifier = _charon_homeIdentifier, charon_delegate = _charon_delegate;
+@synthesize revenant_identifier = _revenant_identifier, revenant_homeIdentifier = _revenant_homeIdentifier, revenant_delegate = _revenant_delegate;
 
-CHARON_HOMEKIT_NIL_INIT
+REVENANT_HOMEKIT_NIL_INIT
 
-- (instancetype)charon_initWithStore:(CharonHomeKitStore *)store identifier:(NSUUID *)identifier __attribute__((objc_method_family(init)))
+- (instancetype)revenant_initWithStore:(RevenantHomeKitStore *)store identifier:(NSUUID *)identifier __attribute__((objc_method_family(init)))
 {
     self = [super init];
     if (self) {
-        _charon_identifier = identifier ? [CharonHomeKitUUIDString(identifier) copy]
-                                        : [CharonHomeKitNewIdentifier() copy];
-        CharonHomeKitRecord(@"homes", _charon_identifier);
+        _revenant_identifier = identifier ? [RevenantHomeKitUUIDString(identifier) copy]
+                                        : [RevenantHomeKitNewIdentifier() copy];
+        RevenantHomeKitRecord(@"homes", _revenant_identifier);
     }
     return self;
 }
 
 - (NSUUID *)uniqueIdentifier
 {
-    return CharonHomeKitUUID(_charon_identifier);
+    return RevenantHomeKitUUID(_revenant_identifier);
 }
 
 - (NSString *)name
 {
-    return CharonHomeKitStringField(CharonHomeKitRecord(@"homes", _charon_identifier), @"name", @"");
+    return RevenantHomeKitStringField(RevenantHomeKitRecord(@"homes", _revenant_identifier), @"name", @"");
 }
 
 - (BOOL)primary
 {
-    return CharonHomeKitBoolField(CharonHomeKitRecord(@"homes", _charon_identifier), @"primary", NO);
+    return RevenantHomeKitBoolField(RevenantHomeKitRecord(@"homes", _revenant_identifier), @"primary", NO);
 }
 
 - (id<HMHomeDelegate>)delegate
 {
-    return _charon_delegate;
+    return _revenant_delegate;
 }
 
 - (void)setDelegate:(id<HMHomeDelegate>)delegate
 {
-    _charon_delegate = delegate;
+    _revenant_delegate = delegate;
 }
 
 - (HMUser *)currentUser
 {
-    NSString *current = CharonHomeKitRecord(@"homes", _charon_identifier)[@"currentUser"];
-    return current ? CharonHomeKitUser(current, _charon_identifier) : nil;
+    NSString *current = RevenantHomeKitRecord(@"homes", _revenant_identifier)[@"currentUser"];
+    return current ? RevenantHomeKitUser(current, _revenant_identifier) : nil;
 }
 
 - (HMHomeHubState)homeHubState
@@ -62,64 +62,64 @@ CHARON_HOMEKIT_NIL_INIT
 - (NSArray<HMRoom *> *)rooms
 {
     NSMutableArray *found = [NSMutableArray array];
-    for (NSString *identifier in CharonHomeKitStringListField(CharonHomeKitRecord(@"homes", _charon_identifier), @"roomOrder"))
-        [found addObject:CharonHomeKitRoom(identifier, _charon_identifier)];
+    for (NSString *identifier in RevenantHomeKitStringListField(RevenantHomeKitRecord(@"homes", _revenant_identifier), @"roomOrder"))
+        [found addObject:RevenantHomeKitRoom(identifier, _revenant_identifier)];
     return found;
 }
 
 - (HMRoom *)roomForEntireHome
 {
-    NSMutableDictionary *record = CharonHomeKitRecord(@"homes", _charon_identifier);
+    NSMutableDictionary *record = RevenantHomeKitRecord(@"homes", _revenant_identifier);
     NSString *identifier = record[@"entireHomeRoom"];
     if (identifier)
-        return CharonHomeKitRoom(identifier, _charon_identifier);
-    HMRoom *room = [[HMRoom alloc] charon_initWithStore:[CharonHomeKitStore shared] identifier:nil];
+        return RevenantHomeKitRoom(identifier, _revenant_identifier);
+    HMRoom *room = [[HMRoom alloc] revenant_initWithStore:[RevenantHomeKitStore shared] identifier:nil];
     [room updateName:@"Home" completionHandler:nil];
-    record[@"entireHomeRoom"] = CharonHomeKitUUIDString(room.uniqueIdentifier);
-    NSMutableArray *order = [CharonHomeKitStringListField(record, @"roomOrder") mutableCopy];
-    [order addObject:CharonHomeKitUUIDString(room.uniqueIdentifier)];
+    record[@"entireHomeRoom"] = RevenantHomeKitUUIDString(room.uniqueIdentifier);
+    NSMutableArray *order = [RevenantHomeKitStringListField(record, @"roomOrder") mutableCopy];
+    [order addObject:RevenantHomeKitUUIDString(room.uniqueIdentifier)];
     record[@"roomOrder"] = order;
-    [[CharonHomeKitStore shared] flushTableNamed:@"homes"];
+    [[RevenantHomeKitStore shared] flushTableNamed:@"homes"];
     return room;
 }
 
 - (NSArray<HMZone *> *)zones
 {
     NSMutableArray *found = [NSMutableArray array];
-    for (NSString *identifier in CharonHomeKitStringListField(CharonHomeKitRecord(@"homes", _charon_identifier), @"zoneOrder"))
-        [found addObject:CharonHomeKitZone(identifier, _charon_identifier)];
+    for (NSString *identifier in RevenantHomeKitStringListField(RevenantHomeKitRecord(@"homes", _revenant_identifier), @"zoneOrder"))
+        [found addObject:RevenantHomeKitZone(identifier, _revenant_identifier)];
     return found;
 }
 
 - (NSArray<HMUser *> *)users
 {
     NSMutableArray *found = [NSMutableArray array];
-    for (NSString *identifier in CharonHomeKitStringListField(CharonHomeKitRecord(@"homes", _charon_identifier), @"userOrder"))
-        [found addObject:CharonHomeKitUser(identifier, _charon_identifier)];
+    for (NSString *identifier in RevenantHomeKitStringListField(RevenantHomeKitRecord(@"homes", _revenant_identifier), @"userOrder"))
+        [found addObject:RevenantHomeKitUser(identifier, _revenant_identifier)];
     return found;
 }
 
 - (NSArray<HMServiceGroup *> *)serviceGroups
 {
     NSMutableArray *found = [NSMutableArray array];
-    for (NSString *identifier in CharonHomeKitStringListField(CharonHomeKitRecord(@"homes", _charon_identifier), @"serviceGroupOrder"))
-        [found addObject:CharonHomeKitServiceGroup(identifier, _charon_identifier)];
+    for (NSString *identifier in RevenantHomeKitStringListField(RevenantHomeKitRecord(@"homes", _revenant_identifier), @"serviceGroupOrder"))
+        [found addObject:RevenantHomeKitServiceGroup(identifier, _revenant_identifier)];
     return found;
 }
 
 - (NSArray<HMAccessory *> *)accessories
 {
     NSMutableArray *found = [NSMutableArray array];
-    for (NSString *identifier in CharonHomeKitStringListField(CharonHomeKitRecord(@"homes", _charon_identifier), @"accessoryOrder"))
-        [found addObject:CharonHomeKitAccessory(identifier, _charon_identifier)];
+    for (NSString *identifier in RevenantHomeKitStringListField(RevenantHomeKitRecord(@"homes", _revenant_identifier), @"accessoryOrder"))
+        [found addObject:RevenantHomeKitAccessory(identifier, _revenant_identifier)];
     return found;
 }
 
 - (NSArray<HMTrigger *> *)triggers
 {
     NSMutableArray *found = [NSMutableArray array];
-    for (NSString *identifier in CharonHomeKitStringListField(CharonHomeKitRecord(@"homes", _charon_identifier), @"triggerOrder")) {
-        [found addObject:CharonHomeKitTimerTrigger(identifier, _charon_identifier)];
+    for (NSString *identifier in RevenantHomeKitStringListField(RevenantHomeKitRecord(@"homes", _revenant_identifier), @"triggerOrder")) {
+        [found addObject:RevenantHomeKitTimerTrigger(identifier, _revenant_identifier)];
     }
     return found;
 }
@@ -127,8 +127,8 @@ CHARON_HOMEKIT_NIL_INIT
 - (NSArray<HMActionSet *> *)actionSets
 {
     NSMutableArray *found = [NSMutableArray array];
-    for (NSString *identifier in CharonHomeKitStringListField(CharonHomeKitRecord(@"homes", _charon_identifier), @"actionSetOrder"))
-        [found addObject:CharonHomeKitActionSet(identifier, _charon_identifier)];
+    for (NSString *identifier in RevenantHomeKitStringListField(RevenantHomeKitRecord(@"homes", _revenant_identifier), @"actionSetOrder"))
+        [found addObject:RevenantHomeKitActionSet(identifier, _revenant_identifier)];
     return found;
 }
 
@@ -144,102 +144,102 @@ CHARON_HOMEKIT_NIL_INIT
 - (void)updateName:(NSString *)name completionHandler:(void (^)(NSError * _Nullable error))completionHandler
 {
     if (!name) {
-        CharonHomeKitFinishError(completionHandler, CharonHomeKitError(HMErrorCodeNilParameter, @"a home needs a name"));
+        RevenantHomeKitFinishError(completionHandler, RevenantHomeKitError(HMErrorCodeNilParameter, @"a home needs a name"));
         return;
     }
-    CharonHomeKitSetField(@"homes", _charon_identifier, @"name", name);
+    RevenantHomeKitSetField(@"homes", _revenant_identifier, @"name", name);
     HMHome *home = self;
-    CharonHomeKitTell(_charon_delegate, @selector(homeDidUpdateName:), ^(id target) {
+    RevenantHomeKitTell(_revenant_delegate, @selector(homeDidUpdateName:), ^(id target) {
         [(id<HMHomeDelegate>)target homeDidUpdateName:home];
     });
-    CharonHomeKitFinishError(completionHandler, nil);
+    RevenantHomeKitFinishError(completionHandler, nil);
 }
 
 - (void)addRoomWithName:(NSString *)name completionHandler:(void (^)(HMRoom * _Nullable room, NSError * _Nullable error))completionHandler
 {
     if (!name) {
-        CharonHomeKitFinish(completionHandler, nil, CharonHomeKitError(HMErrorCodeNilParameter, @"a room needs a name"));
+        RevenantHomeKitFinish(completionHandler, nil, RevenantHomeKitError(HMErrorCodeNilParameter, @"a room needs a name"));
         return;
     }
-    if ([self charon_nameInUse:name]) {
-        CharonHomeKitFinish(completionHandler, nil,
-                            CharonHomeKitError(HMErrorCodeObjectWithSimilarNameExistsInHome,
+    if ([self revenant_nameInUse:name]) {
+        RevenantHomeKitFinish(completionHandler, nil,
+                            RevenantHomeKitError(HMErrorCodeObjectWithSimilarNameExistsInHome,
                                                @"this home already has a room, zone or service group with that name"));
         return;
     }
-    HMRoom *room = [[HMRoom alloc] charon_initWithStore:[CharonHomeKitStore shared] identifier:nil];
+    HMRoom *room = [[HMRoom alloc] revenant_initWithStore:[RevenantHomeKitStore shared] identifier:nil];
     [room updateName:name completionHandler:nil];
-    [self charon_append:CharonHomeKitUUIDString(room.uniqueIdentifier) to:@"roomOrder"];
+    [self revenant_append:RevenantHomeKitUUIDString(room.uniqueIdentifier) to:@"roomOrder"];
     HMHome *home = self;
-    CharonHomeKitTell(_charon_delegate, @selector(home:didAddRoom:), ^(id target) {
+    RevenantHomeKitTell(_revenant_delegate, @selector(home:didAddRoom:), ^(id target) {
         [(id<HMHomeDelegate>)target home:home didAddRoom:room];
     });
-    CharonHomeKitFinish(completionHandler, room, nil);
+    RevenantHomeKitFinish(completionHandler, room, nil);
 }
 
 - (void)addZoneWithName:(NSString *)name completionHandler:(void (^)(HMZone * _Nullable zone, NSError * _Nullable error))completionHandler
 {
     if (!name) {
-        CharonHomeKitFinish(completionHandler, nil, CharonHomeKitError(HMErrorCodeNilParameter, @"a zone needs a name"));
+        RevenantHomeKitFinish(completionHandler, nil, RevenantHomeKitError(HMErrorCodeNilParameter, @"a zone needs a name"));
         return;
     }
-    if ([self charon_nameInUse:name]) {
-        CharonHomeKitFinish(completionHandler, nil,
-                            CharonHomeKitError(HMErrorCodeObjectWithSimilarNameExistsInHome,
+    if ([self revenant_nameInUse:name]) {
+        RevenantHomeKitFinish(completionHandler, nil,
+                            RevenantHomeKitError(HMErrorCodeObjectWithSimilarNameExistsInHome,
                                                @"this home already has a room, zone or service group with that name"));
         return;
     }
-    HMZone *zone = [[HMZone alloc] charon_initWithStore:[CharonHomeKitStore shared] identifier:nil];
+    HMZone *zone = [[HMZone alloc] revenant_initWithStore:[RevenantHomeKitStore shared] identifier:nil];
     [zone updateName:name completionHandler:nil];
-    [self charon_append:CharonHomeKitUUIDString(zone.uniqueIdentifier) to:@"zoneOrder"];
+    [self revenant_append:RevenantHomeKitUUIDString(zone.uniqueIdentifier) to:@"zoneOrder"];
     HMHome *home = self;
-    CharonHomeKitTell(_charon_delegate, @selector(home:didAddZone:), ^(id target) {
+    RevenantHomeKitTell(_revenant_delegate, @selector(home:didAddZone:), ^(id target) {
         [(id<HMHomeDelegate>)target home:home didAddZone:zone];
     });
-    CharonHomeKitFinish(completionHandler, zone, nil);
+    RevenantHomeKitFinish(completionHandler, zone, nil);
 }
 
 - (void)addServiceGroupWithName:(NSString *)name completionHandler:(void (^)(HMServiceGroup * _Nullable group, NSError * _Nullable error))completionHandler
 {
     if (!name) {
-        CharonHomeKitFinish(completionHandler, nil, CharonHomeKitError(HMErrorCodeNilParameter, @"a service group needs a name"));
+        RevenantHomeKitFinish(completionHandler, nil, RevenantHomeKitError(HMErrorCodeNilParameter, @"a service group needs a name"));
         return;
     }
-    if ([self charon_nameInUse:name]) {
-        CharonHomeKitFinish(completionHandler, nil,
-                            CharonHomeKitError(HMErrorCodeObjectWithSimilarNameExistsInHome,
+    if ([self revenant_nameInUse:name]) {
+        RevenantHomeKitFinish(completionHandler, nil,
+                            RevenantHomeKitError(HMErrorCodeObjectWithSimilarNameExistsInHome,
                                                @"this home already has a room, zone or service group with that name"));
         return;
     }
-    HMServiceGroup *group = [[HMServiceGroup alloc] charon_initWithStore:[CharonHomeKitStore shared] identifier:nil];
+    HMServiceGroup *group = [[HMServiceGroup alloc] revenant_initWithStore:[RevenantHomeKitStore shared] identifier:nil];
     [group updateName:name completionHandler:nil];
-    [self charon_append:CharonHomeKitUUIDString(group.uniqueIdentifier) to:@"serviceGroupOrder"];
+    [self revenant_append:RevenantHomeKitUUIDString(group.uniqueIdentifier) to:@"serviceGroupOrder"];
     HMHome *home = self;
-    CharonHomeKitTell(_charon_delegate, @selector(home:didAddServiceGroup:), ^(id target) {
+    RevenantHomeKitTell(_revenant_delegate, @selector(home:didAddServiceGroup:), ^(id target) {
         [(id<HMHomeDelegate>)target home:home didAddServiceGroup:group];
     });
-    CharonHomeKitFinish(completionHandler, group, nil);
+    RevenantHomeKitFinish(completionHandler, group, nil);
 }
 
 - (void)addUserWithCompletionHandler:(void (^)(HMUser * _Nullable user, NSError * _Nullable error))completionHandler
 {
-    HMUser *user = [[HMUser alloc] charon_initWithStore:[CharonHomeKitStore shared] identifier:nil];
-    [user charon_setName:@"Me"];
-    [self charon_append:CharonHomeKitUUIDString(user.uniqueIdentifier) to:@"userOrder"];
-    CharonHomeKitSetField(@"homes", _charon_identifier, @"currentUser", CharonHomeKitUUIDString(user.uniqueIdentifier));
+    HMUser *user = [[HMUser alloc] revenant_initWithStore:[RevenantHomeKitStore shared] identifier:nil];
+    [user revenant_setName:@"Me"];
+    [self revenant_append:RevenantHomeKitUUIDString(user.uniqueIdentifier) to:@"userOrder"];
+    RevenantHomeKitSetField(@"homes", _revenant_identifier, @"currentUser", RevenantHomeKitUUIDString(user.uniqueIdentifier));
     HMHome *home = self;
-    CharonHomeKitTell(_charon_delegate, @selector(home:didAddUser:), ^(id target) {
+    RevenantHomeKitTell(_revenant_delegate, @selector(home:didAddUser:), ^(id target) {
         [(id<HMHomeDelegate>)target home:home didAddUser:user];
     });
-    CharonHomeKitFinish(completionHandler, user,
-                        CharonHomeKitError(HMErrorCodeUserManagementFailed,
+    RevenantHomeKitFinish(completionHandler, user,
+                        RevenantHomeKitError(HMErrorCodeUserManagementFailed,
                                            @"there is no Apple ID on this release to invite a person from, so the user is the one this process runs as"));
 }
 
 - (void)manageUsersWithCompletionHandler:(void (^)(NSError * _Nullable error))completionHandler
 {
-    CharonHomeKitFinishError(completionHandler,
-                             CharonHomeKitError(HMErrorCodeUserManagementFailed,
+    RevenantHomeKitFinishError(completionHandler,
+                             RevenantHomeKitError(HMErrorCodeUserManagementFailed,
                                                 @"managing users needs an iCloud account, which this release has no service for"));
 }
 
@@ -252,7 +252,7 @@ CHARON_HOMEKIT_NIL_INIT
         return nil;
     for (HMUser *held in self.users) {
         if ([held.uniqueIdentifier isEqual:wanted.uniqueIdentifier])
-            return CharonHomeKitHomeAccessControl(self, held);
+            return RevenantHomeKitHomeAccessControl(self, held);
     }
     return nil;
 }
@@ -260,157 +260,157 @@ CHARON_HOMEKIT_NIL_INIT
 - (void)addAccessory:(HMAccessory *)accessory completionHandler:(void (^)(NSError * _Nullable error))completionHandler
 {
     if (!accessory) {
-        CharonHomeKitFinishError(completionHandler, CharonHomeKitError(HMErrorCodeNilParameter, @"an accessory is needed"));
+        RevenantHomeKitFinishError(completionHandler, RevenantHomeKitError(HMErrorCodeNilParameter, @"an accessory is needed"));
         return;
     }
-    if ([self charon_holdsAccessory:accessory]) {
-        CharonHomeKitFinishError(completionHandler, CharonHomeKitError(HMErrorCodeObjectAlreadyAssociatedToHome,
+    if ([self revenant_holdsAccessory:accessory]) {
+        RevenantHomeKitFinishError(completionHandler, RevenantHomeKitError(HMErrorCodeObjectAlreadyAssociatedToHome,
                                                                         @"the accessory is already in a home"));
         return;
     }
-    CharonHomeKitFinishError(completionHandler, CharonHomeKitErrorForAccessory(HMErrorCodeAccessoryPairingFailed, accessory,
+    RevenantHomeKitFinishError(completionHandler, RevenantHomeKitErrorForAccessory(HMErrorCodeAccessoryPairingFailed, accessory,
                                                                                 @"adding an accessory needs a completed HAP pair-setup, which this port does not carry"));
 }
 
 - (void)removeAccessory:(HMAccessory *)accessory completionHandler:(void (^)(NSError * _Nullable error))completionHandler
 {
     if (!accessory) {
-        CharonHomeKitFinishError(completionHandler, CharonHomeKitError(HMErrorCodeNilParameter, @"an accessory is needed"));
+        RevenantHomeKitFinishError(completionHandler, RevenantHomeKitError(HMErrorCodeNilParameter, @"an accessory is needed"));
         return;
     }
-    if (![self charon_holdsAccessory:accessory]) {
-        CharonHomeKitFinishError(completionHandler, CharonHomeKitError(HMErrorCodeObjectNotAssociatedToAnyHome,
+    if (![self revenant_holdsAccessory:accessory]) {
+        RevenantHomeKitFinishError(completionHandler, RevenantHomeKitError(HMErrorCodeObjectNotAssociatedToAnyHome,
                                                                         @"the accessory is not in this home"));
         return;
     }
-    NSMutableArray *order = [self charon_orderFor:@"accessoryOrder"];
-    [order removeObject:CharonHomeKitUUIDString(accessory.identifier)];
-    [self charon_setOrder:order for:@"accessoryOrder"];
+    NSMutableArray *order = [self revenant_orderFor:@"accessoryOrder"];
+    [order removeObject:RevenantHomeKitUUIDString(accessory.identifier)];
+    [self revenant_setOrder:order for:@"accessoryOrder"];
     HMHome *home = self;
-    CharonHomeKitTell(_charon_delegate, @selector(home:didRemoveAccessory:), ^(id target) {
+    RevenantHomeKitTell(_revenant_delegate, @selector(home:didRemoveAccessory:), ^(id target) {
         [(id<HMHomeDelegate>)target home:home didRemoveAccessory:accessory];
     });
-    CharonHomeKitFinishError(completionHandler, nil);
+    RevenantHomeKitFinishError(completionHandler, nil);
 }
 
 - (void)assignAccessory:(HMAccessory *)accessory toRoom:(HMRoom *)room completionHandler:(void (^)(NSError * _Nullable error))completionHandler
 {
     if (!accessory || !room) {
-        CharonHomeKitFinishError(completionHandler, CharonHomeKitError(HMErrorCodeNilParameter, @"an accessory and a room are needed"));
+        RevenantHomeKitFinishError(completionHandler, RevenantHomeKitError(HMErrorCodeNilParameter, @"an accessory and a room are needed"));
         return;
     }
-    if (![self charon_holdsAccessory:accessory]) {
-        CharonHomeKitFinishError(completionHandler, CharonHomeKitError(HMErrorCodeObjectNotAssociatedToAnyHome,
+    if (![self revenant_holdsAccessory:accessory]) {
+        RevenantHomeKitFinishError(completionHandler, RevenantHomeKitError(HMErrorCodeObjectNotAssociatedToAnyHome,
                                                                         @"the accessory is not in this home"));
         return;
     }
     if (room == self.roomForEntireHome) {
-        CharonHomeKitFinishError(completionHandler, CharonHomeKitError(HMErrorCodeRoomForHomeCannotBeUpdated,
+        RevenantHomeKitFinishError(completionHandler, RevenantHomeKitError(HMErrorCodeRoomForHomeCannotBeUpdated,
                                                                         @"the room for the entire home cannot hold one accessory"));
         return;
     }
-    [accessory charon_setRoom:CharonHomeKitUUIDString(room.uniqueIdentifier)];
+    [accessory revenant_setRoom:RevenantHomeKitUUIDString(room.uniqueIdentifier)];
     HMHome *home = self;
-    CharonHomeKitTell(_charon_delegate, @selector(home:didUpdateRoom:forAccessory:), ^(id target) {
+    RevenantHomeKitTell(_revenant_delegate, @selector(home:didUpdateRoom:forAccessory:), ^(id target) {
         [(id<HMHomeDelegate>)target home:home didUpdateRoom:room forAccessory:accessory];
     });
-    CharonHomeKitFinishError(completionHandler, nil);
+    RevenantHomeKitFinishError(completionHandler, nil);
 }
 
 - (void)unblockAccessory:(HMAccessory *)accessory completionHandler:(void (^)(NSError * _Nullable error))completionHandler
 {
     if (!accessory) {
-        CharonHomeKitFinishError(completionHandler, CharonHomeKitError(HMErrorCodeNilParameter, @"an accessory is needed"));
+        RevenantHomeKitFinishError(completionHandler, RevenantHomeKitError(HMErrorCodeNilParameter, @"an accessory is needed"));
         return;
     }
-    CharonHomeKitSetField(@"accessories", CharonHomeKitUUIDString(accessory.identifier), @"blocked", @NO);
+    RevenantHomeKitSetField(@"accessories", RevenantHomeKitUUIDString(accessory.identifier), @"blocked", @NO);
     HMHome *home = self;
-    CharonHomeKitTell(_charon_delegate, @selector(home:didUnblockAccessory:), ^(id target) {
+    RevenantHomeKitTell(_revenant_delegate, @selector(home:didUnblockAccessory:), ^(id target) {
         [(id<HMHomeDelegate>)target home:home didUnblockAccessory:accessory];
     });
-    CharonHomeKitFinishError(completionHandler, nil);
+    RevenantHomeKitFinishError(completionHandler, nil);
 }
 
 - (void)removeRoom:(HMRoom *)room completionHandler:(void (^)(NSError * _Nullable error))completionHandler
 {
     if (!room) {
-        CharonHomeKitFinishError(completionHandler, CharonHomeKitError(HMErrorCodeNilParameter, @"a room is needed"));
+        RevenantHomeKitFinishError(completionHandler, RevenantHomeKitError(HMErrorCodeNilParameter, @"a room is needed"));
         return;
     }
     if (room == self.roomForEntireHome) {
-        CharonHomeKitFinishError(completionHandler, CharonHomeKitError(HMErrorCodeRoomForHomeCannotBeUpdated,
+        RevenantHomeKitFinishError(completionHandler, RevenantHomeKitError(HMErrorCodeRoomForHomeCannotBeUpdated,
                                                                         @"the room for the entire home cannot be removed"));
         return;
     }
-    NSMutableArray *order = [self charon_orderFor:@"roomOrder"];
-    if (![order containsObject:CharonHomeKitUUIDString(room.uniqueIdentifier)]) {
-        CharonHomeKitFinishError(completionHandler, CharonHomeKitError(HMErrorCodeObjectNotAssociatedToAnyHome,
+    NSMutableArray *order = [self revenant_orderFor:@"roomOrder"];
+    if (![order containsObject:RevenantHomeKitUUIDString(room.uniqueIdentifier)]) {
+        RevenantHomeKitFinishError(completionHandler, RevenantHomeKitError(HMErrorCodeObjectNotAssociatedToAnyHome,
                                                                         @"the room is not in this home"));
         return;
     }
-    [order removeObject:CharonHomeKitUUIDString(room.uniqueIdentifier)];
-    [self charon_setOrder:order for:@"roomOrder"];
+    [order removeObject:RevenantHomeKitUUIDString(room.uniqueIdentifier)];
+    [self revenant_setOrder:order for:@"roomOrder"];
     HMHome *home = self;
-    CharonHomeKitTell(_charon_delegate, @selector(home:didRemoveRoom:), ^(id target) {
+    RevenantHomeKitTell(_revenant_delegate, @selector(home:didRemoveRoom:), ^(id target) {
         [(id<HMHomeDelegate>)target home:home didRemoveRoom:room];
     });
-    CharonHomeKitFinishError(completionHandler, nil);
+    RevenantHomeKitFinishError(completionHandler, nil);
 }
 
 - (void)removeZone:(HMZone *)zone completionHandler:(void (^)(NSError * _Nullable error))completionHandler
 {
-    if (![self charon_remove:CharonHomeKitUUIDString(zone.uniqueIdentifier) from:@"zoneOrder" named:@"the zone"]) {
-        CharonHomeKitFinishError(completionHandler, CharonHomeKitError(HMErrorCodeObjectNotAssociatedToAnyHome,
+    if (![self revenant_remove:RevenantHomeKitUUIDString(zone.uniqueIdentifier) from:@"zoneOrder" named:@"the zone"]) {
+        RevenantHomeKitFinishError(completionHandler, RevenantHomeKitError(HMErrorCodeObjectNotAssociatedToAnyHome,
                                                                         @"the zone is not in this home"));
         return;
     }
     HMHome *home = self;
-    CharonHomeKitTell(_charon_delegate, @selector(home:didRemoveZone:), ^(id target) {
+    RevenantHomeKitTell(_revenant_delegate, @selector(home:didRemoveZone:), ^(id target) {
         [(id<HMHomeDelegate>)target home:home didRemoveZone:zone];
     });
-    CharonHomeKitFinishError(completionHandler, nil);
+    RevenantHomeKitFinishError(completionHandler, nil);
 }
 
 - (void)removeServiceGroup:(HMServiceGroup *)group completionHandler:(void (^)(NSError * _Nullable error))completionHandler
 {
-    if (![self charon_remove:CharonHomeKitUUIDString(group.uniqueIdentifier) from:@"serviceGroupOrder" named:@"the service group"]) {
-        CharonHomeKitFinishError(completionHandler, CharonHomeKitError(HMErrorCodeObjectNotAssociatedToAnyHome,
+    if (![self revenant_remove:RevenantHomeKitUUIDString(group.uniqueIdentifier) from:@"serviceGroupOrder" named:@"the service group"]) {
+        RevenantHomeKitFinishError(completionHandler, RevenantHomeKitError(HMErrorCodeObjectNotAssociatedToAnyHome,
                                                                         @"the service group is not in this home"));
         return;
     }
     HMHome *home = self;
-    CharonHomeKitTell(_charon_delegate, @selector(home:didRemoveServiceGroup:), ^(id target) {
+    RevenantHomeKitTell(_revenant_delegate, @selector(home:didRemoveServiceGroup:), ^(id target) {
         [(id<HMHomeDelegate>)target home:home didRemoveServiceGroup:group];
     });
-    CharonHomeKitFinishError(completionHandler, nil);
+    RevenantHomeKitFinishError(completionHandler, nil);
 }
 
 - (void)removeUser:(HMUser *)user completionHandler:(void (^)(NSError * _Nullable error))completionHandler
 {
     if (!user) {
-        CharonHomeKitFinishError(completionHandler, CharonHomeKitError(HMErrorCodeNilParameter, @"a user is needed"));
+        RevenantHomeKitFinishError(completionHandler, RevenantHomeKitError(HMErrorCodeNilParameter, @"a user is needed"));
         return;
     }
-    NSMutableArray *order = [self charon_orderFor:@"userOrder"];
-    if (![order containsObject:CharonHomeKitUUIDString(user.uniqueIdentifier)]) {
-        CharonHomeKitFinishError(completionHandler, CharonHomeKitError(HMErrorCodeObjectNotAssociatedToAnyHome,
+    NSMutableArray *order = [self revenant_orderFor:@"userOrder"];
+    if (![order containsObject:RevenantHomeKitUUIDString(user.uniqueIdentifier)]) {
+        RevenantHomeKitFinishError(completionHandler, RevenantHomeKitError(HMErrorCodeObjectNotAssociatedToAnyHome,
                                                                         @"the user is not in this home"));
         return;
     }
     if (order.count == 1) {
-        CharonHomeKitFinishError(completionHandler, CharonHomeKitError(HMErrorCodeCannotRemoveBuiltinActionSet,
+        RevenantHomeKitFinishError(completionHandler, RevenantHomeKitError(HMErrorCodeCannotRemoveBuiltinActionSet,
                                                                         @"a home keeps at least one user"));
         return;
     }
-    [order removeObject:CharonHomeKitUUIDString(user.uniqueIdentifier)];
-    [self charon_setOrder:order for:@"userOrder"];
-    if ([CharonHomeKitRecord(@"homes", _charon_identifier)[@"currentUser"] isEqualToString:CharonHomeKitUUIDString(user.uniqueIdentifier)])
-        CharonHomeKitSetField(@"homes", _charon_identifier, @"currentUser", order.firstObject);
+    [order removeObject:RevenantHomeKitUUIDString(user.uniqueIdentifier)];
+    [self revenant_setOrder:order for:@"userOrder"];
+    if ([RevenantHomeKitRecord(@"homes", _revenant_identifier)[@"currentUser"] isEqualToString:RevenantHomeKitUUIDString(user.uniqueIdentifier)])
+        RevenantHomeKitSetField(@"homes", _revenant_identifier, @"currentUser", order.firstObject);
     HMHome *home = self;
-    CharonHomeKitTell(_charon_delegate, @selector(home:didRemoveUser:), ^(id target) {
+    RevenantHomeKitTell(_revenant_delegate, @selector(home:didRemoveUser:), ^(id target) {
         [(id<HMHomeDelegate>)target home:home didRemoveUser:user];
     });
-    CharonHomeKitFinishError(completionHandler, nil);
+    RevenantHomeKitFinishError(completionHandler, nil);
 }
 
 - (NSArray<HMService *> *)servicesWithTypes:(NSArray<NSString *> *)types
@@ -428,109 +428,109 @@ CHARON_HOMEKIT_NIL_INIT
 - (void)addTrigger:(HMTrigger *)trigger completionHandler:(void (^)(NSError * _Nullable error))completionHandler
 {
     if (!trigger) {
-        CharonHomeKitFinishError(completionHandler, CharonHomeKitError(HMErrorCodeNilParameter, @"a trigger is needed"));
+        RevenantHomeKitFinishError(completionHandler, RevenantHomeKitError(HMErrorCodeNilParameter, @"a trigger is needed"));
         return;
     }
-    [trigger charon_setHomeIdentifier:_charon_identifier];
-    [self charon_append:CharonHomeKitUUIDString(trigger.uniqueIdentifier) to:@"triggerOrder"];
+    [trigger revenant_setHomeIdentifier:_revenant_identifier];
+    [self revenant_append:RevenantHomeKitUUIDString(trigger.uniqueIdentifier) to:@"triggerOrder"];
     HMHome *home = self;
-    CharonHomeKitTell(_charon_delegate, @selector(home:didAddTrigger:), ^(id target) {
+    RevenantHomeKitTell(_revenant_delegate, @selector(home:didAddTrigger:), ^(id target) {
         [(id<HMHomeDelegate>)target home:home didAddTrigger:trigger];
     });
-    CharonHomeKitFinishError(completionHandler, nil);
+    RevenantHomeKitFinishError(completionHandler, nil);
 }
 
 - (void)removeTrigger:(HMTrigger *)trigger completionHandler:(void (^)(NSError * _Nullable error))completionHandler
 {
     if (!trigger) {
-        CharonHomeKitFinishError(completionHandler, CharonHomeKitError(HMErrorCodeNilParameter, @"a trigger is needed"));
+        RevenantHomeKitFinishError(completionHandler, RevenantHomeKitError(HMErrorCodeNilParameter, @"a trigger is needed"));
         return;
     }
-    [self charon_remove:CharonHomeKitUUIDString(trigger.uniqueIdentifier) from:@"triggerOrder" named:@"the trigger"];
+    [self revenant_remove:RevenantHomeKitUUIDString(trigger.uniqueIdentifier) from:@"triggerOrder" named:@"the trigger"];
     HMHome *home = self;
-    CharonHomeKitTell(_charon_delegate, @selector(home:didRemoveTrigger:), ^(id target) {
+    RevenantHomeKitTell(_revenant_delegate, @selector(home:didRemoveTrigger:), ^(id target) {
         [(id<HMHomeDelegate>)target home:home didRemoveTrigger:trigger];
     });
-    CharonHomeKitFinishError(completionHandler, nil);
+    RevenantHomeKitFinishError(completionHandler, nil);
 }
 
 - (void)addActionSetWithName:(NSString *)name completionHandler:(void (^)(HMActionSet * _Nullable actionSet, NSError * _Nullable error))completionHandler
 {
     if (!name) {
-        CharonHomeKitFinish(completionHandler, nil, CharonHomeKitError(HMErrorCodeNilParameter, @"an action set needs a name"));
+        RevenantHomeKitFinish(completionHandler, nil, RevenantHomeKitError(HMErrorCodeNilParameter, @"an action set needs a name"));
         return;
     }
-    HMActionSet *set = [[HMActionSet alloc] charon_initWithStore:[CharonHomeKitStore shared] identifier:nil];
+    HMActionSet *set = [[HMActionSet alloc] revenant_initWithStore:[RevenantHomeKitStore shared] identifier:nil];
     [set updateName:name completionHandler:nil];
-    [set charon_setHomeIdentifier:_charon_identifier];
-    [self charon_append:CharonHomeKitUUIDString(set.uniqueIdentifier) to:@"actionSetOrder"];
+    [set revenant_setHomeIdentifier:_revenant_identifier];
+    [self revenant_append:RevenantHomeKitUUIDString(set.uniqueIdentifier) to:@"actionSetOrder"];
     HMHome *home = self;
-    CharonHomeKitTell(_charon_delegate, @selector(home:didAddActionSet:), ^(id target) {
+    RevenantHomeKitTell(_revenant_delegate, @selector(home:didAddActionSet:), ^(id target) {
         [(id<HMHomeDelegate>)target home:home didAddActionSet:set];
     });
-    CharonHomeKitFinish(completionHandler, set, nil);
+    RevenantHomeKitFinish(completionHandler, set, nil);
 }
 
 - (void)removeActionSet:(HMActionSet *)actionSet completionHandler:(void (^)(NSError * _Nullable error))completionHandler
 {
     if (!actionSet) {
-        CharonHomeKitFinishError(completionHandler, CharonHomeKitError(HMErrorCodeNilParameter, @"an action set is needed"));
+        RevenantHomeKitFinishError(completionHandler, RevenantHomeKitError(HMErrorCodeNilParameter, @"an action set is needed"));
         return;
     }
     if ([actionSet.actionSetType isEqualToString:HMActionSetTypeWakeUp] ||
         [actionSet.actionSetType isEqualToString:HMActionSetTypeSleep] ||
         [actionSet.actionSetType isEqualToString:HMActionSetTypeHomeArrival] ||
         [actionSet.actionSetType isEqualToString:HMActionSetTypeHomeDeparture]) {
-        CharonHomeKitFinishError(completionHandler, CharonHomeKitError(HMErrorCodeCannotRemoveBuiltinActionSet,
+        RevenantHomeKitFinishError(completionHandler, RevenantHomeKitError(HMErrorCodeCannotRemoveBuiltinActionSet,
                                                                         @"a built-in action set cannot be removed"));
         return;
     }
-    [self charon_remove:CharonHomeKitUUIDString(actionSet.uniqueIdentifier) from:@"actionSetOrder" named:@"the action set"];
+    [self revenant_remove:RevenantHomeKitUUIDString(actionSet.uniqueIdentifier) from:@"actionSetOrder" named:@"the action set"];
     HMHome *home = self;
-    CharonHomeKitTell(_charon_delegate, @selector(home:didRemoveActionSet:), ^(id target) {
+    RevenantHomeKitTell(_revenant_delegate, @selector(home:didRemoveActionSet:), ^(id target) {
         [(id<HMHomeDelegate>)target home:home didRemoveActionSet:actionSet];
     });
-    CharonHomeKitFinishError(completionHandler, nil);
+    RevenantHomeKitFinishError(completionHandler, nil);
 }
 
-- (void)charon_setHomeIdentifier:(NSString *)homeIdentifier
+- (void)revenant_setHomeIdentifier:(NSString *)homeIdentifier
 {
-    self.charon_homeIdentifier = homeIdentifier;
+    self.revenant_homeIdentifier = homeIdentifier;
 }
 
-- (NSMutableArray *)charon_orderFor:(NSString *)key
+- (NSMutableArray *)revenant_orderFor:(NSString *)key
 {
-    return [CharonHomeKitStringListField(CharonHomeKitRecord(@"homes", _charon_identifier), key) mutableCopy];
+    return [RevenantHomeKitStringListField(RevenantHomeKitRecord(@"homes", _revenant_identifier), key) mutableCopy];
 }
 
-- (void)charon_setOrder:(NSArray *)order for:(NSString *)key
+- (void)revenant_setOrder:(NSArray *)order for:(NSString *)key
 {
-    CharonHomeKitSetField(@"homes", _charon_identifier, key, order);
-    [[CharonHomeKitStore shared] flushTableNamed:@"homes"];
+    RevenantHomeKitSetField(@"homes", _revenant_identifier, key, order);
+    [[RevenantHomeKitStore shared] flushTableNamed:@"homes"];
 }
 
-- (void)charon_append:(NSString *)identifier to:(NSString *)key
+- (void)revenant_append:(NSString *)identifier to:(NSString *)key
 {
-    NSMutableArray *order = [self charon_orderFor:key];
+    NSMutableArray *order = [self revenant_orderFor:key];
     if (![order containsObject:identifier]) {
         [order addObject:identifier];
-        [self charon_setOrder:order for:key];
+        [self revenant_setOrder:order for:key];
     }
 }
 
-- (BOOL)charon_remove:(NSString *)identifier from:(NSString *)key named:(NSString *)what
+- (BOOL)revenant_remove:(NSString *)identifier from:(NSString *)key named:(NSString *)what
 {
-    NSMutableArray *order = [self charon_orderFor:key];
+    NSMutableArray *order = [self revenant_orderFor:key];
     BOOL held = [order containsObject:identifier];
     if (held) {
         [order removeObject:identifier];
-        [self charon_setOrder:order for:key];
+        [self revenant_setOrder:order for:key];
     }
     (void)what;
     return held;
 }
 
-- (BOOL)charon_holdsAccessory:(HMAccessory *)accessory
+- (BOOL)revenant_holdsAccessory:(HMAccessory *)accessory
 {
     for (HMAccessory *held in self.accessories) {
         if ([held.identifier isEqual:accessory.identifier])
@@ -539,7 +539,7 @@ CHARON_HOMEKIT_NIL_INIT
     return NO;
 }
 
-- (BOOL)charon_nameInUse:(NSString *)name
+- (BOOL)revenant_nameInUse:(NSString *)name
 {
     for (HMRoom *room in self.rooms) {
         if ([room.name isEqualToString:name])
@@ -561,7 +561,7 @@ CHARON_HOMEKIT_NIL_INIT
 #pragma mark - HMHomeManager
 
 @implementation HMHomeManager
-@synthesize charon_delegate = _charon_delegate;
+@synthesize revenant_delegate = _revenant_delegate;
 
 - (instancetype)init
 {
@@ -570,12 +570,12 @@ CHARON_HOMEKIT_NIL_INIT
 
 - (id<HMHomeManagerDelegate>)delegate
 {
-    return _charon_delegate;
+    return _revenant_delegate;
 }
 
 - (void)setDelegate:(id<HMHomeManagerDelegate>)delegate
 {
-    _charon_delegate = delegate;
+    _revenant_delegate = delegate;
 }
 
 - (HMHomeManagerAuthorizationStatus)authorizationStatus
@@ -586,8 +586,8 @@ CHARON_HOMEKIT_NIL_INIT
 - (NSArray<HMHome *> *)homes
 {
     NSMutableArray *found = [NSMutableArray array];
-    for (NSString *identifier in CharonHomeKitStringListField(CharonHomeKitRecord(@"homes", CharonHomeKitHomeOrderKey), @"homes"))
-        [found addObject:CharonHomeKitHome(identifier)];
+    for (NSString *identifier in RevenantHomeKitStringListField(RevenantHomeKitRecord(@"homes", RevenantHomeKitHomeOrderKey), @"homes"))
+        [found addObject:RevenantHomeKitHome(identifier)];
     return found;
 }
 
@@ -603,93 +603,93 @@ CHARON_HOMEKIT_NIL_INIT
 - (void)addHomeWithName:(NSString *)name completionHandler:(void (^)(HMHome * _Nullable home, NSError * _Nullable error))completionHandler
 {
     if (!name) {
-        CharonHomeKitFinish(completionHandler, nil, CharonHomeKitError(HMErrorCodeNilParameter, @"a home needs a name"));
+        RevenantHomeKitFinish(completionHandler, nil, RevenantHomeKitError(HMErrorCodeNilParameter, @"a home needs a name"));
         return;
     }
     for (HMHome *home in self.homes) {
         if ([home.name isEqualToString:name]) {
-            CharonHomeKitFinish(completionHandler, nil, CharonHomeKitError(HMErrorCodeHomeWithSimilarNameExists,
+            RevenantHomeKitFinish(completionHandler, nil, RevenantHomeKitError(HMErrorCodeHomeWithSimilarNameExists,
                                                                             @"there is already a home with that name"));
             return;
         }
     }
-    HMHome *home = [[HMHome alloc] charon_initWithStore:[CharonHomeKitStore shared] identifier:nil];
+    HMHome *home = [[HMHome alloc] revenant_initWithStore:[RevenantHomeKitStore shared] identifier:nil];
     [home updateName:name completionHandler:nil];
-    CharonHomeKitSetField(@"homes", CharonHomeKitUUIDString(home.uniqueIdentifier), @"primary", @(self.homes.count == 0));
+    RevenantHomeKitSetField(@"homes", RevenantHomeKitUUIDString(home.uniqueIdentifier), @"primary", @(self.homes.count == 0));
 
-    CharonHomeKitStore *store = [CharonHomeKitStore shared];
+    RevenantHomeKitStore *store = [RevenantHomeKitStore shared];
     NSMutableDictionary *homes = [store tableNamed:@"homes"];
-    NSMutableArray *order = [homes[CharonHomeKitHomeOrderKey][@"homes"] mutableCopy] ?: [NSMutableArray array];
-    [order addObject:CharonHomeKitUUIDString(home.uniqueIdentifier)];
-    homes[CharonHomeKitHomeOrderKey] = @{@"homes": order};
+    NSMutableArray *order = [homes[RevenantHomeKitHomeOrderKey][@"homes"] mutableCopy] ?: [NSMutableArray array];
+    [order addObject:RevenantHomeKitUUIDString(home.uniqueIdentifier)];
+    homes[RevenantHomeKitHomeOrderKey] = @{@"homes": order};
     [store flushTableNamed:@"homes"];
 
     HMHomeManager *manager = self;
-    CharonHomeKitTell(_charon_delegate, @selector(homeManager:didAddHome:), ^(id target) {
+    RevenantHomeKitTell(_revenant_delegate, @selector(homeManager:didAddHome:), ^(id target) {
         [(id<HMHomeManagerDelegate>)target homeManager:manager didAddHome:home];
     });
-    CharonHomeKitFinish(completionHandler, home, nil);
+    RevenantHomeKitFinish(completionHandler, home, nil);
 }
 
 - (void)removeHome:(HMHome *)home completionHandler:(void (^)(NSError * _Nullable error))completionHandler
 {
     if (!home) {
-        CharonHomeKitFinishError(completionHandler, CharonHomeKitError(HMErrorCodeNilParameter, @"a home is needed"));
+        RevenantHomeKitFinishError(completionHandler, RevenantHomeKitError(HMErrorCodeNilParameter, @"a home is needed"));
         return;
     }
-    if (![self.homes containsObject:CharonHomeKitHome(CharonHomeKitUUIDString(home.uniqueIdentifier))]) {
-        CharonHomeKitFinishError(completionHandler, CharonHomeKitError(HMErrorCodeObjectNotAssociatedToAnyHome,
+    if (![self.homes containsObject:RevenantHomeKitHome(RevenantHomeKitUUIDString(home.uniqueIdentifier))]) {
+        RevenantHomeKitFinishError(completionHandler, RevenantHomeKitError(HMErrorCodeObjectNotAssociatedToAnyHome,
                                                                         @"the home is not one of this manager's"));
         return;
     }
-    CharonHomeKitStore *store = [CharonHomeKitStore shared];
+    RevenantHomeKitStore *store = [RevenantHomeKitStore shared];
     NSMutableDictionary *homes = [store tableNamed:@"homes"];
-    NSMutableArray *order = [homes[CharonHomeKitHomeOrderKey][@"homes"] mutableCopy] ?: [NSMutableArray array];
-    [order removeObject:CharonHomeKitUUIDString(home.uniqueIdentifier)];
-    homes[CharonHomeKitHomeOrderKey] = @{@"homes": order};
-    [homes removeObjectForKey:CharonHomeKitUUIDString(home.uniqueIdentifier)];
+    NSMutableArray *order = [homes[RevenantHomeKitHomeOrderKey][@"homes"] mutableCopy] ?: [NSMutableArray array];
+    [order removeObject:RevenantHomeKitUUIDString(home.uniqueIdentifier)];
+    homes[RevenantHomeKitHomeOrderKey] = @{@"homes": order};
+    [homes removeObjectForKey:RevenantHomeKitUUIDString(home.uniqueIdentifier)];
     [store flushTableNamed:@"homes"];
     HMHomeManager *manager = self;
-    CharonHomeKitTell(_charon_delegate, @selector(homeManager:didRemoveHome:), ^(id target) {
+    RevenantHomeKitTell(_revenant_delegate, @selector(homeManager:didRemoveHome:), ^(id target) {
         [(id<HMHomeManagerDelegate>)target homeManager:manager didRemoveHome:home];
     });
-    CharonHomeKitFinishError(completionHandler, nil);
+    RevenantHomeKitFinishError(completionHandler, nil);
 }
 
 - (void)updatePrimaryHome:(HMHome *)primaryHome completionHandler:(void (^)(NSError * _Nullable error))completionHandler
 {
     if (!primaryHome) {
-        CharonHomeKitFinishError(completionHandler, CharonHomeKitError(HMErrorCodeNilParameter, @"a home is needed"));
+        RevenantHomeKitFinishError(completionHandler, RevenantHomeKitError(HMErrorCodeNilParameter, @"a home is needed"));
         return;
     }
     for (HMHome *home in self.homes)
-        CharonHomeKitSetField(@"homes", CharonHomeKitUUIDString(home.uniqueIdentifier), @"primary", @(home == primaryHome));
-    CharonHomeKitTell(_charon_delegate, @selector(homeManagerDidUpdatePrimaryHome:), ^(id target) {
+        RevenantHomeKitSetField(@"homes", RevenantHomeKitUUIDString(home.uniqueIdentifier), @"primary", @(home == primaryHome));
+    RevenantHomeKitTell(_revenant_delegate, @selector(homeManagerDidUpdatePrimaryHome:), ^(id target) {
         [(id<HMHomeManagerDelegate>)target homeManagerDidUpdatePrimaryHome:self];
     });
-    CharonHomeKitFinishError(completionHandler, nil);
+    RevenantHomeKitFinishError(completionHandler, nil);
 }
 
 - (void)findVendorAccessoryWithHAPPublicKey:(NSData *)publicKey completionHandler:(void (^)(HMAccessory * _Nullable accessory, NSError * _Nullable error))completionHandler
 {
     if (!publicKey.length) {
-        CharonHomeKitFinish(completionHandler, nil, CharonHomeKitError(HMErrorCodeNilParameter, @"a public key is needed"));
+        RevenantHomeKitFinish(completionHandler, nil, RevenantHomeKitError(HMErrorCodeNilParameter, @"a public key is needed"));
         return;
     }
-    NSMutableDictionary *pairings = [[CharonHomeKitStore shared] tableNamed:@"pairings"];
+    NSMutableDictionary *pairings = [[RevenantHomeKitStore shared] tableNamed:@"pairings"];
     for (NSString *identifier in pairings) {
         if ([pairings[identifier][@"ltpk"] isEqualToData:publicKey]) {
             for (HMHome *home in self.homes) {
                 for (HMAccessory *accessory in home.accessories) {
-                    if ([CharonHomeKitUUIDString(accessory.identifier) isEqualToString:identifier]) {
-                        CharonHomeKitFinish(completionHandler, accessory, nil);
+                    if ([RevenantHomeKitUUIDString(accessory.identifier) isEqualToString:identifier]) {
+                        RevenantHomeKitFinish(completionHandler, accessory, nil);
                         return;
                     }
                 }
             }
         }
     }
-    CharonHomeKitFinish(completionHandler, nil, CharonHomeKitError(HMErrorCodeNotFound,
+    RevenantHomeKitFinish(completionHandler, nil, RevenantHomeKitError(HMErrorCodeNotFound,
                                                                     @"no paired accessory has that public key"));
 }
 

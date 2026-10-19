@@ -4,18 +4,18 @@
 
 #import <SceneKit/SceneKit.h>
 
-#import "CharonARTracker.h"
+#import "RevenantARTracker.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
 enum { kPlaneQuadCorners = 4, kPlaneQuadTriangles = 6 };
 
-static void CharonEncodeStruct(NSCoder *coder, NSString *key, const void *bytes, size_t size)
+static void RevenantEncodeStruct(NSCoder *coder, NSString *key, const void *bytes, size_t size)
 {
     [coder encodeBytes:(const uint8_t *)bytes length:size forKey:key];
 }
 
-static BOOL CharonDecodeStruct(NSCoder *coder, NSString *key, void *bytes, size_t size)
+static BOOL RevenantDecodeStruct(NSCoder *coder, NSString *key, void *bytes, size_t size)
 {
     NSUInteger length = 0;
     const uint8_t *decoded = [coder decodeBytesForKey:key returnedLength:&length];
@@ -25,7 +25,7 @@ static BOOL CharonDecodeStruct(NSCoder *coder, NSString *key, void *bytes, size_
     return YES;
 }
 
-static inline BOOL CharonInvert4x4(simd_float4x4 m, simd_float4x4 *out)
+static inline BOOL RevenantInvert4x4(simd_float4x4 m, simd_float4x4 *out)
 {
     float a[4][8];
     for (int row = 0; row < 4; row++) {
@@ -63,62 +63,62 @@ static inline BOOL CharonInvert4x4(simd_float4x4 m, simd_float4x4 *out)
     return YES;
 }
 
-static inline simd_float4x4 CharonInverse(simd_float4x4 m)
+static inline simd_float4x4 RevenantInverse(simd_float4x4 m)
 {
-    simd_float4x4 inverse = CharonARKitIdentityFloat4x4;
-    if (!CharonInvert4x4(m, &inverse))
-        return CharonARKitIdentityFloat4x4;
+    simd_float4x4 inverse = RevenantARKitIdentityFloat4x4;
+    if (!RevenantInvert4x4(m, &inverse))
+        return RevenantARKitIdentityFloat4x4;
     return inverse;
 }
 
-@interface ARConfiguration (CharonPrivate)
-- (instancetype)initCharonCommon;
+@interface ARConfiguration (RevenantPrivate)
+- (instancetype)initRevenantCommon;
 @end
 
-@interface ARVideoFormat (CharonPrivate)
+@interface ARVideoFormat (RevenantPrivate)
 - (instancetype)initWithCaptureFormat:(AVCaptureDeviceFormat *)format;
 @end
 
-@interface ARPlaneAnchor (CharonPrivate)
-- (instancetype)initWithPlaneValue:(CharonARValue *)value;
+@interface ARPlaneAnchor (RevenantPrivate)
+- (instancetype)initWithPlaneValue:(RevenantARValue *)value;
 @end
 
-@interface ARPlaneGeometry (CharonPrivate)
-- (instancetype)initWithPlaneValue:(CharonARValue *)value;
+@interface ARPlaneGeometry (RevenantPrivate)
+- (instancetype)initWithPlaneValue:(RevenantARValue *)value;
 @end
 
-@interface ARHitTestResult (CharonPrivate)
-- (instancetype)initWithHitValue:(CharonARValue *)value;
+@interface ARHitTestResult (RevenantPrivate)
+- (instancetype)initWithHitValue:(RevenantARValue *)value;
 @end
 
-@interface ARPointCloud (CharonPrivate)
+@interface ARPointCloud (RevenantPrivate)
 - (instancetype)initWithPoints:(NSData *)points count:(NSUInteger)count;
 @end
 
-@interface ARRaycastQuery (CharonPrivate)
+@interface ARRaycastQuery (RevenantPrivate)
 - (instancetype)initWithOrigin:(simd_float3)origin
                     direction:(simd_float3)direction
              allowingTarget:(ARRaycastTarget)target
                     alignment:(ARRaycastTargetAlignment)alignment;
 @end
 
-@interface ARWorldMap (CharonPrivate)
+@interface ARWorldMap (RevenantPrivate)
 - (instancetype)initWithAnchors:(NSArray<ARAnchor *> *)anchors
                    featurePoints:(nullable ARPointCloud *)featurePoints;
 - (nullable NSData *)trackerState;
 - (void)setTrackerState:(nullable NSData *)trackerState;
 @end
 
-@interface ARTrackedRaycast (CharonPrivate)
+@interface ARTrackedRaycast (RevenantPrivate)
 @property (nonatomic, strong) ARRaycastQuery *query;
 - (instancetype)initWithQuery:(ARRaycastQuery *)query;
 @end
 
-@interface ARRaycastResult (CharonPrivate)
-- (instancetype)initWithHitValue:(CharonARValue *)value;
+@interface ARRaycastResult (RevenantPrivate)
+- (instancetype)initWithHitValue:(RevenantARValue *)value;
 @end
 
-@interface ARFrame (CharonPrivate)
+@interface ARFrame (RevenantPrivate)
 - (instancetype)initWithCameraTransform:(simd_float4x4)cameraTransform
                         deviceTransform:(simd_float4x4)deviceTransform
                   cameraTransformTime:(NSTimeInterval)timestamp
@@ -126,12 +126,12 @@ static inline simd_float4x4 CharonInverse(simd_float4x4 m)
                            lightEstimate:(CGFloat)lightEstimate
                 ambientColorTemperature:(CGFloat)ambientColorTemperature
                                tracking:(BOOL)tracking
-                         hitTestTracker:(CharonARTracker *)hitTestTracker;
+                         hitTestTracker:(RevenantARTracker *)hitTestTracker;
 
 - (void)addAnchor:(ARAnchor *)anchor;
 @end
 
-@interface ARAnchor (CharonPrivate)
+@interface ARAnchor (RevenantPrivate)
 @property (nonatomic, copy) NSUUID *identifier;
 
 - (ARAnchor *)anchorByApplyingOrigin:(simd_float4x4)origin;

@@ -11,11 +11,11 @@ typedef struct {
     int (*startInflate)(z_streamp, int, const char *, int);
     int (*runInflate)(z_streamp, int);
     int (*finishInflate)(z_streamp);
-} CharonZlib;
+} RevenantZlib;
 
-static const CharonZlib *charon_zlib(void)
+static const RevenantZlib *revenant_zlib(void)
 {
-    static CharonZlib zlib;
+    static RevenantZlib zlib;
     static BOOL loaded;
     static dispatch_once_t once;
     dispatch_once(&once, ^{
@@ -34,9 +34,9 @@ static const CharonZlib *charon_zlib(void)
     return loaded ? &zlib : NULL;
 }
 
-static NSData *charon_zlib_compress(NSData *input)
+static NSData *revenant_zlib_compress(NSData *input)
 {
-    const CharonZlib *zlib = charon_zlib();
+    const RevenantZlib *zlib = revenant_zlib();
     if (!zlib)
         return nil;
     z_stream stream;
@@ -58,9 +58,9 @@ static NSData *charon_zlib_compress(NSData *input)
     return status == Z_STREAM_END ? output : nil;
 }
 
-static NSData *charon_zlib_decompress(NSData *input)
+static NSData *revenant_zlib_decompress(NSData *input)
 {
-    const CharonZlib *zlib = charon_zlib();
+    const RevenantZlib *zlib = revenant_zlib();
     if (!zlib || !input.length)
         return nil;
     z_stream stream;
@@ -82,20 +82,20 @@ static NSData *charon_zlib_decompress(NSData *input)
     return status == Z_STREAM_END ? output : nil;
 }
 
-static const NSUInteger charon_lz4_block = 65536;
+static const NSUInteger revenant_lz4_block = 65536;
 
-static void charon_put32(NSMutableData *data, uint32_t value)
+static void revenant_put32(NSMutableData *data, uint32_t value)
 {
     unsigned char bytes[4] = {value & 0xFF, (value >> 8) & 0xFF, (value >> 16) & 0xFF, (value >> 24) & 0xFF};
     [data appendBytes:bytes length:4];
 }
 
-static uint32_t charon_get32(const unsigned char *bytes)
+static uint32_t revenant_get32(const unsigned char *bytes)
 {
     return (uint32_t)bytes[0] | ((uint32_t)bytes[1] << 8) | ((uint32_t)bytes[2] << 16) | ((uint32_t)bytes[3] << 24);
 }
 
-static void charon_lz4_length(NSMutableData *out, NSUInteger extra)
+static void revenant_lz4_length(NSMutableData *out, NSUInteger extra)
 {
     while (extra >= 255) {
         unsigned char full = 255;
@@ -106,24 +106,24 @@ static void charon_lz4_length(NSMutableData *out, NSUInteger extra)
     [out appendBytes:&rest length:1];
 }
 
-static void charon_lz4_sequence(NSMutableData *out, const unsigned char *literals, NSUInteger literalLength, NSUInteger offset, NSUInteger matchLength)
+static void revenant_lz4_sequence(NSMutableData *out, const unsigned char *literals, NSUInteger literalLength, NSUInteger offset, NSUInteger matchLength)
 {
     unsigned char token = (unsigned char)((literalLength >= 15 ? 15 : literalLength) << 4);
     if (matchLength)
         token |= (unsigned char)(matchLength - 4 >= 15 ? 15 : matchLength - 4);
     [out appendBytes:&token length:1];
     if (literalLength >= 15)
-        charon_lz4_length(out, literalLength - 15);
+        revenant_lz4_length(out, literalLength - 15);
     [out appendBytes:literals length:literalLength];
     if (!matchLength)
         return;
     unsigned char distance[2] = {offset & 0xFF, (offset >> 8) & 0xFF};
     [out appendBytes:distance length:2];
     if (matchLength - 4 >= 15)
-        charon_lz4_length(out, matchLength - 4 - 15);
+        revenant_lz4_length(out, matchLength - 4 - 15);
 }
 
-static NSData *charon_lz4_compress_block(const unsigned char *in, NSUInteger length)
+static NSData *revenant_lz4_compress_block(const unsigned char *in, NSUInteger length)
 {
     NSMutableData *out = [NSMutableData data];
     NSUInteger anchor = 0;
@@ -147,30 +147,30 @@ static NSData *charon_lz4_compress_block(const unsigned char *in, NSUInteger len
             NSUInteger matchLength = 4;
             while (at + matchLength < length - 5 && in[candidate + matchLength] == in[at + matchLength])
                 matchLength++;
-            charon_lz4_sequence(out, in + anchor, at - anchor, at - candidate, matchLength);
+            revenant_lz4_sequence(out, in + anchor, at - anchor, at - candidate, matchLength);
             at += matchLength;
             anchor = at;
         }
     }
-    charon_lz4_sequence(out, in + anchor, length - anchor, 0, 0);
+    revenant_lz4_sequence(out, in + anchor, length - anchor, 0, 0);
     return out;
 }
 
-static NSData *charon_lz4_compress(NSData *input)
+static NSData *revenant_lz4_compress(NSData *input)
 {
     NSMutableData *out = [NSMutableData data];
     const unsigned char *bytes = input.bytes;
-    for (NSUInteger start = 0; start < input.length; start += charon_lz4_block) {
-        NSUInteger length = MIN(charon_lz4_block, input.length - start);
-        NSData *block = charon_lz4_compress_block(bytes + start, length);
+    for (NSUInteger start = 0; start < input.length; start += revenant_lz4_block) {
+        NSUInteger length = MIN(revenant_lz4_block, input.length - start);
+        NSData *block = revenant_lz4_compress_block(bytes + start, length);
         if (block.length < length) {
             [out appendBytes:"bv41" length:4];
-            charon_put32(out, (uint32_t)length);
-            charon_put32(out, (uint32_t)block.length);
+            revenant_put32(out, (uint32_t)length);
+            revenant_put32(out, (uint32_t)block.length);
             [out appendData:block];
         } else {
             [out appendBytes:"bv4-" length:4];
-            charon_put32(out, (uint32_t)length);
+            revenant_put32(out, (uint32_t)length);
             [out appendBytes:bytes + start length:length];
         }
     }
@@ -178,7 +178,7 @@ static NSData *charon_lz4_compress(NSData *input)
     return out;
 }
 
-static BOOL charon_lz4_decompress_block(const unsigned char *in, NSUInteger inLength, NSMutableData *out)
+static BOOL revenant_lz4_decompress_block(const unsigned char *in, NSUInteger inLength, NSMutableData *out)
 {
     NSUInteger at = 0;
     while (at < inLength) {
@@ -224,7 +224,7 @@ static BOOL charon_lz4_decompress_block(const unsigned char *in, NSUInteger inLe
     return YES;
 }
 
-static NSData *charon_lz4_decompress(NSData *input)
+static NSData *revenant_lz4_decompress(NSData *input)
 {
     const unsigned char *bytes = input.bytes;
     NSUInteger length = input.length;
@@ -235,7 +235,7 @@ static NSData *charon_lz4_decompress(NSData *input)
             return at + 4 == length ? out : nil;
         if (length - at < 8)
             return nil;
-        uint32_t size = charon_get32(bytes + at + 4);
+        uint32_t size = revenant_get32(bytes + at + 4);
         if (!memcmp(bytes + at, "bv4-", 4)) {
             if (length - at - 8 < size)
                 return nil;
@@ -244,8 +244,8 @@ static NSData *charon_lz4_decompress(NSData *input)
         } else if (!memcmp(bytes + at, "bv41", 4)) {
             if (length - at < 12)
                 return nil;
-            uint32_t packed = charon_get32(bytes + at + 8);
-            if (length - at - 12 < packed || !charon_lz4_decompress_block(bytes + at + 12, packed, out))
+            uint32_t packed = revenant_get32(bytes + at + 8);
+            if (length - at - 12 < packed || !revenant_lz4_decompress_block(bytes + at + 12, packed, out))
                 return nil;
             at += 12 + packed;
         } else {
@@ -255,7 +255,7 @@ static NSData *charon_lz4_decompress(NSData *input)
     return nil;
 }
 
-static NSData *charon_lzfse_store(NSData *input)
+static NSData *revenant_lzfse_store(NSData *input)
 {
     static dispatch_once_t once;
     dispatch_once(&once, ^{
@@ -268,7 +268,7 @@ static NSData *charon_lzfse_store(NSData *input)
     do {
         NSUInteger size = MIN(block, length);
         [out appendBytes:"bvx-" length:4];
-        charon_put32(out, (uint32_t)size);
+        revenant_put32(out, (uint32_t)size);
         [out appendBytes:bytes length:size];
         bytes += size;
         length -= size;
@@ -277,7 +277,7 @@ static NSData *charon_lzfse_store(NSData *input)
     return out;
 }
 
-static NSData *charon_lzfse_read(NSData *input)
+static NSData *revenant_lzfse_read(NSData *input)
 {
     const unsigned char *bytes = input.bytes;
     NSUInteger length = input.length;
@@ -288,7 +288,7 @@ static NSData *charon_lzfse_read(NSData *input)
             return out;
         if (memcmp(bytes + at, "bvx-", 4) || length - at < 8)
             return nil;
-        uint32_t size = charon_get32(bytes + at + 4);
+        uint32_t size = revenant_get32(bytes + at + 4);
         if (length - at - 8 < size)
             return nil;
         [out appendBytes:bytes + at + 8 length:size];
@@ -297,25 +297,25 @@ static NSData *charon_lzfse_read(NSData *input)
     return nil;
 }
 
-NSData *charon_lzma_compress(NSData *input);
-NSData *charon_lzma_decompress(NSData *input);
+NSData *revenant_lzma_compress(NSData *input);
+NSData *revenant_lzma_decompress(NSData *input);
 
-static NSData *charon_compress(NSData *data, NSDataCompressionAlgorithm algorithm, BOOL compressing, NSError **error)
+static NSData *revenant_compress(NSData *data, NSDataCompressionAlgorithm algorithm, BOOL compressing, NSError **error)
 {
     if (algorithm < NSDataCompressionAlgorithmLZFSE || algorithm > NSDataCompressionAlgorithmZlib)
         [NSException raise:NSInvalidArgumentException format:@"Unrecognized compression algorithm value: %ld", (long)algorithm];
     NSData *result = nil;
     NSString *reason = nil;
     if (algorithm == NSDataCompressionAlgorithmZlib) {
-        result = compressing ? charon_zlib_compress(data) : charon_zlib_decompress(data);
-        if (!charon_zlib())
+        result = compressing ? revenant_zlib_compress(data) : revenant_zlib_decompress(data);
+        if (!revenant_zlib())
             reason = @"zlib is not available in this process";
     } else if (algorithm == NSDataCompressionAlgorithmLZ4) {
-        result = compressing ? charon_lz4_compress(data) : charon_lz4_decompress(data);
+        result = compressing ? revenant_lz4_compress(data) : revenant_lz4_decompress(data);
     } else if (algorithm == NSDataCompressionAlgorithmLZMA) {
-        result = compressing ? charon_lzma_compress(data) : charon_lzma_decompress(data);
+        result = compressing ? revenant_lzma_compress(data) : revenant_lzma_decompress(data);
     } else {
-        result = compressing ? charon_lzfse_store(data) : charon_lzfse_read(data);
+        result = compressing ? revenant_lzfse_store(data) : revenant_lzfse_read(data);
         if (!result)
             reason = compressing ? nil : @"only LZFSE data written as uncompressed blocks can be read: the compressed blocks have no published format";
     }
@@ -326,25 +326,25 @@ static NSData *charon_compress(NSData *data, NSDataCompressionAlgorithm algorith
     return result;
 }
 
-@implementation NSData (CharonCompression)
+@implementation NSData (RevenantCompression)
 
 - (NSData *)compressedDataUsingAlgorithm:(NSDataCompressionAlgorithm)algorithm error:(NSError **)error
 {
-    return charon_compress(self, algorithm, YES, error);
+    return revenant_compress(self, algorithm, YES, error);
 }
 
 - (NSData *)decompressedDataUsingAlgorithm:(NSDataCompressionAlgorithm)algorithm error:(NSError **)error
 {
-    return charon_compress(self, algorithm, NO, error);
+    return revenant_compress(self, algorithm, NO, error);
 }
 
 @end
 
-@implementation NSMutableData (CharonCompression)
+@implementation NSMutableData (RevenantCompression)
 
 - (BOOL)compressUsingAlgorithm:(NSDataCompressionAlgorithm)algorithm error:(NSError **)error
 {
-    NSData *result = charon_compress(self, algorithm, YES, error);
+    NSData *result = revenant_compress(self, algorithm, YES, error);
     if (!result)
         return NO;
     [self setData:result];
@@ -353,7 +353,7 @@ static NSData *charon_compress(NSData *data, NSDataCompressionAlgorithm algorith
 
 - (BOOL)decompressUsingAlgorithm:(NSDataCompressionAlgorithm)algorithm error:(NSError **)error
 {
-    NSData *result = charon_compress(self, algorithm, NO, error);
+    NSData *result = revenant_compress(self, algorithm, NO, error);
     if (!result)
         return NO;
     [self setData:result];

@@ -32,20 +32,20 @@ static void recordRelations(CertificateRecorder record, NSString *who)
 }
 
 
-static SEL CharonSelWithDate(void) { return @selector(dateWithSRAbsoluteTime:); }
+static SEL RevenantSelWithDate(void) { return @selector(dateWithSRAbsoluteTime:); }
 
-static SEL CharonSelInitWithDate(void) { return @selector(initWithSRAbsoluteTime:); }
+static SEL RevenantSelInitWithDate(void) { return @selector(initWithSRAbsoluteTime:); }
 
-static SEL CharonSelAbsolute(void) { return @selector(srAbsoluteTime); }
+static SEL RevenantSelAbsolute(void) { return @selector(srAbsoluteTime); }
 
-static id CharonSendAbsolute(id date)
+static id RevenantSendAbsolute(id date)
 {
-    if (![date respondsToSelector:CharonSelAbsolute()]) {
+    if (![date respondsToSelector:RevenantSelAbsolute()]) {
         return nil;
     }
-    NSMethodSignature *signature = [date methodSignatureForSelector:CharonSelAbsolute()];
+    NSMethodSignature *signature = [date methodSignatureForSelector:RevenantSelAbsolute()];
     NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:signature];
-    invocation.selector = CharonSelAbsolute();
+    invocation.selector = RevenantSelAbsolute();
     [invocation invokeWithTarget:date];
     SRAbsoluteTime out = 0;
     [invocation getReturnValue:&out];
@@ -56,14 +56,14 @@ static void recordCategoryRelations(CertificateRecorder record, NSString *who)
 {
     Class date = [NSDate class];
     record([NSString stringWithFormat:@"%@.categoryClassMethodPresent", who],
-           [date respondsToSelector:CharonSelWithDate()] ? @"1" : @"0");
+           [date respondsToSelector:RevenantSelWithDate()] ? @"1" : @"0");
     record([NSString stringWithFormat:@"%@.categoryInitPresent", who],
-           [date instancesRespondToSelector:CharonSelInitWithDate()] ? @"1" : @"0");
+           [date instancesRespondToSelector:RevenantSelInitWithDate()] ? @"1" : @"0");
     record([NSString stringWithFormat:@"%@.categoryGetterPresent", who],
-           [date instancesRespondToSelector:CharonSelAbsolute()] ? @"1" : @"0");
-    if (![date respondsToSelector:CharonSelWithDate()] ||
-        ![date instancesRespondToSelector:CharonSelInitWithDate()] ||
-        ![date instancesRespondToSelector:CharonSelAbsolute()]) {
+           [date instancesRespondToSelector:RevenantSelAbsolute()] ? @"1" : @"0");
+    if (![date respondsToSelector:RevenantSelWithDate()] ||
+        ![date instancesRespondToSelector:RevenantSelInitWithDate()] ||
+        ![date instancesRespondToSelector:RevenantSelAbsolute()]) {
         record([NSString stringWithFormat:@"%@.categoryRoundTrip", who], @"not-asked");
         record([NSString stringWithFormat:@"%@.categoryAgreesWithClock", who], @"not-asked");
         record([NSString stringWithFormat:@"%@.categoryNeverBackwards", who], @"not-asked");
@@ -71,8 +71,8 @@ static void recordCategoryRelations(CertificateRecorder record, NSString *who)
     }
 
     SRAbsoluteTime t = SRAbsoluteTimeGetCurrent();
-    id made = [date performSelector:CharonSelWithDate() withObject:[NSNumber numberWithDouble:(double)t]];
-    id read = CharonSendAbsolute(made);
+    id made = [date performSelector:RevenantSelWithDate() withObject:[NSNumber numberWithDouble:(double)t]];
+    id read = RevenantSendAbsolute(made);
     double drift = read ? fabs([read doubleValue] - (double)t) : 1e9;
     record([NSString stringWithFormat:@"%@.categoryRoundTrip", who], drift < 1e-6 ? @"1" : @"0");
     record([NSString stringWithFormat:@"%@.categoryRoundTripDrift", who],
@@ -88,10 +88,10 @@ static void recordCategoryRelations(CertificateRecorder record, NSString *who)
     SRAbsoluteTime first = SRAbsoluteTimeGetCurrent();
     usleep(2000);
     SRAbsoluteTime second = SRAbsoluteTimeGetCurrent();
-    NSDate *one = [date performSelector:CharonSelWithDate() withObject:[NSNumber numberWithDouble:(double)first]];
-    NSDate *two = [date performSelector:CharonSelWithDate() withObject:[NSNumber numberWithDouble:(double)second]];
-    NSNumber *oneRead = CharonSendAbsolute(one);
-    NSNumber *twoRead = CharonSendAbsolute(two);
+    NSDate *one = [date performSelector:RevenantSelWithDate() withObject:[NSNumber numberWithDouble:(double)first]];
+    NSDate *two = [date performSelector:RevenantSelWithDate() withObject:[NSNumber numberWithDouble:(double)second]];
+    NSNumber *oneRead = RevenantSendAbsolute(one);
+    NSNumber *twoRead = RevenantSendAbsolute(two);
     record([NSString stringWithFormat:@"%@.categoryNeverBackwards", who],
            (oneRead && twoRead && [twoRead doubleValue] >= [oneRead doubleValue]) ? @"1" : @"0");
 }
@@ -100,7 +100,7 @@ void sensorkit_run(CertificateRecorder record)
 {
     recordRelations(record, @"system");
     recordCategoryRelations(record, @"system");
-#ifdef CHARON_SENSORKIT_PORT
+#ifdef REVENANT_SENSORKIT_PORT
     recordRelations(record, @"port");
     recordCategoryRelations(record, @"port");
 #endif

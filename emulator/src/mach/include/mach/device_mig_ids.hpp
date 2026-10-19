@@ -18,7 +18,7 @@
 
 #include "mach/xnu_mig_adapter.hpp"
 
-namespace shade::xnu::mig::device {
+namespace emulator::xnu::mig::device {
 
 inline constexpr std::string_view subsystem_name{"iokit"};
 inline constexpr std::uint32_t subsystem_base = 2800U;

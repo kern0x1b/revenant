@@ -5,7 +5,7 @@
 #import <CoreML/CoreML.h>
 #import <CoreVideo/CoreVideo.h>
 
-@interface VNCoreMLModel (CharonModel)
+@interface VNCoreMLModel (RevenantModel)
 - (MLModel *)model;
 @end
 #import <CoreGraphics/CoreGraphics.h>

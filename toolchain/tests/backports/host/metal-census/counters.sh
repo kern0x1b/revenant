@@ -47,7 +47,7 @@ MTLCommonCounterSetStageUtilization MTLCommonCounterSetStatistic \
 MTLBinaryArchiveDomain MTLCounterErrorDomain MTLDynamicLibraryDomain"
 
 renames=""
-for name in $constants; do renames="$renames -D$name=charonHost_$name"; done
+for name in $constants; do renames="$renames -D$name=revenantHost_$name"; done
 
 # THE PORT'S EIGHTEEN MUST BE DEFINED IN THE BINARY, under the names a caller writes. These are
 # symbols, not classes, so the count is of data symbols - and a port that exported none of them
@@ -55,7 +55,7 @@ for name in $constants; do renames="$renames -D$name=charonHost_$name"; done
 prove_defined() {   # $1 nm output of the HOST binary, which holds the port's RENAMED copies
     missing=""
     for name in $constants; do
-        defined=$(printf '%s\n' "$1" | grep -c " [_A-Z]charonHost_$name\$")
+        defined=$(printf '%s\n' "$1" | grep -c " [_A-Z]revenantHost_$name\$")
         [ "$defined" -eq 0 ] && missing="$missing $name"
     done
     if [ -n "$missing" ]; then
@@ -68,7 +68,7 @@ prove_defined() {   # $1 nm output of the HOST binary, which holds the port's RE
 
 # AND THE OTHER SIDE OF IT: on the DEVICE, where nothing is renamed, the eighteen must be defined
 # under APPLE'S OWN NAMES, because a caller writing MTLCommonCounterTimestamp must find that symbol
-# and iOS 6 carries no constant of that name. A port that exported them only under a Charon name
+# and iOS 6 carries no constant of that name. A port that exported them only under a Revenant name
 # would be a row that says implemented and a caller that finds nothing.
 prove_named_on_device() {   # $1 an object built for the device
     missing=""
@@ -180,7 +180,7 @@ echo "  ok   RUN FAILED: the broken mutation did not build, and no binary was le
 i=0
 for name in $constants; do
     i=$((i + 1))
-    mutate "m$i" "$name" "charonMutatedValue$i"
+    mutate "m$i" "$name" "revenantMutatedValue$i"
     build "mutant-m$i" "$work/m$i.m"
     expect_red "M$i $name" "mutant-m$i"
 done

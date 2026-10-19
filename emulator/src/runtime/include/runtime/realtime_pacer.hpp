@@ -11,7 +11,7 @@
 #include <cstdint>
 #include <optional>
 
-namespace shade {
+namespace emulator {
 
 using DeviceMonotonicTime = std::uint64_t;
 

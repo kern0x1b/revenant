@@ -2,11 +2,11 @@
 #import <QuartzCore/QuartzCore.h>
 #import "check.h"
 
-extern NSString *const CharonHostkCACornerCurveCircular, *const CharonHostkCACornerCurveContinuous;
+extern NSString *const RevenantHostkCACornerCurveCircular, *const RevenantHostkCACornerCurveContinuous;
 
-@interface CALayer (CharonHostCornerCurve)
-- (NSString *)charonHostCornerCurve;
-- (void)charonHostSetCornerCurve:(NSString *)cornerCurve;
+@interface CALayer (RevenantHostCornerCurve)
+- (NSString *)revenantHostCornerCurve;
+- (void)revenantHostSetCornerCurve:(NSString *)cornerCurve;
 @end
 
 static double mismatch(CALayer *one, CALayer *two, CGSize size)
@@ -49,31 +49,31 @@ int main(void)
                     layer.masksToBounds = YES;
                 }
                 system.cornerCurve = kCACornerCurveContinuous;
-                [ours charonHostSetCornerCurve:kCACornerCurveContinuous];
+                [ours revenantHostSetCornerCurve:kCACornerCurveContinuous];
                 double off = mismatch(system, ours, size);
                 NSString *name = [NSString stringWithFormat:@"a continuous %gx%g layer with radius %@ covers the system's shape within 1.5%%: %.3f%%", size.width, size.height, radius, off * 100];
                 CHECK(off < 0.015, name.UTF8String);
             }
         }
 
-        CHECK_EQUAL(CharonHostkCACornerCurveCircular, kCACornerCurveCircular, "the circular constant");
-        CHECK_EQUAL(CharonHostkCACornerCurveContinuous, kCACornerCurveContinuous, "the continuous constant");
+        CHECK_EQUAL(RevenantHostkCACornerCurveCircular, kCACornerCurveCircular, "the circular constant");
+        CHECK_EQUAL(RevenantHostkCACornerCurveContinuous, kCACornerCurveContinuous, "the continuous constant");
         for (id value in @[kCACornerCurveContinuous, kCACornerCurveCircular, @"bogus", [NSNull null], @"", @"Continuous"]) {
             CALayer *ours = [CALayer layer], *theirs = [CALayer layer];
-            CHECK_EQUAL([ours charonHostCornerCurve], theirs.cornerCurve, "a fresh layer starts as the system's");
+            CHECK_EQUAL([ours revenantHostCornerCurve], theirs.cornerCurve, "a fresh layer starts as the system's");
             id given = [value isKindOfClass:[NSNull class]] ? nil : value;
-            [ours charonHostSetCornerCurve:given];
+            [ours revenantHostSetCornerCurve:given];
             theirs.cornerCurve = given;
             NSString *first = [NSString stringWithFormat:@"a layer set to %@", value];
-            CHECK_EQUAL([ours charonHostCornerCurve], theirs.cornerCurve, first.UTF8String);
-            [ours charonHostSetCornerCurve:kCACornerCurveContinuous];
+            CHECK_EQUAL([ours revenantHostCornerCurve], theirs.cornerCurve, first.UTF8String);
+            [ours revenantHostSetCornerCurve:kCACornerCurveContinuous];
             theirs.cornerCurve = kCACornerCurveContinuous;
-            [ours charonHostSetCornerCurve:given];
+            [ours revenantHostSetCornerCurve:given];
             theirs.cornerCurve = given;
             NSString *second = [NSString stringWithFormat:@"a continuous layer then set to %@", value];
-            CHECK_EQUAL([ours charonHostCornerCurve], theirs.cornerCurve, second.UTF8String);
+            CHECK_EQUAL([ours revenantHostCornerCurve], theirs.cornerCurve, second.UTF8String);
         }
     }
-    printf("checks=%d failures=%d\n", charon_checks, charon_failures);
-    return charon_failures;
+    printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
+    return revenant_failures;
 }

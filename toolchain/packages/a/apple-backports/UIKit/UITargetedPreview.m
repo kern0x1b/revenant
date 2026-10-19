@@ -1,4 +1,4 @@
-#import "CharonMenus.h"
+#import "RevenantMenus.h"
 
 @implementation UITargetedPreview {
 @private
@@ -25,9 +25,9 @@
 
 - (instancetype)initWithView:(UIView *)view parameters:(UIPreviewParameters *)parameters
 {
-    if (!charon_window_of(view))
+    if (!revenant_window_of(view))
         [NSException raise:NSInternalInconsistencyException format:@"This UITargetedPreview initializer requires that the view is in a window, but it is not. Either fix that, or use the other initializer that takes a target with an explicit container. (view: %@)",
-                                                                   charon_short_description(view)];
+                                                                   revenant_short_description(view)];
     if (!parameters)
         [NSException raise:NSInternalInconsistencyException format:@"Invalid parameter not satisfying: parameters != nil"];
     UIPreviewTarget *target = [[UIPreviewTarget alloc] initWithContainer:view.superview center:view.center transform:view.transform];
@@ -75,8 +75,8 @@
 
 - (NSString *)description
 {
-    return [NSString stringWithFormat:@"<%@: %p; view = %@; parameters = %@; target = %@>", [self class], self, charon_short_description(_view),
-                                      charon_short_description(_parameters), charon_short_description(_target)];
+    return [NSString stringWithFormat:@"<%@: %p; view = %@; parameters = %@; target = %@>", [self class], self, revenant_short_description(_view),
+                                      revenant_short_description(_parameters), revenant_short_description(_target)];
 }
 
 @end

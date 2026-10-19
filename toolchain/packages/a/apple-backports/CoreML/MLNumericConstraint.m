@@ -1,20 +1,20 @@
 #import <CoreML/CoreML.h>
 
-#include "CharonMLConstraints.h"
+#include "RevenantMLConstraints.h"
 
 @interface MLNumericConstraint () {
     NSNumber *_minNumber;
     NSNumber *_maxNumber;
     NSSet<NSNumber *> *_enumeratedNumbers;
 }
-- (instancetype)charon_initWithMinNumber:(NSNumber *)minNumber
+- (instancetype)revenant_initWithMinNumber:(NSNumber *)minNumber
                          maxNumber:(NSNumber *)maxNumber
                 enumeratedNumbers:(NSSet<NSNumber *> *)enumeratedNumbers;
 @end
 
 @implementation MLNumericConstraint
 
-- (instancetype)charon_initWithMinNumber:(NSNumber *)minNumber
+- (instancetype)revenant_initWithMinNumber:(NSNumber *)minNumber
                          maxNumber:(NSNumber *)maxNumber
                 enumeratedNumbers:(NSSet<NSNumber *> *)enumeratedNumbers
 {
@@ -33,7 +33,7 @@
 }
 - (id)copyWithZone:(NSZone *)zone
 {
-    return [[[self class] allocWithZone:zone] charon_initWithMinNumber:_minNumber
+    return [[[self class] allocWithZone:zone] revenant_initWithMinNumber:_minNumber
                                                               maxNumber:_maxNumber
                                                      enumeratedNumbers:_enumeratedNumbers];
 }

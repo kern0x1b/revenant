@@ -7,7 +7,7 @@
    "introduced": "8.0",
    "minimum": "6.0",
    "status": "implemented",
-   "reason": "CharonHomeKitStore.m: one property list per table under the application's own Application Support directory, written atomically when a table changes",
+   "reason": "RevenantHomeKitStore.m: one property list per table under the application's own Application Support directory, written atomically when a table changes",
    "effect": "an accessory of the graph: identifier, uniqueIdentifier, name, category, room, manufacturer, model, firmwareVersion, services, profiles, cameraProfiles, bridged state and delegate are the graph's and are answered from the store. The value of a characteristic, whether the accessory is reachable and -identifyWithCompletionHandler: are the accessory's: with no HAP session to an accessory this port answers HMErrorCodeAccessoryNotReachable, and -reachable is NO",
    "facts": "facts/HomeKit/HMHome.md",
    "source": "HomeKit of the arm64e shared caches of 16.0 and 18.0 and the arm64 one of 12.0, read through modules/apple/dyld.lua, and the documented contract of each class"
@@ -18,7 +18,7 @@
    "introduced": "8.0",
    "minimum": "6.0",
    "status": "implemented",
-   "reason": "CharonHomeKitStore.m: one property list per table under the application's own Application Support directory, written atomically when a table changes",
+   "reason": "RevenantHomeKitStore.m: one property list per table under the application's own Application Support directory, written atomically when a table changes",
    "effect": "a service of an accessory: name, serviceType, associatedServiceType, characteristics, linkedServices, primaryService, userInteractive and localizedDescription are answered from the store, and -updateName: and -updateAssociatedServiceType: write it and report through HMAccessoryDelegate",
    "facts": "facts/HomeKit/HMHome.md",
    "source": "HomeKit of the arm64e shared caches of 16.0 and 18.0 and the arm64 one of 12.0, read through modules/apple/dyld.lua, and the documented contract of each class"
@@ -29,7 +29,7 @@
    "introduced": "8.0",
    "minimum": "6.0",
    "status": "implemented",
-   "reason": "CharonHomeKitStore.m: one property list per table under the application's own Application Support directory, written atomically when a table changes",
+   "reason": "RevenantHomeKitStore.m: one property list per table under the application's own Application Support directory, written atomically when a table changes",
    "effect": "a characteristic of a service: characteristicType, properties, metadata, value, localizedDescription and notificationEnabled are answered from the store. -readValueWithCompletionHandler:, -writeValue:completionHandler:, -enableNotification:completionHandler: and -updateAuthorizationData:completionHandler: are the accessory's own and answer the documented error: HMErrorCodeReadOnlyCharacteristic, HMErrorCodeNotificationNotSupported, HMErrorCodeInvalidOrMissingAuthorizationData, and HMErrorCodeAccessoryNotReachable when the characteristic does allow it but there is no session",
    "facts": "facts/HomeKit/HMHome.md",
    "source": "HomeKit of the arm64e shared caches of 16.0 and 18.0 and the arm64 one of 12.0, read through modules/apple/dyld.lua, and the documented contract of each class"
@@ -40,7 +40,7 @@
    "introduced": "8.0",
    "minimum": "6.0",
    "status": "implemented",
-   "reason": "CharonHomeKitStore.m: one property list per table under the application's own Application Support directory, written atomically when a table changes",
+   "reason": "RevenantHomeKitStore.m: one property list per table under the application's own Application Support directory, written atomically when a table changes",
    "effect": "the metadata of the characteristic that holds it: format, units, minimumValue, maximumValue, stepValue, maxLength, validValues and manufacturerDescription, read out of that characteristic's own record",
    "facts": "facts/HomeKit/HMHome.md",
    "source": "HomeKit of the arm64e shared caches of 16.0 and 18.0 and the arm64 one of 12.0, read through modules/apple/dyld.lua, and the documented contract of each class"
@@ -51,7 +51,7 @@
    "introduced": "8.0",
    "minimum": "6.0",
    "status": "implemented",
-   "reason": "CharonHomeKitStore.m: one property list per table under the application's own Application Support directory, written atomically when a table changes",
+   "reason": "RevenantHomeKitStore.m: one property list per table under the application's own Application Support directory, written atomically when a table changes",
    "effect": "a write of a value to a characteristic, with -updateTargetValue:completionHandler: replacing the value",
    "facts": "facts/HomeKit/HMHome.md",
    "source": "HomeKit of the arm64e shared caches of 16.0 and 18.0 and the arm64 one of 12.0, read through modules/apple/dyld.lua, and the documented contract of each class"
@@ -64,7 +64,7 @@
    "status": "implemented",
    "effect": "a room of a home: name, uniqueIdentifier and the accessories assigned to it, with -updateName:completionHandler: writing the name to the store",
    "facts": "facts/HomeKit/HMHome.md",
-   "source": "CharonHomeKitStore.m: one property list per table under the application's own Application Support directory, written atomically when a table changes"
+   "source": "RevenantHomeKitStore.m: one property list per table under the application's own Application Support directory, written atomically when a table changes"
   },
   {
    "api": "HMZone",
@@ -74,7 +74,7 @@
    "status": "implemented",
    "effect": "a zone of a home: name, uniqueIdentifier and its rooms. -addRoom:completionHandler: refuses a room already in another zone of the same home with HMErrorCodeObjectAlreadyAssociatedToHome, the way the release does",
    "facts": "facts/HomeKit/HMHome.md",
-   "source": "CharonHomeKitStore.m: one property list per table under the application's own Application Support directory, written atomically when a table changes"
+   "source": "RevenantHomeKitStore.m: one property list per table under the application's own Application Support directory, written atomically when a table changes"
   },
   {
    "api": "HMUser",
@@ -84,7 +84,7 @@
    "status": "implemented",
    "effect": "a user of a home: name and uniqueIdentifier from the store",
    "facts": "facts/HomeKit/HMHome.md",
-   "source": "CharonHomeKitStore.m: one property list per table under the application's own Application Support directory, written atomically when a table changes"
+   "source": "RevenantHomeKitStore.m: one property list per table under the application's own Application Support directory, written atomically when a table changes"
   },
   {
    "api": "HMServiceGroup",
@@ -94,7 +94,7 @@
    "status": "implemented",
    "effect": "a group of an accessory's services, with -addService: and -removeService: editing the store's own membership and reporting through HMHomeDelegate",
    "facts": "facts/HomeKit/HMHome.md",
-   "source": "CharonHomeKitStore.m: one property list per table under the application's own Application Support directory, written atomically when a table changes"
+   "source": "RevenantHomeKitStore.m: one property list per table under the application's own Application Support directory, written atomically when a table changes"
   },
   {
    "api": "HMHome",
@@ -104,7 +104,7 @@
    "status": "implemented",
    "effect": "a home: name, primary, uniqueIdentifier, rooms, zones, users, serviceGroups, accessories, triggers, actionSets, currentUser, homeHubState, servicesWithTypes:, roomForEntireHome and the whole of the add/remove/update methods write the store and report through HMHomeDelegate. -homeHubState is HMHomeHubStateNotAvailable, which is what a home with no hub answers. -addAccessory:completionHandler: answers HMErrorCodeAccessoryPairingFailed and changes nothing, because adding an accessory to a home is a HAP pair-setup and this port carries none",
    "facts": "facts/HomeKit/HMHome.md",
-   "source": "CharonHomeKitStore.m: one property list per table under the application's own Application Support directory, written atomically when a table changes"
+   "source": "RevenantHomeKitStore.m: one property list per table under the application's own Application Support directory, written atomically when a table changes"
   },
   {
    "api": "HMHomeManager",
@@ -114,7 +114,7 @@
    "status": "implemented",
    "effect": "the manager: homes, primaryHome, authorizationStatus, delegate, and -addHomeWithName:completionHandler:, -removeHome:completionHandler: and -updatePrimaryHome:completionHandler: writing the store and reporting through HMHomeManagerDelegate. authorizationStatus is HMHomeManagerAuthorizationStatusDetermined, because the port's graph is the application's own store, which no other application can reach",
    "facts": "facts/HomeKit/HMHome.md",
-   "source": "CharonHomeKitStore.m: one property list per table under the application's own Application Support directory, written atomically when a table changes"
+   "source": "RevenantHomeKitStore.m: one property list per table under the application's own Application Support directory, written atomically when a table changes"
   },
   {
    "api": "HMTrigger",
@@ -124,7 +124,7 @@
    "status": "implemented",
    "effect": "a trigger of a home: name, enabled, lastFireDate and actionSets, with -updateName:completionHandler:, -enable:completionHandler:, -addActionSet:completionHandler: and -removeActionSet:completionHandler: writing the store",
    "facts": "facts/HomeKit/HMHome.md",
-   "source": "CharonHomeKitStore.m: one property list per table under the application's own Application Support directory, written atomically when a table changes"
+   "source": "RevenantHomeKitStore.m: one property list per table under the application's own Application Support directory, written atomically when a table changes"
   },
   {
    "api": "HMTimerTrigger",
@@ -134,7 +134,7 @@
    "status": "implemented",
    "effect": "a trigger that fires at a time: fireDate, timeZone, recurrence and recurrenceCalendar, with -updateFireDate:completionHandler: refusing a date in the past with HMErrorCodeFireDateInPast, and the recurrence stored as the numbers a date component is made of so it crosses a property list",
    "facts": "facts/HomeKit/HMHome.md",
-   "source": "CharonHomeKitStore.m: one property list per table under the application's own Application Support directory, written atomically when a table changes"
+   "source": "RevenantHomeKitStore.m: one property list per table under the application's own Application Support directory, written atomically when a table changes"
   },
   {
    "api": "HMActionSet",
@@ -144,7 +144,7 @@
    "status": "implemented",
    "effect": "a set of actions: name, actionSetType, executing, lastExecutionDate and actions, with -addAction: and -removeAction: writing the store and reporting through HMHomeDelegate",
    "facts": "facts/HomeKit/HMHome.md",
-   "source": "CharonHomeKitStore.m: one property list per table under the application's own Application Support directory, written atomically when a table changes"
+   "source": "RevenantHomeKitStore.m: one property list per table under the application's own Application Support directory, written atomically when a table changes"
   },
   {
    "api": "HMAction",
@@ -202,7 +202,7 @@
    "introduced": "11.0",
    "minimum": "6.0",
    "status": "implemented",
-   "reason": "CharonHomeKitStore.m: one property list per table under the application's own Application Support directory, written atomically when a table changes",
+   "reason": "RevenantHomeKitStore.m: one property list per table under the application's own Application Support directory, written atomically when a table changes",
    "effect": "a range of numbers, made the way the release makes it, through +numberRangeWithMinValue:maxValue:; -init is NS_UNAVAILABLE in the release's own header and here too",
    "facts": "facts/HomeKit/HMHome.md",
    "source": "HomeKit of the arm64e shared caches of 16.0 and 18.0 and the arm64 one of 12.0, read through modules/apple/dyld.lua, and the documented contract of each class"
@@ -215,7 +215,7 @@
    "status": "implemented",
    "effect": "the base of the events that fire at a time, with the uniqueIdentifier the trigger's own list is keyed by",
    "facts": "facts/HomeKit/HMHome.md",
-   "source": "CharonHomeKitStore.m: one property list per table under the application's own Application Support directory, written atomically when a table changes"
+   "source": "RevenantHomeKitStore.m: one property list per table under the application's own Application Support directory, written atomically when a table changes"
   },
   {
    "api": "HMDurationEvent",
@@ -225,7 +225,7 @@
    "status": "implemented",
    "effect": "an event that fires after a duration, with -initWithDuration: and the duration it holds",
    "facts": "facts/HomeKit/HMHome.md",
-   "source": "CharonHomeKitStore.m: one property list per table under the application's own Application Support directory, written atomically when a table changes"
+   "source": "RevenantHomeKitStore.m: one property list per table under the application's own Application Support directory, written atomically when a table changes"
   },
   {
    "api": "HMMutableDurationEvent",
@@ -235,7 +235,7 @@
    "status": "implemented",
    "effect": "the writable form of HMDurationEvent, with a settable duration",
    "facts": "facts/HomeKit/HMHome.md",
-   "source": "CharonHomeKitStore.m: one property list per table under the application's own Application Support directory, written atomically when a table changes"
+   "source": "RevenantHomeKitStore.m: one property list per table under the application's own Application Support directory, written atomically when a table changes"
   },
   {
    "api": "HMCalendarEvent",
@@ -245,7 +245,7 @@
    "status": "implemented",
    "effect": "an event that fires on a date's components, with -initWithFireDateComponents:",
    "facts": "facts/HomeKit/HMHome.md",
-   "source": "CharonHomeKitStore.m: one property list per table under the application's own Application Support directory, written atomically when a table changes"
+   "source": "RevenantHomeKitStore.m: one property list per table under the application's own Application Support directory, written atomically when a table changes"
   },
   {
    "api": "HMMutableCalendarEvent",
@@ -255,7 +255,7 @@
    "status": "implemented",
    "effect": "the writable form of HMCalendarEvent, with a settable fireDateComponents",
    "facts": "facts/HomeKit/HMHome.md",
-   "source": "CharonHomeKitStore.m: one property list per table under the application's own Application Support directory, written atomically when a table changes"
+   "source": "RevenantHomeKitStore.m: one property list per table under the application's own Application Support directory, written atomically when a table changes"
   },
   {
    "api": "HMSignificantTimeEvent",
@@ -265,7 +265,7 @@
    "status": "implemented",
    "effect": "an event that fires at sunrise or sunset with an offset, with -initWithSignificantEvent:offset:",
    "facts": "facts/HomeKit/HMHome.md",
-   "source": "CharonHomeKitStore.m: one property list per table under the application's own Application Support directory, written atomically when a table changes"
+   "source": "RevenantHomeKitStore.m: one property list per table under the application's own Application Support directory, written atomically when a table changes"
   },
   {
    "api": "HMMutableSignificantTimeEvent",
@@ -275,7 +275,7 @@
    "status": "implemented",
    "effect": "the writable form of HMSignificantTimeEvent, with a settable significantEvent and offset",
    "facts": "facts/HomeKit/HMHome.md",
-   "source": "CharonHomeKitStore.m: one property list per table under the application's own Application Support directory, written atomically when a table changes"
+   "source": "RevenantHomeKitStore.m: one property list per table under the application's own Application Support directory, written atomically when a table changes"
   },
   {
    "api": "HMPresenceEvent",
@@ -285,7 +285,7 @@
    "status": "implemented",
    "effect": "an event that fires on a user's arrival or departure, with -initWithPresenceEventType:presenceUserType: and the two enumerations the header gives held as the numbers they are",
    "facts": "facts/HomeKit/HMHome.md",
-   "source": "CharonHomeKitStore.m: one property list per table under the application's own Application Support directory, written atomically when a table changes"
+   "source": "RevenantHomeKitStore.m: one property list per table under the application's own Application Support directory, written atomically when a table changes"
   },
   {
    "api": "HMMutablePresenceEvent",
@@ -295,7 +295,7 @@
    "status": "implemented",
    "effect": "the writable form of HMPresenceEvent, with a settable presenceEventType and presenceUserType",
    "facts": "facts/HomeKit/HMHome.md",
-   "source": "CharonHomeKitStore.m: one property list per table under the application's own Application Support directory, written atomically when a table changes"
+   "source": "RevenantHomeKitStore.m: one property list per table under the application's own Application Support directory, written atomically when a table changes"
   },
   {
    "api": "HMMutableCharacteristicEvent",
@@ -305,7 +305,7 @@
    "status": "implemented",
    "effect": "the writable form of HMCharacteristicEvent, with a settable characteristic and triggerValue",
    "facts": "facts/HomeKit/HMHome.md",
-   "source": "CharonHomeKitStore.m: one property list per table under the application's own Application Support directory, written atomically when a table changes"
+   "source": "RevenantHomeKitStore.m: one property list per table under the application's own Application Support directory, written atomically when a table changes"
   },
   {
    "api": "HMCharacteristicThresholdRangeEvent",
@@ -315,7 +315,7 @@
    "status": "implemented",
    "effect": "an event that fires on a characteristic leaving a number range, with -initWithCharacteristic:thresholdRange:",
    "facts": "facts/HomeKit/HMHome.md",
-   "source": "CharonHomeKitStore.m: one property list per table under the application's own Application Support directory, written atomically when a table changes"
+   "source": "RevenantHomeKitStore.m: one property list per table under the application's own Application Support directory, written atomically when a table changes"
   },
   {
    "api": "HMMutableCharacteristicThresholdRangeEvent",
@@ -325,7 +325,7 @@
    "status": "implemented",
    "effect": "the writable form of HMCharacteristicThresholdRangeEvent, with a settable characteristic and thresholdRange",
    "facts": "facts/HomeKit/HMHome.md",
-   "source": "CharonHomeKitStore.m: one property list per table under the application's own Application Support directory, written atomically when a table changes"
+   "source": "RevenantHomeKitStore.m: one property list per table under the application's own Application Support directory, written atomically when a table changes"
   },
   {
    "api": "HMHomeAccessControl",
@@ -343,7 +343,7 @@
    "introduced": "9.0",
    "minimum": "6.0",
    "status": "implemented",
-   "reason": "CharonHomeKitStore.m: one property list per table under the application's own Application Support directory, written atomically when a table changes",
+   "reason": "RevenantHomeKitStore.m: one property list per table under the application's own Application Support directory, written atomically when a table changes",
    "effect": "-categoryType is the accessory's category type, the HAP UUID this library's constants carry. -localizedDescription is registered absent: it is a localized string, the host has no HomeKit in its dyld cache and no release on this machine ships a HomeKit resource bundle this port can read, and a name written here would be one no release ships",
    "facts": "facts/HomeKit/HMAccessoryCategory.md",
    "source": "HomeKit of the arm64e shared caches of 16.0 and 18.0 and the arm64 one of 12.0, read through modules/apple/dyld.lua, and the documented contract of each class"
@@ -673,7 +673,7 @@
    "introduced": "15.4",
    "minimum": "6.0",
    "status": "implemented",
-   "effect": "what a successful setup hands back: the home it went into and the accessories it added. Both properties are readonly and both are carried; -init and +new stay unbound, which is the release's own NS_UNAVAILABLE, so the graph's entry point -charon_initWithHomeIdentifier:accessoryIdentifiers: is the only way one is made, and -copyWithZone: copies the two into a new object rather than sharing self, because a result the caller can push accessories into is not the report the header describes",
+   "effect": "what a successful setup hands back: the home it went into and the accessories it added. Both properties are readonly and both are carried; -init and +new stay unbound, which is the release's own NS_UNAVAILABLE, so the graph's entry point -revenant_initWithHomeIdentifier:accessoryIdentifiers: is the only way one is made, and -copyWithZone: copies the two into a new object rather than sharing self, because a result the caller can push accessories into is not the report the header describes",
    "source": "HMAccessorySetupResult15_4.m: HMAccessorySetupResult.h:14-30 read by clang's AST, one release per object"
   },
   {
@@ -1497,7 +1497,7 @@
    "status": "implemented",
    "effect": "not defined by the port; the class inherits NSObject's -init and an event made that way carries no identifier, which is what the framework's own class answers",
    "source": "the arm64e cache of iOS 16.0, read with the repository's own tools/corpus/objc-inventory.lua: the class has no -init in its own instance list; the port's own folder for the definition that is gone",
-   "reason": "Apple's own class carries no -init of its own - the arm64e cache of iOS 16.0, read with the repository's own tools/corpus/objc-inventory.lua: the class has no -init in its own instance list - and the port carried one that invented a fresh UUID for the event. That was a value no framework produces: on a device an event's identifier is the framework's, and an event made through -init has none. It is removed: nothing in the tree called it (every event the model builds goes through HMEvent's own -charon_initWithStore:identifier:), and the rule the coordinator settled on 2026-10-03 (coordination/wave-2026-10-03/QUEUE.md): a definition would put the selector in the port's metadata where Apple's has none, changing what the class is and answering the caller exactly what NSObject's already answers",
+   "reason": "Apple's own class carries no -init of its own - the arm64e cache of iOS 16.0, read with the repository's own tools/corpus/objc-inventory.lua: the class has no -init in its own instance list - and the port carried one that invented a fresh UUID for the event. That was a value no framework produces: on a device an event's identifier is the framework's, and an event made through -init has none. It is removed: nothing in the tree called it (every event the model builds goes through HMEvent's own -revenant_initWithStore:identifier:), and the rule the coordinator settled on 2026-10-03 (coordination/wave-2026-10-03/QUEUE.md): a definition would put the selector in the port's metadata where Apple's has none, changing what the class is and answering the caller exactly what NSObject's already answers",
    "facts": "facts/HomeKit/InitInherited.md"
   },
   {
@@ -1506,8 +1506,8 @@
    "introduced": "8.0",
    "minimum": "6.0",
    "status": "implemented",
-   "effect": "a caller that reaches [[HMActionSet alloc] init], or [HMActionSet new] - which is NSObject's +new, = [[self alloc] init], and the metaclass of this class carries no +new of its own in the same cache - gets nil. The port makes one through its own -charon_initWithStore:identifier:, which is what the model calls",
-   "source": "HomeKit/HMHomeGraph8_0.m through CHARON_HOMEKIT_NIL_INIT, defined in HomeKit/CharonHomeKitConstruction.h, which returns nil",
+   "effect": "a caller that reaches [[HMActionSet alloc] init], or [HMActionSet new] - which is NSObject's +new, = [[self alloc] init], and the metaclass of this class carries no +new of its own in the same cache - gets nil. The port makes one through its own -revenant_initWithStore:identifier:, which is what the model calls",
+   "source": "HomeKit/HMHomeGraph8_0.m through REVENANT_HOMEKIT_NIL_INIT, defined in HomeKit/RevenantHomeKitConstruction.h, which returns nil",
    "reason": "Apple's own class carries -init in its instance list and answers nil. The body, read out of the arm64e cache of iOS 16.0 at 0x19d0ea29c, is seven instructions: it calls _objc_release with the receiver in x0 - the stub for it sits in the cache's own region between the images and resolves to _objc_release through that call - and then moves 0 into x0, which is [self release]; return nil. facts/HomeKit/HMAccessoryProfile.md carries the body, the address and the name the call resolves to, read with tools/objc-method-imps.lua. The port answers nil, which is what that body makes observable; the [self release] has no ARC equivalent and the port does not perform one, so that half of the body is stated rather than approximated.",
    "facts": "facts/HomeKit/HMAccessoryProfile.md"
   },
@@ -1517,8 +1517,8 @@
    "introduced": "8.0",
    "minimum": "6.0",
    "status": "implemented",
-   "effect": "a caller that reaches [[HMHome alloc] init], or [HMHome new] - which is NSObject's +new, = [[self alloc] init], and the metaclass of this class carries no +new of its own in the same cache - gets nil. The port makes one through its own -charon_initWithStore:identifier:, which is what the model calls",
-   "source": "HomeKit/HMHomeManager8_0.m through CHARON_HOMEKIT_NIL_INIT, defined in HomeKit/CharonHomeKitConstruction.h, which returns nil",
+   "effect": "a caller that reaches [[HMHome alloc] init], or [HMHome new] - which is NSObject's +new, = [[self alloc] init], and the metaclass of this class carries no +new of its own in the same cache - gets nil. The port makes one through its own -revenant_initWithStore:identifier:, which is what the model calls",
+   "source": "HomeKit/HMHomeManager8_0.m through REVENANT_HOMEKIT_NIL_INIT, defined in HomeKit/RevenantHomeKitConstruction.h, which returns nil",
    "reason": "Apple's own class carries -init in its instance list and answers nil. The body, read out of the arm64e cache of iOS 16.0 at 0x19d0142c0, is seven instructions: it calls _objc_release with the receiver in x0 - the stub for it sits in the cache's own region between the images and resolves to _objc_release through that call - and then moves 0 into x0, which is [self release]; return nil. facts/HomeKit/HMAccessoryProfile.md carries the body, the address and the name the call resolves to, read with tools/objc-method-imps.lua. The port answers nil, which is what that body makes observable; the [self release] has no ARC equivalent and the port does not perform one, so that half of the body is stated rather than approximated.",
    "facts": "facts/HomeKit/HMAccessoryProfile.md"
   },
@@ -1528,8 +1528,8 @@
    "introduced": "8.0",
    "minimum": "6.0",
    "status": "implemented",
-   "effect": "a caller that reaches [[HMRoom alloc] init], or [HMRoom new] - which is NSObject's +new, = [[self alloc] init], and the metaclass of this class carries no +new of its own in the same cache - gets nil. The port makes one through its own -charon_initWithStore:identifier:, which is what the model calls",
-   "source": "HomeKit/HMHomeGraph8_0.m through CHARON_HOMEKIT_NIL_INIT, defined in HomeKit/CharonHomeKitConstruction.h, which returns nil",
+   "effect": "a caller that reaches [[HMRoom alloc] init], or [HMRoom new] - which is NSObject's +new, = [[self alloc] init], and the metaclass of this class carries no +new of its own in the same cache - gets nil. The port makes one through its own -revenant_initWithStore:identifier:, which is what the model calls",
+   "source": "HomeKit/HMHomeGraph8_0.m through REVENANT_HOMEKIT_NIL_INIT, defined in HomeKit/RevenantHomeKitConstruction.h, which returns nil",
    "reason": "Apple's own class carries -init in its instance list and answers nil. The body, read out of the arm64e cache of iOS 16.0 at 0x19cfc4f90, is seven instructions: it calls _objc_release with the receiver in x0 - the stub for it sits in the cache's own region between the images and resolves to _objc_release through that call - and then moves 0 into x0, which is [self release]; return nil. facts/HomeKit/HMAccessoryProfile.md carries the body, the address and the name the call resolves to, read with tools/objc-method-imps.lua. The port answers nil, which is what that body makes observable; the [self release] has no ARC equivalent and the port does not perform one, so that half of the body is stated rather than approximated.",
    "facts": "facts/HomeKit/HMAccessoryProfile.md"
   },
@@ -1539,8 +1539,8 @@
    "introduced": "8.0",
    "minimum": "6.0",
    "status": "implemented",
-   "effect": "a caller that reaches [[HMServiceGroup alloc] init], or [HMServiceGroup new] - which is NSObject's +new, = [[self alloc] init], and the metaclass of this class carries no +new of its own in the same cache - gets nil. The port makes one through its own -charon_initWithStore:identifier:, which is what the model calls",
-   "source": "HomeKit/HMHomeGraph8_0.m through CHARON_HOMEKIT_NIL_INIT, defined in HomeKit/CharonHomeKitConstruction.h, which returns nil",
+   "effect": "a caller that reaches [[HMServiceGroup alloc] init], or [HMServiceGroup new] - which is NSObject's +new, = [[self alloc] init], and the metaclass of this class carries no +new of its own in the same cache - gets nil. The port makes one through its own -revenant_initWithStore:identifier:, which is what the model calls",
+   "source": "HomeKit/HMHomeGraph8_0.m through REVENANT_HOMEKIT_NIL_INIT, defined in HomeKit/RevenantHomeKitConstruction.h, which returns nil",
    "reason": "Apple's own class carries -init in its instance list and answers nil. The body, read out of the arm64e cache of iOS 16.0 at 0x19cfd76b8, is seven instructions: it calls _objc_release with the receiver in x0 - the stub for it sits in the cache's own region between the images and resolves to _objc_release through that call - and then moves 0 into x0, which is [self release]; return nil. facts/HomeKit/HMAccessoryProfile.md carries the body, the address and the name the call resolves to, read with tools/objc-method-imps.lua. The port answers nil, which is what that body makes observable; the [self release] has no ARC equivalent and the port does not perform one, so that half of the body is stated rather than approximated.",
    "facts": "facts/HomeKit/HMAccessoryProfile.md"
   },
@@ -1550,8 +1550,8 @@
    "introduced": "8.0",
    "minimum": "6.0",
    "status": "implemented",
-   "effect": "a caller that reaches [[HMTimerTrigger alloc] init], or [HMTimerTrigger new] - which is NSObject's +new, = [[self alloc] init], and the metaclass of this class carries no +new of its own in the same cache - gets nil. The port makes one through its own -charon_initWithStore:identifier:, which is what the model calls",
-   "source": "HomeKit/HMHomeGraph8_0.m through CHARON_HOMEKIT_NIL_INIT, defined in HomeKit/CharonHomeKitConstruction.h, which returns nil",
+   "effect": "a caller that reaches [[HMTimerTrigger alloc] init], or [HMTimerTrigger new] - which is NSObject's +new, = [[self alloc] init], and the metaclass of this class carries no +new of its own in the same cache - gets nil. The port makes one through its own -revenant_initWithStore:identifier:, which is what the model calls",
+   "source": "HomeKit/HMHomeGraph8_0.m through REVENANT_HOMEKIT_NIL_INIT, defined in HomeKit/RevenantHomeKitConstruction.h, which returns nil",
    "reason": "Apple's own class carries -init in its instance list and answers nil. The body, read out of the arm64e cache of iOS 16.0 at 0x19cfe30dc, is seven instructions: it calls _objc_release with the receiver in x0 - the stub for it sits in the cache's own region between the images and resolves to _objc_release through that call - and then moves 0 into x0, which is [self release]; return nil. facts/HomeKit/HMAccessoryProfile.md carries the body, the address and the name the call resolves to, read with tools/objc-method-imps.lua. The port answers nil, which is what that body makes observable; the [self release] has no ARC equivalent and the port does not perform one, so that half of the body is stated rather than approximated.",
    "facts": "facts/HomeKit/HMAccessoryProfile.md"
   },
@@ -1561,8 +1561,8 @@
    "introduced": "8.0",
    "minimum": "6.0",
    "status": "implemented",
-   "effect": "a caller that reaches [[HMZone alloc] init], or [HMZone new] - which is NSObject's +new, = [[self alloc] init], and the metaclass of this class carries no +new of its own in the same cache - gets nil. The port makes one through its own -charon_initWithStore:identifier:, which is what the model calls",
-   "source": "HomeKit/HMHomeGraph8_0.m through CHARON_HOMEKIT_NIL_INIT, defined in HomeKit/CharonHomeKitConstruction.h, which returns nil",
+   "effect": "a caller that reaches [[HMZone alloc] init], or [HMZone new] - which is NSObject's +new, = [[self alloc] init], and the metaclass of this class carries no +new of its own in the same cache - gets nil. The port makes one through its own -revenant_initWithStore:identifier:, which is what the model calls",
+   "source": "HomeKit/HMHomeGraph8_0.m through REVENANT_HOMEKIT_NIL_INIT, defined in HomeKit/RevenantHomeKitConstruction.h, which returns nil",
    "reason": "Apple's own class carries -init in its instance list and answers nil. The body, read out of the arm64e cache of iOS 16.0 at 0x19d0a3e1c, is seven instructions: it calls _objc_release with the receiver in x0 - the stub for it sits in the cache's own region between the images and resolves to _objc_release through that call - and then moves 0 into x0, which is [self release]; return nil. facts/HomeKit/HMAccessoryProfile.md carries the body, the address and the name the call resolves to, read with tools/objc-method-imps.lua. The port answers nil, which is what that body makes observable; the [self release] has no ARC equivalent and the port does not perform one, so that half of the body is stated rather than approximated.",
    "facts": "facts/HomeKit/HMAccessoryProfile.md"
   },
@@ -1573,7 +1573,7 @@
    "minimum": "6.0",
    "status": "implemented",
    "effect": "[[HMAccessControl alloc] init], and [HMAccessControl new] through NSObject's +new, raise NSInternalInconsistencyException whose reason is \"init is unavailable\"",
-   "source": "HomeKit/HMAccessControl11_2.m through CHARON_HOMEKIT_UNAVAILABLE_INIT, defined in HomeKit/CharonHomeKitConstruction.h, which raises NSInternalInconsistencyException with the reason built from the selector",
+   "source": "HomeKit/HMAccessControl11_2.m through REVENANT_HOMEKIT_UNAVAILABLE_INIT, defined in HomeKit/RevenantHomeKitConstruction.h, which raises NSInternalInconsistencyException with the reason built from the selector",
    "reason": "Apple's own class carries -init in its instance list and raises. The body, read out of the arm64e cache of iOS 16.0 at 0x19d0dcc84, sends _cmd to _NSStringFromSelector, builds the reason with +[NSString stringWithFormat:] - the format is a __cfstring of HomeKit's own __AUTH_CONST at 0x1dff71458 whose own length field is 17, and 17 is the length of \"%@ is unavailable\" - and hands an NSException to _objc_exception_throw through +[NSException exceptionWithName:reason:userInfo:] with userInfo nil. The name is NSInternalInconsistencyException: a __cfstring of CoreFoundation at 0x1de2bc558, read through two hops. So a caller sees the framework's own sentence for the selector, \"init is unavailable\", and the port builds it from the selector rather than writing it out, because that is how the framework builds it. facts/HomeKit/HMAccessoryProfile.md carries the body, the literal and every name in it.",
    "facts": "facts/HomeKit/HMAccessoryProfile.md"
   },
@@ -1584,7 +1584,7 @@
    "minimum": "6.0",
    "status": "implemented",
    "effect": "[[HMUser alloc] init], and [HMUser new] through NSObject's +new, raise NSInternalInconsistencyException whose reason is \"init is unavailable\"",
-   "source": "HomeKit/HMHomeGraph8_0.m through CHARON_HOMEKIT_UNAVAILABLE_INIT, defined in HomeKit/CharonHomeKitConstruction.h, which raises NSInternalInconsistencyException with the reason built from the selector",
+   "source": "HomeKit/HMHomeGraph8_0.m through REVENANT_HOMEKIT_UNAVAILABLE_INIT, defined in HomeKit/RevenantHomeKitConstruction.h, which raises NSInternalInconsistencyException with the reason built from the selector",
    "reason": "Apple's own class carries -init in its instance list and raises. The body, read out of the arm64e cache of iOS 16.0 at 0x19d0aef98, sends _cmd to _NSStringFromSelector, builds the reason with +[NSString stringWithFormat:] - the format is a __cfstring of HomeKit's own __AUTH_CONST at 0x1dff71458 whose own length field is 17, and 17 is the length of \"%@ is unavailable\" - and hands an NSException to _objc_exception_throw through +[NSException exceptionWithName:reason:userInfo:] with userInfo nil. The name is NSInternalInconsistencyException: a __cfstring of CoreFoundation at 0x1de2bc558, read through two hops. So a caller sees the framework's own sentence for the selector, \"init is unavailable\", and the port builds it from the selector rather than writing it out, because that is how the framework builds it. facts/HomeKit/HMAccessoryProfile.md carries the body, the literal and every name in it.",
    "facts": "facts/HomeKit/HMAccessoryProfile.md"
   },
@@ -1595,8 +1595,8 @@
    "minimum": "6.0",
    "status": "implemented",
    "effect": "[[HMAction alloc] init] and [HMAction new] answer an action with a fresh uniqueIdentifier and a record of its own, which is what the release's own -init builds",
-   "source": "HomeKit/HMAction8_0.m: -init writes CharonHomeKitNewIdentifier() into the identifier and the record",
-   "reason": "Apple's own class carries -init in its instance list and constructs. The body, read out of the arm64e cache of iOS 16.0 at 0x19d0b62d8, sends UUID to NSUUID - the class read out of HomeKit's own data, the selector out of its own selector table - and sends initWithUUID: to self, so an action made through it carries an identifier nobody supplied, which is what a fresh action has, and it neither raises nor answers nil. facts/HomeKit/HMAccessoryProfile.md carries the body and the names in it. The port's own -init already was that shape: a fresh identifier out of CharonHomeKitNewIdentifier() and a record of its own in the store.",
+   "source": "HomeKit/HMAction8_0.m: -init writes RevenantHomeKitNewIdentifier() into the identifier and the record",
+   "reason": "Apple's own class carries -init in its instance list and constructs. The body, read out of the arm64e cache of iOS 16.0 at 0x19d0b62d8, sends UUID to NSUUID - the class read out of HomeKit's own data, the selector out of its own selector table - and sends initWithUUID: to self, so an action made through it carries an identifier nobody supplied, which is what a fresh action has, and it neither raises nor answers nil. facts/HomeKit/HMAccessoryProfile.md carries the body and the names in it. The port's own -init already was that shape: a fresh identifier out of RevenantHomeKitNewIdentifier() and a record of its own in the store.",
    "facts": "facts/HomeKit/HMAccessoryProfile.md"
   },
   {

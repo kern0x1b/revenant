@@ -1,6 +1,6 @@
-#import "CharonMetal.h"
+#import "RevenantMetal.h"
 
-@implementation CharonMetalCommandBuffer (ResourceState13)
+@implementation RevenantMetalCommandBuffer (ResourceState13)
 
 - (id<MTLResourceStateCommandEncoder>)resourceStateCommandEncoder
 {

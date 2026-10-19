@@ -1,6 +1,6 @@
 #import <UIKit/UIKit.h>
 
-@implementation UIResponder (CharonTargetForAction)
+@implementation UIResponder (RevenantTargetForAction)
 
 - (id)targetForAction:(SEL)action withSender:(id)sender
 {

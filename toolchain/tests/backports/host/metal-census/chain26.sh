@@ -14,7 +14,7 @@
 #     so there is no live Metal 4 command buffer to compare against and nothing below it either.
 #
 # AND THE QUEUE ITSELF IS ABSENT FROM THIS CASE FOR A THIRD REASON, which is not Apple's: the port's
-# queue wraps the port's CharonMetalQueue, which holds an EAGL context over OpenGL ES 2.0, and
+# queue wraps the port's RevenantMetalQueue, which holds an EAGL context over OpenGL ES 2.0, and
 # OpenGLES/EAGL.h is a DEVICE framework - a host binary cannot compile it. So the queue, its two device
 # factories and the capture scope over it are in the next batch with the rest of the chain, and the two
 # descriptors and the error domain - which hold only values - are here.
@@ -47,8 +47,8 @@ includes="-I $S -I $S/Metal -I $S/Foundation -I $work/port"
 cat > "$work/port/port.m" <<'PORTTU'
 /* Written by tests/backports/host/metal-census/chain26.sh: the port's Metal 4 command chain under
  * names this host does not have, so Apple's keeps the real ones and the two can be compared. */
-#define MTL4CommandQueueDescriptor charonHost_MTL4CommandQueueDescriptor
-#define MTL4CommandBufferOptions charonHost_MTL4CommandBufferOptions
+#define MTL4CommandQueueDescriptor revenantHost_MTL4CommandQueueDescriptor
+#define MTL4CommandBufferOptions revenantHost_MTL4CommandBufferOptions
 #include "MTL4CommandChain26.m"
 PORTTU
 cp "$work/port/port.m" "$work/port/port-pristine.m"
@@ -81,7 +81,7 @@ build real
 # THE PORT'S SYMBOLS MUST BE THERE UNDER THE RENAMED NAMES. Metal is linked and Apple 4 is present on
 # this machine, so a case that read Apple's own objects would agree with itself and every line above
 # would be worth nothing.
-for name in _OBJC_CLASS_\$_charonHost_MTL4CommandQueueDescriptor _OBJC_CLASS_\$_charonHost_MTL4CommandBufferOptions; do
+for name in _OBJC_CLASS_\$_revenantHost_MTL4CommandQueueDescriptor _OBJC_CLASS_\$_revenantHost_MTL4CommandBufferOptions; do
     if ! nm -g "$work/real" 2>/dev/null | grep -q "$name"; then
         echo "FAIL: the binary does not define $name" >&2
         echo "  the case would then be measuring Apple's own framework and calling it the port's" >&2
@@ -94,7 +94,7 @@ timeout 120 "$work/real" || { echo "FAIL: the command chain differential failed"
 # THE CONTROL: a mutation that does not compile is "RUN FAILED", never red, and no binary may be left.
 echo "the control: a mutation that does not compile is RUN FAILED, not red"
 cp "$work/port/port-pristine.m" "$work/port/broken.m"
-printf '\n@interface CharonBrokenByTheControl\n' >> "$work/port/broken.m"
+printf '\n@interface RevenantBrokenByTheControl\n' >> "$work/port/broken.m"
 rm -f "$work/broken" "$work/broken-port.o"
 # shellcheck disable=SC2086
 if xcrun clang $common $includes -c "$work/port/broken.m" -o "$work/broken-port.o" > "$work/broken.log" 2>&1; then

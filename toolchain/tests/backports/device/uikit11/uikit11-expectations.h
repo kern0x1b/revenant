@@ -1,4 +1,4 @@
-static const char *const charon_expected[][3] = {
+static const char *const revenant_expected[][3] = {
     {"interactions", "a fresh view holds no interactions", "- class=array"},
     {"interactions", "adding one tells it where it went", "will(view) did(view) "},
     {"interactions", "and the view lists it", "first"},
@@ -85,4 +85,4 @@ static const char *const charon_expected[][3] = {
     {"contentsize", "an unknown string raises", "NSInternalInconsistencyException: UIContentSizeCategoryCompareToCategory cannot be used to order arbitrary strings, only UIContentSizeCategory objects (comparing nonsense to UICTContentSizeCategoryL)."},
     {"contentsize", "the large title style", "UICTFontTextStyleTitle0"},
 };
-static const unsigned charon_expected_count = 85;
+static const unsigned revenant_expected_count = 85;

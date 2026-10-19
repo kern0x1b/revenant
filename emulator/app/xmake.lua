@@ -2,29 +2,29 @@
 -- License, v. 2.0. If a copy of the MPL was not distributed with this
 -- file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-target("shade_app_control")
+target("emulator_app_control")
     set_kind("static")
     add_files("control/live_control.cpp")
-    add_deps("shade_foundation", "shade_debug", {public = true})
+    add_deps("emulator_foundation", "emulator_debug", {public = true})
 
-target("shade_app_sdl")
+target("emulator_app_sdl")
     set_kind("static")
     add_files("sdl/sdl_display.cpp", "sdl/sdl_input.cpp", "sdl/sdl_audio_sink.cpp")
-    add_deps("shade_graphics", "shade_media", {public = true})
-    if has_config("shade_sdl") then
+    add_deps("emulator_graphics", "emulator_media", {public = true})
+    if has_config("emulator_sdl") then
         add_packages("libsdl2")
-        add_defines("SHADE_HAS_SDL2=1")
-        if has_config("shade_vulkan") then
+        add_defines("REVENANT_EMULATOR_HAS_SDL2=1")
+        if has_config("emulator_vulkan") then
             add_packages("vulkan-headers")
-            add_defines("SHADE_HAS_VULKAN=1")
+            add_defines("REVENANT_EMULATOR_HAS_VULKAN=1")
         end
     end
 
-target("shade")
+target("emulator")
     set_kind("binary")
     add_files("main.cpp", "desktop_host.cpp", "abi_command.cpp")
-    add_deps("shade_host", "shade_app_control", "shade_app_sdl", "shade_runtime")
-    if has_config("shade_vulkan") then
+    add_deps("emulator_host", "emulator_app_control", "emulator_app_sdl", "emulator_runtime")
+    if has_config("emulator_vulkan") then
         add_packages("vulkan-loader", "swiftshader")
         on_config(function (target)
             target:add("rpathdirs", path.join(target:pkg("vulkan-loader"):installdir(), "lib"))

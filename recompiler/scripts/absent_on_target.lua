@@ -1,5 +1,5 @@
 local function dyld()
-    return import("apple.dyld", {rootdir = path.join(os.scriptdir(), "..", "..", "charon", "modules"), anonymous = true})
+    return import("apple.dyld", {rootdir = path.join(os.scriptdir(), "..", "..", "toolchain", "modules"), anonymous = true})
 end
 
 function absent(cache, symbols, provided)

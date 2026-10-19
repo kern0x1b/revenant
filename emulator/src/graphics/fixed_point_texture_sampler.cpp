@@ -9,7 +9,7 @@
 #include <algorithm>
 #include <bit>
 
-namespace shade {
+namespace emulator {
 namespace {
 
     std::uint32_t interpolate(

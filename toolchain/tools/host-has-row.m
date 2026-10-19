@@ -213,10 +213,10 @@ int main(int argc, char **argv)
     if (!path) { printf("usage: host-has-row <tsv of api/kind/introduced>\n"); return 2; }
     printf("CONTROL -[NSURLSessionTask cancel]                       %s\n",
            answer("-[NSURLSessionTask cancel]", "method"));
-    printf("CONTROL -[NSURLSessionTask charonProbeNoSuchSelector]    %s\n",
-           answer("-[NSURLSessionTask charonProbeNoSuchSelector]", "method"));
+    printf("CONTROL -[NSURLSessionTask revenantProbeNoSuchSelector]    %s\n",
+           answer("-[NSURLSessionTask revenantProbeNoSuchSelector]", "method"));
     printf("CONTROL NSAttributedString                               %s\n", answer("NSAttributedString", "class"));
-    printf("CONTROL NSCharonProbeNoSuchClass                         %s\n", answer("NSCharonProbeNoSuchClass", "class"));
+    printf("CONTROL NSRevenantProbeNoSuchClass                         %s\n", answer("NSRevenantProbeNoSuchClass", "class"));
     FILE *input = fopen(path, "r");
     if (!input) { printf("FAIL cannot read %s\n", path); return 2; }
     char line[1024];

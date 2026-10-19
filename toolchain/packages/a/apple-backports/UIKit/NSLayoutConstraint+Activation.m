@@ -1,21 +1,21 @@
 #import <UIKit/UIKit.h>
 #import <objc/runtime.h>
 
-static UIView *charon_item_view(id item)
+static UIView *revenant_item_view(id item)
 {
     return [item isKindOfClass:[UILayoutGuide class]] ? [(UILayoutGuide *)item owningView] : item;
 }
 
-static UIView *charon_container(NSLayoutConstraint *constraint)
+static UIView *revenant_container(NSLayoutConstraint *constraint)
 {
-    for (UIView *view = charon_item_view(constraint.firstItem); view; view = view.superview) {
+    for (UIView *view = revenant_item_view(constraint.firstItem); view; view = view.superview) {
         if ([view.constraints indexOfObjectIdenticalTo:constraint] != NSNotFound)
             return view;
     }
     return nil;
 }
 
-static UIView *charon_common_ancestor(UIView *first, UIView *second)
+static UIView *revenant_common_ancestor(UIView *first, UIView *second)
 {
     if (!second)
         return first;
@@ -26,28 +26,28 @@ static UIView *charon_common_ancestor(UIView *first, UIView *second)
     return nil;
 }
 
-@interface NSObject (CharonGuideBacking)
-- (UILayoutGuide *)charon_guide;
+@interface NSObject (RevenantGuideBacking)
+- (UILayoutGuide *)revenant_guide;
 @end
 
-static UILayoutGuide *charon_guide(id item)
+static UILayoutGuide *revenant_guide(id item)
 {
-    return [item respondsToSelector:@selector(charon_guide)] ? [item charon_guide] : nil;
+    return [item respondsToSelector:@selector(revenant_guide)] ? [item revenant_guide] : nil;
 }
 
-static BOOL charon_ownerless(id item)
+static BOOL revenant_ownerless(id item)
 {
-    UILayoutGuide *guide = [item isKindOfClass:[UILayoutGuide class]] ? item : charon_guide(item);
+    UILayoutGuide *guide = [item isKindOfClass:[UILayoutGuide class]] ? item : revenant_guide(item);
     return guide && !guide.owningView;
 }
 
-static UIView *charon_holder(UIView *ancestor)
+static UIView *revenant_holder(UIView *ancestor)
 {
-    UILayoutGuide *guide = charon_guide(ancestor);
+    UILayoutGuide *guide = revenant_guide(ancestor);
     return guide ? guide.owningView : ancestor;
 }
 
-@implementation NSLayoutConstraint (CharonActivation)
+@implementation NSLayoutConstraint (RevenantActivation)
 
 + (void)activateConstraints:(NSArray *)constraints
 {
@@ -63,41 +63,41 @@ static UIView *charon_holder(UIView *ancestor)
 
 - (BOOL)isActive
 {
-    return charon_container(self) != nil;
+    return revenant_container(self) != nil;
 }
 
 - (void)setActive:(BOOL)active
 {
-    UIView *container = charon_container(self);
+    UIView *container = revenant_container(self);
     if (!active) {
         [container removeConstraint:self];
         return;
     }
-    if (container || charon_ownerless(self.firstItem) || charon_ownerless(self.secondItem))
+    if (container || revenant_ownerless(self.firstItem) || revenant_ownerless(self.secondItem))
         return;
-    UIView *ancestor = charon_common_ancestor(charon_item_view(self.firstItem), charon_item_view(self.secondItem));
+    UIView *ancestor = revenant_common_ancestor(revenant_item_view(self.firstItem), revenant_item_view(self.secondItem));
     if (!ancestor)
         [NSException raise:NSGenericException format:@"Unable to activate constraint with items %@ and %@ because they have no common ancestor.  Does the constraint reference items in different view hierarchies?  That's illegal.", self.firstItem, self.secondItem];
-    [charon_holder(ancestor) addConstraint:self];
+    [revenant_holder(ancestor) addConstraint:self];
 }
 
 @end
 
-@interface UILayoutGuide (CharonBacking)
-- (UIView *)charon_view;
+@interface UILayoutGuide (RevenantBacking)
+- (UIView *)revenant_view;
 @end
 
-@interface CharonConstraintGuideItems : NSObject
+@interface RevenantConstraintGuideItems : NSObject
 @end
 
-@implementation CharonConstraintGuideItems
+@implementation RevenantConstraintGuideItems
 
-static id charon_backing(id item)
+static id revenant_backing(id item)
 {
-    return [item isKindOfClass:[UILayoutGuide class]] ? [(UILayoutGuide *)item charon_view] : item;
+    return [item isKindOfClass:[UILayoutGuide class]] ? [(UILayoutGuide *)item revenant_view] : item;
 }
 
-static void charon_swap_constructor(SEL selector, IMP (^make)(IMP original))
+static void revenant_swap_constructor(SEL selector, IMP (^make)(IMP original))
 {
     Method method = class_getClassMethod([NSLayoutConstraint class], selector);
     if (!method)
@@ -107,37 +107,37 @@ static void charon_swap_constructor(SEL selector, IMP (^make)(IMP original))
 
 + (void)load
 {
-    charon_swap_constructor(@selector(constraintWithItem:attribute:relatedBy:toItem:attribute:multiplier:constant:), ^IMP(IMP original) {
+    revenant_swap_constructor(@selector(constraintWithItem:attribute:relatedBy:toItem:attribute:multiplier:constant:), ^IMP(IMP original) {
         SEL selector = @selector(constraintWithItem:attribute:relatedBy:toItem:attribute:multiplier:constant:);
         return imp_implementationWithBlock(^NSLayoutConstraint *(Class self, id first, NSLayoutAttribute firstAttribute, NSLayoutRelation relation, id second, NSLayoutAttribute secondAttribute, CGFloat multiplier, CGFloat constant) {
-            return ((NSLayoutConstraint *(*)(id, SEL, id, NSLayoutAttribute, NSLayoutRelation, id, NSLayoutAttribute, CGFloat, CGFloat))original)(self, selector, charon_backing(first), firstAttribute, relation, charon_backing(second), secondAttribute, multiplier, constant);
+            return ((NSLayoutConstraint *(*)(id, SEL, id, NSLayoutAttribute, NSLayoutRelation, id, NSLayoutAttribute, CGFloat, CGFloat))original)(self, selector, revenant_backing(first), firstAttribute, relation, revenant_backing(second), secondAttribute, multiplier, constant);
         });
     });
-    charon_swap_constructor(@selector(constraintWithItem:attribute:relatedBy:toItem:attribute:constant:), ^IMP(IMP original) {
+    revenant_swap_constructor(@selector(constraintWithItem:attribute:relatedBy:toItem:attribute:constant:), ^IMP(IMP original) {
         SEL selector = @selector(constraintWithItem:attribute:relatedBy:toItem:attribute:constant:);
         return imp_implementationWithBlock(^NSLayoutConstraint *(Class self, id first, NSLayoutAttribute firstAttribute, NSLayoutRelation relation, id second, NSLayoutAttribute secondAttribute, CGFloat constant) {
-            return ((NSLayoutConstraint *(*)(id, SEL, id, NSLayoutAttribute, NSLayoutRelation, id, NSLayoutAttribute, CGFloat))original)(self, selector, charon_backing(first), firstAttribute, relation, charon_backing(second), secondAttribute, constant);
+            return ((NSLayoutConstraint *(*)(id, SEL, id, NSLayoutAttribute, NSLayoutRelation, id, NSLayoutAttribute, CGFloat))original)(self, selector, revenant_backing(first), firstAttribute, relation, revenant_backing(second), secondAttribute, constant);
         });
     });
-    charon_swap_constructor(@selector(constraintWithItem:attribute:relatedBy:toItem:attribute:multiplier:), ^IMP(IMP original) {
+    revenant_swap_constructor(@selector(constraintWithItem:attribute:relatedBy:toItem:attribute:multiplier:), ^IMP(IMP original) {
         SEL selector = @selector(constraintWithItem:attribute:relatedBy:toItem:attribute:multiplier:);
         return imp_implementationWithBlock(^NSLayoutConstraint *(Class self, id first, NSLayoutAttribute firstAttribute, NSLayoutRelation relation, id second, NSLayoutAttribute secondAttribute, CGFloat multiplier) {
-            return ((NSLayoutConstraint *(*)(id, SEL, id, NSLayoutAttribute, NSLayoutRelation, id, NSLayoutAttribute, CGFloat))original)(self, selector, charon_backing(first), firstAttribute, relation, charon_backing(second), secondAttribute, multiplier);
+            return ((NSLayoutConstraint *(*)(id, SEL, id, NSLayoutAttribute, NSLayoutRelation, id, NSLayoutAttribute, CGFloat))original)(self, selector, revenant_backing(first), firstAttribute, relation, revenant_backing(second), secondAttribute, multiplier);
         });
     });
-    charon_swap_constructor(@selector(constraintWithItem:attribute:relatedBy:toItem:attribute:), ^IMP(IMP original) {
+    revenant_swap_constructor(@selector(constraintWithItem:attribute:relatedBy:toItem:attribute:), ^IMP(IMP original) {
         SEL selector = @selector(constraintWithItem:attribute:relatedBy:toItem:attribute:);
         return imp_implementationWithBlock(^NSLayoutConstraint *(Class self, id first, NSLayoutAttribute firstAttribute, NSLayoutRelation relation, id second, NSLayoutAttribute secondAttribute) {
-            return ((NSLayoutConstraint *(*)(id, SEL, id, NSLayoutAttribute, NSLayoutRelation, id, NSLayoutAttribute))original)(self, selector, charon_backing(first), firstAttribute, relation, charon_backing(second), secondAttribute);
+            return ((NSLayoutConstraint *(*)(id, SEL, id, NSLayoutAttribute, NSLayoutRelation, id, NSLayoutAttribute))original)(self, selector, revenant_backing(first), firstAttribute, relation, revenant_backing(second), secondAttribute);
         });
     });
-    charon_swap_constructor(@selector(constraintWithItem:attribute:relatedBy:constant:), ^IMP(IMP original) {
+    revenant_swap_constructor(@selector(constraintWithItem:attribute:relatedBy:constant:), ^IMP(IMP original) {
         SEL selector = @selector(constraintWithItem:attribute:relatedBy:constant:);
         return imp_implementationWithBlock(^NSLayoutConstraint *(Class self, id first, NSLayoutAttribute firstAttribute, NSLayoutRelation relation, CGFloat constant) {
-            return ((NSLayoutConstraint *(*)(id, SEL, id, NSLayoutAttribute, NSLayoutRelation, CGFloat))original)(self, selector, charon_backing(first), firstAttribute, relation, constant);
+            return ((NSLayoutConstraint *(*)(id, SEL, id, NSLayoutAttribute, NSLayoutRelation, CGFloat))original)(self, selector, revenant_backing(first), firstAttribute, relation, constant);
         });
     });
-    charon_swap_constructor(@selector(constraintsWithVisualFormat:options:metrics:views:), ^IMP(IMP original) {
+    revenant_swap_constructor(@selector(constraintsWithVisualFormat:options:metrics:views:), ^IMP(IMP original) {
         SEL selector = @selector(constraintsWithVisualFormat:options:metrics:views:);
         return imp_implementationWithBlock(^NSArray *(Class self, NSString *format, NSLayoutFormatOptions options, NSDictionary *metrics, NSDictionary *views) {
             BOOL hasGuide = NO;
@@ -147,7 +147,7 @@ static void charon_swap_constructor(SEL selector, IMP (^make)(IMP original))
             if (hasGuide) {
                 NSMutableDictionary *mapped = [NSMutableDictionary dictionaryWithCapacity:views.count];
                 for (NSString *key in views)
-                    mapped[key] = charon_backing(views[key]);
+                    mapped[key] = revenant_backing(views[key]);
                 views = mapped;
             }
             return ((NSArray *(*)(id, SEL, NSString *, NSLayoutFormatOptions, NSDictionary *, NSDictionary *))original)(self, selector, format, options, metrics, views);

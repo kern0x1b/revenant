@@ -6,17 +6,17 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-extern NSString *const CharonCKHost;
-extern NSString *const CharonCKDevelopmentEnvironment;
-extern NSString *const CharonCKProductionEnvironment;
+extern NSString *const RevenantCKHost;
+extern NSString *const RevenantCKDevelopmentEnvironment;
+extern NSString *const RevenantCKProductionEnvironment;
 
-extern NSError *CharonCKError(CKErrorCode code, NSString *_Nullable message, NSDictionary *_Nullable extra);
-extern NSError *CharonCKErrorFromPayload(NSDictionary *payload, NSDictionary *_Nullable extra);
-extern NSError *CharonCKNotAuthenticated(void);
-extern NSError *CharonCKBadContainer(NSString *_Nullable containerIdentifier);
-extern NSError *CharonCKTransportError(NSError *underlying);
+extern NSError *RevenantCKError(CKErrorCode code, NSString *_Nullable message, NSDictionary *_Nullable extra);
+extern NSError *RevenantCKErrorFromPayload(NSDictionary *payload, NSDictionary *_Nullable extra);
+extern NSError *RevenantCKNotAuthenticated(void);
+extern NSError *RevenantCKBadContainer(NSString *_Nullable containerIdentifier);
+extern NSError *RevenantCKTransportError(NSError *underlying);
 
-@interface CharonCKCredentials : NSObject
+@interface RevenantCKCredentials : NSObject
 + (instancetype)shared;
 - (nullable NSString *)tokenForContainer:(NSString *)containerIdentifier error:(NSError **)error;
 - (void)setDeveloperToken:(nullable NSString *)token;
@@ -26,13 +26,13 @@ extern NSError *CharonCKTransportError(NSError *underlying);
 - (void)setUserRecordID:(nullable NSString *)userRecordID forContainer:(NSString *)containerIdentifier;
 @end
 
-extern NSString *CharonCKWebAuthToken(NSString *keyID, NSString *teamID, NSDate *now);
-extern NSString *CharonCKBase64URL(NSData *data);
-extern NSData *_Nullable CharonCKPEMPrivateKey(NSString *pem);
+extern NSString *RevenantCKWebAuthToken(NSString *keyID, NSString *teamID, NSDate *now);
+extern NSString *RevenantCKBase64URL(NSData *data);
+extern NSData *_Nullable RevenantCKPEMPrivateKey(NSString *pem);
 
-typedef void (^CharonCKCompletion)(id _Nullable body, NSError *_Nullable error);
+typedef void (^RevenantCKCompletion)(id _Nullable body, NSError *_Nullable error);
 
-@interface CharonCKTransport : NSObject
+@interface RevenantCKTransport : NSObject
 + (instancetype)shared;
 - (void)performContainer:(CKContainer *)container
                 database:(nullable CKDatabase *)database
@@ -40,7 +40,7 @@ typedef void (^CharonCKCompletion)(id _Nullable body, NSError *_Nullable error);
                   method:(NSString *)method
                     path:(NSString *)path
                     body:(nullable NSDictionary *)body
-              completion:(CharonCKCompletion)completion;
+              completion:(RevenantCKCompletion)completion;
 - (NSString *)environmentForContainer:(CKContainer *)container;
 - (NSString *)databaseRootForContainer:(NSString *)containerIdentifier
                               database:(CKDatabase *)database
@@ -52,67 +52,67 @@ typedef void (^CharonCKCompletion)(id _Nullable body, NSError *_Nullable error);
 @property (nonatomic, strong, nullable) NSMapTable *environments;
 @end
 
-extern NSDictionary *CharonCKSubscriptionDocument(CKSubscription *subscription);
-extern CKRecordZone *_Nullable CharonCKZoneWithDocument(NSDictionary *document);
-extern CKSubscription *_Nullable CharonCKSubscriptionWithDocument(NSDictionary *document);
-extern NSDictionary *CharonCKFieldsSnapshot(CKRecord *record);
-extern NSData *_Nullable CharonCKSystemFieldsSnapshotToken(CKServerChangeToken *_Nullable token);
-extern CKServerChangeToken *_Nullable CharonCKServerTokenFromData(NSData *data);
-extern NSDictionary *CharonCKSystemFieldsSnapshot(CKRecord *record);
+extern NSDictionary *RevenantCKSubscriptionDocument(CKSubscription *subscription);
+extern CKRecordZone *_Nullable RevenantCKZoneWithDocument(NSDictionary *document);
+extern CKSubscription *_Nullable RevenantCKSubscriptionWithDocument(NSDictionary *document);
+extern NSDictionary *RevenantCKFieldsSnapshot(CKRecord *record);
+extern NSData *_Nullable RevenantCKSystemFieldsSnapshotToken(CKServerChangeToken *_Nullable token);
+extern CKServerChangeToken *_Nullable RevenantCKServerTokenFromData(NSData *data);
+extern NSDictionary *RevenantCKSystemFieldsSnapshot(CKRecord *record);
 
-extern CKUserIdentity *_Nullable CharonCKUserIdentityWithDocument(NSDictionary *document);
-extern CKUserIdentityLookupInfo *_Nullable CharonCKLookupInfoWithDocument(NSDictionary *document);
-extern CKShareParticipant *_Nullable CharonCKShareParticipantWithDocument(NSDictionary *document);
-extern CKShareMetadata *_Nullable CharonCKShareMetadataWithDocument(NSDictionary *document, CKContainer *_Nullable container);
+extern CKUserIdentity *_Nullable RevenantCKUserIdentityWithDocument(NSDictionary *document);
+extern CKUserIdentityLookupInfo *_Nullable RevenantCKLookupInfoWithDocument(NSDictionary *document);
+extern CKShareParticipant *_Nullable RevenantCKShareParticipantWithDocument(NSDictionary *document);
+extern CKShareMetadata *_Nullable RevenantCKShareMetadataWithDocument(NSDictionary *document, CKContainer *_Nullable container);
 
-@interface CharonCKOPScheduler : NSObject
+@interface RevenantCKOPScheduler : NSObject
 + (void)add:(NSOperation *)operation;
 + (void)complete:(NSOperation *)operation;
 + (void)cancelAll;
 @end
 
-@interface CKDatabase (CharonCKPrivate)
+@interface CKDatabase (RevenantCKPrivate)
 - (nullable CKContainer *)ck_container;
 @end
 
-@interface CKContainer (CharonCKPrivate)
+@interface CKContainer (RevenantCKPrivate)
 - (nullable CKRecordID *)currentUserRecordID;
 @end
 
-@interface CKOperation (CharonCKShared)
-- (void)charon_setUp;
-- (void)charon_finish;
+@interface CKOperation (RevenantCKShared)
+- (void)revenant_setUp;
+- (void)revenant_finish;
 - (nullable NSError *)partialFailureWithItems:(NSDictionary *)items;
 - (void)runMethod:(NSString *)method path:(NSString *)path body:(nullable NSDictionary *)body
       completion:(void (^)(id _Nullable body, NSError *_Nullable error))completion;
 @end
 
-extern CKUserIdentity *_Nullable CharonCKUserIdentityWithDocument(NSDictionary *document);
-extern CKUserIdentityLookupInfo *_Nullable CharonCKLookupInfoWithDocument(NSDictionary *document);
-extern CKShareParticipant *_Nullable CharonCKShareParticipantWithDocument(NSDictionary *document);
-extern CKShareMetadata *_Nullable CharonCKShareMetadataWithDocument(NSDictionary *document, CKContainer *_Nullable container);
+extern CKUserIdentity *_Nullable RevenantCKUserIdentityWithDocument(NSDictionary *document);
+extern CKUserIdentityLookupInfo *_Nullable RevenantCKLookupInfoWithDocument(NSDictionary *document);
+extern CKShareParticipant *_Nullable RevenantCKShareParticipantWithDocument(NSDictionary *document);
+extern CKShareMetadata *_Nullable RevenantCKShareMetadataWithDocument(NSDictionary *document, CKContainer *_Nullable container);
 
-extern NSString *CharonCKDatabaseRoot(CKDatabase *database);
-extern NSString *CharonCKZonePath(CKRecordZoneID *zoneID);
-extern NSDictionary *CharonCKRecordIDDocument(CKRecordID *recordID);
-extern CKRecordZoneID *_Nullable CharonCKZoneIDFromDocument(NSDictionary *_Nullable json);
-extern NSDictionary *CharonCKZoneIDDocument(CKRecordZoneID *zoneID);
-extern CKRecordID *_Nullable CharonCKRecordIDFromDocument(NSDictionary *_Nullable json);
+extern NSString *RevenantCKDatabaseRoot(CKDatabase *database);
+extern NSString *RevenantCKZonePath(CKRecordZoneID *zoneID);
+extern NSDictionary *RevenantCKRecordIDDocument(CKRecordID *recordID);
+extern CKRecordZoneID *_Nullable RevenantCKZoneIDFromDocument(NSDictionary *_Nullable json);
+extern NSDictionary *RevenantCKZoneIDDocument(CKRecordZoneID *zoneID);
+extern CKRecordID *_Nullable RevenantCKRecordIDFromDocument(NSDictionary *_Nullable json);
 
-extern NSDictionary *_Nullable CharonCKQueryDocument(CKQuery *query, NSString *_Nullable zoneID,
+extern NSDictionary *_Nullable RevenantCKQueryDocument(CKQuery *query, NSString *_Nullable zoneID,
                                                       NSArray *_Nullable desiredKeys, NSUInteger resultsLimit,
                                                       NSError **error);
-extern CKQueryCursor *_Nullable CharonCKCursorFromToken(NSData *token);
-extern NSData *_Nullable CharonCKTokenFromCursor(CKQueryCursor *_Nullable cursor);
-extern NSArray<CKRecord *> *CharonCKRecordsFromResults(NSArray *results, NSSet *_Nullable desiredKeys);
-extern CKRecord *_Nullable CharonCKRecordFromResult(NSDictionary *result, NSSet *_Nullable desiredKeys);
+extern CKQueryCursor *_Nullable RevenantCKCursorFromToken(NSData *token);
+extern NSData *_Nullable RevenantCKTokenFromCursor(CKQueryCursor *_Nullable cursor);
+extern NSArray<CKRecord *> *RevenantCKRecordsFromResults(NSArray *results, NSSet *_Nullable desiredKeys);
+extern CKRecord *_Nullable RevenantCKRecordFromResult(NSDictionary *result, NSSet *_Nullable desiredKeys);
 
-extern id _Nullable CharonCKValueFromJSON(id _Nullable json, Class _Nullable *_Nullable kind);
-extern id _Nullable CharonCKValueToJSON(id _Nullable value);
-extern NSDictionary *CharonCKFieldsToJSON(NSDictionary *fields);
-extern NSDictionary *CharonCKFieldsFromJSON(NSDictionary *_Nullable json);
-extern NSDate *_Nullable CharonCKDateFromJSON(id json);
-extern NSString *CharonCKMD5Hex(NSData *data);
-extern double CharonCKMilliseconds(NSDate *date);
+extern id _Nullable RevenantCKValueFromJSON(id _Nullable json, Class _Nullable *_Nullable kind);
+extern id _Nullable RevenantCKValueToJSON(id _Nullable value);
+extern NSDictionary *RevenantCKFieldsToJSON(NSDictionary *fields);
+extern NSDictionary *RevenantCKFieldsFromJSON(NSDictionary *_Nullable json);
+extern NSDate *_Nullable RevenantCKDateFromJSON(id json);
+extern NSString *RevenantCKMD5Hex(NSData *data);
+extern double RevenantCKMilliseconds(NSDate *date);
 
 NS_ASSUME_NONNULL_END

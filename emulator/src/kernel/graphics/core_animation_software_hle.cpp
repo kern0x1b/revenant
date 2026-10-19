@@ -18,7 +18,7 @@
 #include <limits>
 #include <string>
 
-namespace shade {
+namespace emulator {
 namespace {
 
     struct Fixed16SoftwareSamplerArm32Profile {

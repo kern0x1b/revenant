@@ -1,6 +1,6 @@
 #import <UIKit/UIKit.h>
 
-@implementation UIFont (CharonMonospacedDigit)
+@implementation UIFont (RevenantMonospacedDigit)
 
 + (UIFont *)monospacedDigitSystemFontOfSize:(CGFloat)fontSize weight:(UIFontWeight)weight
 {

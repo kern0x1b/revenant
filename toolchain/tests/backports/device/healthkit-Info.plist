@@ -9,7 +9,7 @@
 	<key>CFBundleExecutable</key>
 	<string>healthkit</string>
 	<key>CFBundleIdentifier</key>
-	<string>local.charon.backports.healthkit</string>
+	<string>local.revenant.backports.healthkit</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>

@@ -13,7 +13,7 @@ static NSString *const results_folder = @"/private/var/backports";
 {
     [[NSFileManager defaultManager] createDirectoryAtPath:results_folder withIntermediateDirectories:YES attributes:nil error:NULL];
     [[NSFileManager defaultManager] removeItemAtPath:[results_folder stringByAppendingPathComponent:@"smallapis.done"] error:NULL];
-    charon_log_to([results_folder stringByAppendingPathComponent:@"smallapis.log"]);
+    revenant_log_to([results_folder stringByAppendingPathComponent:@"smallapis.log"]);
     self.window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
     self.window.rootViewController = [[UIViewController alloc] init];
     [self.window makeKeyAndVisible];
@@ -42,8 +42,8 @@ static NSString *const results_folder = @"/private/var/backports";
         CHECK(!called, "the completion of the change is asynchronous");
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.3 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
             CHECK(called && [error.domain isEqual:NSCocoaErrorDomain] && error.code == NSFeatureUnsupportedError, "the change answers the error of a feature that is not supported");
-            printf("checks=%d failures=%d\n", charon_checks, charon_failures);
-            NSString *summary = [NSString stringWithFormat:@"%@ checks=%d failures=%d\n", charon_failures ? @"FAIL" : @"ok", charon_checks, charon_failures];
+            printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
+            NSString *summary = [NSString stringWithFormat:@"%@ checks=%d failures=%d\n", revenant_failures ? @"FAIL" : @"ok", revenant_checks, revenant_failures];
             [summary writeToFile:[results_folder stringByAppendingPathComponent:@"smallapis.done"] atomically:YES encoding:NSUTF8StringEncoding error:NULL];
         });
     });

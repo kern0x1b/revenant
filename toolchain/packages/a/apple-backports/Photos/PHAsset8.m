@@ -1,4 +1,4 @@
-#import "CharonPhotos.h"
+#import "RevenantPhotos.h"
 #import <CoreLocation/CoreLocation.h>
 
 #pragma clang diagnostic ignored "-Wobjc-missing-property-synthesis"
@@ -17,12 +17,12 @@
     PHAssetSourceType _sourceType;
 }
 
-- (instancetype)initWithCharonAsset:(ALAsset *)asset sourceType:(PHAssetSourceType)sourceType
+- (instancetype)initWithRevenantAsset:(ALAsset *)asset sourceType:(PHAssetSourceType)sourceType
 {
     ALAssetRepresentation *representation = asset.defaultRepresentation;
     NSURL *url = representation.url ?: [asset valueForProperty:ALAssetPropertyAssetURL];
     NSString *identifier = url.absoluteString;
-    self = [self initWithCharonLocalIdentifier:identifier];
+    self = [self initWithRevenantLocalIdentifier:identifier];
     if (!self)
         return nil;
     _asset = asset;
@@ -41,7 +41,7 @@
     return self;
 }
 
-- (ALAsset *)charon_asset
+- (ALAsset *)revenant_asset
 {
     return _asset;
 }
@@ -61,12 +61,12 @@
     return NO;
 }
 
-- (PHObject *)charon_refetched
+- (PHObject *)revenant_refetched
 {
-    return [CharonPhotosStore assetWithIdentifier:self.localIdentifier];
+    return [RevenantPhotosStore assetWithIdentifier:self.localIdentifier];
 }
 
-- (BOOL)charon_sameStateAs:(PHObject *)other
+- (BOOL)revenant_sameStateAs:(PHObject *)other
 {
     PHAsset *asset = (PHAsset *)other;
     return [asset isKindOfClass:[PHAsset class]] && asset.mediaType == _mediaType && asset.pixelWidth == _pixelWidth &&
@@ -75,16 +75,16 @@
            (asset.location == _location || (asset.location && _location && [asset.location distanceFromLocation:_location] == 0));
 }
 
-+ (PHFetchResult *)charon_result:(NSArray *(^)(void))query options:(PHFetchOptions *)options
++ (PHFetchResult *)revenant_result:(NSArray *(^)(void))query options:(PHFetchOptions *)options
 {
-    return [[PHFetchResult alloc] initWithCharonQuery:query options:options];
+    return [[PHFetchResult alloc] initWithRevenantQuery:query options:options];
 }
 
 + (PHFetchResult<PHAsset *> *)fetchAssetsWithOptions:(PHFetchOptions *)options
 {
     PHAssetSourceType sourceTypes = options.includeAssetSourceTypes;
-    return [self charon_result:^{
-        return [CharonPhotosStore assetsOfSourceTypes:sourceTypes filter:nil];
+    return [self revenant_result:^{
+        return [RevenantPhotosStore assetsOfSourceTypes:sourceTypes filter:nil];
     } options:options];
 }
 
@@ -92,9 +92,9 @@
 {
     ALAssetsFilter *filter = mediaType == PHAssetMediaTypeImage ? [ALAssetsFilter allPhotos] : mediaType == PHAssetMediaTypeVideo ? [ALAssetsFilter allVideos] : nil;
     PHAssetSourceType sourceTypes = options.includeAssetSourceTypes;
-    return [self charon_result:^{
+    return [self revenant_result:^{
         NSMutableArray *assets = [NSMutableArray array];
-        for (PHAsset *asset in [CharonPhotosStore assetsOfSourceTypes:sourceTypes filter:filter]) {
+        for (PHAsset *asset in [RevenantPhotosStore assetsOfSourceTypes:sourceTypes filter:filter]) {
             if (asset.mediaType == mediaType)
                 [assets addObject:asset];
         }
@@ -104,18 +104,18 @@
 
 + (PHFetchResult<PHAsset *> *)fetchAssetsInAssetCollection:(PHAssetCollection *)assetCollection options:(PHFetchOptions *)options
 {
-    return [self charon_result:^{
-        return [assetCollection charon_assets];
+    return [self revenant_result:^{
+        return [assetCollection revenant_assets];
     } options:options];
 }
 
 + (PHFetchResult<PHAsset *> *)fetchAssetsWithLocalIdentifiers:(NSArray<NSString *> *)identifiers options:(PHFetchOptions *)options
 {
     NSArray *kept = [identifiers copy];
-    return [self charon_result:^{
+    return [self revenant_result:^{
         NSMutableArray *assets = [NSMutableArray array];
         for (NSString *identifier in kept) {
-            PHAsset *asset = [CharonPhotosStore assetWithIdentifier:identifier];
+            PHAsset *asset = [RevenantPhotosStore assetWithIdentifier:identifier];
             if (asset)
                 [assets addObject:asset];
         }

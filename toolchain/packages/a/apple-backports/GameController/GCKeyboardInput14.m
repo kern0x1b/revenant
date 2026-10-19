@@ -1,4 +1,4 @@
-#import "CharonGC.h"
+#import "RevenantGC.h"
 
 #pragma clang diagnostic ignored "-Wobjc-missing-property-synthesis"
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
@@ -140,12 +140,12 @@
         @{@"kind": @"button", @"aliases": @[@"RightAlt"], @"local": [NSNull null], @"unmappedLocal": [NSNull null], @"sf": [NSNull null], @"unmappedSf": [NSNull null], @"analog": @0, @"system": @0, @"collection": [NSNull null], @"order": @124, @"keyCode": @(GCKeyCodeRightAlt)},
         @{@"kind": @"button", @"aliases": @[@"RightGUI"], @"local": [NSNull null], @"unmappedLocal": [NSNull null], @"sf": [NSNull null], @"unmappedSf": [NSNull null], @"analog": @0, @"system": @0, @"collection": [NSNull null], @"order": @125, @"keyCode": @(GCKeyCodeRightGUI)},
     ];
-    self = [super initWithCharonSpecs:specs];
+    self = [super initWithRevenantSpecs:specs];
     if (!self)
         return nil;
     NSMutableDictionary *byCode = [NSMutableDictionary dictionaryWithCapacity:specs.count];
     for (NSDictionary *spec in specs)
-        byCode[@([spec[@"keyCode"] intValue])] = [self charon_elementNamed:[spec[@"aliases"] firstObject]];
+        byCode[@([spec[@"keyCode"] intValue])] = [self revenant_elementNamed:[spec[@"aliases"] firstObject]];
     _byKeyCode = byCode;
     _anyKeyPressed = NO;
     return self;
@@ -171,7 +171,7 @@
     return (id)_byKeyCode[@((int)code)];
 }
 
-- (void)charon_setPressed:(BOOL)pressed forKeyCode:(GCKeyCode)code value:(float)value
+- (void)revenant_setPressed:(BOOL)pressed forKeyCode:(GCKeyCode)code value:(float)value
 {
     GCControllerButtonInput *key = (id)_byKeyCode[@((int)code)];
     if (!key)

@@ -7,7 +7,7 @@
 extern "C" {
 #endif
 
-__attribute__((visibility("default"))) BOOL CharonMLCElementwise(MLCLayer *layer, MLCTensor *input, MLCTensor *output);
+__attribute__((visibility("default"))) BOOL RevenantMLCElementwise(MLCLayer *layer, MLCTensor *input, MLCTensor *output);
 
 #ifdef __cplusplus
 }

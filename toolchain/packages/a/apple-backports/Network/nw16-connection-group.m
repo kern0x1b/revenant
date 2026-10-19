@@ -1,5 +1,5 @@
-#import "CharonNW.h"
-#import "CharonNWSupport.h"
+#import "RevenantNW.h"
+#import "RevenantNWSupport.h"
 
 #include <arpa/inet.h>
 #include <errno.h>
@@ -10,29 +10,29 @@
 #include <sys/socket.h>
 #include <unistd.h>
 
-@interface CharonNWGroupMessage : NSObject {
+@interface RevenantNWGroupMessage : NSObject {
 @public
-    CharonNWEndpoint *_remote;
-    CharonNWEndpoint *_local;
+    RevenantNWEndpoint *_remote;
+    RevenantNWEndpoint *_local;
     nw_path_t _path;
-    CharonNWProtocolMetadata *_ip;
-    CharonNWProtocolMetadata *_udp;
+    RevenantNWProtocolMetadata *_ip;
+    RevenantNWProtocolMetadata *_udp;
     BOOL _answered;
 }
 @end
 
-@implementation CharonNWGroupMessage
+@implementation RevenantNWGroupMessage
 @end
 
-@interface CharonNWConnectionGroup : NSObject <OS_nw_connection_group> {
+@interface RevenantNWConnectionGroup : NSObject <OS_nw_connection_group> {
 @public
-    CharonNWGroupDescriptor *_descriptor;
-    CharonNWParameters *_parameters;
+    RevenantNWGroupDescriptor *_descriptor;
+    RevenantNWParameters *_parameters;
     dispatch_queue_t _queue;
     nw_connection_group_state_changed_handler_t _state;
     nw_connection_group_receive_handler_t _receive;
     nw_connection_group_state_t _value;
-    CharonNWEndpoint *_local;
+    RevenantNWEndpoint *_local;
     NSMutableArray *_members;
     nw_path_monitor_t _monitor;
     nw_path_t _path;
@@ -47,11 +47,11 @@
 }
 @end
 
-@implementation CharonNWConnectionGroup
+@implementation RevenantNWConnectionGroup
 @end
 
-static void charon_group_report(CharonNWConnectionGroup *group, nw_connection_group_state_t state,
-                                CharonNWError *error)
+static void revenant_group_report(RevenantNWConnectionGroup *group, nw_connection_group_state_t state,
+                                RevenantNWError *error)
 {
     @synchronized(group) {
         if (group->_cancelled && state != nw_connection_group_state_cancelled)
@@ -65,22 +65,22 @@ static void charon_group_report(CharonNWConnectionGroup *group, nw_connection_gr
         handler(state, (nw_error_t)error);
 }
 
-static CharonNWError *charon_group_error(int code)
+static RevenantNWError *revenant_group_error(int code)
 {
-    CharonNWError *error = [[CharonNWError alloc] init];
+    RevenantNWError *error = [[RevenantNWError alloc] init];
     error->_domain = nw_error_domain_posix;
     error->_code = code;
     return error;
 }
 
-static struct sockaddr_storage charon_group_address(CharonNWEndpoint *endpoint, socklen_t *out_length)
+static struct sockaddr_storage revenant_group_address(RevenantNWEndpoint *endpoint, socklen_t *out_length)
 {
     struct sockaddr_storage address;
     memset(&address, 0, sizeof address);
     socklen_t length = 0;
     if (!endpoint || endpoint->_type != nw_endpoint_type_address)
         return address;
-    const struct sockaddr *stored = charon_nw_sockaddr_of((__bridge CFDataRef)endpoint->_address, &length);
+    const struct sockaddr *stored = revenant_nw_sockaddr_of((__bridge CFDataRef)endpoint->_address, &length);
     if (!stored || !length)
         return address;
     memcpy(&address, stored, length);
@@ -89,23 +89,23 @@ static struct sockaddr_storage charon_group_address(CharonNWEndpoint *endpoint, 
     return address;
 }
 
-static NSArray *charon_group_members(CharonNWConnectionGroup *group)
+static NSArray *revenant_group_members(RevenantNWConnectionGroup *group)
 {
     NSMutableArray *members = [NSMutableArray array];
     NSMutableArray *endpoints = [NSMutableArray array];
     if (group->_descriptor->_multicastGroup)
         [endpoints addObject:group->_descriptor->_multicastGroup];
     [endpoints addObjectsFromArray:group->_descriptor->_endpoints];
-    for (CharonNWEndpoint *endpoint in endpoints) {
+    for (RevenantNWEndpoint *endpoint in endpoints) {
         socklen_t length = 0;
-        struct sockaddr_storage address = charon_group_address(endpoint, &length);
+        struct sockaddr_storage address = revenant_group_address(endpoint, &length);
         if (length)
             [members addObject:[NSData dataWithBytes:&address length:length]];
     }
     return members;
 }
 
-static NSData *charon_group_destination(CharonNWConnectionGroup *group)
+static NSData *revenant_group_destination(RevenantNWConnectionGroup *group)
 {
     for (NSData *member in group->_members) {
         const struct sockaddr_in *address = (const struct sockaddr_in *)member.bytes;
@@ -119,10 +119,10 @@ static NSData *charon_group_destination(CharonNWConnectionGroup *group)
     return group->_members.firstObject;
 }
 
-static void charon_group_bind_source(CharonNWConnectionGroup *group, struct sockaddr_storage *bound)
+static void revenant_group_bind_source(RevenantNWConnectionGroup *group, struct sockaddr_storage *bound)
 {
     socklen_t length = 0;
-    struct sockaddr_storage source = charon_group_address(group->_descriptor->_specificSource, &length);
+    struct sockaddr_storage source = revenant_group_address(group->_descriptor->_specificSource, &length);
     if (!length)
         return;
     if (source.ss_family == AF_INET && bound->ss_family == AF_INET)
@@ -131,7 +131,7 @@ static void charon_group_bind_source(CharonNWConnectionGroup *group, struct sock
         ((struct sockaddr_in6 *)bound)->sin6_addr = ((struct sockaddr_in6 *)&source)->sin6_addr;
 }
 
-static int charon_group_type_of_service(nw_content_context_t context)
+static int revenant_group_type_of_service(nw_content_context_t context)
 {
     if (!context)
         return 0;
@@ -143,7 +143,7 @@ static int charon_group_type_of_service(nw_content_context_t context)
     return value;
 }
 
-static void charon_group_send(CharonNWConnectionGroup *group, const struct sockaddr *to, socklen_t length,
+static void revenant_group_send(RevenantNWConnectionGroup *group, const struct sockaddr *to, socklen_t length,
                               const void *bytes, size_t size, int service)
 {
     if (!bytes || !size || !length)
@@ -173,23 +173,23 @@ static void charon_group_send(CharonNWConnectionGroup *group, const struct socka
     (void)sendmsg(group->_socket, &message, 0);
 }
 
-static void charon_group_open(CharonNWConnectionGroup *group)
+static void revenant_group_open(RevenantNWConnectionGroup *group)
 {
     if (!group->_multicast) {
-        charon_group_report(group, nw_connection_group_state_failed, charon_group_error(EPROTONOSUPPORT));
+        revenant_group_report(group, nw_connection_group_state_failed, revenant_group_error(EPROTONOSUPPORT));
         return;
     }
     socklen_t length = 0;
-    struct sockaddr_storage address = charon_group_address(group->_descriptor->_multicastGroup, &length);
+    struct sockaddr_storage address = revenant_group_address(group->_descriptor->_multicastGroup, &length);
     if (!length) {
-        charon_group_report(group, nw_connection_group_state_failed, charon_group_error(EINVAL));
+        revenant_group_report(group, nw_connection_group_state_failed, revenant_group_error(EINVAL));
         return;
     }
     uint16_t port = group->_descriptor->_multicastGroup->_port.length
         ? (uint16_t)atoi(group->_descriptor->_multicastGroup->_port.UTF8String) : 0;
-    int handle = charon_nw_socket(address.ss_family, SOCK_DGRAM, IPPROTO_UDP);
+    int handle = revenant_nw_socket(address.ss_family, SOCK_DGRAM, IPPROTO_UDP);
     if (handle < 0) {
-        charon_group_report(group, nw_connection_group_state_failed, charon_group_error(errno));
+        revenant_group_report(group, nw_connection_group_state_failed, revenant_group_error(errno));
         return;
     }
     int on = 1;
@@ -240,32 +240,32 @@ static void charon_group_open(CharonNWConnectionGroup *group)
         ((struct sockaddr_in6 *)&bound)->sin6_family = AF_INET6;
         ((struct sockaddr_in6 *)&bound)->sin6_port = htons(port);
     }
-    charon_group_bind_source(group, &bound);
+    revenant_group_bind_source(group, &bound);
     if (bind(handle, (struct sockaddr *)&bound, bound_length) != 0) {
         int failure = errno;
         close(handle);
-        charon_group_report(group, nw_connection_group_state_failed, charon_group_error(failure));
+        revenant_group_report(group, nw_connection_group_state_failed, revenant_group_error(failure));
         return;
     }
-    charon_nw_set_nonblocking(handle);
+    revenant_nw_set_nonblocking(handle);
     memset(&bound, 0, sizeof bound);
     bound_length = sizeof bound;
     if (getsockname(handle, (struct sockaddr *)&bound, &bound_length) == 0) {
-        CharonNWEndpoint *local = [[CharonNWEndpoint alloc] init];
+        RevenantNWEndpoint *local = [[RevenantNWEndpoint alloc] init];
         local->_type = nw_endpoint_type_address;
         local->_address = (__bridge_transfer NSData *)
-            charon_nw_sockaddr_data((struct sockaddr *)&bound, bound_length);
+            revenant_nw_sockaddr_data((struct sockaddr *)&bound, bound_length);
         char text[INET6_ADDRSTRLEN + 4] = {0};
-        if (charon_nw_sockaddr_text((struct sockaddr *)&bound, text, sizeof text))
+        if (revenant_nw_sockaddr_text((struct sockaddr *)&bound, text, sizeof text))
             local->_hostname = @(text);
-        local->_port = [NSString stringWithFormat:@"%u", charon_nw_sockaddr_port((struct sockaddr *)&bound)];
+        local->_port = [NSString stringWithFormat:@"%u", revenant_nw_sockaddr_port((struct sockaddr *)&bound)];
         group->_local = local;
     }
-    group->_members = [charon_group_members(group) mutableCopy];
+    group->_members = [revenant_group_members(group) mutableCopy];
     group->_socket = handle;
 }
 
-static const void *charon_group_bytes(dispatch_data_t content, size_t *out_size)
+static const void *revenant_group_bytes(dispatch_data_t content, size_t *out_size)
 {
     *out_size = 0;
     if (!content)
@@ -284,7 +284,7 @@ static const void *charon_group_bytes(dispatch_data_t content, size_t *out_size)
 void nw_connection_group_reply(nw_connection_group_t group, nw_content_context_t inbound_message,
                           nw_content_context_t outbound_message, dispatch_data_t content);
 
-static void charon_group_read(CharonNWConnectionGroup *group)
+static void revenant_group_read(RevenantNWConnectionGroup *group)
 {
     for (int taken = 0; taken < 32; taken++) {
         uint8_t buffer[65536];
@@ -306,25 +306,25 @@ static void charon_group_read(CharonNWConnectionGroup *group)
         if (received < 0) {
             if (errno == EAGAIN || errno == EWOULDBLOCK || errno == EINTR)
                 return;
-            charon_group_report(group, nw_connection_group_state_failed, charon_group_error(errno));
+            revenant_group_report(group, nw_connection_group_state_failed, revenant_group_error(errno));
             return;
         }
         socklen_t from_length = from.ss_family == AF_INET ? sizeof(struct sockaddr_in) : sizeof(struct sockaddr_in6);
-        CharonNWEndpoint *remote = [[CharonNWEndpoint alloc] init];
+        RevenantNWEndpoint *remote = [[RevenantNWEndpoint alloc] init];
         remote->_type = nw_endpoint_type_address;
-        remote->_address = (__bridge_transfer NSData *)charon_nw_sockaddr_data((struct sockaddr *)&from, from_length);
+        remote->_address = (__bridge_transfer NSData *)revenant_nw_sockaddr_data((struct sockaddr *)&from, from_length);
         char text[INET6_ADDRSTRLEN + 4] = {0};
-        if (charon_nw_sockaddr_text((struct sockaddr *)&from, text, sizeof text))
+        if (revenant_nw_sockaddr_text((struct sockaddr *)&from, text, sizeof text))
             remote->_hostname = @(text);
-        remote->_port = [NSString stringWithFormat:@"%u", charon_nw_sockaddr_port((struct sockaddr *)&from)];
-        CharonNWEndpoint *local = nil;
+        remote->_port = [NSString stringWithFormat:@"%u", revenant_nw_sockaddr_port((struct sockaddr *)&from)];
+        RevenantNWEndpoint *local = nil;
         BOOL ours = NO;
         for (struct cmsghdr *header = (struct cmsghdr *)control; header && CMSG_FIRSTHDR(&message);
              header = CMSG_NXTHDR(&message, header)) {
             if (header->cmsg_level != IPPROTO_IP || header->cmsg_type != IP_PKTINFO)
                 continue;
             struct in_pktinfo *info = (struct in_pktinfo *)CMSG_DATA(header);
-            local = [[CharonNWEndpoint alloc] init];
+            local = [[RevenantNWEndpoint alloc] init];
             local->_type = nw_endpoint_type_address;
             struct sockaddr_in destination;
             memset(&destination, 0, sizeof destination);
@@ -334,7 +334,7 @@ static void charon_group_read(CharonNWConnectionGroup *group)
             destination.sin_port = group->_local
                 ? htons((uint16_t)atoi(group->_local->_port.UTF8String)) : 0;
             local->_address = (__bridge_transfer NSData *)
-                charon_nw_sockaddr_data((struct sockaddr *)&destination, sizeof destination);
+                revenant_nw_sockaddr_data((struct sockaddr *)&destination, sizeof destination);
             local->_hostname = @(inet_ntoa(info->ipi_spec_dst));
             local->_port = group->_local ? group->_local->_port : remote->_port;
             for (NSData *member in group->_members) {
@@ -348,16 +348,16 @@ static void charon_group_read(CharonNWConnectionGroup *group)
             local = group->_local;
         if (group->_descriptor->_disableUnicastTraffic && !ours)
             continue;
-        CharonNWContentContext *context = [[CharonNWContentContext alloc] init];
+        RevenantNWContentContext *context = [[RevenantNWContentContext alloc] init];
         context->_identifier = @"";
         context->_metadata = [NSMutableDictionary dictionary];
         context->_relativePriority = 0.5;
-        CharonNWGroupMessage *record = [[CharonNWGroupMessage alloc] init];
+        RevenantNWGroupMessage *record = [[RevenantNWGroupMessage alloc] init];
         record->_remote = remote;
         record->_local = local;
         record->_path = group->_path;
-        record->_ip = (CharonNWProtocolMetadata *)nw_ip_create_metadata();
-        record->_udp = (CharonNWProtocolMetadata *)nw_udp_create_metadata();
+        record->_ip = (RevenantNWProtocolMetadata *)nw_ip_create_metadata();
+        record->_udp = (RevenantNWProtocolMetadata *)nw_udp_create_metadata();
         BOOL complete = (uint32_t)received <= group->_maximum;
         if (!complete && group->_rejectOversized) {
             group->_inbound[(id)context] = record;
@@ -380,12 +380,12 @@ nw_connection_group_t nw_connection_group_create(nw_group_descriptor_t group_des
 {
     if (!group_descriptor || !parameters)
         return NULL;
-    CharonNWGroupDescriptor *descriptor = (CharonNWGroupDescriptor *)group_descriptor;
+    RevenantNWGroupDescriptor *descriptor = (RevenantNWGroupDescriptor *)group_descriptor;
     if (!descriptor->_kind)
         return NULL;
-    CharonNWConnectionGroup *group = [[CharonNWConnectionGroup alloc] init];
+    RevenantNWConnectionGroup *group = [[RevenantNWConnectionGroup alloc] init];
     group->_descriptor = descriptor;
-    group->_parameters = (CharonNWParameters *)parameters;
+    group->_parameters = (RevenantNWParameters *)parameters;
     group->_members = [NSMutableArray array];
     group->_inbound = [NSMutableDictionary dictionary];
     group->_maximum = UINT32_MAX;
@@ -397,32 +397,32 @@ nw_connection_group_t nw_connection_group_create(nw_group_descriptor_t group_des
 
 nw_group_descriptor_t nw_connection_group_copy_descriptor(nw_connection_group_t group)
 {
-    return group ? (nw_group_descriptor_t)((CharonNWConnectionGroup *)group)->_descriptor : NULL;
+    return group ? (nw_group_descriptor_t)((RevenantNWConnectionGroup *)group)->_descriptor : NULL;
 }
 
 nw_parameters_t nw_connection_group_copy_parameters(nw_connection_group_t group)
 {
-    return group ? (nw_parameters_t)((CharonNWConnectionGroup *)group)->_parameters : NULL;
+    return group ? (nw_parameters_t)((RevenantNWConnectionGroup *)group)->_parameters : NULL;
 }
 
 void nw_connection_group_set_queue(nw_connection_group_t group, dispatch_queue_t queue)
 {
     if (group)
-        ((CharonNWConnectionGroup *)group)->_queue = queue;
+        ((RevenantNWConnectionGroup *)group)->_queue = queue;
 }
 
 void nw_connection_group_set_state_changed_handler(nw_connection_group_t group,
                                                    nw_connection_group_state_changed_handler_t handler)
 {
     if (group)
-        ((CharonNWConnectionGroup *)group)->_state = [handler copy];
+        ((RevenantNWConnectionGroup *)group)->_state = [handler copy];
 }
 
 void nw_connection_group_set_receive_handler(nw_connection_group_t group, uint32_t maximum_message_size,
                                              bool reject_oversized_messages,
                                              nw_connection_group_receive_handler_t receive_handler)
 {
-    CharonNWConnectionGroup *value = (CharonNWConnectionGroup *)group;
+    RevenantNWConnectionGroup *value = (RevenantNWConnectionGroup *)group;
     if (!value)
         return;
     value->_maximum = maximum_message_size;
@@ -434,7 +434,7 @@ void nw_connection_group_start(nw_connection_group_t group)
 {
     if (!group)
         return;
-    CharonNWConnectionGroup *self = (CharonNWConnectionGroup *)group;
+    RevenantNWConnectionGroup *self = (RevenantNWConnectionGroup *)group;
     @synchronized(self) {
         if (self->_started || self->_cancelled || !self->_queue)
             return;
@@ -443,35 +443,35 @@ void nw_connection_group_start(nw_connection_group_t group)
     dispatch_async(self->_queue, ^{
         if (self->_cancelled)
             return;
-        charon_group_report(self, nw_connection_group_state_waiting, nil);
-        charon_group_open(self);
+        revenant_group_report(self, nw_connection_group_state_waiting, nil);
+        revenant_group_open(self);
         if (self->_cancelled)
             return;
         if (self->_socket < 0) {
             if (self->_value != nw_connection_group_state_failed)
-                charon_group_report(self, nw_connection_group_state_failed, charon_group_error(errno));
+                revenant_group_report(self, nw_connection_group_state_failed, revenant_group_error(errno));
             return;
         }
-        __weak CharonNWConnectionGroup *weak = self;
+        __weak RevenantNWConnectionGroup *weak = self;
         self->_monitor = nw_path_monitor_create();
         nw_path_monitor_set_queue(self->_monitor, self->_queue);
         nw_path_monitor_set_update_handler(self->_monitor, ^(nw_path_t path) {
-            CharonNWConnectionGroup *strong = weak;
+            RevenantNWConnectionGroup *strong = weak;
             if (strong && !strong->_cancelled)
                 strong->_path = path;
         });
         nw_path_monitor_start(self->_monitor);
-        self->_source = charon_nw_read_source(self->_socket, self->_queue);
+        self->_source = revenant_nw_read_source(self->_socket, self->_queue);
         if (!self->_source) {
-            charon_group_report(self, nw_connection_group_state_failed, charon_group_error(errno));
+            revenant_group_report(self, nw_connection_group_state_failed, revenant_group_error(errno));
             return;
         }
         dispatch_source_set_event_handler(self->_source, ^{
-            CharonNWConnectionGroup *strong = weak;
+            RevenantNWConnectionGroup *strong = weak;
             if (strong && !strong->_cancelled)
-                charon_group_read(strong);
+                revenant_group_read(strong);
         });
-        charon_group_report(self, nw_connection_group_state_ready, nil);
+        revenant_group_report(self, nw_connection_group_state_ready, nil);
     });
 }
 
@@ -479,7 +479,7 @@ void nw_connection_group_cancel(nw_connection_group_t group)
 {
     if (!group)
         return;
-    CharonNWConnectionGroup *self = (CharonNWConnectionGroup *)group;
+    RevenantNWConnectionGroup *self = (RevenantNWConnectionGroup *)group;
     dispatch_block_t stop = ^{
         @synchronized(self) {
             if (self->_cancelled)
@@ -498,7 +498,7 @@ void nw_connection_group_cancel(nw_connection_group_t group)
         [self->_inbound removeAllObjects];
         self->_state = nil;
         self->_receive = nil;
-        charon_group_report(self, nw_connection_group_state_cancelled, nil);
+        revenant_group_report(self, nw_connection_group_state_cancelled, nil);
     };
     if (self->_queue)
         dispatch_async(self->_queue, stop);
@@ -506,40 +506,40 @@ void nw_connection_group_cancel(nw_connection_group_t group)
         stop();
 }
 
-static CharonNWGroupMessage *charon_group_message(nw_connection_group_t group, nw_content_context_t context)
+static RevenantNWGroupMessage *revenant_group_message(nw_connection_group_t group, nw_content_context_t context)
 {
     if (!group || !context)
         return NULL;
-    return ((CharonNWConnectionGroup *)group)->_inbound[(id)context];
+    return ((RevenantNWConnectionGroup *)group)->_inbound[(id)context];
 }
 
 nw_endpoint_t nw_connection_group_copy_remote_endpoint_for_message(nw_connection_group_t group,
                                                                    nw_content_context_t context)
 {
-    CharonNWGroupMessage *message = charon_group_message(group, context);
+    RevenantNWGroupMessage *message = revenant_group_message(group, context);
     return message ? (nw_endpoint_t)message->_remote : NULL;
 }
 
 nw_endpoint_t nw_connection_group_copy_local_endpoint_for_message(nw_connection_group_t group,
                                                                   nw_content_context_t context)
 {
-    CharonNWGroupMessage *message = charon_group_message(group, context);
+    RevenantNWGroupMessage *message = revenant_group_message(group, context);
     return message ? (nw_endpoint_t)message->_local : NULL;
 }
 
 nw_path_t nw_connection_group_copy_path_for_message(nw_connection_group_t group, nw_content_context_t context)
 {
-    CharonNWGroupMessage *message = charon_group_message(group, context);
+    RevenantNWGroupMessage *message = revenant_group_message(group, context);
     return message ? message->_path : NULL;
 }
 
 nw_connection_t nw_connection_group_extract_connection_for_message(nw_connection_group_t group,
                                                                   nw_content_context_t context)
 {
-    CharonNWGroupMessage *message = charon_group_message(group, context);
+    RevenantNWGroupMessage *message = revenant_group_message(group, context);
     if (!message)
         return NULL;
-    CharonNWConnectionGroup *self = (CharonNWConnectionGroup *)group;
+    RevenantNWConnectionGroup *self = (RevenantNWConnectionGroup *)group;
     [self->_inbound removeObjectForKey:(id)context];
     nw_connection_t connection = nw_connection_create((nw_endpoint_t)message->_remote,
                                                       (nw_parameters_t)self->_parameters);
@@ -551,47 +551,47 @@ nw_connection_t nw_connection_group_extract_connection_for_message(nw_connection
 void nw_connection_group_reply(nw_connection_group_t group, nw_content_context_t inbound_message,
                                nw_content_context_t outbound_message, dispatch_data_t content)
 {
-    CharonNWGroupMessage *message = charon_group_message(group, inbound_message);
+    RevenantNWGroupMessage *message = revenant_group_message(group, inbound_message);
     if (!message || message->_answered)
         return;
     message->_answered = YES;
     size_t size = 0;
-    const void *bytes = charon_group_bytes(content, &size);
+    const void *bytes = revenant_group_bytes(content, &size);
     socklen_t length = 0;
-    struct sockaddr_storage to = charon_group_address(message->_remote, &length);
-    charon_group_send((CharonNWConnectionGroup *)group, (struct sockaddr *)&to, length, bytes, size,
-                      charon_group_type_of_service(outbound_message));
+    struct sockaddr_storage to = revenant_group_address(message->_remote, &length);
+    revenant_group_send((RevenantNWConnectionGroup *)group, (struct sockaddr *)&to, length, bytes, size,
+                      revenant_group_type_of_service(outbound_message));
     if (nw_content_context_get_is_final(inbound_message))
-        [((CharonNWConnectionGroup *)group)->_inbound removeObjectForKey:(id)inbound_message];
+        [((RevenantNWConnectionGroup *)group)->_inbound removeObjectForKey:(id)inbound_message];
 }
 
 void nw_connection_group_send_message(nw_connection_group_t group, dispatch_data_t content,
                                       nw_endpoint_t endpoint, nw_content_context_t context,
                                       nw_connection_group_send_completion_t completion)
 {
-    CharonNWConnectionGroup *self = (CharonNWConnectionGroup *)group;
+    RevenantNWConnectionGroup *self = (RevenantNWConnectionGroup *)group;
     if (!self || self->_socket < 0) {
         if (completion)
-            completion((nw_error_t)charon_group_error(ENOTCONN));
+            completion((nw_error_t)revenant_group_error(ENOTCONN));
         return;
     }
     size_t size = 0;
-    const void *bytes = charon_group_bytes(content, &size);
+    const void *bytes = revenant_group_bytes(content, &size);
     NSMutableArray *targets = [NSMutableArray array];
     if (endpoint) {
         socklen_t length = 0;
-        struct sockaddr_storage address = charon_group_address((CharonNWEndpoint *)endpoint, &length);
+        struct sockaddr_storage address = revenant_group_address((RevenantNWEndpoint *)endpoint, &length);
         if (length)
             [targets addObject:[NSData dataWithBytes:&address length:length]];
     } else {
-        NSData *destination = charon_group_destination(self);
+        NSData *destination = revenant_group_destination(self);
         if (destination)
             [targets addObject:destination];
         [targets addObjectsFromArray:self->_members];
     }
     for (NSData *target in targets) {
-        charon_group_send(self, target.bytes, (socklen_t)target.length, bytes, size,
-                          charon_group_type_of_service(context));
+        revenant_group_send(self, target.bytes, (socklen_t)target.length, bytes, size,
+                          revenant_group_type_of_service(context));
     }
     if (completion)
         completion(NULL);
@@ -600,7 +600,7 @@ void nw_connection_group_send_message(nw_connection_group_t group, dispatch_data
 nw_protocol_metadata_t nw_connection_group_copy_protocol_metadata(nw_connection_group_t group,
                                                                   nw_protocol_definition_t definition)
 {
-    CharonNWConnectionGroup *value = (CharonNWConnectionGroup *)group;
+    RevenantNWConnectionGroup *value = (RevenantNWConnectionGroup *)group;
     if (!value || value->_socket < 0 || !definition)
         return NULL;
     if (nw_protocol_definition_is_equal(definition, nw_protocol_copy_ip_definition()))
@@ -614,7 +614,7 @@ nw_protocol_metadata_t nw_connection_group_copy_protocol_metadata_for_message(nw
                                                                              nw_content_context_t context,
                                                                              nw_protocol_definition_t definition)
 {
-    CharonNWGroupMessage *message = charon_group_message(group, context);
+    RevenantNWGroupMessage *message = revenant_group_message(group, context);
     if (!message || !definition)
         return NULL;
     if (nw_protocol_definition_is_equal(definition, nw_protocol_copy_ip_definition()))

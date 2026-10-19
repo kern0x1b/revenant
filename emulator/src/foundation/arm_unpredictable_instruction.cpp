@@ -12,7 +12,7 @@
 #include <cstdint>
 #include <utility>
 
-namespace shade {
+namespace emulator {
 namespace {
 
     constexpr std::uint32_t asimd_vtrn_mask = 0xffb30f90U;

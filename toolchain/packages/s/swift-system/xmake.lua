@@ -1,6 +1,6 @@
 package("swift-system")
     set_homepage("https://github.com/apple/swift-system")
-    set_description("swift-system 1.8.1, Apple's System module (FilePath, Errno, FileDescriptor and the calls under them): the release sources pinned by sha256, patched for the port, built for armv7 iOS 6.1.3 in Lua the way styx is, with the host differential against Apple's System. Apache-2.0 upstream")
+    set_description("swift-system 1.8.1, Apple's System module (FilePath, Errno, FileDescriptor and the calls under them): the release sources pinned by sha256, patched for the port, built for armv7 iOS 6.1.3 in Lua the way combine is, with the host differential against Apple's System. Apache-2.0 upstream")
     set_license("Apache-2.0")
     set_policy("package.strict_compatibility", true)
 
@@ -16,7 +16,7 @@ package("swift-system")
     for _, name in ipairs({"openat", "unlinkat", "fdopendir", "fstatat"}) do
         table.insert(inputs, path.join(compat, "src", name .. ".c"))
     end
-    for _, file in ipairs(os.files(path.join(compat, "include", "charon", "*.h"))) do
+    for _, file in ipairs(os.files(path.join(compat, "include", "revenant", "*.h"))) do
         table.insert(inputs, file)
     end
     table.sort(inputs)
@@ -27,9 +27,9 @@ package("swift-system")
                             default = hash.strhash128(table.concat(digests, ";")), type = "string", readonly = true})
 
     on_load("iphoneos", function (package)
-        package:add("deps", "charon@swift-runtime", {alias = "swift-runtime", configs = {backports = true}})
-        package:add("deps", "charon@apple-compat", {alias = "apple-compat"})
-        package:add("deps", "charon@ld64", {alias = "ld64"})
+        package:add("deps", "revenant@swift-runtime", {alias = "swift-runtime", configs = {backports = true}})
+        package:add("deps", "revenant@apple-compat", {alias = "apple-compat"})
+        package:add("deps", "revenant@ld64", {alias = "ld64"})
         package:add("links", "swiftSystem")
         package:add("linkdirs", "lib")
     end)
@@ -39,7 +39,7 @@ package("swift-system")
         local swift = import("apple.swift", {rootdir = modules, anonymous = true})
         local toolchain = assert(package:toolchains(), "swift-system is built with the apple-ios toolchain")[1]
         toolchain:load()
-        local runtime = assert(package:dep("swift-runtime"), "swift-system is compiled against charon@swift-runtime")
+        local runtime = assert(package:dep("swift-runtime"), "swift-system is compiled against revenant@swift-runtime")
         local compat = path.join(package:scriptdir(), "..", "..", "..", "packages", "a", "apple-compat")
         local swiftc = assert(table.wrap((runtime:envs() or {}).SWIFT_EXEC)[1], "swift-runtime names no compiler; reinstall it")
         local minimum = toolchain:config("deployment")
@@ -96,7 +96,7 @@ package("swift-system")
         os.cp(lib, package:installdir("lib"))
 
         os.cp(path.join(os.scriptdir(), "tests", "differential"), package:installdir("share"))
-        package:setenv("CHARON_SWIFT_MODULES", path.join(package:installdir("lib"), "swift", "iphoneos"), path.join(tree, "Sources", "CSystem", "include"))
+        package:setenv("REVENANT_SWIFT_MODULES", path.join(package:installdir("lib"), "swift", "iphoneos"), path.join(tree, "Sources", "CSystem", "include"))
         print("%s: %s installed; libswiftSystem.dylib is in %s", package:name(), package:version_str(), package:installdir("lib"))
     end)
 
@@ -105,7 +105,7 @@ package("swift-system")
         local dyld = import("apple.dyld", {rootdir = modules, anonymous = true})
         local toolchain = assert(package:toolchains(), "swift-system is built with the apple-ios toolchain")[1]
         toolchain:load()
-        local runtime = assert(package:dep("swift-runtime"), "swift-system is compiled against charon@swift-runtime")
+        local runtime = assert(package:dep("swift-runtime"), "swift-system is compiled against revenant@swift-runtime")
         local installed = path.join(package:installdir("lib"), "libswiftSystem.dylib")
         local read = dyld.image_imports({installed}, os.files(path.join(runtime:installdir("lib"), "swift", "iphoneos", "*.dylib")), package:arch())
         local names = {}

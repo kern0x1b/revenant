@@ -1,5 +1,5 @@
 #import <CoreData/CoreData.h>
-#import "CharonAbstract.h"
+#import "RevenantAbstract.h"
 
 @implementation NSPersistentHistoryToken
 
@@ -15,12 +15,12 @@
 
 - (void)encodeWithCoder:(NSCoder *)coder
 {
-    charon_abstract(self, _cmd);
+    revenant_abstract(self, _cmd);
 }
 
 - (instancetype)initWithCoder:(NSCoder *)coder
 {
-    charon_abstract(self, _cmd);
+    revenant_abstract(self, _cmd);
     return nil;
 }
 

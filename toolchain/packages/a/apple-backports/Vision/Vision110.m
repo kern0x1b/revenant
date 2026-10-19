@@ -1,4 +1,4 @@
-#import "CharonVision.h"
+#import "RevenantVision.h"
 
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
 #pragma clang diagnostic ignored "-Wobjc-designated-initializers"

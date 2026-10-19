@@ -16,7 +16,7 @@
 #include <string>
 #include <system_error>
 
-namespace shade::bsd_support {
+namespace emulator::bsd_support {
 
 inline constexpr std::uint32_t carry_flag = 1U << 29U;
 inline constexpr std::uint32_t bad_file_descriptor = 9;

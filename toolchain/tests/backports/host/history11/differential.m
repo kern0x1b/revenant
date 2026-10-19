@@ -16,13 +16,13 @@ static const char *label(NSString *format, ...)
     return string.UTF8String;
 }
 
-extern NSString *const CharonHostNSPersistentHistoryTrackingKey, *const CharonHostNSBinaryStoreSecureDecodingClasses,
-    *const CharonHostNSBinaryStoreInsecureDecodingCompatibilityOption, *const CharonHostNSCoreDataCoreSpotlightExporter, *const CharonHostNSPersistentHistoryTokenKey,
-    *const CharonHostNSPersistentStoreRemoteChangeNotification, *const CharonHostNSPersistentStoreURLKey;
+extern NSString *const RevenantHostNSPersistentHistoryTrackingKey, *const RevenantHostNSBinaryStoreSecureDecodingClasses,
+    *const RevenantHostNSBinaryStoreInsecureDecodingCompatibilityOption, *const RevenantHostNSCoreDataCoreSpotlightExporter, *const RevenantHostNSPersistentHistoryTokenKey,
+    *const RevenantHostNSPersistentStoreRemoteChangeNotification, *const RevenantHostNSPersistentStoreURLKey;
 
 static Class cls(BOOL ours, NSString *name)
 {
-    return NSClassFromString(ours ? [@"CharonHost" stringByAppendingString:name] : name);
+    return NSClassFromString(ours ? [@"RevenantHost" stringByAppendingString:name] : name);
 }
 
 static id request(BOOL ours, NSString *factory, id argument)
@@ -43,13 +43,13 @@ static NSString *description_without_result(NSString *text)
 
 static void constants(void)
 {
-    CHECK_EQUAL(CharonHostNSPersistentHistoryTrackingKey, NSPersistentHistoryTrackingKey, "constant tracking key");
-    CHECK_EQUAL(CharonHostNSBinaryStoreSecureDecodingClasses, NSBinaryStoreSecureDecodingClasses, "constant secure decoding classes");
-    CHECK_EQUAL(CharonHostNSBinaryStoreInsecureDecodingCompatibilityOption, NSBinaryStoreInsecureDecodingCompatibilityOption, "constant insecure decoding option");
-    CHECK_EQUAL(CharonHostNSCoreDataCoreSpotlightExporter, NSCoreDataCoreSpotlightExporter, "constant spotlight exporter");
-    CHECK_EQUAL(CharonHostNSPersistentHistoryTokenKey, NSPersistentHistoryTokenKey, "constant history token key");
-    CHECK_EQUAL(CharonHostNSPersistentStoreRemoteChangeNotification, NSPersistentStoreRemoteChangeNotification, "constant remote change notification");
-    CHECK_EQUAL(CharonHostNSPersistentStoreURLKey, NSPersistentStoreURLKey, "constant store URL key");
+    CHECK_EQUAL(RevenantHostNSPersistentHistoryTrackingKey, NSPersistentHistoryTrackingKey, "constant tracking key");
+    CHECK_EQUAL(RevenantHostNSBinaryStoreSecureDecodingClasses, NSBinaryStoreSecureDecodingClasses, "constant secure decoding classes");
+    CHECK_EQUAL(RevenantHostNSBinaryStoreInsecureDecodingCompatibilityOption, NSBinaryStoreInsecureDecodingCompatibilityOption, "constant insecure decoding option");
+    CHECK_EQUAL(RevenantHostNSCoreDataCoreSpotlightExporter, NSCoreDataCoreSpotlightExporter, "constant spotlight exporter");
+    CHECK_EQUAL(RevenantHostNSPersistentHistoryTokenKey, NSPersistentHistoryTokenKey, "constant history token key");
+    CHECK_EQUAL(RevenantHostNSPersistentStoreRemoteChangeNotification, NSPersistentStoreRemoteChangeNotification, "constant remote change notification");
+    CHECK_EQUAL(RevenantHostNSPersistentStoreURLKey, NSPersistentStoreURLKey, "constant store URL key");
 }
 
 static void requests(void)
@@ -94,14 +94,14 @@ static void abstract_classes(void)
     CHECK([cls(YES, @"NSPersistentHistoryToken") supportsSecureCoding] == [cls(NO, @"NSPersistentHistoryToken") supportsSecureCoding], "token secure coding");
     NSKeyedArchiver *ourArchiver = [[NSKeyedArchiver alloc] initRequiringSecureCoding:YES], *systemArchiver = [[NSKeyedArchiver alloc] initRequiringSecureCoding:YES];
     NSString *ourReason = nil, *systemReason = nil;
-    @try { [ourToken encodeWithCoder:ourArchiver]; } @catch (NSException *exception) { ourReason = [[exception.name stringByAppendingString:exception.reason] stringByReplacingOccurrencesOfString:@"CharonHost" withString:@""]; }
+    @try { [ourToken encodeWithCoder:ourArchiver]; } @catch (NSException *exception) { ourReason = [[exception.name stringByAppendingString:exception.reason] stringByReplacingOccurrencesOfString:@"RevenantHost" withString:@""]; }
     @try { [systemToken encodeWithCoder:systemArchiver]; } @catch (NSException *exception) { systemReason = [exception.name stringByAppendingString:exception.reason]; }
     CHECK_EQUAL(ourReason, systemReason, "token encoding exception text");
     NSArray *selectors = @[@"timestamp", @"changes", @"transactionNumber", @"storeID", @"bundleID", @"processID", @"contextName", @"author", @"token", @"objectIDNotification"];
     for (NSString *selector in selectors) {
         id ours = [[cls(YES, @"NSPersistentHistoryTransaction") alloc] init], system = [[cls(NO, @"NSPersistentHistoryTransaction") alloc] init];
         NSString *ourText = nil, *systemText = nil;
-        @try { ((id (*)(id, SEL))objc_msgSend)(ours, NSSelectorFromString(selector)); } @catch (NSException *exception) { ourText = [exception.reason stringByReplacingOccurrencesOfString:@"CharonHost" withString:@""]; }
+        @try { ((id (*)(id, SEL))objc_msgSend)(ours, NSSelectorFromString(selector)); } @catch (NSException *exception) { ourText = [exception.reason stringByReplacingOccurrencesOfString:@"RevenantHost" withString:@""]; }
         @try { ((id (*)(id, SEL))objc_msgSend)(system, NSSelectorFromString(selector)); } @catch (NSException *exception) { systemText = exception.reason; }
         CHECK(ourText != nil && systemText != nil, label(@"transaction %@ raises", selector));
         CHECK_EQUAL(ourText, systemText, label(@"transaction %@ text", selector));
@@ -110,7 +110,7 @@ static void abstract_classes(void)
     for (NSString *selector in changeSelectors) {
         id ours = [[cls(YES, @"NSPersistentHistoryChange") alloc] init], system = [[cls(NO, @"NSPersistentHistoryChange") alloc] init];
         NSString *ourText = nil, *systemText = nil;
-        @try { ((id (*)(id, SEL))objc_msgSend)(ours, NSSelectorFromString(selector)); } @catch (NSException *exception) { ourText = [exception.reason stringByReplacingOccurrencesOfString:@"CharonHost" withString:@""]; }
+        @try { ((id (*)(id, SEL))objc_msgSend)(ours, NSSelectorFromString(selector)); } @catch (NSException *exception) { ourText = [exception.reason stringByReplacingOccurrencesOfString:@"RevenantHost" withString:@""]; }
         @try { ((id (*)(id, SEL))objc_msgSend)(system, NSSelectorFromString(selector)); } @catch (NSException *exception) { systemText = exception.reason; }
         CHECK(ourText != nil, label(@"change %@ raises", selector));
         CHECK_EQUAL(ourText, systemText, label(@"change %@ text", selector));
@@ -121,13 +121,13 @@ static void abstract_classes(void)
     CHECK(emptyOurs.result == emptySystem.result && emptyOurs.resultType == emptySystem.resultType, "an empty result");
 }
 
-@interface NSManagedObjectContext (CharonHost)
-- (NSString *)charonHosttransactionAuthor;
-- (void)charonHostsetTransactionAuthor:(NSString *)author;
+@interface NSManagedObjectContext (RevenantHost)
+- (NSString *)revenantHosttransactionAuthor;
+- (void)revenantHostsetTransactionAuthor:(NSString *)author;
 @end
 
-@interface NSPersistentStoreCoordinator (CharonHost)
-- (id)charonHostcurrentPersistentHistoryTokenFromStores:(NSArray *)stores;
+@interface NSPersistentStoreCoordinator (RevenantHost)
+- (id)revenantHostcurrentPersistentHistoryTokenFromStores:(NSArray *)stores;
 @end
 
 static void contexts(void)
@@ -138,18 +138,18 @@ static void contexts(void)
     [coordinator addPersistentStoreWithType:NSInMemoryStoreType configuration:nil URL:nil options:nil error:&error];
     NSManagedObjectContext *context = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSMainQueueConcurrencyType];
     context.persistentStoreCoordinator = coordinator;
-    CHECK([context transactionAuthor] == nil && [context charonHosttransactionAuthor] == nil, "author starts nil");
+    CHECK([context transactionAuthor] == nil && [context revenantHosttransactionAuthor] == nil, "author starts nil");
     NSMutableString *author = [NSMutableString stringWithString:@"one"];
     [context setTransactionAuthor:author];
-    [context charonHostsetTransactionAuthor:author];
+    [context revenantHostsetTransactionAuthor:author];
     [author appendString:@"two"];
     CHECK_EQUAL([context transactionAuthor], @"one", "the system copies the author");
-    CHECK_EQUAL([context charonHosttransactionAuthor], @"one", "the port copies the author");
+    CHECK_EQUAL([context revenantHosttransactionAuthor], @"one", "the port copies the author");
     [context setTransactionAuthor:nil];
-    [context charonHostsetTransactionAuthor:nil];
-    CHECK([context transactionAuthor] == nil && [context charonHosttransactionAuthor] == nil, "author cleared");
-    CHECK([coordinator currentPersistentHistoryTokenFromStores:nil] == [coordinator charonHostcurrentPersistentHistoryTokenFromStores:nil], "no token for a store without history");
-    CHECK([coordinator currentPersistentHistoryTokenFromStores:coordinator.persistentStores] == [coordinator charonHostcurrentPersistentHistoryTokenFromStores:coordinator.persistentStores], "no token for given stores");
+    [context revenantHostsetTransactionAuthor:nil];
+    CHECK([context transactionAuthor] == nil && [context revenantHosttransactionAuthor] == nil, "author cleared");
+    CHECK([coordinator currentPersistentHistoryTokenFromStores:nil] == [coordinator revenantHostcurrentPersistentHistoryTokenFromStores:nil], "no token for a store without history");
+    CHECK([coordinator currentPersistentHistoryTokenFromStores:coordinator.persistentStores] == [coordinator revenantHostcurrentPersistentHistoryTokenFromStores:coordinator.persistentStores], "no token for given stores");
 }
 
 int main(void)
@@ -159,7 +159,7 @@ int main(void)
         requests();
         abstract_classes();
         contexts();
-        printf("checks=%d failures=%d\n", charon_checks, charon_failures);
+        printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
     }
-    return charon_failures ? 1 : 0;
+    return revenant_failures ? 1 : 0;
 }

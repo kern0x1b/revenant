@@ -205,7 +205,7 @@
       "introduced": "15.0",
       "kind": "property",
       "minimum": "6.0",
-      "source": "the host's own Foundation, measured by tests/backports/host/morphology/run.sh in the case fresh.unspecified and the eight settings' .unspecified cases, and on the port's own side by CharonMorphology.m's -isUnspecified",
+      "source": "the host's own Foundation, measured by tests/backports/host/morphology/run.sh in the case fresh.unspecified and the eight settings' .unspecified cases, and on the port's own side by RevenantMorphology.m's -isUnspecified",
       "status": "implemented"
     },
     {

@@ -40,7 +40,7 @@ for source in $sources; do
     names=$(sed -n 's/^NSString \*const \([A-Za-z0-9_]*\) = .*/\1/p' "$avf/$source.m")
     [ -n "$names" ] || { echo "FAIL: $source.m defines no constant"; exit 1; }
     for name in $names; do
-        renames="$renames -D$name=charon_host_$name"
+        renames="$renames -D$name=revenant_host_$name"
     done
 done
 

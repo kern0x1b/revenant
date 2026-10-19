@@ -1,38 +1,38 @@
 #import <CoreLocation/CoreLocation.h>
 #import <objc/runtime.h>
 
-@interface CharonLocationAuthorization : NSObject <CLLocationManagerDelegate>
+@interface RevenantLocationAuthorization : NSObject <CLLocationManagerDelegate>
 @end
 
-static const CLLocationAccuracy charon_authorization_accuracy = 3000;
+static const CLLocationAccuracy revenant_authorization_accuracy = 3000;
 
-static CLLocationManager *charon_authorization_manager;
-static id<CLLocationManagerDelegate> charon_authorization_delegate;
+static CLLocationManager *revenant_authorization_manager;
+static id<CLLocationManagerDelegate> revenant_authorization_delegate;
 
-static void charon_request_authorization(CLLocationManager *manager)
+static void revenant_request_authorization(CLLocationManager *manager)
 {
     Class kind = object_getClass(manager);
     if (![kind locationServicesEnabled] || [kind authorizationStatus] != kCLAuthorizationStatusNotDetermined)
         return;
-    if (charon_authorization_manager)
+    if (revenant_authorization_manager)
         return;
-    charon_authorization_manager = [[kind alloc] init];
-    charon_authorization_delegate = [[CharonLocationAuthorization alloc] init];
-    charon_authorization_manager.delegate = charon_authorization_delegate;
-    charon_authorization_manager.desiredAccuracy = charon_authorization_accuracy;
-    [charon_authorization_manager startUpdatingLocation];
+    revenant_authorization_manager = [[kind alloc] init];
+    revenant_authorization_delegate = [[RevenantLocationAuthorization alloc] init];
+    revenant_authorization_manager.delegate = revenant_authorization_delegate;
+    revenant_authorization_manager.desiredAccuracy = revenant_authorization_accuracy;
+    [revenant_authorization_manager startUpdatingLocation];
 }
 
-@implementation CharonLocationAuthorization
+@implementation RevenantLocationAuthorization
 
 - (void)locationManager:(CLLocationManager *)manager didChangeAuthorizationStatus:(CLAuthorizationStatus)status
 {
     if (status == kCLAuthorizationStatusNotDetermined)
         return;
-    [charon_authorization_manager stopUpdatingLocation];
-    charon_authorization_manager.delegate = nil;
-    charon_authorization_manager = nil;
-    charon_authorization_delegate = nil;
+    [revenant_authorization_manager stopUpdatingLocation];
+    revenant_authorization_manager.delegate = nil;
+    revenant_authorization_manager = nil;
+    revenant_authorization_delegate = nil;
 }
 
 - (void)locationManager:(CLLocationManager *)manager didFailWithError:(NSError *)error
@@ -41,21 +41,21 @@ static void charon_request_authorization(CLLocationManager *manager)
 
 - (void)locationManager:(CLLocationManager *)manager didUpdateLocations:(NSArray *)locations
 {
-    [charon_authorization_manager stopUpdatingLocation];
+    [revenant_authorization_manager stopUpdatingLocation];
 }
 
 @end
 
-@implementation CLLocationManager (CharonAuthorization)
+@implementation CLLocationManager (RevenantAuthorization)
 
 - (void)requestWhenInUseAuthorization
 {
-    charon_request_authorization(self);
+    revenant_request_authorization(self);
 }
 
 - (void)requestAlwaysAuthorization
 {
-    charon_request_authorization(self);
+    revenant_request_authorization(self);
 }
 
 @end

@@ -5,7 +5,7 @@
 #include <math.h>
 #include <stdlib.h>
 
-static NSStringEncoding CharonJSONDetectEncoding(NSData *data, NSUInteger *bomLength)
+static NSStringEncoding RevenantJSONDetectEncoding(NSData *data, NSUInteger *bomLength)
 {
     const unsigned char *b = (const unsigned char *)data.bytes;
     NSUInteger n = data.length;
@@ -27,25 +27,25 @@ static NSStringEncoding CharonJSONDetectEncoding(NSData *data, NSUInteger *bomLe
     return NSUTF8StringEncoding;
 }
 
-static NSError *CharonJSONError(NSString *reason, NSUInteger line, NSUInteger column, NSUInteger index)
+static NSError *RevenantJSONError(NSString *reason, NSUInteger line, NSUInteger column, NSUInteger index)
 {
     NSString *debug = [NSString stringWithFormat:@"%@ around line %lu, column %lu.", reason, (unsigned long)line, (unsigned long)column];
     return [NSError errorWithDomain:NSCocoaErrorDomain code:NSPropertyListReadCorruptError
                             userInfo:@{NSDebugDescriptionErrorKey: debug, @"NSJSONSerializationErrorIndex": @(index)}];
 }
 
-static NSError *CharonJSONEmptyDataError(void)
+static NSError *RevenantJSONEmptyDataError(void)
 {
     return [NSError errorWithDomain:NSCocoaErrorDomain code:NSPropertyListReadCorruptError
                             userInfo:@{NSDebugDescriptionErrorKey: @"Unable to parse empty data."}];
 }
 
-static const NSUInteger CharonJSONMaximumDepth = 512;
+static const NSUInteger RevenantJSONMaximumDepth = 512;
 
-static const NSUInteger CharonJSONJSON5Allowed = 1UL << 3;
-static const NSUInteger CharonJSONTopLevelDictionaryAssumed = 1UL << 4;
+static const NSUInteger RevenantJSONJSON5Allowed = 1UL << 3;
+static const NSUInteger RevenantJSONTopLevelDictionaryAssumed = 1UL << 4;
 
-@interface CharonJSONReader : NSObject
+@interface RevenantJSONReader : NSObject
 @property (nonatomic) const unichar *buffer;
 @property (nonatomic) NSUInteger length;
 @property (nonatomic) NSUInteger position;
@@ -63,14 +63,14 @@ static const NSUInteger CharonJSONTopLevelDictionaryAssumed = 1UL << 4;
 @property (nonatomic, strong) NSError *error;
 @end
 
-@implementation CharonJSONReader
+@implementation RevenantJSONReader
 @synthesize buffer = _buffer, length = _length, position = _position, line = _line, lineStart = _lineStart,
             depth = _depth, startOfValue = _startOfValue, lastDelimiter = _lastDelimiter, stringStart = _stringStart,
             endsWithSpace = _endsWithSpace,
             inBody = _inBody, options = _options, assumedTopLevel = _assumedTopLevel,
             unterminatedComment = _unterminatedComment, error = _error;
 
-- (BOOL)json5 { return (self.options & CharonJSONJSON5Allowed) != 0; }
+- (BOOL)json5 { return (self.options & RevenantJSONJSON5Allowed) != 0; }
 
 - (unichar)peek { return self.position < self.length ? self.buffer[self.position] : 0; }
 
@@ -138,7 +138,7 @@ static const NSUInteger CharonJSONTopLevelDictionaryAssumed = 1UL << 4;
 {
     if (self.error)
         return;
-    self.error = CharonJSONError(reason, self.line, index - self.lineStart, index);
+    self.error = RevenantJSONError(reason, self.line, index - self.lineStart, index);
 }
 
 - (void)failAtEndOfTextWantingValue:(BOOL)wantsValue
@@ -273,7 +273,7 @@ static const NSUInteger CharonJSONTopLevelDictionaryAssumed = 1UL << 4;
         [self advance];
         return [self finishedContainer:dict];
     }
-    if (++self.depth > CharonJSONMaximumDepth) {
+    if (++self.depth > RevenantJSONMaximumDepth) {
         [self fail:@"Too many nested arrays or dictionaries"];
         return nil;
     }
@@ -362,7 +362,7 @@ static const NSUInteger CharonJSONTopLevelDictionaryAssumed = 1UL << 4;
         [self advance];
         return [self finishedContainer:array];
     }
-    if (++self.depth > CharonJSONMaximumDepth) {
+    if (++self.depth > RevenantJSONMaximumDepth) {
         [self fail:@"Too many nested arrays or dictionaries"];
         return nil;
     }
@@ -638,32 +638,32 @@ static const NSUInteger CharonJSONTopLevelDictionaryAssumed = 1UL << 4;
 
 @end
 
-static id CharonJSONParse(NSData *data, NSJSONReadingOptions opt, NSError **error)
+static id RevenantJSONParse(NSData *data, NSJSONReadingOptions opt, NSError **error)
 {
     if (data.length == 0) {
-        if ((opt & CharonJSONTopLevelDictionaryAssumed) != 0)
+        if ((opt & RevenantJSONTopLevelDictionaryAssumed) != 0)
             return [NSDictionary dictionary];
-        if (error) *error = CharonJSONEmptyDataError();
+        if (error) *error = RevenantJSONEmptyDataError();
         return nil;
     }
     NSUInteger bom = 0;
-    NSStringEncoding encoding = CharonJSONDetectEncoding(data, &bom);
+    NSStringEncoding encoding = RevenantJSONDetectEncoding(data, &bom);
     NSData *body = bom > 0 ? [data subdataWithRange:NSMakeRange(bom, data.length - bom)] : data;
     NSString *string = [[NSString alloc] initWithData:body encoding:encoding];
     if (!string) {
-        if (error) *error = CharonJSONError(@"Unable to convert data to string", 1, 1, 1);
+        if (error) *error = RevenantJSONError(@"Unable to convert data to string", 1, 1, 1);
         return nil;
     }
     NSUInteger length = string.length;
     unichar *buffer = length > 0 ? malloc(length * sizeof(unichar)) : NULL;
     if (length > 0)
         [string getCharacters:buffer range:NSMakeRange(0, length)];
-    CharonJSONReader *reader = [CharonJSONReader new];
+    RevenantJSONReader *reader = [RevenantJSONReader new];
     reader.buffer = buffer;
     reader.length = length;
     reader.line = 1;
     reader.options = opt;
-    reader.assumedTopLevel = (opt & CharonJSONTopLevelDictionaryAssumed) != 0;
+    reader.assumedTopLevel = (opt & RevenantJSONTopLevelDictionaryAssumed) != 0;
     id result = nil;
     [reader skipWhitespaceAndComments];
     if (!reader.error) {
@@ -692,7 +692,7 @@ static id CharonJSONParse(NSData *data, NSJSONReadingOptions opt, NSError **erro
     return result;
 }
 
-static BOOL CharonJSONValidValue(id obj, BOOL topLevel)
+static BOOL RevenantJSONValidValue(id obj, BOOL topLevel)
 {
     if (obj == nil)
         return NO;
@@ -714,14 +714,14 @@ static BOOL CharonJSONValidValue(id obj, BOOL topLevel)
         return !topLevel;
     if ([obj isKindOfClass:[NSArray class]]) {
         for (id item in (NSArray *)obj)
-            if (!CharonJSONValidValue(item, NO))
+            if (!RevenantJSONValidValue(item, NO))
                 return NO;
         return YES;
     }
     if ([obj isKindOfClass:[NSDictionary class]]) {
         NSDictionary *dict = obj;
         for (id key in dict) {
-            if (![key isKindOfClass:[NSString class]] || !CharonJSONValidValue(dict[key], NO))
+            if (![key isKindOfClass:[NSString class]] || !RevenantJSONValidValue(dict[key], NO))
                 return NO;
         }
         return YES;
@@ -729,7 +729,7 @@ static BOOL CharonJSONValidValue(id obj, BOOL topLevel)
     return NO;
 }
 
-static void CharonJSONWriteString(NSString *s, NSMutableString *out, NSJSONWritingOptions opt)
+static void RevenantJSONWriteString(NSString *s, NSMutableString *out, NSJSONWritingOptions opt)
 {
     BOOL escapeSlashes = !(opt & NSJSONWritingWithoutEscapingSlashes);
     [out appendString:@"\""];
@@ -760,7 +760,7 @@ static void CharonJSONWriteString(NSString *s, NSMutableString *out, NSJSONWriti
     [out appendString:@"\""];
 }
 
-static void CharonJSONWriteNumber(NSNumber *n, NSMutableString *out)
+static void RevenantJSONWriteNumber(NSNumber *n, NSMutableString *out)
 {
     if (CFGetTypeID((CFTypeRef)n) == CFBooleanGetTypeID()) {
         [out appendString:n.boolValue ? @"true" : @"false"];
@@ -785,7 +785,7 @@ static void CharonJSONWriteNumber(NSNumber *n, NSMutableString *out)
     [out appendFormat:@"%lld", n.longLongValue];
 }
 
-static void CharonJSONWriteValue(id obj, NSMutableString *out, NSJSONWritingOptions opt, NSUInteger depth)
+static void RevenantJSONWriteValue(id obj, NSMutableString *out, NSJSONWritingOptions opt, NSUInteger depth)
 {
     if (obj == nil || [obj isKindOfClass:[NSNull class]]) { [out appendString:@"null"]; return; }
     if ([obj isKindOfClass:[NSNumber class]]) {
@@ -803,10 +803,10 @@ static void CharonJSONWriteValue(id obj, NSMutableString *out, NSJSONWritingOpti
                     [NSException raise:NSInvalidArgumentException format:@"Invalid number value (infinite) in JSON write"];
             }
         }
-        CharonJSONWriteNumber(obj, out);
+        RevenantJSONWriteNumber(obj, out);
         return;
     }
-    if ([obj isKindOfClass:[NSString class]]) { CharonJSONWriteString(obj, out, opt); return; }
+    if ([obj isKindOfClass:[NSString class]]) { RevenantJSONWriteString(obj, out, opt); return; }
     BOOL pretty = (opt & NSJSONWritingPrettyPrinted) != 0;
     NSString *indent = pretty ? [@"" stringByPaddingToLength:(depth + 1) * 2 withString:@" " startingAtIndex:0] : @"";
     NSString *closeIndent = pretty ? [@"" stringByPaddingToLength:depth * 2 withString:@" " startingAtIndex:0] : @"";
@@ -817,7 +817,7 @@ static void CharonJSONWriteValue(id obj, NSMutableString *out, NSJSONWritingOpti
         NSUInteger i = 0;
         for (id item in array) {
             [out appendString:indent];
-            CharonJSONWriteValue(item, out, opt, depth + 1);
+            RevenantJSONWriteValue(item, out, opt, depth + 1);
             if (++i < array.count) [out appendString:pretty ? @",\n" : @","];
         }
         if (pretty) {
@@ -840,9 +840,9 @@ static void CharonJSONWriteValue(id obj, NSMutableString *out, NSJSONWritingOpti
         NSUInteger i = 0;
         for (NSString *key in keys) {
             [out appendString:indent];
-            CharonJSONWriteString(key, out, opt);
+            RevenantJSONWriteString(key, out, opt);
             [out appendString:pretty ? @" : " : @":"];
-            CharonJSONWriteValue(dict[key], out, opt, depth + 1);
+            RevenantJSONWriteValue(dict[key], out, opt, depth + 1);
             if (++i < keys.count) [out appendString:pretty ? @",\n" : @","];
         }
         if (pretty) {
@@ -859,7 +859,7 @@ static void CharonJSONWriteValue(id obj, NSMutableString *out, NSJSONWritingOpti
 
 + (BOOL)isValidJSONObject:(id)obj
 {
-    return CharonJSONValidValue(obj, YES);
+    return RevenantJSONValidValue(obj, YES);
 }
 
 + (nullable NSData *)dataWithJSONObject:(id)obj options:(NSJSONWritingOptions)opt error:(NSError **)error
@@ -868,16 +868,16 @@ static void CharonJSONWriteValue(id obj, NSMutableString *out, NSJSONWritingOpti
     if (!fragmentsOK && ![obj isKindOfClass:[NSArray class]] && ![obj isKindOfClass:[NSDictionary class]])
         [NSException raise:NSInvalidArgumentException format:@"*** +[NSJSONSerialization dataWithJSONObject:options:error:]: Invalid top-level type in JSON write"];
     NSMutableString *out = [NSMutableString new];
-    CharonJSONWriteValue(obj, out, opt, 0);
+    RevenantJSONWriteValue(obj, out, opt, 0);
     return [out dataUsingEncoding:NSUTF8StringEncoding];
 }
 
 + (nullable id)JSONObjectWithData:(NSData *)data options:(NSJSONReadingOptions)opt error:(NSError **)error
 {
-    if ((opt & CharonJSONTopLevelDictionaryAssumed) != 0 && (opt & NSJSONReadingFragmentsAllowed) != 0)
+    if ((opt & RevenantJSONTopLevelDictionaryAssumed) != 0 && (opt & NSJSONReadingFragmentsAllowed) != 0)
         [NSException raise:NSInvalidArgumentException
                     format:@"NSJSONReadingAssumeTopLevelDictionary and NSJSONReadingAllowFragments cannot be set at the same time"];
-    return CharonJSONParse(data, opt, error);
+    return RevenantJSONParse(data, opt, error);
 }
 
 + (NSInteger)writeJSONObject:(id)obj toStream:(NSOutputStream *)stream options:(NSJSONWritingOptions)opt error:(NSError **)error
@@ -907,7 +907,7 @@ static void CharonJSONWriteValue(id obj, NSMutableString *out, NSJSONWritingOpti
     NSInteger read;
     while ((read = [stream read:buffer maxLength:sizeof(buffer)]) > 0)
         [data appendBytes:buffer length:(NSUInteger)read];
-    return CharonJSONParse(data, opt, error);
+    return RevenantJSONParse(data, opt, error);
 }
 
 @end

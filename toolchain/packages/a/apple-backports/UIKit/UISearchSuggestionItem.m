@@ -3,7 +3,7 @@
 @interface UISearchSuggestionItem () <UISearchSuggestion>
 @end
 
-static BOOL charon_sameValue(id first, id second)
+static BOOL revenant_sameValue(id first, id second)
 {
     return first == second || [first isEqual:second];
 }
@@ -127,11 +127,11 @@ static BOOL charon_sameValue(id first, id second)
         return NO;
     }
     UISearchSuggestionItem *other = object;
-    return charon_sameValue(_localizedSuggestion, other->_localizedSuggestion)
-        && charon_sameValue(_localizedAttributedSuggestion, other->_localizedAttributedSuggestion)
-        && charon_sameValue(_localizedDescription, other->_localizedDescription)
-        && charon_sameValue(_iconImage, other->_iconImage)
-        && charon_sameValue(_representedObject, other->_representedObject);
+    return revenant_sameValue(_localizedSuggestion, other->_localizedSuggestion)
+        && revenant_sameValue(_localizedAttributedSuggestion, other->_localizedAttributedSuggestion)
+        && revenant_sameValue(_localizedDescription, other->_localizedDescription)
+        && revenant_sameValue(_iconImage, other->_iconImage)
+        && revenant_sameValue(_representedObject, other->_representedObject);
 }
 
 - (NSUInteger)hash

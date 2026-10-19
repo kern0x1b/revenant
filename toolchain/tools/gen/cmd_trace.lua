@@ -22,11 +22,11 @@ local IMPLEMENTED = "implemented"
 local function preamble(fw)
     return {
         layout.constants().MARK,
-        "// Trace-only defaults: built only when CHARON_TRACE_DEFAULTS is set; never shipped. One class per category,",
+        "// Trace-only defaults: built only when REVENANT_TRACE_DEFAULTS is set; never shipped. One class per category,",
         "// and a class the release lacks, when every member is a stub, is one @implementation (presence = full surface).",
         "// A stub logs once `unimplemented: " .. fw .. " <selector>`, returns the zero of its type, and sets an NSError an NSError ** names.",
         "// Block parameters are not invoked. Members with an override or a hand implementation are not stubbed.",
-        "#ifdef CHARON_TRACE_DEFAULTS",
+        "#ifdef REVENANT_TRACE_DEFAULTS",
         "#import <" .. fw .. "/" .. fw .. ".h>",
         "#include <stdio.h>",
         "",
@@ -107,12 +107,12 @@ local function class_lines(fw, cls, members, generated, lines, stub_rows, skippe
     if generated then
         table.insert(lines, "@implementation " .. cls)
     else
-        table.insert(lines, "@interface " .. cls .. " (CharonTrace)")
+        table.insert(lines, "@interface " .. cls .. " (RevenantTrace)")
         for _, m in ipairs(members) do
             table.insert(lines, stubs.signature(m) .. ";")
         end
         table.insert(lines, "@end")
-        table.insert(lines, "@implementation " .. cls .. " (CharonTrace)")
+        table.insert(lines, "@implementation " .. cls .. " (RevenantTrace)")
     end
     local written = 0
     for _, m in ipairs(members) do

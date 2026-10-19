@@ -1,21 +1,21 @@
-#import "CharonGKRandomCommon.h"
+#import "RevenantGKRandomCommon.h"
 #import <GameplayKit/GameplayKit.h>
 
-#define CharonGKLCG_A 1103515245u
-#define CharonGKLCG_C 12345u
-static uint32_t CharonGKLCGState;
-static uint64_t CharonGKLCGSeedValue;
+#define RevenantGKLCG_A 1103515245u
+#define RevenantGKLCG_C 12345u
+static uint32_t RevenantGKLCGState;
+static uint64_t RevenantGKLCGSeedValue;
 
-static uint32_t CharonGKLCGDraw(void *context)
-{ (void)context; CharonGKLCGState = CharonGKLCG_A * CharonGKLCGState + CharonGKLCG_C; return CharonGKLCGState; }
+static uint32_t RevenantGKLCGDraw(void *context)
+{ (void)context; RevenantGKLCGState = RevenantGKLCG_A * RevenantGKLCGState + RevenantGKLCG_C; return RevenantGKLCGState; }
 
 @implementation GKLinearCongruentialRandomSource
 - (instancetype)init { return [self initWithSeed:1u]; }
 - (instancetype)initWithSeed:(uint64_t)seed { self = [super init];
-    if (self) { CharonGKLCGSeedValue = seed; CharonGKLCGState = (uint32_t)seed; }
+    if (self) { RevenantGKLCGSeedValue = seed; RevenantGKLCGState = (uint32_t)seed; }
     return self; }
-- (uint64_t)seed { return CharonGKLCGSeedValue; }
-- (void)setSeed:(uint64_t)seed { CharonGKLCGSeedValue = seed; CharonGKLCGState = (uint32_t)seed; }
-- (instancetype)initWithCoder:(NSCoder *)coder { return [self initWithSeed:CharonGKLCGSeedValue]; }
-- (NSInteger)nextInt { return [self charon_nextWord:CharonGKLCGDraw context:NULL]; }
+- (uint64_t)seed { return RevenantGKLCGSeedValue; }
+- (void)setSeed:(uint64_t)seed { RevenantGKLCGSeedValue = seed; RevenantGKLCGState = (uint32_t)seed; }
+- (instancetype)initWithCoder:(NSCoder *)coder { return [self initWithSeed:RevenantGKLCGSeedValue]; }
+- (NSInteger)nextInt { return [self revenant_nextWord:RevenantGKLCGDraw context:NULL]; }
 @end

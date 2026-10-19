@@ -20,13 +20,13 @@ function run(opt)
     local out = opt.out or steps.env("RELEASEMEASURE_RUN")
                 or steps.workspace().run("v-impl-avf-1", "releasemeasure-" .. steps.stamp())
     steps.copy(path.join(HERE, "app"), {"xmake.lua", "Info.plist", "control", "main.m"}, out)
-    local envs = {CHARPHOTOBRACKET_ROOT = steps.charon(), CHARPHOTOBRACKET_MINIMUM = "6.1.3"}
+    local envs = {CHARPHOTOBRACKET_ROOT = steps.revenant(), CHARPHOTOBRACKET_MINIMUM = "6.1.3"}
     steps.required({what = "the measurement", verb = "configure", curdir = out, envs = envs,
                     argv = {"f", "-p", "iphoneos", "-a", "armv7", "-y"}, log = path.join(out, "configure.log")})
     steps.required({what = "the measurement", verb = "install", curdir = out, envs = envs,
                     argv = table.join(DEVICE, {"install"}), log = path.join(out, "install.log")})
     local run_status = steps.spawn({curdir = out, envs = envs, log = path.join(out, "launch.log"),
-                                    argv = table.join(DEVICE, {"run", "/Applications/charonreleasemeasure.app/charonreleasemeasure"})})
+                                    argv = table.join(DEVICE, {"run", "/Applications/revenantreleasemeasure.app/revenantreleasemeasure"})})
     steps.spawn({curdir = out, envs = envs, argv = table.join(DEVICE, {"log"}), log = path.join(out, "emulate.log")})
     print("run folder: %s (run status %d)", out, run_status)
     local result = verdict(steps.read(path.join(out, "launch.log")), out)

@@ -27,7 +27,7 @@
 # The rename is the mechanism; the plants below are the receipt.
 #
 # A PLANT in the port's own COPY path, and it is this object's own rather than the family-wide
-# CharonMPSStore one - which measurably does not reach here, because -readBytes:strideBytes: and
+# RevenantMPSStore one - which measurably does not reach here, because -readBytes:strideBytes: and
 # -writeBytes:strideBytes: copy bytes and never call the store, so a plant on that path produces a
 # byte-identical binary and a green run it did not earn. Two plants, first and last byte, so a
 # comparison that reads only one end of each case cannot see one of them. The run has to pass once and
@@ -56,7 +56,7 @@ import sys
 names = sorted(line.strip()[len("_OBJC_CLASS_$_"):] for line in open(sys.argv[1]) if line.strip())
 with open(sys.argv[2], "w") as out:
     for name in names:
-        out.write("#define %s Charon%s\n" % (name, name))
+        out.write("#define %s Revenant%s\n" % (name, name))
 print("classes the port defines: %d" % len(names))
 PY
 
@@ -70,11 +70,11 @@ build_one() {
     rm -rf "$_objdir"
     mkdir -p "$_objdir"
     # The plant macro is DEFINED only for a planted build. Defining it as 0 would still select the
-    # planted path - `#if defined(CHARON_NDARRAY_PLANT)` is true for a 0 - and the "unplanted" build
+    # planted path - `#if defined(REVENANT_NDARRAY_PLANT)` is true for a 0 - and the "unplanted" build
     # would then be plant 2, which is what happened the first time this ran: the comparison was red
     # by exactly the +0x08 the second plant adds, on every case.
     _plantflag=""
-    [ "$_plant" -ne 0 ] && _plantflag="-DCHARON_NDARRAY_PLANT=$_plant"
+    [ "$_plant" -ne 0 ] && _plantflag="-DREVENANT_NDARRAY_PLANT=$_plant"
     _objects=""
     for name in $sources; do
         xcrun clang -fno-objc-arc -fvisibility=hidden $target $quiet -I"$mps" -include "$build/rename.h" \

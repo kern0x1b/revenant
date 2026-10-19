@@ -14,13 +14,13 @@ bool CAFrameRateRangeIsEqualToRange(CAFrameRateRange range, CAFrameRateRange oth
     return range.minimum == other.minimum && range.maximum == other.maximum && range.preferred == other.preferred;
 }
 
-static const char CharonAnimationFrameRateRangeKey;
+static const char RevenantAnimationFrameRateRangeKey;
 
-@implementation CAAnimation (CharonFrameRateRange)
+@implementation CAAnimation (RevenantFrameRateRange)
 
 - (CAFrameRateRange)preferredFrameRateRange
 {
-    NSValue *boxed = objc_getAssociatedObject(self, &CharonAnimationFrameRateRangeKey);
+    NSValue *boxed = objc_getAssociatedObject(self, &RevenantAnimationFrameRateRangeKey);
     CAFrameRateRange range = CAFrameRateRangeDefault;
     if (boxed)
         [boxed getValue:&range];
@@ -30,7 +30,7 @@ static const char CharonAnimationFrameRateRangeKey;
 - (void)setPreferredFrameRateRange:(CAFrameRateRange)preferredFrameRateRange
 {
     NSValue *boxed = [NSValue valueWithBytes:&preferredFrameRateRange objCType:@encode(CAFrameRateRange)];
-    objc_setAssociatedObject(self, &CharonAnimationFrameRateRangeKey, boxed, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, &RevenantAnimationFrameRateRangeKey, boxed, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
 @end

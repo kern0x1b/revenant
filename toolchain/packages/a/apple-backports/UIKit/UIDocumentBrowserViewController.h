@@ -1,6 +1,6 @@
 #import <Foundation/Foundation.h>
 
-#import "CharonDocumentBrowserTypes.h"
+#import "RevenantDocumentBrowserTypes.h"
 
 @protocol UIDocumentBrowserViewControllerDelegate;
 

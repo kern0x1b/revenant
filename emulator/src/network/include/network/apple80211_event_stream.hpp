@@ -14,7 +14,7 @@
 #include <string_view>
 #include <vector>
 
-namespace shade::darwin::network::apple80211_driver {
+namespace emulator::darwin::network::apple80211_driver {
 
 enum class EventStreamFormat : std::uint8_t {
     Undetected,

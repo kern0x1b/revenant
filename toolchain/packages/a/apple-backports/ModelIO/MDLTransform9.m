@@ -3,7 +3,7 @@
 
 #pragma clang diagnostic ignored "-Wobjc-missing-property-synthesis"
 
-static matrix_float4x4 CharonMDLRotationMatrix(vector_float3 radians)
+static matrix_float4x4 RevenantMDLRotationMatrix(vector_float3 radians)
 {
     float cx = cosf(radians.x), sx = sinf(radians.x);
     float cy = cosf(radians.y), sy = sinf(radians.y);
@@ -27,7 +27,7 @@ static matrix_float4x4 CharonMDLRotationMatrix(vector_float3 radians)
 }
 
 
-static matrix_float4x4 CharonMDLIdentityFloat4x4(void)
+static matrix_float4x4 RevenantMDLIdentityFloat4x4(void)
 {
     matrix_float4x4 identity;
     identity.columns[0] = (vector_float4){1, 0, 0, 0};
@@ -69,7 +69,7 @@ static matrix_float4x4 CharonMDLIdentityFloat4x4(void)
 
 - (instancetype)init
 {
-    return [self initWithMatrix:CharonMDLIdentityFloat4x4() resetsTransform:YES];
+    return [self initWithMatrix:RevenantMDLIdentityFloat4x4() resetsTransform:YES];
 }
 
 - (instancetype)initWithIdentity
@@ -105,7 +105,7 @@ static matrix_float4x4 CharonMDLIdentityFloat4x4(void)
 
 - (void)setIdentity
 {
-    [self setMatrix:CharonMDLIdentityFloat4x4() forTime:0];
+    [self setMatrix:RevenantMDLIdentityFloat4x4() forTime:0];
 }
 
 - (void)setMatrix:(matrix_float4x4)matrix forTime:(NSTimeInterval)time
@@ -178,7 +178,7 @@ static matrix_float4x4 CharonMDLIdentityFloat4x4(void)
     return _shear;
 }
 
-- (void)charon_recompose
+- (void)revenant_recompose
 {
     _matrix = [self matrixForTranslation:_translation rotation:_rotation shear:_shear scale:_scale];
     [_samples setFloat4x4:_matrix atTime:0];
@@ -199,7 +199,7 @@ static matrix_float4x4 CharonMDLIdentityFloat4x4(void)
         result.columns[1] = (vector_float4){0, scale.y, scale.y * shear.y, 0};
         result.columns[2] = (vector_float4){0, 0, scale.z, 0};
         result.columns[3] = (vector_float4){0, 0, 0, 1};
-    result = simd_mul(CharonMDLRotationMatrix(rotation), result);
+    result = simd_mul(RevenantMDLRotationMatrix(rotation), result);
     result.columns[3] = (vector_float4){translation.x, translation.y, translation.z, 1};
     return result;
 }
@@ -258,7 +258,7 @@ static matrix_float4x4 CharonMDLIdentityFloat4x4(void)
 
 + (matrix_float4x4)globalTransformWithObject:(MDLObject *)object atTime:(NSTimeInterval)time
 {
-    matrix_float4x4 global = CharonMDLIdentityFloat4x4();
+    matrix_float4x4 global = RevenantMDLIdentityFloat4x4();
     for (MDLObject *at = object; at; at = at.parent) {
         id<MDLTransformComponent> transform = at.transform;
         if (!transform)

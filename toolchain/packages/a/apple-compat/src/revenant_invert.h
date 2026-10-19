@@ -1,7 +1,7 @@
 #include <simd/simd.h>
 
-#define CHARON_INVERSE(SCALAR, TAG)                                                                                  \
-    static SCALAR charon_determinant_##TAG(const SCALAR m[4][4], int n)                                              \
+#define REVENANT_INVERSE(SCALAR, TAG)                                                                                  \
+    static SCALAR revenant_determinant_##TAG(const SCALAR m[4][4], int n)                                              \
     {                                                                                                                \
         if (n == 1) {                                                                                                \
             return m[0][0];                                                                                          \
@@ -16,16 +16,16 @@
                     }                                                                                                \
                 }                                                                                                    \
             }                                                                                                        \
-            SCALAR term = m[0][column] * charon_determinant_##TAG(minor, n - 1);                                     \
+            SCALAR term = m[0][column] * revenant_determinant_##TAG(minor, n - 1);                                     \
             sum += column % 2 ? -term : term;                                                                        \
         }                                                                                                            \
         return sum;                                                                                                  \
     }                                                                                                                \
                                                                                                                      \
                                        \
-    static void charon_inverse_##TAG(const SCALAR m[4][4], int n, SCALAR out[4][4])                                  \
+    static void revenant_inverse_##TAG(const SCALAR m[4][4], int n, SCALAR out[4][4])                                  \
     {                                                                                                                \
-        SCALAR determinant = charon_determinant_##TAG(m, n);                                                         \
+        SCALAR determinant = revenant_determinant_##TAG(m, n);                                                         \
         for (int row = 0; row < n; row++) {                                                                          \
             for (int column = 0; column < n; column++) {                                                             \
                                           \
@@ -41,14 +41,14 @@
                     }                                                                                                \
                     taken++;                                                                                         \
                 }                                                                                                    \
-                SCALAR cofactor = charon_determinant_##TAG(minor, n - 1);                                           \
+                SCALAR cofactor = revenant_determinant_##TAG(minor, n - 1);                                           \
                 out[row][column] = ((row + column) % 2 ? -cofactor : cofactor) / determinant;                        \
             }                                                                                                        \
         }                                                                                                            \
     }
 
-#define CHARON_INVERT_FUNCTION(NAME, MATRIX, SCALAR, TAG, N)                                                         \
-    CHARON_INVERSE(SCALAR, TAG)                                                                                      \
+#define REVENANT_INVERT_FUNCTION(NAME, MATRIX, SCALAR, TAG, N)                                                         \
+    REVENANT_INVERSE(SCALAR, TAG)                                                                                      \
     __attribute__((visibility("hidden")))                                                                            \
     MATRIX NAME(MATRIX x)                                                                                            \
     {                                                                                                                \
@@ -58,7 +58,7 @@
                 in[row][column] = x.columns[column][row];                                                            \
             }                                                                                                        \
         }                                                                                                            \
-        charon_inverse_##TAG(in, N, out);                                                                            \
+        revenant_inverse_##TAG(in, N, out);                                                                            \
         MATRIX result;                                                                                               \
         for (int row = 0; row < N; row++) {                                                                          \
             for (int column = 0; column < N; column++) {                                                             \

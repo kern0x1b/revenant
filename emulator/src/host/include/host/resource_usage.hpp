@@ -8,7 +8,7 @@
 
 #include "foundation/host_memory.hpp"
 
-namespace shade {
+namespace emulator {
 
 [[nodiscard]] HostMemorySnapshot host_memory_snapshot();
 [[nodiscard]] HostMemoryBudgetSnapshot host_memory_budget_snapshot();

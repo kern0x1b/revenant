@@ -4,9 +4,9 @@
 #import <CoreFoundation/CoreFoundation.h>
 #import <dispatch/dispatch.h>
 
-@interface CharonSecProtocolMetadata : NSObject <OS_sec_protocol_metadata>
+@interface RevenantSecProtocolMetadata : NSObject <OS_sec_protocol_metadata>
 @end
-@implementation CharonSecProtocolMetadata
+@implementation RevenantSecProtocolMetadata
 @end
 
 tls_protocol_version_t sec_protocol_metadata_get_negotiated_tls_protocol_version(

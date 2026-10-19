@@ -9,7 +9,7 @@
 
 #include <cstdint>
 
-namespace shade {
+namespace emulator {
 
 enum class TouchPhase : std::uint8_t {
     Down,

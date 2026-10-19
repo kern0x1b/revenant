@@ -214,7 +214,7 @@ static void compare_with_native(void)
         UITableViewCell *cell = [controller.tableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:1 inSection:0]];
         BOOL found = NO;
         for (UIView *view in cell.subviews)
-            found = found || [NSStringFromClass([view class]) isEqual:@"CharonSwipeContainer"];
+            found = found || [NSStringFromClass([view class]) isEqual:@"RevenantSwipeContainer"];
         CHECK(found && !controller.tableView.editing, "the swipe buttons of a table view controller's table are shown, and the table is not put into editing by the controller's own willBegin");
     });
 }
@@ -223,7 +223,7 @@ static void compare_with_native(void)
 {
     [[NSFileManager defaultManager] createDirectoryAtPath:results_folder withIntermediateDirectories:YES attributes:nil error:NULL];
     [[NSFileManager defaultManager] removeItemAtPath:[results_folder stringByAppendingPathComponent:@"swipelook.done"] error:NULL];
-    charon_log_to([results_folder stringByAppendingPathComponent:@"swipelook.log"]);
+    revenant_log_to([results_folder stringByAppendingPathComponent:@"swipelook.log"]);
     self.window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
     self.window.rootViewController = [[UIViewController alloc] init];
     [self.window makeKeyAndVisible];
@@ -235,8 +235,8 @@ static void compare_with_native(void)
         [self tableControllerScenario:[LookTableController class]];
         gesture_run(^{
             compare_with_native();
-            printf("checks=%d failures=%d\n", charon_checks, charon_failures);
-            NSString *summary = [NSString stringWithFormat:@"%@ checks=%d failures=%d\n", charon_failures ? @"FAIL" : @"ok", charon_checks, charon_failures];
+            printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
+            NSString *summary = [NSString stringWithFormat:@"%@ checks=%d failures=%d\n", revenant_failures ? @"FAIL" : @"ok", revenant_checks, revenant_failures];
             [summary writeToFile:[results_folder stringByAppendingPathComponent:@"swipelook.done"] atomically:YES encoding:NSUTF8StringEncoding error:NULL];
         });
     });

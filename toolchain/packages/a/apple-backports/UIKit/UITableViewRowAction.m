@@ -1,4 +1,4 @@
-#import "CharonSwipe.h"
+#import "RevenantSwipe.h"
 
 @implementation UITableViewRowAction {
     UITableViewRowActionStyle _style;
@@ -28,7 +28,7 @@
     return copy;
 }
 
-- (void)charon_performForIndexPath:(NSIndexPath *)indexPath
+- (void)revenant_performForIndexPath:(NSIndexPath *)indexPath
 {
     if (_handler)
         _handler(self, indexPath);

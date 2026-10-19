@@ -2,7 +2,7 @@
 
 #pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
 
-@implementation UIWindowScene (CharonGeometry16)
+@implementation UIWindowScene (RevenantGeometry16)
 
 - (void)requestGeometryUpdateWithPreferences:(UIWindowSceneGeometryPreferences *)geometryPreferences errorHandler:(void (^)(NSError *error))errorHandler
 {

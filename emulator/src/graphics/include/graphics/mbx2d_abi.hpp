@@ -9,7 +9,7 @@
 
 #include <cstdint>
 
-namespace shade::mbx2d_abi {
+namespace emulator::mbx2d_abi {
 
 inline constexpr std::uint32_t success = 0;
 inline constexpr std::uint32_t failure = 1;

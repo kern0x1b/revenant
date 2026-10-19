@@ -7,4 +7,4 @@
 
 #pragma once
 
-void shade_guest_run_runtime_initializers(void);
+void emulator_guest_run_runtime_initializers(void);

@@ -1,12 +1,12 @@
 #import <UIKit/UIKit.h>
 
-UIColor *charon_system_colour(NSUInteger row);
+UIColor *revenant_system_colour(NSUInteger row);
 
-@implementation UIColor (CharonSystemPurpleColor)
+@implementation UIColor (RevenantSystemPurpleColor)
 
 + (UIColor *)systemPurpleColor
 {
-    return charon_system_colour(35);
+    return revenant_system_colour(35);
 }
 
 @end

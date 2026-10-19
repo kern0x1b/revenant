@@ -53,7 +53,7 @@ renames=""
 for name in AVPlayerMediaSelectionCriteria AVCaptureBracketedStillImageSettings \
             AVCaptureAutoExposureBracketedStillImageSettings AVCaptureManualExposureBracketedStillImageSettings \
             AVAssetResourceRenewalRequest AVMediaSelection AVMutableMediaSelection; do
-    renames="$renames -D$name=charon_host_$name"
+    renames="$renames -D$name=revenant_host_$name"
 done
 
 for source in $sources; do cp "$avf/$source.m" "$build/src/$source.m"; done
@@ -76,7 +76,7 @@ PERTURB
         # row's value moves and nothing else does.
         #
         # IT READS THE STORED OBJECT, NOT ITSELF. The replacement used to be
-        # `[self.charon_preferredLanguages count] ? @[@"PLANTED"] : @[]`, which is a call into the very
+        # `[self.revenant_preferredLanguages count] ? @[@"PLANTED"] : @[]`, which is a call into the very
         # getter it was substituting for: the probe builds a criteria object through the factory, reads
         # -preferredLanguages, and the process died of unbounded recursion (SIGSEGV) before a single row was
         # written, so this mutant could never have fired and the run said "the port probe did not run" rather
@@ -85,8 +85,8 @@ PERTURB
 import sys
 path = sys.argv[1]
 text = open(path).read()
-before = 'return objc_getAssociatedObject(self, "charon.avf.criteria.preferredLanguages") ?: @[];'
-after = ('return [objc_getAssociatedObject(self, "charon.avf.criteria.preferredLanguages") count] '
+before = 'return objc_getAssociatedObject(self, "revenant.avf.criteria.preferredLanguages") ?: @[];'
+after = ('return [objc_getAssociatedObject(self, "revenant.avf.criteria.preferredLanguages") count] '
          '? @[@"PLANTED"] : @[];')
 if text.count(before) != 1:
     raise SystemExit("the mutant target is not unique (%d matches), so this run proves nothing" % text.count(before))
@@ -144,7 +144,7 @@ env -u AVFDESCPROBE "$build/host" > "$build/host.table" 2> "$build/host.stderr" 
 
 # 2. the same probe against the port's own classes
 # shellcheck disable=SC2086
-xcrun clang -fobjc-arc -w -DCHARON_PORT_BUILD=1 -I"$avf" $renames "$here/probe.m" $objects \
+xcrun clang -fobjc-arc -w -DREVENANT_PORT_BUILD=1 -I"$avf" $renames "$here/probe.m" $objects \
     -framework Foundation -framework AVFoundation -framework CoreMedia \
     -o "$build/port" > "$build/port.log" 2>&1 || {
         echo "FAIL: the port probe did not link - a name the port does not define is a link error"

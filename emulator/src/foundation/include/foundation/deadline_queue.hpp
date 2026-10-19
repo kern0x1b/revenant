@@ -13,7 +13,7 @@
 #include <set>
 #include <utility>
 
-namespace shade {
+namespace emulator {
 
 template <typename Key, typename Deadline, typename KeyCompare = std::less<Key>>
 class DeadlineQueue {

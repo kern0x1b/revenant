@@ -1,8 +1,8 @@
 local CLASSES = {"SCNView", "SCNScene", "SCNNode", "SCNRenderer", "SCNTransaction", "SCNAction",
-    "UIView" , "CharonNoSuchClassXYZ" }
+    "UIView" , "RevenantNoSuchClassXYZ" }
 local PROTOCOLS = {"SCNSceneRenderer", "SCNSceneRendererDelegate", "SCNAnimatable"}
 local SELECTORS = {
-    {"UIView", "-", "setNeedsLayout"} , {"UIView", "-", "charonNoSuchSelector"} , {"SCNView", "-", "initWithFrame:options:"}, {"SCNView", "-", "initWithFrame:"},
+    {"UIView", "-", "setNeedsLayout"} , {"UIView", "-", "revenantNoSuchSelector"} , {"SCNView", "-", "initWithFrame:options:"}, {"SCNView", "-", "initWithFrame:"},
     {"SCNView", "-", "scene"}, {"SCNView", "-", "setScene:"},
     {"SCNView", "-", "delegate"}, {"SCNView", "-", "setDelegate:"},
     {"SCNView", "-", "preferredFramesPerSecond"}, {"SCNView", "-", "setPreferredFramesPerSecond:"},

@@ -1,14 +1,14 @@
 #import <Foundation/Foundation.h>
 #import <CloudKit/CloudKit.h>
 
-#import "CharonCKSubscription.h"
-#import "CharonCKValue.h"
+#import "RevenantCKSubscription.h"
+#import "RevenantCKValue.h"
 
 #pragma mark - CKUserIdentity
 
 @implementation CKUserIdentity
 
-- (instancetype)charon_identity
+- (instancetype)revenant_identity
 {
     return [super init];
 }

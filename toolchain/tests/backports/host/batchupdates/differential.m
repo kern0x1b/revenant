@@ -37,7 +37,7 @@ static void run(BOOL ours, NSMutableArray *order, NSInteger *rowsAfter)
     [table reloadData];
     [table layoutIfNeeded];
 
-    SEL selector = ours ? NSSelectorFromString(@"charonHost_performBatchUpdates:completion:") : @selector(performBatchUpdates:completion:);
+    SEL selector = ours ? NSSelectorFromString(@"revenantHost_performBatchUpdates:completion:") : @selector(performBatchUpdates:completion:);
     [order addObject:@"before"];
     source.rows = 5;
     void (^updates)(void) = ^{

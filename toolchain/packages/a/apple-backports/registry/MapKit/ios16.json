@@ -76,7 +76,7 @@
       "reason": "the member of a class the release has no answer for, so it is carried with the class",
       "effect": "both factories, both initialisers, and includesOptions:/excludesOptions: answering over the header's own option bits",
       "facts": "facts/MapKit/MapKit.md",
-      "source": "the SDK 16.4 header has no MKAddressFilter, so the class and its option bits are declared under Apple's own names in CharonMapKit.h; apple.dyld's first_releases puts it at 18.0"
+      "source": "the SDK 16.4 header has no MKAddressFilter, so the class and its option bits are declared under Apple's own names in RevenantMapKit.h; apple.dyld's first_releases puts it at 18.0"
     },
     {
       "api": "-[MKAddressFilter includesOptions:]",
@@ -87,7 +87,7 @@
       "reason": "the member of a class the release has no answer for, so it is carried with the class",
       "effect": "both factories, both initialisers, and includesOptions:/excludesOptions: answering over the header's own option bits",
       "facts": "facts/MapKit/MapKit.md",
-      "source": "the SDK 16.4 header has no MKAddressFilter, so the class and its option bits are declared under Apple's own names in CharonMapKit.h; apple.dyld's first_releases puts it at 18.0"
+      "source": "the SDK 16.4 header has no MKAddressFilter, so the class and its option bits are declared under Apple's own names in RevenantMapKit.h; apple.dyld's first_releases puts it at 18.0"
     },
     {
       "api": "-[MKAddressFilter initExcludingOptions:]",
@@ -98,7 +98,7 @@
       "reason": "the member of a class the release has no answer for, so it is carried with the class",
       "effect": "both factories, both initialisers, and includesOptions:/excludesOptions: answering over the header's own option bits",
       "facts": "facts/MapKit/MapKit.md",
-      "source": "the SDK 16.4 header has no MKAddressFilter, so the class and its option bits are declared under Apple's own names in CharonMapKit.h; apple.dyld's first_releases puts it at 18.0"
+      "source": "the SDK 16.4 header has no MKAddressFilter, so the class and its option bits are declared under Apple's own names in RevenantMapKit.h; apple.dyld's first_releases puts it at 18.0"
     },
     {
       "api": "-[MKAddressFilter initIncludingOptions:]",
@@ -109,7 +109,7 @@
       "reason": "the member of a class the release has no answer for, so it is carried with the class",
       "effect": "both factories, both initialisers, and includesOptions:/excludesOptions: answering over the header's own option bits",
       "facts": "facts/MapKit/MapKit.md",
-      "source": "the SDK 16.4 header has no MKAddressFilter, so the class and its option bits are declared under Apple's own names in CharonMapKit.h; apple.dyld's first_releases puts it at 18.0"
+      "source": "the SDK 16.4 header has no MKAddressFilter, so the class and its option bits are declared under Apple's own names in RevenantMapKit.h; apple.dyld's first_releases puts it at 18.0"
     },
     {
       "api": "-[MKGradientPolylineRenderer setColors:atLocations:]",
@@ -549,7 +549,7 @@
       "reason": "the filter of a local search's address, which the release's own search has no part in",
       "effect": "both factories, both initialisers, and includesOptions:/excludesOptions: answering over the header's own option bits",
       "facts": "facts/MapKit/MapKit.md",
-      "source": "the SDK 16.4 header has no MKAddressFilter, so the class and its option bits are declared under Apple's own names in CharonMapKit.h; apple.dyld's first_releases puts it at 18.0"
+      "source": "the SDK 16.4 header has no MKAddressFilter, so the class and its option bits are declared under Apple's own names in RevenantMapKit.h; apple.dyld's first_releases puts it at 18.0"
     },
     {
       "api": "MKAddressFilter.filterExcludingAll",
@@ -560,7 +560,7 @@
       "reason": "the member of a class the release has no answer for, so it is carried with the class",
       "effect": "both factories, both initialisers, and includesOptions:/excludesOptions: answering over the header's own option bits",
       "facts": "facts/MapKit/MapKit.md",
-      "source": "the SDK 16.4 header has no MKAddressFilter, so the class and its option bits are declared under Apple's own names in CharonMapKit.h; apple.dyld's first_releases puts it at 18.0"
+      "source": "the SDK 16.4 header has no MKAddressFilter, so the class and its option bits are declared under Apple's own names in RevenantMapKit.h; apple.dyld's first_releases puts it at 18.0"
     },
     {
       "api": "MKAddressFilter.filterIncludingAll",
@@ -571,7 +571,7 @@
       "reason": "the member of a class the release has no answer for, so it is carried with the class",
       "effect": "both factories, both initialisers, and includesOptions:/excludesOptions: answering over the header's own option bits",
       "facts": "facts/MapKit/MapKit.md",
-      "source": "the SDK 16.4 header has no MKAddressFilter, so the class and its option bits are declared under Apple's own names in CharonMapKit.h; apple.dyld's first_releases puts it at 18.0"
+      "source": "the SDK 16.4 header has no MKAddressFilter, so the class and its option bits are declared under Apple's own names in RevenantMapKit.h; apple.dyld's first_releases puts it at 18.0"
     },
     {
       "api": "MKGradientPolylineRenderer",

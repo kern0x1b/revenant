@@ -10,7 +10,7 @@
 #include <algorithm>
 #include <limits>
 
-namespace shade {
+namespace emulator {
 namespace {
 
     constexpr std::uint64_t maximum_positive_offset =

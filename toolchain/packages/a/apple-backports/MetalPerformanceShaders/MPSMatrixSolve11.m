@@ -1,30 +1,30 @@
-#import "CharonMPS.h"
+#import "RevenantMPS.h"
 
 
-static inline double CharonMatrixSolveGet(const CharonMPSMatrixView *view, NSUInteger matrix, NSUInteger row, NSUInteger column)
+static inline double RevenantMatrixSolveGet(const RevenantMPSMatrixView *view, NSUInteger matrix, NSUInteger row, NSUInteger column)
 {
-    return CharonMPSLoad(CharonMPSMatrixElement(view, matrix, row, column), view->dataType, 0);
+    return RevenantMPSLoad(RevenantMPSMatrixElement(view, matrix, row, column), view->dataType, 0);
 }
 
-static inline void CharonMatrixSolvePut(const CharonMPSMatrixView *view, NSUInteger matrix, NSUInteger row, NSUInteger column, double value)
+static inline void RevenantMatrixSolvePut(const RevenantMPSMatrixView *view, NSUInteger matrix, NSUInteger row, NSUInteger column, double value)
 {
-    CharonMPSStore(CharonMPSMatrixElement(view, matrix, row, column), view->dataType, 0, value);
+    RevenantMPSStore(RevenantMPSMatrixElement(view, matrix, row, column), view->dataType, 0, value);
 }
 
-static void CharonMatrixSolveStatus(id<MTLCommandBuffer> commandBuffer, id<MTLBuffer> status, MPSMatrixDecompositionStatus value)
+static void RevenantMatrixSolveStatus(id<MTLCommandBuffer> commandBuffer, id<MTLBuffer> status, MPSMatrixDecompositionStatus value)
 {
     MPSMatrixDecompositionStatus *bytes = [status contents];
     if (bytes)
         *bytes = value;
     else
-        CharonMPSRefuse(@"%s: no status buffer was given, so the decomposition's %d was computed and not "
+        RevenantMPSRefuse(@"%s: no status buffer was given, so the decomposition's %d was computed and not "
                         "written anywhere", "MPSMatrixDecomposition", (int)value);
     (void)commandBuffer;
 }
 
-static inline double CharonMPSCholeskyFactor(const CharonMPSMatrixView *view, BOOL lower, NSUInteger r, NSUInteger c)
+static inline double RevenantMPSCholeskyFactor(const RevenantMPSMatrixView *view, BOOL lower, NSUInteger r, NSUInteger c)
 {
-    return CharonMatrixSolveGet(view, 0, lower ? r : c, lower ? c : r);
+    return RevenantMatrixSolveGet(view, 0, lower ? r : c, lower ? c : r);
 }
 
 @implementation MPSMatrixDecompositionCholesky {
@@ -51,18 +51,18 @@ static inline double CharonMPSCholeskyFactor(const CharonMPSMatrixView *view, BO
                  resultMatrix:(MPSMatrix *)resultMatrix
                        status:(id<MTLBuffer>)status
 {
-    if (!CharonMPSCommandBufferPermits(commandBuffer))
+    if (!RevenantMPSCommandBufferPermits(commandBuffer))
         return;
-    CharonMPSMatrixView from = CharonMPSMatrixViewOf(sourceMatrix);
-    CharonMPSMatrixView to = CharonMPSMatrixViewOf(resultMatrix);
-    if (!CharonMPSDataTypeIsElement(from.dataType) || !CharonMPSDataTypeIsElement(to.dataType)) {
-        CharonMPSRefuse(@"MPSMatrixDecompositionCholesky: a matrix of a data type that is not one of the eight element types was given, so nothing was written");
+    RevenantMPSMatrixView from = RevenantMPSMatrixViewOf(sourceMatrix);
+    RevenantMPSMatrixView to = RevenantMPSMatrixViewOf(resultMatrix);
+    if (!RevenantMPSDataTypeIsElement(from.dataType) || !RevenantMPSDataTypeIsElement(to.dataType)) {
+        RevenantMPSRefuse(@"MPSMatrixDecompositionCholesky: a matrix of a data type that is not one of the eight element types was given, so nothing was written");
         return;
     }
     NSUInteger order = _order;
-    if (!CharonMPSMatrixHolds(&from, 0, 0, 0, order, order) ||
-        !CharonMPSMatrixHolds(&to, 0, 0, 0, order, order)) {
-        CharonMPSRefuse(@"MPSMatrixDecompositionCholesky: the source or the result does not hold a %lux%lu "
+    if (!RevenantMPSMatrixHolds(&from, 0, 0, 0, order, order) ||
+        !RevenantMPSMatrixHolds(&to, 0, 0, 0, order, order)) {
+        RevenantMPSRefuse(@"MPSMatrixDecompositionCholesky: the source or the result does not hold a %lux%lu "
                         @"matrix, so nothing was written", (unsigned long)order, (unsigned long)order);
         return;
     }
@@ -71,28 +71,28 @@ static inline double CharonMPSCholeskyFactor(const CharonMPSMatrixView *view, BO
         for (NSUInteger c = 0; c <= r; c++) {
             NSUInteger row = _lower ? r : c;
             NSUInteger column = _lower ? c : r;
-            double sum = CharonMatrixSolveGet(&from, 0, r, c);
+            double sum = RevenantMatrixSolveGet(&from, 0, r, c);
             for (NSUInteger k = 0; k < c; k++) {
-                sum -= CharonMPSCholeskyFactor(&to, _lower, r, k) * CharonMPSCholeskyFactor(&to, _lower, c, k);
+                sum -= RevenantMPSCholeskyFactor(&to, _lower, r, k) * RevenantMPSCholeskyFactor(&to, _lower, c, k);
             }
             if (r == c) {
                 if (sum <= 0.0) {
-                    CharonMatrixSolveStatus(commandBuffer, status, MPSMatrixDecompositionStatusNonPositiveDefinite);
+                    RevenantMatrixSolveStatus(commandBuffer, status, MPSMatrixDecompositionStatusNonPositiveDefinite);
                     return;
                 }
-                CharonMatrixSolvePut(&to, 0, row, column, sqrt(sum));
+                RevenantMatrixSolvePut(&to, 0, row, column, sqrt(sum));
             } else {
-                double diagonalEntry = CharonMPSCholeskyFactor(&to, _lower, c, c);
+                double diagonalEntry = RevenantMPSCholeskyFactor(&to, _lower, c, c);
                 if (diagonalEntry == 0.0) {
-                    CharonMatrixSolveStatus(commandBuffer, status, MPSMatrixDecompositionStatusSingular);
+                    RevenantMatrixSolveStatus(commandBuffer, status, MPSMatrixDecompositionStatusSingular);
                     return;
                 }
-                CharonMatrixSolvePut(&to, 0, row, column, sum / diagonalEntry);
+                RevenantMatrixSolvePut(&to, 0, row, column, sum / diagonalEntry);
             }
         }
     }
-    CharonMatrixSolveStatus(commandBuffer, status, MPSMatrixDecompositionStatusSuccess);
-    CharonMPSConsumeReadCount(sourceMatrix);
+    RevenantMatrixSolveStatus(commandBuffer, status, MPSMatrixDecompositionStatusSuccess);
+    RevenantMPSConsumeReadCount(sourceMatrix);
 }
 
 @end
@@ -121,21 +121,21 @@ static inline double CharonMPSCholeskyFactor(const CharonMPSMatrixView *view, BO
                 pivotIndices:(MPSMatrix *)pivotIndices
                        status:(id<MTLBuffer>)status
 {
-    if (!CharonMPSCommandBufferPermits(commandBuffer))
+    if (!RevenantMPSCommandBufferPermits(commandBuffer))
         return;
-    CharonMPSMatrixView from = CharonMPSMatrixViewOf(sourceMatrix);
-    CharonMPSMatrixView to = CharonMPSMatrixViewOf(resultMatrix);
-    CharonMPSMatrixView pivot = CharonMPSMatrixViewOf(pivotIndices);
-    if (!CharonMPSDataTypeIsElement(from.dataType) || !CharonMPSDataTypeIsElement(to.dataType)) {
-        CharonMPSRefuse(@"MPSMatrixDecompositionLU: a matrix of a data type that is not one of the eight element types was given, so nothing was written");
+    RevenantMPSMatrixView from = RevenantMPSMatrixViewOf(sourceMatrix);
+    RevenantMPSMatrixView to = RevenantMPSMatrixViewOf(resultMatrix);
+    RevenantMPSMatrixView pivot = RevenantMPSMatrixViewOf(pivotIndices);
+    if (!RevenantMPSDataTypeIsElement(from.dataType) || !RevenantMPSDataTypeIsElement(to.dataType)) {
+        RevenantMPSRefuse(@"MPSMatrixDecompositionLU: a matrix of a data type that is not one of the eight element types was given, so nothing was written");
         return;
     }
     NSUInteger rows = _rows, columns = _columns;
     NSUInteger steps = rows < columns ? rows : columns;
-    if (!CharonMPSMatrixHolds(&from, 0, 0, 0, rows, columns) ||
-        !CharonMPSMatrixHolds(&to, 0, 0, 0, rows, columns) ||
-        !CharonMPSMatrixHolds(&pivot, 0, 0, 0, 1, steps)) {
-        CharonMPSRefuse(@"MPSMatrixDecompositionLU: a matrix does not hold the %lux%lu region the "
+    if (!RevenantMPSMatrixHolds(&from, 0, 0, 0, rows, columns) ||
+        !RevenantMPSMatrixHolds(&to, 0, 0, 0, rows, columns) ||
+        !RevenantMPSMatrixHolds(&pivot, 0, 0, 0, 1, steps)) {
+        RevenantMPSRefuse(@"MPSMatrixDecompositionLU: a matrix does not hold the %lux%lu region the "
                         "factorization names, so nothing was written",
                         (unsigned long)rows, (unsigned long)columns);
         return;
@@ -143,43 +143,43 @@ static inline double CharonMPSCholeskyFactor(const CharonMPSMatrixView *view, BO
 
     for (NSUInteger row = 0; row < rows; row++)
         for (NSUInteger column = 0; column < columns; column++)
-            CharonMatrixSolvePut(&to, 0, row, column, CharonMatrixSolveGet(&from, 0, row, column));
+            RevenantMatrixSolvePut(&to, 0, row, column, RevenantMatrixSolveGet(&from, 0, row, column));
 
     for (NSUInteger step = 0; step < steps; step++) {
         NSUInteger best = step;
-        double bestValue = fabs(CharonMatrixSolveGet(&to, 0, step, step));
+        double bestValue = fabs(RevenantMatrixSolveGet(&to, 0, step, step));
         for (NSUInteger candidate = step + 1; candidate < rows; candidate++) {
-            double magnitude = fabs(CharonMatrixSolveGet(&to, 0, candidate, step));
+            double magnitude = fabs(RevenantMatrixSolveGet(&to, 0, candidate, step));
             if (magnitude > bestValue) {
                 bestValue = magnitude;
                 best = candidate;
             }
         }
-        CharonMPSStore(CharonMPSMatrixElement(&pivot, 0, 0, step), pivot.dataType, 0, (double)best);
+        RevenantMPSStore(RevenantMPSMatrixElement(&pivot, 0, 0, step), pivot.dataType, 0, (double)best);
         if (bestValue == 0.0) {
-            CharonMatrixSolveStatus(commandBuffer, status, MPSMatrixDecompositionStatusSingular);
+            RevenantMatrixSolveStatus(commandBuffer, status, MPSMatrixDecompositionStatusSingular);
             return;
         }
         if (best != step) {
             for (NSUInteger column = 0; column < columns; column++) {
-                double held = CharonMatrixSolveGet(&to, 0, step, column);
-                CharonMatrixSolvePut(&to, 0, step, column, CharonMatrixSolveGet(&to, 0, best, column));
-                CharonMatrixSolvePut(&to, 0, best, column, held);
+                double held = RevenantMatrixSolveGet(&to, 0, step, column);
+                RevenantMatrixSolvePut(&to, 0, step, column, RevenantMatrixSolveGet(&to, 0, best, column));
+                RevenantMatrixSolvePut(&to, 0, best, column, held);
             }
         }
-        double diagonal = CharonMatrixSolveGet(&to, 0, step, step);
+        double diagonal = RevenantMatrixSolveGet(&to, 0, step, step);
         for (NSUInteger row = step + 1; row < rows; row++) {
-            double below = CharonMatrixSolveGet(&to, 0, row, step);
-            CharonMatrixSolvePut(&to, 0, row, step, below / diagonal);
+            double below = RevenantMatrixSolveGet(&to, 0, row, step);
+            RevenantMatrixSolvePut(&to, 0, row, step, below / diagonal);
             for (NSUInteger column = step + 1; column < columns; column++) {
-                double updated = CharonMatrixSolveGet(&to, 0, row, column) -
-                                 CharonMatrixSolveGet(&to, 0, row, step) * CharonMatrixSolveGet(&to, 0, step, column);
-                CharonMatrixSolvePut(&to, 0, row, column, updated);
+                double updated = RevenantMatrixSolveGet(&to, 0, row, column) -
+                                 RevenantMatrixSolveGet(&to, 0, row, step) * RevenantMatrixSolveGet(&to, 0, step, column);
+                RevenantMatrixSolvePut(&to, 0, row, column, updated);
             }
         }
     }
-    CharonMatrixSolveStatus(commandBuffer, status, MPSMatrixDecompositionStatusSuccess);
-    CharonMPSConsumeReadCount(sourceMatrix);
+    RevenantMatrixSolveStatus(commandBuffer, status, MPSMatrixDecompositionStatusSuccess);
+    RevenantMPSConsumeReadCount(sourceMatrix);
 }
 
 @end
@@ -222,24 +222,24 @@ static inline double CharonMPSCholeskyFactor(const CharonMPSMatrixView *view, BO
           rightHandSideMatrix:(MPSMatrix *)rightHandSideMatrix
                solutionMatrix:(MPSMatrix *)solutionMatrix
 {
-    if (!CharonMPSCommandBufferPermits(commandBuffer))
+    if (!RevenantMPSCommandBufferPermits(commandBuffer))
         return;
-    CharonMPSMatrixView a = CharonMPSMatrixViewOf(sourceMatrix);
-    CharonMPSMatrixView b = CharonMPSMatrixViewOf(rightHandSideMatrix);
-    CharonMPSMatrixView x = CharonMPSMatrixViewOf(solutionMatrix);
-    if (!CharonMPSDataTypeIsElement(a.dataType) || !CharonMPSDataTypeIsElement(b.dataType) ||
-        !CharonMPSDataTypeIsElement(x.dataType)) {
-        CharonMPSRefuse(@"MPSMatrixSolveTriangular: a matrix of a data type that is not one of the eight element types was given, so nothing was written");
+    RevenantMPSMatrixView a = RevenantMPSMatrixViewOf(sourceMatrix);
+    RevenantMPSMatrixView b = RevenantMPSMatrixViewOf(rightHandSideMatrix);
+    RevenantMPSMatrixView x = RevenantMPSMatrixViewOf(solutionMatrix);
+    if (!RevenantMPSDataTypeIsElement(a.dataType) || !RevenantMPSDataTypeIsElement(b.dataType) ||
+        !RevenantMPSDataTypeIsElement(x.dataType)) {
+        RevenantMPSRefuse(@"MPSMatrixSolveTriangular: a matrix of a data type that is not one of the eight element types was given, so nothing was written");
         return;
     }
     NSUInteger order = _order;
     NSUInteger sides = _numberOfRightHandSides;
     NSUInteger rows = _right ? sides : order;
     NSUInteger columns = _right ? order : sides;
-    if (!CharonMPSMatrixHolds(&a, 0, 0, 0, order, order) ||
-        !CharonMPSMatrixHolds(&b, 0, 0, 0, rows, columns) ||
-        !CharonMPSMatrixHolds(&x, 0, 0, 0, rows, columns)) {
-        CharonMPSRefuse(@"MPSMatrixSolveTriangular: a matrix does not hold the %lux%lu system named, so "
+    if (!RevenantMPSMatrixHolds(&a, 0, 0, 0, order, order) ||
+        !RevenantMPSMatrixHolds(&b, 0, 0, 0, rows, columns) ||
+        !RevenantMPSMatrixHolds(&x, 0, 0, 0, rows, columns)) {
+        RevenantMPSRefuse(@"MPSMatrixSolveTriangular: a matrix does not hold the %lux%lu system named, so "
                         "nothing was written", (unsigned long)order, (unsigned long)order);
         return;
     }
@@ -249,31 +249,31 @@ static inline double CharonMPSCholeskyFactor(const CharonMPSMatrixView *view, BO
     for (NSUInteger side = 0; side < sides; side++) {
         for (NSUInteger step = 0; step < order; step++) {
             NSUInteger index = lower ? step : order - 1 - step;
-            double sum = _right ? CharonMatrixSolveGet(&b, 0, side, index) * _alpha
-                                : CharonMatrixSolveGet(&b, 0, index, side) * _alpha;
+            double sum = _right ? RevenantMatrixSolveGet(&b, 0, side, index) * _alpha
+                                : RevenantMatrixSolveGet(&b, 0, index, side) * _alpha;
             for (NSUInteger k = 0; k < step; k++) {
                 NSUInteger other = lower ? k : order - 1 - k;
-                double solved = _right ? CharonMatrixSolveGet(&x, 0, side, other)
-                                       : CharonMatrixSolveGet(&x, 0, other, side);
-                sum -= CharonMatrixSolveGet(&a, 0, index, other) * solved;
+                double solved = _right ? RevenantMatrixSolveGet(&x, 0, side, other)
+                                       : RevenantMatrixSolveGet(&x, 0, other, side);
+                sum -= RevenantMatrixSolveGet(&a, 0, index, other) * solved;
             }
-            double diagonal = CharonMatrixSolveGet(&a, 0, index, index);
+            double diagonal = RevenantMatrixSolveGet(&a, 0, index, index);
             double answer = _unit ? sum : (diagonal == 0.0 ? NAN : sum / diagonal);
             if (!_unit && diagonal == 0.0) {
-                CharonMPSRefuse(@"MPSMatrixSolveTriangular: row %lu of the coefficient matrix is zero on "
+                RevenantMPSRefuse(@"MPSMatrixSolveTriangular: row %lu of the coefficient matrix is zero on "
                                 "its diagonal and it was not given as unit, so the system has no solution "
                                 "this kernel can divide its way to and nothing was written",
                                 (unsigned long)index);
                 return;
             }
             if (_right)
-                CharonMatrixSolvePut(&x, 0, side, index, answer);
+                RevenantMatrixSolvePut(&x, 0, side, index, answer);
             else
-                CharonMatrixSolvePut(&x, 0, index, side, answer);
+                RevenantMatrixSolvePut(&x, 0, index, side, answer);
         }
     }
-    CharonMPSConsumeReadCount(sourceMatrix);
-    CharonMPSConsumeReadCount(rightHandSideMatrix);
+    RevenantMPSConsumeReadCount(sourceMatrix);
+    RevenantMPSConsumeReadCount(rightHandSideMatrix);
 }
 
 @end
@@ -306,27 +306,27 @@ static inline double CharonMPSCholeskyFactor(const CharonMPSMatrixView *view, BO
           rightHandSideMatrix:(MPSMatrix *)rightHandSideMatrix
                solutionMatrix:(MPSMatrix *)solutionMatrix
 {
-    if (!CharonMPSCommandBufferPermits(commandBuffer))
+    if (!RevenantMPSCommandBufferPermits(commandBuffer))
         return;
-    CharonMPSMatrixView factor = CharonMPSMatrixViewOf(sourceMatrix);
-    CharonMPSMatrixView b = CharonMPSMatrixViewOf(rightHandSideMatrix);
-    CharonMPSMatrixView x = CharonMPSMatrixViewOf(solutionMatrix);
-    if (!CharonMPSDataTypeIsElement(factor.dataType) || !CharonMPSDataTypeIsElement(b.dataType) ||
-        !CharonMPSDataTypeIsElement(x.dataType)) {
-        CharonMPSRefuse(@"MPSMatrixSolveCholesky: a matrix of a data type that is not one of the eight element types was given, so nothing was written");
+    RevenantMPSMatrixView factor = RevenantMPSMatrixViewOf(sourceMatrix);
+    RevenantMPSMatrixView b = RevenantMPSMatrixViewOf(rightHandSideMatrix);
+    RevenantMPSMatrixView x = RevenantMPSMatrixViewOf(solutionMatrix);
+    if (!RevenantMPSDataTypeIsElement(factor.dataType) || !RevenantMPSDataTypeIsElement(b.dataType) ||
+        !RevenantMPSDataTypeIsElement(x.dataType)) {
+        RevenantMPSRefuse(@"MPSMatrixSolveCholesky: a matrix of a data type that is not one of the eight element types was given, so nothing was written");
         return;
     }
     NSUInteger order = _order, sides = _numberOfRightHandSides;
-    if (!CharonMPSMatrixHolds(&factor, 0, 0, 0, order, order) ||
-        !CharonMPSMatrixHolds(&b, 0, 0, 0, order, sides) ||
-        !CharonMPSMatrixHolds(&x, 0, 0, 0, order, sides)) {
-        CharonMPSRefuse(@"MPSMatrixSolveCholesky: a matrix does not hold the %lux%lu system named, so "
+    if (!RevenantMPSMatrixHolds(&factor, 0, 0, 0, order, order) ||
+        !RevenantMPSMatrixHolds(&b, 0, 0, 0, order, sides) ||
+        !RevenantMPSMatrixHolds(&x, 0, 0, 0, order, sides)) {
+        RevenantMPSRefuse(@"MPSMatrixSolveCholesky: a matrix does not hold the %lux%lu system named, so "
                         "nothing was written", (unsigned long)order, (unsigned long)order);
         return;
     }
     double *intermediate = calloc(order * sides, sizeof(double));
     if (!intermediate) {
-        CharonMPSRefuse(@"MPSMatrixSolveCholesky: no memory for the %lux%lu intermediate, so nothing was "
+        RevenantMPSRefuse(@"MPSMatrixSolveCholesky: no memory for the %lux%lu intermediate, so nothing was "
                         "written", (unsigned long)order, (unsigned long)sides);
         return;
     }
@@ -334,16 +334,16 @@ static inline double CharonMPSCholeskyFactor(const CharonMPSMatrixView *view, BO
     for (NSUInteger side = 0; side < sides; side++) {
         for (NSUInteger step = 0; step < order; step++) {
             NSUInteger row = lower ? step : order - 1 - step;
-            double sum = CharonMatrixSolveGet(&b, 0, row, side);
+            double sum = RevenantMatrixSolveGet(&b, 0, row, side);
             for (NSUInteger k = 0; k < step; k++) {
                 NSUInteger other = lower ? k : order - 1 - k;
-                sum -= CharonMatrixSolveGet(&factor, 0, lower ? row : other, lower ? other : row) *
+                sum -= RevenantMatrixSolveGet(&factor, 0, lower ? row : other, lower ? other : row) *
                        intermediate[other * sides + side];
             }
-            double diagonal = CharonMatrixSolveGet(&factor, 0, row, row);
+            double diagonal = RevenantMatrixSolveGet(&factor, 0, row, row);
             if (diagonal == 0.0) {
                 free(intermediate);
-                CharonMPSRefuse(@"MPSMatrixSolveCholesky: the factor's diagonal entry at %lu is zero, so "
+                RevenantMPSRefuse(@"MPSMatrixSolveCholesky: the factor's diagonal entry at %lu is zero, so "
                                 "the system has no solution this kernel can divide its way to and nothing "
                                 "was written", (unsigned long)row);
                 return;
@@ -355,22 +355,22 @@ static inline double CharonMPSCholeskyFactor(const CharonMPSMatrixView *view, BO
             double sum = intermediate[row * sides + side];
             for (NSUInteger previous = 0; previous < done; previous++) {
                 NSUInteger other = lower ? order - 1 - previous : previous;
-                sum -= CharonMatrixSolveGet(&factor, 0, lower ? other : row, lower ? row : other) *
-                       CharonMatrixSolveGet(&x, 0, other, side);
+                sum -= RevenantMatrixSolveGet(&factor, 0, lower ? other : row, lower ? row : other) *
+                       RevenantMatrixSolveGet(&x, 0, other, side);
             }
-            double diagonal = CharonMatrixSolveGet(&factor, 0, row, row);
+            double diagonal = RevenantMatrixSolveGet(&factor, 0, row, row);
             if (diagonal == 0.0) {
                 free(intermediate);
-                CharonMPSRefuse(@"MPSMatrixSolveCholesky: the factor's diagonal entry at %lu is zero in "
+                RevenantMPSRefuse(@"MPSMatrixSolveCholesky: the factor's diagonal entry at %lu is zero in "
                                 "the transpose substitution too, so nothing was written", (unsigned long)row);
                 return;
             }
-            CharonMatrixSolvePut(&x, 0, row, side, sum / diagonal);
+            RevenantMatrixSolvePut(&x, 0, row, side, sum / diagonal);
         }
     }
     free(intermediate);
-    CharonMPSConsumeReadCount(sourceMatrix);
-    CharonMPSConsumeReadCount(rightHandSideMatrix);
+    RevenantMPSConsumeReadCount(sourceMatrix);
+    RevenantMPSConsumeReadCount(rightHandSideMatrix);
 }
 
 @end
@@ -388,57 +388,57 @@ static inline double CharonMPSCholeskyFactor(const CharonMPSMatrixView *view, BO
                 pivotIndices:(MPSMatrix *)pivotIndices
                solutionMatrix:(MPSMatrix *)solutionMatrix
 {
-    if (!CharonMPSCommandBufferPermits(commandBuffer))
+    if (!RevenantMPSCommandBufferPermits(commandBuffer))
         return;
-    CharonMPSMatrixView a = CharonMPSMatrixViewOf(sourceMatrix);
-    CharonMPSMatrixView b = CharonMPSMatrixViewOf(rightHandSideMatrix);
-    CharonMPSMatrixView x = CharonMPSMatrixViewOf(solutionMatrix);
-    CharonMPSMatrixView pivot = CharonMPSMatrixViewOf(pivotIndices);
-    if (!CharonMPSDataTypeIsElement(a.dataType) || !CharonMPSDataTypeIsElement(b.dataType) ||
-        !CharonMPSDataTypeIsElement(x.dataType)) {
-        CharonMPSRefuse(@"MPSMatrixSolveLU: a matrix of a data type that is not one of the eight element types was given, so nothing was written");
+    RevenantMPSMatrixView a = RevenantMPSMatrixViewOf(sourceMatrix);
+    RevenantMPSMatrixView b = RevenantMPSMatrixViewOf(rightHandSideMatrix);
+    RevenantMPSMatrixView x = RevenantMPSMatrixViewOf(solutionMatrix);
+    RevenantMPSMatrixView pivot = RevenantMPSMatrixViewOf(pivotIndices);
+    if (!RevenantMPSDataTypeIsElement(a.dataType) || !RevenantMPSDataTypeIsElement(b.dataType) ||
+        !RevenantMPSDataTypeIsElement(x.dataType)) {
+        RevenantMPSRefuse(@"MPSMatrixSolveLU: a matrix of a data type that is not one of the eight element types was given, so nothing was written");
         return;
     }
     NSUInteger order = a.rows;
     NSUInteger sides = x.columns;
-    if (!CharonMPSMatrixHolds(&a, 0, 0, 0, order, order) ||
-        !CharonMPSMatrixHolds(&b, 0, 0, 0, order, sides) ||
-        !CharonMPSMatrixHolds(&x, 0, 0, 0, order, sides) ||
-        !CharonMPSMatrixHolds(&pivot, 0, 0, 0, 1, order)) {
-        CharonMPSRefuse(@"MPSMatrixSolveLU: a matrix does not hold the %lux%lu system named, so nothing "
+    if (!RevenantMPSMatrixHolds(&a, 0, 0, 0, order, order) ||
+        !RevenantMPSMatrixHolds(&b, 0, 0, 0, order, sides) ||
+        !RevenantMPSMatrixHolds(&x, 0, 0, 0, order, sides) ||
+        !RevenantMPSMatrixHolds(&pivot, 0, 0, 0, 1, order)) {
+        RevenantMPSRefuse(@"MPSMatrixSolveLU: a matrix does not hold the %lux%lu system named, so nothing "
                         "was written", (unsigned long)order, (unsigned long)order);
         return;
     }
     for (NSUInteger side = 0; side < sides; side++) {
         for (NSUInteger step = 0; step < order; step++) {
-            NSUInteger row = (NSUInteger)CharonMPSLoad(CharonMPSMatrixElement(&pivot, 0, 0, step),
+            NSUInteger row = (NSUInteger)RevenantMPSLoad(RevenantMPSMatrixElement(&pivot, 0, 0, step),
                                                        pivot.dataType, 0);
             if (row >= order) {
-                CharonMPSRefuse(@"MPSMatrixSolveLU: pivot index %lu of %lu is outside the %lux%lu system, "
+                RevenantMPSRefuse(@"MPSMatrixSolveLU: pivot index %lu of %lu is outside the %lux%lu system, "
                                 "so nothing was written", (unsigned long)step, (unsigned long)order,
                                 (unsigned long)order, (unsigned long)order);
                 return;
             }
-            double sum = CharonMatrixSolveGet(&b, 0, row, side);
+            double sum = RevenantMatrixSolveGet(&b, 0, row, side);
             for (NSUInteger k = 0; k < step; k++)
-                sum -= CharonMatrixSolveGet(&a, 0, row, k) * CharonMatrixSolveGet(&x, 0, k, side);
-            CharonMatrixSolvePut(&x, 0, row, side, sum);
+                sum -= RevenantMatrixSolveGet(&a, 0, row, k) * RevenantMatrixSolveGet(&x, 0, k, side);
+            RevenantMatrixSolvePut(&x, 0, row, side, sum);
         }
         for (NSUInteger step = order; step-- > 0; ) {
-            double sum = CharonMatrixSolveGet(&x, 0, step, side);
+            double sum = RevenantMatrixSolveGet(&x, 0, step, side);
             for (NSUInteger k = step + 1; k < order; k++)
-                sum -= CharonMatrixSolveGet(&a, 0, step, k) * CharonMatrixSolveGet(&x, 0, k, side);
-            double diagonal = CharonMatrixSolveGet(&a, 0, step, step);
+                sum -= RevenantMatrixSolveGet(&a, 0, step, k) * RevenantMatrixSolveGet(&x, 0, k, side);
+            double diagonal = RevenantMatrixSolveGet(&a, 0, step, step);
             if (diagonal == 0.0) {
-                CharonMPSRefuse(@"MPSMatrixSolveLU: row %lu of the factored matrix is zero on its "
+                RevenantMPSRefuse(@"MPSMatrixSolveLU: row %lu of the factored matrix is zero on its "
                                 "diagonal, so nothing was written", (unsigned long)step);
                 return;
             }
-            CharonMatrixSolvePut(&x, 0, step, side, sum / diagonal);
+            RevenantMatrixSolvePut(&x, 0, step, side, sum / diagonal);
         }
     }
-    CharonMPSConsumeReadCount(sourceMatrix);
-    CharonMPSConsumeReadCount(rightHandSideMatrix);
+    RevenantMPSConsumeReadCount(sourceMatrix);
+    RevenantMPSConsumeReadCount(rightHandSideMatrix);
 }
 
 @end

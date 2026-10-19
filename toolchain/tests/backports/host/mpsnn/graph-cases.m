@@ -10,7 +10,7 @@ static void Report(const char *what, id object)
     printf("class %-22s %s\n", what, object ? [NSStringFromClass([object class]) UTF8String] : "(nil)");
 }
 
-@protocol CharonImageBytesFive <NSObject>
+@protocol RevenantImageBytesFive <NSObject>
 - (void)writeBytes:(const void *)dataBytes
         dataLayout:(MPSDataLayout)dataLayout
        bytesPerRow:(NSUInteger)bytesPerRow
@@ -28,8 +28,8 @@ static void Report(const char *what, id object)
 static void FillImage(MPSImage *image, NSUInteger cols, NSUInteger rows, NSUInteger channels,
                       const float *values)
 {
-#ifdef CHARON_PORT_BUILD
-    [(id<CharonImageBytesFive>)image writeBytes:values
+#ifdef REVENANT_PORT_BUILD
+    [(id<RevenantImageBytesFive>)image writeBytes:values
                                     dataLayout:MPSDataLayoutHeightxWidthxFeatureChannels
                                    bytesPerRow:cols * channels * sizeof(float)
                                         region:MTLRegionMake3D(0, 0, 0, cols, rows, 1)
@@ -68,8 +68,8 @@ static void PrintValues(const char *name, MPSImage *image, NSUInteger cols, NSUI
         printf("case %-18s too many values to print\n", name);
         return;
     }
-#ifdef CHARON_PORT_BUILD
-    [(id<CharonImageBytesFive>)image readBytes:values
+#ifdef REVENANT_PORT_BUILD
+    [(id<RevenantImageBytesFive>)image readBytes:values
                                    dataLayout:MPSDataLayoutHeightxWidthxFeatureChannels
                                   bytesPerRow:cols * channels * sizeof(float)
                                        region:MTLRegionMake3D(0, 0, 0, cols, rows, 1)

@@ -11,7 +11,7 @@
 #include <algorithm>
 #include <stdexcept>
 
-namespace shade {
+namespace emulator {
 
 namespace {
 

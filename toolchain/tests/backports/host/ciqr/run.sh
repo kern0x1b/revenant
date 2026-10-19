@@ -1,5 +1,5 @@
 #!/bin/sh
-# run.sh - the port's QR decoder (Graphics/CharonQRDecode.c) against the HOST's own CIQRCodeGenerator and CIDetector.
+# run.sh - the port's QR decoder (Graphics/RevenantQRDecode.c) against the HOST's own CIQRCodeGenerator and CIDetector.
 #
 # ciqr.m makes the codes on the host, reads each grid from its pixels (no detection in the decoding), and holds the
 # decoder's message to the host's messageString for the same image. Then each code is damaged with a fixed seed.
@@ -19,7 +19,7 @@ mkdir -p "$build"
 
 build_run() {
     # build_run <directory of the decoder's sources> <output binary>
-    xcrun clang -std=c99 -O2 -Wall -Wextra -c "$1/CharonQRDecode.c" -I "$1" -o "$2.o"
+    xcrun clang -std=c99 -O2 -Wall -Wextra -c "$1/RevenantQRDecode.c" -I "$1" -o "$2.o"
     xcrun clang -fobjc-arc -Wall -Wextra -I "$1" "$here/ciqr.m" "$2.o" \
         -framework Foundation -framework CoreImage -framework CoreGraphics -o "$2"
 }
@@ -41,9 +41,9 @@ plant() {
     # plant <name> <sed script>: the decoder with the script's change must turn the run red
     dir=$build/plant-$1
     mkdir -p "$dir"
-    sed "$2" "$gfx/CharonQRDecode.c" > "$dir/CharonQRDecode.c"
-    cp "$gfx/CharonQRDecode.h" "$dir/CharonQRDecode.h"
-    if cmp -s "$gfx/CharonQRDecode.c" "$dir/CharonQRDecode.c"; then
+    sed "$2" "$gfx/RevenantQRDecode.c" > "$dir/RevenantQRDecode.c"
+    cp "$gfx/RevenantQRDecode.h" "$dir/RevenantQRDecode.h"
+    if cmp -s "$gfx/RevenantQRDecode.c" "$dir/RevenantQRDecode.c"; then
         differs=$((differs + 1))
         echo "PLANT $1: the change did not apply to the source"
         return

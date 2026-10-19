@@ -1,11 +1,11 @@
-#import "CharonMetal.h"
+#import "RevenantMetal.h"
 
 #pragma clang diagnostic ignored "-Wprotocol"
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
 
-const NSUInteger CharonMetalHeapAlignment = 256;
+const NSUInteger RevenantMetalHeapAlignment = 256;
 
-@implementation CharonMetalHeap {
+@implementation RevenantMetalHeap {
     uint8_t *_bytes;
     NSUInteger _size;
     NSUInteger _used;
@@ -22,12 +22,12 @@ const NSUInteger CharonMetalHeapAlignment = 256;
 {
     if ((NSUInteger)descriptor.type == (NSUInteger)MTLHeapTypeSparse) {
         if (error)
-            *error = CharonMetalError(11, @"a sparse heap maps its pages in on demand, and one allocation of the size asked for does not; use an automatic or a placement heap");
+            *error = RevenantMetalError(11, @"a sparse heap maps its pages in on demand, and one allocation of the size asked for does not; use an automatic or a placement heap");
         return nil;
     }
     if (!descriptor.size) {
         if (error)
-            *error = CharonMetalError(12, @"a heap descriptor of zero bytes has nothing to take a resource out of");
+            *error = RevenantMetalError(12, @"a heap descriptor of zero bytes has nothing to take a resource out of");
         return nil;
     }
     if ((self = [super init])) {
@@ -39,7 +39,7 @@ const NSUInteger CharonMetalHeapAlignment = 256;
         _bytes = calloc(1, _size);
         if (!_bytes) {
             if (error)
-                *error = CharonMetalError(13, @"the heap's allocation of its size could not be made");
+                *error = RevenantMetalError(13, @"the heap's allocation of its size could not be made");
             return nil;
         }
     }
@@ -51,14 +51,14 @@ const NSUInteger CharonMetalHeapAlignment = 256;
     free(_bytes);
 }
 
-- (void *)charonBytesAtOffset:(NSUInteger)offset
+- (void *)revenantBytesAtOffset:(NSUInteger)offset
 {
     return _bytes + offset;
 }
 
 - (id<MTLDevice>)device
 {
-    return [CharonMetalDevice shared];
+    return [RevenantMetalDevice shared];
 }
 
 - (NSUInteger)size
@@ -81,15 +81,15 @@ const NSUInteger CharonMetalHeapAlignment = 256;
     return _cpuCacheMode;
 }
 
-- (NSUInteger)charonAligned:(NSUInteger)offset
+- (NSUInteger)revenantAligned:(NSUInteger)offset
 {
-    NSUInteger remainder = offset % CharonMetalHeapAlignment;
-    return remainder ? offset + (CharonMetalHeapAlignment - remainder) : offset;
+    NSUInteger remainder = offset % RevenantMetalHeapAlignment;
+    return remainder ? offset + (RevenantMetalHeapAlignment - remainder) : offset;
 }
 
 - (NSUInteger)maxAvailableSizeWithAlignment:(NSUInteger)alignment
 {
-    NSUInteger step = alignment ? alignment : CharonMetalHeapAlignment;
+    NSUInteger step = alignment ? alignment : RevenantMetalHeapAlignment;
     NSUInteger remainder = _used % step;
     NSUInteger start = remainder ? _used + (step - remainder) : _used;
     if (start > _size)
@@ -98,18 +98,18 @@ const NSUInteger CharonMetalHeapAlignment = 256;
     return available - available % step;
 }
 
-- (BOOL)charonReserve:(NSUInteger)length atOffset:(NSUInteger *)offset error:(NSError **)error
+- (BOOL)revenantReserve:(NSUInteger)length atOffset:(NSUInteger *)offset error:(NSError **)error
 {
     if (_type == (MTLHeapType)MTLHeapTypePlacement) {
-        NSError *why = CharonMetalError(14, @"a placement heap is placed by the application: ask for an offset");
+        NSError *why = RevenantMetalError(14, @"a placement heap is placed by the application: ask for an offset");
         NSLog(@"Metal: %@", why.localizedDescription);
         if (error)
             *error = why;
         return NO;
     }
-    NSUInteger start = [self charonAligned:_used];
+    NSUInteger start = [self revenantAligned:_used];
     if (start > _size || length > _size - start) {
-        NSError *why = CharonMetalError(15, [NSString stringWithFormat:@"the heap has %lu of its %lu bytes left, and a resource of %lu at the alignment it hands out does not fit",
+        NSError *why = RevenantMetalError(15, [NSString stringWithFormat:@"the heap has %lu of its %lu bytes left, and a resource of %lu at the alignment it hands out does not fit",
                                               (unsigned long)(_size > start ? _size - start : 0), (unsigned long)_size, (unsigned long)length]);
         NSLog(@"Metal: %@", why.localizedDescription);
         if (error)
@@ -118,47 +118,47 @@ const NSUInteger CharonMetalHeapAlignment = 256;
     }
     if (offset)
         *offset = start;
-    [self charonDidAllocate:length];
+    [self revenantDidAllocate:length];
     return YES;
 }
 
-- (NSUInteger)charonAllocated
+- (NSUInteger)revenantAllocated
 {
     return _allocated;
 }
 
-- (MTLHeapType)charonType
+- (MTLHeapType)revenantType
 {
     return _type;
 }
 
-- (MTLHazardTrackingMode)charonHazardTracking
+- (MTLHazardTrackingMode)revenantHazardTracking
 {
     return _hazardTracking;
 }
 
-- (MTLStorageMode)charonStorageMode
+- (MTLStorageMode)revenantStorageMode
 {
     return _storageMode;
 }
 
-- (void)charonDidAllocate:(NSUInteger)length
+- (void)revenantDidAllocate:(NSUInteger)length
 {
-    _used = [self charonAligned:_used] + [self charonAligned:length];
+    _used = [self revenantAligned:_used] + [self revenantAligned:length];
     _allocated += length;
 }
 
-- (BOOL)charonPlace:(NSUInteger)length atOffset:(NSUInteger)offset error:(NSError **)error
+- (BOOL)revenantPlace:(NSUInteger)length atOffset:(NSUInteger)offset error:(NSError **)error
 {
-    if (offset % CharonMetalHeapAlignment) {
-        NSError *why = CharonMetalError(16, [NSString stringWithFormat:@"an offset of %lu into a heap is a multiple of the heap's alignment of 256 bytes", (unsigned long)offset]);
+    if (offset % RevenantMetalHeapAlignment) {
+        NSError *why = RevenantMetalError(16, [NSString stringWithFormat:@"an offset of %lu into a heap is a multiple of the heap's alignment of 256 bytes", (unsigned long)offset]);
         NSLog(@"Metal: %@", why.localizedDescription);
         if (error)
             *error = why;
         return NO;
     }
     if (offset > _size || length > _size - offset) {
-        NSError *why = CharonMetalError(15, [NSString stringWithFormat:@"the heap has %lu of its %lu bytes left at offset %lu, and a resource of %lu does not fit",
+        NSError *why = RevenantMetalError(15, [NSString stringWithFormat:@"the heap has %lu of its %lu bytes left at offset %lu, and a resource of %lu does not fit",
                                               (unsigned long)(offset < _size ? _size - offset : 0), (unsigned long)_size, (unsigned long)offset, (unsigned long)length]);
         NSLog(@"Metal: %@", why.localizedDescription);
         if (error)
@@ -174,21 +174,21 @@ const NSUInteger CharonMetalHeapAlignment = 256;
 - (id<MTLBuffer>)newBufferWithLength:(NSUInteger)length options:(MTLResourceOptions)options
 {
     NSUInteger offset = 0;
-    if (![self charonReserve:length atOffset:&offset error:NULL])
+    if (![self revenantReserve:length atOffset:&offset error:NULL])
         return nil;
-    return [[CharonMetalBuffer alloc] initWithHeap:self offset:offset length:length];
+    return [[RevenantMetalBuffer alloc] initWithHeap:self offset:offset length:length];
 }
 
 - (id<MTLTexture>)newTextureWithDescriptor:(MTLTextureDescriptor *)descriptor
 {
-    CharonMetalTexture *texture = [[CharonMetalTexture alloc] initWithDescriptor:descriptor];
+    RevenantMetalTexture *texture = [[RevenantMetalTexture alloc] initWithDescriptor:descriptor];
     if (!texture)
         return nil;
-    NSUInteger bytes = [texture charonStorageSize];
+    NSUInteger bytes = [texture revenantStorageSize];
     NSUInteger offset = 0;
-    if (bytes && ![self charonReserve:bytes atOffset:&offset error:NULL])
+    if (bytes && ![self revenantReserve:bytes atOffset:&offset error:NULL])
         return nil;
-    [texture charonSetHeap:self offset:offset];
+    [texture revenantSetHeap:self offset:offset];
     NSLog(@"Metal: a texture taken out of a heap at offset %lu of %lu bytes has its own pixels, not the heap's: an OpenGL ES 2.0 texture is copied into and cannot be backed by memory the heap hands out (facts/Metal/Heaps.md)",
           (unsigned long)offset, (unsigned long)bytes);
     return texture;
@@ -201,14 +201,14 @@ const NSUInteger CharonMetalHeapAlignment = 256;
 
 @end
 
-@interface CharonMetalDevice (Heap)
+@interface RevenantMetalDevice (Heap)
 @end
 
-@implementation CharonMetalDevice (Heap)
+@implementation RevenantMetalDevice (Heap)
 
 - (id<MTLHeap>)newHeapWithDescriptor:(MTLHeapDescriptor *)descriptor
 {
-    return (id<MTLHeap>)[[CharonMetalHeap alloc] initWithDescriptor:descriptor error:NULL];
+    return (id<MTLHeap>)[[RevenantMetalHeap alloc] initWithDescriptor:descriptor error:NULL];
 }
 
 @end

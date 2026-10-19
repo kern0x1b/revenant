@@ -1,10 +1,10 @@
 #import <UIKit/UIKit.h>
 
-@interface UIPasteboard (CharonOptionsRecord)
-- (void)charonRecordOptions:(NSDictionary *)options;
+@interface UIPasteboard (RevenantOptionsRecord)
+- (void)revenantRecordOptions:(NSDictionary *)options;
 @end
 
-static void charon_pasteboard_store(UIPasteboard *board, id object, NSArray *types)
+static void revenant_pasteboard_store(UIPasteboard *board, id object, NSArray *types)
 {
     NSString *type = [types firstObject];
     if (![type isKindOfClass:[NSString class]] || type.length == 0)
@@ -24,13 +24,13 @@ static void charon_pasteboard_store(UIPasteboard *board, id object, NSArray *typ
     [board setValue:value forPasteboardType:type];
 }
 
-@implementation UIPasteboard (CharonObjects11)
+@implementation UIPasteboard (RevenantObjects11)
 
 - (void)setObjects:(NSArray *)objects
 {
     for (id object in objects) {
         NSArray *types = [object isKindOfClass:[NSURL class]] ? UIPasteboardTypeListURL : UIPasteboardTypeListString;
-        charon_pasteboard_store(self, object, types);
+        revenant_pasteboard_store(self, object, types);
     }
 }
 
@@ -41,7 +41,7 @@ static void charon_pasteboard_store(UIPasteboard *board, id object, NSArray *typ
         options[UIPasteboardOptionLocalOnly] = @(localOnly);
     if (expirationDate)
         options[UIPasteboardOptionExpirationDate] = expirationDate;
-    [self charonRecordOptions:options];
+    [self revenantRecordOptions:options];
     [self setObjects:objects];
 }
 

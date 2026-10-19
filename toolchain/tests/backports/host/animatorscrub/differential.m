@@ -139,7 +139,7 @@ int main(void)
         flavor = [UIViewPropertyAnimator class];
         script(system);
 
-        Class ported = NSClassFromString(@"CharonHostUIViewPropertyAnimator");
+        Class ported = NSClassFromString(@"RevenantHostUIViewPropertyAnimator");
         BOOL carried = ported != Nil;
         CHECK(carried, "the port carries an animator to ask");
         if (carried) {
@@ -150,10 +150,10 @@ int main(void)
             NSArray *mine = index < port.count ? port[index] : nil;
             NSString *expected = system[index][1], *actual = mine ? mine[1] : @"nothing";
             printf("  %s: %s\n", [system[index][0] UTF8String], expected.UTF8String);
-            charon_check([expected isEqual:actual], [system[index][0] UTF8String],
+            revenant_check([expected isEqual:actual], [system[index][0] UTF8String],
                          [NSString stringWithFormat:@"%@ != %@", actual, expected]);
         }
     }
-    printf("checks=%d failures=%d\n", charon_checks, charon_failures);
-    return charon_failures;
+    printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
+    return revenant_failures;
 }

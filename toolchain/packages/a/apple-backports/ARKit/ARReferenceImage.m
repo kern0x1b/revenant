@@ -19,7 +19,7 @@ NS_ASSUME_NONNULL_BEGIN
 @synthesize imageSize = _imageSize;
 @synthesize width = _width;
 
-static CGSize CharonPhysicalSize(CGSize pixels, CGFloat physicalWidth)
+static CGSize RevenantPhysicalSize(CGSize pixels, CGFloat physicalWidth)
 {
     if (pixels.width <= 0 || pixels.height <= 0)
         return CGSizeZero;
@@ -39,7 +39,7 @@ static CGSize CharonPhysicalSize(CGSize pixels, CGFloat physicalWidth)
         return nil;
     _imageSize = CGSizeMake(CGImageGetWidth(image), CGImageGetHeight(image));
     _width = physicalWidth;
-    _physicalSize = CharonPhysicalSize(_imageSize, physicalWidth);
+    _physicalSize = RevenantPhysicalSize(_imageSize, physicalWidth);
     return self;
 }
 
@@ -54,7 +54,7 @@ static CGSize CharonPhysicalSize(CGSize pixels, CGFloat physicalWidth)
         return nil;
     _imageSize = CGSizeMake(CVPixelBufferGetWidth(pixelBuffer), CVPixelBufferGetHeight(pixelBuffer));
     _width = physicalWidth;
-    _physicalSize = CharonPhysicalSize(_imageSize, physicalWidth);
+    _physicalSize = RevenantPhysicalSize(_imageSize, physicalWidth);
     return self;
 }
 

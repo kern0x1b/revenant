@@ -11,7 +11,7 @@
 #include <cmath>
 #include <type_traits>
 
-namespace shade {
+namespace emulator {
 namespace {
     constexpr std::uint32_t fraction_shift = 7;
     constexpr std::uint32_t fraction_mask = 0x3f;

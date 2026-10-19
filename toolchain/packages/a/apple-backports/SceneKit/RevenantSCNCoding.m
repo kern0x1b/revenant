@@ -1,32 +1,32 @@
-#import "CharonSCN.h"
-#import "../CharonSRGB.h"
+#import "RevenantSCN.h"
+#import "../RevenantSRGB.h"
 #import <objc/runtime.h>
 
-static uint32_t CharonICCRead32(const uint8_t *bytes)
+static uint32_t RevenantICCRead32(const uint8_t *bytes)
 {
     return ((uint32_t)bytes[0] << 24) | ((uint32_t)bytes[1] << 16) | ((uint32_t)bytes[2] << 8) | bytes[3];
 }
 
-static double CharonICCReadFixed(const uint8_t *bytes)
+static double RevenantICCReadFixed(const uint8_t *bytes)
 {
-    return (int32_t)CharonICCRead32(bytes) / 65536.0;
+    return (int32_t)RevenantICCRead32(bytes) / 65536.0;
 }
 
-static const uint8_t *CharonICCTag(NSData *profile, const char signature[4], uint32_t *length)
+static const uint8_t *RevenantICCTag(NSData *profile, const char signature[4], uint32_t *length)
 {
     const uint8_t *bytes = profile.bytes;
     NSUInteger size = profile.length;
     if (size < 132) {
         return NULL;
     }
-    uint32_t count = CharonICCRead32(bytes + 128);
+    uint32_t count = RevenantICCRead32(bytes + 128);
     for (uint32_t i = 0; i < count && 144 + 12 * (NSUInteger)i <= size; i++) {
         const uint8_t *entry = bytes + 132 + 12 * i;
         if (memcmp(entry, signature, 4) != 0) {
             continue;
         }
-        uint32_t offset = CharonICCRead32(entry + 4);
-        uint32_t tagLength = CharonICCRead32(entry + 8);
+        uint32_t offset = RevenantICCRead32(entry + 4);
+        uint32_t tagLength = RevenantICCRead32(entry + 8);
         if (tagLength < 12 || offset > size || tagLength > size - offset) {
             return NULL;
         }
@@ -36,10 +36,10 @@ static const uint8_t *CharonICCTag(NSData *profile, const char signature[4], uin
     return NULL;
 }
 
-static BOOL CharonICCEvaluateCurve(const uint8_t *tag, uint32_t length, double x, double *result)
+static BOOL RevenantICCEvaluateCurve(const uint8_t *tag, uint32_t length, double x, double *result)
 {
     if (memcmp(tag, "curv", 4) == 0) {
-        uint32_t count = CharonICCRead32(tag + 8);
+        uint32_t count = RevenantICCRead32(tag + 8);
         if (12 + 2 * (NSUInteger)count > length) {
             return NO;
         }
@@ -69,7 +69,7 @@ static BOOL CharonICCEvaluateCurve(const uint8_t *tag, uint32_t length, double x
         }
         double p[7] = {0};
         for (int i = 0; i < parameterCounts[function]; i++) {
-            p[i] = CharonICCReadFixed(tag + 12 + 4 * i);
+            p[i] = RevenantICCReadFixed(tag + 12 + 4 * i);
         }
         double g = p[0], a = p[1], b = p[2], c = p[3], d = p[4], e = p[5], f = p[6];
         switch (function) {
@@ -94,13 +94,13 @@ static BOOL CharonICCEvaluateCurve(const uint8_t *tag, uint32_t length, double x
     return NO;
 }
 
-static const double CharonSRGBColorants[3][3] = {
+static const double RevenantSRGBColorants[3][3] = {
     {0.436065673828125, 0.3851470947265625, 0.14306640625},
     {0.2224884033203125, 0.7168731689453125, 0.06060791015625},
     {0.013916015625, 0.097076416015625, 0.7140960693359375},
 };
 
-static void CharonInvert3x3(const double m[3][3], double out[3][3])
+static void RevenantInvert3x3(const double m[3][3], double out[3][3])
 {
     double det = m[0][0] * (m[1][1] * m[2][2] - m[1][2] * m[2][1])
                - m[0][1] * (m[1][0] * m[2][2] - m[1][2] * m[2][0])
@@ -116,7 +116,7 @@ static void CharonInvert3x3(const double m[3][3], double out[3][3])
     out[2][2] = (m[0][0] * m[1][1] - m[0][1] * m[1][0]) / det;
 }
 
-static BOOL CharonICCComponentsToSRGB(NSData *profile, const double *components, NSUInteger count, double rgb[3])
+static BOOL RevenantICCComponentsToSRGB(NSData *profile, const double *components, NSUInteger count, double rgb[3])
 {
     if (profile.length < 132) {
         return NO;
@@ -124,12 +124,12 @@ static BOOL CharonICCComponentsToSRGB(NSData *profile, const double *components,
     const uint8_t *header = profile.bytes;
     uint32_t length = 0;
     if (memcmp(header + 16, "GRAY", 4) == 0 && count >= 1) {
-        const uint8_t *curve = CharonICCTag(profile, "kTRC", &length);
+        const uint8_t *curve = RevenantICCTag(profile, "kTRC", &length);
         double luminance = 0;
-        if (curve == NULL || !CharonICCEvaluateCurve(curve, length, components[0], &luminance)) {
+        if (curve == NULL || !RevenantICCEvaluateCurve(curve, length, components[0], &luminance)) {
             return NO;
         }
-        rgb[0] = rgb[1] = rgb[2] = charon_srgb_encode(luminance);
+        rgb[0] = rgb[1] = rgb[2] = revenant_srgb_encode(luminance);
         return YES;
     }
     if (memcmp(header + 16, "RGB ", 4) != 0 || memcmp(header + 20, "XYZ ", 4) != 0 || count < 3) {
@@ -140,31 +140,31 @@ static BOOL CharonICCComponentsToSRGB(NSData *profile, const double *components,
     double colorants[3][3];
     double linear[3];
     for (int channel = 0; channel < 3; channel++) {
-        const uint8_t *colorant = CharonICCTag(profile, colorantTags[channel], &length);
+        const uint8_t *colorant = RevenantICCTag(profile, colorantTags[channel], &length);
         if (colorant == NULL || length < 20) {
             return NO;
         }
         for (int row = 0; row < 3; row++) {
-            colorants[row][channel] = CharonICCReadFixed(colorant + 8 + 4 * row);
+            colorants[row][channel] = RevenantICCReadFixed(colorant + 8 + 4 * row);
         }
-        const uint8_t *curve = CharonICCTag(profile, curveTags[channel], &length);
-        if (curve == NULL || !CharonICCEvaluateCurve(curve, length, components[channel], &linear[channel])) {
+        const uint8_t *curve = RevenantICCTag(profile, curveTags[channel], &length);
+        if (curve == NULL || !RevenantICCEvaluateCurve(curve, length, components[channel], &linear[channel])) {
             return NO;
         }
     }
     double toSRGB[3][3];
-    CharonInvert3x3(CharonSRGBColorants, toSRGB);
+    RevenantInvert3x3(RevenantSRGBColorants, toSRGB);
     double xyz[3];
     for (int row = 0; row < 3; row++) {
         xyz[row] = colorants[row][0] * linear[0] + colorants[row][1] * linear[1] + colorants[row][2] * linear[2];
     }
     for (int row = 0; row < 3; row++) {
-        rgb[row] = charon_srgb_encode(toSRGB[row][0] * xyz[0] + toSRGB[row][1] * xyz[1] + toSRGB[row][2] * xyz[2]);
+        rgb[row] = revenant_srgb_encode(toSRGB[row][0] * xyz[0] + toSRGB[row][1] * xyz[1] + toSRGB[row][2] * xyz[2]);
     }
     return YES;
 }
 
-static NSUInteger CharonParseComponents(NSCoder *coder, NSString *key, double *out, NSUInteger capacity)
+static NSUInteger RevenantParseComponents(NSCoder *coder, NSString *key, double *out, NSUInteger capacity)
 {
     NSUInteger length = 0;
     const uint8_t *bytes = [coder containsValueForKey:key] ? [coder decodeBytesForKey:key returnedLength:&length] : NULL;
@@ -181,11 +181,11 @@ static NSUInteger CharonParseComponents(NSCoder *coder, NSString *key, double *o
     return count;
 }
 
-@interface CharonSCNArchivedColorSpace : NSObject <NSSecureCoding>
+@interface RevenantSCNArchivedColorSpace : NSObject <NSSecureCoding>
 @property(nonatomic, copy) NSData *profile;
 @end
 
-@implementation CharonSCNArchivedColorSpace
+@implementation RevenantSCNArchivedColorSpace
 
 @synthesize profile = _profile;
 
@@ -209,13 +209,13 @@ static NSUInteger CharonParseComponents(NSCoder *coder, NSString *key, double *o
 
 @end
 
-@interface CharonSCNArchivedColor : NSObject <NSSecureCoding>
+@interface RevenantSCNArchivedColor : NSObject <NSSecureCoding>
 @property(nonatomic) CGFloat red, green, blue, alpha;
 @property(nonatomic) BOOL valid;
 @property(nonatomic, copy) NSString *failure;
 @end
 
-@implementation CharonSCNArchivedColor
+@implementation RevenantSCNArchivedColor
 
 @synthesize red = _red;
 @synthesize green = _green;
@@ -242,13 +242,13 @@ static NSUInteger CharonParseComponents(NSCoder *coder, NSString *key, double *o
 {
     if ((self = [super init])) {
         NSInteger model = [coder containsValueForKey:@"NSColorSpace"] ? [coder decodeIntegerForKey:@"NSColorSpace"] : 0;
-        CharonSCNArchivedColorSpace *space = [coder decodeObjectOfClass:[CharonSCNArchivedColorSpace class] forKey:@"NSCustomColorSpace"];
+        RevenantSCNArchivedColorSpace *space = [coder decodeObjectOfClass:[RevenantSCNArchivedColorSpace class] forKey:@"NSCustomColorSpace"];
         double components[5];
         double rgb[3];
-        NSUInteger count = CharonParseComponents(coder, @"NSComponents", components, 5);
+        NSUInteger count = RevenantParseComponents(coder, @"NSComponents", components, 5);
         if (space.profile && count >= 2) {
             NSUInteger channels = count - 1;
-            if (CharonICCComponentsToSRGB(space.profile, components, channels, rgb)) {
+            if (RevenantICCComponentsToSRGB(space.profile, components, channels, rgb)) {
                 [self setRGB:rgb alpha:components[count - 1]];
             } else {
                 _failure = [NSString stringWithFormat:@"its ICC profile (%lu bytes) does not convert %lu components to sRGB",
@@ -257,7 +257,7 @@ static NSUInteger CharonParseComponents(NSCoder *coder, NSString *key, double *o
             return self;
         }
         if (model == 1 || model == 2) {
-            count = CharonParseComponents(coder, @"NSRGB", components, 4);
+            count = RevenantParseComponents(coder, @"NSRGB", components, 4);
             if (model == 2 && count >= 3) {
                 rgb[0] = components[0];
                 rgb[1] = components[1];
@@ -269,9 +269,9 @@ static NSUInteger CharonParseComponents(NSCoder *coder, NSString *key, double *o
                 _failure = [NSString stringWithFormat:@"its NSRGB holds %lu components", (unsigned long)count];
             }
         } else if (model == 3 || model == 4) {
-            count = CharonParseComponents(coder, @"NSWhite", components, 2);
+            count = RevenantParseComponents(coder, @"NSWhite", components, 2);
             if (count >= 1) {
-                double white = model == 3 ? charon_srgb_encode(pow(fmax(components[0], 0), 1.8)) : components[0];
+                double white = model == 3 ? revenant_srgb_encode(pow(fmax(components[0], 0), 1.8)) : components[0];
                 rgb[0] = rgb[1] = rgb[2] = white;
                 [self setRGB:rgb alpha:count > 1 ? components[1] : 1];
             } else {
@@ -298,10 +298,10 @@ static NSUInteger CharonParseComponents(NSCoder *coder, NSString *key, double *o
 
 @end
 
-@interface CharonSCNArchivedData : NSMutableData
+@interface RevenantSCNArchivedData : NSMutableData
 @end
 
-@implementation CharonSCNArchivedData
+@implementation RevenantSCNArchivedData
 {
     NSMutableData *_storage;
 }
@@ -348,14 +348,14 @@ static NSUInteger CharonParseComponents(NSCoder *coder, NSString *key, double *o
 
 @end
 
-static void CharonSCNMapColorClasses(NSKeyedUnarchiver *unarchiver)
+static void RevenantSCNMapColorClasses(NSKeyedUnarchiver *unarchiver)
 {
-    [unarchiver setClass:[CharonSCNArchivedColor class] forClassName:@"NSColor"];
-    [unarchiver setClass:[CharonSCNArchivedColorSpace class] forClassName:@"NSColorSpace"];
-    [unarchiver setClass:[CharonSCNArchivedData class] forClassName:@"NSMutableData"];
+    [unarchiver setClass:[RevenantSCNArchivedColor class] forClassName:@"NSColor"];
+    [unarchiver setClass:[RevenantSCNArchivedColorSpace class] forClassName:@"NSColorSpace"];
+    [unarchiver setClass:[RevenantSCNArchivedData class] forClassName:@"NSMutableData"];
 }
 
-@implementation CharonSCNCoding
+@implementation RevenantSCNCoding
 
 + (SCNVector3)decodeVector3:(NSCoder *)coder forKey:(NSString *)key
 {
@@ -432,15 +432,15 @@ static void CharonSCNMapColorClasses(NSKeyedUnarchiver *unarchiver)
     return objects;
 }
 
-static void CharonSCNColorFailed(NSString *key, NSString *reason)
+static void RevenantSCNColorFailed(NSString *key, NSString *reason)
 {
     NSLog(@"SceneKit: the colour under %@ is not read, and the property keeps its default: %@", key, reason);
 }
 
-static UIColor *CharonSCNArchivedColorValue(CharonSCNArchivedColor *color, NSString *key)
+static UIColor *RevenantSCNArchivedColorValue(RevenantSCNArchivedColor *color, NSString *key)
 {
     if (!color.valid) {
-        CharonSCNColorFailed(key, color.failure ?: @"it holds no components this port reads");
+        RevenantSCNColorFailed(key, color.failure ?: @"it holds no components this port reads");
         return nil;
     }
     return [color toUIColor];
@@ -452,50 +452,50 @@ static UIColor *CharonSCNArchivedColorValue(CharonSCNArchivedColor *color, NSStr
         return nil;
     }
     if ([coder isKindOfClass:[NSKeyedUnarchiver class]]) {
-        CharonSCNMapColorClasses((NSKeyedUnarchiver *)coder);
+        RevenantSCNMapColorClasses((NSKeyedUnarchiver *)coder);
     }
     id decoded = nil;
     @try {
-        decoded = [coder decodeObjectOfClasses:[NSSet setWithObjects:[NSData class], [UIColor class], [CharonSCNArchivedColor class], nil] forKey:key];
+        decoded = [coder decodeObjectOfClasses:[NSSet setWithObjects:[NSData class], [UIColor class], [RevenantSCNArchivedColor class], nil] forKey:key];
     } @catch (NSException *exception) {
-        CharonSCNColorFailed(key, [NSString stringWithFormat:@"%@: %@", exception.name, exception.reason]);
+        RevenantSCNColorFailed(key, [NSString stringWithFormat:@"%@: %@", exception.name, exception.reason]);
         return nil;
     }
-    if ([decoded isKindOfClass:[CharonSCNArchivedColor class]]) {
-        return CharonSCNArchivedColorValue(decoded, key);
+    if ([decoded isKindOfClass:[RevenantSCNArchivedColor class]]) {
+        return RevenantSCNArchivedColorValue(decoded, key);
     }
     if ([decoded isKindOfClass:[UIColor class]]) {
         return decoded;
     }
     NSData *nested = decoded;
     if (decoded == nil) {
-        CharonSCNColorFailed(key, @"it holds nothing");
+        RevenantSCNColorFailed(key, @"it holds nothing");
         return nil;
     }
     if (![nested isKindOfClass:[NSData class]]) {
-        CharonSCNColorFailed(key, [NSString stringWithFormat:@"it holds a %@ where a colour belongs", [decoded class]]);
+        RevenantSCNColorFailed(key, [NSString stringWithFormat:@"it holds a %@ where a colour belongs", [decoded class]]);
         return nil;
     }
     if (nested.length == 0) {
-        CharonSCNColorFailed(key, @"it holds an empty NSData");
+        RevenantSCNColorFailed(key, @"it holds an empty NSData");
         return nil;
     }
     NSKeyedUnarchiver *unarchiver = [[NSKeyedUnarchiver alloc] initForReadingWithData:nested];
     unarchiver.requiresSecureCoding = YES;
-    CharonSCNMapColorClasses(unarchiver);
+    RevenantSCNMapColorClasses(unarchiver);
     id archived = nil;
     @try {
-        archived = [unarchiver decodeObjectOfClasses:[NSSet setWithObjects:[CharonSCNArchivedColor class], [UIColor class], nil] forKey:NSKeyedArchiveRootObjectKey];
+        archived = [unarchiver decodeObjectOfClasses:[NSSet setWithObjects:[RevenantSCNArchivedColor class], [UIColor class], nil] forKey:NSKeyedArchiveRootObjectKey];
     } @catch (NSException *exception) {
-        CharonSCNColorFailed(key, [NSString stringWithFormat:@"its nested archive: %@: %@", exception.name, exception.reason]);
+        RevenantSCNColorFailed(key, [NSString stringWithFormat:@"its nested archive: %@: %@", exception.name, exception.reason]);
         return nil;
     }
     [unarchiver finishDecoding];
-    if ([archived isKindOfClass:[CharonSCNArchivedColor class]]) {
-        return CharonSCNArchivedColorValue(archived, key);
+    if ([archived isKindOfClass:[RevenantSCNArchivedColor class]]) {
+        return RevenantSCNArchivedColorValue(archived, key);
     }
     if (![archived isKindOfClass:[UIColor class]]) {
-        CharonSCNColorFailed(key, @"its nested archive holds no colour");
+        RevenantSCNColorFailed(key, @"its nested archive holds no colour");
         return nil;
     }
     return archived;
@@ -503,7 +503,7 @@ static UIColor *CharonSCNArchivedColorValue(CharonSCNArchivedColor *color, NSStr
 
 + (UIColor *)colorWithLinearWhite:(double)white
 {
-    double encoded = charon_srgb_encode(white);
+    double encoded = revenant_srgb_encode(white);
     return [UIColor colorWithRed:encoded green:encoded blue:encoded alpha:1];
 }
 
@@ -540,7 +540,7 @@ static UIColor *CharonSCNArchivedColorValue(CharonSCNArchivedColor *color, NSStr
     return path.length ? path : nil;
 }
 
-static NSMutableArray *CharonSCNSourceURLStack(void)
+static NSMutableArray *RevenantSCNSourceURLStack(void)
 {
     static NSMutableArray<NSURL *> *stack;
     static dispatch_once_t once;
@@ -552,12 +552,12 @@ static NSMutableArray *CharonSCNSourceURLStack(void)
 
 + (void)pushSourceURL:(NSURL *)url
 {
-    [CharonSCNSourceURLStack() addObject:url ?: [NSNull null]];
+    [RevenantSCNSourceURLStack() addObject:url ?: [NSNull null]];
 }
 
 + (void)popSourceURL
 {
-    NSMutableArray *stack = CharonSCNSourceURLStack();
+    NSMutableArray *stack = RevenantSCNSourceURLStack();
     if (stack.count) {
         [stack removeLastObject];
     }
@@ -565,28 +565,28 @@ static NSMutableArray *CharonSCNSourceURLStack(void)
 
 + (NSURL *)currentSourceURL
 {
-    id last = CharonSCNSourceURLStack().lastObject;
+    id last = RevenantSCNSourceURLStack().lastObject;
     return [last isKindOfClass:[NSURL class]] ? last : nil;
 }
 
-static const void *CharonSCNProvenanceKey = &CharonSCNProvenanceKey;
+static const void *RevenantSCNProvenanceKey = &RevenantSCNProvenanceKey;
 
 + (void)markFound:(BOOL)found forKey:(NSString *)key onObject:(id)object
 {
     if (object == nil) {
         return;
     }
-    NSMutableDictionary<NSString *, NSNumber *> *provenance = objc_getAssociatedObject(object, CharonSCNProvenanceKey);
+    NSMutableDictionary<NSString *, NSNumber *> *provenance = objc_getAssociatedObject(object, RevenantSCNProvenanceKey);
     if (!provenance) {
         provenance = [NSMutableDictionary dictionary];
-        objc_setAssociatedObject(object, CharonSCNProvenanceKey, provenance, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+        objc_setAssociatedObject(object, RevenantSCNProvenanceKey, provenance, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     }
     provenance[key] = @(found);
 }
 
 + (BOOL)wasFound:(NSString *)key onObject:(id)object
 {
-    NSMutableDictionary<NSString *, NSNumber *> *provenance = objc_getAssociatedObject(object, CharonSCNProvenanceKey);
+    NSMutableDictionary<NSString *, NSNumber *> *provenance = objc_getAssociatedObject(object, RevenantSCNProvenanceKey);
     return provenance[key].boolValue;
 }
 

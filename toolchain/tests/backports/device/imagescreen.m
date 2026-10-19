@@ -64,7 +64,7 @@ int main(void)
         CHECK(flippedFrames.images.count == 2 && flippedFrames.duration == 0.5, "an animated image keeps its frames and its duration");
         CGImageRelease(pixels);
 
-        printf("%d checks, %d failures\n", charon_checks, charon_failures);
-        return charon_failures;
+        printf("%d checks, %d failures\n", revenant_checks, revenant_failures);
+        return revenant_failures;
     }
 }

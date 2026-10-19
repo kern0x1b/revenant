@@ -1,9 +1,9 @@
-#import "CharonMLCompute.h"
+#import "RevenantMLCompute.h"
 
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
 #pragma clang diagnostic ignored "-Wnullability-completeness"
 
-@interface CharonMLCNode : NSObject
+@interface RevenantMLCNode : NSObject
 @property (readwrite, nonatomic) MLCLayer *layer;
 @property (readwrite, nonatomic) NSArray<MLCTensor *> *sources;
 @property (readwrite, nonatomic) MLCTensor *result;
@@ -11,7 +11,7 @@
 @property (readwrite, nonatomic) BOOL disableUpdate;
 @end
 
-@implementation CharonMLCNode {
+@implementation RevenantMLCNode {
 @protected
     MLCLayer *_layer;
     NSArray<MLCTensor *> *_sources;
@@ -36,7 +36,7 @@
 
 @end
 
-static MLCTensor *CharonMLCGraphTensor(NSArray<NSNumber *> *shape)
+static MLCTensor *RevenantMLCGraphTensor(NSArray<NSNumber *> *shape)
 {
     if (shape.count == 0)
         return nil;
@@ -45,7 +45,7 @@ static MLCTensor *CharonMLCGraphTensor(NSArray<NSNumber *> *shape)
     return [MLCTensor tensorWithDescriptor:descriptor];
 }
 
-static NSUInteger CharonMLCGraphArityOf(MLCLayer *layer)
+static NSUInteger RevenantMLCGraphArityOf(MLCLayer *layer)
 {
     if ([layer isKindOfClass:[MLCActivationLayer class]])
         return 1;
@@ -55,7 +55,7 @@ static NSUInteger CharonMLCGraphArityOf(MLCLayer *layer)
 @implementation MLCGraph {
     MLCDevice *_device;
     NSMutableArray<MLCLayer *> *_layers;
-    NSMutableArray<CharonMLCNode *> *_nodes;
+    NSMutableArray<RevenantMLCNode *> *_nodes;
     NSDictionary<NSString *, MLCTensor *> *_boundInputs;
 }
 
@@ -91,19 +91,19 @@ static NSUInteger CharonMLCGraphArityOf(MLCLayer *layer)
 
 #pragma mark - the nodes
 
-- (MLCTensor *)charon_mlc_nodeWithLayer:(MLCLayer *)layer
+- (MLCTensor *)revenant_mlc_nodeWithLayer:(MLCLayer *)layer
                                 sources:(NSArray<MLCTensor *> *)sources
                              lossLabels:(NSArray<MLCTensor *> *)lossLabels
                           disableUpdate:(BOOL)disableUpdate
 {
     if (!layer)
         return nil;
-    if (sources.count != CharonMLCGraphArityOf(layer))
+    if (sources.count != RevenantMLCGraphArityOf(layer))
         return nil;
-    MLCTensor *result = CharonMLCGraphTensor(sources.firstObject.descriptor.shape);
+    MLCTensor *result = RevenantMLCGraphTensor(sources.firstObject.descriptor.shape);
     if (!result)
         return nil;
-    CharonMLCNode *node = [[CharonMLCNode alloc] init];
+    RevenantMLCNode *node = [[RevenantMLCNode alloc] init];
     node.layer = layer;
     node.sources = sources;
     node.result = result;
@@ -117,32 +117,32 @@ static NSUInteger CharonMLCGraphArityOf(MLCLayer *layer)
 
 - (MLCTensor *)nodeWithLayer:(MLCLayer *)layer source:(MLCTensor *)source
 {
-    return [self charon_mlc_nodeWithLayer:layer sources:(source ? @[source] : @[]) lossLabels:@[] disableUpdate:NO];
+    return [self revenant_mlc_nodeWithLayer:layer sources:(source ? @[source] : @[]) lossLabels:@[] disableUpdate:NO];
 }
 
 - (MLCTensor *)nodeWithLayer:(MLCLayer *)layer sources:(NSArray<MLCTensor *> *)sources
 {
-    return [self charon_mlc_nodeWithLayer:layer sources:sources lossLabels:@[] disableUpdate:NO];
+    return [self revenant_mlc_nodeWithLayer:layer sources:sources lossLabels:@[] disableUpdate:NO];
 }
 
 - (MLCTensor *)nodeWithLayer:(MLCLayer *)layer
                     sources:(NSArray<MLCTensor *> *)sources
               disableUpdate:(BOOL)disableUpdate
 {
-    return [self charon_mlc_nodeWithLayer:layer sources:sources lossLabels:@[] disableUpdate:disableUpdate];
+    return [self revenant_mlc_nodeWithLayer:layer sources:sources lossLabels:@[] disableUpdate:disableUpdate];
 }
 
 - (MLCTensor *)nodeWithLayer:(MLCLayer *)layer
                     sources:(NSArray<MLCTensor *> *)sources
                   lossLabels:(NSArray<MLCTensor *> *)lossLabels
 {
-    return [self charon_mlc_nodeWithLayer:layer sources:sources lossLabels:lossLabels disableUpdate:NO];
+    return [self revenant_mlc_nodeWithLayer:layer sources:sources lossLabels:lossLabels disableUpdate:NO];
 }
 
 - (NSArray<MLCTensor *> *)sourceTensorsForLayer:(MLCLayer *)layer
 {
     NSMutableArray<MLCTensor *> *tensors = [NSMutableArray array];
-    for (CharonMLCNode *node in _nodes) {
+    for (RevenantMLCNode *node in _nodes) {
         if (node.layer != layer)
             continue;
         for (MLCTensor *source in node.sources) {
@@ -156,7 +156,7 @@ static NSUInteger CharonMLCGraphArityOf(MLCLayer *layer)
 - (NSArray<MLCTensor *> *)resultTensorsForLayer:(MLCLayer *)layer
 {
     NSMutableArray<MLCTensor *> *tensors = [NSMutableArray array];
-    for (CharonMLCNode *node in _nodes) {
+    for (RevenantMLCNode *node in _nodes) {
         if (node.layer != layer)
             continue;
         if (node.result && ![tensors containsObject:node.result])
@@ -179,14 +179,14 @@ static NSUInteger CharonMLCGraphArityOf(MLCLayer *layer)
         total += source.descriptor.shape[dimension].integerValue;
     NSMutableArray<NSNumber *> *joined = [shape mutableCopy];
     joined[dimension] = @(total);
-    return CharonMLCGraphTensor(joined);
+    return RevenantMLCGraphTensor(joined);
 }
 
 - (MLCTensor *)reshapeWithShape:(NSArray<NSNumber *> *)shape source:(MLCTensor *)source
 {
     if (!source || shape.count == 0)
         return nil;
-    return CharonMLCGraphTensor(shape);
+    return RevenantMLCGraphTensor(shape);
 }
 
 - (MLCTensor *)transposeWithDimensions:(NSArray<NSNumber *> *)dimensions source:(MLCTensor *)source
@@ -205,10 +205,10 @@ static NSUInteger CharonMLCGraphArityOf(MLCLayer *layer)
         [seen addObject:@(index)];
         [permuted addObject:shape[index]];
     }
-    return CharonMLCGraphTensor(permuted);
+    return RevenantMLCGraphTensor(permuted);
 }
 
-static NSArray<NSNumber *> *CharonMLCGraphSplitExtents(NSInteger extent, NSUInteger count)
+static NSArray<NSNumber *> *RevenantMLCGraphSplitExtents(NSInteger extent, NSUInteger count)
 {
     if (count == 0 || extent <= 0)
         return @[];
@@ -222,7 +222,7 @@ static NSArray<NSNumber *> *CharonMLCGraphSplitExtents(NSInteger extent, NSUInte
     return extents;
 }
 
-- (NSArray<MLCTensor *> *)charon_mlc_splitWithSource:(MLCTensor *)source
+- (NSArray<MLCTensor *> *)revenant_mlc_splitWithSource:(MLCTensor *)source
                                              extents:(NSArray<NSNumber *> *)extents
                                             dimension:(NSUInteger)dimension
 {
@@ -233,7 +233,7 @@ static NSArray<NSNumber *> *CharonMLCGraphSplitExtents(NSInteger extent, NSUInte
     for (NSNumber *extent in extents) {
         NSMutableArray<NSNumber *> *part = [shape mutableCopy];
         part[dimension] = extent;
-        MLCTensor *tensor = CharonMLCGraphTensor(part);
+        MLCTensor *tensor = RevenantMLCGraphTensor(part);
         if (!tensor)
             return nil;
         [tensors addObject:tensor];
@@ -248,8 +248,8 @@ static NSArray<NSNumber *> *CharonMLCGraphSplitExtents(NSInteger extent, NSUInte
     if (!source)
         return nil;
     NSInteger extent = source.descriptor.shape[dimension].integerValue;
-    return [self charon_mlc_splitWithSource:source
-                                    extents:CharonMLCGraphSplitExtents(extent, splitCount)
+    return [self revenant_mlc_splitWithSource:source
+                                    extents:RevenantMLCGraphSplitExtents(extent, splitCount)
                                    dimension:dimension];
 }
 
@@ -259,12 +259,12 @@ static NSArray<NSNumber *> *CharonMLCGraphSplitExtents(NSInteger extent, NSUInte
 {
     if (!source)
         return nil;
-    return [self charon_mlc_splitWithSource:source extents:splitSectionLengths dimension:dimension];
+    return [self revenant_mlc_splitWithSource:source extents:splitSectionLengths dimension:dimension];
 }
 
 #pragma mark - binding
 
-- (BOOL)charon_mlc_bind:(NSDictionary<NSString *, MLCTensorData *> *)inputsData
+- (BOOL)revenant_mlc_bind:(NSDictionary<NSString *, MLCTensorData *> *)inputsData
              forInputs:(NSDictionary<NSString *, MLCTensor *> *)inputTensors
                toDevice:(MLCDevice *)device
 {
@@ -286,7 +286,7 @@ static NSArray<NSNumber *> *CharonMLCGraphSplitExtents(NSInteger extent, NSUInte
 {
     (void)batchSize;
     (void)synchronous;
-    return [self charon_mlc_bind:inputsData forInputs:inputTensors toDevice:device];
+    return [self revenant_mlc_bind:inputsData forInputs:inputTensors toDevice:device];
 }
 
 - (BOOL)bindAndWriteData:(NSDictionary<NSString *, MLCTensorData *> *)inputsData
@@ -295,7 +295,7 @@ static NSArray<NSNumber *> *CharonMLCGraphSplitExtents(NSInteger extent, NSUInte
             synchronous:(BOOL)synchronous
 {
     (void)synchronous;
-    return [self charon_mlc_bind:inputsData forInputs:inputTensors toDevice:device];
+    return [self revenant_mlc_bind:inputsData forInputs:inputTensors toDevice:device];
 }
 
 @end

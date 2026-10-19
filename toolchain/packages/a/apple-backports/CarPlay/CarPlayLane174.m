@@ -1,7 +1,7 @@
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
-#import "CharonCarPlay174.h"
-#import "CharonCarPlayLane.h"
+#import "RevenantCarPlay174.h"
+#import "RevenantCarPlayLane.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
@@ -10,8 +10,8 @@
     CPLaneStatus _status;
     NSMeasurement<NSUnitAngle *> *_primaryAngle;
     NSArray<NSMeasurement<NSUnitAngle *> *> *_secondaryAngles;
-    NSMeasurement<NSUnitAngle *> *_charonHighlightedAngle;
-    NSArray<NSMeasurement<NSUnitAngle *> *> *_charonAngles;
+    NSMeasurement<NSUnitAngle *> *_revenantHighlightedAngle;
+    NSArray<NSMeasurement<NSUnitAngle *> *> *_revenantAngles;
 }
 
 @dynamic highlightedAngle;
@@ -55,27 +55,27 @@
     _primaryAngle = primaryAngle;
 }
 
-- (NSMeasurement<NSUnitAngle *> *)charon_highlightedAngle
+- (NSMeasurement<NSUnitAngle *> *)revenant_highlightedAngle
 {
-    return _charonHighlightedAngle;
+    return _revenantHighlightedAngle;
 }
 
-- (void)charon_setHighlightedAngle:(NSMeasurement<NSUnitAngle *> *)angle
+- (void)revenant_setHighlightedAngle:(NSMeasurement<NSUnitAngle *> *)angle
 {
-    _charonHighlightedAngle = angle;
+    _revenantHighlightedAngle = angle;
 }
 
-- (NSArray<NSMeasurement<NSUnitAngle *> *> *)charon_angles
+- (NSArray<NSMeasurement<NSUnitAngle *> *> *)revenant_angles
 {
-    return _charonAngles;
+    return _revenantAngles;
 }
 
-- (void)charon_setAngles:(NSArray<NSMeasurement<NSUnitAngle *> *> *)angles
+- (void)revenant_setAngles:(NSArray<NSMeasurement<NSUnitAngle *> *> *)angles
 {
-    _charonAngles = [angles copy];
+    _revenantAngles = [angles copy];
 }
 
-- (instancetype)initCharonWithAngles:(NSArray<NSMeasurement<NSUnitAngle *> *> *)angles
+- (instancetype)initRevenantWithAngles:(NSArray<NSMeasurement<NSUnitAngle *> *> *)angles
                     highlightedAngle:(NSMeasurement<NSUnitAngle *> *)highlightedAngle
                           isPreferred:(BOOL)preferred
 {
@@ -83,16 +83,16 @@
     if (self == nil) {
         return nil;
     }
-    _charonAngles = [angles copy];
+    _revenantAngles = [angles copy];
     if (preferred) {
         _status = CPLaneStatusPreferred;
-        _charonHighlightedAngle = highlightedAngle;
+        _revenantHighlightedAngle = highlightedAngle;
     } else if (highlightedAngle != nil) {
         _status = CPLaneStatusGood;
-        _charonHighlightedAngle = highlightedAngle;
+        _revenantHighlightedAngle = highlightedAngle;
     } else {
         _status = CPLaneStatusNotGood;
-        _charonHighlightedAngle = nil;
+        _revenantHighlightedAngle = nil;
     }
     return self;
 }
@@ -103,8 +103,8 @@
     lane.status = _status;
     lane.primaryAngle = _primaryAngle;
     lane.secondaryAngles = _secondaryAngles;
-    [lane charon_setHighlightedAngle:_charonHighlightedAngle];
-    [lane charon_setAngles:_charonAngles];
+    [lane revenant_setHighlightedAngle:_revenantHighlightedAngle];
+    [lane revenant_setAngles:_revenantAngles];
     return lane;
 }
 
@@ -115,27 +115,27 @@
 
 - (void)encodeWithCoder:(NSCoder *)coder
 {
-    [coder encodeInteger:(NSInteger)_status forKey:@"charon.status"];
-    [coder encodeObject:_primaryAngle forKey:@"charon.primaryAngle"];
-    [coder encodeObject:_secondaryAngles forKey:@"charon.secondaryAngles"];
-    [coder encodeObject:_charonHighlightedAngle forKey:@"charon.highlightedAngle"];
-    [coder encodeObject:_charonAngles forKey:@"charon.angles"];
+    [coder encodeInteger:(NSInteger)_status forKey:@"revenant.status"];
+    [coder encodeObject:_primaryAngle forKey:@"revenant.primaryAngle"];
+    [coder encodeObject:_secondaryAngles forKey:@"revenant.secondaryAngles"];
+    [coder encodeObject:_revenantHighlightedAngle forKey:@"revenant.highlightedAngle"];
+    [coder encodeObject:_revenantAngles forKey:@"revenant.angles"];
 }
 
 - (instancetype)initWithCoder:(NSCoder *)coder
 {
     self = [super init];
     if (self) {
-        _status = (CPLaneStatus)[coder decodeIntegerForKey:@"charon.status"];
-        _primaryAngle = [coder decodeObjectOfClass:[NSMeasurement class] forKey:@"charon.primaryAngle"];
+        _status = (CPLaneStatus)[coder decodeIntegerForKey:@"revenant.status"];
+        _primaryAngle = [coder decodeObjectOfClass:[NSMeasurement class] forKey:@"revenant.primaryAngle"];
         _secondaryAngles = [coder decodeObjectOfClasses:
             [NSSet setWithObjects:[NSArray class], [NSMeasurement class], nil]
-                                               forKey:@"charon.secondaryAngles"];
-        _charonHighlightedAngle = [coder decodeObjectOfClass:[NSMeasurement class]
-                                                     forKey:@"charon.highlightedAngle"];
-        _charonAngles = [coder decodeObjectOfClasses:
+                                               forKey:@"revenant.secondaryAngles"];
+        _revenantHighlightedAngle = [coder decodeObjectOfClass:[NSMeasurement class]
+                                                     forKey:@"revenant.highlightedAngle"];
+        _revenantAngles = [coder decodeObjectOfClasses:
             [NSSet setWithObjects:[NSArray class], [NSMeasurement class], nil]
-                                             forKey:@"charon.angles"];
+                                             forKey:@"revenant.angles"];
     }
     return self;
 }
@@ -147,7 +147,7 @@
     NSString *name = index < 3 ? names[index] : [NSString stringWithFormat:@"%lu", (unsigned long)index];
     return [NSString stringWithFormat:@"<CPLane: %p %@, primary %@, secondary %lu, angles %lu>",
             self, name, _primaryAngle.description ?: @"nil",
-            (unsigned long)_secondaryAngles.count, (unsigned long)_charonAngles.count];
+            (unsigned long)_secondaryAngles.count, (unsigned long)_revenantAngles.count];
 }
 
 @end

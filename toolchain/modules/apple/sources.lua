@@ -14,7 +14,7 @@ function static(package, opt)
     local toolchain = assert(package:toolchains(), package:name() .. " is built for apple-ios without the apple-ios toolchain")[1]
     toolchain:load()
     local root = path.absolute(opt.sourcedir or os.curdir())
-    local builddir = path.join(root, "build_charon")
+    local builddir = path.join(root, "build_revenant")
     local common = table.join(table.wrap(toolchain:get("cxflags")), table.wrap(opt.flags))
     for _, folder in ipairs(table.wrap(opt.includedirs)) do
         table.insert(common, "-I" .. path.absolute(folder, root))

@@ -1,11 +1,11 @@
 #import <HealthKit/HealthKit.h>
 
-#import "CharonHKStore.h"
-#import "CharonHKTypes.h"
+#import "RevenantHKStore.h"
+#import "RevenantHKTypes.h"
 
 @implementation HKQuantityType {
     NSString *_canonicalUnitString;
-    CharonHKAggregationStyle _aggregationStyle;
+    RevenantHKAggregationStyle _aggregationStyle;
 }
 
 + (BOOL)supportsSecureCoding
@@ -18,7 +18,7 @@
     self = [super initWithCoder:coder];
     if (self) {
         _canonicalUnitString = [[coder decodeObjectOfClass:[NSString class] forKey:@"canonicalUnit"] copy];
-        _aggregationStyle = (CharonHKAggregationStyle)[coder decodeIntForKey:@"aggregation"];
+        _aggregationStyle = (RevenantHKAggregationStyle)[coder decodeIntForKey:@"aggregation"];
     }
     return self;
 }
@@ -42,30 +42,30 @@
 
 #pragma mark The store
 
-- (NSInteger)charon_storeKind
+- (NSInteger)revenant_storeKind
 {
-    return CharonHKTypeKindQuantity;
+    return RevenantHKTypeKindQuantity;
 }
 
-- (void)charon_setCanonicalUnitString:(NSString *)unitString aggregationStyle:(NSInteger)aggregationStyle
+- (void)revenant_setCanonicalUnitString:(NSString *)unitString aggregationStyle:(NSInteger)aggregationStyle
 {
     _canonicalUnitString = [unitString copy];
-    _aggregationStyle = (CharonHKAggregationStyle)aggregationStyle;
+    _aggregationStyle = (RevenantHKAggregationStyle)aggregationStyle;
 }
 
-- (NSInteger)charon_aggregationStyleValue
+- (NSInteger)revenant_aggregationStyleValue
 {
     return (NSInteger)_aggregationStyle;
 }
 
-- (NSString *)charon_canonicalUnitString
+- (NSString *)revenant_canonicalUnitString
 {
     return _canonicalUnitString;
 }
 
-- (nullable HKUnit *)charon_canonicalUnit
+- (nullable HKUnit *)revenant_canonicalUnit
 {
-    return [HKUnit charon_canonicalUnitForType:self];
+    return [HKUnit revenant_canonicalUnitForType:self];
 }
 
 #pragma mark The header
@@ -73,7 +73,7 @@
 - (HKQuantityAggregationStyle)aggregationStyle
 {
     switch (_aggregationStyle) {
-    case CharonHKAggregationCumulativeSum:
+    case RevenantHKAggregationCumulativeSum:
         return HKQuantityAggregationStyleCumulative;
     default:
         return HKQuantityAggregationStyleDiscreteArithmetic;
@@ -82,10 +82,10 @@
 
 - (BOOL)isCompatibleWithUnit:(HKUnit *)unit
 {
-    HKUnit *canonical = [self charon_canonicalUnit];
+    HKUnit *canonical = [self revenant_canonicalUnit];
     if (!canonical)
         return NO;
-    return [canonical charon_isCompatibleWithUnit:unit];
+    return [canonical revenant_isCompatibleWithUnit:unit];
 }
 
 @end

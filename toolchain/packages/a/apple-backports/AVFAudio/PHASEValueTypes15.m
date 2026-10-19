@@ -1,16 +1,16 @@
-#import "CharonAVFAudio.h"
+#import "RevenantAVFAudio.h"
 #import <PHASE/PHASE.h>
 
 @implementation PHASENumericPair {
-    double _charon_first;
-    double _charon_second;
+    double _revenant_first;
+    double _revenant_second;
 }
 
 - (instancetype)initWithFirstValue:(double)first secondValue:(double)second
 {
     if ((self = [super init])) {
-        _charon_first = first;
-        _charon_second = second;
+        _revenant_first = first;
+        _revenant_second = second;
     }
     return self;
 }
@@ -22,83 +22,83 @@
 
 - (double)first
 {
-    return _charon_first;
+    return _revenant_first;
 }
 
 - (void)setFirst:(double)first
 {
-    _charon_first = first;
+    _revenant_first = first;
 }
 
 - (double)second
 {
-    return _charon_second;
+    return _revenant_second;
 }
 
 - (void)setSecond:(double)second
 {
-    _charon_second = second;
+    _revenant_second = second;
 }
 
 @end
 
 @implementation PHASEDistanceModelFadeOutParameters {
-    double _charon_cullDistance;
+    double _revenant_cullDistance;
 }
 
 - (instancetype)initWithCullDistance:(double)cullDistance
 {
     if ((self = [super init])) {
-        _charon_cullDistance = cullDistance;
+        _revenant_cullDistance = cullDistance;
     }
     return self;
 }
 
 - (double)cullDistance
 {
-    return _charon_cullDistance;
+    return _revenant_cullDistance;
 }
 
 @end
 
 @implementation PHASEGeometricSpreadingDistanceModelParameters {
-    double _charon_rolloffFactor;
-    BOOL _charon_rolloffSet;
+    double _revenant_rolloffFactor;
+    BOOL _revenant_rolloffSet;
 }
 
 - (double)rolloffFactor
 {
-    return _charon_rolloffSet ? _charon_rolloffFactor : 1.0;
+    return _revenant_rolloffSet ? _revenant_rolloffFactor : 1.0;
 }
 
 - (void)setRolloffFactor:(double)rolloffFactor
 {
-    _charon_rolloffFactor = rolloffFactor;
-    _charon_rolloffSet = YES;
+    _revenant_rolloffFactor = rolloffFactor;
+    _revenant_rolloffSet = YES;
 }
 
-- (double)charon_gainAtDistance:(double)distance
+- (double)revenant_gainAtDistance:(double)distance
 {
     if (distance <= 0) {
         return 0;
     }
-    return 1.0 / pow(distance, _charon_rolloffFactor);
+    return 1.0 / pow(distance, _revenant_rolloffFactor);
 }
 
 @end
 
 @implementation PHASEDistanceModelParameters {
-    PHASEDistanceModelFadeOutParameters *_charon_fadeOut;
+    PHASEDistanceModelFadeOutParameters *_revenant_fadeOut;
 }
 
 - (PHASEDistanceModelFadeOutParameters *)fadeOutParameters
 {
-    return _charon_fadeOut;
+    return _revenant_fadeOut;
 }
 
 - (void)setFadeOutParameters:(PHASEDistanceModelFadeOutParameters *)fadeOutParameters
 {
-    _charon_fadeOut = fadeOutParameters;
+    _revenant_fadeOut = fadeOutParameters;
 }
 
 @end
@@ -107,67 +107,67 @@
 @end
 
 @implementation PHASECardioidDirectivityModelSubbandParameters {
-    double _charon_frequency;
-    double _charon_pattern;
-    double _charon_sharpness;
+    double _revenant_frequency;
+    double _revenant_pattern;
+    double _revenant_sharpness;
 }
 
 - (instancetype)init
 {
     if ((self = [super init])) {
-        _charon_frequency = 1000.0;
-        _charon_pattern = 0.0;
-        _charon_sharpness = 1.0;
+        _revenant_frequency = 1000.0;
+        _revenant_pattern = 0.0;
+        _revenant_sharpness = 1.0;
     }
     return self;
 }
 
 - (double)frequency
 {
-    return _charon_frequency;
+    return _revenant_frequency;
 }
 
 - (void)setFrequency:(double)frequency
 {
-    _charon_frequency = frequency;
+    _revenant_frequency = frequency;
 }
 
 - (double)pattern
 {
-    return _charon_pattern;
+    return _revenant_pattern;
 }
 
 - (void)setPattern:(double)pattern
 {
-    _charon_pattern = pattern;
+    _revenant_pattern = pattern;
 }
 
 - (double)sharpness
 {
-    return _charon_sharpness;
+    return _revenant_sharpness;
 }
 
 - (void)setSharpness:(double)sharpness
 {
-    _charon_sharpness = sharpness;
+    _revenant_sharpness = sharpness;
 }
 
 @end
 
 @implementation PHASEConeDirectivityModelSubbandParameters {
-    double _charon_frequency;
-    double _charon_innerAngle;
-    double _charon_outerAngle;
-    double _charon_outerGain;
+    double _revenant_frequency;
+    double _revenant_innerAngle;
+    double _revenant_outerAngle;
+    double _revenant_outerGain;
 }
 
 - (instancetype)init
 {
     if ((self = [super init])) {
-        _charon_frequency = 1000.0;
-        _charon_innerAngle = 360.0;
-        _charon_outerAngle = 360.0;
-        _charon_outerGain = 1.0;
+        _revenant_frequency = 1000.0;
+        _revenant_innerAngle = 360.0;
+        _revenant_outerAngle = 360.0;
+        _revenant_outerGain = 1.0;
     }
     return self;
 }
@@ -177,76 +177,76 @@
     if (outerAngle < innerAngle) {
         return;
     }
-    _charon_innerAngle = innerAngle;
-    _charon_outerAngle = outerAngle;
+    _revenant_innerAngle = innerAngle;
+    _revenant_outerAngle = outerAngle;
 }
 
 - (double)frequency
 {
-    return _charon_frequency;
+    return _revenant_frequency;
 }
 
 - (void)setFrequency:(double)frequency
 {
-    _charon_frequency = frequency;
+    _revenant_frequency = frequency;
 }
 
 - (double)innerAngle
 {
-    return _charon_innerAngle;
+    return _revenant_innerAngle;
 }
 
 - (double)outerAngle
 {
-    return _charon_outerAngle;
+    return _revenant_outerAngle;
 }
 
 - (double)outerGain
 {
-    return _charon_outerGain;
+    return _revenant_outerGain;
 }
 
 - (void)setOuterGain:(double)outerGain
 {
-    _charon_outerGain = outerGain;
+    _revenant_outerGain = outerGain;
 }
 
 @end
 
 @implementation PHASECardioidDirectivityModelParameters {
-    NSArray<PHASECardioidDirectivityModelSubbandParameters *> *_charon_subbands;
+    NSArray<PHASECardioidDirectivityModelSubbandParameters *> *_revenant_subbands;
 }
 
 - (instancetype)initWithSubbandParameters:(NSArray<PHASECardioidDirectivityModelSubbandParameters *> *)subbandParameters
 {
     if ((self = [PHASECardioidDirectivityModelParameters alloc])) {
-        _charon_subbands = [subbandParameters copy] ?: @[];
+        _revenant_subbands = [subbandParameters copy] ?: @[];
     }
     return self;
 }
 
 - (NSArray<PHASECardioidDirectivityModelSubbandParameters *> *)subbandParameters
 {
-    return _charon_subbands;
+    return _revenant_subbands;
 }
 
 @end
 
 @implementation PHASEConeDirectivityModelParameters {
-    NSArray<PHASEConeDirectivityModelSubbandParameters *> *_charon_subbands;
+    NSArray<PHASEConeDirectivityModelSubbandParameters *> *_revenant_subbands;
 }
 
 - (instancetype)initWithSubbandParameters:(NSArray<PHASEConeDirectivityModelSubbandParameters *> *)subbandParameters
 {
     if ((self = [PHASEConeDirectivityModelParameters alloc])) {
-        _charon_subbands = [subbandParameters copy] ?: @[];
+        _revenant_subbands = [subbandParameters copy] ?: @[];
     }
     return self;
 }
 
 - (NSArray<PHASEConeDirectivityModelSubbandParameters *> *)subbandParameters
 {
-    return _charon_subbands;
+    return _revenant_subbands;
 }
 
 @end

@@ -1,4 +1,4 @@
-#import "CharonMetal.h"
+#import "RevenantMetal.h"
 
 #pragma clang diagnostic ignored "-Wprotocol"
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
@@ -19,30 +19,30 @@ typedef struct {
     NSUInteger channel;
     const char *extension;
     const char *linearExtension;
-} CharonFormat;
+} RevenantFormat;
 
-static BOOL formatFor(MTLPixelFormat pixelFormat, CharonFormat *out)
+static BOOL formatFor(MTLPixelFormat pixelFormat, RevenantFormat *out)
 {
     switch ((NSUInteger)pixelFormat) {
-    case 70: *out = (CharonFormat){GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE, 4, 4, 1, NULL, NULL}; return YES;
-    case 80: *out = (CharonFormat){GL_RGBA, GL_BGRA_EXT, GL_UNSIGNED_BYTE, 4, 4, 1, NULL, NULL}; return YES;
-    case 10: *out = (CharonFormat){GL_RED_EXT, GL_RED_EXT, GL_UNSIGNED_BYTE, 1, 1, 1, "GL_EXT_texture_rg", NULL}; return YES;
-    case 30: *out = (CharonFormat){GL_RG_EXT, GL_RG_EXT, GL_UNSIGNED_BYTE, 2, 2, 1, "GL_EXT_texture_rg", NULL}; return YES;
-    case 115: *out = (CharonFormat){GL_RGBA, GL_RGBA, GL_HALF_FLOAT, 8, 4, 2, "GL_OES_texture_half_float", "GL_OES_texture_half_float_linear"}; return YES;
-    case 25: *out = (CharonFormat){GL_RED_EXT, GL_RED_EXT, GL_HALF_FLOAT, 2, 1, 2, "GL_OES_texture_half_float,GL_EXT_texture_rg", "GL_OES_texture_half_float_linear,GL_EXT_texture_rg"}; return YES;
-    case 65: *out = (CharonFormat){GL_RG_EXT, GL_RG_EXT, GL_HALF_FLOAT, 4, 2, 2, "GL_OES_texture_half_float,GL_EXT_texture_rg", "GL_OES_texture_half_float_linear,GL_EXT_texture_rg"}; return YES;
-    case 55: *out = (CharonFormat){GL_RED_EXT, GL_RED_EXT, GL_FLOAT, 4, 1, 4, "GL_OES_texture_float,GL_EXT_texture_rg", "GL_OES_texture_float_linear,GL_EXT_texture_rg"}; return YES;
-    case 125: *out = (CharonFormat){GL_RGBA, GL_RGBA, GL_FLOAT, 16, 4, 4, "GL_OES_texture_float", "GL_OES_texture_float_linear"}; return YES;
+    case 70: *out = (RevenantFormat){GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE, 4, 4, 1, NULL, NULL}; return YES;
+    case 80: *out = (RevenantFormat){GL_RGBA, GL_BGRA_EXT, GL_UNSIGNED_BYTE, 4, 4, 1, NULL, NULL}; return YES;
+    case 10: *out = (RevenantFormat){GL_RED_EXT, GL_RED_EXT, GL_UNSIGNED_BYTE, 1, 1, 1, "GL_EXT_texture_rg", NULL}; return YES;
+    case 30: *out = (RevenantFormat){GL_RG_EXT, GL_RG_EXT, GL_UNSIGNED_BYTE, 2, 2, 1, "GL_EXT_texture_rg", NULL}; return YES;
+    case 115: *out = (RevenantFormat){GL_RGBA, GL_RGBA, GL_HALF_FLOAT, 8, 4, 2, "GL_OES_texture_half_float", "GL_OES_texture_half_float_linear"}; return YES;
+    case 25: *out = (RevenantFormat){GL_RED_EXT, GL_RED_EXT, GL_HALF_FLOAT, 2, 1, 2, "GL_OES_texture_half_float,GL_EXT_texture_rg", "GL_OES_texture_half_float_linear,GL_EXT_texture_rg"}; return YES;
+    case 65: *out = (RevenantFormat){GL_RG_EXT, GL_RG_EXT, GL_HALF_FLOAT, 4, 2, 2, "GL_OES_texture_half_float,GL_EXT_texture_rg", "GL_OES_texture_half_float_linear,GL_EXT_texture_rg"}; return YES;
+    case 55: *out = (RevenantFormat){GL_RED_EXT, GL_RED_EXT, GL_FLOAT, 4, 1, 4, "GL_OES_texture_float,GL_EXT_texture_rg", "GL_OES_texture_float_linear,GL_EXT_texture_rg"}; return YES;
+    case 125: *out = (RevenantFormat){GL_RGBA, GL_RGBA, GL_FLOAT, 16, 4, 4, "GL_OES_texture_float", "GL_OES_texture_float_linear"}; return YES;
     default: return NO;
     }
 }
 
-static BOOL CharonMetalDeviceHasExtension(const char *required)
+static BOOL RevenantMetalDeviceHasExtension(const char *required)
 {
     static char *extensions;
     static dispatch_once_t once;
     dispatch_once(&once, ^{
-        CharonMetalDevice *device = [CharonMetalDevice shared];
+        RevenantMetalDevice *device = [RevenantMetalDevice shared];
         [device acquire];
         const GLubyte *string = glGetString(GL_EXTENSIONS);
         extensions = string ? strdup((const char *)string) : NULL;
@@ -82,9 +82,9 @@ static NSUInteger levelExtent(NSUInteger extent, NSUInteger level)
     return size ? size : 1;
 }
 
-NSUInteger CharonMetalBindEpoch;
+NSUInteger RevenantMetalBindEpoch;
 
-@implementation CharonMetalTexture {
+@implementation RevenantMetalTexture {
     GLuint _name;
     GLuint _framebuffer;
     BOOL _screen;
@@ -93,13 +93,13 @@ NSUInteger CharonMetalBindEpoch;
     NSUInteger _height;
     NSUInteger _levels;
     MTLTextureUsage _usage;
-    __unsafe_unretained CharonMetalSampler *_appliedSampler;
+    __unsafe_unretained RevenantMetalSampler *_appliedSampler;
     int _kind;
     GLuint _renderbuffer;
     GLuint _checkedDepth, _checkedStencil;
     int _appliedCompare;
-    __strong CharonMetalHeap *_charonHeap;
-    NSUInteger _charonHeapOffset;
+    __strong RevenantMetalHeap *_revenantHeap;
+    NSUInteger _revenantHeapOffset;
     NSUInteger _attachedLevel;
 }
 
@@ -127,14 +127,14 @@ static int depthKind(MTLPixelFormat pixelFormat)
         _usage = descriptor.usage;
         _kind = kind;
         _attachedLevel = NSNotFound;
-        CharonMetalDevice *device = [CharonMetalDevice shared];
+        RevenantMetalDevice *device = [RevenantMetalDevice shared];
         [device acquire];
         if (kind == 3) {
             glGenRenderbuffers(1, &_renderbuffer);
             glBindRenderbuffer(GL_RENDERBUFFER, _renderbuffer);
             glRenderbufferStorage(GL_RENDERBUFFER, GL_STENCIL_INDEX8, (GLsizei)_width, (GLsizei)_height);
         } else {
-            CharonMetalBindEpoch++;
+            RevenantMetalBindEpoch++;
             glGenTextures(1, &_name);
             glBindTexture(GL_TEXTURE_2D, _name);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -196,12 +196,12 @@ static int depthKind(MTLPixelFormat pixelFormat)
     int depth = depthKind(descriptor.pixelFormat);
     if (depth)
         return [self initWithDepthDescriptor:descriptor kind:depth];
-    CharonFormat format;
+    RevenantFormat format;
     if (descriptor.textureType != MTLTextureType2D || !formatFor(descriptor.pixelFormat, &format) || descriptor.sampleCount != 1 || descriptor.width == 0 || descriptor.height == 0) {
         NSLog(@"Metal: texture of type %d, pixel format %d, %d samples has no OpenGL ES 2.0 form", (int)descriptor.textureType, (int)descriptor.pixelFormat, (int)descriptor.sampleCount);
         return nil;
     }
-    if (!CharonMetalDeviceHasExtension(format.extension)) {
+    if (!RevenantMetalDeviceHasExtension(format.extension)) {
         NSLog(@"Metal: pixel format %d needs %s, which this device's OpenGL ES 2.0 driver does not list", (int)descriptor.pixelFormat, format.extension);
         return nil;
     }
@@ -212,9 +212,9 @@ static int depthKind(MTLPixelFormat pixelFormat)
         _levels = descriptor.mipmapLevelCount ? descriptor.mipmapLevelCount : 1;
         _usage = descriptor.usage;
         _attachedLevel = NSNotFound;
-        CharonMetalDevice *device = [CharonMetalDevice shared];
+        RevenantMetalDevice *device = [RevenantMetalDevice shared];
         [device acquire];
-        CharonMetalBindEpoch++;
+        RevenantMetalBindEpoch++;
         glGenTextures(1, &_name);
         glBindTexture(GL_TEXTURE_2D, _name);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -249,7 +249,7 @@ static int depthKind(MTLPixelFormat pixelFormat)
 - (void)dealloc
 {
     if (!_screen && (_name || _renderbuffer)) {
-        CharonMetalDevice *device = [CharonMetalDevice shared];
+        RevenantMetalDevice *device = [RevenantMetalDevice shared];
         [device acquire];
         if (_framebuffer)
             glDeleteFramebuffers(1, &_framebuffer);
@@ -261,12 +261,12 @@ static int depthKind(MTLPixelFormat pixelFormat)
     }
 }
 
-- (CharonMetalSampler *)appliedSampler
+- (RevenantMetalSampler *)appliedSampler
 {
     return _appliedSampler;
 }
 
-- (void)setAppliedSampler:(CharonMetalSampler *)sampler
+- (void)setAppliedSampler:(RevenantMetalSampler *)sampler
 {
     _appliedSampler = sampler;
 }
@@ -343,7 +343,7 @@ static int depthKind(MTLPixelFormat pixelFormat)
 
 - (id<MTLDevice>)device
 {
-    return [CharonMetalDevice shared];
+    return [RevenantMetalDevice shared];
 }
 
 - (MTLResourceOptions)resourceOptions
@@ -358,17 +358,17 @@ static int depthKind(MTLPixelFormat pixelFormat)
 
 - (void)replaceRegion:(MTLRegion)region mipmapLevel:(NSUInteger)level withBytes:(const void *)pointer bytesPerRow:(NSUInteger)bytesPerRow
 {
-    [self charonWriteRegion:region level:level bytes:pointer bytesPerRow:bytesPerRow];
+    [self revenantWriteRegion:region level:level bytes:pointer bytesPerRow:bytesPerRow];
 }
 
 - (void)getBytes:(void *)pointer bytesPerRow:(NSUInteger)bytesPerRow fromRegion:(MTLRegion)region mipmapLevel:(NSUInteger)level
 {
-    [self charonReadRegion:region level:level bytesPerRow:bytesPerRow into:pointer];
+    [self revenantReadRegion:region level:level bytesPerRow:bytesPerRow into:pointer];
 }
 
-- (NSUInteger)charonStorageSize
+- (NSUInteger)revenantStorageSize
 {
-    CharonFormat format;
+    RevenantFormat format;
     if (!formatFor(_pixelFormat, &format))
         return 0;
     NSUInteger levels = _levels ? _levels : 1;
@@ -378,39 +378,39 @@ static int depthKind(MTLPixelFormat pixelFormat)
     return total;
 }
 
-- (void)charonSetHeap:(CharonMetalHeap *)heap offset:(NSUInteger)offset
+- (void)revenantSetHeap:(RevenantMetalHeap *)heap offset:(NSUInteger)offset
 {
-    _charonHeap = heap;
-    _charonHeapOffset = offset;
+    _revenantHeap = heap;
+    _revenantHeapOffset = offset;
 }
 
 - (id<MTLHeap>)heap
 {
-    return _charonHeap;
+    return _revenantHeap;
 }
 
 - (NSUInteger)heapOffset
 {
-    return _charonHeapOffset;
+    return _revenantHeapOffset;
 }
 
-- (BOOL)charonIsColour
+- (BOOL)revenantIsColour
 {
-    CharonFormat format;
+    RevenantFormat format;
     return !_kind && !_screen && formatFor(_pixelFormat, &format);
 }
 
-- (BOOL)charonCanFilter
+- (BOOL)revenantCanFilter
 {
-    CharonFormat format;
+    RevenantFormat format;
     if (!formatFor(_pixelFormat, &format))
         return NO;
-    return CharonMetalDeviceHasExtension(format.linearExtension);
+    return RevenantMetalDeviceHasExtension(format.linearExtension);
 }
 
-- (NSUInteger)charonChannels
+- (NSUInteger)revenantChannels
 {
-    CharonFormat format;
+    RevenantFormat format;
     if (!formatFor(_pixelFormat, &format))
         return 0;
     return format.bytes;
@@ -432,7 +432,7 @@ static int depthKind(MTLPixelFormat pixelFormat)
     return _framebuffer;
 }
 
-- (void)charonRestoreAttachment:(NSUInteger)level previous:(GLint)previous
+- (void)revenantRestoreAttachment:(NSUInteger)level previous:(GLint)previous
 {
     if (!_screen && _attachedLevel != level) {
         glBindFramebuffer(GL_FRAMEBUFFER, _framebuffer);
@@ -442,9 +442,9 @@ static int depthKind(MTLPixelFormat pixelFormat)
     glBindFramebuffer(GL_FRAMEBUFFER, (GLuint)previous);
 }
 
-- (BOOL)charonReadRegion:(MTLRegion)region level:(NSUInteger)level bytesPerRow:(NSUInteger)bytesPerRow into:(void *)pointer
+- (BOOL)revenantReadRegion:(MTLRegion)region level:(NSUInteger)level bytesPerRow:(NSUInteger)bytesPerRow into:(void *)pointer
 {
-    CharonFormat format;
+    RevenantFormat format;
     if (_kind || !formatFor(_pixelFormat, &format) || level >= _levels)
         return NO;
     if (!bytesPerRow)
@@ -456,7 +456,7 @@ static int depthKind(MTLPixelFormat pixelFormat)
     if (!channels)
         return NO;
     if (channels == 4) {
-        CharonMetalDevice *device = [CharonMetalDevice shared];
+        RevenantMetalDevice *device = [RevenantMetalDevice shared];
         [device acquire];
         GLint previous;
         glGetIntegerv(GL_FRAMEBUFFER_BINDING, &previous);
@@ -467,7 +467,7 @@ static int depthKind(MTLPixelFormat pixelFormat)
             glReadPixels((GLint)region.origin.x, (GLint)(region.origin.y + row), (GLsizei)width, 1,
                          format.format == GL_BGRA_EXT ? GL_BGRA_EXT : GL_RGBA, GL_UNSIGNED_BYTE,
                          (uint8_t *)pointer + row * bytesPerRow);
-        [self charonRestoreAttachment:attached previous:previous];
+        [self revenantRestoreAttachment:attached previous:previous];
         [device relinquish];
         return YES;
     }
@@ -475,7 +475,7 @@ static int depthKind(MTLPixelFormat pixelFormat)
     uint8_t *scratch = calloc(1, width * 4 * format.channel);
     if (!scratch)
         return NO;
-    CharonMetalDevice *device = [CharonMetalDevice shared];
+    RevenantMetalDevice *device = [RevenantMetalDevice shared];
     [device acquire];
     GLint previous;
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &previous);
@@ -488,26 +488,26 @@ static int depthKind(MTLPixelFormat pixelFormat)
         uint8_t *target = (uint8_t *)pointer + row * bytesPerRow;
         memcpy(target, source, width * texel);
     }
-    [self charonRestoreAttachment:attached previous:previous];
+    [self revenantRestoreAttachment:attached previous:previous];
     [device relinquish];
     free(scratch);
     return YES;
 }
 
-- (BOOL)charonWriteRegion:(MTLRegion)region level:(NSUInteger)level bytes:(const void *)pointer bytesPerRow:(NSUInteger)bytesPerRow
+- (BOOL)revenantWriteRegion:(MTLRegion)region level:(NSUInteger)level bytes:(const void *)pointer bytesPerRow:(NSUInteger)bytesPerRow
 {
-    CharonFormat format;
+    RevenantFormat format;
     if (_screen || _kind || !formatFor(_pixelFormat, &format) || level >= _levels)
         return NO;
-    if (!CharonMetalDeviceHasExtension(format.extension))
+    if (!RevenantMetalDeviceHasExtension(format.extension))
         return NO;
     if (!bytesPerRow)
         bytesPerRow = region.size.width * format.bytes;
     if (bytesPerRow < region.size.width * format.bytes)
         return NO;
-    CharonMetalDevice *device = [CharonMetalDevice shared];
+    RevenantMetalDevice *device = [RevenantMetalDevice shared];
     [device acquire];
-    CharonMetalBindEpoch++;
+    RevenantMetalBindEpoch++;
     glBindTexture(GL_TEXTURE_2D, _name);
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
     if (bytesPerRow == region.size.width * format.bytes) {
@@ -523,14 +523,14 @@ static int depthKind(MTLPixelFormat pixelFormat)
     return YES;
 }
 
-- (BOOL)charonGenerateMipmaps
+- (BOOL)revenantGenerateMipmaps
 {
-    CharonFormat format;
-    if (![self charonIsColour] || _levels < 2 || !formatFor(_pixelFormat, &format))
+    RevenantFormat format;
+    if (![self revenantIsColour] || _levels < 2 || !formatFor(_pixelFormat, &format))
         return NO;
-    CharonMetalDevice *device = [CharonMetalDevice shared];
+    RevenantMetalDevice *device = [RevenantMetalDevice shared];
     [device acquire];
-    CharonMetalBindEpoch++;
+    RevenantMetalBindEpoch++;
     glBindTexture(GL_TEXTURE_2D, _name);
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
     GLint minFilter = GL_LINEAR;
@@ -547,7 +547,7 @@ static int depthKind(MTLPixelFormat pixelFormat)
 
 @end
 
-@implementation CharonMetalSampler {
+@implementation RevenantMetalSampler {
     GLint _minFilter, _magFilter, _wrapS, _wrapT;
     GLenum _compareFunction;
 }
@@ -618,7 +618,7 @@ static BOOL wrapFor(MTLSamplerAddressMode mode, GLint *out)
 
 - (id<MTLDevice>)device
 {
-    return [CharonMetalDevice shared];
+    return [RevenantMetalDevice shared];
 }
 
 

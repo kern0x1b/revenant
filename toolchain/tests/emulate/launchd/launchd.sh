@@ -6,7 +6,7 @@
 #
 #     $HOME/Git/projects/ios/coordination/heavy.sh sh tests/emulate/launchd/launchd.sh iPhone4,1 6.1.3
 #
-# CHARON_REPO names the checkout whose emulator-guest package (the runner) is run, CHARON_ADDON
+# REVENANT_REPO names the checkout whose emulator-guest package (the runner) is run, REVENANT_ADDON
 # the addon whose emulator module installs it. A runner that starts the program before launchd has
 # loaded the daemons fails, and the lines it prints name the services that were not there.
 set -eu

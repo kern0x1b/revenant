@@ -1,7 +1,7 @@
 #import <Vision/Vision.h>
 #import <objc/runtime.h>
 
-static inline id charon_vision_clone(id object, NSZone *zone)
+static inline id revenant_vision_clone(id object, NSZone *zone)
 {
     id copy = [[object class] allocWithZone:zone];
     for (Class cls = [object class]; cls && cls != [NSObject class]; cls = class_getSuperclass(cls)) {
@@ -23,13 +23,13 @@ static inline id charon_vision_clone(id object, NSZone *zone)
     return copy;
 }
 
-static inline NSError *charon_vision_error(NSInteger code, NSString *message)
+static inline NSError *revenant_vision_error(NSInteger code, NSString *message)
 {
     return [NSError errorWithDomain:VNErrorDomain code:code userInfo:@{NSLocalizedDescriptionKey: message}];
 }
 
-@interface VNDetectContoursRequest (CharonPerform)
-- (NSArray<VNContoursObservation *> *)charon_observationsOnImage:(id)image error:(NSError **)error;
-- (nullable NSNumber *)charon_contrastPivotValue;
-- (void)charon_setContrastPivotValue:(NSNumber *)value;
+@interface VNDetectContoursRequest (RevenantPerform)
+- (NSArray<VNContoursObservation *> *)revenant_observationsOnImage:(id)image error:(NSError **)error;
+- (nullable NSNumber *)revenant_contrastPivotValue;
+- (void)revenant_setContrastPivotValue:(NSNumber *)value;
 @end

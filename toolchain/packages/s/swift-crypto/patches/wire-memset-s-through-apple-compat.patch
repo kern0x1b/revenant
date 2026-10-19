@@ -4,10 +4,10 @@
  #else
  #if canImport(FoundationEssentials)
  import FoundationEssentials
-+import CharonCompat
++import RevenantCompat
  #else
  import Foundation
-+import CharonCompat
++import RevenantCompat
  #endif
  
  protocol Zeroization {
@@ -16,14 +16,14 @@
      func zeroize() {
          let size = MemoryLayout.size(ofValue: Pointee.self)
 -        memset_s(self, size, 0, size)
-+        charon_memset_s(self, size, 0, size)
++        revenant_memset_s(self, size, 0, size)
      }
  }
  
  extension UnsafeMutableRawBufferPointer: Zeroization {
      func zeroize() {
 -        memset_s(self.baseAddress!, self.count, 0, self.count)
-+        charon_memset_s(self.baseAddress!, self.count, 0, self.count)
++        revenant_memset_s(self.baseAddress!, self.count, 0, self.count)
      }
  }
  
@@ -31,7 +31,7 @@
      /// Zeroizes the array
      mutating func zeroize() {
 -        memset_s(&self, self.count, 0, self.count)
-+        charon_memset_s(&self, self.count, 0, self.count)
++        revenant_memset_s(&self, self.count, 0, self.count)
      }
  }
  
@@ -39,7 +39,7 @@
      internal mutating func zeroize() {
          _ = self.withUnsafeMutableBytes {
 -            memset_s($0.baseAddress!, $0.count, 0, $0.count)
-+            charon_memset_s($0.baseAddress!, $0.count, 0, $0.count)
++            revenant_memset_s($0.baseAddress!, $0.count, 0, $0.count)
          }
      }
  }
@@ -49,10 +49,10 @@
  #else
  #if canImport(FoundationEssentials)
  import FoundationEssentials
-+import CharonCompat
++import RevenantCompat
  #else
  import Foundation
-+import CharonCompat
++import RevenantCompat
  #endif
  
  nonisolated(unsafe) private let emptyStorage:SecureBytes.Backing = SecureBytes.Backing.createEmpty()
@@ -61,7 +61,7 @@
  
              _ = self.withUnsafeMutablePointerToElements { elementsPtr in
 -                memset_s(elementsPtr, bytesToClear, 0, bytesToClear)
-+                charon_memset_s(elementsPtr, bytesToClear, 0, bytesToClear)
++                revenant_memset_s(elementsPtr, bytesToClear, 0, bytesToClear)
              }
          }
  
@@ -70,7 +70,7 @@
          deinit {
              // We always clear the whole capacity, even if we don't think we used it all.
 -            memset_s(storage.baseAddress!, storage.count, 0, storage.count)
-+            charon_memset_s(storage.baseAddress!, storage.count, 0, storage.count)
++            revenant_memset_s(storage.baseAddress!, storage.count, 0, storage.count)
              storage.deallocate()
          }
  

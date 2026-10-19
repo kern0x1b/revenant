@@ -2,7 +2,7 @@ import("env")
 
 function setup(name, out)
     local e = env()
-    out = path.absolute(out or path.join(e.builddir, "katabasis", "corpus", name))
+    out = path.absolute(out or path.join(e.builddir, "recompiler", "corpus", name))
     os.mkdir(out)
     return e, out
 end

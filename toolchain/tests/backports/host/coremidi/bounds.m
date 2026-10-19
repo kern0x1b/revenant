@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#import "CharonCoreMIDI.h"
+#import "RevenantCoreMIDI.h"
 
 static int gFailures;
 
@@ -16,7 +16,7 @@ static void expect(int passed, const char *what)
 
 static CFIndex gRequested = -1;
 
-CFMutableDataRef charon_test_CFDataCreateMutable(CFAllocatorRef allocator, CFIndex capacity)
+CFMutableDataRef revenant_test_CFDataCreateMutable(CFAllocatorRef allocator, CFIndex capacity)
 {
     gRequested = capacity;
     if (capacity > (1 << 20))
@@ -28,7 +28,7 @@ static OSStatus gClientStatus;
 static int gClientCalls;
 static NSMutableArray *gLog;
 
-OSStatus charon_test_MIDIClientCreate(CFStringRef name, MIDINotifyProc notifyProc, void *notifyRefCon, MIDIClientRef *outClient)
+OSStatus revenant_test_MIDIClientCreate(CFStringRef name, MIDINotifyProc notifyProc, void *notifyRefCon, MIDIClientRef *outClient)
 {
     gClientCalls++;
     if (gClientStatus == noErr)
@@ -36,30 +36,30 @@ OSStatus charon_test_MIDIClientCreate(CFStringRef name, MIDINotifyProc notifyPro
     return gClientStatus;
 }
 
-OSStatus charon_test_MIDIDestinationCreate(MIDIClientRef client, CFStringRef name, MIDIReadProc readProc, void *refCon,
+OSStatus revenant_test_MIDIDestinationCreate(MIDIClientRef client, CFStringRef name, MIDIReadProc readProc, void *refCon,
                                            MIDIEndpointRef *outDest)
 {
     *outDest = 8;
     return noErr;
 }
 
-OSStatus charon_test_MIDISourceCreate(MIDIClientRef client, CFStringRef name, MIDIEndpointRef *outSrc)
+OSStatus revenant_test_MIDISourceCreate(MIDIClientRef client, CFStringRef name, MIDIEndpointRef *outSrc)
 {
     *outSrc = 9;
     return noErr;
 }
 
-OSStatus charon_test_MIDIObjectSetIntegerProperty(MIDIObjectRef object, CFStringRef propertyID, SInt32 value)
+OSStatus revenant_test_MIDIObjectSetIntegerProperty(MIDIObjectRef object, CFStringRef propertyID, SInt32 value)
 {
     return noErr;
 }
 
-OSStatus charon_test_MIDIObjectGetIntegerProperty(MIDIObjectRef object, CFStringRef propertyID, SInt32 *outValue)
+OSStatus revenant_test_MIDIObjectGetIntegerProperty(MIDIObjectRef object, CFStringRef propertyID, SInt32 *outValue)
 {
     return kMIDIUnknownProperty;
 }
 
-void charon_test_NSLog(NSString *format, ...)
+void revenant_test_NSLog(NSString *format, ...)
 {
     va_list arguments;
     va_start(arguments, format);
@@ -118,7 +118,7 @@ int main(void)
 
         gRequested = -1;
         status = bytes_of(&packet, 1, &bytes, &length, &data);
-        expect(status == charon_paramErr && gRequested == -1, "another group is paramErr, and nothing is asked for");
+        expect(status == revenant_paramErr && gRequested == -1, "another group is paramErr, and nothing is asked for");
 
         MIDI2DeviceManufacturer manufacturer = {{0x12, 0x34, 0x56}};
         MIDI2DeviceRevisionLevel revision = {{0x01, 0x02, 0x03, 0x04}};

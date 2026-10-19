@@ -1,8 +1,8 @@
-#import "CharonVideoToolbox.h"
+#import "RevenantVideoToolbox.h"
 
 @implementation VTFrameProcessor
 
-- (NSError *)charon_errorWithCode:(VTFrameProcessorError)code
+- (NSError *)revenant_errorWithCode:(VTFrameProcessorError)code
                         described:(NSString *)description
 {
     return [NSError errorWithDomain:VTFrameProcessorErrorDomain
@@ -15,12 +15,12 @@
 {
     if (!configuration) {
         if (error)
-            *error = [self charon_errorWithCode:VTFrameProcessorInvalidParameterError
+            *error = [self revenant_errorWithCode:VTFrameProcessorInvalidParameterError
                                      described:@"The frame processor was given no configuration."];
         return NO;
     }
     if (error)
-        *error = [self charon_errorWithCode:VTFrameProcessorInitializationFailed
+        *error = [self revenant_errorWithCode:VTFrameProcessorInitializationFailed
                                  described:@"This device has no VideoToolbox frame processor, so the "
                                           @"processing pipeline cannot be initialized."];
     return NO;
@@ -31,12 +31,12 @@
 {
     if (!parameters) {
         if (error)
-            *error = [self charon_errorWithCode:VTFrameProcessorInvalidParameterError
+            *error = [self revenant_errorWithCode:VTFrameProcessorInvalidParameterError
                                      described:@"The frame processor was given no parameters."];
         return NO;
     }
     if (error)
-        *error = [self charon_errorWithCode:VTFrameProcessorSessionNotStarted
+        *error = [self revenant_errorWithCode:VTFrameProcessorSessionNotStarted
                                  described:@"The frame processor has no session, so it cannot process "
                                           @"frames."];
     return NO;

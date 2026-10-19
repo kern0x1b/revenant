@@ -1,7 +1,7 @@
 #import <UIKit/UIKit.h>
 #import "check.h"
 
-void charon_windowed_run(UIWindow *window);
+void revenant_windowed_run(UIWindow *window);
 
 static uint64_t state = 0x3C6EF372FE94F82Bull;
 
@@ -14,7 +14,7 @@ static uint32_t next(void)
 static NSString *normalized(NSString *text)
 {
     NSMutableString *result = [text mutableCopy];
-    [result replaceOccurrencesOfString:@"CharonHost" withString:@"" options:0 range:NSMakeRange(0, result.length)];
+    [result replaceOccurrencesOfString:@"RevenantHost" withString:@"" options:0 range:NSMakeRange(0, result.length)];
     for (NSString *pattern in @[@"0x[0-9a-f]+", @"[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}"]) {
         NSRegularExpression *expression = [NSRegularExpression regularExpressionWithPattern:pattern options:0 error:NULL];
         NSString *template = [pattern hasPrefix:@"0x"] ? @"0x" : @"GEN";
@@ -131,14 +131,14 @@ static NSString *compareViews(id ours, id theirs, UIScrollView *ourView, UIScrol
     return problems;
 }
 
-static NSInteger charon_items_of_init_source(Class cls)
+static NSInteger revenant_items_of_init_source(Class cls)
 {
     return [(UICollectionViewDiffableDataSource *)[[cls alloc] performSelector:NSSelectorFromString(@"init")] snapshot].numberOfItems;
 }
 
-void charon_windowed_run(UIWindow *window)
+void revenant_windowed_run(UIWindow *window)
 {
-    Class ourCollection = NSClassFromString(@"CharonHostUICollectionViewDiffableDataSource"), ourTable = NSClassFromString(@"CharonHostUITableViewDiffableDataSource"), ourSnapshot = NSClassFromString(@"CharonHostNSDiffableDataSourceSnapshot");
+    Class ourCollection = NSClassFromString(@"RevenantHostUICollectionViewDiffableDataSource"), ourTable = NSClassFromString(@"RevenantHostUITableViewDiffableDataSource"), ourSnapshot = NSClassFromString(@"RevenantHostNSDiffableDataSourceSnapshot");
     CHECK(ourCollection != Nil && ourTable != Nil && ourSnapshot != Nil, "the port defines the data sources and the snapshot");
     CHECK([ourCollection superclass] == [NSObject class] && [ourTable superclass] == [NSObject class], "both are NSObjects");
     CHECK([ourCollection conformsToProtocol:@protocol(UICollectionViewDataSource)] && [ourTable conformsToProtocol:@protocol(UITableViewDataSource)], "each adopts its view's data source protocol");
@@ -149,8 +149,8 @@ void charon_windowed_run(UIWindow *window)
         CHECK([ourCollection instancesRespondToSelector:NSSelectorFromString(name)] == [UICollectionViewDiffableDataSource instancesRespondToSelector:NSSelectorFromString(name)] || [name hasPrefix:@"collectionView:canMove"], "the collection data source answers the callbacks the system's does");
     for (NSString *name in @[@"tableView:cellForRowAtIndexPath:", @"numberOfSectionsInTableView:", @"tableView:numberOfRowsInSection:", @"sectionIndexTitlesForTableView:", @"tableView:titleForHeaderInSection:", @"tableView:canEditRowAtIndexPath:", @"tableView:canMoveRowAtIndexPath:"])
         CHECK([ourTable instancesRespondToSelector:NSSelectorFromString(name)] == [UITableViewDiffableDataSource instancesRespondToSelector:NSSelectorFromString(name)], "the table data source answers the callbacks the system's does");
-    CHECK(charon_items_of_init_source(ourCollection) == charon_items_of_init_source([UICollectionViewDiffableDataSource class]), "a collection data source made by -init answers the system's empty snapshot");
-    CHECK(charon_items_of_init_source(ourTable) == charon_items_of_init_source([UITableViewDiffableDataSource class]), "a table data source made by -init answers the system's empty snapshot");
+    CHECK(revenant_items_of_init_source(ourCollection) == revenant_items_of_init_source([UICollectionViewDiffableDataSource class]), "a collection data source made by -init answers the system's empty snapshot");
+    CHECK(revenant_items_of_init_source(ourTable) == revenant_items_of_init_source([UITableViewDiffableDataSource class]), "a table data source made by -init answers the system's empty snapshot");
 
     {
         NSArray *scenarios = @[
@@ -222,7 +222,7 @@ void charon_windowed_run(UIWindow *window)
                 }
                 [view removeFromSuperview];
             }
-        charon_check(bad == 0, "in the recorded scenarios the provider is asked for the cells the system asks for, in the port and in the system", [NSString stringWithFormat:@"%lu of %lu differ", (unsigned long)bad, (unsigned long)scenarios.count * 4]);
+        revenant_check(bad == 0, "in the recorded scenarios the provider is asked for the cells the system asks for, in the port and in the system", [NSString stringWithFormat:@"%lu of %lu differ", (unsigned long)bad, (unsigned long)scenarios.count * 4]);
     }
 
     NSMutableArray *samples = [NSMutableArray array];
@@ -322,6 +322,6 @@ void charon_windowed_run(UIWindow *window)
         printf("  provider: %s\n", sample.UTF8String);
     for (NSString *sample in samples)
         printf("  %s\n", sample.UTF8String);
-    charon_check(wrong == 0, "the port's data sources answer as the system's after every random snapshot: counts, snapshot, index paths and identifiers", [NSString stringWithFormat:@"%lu differ", (unsigned long)wrong]);
-    charon_check(YES, "the provider is asked for every cell the system asks for, and for the ones a move out of a deleted section or into an inserted one becomes", [NSString stringWithFormat:@"%lu of %lu differ", (unsigned long)calls, (unsigned long)total]);
+    revenant_check(wrong == 0, "the port's data sources answer as the system's after every random snapshot: counts, snapshot, index paths and identifiers", [NSString stringWithFormat:@"%lu differ", (unsigned long)wrong]);
+    revenant_check(YES, "the provider is asked for every cell the system asks for, and for the ones a move out of a deleted section or into an inserted one becomes", [NSString stringWithFormat:@"%lu of %lu differ", (unsigned long)calls, (unsigned long)total]);
 }

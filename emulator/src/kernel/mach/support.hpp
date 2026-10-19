@@ -19,7 +19,7 @@
 #include <span>
 #include <string>
 
-namespace shade {
+namespace emulator {
 
 class AddressSpace;
 class SurfaceStore;

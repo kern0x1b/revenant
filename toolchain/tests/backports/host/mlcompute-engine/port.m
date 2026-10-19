@@ -2,12 +2,12 @@
 #include <stdint.h>
 #include <string.h>
 #import <dlfcn.h>
-#import "CharonMLCompute.h"
+#import "RevenantMLCompute.h"
 #import "cases.h"
 
-typedef BOOL (*CharonElementwise)(id layer, id input, id output);
+typedef BOOL (*RevenantElementwise)(id layer, id input, id output);
 
-static uint32_t charon_bits(float value)
+static uint32_t revenant_bits(float value)
 {
     uint32_t bits;
     memcpy(&bits, &value, sizeof(bits));
@@ -16,8 +16,8 @@ static uint32_t charon_bits(float value)
 
 static void print_values(const char *name, const float *values)
 {
-    printf("activation %s\t%08x,%08x,%08x,%08x\n", name, charon_bits(values[0]), charon_bits(values[1]),
-           charon_bits(values[2]), charon_bits(values[3]));
+    printf("activation %s\t%08x,%08x,%08x,%08x\n", name, revenant_bits(values[0]), revenant_bits(values[1]),
+           revenant_bits(values[2]), revenant_bits(values[3]));
 }
 
 int main(int argc, const char **argv)
@@ -32,7 +32,7 @@ int main(int argc, const char **argv)
         printf("dlopen failed: %s\n", dlerror());
         return 1;
     }
-    CharonElementwise elementwise = (CharonElementwise)dlsym(library, "CharonMLCElementwise");
+    RevenantElementwise elementwise = (RevenantElementwise)dlsym(library, "RevenantMLCElementwise");
     if (!elementwise) {
         printf("dlsym failed: %s\n", dlerror());
         return 1;
@@ -47,7 +47,7 @@ int main(int argc, const char **argv)
         return 1;
     }
     @autoreleasepool {
-        for (int type = 0; type < CHARON_CASES; type++) {
+        for (int type = 0; type < REVENANT_CASES; type++) {
             id descriptor = [descriptorClass descriptorWithShape:@[ @1, @1, @2, @2 ] dataType:1];
             float numbers[4] = { 1, 2, 3, 4 };
             id input = [tensorClass tensorWithDescriptor:descriptor];
@@ -57,11 +57,11 @@ int main(int argc, const char **argv)
             id activationDescriptor = [activationDescriptorClass descriptorWithType:type];
             id layer = [layerClass layerWithDescriptor:activationDescriptor];
             if (!layer || !elementwise(layer, input, result)) {
-                printf("activation %s\t(no answer)\n", charon_case_names[type]);
+                printf("activation %s\t(no answer)\n", revenant_case_names[type]);
                 continue;
             }
             const float *values = [result data].bytes;
-            print_values(charon_case_names[type], values);
+            print_values(revenant_case_names[type], values);
         }
     }
     dlclose(library);

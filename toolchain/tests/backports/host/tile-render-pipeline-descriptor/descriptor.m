@@ -36,7 +36,7 @@ static NSDictionary *snapshot(MTLTileRenderPipelineDescriptor *d)
 
 static void setEverything(MTLTileRenderPipelineDescriptor *d)
 {
-    d.label = @"charon";
+    d.label = @"revenant";
     d.rasterSampleCount = 4;
     [[d.colorAttachments objectAtIndexedSubscript:1] setPixelFormat:MTLPixelFormatRGBA8Unorm];
     d.threadgroupSizeMatchesTileSize = YES;
@@ -74,8 +74,8 @@ int main(int argc, char **argv)
             return 0;
         }
 
-        Class portClass = NSClassFromString(@"CharonHostMTLTileRenderPipelineDescriptor");
-        Class portBuffer = NSClassFromString(@"CharonHostMTLPipelineBufferDescriptor");
+        Class portClass = NSClassFromString(@"RevenantHostMTLTileRenderPipelineDescriptor");
+        Class portBuffer = NSClassFromString(@"RevenantHostMTLPipelineBufferDescriptor");
         check(portClass != nil && portBuffer != nil, @"the port's classes are built in this process");
         if (!portClass || !portBuffer)
             return 1;

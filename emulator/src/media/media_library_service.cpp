@@ -7,7 +7,7 @@
 
 #include "media/media_library_service.hpp"
 
-namespace shade::media_library_service {
+namespace emulator::media_library_service {
 
 bool can_serve_empty_catalogue(const std::filesystem::path& rootfs)
 {

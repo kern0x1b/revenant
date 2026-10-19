@@ -86,9 +86,9 @@ if diff -q "$build/surface-host.txt" "$build/plant-surface.txt" > /dev/null; the
 fi
 echo "plant (surface): the changed member is seen: $(diff "$build/surface-host.txt" "$build/plant-surface.txt" | grep -c '^>') line(s) differ"
 
-cp "$vision/CharonVisionContours.h" "$plant/CharonVisionContours.h"
-sed 's/int candidates\[3\] = {(d + 1) % 4, d, (d + 3) % 4};/int candidates[3] = {(d + 3) % 4, d, (d + 1) % 4};/' "$vision/CharonVisionContours.h" > "$plant/CharonVisionContours.h"
-if cmp -s "$plant/CharonVisionContours.h" "$vision/CharonVisionContours.h"; then
+cp "$vision/RevenantVisionContours.h" "$plant/RevenantVisionContours.h"
+sed 's/int candidates\[3\] = {(d + 1) % 4, d, (d + 3) % 4};/int candidates[3] = {(d + 3) % 4, d, (d + 1) % 4};/' "$vision/RevenantVisionContours.h" > "$plant/RevenantVisionContours.h"
+if cmp -s "$plant/RevenantVisionContours.h" "$vision/RevenantVisionContours.h"; then
     echo "FAIL: the detection plant did not change the file"; exit 1
 fi
 xcrun clang -fobjc-arc -w $libs -I"$plant" "$here/probe.m" "$plant/"*.m "$plant/"*.c -o "$build/plant-detect"

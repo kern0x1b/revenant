@@ -3,18 +3,18 @@
 #include <string.h>
 #include "system_function.h"
 
-static _Atomic(uintptr_t) charon_system_strsignal_r;
+static _Atomic(uintptr_t) revenant_system_strsignal_r;
 
 __attribute__((constructor))
-static void charon_resolve_strsignal_r(void)
+static void revenant_resolve_strsignal_r(void)
 {
-    charon_system_function(&charon_system_strsignal_r, CHARON_LIBSYSTEM, "strsignal_r");
+    revenant_system_function(&revenant_system_strsignal_r, REVENANT_LIBSYSTEM, "strsignal_r");
 }
 
 __attribute__((visibility("default")))
 int strsignal_r(int sig, char *strsignalbuf, size_t buflen)
 {
-    int (*system)(int, char *, size_t) = charon_system_function(&charon_system_strsignal_r, CHARON_LIBSYSTEM, "strsignal_r");
+    int (*system)(int, char *, size_t) = revenant_system_function(&revenant_system_strsignal_r, REVENANT_LIBSYSTEM, "strsignal_r");
     if (system)
         return system(sig, strsignalbuf, buflen);
     char unknown[64];

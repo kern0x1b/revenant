@@ -39,7 +39,7 @@
     NSMutableDictionary *_descriptors;
 }
 
-static const NSUInteger CharonMetalPipelineBufferSlots = 31;
+static const NSUInteger RevenantMetalPipelineBufferSlots = 31;
 
 - (instancetype)init
 {
@@ -50,9 +50,9 @@ static const NSUInteger CharonMetalPipelineBufferSlots = 31;
 
 - (MTLPipelineBufferDescriptor *)objectAtIndexedSubscript:(NSUInteger)bufferIndex
 {
-    if (bufferIndex >= CharonMetalPipelineBufferSlots) {
+    if (bufferIndex >= RevenantMetalPipelineBufferSlots) {
         [NSException raise:NSRangeException format:@"bufferIndex(%lu) must be < %lu",
-                           (unsigned long)bufferIndex, (unsigned long)CharonMetalPipelineBufferSlots];
+                           (unsigned long)bufferIndex, (unsigned long)RevenantMetalPipelineBufferSlots];
         return nil;
     }
     MTLPipelineBufferDescriptor *buffer = _descriptors[@(bufferIndex)];
@@ -65,9 +65,9 @@ static const NSUInteger CharonMetalPipelineBufferSlots = 31;
 
 - (void)setObject:(MTLPipelineBufferDescriptor *)buffer atIndexedSubscript:(NSUInteger)bufferIndex
 {
-    if (bufferIndex >= CharonMetalPipelineBufferSlots) {
+    if (bufferIndex >= RevenantMetalPipelineBufferSlots) {
         [NSException raise:NSRangeException format:@"setObject:atIndexedSubscript:%lu: bufferIndex must be < %lu",
-                           (unsigned long)bufferIndex, (unsigned long)CharonMetalPipelineBufferSlots];
+                           (unsigned long)bufferIndex, (unsigned long)RevenantMetalPipelineBufferSlots];
         return;
     }
     _descriptors[@(bufferIndex)] = buffer ? [buffer copy] : [[MTLPipelineBufferDescriptor alloc] init];

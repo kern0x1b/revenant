@@ -1,4 +1,4 @@
-#import "CharonGC.h"
+#import "RevenantGC.h"
 
 #pragma clang diagnostic ignored "-Wobjc-missing-property-synthesis"
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
@@ -13,7 +13,7 @@
     BOOL _hasAttitudeAndRotationRate;
 }
 
-- (instancetype)initWithCharonAttitudeAndRotationRate:(BOOL)has
+- (instancetype)initWithRevenantAttitudeAndRotationRate:(BOOL)has
 {
     self = [super init];
     if (self) {
@@ -25,17 +25,17 @@
     return self;
 }
 
-- (void)charon_setHasAttitudeAndRotationRate:(BOOL)has
+- (void)revenant_setHasAttitudeAndRotationRate:(BOOL)has
 {
     _hasAttitudeAndRotationRate = has;
 }
 
 - (instancetype)init
 {
-    return [self initWithCharonAttitudeAndRotationRate:NO];
+    return [self initWithRevenantAttitudeAndRotationRate:NO];
 }
 
-- (void)charon_setController:(GCController *)controller
+- (void)revenant_setController:(GCController *)controller
 {
     _controller = controller;
 }

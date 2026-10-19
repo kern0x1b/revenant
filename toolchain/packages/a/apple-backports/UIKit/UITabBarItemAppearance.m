@@ -1,40 +1,40 @@
-#import "CharonBarAppearance.h"
+#import "RevenantBarAppearance.h"
 
-static NSString *const CharonTitle = @"title";
-static NSString *const CharonTitleOffset = @"titleOffset";
-static NSString *const CharonIcon = @"icon";
-static NSString *const CharonBadgeOffset = @"badgeOffset";
-static NSString *const CharonBadgeBackground = @"badgeBackground";
-static NSString *const CharonBadgeTitle = @"badgeTitle";
-static NSString *const CharonBadgeTitleOffset = @"badgeTitleOffset";
+static NSString *const RevenantTitle = @"title";
+static NSString *const RevenantTitleOffset = @"titleOffset";
+static NSString *const RevenantIcon = @"icon";
+static NSString *const RevenantBadgeOffset = @"badgeOffset";
+static NSString *const RevenantBadgeBackground = @"badgeBackground";
+static NSString *const RevenantBadgeTitle = @"badgeTitle";
+static NSString *const RevenantBadgeTitleOffset = @"badgeTitleOffset";
 
-static NSDictionary *charon_item_classes(void)
+static NSDictionary *revenant_item_classes(void)
 {
-    return @{CharonTitle: [NSDictionary class], CharonTitleOffset: [NSArray class], CharonIcon: [UIColor class], CharonBadgeOffset: [NSArray class],
-             CharonBadgeBackground: [UIColor class], CharonBadgeTitle: [NSDictionary class], CharonBadgeTitleOffset: [NSArray class]};
+    return @{RevenantTitle: [NSDictionary class], RevenantTitleOffset: [NSArray class], RevenantIcon: [UIColor class], RevenantBadgeOffset: [NSArray class],
+             RevenantBadgeBackground: [UIColor class], RevenantBadgeTitle: [NSDictionary class], RevenantBadgeTitleOffset: [NSArray class]};
 }
 
-static id charon_item_resolve(NSInteger style, NSArray *customs, NSInteger state, NSString *key)
+static id revenant_item_resolve(NSInteger style, NSArray *customs, NSInteger state, NSString *key)
 {
     NSDictionary *own = customs[state], *normal = customs[0];
-    if ([key isEqual:CharonTitle]) {
+    if ([key isEqual:RevenantTitle]) {
         CGFloat sizes[] = {10, 13, 12};
-        NSDictionary *base = style < 3 ? @{NSFontAttributeName: charon_font(sizes[style], state == 1 ? UIFontWeightSemibold : (style == 0 ? UIFontWeightMedium : UIFontWeightRegular))} : @{};
-        NSDictionary *carried = state ? charon_attributes_carried(normal[key], state != 1, NO) : @{};
-        NSDictionary *merged = charon_attributes_merge(charon_attributes_merge(base, carried), own[key]);
+        NSDictionary *base = style < 3 ? @{NSFontAttributeName: revenant_font(sizes[style], state == 1 ? UIFontWeightSemibold : (style == 0 ? UIFontWeightMedium : UIFontWeightRegular))} : @{};
+        NSDictionary *carried = state ? revenant_attributes_carried(normal[key], state != 1, NO) : @{};
+        NSDictionary *merged = revenant_attributes_merge(revenant_attributes_merge(base, carried), own[key]);
         return merged.count ? merged : nil;
     }
-    if ([key isEqual:CharonBadgeTitle]) {
+    if ([key isEqual:RevenantBadgeTitle]) {
         CGFloat sizes[] = {13, 13, 10, 10, 28};
-        NSDictionary *base = @{NSForegroundColorAttributeName: charon_white_colour(), NSFontAttributeName: charon_font(sizes[style], style == 2 ? UIFontWeightMedium : UIFontWeightRegular)};
-        NSDictionary *carried = state ? charon_attributes_carried(normal[key], YES, NO) : @{};
-        return charon_attributes_merge(charon_attributes_merge(base, carried), own[key]);
+        NSDictionary *base = @{NSForegroundColorAttributeName: revenant_white_colour(), NSFontAttributeName: revenant_font(sizes[style], style == 2 ? UIFontWeightMedium : UIFontWeightRegular)};
+        NSDictionary *carried = state ? revenant_attributes_carried(normal[key], YES, NO) : @{};
+        return revenant_attributes_merge(revenant_attributes_merge(base, carried), own[key]);
     }
-    if ([key isEqual:CharonIcon])
+    if ([key isEqual:RevenantIcon])
         return own[key] ?: ((state == 2 || state == 3) ? normal[key] : nil);
-    if ([key isEqual:CharonBadgeBackground])
+    if ([key isEqual:RevenantBadgeBackground])
         return own[key] ?: (state ? normal[key] : nil) ?: (style >= 3 ? [UIColor colorWithRed:1 green:59.0 / 255 blue:48.0 / 255 alpha:1] : [UIColor colorWithRed:1 green:56.0 / 255 blue:60.0 / 255 alpha:1]);
-    return own[key] ?: (state ? normal[key] : nil) ?: charon_offset_pack(UIOffsetZero);
+    return own[key] ?: (state ? normal[key] : nil) ?: revenant_offset_pack(UIOffsetZero);
 }
 
 @implementation UITabBarItemStateAppearance {
@@ -44,7 +44,7 @@ static id charon_item_resolve(NSInteger style, NSArray *customs, NSInteger state
     NSMutableDictionary *_custom;
 }
 
-- (instancetype)initCharonWithOwner:(UITabBarItemAppearance *)owner state:(NSInteger)state
+- (instancetype)initRevenantWithOwner:(UITabBarItemAppearance *)owner state:(NSInteger)state
 {
     if ((self = [super init])) {
         _owner = owner;
@@ -54,126 +54,126 @@ static id charon_item_resolve(NSInteger style, NSArray *customs, NSInteger state
     return self;
 }
 
-- (NSMutableDictionary *)charon_custom
+- (NSMutableDictionary *)revenant_custom
 {
     return _custom;
 }
 
-- (id)charon_resolve:(NSString *)key
+- (id)revenant_resolve:(NSString *)key
 {
     if (_owner)
-        return [_owner charon_resolveState:_state key:key];
+        return [_owner revenant_resolveState:_state key:key];
     NSMutableArray *customs = [NSMutableArray array];
     for (NSInteger state = 0; state < 4; state++)
         [customs addObject:state == _state ? _custom : @{}];
-    return charon_item_resolve(0, customs, _state, key);
+    return revenant_item_resolve(0, customs, _state, key);
 }
 
-- (void)charon_setValue:(id)value key:(NSString *)key
+- (void)revenant_setValue:(id)value key:(NSString *)key
 {
     if (!value)
         [_custom removeObjectForKey:key];
-    else if (!charon_same(value, [self charon_resolve:key]))
+    else if (!revenant_same(value, [self revenant_resolve:key]))
         _custom[key] = value;
 }
 
-- (void)charon_setAttributes:(NSDictionary *)attributes key:(NSString *)key
+- (void)revenant_setAttributes:(NSDictionary *)attributes key:(NSString *)key
 {
     if (!attributes.count)
         [_custom removeObjectForKey:key];
-    else if (![attributes isEqual:[self charon_resolve:key]])
+    else if (![attributes isEqual:[self revenant_resolve:key]])
         _custom[key] = [attributes copy];
 }
 
 - (NSDictionary *)titleTextAttributes
 {
-    return [self charon_resolve:CharonTitle];
+    return [self revenant_resolve:RevenantTitle];
 }
 
 - (void)setTitleTextAttributes:(NSDictionary *)titleTextAttributes
 {
-    [self charon_setAttributes:titleTextAttributes key:CharonTitle];
-    [_owner charon_notify];
+    [self revenant_setAttributes:titleTextAttributes key:RevenantTitle];
+    [_owner revenant_notify];
 }
 
 - (UIOffset)titlePositionAdjustment
 {
-    return charon_offset_unpack([self charon_resolve:CharonTitleOffset]);
+    return revenant_offset_unpack([self revenant_resolve:RevenantTitleOffset]);
 }
 
 - (void)setTitlePositionAdjustment:(UIOffset)titlePositionAdjustment
 {
-    [self charon_setValue:charon_offset_pack(titlePositionAdjustment) key:CharonTitleOffset];
-    [_owner charon_notify];
+    [self revenant_setValue:revenant_offset_pack(titlePositionAdjustment) key:RevenantTitleOffset];
+    [_owner revenant_notify];
 }
 
 - (UIColor *)iconColor
 {
-    return [self charon_resolve:CharonIcon];
+    return [self revenant_resolve:RevenantIcon];
 }
 
 - (void)setIconColor:(UIColor *)iconColor
 {
-    [self charon_setValue:[iconColor copy] key:CharonIcon];
-    [_owner charon_notify];
+    [self revenant_setValue:[iconColor copy] key:RevenantIcon];
+    [_owner revenant_notify];
 }
 
 - (UIOffset)badgePositionAdjustment
 {
-    return charon_offset_unpack([self charon_resolve:CharonBadgeOffset]);
+    return revenant_offset_unpack([self revenant_resolve:RevenantBadgeOffset]);
 }
 
 - (void)setBadgePositionAdjustment:(UIOffset)badgePositionAdjustment
 {
-    [self charon_setValue:charon_offset_pack(badgePositionAdjustment) key:CharonBadgeOffset];
-    [_owner charon_notify];
+    [self revenant_setValue:revenant_offset_pack(badgePositionAdjustment) key:RevenantBadgeOffset];
+    [_owner revenant_notify];
 }
 
 - (UIColor *)badgeBackgroundColor
 {
-    return [self charon_resolve:CharonBadgeBackground];
+    return [self revenant_resolve:RevenantBadgeBackground];
 }
 
 - (void)setBadgeBackgroundColor:(UIColor *)badgeBackgroundColor
 {
-    [self charon_setValue:[badgeBackgroundColor copy] key:CharonBadgeBackground];
-    [_owner charon_notify];
+    [self revenant_setValue:[badgeBackgroundColor copy] key:RevenantBadgeBackground];
+    [_owner revenant_notify];
 }
 
 - (NSDictionary *)badgeTextAttributes
 {
-    return [self charon_resolve:CharonBadgeTitle];
+    return [self revenant_resolve:RevenantBadgeTitle];
 }
 
 - (void)setBadgeTextAttributes:(NSDictionary *)badgeTextAttributes
 {
-    [self charon_setAttributes:badgeTextAttributes key:CharonBadgeTitle];
-    [_owner charon_notify];
+    [self revenant_setAttributes:badgeTextAttributes key:RevenantBadgeTitle];
+    [_owner revenant_notify];
 }
 
 - (UIOffset)badgeTitlePositionAdjustment
 {
-    return charon_offset_unpack([self charon_resolve:CharonBadgeTitleOffset]);
+    return revenant_offset_unpack([self revenant_resolve:RevenantBadgeTitleOffset]);
 }
 
 - (void)setBadgeTitlePositionAdjustment:(UIOffset)badgeTitlePositionAdjustment
 {
-    [self charon_setValue:charon_offset_pack(badgeTitlePositionAdjustment) key:CharonBadgeTitleOffset];
-    [_owner charon_notify];
+    [self revenant_setValue:revenant_offset_pack(badgeTitlePositionAdjustment) key:RevenantBadgeTitleOffset];
+    [_owner revenant_notify];
 }
 
-- (NSString *)charon_text
+- (NSString *)revenant_text
 {
-    NSMutableArray *parts = [NSMutableArray arrayWithObject:[NSString stringWithFormat:@"titleTextAttributes=%@", charon_attributes_text(_custom[CharonTitle])]];
-    if (_custom[CharonTitleOffset])
-        [parts addObject:[NSString stringWithFormat:@"titlePositionAdjustment=%@", charon_offset_text(_custom[CharonTitleOffset])]];
-    [parts addObject:[NSString stringWithFormat:@"iconColor=%@", charon_text(_custom[CharonIcon])]];
-    if (_custom[CharonBadgeOffset])
-        [parts addObject:[NSString stringWithFormat:@"badgePositionAdjustment=%@", charon_offset_text(_custom[CharonBadgeOffset])]];
-    [parts addObject:[NSString stringWithFormat:@"badgeBackgroundColor=%@", charon_text(_custom[CharonBadgeBackground])]];
-    [parts addObject:[NSString stringWithFormat:@"badgeTextAttributes=%@", charon_attributes_text(_custom[CharonBadgeTitle])]];
-    if (_custom[CharonBadgeTitleOffset])
-        [parts addObject:[NSString stringWithFormat:@"badgeTitlePositionAdjustment=%@", charon_offset_text(_custom[CharonBadgeTitleOffset])]];
+    NSMutableArray *parts = [NSMutableArray arrayWithObject:[NSString stringWithFormat:@"titleTextAttributes=%@", revenant_attributes_text(_custom[RevenantTitle])]];
+    if (_custom[RevenantTitleOffset])
+        [parts addObject:[NSString stringWithFormat:@"titlePositionAdjustment=%@", revenant_offset_text(_custom[RevenantTitleOffset])]];
+    [parts addObject:[NSString stringWithFormat:@"iconColor=%@", revenant_text(_custom[RevenantIcon])]];
+    if (_custom[RevenantBadgeOffset])
+        [parts addObject:[NSString stringWithFormat:@"badgePositionAdjustment=%@", revenant_offset_text(_custom[RevenantBadgeOffset])]];
+    [parts addObject:[NSString stringWithFormat:@"badgeBackgroundColor=%@", revenant_text(_custom[RevenantBadgeBackground])]];
+    [parts addObject:[NSString stringWithFormat:@"badgeTextAttributes=%@", revenant_attributes_text(_custom[RevenantBadgeTitle])]];
+    if (_custom[RevenantBadgeTitleOffset])
+        [parts addObject:[NSString stringWithFormat:@"badgeTitlePositionAdjustment=%@", revenant_offset_text(_custom[RevenantBadgeTitleOffset])]];
     return [NSString stringWithFormat:@"(%@)", [parts componentsJoinedByString:@", "]];
 }
 
@@ -191,7 +191,7 @@ static id charon_item_resolve(NSInteger style, NSArray *customs, NSInteger state
     return YES;
 }
 
-static void charon_check_item_style(NSInteger style)
+static void revenant_check_item_style(NSInteger style)
 {
     if (style < 0 || style > 4)
         [NSException raise:NSInternalInconsistencyException format:@"Unsupported style %ld", (long)style];
@@ -204,25 +204,25 @@ static void charon_check_item_style(NSInteger style)
 
 - (instancetype)initWithStyle:(UITabBarItemAppearanceStyle)style
 {
-    charon_check_item_style(style);
+    revenant_check_item_style(style);
     if ((self = [super init]))
-        [self charon_setUpStyle:style];
+        [self revenant_setUpStyle:style];
     return self;
 }
 
-- (void)charon_setUpStyle:(NSInteger)style
+- (void)revenant_setUpStyle:(NSInteger)style
 {
     _style = style;
     NSMutableArray *states = [NSMutableArray array];
     for (NSInteger state = 0; state < 4; state++)
-        [states addObject:[[UITabBarItemStateAppearance alloc] initCharonWithOwner:self state:state]];
+        [states addObject:[[UITabBarItemStateAppearance alloc] initRevenantWithOwner:self state:state]];
     _states = states;
 }
 
-- (instancetype)initCharonWithStyle:(NSInteger)style
+- (instancetype)initRevenantWithStyle:(NSInteger)style
 {
     if ((self = [self initWithStyle:UITabBarItemAppearanceStyleStacked]))
-        [self charon_setUpStyle:style];
+        [self revenant_setUpStyle:style];
     return self;
 }
 
@@ -230,11 +230,11 @@ static void charon_check_item_style(NSInteger style)
 {
     NSInteger style = [coder decodeIntegerForKey:@"style"];
     if ((self = [super init])) {
-        [self charon_setUpStyle:(style >= 0 && style <= 4) ? style : 0];
+        [self revenant_setUpStyle:(style >= 0 && style <= 4) ? style : 0];
         NSArray *names = @[@"normal", @"selected", @"disabled", @"focused"];
         for (NSInteger state = 0; state < 4; state++) {
-            id packed = [coder decodeObjectOfClasses:charon_plist_classes() forKey:names[state]];
-            [[_states[state] charon_custom] setDictionary:charon_sanitised(charon_plist_unpack(packed), charon_item_classes(), nil)];
+            id packed = [coder decodeObjectOfClasses:revenant_plist_classes() forKey:names[state]];
+            [[_states[state] revenant_custom] setDictionary:revenant_sanitised(revenant_plist_unpack(packed), revenant_item_classes(), nil)];
         }
     }
     return self;
@@ -245,14 +245,14 @@ static void charon_check_item_style(NSInteger style)
     [coder encodeInteger:_style forKey:@"style"];
     NSArray *names = @[@"normal", @"selected", @"disabled", @"focused"];
     for (NSInteger state = 0; state < 4; state++)
-        [coder encodeObject:charon_plist_pack([_states[state] charon_custom]) forKey:names[state]];
+        [coder encodeObject:revenant_plist_pack([_states[state] revenant_custom]) forKey:names[state]];
 }
 
 - (id)copyWithZone:(NSZone *)zone
 {
-    UITabBarItemAppearance *copy = [[[self class] allocWithZone:zone] initCharonWithStyle:_style];
+    UITabBarItemAppearance *copy = [[[self class] allocWithZone:zone] initRevenantWithStyle:_style];
     for (NSInteger state = 0; state < 4; state++)
-        [[copy->_states[state] charon_custom] setDictionary:[_states[state] charon_custom]];
+        [[copy->_states[state] revenant_custom] setDictionary:[_states[state] revenant_custom]];
     return copy;
 }
 
@@ -263,11 +263,11 @@ static void charon_check_item_style(NSInteger style)
 
 - (void)configureWithDefaultForStyle:(UITabBarItemAppearanceStyle)style
 {
-    charon_check_item_style(style);
+    revenant_check_item_style(style);
     _style = style;
     for (UITabBarItemStateAppearance *state in _states)
-        [[state charon_custom] removeAllObjects];
-    [self charon_notify];
+        [[state revenant_custom] removeAllObjects];
+    [self revenant_notify];
 }
 
 - (UITabBarItemStateAppearance *)normal
@@ -290,57 +290,57 @@ static void charon_check_item_style(NSInteger style)
     return _states[3];
 }
 
-- (void)charon_setChangeObserver:(void (^)(void))observer
+- (void)revenant_setChangeObserver:(void (^)(void))observer
 {
     _changeObserver = [observer copy];
 }
 
-- (void)charon_notify
+- (void)revenant_notify
 {
     if (_changeObserver)
         _changeObserver();
 }
 
-- (NSInteger)charon_style
+- (NSInteger)revenant_style
 {
     return _style;
 }
 
-- (NSDictionary *)charon_customOfState:(NSInteger)state
+- (NSDictionary *)revenant_customOfState:(NSInteger)state
 {
-    return [_states[state] charon_custom];
+    return [_states[state] revenant_custom];
 }
 
-- (id)charon_resolveState:(NSInteger)state key:(NSString *)key
+- (id)revenant_resolveState:(NSInteger)state key:(NSString *)key
 {
     NSMutableArray *customs = [NSMutableArray array];
     for (UITabBarItemStateAppearance *one in _states)
-        [customs addObject:[one charon_custom]];
-    return charon_item_resolve(_style, customs, state, key);
+        [customs addObject:[one revenant_custom]];
+    return revenant_item_resolve(_style, customs, state, key);
 }
 
-- (NSString *)charon_text
+- (NSString *)revenant_text
 {
     NSArray *styles = @[@"stacked", @"inline", @"compactInline", @"carplay", @"tv"];
     NSMutableString *text = [NSMutableString stringWithFormat:@"baseStyle=%@", styles[_style]];
     NSArray *names = @[@"normal", @"selected", @"disabled", @"focused"];
     for (NSInteger state = 0; state < 4; state++)
-        [text appendFormat:@" %@=%@", names[state], [_states[state] charon_text]];
+        [text appendFormat:@" %@=%@", names[state], [_states[state] revenant_text]];
     return text;
 }
 
 - (NSString *)description
 {
-    return [NSString stringWithFormat:@"<%@: %p> %@", [self class], self, [self charon_text]];
+    return [NSString stringWithFormat:@"<%@: %p> %@", [self class], self, [self revenant_text]];
 }
 
-- (NSArray *)charon_signature
+- (NSArray *)revenant_signature
 {
     NSMutableArray *signature = [NSMutableArray arrayWithObject:@(_style)];
     for (UITabBarItemStateAppearance *state in _states) {
-        NSMutableDictionary *custom = [NSMutableDictionary dictionaryWithDictionary:[state charon_custom]];
-        for (NSString *key in @[CharonTitleOffset, CharonBadgeOffset, CharonBadgeTitleOffset])
-            if ([custom[key] isEqual:charon_offset_pack(UIOffsetZero)])
+        NSMutableDictionary *custom = [NSMutableDictionary dictionaryWithDictionary:[state revenant_custom]];
+        for (NSString *key in @[RevenantTitleOffset, RevenantBadgeOffset, RevenantBadgeTitleOffset])
+            if ([custom[key] isEqual:revenant_offset_pack(UIOffsetZero)])
                 [custom removeObjectForKey:key];
         [signature addObject:custom];
     }
@@ -349,12 +349,12 @@ static void charon_check_item_style(NSInteger style)
 
 - (BOOL)isEqual:(id)object
 {
-    return object == self || ([object isKindOfClass:[UITabBarItemAppearance class]] && [[self charon_signature] isEqual:[object charon_signature]]);
+    return object == self || ([object isKindOfClass:[UITabBarItemAppearance class]] && [[self revenant_signature] isEqual:[object revenant_signature]]);
 }
 
 - (NSUInteger)hash
 {
-    return [[self charon_signature] hash];
+    return [[self revenant_signature] hash];
 }
 
 @end

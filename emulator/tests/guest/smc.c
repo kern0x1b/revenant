@@ -26,7 +26,7 @@ static void report(const char *name, int ok, const char *why)
 
 static void two_views(void)
 {
-    char path[] = "/tmp/charon-smc-XXXXXX";
+    char path[] = "/tmp/revenant-smc-XXXXXX";
     int fd = mkstemp(path);
     if (fd < 0 || ftruncate(fd, getpagesize()) != 0) {
         report("alias-code", 0, "no file");

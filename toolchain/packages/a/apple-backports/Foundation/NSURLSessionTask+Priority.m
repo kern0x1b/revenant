@@ -5,13 +5,13 @@ const float NSURLSessionTaskPriorityDefault = 0.5f;
 const float NSURLSessionTaskPriorityLow = 0.25f;
 const float NSURLSessionTaskPriorityHigh = 0.75f;
 
-static char CharonPriorityKey;
+static char RevenantPriorityKey;
 
-@implementation NSURLSessionTask (CharonPriority)
+@implementation NSURLSessionTask (RevenantPriority)
 
 - (float)priority
 {
-    NSNumber *priority = objc_getAssociatedObject(self, &CharonPriorityKey);
+    NSNumber *priority = objc_getAssociatedObject(self, &RevenantPriorityKey);
     return priority ? priority.floatValue : NSURLSessionTaskPriorityDefault;
 }
 
@@ -19,7 +19,7 @@ static char CharonPriorityKey;
 {
     if (priority < 0 || priority > 1)
         return;
-    objc_setAssociatedObject(self, &CharonPriorityKey, @(priority), OBJC_ASSOCIATION_RETAIN);
+    objc_setAssociatedObject(self, &RevenantPriorityKey, @(priority), OBJC_ASSOCIATION_RETAIN);
 }
 
 @end

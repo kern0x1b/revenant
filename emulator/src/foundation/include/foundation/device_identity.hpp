@@ -7,7 +7,7 @@
 #include <cstdint>
 #include <string_view>
 
-namespace shade {
+namespace emulator {
 
 enum class ActivationHardwareModelPolicy : std::uint8_t {
     Retail,

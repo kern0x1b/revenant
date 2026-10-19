@@ -46,7 +46,7 @@ static void same_flag(BOOL ours, BOOL theirs, NSString *what)
 
 static Class ours_of(Class theirs)
 {
-    Class mine = NSClassFromString([@"CharonHost" stringByAppendingString:NSStringFromClass(theirs)]);
+    Class mine = NSClassFromString([@"RevenantHost" stringByAppendingString:NSStringFromClass(theirs)]);
     if (!mine)
         fail(@"the backport defines no %@", NSStringFromClass(theirs));
     return mine;
@@ -62,7 +62,7 @@ static NSString *reason_of(void (^block)(void))
     @try {
         block();
     } @catch (NSException *exception) {
-        NSString *reason = [exception.reason stringByReplacingOccurrencesOfString:@"CharonHost" withString:@""];
+        NSString *reason = [exception.reason stringByReplacingOccurrencesOfString:@"RevenantHost" withString:@""];
         reason = [reason stringByReplacingOccurrencesOfString:@"_NSStatic_" withString:@""];
         return [NSString stringWithFormat:@"%@: %@", exception.name, reason];
     }
@@ -222,11 +222,11 @@ static void compare_intervals(void)
                 build(theirs, 5, 10).endDate.timeIntervalSinceReferenceDate, @"end date");
 }
 
-@interface CharonPartialArchive : NSObject <NSCoding>
+@interface RevenantPartialArchive : NSObject <NSCoding>
 @property (nonatomic, copy) NSDictionary *keys;
 @end
 
-@implementation CharonPartialArchive
+@implementation RevenantPartialArchive
 
 - (instancetype)initWithCoder:(NSCoder *)coder
 {
@@ -248,8 +248,8 @@ static void compare_intervals(void)
 static id decode_as(NSString *className, NSDictionary *keys, Class decoded, NSError **error)
 {
     NSKeyedArchiver *archiver = [[NSKeyedArchiver alloc] initRequiringSecureCoding:NO];
-    [archiver setClassName:className forClass:[CharonPartialArchive class]];
-    CharonPartialArchive *partial = [[CharonPartialArchive alloc] init];
+    [archiver setClassName:className forClass:[RevenantPartialArchive class]];
+    RevenantPartialArchive *partial = [[RevenantPartialArchive alloc] init];
     partial.keys = keys;
     [archiver encodeObject:partial forKey:NSKeyedArchiveRootObjectKey];
     [archiver finishEncoding];

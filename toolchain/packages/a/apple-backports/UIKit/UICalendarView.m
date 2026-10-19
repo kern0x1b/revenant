@@ -1,33 +1,33 @@
 #import <UIKit/UIKit.h>
-#import "CharonCalendar.h"
+#import "RevenantCalendar.h"
 
-static Protocol *charon_calendarViewDelegateProtocol(void) __attribute__((used));
-static Protocol *charon_calendarViewDelegateProtocol(void)
+static Protocol *revenant_calendarViewDelegateProtocol(void) __attribute__((used));
+static Protocol *revenant_calendarViewDelegateProtocol(void)
 {
     return @protocol(UICalendarViewDelegate);
 }
 
-static NSString *const CharonDefaultFontDesign = @"NSCTFontUIFontDesignDefault";
+static NSString *const RevenantDefaultFontDesign = @"NSCTFontUIFontDesignDefault";
 
-static const CGFloat CharonHeaderHeight = 44;
-static const CGFloat CharonWeekdayHeight = 20;
-static const CGFloat CharonGridTop = 64;
-static const CGFloat CharonArrowInset = 44;
+static const CGFloat RevenantHeaderHeight = 44;
+static const CGFloat RevenantWeekdayHeight = 20;
+static const CGFloat RevenantGridTop = 64;
+static const CGFloat RevenantArrowInset = 44;
 
-static void charon_needs(BOOL held, NSString *condition)
+static void revenant_needs(BOOL held, NSString *condition)
 {
     if (!held)
         [NSException raise:NSInternalInconsistencyException format:@"Invalid parameter not satisfying: %@", condition];
 }
 
-static NSDate *charon_monthStart(NSCalendar *calendar, NSDate *date)
+static NSDate *revenant_monthStart(NSCalendar *calendar, NSDate *date)
 {
     NSDateComponents *parts = [calendar components:NSCalendarUnitYear | NSCalendarUnitMonth fromDate:date];
     parts.day = 1;
     return [calendar dateFromComponents:parts];
 }
 
-static NSDate *charon_firstOfMonth(NSCalendar *calendar, NSDateComponents *components)
+static NSDate *revenant_firstOfMonth(NSCalendar *calendar, NSDateComponents *components)
 {
     NSDateComponents *parts = [[NSDateComponents alloc] init];
     parts.year = components.year == NSUndefinedDateComponent ? 1 : components.year;
@@ -36,7 +36,7 @@ static NSDate *charon_firstOfMonth(NSCalendar *calendar, NSDateComponents *compo
     return [calendar dateFromComponents:parts];
 }
 
-static NSDateComponents *charon_monthComponents(NSCalendar *calendar, NSDate *monthStart)
+static NSDateComponents *revenant_monthComponents(NSCalendar *calendar, NSDate *monthStart)
 {
     NSDateComponents *parts = [calendar components:NSCalendarUnitEra | NSCalendarUnitYear | NSCalendarUnitMonth fromDate:monthStart];
     parts.day = NSUndefinedDateComponent;
@@ -44,14 +44,14 @@ static NSDateComponents *charon_monthComponents(NSCalendar *calendar, NSDate *mo
     return parts;
 }
 
-static NSDate *charon_shiftMonths(NSCalendar *calendar, NSDate *date, NSInteger months)
+static NSDate *revenant_shiftMonths(NSCalendar *calendar, NSDate *date, NSInteger months)
 {
     NSDateComponents *step = [[NSDateComponents alloc] init];
     step.month = months;
     return [calendar dateByAddingComponents:step toDate:date options:0];
 }
 
-static NSDateInterval *charon_defaultRange(void)
+static NSDateInterval *revenant_defaultRange(void)
 {
     NSCalendar *gregorian = [[NSCalendar alloc] initWithCalendarIdentifier:NSCalendarIdentifierGregorian];
     gregorian.timeZone = [NSTimeZone timeZoneForSecondsFromGMT:0];
@@ -82,7 +82,7 @@ static NSDateInterval *charon_defaultRange(void)
 - (instancetype)initWithFrame:(CGRect)frame
 {
     if ((self = [super initWithFrame:frame])) {
-        [self charon_setUp];
+        [self revenant_setUp];
     }
     return self;
 }
@@ -90,25 +90,25 @@ static NSDateInterval *charon_defaultRange(void)
 - (instancetype)initWithCoder:(NSCoder *)coder
 {
     if ((self = [super initWithCoder:coder])) {
-        [self charon_setUp];
+        [self revenant_setUp];
     }
     return self;
 }
 
-- (void)charon_setUp
+- (void)revenant_setUp
 {
     _locale = [NSLocale currentLocale];
     _calendar = [NSCalendar currentCalendar];
-    _fontDesign = [CharonDefaultFontDesign copy];
-    _availableDateRange = charon_defaultRange();
+    _fontDesign = [RevenantDefaultFontDesign copy];
+    _availableDateRange = revenant_defaultRange();
     _wantsDateDecorations = YES;
-    _visibleDateComponents = charon_monthComponents(_calendar, charon_monthStart(_calendar, [NSDate date]));
+    _visibleDateComponents = revenant_monthComponents(_calendar, revenant_monthStart(_calendar, [NSDate date]));
 
-    [self addGestureRecognizer:[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(charon_tapped:)]];
-    UISwipeGestureRecognizer *toNext = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(charon_swipedToNext:)];
+    [self addGestureRecognizer:[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(revenant_tapped:)]];
+    UISwipeGestureRecognizer *toNext = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(revenant_swipedToNext:)];
     toNext.direction = UISwipeGestureRecognizerDirectionLeft;
     [self addGestureRecognizer:toNext];
-    UISwipeGestureRecognizer *toPrevious = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(charon_swipedToPrevious:)];
+    UISwipeGestureRecognizer *toPrevious = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(revenant_swipedToPrevious:)];
     toPrevious.direction = UISwipeGestureRecognizerDirectionRight;
     [self addGestureRecognizer:toPrevious];
 }
@@ -132,8 +132,8 @@ static NSDateInterval *charon_defaultRange(void)
 {
     UICalendarSelection *previous = _selectionBehavior;
     _selectionBehavior = selectionBehavior;
-    [previous charon_attachToView:nil];
-    [selectionBehavior charon_attachToView:self];
+    [previous revenant_attachToView:nil];
+    [selectionBehavior revenant_attachToView:self];
     [self setNeedsDisplay];
 }
 
@@ -144,7 +144,7 @@ static NSDateInterval *charon_defaultRange(void)
 
 - (void)setLocale:(NSLocale *)locale
 {
-    charon_needs(locale != nil, @"calendar");
+    revenant_needs(locale != nil, @"calendar");
     _locale = [locale copy];
     [self setNeedsDisplay];
 }
@@ -156,10 +156,10 @@ static NSDateInterval *charon_defaultRange(void)
 
 - (void)setCalendar:(NSCalendar *)calendar
 {
-    charon_needs(calendar != nil, @"calendar");
-    NSDate *first = charon_firstOfMonth(_calendar, _visibleDateComponents);
+    revenant_needs(calendar != nil, @"calendar");
+    NSDate *first = revenant_firstOfMonth(_calendar, _visibleDateComponents);
     _calendar = [calendar copy];
-    _visibleDateComponents = charon_monthComponents(_calendar, charon_monthStart(_calendar, first));
+    _visibleDateComponents = revenant_monthComponents(_calendar, revenant_monthStart(_calendar, first));
     [self setNeedsDisplay];
 }
 
@@ -192,16 +192,16 @@ static NSDateInterval *charon_defaultRange(void)
 
 - (void)setAvailableDateRange:(NSDateInterval *)availableDateRange
 {
-    charon_needs(availableDateRange != nil, @"date");
+    revenant_needs(availableDateRange != nil, @"date");
     _availableDateRange = [availableDateRange copy];
-    NSCalendar *calendar = [self charon_calendarForDates];
-    NSDate *visible = charon_firstOfMonth(calendar, _visibleDateComponents);
-    NSDate *first = charon_monthStart(calendar, _availableDateRange.startDate);
-    NSDate *last = charon_monthStart(calendar, _availableDateRange.endDate);
+    NSCalendar *calendar = [self revenant_calendarForDates];
+    NSDate *visible = revenant_firstOfMonth(calendar, _visibleDateComponents);
+    NSDate *first = revenant_monthStart(calendar, _availableDateRange.startDate);
+    NSDate *last = revenant_monthStart(calendar, _availableDateRange.endDate);
     if ([visible compare:first] == NSOrderedAscending)
-        [self charon_showMonthStartingAt:first];
+        [self revenant_showMonthStartingAt:first];
     else if ([visible compare:last] == NSOrderedDescending)
-        [self charon_showMonthStartingAt:last];
+        [self revenant_showMonthStartingAt:last];
 }
 
 - (NSDateComponents *)visibleDateComponents
@@ -211,12 +211,12 @@ static NSDateInterval *charon_defaultRange(void)
 
 - (void)setVisibleDateComponents:(NSDateComponents *)dateComponents animated:(BOOL)animated
 {
-    charon_needs(dateComponents != nil, @"date");
-    NSCalendar *calendar = [self charon_calendarForDates];
-    NSDate *monthStart = charon_firstOfMonth(calendar, dateComponents);
-    if (![self charon_containsMonthStarting:monthStart])
+    revenant_needs(dateComponents != nil, @"date");
+    NSCalendar *calendar = [self revenant_calendarForDates];
+    NSDate *monthStart = revenant_firstOfMonth(calendar, dateComponents);
+    if (![self revenant_containsMonthStarting:monthStart])
         [NSException raise:NSInternalInconsistencyException format:@"Unable to set a visible month that is before the minimum or after the maximum date."];
-    [self charon_showMonthStartingAt:monthStart];
+    [self revenant_showMonthStartingAt:monthStart];
 }
 
 - (BOOL)wantsDateDecorations
@@ -235,7 +235,7 @@ static NSDateInterval *charon_defaultRange(void)
     [self setNeedsDisplay];
 }
 
-- (NSCalendar *)charon_calendarForDates
+- (NSCalendar *)revenant_calendarForDates
 {
     if (!_timeZone)
         return _calendar;
@@ -244,18 +244,18 @@ static NSDateInterval *charon_defaultRange(void)
     return calendar;
 }
 
-- (BOOL)charon_containsMonthStarting:(NSDate *)monthStart
+- (BOOL)revenant_containsMonthStarting:(NSDate *)monthStart
 {
-    NSCalendar *calendar = [self charon_calendarForDates];
-    NSDate *first = charon_monthStart(calendar, _availableDateRange.startDate);
-    NSDate *last = charon_monthStart(calendar, _availableDateRange.endDate);
+    NSCalendar *calendar = [self revenant_calendarForDates];
+    NSDate *first = revenant_monthStart(calendar, _availableDateRange.startDate);
+    NSDate *last = revenant_monthStart(calendar, _availableDateRange.endDate);
     return [monthStart compare:first] != NSOrderedAscending && [monthStart compare:last] != NSOrderedDescending;
 }
 
-- (void)charon_showMonthStartingAt:(NSDate *)monthStart
+- (void)revenant_showMonthStartingAt:(NSDate *)monthStart
 {
     NSDateComponents *previous = _visibleDateComponents;
-    NSDateComponents *next = charon_monthComponents([self charon_calendarForDates], monthStart);
+    NSDateComponents *next = revenant_monthComponents([self revenant_calendarForDates], monthStart);
     next.calendar = _calendar;
     if (previous.year == next.year && previous.month == next.month)
         return;
@@ -268,58 +268,58 @@ static NSDateInterval *charon_defaultRange(void)
     }
 }
 
-- (void)charon_stepMonths:(NSInteger)months
+- (void)revenant_stepMonths:(NSInteger)months
 {
-    NSCalendar *calendar = [self charon_calendarForDates];
-    NSDate *target = charon_shiftMonths(calendar, charon_firstOfMonth(calendar, _visibleDateComponents), months);
-    if ([self charon_containsMonthStarting:target])
-        [self charon_showMonthStartingAt:target];
+    NSCalendar *calendar = [self revenant_calendarForDates];
+    NSDate *target = revenant_shiftMonths(calendar, revenant_firstOfMonth(calendar, _visibleDateComponents), months);
+    if ([self revenant_containsMonthStarting:target])
+        [self revenant_showMonthStartingAt:target];
 }
 
-- (void)charon_swipedToNext:(UISwipeGestureRecognizer *)swipe
+- (void)revenant_swipedToNext:(UISwipeGestureRecognizer *)swipe
 {
-    [self charon_stepMonths:1];
+    [self revenant_stepMonths:1];
 }
 
-- (void)charon_swipedToPrevious:(UISwipeGestureRecognizer *)swipe
+- (void)revenant_swipedToPrevious:(UISwipeGestureRecognizer *)swipe
 {
-    [self charon_stepMonths:-1];
+    [self revenant_stepMonths:-1];
 }
 
-- (void)charon_tapped:(UITapGestureRecognizer *)tap
+- (void)revenant_tapped:(UITapGestureRecognizer *)tap
 {
     CGPoint point = [tap locationInView:self];
-    if (point.y < CharonHeaderHeight) {
-        if (point.x < CharonArrowInset)
-            [self charon_stepMonths:-1];
-        else if (point.x > CGRectGetWidth(self.bounds) - CharonArrowInset)
-            [self charon_stepMonths:1];
+    if (point.y < RevenantHeaderHeight) {
+        if (point.x < RevenantArrowInset)
+            [self revenant_stepMonths:-1];
+        else if (point.x > CGRectGetWidth(self.bounds) - RevenantArrowInset)
+            [self revenant_stepMonths:1];
         return;
     }
-    NSDateComponents *day = [self charon_dateAtPoint:point];
+    NSDateComponents *day = [self revenant_dateAtPoint:point];
     if (day && _selectionBehavior)
-        [_selectionBehavior charon_didTapDay:day];
+        [_selectionBehavior revenant_didTapDay:day];
 }
 
-- (NSInteger)charon_daysInVisibleMonth:(NSDate *)first calendar:(NSCalendar *)calendar
+- (NSInteger)revenant_daysInVisibleMonth:(NSDate *)first calendar:(NSCalendar *)calendar
 {
     return [calendar rangeOfUnit:NSCalendarUnitDay inUnit:NSCalendarUnitMonth forDate:first].length;
 }
 
-- (NSInteger)charon_leadingBlanks:(NSDate *)first calendar:(NSCalendar *)calendar
+- (NSInteger)revenant_leadingBlanks:(NSDate *)first calendar:(NSCalendar *)calendar
 {
     NSInteger weekday = [calendar components:NSCalendarUnitWeekday fromDate:first].weekday;
     return (weekday - calendar.firstWeekday + 7) % 7;
 }
 
-- (CGRect)charon_cellAtIndex:(NSInteger)index
+- (CGRect)revenant_cellAtIndex:(NSInteger)index
 {
     CGFloat cellWidth = floor(CGRectGetWidth(self.bounds) / 7.0);
-    CGFloat cellHeight = floor((CGRectGetHeight(self.bounds) - CharonGridTop) / 6.0);
-    return CGRectMake((index % 7) * cellWidth, CharonGridTop + (index / 7) * cellHeight, cellWidth, cellHeight);
+    CGFloat cellHeight = floor((CGRectGetHeight(self.bounds) - RevenantGridTop) / 6.0);
+    return CGRectMake((index % 7) * cellWidth, RevenantGridTop + (index / 7) * cellHeight, cellWidth, cellHeight);
 }
 
-- (NSDateComponents *)charon_dayComponents:(NSInteger)day
+- (NSDateComponents *)revenant_dayComponents:(NSInteger)day
 {
     NSDateComponents *parts = [[NSDateComponents alloc] init];
     parts.year = _visibleDateComponents.year;
@@ -329,22 +329,22 @@ static NSDateInterval *charon_defaultRange(void)
     return parts;
 }
 
-- (NSDateComponents *)charon_dateAtPoint:(CGPoint)point
+- (NSDateComponents *)revenant_dateAtPoint:(CGPoint)point
 {
-    if (point.y < CharonGridTop)
+    if (point.y < RevenantGridTop)
         return nil;
-    NSCalendar *calendar = [self charon_calendarForDates];
-    NSDate *first = charon_firstOfMonth(calendar, _visibleDateComponents);
+    NSCalendar *calendar = [self revenant_calendarForDates];
+    NSDate *first = revenant_firstOfMonth(calendar, _visibleDateComponents);
     CGFloat cellWidth = floor(CGRectGetWidth(self.bounds) / 7.0);
-    CGFloat cellHeight = floor((CGRectGetHeight(self.bounds) - CharonGridTop) / 6.0);
+    CGFloat cellHeight = floor((CGRectGetHeight(self.bounds) - RevenantGridTop) / 6.0);
     NSInteger column = (NSInteger)(point.x / cellWidth);
-    NSInteger row = (NSInteger)((point.y - CharonGridTop) / cellHeight);
+    NSInteger row = (NSInteger)((point.y - RevenantGridTop) / cellHeight);
     if (column < 0 || column > 6 || row < 0 || row > 5)
         return nil;
-    NSInteger day = row * 7 + column - [self charon_leadingBlanks:first calendar:calendar] + 1;
-    if (day < 1 || day > [self charon_daysInVisibleMonth:first calendar:calendar])
+    NSInteger day = row * 7 + column - [self revenant_leadingBlanks:first calendar:calendar] + 1;
+    if (day < 1 || day > [self revenant_daysInVisibleMonth:first calendar:calendar])
         return nil;
-    NSDateComponents *components = [self charon_dayComponents:day];
+    NSDateComponents *components = [self revenant_dayComponents:day];
     if (![_availableDateRange containsDate:[calendar dateFromComponents:components]])
         return nil;
     return components;
@@ -352,41 +352,41 @@ static NSDateInterval *charon_defaultRange(void)
 
 - (void)drawRect:(CGRect)rect
 {
-    NSCalendar *calendar = [self charon_calendarForDates];
-    NSDate *first = charon_firstOfMonth(calendar, _visibleDateComponents);
-    NSInteger days = [self charon_daysInVisibleMonth:first calendar:calendar];
-    NSInteger leading = [self charon_leadingBlanks:first calendar:calendar];
+    NSCalendar *calendar = [self revenant_calendarForDates];
+    NSDate *first = revenant_firstOfMonth(calendar, _visibleDateComponents);
+    NSInteger days = [self revenant_daysInVisibleMonth:first calendar:calendar];
+    NSInteger leading = [self revenant_leadingBlanks:first calendar:calendar];
 
     NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
     formatter.locale = _locale;
     formatter.calendar = calendar;
     formatter.dateFormat = [NSDateFormatter dateFormatFromTemplate:@"MMMM y" options:0 locale:_locale] ?: @"MMMM y";
-    [self charon_drawHeader:[formatter stringFromDate:first] calendar:calendar];
-    [self charon_drawWeekdaysWithFormatter:formatter calendar:calendar];
+    [self revenant_drawHeader:[formatter stringFromDate:first] calendar:calendar];
+    [self revenant_drawWeekdaysWithFormatter:formatter calendar:calendar];
 
     for (NSInteger index = 0; index < 42; index++) {
         NSInteger day = index - leading + 1;
         if (day >= 1 && day <= days)
-            [self charon_drawDay:day inCell:[self charon_cellAtIndex:index] calendar:calendar];
+            [self revenant_drawDay:day inCell:[self revenant_cellAtIndex:index] calendar:calendar];
     }
 }
 
-- (void)charon_drawHeader:(NSString *)title calendar:(NSCalendar *)calendar
+- (void)revenant_drawHeader:(NSString *)title calendar:(NSCalendar *)calendar
 {
     CGFloat width = CGRectGetWidth(self.bounds);
     NSDictionary *attributes = @{NSFontAttributeName: [UIFont boldSystemFontOfSize:17], NSForegroundColorAttributeName: [UIColor blackColor]};
     CGSize size = [title sizeWithAttributes:attributes];
-    [title drawAtPoint:CGPointMake((width - size.width) / 2.0, (CharonHeaderHeight - size.height) / 2.0) withAttributes:attributes];
+    [title drawAtPoint:CGPointMake((width - size.width) / 2.0, (RevenantHeaderHeight - size.height) / 2.0) withAttributes:attributes];
 
-    BOOL canPrevious = [self charon_containsMonthStarting:charon_shiftMonths(calendar, charon_firstOfMonth(calendar, _visibleDateComponents), -1)];
-    BOOL canNext = [self charon_containsMonthStarting:charon_shiftMonths(calendar, charon_firstOfMonth(calendar, _visibleDateComponents), 1)];
-    [self charon_drawArrowAtX:CharonArrowInset / 2.0 pointingLeft:YES enabled:canPrevious];
-    [self charon_drawArrowAtX:width - CharonArrowInset / 2.0 pointingLeft:NO enabled:canNext];
+    BOOL canPrevious = [self revenant_containsMonthStarting:revenant_shiftMonths(calendar, revenant_firstOfMonth(calendar, _visibleDateComponents), -1)];
+    BOOL canNext = [self revenant_containsMonthStarting:revenant_shiftMonths(calendar, revenant_firstOfMonth(calendar, _visibleDateComponents), 1)];
+    [self revenant_drawArrowAtX:RevenantArrowInset / 2.0 pointingLeft:YES enabled:canPrevious];
+    [self revenant_drawArrowAtX:width - RevenantArrowInset / 2.0 pointingLeft:NO enabled:canNext];
 }
 
-- (void)charon_drawArrowAtX:(CGFloat)x pointingLeft:(BOOL)left enabled:(BOOL)enabled
+- (void)revenant_drawArrowAtX:(CGFloat)x pointingLeft:(BOOL)left enabled:(BOOL)enabled
 {
-    CGFloat y = CharonHeaderHeight / 2.0;
+    CGFloat y = RevenantHeaderHeight / 2.0;
     CGFloat tip = left ? x - 5 : x + 5;
     CGFloat back = left ? x + 5 : x - 5;
     CGContextRef context = UIGraphicsGetCurrentContext();
@@ -400,7 +400,7 @@ static NSDateInterval *charon_defaultRange(void)
     CGContextRestoreGState(context);
 }
 
-- (void)charon_drawWeekdaysWithFormatter:(NSDateFormatter *)formatter calendar:(NSCalendar *)calendar
+- (void)revenant_drawWeekdaysWithFormatter:(NSDateFormatter *)formatter calendar:(NSCalendar *)calendar
 {
     NSArray *symbols = formatter.shortWeekdaySymbols;
     CGFloat cellWidth = floor(CGRectGetWidth(self.bounds) / 7.0);
@@ -409,16 +409,16 @@ static NSDateInterval *charon_defaultRange(void)
         NSString *name = symbols[(calendar.firstWeekday - 1 + column) % 7];
         CGSize size = [name sizeWithAttributes:attributes];
         CGFloat x = column * cellWidth + (cellWidth - size.width) / 2.0;
-        [name drawAtPoint:CGPointMake(x, CharonHeaderHeight + (CharonWeekdayHeight - size.height) / 2.0) withAttributes:attributes];
+        [name drawAtPoint:CGPointMake(x, RevenantHeaderHeight + (RevenantWeekdayHeight - size.height) / 2.0) withAttributes:attributes];
     }
 }
 
-- (void)charon_drawDay:(NSInteger)day inCell:(CGRect)cell calendar:(NSCalendar *)calendar
+- (void)revenant_drawDay:(NSInteger)day inCell:(CGRect)cell calendar:(NSCalendar *)calendar
 {
-    NSDateComponents *components = [self charon_dayComponents:day];
+    NSDateComponents *components = [self revenant_dayComponents:day];
     BOOL inRange = [_availableDateRange containsDate:[calendar dateFromComponents:components]];
-    BOOL selected = _selectionBehavior && [_selectionBehavior charon_isSelected:components];
-    BOOL enabled = inRange && (selected || !_selectionBehavior || [_selectionBehavior charon_canSelect:components]);
+    BOOL selected = _selectionBehavior && [_selectionBehavior revenant_isSelected:components];
+    BOOL enabled = inRange && (selected || !_selectionBehavior || [_selectionBehavior revenant_canSelect:components]);
 
     CGPoint centre = CGPointMake(CGRectGetMidX(cell), CGRectGetMinY(cell) + CGRectGetHeight(cell) * 0.4);
     if (selected) {
@@ -435,7 +435,7 @@ static NSDateInterval *charon_defaultRange(void)
 
     if (_wantsDateDecorations && [_delegate respondsToSelector:@selector(calendarView:decorationForDateComponents:)]) {
         UICalendarViewDecoration *decoration = [_delegate calendarView:self decorationForDateComponents:components];
-        [decoration charon_drawInRect:cell];
+        [decoration revenant_drawInRect:cell];
     }
 }
 

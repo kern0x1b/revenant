@@ -8,7 +8,7 @@
    "minimum": "6.0",
    "status": "implemented",
    "facts": "facts/UIKit/UIKitConstants1001.md",
-   "source": "the value read out of the the 16.0 arm64e cache cache of iOS 10.0.1, the oldest held release that exports the symbol (the 10.0.1 rung of the machine's held ladder)"
+   "source": "the value read out of the 16.0 arm64e cache cache of iOS 10.0.1, the oldest held release that exports the symbol (the 10.0.1 rung of the machine's held ladder)"
   },
   {
    "api": "UIPasteboardTypeAutomatic",

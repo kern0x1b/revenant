@@ -1,4 +1,4 @@
-#import "CharonUTType.h"
+#import "RevenantUTType.h"
 
 UTType *UTTypeCSS;
 
@@ -14,7 +14,7 @@ UTType *UTTypeGeoJSON;
 
 UTType *UTTypeLinkPresentationMetadata;
 
-__attribute__((constructor)) static void charon_uttype_catalog_18(void)
+__attribute__((constructor)) static void revenant_uttype_catalog_18(void)
 {
     UTTypeCSS = [UTType typeWithIdentifier:@"public.css"];
     UTTypeHEICS = [UTType typeWithIdentifier:@"public.heics"];
@@ -24,5 +24,5 @@ __attribute__((constructor)) static void charon_uttype_catalog_18(void)
     UTTypeGeoJSON = [UTType typeWithIdentifier:@"public.geojson"];
     UTTypeLinkPresentationMetadata = [UTType typeWithIdentifier:@"com.apple.linkpresentation.metadata"];
 
-    charon_uttype_catalogue_add(@[UTTypeCSS, UTTypeHEICS, UTTypeEXR, UTTypeDNG, UTTypeTarArchive, UTTypeGeoJSON, UTTypeLinkPresentationMetadata]);
+    revenant_uttype_catalogue_add(@[UTTypeCSS, UTTypeHEICS, UTTypeEXR, UTTypeDNG, UTTypeTarArchive, UTTypeGeoJSON, UTTypeLinkPresentationMetadata]);
 }

@@ -22,7 +22,7 @@
 #include <optional>
 #include <vector>
 
-namespace shade {
+namespace emulator {
 namespace {
 
     constexpr std::uint32_t mach_port_get_context_identifier = 3228U;

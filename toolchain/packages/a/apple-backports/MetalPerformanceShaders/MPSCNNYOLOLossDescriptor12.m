@@ -1,4 +1,4 @@
-#import "CharonMPS.h"
+#import "RevenantMPS.h"
 
 @implementation MPSCNNYOLOLossDescriptor {
     MPSCNNLossDescriptor *_XYLossDescriptor;
@@ -27,7 +27,7 @@
                                           numberOfAnchorBoxes:(NSUInteger)numberOfAnchorBoxes
 {
     if (reductionType >= MPSCNNReductionTypeCount) {
-        CharonMPSRefuse(@"MPSCNNYOLOLossDescriptor: reduction type %d is not an MPSCNNReductionType, so no descriptor is made",
+        RevenantMPSRefuse(@"MPSCNNYOLOLossDescriptor: reduction type %d is not an MPSCNNReductionType, so no descriptor is made",
                         (int)reductionType);
         return nil;
     }

@@ -5,7 +5,7 @@ set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 uikit=$here/../../../../packages/a/apple-backports/UIKit
-build=${SHORTCUT_BUILD:-$(runs_fresh charon-shortcut-item)}
+build=${SHORTCUT_BUILD:-$(runs_fresh revenant-shortcut-item)}
 . "$here/../../common/twoprocess.sh"
 if [ -n "${SHORTCUT_PORT_SOURCES:-}" ]; then
     set -- $SHORTCUT_PORT_SOURCES

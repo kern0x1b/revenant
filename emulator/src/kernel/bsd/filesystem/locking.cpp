@@ -25,7 +25,7 @@
 
 #include "../support.hpp"
 
-namespace shade::bsd {
+namespace emulator::bsd {
 namespace {
 
     bool ranges_overlap(const RecordLockRange& lhs, const RecordLockRange& rhs)
@@ -217,7 +217,7 @@ void AdvisoryFileLockRegistry::release_process_record_locks(
 
 }
 
-namespace shade {
+namespace emulator {
 namespace {
 
     struct GuestRecordLock {

@@ -1,7 +1,7 @@
 #import <MapKit/MapKit.h>
 #import <UIKit/UIKit.h>
 #import <math.h>
-#import "CharonMapKit.h"
+#import "RevenantMapKit.h"
 
 @implementation MKPolygonRenderer {
     CGFloat _strokeStart;
@@ -32,7 +32,7 @@
     [self invalidatePath];
 }
 
-- (void)charon_addRing:(const CLLocationCoordinate2D *)coordinates
+- (void)revenant_addRing:(const CLLocationCoordinate2D *)coordinates
                   count:(NSUInteger)count
               start:(double)start
                     end:(double)end
@@ -77,7 +77,7 @@
     }
 }
 
-- (void)charon_addRingOf:(MKPolygon *)polygon
+- (void)revenant_addRingOf:(MKPolygon *)polygon
                     count:(NSUInteger)count
                     start:(double)start
                       end:(double)end
@@ -92,7 +92,7 @@
         return;
     }
     [polygon getCoordinates:coordinates range:NSMakeRange(0, count)];
-    [self charon_addRing:coordinates count:count start:start end:end reversed:reversed toPath:path];
+    [self revenant_addRing:coordinates count:count start:start end:end reversed:reversed toPath:path];
     free(coordinates);
 }
 
@@ -108,11 +108,11 @@
     }
     double start = (double)self.strokeStart;
     double end = (double)self.strokeEnd;
-    [self charon_addRingOf:polygon count:polygon.pointCount start:start end:end reversed:NO toPath:path];
+    [self revenant_addRingOf:polygon count:polygon.pointCount start:start end:end reversed:NO toPath:path];
     for (NSUInteger index = 1; index < polygon.interiorPolygons.count; index++) {
         MKPolygon *hole = polygon.interiorPolygons[index];
         if (hole.pointCount > 0) {
-            [self charon_addRingOf:hole count:hole.pointCount start:start end:end reversed:YES toPath:path];
+            [self revenant_addRingOf:hole count:hole.pointCount start:start end:end reversed:YES toPath:path];
         }
     }
     self.path = path;

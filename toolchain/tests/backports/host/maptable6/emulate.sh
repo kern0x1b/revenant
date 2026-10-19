@@ -11,7 +11,7 @@ set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 export MAPTABLE6_ROOT=$(cd "$here/../../../.." && pwd)
-build=${MAPTABLE6_BUILD:-$(runs_folder charon-maptable6-device)}
+build=${MAPTABLE6_BUILD:-$(runs_folder revenant-maptable6-device)}
 device=${MAPTABLE6_DEVICE:-iPhone2,1}
 releases=${MAPTABLE6_RELEASES:-"6.0 4.3 5.0 5.1.1"}
 export MAPTABLE6_PORT=${MAPTABLE6_PORT:-}

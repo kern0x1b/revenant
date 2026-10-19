@@ -7,8 +7,8 @@ package("quicly")
     add_urls("https://github.com/h2o/quicly.git")
     add_versions("2026.09.25", "0a163c0e45e728a33f83261d8cf957ac0006935a")
 
-    add_deps("charon@apple-compat", {alias = "apple-compat"})
-    add_deps("charon@picotls 2026.09.24", {alias = "picotls"})
+    add_deps("revenant@apple-compat", {alias = "apple-compat"})
+    add_deps("revenant@picotls 2026.09.24", {alias = "picotls"})
     add_links("picotls-minicrypto", "picotls-core")
 
     add_configs("recipe", {description = "The digest of this recipe, so a changed flag is a different archive.", default = hash.strhash128(hash.sha256(path.join(os.scriptdir(), "xmake.lua"))), type = "string", readonly = true})

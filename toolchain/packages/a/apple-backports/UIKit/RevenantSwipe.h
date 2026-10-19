@@ -1,11 +1,11 @@
 #import <UIKit/UIKit.h>
 
-@interface UITableViewRowAction (CharonSwipe)
-- (void)charon_performForIndexPath:(NSIndexPath *)indexPath;
+@interface UITableViewRowAction (RevenantSwipe)
+- (void)revenant_performForIndexPath:(NSIndexPath *)indexPath;
 @end
 
-@interface UITableView (CharonSwipe)
-- (void)charon_installSwipeActions;
+@interface UITableView (RevenantSwipe)
+- (void)revenant_installSwipeActions;
 @end
 
-BOOL charon_swipe_class_is_backport(Class cls);
+BOOL revenant_swipe_class_is_backport(Class cls);

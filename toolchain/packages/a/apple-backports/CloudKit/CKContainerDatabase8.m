@@ -1,6 +1,6 @@
-#import "CharonCloudKit.h"
-#import "CharonCKConstants.h"
-#import "CharonCKSubscription.h"
+#import "RevenantCloudKit.h"
+#import "RevenantCKConstants.h"
+#import "RevenantCKSubscription.h"
 
 @interface CKDatabase ()
 @property (nonatomic, strong) CKContainer *ck_container;
@@ -67,8 +67,8 @@
     }
     database = [[CKDatabase alloc] initWithContainer:self scope:scope];
     _databases[key] = database;
-    NSString *environment = [[CharonCKTransport shared] environmentForContainer:self];
-    [[CharonCKTransport shared] setContainer:self forDatabase:database environment:environment];
+    NSString *environment = [[RevenantCKTransport shared] environmentForContainer:self];
+    [[RevenantCKTransport shared] setContainer:self forDatabase:database environment:environment];
     return database;
 }
 
@@ -94,17 +94,17 @@
 
 - (void)addOperation:(CKOperation *)operation
 {
-    [CharonCKOPScheduler add:operation];
+    [RevenantCKOPScheduler add:operation];
 }
 
 - (NSString *)environment
 {
-    return [[CharonCKTransport shared] environmentForContainer:self];
+    return [[RevenantCKTransport shared] environmentForContainer:self];
 }
 
 - (CKRecordID *)currentUserRecordID
 {
-    NSString *name = [[CharonCKCredentials shared] userRecordIDForContainer:self.containerIdentifier];
+    NSString *name = [[RevenantCKCredentials shared] userRecordIDForContainer:self.containerIdentifier];
     if (!name.length) {
         name = CKOwnerDefaultName;
     }
@@ -119,7 +119,7 @@
 {
     CKAccountStatus status = CKAccountStatusNoAccount;
     if (!self.containerIdentifier.length) {
-        completionHandler(status, CharonCKBadContainer(nil));
+        completionHandler(status, RevenantCKBadContainer(nil));
         return;
     }
     completionHandler(status, nil);
@@ -127,7 +127,7 @@
 
 - (void)fetchUserRecordIDWithCompletionHandler:(void (^)(CKRecordID *recordID, NSError *error))completionHandler
 {
-    NSString *name = [[CharonCKCredentials shared] userRecordIDForContainer:self.containerIdentifier];
+    NSString *name = [[RevenantCKCredentials shared] userRecordIDForContainer:self.containerIdentifier];
     if (!name.length) {
         name = CKOwnerDefaultName;
     }
@@ -146,21 +146,21 @@
                     completionHandler:(void (^)(CKApplicationPermissionStatus status, NSError *error))completionHandler
 {
     if (!self.containerIdentifier.length) {
-        completionHandler(CKApplicationPermissionStatusInitialState, CharonCKBadContainer(nil));
+        completionHandler(CKApplicationPermissionStatusInitialState, RevenantCKBadContainer(nil));
         return;
     }
-    completionHandler(CKApplicationPermissionStatusCouldNotComplete, CharonCKNotAuthenticated());
+    completionHandler(CKApplicationPermissionStatusCouldNotComplete, RevenantCKNotAuthenticated());
 }
 
 @end
 
 #pragma mark - CKDatabase
 
-@interface CKDatabase (CharonCKPrivate)
+@interface CKDatabase (RevenantCKPrivate)
 - (nullable CKContainer *)ck_container;
 @end
 
-@implementation CKDatabase (CharonCKRequests)
+@implementation CKDatabase (RevenantCKRequests)
 
 + (instancetype)new
 {
@@ -181,17 +181,17 @@
 - (void)addOperation:(CKDatabaseOperation *)operation
 {
     operation.database = self;
-    [CharonCKOPScheduler add:operation];
+    [RevenantCKOPScheduler add:operation];
 }
 
 - (void)perform:(NSString *)method path:(NSString *)path body:(NSDictionary *)body
      completion:(void (^)(id body, NSError *error))completion
 {
-    CharonCKTransport *transport = [CharonCKTransport shared];
+    RevenantCKTransport *transport = [RevenantCKTransport shared];
     NSString *root = [transport databaseRootForContainer:self.ck_container.containerIdentifier
                                                 database:self
                                              environment:[transport environmentForContainer:self.ck_container]];
-    [[CharonCKTransport shared] performContainer:self.ck_container
+    [[RevenantCKTransport shared] performContainer:self.ck_container
                                         database:self
                                      environment:[transport environmentForContainer:self.ck_container]
                                           method:method
@@ -203,15 +203,15 @@
 - (void)fetchRecordWithID:(CKRecordID *)recordID
        completionHandler:(void (^)(CKRecord *record, NSError *error))completionHandler
 {
-    [self perform:@"POST" path:@"records/lookup" body:@{@"recordIDs": @[CharonCKRecordIDDocument(recordID)]}
+    [self perform:@"POST" path:@"records/lookup" body:@{@"recordIDs": @[RevenantCKRecordIDDocument(recordID)]}
        completion:^(id body, NSError *error) {
         if (error) {
             completionHandler(nil, error);
             return;
         }
         NSArray *records = [body[@"records"] isKindOfClass:[NSArray class]] ? body[@"records"] : nil;
-        CKRecord *record = records.count ? CharonCKRecordFromResult(records[0], nil) : nil;
-        completionHandler(record, record ? nil : CharonCKError(CKErrorUnknownItem, @"The record does not exist", nil));
+        CKRecord *record = records.count ? RevenantCKRecordFromResult(records[0], nil) : nil;
+        completionHandler(record, record ? nil : RevenantCKError(CKErrorUnknownItem, @"The record does not exist", nil));
     }];
 }
 
@@ -221,9 +221,9 @@
     NSMutableDictionary *document = [NSMutableDictionary dictionary];
     document[@"recordName"] = record.recordID.recordName;
     document[@"recordType"] = record.recordType;
-    document[@"zoneID"] = CharonCKZoneIDDocument(record.recordID.zoneID);
-    document[@"fields"] = CharonCKFieldsToJSON(CharonCKFieldsSnapshot(record));
-    NSDictionary *system = CharonCKSystemFieldsSnapshot(record);
+    document[@"zoneID"] = RevenantCKZoneIDDocument(record.recordID.zoneID);
+    document[@"fields"] = RevenantCKFieldsToJSON(RevenantCKFieldsSnapshot(record));
+    NSDictionary *system = RevenantCKSystemFieldsSnapshot(record);
     if (system[@"recordChangeTag"]) {
         [document addEntriesFromDictionary:system];
     }
@@ -236,8 +236,8 @@
             return;
         }
         NSArray *records = [body[@"records"] isKindOfClass:[NSArray class]] ? body[@"records"] : nil;
-        CKRecord *saved = records.count ? CharonCKRecordFromResult(records[0], nil) : nil;
-        completionHandler(saved, saved ? nil : CharonCKError(CKErrorInternalError, @"The save answered nothing", nil));
+        CKRecord *saved = records.count ? RevenantCKRecordFromResult(records[0], nil) : nil;
+        completionHandler(saved, saved ? nil : RevenantCKError(CKErrorInternalError, @"The save answered nothing", nil));
     }];
 }
 
@@ -246,7 +246,7 @@
 {
     [self perform:@"POST" path:@"records/modify"
             body:@{@"records": @[@{@"operationType": @"forceDelete",
-                                   @"recordID": CharonCKRecordIDDocument(recordID)}]}
+                                   @"recordID": RevenantCKRecordIDDocument(recordID)}]}
        completion:^(id body, NSError *error) {
         if (error) {
             completionHandler(nil, error);
@@ -267,7 +267,7 @@
         }
         NSMutableArray *zones = [NSMutableArray array];
         for (NSDictionary *document in body[@"zones"]) {
-            CKRecordZone *zone = CharonCKZoneWithDocument(document);
+            CKRecordZone *zone = RevenantCKZoneWithDocument(document);
             if (zone) {
                 [zones addObject:zone];
             }
@@ -279,15 +279,15 @@
 - (void)fetchRecordZoneWithID:(CKRecordZoneID *)zoneID
             completionHandler:(void (^)(CKRecordZone *zone, NSError *error))completionHandler
 {
-    [self perform:@"POST" path:@"zones/lookup" body:@{@"zoneIDs": @[CharonCKZoneIDDocument(zoneID)]}
+    [self perform:@"POST" path:@"zones/lookup" body:@{@"zoneIDs": @[RevenantCKZoneIDDocument(zoneID)]}
        completion:^(id body, NSError *error) {
         if (error) {
             completionHandler(nil, error);
             return;
         }
         NSArray *zones = [body[@"zones"] isKindOfClass:[NSArray class]] ? body[@"zones"] : nil;
-        CKRecordZone *zone = zones.count ? CharonCKZoneWithDocument(zones[0]) : nil;
-        completionHandler(zone, zone ? nil : CharonCKError(CKErrorZoneNotFound, @"The zone does not exist", nil));
+        CKRecordZone *zone = zones.count ? RevenantCKZoneWithDocument(zones[0]) : nil;
+        completionHandler(zone, zone ? nil : RevenantCKError(CKErrorZoneNotFound, @"The zone does not exist", nil));
     }];
 }
 
@@ -295,21 +295,21 @@
      completionHandler:(void (^)(CKRecordZone *zone, NSError *error))completionHandler
 {
     [self perform:@"POST" path:@"zones/modify"
-            body:@{@"zones": @[@{@"zoneID": CharonCKZoneIDDocument(zone.zoneID), @"atomic": @((int)1)}]}
+            body:@{@"zones": @[@{@"zoneID": RevenantCKZoneIDDocument(zone.zoneID), @"atomic": @((int)1)}]}
        completion:^(id body, NSError *error) {
         if (error) {
             completionHandler(nil, error);
             return;
         }
         NSArray *zones = [body[@"zones"] isKindOfClass:[NSArray class]] ? body[@"zones"] : nil;
-        completionHandler(zones.count ? CharonCKZoneWithDocument(zones[0]) : zone, nil);
+        completionHandler(zones.count ? RevenantCKZoneWithDocument(zones[0]) : zone, nil);
     }];
 }
 
 - (void)deleteRecordZoneWithID:(CKRecordZoneID *)zoneID
              completionHandler:(void (^)(CKRecordZoneID *zoneID, NSError *error))completionHandler
 {
-    [self perform:@"POST" path:@"zones/modify" body:@{@"zoneIDs": @[CharonCKZoneIDDocument(zoneID)]}
+    [self perform:@"POST" path:@"zones/modify" body:@{@"zoneIDs": @[RevenantCKZoneIDDocument(zoneID)]}
        completion:^(id body, NSError *error) {
         completionHandler(error ? nil : zoneID, error);
     }];
@@ -319,7 +319,7 @@
    completionHandler:(void (^)(NSArray<CKRecord *> *results, NSError *error))completionHandler
 {
     NSError *refused = nil;
-    NSDictionary *document = CharonCKQueryDocument(query, zoneID.zoneName, nil, 0, &refused);
+    NSDictionary *document = RevenantCKQueryDocument(query, zoneID.zoneName, nil, 0, &refused);
     if (!document) {
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
             completionHandler(nil, refused);
@@ -331,7 +331,7 @@
             completionHandler(nil, error);
             return;
         }
-        completionHandler(CharonCKRecordsFromResults(body[@"records"], nil), nil);
+        completionHandler(RevenantCKRecordsFromResults(body[@"records"], nil), nil);
     }];
 }
 
@@ -345,8 +345,8 @@
             return;
         }
         NSArray *found = [body[@"subscriptions"] isKindOfClass:[NSArray class]] ? body[@"subscriptions"] : nil;
-        completionHandler(found.count ? CharonCKSubscriptionWithDocument(found[0]) : nil,
-                          found.count ? nil : CharonCKError(CKErrorUnknownItem, @"The subscription does not exist", nil));
+        completionHandler(found.count ? RevenantCKSubscriptionWithDocument(found[0]) : nil,
+                          found.count ? nil : RevenantCKError(CKErrorUnknownItem, @"The subscription does not exist", nil));
     }];
 }
 
@@ -359,7 +359,7 @@
         }
         NSMutableArray *found = [NSMutableArray array];
         for (NSDictionary *document in body[@"subscriptions"]) {
-            CKSubscription *subscription = CharonCKSubscriptionWithDocument(document);
+            CKSubscription *subscription = RevenantCKSubscriptionWithDocument(document);
             if (subscription) {
                 [found addObject:subscription];
             }
@@ -371,10 +371,10 @@
 - (void)saveSubscription:(CKSubscription *)subscription
        completionHandler:(void (^)(CKSubscription *subscription, NSError *error))completionHandler
 {
-    NSDictionary *document = CharonCKSubscriptionDocument(subscription);
+    NSDictionary *document = RevenantCKSubscriptionDocument(subscription);
     if (!document) {
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-            completionHandler(nil, CharonCKError(CKErrorInvalidArguments,
+            completionHandler(nil, RevenantCKError(CKErrorInvalidArguments,
                                                   @"This predicate has no form in a CloudKit query", nil));
         });
         return;
@@ -386,7 +386,7 @@
             return;
         }
         NSArray *found = [body[@"subscriptions"] isKindOfClass:[NSArray class]] ? body[@"subscriptions"] : nil;
-        completionHandler(found.count ? CharonCKSubscriptionWithDocument(found[0]) : subscription, nil);
+        completionHandler(found.count ? RevenantCKSubscriptionWithDocument(found[0]) : subscription, nil);
     }];
 }
 

@@ -5,9 +5,9 @@
 
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 
-vImage_Error charon_host_vImageBuffer_Init(vImage_Buffer *buf, vImagePixelCount height, vImagePixelCount width, uint32_t pixelBits, vImage_Flags flags);
-vImage_Error charon_host_vImageBuffer_InitWithCGImage(vImage_Buffer *buf, vImage_CGImageFormat *format, const CGFloat *backgroundColor, CGImageRef image, vImage_Flags flags);
-CGImageRef charon_host_vImageCreateCGImageFromBuffer(const vImage_Buffer *buf, const vImage_CGImageFormat *format, void (*callback)(void *userData, void *buf_data), void *userData, vImage_Flags flags, vImage_Error *error);
+vImage_Error revenant_host_vImageBuffer_Init(vImage_Buffer *buf, vImagePixelCount height, vImagePixelCount width, uint32_t pixelBits, vImage_Flags flags);
+vImage_Error revenant_host_vImageBuffer_InitWithCGImage(vImage_Buffer *buf, vImage_CGImageFormat *format, const CGFloat *backgroundColor, CGImageRef image, vImage_Flags flags);
+CGImageRef revenant_host_vImageCreateCGImageFromBuffer(const vImage_Buffer *buf, const vImage_CGImageFormat *format, void (*callback)(void *userData, void *buf_data), void *userData, vImage_Flags flags, vImage_Error *error);
 
 static CGImageRef make_image(size_t width, size_t height)
 {
@@ -95,7 +95,7 @@ static void check_conversions(void)
             for (size_t b = 0; b < 3; b++) {
                 vImage_CGImageFormat format = {formats[f].bpc, formats[f].bpp, formats[f].gray ? gray : rgb, formats[f].info, 0, NULL, kCGRenderingIntentDefault};
                 vImage_Buffer ours = {0}, theirs = {0};
-                vImage_Error e1 = charon_host_vImageBuffer_InitWithCGImage(&ours, &format, backgrounds[b], image, kvImageNoFlags);
+                vImage_Error e1 = revenant_host_vImageBuffer_InitWithCGImage(&ours, &format, backgrounds[b], image, kvImageNoFlags);
                 vImage_Error e2 = vImageBuffer_InitWithCGImage(&theirs, &format, backgrounds[b], image, kvImageNoFlags);
                 if (e1 != e2) {
                     mismatched++;
@@ -110,7 +110,7 @@ static void check_conversions(void)
                 }
                 worstPixels = MAX(worstPixels, max_difference(&ours, &theirs, formats[f].bpp / 8));
                 vImage_Error r1 = 0, r2 = 0;
-                CGImageRef back1 = charon_host_vImageCreateCGImageFromBuffer(&theirs, &format, NULL, NULL, kvImageNoFlags, &r1);
+                CGImageRef back1 = revenant_host_vImageCreateCGImageFromBuffer(&theirs, &format, NULL, NULL, kvImageNoFlags, &r1);
                 CGImageRef back2 = vImageCreateCGImageFromBuffer(&theirs, &format, NULL, NULL, kvImageNoFlags, &r2);
                 if (r1 != r2 || !back1 != !back2) {
                     mismatched++;
@@ -150,23 +150,23 @@ static void check_errors(void)
     cases[5].name = "unknown flag"; cases[5].format = good; cases[5].flags = 1;
     for (int i = 0; i < 6; i++) {
         vImage_Buffer a = {0}, b = {0};
-        vImage_Error ours = charon_host_vImageBuffer_InitWithCGImage(&a, &cases[i].format, NULL, image, cases[i].flags);
+        vImage_Error ours = revenant_host_vImageBuffer_InitWithCGImage(&a, &cases[i].format, NULL, image, cases[i].flags);
         vImage_Error theirs = vImageBuffer_InitWithCGImage(&b, &cases[i].format, NULL, image, cases[i].flags);
         CHECK(ours == theirs, cases[i].name);
         if (!ours) { free(a.data); free(b.data); }
     }
     vImage_Buffer x = {0}, y = {0};
-    CHECK(charon_host_vImageBuffer_Init(&x, 10, 10, 32, 1) == vImageBuffer_Init(&y, 10, 10, 32, 1), "Init: an unknown flag");
-    CHECK(charon_host_vImageBuffer_Init(&x, 10, 10, 32, kvImageDoNotTile) == vImageBuffer_Init(&y, 10, 10, 32, kvImageDoNotTile), "Init: DoNotTile is unknown to it");
-    vImage_Error ea = charon_host_vImageBuffer_Init(&x, 10, 10, 32, kvImageNoFlags), eb = vImageBuffer_Init(&y, 10, 10, 32, kvImageNoFlags);
+    CHECK(revenant_host_vImageBuffer_Init(&x, 10, 10, 32, 1) == vImageBuffer_Init(&y, 10, 10, 32, 1), "Init: an unknown flag");
+    CHECK(revenant_host_vImageBuffer_Init(&x, 10, 10, 32, kvImageDoNotTile) == vImageBuffer_Init(&y, 10, 10, 32, kvImageDoNotTile), "Init: DoNotTile is unknown to it");
+    vImage_Error ea = revenant_host_vImageBuffer_Init(&x, 10, 10, 32, kvImageNoFlags), eb = vImageBuffer_Init(&y, 10, 10, 32, kvImageNoFlags);
     CHECK(ea == eb && x.height == y.height && x.width == y.width, "Init: the size of the buffer");
     CHECK(x.rowBytes % 16 == 0 && x.rowBytes >= 40 && y.rowBytes % 16 == 0 && y.rowBytes >= 40, "Init: rowBytes is a multiple of 16 and holds a row");
     CHECK((uintptr_t)x.data % 16 == 0 && (uintptr_t)y.data % 16 == 0, "Init: the data is aligned to 16");
     free(x.data); free(y.data);
     vImage_Buffer zero1 = {0}, zero2 = {0};
-    CHECK(charon_host_vImageBuffer_Init(&zero1, 0, 10, 32, 0) == vImageBuffer_Init(&zero2, 0, 10, 32, 0) && (zero1.data != NULL) == (zero2.data != NULL), "Init: a buffer of no rows");
+    CHECK(revenant_host_vImageBuffer_Init(&zero1, 0, 10, 32, 0) == vImageBuffer_Init(&zero2, 0, 10, 32, 0) && (zero1.data != NULL) == (zero2.data != NULL), "Init: a buffer of no rows");
     free(zero1.data); free(zero2.data);
-    CHECK(charon_host_vImageBuffer_Init(&x, 1u << 30, 1u << 30, 32, 0) == vImageBuffer_Init(&y, 1u << 30, 1u << 30, 32, 0), "Init: an impossible size");
+    CHECK(revenant_host_vImageBuffer_Init(&x, 1u << 30, 1u << 30, 32, 0) == vImageBuffer_Init(&y, 1u << 30, 1u << 30, 32, 0), "Init: an impossible size");
     CGColorSpaceRelease(rgb);
     CGImageRelease(image);
 }
@@ -181,7 +181,7 @@ static void check_no_allocate(void)
     ours.data = malloc(64 * 5);
     theirs.data = malloc(64 * 5);
     void *oursData = ours.data, *theirsData = theirs.data;
-    CHECK(charon_host_vImageBuffer_InitWithCGImage(&ours, &format, NULL, image, kvImageNoAllocate) == vImageBuffer_InitWithCGImage(&theirs, &format, NULL, image, kvImageNoAllocate), "NoAllocate: the same answer");
+    CHECK(revenant_host_vImageBuffer_InitWithCGImage(&ours, &format, NULL, image, kvImageNoAllocate) == vImageBuffer_InitWithCGImage(&theirs, &format, NULL, image, kvImageNoAllocate), "NoAllocate: the same answer");
     CHECK(ours.data == oursData && theirs.data == theirsData && ours.rowBytes == 64 && theirs.rowBytes == 64, "NoAllocate: the data and rowBytes are used as they are");
     CHECK(max_difference(&ours, &theirs, 4) <= 1, "NoAllocate: the same pixels");
     free(oursData);
@@ -194,11 +194,11 @@ int main(int argc, char **argv)
 {
     @autoreleasepool {
         if (argc > 1)
-            charon_log_to(@(argv[1]));
+            revenant_log_to(@(argv[1]));
         check_conversions();
         check_errors();
         check_no_allocate();
-        printf("%d checks, %d failed\n", charon_checks, charon_failures);
+        printf("%d checks, %d failed\n", revenant_checks, revenant_failures);
     }
-    return charon_failures;
+    return revenant_failures;
 }

@@ -18,7 +18,7 @@
 #include <unordered_map>
 #include <vector>
 
-namespace shade::xnu::ipc {
+namespace emulator::xnu::ipc {
 
 using TaskId = std::uint32_t;
 using MachName = std::uint32_t;

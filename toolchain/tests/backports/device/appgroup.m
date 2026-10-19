@@ -15,7 +15,7 @@ static NSString *const results_folder = @"/private/var/backports";
 {
     [[NSFileManager defaultManager] createDirectoryAtPath:results_folder withIntermediateDirectories:YES attributes:nil error:NULL];
     [[NSFileManager defaultManager] removeItemAtPath:[results_folder stringByAppendingPathComponent:@"appgroup.done"] error:NULL];
-    charon_log_to([results_folder stringByAppendingPathComponent:@"appgroup.log"]);
+    revenant_log_to([results_folder stringByAppendingPathComponent:@"appgroup.log"]);
     self.window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
     self.window.rootViewController = [[UIViewController alloc] init];
     [self.window makeKeyAndVisible];
@@ -33,20 +33,20 @@ static NSString *const results_folder = @"/private/var/backports";
                 CHECK([manager fileExistsAtPath:url.path isDirectory:&directory] && directory, "the container is a directory that exists");
             }
         }
-        NSURL *first = [manager containerURLForSecurityApplicationGroupIdentifier:@"group.charon.test"];
-        NSURL *again = [manager containerURLForSecurityApplicationGroupIdentifier:@"group.charon.test"];
-        NSURL *other = [manager containerURLForSecurityApplicationGroupIdentifier:@"group.charon.other"];
+        NSURL *first = [manager containerURLForSecurityApplicationGroupIdentifier:@"group.revenant.test"];
+        NSURL *again = [manager containerURLForSecurityApplicationGroupIdentifier:@"group.revenant.test"];
+        NSURL *other = [manager containerURLForSecurityApplicationGroupIdentifier:@"group.revenant.other"];
         CHECK([first isEqual:again], "the same group gives the same container");
         CHECK(![first isEqual:other], "another group gives another container");
         NSURL *file = [first URLByAppendingPathComponent:@"shared.txt"];
         CHECK([@"kept" writeToURL:file atomically:YES encoding:NSUTF8StringEncoding error:NULL], "the container can be written");
-        NSURL *reopened = [[manager containerURLForSecurityApplicationGroupIdentifier:@"group.charon.test"] URLByAppendingPathComponent:@"shared.txt"];
+        NSURL *reopened = [[manager containerURLForSecurityApplicationGroupIdentifier:@"group.revenant.test"] URLByAppendingPathComponent:@"shared.txt"];
         CHECK_EQUAL([NSString stringWithContentsOfURL:reopened encoding:NSUTF8StringEncoding error:NULL], @"kept", "and what was written is found again");
         CHECK([[first.path stringByStandardizingPath] hasPrefix:[NSHomeDirectory() stringByStandardizingPath]], "the container lies in the application's own data");
         [manager removeItemAtURL:first error:NULL];
         [manager removeItemAtURL:other error:NULL];
-        printf("checks=%d failures=%d\n", charon_checks, charon_failures);
-        NSString *summary = [NSString stringWithFormat:@"%@ checks=%d failures=%d\n", charon_failures ? @"FAIL" : @"ok", charon_checks, charon_failures];
+        printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
+        NSString *summary = [NSString stringWithFormat:@"%@ checks=%d failures=%d\n", revenant_failures ? @"FAIL" : @"ok", revenant_checks, revenant_failures];
         [summary writeToFile:[results_folder stringByAppendingPathComponent:@"appgroup.done"] atomically:YES encoding:NSUTF8StringEncoding error:NULL];
     });
     return YES;

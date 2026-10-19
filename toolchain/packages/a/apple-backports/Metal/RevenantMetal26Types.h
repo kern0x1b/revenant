@@ -4,20 +4,20 @@
 NS_ASSUME_NONNULL_BEGIN
 
 #if defined(__IPHONE_OS_VERSION_MAX_ALLOWED)
-#define CHARON_METAL_SDK_MAX __IPHONE_OS_VERSION_MAX_ALLOWED
+#define REVENANT_METAL_SDK_MAX __IPHONE_OS_VERSION_MAX_ALLOWED
 #elif defined(__MAC_OS_X_VERSION_MAX_ALLOWED)
-#define CHARON_METAL_SDK_MAX __MAC_OS_X_VERSION_MAX_ALLOWED
+#define REVENANT_METAL_SDK_MAX __MAC_OS_X_VERSION_MAX_ALLOWED
 #else
-#define CHARON_METAL_SDK_MAX 0
+#define REVENANT_METAL_SDK_MAX 0
 #endif
 
-#if CHARON_METAL_SDK_MAX < 260000
+#if REVENANT_METAL_SDK_MAX < 260000
 @protocol MTL4BinaryFunction <NSObject>
 @property (nullable, readonly) NSString *name;
 @property (readonly) MTLFunctionType functionType;
 @end
 
-#if CHARON_METAL_SDK_MAX < 180000
+#if REVENANT_METAL_SDK_MAX < 180000
 API_AVAILABLE(ios(18.0))
 typedef NS_ENUM(NSInteger, MTLShaderValidation) {
     MTLShaderValidationDefault  = 0,
@@ -26,7 +26,7 @@ typedef NS_ENUM(NSInteger, MTLShaderValidation) {
 };
 #endif
 
-#if CHARON_METAL_SDK_MAX < 260000
+#if REVENANT_METAL_SDK_MAX < 260000
 API_AVAILABLE(ios(26.0))
 typedef NS_OPTIONS(NSUInteger, MTL4ShaderReflection) {
     MTL4ShaderReflectionNone           = 0,

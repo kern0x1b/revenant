@@ -50,7 +50,7 @@ int main(void)
                 for (NSString *name in entry[3]) {
                     for (int repeat = 0; repeat < 2; repeat++) {
                         NSString *system = answer(results[variant], @selector(rangeWithName:), name);
-                        NSString *ours = answer(results[variant], NSSelectorFromString(@"charonHost_rangeWithName:"), name);
+                        NSString *ours = answer(results[variant], NSSelectorFromString(@"revenantHost_rangeWithName:"), name);
                         checks++;
                         if ([system isEqual:ours]) {
                             printf("ok   %s%s [%s]: %s\n", [entry[0] UTF8String], variant ? " shifted" : "", name.UTF8String, system.UTF8String);
@@ -68,7 +68,7 @@ int main(void)
         for (NSArray *entry in odd) {
             NSString *name = entry[1] == [NSNull null] ? nil : entry[1];
             NSString *system = answer(entry[0], @selector(rangeWithName:), name);
-            NSString *ours = answer(entry[0], NSSelectorFromString(@"charonHost_rangeWithName:"), name);
+            NSString *ours = answer(entry[0], NSSelectorFromString(@"revenantHost_rangeWithName:"), name);
             checks++;
             if ([system isEqual:ours]) {
                 printf("ok   %s [%s]: %s\n", NSStringFromClass([entry[0] class]).UTF8String, (name ?: @"nil").UTF8String, system.UTF8String);

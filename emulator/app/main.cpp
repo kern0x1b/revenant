@@ -59,7 +59,7 @@
 
 namespace {
 
-using namespace shade;
+using namespace emulator;
 
 constexpr std::size_t maximum_virtual_processors = 64;
 constexpr std::size_t bytes_per_mebibyte = 1024U * 1024U;
@@ -67,15 +67,15 @@ constexpr std::size_t bytes_per_mebibyte = 1024U * 1024U;
 std::string usage()
 {
     return "Usage:\n"
-           "  shade profile [--list | --device PROFILE] [--output FILE]\n"
-           "  shade abi [--rootfs DIR] [--ios-build CODE] [--output FILE]\n"
-           "  shade inspect --rootfs DIR [--binary /sbin/launchd] "
+           "  emulator profile [--list | --device PROFILE] [--output FILE]\n"
+           "  emulator abi [--rootfs DIR] [--ios-build CODE] [--output FILE]\n"
+           "  emulator inspect --rootfs DIR [--binary /sbin/launchd] "
            "[--device PROFILE] [--shared-cache GUEST_PATH] "
            "[--symbols SUBSTRING] [--output FILE]\n"
-           "  shade catalog --rootfs DIR [--device PROFILE] [--manifest FILE] "
+           "  emulator catalog --rootfs DIR [--device PROFILE] [--manifest FILE] "
            "[--host-cache DIR] "
            "[--output FILE]\n"
-           "  shade firmware prepare --rootfs DIR [--device PROFILE] "
+           "  emulator firmware prepare --rootfs DIR [--device PROFILE] "
            "[--manifest FILE] [--host-cache DIR] [--prepare-force] "
            "[--prepare-file-blocks N] [--prepare-image-blocks N] "
            "[--prepare-firmware-blocks N] [--prepare-file-ms N] "
@@ -85,10 +85,10 @@ std::string usage()
            "[--prepare-profile-hotset-blocks N] "
            "[--jit-artifact-memory-mib 1..4096] "
            "[--jit-artifact-disk-mib 0..4096] [--output FILE]\n"
-           "  shade disasm --rootfs DIR --binary PATH "
+           "  emulator disasm --rootfs DIR --binary PATH "
            "(--symbol NAME | --address ADDR) [--device PROFILE] [--count N] "
            "[--shared-cache GUEST_PATH] [--thumb]\n"
-           "  shade boot --rootfs DIR [--device PROFILE] [--ios-build CODE] "
+           "  emulator boot --rootfs DIR [--device PROFILE] [--ios-build CODE] "
            "[--binary /sbin/launchd] [--guest-command COMMAND] [--ticks N] "
            "[--cores N] [--jit-cache-mib 8..512] "
            "[--jit-cache-budget-mib 256..4096] "
@@ -113,9 +113,9 @@ std::string usage()
            "[--jit-startup-profile-budget-us N] "
            "[--jit-catalog-warming no-enqueue] "
            "[--output FILE]\n"
-           "  shade smoke [--cores N] [--jit-cache-mib 8..512] "
+           "  emulator smoke [--cores N] [--jit-cache-mib 8..512] "
            "[--perf-summary] [--output FILE]\n"
-           "  shade benchmark arm [--iterations N] "
+           "  emulator benchmark arm [--iterations N] "
            "[--jit-cache-mib 8..512] [--perf-summary] "
            "[--output FILE]\n"
            "\nBoot/ABI selection reads SystemVersion.plist by default.\n"
@@ -1249,7 +1249,7 @@ int main(int argc, char** argv)
         }
         return 0;
     } catch (const std::exception& error) {
-        std::cerr << "shade: " << error.what() << '\n';
+        std::cerr << "emulator: " << error.what() << '\n';
         return 1;
     }
 }

@@ -39,7 +39,7 @@ static NSDictionary *snapshot(MTLComputePipelineDescriptor *d)
 
 static void setEverything(MTLComputePipelineDescriptor *d, Class slotClass)
 {
-    d.label = @"charon";
+    d.label = @"revenant";
     d.threadGroupSizeIsMultipleOfThreadExecutionWidth = YES;
     d.maxTotalThreadsPerThreadgroup = 256;
     d.supportIndirectCommandBuffers = YES;
@@ -69,7 +69,7 @@ int main(void)
 {
     setvbuf(stdout, NULL, _IONBF, 0);
     @autoreleasepool {
-        Class portClass = NSClassFromString(@"CharonHostMTLComputePipelineDescriptor");
+        Class portClass = NSClassFromString(@"RevenantHostMTLComputePipelineDescriptor");
         check(portClass != nil, @"the port's class is built in this process");
         if (!portClass)
             return 1;
@@ -81,7 +81,7 @@ int main(void)
 
         printf("every settable member set away from its default\n");
         setEverything(apple, [MTLPipelineBufferDescriptor class]);
-        setEverything(port, NSClassFromString(@"CharonHostMTLPipelineBufferDescriptor"));
+        setEverything(port, NSClassFromString(@"RevenantHostMTLPipelineBufferDescriptor"));
         compareSides(apple, port, @"set");
 
         printf("after -reset\n");
@@ -91,7 +91,7 @@ int main(void)
 
         printf("a copy of the set descriptor\n");
         setEverything(apple, [MTLPipelineBufferDescriptor class]);
-        setEverything(port, NSClassFromString(@"CharonHostMTLPipelineBufferDescriptor"));
+        setEverything(port, NSClassFromString(@"RevenantHostMTLPipelineBufferDescriptor"));
         MTLComputePipelineDescriptor *appleCopy = [apple copy];
         MTLComputePipelineDescriptor *portCopy = [port copy];
         compareSides(appleCopy, portCopy, @"copy");

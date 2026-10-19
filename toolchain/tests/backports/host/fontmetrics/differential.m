@@ -21,7 +21,7 @@ static NSString *number(CGFloat value)
 int main(void)
 {
     @autoreleasepool {
-        Class ours = NSClassFromString(@"CharonHostUIFontMetrics");
+        Class ours = NSClassFromString(@"RevenantHostUIFontMetrics");
         NSArray *styles = @[UIFontTextStyleBody, UIFontTextStyleHeadline, UIFontTextStyleFootnote, UIFontTextStyleCaption1];
         for (UIFontTextStyle style in styles) {
             UIFontMetrics *system = [UIFontMetrics metricsForTextStyle:style];

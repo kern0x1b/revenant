@@ -6,13 +6,13 @@
 #pragma clang diagnostic ignored "-Warc-performSelector-leaks"
 #pragma clang diagnostic ignored "-Wnonnull"
 
-@interface CharonHostUIImageConfiguration : NSObject <NSCopying, NSSecureCoding>
+@interface RevenantHostUIImageConfiguration : NSObject <NSCopying, NSSecureCoding>
 - (UITraitCollection *)traitCollection;
 - (instancetype)configurationWithTraitCollection:(UITraitCollection *)traitCollection;
 - (instancetype)configurationByApplyingConfiguration:(id)configuration;
 @end
 
-@interface CharonHostUIImageSymbolConfiguration : CharonHostUIImageConfiguration
+@interface RevenantHostUIImageSymbolConfiguration : RevenantHostUIImageConfiguration
 + (instancetype)unspecifiedConfiguration;
 + (instancetype)configurationWithScale:(UIImageSymbolScale)scale;
 + (instancetype)configurationWithPointSize:(CGFloat)pointSize;
@@ -30,23 +30,23 @@
 - (BOOL)isEqualToConfiguration:(id)otherConfiguration;
 @end
 
-UIImageSymbolWeight CharonHostUIImageSymbolWeightForFontWeight(UIFontWeight fontWeight);
-UIFontWeight CharonHostUIFontWeightForImageSymbolWeight(UIImageSymbolWeight symbolWeight);
+UIImageSymbolWeight RevenantHostUIImageSymbolWeightForFontWeight(UIFontWeight fontWeight);
+UIFontWeight RevenantHostUIFontWeightForImageSymbolWeight(UIImageSymbolWeight symbolWeight);
 
-@interface UIImage (CharonHostSymbols)
-+ (UIImage *)charonHostSystemImageNamed:(NSString *)name;
-+ (UIImage *)charonHostSystemImageNamed:(NSString *)name compatibleWithTraitCollection:(UITraitCollection *)traitCollection;
-+ (UIImage *)charonHostSystemImageNamed:(NSString *)name withConfiguration:(id)configuration;
-- (BOOL)charonHostIsSymbolImage;
-- (id)charonHostSymbolConfiguration;
-- (UIImage *)charonHostImageByApplyingSymbolConfiguration:(id)configuration;
-- (BOOL)charonHostHasBaseline;
-- (CGFloat)charonHostBaselineOffsetFromBottom;
+@interface UIImage (RevenantHostSymbols)
++ (UIImage *)revenantHostSystemImageNamed:(NSString *)name;
++ (UIImage *)revenantHostSystemImageNamed:(NSString *)name compatibleWithTraitCollection:(UITraitCollection *)traitCollection;
++ (UIImage *)revenantHostSystemImageNamed:(NSString *)name withConfiguration:(id)configuration;
+- (BOOL)revenantHostIsSymbolImage;
+- (id)revenantHostSymbolConfiguration;
+- (UIImage *)revenantHostImageByApplyingSymbolConfiguration:(id)configuration;
+- (BOOL)revenantHostHasBaseline;
+- (CGFloat)revenantHostBaselineOffsetFromBottom;
 @end
 
-@interface UIImageView (CharonHostSymbols)
-- (id)charonHostPreferredSymbolConfiguration;
-- (void)charonHostSetPreferredSymbolConfiguration:(id)configuration;
+@interface UIImageView (RevenantHostSymbols)
+- (id)revenantHostPreferredSymbolConfiguration;
+- (void)revenantHostSetPreferredSymbolConfiguration:(id)configuration;
 @end
 
 #define NAMED(...) ([NSString stringWithFormat:__VA_ARGS__].UTF8String)
@@ -54,7 +54,7 @@ UIFontWeight CharonHostUIFontWeightForImageSymbolWeight(UIImageSymbolWeight symb
 static NSString *norm(id object)
 {
     NSString *text = [NSString stringWithFormat:@"%@", object];
-    text = [text stringByReplacingOccurrencesOfString:@"CharonHost" withString:@""];
+    text = [text stringByReplacingOccurrencesOfString:@"RevenantHost" withString:@""];
     NSRegularExpression *pointer = [NSRegularExpression regularExpressionWithPattern:@"0x[0-9a-f]+" options:0 error:nil];
     return [pointer stringByReplacingMatchesInString:text options:0 range:NSMakeRange(0, text.length) withTemplate:@"PTR"];
 }
@@ -84,7 +84,7 @@ static void agree(NSString *name, NSArray *ours, NSArray *system)
         if (![a isEqual:b])
             [detail appendFormat:@"\n    port   %@\n    system %@", a, b];
     }
-    charon_check(detail.length == 0, name.UTF8String, detail);
+    revenant_check(detail.length == 0, name.UTF8String, detail);
 }
 
 static id fresh(Class cls)
@@ -328,12 +328,12 @@ static NSArray *weight_lines(NSInteger (*symbol_weight)(double), double (*font_w
 
 static NSInteger port_symbol_weight(double weight)
 {
-    return CharonHostUIImageSymbolWeightForFontWeight(weight);
+    return RevenantHostUIImageSymbolWeightForFontWeight(weight);
 }
 
 static double port_font_weight(NSInteger weight)
 {
-    return CharonHostUIFontWeightForImageSymbolWeight((UIImageSymbolWeight)weight);
+    return RevenantHostUIFontWeightForImageSymbolWeight((UIImageSymbolWeight)weight);
 }
 
 static NSInteger system_symbol_weight(double weight)
@@ -365,10 +365,10 @@ static NSArray *image_lines(BOOL port, Class cls)
 {
     NSMutableArray *lines = [NSMutableArray array];
     UIImage *plain = bitmap(1), *retina = bitmap(2), *empty = [[UIImage alloc] init];
-    id (^symbol_configuration)(UIImage *) = ^id(UIImage *image) { return port ? [image charonHostSymbolConfiguration] : image.symbolConfiguration; };
-    BOOL (^is_symbol)(UIImage *) = ^BOOL(UIImage *image) { return port ? [image charonHostIsSymbolImage] : image.symbolImage; };
+    id (^symbol_configuration)(UIImage *) = ^id(UIImage *image) { return port ? [image revenantHostSymbolConfiguration] : image.symbolConfiguration; };
+    BOOL (^is_symbol)(UIImage *) = ^BOOL(UIImage *image) { return port ? [image revenantHostIsSymbolImage] : image.symbolImage; };
     UIImage *(^apply)(UIImage *, id) = ^UIImage *(UIImage *image, id configuration) {
-        return port ? [image charonHostImageByApplyingSymbolConfiguration:configuration] : [image imageByApplyingSymbolConfiguration:configuration];
+        return port ? [image revenantHostImageByApplyingSymbolConfiguration:configuration] : [image imageByApplyingSymbolConfiguration:configuration];
     };
     for (UIImage *image in @[plain, retina, empty])
         [lines addObject:[NSString stringWithFormat:@"ordinary image %@ %d %@", norm(symbol_configuration(image)), is_symbol(image), image_facts(image)]];
@@ -402,17 +402,17 @@ static NSArray *image_lines(BOOL port, Class cls)
     [lines addObject:[NSString stringWithFormat:@"orientation %@ | %@", image_facts(rotated), image_facts(apply(rotated, a))]];
     for (NSString *name in @[@"", @"nonexistent.symbol.zz", @"a.b.c", @"  "]) {
         NSMutableArray *answers = [NSMutableArray array];
-        for (id answer in port ? @[[UIImage charonHostSystemImageNamed:name] ?: [NSNull null], [UIImage charonHostSystemImageNamed:name compatibleWithTraitCollection:display] ?: [NSNull null],
-                                   [UIImage charonHostSystemImageNamed:name withConfiguration:a] ?: [NSNull null], [UIImage charonHostSystemImageNamed:name withConfiguration:nil] ?: [NSNull null]]
+        for (id answer in port ? @[[UIImage revenantHostSystemImageNamed:name] ?: [NSNull null], [UIImage revenantHostSystemImageNamed:name compatibleWithTraitCollection:display] ?: [NSNull null],
+                                   [UIImage revenantHostSystemImageNamed:name withConfiguration:a] ?: [NSNull null], [UIImage revenantHostSystemImageNamed:name withConfiguration:nil] ?: [NSNull null]]
                                : @[[UIImage systemImageNamed:name] ?: [NSNull null], [UIImage systemImageNamed:name compatibleWithTraitCollection:display] ?: [NSNull null],
                                    [UIImage systemImageNamed:name withConfiguration:a] ?: [NSNull null], [UIImage systemImageNamed:name withConfiguration:nil] ?: [NSNull null]])
             [answers addObject:norm(answer)];
         [lines addObject:[NSString stringWithFormat:@"unknown name [%@] %@", name, answers]];
     }
     NSString *(^named_nil)(void) = ^NSString *{
-        UIImage *one = port ? [UIImage charonHostSystemImageNamed:nil] : [UIImage systemImageNamed:nil];
-        UIImage *two = port ? [UIImage charonHostSystemImageNamed:nil compatibleWithTraitCollection:nil] : [UIImage systemImageNamed:nil compatibleWithTraitCollection:nil];
-        UIImage *three = port ? [UIImage charonHostSystemImageNamed:nil withConfiguration:nil] : [UIImage systemImageNamed:nil withConfiguration:nil];
+        UIImage *one = port ? [UIImage revenantHostSystemImageNamed:nil] : [UIImage systemImageNamed:nil];
+        UIImage *two = port ? [UIImage revenantHostSystemImageNamed:nil compatibleWithTraitCollection:nil] : [UIImage systemImageNamed:nil compatibleWithTraitCollection:nil];
+        UIImage *three = port ? [UIImage revenantHostSystemImageNamed:nil withConfiguration:nil] : [UIImage systemImageNamed:nil withConfiguration:nil];
         return [NSString stringWithFormat:@"%@ %@ %@", norm(one), norm(two), norm(three)];
     };
     [lines addObject:[NSString stringWithFormat:@"nil name %@", named_nil()]];
@@ -422,10 +422,10 @@ static NSArray *image_lines(BOOL port, Class cls)
 static NSArray *view_lines(BOOL port, Class cls)
 {
     NSMutableArray *lines = [NSMutableArray array];
-    id (^get)(UIImageView *) = ^id(UIImageView *view) { return port ? [view charonHostPreferredSymbolConfiguration] : view.preferredSymbolConfiguration; };
+    id (^get)(UIImageView *) = ^id(UIImageView *view) { return port ? [view revenantHostPreferredSymbolConfiguration] : view.preferredSymbolConfiguration; };
     void (^set)(UIImageView *, id) = ^(UIImageView *view, id configuration) {
         if (port)
-            [view charonHostSetPreferredSymbolConfiguration:configuration];
+            [view revenantHostSetPreferredSymbolConfiguration:configuration];
         else
             view.preferredSymbolConfiguration = configuration;
     };
@@ -491,21 +491,21 @@ static void symbol_checks(Class port)
     double worstSize = 0, worstInset = 0, worstBaseline = 0;
     NSMutableString *tsv = [NSMutableString string];
     for (NSString *name in names) {
-        UIImage *drawn = [UIImage charonHostSystemImageNamed:name];
+        UIImage *drawn = [UIImage revenantHostSystemImageNamed:name];
         if (!drawn) {
             [missing addObject:name];
             continue;
         }
-        if (!drawn.charonHostSymbolConfiguration || ![drawn charonHostIsSymbolImage] || drawn.renderingMode != UIImageRenderingModeAlwaysTemplate || ![drawn charonHostHasBaseline])
+        if (!drawn.revenantHostSymbolConfiguration || ![drawn revenantHostIsSymbolImage] || drawn.renderingMode != UIImageRenderingModeAlwaysTemplate || ![drawn revenantHostHasBaseline])
             [notImages addObject:name];
         for (int c = 0; c < 8; c++) {
             id configuration = [port configurationWithPointSize:configs[c][0] weight:(UIImageSymbolWeight)configs[c][1] scale:(UIImageSymbolScale)configs[c][2]];
-            UIImage *ours = [UIImage charonHostSystemImageNamed:name withConfiguration:configuration];
+            UIImage *ours = [UIImage revenantHostSystemImageNamed:name withConfiguration:configuration];
             UIImage *host = [UIImage systemImageNamed:name withConfiguration:[UIImageSymbolConfiguration configurationWithPointSize:configs[c][0] weight:(UIImageSymbolWeight)configs[c][1] scale:(UIImageSymbolScale)configs[c][2]]];
             double size = MAX(fabs(ours.size.width - host.size.width), fabs(ours.size.height - host.size.height));
             UIEdgeInsets a = ours.alignmentRectInsets, b = host.alignmentRectInsets;
             double inset = MAX(MAX(fabs(a.top - b.top), fabs(a.left - b.left)), MAX(fabs(a.bottom - b.bottom), fabs(a.right - b.right)));
-            double baseline = fabs([ours charonHostBaselineOffsetFromBottom] - host.baselineOffsetFromBottom);
+            double baseline = fabs([ours revenantHostBaselineOffsetFromBottom] - host.baselineOffsetFromBottom);
             worstSize = MAX(worstSize, size); worstInset = MAX(worstInset, inset); worstBaseline = MAX(worstBaseline, baseline);
             NSString *at = [NSString stringWithFormat:@"%@ at %g/%g/%g", name, configs[c][0], configs[c][1], configs[c][2]];
             if (size > 1) [sizeMisses addObject:[NSString stringWithFormat:@"%@: %g", at, size]];
@@ -515,7 +515,7 @@ static void symbol_checks(Class port)
         double sum = 0;
         NSMutableString *row = [NSMutableString stringWithString:name];
         for (int k = 0; k < 4; k++) {
-            UIImage *ours = [UIImage charonHostSystemImageNamed:name withConfiguration:[port configurationWithPointSize:sizes[k] weight:UIImageSymbolWeightRegular scale:UIImageSymbolScaleMedium]];
+            UIImage *ours = [UIImage revenantHostSystemImageNamed:name withConfiguration:[port configurationWithPointSize:sizes[k] weight:UIImageSymbolWeightRegular scale:UIImageSymbolScaleMedium]];
             UIImage *host = [UIImage systemImageNamed:name withConfiguration:[UIImageSymbolConfiguration configurationWithPointSize:sizes[k] weight:UIImageSymbolWeightRegular scale:UIImageSymbolScaleMedium]];
             double value = overlap(ours, host);
             sum += value;
@@ -527,16 +527,16 @@ static void symbol_checks(Class port)
             [weak addObject:[NSString stringWithFormat:@"%@ %.2f", name, sum / 4]];
     }
     for (NSString *name in absent)
-        if ([UIImage charonHostSystemImageNamed:name] || ![UIImage systemImageNamed:name])
+        if ([UIImage revenantHostSystemImageNamed:name] || ![UIImage systemImageNamed:name])
             [rendered addObject:name];
-    charon_check(names.count >= 500 && !missing.count, "every recorded symbol name is drawn", missing.description);
-    charon_check(!absent.count || !rendered.count, "the names listed as not drawn are the host's and are answered nil", rendered.description);
-    charon_check(!notImages.count, "a drawn symbol is a template symbol image with its configuration and a baseline", notImages.description);
+    revenant_check(names.count >= 500 && !missing.count, "every recorded symbol name is drawn", missing.description);
+    revenant_check(!absent.count || !rendered.count, "the names listed as not drawn are the host's and are answered nil", rendered.description);
+    revenant_check(!notImages.count, "a drawn symbol is a template symbol image with its configuration and a baseline", notImages.description);
     printf("info size: worst difference %g points over %lu names in 8 configurations, %lu beyond 1 point\n", worstSize, (unsigned long)names.count, (unsigned long)sizeMisses.count);
     printf("info alignment insets: worst difference %g points, %lu beyond 1 point; baseline: worst %g, %lu beyond 1 point\n", worstInset, (unsigned long)insetMisses.count, worstBaseline, (unsigned long)baselineMisses.count);
-    charon_check(!sizeMisses.count, "the size of every symbol is the host's within a point", [sizeMisses.description substringToIndex:MIN(400, sizeMisses.description.length)]);
-    charon_check(!insetMisses.count, "the alignment insets of every symbol are the host's within a point", [insetMisses.description substringToIndex:MIN(400, insetMisses.description.length)]);
-    charon_check(!baselineMisses.count, "the baseline offset of every symbol is the host's within a point", [baselineMisses.description substringToIndex:MIN(400, baselineMisses.description.length)]);
+    revenant_check(!sizeMisses.count, "the size of every symbol is the host's within a point", [sizeMisses.description substringToIndex:MIN(400, sizeMisses.description.length)]);
+    revenant_check(!insetMisses.count, "the alignment insets of every symbol are the host's within a point", [insetMisses.description substringToIndex:MIN(400, insetMisses.description.length)]);
+    revenant_check(!baselineMisses.count, "the baseline offset of every symbol is the host's within a point", [baselineMisses.description substringToIndex:MIN(400, baselineMisses.description.length)]);
     NSArray *sorted = [scores sortedArrayUsingSelector:@selector(compare:)];
     double minimum = sorted.count ? [sorted[0] doubleValue] : 0, median = sorted.count ? [sorted[sorted.count / 2] doubleValue] : 0;
     NSUInteger below = 0, belowHalf = 0;
@@ -546,31 +546,31 @@ static void symbol_checks(Class port)
     }
     printf("info overlap with the host's drawing at 12, 17, 32 and 64 points (union over intersection, mean of the four): %lu symbols, minimum %.3f, median %.3f, %lu below 0.5, %lu below 0.3\n",
            (unsigned long)sorted.count, minimum, median, (unsigned long)belowHalf, (unsigned long)below);
-    charon_check(minimum >= 0.10 && median >= 0.60, "the drawings overlap the host's at least 0.10 each and 0.60 at the median", [NSString stringWithFormat:@"%g %g", minimum, median]);
-    const char *write = getenv("CHARON_WRITE_SYMBOLS");
+    revenant_check(minimum >= 0.10 && median >= 0.60, "the drawings overlap the host's at least 0.10 each and 0.60 at the median", [NSString stringWithFormat:@"%g %g", minimum, median]);
+    const char *write = getenv("REVENANT_WRITE_SYMBOLS");
     if (write) {
         NSString *dir = @(write);
         NSArray *recorded = record_names([[@__FILE__ stringByDeletingLastPathComponent] stringByAppendingPathComponent:@"symbols-names.txt"]);
-        [record_metrics_header(recorded) writeToFile:[dir stringByAppendingPathComponent:@"CharonSymbolMetrics.h"] atomically:YES encoding:NSUTF8StringEncoding error:nil];
+        [record_metrics_header(recorded) writeToFile:[dir stringByAppendingPathComponent:@"RevenantSymbolMetrics.h"] atomically:YES encoding:NSUTF8StringEncoding error:nil];
         [record_expectations_header(recorded) writeToFile:[dir stringByAppendingPathComponent:@"symbols-expectations.h"] atomically:YES encoding:NSUTF8StringEncoding error:nil];
         [tsv writeToFile:[dir stringByAppendingPathComponent:@"symbols-overlap.tsv"] atomically:YES encoding:NSUTF8StringEncoding error:nil];
     }
-    UIImage *small = [UIImage charonHostSystemImageNamed:@"star" withConfiguration:[port configurationWithPointSize:12 weight:UIImageSymbolWeightRegular scale:UIImageSymbolScaleMedium]];
-    UIImage *again = [small charonHostImageByApplyingSymbolConfiguration:[port configurationWithPointSize:48 weight:UIImageSymbolWeightBold scale:UIImageSymbolScaleMedium]];
+    UIImage *small = [UIImage revenantHostSystemImageNamed:@"star" withConfiguration:[port configurationWithPointSize:12 weight:UIImageSymbolWeightRegular scale:UIImageSymbolScaleMedium]];
+    UIImage *again = [small revenantHostImageByApplyingSymbolConfiguration:[port configurationWithPointSize:48 weight:UIImageSymbolWeightBold scale:UIImageSymbolScaleMedium]];
     UIImage *host = [[UIImage systemImageNamed:@"star" withConfiguration:[UIImageSymbolConfiguration configurationWithPointSize:12 weight:UIImageSymbolWeightRegular scale:UIImageSymbolScaleMedium]]
                         imageByApplyingSymbolConfiguration:[UIImageSymbolConfiguration configurationWithPointSize:48 weight:UIImageSymbolWeightBold scale:UIImageSymbolScaleMedium]];
-    charon_check(fabs(again.size.width - host.size.width) <= 1 && fabs(again.size.height - host.size.height) <= 1 && [again charonHostIsSymbolImage],
+    revenant_check(fabs(again.size.width - host.size.width) <= 1 && fabs(again.size.height - host.size.height) <= 1 && [again revenantHostIsSymbolImage],
                  "applying a configuration to a symbol image draws it again at the new size", NSStringFromCGSize(again.size));
-    NSString *merged = norm([again charonHostSymbolConfiguration]);
-    charon_check([without_traits([again charonHostSymbolConfiguration]) isEqualToString:@"pointSize=48, weight=Bold, scale=Medium"], "and holds the merged configuration", merged);
-    charon_check([UIImage charonHostSystemImageNamed:@"nonexistent.symbol.zz"] == nil && [UIImage charonHostSystemImageNamed:@"star.fill.fill"] == nil && [UIImage charonHostSystemImageNamed:@""] == nil,
+    NSString *merged = norm([again revenantHostSymbolConfiguration]);
+    revenant_check([without_traits([again revenantHostSymbolConfiguration]) isEqualToString:@"pointSize=48, weight=Bold, scale=Medium"], "and holds the merged configuration", merged);
+    revenant_check([UIImage revenantHostSystemImageNamed:@"nonexistent.symbol.zz"] == nil && [UIImage revenantHostSystemImageNamed:@"star.fill.fill"] == nil && [UIImage revenantHostSystemImageNamed:@""] == nil,
                  "a name that is not a symbol is nil", @"");
 }
 
 int main(void)
 {
     @autoreleasepool {
-        Class port = [CharonHostUIImageSymbolConfiguration class], portBase = [CharonHostUIImageConfiguration class];
+        Class port = [RevenantHostUIImageSymbolConfiguration class], portBase = [RevenantHostUIImageConfiguration class];
         Class system = [UIImageSymbolConfiguration class], systemBase = [UIImageConfiguration class];
 
         agree(@"factories", factory_lines(port), factory_lines(system));
@@ -587,29 +587,29 @@ int main(void)
         NSMutableArray *answers = [NSMutableArray array];
         for (NSString *name in selectors)
             [answers addObject:@([port respondsToSelector:NSSelectorFromString(name)])];
-        charon_check([answers isEqual:@[@NO, @NO, @NO, @NO]], "members of later releases are not answered", answers.description);
+        revenant_check([answers isEqual:@[@NO, @NO, @NO, @NO]], "members of later releases are not answered", answers.description);
 
         UIImage *ordinary = bitmap(1);
-        charon_check([ordinary respondsToSelector:@selector(charonHostSymbolConfiguration)] && [UIImage respondsToSelector:@selector(charonHostSystemImageNamed:)],
+        revenant_check([ordinary respondsToSelector:@selector(revenantHostSymbolConfiguration)] && [UIImage respondsToSelector:@selector(revenantHostSystemImageNamed:)],
                      "the port's UIImage members are there", @"");
 
         UITraitCollection *screen = [UIScreen mainScreen].traitCollection;
-        id applied = [[ordinary charonHostImageByApplyingSymbolConfiguration:[port configurationWithPointSize:9]] charonHostSymbolConfiguration];
-        charon_check([[applied traitCollection] isEqual:screen], "an ordinary image takes the traits of the main screen when a configuration is applied", norm([applied traitCollection]));
+        id applied = [[ordinary revenantHostImageByApplyingSymbolConfiguration:[port configurationWithPointSize:9]] revenantHostSymbolConfiguration];
+        revenant_check([[applied traitCollection] isEqual:screen], "an ordinary image takes the traits of the main screen when a configuration is applied", norm([applied traitCollection]));
         id own = [[port configurationWithScale:UIImageSymbolScaleSmall] configurationWithTraitCollection:[UITraitCollection traitCollectionWithDisplayScale:5]];
-        id merged = [[ordinary charonHostImageByApplyingSymbolConfiguration:own] charonHostSymbolConfiguration];
+        id merged = [[ordinary revenantHostImageByApplyingSymbolConfiguration:own] revenantHostSymbolConfiguration];
         UITraitCollection *expected = [UITraitCollection traitCollectionWithTraitsFromCollections:@[screen, [UITraitCollection traitCollectionWithDisplayScale:5]]];
-        charon_check([[merged traitCollection] isEqual:expected], "the traits of the configuration win over the traits of the screen", norm([merged traitCollection]));
+        revenant_check([[merged traitCollection] isEqual:expected], "the traits of the configuration win over the traits of the screen", norm([merged traitCollection]));
 
         UIFont *body = [UIFont preferredFontForTextStyle:UIFontTextStyleBody];
-        charon_check([norm([port configurationWithFont:body]) isEqualToString:@"pointSize=17, weight=Regular"],
+        revenant_check([norm([port configurationWithFont:body]) isEqualToString:@"pointSize=17, weight=Regular"],
                      "a font of a text style gives its size and weight, where the host keeps the text style", norm([port configurationWithFont:body]));
         for (NSInteger weight = -6; weight <= -1; weight++)
-            charon_check(CharonHostUIFontWeightForImageSymbolWeight((UIImageSymbolWeight)weight) == 0, NAMED(@"symbol weight %ld out of range is Regular where the host reads beside its table", (long)weight), @"");
+            revenant_check(RevenantHostUIFontWeightForImageSymbolWeight((UIImageSymbolWeight)weight) == 0, NAMED(@"symbol weight %ld out of range is Regular where the host reads beside its table", (long)weight), @"");
 
         symbol_checks(port);
 
-        printf("checks=%d failures=%d\n", charon_checks, charon_failures);
-        return charon_failures ? 1 : 0;
+        printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
+        return revenant_failures ? 1 : 0;
     }
 }

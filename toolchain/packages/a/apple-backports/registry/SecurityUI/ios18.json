@@ -40,7 +40,7 @@
       "status": "implemented",
       "effect": "the header marks it unavailable, and the port declares no +new of its own: the call reaches NSObject's, which is alloc and -init, and so gives the same trustless presentation -init gives",
       "facts": "facts/SecurityUI/SFCertificatePresentation.md",
-      "source": "the header of SFCertificatePresentation.h in SDK 26.2 (NS_UNAVAILABLE); the port's own declaration in SecurityUI/CharonSecurityUI.h leaves +new to NSObject, which is the same answer registry/UIKit/ios13diffable.json gives for +[UICollectionViewDiffableDataSource new]"
+      "source": "the header of SFCertificatePresentation.h in SDK 26.2 (NS_UNAVAILABLE); the port's own declaration in SecurityUI/RevenantSecurityUI.h leaves +new to NSObject, which is the same answer registry/UIKit/ios13diffable.json gives for +[UICollectionViewDiffableDataSource new]"
     },
     {
       "api": "-[SFCertificatePresentation presentSheetInViewController:dismissHandler:]",

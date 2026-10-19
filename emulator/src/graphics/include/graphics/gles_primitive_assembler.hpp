@@ -15,7 +15,7 @@
 
 #include "graphics/gles_rasterizer.hpp"
 
-namespace shade {
+namespace emulator {
 
 class GlesPrimitiveBatch {
 public:

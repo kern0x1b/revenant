@@ -20,7 +20,7 @@
 #include "graphics/gles_resources.hpp"
 #include "graphics/gles_sampler_state.hpp"
 
-namespace shade {
+namespace emulator {
 namespace {
 
     struct ScreenVertex {

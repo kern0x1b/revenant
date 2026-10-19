@@ -61,7 +61,7 @@ int main(void)
         printf("call.getCurrentAssociationInfo\t%s\n", answer ? [[answer description] UTF8String] : "(nil)");
     }
 
-    NSString *name = @"charon-probe-no-such-network";
+    NSString *name = @"revenant-probe-no-such-network";
     SEL byName = NSSelectorFromString(@"joinNetworkWithNameAsync:password:rememberChoice:");
     if ([instance respondsToSelector:byName]) {
         printf("call.joinNetworkWithNameAsync\tstart\n");

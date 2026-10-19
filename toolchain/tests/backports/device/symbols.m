@@ -153,12 +153,12 @@ static void run_checks(void)
         int mismatches = 0, insetMisses = 0, baselineMisses = 0, cellFailures = 0;
         NSMutableArray *worst = [NSMutableArray array];
         static const double configs[3][3] = {{17, 4, 2}, {34, 7, 3}, {12, 1, 1}};
-        size_t count = sizeof CharonSymbolExpectations / sizeof CharonSymbolExpectations[0];
+        size_t count = sizeof RevenantSymbolExpectations / sizeof RevenantSymbolExpectations[0];
         for (size_t index = 0; index < count; index++) {
-            NSString *name = @(CharonSymbolExpectations[index].name);
+            NSString *name = @(RevenantSymbolExpectations[index].name);
             for (int c = 0; c < 3; c++) {
                 UIImage *image = [UIImage systemImageNamed:name withConfiguration:[UIImageSymbolConfiguration configurationWithPointSize:configs[c][0] weight:(UIImageSymbolWeight)configs[c][1] scale:(UIImageSymbolScale)configs[c][2]]];
-                const float *want = CharonSymbolExpectations[index].metrics[c];
+                const float *want = RevenantSymbolExpectations[index].metrics[c];
                 if (!image || fabs(image.size.width - want[0]) > 1 || fabs(image.size.height - want[1]) > 1)
                     mismatches++;
                 if (image) {
@@ -193,7 +193,7 @@ static void run_checks(void)
                             sum += pixels[y * width + x];
                             cells++;
                         }
-                    BOOL ours = cells && sum / cells >= 127.5, theirs = (CharonSymbolExpectations[index].grid[gy] >> (15 - gx)) & 1;
+                    BOOL ours = cells && sum / cells >= 127.5, theirs = (RevenantSymbolExpectations[index].grid[gy] >> (15 - gx)) & 1;
                     both += ours && theirs;
                     either += ours || theirs;
                 }
@@ -234,15 +234,15 @@ static void run_checks(void)
 
 static NSString *const results_folder = @"/private/var/backports";
 
-@interface CharonSymbolsDelegate : UIResponder <UIApplicationDelegate>
+@interface RevenantSymbolsDelegate : UIResponder <UIApplicationDelegate>
 @property (nonatomic, strong) UIWindow *window;
 @end
 
-@implementation CharonSymbolsDelegate
+@implementation RevenantSymbolsDelegate
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)options
 {
-    charon_log_to([results_folder stringByAppendingPathComponent:@"symbols.log"]);
+    revenant_log_to([results_folder stringByAppendingPathComponent:@"symbols.log"]);
     self.window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
     self.window.rootViewController = [[UIViewController alloc] init];
     [self.window makeKeyAndVisible];
@@ -255,9 +255,9 @@ static NSString *const results_folder = @"/private/var/backports";
     @try {
         run_checks();
     } @catch (NSException *exception) {
-        charon_check(NO, "the checks raise no exception", [NSString stringWithFormat:@"%@: %@", exception.name, exception.reason]);
+        revenant_check(NO, "the checks raise no exception", [NSString stringWithFormat:@"%@: %@", exception.name, exception.reason]);
     }
-    NSString *summary = [NSString stringWithFormat:@"%@ checks=%d failures=%d\n", charon_failures ? @"FAIL" : @"ok", charon_checks, charon_failures];
+    NSString *summary = [NSString stringWithFormat:@"%@ checks=%d failures=%d\n", revenant_failures ? @"FAIL" : @"ok", revenant_checks, revenant_failures];
     [summary writeToFile:[results_folder stringByAppendingPathComponent:@"symbols.done"] atomically:YES encoding:NSUTF8StringEncoding error:NULL];
 }
 
@@ -267,6 +267,6 @@ int main(int argc, char *argv[])
 {
     @autoreleasepool {
         [[NSFileManager defaultManager] createDirectoryAtPath:results_folder withIntermediateDirectories:YES attributes:nil error:NULL];
-        return UIApplicationMain(argc, argv, nil, @"CharonSymbolsDelegate");
+        return UIApplicationMain(argc, argv, nil, @"RevenantSymbolsDelegate");
     }
 }

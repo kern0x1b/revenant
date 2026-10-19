@@ -1,5 +1,5 @@
 #!/bin/sh
-# run.sh - the port's IOSurface property keys (renamed charonHost_*) against the host's own IOSurface,
+# run.sh - the port's IOSurface property keys (renamed revenantHost_*) against the host's own IOSurface,
 # which exports every one of them. The values were read out of the arm64e shared cache of iOS 18.0;
 # this is the second, independent source, and a key mistyped on the way out of the cache shows up here.
 set -eu
@@ -7,13 +7,13 @@ here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 port=${PORT:-$here/../../../../packages/a/apple-backports/.gen/IOSurface}
 harness=${IOSURFACENAMES_HARNESS:-$here/../../device}
-build=${IOSURFACENAMES_BUILD:-$(runs_fresh charon-iosurfacenames)}
+build=${IOSURFACENAMES_BUILD:-$(runs_fresh revenant-iosurfacenames)}
 rm -rf "$build"
 mkdir -p "$build"
 renames=""
 for name in $(sed -e '1,3d' "$here/names.txt"); do
     case "$name" in
-        *) renames="$renames -D$name=charonHost_$name" ;;
+        *) renames="$renames -D$name=revenantHost_$name" ;;
     esac
 done
 objects=""

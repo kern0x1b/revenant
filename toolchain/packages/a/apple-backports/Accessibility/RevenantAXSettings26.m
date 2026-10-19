@@ -1,9 +1,9 @@
-#import "CharonAXSettings.h"
-#import "CharonAXSettingsCommon.h"
+#import "RevenantAXSettings.h"
+#import "RevenantAXSettingsCommon.h"
 
 BOOL AXPrefersActionSliderAlternative(void)
 {
-    return CharonAXSettingIsOffOnThisRelease();
+    return RevenantAXSettingIsOffOnThisRelease();
 }
 
 NSNotificationName const AXPrefersActionSliderAlternativeDidChangeNotification =
@@ -11,7 +11,7 @@ NSNotificationName const AXPrefersActionSliderAlternativeDidChangeNotification =
 
 BOOL AXShowBordersEnabled(void)
 {
-    return CharonAXSettingIsOffOnThisRelease();
+    return RevenantAXSettingIsOffOnThisRelease();
 }
 
 NSNotificationName const AXShowBordersEnabledStatusDidChangeNotification =

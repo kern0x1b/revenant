@@ -12,14 +12,14 @@ static uint32_t next(void)
 
 static NSString *policy_of(NSHTTPCookie *cookie, BOOL port)
 {
-    return port ? ((id (*)(id, SEL))objc_msgSend)(cookie, NSSelectorFromString(@"charonHostSameSitePolicy")) : cookie.sameSitePolicy;
+    return port ? ((id (*)(id, SEL))objc_msgSend)(cookie, NSSelectorFromString(@"revenantHostSameSitePolicy")) : cookie.sameSitePolicy;
 }
 
 static NSString *describe(NSArray *cookies, BOOL port)
 {
     NSMutableString *text = [NSMutableString string];
     for (NSHTTPCookie *cookie in cookies) {
-        NSDictionary *properties = port ? ((id (*)(id, SEL, id))objc_msgSend)(cookie, NSSelectorFromString(@"charonHostCharon_properties:"), cookie.properties) : cookie.properties;
+        NSDictionary *properties = port ? ((id (*)(id, SEL, id))objc_msgSend)(cookie, NSSelectorFromString(@"revenantHostRevenant_properties:"), cookie.properties) : cookie.properties;
         [text appendFormat:@"[%@=%@ %@ %@ %@] ", cookie.name, cookie.value, policy_of(cookie, port), properties[@"SameSite"], cookie.path];
     }
     return text;
@@ -38,7 +38,7 @@ int main(int argc, char **argv)
             if (next() % 3 == 0)
                 properties[NSHTTPCookieSecure] = @"TRUE";
             NSHTTPCookie *system = [NSHTTPCookie cookieWithProperties:properties];
-            NSHTTPCookie *port = ((id (*)(id, SEL, id, id))objc_msgSend)([NSHTTPCookie class], NSSelectorFromString(@"charonHostCharon_cookieWithProperties:original:"), properties, ^NSHTTPCookie *(NSDictionary *plain) {
+            NSHTTPCookie *port = ((id (*)(id, SEL, id, id))objc_msgSend)([NSHTTPCookie class], NSSelectorFromString(@"revenantHostRevenant_cookieWithProperties:original:"), properties, ^NSHTTPCookie *(NSDictionary *plain) {
                 return [NSHTTPCookie cookieWithProperties:plain];
             });
             NSString *a = describe(port ? @[port] : @[], YES), *b = describe(system ? @[system] : @[], NO);
@@ -69,7 +69,7 @@ int main(int argc, char **argv)
             NSDictionary *fields = @{next() % 4 ? @"Set-Cookie" : @"set-cookie": [parts componentsJoinedByString:@", "]};
             NSURL *URL = [NSURL URLWithString:@"http://x.com/"];
             NSArray *system = [NSHTTPCookie cookiesWithResponseHeaderFields:fields forURL:URL];
-            NSArray *port = ((id (*)(id, SEL, id, id, id))objc_msgSend)([NSHTTPCookie class], NSSelectorFromString(@"charonHostCharon_cookiesWithHeaderFields:forURL:original:"), fields, URL, ^NSArray *{
+            NSArray *port = ((id (*)(id, SEL, id, id, id))objc_msgSend)([NSHTTPCookie class], NSSelectorFromString(@"revenantHostRevenant_cookiesWithHeaderFields:forURL:original:"), fields, URL, ^NSArray *{
                 return [NSHTTPCookie cookiesWithResponseHeaderFields:fields forURL:URL];
             });
             NSString *a = describe(port, YES), *b = describe(system, NO);
@@ -81,9 +81,9 @@ int main(int argc, char **argv)
         }
         for (NSString *sample in samples)
             printf("  %s\n", sample.UTF8String);
-        charon_check(wrong == 0, "the SameSite of a cookie made from properties or read from a header is the system's", [NSString stringWithFormat:@"%lu of %lu differ", (unsigned long)wrong, (unsigned long)cases * 2]);
+        revenant_check(wrong == 0, "the SameSite of a cookie made from properties or read from a header is the system's", [NSString stringWithFormat:@"%lu of %lu differ", (unsigned long)wrong, (unsigned long)cases * 2]);
         CHECK_EQUAL(NSHTTPCookieSameSiteLax, @"lax", "the lax constant");
     }
-    printf("checks=%d failures=%d\n", charon_checks, charon_failures);
-    return charon_failures;
+    printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
+    return revenant_failures;
 }

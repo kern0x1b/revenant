@@ -124,7 +124,7 @@
    "minimum": "6.0",
    "status": "implemented",
    "facts": "facts/PDFKit/Document11.md",
-   "source": "the gate's own build of this library: the stack6 gate on 6.1.3 listed the class and these members as \"built, but no entry in registry/\", and every built member carries a row here as the tree's own convention does elsewhere - Accelerate carries four dealloc rows and MPSGraph a charon_ internal one",
+   "source": "the gate's own build of this library: the stack6 gate on 6.1.3 listed the class and these members as \"built, but no entry in registry/\", and every built member carries a row here as the tree's own convention does elsewhere - Accelerate carries four dealloc rows and MPSGraph a revenant_ internal one",
    "effect": "the port's own page, a CGPDFPage with the document that produced it, its index in that document and the document weak beside it, so a page that outlives its document answers nil for it rather than messaging a released one"
   },
   {
@@ -134,7 +134,7 @@
    "minimum": "6.0",
    "status": "implemented",
    "facts": "facts/PDFKit/Document11.md",
-   "source": "the gate's own build of this library: the stack6 gate on 6.1.3 listed the class and these members as \"built, but no entry in registry/\", and every built member carries a row here as the tree's own convention does elsewhere - Accelerate carries four dealloc rows and MPSGraph a charon_ internal one",
+   "source": "the gate's own build of this library: the stack6 gate on 6.1.3 listed the class and these members as \"built, but no entry in registry/\", and every built member carries a row here as the tree's own convention does elsewhere - Accelerate carries four dealloc rows and MPSGraph a revenant_ internal one",
    "effect": "releases the page's own CGPDFPageRetain and its own CGPDFDocumentRetain.  The page holds the page as a Get - CGPDFDocumentGetPage hands back a page the document owns - so a page released while its document is alive is the direction CoreGraphics does not support, which is what these two releases are for"
   },
   {
@@ -144,7 +144,7 @@
    "minimum": "6.0",
    "status": "implemented",
    "facts": "facts/PDFKit/Document11.md",
-   "source": "the gate's own build of this library: the stack6 gate on 6.1.3 listed the class and these members as \"built, but no entry in registry/\", and every built member carries a row here as the tree's own convention does elsewhere - Accelerate carries four dealloc rows and MPSGraph a charon_ internal one",
+   "source": "the gate's own build of this library: the stack6 gate on 6.1.3 listed the class and these members as \"built, but no entry in registry/\", and every built member carries a row here as the tree's own convention does elsewhere - Accelerate carries four dealloc rows and MPSGraph a revenant_ internal one",
    "effect": "the document the page came from, held WEAK, as the 26.2 header declares it (PDFPage.h:70).  The page keeps the CGPDFDocument alive in its own right and the object weakly, so a page outliving its document answers nil for it"
   },
   {
@@ -154,7 +154,7 @@
    "minimum": "6.0",
    "status": "implemented",
    "facts": "facts/PDFKit/Document11.md",
-   "source": "the gate's own build of this library: the stack6 gate on 6.1.3 listed the class and these members as \"built, but no entry in registry/\", and every built member carries a row here as the tree's own convention does elsewhere - Accelerate carries four dealloc rows and MPSGraph a charon_ internal one",
+   "source": "the gate's own build of this library: the stack6 gate on 6.1.3 listed the class and these members as \"built, but no entry in registry/\", and every built member carries a row here as the tree's own convention does elsewhere - Accelerate carries four dealloc rows and MPSGraph a revenant_ internal one",
    "effect": "the port's own way in, and it now takes the DOCUMENT OBJECT: nothing ever set the page's weak object reference, so -document answered nil on every page while the host answered an object on every fixture. The page then retains the CGPDFDocument behind that object for itself"
   },
   {
@@ -164,7 +164,7 @@
    "minimum": "6.0",
    "status": "implemented",
    "facts": "facts/PDFKit/Document11.md",
-   "source": "the gate's own build of this library: the stack6 gate on 6.1.3 listed the class and these members as \"built, but no entry in registry/\", and every built member carries a row here as the tree's own convention does elsewhere - Accelerate carries four dealloc rows and MPSGraph a charon_ internal one",
+   "source": "the gate's own build of this library: the stack6 gate on 6.1.3 listed the class and these members as \"built, but no entry in registry/\", and every built member carries a row here as the tree's own convention does elsewhere - Accelerate carries four dealloc rows and MPSGraph a revenant_ internal one",
    "effect": "the page's index in the document that produced it, which is what -[PDFDocument pageAtIndex:] passed and what a caller reads back; the document is held weakly, so this survives the document and says the number the page was made with"
   },
   {
@@ -311,7 +311,7 @@
    "introduced": "11.0",
    "minimum": "6.0",
    "status": "implemented",
-   "effect": "the page the view is on: the host answers an-object as soon as a document is set, with no window and no page shown, and nil as soon as the document is cleared. the host's answer with NO WINDOW and never shown, measured on box-all, charon-fixture-3 and box-rotated and identical on all three; the port is in the same position - neither band carries UIKit's PDFView and a port view has nowhere to be put - so the comparison is windowless on both sides",
+   "effect": "the page the view is on: the host answers an-object as soon as a document is set, with no window and no page shown, and nil as soon as the document is cleared. the host's answer with NO WINDOW and never shown, measured on box-all, revenant-fixture-3 and box-rotated and identical on all three; the port is in the same position - neither band carries UIKit's PDFView and a port view has nowhere to be put - so the comparison is windowless on both sides",
    "reason": "",
    "facts": "facts/PDFKit/Document11.md",
    "source": "the host's own PDFView and PDFKit in a process holding no port object, against the port's objects in a process holding no macOS PDFKit and no AppKit - tests/backports/host/pdfkit-document/run.sh, two binaries, dladdr proving each side's class comes from where it should: COMPARED 205 MISMATCHES 0, and tests/backports/host/pdfkit-document/tools/host-view-windowless.m is the probe the defaults were read off"
@@ -322,7 +322,7 @@
    "introduced": "11.0",
    "minimum": "6.0",
    "status": "implemented",
-   "effect": "the host's answer with NO WINDOW and never shown, measured on box-all, charon-fixture-3 and box-rotated and identical on all three; the port is in the same position - neither band carries UIKit's PDFView and a port view has nowhere to be put - so the comparison is windowless on both sides",
+   "effect": "the host's answer with NO WINDOW and never shown, measured on box-all, revenant-fixture-3 and box-rotated and identical on all three; the port is in the same position - neither band carries UIKit's PDFView and a port view has nowhere to be put - so the comparison is windowless on both sides",
    "reason": "",
    "facts": "facts/PDFKit/Document11.md",
    "source": "the host's own PDFView and PDFKit in a process holding no port object, against the port's objects in a process holding no macOS PDFKit and no AppKit - tests/backports/host/pdfkit-document/run.sh, two binaries, dladdr proving each side's class comes from where it should: COMPARED 205 MISMATCHES 0, and tests/backports/host/pdfkit-document/tools/host-view-windowless.m is the probe the defaults were read off"
@@ -333,7 +333,7 @@
    "introduced": "11.0",
    "minimum": "6.0",
    "status": "implemented",
-   "effect": "the host's answer with NO WINDOW and never shown, measured on box-all, charon-fixture-3 and box-rotated and identical on all three; the port is in the same position - neither band carries UIKit's PDFView and a port view has nowhere to be put - so the comparison is windowless on both sides",
+   "effect": "the host's answer with NO WINDOW and never shown, measured on box-all, revenant-fixture-3 and box-rotated and identical on all three; the port is in the same position - neither band carries UIKit's PDFView and a port view has nowhere to be put - so the comparison is windowless on both sides",
    "reason": "",
    "facts": "facts/PDFKit/Document11.md",
    "source": "the host's own PDFView and PDFKit in a process holding no port object, against the port's objects in a process holding no macOS PDFKit and no AppKit - tests/backports/host/pdfkit-document/run.sh, two binaries, dladdr proving each side's class comes from where it should: COMPARED 205 MISMATCHES 0, and tests/backports/host/pdfkit-document/tools/host-view-windowless.m is the probe the defaults were read off"
@@ -344,7 +344,7 @@
    "introduced": "11.0",
    "minimum": "6.0",
    "status": "implemented",
-   "effect": "the host's answer with NO WINDOW and never shown, measured on box-all, charon-fixture-3 and box-rotated and identical on all three; the port is in the same position - neither band carries UIKit's PDFView and a port view has nowhere to be put - so the comparison is windowless on both sides",
+   "effect": "the host's answer with NO WINDOW and never shown, measured on box-all, revenant-fixture-3 and box-rotated and identical on all three; the port is in the same position - neither band carries UIKit's PDFView and a port view has nowhere to be put - so the comparison is windowless on both sides",
    "reason": "",
    "facts": "facts/PDFKit/Document11.md",
    "source": "the host's own PDFView and PDFKit in a process holding no port object, against the port's objects in a process holding no macOS PDFKit and no AppKit - tests/backports/host/pdfkit-document/run.sh, two binaries, dladdr proving each side's class comes from where it should: COMPARED 205 MISMATCHES 0, and tests/backports/host/pdfkit-document/tools/host-view-windowless.m is the probe the defaults were read off"
@@ -355,7 +355,7 @@
    "introduced": "11.0",
    "minimum": "6.0",
    "status": "implemented",
-   "effect": "the host's answer with NO WINDOW and never shown, measured on box-all, charon-fixture-3 and box-rotated and identical on all three; the port is in the same position - neither band carries UIKit's PDFView and a port view has nowhere to be put - so the comparison is windowless on both sides",
+   "effect": "the host's answer with NO WINDOW and never shown, measured on box-all, revenant-fixture-3 and box-rotated and identical on all three; the port is in the same position - neither band carries UIKit's PDFView and a port view has nowhere to be put - so the comparison is windowless on both sides",
    "reason": "",
    "facts": "facts/PDFKit/Document11.md",
    "source": "the host's own PDFView and PDFKit in a process holding no port object, against the port's objects in a process holding no macOS PDFKit and no AppKit - tests/backports/host/pdfkit-document/run.sh, two binaries, dladdr proving each side's class comes from where it should: COMPARED 205 MISMATCHES 0, and tests/backports/host/pdfkit-document/tools/host-view-windowless.m is the probe the defaults were read off"
@@ -366,7 +366,7 @@
    "introduced": "11.0",
    "minimum": "6.0",
    "status": "implemented",
-   "effect": "the host's answer with NO WINDOW and never shown, measured on box-all, charon-fixture-3 and box-rotated and identical on all three; the port is in the same position - neither band carries UIKit's PDFView and a port view has nowhere to be put - so the comparison is windowless on both sides; setting it sticks and reads back, measured",
+   "effect": "the host's answer with NO WINDOW and never shown, measured on box-all, revenant-fixture-3 and box-rotated and identical on all three; the port is in the same position - neither band carries UIKit's PDFView and a port view has nowhere to be put - so the comparison is windowless on both sides; setting it sticks and reads back, measured",
    "reason": "",
    "facts": "facts/PDFKit/Document11.md",
    "source": "the host's own PDFView and PDFKit in a process holding no port object, against the port's objects in a process holding no macOS PDFKit and no AppKit - tests/backports/host/pdfkit-document/run.sh, two binaries, dladdr proving each side's class comes from where it should: COMPARED 205 MISMATCHES 0, and tests/backports/host/pdfkit-document/tools/host-view-windowless.m is the probe the defaults were read off"
@@ -377,7 +377,7 @@
    "introduced": "11.0",
    "minimum": "6.0",
    "status": "implemented",
-   "effect": "the host's answer with NO WINDOW and never shown, measured on box-all, charon-fixture-3 and box-rotated and identical on all three; the port is in the same position - neither band carries UIKit's PDFView and a port view has nowhere to be put - so the comparison is windowless on both sides; setting it sticks and reads back, measured",
+   "effect": "the host's answer with NO WINDOW and never shown, measured on box-all, revenant-fixture-3 and box-rotated and identical on all three; the port is in the same position - neither band carries UIKit's PDFView and a port view has nowhere to be put - so the comparison is windowless on both sides; setting it sticks and reads back, measured",
    "reason": "",
    "facts": "facts/PDFKit/Document11.md",
    "source": "the host's own PDFView and PDFKit in a process holding no port object, against the port's objects in a process holding no macOS PDFKit and no AppKit - tests/backports/host/pdfkit-document/run.sh, two binaries, dladdr proving each side's class comes from where it should: COMPARED 205 MISMATCHES 0, and tests/backports/host/pdfkit-document/tools/host-view-windowless.m is the probe the defaults were read off"
@@ -399,7 +399,7 @@
    "introduced": "11.0",
    "minimum": "6.0",
    "status": "implemented",
-   "effect": "the host's answer with NO WINDOW and never shown, measured on box-all, charon-fixture-3 and box-rotated and identical on all three; the port is in the same position - neither band carries UIKit's PDFView and a port view has nowhere to be put - so the comparison is windowless on both sides",
+   "effect": "the host's answer with NO WINDOW and never shown, measured on box-all, revenant-fixture-3 and box-rotated and identical on all three; the port is in the same position - neither band carries UIKit's PDFView and a port view has nowhere to be put - so the comparison is windowless on both sides",
    "reason": "",
    "facts": "facts/PDFKit/Document11.md",
    "source": "the host's own PDFView and PDFKit in a process holding no port object, against the port's objects in a process holding no macOS PDFKit and no AppKit - tests/backports/host/pdfkit-document/run.sh, two binaries, dladdr proving each side's class comes from where it should: COMPARED 205 MISMATCHES 0, and tests/backports/host/pdfkit-document/tools/host-view-windowless.m is the probe the defaults were read off"
@@ -421,7 +421,7 @@
    "introduced": "11.0",
    "minimum": "6.0",
    "status": "implemented",
-   "effect": "an annotation over one dictionary of a page's /Annots array, in the array's own order; built by -[PDFPage annotations], and the port's own initializer is -initWithCharonDictionary:onPage: because Apple's -initWithBounds:forType:withProperties: WRITES a new annotation into a document and the port only reads them.  Seven of the family's members are here; the rest are rows of their own and say why not",
+   "effect": "an annotation over one dictionary of a page's /Annots array, in the array's own order; built by -[PDFPage annotations], and the port's own initializer is -initWithRevenantDictionary:onPage: because Apple's -initWithBounds:forType:withProperties: WRITES a new annotation into a document and the port only reads them.  Seven of the family's members are here; the rest are rows of their own and say why not",
    "facts": "facts/PDFKit/Document11.md",
    "source": "the host's own PDFKit under macOS in a process containing no port object, against the port's objects in a process containing no macOS PDFKit - tests/backports/host/pdfkit-document/run.sh, two binaries, dladdr proving each side's class comes from where it should: COMPARED 586 MISMATCHES 0, which includes every annotation key below; two red controls confirm the differential is live - the Print bit read as the Hidden bit makes six annotations DIFFER, and dropping the /Text note rule makes three",
    "ledger": "missing"

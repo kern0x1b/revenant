@@ -1,4 +1,4 @@
-#import "CharonVideoToolbox.h"
+#import "RevenantVideoToolbox.h"
 #import "VideoToolboxValueStore.h"
 
 @implementation VTMotionBlurConfiguration
@@ -12,11 +12,11 @@
     self = [super init];
     if (!self)
         return nil;
-    CharonValueSet(self, @(frameWidth), @"frameWidth");
-    CharonValueSet(self, @(frameHeight), @"frameHeight");
-    CharonValueSet(self, @(usePrecomputedFlow), @"usePrecomputedFlow");
-    CharonValueSet(self, @(qualityPrioritization), @"qualityPrioritization");
-    CharonValueSet(self, @(revision), @"revision");
+    RevenantValueSet(self, @(frameWidth), @"frameWidth");
+    RevenantValueSet(self, @(frameHeight), @"frameHeight");
+    RevenantValueSet(self, @(usePrecomputedFlow), @"usePrecomputedFlow");
+    RevenantValueSet(self, @(qualityPrioritization), @"qualityPrioritization");
+    RevenantValueSet(self, @(revision), @"revision");
     return self;
 }
 
@@ -30,33 +30,33 @@
 
 - (NSArray<NSNumber *> *)frameSupportedPixelFormats
 {
-    return (NSArray<NSNumber *> *)CharonValueStore(self)[@"frameSupportedPixelFormats"];
+    return (NSArray<NSNumber *> *)RevenantValueStore(self)[@"frameSupportedPixelFormats"];
 }
 
 - (NSDictionary<NSString *, id> *)sourcePixelBufferAttributes
 {
-    return (NSDictionary<NSString *, id> *)CharonValueStore(self)[@"sourcePixelBufferAttributes"];
+    return (NSDictionary<NSString *, id> *)RevenantValueStore(self)[@"sourcePixelBufferAttributes"];
 }
 
 - (NSDictionary<NSString *, id> *)destinationPixelBufferAttributes
 {
-    return (NSDictionary<NSString *, id> *)CharonValueStore(self)[@"destinationPixelBufferAttributes"];
+    return (NSDictionary<NSString *, id> *)RevenantValueStore(self)[@"destinationPixelBufferAttributes"];
 }
 
 - (NSInteger)nextFrameCount
 {
-    return (NSInteger)[CharonValueStore(self)[@"nextFrameCount"] longLongValue];
+    return (NSInteger)[RevenantValueStore(self)[@"nextFrameCount"] longLongValue];
 }
 
 - (NSInteger)previousFrameCount
 {
-    return (NSInteger)[CharonValueStore(self)[@"previousFrameCount"] longLongValue];
+    return (NSInteger)[RevenantValueStore(self)[@"previousFrameCount"] longLongValue];
 }
 
 + (CMVideoDimensions)maximumDimensions
 {
     CMVideoDimensions value = {0, 0};
-    NSValue *boxed = CharonValueStoreOfClass([self class])[@"maximumDimensions"];
+    NSValue *boxed = RevenantValueStoreOfClass([self class])[@"maximumDimensions"];
     if (boxed)
         [boxed getValue:&value];
     return value;
@@ -65,7 +65,7 @@
 + (CMVideoDimensions)minimumDimensions
 {
     CMVideoDimensions value = {0, 0};
-    NSValue *boxed = CharonValueStoreOfClass([self class])[@"minimumDimensions"];
+    NSValue *boxed = RevenantValueStoreOfClass([self class])[@"minimumDimensions"];
     if (boxed)
         [boxed getValue:&value];
     return value;
@@ -75,37 +75,37 @@
 
 - (NSInteger)frameWidth
 {
-    return (NSInteger)[CharonValueStore(self)[@"frameWidth"] longLongValue];
+    return (NSInteger)[RevenantValueStore(self)[@"frameWidth"] longLongValue];
 }
 
 - (NSInteger)frameHeight
 {
-    return (NSInteger)[CharonValueStore(self)[@"frameHeight"] longLongValue];
+    return (NSInteger)[RevenantValueStore(self)[@"frameHeight"] longLongValue];
 }
 
 - (BOOL)usePrecomputedFlow
 {
-    return (BOOL)[CharonValueStore(self)[@"usePrecomputedFlow"] longLongValue];
+    return (BOOL)[RevenantValueStore(self)[@"usePrecomputedFlow"] longLongValue];
 }
 
 - (VTMotionBlurConfigurationQualityPrioritization)qualityPrioritization
 {
-    return (VTMotionBlurConfigurationQualityPrioritization)[CharonValueStore(self)[@"qualityPrioritization"] longLongValue];
+    return (VTMotionBlurConfigurationQualityPrioritization)[RevenantValueStore(self)[@"qualityPrioritization"] longLongValue];
 }
 
 - (VTMotionBlurConfigurationRevision)revision
 {
-    return (VTMotionBlurConfigurationRevision)[CharonValueStore(self)[@"revision"] longLongValue];
+    return (VTMotionBlurConfigurationRevision)[RevenantValueStore(self)[@"revision"] longLongValue];
 }
 
 + (NSIndexSet *)supportedRevisions
 {
-    return (NSIndexSet *)CharonValueStoreOfClass([self class])[@"supportedRevisions"];
+    return (NSIndexSet *)RevenantValueStoreOfClass([self class])[@"supportedRevisions"];
 }
 
 + (VTMotionBlurConfigurationRevision)defaultRevision
 {
-    return (VTMotionBlurConfigurationRevision)[CharonValueStoreOfClass([self class])[@"defaultRevision"] longLongValue];
+    return (VTMotionBlurConfigurationRevision)[RevenantValueStoreOfClass([self class])[@"defaultRevision"] longLongValue];
 }
 
 #pragma mark - Initialisation, the one the header leaves open
@@ -116,10 +116,10 @@
               qualityPrioritization:(VTMotionBlurConfigurationQualityPrioritization)qualityPrioritization
 {
     if ((self = [super init])) {
-        CharonValueStore(self)[@"frameWidth"] = @(frameWidth);
-        CharonValueStore(self)[@"frameHeight"] = @(frameHeight);
-        CharonValueStore(self)[@"usePrecomputedFlow"] = @(usePrecomputedFlow);
-        CharonValueStore(self)[@"qualityPrioritization"] = @(qualityPrioritization);
+        RevenantValueStore(self)[@"frameWidth"] = @(frameWidth);
+        RevenantValueStore(self)[@"frameHeight"] = @(frameHeight);
+        RevenantValueStore(self)[@"usePrecomputedFlow"] = @(usePrecomputedFlow);
+        RevenantValueStore(self)[@"qualityPrioritization"] = @(qualityPrioritization);
     }
     return self;
 }

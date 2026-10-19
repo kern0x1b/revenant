@@ -4,12 +4,12 @@
 
 #pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
 
-static const char CharonHeadersPinKey;
-static const char CharonFootersPinKey;
-static const char CharonUseLayoutToLayoutKey;
-static const char CharonInstallsGestureKey;
+static const char RevenantHeadersPinKey;
+static const char RevenantFootersPinKey;
+static const char RevenantUseLayoutToLayoutKey;
+static const char RevenantInstallsGestureKey;
 
-@implementation UICollectionViewLayoutAttributes (CharonBounds7)
+@implementation UICollectionViewLayoutAttributes (RevenantBounds7)
 
 - (CGRect)bounds
 {
@@ -25,33 +25,33 @@ static const char CharonInstallsGestureKey;
 
 @end
 
-@implementation UICollectionViewFlowLayout (CharonPinning9)
+@implementation UICollectionViewFlowLayout (RevenantPinning9)
 
 - (BOOL)sectionHeadersPinToVisibleBounds
 {
-    return [objc_getAssociatedObject(self, &CharonHeadersPinKey) boolValue];
+    return [objc_getAssociatedObject(self, &RevenantHeadersPinKey) boolValue];
 }
 
 - (void)setSectionHeadersPinToVisibleBounds:(BOOL)pins
 {
-    objc_setAssociatedObject(self, &CharonHeadersPinKey, @(pins), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, &RevenantHeadersPinKey, @(pins), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     [self invalidateLayout];
 }
 
 - (BOOL)sectionFootersPinToVisibleBounds
 {
-    return [objc_getAssociatedObject(self, &CharonFootersPinKey) boolValue];
+    return [objc_getAssociatedObject(self, &RevenantFootersPinKey) boolValue];
 }
 
 - (void)setSectionFootersPinToVisibleBounds:(BOOL)pins
 {
-    objc_setAssociatedObject(self, &CharonFootersPinKey, @(pins), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, &RevenantFootersPinKey, @(pins), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     [self invalidateLayout];
 }
 
 @end
 
-@implementation UICollectionViewController (CharonController7)
+@implementation UICollectionViewController (RevenantController7)
 
 - (UICollectionViewLayout *)collectionViewLayout
 {
@@ -65,38 +65,38 @@ static const char CharonInstallsGestureKey;
 
 - (BOOL)useLayoutToLayoutNavigationTransitions
 {
-    return [objc_getAssociatedObject(self, &CharonUseLayoutToLayoutKey) boolValue];
+    return [objc_getAssociatedObject(self, &RevenantUseLayoutToLayoutKey) boolValue];
 }
 
 - (void)setUseLayoutToLayoutNavigationTransitions:(BOOL)uses
 {
-    objc_setAssociatedObject(self, &CharonUseLayoutToLayoutKey, @(uses), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, &RevenantUseLayoutToLayoutKey, @(uses), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
 - (BOOL)installsStandardGestureForInteractiveMovement
 {
-    NSNumber *stored = objc_getAssociatedObject(self, &CharonInstallsGestureKey);
+    NSNumber *stored = objc_getAssociatedObject(self, &RevenantInstallsGestureKey);
     return stored ? stored.boolValue : YES;
 }
 
 - (void)setInstallsStandardGestureForInteractiveMovement:(BOOL)installs
 {
-    objc_setAssociatedObject(self, &CharonInstallsGestureKey, @(installs), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, &RevenantInstallsGestureKey, @(installs), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
 @end
 
-@interface UICollectionView (CharonDelegateQuestions9)
-- (void)charon_tellDelegateAboutVisibleElements;
-- (void)charon_tellDelegateWillDisplayIndexPath:(NSIndexPath *)indexPath;
-- (void)charon_tellDelegateWillDisplaySupplementaryIndexPath:(NSIndexPath *)indexPath ofKind:(NSString *)kind;
-- (CGPoint)charon_targetContentOffsetForProposedContentOffset:(CGPoint)proposed;
+@interface UICollectionView (RevenantDelegateQuestions9)
+- (void)revenant_tellDelegateAboutVisibleElements;
+- (void)revenant_tellDelegateWillDisplayIndexPath:(NSIndexPath *)indexPath;
+- (void)revenant_tellDelegateWillDisplaySupplementaryIndexPath:(NSIndexPath *)indexPath ofKind:(NSString *)kind;
+- (CGPoint)revenant_targetContentOffsetForProposedContentOffset:(CGPoint)proposed;
 @end
 
-@interface CharonCollectionViewDelegateInstaller : NSObject
+@interface RevenantCollectionViewDelegateInstaller : NSObject
 @end
 
-@implementation CharonCollectionViewDelegateInstaller
+@implementation RevenantCollectionViewDelegateInstaller
 
 + (void)load
 {
@@ -105,15 +105,15 @@ static const char CharonInstallsGestureKey;
     void (*previous)(id, SEL) = (void (*)(id, SEL))method_getImplementation(layout);
     class_replaceMethod(view, @selector(layoutSubviews), imp_implementationWithBlock(^(UICollectionView *self_) {
         previous(self_, @selector(layoutSubviews));
-        [self_ charon_tellDelegateAboutVisibleElements];
+        [self_ revenant_tellDelegateAboutVisibleElements];
     }), method_getTypeEncoding(layout));
 }
 
 @end
 
-@implementation UICollectionView (CharonDelegateQuestions9)
+@implementation UICollectionView (RevenantDelegateQuestions9)
 
-- (void)charon_tellDelegateAboutVisibleElements
+- (void)revenant_tellDelegateAboutVisibleElements
 {
     static const char toldKey;
     NSMutableSet *told = objc_getAssociatedObject(self, &toldKey);
@@ -125,7 +125,7 @@ static const char CharonInstallsGestureKey;
         if ([told containsObject:indexPath])
             continue;
         [told addObject:indexPath];
-        [self charon_tellDelegateWillDisplayIndexPath:indexPath];
+        [self revenant_tellDelegateWillDisplayIndexPath:indexPath];
     }
     for (NSString *kind in @[UICollectionElementKindSectionHeader, UICollectionElementKindSectionFooter]) {
         for (NSIndexPath *indexPath in [self indexPathsForVisibleSupplementaryElementsOfKind:kind]) {
@@ -133,12 +133,12 @@ static const char CharonInstallsGestureKey;
             if ([told containsObject:key])
                 continue;
             [told addObject:key];
-            [self charon_tellDelegateWillDisplaySupplementaryIndexPath:indexPath ofKind:kind];
+            [self revenant_tellDelegateWillDisplaySupplementaryIndexPath:indexPath ofKind:kind];
         }
     }
 }
 
-- (CGPoint)charon_targetContentOffsetForProposedContentOffset:(CGPoint)proposed
+- (CGPoint)revenant_targetContentOffsetForProposedContentOffset:(CGPoint)proposed
 {
     CGPoint target = [self.collectionViewLayout targetContentOffsetForProposedContentOffset:proposed];
     id delegate = self.delegate;
@@ -148,7 +148,7 @@ static const char CharonInstallsGestureKey;
     return target;
 }
 
-- (void)charon_tellDelegateWillDisplayIndexPath:(NSIndexPath *)indexPath
+- (void)revenant_tellDelegateWillDisplayIndexPath:(NSIndexPath *)indexPath
 {
     id delegate = self.delegate;
     if (![delegate respondsToSelector:@selector(collectionView:willDisplayCell:forItemAtIndexPath:)])
@@ -158,7 +158,7 @@ static const char CharonInstallsGestureKey;
         ((void (*)(id, SEL, id, id, id))objc_msgSend)(delegate, @selector(collectionView:willDisplayCell:forItemAtIndexPath:), self, indexPath, cell);
 }
 
-- (void)charon_tellDelegateWillDisplaySupplementaryIndexPath:(NSIndexPath *)indexPath ofKind:(NSString *)kind
+- (void)revenant_tellDelegateWillDisplaySupplementaryIndexPath:(NSIndexPath *)indexPath ofKind:(NSString *)kind
 {
     id delegate = self.delegate;
     SEL ask = @selector(collectionView:willDisplaySupplementaryView:forElementKind:atIndexPath:);
@@ -171,15 +171,15 @@ static const char CharonInstallsGestureKey;
 
 @end
 
-@interface UITableView (CharonEstimatedHeights7)
-- (CGFloat)charon_estimatedHeightForRowAtIndexPath:(NSIndexPath *)indexPath;
-- (CGFloat)charon_estimatedHeightForHeaderInSection:(NSInteger)section;
-- (CGFloat)charon_estimatedHeightForFooterInSection:(NSInteger)section;
+@interface UITableView (RevenantEstimatedHeights7)
+- (CGFloat)revenant_estimatedHeightForRowAtIndexPath:(NSIndexPath *)indexPath;
+- (CGFloat)revenant_estimatedHeightForHeaderInSection:(NSInteger)section;
+- (CGFloat)revenant_estimatedHeightForFooterInSection:(NSInteger)section;
 @end
 
-@implementation UITableView (CharonEstimatedHeights7)
+@implementation UITableView (RevenantEstimatedHeights7)
 
-- (CGFloat)charon_estimatedHeightForRowAtIndexPath:(NSIndexPath *)indexPath
+- (CGFloat)revenant_estimatedHeightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     id delegate = self.delegate;
     SEL ask = @selector(tableView:estimatedHeightForRowAtIndexPath:);
@@ -188,7 +188,7 @@ static const char CharonInstallsGestureKey;
     return ((CGFloat (*)(id, SEL, id, id))objc_msgSend)(delegate, ask, self, indexPath);
 }
 
-- (CGFloat)charon_estimatedHeightForHeaderInSection:(NSInteger)section
+- (CGFloat)revenant_estimatedHeightForHeaderInSection:(NSInteger)section
 {
     id delegate = self.delegate;
     SEL ask = @selector(tableView:estimatedHeightForHeaderInSection:);
@@ -197,7 +197,7 @@ static const char CharonInstallsGestureKey;
     return ((CGFloat (*)(id, SEL, id, NSInteger))objc_msgSend)(delegate, ask, self, section);
 }
 
-- (CGFloat)charon_estimatedHeightForFooterInSection:(NSInteger)section
+- (CGFloat)revenant_estimatedHeightForFooterInSection:(NSInteger)section
 {
     id delegate = self.delegate;
     SEL ask = @selector(tableView:estimatedHeightForFooterInSection:);

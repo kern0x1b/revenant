@@ -12,7 +12,7 @@ static NSString *show(id value)
 void errorprovider_run(Class error_class, ErrorProviderSetter set_provider, ErrorProviderRecorder record)
 {
     NSMutableArray *asked = [NSMutableArray array];
-    NSString *domain = @"charon.provider";
+    NSString *domain = @"revenant.provider";
     NSError *(^plain)(void) = ^NSError *{ return [error_class errorWithDomain:domain code:7 userInfo:nil]; };
     record(@"no provider description", show(plain().localizedDescription));
     record(@"no provider reason", show(plain().localizedFailureReason));
@@ -47,7 +47,7 @@ void errorprovider_run(Class error_class, ErrorProviderSetter set_provider, Erro
     [asked removeAllObjects];
     NSError *given = [error_class errorWithDomain:domain code:8 userInfo:@{NSLocalizedDescriptionKey: @"given", NSLocalizedFailureReasonErrorKey: @"given reason"}];
     record(@"user info wins", [NSString stringWithFormat:@"%@ / %@ | asked %@", given.localizedDescription, given.localizedFailureReason, [asked componentsJoinedByString:@","]]);
-    NSError *other = [error_class errorWithDomain:@"charon.other" code:7 userInfo:nil];
+    NSError *other = [error_class errorWithDomain:@"revenant.other" code:7 userInfo:nil];
     [asked removeAllObjects];
     record(@"other domain", [NSString stringWithFormat:@"%@ | asked %lu", show(other.localizedDescription), (unsigned long)asked.count]);
     NSError *reasoned = [error_class errorWithDomain:domain code:9 userInfo:@{NSLocalizedFailureReasonErrorKey: @"only a reason"}];
@@ -58,13 +58,13 @@ void errorprovider_run(Class error_class, ErrorProviderSetter set_provider, Erro
     record(@"replaced provider", [NSString stringWithFormat:@"%@ / %@", show(plain().localizedFailureReason), show(plain().localizedDescription)]);
     set_provider(error_class, domain, nil);
     record(@"removed provider", [NSString stringWithFormat:@"%@ / %@", show(plain().localizedFailureReason), show(plain().localizedDescription)]);
-    set_provider(error_class, @"charon.retained", ^id(NSError *error, NSErrorUserInfoKey key) {
+    set_provider(error_class, @"revenant.retained", ^id(NSError *error, NSErrorUserInfoKey key) {
         return [key isEqualToString:NSLocalizedDescriptionKey] ? [NSString stringWithFormat:@"%@:%ld", error.domain, (long)error.code] : nil;
     });
-    NSError *retained = [error_class errorWithDomain:@"charon.retained" code:3 userInfo:nil];
+    NSError *retained = [error_class errorWithDomain:@"revenant.retained" code:3 userInfo:nil];
     NSError *copy = [retained copy];
     record(@"copied error", show(copy.localizedDescription));
     record(@"retained domain", show(retained.localizedDescription));
-    NSError *underlying = [error_class errorWithDomain:@"charon.outer" code:1 userInfo:@{NSUnderlyingErrorKey: retained}];
+    NSError *underlying = [error_class errorWithDomain:@"revenant.outer" code:1 userInfo:@{NSUnderlyingErrorKey: retained}];
     record(@"underlying not consulted", show(underlying.localizedDescription));
 }

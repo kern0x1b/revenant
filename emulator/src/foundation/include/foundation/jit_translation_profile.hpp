@@ -25,7 +25,7 @@
 #include "foundation/content_identity.hpp"
 #include "foundation/jit_work_signal.hpp"
 
-namespace shade {
+namespace emulator {
 
 inline constexpr std::size_t jit_translation_profile_maximum_locations =
     262'144;

@@ -5,7 +5,7 @@ set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 DEVICE=${DEVICE:-$here/../../device}
-BUILD=${BUILD:-$(runs_fresh charon-scenekit)}
+BUILD=${BUILD:-$(runs_fresh revenant-scenekit)}
 EXPECTATIONS=${EXPECTATIONS:-$DEVICE/scenekit-expectations.h}
 mkdir -p "$BUILD"
 xcrun swiftc -O "$here/oracle.swift" -o "$BUILD/oracle"

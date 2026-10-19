@@ -7,7 +7,7 @@
 #include <array>
 #include <span>
 
-namespace shade::bsd::sandbox {
+namespace emulator::bsd::sandbox {
 namespace {
     constexpr std::uint32_t issue = 5U;
     constexpr std::uint32_t consume = 6U;
@@ -50,7 +50,7 @@ CallResult Extensions::dispatch(AddressSpace& memory, std::uint32_t pid,
         if (found == grants_.end() && grants_.size() >= maximum_grants)
             return CallResult::NoMemory;
         const auto id = found == grants_.end() ? grants_.size() + 1U : found->second;
-        const auto token = "shade.sandbox." + std::to_string(id);
+        const auto token = "emulator.sandbox." + std::to_string(id);
         const auto bytes = std::as_bytes(std::span { token.c_str(), token.size() + 1U });
         if (!memory.copy_in(static_cast<std::uint32_t>(args[4]), bytes))
             return CallResult::BadAddress;

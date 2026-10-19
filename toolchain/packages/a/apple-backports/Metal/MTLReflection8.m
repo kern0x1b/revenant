@@ -1,4 +1,4 @@
-#import "CharonMetal.h"
+#import "RevenantMetal.h"
 #import "MTLTypeReflectionInternal.h"
 
 #include <stdlib.h>
@@ -28,7 +28,7 @@
 
 - (MTLDataType)attributeType
 {
-    return CharonDataTypeFromScalar(_node[@"scalar"]);
+    return RevenantDataTypeFromScalar(_node[@"scalar"]);
 }
 
 - (BOOL)isActive

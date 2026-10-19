@@ -4,7 +4,7 @@ here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 sources=${STACKSPACING_SOURCES:-$here/../../../../packages/a/apple-backports/UIKit}
 harness=${STACKSPACING_HARNESS:-$here/../../device}
-build=${STACKSPACING_BUILD:-$(runs_folder charon-stackspacing-host)}
+build=${STACKSPACING_BUILD:-$(runs_folder revenant-stackspacing-host)}
 sdk=$(xcrun --show-sdk-path)
 target="-target arm64-apple-ios15.0-macabi -isysroot $sdk -iframework $sdk/System/iOSSupport/System/Library/Frameworks"
 files="NSLayoutAnchor.m UIView+Anchors.m UILayoutGuide.m UIView+LayoutGuides.m NSLayoutAnchor+SystemSpacing.m UIStackView.m"
@@ -19,13 +19,13 @@ for file in $files; do plain="$plain $build/plain/$file.o"; done
 rename() {
     awk '{
         t = $0
-        if (t ~ /^set[A-Z]/) { rest = substr(t, 4); print "-D" t "=setCharonHost" rest; print "-D" tolower(substr(rest, 1, 1)) substr(rest, 2) "=charonHost" rest }
-        else if (t ~ /^is[A-Z]/) { rest = substr(t, 3); print "-D" t "=isCharonHost" rest; print "-D" tolower(substr(rest, 1, 1)) substr(rest, 2) "=charonHost" rest }
-        else print "-D" t "=charonHost" toupper(substr(t, 1, 1)) substr(t, 2)
+        if (t ~ /^set[A-Z]/) { rest = substr(t, 4); print "-D" t "=setRevenantHost" rest; print "-D" tolower(substr(rest, 1, 1)) substr(rest, 2) "=revenantHost" rest }
+        else if (t ~ /^is[A-Z]/) { rest = substr(t, 3); print "-D" t "=isRevenantHost" rest; print "-D" tolower(substr(rest, 1, 1)) substr(rest, 2) "=revenantHost" rest }
+        else print "-D" t "=revenantHost" toupper(substr(t, 1, 1)) substr(t, 2)
     }' | sort -u
 }
-classes=$(nm -g $plain | sed -n 's/.* S _OBJC_CLASS_\$_\(.*\)/-D\1=CharonHost\1/p' | sort -u)
-selectors=$(nm $plain | sed -n 's/.*[-+]\[[A-Za-z_]*([A-Za-z]*) \([A-Za-z_]*\).*\]$/\1/p' | grep -v '^charon_' | rename)
+classes=$(nm -g $plain | sed -n 's/.* S _OBJC_CLASS_\$_\(.*\)/-D\1=RevenantHost\1/p' | sort -u)
+selectors=$(nm $plain | sed -n 's/.*[-+]\[[A-Za-z_]*([A-Za-z]*) \([A-Za-z_]*\).*\]$/\1/p' | grep -v '^revenant_' | rename)
 printf '%s\n' $classes $selectors > "$build/flags"
 mkdir -p "$build/ours"
 objects=""

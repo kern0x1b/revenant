@@ -9,7 +9,7 @@
 	<key>CFBundleExecutable</key>
 	<string>interactivepop</string>
 	<key>CFBundleIdentifier</key>
-	<string>local.charon.backports.interactivepop</string>
+	<string>local.revenant.backports.interactivepop</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>

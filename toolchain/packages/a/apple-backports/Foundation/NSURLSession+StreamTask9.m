@@ -1,11 +1,11 @@
 #import <Foundation/Foundation.h>
 #import <objc/message.h>
 
-@interface NSURLSessionStreamTask (CharonConstruction)
+@interface NSURLSessionStreamTask (RevenantConstruction)
 - (instancetype)initWithSession:(NSURLSession *)session hostName:(NSString *)hostName port:(NSInteger)port;
 @end
 
-@implementation NSURLSession (CharonStreamTask)
+@implementation NSURLSession (RevenantStreamTask)
 
 - (NSURLSessionStreamTask *)streamTaskWithHostName:(NSString *)hostname port:(NSInteger)port
 {

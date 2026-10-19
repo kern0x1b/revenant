@@ -1,5 +1,5 @@
 #!/bin/sh
-# run.sh - the port's 207 CNLabel names (renamed charonHost_*) against the host's own Contacts, which
+# run.sh - the port's 207 CNLabel names (renamed revenantHost_*) against the host's own Contacts, which
 # exports every one of them. The values were read out of the arm64e shared cache of iOS 18.0; this is
 # the second, independent source, and a value mistyped on the way out of the cache shows up here.
 set -eu
@@ -7,12 +7,12 @@ here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 port=${PORT:-$here/../../../../packages/a/apple-backports/.gen/Contacts}
 harness=${CONTACTLABELS_HARNESS:-$here/../../device}
-build=${CONTACTLABELS_BUILD:-$(runs_fresh charon-contactlabels)}
+build=${CONTACTLABELS_BUILD:-$(runs_fresh revenant-contactlabels)}
 rm -rf "$build"
 mkdir -p "$build"
 renames=""
 for name in $(sed -e '1,3d' "$here/names.txt"); do
-    renames="$renames -D$name=charonHost_$name"
+    renames="$renames -D$name=revenantHost_$name"
 done
 # shellcheck disable=SC2086
 objects=""

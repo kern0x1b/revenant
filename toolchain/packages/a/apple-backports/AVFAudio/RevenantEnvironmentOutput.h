@@ -3,26 +3,26 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunguarded-availability-new"
 
-typedef NS_ENUM(NSInteger, CharonEnvironmentRouteClass) {
-    CharonEnvironmentRouteClassUnknown = 0,
-    CharonEnvironmentRouteClassWired,
-    CharonEnvironmentRouteClassBuiltIn,
-    CharonEnvironmentRouteClassExternal,
+typedef NS_ENUM(NSInteger, RevenantEnvironmentRouteClass) {
+    RevenantEnvironmentRouteClassUnknown = 0,
+    RevenantEnvironmentRouteClassWired,
+    RevenantEnvironmentRouteClassBuiltIn,
+    RevenantEnvironmentRouteClassExternal,
 };
 
-static inline AVAudioEnvironmentOutputType CharonResolveEnvironmentOutputType(AVAudioEnvironmentOutputType requested,
-                                                                             CharonEnvironmentRouteClass route)
+static inline AVAudioEnvironmentOutputType RevenantResolveEnvironmentOutputType(AVAudioEnvironmentOutputType requested,
+                                                                             RevenantEnvironmentRouteClass route)
 {
     if (requested != AVAudioEnvironmentOutputTypeAuto) {
         return requested;
     }
     switch (route) {
-        case CharonEnvironmentRouteClassWired:
+        case RevenantEnvironmentRouteClassWired:
             return AVAudioEnvironmentOutputTypeHeadphones;
-        case CharonEnvironmentRouteClassBuiltIn:
+        case RevenantEnvironmentRouteClassBuiltIn:
             return AVAudioEnvironmentOutputTypeBuiltInSpeakers;
-        case CharonEnvironmentRouteClassUnknown:
-        case CharonEnvironmentRouteClassExternal:
+        case RevenantEnvironmentRouteClassUnknown:
+        case RevenantEnvironmentRouteClassExternal:
             return AVAudioEnvironmentOutputTypeExternalSpeakers;
     }
     return AVAudioEnvironmentOutputTypeExternalSpeakers;
@@ -30,7 +30,7 @@ static inline AVAudioEnvironmentOutputType CharonResolveEnvironmentOutputType(AV
 
 #pragma clang diagnostic pop
 
-static inline BOOL CharonEnvironmentHeadTrackingAnswer(BOOL requested)
+static inline BOOL RevenantEnvironmentHeadTrackingAnswer(BOOL requested)
 {
     (void)requested;
     return NO;

@@ -194,8 +194,8 @@ function main()
         .. "the 18.0 tier catches iOS13+ system demand (\"13+\", beyond current backports) so residual is now ~0. weak/strong from "
         .. "`nm -m`; carried-status from Backports 7-10's registry export.\n\n")
     w("**Scope:** classes + constants (link-time symbols). Methods/properties are runtime-dispatched (invisible to nm) " .. "\u{2192}"
-        .. " covered by Katabasis `sel` rows. Metal marked `n/a-A5` (A5 devices never ran Metal; `MTLCreateSystemDefaultDevice()` "
-        .. "returns nil). SYSCALL/RUNTIME route to Katabasis.\n\n")
+        .. " covered by the recompiler's `sel` rows. Metal marked `n/a-A5` (A5 devices never ran Metal; `MTLCreateSystemDefaultDevice()` "
+        .. "returns nil). SYSCALL/RUNTIME route to the recompiler.\n\n")
     w("## Actionable backport demand (bands 7" .. EN .. "12) " .. EM .. " distinct FRAMEWORK class+constant\n\n")
     w("| band | route | GAP | carried | n/a-A5 |\n| --- | --- | --- | --- | --- |\n")
     for _, b in ipairs(BANDS_7_12) do
@@ -213,13 +213,13 @@ function main()
     w(string.format("\n**LAUNCH-BLOCKERS (strong/hard-linked imports the 6.1.3 band of canon %s does not export, bands 7" .. EN
         .. "12):** %d, beside %d gaps; a carried row the band does not export (an `ignored` decision with no symbol) counts too " .. EM
         .. " a missing hard-linked symbol aborts dyld before main, so the app never starts (proven: iSH won't launch without "
-        .. "NSUserActivity). These are the load-gating set: apps stay dead until they exist (or Katabasis weak-binds them). The rest "
+        .. "NSUserActivity). These are the load-gating set: apps stay dead until they exist (or the recompiler weak-binds them). The rest "
         .. "are `#available`-guarded and degrade to nil.\n", built_canon, sum(lb, BANDS_7_12), sum(g7, BANDS_7_12)))
     w(string.format("\n**Frontier (band 13+, beyond current backports):** %d distinct system class+constant demands introduced iOS 13" .. EN
         .. "18 " .. EM .. " real for the \"all apps\" goal but out of current 7" .. EN .. "12 scope.\n\n", g7["13+"] or 0))
     w("## Top gaps, bands 7" .. EN .. "12, most-apps-first\n")
     w("`LB` = LAUNCH-BLOCKER: a strong (hard-linked) gap " .. EM .. " if absent, dyld aborts before main and the app never starts "
-        .. "(proven on iPad2: iSH won't launch without NSUserActivity). All-weak gaps (blank) degrade to nil gracefully. Katabasis is "
+        .. "(proven on iPad2: iSH won't launch without NSUserActivity). All-weak gaps (blank) degrade to nil gracefully. The recompiler is "
         .. "separately weak-binding uncovered classrefs so the long tail degrades instead of hard-failing.\n\n```\n")
     w(string.format("%-2s %3s %3s  %-11s %-6s %-22s %-6s name\n", "LB", "str", "app", "carried", "band", "framework", "kind"))
     for _, e in ipairs(top_rows(BAND_SET_7_12, 40)) do
@@ -227,8 +227,8 @@ function main()
         w(string.format("%-2s %3d %3d  %-11s %-6s %-22s %-6s %s\n", flag, e.nstrong, e.napps, e.status, e.band, e.framework,
             e.kind, e.name))
     end
-    w("```\n\n## Cross-check vs Katabasis translator (class agreement)\n\n")
-    w("| app | corpus classes | katabasis classes | agree |\n| --- | --- | --- | --- |\n")
+    w("```\n\n## Cross-check vs the recompiler (class agreement)\n\n")
+    w("| app | corpus classes | recompiler classes | agree |\n| --- | --- | --- | --- |\n")
     for _, app in ipairs(apps) do
         local mine = {}
         for _, r in ipairs(store.apps[app].demand) do

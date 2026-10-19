@@ -1,6 +1,6 @@
 #import <UIKit/UIKit.h>
 
-static CGFloat charon_rounded_to_scale(CGFloat value, CGFloat scale)
+static CGFloat revenant_rounded_to_scale(CGFloat value, CGFloat scale)
 {
     if (scale <= 0)
         scale = [UIScreen mainScreen].scale;
@@ -9,7 +9,7 @@ static CGFloat charon_rounded_to_scale(CGFloat value, CGFloat scale)
     return round(value * scale) / scale;
 }
 
-static CGFloat charon_scale_for_text_style(UIFontTextStyle textStyle, UITraitCollection *traits)
+static CGFloat revenant_scale_for_text_style(UIFontTextStyle textStyle, UITraitCollection *traits)
 {
     UIFont *preferred = [UIFont preferredFontForTextStyle:textStyle];
     UIFont *base = [UIFont preferredFontForTextStyle:textStyle];
@@ -20,7 +20,7 @@ static CGFloat charon_scale_for_text_style(UIFontTextStyle textStyle, UITraitCol
 
 @implementation UIFontMetrics
 {
-    UIFontTextStyle _charonTextStyle;
+    UIFontTextStyle _revenantTextStyle;
 }
 
 + (UIFontMetrics *)defaultMetrics
@@ -36,7 +36,7 @@ static CGFloat charon_scale_for_text_style(UIFontTextStyle textStyle, UITraitCol
 - (instancetype)initForTextStyle:(UIFontTextStyle)textStyle
 {
     if ((self = [super init]))
-        _charonTextStyle = [textStyle copy];
+        _revenantTextStyle = [textStyle copy];
     return self;
 }
 
@@ -66,7 +66,7 @@ static CGFloat charon_scale_for_text_style(UIFontTextStyle textStyle, UITraitCol
     if (!font)
         [NSException raise:NSInvalidArgumentException format:@"The font passed to %@ must be non-nil.",
                                                              NSStringFromSelector(@selector(scaledFontForFont:maximumPointSize:compatibleWithTraitCollection:))];
-    CGFloat size = font.pointSize * charon_scale_for_text_style(_charonTextStyle, traitCollection);
+    CGFloat size = font.pointSize * revenant_scale_for_text_style(_revenantTextStyle, traitCollection);
     if (maximumPointSize > 0 && size > maximumPointSize)
         size = maximumPointSize;
     return [font fontWithSize:size];
@@ -82,7 +82,7 @@ static CGFloat charon_scale_for_text_style(UIFontTextStyle textStyle, UITraitCol
     CGFloat scale = 0;
     if ([traitCollection respondsToSelector:@selector(displayScale)])
         scale = traitCollection.displayScale;
-    return charon_rounded_to_scale(value * charon_scale_for_text_style(_charonTextStyle, traitCollection), scale);
+    return revenant_rounded_to_scale(value * revenant_scale_for_text_style(_revenantTextStyle, traitCollection), scale);
 }
 
 @end

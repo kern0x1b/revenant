@@ -10,7 +10,7 @@
 #include "debug/gdb_rsp.hpp"
 #include "process.hpp"
 
-namespace shade::runtime_detail {
+namespace emulator::runtime_detail {
 
 class BootGdbTarget final : public GdbTarget {
 public:

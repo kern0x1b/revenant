@@ -1,30 +1,30 @@
-#import "CharonWebKit.h"
+#import "RevenantWebKit.h"
 
-NSString *const CharonWebKitBridgeScheme = @"charon-wkbridge";
+NSString *const RevenantWebKitBridgeScheme = @"revenant-wkbridge";
 
-static NSString *const CharonEncoder =
+static NSString *const RevenantEncoder =
     @"function(v){"
     @"var seen=[];"
     @"function walk(x,top,inArray){"
     @"var t=typeof x;"
-    @"if(x===undefined){if(top){return {'$charon':'u'};}return inArray?null:undefined;}"
+    @"if(x===undefined){if(top){return {'$revenant':'u'};}return inArray?null:undefined;}"
     @"if(x===null||t==='string'||t==='boolean'){return x;}"
-    @"if(t==='number'){if(!isFinite(x)){return {'$charon':'n','v':String(x)};}if(x===0&&1/x<0){return {'$charon':'n','v':'-0'};}return x;}"
+    @"if(t==='number'){if(!isFinite(x)){return {'$revenant':'n','v':String(x)};}if(x===0&&1/x<0){return {'$revenant':'n','v':'-0'};}return x;}"
     @"if(t==='function'){throw {unsupported:1};}"
     @"var tag=Object.prototype.toString.call(x);"
-    @"if(tag==='[object Date]'){return isNaN(x.getTime())?null:{'$charon':'d','v':x.getTime()};}"
+    @"if(tag==='[object Date]'){return isNaN(x.getTime())?null:{'$revenant':'d','v':x.getTime()};}"
     @"if(tag==='[object Arguments]'){throw {unsupported:1};}"
     @"var seenAt=seen.indexOf(x);"
-    @"if(seenAt>=0){return {'$charon':'r','i':seenAt};}"
+    @"if(seenAt>=0){return {'$revenant':'r','i':seenAt};}"
     @"seen.push(x);"
-    @"if(Array.isArray(x)){var items=[];for(var j=0;j<x.length;j++){items.push(walk(x[j],false,true));}return {'$charon':'a','v':items};}"
+    @"if(Array.isArray(x)){var items=[];for(var j=0;j<x.length;j++){items.push(walk(x[j],false,true));}return {'$revenant':'a','v':items};}"
     @"var keys=[],values=[];"
     @"for(var k in x){if(Object.prototype.hasOwnProperty.call(x,k)&&typeof x[k]!=='function'){var w=walk(x[k],false,false);if(w!==undefined){keys.push(k);values.push(w);}}}"
-    @"return {'$charon':'o','k':keys,'v':values};"
+    @"return {'$revenant':'o','k':keys,'v':values};"
     @"}"
     @"return JSON.stringify(walk(v,true,false));}";
 
-static NSString *const CharonEvaluate =
+static NSString *const RevenantEvaluate =
     @"(function(src){"
     @"var encode=%@;"
     @"var value;"
@@ -34,7 +34,7 @@ static NSString *const CharonEvaluate =
     @"return '{\"ok\":'+text+'}';"
     @"})(%@)";
 
-static NSString *const CharonShim =
+static NSString *const RevenantShim =
     @"(function(names){"
     @"if(!names.length){try{delete window.webkit;}catch(e){window.webkit=undefined;}return;}"
     @"var encode=%@;"
@@ -44,7 +44,7 @@ static NSString *const CharonShim =
     @"var text=encode(body);"
     @"var frame=document.createElement('iframe');"
     @"frame.style.display='none';"
-    @"frame.src='" @"charon-wkbridge" @"://m/'+encodeURIComponent(JSON.stringify({n:name,b:text,m:top}));"
+    @"frame.src='" @"revenant-wkbridge" @"://m/'+encodeURIComponent(JSON.stringify({n:name,b:text,m:top}));"
     @"(document.documentElement||document.body).appendChild(frame);"
     @"setTimeout(function(){if(frame.parentNode){frame.parentNode.removeChild(frame);}},0);"
     @"}};});"
@@ -56,7 +56,7 @@ static id decode(id value, NSMutableArray *ids)
 {
     if (![value isKindOfClass:[NSDictionary class]])
         return value;
-    NSString *kind = value[@"$charon"];
+    NSString *kind = value[@"$revenant"];
     if ([kind isEqualToString:@"d"])
         return [NSDate dateWithTimeIntervalSince1970:[value[@"v"] doubleValue] / 1000];
     if ([kind isEqualToString:@"n"]) {
@@ -116,7 +116,7 @@ static NSURL *withoutFragment(NSURL *url)
     return range.location == NSNotFound ? url : [NSURL URLWithString:[string substringToIndex:range.location]];
 }
 
-@interface WKWebView () <UIWebViewDelegate, CharonWebKitScriptHost>
+@interface WKWebView () <UIWebViewDelegate, RevenantWebKitScriptHost>
 @end
 
 @implementation WKWebView {
@@ -156,7 +156,7 @@ static NSURL *withoutFragment(NSURL *url)
 {
     self = [super initWithFrame:frame];
     if (self)
-        [self charon_setUpWithConfiguration:configuration];
+        [self revenant_setUpWithConfiguration:configuration];
     return self;
 }
 
@@ -164,17 +164,17 @@ static NSURL *withoutFragment(NSURL *url)
 {
     self = [super initWithCoder:coder];
     if (self)
-        [self charon_setUpWithConfiguration:[[WKWebViewConfiguration alloc] init]];
+        [self revenant_setUpWithConfiguration:[[WKWebViewConfiguration alloc] init]];
     return self;
 }
 
-- (void)charon_setUpWithConfiguration:(WKWebViewConfiguration *)configuration
+- (void)revenant_setUpWithConfiguration:(WKWebViewConfiguration *)configuration
 {
     _configuration = [configuration copy];
     _title = @"";
     _items = [NSMutableArray array];
     _list = [WKBackForwardList alloc];
-    [_list charon_setItems:@[] index:-1];
+    [_list revenant_setItems:@[] index:-1];
     _index = -1;
     _allowsLinkPreview = NO;
     _web = [[UIWebView alloc] initWithFrame:self.bounds];
@@ -187,7 +187,7 @@ static NSURL *withoutFragment(NSURL *url)
     _web.mediaPlaybackAllowsAirPlay = _configuration.allowsAirPlayForMediaPlayback;
     _web.dataDetectorTypes = (UIDataDetectorTypes)(_configuration.dataDetectorTypes & 0xF);
     [self addSubview:_web];
-    [_configuration.userContentController charon_attach:self];
+    [_configuration.userContentController revenant_attach:self];
 }
 
 - (void)dealloc
@@ -300,7 +300,7 @@ static NSURL *withoutFragment(NSURL *url)
     return NO;
 }
 
-- (void)charon_setURL:(NSURL *)URL
+- (void)revenant_setURL:(NSURL *)URL
 {
     if ((URL == _URL) || [URL isEqual:_URL])
         return;
@@ -309,7 +309,7 @@ static NSURL *withoutFragment(NSURL *url)
     [self didChangeValueForKey:@"URL"];
 }
 
-- (void)charon_setTitle:(NSString *)title
+- (void)revenant_setTitle:(NSString *)title
 {
     title = title ?: @"";
     if ([title isEqualToString:_title])
@@ -319,7 +319,7 @@ static NSURL *withoutFragment(NSURL *url)
     [self didChangeValueForKey:@"title"];
 }
 
-- (void)charon_setLoading:(BOOL)loading
+- (void)revenant_setLoading:(BOOL)loading
 {
     if (loading == _loading)
         return;
@@ -328,7 +328,7 @@ static NSURL *withoutFragment(NSURL *url)
     [self didChangeValueForKey:@"loading"];
 }
 
-- (void)charon_setProgress:(double)progress
+- (void)revenant_setProgress:(double)progress
 {
     if (progress == _progress)
         return;
@@ -337,12 +337,12 @@ static NSURL *withoutFragment(NSURL *url)
     [self didChangeValueForKey:@"estimatedProgress"];
 }
 
-- (void)charon_setItems:(NSArray<WKBackForwardListItem *> *)items index:(NSInteger)index
+- (void)revenant_setItems:(NSArray<WKBackForwardListItem *> *)items index:(NSInteger)index
 {
     BOOL back = self.canGoBack, forward = self.canGoForward;
     _items = [items mutableCopy];
     _index = index;
-    [_list charon_setItems:_items index:_index];
+    [_list revenant_setItems:_items index:_index];
     if (back != self.canGoBack) {
         [self willChangeValueForKey:@"canGoBack"];
         [self didChangeValueForKey:@"canGoBack"];
@@ -353,12 +353,12 @@ static NSURL *withoutFragment(NSURL *url)
     }
 }
 
-- (WKNavigation *)charon_beginNavigation:(NSURL *)URL type:(WKNavigationType)type
+- (WKNavigation *)revenant_beginNavigation:(NSURL *)URL type:(WKNavigationType)type
 {
-    return [self charon_beginNavigation:URL type:type index:-1];
+    return [self revenant_beginNavigation:URL type:type index:-1];
 }
 
-- (WKNavigation *)charon_beginNavigation:(NSURL *)URL type:(WKNavigationType)type index:(NSInteger)index
+- (WKNavigation *)revenant_beginNavigation:(NSURL *)URL type:(WKNavigationType)type index:(NSInteger)index
 {
     _navigation = [WKNavigation alloc];
     _accepted = NO;
@@ -369,32 +369,32 @@ static NSURL *withoutFragment(NSURL *url)
     _previousIndex = -1;
     if (index >= 0 && index != _index) {
         _previousIndex = _index;
-        [self charon_setItems:_items index:index];
+        [self revenant_setItems:_items index:index];
     }
-    [self charon_setURL:URL];
-    [self charon_setLoading:YES];
-    [self charon_setProgress:0.1];
+    [self revenant_setURL:URL];
+    [self revenant_setLoading:YES];
+    [self revenant_setProgress:0.1];
     return _navigation;
 }
 
-- (void)charon_abandonNavigation
+- (void)revenant_abandonNavigation
 {
     if (_previousIndex >= 0)
-        [self charon_setItems:_items index:_previousIndex];
+        [self revenant_setItems:_items index:_previousIndex];
     _previousIndex = -1;
     _navigation = nil;
     _accepted = NO;
     _started = NO;
     _decided = NO;
     _didCommit = NO;
-    [self charon_setURL:_committedURL];
-    [self charon_setLoading:NO];
+    [self revenant_setURL:_committedURL];
+    [self revenant_setLoading:NO];
 }
 
-- (WKNavigation *)charon_navigateWithRequest:(NSURLRequest *)request type:(WKNavigationType)type index:(NSInteger)index perform:(void (^)(void))perform
+- (WKNavigation *)revenant_navigateWithRequest:(NSURLRequest *)request type:(WKNavigationType)type index:(NSInteger)index perform:(void (^)(void))perform
 {
-    WKNavigation *navigation = [self charon_beginNavigation:request.URL type:type index:index];
-    navigation.charon_request = request;
+    WKNavigation *navigation = [self revenant_beginNavigation:request.URL type:type index:index];
+    navigation.revenant_request = request;
     id<WKNavigationDelegate> delegate = _navigationDelegate;
     if (![delegate respondsToSelector:@selector(webView:decidePolicyForNavigationAction:decisionHandler:)]) {
         _accepted = YES;
@@ -404,7 +404,7 @@ static NSURL *withoutFragment(NSURL *url)
     }
     __block BOOL returned = NO, allowed = NO, answered = NO;
     __weak WKWebView *weak = self;
-    WKNavigationAction *action = [WKNavigationAction charon_actionWithRequest:request type:type mainFrame:YES];
+    WKNavigationAction *action = [WKNavigationAction revenant_actionWithRequest:request type:type mainFrame:YES];
     [delegate webView:self decidePolicyForNavigationAction:action decisionHandler:^(WKNavigationActionPolicy policy) {
         answered = YES;
         allowed = policy == WKNavigationActionPolicyAllow;
@@ -418,7 +418,7 @@ static NSURL *withoutFragment(NSURL *url)
                     view->_decided = YES;
                     perform();
                 } else {
-                    [view charon_abandonNavigation];
+                    [view revenant_abandonNavigation];
                 }
             });
         }
@@ -430,7 +430,7 @@ static NSURL *withoutFragment(NSURL *url)
             _decided = YES;
             perform();
         } else {
-            [self charon_abandonNavigation];
+            [self revenant_abandonNavigation];
         }
     }
     return navigation;
@@ -438,7 +438,7 @@ static NSURL *withoutFragment(NSURL *url)
 
 - (WKNavigation *)loadRequest:(NSURLRequest *)request
 {
-    return [self charon_navigateWithRequest:request type:WKNavigationTypeOther index:-1 perform:^{
+    return [self revenant_navigateWithRequest:request type:WKNavigationTypeOther index:-1 perform:^{
         [_web loadRequest:request];
     }];
 }
@@ -451,7 +451,7 @@ static NSURL *withoutFragment(NSURL *url)
 - (WKNavigation *)loadHTMLString:(NSString *)string baseURL:(NSURL *)baseURL
 {
     NSURL *URL = baseURL ?: [NSURL URLWithString:@"about:blank"];
-    return [self charon_navigateWithRequest:[NSURLRequest requestWithURL:URL] type:WKNavigationTypeOther index:-1 perform:^{
+    return [self revenant_navigateWithRequest:[NSURLRequest requestWithURL:URL] type:WKNavigationTypeOther index:-1 perform:^{
         [_web loadHTMLString:string baseURL:baseURL];
     }];
 }
@@ -459,7 +459,7 @@ static NSURL *withoutFragment(NSURL *url)
 - (WKNavigation *)loadData:(NSData *)data MIMEType:(NSString *)MIMEType characterEncodingName:(NSString *)characterEncodingName baseURL:(NSURL *)baseURL
 {
     NSURL *URL = baseURL ?: [NSURL URLWithString:@"about:blank"];
-    return [self charon_navigateWithRequest:[NSURLRequest requestWithURL:URL] type:WKNavigationTypeOther index:-1 perform:^{
+    return [self revenant_navigateWithRequest:[NSURLRequest requestWithURL:URL] type:WKNavigationTypeOther index:-1 perform:^{
         [_web loadData:data MIMEType:MIMEType textEncodingName:characterEncodingName baseURL:baseURL];
     }];
 }
@@ -468,7 +468,7 @@ static NSURL *withoutFragment(NSURL *url)
 {
     if (!self.canGoBack)
         return nil;
-    return [self charon_navigateWithRequest:[NSURLRequest requestWithURL:_items[_index - 1].URL] type:WKNavigationTypeBackForward index:_index - 1 perform:^{
+    return [self revenant_navigateWithRequest:[NSURLRequest requestWithURL:_items[_index - 1].URL] type:WKNavigationTypeBackForward index:_index - 1 perform:^{
         [_web goBack];
     }];
 }
@@ -477,7 +477,7 @@ static NSURL *withoutFragment(NSURL *url)
 {
     if (!self.canGoForward)
         return nil;
-    return [self charon_navigateWithRequest:[NSURLRequest requestWithURL:_items[_index + 1].URL] type:WKNavigationTypeBackForward index:_index + 1 perform:^{
+    return [self revenant_navigateWithRequest:[NSURLRequest requestWithURL:_items[_index + 1].URL] type:WKNavigationTypeBackForward index:_index + 1 perform:^{
         [_web goForward];
     }];
 }
@@ -488,7 +488,7 @@ static NSURL *withoutFragment(NSURL *url)
     if (position == NSNotFound || (NSInteger)position == _index)
         return nil;
     NSInteger delta = (NSInteger)position - _index;
-    return [self charon_navigateWithRequest:[NSURLRequest requestWithURL:item.URL] type:WKNavigationTypeBackForward index:(NSInteger)position perform:^{
+    return [self revenant_navigateWithRequest:[NSURLRequest requestWithURL:item.URL] type:WKNavigationTypeBackForward index:(NSInteger)position perform:^{
         [_web stringByEvaluatingJavaScriptFromString:[NSString stringWithFormat:@"history.go(%ld)", (long)delta]];
     }];
 }
@@ -497,7 +497,7 @@ static NSURL *withoutFragment(NSURL *url)
 {
     if (!_committedURL)
         return nil;
-    return [self charon_navigateWithRequest:[NSURLRequest requestWithURL:_committedURL] type:WKNavigationTypeReload index:-1 perform:^{
+    return [self revenant_navigateWithRequest:[NSURLRequest requestWithURL:_committedURL] type:WKNavigationTypeReload index:-1 perform:^{
         [_web reload];
     }];
 }
@@ -511,12 +511,12 @@ static NSURL *withoutFragment(NSURL *url)
 {
     [_web stopLoading];
     if (_navigation)
-        [self charon_abandonNavigation];
+        [self revenant_abandonNavigation];
 }
 
 - (void)evaluateJavaScript:(NSString *)javaScriptString completionHandler:(void (^)(id, NSError *))completionHandler
 {
-    NSString *script = [NSString stringWithFormat:CharonEvaluate, CharonEncoder, literal(javaScriptString)];
+    NSString *script = [NSString stringWithFormat:RevenantEvaluate, RevenantEncoder, literal(javaScriptString)];
     NSString *answer = [_web stringByEvaluatingJavaScriptFromString:script];
     id result = nil;
     NSError *error = nil;
@@ -532,7 +532,7 @@ static NSURL *withoutFragment(NSURL *url)
         result = decoded(envelope[@"ok"]);
     }
     if (_documentReady)
-        [self charon_refreshTitle];
+        [self revenant_refreshTitle];
     if (completionHandler) {
         void (^handler)(id, NSError *) = [completionHandler copy];
         dispatch_async(dispatch_get_main_queue(), ^{
@@ -541,81 +541,81 @@ static NSURL *withoutFragment(NSURL *url)
     }
 }
 
-- (void)charon_refreshTitle
+- (void)revenant_refreshTitle
 {
     NSString *title = [_web stringByEvaluatingJavaScriptFromString:@"document.title"];
-    [self charon_setTitle:title];
+    [self revenant_setTitle:title];
     if (_index >= 0 && _index < (NSInteger)_items.count)
-        _items[_index].charon_title = title;
+        _items[_index].revenant_title = title;
 }
 
-- (void)charon_installScripts:(BOOL)userScripts
+- (void)revenant_installScripts:(BOOL)userScripts
 {
     WKUserContentController *controller = _configuration.userContentController;
-    NSArray *names = controller.charon_handlerNames;
+    NSArray *names = controller.revenant_handlerNames;
     if (names.count || _shimmed) {
         NSData *data = [NSJSONSerialization dataWithJSONObject:names options:0 error:NULL];
-        [_web stringByEvaluatingJavaScriptFromString:[NSString stringWithFormat:CharonShim, CharonEncoder, [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding]]];
+        [_web stringByEvaluatingJavaScriptFromString:[NSString stringWithFormat:RevenantShim, RevenantEncoder, [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding]]];
         _shimmed = names.count > 0;
     }
     if (userScripts)
-        for (WKUserScript *script in controller.charon_scripts)
+        for (WKUserScript *script in controller.revenant_scripts)
             [_web stringByEvaluatingJavaScriptFromString:script.source];
 }
 
-- (void)charon_scriptsDidChange
+- (void)revenant_scriptsDidChange
 {
     if (_documentReady)
-        [self charon_installScripts:NO];
+        [self revenant_installScripts:NO];
 }
 
-- (BOOL)charon_isMainFrameRequest:(NSURLRequest *)request
+- (BOOL)revenant_isMainFrameRequest:(NSURLRequest *)request
 {
     NSURL *main = request.mainDocumentURL;
     return main == nil || [withoutFragment(main) isEqual:withoutFragment(request.URL)];
 }
 
-- (void)charon_receiveBridgeURL:(NSURL *)URL
+- (void)revenant_receiveBridgeURL:(NSURL *)URL
 {
-    NSString *prefix = [CharonWebKitBridgeScheme stringByAppendingString:@"://m/"];
+    NSString *prefix = [RevenantWebKitBridgeScheme stringByAppendingString:@"://m/"];
     NSString *encoded = [URL.absoluteString substringFromIndex:MIN(prefix.length, URL.absoluteString.length)];
     BOOL valid = NO;
     NSDictionary *message = parsed([encoded stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding], &valid);
     if (!valid || ![message isKindOfClass:[NSDictionary class]])
         return;
     NSString *name = message[@"n"];
-    id<WKScriptMessageHandler> handler = [_configuration.userContentController charon_handlerNamed:name];
+    id<WKScriptMessageHandler> handler = [_configuration.userContentController revenant_handlerNamed:name];
     if (!handler)
         return;
     BOOL bodyValid = NO;
     id body = decoded(parsed(message[@"b"], &bodyValid));
-    WKScriptMessage *object = [WKScriptMessage charon_messageWithBody:body name:name webView:self mainFrame:[message[@"m"] boolValue]];
+    WKScriptMessage *object = [WKScriptMessage revenant_messageWithBody:body name:name webView:self mainFrame:[message[@"m"] boolValue]];
     dispatch_async(dispatch_get_main_queue(), ^{
         [handler userContentController:_configuration.userContentController didReceiveScriptMessage:object];
     });
 }
 
-- (void)charon_replay:(NSURLRequest *)request
+- (void)revenant_replay:(NSURLRequest *)request
 {
     _approved = request;
     if (!_navigation)
-        [self charon_beginNavigation:request.URL type:_navigationType];
+        [self revenant_beginNavigation:request.URL type:_navigationType];
     [_web loadRequest:request];
 }
 
 - (BOOL)webView:(UIWebView *)webView shouldStartLoadWithRequest:(NSURLRequest *)request navigationType:(UIWebViewNavigationType)type
 {
-    if ([request.URL.scheme isEqualToString:CharonWebKitBridgeScheme]) {
-        [self charon_receiveBridgeURL:request.URL];
+    if ([request.URL.scheme isEqualToString:RevenantWebKitBridgeScheme]) {
+        [self revenant_receiveBridgeURL:request.URL];
         return NO;
     }
-    BOOL main = [self charon_isMainFrameRequest:request];
+    BOOL main = [self revenant_isMainFrameRequest:request];
     WKNavigationType wkType = type == UIWebViewNavigationTypeOther ? WKNavigationTypeOther : (WKNavigationType)type;
     if (main && _navigation)
         wkType = _navigationType == WKNavigationTypeOther ? wkType : _navigationType;
     if (main && _decided) {
         _decided = NO;
-        [self charon_setURL:request.URL];
+        [self revenant_setURL:request.URL];
         return YES;
     }
     if (main && _approved && [_approved isEqual:request]) {
@@ -624,12 +624,12 @@ static NSURL *withoutFragment(NSURL *url)
         return YES;
     }
     if (!main && _navigation && _accepted && _started)
-        [self charon_emitCommit];
+        [self revenant_emitCommit];
     id<WKNavigationDelegate> delegate = _navigationDelegate;
     __block BOOL decided = YES, allow = YES, returned = NO;
     if ([delegate respondsToSelector:@selector(webView:decidePolicyForNavigationAction:decisionHandler:)]) {
         decided = NO;
-        WKNavigationAction *action = [WKNavigationAction charon_actionWithRequest:request type:wkType mainFrame:main];
+        WKNavigationAction *action = [WKNavigationAction revenant_actionWithRequest:request type:wkType mainFrame:main];
         __weak WKWebView *weak = self;
         [delegate webView:self decidePolicyForNavigationAction:action decisionHandler:^(WKNavigationActionPolicy policy) {
             if (!returned) {
@@ -637,7 +637,7 @@ static NSURL *withoutFragment(NSURL *url)
                 allow = policy == WKNavigationActionPolicyAllow;
             } else if (policy == WKNavigationActionPolicyAllow && main) {
                 dispatch_async(dispatch_get_main_queue(), ^{
-                    [weak charon_replay:request];
+                    [weak revenant_replay:request];
                 });
             }
         }];
@@ -649,15 +649,15 @@ static NSURL *withoutFragment(NSURL *url)
         return allow;
     if (!allow) {
         if (_navigation)
-            [self charon_abandonNavigation];
+            [self revenant_abandonNavigation];
         return NO;
     }
     NSURL *reference = _committedURL;
     if (!_navigation && reference && request.URL.fragment && [withoutFragment(request.URL) isEqual:withoutFragment(reference)] && wkType != WKNavigationTypeReload) {
-        [self charon_setURL:request.URL];
+        [self revenant_setURL:request.URL];
         _committedURL = request.URL;
         if (_index >= 0)
-            [self charon_setItems:[self charon_itemsReplacingCurrent:request.URL] index:_index];
+            [self revenant_setItems:[self revenant_itemsReplacingCurrent:request.URL] index:_index];
         return YES;
     }
     if (!_navigation) {
@@ -668,18 +668,18 @@ static NSURL *withoutFragment(NSURL *url)
             else if (_index + 1 < (NSInteger)_items.count && [_items[_index + 1].URL isEqual:request.URL])
                 target = _index + 1;
         }
-        [self charon_beginNavigation:request.URL type:wkType index:target];
+        [self revenant_beginNavigation:request.URL type:wkType index:target];
     } else {
-        [self charon_setURL:request.URL];
+        [self revenant_setURL:request.URL];
     }
     _accepted = YES;
     return YES;
 }
 
-- (NSArray *)charon_itemsReplacingCurrent:(NSURL *)URL
+- (NSArray *)revenant_itemsReplacingCurrent:(NSURL *)URL
 {
     NSMutableArray *items = [_items mutableCopy];
-    items[_index] = [WKBackForwardListItem charon_itemWithURL:URL title:_title];
+    items[_index] = [WKBackForwardListItem revenant_itemWithURL:URL title:_title];
     return items;
 }
 
@@ -693,12 +693,12 @@ static NSURL *withoutFragment(NSURL *url)
         [delegate webView:self didStartProvisionalNavigation:_navigation];
 }
 
-- (void)charon_commit
+- (void)revenant_commit
 {
     NSURL *URL = _URL;
     NSMutableArray<WKBackForwardListItem *> *items = [_items mutableCopy];
     NSInteger index = _index;
-    WKBackForwardListItem *item = [WKBackForwardListItem charon_itemWithURL:URL title:@""];
+    WKBackForwardListItem *item = [WKBackForwardListItem revenant_itemWithURL:URL title:@""];
     if (_navigationType == WKNavigationTypeReload && index >= 0) {
         items[index] = item;
     } else if (_navigationType == WKNavigationTypeBackForward && index >= 0) {
@@ -712,16 +712,16 @@ static NSURL *withoutFragment(NSURL *url)
     }
     _previousIndex = -1;
     _committedURL = URL;
-    [self charon_setTitle:@""];
-    [self charon_setItems:items index:index];
+    [self revenant_setTitle:@""];
+    [self revenant_setItems:items index:index];
 }
 
-- (void)charon_emitCommit
+- (void)revenant_emitCommit
 {
     if (_didCommit || !_navigation)
         return;
     _didCommit = YES;
-    [self charon_commit];
+    [self revenant_commit];
     id<WKNavigationDelegate> delegate = _navigationDelegate;
     if ([delegate respondsToSelector:@selector(webView:didCommitNavigation:)])
         [delegate webView:self didCommitNavigation:_navigation];
@@ -740,21 +740,21 @@ static NSURL *withoutFragment(NSURL *url)
             [delegate webView:self didStartProvisionalNavigation:navigation];
     }
     _documentReady = YES;
-    [self charon_installScripts:YES];
-    [self charon_emitCommit];
+    [self revenant_installScripts:YES];
+    [self revenant_emitCommit];
     _navigation = nil;
     _didCommit = NO;
     _accepted = NO;
     _started = NO;
     _decided = NO;
     if (type == WKNavigationTypeBackForward && _index >= 0 && _index < (NSInteger)_items.count)
-        [self charon_setTitle:_items[_index].charon_title];
-    [self charon_setProgress:1];
-    [self charon_setLoading:NO];
+        [self revenant_setTitle:_items[_index].revenant_title];
+    [self revenant_setProgress:1];
+    [self revenant_setLoading:NO];
     if ([delegate respondsToSelector:@selector(webView:didFinishNavigation:)])
         [delegate webView:self didFinishNavigation:navigation];
     dispatch_async(dispatch_get_main_queue(), ^{
-        [self charon_refreshTitle];
+        [self revenant_refreshTitle];
     });
 }
 
@@ -771,7 +771,7 @@ static NSURL *withoutFragment(NSURL *url)
         if ([delegate respondsToSelector:@selector(webView:didStartProvisionalNavigation:)])
             [delegate webView:self didStartProvisionalNavigation:navigation];
     }
-    [self charon_abandonNavigation];
+    [self revenant_abandonNavigation];
     if ([error.domain isEqualToString:@"WebKitErrorDomain"] && error.code == 101) {
         NSMutableDictionary *info = [error.userInfo mutableCopy] ?: [NSMutableDictionary dictionary];
         error = [NSError errorWithDomain:NSURLErrorDomain code:NSURLErrorUnsupportedURL userInfo:info];

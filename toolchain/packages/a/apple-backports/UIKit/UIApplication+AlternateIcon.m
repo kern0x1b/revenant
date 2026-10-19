@@ -1,6 +1,6 @@
 #import <UIKit/UIKit.h>
 
-@implementation UIApplication (CharonAlternateIcon)
+@implementation UIApplication (RevenantAlternateIcon)
 
 - (BOOL)supportsAlternateIcons
 {

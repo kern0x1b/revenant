@@ -1,4 +1,4 @@
-#import "CharonWebKit.h"
+#import "RevenantWebKit.h"
 
 NSString *const WKWebsiteDataTypeCookies = @"WKWebsiteDataTypeCookies";
 NSString *const WKWebsiteDataTypeDiskCache = @"WKWebsiteDataTypeDiskCache";

@@ -6,7 +6,7 @@
 
 #pragma once
 
-namespace shade {
+namespace emulator {
 
 void register_native_gles_renderer();
 

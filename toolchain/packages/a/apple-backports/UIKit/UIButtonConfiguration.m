@@ -57,7 +57,7 @@
 @synthesize activityIndicatorColorTransformer = _activityIndicatorColorTransformer;
 @synthesize macIdiomStyle = _macIdiomStyle;
 
-static NSDirectionalEdgeInsets charon_button_configuration_default_content_insets(void)
+static NSDirectionalEdgeInsets revenant_button_configuration_default_content_insets(void)
 {
     return NSDirectionalEdgeInsetsMake(7, 12, 7, 12);
 }
@@ -68,7 +68,7 @@ static NSDirectionalEdgeInsets charon_button_configuration_default_content_inset
     if (self) {
         _background = [[UIBackgroundConfiguration alloc] init];
         _background.cornerRadius = 17;
-        _contentInsets = charon_button_configuration_default_content_insets();
+        _contentInsets = revenant_button_configuration_default_content_insets();
         _imagePlacement = 2;
         _titlePadding = 1;
         _automaticallyUpdateForSelection = YES;
@@ -97,7 +97,7 @@ static NSDirectionalEdgeInsets charon_button_configuration_default_content_inset
 
 - (instancetype)updatedConfigurationForButton:(UIButton *)button { return self; }
 
-- (void)setDefaultContentInsets { self.contentInsets = charon_button_configuration_default_content_insets(); }
+- (void)setDefaultContentInsets { self.contentInsets = revenant_button_configuration_default_content_insets(); }
 
 - (id)copyWithZone:(NSZone *)zone
 {

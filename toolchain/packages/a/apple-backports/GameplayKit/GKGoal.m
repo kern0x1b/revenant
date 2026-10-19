@@ -1,7 +1,7 @@
-#import "CharonGK.h"
+#import "RevenantGK.h"
 
 @implementation GKGoal {
-    CharonGKGoalKind _kind;
+    RevenantGKGoalKind _kind;
     GKAgent *_agent;
     NSArray<GKObstacle *> *_obstacles;
     NSArray<GKAgent *> *_agents;
@@ -13,12 +13,12 @@
     BOOL _forward;
 }
 
-+ (instancetype)charon_goalOfKind:(CharonGKGoalKind)kind
++ (instancetype)revenant_goalOfKind:(RevenantGKGoalKind)kind
 {
-    return [[self alloc] initWithCharonKind:kind];
+    return [[self alloc] initWithRevenantKind:kind];
 }
 
-- (instancetype)initWithCharonKind:(CharonGKGoalKind)kind
+- (instancetype)initWithRevenantKind:(RevenantGKGoalKind)kind
 {
     self = [super init];
     if (self) {
@@ -29,83 +29,83 @@
 
 - (instancetype)init
 {
-    return [self initWithCharonKind:CharonGKGoalWander];
+    return [self initWithRevenantKind:RevenantGKGoalWander];
 }
 
-- (CharonGKGoalKind)charon_kind
+- (RevenantGKGoalKind)revenant_kind
 {
     return _kind;
 }
 
-- (GKAgent *)charon_agent
+- (GKAgent *)revenant_agent
 {
     return _agent;
 }
 
-- (NSArray<GKObstacle *> *)charon_obstacles
+- (NSArray<GKObstacle *> *)revenant_obstacles
 {
     return _obstacles;
 }
 
-- (NSArray<GKAgent *> *)charon_agents
+- (NSArray<GKAgent *> *)revenant_agents
 {
     return _agents;
 }
 
-- (GKPath *)charon_path
+- (GKPath *)revenant_path
 {
     return _path;
 }
 
-- (NSTimeInterval)charon_maxPredictionTime
+- (NSTimeInterval)revenant_maxPredictionTime
 {
     return _maxPredictionTime;
 }
 
-- (float)charon_value
+- (float)revenant_value
 {
     return _value;
 }
 
-- (float)charon_maxDistance
+- (float)revenant_maxDistance
 {
     return _maxDistance;
 }
 
-- (float)charon_maxAngle
+- (float)revenant_maxAngle
 {
     return _maxAngle;
 }
 
-- (BOOL)charon_forward
+- (BOOL)revenant_forward
 {
     return _forward;
 }
 
 + (instancetype)goalToSeekAgent:(GKAgent *)agent
 {
-    return [self charon_goalWithAgent:agent kind:CharonGKGoalSeek];
+    return [self revenant_goalWithAgent:agent kind:RevenantGKGoalSeek];
 }
 
 + (instancetype)goalToFleeAgent:(GKAgent *)agent
 {
-    return [self charon_goalWithAgent:agent kind:CharonGKGoalFlee];
+    return [self revenant_goalWithAgent:agent kind:RevenantGKGoalFlee];
 }
 
-+ (instancetype)charon_goalWithAgent:(GKAgent *)agent kind:(CharonGKGoalKind)kind
++ (instancetype)revenant_goalWithAgent:(GKAgent *)agent kind:(RevenantGKGoalKind)kind
 {
     if (!agent) {
         [NSException raise:NSInvalidArgumentException format:@"%@ needs an agent", NSStringFromSelector(_cmd)];
         return nil;
     }
-    GKGoal *goal = [self charon_goalOfKind:kind];
+    GKGoal *goal = [self revenant_goalOfKind:kind];
     goal->_agent = agent;
     return goal;
 }
 
 + (instancetype)goalToAvoidObstacles:(NSArray<GKObstacle *> *)obstacles maxPredictionTime:(NSTimeInterval)maxPredictionTime
 {
-    GKGoal *goal = [self charon_goalOfKind:CharonGKGoalAvoidObstacles];
+    GKGoal *goal = [self revenant_goalOfKind:RevenantGKGoalAvoidObstacles];
     goal->_obstacles = [obstacles copy];
     goal->_maxPredictionTime = maxPredictionTime;
     return goal;
@@ -113,7 +113,7 @@
 
 + (instancetype)goalToAvoidAgents:(NSArray<GKAgent *> *)agents maxPredictionTime:(NSTimeInterval)maxPredictionTime
 {
-    GKGoal *goal = [self charon_goalOfKind:CharonGKGoalAvoidAgents];
+    GKGoal *goal = [self revenant_goalOfKind:RevenantGKGoalAvoidAgents];
     goal->_agents = [agents copy];
     goal->_maxPredictionTime = maxPredictionTime;
     return goal;
@@ -121,7 +121,7 @@
 
 + (instancetype)goalToSeparateFromAgents:(NSArray<GKAgent *> *)agents maxDistance:(float)maxDistance maxAngle:(float)maxAngle
 {
-    GKGoal *goal = [self charon_goalOfKind:CharonGKGoalSeparate];
+    GKGoal *goal = [self revenant_goalOfKind:RevenantGKGoalSeparate];
     goal->_agents = [agents copy];
     goal->_maxDistance = maxDistance;
     goal->_maxAngle = maxAngle;
@@ -130,7 +130,7 @@
 
 + (instancetype)goalToAlignWithAgents:(NSArray<GKAgent *> *)agents maxDistance:(float)maxDistance maxAngle:(float)maxAngle
 {
-    GKGoal *goal = [self charon_goalOfKind:CharonGKGoalAlign];
+    GKGoal *goal = [self revenant_goalOfKind:RevenantGKGoalAlign];
     goal->_agents = [agents copy];
     goal->_maxDistance = maxDistance;
     goal->_maxAngle = maxAngle;
@@ -139,7 +139,7 @@
 
 + (instancetype)goalToCohereWithAgents:(NSArray<GKAgent *> *)agents maxDistance:(float)maxDistance maxAngle:(float)maxAngle
 {
-    GKGoal *goal = [self charon_goalOfKind:CharonGKGoalCohere];
+    GKGoal *goal = [self revenant_goalOfKind:RevenantGKGoalCohere];
     goal->_agents = [agents copy];
     goal->_maxDistance = maxDistance;
     goal->_maxAngle = maxAngle;
@@ -148,28 +148,28 @@
 
 + (instancetype)goalToReachTargetSpeed:(float)targetSpeed
 {
-    GKGoal *goal = [self charon_goalOfKind:CharonGKGoalReachTargetSpeed];
+    GKGoal *goal = [self revenant_goalOfKind:RevenantGKGoalReachTargetSpeed];
     goal->_value = targetSpeed;
     return goal;
 }
 
 + (instancetype)goalToWander:(float)speed
 {
-    GKGoal *goal = [self charon_goalOfKind:CharonGKGoalWander];
+    GKGoal *goal = [self revenant_goalOfKind:RevenantGKGoalWander];
     goal->_value = speed;
     return goal;
 }
 
 + (instancetype)goalToInterceptAgent:(GKAgent *)target maxPredictionTime:(NSTimeInterval)maxPredictionTime
 {
-    GKGoal *goal = [self charon_goalWithAgent:target kind:CharonGKGoalIntercept];
+    GKGoal *goal = [self revenant_goalWithAgent:target kind:RevenantGKGoalIntercept];
     goal->_maxPredictionTime = maxPredictionTime;
     return goal;
 }
 
 + (instancetype)goalToFollowPath:(GKPath *)path maxPredictionTime:(NSTimeInterval)maxPredictionTime forward:(BOOL)forward
 {
-    GKGoal *goal = [self charon_goalOfKind:CharonGKGoalFollowPath];
+    GKGoal *goal = [self revenant_goalOfKind:RevenantGKGoalFollowPath];
     goal->_path = path;
     goal->_maxPredictionTime = maxPredictionTime;
     goal->_forward = forward;
@@ -178,7 +178,7 @@
 
 + (instancetype)goalToStayOnPath:(GKPath *)path maxPredictionTime:(NSTimeInterval)maxPredictionTime
 {
-    GKGoal *goal = [self charon_goalOfKind:CharonGKGoalStayOnPath];
+    GKGoal *goal = [self revenant_goalOfKind:RevenantGKGoalStayOnPath];
     goal->_path = path;
     goal->_maxPredictionTime = maxPredictionTime;
     return goal;
@@ -186,7 +186,7 @@
 
 - (id)copyWithZone:(NSZone *)zone
 {
-    GKGoal *copy = [[[self class] allocWithZone:zone] initWithCharonKind:_kind];
+    GKGoal *copy = [[[self class] allocWithZone:zone] initWithRevenantKind:_kind];
     copy->_agent = _agent;
     copy->_obstacles = [_obstacles copy];
     copy->_agents = [_agents copy];

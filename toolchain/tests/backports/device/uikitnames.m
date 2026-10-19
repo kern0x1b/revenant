@@ -40,7 +40,7 @@ static NSString *const results_folder = @"/private/var/backports";
 {
     [[NSFileManager defaultManager] createDirectoryAtPath:results_folder withIntermediateDirectories:YES attributes:nil error:NULL];
     [[NSFileManager defaultManager] removeItemAtPath:[results_folder stringByAppendingPathComponent:@"uikitnames.done"] error:NULL];
-    charon_log_to([results_folder stringByAppendingPathComponent:@"uikitnames.log"]);
+    revenant_log_to([results_folder stringByAppendingPathComponent:@"uikitnames.log"]);
     self.window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
     self.window.rootViewController = [[UIViewController alloc] init];
     [self.window makeKeyAndVisible];
@@ -53,9 +53,9 @@ static NSString *const results_folder = @"/private/var/backports";
         });
         for (NSString *name in [expected.allKeys sortedArrayUsingSelector:@selector(compare:)]) {
             if ([expected[name] isEqualToString:records[name]] || tolerance(name, records[name], expected[name]))
-                charon_check(YES, name.UTF8String, nil);
+                revenant_check(YES, name.UTF8String, nil);
             else
-                charon_check(NO, name.UTF8String, [NSString stringWithFormat:@"\n    device %@\n    host   %@", records[name], expected[name]]);
+                revenant_check(NO, name.UTF8String, [NSString stringWithFormat:@"\n    device %@\n    host   %@", records[name], expected[name]]);
         }
         UIWindow *window = [[UIWindow alloc] initWithFrame:CGRectMake(0, 0, 320, 480)];
         UIView *inner = [[UIView alloc] initWithFrame:CGRectMake(10, 20, 100, 100)];
@@ -66,13 +66,13 @@ static NSString *const results_folder = @"/private/var/backports";
         CHECK(fabs(converted.origin.x - 16) < 0.01 && fabs(converted.origin.y - 27) < 0.01 && converted.size.width == 3 && converted.size.height == 4, "a frame in a view of a window is converted through the views and the window");
         CGRect bounds = CGRectMake(0, 0, 320, 480);
         Class edge = [UIScreenEdgePanGestureRecognizer class];
-        BOOL (*near)(id, SEL, CGPoint, UIRectEdge, CGRect) = (BOOL (*)(id, SEL, CGPoint, UIRectEdge, CGRect))[edge methodForSelector:NSSelectorFromString(@"charon_point:isNearEdges:inBounds:")];
-        SEL nearSelector = NSSelectorFromString(@"charon_point:isNearEdges:inBounds:");
+        BOOL (*near)(id, SEL, CGPoint, UIRectEdge, CGRect) = (BOOL (*)(id, SEL, CGPoint, UIRectEdge, CGRect))[edge methodForSelector:NSSelectorFromString(@"revenant_point:isNearEdges:inBounds:")];
+        SEL nearSelector = NSSelectorFromString(@"revenant_point:isNearEdges:inBounds:");
         CHECK(near(edge, nearSelector, CGPointMake(5, 200), UIRectEdgeLeft, bounds) && !near(edge, nearSelector, CGPointMake(60, 200), UIRectEdgeLeft, bounds), "a touch within twenty points of the left edge starts an edge pan, one farther in does not");
         CHECK(near(edge, nearSelector, CGPointMake(315, 200), UIRectEdgeRight, bounds) && !near(edge, nearSelector, CGPointMake(5, 200), UIRectEdgeRight, bounds), "and the right edge is the right");
         CHECK(!near(edge, nearSelector, CGPointMake(5, 200), 0, bounds), "no edges start none");
-        printf("checks=%d failures=%d\n", charon_checks, charon_failures);
-        NSString *summary = [NSString stringWithFormat:@"%@ checks=%d failures=%d\n", charon_failures ? @"FAIL" : @"ok", charon_checks, charon_failures];
+        printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
+        NSString *summary = [NSString stringWithFormat:@"%@ checks=%d failures=%d\n", revenant_failures ? @"FAIL" : @"ok", revenant_checks, revenant_failures];
         [summary writeToFile:[results_folder stringByAppendingPathComponent:@"uikitnames.done"] atomically:YES encoding:NSUTF8StringEncoding error:NULL];
     });
     return YES;

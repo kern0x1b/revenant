@@ -5,7 +5,7 @@ here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 ACCELERATE=$here/../../../../packages/a/apple-backports/Accelerate
 REGISTRY=$here/../../../../packages/a/apple-backports/registry/Accelerate
-build=${VIMAGEPLANAR_BUILD:-$(runs_folder charon-vimageplanar-host)}
+build=${VIMAGEPLANAR_BUILD:-$(runs_folder revenant-vimageplanar-host)}
 rm -rf "$build"
 mkdir -p "$build"
 
@@ -21,7 +21,7 @@ for entry in json.load(open(sys.argv[1]))['entries']:
 
 renames=""
 for name in $names; do
-    renames="$renames -D$name=charon_host_$name"
+    renames="$renames -D$name=revenant_host_$name"
 done
 
 xcrun clang -fobjc-arc -w $renames -I"$ACCELERATE" -c "$ACCELERATE/vImagePlanar7.m" -o "$build/vImagePlanar7.o"

@@ -23,10 +23,10 @@ ARKit=$repo/packages/a/apple-backports/ARKit
 runs=${RUNS:-$repo/.agent-work/runs/arkit-skeleton-host}
 mkdir -p "$runs"
 
-renames="-DARSkeletonDefinition=CharonPortARSkeletonDefinition \
-         -DARSkeleton=CharonPortARSkeleton \
-         -DARSkeleton2D=CharonPortARSkeleton2D \
-         -DARSkeletonJointName=CharonPortARSkeletonJointName"
+renames="-DARSkeletonDefinition=RevenantPortARSkeletonDefinition \
+         -DARSkeleton=RevenantPortARSkeleton \
+         -DARSkeleton2D=RevenantPortARSkeleton2D \
+         -DARSkeletonJointName=RevenantPortARSkeletonJointName"
 
 # Two steps, because the port's class is renamed but the host's is not: the port's object is compiled
 # on its own with the renames, and the harness is compiled against the two declarations it needs --
@@ -53,7 +53,7 @@ mutant() {
     label=$1; from=$2; to=$3
     copy="$runs/mutant"
     rm -rf "$copy"; mkdir -p "$copy"
-    cp "$ARKit/ARSkeletonDefinition13.m" "$ARKit/CharonARKitSkeleton.h" "$copy/"
+    cp "$ARKit/ARSkeletonDefinition13.m" "$ARKit/RevenantARKitSkeleton.h" "$copy/"
     python3 - "$copy/ARSkeletonDefinition13.m" "$from" "$to" <<'PY' || { echo "MUTANT NOT APPLIED: $label"; survived=$((survived + 1)); return; }
 import sys
 path, old, new = sys.argv[1], sys.argv[2], sys.argv[3]

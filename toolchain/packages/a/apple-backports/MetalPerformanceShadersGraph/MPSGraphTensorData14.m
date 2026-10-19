@@ -1,4 +1,4 @@
-#import "CharonMPSGraph.h"
+#import "RevenantMPSGraph.h"
 
 #pragma clang diagnostic ignored "-Wprotocol"
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
@@ -76,19 +76,19 @@
     return _device;
 }
 
-- (id<MTLBuffer>)charon_mps_buffer
+- (id<MTLBuffer>)revenant_mps_buffer
 {
     return _buffer;
 }
 
-- (void *)charon_mps_bytes
+- (void *)revenant_mps_bytes
 {
     if (_buffer)
         return [_buffer contents];
     if (!_buffer && _owned.length) {
         id<MTLDevice> metal = _device.metalDevice;
         if (!metal) {
-            CharonMPSGraphRefuse(@"MPSGraphTensorData: %lu bytes of data have nowhere to go: the tensor data has no device, so nothing was read",
+            RevenantMPSGraphRefuse(@"MPSGraphTensorData: %lu bytes of data have nowhere to go: the tensor data has no device, so nothing was read",
                                  (unsigned long)_owned.length);
             return NULL;
         }
@@ -97,9 +97,9 @@
     return _buffer ? [_buffer contents] : NULL;
 }
 
-- (NSUInteger)charon_mps_elementCount
+- (NSUInteger)revenant_mps_elementCount
 {
-    return CharonMPSGraphElementCount(_shape);
+    return RevenantMPSGraphElementCount(_shape);
 }
 
 @end

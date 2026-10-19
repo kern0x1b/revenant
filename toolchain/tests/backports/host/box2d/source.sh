@@ -1,4 +1,4 @@
-# source.sh — sourced, not run: fetches Box2D as charon@box2d does, from the recipe's pinned URL,
+# source.sh — sourced, not run: fetches Box2D as revenant@box2d does, from the recipe's pinned URL,
 # checks the archive against the recipe's digest and unpacks it. The caller sets `box2d` (this
 # directory) and `BUILD` (where the archive is kept and unpacked); this sets `version`, `digest`,
 # `url`, `flags` (the recipe's compiler flags) and `source` (the unpacked tree, $BUILD/src/...).

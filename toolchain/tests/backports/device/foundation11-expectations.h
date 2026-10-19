@@ -1,6 +1,6 @@
 static const char foundation11_expectations[] =
     "{\"decodeValue.roundTrip\":\"42\",\"decodeValue.wrongSize\":\"NSInvalidArgumentException: Cannot get decode with size 1. The type encoded as i is expected to be 4 byte"
-    "s\",\"paths.stable\":\"charon11-array.plist\",\"queryItems.read.\?\":\"\",\"queryItems.read.\?=v\":\"=v\",\"queryItems.read.\?a\":\"a=(nil)\",\"queryItems.read.\?a+b=c+d\":\"a+b=c+d\",\""
+    "s\",\"paths.stable\":\"revenant11-array.plist\",\"queryItems.read.\?\":\"\",\"queryItems.read.\?=v\":\"=v\",\"queryItems.read.\?a\":\"a=(nil)\",\"queryItems.read.\?a+b=c+d\":\"a+b=c+d\",\""
     "queryItems.read.\?a=\":\"a=\",\"queryItems.read.\?a=%E2%82%AC&b=two%20words\":\"a=%E2%82%AC|b=two%20words\",\"queryItems.read.\?a=1\":\"a=1\",\"queryItems.read.\?a=1&&b=2\":\"a=1"
     "|=(nil)|b=2\",\"queryItems.read.\?a=1&a=2\":\"a=1|a=2\",\"queryItems.read.\?a=b=c\":\"a=b=c\",\"queryItems.read.(none)\":\"(nil array)\",\"queryItems.write.0\":\" / \",\"queryItems"
     ".write.1\":\"x=%41 / x=A\",\"queryItems.write.2\":\"x / x\",\"queryItems.write.3\":\"x= / x=\",\"queryItems.write.4\":\"=v / =v\",\"queryItems.write.5\":\"a=1&b=2 / a=1&b=2\",\"que"

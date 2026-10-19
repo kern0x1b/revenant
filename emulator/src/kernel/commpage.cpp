@@ -10,7 +10,7 @@
 #include <cstdint>
 #include <string_view>
 
-namespace shade {
+namespace emulator {
 
 void CompatibilityKernel::install_commpage()
 {

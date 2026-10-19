@@ -1,15 +1,15 @@
 #import <Foundation/Foundation.h>
 #import <objc/runtime.h>
 
-NSQualityOfService charon_quality_of_service(NSInteger quality);
+NSQualityOfService revenant_quality_of_service(NSInteger quality);
 
-static char CharonThreadQualityKey;
+static char RevenantThreadQualityKey;
 
-@implementation NSThread (CharonQualityOfService)
+@implementation NSThread (RevenantQualityOfService)
 
 - (NSQualityOfService)qualityOfService
 {
-    NSNumber *quality = objc_getAssociatedObject(self, &CharonThreadQualityKey);
+    NSNumber *quality = objc_getAssociatedObject(self, &RevenantThreadQualityKey);
     if (quality)
         return (NSQualityOfService)quality.integerValue;
     return self.isMainThread ? NSQualityOfServiceUserInteractive : NSQualityOfServiceDefault;
@@ -19,7 +19,7 @@ static char CharonThreadQualityKey;
 {
     if (self.isExecuting || self.isFinished || self.isMainThread)
         return;
-    objc_setAssociatedObject(self, &CharonThreadQualityKey, @(charon_quality_of_service(qualityOfService)), OBJC_ASSOCIATION_RETAIN);
+    objc_setAssociatedObject(self, &RevenantThreadQualityKey, @(revenant_quality_of_service(qualityOfService)), OBJC_ASSOCIATION_RETAIN);
 }
 
 @end

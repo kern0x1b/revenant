@@ -1,6 +1,6 @@
 #import <AVFoundation/AVFoundation.h>
 
-@interface CharonStandInPlayerItem : NSObject
+@interface RevenantStandInPlayerItem : NSObject
 
 - (instancetype)initWithAsset:(AVAsset *)asset;
 

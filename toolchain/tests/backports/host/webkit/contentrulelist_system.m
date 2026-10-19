@@ -3,9 +3,9 @@
 int main(void)
 {
     @autoreleasepool {
-        const char *path = getenv("CHARON_EXPECTED");
+        const char *path = getenv("REVENANT_EXPECTED");
         if (path == NULL) {
-            fprintf(stderr, "CHARON_EXPECTED is not set: this program records what the system answers and has nowhere to put it\n");
+            fprintf(stderr, "REVENANT_EXPECTED is not set: this program records what the system answers and has nowhere to put it\n");
             return 2;
         }
         NSArray *answers = content_rule_list_scenario();

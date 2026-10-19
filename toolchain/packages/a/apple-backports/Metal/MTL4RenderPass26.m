@@ -1,9 +1,9 @@
 #import <Foundation/Foundation.h>
 #import <Metal/Metal.h>
 #import <objc/runtime.h>
-#import "CharonMetal26Types.h"
+#import "RevenantMetal26Types.h"
 
-static BOOL CharonMetal4AttachmentBaseEqual(MTLRenderPassAttachmentDescriptor *mine,
+static BOOL RevenantMetal4AttachmentBaseEqual(MTLRenderPassAttachmentDescriptor *mine,
                                              MTLRenderPassAttachmentDescriptor *theirs)
 {
     if (mine.texture != theirs.texture && ![mine.texture isEqual:theirs.texture]) return NO;
@@ -14,7 +14,7 @@ static BOOL CharonMetal4AttachmentBaseEqual(MTLRenderPassAttachmentDescriptor *m
     return YES;
 }
 
-static NSUInteger CharonMetal4AttachmentBaseHash(MTLRenderPassAttachmentDescriptor *mine)
+static NSUInteger RevenantMetal4AttachmentBaseHash(MTLRenderPassAttachmentDescriptor *mine)
 {
     NSUInteger hash = (NSUInteger)object_getClass(mine);
     hash = hash * 31u + (uint32_t)[mine.texture hash];
@@ -25,14 +25,14 @@ static NSUInteger CharonMetal4AttachmentBaseHash(MTLRenderPassAttachmentDescript
     return hash;
 }
 
-enum { CharonMetal4SamplePositions = 8 };
+enum { RevenantMetal4SamplePositions = 8 };
 
-static BOOL CharonMetal4SampleCountIsValid(NSUInteger count)
+static BOOL RevenantMetal4SampleCountIsValid(NSUInteger count)
 {
     return count == 0 || count == 2 || count == 4 || count == 8;
 }
 
-static BOOL CharonMetal4CoordinateIsInRange(float value)
+static BOOL RevenantMetal4CoordinateIsInRange(float value)
 {
     return value >= 0.0f && value < 1.0f;
 }
@@ -53,7 +53,7 @@ static BOOL CharonMetal4CoordinateIsInRange(float value)
     id<MTLBuffer> _visibilityResultBuffer;
     MTLVisibilityResultType _visibilityResultType;
     BOOL _supportColorAttachmentMapping;
-    MTLSamplePosition _samplePositions[CharonMetal4SamplePositions];
+    MTLSamplePosition _samplePositions[RevenantMetal4SamplePositions];
     NSUInteger _samplePositionCount;
 }
 
@@ -95,7 +95,7 @@ static BOOL CharonMetal4CoordinateIsInRange(float value)
 
 - (void)setSamplePositions:(const MTLSamplePosition *)positions count:(NSUInteger)count
 {
-    if (!CharonMetal4SampleCountIsValid(count)) {
+    if (!RevenantMetal4SampleCountIsValid(count)) {
         [NSException raise:NSInvalidArgumentException
                     format:@"setSamplePositions:count:%lu: a custom sample position count must be 0, 2, 4 or 8",
                            (unsigned long)count];
@@ -103,11 +103,11 @@ static BOOL CharonMetal4CoordinateIsInRange(float value)
     }
     if (positions)
         for (NSUInteger index = 0; index < count; index++) {
-            if (!CharonMetal4CoordinateIsInRange(positions[index].x))
+            if (!RevenantMetal4CoordinateIsInRange(positions[index].x))
                 [NSException raise:NSInvalidArgumentException
                             format:@"setSamplePositions:count:%lu: sample position %lu has x-coodicate %f, which is not within the range [0,1)",
                                    (unsigned long)count, (unsigned long)index, positions[index].x];
-            if (!CharonMetal4CoordinateIsInRange(positions[index].y))
+            if (!RevenantMetal4CoordinateIsInRange(positions[index].y))
                 [NSException raise:NSInvalidArgumentException
                             format:@"setSamplePositions:count:%lu: sample position %lu has y-coodicate %f, which is not within the range [0,1)",
                                    (unsigned long)count, (unsigned long)index, positions[index].y];
@@ -140,9 +140,9 @@ static BOOL CharonMetal4CoordinateIsInRange(float value)
     if (self == object) return YES;
     if (![object isKindOfClass:[MTL4RenderPassDescriptor class]]) return NO;
     MTL4RenderPassDescriptor *theirs = object;
-    if (!CharonMetal4AttachmentBaseEqual(self.depthAttachment, theirs.depthAttachment)) return NO;
+    if (!RevenantMetal4AttachmentBaseEqual(self.depthAttachment, theirs.depthAttachment)) return NO;
     if (self.depthAttachment.clearDepth != theirs.depthAttachment.clearDepth) return NO;
-    if (!CharonMetal4AttachmentBaseEqual(self.stencilAttachment, theirs.stencilAttachment)) return NO;
+    if (!RevenantMetal4AttachmentBaseEqual(self.stencilAttachment, theirs.stencilAttachment)) return NO;
     if (self.stencilAttachment.clearStencil != theirs.stencilAttachment.clearStencil) return NO;
     if (self.renderTargetArrayLength != theirs.renderTargetArrayLength) return NO;
     if (self.imageblockSampleLength != theirs.imageblockSampleLength) return NO;
@@ -166,9 +166,9 @@ static BOOL CharonMetal4CoordinateIsInRange(float value)
 - (NSUInteger)hash
 {
     NSUInteger hash = (NSUInteger)object_getClass(self);
-    hash = hash * 31u + (uint32_t)CharonMetal4AttachmentBaseHash(self.depthAttachment);
+    hash = hash * 31u + (uint32_t)RevenantMetal4AttachmentBaseHash(self.depthAttachment);
     hash = hash * 31u + (uint32_t)(uint64_t)self.depthAttachment.clearDepth;
-    hash = hash * 31u + (uint32_t)CharonMetal4AttachmentBaseHash(self.stencilAttachment);
+    hash = hash * 31u + (uint32_t)RevenantMetal4AttachmentBaseHash(self.stencilAttachment);
     hash = hash * 31u + (uint32_t)self.stencilAttachment.clearStencil;
     hash = hash * 31u + (uint32_t)self.renderTargetArrayLength;
     hash = hash * 31u + (uint32_t)self.imageblockSampleLength;

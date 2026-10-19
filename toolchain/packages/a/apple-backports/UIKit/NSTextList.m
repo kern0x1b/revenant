@@ -1,4 +1,4 @@
 #import <UIKit/UIKit.h>
-#import "../charon_alias.h"
+#import "../revenant_alias.h"
 
-CHARON_ALIAS(NSTextList)
+REVENANT_ALIAS(NSTextList)

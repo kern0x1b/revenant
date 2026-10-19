@@ -1,6 +1,6 @@
 #import <MapKit/MKGradientPolylineRenderer.h>
 #import <UIKit/UIKit.h>
-#import "CharonMapKit.h"
+#import "RevenantMapKit.h"
 
 @implementation MKGradientPolylineRenderer
 
@@ -44,7 +44,7 @@
     [self setNeedsDisplay];
 }
 
-- (BOOL)charon_gradientFromPoint:(CGPoint *)outFrom toPoint:(CGPoint *)outTo
+- (BOOL)revenant_gradientFromPoint:(CGPoint *)outFrom toPoint:(CGPoint *)outTo
 {
     MKPolyline *polyline = self.polyline;
     if (!polyline || polyline.pointCount < 2) {
@@ -62,25 +62,25 @@
     return YES;
 }
 
-- (void)charon_drawInContext:(CGContextRef)context zoomScale:(MKZoomScale)zoomScale mapRect:(MKMapRect)mapRect
+- (void)revenant_drawInContext:(CGContextRef)context zoomScale:(MKZoomScale)zoomScale mapRect:(MKMapRect)mapRect
 {
     CGPathRef path = self.path;
     CGPoint from, to;
-    if (!path || _colors.count == 0 || ![self charon_gradientFromPoint:&from toPoint:&to]) {
+    if (!path || _colors.count == 0 || ![self revenant_gradientFromPoint:&from toPoint:&to]) {
         return;
     }
     if (CGPointEqualToPoint(from, to)) {
-        [[self charon_colorAtIndex:0] setStroke];
+        [[self revenant_colorAtIndex:0] setStroke];
         CGContextBeginPath(context);
         CGContextAddPath(context, path);
-        CGContextSetLineWidth(context, [(MKOverlayPathRenderer *)self charon_lineWidthAtZoomScale:zoomScale]);
+        CGContextSetLineWidth(context, [(MKOverlayPathRenderer *)self revenant_lineWidthAtZoomScale:zoomScale]);
         CGContextStrokePath(context);
         return;
     }
     NSUInteger count = _colors.count;
     NSMutableArray *tinted = [NSMutableArray arrayWithCapacity:count];
     for (NSUInteger index = 0; index < count; index++) {
-        [tinted addObject:(__bridge id)[[self charon_colorAtIndex:index] CGColor]];
+        [tinted addObject:(__bridge id)[[self revenant_colorAtIndex:index] CGColor]];
     }
     CGFloat *stops = NULL;
     if (_locations.count == count) {
@@ -95,7 +95,7 @@
     CGGradientRef gradient = space && count > 0 ? CGGradientCreateWithColors(space, (__bridge CFArrayRef)tinted, stops) : NULL;
     CGContextSaveGState(context);
     [self applyStrokePropertiesToContext:context atZoomScale:zoomScale];
-    CGContextSetLineWidth(context, [(MKOverlayPathRenderer *)self charon_lineWidthAtZoomScale:zoomScale]);
+    CGContextSetLineWidth(context, [(MKOverlayPathRenderer *)self revenant_lineWidthAtZoomScale:zoomScale]);
     CGContextAddPath(context, path);
     CGContextReplacePathWithStrokedPath(context);
     CGContextClip(context);
@@ -112,7 +112,7 @@
     free(stops);
 }
 
-- (UIColor *)charon_colorAtIndex:(NSUInteger)index
+- (UIColor *)revenant_colorAtIndex:(NSUInteger)index
 {
     NSUInteger count = _colors.count;
     if (count == 0) {

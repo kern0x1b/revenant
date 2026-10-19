@@ -12,7 +12,7 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 tree=$(cd "$here/../../../.." && pwd)
-rel=${MUTATE_FILE:-packages/a/apple-backports/GameController/CharonGCSnapshot.h}
+rel=${MUTATE_FILE:-packages/a/apple-backports/GameController/RevenantGCSnapshot.h}
 source_file="$tree/$rel"
 out=${BUILD:-$here/../../../../.agent-work/fin/mutants}
 mkdir -p "$out"
@@ -214,8 +214,8 @@ check_objects '@"Button Y": @(fields->buttonY)' \
              '@"Button Y": @(fields->buttonX)' \
              'snapshot-field-read-from-the-wrong-element'
 
-check_objects 'fields.dpadX = charon_gc_pad_axis(dpad, @selector(xAxis));' \
-             'fields.dpadX = charon_gc_read_float(dpad, @selector(xAxis));' \
+check_objects 'fields.dpadX = revenant_gc_pad_axis(dpad, @selector(xAxis));' \
+             'fields.dpadX = revenant_gc_read_float(dpad, @selector(xAxis));' \
              'snapshot-direction-pad-read-as-an-axis'
 
 # And the extended half, which is in the 7.0 object with GCGamepadSnapshot. The same field-mapping
@@ -231,8 +231,8 @@ check_in_7 \
 # one held here too: the read-back group compares the port's method against the host's own encoder for
 # the same values, byte for byte, and a crossed field moves four bytes.
 check_in_7 \
-    'fields.buttonB = charon_gc_button_value([self charon_elementNamed:@"Button B"]);' \
-    'fields.buttonB = charon_gc_button_value([self charon_elementNamed:@"Button A"]);' \
+    'fields.buttonB = revenant_gc_button_value([self revenant_elementNamed:@"Button B"]);' \
+    'fields.buttonB = revenant_gc_button_value([self revenant_elementNamed:@"Button A"]);' \
     'extended-save-snapshot-reads-the-wrong-button'
 
 # The 7.0 object's extended half, held the same way as the 10.0.1 one.
@@ -329,8 +329,8 @@ check_trigger154() {
 # controller's answer and stays 0 either way - which is the rule being held, not a gap in the mutant.
 # So the mutant moves the recording to the mode the host never answers with, which is the mistake a port
 # makes when it treats the caller's request as the controller's state.
-check_trigger154 '    [self charon_setRequestedMode:GCDualSenseAdaptiveTriggerModeSlopeFeedback];' \
-                 '    [self charon_setMode:GCDualSenseAdaptiveTriggerModeSlopeFeedback];' \
+check_trigger154 '    [self revenant_setRequestedMode:GCDualSenseAdaptiveTriggerModeSlopeFeedback];' \
+                 '    [self revenant_setMode:GCDualSenseAdaptiveTriggerModeSlopeFeedback];' \
                  'trigger-15-4-sets-the-public-mode'
 
 # The header's own default is the other thing both copies are held to, and it contradicts the

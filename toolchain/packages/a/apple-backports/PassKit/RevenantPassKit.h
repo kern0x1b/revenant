@@ -15,4 +15,4 @@ typedef NS_ENUM(NSInteger, PKPassLibraryAuthorizationStatus) {
 
 #endif
 
-extern NSError *CharonPassKitNoHardwareError(void);
+extern NSError *RevenantPassKitNoHardwareError(void);

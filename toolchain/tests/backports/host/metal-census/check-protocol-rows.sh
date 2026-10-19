@@ -1,6 +1,6 @@
 #!/bin/sh
 # check-protocol-rows.sh - every `implemented` PROTOCOL row must be declared in its library's
-# Charon<Folder>Protocols.h, and this is the check that says so.
+# Revenant<Folder>Protocols.h, and this is the check that says so.
 #
 #     sh tests/backports/host/metal-census/check-protocol-rows.sh
 #     SELF_TEST=1 sh tests/backports/host/metal-census/check-protocol-rows.sh
@@ -18,7 +18,7 @@ set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 root=$(cd "$here/../../../.." && pwd)
 reg=$root/packages/a/apple-backports/registry/Metal/absent_Metal.json
-hdr=$root/packages/a/apple-backports/.gen/Metal/CharonMetalProtocols.h
+hdr=$root/packages/a/apple-backports/.gen/Metal/RevenantMetalProtocols.h
 work=${WORK:-$root/.agent-work/runs/metal-census/protocol-rows}
 # ONE guard for every script that removes a scratch path - see work-guard.sh.
 . "$here/work-guard.sh"
@@ -94,7 +94,7 @@ import json
 d = json.load(open('$reg', encoding='utf-8'))
 print(sum(1 for r in d['entries'] if r.get('status') == 'implemented' and r.get('kind') == 'protocol'))")
 declared=$(grep -c '^@protocol' "$hdr")
-echo "  every implemented protocol row is declared: $count row(s), $declared declaration(s) in CharonMetalProtocols.h"
+echo "  every implemented protocol row is declared: $count row(s), $declared declaration(s) in RevenantMetalProtocols.h"
 echo "check-protocol-rows: OK"
 # THE SCRATCH IS REMOVED HERE.
 rm -rf "$work"

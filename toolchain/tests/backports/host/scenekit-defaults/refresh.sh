@@ -5,7 +5,7 @@ set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 device=$here/../../device
-build=${SCENEKIT_DEFAULTS_BUILD:-$(runs_folder charon-scenekit-defaults-refresh)}
+build=${SCENEKIT_DEFAULTS_BUILD:-$(runs_folder revenant-scenekit-defaults-refresh)}
 rm -rf "$build"
 mkdir -p "$build"
 cat > "$build/main.m" <<'M'
@@ -14,7 +14,7 @@ int main(void)
 {
     @autoreleasepool {
         printf("// The answers of the host's SceneKit, written by host/scenekit-defaults/refresh.sh from scenekit-defaults-cases.m.\n");
-        charon_scenekit_default_cases(^(NSString *name, NSString *value) {
+        revenant_scenekit_default_cases(^(NSString *name, NSString *value) {
             printf("    {\"%s\", \"%s\"},\n", [name UTF8String], [value UTF8String]);
         });
     }

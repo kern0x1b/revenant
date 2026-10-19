@@ -3,7 +3,7 @@
 # against the host's own Accessibility.framework.
 #
 # The system builds these sixteen classes and the port builds the same sixteen in
-# Accessibility/CharonAXMathExpression.m and Accessibility/CharonAXCustomContent.m. The check is: build
+# Accessibility/RevenantAXMathExpression.m and Accessibility/RevenantAXCustomContent.m. The check is: build
 # the same tree in both, ask both the same questions, and the two answers must be the same.
 #
 # It runs on the host because the host has the framework - its SDK carries AXMathExpression.h, the very
@@ -40,25 +40,25 @@ target=arm64-apple-macos26.0
 common="-target $target -isysroot $sdk -fobjc-arc -O0 -Wall -Wno-nonnull -Wno-objc-protocol-property-synthesis"
 
 # The port's own spelling of every class this case names. A -D renames the declaration as well, which
-# is what keeps the two halves from colliding, and the port's CharonAXMathExpression.h is what it
+# is what keeps the two halves from colliding, and the port's RevenantAXMathExpression.h is what it
 # renames the declarations in.
-renames="-DAXMathExpression=CharonPortAXMathExpression
--DAXMathExpressionNumber=CharonPortAXMathExpressionNumber
--DAXMathExpressionIdentifier=CharonPortAXMathExpressionIdentifier
--DAXMathExpressionOperator=CharonPortAXMathExpressionOperator
--DAXMathExpressionText=CharonPortAXMathExpressionText
--DAXMathExpressionFenced=CharonPortAXMathExpressionFenced
--DAXMathExpressionRow=CharonPortAXMathExpressionRow
--DAXMathExpressionTable=CharonPortAXMathExpressionTable
--DAXMathExpressionTableRow=CharonPortAXMathExpressionTableRow
--DAXMathExpressionTableCell=CharonPortAXMathExpressionTableCell
--DAXMathExpressionUnderOver=CharonPortAXMathExpressionUnderOver
--DAXMathExpressionSubSuperscript=CharonPortAXMathExpressionSubSuperscript
--DAXMathExpressionFraction=CharonPortAXMathExpressionFraction
--DAXMathExpressionMultiscript=CharonPortAXMathExpressionMultiscript
--DAXMathExpressionRoot=CharonPortAXMathExpressionRoot
--DAXMathExpressionProvider=CharonPortAXMathExpressionProvider
--DAXCustomContent=CharonPortAXCustomContent"
+renames="-DAXMathExpression=RevenantPortAXMathExpression
+-DAXMathExpressionNumber=RevenantPortAXMathExpressionNumber
+-DAXMathExpressionIdentifier=RevenantPortAXMathExpressionIdentifier
+-DAXMathExpressionOperator=RevenantPortAXMathExpressionOperator
+-DAXMathExpressionText=RevenantPortAXMathExpressionText
+-DAXMathExpressionFenced=RevenantPortAXMathExpressionFenced
+-DAXMathExpressionRow=RevenantPortAXMathExpressionRow
+-DAXMathExpressionTable=RevenantPortAXMathExpressionTable
+-DAXMathExpressionTableRow=RevenantPortAXMathExpressionTableRow
+-DAXMathExpressionTableCell=RevenantPortAXMathExpressionTableCell
+-DAXMathExpressionUnderOver=RevenantPortAXMathExpressionUnderOver
+-DAXMathExpressionSubSuperscript=RevenantPortAXMathExpressionSubSuperscript
+-DAXMathExpressionFraction=RevenantPortAXMathExpressionFraction
+-DAXMathExpressionMultiscript=RevenantPortAXMathExpressionMultiscript
+-DAXMathExpressionRoot=RevenantPortAXMathExpressionRoot
+-DAXMathExpressionProvider=RevenantPortAXMathExpressionProvider
+-DAXCustomContent=RevenantPortAXCustomContent"
 
 host_build() {
     xcrun clang $common "$here/cases.m" -framework Foundation -framework Accessibility \
@@ -68,7 +68,7 @@ port_build() {
     # the renames are a list of -D flags and have to reach the shell unquoted
     # shellcheck disable=SC2086
     xcrun clang $common $renames "$here/cases.m" \
-        "$sources/CharonAXMathExpression.m" "$sources/CharonAXCustomContent.m" \
+        "$sources/RevenantAXMathExpression.m" "$sources/RevenantAXCustomContent.m" \
         -I"$sources" -framework Foundation -o "$build/port" 2> "$build/port-build.log" || return 1
 }
 for half in host port; do

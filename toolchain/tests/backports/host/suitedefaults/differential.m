@@ -8,14 +8,14 @@ int main(void)
 {
     @autoreleasepool {
         host_attach_prefixed("");
-        NSString *name = [NSString stringWithFormat:@"charon.suite.%@", [[NSUUID UUID] UUIDString]];
+        NSString *name = [NSString stringWithFormat:@"revenant.suite.%@", [[NSUUID UUID] UUIDString]];
         NSString *portName = [name stringByAppendingString:@".port"];
         NSMutableArray *system = [NSMutableArray array], *port = [NSMutableArray array];
         suite_run(^{ return [[NSUserDefaults alloc] initWithSuiteName:name]; }, ^(NSString *n, NSString *v) { [system addObject:@[n, v]]; });
         suite_run(^{
             NSUserDefaults *d = [NSUserDefaults alloc];
             CFRetain((__bridge CFTypeRef)d);
-            return ((NSUserDefaults * (*)(id, SEL, id))objc_msgSend)(d, NSSelectorFromString(@"initCharonHostWithSuiteName:"), portName);
+            return ((NSUserDefaults * (*)(id, SEL, id))objc_msgSend)(d, NSSelectorFromString(@"initRevenantHostWithSuiteName:"), portName);
         }, ^(NSString *n, NSString *v) { [port addObject:@[n, v]]; });
         int checks = 0, failures = 0;
         NSMutableString *header = [NSMutableString stringWithString:@"static const char *const suitedefaults_expectations[] = {\n"];

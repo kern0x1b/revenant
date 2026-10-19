@@ -2,7 +2,7 @@
 #import <MapKit/MKMapItem.h>
 #import <objc/message.h>
 #import <math.h>
-#import "CharonMapKit.h"
+#import "RevenantMapKit.h"
 
 @implementation MKMapCamera
 
@@ -12,7 +12,7 @@
 @synthesize pitch = _pitch;
 @synthesize altitude = _altitude;
 
-+ (instancetype)charon_cameraAtCoordinate:(CLLocationCoordinate2D)coordinate
++ (instancetype)revenant_cameraAtCoordinate:(CLLocationCoordinate2D)coordinate
                                 distance:(CLLocationDistance)distance
                                    pitch:(CGFloat)pitch
                                  heading:(CLLocationDirection)heading
@@ -28,7 +28,7 @@
 
 + (instancetype)camera
 {
-    return [self charon_cameraAtCoordinate:CLLocationCoordinate2DMake(0.0, 0.0)
+    return [self revenant_cameraAtCoordinate:CLLocationCoordinate2DMake(0.0, 0.0)
                                   distance:16000000.0
                                      pitch:0.0
                                    heading:0.0];
@@ -48,9 +48,9 @@
         ratio = 1.0;
     }
     CGFloat pitch = (CGFloat)(acos(ratio) * 180.0 / M_PI);
-    CLLocationDirection heading = [CharonMapKit charon_bearingFromCoordinate:eyeCoordinate
+    CLLocationDirection heading = [RevenantMapKit revenant_bearingFromCoordinate:eyeCoordinate
                                                                  toCoordinate:centerCoordinate];
-    return [self charon_cameraAtCoordinate:centerCoordinate distance:distance pitch:pitch heading:heading];
+    return [self revenant_cameraAtCoordinate:centerCoordinate distance:distance pitch:pitch heading:heading];
 }
 
 + (instancetype)cameraLookingAtCenterCoordinate:(CLLocationCoordinate2D)centerCoordinate
@@ -58,7 +58,7 @@
                                            pitch:(CGFloat)pitch
                                          heading:(CLLocationDirection)heading
 {
-    return [self charon_cameraAtCoordinate:centerCoordinate distance:distance pitch:pitch heading:heading];
+    return [self revenant_cameraAtCoordinate:centerCoordinate distance:distance pitch:pitch heading:heading];
 }
 
 + (instancetype)cameraLookingAtMapItem:(MKMapItem *)mapItem
@@ -78,14 +78,14 @@
         }
     }
     double aspect = viewSize.height > 0.0 ? (double)viewSize.width / (double)viewSize.height : 1.0;
-    MKMapCamera *camera = [self charon_cameraAtCoordinate:centre
-                                                 distance:[self charon_distanceForLatitudeSpan:span * aspect]
+    MKMapCamera *camera = [self revenant_cameraAtCoordinate:centre
+                                                 distance:[self revenant_distanceForLatitudeSpan:span * aspect]
                                                     pitch:allowPitch ? 45.0 : 0.0
                                                   heading:0.0];
     return camera;
 }
 
-+ (CLLocationDistance)charon_distanceForLatitudeSpan:(double)latitudeDegrees
++ (CLLocationDistance)revenant_distanceForLatitudeSpan:(double)latitudeDegrees
 {
     MKMapPoint centre = MKMapPointForCoordinate(CLLocationCoordinate2DMake(0.0, 0.0));
     MKMapPoint edge = MKMapPointForCoordinate(CLLocationCoordinate2DMake(0.0, latitudeDegrees));

@@ -1,13 +1,13 @@
 #import <UIKit/UIKit.h>
 #import <QuartzCore/QuartzCore.h>
 
-@interface CharonSnapshotView : UIView
+@interface RevenantSnapshotView : UIView
 @end
 
-@implementation CharonSnapshotView
+@implementation RevenantSnapshotView
 @end
 
-static void charon_draw(UIView *view, CGContextRef context, CGRect source, CGRect destination, CGFloat alpha)
+static void revenant_draw(UIView *view, CGContextRef context, CGRect source, CGRect destination, CGFloat alpha)
 {
     if (alpha <= 0 || CGRectIsEmpty(source) || CGRectIsEmpty(destination))
         return;
@@ -21,7 +21,7 @@ static void charon_draw(UIView *view, CGContextRef context, CGRect source, CGRec
     CGContextRestoreGState(context);
 }
 
-static void charon_settle(UIView *view, BOOL afterUpdates)
+static void revenant_settle(UIView *view, BOOL afterUpdates)
 {
     if (!afterUpdates)
         return;
@@ -29,7 +29,7 @@ static void charon_settle(UIView *view, BOOL afterUpdates)
     [CATransaction flush];
 }
 
-static void charon_axis(CGFloat position, CGFloat before, CGFloat after, CGFloat length, CGFloat *origin, CGFloat *extent)
+static void revenant_axis(CGFloat position, CGFloat before, CGFloat after, CGFloat length, CGFloat *origin, CGFloat *extent)
 {
     if (position == 0 && before == 0 && after == 0) {
         *origin = 0;
@@ -45,7 +45,7 @@ static void charon_axis(CGFloat position, CGFloat before, CGFloat after, CGFloat
     }
 }
 
-@implementation UIView (CharonSnapshots)
+@implementation UIView (RevenantSnapshots)
 
 - (BOOL)drawViewHierarchyInRect:(CGRect)rect afterScreenUpdates:(BOOL)afterUpdates
 {
@@ -56,12 +56,12 @@ static void charon_axis(CGFloat position, CGFloat before, CGFloat after, CGFloat
         return YES;
     if (!self.window)
         return NO;
-    charon_settle(self, afterUpdates);
+    revenant_settle(self, afterUpdates);
     BOOL shown = YES;
     for (UIView *current = self; current; current = current.superview)
         shown = shown && !current.hidden;
     if (shown)
-        charon_draw(self, context, self.bounds, rect, self.alpha);
+        revenant_draw(self, context, self.bounds, rect, self.alpha);
     return YES;
 }
 
@@ -69,23 +69,23 @@ static void charon_axis(CGFloat position, CGFloat before, CGFloat after, CGFloat
 {
     CGSize size = CGRectIsNull(rect) ? CGSizeZero : CGSizeMake(MAX(0, rect.size.width), MAX(0, rect.size.height));
     CGPoint origin = rect.origin;
-    CharonSnapshotView *snapshot = [[CharonSnapshotView alloc] initWithFrame:CGRectMake(0, 0, size.width, size.height)];
+    RevenantSnapshotView *snapshot = [[RevenantSnapshotView alloc] initWithFrame:CGRectMake(0, 0, size.width, size.height)];
     snapshot.autoresizingMask = UIViewAutoresizingNone;
     CGFloat scale = [UIScreen mainScreen].scale;
     snapshot.layer.contentsScale = scale;
     snapshot.layer.contentsGravity = kCAGravityResize;
     if (capInsets.top != 0 || capInsets.left != 0 || capInsets.bottom != 0 || capInsets.right != 0) {
         CGFloat x, width, y, height;
-        charon_axis(origin.x * scale, capInsets.left * scale, capInsets.right * scale, size.width * scale, &x, &width);
-        charon_axis(origin.y * scale, capInsets.top * scale, capInsets.bottom * scale, size.height * scale, &y, &height);
+        revenant_axis(origin.x * scale, capInsets.left * scale, capInsets.right * scale, size.width * scale, &x, &width);
+        revenant_axis(origin.y * scale, capInsets.top * scale, capInsets.bottom * scale, size.height * scale, &y, &height);
         snapshot.layer.contentsCenter = CGRectMake(x, y, width, height);
     }
     if (size.width <= 0 || size.height <= 0)
         return snapshot;
-    charon_settle(self, afterUpdates);
+    revenant_settle(self, afterUpdates);
     UIGraphicsBeginImageContextWithOptions(size, NO, scale);
     CGFloat alpha = self.hidden ? 0 : self.alpha;
-    charon_draw(self, UIGraphicsGetCurrentContext(), rect, CGRectMake(0, 0, size.width, size.height), alpha);
+    revenant_draw(self, UIGraphicsGetCurrentContext(), rect, CGRectMake(0, 0, size.width, size.height), alpha);
     UIImage *image = UIGraphicsGetImageFromCurrentImageContext();
     UIGraphicsEndImageContext();
     snapshot.layer.contents = (__bridge id)image.CGImage;

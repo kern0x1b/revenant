@@ -132,7 +132,7 @@ int main(void)
             NSDirectoryEnumerator *enumerator = [manager enumeratorAtURL:rootURL includingPropertiesForKeys:@[NSURLIsDirectoryKey] options:options | (1UL << 3) errorHandler:nil];
             NSString *order = walk(enumerator, root, problems, variant >= 4);
             NSString *name = [NSString stringWithFormat:@"directories are visited again after their contents (variant %lu)", (unsigned long)variant];
-            charon_check(problems.count == 0, name.UTF8String, [NSString stringWithFormat:@"%@ in %@", problems.firstObject, order]);
+            revenant_check(problems.count == 0, name.UTF8String, [NSString stringWithFormat:@"%@ in %@", problems.firstObject, order]);
             if (variant == 0) {
                 CHECK([order rangeOfString:@"/root/empty /root/empty^"].location != NSNotFound || [order rangeOfString:@"/root/empty^"].location != NSNotFound, "an empty folder is visited before and after");
                 CHECK([order rangeOfString:@"/root/link^"].location == NSNotFound && [order rangeOfString:@"/root/link"].location != NSNotFound, "a link to a folder is not entered and not visited again");
@@ -191,6 +191,6 @@ int main(void)
         CHECK([response respondsToSelector:@selector(valueForHTTPHeaderField:)] && [NSMutableData instancesRespondToSelector:@selector(compressUsingAlgorithm:error:)] && [NSOperationQueue instancesRespondToSelector:@selector(addBarrierBlock:)], "the members answer respondsToSelector: as carried");
         NSLog(@"foundation14 done");
     }
-    printf("checks=%d failures=%d\n", charon_checks, charon_failures);
-    return charon_failures;
+    printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
+    return revenant_failures;
 }

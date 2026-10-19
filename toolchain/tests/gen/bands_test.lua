@@ -38,7 +38,7 @@ expect(string.find(eleven, "@end\n\n", 1, true) ~= nil and string.find(eleven, "
 expect(has(eleven, "//   never called: +[NSFileProviderManager addDomain:completionHandler:]\n"), "a never_call name is written as carried")
 
 local sixteen = objects["FileProvider16.m"]
-expect(has(sixteen, "@implementation NSFileProviderDomain (Charon16)\n"), "the 16.0 object is a category of NSFileProviderDomain")
+expect(has(sixteen, "@implementation NSFileProviderDomain (Revenant16)\n"), "the 16.0 object is a category of NSFileProviderDomain")
 expect(not has(sixteen, "@implementation NSFileProviderDomain {"), "the 16.0 object defines no class")
 expect(has(sixteen, "- (void)setSupportsSyncingTrash:(BOOL)supportsSyncingTrash {"), "the 16.0 category sets supportsSyncingTrash")
 

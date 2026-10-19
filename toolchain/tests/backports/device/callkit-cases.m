@@ -10,7 +10,7 @@ static NSString *flag(BOOL value)
 static NSString *named(Class cls)
 {
     NSString *name = NSStringFromClass(cls);
-    return [name hasPrefix:@"Charon"] ? [name substringFromIndex:6] : name;
+    return [name hasPrefix:@"Revenant"] ? [name substringFromIndex:8] : name;
 }
 
 static NSUUID *fixed(unsigned char last)
@@ -36,7 +36,7 @@ static void configuration(CallKitRecorder record)
                                        flag(made.supportsVideo), flag(made.includesCallsInRecents),
                                        (unsigned long)made.supportedHandleTypes.count, flag(made.ringtoneSound != nil), flag(made.iconTemplateImageData != nil)]);
 
-    CXProviderConfiguration *titled = [[CXProviderConfiguration alloc] initWithLocalizedName:@"Charon"];
+    CXProviderConfiguration *titled = [[CXProviderConfiguration alloc] initWithLocalizedName:@"Revenant"];
     record(@"configuration.titled", [NSString stringWithFormat:@"%@ groups=%lu", titled.localizedName, (unsigned long)titled.maximumCallGroups]);
     record(@"configuration.unnamed", flag(made.localizedName == nil));
 
@@ -228,7 +228,7 @@ static void directoryManager(CallKitRecorder record)
 {
     CXCallDirectoryManager *manager = [CXCallDirectoryManager sharedInstance];
     record(@"directoryManager.shared", [NSString stringWithFormat:@"same=%@ class=%@", flag(manager == [CXCallDirectoryManager sharedInstance]), named([manager class])]);
-    NSString *identifier = @"space.kern0x1b.charon.CallDirectory";
+    NSString *identifier = @"space.kern0x1b.revenant.CallDirectory";
     __block BOOL reloaded = NO, reloadedOnMain = NO, answered = NO, answeredOnMain = NO;
     __block NSError *reloadError = nil, *statusError = nil;
     __block CXCallDirectoryEnabledStatus status = (CXCallDirectoryEnabledStatus)-1;
@@ -271,7 +271,7 @@ static void directoryExtension(CallKitRecorder record)
                                       named([context class]), named(class_getSuperclass([context class])), flag(context.isIncremental),
                                       flag(context.delegate != nil), (unsigned long)context.inputItems.count]);
     [context addBlockingEntryWithNextSequentialPhoneNumber:18005550100];
-    [context addIdentificationEntryWithNextSequentialPhoneNumber:18005550101 label:@"Charon"];
+    [context addIdentificationEntryWithNextSequentialPhoneNumber:18005550101 label:@"Revenant"];
     record(@"directoryContext.entries", @"returned");
     NSMutableArray *removals = [NSMutableArray array];
     NSArray *blocks = @[^{ [context removeBlockingEntryWithPhoneNumber:18005550100]; }, ^{ [context removeIdentificationEntryWithPhoneNumber:18005550101]; },

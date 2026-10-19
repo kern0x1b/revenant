@@ -4,7 +4,7 @@
 #
 # The host's own Security framework builds the trust and answers it; the port's sheet is asked for the
 # same trust and must produce the same lines. The port's classes are compiled under names of their own
-# (SFCertificatePresentation becomes CharonSFCertificatePresentation, from the registry's own class
+# (SFCertificatePresentation becomes RevenantSFCertificatePresentation, from the registry's own class
 # entries) so that a build which never links the host's SecurityUI still builds, and so the two builds
 # are never confused for one another. The host has no SecurityUI of its own in this SDK to compare
 # against, which is why the oracle is the trust: every line the sheet shows is read out of the trust
@@ -22,7 +22,7 @@ here=$(cd "$(dirname "$0")" && pwd)
 device=${DEVICE:-$here/../../device}
 securityui=${SECURITYUI:-$here/../../../../packages/a/apple-backports/SecurityUI}
 registry=${REGISTRY:-$here/../../../../packages/a/apple-backports/registry/SecurityUI/ios18.json}
-build=${BUILD:-$(runs_fresh charon-certificatepresentation)}
+build=${BUILD:-$(runs_fresh revenant-certificatepresentation)}
 mkdir -p "$build"
 sdk=$(xcrun --show-sdk-path --sdk macosx)
 frameworks="-iframework $sdk/System/iOSSupport/System/Library/Frameworks"
@@ -37,7 +37,7 @@ python3 "$here/rename.py" "$registry" "$build/rename.h"
 
 port() {
     dir=$1
-    xcrun clang $common -DCHARON_CERTIFICATE_PORT=1 -DCHARON_HOST_DIFFERENTIAL=1 -include "$build/rename.h" -I"$device" -I"$securityui" \
+    xcrun clang $common -DREVENANT_CERTIFICATE_PORT=1 -DREVENANT_HOST_DIFFERENTIAL=1 -include "$build/rename.h" -I"$device" -I"$securityui" \
         "$here/record.m" "$device/certificate-cases.m" "$dir"/*.m $libs -o "$dir/run"
 }
 rm -rf "$build/port"; mkdir -p "$build/port"

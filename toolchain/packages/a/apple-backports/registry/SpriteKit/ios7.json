@@ -9,7 +9,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "facts": "facts/SpriteKit/SKNode.md",
-      "source": "spec/SpriteKit/declarations.tsv (interface SKNode, NSObject with NSCopying and NSSecureCoding on iOS); SpriteKit/CharonSpriteKit.h",
+      "source": "spec/SpriteKit/declarations.tsv (interface SKNode, NSObject with NSCopying and NSSecureCoding on iOS); SpriteKit/RevenantSpriteKit.h",
       "effect": "the base of every node: the tree, the transform and the hit tests; a plain SKNode draws nothing"
     },
     {
@@ -534,7 +534,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "facts": "facts/SpriteKit/SKScene.md",
-      "source": "spec/SpriteKit/declarations.tsv (interface SKScene, superclass SKEffectNode); SpriteKit/CharonSpriteKit.h",
+      "source": "spec/SpriteKit/declarations.tsv (interface SKScene, superclass SKEffectNode); SpriteKit/RevenantSpriteKit.h",
       "effect": "the root of a tree of nodes, presented in a view: the viewport size, the scale mode, the anchor point, the background colour and the frame it gives"
     },
     {
@@ -756,7 +756,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "facts": "facts/SpriteKit/SKScene.md",
-      "source": "spec/SpriteKit/declarations.tsv, the SKView class (UIView subclass, iOS); SpriteKit/CharonSpriteKit.h; SpriteKitView7.m",
+      "source": "spec/SpriteKit/declarations.tsv, the SKView class (UIView subclass, iOS); SpriteKit/RevenantSpriteKit.h; SpriteKitView7.m",
       "effect": "the UIView over a CAEAGLLayer that presents a scene: an OpenGL ES 2 framebuffer, a display link, and a frame that steps the scene and clears to its background colour. Device-unverified; the nodes' content is owed"
     },
     {
@@ -962,7 +962,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "facts": "facts/SpriteKit/SKTexture.md",
-      "source": "spec/SpriteKit/declarations.tsv (the enum, NSInteger, ios=7.0); declared in SpriteKit/CharonSpriteKit.h with the SDK's values",
+      "source": "spec/SpriteKit/declarations.tsv (the enum, NSInteger, ios=7.0); declared in SpriteKit/RevenantSpriteKit.h with the SDK's values",
       "effect": "the enumeration names the filter of a texture"
     },
     {
@@ -992,7 +992,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "facts": "facts/SpriteKit/SKSpriteNode.md",
-      "source": "spec/SpriteKit/declarations.tsv (the enum, NSInteger, ios=7.0); declared in SpriteKit/CharonSpriteKit.h with the SDK's values",
+      "source": "spec/SpriteKit/declarations.tsv (the enum, NSInteger, ios=7.0); declared in SpriteKit/RevenantSpriteKit.h with the SDK's values",
       "effect": "the enumeration names the blend mode of a node that draws"
     },
     {
@@ -1082,7 +1082,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "facts": "facts/SpriteKit/SKTexture.md",
-      "source": "spec/SpriteKit/declarations.tsv (interface SKTexture, NSObject with NSCopying and NSSecureCoding on iOS); SpriteKit/CharonSpriteKit.h; SpriteKit/SpriteKitTexture7.m",
+      "source": "spec/SpriteKit/declarations.tsv (interface SKTexture, NSObject with NSCopying and NSSecureCoding on iOS); SpriteKit/RevenantSpriteKit.h; SpriteKit/SpriteKitTexture7.m",
       "effect": "a rectangle of an image with its size, filter and mipmap flag; a texture draws nothing until the renderer is carried"
     },
     {
@@ -1242,7 +1242,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "facts": "facts/SpriteKit/SKSpriteNode.md",
-      "source": "spec/SpriteKit/declarations.tsv (interface SKSpriteNode, SKNode, conforms SKWarpable); SpriteKit/CharonSpriteKit.h; SpriteKit/SpriteKitSprite7.m",
+      "source": "spec/SpriteKit/declarations.tsv (interface SKSpriteNode, SKNode, conforms SKWarpable); SpriteKit/RevenantSpriteKit.h; SpriteKit/SpriteKitSprite7.m",
       "effect": "a node with a colour or a texture, a size, an anchor point, a centre rectangle and a blend; nothing draws until the renderer is carried"
     },
     {
@@ -1412,7 +1412,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "facts": "facts/SpriteKit/SKShapeNode.md",
-      "source": "spec/SpriteKit/declarations.tsv (interface SKShapeNode, SKNode); SpriteKit/CharonSpriteKit.h; SpriteKitShape7.m",
+      "source": "spec/SpriteKit/declarations.tsv (interface SKShapeNode, SKNode); SpriteKit/RevenantSpriteKit.h; SpriteKitShape7.m",
       "effect": "a node that draws a path with its stroke, fill and line style; nothing draws until the renderer is carried"
     },
     {
@@ -1612,7 +1612,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "facts": "facts/SpriteKit/SKLabelNode.md",
-      "source": "spec/SpriteKit/declarations.tsv (interface SKLabelNode, SKNode); SpriteKit/CharonSpriteKit.h; SpriteKitLabel7.m",
+      "source": "spec/SpriteKit/declarations.tsv (interface SKLabelNode, SKNode); SpriteKit/RevenantSpriteKit.h; SpriteKitLabel7.m",
       "effect": "a text in a font, with its colour, its alignment and its layout; nothing is rasterised yet"
     },
     {
@@ -1772,7 +1772,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "facts": "facts/SpriteKit/SKCropNode.md",
-      "source": "spec/SpriteKit/declarations.tsv (interface SKCropNode, SKNode); SpriteKit/CharonSpriteKit.h; SpriteKitCrop7.m",
+      "source": "spec/SpriteKit/declarations.tsv (interface SKCropNode, SKNode); SpriteKit/RevenantSpriteKit.h; SpriteKitCrop7.m",
       "effect": "a node that shows its children where its mask has content; the crop is not drawn yet"
     },
     {
@@ -1792,7 +1792,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "facts": "facts/SpriteKit/SKEffectNode.md",
-      "source": "spec/SpriteKit/declarations.tsv (interface SKEffectNode, SKNode); SpriteKit/CharonSpriteKit.h; SpriteKitEffect7.m",
+      "source": "spec/SpriteKit/declarations.tsv (interface SKEffectNode, SKNode); SpriteKit/RevenantSpriteKit.h; SpriteKitEffect7.m",
       "effect": "a node that draws its children through an effect; the effect is not run yet"
     },
     {

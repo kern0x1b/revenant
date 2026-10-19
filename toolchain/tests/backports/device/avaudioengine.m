@@ -5,14 +5,14 @@
 
 static void setForcedOfflineOutput(BOOL offline)
 {
-    Class cls = NSClassFromString(@"CharonAudioEngineTestSupport");
+    Class cls = NSClassFromString(@"RevenantAudioEngineTestSupport");
     SEL sel = NSSelectorFromString(@"setForcedOfflineOutput:");
     ((void (*)(Class, SEL, BOOL))objc_msgSend)(cls, sel, offline);
 }
 
 static OSStatus pullOutput(AudioBufferList *ioData, AVAudioFrameCount frames, AVAudioEngine *engine)
 {
-    Class cls = NSClassFromString(@"CharonAudioEngineTestSupport");
+    Class cls = NSClassFromString(@"RevenantAudioEngineTestSupport");
     SEL sel = NSSelectorFromString(@"pullOutput:frames:fromEngine:");
     return ((OSStatus (*)(Class, SEL, AudioBufferList *, AVAudioFrameCount, AVAudioEngine *))objc_msgSend)(cls, sel, ioData, frames, engine);
 }
@@ -77,8 +77,8 @@ int main(void)
             if (fabsf(pulledSamples[i] - sourceChannels[0][i]) > 0.05f)
                 matchesSource = NO;
         }
-        charon_check(anyNonZero, "the graph's real output is not silent (the coordinator's named trap)", nil);
-        charon_check(matchesSource, "the graph's output recognizably carries the waveform that was scheduled, not noise or silence", nil);
+        revenant_check(anyNonZero, "the graph's real output is not silent (the coordinator's named trap)", nil);
+        revenant_check(matchesSource, "the graph's output recognizably carries the waveform that was scheduled, not noise or silence", nil);
 
         [engine stop];
         CHECK(![engine isRunning], "engine reports stopped");
@@ -89,7 +89,7 @@ int main(void)
         for (int i = 0; i < 8; i++) printf("%+.4f ", pulledSamples[i]);
         printf("\n");
 
-        printf("checks=%d failures=%d\n", charon_checks, charon_failures);
+        printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
     }
-    return charon_failures ? 1 : 0;
+    return revenant_failures ? 1 : 0;
 }

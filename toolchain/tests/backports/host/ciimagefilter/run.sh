@@ -3,9 +3,9 @@ set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 GRAPHICS=${GRAPHICS:-$here/../../../../packages/a/apple-backports/.gen/CoreImage}
-BUILD=${BUILD:-$(runs_fresh charon-ciimagefilter)}
+BUILD=${BUILD:-$(runs_fresh revenant-ciimagefilter)}
 # CoreImage is on the host itself: the port's categories are built for macOS with their selectors
-# prefixed, so the host's +[CIFilter gaussianBlurFilter] and the port's +charonHost_gaussianBlurFilter
+# prefixed, so the host's +[CIFilter gaussianBlurFilter] and the port's +revenantHost_gaussianBlurFilter
 # answer side by side in one process and the differential compares them.
 quiet="-Wno-nonnull -Wno-deprecated-declarations -Wno-unguarded-availability-new -Wno-objc-protocol-method-implementation -Wno-nullability-completeness -Wno-availability"
 carried="CIFilterBuiltins7.m CIFilterBuiltins80.m CIFilterBuiltins841.m CIFilterBuiltins11.m CIFilterBuiltins16.m CIFilterBuiltins18.m CIFilterBuiltins26.m"

@@ -1,15 +1,15 @@
 #!/bin/bash
-# Runs psychopomp scenarios on a clean machine: for each one, an empty project directory outside
-# any repository, a fresh HOME in which only this plugin is installed (from a clone of hades
+# Runs agent-skills scenarios on a clean machine: for each one, an empty project directory outside
+# any repository, a fresh HOME in which only this plugin is installed (from a clone of revenant
 # at HEAD), the scenario's answers.md, and an agent run headless on request.md.
 # tests/check.sh then decides whether the run counts. Evidence is copied to
-# $HOME/.cache/hades/psychopomp/<run>/<scenario>/.
+# $HOME/.revenant/cache/agent-skills/<run>/<scenario>/.
 #
 # Usage: tests/run.sh [--runtime claude] [--hours N] SCENARIO... | all
 #
 # Shared state, deliberately not isolated: the xmake package store (XMAKE_GLOBALDIR points at the
 # real home, so ~/.xmake is the one every project uses and nothing is rebuilt privately) and
-# Charon's firmware, dyld caches and emulator images (CHARON_HOME). A guard on PATH refuses
+# Revenant's firmware, dyld caches and emulator images (REVENANT_HOME). A guard on PATH refuses
 # `xmake emulate clean` and `--force`, which would damage that shared state.
 #
 # Login: the agent's own login is copied from the login keychain into the scenario's HOME as
@@ -30,13 +30,13 @@ while [ $# -gt 0 ]; do
 done
 repo=$(cd "$(dirname "$0")/.." && pwd)
 top=$(git -C "$repo" rev-parse --show-toplevel)
-cache=$HOME/.cache/hades/psychopomp
+cache=$HOME/.revenant/cache/agent-skills
 [ ${#scenarios[@]} -gt 0 ] || { echo "name a scenario, or all" >&2; exit 2; }
 [ "${scenarios[0]}" = all ] && scenarios=($(ls "$repo/tests/scenarios"))
 
 # The isolation was approved by the owner; the variable keeps an accidental run from starting it.
-if [ "${PSYCHOPOMP_ISOLATION_APPROVED:-}" != 1 ]; then
-  echo "refused: set PSYCHOPOMP_ISOLATION_APPROVED=1 to run with the approved isolation" >&2
+if [ "${REVENANT_AGENT_SKILLS_ISOLATION_APPROVED:-}" != 1 ]; then
+  echo "refused: set REVENANT_AGENT_SKILLS_ISOLATION_APPROVED=1 to run with the approved isolation" >&2
   exit 3
 fi
 
@@ -47,7 +47,7 @@ evidence_root=$cache/$run
 mkdir -p "$cache"
 scratch=$(mktemp -d "$cache/scratch.XXXXXX")
 scratch=$(cd "$scratch" && pwd -P)
-case $scratch in "$(cd "$top" && pwd -P)"/*) echo "scratch $scratch is inside hades" >&2; exit 2 ;; esac
+case $scratch in "$(cd "$top" && pwd -P)"/*) echo "scratch $scratch is inside revenant" >&2; exit 2 ;; esac
 mkdir -p "$evidence_root"
 echo "run $run, scratch $scratch"
 
@@ -57,7 +57,7 @@ xmake_bin=$(command -v xmake)
 tests_dir=$(cd "$(dirname "$0")" && pwd)
 
 # The plugin cloned at HEAD, and the guard in front of xmake. Each scenario gets its own HOME.
-clone=$scratch/hades plugin=$scratch/hades/psychopomp guard=$scratch/guard
+clone=$scratch/revenant plugin=$scratch/revenant/agent-skills guard=$scratch/guard
 mkdir -p "$guard"
 homes=()
 cleanup() { local h; for h in "${homes[@]+"${homes[@]}"}"; do rm -rf "$h"; done; }
@@ -77,7 +77,7 @@ fresh_home() {
   home=$1; homes+=("$home"); mkdir -p "$home/.claude"; chmod 700 "$home"
   vars=(HOME="$home" USER="$USER" LOGNAME="$USER" SHELL=/bin/zsh LANG=en_US.UTF-8 TERM=xterm-256color
         TMPDIR="$scratch/tmp" PATH="$guard:$brew_prefix/bin:$brew_prefix/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
-        XMAKE_GLOBALDIR="$real_home" CHARON_HOME="$real_home/.charon")
+        XMAKE_GLOBALDIR="$real_home" REVENANT_HOME="$real_home/.revenant")
   (umask 077; security find-generic-password -s "Claude Code-credentials" -w |
     "$xmake_bin" l "$tests_dir/credentials.lua" store "$home/.claude/.credentials.json")
   left=$("$xmake_bin" l "$tests_dir/credentials.lua" left "$home/.claude/.credentials.json")
@@ -96,9 +96,9 @@ esac
 # Install the plugin into a HOME with nothing else in it, the way a user would.
 install_plugin() {
   clean_env claude plugin marketplace add "$clone" > "$1" 2>&1
-  clean_env claude plugin install psychopomp@hades --scope user >> "$1" 2>&1
+  clean_env claude plugin install agent-skills@revenant --scope user >> "$1" 2>&1
   clean_env claude plugin list >> "$1" 2>&1
-  grep -q psychopomp "$1" || { echo "the plugin did not install; see $1" >&2; return 1; }
+  grep -q agent-skills "$1" || { echo "the plugin did not install; see $1" >&2; return 1; }
   local d
   for d in .claude/skills .agents/skills .codex .config/opencode; do
     [ ! -e "$home/$d" ] || { echo "the clean HOME already has $d" >&2; return 1; }

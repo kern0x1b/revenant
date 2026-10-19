@@ -31,7 +31,7 @@ function run(opt)
     if no_background then
         os.vrunv("plutil", {"-remove", "UIBackgroundModes", path.join(out, "Info.plist")})
     end
-    local envs = {CHARCOREMIDI_ROOT = steps.charon(), CHARCOREMIDI_MINIMUM = minimum}
+    local envs = {CHARCOREMIDI_ROOT = steps.revenant(), CHARCOREMIDI_MINIMUM = minimum}
     if probe and not steps.env("CHARCOREMIDI_PROBE") then
         envs.CHARCOREMIDI_PROBE = "1"
     end
@@ -40,7 +40,7 @@ function run(opt)
                     argv = {"f", "-p", "iphoneos", "-a", "armv7", "-y"}, log = path.join(out, "configure.log")})
     steps.required({what = "the application", verb = "install", curdir = out, envs = envs,
                     argv = table.join(device, {"install"}), log = path.join(out, "install.log")})
-    local launch_argv = table.join(device, probe and {"-s", seconds} or {}, {"launch", "local.charon.backports.coremidiapp"},
+    local launch_argv = table.join(device, probe and {"-s", seconds} or {}, {"launch", "local.revenant.backports.coremidiapp"},
                                    probe and {"until-exit"} or {})
     local log = path.join(out, "launch.log")
     local launch_status = steps.spawn({curdir = out, envs = envs, argv = launch_argv, log = log})

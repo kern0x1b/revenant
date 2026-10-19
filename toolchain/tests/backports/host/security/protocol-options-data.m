@@ -4,10 +4,10 @@
 #import <dispatch/dispatch.h>
 #import <stdio.h>
 
-@interface CharonSecProtocolData : NSObject <OS_sec_protocol_options>
-- (dispatch_data_t)charonDHParams;
-- (size_t)charonPSKCount;
-- (BOOL)charonPSKAt:(size_t)index psk:(dispatch_data_t *)psk identity:(dispatch_data_t *)identity;
+@interface RevenantSecProtocolData : NSObject <OS_sec_protocol_options>
+- (dispatch_data_t)revenantDHParams;
+- (size_t)revenantPSKCount;
+- (BOOL)revenantPSKAt:(size_t)index psk:(dispatch_data_t *)psk identity:(dispatch_data_t *)identity;
 @end
 
 static int failures = 0;
@@ -45,24 +45,24 @@ int main(void)
     setvbuf(stdout, NULL, _IONBF, 0);
     __weak id weakOptions = nil;
     @autoreleasepool {
-        Class cls = NSClassFromString(@"CharonSecProtocolData");
+        Class cls = NSClassFromString(@"RevenantSecProtocolData");
         printf("port-class\t%s\n", cls ? "found" : "MISSING");
         if (!cls) return 1;
         sec_protocol_options_t o = (sec_protocol_options_t)[[cls alloc] init];
 
         setFromAScopeThatEnds(o);
 
-        text([(id)o charonDHParams], "dh-after-scope");
+        text([(id)o revenantDHParams], "dh-after-scope");
         dispatch_data_t psk = NULL, identity = NULL;
-        want("pair-present", [(id)o charonPSKAt:0 psk:&psk identity:&identity] ? 1 : 0, 1);
+        want("pair-present", [(id)o revenantPSKAt:0 psk:&psk identity:&identity] ? 1 : 0, 1);
         text(psk, "psk-after-scope");
         text(identity, "identity-after-scope");
-        want("psk-count", (long)[(id)o charonPSKCount], 1);
+        want("psk-count", (long)[(id)o revenantPSKCount], 1);
         const char a[] = "key only";
         dispatch_data_t onlyKey = dispatch_data_create(a, sizeof a - 1, NULL, NULL);
         sec_protocol_options_add_pre_shared_key(o, onlyKey, NULL);
-        want("after-half-pair", (long)[(id)o charonPSKCount], 1);
-        want("past-end", [(id)o charonPSKAt:9 psk:&psk identity:&identity] ? 1 : 0, 0);
+        want("after-half-pair", (long)[(id)o revenantPSKCount], 1);
+        want("past-end", [(id)o revenantPSKAt:9 psk:&psk identity:&identity] ? 1 : 0, 0);
 
         sec_protocol_options_set_tls_diffie_hellman_parameters(NULL, NULL);
         sec_protocol_options_add_pre_shared_key(NULL, NULL, NULL);

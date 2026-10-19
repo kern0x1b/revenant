@@ -5,7 +5,7 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../../common/runs.sh" "$here"
-BUILD=${BUILD:-$(runs_fresh charon-lighting)}
+BUILD=${BUILD:-$(runs_fresh revenant-lighting)}
 cp "$here"/fitspec.py "$here"/fitpbr.py "$here"/fitgraze.py "$here"/fitselfillumination.py "$BUILD"/
 xcrun swiftc -O "$here/dense.swift" -o "$BUILD/dense"
 xcrun swiftc -O "$here/grazing.swift" -o "$BUILD/grazing"

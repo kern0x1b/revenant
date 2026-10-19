@@ -1,9 +1,9 @@
 #import <BackgroundTasks/BackgroundTasks.h>
 
-@interface BGTaskRequest (CharonBackgroundTasks)
-- (instancetype)initCharonWithIdentifier:(NSString *)identifier;
+@interface BGTaskRequest (RevenantBackgroundTasks)
+- (instancetype)initRevenantWithIdentifier:(NSString *)identifier;
 @end
 
-@interface BGTask (CharonBackgroundTasks)
-- (instancetype)initCharonWithIdentifier:(NSString *)identifier;
+@interface BGTask (RevenantBackgroundTasks)
+- (instancetype)initRevenantWithIdentifier:(NSString *)identifier;
 @end

@@ -22,7 +22,7 @@
 #include <string_view>
 #include <vector>
 
-namespace shade {
+namespace emulator {
 
 enum class HostNetworkPolicy : std::uint8_t {
     Isolated,

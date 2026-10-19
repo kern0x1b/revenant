@@ -14,7 +14,7 @@ static NSString *yes_no(BOOL answer)
 static NSString *class_name(id object)
 {
     NSString *name = NSStringFromClass([object class]);
-    return [name hasPrefix:@"CharonPort"] ? [name substringFromIndex:10] : name;
+    return [name hasPrefix:@"RevenantPort"] ? [name substringFromIndex:12] : name;
 }
 
 static NSString *count_text(NSArray *items)

@@ -1,3 +1,3 @@
-#import "CharonVideoToolbox.h"
+#import "RevenantVideoToolbox.h"
 
 NSErrorDomain const VTFrameProcessorErrorDomain = @"VTFrameProcessorErrorDomain";

@@ -1,12 +1,12 @@
-#import "CharonOrderedCollections.h"
+#import "RevenantOrderedCollections.h"
 
-static NSComparisonResult charon_compare_changes(NSOrderedCollectionChange *one, NSOrderedCollectionChange *two, void *context)
+static NSComparisonResult revenant_compare_changes(NSOrderedCollectionChange *one, NSOrderedCollectionChange *two, void *context)
 {
     NSUInteger a = one.index, b = two.index;
     return a < b ? NSOrderedAscending : (a > b ? NSOrderedDescending : NSOrderedSame);
 }
 
-static void charon_raise_duplicate(NSString *reason, NSUInteger index)
+static void revenant_raise_duplicate(NSString *reason, NSUInteger index)
 {
     [[NSException exceptionWithName:NSInvalidArgumentException reason:reason userInfo:@{@"index": @(index)}] raise];
 }
@@ -64,7 +64,7 @@ static void charon_raise_duplicate(NSString *reason, NSUInteger index)
         NSUInteger index = change.index, link = change.associatedIndex;
         if (change.changeType == NSCollectionChangeInsert) {
             if ([insertSeen containsIndex:index])
-                charon_raise_duplicate(@"Remove index duplicated between index set and additional changes parameters", index);
+                revenant_raise_duplicate(@"Remove index duplicated between index set and additional changes parameters", index);
             if (insertedObjects && !change.object)
                 [NSException raise:NSInvalidArgumentException format:@"Inserted objects array provided, but additional change omitted object"];
             if (!insertedObjects && change.object)
@@ -77,7 +77,7 @@ static void charon_raise_duplicate(NSString *reason, NSUInteger index)
             }
         } else {
             if ([removeSeen containsIndex:index])
-                charon_raise_duplicate(@"Insert index duplicated between index set and additional changes parameters", index);
+                revenant_raise_duplicate(@"Insert index duplicated between index set and additional changes parameters", index);
             if (removedObjects && !change.object)
                 [NSException raise:NSInvalidArgumentException format:@"Removed objects array provided, but additional change omitted object"];
             if (!removedObjects && change.object)
@@ -104,21 +104,21 @@ static void charon_raise_duplicate(NSString *reason, NSUInteger index)
             [NSException raise:NSInvalidArgumentException format:@"Inconsistent associations for moves"];
         [[NSException exceptionWithName:NSInternalInconsistencyException reason:@"Unbalanced number of remove and insert changes with associations." userInfo:@{@"NSAssertFile": @"NSOrderedCollectionDifference.m", @"NSAssertLine": @38}] raise];
     }
-    [insertions sortUsingFunction:charon_compare_changes context:NULL];
-    [removals sortUsingFunction:charon_compare_changes context:NULL];
+    [insertions sortUsingFunction:revenant_compare_changes context:NULL];
+    [removals sortUsingFunction:revenant_compare_changes context:NULL];
     if ((self = [super init]))
-        [self charon_setInsertions:insertions removals:removals];
+        [self revenant_setInsertions:insertions removals:removals];
     return self;
 }
 
-- (instancetype)charon_initWithInsertions:(NSArray *)insertions removals:(NSArray *)removals
+- (instancetype)revenant_initWithInsertions:(NSArray *)insertions removals:(NSArray *)removals
 {
     if ((self = [self initWithInsertIndexes:[NSIndexSet indexSet] insertedObjects:nil removeIndexes:[NSIndexSet indexSet] removedObjects:nil]))
-        [self charon_setInsertions:insertions removals:removals];
+        [self revenant_setInsertions:insertions removals:removals];
     return self;
 }
 
-- (void)charon_setInsertions:(NSArray *)insertions removals:(NSArray *)removals
+- (void)revenant_setInsertions:(NSArray *)insertions removals:(NSArray *)removals
 {
     _insertions = [insertions copy];
     _removals = [removals copy];
@@ -164,7 +164,7 @@ static void charon_raise_duplicate(NSString *reason, NSUInteger index)
         [insertions addObject:[NSOrderedCollectionChange changeWithObject:change.object type:NSCollectionChangeInsert index:change.index associatedIndex:change.associatedIndex]];
     for (NSOrderedCollectionChange *change in _insertions)
         [removals addObject:[NSOrderedCollectionChange changeWithObject:change.object type:NSCollectionChangeRemove index:change.index associatedIndex:change.associatedIndex]];
-    return [[[self class] alloc] charon_initWithInsertions:insertions removals:removals];
+    return [[[self class] alloc] revenant_initWithInsertions:insertions removals:removals];
 }
 
 - (BOOL)isEqual:(id)other
@@ -191,7 +191,7 @@ static void charon_raise_duplicate(NSString *reason, NSUInteger index)
     return [NSString stringWithFormat:@"<%@: %p>(%lu insertion%@, %lu removal%@)", NSStringFromClass([self class]), self, (unsigned long)insertions, insertions == 1 ? @"" : @"s", (unsigned long)removals, removals == 1 ? @"" : @"s"];
 }
 
-- (NSString *)charon_listing
+- (NSString *)revenant_listing
 {
     NSMutableString *text = [NSMutableString string];
     if (!_ordered.count)
@@ -212,7 +212,7 @@ static void charon_raise_duplicate(NSString *reason, NSUInteger index)
             break;
         }
     if (!plain)
-        return [NSString stringWithFormat:@"%@ %@", self.description, [self charon_listing]];
+        return [NSString stringWithFormat:@"%@ %@", self.description, [self revenant_listing]];
     NSMutableString *text = [NSMutableString string], *lines = [NSMutableString string];
     NSUInteger removalIndex = 0, insertionIndex = 0, removalsBefore = 0, insertionsBefore = 0;
     BOOL open = NO, hasInsertion = NO, lastWasRemoval = NO;

@@ -9,7 +9,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @protocol AVCaptureSessionDeferredStartDelegate;
 
-@interface AVCaptureSession (CharonCaptureDeferredStart26)
+@interface AVCaptureSession (RevenantCaptureDeferredStart26)
 
 @property(nonatomic, readonly, getter=isManualDeferredStartSupported) BOOL manualDeferredStartSupported API_AVAILABLE(ios(26.0));
 @property(nonatomic) BOOL automaticallyRunsDeferredStart API_AVAILABLE(ios(26.0));
@@ -20,14 +20,14 @@ NS_ASSUME_NONNULL_BEGIN
 
 @end
 
-@interface AVCaptureOutput (CharonCaptureDeferredStart26)
+@interface AVCaptureOutput (RevenantCaptureDeferredStart26)
 
 @property(nonatomic, readonly, getter=isDeferredStartSupported) BOOL deferredStartSupported API_AVAILABLE(ios(26.0));
 @property(nonatomic, getter=isDeferredStartEnabled) BOOL deferredStartEnabled API_AVAILABLE(ios(26.0));
 
 @end
 
-@interface AVCaptureVideoPreviewLayer (CharonCaptureDeferredStart26)
+@interface AVCaptureVideoPreviewLayer (RevenantCaptureDeferredStart26)
 
 @property(nonatomic, readonly, getter=isDeferredStartSupported) BOOL deferredStartSupported API_AVAILABLE(ios(26.0));
 @property(nonatomic, getter=isDeferredStartEnabled) BOOL deferredStartEnabled API_AVAILABLE(ios(26.0));

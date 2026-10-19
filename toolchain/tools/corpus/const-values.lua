@@ -140,7 +140,7 @@ end
 function main(...)
     local args = common.parse_args("const-values.lua", OPTIONS, {...})
     local started = os.mclock()
-    local charon_root = os.getenv("CHARON_ROOT") or workspace.root()
+    local revenant_root = os.getenv("REVENANT_ROOT") or workspace.root()
     local scratch = workspace.fresh("const-values")
     local surface = args.surface or workspace.corpus("sdk-26.2-surface.tsv")
 
@@ -163,7 +163,7 @@ function main(...)
         end
     end
     byteorder.sort(strings)
-    local reference = values_const.read_cache(args["oracle-cache"], symbols(strings), scratch, charon_root)
+    local reference = values_const.read_cache(args["oracle-cache"], symbols(strings), scratch, revenant_root)
     local pairs_given = common.split(args.caches, ",")
     local release_of = {}
     for _, pair in ipairs(pairs_given) do
@@ -233,7 +233,7 @@ function main(...)
                 ask[name] = true
             end
             local batch = symbols(sorted_keys(ask))
-            local probe, abi = values_const.read_cache(cachefile, oracle_symbols, scratch, charon_root)
+            local probe, abi = values_const.read_cache(cachefile, oracle_symbols, scratch, revenant_root)
             local present = sorted_keys(probe)
             local agreed, agreed_set, changed, changed_count = {}, {}, {}, 0
             for _, name in ipairs(present) do
@@ -263,7 +263,7 @@ function main(...)
                 if verdicts[abi] == nil then
                     verdicts[abi] = {release = release, agreed = #agreed, present = #present}
                 end
-                local values = values_const.read_cache(cachefile, batch, scratch, charon_root)
+                local values = values_const.read_cache(cachefile, batch, scratch, revenant_root)
                 local found = 0
                 for _, name in ipairs(sorted_keys(values)) do
                     local value = values[name]
@@ -291,7 +291,7 @@ function main(...)
             table.insert(refused, string.format("%s (%s: unchecked, and no %s cache was checked to inherit from)", pending.release, pending.abi, pending.abi))
             note(string.format("    %s (%s): no %s cache was checked, so this one is refused", pending.release, pending.abi, pending.abi))
         else
-            local values = values_const.read_cache(pending.cachefile, pending.batch, scratch, charon_root)
+            local values = values_const.read_cache(pending.cachefile, pending.batch, scratch, revenant_root)
             local found = 0
             for name, value in pairs(values) do
                 found = found + 1

@@ -54,7 +54,7 @@ void foundation8b_run(Foundation8bRecorder record)
     record(@"deallocator.data", [NSString stringWithFormat:@"%lu %d", (unsigned long)data.length, ((const uint8_t *)data.bytes)[31]]);
     record(@"extension.main", [NSString stringWithFormat:@"%d", (void *)NSExtensionMain != NULL]);
 
-    NSString *folder = [NSTemporaryDirectory() stringByAppendingPathComponent:@"charon-intents"];
+    NSString *folder = [NSTemporaryDirectory() stringByAppendingPathComponent:@"revenant-intents"];
     [[NSFileManager defaultManager] removeItemAtPath:folder error:NULL];
     [[NSFileManager defaultManager] createDirectoryAtPath:folder withIntermediateDirectories:YES attributes:nil error:NULL];
     NSURL *file = [NSURL fileURLWithPath:[folder stringByAppendingPathComponent:@"one.txt"]];

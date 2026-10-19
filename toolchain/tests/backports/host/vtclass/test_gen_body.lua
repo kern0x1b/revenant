@@ -264,11 +264,11 @@ local function run_checks()
     end
 
     local EXPECTED = {
-        ["object"] = "CHARON_VALUE_PROPERTY(NSIndexSet *, supportedRevisions)\n",
+        ["object"] = "REVENANT_VALUE_PROPERTY(NSIndexSet *, supportedRevisions)\n",
         ["class-object"] = "+ (NSIndexSet *)supportedRevisions\n{\n"
-            .. "    return (NSIndexSet *)CharonValueStoreOfClass([self class])"
+            .. "    return (NSIndexSet *)RevenantValueStoreOfClass([self class])"
             .. "[@\"supportedRevisions\"];\n}\n",
-        ["scalar"] = "CHARON_SCALAR_PROPERTY(NSInteger, frameWidth)\n",
+        ["scalar"] = "REVENANT_SCALAR_PROPERTY(NSInteger, frameWidth)\n",
     }
     local shapes = {
         {"object", G.odict_get(props('@property (nonatomic, readonly) NSIndexSet* supportedRevisions;'),
@@ -379,11 +379,11 @@ local function run_checks()
     local STRUCT_ARG = {{"presentationTimeStamp", "CMTime", "presentationTimeStamp"}}
     local branch_cases = {
         {"a scalar goes in the keyed store", SCALAR_ARGS,
-         '    CharonValueSet(self, @(frameWidth), @"frameWidth");'},
+         '    RevenantValueSet(self, @(frameWidth), @"frameWidth");'},
         {"a CFTypeRef goes in an ivar, retained", CF_ARG,
          '    if (self->_buffer)\n        CFRetain(self->_buffer);'},
         {"a struct is boxed, which is what getValue: reads", STRUCT_ARG,
-         'CharonValueSet(self, [NSValue valueWithBytes:&boxed objCType:@encode(CMTime)], @"presentationTimeStamp");'},
+         'RevenantValueSet(self, [NSValue valueWithBytes:&boxed objCType:@encode(CMTime)], @"presentationTimeStamp");'},
     }
     for _, bc in ipairs(branch_cases) do
         local label, arg, wanted = bc[1], bc[2], bc[3]
@@ -402,7 +402,7 @@ local function run_checks()
 
     local cf_accessor = G.body("buffer", G.odict_get(props("@property(nonatomic,readonly) CVPixelBufferRef buffer;"),
                                                      "buffer"))
-    if not cf_accessor:find("self->_buffer", 1, true) or cf_accessor:find("CharonValueStore", 1, true) then
+    if not cf_accessor:find("self->_buffer", 1, true) or cf_accessor:find("RevenantValueStore", 1, true) then
         bad[#bad + 1] = "the CF accessor does not read the ivar:\n" .. cf_accessor
     else
         print("  the CF accessor reads the ivar: " .. strip_ws(first_line(cf_accessor)))

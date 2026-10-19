@@ -230,7 +230,7 @@ function write_output(results, args, elapsed, indexes, walked, header_seconds, s
     write(string.format("| real 26.2 SDK | `%s` |\n", plain_replace(ledger_inputs.short((args.sdk:gsub("/+$", ""))), "$HOME/.agent-work/sdk-26.2/", "")))
     write(string.format("| lift overlay | `%s` (mtime %d) |\n", path.filename(args.vfs), os.mtime(args.vfs)))
     write(string.format("| header target | `%s` |\n", TARGET))
-    write(string.format("| tool | `charon/tools/corpus/%s`, header walk by `tools/corpus/%s` |\n\n", TOOL, WALK))
+    write(string.format("| tool | `toolchain/tools/corpus/%s`, header walk by `tools/corpus/%s` |\n\n", TOOL, WALK))
     write(string.format("Reproduce (the per-framework header walk is cached under `--cache-dir`, keyed by the SDK, the target and the overlay's mtime, so the first run over new inputs is the expensive one and every run after it is cheap):\n\n```\n%s build \\\n  --surface %s \\\n  --gate %s \\\n  --release %s --release-cache %s \\\n  --sdk %s \\\n  --vfs %s \\\n  --cache-dir <dir> --out <dir> --jobs %d\n```\n\n",
                         TOOL, ledger_inputs.short(args.surface), ledger_inputs.short(args.gate), release, ledger_inputs.short(args.release_cache),
                         ledger_inputs.short(args.sdk), ledger_inputs.short(args.vfs), args.jobs))

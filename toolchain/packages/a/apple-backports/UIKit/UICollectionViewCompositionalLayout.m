@@ -1,17 +1,17 @@
-#import "CharonCompositionalLayout.h"
+#import "RevenantCompositionalLayout.h"
 #import <objc/runtime.h>
 
-@interface UICollectionViewCompositionalLayout (CharonSectionNoting)
-- (void)charon_beginNotingSections;
-- (void)charon_noteSection:(NSCollectionLayoutSection *)section;
+@interface UICollectionViewCompositionalLayout (RevenantSectionNoting)
+- (void)revenant_beginNotingSections;
+- (void)revenant_noteSection:(NSCollectionLayoutSection *)section;
 @end
 
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
 
-static const NSInteger CharonBoundaryIndexMax = NSIntegerMax;
-static const NSInteger CharonPinnedZIndex = 1000000000;
+static const NSInteger RevenantBoundaryIndexMax = NSIntegerMax;
+static const NSInteger RevenantPinnedZIndex = 1000000000;
 
-@interface CharonCollectionLayoutContainer : NSObject <NSCollectionLayoutContainer> {
+@interface RevenantCollectionLayoutContainer : NSObject <NSCollectionLayoutContainer> {
 @private
     CGSize _contentSize;
     NSDirectionalEdgeInsets _insets;
@@ -19,7 +19,7 @@ static const NSInteger CharonPinnedZIndex = 1000000000;
 - (instancetype)initWithContentSize:(CGSize)size insets:(NSDirectionalEdgeInsets)insets;
 @end
 
-@implementation CharonCollectionLayoutContainer
+@implementation RevenantCollectionLayoutContainer
 
 - (instancetype)initWithContentSize:(CGSize)size insets:(NSDirectionalEdgeInsets)insets
 {
@@ -52,7 +52,7 @@ static const NSInteger CharonPinnedZIndex = 1000000000;
 
 @end
 
-@interface CharonCollectionLayoutEnvironment : NSObject <NSCollectionLayoutEnvironment> {
+@interface RevenantCollectionLayoutEnvironment : NSObject <NSCollectionLayoutEnvironment> {
 @private
     id<NSCollectionLayoutContainer> _container;
     UITraitCollection *_traitCollection;
@@ -60,7 +60,7 @@ static const NSInteger CharonPinnedZIndex = 1000000000;
 - (instancetype)initWithContainer:(id<NSCollectionLayoutContainer>)container traitCollection:(UITraitCollection *)traitCollection;
 @end
 
-@implementation CharonCollectionLayoutEnvironment
+@implementation RevenantCollectionLayoutEnvironment
 
 - (instancetype)initWithContainer:(id<NSCollectionLayoutContainer>)container traitCollection:(UITraitCollection *)traitCollection
 {
@@ -132,12 +132,12 @@ static const NSInteger CharonPinnedZIndex = 1000000000;
     _boundarySupplementaryItems = [boundarySupplementaryItems copy];
 }
 
-- (NSInteger)charon_contentInsetsReference
+- (NSInteger)revenant_contentInsetsReference
 {
     return _contentInsetsReference;
 }
 
-- (void)charon_setContentInsetsReference:(NSInteger)reference
+- (void)revenant_setContentInsetsReference:(NSInteger)reference
 {
     _contentInsetsReference = reference;
 }
@@ -156,13 +156,13 @@ static const NSInteger CharonPinnedZIndex = 1000000000;
 
 #pragma mark - Solving
 
-@implementation CharonSolvedElement
+@implementation RevenantSolvedElement
 @end
 
-@implementation CharonSolvedSection
+@implementation RevenantSolvedSection
 @end
 
-@interface CharonSlot : NSObject {
+@interface RevenantSlot : NSObject {
 @public
     NSCollectionLayoutItem *item;
     CGRect slot;
@@ -170,10 +170,10 @@ static const NSInteger CharonPinnedZIndex = 1000000000;
 }
 @end
 
-@implementation CharonSlot
+@implementation RevenantSlot
 @end
 
-@interface CharonLeaf : NSObject {
+@interface RevenantLeaf : NSObject {
 @public
     CGRect frame;
     NSInteger zIndex;
@@ -185,10 +185,10 @@ static const NSInteger CharonPinnedZIndex = 1000000000;
 }
 @end
 
-@implementation CharonLeaf
+@implementation RevenantLeaf
 @end
 
-@interface CharonSolver : NSObject {
+@interface RevenantSolver : NSObject {
 @public
     CGFloat scale;
     CGSize container;
@@ -205,7 +205,7 @@ static const NSInteger CharonPinnedZIndex = 1000000000;
 }
 @end
 
-@implementation CharonSolver
+@implementation RevenantSolver
 
 - (CGFloat)floorPixels:(CGFloat)value
 {
@@ -226,18 +226,18 @@ static const NSInteger CharonPinnedZIndex = 1000000000;
     return dimension.dimension;
 }
 
-static CGFloat charon_spacing_min(NSCollectionLayoutSpacing *spacing)
+static CGFloat revenant_spacing_min(NSCollectionLayoutSpacing *spacing)
 {
     return spacing ? spacing.spacing : 0;
 }
 
-static CGFloat charon_edge_min(NSCollectionLayoutEdgeSpacing *edges, NSInteger edge)
+static CGFloat revenant_edge_min(NSCollectionLayoutEdgeSpacing *edges, NSInteger edge)
 {
     NSCollectionLayoutSpacing *spacing = edge == 0 ? edges.leading : edge == 1 ? edges.top : edge == 2 ? edges.trailing : edges.bottom;
-    return charon_spacing_min(spacing);
+    return revenant_spacing_min(spacing);
 }
 
-static BOOL charon_edge_flexible(NSCollectionLayoutEdgeSpacing *edges, NSInteger edge)
+static BOOL revenant_edge_flexible(NSCollectionLayoutEdgeSpacing *edges, NSInteger edge)
 {
     NSCollectionLayoutSpacing *spacing = edge == 0 ? edges.leading : edge == 1 ? edges.top : edge == 2 ? edges.trailing : edges.bottom;
     return spacing.isFlexibleSpacing;
@@ -280,13 +280,13 @@ static BOOL charon_edge_flexible(NSCollectionLayoutEdgeSpacing *edges, NSInteger
 
 - (NSArray *)computePatternForGroup:(NSCollectionLayoutGroup *)group inner:(CGSize)inner
 {
-    BOOL horizontal = group.charon_direction == CharonGroupDirectionHorizontal;
+    BOOL horizontal = group.revenant_direction == RevenantGroupDirectionHorizontal;
     NSArray *subitems = group.subitems;
     NSUInteger cycle = subitems.count;
     if (cycle == 0)
         return nil;
-    NSInteger fixedCount = group.charon_repeatCount;
-    CGFloat between = charon_spacing_min(group.interItemSpacing);
+    NSInteger fixedCount = group.revenant_repeatCount;
+    CGFloat between = revenant_spacing_min(group.interItemSpacing);
     BOOL betweenFlexible = group.interItemSpacing.isFlexibleSpacing;
     CGFloat main = horizontal ? inner.width : inner.height;
     CGFloat cross = horizontal ? inner.height : inner.width;
@@ -302,7 +302,7 @@ static BOOL charon_edge_flexible(NSCollectionLayoutEdgeSpacing *edges, NSInteger
     NSUInteger limit = fixedCount > 0 ? (NSUInteger)fixedCount : 512;
     CGFloat (^extent)(NSCollectionLayoutItem *, CGFloat) = ^CGFloat(NSCollectionLayoutItem *item, CGFloat base) {
         return [self resolve:mainDimension(item) width:horizontal ? base : inner.width height:horizontal ? inner.height : base]
-             + charon_edge_min(item.edgeSpacing, horizontal ? 0 : 1) + charon_edge_min(item.edgeSpacing, horizontal ? 2 : 3);
+             + revenant_edge_min(item.edgeSpacing, horizontal ? 0 : 1) + revenant_edge_min(item.edgeSpacing, horizontal ? 2 : 3);
     };
     NSUInteger chosen = 0;
     CGFloat base = main;
@@ -360,21 +360,21 @@ static BOOL charon_edge_flexible(NSCollectionLayoutEdgeSpacing *edges, NSInteger
         NSCollectionLayoutDimension *crossDimension = horizontal ? item.layoutSize.heightDimension : item.layoutSize.widthDimension;
         sizes[index] = [self resolve:mainDimension width:horizontal ? base : inner.width height:horizontal ? inner.height : base];
         crossSizes[index] = [self resolve:crossDimension width:horizontal ? base : inner.width height:horizontal ? inner.height : base];
-        leadMin[index] = charon_edge_min(item.edgeSpacing, horizontal ? 0 : 1);
-        trailMin[index] = charon_edge_min(item.edgeSpacing, horizontal ? 2 : 3);
-        leadFlex[index] = charon_edge_flexible(item.edgeSpacing, horizontal ? 0 : 1);
-        trailFlex[index] = charon_edge_flexible(item.edgeSpacing, horizontal ? 2 : 3);
+        leadMin[index] = revenant_edge_min(item.edgeSpacing, horizontal ? 0 : 1);
+        trailMin[index] = revenant_edge_min(item.edgeSpacing, horizontal ? 2 : 3);
+        leadFlex[index] = revenant_edge_flexible(item.edgeSpacing, horizontal ? 0 : 1);
+        trailFlex[index] = revenant_edge_flexible(item.edgeSpacing, horizontal ? 2 : 3);
     }
     [self placeRun:main count:count sizes:sizes leadMin:leadMin trailMin:trailMin leadFlex:leadFlex trailFlex:trailFlex between:between betweenFlexible:betweenFlexible positions:positions];
     NSMutableArray *slots = [NSMutableArray arrayWithCapacity:count];
     for (NSUInteger index = 0; index < count; index++) {
         NSCollectionLayoutItem *item = subitems[index % cycle];
         CGFloat one = crossSizes[index];
-        CGFloat crossLead = charon_edge_min(item.edgeSpacing, horizontal ? 1 : 0), crossTrail = charon_edge_min(item.edgeSpacing, horizontal ? 3 : 2);
-        BOOL crossLeadFlex = charon_edge_flexible(item.edgeSpacing, horizontal ? 1 : 0), crossTrailFlex = charon_edge_flexible(item.edgeSpacing, horizontal ? 3 : 2);
+        CGFloat crossLead = revenant_edge_min(item.edgeSpacing, horizontal ? 1 : 0), crossTrail = revenant_edge_min(item.edgeSpacing, horizontal ? 3 : 2);
+        BOOL crossLeadFlex = revenant_edge_flexible(item.edgeSpacing, horizontal ? 1 : 0), crossTrailFlex = revenant_edge_flexible(item.edgeSpacing, horizontal ? 3 : 2);
         CGFloat crossPosition = 0;
         [self placeRun:cross count:1 sizes:&one leadMin:&crossLead trailMin:&crossTrail leadFlex:&crossLeadFlex trailFlex:&crossTrailFlex between:0 betweenFlexible:NO positions:&crossPosition];
-        CharonSlot *slot = [[CharonSlot alloc] init];
+        RevenantSlot *slot = [[RevenantSlot alloc] init];
         slot->item = item;
         CGFloat mainPosition = [self roundPixels:positions[index]];
         crossPosition = [self roundPixels:crossPosition];
@@ -394,16 +394,16 @@ static BOOL charon_edge_flexible(NSCollectionLayoutEdgeSpacing *edges, NSInteger
 
 - (NSArray *)measuredSlots:(NSArray *)slots group:(NSCollectionLayoutGroup *)group horizontal:(BOOL)horizontal first:(NSInteger)first found:(BOOL *)found
 {
-    for (CharonSlot *slot in slots) {
+    for (RevenantSlot *slot in slots) {
         if ([slot->item isKindOfClass:[NSCollectionLayoutGroup class]])
             return slots;
     }
-    BOOL counted = group.charon_repeatCount > 0;
+    BOOL counted = group.revenant_repeatCount > 0;
     NSMutableArray *result = [NSMutableArray arrayWithCapacity:slots.count];
     CGFloat shift = 0;
     for (NSUInteger index = 0; index < slots.count; index++) {
-        CharonSlot *slot = slots[index];
-        CharonSlot *copy = [[CharonSlot alloc] init];
+        RevenantSlot *slot = slots[index];
+        RevenantSlot *copy = [[RevenantSlot alloc] init];
         copy->item = slot->item;
         copy->slot = slot->slot;
         copy->edge = slot->edge;
@@ -442,18 +442,18 @@ static BOOL charon_edge_flexible(NSCollectionLayoutEdgeSpacing *edges, NSInteger
 {
     NSCollectionLayoutSize *layoutSize = supplementary.layoutSize;
     if (layoutSize.widthDimension.isEstimated || layoutSize.heightDimension.isEstimated)
-        charon_layout_say_once(@"estimated-supplementary", @"UICollectionViewCompositionalLayout: a supplementary item of an item or of a group is laid out at its estimate; only the boundary items of a section or the layout are measured.");
+        revenant_layout_say_once(@"estimated-supplementary", @"UICollectionViewCompositionalLayout: a supplementary item of an item or of a group is laid out at its estimate; only the boundary items of a section or the layout are measured.");
     CGFloat width = [self resolve:layoutSize.widthDimension width:base.width height:base.height];
     CGFloat height = [self resolve:layoutSize.heightDimension width:base.width height:base.height];
     NSCollectionLayoutAnchor *containerAnchor = supplementary.containerAnchor, *itemAnchor = supplementary.itemAnchor ?: supplementary.containerAnchor;
-    CGPoint containerPoint = containerAnchor ? [containerAnchor charon_anchorPoint] : CGPointMake(0.5, 0.5);
+    CGPoint containerPoint = containerAnchor ? [containerAnchor revenant_anchorPoint] : CGPointMake(0.5, 0.5);
     CGPoint point = CGPointMake(CGRectGetMinX(frame) + containerPoint.x * frame.size.width, CGRectGetMinY(frame) + containerPoint.y * frame.size.height);
     if (containerAnchor) {
         CGPoint offset = containerAnchor.offset;
         point.x += containerAnchor.isAbsoluteOffset ? offset.x : offset.x * width;
         point.y += containerAnchor.isAbsoluteOffset ? offset.y : offset.y * height;
     }
-    CGPoint itemPoint = itemAnchor ? [itemAnchor charon_anchorPoint] : CGPointMake(0.5, 0.5);
+    CGPoint itemPoint = itemAnchor ? [itemAnchor revenant_anchorPoint] : CGPointMake(0.5, 0.5);
     CGPoint origin = CGPointMake(point.x - itemPoint.x * width, point.y - itemPoint.y * height);
     if (supplementary.itemAnchor) {
         CGPoint offset = supplementary.itemAnchor.offset;
@@ -468,7 +468,7 @@ static BOOL charon_edge_flexible(NSCollectionLayoutEdgeSpacing *edges, NSInteger
     for (NSCollectionLayoutSupplementaryItem *supplementary in supplementaries) {
         if (![supplementary isKindOfClass:[NSCollectionLayoutSupplementaryItem class]])
             continue;
-        CharonSolvedElement *element = [[CharonSolvedElement alloc] init];
+        RevenantSolvedElement *element = [[RevenantSolvedElement alloc] init];
         element->category = 1;
         element->kind = supplementary.elementKind;
         element->frame = [self supplementaryFrame:supplementary relativeTo:frame base:base];
@@ -488,15 +488,15 @@ static BOOL charon_edge_flexible(NSCollectionLayoutEdgeSpacing *edges, NSInteger
     NSDirectionalEdgeInsets insets = group.contentInsets;
     CGSize inner = CGSizeMake(MAX(0, outer.width - insets.leading - insets.trailing), MAX(0, outer.height - insets.top - insets.bottom));
     CGPoint innerOrigin = CGPointMake(origin.x + insets.leading, origin.y + insets.top);
-    CharonGroupDirection direction = group.charon_direction;
+    RevenantGroupDirection direction = group.revenant_direction;
     CGSize actual = outer;
-    if (direction == CharonGroupDirectionCustom) {
+    if (direction == RevenantGroupDirectionCustom) {
         NSArray *customItems = [self customItemsForGroup:group outer:outer];
         NSInteger placed = 0;
         for (NSCollectionLayoutGroupCustomItem *custom in customItems) {
             if (*remaining <= 0)
                 break;
-            CharonLeaf *leaf = [[CharonLeaf alloc] init];
+            RevenantLeaf *leaf = [[RevenantLeaf alloc] init];
             leaf->frame = CGRectOffset(custom.frame, origin.x, origin.y);
             leaf->slotEdge = CGPointMake(CGRectGetMaxX(leaf->frame), CGRectGetMaxY(leaf->frame));
             leaf->zIndex = custom.zIndex;
@@ -508,7 +508,7 @@ static BOOL charon_edge_flexible(NSCollectionLayoutEdgeSpacing *edges, NSInteger
         if (partial && placed < (NSInteger)customItems.count)
             *partial = YES;
     } else {
-        BOOL horizontal = direction == CharonGroupDirectionHorizontal;
+        BOOL horizontal = direction == RevenantGroupDirectionHorizontal;
         NSArray *slots = [self patternForGroup:group inner:inner];
         if (!slots) {
             unfit = unfit || top;
@@ -519,7 +519,7 @@ static BOOL charon_edge_flexible(NSCollectionLayoutEdgeSpacing *edges, NSInteger
         if (measured.count > 0 && !dry)
             slots = [self measuredSlots:slots group:group horizontal:horizontal first:(NSInteger)items.count found:&sized];
         CGFloat crossExtent = 0;
-        for (CharonSlot *slot in slots)
+        for (RevenantSlot *slot in slots)
             crossExtent = MAX(crossExtent, horizontal ? CGRectGetMaxY(slot->slot) : CGRectGetMaxX(slot->slot));
         BOOL crossEstimated = horizontal ? group.layoutSize.heightDimension.isEstimated : group.layoutSize.widthDimension.isEstimated;
         if (crossEstimated) {
@@ -529,7 +529,7 @@ static BOOL charon_edge_flexible(NSCollectionLayoutEdgeSpacing *edges, NSInteger
                 actual.width = crossExtent + insets.leading + insets.trailing;
         }
         BOOL ran = NO;
-        for (CharonSlot *slot in slots) {
+        for (RevenantSlot *slot in slots) {
             if (*remaining <= 0) {
                 ran = YES;
                 break;
@@ -550,11 +550,11 @@ static BOOL charon_edge_flexible(NSCollectionLayoutEdgeSpacing *edges, NSInteger
                     itemInsets.top = itemInsets.bottom = 0;
                 CGRect body = CGRectMake(frame.origin.x + itemInsets.leading, frame.origin.y + itemInsets.top, fabs(frame.size.width - itemInsets.leading - itemInsets.trailing),
                                          fabs(frame.size.height - itemInsets.top - itemInsets.bottom));
-                CharonLeaf *leaf = [[CharonLeaf alloc] init];
+                RevenantLeaf *leaf = [[RevenantLeaf alloc] init];
                 leaf->frame = body;
                 leaf->estimatedWidth = estimatedWidth;
                 leaf->estimatedHeight = estimatedHeight;
-                leaf->slotEdge = CGPointMake(CGRectGetMaxX(body) + charon_edge_min(item.edgeSpacing, 2), CGRectGetMaxY(body) + charon_edge_min(item.edgeSpacing, 3));
+                leaf->slotEdge = CGPointMake(CGRectGetMaxX(body) + revenant_edge_min(item.edgeSpacing, 2), CGRectGetMaxY(body) + revenant_edge_min(item.edgeSpacing, 3));
                 leaf->supplementaries = [NSMutableArray array];
                 [items addObject:leaf];
                 if (!dry) {
@@ -567,7 +567,7 @@ static BOOL charon_edge_flexible(NSCollectionLayoutEdgeSpacing *edges, NSInteger
         if (mainEstimatedGroup) {
             CGFloat used = 0;
             for (NSUInteger index = firstLeaf; index < items.count; index++) {
-                CharonLeaf *leaf = items[index];
+                RevenantLeaf *leaf = items[index];
                 used = MAX(used, horizontal ? leaf->slotEdge.x - innerOrigin.x : leaf->slotEdge.y - innerOrigin.y);
             }
             if (horizontal)
@@ -580,7 +580,7 @@ static BOOL charon_edge_flexible(NSCollectionLayoutEdgeSpacing *edges, NSInteger
         if (ran && top && !mainEstimatedGroup) {
             CGPoint used = CGPointZero, pattern = CGPointZero;
             for (NSUInteger index = firstLeaf; index < items.count; index++) {
-                CharonLeaf *leaf = items[index];
+                RevenantLeaf *leaf = items[index];
                 used = CGPointMake(MAX(used.x, leaf->slotEdge.x), MAX(used.y, leaf->slotEdge.y));
             }
             NSMutableArray *scratch = [NSMutableArray array];
@@ -590,7 +590,7 @@ static BOOL charon_edge_flexible(NSCollectionLayoutEdgeSpacing *edges, NSInteger
             dry = YES;
             [self layoutGroup:group origin:origin outer:outer container:containerSize remaining:&unlimited items:scratch partial:&ignored top:NO];
             dry = saved;
-            for (CharonLeaf *leaf in scratch)
+            for (RevenantLeaf *leaf in scratch)
                 pattern = CGPointMake(MAX(pattern.x, leaf->slotEdge.x), MAX(pattern.y, leaf->slotEdge.y));
             if (vertical) {
                 CGFloat innerUsed = used.y - innerOrigin.y, innerPattern = pattern.y - innerOrigin.y;
@@ -618,9 +618,9 @@ static BOOL charon_edge_flexible(NSCollectionLayoutEdgeSpacing *edges, NSInteger
     CGSize resolved = [self groupSizeFor:group container:container];
     BOOL estimated = group.layoutSize.widthDimension.isEstimated || group.layoutSize.heightDimension.isEstimated;
     NSDirectionalEdgeInsets shown = estimated ? NSDirectionalEdgeInsetsZero : insets;
-    CharonCollectionLayoutContainer *box = [[CharonCollectionLayoutContainer alloc] initWithContentSize:resolved insets:shown];
-    CharonCollectionLayoutEnvironment *environment = [[CharonCollectionLayoutEnvironment alloc] initWithContainer:box traitCollection:traits];
-    NSCollectionLayoutGroupCustomItemProvider provider = group.charon_itemProvider;
+    RevenantCollectionLayoutContainer *box = [[RevenantCollectionLayoutContainer alloc] initWithContentSize:resolved insets:shown];
+    RevenantCollectionLayoutEnvironment *environment = [[RevenantCollectionLayoutEnvironment alloc] initWithContainer:box traitCollection:traits];
+    NSCollectionLayoutGroupCustomItemProvider provider = group.revenant_itemProvider;
     NSArray *items = provider ? provider(environment) : @[];
     customCache[key] = items ?: @[];
     return customCache[key];
@@ -635,7 +635,7 @@ static BOOL charon_edge_flexible(NSCollectionLayoutEdgeSpacing *edges, NSInteger
 
 #pragma mark Sections
 
-static void charon_collect_kinds(NSCollectionLayoutItem *item, NSMutableArray *kinds)
+static void revenant_collect_kinds(NSCollectionLayoutItem *item, NSMutableArray *kinds)
 {
     for (NSCollectionLayoutSupplementaryItem *supplementary in item.supplementaryItems) {
         if ([supplementary isKindOfClass:[NSCollectionLayoutSupplementaryItem class]] && supplementary.elementKind)
@@ -643,18 +643,18 @@ static void charon_collect_kinds(NSCollectionLayoutItem *item, NSMutableArray *k
     }
     if ([item isKindOfClass:[NSCollectionLayoutGroup class]]) {
         for (NSCollectionLayoutItem *subitem in ((NSCollectionLayoutGroup *)item).subitems)
-            charon_collect_kinds(subitem, kinds);
+            revenant_collect_kinds(subitem, kinds);
     }
 }
 
-static void charon_check_unique_kinds(NSCollectionLayoutSection *section)
+static void revenant_check_unique_kinds(NSCollectionLayoutSection *section)
 {
     NSMutableArray *kinds = [NSMutableArray array];
     for (NSCollectionLayoutBoundarySupplementaryItem *boundary in section.boundarySupplementaryItems) {
         if ([boundary isKindOfClass:[NSCollectionLayoutSupplementaryItem class]] && boundary.elementKind)
             [kinds addObject:boundary.elementKind];
     }
-    charon_collect_kinds(section.charon_group, kinds);
+    revenant_collect_kinds(section.revenant_group, kinds);
     NSMutableArray *seen = [NSMutableArray array], *duplicates = [NSMutableArray array];
     for (NSString *kind in kinds) {
         if ([seen containsObject:kind]) {
@@ -671,21 +671,21 @@ static void charon_check_unique_kinds(NSCollectionLayoutSection *section)
 typedef struct {
     int horizontal;
     int vertical;
-} CharonAlignmentParts;
+} RevenantAlignmentParts;
 
-static CharonAlignmentParts charon_alignment_parts(NSRectAlignment alignment)
+static RevenantAlignmentParts revenant_alignment_parts(NSRectAlignment alignment)
 {
     switch ((NSInteger)alignment) {
-    case 1: return (CharonAlignmentParts){0, -1};
-    case 2: return (CharonAlignmentParts){-1, -1};
-    case 3: return (CharonAlignmentParts){-1, 0};
-    case 4: return (CharonAlignmentParts){-1, 1};
-    case 5: return (CharonAlignmentParts){0, 1};
-    case 6: return (CharonAlignmentParts){1, 1};
-    case 7: return (CharonAlignmentParts){1, 0};
-    case 8: return (CharonAlignmentParts){1, -1};
+    case 1: return (RevenantAlignmentParts){0, -1};
+    case 2: return (RevenantAlignmentParts){-1, -1};
+    case 3: return (RevenantAlignmentParts){-1, 0};
+    case 4: return (RevenantAlignmentParts){-1, 1};
+    case 5: return (RevenantAlignmentParts){0, 1};
+    case 6: return (RevenantAlignmentParts){1, 1};
+    case 7: return (RevenantAlignmentParts){1, 0};
+    case 8: return (RevenantAlignmentParts){1, -1};
     }
-    return (CharonAlignmentParts){2, 2};
+    return (RevenantAlignmentParts){2, 2};
 }
 
 - (void)placeBoundary:(NSArray *)boundaries in:(CGRect *)regionPointer follow:(BOOL)follow insets:(NSDirectionalEdgeInsets)insets effective:(CGSize)effective
@@ -701,7 +701,7 @@ static CharonAlignmentParts charon_alignment_parts(NSRectAlignment alignment)
         CGFloat baseHeight = vertical ? container.height : (follow ? effective.height : container.height);
         NSCollectionLayoutSize *layoutSize = boundary.layoutSize;
         CGSize size = CGSizeMake([self resolve:layoutSize.widthDimension width:baseWidth height:baseHeight], [self resolve:layoutSize.heightDimension width:baseWidth height:baseHeight]);
-        CharonAlignmentParts parts = charon_alignment_parts(boundary.alignment);
+        RevenantAlignmentParts parts = revenant_alignment_parts(boundary.alignment);
         NSIndexPath *boundaryPath = fixedIndexPath ?: [NSIndexPath indexPathForItem:0 inSection:section];
         NSValue *known = measured[[NSString stringWithFormat:@"b/%@/%ld/%ld", boundary.elementKind, (long)boundaryPath.section, (long)boundaryPath.item]];
         if (known) {
@@ -725,7 +725,7 @@ static CharonAlignmentParts charon_alignment_parts(NSRectAlignment alignment)
         NSCollectionLayoutBoundarySupplementaryItem *boundary = usable[index];
         CGSize size = [sizes[index] CGSizeValue];
         CGFloat width = size.width, height = size.height;
-        CharonAlignmentParts parts = charon_alignment_parts(boundary.alignment);
+        RevenantAlignmentParts parts = revenant_alignment_parts(boundary.alignment);
         CGPoint offset = boundary.offset;
         CGRect frame = CGRectMake(0, 0, 0, 0);
         BOOL extends = boundary.extendsBoundary;
@@ -759,7 +759,7 @@ static CharonAlignmentParts charon_alignment_parts(NSRectAlignment alignment)
                 }
             }
         }
-        CharonSolvedElement *element = [[CharonSolvedElement alloc] init];
+        RevenantSolvedElement *element = [[RevenantSolvedElement alloc] init];
         element->category = 1;
         element->kind = boundary.elementKind;
         element->frame = frame;
@@ -773,8 +773,8 @@ static CharonAlignmentParts charon_alignment_parts(NSRectAlignment alignment)
         }
         [placed addObject:element];
     }
-    for (CharonSolvedElement *element in placed) {
-        CharonAlignmentParts parts = charon_alignment_parts(element->alignment);
+    for (RevenantSolvedElement *element in placed) {
+        RevenantAlignmentParts parts = revenant_alignment_parts(element->alignment);
         if (!element->pinned)
             continue;
         BOOL leading = vertical ? parts.vertical < 0 : parts.horizontal < 0;
@@ -789,15 +789,15 @@ static CharonAlignmentParts charon_alignment_parts(NSRectAlignment alignment)
     extents[1] = extendEnd;
 }
 
-- (CharonSolvedSection *)solveSection:(NSCollectionLayoutSection *)definition index:(NSInteger)section itemCount:(NSInteger)itemCount
+- (RevenantSolvedSection *)solveSection:(NSCollectionLayoutSection *)definition index:(NSInteger)section itemCount:(NSInteger)itemCount
 {
-    if (!definition || !definition.charon_group)
+    if (!definition || !definition.revenant_group)
         [NSException raise:NSInternalInconsistencyException format:@"Invalid section definition. Please specify a valid section definition when content is to be rendered for a section. This is a client error."];
-    charon_check_unique_kinds(definition);
+    revenant_check_unique_kinds(definition);
     BOOL restoreVertical = vertical;
     BOOL orthogonal = definition.orthogonalScrollingBehavior != UICollectionLayoutSectionOrthogonalScrollingBehaviorNone && vertical;
     if (definition.orthogonalScrollingBehavior != UICollectionLayoutSectionOrthogonalScrollingBehaviorNone && !vertical)
-        charon_layout_say_once(@"orthogonal", @"UICollectionViewCompositionalLayout: a section that scrolls across a layout that scrolls sideways is laid out as an ordinary section.");
+        revenant_layout_say_once(@"orthogonal", @"UICollectionViewCompositionalLayout: a section that scrolls across a layout that scrolls sideways is laid out as an ordinary section.");
     NSArray *boundaries = definition.boundarySupplementaryItems;
     if (itemCount == 0 && boundaries.count == 0)
         return nil;
@@ -807,7 +807,7 @@ static CharonAlignmentParts charon_alignment_parts(NSRectAlignment alignment)
     NSDirectionalEdgeInsets insets = definition.contentInsets;
     CGSize effective = CGSizeMake(container.width - insets.leading - insets.trailing, container.height - insets.top - insets.bottom);
     CGSize groupContainer = vertical ? CGSizeMake(effective.width, container.height) : CGSizeMake(container.width, effective.height);
-    NSCollectionLayoutGroup *group = definition.charon_group;
+    NSCollectionLayoutGroup *group = definition.revenant_group;
     NSMutableArray *itemLeaves = [NSMutableArray array];
     unfit = NO;
     groupSupplementaries = [NSMutableArray array];
@@ -824,12 +824,12 @@ static CharonAlignmentParts charon_alignment_parts(NSRectAlignment alignment)
     while (remaining > 0) {
         CGSize outer = [self groupSizeFor:group container:groupContainer];
         CGFloat one = vertical ? outer.width : outer.height;
-        CGFloat crossLead = charon_edge_min(edges, vertical ? 0 : 1), crossTrail = charon_edge_min(edges, vertical ? 2 : 3);
-        BOOL crossLeadFlex = charon_edge_flexible(edges, vertical ? 0 : 1), crossTrailFlex = charon_edge_flexible(edges, vertical ? 2 : 3);
+        CGFloat crossLead = revenant_edge_min(edges, vertical ? 0 : 1), crossTrail = revenant_edge_min(edges, vertical ? 2 : 3);
+        BOOL crossLeadFlex = revenant_edge_flexible(edges, vertical ? 0 : 1), crossTrailFlex = revenant_edge_flexible(edges, vertical ? 2 : 3);
         CGFloat crossPosition = 0;
         [self placeRun:vertical ? effective.width : effective.height count:1 sizes:&one leadMin:&crossLead trailMin:&crossTrail leadFlex:&crossLeadFlex trailFlex:&crossTrailFlex between:0
               betweenFlexible:NO positions:&crossPosition];
-        CGFloat mainLead = charon_edge_min(edges, vertical ? 1 : 0), mainTrail = charon_edge_min(edges, vertical ? 3 : 2);
+        CGFloat mainLead = revenant_edge_min(edges, vertical ? 1 : 0), mainTrail = revenant_edge_min(edges, vertical ? 3 : 2);
         CGPoint origin = vertical ? CGPointMake(insets.leading + [self roundPixels:crossPosition], cursor + mainLead) : CGPointMake(cursor + mainLead, insets.top + [self roundPixels:crossPosition]);
         NSInteger before = remaining;
         BOOL partial = NO;
@@ -837,7 +837,7 @@ static CharonAlignmentParts charon_alignment_parts(NSRectAlignment alignment)
         NSUInteger firstSupplement = groupSupplementaries.count;
         CGSize actual = [self layoutGroup:group origin:origin outer:outer container:groupContainer remaining:&remaining items:itemLeaves partial:&partial top:YES];
         if (unfit) {
-            charon_layout_say_once(@"unfit", @"UICollectionViewCompositionalLayout: a subitem is larger than the group that holds it along the group's own axis, so the section has no items.");
+            revenant_layout_say_once(@"unfit", @"UICollectionViewCompositionalLayout: a subitem is larger than the group that holds it along the group's own axis, so the section has no items.");
             itemLeaves = [NSMutableArray array];
             groupSupplementaries = [NSMutableArray array];
             remaining = 0;
@@ -851,9 +851,9 @@ static CharonAlignmentParts charon_alignment_parts(NSRectAlignment alignment)
         [leads addObject:@(origin.x - insets.leading)];
         [widths addObject:@(actual.width)];
         for (NSUInteger index = firstLeaf; index < itemLeaves.count; index++)
-            ((CharonLeaf *)itemLeaves[index])->owner = groupFrame;
+            ((RevenantLeaf *)itemLeaves[index])->owner = groupFrame;
         for (NSUInteger index = firstSupplement; index < groupSupplementaries.count; index++) {
-            CharonSolvedElement *supplement = groupSupplementaries[index];
+            RevenantSolvedElement *supplement = groupSupplementaries[index];
             supplement->hasOwner = YES;
             supplement->owner = groupFrame;
         }
@@ -882,7 +882,7 @@ static CharonAlignmentParts charon_alignment_parts(NSRectAlignment alignment)
     mainSize = vertical ? region.size.height : region.size.width;
     CGFloat shiftX = vertical ? 0 : extents[0], shiftY = vertical ? extents[0] : 0;
     CGFloat total = MAX(0, extents[0] + mainSize + extents[1]);
-    CharonSolvedSection *solved = [[CharonSolvedSection alloc] init];
+    RevenantSolvedSection *solved = [[RevenantSolvedSection alloc] init];
     solved->section = section;
     solved->crossSize = widest;
     if (orthogonal) {
@@ -898,8 +898,8 @@ static CharonAlignmentParts charon_alignment_parts(NSRectAlignment alignment)
     BOOL raised = definition.decorationItems.count > 0;
     NSInteger index = 0;
     NSMutableArray *ordered = [NSMutableArray array];
-    for (CharonLeaf *leaf in itemLeaves) {
-        CharonSolvedElement *element = [[CharonSolvedElement alloc] init];
+    for (RevenantLeaf *leaf in itemLeaves) {
+        RevenantSolvedElement *element = [[RevenantSolvedElement alloc] init];
         element->category = 0;
         element->frame = CGRectOffset(leaf->frame, shiftX, shiftY);
         element->zIndex = raised ? MAX(1, leaf->zIndex) : leaf->zIndex;
@@ -912,7 +912,7 @@ static CharonAlignmentParts charon_alignment_parts(NSRectAlignment alignment)
         [ordered addObject:element];
         NSMutableArray *found = [NSMutableArray array];
         [self addSupplementaries:leaf->supplementaries anchoredTo:leaf->frame base:leaf->frame.size into:found];
-        for (CharonSolvedElement *supplementary in found) {
+        for (RevenantSolvedElement *supplementary in found) {
             supplementary->frame = CGRectOffset(supplementary->frame, shiftX, shiftY);
             supplementary->hasOwner = YES;
             supplementary->owner = element->owner;
@@ -921,13 +921,13 @@ static CharonAlignmentParts charon_alignment_parts(NSRectAlignment alignment)
         }
         index++;
     }
-    for (CharonSolvedElement *supplementary in groupSupplementaries) {
+    for (RevenantSolvedElement *supplementary in groupSupplementaries) {
         supplementary->frame = CGRectOffset(supplementary->frame, shiftX, shiftY);
         supplementary->owner = CGRectOffset(supplementary->owner, shiftX, shiftY);
         supplementary->scrolls = orthogonal;
         [ordered addObject:supplementary];
     }
-    for (CharonSolvedElement *boundary in elements) {
+    for (RevenantSolvedElement *boundary in elements) {
         boundary->frame = CGRectOffset(boundary->frame, shiftX, shiftY);
         boundary->pinLow += extents[0];
         boundary->pinHigh += extents[0];
@@ -938,7 +938,7 @@ static CharonAlignmentParts charon_alignment_parts(NSRectAlignment alignment)
         if (![decoration isKindOfClass:[NSCollectionLayoutDecorationItem class]])
             continue;
         NSDirectionalEdgeInsets shown = decoration.contentInsets;
-        CharonSolvedElement *element = [[CharonSolvedElement alloc] init];
+        RevenantSolvedElement *element = [[RevenantSolvedElement alloc] init];
         element->category = 2;
         element->kind = decoration.elementKind;
         element->frame = CGRectMake(solved->extent.origin.x + shown.leading, solved->extent.origin.y + shown.top, solved->extent.size.width - shown.leading - shown.trailing,
@@ -955,26 +955,26 @@ static CharonAlignmentParts charon_alignment_parts(NSRectAlignment alignment)
 
 #pragma mark - The layout
 
-static BOOL charon_touches(CGRect a, CGRect b)
+static BOOL revenant_touches(CGRect a, CGRect b)
 {
     return CGRectGetMinX(a) <= CGRectGetMaxX(b) && CGRectGetMinX(b) <= CGRectGetMaxX(a) && CGRectGetMinY(a) <= CGRectGetMaxY(b) && CGRectGetMinY(b) <= CGRectGetMaxY(a);
 }
 
-static BOOL charon_within_owner(CGRect frame, CGRect owner, CGRect clipped)
+static BOOL revenant_within_owner(CGRect frame, CGRect owner, CGRect clipped)
 {
     CGRect shown = CGRectIntersection(frame, owner);
     if (frame.size.width > 0 && frame.size.height > 0)
         return shown.size.width > 0 && shown.size.height > 0 && CGRectIntersectsRect(shown, clipped);
-    return charon_touches(shown, owner) && CGRectIntersectsRect(frame, clipped);
+    return revenant_touches(shown, owner) && CGRectIntersectsRect(frame, clipped);
 }
 
-static BOOL charon_spans(CGRect frame, CGRect rect)
+static BOOL revenant_spans(CGRect frame, CGRect rect)
 {
     return (CGRectGetMinY(frame) < CGRectGetMinY(rect) && CGRectGetMaxY(frame) > CGRectGetMaxY(rect))
         || (CGRectGetMinX(frame) < CGRectGetMinX(rect) && CGRectGetMaxX(frame) > CGRectGetMaxX(rect));
 }
 
-static BOOL charon_files_by_pages(void)
+static BOOL revenant_files_by_pages(void)
 {
     return NSFoundationVersionNumber <= NSFoundationVersionNumber_iOS_6_1;
 }
@@ -994,7 +994,7 @@ static BOOL charon_files_by_pages(void)
     BOOL _keepSolution;
     BOOL _boundsOnlyChange;
     BOOL _hasPinned;
-    CharonOrthogonalController *_orthogonal;
+    RevenantOrthogonalController *_orthogonal;
     NSMutableDictionary *_measured;
     NSMutableDictionary *_measuredAgainst;
     NSMutableDictionary *_pending;
@@ -1004,7 +1004,7 @@ static BOOL charon_files_by_pages(void)
     NSUInteger _settleRounds;
 }
 
-- (instancetype)initCharonWithSection:(NSCollectionLayoutSection *)section provider:(UICollectionViewCompositionalLayoutSectionProvider)provider
+- (instancetype)initRevenantWithSection:(NSCollectionLayoutSection *)section provider:(UICollectionViewCompositionalLayoutSectionProvider)provider
                        configuration:(UICollectionViewCompositionalLayoutConfiguration *)configuration
 {
     if ((self = [super init])) {
@@ -1017,22 +1017,22 @@ static BOOL charon_files_by_pages(void)
 
 - (instancetype)initWithSection:(NSCollectionLayoutSection *)section
 {
-    return [self initCharonWithSection:section provider:nil configuration:nil];
+    return [self initRevenantWithSection:section provider:nil configuration:nil];
 }
 
 - (instancetype)initWithSection:(NSCollectionLayoutSection *)section configuration:(UICollectionViewCompositionalLayoutConfiguration *)configuration
 {
-    return [self initCharonWithSection:section provider:nil configuration:configuration];
+    return [self initRevenantWithSection:section provider:nil configuration:configuration];
 }
 
 - (instancetype)initWithSectionProvider:(UICollectionViewCompositionalLayoutSectionProvider)sectionProvider
 {
-    return [self initCharonWithSection:nil provider:sectionProvider configuration:nil];
+    return [self initRevenantWithSection:nil provider:sectionProvider configuration:nil];
 }
 
 - (instancetype)initWithSectionProvider:(UICollectionViewCompositionalLayoutSectionProvider)sectionProvider configuration:(UICollectionViewCompositionalLayoutConfiguration *)configuration
 {
-    return [self initCharonWithSection:nil provider:sectionProvider configuration:configuration];
+    return [self initRevenantWithSection:nil provider:sectionProvider configuration:configuration];
 }
 
 - (UICollectionViewCompositionalLayoutConfiguration *)configuration
@@ -1098,33 +1098,33 @@ static BOOL charon_files_by_pages(void)
     _contentSize = CGSizeZero;
     if (!view)
         return;
-    [self charon_solveView:view];
+    [self revenant_solveView:view];
 }
 
-- (void)charon_solveView:(UICollectionView *)view
+- (void)revenant_solveView:(UICollectionView *)view
 {
-    CharonSolver *solver = [[CharonSolver alloc] init];
+    RevenantSolver *solver = [[RevenantSolver alloc] init];
     solver->measured = _measured;
     solver->scale = _scale = [self screenScale];
     solver->container = view.bounds.size;
     solver->vertical = _vertical = _configuration.scrollDirection == UICollectionViewScrollDirectionVertical;
     solver->traits = [view respondsToSelector:@selector(traitCollection)] ? view.traitCollection : nil;
-    CharonCollectionLayoutContainer *box = [[CharonCollectionLayoutContainer alloc] initWithContentSize:view.bounds.size insets:NSDirectionalEdgeInsetsZero];
-    CharonCollectionLayoutEnvironment *environment = [[CharonCollectionLayoutEnvironment alloc] initWithContainer:box traitCollection:solver->traits];
+    RevenantCollectionLayoutContainer *box = [[RevenantCollectionLayoutContainer alloc] initWithContentSize:view.bounds.size insets:NSDirectionalEdgeInsetsZero];
+    RevenantCollectionLayoutEnvironment *environment = [[RevenantCollectionLayoutEnvironment alloc] initWithContainer:box traitCollection:solver->traits];
     NSInteger sections = view.numberOfSections;
-    [self charon_beginNotingSections];
+    [self revenant_beginNotingSections];
     CGFloat spacing = _configuration.interSectionSpacing;
     CGFloat cursor = 0;
     CGSize whole = view.bounds.size;
     for (NSInteger section = 0; section < sections; section++) {
         NSCollectionLayoutSection *definition = _section ?: (_provider ? _provider(section, environment) : nil);
-        [self charon_noteSection:definition];
+        [self revenant_noteSection:definition];
         NSInteger count = [view numberOfItemsInSection:section];
-        NSInteger reference = definition ? definition.charon_contentInsetsReference : 0;
+        NSInteger reference = definition ? definition.revenant_contentInsetsReference : 0;
         CGFloat before = 0, after = 0;
-        [self referenceInsets:reference == 0 ? _configuration.charon_contentInsetsReference : reference lead:&before trail:&after];
+        [self referenceInsets:reference == 0 ? _configuration.revenant_contentInsetsReference : reference lead:&before trail:&after];
         solver->container = _vertical ? CGSizeMake(whole.width - before - after, whole.height) : CGSizeMake(whole.width, whole.height - before - after);
-        CharonSolvedSection *solved = (definition || count > 0) ? [solver solveSection:definition index:section itemCount:count] : nil;
+        RevenantSolvedSection *solved = (definition || count > 0) ? [solver solveSection:definition index:section itemCount:count] : nil;
         CGFloat extent = 0;
         if (solved) {
             [self shiftCross:solved by:before];
@@ -1141,46 +1141,46 @@ static BOOL charon_files_by_pages(void)
     solver->sectionIndex = 0;
     solver->container = whole;
     [solver placeBoundary:_configuration.boundarySupplementaryItems in:&region follow:NO insets:NSDirectionalEdgeInsetsZero effective:view.bounds.size
-                indexPath:[NSIndexPath indexPathForItem:CharonBoundaryIndexMax inSection:0] sectionIndex:0 into:outer extents:extents];
+                indexPath:[NSIndexPath indexPathForItem:RevenantBoundaryIndexMax inSection:0] sectionIndex:0 into:outer extents:extents];
     total = _vertical ? region.size.height : region.size.width;
     CGFloat shift = extents[0];
     if (shift > 0) {
-        for (CharonSolvedSection *solved in _solvedSections)
+        for (RevenantSolvedSection *solved in _solvedSections)
             [self shiftSolved:solved by:shift];
     }
     total += extents[0] + extents[1];
-    for (CharonSolvedElement *element in outer) {
+    for (RevenantSolvedElement *element in outer) {
         element->frame = _vertical ? CGRectOffset(element->frame, 0, shift) : CGRectOffset(element->frame, shift, 0);
         element->pinLow += shift;
         element->pinHigh += shift;
         [_boundaryElements addObject:element];
     }
-    for (CharonSolvedSection *solved in _solvedSections) {
-        for (CharonSolvedElement *element in solved->elements) {
+    for (RevenantSolvedSection *solved in _solvedSections) {
+        for (RevenantSolvedElement *element in solved->elements) {
             element->frame = [self settled:element];
             _hasPinned = _hasPinned || element->pinned;
             [self record:element];
         }
     }
-    for (CharonSolvedElement *element in _boundaryElements) {
+    for (RevenantSolvedElement *element in _boundaryElements) {
         element->frame = [self settled:element];
         _hasPinned = _hasPinned || element->pinned;
         [self record:element];
     }
     CGFloat cross = _vertical ? view.bounds.size.width : view.bounds.size.height;
-    for (CharonSolvedSection *solved in _solvedSections)
+    for (RevenantSolvedSection *solved in _solvedSections)
         cross = MAX(cross, solved->crossSize);
     _contentSize = _vertical ? CGSizeMake([self roundedPixels:cross], [self roundedPixels:total]) : CGSizeMake([self roundedPixels:total], [self roundedPixels:cross]);
     _solved = YES;
     BOOL any = NO;
-    for (CharonSolvedSection *solved in _solvedSections)
+    for (RevenantSolvedSection *solved in _solvedSections)
         any = any || solved->orthogonal;
     if (any && !_orthogonal)
-        _orthogonal = [[CharonOrthogonalController alloc] initWithLayout:self];
+        _orthogonal = [[RevenantOrthogonalController alloc] initWithLayout:self];
     [_orthogonal updateSections:_solvedSections view:view environment:environment];
 }
 
-- (void)charon_note:(CharonSolvedElement *)element attributes:(UICollectionViewLayoutAttributes *)attributes
+- (void)revenant_note:(RevenantSolvedElement *)element attributes:(UICollectionViewLayoutAttributes *)attributes
 {
     if (_measuring || element->category == 2 || !(element->estimatedWidth || element->estimatedHeight))
         return;
@@ -1188,19 +1188,19 @@ static BOOL charon_files_by_pages(void)
     NSString *key = [NSString stringWithFormat:@"%d/%@/%ld/%ld", cell ? 0 : 1, cell ? @"" : element->kind, (long)element->indexPath.section, (long)element->indexPath.item];
     if (!_pending) {
         if (_settleRounds >= 12) {
-            charon_layout_say_once(@"compositional-settle-rounds", @"NSCollectionLayoutSection: self-sizing did not settle within 12 rounds; keeping the last estimate instead of measuring further");
+            revenant_layout_say_once(@"compositional-settle-rounds", @"NSCollectionLayoutSection: self-sizing did not settle within 12 rounds; keeping the last estimate instead of measuring further");
             return;
         }
         _settleRounds++;
         _pending = [NSMutableDictionary dictionary];
-        charon_layout_perform(self, ^(UICollectionViewLayout *layout) {
-            [(UICollectionViewCompositionalLayout *)layout charon_settleLater];
+        revenant_layout_perform(self, ^(UICollectionViewLayout *layout) {
+            [(UICollectionViewCompositionalLayout *)layout revenant_settleLater];
         });
     }
     _pending[key] = @{@"path" : element->indexPath, @"kind" : cell ? @"" : element->kind, @"cell" : @(cell), @"frame" : [NSValue valueWithCGRect:attributes.frame]};
 }
 
-- (UICollectionReusableView *)charon_shownSupplementaryOfKind:(NSString *)kind frame:(CGRect)frame
+- (UICollectionReusableView *)revenant_shownSupplementaryOfKind:(NSString *)kind frame:(CGRect)frame
 {
     UICollectionReusableView *best = nil;
     CGFloat distance = CGFLOAT_MAX;
@@ -1216,13 +1216,13 @@ static BOOL charon_files_by_pages(void)
     return distance < 0.5 ? best : nil;
 }
 
-- (void)charon_settleLater
+- (void)revenant_settleLater
 {
     if (self.collectionView && _pending.count > 0)
-        [self charon_settleMeasurements];
+        [self revenant_settleMeasurements];
 }
 
-- (BOOL)charon_settleMeasurements
+- (BOOL)revenant_settleMeasurements
 {
     NSArray *entries = [_pending.allValues sortedArrayUsingComparator:^NSComparisonResult(NSDictionary *a, NSDictionary *b) {
         NSComparisonResult order = [@([b[@"cell"] boolValue]) compare:@([a[@"cell"] boolValue])];
@@ -1239,17 +1239,17 @@ static BOOL charon_files_by_pages(void)
         NSIndexPath *path = entry[@"path"];
         BOOL cell = [entry[@"cell"] boolValue];
         NSString *kind = cell ? nil : entry[@"kind"];
-        UICollectionReusableView *shown = cell ? [view cellForItemAtIndexPath:path] : [self charon_shownSupplementaryOfKind:kind frame:[entry[@"frame"] CGRectValue]];
-        CharonSolvedElement *element = _lookup[[self keyForCategory:cell ? 0 : 1 kind:kind indexPath:path]];
+        UICollectionReusableView *shown = cell ? [view cellForItemAtIndexPath:path] : [self revenant_shownSupplementaryOfKind:kind frame:[entry[@"frame"] CGRectValue]];
+        RevenantSolvedElement *element = _lookup[[self keyForCategory:cell ? 0 : 1 kind:kind indexPath:path]];
         if (!shown || !shown.superview || !element)
             continue;
         CGRect frame = element->scrolls ? [_orthogonal shiftedFrame:element->frame section:path.section] : element->frame;
         if (!CGRectIntersectsRect(frame, view.bounds))
             continue;
-        if ([self charon_measureView:shown element:element kind:kind]) {
+        if ([self revenant_measureView:shown element:element kind:kind]) {
             changed = YES;
             if (position < entries.count)
-                [self charon_solveView:view];
+                [self revenant_solveView:view];
         }
     }
     NSArray *contexts = _preferredContexts;
@@ -1265,7 +1265,7 @@ static BOOL charon_files_by_pages(void)
     return changed;
 }
 
-- (BOOL)charon_measureView:(UICollectionReusableView *)view element:(CharonSolvedElement *)element kind:(NSString *)kind
+- (BOOL)revenant_measureView:(UICollectionReusableView *)view element:(RevenantSolvedElement *)element kind:(NSString *)kind
 {
     if (_measuring || !_solved || !(element->estimatedWidth || element->estimatedHeight))
         return NO;
@@ -1283,7 +1283,7 @@ static BOOL charon_files_by_pages(void)
                                                        : [UICollectionViewLayoutAttributes layoutAttributesForCellWithIndexPath:element->indexPath];
     original.frame = element->frame;
     _measuring = YES;
-    UICollectionViewLayoutAttributes *preferred = charon_preferred_attributes(view, original, element->estimatedWidth, element->estimatedHeight, _scale);
+    UICollectionViewLayoutAttributes *preferred = revenant_preferred_attributes(view, original, element->estimatedWidth, element->estimatedHeight, _scale);
     _measuring = NO;
     _measuredAgainst[key] = @(fixed);
     if (![self shouldInvalidateLayoutForPreferredLayoutAttributes:preferred withOriginalAttributes:original]) {
@@ -1297,10 +1297,10 @@ static BOOL charon_files_by_pages(void)
     return YES;
 }
 
-- (NSUInteger)charon_estimatedAxesForAttributes:(UICollectionViewLayoutAttributes *)attributes
+- (NSUInteger)revenant_estimatedAxesForAttributes:(UICollectionViewLayoutAttributes *)attributes
 {
     NSString *kind = attributes.representedElementCategory == UICollectionElementCategoryCell ? nil : attributes.representedElementKind;
-    CharonSolvedElement *element = _lookup[[self keyForCategory:kind ? 1 : 0 kind:kind indexPath:attributes.indexPath]];
+    RevenantSolvedElement *element = _lookup[[self keyForCategory:kind ? 1 : 0 kind:kind indexPath:attributes.indexPath]];
     if (!element)
         return 0;
     return (element->estimatedWidth ? 1u : 0u) | (element->estimatedHeight ? 2u : 0u);
@@ -1321,18 +1321,18 @@ static BOOL charon_files_by_pages(void)
     [super invalidateLayoutWithContext:context];
 }
 
-- (void)charon_offsetsDidChange
+- (void)revenant_offsetsDidChange
 {
     _boundsOnlyChange = YES;
     [self invalidateLayout];
 }
 
-- (void)charon_scrollSection:(NSInteger)section toOffset:(CGFloat)offset settle:(BOOL)settle
+- (void)revenant_scrollSection:(NSInteger)section toOffset:(CGFloat)offset settle:(BOOL)settle
 {
     [_orthogonal scrollSection:section toOffset:offset settle:settle];
 }
 
-- (CGFloat)charon_offsetOfSection:(NSInteger)section
+- (CGFloat)revenant_offsetOfSection:(NSInteger)section
 {
     return [_orthogonal offsetOfSection:section];
 }
@@ -1354,13 +1354,13 @@ static BOOL charon_files_by_pages(void)
     *trail = _vertical ? insets.right : insets.bottom;
 }
 
-- (void)shiftCross:(CharonSolvedSection *)solved by:(CGFloat)shift
+- (void)shiftCross:(RevenantSolvedSection *)solved by:(CGFloat)shift
 {
     if (shift == 0)
         return;
     CGFloat dx = _vertical ? shift : 0, dy = _vertical ? 0 : shift;
     solved->viewport = CGRectOffset(solved->viewport, dx, dy);
-    for (CharonSolvedElement *element in solved->elements) {
+    for (RevenantSolvedElement *element in solved->elements) {
         element->frame = CGRectOffset(element->frame, dx, dy);
         element->owner = CGRectOffset(element->owner, dx, dy);
     }
@@ -1371,7 +1371,7 @@ static BOOL charon_files_by_pages(void)
     return floor(value * _scale + 0.5) / _scale;
 }
 
-- (CGRect)settled:(CharonSolvedElement *)element
+- (CGRect)settled:(RevenantSolvedElement *)element
 {
     CGRect frame = element->frame;
     CGRect rounded = CGRectMake([self roundedPixels:frame.origin.x], [self roundedPixels:frame.origin.y], frame.size.width, frame.size.height);
@@ -1382,12 +1382,12 @@ static BOOL charon_files_by_pages(void)
     return rounded;
 }
 
-- (void)shiftSolved:(CharonSolvedSection *)solved by:(CGFloat)shift
+- (void)shiftSolved:(RevenantSolvedSection *)solved by:(CGFloat)shift
 {
     CGFloat dx = _vertical ? 0 : shift, dy = _vertical ? shift : 0;
     solved->extent = CGRectOffset(solved->extent, dx, dy);
     solved->viewport = CGRectOffset(solved->viewport, dx, dy);
-    for (CharonSolvedElement *element in solved->elements) {
+    for (RevenantSolvedElement *element in solved->elements) {
         element->frame = CGRectOffset(element->frame, dx, dy);
         element->owner = CGRectOffset(element->owner, dx, dy);
         element->pinLow += _vertical ? dy : dx;
@@ -1400,7 +1400,7 @@ static BOOL charon_files_by_pages(void)
     return [NSString stringWithFormat:@"%ld/%@/%ld/%ld", (long)category, kind ?: @"", (long)indexPath.section, (long)indexPath.item];
 }
 
-- (void)record:(CharonSolvedElement *)element
+- (void)record:(RevenantSolvedElement *)element
 {
     _lookup[[self keyForCategory:element->category kind:element->kind indexPath:element->indexPath]] = element;
 }
@@ -1410,7 +1410,7 @@ static BOOL charon_files_by_pages(void)
     return _contentSize;
 }
 
-- (UICollectionViewLayoutAttributes *)attributesForElement:(CharonSolvedElement *)element
+- (UICollectionViewLayoutAttributes *)attributesForElement:(RevenantSolvedElement *)element
 {
     UICollectionViewLayoutAttributes *attributes;
     if (element->category == 0)
@@ -1425,7 +1425,7 @@ static BOOL charon_files_by_pages(void)
         UICollectionView *view = self.collectionView;
         CGRect bounds = view.bounds;
         UIEdgeInsets inset = [view respondsToSelector:@selector(adjustedContentInset)] ? view.adjustedContentInset : view.contentInset;
-        CharonAlignmentParts parts = charon_alignment_parts(element->alignment);
+        RevenantAlignmentParts parts = revenant_alignment_parts(element->alignment);
         CGFloat low = element->pinLow, high = MAX(low, element->pinHigh);
         if (_vertical) {
             CGFloat wanted = parts.vertical < 0 ? CGRectGetMinY(bounds) + inset.top : CGRectGetMaxY(bounds) - inset.bottom - frame.size.height;
@@ -1435,7 +1435,7 @@ static BOOL charon_files_by_pages(void)
             frame.origin.x = MIN(MAX(wanted, low), high);
         }
         if (CGRectIntersectsRect(frame, bounds))
-            z += CharonPinnedZIndex;
+            z += RevenantPinnedZIndex;
     }
     attributes.frame = frame;
     attributes.zIndex = z;
@@ -1451,10 +1451,10 @@ static BOOL charon_files_by_pages(void)
         return @[];
     BOOL flat = clipped.size.width <= 0 || clipped.size.height <= 0;
     NSMutableArray *found = [NSMutableArray array];
-    for (CharonSolvedSection *solved in _solvedSections) {
-        if (solved->extent.size.width <= 0 || solved->extent.size.height <= 0 || !charon_touches(solved->extent, clipped))
+    for (RevenantSolvedSection *solved in _solvedSections) {
+        if (solved->extent.size.width <= 0 || solved->extent.size.height <= 0 || !revenant_touches(solved->extent, clipped))
             continue;
-        for (CharonSolvedElement *element in solved->elements) {
+        for (RevenantSolvedElement *element in solved->elements) {
             if (element->category == 2) {
                 [found addObject:[self attributesForElement:element]];
                 continue;
@@ -1473,25 +1473,25 @@ static BOOL charon_files_by_pages(void)
                 UICollectionViewLayoutAttributes *attributes = [self attributesForElement:element];
                 if (!element->scrolls && !CGRectIntersectsRect(attributes.frame, clipped))
                     continue;
-                if (element->category == 0 && element->hasOwner && !element->scrolls && !charon_within_owner(attributes.frame, element->owner, clipped))
+                if (element->category == 0 && element->hasOwner && !element->scrolls && !revenant_within_owner(attributes.frame, element->owner, clipped))
                     continue;
-                if (element->category == 0 && charon_files_by_pages() && charon_spans(attributes.frame, clipped)) {
+                if (element->category == 0 && revenant_files_by_pages() && revenant_spans(attributes.frame, clipped)) {
                     UICollectionViewLayoutAttributes *pilot = [attributes copy];
                     pilot.frame = CGRectIntersection(attributes.frame, clipped);
                     [found addObject:pilot];
                 }
                 [found addObject:attributes];
-                [self charon_note:element attributes:attributes];
+                [self revenant_note:element attributes:attributes];
             }
         }
     }
     if (flat)
         return found;
-    for (CharonSolvedElement *element in _boundaryElements) {
+    for (RevenantSolvedElement *element in _boundaryElements) {
         UICollectionViewLayoutAttributes *attributes = [self attributesForElement:element];
         if (CGRectIntersectsRect(attributes.frame, clipped)) {
             [found addObject:attributes];
-            [self charon_note:element attributes:attributes];
+            [self revenant_note:element attributes:attributes];
         }
     }
     return found;
@@ -1499,19 +1499,19 @@ static BOOL charon_files_by_pages(void)
 
 - (UICollectionViewLayoutAttributes *)layoutAttributesForItemAtIndexPath:(NSIndexPath *)indexPath
 {
-    CharonSolvedElement *element = _lookup[[self keyForCategory:0 kind:nil indexPath:indexPath]];
+    RevenantSolvedElement *element = _lookup[[self keyForCategory:0 kind:nil indexPath:indexPath]];
     return element ? [self attributesForElement:element] : nil;
 }
 
 - (UICollectionViewLayoutAttributes *)layoutAttributesForSupplementaryViewOfKind:(NSString *)elementKind atIndexPath:(NSIndexPath *)indexPath
 {
-    CharonSolvedElement *element = _lookup[[self keyForCategory:1 kind:elementKind indexPath:indexPath]];
+    RevenantSolvedElement *element = _lookup[[self keyForCategory:1 kind:elementKind indexPath:indexPath]];
     return element ? [self attributesForElement:element] : nil;
 }
 
 - (UICollectionViewLayoutAttributes *)layoutAttributesForDecorationViewOfKind:(NSString *)elementKind atIndexPath:(NSIndexPath *)indexPath
 {
-    CharonSolvedElement *element = _lookup[[self keyForCategory:2 kind:elementKind indexPath:indexPath]];
+    RevenantSolvedElement *element = _lookup[[self keyForCategory:2 kind:elementKind indexPath:indexPath]];
     return element ? [self attributesForElement:element] : nil;
 }
 

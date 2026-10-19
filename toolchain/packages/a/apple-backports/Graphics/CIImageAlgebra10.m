@@ -3,7 +3,7 @@
 
 #pragma clang diagnostic ignored "-Wobjc-missing-property-synthesis"
 
-@implementation CIImage (CharonAlgebra)
+@implementation CIImage (RevenantAlgebra)
 
 - (CIImage *)imageByApplyingGaussianBlurWithSigma:(CGFloat)sigma
 {
@@ -13,41 +13,41 @@
     return blur.outputImage ?: self;
 }
 
-static NSString *const CharonCIClampDepthKey = @"charon.ciimage.clampDepth";
+static NSString *const RevenantCIClampDepthKey = @"revenant.ciimage.clampDepth";
 
-static NSInteger CharonCIClampDepth(void)
+static NSInteger RevenantCIClampDepth(void)
 {
-    return [[[[NSThread currentThread] threadDictionary] objectForKey:CharonCIClampDepthKey] integerValue];
+    return [[[[NSThread currentThread] threadDictionary] objectForKey:RevenantCIClampDepthKey] integerValue];
 }
 
-static void CharonSetCIClampDepth(NSInteger depth)
+static void RevenantSetCIClampDepth(NSInteger depth)
 {
-    [[[NSThread currentThread] threadDictionary] setObject:@(depth) forKey:CharonCIClampDepthKey];
+    [[[NSThread currentThread] threadDictionary] setObject:@(depth) forKey:RevenantCIClampDepthKey];
 }
 
-static CIImage *CharonCIClamp(CIImage *image, CGRect rect)
+static CIImage *RevenantCIClamp(CIImage *image, CGRect rect)
 {
-    if (CharonCIClampDepth() > 0)
+    if (RevenantCIClampDepth() > 0)
         return image;
-    CharonSetCIClampDepth(CharonCIClampDepth() + 1);
+    RevenantSetCIClampDepth(RevenantCIClampDepth() + 1);
     CIImage *clamped = image;
     if (!CGRectIsNull(rect) && !CGRectIsEmpty(rect)) {
         CIFilter *filter = [CIFilter filterWithName:@"CIAffineClamp"];
         [filter setValue:[image imageByCroppingToRect:rect] forKey:kCIInputImageKey];
         clamped = filter.outputImage ?: [image imageByCroppingToRect:rect];
     }
-    CharonSetCIClampDepth(CharonCIClampDepth() - 1);
+    RevenantSetCIClampDepth(RevenantCIClampDepth() - 1);
     return clamped;
 }
 
 - (CIImage *)imageByClampingToExtent
 {
-    return CharonCIClamp(self, self.extent);
+    return RevenantCIClamp(self, self.extent);
 }
 
 - (CIImage *)imageByClampingToRect:(CGRect)rect
 {
-    return CharonCIClamp(self, rect);
+    return RevenantCIClamp(self, rect);
 }
 
 - (CIImage *)imageByInsertingIntermediate
@@ -86,9 +86,9 @@ static CIImage *CharonCIClamp(CIImage *image, CGRect rect)
 
 @end
 
-@implementation CIImage (CharonConstantColors)
+@implementation CIImage (RevenantConstantColors)
 
-- (CIImage *)charon_imageOfColor:(CIColor *)color
+- (CIImage *)revenant_imageOfColor:(CIColor *)color
 {
     return [[CIImage alloc] initWithColor:color];
 }

@@ -22,7 +22,7 @@
 
 #include "../support.hpp"
 
-namespace shade {
+namespace emulator {
 namespace {
 
     constexpr std::uint32_t complex_reply_size = 68;

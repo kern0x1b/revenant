@@ -1,7 +1,7 @@
 #import <UIKit/UIKit.h>
 #import <objc/message.h>
 
-@implementation UIScrollView (CharonStopScrolling17)
+@implementation UIScrollView (RevenantStopScrolling17)
 
 - (void)stopScrollingAndZooming
 {

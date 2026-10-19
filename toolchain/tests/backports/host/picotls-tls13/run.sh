@@ -15,7 +15,7 @@ here=$(cd "$(dirname "$0")" && pwd)
 BACKPORTS=${BACKPORTS:-$here/../../../../packages}
 PICOTLS_URL=https://github.com/h2o/picotls.git
 PICOTLS_COMMIT=d6c3da61b47cc3ccecaf9aa093c24e4aafebd52a
-build=${PICOTLS_BUILD:-$(runs_folder charon-picotls-tls13)}
+build=${PICOTLS_BUILD:-$(runs_folder revenant-picotls-tls13)}
 
 # the sources: the installed package's, or a checkout at the commit the recipe pins
 # PICOTLS_SOURCES names a checkout of the pinned commit, and the installed package is used otherwise.
@@ -66,7 +66,7 @@ xcrun clang -std=c99 -Os -w -I "$sources/include" -o "$build/probe" "$here/probe
 
 # the certificate and the key, made here and left here
 openssl req -x509 -newkey ec -pkeyopt ec_paramgen_curve:P-256 -nodes -days 1 \
-    -keyout "$build/key.pem" -out "$build/cert.pem" -subj "/CN=charon probe" >/dev/null 2>&1
+    -keyout "$build/key.pem" -out "$build/cert.pem" -subj "/CN=revenant probe" >/dev/null 2>&1
 openssl pkcs8 -topk8 -nocrypt -in "$build/key.pem" -outform DER -out "$build/key.der" 2>/dev/null
 # picotls's own signer takes the raw secp256r1 scalar, which is the last 32 bytes of the PKCS#8 form
 python3 - "$build/key.der" "$build/key.raw" <<'PY'

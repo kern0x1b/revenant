@@ -3,7 +3,7 @@
 #import "check.h"
 #import "wsserver.h"
 
-extern int CharonHostcharon_network_cellular_override;
+extern int RevenantHostrevenant_network_cellular_override;
 
 static uint64_t state = 0x4E7ACCE55ull;
 
@@ -15,7 +15,7 @@ static uint32_t next(void)
 
 static BOOL flag(id object, NSString *name, BOOL port)
 {
-    NSString *selector = port ? [@"charonHost" stringByAppendingString:[[name substringToIndex:1].uppercaseString stringByAppendingString:[name substringFromIndex:1]]] : name;
+    NSString *selector = port ? [@"revenantHost" stringByAppendingString:[[name substringToIndex:1].uppercaseString stringByAppendingString:[name substringFromIndex:1]]] : name;
     return ((BOOL (*)(id, SEL))objc_msgSend)(object, NSSelectorFromString(selector));
 }
 
@@ -23,7 +23,7 @@ static void set_flag(id object, NSString *name, BOOL value, BOOL port)
 {
     NSString *setter = [@"set" stringByAppendingString:[[name substringToIndex:1].uppercaseString stringByAppendingString:[name substringFromIndex:1]]];
     if (port)
-        setter = [@"charonHostSet" stringByAppendingString:[[name substringToIndex:1].uppercaseString stringByAppendingString:[name substringFromIndex:1]]];
+        setter = [@"revenantHostSet" stringByAppendingString:[[name substringToIndex:1].uppercaseString stringByAppendingString:[name substringFromIndex:1]]];
     ((void (*)(id, SEL, BOOL))objc_msgSend)(object, NSSelectorFromString([setter stringByAppendingString:@":"]), value);
 }
 
@@ -70,7 +70,7 @@ int main(int argc, char **argv)
         }
         for (NSString *sample in samples)
             printf("  %s\n", sample.UTF8String);
-        charon_check(wrong == 0, "requests keep and pass on their network flags through copies as the system's do", [NSString stringWithFormat:@"%lu of %lu differ", (unsigned long)wrong, (unsigned long)cases]);
+        revenant_check(wrong == 0, "requests keep and pass on their network flags through copies as the system's do", [NSString stringWithFormat:@"%lu of %lu differ", (unsigned long)wrong, (unsigned long)cases]);
 
         NSURLSessionConfiguration *configuration = [NSURLSessionConfiguration defaultSessionConfiguration];
         CHECK(flag(configuration, @"allowsExpensiveNetworkAccess", YES) == configuration.allowsExpensiveNetworkAccess && flag(configuration, @"allowsConstrainedNetworkAccess", YES), "a configuration allows both by default");
@@ -83,7 +83,7 @@ int main(int argc, char **argv)
         NSMutableURLRequest *forbidding = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:@"http://192.0.2.1/x"]];
         forbidding.timeoutInterval = 3;
         set_flag(forbidding, @"allowsExpensiveNetworkAccess", NO, YES);
-        CharonHostcharon_network_cellular_override = 1;
+        RevenantHostrevenant_network_cellular_override = 1;
         NSError *error = nil;
         NSHTTPURLResponse *response = nil;
         NSData *body = [NSURLConnection sendSynchronousRequest:forbidding returningResponse:&response error:&error];
@@ -94,17 +94,17 @@ int main(int argc, char **argv)
         error = nil;
         body = [NSURLConnection sendSynchronousRequest:toLocal returningResponse:&response error:&error];
         CHECK(body != nil && response.statusCode == 200, "a request to this device is never held back");
-        CharonHostcharon_network_cellular_override = 0;
+        RevenantHostrevenant_network_cellular_override = 0;
         error = nil;
         body = [NSURLConnection sendSynchronousRequest:toLocal returningResponse:&response error:&error];
         CHECK(body != nil && response.statusCode == 200, "and neither is one on a path that is not cellular");
         NSMutableURLRequest *unbothered = [NSMutableURLRequest requestWithURL:local];
-        CharonHostcharon_network_cellular_override = 1;
+        RevenantHostrevenant_network_cellular_override = 1;
         error = nil;
         body = [NSURLConnection sendSynchronousRequest:unbothered returningResponse:&response error:&error];
         CHECK(body != nil, "a request that says nothing about it is never held back either");
-        CharonHostcharon_network_cellular_override = -1;
+        RevenantHostrevenant_network_cellular_override = -1;
     }
-    printf("checks=%d failures=%d\n", charon_checks, charon_failures);
-    return charon_failures;
+    printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
+    return revenant_failures;
 }

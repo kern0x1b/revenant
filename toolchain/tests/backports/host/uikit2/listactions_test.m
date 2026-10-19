@@ -2,7 +2,7 @@
 #import <objc/message.h>
 #import <objc/runtime.h>
 
-void charon_windowed_run(UIWindow *window);
+void revenant_windowed_run(UIWindow *window);
 
 static UIWindow *test_window;
 
@@ -16,7 +16,7 @@ static SEL renamed(int side, NSString *getter)
     if (!side)
         return NSSelectorFromString(getter);
     NSString *tail = [[[getter substringToIndex:1] uppercaseString] stringByAppendingString:[getter substringFromIndex:1]];
-    return NSSelectorFromString([@"charonHost" stringByAppendingString:tail]);
+    return NSSelectorFromString([@"revenantHost" stringByAppendingString:tail]);
 }
 
 static NSString *items_of(id source)
@@ -66,7 +66,7 @@ static UICollectionView *list_view(int side, id *sourceOut, NSMutableArray *log,
         UICollectionViewListCell *cell = [v dequeueReusableCellWithReuseIdentifier:@"c" forIndexPath:path];
         id content = ((id (*)(id, SEL))objc_msgSend)(cell, @selector(defaultContentConfiguration));
         [content setText:item];
-        ((void (*)(id, SEL, id))objc_msgSend)(cell, side ? NSSelectorFromString(@"charonHostSetContentConfiguration:") : NSSelectorFromString(@"setContentConfiguration:"), content);
+        ((void (*)(id, SEL, id))objc_msgSend)(cell, side ? NSSelectorFromString(@"revenantHostSetContentConfiguration:") : NSSelectorFromString(@"setContentConfiguration:"), content);
         id ss = [source snapshotForSection:@"s"];
         BOOL parent = [ss containsItem:item] && [[ss snapshotOfParentItem:item] items].count;
         cell.accessories = parent ? @[[[named(side, @"UICellAccessoryOutlineDisclosure") alloc] init]] : @[];
@@ -216,7 +216,7 @@ static void run_reorder(void)
         same([NSString stringWithFormat:@"reorder step %lu", (unsigned long)index], answers[0][index], answers[1][index]);
 }
 
-void charon_windowed_run(UIWindow *window)
+void revenant_windowed_run(UIWindow *window)
 {
     test_window = window;
     run_outline();

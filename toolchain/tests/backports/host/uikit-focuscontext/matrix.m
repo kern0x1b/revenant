@@ -4,7 +4,7 @@
 static NSString *shown(Class c)
 {
     NSString *name = [NSString stringWithUTF8String:class_getName(c)];
-    return [name hasPrefix:@"CharonHost"] ? [name substringFromIndex:10] : name;
+    return [name hasPrefix:@"RevenantHost"] ? [name substringFromIndex:12] : name;
 }
 
 static const char *kBase[] = { "previouslyFocusedView", "nextFocusedView", "previouslyFocusedItem", "nextFocusedItem", "focusHeading" };

@@ -3,7 +3,7 @@
 NSString *const AVAssetExportPresetPassthrough = @"AVAssetExportPresetPassthrough";
 NSString *const AVFileTypeQuickTimeMovie = @"com.apple.quicktime-movie";
 
-static NSArray *charon_source_metadata(void)
+static NSArray *revenant_source_metadata(void)
 {
     NSMutableArray *items = [NSMutableArray array];
     for (NSString *identifier in @[@"mdta/keys/copyright", @"mdta/keys/location"]) {
@@ -29,13 +29,13 @@ static NSArray *charon_source_metadata(void)
 @end
 
 @implementation AVMetadataItem {
-    NSString *_charon_identifier;
+    NSString *_revenant_identifier;
 }
 
 - (void)setValue:(id)value forKey:(NSString *)key
 {
     if ([key isEqualToString:@"identifier"]) {
-        _charon_identifier = [value copy];
+        _revenant_identifier = [value copy];
         return;
     }
     [super setValue:value forKey:key];
@@ -43,7 +43,7 @@ static NSArray *charon_source_metadata(void)
 
 - (NSString *)identifier
 {
-    return _charon_identifier;
+    return _revenant_identifier;
 }
 
 + (NSArray<AVMetadataItem *> *)metadataItemsFromArray:(NSArray<AVMetadataItem *> *)items
@@ -66,65 +66,65 @@ static NSArray *charon_source_metadata(void)
 
 - (NSArray *)commonMetadata
 {
-    return charon_source_metadata();
+    return revenant_source_metadata();
 }
 
 @end
 
 @implementation AVAssetExportSession {
-    AVAsset *_charon_asset;
-    NSArray<AVMetadataItem *> *_charon_metadata;
-    NSURL *_charon_outputURL;
-    AVFileType _charon_outputFileType;
-    NSUInteger _charon_exports;
+    AVAsset *_revenant_asset;
+    NSArray<AVMetadataItem *> *_revenant_metadata;
+    NSURL *_revenant_outputURL;
+    AVFileType _revenant_outputFileType;
+    NSUInteger _revenant_exports;
 }
 
 - (instancetype)initWithAsset:(AVAsset *)asset presetName:(AVAssetExportPreset)presetName
 {
     self = [super init];
     if (self)
-        _charon_asset = asset;
+        _revenant_asset = asset;
     return self;
 }
 
 - (AVAsset *)asset
 {
-    return _charon_asset;
+    return _revenant_asset;
 }
 
 - (NSArray<AVMetadataItem *> *)metadata
 {
-    return _charon_metadata;
+    return _revenant_metadata;
 }
 
 - (void)setMetadata:(NSArray<AVMetadataItem *> *)metadata
 {
-    _charon_metadata = [metadata copy];
+    _revenant_metadata = [metadata copy];
 }
 
 - (NSURL *)outputURL
 {
-    return _charon_outputURL;
+    return _revenant_outputURL;
 }
 
 - (void)setOutputURL:(NSURL *)outputURL
 {
-    _charon_outputURL = [outputURL copy];
+    _revenant_outputURL = [outputURL copy];
 }
 
 - (AVFileType)outputFileType
 {
-    return _charon_outputFileType;
+    return _revenant_outputFileType;
 }
 
 - (void)setOutputFileType:(AVFileType)outputFileType
 {
-    _charon_outputFileType = [outputFileType copy];
+    _revenant_outputFileType = [outputFileType copy];
 }
 
 - (void)exportAsynchronouslyWithCompletionHandler:(void (^)(void))handler
 {
-    _charon_exports++;
+    _revenant_exports++;
     if (handler)
         handler();
 }

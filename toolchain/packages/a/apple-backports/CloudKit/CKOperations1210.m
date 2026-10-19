@@ -1,6 +1,6 @@
-#import "CharonCloudKit.h"
-#import "CharonCKConstants.h"
-#import "CharonCKSubscription.h"
+#import "RevenantCloudKit.h"
+#import "RevenantCKConstants.h"
+#import "RevenantCKSubscription.h"
 
 
 #pragma mark - CKFetchDatabaseChangesOperation
@@ -11,7 +11,7 @@
 {
     self = [super init];
     if (self) {
-        [self charon_setUp];
+        [self revenant_setUp];
         _resultsLimit = CKQueryOperationMaximumResults;
     }
     return self;
@@ -35,7 +35,7 @@
 {
     NSMutableDictionary *body = [NSMutableDictionary dictionary];
     if (self.previousServerChangeToken) {
-        NSData *previous = CharonCKSystemFieldsSnapshotToken(self.previousServerChangeToken);
+        NSData *previous = RevenantCKSystemFieldsSnapshotToken(self.previousServerChangeToken);
         if (previous.length) {
             body[@"resultsLimit"] = @(self.resultsLimit ?: 0);
             body[@"continuationMarker"] = [previous base64EncodedStringWithOptions:0];
@@ -80,7 +80,7 @@
                                                                       options:NSDataBase64DecodingIgnoreUnknownCharacters] : nil;
         BOOL more = [answer[@"moreComing"] boolValue];
         if (strongSelf.fetchDatabaseChangesCompletionBlock) {
-            strongSelf.fetchDatabaseChangesCompletionBlock(CharonCKServerTokenFromData(token), more, nil);
+            strongSelf.fetchDatabaseChangesCompletionBlock(RevenantCKServerTokenFromData(token), more, nil);
         }
     }];
 }
@@ -128,7 +128,7 @@
 
 #pragma mark - The per-zone fetch document
 
-static void CharonCKTakeZoneChanging(id entry, NSString **token, NSUInteger *limit, NSArray **keys)
+static void RevenantCKTakeZoneChanging(id entry, NSString **token, NSUInteger *limit, NSArray **keys)
 {
     if ([entry isKindOfClass:[CKFetchRecordZoneChangesConfiguration class]]) {
         CKFetchRecordZoneChangesConfiguration *configuration = (CKFetchRecordZoneChangesConfiguration *)entry;
@@ -153,7 +153,7 @@ static void CharonCKTakeZoneChanging(id entry, NSString **token, NSUInteger *lim
 {
     self = [super init];
     if (self) {
-        [self charon_setUp];
+        [self revenant_setUp];
         _recordZoneIDs = @[];
     }
     return self;
@@ -197,9 +197,9 @@ static void CharonCKTakeZoneChanging(id entry, NSString **token, NSUInteger *lim
 {
     if (!self.recordZoneIDs.count) {
         if (self.fetchRecordZoneChangesCompletionBlock) {
-            self.fetchRecordZoneChangesCompletionBlock(CharonCKError(CKErrorInvalidArguments, @"No zone", nil));
+            self.fetchRecordZoneChangesCompletionBlock(RevenantCKError(CKErrorInvalidArguments, @"No zone", nil));
         }
-        [self charon_finish];
+        [self revenant_finish];
         return;
     }
     NSMutableDictionary *body = [NSMutableDictionary dictionary];
@@ -208,10 +208,10 @@ static void CharonCKTakeZoneChanging(id entry, NSString **token, NSUInteger *lim
         NSString *token = nil;
         NSUInteger limit = 0;
         NSArray *keys = nil;
-        CharonCKTakeZoneChanging(self.configurationsByRecordZoneID[zoneID]
+        RevenantCKTakeZoneChanging(self.configurationsByRecordZoneID[zoneID]
                                      ?: self.optionsByRecordZoneID[zoneID], &token, &limit, &keys);
         NSMutableDictionary *half = [NSMutableDictionary dictionary];
-        half[@"zoneID"] = CharonCKZoneIDDocument(zoneID);
+        half[@"zoneID"] = RevenantCKZoneIDDocument(zoneID);
         if (token.length) {
             half[@"resultsLimit"] = @(limit);
             [half setObject:token forKey:@"continuationMarker"];
@@ -239,15 +239,15 @@ static void CharonCKTakeZoneChanging(id entry, NSString **token, NSUInteger *lim
         }
         NSMutableDictionary *failures = [NSMutableDictionary dictionary];
         for (NSDictionary *document in answer[@"zones"]) {
-            CKRecordZoneID *zoneID = CharonCKZoneIDFromDocument(document[@"zoneID"]);
+            CKRecordZoneID *zoneID = RevenantCKZoneIDFromDocument(document[@"zoneID"]);
             NSError *zoneError = [document[@"serverError"] isKindOfClass:[NSDictionary class]]
-                ? CharonCKErrorFromPayload(document[@"serverError"], nil) : nil;
+                ? RevenantCKErrorFromPayload(document[@"serverError"], nil) : nil;
             if (zoneID && zoneError) {
                 failures[zoneID.zoneName] = zoneError;
             }
             for (NSDictionary *record in document[@"records"]) {
-                CKRecord *changed = CharonCKRecordFromResult(record, nil);
-                CKRecordID *recordID = CharonCKRecordIDFromDocument(record);
+                CKRecord *changed = RevenantCKRecordFromResult(record, nil);
+                CKRecordID *recordID = RevenantCKRecordIDFromDocument(record);
                 if (changed && strongSelf.recordChangedBlock) {
                     strongSelf.recordChangedBlock(changed);
                 }
@@ -256,7 +256,7 @@ static void CharonCKTakeZoneChanging(id entry, NSString **token, NSUInteger *lim
                 }
             }
             for (NSDictionary *deleted in document[@"deletedRecordIDs"]) {
-                CKRecordID *recordID = CharonCKRecordIDFromDocument(deleted);
+                CKRecordID *recordID = RevenantCKRecordIDFromDocument(deleted);
                 NSString *type = [deleted[@"recordType"] isKindOfClass:[NSString class]] ? deleted[@"recordType"] : @"*";
                 if (recordID && strongSelf.recordWithIDWasDeletedBlock) {
                     strongSelf.recordWithIDWasDeletedBlock(recordID, type);
@@ -267,11 +267,11 @@ static void CharonCKTakeZoneChanging(id entry, NSString **token, NSUInteger *lim
             NSData *token = marker.length ? [[NSData alloc] initWithBase64EncodedString:marker
                                                                       options:NSDataBase64DecodingIgnoreUnknownCharacters] : nil;
             if (zoneID && strongSelf.recordZoneChangeTokensUpdatedBlock) {
-                strongSelf.recordZoneChangeTokensUpdatedBlock(zoneID, CharonCKServerTokenFromData(token),
+                strongSelf.recordZoneChangeTokensUpdatedBlock(zoneID, RevenantCKServerTokenFromData(token),
                                                               document[@"clientChangeToken"]);
             }
             if (zoneID && strongSelf.recordZoneFetchCompletionBlock) {
-                strongSelf.recordZoneFetchCompletionBlock(zoneID, CharonCKServerTokenFromData(token),
+                strongSelf.recordZoneFetchCompletionBlock(zoneID, RevenantCKServerTokenFromData(token),
                                                          document[@"clientChangeToken"],
                                                          [document[@"moreComing"] boolValue], zoneError);
             }

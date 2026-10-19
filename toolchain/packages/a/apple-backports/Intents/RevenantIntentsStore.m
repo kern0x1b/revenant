@@ -1,27 +1,27 @@
-#import "CharonIntentsStore.h"
+#import "RevenantIntentsStore.h"
 
 #import <Intents/Intents.h>
 
-static NSString *const CharonIntentsErrorDomain = @"org.charon.intents.store";
+static NSString *const RevenantIntentsErrorDomain = @"org.revenant.intents.store";
 
 enum {
-    CharonIntentsErrorCannotCreate = 1,
-    CharonIntentsErrorCannotWrite,
-    CharonIntentsErrorCannotRead,
-    CharonIntentsErrorCannotDecode,
+    RevenantIntentsErrorCannotCreate = 1,
+    RevenantIntentsErrorCannotWrite,
+    RevenantIntentsErrorCannotRead,
+    RevenantIntentsErrorCannotDecode,
 };
 
-static dispatch_queue_t charon_intents_queue(void)
+static dispatch_queue_t revenant_intents_queue(void)
 {
     static dispatch_queue_t queue;
     static dispatch_once_t once;
     dispatch_once(&once, ^{
-        queue = dispatch_queue_create("org.charon.intents.store", DISPATCH_QUEUE_SERIAL);
+        queue = dispatch_queue_create("org.revenant.intents.store", DISPATCH_QUEUE_SERIAL);
     });
     return queue;
 }
 
-NSString *charon_intents_store_directory(void)
+NSString *revenant_intents_store_directory(void)
 {
     static NSString *directory;
     static dispatch_once_t once;
@@ -29,17 +29,17 @@ NSString *charon_intents_store_directory(void)
         NSArray *paths = NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory,
                                                              NSUserDomainMask, YES);
         NSString *base = paths.count ? paths[0] : NSTemporaryDirectory();
-        directory = [base stringByAppendingPathComponent:@"Charon/Intents"];
+        directory = [base stringByAppendingPathComponent:@"Revenant/Intents"];
     });
     return directory;
 }
 
-static NSString *charon_intents_file(NSString *name)
+static NSString *revenant_intents_file(NSString *name)
 {
-    return [charon_intents_store_directory() stringByAppendingPathComponent:name];
+    return [revenant_intents_store_directory() stringByAppendingPathComponent:name];
 }
 
-static NSError *charon_intents_error(NSInteger code, NSString *path, NSError *cause)
+static NSError *revenant_intents_error(NSInteger code, NSString *path, NSError *cause)
 {
     NSMutableDictionary *info = [NSMutableDictionary dictionary];
     info[NSLocalizedDescriptionKey] = [NSString stringWithFormat:@"the Intents store could not use %@", path];
@@ -47,13 +47,13 @@ static NSError *charon_intents_error(NSInteger code, NSString *path, NSError *ca
     if (cause) {
         info[NSUnderlyingErrorKey] = cause;
     }
-    return [NSError errorWithDomain:CharonIntentsErrorDomain code:code userInfo:info];
+    return [NSError errorWithDomain:RevenantIntentsErrorDomain code:code userInfo:info];
 }
 
-static BOOL charon_intents_prepare(NSError **error)
+static BOOL revenant_intents_prepare(NSError **error)
 {
     NSFileManager *files = [NSFileManager defaultManager];
-    NSString *directory = charon_intents_store_directory();
+    NSString *directory = revenant_intents_store_directory();
     if ([files fileExistsAtPath:directory]) {
         return YES;
     }
@@ -63,14 +63,14 @@ static BOOL charon_intents_prepare(NSError **error)
         return YES;
     }
     if (error) {
-        *error = charon_intents_error(CharonIntentsErrorCannotCreate, directory, failure);
+        *error = revenant_intents_error(RevenantIntentsErrorCannotCreate, directory, failure);
     }
     return NO;
 }
 
-static BOOL charon_intents_write(NSString *path, id contents, NSError **error)
+static BOOL revenant_intents_write(NSString *path, id contents, NSError **error)
 {
-    if (!charon_intents_prepare(error)) {
+    if (!revenant_intents_prepare(error)) {
         return NO;
     }
     NSError *failure = nil;
@@ -80,14 +80,14 @@ static BOOL charon_intents_write(NSString *path, id contents, NSError **error)
                                                                error:&failure];
     if (!data || ![data writeToFile:path atomically:YES]) {
         if (error) {
-            *error = charon_intents_error(CharonIntentsErrorCannotWrite, path, failure);
+            *error = revenant_intents_error(RevenantIntentsErrorCannotWrite, path, failure);
         }
         return NO;
     }
     return YES;
 }
 
-static id charon_intents_contents(NSString *path, NSError **error, Class wanted)
+static id revenant_intents_contents(NSString *path, NSError **error, Class wanted)
 {
     if (![[NSFileManager defaultManager] fileExistsAtPath:path]) {
         return nil;
@@ -95,7 +95,7 @@ static id charon_intents_contents(NSString *path, NSError **error, Class wanted)
     NSData *data = [NSData dataWithContentsOfFile:path];
     if (!data) {
         if (error) {
-            *error = charon_intents_error(CharonIntentsErrorCannotRead, path, nil);
+            *error = revenant_intents_error(RevenantIntentsErrorCannotRead, path, nil);
         }
         return nil;
     }
@@ -106,7 +106,7 @@ static id charon_intents_contents(NSString *path, NSError **error, Class wanted)
                                                                error:&failure];
     if (![contents isKindOfClass:wanted]) {
         if (error) {
-            *error = charon_intents_error(CharonIntentsErrorCannotDecode, path, failure);
+            *error = revenant_intents_error(RevenantIntentsErrorCannotDecode, path, failure);
         }
         return nil;
     }
@@ -115,15 +115,15 @@ static id charon_intents_contents(NSString *path, NSError **error, Class wanted)
 
 #pragma mark - The interaction store
 
-static NSString *charon_intents_interactions_file(void)
+static NSString *revenant_intents_interactions_file(void)
 {
-    return charon_intents_file(@"Interactions.plist");
+    return revenant_intents_file(@"Interactions.plist");
 }
 
-static NSMutableArray *charon_intents_stored_archives(NSError **error)
+static NSMutableArray *revenant_intents_stored_archives(NSError **error)
 {
     NSMutableArray *archives = [NSMutableArray array];
-    id contents = charon_intents_contents(charon_intents_interactions_file(), error, [NSArray class]);
+    id contents = revenant_intents_contents(revenant_intents_interactions_file(), error, [NSArray class]);
     for (id entry in contents) {
         if ([entry isKindOfClass:[NSData class]]) {
             [archives addObject:entry];
@@ -132,17 +132,17 @@ static NSMutableArray *charon_intents_stored_archives(NSError **error)
     return archives;
 }
 
-static BOOL charon_intents_write_archives(NSArray *archives, NSError **error)
+static BOOL revenant_intents_write_archives(NSArray *archives, NSError **error)
 {
-    return charon_intents_write(charon_intents_interactions_file(), archives, error);
+    return revenant_intents_write(revenant_intents_interactions_file(), archives, error);
 }
 
-NSArray *charon_intents_stored_interactions(NSString *groupIdentifier)
+NSArray *revenant_intents_stored_interactions(NSString *groupIdentifier)
 {
     __block NSArray *found;
-    dispatch_sync(charon_intents_queue(), ^{
+    dispatch_sync(revenant_intents_queue(), ^{
         NSMutableArray *interactions = [NSMutableArray array];
-        for (NSData *archive in charon_intents_stored_archives(NULL)) {
+        for (NSData *archive in revenant_intents_stored_archives(NULL)) {
             INInteraction *interaction = [NSKeyedUnarchiver unarchiveObjectWithData:archive];
             if (!interaction) {
                 continue;
@@ -157,12 +157,12 @@ NSArray *charon_intents_stored_interactions(NSString *groupIdentifier)
     return found;
 }
 
-NSError *charon_intents_store_interaction(INInteraction *interaction)
+NSError *revenant_intents_store_interaction(INInteraction *interaction)
 {
     __block NSError *reported = nil;
-    dispatch_sync(charon_intents_queue(), ^{
+    dispatch_sync(revenant_intents_queue(), ^{
         NSError *failure = nil;
-        NSMutableArray *archives = charon_intents_stored_archives(&failure);
+        NSMutableArray *archives = revenant_intents_stored_archives(&failure);
         if (failure) {
             reported = failure;
             return;
@@ -172,30 +172,30 @@ NSError *charon_intents_store_interaction(INInteraction *interaction)
                                                 requiringSecureCoding:YES
                                                                 error:&archiveFailure];
         if (!archive) {
-            reported = charon_intents_error(CharonIntentsErrorCannotDecode,
-                                            charon_intents_interactions_file(), archiveFailure);
+            reported = revenant_intents_error(RevenantIntentsErrorCannotDecode,
+                                            revenant_intents_interactions_file(), archiveFailure);
             return;
         }
         [archives addObject:archive];
-        if (!charon_intents_write_archives(archives, &failure)) {
+        if (!revenant_intents_write_archives(archives, &failure)) {
             reported = failure;
         }
     });
     return reported;
 }
 
-NSError *charon_intents_delete_interactions(NSArray *identifiers, NSString *groupIdentifier)
+NSError *revenant_intents_delete_interactions(NSArray *identifiers, NSString *groupIdentifier)
 {
     __block NSError *reported = nil;
-    dispatch_sync(charon_intents_queue(), ^{
+    dispatch_sync(revenant_intents_queue(), ^{
         NSError *failure = nil;
-        NSMutableArray *archives = charon_intents_stored_archives(&failure);
+        NSMutableArray *archives = revenant_intents_stored_archives(&failure);
         if (failure) {
             reported = failure;
             return;
         }
         if (!identifiers && !groupIdentifier) {
-            reported = charon_intents_write_archives([NSArray array], &failure) ? nil : failure;
+            reported = revenant_intents_write_archives([NSArray array], &failure) ? nil : failure;
             return;
         }
         NSSet *wanted = identifiers.count ? [NSSet setWithArray:identifiers] : nil;
@@ -211,7 +211,7 @@ NSError *charon_intents_delete_interactions(NSArray *identifiers, NSString *grou
             }
             [kept addObject:archive];
         }
-        if (!charon_intents_write_archives(kept, &failure)) {
+        if (!revenant_intents_write_archives(kept, &failure)) {
             reported = failure;
         }
     });
@@ -220,15 +220,15 @@ NSError *charon_intents_delete_interactions(NSArray *identifiers, NSString *grou
 
 #pragma mark - The vocabulary store
 
-static NSString *charon_intents_vocabulary_file(void)
+static NSString *revenant_intents_vocabulary_file(void)
 {
-    return charon_intents_file(@"Vocabulary.plist");
+    return revenant_intents_file(@"Vocabulary.plist");
 }
 
-static NSMutableDictionary *charon_intents_stored_vocabulary(NSError **error)
+static NSMutableDictionary *revenant_intents_stored_vocabulary(NSError **error)
 {
     NSMutableDictionary *stored = [NSMutableDictionary dictionary];
-    id contents = charon_intents_contents(charon_intents_vocabulary_file(), error, [NSDictionary class]);
+    id contents = revenant_intents_contents(revenant_intents_vocabulary_file(), error, [NSDictionary class]);
     for (id key in contents) {
         id value = contents[key];
         if ([key isKindOfClass:[NSString class]] && [value isKindOfClass:[NSArray class]]) {
@@ -238,28 +238,28 @@ static NSMutableDictionary *charon_intents_stored_vocabulary(NSError **error)
     return stored;
 }
 
-NSOrderedSet *charon_intents_vocabulary(NSInteger type)
+NSOrderedSet *revenant_intents_vocabulary(NSInteger type)
 {
     __block NSOrderedSet *found;
-    dispatch_sync(charon_intents_queue(), ^{
-        id phrases = charon_intents_stored_vocabulary(NULL)[@(type)];
+    dispatch_sync(revenant_intents_queue(), ^{
+        id phrases = revenant_intents_stored_vocabulary(NULL)[@(type)];
         found = [NSOrderedSet orderedSetWithArray:phrases ?: [NSArray array]];
     });
     return found;
 }
 
-void charon_intents_store_vocabulary(NSInteger type, NSArray *phrases)
+void revenant_intents_store_vocabulary(NSInteger type, NSArray *phrases)
 {
-    dispatch_sync(charon_intents_queue(), ^{
-        NSMutableDictionary *stored = charon_intents_stored_vocabulary(NULL);
+    dispatch_sync(revenant_intents_queue(), ^{
+        NSMutableDictionary *stored = revenant_intents_stored_vocabulary(NULL);
         stored[@(type)] = [phrases copy] ?: [NSArray array];
-        charon_intents_write(charon_intents_vocabulary_file(), stored, NULL);
+        revenant_intents_write(revenant_intents_vocabulary_file(), stored, NULL);
     });
 }
 
-void charon_intents_remove_vocabulary(void)
+void revenant_intents_remove_vocabulary(void)
 {
-    dispatch_sync(charon_intents_queue(), ^{
-        charon_intents_write(charon_intents_vocabulary_file(), [NSDictionary dictionary], NULL);
+    dispatch_sync(revenant_intents_queue(), ^{
+        revenant_intents_write(revenant_intents_vocabulary_file(), [NSDictionary dictionary], NULL);
     });
 }

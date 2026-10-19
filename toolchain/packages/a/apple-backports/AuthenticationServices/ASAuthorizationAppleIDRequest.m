@@ -1,5 +1,5 @@
 #import <AuthenticationServices/AuthenticationServices.h>
-#import "CharonASConstruction.h"
+#import "RevenantASConstruction.h"
 
 @implementation ASAuthorizationAppleIDRequest
 
@@ -13,9 +13,9 @@
     return self;
 }
 
-- (instancetype)charon_initWithProvider:(id<ASAuthorizationProvider>)provider __attribute__((objc_method_family(init)))
+- (instancetype)revenant_initWithProvider:(id<ASAuthorizationProvider>)provider __attribute__((objc_method_family(init)))
 {
-    self = [super charon_initWithProvider:provider];
+    self = [super revenant_initWithProvider:provider];
     if (self)
         _user = nil;
     return self;

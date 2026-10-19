@@ -11,7 +11,7 @@
 
 #include <utility>
 
-namespace shade {
+namespace emulator {
 
 VnodeWatch::VnodeWatch(
     std::filesystem::path path, GuestFileGenerationRegistry& files)

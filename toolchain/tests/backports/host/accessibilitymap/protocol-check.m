@@ -15,9 +15,9 @@ static void check(NSString *rule, id got, id want)
     if (!same) failures++;
 }
 
-@interface CharonMapRendererAdopter : NSObject <AXBrailleMapRenderer> @end
+@interface RevenantMapRendererAdopter : NSObject <AXBrailleMapRenderer> @end
 
-@implementation CharonMapRendererAdopter
+@implementation RevenantMapRendererAdopter
 
 - (id)accessibilityBrailleMapRenderer
 {
@@ -34,13 +34,13 @@ static void check(NSString *rule, id got, id want)
 int main(void)
 {
     @autoreleasepool {
-        for (NSString *claimed in CHARON_PROTOCOLS) {
+        for (NSString *claimed in REVENANT_PROTOCOLS) {
             check(([NSString stringWithFormat:@"the registry's row %@ resolves by name", claimed]),
                   objc_getProtocol(claimed.UTF8String) ? @"yes" : @"no", @"yes");
         }
-        printf("registry protocol rows looked up\t%lu\n", (unsigned long)CHARON_PROTOCOLS.count);
+        printf("registry protocol rows looked up\t%lu\n", (unsigned long)REVENANT_PROTOCOLS.count);
         check(@"a name the registry does not hold answers nil",
-              objc_getProtocol("CharonNoSuchProtocol") ? @"yes" : @"no", @"no");
+              objc_getProtocol("RevenantNoSuchProtocol") ? @"yes" : @"no", @"no");
 
         Protocol *renderer = objc_getProtocol("AXBrailleMapRenderer");
         check(@"objc_getProtocol finds the renderer protocol by its real name", renderer ? @"yes" : @"no",
@@ -48,7 +48,7 @@ int main(void)
         check(@"NSProtocolFromString finds it too", NSProtocolFromString(@"AXBrailleMapRenderer") ? @"yes" : @"no",
               @"yes");
         check(@"a class that adopts it answers conformsToProtocol:",
-              [[CharonMapRendererAdopter new] conformsToProtocol:@protocol(AXBrailleMapRenderer)] ? @"yes" : @"no",
+              [[RevenantMapRendererAdopter new] conformsToProtocol:@protocol(AXBrailleMapRenderer)] ? @"yes" : @"no",
               @"yes");
         if (renderer) {
             check(@"the protocol is named as the SDK names it",
@@ -64,7 +64,7 @@ int main(void)
         check(@"the map class does not adopt the renderer protocol",
               [NSClassFromString(@"AXBrailleMap") conformsToProtocol:@protocol(AXBrailleMapRenderer)] ? @"yes" : @"no",
               @"no");
-        printf("checks run: %lu, failed: %d\n", (unsigned long)(CHARON_PROTOCOLS.count + 8), failures);
+        printf("checks run: %lu, failed: %d\n", (unsigned long)(REVENANT_PROTOCOLS.count + 8), failures);
     }
     return failures == 0 ? 0 : 1;
 }

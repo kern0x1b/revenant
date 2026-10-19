@@ -1,12 +1,12 @@
 #import <UIKit/UIKit.h>
 #import "check.h"
 
-void charon_windowed_run(UIWindow *window);
+void revenant_windowed_run(UIWindow *window);
 
-@interface CharonWindowedDelegate : UIResponder <UIApplicationDelegate>
+@interface RevenantWindowedDelegate : UIResponder <UIApplicationDelegate>
 @end
 
-@implementation CharonWindowedDelegate
+@implementation RevenantWindowedDelegate
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)options
 {
@@ -15,11 +15,11 @@ void charon_windowed_run(UIWindow *window);
 
 @end
 
-@interface CharonWindowedScene : UIResponder <UIWindowSceneDelegate>
+@interface RevenantWindowedScene : UIResponder <UIWindowSceneDelegate>
 @property (nonatomic, strong) UIWindow *window;
 @end
 
-@implementation CharonWindowedScene
+@implementation RevenantWindowedScene
 
 - (void)scene:(UIScene *)scene willConnectToSession:(UISceneSession *)session options:(UISceneConnectionOptions *)connectionOptions
 {
@@ -28,10 +28,10 @@ void charon_windowed_run(UIWindow *window);
     self.window.rootViewController = [[UIViewController alloc] init];
     [self.window makeKeyAndVisible];
     dispatch_async(dispatch_get_main_queue(), ^{
-        charon_windowed_run(self.window);
-        printf("checks=%d failures=%d\n", charon_checks, charon_failures);
+        revenant_windowed_run(self.window);
+        printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
         fflush(stdout);
-        exit(charon_failures ? 1 : 0);
+        exit(revenant_failures ? 1 : 0);
     });
 }
 
@@ -40,6 +40,6 @@ void charon_windowed_run(UIWindow *window);
 int main(int argc, char **argv)
 {
     @autoreleasepool {
-        return UIApplicationMain(argc, argv, nil, @"CharonWindowedDelegate");
+        return UIApplicationMain(argc, argv, nil, @"RevenantWindowedDelegate");
     }
 }

@@ -1,6 +1,6 @@
-#import "CharonAVFAudio.h"
+#import "RevenantAVFAudio.h"
 
-@implementation AVAudioUnitComponent (Charon16)
+@implementation AVAudioUnitComponent (Revenant16)
 
 - (NSDictionary<NSString *, id> *)configurationDictionary
 {

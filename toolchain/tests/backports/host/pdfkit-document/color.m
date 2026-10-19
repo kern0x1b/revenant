@@ -1,7 +1,7 @@
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
-#import "CharonPDFKit.h"
-#import "CharonPDFKitColours.h"
+#import "RevenantPDFKit.h"
+#import "RevenantPDFKitColours.h"
 #include <stdio.h>
 
 static void printAppearanceColour(const char *label, const char *member, UIColor *colour)
@@ -69,10 +69,10 @@ static void printAnnotationColour(const char *label, const char *member, CGColor
     CGColorRelease(colour);
 }
 
-static const char *charonAnnotationName(PDFAnnotation *annotation)
+static const char *revenantAnnotationName(PDFAnnotation *annotation)
 {
     CGPDFObjectRef found = NULL;
-    if (!CGPDFDictionaryGetObject([annotation charon_CGPDFDictionary], "NM", &found) || found == NULL
+    if (!CGPDFDictionaryGetObject([annotation revenant_CGPDFDictionary], "NM", &found) || found == NULL
         || CGPDFObjectGetType(found) != kCGPDFObjectTypeString)
         return NULL;
     CGPDFStringRef string = NULL;
@@ -89,7 +89,7 @@ static void printAnnotationColourFacts(const char *fixture, PDFPage *page)
 {
     NSMutableArray *names = [NSMutableArray array];
     for (unsigned a = 0; a < page.annotations.count; a++) {
-        const char *name = charonAnnotationName(page.annotations[a]);
+        const char *name = revenantAnnotationName(page.annotations[a]);
         if (name != NULL)
             [names addObject:@(name)];
     }
@@ -98,19 +98,19 @@ static void printAnnotationColourFacts(const char *fixture, PDFPage *page)
     printf("%s.colours.names=%s\n", fixture, [[names componentsJoinedByString:@","] UTF8String]);
     for (unsigned a = 0; a < page.annotations.count; a++) {
         PDFAnnotation *annotation = page.annotations[a];
-        const char *name = charonAnnotationName(annotation);
+        const char *name = revenantAnnotationName(annotation);
         if (name == NULL)
             continue;
         char label[512];
         snprintf(label, sizeof(label), "%s.colours.nm%s", fixture, name);
-        CGPDFDictionaryRef dictionary = [annotation charon_CGPDFDictionary];
+        CGPDFDictionaryRef dictionary = [annotation revenant_CGPDFDictionary];
         printAnnotationColour(label, "backgroundColor",
-                              charon_annotation_background_colour(dictionary));
+                              revenant_annotation_background_colour(dictionary));
         printAnnotationColour(label, "interiorColor",
-                              charon_annotation_interior_colour(dictionary));
-        printAnnotationColour(label, "fontColor", charon_annotation_font_colour(dictionary));
-        NSString *fontName = charon_annotation_font_name(dictionary);
-        CGFloat fontSize = charon_annotation_font_size(dictionary);
+                              revenant_annotation_interior_colour(dictionary));
+        printAnnotationColour(label, "fontColor", revenant_annotation_font_colour(dictionary));
+        NSString *fontName = revenant_annotation_font_name(dictionary);
+        CGFloat fontSize = revenant_annotation_font_size(dictionary);
         UIFont *font = [UIFont fontWithName:fontName size:fontSize];
         if (font == nil) {
             printf("%s.font.name=%s\n", label, [fontName UTF8String]);

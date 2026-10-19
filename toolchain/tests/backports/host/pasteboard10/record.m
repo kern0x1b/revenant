@@ -1,9 +1,9 @@
 #import <UIKit/UIKit.h>
 #import "pasteboard10-cases.h"
 
-void charon_windowed_run(UIWindow *window);
+void revenant_windowed_run(UIWindow *window);
 
-void charon_windowed_run(UIWindow *window)
+void revenant_windowed_run(UIWindow *window)
 {
     (void)window;
     NSMutableDictionary *records = [NSMutableDictionary dictionary];

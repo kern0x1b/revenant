@@ -5,7 +5,7 @@
 
 #pragma clang diagnostic ignored "-Wobjc-designated-initializers"
 
-@implementation NSURL (CharonFileSystemRepresentation)
+@implementation NSURL (RevenantFileSystemRepresentation)
 
 + (NSURL *)fileURLWithFileSystemRepresentation:(const char *)path isDirectory:(BOOL)isDir relativeToURL:(NSURL *)baseURL
 {

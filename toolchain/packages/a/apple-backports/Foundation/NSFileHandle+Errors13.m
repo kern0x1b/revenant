@@ -6,9 +6,9 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
-static char CharonFileHandleClosedKey;
+static char RevenantFileHandleClosedKey;
 
-static NSInteger charon_file_code(int code, BOOL reading)
+static NSInteger revenant_file_code(int code, BOOL reading)
 {
     if (reading) {
         switch (code) {
@@ -33,18 +33,18 @@ static NSInteger charon_file_code(int code, BOOL reading)
     }
 }
 
-static BOOL charon_file_fail(NSError **error, int code, BOOL reading)
+static BOOL revenant_file_fail(NSError **error, int code, BOOL reading)
 {
     if (error) {
         NSError *underlying = [NSError errorWithDomain:NSPOSIXErrorDomain code:code userInfo:nil];
-        *error = [NSError errorWithDomain:NSCocoaErrorDomain code:charon_file_code(code, reading) userInfo:@{NSUnderlyingErrorKey: underlying}];
+        *error = [NSError errorWithDomain:NSCocoaErrorDomain code:revenant_file_code(code, reading) userInfo:@{NSUnderlyingErrorKey: underlying}];
     }
     return NO;
 }
 
-static int charon_file_descriptor(NSFileHandle *handle)
+static int revenant_file_descriptor(NSFileHandle *handle)
 {
-    if (objc_getAssociatedObject(handle, &CharonFileHandleClosedKey))
+    if (objc_getAssociatedObject(handle, &RevenantFileHandleClosedKey))
         return -1;
     int descriptor = -1;
     @try {
@@ -57,7 +57,7 @@ static int charon_file_descriptor(NSFileHandle *handle)
     return descriptor;
 }
 
-@implementation NSFileHandle (CharonErrors)
+@implementation NSFileHandle (RevenantErrors)
 
 - (NSData *)readDataToEndOfFileAndReturnError:(NSError **)error
 {
@@ -66,9 +66,9 @@ static int charon_file_descriptor(NSFileHandle *handle)
 
 - (NSData *)readDataUpToLength:(NSUInteger)length error:(NSError **)error
 {
-    int descriptor = charon_file_descriptor(self);
+    int descriptor = revenant_file_descriptor(self);
     if (descriptor < 0) {
-        charon_file_fail(error, EBADF, YES);
+        revenant_file_fail(error, EBADF, YES);
         return nil;
     }
     struct stat status;
@@ -79,7 +79,7 @@ static int charon_file_descriptor(NSFileHandle *handle)
     }
     int access = fcntl(descriptor, F_GETFL);
     if (access >= 0 && (access & O_ACCMODE) == O_WRONLY && length > 0) {
-        charon_file_fail(error, EBADF, YES);
+        revenant_file_fail(error, EBADF, YES);
         return nil;
     }
     NSMutableData *data = [NSMutableData data];
@@ -94,7 +94,7 @@ static int charon_file_descriptor(NSFileHandle *handle)
             data.length = before;
             if (code == EINTR)
                 continue;
-            charon_file_fail(error, code, YES);
+            revenant_file_fail(error, code, YES);
             return nil;
         }
         data.length = before + (NSUInteger)got;
@@ -108,9 +108,9 @@ static int charon_file_descriptor(NSFileHandle *handle)
 
 - (BOOL)writeData:(NSData *)data error:(NSError **)error
 {
-    int descriptor = charon_file_descriptor(self);
+    int descriptor = revenant_file_descriptor(self);
     if (descriptor < 0)
-        return charon_file_fail(error, EBADF, NO);
+        return revenant_file_fail(error, EBADF, NO);
     const unsigned char *bytes = data.bytes;
     NSUInteger remaining = data.length;
     while (remaining) {
@@ -118,7 +118,7 @@ static int charon_file_descriptor(NSFileHandle *handle)
         if (written < 0) {
             if (errno == EINTR)
                 continue;
-            return charon_file_fail(error, errno, NO);
+            return revenant_file_fail(error, errno, NO);
         }
         bytes += written;
         remaining -= (NSUInteger)written;
@@ -128,12 +128,12 @@ static int charon_file_descriptor(NSFileHandle *handle)
 
 - (BOOL)getOffset:(unsigned long long *)offsetInFile error:(NSError **)error
 {
-    int descriptor = charon_file_descriptor(self);
+    int descriptor = revenant_file_descriptor(self);
     if (descriptor < 0)
-        return charon_file_fail(error, EBADF, YES);
+        return revenant_file_fail(error, EBADF, YES);
     off_t offset = lseek(descriptor, 0, SEEK_CUR);
     if (offset < 0)
-        return charon_file_fail(error, errno, YES);
+        return revenant_file_fail(error, errno, YES);
     if (offsetInFile)
         *offsetInFile = (unsigned long long)offset;
     return YES;
@@ -141,12 +141,12 @@ static int charon_file_descriptor(NSFileHandle *handle)
 
 - (BOOL)seekToEndReturningOffset:(unsigned long long *)offsetInFile error:(NSError **)error
 {
-    int descriptor = charon_file_descriptor(self);
+    int descriptor = revenant_file_descriptor(self);
     if (descriptor < 0)
-        return charon_file_fail(error, EBADF, YES);
+        return revenant_file_fail(error, EBADF, YES);
     off_t offset = lseek(descriptor, 0, SEEK_END);
     if (offset < 0)
-        return charon_file_fail(error, errno, YES);
+        return revenant_file_fail(error, errno, YES);
     if (offsetInFile)
         *offsetInFile = (unsigned long long)offset;
     return YES;
@@ -154,46 +154,46 @@ static int charon_file_descriptor(NSFileHandle *handle)
 
 - (BOOL)seekToOffset:(unsigned long long)offset error:(NSError **)error
 {
-    int descriptor = charon_file_descriptor(self);
+    int descriptor = revenant_file_descriptor(self);
     if (descriptor < 0)
-        return charon_file_fail(error, EBADF, YES);
+        return revenant_file_fail(error, EBADF, YES);
     if (lseek(descriptor, (off_t)offset, SEEK_SET) < 0)
-        return charon_file_fail(error, errno, YES);
+        return revenant_file_fail(error, errno, YES);
     return YES;
 }
 
 - (BOOL)truncateAtOffset:(unsigned long long)offset error:(NSError **)error
 {
-    int descriptor = charon_file_descriptor(self);
+    int descriptor = revenant_file_descriptor(self);
     if (descriptor < 0)
-        return charon_file_fail(error, EBADF, NO);
+        return revenant_file_fail(error, EBADF, NO);
     if (lseek(descriptor, (off_t)offset, SEEK_SET) < 0)
-        return charon_file_fail(error, errno, NO);
+        return revenant_file_fail(error, errno, NO);
     if (ftruncate(descriptor, (off_t)offset) < 0)
-        return charon_file_fail(error, errno, NO);
+        return revenant_file_fail(error, errno, NO);
     return YES;
 }
 
 - (BOOL)synchronizeAndReturnError:(NSError **)error
 {
-    int descriptor = charon_file_descriptor(self);
+    int descriptor = revenant_file_descriptor(self);
     if (descriptor < 0)
-        return charon_file_fail(error, EBADF, NO);
+        return revenant_file_fail(error, EBADF, NO);
     if (fsync(descriptor) < 0)
-        return charon_file_fail(error, errno, NO);
+        return revenant_file_fail(error, errno, NO);
     return YES;
 }
 
 - (BOOL)closeAndReturnError:(NSError **)error
 {
-    if (charon_file_descriptor(self) < 0)
+    if (revenant_file_descriptor(self) < 0)
         return YES;
     @try {
         [self closeFile];
     } @catch (NSException *exception) {
-        return charon_file_fail(error, EBADF, NO);
+        return revenant_file_fail(error, EBADF, NO);
     }
-    objc_setAssociatedObject(self, &CharonFileHandleClosedKey, @YES, OBJC_ASSOCIATION_RETAIN);
+    objc_setAssociatedObject(self, &RevenantFileHandleClosedKey, @YES, OBJC_ASSOCIATION_RETAIN);
     return YES;
 }
 

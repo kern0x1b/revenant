@@ -1,41 +1,41 @@
-#ifndef CHARON_METRIC_VALUE_H
-#define CHARON_METRIC_VALUE_H
+#ifndef REVENANT_METRIC_VALUE_H
+#define REVENANT_METRIC_VALUE_H
 
 #import <Foundation/Foundation.h>
-#import "CharonMetricKit.h"
-#import "../CharonValueStore.h"
+#import "RevenantMetricKit.h"
+#import "../RevenantValueStore.h"
 
 @class MXSignpostMetric;
 
-#define CHARON_VALUE_STORE_DECLARATION                                                     \
-    - (NSMutableDictionary *)charon_values;                                                \
-    - (id)charon_valueForKey:(NSString *)key;                                              \
-    - (void)charon_setValue:(id)value forKey:(NSString *)key;
+#define REVENANT_VALUE_STORE_DECLARATION                                                     \
+    - (NSMutableDictionary *)revenant_values;                                                \
+    - (id)revenant_valueForKey:(NSString *)key;                                              \
+    - (void)revenant_setValue:(id)value forKey:(NSString *)key;
 
-#define CHARON_VALUE_CODING_DECLARATION                                                     \
+#define REVENANT_VALUE_CODING_DECLARATION                                                     \
     + (BOOL)supportsSecureCoding;                                                           \
     - (void)encodeWithCoder:(NSCoder *)coder;                                              \
     - (instancetype)initWithCoder:(NSCoder *)coder;
 
-#define CHARON_VALUE_CODING_METHODS                                                         \
-    - (void)charon_encodePropertiesWithCoder:(NSCoder *)coder                               \
+#define REVENANT_VALUE_CODING_METHODS                                                         \
+    - (void)revenant_encodePropertiesWithCoder:(NSCoder *)coder                               \
     {                                                                                       \
-        for (NSString *name in [CharonMetricValue propertyNamesOf:[self class]]) {           \
-            id value = [self charon_valueForKey:name];                                       \
+        for (NSString *name in [RevenantMetricValue propertyNamesOf:[self class]]) {           \
+            id value = [self revenant_valueForKey:name];                                       \
             if (value)                                                                      \
                 [coder encodeObject:value forKey:name];                                      \
         }                                                                                   \
     }                                                                                       \
-    - (BOOL)charon_decodePropertiesWithCoder:(NSCoder *)coder                               \
+    - (BOOL)revenant_decodePropertiesWithCoder:(NSCoder *)coder                               \
     {                                                                                       \
-        NSSet *allowed = [CharonMetricValue decodableClasses];                              \
+        NSSet *allowed = [RevenantMetricValue decodableClasses];                              \
         BOOL whole = YES;                                                                   \
-        for (NSString *name in [CharonMetricValue propertyNamesOf:[self class]]) {           \
+        for (NSString *name in [RevenantMetricValue propertyNamesOf:[self class]]) {           \
             if (![coder containsValueForKey:name])                                          \
                 continue;                                                                    \
             id value = [coder decodeObjectOfClasses:allowed forKey:name];                     \
             if (value)                                                                       \
-                [self charon_setValue:value forKey:name];                                    \
+                [self revenant_setValue:value forKey:name];                                    \
             else                                                                            \
                 whole = NO;                                                                 \
         }                                                                                   \
@@ -47,28 +47,28 @@
         MXSignpostIntervalData, MXBackgroundExitData, MXForegroundExitData, MXCallStackTree,
         MXUnitAveragePixelLuminance, MXUnitSignalBars;
 
-@interface MXMetric (CharonMetricValue)
-- (NSMutableDictionary *)charon_values;
-- (id)charon_valueForKey:(NSString *)key;
-- (void)charon_setValue:(id)value forKey:(NSString *)key;
-- (void)charon_encodePropertiesWithCoder:(NSCoder *)coder;
-- (BOOL)charon_decodePropertiesWithCoder:(NSCoder *)coder;
+@interface MXMetric (RevenantMetricValue)
+- (NSMutableDictionary *)revenant_values;
+- (id)revenant_valueForKey:(NSString *)key;
+- (void)revenant_setValue:(id)value forKey:(NSString *)key;
+- (void)revenant_encodePropertiesWithCoder:(NSCoder *)coder;
+- (BOOL)revenant_decodePropertiesWithCoder:(NSCoder *)coder;
 @end
 
-@interface MXDiagnostic (CharonMetricValue)
-- (NSMutableDictionary *)charon_values;
-- (id)charon_valueForKey:(NSString *)key;
-- (void)charon_setValue:(id)value forKey:(NSString *)key;
-- (void)charon_encodePropertiesWithCoder:(NSCoder *)coder;
-- (BOOL)charon_decodePropertiesWithCoder:(NSCoder *)coder;
+@interface MXDiagnostic (RevenantMetricValue)
+- (NSMutableDictionary *)revenant_values;
+- (id)revenant_valueForKey:(NSString *)key;
+- (void)revenant_setValue:(id)value forKey:(NSString *)key;
+- (void)revenant_encodePropertiesWithCoder:(NSCoder *)coder;
+- (BOOL)revenant_decodePropertiesWithCoder:(NSCoder *)coder;
 @end
 
-@interface MXAverage (CharonMetricValue)
-- (NSMutableDictionary *)charon_values;
-- (id)charon_valueForKey:(NSString *)key;
-- (void)charon_setValue:(id)value forKey:(NSString *)key;
-- (void)charon_encodePropertiesWithCoder:(NSCoder *)coder;
-- (BOOL)charon_decodePropertiesWithCoder:(NSCoder *)coder;
+@interface MXAverage (RevenantMetricValue)
+- (NSMutableDictionary *)revenant_values;
+- (id)revenant_valueForKey:(NSString *)key;
+- (void)revenant_setValue:(id)value forKey:(NSString *)key;
+- (void)revenant_encodePropertiesWithCoder:(NSCoder *)coder;
+- (BOOL)revenant_decodePropertiesWithCoder:(NSCoder *)coder;
 - (NSData *)JSONRepresentation;
 - (NSDictionary *)dictionaryRepresentation;
 + (BOOL)supportsSecureCoding;
@@ -76,69 +76,56 @@
 - (instancetype)initWithCoder:(NSCoder *)coder;
 @end
 
-@interface MXHistogram (CharonMetricValue)
-- (NSMutableDictionary *)charon_values;
-- (id)charon_valueForKey:(NSString *)key;
-- (void)charon_setValue:(id)value forKey:(NSString *)key;
-- (void)charon_encodePropertiesWithCoder:(NSCoder *)coder;
-- (BOOL)charon_decodePropertiesWithCoder:(NSCoder *)coder;
+@interface MXHistogram (RevenantMetricValue)
+- (NSMutableDictionary *)revenant_values;
+- (id)revenant_valueForKey:(NSString *)key;
+- (void)revenant_setValue:(id)value forKey:(NSString *)key;
+- (void)revenant_encodePropertiesWithCoder:(NSCoder *)coder;
+- (BOOL)revenant_decodePropertiesWithCoder:(NSCoder *)coder;
 @end
 
-@interface MXHistogramBucket (CharonMetricValue)
-- (NSMutableDictionary *)charon_values;
-- (id)charon_valueForKey:(NSString *)key;
-- (void)charon_setValue:(id)value forKey:(NSString *)key;
-- (void)charon_encodePropertiesWithCoder:(NSCoder *)coder;
-- (BOOL)charon_decodePropertiesWithCoder:(NSCoder *)coder;
+@interface MXHistogramBucket (RevenantMetricValue)
+- (NSMutableDictionary *)revenant_values;
+- (id)revenant_valueForKey:(NSString *)key;
+- (void)revenant_setValue:(id)value forKey:(NSString *)key;
+- (void)revenant_encodePropertiesWithCoder:(NSCoder *)coder;
+- (BOOL)revenant_decodePropertiesWithCoder:(NSCoder *)coder;
 @end
 
-@interface MXMetaData (CharonMetricValue)
-- (NSMutableDictionary *)charon_values;
-- (id)charon_valueForKey:(NSString *)key;
-- (void)charon_setValue:(id)value forKey:(NSString *)key;
-- (void)charon_encodePropertiesWithCoder:(NSCoder *)coder;
-- (BOOL)charon_decodePropertiesWithCoder:(NSCoder *)coder;
+@interface MXMetaData (RevenantMetricValue)
+- (NSMutableDictionary *)revenant_values;
+- (id)revenant_valueForKey:(NSString *)key;
+- (void)revenant_setValue:(id)value forKey:(NSString *)key;
+- (void)revenant_encodePropertiesWithCoder:(NSCoder *)coder;
+- (BOOL)revenant_decodePropertiesWithCoder:(NSCoder *)coder;
 - (NSData *)JSONRepresentation;
 - (NSDictionary *)dictionaryRepresentation;
 @end
 
-@interface MXMetricPayload (CharonMetricValue)
-- (NSMutableDictionary *)charon_values;
-- (id)charon_valueForKey:(NSString *)key;
-- (void)charon_setValue:(id)value forKey:(NSString *)key;
-- (void)charon_encodePropertiesWithCoder:(NSCoder *)coder;
-- (BOOL)charon_decodePropertiesWithCoder:(NSCoder *)coder;
+@interface MXMetricPayload (RevenantMetricValue)
+- (NSMutableDictionary *)revenant_values;
+- (id)revenant_valueForKey:(NSString *)key;
+- (void)revenant_setValue:(id)value forKey:(NSString *)key;
+- (void)revenant_encodePropertiesWithCoder:(NSCoder *)coder;
+- (BOOL)revenant_decodePropertiesWithCoder:(NSCoder *)coder;
 - (NSData *)JSONRepresentation;
 - (NSDictionary *)dictionaryRepresentation;
 @end
 
-@interface MXDiagnosticPayload (CharonMetricValue)
-- (NSMutableDictionary *)charon_values;
-- (id)charon_valueForKey:(NSString *)key;
-- (void)charon_setValue:(id)value forKey:(NSString *)key;
-- (void)charon_encodePropertiesWithCoder:(NSCoder *)coder;
-- (BOOL)charon_decodePropertiesWithCoder:(NSCoder *)coder;
+@interface MXDiagnosticPayload (RevenantMetricValue)
+- (NSMutableDictionary *)revenant_values;
+- (id)revenant_valueForKey:(NSString *)key;
+- (void)revenant_setValue:(id)value forKey:(NSString *)key;
+- (void)revenant_encodePropertiesWithCoder:(NSCoder *)coder;
+- (BOOL)revenant_decodePropertiesWithCoder:(NSCoder *)coder;
 @end
 
-@interface MXCrashDiagnosticObjectiveCExceptionReason (CharonMetricValue)
-- (NSMutableDictionary *)charon_values;
-- (id)charon_valueForKey:(NSString *)key;
-- (void)charon_setValue:(id)value forKey:(NSString *)key;
-- (void)charon_encodePropertiesWithCoder:(NSCoder *)coder;
-- (BOOL)charon_decodePropertiesWithCoder:(NSCoder *)coder;
-- (NSData *)JSONRepresentation;
-- (NSDictionary *)dictionaryRepresentation;
-+ (BOOL)supportsSecureCoding;
-- (void)encodeWithCoder:(NSCoder *)coder;
-- (instancetype)initWithCoder:(NSCoder *)coder;
-@end
-
-@interface MXSignpostRecord (CharonMetricValue)
-- (NSMutableDictionary *)charon_values;
-- (id)charon_valueForKey:(NSString *)key;
-- (void)charon_setValue:(id)value forKey:(NSString *)key;
-- (void)charon_encodePropertiesWithCoder:(NSCoder *)coder;
-- (BOOL)charon_decodePropertiesWithCoder:(NSCoder *)coder;
+@interface MXCrashDiagnosticObjectiveCExceptionReason (RevenantMetricValue)
+- (NSMutableDictionary *)revenant_values;
+- (id)revenant_valueForKey:(NSString *)key;
+- (void)revenant_setValue:(id)value forKey:(NSString *)key;
+- (void)revenant_encodePropertiesWithCoder:(NSCoder *)coder;
+- (BOOL)revenant_decodePropertiesWithCoder:(NSCoder *)coder;
 - (NSData *)JSONRepresentation;
 - (NSDictionary *)dictionaryRepresentation;
 + (BOOL)supportsSecureCoding;
@@ -146,12 +133,12 @@
 - (instancetype)initWithCoder:(NSCoder *)coder;
 @end
 
-@interface MXSignpostIntervalData (CharonMetricValue)
-- (NSMutableDictionary *)charon_values;
-- (id)charon_valueForKey:(NSString *)key;
-- (void)charon_setValue:(id)value forKey:(NSString *)key;
-- (void)charon_encodePropertiesWithCoder:(NSCoder *)coder;
-- (BOOL)charon_decodePropertiesWithCoder:(NSCoder *)coder;
+@interface MXSignpostRecord (RevenantMetricValue)
+- (NSMutableDictionary *)revenant_values;
+- (id)revenant_valueForKey:(NSString *)key;
+- (void)revenant_setValue:(id)value forKey:(NSString *)key;
+- (void)revenant_encodePropertiesWithCoder:(NSCoder *)coder;
+- (BOOL)revenant_decodePropertiesWithCoder:(NSCoder *)coder;
 - (NSData *)JSONRepresentation;
 - (NSDictionary *)dictionaryRepresentation;
 + (BOOL)supportsSecureCoding;
@@ -159,12 +146,12 @@
 - (instancetype)initWithCoder:(NSCoder *)coder;
 @end
 
-@interface MXBackgroundExitData (CharonMetricValue)
-- (NSMutableDictionary *)charon_values;
-- (id)charon_valueForKey:(NSString *)key;
-- (void)charon_setValue:(id)value forKey:(NSString *)key;
-- (void)charon_encodePropertiesWithCoder:(NSCoder *)coder;
-- (BOOL)charon_decodePropertiesWithCoder:(NSCoder *)coder;
+@interface MXSignpostIntervalData (RevenantMetricValue)
+- (NSMutableDictionary *)revenant_values;
+- (id)revenant_valueForKey:(NSString *)key;
+- (void)revenant_setValue:(id)value forKey:(NSString *)key;
+- (void)revenant_encodePropertiesWithCoder:(NSCoder *)coder;
+- (BOOL)revenant_decodePropertiesWithCoder:(NSCoder *)coder;
 - (NSData *)JSONRepresentation;
 - (NSDictionary *)dictionaryRepresentation;
 + (BOOL)supportsSecureCoding;
@@ -172,12 +159,12 @@
 - (instancetype)initWithCoder:(NSCoder *)coder;
 @end
 
-@interface MXForegroundExitData (CharonMetricValue)
-- (NSMutableDictionary *)charon_values;
-- (id)charon_valueForKey:(NSString *)key;
-- (void)charon_setValue:(id)value forKey:(NSString *)key;
-- (void)charon_encodePropertiesWithCoder:(NSCoder *)coder;
-- (BOOL)charon_decodePropertiesWithCoder:(NSCoder *)coder;
+@interface MXBackgroundExitData (RevenantMetricValue)
+- (NSMutableDictionary *)revenant_values;
+- (id)revenant_valueForKey:(NSString *)key;
+- (void)revenant_setValue:(id)value forKey:(NSString *)key;
+- (void)revenant_encodePropertiesWithCoder:(NSCoder *)coder;
+- (BOOL)revenant_decodePropertiesWithCoder:(NSCoder *)coder;
 - (NSData *)JSONRepresentation;
 - (NSDictionary *)dictionaryRepresentation;
 + (BOOL)supportsSecureCoding;
@@ -185,12 +172,12 @@
 - (instancetype)initWithCoder:(NSCoder *)coder;
 @end
 
-@interface MXCallStackTree (CharonMetricValue)
-- (NSMutableDictionary *)charon_values;
-- (id)charon_valueForKey:(NSString *)key;
-- (void)charon_setValue:(id)value forKey:(NSString *)key;
-- (void)charon_encodePropertiesWithCoder:(NSCoder *)coder;
-- (BOOL)charon_decodePropertiesWithCoder:(NSCoder *)coder;
+@interface MXForegroundExitData (RevenantMetricValue)
+- (NSMutableDictionary *)revenant_values;
+- (id)revenant_valueForKey:(NSString *)key;
+- (void)revenant_setValue:(id)value forKey:(NSString *)key;
+- (void)revenant_encodePropertiesWithCoder:(NSCoder *)coder;
+- (BOOL)revenant_decodePropertiesWithCoder:(NSCoder *)coder;
 - (NSData *)JSONRepresentation;
 - (NSDictionary *)dictionaryRepresentation;
 + (BOOL)supportsSecureCoding;
@@ -198,19 +185,32 @@
 - (instancetype)initWithCoder:(NSCoder *)coder;
 @end
 
-@interface MXUnitAveragePixelLuminance (CharonMetricValue)
-- (NSMutableDictionary *)charon_values;
-- (id)charon_valueForKey:(NSString *)key;
-- (void)charon_setValue:(id)value forKey:(NSString *)key;
+@interface MXCallStackTree (RevenantMetricValue)
+- (NSMutableDictionary *)revenant_values;
+- (id)revenant_valueForKey:(NSString *)key;
+- (void)revenant_setValue:(id)value forKey:(NSString *)key;
+- (void)revenant_encodePropertiesWithCoder:(NSCoder *)coder;
+- (BOOL)revenant_decodePropertiesWithCoder:(NSCoder *)coder;
+- (NSData *)JSONRepresentation;
+- (NSDictionary *)dictionaryRepresentation;
++ (BOOL)supportsSecureCoding;
+- (void)encodeWithCoder:(NSCoder *)coder;
+- (instancetype)initWithCoder:(NSCoder *)coder;
 @end
 
-@interface MXUnitSignalBars (CharonMetricValue)
-- (NSMutableDictionary *)charon_values;
-- (id)charon_valueForKey:(NSString *)key;
-- (void)charon_setValue:(id)value forKey:(NSString *)key;
+@interface MXUnitAveragePixelLuminance (RevenantMetricValue)
+- (NSMutableDictionary *)revenant_values;
+- (id)revenant_valueForKey:(NSString *)key;
+- (void)revenant_setValue:(id)value forKey:(NSString *)key;
 @end
 
-@interface CharonMetricValue : NSObject
+@interface MXUnitSignalBars (RevenantMetricValue)
+- (NSMutableDictionary *)revenant_values;
+- (id)revenant_valueForKey:(NSString *)key;
+- (void)revenant_setValue:(id)value forKey:(NSString *)key;
+@end
+
+@interface RevenantMetricValue : NSObject
 
 + (NSArray<NSString *> *)propertyNamesOf:(Class)cls;
 
@@ -221,45 +221,45 @@
 
 @end
 
-#define CHARON_VALUE_STORE_IMPLEMENTATION                                                   \
-    -(NSMutableDictionary *)charon_values { return CharonValueStore(self); }                \
-    -(id)charon_valueForKey:(NSString *)key { return [self charon_values][key]; }            \
-    -(void)charon_setValue:(id)value forKey:(NSString *)key { CharonValueSet(self, value, key); }
+#define REVENANT_VALUE_STORE_IMPLEMENTATION                                                   \
+    -(NSMutableDictionary *)revenant_values { return RevenantValueStore(self); }                \
+    -(id)revenant_valueForKey:(NSString *)key { return [self revenant_values][key]; }            \
+    -(void)revenant_setValue:(id)value forKey:(NSString *)key { RevenantValueSet(self, value, key); }
 
-@interface MXHistogram (CharonMetricKitSetters)
-- (void)charon_setTotalBucketCount:(NSUInteger)value;
-- (void)charon_setBucketEnumerator:(id)value;
-- (id)charon_bucketEnumerator;
+@interface MXHistogram (RevenantMetricKitSetters)
+- (void)revenant_setTotalBucketCount:(NSUInteger)value;
+- (void)revenant_setBucketEnumerator:(id)value;
+- (id)revenant_bucketEnumerator;
 @end
 
-@interface MXHistogramBucket (CharonMetricKitSetters)
-- (void)charon_setBucketStart:(id)value;
-- (void)charon_setBucketEnd:(id)value;
-- (void)charon_setBucketCount:(NSUInteger)value;
+@interface MXHistogramBucket (RevenantMetricKitSetters)
+- (void)revenant_setBucketStart:(id)value;
+- (void)revenant_setBucketEnd:(id)value;
+- (void)revenant_setBucketCount:(NSUInteger)value;
 @end
 
-FOUNDATION_EXPORT NSArray<MXSignpostMetric *> *CharonSignpostMetrics(void);
+FOUNDATION_EXPORT NSArray<MXSignpostMetric *> *RevenantSignpostMetrics(void);
 
-@interface MXSignpostMetric (CharonMetricKitSetters)
-- (void)charon_setSignpostName:(id)value;
-- (void)charon_setSignpostCategory:(id)value;
-- (void)charon_setSignpostIntervalData:(id)value;
-- (void)charon_setTotalCount:(NSUInteger)value;
-- (id)charon_totalCount;
-- (id)charon_signpostIntervalData;
+@interface MXSignpostMetric (RevenantMetricKitSetters)
+- (void)revenant_setSignpostName:(id)value;
+- (void)revenant_setSignpostCategory:(id)value;
+- (void)revenant_setSignpostIntervalData:(id)value;
+- (void)revenant_setTotalCount:(NSUInteger)value;
+- (id)revenant_totalCount;
+- (id)revenant_signpostIntervalData;
 @end
 
-@interface MXSignpostIntervalData (CharonMetricKitSetters)
-- (void)charon_setHistogrammedSignpostDuration:(id)value;
-- (void)charon_setCumulativeCPUTime:(id)value;
-- (id)charon_cumulativeCPUTime;
-- (id)charon_histogrammedSignpostDuration;
+@interface MXSignpostIntervalData (RevenantMetricKitSetters)
+- (void)revenant_setHistogrammedSignpostDuration:(id)value;
+- (void)revenant_setCumulativeCPUTime:(id)value;
+- (id)revenant_cumulativeCPUTime;
+- (id)revenant_histogrammedSignpostDuration;
 @end
 
 
-@interface MXAppLaunchMetric (CharonMetricKitSetters)
-- (void)charon_setHistogrammedExtendedLaunch:(id)value;
-- (void)charon_setHistogrammedTimeToFirstDraw:(id)value;
+@interface MXAppLaunchMetric (RevenantMetricKitSetters)
+- (void)revenant_setHistogrammedExtendedLaunch:(id)value;
+- (void)revenant_setHistogrammedTimeToFirstDraw:(id)value;
 @end
 
 #endif

@@ -4,10 +4,10 @@
 #pragma clang diagnostic ignored "-Wobjc-missing-property-synthesis"
 
 @interface MDLObjectContainer ()
-@property (nonatomic, assign) MDLObject *charon_owner;
+@property (nonatomic, assign) MDLObject *revenant_owner;
 @end
 
-static void CharonMDLBounds(MDLAxisAlignedBoundingBox *box, vector_float3 point)
+static void RevenantMDLBounds(MDLAxisAlignedBoundingBox *box, vector_float3 point)
 {
     float low[3], high[3], p[3];
     low[0] = box->minBounds.x, low[1] = box->minBounds.y, low[2] = box->minBounds.z;
@@ -115,7 +115,7 @@ static void CharonMDLBounds(MDLAxisAlignedBoundingBox *box, vector_float3 point)
 {
     if (!_children) {
         MDLObjectContainer *container = [[MDLObjectContainer alloc] init];
-        container.charon_owner = self;
+        container.revenant_owner = self;
         _children = container;
     }
     return _children;
@@ -127,7 +127,7 @@ static void CharonMDLBounds(MDLAxisAlignedBoundingBox *box, vector_float3 point)
         _children = children;
     }
     if ([children isKindOfClass:[MDLObjectContainer class]])
-        [(MDLObjectContainer *)children setCharon_owner:self];
+        [(MDLObjectContainer *)children setRevenant_owner:self];
     for (MDLObject *child in [_children objects])
         if (child.parent != self)
             [child setParent:self];
@@ -211,7 +211,7 @@ static void CharonMDLBounds(MDLAxisAlignedBoundingBox *box, vector_float3 point)
             vector_float3 point = {(corner & 1) ? box.maxBounds.x : box.minBounds.x, (corner & 2) ? box.maxBounds.y : box.minBounds.y,
                                    (corner & 4) ? box.maxBounds.z : box.minBounds.z};
             vector_float4 transformed = simd_mul(global, (vector_float4){point.x, point.y, point.z, 1});
-            CharonMDLBounds(&result, transformed.xyz);
+            RevenantMDLBounds(&result, transformed.xyz);
         }
     }
     if (result.minBounds[0] > result.maxBounds[0]) {
@@ -243,15 +243,15 @@ static void CharonMDLBounds(MDLAxisAlignedBoundingBox *box, vector_float3 point)
     if (!object || [_objects containsObject:object])
         return;
     [_objects addObject:object];
-    if (self.charon_owner && object.parent != self.charon_owner)
-        [object setParent:self.charon_owner];
+    if (self.revenant_owner && object.parent != self.revenant_owner)
+        [object setParent:self.revenant_owner];
 }
 
 - (void)removeObject:(MDLObject *)object
 {
     if ([_objects containsObject:object]) {
         [_objects removeObject:object];
-        if (object.parent == self.charon_owner)
+        if (object.parent == self.revenant_owner)
             [object setParent:nil];
     }
 }

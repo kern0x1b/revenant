@@ -1,6 +1,6 @@
-#ifdef CHARON_CMTAG_PORT_HEADER
+#ifdef REVENANT_CMTAG_PORT_HEADER
 #import <Foundation/Foundation.h>
-#import "CharonCMTag26.h"
+#import "RevenantCMTag26.h"
 #else
 #import <CoreMedia/CoreMedia.h>
 #import <CoreMedia/CMTag.h>

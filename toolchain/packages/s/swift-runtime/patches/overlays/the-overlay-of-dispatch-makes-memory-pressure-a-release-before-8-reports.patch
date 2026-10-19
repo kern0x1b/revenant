@@ -21,7 +21,7 @@ diff --git a/stdlib/public/Darwin/Dispatch/Source.swift b/stdlib/public/Darwin/D
 +	private static let normal: UInt = 1, warning: UInt = 2, critical: UInt = 4
 +
 +	let mask: UInt
-+	private let queue = DispatchQueue(label: "org.charon.dispatch.memorypressure")
++	private let queue = DispatchQueue(label: "org.revenant.dispatch.memorypressure")
 +	private let pressure: UInt
 +	private let criticalLimit: UInt
 +	private let total: UInt

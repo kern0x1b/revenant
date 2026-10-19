@@ -1,7 +1,7 @@
-#import "CharonCloudKit.h"
-#import "CharonCKConstants.h"
-#import "CharonCKSubscription.h"
-#import "CharonCKIOS26.h"
+#import "RevenantCloudKit.h"
+#import "RevenantCKConstants.h"
+#import "RevenantCKSubscription.h"
+#import "RevenantCKIOS26.h"
 
 @implementation CKShareRequestAccessOperation
 
@@ -36,9 +36,9 @@
 {
     if (!self.shareURLs.count) {
         if (self.shareRequestAccessCompletionBlock) {
-            self.shareRequestAccessCompletionBlock(CharonCKError(CKErrorInvalidArguments, @"No share URL", nil));
+            self.shareRequestAccessCompletionBlock(RevenantCKError(CKErrorInvalidArguments, @"No share URL", nil));
         }
-        [self charon_finish];
+        [self revenant_finish];
         return;
     }
     NSMutableArray *urls = [NSMutableArray array];
@@ -62,7 +62,7 @@
         for (NSDictionary *document in answer[@"shares"]) {
             NSString *url = document[@"shareURL"];
             NSError *itemError = [document[@"serverError"] isKindOfClass:[NSDictionary class]]
-                ? CharonCKErrorFromPayload(document[@"serverError"], nil) : nil;
+                ? RevenantCKErrorFromPayload(document[@"serverError"], nil) : nil;
             if (itemError) {
                 failures[url ?: @"?"] = itemError;
             }

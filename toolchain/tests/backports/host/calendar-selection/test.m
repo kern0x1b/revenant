@@ -1,6 +1,6 @@
 #import <UIKit/UIKit.h>
 #include <stdio.h>
-#include "CharonCalendar.h"
+#include "RevenantCalendar.h"
 
 typedef id (*PlainFn)(id, SEL);
 
@@ -30,12 +30,12 @@ static NSString *day_text(NSDateComponents *c)
     return [NSString stringWithFormat:@"%ld/%ld/%ld", (long)c.year, (long)c.month, (long)c.day];
 }
 
-@interface CharonSingleProbe : NSObject <UICalendarSelectionSingleDateDelegate>
+@interface RevenantSingleProbe : NSObject <UICalendarSelectionSingleDateDelegate>
 @property (nonatomic) NSInteger selectedCalls;
 @property (nonatomic) NSInteger refusedDay;
 @end
 
-@implementation CharonSingleProbe
+@implementation RevenantSingleProbe
 - (void)dateSelection:(UICalendarSelectionSingleDate *)selection didSelectDate:(NSDateComponents *)dateComponents
 {
     self.selectedCalls++;
@@ -62,7 +62,7 @@ static void run(const char *side, Class baseClass, Class singleClass)
     report(side, "base-update-without-view", @"yes");
 
     report(side, "single-superclass-is-base", yes_no([singleClass superclass] == baseClass));
-    CharonSingleProbe *probe = [[CharonSingleProbe alloc] init];
+    RevenantSingleProbe *probe = [[RevenantSingleProbe alloc] init];
     id single = [[singleClass alloc] initWithDelegate:probe];
     report(side, "single-delegate-reads-back", [single delegate] == probe ? @"yes" : @"no");
     report(side, "single-default-selected", [single selectedDate] ? @"set" : @"nil");
@@ -86,24 +86,24 @@ static void run(const char *side, Class baseClass, Class singleClass)
 
 static void runPortOnly(void)
 {
-    CharonSingleProbe *probe = [[CharonSingleProbe alloc] init];
+    RevenantSingleProbe *probe = [[RevenantSingleProbe alloc] init];
     probe.refusedDay = 7;
     UICalendarSelectionSingleDate *single = [[UICalendarSelectionSingleDate alloc] initWithDelegate:probe];
 
-    [single charon_didTapDay:day(2024, 5, 6)];
+    [single revenant_didTapDay:day(2024, 5, 6)];
     report("only", "tap-chooses-allowed-day", yes_no([single selectedDate].day == 6 && probe.selectedCalls == 1));
     report("only", "tap-same-day-changes-nothing", yes_no(^{
-        [single charon_didTapDay:day(2024, 5, 6)];
+        [single revenant_didTapDay:day(2024, 5, 6)];
         return [single selectedDate].day == 6 && probe.selectedCalls == 1;
     }()));
     report("only", "tap-refused-day-changes-nothing", yes_no(^{
-        [single charon_didTapDay:day(2024, 5, 7)];
+        [single revenant_didTapDay:day(2024, 5, 7)];
         return [single selectedDate].day == 6 && probe.selectedCalls == 1;
     }()));
-    report("only", "is-selected-the-chosen-day", yes_no([single charon_isSelected:day(2024, 5, 6)] && ![single charon_isSelected:day(2024, 5, 8)]));
+    report("only", "is-selected-the-chosen-day", yes_no([single revenant_isSelected:day(2024, 5, 6)] && ![single revenant_isSelected:day(2024, 5, 8)]));
     report("only", "tap-without-delegate-chooses", yes_no(^{
         UICalendarSelectionSingleDate *bare = [[UICalendarSelectionSingleDate alloc] initWithDelegate:nil];
-        [bare charon_didTapDay:day(2024, 5, 20)];
+        [bare revenant_didTapDay:day(2024, 5, 20)];
         return [bare selectedDate].day == 20;
     }()));
 }

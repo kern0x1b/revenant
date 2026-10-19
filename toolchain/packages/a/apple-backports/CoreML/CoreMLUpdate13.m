@@ -1,14 +1,14 @@
 #import <CoreML/CoreML.h>
-#import "CharonMLUpdateTask.h"
-#import "CharonMLBridge.h"
-#import "CharonMLProto.h"
-#import "CharonMLTrain.h"
-#import "CharonMLWrite.h"
+#import "RevenantMLUpdateTask.h"
+#import "RevenantMLBridge.h"
+#import "RevenantMLProto.h"
+#import "RevenantMLTrain.h"
+#import "RevenantMLWrite.h"
 
 #pragma clang diagnostic ignored "-Wprotocol"
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
 
-#define CharonMLRefuse(...) NSLog(__VA_ARGS__)
+#define RevenantMLRefuse(...) NSLog(__VA_ARGS__)
 
 @implementation MLTask {
     NSString *_taskIdentifier;
@@ -18,18 +18,18 @@
 
 - (instancetype)init
 {
-    CharonMLRefuse(@"CoreML: MLTask marks -init NS_UNAVAILABLE with the reason \"cannot construct MLTask"
+    RevenantMLRefuse(@"CoreML: MLTask marks -init NS_UNAVAILABLE with the reason \"cannot construct MLTask"
                     @" without parameters\"; a task is made by the framework that runs it");
     return nil;
 }
 
 + (instancetype)new
 {
-    CharonMLRefuse(@"CoreML: MLTask marks +new NS_UNAVAILABLE for the same reason -init is");
+    RevenantMLRefuse(@"CoreML: MLTask marks +new NS_UNAVAILABLE for the same reason -init is");
     return nil;
 }
 
-- (instancetype)initForCharonML
+- (instancetype)initForRevenantML
 {
     self = [super init];
     if (self) {
@@ -55,7 +55,7 @@
     }
 }
 
-- (void)charon_ml_setState:(MLTaskState)state error:(NSError *)error
+- (void)revenant_ml_setState:(MLTaskState)state error:(NSError *)error
 {
     @synchronized (self) {
         _state = state;
@@ -63,7 +63,7 @@
     }
 }
 
-- (BOOL)charon_ml_isCancelling
+- (BOOL)revenant_ml_isCancelling
 {
     return self.state == MLTaskStateCancelling;
 }
@@ -72,7 +72,7 @@
 {
     @synchronized (self) {
         if (_state != MLTaskStateSuspended) {
-            CharonMLRefuse(@"CoreML: -[MLTask resume] was called on a task whose state is %ld, and MLTask"
+            RevenantMLRefuse(@"CoreML: -[MLTask resume] was called on a task whose state is %ld, and MLTask"
                             @" describes resuming a Suspended task; nothing was changed",
                             (long)_state);
             return;
@@ -85,7 +85,7 @@
 {
     @synchronized (self) {
         if (_state != MLTaskStateSuspended && _state != MLTaskStateRunning) {
-            CharonMLRefuse(@"CoreML: -[MLTask cancel] was called on a task whose state is %ld, and MLTask"
+            RevenantMLRefuse(@"CoreML: -[MLTask cancel] was called on a task whose state is %ld, and MLTask"
                             @" describes cancelling a task that is Suspended or Running; nothing was changed",
                             (long)_state);
             return;
@@ -96,10 +96,10 @@
 
 @end
 
-@interface CharonMLWritableWrappedModel : MLModel <MLWritable>
+@interface RevenantMLWritableWrappedModel : MLModel <MLWritable>
 @end
 
-@implementation CharonMLWritableWrappedModel {
+@implementation RevenantMLWritableWrappedModel {
     NSURL *_snapshotURL;
 }
 
@@ -131,16 +131,16 @@
 @end
 
 @interface MLUpdateTask ()
-- (void)charon_ml_run;
-- (BOOL)charon_ml_deliver:(MLUpdateProgressEvent)event metrics:(NSDictionary *)metrics;
-- (nullable MLModel *)charon_ml_snapshot:(NSError * _Nullable * _Nullable)error;
-- (NSError *)charon_ml_failure:(const char *)message;
+- (void)revenant_ml_run;
+- (BOOL)revenant_ml_deliver:(MLUpdateProgressEvent)event metrics:(NSDictionary *)metrics;
+- (nullable MLModel *)revenant_ml_snapshot:(NSError * _Nullable * _Nullable)error;
+- (NSError *)revenant_ml_failure:(const char *)message;
 @end
 
 @implementation MLUpdateTask {
     NSURL *_modelURL;
-    charon_ml_node _document;
-    charon_ml_trainer *_trainer;
+    revenant_ml_node _document;
+    revenant_ml_trainer *_trainer;
     MLUpdateProgressHandlers *_handlers;
     NSUInteger _count;
     size_t _inputCount, _outputCount;
@@ -160,7 +160,7 @@
     if (handlers == nil) {
         return nil;
     }
-    return [self charon_ml_taskForModelAtURL:modelURL trainingData:trainingData progressHandlers:handlers error:error];
+    return [self revenant_ml_taskForModelAtURL:modelURL trainingData:trainingData progressHandlers:handlers error:error];
 }
 
 + (nullable instancetype)updateTaskForModelAtURL:(NSURL *)modelURL
@@ -169,35 +169,35 @@
                                 progressHandlers:(MLUpdateProgressHandlers *)progressHandlers
                                            error:(NSError * _Nullable * _Nullable)error
 {
-    return [self charon_ml_taskForModelAtURL:modelURL trainingData:trainingData progressHandlers:progressHandlers error:error];
+    return [self revenant_ml_taskForModelAtURL:modelURL trainingData:trainingData progressHandlers:progressHandlers error:error];
 }
 
-+ (nullable instancetype)charon_ml_taskForModelAtURL:(NSURL *)modelURL
++ (nullable instancetype)revenant_ml_taskForModelAtURL:(NSURL *)modelURL
                                         trainingData:(id<MLBatchProvider>)trainingData
                                     progressHandlers:(MLUpdateProgressHandlers *)progressHandlers
                                                error:(NSError * _Nullable * _Nullable)error
 {
     if (modelURL == nil || !modelURL.isFileURL) {
-        charon_ml_error(error, CHARON_ML_ERROR_IO, @"a model is trained from a file, and the URL given is not a file's");
+        revenant_ml_error(error, REVENANT_ML_ERROR_IO, @"a model is trained from a file, and the URL given is not a file's");
         return nil;
     }
     NSData *container = [NSData dataWithContentsOfURL:modelURL options:0 error:error];
     if (container == nil) {
         return nil;
     }
-    charon_ml_node document;
-    if (!charon_ml_read(&document, container.bytes, container.length, "CoreML.Specification.Model")) {
-        charon_ml_error(error, CHARON_ML_ERROR_GENERIC, @"the file is not a model container the port can read");
+    revenant_ml_node document;
+    if (!revenant_ml_read(&document, container.bytes, container.length, "CoreML.Specification.Model")) {
+        revenant_ml_error(error, REVENANT_ML_ERROR_GENERIC, @"the file is not a model container the port can read");
         return nil;
     }
     char message[512] = "";
-    charon_ml_trainer *trainer = charon_ml_trainer_new(&document, message, sizeof message);
+    revenant_ml_trainer *trainer = revenant_ml_trainer_new(&document, message, sizeof message);
     if (trainer == NULL) {
-        charon_ml_free(&document);
-        charon_ml_error(error, CHARON_ML_ERROR_GENERIC, @(message));
+        revenant_ml_free(&document);
+        revenant_ml_error(error, REVENANT_ML_ERROR_GENERIC, @(message));
         return nil;
     }
-    size_t inputCount = charon_ml_trainer_input_count(trainer), outputCount = charon_ml_trainer_output_count(trainer);
+    size_t inputCount = revenant_ml_trainer_input_count(trainer), outputCount = revenant_ml_trainer_output_count(trainer);
     NSInteger count = trainingData.count;
 
     float *inputs = count > 0 ? malloc(sizeof(float) * (size_t)count * inputCount) : NULL;
@@ -227,13 +227,13 @@
     if (failure != nil) {
         free(inputs);
         free(targets);
-        charon_ml_trainer_free(trainer);
-        charon_ml_free(&document);
-        charon_ml_error(error, CHARON_ML_ERROR_GENERIC, failure);
+        revenant_ml_trainer_free(trainer);
+        revenant_ml_free(&document);
+        revenant_ml_error(error, REVENANT_ML_ERROR_GENERIC, failure);
         return nil;
     }
 
-    MLUpdateTask *task = [[MLUpdateTask alloc] initForCharonML];
+    MLUpdateTask *task = [[MLUpdateTask alloc] initForRevenantML];
     task->_modelURL = [modelURL copy];
     task->_document = document;
     task->_trainer = trainer;
@@ -243,14 +243,14 @@
     task->_outputCount = outputCount;
     task->_inputs = inputs;
     task->_targets = targets;
-    task->_queue = dispatch_queue_create("com.charon.coreml.update", DISPATCH_QUEUE_SERIAL);
+    task->_queue = dispatch_queue_create("com.revenant.coreml.update", DISPATCH_QUEUE_SERIAL);
     return task;
 }
 
 - (void)resumeWithParameters:(NSDictionary<MLParameterKey *, id> *)updateParameters
 {
     if (updateParameters.count > 0) {
-        CharonMLRefuse(@"CoreML: -[MLUpdateTask resumeWithParameters:] was given %lu parameters, and the port applies"
+        RevenantMLRefuse(@"CoreML: -[MLUpdateTask resumeWithParameters:] was given %lu parameters, and the port applies"
                         @" none of them yet; nothing was changed", (unsigned long)updateParameters.count);
         return;
     }
@@ -263,106 +263,106 @@
     [super resume];
     if (before == MLTaskStateSuspended && self.state == MLTaskStateRunning) {
         dispatch_async(_queue, ^{
-            [self charon_ml_run];
+            [self revenant_ml_run];
         });
     }
 }
 
-- (void)charon_ml_run
+- (void)revenant_ml_run
 {
-    if (![self charon_ml_deliver:MLUpdateProgressEventTrainingBegin metrics:@{}]) {
+    if (![self revenant_ml_deliver:MLUpdateProgressEventTrainingBegin metrics:@{}]) {
         return;
     }
-    size_t minibatch = charon_ml_trainer_minibatch_size(_trainer);
-    long long epochs = charon_ml_trainer_epochs(_trainer);
+    size_t minibatch = revenant_ml_trainer_minibatch_size(_trainer);
+    long long epochs = revenant_ml_trainer_epochs(_trainer);
     for (long long epoch = 0; epoch < epochs; epoch++) {
         size_t index = 0;
         for (size_t first = 0; first < _count; first += minibatch, index++) {
-            if ([self charon_ml_isCancelling]) {
+            if ([self revenant_ml_isCancelling]) {
                 return;
             }
             size_t samples = _count - first < minibatch ? _count - first : minibatch;
             char message[512] = "";
-            if (!charon_ml_trainer_step(_trainer, _inputs + first * _inputCount, _targets + first * _outputCount,
+            if (!revenant_ml_trainer_step(_trainer, _inputs + first * _inputCount, _targets + first * _outputCount,
                                         samples, message, sizeof message)) {
-                [self charon_ml_setState:MLTaskStateFailed error:[self charon_ml_failure:message]];
+                [self revenant_ml_setState:MLTaskStateFailed error:[self revenant_ml_failure:message]];
                 return;
             }
-            if (![self charon_ml_deliver:MLUpdateProgressEventMiniBatchEnd
+            if (![self revenant_ml_deliver:MLUpdateProgressEventMiniBatchEnd
                                  metrics:@{MLMetricKey.miniBatchIndex: @(index)}]) {
                 return;
             }
         }
-        if (![self charon_ml_deliver:MLUpdateProgressEventEpochEnd metrics:@{MLMetricKey.epochIndex: @(epoch)}]) {
+        if (![self revenant_ml_deliver:MLUpdateProgressEventEpochEnd metrics:@{MLMetricKey.epochIndex: @(epoch)}]) {
             return;
         }
     }
     NSError *error = nil;
-    MLModel *model = [self charon_ml_snapshot:&error];
+    MLModel *model = [self revenant_ml_snapshot:&error];
     if (model == nil) {
-        [self charon_ml_setState:MLTaskStateFailed error:error];
+        [self revenant_ml_setState:MLTaskStateFailed error:error];
         return;
     }
-    [self charon_ml_setState:MLTaskStateCompleted error:nil];
-    if (_handlers.charon_ml_completionHandler) {
-        MLUpdateContext *context = [[MLUpdateContext alloc] initForCharonMLWithTask:self model:model
+    [self revenant_ml_setState:MLTaskStateCompleted error:nil];
+    if (_handlers.revenant_ml_completionHandler) {
+        MLUpdateContext *context = [[MLUpdateContext alloc] initForRevenantMLWithTask:self model:model
                                                                              event:(MLUpdateProgressEvent)0
                                                                            metrics:@{}
                                                                         parameters:@{}];
-        _handlers.charon_ml_completionHandler(context);
+        _handlers.revenant_ml_completionHandler(context);
     }
 }
 
-- (BOOL)charon_ml_deliver:(MLUpdateProgressEvent)event metrics:(NSDictionary *)metrics
+- (BOOL)revenant_ml_deliver:(MLUpdateProgressEvent)event metrics:(NSDictionary *)metrics
 {
-    void (^progress)(MLUpdateContext *) = _handlers.charon_ml_progressHandler;
-    if (progress == nil || (_handlers.charon_ml_interestedEvents & event) == 0) {
+    void (^progress)(MLUpdateContext *) = _handlers.revenant_ml_progressHandler;
+    if (progress == nil || (_handlers.revenant_ml_interestedEvents & event) == 0) {
         return YES;
     }
     NSError *error = nil;
-    MLModel *model = [self charon_ml_snapshot:&error];
+    MLModel *model = [self revenant_ml_snapshot:&error];
     if (model == nil) {
-        [self charon_ml_setState:MLTaskStateFailed error:error];
+        [self revenant_ml_setState:MLTaskStateFailed error:error];
         return NO;
     }
-    MLUpdateContext *context = [[MLUpdateContext alloc] initForCharonMLWithTask:self model:model event:event
+    MLUpdateContext *context = [[MLUpdateContext alloc] initForRevenantMLWithTask:self model:model event:event
                                                                          metrics:metrics parameters:@{}];
     progress(context);
     return YES;
 }
 
-- (nullable MLModel *)charon_ml_snapshot:(NSError * _Nullable * _Nullable)error
+- (nullable MLModel *)revenant_ml_snapshot:(NSError * _Nullable * _Nullable)error
 {
-    if (!charon_ml_trainer_store(_trainer, &_document)) {
-        charon_ml_error(error, CHARON_ML_ERROR_GENERIC, @"the trained values do not fit the model's document");
+    if (!revenant_ml_trainer_store(_trainer, &_document)) {
+        revenant_ml_error(error, REVENANT_ML_ERROR_GENERIC, @"the trained values do not fit the model's document");
         return nil;
     }
     unsigned char *bytes = NULL;
     size_t length = 0;
-    if (!charon_ml_write(&_document, &bytes, &length)) {
-        charon_ml_error(error, CHARON_ML_ERROR_GENERIC, @"the model's document could not be encoded");
+    if (!revenant_ml_write(&_document, &bytes, &length)) {
+        revenant_ml_error(error, REVENANT_ML_ERROR_GENERIC, @"the model's document could not be encoded");
         return nil;
     }
     NSData *container = [NSData dataWithBytesNoCopy:bytes length:length freeWhenDone:YES];
-    NSString *name = [NSString stringWithFormat:@"charon-update-%@.mlmodel", [[NSUUID UUID] UUIDString]];
+    NSString *name = [NSString stringWithFormat:@"revenant-update-%@.mlmodel", [[NSUUID UUID] UUIDString]];
     NSURL *url = [[NSURL fileURLWithPath:NSTemporaryDirectory()] URLByAppendingPathComponent:name];
     if (![container writeToURL:url options:NSDataWritingAtomic error:error]) {
         return nil;
     }
-    return [[CharonMLWritableWrappedModel alloc] initWithContentsOfURL:url configuration:nil error:error];
+    return [[RevenantMLWritableWrappedModel alloc] initWithContentsOfURL:url configuration:nil error:error];
 }
 
-- (NSError *)charon_ml_failure:(const char *)message
+- (NSError *)revenant_ml_failure:(const char *)message
 {
     NSError *error = nil;
-    charon_ml_error(&error, CHARON_ML_ERROR_GENERIC, [NSString stringWithUTF8String:message]);
+    revenant_ml_error(&error, REVENANT_ML_ERROR_GENERIC, [NSString stringWithUTF8String:message]);
     return error;
 }
 
 - (void)dealloc
 {
-    charon_ml_trainer_free(_trainer);
-    charon_ml_free(&_document);
+    revenant_ml_trainer_free(_trainer);
+    revenant_ml_free(&_document);
     free(_inputs);
     free(_targets);
 }
@@ -377,7 +377,7 @@
     NSDictionary *_parameters;
 }
 
-- (instancetype)initForCharonMLWithTask:(MLUpdateTask *)task
+- (instancetype)initForRevenantMLWithTask:(MLUpdateTask *)task
                                  model:(MLModel *)model
                                  event:(MLUpdateProgressEvent)event
                                metrics:(NSDictionary *)metrics
@@ -413,7 +413,7 @@
             completionHandler:(void (^)(MLUpdateContext *))completionHandler
 {
     if (!completionHandler) {
-        CharonMLRefuse(@"CoreML: MLUpdateProgressHandlers declares the completion handler nonnull and"
+        RevenantMLRefuse(@"CoreML: MLUpdateProgressHandlers declares the completion handler nonnull and"
                         @" none was given, so no handlers were registered");
         return nil;
     }
@@ -427,7 +427,7 @@
 
 - (instancetype)init
 {
-    CharonMLRefuse(@"CoreML: MLUpdateProgressHandlers marks -init NS_UNAVAILABLE with the reason \"cannot construct"
+    RevenantMLRefuse(@"CoreML: MLUpdateProgressHandlers marks -init NS_UNAVAILABLE with the reason \"cannot construct"
                     @" MLUpdateTask without parameters\" - the header's own wording, and it names the other class;"
                     @" use -initForEvents:progressHandler:completionHandler:");
     return nil;
@@ -435,12 +435,12 @@
 
 + (instancetype)new
 {
-    CharonMLRefuse(@"CoreML: MLUpdateProgressHandlers marks +new NS_UNAVAILABLE for the same reason -init is");
+    RevenantMLRefuse(@"CoreML: MLUpdateProgressHandlers marks +new NS_UNAVAILABLE for the same reason -init is");
     return nil;
 }
 
-- (MLUpdateProgressEvent)charon_ml_interestedEvents { return _interestedEvents; }
-- (void (^)(MLUpdateContext *))charon_ml_progressHandler { return _progressHandler; }
-- (void (^)(MLUpdateContext *))charon_ml_completionHandler { return _completionHandler; }
+- (MLUpdateProgressEvent)revenant_ml_interestedEvents { return _interestedEvents; }
+- (void (^)(MLUpdateContext *))revenant_ml_progressHandler { return _progressHandler; }
+- (void (^)(MLUpdateContext *))revenant_ml_completionHandler { return _completionHandler; }
 
 @end

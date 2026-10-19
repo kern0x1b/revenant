@@ -1,8 +1,8 @@
 #import <Foundation/Foundation.h>
 
-static const char charon_hex_digits[] = "0123456789ABCDEF";
+static const char revenant_hex_digits[] = "0123456789ABCDEF";
 
-static int charon_hex_value(unichar character)
+static int revenant_hex_value(unichar character)
 {
     if (character >= '0' && character <= '9')
         return character - '0';
@@ -13,7 +13,7 @@ static int charon_hex_value(unichar character)
     return -1;
 }
 
-static NSUInteger charon_decode_utf8(const uint8_t *bytes, NSUInteger length, unichar *output)
+static NSUInteger revenant_decode_utf8(const uint8_t *bytes, NSUInteger length, unichar *output)
 {
     NSUInteger used = 0;
     NSUInteger index = 0;
@@ -63,7 +63,7 @@ static NSUInteger charon_decode_utf8(const uint8_t *bytes, NSUInteger length, un
     return used;
 }
 
-@implementation NSString (CharonURLUtilities)
+@implementation NSString (RevenantURLUtilities)
 
 - (NSString *)stringByAddingPercentEncodingWithAllowedCharacters:(NSCharacterSet *)allowedCharacters
 {
@@ -123,8 +123,8 @@ static NSUInteger charon_decode_utf8(const uint8_t *bytes, NSUInteger length, un
         }
         for (NSUInteger byte = 0; byte < count; byte++) {
             output[used++] = '%';
-            output[used++] = (unichar)charon_hex_digits[bytes[byte] >> 4];
-            output[used++] = (unichar)charon_hex_digits[bytes[byte] & 0x0F];
+            output[used++] = (unichar)revenant_hex_digits[bytes[byte] >> 4];
+            output[used++] = (unichar)revenant_hex_digits[bytes[byte] & 0x0F];
         }
     }
     if (index >= length)
@@ -161,8 +161,8 @@ static NSUInteger charon_decode_utf8(const uint8_t *bytes, NSUInteger length, un
         }
         NSUInteger count = 0;
         while (index < length && characters[index] == '%') {
-            int high = index + 2 < length ? charon_hex_value(characters[index + 1]) : -1;
-            int low = index + 2 < length ? charon_hex_value(characters[index + 2]) : -1;
+            int high = index + 2 < length ? revenant_hex_value(characters[index + 1]) : -1;
+            int low = index + 2 < length ? revenant_hex_value(characters[index + 2]) : -1;
             if (high < 0 || low < 0) {
                 valid = NO;
                 break;
@@ -172,7 +172,7 @@ static NSUInteger charon_decode_utf8(const uint8_t *bytes, NSUInteger length, un
         }
         if (!valid)
             break;
-        NSUInteger decoded = charon_decode_utf8(bytes, count, output + used);
+        NSUInteger decoded = revenant_decode_utf8(bytes, count, output + used);
         if (decoded == NSNotFound)
             valid = NO;
         else

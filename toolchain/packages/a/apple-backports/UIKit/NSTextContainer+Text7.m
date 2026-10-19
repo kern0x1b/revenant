@@ -6,7 +6,7 @@ static const void *WidthTracksKey = &WidthTracksKey;
 static const void *HeightTracksKey = &HeightTracksKey;
 static const void *BreakModeKey = &BreakModeKey;
 
-@interface NSTextContainer (CharonNative)
+@interface NSTextContainer (RevenantNative)
 - (NSUInteger)maximumNumberOfLines;
 - (instancetype)initWithContainerSize:(CGSize)size;
 - (CGSize)containerSize;
@@ -22,10 +22,10 @@ static BOOL is_simple(NSTextContainer *self, SEL selector)
     return native_simple(self, selector) && ![self exclusionPaths].count && ![self maximumNumberOfLines];
 }
 
-@interface CharonTextContainer7 : NSObject
+@interface RevenantTextContainer7 : NSObject
 @end
 
-@implementation CharonTextContainer7
+@implementation RevenantTextContainer7
 
 + (void)load
 {
@@ -40,7 +40,7 @@ static BOOL is_simple(NSTextContainer *self, SEL selector)
 
 @end
 
-@implementation NSTextContainer (CharonText7)
+@implementation NSTextContainer (RevenantText7)
 
 - (instancetype)initWithSize:(CGSize)size
 {

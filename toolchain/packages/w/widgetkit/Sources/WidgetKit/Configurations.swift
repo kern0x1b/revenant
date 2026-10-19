@@ -11,7 +11,7 @@ public protocol WidgetBody {
     associatedtype BodyType
 }
 
-public typealias WidgetView = CharonControlLabel<Never>
+public typealias WidgetView = RevenantControlLabel<Never>
 
 public protocol WidgetConfiguration {
     static var kind: String { get }

@@ -1,6 +1,6 @@
 #!/bin/sh
 # run.sh — records what the system's Vision answers for every case of device/vision-cases.m in a Mac Catalyst binary, writes the answers
-# where the device test reads them, then compiles the port's Vision classes under names of their own (Charon<name>) and holds them to the
+# where the device test reads them, then compiles the port's Vision classes under names of their own (Revenant<name>) and holds them to the
 # same records, with mutants of the port that each have to be told apart.
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
@@ -24,7 +24,7 @@ expected_records=45
 # value (picture/error), and a run that is short a container must not be a run that passes. Kept in
 # step with the case file by the sentence above, which is where a new container is added.
 required="glm_classifier.mlmodel nn_image.mlmodel vision_image.mlmodel"
-build=${BUILD:-$(runs_fresh charon-vision)}
+build=${BUILD:-$(runs_fresh revenant-vision)}
 sdk=$(xcrun --show-sdk-path)
 frameworks="-iframework $sdk/System/iOSSupport/System/Library/Frameworks"
 common="-target arm64-apple-ios15.0-macabi -isysroot $sdk $frameworks -fobjc-arc -w"
@@ -127,13 +127,13 @@ for entry in json.load(open(sys.argv[1]))["entries"]:
         names.add(entry["api"].replace("()", ""))
 with open(sys.argv[2], "w") as out:
     for name in sorted(names):
-        out.write("#define %s Charon%s\n" % (name, name))
+        out.write("#define %s Revenant%s\n" % (name, name))
 PY
 
 port() {
     dir=$1
     xcrun clang $common -include "$build/rename.h" -I"$device" -I"$vision" "$here/record.m" "$device/vision-cases.m" \
-        "$dir/CharonVisionBilinear.c" "$dir/VNConstants.m" "$dir/VNObservations.m" "$dir/VNRecognizedObjectObservation.m" "$dir/VNRequests.m" "$dir/VNHandlers.m" $libs -o "$dir/run"
+        "$dir/RevenantVisionBilinear.c" "$dir/VNConstants.m" "$dir/VNObservations.m" "$dir/VNRecognizedObjectObservation.m" "$dir/VNRequests.m" "$dir/VNHandlers.m" $libs -o "$dir/run"
 }
 mkdir -p "$build/port"
 cp "$vision"/*.c "$vision"/*.m "$vision"/*.h "$build/port/"
@@ -193,8 +193,8 @@ mutant VNObservations.m "_confidence = 1;" "_confidence = 0.5f;"
 mutant VNObservations.m "_requestRevision = requestRevision;" "_requestRevision = requestRevision + 1;"
 mutant VNObservations.m "return [self observationWithRequestRevision:0 boundingBox:boundingBox];" "return [self observationWithRequestRevision:1 boundingBox:boundingBox];"
 mutant VNObservations.m "return YES;" "return NO;"
-mutant VNObservations.m "return charon_vision_clone(self, zone);" "return [[VNObservation alloc] init];"
-mutant VNRequests.m "    if ([wrapper charon_coreml_image_feature] == nil) {" "    if (0) {"
+mutant VNObservations.m "return revenant_vision_clone(self, zone);" "return [[VNObservation alloc] init];"
+mutant VNRequests.m "    if ([wrapper revenant_coreml_image_feature] == nil) {" "    if (0) {"
 # The wrapper's refusal, which is the host's own answer for every image model in the corpus and the
 # one this mutant kills: a wrapper that answered for a model with no image in any of its inputs
 # would be a difference the picture case would see.
@@ -203,7 +203,7 @@ mutant VNHandlers.m "if (handler)
             handler(request, failure);" "if (handler)
             handler(request, nil);"
 # NOT HERE, and named rather than left to fail the line: the two crop-and-scale rules in
-# CharonVisionImage.h, the Core ML branch of charon_vision_perform, and the request path's own
+# RevenantVisionImage.h, the Core ML branch of revenant_vision_perform, and the request path's own
 # resampler. Every shape of an image model in the corpus is refused by the host's own Vision before
 # the request path reaches a picture -- "Failed to initialize VNCoreMLTransformer" for the ranged
 # and the preprocessed one, "The VNCoreMLTransform request failed" for the fixed one -- so the
@@ -213,7 +213,7 @@ mutant VNHandlers.m "if (handler)
 # facts/CoreML/CoreML.md. The crop-and-scale rules are measured against Core ML's own image constructor -- the
 # oracle facts/Vision/Vision.md cites -- by comparing pixels, which is NOT yet a check in this
 # tree: the review measured 1996 of 50176 pixels differing for 100x50 to 224x224 and 22 of 64 for
-# 13x7 to 8x8 against a paste, and the interpolation quality in CharonVisionImage.h is the change
+# 13x7 to 8x8 against a paste, and the interpolation quality in RevenantVisionImage.h is the change
 # made for it, unverified here.
 echo "mutants: $ran run, $survived surviving"
 

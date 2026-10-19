@@ -18,7 +18,7 @@
 #include <utility>
 #include <vector>
 
-namespace shade {
+namespace emulator {
 namespace {
 
     std::uint32_t socket_error(bsd::VirtualUdpStatus status)

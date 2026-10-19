@@ -38,7 +38,7 @@ public func _testFirstPathInterfaces(_ required: NWInterface.InterfaceType?) -> 
     return found ?? []
 }
 
-@_cdecl("charon_interface_named")
+@_cdecl("revenant_interface_named")
 public func _testInterfaceNamed(_ name: UnsafePointer<CChar>) -> nw_interface_t? {
     let wanted = String(cString: name)
     return _testFirstPathInterfaces(nil).first { $0.name == wanted }?.interface

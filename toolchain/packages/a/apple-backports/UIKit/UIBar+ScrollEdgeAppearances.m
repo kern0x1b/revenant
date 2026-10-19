@@ -1,90 +1,90 @@
-#import "CharonBarAppearance.h"
+#import "RevenantBarAppearance.h"
 
-static const void *CharonScrollEdgeKey = &CharonScrollEdgeKey;
-static const void *CharonCompactScrollEdgeKey = &CharonCompactScrollEdgeKey;
+static const void *RevenantScrollEdgeKey = &RevenantScrollEdgeKey;
+static const void *RevenantCompactScrollEdgeKey = &RevenantCompactScrollEdgeKey;
 
-@implementation UINavigationBar (CharonScrollEdgeAppearances)
+@implementation UINavigationBar (RevenantScrollEdgeAppearances)
 
 - (UINavigationBarAppearance *)compactScrollEdgeAppearance
 {
-    return charon_appearance_peek(self, CharonCompactScrollEdgeKey);
+    return revenant_appearance_peek(self, RevenantCompactScrollEdgeKey);
 }
 
 - (void)setCompactScrollEdgeAppearance:(UINavigationBarAppearance *)compactScrollEdgeAppearance
 {
-    charon_appearance_store_observed(self, CharonCompactScrollEdgeKey, compactScrollEdgeAppearance, @selector(charon_otherChanged));
-    [self charon_refreshForced:YES];
+    revenant_appearance_store_observed(self, RevenantCompactScrollEdgeKey, compactScrollEdgeAppearance, @selector(revenant_otherChanged));
+    [self revenant_refreshForced:YES];
 }
 
 @end
 
-@implementation UIToolbar (CharonScrollEdgeAppearances)
+@implementation UIToolbar (RevenantScrollEdgeAppearances)
 
 - (UIToolbarAppearance *)scrollEdgeAppearance
 {
-    return charon_appearance_peek(self, CharonScrollEdgeKey);
+    return revenant_appearance_peek(self, RevenantScrollEdgeKey);
 }
 
 - (void)setScrollEdgeAppearance:(UIToolbarAppearance *)scrollEdgeAppearance
 {
-    charon_appearance_store_observed(self, CharonScrollEdgeKey, scrollEdgeAppearance, @selector(charon_otherChanged));
-    [self charon_refreshForced:YES];
+    revenant_appearance_store_observed(self, RevenantScrollEdgeKey, scrollEdgeAppearance, @selector(revenant_otherChanged));
+    [self revenant_refreshForced:YES];
 }
 
 - (UIToolbarAppearance *)compactScrollEdgeAppearance
 {
-    return charon_appearance_peek(self, CharonCompactScrollEdgeKey);
+    return revenant_appearance_peek(self, RevenantCompactScrollEdgeKey);
 }
 
 - (void)setCompactScrollEdgeAppearance:(UIToolbarAppearance *)compactScrollEdgeAppearance
 {
-    charon_appearance_store_observed(self, CharonCompactScrollEdgeKey, compactScrollEdgeAppearance, @selector(charon_otherChanged));
-    [self charon_refreshForced:YES];
+    revenant_appearance_store_observed(self, RevenantCompactScrollEdgeKey, compactScrollEdgeAppearance, @selector(revenant_otherChanged));
+    [self revenant_refreshForced:YES];
 }
 
 @end
 
-@implementation UITabBar (CharonScrollEdgeAppearances)
+@implementation UITabBar (RevenantScrollEdgeAppearances)
 
 - (UITabBarAppearance *)scrollEdgeAppearance
 {
-    return charon_appearance_peek(self, CharonScrollEdgeKey);
+    return revenant_appearance_peek(self, RevenantScrollEdgeKey);
 }
 
 - (void)setScrollEdgeAppearance:(UITabBarAppearance *)scrollEdgeAppearance
 {
-    charon_appearance_store_observed(self, CharonScrollEdgeKey, scrollEdgeAppearance, @selector(charon_otherChanged));
-    [self charon_refreshForced:YES];
+    revenant_appearance_store_observed(self, RevenantScrollEdgeKey, scrollEdgeAppearance, @selector(revenant_otherChanged));
+    [self revenant_refreshForced:YES];
 }
 
 @end
 
-@implementation UINavigationItem (CharonScrollEdgeAppearances)
+@implementation UINavigationItem (RevenantScrollEdgeAppearances)
 
 - (UINavigationBarAppearance *)compactScrollEdgeAppearance
 {
-    return charon_appearance_peek(self, CharonCompactScrollEdgeKey);
+    return revenant_appearance_peek(self, RevenantCompactScrollEdgeKey);
 }
 
 - (void)setCompactScrollEdgeAppearance:(UINavigationBarAppearance *)compactScrollEdgeAppearance
 {
-    charon_appearance_store_observed(self, CharonCompactScrollEdgeKey, compactScrollEdgeAppearance, @selector(charon_appearanceChanged));
-    charon_refresh_bars_showing(self);
+    revenant_appearance_store_observed(self, RevenantCompactScrollEdgeKey, compactScrollEdgeAppearance, @selector(revenant_appearanceChanged));
+    revenant_refresh_bars_showing(self);
 }
 
 @end
 
-@implementation UITabBarItem (CharonScrollEdgeAppearances)
+@implementation UITabBarItem (RevenantScrollEdgeAppearances)
 
 - (UITabBarAppearance *)scrollEdgeAppearance
 {
-    return charon_appearance_peek(self, CharonScrollEdgeKey);
+    return revenant_appearance_peek(self, RevenantScrollEdgeKey);
 }
 
 - (void)setScrollEdgeAppearance:(UITabBarAppearance *)scrollEdgeAppearance
 {
-    charon_appearance_store_observed(self, CharonScrollEdgeKey, scrollEdgeAppearance, @selector(charon_appearanceChanged));
-    charon_refresh_bars_showing(self);
+    revenant_appearance_store_observed(self, RevenantScrollEdgeKey, scrollEdgeAppearance, @selector(revenant_appearanceChanged));
+    revenant_refresh_bars_showing(self);
 }
 
 @end

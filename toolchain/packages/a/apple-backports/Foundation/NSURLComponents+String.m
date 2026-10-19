@@ -1,12 +1,12 @@
 #import <Foundation/Foundation.h>
 
-NSString *charon_url_compose(NSURLComponents *components, NSRange *ranges);
+NSString *revenant_url_compose(NSURLComponents *components, NSRange *ranges);
 
-@implementation NSURLComponents (CharonString)
+@implementation NSURLComponents (RevenantString)
 
 - (NSString *)string
 {
-    return charon_url_compose(self, NULL);
+    return revenant_url_compose(self, NULL);
 }
 
 @end

@@ -32,31 +32,31 @@ int main(void)
 
 local RECIPE = [[set_project("exportprobe")
 set_version("0.1.0")
-add_repositories("charon @CHARON@")
-add_addons("charon latest")
+add_repositories("revenant @REVENANT@")
+add_addons("revenant latest")
 set_config("apple_minimum", "@RELEASE@")
-includes("@addon/charon/apple-ios")
-includes("@addon/charon/emulate")
+includes("@addon/revenant/apple-ios")
+includes("@addon/revenant/emulate")
 set_defaultplat("iphoneos")
 set_defaultarchs("iphoneos|armv7")
 target("exportprobe")
-    add_rules("@addon/charon/daemon")
+    add_rules("@addon/revenant/daemon")
     add_files("probe.m")
     add_frameworks("Foundation")
-    set_values("charon.control", "packaging/control")
+    set_values("revenant.control", "packaging/control")
 ]]
 
-local CONTROL = [[Package: org.charon.exportprobe
-Name: Charon export probe
+local CONTROL = [[Package: org.revenant.exportprobe
+Name: Revenant export probe
 Architecture: iphoneos-arm
 Description: asks the release which names it exports
-Maintainer: charon
-Author: charon
+Maintainer: revenant
+Author: revenant
 Section: Development
 ]]
 
 local USAGE = "usage: xmake l tests/backports/tools/probe-exports.lua (--registry | --names <file>) --workdir <folder> "
-              .. "[--release 6.0] [--charon <tree>]"
+              .. "[--release 6.0] [--revenant <tree>]"
 
 local function replace(text, marker, value)
     return (text:gsub(marker:gsub("%p", "%%%0"), (value:gsub("%%", "%%%%"))))
@@ -108,8 +108,8 @@ function source_text(listed)
     return replace(SOURCE, "@NAMES@", table.concat(literal))
 end
 
-function recipe_text(charon, release)
-    return replace(replace(RECIPE, "@CHARON@", charon), "@RELEASE@", release)
+function recipe_text(revenant, release)
+    return replace(replace(RECIPE, "@REVENANT@", revenant), "@RELEASE@", release)
 end
 
 function control_text()
@@ -117,14 +117,14 @@ function control_text()
 end
 
 local function parse(argv)
-    local options = {release = "6.0", charon = workspace.root()}
+    local options = {release = "6.0", revenant = workspace.root()}
     local i = 1
     while i <= #argv do
         local name = argv[i]
         if name == "--registry" then
             options.registry = true
             i = i + 1
-        elseif name == "--names" or name == "--release" or name == "--charon" or name == "--workdir" then
+        elseif name == "--names" or name == "--release" or name == "--revenant" or name == "--workdir" then
             local value = argv[i + 1]
             if value == nil then
                 raise("%s needs a value\n%s", name, USAGE)
@@ -153,7 +153,7 @@ end
 
 function main(...)
     local options = parse({...})
-    local root = path.join(options.charon, "packages", "a", "apple-backports")
+    local root = path.join(options.revenant, "packages", "a", "apple-backports")
     local listed
     if options.registry then
         listed = registry_names(root)
@@ -175,7 +175,7 @@ function main(...)
     os.tryrm(workdir)
     os.mkdir(path.join(workdir, "packaging"))
     io.writefile(path.join(workdir, "probe.m"), source_text(listed))
-    io.writefile(path.join(workdir, "xmake.lua"), recipe_text(options.charon, options.release))
+    io.writefile(path.join(workdir, "xmake.lua"), recipe_text(options.revenant, options.release))
     io.writefile(path.join(workdir, "packaging", "control"), control_text())
     for _, argv in ipairs({{"f", "-y", "-c"}, {"-y"}, {"emulate", "install"}}) do
         local status, text = run(argv, workdir)

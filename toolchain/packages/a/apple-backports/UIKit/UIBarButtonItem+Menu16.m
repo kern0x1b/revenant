@@ -2,7 +2,7 @@
 
 #pragma clang diagnostic ignored "-Wobjc-designated-initializers"
 
-@implementation UIBarButtonItem (CharonMenu16)
+@implementation UIBarButtonItem (RevenantMenu16)
 
 - (instancetype)initWithPrimaryAction:(UIAction *)primaryAction menu:(UIMenu *)menu
 {

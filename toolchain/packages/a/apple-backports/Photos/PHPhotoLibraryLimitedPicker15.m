@@ -1,9 +1,9 @@
-#import "CharonPhotosPicker.h"
+#import "RevenantPhotosPicker.h"
 
 #pragma clang diagnostic ignored "-Wunguarded-availability-new"
 #pragma clang diagnostic ignored "-Wunguarded-availability"
 
-@implementation PHPhotoLibrary (CharonLimitedLibrary15)
+@implementation PHPhotoLibrary (RevenantLimitedLibrary15)
 
 - (void)presentLimitedLibraryPickerFromViewController:(UIViewController *)controller
                                    completionHandler:(void (^)(NSArray<NSString *> *))completionHandler

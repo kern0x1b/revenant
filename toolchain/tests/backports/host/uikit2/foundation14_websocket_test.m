@@ -5,7 +5,7 @@
 
 static NSString *host_selector(NSString *name)
 {
-    return [@"charonHost" stringByAppendingString:[[name substringToIndex:1].uppercaseString stringByAppendingString:[name substringFromIndex:1]]];
+    return [@"revenantHost" stringByAppendingString:[[name substringToIndex:1].uppercaseString stringByAppendingString:[name substringFromIndex:1]]];
 }
 
 static NSString *described(NSError *error)
@@ -60,7 +60,7 @@ static NSString *message_text(id message)
 
 static id make_message(BOOL port, id payload)
 {
-    Class cls = port ? NSClassFromString(@"CharonHostNSURLSessionWebSocketMessage") : [NSURLSessionWebSocketMessage class];
+    Class cls = port ? NSClassFromString(@"RevenantHostNSURLSessionWebSocketMessage") : [NSURLSessionWebSocketMessage class];
     return [payload isKindOfClass:[NSString class]] ? [[cls alloc] initWithString:payload] : [[cls alloc] initWithData:payload];
 }
 
@@ -88,8 +88,8 @@ int main(int argc, char **argv)
 {
     @autoreleasepool {
         int listener = wsserver_start();
-        Class portTask = NSClassFromString(@"CharonHostNSURLSessionWebSocketTask");
-        CHECK(portTask != Nil && NSClassFromString(@"CharonHostNSURLSessionWebSocketMessage") != Nil, "the port defines the task and the message");
+        Class portTask = NSClassFromString(@"RevenantHostNSURLSessionWebSocketTask");
+        CHECK(portTask != Nil && NSClassFromString(@"RevenantHostNSURLSessionWebSocketMessage") != Nil, "the port defines the task and the message");
         NSURL *(^url)(NSString *) = ^NSURL *(NSString *path) {
             return [NSURL URLWithString:[NSString stringWithFormat:@"ws://127.0.0.1:%d%@", listener, path]];
         };
@@ -302,7 +302,7 @@ int main(int argc, char **argv)
                         }
                         L([NSString stringWithFormat:@"nil %d: %@", nilKind, raised]);
                     }
-                    Class message = port ? NSClassFromString(@"CharonHostNSURLSessionWebSocketMessage") : [NSURLSessionWebSocketMessage class];
+                    Class message = port ? NSClassFromString(@"RevenantHostNSURLSessionWebSocketMessage") : [NSURLSessionWebSocketMessage class];
                     id text = [[message alloc] initWithString:@"abc"], data = [[message alloc] initWithData:[NSData dataWithBytes:"ab" length:2]];
                     L([NSString stringWithFormat:@"text type=%ld string=%@ data=%@ desc=%@", (long)[[text valueForKey:@"type"] integerValue], [text valueForKey:@"string"], [text valueForKey:@"data"], text]);
                     L([NSString stringWithFormat:@"data type=%ld string=%@ data=%@", (long)[[data valueForKey:@"type"] integerValue], [data valueForKey:@"string"], [data valueForKey:@"data"]]);
@@ -335,9 +335,9 @@ int main(int argc, char **argv)
             BOOL same = [transcripts[0] isEqualToString:transcripts[1]];
             if (!same)
                 printf("  scenario %d %s\n port:\n   %s\n system:\n   %s\n", which, [names[which] UTF8String], transcripts[0].UTF8String, transcripts[1].UTF8String);
-            charon_check(same, [names[which] UTF8String], @"the transcripts differ");
+            revenant_check(same, [names[which] UTF8String], @"the transcripts differ");
         }
     }
-    printf("checks=%d failures=%d\n", charon_checks, charon_failures);
-    return charon_failures;
+    printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
+    return revenant_failures;
 }

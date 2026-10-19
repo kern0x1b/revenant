@@ -4,15 +4,15 @@
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 #pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
 
-static const CGFloat charon_dimming_alpha = 0.15f;
-static const NSTimeInterval charon_presentation_duration = 0.3;
-static char charon_placeholder_key;
+static const CGFloat revenant_dimming_alpha = 0.15f;
+static const NSTimeInterval revenant_presentation_duration = 0.3;
+static char revenant_placeholder_key;
 
-@interface CharonSearchBar : UISearchBar
-- (void)charon_attachController:(id<UISearchBarDelegate>)controller;
+@interface RevenantSearchBar : UISearchBar
+- (void)revenant_attachController:(id<UISearchBarDelegate>)controller;
 @end
 
-@implementation CharonSearchBar {
+@implementation RevenantSearchBar {
     __weak id<UISearchBarDelegate> _controller;
     __weak id<UISearchBarDelegate> _applicationDelegate;
 }
@@ -22,7 +22,7 @@ static char charon_placeholder_key;
     return [super text] ?: @"";
 }
 
-- (void)charon_attachController:(id<UISearchBarDelegate>)controller
+- (void)revenant_attachController:(id<UISearchBarDelegate>)controller
 {
     _controller = controller;
     [super setDelegate:controller];
@@ -46,7 +46,7 @@ static char charon_placeholder_key;
 
 @implementation UISearchController {
     UIViewController *_resultsController;
-    CharonSearchBar *_searchBar;
+    RevenantSearchBar *_searchBar;
     __weak id<UISearchResultsUpdating> _searchResultsUpdater;
     __weak id<UISearchControllerDelegate> _delegate;
     BOOL _obscuresBackgroundDuringPresentation;
@@ -80,7 +80,7 @@ static char charon_placeholder_key;
 {
     if ((self = [super initWithNibName:nil bundle:nil])) {
         _resultsController = searchResultsController;
-        [self charon_commonInit];
+        [self revenant_commonInit];
     }
     return self;
 }
@@ -88,7 +88,7 @@ static char charon_placeholder_key;
 - (instancetype)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
     if ((self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil]))
-        [self charon_commonInit];
+        [self revenant_commonInit];
     return self;
 }
 
@@ -96,7 +96,7 @@ static char charon_placeholder_key;
 {
     if ((self = [super initWithCoder:coder])) {
         _resultsController = [coder decodeObjectForKey:@"UISearchControllerResultsController"];
-        [self charon_commonInit];
+        [self revenant_commonInit];
     }
     return self;
 }
@@ -107,19 +107,19 @@ static char charon_placeholder_key;
     [coder encodeObject:_resultsController forKey:@"UISearchControllerResultsController"];
 }
 
-- (void)charon_commonInit
+- (void)revenant_commonInit
 {
     _obscuresBackgroundDuringPresentation = YES;
     _hidesNavigationBarDuringPresentation = YES;
     _automaticallyShowsCancelButton = YES;
     _automaticallyShowsSearchResultsController = YES;
     _scopeBarActivation = UISearchControllerScopeBarActivationManual;
-    _searchBar = [[CharonSearchBar alloc] initWithFrame:CGRectMake(0, 0, 320, 44)];
+    _searchBar = [[RevenantSearchBar alloc] initWithFrame:CGRectMake(0, 0, 320, 44)];
     _searchBar.placeholder = NSLocalizedStringFromTableInBundle(@"Search", @"Localizable", [NSBundle bundleForClass:[UIView class]], nil);
-    [_searchBar charon_attachController:self];
+    [_searchBar revenant_attachController:self];
 }
 
-- (void)charon_setNavigationItem:(UINavigationItem *)item
+- (void)revenant_setNavigationItem:(UINavigationItem *)item
 {
     _navigationItem = item;
 }
@@ -184,9 +184,9 @@ static char charon_placeholder_key;
 - (void)setActive:(BOOL)active
 {
     if (active)
-        [self charon_present];
+        [self revenant_present];
     else
-        [self charon_dismiss];
+        [self revenant_dismiss];
 }
 
 - (void)loadView
@@ -203,8 +203,8 @@ static char charon_placeholder_key;
     UIView *view = self.view;
     _dimmingView = [[UIView alloc] initWithFrame:view.bounds];
     _dimmingView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-    _dimmingView.backgroundColor = [UIColor colorWithWhite:0 alpha:charon_dimming_alpha];
-    [_dimmingView addGestureRecognizer:[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(charon_dimmingViewTapped:)]];
+    _dimmingView.backgroundColor = [UIColor colorWithWhite:0 alpha:revenant_dimming_alpha];
+    [_dimmingView addGestureRecognizer:[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(revenant_dimmingViewTapped:)]];
     [view addSubview:_dimmingView];
     _resultsContainer = [[UIView alloc] initWithFrame:view.bounds];
     _resultsContainer.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
@@ -222,12 +222,12 @@ static char charon_placeholder_key;
     [view addSubview:_barContainer];
 }
 
-- (void)charon_dimmingViewTapped:(UITapGestureRecognizer *)recognizer
+- (void)revenant_dimmingViewTapped:(UITapGestureRecognizer *)recognizer
 {
-    [self charon_dismiss];
+    [self revenant_dismiss];
 }
 
-- (UIViewController *)charon_locatePresenter
+- (UIViewController *)revenant_locatePresenter
 {
     UIResponder *responder = _searchBar;
     while (responder && ![responder isKindOfClass:[UIViewController class]])
@@ -244,7 +244,7 @@ static char charon_placeholder_key;
     return found;
 }
 
-- (CGFloat)charon_statusBarInsetForHost:(UIViewController *)host
+- (CGFloat)revenant_statusBarInsetForHost:(UIViewController *)host
 {
     UIApplication *application = [UIApplication sharedApplication];
     if (application.statusBarHidden)
@@ -253,12 +253,12 @@ static char charon_placeholder_key;
     return MAX(0, CGRectGetHeight(application.statusBarFrame) - MAX(0, CGRectGetMinY(onScreen)));
 }
 
-- (void)charon_layoutBarContainer
+- (void)revenant_layoutBarContainer
 {
     UIViewController *host = _host;
     if (!host)
         return;
-    CGFloat inset = [self charon_statusBarInsetForHost:host];
+    CGFloat inset = [self revenant_statusBarInsetForHost:host];
     CGFloat height = _searchBar.bounds.size.height;
     _barContainer.frame = CGRectMake(0, 0, self.view.bounds.size.width, inset + height);
     _searchBar.frame = CGRectMake(0, inset, _barContainer.bounds.size.width, height);
@@ -272,10 +272,10 @@ static char charon_placeholder_key;
 {
     [super viewDidLayoutSubviews];
     if (_presented)
-        [self charon_layoutBarContainer];
+        [self revenant_layoutBarContainer];
 }
 
-- (void)charon_updateVisibility
+- (void)revenant_updateVisibility
 {
     _resultsContainer.hidden = _automaticallyShowsSearchResultsController ? _searchBar.text.length == 0 : !_showsSearchResultsController;
 }
@@ -299,7 +299,7 @@ static char charon_placeholder_key;
 {
     _automaticallyShowsSearchResultsController = shows;
     if (_resultsContainer)
-        [self charon_updateVisibility];
+        [self revenant_updateVisibility];
 }
 
 - (BOOL)showsSearchResultsController
@@ -312,28 +312,28 @@ static char charon_placeholder_key;
     _showsSearchResultsController = shows;
     _automaticallyShowsSearchResultsController = NO;
     if (_resultsContainer)
-        [self charon_updateVisibility];
+        [self revenant_updateVisibility];
 }
 
-- (void)charon_updateResults
+- (void)revenant_updateResults
 {
     id<UISearchResultsUpdating> updater = _searchResultsUpdater;
     if (updater)
         [updater updateSearchResultsForSearchController:self];
 }
 
-- (void)charon_present
+- (void)revenant_present
 {
     if (_presented || _dismissing)
         return;
-    UIViewController *host = [self charon_locatePresenter];
+    UIViewController *host = [self revenant_locatePresenter];
     if (!host || !host.view)
         return;
     id<UISearchControllerDelegate> delegate = _delegate;
     if ([delegate respondsToSelector:@selector(presentSearchController:)]) {
         [delegate presentSearchController:self];
-        [self charon_updateVisibility];
-        [self charon_updateResults];
+        [self revenant_updateVisibility];
+        [self revenant_updateResults];
         return;
     }
     if ([delegate respondsToSelector:@selector(willPresentSearchController:)])
@@ -353,7 +353,7 @@ static char charon_placeholder_key;
         placeholder.autoresizingMask = _originalMask;
         placeholder.userInteractionEnabled = NO;
         [_originalSuperview insertSubview:placeholder atIndex:_originalIndex];
-        objc_setAssociatedObject(_searchBar, &charon_placeholder_key, placeholder, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+        objc_setAssociatedObject(_searchBar, &revenant_placeholder_key, placeholder, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     }
     [_searchBar removeFromSuperview];
     _searchBar.autoresizingMask = UIViewAutoresizingFlexibleWidth;
@@ -370,30 +370,30 @@ static char charon_placeholder_key;
         [navigation setNavigationBarHidden:YES animated:animated];
     }
     self.view.frame = host.view.bounds;
-    [self charon_layoutBarContainer];
+    [self revenant_layoutBarContainer];
     if (_automaticallyShowsCancelButton)
         [_searchBar setShowsCancelButton:YES animated:animated];
-    [self charon_updateVisibility];
+    [self revenant_updateVisibility];
     void (^finish)(BOOL) = ^(BOOL finished) {
         id<UISearchControllerDelegate> current = self->_delegate;
         if ([current respondsToSelector:@selector(didPresentSearchController:)])
             [current didPresentSearchController:self];
     };
     if (animated)
-        [UIView animateWithDuration:charon_presentation_duration animations:^{ self.view.alpha = 1; } completion:finish];
+        [UIView animateWithDuration:revenant_presentation_duration animations:^{ self.view.alpha = 1; } completion:finish];
     else
         finish(YES);
-    [self charon_updateResults];
+    [self revenant_updateResults];
 }
 
-- (void)charon_dismissModal
+- (void)revenant_dismissModal
 {
     id<UISearchControllerDelegate> delegate = _delegate;
     _dismissing = YES;
     if ([delegate respondsToSelector:@selector(willDismissSearchController:)])
         [delegate willDismissSearchController:self];
     _searchBar.text = nil;
-    [self charon_updateResults];
+    [self revenant_updateResults];
     [_searchBar resignFirstResponder];
     [self.presentingViewController dismissViewControllerAnimated:[UIView areAnimationsEnabled] completion:^{
         self->_dismissing = NO;
@@ -403,10 +403,10 @@ static char charon_placeholder_key;
     }];
 }
 
-- (void)charon_dismiss
+- (void)revenant_dismiss
 {
     if (!_presented && [self isActive]) {
-        [self charon_dismissModal];
+        [self revenant_dismissModal];
         return;
     }
     if (!_presented || _dismissing)
@@ -417,8 +417,8 @@ static char charon_placeholder_key;
         [delegate willDismissSearchController:self];
     BOOL animated = [UIView areAnimationsEnabled];
     _searchBar.text = nil;
-    [self charon_updateVisibility];
-    [self charon_updateResults];
+    [self revenant_updateVisibility];
+    [self revenant_updateResults];
     [_searchBar resignFirstResponder];
     UIViewController *host = _host;
     UINavigationController *navigation = host.navigationController;
@@ -428,7 +428,7 @@ static char charon_placeholder_key;
     }
     [_searchBar setShowsCancelButton:_originalShowsCancel animated:animated];
     void (^finish)(BOOL) = ^(BOOL finished) {
-        [self charon_restoreSearchBar];
+        [self revenant_restoreSearchBar];
         [self willMoveToParentViewController:nil];
         [self.view removeFromSuperview];
         [self removeFromParentViewController];
@@ -440,14 +440,14 @@ static char charon_placeholder_key;
             [current didDismissSearchController:self];
     };
     if (animated)
-        [UIView animateWithDuration:charon_presentation_duration animations:^{ self.view.alpha = 0; } completion:finish];
+        [UIView animateWithDuration:revenant_presentation_duration animations:^{ self.view.alpha = 0; } completion:finish];
     else
         finish(YES);
 }
 
-- (void)charon_restoreSearchBar
+- (void)revenant_restoreSearchBar
 {
-    UIView *placeholder = objc_getAssociatedObject(_searchBar, &charon_placeholder_key);
+    UIView *placeholder = objc_getAssociatedObject(_searchBar, &revenant_placeholder_key);
     [_searchBar removeFromSuperview];
     _searchBar.autoresizingMask = _originalMask;
     _searchBar.frame = _originalFrame;
@@ -457,7 +457,7 @@ static char charon_placeholder_key;
         [superview insertSubview:_searchBar atIndex:MIN(index, superview.subviews.count)];
     }
     [placeholder removeFromSuperview];
-    objc_setAssociatedObject(_searchBar, &charon_placeholder_key, nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(_searchBar, &revenant_placeholder_key, nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     _originalSuperview = nil;
 }
 
@@ -478,9 +478,9 @@ static char charon_placeholder_key;
     if ([target respondsToSelector:_cmd])
         [target searchBarTextDidBeginEditing:searchBar];
     if (_presented && !_dismissing)
-        [self charon_updateResults];
+        [self revenant_updateResults];
     else
-        [self charon_present];
+        [self revenant_present];
 }
 
 - (void)searchBar:(UISearchBar *)searchBar textDidChange:(NSString *)searchText
@@ -488,8 +488,8 @@ static char charon_placeholder_key;
     id<UISearchBarDelegate> target = searchBar.delegate;
     if ([target respondsToSelector:_cmd])
         [target searchBar:searchBar textDidChange:searchText];
-    [self charon_updateVisibility];
-    [self charon_updateResults];
+    [self revenant_updateVisibility];
+    [self revenant_updateResults];
 }
 
 - (void)searchBarSearchButtonClicked:(UISearchBar *)searchBar
@@ -505,7 +505,7 @@ static char charon_placeholder_key;
     id<UISearchBarDelegate> target = searchBar.delegate;
     if ([target respondsToSelector:_cmd])
         [target searchBarCancelButtonClicked:searchBar];
-    [self charon_dismiss];
+    [self revenant_dismiss];
 }
 
 @end

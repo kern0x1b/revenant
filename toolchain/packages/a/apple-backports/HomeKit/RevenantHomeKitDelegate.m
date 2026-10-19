@@ -1,14 +1,14 @@
-#import "CharonHomeKitInternal.h"
+#import "RevenantHomeKitInternal.h"
 
-@implementation NSObject (CharonHomeKitDelegate)
+@implementation NSObject (RevenantHomeKitDelegate)
 
-- (void)charon_tellHome:(SEL)selector object:(id)object block:(void (^)(id<HMHomeDelegate> delegate, HMHome *home, id object))block
+- (void)revenant_tellHome:(SEL)selector object:(id)object block:(void (^)(id<HMHomeDelegate> delegate, HMHome *home, id object))block
 {
-    id identifier = [self valueForKey:@"charon_homeIdentifier"];
+    id identifier = [self valueForKey:@"revenant_homeIdentifier"];
     if (![identifier isKindOfClass:[NSString class]] || ![(NSString *)identifier length])
         return;
-    HMHome *home = CharonHomeKitHome(identifier);
-    CharonHomeKitTell(home.delegate, selector, ^(id target) {
+    HMHome *home = RevenantHomeKitHome(identifier);
+    RevenantHomeKitTell(home.delegate, selector, ^(id target) {
         block((id<HMHomeDelegate>)target, home, object);
     });
 }

@@ -1,5 +1,5 @@
-#ifndef CHARON_BLUR_COST_SHIM_H
-#define CHARON_BLUR_COST_SHIM_H
+#ifndef REVENANT_BLUR_COST_SHIM_H
+#define REVENANT_BLUR_COST_SHIM_H
 
 #include <stddef.h>
 #include <stdint.h>
@@ -20,11 +20,11 @@ typedef struct {
     CGFloat tintGreen;
     CGFloat tintBlue;
     CGFloat tintAlpha;
-} CharonBlurParameters;
+} RevenantBlurParameters;
 
-CharonBlurParameters charon_blur_parameters(UIBlurEffectStyle style);
+RevenantBlurParameters revenant_blur_parameters(UIBlurEffectStyle style);
 
-void charon_blur_pixels(uint8_t *pixels, size_t width, size_t height, size_t rowBytes, CGFloat sigma,
+void revenant_blur_pixels(uint8_t *pixels, size_t width, size_t height, size_t rowBytes, CGFloat sigma,
                         CGFloat saturation, CGFloat tintRed, CGFloat tintGreen, CGFloat tintBlue,
                         CGFloat tintAlpha);
 

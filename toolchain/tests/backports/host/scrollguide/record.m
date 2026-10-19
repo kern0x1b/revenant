@@ -1,9 +1,9 @@
 #import <UIKit/UIKit.h>
 #import "scrollguide-cases.h"
 
-void charon_windowed_run(UIWindow *window);
+void revenant_windowed_run(UIWindow *window);
 
-void charon_windowed_run(UIWindow *window)
+void revenant_windowed_run(UIWindow *window)
 {
     NSMutableDictionary *records = [NSMutableDictionary dictionary];
     scrollguide_run(window, ^(NSString *name, NSString *value) {

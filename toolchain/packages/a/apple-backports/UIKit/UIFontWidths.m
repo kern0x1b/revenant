@@ -4,7 +4,7 @@
 
 const CGFloat UIFontWidthCompressed = -0.3f;
 
-@implementation UIFont (CharonWidths)
+@implementation UIFont (RevenantWidths)
 
 + (UIFont *)systemFontOfSize:(CGFloat)fontSize weight:(UIFontWeight)weight width:(CGFloat)width
 {

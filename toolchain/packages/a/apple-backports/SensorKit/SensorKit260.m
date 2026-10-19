@@ -1,67 +1,67 @@
-#import "CharonSensorKit.h"
-#import "CharonSensorKitValue.h"
-#import "../CharonValueStore.h"
+#import "RevenantSensorKit.h"
+#import "RevenantSensorKitValue.h"
+#import "../RevenantValueStore.h"
 
 @implementation SRAcousticSettings
 @dynamic environmentalSoundMeasurementsEnabled, audioExposureSampleLifetime, headphoneSafetyAudioLevel, musicEQSettings, accessibilitySettings;
-CHARON_SCALAR_GETTER(BOOL, environmentalSoundMeasurementsEnabled, isEnvironmentalSoundMeasurementsEnabled)
-CHARON_SCALAR_PROPERTY(SRAcousticSettingsSampleLifetime, audioExposureSampleLifetime)
-CHARON_VALUE_PROPERTY(NSNumber *, headphoneSafetyAudioLevel)
-CHARON_VALUE_PROPERTY(SRAcousticSettingsMusicEQ *, musicEQSettings)
-CHARON_VALUE_PROPERTY(SRAcousticSettingsAccessibility *, accessibilitySettings)
+REVENANT_SCALAR_GETTER(BOOL, environmentalSoundMeasurementsEnabled, isEnvironmentalSoundMeasurementsEnabled)
+REVENANT_SCALAR_PROPERTY(SRAcousticSettingsSampleLifetime, audioExposureSampleLifetime)
+REVENANT_VALUE_PROPERTY(NSNumber *, headphoneSafetyAudioLevel)
+REVENANT_VALUE_PROPERTY(SRAcousticSettingsMusicEQ *, musicEQSettings)
+REVENANT_VALUE_PROPERTY(SRAcousticSettingsAccessibility *, accessibilitySettings)
 @end
-@implementation SRAcousticSettings (CharonSensorKitValue)
-CHARON_SENSORKIT_VALUE_STORE_IMPLEMENTATION
+@implementation SRAcousticSettings (RevenantSensorKitValue)
+REVENANT_SENSORKIT_VALUE_STORE_IMPLEMENTATION
 @end
 @implementation SRAcousticSettingsAccessibility
 @dynamic leftRightBalance, monoAudioEnabled, backgroundSounds, headphoneAccommodations;
-CHARON_SCALAR_PROPERTY(double, leftRightBalance)
-CHARON_SCALAR_GETTER(BOOL, monoAudioEnabled, isMonoAudioEnabled)
-CHARON_VALUE_PROPERTY(SRAcousticSettingsAccessibilityBackgroundSounds *, backgroundSounds)
-CHARON_VALUE_PROPERTY(SRAcousticSettingsAccessibilityHeadphoneAccommodations *, headphoneAccommodations)
+REVENANT_SCALAR_PROPERTY(double, leftRightBalance)
+REVENANT_SCALAR_GETTER(BOOL, monoAudioEnabled, isMonoAudioEnabled)
+REVENANT_VALUE_PROPERTY(SRAcousticSettingsAccessibilityBackgroundSounds *, backgroundSounds)
+REVENANT_VALUE_PROPERTY(SRAcousticSettingsAccessibilityHeadphoneAccommodations *, headphoneAccommodations)
 @end
-@implementation SRAcousticSettingsAccessibility (CharonSensorKitValue)
-CHARON_SENSORKIT_VALUE_STORE_IMPLEMENTATION
+@implementation SRAcousticSettingsAccessibility (RevenantSensorKitValue)
+REVENANT_SENSORKIT_VALUE_STORE_IMPLEMENTATION
 @end
 @implementation SRAcousticSettingsAccessibilityBackgroundSounds
 @dynamic enabled, soundName, relativeVolume, playWithMediaEnabled, relativeVolumeWithMedia, stopOnLockEnabled;
-CHARON_SCALAR_GETTER(BOOL, enabled, isEnabled)
-CHARON_SCALAR_PROPERTY(SRAcousticSettingsAccessibilityBackgroundSoundsName, soundName)
-CHARON_SCALAR_PROPERTY(double, relativeVolume)
-CHARON_SCALAR_GETTER(BOOL, playWithMediaEnabled, isPlayWithMediaEnabled)
-CHARON_SCALAR_PROPERTY(double, relativeVolumeWithMedia)
-CHARON_SCALAR_GETTER(BOOL, stopOnLockEnabled, isStopOnLockEnabled)
+REVENANT_SCALAR_GETTER(BOOL, enabled, isEnabled)
+REVENANT_SCALAR_PROPERTY(SRAcousticSettingsAccessibilityBackgroundSoundsName, soundName)
+REVENANT_SCALAR_PROPERTY(double, relativeVolume)
+REVENANT_SCALAR_GETTER(BOOL, playWithMediaEnabled, isPlayWithMediaEnabled)
+REVENANT_SCALAR_PROPERTY(double, relativeVolumeWithMedia)
+REVENANT_SCALAR_GETTER(BOOL, stopOnLockEnabled, isStopOnLockEnabled)
 @end
-@implementation SRAcousticSettingsAccessibilityBackgroundSounds (CharonSensorKitValue)
-CHARON_SENSORKIT_VALUE_STORE_IMPLEMENTATION
+@implementation SRAcousticSettingsAccessibilityBackgroundSounds (RevenantSensorKitValue)
+REVENANT_SENSORKIT_VALUE_STORE_IMPLEMENTATION
 @end
 @implementation SRAcousticSettingsAccessibilityHeadphoneAccommodations
 @dynamic enabled, mediaEnhanceTuning, mediaEnhanceBoosting, mediaEnhanceApplication;
-CHARON_SCALAR_GETTER(BOOL, enabled, isEnabled)
-CHARON_SCALAR_PROPERTY(SRAcousticSettingsAccessibilityHeadphoneAccommodationsMediaEnhanceTuning, mediaEnhanceTuning)
-CHARON_SCALAR_PROPERTY(SRAcousticSettingsAccessibilityHeadphoneAccommodationsMediaEnhanceBoosting, mediaEnhanceBoosting)
-CHARON_SCALAR_PROPERTY(SRAcousticSettingsAccessibilityHeadphoneAccommodationsMediaEnhanceApplication, mediaEnhanceApplication)
+REVENANT_SCALAR_GETTER(BOOL, enabled, isEnabled)
+REVENANT_SCALAR_PROPERTY(SRAcousticSettingsAccessibilityHeadphoneAccommodationsMediaEnhanceTuning, mediaEnhanceTuning)
+REVENANT_SCALAR_PROPERTY(SRAcousticSettingsAccessibilityHeadphoneAccommodationsMediaEnhanceBoosting, mediaEnhanceBoosting)
+REVENANT_SCALAR_PROPERTY(SRAcousticSettingsAccessibilityHeadphoneAccommodationsMediaEnhanceApplication, mediaEnhanceApplication)
 @end
-@implementation SRAcousticSettingsAccessibilityHeadphoneAccommodations (CharonSensorKitValue)
-CHARON_SENSORKIT_VALUE_STORE_IMPLEMENTATION
+@implementation SRAcousticSettingsAccessibilityHeadphoneAccommodations (RevenantSensorKitValue)
+REVENANT_SENSORKIT_VALUE_STORE_IMPLEMENTATION
 @end
 @implementation SRAcousticSettingsMusicEQ
 @dynamic soundCheckEnabled, lateNightModeEnabled;
-CHARON_SCALAR_GETTER(BOOL, soundCheckEnabled, isSoundCheckEnabled)
-CHARON_SCALAR_GETTER(BOOL, lateNightModeEnabled, isLateNightModeEnabled)
+REVENANT_SCALAR_GETTER(BOOL, soundCheckEnabled, isSoundCheckEnabled)
+REVENANT_SCALAR_GETTER(BOOL, lateNightModeEnabled, isLateNightModeEnabled)
 @end
-@implementation SRAcousticSettingsMusicEQ (CharonSensorKitValue)
-CHARON_SENSORKIT_VALUE_STORE_IMPLEMENTATION
+@implementation SRAcousticSettingsMusicEQ (RevenantSensorKitValue)
+REVENANT_SENSORKIT_VALUE_STORE_IMPLEMENTATION
 @end
 @implementation SRSleepSession
 @dynamic startDate, duration, identifier;
-CHARON_VALUE_PROPERTY(NSDate *, startDate)
-CHARON_SCALAR_PROPERTY(NSTimeInterval, duration)
-CHARON_VALUE_PROPERTY(NSString *, identifier)
+REVENANT_VALUE_PROPERTY(NSDate *, startDate)
+REVENANT_SCALAR_PROPERTY(NSTimeInterval, duration)
+REVENANT_VALUE_PROPERTY(NSString *, identifier)
 @end
-@implementation SRSleepSession (CharonSensorKitValue)
-CHARON_SENSORKIT_VALUE_STORE_IMPLEMENTATION
+@implementation SRSleepSession (RevenantSensorKitValue)
+REVENANT_SENSORKIT_VALUE_STORE_IMPLEMENTATION
 @end
 
-#define CHARON_SENSORKIT_NAMES_26_0
-#import "CharonSensorKitNames.h"
+#define REVENANT_SENSORKIT_NAMES_26_0
+#import "RevenantSensorKitNames.h"

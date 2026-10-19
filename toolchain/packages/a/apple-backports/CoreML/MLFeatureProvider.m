@@ -9,15 +9,15 @@
 #import <CoreML/CoreML.h>
 #pragma clang diagnostic pop
 
-#include "CharonMLBridge.h"
-#include "CharonMLInternal.h"
+#include "RevenantMLBridge.h"
+#include "RevenantMLInternal.h"
 
 
 @implementation MLDictionaryFeatureProvider {
     NSDictionary<NSString *, MLFeatureValue *> *_dictionary;
 }
 
-static MLFeatureValue *charon_ml_value_of_object(id object)
+static MLFeatureValue *revenant_ml_value_of_object(id object)
 {
     if ([object isKindOfClass:[MLFeatureValue class]]) {
         return object;
@@ -57,7 +57,7 @@ static MLFeatureValue *charon_ml_value_of_object(id object)
                                                             ? [MLSequence sequenceWithStringArray:list]
                                                             : [MLSequence sequenceWithInt64Array:numbers]];
     }
-    return [MLFeatureValue charon_featureValueOfInvalidType];
+    return [MLFeatureValue revenant_featureValueOfInvalidType];
 }
 
 - (instancetype)initWithDictionary:(NSDictionary<NSString *, id> *)dictionary error:(NSError **)error
@@ -76,7 +76,7 @@ static MLFeatureValue *charon_ml_value_of_object(id object)
     converted = [NSMutableDictionary dictionaryWithCapacity:dictionary.count];
     names = [dictionary keyEnumerator];
     while ((name = [names nextObject]) != nil) {
-        converted[name] = charon_ml_value_of_object([dictionary objectForKey:name]);
+        converted[name] = revenant_ml_value_of_object([dictionary objectForKey:name]);
     }
     _dictionary = converted;
     return self;

@@ -10,7 +10,7 @@
 
 #include <cstdint>
 
-namespace shade {
+namespace emulator {
 
 struct GlesPixelUnpack {
     std::uint32_t alignment { gles_abi::default_pixel_alignment };

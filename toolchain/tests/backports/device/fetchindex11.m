@@ -45,7 +45,7 @@ int main(int argc, char **argv)
 {
     @autoreleasepool {
         if (argc > 1)
-            charon_log_to(@(argv[1]));
+            revenant_log_to(@(argv[1]));
         CHECK_EQUAL(image_of((__bridge void *)[NSFetchIndexDescription class]), @"libCoreDataBackports.dylib", "the index description comes from the backports");
         CHECK_EQUAL(image_of((__bridge void *)[NSFetchIndexElementDescription class]), @"libCoreDataBackports.dylib", "the index element comes from the backports");
         NSAttributeDescription *name = attribute(@"name", NSStringAttributeType), *lat = attribute(@"lat", NSDoubleAttributeType), *flt = attribute(@"flt", NSFloatAttributeType);
@@ -133,7 +133,7 @@ int main(int argc, char **argv)
         model.entities = @[frozen];
         (void)[[NSPersistentStoreCoordinator alloc] initWithManagedObjectModel:model];
         CHECK_EQUAL(raised(^{ frozen.indexes = @[]; }), @"NSInternalInconsistencyException: Can't modify an immutable model.", "the indexes of an entity of a model in use cannot change");
-        printf("checks=%d failures=%d\n", charon_checks, charon_failures);
+        printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
     }
-    return charon_failures ? 1 : 0;
+    return revenant_failures ? 1 : 0;
 }

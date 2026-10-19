@@ -1,5 +1,5 @@
 static const char collectiontransition_expectations[] =
-    "{\"charon.decoration.deleteDecoration\":\"0\",\"charon.decoration.deleteSupplementary\":\"0\",\"charon.decoration.insertDecoration\":\"0\",\"charon.decoration.insertSuppleme"
+    "{\"revenant.decoration.deleteDecoration\":\"0\",\"revenant.decoration.deleteSupplementary\":\"0\",\"revenant.decoration.insertDecoration\":\"0\",\"revenant.decoration.insertSuppleme"
     "ntary\":\"0\",\"prepareAndFinalizeLeaveContentSize\":\"same\",\"targetContentOffset\":\"{11, 22}\",\"targetContentOffsetZero\":\"{0, 0}\",\"transition.animatedKeyAfterUpdate\":\""
     "{0, 0}\",\"transition.animatedKeyOther\":\"{0, 0}\",\"transition.currentLayoutIsFrom\":\"same\",\"transition.nextLayoutIsTo\":\"same\",\"transition.progressAboveOne\":\"{2, 0}\""
     ",\"transition.progressAfterAnimatedKeyUpdate\":\"{0.5, 0}\",\"transition.progressAfterFinalize\":\"{0.5, 0}\",\"transition.progressAtStart\":\"{0, 0}\",\"transition.progress"

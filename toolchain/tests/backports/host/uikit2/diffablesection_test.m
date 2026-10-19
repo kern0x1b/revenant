@@ -16,7 +16,7 @@ static uint32_t next(void)
 static NSString *normalized(NSString *text)
 {
     NSMutableString *result = [text mutableCopy];
-    [result replaceOccurrencesOfString:@"CharonHost" withString:@"" options:0 range:NSMakeRange(0, result.length)];
+    [result replaceOccurrencesOfString:@"RevenantHost" withString:@"" options:0 range:NSMakeRange(0, result.length)];
     NSRegularExpression *expression = [NSRegularExpression regularExpressionWithPattern:@"0x[0-9a-f]+" options:0 error:NULL];
     return [expression stringByReplacingMatchesInString:result options:0 range:NSMakeRange(0, result.length) withTemplate:@"0x"];
 }
@@ -132,7 +132,7 @@ static id randomOperation(Section *target, Class cls)
 int main(int argc, char **argv)
 {
     @autoreleasepool {
-        Class port = NSClassFromString(@"CharonHostNSDiffableDataSourceSectionSnapshot");
+        Class port = NSClassFromString(@"RevenantHostNSDiffableDataSourceSectionSnapshot");
         CHECK(port != Nil, "the port defines the section snapshot");
         CHECK([port superclass] == [NSObject class] && [port conformsToProtocol:@protocol(NSCopying)] == [Section conformsToProtocol:@protocol(NSCopying)], "it is an NSObject that copies, as the system's is");
 
@@ -203,7 +203,7 @@ int main(int argc, char **argv)
             printf("  %s\n", sample.UTF8String);
         for (NSString *kind in [kinds.allKeys sortedArrayUsingSelector:@selector(compare:)])
             printf("  %5ld %s\n", (long)[kinds[kind] integerValue], kind.UTF8String);
-        charon_check(wrong == 0, "random sequences of section snapshot operations end in the system's tree and exception", [NSString stringWithFormat:@"%lu differ", (unsigned long)wrong]);
+        revenant_check(wrong == 0, "random sequences of section snapshot operations end in the system's tree and exception", [NSString stringWithFormat:@"%lu differ", (unsigned long)wrong]);
 
         NSMutableArray *built = [NSMutableArray array];
         for (NSUInteger round = 0; round < 400; round++) {
@@ -241,8 +241,8 @@ int main(int argc, char **argv)
         }
         for (NSUInteger index = 0; index < MIN(built.count, 3); index++)
             printf("built: %s\n", [built[index] UTF8String]);
-        charon_check(built.count == 0, "a tree built one appendItems per parent is described in runs as the system describes it", [NSString stringWithFormat:@"%lu differ", (unsigned long)built.count]);
+        revenant_check(built.count == 0, "a tree built one appendItems per parent is described in runs as the system describes it", [NSString stringWithFormat:@"%lu differ", (unsigned long)built.count]);
     }
-    printf("checks=%d failures=%d\n", charon_checks, charon_failures);
-    return charon_failures;
+    printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
+    return revenant_failures;
 }

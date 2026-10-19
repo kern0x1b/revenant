@@ -10,7 +10,7 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-build=${MLCOMPUTE_MEASURE_BUILD:-$(runs_folder charon-mlcompute-measure)}
+build=${MLCOMPUTE_MEASURE_BUILD:-$(runs_folder revenant-mlcompute-measure)}
 rm -rf "$build"
 mkdir -p "$build"
 sdk=$(xcrun --show-sdk-path)

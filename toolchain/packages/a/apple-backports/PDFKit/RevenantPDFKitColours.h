@@ -2,10 +2,10 @@
 #import <CoreGraphics/CoreGraphics.h>
 #import <UIKit/UIKit.h>
 
-#define CHARON_ANNOTATION_FONT_DEFAULT_NAME @"Helvetica"
-#define CHARON_ANNOTATION_FONT_DEFAULT_SIZE ((CGFloat)12)
+#define REVENANT_ANNOTATION_FONT_DEFAULT_NAME @"Helvetica"
+#define REVENANT_ANNOTATION_FONT_DEFAULT_SIZE ((CGFloat)12)
 
-static inline BOOL charon_annotation_number(CGPDFArrayRef array, size_t index, double *out)
+static inline BOOL revenant_annotation_number(CGPDFArrayRef array, size_t index, double *out)
 {
     CGPDFObjectRef component = NULL;
     if (!CGPDFArrayGetObject(array, index, &component) || component == NULL)
@@ -30,7 +30,7 @@ static inline BOOL charon_annotation_number(CGPDFArrayRef array, size_t index, d
     }
 }
 
-static inline CGColorRef charon_annotation_device_colour(CGPDFArrayRef array)
+static inline CGColorRef revenant_annotation_device_colour(CGPDFArrayRef array)
 {
     if (array == NULL)
         return NULL;
@@ -47,7 +47,7 @@ static inline CGColorRef charon_annotation_device_colour(CGPDFArrayRef array)
     CGFloat values[5] = {0, 0, 0, 0, 0};
     for (size_t i = 0; i < components; i++) {
         double component = 0;
-        if (!charon_annotation_number(array, i, &component)) {
+        if (!revenant_annotation_number(array, i, &component)) {
             CGColorSpaceRelease(space);
             return NULL;
         }
@@ -59,7 +59,7 @@ static inline CGColorRef charon_annotation_device_colour(CGPDFArrayRef array)
     return colour;
 }
 
-static inline CGColorRef charon_annotation_named_colour(CFStringRef name, const CGFloat *components,
+static inline CGColorRef revenant_annotation_named_colour(CFStringRef name, const CGFloat *components,
                                                         size_t count)
 {
     CGColorSpaceRef space = CGColorSpaceCreateWithName(name);
@@ -70,7 +70,7 @@ static inline CGColorRef charon_annotation_named_colour(CFStringRef name, const 
     return colour;
 }
 
-static inline CGColorRef charon_annotation_colour_for_key(CGPDFDictionaryRef annotation, const char *key,
+static inline CGColorRef revenant_annotation_colour_for_key(CGPDFDictionaryRef annotation, const char *key,
                                                           bool appearance)
 {
     if (annotation == NULL)
@@ -95,20 +95,20 @@ static inline CGColorRef charon_annotation_colour_for_key(CGPDFDictionaryRef ann
         if (!CGPDFObjectGetValue(found, kCGPDFObjectTypeArray, &array) || array == NULL)
             return NULL;
     }
-    return charon_annotation_device_colour(array);
+    return revenant_annotation_device_colour(array);
 }
 
-static inline CGColorRef charon_annotation_background_colour(CGPDFDictionaryRef annotation)
+static inline CGColorRef revenant_annotation_background_colour(CGPDFDictionaryRef annotation)
 {
-    return charon_annotation_colour_for_key(annotation, "BG", true);
+    return revenant_annotation_colour_for_key(annotation, "BG", true);
 }
 
-static inline CGColorRef charon_annotation_interior_colour(CGPDFDictionaryRef annotation)
+static inline CGColorRef revenant_annotation_interior_colour(CGPDFDictionaryRef annotation)
 {
-    return charon_annotation_colour_for_key(annotation, "IC", false);
+    return revenant_annotation_colour_for_key(annotation, "IC", false);
 }
 
-static inline NSArray *charon_annotation_da_tokens(NSString *text)
+static inline NSArray *revenant_annotation_da_tokens(NSString *text)
 {
     NSMutableArray *tokens = [NSMutableArray array];
     for (NSString *word in [text componentsSeparatedByCharactersInSet:
@@ -120,12 +120,12 @@ static inline NSArray *charon_annotation_da_tokens(NSString *text)
     return tokens;
 }
 
-static inline BOOL charon_annotation_da_is_operator(NSString *token, NSString *wanted)
+static inline BOOL revenant_annotation_da_is_operator(NSString *token, NSString *wanted)
 {
     return ![token hasPrefix:@"/"] && [token isEqualToString:wanted];
 }
 
-static inline NSString *charon_annotation_da_text(CGPDFDictionaryRef annotation, bool *present)
+static inline NSString *revenant_annotation_da_text(CGPDFDictionaryRef annotation, bool *present)
 {
     *present = NO;
     if (annotation == NULL)
@@ -144,63 +144,63 @@ static inline NSString *charon_annotation_da_text(CGPDFDictionaryRef annotation,
     return (__bridge NSString *)text;
 }
 
-static inline CGColorRef charon_annotation_font_colour(CGPDFDictionaryRef annotation)
+static inline CGColorRef revenant_annotation_font_colour(CGPDFDictionaryRef annotation)
 {
     bool present = NO;
-    NSString *text = charon_annotation_da_text(annotation, &present);
+    NSString *text = revenant_annotation_da_text(annotation, &present);
     if (!present)
-        return charon_annotation_named_colour(kCGColorSpaceGenericGrayGamma2_2,
+        return revenant_annotation_named_colour(kCGColorSpaceGenericGrayGamma2_2,
                                               (const CGFloat[]){0, 1}, 2);
-    NSArray *tokens = charon_annotation_da_tokens(text);
+    NSArray *tokens = revenant_annotation_da_tokens(text);
     for (NSUInteger i = 0; i < tokens.count; i++) {
         NSString *token = tokens[i];
-        if (charon_annotation_da_is_operator(token, @"rg") && i >= 3) {
+        if (revenant_annotation_da_is_operator(token, @"rg") && i >= 3) {
             CGFloat values[4] = {(CGFloat)[tokens[i - 3] doubleValue],
                                  (CGFloat)[tokens[i - 2] doubleValue],
                                  (CGFloat)[tokens[i - 1] doubleValue], 1};
-            return charon_annotation_named_colour(kCGColorSpaceGenericRGB, values, 4);
+            return revenant_annotation_named_colour(kCGColorSpaceGenericRGB, values, 4);
         }
-        if (charon_annotation_da_is_operator(token, @"g") && i >= 1) {
+        if (revenant_annotation_da_is_operator(token, @"g") && i >= 1) {
             CGFloat values[2] = {(CGFloat)[tokens[i - 1] doubleValue], 1};
-            return charon_annotation_named_colour(kCGColorSpaceGenericGray, values, 2);
+            return revenant_annotation_named_colour(kCGColorSpaceGenericGray, values, 2);
         }
     }
-    return charon_annotation_named_colour(kCGColorSpaceGenericGray, (const CGFloat[]){0, 1}, 2);
+    return revenant_annotation_named_colour(kCGColorSpaceGenericGray, (const CGFloat[]){0, 1}, 2);
 }
 
-static inline CGFloat charon_annotation_font_size(CGPDFDictionaryRef annotation)
+static inline CGFloat revenant_annotation_font_size(CGPDFDictionaryRef annotation)
 {
     bool present = NO;
-    NSString *text = charon_annotation_da_text(annotation, &present);
+    NSString *text = revenant_annotation_da_text(annotation, &present);
     if (!present)
-        return CHARON_ANNOTATION_FONT_DEFAULT_SIZE;
-    NSArray *tokens = charon_annotation_da_tokens(text);
+        return REVENANT_ANNOTATION_FONT_DEFAULT_SIZE;
+    NSArray *tokens = revenant_annotation_da_tokens(text);
     for (NSUInteger i = 0; i < tokens.count; i++) {
-        if (!charon_annotation_da_is_operator(tokens[i], @"Tf") || i < 1)
+        if (!revenant_annotation_da_is_operator(tokens[i], @"Tf") || i < 1)
             continue;
         NSString *sizeToken = tokens[i - 1];
         if ([sizeToken hasPrefix:@"/"])
             break;
         return (CGFloat)[sizeToken doubleValue];
     }
-    return CHARON_ANNOTATION_FONT_DEFAULT_SIZE;
+    return REVENANT_ANNOTATION_FONT_DEFAULT_SIZE;
 }
 
-static inline NSString *charon_annotation_font_name(CGPDFDictionaryRef annotation)
+static inline NSString *revenant_annotation_font_name(CGPDFDictionaryRef annotation)
 {
     bool present = NO;
-    NSString *text = charon_annotation_da_text(annotation, &present);
+    NSString *text = revenant_annotation_da_text(annotation, &present);
     if (!present)
-        return CHARON_ANNOTATION_FONT_DEFAULT_NAME;
-    NSArray *tokens = charon_annotation_da_tokens(text);
+        return REVENANT_ANNOTATION_FONT_DEFAULT_NAME;
+    NSArray *tokens = revenant_annotation_da_tokens(text);
     for (NSUInteger i = 0; i < tokens.count; i++) {
-        if (!charon_annotation_da_is_operator(tokens[i], @"Tf") || i < 2)
+        if (!revenant_annotation_da_is_operator(tokens[i], @"Tf") || i < 2)
             continue;
         NSString *nameToken = tokens[i - 2];
         if (![nameToken hasPrefix:@"/"])
             break;
         NSString *name = [nameToken substringFromIndex:1];
-        CGFloat size = charon_annotation_font_size(annotation);
+        CGFloat size = revenant_annotation_font_size(annotation);
         if ([UIFont fontWithName:name size:size] != nil)
             return name;
         if ([name isEqualToString:@"Helv"])
@@ -211,5 +211,5 @@ static inline NSString *charon_annotation_font_name(CGPDFDictionaryRef annotatio
             return @"Courier";
         break;
     }
-    return CHARON_ANNOTATION_FONT_DEFAULT_NAME;
+    return REVENANT_ANNOTATION_FONT_DEFAULT_NAME;
 }

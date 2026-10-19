@@ -20,7 +20,7 @@ private func bindingAccessor(_ declaration: some DeclSyntaxProtocol) -> String {
     return " = \(value.trimmedDescription)"
 }
 
-struct CharonEntityProperty: PeerMacro, AccessorMacro {
+struct RevenantEntityProperty: PeerMacro, AccessorMacro {
     static func expansion(
         of node: AttributeSyntax,
         providingPeersOf declaration: some DeclSyntaxProtocol,
@@ -63,7 +63,7 @@ public struct EntityPropertyMacro: PeerMacro, AccessorMacro {
         providingPeersOf declaration: some DeclSyntaxProtocol,
         in context: some MacroExpansionContext
     ) throws -> [DeclSyntax] {
-        return CharonEntityProperty.expansion(of: node, providingPeersOf: declaration, in: context)
+        return RevenantEntityProperty.expansion(of: node, providingPeersOf: declaration, in: context)
     }
 
     public static func expansion(
@@ -71,7 +71,7 @@ public struct EntityPropertyMacro: PeerMacro, AccessorMacro {
         providingAccessorsOf declaration: some DeclSyntaxProtocol,
         in context: some MacroExpansionContext
     ) throws -> [AccessorDeclSyntax] {
-        return CharonEntityProperty.expansion(of: node, providingAccessorsOf: declaration, in: context)
+        return RevenantEntityProperty.expansion(of: node, providingAccessorsOf: declaration, in: context)
     }
 }
 
@@ -81,7 +81,7 @@ public struct DeferredPropertyMacro: PeerMacro, AccessorMacro {
         providingPeersOf declaration: some DeclSyntaxProtocol,
         in context: some MacroExpansionContext
     ) throws -> [DeclSyntax] {
-        return CharonEntityProperty.expansion(of: node, providingPeersOf: declaration, in: context)
+        return RevenantEntityProperty.expansion(of: node, providingPeersOf: declaration, in: context)
     }
 
     public static func expansion(
@@ -89,7 +89,7 @@ public struct DeferredPropertyMacro: PeerMacro, AccessorMacro {
         providingAccessorsOf declaration: some DeclSyntaxProtocol,
         in context: some MacroExpansionContext
     ) throws -> [AccessorDeclSyntax] {
-        return CharonEntityProperty.expansion(of: node, providingAccessorsOf: declaration, in: context)
+        return RevenantEntityProperty.expansion(of: node, providingAccessorsOf: declaration, in: context)
     }
 }
 

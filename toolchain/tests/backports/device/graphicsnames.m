@@ -16,7 +16,7 @@ int main(int argc, char **argv)
 {
     @autoreleasepool {
         if (argc > 1)
-            charon_log_to(@(argv[1]));
+            revenant_log_to(@(argv[1]));
         CHECK_EQUAL(image_of((void *)&kCIInputAngleKey), @"libGraphicsBackports.dylib", "kCIInputAngleKey comes from the backports");
         CHECK_EQUAL(kCIInputAngleKey, @"inputAngle", "the angle key");
         CHECK_EQUAL(kCIInputRadiusKey, @"inputRadius", "the radius key");
@@ -28,7 +28,7 @@ int main(int argc, char **argv)
         CHECK([[blur inputKeys] containsObject:kCIInputImageKey], "and its image under the image key of the release");
         CIFilter *straighten = [CIFilter filterWithName:@"CIStraightenFilter"];
         CHECK(straighten != nil && [[straighten inputKeys] containsObject:kCIInputAngleKey], "the straighten filter reads its angle under the angle key");
-        printf("%d checks, %d failed\n", charon_checks, charon_failures);
+        printf("%d checks, %d failed\n", revenant_checks, revenant_failures);
     }
-    return charon_failures;
+    return revenant_failures;
 }

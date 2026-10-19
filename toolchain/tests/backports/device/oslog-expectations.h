@@ -1,7 +1,7 @@
 static const struct {
     int index;
     const char *text;
-} charon_oslog_expected[] = {
+} revenant_oslog_expected[] = {
     {1, "plain text no args"},
     {2, "percent % sign"},
     {3, "d -7 i -7 u 4000000000 x ff X FF o 10"},

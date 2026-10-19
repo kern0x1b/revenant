@@ -1,5 +1,5 @@
 #import <Foundation/Foundation.h>
-#if defined(CHARON_MEDIAPLAYER_STANDIN)
+#if defined(REVENANT_MEDIAPLAYER_STANDIN)
 #else
 #import <MediaPlayer/MediaPlayer.h>
 #endif

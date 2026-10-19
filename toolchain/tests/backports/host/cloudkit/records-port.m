@@ -5,7 +5,7 @@ int main(void)
 {
     @autoreleasepool {
         NSMutableDictionary *out = [NSMutableDictionary dictionary];
-        CharonRecordCases(out);
+        RevenantRecordCases(out);
         NSData *json = [NSJSONSerialization dataWithJSONObject:out
                                                        options:NSJSONWritingPrettyPrinted | NSJSONWritingSortedKeys
                                                          error:NULL];

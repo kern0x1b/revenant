@@ -9,7 +9,7 @@
 	<key>CFBundleExecutable</key>
 	<string>uikit2</string>
 	<key>CFBundleIdentifier</key>
-	<string>local.charon.backports.uikit2</string>
+	<string>local.revenant.backports.uikit2</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
@@ -26,10 +26,10 @@
 	<array>
 		<dict>
 			<key>CFBundleURLName</key>
-			<string>local.charon.backports.uikit2</string>
+			<string>local.revenant.backports.uikit2</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>charon-backports-uikit2</string>
+				<string>revenant-backports-uikit2</string>
 			</array>
 		</dict>
 	</array>

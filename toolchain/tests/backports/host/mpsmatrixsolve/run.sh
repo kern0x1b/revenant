@@ -2,7 +2,7 @@
 # run.sh - is this port's MPSImageStatistics the same arithmetic as MPSImageStatistics.h's own sentence?
 #
 # matrix-cases.m is compiled twice and run twice: once against the system's own MPS, once against
-# this port's classes with the MPS names mapped to Charon names, so the port's implementations are
+# this port's classes with the MPS names mapped to Revenant names, so the port's implementations are
 # reached under names of their own and cannot be the system's.
 #
 # WHAT THE COMPARISON IS. The system run is kept because "the release could not be asked" belongs on the
@@ -10,7 +10,7 @@
 # kernel dies encoding with '-[AGXG16XFamilyCommandBuffer mtlnext
 # computeCommandEncoderWithDispatchType:]': unrecognized selector. So the release is not the oracle here,
 # exactly as it is not for the MPSImageReduce or MPSNNReduce rows. What the run establishes is that the
-# port's walk agrees with CharonMPSMatrixSolveReference.h, which is the header's own sentences written as
+# port's walk agrees with RevenantMPSMatrixSolveReference.h, which is the header's own sentences written as
 # arithmetic in plain C and never names the port's class.
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
@@ -37,12 +37,12 @@ import sys
 names = [line.strip() for line in open(sys.argv[1]) if line.strip()]
 with open(sys.argv[2], 'w') as out:
     for name in names:
-        out.write("#define %s Charon%s\n" % (name, name))
+        out.write("#define %s Revenant%s\n" % (name, name))
 print("classes the port defines: %d" % len(names))
 PY
 echo "renamed: $(grep -c define "$build/rename.h") classes"
 
-printf '#import <MetalPerformanceShaders/MetalPerformanceShaders.h>\n#import "CharonMPSCnn.h"\n#import <objc/runtime.h>\n#include <stdio.h>\n' > "$build/declarations.h"
+printf '#import <MetalPerformanceShaders/MetalPerformanceShaders.h>\n#import "RevenantMPSCnn.h"\n#import <objc/runtime.h>\n#include <stdio.h>\n' > "$build/declarations.h"
 
 # The system build, which has no rename header and no port classes: there is nothing for it to reach.
 xcrun clang -fobjc-arc $target $quiet "$here/matrix-cases.m" \
@@ -52,7 +52,7 @@ xcrun clang -fobjc-arc $target $quiet "$here/matrix-cases.m" \
 echo "system: $(grep -c 'MISMATCH ' "$build/system.txt" || echo 0) cases, $(grep -c 'unrecognized selector' "$build/system.txt" || echo 0) died on the missing encoder"
 
 # The port build: every MPS source compiled with the rename header in front of it, so the port's classes
-# are Charon* and the case's class references - which the header rewrites - reach the port's own.
+# are Revenant* and the case's class references - which the header rewrites - reach the port's own.
 objects=""
 for source in "$mps"/*.m; do
     name=$(basename "$source" .m)

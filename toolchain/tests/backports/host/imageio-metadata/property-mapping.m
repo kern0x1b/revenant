@@ -1,14 +1,14 @@
 #import <Foundation/Foundation.h>
 #import <ImageIO/ImageIO.h>
 
-#define CHARON_S_BUFFERS 4
+#define REVENANT_S_BUFFERS 4
 static const char *S(CFStringRef s)
 {
-    static char buffers[CHARON_S_BUFFERS][1024];
+    static char buffers[REVENANT_S_BUFFERS][1024];
     static unsigned next = 0;
     if (!s)
         return "(nil)";
-    char *buffer = buffers[next++ % CHARON_S_BUFFERS];
+    char *buffer = buffers[next++ % REVENANT_S_BUFFERS];
     if (!CFStringGetCString(s, buffer, sizeof buffers[0], kCFStringEncodingUTF8))
         return "(unprintable)";
     return buffer;
@@ -37,14 +37,14 @@ static void answerValue(const char *label, const char *dictName, const char *pro
 typedef struct {
     CFStringRef dictionary;
     CFStringRef property;
-} charon_probe_pair;
+} revenant_probe_pair;
 
 typedef struct {
     CFStringRef prefix;
     CFStringRef namespace;
-} charon_probe_space;
+} revenant_probe_space;
 
-static size_t charon_probe_spaces(charon_probe_space *out)
+static size_t revenant_probe_spaces(revenant_probe_space *out)
 {
     out[0].prefix = kCGImageMetadataPrefixExif;          out[0].namespace = kCGImageMetadataNamespaceExif;
     out[1].prefix = kCGImageMetadataPrefixTIFF;          out[1].namespace = kCGImageMetadataNamespaceTIFF;
@@ -71,8 +71,8 @@ int main(int argc, const char **argv)
         CGImageMetadataSetValueWithPath(filled, NULL, CFSTR("tiff:Orientation"), (__bridge CFNumberRef)@1);
         CGImageMetadataSetValueWithPath(filled, NULL, CFSTR("exif:DateTimeOriginal"), CFSTR("2010:01:02 03:04:05"));
 
-        charon_probe_pair pairs[256];
-        size_t npairs = charon_probe_pairs(pairs);
+        revenant_probe_pair pairs[256];
+        size_t npairs = revenant_probe_pairs(pairs);
         if (argc > 1) {
         if (argc > 1) {
             size_t index = (size_t)atoi(argv[1]);
@@ -123,8 +123,8 @@ int main(int argc, const char **argv)
         answerValue("held-dto", "Exif", "DateTimeOriginal", kCGImagePropertyExifDictionary,
                     kCGImagePropertyExifDateTimeOriginal, filled);
 
-        charon_probe_space spaces[9];
-        size_t nspaces = charon_probe_spaces(spaces);
+        revenant_probe_space spaces[9];
+        size_t nspaces = revenant_probe_spaces(spaces);
         (void)nspaces;
 
         printf("# which namespace: dict\tproperty\tprefix-that-answered\n");

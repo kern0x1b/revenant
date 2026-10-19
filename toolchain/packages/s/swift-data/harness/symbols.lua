@@ -93,7 +93,7 @@ function symbols.check_pending(names)
     local parts = {}
     if #resolved > 0 then
         table.insert(parts, table.concat(resolved, ", ") ..
-            " is no longer undefined: charon@swift-foundation is installed, or the code stopped "
+            " is no longer undefined: revenant@swift-foundation is installed, or the code stopped "
             .. "using it. Update PENDING in this file and the registry's reasons.")
     end
     if #unlisted > 0 then
@@ -105,9 +105,9 @@ function symbols.check_pending(names)
 end
 
 function symbols.main()
-    local object = os.getenv("CHARON_SWIFTDATA_OBJECT")
+    local object = os.getenv("REVENANT_SWIFTDATA_OBJECT")
     if not object or not os.isfile(object) then
-        raise("symbols.lua needs CHARON_SWIFTDATA_OBJECT naming an object to read")
+        raise("symbols.lua needs REVENANT_SWIFTDATA_OBJECT naming an object to read")
     end
     local undefined = os.iorunv("nm", {"-u", object})
     local names = symbols.undefined_names(undefined)
@@ -185,14 +185,14 @@ function symbols.control()
 end
 
 function main()
-    local control, object = os.getenv("CHARON_SWIFTDATA_CONTROL"), os.getenv("CHARON_SWIFTDATA_OBJECT")
+    local control, object = os.getenv("REVENANT_SWIFTDATA_CONTROL"), os.getenv("REVENANT_SWIFTDATA_OBJECT")
     if control then
         symbols.control()
     elseif object then
         symbols.main()
     else
-        raise("symbols.lua does nothing without one of two: CHARON_SWIFTDATA_CONTROL=1 runs the " ..
-              "control for check_pending, and CHARON_SWIFTDATA_OBJECT=<object or archive> reads " ..
+        raise("symbols.lua does nothing without one of two: REVENANT_SWIFTDATA_CONTROL=1 runs the " ..
+              "control for check_pending, and REVENANT_SWIFTDATA_OBJECT=<object or archive> reads " ..
               "an object's undefined symbols. Neither is set.")
     end
 end

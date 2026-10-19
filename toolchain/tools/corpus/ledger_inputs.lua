@@ -8,7 +8,7 @@ local SURFACE_COLUMNS = {"framework", "kind", "lang", "api", "introduced", "depr
                    "unavailable", "via", "getter", "registry", "owner-registry", "demand-rank",
                    "demand-severity", "demand-apps", "demand-telegram", "impl-lead", "impl-file-lead"}
 
-function charon_root()
+function revenant_root()
     return path.absolute(path.join(HERE, "..", ".."))
 end
 
@@ -195,7 +195,7 @@ end
 function default_checkout(surface)
     local directory = path.directory(realpath(surface))
     for _ = 1, 6 do
-        local candidate = path.join(directory, "charon")
+        local candidate = path.join(directory, "toolchain")
         if os.isdir(path.join(candidate, "packages")) then
             return candidate
         end
@@ -300,7 +300,7 @@ local function entry_of(found, protocol)
 end
 
 function objc_inventory(source, architecture)
-    local objc = import("apple.objc", {rootdir = path.join(charon_root(), "modules"), anonymous = true})
+    local objc = import("apple.objc", {rootdir = path.join(revenant_root(), "modules"), anonymous = true})
     local found = architecture and objc.binary_inventory(source, architecture) or objc.inventory(source)
     assert(found, source .. " holds no readable Objective-C metadata")
     local classes, protocols = {}, {}
@@ -314,7 +314,7 @@ function objc_inventory(source, architecture)
 end
 
 function cache_exports(cachefile)
-    local dyld = import("apple.dyld", {rootdir = path.join(charon_root(), "modules"), anonymous = true})
+    local dyld = import("apple.dyld", {rootdir = path.join(revenant_root(), "modules"), anonymous = true})
     local cache = dyld.load(cachefile)
     local names = {}
     for _, library in pairs(cache.libraries) do

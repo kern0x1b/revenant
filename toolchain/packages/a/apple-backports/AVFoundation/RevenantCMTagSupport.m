@@ -1,14 +1,14 @@
-#import "CharonCMTagSupport.h"
+#import "RevenantCMTagSupport.h"
 #import <CoreMedia/CoreMedia.h>
 #include <stdlib.h>
 #include <string.h>
 
-BOOL charon_tag_equal(CMTag left, CMTag right)
+BOOL revenant_tag_equal(CMTag left, CMTag right)
 {
     return left.category == right.category && left.dataType == right.dataType && left.value == right.value;
 }
 
-BOOL charon_tag_is_less(CMTag left, CMTag right)
+BOOL revenant_tag_is_less(CMTag left, CMTag right)
 {
     if (left.category != right.category)
         return left.category < right.category;
@@ -16,12 +16,12 @@ BOOL charon_tag_is_less(CMTag left, CMTag right)
         return left.dataType < right.dataType;
     return left.value < right.value;
 }
-BOOL charon_tag_carries(const CMTag *held, CMItemCount heldCount, const CMTag *wanted, CMItemCount wantedCount)
+BOOL revenant_tag_carries(const CMTag *held, CMItemCount heldCount, const CMTag *wanted, CMItemCount wantedCount)
 {
     for (CMItemCount index = 0; index < wantedCount; index++) {
         BOOL seen = NO;
         for (CMItemCount other = 0; other < heldCount; other++)
-            if (charon_tag_equal(held[other], wanted[index])) {
+            if (revenant_tag_equal(held[other], wanted[index])) {
                 seen = YES;
                 break;
             }
@@ -31,15 +31,15 @@ BOOL charon_tag_carries(const CMTag *held, CMItemCount heldCount, const CMTag *w
     return YES;
 }
 
-@implementation CharonCMTagCollection {
+@implementation RevenantCMTagCollection {
     CMTag *_tags;
     NSUInteger _count;
     NSUInteger _capacity;
 }
 
-@synthesize charon_count = _count;
+@synthesize revenant_count = _count;
 
-- (instancetype)charon_initWithTags:(const CMTag *)tags count:(NSUInteger)count __attribute__((objc_method_family(init)))
+- (instancetype)revenant_initWithTags:(const CMTag *)tags count:(NSUInteger)count __attribute__((objc_method_family(init)))
 {
     self = [super init];
     if (!self)
@@ -50,7 +50,7 @@ BOOL charon_tag_carries(const CMTag *held, CMItemCount heldCount, const CMTag *w
             return nil;
         _capacity = count;
         for (NSUInteger index = 0; index < count; index++)
-            [self charon_insert:tags[index]];
+            [self revenant_insert:tags[index]];
     }
     return self;
 }
@@ -63,17 +63,17 @@ BOOL charon_tag_carries(const CMTag *held, CMItemCount heldCount, const CMTag *w
     _capacity = 0;
 }
 
-- (const CMTag *)charon_tags
+- (const CMTag *)revenant_tags
 {
     return _tags;
 }
 
-- (NSUInteger)charon_indexOfTag:(CMTag)tag
+- (NSUInteger)revenant_indexOfTag:(CMTag)tag
 {
     NSUInteger low = 0, high = _count;
     while (low < high) {
         NSUInteger middle = low + (high - low) / 2;
-        if (charon_tag_is_less(_tags[middle], tag))
+        if (revenant_tag_is_less(_tags[middle], tag))
             low = middle + 1;
         else
             high = middle;
@@ -81,17 +81,17 @@ BOOL charon_tag_carries(const CMTag *held, CMItemCount heldCount, const CMTag *w
     return low;
 }
 
-- (BOOL)charon_contains:(CMTag)tag
+- (BOOL)revenant_contains:(CMTag)tag
 {
     if (!CMTagIsValid(tag))
         return NO;
-    NSUInteger at = [self charon_indexOfTag:tag];
-    return at < _count && charon_tag_equal(_tags[at], tag);
+    NSUInteger at = [self revenant_indexOfTag:tag];
+    return at < _count && revenant_tag_equal(_tags[at], tag);
 }
 
-- (BOOL)charon_insert:(CMTag)tag
+- (BOOL)revenant_insert:(CMTag)tag
 {
-    if ([self charon_contains:tag])
+    if ([self revenant_contains:tag])
         return YES;
     if (_count == _capacity) {
         NSUInteger capacity = _capacity ? _capacity * 2 : 8;
@@ -101,27 +101,27 @@ BOOL charon_tag_carries(const CMTag *held, CMItemCount heldCount, const CMTag *w
         _tags = tags;
         _capacity = capacity;
     }
-    NSUInteger at = [self charon_indexOfTag:tag];
+    NSUInteger at = [self revenant_indexOfTag:tag];
     memmove(_tags + at + 1, _tags + at, (_count - at) * sizeof *_tags);
     _tags[at] = tag;
     _count++;
     return YES;
 }
 
-- (BOOL)charon_remove:(CMTag)tag
+- (BOOL)revenant_remove:(CMTag)tag
 {
-    NSUInteger at = [self charon_indexOfTag:tag];
-    if (at >= _count || !charon_tag_equal(_tags[at], tag))
+    NSUInteger at = [self revenant_indexOfTag:tag];
+    if (at >= _count || !revenant_tag_equal(_tags[at], tag))
         return NO;
     memmove(_tags + at, _tags + at + 1, (_count - at - 1) * sizeof *_tags);
     _count--;
     return YES;
 }
 
-- (NSUInteger)charon_removeCategory:(CMTagCategory)category
+- (NSUInteger)revenant_removeCategory:(CMTagCategory)category
 {
     CMTag probe = {category, kCMTagDataType_Invalid, 0};
-    NSUInteger at = [self charon_indexOfTag:probe], end = at;
+    NSUInteger at = [self revenant_indexOfTag:probe], end = at;
     while (end < _count && _tags[end].category == category)
         end++;
     if (end > at) {
@@ -131,15 +131,15 @@ BOOL charon_tag_carries(const CMTag *held, CMItemCount heldCount, const CMTag *w
     return end - at;
 }
 
-- (void)charon_removeAll
+- (void)revenant_removeAll
 {
     _count = 0;
 }
 
-- (NSUInteger)charon_countOfCategory:(CMTagCategory)category
+- (NSUInteger)revenant_countOfCategory:(CMTagCategory)category
 {
     CMTag probe = {category, kCMTagDataType_Invalid, 0};
-    NSUInteger at = [self charon_indexOfTag:probe], count = 0;
+    NSUInteger at = [self revenant_indexOfTag:probe], count = 0;
     while (at < _count && _tags[at].category == category) {
         count++;
         at++;
@@ -147,7 +147,7 @@ BOOL charon_tag_carries(const CMTag *held, CMItemCount heldCount, const CMTag *w
     return count;
 }
 
-- (CMTag *)charon_copyAllTags:(CMItemCount *)countOut
+- (CMTag *)revenant_copyAllTags:(CMItemCount *)countOut
 {
     CMTag *copy = _count ? malloc(_count * sizeof *copy) : NULL;
     if (_count && !copy)
@@ -160,13 +160,13 @@ BOOL charon_tag_carries(const CMTag *held, CMItemCount heldCount, const CMTag *w
 }
 @end
 
-CMTag *charon_copy_all_tags(CMTagCollectionRef collection, CMItemCount *countOut)
+CMTag *revenant_copy_all_tags(CMTagCollectionRef collection, CMItemCount *countOut)
 {
-    CharonCMTagCollection *mine = (__bridge CharonCMTagCollection *)collection;
+    RevenantCMTagCollection *mine = (__bridge RevenantCMTagCollection *)collection;
     if (!mine) {
         if (countOut)
             *countOut = 0;
         return NULL;
     }
-    return [mine charon_copyAllTags:countOut];
+    return [mine revenant_copyAllTags:countOut];
 }

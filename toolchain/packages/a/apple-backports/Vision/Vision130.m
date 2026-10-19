@@ -1,4 +1,4 @@
-#import "CharonVision.h"
+#import "RevenantVision.h"
 
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
 #pragma clang diagnostic ignored "-Wobjc-designated-initializers"
@@ -22,7 +22,7 @@ NSUInteger VNElementTypeSize(VNElementType elementType)
     return 0;
 }
 
-@implementation VNDetectFaceLandmarksRequest (CharonVision130Constellation)
+@implementation VNDetectFaceLandmarksRequest (RevenantVision130Constellation)
 
 + (BOOL)revision:(NSUInteger)requestRevision supportsConstellation:(VNRequestFaceLandmarksConstellation)constellation
 {
@@ -35,7 +35,7 @@ NSUInteger VNElementTypeSize(VNElementType elementType)
 
 @end
 
-@implementation VNClassificationObservation (CharonVision130PrecisionRecall)
+@implementation VNClassificationObservation (RevenantVision130PrecisionRecall)
 
 - (BOOL)hasPrecisionRecallCurve
 {
@@ -60,7 +60,7 @@ NSUInteger VNElementTypeSize(VNElementType elementType)
 {
     if (![[self supportedRevisions] containsIndex:requestRevision]) {
         if (error)
-            *error = charon_vision_error(VNErrorUnsupportedRevision, [NSString stringWithFormat:@"%@ does not support Revision%lu",
+            *error = revenant_vision_error(VNErrorUnsupportedRevision, [NSString stringWithFormat:@"%@ does not support Revision%lu",
                                                                            NSStringFromClass(self), (unsigned long)requestRevision]);
         return nil;
     }

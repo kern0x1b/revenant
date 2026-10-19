@@ -1,11 +1,11 @@
 #import <UIKit/UIKit.h>
 
-UIUserInterfaceStyle charon_trait_style(UITraitCollection *collection);
-void charon_set_trait_style(UITraitCollection *collection, UIUserInterfaceStyle style);
+UIUserInterfaceStyle revenant_trait_style(UITraitCollection *collection);
+void revenant_set_trait_style(UITraitCollection *collection, UIUserInterfaceStyle style);
 
-typedef void (*CharonTraitChangeObserver)(NSArray *environments, NSArray *previous);
-void charon_add_trait_change_observer(CharonTraitChangeObserver observer);
-void charon_call_trait_change_observers(NSArray *environments, NSArray *previous);
+typedef void (*RevenantTraitChangeObserver)(NSArray *environments, NSArray *previous);
+void revenant_add_trait_change_observer(RevenantTraitChangeObserver observer);
+void revenant_call_trait_change_observers(NSArray *environments, NSArray *previous);
 
 typedef struct {
     __unsafe_unretained NSString *name;
@@ -13,26 +13,26 @@ typedef struct {
     int described;
     __unsafe_unretained NSString *first;
     __unsafe_unretained NSString *second;
-} CharonTraitKind;
+} RevenantTraitKind;
 
-void charon_register_trait_kind(CharonTraitKind kind);
-NSInteger charon_trait_extra(UITraitCollection *collection, NSString *name);
-void charon_set_trait_extra(UITraitCollection *collection, NSString *name, NSInteger value);
-NSDictionary *charon_trait_extras(UITraitCollection *collection);
-NSDictionary *charon_merge_trait_extras(NSArray *collections);
-void charon_apply_trait_extras(UITraitCollection *collection, NSDictionary *extras);
-void charon_apply_screen_trait_extras(UITraitCollection *collection);
-BOOL charon_trait_extras_contained(UITraitCollection *collection, UITraitCollection *wanted);
-BOOL charon_trait_extras_equal(UITraitCollection *a, UITraitCollection *b);
-NSUInteger charon_trait_extras_hash(UITraitCollection *collection);
-void charon_add_trait_extras_description(UITraitCollection *collection, NSMutableArray *traits);
-void charon_encode_trait_extras(UITraitCollection *collection, NSCoder *coder);
-void charon_decode_trait_extras(UITraitCollection *collection, NSCoder *coder);
+void revenant_register_trait_kind(RevenantTraitKind kind);
+NSInteger revenant_trait_extra(UITraitCollection *collection, NSString *name);
+void revenant_set_trait_extra(UITraitCollection *collection, NSString *name, NSInteger value);
+NSDictionary *revenant_trait_extras(UITraitCollection *collection);
+NSDictionary *revenant_merge_trait_extras(NSArray *collections);
+void revenant_apply_trait_extras(UITraitCollection *collection, NSDictionary *extras);
+void revenant_apply_screen_trait_extras(UITraitCollection *collection);
+BOOL revenant_trait_extras_contained(UITraitCollection *collection, UITraitCollection *wanted);
+BOOL revenant_trait_extras_equal(UITraitCollection *a, UITraitCollection *b);
+NSUInteger revenant_trait_extras_hash(UITraitCollection *collection);
+void revenant_add_trait_extras_description(UITraitCollection *collection, NSMutableArray *traits);
+void revenant_encode_trait_extras(UITraitCollection *collection, NSCoder *coder);
+void revenant_decode_trait_extras(UITraitCollection *collection, NSCoder *coder);
 
-id charon_trait_extra_object(UITraitCollection *collection, NSString *name);
-void charon_set_trait_extra_object(UITraitCollection *collection, NSString *name, id value);
+id revenant_trait_extra_object(UITraitCollection *collection, NSString *name);
+void revenant_set_trait_extra_object(UITraitCollection *collection, NSString *name, id value);
 
-void charon_set_trait_force_touch(UITraitCollection *collection, UIForceTouchCapability capability);
-void charon_set_screen_trait_force_touch(UITraitCollection *collection);
+void revenant_set_trait_force_touch(UITraitCollection *collection, UIForceTouchCapability capability);
+void revenant_set_screen_trait_force_touch(UITraitCollection *collection);
 
-void charon_deliver_trait_registrations(NSArray *environments, NSArray *previous);
+void revenant_deliver_trait_registrations(NSArray *environments, NSArray *previous);

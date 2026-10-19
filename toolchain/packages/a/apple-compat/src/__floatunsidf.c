@@ -2,5 +2,5 @@
 
 double __floatunsidf(unsigned int value)
 {
-    return charon_double(value);
+    return revenant_double(value);
 }

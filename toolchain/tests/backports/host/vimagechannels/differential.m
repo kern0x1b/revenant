@@ -7,33 +7,33 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
-vImage_Error charon_host_vImagePermuteChannels_ARGB16U(const vImage_Buffer *, const vImage_Buffer *,
+vImage_Error revenant_host_vImagePermuteChannels_ARGB16U(const vImage_Buffer *, const vImage_Buffer *,
                                                        const uint8_t permuteMap[4], vImage_Flags);
-vImage_Error charon_host_vImagePermuteChannels_ARGB16F(const vImage_Buffer *, const vImage_Buffer *,
+vImage_Error revenant_host_vImagePermuteChannels_ARGB16F(const vImage_Buffer *, const vImage_Buffer *,
                                                        const uint8_t permuteMap[4], vImage_Flags);
-vImage_Error charon_host_vImagePermuteChannels_RGB888(const vImage_Buffer *, const vImage_Buffer *,
+vImage_Error revenant_host_vImagePermuteChannels_RGB888(const vImage_Buffer *, const vImage_Buffer *,
                                                       const uint8_t permuteMap[3], vImage_Flags);
-vImage_Error charon_host_vImagePermuteChannelsWithMaskedInsert_ARGB16U(const vImage_Buffer *, const vImage_Buffer *,
+vImage_Error revenant_host_vImagePermuteChannelsWithMaskedInsert_ARGB16U(const vImage_Buffer *, const vImage_Buffer *,
                                                                       const uint8_t permuteMap[4], uint8_t copyMask,
                                                                       const Pixel_ARGB_16U backgroundColor,
                                                                       vImage_Flags);
-vImage_Error charon_host_vImagePermuteChannelsWithMaskedInsert_ARGB8888(const vImage_Buffer *, const vImage_Buffer *,
+vImage_Error revenant_host_vImagePermuteChannelsWithMaskedInsert_ARGB8888(const vImage_Buffer *, const vImage_Buffer *,
                                                                        const uint8_t permuteMap[4], uint8_t copyMask,
                                                                        const Pixel_8888 backgroundColor,
                                                                        vImage_Flags);
-vImage_Error charon_host_vImagePermuteChannelsWithMaskedInsert_ARGBFFFF(const vImage_Buffer *, const vImage_Buffer *,
+vImage_Error revenant_host_vImagePermuteChannelsWithMaskedInsert_ARGBFFFF(const vImage_Buffer *, const vImage_Buffer *,
                                                                        const uint8_t permuteMap[4], uint8_t copyMask,
                                                                        const Pixel_FFFF backgroundColor,
                                                                        vImage_Flags);
-vImage_Error charon_host_vImageExtractChannel_ARGB16U(const vImage_Buffer *, const vImage_Buffer *, long,
+vImage_Error revenant_host_vImageExtractChannel_ARGB16U(const vImage_Buffer *, const vImage_Buffer *, long,
                                                        vImage_Flags);
-vImage_Error charon_host_vImageExtractChannel_ARGBFFFF(const vImage_Buffer *, const vImage_Buffer *, long,
+vImage_Error revenant_host_vImageExtractChannel_ARGBFFFF(const vImage_Buffer *, const vImage_Buffer *, long,
                                                        vImage_Flags);
-vImage_Error charon_host_vImageOverwriteChannelsWithPixel_ARGB16U(const Pixel_ARGB_16U, const vImage_Buffer *,
+vImage_Error revenant_host_vImageOverwriteChannelsWithPixel_ARGB16U(const Pixel_ARGB_16U, const vImage_Buffer *,
                                                                    const vImage_Buffer *, uint8_t, vImage_Flags);
-vImage_Error charon_host_vImageOverwriteChannelsWithScalar_Planar16U(Pixel_16U, const vImage_Buffer *, vImage_Flags);
-vImage_Error charon_host_vImageOverwriteChannelsWithScalar_Planar16S(Pixel_16S, const vImage_Buffer *, vImage_Flags);
-vImage_Error charon_host_vImageOverwriteChannelsWithScalar_Planar16F(Pixel_16F, const vImage_Buffer *, vImage_Flags);
+vImage_Error revenant_host_vImageOverwriteChannelsWithScalar_Planar16U(Pixel_16U, const vImage_Buffer *, vImage_Flags);
+vImage_Error revenant_host_vImageOverwriteChannelsWithScalar_Planar16S(Pixel_16S, const vImage_Buffer *, vImage_Flags);
+vImage_Error revenant_host_vImageOverwriteChannelsWithScalar_Planar16F(Pixel_16F, const vImage_Buffer *, vImage_Flags);
 
 #define W 7
 #define H 3
@@ -62,13 +62,13 @@ static void report(int passed, const char *name, const char *why, ...)
     fflush(stdout);
 }
 
-#define CHARON_CHILD_CRASHED (-1)
+#define REVENANT_CHILD_CRASHED (-1)
 
 static int in_child(vImage_Error (*call)(void *), void *context)
 {
     int channel[2];
     if (pipe(channel) != 0)
-        return CHARON_CHILD_CRASHED;
+        return REVENANT_CHILD_CRASHED;
     fflush(stdout);
     pid_t child = fork();
     if (child == 0) {
@@ -86,8 +86,8 @@ static int in_child(vImage_Error (*call)(void *), void *context)
     int status = 0;
     waitpid(child, &status, 0);
     if (WIFSIGNALED(status))
-        return CHARON_CHILD_CRASHED;
-    return got == (ssize_t)sizeof answer ? (int)answer : CHARON_CHILD_CRASHED;
+        return REVENANT_CHILD_CRASHED;
+    return got == (ssize_t)sizeof answer ? (int)answer : REVENANT_CHILD_CRASHED;
 }
 
 enum { ShapePermute4, ShapePermute4F, ShapePermute3, ShapeMaskedInsert16U, ShapeMaskedInsert8888,
@@ -153,36 +153,36 @@ static vImage_Error call_shape_port(void *context)
     struct Call *call = (struct Call *)context;
     switch (call->shape) {
         case ShapePermute4:
-            return charon_host_vImagePermuteChannels_ARGB16U(call->src, call->dest, call->map, call->flags);
+            return revenant_host_vImagePermuteChannels_ARGB16U(call->src, call->dest, call->map, call->flags);
         case ShapePermute4F:
-            return charon_host_vImagePermuteChannels_ARGB16F(call->src, call->dest, call->map, call->flags);
+            return revenant_host_vImagePermuteChannels_ARGB16F(call->src, call->dest, call->map, call->flags);
         case ShapePermute3:
-            return charon_host_vImagePermuteChannels_RGB888(call->src, call->dest, call->map, call->flags);
+            return revenant_host_vImagePermuteChannels_RGB888(call->src, call->dest, call->map, call->flags);
         case ShapeMaskedInsert16U:
-            return charon_host_vImagePermuteChannelsWithMaskedInsert_ARGB16U(
+            return revenant_host_vImagePermuteChannelsWithMaskedInsert_ARGB16U(
                 call->src, call->dest, call->map, call->mask, *(const Pixel_ARGB_16U *)call->pixel, call->flags);
         case ShapeMaskedInsert8888:
-            return charon_host_vImagePermuteChannelsWithMaskedInsert_ARGB8888(
+            return revenant_host_vImagePermuteChannelsWithMaskedInsert_ARGB8888(
                 call->src, call->dest, call->map, call->mask, *(const Pixel_8888 *)call->pixel, call->flags);
         case ShapeMaskedInsertFFFF:
-            return charon_host_vImagePermuteChannelsWithMaskedInsert_ARGBFFFF(
+            return revenant_host_vImagePermuteChannelsWithMaskedInsert_ARGBFFFF(
                 call->src, call->dest, call->map, call->mask, *(const Pixel_FFFF *)call->pixel, call->flags);
         case ShapeExtract:
-            return charon_host_vImageExtractChannel_ARGB16U(call->src, call->dest, call->channel, call->flags);
+            return revenant_host_vImageExtractChannel_ARGB16U(call->src, call->dest, call->channel, call->flags);
         case ShapeExtractFFFF:
-            return charon_host_vImageExtractChannel_ARGBFFFF(call->src, call->dest, call->channel, call->flags);
+            return revenant_host_vImageExtractChannel_ARGBFFFF(call->src, call->dest, call->channel, call->flags);
         case ShapeOverwritePixel:
-            return charon_host_vImageOverwriteChannelsWithPixel_ARGB16U(*(const Pixel_ARGB_16U *)call->pixel,
+            return revenant_host_vImageOverwriteChannelsWithPixel_ARGB16U(*(const Pixel_ARGB_16U *)call->pixel,
                                                                         call->src, call->dest, call->mask,
                                                                         call->flags);
         case ShapeFill16U:
-            return charon_host_vImageOverwriteChannelsWithScalar_Planar16U(*(const Pixel_16U *)call->pixel,
+            return revenant_host_vImageOverwriteChannelsWithScalar_Planar16U(*(const Pixel_16U *)call->pixel,
                                                                             call->dest, call->flags);
         case ShapeFill16S:
-            return charon_host_vImageOverwriteChannelsWithScalar_Planar16S(*(const Pixel_16S *)call->pixel,
+            return revenant_host_vImageOverwriteChannelsWithScalar_Planar16S(*(const Pixel_16S *)call->pixel,
                                                                             call->dest, call->flags);
         default:
-            return charon_host_vImageOverwriteChannelsWithScalar_Planar16F(*(const Pixel_16F *)call->pixel,
+            return revenant_host_vImageOverwriteChannelsWithScalar_Planar16F(*(const Pixel_16F *)call->pixel,
                                                                             call->dest, call->flags);
     }
 }
@@ -320,13 +320,13 @@ static void permute3_case(void)
         vImage_Buffer s = buffer_of(src, W, H, srcRow);
         vImage_Buffer hd = buffer_of(hostDest, W, H, destRow);
         vImage_Buffer pd = buffer_of(portDest, W, H, destRow);
-        vImage_Error portAnswer = charon_host_vImagePermuteChannels_RGB888(&s, &pd, m < 0 ? NULL : map, kvImageNoFlags);
+        vImage_Error portAnswer = revenant_host_vImagePermuteChannels_RGB888(&s, &pd, m < 0 ? NULL : map, kvImageNoFlags);
         vImage_Error hostAnswer;
         if (m < 0) {
             struct Call call = {ShapePermute3, &s, &hd, NULL, 0, 0, NULL, kvImageNoFlags};
             hostAnswer = (vImage_Error)host_asks(&call);
             printf("     vImagePermuteChannels_RGB888 with a NULL map: the host's own process ended %s\n",
-                   hostAnswer == CHARON_CHILD_CRASHED ? "on a signal" : "normally");
+                   hostAnswer == REVENANT_CHILD_CRASHED ? "on a signal" : "normally");
         } else {
             hostAnswer = vImagePermuteChannels_RGB888(&s, &hd, map, kvImageNoFlags);
         }
@@ -403,21 +403,21 @@ static vImage_Error host_masked_ffff(const vImage_Buffer *s, const vImage_Buffer
 static vImage_Error port_masked_16u(const vImage_Buffer *s, const vImage_Buffer *d, const uint8_t *map,
                                     uint8_t mask, const void *background, vImage_Flags flags)
 {
-    return charon_host_vImagePermuteChannelsWithMaskedInsert_ARGB16U(s, d, map, mask,
+    return revenant_host_vImagePermuteChannelsWithMaskedInsert_ARGB16U(s, d, map, mask,
                                                                      *(const Pixel_ARGB_16U *)background, flags);
 }
 
 static vImage_Error port_masked_8888(const vImage_Buffer *s, const vImage_Buffer *d, const uint8_t *map,
                                      uint8_t mask, const void *background, vImage_Flags flags)
 {
-    return charon_host_vImagePermuteChannelsWithMaskedInsert_ARGB8888(s, d, map, mask,
+    return revenant_host_vImagePermuteChannelsWithMaskedInsert_ARGB8888(s, d, map, mask,
                                                                       *(const Pixel_8888 *)background, flags);
 }
 
 static vImage_Error port_masked_ffff(const vImage_Buffer *s, const vImage_Buffer *d, const uint8_t *map,
                                      uint8_t mask, const void *background, vImage_Flags flags)
 {
-    return charon_host_vImagePermuteChannelsWithMaskedInsert_ARGBFFFF(s, d, map, mask,
+    return revenant_host_vImagePermuteChannelsWithMaskedInsert_ARGBFFFF(s, d, map, mask,
                                                                       *(const Pixel_FFFF *)background, flags);
 }
 
@@ -506,21 +506,21 @@ static vImage_Error port_fill_16u(const uint8_t *value, const vImage_Buffer *d, 
 {
     Pixel_16U scalar;
     memcpy(&scalar, value, sizeof scalar);
-    return charon_host_vImageOverwriteChannelsWithScalar_Planar16U(scalar, d, f);
+    return revenant_host_vImageOverwriteChannelsWithScalar_Planar16U(scalar, d, f);
 }
 
 static vImage_Error port_fill_16s(const uint8_t *value, const vImage_Buffer *d, vImage_Flags f)
 {
     Pixel_16S scalar;
     memcpy(&scalar, value, sizeof scalar);
-    return charon_host_vImageOverwriteChannelsWithScalar_Planar16S(scalar, d, f);
+    return revenant_host_vImageOverwriteChannelsWithScalar_Planar16S(scalar, d, f);
 }
 
 static vImage_Error port_fill_16f(const uint8_t *value, const vImage_Buffer *d, vImage_Flags f)
 {
     Pixel_16F scalar;
     memcpy(&scalar, value, sizeof scalar);
-    return charon_host_vImageOverwriteChannelsWithScalar_Planar16F(scalar, d, f);
+    return revenant_host_vImageOverwriteChannelsWithScalar_Planar16F(scalar, d, f);
 }
 
 static void overwrite_pixel_case(const char *what, vImage_Error (*host)(const uint8_t *, const vImage_Buffer *,
@@ -578,7 +578,7 @@ static vImage_Error port_overwrite_pixel(const uint8_t *pixel, const vImage_Buff
 {
     Pixel_ARGB_16U value;
     memcpy(&value, pixel, sizeof value);
-    return charon_host_vImageOverwriteChannelsWithPixel_ARGB16U(value, s, d, mask, flags);
+    return revenant_host_vImageOverwriteChannelsWithPixel_ARGB16U(value, s, d, mask, flags);
 }
 
 static void refusal_case(const char *what, const char *inputs, vImage_Error hostAnswer, vImage_Error portAnswer,
@@ -586,7 +586,7 @@ static void refusal_case(const char *what, const char *inputs, vImage_Error host
 {
     char label[200];
     snprintf(label, sizeof label, "%s, %s", what, inputs);
-    int hostAlive = hostAnswer != CHARON_CHILD_CRASHED;
+    int hostAlive = hostAnswer != REVENANT_CHILD_CRASHED;
     report(hostAlive ? hostAnswer == portAnswer : portAnswer != kvImageNoError, label,
            "the host %s, the port %d", hostAlive ? "answers a different code" : "died on a signal and the port answers",
            (int)portAnswer);
@@ -776,9 +776,9 @@ int main(void)
         static const uint8_t value16[2] = {0x34, 0x12};
         printf("the port's channel moves against the host's own vImage\n");
         permute_case("vImagePermuteChannels_ARGB16U", vImagePermuteChannels_ARGB16U,
-                     charon_host_vImagePermuteChannels_ARGB16U, 4, 2);
+                     revenant_host_vImagePermuteChannels_ARGB16U, 4, 2);
         permute_case("vImagePermuteChannels_ARGB16F", vImagePermuteChannels_ARGB16F,
-                     charon_host_vImagePermuteChannels_ARGB16F, 4, 2);
+                     revenant_host_vImagePermuteChannels_ARGB16F, 4, 2);
         permute3_case();
         masked_insert_case("vImagePermuteChannelsWithMaskedInsert_ARGB16U", host_masked_16u, port_masked_16u, 2,
                            background16u);
@@ -787,9 +787,9 @@ int main(void)
         masked_insert_case("vImagePermuteChannelsWithMaskedInsert_ARGBFFFF", host_masked_ffff, port_masked_ffff, 4,
                            backgroundffff);
         extract_case("vImageExtractChannel_ARGB16U", vImageExtractChannel_ARGB16U,
-                     charon_host_vImageExtractChannel_ARGB16U, 4, 2);
+                     revenant_host_vImageExtractChannel_ARGB16U, 4, 2);
         extract_case("vImageExtractChannel_ARGBFFFF", vImageExtractChannel_ARGBFFFF,
-                     charon_host_vImageExtractChannel_ARGBFFFF, 4, 4);
+                     revenant_host_vImageExtractChannel_ARGBFFFF, 4, 4);
         overwrite_pixel_case("vImageOverwriteChannelsWithPixel_ARGB16U", host_overwrite_pixel, port_overwrite_pixel,
                              background16u, 2);
         fill_case("vImageOverwriteChannelsWithScalar_Planar16U", host_fill_16u, port_fill_16u, value16, 2);

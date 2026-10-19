@@ -1,7 +1,7 @@
 #import <UIKit/UIKit.h>
 #import <UIKit/UIGestureRecognizerSubclass.h>
 
-static const CGFloat CharonEdgeWidth = 20;
+static const CGFloat RevenantEdgeWidth = 20;
 
 @implementation UIScreenEdgePanGestureRecognizer
 
@@ -15,15 +15,15 @@ static const CGFloat CharonEdgeWidth = 20;
     return self;
 }
 
-+ (BOOL)charon_point:(CGPoint)point isNearEdges:(UIRectEdge)edges inBounds:(CGRect)bounds
++ (BOOL)revenant_point:(CGPoint)point isNearEdges:(UIRectEdge)edges inBounds:(CGRect)bounds
 {
-    if ((edges & UIRectEdgeLeft) && point.x - CGRectGetMinX(bounds) <= CharonEdgeWidth)
+    if ((edges & UIRectEdgeLeft) && point.x - CGRectGetMinX(bounds) <= RevenantEdgeWidth)
         return YES;
-    if ((edges & UIRectEdgeRight) && CGRectGetMaxX(bounds) - point.x <= CharonEdgeWidth)
+    if ((edges & UIRectEdgeRight) && CGRectGetMaxX(bounds) - point.x <= RevenantEdgeWidth)
         return YES;
-    if ((edges & UIRectEdgeTop) && point.y - CGRectGetMinY(bounds) <= CharonEdgeWidth)
+    if ((edges & UIRectEdgeTop) && point.y - CGRectGetMinY(bounds) <= RevenantEdgeWidth)
         return YES;
-    if ((edges & UIRectEdgeBottom) && CGRectGetMaxY(bounds) - point.y <= CharonEdgeWidth)
+    if ((edges & UIRectEdgeBottom) && CGRectGetMaxY(bounds) - point.y <= RevenantEdgeWidth)
         return YES;
     return NO;
 }
@@ -38,7 +38,7 @@ static const CGFloat CharonEdgeWidth = 20;
     UITouch *touch = [touches anyObject];
     UIView *space = self.view.window.rootViewController.view ?: self.view.window ?: self.view;
     CGPoint point = [touch locationInView:space];
-    if (![UIScreenEdgePanGestureRecognizer charon_point:point isNearEdges:self.edges inBounds:space.bounds])
+    if (![UIScreenEdgePanGestureRecognizer revenant_point:point isNearEdges:self.edges inBounds:space.bounds])
         self.state = UIGestureRecognizerStateFailed;
 }
 

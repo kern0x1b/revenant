@@ -1,6 +1,6 @@
 #import <MapKit/MapKit.h>
 #import <Foundation/Foundation.h>
-#import "CharonMapKit.h"
+#import "RevenantMapKit.h"
 
 @implementation MKAddressFilter {
     NSUInteger _includingOptions;
@@ -9,15 +9,15 @@
 
 + (instancetype)filterIncludingAll
 {
-    return [[[self alloc] init] charon_setIncluding:0 excluding:0];
+    return [[[self alloc] init] revenant_setIncluding:0 excluding:0];
 }
 
 + (instancetype)filterExcludingAll
 {
-    return [[[self alloc] init] charon_setIncluding:0 excluding:0];
+    return [[[self alloc] init] revenant_setIncluding:0 excluding:0];
 }
 
-- (instancetype)charon_setIncluding:(NSUInteger)including excluding:(NSUInteger)excluding
+- (instancetype)revenant_setIncluding:(NSUInteger)including excluding:(NSUInteger)excluding
 {
     _includingOptions = including;
     _excludingOptions = excluding;

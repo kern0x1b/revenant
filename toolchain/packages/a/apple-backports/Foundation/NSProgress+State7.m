@@ -1,11 +1,11 @@
 #import <Foundation/Foundation.h>
 #import <objc/runtime.h>
 
-static char CharonProgressPausedKey;
-static char CharonProgressAdditionalKey;
-static char CharonProgressResumingKey;
+static char RevenantProgressPausedKey;
+static char RevenantProgressAdditionalKey;
+static char RevenantProgressResumingKey;
 
-@implementation NSProgress (CharonState)
+@implementation NSProgress (RevenantState)
 
 - (BOOL)isIndeterminate
 {
@@ -15,12 +15,12 @@ static char CharonProgressResumingKey;
 
 - (BOOL)isPaused
 {
-    return [objc_getAssociatedObject(self, &CharonProgressPausedKey) boolValue];
+    return [objc_getAssociatedObject(self, &RevenantProgressPausedKey) boolValue];
 }
 
 - (NSString *)localizedAdditionalDescription
 {
-    return objc_getAssociatedObject(self, &CharonProgressAdditionalKey);
+    return objc_getAssociatedObject(self, &RevenantProgressAdditionalKey);
 }
 
 - (void)setLocalizedAdditionalDescription:(NSString *)description
@@ -31,30 +31,30 @@ static char CharonProgressResumingKey;
         if (total && done)
             description = [NSString stringWithFormat:@"%@ of %@", done, total];
     }
-    objc_setAssociatedObject(self, &CharonProgressAdditionalKey, [description copy], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, &RevenantProgressAdditionalKey, [description copy], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
 - (void (^)(void))resumingHandler
 {
-    return objc_getAssociatedObject(self, &CharonProgressResumingKey);
+    return objc_getAssociatedObject(self, &RevenantProgressResumingKey);
 }
 
 - (void)setResumingHandler:(void (^)(void))handler
 {
-    objc_setAssociatedObject(self, &CharonProgressResumingKey, [handler copy], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, &RevenantProgressResumingKey, [handler copy], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
-- (void (^)(void))charon_progressResumingHandler
+- (void (^)(void))revenant_progressResumingHandler
 {
-    return objc_getAssociatedObject(self, &CharonProgressResumingKey);
+    return objc_getAssociatedObject(self, &RevenantProgressResumingKey);
 }
 
 - (void)resume
 {
     BOOL wasPaused = self.isPaused;
     if (wasPaused)
-        objc_setAssociatedObject(self, &CharonProgressPausedKey, @NO, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-    void (^handler)(void) = [self charon_progressResumingHandler];
+        objc_setAssociatedObject(self, &RevenantProgressPausedKey, @NO, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    void (^handler)(void) = [self revenant_progressResumingHandler];
     if (handler && wasPaused)
         handler();
 }

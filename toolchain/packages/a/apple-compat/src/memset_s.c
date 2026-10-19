@@ -3,7 +3,7 @@
 #include <string.h>
 
 __attribute__((visibility("hidden")))
-int charon_memset_s(void *bytes, size_t capacity, int value, size_t count)
+int revenant_memset_s(void *bytes, size_t capacity, int value, size_t count)
 {
     int error = 0;
     if (bytes == NULL)

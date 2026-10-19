@@ -6,9 +6,9 @@ int sqlite3_keyword_count(void);
 int sqlite3_keyword_name(int, const char **, int *);
 int sqlite3_keyword_check(const char *, int);
 
-int charon_port_sqlite3_keyword_count(void);
-int charon_port_sqlite3_keyword_name(int, const char **, int *);
-int charon_port_sqlite3_keyword_check(const char *, int);
+int revenant_port_sqlite3_keyword_count(void);
+int revenant_port_sqlite3_keyword_name(int, const char **, int *);
+int revenant_port_sqlite3_keyword_check(const char *, int);
 
 static int failures;
 
@@ -24,7 +24,7 @@ static void report(const char *name, int bad, const char *what)
 
 static void check_count(void)
 {
-    int h = sqlite3_keyword_count(), p = charon_port_sqlite3_keyword_count();
+    int h = sqlite3_keyword_count(), p = revenant_port_sqlite3_keyword_count();
     char what[96];
     snprintf(what, sizeof what, "host=%d port=%d", h, p);
     report("keyword-count", h != p, what);
@@ -38,7 +38,7 @@ static void check_names(void)
         const char *hz = sentinel, *pz = sentinel;
         int hn = -7, pn = -7;
         int hr = sqlite3_keyword_name(i, &hz, &hn);
-        int pr = charon_port_sqlite3_keyword_name(i, &pz, &pn);
+        int pr = revenant_port_sqlite3_keyword_name(i, &pz, &pn);
         char what[160];
         if (hr != pr) {
             snprintf(what, sizeof what, "index=%d rc host=%d port=%d", i, hr, pr);
@@ -62,7 +62,7 @@ static void check_names(void)
 
 static int check_one(const char *word, int n, const char *label)
 {
-    int h = sqlite3_keyword_check(word, n), p = charon_port_sqlite3_keyword_check(word, n);
+    int h = sqlite3_keyword_check(word, n), p = revenant_port_sqlite3_keyword_check(word, n);
     if (h != p) {
         char what[200];
         snprintf(what, sizeof what, "%s [%s] n=%d host=%d port=%d", label, word, n, h, p);

@@ -111,9 +111,9 @@ void show_run(UIWindow *window, ShowRecorder record)
     record(@"target for show from the top", name([fromChild targetViewControllerForAction:@selector(showViewController:sender:) sender:nil]));
     record(@"target for show from the navigation controller", name([navigation targetViewControllerForAction:@selector(showViewController:sender:) sender:nil]));
     record(@"target for another action", name([child targetViewControllerForAction:@selector(showDetailViewController:sender:) sender:nil]));
-    record(@"target for an action nobody has", name([child targetViewControllerForAction:@selector(charonNobodyHas:) sender:nil]));
+    record(@"target for an action nobody has", name([child targetViewControllerForAction:@selector(revenantNobodyHas:) sender:nil]));
     record(@"responder target for show", name([child targetForAction:@selector(showViewController:sender:) withSender:nil]));
-    record(@"responder target for an action nobody has", name([child targetForAction:@selector(charonNobodyHas:) withSender:nil]));
+    record(@"responder target for an action nobody has", name([child targetForAction:@selector(revenantNobodyHas:) withSender:nil]));
     ShowLeaf *detail = leaf(@"detail");
     [child showDetailViewController:detail sender:nil];
     settle();

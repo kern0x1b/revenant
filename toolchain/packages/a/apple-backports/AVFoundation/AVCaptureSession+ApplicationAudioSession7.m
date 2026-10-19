@@ -2,9 +2,9 @@
 
 #pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
 
-@implementation AVCaptureSession (CharonApplicationAudioSession)
+@implementation AVCaptureSession (RevenantApplicationAudioSession)
 
-static void charon_say_once(void)
+static void revenant_say_once(void)
 {
     static dispatch_once_t once;
     dispatch_once(&once, ^{
@@ -21,7 +21,7 @@ static void charon_say_once(void)
 - (void)setUsesApplicationAudioSession:(BOOL)uses
 {
     if (uses)
-        charon_say_once();
+        revenant_say_once();
 }
 
 - (BOOL)automaticallyConfiguresApplicationAudioSession
@@ -32,7 +32,7 @@ static void charon_say_once(void)
 - (void)setAutomaticallyConfiguresApplicationAudioSession:(BOOL)configures
 {
     if (configures)
-        charon_say_once();
+        revenant_say_once();
 }
 
 @end

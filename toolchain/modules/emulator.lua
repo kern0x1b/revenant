@@ -7,12 +7,12 @@ import("gdb")
 import("apple.firmware")
 import("byteorder")
 
-RESULTS = "private/var/charon"
+RESULTS = "private/var/revenant"
 REPORTS = "private/var/logs/CrashReporter"
-RUNNER = "usr/libexec/charon-runner"
-LAUNCHER = "usr/libexec/charon-sblaunch"
+RUNNER = "usr/libexec/revenant-runner"
+LAUNCHER = "usr/libexec/revenant-sblaunch"
 INSTALLATION_CACHE = "private/var/mobile/Library/Caches/com.apple.mobile.installation.plist"
-RUNNER_JOB = "System/Library/LaunchDaemons/org.charon.emulator.runner.plist"
+RUNNER_JOB = "System/Library/LaunchDaemons/org.revenant.emulator.runner.plist"
 LAUNCHD_CONF = "private/etc/launchd.conf"
 RUNNER_TASK = RESULTS .. "/job"
 MIGRATOR = "System/Library/PrivateFrameworks/DataMigration.framework/Support/DataMigrator"
@@ -47,17 +47,17 @@ function root()
     return path.join(path.directory(dyld.root()), "emulator")
 end
 
-function profiles(shade)
+function profiles(emulator)
     local listed = {}
-    for line in os.iorunv(shade, {"profile", "--list"}):gmatch("[^\n]+") do
+    for line in os.iorunv(emulator, {"profile", "--list"}):gmatch("[^\n]+") do
         table.insert(listed, line:trim())
     end
     return listed
 end
 
-function kernels(shade)
+function kernels(emulator)
     local known = {}
-    for line in os.iorunv(shade, {"abi"}):gmatch("[^\n]+") do
+    for line in os.iorunv(emulator, {"abi"}):gmatch("[^\n]+") do
         local name = line:match("^%s+(darwin%S+)$")
         if name then
             table.insert(known, name)
@@ -66,8 +66,8 @@ function kernels(shade)
     return known
 end
 
-function kernel(shade, build)
-    local output = try {function () return os.iorunv(shade, {"abi", "--ios-build", build}) end}
+function kernel(emulator, build)
+    local output = try {function () return os.iorunv(emulator, {"abi", "--ios-build", build}) end}
     return output and output:match("abi: (%S+)")
 end
 
@@ -80,7 +80,7 @@ function choose(devices, emulated, opt)
     if opt.device then
         local device = known[opt.device:lower()] or raise("the firmware catalog knows no device %s", opt.device)
         if not table.contains(emulated, device.identifier) then
-            raise("Shade has no profile for %s; it emulates %s", device.identifier, table.concat(emulated, ", "))
+            raise("the emulator has no profile for %s; it emulates %s", device.identifier, table.concat(emulated, ", "))
         end
         candidates = {device}
     else
@@ -104,7 +104,7 @@ function choose(devices, emulated, opt)
     if opt.device then
         raise("%s has no firmware of release %s or later in the catalog; pass -r with a release it runs", opt.device, opt.release)
     end
-    raise("no device Shade emulates (%s) runs %s release %s or later; pass -d and -r", table.concat(emulated, ", "), opt.architecture, opt.release)
+    raise("no device the emulator emulates (%s) runs %s release %s or later; pass -d and -r", table.concat(emulated, ", "), opt.architecture, opt.release)
 end
 
 function guest_path(rootfs, relative, opt)
@@ -242,7 +242,7 @@ function debugged(opt)
     end
     directory(opt.tmpdir)
     directory(opt.cache)
-    local proc = process.openv(opt.shade, argv, {stdout = log, stderr = errors, envs = envs})
+    local proc = process.openv(opt.emulator, argv, {stdout = log, stderr = errors, envs = envs})
     local report = try {
         function ()
             local connection = gdb.connect(port, {patience = opt.patience or 120})
@@ -625,7 +625,7 @@ function runner_job()
         '<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">',
         '<plist version="1.0">',
         "<dict>",
-        "<key>Label</key><string>org.charon.emulator.runner</string>",
+        "<key>Label</key><string>org.revenant.emulator.runner</string>",
         "<key>ProgramArguments</key><array>" .. table.concat(arguments) .. "</array>",
         "<key>RunAtLoad</key><true/>",
         "<key>LaunchOnlyOnce</key><true/>",
@@ -697,7 +697,7 @@ function scan(state, line)
             state.springboard = true
         elseif program:endswith("/DataMigrator") then
             state.migrator = pid
-        elseif program:endswith("/charon-runner") then
+        elseif program:endswith("/revenant-runner") then
             state.runner = pid
         end
     end
@@ -1000,7 +1000,7 @@ function boot(opt)
     directory(opt.tmpdir)
     directory(opt.cache)
     local started = os.mclock()
-    local proc = process.openv(opt.shade, argv, {stdin = input, stdout = log, stderr = errors, envs = envs})
+    local proc = process.openv(opt.emulator, argv, {stdin = input, stdout = log, stderr = errors, envs = envs})
     input:close()
     local state, offset, reason = {}, 0, "deadline"
     local pending = ""
@@ -1052,7 +1052,7 @@ function capacity()
     return math.max(1, math.min(cores // 3, gigabytes // 5))
 end
 
-BUILD_SLOT = "CHARON_BUILD_SLOT"
+BUILD_SLOT = "REVENANT_BUILD_SLOT"
 
 function build_slot_name()
     return BUILD_SLOT
@@ -1170,7 +1170,7 @@ function retire(parent, opt, kept)
     for _, marker in ipairs(os.files(path.join(parent, opt.identifier .. "_" .. opt.build .. "_*", "golden.json"))) do
         local folder = path.directory(marker)
         local recorded = try {function () return json.loadfile(marker) end}
-        if path.filename(folder) ~= kept and recorded and recorded.shade ~= opt.shade_hash then
+        if path.filename(folder) ~= kept and recorded and recorded.emulator ~= opt.emulator_hash then
             local lock = io.openlock(folder .. ".lock")
             if lock and lock:trylock() then
                 remove(folder)
@@ -1286,7 +1286,7 @@ function golden(opt)
     for _, key in ipairs(table.join(setup_keys(opt.firmware, opt.build), LOCKDOWN_KEYS)) do
         table.insert(written, table.concat(key, " "))
     end
-    local key = string.format("%s_%s_%s", opt.identifier, opt.build, hash.strhash128(opt.shade_hash .. ";" ..
+    local key = string.format("%s_%s_%s", opt.identifier, opt.build, hash.strhash128(opt.emulator_hash .. ";" ..
                               table.concat(opt.steps or {"home"}, ";") .. ";" .. table.concat(written, ";")))
     local parent = path.join(opt.root or root(), "golden.noindex")
     local folder = path.join(parent, key)
@@ -1318,7 +1318,7 @@ function golden(opt)
                 raise("%s %s did not get past %s within %d seconds; the emulator log is %s", opt.identifier, opt.build,
                       milestone(booted.state), opt.deadline, booted.log)
             end
-            json.savefile(path.join(staging, "golden.json"), {identifier = opt.identifier, build = opt.build, shade = opt.shade_hash, seconds = booted.seconds})
+            json.savefile(path.join(staging, "golden.json"), {identifier = opt.identifier, build = opt.build, emulator = opt.emulator_hash, seconds = booted.seconds})
             remove(folder)
             os.mv(staging, folder)
             retire(parent, opt, key)

@@ -4,13 +4,13 @@
 typedef struct {
     double sine;
     double cosine;
-} charon_sine_cosine;
+} revenant_sine_cosine;
 
-extern charon_sine_cosine charon_sincos_stret(double) __asm("___sincos_stret");
+extern revenant_sine_cosine revenant_sincos_stret(double) __asm("___sincos_stret");
 
-static void charon_sincos(CGFloat angle, CGFloat *sine, CGFloat *cosine)
+static void revenant_sincos(CGFloat angle, CGFloat *sine, CGFloat *cosine)
 {
-    charon_sine_cosine pair = charon_sincos_stret(angle);
+    revenant_sine_cosine pair = revenant_sincos_stret(angle);
     *sine = pair.sine;
     *cosine = pair.cosine;
 }
@@ -28,7 +28,7 @@ CGAffineTransformComponents CGAffineTransformDecompose(CGAffineTransform transfo
     } else {
         CGFloat angle = atan2(b, a);
         CGFloat sine, cosine;
-        charon_sincos(angle, &sine, &cosine);
+        revenant_sincos(angle, &sine, &cosine);
         CGFloat across = d * cosine - c * sine;
         BOOL flip = across < 0;
         sx = flip ? -length : length;
@@ -40,7 +40,7 @@ CGAffineTransformComponents CGAffineTransformDecompose(CGAffineTransform transfo
     CGFloat shear = 0;
     if (sy != 0) {
         CGFloat sine, cosine;
-        charon_sincos(rotation, &sine, &cosine);
+        revenant_sincos(rotation, &sine, &cosine);
         shear = (c * cosine + d * sine) / sy;
     }
     CGAffineTransformComponents components;

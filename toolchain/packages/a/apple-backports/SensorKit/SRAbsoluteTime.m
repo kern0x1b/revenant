@@ -5,11 +5,11 @@
 typedef struct {
     uint64_t continuous;
     CFAbsoluteTime absolute;
-} CharonSensorKitClockAnchor;
+} RevenantSensorKitClockAnchor;
 
-static const CharonSensorKitClockAnchor *CharonSensorKitClockAnchorOf(void)
+static const RevenantSensorKitClockAnchor *RevenantSensorKitClockAnchorOf(void)
 {
-    static CharonSensorKitClockAnchor anchor;
+    static RevenantSensorKitClockAnchor anchor;
     static dispatch_once_t once;
     dispatch_once(&once, ^{
         anchor.continuous = mach_absolute_time();
@@ -18,21 +18,21 @@ static const CharonSensorKitClockAnchor *CharonSensorKitClockAnchorOf(void)
     return &anchor;
 }
 
-static mach_timebase_info_data_t CharonSensorKitTimebase(void)
+static mach_timebase_info_data_t RevenantSensorKitTimebase(void)
 {
     mach_timebase_info_data_t info = {0, 0};
     mach_timebase_info(&info);
     return info;
 }
 
-static NSTimeInterval CharonSensorKitSecondsFromTicks(uint64_t ticks)
+static NSTimeInterval RevenantSensorKitSecondsFromTicks(uint64_t ticks)
 {
-    mach_timebase_info_data_t info = CharonSensorKitTimebase();
+    mach_timebase_info_data_t info = RevenantSensorKitTimebase();
     long double seconds = ((long double)ticks * (long double)info.numer) / (long double)info.denom / 1e9L;
     return (NSTimeInterval)seconds;
 }
 
-double CharonSensorKitMonotonicSeconds(void)
+double RevenantSensorKitMonotonicSeconds(void)
 {
     static mach_timebase_info_data_t info = {0, 0};
     static dispatch_once_t once;
@@ -43,26 +43,26 @@ double CharonSensorKitMonotonicSeconds(void)
 
 SRAbsoluteTime SRAbsoluteTimeGetCurrent(void)
 {
-    const CharonSensorKitClockAnchor *anchor = CharonSensorKitClockAnchorOf();
-    NSTimeInterval elapsed = CharonSensorKitSecondsFromTicks(mach_absolute_time() - anchor->continuous);
+    const RevenantSensorKitClockAnchor *anchor = RevenantSensorKitClockAnchorOf();
+    NSTimeInterval elapsed = RevenantSensorKitSecondsFromTicks(mach_absolute_time() - anchor->continuous);
     return (SRAbsoluteTime)(anchor->absolute + elapsed);
 }
 
 SRAbsoluteTime SRAbsoluteTimeFromContinuousTime(uint64_t cont)
 {
-    const CharonSensorKitClockAnchor *anchor = CharonSensorKitClockAnchorOf();
+    const RevenantSensorKitClockAnchor *anchor = RevenantSensorKitClockAnchorOf();
     uint64_t sinceBoot = cont > anchor->continuous ? cont - anchor->continuous : 0;
-    return (SRAbsoluteTime)(anchor->absolute + CharonSensorKitSecondsFromTicks(sinceBoot));
+    return (SRAbsoluteTime)(anchor->absolute + RevenantSensorKitSecondsFromTicks(sinceBoot));
 }
 
 CFAbsoluteTime SRAbsoluteTimeToCFAbsoluteTime(SRAbsoluteTime sr)
 {
-    const CharonSensorKitClockAnchor *anchor = CharonSensorKitClockAnchorOf();
+    const RevenantSensorKitClockAnchor *anchor = RevenantSensorKitClockAnchorOf();
     return anchor->absolute + ((CFAbsoluteTime)sr - anchor->absolute);
 }
 
 SRAbsoluteTime SRAbsoluteTimeFromCFAbsoluteTime(CFAbsoluteTime cf)
 {
-    const CharonSensorKitClockAnchor *anchor = CharonSensorKitClockAnchorOf();
+    const RevenantSensorKitClockAnchor *anchor = RevenantSensorKitClockAnchorOf();
     return (SRAbsoluteTime)(anchor->absolute + (cf - anchor->absolute));
 }

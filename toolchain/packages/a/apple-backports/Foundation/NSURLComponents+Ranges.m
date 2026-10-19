@@ -1,68 +1,68 @@
 #import <Foundation/Foundation.h>
 
-typedef NS_ENUM(NSUInteger, CharonURLPart) {
-    CharonURLScheme,
-    CharonURLUser,
-    CharonURLPassword,
-    CharonURLHost,
-    CharonURLPort,
-    CharonURLPath,
-    CharonURLQuery,
-    CharonURLFragment,
-    CharonURLPartCount
+typedef NS_ENUM(NSUInteger, RevenantURLPart) {
+    RevenantURLScheme,
+    RevenantURLUser,
+    RevenantURLPassword,
+    RevenantURLHost,
+    RevenantURLPort,
+    RevenantURLPath,
+    RevenantURLQuery,
+    RevenantURLFragment,
+    RevenantURLPartCount
 };
 
-BOOL charon_url_parse(NSString *string, NSRange *ranges);
+BOOL revenant_url_parse(NSString *string, NSRange *ranges);
 
-static NSRange charon_url_range(NSURLComponents *components, CharonURLPart part)
+static NSRange revenant_url_range(NSURLComponents *components, RevenantURLPart part)
 {
-    NSRange ranges[CharonURLPartCount];
+    NSRange ranges[RevenantURLPartCount];
     NSString *string = components.string;
-    if (!string || !charon_url_parse(string, ranges))
+    if (!string || !revenant_url_parse(string, ranges))
         return NSMakeRange(NSNotFound, 0);
     return ranges[part];
 }
 
-@implementation NSURLComponents (CharonRanges)
+@implementation NSURLComponents (RevenantRanges)
 
 - (NSRange)rangeOfScheme
 {
-    return charon_url_range(self, CharonURLScheme);
+    return revenant_url_range(self, RevenantURLScheme);
 }
 
 - (NSRange)rangeOfUser
 {
-    return charon_url_range(self, CharonURLUser);
+    return revenant_url_range(self, RevenantURLUser);
 }
 
 - (NSRange)rangeOfPassword
 {
-    return charon_url_range(self, CharonURLPassword);
+    return revenant_url_range(self, RevenantURLPassword);
 }
 
 - (NSRange)rangeOfHost
 {
-    return charon_url_range(self, CharonURLHost);
+    return revenant_url_range(self, RevenantURLHost);
 }
 
 - (NSRange)rangeOfPort
 {
-    return charon_url_range(self, CharonURLPort);
+    return revenant_url_range(self, RevenantURLPort);
 }
 
 - (NSRange)rangeOfPath
 {
-    return charon_url_range(self, CharonURLPath);
+    return revenant_url_range(self, RevenantURLPath);
 }
 
 - (NSRange)rangeOfQuery
 {
-    return charon_url_range(self, CharonURLQuery);
+    return revenant_url_range(self, RevenantURLQuery);
 }
 
 - (NSRange)rangeOfFragment
 {
-    return charon_url_range(self, CharonURLFragment);
+    return revenant_url_range(self, RevenantURLFragment);
 }
 
 @end

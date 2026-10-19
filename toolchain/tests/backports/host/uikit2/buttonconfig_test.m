@@ -2,7 +2,7 @@
 #import "check.h"
 #pragma clang diagnostic ignored "-Wunguarded-availability-new"
 
-@interface CharonHostUIButtonConfiguration : NSObject
+@interface RevenantHostUIButtonConfiguration : NSObject
 + (instancetype)plainButtonConfiguration;
 + (instancetype)tintedButtonConfiguration;
 + (instancetype)grayButtonConfiguration;
@@ -40,38 +40,38 @@
 @property (nonatomic, readwrite, assign) UIButtonConfigurationMacIdiomStyle macIdiomStyle;
 @end
 
-static NSString *charonMutation = nil;
-static NSMutableArray *charonKeys = nil;
-static BOOL charonPlanted = NO;
+static NSString *revenantMutation = nil;
+static NSMutableArray *revenantKeys = nil;
+static BOOL revenantPlanted = NO;
 
 static void mutation_refuse(NSString *why)
 {
     fprintf(stderr, "MUTATION refused: %s\n", why.UTF8String);
-    if (charonKeys.count)
+    if (revenantKeys.count)
         fprintf(stderr, "MUTATION the keys this case compares are: %s\n",
-                [[charonKeys componentsJoinedByString:@" | "] UTF8String]);
+                [[revenantKeys componentsJoinedByString:@" | "] UTF8String]);
     exit(2);
 }
 
 static void BOTH(NSString *what, NSString *ours, NSString *theirs)
 {
-    if (charonMutation) {
-        [charonKeys addObject:what];
-        BOOL asks = [what isEqualToString:charonMutation];
-        if (asks || ([charonMutation isEqualToString:@"auto"] && !charonPlanted)) {
+    if (revenantMutation) {
+        [revenantKeys addObject:what];
+        BOOL asks = [what isEqualToString:revenantMutation];
+        if (asks || ([revenantMutation isEqualToString:@"auto"] && !revenantPlanted)) {
             if (![ours isEqualToString:theirs])
                 mutation_refuse([NSString stringWithFormat:
                     @"%@ is asked for, and the two sides do NOT agree on it (%@ vs %@), so a mutation there"
                     @" would fail for a reason that has nothing to do with the mutation", what, ours, theirs]);
-            if (asks && charonPlanted)
+            if (asks && revenantPlanted)
                 mutation_refuse([NSString stringWithFormat:@"%@ was asked for twice", what]);
             printf("MUTATION planted on %s: the port's answer %s becomes %s-PLANTED\n",
                    what.UTF8String, ours.UTF8String, ours.UTF8String);
             ours = [ours stringByAppendingString:@"-PLANTED"];
-            charonPlanted = YES;
+            revenantPlanted = YES;
         }
     }
-    charon_check([ours isEqualToString:theirs], what.UTF8String,
+    revenant_check([ours isEqualToString:theirs], what.UTF8String,
                  [NSString stringWithFormat:@"port %@ != system %@", ours, theirs]);
 }
 
@@ -80,8 +80,8 @@ static void BOTH(NSString *what, NSString *ours, NSString *theirs)
 
 static void check_constructors(void)
 {
-    Class port = NSClassFromString(@"CharonHostUIButtonConfiguration");
-    charon_check(port != Nil, "the port's configuration class is in the process", @"it is not");
+    Class port = NSClassFromString(@"RevenantHostUIButtonConfiguration");
+    revenant_check(port != Nil, "the port's configuration class is in the process", @"it is not");
 
     BOTH(@"a plain configuration is made on both sides",
          [port plainButtonConfiguration] != Nil ? @"made" : @"nothing",
@@ -111,26 +111,26 @@ static void check_constructors(void)
 
 static void check_constructor_differences(void)
 {
-    Class port = NSClassFromString(@"CharonHostUIButtonConfiguration");
+    Class port = NSClassFromString(@"RevenantHostUIButtonConfiguration");
     BOTH(@"a filled configuration does not update for selection",
-         [@(((CharonHostUIButtonConfiguration *)[port filledButtonConfiguration]).automaticallyUpdateForSelection) stringValue],
+         [@(((RevenantHostUIButtonConfiguration *)[port filledButtonConfiguration]).automaticallyUpdateForSelection) stringValue],
          [@([UIButtonConfiguration filledButtonConfiguration].automaticallyUpdateForSelection) stringValue]);
     BOTH(@"a bordered prominent configuration does not update for selection",
-         [@(((CharonHostUIButtonConfiguration *)[port borderedProminentButtonConfiguration]).automaticallyUpdateForSelection) stringValue],
+         [@(((RevenantHostUIButtonConfiguration *)[port borderedProminentButtonConfiguration]).automaticallyUpdateForSelection) stringValue],
          [@([UIButtonConfiguration borderedProminentButtonConfiguration].automaticallyUpdateForSelection) stringValue]);
     BOTH(@"a plain configuration does update for selection",
-         [@(((CharonHostUIButtonConfiguration *)[port plainButtonConfiguration]).automaticallyUpdateForSelection) stringValue],
+         [@(((RevenantHostUIButtonConfiguration *)[port plainButtonConfiguration]).automaticallyUpdateForSelection) stringValue],
          [@([UIButtonConfiguration plainButtonConfiguration].automaticallyUpdateForSelection) stringValue]);
     BOTH(@"a gray configuration does update for selection",
-         [@(((CharonHostUIButtonConfiguration *)[port grayButtonConfiguration]).automaticallyUpdateForSelection) stringValue],
+         [@(((RevenantHostUIButtonConfiguration *)[port grayButtonConfiguration]).automaticallyUpdateForSelection) stringValue],
          [@([UIButtonConfiguration grayButtonConfiguration].automaticallyUpdateForSelection) stringValue]);
 }
 
 static void check_defaults(void)
 {
-    CharonHostUIButtonConfiguration *ours = [NSClassFromString(@"CharonHostUIButtonConfiguration") plainButtonConfiguration];
+    RevenantHostUIButtonConfiguration *ours = [NSClassFromString(@"RevenantHostUIButtonConfiguration") plainButtonConfiguration];
     UIButtonConfiguration *system = [UIButtonConfiguration plainButtonConfiguration];
-    charon_check(ours != nil && system != nil, "both sides make a configuration", @"one of the two answered nothing");
+    revenant_check(ours != nil && system != nil, "both sides make a configuration", @"one of the two answered nothing");
 
     BOTH(@"a fresh configuration's background has the same corner radius",
          ours.background == nil ? @"nil" : [@(ours.background.cornerRadius) stringValue],
@@ -174,7 +174,7 @@ static void check_defaults(void)
 
 static void check_writes(void)
 {
-    CharonHostUIButtonConfiguration *ours = [NSClassFromString(@"CharonHostUIButtonConfiguration") plainButtonConfiguration];
+    RevenantHostUIButtonConfiguration *ours = [NSClassFromString(@"RevenantHostUIButtonConfiguration") plainButtonConfiguration];
     UIButtonConfiguration *system = [UIButtonConfiguration plainButtonConfiguration];
     UIColor *colour = [UIColor redColor];
     NSString *title = @"a title";
@@ -209,7 +209,7 @@ static void check_writes(void)
     BOTH(@"a configuration reads back the selection flag it was given",
          [@(ours.automaticallyUpdateForSelection) stringValue], [@(system.automaticallyUpdateForSelection) stringValue]);
 
-    CharonHostUIButtonConfiguration *ourCopy = [ours copy];
+    RevenantHostUIButtonConfiguration *ourCopy = [ours copy];
     UIButtonConfiguration *systemCopy = [system copy];
     BOTH(@"a configuration's copy holds the title", ourCopy.title, systemCopy.title);
     BOTH(@"a configuration's copy holds the title padding",
@@ -220,11 +220,11 @@ static void check_writes(void)
 
 static void check_methods(void)
 {
-    CharonHostUIButtonConfiguration *ours = [NSClassFromString(@"CharonHostUIButtonConfiguration") plainButtonConfiguration];
+    RevenantHostUIButtonConfiguration *ours = [NSClassFromString(@"RevenantHostUIButtonConfiguration") plainButtonConfiguration];
     UIButtonConfiguration *system = [UIButtonConfiguration plainButtonConfiguration];
     UIButton *button = [UIButton buttonWithType:UIButtonTypeSystem];
     id ourUpdated = [ours updatedConfigurationForButton:button];
-    charon_check([ourUpdated isKindOfClass:[NSClassFromString(@"CharonHostUIButtonConfiguration") class]],
+    revenant_check([ourUpdated isKindOfClass:[NSClassFromString(@"RevenantHostUIButtonConfiguration") class]],
                  "the port's -updatedConfigurationForButton: answers a configuration",
                  [NSString stringWithFormat:@"%@", ourUpdated]);
 
@@ -237,7 +237,7 @@ static void check_methods(void)
 
 static void check_archive(void)
 {
-    CharonHostUIButtonConfiguration *ours = [NSClassFromString(@"CharonHostUIButtonConfiguration") plainButtonConfiguration];
+    RevenantHostUIButtonConfiguration *ours = [NSClassFromString(@"RevenantHostUIButtonConfiguration") plainButtonConfiguration];
     UIButtonConfiguration *system = [UIButtonConfiguration plainButtonConfiguration];
     ours.title = @"archived"; system.title = @"archived";
     ours.cornerStyle = 2; system.cornerStyle = 2;
@@ -252,7 +252,7 @@ static void check_archive(void)
     [ourArchiver finishEncoding];
     NSKeyedUnarchiver *ourReader = [[NSKeyedUnarchiver alloc] initForReadingFromData:ourData error:nil];
     [ourReader setRequiresSecureCoding:YES];
-    CharonHostUIButtonConfiguration *ourBack = [ourReader decodeObjectOfClass:[NSClassFromString(@"CharonHostUIButtonConfiguration") class]
+    RevenantHostUIButtonConfiguration *ourBack = [ourReader decodeObjectOfClass:[NSClassFromString(@"RevenantHostUIButtonConfiguration") class]
                                                         forKey:NSKeyedArchiveRootObjectKey];
 
     NSMutableData *systemData = [NSMutableData data];
@@ -265,7 +265,7 @@ static void check_archive(void)
     UIButtonConfiguration *systemBack = [systemReader decodeObjectOfClass:[UIButtonConfiguration class]
                                                              forKey:NSKeyedArchiveRootObjectKey];
 
-    charon_check(ourBack != nil && systemBack != nil, "both sides read a configuration back from an archive",
+    revenant_check(ourBack != nil && systemBack != nil, "both sides read a configuration back from an archive",
                  @"one of the two answered nothing");
     #pragma clang diagnostic pop
     if (ourBack && systemBack) {
@@ -280,8 +280,8 @@ static void check_archive(void)
 int main(int argc, char **argv)
 {
     @autoreleasepool {
-        charonKeys = [NSMutableArray array];
-        const char *asked = getenv("CHARON_MUTATION");
+        revenantKeys = [NSMutableArray array];
+        const char *asked = getenv("REVENANT_MUTATION");
         for (int i = 1; i < argc; i++)
             if (strcmp(argv[i], "--mutation") == 0 && i + 1 < argc)
                 asked = argv[++i];
@@ -292,7 +292,7 @@ int main(int argc, char **argv)
                 mutation_refuse([NSString stringWithFormat:
                     @"--mutation was given the flag %@ and no key, and a control that plants nothing must"
                     @" fail rather than report a clean run", @(asked)]);
-            charonMutation = @(asked);
+            revenantMutation = @(asked);
         }
         check_constructors();
         check_constructor_differences();
@@ -300,12 +300,12 @@ int main(int argc, char **argv)
         check_writes();
         check_methods();
         check_archive();
-        printf("checks=%d failures=%d\n", charon_checks, charon_failures);
-        if (charonMutation && !charonPlanted) {
+        printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
+        if (revenantMutation && !revenantPlanted) {
             fprintf(stderr, "MUTATION refused: %s was asked for and no case carries it\n",
-                    charonMutation.UTF8String);
+                    revenantMutation.UTF8String);
             return 2;
         }
     }
-    return charon_failures;
+    return revenant_failures;
 }

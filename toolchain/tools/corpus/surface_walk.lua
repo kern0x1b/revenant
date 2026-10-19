@@ -864,7 +864,7 @@ function release_from(file, name)
 end
 
 function release(name)
-    return release_from(path.join(os.getenv("HOME"), ".charon", "dyld", name, "classes_armv7.json"), name)
+    return release_from(path.join(os.getenv("HOME"), ".revenant", "dyld", name, "classes_armv7.json"), name)
 end
 
 local function add_all(set, list)

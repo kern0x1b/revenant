@@ -5,7 +5,7 @@
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
 
-static const int8_t charon_default_measured_power = -59;
+static const int8_t revenant_default_measured_power = -59;
 
 @implementation CLBeaconRegion {
     NSUUID *_proximityUUID;
@@ -16,20 +16,20 @@ static const int8_t charon_default_measured_power = -59;
 
 - (instancetype)initWithProximityUUID:(NSUUID *)proximityUUID identifier:(NSString *)identifier
 {
-    return [self initWithCharonProximityUUID:proximityUUID major:nil minor:nil identifier:identifier];
+    return [self initWithRevenantProximityUUID:proximityUUID major:nil minor:nil identifier:identifier];
 }
 
 - (instancetype)initWithProximityUUID:(NSUUID *)proximityUUID major:(CLBeaconMajorValue)major identifier:(NSString *)identifier
 {
-    return [self initWithCharonProximityUUID:proximityUUID major:@(major) minor:nil identifier:identifier];
+    return [self initWithRevenantProximityUUID:proximityUUID major:@(major) minor:nil identifier:identifier];
 }
 
 - (instancetype)initWithProximityUUID:(NSUUID *)proximityUUID major:(CLBeaconMajorValue)major minor:(CLBeaconMinorValue)minor identifier:(NSString *)identifier
 {
-    return [self initWithCharonProximityUUID:proximityUUID major:@(major) minor:@(minor) identifier:identifier];
+    return [self initWithRevenantProximityUUID:proximityUUID major:@(major) minor:@(minor) identifier:identifier];
 }
 
-- (instancetype)initWithCharonProximityUUID:(NSUUID *)proximityUUID major:(NSNumber *)major minor:(NSNumber *)minor identifier:(NSString *)identifier
+- (instancetype)initWithRevenantProximityUUID:(NSUUID *)proximityUUID major:(NSNumber *)major minor:(NSNumber *)minor identifier:(NSString *)identifier
 {
     if (!proximityUUID)
         [NSException raise:NSInvalidArgumentException format:@"Invalid parameter not satisfying: proximityUUID != nil"];
@@ -80,7 +80,7 @@ static const int8_t charon_default_measured_power = -59;
     [_proximityUUID getUUIDBytes:uuid];
     uint16_t major = CFSwapInt16HostToBig((uint16_t)_major.shortValue);
     uint16_t minor = CFSwapInt16HostToBig((uint16_t)_minor.shortValue);
-    int8_t power = measuredPower ? (int8_t)measuredPower.charValue : charon_default_measured_power;
+    int8_t power = measuredPower ? (int8_t)measuredPower.charValue : revenant_default_measured_power;
     NSMutableData *data = [NSMutableData dataWithCapacity:21];
     [data appendBytes:uuid length:sizeof uuid];
     [data appendBytes:&major length:sizeof major];

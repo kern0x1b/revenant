@@ -1,6 +1,6 @@
 #import <Foundation/Foundation.h>
 
-@implementation NSURL (CharonSecurityScope)
+@implementation NSURL (RevenantSecurityScope)
 
 - (BOOL)startAccessingSecurityScopedResource
 {

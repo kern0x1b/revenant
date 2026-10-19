@@ -9,7 +9,7 @@
 
 #include "runtime/session_host.hpp"
 
-namespace shade {
+namespace emulator {
 
 class DesktopHost final : public SessionHost {
 public:

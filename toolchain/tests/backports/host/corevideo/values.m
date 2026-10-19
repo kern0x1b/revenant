@@ -4,11 +4,11 @@
 #include <stdio.h>
 #include <string.h>
 
-#define PORTED(name) charonHost_##name
+#define PORTED(name) revenantHost_##name
 
 #define EXPECTED_OPENGLES_KEY "OpenGLESTextureCacheCompatibility"
 
-#define ROW(api) { #api, "charonHost_" #api }
+#define ROW(api) { #api, "revenantHost_" #api }
 static const struct { const char *api; const char *portSymbol; } kRows[] = {
     ROW(kCVPixelBufferOpenGLESTextureCacheCompatibilityKey),
     ROW(kCVImageBufferAlphaChannelModeKey),

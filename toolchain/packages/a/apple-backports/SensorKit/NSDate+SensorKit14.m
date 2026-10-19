@@ -7,7 +7,7 @@ extern SRAbsoluteTime SRAbsoluteTimeGetCurrent(void);
 extern CFAbsoluteTime SRAbsoluteTimeToCFAbsoluteTime(SRAbsoluteTime sr);
 extern SRAbsoluteTime SRAbsoluteTimeFromCFAbsoluteTime(CFAbsoluteTime cf);
 
-@interface NSDate (CharonSensorKit)
+@interface NSDate (RevenantSensorKit)
 
 + (instancetype)dateWithSRAbsoluteTime:(SRAbsoluteTime)time;
 - (instancetype)initWithSRAbsoluteTime:(SRAbsoluteTime)time;
@@ -15,7 +15,7 @@ extern SRAbsoluteTime SRAbsoluteTimeFromCFAbsoluteTime(CFAbsoluteTime cf);
 
 @end
 
-@implementation NSDate (CharonSensorKit)
+@implementation NSDate (RevenantSensorKit)
 
 + (instancetype)dateWithSRAbsoluteTime:(SRAbsoluteTime)time
 {

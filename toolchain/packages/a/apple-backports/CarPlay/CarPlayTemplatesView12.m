@@ -2,49 +2,49 @@
 #import <UIKit/UIKit.h>
 #import <objc/message.h>
 #import <objc/runtime.h>
-#import "CharonCarPlayTemplate.h"
+#import "RevenantCarPlayTemplate.h"
 
-@interface CPBarButton (CharonDrawing)
-- (void)charon_drawInRect:(CGRect)rect alpha:(CGFloat)alpha;
-- (void)charon_tap;
+@interface CPBarButton (RevenantDrawing)
+- (void)revenant_drawInRect:(CGRect)rect alpha:(CGFloat)alpha;
+- (void)revenant_tap;
 @end
 
-@interface CPGridButton (CharonDrawing)
-- (void)charon_drawInRect:(CGRect)rect;
-- (void)charon_tap;
+@interface CPGridButton (RevenantDrawing)
+- (void)revenant_drawInRect:(CGRect)rect;
+- (void)revenant_tap;
 @end
 
-@interface CPMapButton (CharonDrawing)
-- (void)charon_drawInRect:(CGRect)rect;
-- (void)charon_tap;
+@interface CPMapButton (RevenantDrawing)
+- (void)revenant_drawInRect:(CGRect)rect;
+- (void)revenant_tap;
 @end
 
-@interface CPTemplate (CharonDrawing)
-- (UIViewController *)charon_viewControllerForInterfaceController:(CPInterfaceController *)controller;
+@interface CPTemplate (RevenantDrawing)
+- (UIViewController *)revenant_viewControllerForInterfaceController:(CPInterfaceController *)controller;
 @end
 
-@interface CharonListItemHandler : NSObject
-- (void)charon_call:(id)item completion:(id)completion;
+@interface RevenantListItemHandler : NSObject
+- (void)revenant_call:(id)item completion:(id)completion;
 @end
 
-@interface CharonGridSource : NSObject <UICollectionViewDataSource, UICollectionViewDelegate>
+@interface RevenantGridSource : NSObject <UICollectionViewDataSource, UICollectionViewDelegate>
 + (instancetype)sourceForTemplate:(CPGridTemplate *)template;
 @end
 
-@interface CharonCarPlayInterface : NSObject
+@interface RevenantCarPlayInterface : NSObject
 + (instancetype)current;
 @property (nonatomic, weak) CPInterfaceController *controller;
 @end
 
-@interface CharonMapButtons : UIView
-@property (nonatomic, copy) NSArray<CPMapButton *> *charon_buttons;
+@interface RevenantMapButtons : UIView
+@property (nonatomic, copy) NSArray<CPMapButton *> *revenant_buttons;
 @end
 
-@interface CPInterfaceController (CharonWindow)
+@interface CPInterfaceController (RevenantWindow)
 @property (nonatomic, readonly, strong) CPWindow *contentWindow;
 @end
 
-@interface CharonListRowState : NSObject
+@interface RevenantListRowState : NSObject
 @property (nonatomic, copy) NSString *text;
 @property (nonatomic, copy) NSString *detailText;
 @property (nonatomic, strong) UIImage *image;
@@ -61,7 +61,7 @@
 @property (nonatomic, assign) BOOL showsExplicitLabel;
 @end
 
-@implementation CharonListRowState
+@implementation RevenantListRowState
 @synthesize text = _text;
 @synthesize detailText = _detailText;
 @synthesize image = _image;
@@ -78,14 +78,14 @@
 @synthesize showsExplicitLabel = _showsExplicitLabel;
 @end
 
-@implementation CPListItem (CharonRow)
+@implementation CPListItem (RevenantRow)
 
-- (CharonListRowState *)charon_state
+- (RevenantListRowState *)revenant_state
 {
     static const void *key = &key;
-    CharonListRowState *state = objc_getAssociatedObject(self, key);
+    RevenantListRowState *state = objc_getAssociatedObject(self, key);
     if (!state) {
-        state = [[CharonListRowState alloc] init];
+        state = [[RevenantListRowState alloc] init];
         state.enabled = YES;
         state.showsDisclosureIndicator = YES;
         objc_setAssociatedObject(self, key, state, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
@@ -93,13 +93,13 @@
     return state;
 }
 
-- (CharonListRowState *)charon_stateInitWithText:(NSString *)text
+- (RevenantListRowState *)revenant_stateInitWithText:(NSString *)text
                                detailText:(NSString *)detailText
                                     image:(UIImage *)image
                            accessoryImage:(UIImage *)accessoryImage
                             accessoryType:(NSInteger)accessoryType
 {
-    CharonListRowState *state = [[CharonListRowState alloc] init];
+    RevenantListRowState *state = [[RevenantListRowState alloc] init];
     state.text = text ?: @"";
     state.detailText = detailText ?: @"";
     state.image = image;
@@ -118,62 +118,62 @@
 {
     self = ((id (*)(id, SEL))objc_msgSend)([CPListItem class], @selector(alloc));
     self = ((id (*)(id, SEL, id))objc_msgSend)(self, @selector(init), @"");
-    [self charon_setState:[self charon_stateInitWithText:text detailText:detailText image:image
+    [self revenant_setState:[self revenant_stateInitWithText:text detailText:detailText image:image
                                      accessoryImage:accessoryImage accessoryType:accessoryType]];
     return self;
 }
 
-- (void)charon_setState:(CharonListRowState *)state
+- (void)revenant_setState:(RevenantListRowState *)state
 {
     static const void *key = &key;
     objc_setAssociatedObject(self, key, state, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
-- (NSString *)text { return [self charon_state].text; }
-- (void)setText:(NSString *)text { [self charon_state].text = text ?: @""; }
-- (NSString *)detailText { return [self charon_state].detailText; }
-- (void)setDetailText:(NSString *)detailText { [self charon_state].detailText = detailText ?: @""; }
-- (UIImage *)image { return [self charon_state].image; }
-- (void)setImage:(UIImage *)image { [self charon_state].image = image; }
-- (UIImage *)accessoryImage { return [self charon_state].accessoryImage; }
+- (NSString *)text { return [self revenant_state].text; }
+- (void)setText:(NSString *)text { [self revenant_state].text = text ?: @""; }
+- (NSString *)detailText { return [self revenant_state].detailText; }
+- (void)setDetailText:(NSString *)detailText { [self revenant_state].detailText = detailText ?: @""; }
+- (UIImage *)image { return [self revenant_state].image; }
+- (void)setImage:(UIImage *)image { [self revenant_state].image = image; }
+- (UIImage *)accessoryImage { return [self revenant_state].accessoryImage; }
 - (void)setAccessoryImage:(UIImage *)image
 {
-    [self charon_state].accessoryImage = image;
+    [self revenant_state].accessoryImage = image;
     if (image) {
-        [self charon_state].accessoryType = 0;
+        [self revenant_state].accessoryType = 0;
     }
 }
-- (NSInteger)accessoryType { return [self charon_state].accessoryType; }
-- (void)setAccessoryType:(NSInteger)accessoryType { [self charon_state].accessoryType = accessoryType; }
-- (BOOL)showsDisclosureIndicator { return [self charon_state].showsDisclosureIndicator; }
-- (void)setShowsDisclosureIndicator:(BOOL)shows { [self charon_state].showsDisclosureIndicator = shows; }
-- (id)userInfo { return [self charon_state].userInfo; }
-- (void)setUserInfo:(id)userInfo { [self charon_state].userInfo = userInfo; }
-- (id)handler { return [self charon_state].handler; }
-- (void)setHandler:(id)handler { [self charon_state].handler = handler; }
-- (BOOL)isExplicitContent { return [self charon_state].explicitContent; }
-- (void)setExplicitContent:(BOOL)explicitContent { [self charon_state].explicitContent = explicitContent; }
-- (double)playbackProgress { return [self charon_state].playbackProgress; }
-- (void)setPlaybackProgress:(double)progress { [self charon_state].playbackProgress = progress; }
-- (BOOL)isPlaying { return [self charon_state].playing; }
-- (void)setPlaying:(BOOL)playing { [self charon_state].playing = playing; }
-- (NSInteger)playingIndicatorLocation { return [self charon_state].playingIndicatorLocation; }
-- (void)setPlayingIndicatorLocation:(NSInteger)location { [self charon_state].playingIndicatorLocation = location; }
-- (BOOL)isEnabled { return [self charon_state].enabled; }
-- (void)setEnabled:(BOOL)enabled { [self charon_state].enabled = enabled; }
-- (BOOL)isShowingExplicitLabel { return [self charon_state].showsExplicitLabel; }
-- (void)setShowsExplicitLabel:(BOOL)shows { [self charon_state].showsExplicitLabel = shows; }
+- (NSInteger)accessoryType { return [self revenant_state].accessoryType; }
+- (void)setAccessoryType:(NSInteger)accessoryType { [self revenant_state].accessoryType = accessoryType; }
+- (BOOL)showsDisclosureIndicator { return [self revenant_state].showsDisclosureIndicator; }
+- (void)setShowsDisclosureIndicator:(BOOL)shows { [self revenant_state].showsDisclosureIndicator = shows; }
+- (id)userInfo { return [self revenant_state].userInfo; }
+- (void)setUserInfo:(id)userInfo { [self revenant_state].userInfo = userInfo; }
+- (id)handler { return [self revenant_state].handler; }
+- (void)setHandler:(id)handler { [self revenant_state].handler = handler; }
+- (BOOL)isExplicitContent { return [self revenant_state].explicitContent; }
+- (void)setExplicitContent:(BOOL)explicitContent { [self revenant_state].explicitContent = explicitContent; }
+- (double)playbackProgress { return [self revenant_state].playbackProgress; }
+- (void)setPlaybackProgress:(double)progress { [self revenant_state].playbackProgress = progress; }
+- (BOOL)isPlaying { return [self revenant_state].playing; }
+- (void)setPlaying:(BOOL)playing { [self revenant_state].playing = playing; }
+- (NSInteger)playingIndicatorLocation { return [self revenant_state].playingIndicatorLocation; }
+- (void)setPlayingIndicatorLocation:(NSInteger)location { [self revenant_state].playingIndicatorLocation = location; }
+- (BOOL)isEnabled { return [self revenant_state].enabled; }
+- (void)setEnabled:(BOOL)enabled { [self revenant_state].enabled = enabled; }
+- (BOOL)isShowingExplicitLabel { return [self revenant_state].showsExplicitLabel; }
+- (void)setShowsExplicitLabel:(BOOL)shows { [self revenant_state].showsExplicitLabel = shows; }
 
 + (CGSize)maximumImageSize
 {
     return CGSizeMake(60.0, 60.0);
 }
 
-- (void)charon_selected
+- (void)revenant_selected
 {
-    id handler = [self charon_state].handler;
+    id handler = [self revenant_state].handler;
     void (*call)(id, SEL, id, id) = (void (*)(id, SEL, id, id))objc_msgSend;
-    SEL selector = NSSelectorFromString(@"charon_call");
+    SEL selector = NSSelectorFromString(@"revenant_call");
     if (handler && [handler respondsToSelector:selector]) {
         call(handler, selector, self, ^{
         });
@@ -182,8 +182,8 @@
 
 @end
 
-@implementation CharonListItemHandler
-- (void)charon_call:(id)item completion:(id)completion { }
+@implementation RevenantListItemHandler
+- (void)revenant_call:(id)item completion:(id)completion { }
 @end
 
 @implementation CPListSection {
@@ -248,9 +248,9 @@
     _headerButton = headerButton;
 }
 
-- (void)charon_setHeaderSubtitle:(NSString *)headerSubtitle { _headerSubtitle = [headerSubtitle copy]; }
-- (void)charon_setHeaderImage:(UIImage *)headerImage { _headerImage = headerImage; }
-- (void)charon_setHeaderButton:(CPButton *)headerButton { _headerButton = headerButton; }
+- (void)revenant_setHeaderSubtitle:(NSString *)headerSubtitle { _headerSubtitle = [headerSubtitle copy]; }
+- (void)revenant_setHeaderImage:(UIImage *)headerImage { _headerImage = headerImage; }
+- (void)revenant_setHeaderButton:(CPButton *)headerButton { _headerButton = headerButton; }
 
 - (void)encodeWithCoder:(NSCoder *)coder
 {
@@ -279,28 +279,28 @@
 
 @end
 
-@interface CharonCarPlayBar : UIView
-@property (nonatomic, copy) NSArray<CPBarButton *> *charon_buttons;
+@interface RevenantCarPlayBar : UIView
+@property (nonatomic, copy) NSArray<CPBarButton *> *revenant_buttons;
 @end
 
-@implementation CharonCarPlayBar {
+@implementation RevenantCarPlayBar {
     NSArray<CPBarButton *> *_buttons;
 }
 
-@synthesize charon_buttons = _buttons;
+@synthesize revenant_buttons = _buttons;
 
 - (instancetype)initWithFrame:(CGRect)frame
 {
     self = [super initWithFrame:frame];
     if (self) {
         UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self
-                                                                                action:@selector(charon_tappedAtPoint:)];
+                                                                                action:@selector(revenant_tappedAtPoint:)];
         [self addGestureRecognizer:tap];
     }
     return self;
 }
 
-- (void)setCharon_buttons:(NSArray<CPBarButton *> *)buttons
+- (void)setRevenant_buttons:(NSArray<CPBarButton *> *)buttons
 {
     _buttons = [buttons copy] ?: @[];
     [self setNeedsDisplay];
@@ -315,15 +315,15 @@
             break;
         }
         if (button.isEnabled) {
-            [(CPBarButton *)button charon_drawInRect:CGRectMake(at, 0.0, width, CGRectGetHeight(rect)) alpha:1.0];
+            [(CPBarButton *)button revenant_drawInRect:CGRectMake(at, 0.0, width, CGRectGetHeight(rect)) alpha:1.0];
         } else {
-            [(CPBarButton *)button charon_drawInRect:CGRectMake(at, 0.0, width, CGRectGetHeight(rect)) alpha:0.4];
+            [(CPBarButton *)button revenant_drawInRect:CGRectMake(at, 0.0, width, CGRectGetHeight(rect)) alpha:0.4];
         }
         at += width;
     }
 }
 
-- (void)charon_tappedAtPoint:(UITapGestureRecognizer *)gesture
+- (void)revenant_tappedAtPoint:(UITapGestureRecognizer *)gesture
 {
     CGPoint point = [gesture locationInView:self];
     CGFloat width = MIN(88.0, CGRectGetWidth(self.bounds) / (CGFloat)MAX((NSUInteger)_buttons.count, 1U));
@@ -335,19 +335,19 @@
     if (!button.isEnabled) {
         return;
     }
-    [(CPBarButton *)button charon_tap];
+    [(CPBarButton *)button revenant_tap];
 }
 
 @end
 
-@interface CharonListSource : NSObject <UITableViewDataSource, UITableViewDelegate>
+@interface RevenantListSource : NSObject <UITableViewDataSource, UITableViewDelegate>
 + (instancetype)sourceForTemplate:(CPListTemplate *)template;
 @end
 
 static UINavigationBar *_listNavigationBar;
 
-@interface CPListTemplate (CharonRows)
-- (NSArray<CPListItem *> *)charon_items;
+@interface CPListTemplate (RevenantRows)
+- (NSArray<CPListItem *> *)revenant_items;
 @property (nonatomic, copy) NSString *title;
 @end
 
@@ -358,9 +358,9 @@ static UINavigationBar *_listNavigationBar;
     NSArray<NSString *> *_emptyViewSubtitleVariants;
     CPAssistantCellConfiguration *_assistantCellConfiguration;
     UITableViewController *_list;
-    CharonCarPlayBar *_charon_bar;
-    BOOL _charon_showsSpinnerWhileEmpty;
-    NSArray<CPGridButton *> *_charon_headerGridButtons;
+    RevenantCarPlayBar *_revenant_bar;
+    BOOL _revenant_showsSpinnerWhileEmpty;
+    NSArray<CPGridButton *> *_revenant_headerGridButtons;
 }
 
 @synthesize delegate = _delegate;
@@ -398,7 +398,7 @@ static UINavigationBar *_listNavigationBar;
 
 - (NSUInteger)itemCount
 {
-    return [self charon_items].count;
+    return [self revenant_items].count;
 }
 
 + (NSUInteger)maximumItemCount
@@ -432,7 +432,7 @@ static UINavigationBar *_listNavigationBar;
     return [NSIndexPath indexPathForRow:(NSInteger)row inSection:(NSInteger)section];
 }
 
-- (NSArray<CPListItem *> *)charon_items
+- (NSArray<CPListItem *> *)revenant_items
 {
     NSMutableArray *all = [NSMutableArray array];
     for (CPListSection *section in _sections) {
@@ -445,7 +445,7 @@ static UINavigationBar *_listNavigationBar;
     return all;
 }
 
-- (UIViewController *)charon_viewControllerForInterfaceController:(CPInterfaceController *)controller
+- (UIViewController *)revenant_viewControllerForInterfaceController:(CPInterfaceController *)controller
 {
     if (_list) {
         return _list;
@@ -466,20 +466,20 @@ static UINavigationBar *_listNavigationBar;
         [barItems addObject:[[UIBarButtonItem alloc] initWithTitle:button.title
                                                             style:UIBarButtonItemStylePlain
                                                            target:button
-                                                           action:@selector(charon_tap)]];
+                                                           action:@selector(revenant_tap)]];
     }
     barItems = [NSMutableArray array];
     for (CPBarButton *button in self.barButtons) {
         [barItems addObject:[[UIBarButtonItem alloc] initWithTitle:button.title
                                                             style:UIBarButtonItemStylePlain
                                                            target:button
-                                                           action:@selector(charon_tap)]];
+                                                           action:@selector(revenant_tap)]];
     }
     _listNavigationBar.topItem.leftBarButtonItems = barItems;
-    _list.tableView.dataSource = (id)[CharonListSource sourceForTemplate:self];
-    _list.tableView.delegate = (id)[CharonListSource sourceForTemplate:self];
+    _list.tableView.dataSource = (id)[RevenantListSource sourceForTemplate:self];
+    _list.tableView.delegate = (id)[RevenantListSource sourceForTemplate:self];
     if (_sections.count == 0) {
-        if (_charon_showsSpinnerWhileEmpty) {
+        if (_revenant_showsSpinnerWhileEmpty) {
             UIActivityIndicatorView *spinner =
                     [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhiteLarge];
             spinner.center = CGPointMake(CGRectGetMidX(_list.view.bounds), CGRectGetMidY(_list.view.bounds));
@@ -496,39 +496,39 @@ static UINavigationBar *_listNavigationBar;
             _list.tableView.backgroundView = label;
         }
     }
-    _charon_bar = [[CharonCarPlayBar alloc] initWithFrame:CGRectMake(0.0, 0.0, 176.0, 44.0)];
-    _charon_bar.charon_buttons = self.barButtons;
-    _charon_bar.backgroundColor = [UIColor clearColor];
-    [_list.view addSubview:_charon_bar];
+    _revenant_bar = [[RevenantCarPlayBar alloc] initWithFrame:CGRectMake(0.0, 0.0, 176.0, 44.0)];
+    _revenant_bar.revenant_buttons = self.barButtons;
+    _revenant_bar.backgroundColor = [UIColor clearColor];
+    [_list.view addSubview:_revenant_bar];
     return _list;
 }
 
 - (NSArray<CPBarButton *> *)barButtons
 {
-    return _charon_bar.charon_buttons ?: @[];
+    return _revenant_bar.revenant_buttons ?: @[];
 }
 
 - (void)setBarButtons:(NSArray<CPBarButton *> *)barButtons
 {
-    if (!_charon_bar) {
-        _charon_bar = [[CharonCarPlayBar alloc] initWithFrame:CGRectMake(0.0, 0.0, 176.0, 44.0)];
-        _charon_bar.backgroundColor = [UIColor clearColor];
+    if (!_revenant_bar) {
+        _revenant_bar = [[RevenantCarPlayBar alloc] initWithFrame:CGRectMake(0.0, 0.0, 176.0, 44.0)];
+        _revenant_bar.backgroundColor = [UIColor clearColor];
     }
-    _charon_bar.charon_buttons = barButtons;
+    _revenant_bar.revenant_buttons = barButtons;
 }
 
-- (BOOL)charon_showsSpinnerWhileEmpty { return _charon_showsSpinnerWhileEmpty; }
+- (BOOL)revenant_showsSpinnerWhileEmpty { return _revenant_showsSpinnerWhileEmpty; }
 
-- (void)charon_setShowsSpinnerWhileEmpty:(BOOL)showsSpinnerWhileEmpty
+- (void)revenant_setShowsSpinnerWhileEmpty:(BOOL)showsSpinnerWhileEmpty
 {
-    _charon_showsSpinnerWhileEmpty = showsSpinnerWhileEmpty;
+    _revenant_showsSpinnerWhileEmpty = showsSpinnerWhileEmpty;
 }
 
-- (NSArray<CPGridButton *> *)charon_headerGridButtons { return _charon_headerGridButtons; }
+- (NSArray<CPGridButton *> *)revenant_headerGridButtons { return _revenant_headerGridButtons; }
 
-- (void)charon_setHeaderGridButtons:(NSArray<CPGridButton *> *)headerGridButtons
+- (void)revenant_setHeaderGridButtons:(NSArray<CPGridButton *> *)headerGridButtons
 {
-    _charon_headerGridButtons = [headerGridButtons copy];
+    _revenant_headerGridButtons = [headerGridButtons copy];
 }
 
 - (void)encodeWithCoder:(NSCoder *)coder
@@ -552,13 +552,13 @@ static UINavigationBar *_listNavigationBar;
 
 @end
 
-@implementation CharonListSource {
+@implementation RevenantListSource {
     __weak CPListTemplate *_template;
 }
 
 + (instancetype)sourceForTemplate:(CPListTemplate *)template
 {
-    CharonListSource *source = [[CharonListSource alloc] init];
+    RevenantListSource *source = [[RevenantListSource alloc] init];
     source->_template = template;
     return source;
 }
@@ -588,7 +588,7 @@ static UINavigationBar *_listNavigationBar;
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    static NSString *const cellIdentifier = @"CharonCarPlayListRow";
+    static NSString *const cellIdentifier = @"RevenantCarPlayListRow";
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:cellIdentifier];
     if (!cell) {
         cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle
@@ -631,7 +631,7 @@ static UINavigationBar *_listNavigationBar;
     }
     NSArray<id<CPListTemplateItem>> *rows = sections[(NSUInteger)indexPath.section].items;
     if ((NSUInteger)indexPath.row < rows.count && [rows[(NSUInteger)indexPath.row] isKindOfClass:[CPListItem class]]) {
-        [(CPListItem *)rows[(NSUInteger)indexPath.row] charon_selected];
+        [(CPListItem *)rows[(NSUInteger)indexPath.row] revenant_selected];
     }
 }
 
@@ -641,7 +641,7 @@ static UINavigationBar *_listNavigationBar;
     NSArray<CPGridButton *> *_gridButtons;
     NSString *_title;
     UICollectionViewController *_grid;
-    CharonCarPlayBar *_charon_bar;
+    RevenantCarPlayBar *_revenant_bar;
 }
 
 - (instancetype)initWithTitle:(NSString *)title gridButtons:(NSArray<CPGridButton *> *)gridButtons
@@ -687,7 +687,7 @@ static UINavigationBar *_listNavigationBar;
     return self;
 }
 
-- (UIViewController *)charon_viewControllerForInterfaceController:(CPInterfaceController *)controller
+- (UIViewController *)revenant_viewControllerForInterfaceController:(CPInterfaceController *)controller
 {
     if (_grid) {
         return _grid;
@@ -699,38 +699,38 @@ static UINavigationBar *_listNavigationBar;
     _grid = [[UICollectionViewController alloc] initWithCollectionViewLayout:layout];
     _grid.title = _title;
     _grid.collectionView.backgroundColor = [UIColor blackColor];
-    _grid.collectionView.dataSource = (id)[CharonGridSource sourceForTemplate:self];
-    _grid.collectionView.delegate = (id)[CharonGridSource sourceForTemplate:self];
-    _charon_bar = [[CharonCarPlayBar alloc] initWithFrame:CGRectMake(0.0, 0.0, 176.0, 44.0)];
-    _charon_bar.charon_buttons = self.barButtons;
-    _charon_bar.backgroundColor = [UIColor clearColor];
-    [_grid.view addSubview:_charon_bar];
+    _grid.collectionView.dataSource = (id)[RevenantGridSource sourceForTemplate:self];
+    _grid.collectionView.delegate = (id)[RevenantGridSource sourceForTemplate:self];
+    _revenant_bar = [[RevenantCarPlayBar alloc] initWithFrame:CGRectMake(0.0, 0.0, 176.0, 44.0)];
+    _revenant_bar.revenant_buttons = self.barButtons;
+    _revenant_bar.backgroundColor = [UIColor clearColor];
+    [_grid.view addSubview:_revenant_bar];
     return _grid;
 }
 
 - (NSArray<CPBarButton *> *)barButtons
 {
-    return _charon_bar.charon_buttons ?: @[];
+    return _revenant_bar.revenant_buttons ?: @[];
 }
 
 - (void)setBarButtons:(NSArray<CPBarButton *> *)barButtons
 {
-    if (!_charon_bar) {
-        _charon_bar = [[CharonCarPlayBar alloc] initWithFrame:CGRectMake(0.0, 0.0, 176.0, 44.0)];
-        _charon_bar.backgroundColor = [UIColor clearColor];
+    if (!_revenant_bar) {
+        _revenant_bar = [[RevenantCarPlayBar alloc] initWithFrame:CGRectMake(0.0, 0.0, 176.0, 44.0)];
+        _revenant_bar.backgroundColor = [UIColor clearColor];
     }
-    _charon_bar.charon_buttons = barButtons;
+    _revenant_bar.revenant_buttons = barButtons;
 }
 
 @end
 
-@implementation CharonGridSource {
+@implementation RevenantGridSource {
     __weak CPGridTemplate *_template;
 }
 
 + (instancetype)sourceForTemplate:(CPGridTemplate *)template
 {
-    CharonGridSource *source = [[CharonGridSource alloc] init];
+    RevenantGridSource *source = [[RevenantGridSource alloc] init];
     source->_template = template;
     return source;
 }
@@ -743,7 +743,7 @@ static UINavigationBar *_listNavigationBar;
 - (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView
                   cellForItemAtIndexPath:(NSIndexPath *)indexPath
 {
-    static NSString *const cellIdentifier = @"CharonCarPlayGridButton";
+    static NSString *const cellIdentifier = @"RevenantCarPlayGridButton";
     UICollectionViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:cellIdentifier
                                                                           forIndexPath:indexPath];
     cell.backgroundColor = [UIColor clearColor];
@@ -757,7 +757,7 @@ static UINavigationBar *_listNavigationBar;
     NSArray<CPGridButton *> *buttons = _template.gridButtons;
     if ((NSUInteger)indexPath.item < buttons.count) {
         CPGridButton *button = buttons[(NSUInteger)indexPath.item];
-        [(CPGridButton *)button charon_drawInRect:cell.contentView.bounds];
+        [(CPGridButton *)button revenant_drawInRect:cell.contentView.bounds];
     }
     return cell;
 }
@@ -766,16 +766,16 @@ static UINavigationBar *_listNavigationBar;
 {
     NSArray<CPGridButton *> *buttons = _template.gridButtons;
     if ((NSUInteger)indexPath.item < buttons.count) {
-        [(CPGridButton *)buttons[(NSUInteger)indexPath.item] charon_tap];
+        [(CPGridButton *)buttons[(NSUInteger)indexPath.item] revenant_tap];
     }
 }
 
 @end
 
-@interface CharonCarPlayAlertCard : UIView
+@interface RevenantCarPlayAlertCard : UIView
 @end
 
-@implementation CharonCarPlayAlertCard
+@implementation RevenantCarPlayAlertCard
 @end
 
 @implementation CPMapTemplate {
@@ -789,14 +789,14 @@ static UINavigationBar *_listNavigationBar;
     CPImageSet *_mapImageSet;
     NSString *_title;
     MKMapView *_mapView;
-    CharonCarPlayBar *_charon_bar;
-    CharonMapButtons *_charon_map_buttons;
+    RevenantCarPlayBar *_revenant_bar;
+    RevenantMapButtons *_revenant_map_buttons;
     id _navigationSession;
-    CPNavigationAlert *_charon_navigationAlert;
-    NSArray *_charon_tripPreviews;
-    CPTrip *_charon_selectedTrip;
-    NSMutableDictionary *_charon_estimates;
-    CPTimeRemainingColor _charon_timeRemainingColor;
+    CPNavigationAlert *_revenant_navigationAlert;
+    NSArray *_revenant_tripPreviews;
+    CPTrip *_revenant_selectedTrip;
+    NSMutableDictionary *_revenant_estimates;
+    CPTimeRemainingColor _revenant_timeRemainingColor;
 }
 
 @synthesize guidanceBackgroundColor = _guidanceBackgroundColor;
@@ -821,34 +821,34 @@ static UINavigationBar *_listNavigationBar;
 
 - (NSArray<CPBarButton *> *)barButtons
 {
-    return _charon_bar.charon_buttons ?: @[];
+    return _revenant_bar.revenant_buttons ?: @[];
 }
 
 - (void)setBarButtons:(NSArray<CPBarButton *> *)barButtons
 {
-    if (!_charon_bar) {
-        _charon_bar = [[CharonCarPlayBar alloc] initWithFrame:CGRectMake(0.0, 0.0, 176.0, 44.0)];
-        _charon_bar.backgroundColor = [UIColor clearColor];
+    if (!_revenant_bar) {
+        _revenant_bar = [[RevenantCarPlayBar alloc] initWithFrame:CGRectMake(0.0, 0.0, 176.0, 44.0)];
+        _revenant_bar.backgroundColor = [UIColor clearColor];
     }
-    _charon_bar.charon_buttons = barButtons;
+    _revenant_bar.revenant_buttons = barButtons;
 }
 
-- (UIViewController *)charon_viewControllerForInterfaceController:(CPInterfaceController *)controller
+- (UIViewController *)revenant_viewControllerForInterfaceController:(CPInterfaceController *)controller
 {
     if (_mapView) {
         return (UIViewController *)_mapView;
     }
     _mapView = [[MKMapView alloc] initWithFrame:CGRectMake(0.0, 0.0, 1024.0, 600.0)];
     _mapView.mapType = MKMapTypeStandard;
-    _charon_map_buttons = [[CharonMapButtons alloc] initWithFrame:CGRectMake(0.0, 460.0, 1024.0, 120.0)];
-    _charon_map_buttons.charon_buttons = _mapButtons;
-    _charon_map_buttons.backgroundColor = [UIColor clearColor];
-    _charon_map_buttons.frame = CGRectMake(0.0, 440.0, 1024.0, 140.0);
-    [_mapView addSubview:_charon_map_buttons];
-    _charon_bar = [[CharonCarPlayBar alloc] initWithFrame:CGRectMake(0.0, 0.0, 176.0, 44.0)];
-    _charon_bar.charon_buttons = self.barButtons;
-    _charon_bar.backgroundColor = [UIColor clearColor];
-    [_mapView addSubview:_charon_bar];
+    _revenant_map_buttons = [[RevenantMapButtons alloc] initWithFrame:CGRectMake(0.0, 460.0, 1024.0, 120.0)];
+    _revenant_map_buttons.revenant_buttons = _mapButtons;
+    _revenant_map_buttons.backgroundColor = [UIColor clearColor];
+    _revenant_map_buttons.frame = CGRectMake(0.0, 440.0, 1024.0, 140.0);
+    [_mapView addSubview:_revenant_map_buttons];
+    _revenant_bar = [[RevenantCarPlayBar alloc] initWithFrame:CGRectMake(0.0, 0.0, 176.0, 44.0)];
+    _revenant_bar.revenant_buttons = self.barButtons;
+    _revenant_bar.backgroundColor = [UIColor clearColor];
+    [_mapView addSubview:_revenant_bar];
     UINavigationBar *bar = [[UINavigationBar alloc] initWithFrame:CGRectMake(0.0, 0.0, 1024.0, 44.0)];
     bar.barStyle = UIBarStyleBlack;
     bar.translucent = YES;
@@ -856,7 +856,7 @@ static UINavigationBar *_listNavigationBar;
     return (UIViewController *)_mapView;
 }
 
-- (void)charon_showCurrentAlert
+- (void)revenant_showCurrentAlert
 {
     CPNavigationAlert *alert = _currentNavigationAlert;
     if (!alert || !_mapView) {
@@ -865,7 +865,7 @@ static UINavigationBar *_listNavigationBar;
     NSString *title = alert.titleVariants.firstObject ?: @"";
     NSString *subtitle = alert.subtitleVariants.firstObject ?: @"";
     CGSize size = CGSizeMake(420.0, 96.0);
-    CharonCarPlayAlertCard *card = [[CharonCarPlayAlertCard alloc]
+    RevenantCarPlayAlertCard *card = [[RevenantCarPlayAlertCard alloc]
         initWithFrame:CGRectMake(20.0, 20.0, size.width, size.height)];
     card.backgroundColor = _guidanceBackgroundColor;
     card.layer.cornerRadius = 10.0;
@@ -877,108 +877,108 @@ static UINavigationBar *_listNavigationBar;
     [_mapView addSubview:card];
 }
 
-- (UIView *)charon_mapView
+- (UIView *)revenant_mapView
 {
     return _mapView;
 }
 
-- (CPNavigationAlert *)charon_navigationAlert
+- (CPNavigationAlert *)revenant_navigationAlert
 {
-    return _charon_navigationAlert;
+    return _revenant_navigationAlert;
 }
 
-- (void)charon_setNavigationAlert:(CPNavigationAlert *)alert
+- (void)revenant_setNavigationAlert:(CPNavigationAlert *)alert
 {
-    _charon_navigationAlert = alert;
+    _revenant_navigationAlert = alert;
     if (alert == nil) {
         _currentNavigationAlert = nil;
         for (UIView *sub in [_mapView.subviews copy]) {
-            if ([sub isKindOfClass:[CharonCarPlayAlertCard class]]) {
+            if ([sub isKindOfClass:[RevenantCarPlayAlertCard class]]) {
                 [sub removeFromSuperview];
             }
         }
         return;
     }
     _currentNavigationAlert = alert;
-    [self charon_showCurrentAlert];
+    [self revenant_showCurrentAlert];
 }
 
-- (UIView *)charon_mapButtons
+- (UIView *)revenant_mapButtons
 {
-    return _charon_map_buttons;
+    return _revenant_map_buttons;
 }
 
-- (BOOL)charon_panningInterfaceVisible
+- (BOOL)revenant_panningInterfaceVisible
 {
     return _panningInterfaceVisible;
 }
 
-- (void)charon_setPanningInterfaceVisible:(BOOL)visible
+- (void)revenant_setPanningInterfaceVisible:(BOOL)visible
 {
     _panningInterfaceVisible = visible;
 }
 
-- (NSArray *)charon_tripPreviews
+- (NSArray *)revenant_tripPreviews
 {
-    return _charon_tripPreviews;
+    return _revenant_tripPreviews;
 }
 
-- (void)charon_setTripPreviews:(NSArray *)previews selectedTrip:(CPTrip *)selectedTrip
+- (void)revenant_setTripPreviews:(NSArray *)previews selectedTrip:(CPTrip *)selectedTrip
 {
-    _charon_tripPreviews = [previews copy];
-    _charon_selectedTrip = selectedTrip;
+    _revenant_tripPreviews = [previews copy];
+    _revenant_selectedTrip = selectedTrip;
 }
 
-- (CPTrip *)charon_selectedTrip
+- (CPTrip *)revenant_selectedTrip
 {
-    return _charon_selectedTrip;
+    return _revenant_selectedTrip;
 }
 
-- (void)charon_setEstimates:(CPTravelEstimates *)estimates forTrip:(CPTrip *)trip
+- (void)revenant_setEstimates:(CPTravelEstimates *)estimates forTrip:(CPTrip *)trip
 {
-    if (_charon_estimates == nil) {
-        _charon_estimates = [NSMutableDictionary dictionary];
+    if (_revenant_estimates == nil) {
+        _revenant_estimates = [NSMutableDictionary dictionary];
     }
     if (trip == nil) {
         return;
     }
-    _charon_estimates[trip] = estimates;
+    _revenant_estimates[trip] = estimates;
 }
 
-- (CPTravelEstimates *)charon_estimatesForTrip:(CPTrip *)trip
+- (CPTravelEstimates *)revenant_estimatesForTrip:(CPTrip *)trip
 {
-    return trip == nil ? nil : _charon_estimates[trip];
+    return trip == nil ? nil : _revenant_estimates[trip];
 }
 
-- (void)charon_setTimeRemainingColor:(CPTimeRemainingColor)color
+- (void)revenant_setTimeRemainingColor:(CPTimeRemainingColor)color
 {
-    _charon_timeRemainingColor = color;
+    _revenant_timeRemainingColor = color;
 }
 
-- (CPTimeRemainingColor)charon_timeRemainingColor
+- (CPTimeRemainingColor)revenant_timeRemainingColor
 {
-    return _charon_timeRemainingColor;
+    return _revenant_timeRemainingColor;
 }
 
-- (id)charon_navigationSession
+- (id)revenant_navigationSession
 {
     return _navigationSession;
 }
 
-- (void)charon_setNavigationSession:(id)session
+- (void)revenant_setNavigationSession:(id)session
 {
     _navigationSession = session;
 }
 
 @end
 
-@implementation CharonMapButtons {
+@implementation RevenantMapButtons {
     NSArray<CPMapButton *> *_buttons;
 }
 
-@synthesize charon_buttons = _buttons;
+@synthesize revenant_buttons = _buttons;
 
-- (void)setCharon_buttons:(NSArray<CPMapButton *> *)buttons
+- (void)setRevenant_buttons:(NSArray<CPMapButton *> *)buttons
 {
     _buttons = [buttons copy] ?: @[];
     [self setNeedsDisplay];
@@ -992,12 +992,12 @@ static UINavigationBar *_listNavigationBar;
         if (at + size > CGRectGetWidth(rect)) {
             break;
         }
-        [(CPMapButton *)button charon_drawInRect:CGRectMake(at, 0.0, size, size)];
+        [(CPMapButton *)button revenant_drawInRect:CGRectMake(at, 0.0, size, size)];
         at += size + 12.0;
     }
 }
 
-- (void)charon_tappedAtPoint:(UITapGestureRecognizer *)gesture
+- (void)revenant_tappedAtPoint:(UITapGestureRecognizer *)gesture
 {
     CGPoint point = [gesture locationInView:self];
     CGFloat size = 88.0;
@@ -1009,7 +1009,7 @@ static UINavigationBar *_listNavigationBar;
     if (button.isHidden || !button.isEnabled) {
         return;
     }
-    [(CPMapButton *)button charon_tap];
+    [(CPMapButton *)button revenant_tap];
 }
 
 @end
@@ -1066,7 +1066,7 @@ static UINavigationBar *_listNavigationBar;
     if (rootTemplate) {
         [_stack addObject:rootTemplate];
     }
-    [self charon_showTop];
+    [self revenant_showTop];
     [self templateWillAppear:rootTemplate animated:animated];
     [self templateDidAppear:rootTemplate animated:animated];
     if (completion) {
@@ -1087,8 +1087,8 @@ static UINavigationBar *_listNavigationBar;
         [self templateWillDisappear:below animated:animated];
     }
     [_stack addObject:templateToPush];
-    [CharonCarPlayInterface current].controller = self;
-    [self charon_showTop];
+    [RevenantCarPlayInterface current].controller = self;
+    [self revenant_showTop];
     [self templateWillAppear:templateToPush animated:animated];
     [self templateDidAppear:templateToPush animated:animated];
     if (completion) {
@@ -1107,7 +1107,7 @@ static UINavigationBar *_listNavigationBar;
     }
     [self templateWillDisappear:going animated:animated];
     [_stack removeLastObject];
-    [self charon_showTop];
+    [self revenant_showTop];
     [self templateDidDisappear:going animated:animated];
     CPTemplate *now = self.topTemplate;
     if (now) {
@@ -1123,7 +1123,7 @@ static UINavigationBar *_listNavigationBar;
     while (_stack.count > 1) {
         [_stack removeLastObject];
     }
-    [self charon_showTop];
+    [self revenant_showTop];
     CPTemplate *now = self.topTemplate;
     if (now) {
         [self templateDidAppear:now animated:animated];
@@ -1145,7 +1145,7 @@ static UINavigationBar *_listNavigationBar;
     while (_stack.count > index + 1) {
         [_stack removeLastObject];
     }
-    [self charon_showTop];
+    [self revenant_showTop];
     if (completion) {
         completion(YES, nil);
     }
@@ -1196,7 +1196,7 @@ static UINavigationBar *_listNavigationBar;
     [self dismissTemplateAnimated:animated completion:nil];
 }
 
-- (void)charon_showTop
+- (void)revenant_showTop
 {
     CPWindow *window = [self contentWindow];
     for (UIView *view in window.subviews) {
@@ -1206,7 +1206,7 @@ static UINavigationBar *_listNavigationBar;
     if (!top) {
         return;
     }
-    UIViewController *controller = [top charon_viewControllerForInterfaceController:self];
+    UIViewController *controller = [top revenant_viewControllerForInterfaceController:self];
     if (controller) {
         window.rootViewController = controller;
         [window makeKeyAndVisible];

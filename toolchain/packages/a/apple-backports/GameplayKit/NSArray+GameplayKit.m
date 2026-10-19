@@ -1,4 +1,4 @@
-#import "CharonGK.h"
+#import "RevenantGK.h"
 
 @implementation NSArray (GameplayKit)
 

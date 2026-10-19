@@ -14,7 +14,7 @@
 #include <span>
 #include <string_view>
 
-namespace shade::kernel_iokit::audio {
+namespace emulator::kernel_iokit::audio {
 
 enum class IOAudio2StreamDirection { Input, Output };
 

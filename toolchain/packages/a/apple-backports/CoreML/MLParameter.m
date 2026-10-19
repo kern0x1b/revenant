@@ -1,14 +1,14 @@
 #import <CoreML/CoreML.h>
 
-#include "CharonMLBridge.h"
-#include "CharonMLInternal.h"
+#include "RevenantMLBridge.h"
+#include "RevenantMLInternal.h"
 
 @implementation MLKey {
     NSString *_name;
     NSString *_scope;
 }
 
-- (instancetype)charon_initWithName:(NSString *)name scope:(NSString *)scope
+- (instancetype)revenant_initWithName:(NSString *)name scope:(NSString *)scope
 {
     MLKey *built = [super init];
     if (built != nil) {
@@ -51,7 +51,7 @@
 
 - (id)copyWithZone:(NSZone *)zone
 {
-    MLKey *copy = [[[self class] allocWithZone:zone] charon_initWithName:self.name scope:self.scope];
+    MLKey *copy = [[[self class] allocWithZone:zone] revenant_initWithName:self.name scope:self.scope];
     return copy;
 }
 
@@ -62,7 +62,7 @@
 
 - (instancetype)initWithCoder:(NSCoder *)coder
 {
-    return [self charon_initWithName:[coder decodeObjectOfClass:[NSString class] forKey:@"name"]
+    return [self revenant_initWithName:[coder decodeObjectOfClass:[NSString class] forKey:@"name"]
                                scope:[coder decodeObjectOfClass:[NSString class] forKey:@"scope"]];
 }
 
@@ -72,12 +72,12 @@
     [coder encodeObject:_scope forKey:@"scope"];
 }
 
-+ (instancetype)charon_keyNamed:(NSString *)name
++ (instancetype)revenant_keyNamed:(NSString *)name
 {
     if (name == nil) {
         return nil;
     }
-    return [[[self class] alloc] charon_initWithName:name scope:nil];
+    return [[[self class] alloc] revenant_initWithName:name scope:nil];
 }
 
 @end
@@ -86,72 +86,72 @@
 
 + (MLParameterKey *)learningRate
 {
-    return [self charon_keyNamed:@"learningRate"];
+    return [self revenant_keyNamed:@"learningRate"];
 }
 
 + (MLParameterKey *)momentum
 {
-    return [self charon_keyNamed:@"momentum"];
+    return [self revenant_keyNamed:@"momentum"];
 }
 
 + (MLParameterKey *)miniBatchSize
 {
-    return [self charon_keyNamed:@"miniBatchSize"];
+    return [self revenant_keyNamed:@"miniBatchSize"];
 }
 
 + (MLParameterKey *)beta1
 {
-    return [self charon_keyNamed:@"beta1"];
+    return [self revenant_keyNamed:@"beta1"];
 }
 
 + (MLParameterKey *)beta2
 {
-    return [self charon_keyNamed:@"beta2"];
+    return [self revenant_keyNamed:@"beta2"];
 }
 
 + (MLParameterKey *)eps
 {
-    return [self charon_keyNamed:@"eps"];
+    return [self revenant_keyNamed:@"eps"];
 }
 
 + (MLParameterKey *)epochs
 {
-    return [self charon_keyNamed:@"epochs"];
+    return [self revenant_keyNamed:@"epochs"];
 }
 
 + (MLParameterKey *)shuffle
 {
-    return [self charon_keyNamed:@"shuffle"];
+    return [self revenant_keyNamed:@"shuffle"];
 }
 
 + (MLParameterKey *)seed
 {
-    return [self charon_keyNamed:@"seed"];
+    return [self revenant_keyNamed:@"seed"];
 }
 
 + (MLParameterKey *)numberOfNeighbors
 {
-    return [self charon_keyNamed:@"numberOfNeighbors"];
+    return [self revenant_keyNamed:@"numberOfNeighbors"];
 }
 
 + (MLParameterKey *)linkedModelFileName
 {
-    return [self charon_keyNamed:@"linkedModelFileName"];
+    return [self revenant_keyNamed:@"linkedModelFileName"];
 }
 
 + (MLParameterKey *)linkedModelSearchPath
 {
-    return [self charon_keyNamed:@"linkedModelSearchPath"];
+    return [self revenant_keyNamed:@"linkedModelSearchPath"];
 }
 
 + (MLParameterKey *)weights
 {
-    return [self charon_keyNamed:@"weights"];
+    return [self revenant_keyNamed:@"weights"];
 }
 
 + (MLParameterKey *)biases
 {
-    return [self charon_keyNamed:@"biases"];
+    return [self revenant_keyNamed:@"biases"];
 }
 
 - (MLParameterKey *)scopedTo:(NSString *)scope
@@ -159,7 +159,7 @@
     if (scope == nil) {
         return nil;
     }
-    return [[MLParameterKey alloc] charon_initWithName:self.name scope:scope];
+    return [[MLParameterKey alloc] revenant_initWithName:self.name scope:scope];
 }
 
 @end
@@ -168,17 +168,17 @@
 
 + (MLMetricKey *)lossValue
 {
-    return [self charon_keyNamed:@"lossValue"];
+    return [self revenant_keyNamed:@"lossValue"];
 }
 
 + (MLMetricKey *)epochIndex
 {
-    return [self charon_keyNamed:@"epochIndex"];
+    return [self revenant_keyNamed:@"epochIndex"];
 }
 
 + (MLMetricKey *)miniBatchIndex
 {
-    return [self charon_keyNamed:@"miniBatchIndex"];
+    return [self revenant_keyNamed:@"miniBatchIndex"];
 }
 
 @end
@@ -189,7 +189,7 @@
     MLNumericConstraint *_numericConstraint;
 }
 
-- (instancetype)charon_initWithKey:(MLParameterKey *)key
+- (instancetype)revenant_initWithKey:(MLParameterKey *)key
                defaultValue:(id)defaultValue
           numericConstraint:(MLNumericConstraint *)numericConstraint
 {

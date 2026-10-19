@@ -2,7 +2,7 @@
 
 #pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
 
-@implementation CXCallDirectoryManager (CharonOpenSettings)
+@implementation CXCallDirectoryManager (RevenantOpenSettings)
 
 - (void)openSettingsWithCompletionHandler:(void (^)(NSError *error))completion
 {

@@ -9,7 +9,7 @@
 	<key>CFBundleExecutable</key>
 	<string>touchtypes</string>
 	<key>CFBundleIdentifier</key>
-	<string>local.charon.backports.touchtypes</string>
+	<string>local.revenant.backports.touchtypes</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>

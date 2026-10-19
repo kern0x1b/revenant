@@ -1,9 +1,9 @@
-#import "CharonOSSignpost.h"
-#import "CharonOSLog.h"
+#import "RevenantOSSignpost.h"
+#import "RevenantOSLog.h"
 #import <objc/runtime.h>
 #import <mach/mach_time.h>
 
-@implementation CharonSignpostInterval
+@implementation RevenantSignpostInterval
 
 @synthesize name = _name;
 @synthesize subsystem = _subsystem;
@@ -13,9 +13,9 @@
 
 @end
 
-@implementation CharonSignpostStore
+@implementation RevenantSignpostStore
 
-static NSMutableArray<CharonSignpostInterval *> *charon_intervals(void)
+static NSMutableArray<RevenantSignpostInterval *> *revenant_intervals(void)
 {
     static NSMutableArray *intervals;
     static dispatch_once_t once;
@@ -25,7 +25,7 @@ static NSMutableArray<CharonSignpostInterval *> *charon_intervals(void)
     return intervals;
 }
 
-static NSMutableDictionary<NSNumber *, NSMutableDictionary *> *charon_open(void)
+static NSMutableDictionary<NSNumber *, NSMutableDictionary *> *revenant_open(void)
 {
     static NSMutableDictionary *open;
     static dispatch_once_t once;
@@ -35,7 +35,7 @@ static NSMutableDictionary<NSNumber *, NSMutableDictionary *> *charon_open(void)
     return open;
 }
 
-static NSTimeInterval charon_monotonic(void)
+static NSTimeInterval revenant_monotonic(void)
 {
     static mach_timebase_info_data_t info;
     static dispatch_once_t once;
@@ -47,17 +47,17 @@ static NSTimeInterval charon_monotonic(void)
     return (NSTimeInterval)seconds;
 }
 
-static void charon_handleNames(os_log_t log, NSString **subsystem, NSString **category)
+static void revenant_handleNames(os_log_t log, NSString **subsystem, NSString **category)
 {
-    id handle = (CHARON_OS_LOG_BRIDGE id)log;
-    CharonOSLog *own = [handle isKindOfClass:[CharonOSLog class]] ? (CharonOSLog *)handle : nil;
+    id handle = (REVENANT_OS_LOG_BRIDGE id)log;
+    RevenantOSLog *own = [handle isKindOfClass:[RevenantOSLog class]] ? (RevenantOSLog *)handle : nil;
     *subsystem = own && own->_subsystem ? @(own->_subsystem) : @"";
     *category = own && own->_category ? @(own->_category) : @"";
 }
 
-static CharonSignpostInterval *charon_begin_record(NSDictionary *begin, const char *name)
+static RevenantSignpostInterval *revenant_begin_record(NSDictionary *begin, const char *name)
 {
-    CharonSignpostInterval *interval = [[CharonSignpostInterval alloc] init];
+    RevenantSignpostInterval *interval = [[RevenantSignpostInterval alloc] init];
     interval.name = name && *name ? @(name) : @"";
     interval.subsystem = begin[@"subsystem"] ?: @"";
     interval.category = begin[@"category"] ?: @"";
@@ -66,76 +66,76 @@ static CharonSignpostInterval *charon_begin_record(NSDictionary *begin, const ch
     return interval;
 }
 
-+ (void)takePointer:(void *)pointer forInterval:(CharonSignpostInterval *)interval
++ (void)takePointer:(void *)pointer forInterval:(RevenantSignpostInterval *)interval
 {
-    objc_setAssociatedObject(interval, @selector(CharonSignpostSnapshot), (__bridge id)pointer, OBJC_ASSOCIATION_ASSIGN);
+    objc_setAssociatedObject(interval, @selector(RevenantSignpostSnapshot), (__bridge id)pointer, OBJC_ASSOCIATION_ASSIGN);
 }
 
-+ (NSArray<CharonSignpostInterval *> *)intervals
++ (NSArray<RevenantSignpostInterval *> *)intervals
 {
-    @synchronized (charon_intervals()) {
-        return [charon_intervals() copy];
+    @synchronized (revenant_intervals()) {
+        return [revenant_intervals() copy];
     }
 }
 
 + (void)recordBeginFor:(os_signpost_id_t)spid log:(os_log_t)log name:(const char *)name
 {
     NSString *subsystem = nil, *category = nil;
-    charon_handleNames(log, &subsystem, &category);
+    revenant_handleNames(log, &subsystem, &category);
     NSMutableDictionary *begin = [NSMutableDictionary dictionary];
     begin[@"subsystem"] = subsystem;
     begin[@"category"] = category;
-    begin[@"at"] = @(charon_monotonic());
+    begin[@"at"] = @(revenant_monotonic());
     begin[@"name"] = name && *name ? @(name) : @"";
-    @synchronized (charon_open()) {
-        charon_open()[@(spid)] = begin;
+    @synchronized (revenant_open()) {
+        revenant_open()[@(spid)] = begin;
     }
 }
 
 + (void)recordEndFor:(os_signpost_id_t)spid log:(os_log_t)log name:(const char *)name
 {
     NSDictionary *begin = nil;
-    @synchronized (charon_open()) {
-        begin = charon_open()[@(spid)];
+    @synchronized (revenant_open()) {
+        begin = revenant_open()[@(spid)];
         if (begin)
-            [charon_open() removeObjectForKey:@(spid)];
+            [revenant_open() removeObjectForKey:@(spid)];
     }
     if (!begin)
         return;
-    CharonSignpostInterval *interval = charon_begin_record(begin, [begin[@"name"] UTF8String]);
-    interval.seconds = charon_monotonic() - [begin[@"at"] doubleValue];
+    RevenantSignpostInterval *interval = revenant_begin_record(begin, [begin[@"name"] UTF8String]);
+    interval.seconds = revenant_monotonic() - [begin[@"at"] doubleValue];
     interval.name = name && *name ? @(name) : interval.name;
-    @synchronized (charon_intervals()) {
-        [charon_intervals() addObject:interval];
+    @synchronized (revenant_intervals()) {
+        [revenant_intervals() addObject:interval];
     }
 }
 
 + (void)recordEventFor:(os_signpost_id_t)spid log:(os_log_t)log name:(const char *)name
 {
     NSString *subsystem = nil, *category = nil;
-    charon_handleNames(log, &subsystem, &category);
+    revenant_handleNames(log, &subsystem, &category);
     NSDictionary *begin = @{ @"subsystem": subsystem, @"category": category };
-    CharonSignpostInterval *event = charon_begin_record(begin, name);
+    RevenantSignpostInterval *event = revenant_begin_record(begin, name);
     event.seconds = 0.0;
     event.count = 1;
-    @synchronized (charon_intervals()) {
-        [charon_intervals() addObject:event];
+    @synchronized (revenant_intervals()) {
+        [revenant_intervals() addObject:event];
     }
 }
 
 + (void)reset
 {
-    @synchronized (charon_open()) {
-        [charon_open() removeAllObjects];
+    @synchronized (revenant_open()) {
+        [revenant_open() removeAllObjects];
     }
-    @synchronized (charon_intervals()) {
-        [charon_intervals() removeAllObjects];
+    @synchronized (revenant_intervals()) {
+        [revenant_intervals() removeAllObjects];
     }
 }
 
 @end
 
-static os_signpost_id_t charon_next_id(void)
+static os_signpost_id_t revenant_next_id(void)
 {
     static uint64_t counter;
     static dispatch_once_t once;
@@ -143,7 +143,7 @@ static os_signpost_id_t charon_next_id(void)
         counter = 1;
     });
     uint64_t value;
-    @synchronized ([CharonSignpostStore class]) {
+    @synchronized ([RevenantSignpostStore class]) {
         value = counter++;
     }
     return (os_signpost_id_t)value;
@@ -151,7 +151,7 @@ static os_signpost_id_t charon_next_id(void)
 
 os_signpost_id_t os_signpost_id_generate(os_log_t log)
 {
-    return charon_next_id();
+    return revenant_next_id();
 }
 
 os_signpost_id_t os_signpost_id_make_with_pointer(os_log_t log, const void *ptr)

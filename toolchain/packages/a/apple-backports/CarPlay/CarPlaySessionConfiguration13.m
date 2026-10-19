@@ -1,11 +1,11 @@
 #import <CarPlay/CarPlay.h>
-#import "CharonCarPlaySessionConfiguration.h"
+#import "RevenantCarPlaySessionConfiguration.h"
 
-@implementation CPSessionConfiguration (CharonContentStyle13)
+@implementation CPSessionConfiguration (RevenantContentStyle13)
 
 - (CPContentStyle)contentStyle
 {
-    return [self charon_contentStyle];
+    return [self revenant_contentStyle];
 }
 
 @end

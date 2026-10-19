@@ -12,7 +12,7 @@
 
 #include "network/darwin_network_abi.hpp"
 
-namespace shade::darwin::network::apple80211_driver {
+namespace emulator::darwin::network::apple80211_driver {
 namespace {
 
     constexpr std::size_t legacy_bitmask_size = sizeof(std::uint16_t);

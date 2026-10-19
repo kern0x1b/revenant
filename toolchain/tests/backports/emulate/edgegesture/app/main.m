@@ -1,11 +1,11 @@
 #import <UIKit/UIKit.h>
 #include <stdio.h>
 
-@interface CharonEdgeProbeDelegate : UIResponder <UIApplicationDelegate>
+@interface RevenantEdgeProbeDelegate : UIResponder <UIApplicationDelegate>
 @property (strong, nonatomic) UIWindow *window;
 @end
 
-@implementation CharonEdgeProbeDelegate
+@implementation RevenantEdgeProbeDelegate
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)options
 {
@@ -24,6 +24,6 @@
 int main(int argc, char *argv[])
 {
     @autoreleasepool {
-        return UIApplicationMain(argc, argv, nil, NSStringFromClass([CharonEdgeProbeDelegate class]));
+        return UIApplicationMain(argc, argv, nil, NSStringFromClass([RevenantEdgeProbeDelegate class]));
     }
 }

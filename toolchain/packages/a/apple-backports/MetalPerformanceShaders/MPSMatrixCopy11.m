@@ -1,4 +1,4 @@
-#import "CharonMPS.h"
+#import "RevenantMPS.h"
 
 
 @implementation MPSMatrixCopy {
@@ -55,28 +55,28 @@
          columnPermuteIndices:(MPSVector *)columnPermuteIndices
           columnPermuteOffset:(NSUInteger)columnPermuteOffset
 {
-    if (!CharonMPSCommandBufferPermits(commandBuffer))
+    if (!RevenantMPSCommandBufferPermits(commandBuffer))
         return;
-    for (NSUInteger index = 0; index < [copyDescriptor charon_mps_count]; index++) {
-        MPSMatrix *source = [copyDescriptor charon_mps_sourceAtIndex:index];
-        MPSMatrix *destination = [copyDescriptor charon_mps_destinationAtIndex:index];
-        MPSMatrixCopyOffsets offsets = [copyDescriptor charon_mps_offsetsAtIndex:index];
+    for (NSUInteger index = 0; index < [copyDescriptor revenant_mps_count]; index++) {
+        MPSMatrix *source = [copyDescriptor revenant_mps_sourceAtIndex:index];
+        MPSMatrix *destination = [copyDescriptor revenant_mps_destinationAtIndex:index];
+        MPSMatrixCopyOffsets offsets = [copyDescriptor revenant_mps_offsetsAtIndex:index];
         if (!source || !destination) {
-            CharonMPSRefuse(@"MPSMatrixCopy: copy operation %lu names no source or no destination", (unsigned long)index);
+            RevenantMPSRefuse(@"MPSMatrixCopy: copy operation %lu names no source or no destination", (unsigned long)index);
             continue;
         }
-        CharonMPSMatrixView from = CharonMPSMatrixViewOf(source), to = CharonMPSMatrixViewOf(destination);
-        if (!CharonMPSDataTypeIsElement(from.dataType) || !CharonMPSDataTypeIsElement(to.dataType)) {
-            CharonMPSRefuse(@"MPSMatrixCopy: a matrix of a data type that is not one of the eight element types was given");
+        RevenantMPSMatrixView from = RevenantMPSMatrixViewOf(source), to = RevenantMPSMatrixViewOf(destination);
+        if (!RevenantMPSDataTypeIsElement(from.dataType) || !RevenantMPSDataTypeIsElement(to.dataType)) {
+            RevenantMPSRefuse(@"MPSMatrixCopy: a matrix of a data type that is not one of the eight element types was given");
             continue;
         }
         NSUInteger sourceRows = _sourcesAreTransposed ? _copyColumns : _copyRows;
         NSUInteger sourceColumns = _sourcesAreTransposed ? _copyRows : _copyColumns;
         NSUInteger destinationRows = _destinationsAreTransposed ? _copyColumns : _copyRows;
         NSUInteger destinationColumns = _destinationsAreTransposed ? _copyRows : _copyColumns;
-        if (!CharonMPSMatrixHolds(&from, 0, offsets.sourceRowOffset, offsets.sourceColumnOffset, sourceRows, sourceColumns) ||
-            !CharonMPSMatrixHolds(&to, 0, offsets.destinationRowOffset, offsets.destinationColumnOffset, destinationRows, destinationColumns)) {
-            CharonMPSRefuse(@"MPSMatrixCopy: copy operation %lu names a %lux%lu region a matrix does not hold", (unsigned long)index, (unsigned long)_copyRows, (unsigned long)_copyColumns);
+        if (!RevenantMPSMatrixHolds(&from, 0, offsets.sourceRowOffset, offsets.sourceColumnOffset, sourceRows, sourceColumns) ||
+            !RevenantMPSMatrixHolds(&to, 0, offsets.destinationRowOffset, offsets.destinationColumnOffset, destinationRows, destinationColumns)) {
+            RevenantMPSRefuse(@"MPSMatrixCopy: copy operation %lu names a %lux%lu region a matrix does not hold", (unsigned long)index, (unsigned long)_copyRows, (unsigned long)_copyColumns);
             continue;
         }
         for (NSUInteger row = 0; row < _copyRows; row++) {
@@ -86,26 +86,26 @@
                 NSUInteger destinationRow = _destinationsAreTransposed ? column : row;
                 NSUInteger destinationColumn = _destinationsAreTransposed ? row : column;
                 if (rowPermuteIndices) {
-                    NSUInteger permuted = (NSUInteger)CharonMPSLoad((const char *)[[rowPermuteIndices data] contents] + rowPermuteOffset + row * 4, MPSDataTypeUInt32, 0);
+                    NSUInteger permuted = (NSUInteger)RevenantMPSLoad((const char *)[[rowPermuteIndices data] contents] + rowPermuteOffset + row * 4, MPSDataTypeUInt32, 0);
                     if (permuted >= _copyRows) {
-                        CharonMPSRefuse(@"MPSMatrixCopy: row permute index %lu names no row of %lu", (unsigned long)permuted, (unsigned long)_copyRows);
+                        RevenantMPSRefuse(@"MPSMatrixCopy: row permute index %lu names no row of %lu", (unsigned long)permuted, (unsigned long)_copyRows);
                         return;
                     }
                     sourceRow = permuted;
                 }
                 if (columnPermuteIndices) {
-                    NSUInteger permuted = (NSUInteger)CharonMPSLoad((const char *)[[columnPermuteIndices data] contents] + columnPermuteOffset + column * 4, MPSDataTypeUInt32, 0);
+                    NSUInteger permuted = (NSUInteger)RevenantMPSLoad((const char *)[[columnPermuteIndices data] contents] + columnPermuteOffset + column * 4, MPSDataTypeUInt32, 0);
                     if (permuted >= _copyColumns) {
-                        CharonMPSRefuse(@"MPSMatrixCopy: column permute index %lu names no column of %lu", (unsigned long)permuted, (unsigned long)_copyColumns);
+                        RevenantMPSRefuse(@"MPSMatrixCopy: column permute index %lu names no column of %lu", (unsigned long)permuted, (unsigned long)_copyColumns);
                         return;
                     }
                     sourceColumn = permuted;
                 }
-                double value = CharonMPSLoad(CharonMPSMatrixElement(&from, 0, offsets.sourceRowOffset + sourceRow, offsets.sourceColumnOffset + sourceColumn), from.dataType, 0);
-                CharonMPSStore(CharonMPSMatrixElement(&to, 0, offsets.destinationRowOffset + destinationRow, offsets.destinationColumnOffset + destinationColumn), to.dataType, 0, value);
+                double value = RevenantMPSLoad(RevenantMPSMatrixElement(&from, 0, offsets.sourceRowOffset + sourceRow, offsets.sourceColumnOffset + sourceColumn), from.dataType, 0);
+                RevenantMPSStore(RevenantMPSMatrixElement(&to, 0, offsets.destinationRowOffset + destinationRow, offsets.destinationColumnOffset + destinationColumn), to.dataType, 0, value);
             }
         }
-        CharonMPSConsumeReadCount(source);
+        RevenantMPSConsumeReadCount(source);
     }
 }
 

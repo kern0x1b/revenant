@@ -2,8 +2,8 @@ import("fixtures")
 
 function claim_failures(device, folder)
     local found = {}
-    local home, holder = os.getenv("CHARON_HOME"), os.getenv("CHARON_DEVICE_HOLDER")
-    os.setenv("CHARON_HOME", path.join(folder, "home"))
+    local home, holder = os.getenv("REVENANT_HOME"), os.getenv("REVENANT_DEVICE_HOLDER")
+    os.setenv("REVENANT_HOME", path.join(folder, "home"))
     local phone = {host = "10.0.0.7", port = "22", password = "", udid = "abc123"}
     device.claim(phone, "first", 30)
     local errors = fixtures.refusal(function () device.claim(phone, "second", 30) end)
@@ -13,12 +13,12 @@ function claim_failures(device, folder)
     if not fixtures.refusal(function () device.release(phone, "second") end) then
         table.insert(found, "only the holder releases a claim")
     end
-    os.setenv("CHARON_DEVICE_HOLDER", "second")
+    os.setenv("REVENANT_DEVICE_HOLDER", "second")
     errors = fixtures.refusal(function () device.tunnel(phone) end)
     if not errors or not errors:find("held by first", 1, true) then
         table.insert(found, "reaching a device another holder claimed must be refused: " .. tostring(errors))
     end
-    os.setenv("CHARON_DEVICE_HOLDER", "first")
+    os.setenv("REVENANT_DEVICE_HOLDER", "first")
     if fixtures.refusal(function () device.tunnel(phone) end) then
         table.insert(found, "the holder reaches the device it claimed")
     end
@@ -36,14 +36,14 @@ function claim_failures(device, folder)
     end
     local networked = {host = "10.0.0.9", port = "22", password = "", udid = ""}
     device.claim(networked, "first", 5)
-    os.setenv("CHARON_DEVICE_HOLDER", "second")
+    os.setenv("REVENANT_DEVICE_HOLDER", "second")
     errors = fixtures.refusal(function () device.tunnel(networked) end)
     if not errors or not errors:find("held by first", 1, true) then
         table.insert(found, "a device claimed by its address must refuse another holder: " .. tostring(errors))
     end
-    os.setenv("CHARON_DEVICE_HOLDER", "first")
+    os.setenv("REVENANT_DEVICE_HOLDER", "first")
     device.release(networked, "first")
-    for name, value in pairs({CHARON_HOME = home or false, CHARON_DEVICE_HOLDER = holder or false}) do
+    for name, value in pairs({REVENANT_HOME = home or false, REVENANT_DEVICE_HOLDER = holder or false}) do
         if value then
             os.setenv(name, value)
         else
@@ -76,37 +76,37 @@ local function pruning_failures(device, folder)
     local ok = "|install ok installed|"
     local function chain(extra)
         return table.join({
-            "port.a" .. ok .. "org.charon.swift-runtime-11111111 (= 1), org.charon.libcxx-22222222 (= 1)",
-            "port.b" .. ok .. "org.charon.swift-runtime-11111111 (= 1), org.charon.libcxx-22222222 (= 1)",
-            "org.charon.swift-runtime-11111111" .. ok .. "org.charon.libcxx-22222222 (= 1)",
-            "org.charon.swift-runtime-ui-11111111" .. ok .. "org.charon.swift-runtime-11111111 (= 1)",
-            "org.charon.libcxx-22222222" .. ok,
-            "org.charon.apple-backports" .. ok,
-            "org.charon.swiftfull" .. ok
+            "port.a" .. ok .. "org.revenant.swift-runtime-11111111 (= 1), org.revenant.libcxx-22222222 (= 1)",
+            "port.b" .. ok .. "org.revenant.swift-runtime-11111111 (= 1), org.revenant.libcxx-22222222 (= 1)",
+            "org.revenant.swift-runtime-11111111" .. ok .. "org.revenant.libcxx-22222222 (= 1)",
+            "org.revenant.swift-runtime-ui-11111111" .. ok .. "org.revenant.swift-runtime-11111111 (= 1)",
+            "org.revenant.libcxx-22222222" .. ok,
+            "org.revenant.apple-backports" .. ok,
+            "org.revenant.swiftfull" .. ok
         }, extra or {})
     end
     installed(chain())
     local left = remove({"port.a"})
-    if left ~= "org.charon.apple-backports org.charon.libcxx-22222222 org.charon.swift-runtime-11111111 org.charon.swiftfull port.b" then
+    if left ~= "org.revenant.apple-backports org.revenant.libcxx-22222222 org.revenant.swift-runtime-11111111 org.revenant.swiftfull port.b" then
         table.insert(found, "the runtime a program still needs must stay, and the UI package nobody needs must go: " .. left)
     end
     left = remove({"port.b"})
-    if left ~= "org.charon.apple-backports org.charon.swiftfull" then
+    if left ~= "org.revenant.apple-backports org.revenant.swiftfull" then
         table.insert(found, "the last program takes the runtime and the C++ runtime with it, in as many passes as it takes, and leaves everything else: " .. left)
     end
     installed(chain())
     left = remove({"port.a"}, {keep = true})
-    if not left:find("org.charon.swift-runtime-ui-11111111", 1, true) then
+    if not left:find("org.revenant.swift-runtime-ui-11111111", 1, true) then
         table.insert(found, "keep must remove only what is named: " .. left)
     end
-    installed(chain({"port.ui" .. ok .. "org.charon.swift-runtime-ui-11111111 (= 1)"}))
+    installed(chain({"port.ui" .. ok .. "org.revenant.swift-runtime-ui-11111111 (= 1)"}))
     left = remove({"port.b"})
-    if not left:find("org.charon.swift-runtime-ui-11111111", 1, true) or not left:find("org.charon.swift-runtime-11111111", 1, true) then
+    if not left:find("org.revenant.swift-runtime-ui-11111111", 1, true) or not left:find("org.revenant.swift-runtime-11111111", 1, true) then
         table.insert(found, "a program that needs the UI package keeps it, and the runtime it needs: " .. left)
     end
-    installed(chain({"ghost|deinstall ok config-files|org.charon.swift-runtime-11111111 (= 1)"}))
+    installed(chain({"ghost|deinstall ok config-files|org.revenant.swift-runtime-11111111 (= 1)"}))
     left = remove({"port.a", "port.b"})
-    if left:find("org.charon.swift-runtime-1", 1, true) then
+    if left:find("org.revenant.swift-runtime-1", 1, true) then
         table.insert(found, "a package that is removed and only keeps its configuration files needs nothing: " .. left)
     end
     if not fixtures.refusal(function () device.uninstall_command({"x; rm -rf /"}) end) then

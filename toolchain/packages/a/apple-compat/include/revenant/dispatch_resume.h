@@ -1,5 +1,5 @@
-#ifndef CHARON_DISPATCH_RESUME_H
-#define CHARON_DISPATCH_RESUME_H
+#ifndef REVENANT_DISPATCH_RESUME_H
+#define REVENANT_DISPATCH_RESUME_H
 
 #include <dispatch/dispatch.h>
 
@@ -7,12 +7,12 @@
 extern "C" {
 #endif
 
-void charon_dispatch_resume(dispatch_object_t object);
+void revenant_dispatch_resume(dispatch_object_t object);
 
 #ifdef __cplusplus
 }
 #endif
 
-#define dispatch_resume charon_dispatch_resume
+#define dispatch_resume revenant_dispatch_resume
 
 #endif

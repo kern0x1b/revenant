@@ -13,7 +13,7 @@
 #include "foundation/jit_code_cache_governor.hpp"
 #include "foundation/jit_translation_profile.hpp"
 
-namespace shade {
+namespace emulator {
 namespace {
 
     constexpr std::size_t minimum_native_slab_bytes = 64U * 1024U * 1024U;

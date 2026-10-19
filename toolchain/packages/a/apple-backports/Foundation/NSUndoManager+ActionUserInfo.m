@@ -23,13 +23,13 @@ static VoidIMP nativeRedo;
 static VoidIMP nativeRemoveAllActions;
 static RemoveWithTargetIMP nativeRemoveAllActionsWithTarget;
 
-@interface CharonUndoRecord : NSObject
+@interface RevenantUndoRecord : NSObject
 @property (nonatomic, copy) NSString *actionName;
 @property (nonatomic, strong) NSMutableDictionary *userInfo;
 @property (nonatomic, weak) id target;
 @end
 
-@implementation CharonUndoRecord
+@implementation RevenantUndoRecord
 @synthesize actionName = _actionName;
 @synthesize userInfo = _userInfo;
 @synthesize target = _target;
@@ -56,7 +56,7 @@ static BOOL UndoShadowRegistrationGoesToRedo(NSUndoManager *manager)
     return [manager isUndoing] && ![manager isRedoing];
 }
 
-static CharonUndoRecord *UndoShadowCurrent(NSUndoManager *manager, BOOL creating)
+static RevenantUndoRecord *UndoShadowCurrent(NSUndoManager *manager, BOOL creating)
 {
     BOOL toRedo = UndoShadowRegistrationGoesToRedo(manager);
     NSMutableArray *open = UndoShadowStack(manager, UndoShadowOpenKey);
@@ -67,7 +67,7 @@ static CharonUndoRecord *UndoShadowCurrent(NSUndoManager *manager, BOOL creating
     [open removeAllObjects];
     if (!creating)
         return UndoShadowStack(manager, UndoShadowStackKey).lastObject;
-    CharonUndoRecord *record = [CharonUndoRecord new];
+    RevenantUndoRecord *record = [RevenantUndoRecord new];
     [open addObject:record];
     NSMutableArray *redo = UndoShadowStack(manager, UndoShadowRedoKey);
     if (toRedo) {
@@ -84,17 +84,17 @@ static CharonUndoRecord *UndoShadowCurrent(NSUndoManager *manager, BOOL creating
     return record;
 }
 
-static CharonUndoRecord *UndoShadowTakeTop(NSMutableArray *stack)
+static RevenantUndoRecord *UndoShadowTakeTop(NSMutableArray *stack)
 {
-    CharonUndoRecord *record = stack.lastObject;
+    RevenantUndoRecord *record = stack.lastObject;
     if (record)
         [stack removeLastObject];
     return record;
 }
 
-static void charon_registerUndoWithTarget_selector_object(id self, SEL selector, id target, SEL action, id object)
+static void revenant_registerUndoWithTarget_selector_object(id self, SEL selector, id target, SEL action, id object)
 {
-    CharonUndoRecord *record = UndoShadowCurrent(self, YES);
+    RevenantUndoRecord *record = UndoShadowCurrent(self, YES);
     if (!record.target)
         record.target = target;
     if (!record.actionName)
@@ -102,40 +102,40 @@ static void charon_registerUndoWithTarget_selector_object(id self, SEL selector,
     nativeRegisterUndo(self, selector, target, action, object);
 }
 
-static void charon_setUndoActionName(NSUndoManager *self, SEL selector, NSString *actionName)
+static void revenant_setUndoActionName(NSUndoManager *self, SEL selector, NSString *actionName)
 {
     UndoShadowCurrent(self, YES).actionName = actionName;
     nativeSetUndoActionName(self, selector, actionName);
 }
 
-static void charon_setActionName(NSUndoManager *self, SEL selector, NSString *actionName)
+static void revenant_setActionName(NSUndoManager *self, SEL selector, NSString *actionName)
 {
     UndoShadowCurrent(self, YES).actionName = actionName;
     nativeSetActionName(self, selector, actionName);
 }
 
-static void charon_closeUndoGroup(NSUndoManager *self, SEL selector)
+static void revenant_closeUndoGroup(NSUndoManager *self, SEL selector)
 {
     [UndoShadowStack(self, UndoShadowOpenKey) removeAllObjects];
     nativeCloseUndoGroup(self, selector);
 }
 
-static void charon_endUndoGrouping(NSUndoManager *self, SEL selector)
+static void revenant_endUndoGrouping(NSUndoManager *self, SEL selector)
 {
     [UndoShadowStack(self, UndoShadowOpenKey) removeAllObjects];
     nativeEndUndoGrouping(self, selector);
 }
 
-static void charon_undo(NSUndoManager *self, SEL selector)
+static void revenant_undo(NSUndoManager *self, SEL selector)
 {
     [UndoShadowStack(self, UndoShadowOpenKey) removeAllObjects];
-    CharonUndoRecord *undone = UndoShadowTakeTop(UndoShadowStack(self, UndoShadowStackKey));
+    RevenantUndoRecord *undone = UndoShadowTakeTop(UndoShadowStack(self, UndoShadowStackKey));
     objc_setAssociatedObject(self, UndoShadowInheritedKey,
                              undone.userInfo ?: [NSMutableDictionary dictionary], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     nativeUndo(self, selector);
 }
 
-static void charon_redo(NSUndoManager *self, SEL selector)
+static void revenant_redo(NSUndoManager *self, SEL selector)
 {
     [UndoShadowStack(self, UndoShadowOpenKey) removeAllObjects];
     UndoShadowTakeTop(UndoShadowStack(self, UndoShadowRedoKey));
@@ -143,7 +143,7 @@ static void charon_redo(NSUndoManager *self, SEL selector)
     nativeRedo(self, selector);
 }
 
-static void charon_removeAllActions(NSUndoManager *self, SEL selector)
+static void revenant_removeAllActions(NSUndoManager *self, SEL selector)
 {
     [UndoShadowStack(self, UndoShadowStackKey) removeAllObjects];
     [UndoShadowStack(self, UndoShadowRedoKey) removeAllObjects];
@@ -151,27 +151,27 @@ static void charon_removeAllActions(NSUndoManager *self, SEL selector)
     nativeRemoveAllActions(self, selector);
 }
 
-static void charon_removeAllActionsWithTarget(NSUndoManager *self, SEL selector, id target)
+static void revenant_removeAllActionsWithTarget(NSUndoManager *self, SEL selector, id target)
 {
     NSMutableArray *survivors = [NSMutableArray array];
     NSMutableArray *undo = UndoShadowStack(self, UndoShadowStackKey);
-    for (CharonUndoRecord *record in undo)
+    for (RevenantUndoRecord *record in undo)
         if (record.target != target)
             [survivors addObject:record];
     [undo setArray:survivors];
     [survivors removeAllObjects];
     NSMutableArray *redo = UndoShadowStack(self, UndoShadowRedoKey);
-    for (CharonUndoRecord *record in redo)
+    for (RevenantUndoRecord *record in redo)
         if (record.target != target)
             [survivors addObject:record];
     [redo setArray:survivors];
     nativeRemoveAllActionsWithTarget(self, selector, target);
 }
 
-@interface CharonUndoManagerInstaller18 : NSObject
+@interface RevenantUndoManagerInstaller18 : NSObject
 @end
 
-@implementation CharonUndoManagerInstaller18
+@implementation RevenantUndoManagerInstaller18
 
 + (void)load
 {
@@ -181,45 +181,45 @@ static void charon_removeAllActionsWithTarget(NSUndoManager *self, SEL selector,
     Method method;
     if ((method = class_getInstanceMethod(manager, @selector(registerUndoWithTarget:selector:object:)))) {
         nativeRegisterUndo = (RegisterUndoIMP)method_getImplementation(method);
-        method_setImplementation(method, (IMP)charon_registerUndoWithTarget_selector_object);
+        method_setImplementation(method, (IMP)revenant_registerUndoWithTarget_selector_object);
     }
     if ((method = class_getInstanceMethod(manager, @selector(setUndoActionName:)))) {
         nativeSetUndoActionName = (UndoActionNameIMP)method_getImplementation(method);
-        method_setImplementation(method, (IMP)charon_setUndoActionName);
+        method_setImplementation(method, (IMP)revenant_setUndoActionName);
     }
     if ((method = class_getInstanceMethod(manager, @selector(closeUndoGroup)))) {
         nativeCloseUndoGroup = (VoidIMP)method_getImplementation(method);
-        method_setImplementation(method, (IMP)charon_closeUndoGroup);
+        method_setImplementation(method, (IMP)revenant_closeUndoGroup);
     }
     if ((method = class_getInstanceMethod(manager, @selector(setActionName:)))) {
         nativeSetActionName = (UndoActionNameIMP)method_getImplementation(method);
-        method_setImplementation(method, (IMP)charon_setActionName);
+        method_setImplementation(method, (IMP)revenant_setActionName);
     }
     if ((method = class_getInstanceMethod(manager, @selector(endUndoGrouping)))) {
         nativeEndUndoGrouping = (VoidIMP)method_getImplementation(method);
-        method_setImplementation(method, (IMP)charon_endUndoGrouping);
+        method_setImplementation(method, (IMP)revenant_endUndoGrouping);
     }
     if ((method = class_getInstanceMethod(manager, @selector(undo)))) {
         nativeUndo = (VoidIMP)method_getImplementation(method);
-        method_setImplementation(method, (IMP)charon_undo);
+        method_setImplementation(method, (IMP)revenant_undo);
     }
     if ((method = class_getInstanceMethod(manager, @selector(redo)))) {
         nativeRedo = (VoidIMP)method_getImplementation(method);
-        method_setImplementation(method, (IMP)charon_redo);
+        method_setImplementation(method, (IMP)revenant_redo);
     }
     if ((method = class_getInstanceMethod(manager, @selector(removeAllActions)))) {
         nativeRemoveAllActions = (VoidIMP)method_getImplementation(method);
-        method_setImplementation(method, (IMP)charon_removeAllActions);
+        method_setImplementation(method, (IMP)revenant_removeAllActions);
     }
     if ((method = class_getInstanceMethod(manager, @selector(removeAllActionsWithTarget:)))) {
         nativeRemoveAllActionsWithTarget = (RemoveWithTargetIMP)method_getImplementation(method);
-        method_setImplementation(method, (IMP)charon_removeAllActionsWithTarget);
+        method_setImplementation(method, (IMP)revenant_removeAllActionsWithTarget);
     }
 }
 
 @end
 
-@implementation NSUndoManager (CharonActionUserInfo18)
+@implementation NSUndoManager (RevenantActionUserInfo18)
 
 - (NSUInteger)undoCount
 {
@@ -233,7 +233,7 @@ static void charon_removeAllActionsWithTarget(NSUndoManager *self, SEL selector,
 
 - (void)setActionUserInfoValue:(id)value forKey:(NSString *)key
 {
-    CharonUndoRecord *record = UndoShadowCurrent(self, NO);
+    RevenantUndoRecord *record = UndoShadowCurrent(self, NO);
     if (!record) {
         [NSException raise:NSInternalInconsistencyException
                     format:@"setActionUserInfoValue:forKey:: NSUndoManager %p is in invalid state, must begin a group before setting undo action user info", self];
@@ -244,13 +244,13 @@ static void charon_removeAllActionsWithTarget(NSUndoManager *self, SEL selector,
 
 - (id)undoActionUserInfoValueForKey:(NSString *)key
 {
-    CharonUndoRecord *record = UndoShadowStack(self, UndoShadowStackKey).lastObject;
+    RevenantUndoRecord *record = UndoShadowStack(self, UndoShadowStackKey).lastObject;
     return record.userInfo[key];
 }
 
 - (id)redoActionUserInfoValueForKey:(NSString *)key
 {
-    CharonUndoRecord *record = UndoShadowStack(self, UndoShadowRedoKey).lastObject;
+    RevenantUndoRecord *record = UndoShadowStack(self, UndoShadowRedoKey).lastObject;
     return record.userInfo[key];
 }
 

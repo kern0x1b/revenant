@@ -9,7 +9,7 @@ int main(void)
         NSMutableDictionary *out = [NSMutableDictionary dictionary];
         out[@"conditions"] = @"the port's own objects, no CloudKit framework linked, in memory only";
         @try {
-            CharonDatabaseCases(out);
+            RevenantDatabaseCases(out);
         } @catch (NSException *raised) {
             out[@"raisedDuring"] = @{@"name": raised.name ?: @"(unnamed)",
                                      @"reason": raised.reason ?: @"(no reason)"};

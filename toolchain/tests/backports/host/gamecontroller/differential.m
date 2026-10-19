@@ -381,7 +381,7 @@ static NSArray *drive(Class controllerClass, BOOL micro)
             weakProfile = tp;
             [log addObject:[NSString stringWithFormat:@"temp controller kept profile=%d", [tp controller] != nil]];
         }
-                id direct = [[NSClassFromString(micro ? (controllerClass == NSClassFromString(@"GCController") ? @"GCMicroGamepad" : @"CharonHostGCMicroGamepad") : (controllerClass == NSClassFromString(@"GCController") ? @"GCExtendedGamepad" : @"CharonHostGCExtendedGamepad")) alloc] init];
+                id direct = [[NSClassFromString(micro ? (controllerClass == NSClassFromString(@"GCController") ? @"GCMicroGamepad" : @"RevenantHostGCMicroGamepad") : (controllerClass == NSClassFromString(@"GCController") ? @"GCExtendedGamepad" : @"RevenantHostGCExtendedGamepad")) alloc] init];
         id<LProfile> dp = direct;
         [log addObject:[NSString stringWithFormat:@"direct init: profile=%d elements=%lu controller=%d device=%d", dp != nil, (unsigned long)dp.elements.count, dp.controller != nil, dp.device != nil]];
     }
@@ -407,18 +407,18 @@ static NSArray *drive(Class controllerClass, BOOL micro)
 @end
 
 
-extern BOOL charonHost_GCGamepadSnapShotDataV100FromNSData(GCGamepadSnapShotDataV100 *, NSData *);
-extern NSData *charonHost_NSDataFromGCGamepadSnapShotDataV100(GCGamepadSnapShotDataV100 *);
-extern BOOL charonHost_GCExtendedGamepadSnapShotDataV100FromNSData(GCExtendedGamepadSnapShotDataV100 *, NSData *);
-extern NSData *charonHost_NSDataFromGCExtendedGamepadSnapShotDataV100(GCExtendedGamepadSnapShotDataV100 *);
-extern BOOL charonHost_GCExtendedGamepadSnapshotDataFromNSData(GCExtendedGamepadSnapshotData *, NSData *);
-extern NSData *charonHost_NSDataFromGCExtendedGamepadSnapshotData(GCExtendedGamepadSnapshotData *);
-extern BOOL charonHost_GCMicroGamepadSnapShotDataV100FromNSData(GCMicroGamepadSnapShotDataV100 *, NSData *);
-extern NSData *charonHost_NSDataFromGCMicroGamepadSnapShotDataV100(GCMicroGamepadSnapShotDataV100 *);
-extern BOOL charonHost_GCMicroGamepadSnapshotDataFromNSData(GCMicroGamepadSnapshotData *, NSData *);
-extern NSData *charonHost_NSDataFromGCMicroGamepadSnapshotData(GCMicroGamepadSnapshotData *);
-extern const long charonHost_GCCurrentExtendedGamepadSnapshotDataVersion;
-extern const long charonHost_GCCurrentMicroGamepadSnapshotDataVersion;
+extern BOOL revenantHost_GCGamepadSnapShotDataV100FromNSData(GCGamepadSnapShotDataV100 *, NSData *);
+extern NSData *revenantHost_NSDataFromGCGamepadSnapShotDataV100(GCGamepadSnapShotDataV100 *);
+extern BOOL revenantHost_GCExtendedGamepadSnapShotDataV100FromNSData(GCExtendedGamepadSnapShotDataV100 *, NSData *);
+extern NSData *revenantHost_NSDataFromGCExtendedGamepadSnapShotDataV100(GCExtendedGamepadSnapShotDataV100 *);
+extern BOOL revenantHost_GCExtendedGamepadSnapshotDataFromNSData(GCExtendedGamepadSnapshotData *, NSData *);
+extern NSData *revenantHost_NSDataFromGCExtendedGamepadSnapshotData(GCExtendedGamepadSnapshotData *);
+extern BOOL revenantHost_GCMicroGamepadSnapShotDataV100FromNSData(GCMicroGamepadSnapShotDataV100 *, NSData *);
+extern NSData *revenantHost_NSDataFromGCMicroGamepadSnapShotDataV100(GCMicroGamepadSnapShotDataV100 *);
+extern BOOL revenantHost_GCMicroGamepadSnapshotDataFromNSData(GCMicroGamepadSnapshotData *, NSData *);
+extern NSData *revenantHost_NSDataFromGCMicroGamepadSnapshotData(GCMicroGamepadSnapshotData *);
+extern const long revenantHost_GCCurrentExtendedGamepadSnapshotDataVersion;
+extern const long revenantHost_GCCurrentMicroGamepadSnapshotDataVersion;
 
 static NSData *pattern(unsigned length)
 {
@@ -454,17 +454,17 @@ static NSArray *snapshotFunctionGroup(BOOL port)
     for (int which = 0; which < 2; which++) {
         GCGamepadSnapShotDataV100 *in = which ? &g2 : &g1;
         [log addObject:[NSString stringWithFormat:@"gamepad NSDataFrom(%d) = %@", which,
-                                                  whole(port ? charonHost_NSDataFromGCGamepadSnapShotDataV100(in)
+                                                  whole(port ? revenantHost_NSDataFromGCGamepadSnapShotDataV100(in)
                                                              : NSDataFromGCGamepadSnapShotDataV100(in))]];
         [log addObject:[NSString stringWithFormat:@"gamepad NSDataFrom(NULL) = %@",
-                                                  port ? charonHost_NSDataFromGCGamepadSnapShotDataV100(NULL) : NSDataFromGCGamepadSnapShotDataV100(NULL)]];
+                                                  port ? revenantHost_NSDataFromGCGamepadSnapShotDataV100(NULL) : NSDataFromGCGamepadSnapShotDataV100(NULL)]];
     }
     GCExtendedGamepadSnapShotDataV100 e1;
     memset(&e1, 0, sizeof(e1));
     e1.buttonB = 0.5f;
     e1.leftTrigger = 0.75f;
     [log addObject:[NSString stringWithFormat:@"extended NSDataFromV100 = %@",
-                                              whole(port ? charonHost_NSDataFromGCExtendedGamepadSnapShotDataV100(&e1)
+                                              whole(port ? revenantHost_NSDataFromGCExtendedGamepadSnapShotDataV100(&e1)
                                                          : NSDataFromGCExtendedGamepadSnapShotDataV100(&e1))]];
     GCExtendedGamepadSnapshotData e2;
     memset(&e2, 0, sizeof(e2));
@@ -473,31 +473,31 @@ static NSArray *snapshotFunctionGroup(BOOL port)
     e2.supportsClickableThumbsticks = 1;
     e2.leftThumbstickButton = 1;
     [log addObject:[NSString stringWithFormat:@"extended NSDataFrom = %@",
-                                              whole(port ? charonHost_NSDataFromGCExtendedGamepadSnapshotData(&e2)
+                                              whole(port ? revenantHost_NSDataFromGCExtendedGamepadSnapshotData(&e2)
                                                          : NSDataFromGCExtendedGamepadSnapshotData(&e2))]];
     GCExtendedGamepadSnapshotData e3 = e2;
     e3.version = GCExtendedGamepadSnapshotDataVersion1;
     e3.size = sizeof(GCExtendedGamepadSnapShotDataV100);
     [log addObject:[NSString stringWithFormat:@"extended NSDataFrom with the V100 header = %@",
-                                              whole(port ? charonHost_NSDataFromGCExtendedGamepadSnapshotData(&e3)
+                                              whole(port ? revenantHost_NSDataFromGCExtendedGamepadSnapshotData(&e3)
                                                          : NSDataFromGCExtendedGamepadSnapshotData(&e3))]];
     GCMicroGamepadSnapshotData m1;
     memset(&m1, 0, sizeof(m1));
     m1.dpadX = -1.0f;
     m1.buttonA = 0.5f;
     [log addObject:[NSString stringWithFormat:@"micro NSDataFrom = %@",
-                                              whole(port ? charonHost_NSDataFromGCMicroGamepadSnapshotData(&m1)
+                                              whole(port ? revenantHost_NSDataFromGCMicroGamepadSnapshotData(&m1)
                                                          : NSDataFromGCMicroGamepadSnapshotData(&m1))]];
     GCMicroGamepadSnapShotDataV100 m2;
     memset(&m2, 0, sizeof(m2));
     m2.buttonX = 1.0f;
     [log addObject:[NSString stringWithFormat:@"micro NSDataFromV100 = %@",
-                                              whole(port ? charonHost_NSDataFromGCMicroGamepadSnapShotDataV100(&m2)
+                                              whole(port ? revenantHost_NSDataFromGCMicroGamepadSnapShotDataV100(&m2)
                                                          : NSDataFromGCMicroGamepadSnapShotDataV100(&m2))]];
     [log addObject:[NSString stringWithFormat:@"versions extended=%ld micro=%ld",
-                                              (long)(port ? charonHost_GCCurrentExtendedGamepadSnapshotDataVersion
+                                              (long)(port ? revenantHost_GCCurrentExtendedGamepadSnapshotDataVersion
                                                           : GCCurrentExtendedGamepadSnapshotDataVersion),
-                                              (long)(port ? charonHost_GCCurrentMicroGamepadSnapshotDataVersion
+                                              (long)(port ? revenantHost_GCCurrentMicroGamepadSnapshotDataVersion
                                                           : GCCurrentMicroGamepadSnapshotDataVersion)]];
 
     NSArray *inputs = @[ (id)[NSData data], (id)pattern(4), (id)pattern(20), (id)pattern(35), (id)pattern(36), (id)pattern(37),
@@ -515,14 +515,14 @@ static NSArray *snapshotFunctionGroup(BOOL port)
         memset(&mc, 0xEE, sizeof(mc));
         [log addObject:[NSString stringWithFormat:@"read %3lu gamepadV100=%d extendedV100=%d extended=%d microV100=%d micro=%d",
                                               (unsigned long)in.length,
-                                              port ? charonHost_GCGamepadSnapShotDataV100FromNSData(&g, in) : GCGamepadSnapShotDataV100FromNSData(&g, in),
-                                              port ? charonHost_GCExtendedGamepadSnapShotDataV100FromNSData(&ev, in)
+                                              port ? revenantHost_GCGamepadSnapShotDataV100FromNSData(&g, in) : GCGamepadSnapShotDataV100FromNSData(&g, in),
+                                              port ? revenantHost_GCExtendedGamepadSnapShotDataV100FromNSData(&ev, in)
                                                    : GCExtendedGamepadSnapShotDataV100FromNSData(&ev, in),
-                                              port ? charonHost_GCExtendedGamepadSnapshotDataFromNSData(&ec, in)
+                                              port ? revenantHost_GCExtendedGamepadSnapshotDataFromNSData(&ec, in)
                                                    : GCExtendedGamepadSnapshotDataFromNSData(&ec, in),
-                                              port ? charonHost_GCMicroGamepadSnapShotDataV100FromNSData(&mv, in)
+                                              port ? revenantHost_GCMicroGamepadSnapShotDataV100FromNSData(&mv, in)
                                                    : GCMicroGamepadSnapShotDataV100FromNSData(&mv, in),
-                                              port ? charonHost_GCMicroGamepadSnapshotDataFromNSData(&mc, in)
+                                              port ? revenantHost_GCMicroGamepadSnapshotDataFromNSData(&mc, in)
                                                    : GCMicroGamepadSnapshotDataFromNSData(&mc, in)]];
         [log addObject:[NSString stringWithFormat:@"read %3lu gamepadV100 struct=0x%04x/%u extended=0x%04x/%u micro=0x%04x/%u",
                                               (unsigned long)in.length, g.version, g.size, ec.version, ec.size, mc.version, mc.size]];
@@ -539,11 +539,11 @@ static NSArray *snapshotFunctionGroup(BOOL port)
                 memset(&ec, 0xEE, sizeof(ec));
                 memset(&mc, 0xEE, sizeof(mc));
                 [log addObject:[NSString stringWithFormat:@"blob 0x%04x %2lu gamepad=%d extended=%d micro=%d", versions[v], (unsigned long)len,
-                                                      port ? charonHost_GCGamepadSnapShotDataV100FromNSData(&g, blob)
+                                                      port ? revenantHost_GCGamepadSnapShotDataV100FromNSData(&g, blob)
                                                            : GCGamepadSnapShotDataV100FromNSData(&g, blob),
-                                                      port ? charonHost_GCExtendedGamepadSnapshotDataFromNSData(&ec, blob)
+                                                      port ? revenantHost_GCExtendedGamepadSnapshotDataFromNSData(&ec, blob)
                                                            : GCExtendedGamepadSnapshotDataFromNSData(&ec, blob),
-                                                      port ? charonHost_GCMicroGamepadSnapshotDataFromNSData(&mc, blob)
+                                                      port ? revenantHost_GCMicroGamepadSnapshotDataFromNSData(&mc, blob)
                                                            : GCMicroGamepadSnapshotDataFromNSData(&mc, blob)]];
             }
         }
@@ -556,26 +556,26 @@ static NSArray *snapshotFunctionGroup(BOOL port)
         GCMicroGamepadSnapshotData mc;
         NSData *good = (NSData *)[NSMutableData dataWithLength:36];
         [log addObject:[NSString stringWithFormat:@"nil data gamepad=%d extendedV100=%d extended=%d microV100=%d micro=%d",
-                                                  port ? charonHost_GCGamepadSnapShotDataV100FromNSData(&g, nil)
+                                                  port ? revenantHost_GCGamepadSnapShotDataV100FromNSData(&g, nil)
                                                        : GCGamepadSnapShotDataV100FromNSData(&g, nil),
-                                                  port ? charonHost_GCExtendedGamepadSnapShotDataV100FromNSData(&ev, nil)
+                                                  port ? revenantHost_GCExtendedGamepadSnapShotDataV100FromNSData(&ev, nil)
                                                        : GCExtendedGamepadSnapShotDataV100FromNSData(&ev, nil),
-                                                  port ? charonHost_GCExtendedGamepadSnapshotDataFromNSData(&ec, nil)
+                                                  port ? revenantHost_GCExtendedGamepadSnapshotDataFromNSData(&ec, nil)
                                                        : GCExtendedGamepadSnapshotDataFromNSData(&ec, nil),
-                                                  port ? charonHost_GCMicroGamepadSnapShotDataV100FromNSData(&mv, nil)
+                                                  port ? revenantHost_GCMicroGamepadSnapShotDataV100FromNSData(&mv, nil)
                                                        : GCMicroGamepadSnapShotDataV100FromNSData(&mv, nil),
-                                                  port ? charonHost_GCMicroGamepadSnapshotDataFromNSData(&mc, nil)
+                                                  port ? revenantHost_GCMicroGamepadSnapshotDataFromNSData(&mc, nil)
                                                        : GCMicroGamepadSnapshotDataFromNSData(&mc, nil)]];
         [log addObject:[NSString stringWithFormat:@"NULL out with data gamepad=%d extendedV100=%d extended=%d microV100=%d micro=%d",
-                                                  port ? charonHost_GCGamepadSnapShotDataV100FromNSData(NULL, good)
+                                                  port ? revenantHost_GCGamepadSnapShotDataV100FromNSData(NULL, good)
                                                        : GCGamepadSnapShotDataV100FromNSData(NULL, good),
-                                                  port ? charonHost_GCExtendedGamepadSnapShotDataV100FromNSData(NULL, good)
+                                                  port ? revenantHost_GCExtendedGamepadSnapShotDataV100FromNSData(NULL, good)
                                                        : GCExtendedGamepadSnapShotDataV100FromNSData(NULL, good),
-                                                  port ? charonHost_GCExtendedGamepadSnapshotDataFromNSData(NULL, good)
+                                                  port ? revenantHost_GCExtendedGamepadSnapshotDataFromNSData(NULL, good)
                                                        : GCExtendedGamepadSnapshotDataFromNSData(NULL, good),
-                                                  port ? charonHost_GCMicroGamepadSnapShotDataV100FromNSData(NULL, good)
+                                                  port ? revenantHost_GCMicroGamepadSnapShotDataV100FromNSData(NULL, good)
                                                        : GCMicroGamepadSnapShotDataV100FromNSData(NULL, good),
-                                                  port ? charonHost_GCMicroGamepadSnapshotDataFromNSData(NULL, good)
+                                                  port ? revenantHost_GCMicroGamepadSnapshotDataFromNSData(NULL, good)
                                                        : GCMicroGamepadSnapshotDataFromNSData(NULL, good)]];
     }
     return log;
@@ -604,7 +604,7 @@ static NSString *describeReading(id element)
 static NSArray *touchpadState(BOOL port)
 {
     NSMutableArray *log = [NSMutableArray array];
-    Class c = port ? NSClassFromString(@"CharonHostGCControllerTouchpad") : NSClassFromString(@"GCControllerTouchpad");
+    Class c = port ? NSClassFromString(@"RevenantHostGCControllerTouchpad") : NSClassFromString(@"GCControllerTouchpad");
     id<LTouchpad> touchpad = (id<LTouchpad>)[[c alloc] init];
     [log addObject:[NSString stringWithFormat:@"touchpad init=%d", touchpad != nil]];
     [log addObject:[NSString stringWithFormat:@"touchpad state=%ld absolute=%d", (long)touchpad.touchState, touchpad.reportsAbsoluteTouchSurfaceValues]];
@@ -626,7 +626,7 @@ static NSArray *touchpadState(BOOL port)
 static NSArray *touchpadElements(void)
 {
     NSMutableArray *log = [NSMutableArray array];
-    id<LTouchpad> t = (id<LTouchpad>)[[NSClassFromString(@"CharonHostGCControllerTouchpad") alloc] init];
+    id<LTouchpad> t = (id<LTouchpad>)[[NSClassFromString(@"RevenantHostGCControllerTouchpad") alloc] init];
     id button = t.button, surface = t.touchSurface;
     [log addObject:[NSString stringWithFormat:@"port touchpad children: button=%s surface=%s", describeElement(button).UTF8String, describeElement(surface).UTF8String]];
     if (!button || !surface)
@@ -647,7 +647,7 @@ static NSArray *touchpadElements(void)
 static NSArray *keyboardGroup(BOOL port)
 {
     NSMutableArray *log = [NSMutableArray array];
-    Class c = port ? NSClassFromString(@"CharonHostGCKeyboardInput") : NSClassFromString(@"GCKeyboardInput");
+    Class c = port ? NSClassFromString(@"RevenantHostGCKeyboardInput") : NSClassFromString(@"GCKeyboardInput");
     id<LKProfile> k = (id<LKProfile>)[[c alloc] init];
     [log addObject:[NSString stringWithFormat:@"keyboard init=%d", k != nil]];
     [log addObject:[NSString stringWithFormat:@"keyboard elements=%lu buttons=%lu", (unsigned long)k.elements.count, (unsigned long)k.buttons.count]];
@@ -697,7 +697,7 @@ static NSArray *keyboardKeys(NSString *mine, NSString *theirs)
 static NSArray *keyCodeGroup(BOOL port)
 {
     NSMutableArray *log = [NSMutableArray array];
-    id<LKProfile> k = (id<LKProfile>)[[NSClassFromString(port ? @"CharonHostGCKeyboardInput" : @"GCKeyboardInput") alloc] init];
+    id<LKProfile> k = (id<LKProfile>)[[NSClassFromString(port ? @"RevenantHostGCKeyboardInput" : @"GCKeyboardInput") alloc] init];
     for (NSNumber *code in @[@(21), @(0), @(9999)])
         [log addObject:[NSString stringWithFormat:@"keyboard code %@ -> %@", code,
                   [k buttonForKeyCode:(GCKeyCode)code.intValue] ? @"a key" : @"nil"]];
@@ -707,13 +707,13 @@ static NSArray *keyCodeGroup(BOOL port)
 static NSArray *hardwareGroup(BOOL port)
 {
     NSMutableArray *log = [NSMutableArray array];
-    id<LController> c = (id<LController>)[NSClassFromString(port ? @"CharonHostGCController" : @"GCController") controllerWithExtendedGamepad];
+    id<LController> c = (id<LController>)[NSClassFromString(port ? @"RevenantHostGCController" : @"GCController") controllerWithExtendedGamepad];
     [log addObject:[NSString stringWithFormat:@"hardware controller=%d", c != nil]];
     [log addObject:[NSString stringWithFormat:@"hardware battery=%@", c.battery ? @"made" : @"nil"]];
     [log addObject:[NSString stringWithFormat:@"hardware light=%@", c.light ? @"made" : @"nil"]];
     [log addObject:[NSString stringWithFormat:@"hardware haptics=%@", c.haptics ? @"made" : @"nil"]];
     [log addObject:[NSString stringWithFormat:@"hardware coalescedKeyboard=%@",
-                  [NSClassFromString(port ? @"CharonHostGCKeyboard" : @"GCKeyboard") coalescedKeyboard] ? @"made" : @"nil"]];
+                  [NSClassFromString(port ? @"RevenantHostGCKeyboard" : @"GCKeyboard") coalescedKeyboard] ? @"made" : @"nil"]];
     return log;
 }
 
@@ -755,7 +755,7 @@ static NSArray *hardwareGroup(BOOL port)
 static NSArray *paddlesGroup(BOOL host)
 {
     NSMutableArray *log = [NSMutableArray array];
-    id<LPaddles> x = (id<LPaddles>)[[NSClassFromString(host ? @"GCXboxGamepad" : @"CharonHostGCXboxGamepad") alloc] init];
+    id<LPaddles> x = (id<LPaddles>)[[NSClassFromString(host ? @"GCXboxGamepad" : @"RevenantHostGCXboxGamepad") alloc] init];
     [log addObject:[NSString stringWithFormat:@"paddles %@ %@ %@ %@", x.paddleButton1 ? @"a button" : @"nil",
                   x.paddleButton2 ? @"a button" : @"nil", x.paddleButton3 ? @"a button" : @"nil",
                   x.paddleButton4 ? @"a button" : @"nil"]];
@@ -766,7 +766,7 @@ static NSArray *touchpadsGroup(BOOL host)
 {
     NSMutableArray *log = [NSMutableArray array];
     for (NSString *name in @[@"GCDualShockGamepad", @"GCDualSenseGamepad"]) {
-        id<LGamepadExtra> g = (id<LGamepadExtra>)[[NSClassFromString(host ? name : [@"CharonHost" stringByAppendingString:name]) alloc] init];
+        id<LGamepadExtra> g = (id<LGamepadExtra>)[[NSClassFromString(host ? name : [@"RevenantHost" stringByAppendingString:name]) alloc] init];
         [log addObject:[NSString stringWithFormat:@"%@ init=%d", name, g != nil]];
         [log addObject:[NSString stringWithFormat:@"%@ touchpadButton=%@", name, describeReading(g.touchpadButton)]];
         [log addObject:[NSString stringWithFormat:@"%@ touchpadPrimary=%@", name, describeReading(g.touchpadPrimary)]];
@@ -783,7 +783,7 @@ static NSArray *touchpadsGroup(BOOL host)
 static NSArray *triggerGroup(BOOL host)
 {
     NSMutableArray *log = [NSMutableArray array];
-    id<LTrigger> t = (id<LTrigger>)[[NSClassFromString(host ? @"GCDualSenseAdaptiveTrigger" : @"CharonHostGCDualSenseAdaptiveTrigger") alloc] init];
+    id<LTrigger> t = (id<LTrigger>)[[NSClassFromString(host ? @"GCDualSenseAdaptiveTrigger" : @"RevenantHostGCDualSenseAdaptiveTrigger") alloc] init];
     BOOL answersButton = [t respondsToSelector:@selector(setValue:)] && [t respondsToSelector:@selector(isPressed)];
     [log addObject:[NSString stringWithFormat:@"trigger init=%d answersButton=%d", (int)(t != nil), (int)answersButton]];
     [log addObject:[NSString stringWithFormat:@"trigger at rest: mode=%ld status=%ld armPosition=%f", (long)t.mode, (long)t.status, t.armPosition]];
@@ -914,7 +914,7 @@ static NSArray *microSnapshotValues(void)
 static NSArray *snapshotObjectGroup(BOOL port)
 {
     NSMutableArray *log = [NSMutableArray array];
-    Class controllerClass = NSClassFromString(port ? @"CharonHostGCController" : @"GCController");
+    Class controllerClass = NSClassFromString(port ? @"RevenantHostGCController" : @"GCController");
     NSString *what = nil;
 
     id<LProfile> extended = [controllerClass controllerWithExtendedGamepad].extendedGamepad;
@@ -942,7 +942,7 @@ static NSArray *snapshotObjectGroup(BOOL port)
         fields.supportsClickableThumbsticks = YES;
         fields.leftThumbstickButton = [values[@"Left Thumbstick Button"][0] floatValue] > 0;
         fields.rightThumbstickButton = [values[@"Right Thumbstick Button"][0] floatValue] > 0;
-        NSData *encoded = port ? charonHost_NSDataFromGCExtendedGamepadSnapshotData(&fields)
+        NSData *encoded = port ? revenantHost_NSDataFromGCExtendedGamepadSnapshotData(&fields)
                                : NSDataFromGCExtendedGamepadSnapshotData(&fields);
         [log addObject:[NSString stringWithFormat:@"extended set %lu encoder %@", (unsigned long)index, hexData(encoded)]];
         index++;
@@ -974,10 +974,10 @@ static NSArray *snapshotObjectGroup(BOOL port)
 static NSArray *snapshotReadBackLines(void)
 {
     NSMutableArray *log = [NSMutableArray array];
-    NSString *snapshotName = @"CharonHostGCExtendedGamepadSnapshot";
-    NSString *microSnapshotName = @"CharonHostGCMicroGamepadSnapshot";
+    NSString *snapshotName = @"RevenantHostGCExtendedGamepadSnapshot";
+    NSString *microSnapshotName = @"RevenantHostGCMicroGamepadSnapshot";
 
-    id<LProfile> extendedExtended = [NSClassFromString(@"CharonHostGCController") controllerWithExtendedGamepad].extendedGamepad;
+    id<LProfile> extendedExtended = [NSClassFromString(@"RevenantHostGCController") controllerWithExtendedGamepad].extendedGamepad;
     [log addObject:[NSString stringWithFormat:@"extended -saveSnapshot is present: %@%@",
                      [extendedExtended respondsToSelector:@selector(saveSnapshot)] ? @"yes" : @"NO",
                      [extendedExtended respondsToSelector:@selector(saveSnapshot)] ? @"" : @" MISMATCH"]];
@@ -1009,7 +1009,7 @@ static NSArray *snapshotReadBackLines(void)
             fields.leftThumbstickButton = [values[@"Left Thumbstick Button"][0] floatValue] > 0;
             fields.rightThumbstickButton = [values[@"Right Thumbstick Button"][0] floatValue] > 0;
 
-            id<LProfile> live = [NSClassFromString(@"CharonHostGCController") controllerWithExtendedGamepad].extendedGamepad;
+            id<LProfile> live = [NSClassFromString(@"RevenantHostGCController") controllerWithExtendedGamepad].extendedGamepad;
             writeValues(live, values);
             NSString *why = nil;
             NSString *reference = hexData(NSDataFromGCExtendedGamepadSnapshotData(&fields));
@@ -1063,7 +1063,7 @@ int main(void)
 {
     setvbuf(stdout, NULL, _IONBF, 0);
     @autoreleasepool {
-        Class host = NSClassFromString(@"GCController"), port = NSClassFromString(@"CharonHostGCController");
+        Class host = NSClassFromString(@"GCController"), port = NSClassFromString(@"RevenantHostGCController");
         int failures = 0, checks = 0;
         for (int micro = 0; micro < 2; micro++) {
             NSArray *a = drive(host, micro), *b = drive(port, micro);
@@ -1080,8 +1080,8 @@ int main(void)
             }
         }
         {
-            NSArray *a = [keyboardKeys(@"GCKeyboardInput", @"CharonHostGCKeyboardInput") arrayByAddingObjectsFromArray:keyCodeGroup(false)],
-                     *b = [keyboardKeys(@"CharonHostGCKeyboardInput", @"GCKeyboardInput") arrayByAddingObjectsFromArray:keyCodeGroup(true)];
+            NSArray *a = [keyboardKeys(@"GCKeyboardInput", @"RevenantHostGCKeyboardInput") arrayByAddingObjectsFromArray:keyCodeGroup(false)],
+                     *b = [keyboardKeys(@"RevenantHostGCKeyboardInput", @"GCKeyboardInput") arrayByAddingObjectsFromArray:keyCodeGroup(true)];
             printf("keyboard: %lu lines from the host, %lu from the port\n", (unsigned long)a.count, (unsigned long)b.count);
             int shownKeyboard = 0;
             for (NSUInteger i = 0; i < MAX(a.count, b.count); i++) {
@@ -1145,7 +1145,7 @@ int main(void)
         }
         {
             NSArray *a = [gamepadInfo(@"GCGamepad") arrayByAddingObjectsFromArray:[gamepadInfo(@"GCExtendedGamepad") arrayByAddingObjectsFromArray:gamepadInfo(@"GCMicroGamepad")]];
-            NSArray *b = [gamepadInfo(@"CharonHostGCGamepad") arrayByAddingObjectsFromArray:[gamepadInfo(@"CharonHostGCExtendedGamepad") arrayByAddingObjectsFromArray:gamepadInfo(@"CharonHostGCMicroGamepad")]];
+            NSArray *b = [gamepadInfo(@"RevenantHostGCGamepad") arrayByAddingObjectsFromArray:[gamepadInfo(@"RevenantHostGCExtendedGamepad") arrayByAddingObjectsFromArray:gamepadInfo(@"RevenantHostGCMicroGamepad")]];
             printf("gamepad: %lu lines from the host, %lu from the port\n", (unsigned long)a.count, (unsigned long)b.count);
             for (NSUInteger i = 0; i < MAX(a.count, b.count); i++) {
                 checks++;

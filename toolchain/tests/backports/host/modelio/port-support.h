@@ -2,7 +2,7 @@
 #import <ModelIO/ModelIO.h>
 #import <simd/simd.h>
 
-@interface MDLMesh (CharonProbePlane)
+@interface MDLMesh (RevenantProbePlane)
 + (instancetype)newPlaneWithDimensions:(vector_float2)dimensions
                               segments:(vector_uint2)segments
                           geometryType:(MDLGeometryType)geometryType
@@ -10,7 +10,7 @@
                              allocator:(id<MDLMeshBufferAllocator>)allocator;
 @end
 
-@interface MDLTexture (CharonProbeTexture)
+@interface MDLTexture (RevenantProbeTexture)
 - (instancetype)initWithData:(NSData *)pixelData
                topLeftOrigin:(BOOL)topLeftOrigin
                         name:(NSString *)name

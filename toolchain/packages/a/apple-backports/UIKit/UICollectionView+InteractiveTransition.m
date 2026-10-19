@@ -3,20 +3,20 @@
 
 #pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
 
-static const char CharonTransitionKey;
-static const NSTimeInterval CharonTransitionDuration = 0.35;
+static const char RevenantTransitionKey;
+static const NSTimeInterval RevenantTransitionDuration = 0.35;
 
-@interface CharonPendingLayout : NSObject
+@interface RevenantPendingLayout : NSObject
 @property (nonatomic, strong) UICollectionViewLayout *layout;
 @property (nonatomic, copy) void (^completion)(BOOL finished);
 @end
 
-@implementation CharonPendingLayout
+@implementation RevenantPendingLayout
 @synthesize layout = _layout;
 @synthesize completion = _completion;
 @end
 
-@interface CharonLayoutTransition : NSObject
+@interface RevenantLayoutTransition : NSObject
 @property (nonatomic, strong) UICollectionViewTransitionLayout *layout;
 @property (nonatomic, strong) UICollectionViewLayout *from;
 @property (nonatomic, strong) UICollectionViewLayout *to;
@@ -27,10 +27,10 @@ static const NSTimeInterval CharonTransitionDuration = 0.35;
 @property (nonatomic) BOOL finishing;
 @property (nonatomic, strong) NSTimer *timer;
 @property (nonatomic, strong) NSDate *began;
-@property (nonatomic, strong) NSMutableArray<CharonPendingLayout *> *pending;
+@property (nonatomic, strong) NSMutableArray<RevenantPendingLayout *> *pending;
 @end
 
-@implementation CharonLayoutTransition
+@implementation RevenantLayoutTransition
 @synthesize layout = _layout;
 @synthesize from = _from;
 @synthesize to = _to;
@@ -47,10 +47,10 @@ static const NSTimeInterval CharonTransitionDuration = 0.35;
 {
     NSTimeInterval elapsed = -[_began timeIntervalSinceNow];
     CGFloat span = _target - _start;
-    CGFloat progress = elapsed >= CharonTransitionDuration ? _target
-                       : _start + span * (CGFloat)(elapsed / CharonTransitionDuration);
+    CGFloat progress = elapsed >= RevenantTransitionDuration ? _target
+                       : _start + span * (CGFloat)(elapsed / RevenantTransitionDuration);
     _layout.transitionProgress = progress;
-    if (elapsed < CharonTransitionDuration)
+    if (elapsed < RevenantTransitionDuration)
         return;
     [_timer invalidate];
     _timer = nil;
@@ -58,13 +58,13 @@ static const NSTimeInterval CharonTransitionDuration = 0.35;
     UICollectionViewLayout *settled = span >= 0 ? _to : _from;
     BOOL finished = span >= 0;
     view.collectionViewLayout = settled;
-    for (CharonPendingLayout *waiting in _pending) {
+    for (RevenantPendingLayout *waiting in _pending) {
         view.collectionViewLayout = waiting.layout;
         if (waiting.completion)
             waiting.completion(YES);
     }
     [_pending removeAllObjects];
-    objc_setAssociatedObject(view, &CharonTransitionKey, nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(view, &RevenantTransitionKey, nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     [_layout finalizeLayoutTransition];
     UICollectionViewLayoutInteractiveTransitionCompletion completion = _completion;
     _completion = nil;
@@ -73,20 +73,20 @@ static const NSTimeInterval CharonTransitionDuration = 0.35;
 }
 @end
 
-@implementation UICollectionView (CharonInteractiveTransition)
+@implementation UICollectionView (RevenantInteractiveTransition)
 
-- (CharonLayoutTransition *)charon_layoutTransition
+- (RevenantLayoutTransition *)revenant_layoutTransition
 {
-    return objc_getAssociatedObject(self, &CharonTransitionKey);
+    return objc_getAssociatedObject(self, &RevenantTransitionKey);
 }
 
 - (UICollectionViewTransitionLayout *)startInteractiveTransitionToCollectionViewLayout:(UICollectionViewLayout *)layout
                                                                             completion:(UICollectionViewLayoutInteractiveTransitionCompletion)completion
 {
-    if (!layout || layout == self.collectionViewLayout || [self charon_layoutTransition])
+    if (!layout || layout == self.collectionViewLayout || [self revenant_layoutTransition])
         return nil;
     UICollectionViewLayout *from = self.collectionViewLayout;
-    CharonLayoutTransition *transition = [[CharonLayoutTransition alloc] init];
+    RevenantLayoutTransition *transition = [[RevenantLayoutTransition alloc] init];
     transition.from = from;
     transition.to = layout;
     transition.view = self;
@@ -94,14 +94,14 @@ static const NSTimeInterval CharonTransitionDuration = 0.35;
     transition.layout = [[UICollectionViewTransitionLayout alloc] initWithCurrentLayout:from nextLayout:layout];
     transition.start = transition.layout.transitionProgress;
     transition.pending = [NSMutableArray array];
-    objc_setAssociatedObject(self, &CharonTransitionKey, transition, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, &RevenantTransitionKey, transition, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     [from prepareForTransitionToLayout:layout];
     [layout prepareForTransitionFromLayout:from];
     self.collectionViewLayout = transition.layout;
     return transition.layout;
 }
 
-- (void)charon_settleLayoutTransition:(CharonLayoutTransition *)transition target:(CGFloat)target
+- (void)revenant_settleLayoutTransition:(RevenantLayoutTransition *)transition target:(CGFloat)target
 {
     if (transition.finishing)
         return;
@@ -119,18 +119,18 @@ static const NSTimeInterval CharonTransitionDuration = 0.35;
 
 - (void)finishInteractiveTransition
 {
-    CharonLayoutTransition *transition = [self charon_layoutTransition];
+    RevenantLayoutTransition *transition = [self revenant_layoutTransition];
     if (!transition)
         return;
-    [self charon_settleLayoutTransition:transition target:1.0];
+    [self revenant_settleLayoutTransition:transition target:1.0];
 }
 
 - (void)cancelInteractiveTransition
 {
-    CharonLayoutTransition *transition = [self charon_layoutTransition];
+    RevenantLayoutTransition *transition = [self revenant_layoutTransition];
     if (!transition)
         return;
-    [self charon_settleLayoutTransition:transition target:0.0];
+    [self revenant_settleLayoutTransition:transition target:0.0];
 }
 
 - (void)setCollectionViewLayout:(UICollectionViewLayout *)layout animated:(BOOL)animated completion:(void (^)(BOOL finished))completion
@@ -146,9 +146,9 @@ static const NSTimeInterval CharonTransitionDuration = 0.35;
             completion(YES);
         return;
     }
-    CharonLayoutTransition *running = [self charon_layoutTransition];
+    RevenantLayoutTransition *running = [self revenant_layoutTransition];
     if (running) {
-        CharonPendingLayout *waiting = [[CharonPendingLayout alloc] init];
+        RevenantPendingLayout *waiting = [[RevenantPendingLayout alloc] init];
         waiting.layout = layout;
         waiting.completion = completion;
         [running.pending addObject:waiting];

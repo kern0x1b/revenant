@@ -6,7 +6,7 @@ func logProbe(_ line: String) { probe(line) }
 func probe(_ line: String) {
     let text = "[probe] \(line)\n"
     print(text, terminator: "")
-    let path = "/tmp/eidolon-demo.log"
+    let path = "/tmp/swiftui-demo.log"
     if let handle = FileHandle(forWritingAtPath: path) {
         handle.seekToEndOfFile(); handle.write(text.data(using: .utf8)!); handle.closeFile()
     } else {
@@ -124,16 +124,16 @@ struct ContentView: View {
                     }
                 }
             }
-            .navigationTitle("Eidolon")
+            .navigationTitle("SwiftUI")
         }
         .environmentObject(library)
         .onAppear {
             probe("content appeared books=\(library.books.count)")
-            if FileManager.default.fileExists(atPath: "/var/charon/perf.on") {
+            if FileManager.default.fileExists(atPath: "/var/revenant/perf.on") {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 2) { runPerf() }
             }
             if snapshotRun != nil {
-                let folder = "/var/charon/eidolon-snapshots"
+                let folder = "/var/revenant/swiftui-snapshots"
                 DispatchQueue.main.asyncAfter(deadline: .now() + 2) { writeSnapshots(to: folder) }
             }
         }
@@ -145,15 +145,15 @@ func loadBackports() {
 }
 
 let snapshotRun: (only: String?, images: Bool, fromBundle: Bool)? = {
-    let fromBundle = Bundle.main.object(forInfoDictionaryKey: "EidolonSnapshots") != nil
-    guard fromBundle || FileManager.default.fileExists(atPath: "/var/charon/snapshots.on") else {
+    let fromBundle = Bundle.main.object(forInfoDictionaryKey: "SwiftUISnapshots") != nil
+    guard fromBundle || FileManager.default.fileExists(atPath: "/var/revenant/snapshots.on") else {
         return nil
     }
-    let only = (try? String(contentsOfFile: "/var/charon/snapshots.only", encoding: .utf8))
-        ?? (Bundle.main.object(forInfoDictionaryKey: "EidolonSnapshotOnly") as? String)
+    let only = (try? String(contentsOfFile: "/var/revenant/snapshots.only", encoding: .utf8))
+        ?? (Bundle.main.object(forInfoDictionaryKey: "SwiftUISnapshotOnly") as? String)
     let name = only?.trimmingCharacters(in: .whitespacesAndNewlines)
-    let images = Bundle.main.object(forInfoDictionaryKey: "EidolonSnapshotImages") != nil
-        || FileManager.default.fileExists(atPath: "/var/charon/snapshots.png")
+    let images = Bundle.main.object(forInfoDictionaryKey: "SwiftUISnapshotImages") != nil
+        || FileManager.default.fileExists(atPath: "/var/revenant/snapshots.png")
     return (name?.isEmpty == false ? name : nil, images, fromBundle)
 }()
 
@@ -179,10 +179,10 @@ struct DemoApp: App {
 
     var body: some Scene {
         WindowGroup {
-            if let name = try? String(contentsOfFile: "/var/charon/show", encoding: .utf8),
+            if let name = try? String(contentsOfFile: "/var/revenant/show", encoding: .utf8),
                let scenario = snapshotCases().first(where: { $0.name == name.trimmingCharacters(in: .whitespacesAndNewlines) }) {
                 AnyView(scenario.view).onAppear {
-                    if let gesture = try? String(contentsOfFile: "/var/charon/gesture", encoding: .utf8) {
+                    if let gesture = try? String(contentsOfFile: "/var/revenant/gesture", encoding: .utf8) {
                         DispatchQueue.main.asyncAfter(deadline: .now() + 2) { runDeviceGesture(gesture.trimmingCharacters(in: .whitespacesAndNewlines)) }
                     }
                 }

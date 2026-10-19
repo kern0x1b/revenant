@@ -19,7 +19,7 @@
 #include <system_error>
 #include <utility>
 
-namespace shade {
+namespace emulator {
 namespace {
 
     constexpr std::array<char, 8> profile_magic { 'i', 'L', 'J', 'T', 'P', 'R',

@@ -3,16 +3,16 @@
 #import <CoreText/CoreText.h>
 
 #ifdef PORT
-@interface CIRectangleFeature (CharonTest)
-- (instancetype)initWithCharonBounds:(CGRect)boundsRect
+@interface CIRectangleFeature (RevenantTest)
+- (instancetype)initWithRevenantBounds:(CGRect)boundsRect
                               topLeft:(CGPoint)topLeftPoint
                              topRight:(CGPoint)topRightPoint
                            bottomLeft:(CGPoint)bottomLeftPoint
                           bottomRight:(CGPoint)bottomRightPoint;
 @end
 
-@interface CIQRCodeFeature (CharonTest)
-- (instancetype)initWithCharonBounds:(CGRect)boundsRect
+@interface CIQRCodeFeature (RevenantTest)
+- (instancetype)initWithRevenantBounds:(CGRect)boundsRect
                               topLeft:(CGPoint)topLeftPoint
                              topRight:(CGPoint)topRightPoint
                            bottomLeft:(CGPoint)bottomLeftPoint
@@ -20,8 +20,8 @@
                         messageString:(NSString *)message;
 @end
 
-@interface CITextFeature (CharonTest)
-- (instancetype)initWithCharonBounds:(CGRect)boundsRect
+@interface CITextFeature (RevenantTest)
+- (instancetype)initWithRevenantBounds:(CGRect)boundsRect
                               topLeft:(CGPoint)topLeftPoint
                              topRight:(CGPoint)topRightPoint
                            bottomLeft:(CGPoint)bottomLeftPoint
@@ -34,8 +34,8 @@ static NSString *className(Class c)
 {
     NSString *n = NSStringFromClass(c);
 #ifdef PORT
-    if ([n hasPrefix:@"CharonPort"]) {
-        n = [n substringFromIndex:strlen("CharonPort")];
+    if ([n hasPrefix:@"RevenantPort"]) {
+        n = [n substringFromIndex:strlen("RevenantPort")];
     }
 #endif
     return n;
@@ -125,14 +125,14 @@ int main(void)
                [CIFeatureTypeQRCode UTF8String], [CIFeatureTypeRectangle UTF8String], [CIFeatureTypeText UTF8String]);
 
 #ifdef PORT
-        CIQRCodeFeature *qr = [[CIQRCodeFeature alloc] initWithCharonBounds:CGRectMake(8, 8, 168, 168)
+        CIQRCodeFeature *qr = [[CIQRCodeFeature alloc] initWithRevenantBounds:CGRectMake(8, 8, 168, 168)
             topLeft:CGPointMake(8, 176) topRight:CGPointMake(176, 176)
             bottomLeft:CGPointMake(8, 8) bottomRight:CGPointMake(176, 8)
             messageString:@"Hello QR"];
-        CIRectangleFeature *rect = [[CIRectangleFeature alloc] initWithCharonBounds:CGRectMake(79.34, 59.41, 240.77, 181.02)
+        CIRectangleFeature *rect = [[CIRectangleFeature alloc] initWithRevenantBounds:CGRectMake(79.34, 59.41, 240.77, 181.02)
             topLeft:CGPointMake(79.34, 240.16) topRight:CGPointMake(319.85, 240.42)
             bottomLeft:CGPointMake(79.59, 59.41) bottomRight:CGPointMake(320.10, 59.67)];
-        CITextFeature *text = [[CITextFeature alloc] initWithCharonBounds:CGRectMake(23, 39, 352, 37)
+        CITextFeature *text = [[CITextFeature alloc] initWithRevenantBounds:CGRectMake(23, 39, 352, 37)
             topLeft:CGPointMake(23, 76) topRight:CGPointMake(375, 76)
             bottomLeft:CGPointMake(23, 39) bottomRight:CGPointMake(375, 39)
             subFeatures:@[]];

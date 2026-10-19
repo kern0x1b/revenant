@@ -12,12 +12,12 @@ static uint32_t next(void)
 
 static NSData *port_compress(NSData *data, NSInteger algorithm, NSError **error)
 {
-    return ((id (*)(id, SEL, NSInteger, NSError **))objc_msgSend)(data, NSSelectorFromString(@"charonHostCompressedDataUsingAlgorithm:error:"), algorithm, error);
+    return ((id (*)(id, SEL, NSInteger, NSError **))objc_msgSend)(data, NSSelectorFromString(@"revenantHostCompressedDataUsingAlgorithm:error:"), algorithm, error);
 }
 
 static NSData *port_decompress(NSData *data, NSInteger algorithm, NSError **error)
 {
-    return ((id (*)(id, SEL, NSInteger, NSError **))objc_msgSend)(data, NSSelectorFromString(@"charonHostDecompressedDataUsingAlgorithm:error:"), algorithm, error);
+    return ((id (*)(id, SEL, NSInteger, NSError **))objc_msgSend)(data, NSSelectorFromString(@"revenantHostDecompressedDataUsingAlgorithm:error:"), algorithm, error);
 }
 
 static NSData *make_input(int kind, NSUInteger length)
@@ -84,7 +84,7 @@ int main(int argc, char **argv)
             }
             for (NSString *sample in samples)
                 printf("%s\n", sample.UTF8String);
-            charon_check(failures == 0, [[NSString stringWithFormat:@"%@ data the port compresses the system reads, and the port reads what the system compresses", names[algorithm]] UTF8String],
+            revenant_check(failures == 0, [[NSString stringWithFormat:@"%@ data the port compresses the system reads, and the port reads what the system compresses", names[algorithm]] UTF8String],
                          [NSString stringWithFormat:@"%lu of %lu inputs fail", (unsigned long)failures, (unsigned long)checked]);
         }
 
@@ -121,7 +121,7 @@ int main(int argc, char **argv)
         for (NSString *sample in samples)
             printf("  %s\n", sample.UTF8String);
         printf("info: %lu damaged LZ4 blocks the system reads (a match may reach before the start of its data) and the port refuses\n", (unsigned long)stricter);
-        charon_check(differing == 0, "damaged, truncated, extended and headless streams are refused or read as the system does", [NSString stringWithFormat:@"%lu of %lu differ", (unsigned long)differing, (unsigned long)compared]);
+        revenant_check(differing == 0, "damaged, truncated, extended and headless streams are refused or read as the system does", [NSString stringWithFormat:@"%lu of %lu differ", (unsigned long)differing, (unsigned long)compared]);
 
         NSError *error = nil;
         NSData *plain = [@"hello" dataUsingEncoding:NSUTF8StringEncoding];
@@ -143,20 +143,20 @@ int main(int argc, char **argv)
             NSData *fixed = make_input(3, 5000);
             NSMutableData *mine = [fixed mutableCopy], *theirs = [fixed mutableCopy];
             NSError *e1 = nil, *e2 = nil;
-            BOOL a = ((BOOL (*)(id, SEL, NSInteger, NSError **))objc_msgSend)(mine, NSSelectorFromString(@"charonHostCompressUsingAlgorithm:error:"), algorithm, &e1);
+            BOOL a = ((BOOL (*)(id, SEL, NSInteger, NSError **))objc_msgSend)(mine, NSSelectorFromString(@"revenantHostCompressUsingAlgorithm:error:"), algorithm, &e1);
             BOOL b = [theirs compressUsingAlgorithm:(NSDataCompressionAlgorithm)algorithm error:&e2];
             CHECK(a && b && mine.length < 5000 && theirs.length < 5000, "a mutable data compresses in place");
-            a = ((BOOL (*)(id, SEL, NSInteger, NSError **))objc_msgSend)(mine, NSSelectorFromString(@"charonHostDecompressUsingAlgorithm:error:"), algorithm, &e1);
+            a = ((BOOL (*)(id, SEL, NSInteger, NSError **))objc_msgSend)(mine, NSSelectorFromString(@"revenantHostDecompressUsingAlgorithm:error:"), algorithm, &e1);
             CHECK(a && [mine isEqualToData:fixed] && [theirs decompressUsingAlgorithm:(NSDataCompressionAlgorithm)algorithm error:&e2] && [theirs isEqualToData:mine], "and decompresses in place to what it was");
             NSMutableData *garbage = [[@"not a stream at all" dataUsingEncoding:NSUTF8StringEncoding] mutableCopy];
             NSData *before = [garbage copy];
-            a = ((BOOL (*)(id, SEL, NSInteger, NSError **))objc_msgSend)(garbage, NSSelectorFromString(@"charonHostDecompressUsingAlgorithm:error:"), algorithm, &e1);
+            a = ((BOOL (*)(id, SEL, NSInteger, NSError **))objc_msgSend)(garbage, NSSelectorFromString(@"revenantHostDecompressUsingAlgorithm:error:"), algorithm, &e1);
             CHECK(!a && [garbage isEqualToData:before] && e1.code == 5377, "a failed in-place decompression leaves the data as it was");
             CHECK([garbage decompressUsingAlgorithm:(NSDataCompressionAlgorithm)algorithm error:&e2] == a && e2.code == e1.code, "and the system fails the same way");
         }
         NSData *ok = port_compress(plain, 3, NULL);
         CHECK(ok != nil, "the error out parameter may be NULL");
     }
-    printf("checks=%d failures=%d\n", charon_checks, charon_failures);
-    return charon_failures;
+    printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
+    return revenant_failures;
 }

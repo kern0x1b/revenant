@@ -98,7 +98,7 @@
     if (_displayedString)
         return _displayedString;
     NSMutableAttributedString *text = [[NSMutableAttributedString alloc] initWithString:@""];
-    NSString *marker = [self charon_marker];
+    NSString *marker = [self revenant_marker];
     if (marker) {
         NSDictionary *attributes = _markerAttributes.count ? _markerAttributes
                                                            : @{ NSFontAttributeName : [UIFont systemFontOfSize:12] };
@@ -109,7 +109,7 @@
     return text;
 }
 
-- (NSString *)charon_marker
+- (NSString *)revenant_marker
 {
     if (!_textList || !_contents)
         return nil;

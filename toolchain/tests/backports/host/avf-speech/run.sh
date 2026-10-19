@@ -3,7 +3,7 @@
 # AVSpeechSynthesisVoice (voice-checks.m) in a second binary, in four locale variants.
 #
 # The port's objects (AVFoundation/AVSpeechUtterance7.m, AVFoundation/AVSpeechConstants7.m, and for the voice
-# AVFoundation/AVSpeechSynthesisVoice7.m) are compiled with every name they define renamed to a charon_host_ spelling,
+# AVFoundation/AVSpeechSynthesisVoice7.m) are compiled with every name they define renamed to a revenant_host_ spelling,
 # and linked beside the checks, which ask the host's own class and the port's the same questions in one process.
 #
 # Controls keep the checks honest:
@@ -23,7 +23,7 @@ here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
 avf=$root/packages/a/apple-backports/AVFoundation
-build=$(runs_folder charon-avf-speech)
+build=$(runs_folder revenant-avf-speech)
 rm -rf "$build"
 mkdir -p "$build/src"
 
@@ -35,10 +35,10 @@ if [ "$mutant" = pitch ]; then
     echo "planted: pitchMultiplier floor 0.25 in the copy (control: must go red)"
 fi
 
-renames="-DAVSpeechUtterance=charon_host_AVSpeechUtterance
--DAVSpeechUtteranceMinimumSpeechRate=charon_host_AVSpeechUtteranceMinimumSpeechRate
--DAVSpeechUtteranceMaximumSpeechRate=charon_host_AVSpeechUtteranceMaximumSpeechRate
--DAVSpeechUtteranceDefaultSpeechRate=charon_host_AVSpeechUtteranceDefaultSpeechRate"
+renames="-DAVSpeechUtterance=revenant_host_AVSpeechUtterance
+-DAVSpeechUtteranceMinimumSpeechRate=revenant_host_AVSpeechUtteranceMinimumSpeechRate
+-DAVSpeechUtteranceMaximumSpeechRate=revenant_host_AVSpeechUtteranceMaximumSpeechRate
+-DAVSpeechUtteranceDefaultSpeechRate=revenant_host_AVSpeechUtteranceDefaultSpeechRate"
 # shellcheck disable=SC2086
 for source in AVSpeechUtterance7.m AVSpeechConstants7.m; do
     xcrun clang -fobjc-arc -Wall -Wno-deprecated-declarations $renames -I"$avf" \
@@ -74,7 +74,7 @@ if [ "$vmutant" = identifier ]; then
     [ "$(grep -c 'super-compact.en-US.Samantha' "$build/src/AVSpeechSynthesisVoice7.m")" -eq 1 ] || { echo "FAIL: the planted identifier did not apply"; exit 1; }
     echo "planted: Samantha's identifier in the copy is the super-compact one (control: must go red)"
 fi
-xcrun clang -fobjc-arc -Wall -Wno-deprecated-declarations -DAVSpeechSynthesisVoice=charon_host_AVSpeechSynthesisVoice \
+xcrun clang -fobjc-arc -Wall -Wno-deprecated-declarations -DAVSpeechSynthesisVoice=revenant_host_AVSpeechSynthesisVoice \
     -I"$avf" -c "$build/src/AVSpeechSynthesisVoice7.m" -o "$build/AVSpeechSynthesisVoice7.o" 2> "$build/voice.err" || {
         echo "FAIL compiling the port's AVSpeechSynthesisVoice7.m"; head -6 "$build/voice.err"; exit 1; }
 xcrun clang -fobjc-arc -Wall -Wno-deprecated-declarations "$here/voice-checks.m" "$build/AVSpeechSynthesisVoice7.o" \
@@ -116,13 +116,13 @@ if [ "$later" = audio-session ]; then
 fi
 # shellcheck disable=SC2086
 xcrun clang -fobjc-arc -Wall -Wno-deprecated-declarations $renames \
-    -DAVSpeechSynthesisVoice=charon_host_AVSpeechSynthesisVoice -DAVSpeechSynthesizer=charon_host_AVSpeechSynthesizer \
+    -DAVSpeechSynthesisVoice=revenant_host_AVSpeechSynthesisVoice -DAVSpeechSynthesizer=revenant_host_AVSpeechSynthesizer \
     -I"$avf" -c "$build/src/AVSpeechSynthesizer7.m" -o "$build/AVSpeechSynthesizer7.o" 2> "$build/synth.err" || {
         echo "FAIL compiling the port's AVSpeechSynthesizer7.m"; head -6 "$build/synth.err"; exit 1; }
 for source in AVSpeechSynthesizer10.m AVSpeechSynthesizer13.m; do
     # shellcheck disable=SC2086
     xcrun clang -fobjc-arc -Wall -Wno-deprecated-declarations $renames \
-        -DAVSpeechSynthesisVoice=charon_host_AVSpeechSynthesisVoice -DAVSpeechSynthesizer=charon_host_AVSpeechSynthesizer \
+        -DAVSpeechSynthesisVoice=revenant_host_AVSpeechSynthesisVoice -DAVSpeechSynthesizer=revenant_host_AVSpeechSynthesizer \
         -I"$avf" -c "$build/src/$source" -o "$build/${source%.m}.o" 2> "$build/$source.err" || {
             echo "FAIL compiling the port's $source"; head -6 "$build/$source.err"; exit 1; }
 done

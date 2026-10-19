@@ -1,9 +1,9 @@
-#ifndef CHARON_VIDEOTOOLBOX_VALUE_STORE_H
-#define CHARON_VIDEOTOOLBOX_VALUE_STORE_H
+#ifndef REVENANT_VIDEOTOOLBOX_VALUE_STORE_H
+#define REVENANT_VIDEOTOOLBOX_VALUE_STORE_H
 
-#import "../CharonValueStore.h"
+#import "../RevenantValueStore.h"
 
-static inline NSMutableDictionary *CharonValueStoreOfClass(Class cls)
+static inline NSMutableDictionary *RevenantValueStoreOfClass(Class cls)
 {
     static const char key;
     NSMutableDictionary *values = objc_getAssociatedObject(cls, &key);
@@ -14,22 +14,22 @@ static inline NSMutableDictionary *CharonValueStoreOfClass(Class cls)
     return values;
 }
 
-static inline void CharonValueSetOnClass(Class cls, id value, NSString *name)
+static inline void RevenantValueSetOnClass(Class cls, id value, NSString *name)
 {
     if (!name)
         return;
     if (value)
-        CharonValueStoreOfClass(cls)[name] = value;
+        RevenantValueStoreOfClass(cls)[name] = value;
     else
-        [CharonValueStoreOfClass(cls) removeObjectForKey:name];
+        [RevenantValueStoreOfClass(cls) removeObjectForKey:name];
 }
 
-#define CHARON_VIDEO_TOOLBOX_VALUE_STORE(ClassName)                                        \
-    @implementation ClassName (CharonVideoToolboxValue)                                   \
-    - (NSMutableDictionary *)charon_values { return CharonValueStore(self); }             \
-    - (id)charon_valueForKey:(NSString *)key { return CharonValueStore(self)[key]; }       \
-    - (void)charon_setValue:(id)value forKey:(NSString *)key                                \
-    { CharonValueSet(self, value, key); }                                                  \
+#define REVENANT_VIDEO_TOOLBOX_VALUE_STORE(ClassName)                                        \
+    @implementation ClassName (RevenantVideoToolboxValue)                                   \
+    - (NSMutableDictionary *)revenant_values { return RevenantValueStore(self); }             \
+    - (id)revenant_valueForKey:(NSString *)key { return RevenantValueStore(self)[key]; }       \
+    - (void)revenant_setValue:(id)value forKey:(NSString *)key                                \
+    { RevenantValueSet(self, value, key); }                                                  \
     @end
 
 #endif

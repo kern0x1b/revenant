@@ -14,7 +14,7 @@
 
 #include "kernel/kernel_shared_state.hpp"
 
-namespace shade::mach_ipc {
+namespace emulator::mach_ipc {
 
 struct ReceivedMessage {
     std::vector<std::byte> bytes;

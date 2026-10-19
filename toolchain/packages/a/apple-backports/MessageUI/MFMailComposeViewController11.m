@@ -1,8 +1,8 @@
 #import <UIKit/UIKit.h>
 #import <MessageUI/MessageUI.h>
-#import "../CharonSayOnce.h"
+#import "../RevenantSayOnce.h"
 
-@implementation MFMailComposeViewController (Charon11)
+@implementation MFMailComposeViewController (Revenant11)
 
 - (void)setPreferredSendingEmailAddress:(NSString *)emailAddress
 {
@@ -11,8 +11,8 @@
 
 - (void)insertCollaborationItemProvider:(NSItemProvider *)itemProvider completionHandler:(void (^)(BOOL))completionHandler
 {
-    charon_say_once_for(@"MFMailComposeViewController.insertCollaborationItemProvider:completionHandler:",
-                        @"CharonMessageUI: this release's mail composer has no collaboration row, so the item provider is "
+    revenant_say_once_for(@"MFMailComposeViewController.insertCollaborationItemProvider:completionHandler:",
+                        @"RevenantMessageUI: this release's mail composer has no collaboration row, so the item provider is "
                         @"not inserted and the completion handler is called with NO.");
     if (completionHandler)
         completionHandler(NO);

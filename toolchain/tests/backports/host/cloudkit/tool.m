@@ -1,5 +1,5 @@
 #import <Foundation/Foundation.h>
-#import "CharonCKWebAuth.h"
+#import "RevenantCKWebAuth.h"
 
 static NSData *HexData(NSString *hex, NSUInteger length)
 {
@@ -31,7 +31,7 @@ int main(int argc, char **argv)
 
         if ([mode isEqualToString:@"sign"]) {
             uint8_t der[80];
-            int length = CharonCKSignES256(scalar.bytes, message.bytes, message.length, der, sizeof der);
+            int length = RevenantCKSignES256(scalar.bytes, message.bytes, message.length, der, sizeof der);
             if (length <= 0) { fprintf(stderr, "FAIL: no signature\n"); return 1; }
             [[NSData dataWithBytes:der length:(NSUInteger)length] writeToFile:@(argv[5]) atomically:YES];
             printf("signed %d bytes of a message of %lu\n", length, (unsigned long)message.length);
@@ -39,15 +39,15 @@ int main(int argc, char **argv)
         }
         if ([mode isEqualToString:@"verify"]) {
             NSData *der = [NSData dataWithContentsOfFile:@(argv[5])];
-            int ok = CharonCKVerifyES256(publicKey.bytes, publicKey.length, message.bytes, message.length,
+            int ok = RevenantCKVerifyES256(publicKey.bytes, publicKey.length, message.bytes, message.length,
                                          der.bytes, der.length);
             printf("verify %d\n", ok);
             return ok ? 0 : 1;
         }
         if ([mode isEqualToString:@"low-s"]) {
             NSUInteger count = argc > 5 ? (NSUInteger)atoi(argv[5]) : 5000;
-            const uint8_t *order = CharonCKGroupOrder();
-            const uint8_t *half = CharonCKGroupOrderHalf();
+            const uint8_t *order = RevenantCKGroupOrder();
+            const uint8_t *half = RevenantCKGroupOrderHalf();
             NSUInteger low = 0, high = 0, selfVerifyFailed = 0;
             for (NSUInteger index = 0; index < count; index++) {
                 NSMutableData *body = [NSMutableData dataWithLength:index % 900 + 1];
@@ -56,12 +56,12 @@ int main(int argc, char **argv)
                     bytes[at] = (uint8_t)((index * 7 + at * 31) & 0xff);
                 }
                 uint8_t der[80];
-                int length = CharonCKSignES256(scalar.bytes, body.bytes, body.length, der, sizeof der);
+                int length = RevenantCKSignES256(scalar.bytes, body.bytes, body.length, der, sizeof der);
                 if (length <= 0) { selfVerifyFailed++; continue; }
-                const uint8_t *s = CharonCKDERSignatureS(der, (size_t)length);
+                const uint8_t *s = RevenantCKDERSignatureS(der, (size_t)length);
                 if (!s) { selfVerifyFailed++; continue; }
                 if (memcmp(s, half, 32) <= 0) { low++; } else { high++; }
-                if (!CharonCKVerifyES256(publicKey.bytes, publicKey.length, body.bytes, body.length,
+                if (!RevenantCKVerifyES256(publicKey.bytes, publicKey.length, body.bytes, body.length,
                                          der, (size_t)length)) {
                     selfVerifyFailed++;
                 }

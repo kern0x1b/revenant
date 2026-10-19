@@ -1,2 +1,2 @@
-                sum -= CharonMatrixSolveGet(&factor, 0, lower ? row : other, lower ? other : row) *
-                       CharonMatrixSolveGet(&x, 0, other, side);
+                sum -= RevenantMatrixSolveGet(&factor, 0, lower ? row : other, lower ? other : row) *
+                       RevenantMatrixSolveGet(&x, 0, other, side);

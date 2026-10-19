@@ -3,11 +3,11 @@ set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 FOUNDATION=${FOUNDATION:-$here/../../../../packages/a/apple-backports/Foundation}
-build=${VALIDATEDFORMAT_BUILD:-$(runs_folder charon-validatedformat-host)}
+build=${VALIDATEDFORMAT_BUILD:-$(runs_folder revenant-validatedformat-host)}
 rm -rf "$build"
 mkdir -p "$build"
 compile() {
-    xcrun clang -fobjc-arc -w "-DCHARON_VALIDATED_FORMAT=\"$1\"" "$here/fuzz.m" -framework Foundation -o "$2"
+    xcrun clang -fobjc-arc -w "-DREVENANT_VALIDATED_FORMAT=\"$1\"" "$here/fuzz.m" -framework Foundation -o "$2"
 }
 if [ "${1:-}" != --mutants ]; then
     compile "$FOUNDATION/NSString+ValidatedFormat.m" "$build/fuzz"

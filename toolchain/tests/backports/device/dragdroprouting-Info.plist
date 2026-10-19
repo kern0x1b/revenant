@@ -9,7 +9,7 @@
 	<key>CFBundleExecutable</key>
 	<string>dragdroprouting</string>
 	<key>CFBundleIdentifier</key>
-	<string>local.charon.backports.dragdroprouting</string>
+	<string>local.revenant.backports.dragdroprouting</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>

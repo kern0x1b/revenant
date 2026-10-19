@@ -19,7 +19,7 @@
 #include <variant>
 #include <vector>
 
-namespace shade {
+namespace emulator {
 
 using AudioSamples = std::variant<std::vector<std::int16_t>,
     std::vector<std::int32_t>, std::vector<float>>;

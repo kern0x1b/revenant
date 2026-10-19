@@ -2,7 +2,7 @@
 # run.sh -- the AVFoundation constants the port carries, the port against the host, in one binary.
 #
 # One program. probe.m is compiled plain, so every BARE name in it is Apple's own symbol; the port's
-# five AVFoundationGlobals*.m are compiled with every constant name defined to its `charon_host_`
+# five AVFoundationGlobals*.m are compiled with every constant name defined to its `revenant_host_`
 # spelling and linked beside it, so the PREFIXED name is the port's own definition of the same
 # constant. One process then reads both and prints them side by side, and the join below is a
 # comparison of the two columns of one run rather than of two runs that could have drifted.
@@ -75,7 +75,7 @@ fi
 # THE PORT'S DEFINITIONS ARE RENAMED IN THE COPY, NOT WITH -D. A -D macro renames every occurrence of
 # the name, and on this host the macOS SDK's own AVFoundation headers DECLARE many of these constants
 # (AVCaptureReactions.h:43 declares AVCaptureReactionTypeBalloons among them), so the macro renames the
-# SDK's declaration too and the compile stops with "redefinition of charon_host_AVCaptureReactionTypeBalloons
+# SDK's declaration too and the compile stops with "redefinition of revenant_host_AVCaptureReactionTypeBalloons
 # with a different type". What has to be renamed is the port's DEFINITION and nothing else, so the copy is
 # rewritten textually on the `NSString *const <name> =` line and the import is left exactly as it was.
 # pass 1: the renamed copy of every source, so the mutation below has all of them on disk whatever
@@ -83,7 +83,7 @@ fi
 # not the mutated one - it stopped with FileNotFoundError, so the mutation could never fire and the
 # mutant run proved nothing.
 for source in $sources; do
-    sed -E 's/^NSString \*const ([A-Za-z_][A-Za-z0-9_]*) =/NSString *const charon_host_\1 =/' \
+    sed -E 's/^NSString \*const ([A-Za-z_][A-Za-z0-9_]*) =/NSString *const revenant_host_\1 =/' \
         "$avf/$source" > "$build/src/$source"
 done
 
@@ -95,8 +95,8 @@ import sys
 path = sys.argv[1]
 text = open(path).read()
 # One value, in the RENAMED copy, so the plant changes what the port holds and nothing else.
-before = 'NSString *const charon_host_AVFileTypeDICOM = @"org.nema.dicom";'
-after = 'NSString *const charon_host_AVFileTypeDICOM = @"org.nema.dicom.PLANTED";'
+before = 'NSString *const revenant_host_AVFileTypeDICOM = @"org.nema.dicom";'
+after = 'NSString *const revenant_host_AVFileTypeDICOM = @"org.nema.dicom.PLANTED";'
 if text.count(before) != 1:
     raise SystemExit("the mutation target is not unique (%d matches), so this run proves nothing"
                      % text.count(before))
@@ -150,7 +150,7 @@ check_control() {
 }
 check_control AVMediaTypeVideo HAS
 check_control AVMediaTypeDepthData HAS
-check_control AVMediaTypeCharonProbeNoSuchConstant LACKS
+check_control AVMediaTypeRevenantProbeNoSuchConstant LACKS
 check_control AVPlayer HAS
 
 # 2. the row count the probe reports must be the number the sources declare
@@ -244,7 +244,7 @@ echo "ok  every one of the $declared constants the port defines holds the value 
 
 # ---------------------------------------------------------------------------------------------
 # The four FUNCTIONS, the same way: the port's object compiled with each name defined to its
-# charon_host_ spelling, linked beside a probe that calls Apple's own symbol and the port's, and the two
+# revenant_host_ spelling, linked beside a probe that calls Apple's own symbol and the port's, and the two
 # answers printed side by side. The three caption constructors return a struct of two fields out of two
 # arguments, so the comparison is over field values; the reaction lookup is compared for every type the
 # port carries and for one it does not, where the host's own answer is measured too.
@@ -277,14 +277,14 @@ echo "the port's $fsource defines $fn functions"
 # constructors are written `AVCaptionDimension AVCaptionDimensionMake(...)` and the lookup
 # `NSString *AVCaptureReactionSystemImageNameForType(...)`, so neither has its name at column 0. An
 # anchored pattern renamed NOTHING, the four symbols then resolved against the linked AVFoundation, every
-# `charon_host_` pointer stayed NULL, and the probe segfaulted on the first call - a green-looking run
+# `revenant_host_` pointer stayed NULL, and the probe segfaulted on the first call - a green-looking run
 # that had compared nothing.
-sed -E -e 's/(AVCaptionDimensionMake|AVCaptionPointMake|AVCaptionSizeMake|AVCaptureReactionSystemImageNameForType)\(/charon_host_\1(/g' \
-       -e 's/isEqualToString:AVCaptureReactionType/isEqualToString:charon_host_AVCaptureReactionType/' \
+sed -E -e 's/(AVCaptionDimensionMake|AVCaptionPointMake|AVCaptionSizeMake|AVCaptureReactionSystemImageNameForType)\(/revenant_host_\1(/g' \
+       -e 's/isEqualToString:AVCaptureReactionType/isEqualToString:revenant_host_AVCaptureReactionType/' \
     "$avf/$fsource" > "$build/src/$fsource.fn"
 for name in AVCaptionDimensionMake AVCaptionPointMake AVCaptionSizeMake AVCaptureReactionSystemImageNameForType; do
-    grep -q "charon_host_$name(" "$build/src/$fsource.fn" || {
-        echo "FAIL: the copy of $fsource does not define charon_host_$name, so the probe would call a NULL"
+    grep -q "revenant_host_$name(" "$build/src/$fsource.fn" || {
+        echo "FAIL: the copy of $fsource does not define revenant_host_$name, so the probe would call a NULL"
         echo "      pointer and this run would prove nothing"
         exit 1
     }
@@ -292,8 +292,8 @@ done
 # The rename has to have landed on all of them, or the port's lookup is silently comparing against
 # something this copy never renamed and the link error below is the only thing that would say so.
 for name in Balloons Confetti Fireworks Heart Lasers Rain ThumbsUp ThumbsDown; do
-    grep -q "charon_host_AVCaptureReactionType$name" "$build/src/$fsource.fn" || {
-        echo "FAIL: the copy of $fsource does not reference charon_host_AVCaptureReactionType$name, so the"
+    grep -q "revenant_host_AVCaptureReactionType$name" "$build/src/$fsource.fn" || {
+        echo "FAIL: the copy of $fsource does not reference revenant_host_AVCaptureReactionType$name, so the"
         echo "      lookup would compare against a symbol this build does not provide"
         exit 1
     }
@@ -337,7 +337,7 @@ fi
 # for the type it passes in, which is Apple's own symbol and the same string either way, so the port's
 # lookup is still asked about the value it will really be asked about.
 globals180="$avf/AVFoundationGlobals180.m"
-sed -E 's/^NSString \*const ([A-Za-z_][A-Za-z0-9_]*) =/NSString *const charon_host_\1 =/' \
+sed -E 's/^NSString \*const ([A-Za-z_][A-Za-z0-9_]*) =/NSString *const revenant_host_\1 =/' \
     "$globals180" > "$build/src/globals180.fn"
 if ! xcrun clang -fobjc-arc -w -x objective-c -I"$avf" -I"$avf_gen" -c "$build/src/globals180.fn" -o "$build/o/globals180.o" \
         > "$build/o/globals180.log" 2>&1; then
@@ -414,7 +414,7 @@ echo "note: the type the port does not carry, measured on both sides: $planted"
 
 # ---------------------------------------------------------------------------------------------
 # The METRIC surface. Same shape again: the port's two metric objects compiled with every CLASS name
-# defined to its charon_host_ spelling, linked beside a probe that asks the ObjC runtime on both sides.
+# defined to its revenant_host_ spelling, linked beside a probe that asks the ObjC runtime on both sides.
 # The names come from the two registry files, so the probe cannot ask about something the registry does
 # not carry and a row the tree forgot to register is not silently skipped.
 #
@@ -434,7 +434,7 @@ done
 # THE DECLARED GETTER, not the property name. `@property (readonly, getter=wasReadFromCache) BOOL
 # readFromCache;` declares a property called readFromCache whose accessor is -wasReadFromCache, so a probe
 # that asks for -readFromCache finds nothing on EITHER side and reports the row equal - it never asks.
-# CharonAVMetrics18.h:156 is that line, and the first version of this list asked the property name, so
+# RevenantAVMetrics18.h:156 is that line, and the first version of this list asked the property name, so
 # `-[AVMetricMediaResourceRequestEvent readFromCache] host=no` was a statement about a selector neither side
 # implements rather than about the port carrying more than the host.
 #
@@ -518,23 +518,23 @@ with open(out, "w") as handle:
 print("the metric probe is asked about %d classes, protocols and members" % len(rows))
 LISTEOF
 # THE CLASSES ARE RENAMED WHOLESALE, and the macOS SDK is why: it ships AVMetrics.h of its own, so
-# CharonAVMetrics18.h's guard excludes every declaration here, and an unrenamed copy would compile
+# RevenantAVMetrics18.h's guard excludes every declaration here, and an unrenamed copy would compile
 # AVFoundationMetrics18.m against APPLE's declarations and its @implementation would BE Apple's class -
 # the probe would then be comparing the host against itself and would report every row equal.
 #
 # A rename of the @implementation lines alone does not work: the class extension in the .m keeps the old
 # name, so clang sees a root class and stops with "no known class method for selector 'alloc'" and
-# "'charon_host_AVMetricEventStream' cannot use 'super' because it is a root class". So the copy also
-# carries a prologue that declares each renamed class with the hierarchy CharonAVMetrics18.h gives it,
+# "'revenant_host_AVMetricEventStream' cannot use 'super' because it is a root class". So the copy also
+# carries a prologue that declares each renamed class with the hierarchy RevenantAVMetrics18.h gives it,
 # read out of that header so the two cannot disagree.
 python3 - "$avf/CharonAVMetrics18.h" "$build/src/metric-prologue.h" <<'PROLOGUE'
 import re, sys
 text = open(sys.argv[1]).read()
-out = ["// Generated by tests/backports/host/avf-globals/run.sh from CharonAVMetrics18.h: every @interface",
+out = ["// Generated by tests/backports/host/avf-globals/run.sh from RevenantAVMetrics18.h: every @interface",
        "// the header declares, with the class name prefixed. The BODY is copied with it, properties and",
-       "// all - a bare `@interface charon_host_X : NSObject @end` is not enough, because the copy's",
+       "// all - a bare `@interface revenant_host_X : NSObject @end` is not enough, because the copy's",
        "// @synthesize lines then have no declaration to synthesize and clang stops with \"property",
-       "// implementation must have its declaration in interface 'charon_host_AVMetricEvent'\".",
+       "// implementation must have its declaration in interface 'revenant_host_AVMetricEvent'\".",
        "#import <Foundation/Foundation.h>",
        "#import <CoreMedia/CoreMedia.h>",
        "#import <AVFoundation/AVFoundation.h>"]
@@ -548,16 +548,16 @@ for parent in sorted(parents):
         out.append("@class %s;" % parent)
 # THE PARENT IS RENAMED TOO, and not renaming it is what made one archived value disappear.
 #
-# `@interface AVMetricErrorEvent : AVMetricEvent` becomes `@interface charon_host_AVMetricErrorEvent : AVMetricEvent`
+# `@interface AVMetricErrorEvent : AVMetricEvent` becomes `@interface revenant_host_AVMetricErrorEvent : AVMetricEvent`
 # if only the class's own name is prefixed - and bare `AVMetricEvent` in the host build resolves to APPLE's
 # class, because the host framework is linked in. The port's error event then derives from Apple's event, and
-# packages/c/charon-coding's walker, which walks [object class] up to NSObject, reaches Apple's AVMetricEvent
+# packages/r/revenant-coding's walker, which walks [object class] up to NSObject, reaches Apple's AVMetricEvent
 # and reads and writes ITS ivars at ITS offsets on a port object.
 #
 # The dump that showed it, from the port's own class:
 #
-#   ivar _didRecover   owner=charon_host_AVMetricErrorEvent   type=B    size=1
-#   ivar _error        owner=charon_host_AVMetricErrorEvent   type=@"NSError" size=8
+#   ivar _didRecover   owner=revenant_host_AVMetricErrorEvent   type=B    size=1
+#   ivar _error        owner=revenant_host_AVMetricErrorEvent   type=@"NSError" size=8
 #   ivar _date         owner=AVMetricEvent                    <- Apple's class, not the port's
 #   ivar _mediaTime    owner=AVMetricEvent
 #   ivar _sessionID    owner=AVMetricEvent
@@ -572,23 +572,23 @@ for declaration, body in blocks:
     if parent == "AVMetricEventStream":
         parent = "NSObject"
     if parent.startswith("AVMetric"):
-        parent = "charon_host_" + parent
-    out.append(declaration.replace("@interface " + name, "@interface charon_host_" + name, 1)
+        parent = "revenant_host_" + parent
+    out.append(declaration.replace("@interface " + name, "@interface revenant_host_" + name, 1)
                             .replace(" : " + declaration.split(":", 1)[1].strip().split()[0],
                                      " : " + parent, 1))
     out.append(body.rstrip())
     out.append("@end")
 for parent in sorted(parents):
     if parent != "NSObject" and parent.startswith("AVMetric"):
-        out.append("@class charon_host_%s;" % parent)
+        out.append("@class revenant_host_%s;" % parent)
 open(sys.argv[2], "w").write("\n".join(out) + "\n")
 print("the host build's prologue declares %d renamed classes" % len(blocks))
 PROLOGUE
 {
     cat "$build/src/metric-prologue.h"
-    sed -E -e 's/^@implementation (AVMetric[A-Za-z0-9_]*) *$/@implementation charon_host_\1/' \
-           -e 's/^@implementation (AVMetric[A-Za-z0-9_]*) \(/@implementation charon_host_\1 (/' \
-           -e 's/^@interface (AVMetric[A-Za-z0-9_]*) \(/@interface charon_host_\1 (/' \
+    sed -E -e 's/^@implementation (AVMetric[A-Za-z0-9_]*) *$/@implementation revenant_host_\1/' \
+           -e 's/^@implementation (AVMetric[A-Za-z0-9_]*) \(/@implementation revenant_host_\1 (/' \
+           -e 's/^@interface (AVMetric[A-Za-z0-9_]*) \(/@interface revenant_host_\1 (/' \
         "$avf/AVFoundationMetrics18.m"
 } > "$build/src/metrics18.rn"
 if [ "$mutant" != 0 ] && [ "$control" = 0 ] && [ "$kind" = metrics ]; then
@@ -598,11 +598,11 @@ if [ "$mutant" != 0 ] && [ "$control" = 0 ] && [ "$kind" = metrics ]; then
 import re, sys
 path = sys.argv[1]
 text = open(path).read()
-# The parent is spelled charon_host_-prefixed since the prologue began renaming parents too; an unprefixed
+# The parent is spelled revenant_host_-prefixed since the prologue began renaming parents too; an unprefixed
 # anchor stopped matching then and the guard printed "the mutation target is not unique (0 matches)", which
 # is the guard doing its job on a stale aim rather than on a missing plant.
-before = "@interface charon_host_AVMetricPlayerItemStallEvent : charon_host_AVMetricPlayerItemRateChangeEvent"
-after = "@interface charon_host_AVMetricPlayerItemStallEvent : charon_host_AVMetricEvent"
+before = "@interface revenant_host_AVMetricPlayerItemStallEvent : revenant_host_AVMetricPlayerItemRateChangeEvent"
+after = "@interface revenant_host_AVMetricPlayerItemStallEvent : revenant_host_AVMetricEvent"
 if text.count(before) != 1:
     raise SystemExit("the mutation target is not unique (%d matches), so this run proves nothing"
                      % text.count(before))
@@ -615,9 +615,9 @@ PERTURB
 fi
 {
     cat "$build/src/metric-prologue.h"
-    sed -E -e 's/^@implementation (AVMetric[A-Za-z0-9_]*) *$/@implementation charon_host_\1/' \
-           -e 's/^@implementation (AVMetric[A-Za-z0-9_]*) \(/@implementation charon_host_\1 (/' \
-           -e 's/^@interface (AVMetric[A-Za-z0-9_]*) \(/@interface charon_host_\1 (/' \
+    sed -E -e 's/^@implementation (AVMetric[A-Za-z0-9_]*) *$/@implementation revenant_host_\1/' \
+           -e 's/^@implementation (AVMetric[A-Za-z0-9_]*) \(/@implementation revenant_host_\1 (/' \
+           -e 's/^@interface (AVMetric[A-Za-z0-9_]*) \(/@interface revenant_host_\1 (/' \
         "$avf/AVFoundationMetrics26.m"
 } > "$build/src/metrics26.rn"
 # The 18 BAND object is in this binary too. Without it the probe reports port=no for every
@@ -625,9 +625,9 @@ fi
 # port-lacks guard doing its job on a port that was merely not linked.
 {
     cat "$build/src/metric-prologue.h"
-    sed -E -e 's/^@implementation (AVMetric[A-Za-z0-9_]*) *$/@implementation charon_host_\1/' \
-           -e 's/^@implementation (AVMetric[A-Za-z0-9_]*) \(/@implementation charon_host_\1 (/' \
-           -e 's/^@interface (AVMetric[A-Za-z0-9_]*) \(/@interface charon_host_\1 (/' \
+    sed -E -e 's/^@implementation (AVMetric[A-Za-z0-9_]*) *$/@implementation revenant_host_\1/' \
+           -e 's/^@implementation (AVMetric[A-Za-z0-9_]*) \(/@implementation revenant_host_\1 (/' \
+           -e 's/^@interface (AVMetric[A-Za-z0-9_]*) \(/@interface revenant_host_\1 (/' \
         "$avf/AVFoundationMetrics18b.m"
 } > "$build/src/metrics18b.rn"
 mobjs=""
@@ -646,30 +646,30 @@ for pair in "metrics18.rn:metrics18.o" "metrics18b.rn:metrics18b.o" "metrics26.r
     mobjs="$mobjs $build/o/$obj"
 done
 # THE ARCHIVER IS COMPILED FOR THE HOST, from the tree's own source, rather than linked from the installed
-# package - and that is not a preference. The installed libcharon-coding.a is `Non-fat file ... architecture:
+# package - and that is not a preference. The installed librevenant-coding.a is `Non-fat file ... architecture:
 # armv7`: it is built for the device, so linking it into an arm64 macOS binary leaves
 #
-#   "_charon_intents_encode", referenced from: -[charon_host_AVMetricEvent encodeWithCoder:]
+#   "_revenant_intents_encode", referenced from: -[revenant_host_AVMetricEvent encodeWithCoder:]
 #   ld: symbol(s) not found for architecture arm64
 #
 # The port's own objects are compiled for the host here in the same way, so the walker is treated the same.
 coding=""
-for candidate in "$root/packages/c/charon-coding/files" "$HOME/Git/projects/ios/charon/packages/c/charon-coding/files"; do
-    [ -f "$candidate/CharonCoding.m" ] && { coding_source="$candidate/CharonCoding.m"; break; }
+for candidate in "$root/packages/r/revenant-coding/files" "$HOME/Git/projects/ios/hades/toolchain/packages/r/revenant-coding/files"; do
+    [ -f "$candidate/RevenantCoding.m" ] && { coding_source="$candidate/RevenantCoding.m"; break; }
 done
 [ -n "${coding_source:-}" ] || {
-    echo "FAIL: no CharonCoding.m was found, so the archive would carry nothing and every"
+    echo "FAIL: no RevenantCoding.m was found, so the archive would carry nothing and every"
     echo "      +supportsSecureCoding would answer no. Build the package and try again."
     exit 1
 }
 if ! xcrun clang -fobjc-arc -w -c "$coding_source" -o "$build/o/coding.o" > "$build/o/coding.log" 2>&1; then
-    echo "RUN FAILED: the tree's own CharonCoding.m did not build for the host"
+    echo "RUN FAILED: the tree's own RevenantCoding.m did not build for the host"
     head -8 "$build/o/coding.log"
     exit 1
 fi
 [ -f "$build/o/coding.o" ] || { echo "FAIL: coding.o was not written, so the round trip would measure nothing"; exit 1; }
 coding="$build/o/coding.o"
-echo "charon-coding compiled for the host from $(basename "$coding_source")"
+echo "revenant-coding compiled for the host from $(basename "$coding_source")"
 
 if ! xcrun clang -fobjc-arc -w "$here/metrics.m" $mobjs $coding -framework Foundation -framework CoreMedia \
         -framework AVFoundation -o "$build/metrics" > "$build/metrics.log" 2>&1; then
@@ -688,11 +688,11 @@ text = open(path).read()
 # Three plants were tried here and the first two were invisible, which is worth recording because each read
 # as a passing run:
 #
-#   1. swap charon_intents_super_init for [self init] in -initWithCoder:. Invisible: -init stamps a date,
+#   1. swap revenant_intents_super_init for [self init] in -initWithCoder:. Invisible: -init stamps a date,
 #      the decode then overwrites it from the archive, and every value still arrives.
-#   2. delete the charon_intents_decode call. Also invisible: NSKeyedUnarchiver has already restored the
+#   2. delete the revenant_intents_decode call. Also invisible: NSKeyedUnarchiver has already restored the
 #      ivars by the time a nil decode could matter, and the probe reads the ACCESSORS.
-#   3. delete the charon_intents_encode call - this one. The archive then has no key for these classes at
+#   3. delete the revenant_intents_encode call - this one. The archive then has no key for these classes at
 #      all and every value must notice it.
 #
 # Two of those edits never even landed. They were python string replacements aimed at text a previous edit
@@ -702,7 +702,7 @@ text = open(path).read()
 # is not there, instead of compiling whatever is there and reporting that the mutation "was applied".
 path = sys.argv[1]
 text = open(path).read()
-before = "    charon_intents_encode(self, coder);"
+before = "    revenant_intents_encode(self, coder);"
 after = "    /* PLANTED: the archive writes nothing at all */"
 if text.count(before) != 1:
     raise SystemExit("the mutation target is not unique (%d matches), so this run proves nothing"
@@ -827,7 +827,7 @@ crestamped=$(grep -c 'held=RESTAMPED' "$build/coding.table" || true)
 copen=$(grep -c '	OPEN' "$build/coding.table" || true)
 if [ "$mutant" != 0 ] && [ "$control" = 0 ] && [ "$kind" = coding ]; then
     if [ "$cbad" = 0 ] && [ "$crestamped" = 0 ]; then
-        # OPEN, and the run says so instead of passing. The plant removes charon_intents_decode from
+        # OPEN, and the run says so instead of passing. The plant removes revenant_intents_decode from
         # -initWithCoder: and the archived values still arrive, so the phase does not yet catch it and is
         # therefore NOT a check for the archive path - only its controls and its values are evidence. The
         # plant lands in the source and the values still arrive, which points at the rebuild below not
@@ -858,7 +858,7 @@ echo "    subclass, and -initWithCoder: did not go through -init"
 # compiled here unchanged would not be the port's category at all - it would replace Apple's own ten
 # implementations in this process, and the probe would then be comparing the port against itself. So the
 # copy is renamed at its @implementation line and lands on a stand-in owner this build declares
-# (charon_host_AVCaptureSession), while the port's class is renamed the way the metric phase renames its
+# (revenant_host_AVCaptureSession), while the port's class is renamed the way the metric phase renames its
 # seventeen. The category NAME is not renamed and the stand-in declares that same name, so a category
 # spelled differently in the port's source still fails to compile (clang: "cannot find interface
 # declaration for '<name>'"), and the reason strings the port raises stay Apple's own text.
@@ -868,8 +868,8 @@ csource=AVCaptureControls18.m
     echo "FAIL: $avf/$csource does not exist, so the controls surface this run checks for is not there"
     exit 1
 }
-[ -f "$avf/CharonAVCaptureControls18.h" ] || {
-    echo "FAIL: $avf/CharonAVCaptureControls18.h does not exist, so the class this run asks about is not declared"
+[ -f "$avf/RevenantAVCaptureControls18.h" ] || {
+    echo "FAIL: $avf/RevenantAVCaptureControls18.h does not exist, so the class this run asks about is not declared"
     exit 1
 }
 
@@ -973,14 +973,14 @@ lines = ["// Generated by tests/backports/host/avf-globals/run.sh from " + heade
          "#import <Foundation/Foundation.h>",
          "#import <AVFoundation/AVFoundation.h>",
          "",
-         "@interface charon_host_AVCaptureControl : NSObject",
+         "@interface revenant_host_AVCaptureControl : NSObject",
          control.group(1).rstrip(),
          "@end",
          "",
-         "@interface charon_host_AVCaptureSession : NSObject",
+         "@interface revenant_host_AVCaptureSession : NSObject",
          "@end",
          "",
-         "@interface charon_host_AVCaptureSession (%s)" % category.group(1),
+         "@interface revenant_host_AVCaptureSession (%s)" % category.group(1),
          "@end",
          ""]
 open(out, "w").write("\n".join(lines))
@@ -989,11 +989,11 @@ print("the host build's prologue declares the port's renamed class and a stand-i
 CONTROLSPROLOGUE
 # The stand-in's own OBJECT, in a source of its own and not in the prologue. The port's copy carries only
 # the category, so nothing else defines the class and the link stops without it ("_OBJC_CLASS_$
-# _charon_host_AVCaptureSession, referenced from __OBJC_$_CATEGORY_..."), and a prologue that also
+# _revenant_host_AVCaptureSession, referenced from __OBJC_$_CATEGORY_..."), and a prologue that also
 # implemented it would define it twice instead - once in each of the two copies it is prepended to.
 {
     echo '#import "controls-prologue.h"'
-    echo '@implementation charon_host_AVCaptureSession'
+    echo '@implementation revenant_host_AVCaptureSession'
     echo '@end'
 } > "$build/src/controls-standin.rn"
 # The protocol source, in the shape modules/apple/backports.lua writes from a protocol row: naming the
@@ -1015,10 +1015,10 @@ if not names:
 lines = ["// Generated by tests/backports/host/avf-globals/run.sh, in the shape modules/apple/backports.lua",
          "// writes for a library's protocol rows: every @protocol() named so clang emits",
          "// _OBJC_PROTOCOL_$_<name> into the object.",
-         '#import "CharonAVFoundationProtocols.h"',
+         '#import "RevenantAVFoundationProtocols.h"',
          "",
-         "static void charon_avf_controls_protocols(void) __attribute__((used));",
-         "static void charon_avf_controls_protocols(void)",
+         "static void revenant_avf_controls_protocols(void) __attribute__((used));",
+         "static void revenant_avf_controls_protocols(void)",
          "{"]
 lines += ["    (void)@protocol(%s);" % name for name in sorted(names)]
 lines += ["}", ""]
@@ -1030,7 +1030,7 @@ CONTROLSPROTOC
 #     the start of the line, so the reason strings the port raises keep Apple's own spelling of the selector
 #     - an unanchored rename would rewrite "*** -[AVCaptureSession %@] Controls are not supported" and the
 #     comparison of the three refusals would then be a comparison of two different texts;
-#   * the import of the port's Charon header is DROPPED, because on this host its @interface
+#   * the import of the port's Revenant header is DROPPED, because on this host its @interface
 #     AVCaptureControl is a duplicate of the macOS SDK's own (measured: "duplicate interface definition for
 #     class 'AVCaptureControl'") and its category would replace Apple's implementations in this process.
 #     The prologue above is what the copy is compiled against instead.
@@ -1040,18 +1040,18 @@ if true; then
 import re, sys
 source, prologue, out = sys.argv[1], sys.argv[2], sys.argv[3]
 text = open(source).read()
-drop = '#import "CharonAVCaptureControls18.h"\n'
+drop = '#import "RevenantAVCaptureControls18.h"\n'
 if text.count(drop) != 1:
-    raise SystemExit("%s imports the Charon header %d time(s), so this copy is not the one the harness "
+    raise SystemExit("%s imports the Revenant header %d time(s), so this copy is not the one the harness "
                      "was written against" % (source, text.count(drop)))
 text = text.replace(drop, "")
 text, renamed = re.subn(r"^(@(?:implementation|interface)\s+)(AVCaptureControl\b|AVCaptureSession\b)",
-                        r"\1charon_host_\2", text, flags=re.M)
+                        r"\1revenant_host_\2", text, flags=re.M)
 if renamed != 2:
     raise SystemExit("%s names %d of its own two classes at an @implementation/@interface line, and this "
                      "copy is written for exactly two" % (source, renamed))
 # The prologue is prepended, not imported: the copy's own import of the port's header is dropped above, and
-# what declares charon_host_AVCaptureControl for it is here (the metric phase does the same, for the same
+# what declares revenant_host_AVCaptureControl for it is here (the metric phase does the same, for the same
 # reason: a renamed @implementation with no @interface behind it is a root class and stops the compile).
 open(out, "w").write(open(prologue).read() + text)
 print("the copy of %s is renamed (%d class line(s)), carries the prologue and no longer imports the port's "
@@ -1147,8 +1147,8 @@ ccontrol() {
 ccontrol AVCaptureNoSuchClass ABSENT
 ccontrol AVCaptureControl HAS
 ccontrol "-\[AVCaptureControl isEnabled\]" YES
-ccontrol charon_host_AVCaptureControl HAS
-ccontrol charon_host_AVCaptureSession HAS
+ccontrol revenant_host_AVCaptureControl HAS
+ccontrol revenant_host_AVCaptureSession HAS
 cline=$(grep "^CONTROL	AVCaptureSessionControlsDelegate	" "$build/controls.table" | cut -f3 || true)
 case "$cline" in
     "port=HAS"*) echo "ok  control AVCaptureSessionControlsDelegate = $cline" ;;
@@ -1162,7 +1162,7 @@ ccontrol "AVCaptureSessionControlsDelegate conformed" YES
 # selector references the runtime has not registered. tools/corpus/objc-inventory.lua is what the registry
 # check reads too, so this is the metadata the gate would see.
 cpdeclared=$(wc -l < "$build/controls-protocol.tsv" | tr -d ' ')
-if ! CHARON_ROOT="$root" xmake l tools/corpus/objc-inventory.lua "$build/controls" arm64 \
+if ! REVENANT_ROOT="$root" xmake l tools/corpus/objc-inventory.lua "$build/controls" arm64 \
         > "$build/controls-metadata.tsv" 2> "$build/controls-metadata.log"; then
     echo "FAIL: the Objective-C metadata of the probe binary could not be read"
     head -5 "$build/controls-metadata.log"

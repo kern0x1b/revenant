@@ -30,9 +30,9 @@ int main(int argc, char **argv)
 {
     @autoreleasepool {
         NSString *directory = argc > 1 ? @(argv[1]) : NSTemporaryDirectory();
-        NSString *three = [directory stringByAppendingPathComponent:@"charon-fixture-3.pdf"];
-        NSString *one = [directory stringByAppendingPathComponent:@"charon-fixture-1.pdf"];
-        NSString *none = [directory stringByAppendingPathComponent:@"charon-fixture-0.pdf"];
+        NSString *three = [directory stringByAppendingPathComponent:@"revenant-fixture-3.pdf"];
+        NSString *one = [directory stringByAppendingPathComponent:@"revenant-fixture-1.pdf"];
+        NSString *none = [directory stringByAppendingPathComponent:@"revenant-fixture-0.pdf"];
         draw(three, 3, CGRectMake(0, 0, 612, 792));
         draw(one, 1, CGRectMake(0, 0, 200, 400));
         draw(none, 0, CGRectMake(0, 0, 100, 100));

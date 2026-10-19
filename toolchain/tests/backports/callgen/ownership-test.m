@@ -1,7 +1,7 @@
 #import <Foundation/Foundation.h>
 #import <objc/runtime.h>
 
-extern int charon_copy_is_copy_for_testing(Class owner, const char *ivar);
+extern int revenant_copy_is_copy_for_testing(Class owner, const char *ivar);
 
 @interface OwnershipProbe : NSObject
 @property (nonatomic, strong) NSMutableString *retained;
@@ -12,12 +12,12 @@ extern int charon_copy_is_copy_for_testing(Class owner, const char *ivar);
 @implementation OwnershipProbe
 @end
 
-static unsigned charon_failures = 0;
+static unsigned revenant_failures = 0;
 
-static void charon_check(const char *what, int got, int want)
+static void revenant_check(const char *what, int got, int want)
 {
     if (got != want) {
-        charon_failures++;
+        revenant_failures++;
     }
     printf("%-10s %-28s got %d, want %d\n", got == want ? "same" : "DIFFER", what, got, want);
 }
@@ -25,13 +25,13 @@ static void charon_check(const char *what, int got, int want)
 int main(void)
 {
     @autoreleasepool {
-        charon_check("strong answers copy", charon_copy_is_copy_for_testing([OwnershipProbe class], "_retained"), 0);
-        charon_check("copy answers copy", charon_copy_is_copy_for_testing([OwnershipProbe class], "_copied"), 1);
-        charon_check("assign answers copy", charon_copy_is_copy_for_testing([OwnershipProbe class], "_assigned"), 0);
-        charon_check("an ivar with no property", charon_copy_is_copy_for_testing([OwnershipProbe class], "_nonesuch"), 1);
+        revenant_check("strong answers copy", revenant_copy_is_copy_for_testing([OwnershipProbe class], "_retained"), 0);
+        revenant_check("copy answers copy", revenant_copy_is_copy_for_testing([OwnershipProbe class], "_copied"), 1);
+        revenant_check("assign answers copy", revenant_copy_is_copy_for_testing([OwnershipProbe class], "_assigned"), 0);
+        revenant_check("an ivar with no property", revenant_copy_is_copy_for_testing([OwnershipProbe class], "_nonesuch"), 1);
 
-        printf("\n%s: %u expectation(s) failed\n", charon_failures ? "FAILED" : "all met",
-               charon_failures);
-        return charon_failures ? 1 : 0;
+        printf("\n%s: %u expectation(s) failed\n", revenant_failures ? "FAILED" : "all met",
+               revenant_failures);
+        return revenant_failures ? 1 : 0;
     }
 }

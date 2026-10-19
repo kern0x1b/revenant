@@ -1,4 +1,4 @@
-#import "CharonNetworkExtensionSettings.h"
+#import "RevenantNetworkExtensionSettings.h"
 
 @implementation NEIPv4Route {
     NSString *_destinationAddress;

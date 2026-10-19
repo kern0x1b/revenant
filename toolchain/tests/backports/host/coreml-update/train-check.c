@@ -2,8 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "CharonMLProto.h"
-#include "CharonMLTrain.h"
+#include "RevenantMLProto.h"
+#include "RevenantMLTrain.h"
 
 static unsigned char *slurp(const char *path, size_t *length)
 {
@@ -21,15 +21,15 @@ static unsigned char *slurp(const char *path, size_t *length)
     return bytes;
 }
 
-static int write_dump(const charon_ml_trainer *trainer, const char *path)
+static int write_dump(const revenant_ml_trainer *trainer, const char *path)
 {
     FILE *f = fopen(path, "w");
     if (!f) return 0;
-    for (size_t which = 0; which < charon_ml_trainer_layer_count(trainer); which++) {
-        fprintf(f, "layer %s %s\n", charon_ml_trainer_layer_name(trainer, which), charon_ml_trainer_layer_kind(trainer, which));
+    for (size_t which = 0; which < revenant_ml_trainer_layer_count(trainer); which++) {
+        fprintf(f, "layer %s %s\n", revenant_ml_trainer_layer_name(trainer, which), revenant_ml_trainer_layer_kind(trainer, which));
         for (int bias = 0; bias <= 1; bias++) {
             size_t count = 0;
-            const float *values = charon_ml_trainer_tensor(trainer, which, bias, &count);
+            const float *values = revenant_ml_trainer_tensor(trainer, which, bias, &count);
             fprintf(f, "%s %zu", bias ? "bias" : "weights", count);
             for (size_t i = 0; i < count; i++) fprintf(f, " %.9g", (double)values[i]);
             fprintf(f, "\n");
@@ -55,19 +55,19 @@ int main(int argc, char **argv)
     }
     size_t length = 0;
     unsigned char *bytes = slurp(argv[1], &length);
-    charon_ml_node document;
-    if (!bytes || !charon_ml_read(&document, bytes, length, "CoreML.Specification.Model")) {
+    revenant_ml_node document;
+    if (!bytes || !revenant_ml_read(&document, bytes, length, "CoreML.Specification.Model")) {
         fprintf(stderr, "read: %s\n", argv[1]);
         return 1;
     }
     char error[512] = "";
-    charon_ml_trainer *trainer = charon_ml_trainer_new(&document, error, sizeof error);
+    revenant_ml_trainer *trainer = revenant_ml_trainer_new(&document, error, sizeof error);
     if (!trainer) {
         fprintf(stderr, "trainer: %s\n", error);
         return 1;
     }
     size_t samples = (size_t)atol(argv[5]);
-    size_t inputs = charon_ml_trainer_input_count(trainer), outputs = charon_ml_trainer_output_count(trainer);
+    size_t inputs = revenant_ml_trainer_input_count(trainer), outputs = revenant_ml_trainer_output_count(trainer);
     size_t n_in = 0, n_out = 0;
     unsigned char *xb = slurp(argv[2], &n_in), *tb = slurp(argv[3], &n_out);
     if (!xb || !tb || n_in != samples * inputs * sizeof(float) || n_out != samples * outputs * sizeof(float)) {
@@ -75,8 +75,8 @@ int main(int argc, char **argv)
         return 1;
     }
     const float *x = (const float *)xb, *t = (const float *)tb;
-    size_t minibatch = charon_ml_trainer_minibatch_size(trainer);
-    long long epochs = charon_ml_trainer_epochs(trainer);
+    size_t minibatch = revenant_ml_trainer_minibatch_size(trainer);
+    long long epochs = revenant_ml_trainer_epochs(trainer);
 
     int step = 0;
     if (!write_dump(trainer, step_path(argv[4], step))) return 1;
@@ -84,7 +84,7 @@ int main(int argc, char **argv)
     for (long long epoch = 0; epoch < epochs; epoch++) {
         for (size_t first = 0; first < samples; first += minibatch) {
             size_t count = samples - first < minibatch ? samples - first : minibatch;
-            if (!charon_ml_trainer_step(trainer, x + first * inputs, t + first * outputs, count, error, sizeof error)) {
+            if (!revenant_ml_trainer_step(trainer, x + first * inputs, t + first * outputs, count, error, sizeof error)) {
                 fprintf(stderr, "step: %s\n", error);
                 return 1;
             }
@@ -98,8 +98,8 @@ int main(int argc, char **argv)
     if (!write_dump(trainer, path)) return 1;
     printf("steps %d epochs %lld minibatch %zu\n", step, epochs, minibatch);
 
-    charon_ml_trainer_free(trainer);
-    charon_ml_free(&document);
+    revenant_ml_trainer_free(trainer);
+    revenant_ml_free(&document);
     free(xb);
     free(tb);
     free(bytes);

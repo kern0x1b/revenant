@@ -1,6 +1,6 @@
 #import <Foundation/Foundation.h>
 
-static NSMutableDictionary *charon_registration(void)
+static NSMutableDictionary *revenant_registration(void)
 {
     static NSMutableDictionary *registration;
     static dispatch_once_t once;
@@ -10,23 +10,23 @@ static NSMutableDictionary *charon_registration(void)
     return registration;
 }
 
-@interface CharonSuiteDefaults : NSUserDefaults
-@property (nonatomic, copy) NSString *charon_suite;
+@interface RevenantSuiteDefaults : NSUserDefaults
+@property (nonatomic, copy) NSString *revenant_suite;
 @end
 
-@implementation CharonSuiteDefaults
+@implementation RevenantSuiteDefaults
 
-@synthesize charon_suite;
+@synthesize revenant_suite;
 
 - (id)objectForKey:(NSString *)key
 {
     if (![key isKindOfClass:[NSString class]])
         return nil;
-    id value = CFBridgingRelease(CFPreferencesCopyAppValue((__bridge CFStringRef)key, (__bridge CFStringRef)self.charon_suite));
+    id value = CFBridgingRelease(CFPreferencesCopyAppValue((__bridge CFStringRef)key, (__bridge CFStringRef)self.revenant_suite));
     if (value)
         return value;
-    @synchronized(charon_registration()) {
-        return charon_registration()[key];
+    @synchronized(revenant_registration()) {
+        return revenant_registration()[key];
     }
 }
 
@@ -38,13 +38,13 @@ static NSMutableDictionary *charon_registration(void)
     }
     if (![NSPropertyListSerialization propertyList:value isValidForFormat:NSPropertyListBinaryFormat_v1_0])
         [NSException raise:NSInvalidArgumentException format:@"Attempt to insert non-property list object %@ for key %@", value, key];
-    CFPreferencesSetAppValue((__bridge CFStringRef)key, (__bridge CFPropertyListRef)value, (__bridge CFStringRef)self.charon_suite);
+    CFPreferencesSetAppValue((__bridge CFStringRef)key, (__bridge CFPropertyListRef)value, (__bridge CFStringRef)self.revenant_suite);
     [[NSNotificationCenter defaultCenter] postNotificationName:NSUserDefaultsDidChangeNotification object:self];
 }
 
 - (void)removeObjectForKey:(NSString *)key
 {
-    CFPreferencesSetAppValue((__bridge CFStringRef)key, NULL, (__bridge CFStringRef)self.charon_suite);
+    CFPreferencesSetAppValue((__bridge CFStringRef)key, NULL, (__bridge CFStringRef)self.revenant_suite);
     [[NSNotificationCenter defaultCenter] postNotificationName:NSUserDefaultsDidChangeNotification object:self];
 }
 
@@ -157,20 +157,20 @@ static NSMutableDictionary *charon_registration(void)
 
 - (void)registerDefaults:(NSDictionary *)dictionary
 {
-    @synchronized(charon_registration()) {
-        [charon_registration() addEntriesFromDictionary:dictionary];
+    @synchronized(revenant_registration()) {
+        [revenant_registration() addEntriesFromDictionary:dictionary];
     }
 }
 
 - (NSDictionary *)dictionaryRepresentation
 {
     NSMutableDictionary *result;
-    @synchronized(charon_registration()) {
-        result = [NSMutableDictionary dictionaryWithDictionary:charon_registration()];
+    @synchronized(revenant_registration()) {
+        result = [NSMutableDictionary dictionaryWithDictionary:revenant_registration()];
     }
-    CFArrayRef keys = CFPreferencesCopyKeyList((__bridge CFStringRef)self.charon_suite, kCFPreferencesCurrentUser, kCFPreferencesAnyHost);
+    CFArrayRef keys = CFPreferencesCopyKeyList((__bridge CFStringRef)self.revenant_suite, kCFPreferencesCurrentUser, kCFPreferencesAnyHost);
     if (keys) {
-        NSDictionary *values = CFBridgingRelease(CFPreferencesCopyMultiple(keys, (__bridge CFStringRef)self.charon_suite, kCFPreferencesCurrentUser, kCFPreferencesAnyHost));
+        NSDictionary *values = CFBridgingRelease(CFPreferencesCopyMultiple(keys, (__bridge CFStringRef)self.revenant_suite, kCFPreferencesCurrentUser, kCFPreferencesAnyHost));
         [result addEntriesFromDictionary:values];
         CFRelease(keys);
     }
@@ -179,12 +179,12 @@ static NSMutableDictionary *charon_registration(void)
 
 - (BOOL)synchronize
 {
-    return CFPreferencesAppSynchronize((__bridge CFStringRef)self.charon_suite);
+    return CFPreferencesAppSynchronize((__bridge CFStringRef)self.revenant_suite);
 }
 
 @end
 
-@implementation NSUserDefaults (CharonSuiteName)
+@implementation NSUserDefaults (RevenantSuiteName)
 
 - (instancetype)initWithSuiteName:(NSString *)suitename
 {
@@ -192,8 +192,8 @@ static NSMutableDictionary *charon_registration(void)
         return [self init];
     if ([suitename isEqualToString:NSGlobalDomain] || [suitename isEqualToString:[NSBundle mainBundle].bundleIdentifier])
         return nil;
-    CharonSuiteDefaults *defaults = [[CharonSuiteDefaults alloc] init];
-    defaults.charon_suite = suitename;
+    RevenantSuiteDefaults *defaults = [[RevenantSuiteDefaults alloc] init];
+    defaults.revenant_suite = suitename;
     return defaults;
 }
 

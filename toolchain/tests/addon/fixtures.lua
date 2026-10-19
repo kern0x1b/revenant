@@ -79,7 +79,7 @@ end
 
 function repository(folder)
     local root = path.absolute(path.join(os.scriptdir(), "..", ".."))
-    local copy = path.join(folder, "charon")
+    local copy = path.join(folder, "revenant")
     os.mkdir(copy)
     local listed = os.iorunv("git", {"-C", root, "ls-files", "-c", "-o", "--exclude-standard"})
     for _, file in ipairs(listed:split("\n", {plain = true})) do
@@ -90,14 +90,14 @@ function repository(folder)
         end
     end
     for _, argv in ipairs({{"init", "-q", "-b", "main"}, {"add", "-A"},
-                           {"-c", "user.name=charon", "-c", "user.email=charon@example.com", "commit", "-q", "-m", "the working tree"}}) do
+                           {"-c", "user.name=revenant", "-c", "user.email=revenant@example.com", "commit", "-q", "-m", "the working tree"}}) do
         os.vrunv("git", table.join({"-C", copy}, argv))
     end
     local head = os.iorunv("git", {"-C", copy, "rev-parse", "HEAD"}):trim()
     local version = "v0.0.0-" .. head:sub(1, 12)
     os.vrunv("git", {"-C", copy, "tag", version})
 
-    local recipe = path.join(copy, "addons", "c", "charon", "xmake.lua")
+    local recipe = path.join(copy, "addons", "r", "revenant", "xmake.lua")
     local text = io.readfile(recipe):gsub('add_urls%("[^"]*"%)', 'add_urls("file://' .. path.join(copy, ".git") .. '")', 1)
     io.writefile(recipe, text .. string.format('    add_versions("%s", "%s")\n', version, head))
     return copy, version

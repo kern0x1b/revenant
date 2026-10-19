@@ -2,7 +2,7 @@
 
 #pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
 
-@implementation NSUUID (CharonCompare)
+@implementation NSUUID (RevenantCompare)
 
 - (NSComparisonResult)compare:(NSUUID *)otherUUID
 {

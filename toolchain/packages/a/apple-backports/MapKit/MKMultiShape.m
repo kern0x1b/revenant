@@ -2,7 +2,7 @@
 #import <MapKit/MKMultiPolygonRenderer.h>
 #import <MapKit/MKMultiPolyline.h>
 #import <MapKit/MKMultiPolylineRenderer.h>
-#import "CharonMapKit.h"
+#import "RevenantMapKit.h"
 
 @implementation MKMultiPolygon {
     NSArray<MKPolygon *> *_polygons;
@@ -42,7 +42,7 @@
 
 @implementation MKMultiPolygonRenderer
 
-- (CLLocationCoordinate2D *)charon_coordinatesOf:(MKMultiPoint *)shape
+- (CLLocationCoordinate2D *)revenant_coordinatesOf:(MKMultiPoint *)shape
 {
     NSUInteger count = shape.pointCount;
     if (count == 0) {
@@ -92,7 +92,7 @@
         if (polygon.pointCount == 0) {
             continue;
         }
-        CLLocationCoordinate2D *coordinates = [self charon_coordinatesOf:polygon];
+        CLLocationCoordinate2D *coordinates = [self revenant_coordinatesOf:polygon];
         if (coordinates) {
             CGPoint point = [self pointForMapPoint:MKMapPointForCoordinate(coordinates[0])];
             CGPathMoveToPoint(path, NULL, point.x, point.y);
@@ -105,7 +105,7 @@
         }
         for (NSUInteger index = 1; index < polygon.interiorPolygons.count; index++) {
             MKPolygon *hole = polygon.interiorPolygons[index];
-            CLLocationCoordinate2D *holeCoordinates = [self charon_coordinatesOf:hole];
+            CLLocationCoordinate2D *holeCoordinates = [self revenant_coordinatesOf:hole];
             if (!holeCoordinates) {
                 continue;
             }
@@ -199,7 +199,7 @@
         if (polyline.pointCount == 0) {
             continue;
         }
-        CLLocationCoordinate2D *coordinates = [(MKMultiPolygonRenderer *)self charon_coordinatesOf:polyline];
+        CLLocationCoordinate2D *coordinates = [(MKMultiPolygonRenderer *)self revenant_coordinatesOf:polyline];
         if (!coordinates) {
             continue;
         }

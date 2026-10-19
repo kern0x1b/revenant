@@ -1,12 +1,12 @@
-#import "CharonMPSGraph.h"
+#import "RevenantMPSGraph.h"
 
-@implementation MPSGraph (CharonMPSGraphReduction150)
+@implementation MPSGraph (RevenantMPSGraphReduction150)
 
 - (MPSGraphTensor *)reductionArgMaximumWithTensor:(MPSGraphTensor *)tensor
                                              axis:(NSInteger)axis
                                              name:(NSString *)name
 {
-    return [self charon_mps_reduction:CharonMPSGraphOperationKindReductionArgMaximum
+    return [self revenant_mps_reduction:RevenantMPSGraphOperationKindReductionArgMaximum
                                  axes:@[@(axis)]
                                tensor:tensor
                           parameters:@{@"combination": @"maximum", @"index": @YES,
@@ -18,7 +18,7 @@
                                              axis:(NSInteger)axis
                                              name:(NSString *)name
 {
-    return [self charon_mps_reduction:CharonMPSGraphOperationKindReductionArgMinimum
+    return [self revenant_mps_reduction:RevenantMPSGraphOperationKindReductionArgMinimum
                                  axes:@[@(axis)]
                                tensor:tensor
                           parameters:@{@"combination": @"minimum", @"index": @YES,
@@ -30,7 +30,7 @@
                                               secondaryTensor:(MPSGraphTensor *)secondaryTensor
                                                          name:(NSString *)name
 {
-    return [self charon_mps_nanPropagatingExtreme:primaryTensor
+    return [self revenant_mps_nanPropagatingExtreme:primaryTensor
                                  secondaryTensor:secondaryTensor
                                           lesser:YES
                                             name:name];
@@ -40,13 +40,13 @@
                                               secondaryTensor:(MPSGraphTensor *)secondaryTensor
                                                          name:(NSString *)name
 {
-    return [self charon_mps_nanPropagatingExtreme:primaryTensor
+    return [self revenant_mps_nanPropagatingExtreme:primaryTensor
                                  secondaryTensor:secondaryTensor
                                           lesser:NO
                                             name:name];
 }
 
-- (MPSGraphTensor *)charon_mps_nanPropagatingExtreme:(MPSGraphTensor *)primaryTensor
+- (MPSGraphTensor *)revenant_mps_nanPropagatingExtreme:(MPSGraphTensor *)primaryTensor
                                    secondaryTensor:(MPSGraphTensor *)secondaryTensor
                                             lesser:(BOOL)lesser
                                               name:(NSString *)name
@@ -60,8 +60,8 @@
                            @"integer type to ask with",
                             name, (unsigned)type];
     }
-    return [self charon_mps_operation:lesser ? CharonMPSGraphOperationKindMinimum
-                                             : CharonMPSGraphOperationKindMaximum
+    return [self revenant_mps_operation:lesser ? RevenantMPSGraphOperationKindMinimum
+                                             : RevenantMPSGraphOperationKindMaximum
                                 inputs:@[primaryTensor, secondaryTensor]
                             parameters:@{@"latchNaN": @YES}
                                    name:name];

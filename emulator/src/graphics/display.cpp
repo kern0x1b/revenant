@@ -12,7 +12,7 @@
 #include <algorithm>
 #include <utility>
 
-namespace shade {
+namespace emulator {
 namespace {
 
     void attach_presentation_leases(DisplayFrame& frame)

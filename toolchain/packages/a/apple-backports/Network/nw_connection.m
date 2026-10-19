@@ -1,5 +1,5 @@
-#import "CharonNW.h"
-#import "CharonNWSupport.h"
+#import "RevenantNW.h"
+#import "RevenantNWSupport.h"
 
 #include <assert.h>
 #include <errno.h>
@@ -22,10 +22,10 @@
 
 enum { nw_connection_state_setup = 0 };
 
-@interface CharonNWConnection : NSObject <OS_nw_connection> {
+@interface RevenantNWConnection : NSObject <OS_nw_connection> {
 @public
-    CharonNWEndpoint *_endpoint;
-    CharonNWParameters *_parameters;
+    RevenantNWEndpoint *_endpoint;
+    RevenantNWParameters *_parameters;
     dispatch_queue_t _queue;
     dispatch_queue_t _connectQueue;
     nw_connection_state_changed_handler_t _state;
@@ -35,7 +35,7 @@ enum { nw_connection_state_setup = 0 };
     nw_connection_state_t _value;
     nw_path_t _currentPath;
     nw_path_monitor_t _monitor;
-    CharonNWEndpoint *_currentEndpoint;
+    RevenantNWEndpoint *_currentEndpoint;
     BOOL _started, _cancelled, _finished, _secure, _viable, _viableKnown, _connecting;
     int _socket;
     int _acceptedSocket;
@@ -51,18 +51,18 @@ enum { nw_connection_state_setup = 0 };
     uint64_t _startedAtMilliseconds;
     uint32_t _attempts;
     BOOL _isDatagram;
-    CharonNWProtocolMetadata *_ipMetadata;
-    CharonNWProtocolMetadata *_transportMetadata;
-    CharonNWProtocolMetadata *_secureMetadata;
-    CharonNWFramer *_framer;
+    RevenantNWProtocolMetadata *_ipMetadata;
+    RevenantNWProtocolMetadata *_transportMetadata;
+    RevenantNWProtocolMetadata *_secureMetadata;
+    RevenantNWFramer *_framer;
     id _lastFramerMessage;
 }
 @end
 
-@implementation CharonNWConnection
+@implementation RevenantNWConnection
 @end
 
-@interface CharonNWSend : NSObject {
+@interface RevenantNWSend : NSObject {
 @public
     NSData *_content;
     nw_content_context_t _context;
@@ -70,66 +70,66 @@ enum { nw_connection_state_setup = 0 };
     nw_connection_send_completion_t _completion;
 }
 @end
-@implementation CharonNWSend
+@implementation RevenantNWSend
 @end
 
-@interface CharonNWReceive : NSObject {
+@interface RevenantNWReceive : NSObject {
 @public
     uint32_t _minimum;
     uint32_t _maximum;
     nw_connection_receive_completion_t _completion;
 }
 @end
-@implementation CharonNWReceive
+@implementation RevenantNWReceive
 @end
 
-static CharonNWProtocolOptions *charon_stack_application(CharonNWParameters *parameters, NSString *family)
+static RevenantNWProtocolOptions *revenant_stack_application(RevenantNWParameters *parameters, NSString *family)
 {
-    for (CharonNWProtocolOptions *options in parameters->_stack->_application) {
+    for (RevenantNWProtocolOptions *options in parameters->_stack->_application) {
         if ([options->_definition->_family isEqualToString:family])
             return options;
     }
     return nil;
 }
 
-static BOOL charon_is_datagram(CharonNWParameters *parameters)
+static BOOL revenant_is_datagram(RevenantNWParameters *parameters)
 {
-    CharonNWProtocolDefinition *transport = parameters->_stack->_transport ? parameters->_stack->_transport->_definition : nil;
+    RevenantNWProtocolDefinition *transport = parameters->_stack->_transport ? parameters->_stack->_transport->_definition : nil;
     if (transport)
         return [transport->_family isEqualToString:@"nw_udp"];
     return NO;
 }
 
-static BOOL charon_is_secure(CharonNWParameters *parameters)
+static BOOL revenant_is_secure(RevenantNWParameters *parameters)
 {
-    return charon_stack_application(parameters, @"nw_tls") != nil;
+    return revenant_stack_application(parameters, @"nw_tls") != nil;
 }
 
-static CharonNWProtocolOptions *charon_stack_framer(CharonNWParameters *parameters)
+static RevenantNWProtocolOptions *revenant_stack_framer(RevenantNWParameters *parameters)
 {
-    for (CharonNWProtocolOptions *options in parameters->_stack->_application) {
+    for (RevenantNWProtocolOptions *options in parameters->_stack->_application) {
         if (options->_definition->_payload)
             return options;
     }
     return nil;
 }
 
-static void charon_deliver_received(CharonNWConnection *connection);
-static void charon_ready(CharonNWConnection *connection);
-static void charon_tls_pump(CharonNWConnection *connection);
-static void charon_handshake(CharonNWConnection *connection);
-static void charon_flush(CharonNWConnection *connection);
-static void charon_connect_finished(CharonNWConnection *connection);
-static void charon_install_sources(CharonNWConnection *connection);
-static BOOL charon_take_connected_socket(CharonNWConnection *connection, int handle, CharonNWEndpoint *endpoint);
-static void charon_stop(CharonNWConnection *connection, nw_connection_state_t state, CharonNWError *error);
-static void charon_readable(CharonNWConnection *connection);
+static void revenant_deliver_received(RevenantNWConnection *connection);
+static void revenant_ready(RevenantNWConnection *connection);
+static void revenant_tls_pump(RevenantNWConnection *connection);
+static void revenant_handshake(RevenantNWConnection *connection);
+static void revenant_flush(RevenantNWConnection *connection);
+static void revenant_connect_finished(RevenantNWConnection *connection);
+static void revenant_install_sources(RevenantNWConnection *connection);
+static BOOL revenant_take_connected_socket(RevenantNWConnection *connection, int handle, RevenantNWEndpoint *endpoint);
+static void revenant_stop(RevenantNWConnection *connection, nw_connection_state_t state, RevenantNWError *error);
+static void revenant_readable(RevenantNWConnection *connection);
 
 #pragma mark - the state machine
 
-static void charon_report_state(CharonNWConnection *connection, nw_connection_state_t state, CharonNWError *error)
+static void revenant_report_state(RevenantNWConnection *connection, nw_connection_state_t state, RevenantNWError *error)
 {
-    if (getenv("CHARON_TRACE_CONNECTION"))
+    if (getenv("REVENANT_TRACE_CONNECTION"))
         fprintf(stderr, "[%8llu] port: state fd=%d -> %d error=%d/%d\n",
                 (unsigned long long)(mach_absolute_time() / 1000000), connection->_socket, state,
                 error ? error->_domain : 0, error ? error->_code : 0);
@@ -145,63 +145,63 @@ static void charon_report_state(CharonNWConnection *connection, nw_connection_st
         handler(state, error);
 }
 
-static CharonNWError *charon_error(nw_error_domain_t domain, int code)
+static RevenantNWError *revenant_error(nw_error_domain_t domain, int code)
 {
     if (!code)
         return nil;
-    CharonNWError *error = [[CharonNWError alloc] init];
+    RevenantNWError *error = [[RevenantNWError alloc] init];
     error->_domain = domain;
     error->_code = code;
     return error;
 }
 
-static CharonNWError *charon_posix_error(void)
+static RevenantNWError *revenant_posix_error(void)
 {
-    return charon_error(nw_error_domain_posix, errno);
+    return revenant_error(nw_error_domain_posix, errno);
 }
 
 #pragma mark - the socket
 
-static void charon_apply_options(CharonNWConnection *connection)
+static void revenant_apply_options(RevenantNWConnection *connection)
 {
     int handle = connection->_socket;
-    CharonNWParameters *parameters = connection->_parameters;
-    CharonNWProtocolStack *stack = parameters->_stack;
+    RevenantNWParameters *parameters = connection->_parameters;
+    RevenantNWProtocolStack *stack = parameters->_stack;
     if (!connection->_isDatagram) {
-        CharonNWProtocolOptions *tcp = stack->_transport;
+        RevenantNWProtocolOptions *tcp = stack->_transport;
         NSDictionary *values = tcp ? tcp->_values : nil;
         int on = 1;
-        if (charon_nw_flag((__bridge CFDictionaryRef)values, "no_delay", false))
+        if (revenant_nw_flag((__bridge CFDictionaryRef)values, "no_delay", false))
             setsockopt(handle, IPPROTO_TCP, TCP_NODELAY, &on, sizeof on);
-        if (charon_nw_flag((__bridge CFDictionaryRef)values, "no_options", false))
+        if (revenant_nw_flag((__bridge CFDictionaryRef)values, "no_options", false))
             setsockopt(handle, IPPROTO_TCP, TCP_NOOPT, &on, sizeof on);
-        if (charon_nw_flag((__bridge CFDictionaryRef)values, "no_push", false))
+        if (revenant_nw_flag((__bridge CFDictionaryRef)values, "no_push", false))
             setsockopt(handle, IPPROTO_TCP, TCP_NOPUSH, &on, sizeof on);
-        if (charon_nw_flag((__bridge CFDictionaryRef)values, "enable_keepalive", false)) {
+        if (revenant_nw_flag((__bridge CFDictionaryRef)values, "enable_keepalive", false)) {
             setsockopt(handle, SOL_SOCKET, SO_KEEPALIVE, &on, sizeof on);
-            int count = (int)charon_nw_integer((__bridge CFDictionaryRef)values, "keepalive_count", 0);
+            int count = (int)revenant_nw_integer((__bridge CFDictionaryRef)values, "keepalive_count", 0);
             if (count > 0)
                 setsockopt(handle, IPPROTO_TCP, TCP_KEEPCNT, &count, sizeof count);
-            int idle = (int)charon_nw_integer((__bridge CFDictionaryRef)values, "keepalive_idle_time", 0);
+            int idle = (int)revenant_nw_integer((__bridge CFDictionaryRef)values, "keepalive_idle_time", 0);
             if (idle > 0)
                 setsockopt(handle, IPPROTO_TCP, TCP_KEEPALIVE, &idle, sizeof idle);
-            int interval = (int)charon_nw_integer((__bridge CFDictionaryRef)values, "keepalive_interval", 0);
+            int interval = (int)revenant_nw_integer((__bridge CFDictionaryRef)values, "keepalive_interval", 0);
             if (interval > 0)
                 setsockopt(handle, IPPROTO_TCP, TCP_KEEPINTVL, &interval, sizeof interval);
         }
     }
-    CharonNWProtocolOptions *ip = stack->_internet;
+    RevenantNWProtocolOptions *ip = stack->_internet;
     NSDictionary *values = ip ? ip->_values : nil;
     int on = 1;
-    if (charon_nw_flag((__bridge CFDictionaryRef)values, "disable_multicast_loopback", false))
+    if (revenant_nw_flag((__bridge CFDictionaryRef)values, "disable_multicast_loopback", false))
         setsockopt(handle, IPPROTO_IP, IP_MULTICAST_LOOP, &on, sizeof on);
-    if (charon_nw_flag((__bridge CFDictionaryRef)values, "disable_fragmentation", false))
+    if (revenant_nw_flag((__bridge CFDictionaryRef)values, "disable_fragmentation", false))
         setsockopt(handle, IPPROTO_IP, IP_DONTFRAG, &on, sizeof on);
-    if (charon_nw_flag((__bridge CFDictionaryRef)values, "use_minimum_mtu", false))
+    if (revenant_nw_flag((__bridge CFDictionaryRef)values, "use_minimum_mtu", false))
         setsockopt(handle, IPPROTO_IP, IP_DONTFRAG, &on, sizeof on);
-    if (charon_nw_flag((__bridge CFDictionaryRef)values, "no_delay", false)) {
+    if (revenant_nw_flag((__bridge CFDictionaryRef)values, "no_delay", false)) {
     }
-    CharonNWEndpoint *local = parameters->_localEndpoint;
+    RevenantNWEndpoint *local = parameters->_localEndpoint;
     if (local && local->_address.length) {
         struct sockaddr_storage address;
         memset(&address, 0, sizeof address);
@@ -238,9 +238,9 @@ static void charon_apply_options(CharonNWConnection *connection)
 
 #pragma mark - the TLS of the release, over the same engine
 
-static OSStatus charon_tls_read(SSLConnectionRef connection, void *data, size_t *length)
+static OSStatus revenant_tls_read(SSLConnectionRef connection, void *data, size_t *length)
 {
-    CharonNWConnection *self = (__bridge CharonNWConnection *)connection;
+    RevenantNWConnection *self = (__bridge RevenantNWConnection *)connection;
     if (self->_pendingRead.length >= *length) {
         memcpy(data, self->_pendingRead.bytes, *length);
         [self->_pendingRead replaceBytesInRange:NSMakeRange(0, *length) withBytes:NULL length:0];
@@ -258,10 +258,10 @@ static OSStatus charon_tls_read(SSLConnectionRef connection, void *data, size_t 
     return errSSLWouldBlock;
 }
 
-static OSStatus charon_tls_write(SSLConnectionRef connection, const void *data, size_t *length)
+static OSStatus revenant_tls_write(SSLConnectionRef connection, const void *data, size_t *length)
 {
-    CharonNWConnection *self = (__bridge CharonNWConnection *)connection;
-    if (self->_pendingWrite.length + *length > (NSUInteger)charon_nw_available_send_buffer(self->_socket)) {
+    RevenantNWConnection *self = (__bridge RevenantNWConnection *)connection;
+    if (self->_pendingWrite.length + *length > (NSUInteger)revenant_nw_available_send_buffer(self->_socket)) {
         [self->_pendingWrite appendBytes:data length:*length];
         *length = 0;
         return errSSLWouldBlock;
@@ -278,23 +278,23 @@ static OSStatus charon_tls_write(SSLConnectionRef connection, const void *data, 
 
 #pragma mark - the bytes
 
-static void charon_received(CharonNWConnection *connection, NSData *bytes)
+static void revenant_received(RevenantNWConnection *connection, NSData *bytes)
 {
     connection->_receivedBytes += bytes.length;
     if (connection->_framer) {
         [connection->_framer->_input appendData:bytes];
         if (connection->_framer->_inputHandler)
             connection->_framer->_inputHandler((nw_framer_t)connection->_framer);
-        charon_deliver_received(connection);
+        revenant_deliver_received(connection);
         return;
     }
     [connection->_pendingRead appendData:bytes];
-    charon_deliver_received(connection);
+    revenant_deliver_received(connection);
 }
 
-static NSData *charon_framer_message(CharonNWConnection *connection, BOOL *isComplete)
+static NSData *revenant_framer_message(RevenantNWConnection *connection, BOOL *isComplete)
 {
-    CharonNWFramer *framer = connection->_framer;
+    RevenantNWFramer *framer = connection->_framer;
     while (framer->_delivered.count) {
         NSArray *entry = framer->_delivered.firstObject;
         [framer->_delivered removeObjectAtIndex:0];
@@ -303,24 +303,24 @@ static NSData *charon_framer_message(CharonNWConnection *connection, BOOL *isCom
         id complete = entry[2];
         if (isComplete)
             *isComplete = [complete boolValue];
-        if ([message isKindOfClass:[CharonNWProtocolMetadata class]])
+        if ([message isKindOfClass:[RevenantNWProtocolMetadata class]])
             connection->_lastFramerMessage = message;
         return bytes;
     }
     return nil;
 }
 
-static void charon_deliver_received(CharonNWConnection *connection)
+static void revenant_deliver_received(RevenantNWConnection *connection)
 {
-    if (getenv("CHARON_TRACE_FD"))
-        fprintf(stderr, "[charon] drain: enter connection=%p state=%d receives=%lu pendingRead=%lu framer=%d\n",
+    if (getenv("REVENANT_TRACE_FD"))
+        fprintf(stderr, "[revenant] drain: enter connection=%p state=%d receives=%lu pendingRead=%lu framer=%d\n",
                 (__bridge void *)connection, connection->_value, (unsigned long)connection->_receives.count,
                 (unsigned long)connection->_pendingRead.length, connection->_framer ? 1 : 0);
-    for (CharonNWReceive *receive in [connection->_receives copy]) {
+    for (RevenantNWReceive *receive in [connection->_receives copy]) {
         NSData *message = nil;
         BOOL isComplete = NO;
         if (connection->_framer && connection->_framer->_delivered.count)
-            message = charon_framer_message(connection, &isComplete);
+            message = revenant_framer_message(connection, &isComplete);
         if (!message)
             break;
         if (message.length < receive->_minimum) {
@@ -347,12 +347,12 @@ static void charon_deliver_received(CharonNWConnection *connection)
         break;
     }
     if (connection->_pendingRead.length && !connection->_framer) {
-        for (CharonNWReceive *receive in [connection->_receives copy]) {
+        for (RevenantNWReceive *receive in [connection->_receives copy]) {
             NSUInteger take = connection->_pendingRead.length;
             if (receive->_maximum && take > receive->_maximum)
                 take = receive->_maximum;
-            if (getenv("CHARON_TRACE_FD"))
-                fprintf(stderr, "[charon] drain: stream take=%lu min=%u max=%u\n", (unsigned long)take,
+            if (getenv("REVENANT_TRACE_FD"))
+                fprintf(stderr, "[revenant] drain: stream take=%lu min=%u max=%u\n", (unsigned long)take,
                         receive->_minimum, receive->_maximum);
             if (take < receive->_minimum)
                 break;
@@ -372,12 +372,12 @@ static void charon_deliver_received(CharonNWConnection *connection)
     }
 }
 
-static void charon_dump(CharonNWConnection *connection, const char *where)
+static void revenant_dump(RevenantNWConnection *connection, const char *where)
 {
-    if (!getenv("CHARON_TRACE_CONNECTION"))
+    if (!getenv("REVENANT_TRACE_CONNECTION"))
         return;
     uintptr_t read_data = connection->_readSource ? dispatch_source_get_data(connection->_readSource) : 0;
-    fprintf(stderr, "[charon] %s fd=%d state=%d queue=%p readSource=%p over=%d writeSource=%p over=%d writing=%d "
+    fprintf(stderr, "[revenant] %s fd=%d state=%d queue=%p readSource=%p over=%d writeSource=%p over=%d writing=%d "
                     "started=%d cancelled=%d datagram=%d secure=%d sends=%lu receives=%lu\n",
             where, connection->_socket, connection->_value, (__bridge void *)connection->_queue,
             (__bridge void *)connection->_readSource, (int)read_data, (__bridge void *)connection->_writeSource,
@@ -386,9 +386,9 @@ static void charon_dump(CharonNWConnection *connection, const char *where)
             connection->_secure, (unsigned long)connection->_sends.count, (unsigned long)connection->_receives.count);
 }
 
-static void charon_flush(CharonNWConnection *connection)
+static void revenant_flush(RevenantNWConnection *connection)
 {
-    charon_dump(connection, "flush");
+    revenant_dump(connection, "flush");
     while (connection->_pendingWrite.length) {
         size_t length = connection->_pendingWrite.length;
         if (connection->_ssl) {
@@ -398,7 +398,7 @@ static void charon_flush(CharonNWConnection *connection)
             if (status == errSSLWouldBlock)
                 break;
             if (status != errSecSuccess) {
-                charon_report_state(connection, nw_connection_state_failed, charon_error(nw_error_domain_tls, (int)status));
+                revenant_report_state(connection, nw_connection_state_failed, revenant_error(nw_error_domain_tls, (int)status));
                 return;
             }
         } else {
@@ -408,14 +408,14 @@ static void charon_flush(CharonNWConnection *connection)
             else if (put < 0 && (errno == EAGAIN || errno == EWOULDBLOCK))
                 break;
             else {
-                charon_report_state(connection, nw_connection_state_failed, charon_posix_error());
+                revenant_report_state(connection, nw_connection_state_failed, revenant_posix_error());
                 return;
             }
         }
         [connection->_pendingWrite replaceBytesInRange:NSMakeRange(0, length) withBytes:NULL length:0];
     }
     while (connection->_sends.count && !connection->_pendingWrite.length) {
-        CharonNWSend *send = connection->_sends.firstObject;
+        RevenantNWSend *send = connection->_sends.firstObject;
         NSData *content = send->_content;
         size_t length = content.length;
         nw_connection_send_completion_t completion = send->_completion;
@@ -431,8 +431,8 @@ static void charon_flush(CharonNWConnection *connection)
             }
             if (status != errSecSuccess) {
                 if (completion)
-                    completion(charon_error(nw_error_domain_tls, (int)status));
-                charon_report_state(connection, nw_connection_state_failed, charon_error(nw_error_domain_tls, (int)status));
+                    completion(revenant_error(nw_error_domain_tls, (int)status));
+                revenant_report_state(connection, nw_connection_state_failed, revenant_error(nw_error_domain_tls, (int)status));
                 return;
             }
         } else {
@@ -445,8 +445,8 @@ static void charon_flush(CharonNWConnection *connection)
                 break;
             } else {
                 if (completion)
-                    completion(charon_posix_error());
-                charon_report_state(connection, nw_connection_state_failed, charon_posix_error());
+                    completion(revenant_posix_error());
+                revenant_report_state(connection, nw_connection_state_failed, revenant_posix_error());
                 return;
             }
         }
@@ -467,7 +467,7 @@ static void charon_flush(CharonNWConnection *connection)
     }
 }
 
-static void charon_tls_pump(CharonNWConnection *connection)
+static void revenant_tls_pump(RevenantNWConnection *connection)
 {
     uint8_t buffer[16384];
     for (;;) {
@@ -477,29 +477,29 @@ static void charon_tls_pump(CharonNWConnection *connection)
             return;
         if (status != errSecSuccess && status != errSSLClosedNoNotify) {
             connection->_finished = YES;
-            charon_report_state(connection, nw_connection_state_failed, charon_error(nw_error_domain_tls, (int)status));
+            revenant_report_state(connection, nw_connection_state_failed, revenant_error(nw_error_domain_tls, (int)status));
             return;
         }
         if (!length)
             return;
-        charon_received(connection, [NSData dataWithBytes:buffer length:length]);
+        revenant_received(connection, [NSData dataWithBytes:buffer length:length]);
     }
 }
 
-static void charon_readable(CharonNWConnection *connection)
+static void revenant_readable(RevenantNWConnection *connection)
 {
-    if (getenv("CHARON_TRACE_FD"))
-        fprintf(stderr, "[charon] readable: fd=%d\n", connection->_socket);
-    charon_dump(connection, "read");
+    if (getenv("REVENANT_TRACE_FD"))
+        fprintf(stderr, "[revenant] readable: fd=%d\n", connection->_socket);
+    revenant_dump(connection, "read");
     uint8_t buffer[16384];
     while (YES) {
         ssize_t got = read(connection->_socket, buffer, sizeof buffer);
-        if (getenv("CHARON_TRACE_FD"))
-            fprintf(stderr, "[charon] read: fd=%d connection=%p state=%d got=%zd errno=%d receives=%lu pendingRead=%lu\n",
+        if (getenv("REVENANT_TRACE_FD"))
+            fprintf(stderr, "[revenant] read: fd=%d connection=%p state=%d got=%zd errno=%d receives=%lu pendingRead=%lu\n",
                     connection->_socket, (__bridge void *)connection, connection->_value, got, got < 0 ? errno : 0,
                     (unsigned long)connection->_receives.count, (unsigned long)connection->_pendingRead.length);
         if (got > 0) {
-            charon_received(connection, [NSData dataWithBytes:buffer length:(NSUInteger)got]);
+            revenant_received(connection, [NSData dataWithBytes:buffer length:(NSUInteger)got]);
             if (connection->_cancelled || connection->_finished)
                 return;
             if ((NSUInteger)got < sizeof buffer)
@@ -508,35 +508,35 @@ static void charon_readable(CharonNWConnection *connection)
         }
         if (got == 0) {
             connection->_finished = YES;
-            charon_deliver_received(connection);
-            charon_report_state(connection, nw_connection_state_cancelled, nil);
+            revenant_deliver_received(connection);
+            revenant_report_state(connection, nw_connection_state_cancelled, nil);
             return;
         }
         if (errno == EAGAIN || errno == EWOULDBLOCK)
             return;
         if (errno == EINTR)
             continue;
-        charon_report_state(connection, nw_connection_state_failed, charon_posix_error());
+        revenant_report_state(connection, nw_connection_state_failed, revenant_posix_error());
         return;
     }
 }
 
-static void charon_handshake(CharonNWConnection *connection)
+static void revenant_handshake(RevenantNWConnection *connection)
 {
     OSStatus status = SSLHandshake(connection->_ssl);
     if (status == errSecSuccess) {
         connection->_handshaking = NO;
-        charon_report_state(connection, nw_connection_state_ready, nil);
+        revenant_report_state(connection, nw_connection_state_ready, nil);
         return;
     }
     if (status == errSSLWouldBlock)
         return;
-    charon_report_state(connection, nw_connection_state_failed, charon_error(nw_error_domain_tls, (int)status));
+    revenant_report_state(connection, nw_connection_state_failed, revenant_error(nw_error_domain_tls, (int)status));
 }
 
 #pragma mark - opening and closing
 
-static void charon_watch_path(CharonNWConnection *connection)
+static void revenant_watch_path(RevenantNWConnection *connection)
 {
     if (connection->_monitor)
         return;
@@ -545,9 +545,9 @@ static void charon_watch_path(CharonNWConnection *connection)
         return;
     connection->_monitor = monitor;
     nw_path_monitor_set_queue(monitor, connection->_queue);
-    __weak CharonNWConnection *weak = connection;
+    __weak RevenantNWConnection *weak = connection;
     nw_path_monitor_set_update_handler(monitor, ^(nw_path_t path) {
-        CharonNWConnection *self = weak;
+        RevenantNWConnection *self = weak;
         if (!self || self->_cancelled)
             return;
         self->_currentPath = path;
@@ -564,12 +564,12 @@ static void charon_watch_path(CharonNWConnection *connection)
     nw_path_monitor_start(monitor);
 }
 
-static void charon_make_framer(CharonNWConnection *connection)
+static void revenant_make_framer(RevenantNWConnection *connection)
 {
-    CharonNWProtocolOptions *options = charon_stack_framer(connection->_parameters);
+    RevenantNWProtocolOptions *options = revenant_stack_framer(connection->_parameters);
     if (!options)
         return;
-    CharonNWFramer *framer = [[CharonNWFramer alloc] init];
+    RevenantNWFramer *framer = [[RevenantNWFramer alloc] init];
     framer->_definition = options->_definition;
     framer->_options = options;
     framer->_parameters = connection->_parameters;
@@ -583,45 +583,45 @@ static void charon_make_framer(CharonNWConnection *connection)
     connection->_framer = framer;
 }
 
-static void charon_install_sources(CharonNWConnection *connection)
+static void revenant_install_sources(RevenantNWConnection *connection)
 {
     if (connection->_readSource || connection->_writeSource)
         return;
-    if (getenv("CHARON_TRACE_FD"))
-        fprintf(stderr, "[charon] sources: fd=%d connecting=%d queue=%p\n", connection->_socket,
+    if (getenv("REVENANT_TRACE_FD"))
+        fprintf(stderr, "[revenant] sources: fd=%d connecting=%d queue=%p\n", connection->_socket,
                 connection->_connecting, (__bridge void *)connection->_queue);
-    connection->_readSource = connection->_connecting ? NULL : charon_nw_read_source(connection->_socket, connection->_queue);
+    connection->_readSource = connection->_connecting ? NULL : revenant_nw_read_source(connection->_socket, connection->_queue);
     if (connection->_readSource) {
-        __weak CharonNWConnection *weak = connection;
+        __weak RevenantNWConnection *weak = connection;
         dispatch_source_set_event_handler(connection->_readSource, ^{
-            CharonNWConnection *self = weak;
+            RevenantNWConnection *self = weak;
             if (!self || self->_cancelled)
                 return;
             if (self->_ssl && self->_handshaking) {
-                charon_handshake(self);
+                revenant_handshake(self);
                 return;
             }
             if (self->_ssl) {
-                charon_tls_pump(self);
+                revenant_tls_pump(self);
                 return;
             }
-            charon_readable(self);
+            revenant_readable(self);
             if (!self->_cancelled)
-                charon_flush(self);
+                revenant_flush(self);
         });
     }
-    connection->_writeSource = charon_nw_write_source(connection->_socket, connection->_queue);
+    connection->_writeSource = revenant_nw_write_source(connection->_socket, connection->_queue);
     if (connection->_writeSource) {
-        __weak CharonNWConnection *weak = connection;
+        __weak RevenantNWConnection *weak = connection;
         dispatch_source_set_event_handler(connection->_writeSource, ^{
-            CharonNWConnection *self = weak;
+            RevenantNWConnection *self = weak;
             if (!self || self->_cancelled)
                 return;
             if (self->_connecting) {
-                charon_connect_finished(self);
+                revenant_connect_finished(self);
                 return;
             }
-            charon_flush(self);
+            revenant_flush(self);
         });
         if (connection->_connecting) {
             dispatch_resume(connection->_writeSource);
@@ -629,10 +629,10 @@ static void charon_install_sources(CharonNWConnection *connection)
             return;
         }
     }
-    charon_flush(connection);
+    revenant_flush(connection);
 }
 
-static void charon_connect_finished(CharonNWConnection *connection)
+static void revenant_connect_finished(RevenantNWConnection *connection)
 {
     if (connection->_readSource)
         return;
@@ -646,28 +646,28 @@ static void charon_connect_finished(CharonNWConnection *connection)
         connection->_readingSource = NO;
     }
     if (failure) {
-        charon_stop(connection, nw_connection_state_failed, charon_error(nw_error_domain_posix, failure));
+        revenant_stop(connection, nw_connection_state_failed, revenant_error(nw_error_domain_posix, failure));
         return;
     }
-    charon_ready(connection);
+    revenant_ready(connection);
 }
 
-void CharonNWConnectionAttach(nw_connection_t value, int handle, BOOL connected)
+void RevenantNWConnectionAttach(nw_connection_t value, int handle, BOOL connected)
 {
-    if (getenv("CHARON_TRACE_CONNECTION")) {
-        CharonNWConnection *attached = (CharonNWConnection *)value;
+    if (getenv("REVENANT_TRACE_CONNECTION")) {
+        RevenantNWConnection *attached = (RevenantNWConnection *)value;
         unsigned peer_port = 0;
         struct sockaddr_storage peer;
         socklen_t peer_length = sizeof peer;
         memset(&peer, 0, sizeof peer);
         if (getpeername(handle, (struct sockaddr *)&peer, &peer_length) == 0)
-            peer_port = charon_nw_sockaddr_port((const struct sockaddr *)&peer);
+            peer_port = revenant_nw_sockaddr_port((const struct sockaddr *)&peer);
         fprintf(stderr, "[%8llu] port: attached fd=%d peerPort=%u connected=%d queue=%p datagram=%d secure=%d\n",
                 (unsigned long long)(mach_absolute_time() / 1000000), handle, peer_port, connected,
                 attached ? (__bridge void *)attached->_queue : NULL, attached ? attached->_isDatagram : 0,
                 attached ? attached->_secure : 0);
     }
-    CharonNWConnection *connection = (CharonNWConnection *)value;
+    RevenantNWConnection *connection = (RevenantNWConnection *)value;
     (void)connected;
     if (!connection || handle < 0)
         return;
@@ -679,25 +679,25 @@ void CharonNWConnectionAttach(nw_connection_t value, int handle, BOOL connected)
         connection->_currentEndpoint = connection->_endpoint;
         assert(connection->_socket == handle);
     }
-    charon_nw_set_nonblocking(handle);
-    CharonNWParameters *parameters = connection->_parameters;
-    connection->_isDatagram = charon_is_datagram(parameters);
-    connection->_secure = charon_is_secure(parameters);
+    revenant_nw_set_nonblocking(handle);
+    RevenantNWParameters *parameters = connection->_parameters;
+    connection->_isDatagram = revenant_is_datagram(parameters);
+    connection->_secure = revenant_is_secure(parameters);
 }
 
-int charon_nw_connection_socket(nw_connection_t value)
+int revenant_nw_connection_socket(nw_connection_t value)
 {
-    return ((CharonNWConnection *)value)->_socket;
+    return ((RevenantNWConnection *)value)->_socket;
 }
 
-BOOL CharonNWConnectionHasQueue(nw_connection_t value)
+BOOL RevenantNWConnectionHasQueue(nw_connection_t value)
 {
-    return ((CharonNWConnection *)value)->_queue != NULL;
+    return ((RevenantNWConnection *)value)->_queue != NULL;
 }
 
-BOOL CharonNWConnectionTakeSocket(nw_connection_t value, int *out_handle, void *out_endpoint, void *out_parameters)
+BOOL RevenantNWConnectionTakeSocket(nw_connection_t value, int *out_handle, void *out_endpoint, void *out_parameters)
 {
-    CharonNWConnection *connection = (CharonNWConnection *)value;
+    RevenantNWConnection *connection = (RevenantNWConnection *)value;
     if (!connection)
         return NO;
     @synchronized(connection) {
@@ -706,7 +706,7 @@ BOOL CharonNWConnectionTakeSocket(nw_connection_t value, int *out_handle, void *
         if (out_handle)
             *out_handle = connection->_socket;
         if (out_endpoint)
-            *(CharonNWEndpoint * _Nonnull __unsafe_unretained *)out_endpoint = connection->_currentEndpoint;
+            *(RevenantNWEndpoint * _Nonnull __unsafe_unretained *)out_endpoint = connection->_currentEndpoint;
         if (out_parameters)
             *(nw_parameters_t __unsafe_unretained *)out_parameters = connection->_parameters;
         connection->_socket = -1;
@@ -714,81 +714,81 @@ BOOL CharonNWConnectionTakeSocket(nw_connection_t value, int *out_handle, void *
     return YES;
 }
 
-static void charon_ready(CharonNWConnection *connection)
+static void revenant_ready(RevenantNWConnection *connection)
 {
     if (connection->_cancelled)
         return;
-    charon_report_state(connection, nw_connection_state_preparing, nil);
-    charon_watch_path(connection);
-    CharonNWProtocolMetadata *ip = [[CharonNWProtocolMetadata alloc] init];
-    ip->_definition = (CharonNWProtocolDefinition *)nw_protocol_copy_ip_definition();
+    revenant_report_state(connection, nw_connection_state_preparing, nil);
+    revenant_watch_path(connection);
+    RevenantNWProtocolMetadata *ip = [[RevenantNWProtocolMetadata alloc] init];
+    ip->_definition = (RevenantNWProtocolDefinition *)nw_protocol_copy_ip_definition();
     ip->_values = [NSMutableDictionary dictionary];
     ip->_objects = [NSMutableDictionary dictionary];
-    charon_nw_set_integer((__bridge CFMutableDictionaryRef)ip->_values, "service_class", connection->_parameters->_serviceClass);
+    revenant_nw_set_integer((__bridge CFMutableDictionaryRef)ip->_values, "service_class", connection->_parameters->_serviceClass);
     connection->_ipMetadata = ip;
 
     if (!connection->_isDatagram) {
-        CharonNWProtocolMetadata *tcp = [[CharonNWProtocolMetadata alloc] init];
-        tcp->_definition = (CharonNWProtocolDefinition *)nw_protocol_copy_tcp_definition();
+        RevenantNWProtocolMetadata *tcp = [[RevenantNWProtocolMetadata alloc] init];
+        tcp->_definition = (RevenantNWProtocolDefinition *)nw_protocol_copy_tcp_definition();
         tcp->_values = [NSMutableDictionary dictionary];
         tcp->_objects = [NSMutableDictionary dictionary];
-        charon_nw_set_integer((__bridge CFMutableDictionaryRef)tcp->_values, "available_send_buffer",
-                              charon_nw_available_send_buffer(connection->_socket));
-        charon_nw_set_integer((__bridge CFMutableDictionaryRef)tcp->_values, "available_receive_buffer",
-                              charon_nw_available_receive_buffer(connection->_socket));
+        revenant_nw_set_integer((__bridge CFMutableDictionaryRef)tcp->_values, "available_send_buffer",
+                              revenant_nw_available_send_buffer(connection->_socket));
+        revenant_nw_set_integer((__bridge CFMutableDictionaryRef)tcp->_values, "available_receive_buffer",
+                              revenant_nw_available_receive_buffer(connection->_socket));
         connection->_transportMetadata = tcp;
     } else {
-        CharonNWProtocolMetadata *udp = [[CharonNWProtocolMetadata alloc] init];
-        udp->_definition = (CharonNWProtocolDefinition *)nw_protocol_copy_udp_definition();
+        RevenantNWProtocolMetadata *udp = [[RevenantNWProtocolMetadata alloc] init];
+        udp->_definition = (RevenantNWProtocolDefinition *)nw_protocol_copy_udp_definition();
         udp->_values = [NSMutableDictionary dictionary];
         udp->_objects = [NSMutableDictionary dictionary];
         connection->_transportMetadata = udp;
     }
 
-    charon_make_framer(connection);
-    charon_install_sources(connection);
+    revenant_make_framer(connection);
+    revenant_install_sources(connection);
 
     if (connection->_secure) {
         connection->_ssl = SSLCreateContext(kCFAllocatorDefault, kSSLClientSide, kSSLStreamType);
         if (!connection->_ssl) {
-            charon_report_state(connection, nw_connection_state_failed, charon_error(nw_error_domain_tls, errSSLInternal));
+            revenant_report_state(connection, nw_connection_state_failed, revenant_error(nw_error_domain_tls, errSSLInternal));
             return;
         }
-        SSLSetIOFuncs(connection->_ssl, charon_tls_read, charon_tls_write);
+        SSLSetIOFuncs(connection->_ssl, revenant_tls_read, revenant_tls_write);
         SSLSetProtocolVersionMin(connection->_ssl, kTLSProtocol1);
         SSLSetProtocolVersionMax(connection->_ssl, kTLSProtocol12);
         NSString *peer = connection->_endpoint->_hostname.length ? connection->_endpoint->_hostname : nil;
         if (peer.length)
             SSLSetPeerDomainName(connection->_ssl, peer.UTF8String, (int)peer.length);
         connection->_handshaking = YES;
-        charon_handshake(connection);
+        revenant_handshake(connection);
         if (connection->_handshaking)
             return;
         if (connection->_cancelled)
             return;
     }
-    charon_report_state(connection, nw_connection_state_ready, nil);
+    revenant_report_state(connection, nw_connection_state_ready, nil);
 }
 
-static BOOL charon_take_connected_socket(CharonNWConnection *connection, int handle, CharonNWEndpoint *endpoint)
+static BOOL revenant_take_connected_socket(RevenantNWConnection *connection, int handle, RevenantNWEndpoint *endpoint)
 {
     @synchronized(connection) {
         if (connection->_cancelled)
             return NO;
         connection->_socket = handle;
         connection->_currentEndpoint = endpoint;
-        charon_nw_set_nonblocking(handle);
+        revenant_nw_set_nonblocking(handle);
         return YES;
     }
 }
 
-static void charon_open(CharonNWConnection *connection)
+static void revenant_open(RevenantNWConnection *connection)
 {
-    CharonNWConnection *self = connection;
-    CharonNWEndpoint *endpoint = connection->_endpoint;
-    CharonNWParameters *parameters = connection->_parameters;
-    connection->_isDatagram = charon_is_datagram(parameters);
-    connection->_secure = charon_is_secure(parameters);
+    RevenantNWConnection *self = connection;
+    RevenantNWEndpoint *endpoint = connection->_endpoint;
+    RevenantNWParameters *parameters = connection->_parameters;
+    connection->_isDatagram = revenant_is_datagram(parameters);
+    connection->_secure = revenant_is_secure(parameters);
 
     struct addrinfo hints;
     memset(&hints, 0, sizeof hints);
@@ -805,27 +805,27 @@ static void charon_open(CharonNWConnection *connection)
         if (failure != 0 || !list) {
             last = failure ? failure : EAI_NONAME;
             dispatch_async(connection->_queue, ^{
-                charon_report_state(connection, nw_connection_state_failed, charon_error(nw_error_domain_dns, failure));
+                revenant_report_state(connection, nw_connection_state_failed, revenant_error(nw_error_domain_dns, failure));
             });
             return;
         }
         for (struct addrinfo *entry = list; entry; entry = entry->ai_next) {
-            int handle = charon_nw_blocking_socket(entry->ai_family, entry->ai_socktype, entry->ai_protocol);
+            int handle = revenant_nw_blocking_socket(entry->ai_family, entry->ai_socktype, entry->ai_protocol);
             if (handle < 0) {
                 last = errno;
                 continue;
             }
             connection->_socket = handle;
-            charon_apply_options(connection);
+            revenant_apply_options(connection);
             if (connect(handle, entry->ai_addr, entry->ai_addrlen) == 0) {
                 freeaddrinfo(list);
-                if (!charon_take_connected_socket(self, handle, endpoint)) {
+                if (!revenant_take_connected_socket(self, handle, endpoint)) {
                     close(handle);
                     return;
                 }
                 dispatch_async(connection->_queue, ^{
-                    charon_install_sources(self);
-                    charon_ready(self);
+                    revenant_install_sources(self);
+                    revenant_ready(self);
                 });
                 return;
             }
@@ -841,38 +841,38 @@ static void charon_open(CharonNWConnection *connection)
         int family = address.ss_family;
         int type = connection->_isDatagram ? SOCK_DGRAM : SOCK_STREAM;
         int protocol = connection->_isDatagram ? IPPROTO_UDP : IPPROTO_TCP;
-        int handle = charon_nw_blocking_socket(family, type, protocol);
+        int handle = revenant_nw_blocking_socket(family, type, protocol);
         if (handle < 0) {
-            charon_report_state(connection, nw_connection_state_failed, charon_posix_error());
+            revenant_report_state(connection, nw_connection_state_failed, revenant_posix_error());
             return;
         }
         connection->_socket = handle;
-        charon_apply_options(connection);
+        revenant_apply_options(connection);
         if (connect(handle, (struct sockaddr *)&address, (socklen_t)endpoint->_address.length) != 0) {
             last = errno;
             close(handle);
             connection->_socket = -1;
         } else {
-            if (!charon_take_connected_socket(self, handle, endpoint)) {
+            if (!revenant_take_connected_socket(self, handle, endpoint)) {
                 close(handle);
                 return;
             }
             dispatch_async(connection->_queue, ^{
-                charon_install_sources(self);
-                charon_ready(self);
+                revenant_install_sources(self);
+                revenant_ready(self);
             });
             return;
         }
     } else {
-        charon_report_state(connection, nw_connection_state_failed, charon_error(nw_error_domain_dns, EAI_NONAME));
+        revenant_report_state(connection, nw_connection_state_failed, revenant_error(nw_error_domain_dns, EAI_NONAME));
         return;
     }
     dispatch_async(connection->_queue, ^{
-        charon_report_state(connection, nw_connection_state_failed, charon_error(nw_error_domain_posix, last));
+        revenant_report_state(connection, nw_connection_state_failed, revenant_error(nw_error_domain_posix, last));
     });
 }
 
-static void charon_stop(CharonNWConnection *connection, nw_connection_state_t state, CharonNWError *error)
+static void revenant_stop(RevenantNWConnection *connection, nw_connection_state_t state, RevenantNWError *error)
 {
     @synchronized(connection) {
         if (connection->_cancelled && state != nw_connection_state_cancelled)
@@ -909,17 +909,17 @@ static void charon_stop(CharonNWConnection *connection, nw_connection_state_t st
     connection->_betterPath = nil;
     connection->_state = nil;
 
-    for (CharonNWReceive *receive in [connection->_receives copy]) {
+    for (RevenantNWReceive *receive in [connection->_receives copy]) {
         [connection->_receives removeObject:receive];
         if (receive->_completion)
             receive->_completion(NULL, NULL, true, error);
     }
-    for (CharonNWSend *send in [connection->_sends copy]) {
+    for (RevenantNWSend *send in [connection->_sends copy]) {
         [connection->_sends removeObject:send];
         if (send->_completion)
             send->_completion(error);
     }
-    charon_report_state(connection, state, error);
+    revenant_report_state(connection, state, error);
 }
 
 #pragma mark - the calls
@@ -928,12 +928,12 @@ nw_connection_t nw_connection_create(nw_endpoint_t endpoint, nw_parameters_t par
 {
     if (!endpoint || !parameters)
         return nil;
-    CharonNWConnection *connection = [[CharonNWConnection alloc] init];
-    connection->_endpoint = (CharonNWEndpoint *)endpoint;
-    connection->_parameters = (CharonNWParameters *)parameters;
+    RevenantNWConnection *connection = [[RevenantNWConnection alloc] init];
+    connection->_endpoint = (RevenantNWEndpoint *)endpoint;
+    connection->_parameters = (RevenantNWParameters *)parameters;
     connection->_socket = -1;
     connection->_acceptedSocket = -1;
-    connection->_connectQueue = dispatch_queue_create("charon.connect", DISPATCH_QUEUE_SERIAL);
+    connection->_connectQueue = dispatch_queue_create("revenant.connect", DISPATCH_QUEUE_SERIAL);
     connection->_sends = [NSMutableArray array];
     connection->_receives = [NSMutableArray array];
     connection->_pendingWrite = [NSMutableData data];
@@ -944,49 +944,49 @@ nw_connection_t nw_connection_create(nw_endpoint_t endpoint, nw_parameters_t par
 
 nw_endpoint_t nw_connection_copy_endpoint(nw_connection_t connection)
 {
-    return connection ? ((CharonNWConnection *)connection)->_endpoint : NULL;
+    return connection ? ((RevenantNWConnection *)connection)->_endpoint : NULL;
 }
 
 nw_parameters_t nw_connection_copy_parameters(nw_connection_t connection)
 {
-    return connection ? ((CharonNWConnection *)connection)->_parameters : NULL;
+    return connection ? ((RevenantNWConnection *)connection)->_parameters : NULL;
 }
 
 void nw_connection_set_queue(nw_connection_t connection, dispatch_queue_t queue)
 {
     if (connection)
-        ((CharonNWConnection *)connection)->_queue = queue;
+        ((RevenantNWConnection *)connection)->_queue = queue;
 }
 
 void nw_connection_set_path_changed_handler(nw_connection_t connection, nw_connection_path_event_handler_t handler)
 {
     if (connection)
-        ((CharonNWConnection *)connection)->_path = [handler copy];
+        ((RevenantNWConnection *)connection)->_path = [handler copy];
 }
 
 void nw_connection_set_viability_changed_handler(nw_connection_t connection, nw_connection_boolean_event_handler_t handler)
 {
     if (connection)
-        ((CharonNWConnection *)connection)->_viability = [handler copy];
+        ((RevenantNWConnection *)connection)->_viability = [handler copy];
 }
 
 void nw_connection_set_better_path_available_handler(nw_connection_t connection, nw_connection_boolean_event_handler_t handler)
 {
     if (connection)
-        ((CharonNWConnection *)connection)->_betterPath = [handler copy];
+        ((RevenantNWConnection *)connection)->_betterPath = [handler copy];
 }
 
 void nw_connection_set_state_changed_handler(nw_connection_t connection, nw_connection_state_changed_handler_t handler)
 {
     if (connection)
-        ((CharonNWConnection *)connection)->_state = [handler copy];
+        ((RevenantNWConnection *)connection)->_state = [handler copy];
 }
 
 void nw_connection_start(nw_connection_t connection)
 {
     if (!connection)
         return;
-    CharonNWConnection *self = (CharonNWConnection *)connection;
+    RevenantNWConnection *self = (RevenantNWConnection *)connection;
     @synchronized(self) {
         if (self->_started || self->_cancelled || !self->_queue)
             return;
@@ -995,18 +995,18 @@ void nw_connection_start(nw_connection_t connection)
     dispatch_async(self->_queue, ^{
         if (self->_cancelled)
             return;
-        self->_startedAtMilliseconds = charon_nw_uptime_milliseconds();
-        charon_report_state(self, nw_connection_state_waiting, nil);
+        self->_startedAtMilliseconds = revenant_nw_uptime_milliseconds();
+        revenant_report_state(self, nw_connection_state_waiting, nil);
         if (self->_acceptedSocket >= 0) {
             @synchronized(self) {
                 assert(self->_socket == self->_acceptedSocket);
             }
-            charon_install_sources(self);
-            charon_ready(self);
+            revenant_install_sources(self);
+            revenant_ready(self);
             return;
         }
         dispatch_async(self->_connectQueue, ^{
-            charon_open(self);
+            revenant_open(self);
         });
     });
 }
@@ -1015,9 +1015,9 @@ void nw_connection_cancel(nw_connection_t connection)
 {
     if (!connection)
         return;
-    CharonNWConnection *self = (CharonNWConnection *)connection;
+    RevenantNWConnection *self = (RevenantNWConnection *)connection;
     dispatch_block_t stop = ^{
-        charon_stop(self, nw_connection_state_cancelled, nil);
+        revenant_stop(self, nw_connection_state_cancelled, nil);
     };
     if (self->_queue)
         dispatch_async(self->_queue, stop);
@@ -1029,15 +1029,15 @@ void nw_connection_force_cancel(nw_connection_t connection)
 {
     if (!connection)
         return;
-    CharonNWConnection *self = (CharonNWConnection *)connection;
-    charon_stop(self, nw_connection_state_cancelled, nil);
+    RevenantNWConnection *self = (RevenantNWConnection *)connection;
+    revenant_stop(self, nw_connection_state_cancelled, nil);
 }
 
 void nw_connection_restart(nw_connection_t connection)
 {
     if (!connection)
         return;
-    CharonNWConnection *self = (CharonNWConnection *)connection;
+    RevenantNWConnection *self = (RevenantNWConnection *)connection;
     dispatch_async(self->_queue ?: dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         if (self->_cancelled)
             return;
@@ -1046,8 +1046,8 @@ void nw_connection_restart(nw_connection_t connection)
         if (self->_socket >= 0)
             close(self->_socket);
         self->_socket = -1;
-        charon_report_state(self, nw_connection_state_waiting, nil);
-        charon_open(self);
+        revenant_report_state(self, nw_connection_state_waiting, nil);
+        revenant_open(self);
     });
 }
 
@@ -1055,7 +1055,7 @@ void nw_connection_cancel_current_endpoint(nw_connection_t connection)
 {
     if (!connection)
         return;
-    CharonNWConnection *self = (CharonNWConnection *)connection;
+    RevenantNWConnection *self = (RevenantNWConnection *)connection;
     self->_currentEndpoint = nil;
     dispatch_async(self->_queue ?: dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         if (self->_cancelled)
@@ -1065,8 +1065,8 @@ void nw_connection_cancel_current_endpoint(nw_connection_t connection)
             self->_socket = -1;
         }
         self->_attempts++;
-        charon_report_state(self, nw_connection_state_waiting, nil);
-        charon_open(self);
+        revenant_report_state(self, nw_connection_state_waiting, nil);
+        revenant_open(self);
     });
 }
 
@@ -1074,7 +1074,7 @@ void nw_connection_batch(nw_connection_t connection, dispatch_block_t batch_bloc
 {
     if (!connection)
         return;
-    CharonNWConnection *self = (CharonNWConnection *)connection;
+    RevenantNWConnection *self = (RevenantNWConnection *)connection;
     if (!batch_block)
         return;
     dispatch_async(self->_queue ?: dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
@@ -1086,13 +1086,13 @@ void nw_connection_batch(nw_connection_t connection, dispatch_block_t batch_bloc
 
 nw_path_t nw_connection_copy_current_path(nw_connection_t connection)
 {
-    CharonNWConnection *value = (CharonNWConnection *)connection;
+    RevenantNWConnection *value = (RevenantNWConnection *)connection;
     return value ? value->_currentPath : NULL;
 }
 
 uint32_t nw_connection_get_maximum_datagram_size(nw_connection_t connection)
 {
-    CharonNWConnection *self = (CharonNWConnection *)connection;
+    RevenantNWConnection *self = (RevenantNWConnection *)connection;
     if (!self || self->_socket < 0)
         return 0;
     struct sockaddr_storage local;
@@ -1117,7 +1117,7 @@ uint32_t nw_connection_get_maximum_datagram_size(nw_connection_t connection)
             matches = !memcmp(&((struct sockaddr_in6 *)item->ifa_addr)->sin6_addr, wanted, family);
         if (!matches)
             continue;
-        int probe = charon_nw_socket(AF_INET, SOCK_DGRAM, 0);
+        int probe = revenant_nw_socket(AF_INET, SOCK_DGRAM, 0);
         if (probe >= 0) {
             struct ifreq request;
             memset(&request, 0, sizeof request);
@@ -1135,7 +1135,7 @@ uint32_t nw_connection_get_maximum_datagram_size(nw_connection_t connection)
 
 char *nw_connection_copy_description(nw_connection_t connection)
 {
-    CharonNWConnection *self = (CharonNWConnection *)connection;
+    RevenantNWConnection *self = (RevenantNWConnection *)connection;
     if (!self)
         return NULL;
     NSMutableString *text = [NSMutableString string];
@@ -1163,7 +1163,7 @@ char *nw_connection_copy_description(nw_connection_t connection)
     if (self->_viableKnown)
         [text appendFormat:@", viable"];
     [text appendString:@"]"];
-    return charon_nw_copy_cstring(text.UTF8String);
+    return revenant_nw_copy_cstring(text.UTF8String);
 }
 
 void nw_connection_send(nw_connection_t connection, dispatch_data_t content, nw_content_context_t context,
@@ -1171,19 +1171,19 @@ void nw_connection_send(nw_connection_t connection, dispatch_data_t content, nw_
 {
     if (!connection)
         return;
-    CharonNWConnection *self = (CharonNWConnection *)connection;
+    RevenantNWConnection *self = (RevenantNWConnection *)connection;
     if (!self->_queue) {
         if (completion)
-            completion(charon_error(nw_error_domain_posix, EINVAL));
+            completion(revenant_error(nw_error_domain_posix, EINVAL));
         return;
     }
     dispatch_async(self->_queue, ^{
         if (self->_cancelled || self->_value != nw_connection_state_ready) {
             if (completion)
-                completion(charon_error(nw_error_domain_posix, self->_cancelled ? ECANCELED : ENOTCONN));
+                completion(revenant_error(nw_error_domain_posix, self->_cancelled ? ECANCELED : ENOTCONN));
             return;
         }
-        CharonNWSend *send = [[CharonNWSend alloc] init];
+        RevenantNWSend *send = [[RevenantNWSend alloc] init];
         size_t length = content ? dispatch_data_get_size(content) : 0;
         NSMutableData *bytes = [NSMutableData dataWithLength:length];
         if (length) {
@@ -1200,7 +1200,7 @@ void nw_connection_send(nw_connection_t connection, dispatch_data_t content, nw_
         send->_isComplete = is_complete;
         send->_completion = completion;
         [self->_sends addObject:send];
-        charon_flush(self);
+        revenant_flush(self);
     });
 }
 
@@ -1209,19 +1209,19 @@ void nw_connection_receive(nw_connection_t connection, uint32_t minimum_incomple
 {
     if (!connection)
         return;
-    CharonNWConnection *self = (CharonNWConnection *)connection;
+    RevenantNWConnection *self = (RevenantNWConnection *)connection;
     if (!self->_queue) {
         if (completion)
             completion(NULL, NULL, true, NULL);
         return;
     }
     dispatch_async(self->_queue, ^{
-        CharonNWReceive *receive = [[CharonNWReceive alloc] init];
+        RevenantNWReceive *receive = [[RevenantNWReceive alloc] init];
         receive->_minimum = minimum_incomplete_length;
         receive->_maximum = maximum_length;
         receive->_completion = completion;
         [self->_receives addObject:receive];
-        charon_deliver_received(self);
+        revenant_deliver_received(self);
     });
 }
 
@@ -1232,10 +1232,10 @@ void nw_connection_receive_message(nw_connection_t connection, nw_connection_rec
 
 nw_protocol_metadata_t nw_connection_copy_protocol_metadata(nw_connection_t connection, nw_protocol_definition_t definition)
 {
-    CharonNWConnection *self = (CharonNWConnection *)connection;
+    RevenantNWConnection *self = (RevenantNWConnection *)connection;
     if (!self || !definition)
         return NULL;
-    CharonNWProtocolDefinition *wanted = (CharonNWProtocolDefinition *)definition;
+    RevenantNWProtocolDefinition *wanted = (RevenantNWProtocolDefinition *)definition;
     if (self->_ipMetadata && [self->_ipMetadata->_definition->_family isEqualToString:wanted->_family])
         return self->_ipMetadata;
     if (self->_transportMetadata && [self->_transportMetadata->_definition->_family isEqualToString:wanted->_family])
@@ -1245,33 +1245,33 @@ nw_protocol_metadata_t nw_connection_copy_protocol_metadata(nw_connection_t conn
     return NULL;
 }
 
-nw_establishment_report_t CharonNWConnectionEstablishmentReport(nw_connection_t connection)
+nw_establishment_report_t RevenantNWConnectionEstablishmentReport(nw_connection_t connection)
 {
-    CharonNWConnection *self = (CharonNWConnection *)connection;
+    RevenantNWConnection *self = (RevenantNWConnection *)connection;
     if (!self)
         return NULL;
-    CharonNWEstablishmentReport *report = [[CharonNWEstablishmentReport alloc] init];
+    RevenantNWEstablishmentReport *report = [[RevenantNWEstablishmentReport alloc] init];
     report->_protocols = [NSMutableArray array];
     report->_protocolHandshakeMilliseconds = [NSMutableArray array];
     report->_protocolHandshakeRTTMilliseconds = [NSMutableArray array];
     report->_resolutions = [NSMutableArray array];
     report->_resolutionReports = [NSMutableArray array];
     report->_durationMilliseconds = self->_startedAtMilliseconds
-        ? charon_nw_uptime_milliseconds() - self->_startedAtMilliseconds : 0;
+        ? revenant_nw_uptime_milliseconds() - self->_startedAtMilliseconds : 0;
     report->_previousAttemptCount = self->_attempts;
-    [report->_protocols addObject:(CharonNWProtocolDefinition *)nw_protocol_copy_udp_definition()];
+    [report->_protocols addObject:(RevenantNWProtocolDefinition *)nw_protocol_copy_udp_definition()];
     if (!self->_isDatagram)
-        [report->_protocols addObject:(CharonNWProtocolDefinition *)nw_protocol_copy_tcp_definition()];
+        [report->_protocols addObject:(RevenantNWProtocolDefinition *)nw_protocol_copy_tcp_definition()];
     if (self->_secure)
-        [report->_protocols addObject:(CharonNWProtocolDefinition *)nw_protocol_copy_tls_definition()];
-    [report->_protocols addObject:(CharonNWProtocolDefinition *)nw_protocol_copy_ip_definition()];
+        [report->_protocols addObject:(RevenantNWProtocolDefinition *)nw_protocol_copy_tls_definition()];
+    [report->_protocols addObject:(RevenantNWProtocolDefinition *)nw_protocol_copy_ip_definition()];
     while (report->_protocolHandshakeMilliseconds.count < report->_protocols.count) {
         [report->_protocolHandshakeMilliseconds addObject:@(0)];
         [report->_protocolHandshakeRTTMilliseconds addObject:@(0)];
     }
     if (self->_currentEndpoint) {
         [report->_resolutions addObject:self->_currentEndpoint];
-        CharonNWResolutionReport *resolution = [[CharonNWResolutionReport alloc] init];
+        RevenantNWResolutionReport *resolution = [[RevenantNWResolutionReport alloc] init];
         resolution->_endpoints = [NSMutableArray arrayWithObject:self->_currentEndpoint];
         resolution->_endpointCount = 1;
         resolution->_milliseconds = report->_durationMilliseconds;
@@ -1285,21 +1285,21 @@ nw_establishment_report_t CharonNWConnectionEstablishmentReport(nw_connection_t 
     return report;
 }
 
-nw_data_transfer_report_t CharonNWConnectionDataTransferReport(nw_connection_t connection)
+nw_data_transfer_report_t RevenantNWConnectionDataTransferReport(nw_connection_t connection)
 {
-    CharonNWConnection *self = (CharonNWConnection *)connection;
+    RevenantNWConnection *self = (RevenantNWConnection *)connection;
     if (!self)
         return NULL;
-    CharonNWDataTransferReport *report = [[CharonNWDataTransferReport alloc] init];
+    RevenantNWDataTransferReport *report = [[RevenantNWDataTransferReport alloc] init];
     report->_sentApplicationBytes = self->_sentBytes;
     report->_receivedApplicationBytes = self->_receivedBytes;
     report->_sentTransportBytes = self->_sentBytes;
     report->_receivedTransportBytes = self->_receivedBytes;
     report->_durationMilliseconds = self->_startedAtMilliseconds
-        ? charon_nw_uptime_milliseconds() - self->_startedAtMilliseconds : 0;
+        ? revenant_nw_uptime_milliseconds() - self->_startedAtMilliseconds : 0;
     if (self->_socket >= 0 && !self->_isDatagram) {
         uint64_t smoothed = 0, minimum = 0, variance = 0;
-        if (charon_nw_tcp_round_trips(self->_socket, &smoothed, &minimum, &variance)) {
+        if (revenant_nw_tcp_round_trips(self->_socket, &smoothed, &minimum, &variance)) {
             report->_smoothedRTTMilliseconds = smoothed;
             report->_minimumRTTMilliseconds = minimum;
             report->_rttVarianceMilliseconds = variance;

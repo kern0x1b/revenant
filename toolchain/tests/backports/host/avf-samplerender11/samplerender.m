@@ -159,7 +159,7 @@ static void probeSynchronizerObservers(void)
     __block NSInteger fires = 0;
     __block CMTime first = kCMTimeInvalid, atFirst = kCMTimeInvalid, previous = kCMTimeInvalid;
     __block double step = -1.0;
-    dispatch_queue_t queue = dispatch_queue_create("charon.observer", DISPATCH_QUEUE_SERIAL);
+    dispatch_queue_t queue = dispatch_queue_create("revenant.observer", DISPATCH_QUEUE_SERIAL);
     id periodic = [sync addPeriodicTimeObserverForInterval:CMTimeMake(1, 10)
                                                       queue:queue
                                                   usingBlock:^(CMTime time) {
@@ -466,7 +466,7 @@ static void probeRendererFlushWithoutMedia(AVSampleBufferRenderSynchronizer *syn
     }
 
     __block NSInteger supplies = 0;
-    dispatch_queue_t queue = dispatch_queue_create("charon.media", DISPATCH_QUEUE_SERIAL);
+    dispatch_queue_t queue = dispatch_queue_create("revenant.media", DISPATCH_QUEUE_SERIAL);
     [renderer requestMediaDataWhenReadyOnQueue:queue usingBlock:^{ supplies++; }];
     usleep(300000);
     row("renderer: the requestMediaDataWhenReady block ran while the renderer holds no media", yesno(supplies > 0));

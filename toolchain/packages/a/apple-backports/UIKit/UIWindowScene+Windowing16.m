@@ -2,7 +2,7 @@
 
 #pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
 
-@implementation UIWindowScene (CharonWindowing16)
+@implementation UIWindowScene (RevenantWindowing16)
 
 - (UISceneWindowingBehaviors *)windowingBehaviors
 {

@@ -26,7 +26,7 @@
 
 #include "foundation/content_identity.hpp"
 
-namespace shade {
+namespace emulator {
 
 inline constexpr std::uint32_t guest_memory_page_size = 4096;
 inline constexpr std::uint32_t guest_exclusive_granule_size = 64;

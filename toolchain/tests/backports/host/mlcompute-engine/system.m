@@ -4,7 +4,7 @@
 #import <MLCompute/MLCompute.h>
 #import "cases.h"
 
-static uint32_t charon_bits(float value)
+static uint32_t revenant_bits(float value)
 {
     uint32_t bits;
     memcpy(&bits, &value, sizeof(bits));
@@ -13,15 +13,15 @@ static uint32_t charon_bits(float value)
 
 static void print_values(const char *name, const float *values)
 {
-    printf("activation %s\t%08x,%08x,%08x,%08x\n", name, charon_bits(values[0]), charon_bits(values[1]),
-           charon_bits(values[2]), charon_bits(values[3]));
+    printf("activation %s\t%08x,%08x,%08x,%08x\n", name, revenant_bits(values[0]), revenant_bits(values[1]),
+           revenant_bits(values[2]), revenant_bits(values[3]));
 }
 
 int main(void)
 {
     setbuf(stdout, NULL);
     @autoreleasepool {
-        for (int type = 0; type < CHARON_CASES; type++) {
+        for (int type = 0; type < REVENANT_CASES; type++) {
             MLCTensorDescriptor *descriptor = [MLCTensorDescriptor descriptorWithShape:@[ @1, @1, @2, @2 ] dataType:MLCDataTypeFloat32];
             MLCTensor *input = [MLCTensor tensorWithDescriptor:descriptor];
             [input bindAndWriteData:[MLCTensorData dataWithBytesNoCopy:(float[4]){ 1, 2, 3, 4 } length:4 * sizeof(float)] toDevice:nil];
@@ -53,10 +53,10 @@ int main(void)
                 }
             }
             if (!done || ![outcome isEqualToString:@"ok"]) {
-                printf("activation %s\t(no answer: %s)\n", charon_case_names[type], outcome.UTF8String ?: "did not compile");
+                printf("activation %s\t(no answer: %s)\n", revenant_case_names[type], outcome.UTF8String ?: "did not compile");
                 continue;
             }
-            print_values(charon_case_names[type], out);
+            print_values(revenant_case_names[type], out);
             free(out);
         }
     }

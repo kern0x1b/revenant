@@ -1,20 +1,20 @@
-#import "CharonMetal.h"
+#import "RevenantMetal.h"
 
-@implementation CharonMetalCommandBuffer (Errors14)
+@implementation RevenantMetalCommandBuffer (Errors14)
 
 - (MTLCommandBufferErrorOption)errorOptions
 {
-    return [self charonErrorOptions];
+    return [self revenantErrorOptions];
 }
 
 - (id<MTLLogContainer>)logs
 {
-    return (id<MTLLogContainer>)[[CharonMetalLogContainer alloc] init];
+    return (id<MTLLogContainer>)[[RevenantMetalLogContainer alloc] init];
 }
 
 @end
 
-@implementation CharonMetalCommandBuffer (Blit14)
+@implementation RevenantMetalCommandBuffer (Blit14)
 
 - (id<MTLBlitCommandEncoder>)blitCommandEncoderWithDescriptor:(MTLBlitPassDescriptor *)blitPassDescriptor
 {
@@ -27,7 +27,7 @@
 
 @end
 
-@implementation CharonMetalCommandBuffer (Compute14)
+@implementation RevenantMetalCommandBuffer (Compute14)
 
 - (id<MTLComputeCommandEncoder>)computeCommandEncoderWithDescriptor:(MTLComputePassDescriptor *)computePassDescriptor
 {
@@ -40,7 +40,7 @@
 
 @end
 
-@implementation CharonMetalCommandBuffer (AccelerationStructure14)
+@implementation RevenantMetalCommandBuffer (AccelerationStructure14)
 
 - (id<MTLAccelerationStructureCommandEncoder>)accelerationStructureCommandEncoder
 {
@@ -50,7 +50,7 @@
 
 @end
 
-@implementation CharonMetalCommandBuffer (ResourceState14)
+@implementation RevenantMetalCommandBuffer (ResourceState14)
 
 - (id<MTLResourceStateCommandEncoder>)resourceStateCommandEncoderWithDescriptor:(MTLResourceStatePassDescriptor *)descriptor
 {

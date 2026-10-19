@@ -1,4 +1,4 @@
-#import "CharonSCN.h"
+#import "RevenantSCN.h"
 
 SCNLightingModel const SCNLightingModelPhong = @"SCNLightingModelPhong";
 SCNLightingModel const SCNLightingModelBlinn = @"SCNLightingModelBlinn";
@@ -11,23 +11,23 @@ SCNLightingModel const SCNLightingModelConstant = @"SCNLightingModelConstant";
 {
     if ((self = [super init])) {
         UIColor *white = [UIColor whiteColor], *black = [UIColor blackColor];
-        UIColor *grey = [CharonSCNCoding colorWithLinearWhite:0.2];
-        _diffuse = [SCNMaterialProperty charonDefaultWithContents:white];
-        _ambient = [SCNMaterialProperty charonDefaultWithContents:grey];
-        _specular = [SCNMaterialProperty charonDefaultWithContents:black];
-        _normal = [SCNMaterialProperty charonDefaultWithContents:white];
-        _reflective = [SCNMaterialProperty charonDefaultWithContents:black];
-        _emission = [SCNMaterialProperty charonDefaultWithContents:black];
-        _transparent = [SCNMaterialProperty charonDefaultWithContents:white];
-        _multiply = [SCNMaterialProperty charonDefaultWithContents:white];
-        _displacement = [SCNMaterialProperty charonDefaultWithContents:black];
-        _ambientOcclusion = [SCNMaterialProperty charonDefaultWithContents:white];
-        _selfIllumination = [SCNMaterialProperty charonDefaultWithContents:black];
-        _metalness = [SCNMaterialProperty charonDefaultWithContents:black];
-        _roughness = [SCNMaterialProperty charonDefaultWithContents:grey];
-        _clearCoat = [SCNMaterialProperty charonDefaultWithContents:black];
-        _clearCoatRoughness = [SCNMaterialProperty charonDefaultWithContents:black];
-        _clearCoatNormal = [SCNMaterialProperty charonDefaultWithContents:white];
+        UIColor *grey = [RevenantSCNCoding colorWithLinearWhite:0.2];
+        _diffuse = [SCNMaterialProperty revenantDefaultWithContents:white];
+        _ambient = [SCNMaterialProperty revenantDefaultWithContents:grey];
+        _specular = [SCNMaterialProperty revenantDefaultWithContents:black];
+        _normal = [SCNMaterialProperty revenantDefaultWithContents:white];
+        _reflective = [SCNMaterialProperty revenantDefaultWithContents:black];
+        _emission = [SCNMaterialProperty revenantDefaultWithContents:black];
+        _transparent = [SCNMaterialProperty revenantDefaultWithContents:white];
+        _multiply = [SCNMaterialProperty revenantDefaultWithContents:white];
+        _displacement = [SCNMaterialProperty revenantDefaultWithContents:black];
+        _ambientOcclusion = [SCNMaterialProperty revenantDefaultWithContents:white];
+        _selfIllumination = [SCNMaterialProperty revenantDefaultWithContents:black];
+        _metalness = [SCNMaterialProperty revenantDefaultWithContents:black];
+        _roughness = [SCNMaterialProperty revenantDefaultWithContents:grey];
+        _clearCoat = [SCNMaterialProperty revenantDefaultWithContents:black];
+        _clearCoatRoughness = [SCNMaterialProperty revenantDefaultWithContents:black];
+        _clearCoatNormal = [SCNMaterialProperty revenantDefaultWithContents:white];
         _lightingModelName = SCNLightingModelBlinn;
         _transparency = 1;
         _shininess = 1;
@@ -86,8 +86,8 @@ SCNLightingModel const SCNLightingModelConstant = @"SCNLightingModelConstant";
             if ([coder containsValueForKey:key]) {
                 SCNMaterialProperty *property = [coder decodeObjectOfClass:[SCNMaterialProperty class] forKey:key];
                 if (property) {
-                    if (property.charonColorNotRead) {
-                        [property charonKeepDefaultOf:[self valueForKey:key]];
+                    if (property.revenantColorNotRead) {
+                        [property revenantKeepDefaultOf:[self valueForKey:key]];
                     }
                     [self setValue:property forKey:key];
                 }
@@ -97,7 +97,7 @@ SCNLightingModel const SCNLightingModelConstant = @"SCNLightingModelConstant";
         if (lightingModel.length) {
             _lightingModelName = lightingModel;
         }
-        _doubleSided = [CharonSCNCoding decodeBool:coder forKey:@"doubleSided" default:NO];
+        _doubleSided = [RevenantSCNCoding decodeBool:coder forKey:@"doubleSided" default:NO];
         if ([coder containsValueForKey:@"transparency"]) {
             _transparency = [coder decodeDoubleForKey:@"transparency"];
         }
@@ -107,10 +107,10 @@ SCNLightingModel const SCNLightingModelConstant = @"SCNLightingModelConstant";
         if ([coder containsValueForKey:@"blendMode"]) {
             _blendMode = [coder decodeIntegerForKey:@"blendMode"];
         }
-        _locksAmbientWithDiffuse = [CharonSCNCoding decodeBool:coder forKey:@"locksAmbientWithDiffuse" default:YES];
+        _locksAmbientWithDiffuse = [RevenantSCNCoding decodeBool:coder forKey:@"locksAmbientWithDiffuse" default:YES];
         _cullMode = [coder decodeIntegerForKey:@"cullMode"];
-        _writesToDepthBuffer = [CharonSCNCoding decodeBool:coder forKey:@"writesToDepthBuffer" default:YES];
-        _readsFromDepthBuffer = [CharonSCNCoding decodeBool:coder forKey:@"readsFromDepthBuffer" default:YES];
+        _writesToDepthBuffer = [RevenantSCNCoding decodeBool:coder forKey:@"writesToDepthBuffer" default:YES];
+        _readsFromDepthBuffer = [RevenantSCNCoding decodeBool:coder forKey:@"readsFromDepthBuffer" default:YES];
     }
     return self;
 }

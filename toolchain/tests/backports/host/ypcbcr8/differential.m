@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define RENAME(x) charonHost_##x
+#define RENAME(x) revenantHost_##x
 extern const vImage_YpCbCrToARGBMatrix *RENAME(kvImage_YpCbCrToARGBMatrix_ITU_R_601_4);
 extern const vImage_YpCbCrToARGBMatrix *RENAME(kvImage_YpCbCrToARGBMatrix_ITU_R_709_2);
 extern const vImage_ARGBToYpCbCrMatrix *RENAME(kvImage_ARGBToYpCbCrMatrix_ITU_R_601_4);
@@ -63,8 +63,8 @@ static unsigned long long bytesCompared, bytesApart;
 static int widest;
 static char widestWhere[1024] = "no case has differed at all";
 
-#define CharonYpCbCrBound 2
-#define CharonWideBound 256
+#define RevenantYpCbCrBound 2
+#define RevenantWideBound 256
 
 struct ref_scale {
     float yScale, cScale, biasY, biasC, yMin, yMax, cMin, cMax;
@@ -639,7 +639,7 @@ int main(void)
                                    ([NSString stringWithFormat:@"%ld against %ld", (long)theirs, (long)ours]));
                             NSString *difference;
                             if (!header_only(example->type)) {
-                                NSString *difference = compare(theirDest, ourDest, example->wide ? 2 : 1, CharonYpCbCrBound);
+                                NSString *difference = compare(theirDest, ourDest, example->wide ? 2 : 1, RevenantYpCbCrBound);
                                 report(difference == nil,
                                        [what stringByAppendingString:@": Y'CbCr to ARGB is within the last bit"],
                                        difference ?: @"");
@@ -710,8 +710,8 @@ int main(void)
                                 if (header_only(example->type))
                                     break;
                                 int shapeScale = (example->type == kvImage422CbYpCrYp16
-                                                  || example->type == kvImage444AYpCbCr16) ? CharonWideBound
-                                                                                           : CharonYpCbCrBound;
+                                                  || example->type == kvImage444AYpCbCr16) ? RevenantWideBound
+                                                                                           : RevenantYpCbCrBound;
                                 difference = compare(theirBack[plane], ourBack[plane], example->wide ? 2 : 1,
                                                    example->wide ? (int)(full_of(example->argb) / 255.0f) : shapeScale);;
                                 NSString *which = [what stringByAppendingString:(plane ? @": the chroma plane"
@@ -818,7 +818,7 @@ int main(void)
                         report(theirs == ours && theirs == kvImageNoError,
                                [what stringByAppendingString:@": Y'CbCr to ARGB answers"],
                                ([NSString stringWithFormat:@"%ld against %ld", (long)theirs, (long)ours]));
-                        NSString *difference = compare(theirDest, ourDest, 1, CharonYpCbCrBound);
+                        NSString *difference = compare(theirDest, ourDest, 1, RevenantYpCbCrBound);
                         report(difference == nil,
                                [what stringByAppendingString:@": Y'CbCr to ARGB is within the last bit"], difference ?: @"");
 
@@ -834,10 +834,10 @@ int main(void)
                         report(theirs == ours && theirs == kvImageNoError,
                                [what stringByAppendingString:@": ARGB to Y'CbCr answers"],
                                ([NSString stringWithFormat:@"%ld against %ld", (long)theirs, (long)ours]));
-                        difference = compare(theirBack, ourBack, 1, CharonYpCbCrBound);
+                        difference = compare(theirBack, ourBack, 1, RevenantYpCbCrBound);
                         report(difference == nil,
                                [what stringByAppendingString:@": ARGB to Y'CbCr is within the last bit"], difference ?: @"");
-                        difference = compare(theirAlphaOut, ourAlphaOut, 1, CharonYpCbCrBound);
+                        difference = compare(theirAlphaOut, ourAlphaOut, 1, RevenantYpCbCrBound);
                         (void)difference;
                         report(difference == nil,
                                [what stringByAppendingString:@": the alpha plane is within the last bit"], difference ?: @"");
@@ -905,7 +905,7 @@ int main(void)
                                [what stringByAppendingString:@": ARGB to Y'CbCr answers"],
                                ([NSString stringWithFormat:@"%ld against %ld", (long)theirs, (long)ours]));
                         if (c < 2) {
-                            NSString *difference = compare(theirDest, ourDest, 2, CharonWideBound);
+                            NSString *difference = compare(theirDest, ourDest, 2, RevenantWideBound);
                             report(difference == nil,
                                    [what stringByAppendingString:@": ARGB to Y'CbCr is within the last bit"], difference ?: @"");
                             continue;

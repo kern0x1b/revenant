@@ -1,11 +1,11 @@
 #import <sqlite3.h>
 
-#import "CharonHKStore.h"
-#import "../CharonSayOnce.h"
+#import "RevenantHKStore.h"
+#import "../RevenantSayOnce.h"
 
 #pragma mark - Errors
 
-NSError *CharonHKError(NSInteger code, NSString *description, NSString *debug)
+NSError *RevenantHKError(NSInteger code, NSString *description, NSString *debug)
 {
     NSMutableDictionary *info = [NSMutableDictionary dictionaryWithObject:description forKey:NSLocalizedDescriptionKey];
     if (debug)
@@ -13,21 +13,21 @@ NSError *CharonHKError(NSInteger code, NSString *description, NSString *debug)
     return [NSError errorWithDomain:HKErrorDomain code:code userInfo:info];
 }
 
-void charon_hk_say_once(NSString *key, NSString *text)
+void revenant_hk_say_once(NSString *key, NSString *text)
 {
-    charon_say_once_for(key, text);
+    revenant_say_once_for(key, text);
 }
 
 #pragma mark - Where the database is
 
-NSString *CharonHKStorePath(void)
+NSString *RevenantHKStorePath(void)
 {
     static NSString *path;
     static dispatch_once_t once;
     dispatch_once(&once, ^{
         NSArray *folders = NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, YES);
         NSString *root = folders.count ? [folders objectAtIndex:0] : NSTemporaryDirectory();
-        NSString *folder = [root stringByAppendingPathComponent:@"CharonHealthKit"];
+        NSString *folder = [root stringByAppendingPathComponent:@"RevenantHealthKit"];
         NSFileManager *files = [NSFileManager defaultManager];
         if (![files fileExistsAtPath:folder])
             [files createDirectoryAtPath:folder withIntermediateDirectories:YES attributes:nil error:NULL];
@@ -38,7 +38,7 @@ NSString *CharonHKStorePath(void)
 
 #pragma mark - The row
 
-@interface CharonHKRow ()
+@interface RevenantHKRow ()
 @property (readwrite, copy) NSUUID *uuid;
 @property (readwrite, copy) NSString *type;
 @property (readwrite) NSInteger kind;
@@ -52,7 +52,7 @@ NSString *CharonHKStorePath(void)
 @property (readwrite, copy) NSData *archive;
 @end
 
-@implementation CharonHKRow
+@implementation RevenantHKRow
 @synthesize uuid = _uuid;
 @synthesize type = _type;
 @synthesize kind = _kind;
@@ -74,12 +74,12 @@ NSString *CharonHKStorePath(void)
 
 #pragma mark - The store
 
-typedef NS_ENUM(NSUInteger, CharonHKAuthorizationBits) {
-    CharonHKAuthorizationShare = 1u << 0,
-    CharonHKAuthorizationRead = 1u << 1,
+typedef NS_ENUM(NSUInteger, RevenantHKAuthorizationBits) {
+    RevenantHKAuthorizationShare = 1u << 0,
+    RevenantHKAuthorizationRead = 1u << 1,
 };
 
-@implementation CharonHKStore {
+@implementation RevenantHKStore {
     sqlite3 *_database;
     NSRecursiveLock *_lock;
     NSMutableDictionary<NSString *, NSNumber *> *_authorization;
@@ -91,12 +91,12 @@ typedef NS_ENUM(NSUInteger, CharonHKAuthorizationBits) {
 @synthesize path = _path;
 @synthesize open = _open;
 
-+ (CharonHKStore *)sharedStore
++ (RevenantHKStore *)sharedStore
 {
-    static CharonHKStore *store;
+    static RevenantHKStore *store;
     static dispatch_once_t once;
     dispatch_once(&once, ^{
-        store = [[CharonHKStore alloc] init];
+        store = [[RevenantHKStore alloc] init];
     });
     return store;
 }
@@ -105,9 +105,9 @@ typedef NS_ENUM(NSUInteger, CharonHKAuthorizationBits) {
 {
     self = [super init];
     if (self) {
-        _path = [CharonHKStorePath() copy];
+        _path = [RevenantHKStorePath() copy];
         _lock = [[NSRecursiveLock alloc] init];
-        _lock.name = @"org.charon.healthkit.store";
+        _lock.name = @"org.revenant.healthkit.store";
         _authorization = [[NSMutableDictionary alloc] init];
         _observers = [[NSMutableArray alloc] init];
     }
@@ -122,7 +122,7 @@ typedef NS_ENUM(NSUInteger, CharonHKAuthorizationBits) {
 
 #pragma mark The connection
 
-- (BOOL)charon_openLocked:(NSError **)error
+- (BOOL)revenant_openLocked:(NSError **)error
 {
     if (_opened)
         return YES;
@@ -134,7 +134,7 @@ typedef NS_ENUM(NSUInteger, CharonHKAuthorizationBits) {
                                  SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE | SQLITE_OPEN_FULLMUTEX, NULL);
     if (opened != SQLITE_OK) {
         if (error)
-            *error = CharonHKError(HKErrorHealthDataUnavailable,
+            *error = RevenantHKError(HKErrorHealthDataUnavailable,
                                    [NSString stringWithFormat:@"The health database at %@ could not be opened: %s.", _path,
                                                               _database ? sqlite3_errmsg(_database) : "no database"], nil);
         if (_database) {
@@ -144,12 +144,12 @@ typedef NS_ENUM(NSUInteger, CharonHKAuthorizationBits) {
         return NO;
     }
     sqlite3_busy_timeout(_database, 5000);
-    if (![self charon_schemaLocked:error]) {
+    if (![self revenant_schemaLocked:error]) {
         sqlite3_close(_database);
         _database = NULL;
         return NO;
     }
-    [self charon_loadLocked];
+    [self revenant_loadLocked];
     _open = YES;
     _opened = YES;
     return YES;
@@ -161,7 +161,7 @@ typedef NS_ENUM(NSUInteger, CharonHKAuthorizationBits) {
     __block NSError *failure = nil;
     [_lock lock];
     @try {
-        ok = [self charon_openLocked:&failure];
+        ok = [self revenant_openLocked:&failure];
     } @finally {
         [_lock unlock];
     }
@@ -185,38 +185,38 @@ typedef NS_ENUM(NSUInteger, CharonHKAuthorizationBits) {
     }
 }
 
-- (void)charon_loadLocked
+- (void)revenant_loadLocked
 {
-    for (NSDictionary *row in [self charon_rowsLocked:@"SELECT type, share, read FROM authorization" bindings:@[]])
-        _authorization[[row objectForKey:@"type"]] = @([[row objectForKey:@"share"] integerValue] * CharonHKAuthorizationShare
-                                                       | [[row objectForKey:@"read"] integerValue] * CharonHKAuthorizationRead);
-    NSArray *rows = [self charon_rowsLocked:@"SELECT value FROM meta WHERE key = 'sequence'" bindings:@[]];
+    for (NSDictionary *row in [self revenant_rowsLocked:@"SELECT type, share, read FROM authorization" bindings:@[]])
+        _authorization[[row objectForKey:@"type"]] = @([[row objectForKey:@"share"] integerValue] * RevenantHKAuthorizationShare
+                                                       | [[row objectForKey:@"read"] integerValue] * RevenantHKAuthorizationRead);
+    NSArray *rows = [self revenant_rowsLocked:@"SELECT value FROM meta WHERE key = 'sequence'" bindings:@[]];
     _sequence = [[rows.firstObject objectForKey:@"value"] integerValue];
 }
 
 #pragma mark SQL
 
-- (BOOL)charon_runLocked:(NSString *)sql bindings:(NSArray *)bindings error:(NSError **)error
+- (BOOL)revenant_runLocked:(NSString *)sql bindings:(NSArray *)bindings error:(NSError **)error
 {
     sqlite3_stmt *statement = NULL;
     if (!_database) {
         if (error)
-            *error = CharonHKError(HKErrorHealthDataUnavailable, @"The health database is not open.", nil);
+            *error = RevenantHKError(HKErrorHealthDataUnavailable, @"The health database is not open.", nil);
         return NO;
     }
     if (sqlite3_prepare_v2(_database, [sql UTF8String], -1, &statement, NULL) != SQLITE_OK) {
         if (error)
-            *error = CharonHKError(HKErrorHealthDataUnavailable,
+            *error = RevenantHKError(HKErrorHealthDataUnavailable,
                                    [NSString stringWithFormat:@"The health database refused a statement: %s.",
                                                               sqlite3_errmsg(_database)], sql);
         return NO;
     }
-    [self charon_bindLocked:statement bindings:bindings];
+    [self revenant_bindLocked:statement bindings:bindings];
     int stepped = sqlite3_step(statement);
     sqlite3_finalize(statement);
     if (stepped != SQLITE_DONE) {
         if (error)
-            *error = CharonHKError(HKErrorHealthDataUnavailable,
+            *error = RevenantHKError(HKErrorHealthDataUnavailable,
                                    [NSString stringWithFormat:@"The health database refused a write: %s.",
                                                               sqlite3_errmsg(_database)], nil);
         return NO;
@@ -224,7 +224,7 @@ typedef NS_ENUM(NSUInteger, CharonHKAuthorizationBits) {
     return YES;
 }
 
-- (void)charon_bindLocked:(sqlite3_stmt *)statement bindings:(NSArray *)bindings
+- (void)revenant_bindLocked:(sqlite3_stmt *)statement bindings:(NSArray *)bindings
 {
     for (NSUInteger index = 0; index < bindings.count; index++) {
         id value = [bindings objectAtIndex:index];
@@ -242,14 +242,14 @@ typedef NS_ENUM(NSUInteger, CharonHKAuthorizationBits) {
     }
 }
 
-- (NSArray *)charon_rowsLocked:(NSString *)sql bindings:(NSArray *)bindings
+- (NSArray *)revenant_rowsLocked:(NSString *)sql bindings:(NSArray *)bindings
 {
     if (!_database)
         return @[];
     sqlite3_stmt *statement = NULL;
     if (sqlite3_prepare_v2(_database, [sql UTF8String], -1, &statement, NULL) != SQLITE_OK)
         return @[];
-    [self charon_bindLocked:statement bindings:bindings];
+    [self revenant_bindLocked:statement bindings:bindings];
     NSMutableArray *rows = [NSMutableArray array];
     int columns = sqlite3_column_count(statement);
     while (sqlite3_step(statement) == SQLITE_ROW) {
@@ -285,7 +285,7 @@ typedef NS_ENUM(NSUInteger, CharonHKAuthorizationBits) {
     return rows;
 }
 
-- (BOOL)charon_schemaLocked:(NSError **)error
+- (BOOL)revenant_schemaLocked:(NSError **)error
 {
     NSArray *statements = @[
         @"CREATE TABLE IF NOT EXISTS meta (key TEXT PRIMARY KEY NOT NULL, value TEXT)",
@@ -304,28 +304,28 @@ typedef NS_ENUM(NSUInteger, CharonHKAuthorizationBits) {
         @"CREATE TABLE IF NOT EXISTS deleted (uuid TEXT PRIMARY KEY NOT NULL, sequence INTEGER NOT NULL)",
     ];
     for (NSString *sql in statements)
-        if (![self charon_runLocked:sql bindings:@[] error:error])
+        if (![self revenant_runLocked:sql bindings:@[] error:error])
             return NO;
-    return [self charon_runLocked:@"INSERT OR IGNORE INTO meta (key, value) VALUES ('sequence', '0')" bindings:@[] error:error];
+    return [self revenant_runLocked:@"INSERT OR IGNORE INTO meta (key, value) VALUES ('sequence', '0')" bindings:@[] error:error];
 }
 
-- (BOOL)charon_transactionLocked:(BOOL (^)(NSError **))body error:(NSError **)error
+- (BOOL)revenant_transactionLocked:(BOOL (^)(NSError **))body error:(NSError **)error
 {
-    if (![self charon_openLocked:error])
+    if (![self revenant_openLocked:error])
         return NO;
-    if (![self charon_runLocked:@"BEGIN IMMEDIATE" bindings:@[] error:error])
+    if (![self revenant_runLocked:@"BEGIN IMMEDIATE" bindings:@[] error:error])
         return NO;
     NSError *failure = nil;
     if (!body(&failure)) {
-        [self charon_runLocked:@"ROLLBACK" bindings:@[] error:NULL];
+        [self revenant_runLocked:@"ROLLBACK" bindings:@[] error:NULL];
         if (error)
             *error = failure;
         return NO;
     }
-    return [self charon_runLocked:@"COMMIT" bindings:@[] error:error];
+    return [self revenant_runLocked:@"COMMIT" bindings:@[] error:error];
 }
 
-- (NSInteger)charon_nextSequenceLocked
+- (NSInteger)revenant_nextSequenceLocked
 {
     return ++_sequence;
 }
@@ -334,23 +334,23 @@ typedef NS_ENUM(NSUInteger, CharonHKAuthorizationBits) {
 
 - (BOOL)declareType:(HKObjectType *)type error:(NSError **)error
 {
-    if (![type conformsToProtocol:@protocol(CharonHKTyped)]) {
+    if (![type conformsToProtocol:@protocol(RevenantHKTyped)]) {
         if (error)
-            *error = CharonHKError(HKErrorInvalidArgument,
+            *error = RevenantHKError(HKErrorInvalidArgument,
                                    [NSString stringWithFormat:@"A %@ is not a type this database can keep.",
                                                               NSStringFromClass([type class])], nil);
         return NO;
     }
-    id<CharonHKTyped> typed = (id<CharonHKTyped>)type;
+    id<RevenantHKTyped> typed = (id<RevenantHKTyped>)type;
     __block BOOL ok = NO;
     __block NSError *failure = nil;
     [_lock lock];
     @try {
-        ok = [self charon_transactionLocked:^BOOL(NSError **inner) {
-            return [self charon_runLocked:@"INSERT OR REPLACE INTO type (identifier, kind, unit, aggregation) VALUES (?, ?, ?, ?)"
-                                 bindings:@[type.identifier, @([typed charon_storeKind]),
-                                            [typed charon_canonicalUnitString] ?: [NSNull null],
-                                            @([typed charon_aggregationStyleValue])]
+        ok = [self revenant_transactionLocked:^BOOL(NSError **inner) {
+            return [self revenant_runLocked:@"INSERT OR REPLACE INTO type (identifier, kind, unit, aggregation) VALUES (?, ?, ?, ?)"
+                                 bindings:@[type.identifier, @([typed revenant_storeKind]),
+                                            [typed revenant_canonicalUnitString] ?: [NSNull null],
+                                            @([typed revenant_aggregationStyleValue])]
                                     error:inner];
         } error:&failure];
     } @finally {
@@ -368,20 +368,20 @@ typedef NS_ENUM(NSUInteger, CharonHKAuthorizationBits) {
     __block HKObjectType *found = nil;
     [_lock lock];
     @try {
-        if (![self charon_openLocked:NULL])
+        if (![self revenant_openLocked:NULL])
             return nil;
-        NSDictionary *row = [self charon_rowsLocked:@"SELECT kind, unit, aggregation FROM type WHERE identifier = ?"
+        NSDictionary *row = [self revenant_rowsLocked:@"SELECT kind, unit, aggregation FROM type WHERE identifier = ?"
                                          bindings:@[identifier]].firstObject;
         if (!row)
             return nil;
         NSInteger kind = [[row objectForKey:@"kind"] integerValue];
-        Class cls = CharonHKClassForTypeKind(kind);
+        Class cls = RevenantHKClassForTypeKind(kind);
         if (!cls)
             return nil;
-        HKObjectType *type = [cls charon_typeWithIdentifier:identifier];
+        HKObjectType *type = [cls revenant_typeWithIdentifier:identifier];
         id unit = [row objectForKey:@"unit"];
         if ([unit isKindOfClass:[NSString class]])
-            [(id<CharonHKTyped>)type charon_setCanonicalUnitString:unit aggregationStyle:[[row objectForKey:@"aggregation"] integerValue]];
+            [(id<RevenantHKTyped>)type revenant_setCanonicalUnitString:unit aggregationStyle:[[row objectForKey:@"aggregation"] integerValue]];
         found = type;
     } @finally {
         [_lock unlock];
@@ -395,19 +395,19 @@ typedef NS_ENUM(NSUInteger, CharonHKAuthorizationBits) {
 {
     NSMutableDictionary<NSString *, NSNumber *> *asked = [NSMutableDictionary dictionary];
     for (HKObjectType *type in typesToShare)
-        asked[type.identifier] = @(CharonHKAuthorizationShare);
+        asked[type.identifier] = @(RevenantHKAuthorizationShare);
     for (HKObjectType *type in typesToRead)
-        asked[type.identifier] = @([asked[type.identifier] unsignedIntegerValue] | CharonHKAuthorizationRead);
+        asked[type.identifier] = @([asked[type.identifier] unsignedIntegerValue] | RevenantHKAuthorizationRead);
     __block BOOL ok = NO;
     __block NSError *failure = nil;
     [_lock lock];
     @try {
-        ok = [self charon_transactionLocked:^BOOL(NSError **inner) {
+        ok = [self revenant_transactionLocked:^BOOL(NSError **inner) {
             for (NSString *identifier in asked) {
                 NSUInteger bits = [asked[identifier] unsignedIntegerValue];
-                if (![self charon_runLocked:@"INSERT OR REPLACE INTO authorization (type, share, read) VALUES (?, ?, ?)"
-                                  bindings:@[identifier, @((bits & CharonHKAuthorizationShare) ? 1 : 0),
-                                             @((bits & CharonHKAuthorizationRead) ? 1 : 0)]
+                if (![self revenant_runLocked:@"INSERT OR REPLACE INTO authorization (type, share, read) VALUES (?, ?, ?)"
+                                  bindings:@[identifier, @((bits & RevenantHKAuthorizationShare) ? 1 : 0),
+                                             @((bits & RevenantHKAuthorizationRead) ? 1 : 0)]
                                      error:inner])
                     return NO;
             }
@@ -426,7 +426,7 @@ typedef NS_ENUM(NSUInteger, CharonHKAuthorizationBits) {
     return ok;
 }
 
-- (NSUInteger)charon_bitsForType:(HKObjectType *)type
+- (NSUInteger)revenant_bitsForType:(HKObjectType *)type
 {
     NSNumber *bits = nil;
     @synchronized(_authorization) {
@@ -437,20 +437,20 @@ typedef NS_ENUM(NSUInteger, CharonHKAuthorizationBits) {
 
 - (BOOL)mayShareType:(HKObjectType *)type
 {
-    return ([self charon_bitsForType:type] & CharonHKAuthorizationShare) != 0;
+    return ([self revenant_bitsForType:type] & RevenantHKAuthorizationShare) != 0;
 }
 
 - (BOOL)mayReadType:(HKObjectType *)type
 {
-    return ([self charon_bitsForType:type] & CharonHKAuthorizationRead) != 0;
+    return ([self revenant_bitsForType:type] & RevenantHKAuthorizationRead) != 0;
 }
 
 - (HKAuthorizationStatus)authorizationStatusForType:(HKObjectType *)type
 {
-    NSUInteger bits = [self charon_bitsForType:type];
+    NSUInteger bits = [self revenant_bitsForType:type];
     if (!bits)
         return HKAuthorizationStatusNotDetermined;
-    if (bits & CharonHKAuthorizationShare)
+    if (bits & RevenantHKAuthorizationShare)
         return HKAuthorizationStatusSharingAuthorized;
     return HKAuthorizationStatusSharingDenied;
 }
@@ -462,9 +462,9 @@ typedef NS_ENUM(NSUInteger, CharonHKAuthorizationBits) {
     __block id value = nil;
     [_lock lock];
     @try {
-        if (![self charon_openLocked:NULL])
+        if (![self revenant_openLocked:NULL])
             return nil;
-        NSData *data = [self charon_rowsLocked:@"SELECT value FROM characteristic WHERE identifier = ?"
+        NSData *data = [self revenant_rowsLocked:@"SELECT value FROM characteristic WHERE identifier = ?"
                                      bindings:@[identifier]].firstObject[@"value"];
         if (![data isKindOfClass:[NSData class]])
             return nil;
@@ -481,7 +481,7 @@ typedef NS_ENUM(NSUInteger, CharonHKAuthorizationBits) {
     if (value) {
         if (![NSPropertyListSerialization propertyList:value isValidForFormat:NSPropertyListBinaryFormat_v1_0]) {
             if (error)
-                *error = CharonHKError(HKErrorInvalidArgument,
+                *error = RevenantHKError(HKErrorInvalidArgument,
                                        [NSString stringWithFormat:@"A %@ is not a value this database can keep.",
                                                                   NSStringFromClass([value class])], nil);
             return NO;
@@ -495,7 +495,7 @@ typedef NS_ENUM(NSUInteger, CharonHKAuthorizationBits) {
     __block NSError *failure = nil;
     [_lock lock];
     @try {
-        ok = [self charon_runLocked:@"INSERT OR REPLACE INTO characteristic (identifier, value) VALUES (?, ?)"
+        ok = [self revenant_runLocked:@"INSERT OR REPLACE INTO characteristic (identifier, value) VALUES (?, ?)"
                           bindings:@[identifier, data ?: [NSData data]]
                              error:&failure];
     } @finally {
@@ -517,57 +517,57 @@ typedef NS_ENUM(NSUInteger, CharonHKAuthorizationBits) {
     __block NSError *failure = nil;
     [_lock lock];
     @try {
-        ok = [self charon_transactionLocked:^BOOL(NSError **inner) {
+        ok = [self revenant_transactionLocked:^BOOL(NSError **inner) {
             for (id object in objects) {
-                if (![object conformsToProtocol:@protocol(CharonHKStorable)]) {
-                    *inner = CharonHKError(HKErrorInvalidArgument,
+                if (![object conformsToProtocol:@protocol(RevenantHKStorable)]) {
+                    *inner = RevenantHKError(HKErrorInvalidArgument,
                                            [NSString stringWithFormat:@"A %@ is not a health object this database can keep.",
                                                                       NSStringFromClass([object class])], nil);
                     return NO;
                 }
-                id<CharonHKStorable> storable = (id<CharonHKStorable>)object;
-                NSString *identifier = [storable charon_storeTypeIdentifier];
+                id<RevenantHKStorable> storable = (id<RevenantHKStorable>)object;
+                NSString *identifier = [storable revenant_storeTypeIdentifier];
                 if (!identifier.length) {
-                    *inner = CharonHKError(HKErrorInvalidArgument,
+                    *inner = RevenantHKError(HKErrorInvalidArgument,
                                            [NSString stringWithFormat:@"A %@ has no type, and a sample is saved under one.",
                                                                       NSStringFromClass([object class])], nil);
                     return NO;
                 }
-                HKObjectType *type = [storable respondsToSelector:@selector(charon_typeForSaving)]
-                                       ? [(id)storable charon_typeForSaving]
+                HKObjectType *type = [storable respondsToSelector:@selector(revenant_typeForSaving)]
+                                       ? [(id)storable revenant_typeForSaving]
                                        : [self typeWithIdentifier:identifier];
                 if (![self mayShareType:type]) {
-                    *inner = CharonHKError(HKErrorAuthorizationDenied,
+                    *inner = RevenantHKError(HKErrorAuthorizationDenied,
                                            [NSString stringWithFormat:@"Sharing %@ data has not been authorized.", identifier],
                                            nil);
                     return NO;
                 }
-                if (![self charon_runLocked:@"INSERT OR REPLACE INTO type (identifier, kind, unit, aggregation) VALUES (?, ?, ?, ?)"
-                                  bindings:@[identifier, @([storable charon_storeKind]), [NSNull null], @0]
+                if (![self revenant_runLocked:@"INSERT OR REPLACE INTO type (identifier, kind, unit, aggregation) VALUES (?, ?, ?, ?)"
+                                  bindings:@[identifier, @([storable revenant_storeKind]), [NSNull null], @0]
                                      error:inner])
                     return NO;
                 NSString *uuid = [(HKObject *)object UUID].UUIDString;
-                NSInteger sequence = [self charon_nextSequenceLocked];
-                if (![self charon_runLocked:@"INSERT OR REPLACE INTO object (uuid, type, kind, start, end, source_bundle, source_name, source_version, sequence, created, archive) "
+                NSInteger sequence = [self revenant_nextSequenceLocked];
+                if (![self revenant_runLocked:@"INSERT OR REPLACE INTO object (uuid, type, kind, start, end, source_bundle, source_name, source_version, sequence, created, archive) "
                                             "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
-                                  bindings:@[uuid, identifier, @([storable charon_storeKind]),
+                                  bindings:@[uuid, identifier, @([storable revenant_storeKind]),
                                              @([(HKSample *)object startDate].timeIntervalSince1970),
                                              @([(HKSample *)object endDate].timeIntervalSince1970),
                                              [(HKObject *)object source].bundleIdentifier ?: @"",
                                              [(HKObject *)object source].name ?: @"",
-                                             [HKSource charon_processVersion] ?: [NSNull null],
+                                             [HKSource revenant_processVersion] ?: [NSNull null],
                                              @(sequence), @([[NSDate date] timeIntervalSince1970]),
-                                             [storable charon_storeArchive]]
+                                             [storable revenant_storeArchive]]
                                      error:inner])
                     return NO;
-                if (![self charon_runLocked:@"DELETE FROM deleted WHERE uuid = ?" bindings:@[uuid] error:inner])
+                if (![self revenant_runLocked:@"DELETE FROM deleted WHERE uuid = ?" bindings:@[uuid] error:inner])
                     return NO;
                 if ([object isKindOfClass:[HKCorrelation class]]) {
-                    if (![self charon_runLocked:@"DELETE FROM correlated WHERE correlation = ?" bindings:@[uuid] error:inner])
+                    if (![self revenant_runLocked:@"DELETE FROM correlated WHERE correlation = ?" bindings:@[uuid] error:inner])
                         return NO;
                     NSUInteger position = 0;
-                    for (HKObject *member in [(HKCorrelation *)object charon_allObjects])
-                        if (![self charon_runLocked:@"INSERT OR REPLACE INTO correlated (correlation, member, position) VALUES (?, ?, ?)"
+                    for (HKObject *member in [(HKCorrelation *)object revenant_allObjects])
+                        if (![self revenant_runLocked:@"INSERT OR REPLACE INTO correlated (correlation, member, position) VALUES (?, ?, ?)"
                                           bindings:@[uuid, member.UUID.UUIDString, @(position++)]
                                              error:inner])
                             return NO;
@@ -577,13 +577,13 @@ typedef NS_ENUM(NSUInteger, CharonHKAuthorizationBits) {
             return YES;
         } error:&failure];
         if (ok)
-            [self charon_runLocked:@"INSERT OR REPLACE INTO meta (key, value) VALUES ('sequence', ?)"
+            [self revenant_runLocked:@"INSERT OR REPLACE INTO meta (key, value) VALUES ('sequence', ?)"
                           bindings:@[[[NSNumber numberWithInteger:_sequence] stringValue]] error:NULL];
     } @finally {
         [_lock unlock];
     }
     if (ok)
-        [self charon_publishChanged:changed];
+        [self revenant_publishChanged:changed];
     else if (error)
         *error = failure;
     return ok;
@@ -591,11 +591,11 @@ typedef NS_ENUM(NSUInteger, CharonHKAuthorizationBits) {
 
 - (BOOL)addSamples:(NSArray *)samples toWorkout:(HKObject *)workout error:(NSError **)error
 {
-    if (![self mayShareType:[(HKSample *)workout charon_typeForSaving]]) {
+    if (![self mayShareType:[(HKSample *)workout revenant_typeForSaving]]) {
         if (error)
-            *error = CharonHKError(HKErrorAuthorizationDenied,
+            *error = RevenantHKError(HKErrorAuthorizationDenied,
                                    [NSString stringWithFormat:@"Sharing %@ data has not been authorized.",
-                                                              [(HKSample *)workout charon_typeForSaving].identifier],
+                                                              [(HKSample *)workout revenant_typeForSaving].identifier],
                                    nil);
         return NO;
     }
@@ -603,9 +603,9 @@ typedef NS_ENUM(NSUInteger, CharonHKAuthorizationBits) {
     __block NSError *failure = nil;
     [_lock lock];
     @try {
-        ok = [self charon_transactionLocked:^BOOL(NSError **inner) {
+        ok = [self revenant_transactionLocked:^BOOL(NSError **inner) {
             for (HKObject *sample in samples)
-                if (![self charon_runLocked:@"INSERT OR REPLACE INTO correlated (correlation, member, position) VALUES (?, ?, ?)"
+                if (![self revenant_runLocked:@"INSERT OR REPLACE INTO correlated (correlation, member, position) VALUES (?, ?, ?)"
                                   bindings:@[workout.UUID.UUIDString, sample.UUID.UUIDString, @0]
                                      error:inner])
                     return NO;
@@ -615,7 +615,7 @@ typedef NS_ENUM(NSUInteger, CharonHKAuthorizationBits) {
         [_lock unlock];
     }
     if (ok)
-        [self charon_publishChanged:[samples valueForKey:@"UUID"]];
+        [self revenant_publishChanged:[samples valueForKey:@"UUID"]];
     else if (error)
         *error = failure;
     return ok;
@@ -630,35 +630,35 @@ typedef NS_ENUM(NSUInteger, CharonHKAuthorizationBits) {
     __block NSError *failure = nil;
     [_lock lock];
     @try {
-        ok = [self charon_transactionLocked:^BOOL(NSError **inner) {
+        ok = [self revenant_transactionLocked:^BOOL(NSError **inner) {
             for (HKObject *object in objects) {
-                if (![self charon_removeLocked:object.UUID.UUIDString error:inner])
+                if (![self revenant_removeLocked:object.UUID.UUIDString error:inner])
                     return NO;
                 [changed addObject:object.UUID.UUIDString];
             }
             return YES;
         } error:&failure];
         if (ok)
-            [self charon_runLocked:@"INSERT OR REPLACE INTO meta (key, value) VALUES ('sequence', ?)"
+            [self revenant_runLocked:@"INSERT OR REPLACE INTO meta (key, value) VALUES ('sequence', ?)"
                           bindings:@[[[NSNumber numberWithInteger:_sequence] stringValue]] error:NULL];
     } @finally {
         [_lock unlock];
     }
     if (ok)
-        [self charon_publishChanged:changed];
+        [self revenant_publishChanged:changed];
     else if (error)
         *error = failure;
     return ok;
 }
 
-- (BOOL)charon_removeLocked:(NSString *)uuid error:(NSError **)error
+- (BOOL)revenant_removeLocked:(NSString *)uuid error:(NSError **)error
 {
-    if (![self charon_runLocked:@"DELETE FROM object WHERE uuid = ?" bindings:@[uuid] error:error])
+    if (![self revenant_runLocked:@"DELETE FROM object WHERE uuid = ?" bindings:@[uuid] error:error])
         return NO;
-    if (![self charon_runLocked:@"DELETE FROM correlated WHERE correlation = ? OR member = ?" bindings:@[uuid, uuid] error:error])
+    if (![self revenant_runLocked:@"DELETE FROM correlated WHERE correlation = ? OR member = ?" bindings:@[uuid, uuid] error:error])
         return NO;
-    return [self charon_runLocked:@"INSERT OR REPLACE INTO deleted (uuid, sequence) VALUES (?, ?)"
-                        bindings:@[uuid, @([self charon_nextSequenceLocked])]
+    return [self revenant_runLocked:@"INSERT OR REPLACE INTO deleted (uuid, sequence) VALUES (?, ?)"
+                        bindings:@[uuid, @([self revenant_nextSequenceLocked])]
                            error:error];
 }
 
@@ -683,9 +683,9 @@ typedef NS_ENUM(NSUInteger, CharonHKAuthorizationBits) {
 
 #pragma mark Reading
 
-- (CharonHKRow *)charon_rowFrom:(NSDictionary *)raw
+- (RevenantHKRow *)revenant_rowFrom:(NSDictionary *)raw
 {
-    CharonHKRow *row = [[CharonHKRow alloc] init];
+    RevenantHKRow *row = [[RevenantHKRow alloc] init];
     NSString *uuid = [raw objectForKey:@"uuid"];
     id version = [raw objectForKey:@"source_version"];
     [row setValue:[[[NSUUID alloc] initWithUUIDString:uuid] copy] forKey:@"uuid"];
@@ -702,32 +702,32 @@ typedef NS_ENUM(NSUInteger, CharonHKAuthorizationBits) {
     return row;
 }
 
-- (void)charon_annotate:(id)object source:(CharonHKRow *)row
+- (void)revenant_annotate:(id)object source:(RevenantHKRow *)row
 {
-    if (![object respondsToSelector:@selector(charon_setSourceRevision:device:)])
+    if (![object respondsToSelector:@selector(revenant_setSourceRevision:device:)])
         return;
-    HKSourceRevision *revision = [[HKSourceRevision alloc] charon_initWithSource:[HKSource charon_sourceWithName:row.sourceName
+    HKSourceRevision *revision = [[HKSourceRevision alloc] revenant_initWithSource:[HKSource revenant_sourceWithName:row.sourceName
                                                                                           bundleIdentifier:row.sourceBundle]
                                                                         version:row.sourceVersion];
-    [object charon_setSourceRevision:revision device:nil];
+    [object revenant_setSourceRevision:revision device:nil];
 }
 
-- (void)charon_linkMembershipOf:(id)object uuid:(NSString *)uuid
+- (void)revenant_linkMembershipOf:(id)object uuid:(NSString *)uuid
 {
-    if (![object respondsToSelector:@selector(charon_setCorrelation:)])
+    if (![object respondsToSelector:@selector(revenant_setCorrelation:)])
         return;
-    for (NSDictionary *row in [self charon_rowsLocked:@"SELECT correlation FROM correlated WHERE member = ?"
+    for (NSDictionary *row in [self revenant_rowsLocked:@"SELECT correlation FROM correlated WHERE member = ?"
                                           bindings:@[uuid]]) {
         NSString *owner = [row objectForKey:@"correlation"];
-        NSDictionary *raw = [self charon_rowsLocked:@"SELECT * FROM object WHERE uuid = ?" bindings:@[owner]].firstObject;
+        NSDictionary *raw = [self revenant_rowsLocked:@"SELECT * FROM object WHERE uuid = ?" bindings:@[owner]].firstObject;
         if (!raw)
             continue;
-        CharonHKRow *ownerRow = [self charon_rowFrom:raw];
-        id parent = [CharonHKClassForObjectKind(ownerRow.kind) charon_objectFromArchive:ownerRow.archive
+        RevenantHKRow *ownerRow = [self revenant_rowFrom:raw];
+        id parent = [RevenantHKClassForObjectKind(ownerRow.kind) revenant_objectFromArchive:ownerRow.archive
                                                                                    type:[self typeWithIdentifier:ownerRow.type]
                                                                                   store:self];
         if (parent)
-            [object charon_setCorrelation:parent];
+            [object revenant_setCorrelation:parent];
     }
 }
 
@@ -742,11 +742,11 @@ typedef NS_ENUM(NSUInteger, CharonHKAuthorizationBits) {
                      fromSequence:(NSInteger)fromSequence
                              error:(NSError **)error
 {
-    if (![self charon_openLocked:error])
+    if (![self revenant_openLocked:error])
         return nil;
     if (![self mayReadType:type]) {
         if (error)
-            *error = CharonHKError(HKErrorAuthorizationDenied,
+            *error = RevenantHKError(HKErrorAuthorizationDenied,
                                    [NSString stringWithFormat:@"Reading %@ data has not been authorized.", type.identifier],
                                    nil);
         return nil;
@@ -771,13 +771,13 @@ typedef NS_ENUM(NSUInteger, CharonHKAuthorizationBits) {
             [bindings addObject:@(fromSequence)];
         }
         [sql appendString:@" ORDER BY start, uuid"];
-        for (NSDictionary *raw in [self charon_rowsLocked:sql bindings:bindings]) {
-            CharonHKRow *row = [self charon_rowFrom:raw];
-            id object = [CharonHKClassForObjectKind(row.kind) charon_objectFromArchive:row.archive type:type store:self];
+        for (NSDictionary *raw in [self revenant_rowsLocked:sql bindings:bindings]) {
+            RevenantHKRow *row = [self revenant_rowFrom:raw];
+            id object = [RevenantHKClassForObjectKind(row.kind) revenant_objectFromArchive:row.archive type:type store:self];
             if (!object)
                 continue;
-            [self charon_linkMembershipOf:object uuid:row.uuid.UUIDString];
-            [self charon_annotate:object source:row];
+            [self revenant_linkMembershipOf:object uuid:row.uuid.UUIDString];
+            [self revenant_annotate:object source:row];
             if (predicate && ![predicate evaluateWithObject:object])
                 continue;
             [objects addObject:object];
@@ -794,11 +794,11 @@ typedef NS_ENUM(NSUInteger, CharonHKAuthorizationBits) {
 
 - (nullable NSArray *)objectsWithUUIDs:(NSArray<NSUUID *> *)uuids ofType:(HKObjectType *)type error:(NSError **)error
 {
-    if (![self charon_openLocked:error])
+    if (![self revenant_openLocked:error])
         return nil;
     if (![self mayReadType:type]) {
         if (error)
-            *error = CharonHKError(HKErrorAuthorizationDenied,
+            *error = RevenantHKError(HKErrorAuthorizationDenied,
                                    [NSString stringWithFormat:@"Reading %@ data has not been authorized.", type.identifier],
                                    nil);
         return nil;
@@ -808,12 +808,12 @@ typedef NS_ENUM(NSUInteger, CharonHKAuthorizationBits) {
     [_lock lock];
     @try {
         for (NSUUID *uuid in uuids) {
-            NSDictionary *raw = [self charon_rowsLocked:@"SELECT * FROM object WHERE uuid = ? AND type = ?"
+            NSDictionary *raw = [self revenant_rowsLocked:@"SELECT * FROM object WHERE uuid = ? AND type = ?"
                                              bindings:@[uuid.UUIDString, type.identifier]].firstObject;
             if (!raw)
                 continue;
-            id object = [CharonHKClassForObjectKind([[raw objectForKey:@"kind"] integerValue])
-                             charon_objectFromArchive:[raw objectForKey:@"archive"] type:type store:self];
+            id object = [RevenantHKClassForObjectKind([[raw objectForKey:@"kind"] integerValue])
+                             revenant_objectFromArchive:[raw objectForKey:@"archive"] type:type store:self];
             if (object)
                 [objects addObject:object];
         }
@@ -831,9 +831,9 @@ typedef NS_ENUM(NSUInteger, CharonHKAuthorizationBits) {
     __block NSInteger sequence = 0;
     [_lock lock];
     @try {
-        if (![self charon_openLocked:NULL])
+        if (![self revenant_openLocked:NULL])
             return 0;
-        sequence = [[self charon_rowsLocked:@"SELECT MAX(sequence) AS top FROM object" bindings:@[]].firstObject[@"top"] integerValue];
+        sequence = [[self revenant_rowsLocked:@"SELECT MAX(sequence) AS top FROM object" bindings:@[]].firstObject[@"top"] integerValue];
     } @finally {
         [_lock unlock];
     }
@@ -844,7 +844,7 @@ typedef NS_ENUM(NSUInteger, CharonHKAuthorizationBits) {
 {
     NSMutableArray *deleted = [NSMutableArray array];
     for (NSUUID *uuid in [self deletedUUIDsSinceSequence:sequence])
-        [deleted addObject:[[HKDeletedObject alloc] charon_initWithUUID:uuid]];
+        [deleted addObject:[[HKDeletedObject alloc] revenant_initWithUUID:uuid]];
     return deleted;
 }
 
@@ -853,9 +853,9 @@ typedef NS_ENUM(NSUInteger, CharonHKAuthorizationBits) {
     __block NSMutableArray *uuids = [NSMutableArray array];
     [_lock lock];
     @try {
-        if (![self charon_openLocked:NULL])
+        if (![self revenant_openLocked:NULL])
             return @[];
-        for (NSDictionary *row in [self charon_rowsLocked:@"SELECT uuid FROM deleted WHERE sequence > ? ORDER BY sequence"
+        for (NSDictionary *row in [self revenant_rowsLocked:@"SELECT uuid FROM deleted WHERE sequence > ? ORDER BY sequence"
                                         bindings:@[@(sequence)]]) {
             NSUUID *uuid = [[NSUUID alloc] initWithUUIDString:[row objectForKey:@"uuid"]];
             if (uuid)
@@ -869,7 +869,7 @@ typedef NS_ENUM(NSUInteger, CharonHKAuthorizationBits) {
 
 #pragma mark Workout routes
 
-static NSData *CharonHKRouteMetadataArchive(NSDictionary *metadata)
+static NSData *RevenantHKRouteMetadataArchive(NSDictionary *metadata)
 {
     if (!metadata)
         return nil;
@@ -889,19 +889,19 @@ static NSData *CharonHKRouteMetadataArchive(NSDictionary *metadata)
 {
     if (![route isKindOfClass:[HKWorkoutRoute class]] || ![workout isKindOfClass:[HKWorkout class]]) {
         if (error)
-            *error = CharonHKError(HKErrorInvalidArgument, @"A route and a workout are both needed.", nil);
+            *error = RevenantHKError(HKErrorInvalidArgument, @"A route and a workout are both needed.", nil);
         return;
     }
     NSMutableData *joined = [NSMutableData data];
-    NSData *bytes = [CharonHKStore charon_routeDataOf:route];
+    NSData *bytes = [RevenantHKStore revenant_routeDataOf:route];
     [joined appendData:bytes];
     NSString *key = device.localIdentifier ?: @"";
     __block BOOL ok = NO;
     __block NSError *failure = nil;
     [_lock lock];
     @try {
-        ok = [self charon_runLocked:@"INSERT OR REPLACE INTO workout_route (workout, device, route, metadata) VALUES (?, ?, ?, ?)"
-                            bindings:@[workout.UUID.UUIDString, key, joined, CharonHKRouteMetadataArchive(metadata) ?: [NSNull null]]
+        ok = [self revenant_runLocked:@"INSERT OR REPLACE INTO workout_route (workout, device, route, metadata) VALUES (?, ?, ?, ?)"
+                            bindings:@[workout.UUID.UUIDString, key, joined, RevenantHKRouteMetadataArchive(metadata) ?: [NSNull null]]
                                error:&failure];
     } @finally {
         [_lock unlock];
@@ -910,7 +910,7 @@ static NSData *CharonHKRouteMetadataArchive(NSDictionary *metadata)
         *error = failure;
 }
 
-+ (NSData *)charon_routeDataOf:(HKWorkoutRoute *)route
++ (NSData *)revenant_routeDataOf:(HKWorkoutRoute *)route
 {
     NSData *archive = [NSKeyedArchiver archivedDataWithRootObject:route];
     if (!archive.length)
@@ -923,7 +923,7 @@ static NSData *CharonHKRouteMetadataArchive(NSDictionary *metadata)
 
 - (NSData *)routeDataOf:(HKWorkoutRoute *)route
 {
-    return [CharonHKStore charon_routeDataOf:route];
+    return [RevenantHKStore revenant_routeDataOf:route];
 }
 
 #pragma mark Documents
@@ -952,8 +952,8 @@ static NSData *CharonHKRouteMetadataArchive(NSDictionary *metadata)
     NSMutableArray *without = [NSMutableArray arrayWithCapacity:found.count];
     for (HKDocumentSample *sample in found) {
         NSMutableDictionary *facts = [NSMutableDictionary dictionaryWithDictionary:[sample metadata]];
-        [facts removeObjectForKey:@"_charon_document"];
-        [without addObject:[sample charon_copyWithoutDocument:facts]];
+        [facts removeObjectForKey:@"_revenant_document"];
+        [without addObject:[sample revenant_copyWithoutDocument:facts]];
     }
     return without;
 }
@@ -965,10 +965,10 @@ static NSData *CharonHKRouteMetadataArchive(NSDictionary *metadata)
     __block NSMutableArray *summaries = [NSMutableArray array];
     [_lock lock];
     @try {
-        if (![self charon_openLocked:error])
+        if (![self revenant_openLocked:error])
             return nil;
-        for (NSDictionary *raw in [self charon_rowsLocked:@"SELECT * FROM activity_summary ORDER BY start" bindings:@[]]) {
-            id summary = [HKActivitySummary charon_objectFromArchive:[raw objectForKey:@"archive"]
+        for (NSDictionary *raw in [self revenant_rowsLocked:@"SELECT * FROM activity_summary ORDER BY start" bindings:@[]]) {
+            id summary = [HKActivitySummary revenant_objectFromArchive:[raw objectForKey:@"archive"]
                                                                 type:[HKObjectType activitySummaryType]
                                                                store:self];
             if (!summary)
@@ -985,9 +985,9 @@ static NSData *CharonHKRouteMetadataArchive(NSDictionary *metadata)
 
 #pragma mark Sources
 
-- (HKSource *)charon_sourceFrom:(NSDictionary *)raw
+- (HKSource *)revenant_sourceFrom:(NSDictionary *)raw
 {
-    return [HKSource charon_sourceWithName:[raw objectForKey:@"source_name"]
+    return [HKSource revenant_sourceWithName:[raw objectForKey:@"source_name"]
                           bundleIdentifier:[raw objectForKey:@"source_bundle"]];
 }
 
@@ -996,11 +996,11 @@ static NSData *CharonHKRouteMetadataArchive(NSDictionary *metadata)
     __block NSMutableArray *sources = [NSMutableArray array];
     [_lock lock];
     @try {
-        if (![self charon_openLocked:NULL])
+        if (![self revenant_openLocked:NULL])
             return @[];
-        for (NSDictionary *raw in [self charon_rowsLocked:@"SELECT DISTINCT source_bundle, source_name, source_version FROM object WHERE source_name <> '' ORDER BY source_name"
+        for (NSDictionary *raw in [self revenant_rowsLocked:@"SELECT DISTINCT source_bundle, source_name, source_version FROM object WHERE source_name <> '' ORDER BY source_name"
                                          bindings:@[]])
-            [sources addObject:[self charon_sourceFrom:raw]];
+            [sources addObject:[self revenant_sourceFrom:raw]];
     } @finally {
         [_lock unlock];
     }
@@ -1012,15 +1012,15 @@ static NSData *CharonHKRouteMetadataArchive(NSDictionary *metadata)
     __block NSMutableArray *sources = [NSMutableArray array];
     [_lock lock];
     @try {
-        if (![self charon_openLocked:NULL])
+        if (![self revenant_openLocked:NULL])
             return @[];
         NSMutableDictionary<NSString *, NSNumber *> *order = [NSMutableDictionary dictionary];
-        for (NSDictionary *row in [self charon_rowsLocked:@"SELECT bundle, position FROM source_order WHERE type = ? ORDER BY position"
+        for (NSDictionary *row in [self revenant_rowsLocked:@"SELECT bundle, position FROM source_order WHERE type = ? ORDER BY position"
                                         bindings:@[type.identifier]])
             order[[row objectForKey:@"bundle"]] = @([[row objectForKey:@"position"] integerValue]);
-        for (NSDictionary *raw in [self charon_rowsLocked:@"SELECT DISTINCT source_bundle, source_name, source_version FROM object WHERE type = ? AND source_name <> '' ORDER BY source_name"
+        for (NSDictionary *raw in [self revenant_rowsLocked:@"SELECT DISTINCT source_bundle, source_name, source_version FROM object WHERE type = ? AND source_name <> '' ORDER BY source_name"
                                          bindings:@[type.identifier]])
-            [sources addObject:[self charon_sourceFrom:raw]];
+            [sources addObject:[self revenant_sourceFrom:raw]];
         [sources sortUsingComparator:^NSComparisonResult(HKSource *left, HKSource *right) {
             NSNumber *l = order[left.bundleIdentifier ?: @""], *r = order[right.bundleIdentifier ?: @""];
             if (l && r)
@@ -1043,12 +1043,12 @@ static NSData *CharonHKRouteMetadataArchive(NSDictionary *metadata)
     __block NSError *failure = nil;
     [_lock lock];
     @try {
-        ok = [self charon_transactionLocked:^BOOL(NSError **inner) {
-            for (NSDictionary *row in [self charon_rowsLocked:@"SELECT uuid FROM object WHERE source_bundle = ?"
+        ok = [self revenant_transactionLocked:^BOOL(NSError **inner) {
+            for (NSDictionary *row in [self revenant_rowsLocked:@"SELECT uuid FROM object WHERE source_bundle = ?"
                                         bindings:@[bundleIdentifier]])
-                if (![self charon_removeLocked:[row objectForKey:@"uuid"] error:inner])
+                if (![self revenant_removeLocked:[row objectForKey:@"uuid"] error:inner])
                     return NO;
-            if (![self charon_runLocked:@"DELETE FROM source_order WHERE bundle = ?" bindings:@[bundleIdentifier] error:inner])
+            if (![self revenant_runLocked:@"DELETE FROM source_order WHERE bundle = ?" bindings:@[bundleIdentifier] error:inner])
                 return NO;
             return YES;
         } error:&failure];
@@ -1066,12 +1066,12 @@ static NSData *CharonHKRouteMetadataArchive(NSDictionary *metadata)
     __block NSError *failure = nil;
     [_lock lock];
     @try {
-        ok = [self charon_transactionLocked:^BOOL(NSError **inner) {
-            if (![self charon_runLocked:@"DELETE FROM source_order WHERE type = ?" bindings:@[type.identifier] error:inner])
+        ok = [self revenant_transactionLocked:^BOOL(NSError **inner) {
+            if (![self revenant_runLocked:@"DELETE FROM source_order WHERE type = ?" bindings:@[type.identifier] error:inner])
                 return NO;
             NSUInteger position = 0;
             for (HKSource *source in sources)
-                if (![self charon_runLocked:@"INSERT OR REPLACE INTO source_order (type, bundle, position) VALUES (?, ?, ?)"
+                if (![self revenant_runLocked:@"INSERT OR REPLACE INTO source_order (type, bundle, position) VALUES (?, ?, ?)"
                                   bindings:@[type.identifier, source.bundleIdentifier ?: @"", @(position++)]
                                      error:inner])
                     return NO;
@@ -1093,12 +1093,12 @@ static NSData *CharonHKRouteMetadataArchive(NSDictionary *metadata)
     __block NSError *failure = nil;
     [_lock lock];
     @try {
-        if (![self charon_openLocked:&failure])
+        if (![self revenant_openLocked:&failure])
             return NO;
-        ok = enabled ? [self charon_runLocked:@"INSERT OR REPLACE INTO background_delivery (type, frequency) VALUES (?, ?)"
+        ok = enabled ? [self revenant_runLocked:@"INSERT OR REPLACE INTO background_delivery (type, frequency) VALUES (?, ?)"
                                         bindings:@[type.identifier, @(frequency)]
                                            error:&failure]
-                     : [self charon_runLocked:@"DELETE FROM background_delivery WHERE type = ? AND frequency = ?"
+                     : [self revenant_runLocked:@"DELETE FROM background_delivery WHERE type = ? AND frequency = ?"
                                         bindings:@[type.identifier, @(frequency)]
                                            error:&failure];
     } @finally {
@@ -1115,8 +1115,8 @@ static NSData *CharonHKRouteMetadataArchive(NSDictionary *metadata)
     __block NSError *failure = nil;
     [_lock lock];
     @try {
-        ok = [self charon_openLocked:NULL]
-             && [self charon_runLocked:@"DELETE FROM background_delivery" bindings:@[] error:&failure];
+        ok = [self revenant_openLocked:NULL]
+             && [self revenant_runLocked:@"DELETE FROM background_delivery" bindings:@[] error:&failure];
     } @finally {
         [_lock unlock];
     }
@@ -1132,9 +1132,9 @@ static NSData *CharonHKRouteMetadataArchive(NSDictionary *metadata)
     __block id anchor = nil;
     [_lock lock];
     @try {
-        if (![self charon_openLocked:NULL])
+        if (![self revenant_openLocked:NULL])
             return nil;
-        NSData *data = [self charon_rowsLocked:@"SELECT data FROM anchor WHERE uuid = ?" bindings:@[uuid.UUIDString]].firstObject[@"data"];
+        NSData *data = [self revenant_rowsLocked:@"SELECT data FROM anchor WHERE uuid = ?" bindings:@[uuid.UUIDString]].firstObject[@"data"];
         if (![data isKindOfClass:[NSData class]])
             return nil;
         anchor = [NSKeyedUnarchiver unarchiveObjectWithData:data];
@@ -1149,12 +1149,12 @@ static NSData *CharonHKRouteMetadataArchive(NSDictionary *metadata)
     NSData *data = anchor ? [NSKeyedArchiver archivedDataWithRootObject:anchor] : nil;
     [_lock lock];
     @try {
-        if (![self charon_openLocked:NULL])
+        if (![self revenant_openLocked:NULL])
             return;
         if (data)
-            [self charon_runLocked:@"INSERT OR REPLACE INTO anchor (uuid, data) VALUES (?, ?)" bindings:@[uuid.UUIDString, data] error:NULL];
+            [self revenant_runLocked:@"INSERT OR REPLACE INTO anchor (uuid, data) VALUES (?, ?)" bindings:@[uuid.UUIDString, data] error:NULL];
         else
-            [self charon_runLocked:@"DELETE FROM anchor WHERE uuid = ?" bindings:@[uuid.UUIDString] error:NULL];
+            [self revenant_runLocked:@"DELETE FROM anchor WHERE uuid = ?" bindings:@[uuid.UUIDString] error:NULL];
     } @finally {
         [_lock unlock];
     }
@@ -1180,7 +1180,7 @@ static NSData *CharonHKRouteMetadataArchive(NSDictionary *metadata)
     }
 }
 
-- (void)charon_publishChanged:(NSArray<NSString *> *)uuids
+- (void)revenant_publishChanged:(NSArray<NSString *> *)uuids
 {
     if (!uuids.count)
         return;
@@ -1196,8 +1196,8 @@ static NSData *CharonHKRouteMetadataArchive(NSDictionary *metadata)
     }
     for (NSDictionary *entry in observers) {
         id observer = entry[@"observer"];
-        if ([observer respondsToSelector:@selector(charon_storeDidChange:)])
-            [observer charon_storeDidChange:identifiers];
+        if ([observer respondsToSelector:@selector(revenant_storeDidChange:)])
+            [observer revenant_storeDidChange:identifiers];
     }
 }
 

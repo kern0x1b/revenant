@@ -25,8 +25,8 @@ static NSString *image_of_method(Class class, SEL selector)
 static void check_focus(void)
 {
     Class coordinator = NSClassFromString(@"UIFocusAnimationCoordinator");
-    charon_check(coordinator != Nil, "UIFocusAnimationCoordinator is there", nil);
-    charon_check([image_of_class(coordinator) isEqualToString:@"libUIKitBackports.dylib"],
+    revenant_check(coordinator != Nil, "UIFocusAnimationCoordinator is there", nil);
+    revenant_check([image_of_class(coordinator) isEqualToString:@"libUIKitBackports.dylib"],
                  "UIFocusAnimationCoordinator comes from the backports", image_of_class(coordinator));
     if (!coordinator)
         return;
@@ -34,30 +34,30 @@ static void check_focus(void)
     UIFocusAnimationCoordinator *made = [[UIFocusAnimationCoordinator alloc] init];
     __block NSMutableArray *order = [NSMutableArray array];
     [made addCoordinatedAnimations:^{ [order addObject:@"animations"]; } completion:^{ [order addObject:@"completion"]; }];
-    charon_check([order isEqualToArray:@[@"animations", @"completion"]],
+    revenant_check([order isEqualToArray:@[@"animations", @"completion"]],
                  "the animations run and then the completion, at once", [order componentsJoinedByString:@","]);
 
     order = [NSMutableArray array];
     [made addCoordinatedAnimations:nil completion:^{ [order addObject:@"completion"]; }];
-    charon_check([order isEqualToArray:@[@"completion"]], "a completion alone is run", [order componentsJoinedByString:@","]);
+    revenant_check([order isEqualToArray:@[@"completion"]], "a completion alone is run", [order componentsJoinedByString:@","]);
 
     [made addCoordinatedAnimations:nil completion:nil];
-    charon_check(YES, "both blocks nil is quiet", nil);
+    revenant_check(YES, "both blocks nil is quiet", nil);
 }
 
 static void check_adjusting(void)
 {
     Protocol *adjusting = NSProtocolFromString(@"UIContentSizeCategoryAdjusting");
-    charon_check(adjusting != NULL, "UIContentSizeCategoryAdjusting is a protocol the process knows", nil);
+    revenant_check(adjusting != NULL, "UIContentSizeCategoryAdjusting is a protocol the process knows", nil);
     for (NSString *name in @[@"UILabel", @"UITextField", @"UITextView"]) {
         Class class = NSClassFromString(name);
-        charon_check(class != Nil, [NSString stringWithFormat:@"%@ is there", name].UTF8String, nil);
+        revenant_check(class != Nil, [NSString stringWithFormat:@"%@ is there", name].UTF8String, nil);
         for (NSString *selector in @[@"adjustsFontForContentSizeCategory", @"setAdjustsFontForContentSizeCategory:"]) {
             NSString *image = image_of_method(class, NSSelectorFromString(selector));
-            charon_check([image isEqualToString:@"libUIKitBackports.dylib"],
+            revenant_check([image isEqualToString:@"libUIKitBackports.dylib"],
                          [NSString stringWithFormat:@"-[%@ %@] comes from the backports", name, selector].UTF8String, image);
         }
-        charon_check(adjusting && class_conformsToProtocol(class, adjusting),
+        revenant_check(adjusting && class_conformsToProtocol(class, adjusting),
                      [NSString stringWithFormat:@"%@ says it adopts UIContentSizeCategoryAdjusting", name].UTF8String, nil);
     }
 }
@@ -69,7 +69,7 @@ int main(int argc, char **argv)
         (void)argv;
         check_focus();
         check_adjusting();
-        printf("checks=%d failures=%d\n", charon_checks, charon_failures);
-        return charon_failures;
+        printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
+        return revenant_failures;
     }
 }

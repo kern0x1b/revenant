@@ -1,7 +1,7 @@
-#import "CharonMetal.h"
+#import "RevenantMetal.h"
 
 
-@implementation CharonMetalBlitEncoder (Optimize)
+@implementation RevenantMetalBlitEncoder (Optimize)
 
 - (void)optimizeContentsForCPUAccess:(id<MTLTexture>)texture
 {

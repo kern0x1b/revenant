@@ -1,5 +1,5 @@
 #pragma clang diagnostic ignored "-Wnullability-completeness"
-#import "CharonWebExtension.h"
+#import "RevenantWebExtension.h"
 
 @implementation WKWebExtensionAction {
     __weak WKWebExtensionContext *_webExtensionContext;
@@ -15,7 +15,7 @@
     BOOL _presentsPopup;
 }
 
-- (instancetype)charon_initWithContext:(WKWebExtensionContext *)context
+- (instancetype)revenant_initWithContext:(WKWebExtensionContext *)context
 {
     if ((self = [super init])) {
         _webExtensionContext = context;
@@ -101,7 +101,7 @@
     _popupViewController = nil;
 }
 
-- (void)charon_setLabel:(NSString *)label
+- (void)revenant_setLabel:(NSString *)label
               badgeText:(NSString *)badgeText
        inspectionName:(NSString *)inspectionName
              menuItems:(NSArray<UIMenuElement *> *)menuItems
@@ -121,7 +121,7 @@
     _hasUnreadBadgeText = badgeText.length > 0;
 }
 
-- (void)charon_setAssociatedTab:(id<WKWebExtensionTab>)tab
+- (void)revenant_setAssociatedTab:(id<WKWebExtensionTab>)tab
 {
     _associatedTab = tab;
 }
@@ -138,7 +138,7 @@
     UIKeyCommand *_keyCommand;
 }
 
-- (instancetype)charon_initWithContext:(WKWebExtensionContext *)context
+- (instancetype)revenant_initWithContext:(WKWebExtensionContext *)context
                              identifier:(NSString *)identifier
                                   title:(NSString *)title
 {
@@ -172,7 +172,7 @@
 
 - (void)setActivationKey:(NSString *)activationKey
 {
-    [self charon_setActivationKey:activationKey menuItem:_menuItem];
+    [self revenant_setActivationKey:activationKey menuItem:_menuItem];
 }
 
 - (UIKeyModifierFlags)modifierFlags
@@ -197,7 +197,7 @@
     return _keyCommand;
 }
 
-- (void)charon_setActivationKey:(NSString *)activationKey menuItem:(UIMenuElement *)menuItem
+- (void)revenant_setActivationKey:(NSString *)activationKey menuItem:(UIMenuElement *)menuItem
 {
     _activationKey = [activationKey copy];
     _menuItem = menuItem;

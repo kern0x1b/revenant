@@ -7,7 +7,7 @@ here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 device=${DEVICE:-$here/../../device}
 uikit=${UIKIT:-$here/../../../../packages/a/apple-backports/UIKit}
-build=${BUILD:-$(runs_fresh charon-insetref)}
+build=${BUILD:-$(runs_fresh revenant-insetref)}
 sdk=$(xcrun --show-sdk-path)
 compile() {
     output=$1; shift
@@ -59,7 +59,7 @@ mutant "inset.right = MAX(inset.right + against.right - adjusted.right, 0);" "in
 mutant "reference == 2 ? view.layoutMargins : view.safeAreaInsets" "reference == 1 ? view.layoutMargins : view.safeAreaInsets"
 mutant "MAX(inset.left + against.left - adjusted.left, 0)" "inset.left + against.left - adjusted.left"
 mutant "CGFloat width = view.bounds.size.width - adjustment.left - adjustment.right;" "CGFloat width = view.bounds.size.width - adjustment.left;"
-mutant "return charon_reference_kind(flow) != 0 &&" "return charon_reference_kind(flow) == 1 &&"
+mutant "return revenant_reference_kind(flow) != 0 &&" "return revenant_reference_kind(flow) == 1 &&"
 mutant "layout.itemSize;" "CGSizeMake(50, 50);"
 mutant "    if (reference == 0)
         return inset;" "    if (reference == 3)

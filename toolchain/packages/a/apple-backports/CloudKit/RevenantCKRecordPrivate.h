@@ -1,4 +1,4 @@
-#import "CharonCloudKit.h"
+#import "RevenantCloudKit.h"
 
 @interface CKRecord () {
     NSString *_recordType;
@@ -19,6 +19,6 @@
 @property (nonatomic, copy, nullable) CKRecordID *lastModifiedUserRecordID;
 @property (nonatomic, copy, nullable) NSDate *modificationDate;
 @end
-extern void CharonCKRecordSetParent(CKRecord *_Nonnull record, CKReference *_Nullable parent);
-extern void CharonCKRecordSetParentReferenceFromRecordID(CKRecord *_Nonnull record, CKRecordID *_Nullable parentRecordID);
-extern void CharonCKRecordSetParentReferenceFromRecord(CKRecord *_Nonnull record, CKRecord *_Nullable parentRecord);
+extern void RevenantCKRecordSetParent(CKRecord *_Nonnull record, CKReference *_Nullable parent);
+extern void RevenantCKRecordSetParentReferenceFromRecordID(CKRecord *_Nonnull record, CKRecordID *_Nullable parentRecordID);
+extern void RevenantCKRecordSetParentReferenceFromRecord(CKRecord *_Nonnull record, CKRecord *_Nullable parentRecord);

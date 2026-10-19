@@ -1,13 +1,13 @@
-#import "CharonVideoToolbox.h"
+#import "RevenantVideoToolbox.h"
 #include <CoreFoundation/CoreFoundation.h>
 #include <CoreMedia/CoreMedia.h>
 #include <VideoToolbox/VTErrors.h>
 #include <VideoToolbox/VTMultiPassStorage.h>
 #import <objc/runtime.h>
 
-static const OSStatus kCharonVTMultiPassStorageDirectoryMissing = -17913;
+static const OSStatus kRevenantVTMultiPassStorageDirectoryMissing = -17913;
 
-@interface CharonVTMultiPassStorage : NSObject {
+@interface RevenantVTMultiPassStorage : NSObject {
 @public
     CFStringRef _path;
     CFURLRef _url;
@@ -16,7 +16,7 @@ static const OSStatus kCharonVTMultiPassStorageDirectoryMissing = -17913;
     CMTimeRange _timeRange;
     Boolean _closed;
 }
-- (instancetype)charon_initWithPath:(NSString *)path
+- (instancetype)revenant_initWithPath:(NSString *)path
                              isURL:(CFURLRef)url
                       createdFile:(Boolean)createdTheFile
                         doNotDelete:(Boolean)doNotDelete
@@ -24,9 +24,9 @@ static const OSStatus kCharonVTMultiPassStorageDirectoryMissing = -17913;
     __attribute__((objc_method_family(init)));
 @end
 
-@implementation CharonVTMultiPassStorage
+@implementation RevenantVTMultiPassStorage
 
-- (instancetype)charon_initWithPath:(NSString *)path
+- (instancetype)revenant_initWithPath:(NSString *)path
                              isURL:(CFURLRef)url
                       createdFile:(Boolean)createdTheFile
                         doNotDelete:(Boolean)doNotDelete
@@ -54,19 +54,19 @@ static const OSStatus kCharonVTMultiPassStorageDirectoryMissing = -17913;
         CFRelease(_path);
 }
 
-static VTMultiPassStorageRef charon_from(CharonVTMultiPassStorage *storage)
+static VTMultiPassStorageRef revenant_from(RevenantVTMultiPassStorage *storage)
 {
     return (VTMultiPassStorageRef)CFBridgingRetain(storage);
 }
 
-static CharonVTMultiPassStorage *charon_to(VTMultiPassStorageRef storage)
+static RevenantVTMultiPassStorage *revenant_to(VTMultiPassStorageRef storage)
 {
-    return (CharonVTMultiPassStorage *)(__bridge id)storage;
+    return (RevenantVTMultiPassStorage *)(__bridge id)storage;
 }
 
 CFTypeID VTMultiPassStorageGetTypeID(void)
 {
-    return (CFTypeID)objc_getClass("CharonVTMultiPassStorage");
+    return (CFTypeID)objc_getClass("RevenantVTMultiPassStorage");
 }
 
 OSStatus VTMultiPassStorageCreate(
@@ -99,7 +99,7 @@ OSStatus VTMultiPassStorageCreate(
         }
     } else {
         NSString *unique = [NSTemporaryDirectory()
-            stringByAppendingPathComponent:[NSString stringWithFormat:@"CharonVTMultiPassStorage-%@",
+            stringByAppendingPathComponent:[NSString stringWithFormat:@"RevenantVTMultiPassStorage-%@",
                                                    [[NSUUID UUID] UUIDString]]];
         path = CFStringCreateWithCString(kCFAllocatorDefault, [unique UTF8String], kCFStringEncodingUTF8);
         if (!path)
@@ -121,7 +121,7 @@ OSStatus VTMultiPassStorageCreate(
     if (![parent length] || ![[NSFileManager defaultManager] fileExistsAtPath:parent]) {
         CFRelease(url);
         CFRelease(path);
-        return kCharonVTMultiPassStorageDirectoryMissing;
+        return kRevenantVTMultiPassStorageDirectoryMissing;
     }
     if (![[NSFileManager defaultManager] createFileAtPath:pathString
                                                 contents:[NSData data]
@@ -131,8 +131,8 @@ OSStatus VTMultiPassStorageCreate(
         return kVTAllocationFailedErr;
     }
 
-    CharonVTMultiPassStorage *storage =
-        [[CharonVTMultiPassStorage alloc] charon_initWithPath:pathString
+    RevenantVTMultiPassStorage *storage =
+        [[RevenantVTMultiPassStorage alloc] revenant_initWithPath:pathString
                                                         isURL:url
                                                  createdFile:true
                                                    doNotDelete:doNotDelete
@@ -141,13 +141,13 @@ OSStatus VTMultiPassStorageCreate(
     CFRelease(path);
     if (!storage)
         return kVTAllocationFailedErr;
-    *multiPassStorageOut = charon_from(storage);
+    *multiPassStorageOut = revenant_from(storage);
     return noErr;
 }
 
 OSStatus VTMultiPassStorageClose(VTMultiPassStorageRef multiPassStorage)
 {
-    CharonVTMultiPassStorage *storage = charon_to(multiPassStorage);
+    RevenantVTMultiPassStorage *storage = revenant_to(multiPassStorage);
     if (!storage)
         return kVTMultiPassStorageInvalidErr;
     if (storage->_closed)

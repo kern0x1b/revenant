@@ -42,7 +42,7 @@ int main(int argc, char **argv)
 {
     @autoreleasepool {
         if (argc > 1)
-            charon_log_to(@(argv[1]));
+            revenant_log_to(@(argv[1]));
         CHECK_EQUAL(image_of((void *)method_getImplementation(class_getClassMethod([NSManagedObjectContext class], @selector(mergeChangesFromRemoteContextSave:intoContexts:)))), @"libCoreDataBackports.dylib", "the method comes from the backports");
         NSString *path = [NSTemporaryDirectory() stringByAppendingPathComponent:[NSString stringWithFormat:@"coredata9merge-%d.sqlite", getpid()]];
         [[NSFileManager defaultManager] removeItemAtPath:path error:NULL];
@@ -106,7 +106,7 @@ int main(int argc, char **argv)
         CHECK_EQUAL(raised(^{ [NSManagedObjectContext mergeChangesFromRemoteContextSave:@{NSUpdatedObjectsKey: @[o0.objectID]} intoContexts:@[]]; }), @"ok", "no contexts is fine");
         CHECK_EQUAL(raised(^{ [NSManagedObjectContext mergeChangesFromRemoteContextSave:nil intoContexts:@[context]]; }), @"ok", "a nil dictionary is fine");
         [[NSNotificationCenter defaultCenter] removeObserver:observer];
-        printf("checks=%d failures=%d\n", charon_checks, charon_failures);
+        printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
     }
-    return charon_failures ? 1 : 0;
+    return revenant_failures ? 1 : 0;
 }

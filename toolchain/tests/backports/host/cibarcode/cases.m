@@ -34,7 +34,7 @@ static void record(NSString *name, NSString *answer)
 static const char *apiName(id object)
 {
     const char *name = class_getName([object class]);
-    return (name && !strncmp(name, "Charon", 6)) ? name + 6 : name;
+    return (name && !strncmp(name, "Revenant", 8)) ? name + 8 : name;
 }
 
 static NSString *show(id object)
@@ -322,7 +322,7 @@ int main(int argc, const char **argv)
         setvbuf(stdout, NULL, _IOLBF, 0);
         NSString *group = argc > 1 ? @(argv[1]) : @"";
 
-#ifdef CHARON_PORT
+#ifdef REVENANT_PORT
         {
             IMP imp = [CIPDF417CodeDescriptor instanceMethodForSelector:@selector(rowCount)];
             Dl_info info;

@@ -70,7 +70,7 @@ int main(int argc, char **argv)
         [@{@"entries": @[@"not", @"a", @"dictionary"]} writeToFile:[other stringByAppendingPathComponent:@"array.plist"] atomically:YES];
         [@"not a property list" writeToFile:[other stringByAppendingPathComponent:@"text.plist"] atomically:YES encoding:NSUTF8StringEncoding error:NULL];
 
-        Class datastore = NSClassFromString(@"CharonSearchDatastore");
+        Class datastore = NSClassFromString(@"RevenantSearchDatastore");
         check(datastore != Nil, @"the bundle registered its datastore class");
         Pipe *pipe = [Pipe new];
         pipe.found = [NSMutableArray array];

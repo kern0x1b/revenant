@@ -1,21 +1,21 @@
-#import "CharonLists.h"
+#import "RevenantLists.h"
 #import <objc/runtime.h>
 
 #pragma clang diagnostic ignored "-Wobjc-designated-initializers"
 
-static const char CharonGuideConstraintsKey;
+static const char RevenantGuideConstraintsKey;
 
-@implementation UILayoutGuide (CharonLists)
+@implementation UILayoutGuide (RevenantLists)
 
-- (void)charon_pinFrame:(CGRect)frame inView:(UIView *)view
+- (void)revenant_pinFrame:(CGRect)frame inView:(UIView *)view
 {
-    NSArray *constraints = objc_getAssociatedObject(self, &CharonGuideConstraintsKey);
+    NSArray *constraints = objc_getAssociatedObject(self, &RevenantGuideConstraintsKey);
     if (!constraints) {
         constraints = @[[self.leadingAnchor constraintEqualToAnchor:view.leadingAnchor constant:frame.origin.x],
                         [self.topAnchor constraintEqualToAnchor:view.topAnchor constant:frame.origin.y],
                         [self.widthAnchor constraintEqualToConstant:frame.size.width],
                         [self.heightAnchor constraintEqualToConstant:frame.size.height]];
-        objc_setAssociatedObject(self, &CharonGuideConstraintsKey, constraints, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+        objc_setAssociatedObject(self, &RevenantGuideConstraintsKey, constraints, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
         [NSLayoutConstraint activateConstraints:constraints];
         return;
     }
@@ -32,7 +32,7 @@ static const char CharonGuideConstraintsKey;
 
 @end
 
-static NSString *charon_transformed(NSString *text, UIListContentTextTransform transform)
+static NSString *revenant_transformed(NSString *text, UIListContentTextTransform transform)
 {
     switch (transform) {
     case UIListContentTextTransformUppercase:
@@ -46,7 +46,7 @@ static NSString *charon_transformed(NSString *text, UIListContentTextTransform t
     }
 }
 
-static NSTextAlignment charon_alignment(UIListContentTextAlignment alignment)
+static NSTextAlignment revenant_alignment(UIListContentTextAlignment alignment)
 {
     return alignment == UIListContentTextAlignmentCenter ? NSTextAlignmentCenter : alignment == UIListContentTextAlignmentJustified ? NSTextAlignmentJustified : NSTextAlignmentLeft;
 }
@@ -106,18 +106,18 @@ static NSTextAlignment charon_alignment(UIListContentTextAlignment alignment)
     return [_configuration copy];
 }
 
-- (UILabel *)charon_makeLabel
+- (UILabel *)revenant_makeLabel
 {
     UILabel *label = [[UILabel alloc] initWithFrame:CGRectZero];
     label.backgroundColor = [UIColor clearColor];
     return label;
 }
 
-- (void)charon_configureLabel:(UILabel *)label properties:(UIListContentTextProperties *)properties text:(NSString *)text attributed:(NSAttributedString *)attributed
+- (void)revenant_configureLabel:(UILabel *)label properties:(UIListContentTextProperties *)properties text:(NSString *)text attributed:(NSAttributedString *)attributed
 {
     label.numberOfLines = properties.numberOfLines;
     label.lineBreakMode = properties.lineBreakMode;
-    label.textAlignment = charon_alignment(properties.alignment);
+    label.textAlignment = revenant_alignment(properties.alignment);
     label.adjustsFontSizeToFitWidth = properties.adjustsFontSizeToFitWidth;
     label.minimumScaleFactor = properties.minimumScaleFactor;
     if ([label respondsToSelector:@selector(setAllowsDefaultTighteningForTruncation:)])
@@ -135,7 +135,7 @@ static NSTextAlignment charon_alignment(UIListContentTextAlignment alignment)
         }];
         label.attributedText = content;
     } else {
-        label.text = charon_transformed(text, properties.transform);
+        label.text = revenant_transformed(text, properties.transform);
     }
 }
 
@@ -147,20 +147,20 @@ static NSTextAlignment charon_alignment(UIListContentTextAlignment alignment)
     BOOL hasSecondary = config.secondaryText != nil || config.secondaryAttributedText != nil;
     if (hasText) {
         if (!_textLabel) {
-            _textLabel = [self charon_makeLabel];
+            _textLabel = [self revenant_makeLabel];
             [self addSubview:_textLabel];
         }
-        [self charon_configureLabel:_textLabel properties:config.textProperties text:config.text attributed:config.attributedText];
+        [self revenant_configureLabel:_textLabel properties:config.textProperties text:config.text attributed:config.attributedText];
     } else {
         [_textLabel removeFromSuperview];
         _textLabel = nil;
     }
     if (hasSecondary) {
         if (!_secondaryLabel) {
-            _secondaryLabel = [self charon_makeLabel];
+            _secondaryLabel = [self revenant_makeLabel];
             [self addSubview:_secondaryLabel];
         }
-        [self charon_configureLabel:_secondaryLabel properties:config.secondaryTextProperties text:config.secondaryText attributed:config.secondaryAttributedText];
+        [self revenant_configureLabel:_secondaryLabel properties:config.secondaryTextProperties text:config.secondaryText attributed:config.secondaryAttributedText];
     } else {
         [_secondaryLabel removeFromSuperview];
         _secondaryLabel = nil;
@@ -184,7 +184,7 @@ static NSTextAlignment charon_alignment(UIListContentTextAlignment alignment)
         [_imageView removeFromSuperview];
         _imageView = nil;
     }
-    CGFloat alpha = [config charon_alpha];
+    CGFloat alpha = [config revenant_alpha];
     _textLabel.alpha = alpha;
     _secondaryLabel.alpha = alpha;
     _imageView.alpha = alpha;
@@ -198,7 +198,7 @@ static NSTextAlignment charon_alignment(UIListContentTextAlignment alignment)
         [self setConfiguration:_configuration];
 }
 
-- (CGSize)charon_imageSize
+- (CGSize)revenant_imageSize
 {
     UIListContentImageProperties *properties = _configuration.imageProperties;
     CGSize size = _configuration.image.size;
@@ -214,7 +214,7 @@ static NSTextAlignment charon_alignment(UIListContentTextAlignment alignment)
     return _configuration.image ? size : CGSizeZero;
 }
 
-- (CGFloat)charon_lineHeightOfLabel:(UILabel *)label lines:(NSInteger)lines
+- (CGFloat)revenant_lineHeightOfLabel:(UILabel *)label lines:(NSInteger)lines
 {
     NSString *saved = label.text;
     NSAttributedString *savedAttributed = label.attributedText;
@@ -230,7 +230,7 @@ static NSTextAlignment charon_alignment(UIListContentTextAlignment alignment)
     return height;
 }
 
-- (CGSize)charon_fit:(UILabel *)label width:(CGFloat)width
+- (CGSize)revenant_fit:(UILabel *)label width:(CGFloat)width
 {
     if (!label)
         return CGSizeZero;
@@ -242,44 +242,44 @@ static NSTextAlignment charon_alignment(UIListContentTextAlignment alignment)
     label.numberOfLines = limit;
     label.adjustsFontSizeToFitWidth = shrinks;
     if (limit > 1) {
-        CGFloat single = [self charon_lineHeightOfLabel:label lines:1], pitch = [self charon_lineHeightOfLabel:label lines:2] - single;
+        CGFloat single = [self revenant_lineHeightOfLabel:label lines:1], pitch = [self revenant_lineHeightOfLabel:label lines:2] - single;
         NSInteger lines = pitch > 0 ? (NSInteger)llround((size.height - single) / pitch) + 1 : 1;
         if (lines > limit)
             size.height = single + pitch * (limit - 1);
     }
-    CGFloat scale = charon_screen_scale();
-    CGFloat fitted = MIN(charon_pixel_ceil(size.width, scale), MAX(width, 0));
+    CGFloat scale = revenant_screen_scale();
+    CGFloat fitted = MIN(revenant_pixel_ceil(size.width, scale), MAX(width, 0));
     if (_textLabel && label.textAlignment != NSTextAlignmentLeft)
         fitted = MAX(width, 0);
-    return CGSizeMake(fitted, charon_pixel_ceil(size.height, scale));
+    return CGSizeMake(fitted, revenant_pixel_ceil(size.height, scale));
 }
 
-- (CGFloat)charon_textLeading
+- (CGFloat)revenant_textLeading
 {
-    NSDirectionalEdgeInsets margins = [self charon_effectiveMargins];
-    CGSize imageSize = [self charon_imageSize];
+    NSDirectionalEdgeInsets margins = [self revenant_effectiveMargins];
+    CGSize imageSize = [self revenant_imageSize];
     CGSize reserved = _configuration.imageProperties.reservedLayoutSize;
     return margins.leading + (_configuration.image ? (reserved.width > 0 ? reserved.width : imageSize.width) + _configuration.imageToTextPadding : 0);
 }
 
-- (CGFloat)charon_minimumHeight
+- (CGFloat)revenant_minimumHeight
 {
-    switch ([_configuration charon_style]) {
-    case CharonListStyleCell:
-    case CharonListStyleSubtitle:
-    case CharonListStyleValue:
+    switch ([_configuration revenant_style]) {
+    case RevenantListStyleCell:
+    case RevenantListStyleSubtitle:
+    case RevenantListStyleValue:
         return 40.04;
-    case CharonListStyleSidebarCell:
-    case CharonListStyleSidebarSubtitle:
-    case CharonListStyleAccompaniedSidebar:
-    case CharonListStyleAccompaniedSidebarSubtitle:
-    case CharonListStyleSidebarHeader:
+    case RevenantListStyleSidebarCell:
+    case RevenantListStyleSidebarSubtitle:
+    case RevenantListStyleAccompaniedSidebar:
+    case RevenantListStyleAccompaniedSidebarSubtitle:
+    case RevenantListStyleSidebarHeader:
         return 33.88;
     }
     return 0;
 }
 
-- (NSDirectionalEdgeInsets)charon_effectiveMargins
+- (NSDirectionalEdgeInsets)revenant_effectiveMargins
 {
     NSDirectionalEdgeInsets margins = _configuration.directionalLayoutMargins;
     UIAxis axes = _configuration.axesPreservingSuperviewLayoutMargins;
@@ -299,15 +299,15 @@ static NSTextAlignment charon_alignment(UIListContentTextAlignment alignment)
     return margins;
 }
 
-- (CGFloat)charon_solveInSize:(CGSize)bounds apply:(BOOL)apply totalHeight:(CGFloat *)totalHeight
+- (CGFloat)revenant_solveInSize:(CGSize)bounds apply:(BOOL)apply totalHeight:(CGFloat *)totalHeight
 {
     UIListContentConfiguration *config = _configuration;
     UIListContentImageProperties *properties = config.imageProperties;
-    CGFloat scale = charon_screen_scale();
-    NSDirectionalEdgeInsets margins = [self charon_effectiveMargins];
+    CGFloat scale = revenant_screen_scale();
+    NSDirectionalEdgeInsets margins = [self revenant_effectiveMargins];
     CGFloat region = bounds.height - margins.top - margins.bottom;
     CGSize reserved = properties.reservedLayoutSize;
-    CGSize imageSize = [self charon_imageSize];
+    CGSize imageSize = [self revenant_imageSize];
     BOOL hasImage = config.image != nil;
     if (hasImage && imageSize.height > 0 && bounds.height < CGFLOAT_MAX / 2) {
         CGSize limit = properties.maximumSize;
@@ -337,11 +337,11 @@ static NSTextAlignment charon_alignment(UIListContentTextAlignment alignment)
         _textLabel.textAlignment = NSTextAlignmentLeft;
         _secondaryLabel.textAlignment = NSTextAlignmentLeft;
     } else if (config.prefersSideBySideTextAndSecondaryText && _secondaryLabel && _textLabel &&
-               [_textLabel sizeThatFits:CGSizeMake(available, CGFLOAT_MAX)].height < [self charon_lineHeightOfLabel:_textLabel lines:1] * 1.5) {
+               [_textLabel sizeThatFits:CGSizeMake(available, CGFLOAT_MAX)].height < [self revenant_lineHeightOfLabel:_textLabel lines:1] * 1.5) {
         _textLabel.textAlignment = NSTextAlignmentLeft;
     }
-    CGSize textSize = [self charon_fit:_textLabel width:available];
-    CGSize secondarySize = [self charon_fit:_secondaryLabel width:_textLabel ? available : available - config.textToSecondaryTextHorizontalPadding];
+    CGSize textSize = [self revenant_fit:_textLabel width:available];
+    CGSize secondarySize = [self revenant_fit:_secondaryLabel width:_textLabel ? available : available - config.textToSecondaryTextHorizontalPadding];
     _textLabel.textAlignment = textAlignment;
     _secondaryLabel.textAlignment = secondaryAlignment;
     CGFloat naturalBlock = 0;
@@ -350,7 +350,7 @@ static NSTextAlignment charon_alignment(UIListContentTextAlignment alignment)
     else
         naturalBlock = MAX(textSize.height, secondarySize.height);
     if (totalHeight)
-        *totalHeight = MAX(margins.top + MAX(naturalBlock, slot.height) + margins.bottom, [self charon_minimumHeight]);
+        *totalHeight = MAX(margins.top + MAX(naturalBlock, slot.height) + margins.bottom, [self revenant_minimumHeight]);
     CGFloat fittingWidth = margins.leading + (hasImage ? slot.width + config.imageToTextPadding : 0) + margins.trailing;
     if (sideBySide)
         fittingWidth += textSize.width + config.textToSecondaryTextHorizontalPadding + secondarySize.width;
@@ -369,8 +369,8 @@ static NSTextAlignment charon_alignment(UIListContentTextAlignment alignment)
         secondarySize.height = MIN(secondarySize.height, limit);
         blockHeight = MAX(textSize.height, secondarySize.height);
         CGFloat center = margins.top + region / 2;
-        textY = charon_pixel_round(center - textSize.height / 2, scale) - charon_pixel_round(margins.top + (region - blockHeight) / 2, scale);
-        secondaryY = charon_pixel_round(center - secondarySize.height / 2, scale) - charon_pixel_round(margins.top + (region - blockHeight) / 2, scale);
+        textY = revenant_pixel_round(center - textSize.height / 2, scale) - revenant_pixel_round(margins.top + (region - blockHeight) / 2, scale);
+        secondaryY = revenant_pixel_round(center - secondarySize.height / 2, scale) - revenant_pixel_round(margins.top + (region - blockHeight) / 2, scale);
     } else if (_textLabel && _secondaryLabel) {
         textSize.height = MIN(textSize.height, limit);
         secondarySize.height = MAX(0, MIN(secondarySize.height, limit - textSize.height - config.textToSecondaryTextVerticalPadding));
@@ -383,8 +383,8 @@ static NSTextAlignment charon_alignment(UIListContentTextAlignment alignment)
         secondarySize.height = MIN(secondarySize.height, limit);
         blockHeight = secondarySize.height;
     }
-    CGFloat blockY = charon_pixel_round(margins.top + (region - blockHeight) / 2, scale);
-    CGFloat imageY = charon_pixel_round(margins.top + (region - imageSize.height) / 2, scale);
+    CGFloat blockY = revenant_pixel_round(margins.top + (region - blockHeight) / 2, scale);
+    CGFloat imageY = revenant_pixel_round(margins.top + (region - imageSize.height) / 2, scale);
     _textFrame = _textLabel ? CGRectMake(textX, blockY + textY, textSize.width, textSize.height) : CGRectZero;
     _secondaryFrame = _secondaryLabel ? CGRectMake(secondaryX, blockY + secondaryY, secondarySize.width, secondarySize.height) : CGRectZero;
     _imageFrame = hasImage ? CGRectMake(margins.leading + (slot.width - imageSize.width) / 2, imageY, imageSize.width, imageSize.height) : CGRectZero;
@@ -399,26 +399,26 @@ static NSTextAlignment charon_alignment(UIListContentTextAlignment alignment)
 - (void)layoutSubviews
 {
     [super layoutSubviews];
-    [self charon_solveInSize:self.bounds.size apply:YES totalHeight:NULL];
-    [_textGuide charon_pinFrame:_textFrame inView:self];
-    [_secondaryGuide charon_pinFrame:_secondaryFrame inView:self];
-    [_imageGuide charon_pinFrame:_imageFrame inView:self];
+    [self revenant_solveInSize:self.bounds.size apply:YES totalHeight:NULL];
+    [_textGuide revenant_pinFrame:_textFrame inView:self];
+    [_secondaryGuide revenant_pinFrame:_secondaryFrame inView:self];
+    [_imageGuide revenant_pinFrame:_imageFrame inView:self];
 }
 
 - (CGSize)sizeThatFits:(CGSize)size
 {
     CGSize bounds = CGSizeMake(size.width, size.height > 0 ? size.height : CGFLOAT_MAX);
     CGFloat height = 0;
-    CGFloat width = [self charon_solveInSize:bounds apply:NO totalHeight:&height];
+    CGFloat width = [self revenant_solveInSize:bounds apply:NO totalHeight:&height];
     return CGSizeMake(MIN(width, size.width), MIN(height, bounds.height));
 }
 
-- (CGSize)charon_sizeFittingWidth:(CGFloat)width
+- (CGSize)revenant_sizeFittingWidth:(CGFloat)width
 {
     return [self sizeThatFits:CGSizeMake(width, CGFLOAT_MAX)];
 }
 
-- (UILayoutGuide *)charon_guideNamed:(NSString *)name
+- (UILayoutGuide *)revenant_guideNamed:(NSString *)name
 {
     UILayoutGuide *guide = [[UILayoutGuide alloc] init];
     guide.identifier = name;
@@ -429,7 +429,7 @@ static NSTextAlignment charon_alignment(UIListContentTextAlignment alignment)
 - (UILayoutGuide *)textLayoutGuide
 {
     if (!_textGuide) {
-        _textGuide = [self charon_guideNamed:@"UIListContentViewTextLayoutGuide"];
+        _textGuide = [self revenant_guideNamed:@"UIListContentViewTextLayoutGuide"];
         [self setNeedsLayout];
         [self layoutIfNeeded];
     }
@@ -439,7 +439,7 @@ static NSTextAlignment charon_alignment(UIListContentTextAlignment alignment)
 - (UILayoutGuide *)secondaryTextLayoutGuide
 {
     if (!_secondaryGuide) {
-        _secondaryGuide = [self charon_guideNamed:@"UIListContentViewSecondaryTextLayoutGuide"];
+        _secondaryGuide = [self revenant_guideNamed:@"UIListContentViewSecondaryTextLayoutGuide"];
         [self setNeedsLayout];
         [self layoutIfNeeded];
     }
@@ -449,7 +449,7 @@ static NSTextAlignment charon_alignment(UIListContentTextAlignment alignment)
 - (UILayoutGuide *)imageLayoutGuide
 {
     if (!_imageGuide) {
-        _imageGuide = [self charon_guideNamed:@"UIListContentViewImageLayoutGuide"];
+        _imageGuide = [self revenant_guideNamed:@"UIListContentViewImageLayoutGuide"];
         [self setNeedsLayout];
         [self layoutIfNeeded];
     }

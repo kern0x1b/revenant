@@ -1,12 +1,12 @@
 #import <MetalPerformanceShaders/MetalPerformanceShaders.h>
-#import "CharonMPSStatisticsReference.h"
+#import "RevenantMPSStatisticsReference.h"
 #include <stdio.h>
 
 NSUInteger gCompared = 0;
 NSUInteger gMismatches = 0;
 
-static void CharonStatisticsCase(const char *name, NSUInteger rows, NSUInteger cols, NSUInteger channels,
-                                 const float *values, Class kernelClass, CharonMPSStatisticsOp op,
+static void RevenantStatisticsCase(const char *name, NSUInteger rows, NSUInteger cols, NSUInteger channels,
+                                 const float *values, Class kernelClass, RevenantMPSStatisticsOp op,
                                  MTLRegion *clip, NSUInteger dstCols)
 {
     id<MTLDevice> device = MTLCreateSystemDefaultDevice();
@@ -36,7 +36,7 @@ static void CharonStatisticsCase(const char *name, NSUInteger rows, NSUInteger c
     [destination.texture getBytes:readBack bytesPerRow:dstCols * sizeof(float)
                       fromRegion:MTLRegionMake2D(0, 0, dstCols, 1) mipmapLevel:0];
 
-    CharonMPSStatisticsReference(name, values, rows, cols, channels, op, readBack);
+    RevenantMPSStatisticsReference(name, values, rows, cols, channels, op, readBack);
 }
 
 int main(void)
@@ -47,27 +47,27 @@ int main(void)
 
     for (int i = 0; i < 3; i++) {
         const float *values = i == 0 ? nine : (i == 1 ? offset : negative);
-        CharonStatisticsCase("minmax", 3, 3, 1, values, [MPSImageStatisticsMinAndMax class],
-                             CharonMPSStatisticsMinMax, NULL, 2);
-        CharonStatisticsCase("meanvar", 3, 3, 1, values, [MPSImageStatisticsMeanAndVariance class],
-                             CharonMPSStatisticsMeanVar, NULL, 2);
-        CharonStatisticsCase("mean", 3, 3, 1, values, [MPSImageStatisticsMean class],
-                             CharonMPSStatisticsMean, NULL, 2);
+        RevenantStatisticsCase("minmax", 3, 3, 1, values, [MPSImageStatisticsMinAndMax class],
+                             RevenantMPSStatisticsMinMax, NULL, 2);
+        RevenantStatisticsCase("meanvar", 3, 3, 1, values, [MPSImageStatisticsMeanAndVariance class],
+                             RevenantMPSStatisticsMeanVar, NULL, 2);
+        RevenantStatisticsCase("mean", 3, 3, 1, values, [MPSImageStatisticsMean class],
+                             RevenantMPSStatisticsMean, NULL, 2);
     }
 
     const float twoChannel[12] = {1, 10, 2, 20, 3, 30, 4, 40, 5, 50, 6, 60};
-    CharonStatisticsCase("minmax-c2", 3, 2, 2, twoChannel, [MPSImageStatisticsMinAndMax class],
-                         CharonMPSStatisticsMinMax, NULL, 2);
-    CharonStatisticsCase("meanvar-c2", 3, 2, 2, twoChannel, [MPSImageStatisticsMeanAndVariance class],
-                         CharonMPSStatisticsMeanVar, NULL, 2);
-    CharonStatisticsCase("mean-c2", 3, 2, 2, twoChannel, [MPSImageStatisticsMean class],
-                         CharonMPSStatisticsMean, NULL, 2);
+    RevenantStatisticsCase("minmax-c2", 3, 2, 2, twoChannel, [MPSImageStatisticsMinAndMax class],
+                         RevenantMPSStatisticsMinMax, NULL, 2);
+    RevenantStatisticsCase("meanvar-c2", 3, 2, 2, twoChannel, [MPSImageStatisticsMeanAndVariance class],
+                         RevenantMPSStatisticsMeanVar, NULL, 2);
+    RevenantStatisticsCase("mean-c2", 3, 2, 2, twoChannel, [MPSImageStatisticsMean class],
+                         RevenantMPSStatisticsMean, NULL, 2);
 
     const float one[1] = {42};
-    CharonStatisticsCase("minmax-1x1", 1, 1, 1, one, [MPSImageStatisticsMinAndMax class],
-                         CharonMPSStatisticsMinMax, NULL, 2);
-    CharonStatisticsCase("mean-1x1", 1, 1, 1, one, [MPSImageStatisticsMean class],
-                         CharonMPSStatisticsMean, NULL, 2);
+    RevenantStatisticsCase("minmax-1x1", 1, 1, 1, one, [MPSImageStatisticsMinAndMax class],
+                         RevenantMPSStatisticsMinMax, NULL, 2);
+    RevenantStatisticsCase("mean-1x1", 1, 1, 1, one, [MPSImageStatisticsMean class],
+                         RevenantMPSStatisticsMean, NULL, 2);
 
     {
         id<MTLDevice> device = MTLCreateSystemDefaultDevice();

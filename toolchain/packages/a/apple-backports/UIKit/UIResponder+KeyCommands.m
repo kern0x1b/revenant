@@ -1,6 +1,6 @@
 #import <UIKit/UIKit.h>
 
-@implementation UIResponder (CharonKeyCommands)
+@implementation UIResponder (RevenantKeyCommands)
 
 - (NSArray *)keyCommands
 {

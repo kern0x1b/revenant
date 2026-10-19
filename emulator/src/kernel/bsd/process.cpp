@@ -47,7 +47,7 @@
 #include "../mach/support.hpp"
 #include "support.hpp"
 
-namespace shade {
+namespace emulator {
 
 void CompatibilityKernel::release_process_mach_rights()
 {

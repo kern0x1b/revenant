@@ -6,12 +6,12 @@
 #pragma clang diagnostic ignored "-Warc-performSelector-leaks"
 #pragma clang diagnostic ignored "-Wnonnull"
 
-void charon_windowed_run(UIWindow *window);
+void revenant_windowed_run(UIWindow *window);
 
 static NSString *norm(id object)
 {
     NSString *text = [NSString stringWithFormat:@"%@", object];
-    text = [text stringByReplacingOccurrencesOfString:@"CharonHost" withString:@""];
+    text = [text stringByReplacingOccurrencesOfString:@"RevenantHost" withString:@""];
     text = [text stringByReplacingOccurrencesOfString:@"_UISearchToken" withString:@"UISearchToken"];
     NSRegularExpression *pointer = [NSRegularExpression regularExpressionWithPattern:@"0x[0-9a-f]+" options:0 error:nil];
     return [pointer stringByReplacingMatchesInString:text options:0 range:NSMakeRange(0, text.length) withTemplate:@"PTR"];
@@ -43,7 +43,7 @@ static void agree(NSString *name, NSArray *ours, NSArray *system)
         if (![a isEqual:b])
             [detail appendFormat:@"\n    port   %@\n    system %@", a, b];
     }
-    charon_check(detail.length == 0, name.UTF8String, detail);
+    revenant_check(detail.length == 0, name.UTF8String, detail);
 }
 
 static NSString *line(NSString *label, id value)
@@ -166,15 +166,15 @@ static NSArray *field_lines(Class field_class, UIWindow *window, Class token, BO
     return lines;
 }
 
-void charon_windowed_run(UIWindow *window)
+void revenant_windowed_run(UIWindow *window)
 {
-    Class ourToken = NSClassFromString(@"CharonHostUISearchToken"), ourField = NSClassFromString(@"CharonHostUISearchTextField");
-    charon_check(ourToken && ourField, "the port's classes are linked under their host names", @"one is missing");
-    charon_check(class_getSuperclass(ourToken) == [NSObject class] && class_getSuperclass(ourField) == [UITextField class], "the classes descend as the system's do", @"a superclass differs");
-    agree(@"search token", token_lines(ourToken, ^NSString *(id token) { return ((id (*)(id, SEL))objc_msgSend)(token, NSSelectorFromString(@"charon_text")); }),
+    Class ourToken = NSClassFromString(@"RevenantHostUISearchToken"), ourField = NSClassFromString(@"RevenantHostUISearchTextField");
+    revenant_check(ourToken && ourField, "the port's classes are linked under their host names", @"one is missing");
+    revenant_check(class_getSuperclass(ourToken) == [NSObject class] && class_getSuperclass(ourField) == [UITextField class], "the classes descend as the system's do", @"a superclass differs");
+    agree(@"search token", token_lines(ourToken, ^NSString *(id token) { return ((id (*)(id, SEL))objc_msgSend)(token, NSSelectorFromString(@"revenant_text")); }),
           token_lines([UISearchToken class], ^NSString *(id token) { return [token valueForKey:@"text"]; }));
     agree(@"search text field", field_lines(ourField, window, ourToken, YES), field_lines([UISearchTextField class], window, [UISearchToken class], NO));
-    charon_check(![ourField instancesRespondToSelector:@selector(searchSuggestions)] && [UISearchTextField instancesRespondToSelector:@selector(searchSuggestions)],
+    revenant_check(![ourField instancesRespondToSelector:@selector(searchSuggestions)] && [UISearchTextField instancesRespondToSelector:@selector(searchSuggestions)],
                  "the search text field leaves the suggestions of iOS 16 to the release", @"it answers them");
 
     UISearchTextField *field = [[ourField alloc] initWithFrame:CGRectMake(0, 0, 200, 30)];
@@ -186,10 +186,10 @@ void charon_windowed_run(UIWindow *window)
     for (UIView *sub in field.subviews)
         if ([sub isKindOfClass:[UILabel class]])
             [chips addObject:sub];
-    charon_check(chips.count == 2 && [[chips[0] text] isEqual:@"Alpha"] && [[chips[1] text] isEqual:@"Beta"] && CGRectGetMinX([chips[1] frame]) > CGRectGetMaxX([chips[0] frame]),
+    revenant_check(chips.count == 2 && [[chips[0] text] isEqual:@"Alpha"] && [[chips[1] text] isEqual:@"Beta"] && CGRectGetMinX([chips[1] frame]) > CGRectGetMaxX([chips[0] frame]),
                  "each token is drawn as a chip, side by side", ([NSString stringWithFormat:@"%@", chips]));
     CGRect text_rect = [field textRectForBounds:field.bounds], edit_rect = [field editingRectForBounds:field.bounds];
-    charon_check(CGRectGetMinX(text_rect) >= CGRectGetMaxX([chips[1] frame]) && CGRectGetMinX(edit_rect) >= CGRectGetMaxX([chips[1] frame]) && CGRectGetWidth(text_rect) >= 30,
+    revenant_check(CGRectGetMinX(text_rect) >= CGRectGetMaxX([chips[1] frame]) && CGRectGetMinX(edit_rect) >= CGRectGetMaxX([chips[1] frame]) && CGRectGetWidth(text_rect) >= 30,
                  "the text starts after the chips", ([NSString stringWithFormat:@"%@ %@", NSStringFromCGRect(text_rect), NSStringFromCGRect([chips[1] frame])]));
     field.tokens = @[[ourToken tokenWithIcon:nil text:@"Alpha"]];
     [field layoutIfNeeded];
@@ -197,10 +197,10 @@ void charon_windowed_run(UIWindow *window)
     for (UIView *sub in field.subviews)
         if ([sub isKindOfClass:[UILabel class]])
             left++;
-    charon_check(left == 1, "a token taken away takes its chip away", ([NSString stringWithFormat:@"%lu chips", (unsigned long)left]));
+    revenant_check(left == 1, "a token taken away takes its chip away", ([NSString stringWithFormat:@"%lu chips", (unsigned long)left]));
     field.tokens = @[];
     [field layoutIfNeeded];
-    charon_check(CGRectGetMinX([field textRectForBounds:field.bounds]) < CGRectGetMinX(text_rect), "and the text moves back", @"it does not");
+    revenant_check(CGRectGetMinX([field textRectForBounds:field.bounds]) < CGRectGetMinX(text_rect), "and the text moves back", @"it does not");
     field.tokens = @[[ourToken tokenWithIcon:nil text:@"One"], [ourToken tokenWithIcon:nil text:@"Two"]];
     field.text = @"ab";
     UITextRange *at_end = [field textRangeFromPosition:field.endOfDocument toPosition:field.endOfDocument];
@@ -208,17 +208,17 @@ void charon_windowed_run(UIWindow *window)
     field.selectedTextRange = at_end;
     if (field.selectedTextRange) {
         [field deleteBackward];
-        charon_check(field.tokens.count == 2 && [field.text isEqual:@"a"], "a backspace after text deletes the text and no token", ([NSString stringWithFormat:@"%lu %@", (unsigned long)field.tokens.count, field.text]));
+        revenant_check(field.tokens.count == 2 && [field.text isEqual:@"a"], "a backspace after text deletes the text and no token", ([NSString stringWithFormat:@"%lu %@", (unsigned long)field.tokens.count, field.text]));
         field.text = @"";
         field.selectedTextRange = [field textRangeFromPosition:field.beginningOfDocument toPosition:field.beginningOfDocument];
         field.allowsDeletingTokens = NO;
         [field deleteBackward];
-        charon_check(field.tokens.count == 2, "a backspace at the start does not delete a token when the field does not allow it", ([NSString stringWithFormat:@"%lu", (unsigned long)field.tokens.count]));
+        revenant_check(field.tokens.count == 2, "a backspace at the start does not delete a token when the field does not allow it", ([NSString stringWithFormat:@"%lu", (unsigned long)field.tokens.count]));
         field.allowsDeletingTokens = YES;
         [field deleteBackward];
-        charon_check(field.tokens.count == 1 && [[field.tokens[0] valueForKey:@"charon_text"] isEqual:@"One"], "a backspace at the start of an empty field deletes the last token", ([NSString stringWithFormat:@"%lu", (unsigned long)field.tokens.count]));
+        revenant_check(field.tokens.count == 1 && [[field.tokens[0] valueForKey:@"revenant_text"] isEqual:@"One"], "a backspace at the start of an empty field deletes the last token", ([NSString stringWithFormat:@"%lu", (unsigned long)field.tokens.count]));
     } else {
-        charon_check(NO, "the field has a selection while editing", @"it has none");
+        revenant_check(NO, "the field has a selection while editing", @"it has none");
     }
     [field resignFirstResponder];
     [field removeFromSuperview];

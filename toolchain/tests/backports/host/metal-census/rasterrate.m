@@ -1,23 +1,23 @@
 #import <Foundation/Foundation.h>
 #import <Metal/Metal.h>
 
-@interface charonHost_MTLRasterizationRateSampleArray : NSObject
+@interface revenantHost_MTLRasterizationRateSampleArray : NSObject
 - (NSNumber *)objectAtIndexedSubscript:(NSUInteger)index;
 - (void)setObject:(NSNumber *)value atIndexedSubscript:(NSUInteger)index;
 @end
-@interface charonHost_MTLRasterizationRateLayerDescriptor : NSObject
+@interface revenantHost_MTLRasterizationRateLayerDescriptor : NSObject
 - (instancetype)initWithSampleCount:(MTLSize)sampleCount;
 @property (nonatomic) MTLSize sampleCount;
 @property (nonatomic) MTLSize maxSampleCount;
 @property (nonatomic) MTLRasterizationRateSampleArray *horizontal;
 @property (nonatomic) MTLRasterizationRateSampleArray *vertical;
 @end
-@interface charonHost_MTLRasterizationRateLayerArray : NSObject
+@interface revenantHost_MTLRasterizationRateLayerArray : NSObject
 - (MTLRasterizationRateLayerDescriptor *)objectAtIndexedSubscript:(NSUInteger)index;
 - (void)setObject:(MTLRasterizationRateLayerDescriptor *)layer atIndexedSubscript:(NSUInteger)index;
 - (NSUInteger)count;
 @end
-@interface charonHost_MTLRasterizationRateMapDescriptor : NSObject
+@interface revenantHost_MTLRasterizationRateMapDescriptor : NSObject
 @property (nonatomic, readonly) MTLRasterizationRateLayerArray *layers;
 @property (nonatomic) MTLSize screenSize;
 @property (nonatomic, copy) NSString *label;
@@ -50,8 +50,8 @@ int main(void)
     @autoreleasepool {
         {
             MTLRasterizationRateMapDescriptor *h = [[MTLRasterizationRateMapDescriptor alloc] init];
-            charonHost_MTLRasterizationRateMapDescriptor *p =
-                [[charonHost_MTLRasterizationRateMapDescriptor alloc] init];
+            revenantHost_MTLRasterizationRateMapDescriptor *p =
+                [[revenantHost_MTLRasterizationRateMapDescriptor alloc] init];
             same_size([h screenSize], [p screenSize], @"MTLRasterizationRateMapDescriptor.screenSize fresh");
             check([h layerAtIndex:0] == nil && [p layerAtIndex:0] == nil,
                   @"a fresh map: layerAtIndex:0 is nil on both sides");
@@ -66,11 +66,11 @@ int main(void)
         {
             MTLRasterizationRateLayerDescriptor *hl =
                 [[MTLRasterizationRateLayerDescriptor alloc] initWithSampleCount:MTLSizeMake(4, 4, 1)];
-            charonHost_MTLRasterizationRateLayerDescriptor *pl =
-                [[charonHost_MTLRasterizationRateLayerDescriptor alloc] initWithSampleCount:MTLSizeMake(4, 4, 1)];
+            revenantHost_MTLRasterizationRateLayerDescriptor *pl =
+                [[revenantHost_MTLRasterizationRateLayerDescriptor alloc] initWithSampleCount:MTLSizeMake(4, 4, 1)];
             MTLRasterizationRateMapDescriptor *h = [[MTLRasterizationRateMapDescriptor alloc] init];
-            charonHost_MTLRasterizationRateMapDescriptor *p =
-                [[charonHost_MTLRasterizationRateMapDescriptor alloc] init];
+            revenantHost_MTLRasterizationRateMapDescriptor *p =
+                [[revenantHost_MTLRasterizationRateMapDescriptor alloc] init];
             [h setLayer:hl atIndex:2]; [p setLayer:pl atIndex:2];
             check([h layerAtIndex:2] != nil && [p layerAtIndex:2] != nil,
                   @"a layer written at index 2 reads back on both sides");
@@ -87,19 +87,19 @@ int main(void)
                   @"a write far past the run leaves the count alone, and both sides agree");
         }
         {
-            charonHost_MTLRasterizationRateLayerDescriptor *p =
-                [[charonHost_MTLRasterizationRateLayerDescriptor alloc] initWithSampleCount:MTLSizeMake(7, 5, 1)];
+            revenantHost_MTLRasterizationRateLayerDescriptor *p =
+                [[revenantHost_MTLRasterizationRateLayerDescriptor alloc] initWithSampleCount:MTLSizeMake(7, 5, 1)];
             same_size([p sampleCount], MTLSizeMake(7, 5, 1),
                       @"MTLRasterizationRateLayerDescriptor.sampleCount is the count it was built with");
-            charonHost_MTLRasterizationRateLayerDescriptor *fresh =
-                [[charonHost_MTLRasterizationRateLayerDescriptor alloc] initWithSampleCount:MTLSizeMake(0, 0, 0)];
+            revenantHost_MTLRasterizationRateLayerDescriptor *fresh =
+                [[revenantHost_MTLRasterizationRateLayerDescriptor alloc] initWithSampleCount:MTLSizeMake(0, 0, 0)];
             same_size([fresh sampleCount], MTLSizeMake(0, 0, 0), @"a layer built with no samples answers 0");
             same_size([fresh maxSampleCount], [fresh sampleCount],
                       @"maxSampleCount answers what sampleCount does, both the enumeration's zero");
         }
         {
-            charonHost_MTLRasterizationRateLayerDescriptor *p =
-                [[charonHost_MTLRasterizationRateLayerDescriptor alloc] initWithSampleCount:MTLSizeMake(2, 2, 1)];
+            revenantHost_MTLRasterizationRateLayerDescriptor *p =
+                [[revenantHost_MTLRasterizationRateLayerDescriptor alloc] initWithSampleCount:MTLSizeMake(2, 2, 1)];
             check([p.horizontal objectAtIndexedSubscript:0] == nil, @"a fresh layer's horizontal array is empty");
             [p.horizontal setObject:@2 atIndexedSubscript:0];
             check([p.horizontal objectAtIndexedSubscript:0].intValue == 2, @"a sample written at 0 reads back 2");

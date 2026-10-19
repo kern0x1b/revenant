@@ -6,6 +6,6 @@ function main(out)
     local here = os.scriptdir()
     corpus.ios(e, {"-O2", "-fobjc-arc", "-w", "-framework", "UIKit", "-framework", "Foundation", "-framework", "CoreGraphics", "-framework", "QuartzCore",
                    path.join(here, "main.m"), "-o", path.join(out, "RefRepro-arm64")})
-    io.writefile(path.join(out, "includes.h"), io.readfile(path.join(e.katabasis, "p3", "includes.h")) .. "#import <objc/runtime.h>\n")
+    io.writefile(path.join(out, "includes.h"), io.readfile(path.join(e.recompiler, "p3", "includes.h")) .. "#import <objc/runtime.h>\n")
     return corpus.app(out, "RefRepro", path.join(here, "Info.plist"))
 end

@@ -1,18 +1,18 @@
 #import <UIKit/UIKit.h>
 #import <objc/runtime.h>
 
-static char CharonGestureRecognizerNameKey;
+static char RevenantGestureRecognizerNameKey;
 
-@implementation UIGestureRecognizer (CharonName)
+@implementation UIGestureRecognizer (RevenantName)
 
 - (NSString *)name
 {
-    return objc_getAssociatedObject(self, &CharonGestureRecognizerNameKey);
+    return objc_getAssociatedObject(self, &RevenantGestureRecognizerNameKey);
 }
 
 - (void)setName:(NSString *)name
 {
-    objc_setAssociatedObject(self, &CharonGestureRecognizerNameKey, [name copy], OBJC_ASSOCIATION_RETAIN);
+    objc_setAssociatedObject(self, &RevenantGestureRecognizerNameKey, [name copy], OBJC_ASSOCIATION_RETAIN);
 }
 
 @end

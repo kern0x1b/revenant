@@ -4,7 +4,7 @@
 #import <stdio.h>
 #import <dlfcn.h>
 
-bool CharonCertificateNameTLV(const uint8_t *bytes, size_t length, bool wantSubject,
+bool RevenantCertificateNameTLV(const uint8_t *bytes, size_t length, bool wantSubject,
                              size_t *outStart, size_t *outEnd);
 
 typedef CFDataRef (*CopyName)(SecCertificateRef);
@@ -71,7 +71,7 @@ int main(void)
         };
         for (size_t i = 0; i < sizeof shapes / sizeof shapes[0]; i++) {
             size_t start = 0, end = 0;
-            bool ok = CharonCertificateNameTLV(shapes[i].bytes, shapes[i].n, false, &start, &end);
+            bool ok = RevenantCertificateNameTLV(shapes[i].bytes, shapes[i].n, false, &start, &end);
             printf("malformed-%s\t%s\n", shapes[i].what, ok ? "ACCEPTED" : "refused");
             if (ok) printf("WRONG\tmalformed-%s: the walk accepted bytes that are not a certificate\n", shapes[i].what);
         }

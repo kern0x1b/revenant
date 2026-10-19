@@ -4,7 +4,7 @@
 #
 # mps-cases.m is compiled twice and run twice. The first build links the system's MetalPerformanceShaders
 # and calls it by its own names. The second build compiles this port's own sources with the MPS class
-# names mapped to Charon names and its selectors prefixed (prefix_selectors.py), so the port's
+# names mapped to Revenant names and its selectors prefixed (prefix_selectors.py), so the port's
 # implementations are reached under names of their own and cannot replace the system's, and it calls the
 # same cases.m with the same mapping. Every case prints its result buffer as bytes, so the two runs are
 # compared exactly: a difference of one bit in one element is a failure, not a tolerance this script
@@ -22,7 +22,7 @@ mps=${MPS:-$here/../../../../packages/a/apple-backports/MetalPerformanceShaders}
 sh "$here/rank-selftest.sh" || { echo "rank-selftest failed; the grader is not measuring" >&2; exit 1; }
 
 build=${BUILD:-$here/../../../../.agent-work/runs/host/mpsmatrix}
-candidate=${CANDIDATE:+-DCHARON_BN_CANDIDATE=$CANDIDATE}
+candidate=${CANDIDATE:+-DREVENANT_BN_CANDIDATE=$CANDIDATE}
 system=${SYSTEM_TXT:-}
 rm -rf "$build"
 mkdir -p "$build"
@@ -66,7 +66,7 @@ import sys
 names = [line.strip() for line in open(sys.argv[1]) if line.strip()]
 with open(sys.argv[2], 'w') as out:
     for name in names:
-        out.write("#define %s Charon%s\n" % (name, name))
+        out.write("#define %s Revenant%s\n" % (name, name))
 print("classes the port defines: %d" % len(names))
 PY
 echo "renamed: $(grep -c define "$build/rename.h") classes"
@@ -76,7 +76,7 @@ printf '#import <MetalPerformanceShaders/MetalPerformanceShaders.h>\n' > "$build
 objects=""
 for source in "$mps"/*.m; do
     name=$(basename "$source" .m)
-    if ! xcrun clang -fobjc-arc -Wformat -Werror=format -fvisibility=hidden -DCHARON_BN_TRACE $target $candidate $quiet -c "$source" -o "$build/$name.plain.o"; then
+    if ! xcrun clang -fobjc-arc -Wformat -Werror=format -fvisibility=hidden -DREVENANT_BN_TRACE $target $candidate $quiet -c "$source" -o "$build/$name.plain.o"; then
         echo "the port source $source did not compile; stopping, because a count from a stale build is not a count"
         exit 1
     fi
@@ -85,7 +85,7 @@ for source in "$mps"/*.m; do
     # The define belongs here and not only on the plain compile: prefix_selectors.py turns the plain
     # object back into source, and this is the compile whose object is linked, so a define left off
     # here is a trace that is compiled in and then thrown away.
-    if ! xcrun clang -fobjc-arc -Wformat -Werror=format -fvisibility=hidden -DCHARON_BN_TRACE $target $candidate $quiet -I"$mps" -include "$build/rename.h" \
+    if ! xcrun clang -fobjc-arc -Wformat -Werror=format -fvisibility=hidden -DREVENANT_BN_TRACE $target $candidate $quiet -I"$mps" -include "$build/rename.h" \
         -include "$build/declarations.h" -c "$build/$name.m" -o "$build/$name.o"; then
         echo "the prefixed port source $build/$name.m did not compile; stopping"
         exit 1

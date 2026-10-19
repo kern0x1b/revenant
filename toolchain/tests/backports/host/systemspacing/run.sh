@@ -3,7 +3,7 @@ set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 UIKIT=${UIKIT:-$here/../../../../packages/a/apple-backports/UIKit}
-BUILD=${BUILD:-$(runs_fresh charon-systemspacing)}
+BUILD=${BUILD:-$(runs_fresh revenant-systemspacing)}
 sdk=$(xcrun --show-sdk-path)
 quiet="-Wno-deprecated-declarations -Wno-unguarded-availability-new -Wno-incomplete-implementation -Wno-objc-protocol-method-implementation -Wno-nullability-completeness"
 target="-target arm64-apple-ios15.0-macabi -isysroot $sdk -iframework $sdk/System/iOSSupport/System/Library/Frameworks"
@@ -12,7 +12,7 @@ xcrun clang -fobjc-arc -fvisibility=hidden $target $quiet -c "$UIKIT/NSLayoutAnc
 printf '#import <UIKit/UIKit.h>\n' > "$BUILD/declarations.h"
 python3 "$here/../prefix_selectors.py" "$UIKIT/NSLayoutAnchor+SystemSpacing.m" "$BUILD/NSLayoutAnchor+SystemSpacing.m" charonHost_ --declarations="$BUILD/declarations.h" -fobjc-arc $target $quiet -- "$BUILD/plain.o"
 xcrun clang -fobjc-arc -fvisibility=hidden $target $quiet -I"$UIKIT" -include "$BUILD/declarations.h" -c "$BUILD/NSLayoutAnchor+SystemSpacing.m" -o "$BUILD/spacing.o"
-perl -0777 -pi -e 's/__objc_catlist\0\0/__charon_catlist/g' "$BUILD/spacing.o"
+perl -0777 -pi -e 's/__objc_catlist\0\0/__revenant_catlist/g' "$BUILD/spacing.o"
 xcrun clang -fobjc-arc $target $quiet "$here/differential.m" "$here/../foundation2/host-attach.c" "$BUILD/spacing.o" \
     -framework UIKit -framework Foundation -framework CoreGraphics -o "$BUILD/differential"
 "$BUILD/differential"

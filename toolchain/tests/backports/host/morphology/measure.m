@@ -1,6 +1,6 @@
 #import <Foundation/Foundation.h>
 #import <dlfcn.h>
-#import "CharonMorphology26.h"
+#import "RevenantMorphology26.h"
 
 static NSArray *Languages(void)
 {

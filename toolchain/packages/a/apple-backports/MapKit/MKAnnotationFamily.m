@@ -2,11 +2,11 @@
 #import <UIKit/UIKit.h>
 #import <objc/runtime.h>
 #import <objc/message.h>
-#import "CharonMapKit.h"
+#import "RevenantMapKit.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface MKAnnotationView (CharonAnnotation)
+@interface MKAnnotationView (RevenantAnnotation)
 @property (nonatomic, strong, nullable) UIView *detailCalloutAccessoryView;
 @property (nonatomic, copy, nullable) NSString *clusteringIdentifier;
 @property (nonatomic, weak, readonly, nullable) MKAnnotationView *clusterAnnotationView;
@@ -18,14 +18,14 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)prepareForDisplay;
 @end
 
-@interface MKPinAnnotationView (CharonAnnotation)
+@interface MKPinAnnotationView (RevenantAnnotation)
 @property (nonatomic, strong, null_resettable) UIColor *pinTintColor;
 + (UIColor *)redPinColor;
 + (UIColor *)greenPinColor;
 + (UIColor *)purplePinColor;
 @end
 
-@interface CharonAnnotationState : NSObject
+@interface RevenantAnnotationState : NSObject
 @property (nonatomic, strong) UIColor *tint;
 @property (nonatomic, copy) NSString *clusteringIdentifier;
 @property (nonatomic, weak) MKAnnotationView *clusterView;
@@ -36,7 +36,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, assign) CGPoint accessoryOffset;
 @end
 
-@implementation CharonAnnotationState
+@implementation RevenantAnnotationState
 @synthesize tint = _tint;
 @synthesize clusteringIdentifier = _clusteringIdentifier;
 @synthesize clusterView = _clusterView;
@@ -47,7 +47,7 @@ NS_ASSUME_NONNULL_BEGIN
 @synthesize accessoryOffset = _accessoryOffset;
 @end
 
-static UIColor *CharonPinColor(MKPinAnnotationColor color)
+static UIColor *RevenantPinColor(MKPinAnnotationColor color)
 {
     switch (color) {
         case MKPinAnnotationColorGreen:
@@ -59,41 +59,41 @@ static UIColor *CharonPinColor(MKPinAnnotationColor color)
     }
 }
 
-static CharonAnnotationState *CharonStateFor(id view)
+static RevenantAnnotationState *RevenantStateFor(id view)
 {
     static const void *key = &key;
-    CharonAnnotationState *state = objc_getAssociatedObject(view, key);
+    RevenantAnnotationState *state = objc_getAssociatedObject(view, key);
     if (!state) {
-        state = [[CharonAnnotationState alloc] init];
+        state = [[RevenantAnnotationState alloc] init];
         objc_setAssociatedObject(view, key, state, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     }
     return state;
 }
 
-@implementation MKPinAnnotationView (CharonAnnotation)
+@implementation MKPinAnnotationView (RevenantAnnotation)
 
 - (UIColor *)pinTintColor
 {
-    CharonAnnotationState *state = CharonStateFor(self);
-    return state.tint ?: CharonPinColor(self.pinColor);
+    RevenantAnnotationState *state = RevenantStateFor(self);
+    return state.tint ?: RevenantPinColor(self.pinColor);
 }
 
 - (void)setPinTintColor:(nullable UIColor *)pinTintColor
 {
-    CharonStateFor(self).tint = pinTintColor;
+    RevenantStateFor(self).tint = pinTintColor;
 }
 
-+ (UIColor *)redPinColor { return CharonPinColor(MKPinAnnotationColorRed); }
-+ (UIColor *)greenPinColor { return CharonPinColor(MKPinAnnotationColorGreen); }
-+ (UIColor *)purplePinColor { return CharonPinColor(MKPinAnnotationColorPurple); }
++ (UIColor *)redPinColor { return RevenantPinColor(MKPinAnnotationColorRed); }
++ (UIColor *)greenPinColor { return RevenantPinColor(MKPinAnnotationColorGreen); }
++ (UIColor *)purplePinColor { return RevenantPinColor(MKPinAnnotationColorPurple); }
 
 @end
 
-@implementation MKAnnotationView (CharonAnnotation)
+@implementation MKAnnotationView (RevenantAnnotation)
 
 - (nullable UIView *)detailCalloutAccessoryView
 {
-    charon_sayOnce(@"MKAnnotationView.detailCalloutAccessoryView",
+    revenant_sayOnce(@"MKAnnotationView.detailCalloutAccessoryView",
                    @"it is answered from the release's LEFT callout accessory slot, which is beside the "
                    @"callout and not under its title, because iOS 6 has no detail area: the selector and "
                    @"-calloutView are both absent from the armv7 cache of 6.1.3, and the native fix -- a "
@@ -106,39 +106,39 @@ static CharonAnnotationState *CharonStateFor(id view)
     self.leftCalloutAccessoryView = detailCalloutAccessoryView;
 }
 
-- (nullable NSString *)clusteringIdentifier { return CharonStateFor(self).clusteringIdentifier; }
+- (nullable NSString *)clusteringIdentifier { return RevenantStateFor(self).clusteringIdentifier; }
 - (void)setClusteringIdentifier:(nullable NSString *)clusteringIdentifier
 {
-    CharonStateFor(self).clusteringIdentifier = clusteringIdentifier;
+    RevenantStateFor(self).clusteringIdentifier = clusteringIdentifier;
 }
 
-- (nullable MKAnnotationView *)clusterAnnotationView { return CharonStateFor(self).clusterView; }
-- (void)charon_setClusterAnnotationView:(nullable MKAnnotationView *)view
+- (nullable MKAnnotationView *)clusterAnnotationView { return RevenantStateFor(self).clusterView; }
+- (void)revenant_setClusterAnnotationView:(nullable MKAnnotationView *)view
 {
-    CharonStateFor(self).clusterView = view;
+    RevenantStateFor(self).clusterView = view;
 }
 
-- (NSInteger)displayPriority { return CharonStateFor(self).displayPriority; }
+- (NSInteger)displayPriority { return RevenantStateFor(self).displayPriority; }
 - (void)setDisplayPriority:(NSInteger)displayPriority
 {
-    CharonStateFor(self).displayPriority = displayPriority;
+    RevenantStateFor(self).displayPriority = displayPriority;
 }
 
-- (NSInteger)zPriority { return CharonStateFor(self).zPriority; }
-- (void)setZPriority:(NSInteger)zPriority { CharonStateFor(self).zPriority = zPriority; }
-- (NSInteger)selectedZPriority { return CharonStateFor(self).selectedZPriority; }
+- (NSInteger)zPriority { return RevenantStateFor(self).zPriority; }
+- (void)setZPriority:(NSInteger)zPriority { RevenantStateFor(self).zPriority = zPriority; }
+- (NSInteger)selectedZPriority { return RevenantStateFor(self).selectedZPriority; }
 - (void)setSelectedZPriority:(NSInteger)selectedZPriority
 {
-    CharonStateFor(self).selectedZPriority = selectedZPriority;
+    RevenantStateFor(self).selectedZPriority = selectedZPriority;
 }
 
-- (NSInteger)collisionMode { return CharonStateFor(self).collisionMode; }
-- (void)setCollisionMode:(NSInteger)collisionMode { CharonStateFor(self).collisionMode = collisionMode; }
+- (NSInteger)collisionMode { return RevenantStateFor(self).collisionMode; }
+- (void)setCollisionMode:(NSInteger)collisionMode { RevenantStateFor(self).collisionMode = collisionMode; }
 
-- (CGPoint)accessoryOffset { return CharonStateFor(self).accessoryOffset; }
+- (CGPoint)accessoryOffset { return RevenantStateFor(self).accessoryOffset; }
 - (void)setAccessoryOffset:(CGPoint)accessoryOffset
 {
-    CharonStateFor(self).accessoryOffset = accessoryOffset;
+    RevenantStateFor(self).accessoryOffset = accessoryOffset;
 }
 
 - (void)prepareForDisplay
@@ -148,7 +148,7 @@ static CharonAnnotationState *CharonStateFor(id view)
 
 @end
 
-@implementation MKMultiPoint (CharonAnnotation)
+@implementation MKMultiPoint (RevenantAnnotation)
 
 - (nullable CLLocation *)locationAtPointIndex:(NSUInteger)pointIndex
 {
@@ -180,7 +180,7 @@ static CharonAnnotationState *CharonStateFor(id view)
 
 @end
 
-@implementation MKPlacemark (CharonAnnotation)
+@implementation MKPlacemark (RevenantAnnotation)
 
 - (instancetype)initWithCoordinate:(CLLocationCoordinate2D)coordinate
 {
@@ -204,7 +204,7 @@ static CharonAnnotationState *CharonStateFor(id view)
 
 @end
 
-@implementation MKPointAnnotation (CharonAnnotation)
+@implementation MKPointAnnotation (RevenantAnnotation)
 
 - (instancetype)initWithCoordinate:(CLLocationCoordinate2D)coordinate
 {
@@ -229,7 +229,7 @@ static CharonAnnotationState *CharonStateFor(id view)
 
 @end
 
-@implementation NSUserActivity (CharonAnnotation)
+@implementation NSUserActivity (RevenantAnnotation)
 
 - (nullable MKMapItem *)mapItem
 {

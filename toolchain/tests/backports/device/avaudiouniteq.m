@@ -6,14 +6,14 @@
 
 static void setForcedOfflineOutput(BOOL offline)
 {
-    Class cls = NSClassFromString(@"CharonAudioEngineTestSupport");
+    Class cls = NSClassFromString(@"RevenantAudioEngineTestSupport");
     SEL sel = NSSelectorFromString(@"setForcedOfflineOutput:");
     ((void (*)(Class, SEL, BOOL))objc_msgSend)(cls, sel, offline);
 }
 
 static OSStatus pullOutput(AudioBufferList *ioData, AVAudioFrameCount frames, AVAudioEngine *engine)
 {
-    Class cls = NSClassFromString(@"CharonAudioEngineTestSupport");
+    Class cls = NSClassFromString(@"RevenantAudioEngineTestSupport");
     SEL sel = NSSelectorFromString(@"pullOutput:frames:fromEngine:");
     return ((OSStatus (*)(Class, SEL, AudioBufferList *, AVAudioFrameCount, AVAudioEngine *))objc_msgSend)(cls, sel, ioData, frames, engine);
 }
@@ -99,7 +99,7 @@ int main(void)
                 maxZeroGainDelta = delta;
         }
         printf("max |output - source| with an active 0 dB band: %.6f\n", maxZeroGainDelta);
-        charon_check(maxZeroGainDelta < 0.01f,
+        revenant_check(maxZeroGainDelta < 0.01f,
                      "a 0 dB active band matches the input closely (near-identity, not a rubber stamp on non-zero output)", nil);
 
         float *filteredOutput = runGraph(^(AVAudioUnitEQ *eq) {
@@ -119,10 +119,10 @@ int main(void)
         float filteredRMS = rms(filteredOutput, kFrames);
         printf("RMS: source=%.6f zero-gain-band=%.6f 150Hz-lowpass-on-2kHz-tone=%.6f\n", sourceRMS, zeroGainRMS, filteredRMS);
 
-        charon_check(filteredRMS < zeroGainRMS * 0.5f,
+        revenant_check(filteredRMS < zeroGainRMS * 0.5f,
                      "a real low-pass band well below the test tone measurably and predictably attenuates it (not silence, not unchanged)", nil);
 
-        printf("checks=%d failures=%d\n", charon_checks, charon_failures);
+        printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
     }
-    return charon_failures ? 1 : 0;
+    return revenant_failures ? 1 : 0;
 }

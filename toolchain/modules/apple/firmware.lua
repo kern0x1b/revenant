@@ -32,7 +32,7 @@ end
 
 local function download(url, output, opt)
     opt = opt or {}
-    local argv = {"-fsSL", "--retry", "5", "--retry-all-errors", "-A", "charon", "-o", output}
+    local argv = {"-fsSL", "--retry", "5", "--retry-all-errors", "-A", "revenant", "-o", output}
     if opt.range then
         table.join2(argv, {"-r", opt.range})
     end
@@ -595,7 +595,7 @@ function fetch(architecture, minimum, opt)
             end
         end
     end
-    local tool = assert(opt.tool, "fetching firmware needs the charon-firmware tool")
+    local tool = assert(opt.tool, "fetching firmware needs the revenant-firmware tool")
     local failures = {}
     local function failed(firmware, reason)
         table.insert(failures, firmware.identifier .. " " .. firmware.build .. ": " .. reason)
@@ -755,7 +755,7 @@ function rootfs(identifier, minimum, opt)
     if os.isfile(path.join(folder, "System", "Library", "CoreServices", "SystemVersion.plist")) then
         return folder, firmware
     end
-    firmware.tool = assert(opt.tool, "unpacking firmware needs the charon-firmware tool")
+    firmware.tool = assert(opt.tool, "unpacking firmware needs the revenant-firmware tool")
     cprint("${bright}unpacking the root filesystem of %s %s (%s)${clear} from %s", firmware.identifier, firmware.version, firmware.build, firmware.url)
     local work = path.join(home(), "firmware", "work", firmware.identifier .. "_" .. firmware.build)
     local staging = folder .. ".partial"

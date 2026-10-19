@@ -167,7 +167,7 @@ int main(void) {
 ]==]
 
 local function log_of(api)
-    return 'static BOOL charon_logged = NO; if (!charon_logged) { charon_logged = YES; fprintf(stderr, "unimplemented: FixtureKit %s\\n", "' .. api .. '"); }'
+    return 'static BOOL revenant_logged = NO; if (!revenant_logged) { revenant_logged = YES; fprintf(stderr, "unimplemented: FixtureKit %s\\n", "' .. api .. '"); }'
 end
 local ERROR = 'if (error) { *error = [NSError errorWithDomain:@"FixtureKit.Unimplemented" code:-1 userInfo:@{NSLocalizedDescriptionKey: @"%s is not implemented by the port"}]; } '
 local STUB_CASES = {
@@ -415,7 +415,7 @@ local function build_and_run(root, tree, sdk)
     emit.file(program, PROGRAM)
     local binary = path.join(root, "run")
     local frameworks = path.join(sdk, "System", "Library", "Frameworks")
-    local compiled, diagnostics = stream.run("clang", {"-fobjc-arc", "-DCHARON_TRACE_DEFAULTS", "-F", frameworks, "-I",
+    local compiled, diagnostics = stream.run("clang", {"-fobjc-arc", "-DREVENANT_TRACE_DEFAULTS", "-F", frameworks, "-I",
                                                         path.join(frameworks, FRAMEWORK .. ".framework", "Headers"), "-framework",
                                                         "Foundation", program, trace_files.defaults_file(tree, FRAMEWORK), "-o", binary},
                                              function() end)
@@ -450,7 +450,7 @@ local function test_trace_run(check, root)
     local status = trace.run({tree = tree, framework = FRAMEWORK, sdk = sdk, coordination = corpus, ledger_rows = path.join(root, "ledger-rows")})
     check(status == 0, "the trace layer writes the fixture")
     local compiled, diagnostics, ran, output = build_and_run(root, tree, sdk)
-    check(compiled == 0, "the stubs compile with CHARON_TRACE_DEFAULTS")
+    check(compiled == 0, "the stubs compile with REVENANT_TRACE_DEFAULTS")
     if compiled ~= 0 then
         print(diagnostics)
         return

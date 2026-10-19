@@ -1,30 +1,30 @@
 #import "uirest.h"
 
-@interface UIView (CharonHostLargeContent)
-- (BOOL)charonHostShowsLargeContentViewer;
-- (void)charonHostSetShowsLargeContentViewer:(BOOL)value;
-- (NSString *)charonHostLargeContentTitle;
-- (void)charonHostSetLargeContentTitle:(NSString *)value;
-- (UIImage *)charonHostLargeContentImage;
-- (void)charonHostSetLargeContentImage:(UIImage *)value;
-- (BOOL)charonHostScalesLargeContentImage;
-- (void)charonHostSetScalesLargeContentImage:(BOOL)value;
-- (UIEdgeInsets)charonHostLargeContentImageInsets;
-- (void)charonHostSetLargeContentImageInsets:(UIEdgeInsets)value;
+@interface UIView (RevenantHostLargeContent)
+- (BOOL)revenantHostShowsLargeContentViewer;
+- (void)revenantHostSetShowsLargeContentViewer:(BOOL)value;
+- (NSString *)revenantHostLargeContentTitle;
+- (void)revenantHostSetLargeContentTitle:(NSString *)value;
+- (UIImage *)revenantHostLargeContentImage;
+- (void)revenantHostSetLargeContentImage:(UIImage *)value;
+- (BOOL)revenantHostScalesLargeContentImage;
+- (void)revenantHostSetScalesLargeContentImage:(BOOL)value;
+- (UIEdgeInsets)revenantHostLargeContentImageInsets;
+- (void)revenantHostSetLargeContentImageInsets:(UIEdgeInsets)value;
 @end
 
-@interface UIWindowScene (CharonHostScreenshot)
-- (id)charonHostScreenshotService;
+@interface UIWindowScene (RevenantHostScreenshot)
+- (id)revenantHostScreenshotService;
 @end
 
-@interface UIScene (CharonHostPointerLock)
-- (id)charonHostPointerLockState;
+@interface UIScene (RevenantHostPointerLock)
+- (id)revenantHostPointerLockState;
 @end
 
-@interface UIViewController (CharonHostPointerLock)
-- (BOOL)charonHostPrefersPointerLocked;
-- (UIViewController *)charonHostChildViewControllerForPointerLock;
-- (void)charonHostSetNeedsUpdateOfPrefersPointerLocked;
+@interface UIViewController (RevenantHostPointerLock)
+- (BOOL)revenantHostPrefersPointerLocked;
+- (UIViewController *)revenantHostChildViewControllerForPointerLock;
+- (void)revenantHostSetNeedsUpdateOfPrefersPointerLocked;
 @end
 
 @interface Delegate : NSObject <UILargeContentViewerInteractionDelegate, UIScribbleInteractionDelegate, UIIndirectScribbleInteractionDelegate, UITextInteractionDelegate, UIScreenshotServiceDelegate, UITextFormattingCoordinatorDelegate>
@@ -71,11 +71,11 @@ static NSArray *large_lines(BOOL port, UIView *view, Class interaction, UIView *
     void (*setBool)(id, SEL, BOOL) = (void *)objc_msgSend;
     void (*setObject)(id, SEL, id) = (void *)objc_msgSend;
     void (*setEdge)(id, SEL, UIEdgeInsets) = (void *)objc_msgSend;
-    SEL showsGet = port ? @selector(charonHostShowsLargeContentViewer) : @selector(showsLargeContentViewer), showsSet = port ? @selector(charonHostSetShowsLargeContentViewer:) : @selector(setShowsLargeContentViewer:),
-        titleGet = port ? @selector(charonHostLargeContentTitle) : @selector(largeContentTitle), titleSet = port ? @selector(charonHostSetLargeContentTitle:) : @selector(setLargeContentTitle:),
-        imageGet = port ? @selector(charonHostLargeContentImage) : @selector(largeContentImage), imageSet = port ? @selector(charonHostSetLargeContentImage:) : @selector(setLargeContentImage:),
-        scalesGet = port ? @selector(charonHostScalesLargeContentImage) : @selector(scalesLargeContentImage), scalesSet = port ? @selector(charonHostSetScalesLargeContentImage:) : @selector(setScalesLargeContentImage:),
-        edgeGet = port ? @selector(charonHostLargeContentImageInsets) : @selector(largeContentImageInsets), edgeSet = port ? @selector(charonHostSetLargeContentImageInsets:) : @selector(setLargeContentImageInsets:);
+    SEL showsGet = port ? @selector(revenantHostShowsLargeContentViewer) : @selector(showsLargeContentViewer), showsSet = port ? @selector(revenantHostSetShowsLargeContentViewer:) : @selector(setShowsLargeContentViewer:),
+        titleGet = port ? @selector(revenantHostLargeContentTitle) : @selector(largeContentTitle), titleSet = port ? @selector(revenantHostSetLargeContentTitle:) : @selector(setLargeContentTitle:),
+        imageGet = port ? @selector(revenantHostLargeContentImage) : @selector(largeContentImage), imageSet = port ? @selector(revenantHostSetLargeContentImage:) : @selector(setLargeContentImage:),
+        scalesGet = port ? @selector(revenantHostScalesLargeContentImage) : @selector(scalesLargeContentImage), scalesSet = port ? @selector(revenantHostSetScalesLargeContentImage:) : @selector(setScalesLargeContentImage:),
+        edgeGet = port ? @selector(revenantHostLargeContentImageInsets) : @selector(largeContentImageInsets), edgeSet = port ? @selector(revenantHostSetLargeContentImageInsets:) : @selector(setLargeContentImageInsets:);
     [lines addObject:ur_line(@"defaults", @[ur_yes(shows(view, showsGet)), title(view, titleGet) ?: @"nil", image(view, imageGet) ?: @"nil", ur_yes(shows(view, scalesGet)), insets(edge(view, edgeGet))])];
     UIImage *picture = [[UIImage alloc] init];
     NSMutableString *mutable = [NSMutableString stringWithString:@"a"];
@@ -100,21 +100,21 @@ static NSArray *large_lines(BOOL port, UIView *view, Class interaction, UIView *
     return lines;
 }
 
-void charon_windowed_run(UIWindow *window)
+void revenant_windowed_run(UIWindow *window)
 {
     @autoreleasepool {
-        Class ourLarge = NSClassFromString(@"CharonHostUILargeContentViewerInteraction"), ourShot = NSClassFromString(@"CharonHostUIScreenshotService"), ourScribble = NSClassFromString(@"CharonHostUIScribbleInteraction"),
-              ourIndirect = NSClassFromString(@"CharonHostUIIndirectScribbleInteraction"), ourLock = NSClassFromString(@"CharonHostUIPointerLockState"), ourCoordinator = NSClassFromString(@"CharonHostUITextFormattingCoordinator"),
-              ourPlaceholder = NSClassFromString(@"CharonHostUITextPlaceholder");
-        charon_check(ourLarge && ourShot && ourScribble && ourIndirect && ourLock && ourCoordinator && ourPlaceholder, "the port's classes are linked under their host names", @"one is missing");
+        Class ourLarge = NSClassFromString(@"RevenantHostUILargeContentViewerInteraction"), ourShot = NSClassFromString(@"RevenantHostUIScreenshotService"), ourScribble = NSClassFromString(@"RevenantHostUIScribbleInteraction"),
+              ourIndirect = NSClassFromString(@"RevenantHostUIIndirectScribbleInteraction"), ourLock = NSClassFromString(@"RevenantHostUIPointerLockState"), ourCoordinator = NSClassFromString(@"RevenantHostUITextFormattingCoordinator"),
+              ourPlaceholder = NSClassFromString(@"RevenantHostUITextPlaceholder");
+        revenant_check(ourLarge && ourShot && ourScribble && ourIndirect && ourLock && ourCoordinator && ourPlaceholder, "the port's classes are linked under their host names", @"one is missing");
         UIView *a = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 10, 10)], *b = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 10, 10)];
         [window addSubview:a];
         [window addSubview:b];
         ur_agree(@"large content viewer", large_lines(YES, a, ourLarge, [[UIView alloc] init]), large_lines(NO, b, [UILargeContentViewerInteraction class], [[UIView alloc] init]));
-        charon_check(![ourLarge isEnabled], "the large content viewer is not enabled", @"it is");
+        revenant_check(![ourLarge isEnabled], "the large content viewer is not enabled", @"it is");
         NSString *(^constant)(const char *) = ^NSString *(const char *name) { return *(NSString *const *)dlsym(RTLD_DEFAULT, name); };
-        charon_check([constant("CharonHostUILargeContentViewerInteractionEnabledStatusDidChangeNotification") isEqualToString:UILargeContentViewerInteractionEnabledStatusDidChangeNotification] &&
-                         [constant("CharonHostUIPointerLockStateDidChangeNotification") isEqualToString:UIPointerLockStateDidChangeNotification] && [constant("CharonHostUIPointerLockStateSceneUserInfoKey") isEqualToString:UIPointerLockStateSceneUserInfoKey],
+        revenant_check([constant("RevenantHostUILargeContentViewerInteractionEnabledStatusDidChangeNotification") isEqualToString:UILargeContentViewerInteractionEnabledStatusDidChangeNotification] &&
+                         [constant("RevenantHostUIPointerLockStateDidChangeNotification") isEqualToString:UIPointerLockStateDidChangeNotification] && [constant("RevenantHostUIPointerLockStateSceneUserInfoKey") isEqualToString:UIPointerLockStateSceneUserInfoKey],
                      "the notification names and the key are the system's", @"one differs");
 
         Delegate *delegate = [[Delegate alloc] init];
@@ -143,15 +143,15 @@ void charon_windowed_run(UIWindow *window)
         ur_agree(@"scribble and text values", ours, theirs);
 
         UIWindowScene *scene = window.windowScene;
-        id shot = [scene charonHostScreenshotService], systemShot = scene.screenshotService;
-        charon_check(shot != nil && systemShot != nil && [shot windowScene] == scene && [systemShot windowScene] == scene && [shot delegate] == nil && [systemShot delegate] == nil, "a scene has a screenshot service with no delegate", @"it does not");
+        id shot = [scene revenantHostScreenshotService], systemShot = scene.screenshotService;
+        revenant_check(shot != nil && systemShot != nil && [shot windowScene] == scene && [systemShot windowScene] == scene && [shot delegate] == nil && [systemShot delegate] == nil, "a scene has a screenshot service with no delegate", @"it does not");
         [shot setDelegate:delegate];
         [systemShot setDelegate:delegate];
-        charon_check([shot delegate] == delegate && [systemShot delegate] == delegate && shot == [scene charonHostScreenshotService], "the delegate is kept and the service is the scene's own", @"it is not");
-        id state = [scene charonHostPointerLockState], systemState = scene.pointerLockState;
-        charon_check(state != nil && systemState != nil && ![state isLocked] && [state isKindOfClass:ourLock] && state == [scene charonHostPointerLockState], "a scene has a pointer lock state that is not locked", @"it does not");
+        revenant_check([shot delegate] == delegate && [systemShot delegate] == delegate && shot == [scene revenantHostScreenshotService], "the delegate is kept and the service is the scene's own", @"it is not");
+        id state = [scene revenantHostPointerLockState], systemState = scene.pointerLockState;
+        revenant_check(state != nil && systemState != nil && ![state isLocked] && [state isKindOfClass:ourLock] && state == [scene revenantHostPointerLockState], "a scene has a pointer lock state that is not locked", @"it does not");
         UIViewController *controller = window.rootViewController;
-        NSString *portLock = ur_line(@"lock", @[ur_yes([controller charonHostPrefersPointerLocked]), [controller charonHostChildViewControllerForPointerLock] ?: @"nil", ur_raised(^id { [controller charonHostSetNeedsUpdateOfPrefersPointerLocked]; return @"ok"; })]);
+        NSString *portLock = ur_line(@"lock", @[ur_yes([controller revenantHostPrefersPointerLocked]), [controller revenantHostChildViewControllerForPointerLock] ?: @"nil", ur_raised(^id { [controller revenantHostSetNeedsUpdateOfPrefersPointerLocked]; return @"ok"; })]);
         NSString *systemLock = ur_line(@"lock", @[ur_yes([controller prefersPointerLocked]), controller.childViewControllerForPointerLock ?: @"nil", ur_raised(^id { [controller setNeedsUpdateOfPrefersPointerLocked]; return @"ok"; })]);
         ur_agree(@"pointer lock members of a view controller", @[portLock], @[systemLock]);
     }

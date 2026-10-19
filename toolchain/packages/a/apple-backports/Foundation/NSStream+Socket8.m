@@ -2,7 +2,7 @@
 #import <CoreFoundation/CFStream.h>
 #include <string.h>
 
-@implementation NSStream (CharonSocket)
+@implementation NSStream (RevenantSocket)
 
 + (void)getStreamsToHostWithName:(NSString *)hostname
                              port:(NSInteger)port

@@ -1,4 +1,4 @@
-#import "CharonSpriteKit.h"
+#import "RevenantSpriteKit.h"
 #include <objc/runtime.h>
 
 @implementation SKUniform {
@@ -131,33 +131,33 @@
 
 @end
 
-@implementation SKNode (CharonSpriteKit8)
+@implementation SKNode (RevenantSpriteKit8)
 
 - (NSArray *)objectForKeyedSubscript:(NSString *)path
 {
-    return [self charon_nodesMatchingPath:path];
+    return [self revenant_nodesMatchingPath:path];
 }
 
 @end
 
-static CGPoint CharonSKSplinePoint(const CGPoint *points, size_t index)
+static CGPoint RevenantSKSplinePoint(const CGPoint *points, size_t index)
 {
     return points[index == 0 ? 0 : index - 1];
 }
 
-static CGPoint CharonSKSplineTangent(const CGPoint *points, size_t numPoints, size_t index)
+static CGPoint RevenantSKSplineTangent(const CGPoint *points, size_t numPoints, size_t index)
 {
     size_t next = index < numPoints ? index + 1 : numPoints;
     size_t previous = index > 0 ? index - 1 : 0;
-    CGPoint after = CharonSKSplinePoint(points, next);
-    CGPoint before = CharonSKSplinePoint(points, previous);
+    CGPoint after = RevenantSKSplinePoint(points, next);
+    CGPoint before = RevenantSKSplinePoint(points, previous);
     return CGPointMake((after.x - before.x) / 2, (after.y - before.y) / 2);
 }
 
-static const void *CharonSKFillTextureKey = &CharonSKFillTextureKey;
-static const void *CharonSKStrokeTextureKey = &CharonSKStrokeTextureKey;
+static const void *RevenantSKFillTextureKey = &RevenantSKFillTextureKey;
+static const void *RevenantSKStrokeTextureKey = &RevenantSKStrokeTextureKey;
 
-@implementation SKShapeNode (CharonSpriteKitShape8)
+@implementation SKShapeNode (RevenantSpriteKitShape8)
 
 + (instancetype)shapeNodeWithPoints:(CGPoint *)points count:(size_t)numPoints
 {
@@ -178,13 +178,13 @@ static const void *CharonSKStrokeTextureKey = &CharonSKStrokeTextureKey;
 {
     CGMutablePathRef path = CGPathCreateMutable();
     if (numPoints > 0) {
-        CGPoint start = CharonSKSplinePoint(points, 0);
+        CGPoint start = RevenantSKSplinePoint(points, 0);
         CGPathMoveToPoint(path, NULL, start.x, start.y);
         for (size_t index = 0; index < numPoints; index++) {
-            CGPoint from = CharonSKSplinePoint(points, index);
-            CGPoint to = CharonSKSplinePoint(points, index + 1);
-            CGPoint fromTangent = CharonSKSplineTangent(points, numPoints, index);
-            CGPoint toTangent = CharonSKSplineTangent(points, numPoints, index + 1);
+            CGPoint from = RevenantSKSplinePoint(points, index);
+            CGPoint to = RevenantSKSplinePoint(points, index + 1);
+            CGPoint fromTangent = RevenantSKSplineTangent(points, numPoints, index);
+            CGPoint toTangent = RevenantSKSplineTangent(points, numPoints, index + 1);
             CGPathAddCurveToPoint(path, NULL, from.x + fromTangent.x / 3, from.y + fromTangent.y / 3,
                                   to.x - toTangent.x / 3, to.y - toTangent.y / 3, to.x, to.y);
         }
@@ -196,22 +196,22 @@ static const void *CharonSKStrokeTextureKey = &CharonSKStrokeTextureKey;
 
 - (SKTexture *)fillTexture
 {
-    return objc_getAssociatedObject(self, CharonSKFillTextureKey);
+    return objc_getAssociatedObject(self, RevenantSKFillTextureKey);
 }
 
 - (void)setFillTexture:(SKTexture *)fillTexture
 {
-    objc_setAssociatedObject(self, CharonSKFillTextureKey, fillTexture, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, RevenantSKFillTextureKey, fillTexture, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
 - (SKTexture *)strokeTexture
 {
-    return objc_getAssociatedObject(self, CharonSKStrokeTextureKey);
+    return objc_getAssociatedObject(self, RevenantSKStrokeTextureKey);
 }
 
 - (void)setStrokeTexture:(SKTexture *)strokeTexture
 {
-    objc_setAssociatedObject(self, CharonSKStrokeTextureKey, strokeTexture, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, RevenantSKStrokeTextureKey, strokeTexture, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
 @end

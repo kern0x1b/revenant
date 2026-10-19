@@ -36,7 +36,7 @@ static id random_item(void)
 int main(int argc, char **argv)
 {
     @autoreleasepool {
-        Class ours = NSClassFromString(@"CharonHostNSListFormatter");
+        Class ours = NSClassFromString(@"RevenantHostNSListFormatter");
         CHECK(ours != Nil, "the port defines the class");
         id fresh = [[ours alloc] init];
         NSListFormatter *theirs = [[NSListFormatter alloc] init];
@@ -100,8 +100,8 @@ int main(int argc, char **argv)
             printf("  %s\n", sample.UTF8String);
         for (NSString *key in [[byLocale allKeys] sortedArrayUsingSelector:@selector(compare:)])
             printf("  differs in %s: %ld\n", key.UTF8String, (long)[byLocale[key] integerValue]);
-        charon_check(wrong == 0, "the port joins random lists in random locales as the system does", [NSString stringWithFormat:@"%lu of %lu differ", (unsigned long)wrong, (unsigned long)cases]);
+        revenant_check(wrong == 0, "the port joins random lists in random locales as the system does", [NSString stringWithFormat:@"%lu of %lu differ", (unsigned long)wrong, (unsigned long)cases]);
     }
-    printf("checks=%d failures=%d\n", charon_checks, charon_failures);
-    return charon_failures;
+    printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
+    return revenant_failures;
 }

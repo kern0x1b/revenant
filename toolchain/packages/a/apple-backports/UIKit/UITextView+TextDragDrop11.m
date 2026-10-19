@@ -7,161 +7,161 @@
 #import <objc/message.h>
 #import <objc/runtime.h>
 
-#import "CharonDragSession.h"
-#import "CharonTextDragDrop11.h"
+#import "RevenantDragSession.h"
+#import "RevenantTextDragDrop11.h"
 
 #pragma clang diagnostic ignored "-Wobjc-designated-initializers"
 #pragma clang diagnostic ignored "-Wobjc-property-implementation"
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
 
-static const char kCharonFieldTextDragDelegate;
-static const char kCharonFieldTextDropDelegate;
+static const char kRevenantFieldTextDragDelegate;
+static const char kRevenantFieldTextDropDelegate;
 
-static const char CharonTextDragDelegateKey;
-static const char CharonTextDropDelegateKey;
-static const char CharonTextDragOptionsKey;
-static const char CharonTextDragInteractionKey;
-static const char CharonTextDropInteractionKey;
+static const char RevenantTextDragDelegateKey;
+static const char RevenantTextDropDelegateKey;
+static const char RevenantTextDragOptionsKey;
+static const char RevenantTextDragInteractionKey;
+static const char RevenantTextDropInteractionKey;
 
-@implementation UITextView (CharonTextDragDropAdaptors)
+@implementation UITextView (RevenantTextDragDropAdaptors)
 
-- (CharonTextDragAdaptor *)charon_textDragDelegateAdaptor
+- (RevenantTextDragAdaptor *)revenant_textDragDelegateAdaptor
 {
     static const char key;
-    CharonTextDragAdaptor *adaptor = objc_getAssociatedObject(self, &key);
+    RevenantTextDragAdaptor *adaptor = objc_getAssociatedObject(self, &key);
     if (adaptor)
         return adaptor;
-    adaptor = [[CharonTextDragAdaptor alloc] initWithControl:self];
+    adaptor = [[RevenantTextDragAdaptor alloc] initWithControl:self];
     objc_setAssociatedObject(self, &key, adaptor, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     return adaptor;
 }
 
-- (CharonTextDropAdaptor *)charon_textDropDelegateAdaptor
+- (RevenantTextDropAdaptor *)revenant_textDropDelegateAdaptor
 {
     static const char key;
-    CharonTextDropAdaptor *adaptor = objc_getAssociatedObject(self, &key);
+    RevenantTextDropAdaptor *adaptor = objc_getAssociatedObject(self, &key);
     if (adaptor)
         return adaptor;
-    adaptor = [[CharonTextDropAdaptor alloc] initWithControl:self];
+    adaptor = [[RevenantTextDropAdaptor alloc] initWithControl:self];
     objc_setAssociatedObject(self, &key, adaptor, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     return adaptor;
 }
 
 @end
 
-@interface CharonWeakDelegateBox : NSObject
+@interface RevenantWeakDelegateBox : NSObject
 @property (nonatomic, weak) id target;
 @end
 
-@implementation CharonWeakDelegateBox
+@implementation RevenantWeakDelegateBox
 @synthesize target = _target;
 @end
 
-static id CharonTextDragDelegateOf(id<UITextDraggable> control)
+static id RevenantTextDragDelegateOf(id<UITextDraggable> control)
 {
-    CharonWeakDelegateBox *box = objc_getAssociatedObject(control, &CharonTextDragDelegateKey);
+    RevenantWeakDelegateBox *box = objc_getAssociatedObject(control, &RevenantTextDragDelegateKey);
     return box.target;
 }
 
-static void CharonSetTextDragDelegate(id<UITextDraggable> control, id<UITextDragDelegate> delegate)
+static void RevenantSetTextDragDelegate(id<UITextDraggable> control, id<UITextDragDelegate> delegate)
 {
     if (!delegate) {
-        objc_setAssociatedObject(control, &CharonTextDragDelegateKey, nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+        objc_setAssociatedObject(control, &RevenantTextDragDelegateKey, nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
         return;
     }
-    CharonWeakDelegateBox *box = [[CharonWeakDelegateBox alloc] init];
+    RevenantWeakDelegateBox *box = [[RevenantWeakDelegateBox alloc] init];
     box.target = delegate;
-    objc_setAssociatedObject(control, &CharonTextDragDelegateKey, box, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(control, &RevenantTextDragDelegateKey, box, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
-static UIDragInteraction *CharonTextDragInteraction(id<UITextDraggable> control)
+static UIDragInteraction *RevenantTextDragInteraction(id<UITextDraggable> control)
 {
-    UIDragInteraction *interaction = objc_getAssociatedObject(control, &CharonTextDragInteractionKey);
+    UIDragInteraction *interaction = objc_getAssociatedObject(control, &RevenantTextDragInteractionKey);
     if (interaction)
         return interaction;
     id<UIDragInteractionDelegate> delegate =
-        (id<UIDragInteractionDelegate>)[(UIView *)control charon_textDragDelegateAdaptor];
+        (id<UIDragInteractionDelegate>)[(UIView *)control revenant_textDragDelegateAdaptor];
     interaction = [[UIDragInteraction alloc] initWithDelegate:delegate];
-    objc_setAssociatedObject(control, &CharonTextDragInteractionKey, interaction,
+    objc_setAssociatedObject(control, &RevenantTextDragInteractionKey, interaction,
                              OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     return interaction;
 }
 
-static BOOL CharonIsTextDragActive(id<UITextDraggable> control)
+static BOOL RevenantIsTextDragActive(id<UITextDraggable> control)
 {
-    UIDragInteraction *interaction = objc_getAssociatedObject(control, &CharonTextDragInteractionKey);
+    UIDragInteraction *interaction = objc_getAssociatedObject(control, &RevenantTextDragInteractionKey);
     return interaction ? interaction.session != nil : NO;
 }
 
-static UITextDragOptions CharonTextDragOptionsOf(id<UITextDraggable> control)
+static UITextDragOptions RevenantTextDragOptionsOf(id<UITextDraggable> control)
 {
-    NSNumber *options = objc_getAssociatedObject(control, &CharonTextDragOptionsKey);
+    NSNumber *options = objc_getAssociatedObject(control, &RevenantTextDragOptionsKey);
     return (UITextDragOptions)(options ? options.unsignedIntegerValue : UITextDragOptionsNone);
 }
 
-static void CharonSetTextDragOptions(id<UITextDraggable> control, UITextDragOptions options)
+static void RevenantSetTextDragOptions(id<UITextDraggable> control, UITextDragOptions options)
 {
-    objc_setAssociatedObject(control, &CharonTextDragOptionsKey, @(options),
+    objc_setAssociatedObject(control, &RevenantTextDragOptionsKey, @(options),
                              OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
-static id CharonTextDropDelegateOf(id<UITextDroppable> control)
+static id RevenantTextDropDelegateOf(id<UITextDroppable> control)
 {
-    CharonWeakDelegateBox *box = objc_getAssociatedObject(control, &CharonTextDropDelegateKey);
+    RevenantWeakDelegateBox *box = objc_getAssociatedObject(control, &RevenantTextDropDelegateKey);
     return box.target;
 }
 
-static void CharonSetTextDropDelegate(id<UITextDroppable> control, id<UITextDropDelegate> delegate)
+static void RevenantSetTextDropDelegate(id<UITextDroppable> control, id<UITextDropDelegate> delegate)
 {
     if (!delegate) {
-        objc_setAssociatedObject(control, &CharonTextDropDelegateKey, nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+        objc_setAssociatedObject(control, &RevenantTextDropDelegateKey, nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
         return;
     }
-    CharonWeakDelegateBox *box = [[CharonWeakDelegateBox alloc] init];
+    RevenantWeakDelegateBox *box = [[RevenantWeakDelegateBox alloc] init];
     box.target = delegate;
-    objc_setAssociatedObject(control, &CharonTextDropDelegateKey, box, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(control, &RevenantTextDropDelegateKey, box, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
-static UIDropInteraction *CharonTextDropInteraction(id<UITextDroppable> control)
+static UIDropInteraction *RevenantTextDropInteraction(id<UITextDroppable> control)
 {
-    UIDropInteraction *interaction = objc_getAssociatedObject(control, &CharonTextDropInteractionKey);
+    UIDropInteraction *interaction = objc_getAssociatedObject(control, &RevenantTextDropInteractionKey);
     if (interaction)
         return interaction;
     id<UIDropInteractionDelegate> delegate =
-        (id<UIDropInteractionDelegate>)[(UIView *)control charon_textDropDelegateAdaptor];
+        (id<UIDropInteractionDelegate>)[(UIView *)control revenant_textDropDelegateAdaptor];
     interaction = [[UIDropInteraction alloc] initWithDelegate:delegate];
-    objc_setAssociatedObject(control, &CharonTextDropInteractionKey, interaction,
+    objc_setAssociatedObject(control, &RevenantTextDropInteractionKey, interaction,
                              OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     return interaction;
 }
 
-static BOOL CharonIsTextDropActive(id<UITextDroppable> control)
+static BOOL RevenantIsTextDropActive(id<UITextDroppable> control)
 {
-    UIDropInteraction *interaction = objc_getAssociatedObject(control, &CharonTextDropInteractionKey);
+    UIDropInteraction *interaction = objc_getAssociatedObject(control, &RevenantTextDropInteractionKey);
     return interaction ? interaction.currentDrop != nil : NO;
 }
 
-#define CHARON_TEXT_DRAG_DROP_MEMBERS(ControlType)                                                              \
-    - (id<UITextDragDelegate>)textDragDelegate { return CharonTextDragDelegateOf(self); }                        \
-    - (void)setTextDragDelegate:(id<UITextDragDelegate>)d { CharonSetTextDragDelegate(self, d); }                  \
-    - (UIDragInteraction *)textDragInteraction { return CharonTextDragInteraction(self); }                         \
-    - (BOOL)isTextDragActive { return CharonIsTextDragActive(self); }                                             \
-    - (UITextDragOptions)textDragOptions { return CharonTextDragOptionsOf(self); }                                \
-    - (void)setTextDragOptions:(UITextDragOptions)o { CharonSetTextDragOptions(self, o); }                        \
-    - (id<UITextDropDelegate>)textDropDelegate { return CharonTextDropDelegateOf(self); }                          \
-    - (void)setTextDropDelegate:(id<UITextDropDelegate>)d { CharonSetTextDropDelegate(self, d); }                  \
-    - (UIDropInteraction *)textDropInteraction { return CharonTextDropInteraction(self); }                         \
-    - (BOOL)isTextDropActive { return CharonIsTextDropActive(self); }
+#define REVENANT_TEXT_DRAG_DROP_MEMBERS(ControlType)                                                              \
+    - (id<UITextDragDelegate>)textDragDelegate { return RevenantTextDragDelegateOf(self); }                        \
+    - (void)setTextDragDelegate:(id<UITextDragDelegate>)d { RevenantSetTextDragDelegate(self, d); }                  \
+    - (UIDragInteraction *)textDragInteraction { return RevenantTextDragInteraction(self); }                         \
+    - (BOOL)isTextDragActive { return RevenantIsTextDragActive(self); }                                             \
+    - (UITextDragOptions)textDragOptions { return RevenantTextDragOptionsOf(self); }                                \
+    - (void)setTextDragOptions:(UITextDragOptions)o { RevenantSetTextDragOptions(self, o); }                        \
+    - (id<UITextDropDelegate>)textDropDelegate { return RevenantTextDropDelegateOf(self); }                          \
+    - (void)setTextDropDelegate:(id<UITextDropDelegate>)d { RevenantSetTextDropDelegate(self, d); }                  \
+    - (UIDropInteraction *)textDropInteraction { return RevenantTextDropInteraction(self); }                         \
+    - (BOOL)isTextDropActive { return RevenantIsTextDropActive(self); }
 
-@implementation UITextView (CharonTextDragDrop11)
-CHARON_TEXT_DRAG_DROP_MEMBERS(UITextView)
+@implementation UITextView (RevenantTextDragDrop11)
+REVENANT_TEXT_DRAG_DROP_MEMBERS(UITextView)
 @end
 
-@implementation UITextField (CharonTextDragDrop11)
-CHARON_TEXT_DRAG_DROP_MEMBERS(UITextField)
+@implementation UITextField (RevenantTextDragDrop11)
+REVENANT_TEXT_DRAG_DROP_MEMBERS(UITextField)
 @end
 
-@implementation CharonTextDragAdaptor
+@implementation RevenantTextDragAdaptor
 @synthesize control = _control;
 
 - (instancetype)initWithControl:(UIView<UITextDraggable, UITextDroppable> *)control
@@ -174,16 +174,16 @@ CHARON_TEXT_DRAG_DROP_MEMBERS(UITextField)
 - (NSArray<UIDragItem *> *)dragInteraction:(UIDragInteraction *)interaction
                    itemsForBeginningSession:(id<UIDragSession>)session
 {
-    return [self charon_itemsForDragSession:session];
+    return [self revenant_itemsForDragSession:session];
 }
 
-- (NSArray<UIDragItem *> *)charon_itemsForDragSession:(id<UIDragSession>)session
+- (NSArray<UIDragItem *> *)revenant_itemsForDragSession:(id<UIDragSession>)session
 {
     id<UITextDragDelegate> delegate = self.control.textDragDelegate;
     SEL ask = @selector(textDraggableView:itemsForDrag:);
     if (![delegate respondsToSelector:ask])
         return nil;
-    CharonTextDragRequest *request = [[CharonTextDragRequest alloc] initWithSession:session];
+    RevenantTextDragRequest *request = [[RevenantTextDragRequest alloc] initWithSession:session];
     if ([self.control isKindOfClass:[UITextView class]]) {
         UITextView *text = (UITextView *)self.control;
         UITextPosition *start = [text positionFromPosition:text.beginningOfDocument offset:0];
@@ -195,7 +195,7 @@ CHARON_TEXT_DRAG_DROP_MEMBERS(UITextField)
     return items.count ? items : nil;
 }
 
-- (UITargetedDragPreview *)charon_previewForLiftingItem:(UIDragItem *)item session:(id<UIDragSession>)session
+- (UITargetedDragPreview *)revenant_previewForLiftingItem:(UIDragItem *)item session:(id<UIDragSession>)session
 {
     id<UITextDragDelegate> delegate = self.control.textDragDelegate;
     SEL ask = @selector(textDraggableView:dragPreviewForLiftingItem:session:);
@@ -225,7 +225,7 @@ CHARON_TEXT_DRAG_DROP_MEMBERS(UITextField)
                                                                                                           CGRectGetMidY([text bounds]))]];
 }
 
-- (void)charon_willAnimateLiftWithSession:(id<UIDragSession>)session
+- (void)revenant_willAnimateLiftWithSession:(id<UIDragSession>)session
 {
     id<UITextDragDelegate> delegate = self.control.textDragDelegate;
     SEL preview = @selector(textDraggableView:dragPreviewForLiftingItem:session:);
@@ -240,7 +240,7 @@ CHARON_TEXT_DRAG_DROP_MEMBERS(UITextField)
         ((void (*)(id, SEL, id, id))objc_msgSend)(delegate, willBegin, self.control, session);
 }
 
-- (void)charon_dragSessionDidEnd:(id<UIDragSession>)session withOperation:(UIDropOperation)operation
+- (void)revenant_dragSessionDidEnd:(id<UIDragSession>)session withOperation:(UIDropOperation)operation
 {
     id<UITextDragDelegate> delegate = self.control.textDragDelegate;
     SEL ask = @selector(textDraggableView:dragSessionDidEnd:withOperation:);
@@ -250,7 +250,7 @@ CHARON_TEXT_DRAG_DROP_MEMBERS(UITextField)
 
 @end
 
-@implementation CharonTextDropAdaptor
+@implementation RevenantTextDropAdaptor
 @synthesize control = _control;
 
 - (instancetype)initWithControl:(UIView<UITextDraggable, UITextDroppable> *)control
@@ -260,24 +260,24 @@ CHARON_TEXT_DRAG_DROP_MEMBERS(UITextField)
     return self;
 }
 
-- (BOOL)charon_canHandleSession:(id<UIDropSession>)session
+- (BOOL)revenant_canHandleSession:(id<UIDropSession>)session
 {
     id<UITextDropDelegate> delegate = self.control.textDropDelegate;
     SEL ask = @selector(textDroppableView:willBecomeEditableForDrop:);
     if (![delegate respondsToSelector:ask])
         return NO;
-    CharonTextDropRequest *request = [[CharonTextDropRequest alloc] initWithSession:session];
+    RevenantTextDropRequest *request = [[RevenantTextDropRequest alloc] initWithSession:session];
     UITextDropEditability editability = ((UITextDropEditability (*)(id, SEL, id, id))objc_msgSend)(delegate, ask, self.control, request);
     return editability == UITextDropEditabilityYes;
 }
 
-- (void)charon_updateForSession:(id<UIDropSession>)session
+- (void)revenant_updateForSession:(id<UIDropSession>)session
 {
     id<UITextDropDelegate> delegate = self.control.textDropDelegate;
     SEL proposal = @selector(textDroppableView:proposalForDrop:);
     SEL perform = @selector(textDroppableView:willPerformDrop:);
     SEL preview = @selector(textDroppableView:previewForDroppingAllItemsWithDefault:);
-    CharonTextDropRequest *request = [[CharonTextDropRequest alloc] initWithSession:session];
+    RevenantTextDropRequest *request = [[RevenantTextDropRequest alloc] initWithSession:session];
     if ([delegate respondsToSelector:proposal]) {
         UITextDropProposal *answer = ((UITextDropProposal * (*)(id, SEL, id, id))objc_msgSend)(delegate, proposal, self.control, request);
         request.proposal = answer;
@@ -288,7 +288,7 @@ CHARON_TEXT_DRAG_DROP_MEMBERS(UITextField)
         ((UITargetedDragPreview * (*)(id, SEL, id, id))objc_msgSend)(delegate, preview, self.control, (id)[UITargetedDragPreview class]);
 }
 
-- (void)charon_sessionDidEnter:(id<UIDropSession>)session
+- (void)revenant_sessionDidEnter:(id<UIDropSession>)session
 {
     id<UITextDropDelegate> delegate = self.control.textDropDelegate;
     SEL ask = @selector(textDroppableView:dropSessionDidEnter:);
@@ -296,7 +296,7 @@ CHARON_TEXT_DRAG_DROP_MEMBERS(UITextField)
         ((void (*)(id, SEL, id, id))objc_msgSend)(delegate, ask, self.control, session);
 }
 
-- (void)charon_sessionDidExit:(id<UIDropSession>)session
+- (void)revenant_sessionDidExit:(id<UIDropSession>)session
 {
     id<UITextDropDelegate> delegate = self.control.textDropDelegate;
     SEL ask = @selector(textDroppableView:dropSessionDidExit:);
@@ -304,7 +304,7 @@ CHARON_TEXT_DRAG_DROP_MEMBERS(UITextField)
         ((void (*)(id, SEL, id, id))objc_msgSend)(delegate, ask, self.control, session);
 }
 
-- (void)charon_sessionDidEnd:(id<UIDropSession>)session
+- (void)revenant_sessionDidEnd:(id<UIDropSession>)session
 {
     id<UITextDropDelegate> delegate = self.control.textDropDelegate;
     SEL ask = @selector(textDroppableView:dropSessionDidEnd:);
@@ -314,7 +314,7 @@ CHARON_TEXT_DRAG_DROP_MEMBERS(UITextField)
 
 @end
 
-@implementation CharonTextDragRequest
+@implementation RevenantTextDragRequest
 @synthesize session = _session;
 @synthesize range = _range;
 @synthesize suggested = _suggested;
@@ -356,7 +356,7 @@ CHARON_TEXT_DRAG_DROP_MEMBERS(UITextField)
 
 @end
 
-@implementation CharonTextDropRequest
+@implementation RevenantTextDropRequest
 @synthesize session = _session;
 @synthesize position = _position;
 @synthesize proposal = _proposal;

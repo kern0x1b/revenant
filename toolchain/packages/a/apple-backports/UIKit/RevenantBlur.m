@@ -1,26 +1,26 @@
-#import "CharonBlur.h"
+#import "RevenantBlur.h"
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
 
-CharonBlurParameters charon_blur_parameters(UIBlurEffectStyle style)
+RevenantBlurParameters revenant_blur_parameters(UIBlurEffectStyle style)
 {
     switch ((NSInteger)style) {
     case 0:
-        return (CharonBlurParameters){20, 1.8, 0.97, 0.97, 0.97, 0.82};
+        return (RevenantBlurParameters){20, 1.8, 0.97, 0.97, 0.97, 0.82};
     case 2:
-        return (CharonBlurParameters){20, 1.8, 0.11, 0.11, 0.11, 0.73};
+        return (RevenantBlurParameters){20, 1.8, 0.11, 0.11, 0.11, 0.73};
     case 5:
-        return (CharonBlurParameters){20, 1.8, 0.97, 0.97, 0.97, 0.82};
+        return (RevenantBlurParameters){20, 1.8, 0.97, 0.97, 0.97, 0.82};
     case 3:
     case 8: case 10: case 12: case 14: case 16: case 18: case 20: case 22: case 24: case 26: case 28:
-        return (CharonBlurParameters){20, 1.8, 0.11, 0.11, 0.11, 0.73};
+        return (RevenantBlurParameters){20, 1.8, 0.11, 0.11, 0.11, 0.73};
     default:
-        return (CharonBlurParameters){30, 1.8, 1.0, 1.0, 1.0, 0.3};
+        return (RevenantBlurParameters){30, 1.8, 1.0, 1.0, 1.0, 0.3};
     }
 }
 
-static void charon_box_pass(uint8_t *pixels, size_t width, size_t height, size_t rowBytes, int diameter, BOOL horizontal, uint8_t *scratch)
+static void revenant_box_pass(uint8_t *pixels, size_t width, size_t height, size_t rowBytes, int diameter, BOOL horizontal, uint8_t *scratch)
 {
     int radius = diameter / 2;
     size_t length = horizontal ? width : height;
@@ -48,7 +48,7 @@ static void charon_box_pass(uint8_t *pixels, size_t width, size_t height, size_t
     }
 }
 
-void charon_blur_pixels(uint8_t *pixels, size_t width, size_t height, size_t rowBytes, CGFloat sigma, CGFloat saturation, CGFloat tintRed, CGFloat tintGreen, CGFloat tintBlue, CGFloat tintAlpha)
+void revenant_blur_pixels(uint8_t *pixels, size_t width, size_t height, size_t rowBytes, CGFloat sigma, CGFloat saturation, CGFloat tintRed, CGFloat tintGreen, CGFloat tintBlue, CGFloat tintAlpha)
 {
     if (!width || !height)
         return;
@@ -58,8 +58,8 @@ void charon_blur_pixels(uint8_t *pixels, size_t width, size_t height, size_t row
         diameter = 3;
     uint8_t *scratch = malloc(width > height ? width : height);
     for (int pass = 0; pass < 3; pass++) {
-        charon_box_pass(pixels, width, height, rowBytes, diameter, YES, scratch);
-        charon_box_pass(pixels, width, height, rowBytes, diameter, NO, scratch);
+        revenant_box_pass(pixels, width, height, rowBytes, diameter, YES, scratch);
+        revenant_box_pass(pixels, width, height, rowBytes, diameter, NO, scratch);
     }
     free(scratch);
     float matrix[3][3] = {

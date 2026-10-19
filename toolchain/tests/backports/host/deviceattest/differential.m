@@ -4,7 +4,7 @@
 #import <DeviceCheck/DeviceCheck.h>
 #import "check.h"
 
-@interface CharonHostDCAppAttestService : NSObject
+@interface RevenantHostDCAppAttestService : NSObject
 + (DCAppAttestService *)sharedService;
 - (BOOL)isSupported;
 - (void)generateKeyWithCompletionHandler:(void (^)(NSString *keyId, NSError *error))completionHandler;
@@ -116,55 +116,55 @@ int main(void)
 {
     setvbuf(stdout, NULL, _IOLBF, 0);
 
-    Class port_class = NSClassFromString(@"CharonHostDCAppAttestService");
+    Class port_class = NSClassFromString(@"RevenantHostDCAppAttestService");
     Class system_class = NSClassFromString(@"DCAppAttestService");
-    charon_check(port_class != Nil && system_class != Nil, "both classes are there to ask",
+    revenant_check(port_class != Nil && system_class != Nil, "both classes are there to ask",
                  [NSString stringWithFormat:@"port %@, host %@", port_class, system_class]);
 
     id<Shared> port_name = (id<Shared>)port_class;
     id<Shared> system_name = (id<Shared>)system_class;
     id port = [port_name sharedService];
     id host = [system_name sharedService];
-    charon_check(port != nil && host != nil, "both hand out a service", @"one of them is nil");
-    charon_check([port_name sharedService] == port, "the port's service is one object, asked twice",
+    revenant_check(port != nil && host != nil, "both hand out a service", @"one of them is nil");
+    revenant_check([port_name sharedService] == port, "the port's service is one object, asked twice",
                  [NSString stringWithFormat:@"%@", [port_name sharedService]]);
-    charon_check([system_name sharedService] == host, "and so is the host's, which is the control",
+    revenant_check([system_name sharedService] == host, "and so is the host's, which is the control",
                  [NSString stringWithFormat:@"%@", [system_name sharedService]]);
 
     BOOL (*send)(id, SEL) = (BOOL (*)(id, SEL))objc_msgSend;
     BOOL port_supported = send(port, NSSelectorFromString(@"isSupported"));
     BOOL host_supported = send(host, NSSelectorFromString(@"isSupported"));
-    charon_check(port_supported == host_supported, "the answer to isSupported is the host's",
+    revenant_check(port_supported == host_supported, "the answer to isSupported is the host's",
                  [NSString stringWithFormat:@"port %d, host %d", (int)port_supported, (int)host_supported]);
-    charon_check(port_supported == NO, "and it is NO, a device that does not provide the service",
+    revenant_check(port_supported == NO, "and it is NO, a device that does not provide the service",
                  [NSString stringWithFormat:@"port %d", (int)port_supported]);
 
     Answer *port_key = ask_port_key(port);
     Answer *host_key = ask_host_key(host);
-    charon_check(port_key.code == host_key.code, "a key is not made, with the code the host gives",
+    revenant_check(port_key.code == host_key.code, "a key is not made, with the code the host gives",
                  [NSString stringWithFormat:@"port %@, host %@", describe(port_key), describe(host_key)]);
-    charon_check(port_key.code == DCErrorFeatureUnsupported, "the code is the one the header defines as the feature being unavailable",
+    revenant_check(port_key.code == DCErrorFeatureUnsupported, "the code is the one the header defines as the feature being unavailable",
                  [NSString stringWithFormat:@"port %lu", port_key.code]);
 
     Answer *port_attest = ask_port_attest(port);
     Answer *host_attest = ask_host_attest(host);
-    charon_check(port_attest.code == host_attest.code, "nothing is attested, with the code the host gives",
+    revenant_check(port_attest.code == host_attest.code, "nothing is attested, with the code the host gives",
                  [NSString stringWithFormat:@"port %@, host %@", describe(port_attest), describe(host_attest)]);
-    charon_check(port_attest.code == DCErrorInvalidInput, "which is DCErrorInvalidInput for a key no device made",
+    revenant_check(port_attest.code == DCErrorInvalidInput, "which is DCErrorInvalidInput for a key no device made",
                  [NSString stringWithFormat:@"port %lu", port_attest.code]);
 
     Answer *port_assertion = ask_port_assertion(port);
     Answer *host_assertion = ask_host_assertion(host);
-    charon_check(port_assertion.code == host_assertion.code, "nothing is signed, with the code the host gives",
+    revenant_check(port_assertion.code == host_assertion.code, "nothing is signed, with the code the host gives",
                  [NSString stringWithFormat:@"port %@, host %@", describe(port_assertion), describe(host_assertion)]);
-    charon_check(port_assertion.code == DCErrorInvalidInput, "which is DCErrorInvalidInput as well",
+    revenant_check(port_assertion.code == DCErrorInvalidInput, "which is DCErrorInvalidInput as well",
                  [NSString stringWithFormat:@"port %lu", port_assertion.code]);
 
     [port generateKeyWithCompletionHandler:nil];
     [port attestKey:KeyId clientDataHash:[NSMutableData dataWithLength:32] completionHandler:nil];
     [port generateAssertion:KeyId clientDataHash:[NSMutableData dataWithLength:32] completionHandler:nil];
-    charon_check(YES, "a nil completion handler is ignored by all three", @"raised");
+    revenant_check(YES, "a nil completion handler is ignored by all three", @"raised");
 
-    printf("checks=%d failures=%d\n", charon_checks, charon_failures);
-    return charon_failures == 0 ? 0 : 1;
+    printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
+    return revenant_failures == 0 ? 0 : 1;
 }

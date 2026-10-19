@@ -2,10 +2,10 @@
 # run.sh: type-check the two table snippets against the module this tree builds - positive must compile,
 # negative must be rejected. The positive one says a table can be written over a collection of rows and
 # that the row value reaches through ForEach and Group as the element's own type; the negative one says a
-# Text is not table content. Build the module first (eidolon/build.sh), which writes eidolon/out/mods.
+# Text is not table content. Build the module first (SwiftUI/build.sh), which writes SwiftUI/out/mods.
 set -u
 ROOT=$(cd "$(dirname "$0")/../../.." && pwd)
-O=$ROOT/eidolon/out
+O=$ROOT/SwiftUI/out
 # pkg-env.sh finds the packages under $PWD, so it is read from the repository root, the way build.sh does
 cd "$ROOT"
 source ./pkg-env.sh
@@ -13,10 +13,10 @@ source ./pkg-env.sh
 # snippet that passed. Say so and fail.
 if [ -z "${SWIFTC:-}" ] || [ ! -x "${SWIFTC:-}" ]; then
   echo "tabletests: no swiftc: pkg-env.sh set SWIFTC='${SWIFTC:-}'" >&2
-  echo "tabletests: install rtpkg's packages into the shared store, then run eidolon/build.sh, after eidolon/build.sh" >&2
+  echo "tabletests: install rtpkg's packages into the shared store, then run SwiftUI/build.sh, after SwiftUI/build.sh" >&2
   exit 2
 fi
-cd "$ROOT/eidolon"
+cd "$ROOT/SwiftUI"
 
 # The positive snippet must compile, and the negative one must be rejected for the reason it exists:
 # a Text is not table content, and a bare `if` is not a widget bundle member. Anything else -- a snippet that compiles, or one rejected for an
@@ -28,7 +28,7 @@ check_one() {
   # shellcheck disable=SC2086
   out=$("$SWIFTC" $PKGFLAGS $OCFLAGS -I "$O/mods" -module-cache-path "$O/mc" -enforce-exclusivity=unchecked \
         -suppress-warnings -typecheck -parse-as-library -module-name TableChecks $extra \
-        "$ROOT/eidolon/tools/tabletests/$name.swift" 2>&1)
+        "$ROOT/SwiftUI/tools/tabletests/$name.swift" 2>&1)
   if [ $? -ne 0 ] && [ -z "$out" ]; then
     printf '%-9s FAIL -- the compiler exited without saying why\n' "$name:"
     status=1

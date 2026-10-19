@@ -9,7 +9,7 @@
 #include <algorithm>
 #include <array>
 
-namespace shade::kernel_iokit::audio {
+namespace emulator::kernel_iokit::audio {
 namespace {
 
     constexpr std::uint32_t four_cc(

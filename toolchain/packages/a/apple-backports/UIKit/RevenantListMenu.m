@@ -1,14 +1,14 @@
-#import "CharonListMenu.h"
+#import "RevenantListMenu.h"
 #import <objc/runtime.h>
 #import <objc/message.h>
 
-@interface CharonListMenuDelegate : NSObject <UIContextMenuInteractionDelegate>
+@interface RevenantListMenuDelegate : NSObject <UIContextMenuInteractionDelegate>
 - (instancetype)initWithView:(UIScrollView *)view;
 @end
 
-static const char charon_interaction_key, charon_delegate_key;
+static const char revenant_interaction_key, revenant_delegate_key;
 
-@implementation CharonListMenuDelegate {
+@implementation RevenantListMenuDelegate {
 @private
     __weak UIScrollView *_view;
     NSMutableDictionary *_paths;
@@ -76,20 +76,20 @@ static const char charon_interaction_key, charon_delegate_key;
 
 @end
 
-UIContextMenuInteraction *charon_list_menu_interaction(UIScrollView *view, BOOL create)
+UIContextMenuInteraction *revenant_list_menu_interaction(UIScrollView *view, BOOL create)
 {
-    UIContextMenuInteraction *held = objc_getAssociatedObject(view, &charon_interaction_key);
+    UIContextMenuInteraction *held = objc_getAssociatedObject(view, &revenant_interaction_key);
     if (held || !create)
         return held;
-    CharonListMenuDelegate *delegate = [[CharonListMenuDelegate alloc] initWithView:view];
+    RevenantListMenuDelegate *delegate = [[RevenantListMenuDelegate alloc] initWithView:view];
     held = [[UIContextMenuInteraction alloc] initWithDelegate:delegate];
-    objc_setAssociatedObject(view, &charon_delegate_key, delegate, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-    objc_setAssociatedObject(view, &charon_interaction_key, held, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(view, &revenant_delegate_key, delegate, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(view, &revenant_interaction_key, held, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     [view addInteraction:held];
     return held;
 }
 
-static void charon_hook_delegate(Class cls, SEL setter, NSArray *selectors)
+static void revenant_hook_delegate(Class cls, SEL setter, NSArray *selectors)
 {
     Method method = class_getInstanceMethod(cls, setter);
     if (!method)
@@ -99,22 +99,22 @@ static void charon_hook_delegate(Class cls, SEL setter, NSArray *selectors)
         original(view, setter, delegate);
         for (NSString *name in selectors) {
             if ([delegate respondsToSelector:NSSelectorFromString(name)]) {
-                charon_list_menu_interaction(view, YES);
+                revenant_list_menu_interaction(view, YES);
                 return;
             }
         }
     }), method_getTypeEncoding(method));
 }
 
-@interface CharonListMenuHooks : NSObject
+@interface RevenantListMenuHooks : NSObject
 @end
 
-@implementation CharonListMenuHooks
+@implementation RevenantListMenuHooks
 
 + (void)load
 {
-    charon_hook_delegate([UITableView class], @selector(setDelegate:), @[@"tableView:contextMenuConfigurationForRowAtIndexPath:point:"]);
-    charon_hook_delegate([UICollectionView class], @selector(setDelegate:), @[@"collectionView:contextMenuConfigurationForItemAtIndexPath:point:"]);
+    revenant_hook_delegate([UITableView class], @selector(setDelegate:), @[@"tableView:contextMenuConfigurationForRowAtIndexPath:point:"]);
+    revenant_hook_delegate([UICollectionView class], @selector(setDelegate:), @[@"collectionView:contextMenuConfigurationForItemAtIndexPath:point:"]);
 }
 
 @end

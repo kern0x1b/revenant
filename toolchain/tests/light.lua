@@ -1,7 +1,7 @@
 function main(checkout)
-    local charon = path.absolute(checkout or path.directory(os.scriptdir()))
-    local addon = path.join(charon, "tests", "addon")
-    local modules = path.join(charon, "modules")
+    local revenant = path.absolute(checkout or path.directory(os.scriptdir()))
+    local addon = path.join(revenant, "tests", "addon")
+    local modules = path.join(revenant, "modules")
     local names = {"descriptions_test", "checkout_test", "registry_test", "dependency_test", "swift_rule_test", "workspace_test"}
     if os.isfile(path.join(addon, "lock_test.lua")) then
         table.insert(names, "lock_test")
@@ -53,11 +53,11 @@ function main(checkout)
         }
         if not ok then failed = failed + 1 end
     end
-    local corpus_lua_test = path.join(charon, "tools", "corpus", "tests", "corpus_test.lua")
+    local corpus_lua_test = path.join(revenant, "tools", "corpus", "tests", "corpus_test.lua")
     if os.isfile(corpus_lua_test) then
         local ok = try {
             function ()
-                os.execv(os.programfile(), {"l", corpus_lua_test}, {stdout = os.nuldev(), stderr = os.nuldev(), curdir = charon})
+                os.execv(os.programfile(), {"l", corpus_lua_test}, {stdout = os.nuldev(), stderr = os.nuldev(), curdir = revenant})
                 print("corpus_test.lua: OK")
                 return true
             end,
@@ -69,12 +69,12 @@ function main(checkout)
         }
         if not ok then failed = failed + 1 end
     end
-    if os.isfile(path.join(charon, "tools", "found", "xmake.lua")) and os.isfile(path.join(charon, "tests", "gen", "render_headers_test.lua")) then
-        local found = path.join(charon, "tools", "found")
+    if os.isfile(path.join(revenant, "tools", "found", "xmake.lua")) and os.isfile(path.join(revenant, "tests", "gen", "render_headers_test.lua")) then
+        local found = path.join(revenant, "tools", "found")
         local built = try {
             function ()
-                os.execv(os.programfile(), {"f", "-P", found, "-y"}, {stdout = os.nuldev(), stderr = os.nuldev(), curdir = charon})
-                os.execv(os.programfile(), {"-P", found}, {stdout = os.nuldev(), stderr = os.nuldev(), curdir = charon})
+                os.execv(os.programfile(), {"f", "-P", found, "-y"}, {stdout = os.nuldev(), stderr = os.nuldev(), curdir = revenant})
+                os.execv(os.programfile(), {"-P", found}, {stdout = os.nuldev(), stderr = os.nuldev(), curdir = revenant})
                 return true
             end,
             catch {
@@ -100,11 +100,11 @@ function main(checkout)
                            "measured_test",
                            "functions_test", "usr_include_test", "probe_test",
                            "swift_name_render_test", "reexport_import_test", "usr_headers_test", "vfs_overlay_test"}) do
-        local suite = path.join(charon, "tests", "gen", name .. ".lua")
+        local suite = path.join(revenant, "tests", "gen", name .. ".lua")
         if os.isfile(suite) then
             local ok = try {
                 function ()
-                    os.execv(os.programfile(), {"l", suite}, {stdout = os.nuldev(), stderr = os.nuldev(), curdir = charon})
+                    os.execv(os.programfile(), {"l", suite}, {stdout = os.nuldev(), stderr = os.nuldev(), curdir = revenant})
                     print(name .. ": OK")
                     return true
                 end,

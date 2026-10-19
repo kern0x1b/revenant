@@ -14,7 +14,7 @@ here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 sources=${SOURCES:-$here/../../../../packages/a/apple-backports/Foundation}
 harness=${HARNESS:-$here/../../device}
-build=${BUILD:-$(runs_fresh charon-foundationbatch)}
+build=${BUILD:-$(runs_fresh revenant-foundationbatch)}
 sdk=$(xcrun --show-sdk-path)
 target="-target arm64-apple-ios15.0-macabi -isysroot $sdk -iframework $sdk/System/iOSSupport/System/Library/Frameworks"
 quiet="-Wno-deprecated-declarations -Wno-unguarded-availability-new -Wno-incomplete-implementation -Wno-objc-protocol-method-implementation -Wno-nullability-completeness"
@@ -28,7 +28,7 @@ for file in $files; do
         --declarations="$build/prefixed/declarations.h" -fobjc-arc $target $quiet -- "$build/plain/$file.o"
     xcrun clang -fobjc-arc -fvisibility=hidden $target $quiet -I"$sources" \
         -include "$build/prefixed/declarations.h" -c "$build/prefixed/$file" -o "$build/renamed/$file.o"
-    perl -0777 -pi -e 's/__objc_catlist\0\0/__charon_catlist/g' "$build/renamed/$file.o"
+    perl -0777 -pi -e 's/__objc_catlist\0\0/__revenant_catlist/g' "$build/renamed/$file.o"
     renamed="$renamed $build/renamed/$file.o"
 done
 xcrun clang -fobjc-arc $target $quiet -I"$harness" "$here/test.m" "$here/../foundation2/host-attach.c" \

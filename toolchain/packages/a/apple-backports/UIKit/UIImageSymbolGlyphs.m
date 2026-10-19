@@ -1,6 +1,6 @@
-#import "CharonSymbols.h"
-#import "CharonSymbolMetrics.h"
-#import "CharonSymbolGlyphs.h"
+#import "RevenantSymbols.h"
+#import "RevenantSymbolMetrics.h"
+#import "RevenantSymbolGlyphs.h"
 #include <math.h>
 
 typedef struct {
@@ -11,9 +11,9 @@ typedef struct {
     BOOL clear;
     int depth;
     CGRect *bounds;
-} CharonScene;
+} RevenantScene;
 
-static NSArray<NSString *> *charon_tokens(NSString *script)
+static NSArray<NSString *> *revenant_tokens(NSString *script)
 {
     static NSMutableDictionary *cache;
     static dispatch_once_t once;
@@ -31,23 +31,23 @@ static NSArray<NSString *> *charon_tokens(NSString *script)
     }
 }
 
-NSString *charon_glyph_script(NSString *name);
+NSString *revenant_glyph_script(NSString *name);
 
 
-static NSDictionary<NSString *, NSString *> *charon_glyph_table(void)
+static NSDictionary<NSString *, NSString *> *revenant_glyph_table(void)
 {
     static NSDictionary *table;
     static dispatch_once_t once;
     dispatch_once(&once, ^{
         NSMutableDictionary *built = [NSMutableDictionary dictionary];
-        for (size_t i = 0; i < sizeof CharonGlyphs / sizeof CharonGlyphs[0]; i++)
-            built[@(CharonGlyphs[i].name)] = @(CharonGlyphs[i].script);
+        for (size_t i = 0; i < sizeof RevenantGlyphs / sizeof RevenantGlyphs[0]; i++)
+            built[@(RevenantGlyphs[i].name)] = @(RevenantGlyphs[i].script);
         table = built;
     });
     return table;
 }
 
-static NSString *charon_core_box(NSString *core)
+static NSString *revenant_core_box(NSString *core)
 {
     static NSDictionary *boxes;
     static dispatch_once_t once;
@@ -62,7 +62,7 @@ static NSString *charon_core_box(NSString *core)
     return boxes[core] ?: @"26 26 48 48";
 }
 
-static NSString *charon_badge_core(NSString *kind)
+static NSString *revenant_badge_core(NSString *kind)
 {
     static NSDictionary *cores;
     static dispatch_once_t once;
@@ -73,9 +73,9 @@ static NSString *charon_badge_core(NSString *kind)
     return cores[kind];
 }
 
-NSString *charon_glyph_script(NSString *name)
+NSString *revenant_glyph_script(NSString *name)
 {
-    NSString *exact = charon_glyph_table()[name];
+    NSString *exact = revenant_glyph_table()[name];
     if (exact)
         return exact;
     NSArray<NSString *> *parts = [name componentsSeparatedByString:@"."];
@@ -133,10 +133,10 @@ NSString *charon_glyph_script(NSString *name)
         BOOL solid = [last isEqualToString:@"fill"];
         NSUInteger drop = solid ? 2 : 1;
         NSString *core = [[parts subarrayWithRange:NSMakeRange(0, count - drop)] componentsJoinedByString:@"."];
-        if (!core.length || !charon_glyph_script(core))
+        if (!core.length || !revenant_glyph_script(core))
             continue;
         NSString *outline = [shapeName isEqualToString:@"circle"] ? @"o 50 50 50 50" : [shapeName isEqualToString:@"square"] ? @"r 0 0 100 100 24" : [shapeName isEqualToString:@"rectangle"] ? @"r 0 6 100 88 18" : @"m 50 0 l 100 50 l 50 100 l 0 50 z";
-        NSString *box = charon_core_box(core);
+        NSString *box = revenant_core_box(core);
         if (solid)
             return [NSString stringWithFormat:@"%@ B K g %@ %@ 0", outline, core, box];
         return [NSString stringWithFormat:@"%@ S g %@ %@ 0", outline, core, box];
@@ -144,7 +144,7 @@ NSString *charon_glyph_script(NSString *name)
     if ([last isEqualToString:@"slash"] || ([last isEqualToString:@"fill"] && [afterLast isEqualToString:@"slash"])) {
         BOOL solid = [last isEqualToString:@"fill"];
         NSString *base = [[parts subarrayWithRange:NSMakeRange(0, count - (solid ? 2 : 1))] componentsJoinedByString:@"."];
-        if (charon_glyph_script(base))
+        if (revenant_glyph_script(base))
             return [NSString stringWithFormat:@"%@g %@ 0 0 100 100 0 K w 2.6 m 6 6 l 94 94 S k w 1 m 6 6 l 94 94 S", solid ? @"!f " : @"", base];
     }
     for (NSUInteger i = 1; i + 1 < count; i++) {
@@ -155,14 +155,14 @@ NSString *charon_glyph_script(NSString *name)
         NSString *kind = [[parts subarrayWithRange:NSMakeRange(i + 1, count - i - 1)] componentsJoinedByString:@"."];
         if ([kind hasSuffix:@".fill"] && ![kind isEqualToString:@"fill"])
             kind = [kind substringToIndex:kind.length - 5];
-        NSString *core = charon_badge_core(kind);
+        NSString *core = revenant_badge_core(kind);
         if (triangle && [kind isEqualToString:@"exclamationmark"]) {
-            NSString *baseScript = charon_glyph_script(base) ? base : nil;
+            NSString *baseScript = revenant_glyph_script(base) ? base : nil;
             if (!baseScript)
                 return nil;
             return [NSString stringWithFormat:@"g %@ 0 0 100 92 0 K m 76 44 l 100 96 l 52 96 z Y k m 76 46 l 96 92 l 56 92 z B K m 76 60 l 76 72 S d 76 82 k", baseScript];
         }
-        if (!core || !charon_glyph_script(base) || (core.length && !charon_glyph_script(core)))
+        if (!core || !revenant_glyph_script(base) || (core.length && !revenant_glyph_script(core)))
             continue;
         NSString *first = parts[0];
         double x = 76, y = 76;
@@ -177,13 +177,13 @@ NSString *charon_glyph_script(NSString *name)
     }
     if ([last isEqualToString:@"fill"]) {
         NSString *base = [name substringToIndex:name.length - 5];
-        if (charon_glyph_script(base))
+        if (revenant_glyph_script(base))
             return [NSString stringWithFormat:@"!f g %@ 0 0 100 100 0", base];
     }
     return nil;
 }
 
-static void charon_arc(CGMutablePathRef path, const CGAffineTransform *map, double cx, double cy, double r, double from, double to, BOOL connect)
+static void revenant_arc(CGMutablePathRef path, const CGAffineTransform *map, double cx, double cy, double r, double from, double to, BOOL connect)
 {
     double span = to - from;
     int pieces = (int)ceil(fabs(span) / 90);
@@ -204,7 +204,7 @@ static void charon_arc(CGMutablePathRef path, const CGAffineTransform *map, doub
     }
 }
 
-static void charon_head(CGMutablePathRef path, const CGAffineTransform *map, double x, double y, double degrees, double length)
+static void revenant_head(CGMutablePathRef path, const CGAffineTransform *map, double x, double y, double degrees, double length)
 {
     double angle = degrees * M_PI / 180, spread = 40 * M_PI / 180;
     CGPathMoveToPoint(path, map, x + length * cos(angle + M_PI - spread), y + length * sin(angle + M_PI - spread));
@@ -212,9 +212,9 @@ static void charon_head(CGMutablePathRef path, const CGAffineTransform *map, dou
     CGPathAddLineToPoint(path, map, x + length * cos(angle + M_PI + spread), y + length * sin(angle + M_PI + spread));
 }
 
-static void charon_run(NSString *script, CharonScene scene);
+static void revenant_run(NSString *script, RevenantScene scene);
 
-static void charon_draw_path(CharonScene *scene, CGMutablePathRef path, unichar style, BOOL open, CGFloat multiplier, const CGFloat *dash)
+static void revenant_draw_path(RevenantScene *scene, CGMutablePathRef path, unichar style, BOOL open, CGFloat multiplier, const CGFloat *dash)
 {
     if (scene->bounds) {
         if (!scene->clear && style != 'X' && style != 'Y')
@@ -249,11 +249,11 @@ static void charon_draw_path(CharonScene *scene, CGMutablePathRef path, unichar 
     CGContextRestoreGState(context);
 }
 
-static void charon_run(NSString *script, CharonScene scene)
+static void revenant_run(NSString *script, RevenantScene scene)
 {
     if (!script || scene.depth > 6)
         return;
-    NSArray *tokens = charon_tokens(script);
+    NSArray *tokens = revenant_tokens(script);
     NSUInteger count = tokens.count, index = 0;
     CGMutablePathRef path = CGPathCreateMutable();
     CGAffineTransform map = scene.map;
@@ -290,7 +290,7 @@ static void charon_run(NSString *script, CharonScene scene)
         for (int i = 0; i < arguments && index < count; i++)
             v[i] = strtod([tokens[index++] UTF8String], NULL);
         if ([token isEqualToString:@"g"]) {
-            CharonScene child = scene;
+            RevenantScene child = scene;
             child.depth++;
             CGRect rect = CGRectMake(v[0], v[1], v[2], v[3]);
             CGAffineTransform placed = CGAffineTransformTranslate(map, rect.origin.x, rect.origin.y);
@@ -302,7 +302,7 @@ static void charon_run(NSString *script, CharonScene scene)
             }
             child.map = placed;
             child.line = scene.line * multiplier;
-            charon_run(charon_glyph_script(nameArgument), child);
+            revenant_run(revenant_glyph_script(nameArgument), child);
             continue;
         }
         switch (op) {
@@ -313,18 +313,18 @@ static void charon_run(NSString *script, CharonScene scene)
         case 'z': CGPathCloseSubpath(path); open = NO; break;
         case 'o': CGPathAddEllipseInRect(path, &map, CGRectMake(v[0] - v[2], v[1] - v[3], 2 * v[2], 2 * v[3])); hasPath = YES; break;
         case 'r': CGPathAddRoundedRect(path, &map, CGRectMake(v[0], v[1], v[2], v[3]), v[4], v[4]); hasPath = YES; break;
-        case 'a': charon_arc(path, &map, v[0], v[1], v[2], v[3], v[4], NO); open = YES; hasPath = YES; break;
-        case 'A': charon_arc(path, &map, v[0], v[1], v[2], v[3], v[4], YES); break;
+        case 'a': revenant_arc(path, &map, v[0], v[1], v[2], v[3], v[4], NO); open = YES; hasPath = YES; break;
+        case 'A': revenant_arc(path, &map, v[0], v[1], v[2], v[3], v[4], YES); break;
         case 'H': {
-            charon_arc(path, &map, v[0], v[1], v[2], v[3], v[4], NO);
+            revenant_arc(path, &map, v[0], v[1], v[2], v[3], v[4], NO);
             double end = v[4] * M_PI / 180, direction = v[4] > v[3] ? 1 : -1;
             double x = v[0] + v[2] * cos(end), y = v[1] + v[2] * sin(end);
             double heading = v[4] + direction * 90;
-            charon_head(path, &map, x, y, heading, v[5]);
+            revenant_head(path, &map, x, y, heading, v[5]);
             open = YES; hasPath = YES;
             break;
         }
-        case 'h': charon_head(path, &map, v[0], v[1], v[2], v[3]); open = YES; hasPath = YES; break;
+        case 'h': revenant_head(path, &map, v[0], v[1], v[2], v[3]); open = YES; hasPath = YES; break;
         case '*': {
             int points = (int)v[4];
             for (int i = 0; i < points * 2; i++) {
@@ -360,8 +360,8 @@ static void charon_run(NSString *script, CharonScene scene)
             if (scene.bounds && !scene.clear)
                 *scene.bounds = CGRectUnion(*scene.bounds, CGRectMake(centre.x, centre.y, 0, 0));
             CGPathAddEllipseInRect(dot, NULL, CGRectMake(centre.x - r, centre.y - r, 2 * r, 2 * r));
-            CharonScene flat = scene;
-            charon_draw_path(&flat, dot, 'F', NO, 1, NULL);
+            RevenantScene flat = scene;
+            revenant_draw_path(&flat, dot, 'F', NO, 1, NULL);
             CGPathRelease(dot);
             break;
         }
@@ -373,11 +373,11 @@ static void charon_run(NSString *script, CharonScene scene)
         case 'S': case 'F': case 'B': case 'X': case 'Y':
             if (hasPath) {
                 if (op == 'X' || op == 'Y') {
-                    CharonScene wiping = scene;
+                    RevenantScene wiping = scene;
                     wiping.clear = YES;
-                    charon_draw_path(&wiping, path, op, open, multiplier, dashed ? dashPattern : NULL);
+                    revenant_draw_path(&wiping, path, op, open, multiplier, dashed ? dashPattern : NULL);
                 } else {
-                    charon_draw_path(&scene, path, op, open, multiplier, dashed ? dashPattern : NULL);
+                    revenant_draw_path(&scene, path, op, open, multiplier, dashed ? dashPattern : NULL);
                 }
             }
             CGPathRelease(path);
@@ -390,19 +390,19 @@ static void charon_run(NSString *script, CharonScene scene)
         }
     }
     if (hasPath)
-        charon_draw_path(&scene, path, 'S', open, multiplier, dashed ? dashPattern : NULL);
+        revenant_draw_path(&scene, path, 'S', open, multiplier, dashed ? dashPattern : NULL);
     CGPathRelease(path);
 }
 
-static NSInteger charon_symbol_index(NSString *name)
+static NSInteger revenant_symbol_index(NSString *name)
 {
     if (![name isKindOfClass:[NSString class]] || !name.length)
         return -1;
     const char *needle = name.UTF8String;
-    NSInteger low = 0, high = CHARON_SYMBOL_COUNT - 1;
+    NSInteger low = 0, high = REVENANT_SYMBOL_COUNT - 1;
     while (low <= high) {
         NSInteger middle = (low + high) / 2;
-        int order = strcmp(needle, CharonSymbolNames[middle]);
+        int order = strcmp(needle, RevenantSymbolNames[middle]);
         if (!order)
             return middle;
         if (order < 0)
@@ -413,61 +413,61 @@ static NSInteger charon_symbol_index(NSString *name)
     return -1;
 }
 
-static const double CharonLineWeights[10] = {0.09, 0.025, 0.04, 0.07, 0.09, 0.11, 0.13, 0.15, 0.185, 0.21};
-static const int CharonWeightAnchors[4] = {1, 4, 7, 9};
+static const double RevenantLineWeights[10] = {0.09, 0.025, 0.04, 0.07, 0.09, 0.11, 0.13, 0.15, 0.185, 0.21};
+static const int RevenantWeightAnchors[4] = {1, 4, 7, 9};
 
-static double charon_round_half(double value)
+static double revenant_round_half(double value)
 {
     return floor(value * 2 + 0.5) / 2;
 }
 
-static double charon_grid_value(const int16_t *values, int stride, int offset, double pointSize, int weight, int scale)
+static double revenant_grid_value(const int16_t *values, int stride, int offset, double pointSize, int weight, int scale)
 {
     double at[2] = {0, 0};
     for (int size = 0; size < 2; size++) {
         int low = 0;
-        while (low < 3 && CharonWeightAnchors[low + 1] <= weight)
+        while (low < 3 && RevenantWeightAnchors[low + 1] <= weight)
             low++;
-        int high = low < 3 && weight > CharonWeightAnchors[low] ? low + 1 : low;
+        int high = low < 3 && weight > RevenantWeightAnchors[low] ? low + 1 : low;
         double a = values[((size * 4 + low) * 3 + (scale - 1)) * stride + offset] / 2.0;
         double b = values[((size * 4 + high) * 3 + (scale - 1)) * stride + offset] / 2.0;
-        double fraction = high == low ? 0 : (CharonLineWeights[weight] - CharonLineWeights[CharonWeightAnchors[low]]) / (CharonLineWeights[CharonWeightAnchors[high]] - CharonLineWeights[CharonWeightAnchors[low]]);
+        double fraction = high == low ? 0 : (RevenantLineWeights[weight] - RevenantLineWeights[RevenantWeightAnchors[low]]) / (RevenantLineWeights[RevenantWeightAnchors[high]] - RevenantLineWeights[RevenantWeightAnchors[low]]);
         at[size] = a + (b - a) * fraction;
     }
-    return charon_round_half(at[0] + (at[1] - at[0]) * (pointSize - 17) / 83);
+    return revenant_round_half(at[0] + (at[1] - at[0]) * (pointSize - 17) / 83);
 }
 
-BOOL charon_symbol_known(NSString *name)
+BOOL revenant_symbol_known(NSString *name)
 {
-    return charon_symbol_index(name) >= 0 && charon_glyph_script(name) != nil;
+    return revenant_symbol_index(name) >= 0 && revenant_glyph_script(name) != nil;
 }
 
-BOOL charon_symbol_metrics(NSString *name, double pointSize, NSInteger weight, NSInteger scale, CGSize *size, UIEdgeInsets *insets, CGFloat *baseline)
+BOOL revenant_symbol_metrics(NSString *name, double pointSize, NSInteger weight, NSInteger scale, CGSize *size, UIEdgeInsets *insets, CGFloat *baseline)
 {
-    NSInteger index = charon_symbol_index(name);
+    NSInteger index = revenant_symbol_index(name);
     if (index < 0)
         return NO;
     weight = weight >= 1 && weight <= 9 ? weight : 4;
     scale = scale >= 1 && scale <= 3 ? scale : 2;
-    const int16_t *grid = CharonSymbolGrid[index];
-    double width = charon_grid_value(grid, 3, 0, pointSize, (int)weight, (int)scale);
-    double height = charon_grid_value(grid, 3, 1, pointSize, (int)weight, (int)scale);
-    double bottom = charon_grid_value(grid, 3, 2, pointSize, (int)weight, (int)scale);
+    const int16_t *grid = RevenantSymbolGrid[index];
+    double width = revenant_grid_value(grid, 3, 0, pointSize, (int)weight, (int)scale);
+    double height = revenant_grid_value(grid, 3, 1, pointSize, (int)weight, (int)scale);
+    double bottom = revenant_grid_value(grid, 3, 2, pointSize, (int)weight, (int)scale);
     double left = 0, right = 0;
-    for (size_t i = 0; i < sizeof CharonSymbolSideInsets / sizeof CharonSymbolSideInsets[0]; i++) {
-        if (CharonSymbolSideInsets[i].index == index) {
-            left = charon_grid_value(CharonSymbolSideInsets[i].values, 2, 0, pointSize, (int)weight, (int)scale);
-            right = charon_grid_value(CharonSymbolSideInsets[i].values, 2, 1, pointSize, (int)weight, (int)scale);
+    for (size_t i = 0; i < sizeof RevenantSymbolSideInsets / sizeof RevenantSymbolSideInsets[0]; i++) {
+        if (RevenantSymbolSideInsets[i].index == index) {
+            left = revenant_grid_value(RevenantSymbolSideInsets[i].values, 2, 0, pointSize, (int)weight, (int)scale);
+            right = revenant_grid_value(RevenantSymbolSideInsets[i].values, 2, 1, pointSize, (int)weight, (int)scale);
         }
     }
-    double alignment = charon_round_half(1.174 * pointSize), descent = charon_round_half(0.2085 * pointSize);
+    double alignment = revenant_round_half(1.174 * pointSize), descent = revenant_round_half(0.2085 * pointSize);
     *size = CGSizeMake(width, height);
     *insets = UIEdgeInsetsMake(height - alignment - bottom, left, bottom, right);
     *baseline = bottom + descent;
     return YES;
 }
 
-static CGRect charon_glyph_bounds(NSString *name, NSString *script)
+static CGRect revenant_glyph_bounds(NSString *name, NSString *script)
 {
     static NSMutableDictionary *cache;
     static dispatch_once_t once;
@@ -479,8 +479,8 @@ static CGRect charon_glyph_bounds(NSString *name, NSString *script)
         if (stored)
             return [stored CGRectValue];
         CGRect bounds = CGRectNull;
-        CharonScene scene = {NULL, CGAffineTransformIdentity, 1, NO, NO, 0, &bounds};
-        charon_run(script, scene);
+        RevenantScene scene = {NULL, CGAffineTransformIdentity, 1, NO, NO, 0, &bounds};
+        revenant_run(script, scene);
         if (CGRectIsNull(bounds) || bounds.size.width < 1 || bounds.size.height < 1)
             bounds = CGRectMake(0, 0, 100, 100);
         cache[name] = [NSValue valueWithCGRect:bounds];
@@ -488,28 +488,28 @@ static CGRect charon_glyph_bounds(NSString *name, NSString *script)
     }
 }
 
-UIImage *charon_symbol_bitmap(NSString *name, double pointSize, NSInteger weight, NSInteger scale, CGFloat displayScale)
+UIImage *revenant_symbol_bitmap(NSString *name, double pointSize, NSInteger weight, NSInteger scale, CGFloat displayScale)
 {
-    NSInteger index = charon_symbol_index(name);
-    NSString *script = charon_glyph_script(name);
+    NSInteger index = revenant_symbol_index(name);
+    NSString *script = revenant_glyph_script(name);
     CGSize size;
     UIEdgeInsets insets;
     CGFloat baseline;
-    if (index < 0 || !script || !charon_symbol_metrics(name, pointSize, weight, scale, &size, &insets, &baseline))
+    if (index < 0 || !script || !revenant_symbol_metrics(name, pointSize, weight, scale, &size, &insets, &baseline))
         return nil;
     weight = weight >= 1 && weight <= 9 ? weight : 4;
     scale = scale >= 1 && scale <= 3 ? scale : 2;
-    const int16_t *margins = CharonSymbolMargins[index] + (scale - 1) * 4;
+    const int16_t *margins = RevenantSymbolMargins[index] + (scale - 1) * 4;
     double unit = pointSize / 100 / 2;
     CGRect ink = CGRectMake(margins[0] * unit, margins[1] * unit, size.width - (margins[0] + margins[2]) * unit, size.height - (margins[1] + margins[3]) * unit);
-    double line = pointSize * CharonLineWeights[weight];
+    double line = pointSize * RevenantLineWeights[weight];
     CGRect box = CGRectInset(ink, MIN(line / 2, ink.size.width / 2.2), MIN(line / 2, ink.size.height / 2.2));
     UIGraphicsBeginImageContextWithOptions(size, NO, displayScale);
-    CharonScene scene = {UIGraphicsGetCurrentContext(), CGAffineTransformIdentity, (CGFloat)line, NO, NO, 0, NULL};
-    CGRect extent = charon_glyph_bounds(name, script);
+    RevenantScene scene = {UIGraphicsGetCurrentContext(), CGAffineTransformIdentity, (CGFloat)line, NO, NO, 0, NULL};
+    CGRect extent = revenant_glyph_bounds(name, script);
     scene.map = CGAffineTransformScale(CGAffineTransformMakeTranslation(box.origin.x, box.origin.y), box.size.width / extent.size.width, box.size.height / extent.size.height);
     scene.map = CGAffineTransformTranslate(scene.map, -extent.origin.x, -extent.origin.y);
-    charon_run(script, scene);
+    revenant_run(script, scene);
     UIImage *image = UIGraphicsGetImageFromCurrentImageContext();
     UIGraphicsEndImageContext();
     return image;

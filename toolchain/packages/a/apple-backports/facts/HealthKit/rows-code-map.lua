@@ -23,7 +23,7 @@ for owner in pairs(OWNERS) do
     if owner ~= "HKQuery" and owner ~= "HKHealthStore" then OWNERS[owner] = true end
 end
 
-local root = path.join(os.getenv("CHARON_ROOT"), "modules")
+local root = path.join(os.getenv("REVENANT_ROOT"), "modules")
 local objc = import("apple.objc", {rootdir = root, anonymous = true})
 local dyld = import("apple.dyld", {rootdir = root, anonymous = true})
 

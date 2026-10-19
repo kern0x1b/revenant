@@ -1,15 +1,15 @@
 #import <ARKit/ARKit.h>
 #import <string.h>
 
-#import "CharonARTracker.h"
-#import "CharonARKitPrivate.h"
+#import "RevenantARTracker.h"
+#import "RevenantARKitPrivate.h"
 
 #pragma clang diagnostic ignored "-Wunguarded-availability-new"
 
-@interface ARAnchor (CharonConforms) <ARAnchorCopying>
+@interface ARAnchor (RevenantConforms) <ARAnchorCopying>
 @end
 
-@interface ARPlaneAnchor (CharonConforms) <ARTrackable>
+@interface ARPlaneAnchor (RevenantConforms) <ARTrackable>
 @end
 
 @implementation ARAnchor
@@ -60,7 +60,7 @@
 {
     [coder encodeObject:_identifier forKey:@"identifier"];
     [coder encodeObject:_name forKey:@"name"];
-    CharonEncodeStruct(coder, @"transform", &_transform, sizeof _transform);
+    RevenantEncodeStruct(coder, @"transform", &_transform, sizeof _transform);
 }
 
 - (instancetype)initWithCoder:(NSCoder *)coder
@@ -70,7 +70,7 @@
         return nil;
     _identifier = [coder decodeObjectOfClass:[NSUUID class] forKey:@"identifier"] ?: [NSUUID UUID];
     _name = [coder decodeObjectOfClass:[NSString class] forKey:@"name"];
-    CharonDecodeStruct(coder, @"transform", &_transform, sizeof _transform);
+    RevenantDecodeStruct(coder, @"transform", &_transform, sizeof _transform);
     return self;
 }
 
@@ -129,11 +129,11 @@
 
 
 
-- (instancetype)initWithPlaneValue:(CharonARValue *)value
+- (instancetype)initWithPlaneValue:(RevenantARValue *)value
 {
-    CharonARPlane plane;
+    RevenantARPlane plane;
     [value getValue:&plane];
-    self = [super initWithIdentifier:[NSUUID UUID] transform:CharonARKitIdentityFloat4x4];
+    self = [super initWithIdentifier:[NSUUID UUID] transform:RevenantARKitIdentityFloat4x4];
     if (!self)
         return nil;
     _alignment = ARPlaneAnchorAlignmentHorizontal;
@@ -173,8 +173,8 @@
 {
     [super encodeWithCoder:coder];
     [coder encodeInteger:(NSInteger)_alignment forKey:@"alignment"];
-    CharonEncodeStruct(coder, @"center", &_center, sizeof _center);
-    CharonEncodeStruct(coder, @"extent", &_extent, sizeof _extent);
+    RevenantEncodeStruct(coder, @"center", &_center, sizeof _center);
+    RevenantEncodeStruct(coder, @"extent", &_extent, sizeof _extent);
 }
 
 - (instancetype)initWithCoder:(NSCoder *)coder
@@ -183,22 +183,22 @@
     if (!self)
         return nil;
     _alignment = (ARPlaneAnchorAlignment)[coder decodeIntegerForKey:@"alignment"];
-    CharonDecodeStruct(coder, @"center", &_center, sizeof _center);
-    CharonDecodeStruct(coder, @"extent", &_extent, sizeof _extent);
+    RevenantDecodeStruct(coder, @"center", &_center, sizeof _center);
+    RevenantDecodeStruct(coder, @"extent", &_extent, sizeof _extent);
     return self;
 }
 
 - (ARPlaneGeometry *)geometry
 {
     if (!_geometry) {
-        CharonARPlane plane;
+        RevenantARPlane plane;
         memset(&plane, 0, sizeof(plane));
         plane.center = _center;
         plane.extent = _extent;
         plane.normal = ((simd_float3){0, 1, 0});
         plane.identifier = 0;
         plane.alignment = 0;
-        CharonARValue *value = [[CharonARValue alloc] initWithBytes:&plane size:sizeof plane];
+        RevenantARValue *value = [[RevenantARValue alloc] initWithBytes:&plane size:sizeof plane];
         _geometry = [[ARPlaneGeometry alloc] initWithPlaneValue:value];
     }
     return _geometry;
@@ -242,7 +242,7 @@
 - (void)encodeWithCoder:(NSCoder *)coder
 {
     [coder encodeInteger:(NSInteger)_count forKey:@"count"];
-    CharonEncodeStruct(coder, @"points", _points, _count * sizeof * _points);
+    RevenantEncodeStruct(coder, @"points", _points, _count * sizeof * _points);
 }
 
 - (instancetype)initWithCoder:(NSCoder *)coder
@@ -254,7 +254,7 @@
     if (!_count)
         return nil;
     _points = malloc(_count * sizeof * _points);
-    if (!_points || !CharonDecodeStruct(coder, @"points", _points, _count * sizeof * _points)) {
+    if (!_points || !RevenantDecodeStruct(coder, @"points", _points, _count * sizeof * _points)) {
         free(_points);
         _points = NULL;
         _count = 0;
@@ -296,12 +296,12 @@
 
 
 
-- (instancetype)initWithHitValue:(CharonARValue *)value
+- (instancetype)initWithHitValue:(RevenantARValue *)value
 {
     self = [super init];
     if (!self)
         return nil;
-    CharonARHit hit;
+    RevenantARHit hit;
     [value getValue:&hit];
     _worldPosition = hit.position;
     _localNormal = hit.localNormal;
@@ -313,7 +313,7 @@
 - (ARHitTestResultType)type { return _type; }
 - (simd_float4x4)worldTransform
 {
-    return CharonARKitIdentityFloat4x4;
+    return RevenantARKitIdentityFloat4x4;
 }
 - (simd_float3)localPosition { return _worldPosition; }
 - (simd_float3)localNormal { return _localNormal; }

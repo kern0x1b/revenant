@@ -3,18 +3,18 @@
 #include <string.h>
 #include "system_function.h"
 
-static _Atomic(uintptr_t) charon_system_arc4random_buf;
+static _Atomic(uintptr_t) revenant_system_arc4random_buf;
 
 __attribute__((constructor))
-static void charon_resolve_arc4random_buf(void)
+static void revenant_resolve_arc4random_buf(void)
 {
-    charon_system_function(&charon_system_arc4random_buf, CHARON_LIBSYSTEM, "arc4random_buf");
+    revenant_system_function(&revenant_system_arc4random_buf, REVENANT_LIBSYSTEM, "arc4random_buf");
 }
 
 __attribute__((visibility("hidden")))
-void charon_arc4random_buf(void *buffer, size_t length)
+void revenant_arc4random_buf(void *buffer, size_t length)
 {
-    void (*system)(void *, size_t) = charon_system_function(&charon_system_arc4random_buf, CHARON_LIBSYSTEM, "arc4random_buf");
+    void (*system)(void *, size_t) = revenant_system_function(&revenant_system_arc4random_buf, REVENANT_LIBSYSTEM, "arc4random_buf");
     if (system) {
         system(buffer, length);
         return;
@@ -35,5 +35,5 @@ void charon_arc4random_buf(void *buffer, size_t length)
 __attribute__((visibility("hidden")))
 void arc4random_buf(void *buffer, size_t length)
 {
-    charon_arc4random_buf(buffer, length);
+    revenant_arc4random_buf(buffer, length);
 }

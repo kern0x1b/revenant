@@ -13,12 +13,12 @@
 
 #include "foundation/macho.hpp"
 
-#if defined(SHADE_HAS_LIBPLIST)
+#if defined(REVENANT_EMULATOR_HAS_LIBPLIST)
 #include <cstdlib>
 #include <plist/plist.h>
 #endif
 
-namespace shade {
+namespace emulator {
 namespace {
 
     constexpr std::string_view activation_state_key { "-ActivationState" };
@@ -64,7 +64,7 @@ namespace {
     {
         std::filesystem::create_directories(path.parent_path());
         auto temporary = path;
-        temporary += ".shade.tmp";
+        temporary += ".emulator.tmp";
         {
             std::ofstream output { temporary,
                 std::ios::binary | std::ios::trunc };
@@ -77,7 +77,7 @@ namespace {
         std::filesystem::rename(temporary, path);
     }
 
-#if defined(SHADE_HAS_LIBPLIST)
+#if defined(REVENANT_EMULATOR_HAS_LIBPLIST)
     class PlistOwner {
     public:
         explicit PlistOwner(plist_t node = nullptr)
@@ -238,7 +238,7 @@ LockdownStateUpdate apply_lockdown_state(
     if (activation == LockdownActivation::Preserve)
         return { path, false };
 
-#if defined(SHADE_HAS_LIBPLIST)
+#if defined(REVENANT_EMULATOR_HAS_LIBPLIST)
     const auto content = read_file(path);
     plist_t parsed = nullptr;
     plist_format_t format = PLIST_FORMAT_XML;

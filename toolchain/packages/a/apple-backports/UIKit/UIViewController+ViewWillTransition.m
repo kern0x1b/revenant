@@ -1,23 +1,23 @@
 #import <UIKit/UIKit.h>
 #import <objc/runtime.h>
-#import "CharonTransitionCoordinator.h"
+#import "RevenantTransitionCoordinator.h"
 
-@interface CharonRotationCoordinator : CharonTransitionCoordinator
-@property (nonatomic, assign) CGAffineTransform charon_transform;
+@interface RevenantRotationCoordinator : RevenantTransitionCoordinator
+@property (nonatomic, assign) CGAffineTransform revenant_transform;
 @end
 
-@implementation CharonRotationCoordinator
+@implementation RevenantRotationCoordinator
 
-@synthesize charon_transform;
+@synthesize revenant_transform;
 
 - (CGAffineTransform)targetTransform
 {
-    return self.charon_transform;
+    return self.revenant_transform;
 }
 
 @end
 
-static CGFloat charon_angle(UIInterfaceOrientation orientation)
+static CGFloat revenant_angle(UIInterfaceOrientation orientation)
 {
     switch (orientation) {
     case UIInterfaceOrientationPortraitUpsideDown:
@@ -31,12 +31,12 @@ static CGFloat charon_angle(UIInterfaceOrientation orientation)
     }
 }
 
-static CGSize charon_forward_size(UIViewController *container, UIViewController *child, CGSize size)
+static CGSize revenant_forward_size(UIViewController *container, UIViewController *child, CGSize size)
 {
     return [container sizeForChildContentContainer:child withParentContainerSize:size];
 }
 
-@implementation UIViewController (CharonViewWillTransition)
+@implementation UIViewController (RevenantViewWillTransition)
 
 - (CGSize)sizeForChildContentContainer:(id<UIContentContainer>)container withParentContainerSize:(CGSize)parentSize
 {
@@ -46,7 +46,7 @@ static CGSize charon_forward_size(UIViewController *container, UIViewController 
 - (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator
 {
     for (UIViewController *child in self.childViewControllers) {
-        CGSize childSize = charon_forward_size(self, child, size);
+        CGSize childSize = revenant_forward_size(self, child, size);
         CGSize current = child.isViewLoaded ? child.view.bounds.size : CGSizeZero;
         if (!CGSizeEqualToSize(childSize, current))
             [child viewWillTransitionToSize:childSize withTransitionCoordinator:coordinator];
@@ -67,10 +67,10 @@ static CGSize charon_forward_size(UIViewController *container, UIViewController 
 
 @end
 
-@interface CharonRotationDriver : NSObject
+@interface RevenantRotationDriver : NSObject
 @end
 
-@implementation CharonRotationDriver
+@implementation RevenantRotationDriver
 
 + (void)load
 {
@@ -87,8 +87,8 @@ static CGSize charon_forward_size(UIViewController *container, UIViewController 
             CGSize size = window.bounds.size;
             if ((size.width > size.height) != UIInterfaceOrientationIsLandscape(next))
                 size = CGSizeMake(size.height, size.width);
-            CharonRotationCoordinator *coordinator = [[CharonRotationCoordinator alloc] initWithFrom:nil to:nil container:window animated:duration > 0 duration:duration style:UIModalPresentationNone];
-            coordinator.charon_transform = CGAffineTransformMakeRotation(charon_angle(next) - charon_angle(current));
+            RevenantRotationCoordinator *coordinator = [[RevenantRotationCoordinator alloc] initWithFrom:nil to:nil container:window animated:duration > 0 duration:duration style:UIModalPresentationNone];
+            coordinator.revenant_transform = CGAffineTransformMakeRotation(revenant_angle(next) - revenant_angle(current));
             [root viewWillTransitionToSize:size withTransitionCoordinator:coordinator];
             dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)((duration + 0.05) * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
                 [coordinator finish];

@@ -1,20 +1,20 @@
 #import <UIKit/UIKit.h>
 #import <objc/runtime.h>
 
-static const char CharonDropPreviewUpdateCountKey;
+static const char RevenantDropPreviewUpdateCountKey;
 
-@implementation UIDragItem (CharonDropPreviewUpdate17)
+@implementation UIDragItem (RevenantDropPreviewUpdate17)
 
 - (void)setNeedsDropPreviewUpdate
 {
-    NSUInteger asked = [objc_getAssociatedObject(self, &CharonDropPreviewUpdateCountKey) unsignedIntegerValue];
-    objc_setAssociatedObject(self, &CharonDropPreviewUpdateCountKey,
+    NSUInteger asked = [objc_getAssociatedObject(self, &RevenantDropPreviewUpdateCountKey) unsignedIntegerValue];
+    objc_setAssociatedObject(self, &RevenantDropPreviewUpdateCountKey,
                             @(asked + 1), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
-- (NSUInteger)charon_dropPreviewUpdateCount
+- (NSUInteger)revenant_dropPreviewUpdateCount
 {
-    return [objc_getAssociatedObject(self, &CharonDropPreviewUpdateCountKey) unsignedIntegerValue];
+    return [objc_getAssociatedObject(self, &RevenantDropPreviewUpdateCountKey) unsignedIntegerValue];
 }
 
 @end

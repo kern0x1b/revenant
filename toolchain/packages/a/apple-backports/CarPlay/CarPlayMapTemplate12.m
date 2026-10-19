@@ -1,29 +1,29 @@
 #import <CarPlay/CarPlay.h>
 #import <UIKit/UIKit.h>
-#import "CharonCarPlayTemplate.h"
+#import "RevenantCarPlayTemplate.h"
 
-static const NSUInteger CharonMapMaximumPreviews = 12;
+static const NSUInteger RevenantMapMaximumPreviews = 12;
 
-@interface CharonMapPreviewCard : UIView
+@interface RevenantMapPreviewCard : UIView
 @end
 
-@implementation CharonMapPreviewCard
+@implementation RevenantMapPreviewCard
 @end
 
-@implementation CPMapTemplate (CharonMapTemplate12)
+@implementation CPMapTemplate (RevenantMapTemplate12)
 
 #pragma mark - the navigation alert
 
 - (void)presentNavigationAlert:(CPNavigationAlert *)navigationAlert animated:(BOOL)animated
 {
-    if (navigationAlert == nil || self.charon_navigationAlert != nil) {
+    if (navigationAlert == nil || self.revenant_navigationAlert != nil) {
         return;
     }
     if (animated) {
-        [UIView beginAnimations:@"charon.alert.present" context:nil];
+        [UIView beginAnimations:@"revenant.alert.present" context:nil];
         [UIView setAnimationDuration:0.25];
     }
-    [self charon_setNavigationAlert:navigationAlert];
+    [self revenant_setNavigationAlert:navigationAlert];
     if (animated) {
         [UIView commitAnimations];
     }
@@ -31,12 +31,12 @@ static const NSUInteger CharonMapMaximumPreviews = 12;
 
 - (void)dismissNavigationAlertAnimated:(BOOL)animated completion:(void (^)(BOOL dismissed))completion
 {
-    BOOL wasVisible = self.charon_navigationAlert != nil;
+    BOOL wasVisible = self.revenant_navigationAlert != nil;
     if (animated) {
-        [UIView beginAnimations:@"charon.alert.dismiss" context:nil];
+        [UIView beginAnimations:@"revenant.alert.dismiss" context:nil];
         [UIView setAnimationDuration:0.25];
     }
-    [self charon_setNavigationAlert:nil];
+    [self revenant_setNavigationAlert:nil];
     if (animated) {
         [UIView commitAnimations];
     }
@@ -49,14 +49,14 @@ static const NSUInteger CharonMapMaximumPreviews = 12;
 
 - (void)showPanningInterfaceAnimated:(BOOL)animated
 {
-    if (self.charon_panningInterfaceVisible) {
+    if (self.revenant_panningInterfaceVisible) {
         return;
     }
     if (animated) {
-        [UIView beginAnimations:@"charon.panning.show" context:nil];
+        [UIView beginAnimations:@"revenant.panning.show" context:nil];
         [UIView setAnimationDuration:0.25];
     }
-    [self charon_setPanningInterfaceVisible:YES];
+    [self revenant_setPanningInterfaceVisible:YES];
     NSArray<CPMapButton *> *buttons = self.mapButtons;
     for (NSUInteger i = 0; i < buttons.count; i++) {
         [buttons[i] setHidden:i >= 2];
@@ -68,14 +68,14 @@ static const NSUInteger CharonMapMaximumPreviews = 12;
 
 - (void)dismissPanningInterfaceAnimated:(BOOL)animated
 {
-    if (!self.charon_panningInterfaceVisible) {
+    if (!self.revenant_panningInterfaceVisible) {
         return;
     }
     if (animated) {
-        [UIView beginAnimations:@"charon.panning.dismiss" context:nil];
+        [UIView beginAnimations:@"revenant.panning.dismiss" context:nil];
         [UIView setAnimationDuration:0.25];
     }
-    [self charon_setPanningInterfaceVisible:NO];
+    [self revenant_setPanningInterfaceVisible:NO];
     for (CPMapButton *button in self.mapButtons) {
         [button setHidden:NO];
     }
@@ -91,9 +91,9 @@ static const NSUInteger CharonMapMaximumPreviews = 12;
     if (trips == nil) {
         return;
     }
-    NSUInteger kept = MIN(trips.count, CharonMapMaximumPreviews);
-    [self charon_setTripPreviews:[trips subarrayWithRange:NSMakeRange(0, kept)] selectedTrip:nil];
-    [self charon_drawTripPreviews];
+    NSUInteger kept = MIN(trips.count, RevenantMapMaximumPreviews);
+    [self revenant_setTripPreviews:[trips subarrayWithRange:NSMakeRange(0, kept)] selectedTrip:nil];
+    [self revenant_drawTripPreviews];
 }
 
 - (void)showRouteChoicesPreviewForTrip:(CPTrip *)trip textConfiguration:(CPTripPreviewTextConfiguration *)textConfiguration
@@ -101,16 +101,16 @@ static const NSUInteger CharonMapMaximumPreviews = 12;
     if (trip == nil) {
         return;
     }
-    [self charon_setTripPreviews:@[trip] selectedTrip:trip];
-    [self charon_drawTripPreviews];
+    [self revenant_setTripPreviews:@[trip] selectedTrip:trip];
+    [self revenant_drawTripPreviews];
 }
 
 - (void)hideTripPreviews
 {
-    [self charon_setTripPreviews:nil selectedTrip:nil];
-    UIView *map = [self charon_mapView];
+    [self revenant_setTripPreviews:nil selectedTrip:nil];
+    UIView *map = [self revenant_mapView];
     for (UIView *sub in [map.subviews copy]) {
-        if ([sub isKindOfClass:[CharonMapPreviewCard class]]) {
+        if ([sub isKindOfClass:[RevenantMapPreviewCard class]]) {
             [sub removeFromSuperview];
         }
     }
@@ -130,13 +130,13 @@ static const NSUInteger CharonMapMaximumPreviews = 12;
     if (trip == nil) {
         return;
     }
-    [self charon_setEstimates:estimates forTrip:trip];
-    [self charon_setTimeRemainingColor:timeRemainingColor];
+    [self revenant_setEstimates:estimates forTrip:trip];
+    [self revenant_setTimeRemainingColor:timeRemainingColor];
 }
 
 #pragma mark - the drawing these members reach
 
-static NSString *charon_nameForTimeRemainingColor(CPTimeRemainingColor color)
+static NSString *revenant_nameForTimeRemainingColor(CPTimeRemainingColor color)
 {
     switch (color) {
         case CPTimeRemainingColorGreen: return @"green";
@@ -147,18 +147,18 @@ static NSString *charon_nameForTimeRemainingColor(CPTimeRemainingColor color)
     return @"default";
 }
 
-- (void)charon_drawTripPreviews
+- (void)revenant_drawTripPreviews
 {
-    UIView *map = [self charon_mapView];
+    UIView *map = [self revenant_mapView];
     if (map == nil) {
         return;
     }
     for (UIView *sub in [map.subviews copy]) {
-        if ([sub isKindOfClass:[CharonMapPreviewCard class]]) {
+        if ([sub isKindOfClass:[RevenantMapPreviewCard class]]) {
             [sub removeFromSuperview];
         }
     }
-    NSArray<CPTrip *> *previews = self.charon_tripPreviews;
+    NSArray<CPTrip *> *previews = self.revenant_tripPreviews;
     if (previews.count == 0) {
         return;
     }
@@ -171,18 +171,18 @@ static NSString *charon_nameForTimeRemainingColor(CPTimeRemainingColor color)
                                               : origin)
                                            : @"(trip)"];
     }
-    if (self.charon_selectedTrip != nil) {
-        CPTravelEstimates *estimates = [self charon_estimatesForTrip:self.charon_selectedTrip];
+    if (self.revenant_selectedTrip != nil) {
+        CPTravelEstimates *estimates = [self revenant_estimatesForTrip:self.revenant_selectedTrip];
         if (estimates != nil) {
             NSString *remaining = estimates.timeRemaining < 0.0
                 ? @"--"
                 : [NSString stringWithFormat:@"%.0f min", estimates.timeRemaining / 60.0];
             [lines addObject:[NSString stringWithFormat:@"%@ - %@", remaining,
-                                  charon_nameForTimeRemainingColor(self.charon_timeRemainingColor)]];
+                                  revenant_nameForTimeRemainingColor(self.revenant_timeRemainingColor)]];
         }
     }
     CGSize size = CGSizeMake(420.0, 24.0 + 22.0 * (CGFloat)lines.count);
-    CharonMapPreviewCard *card = [[CharonMapPreviewCard alloc]
+    RevenantMapPreviewCard *card = [[RevenantMapPreviewCard alloc]
         initWithFrame:CGRectMake(20.0, CGRectGetHeight(map.bounds) - size.height - 20.0,
                                  size.width, size.height)];
     card.backgroundColor = self.guidanceBackgroundColor;
@@ -197,13 +197,13 @@ static NSString *charon_nameForTimeRemainingColor(CPTimeRemainingColor color)
 
 @end
 
-@implementation CPImageSet (CharonImageSetInitialiser)
+@implementation CPImageSet (RevenantImageSetInitialiser)
 
 - (instancetype)initWithLightContentImage:(UIImage *)lightImage darkContentImage:(UIImage *)darkImage
 {
     self = [super init];
     if (self) {
-        [self charon_setLightContentImage:lightImage darkContentImage:darkImage];
+        [self revenant_setLightContentImage:lightImage darkContentImage:darkImage];
     }
     return self;
 }

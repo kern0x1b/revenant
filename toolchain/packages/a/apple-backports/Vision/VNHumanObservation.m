@@ -1,4 +1,4 @@
-#import "CharonVision.h"
+#import "RevenantVision.h"
 
 @implementation VNHumanObservation {
     BOOL _upperBodyOnly;

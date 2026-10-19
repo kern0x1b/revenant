@@ -10,7 +10,7 @@
 #include <optional>
 #include <string_view>
 
-namespace shade::bsd::kernel_control {
+namespace emulator::bsd::kernel_control {
 
 inline constexpr std::string_view descriptor_kind { "system-control-socket" };
 inline constexpr std::string_view ip_interface_name { "com.apple.ipif" };

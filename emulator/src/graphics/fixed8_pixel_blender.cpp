@@ -7,7 +7,7 @@
 
 #include "graphics/fixed8_pixel_blender.hpp"
 
-namespace shade {
+namespace emulator {
 
 void Fixed8PixelBlender::source_over(std::span<const std::uint32_t> source,
     std::span<const std::uint32_t> destination,

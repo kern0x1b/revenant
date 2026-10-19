@@ -1,67 +1,67 @@
-#include "CharonMLLayerKinds.h"
+#include "RevenantMLLayerKinds.h"
 
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-charon_ml_tensor *charon_ml_input(charon_ml_bindings *bindings, const charon_ml_node *layer)
+revenant_ml_tensor *revenant_ml_input(revenant_ml_bindings *bindings, const revenant_ml_node *layer)
 {
     char name[256];
-    if (charon_ml_name_count(layer, "input") != 1) {
+    if (revenant_ml_name_count(layer, "input") != 1) {
         return NULL;
     }
-    if (charon_ml_name_at(layer, "input", 0, name, sizeof name) == NULL) {
+    if (revenant_ml_name_at(layer, "input", 0, name, sizeof name) == NULL) {
         return NULL;
     }
-    return charon_ml_bindings_find(bindings, name);
+    return revenant_ml_bindings_find(bindings, name);
 }
 
-static int take_output(const charon_ml_node *layer, charon_ml_bindings *bindings, charon_ml_tensor tensor,
+static int take_output(const revenant_ml_node *layer, revenant_ml_bindings *bindings, revenant_ml_tensor tensor,
                        char *error, size_t error_size)
 {
     char name[256];
-    if (charon_ml_name_count(layer, "output") != 1 ||
-        charon_ml_name_at(layer, "output", 0, name, sizeof name) == NULL) {
-        charon_ml_tensor_free(&tensor);
-        snprintf(error, error_size, "the layer '%s' does not name exactly one output", charon_ml_layer_name(layer));
+    if (revenant_ml_name_count(layer, "output") != 1 ||
+        revenant_ml_name_at(layer, "output", 0, name, sizeof name) == NULL) {
+        revenant_ml_tensor_free(&tensor);
+        snprintf(error, error_size, "the layer '%s' does not name exactly one output", revenant_ml_layer_name(layer));
         return 0;
     }
-    if (!charon_ml_bindings_put(bindings, name, tensor)) {
-        snprintf(error, error_size, "the layer '%s' writes to a value set with no room left", charon_ml_layer_name(layer));
+    if (!revenant_ml_bindings_put(bindings, name, tensor)) {
+        snprintf(error, error_size, "the layer '%s' writes to a value set with no room left", revenant_ml_layer_name(layer));
         return 0;
     }
     return 1;
 }
 
-typedef enum { CHARON_ML_PAD_VALID = 0, CHARON_ML_PAD_SAME } charon_ml_pad_kind;
+typedef enum { REVENANT_ML_PAD_VALID = 0, REVENANT_ML_PAD_SAME } revenant_ml_pad_kind;
 
-static int read_padding(const charon_ml_node *params, charon_ml_pad_kind *kind, int64_t pad[4])
+static int read_padding(const revenant_ml_node *params, revenant_ml_pad_kind *kind, int64_t pad[4])
 {
-    const charon_ml_node *valid = charon_ml_get(params, "valid");
-    const charon_ml_node *same = charon_ml_get(params, "same");
+    const revenant_ml_node *valid = revenant_ml_get(params, "valid");
+    const revenant_ml_node *same = revenant_ml_get(params, "same");
     int index;
     for (index = 0; index < 4; index++) {
         pad[index] = 0;
     }
     if (valid != NULL) {
-        *kind = CHARON_ML_PAD_VALID;
+        *kind = REVENANT_ML_PAD_VALID;
         {
-            const charon_ml_node *amounts = charon_ml_get(valid, "paddingAmounts");
-            const charon_ml_node *edges = charon_ml_node_at_field(amounts, "borderAmounts", 0);
-            const charon_ml_node *across = charon_ml_node_at_field(amounts, "borderAmounts", 1);
-            pad[0] = charon_ml_int_at(edges, "startEdgeSize", 0, 0);
-            pad[1] = charon_ml_int_at(edges, "endEdgeSize", 0, 0);
-            pad[2] = charon_ml_int_at(across, "startEdgeSize", 0, 0);
-            pad[3] = charon_ml_int_at(across, "endEdgeSize", 0, 0);
+            const revenant_ml_node *amounts = revenant_ml_get(valid, "paddingAmounts");
+            const revenant_ml_node *edges = revenant_ml_node_at_field(amounts, "borderAmounts", 0);
+            const revenant_ml_node *across = revenant_ml_node_at_field(amounts, "borderAmounts", 1);
+            pad[0] = revenant_ml_int_at(edges, "startEdgeSize", 0, 0);
+            pad[1] = revenant_ml_int_at(edges, "endEdgeSize", 0, 0);
+            pad[2] = revenant_ml_int_at(across, "startEdgeSize", 0, 0);
+            pad[3] = revenant_ml_int_at(across, "endEdgeSize", 0, 0);
         }
         return 1;
     }
     if (same != NULL) {
-        *kind = CHARON_ML_PAD_SAME;
+        *kind = REVENANT_ML_PAD_SAME;
         return 1;
     }
-    *kind = CHARON_ML_PAD_VALID;
+    *kind = REVENANT_ML_PAD_VALID;
     return 1;
 }
 
@@ -72,41 +72,41 @@ static int64_t same_padding(int64_t size, int64_t kernel, int64_t stride, int en
     return end ? (total + 1) / 2 : total / 2;
 }
 
-int charon_ml_layer_convolution(const charon_ml_node *layer, const charon_ml_node *params,
-                                charon_ml_bindings *bindings, char *error, size_t error_size)
+int revenant_ml_layer_convolution(const revenant_ml_node *layer, const revenant_ml_node *params,
+                                revenant_ml_bindings *bindings, char *error, size_t error_size)
 {
-    charon_ml_tensor *input = charon_ml_input(bindings, layer);
+    revenant_ml_tensor *input = revenant_ml_input(bindings, layer);
     double *weights = NULL, *bias = NULL;
     size_t weight_count = 0, bias_count = 0;
     int64_t kernel[2], stride[2], dilation[2], pad[4], shape[3];
     int out_channels, groups, has_bias, channels, index;
-    charon_ml_tensor output;
+    revenant_ml_tensor output;
 
     for (index = 0; index < 4; index++) {
         pad[index] = 0;
     }
     if (input == NULL) {
-        return charon_ml_layer_missing_input(layer, "input", error, error_size);
+        return revenant_ml_layer_missing_input(layer, "input", error, error_size);
     }
     if (input->rank != 3) {
-        return charon_ml_layer_bad_shape(layer, "an input that is not channels by height by width", input,
+        return revenant_ml_layer_bad_shape(layer, "an input that is not channels by height by width", input,
                                          error, error_size);
     }
-    out_channels = charon_ml_integer_of(params, "outputChannels", 0);
-    groups = charon_ml_integer_of(params, "nGroups", 1);
-    has_bias = charon_ml_integer_of(params, "hasBias", 0) != 0;
-    kernel[0] = charon_ml_int_at(params, "kernelSize", 0, 1);
-    kernel[1] = kernel[0] == charon_ml_int_at(params, "kernelSize", 0, 1)
-                   ? charon_ml_int_at(params, "kernelSize", 1, kernel[0])
+    out_channels = revenant_ml_integer_of(params, "outputChannels", 0);
+    groups = revenant_ml_integer_of(params, "nGroups", 1);
+    has_bias = revenant_ml_integer_of(params, "hasBias", 0) != 0;
+    kernel[0] = revenant_ml_int_at(params, "kernelSize", 0, 1);
+    kernel[1] = kernel[0] == revenant_ml_int_at(params, "kernelSize", 0, 1)
+                   ? revenant_ml_int_at(params, "kernelSize", 1, kernel[0])
                    : kernel[0];
-    stride[0] = charon_ml_int_at(params, "stride", 0, 1);
-    stride[1] = charon_ml_int_at(params, "stride", 1, stride[0]);
-    dilation[0] = charon_ml_int_at(params, "dilationFactor", 0, 1);
-    dilation[1] = charon_ml_int_at(params, "dilationFactor", 1, dilation[0]);
+    stride[0] = revenant_ml_int_at(params, "stride", 0, 1);
+    stride[1] = revenant_ml_int_at(params, "stride", 1, stride[0]);
+    dilation[0] = revenant_ml_int_at(params, "dilationFactor", 0, 1);
+    dilation[1] = revenant_ml_int_at(params, "dilationFactor", 1, dilation[0]);
     {
-        charon_ml_pad_kind how;
+        revenant_ml_pad_kind how;
         read_padding(params, &how, pad);
-        if (how == CHARON_ML_PAD_SAME) {
+        if (how == REVENANT_ML_PAD_SAME) {
             pad[0] = same_padding(input->shape[1], kernel[0], stride[0], 0);
             pad[1] = same_padding(input->shape[1], kernel[0], stride[0], 1);
             pad[2] = same_padding(input->shape[2], kernel[1], stride[1], 0);
@@ -116,27 +116,27 @@ int charon_ml_layer_convolution(const charon_ml_node *layer, const charon_ml_nod
     if (out_channels <= 0 || groups <= 0 || stride[0] <= 0 || stride[1] <= 0 || kernel[0] <= 0 ||
         kernel[1] <= 0 || dilation[0] <= 0 || dilation[1] <= 0) {
         snprintf(error, error_size, "the layer '%s' has a kernel, a stride or a channel count of no length",
-                 charon_ml_layer_name(layer));
+                 revenant_ml_layer_name(layer));
         return 0;
     }
     channels = (int)input->shape[0];
     if (channels % groups != 0 || out_channels % groups != 0) {
         snprintf(error, error_size,
                  "the layer '%s' has %d input channels and %d output channels over %d groups, which do not divide",
-                 charon_ml_layer_name(layer), channels, out_channels, groups);
+                 revenant_ml_layer_name(layer), channels, out_channels, groups);
         return 0;
     }
-    if (!charon_ml_read_numbers(charon_ml_get(params, "weights"), &weights, &weight_count) ||
+    if (!revenant_ml_read_numbers(revenant_ml_get(params, "weights"), &weights, &weight_count) ||
         (size_t)(out_channels * channels / groups) * (size_t)kernel[0] * (size_t)kernel[1] != weight_count) {
         free(weights);
         snprintf(error, error_size,
                  "the layer '%s' has weights for something other than %d kernels of %ld by %ld over %d channels",
-                 charon_ml_layer_name(layer), out_channels, (long)kernel[0], (long)kernel[1], channels / groups);
+                 revenant_ml_layer_name(layer), out_channels, (long)kernel[0], (long)kernel[1], channels / groups);
         return 0;
     }
-    if (has_bias && !charon_ml_read_numbers(charon_ml_get(params, "bias"), &bias, &bias_count)) {
+    if (has_bias && !revenant_ml_read_numbers(revenant_ml_get(params, "bias"), &bias, &bias_count)) {
         free(weights);
-        snprintf(error, error_size, "the layer '%s' says it has a bias and has none", charon_ml_layer_name(layer));
+        snprintf(error, error_size, "the layer '%s' says it has a bias and has none", revenant_ml_layer_name(layer));
         return 0;
     }
     shape[0] = out_channels;
@@ -146,14 +146,14 @@ int charon_ml_layer_convolution(const charon_ml_node *layer, const charon_ml_nod
         free(weights);
         free(bias);
         snprintf(error, error_size, "the layer '%s' has a kernel larger than its padded input",
-                 charon_ml_layer_name(layer));
+                 revenant_ml_layer_name(layer));
         return 0;
     }
-    output = charon_ml_tensor_make(3, shape);
+    output = revenant_ml_tensor_make(3, shape);
     if (output.data == NULL) {
         free(weights);
         free(bias);
-        snprintf(error, error_size, "the layer '%s' has an output of no room for it", charon_ml_layer_name(layer));
+        snprintf(error, error_size, "the layer '%s' has an output of no room for it", revenant_ml_layer_name(layer));
         return 0;
     }
     {
@@ -193,40 +193,40 @@ int charon_ml_layer_convolution(const charon_ml_node *layer, const charon_ml_nod
     return take_output(layer, bindings, output, error, error_size);
 }
 
-int charon_ml_layer_pooling(const charon_ml_node *layer, const charon_ml_node *params,
-                            charon_ml_bindings *bindings, char *error, size_t error_size)
+int revenant_ml_layer_pooling(const revenant_ml_node *layer, const revenant_ml_node *params,
+                            revenant_ml_bindings *bindings, char *error, size_t error_size)
 {
-    charon_ml_tensor *input = charon_ml_input(bindings, layer);
+    revenant_ml_tensor *input = revenant_ml_input(bindings, layer);
     int64_t kernel[2], stride[2], pad[4], shape[3];
     int kind, global, ceil_mode, index;
-    charon_ml_tensor output;
+    revenant_ml_tensor output;
 
     for (index = 0; index < 4; index++) {
         pad[index] = 0;
     }
     if (input == NULL) {
-        return charon_ml_layer_missing_input(layer, "input", error, error_size);
+        return revenant_ml_layer_missing_input(layer, "input", error, error_size);
     }
     if (input->rank != 3) {
-        return charon_ml_layer_bad_shape(layer, "an input that is not channels by height by width", input,
+        return revenant_ml_layer_bad_shape(layer, "an input that is not channels by height by width", input,
                                          error, error_size);
     }
-    kind = charon_ml_integer_of(params, "type", 0);
-    global = charon_ml_integer_of(params, "globalPooling", 0) != 0;
-    ceil_mode = charon_ml_integer_of(params, "includeLastPixel", 0) != 0;
+    kind = revenant_ml_integer_of(params, "type", 0);
+    global = revenant_ml_integer_of(params, "globalPooling", 0) != 0;
+    ceil_mode = revenant_ml_integer_of(params, "includeLastPixel", 0) != 0;
     if (global) {
         kernel[0] = input->shape[1];
         kernel[1] = input->shape[2];
         stride[0] = 1;
         stride[1] = 1;
     } else {
-        charon_ml_pad_kind how;
-        kernel[0] = charon_ml_int_at(params, "kernelSize", 0, 1);
-        kernel[1] = charon_ml_int_at(params, "kernelSize", 1, kernel[0]);
-        stride[0] = charon_ml_int_at(params, "stride", 0, 1);
-        stride[1] = charon_ml_int_at(params, "stride", 1, stride[0]);
+        revenant_ml_pad_kind how;
+        kernel[0] = revenant_ml_int_at(params, "kernelSize", 0, 1);
+        kernel[1] = revenant_ml_int_at(params, "kernelSize", 1, kernel[0]);
+        stride[0] = revenant_ml_int_at(params, "stride", 0, 1);
+        stride[1] = revenant_ml_int_at(params, "stride", 1, stride[0]);
         read_padding(params, &how, pad);
-        if (how == CHARON_ML_PAD_SAME) {
+        if (how == REVENANT_ML_PAD_SAME) {
             pad[0] = same_padding(input->shape[1], kernel[0], stride[0], 0);
             pad[1] = same_padding(input->shape[1], kernel[0], stride[0], 1);
             pad[2] = same_padding(input->shape[2], kernel[1], stride[1], 0);
@@ -235,7 +235,7 @@ int charon_ml_layer_pooling(const charon_ml_node *layer, const charon_ml_node *p
     }
     if (kernel[0] <= 0 || kernel[1] <= 0 || stride[0] <= 0 || stride[1] <= 0) {
         snprintf(error, error_size, "the layer '%s' has a window or a stride of no length",
-                 charon_ml_layer_name(layer));
+                 revenant_ml_layer_name(layer));
         return 0;
     }
     for (index = 0; index < 2; index++) {
@@ -247,9 +247,9 @@ int charon_ml_layer_pooling(const charon_ml_node *layer, const charon_ml_node *p
         shape[1 + index] = count;
     }
     shape[0] = input->shape[0];
-    output = charon_ml_tensor_make(3, shape);
+    output = revenant_ml_tensor_make(3, shape);
     if (output.data == NULL) {
-        snprintf(error, error_size, "the layer '%s' has an output of no room for it", charon_ml_layer_name(layer));
+        snprintf(error, error_size, "the layer '%s' has an output of no room for it", revenant_ml_layer_name(layer));
         return 0;
     }
     {
@@ -292,25 +292,25 @@ int charon_ml_layer_pooling(const charon_ml_node *layer, const charon_ml_node *p
     return take_output(layer, bindings, output, error, error_size);
 }
 
-int charon_ml_layer_inner_product(const charon_ml_node *layer, const charon_ml_node *params,
-                                  charon_ml_bindings *bindings, char *error, size_t error_size)
+int revenant_ml_layer_inner_product(const revenant_ml_node *layer, const revenant_ml_node *params,
+                                  revenant_ml_bindings *bindings, char *error, size_t error_size)
 {
-    charon_ml_tensor *input = charon_ml_input(bindings, layer);
+    revenant_ml_tensor *input = revenant_ml_input(bindings, layer);
     double *weights = NULL, *bias = NULL;
     size_t weight_count = 0, bias_count = 0;
     int in_channels, out_channels, has_bias, channel, out_channel;
     int64_t shape[1];
-    charon_ml_tensor output;
+    revenant_ml_tensor output;
 
     if (input == NULL) {
-        return charon_ml_layer_missing_input(layer, "input", error, error_size);
+        return revenant_ml_layer_missing_input(layer, "input", error, error_size);
     }
-    in_channels = charon_ml_integer_of(params, "inputChannels", 0);
-    out_channels = charon_ml_integer_of(params, "outputChannels", 0);
-    has_bias = charon_ml_integer_of(params, "hasBias", 0) != 0;
+    in_channels = revenant_ml_integer_of(params, "inputChannels", 0);
+    out_channels = revenant_ml_integer_of(params, "outputChannels", 0);
+    has_bias = revenant_ml_integer_of(params, "hasBias", 0) != 0;
     if (in_channels <= 0 || out_channels <= 0) {
         snprintf(error, error_size, "the layer '%s' has a channel count of no length",
-                 charon_ml_layer_name(layer));
+                 revenant_ml_layer_name(layer));
         return 0;
     }
     {
@@ -321,31 +321,31 @@ int charon_ml_layer_inner_product(const charon_ml_node *layer, const charon_ml_n
         }
         if (features != in_channels) {
             snprintf(error, error_size,
-                     "the layer '%s' takes %d features and its input has %lld", charon_ml_layer_name(layer),
+                     "the layer '%s' takes %d features and its input has %lld", revenant_ml_layer_name(layer),
                      in_channels, (long long)features);
             return 0;
         }
         in_channels = (int)features;
     }
-    if (!charon_ml_read_numbers(charon_ml_get(params, "weights"), &weights, &weight_count) ||
+    if (!revenant_ml_read_numbers(revenant_ml_get(params, "weights"), &weights, &weight_count) ||
         weight_count != (size_t)in_channels * (size_t)out_channels) {
         free(weights);
         snprintf(error, error_size,
                  "the layer '%s' has weights for something other than %d outputs of %d features",
-                 charon_ml_layer_name(layer), out_channels, in_channels);
+                 revenant_ml_layer_name(layer), out_channels, in_channels);
         return 0;
     }
-    if (has_bias && !charon_ml_read_numbers(charon_ml_get(params, "bias"), &bias, &bias_count)) {
+    if (has_bias && !revenant_ml_read_numbers(revenant_ml_get(params, "bias"), &bias, &bias_count)) {
         free(weights);
-        snprintf(error, error_size, "the layer '%s' says it has a bias and has none", charon_ml_layer_name(layer));
+        snprintf(error, error_size, "the layer '%s' says it has a bias and has none", revenant_ml_layer_name(layer));
         return 0;
     }
     shape[0] = out_channels;
-    output = charon_ml_tensor_make(1, shape);
+    output = revenant_ml_tensor_make(1, shape);
     if (output.data == NULL) {
         free(weights);
         free(bias);
-        snprintf(error, error_size, "the layer '%s' has an output of no room for it", charon_ml_layer_name(layer));
+        snprintf(error, error_size, "the layer '%s' has an output of no room for it", revenant_ml_layer_name(layer));
         return 0;
     }
     for (out_channel = 0; out_channel < out_channels; out_channel++) {
@@ -360,88 +360,88 @@ int charon_ml_layer_inner_product(const charon_ml_node *layer, const charon_ml_n
     return take_output(layer, bindings, output, error, error_size);
 }
 
-int charon_ml_layer_activation(const charon_ml_node *layer, const charon_ml_node *params,
-                               charon_ml_bindings *bindings, char *error, size_t error_size)
+int revenant_ml_layer_activation(const revenant_ml_node *layer, const revenant_ml_node *params,
+                               revenant_ml_bindings *bindings, char *error, size_t error_size)
 {
-    charon_ml_tensor *input = charon_ml_input(bindings, layer);
+    revenant_ml_tensor *input = revenant_ml_input(bindings, layer);
     int kind;
     if (input == NULL) {
-        return charon_ml_layer_missing_input(layer, "input", error, error_size);
+        return revenant_ml_layer_missing_input(layer, "input", error, error_size);
     }
-    kind = charon_ml_activation_kind(params);
+    kind = revenant_ml_activation_kind(params);
     if (kind == 0) {
         snprintf(error, error_size, "the layer '%s' has no activation the specification names",
-                 charon_ml_layer_name(layer));
+                 revenant_ml_layer_name(layer));
         return 0;
     }
-    return take_output(layer, bindings, charon_ml_map_unary(input, kind, params), error, error_size);
+    return take_output(layer, bindings, revenant_ml_map_unary(input, kind, params), error, error_size);
 }
 
-int charon_ml_layer_softmax(const charon_ml_node *layer, const charon_ml_node *params,
-                            charon_ml_bindings *bindings, char *error, size_t error_size)
+int revenant_ml_layer_softmax(const revenant_ml_node *layer, const revenant_ml_node *params,
+                            revenant_ml_bindings *bindings, char *error, size_t error_size)
 {
-    charon_ml_tensor *input = charon_ml_input(bindings, layer);
-    charon_ml_tensor output;
+    revenant_ml_tensor *input = revenant_ml_input(bindings, layer);
+    revenant_ml_tensor output;
     int axis;
     if (input == NULL) {
-        return charon_ml_layer_missing_input(layer, "input", error, error_size);
+        return revenant_ml_layer_missing_input(layer, "input", error, error_size);
     }
-    axis = charon_ml_integer_of(params, "axis", 0);
-    output = charon_ml_tensor_make(input->rank, input->shape);
+    axis = revenant_ml_integer_of(params, "axis", 0);
+    output = revenant_ml_tensor_make(input->rank, input->shape);
     if (output.data == NULL) {
-        snprintf(error, error_size, "the layer '%s' has an output of no room for it", charon_ml_layer_name(layer));
+        snprintf(error, error_size, "the layer '%s' has an output of no room for it", revenant_ml_layer_name(layer));
         return 0;
     }
     memcpy(output.data, input->data, input->count * sizeof *output.data);
-    charon_ml_softmax_axis(&output, axis);
+    revenant_ml_softmax_axis(&output, axis);
     return take_output(layer, bindings, output, error, error_size);
 }
 
-int charon_ml_layer_batchnorm(const charon_ml_node *layer, const charon_ml_node *params,
-                              charon_ml_bindings *bindings, char *error, size_t error_size)
+int revenant_ml_layer_batchnorm(const revenant_ml_node *layer, const revenant_ml_node *params,
+                              revenant_ml_bindings *bindings, char *error, size_t error_size)
 {
-    charon_ml_tensor *input = charon_ml_input(bindings, layer);
+    revenant_ml_tensor *input = revenant_ml_input(bindings, layer);
     double *gamma = NULL, *beta = NULL, *mean = NULL, *variance = NULL;
     size_t gamma_count = 0, beta_count = 0, mean_count = 0, variance_count = 0;
     double epsilon, instance_normalization;
     size_t index;
-    charon_ml_tensor output;
+    revenant_ml_tensor output;
 
     if (input == NULL) {
-        return charon_ml_layer_missing_input(layer, "input", error, error_size);
+        return revenant_ml_layer_missing_input(layer, "input", error, error_size);
     }
-    if (!charon_ml_read_numbers(charon_ml_get(params, "gamma"), &gamma, &gamma_count) ||
-        !charon_ml_read_numbers(charon_ml_get(params, "beta"), &beta, &beta_count) ||
-        !charon_ml_read_numbers(charon_ml_get(params, "mean"), &mean, &mean_count) ||
-        !charon_ml_read_numbers(charon_ml_get(params, "variance"), &variance, &variance_count)) {
+    if (!revenant_ml_read_numbers(revenant_ml_get(params, "gamma"), &gamma, &gamma_count) ||
+        !revenant_ml_read_numbers(revenant_ml_get(params, "beta"), &beta, &beta_count) ||
+        !revenant_ml_read_numbers(revenant_ml_get(params, "mean"), &mean, &mean_count) ||
+        !revenant_ml_read_numbers(revenant_ml_get(params, "variance"), &variance, &variance_count)) {
         free(gamma);
         free(beta);
         free(mean);
         free(variance);
         snprintf(error, error_size,
                  "the layer '%s' does not carry all four of the gamma, beta, mean and variance a batch norm needs",
-                 charon_ml_layer_name(layer));
+                 revenant_ml_layer_name(layer));
         return 0;
     }
-    epsilon = charon_ml_number_of(params, "epsilon", 1e-5);
-    instance_normalization = charon_ml_integer_of(params, "instanceNormalization", 0) != 0;
-    output = charon_ml_tensor_make(input->rank, input->shape);
+    epsilon = revenant_ml_number_of(params, "epsilon", 1e-5);
+    instance_normalization = revenant_ml_integer_of(params, "instanceNormalization", 0) != 0;
+    output = revenant_ml_tensor_make(input->rank, input->shape);
     if (output.data == NULL) {
         free(gamma);
         free(beta);
         free(mean);
         free(variance);
-        snprintf(error, error_size, "the layer '%s' has an output of no room for it", charon_ml_layer_name(layer));
+        snprintf(error, error_size, "the layer '%s' has an output of no room for it", revenant_ml_layer_name(layer));
         return 0;
     }
     if (instance_normalization || input->rank < 2) {
         for (index = 0; index < input->count; index++) {
-            int64_t position[CHARON_ML_MAX_RANK];
+            int64_t position[REVENANT_ML_MAX_RANK];
             size_t channel, at;
             double total = 0.0, squares = 0.0, average, spread;
             int64_t area = 1;
             int axis;
-            charon_ml_unravel((int64_t)index, input->rank, input->shape, position);
+            revenant_ml_unravel((int64_t)index, input->rank, input->shape, position);
             channel = (size_t)position[0];
             for (axis = 1; axis < input->rank; axis++) {
                 area *= input->shape[axis];
@@ -481,27 +481,27 @@ int charon_ml_layer_batchnorm(const charon_ml_node *layer, const charon_ml_node 
     return take_output(layer, bindings, output, error, error_size);
 }
 
-int charon_ml_layer_mvn(const charon_ml_node *layer, const charon_ml_node *params, charon_ml_bindings *bindings,
+int revenant_ml_layer_mvn(const revenant_ml_node *layer, const revenant_ml_node *params, revenant_ml_bindings *bindings,
                         char *error, size_t error_size)
 {
-    charon_ml_tensor *input = charon_ml_input(bindings, layer);
+    revenant_ml_tensor *input = revenant_ml_input(bindings, layer);
     int across_channels, normalize_variance;
     double epsilon;
-    charon_ml_tensor output;
+    revenant_ml_tensor output;
 
     if (input == NULL) {
-        return charon_ml_layer_missing_input(layer, "input", error, error_size);
+        return revenant_ml_layer_missing_input(layer, "input", error, error_size);
     }
     if (input->rank < 2) {
-        return charon_ml_layer_bad_shape(layer, "an input of one dimension, which a mean and variance has none over",
+        return revenant_ml_layer_bad_shape(layer, "an input of one dimension, which a mean and variance has none over",
                                          input, error, error_size);
     }
-    across_channels = charon_ml_integer_of(params, "acrossChannels", 0) != 0;
-    normalize_variance = charon_ml_integer_of(params, "normalizeVariance", 0) != 0;
-    epsilon = charon_ml_number_of(params, "epsilon", 1e-5);
-    output = charon_ml_tensor_make(input->rank, input->shape);
+    across_channels = revenant_ml_integer_of(params, "acrossChannels", 0) != 0;
+    normalize_variance = revenant_ml_integer_of(params, "normalizeVariance", 0) != 0;
+    epsilon = revenant_ml_number_of(params, "epsilon", 1e-5);
+    output = revenant_ml_tensor_make(input->rank, input->shape);
     if (output.data == NULL) {
-        snprintf(error, error_size, "the layer '%s' has an output of no room for it", charon_ml_layer_name(layer));
+        snprintf(error, error_size, "the layer '%s' has an output of no room for it", revenant_ml_layer_name(layer));
         return 0;
     }
     {
@@ -521,21 +521,21 @@ int charon_ml_layer_mvn(const charon_ml_node *layer, const charon_ml_node *param
     return take_output(layer, bindings, output, error, error_size);
 }
 
-int charon_ml_layer_l2normalize(const charon_ml_node *layer, const charon_ml_node *params,
-                                charon_ml_bindings *bindings, char *error, size_t error_size)
+int revenant_ml_layer_l2normalize(const revenant_ml_node *layer, const revenant_ml_node *params,
+                                revenant_ml_bindings *bindings, char *error, size_t error_size)
 {
-    charon_ml_tensor *input = charon_ml_input(bindings, layer);
-    charon_ml_tensor output;
+    revenant_ml_tensor *input = revenant_ml_input(bindings, layer);
+    revenant_ml_tensor output;
     double epsilon, total = 0.0;
     size_t at;
 
     if (input == NULL) {
-        return charon_ml_layer_missing_input(layer, "input", error, error_size);
+        return revenant_ml_layer_missing_input(layer, "input", error, error_size);
     }
-    epsilon = charon_ml_number_of(params, "epsilon", 1e-12);
-    output = charon_ml_tensor_make(input->rank, input->shape);
+    epsilon = revenant_ml_number_of(params, "epsilon", 1e-12);
+    output = revenant_ml_tensor_make(input->rank, input->shape);
     if (output.data == NULL) {
-        snprintf(error, error_size, "the layer '%s' has an output of no room for it", charon_ml_layer_name(layer));
+        snprintf(error, error_size, "the layer '%s' has an output of no room for it", revenant_ml_layer_name(layer));
         return 0;
     }
     for (at = 0; at < input->count; at++) {
@@ -548,33 +548,33 @@ int charon_ml_layer_l2normalize(const charon_ml_node *layer, const charon_ml_nod
     return take_output(layer, bindings, output, error, error_size);
 }
 
-int charon_ml_layer_lrn(const charon_ml_node *layer, const charon_ml_node *params, charon_ml_bindings *bindings,
+int revenant_ml_layer_lrn(const revenant_ml_node *layer, const revenant_ml_node *params, revenant_ml_bindings *bindings,
                        char *error, size_t error_size)
 {
-    charon_ml_tensor *input = charon_ml_input(bindings, layer);
+    revenant_ml_tensor *input = revenant_ml_input(bindings, layer);
     double alpha, beta, k;
     int local_size, channel;
     int64_t area = 1, at;
     int axis;
-    charon_ml_tensor output;
+    revenant_ml_tensor output;
 
     if (input == NULL) {
-        return charon_ml_layer_missing_input(layer, "input", error, error_size);
+        return revenant_ml_layer_missing_input(layer, "input", error, error_size);
     }
     if (input->rank < 3) {
-        return charon_ml_layer_bad_shape(layer, "an input with no spatial extent to reach across", input, error,
+        return revenant_ml_layer_bad_shape(layer, "an input with no spatial extent to reach across", input, error,
                                          error_size);
     }
-    alpha = charon_ml_number_of(params, "alpha", 0.0001);
-    beta = charon_ml_number_of(params, "beta", 0.75);
-    k = charon_ml_number_of(params, "k", 1.0);
-    local_size = charon_ml_integer_of(params, "localSize", 1);
+    alpha = revenant_ml_number_of(params, "alpha", 0.0001);
+    beta = revenant_ml_number_of(params, "beta", 0.75);
+    k = revenant_ml_number_of(params, "k", 1.0);
+    local_size = revenant_ml_integer_of(params, "localSize", 1);
     for (axis = 1; axis < input->rank; axis++) {
         area *= input->shape[axis];
     }
-    output = charon_ml_tensor_make(input->rank, input->shape);
+    output = revenant_ml_tensor_make(input->rank, input->shape);
     if (output.data == NULL) {
-        snprintf(error, error_size, "the layer '%s' has an output of no room for it", charon_ml_layer_name(layer));
+        snprintf(error, error_size, "the layer '%s' has an output of no room for it", revenant_ml_layer_name(layer));
         return 0;
     }
     for (channel = 0; channel < (int)input->shape[0]; channel++) {
@@ -604,47 +604,47 @@ int charon_ml_layer_lrn(const charon_ml_node *layer, const charon_ml_node *param
     return take_output(layer, bindings, output, error, error_size);
 }
 
-int charon_ml_layer_embedding(const charon_ml_node *layer, const charon_ml_node *params,
-                              charon_ml_bindings *bindings, char *error, size_t error_size)
+int revenant_ml_layer_embedding(const revenant_ml_node *layer, const revenant_ml_node *params,
+                              revenant_ml_bindings *bindings, char *error, size_t error_size)
 {
-    charon_ml_tensor *input = charon_ml_input(bindings, layer);
+    revenant_ml_tensor *input = revenant_ml_input(bindings, layer);
     double *weights = NULL, *bias = NULL;
     size_t weight_count = 0, bias_count = 0;
     int input_dim, output_channels, has_bias;
     int64_t shape[2];
-    charon_ml_tensor output;
+    revenant_ml_tensor output;
     size_t index;
 
     if (input == NULL) {
-        return charon_ml_layer_missing_input(layer, "input", error, error_size);
+        return revenant_ml_layer_missing_input(layer, "input", error, error_size);
     }
-    input_dim = charon_ml_integer_of(params, "inputDim", 0);
-    output_channels = charon_ml_integer_of(params, "outputChannels", 0);
-    has_bias = charon_ml_integer_of(params, "hasBias", 0) != 0;
+    input_dim = revenant_ml_integer_of(params, "inputDim", 0);
+    output_channels = revenant_ml_integer_of(params, "outputChannels", 0);
+    has_bias = revenant_ml_integer_of(params, "hasBias", 0) != 0;
     if (input_dim <= 0 || output_channels <= 0) {
-        snprintf(error, error_size, "the layer '%s' has a dimension of no length", charon_ml_layer_name(layer));
+        snprintf(error, error_size, "the layer '%s' has a dimension of no length", revenant_ml_layer_name(layer));
         return 0;
     }
-    if (!charon_ml_read_numbers(charon_ml_get(params, "weights"), &weights, &weight_count) ||
+    if (!revenant_ml_read_numbers(revenant_ml_get(params, "weights"), &weights, &weight_count) ||
         weight_count != (size_t)input_dim * (size_t)output_channels) {
         free(weights);
         snprintf(error, error_size,
-                 "the layer '%s' has weights for something other than %d rows of %d", charon_ml_layer_name(layer),
+                 "the layer '%s' has weights for something other than %d rows of %d", revenant_ml_layer_name(layer),
                  input_dim, output_channels);
         return 0;
     }
-    if (has_bias && !charon_ml_read_numbers(charon_ml_get(params, "bias"), &bias, &bias_count)) {
+    if (has_bias && !revenant_ml_read_numbers(revenant_ml_get(params, "bias"), &bias, &bias_count)) {
         free(weights);
-        snprintf(error, error_size, "the layer '%s' says it has a bias and has none", charon_ml_layer_name(layer));
+        snprintf(error, error_size, "the layer '%s' says it has a bias and has none", revenant_ml_layer_name(layer));
         return 0;
     }
     shape[0] = input->count;
     shape[1] = output_channels;
-    output = charon_ml_tensor_make(2, shape);
+    output = revenant_ml_tensor_make(2, shape);
     if (output.data == NULL) {
         free(weights);
         free(bias);
-        snprintf(error, error_size, "the layer '%s' has an output of no room for it", charon_ml_layer_name(layer));
+        snprintf(error, error_size, "the layer '%s' has an output of no room for it", revenant_ml_layer_name(layer));
         return 0;
     }
     for (index = 0; index < input->count; index++) {
@@ -652,8 +652,8 @@ int charon_ml_layer_embedding(const charon_ml_node *layer, const charon_ml_node 
         int64_t at;
         if (row < 0 || row >= input_dim) {
             snprintf(error, error_size, "the layer '%s' is given the index %lld, which is not one of its %d rows",
-                     charon_ml_layer_name(layer), (long long)row, input_dim);
-            charon_ml_tensor_free(&output);
+                     revenant_ml_layer_name(layer), (long long)row, input_dim);
+            revenant_ml_tensor_free(&output);
             free(weights);
             free(bias);
             return 0;
@@ -669,21 +669,21 @@ int charon_ml_layer_embedding(const charon_ml_node *layer, const charon_ml_node 
     return take_output(layer, bindings, output, error, error_size);
 }
 
-static int own_numbers(const charon_ml_node *params, const char *field, const charon_ml_node *layer,
-                       charon_ml_bindings *bindings, size_t input_index, double **out, int *count,
+static int own_numbers(const revenant_ml_node *params, const char *field, const revenant_ml_node *layer,
+                       revenant_ml_bindings *bindings, size_t input_index, double **out, int *count,
                        char *error, size_t error_size)
 {
     char name[256];
-    charon_ml_tensor *named = NULL;
+    revenant_ml_tensor *named = NULL;
     *out = NULL;
     *count = 0;
-    if (charon_ml_name_at(layer, "input", input_index, name, sizeof name) != NULL) {
-        named = charon_ml_bindings_find(bindings, name);
+    if (revenant_ml_name_at(layer, "input", input_index, name, sizeof name) != NULL) {
+        named = revenant_ml_bindings_find(bindings, name);
     }
     if (named != NULL) {
         *out = (double *)malloc(named->count * sizeof **out);
         if (*out == NULL) {
-            snprintf(error, error_size, "the layer '%s' has values of no room for it", charon_ml_layer_name(layer));
+            snprintf(error, error_size, "the layer '%s' has values of no room for it", revenant_ml_layer_name(layer));
             return 0;
         }
         for (*count = 0; (size_t)(*count) < named->count; (*count)++) {
@@ -693,7 +693,7 @@ static int own_numbers(const charon_ml_node *params, const char *field, const ch
     }
     {
         size_t total = 0;
-        if (charon_ml_read_numbers(charon_ml_get(params, field), out, &total) && total > 0) {
+        if (revenant_ml_read_numbers(revenant_ml_get(params, field), out, &total) && total > 0) {
             *count = (int)total;
             return 1;
         }
@@ -701,40 +701,40 @@ static int own_numbers(const charon_ml_node *params, const char *field, const ch
         *out = NULL;
     }
     snprintf(error, error_size, "the layer '%s' has neither a '%s' of its own nor one named as an input",
-             charon_ml_layer_name(layer), field);
+             revenant_ml_layer_name(layer), field);
     return 0;
 }
 
-int charon_ml_layer_scale(const charon_ml_node *layer, const charon_ml_node *params, charon_ml_bindings *bindings,
+int revenant_ml_layer_scale(const revenant_ml_node *layer, const revenant_ml_node *params, revenant_ml_bindings *bindings,
                           char *error, size_t error_size)
 {
     char name[256];
-    charon_ml_tensor *input = NULL;
+    revenant_ml_tensor *input = NULL;
     double *scale = NULL, *shift = NULL;
     int scale_count = 0, shift_count = 0;
-    charon_ml_tensor output;
+    revenant_ml_tensor output;
     int64_t area = 1, at, channel;
     int axis;
 
-    if (charon_ml_name_at(layer, "input", 0, name, sizeof name) != NULL) {
-        input = charon_ml_bindings_find(bindings, name);
+    if (revenant_ml_name_at(layer, "input", 0, name, sizeof name) != NULL) {
+        input = revenant_ml_bindings_find(bindings, name);
     }
     if (input == NULL) {
-        return charon_ml_layer_missing_input(layer, "input", error, error_size);
+        return revenant_ml_layer_missing_input(layer, "input", error, error_size);
     }
     if (!own_numbers(params, "scale", layer, bindings, 1, &scale, &scale_count, error, error_size)) {
         return 0;
     }
-    if (charon_ml_integer_of(params, "hasBias", 0) != 0 &&
+    if (revenant_ml_integer_of(params, "hasBias", 0) != 0 &&
         !own_numbers(params, "bias", layer, bindings, 2, &shift, &shift_count, error, error_size)) {
         free(scale);
         return 0;
     }
-    output = charon_ml_tensor_make(input->rank, input->shape);
+    output = revenant_ml_tensor_make(input->rank, input->shape);
     if (output.data == NULL) {
         free(scale);
         free(shift);
-        snprintf(error, error_size, "the layer '%s' has an output of no room for it", charon_ml_layer_name(layer));
+        snprintf(error, error_size, "the layer '%s' has an output of no room for it", revenant_ml_layer_name(layer));
         return 0;
     }
     for (axis = 1; axis < input->rank; axis++) {
@@ -753,45 +753,45 @@ int charon_ml_layer_scale(const charon_ml_node *layer, const charon_ml_node *par
     return take_output(layer, bindings, output, error, error_size);
 }
 
-int charon_ml_layer_bias(const charon_ml_node *layer, const charon_ml_node *params, charon_ml_bindings *bindings,
+int revenant_ml_layer_bias(const revenant_ml_node *layer, const revenant_ml_node *params, revenant_ml_bindings *bindings,
                          char *error, size_t error_size)
 {
     char name[256];
-    charon_ml_tensor *input = NULL, *offset = NULL;
-    charon_ml_tensor output;
+    revenant_ml_tensor *input = NULL, *offset = NULL;
+    revenant_ml_tensor output;
     size_t index;
     int64_t extent;
 
-    if (charon_ml_name_at(layer, "input", 0, name, sizeof name) != NULL) {
-        input = charon_ml_bindings_find(bindings, name);
+    if (revenant_ml_name_at(layer, "input", 0, name, sizeof name) != NULL) {
+        input = revenant_ml_bindings_find(bindings, name);
     }
     if (input == NULL) {
-        return charon_ml_layer_missing_input(layer, "input", error, error_size);
+        return revenant_ml_layer_missing_input(layer, "input", error, error_size);
     }
     extent = (int64_t)input->count;
     (void)extent;
-    if (charon_ml_name_at(layer, "input", 1, name, sizeof name) != NULL) {
-        offset = charon_ml_bindings_find(bindings, name);
+    if (revenant_ml_name_at(layer, "input", 1, name, sizeof name) != NULL) {
+        offset = revenant_ml_bindings_find(bindings, name);
     }
     if (offset == NULL) {
         double *numbers = NULL;
         size_t total = 0;
-        charon_ml_tensor own;
-        if (!charon_ml_read_numbers(charon_ml_get(params, "bias"), &numbers, &total) || total == 0) {
+        revenant_ml_tensor own;
+        if (!revenant_ml_read_numbers(revenant_ml_get(params, "bias"), &numbers, &total) || total == 0) {
             free(numbers);
             snprintf(error, error_size, "the layer '%s' has neither an offset named as an input nor one of its own",
-                     charon_ml_layer_name(layer));
+                     revenant_ml_layer_name(layer));
             return 0;
         }
-        own = charon_ml_tensor_make(1, &(int64_t){(int64_t)total});
+        own = revenant_ml_tensor_make(1, &(int64_t){(int64_t)total});
         for (index = 0; index < own.count; index++) {
             own.data[index] = (float)numbers[index];
         }
         free(numbers);
         offset = &own;
-        output = charon_ml_tensor_make(input->rank, input->shape);
+        output = revenant_ml_tensor_make(input->rank, input->shape);
         if (output.data == NULL) {
-            snprintf(error, error_size, "the layer '%s' has an output of no room for it", charon_ml_layer_name(layer));
+            snprintf(error, error_size, "the layer '%s' has an output of no room for it", revenant_ml_layer_name(layer));
             return 0;
         }
         for (index = 0; index < input->count && index < offset->count; index++) {
@@ -799,9 +799,9 @@ int charon_ml_layer_bias(const charon_ml_node *layer, const charon_ml_node *para
         }
         return take_output(layer, bindings, output, error, error_size);
     }
-    output = charon_ml_tensor_make(input->rank, input->shape);
+    output = revenant_ml_tensor_make(input->rank, input->shape);
     if (output.data == NULL) {
-        snprintf(error, error_size, "the layer '%s' has an output of no room for it", charon_ml_layer_name(layer));
+        snprintf(error, error_size, "the layer '%s' has an output of no room for it", revenant_ml_layer_name(layer));
         return 0;
     }
     for (index = 0; index < input->count && index < offset->count; index++) {
@@ -810,40 +810,40 @@ int charon_ml_layer_bias(const charon_ml_node *layer, const charon_ml_node *para
     return take_output(layer, bindings, output, error, error_size);
 }
 
-int charon_ml_layer_padding(const charon_ml_node *layer, const charon_ml_node *params,
-                            charon_ml_bindings *bindings, char *error, size_t error_size)
+int revenant_ml_layer_padding(const revenant_ml_node *layer, const revenant_ml_node *params,
+                            revenant_ml_bindings *bindings, char *error, size_t error_size)
 {
-    charon_ml_tensor *input = charon_ml_input(bindings, layer);
+    revenant_ml_tensor *input = revenant_ml_input(bindings, layer);
     int64_t pad[4], shape[3];
     int constant;
-    charon_ml_pad_kind how;
+    revenant_ml_pad_kind how;
     double value;
-    charon_ml_tensor output;
+    revenant_ml_tensor output;
     int64_t channel, y, x;
 
     if (input == NULL) {
-        return charon_ml_layer_missing_input(layer, "input", error, error_size);
+        return revenant_ml_layer_missing_input(layer, "input", error, error_size);
     }
     if (input->rank != 3) {
-        return charon_ml_layer_bad_shape(layer, "an input that is not channels by height by width", input,
+        return revenant_ml_layer_bad_shape(layer, "an input that is not channels by height by width", input,
                                          error, error_size);
     }
     {
-        const charon_ml_node *fill = charon_ml_get(params, "constant");
+        const revenant_ml_node *fill = revenant_ml_get(params, "constant");
         read_padding(params, &how, pad);
         constant = fill != NULL;
-        value = charon_ml_number_of(fill, "value", 0.0);
+        value = revenant_ml_number_of(fill, "value", 0.0);
     }
     if (pad[0] < 0 || pad[1] < 0 || pad[2] < 0 || pad[3] < 0) {
-        snprintf(error, error_size, "the layer '%s' has a padding of negative length", charon_ml_layer_name(layer));
+        snprintf(error, error_size, "the layer '%s' has a padding of negative length", revenant_ml_layer_name(layer));
         return 0;
     }
     shape[0] = input->shape[0];
     shape[1] = input->shape[1] + pad[0] + pad[1];
     shape[2] = input->shape[2] + pad[2] + pad[3];
-    output = charon_ml_tensor_make(3, shape);
+    output = revenant_ml_tensor_make(3, shape);
     if (output.data == NULL) {
-        snprintf(error, error_size, "the layer '%s' has an output of no room for it", charon_ml_layer_name(layer));
+        snprintf(error, error_size, "the layer '%s' has an output of no room for it", revenant_ml_layer_name(layer));
         return 0;
     }
     for (channel = 0; channel < shape[0]; channel++) {
@@ -860,45 +860,45 @@ int charon_ml_layer_padding(const charon_ml_node *layer, const charon_ml_node *p
     return take_output(layer, bindings, output, error, error_size);
 }
 
-int charon_ml_layer_load_constant(const charon_ml_node *layer, const charon_ml_node *params,
-                                  charon_ml_bindings *bindings, char *error, size_t error_size)
+int revenant_ml_layer_load_constant(const revenant_ml_node *layer, const revenant_ml_node *params,
+                                  revenant_ml_bindings *bindings, char *error, size_t error_size)
 {
-    const charon_ml_node *data = charon_ml_get(params, "data");
+    const revenant_ml_node *data = revenant_ml_get(params, "data");
     double *numbers = NULL;
     size_t count = 0, index;
-    int rank = (int)charon_ml_count_field(params, "shape");
-    int64_t shape[CHARON_ML_MAX_RANK];
-    charon_ml_tensor output;
+    int rank = (int)revenant_ml_count_field(params, "shape");
+    int64_t shape[REVENANT_ML_MAX_RANK];
+    revenant_ml_tensor output;
 
-    if (rank > CHARON_ML_MAX_RANK) {
+    if (rank > REVENANT_ML_MAX_RANK) {
         snprintf(error, error_size, "the layer '%s' is a constant of more dimensions than this port holds",
-                 charon_ml_layer_name(layer));
+                 revenant_ml_layer_name(layer));
         return 0;
     }
     for (index = 0; index < (size_t)rank; index++) {
-        shape[index] = charon_ml_int_at(params, "shape", index, 0);
+        shape[index] = revenant_ml_int_at(params, "shape", index, 0);
     }
-    output = charon_ml_tensor_make(rank, shape);
+    output = revenant_ml_tensor_make(rank, shape);
     if (output.data == NULL) {
         snprintf(error, error_size, "the layer '%s' is a constant whose shape has no room for it",
-                 charon_ml_layer_name(layer));
+                 revenant_ml_layer_name(layer));
         return 0;
     }
     if (data == NULL) {
         return take_output(layer, bindings, output, error, error_size);
     }
-    if (charon_ml_read_numbers(data, &numbers, &count)) {
+    if (revenant_ml_read_numbers(data, &numbers, &count)) {
         for (index = 0; index < count && index < output.count; index++) {
             output.data[index] = (float)numbers[index];
         }
         free(numbers);
     } else {
-        const charon_ml_node *entry = charon_ml_get(data, "rawValue");
+        const revenant_ml_node *entry = revenant_ml_get(data, "rawValue");
         if (entry == NULL) {
-            entry = charon_ml_get(data, "float16Value");
+            entry = revenant_ml_get(data, "float16Value");
         }
         if (entry != NULL) {
-            charon_ml_tensor from;
+            revenant_ml_tensor from;
             memset(&from, 0, sizeof from);
             for (index = 0; index < output.count; index++) {
                 output.data[index] = 0.0f;
@@ -909,75 +909,75 @@ int charon_ml_layer_load_constant(const charon_ml_node *layer, const charon_ml_n
     return take_output(layer, bindings, output, error, error_size);
 }
 
-int charon_ml_layer_permute(const charon_ml_node *layer, const charon_ml_node *params,
-                            charon_ml_bindings *bindings, char *error, size_t error_size)
+int revenant_ml_layer_permute(const revenant_ml_node *layer, const revenant_ml_node *params,
+                            revenant_ml_bindings *bindings, char *error, size_t error_size)
 {
-    charon_ml_tensor *input = charon_ml_input(bindings, layer);
-    charon_ml_tensor output;
-    int64_t shape[CHARON_ML_MAX_RANK], source_strides[CHARON_ML_MAX_RANK], position[CHARON_ML_MAX_RANK];
-    int64_t axis_strides[CHARON_ML_MAX_RANK];
+    revenant_ml_tensor *input = revenant_ml_input(bindings, layer);
+    revenant_ml_tensor output;
+    int64_t shape[REVENANT_ML_MAX_RANK], source_strides[REVENANT_ML_MAX_RANK], position[REVENANT_ML_MAX_RANK];
+    int64_t axis_strides[REVENANT_ML_MAX_RANK];
     size_t index;
     int axis;
 
     if (input == NULL) {
-        return charon_ml_layer_missing_input(layer, "input", error, error_size);
+        return revenant_ml_layer_missing_input(layer, "input", error, error_size);
     }
-    if ((int)charon_ml_count_field(params, "axis") != input->rank) {
+    if ((int)revenant_ml_count_field(params, "axis") != input->rank) {
         snprintf(error, error_size, "the layer '%s' is given %d axes for an input of %d dimensions",
-                 charon_ml_layer_name(layer), (int)charon_ml_count_field(params, "axis"), input->rank);
+                 revenant_ml_layer_name(layer), (int)revenant_ml_count_field(params, "axis"), input->rank);
         return 0;
     }
     for (axis = 0; axis < input->rank; axis++) {
-        int source = charon_ml_int_at(params, "axis", (size_t)axis, -1);
+        int source = revenant_ml_int_at(params, "axis", (size_t)axis, -1);
         if (source < 0 || source >= input->rank) {
             snprintf(error, error_size, "the layer '%s' names the axis %d, which its input does not have",
-                     charon_ml_layer_name(layer), source);
+                     revenant_ml_layer_name(layer), source);
             return 0;
         }
         shape[axis] = input->shape[source];
     }
-    output = charon_ml_tensor_make(input->rank, shape);
+    output = revenant_ml_tensor_make(input->rank, shape);
     if (output.data == NULL) {
-        snprintf(error, error_size, "the layer '%s' has an output of no room for it", charon_ml_layer_name(layer));
+        snprintf(error, error_size, "the layer '%s' has an output of no room for it", revenant_ml_layer_name(layer));
         return 0;
     }
-    charon_ml_row_major_strides(input->shape, input->rank, source_strides);
+    revenant_ml_row_major_strides(input->shape, input->rank, source_strides);
     for (axis = 0; axis < input->rank; axis++) {
-        axis_strides[axis] = source_strides[charon_ml_int_at(params, "axis", (size_t)axis, 0)];
+        axis_strides[axis] = source_strides[revenant_ml_int_at(params, "axis", (size_t)axis, 0)];
     }
     for (index = 0; index < output.count; index++) {
-        charon_ml_unravel((int64_t)index, output.rank, shape, position);
-        output.data[index] = input->data[charon_ml_ravel(position, output.rank, axis_strides)];
+        revenant_ml_unravel((int64_t)index, output.rank, shape, position);
+        output.data[index] = input->data[revenant_ml_ravel(position, output.rank, axis_strides)];
     }
     return take_output(layer, bindings, output, error, error_size);
 }
 
-int charon_ml_layer_reshape(const charon_ml_node *layer, const charon_ml_node *params,
-                            charon_ml_bindings *bindings, char *error, size_t error_size)
+int revenant_ml_layer_reshape(const revenant_ml_node *layer, const revenant_ml_node *params,
+                            revenant_ml_bindings *bindings, char *error, size_t error_size)
 {
-    charon_ml_tensor *input = charon_ml_input(bindings, layer);
-    charon_ml_tensor output;
-    int64_t shape[CHARON_ML_MAX_RANK], known = 1, total = 0;
+    revenant_ml_tensor *input = revenant_ml_input(bindings, layer);
+    revenant_ml_tensor output;
+    int64_t shape[REVENANT_ML_MAX_RANK], known = 1, total = 0;
     int rank, index, wildcard = -1;
 
     if (input == NULL) {
-        return charon_ml_layer_missing_input(layer, "input", error, error_size);
+        return revenant_ml_layer_missing_input(layer, "input", error, error_size);
     }
-    rank = (int)charon_ml_count_field(params, "targetShape");
-    if (rank > CHARON_ML_MAX_RANK) {
+    rank = (int)revenant_ml_count_field(params, "targetShape");
+    if (rank > REVENANT_ML_MAX_RANK) {
         snprintf(error, error_size, "the layer '%s' reshapes to more dimensions than this port holds",
-                 charon_ml_layer_name(layer));
+                 revenant_ml_layer_name(layer));
         return 0;
     }
     for (index = 0; index < input->rank; index++) {
         total += (int)input->shape[index];
     }
     for (index = 0; index < rank; index++) {
-        shape[index] = charon_ml_int_at(params, "targetShape", (size_t)index, -1);
+        shape[index] = revenant_ml_int_at(params, "targetShape", (size_t)index, -1);
         if (shape[index] < 0) {
             if (wildcard >= 0) {
                 snprintf(error, error_size, "the layer '%s' leaves two of its target dimensions open",
-                         charon_ml_layer_name(layer));
+                         revenant_ml_layer_name(layer));
                 return 0;
             }
             wildcard = index;
@@ -989,78 +989,78 @@ int charon_ml_layer_reshape(const charon_ml_node *layer, const charon_ml_node *p
     if (wildcard >= 0) {
         if (known <= 0) {
             snprintf(error, error_size, "the layer '%s' reshapes to a target of no length",
-                     charon_ml_layer_name(layer));
+                     revenant_ml_layer_name(layer));
             return 0;
         }
         shape[wildcard] = total / known;
     }
-    output = charon_ml_tensor_make(rank, shape);
+    output = revenant_ml_tensor_make(rank, shape);
     if (output.data == NULL || output.count != input->count) {
-        charon_ml_tensor_free(&output);
+        revenant_ml_tensor_free(&output);
         snprintf(error, error_size, "the layer '%s' reshapes %lu values into a shape that holds %lu",
-                 charon_ml_layer_name(layer), (unsigned long)input->count, (unsigned long)output.count);
+                 revenant_ml_layer_name(layer), (unsigned long)input->count, (unsigned long)output.count);
         return 0;
     }
     memcpy(output.data, input->data, input->count * sizeof *output.data);
     return take_output(layer, bindings, output, error, error_size);
 }
 
-int charon_ml_layer_flatten(const charon_ml_node *layer, const charon_ml_node *params,
-                            charon_ml_bindings *bindings, char *error, size_t error_size)
+int revenant_ml_layer_flatten(const revenant_ml_node *layer, const revenant_ml_node *params,
+                            revenant_ml_bindings *bindings, char *error, size_t error_size)
 {
-    charon_ml_tensor *input = charon_ml_input(bindings, layer);
-    charon_ml_tensor output;
+    revenant_ml_tensor *input = revenant_ml_input(bindings, layer);
+    revenant_ml_tensor output;
     int64_t shape[1];
     int channel_last;
 
     if (input == NULL) {
-        return charon_ml_layer_missing_input(layer, "input", error, error_size);
+        return revenant_ml_layer_missing_input(layer, "input", error, error_size);
     }
-    channel_last = charon_ml_integer_of(params, "order", 0) == 1;
+    channel_last = revenant_ml_integer_of(params, "order", 0) == 1;
     (void)channel_last;
     shape[0] = (int64_t)input->count;
-    output = charon_ml_tensor_make(1, shape);
+    output = revenant_ml_tensor_make(1, shape);
     if (output.data == NULL) {
-        snprintf(error, error_size, "the layer '%s' has an output of no room for it", charon_ml_layer_name(layer));
+        snprintf(error, error_size, "the layer '%s' has an output of no room for it", revenant_ml_layer_name(layer));
         return 0;
     }
     memcpy(output.data, input->data, input->count * sizeof *output.data);
     return take_output(layer, bindings, output, error, error_size);
 }
 
-int charon_ml_layer_concat(const charon_ml_node *layer, const charon_ml_node *params,
-                           charon_ml_bindings *bindings, char *error, size_t error_size)
+int revenant_ml_layer_concat(const revenant_ml_node *layer, const revenant_ml_node *params,
+                           revenant_ml_bindings *bindings, char *error, size_t error_size)
 {
-    size_t inputs = charon_ml_name_count(layer, "input"), index;
-    charon_ml_tensor output;
-    int64_t shape[CHARON_ML_MAX_RANK], strides[CHARON_ML_MAX_RANK];
-    int64_t offset[CHARON_ML_MAX_RANK];
+    size_t inputs = revenant_ml_name_count(layer, "input"), index;
+    revenant_ml_tensor output;
+    int64_t shape[REVENANT_ML_MAX_RANK], strides[REVENANT_ML_MAX_RANK];
+    int64_t offset[REVENANT_ML_MAX_RANK];
     char names[8][256];
     size_t kept;
 
     if (inputs < 2 || inputs > 8) {
         snprintf(error, error_size, "the layer '%s' joins %lu inputs, and this port joins two to eight",
-                 charon_ml_layer_name(layer), (unsigned long)inputs);
+                 revenant_ml_layer_name(layer), (unsigned long)inputs);
         return 0;
     }
     kept = 0;
     for (index = 0; index < inputs && kept < 8; index++) {
         char *name = names[kept];
-        if (charon_ml_name_at(layer, "input", index, name, 256) == NULL ||
-            charon_ml_bindings_find(bindings, name) == NULL) {
-            snprintf(error, error_size, "the layer '%s' names an input that is not there", charon_ml_layer_name(layer));
+        if (revenant_ml_name_at(layer, "input", index, name, 256) == NULL ||
+            revenant_ml_bindings_find(bindings, name) == NULL) {
+            snprintf(error, error_size, "the layer '%s' names an input that is not there", revenant_ml_layer_name(layer));
             return 0;
         }
         kept++;
     }
     {
-        charon_ml_tensor *first = charon_ml_bindings_find(bindings, names[0]);
+        revenant_ml_tensor *first = revenant_ml_bindings_find(bindings, names[0]);
         int rank = first->rank;
         int position = 0;
         if (rank != 1 && rank != 3) {
             snprintf(error, error_size,
                      "the layer '%s' joins values of %d dimensions, and Core ML joins the channels of three or a whole one",
-                     charon_ml_layer_name(layer), rank);
+                     revenant_ml_layer_name(layer), rank);
             return 0;
         }
         for (index = 0; index < (size_t)rank; index++) {
@@ -1068,39 +1068,39 @@ int charon_ml_layer_concat(const charon_ml_node *layer, const charon_ml_node *pa
         }
         shape[position] = 0;
         for (index = 0; index < kept; index++) {
-            charon_ml_tensor *other = charon_ml_bindings_find(bindings, names[index]);
+            revenant_ml_tensor *other = revenant_ml_bindings_find(bindings, names[index]);
             int axis_index;
             if (other->rank != rank) {
                 snprintf(error, error_size, "the layer '%s' joins an input of %d dimensions with one of %d",
-                         charon_ml_layer_name(layer), other->rank, rank);
+                         revenant_ml_layer_name(layer), other->rank, rank);
                 return 0;
             }
             for (axis_index = 0; axis_index < rank; axis_index++) {
                 if (axis_index != position && other->shape[axis_index] != shape[axis_index]) {
                     snprintf(error, error_size,
                              "the layer '%s' joins inputs whose dimension %d is %lld in one and %lld in another",
-                             charon_ml_layer_name(layer), axis_index, (long long)other->shape[axis_index],
+                             revenant_ml_layer_name(layer), axis_index, (long long)other->shape[axis_index],
                              (long long)shape[axis_index]);
                     return 0;
                 }
             }
             shape[position] += other->shape[position];
         }
-        output = charon_ml_tensor_make(rank, shape);
+        output = revenant_ml_tensor_make(rank, shape);
         if (output.data == NULL) {
-            snprintf(error, error_size, "the layer '%s' has an output of no room for it", charon_ml_layer_name(layer));
+            snprintf(error, error_size, "the layer '%s' has an output of no room for it", revenant_ml_layer_name(layer));
             return 0;
         }
-        charon_ml_row_major_strides(shape, rank, strides);
+        revenant_ml_row_major_strides(shape, rank, strides);
         memset(offset, 0, sizeof offset);
         for (index = 0; index < kept; index++) {
-            charon_ml_tensor *other = charon_ml_bindings_find(bindings, names[index]);
+            revenant_ml_tensor *other = revenant_ml_bindings_find(bindings, names[index]);
             size_t at;
             for (at = 0; at < other->count; at++) {
-                int64_t position_in[CHARON_ML_MAX_RANK];
-                charon_ml_unravel((int64_t)at, rank, shape, position_in);
+                int64_t position_in[REVENANT_ML_MAX_RANK];
+                revenant_ml_unravel((int64_t)at, rank, shape, position_in);
                 position_in[position] -= offset[position];
-                output.data[charon_ml_ravel(position_in, rank, strides)] = other->data[at];
+                output.data[revenant_ml_ravel(position_in, rank, strides)] = other->data[at];
             }
             offset[position] += other->shape[position];
         }
@@ -1108,63 +1108,63 @@ int charon_ml_layer_concat(const charon_ml_node *layer, const charon_ml_node *pa
     return take_output(layer, bindings, output, error, error_size);
 }
 
-int charon_ml_layer_split(const charon_ml_node *layer, const charon_ml_node *params,
-                          charon_ml_bindings *bindings, char *error, size_t error_size)
+int revenant_ml_layer_split(const revenant_ml_node *layer, const revenant_ml_node *params,
+                          revenant_ml_bindings *bindings, char *error, size_t error_size)
 {
-    charon_ml_tensor *input = charon_ml_input(bindings, layer);
-    size_t outputs = charon_ml_name_count(layer, "output"), index;
+    revenant_ml_tensor *input = revenant_ml_input(bindings, layer);
+    size_t outputs = revenant_ml_name_count(layer, "output"), index;
     int axis;
-    charon_ml_tensor piece;
+    revenant_ml_tensor piece;
     char name[256];
 
     if (input == NULL) {
-        return charon_ml_layer_missing_input(layer, "input", error, error_size);
+        return revenant_ml_layer_missing_input(layer, "input", error, error_size);
     }
     if (outputs < 1 || outputs > 4) {
         snprintf(error, error_size, "the layer '%s' splits into %lu outputs, and this port splits into one to four",
-                 charon_ml_layer_name(layer), (unsigned long)outputs);
+                 revenant_ml_layer_name(layer), (unsigned long)outputs);
         return 0;
     }
-    axis = charon_ml_integer_of(params, "axis", 0);
+    axis = revenant_ml_integer_of(params, "axis", 0);
     if (axis < 0) {
         axis += input->rank;
     }
     if (axis < 0 || axis >= input->rank) {
         snprintf(error, error_size, "the layer '%s' splits along the axis %d, which its input does not have",
-                 charon_ml_layer_name(layer), axis);
+                 revenant_ml_layer_name(layer), axis);
         return 0;
     }
     {
-        int64_t along = input->shape[axis] / (int64_t)outputs, position[CHARON_ML_MAX_RANK];
-        int64_t strides[CHARON_ML_MAX_RANK];
-        charon_ml_row_major_strides(input->shape, input->rank, strides);
+        int64_t along = input->shape[axis] / (int64_t)outputs, position[REVENANT_ML_MAX_RANK];
+        int64_t strides[REVENANT_ML_MAX_RANK];
+        revenant_ml_row_major_strides(input->shape, input->rank, strides);
         if (along * (int64_t)outputs != input->shape[axis]) {
             snprintf(error, error_size, "the layer '%s' splits %lld values into %lu equal parts, which does not divide",
-                     charon_ml_layer_name(layer), (long long)input->shape[axis], (unsigned long)outputs);
+                     revenant_ml_layer_name(layer), (long long)input->shape[axis], (unsigned long)outputs);
             return 0;
         }
         for (index = 0; index < outputs; index++) {
-            int64_t shape[CHARON_ML_MAX_RANK];
+            int64_t shape[REVENANT_ML_MAX_RANK];
             size_t out;
             memcpy(shape, input->shape, (size_t)input->rank * sizeof *shape);
             shape[axis] = along;
-            piece = charon_ml_tensor_make(input->rank, shape);
+            piece = revenant_ml_tensor_make(input->rank, shape);
             if (piece.data == NULL) {
-                snprintf(error, error_size, "the layer '%s' has a part of no room for it", charon_ml_layer_name(layer));
+                snprintf(error, error_size, "the layer '%s' has a part of no room for it", revenant_ml_layer_name(layer));
                 return 0;
             }
             for (out = 0; out < piece.count; out++) {
-                int64_t source[CHARON_ML_MAX_RANK];
-                charon_ml_unravel((int64_t)out, piece.rank, shape, position);
+                int64_t source[REVENANT_ML_MAX_RANK];
+                revenant_ml_unravel((int64_t)out, piece.rank, shape, position);
                 memcpy(source, position, (size_t)input->rank * sizeof *source);
                 source[axis] += (int64_t)index * along;
-                piece.data[out] = input->data[charon_ml_ravel(source, input->rank, strides)];
+                piece.data[out] = input->data[revenant_ml_ravel(source, input->rank, strides)];
             }
-            if (charon_ml_name_at(layer, "output", index, name, sizeof name) == NULL ||
-                !charon_ml_bindings_put(bindings, name, piece)) {
-                charon_ml_tensor_free(&piece);
+            if (revenant_ml_name_at(layer, "output", index, name, sizeof name) == NULL ||
+                !revenant_ml_bindings_put(bindings, name, piece)) {
+                revenant_ml_tensor_free(&piece);
                 snprintf(error, error_size, "the layer '%s' names an output that is not there, or has no room for it",
-                         charon_ml_layer_name(layer));
+                         revenant_ml_layer_name(layer));
                 return 0;
             }
         }
@@ -1172,23 +1172,23 @@ int charon_ml_layer_split(const charon_ml_node *layer, const charon_ml_node *par
     return 1;
 }
 
-int charon_ml_layer_slice(const charon_ml_node *layer, const charon_ml_node *params,
-                          charon_ml_bindings *bindings, char *error, size_t error_size)
+int revenant_ml_layer_slice(const revenant_ml_node *layer, const revenant_ml_node *params,
+                          revenant_ml_bindings *bindings, char *error, size_t error_size)
 {
-    charon_ml_tensor *input = charon_ml_input(bindings, layer);
-    charon_ml_tensor output;
-    int64_t shape[CHARON_ML_MAX_RANK], position[CHARON_ML_MAX_RANK], strides[CHARON_ML_MAX_RANK];
+    revenant_ml_tensor *input = revenant_ml_input(bindings, layer);
+    revenant_ml_tensor output;
+    int64_t shape[REVENANT_ML_MAX_RANK], position[REVENANT_ML_MAX_RANK], strides[REVENANT_ML_MAX_RANK];
     int rank, axis;
     size_t index;
 
     if (input == NULL) {
-        return charon_ml_layer_missing_input(layer, "input", error, error_size);
+        return revenant_ml_layer_missing_input(layer, "input", error, error_size);
     }
     rank = input->rank;
     for (axis = 0; axis < rank; axis++) {
-        int64_t start = charon_ml_int_at(params, "startIndices", (size_t)axis, 0);
-        int64_t end = charon_ml_int_at(params, "endIndices", (size_t)axis, input->shape[axis] - 1);
-        int64_t step = charon_ml_int_at(params, "strides", (size_t)axis, 1);
+        int64_t start = revenant_ml_int_at(params, "startIndices", (size_t)axis, 0);
+        int64_t end = revenant_ml_int_at(params, "endIndices", (size_t)axis, input->shape[axis] - 1);
+        int64_t step = revenant_ml_int_at(params, "strides", (size_t)axis, 1);
         if (start < 0) {
             start += input->shape[axis];
         }
@@ -1197,127 +1197,127 @@ int charon_ml_layer_slice(const charon_ml_node *layer, const charon_ml_node *par
         }
         if (step <= 0 || start < 0 || end >= input->shape[axis] || end < start) {
             snprintf(error, error_size, "the layer '%s' takes a slice of its input that lies outside it",
-                     charon_ml_layer_name(layer));
+                     revenant_ml_layer_name(layer));
             return 0;
         }
         shape[axis] = (end - start) / step + 1;
     }
-    output = charon_ml_tensor_make(rank, shape);
+    output = revenant_ml_tensor_make(rank, shape);
     if (output.data == NULL) {
-        snprintf(error, error_size, "the layer '%s' has an output of no room for it", charon_ml_layer_name(layer));
+        snprintf(error, error_size, "the layer '%s' has an output of no room for it", revenant_ml_layer_name(layer));
         return 0;
     }
-    charon_ml_row_major_strides(input->shape, rank, strides);
+    revenant_ml_row_major_strides(input->shape, rank, strides);
     for (index = 0; index < output.count; index++) {
-        int64_t source[CHARON_ML_MAX_RANK];
-        charon_ml_unravel((int64_t)index, rank, shape, position);
+        int64_t source[REVENANT_ML_MAX_RANK];
+        revenant_ml_unravel((int64_t)index, rank, shape, position);
         for (axis = 0; axis < rank; axis++) {
-            int64_t start = charon_ml_int_at(params, "startIndices", (size_t)axis, 0);
-            int64_t step = charon_ml_int_at(params, "strides", (size_t)axis, 1);
+            int64_t start = revenant_ml_int_at(params, "startIndices", (size_t)axis, 0);
+            int64_t step = revenant_ml_int_at(params, "strides", (size_t)axis, 1);
             if (start < 0) {
                 start += input->shape[axis];
             }
             source[axis] = start + position[axis] * step;
         }
-        output.data[index] = input->data[charon_ml_ravel(source, rank, strides)];
+        output.data[index] = input->data[revenant_ml_ravel(source, rank, strides)];
     }
     return take_output(layer, bindings, output, error, error_size);
 }
 
-int charon_ml_layer_copy(const charon_ml_node *layer, const charon_ml_node *params, charon_ml_bindings *bindings,
+int revenant_ml_layer_copy(const revenant_ml_node *layer, const revenant_ml_node *params, revenant_ml_bindings *bindings,
                          char *error, size_t error_size)
 {
-    charon_ml_tensor *input = charon_ml_input(bindings, layer);
-    charon_ml_tensor output;
+    revenant_ml_tensor *input = revenant_ml_input(bindings, layer);
+    revenant_ml_tensor output;
     if (input == NULL) {
-        return charon_ml_layer_missing_input(layer, "input", error, error_size);
+        return revenant_ml_layer_missing_input(layer, "input", error, error_size);
     }
-    output = charon_ml_tensor_make(input->rank, input->shape);
+    output = revenant_ml_tensor_make(input->rank, input->shape);
     if (output.data == NULL) {
-        snprintf(error, error_size, "the layer '%s' has an output of no room for it", charon_ml_layer_name(layer));
+        snprintf(error, error_size, "the layer '%s' has an output of no room for it", revenant_ml_layer_name(layer));
         return 0;
     }
     memcpy(output.data, input->data, input->count * sizeof *output.data);
     return take_output(layer, bindings, output, error, error_size);
 }
 
-int charon_ml_layer_transpose(const charon_ml_node *layer, const charon_ml_node *params,
-                              charon_ml_bindings *bindings, char *error, size_t error_size)
+int revenant_ml_layer_transpose(const revenant_ml_node *layer, const revenant_ml_node *params,
+                              revenant_ml_bindings *bindings, char *error, size_t error_size)
 {
-    charon_ml_tensor *input = charon_ml_input(bindings, layer);
-    charon_ml_tensor output;
-    int64_t shape[CHARON_ML_MAX_RANK], source_strides[CHARON_ML_MAX_RANK], axis_strides[CHARON_ML_MAX_RANK];
-    int64_t position[CHARON_ML_MAX_RANK];
+    revenant_ml_tensor *input = revenant_ml_input(bindings, layer);
+    revenant_ml_tensor output;
+    int64_t shape[REVENANT_ML_MAX_RANK], source_strides[REVENANT_ML_MAX_RANK], axis_strides[REVENANT_ML_MAX_RANK];
+    int64_t position[REVENANT_ML_MAX_RANK];
     int rank, axis;
     size_t index;
 
     if (input == NULL) {
-        return charon_ml_layer_missing_input(layer, "input", error, error_size);
+        return revenant_ml_layer_missing_input(layer, "input", error, error_size);
     }
     rank = input->rank;
-    if ((int)charon_ml_count_field(params, "axes") != rank) {
+    if ((int)revenant_ml_count_field(params, "axes") != rank) {
         snprintf(error, error_size, "the layer '%s' is given %d axes for an input of %d dimensions",
-                 charon_ml_layer_name(layer), (int)charon_ml_count_field(params, "axes"), rank);
+                 revenant_ml_layer_name(layer), (int)revenant_ml_count_field(params, "axes"), rank);
         return 0;
     }
     for (axis = 0; axis < rank; axis++) {
-        int source = charon_ml_int_at(params, "axes", (size_t)axis, -1);
+        int source = revenant_ml_int_at(params, "axes", (size_t)axis, -1);
         if (source < 0 || source >= rank) {
             snprintf(error, error_size, "the layer '%s' names the axis %d, which its input does not have",
-                     charon_ml_layer_name(layer), source);
+                     revenant_ml_layer_name(layer), source);
             return 0;
         }
         shape[axis] = input->shape[source];
     }
-    output = charon_ml_tensor_make(rank, shape);
+    output = revenant_ml_tensor_make(rank, shape);
     if (output.data == NULL) {
-        snprintf(error, error_size, "the layer '%s' has an output of no room for it", charon_ml_layer_name(layer));
+        snprintf(error, error_size, "the layer '%s' has an output of no room for it", revenant_ml_layer_name(layer));
         return 0;
     }
-    charon_ml_row_major_strides(input->shape, rank, source_strides);
+    revenant_ml_row_major_strides(input->shape, rank, source_strides);
     for (axis = 0; axis < rank; axis++) {
-        axis_strides[axis] = source_strides[charon_ml_int_at(params, "axes", (size_t)axis, 0)];
+        axis_strides[axis] = source_strides[revenant_ml_int_at(params, "axes", (size_t)axis, 0)];
     }
     for (index = 0; index < output.count; index++) {
-        charon_ml_unravel((int64_t)index, rank, shape, position);
-        output.data[index] = input->data[charon_ml_ravel(position, rank, axis_strides)];
+        revenant_ml_unravel((int64_t)index, rank, shape, position);
+        output.data[index] = input->data[revenant_ml_ravel(position, rank, axis_strides)];
     }
     return take_output(layer, bindings, output, error, error_size);
 }
 
-int charon_ml_layer_upsample(const charon_ml_node *layer, const charon_ml_node *params,
-                             charon_ml_bindings *bindings, char *error, size_t error_size)
+int revenant_ml_layer_upsample(const revenant_ml_node *layer, const revenant_ml_node *params,
+                             revenant_ml_bindings *bindings, char *error, size_t error_size)
 {
-    charon_ml_tensor *input = charon_ml_input(bindings, layer);
-    charon_ml_tensor output;
+    revenant_ml_tensor *input = revenant_ml_input(bindings, layer);
+    revenant_ml_tensor output;
     int64_t scale_y, scale_x, shape[3], channel, y, x;
     int mode;
 
     if (input == NULL) {
-        return charon_ml_layer_missing_input(layer, "input", error, error_size);
+        return revenant_ml_layer_missing_input(layer, "input", error, error_size);
     }
     if (input->rank != 3) {
-        return charon_ml_layer_bad_shape(layer, "an input that is not channels by height by width", input,
+        return revenant_ml_layer_bad_shape(layer, "an input that is not channels by height by width", input,
                                          error, error_size);
     }
-    scale_y = charon_ml_int_at(params, "scalingFactor", 0, 1);
-    scale_x = charon_ml_int_at(params, "scalingFactor", 1, 1);
-    mode = charon_ml_integer_of(params, "mode", 0);
+    scale_y = revenant_ml_int_at(params, "scalingFactor", 0, 1);
+    scale_x = revenant_ml_int_at(params, "scalingFactor", 1, 1);
+    mode = revenant_ml_integer_of(params, "mode", 0);
     if (scale_y < 1 || scale_x < 1) {
-        snprintf(error, error_size, "the layer '%s' scales by a factor below one", charon_ml_layer_name(layer));
+        snprintf(error, error_size, "the layer '%s' scales by a factor below one", revenant_ml_layer_name(layer));
         return 0;
     }
     if (mode != 0) {
         snprintf(error, error_size, "the layer '%s' interpolates bilinearly, which this port does not do",
-                 charon_ml_layer_name(layer));
+                 revenant_ml_layer_name(layer));
         return 0;
     }
     shape[0] = input->shape[0];
     shape[1] = input->shape[1] * scale_y;
     shape[2] = input->shape[2] * scale_x;
-    output = charon_ml_tensor_make(3, shape);
+    output = revenant_ml_tensor_make(3, shape);
     if (output.data == NULL) {
-        snprintf(error, error_size, "the layer '%s' has an output of no room for it", charon_ml_layer_name(layer));
+        snprintf(error, error_size, "the layer '%s' has an output of no room for it", revenant_ml_layer_name(layer));
         return 0;
     }
     for (channel = 0; channel < shape[0]; channel++) {
@@ -1331,54 +1331,54 @@ int charon_ml_layer_upsample(const charon_ml_node *layer, const charon_ml_node *
     return take_output(layer, bindings, output, error, error_size);
 }
 
-int charon_ml_layer_dot(const charon_ml_node *layer, const charon_ml_node *params, charon_ml_bindings *bindings,
+int revenant_ml_layer_dot(const revenant_ml_node *layer, const revenant_ml_node *params, revenant_ml_bindings *bindings,
                         char *error, size_t error_size)
 {
     char name[256];
-    charon_ml_tensor *left = NULL, *right = NULL;
-    charon_ml_tensor output;
+    revenant_ml_tensor *left = NULL, *right = NULL;
+    revenant_ml_tensor output;
     int64_t shape[1];
     size_t index, count;
     double total = 0.0;
 
-    if (charon_ml_name_at(layer, "input", 0, name, sizeof name) != NULL) {
-        left = charon_ml_bindings_find(bindings, name);
+    if (revenant_ml_name_at(layer, "input", 0, name, sizeof name) != NULL) {
+        left = revenant_ml_bindings_find(bindings, name);
     }
-    if (charon_ml_name_at(layer, "input", 1, name, sizeof name) != NULL) {
-        right = charon_ml_bindings_find(bindings, name);
+    if (revenant_ml_name_at(layer, "input", 1, name, sizeof name) != NULL) {
+        right = revenant_ml_bindings_find(bindings, name);
     }
     if (left == NULL || right == NULL) {
-        return charon_ml_layer_missing_input(layer, "input", error, error_size);
+        return revenant_ml_layer_missing_input(layer, "input", error, error_size);
     }
     count = left->count < right->count ? left->count : right->count;
     for (index = 0; index < count; index++) {
         total += (double)left->data[index] * (double)right->data[index];
     }
     shape[0] = 1;
-    output = charon_ml_tensor_make(1, shape);
+    output = revenant_ml_tensor_make(1, shape);
     if (output.data == NULL) {
-        snprintf(error, error_size, "the layer '%s' has an output of no room for it", charon_ml_layer_name(layer));
+        snprintf(error, error_size, "the layer '%s' has an output of no room for it", revenant_ml_layer_name(layer));
         return 0;
     }
     output.data[0] = (float)total;
     return take_output(layer, bindings, output, error, error_size);
 }
 
-int charon_ml_layer_reduce(const charon_ml_node *layer, const charon_ml_node *params,
-                           charon_ml_bindings *bindings, char *error, size_t error_size)
+int revenant_ml_layer_reduce(const revenant_ml_node *layer, const revenant_ml_node *params,
+                           revenant_ml_bindings *bindings, char *error, size_t error_size)
 {
-    charon_ml_tensor *input = charon_ml_input(bindings, layer);
-    charon_ml_tensor output;
+    revenant_ml_tensor *input = revenant_ml_input(bindings, layer);
+    revenant_ml_tensor output;
     int operation, axis_kind;
-    int64_t shape[CHARON_ML_MAX_RANK], strides[CHARON_ML_MAX_RANK], outer = 1, inner, along, position[CHARON_ML_MAX_RANK];
+    int64_t shape[REVENANT_ML_MAX_RANK], strides[REVENANT_ML_MAX_RANK], outer = 1, inner, along, position[REVENANT_ML_MAX_RANK];
     int rank, kept = 0, index;
     size_t at;
 
     if (input == NULL) {
-        return charon_ml_layer_missing_input(layer, "input", error, error_size);
+        return revenant_ml_layer_missing_input(layer, "input", error, error_size);
     }
-    operation = charon_ml_integer_of(params, "mode", 0);
-    axis_kind = charon_ml_integer_of(params, "axis", 0);
+    operation = revenant_ml_integer_of(params, "mode", 0);
+    axis_kind = revenant_ml_integer_of(params, "axis", 0);
     rank = input->rank;
     for (index = 0; index < rank; index++) {
         int covered = (axis_kind == 0) || (axis_kind == 1 && index > 0) ||
@@ -1395,17 +1395,17 @@ int charon_ml_layer_reduce(const charon_ml_node *layer, const charon_ml_node *pa
         shape[0] = 1;
         kept = 1;
     }
-    output = charon_ml_tensor_make(kept, shape);
+    output = revenant_ml_tensor_make(kept, shape);
     if (output.data == NULL) {
-        snprintf(error, error_size, "the layer '%s' has an output of no room for it", charon_ml_layer_name(layer));
+        snprintf(error, error_size, "the layer '%s' has an output of no room for it", revenant_ml_layer_name(layer));
         return 0;
     }
-    charon_ml_row_major_strides(shape, kept, strides);
+    revenant_ml_row_major_strides(shape, kept, strides);
     inner = kept < 2 ? 1 : strides[1];
     for (along = 0; along < (int64_t)output.count; along++) {
         double total = 0.0, best = 0.0, product = 1.0;
         int seen = 0;
-        charon_ml_unravel((int64_t)along, kept, shape, position);
+        revenant_ml_unravel((int64_t)along, kept, shape, position);
         for (at = 0; at < (size_t)outer; at++) {
             int64_t flat = along * (int64_t)outer + (int64_t)at;
             double value = input->data[flat];
@@ -1458,26 +1458,26 @@ int charon_ml_layer_reduce(const charon_ml_node *layer, const charon_ml_node *pa
     return take_output(layer, bindings, output, error, error_size);
 }
 
-int charon_ml_layer_reorganize(const charon_ml_node *layer, const charon_ml_node *params,
-                               charon_ml_bindings *bindings, char *error, size_t error_size)
+int revenant_ml_layer_reorganize(const revenant_ml_node *layer, const revenant_ml_node *params,
+                               revenant_ml_bindings *bindings, char *error, size_t error_size)
 {
-    charon_ml_tensor *input = charon_ml_input(bindings, layer);
-    charon_ml_tensor output;
+    revenant_ml_tensor *input = revenant_ml_input(bindings, layer);
+    revenant_ml_tensor output;
     int kind, block, index;
     int64_t shape[3];
 
     if (input == NULL) {
-        return charon_ml_layer_missing_input(layer, "input", error, error_size);
+        return revenant_ml_layer_missing_input(layer, "input", error, error_size);
     }
     if (input->rank != 3) {
-        return charon_ml_layer_bad_shape(layer, "an input that is not channels by height by width", input,
+        return revenant_ml_layer_bad_shape(layer, "an input that is not channels by height by width", input,
                                          error, error_size);
     }
-    kind = charon_ml_integer_of(params, "reorganizationType", 0);
-    block = charon_ml_integer_of(params, "blockSizeHeight", 2);
+    kind = revenant_ml_integer_of(params, "reorganizationType", 0);
+    block = revenant_ml_integer_of(params, "blockSizeHeight", 2);
     if (block <= 0) {
         snprintf(error, error_size, "the layer '%s' reorganizes in blocks of no length",
-                 charon_ml_layer_name(layer));
+                 revenant_ml_layer_name(layer));
         return 0;
     }
     if (kind == 0) {
@@ -1487,16 +1487,16 @@ int charon_ml_layer_reorganize(const charon_ml_node *layer, const charon_ml_node
     } else {
         if (input->shape[0] % (block * block) != 0) {
             snprintf(error, error_size, "the layer '%s' has %lld channels, which is not a whole number of blocks",
-                     charon_ml_layer_name(layer), (long long)input->shape[0]);
+                     revenant_ml_layer_name(layer), (long long)input->shape[0]);
             return 0;
         }
         shape[0] = input->shape[0] / (block * block);
         shape[1] = input->shape[1] * block;
         shape[2] = input->shape[2] * block;
     }
-    output = charon_ml_tensor_make(3, shape);
+    output = revenant_ml_tensor_make(3, shape);
     if (output.data == NULL) {
-        snprintf(error, error_size, "the layer '%s' has an output of no room for it", charon_ml_layer_name(layer));
+        snprintf(error, error_size, "the layer '%s' has an output of no room for it", revenant_ml_layer_name(layer));
         return 0;
     }
     {
@@ -1529,26 +1529,26 @@ int charon_ml_layer_reorganize(const charon_ml_node *layer, const charon_ml_node
     return take_output(layer, bindings, output, error, error_size);
 }
 
-int charon_ml_layer_unary_math(const charon_ml_node *layer, const charon_ml_node *params,
-                               charon_ml_bindings *bindings, char *error, size_t error_size)
+int revenant_ml_layer_unary_math(const revenant_ml_node *layer, const revenant_ml_node *params,
+                               revenant_ml_bindings *bindings, char *error, size_t error_size)
 {
-    charon_ml_tensor *input = charon_ml_input(bindings, layer);
-    charon_ml_tensor output;
+    revenant_ml_tensor *input = revenant_ml_input(bindings, layer);
+    revenant_ml_tensor output;
     size_t index;
     int which = 0;
 
     if (input == NULL) {
-        return charon_ml_layer_missing_input(layer, "input", error, error_size);
+        return revenant_ml_layer_missing_input(layer, "input", error, error_size);
     }
-    output = charon_ml_tensor_make(input->rank, input->shape);
+    output = revenant_ml_tensor_make(input->rank, input->shape);
     if (output.data == NULL) {
-        snprintf(error, error_size, "the layer '%s' has an output of no room for it", charon_ml_layer_name(layer));
+        snprintf(error, error_size, "the layer '%s' has an output of no room for it", revenant_ml_layer_name(layer));
         return 0;
     }
     {
-        size_t at, total = charon_ml_count(layer);
+        size_t at, total = revenant_ml_count(layer);
         for (at = 0; at < total; at++) {
-            const charon_ml_node *entry = charon_ml_at(layer, at);
+            const revenant_ml_node *entry = revenant_ml_at(layer, at);
             if (entry->field->number >= 660 && entry->field->number <= 800) {
                 which = entry->field->number;
                 break;
@@ -1560,8 +1560,8 @@ int charon_ml_layer_unary_math(const charon_ml_node *layer, const charon_ml_node
         double value;
         switch (which) {
         case 660:
-            value = fmin(fmax(x, charon_ml_number_of(params, "minVal", 0.0)),
-                         charon_ml_number_of(params, "maxVal", 1.0));
+            value = fmin(fmax(x, revenant_ml_number_of(params, "minVal", 0.0)),
+                         revenant_ml_number_of(params, "maxVal", 1.0));
             break;
         case 665:
             value = ceil(x);
@@ -1618,12 +1618,12 @@ int charon_ml_layer_unary_math(const charon_ml_node *layer, const charon_ml_node
             value = erf(x);
             break;
         case 795: {
-            int mode = charon_ml_integer_of(params, "mode", 0);
+            int mode = revenant_ml_integer_of(params, "mode", 0);
             if (mode != 0) {
-                charon_ml_tensor_free(&output);
+                revenant_ml_tensor_free(&output);
                 snprintf(error, error_size,
                          "the layer '%s' approximates the GELU in mode %d, which this port does not carry",
-                         charon_ml_layer_name(layer), mode);
+                         revenant_ml_layer_name(layer), mode);
                 return 0;
             }
             value = x * 0.5 * (1.0 + erf(x / sqrt(2.0)));
@@ -1638,45 +1638,45 @@ int charon_ml_layer_unary_math(const charon_ml_node *layer, const charon_ml_node
     return take_output(layer, bindings, output, error, error_size);
 }
 
-int charon_ml_layer_clip(const charon_ml_node *layer, const charon_ml_node *params,
-                         charon_ml_bindings *bindings, char *error, size_t error_size)
+int revenant_ml_layer_clip(const revenant_ml_node *layer, const revenant_ml_node *params,
+                         revenant_ml_bindings *bindings, char *error, size_t error_size)
 {
-    return charon_ml_layer_unary_math(layer, params, bindings, error, error_size);
+    return revenant_ml_layer_unary_math(layer, params, bindings, error, error_size);
 }
 
-static charon_ml_tensor gather_axes(const charon_ml_node *layer, const charon_ml_bindings *bindings,
+static revenant_ml_tensor gather_axes(const revenant_ml_node *layer, const revenant_ml_bindings *bindings,
                                     const int *kept, int kept_count, int source_rank,
                                     char *error, size_t error_size)
 {
     char name[256];
-    charon_ml_tensor *input = NULL;
-    charon_ml_tensor output;
-    int64_t shape[CHARON_ML_MAX_RANK], strides[CHARON_ML_MAX_RANK], position[CHARON_ML_MAX_RANK];
-    int64_t source[CHARON_ML_MAX_RANK];
+    revenant_ml_tensor *input = NULL;
+    revenant_ml_tensor output;
+    int64_t shape[REVENANT_ML_MAX_RANK], strides[REVENANT_ML_MAX_RANK], position[REVENANT_ML_MAX_RANK];
+    int64_t source[REVENANT_ML_MAX_RANK];
     int k;
     size_t at;
 
     memset(&output, 0, sizeof output);
-    if (charon_ml_name_at(layer, "input", 0, name, sizeof name) != NULL) {
-        input = charon_ml_bindings_find((charon_ml_bindings *)bindings, name);
+    if (revenant_ml_name_at(layer, "input", 0, name, sizeof name) != NULL) {
+        input = revenant_ml_bindings_find((revenant_ml_bindings *)bindings, name);
     }
     if (input == NULL || input->rank != source_rank) {
-        snprintf(error, error_size, "the layer '%s' has no input of %d dimensions", charon_ml_layer_name(layer),
+        snprintf(error, error_size, "the layer '%s' has no input of %d dimensions", revenant_ml_layer_name(layer),
                  source_rank);
         return output;
     }
     for (k = 0; k < kept_count; k++) {
         shape[k] = kept[k] < 0 ? 1 : input->shape[kept[k]];
     }
-    output = charon_ml_tensor_make(kept_count, shape);
+    output = revenant_ml_tensor_make(kept_count, shape);
     if (output.data == NULL) {
-        snprintf(error, error_size, "the layer '%s' has an output of no room for it", charon_ml_layer_name(layer));
+        snprintf(error, error_size, "the layer '%s' has an output of no room for it", revenant_ml_layer_name(layer));
         return output;
     }
-    charon_ml_row_major_strides(input->shape, input->rank, strides);
+    revenant_ml_row_major_strides(input->shape, input->rank, strides);
     for (at = 0; at < output.count; at++) {
         int next = 0;
-        charon_ml_unravel((int64_t)at, kept_count, shape, position);
+        revenant_ml_unravel((int64_t)at, kept_count, shape, position);
         for (k = 0; k < source_rank; k++) {
             source[k] = 0;
         }
@@ -1686,33 +1686,33 @@ static charon_ml_tensor gather_axes(const charon_ml_node *layer, const charon_ml
                 next++;
             }
         }
-        output.data[at] = input->data[charon_ml_ravel(source, source_rank, strides)];
+        output.data[at] = input->data[revenant_ml_ravel(source, source_rank, strides)];
     }
     return output;
 }
 
-int charon_ml_layer_squeeze(const charon_ml_node *layer, const charon_ml_node *params,
-                            charon_ml_bindings *bindings, char *error, size_t error_size)
+int revenant_ml_layer_squeeze(const revenant_ml_node *layer, const revenant_ml_node *params,
+                            revenant_ml_bindings *bindings, char *error, size_t error_size)
 {
-    charon_ml_tensor *input = charon_ml_input(bindings, layer);
-    int kept[CHARON_ML_MAX_RANK];
+    revenant_ml_tensor *input = revenant_ml_input(bindings, layer);
+    int kept[REVENANT_ML_MAX_RANK];
     int kept_count = 0, all, axis;
 
     if (input == NULL) {
-        return charon_ml_layer_missing_input(layer, "input", error, error_size);
+        return revenant_ml_layer_missing_input(layer, "input", error, error_size);
     }
-    all = charon_ml_integer_of(params, "squeezeAll", 0) != 0;
+    all = revenant_ml_integer_of(params, "squeezeAll", 0) != 0;
     for (axis = 0; axis < input->rank; axis++) {
         int drop = all && input->shape[axis] == 1;
-        if (charon_ml_int_at(params, "axes", (size_t)axis, -1) == 1) {
+        if (revenant_ml_int_at(params, "axes", (size_t)axis, -1) == 1) {
             drop = 1;
         }
         if (drop) {
             continue;
         }
-        if (kept_count >= CHARON_ML_MAX_RANK) {
+        if (kept_count >= REVENANT_ML_MAX_RANK) {
             snprintf(error, error_size, "the layer '%s' keeps more dimensions than this port holds",
-                     charon_ml_layer_name(layer));
+                     revenant_ml_layer_name(layer));
             return 0;
         }
         kept[kept_count++] = axis;
@@ -1725,34 +1725,34 @@ int charon_ml_layer_squeeze(const charon_ml_node *layer, const charon_ml_node *p
                        error, error_size);
 }
 
-int charon_ml_layer_expand_dims(const charon_ml_node *layer, const charon_ml_node *params,
-                                charon_ml_bindings *bindings, char *error, size_t error_size)
+int revenant_ml_layer_expand_dims(const revenant_ml_node *layer, const revenant_ml_node *params,
+                                revenant_ml_bindings *bindings, char *error, size_t error_size)
 {
-    charon_ml_tensor *input = charon_ml_input(bindings, layer);
-    int added[CHARON_ML_MAX_RANK], kept[CHARON_ML_MAX_RANK];
+    revenant_ml_tensor *input = revenant_ml_input(bindings, layer);
+    int added[REVENANT_ML_MAX_RANK], kept[REVENANT_ML_MAX_RANK];
     int added_count, kept_count = 0, rank, index, k;
 
     if (input == NULL) {
-        return charon_ml_layer_missing_input(layer, "input", error, error_size);
+        return revenant_ml_layer_missing_input(layer, "input", error, error_size);
     }
-    added_count = (int)charon_ml_count_field(params, "axes");
+    added_count = (int)revenant_ml_count_field(params, "axes");
     rank = input->rank + added_count;
-    if (added_count < 0 || rank > CHARON_ML_MAX_RANK) {
+    if (added_count < 0 || rank > REVENANT_ML_MAX_RANK) {
         snprintf(error, error_size, "the layer '%s' expands to more dimensions than this port holds",
-                 charon_ml_layer_name(layer));
+                 revenant_ml_layer_name(layer));
         return 0;
     }
     for (index = 0; index < rank; index++) {
         added[index] = 0;
     }
     for (index = 0; index < added_count; index++) {
-        int where = charon_ml_int_at(params, "axes", (size_t)index, 0);
+        int where = revenant_ml_int_at(params, "axes", (size_t)index, 0);
         if (where < 0) {
             where += rank;
         }
         if (where < 0 || where >= rank) {
             snprintf(error, error_size, "the layer '%s' inserts a dimension at %d, which is outside its output",
-                     charon_ml_layer_name(layer), where);
+                     revenant_ml_layer_name(layer), where);
             return 0;
         }
         added[where] = 1;
@@ -1761,7 +1761,7 @@ int charon_ml_layer_expand_dims(const charon_ml_node *layer, const charon_ml_nod
         if (!added[index]) {
             if (kept_count >= input->rank) {
                 snprintf(error, error_size, "the layer '%s' names fewer dimensions to insert than it has input",
-                         charon_ml_layer_name(layer));
+                         revenant_ml_layer_name(layer));
                 return 0;
             }
             kept[kept_count++] = index;
@@ -1769,7 +1769,7 @@ int charon_ml_layer_expand_dims(const charon_ml_node *layer, const charon_ml_nod
     }
     if (kept_count != input->rank) {
         snprintf(error, error_size, "the layer '%s' names %d dimensions to insert, leaving room for %d of its %d",
-                 charon_ml_layer_name(layer), added_count, kept_count, input->rank);
+                 revenant_ml_layer_name(layer), added_count, kept_count, input->rank);
         return 0;
     }
     (void)k;
@@ -1777,113 +1777,113 @@ int charon_ml_layer_expand_dims(const charon_ml_node *layer, const charon_ml_nod
                        error, error_size);
 }
 
-int charon_ml_layer_tile(const charon_ml_node *layer, const charon_ml_node *params,
-                         charon_ml_bindings *bindings, char *error, size_t error_size)
+int revenant_ml_layer_tile(const revenant_ml_node *layer, const revenant_ml_node *params,
+                         revenant_ml_bindings *bindings, char *error, size_t error_size)
 {
-    charon_ml_tensor *input = charon_ml_input(bindings, layer);
-    charon_ml_tensor output;
-    int64_t shape[CHARON_ML_MAX_RANK], position[CHARON_ML_MAX_RANK], source[CHARON_ML_MAX_RANK];
-    int64_t strides[CHARON_ML_MAX_RANK];
+    revenant_ml_tensor *input = revenant_ml_input(bindings, layer);
+    revenant_ml_tensor output;
+    int64_t shape[REVENANT_ML_MAX_RANK], position[REVENANT_ML_MAX_RANK], source[REVENANT_ML_MAX_RANK];
+    int64_t strides[REVENANT_ML_MAX_RANK];
     int rank, axis;
     size_t at;
 
     if (input == NULL) {
-        return charon_ml_layer_missing_input(layer, "input", error, error_size);
+        return revenant_ml_layer_missing_input(layer, "input", error, error_size);
     }
     rank = input->rank;
-    if ((int)charon_ml_count_field(params, "reps") != rank) {
+    if ((int)revenant_ml_count_field(params, "reps") != rank) {
         snprintf(error, error_size, "the layer '%s' is given %d repeats for an input of %d dimensions",
-                 charon_ml_layer_name(layer), (int)charon_ml_count_field(params, "reps"), rank);
+                 revenant_ml_layer_name(layer), (int)revenant_ml_count_field(params, "reps"), rank);
         return 0;
     }
     for (axis = 0; axis < rank; axis++) {
-        int64_t times = charon_ml_int_at(params, "reps", (size_t)axis, 1);
+        int64_t times = revenant_ml_int_at(params, "reps", (size_t)axis, 1);
         if (times < 1) {
-            snprintf(error, error_size, "the layer '%s' repeats a dimension fewer than once", charon_ml_layer_name(layer));
+            snprintf(error, error_size, "the layer '%s' repeats a dimension fewer than once", revenant_ml_layer_name(layer));
             return 0;
         }
         shape[axis] = input->shape[axis] * times;
     }
-    output = charon_ml_tensor_make(rank, shape);
+    output = revenant_ml_tensor_make(rank, shape);
     if (output.data == NULL) {
-        snprintf(error, error_size, "the layer '%s' has an output of no room for it", charon_ml_layer_name(layer));
+        snprintf(error, error_size, "the layer '%s' has an output of no room for it", revenant_ml_layer_name(layer));
         return 0;
     }
-    charon_ml_row_major_strides(input->shape, rank, strides);
+    revenant_ml_row_major_strides(input->shape, rank, strides);
     for (at = 0; at < output.count; at++) {
-        charon_ml_unravel((int64_t)at, rank, shape, position);
+        revenant_ml_unravel((int64_t)at, rank, shape, position);
         for (axis = 0; axis < rank; axis++) {
             source[axis] = position[axis] % input->shape[axis];
         }
-        output.data[at] = input->data[charon_ml_ravel(source, rank, strides)];
+        output.data[at] = input->data[revenant_ml_ravel(source, rank, strides)];
     }
     return take_output(layer, bindings, output, error, error_size);
 }
 
-int charon_ml_layer_simple_recurrent(const charon_ml_node *layer, const charon_ml_node *params,
-                                     charon_ml_bindings *bindings, char *error, size_t error_size)
+int revenant_ml_layer_simple_recurrent(const revenant_ml_node *layer, const revenant_ml_node *params,
+                                     revenant_ml_bindings *bindings, char *error, size_t error_size)
 {
-    charon_ml_tensor *input = charon_ml_input(bindings, layer);
+    revenant_ml_tensor *input = revenant_ml_input(bindings, layer);
     double *wx = NULL, *wh = NULL, *bias = NULL;
     size_t wx_count = 0, wh_count = 0, bias_count = 0;
     int input_size, hidden_size, activation, reverse, has_bias, has_state;
     char initial_name[256];
-    charon_ml_tensor *initial = NULL;
+    revenant_ml_tensor *initial = NULL;
     int64_t steps, shape[2];
-    charon_ml_tensor output;
+    revenant_ml_tensor output;
     float *state;
 
     if (input == NULL) {
-        return charon_ml_layer_missing_input(layer, "input", error, error_size);
+        return revenant_ml_layer_missing_input(layer, "input", error, error_size);
     }
-    input_size = charon_ml_integer_of(params, "inputVectorSize", 0);
-    hidden_size = charon_ml_integer_of(params, "outputVectorSize", 0);
-    activation = charon_ml_activation_kind(charon_ml_get(params, "activation"));
-    reverse = charon_ml_integer_of(params, "reverseInput", 0) != 0;
-    has_bias = charon_ml_integer_of(params, "hasBiasVector", 0) != 0;
-    has_state = charon_ml_name_count(layer, "input") > 1;
+    input_size = revenant_ml_integer_of(params, "inputVectorSize", 0);
+    hidden_size = revenant_ml_integer_of(params, "outputVectorSize", 0);
+    activation = revenant_ml_activation_kind(revenant_ml_get(params, "activation"));
+    reverse = revenant_ml_integer_of(params, "reverseInput", 0) != 0;
+    has_bias = revenant_ml_integer_of(params, "hasBiasVector", 0) != 0;
+    has_state = revenant_ml_name_count(layer, "input") > 1;
     if (has_state) {
-        if (charon_ml_name_at(layer, "input", 1, initial_name, sizeof initial_name) != NULL) {
-            initial = charon_ml_bindings_find(bindings, initial_name);
+        if (revenant_ml_name_at(layer, "input", 1, initial_name, sizeof initial_name) != NULL) {
+            initial = revenant_ml_bindings_find(bindings, initial_name);
         }
     }
     if (input_size <= 0 || hidden_size <= 0) {
-        snprintf(error, error_size, "the layer '%s' has a vector size of no length", charon_ml_layer_name(layer));
+        snprintf(error, error_size, "the layer '%s' has a vector size of no length", revenant_ml_layer_name(layer));
         return 0;
     }
-    if (!charon_ml_read_numbers(charon_ml_get(params, "weightMatrix"), &wx, &wx_count) ||
+    if (!revenant_ml_read_numbers(revenant_ml_get(params, "weightMatrix"), &wx, &wx_count) ||
         wx_count != (size_t)input_size * (size_t)hidden_size) {
         free(wx);
         snprintf(error, error_size, "the layer '%s' has an input matrix of the wrong shape",
-                 charon_ml_layer_name(layer));
+                 revenant_ml_layer_name(layer));
         return 0;
     }
-    if (!charon_ml_read_numbers(charon_ml_get(params, "recursionMatrix"), &wh, &wh_count) ||
+    if (!revenant_ml_read_numbers(revenant_ml_get(params, "recursionMatrix"), &wh, &wh_count) ||
         wh_count != (size_t)hidden_size * (size_t)hidden_size) {
         free(wx);
         free(wh);
-        snprintf(error, error_size, "the layer '%s' has a state matrix of the wrong shape", charon_ml_layer_name(layer));
+        snprintf(error, error_size, "the layer '%s' has a state matrix of the wrong shape", revenant_ml_layer_name(layer));
         return 0;
     }
-    if (has_bias && !charon_ml_read_numbers(charon_ml_get(params, "biasVector"), &bias, &bias_count)) {
+    if (has_bias && !revenant_ml_read_numbers(revenant_ml_get(params, "biasVector"), &bias, &bias_count)) {
         free(wx);
         free(wh);
         snprintf(error, error_size, "the layer '%s' says it has a bias vector and has none",
-                 charon_ml_layer_name(layer));
+                 revenant_ml_layer_name(layer));
         return 0;
     }
     steps = input->count / input_size;
     shape[0] = steps;
     shape[1] = hidden_size;
-    output = charon_ml_tensor_make(2, shape);
+    output = revenant_ml_tensor_make(2, shape);
     state = (float *)calloc((size_t)hidden_size, sizeof *state);
     if (output.data == NULL || state == NULL) {
         free(wx);
         free(wh);
         free(bias);
         free(state);
-        charon_ml_tensor_free(&output);
-        snprintf(error, error_size, "the layer '%s' has an output of no room for it", charon_ml_layer_name(layer));
+        revenant_ml_tensor_free(&output);
+        snprintf(error, error_size, "the layer '%s' has an output of no room for it", revenant_ml_layer_name(layer));
         return 0;
     }
     if (initial != NULL && initial->count >= (size_t)hidden_size) {
@@ -1910,7 +1910,7 @@ int charon_ml_layer_simple_recurrent(const charon_ml_node *layer, const charon_m
                 for (in = 0; in < hidden_size; in++) {
                     total += wh[(size_t)(in * hidden_size + hidden)] * (double)state[in];
                 }
-                next[hidden] = (float)charon_ml_activate(activation, total, charon_ml_get(params, "activation"));
+                next[hidden] = (float)revenant_ml_activate(activation, total, revenant_ml_get(params, "activation"));
             }
             memcpy(state, next, (size_t)hidden_size * sizeof *state);
             memcpy(output.data + at_step * hidden_size, next, (size_t)hidden_size * sizeof *next);

@@ -12,12 +12,12 @@ int rpmatch(const char *);
 long long strtonum(const char *, long long, long long, const char **);
 int strsignal_r(int, char *, size_t);
 int timespec_get(struct timespec *, int);
-int charon_port_timingsafe_bcmp(const void *, const void *, size_t);
-char *charon_port_strchrnul(const char *, int);
-int charon_port_rpmatch(const char *);
-long long charon_port_strtonum(const char *, long long, long long, const char **);
-int charon_port_strsignal_r(int, char *, size_t);
-int charon_port_timespec_get(struct timespec *, int);
+int revenant_port_timingsafe_bcmp(const void *, const void *, size_t);
+char *revenant_port_strchrnul(const char *, int);
+int revenant_port_rpmatch(const char *);
+long long revenant_port_strtonum(const char *, long long, long long, const char **);
+int revenant_port_strsignal_r(int, char *, size_t);
+int revenant_port_timespec_get(struct timespec *, int);
 
 static int failures;
 
@@ -38,14 +38,14 @@ static void bcmp_case(void)
     for (size_t len = 0; len <= sizeof(a) && passed; len++) {
         for (size_t i = 0; i < sizeof(a); i++)
             a[i] = b[i] = (unsigned char)(i * 37 + len);
-        if ((timingsafe_bcmp(a, b, len) != 0) != (charon_port_timingsafe_bcmp(a, b, len) != 0)) {
+        if ((timingsafe_bcmp(a, b, len) != 0) != (revenant_port_timingsafe_bcmp(a, b, len) != 0)) {
             report(0, "timingsafe_bcmp", 1, 0);
             passed = 0;
         }
         for (size_t at = 0; at < len && passed; at++) {
             unsigned char saved = b[at];
             b[at] ^= 0x80;
-            int host = timingsafe_bcmp(a, b, len) != 0, port = charon_port_timingsafe_bcmp(a, b, len) != 0;
+            int host = timingsafe_bcmp(a, b, len) != 0, port = revenant_port_timingsafe_bcmp(a, b, len) != 0;
             b[at] = saved;
             if (host != port || !port) {
                 report(0, "timingsafe_bcmp", port, host);
@@ -65,7 +65,7 @@ static void strchrnul_case(void)
     for (size_t i = 0; i < sizeof(texts) / sizeof(texts[0]); i++) {
         for (size_t j = 0; j < sizeof(targets) / sizeof(targets[0]); j++) {
             long host = strchrnul(texts[i], targets[j]) - texts[i];
-            long port = charon_port_strchrnul(texts[i], targets[j]) - texts[i];
+            long port = revenant_port_strchrnul(texts[i], targets[j]) - texts[i];
             if (host != port) {
                 report(0, "strchrnul", port, host);
                 passed = 0;
@@ -81,7 +81,7 @@ static void rpmatch_case(void)
     const char *responses[] = {"y", "Y", "yes", "YES", "n", "N", "no", "x", "", "Yes", " y", "nope"};
     int passed = 1;
     for (size_t i = 0; i < sizeof(responses) / sizeof(responses[0]); i++) {
-        int host = rpmatch(responses[i]), port = charon_port_rpmatch(responses[i]);
+        int host = rpmatch(responses[i]), port = revenant_port_rpmatch(responses[i]);
         if (host != port) {
             report(0, "rpmatch", port, host);
             passed = 0;
@@ -104,7 +104,7 @@ static void strtonum_case(void)
             long long host = strtonum(numbers[i], bounds[j][0], bounds[j][1], &host_error);
             int host_errno = errno;
             errno = 0;
-            long long port = charon_port_strtonum(numbers[i], bounds[j][0], bounds[j][1], &port_error);
+            long long port = revenant_port_strtonum(numbers[i], bounds[j][0], bounds[j][1], &port_error);
             int port_errno = errno;
             int same_error = (host_error == NULL) == (port_error == NULL) &&
                              (host_error == NULL || strcmp(host_error, port_error) == 0);
@@ -128,7 +128,7 @@ static void strsignal_case(void)
             memset(host_buf, '#', sizeof(host_buf));
             memset(port_buf, '#', sizeof(port_buf));
             int host = strsignal_r(sig, host_buf, sizes[s]);
-            int port = charon_port_strsignal_r(sig, port_buf, sizes[s]);
+            int port = revenant_port_strsignal_r(sig, port_buf, sizes[s]);
             if (host != port || (sizes[s] > 0 && strcmp(host_buf, port_buf) != 0)) {
                 report(0, "strsignal_r", port, host);
                 passed = 0;
@@ -143,10 +143,10 @@ static void timespec_case(void)
 {
     struct timespec ts;
     time_t before = time(NULL);
-    int port = charon_port_timespec_get(&ts, TIME_UTC);
+    int port = revenant_port_timespec_get(&ts, TIME_UTC);
     time_t after = time(NULL);
     int passed = port == TIME_UTC && ts.tv_sec >= before && ts.tv_sec <= after && ts.tv_nsec >= 0 && ts.tv_nsec < 1000000000L;
-    if (charon_port_timespec_get(&ts, 0) != 0 || timespec_get(&ts, 0) != 0)
+    if (revenant_port_timespec_get(&ts, 0) != 0 || timespec_get(&ts, 0) != 0)
         passed = 0;
     if (passed)
         report(1, "timespec_get", 0, 0);

@@ -6,7 +6,7 @@
 #include <string.h>
 
 #ifdef PORT
-#define PREFIX "CharonHost"
+#define PREFIX "RevenantHost"
 #else
 #define PREFIX ""
 #endif
@@ -18,7 +18,7 @@ static const char *appleName(id object)
     return strncmp(name, PREFIX, prefix) == 0 ? name + prefix : name;
 }
 
-static Class charonClass(const char *name)
+static Class revenantClass(const char *name)
 {
     return NSClassFromString([NSString stringWithFormat:@"%s%s", PREFIX, name]);
 }
@@ -36,9 +36,9 @@ static void row(const char *className, const char *selector, id answer, Class ex
 int main(void)
 {
     @autoreleasepool {
-        Class button = charonClass("INUIAddVoiceShortcutButton");
-        Class addVC = charonClass("INUIAddVoiceShortcutViewController");
-        Class editVC = charonClass("INUIEditVoiceShortcutViewController");
+        Class button = revenantClass("INUIAddVoiceShortcutButton");
+        Class addVC = revenantClass("INUIAddVoiceShortcutViewController");
+        Class editVC = revenantClass("INUIEditVoiceShortcutViewController");
         if (!button || !addVC || !editVC) {
             printf("FAIL: a class is not defined in this build\n");
             return 2;

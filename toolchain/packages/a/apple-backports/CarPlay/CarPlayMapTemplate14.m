@@ -1,8 +1,8 @@
 #import <CarPlay/CarPlay.h>
 #import <UIKit/UIKit.h>
-#import "CharonCarPlayTemplate.h"
+#import "RevenantCarPlayTemplate.h"
 
-@implementation CPMapTemplate (CharonMapTemplate14)
+@implementation CPMapTemplate (RevenantMapTemplate14)
 
 - (void)showTripPreviews:(NSArray<CPTrip *> *)trips
              selectedTrip:(CPTrip *)selectedTrip
@@ -14,8 +14,8 @@
     NSUInteger kept = MIN(trips.count, (NSUInteger)12);
     NSArray<CPTrip *> *shown = [trips subarrayWithRange:NSMakeRange(0, kept)];
     CPTrip *selected = [shown containsObject:selectedTrip] ? selectedTrip : nil;
-    [self charon_setTripPreviews:shown selectedTrip:selected];
-    [self charon_drawTripPreviews];
+    [self revenant_setTripPreviews:shown selectedTrip:selected];
+    [self revenant_drawTripPreviews];
 }
 
 @end

@@ -2942,7 +2942,7 @@
       "source": "the headers of MLCompute in the SDK of iOS 16.4 for every signature and default, and the behaviour measured against the system's own MLCompute by the probe named in the facts"
     },
     {
-      "api": "+[MLCOptimizer charon_mlc_optimizerOfClass:copying:]",
+      "api": "+[MLCOptimizer revenant_mlc_optimizerOfClass:copying:]",
       "kind": "method",
       "introduced": "14.0",
       "minimum": "6.0",
@@ -2952,7 +2952,7 @@
       "source": "the headers of MLCompute in the SDK of iOS 16.4 for every signature and default, and the behaviour measured against the system's own MLCompute by the probe named in the facts"
     },
     {
-      "api": "-[MLCOptimizer charon_mlc_state]",
+      "api": "-[MLCOptimizer revenant_mlc_state]",
       "kind": "method",
       "introduced": "14.0",
       "minimum": "6.0",
@@ -2962,7 +2962,7 @@
       "source": "the headers of MLCompute in the SDK of iOS 16.4 for every signature and default, and the behaviour measured against the system's own MLCompute by the probe named in the facts"
     },
     {
-      "api": "-[MLCOptimizer charon_mlc_takeStateFrom:]",
+      "api": "-[MLCOptimizer revenant_mlc_takeStateFrom:]",
       "kind": "method",
       "introduced": "14.0",
       "minimum": "6.0",
@@ -2972,7 +2972,7 @@
       "source": "the headers of MLCompute in the SDK of iOS 16.4 for every signature and default, and the behaviour measured against the system's own MLCompute by the probe named in the facts"
     },
     {
-      "api": "-[MLCOptimizer charon_mlc_setState:]",
+      "api": "-[MLCOptimizer revenant_mlc_setState:]",
       "kind": "method",
       "introduced": "14.0",
       "minimum": "6.0",

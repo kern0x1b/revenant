@@ -24,7 +24,7 @@
 
 #include "support.hpp"
 
-namespace shade {
+namespace emulator {
 namespace {
 
     std::string interface_name(std::span<const std::byte> request)

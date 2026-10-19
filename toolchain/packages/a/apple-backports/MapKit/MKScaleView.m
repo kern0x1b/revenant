@@ -2,7 +2,7 @@
 #import <MapKit/MKScaleView.h>
 #import <UIKit/UIKit.h>
 #import <math.h>
-#import "CharonMapKit.h"
+#import "RevenantMapKit.h"
 
 @implementation MKScaleView {
     MKMapView *_mapView;
@@ -20,7 +20,7 @@
     MKScaleView *scale = [[self alloc] initWithFrame:CGRectMake(0.0, 0.0, 120.0, 24.0)];
     if (scale) {
         scale->_mapView = mapView;
-        [scale charon_build];
+        [scale revenant_build];
     }
     return scale;
 }
@@ -31,7 +31,7 @@
     if (self) {
         _scaleVisibility = MKFeatureVisibilityAdaptive;
         _legendAlignment = MKScaleViewAlignmentTrailing;
-        [self charon_build];
+        [self revenant_build];
     }
     return self;
 }
@@ -44,10 +44,10 @@
 - (void)setMapView:(MKMapView *)mapView
 {
     _mapView = mapView;
-    [self charon_update];
+    [self revenant_update];
 }
 
-- (void)charon_build
+- (void)revenant_build
 {
     self.backgroundColor = [UIColor clearColor];
     _legend = [[UILabel alloc] initWithFrame:CGRectZero];
@@ -59,16 +59,16 @@
     _bar = [[UIView alloc] initWithFrame:CGRectZero];
     _bar.backgroundColor = [UIColor blackColor];
     [self addSubview:_bar];
-    [self charon_update];
+    [self revenant_update];
 }
 
 - (void)layoutSubviews
 {
     [super layoutSubviews];
-    [self charon_update];
+    [self revenant_update];
 }
 
-- (void)charon_update
+- (void)revenant_update
 {
     MKMapView *mapView = _mapView;
     CGRect box = self.bounds;

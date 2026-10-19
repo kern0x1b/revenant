@@ -16,7 +16,7 @@ extern "C" {
 #include <jpeglib.h>
 }
 
-namespace shade {
+namespace emulator {
 namespace {
 
     struct JpegErrorState {

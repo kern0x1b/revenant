@@ -1,13 +1,13 @@
 #import <MobileCoreServices/MobileCoreServices.h>
-#import "CharonUTType.h"
+#import "RevenantUTType.h"
 
 @interface UTType ()
-@property (nonatomic, readonly, copy) NSString *charon_identifier;
+@property (nonatomic, readonly, copy) NSString *revenant_identifier;
 @end
 
 @implementation UTType
 
-@synthesize charon_identifier = _charon_identifier;
+@synthesize revenant_identifier = _revenant_identifier;
 
 @dynamic version;
 @dynamic referenceURL;
@@ -25,11 +25,11 @@
     return nil;
 }
 
-- (instancetype)charon_initWithIdentifier:(NSString *)identifier __attribute__((objc_method_family(init)))
+- (instancetype)revenant_initWithIdentifier:(NSString *)identifier __attribute__((objc_method_family(init)))
 {
     self = [super init];
     if (self)
-        _charon_identifier = [identifier copy];
+        _revenant_identifier = [identifier copy];
     return self;
 }
 
@@ -37,7 +37,7 @@
 {
     if (!identifier.length)
         return nil;
-    return [[self alloc] charon_initWithIdentifier:identifier];
+    return [[self alloc] revenant_initWithIdentifier:identifier];
 }
 
 + (instancetype)typeWithTag:(NSString *)tag tagClass:(NSString *)tagClass conformingToType:(UTType *)supertype
@@ -74,29 +74,29 @@
 
 - (NSString *)identifier
 {
-    return _charon_identifier;
+    return _revenant_identifier;
 }
 
 - (NSString *)preferredFilenameExtension
 {
-    return CFBridgingRelease(UTTypeCopyPreferredTagWithClass((__bridge CFStringRef)_charon_identifier, kUTTagClassFilenameExtension));
+    return CFBridgingRelease(UTTypeCopyPreferredTagWithClass((__bridge CFStringRef)_revenant_identifier, kUTTagClassFilenameExtension));
 }
 
 - (NSString *)preferredMIMEType
 {
-    return CFBridgingRelease(UTTypeCopyPreferredTagWithClass((__bridge CFStringRef)_charon_identifier, kUTTagClassMIMEType));
+    return CFBridgingRelease(UTTypeCopyPreferredTagWithClass((__bridge CFStringRef)_revenant_identifier, kUTTagClassMIMEType));
 }
 
 - (NSString *)localizedDescription
 {
-    return CFBridgingRelease(UTTypeCopyDescription((__bridge CFStringRef)_charon_identifier));
+    return CFBridgingRelease(UTTypeCopyDescription((__bridge CFStringRef)_revenant_identifier));
 }
 
 - (NSDictionary<NSString *, NSArray<NSString *> *> *)tags
 {
     NSMutableDictionary *tags = [NSMutableDictionary dictionary];
     for (NSString *tagClass in @[(NSString *)kUTTagClassFilenameExtension, (NSString *)kUTTagClassMIMEType]) {
-        NSString *tag = CFBridgingRelease(UTTypeCopyPreferredTagWithClass((__bridge CFStringRef)_charon_identifier, (__bridge CFStringRef)tagClass));
+        NSString *tag = CFBridgingRelease(UTTypeCopyPreferredTagWithClass((__bridge CFStringRef)_revenant_identifier, (__bridge CFStringRef)tagClass));
         if (tag)
             tags[tagClass] = @[tag];
     }
@@ -106,25 +106,25 @@
 - (BOOL)isDynamic
 {
     if (UTTypeIsDynamic != NULL)
-        return UTTypeIsDynamic((__bridge CFStringRef)_charon_identifier);
+        return UTTypeIsDynamic((__bridge CFStringRef)_revenant_identifier);
     return NO;
 }
 
 - (BOOL)isDeclared
 {
     if (UTTypeIsDeclared != NULL)
-        return UTTypeIsDeclared((__bridge CFStringRef)_charon_identifier);
+        return UTTypeIsDeclared((__bridge CFStringRef)_revenant_identifier);
     return YES;
 }
 
 - (BOOL)isPublicType
 {
-    return [_charon_identifier hasPrefix:@"public."];
+    return [_revenant_identifier hasPrefix:@"public."];
 }
 
 - (BOOL)conformsToType:(UTType *)type
 {
-    return type != nil && UTTypeConformsTo((__bridge CFStringRef)_charon_identifier, (__bridge CFStringRef)type.identifier);
+    return type != nil && UTTypeConformsTo((__bridge CFStringRef)_revenant_identifier, (__bridge CFStringRef)type.identifier);
 }
 
 - (BOOL)isSupertypeOfType:(UTType *)type
@@ -148,17 +148,17 @@
         return YES;
     if (![other isKindOfClass:[UTType class]])
         return NO;
-    return [_charon_identifier isEqualToString:[(UTType *)other identifier]];
+    return [_revenant_identifier isEqualToString:[(UTType *)other identifier]];
 }
 
 - (NSUInteger)hash
 {
-    return _charon_identifier.hash;
+    return _revenant_identifier.hash;
 }
 
 - (NSString *)description
 {
-    return [NSString stringWithFormat:@"<UTType: %@>", _charon_identifier];
+    return [NSString stringWithFormat:@"<UTType: %@>", _revenant_identifier];
 }
 
 @end
@@ -175,7 +175,7 @@ UTType *UTTypeUTF8PlainText;
 UTType *UTTypeImage;
 UTType *UTTypePDF;
 
-__attribute__((constructor)) static void charon_uttype_constants(void)
+__attribute__((constructor)) static void revenant_uttype_constants(void)
 {
     UTTypeItem = [UTType typeWithIdentifier:@"public.item"];
     UTTypeContent = [UTType typeWithIdentifier:@"public.content"];
@@ -189,7 +189,7 @@ __attribute__((constructor)) static void charon_uttype_constants(void)
     UTTypeImage = [UTType typeWithIdentifier:@"public.image"];
     UTTypePDF = [UTType typeWithIdentifier:@"com.adobe.pdf"];
 
-    charon_uttype_catalogue_add(@[UTTypeItem, UTTypeContent, UTTypeData, UTTypeDirectory, UTTypeURL,
+    revenant_uttype_catalogue_add(@[UTTypeItem, UTTypeContent, UTTypeData, UTTypeDirectory, UTTypeURL,
                                   UTTypeFileURL, UTTypeText, UTTypePlainText, UTTypeUTF8PlainText,
                                   UTTypeImage, UTTypePDF]);
 }

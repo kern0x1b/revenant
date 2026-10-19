@@ -217,7 +217,7 @@ static void initializer(NSString *name, MLCRandomInitializerType type)
     key(name, [NSString stringWithFormat:@"withinBound=%d reachesBound=%d meanNear=%d", (int)withinBound, (int)reachesBound, (int)meanNear]);
 }
 
-void charon_mlcompute_cases(void)
+void revenant_mlcompute_cases(void)
 {
     __block int deallocatorCalled = 0;
     @autoreleasepool {
@@ -372,8 +372,8 @@ void charon_mlcompute_cases(void)
                                                                         sortedSequences:YES
                                                                                dataType:MLCDataTypeFloat32]);
         showDescriptor(@"descriptor copy", [[MLCTensorDescriptor descriptorWithShape:@[@2, @3, @4, @5] dataType:MLCDataTypeFloat32] copy]);
-        showDescriptor(@"descriptor init", CharonNewOf(NSStringFromClass([MLCTensorDescriptor class])));
-        showDescriptor(@"descriptor new", CharonNewOf(NSStringFromClass([MLCTensorDescriptor class])));
+        showDescriptor(@"descriptor init", RevenantNewOf(NSStringFromClass([MLCTensorDescriptor class])));
+        showDescriptor(@"descriptor new", RevenantNewOf(NSStringFromClass([MLCTensorDescriptor class])));
 
         printf("== MLCTensorData\n");
         float values[64];
@@ -400,8 +400,8 @@ void charon_mlcompute_cases(void)
             key(@"data with a deallocator", [NSString stringWithFormat:@"raised %@", raised.name]);
         }
         key(@"data deallocator called", deallocatorCalled ? @"YES" : @"NO");
-        key(@"data init", CharonNewOf(NSStringFromClass([MLCTensorData class])) ? @"set" : @"(nil)");
-        MLCTensorData *newData = CharonNewOf(NSStringFromClass([MLCTensorData class]));
+        key(@"data init", RevenantNewOf(NSStringFromClass([MLCTensorData class])) ? @"set" : @"(nil)");
+        MLCTensorData *newData = RevenantNewOf(NSStringFromClass([MLCTensorData class]));
         if ([newData respondsToSelector:@selector(length)]) {
             counted(@"data new length", ((MLCTensorData *)newData).length);
         }
@@ -536,8 +536,8 @@ void charon_mlcompute_cases(void)
         key(@"dequantized per axis", dequantizedAxis ? [NSString stringWithFormat:@"type=%d", (int)dequantizedAxis.descriptor.dataType] : @"(nil)");
         MLCTensor *dequantizedInt = [quantized tensorByDequantizingToType:MLCDataTypeInt32 scale:scaleTensor bias:biasTensor];
         key(@"dequantized to int32", dequantizedInt ? @"set" : @"(nil)");
-        key(@"tensor init", CharonNewOf(NSStringFromClass([MLCTensor class])) ? @"set" : @"(nil)");
-        MLCTensor *newTensor = CharonNewOf(NSStringFromClass([MLCTensor class]));
+        key(@"tensor init", RevenantNewOf(NSStringFromClass([MLCTensor class])) ? @"set" : @"(nil)");
+        MLCTensor *newTensor = RevenantNewOf(NSStringFromClass([MLCTensor class]));
         if (newTensor) {
             showTensor(@"tensor new", newTensor);
         }
@@ -551,18 +551,18 @@ void charon_mlcompute_cases(void)
         key(@"parameter with optimizer data", [NSString stringWithFormat:@"same=%d updatable=%d", (int)(withOptimizer.tensor == tensor), (int)withOptimizer.isUpdatable]);
         parameter.isUpdatable = NO;
         flag(@"parameter updatable set", parameter.isUpdatable);
-        MLCTensorParameter *newParameter = CharonNewOf(NSStringFromClass([MLCTensorParameter class]));
+        MLCTensorParameter *newParameter = RevenantNewOf(NSStringFromClass([MLCTensorParameter class]));
         key(@"parameter init", newParameter ? [NSString stringWithFormat:@"tensor=%@ updatable=%d", newParameter.tensor, (int)newParameter.isUpdatable] : @"(nil)");
-        MLCTensorParameter *newParameter2 = CharonNewOf(NSStringFromClass([MLCTensorParameter class]));
-        id optimizerDeviceData = CharonNewOf(NSStringFromClass([MLCTensorOptimizerDeviceData class]));
+        MLCTensorParameter *newParameter2 = RevenantNewOf(NSStringFromClass([MLCTensorParameter class]));
+        id optimizerDeviceData = RevenantNewOf(NSStringFromClass([MLCTensorOptimizerDeviceData class]));
         flag(@"MLCTensorOptimizerDeviceData new is of the class",
              [optimizerDeviceData isKindOfClass:[MLCTensorOptimizerDeviceData class]]);
         flag(@"MLCTensorOptimizerDeviceData copies", [optimizerDeviceData copy] ? @"yes" : @"no");
 
         printf("== MLCLayer\n");
-        MLCLayer *layer0 = CharonNewOf(NSStringFromClass([MLCLayer class]));
+        MLCLayer *layer0 = RevenantNewOf(NSStringFromClass([MLCLayer class]));
         showLayer(@"layer init", layer0);
-        showLayer(@"layer new", CharonNewOf(NSStringFromClass([MLCLayer class])));
+        showLayer(@"layer new", RevenantNewOf(NSStringFromClass([MLCLayer class])));
         layer0.label = @"named";
         layer0.isDebuggingEnabled = YES;
         showLayer(@"layer after setting", layer0);
@@ -579,7 +579,7 @@ void charon_mlcompute_cases(void)
             showActivation([NSString stringWithFormat:@"activation %d a b c", type], [MLCActivationDescriptor descriptorWithType:(MLCActivationType)type a:0.5 b:0.25 c:0.125]);
         }
         showActivation(@"activation copy", [[MLCActivationDescriptor descriptorWithType:MLCActivationTypeHardSwish a:1 b:2 c:3] copy]);
-        showActivation(@"activation init", CharonNewOf(NSStringFromClass([MLCActivationDescriptor class])));
+        showActivation(@"activation init", RevenantNewOf(NSStringFromClass([MLCActivationDescriptor class])));
 
         printf("== MLCConvolutionDescriptor\n");
         showConvolution(@"convolution kernel sizes", [MLCConvolutionDescriptor descriptorWithKernelWidth:3
@@ -643,7 +643,7 @@ void charon_mlcompute_cases(void)
                                                                                                                    paddingPolicy:MLCPaddingPolicyValid
                                                                                                                     paddingSizes:nil]);
         showConvolution(@"convolution copy", [[MLCConvolutionDescriptor descriptorWithKernelWidth:3 kernelHeight:5 inputFeatureChannelCount:1 outputFeatureChannelCount:2] copy]);
-        showConvolution(@"convolution init", CharonNewOf(NSStringFromClass([MLCConvolutionDescriptor class])));
+        showConvolution(@"convolution init", RevenantNewOf(NSStringFromClass([MLCConvolutionDescriptor class])));
 
         printf("== MLCPoolingDescriptor\n");
         showPooling(@"pooling kernel size and stride", [MLCPoolingDescriptor poolingDescriptorWithType:MLCPoolingTypeMax kernelSize:2 stride:2]);
@@ -677,7 +677,7 @@ void charon_mlcompute_cases(void)
                                                                                        paddingPolicy:MLCPaddingPolicyValid
                                                                                         paddingSizes:nil]);
         showPooling(@"pooling copy", [[MLCPoolingDescriptor poolingDescriptorWithType:MLCPoolingTypeL2Norm kernelSize:3 stride:1] copy]);
-        showPooling(@"pooling init", CharonNewOf(NSStringFromClass([MLCPoolingDescriptor class])));
+        showPooling(@"pooling init", RevenantNewOf(NSStringFromClass([MLCPoolingDescriptor class])));
 
         printf("== MLCLossDescriptor\n");
         showLoss(@"loss type and reduction", [MLCLossDescriptor descriptorWithType:MLCLossTypeSoftmaxCrossEntropy reductionType:MLCReductionTypeMean]);
@@ -687,7 +687,7 @@ void charon_mlcompute_cases(void)
         showLoss(@"loss with every argument", [MLCLossDescriptor descriptorWithType:MLCLossTypeHuber reductionType:MLCReductionTypeSum
                                                                          weight:2 labelSmoothing:0.1 classCount:7 epsilon:1e-5 delta:0.5]);
         showLoss(@"loss copy", [[MLCLossDescriptor descriptorWithType:MLCLossTypeHinge reductionType:MLCReductionTypeMax weight:2] copy]);
-        showLoss(@"loss init", CharonNewOf(NSStringFromClass([MLCLossDescriptor class])));
+        showLoss(@"loss init", RevenantNewOf(NSStringFromClass([MLCLossDescriptor class])));
 
         printf("== MLCOptimizerDescriptor\n");
         showOptimizer(@"optimizer four arguments", [MLCOptimizerDescriptor descriptorWithLearningRate:0.01
@@ -712,7 +712,7 @@ void charon_mlcompute_cases(void)
                                                          regularizationType:MLCRegularizationTypeL2
                                                        regularizationScale:0.02]);
         showOptimizer(@"optimizer copy", [[MLCOptimizerDescriptor descriptorWithLearningRate:0.5 gradientRescale:3 regularizationType:MLCRegularizationTypeL1 regularizationScale:0.5] copy]);
-        showOptimizer(@"optimizer init", CharonNewOf(NSStringFromClass([MLCOptimizerDescriptor class])));
+        showOptimizer(@"optimizer init", RevenantNewOf(NSStringFromClass([MLCOptimizerDescriptor class])));
 
         printf("== MLCMatMulDescriptor\n");
         MLCMatMulDescriptor *matmul = [MLCMatMulDescriptor descriptorWithAlpha:2 transposesX:YES transposesY:NO];
@@ -721,7 +721,7 @@ void charon_mlcompute_cases(void)
         key(@"matmul descriptor", [NSString stringWithFormat:@"alpha=%g transposesX=%d transposesY=%d", plain.alpha, (int)plain.transposesX, (int)plain.transposesY]);
         MLCMatMulDescriptor *matmulCopy = [matmul copy];
         key(@"matmul copy", [NSString stringWithFormat:@"alpha=%g transposesX=%d", matmulCopy.alpha, (int)matmulCopy.transposesX]);
-        MLCMatMulDescriptor *matmulInit = CharonNewOf(NSStringFromClass([MLCMatMulDescriptor class]));
+        MLCMatMulDescriptor *matmulInit = RevenantNewOf(NSStringFromClass([MLCMatMulDescriptor class]));
         key(@"matmul init", matmulInit ? [NSString stringWithFormat:@"alpha=%g", matmulInit.alpha] : @"(nil)");
 
         printf("== MLCEmbeddingDescriptor\n");
@@ -733,7 +733,7 @@ void charon_mlcompute_cases(void)
                                                                                              pNorm:@(1.5)
                                                                            scalesGradientByFrequency:YES]);
         showEmbedding(@"embedding copy", [[MLCEmbeddingDescriptor descriptorWithEmbeddingCount:@(7) embeddingDimension:@(3)] copy]);
-        showEmbedding(@"embedding init", CharonNewOf(NSStringFromClass([MLCEmbeddingDescriptor class])));
+        showEmbedding(@"embedding init", RevenantNewOf(NSStringFromClass([MLCEmbeddingDescriptor class])));
 
         printf("== MLCLSTMDescriptor\n");
         showLstm(@"lstm three arguments", [MLCLSTMDescriptor descriptorWithInputSize:4 hiddenSize:5 layerCount:2]);
@@ -744,7 +744,7 @@ void charon_mlcompute_cases(void)
         showLstm(@"lstm every argument", [MLCLSTMDescriptor descriptorWithInputSize:4 hiddenSize:5 layerCount:2 usesBiases:YES batchFirst:NO isBidirectional:NO
                                    returnsSequences:YES dropout:0.1 resultMode:MLCLSTMResultModeOutputAndStates]);
         showLstm(@"lstm copy", [[MLCLSTMDescriptor descriptorWithInputSize:1 hiddenSize:2 layerCount:3] copy]);
-        showLstm(@"lstm init", CharonNewOf(NSStringFromClass([MLCLSTMDescriptor class])));
+        showLstm(@"lstm init", RevenantNewOf(NSStringFromClass([MLCLSTMDescriptor class])));
 
         printf("== MLCMultiheadAttentionDescriptor\n");
         showAttention(@"attention model and heads", [MLCMultiheadAttentionDescriptor descriptorWithModelDimension:8 headCount:2]);
@@ -757,7 +757,7 @@ void charon_mlcompute_cases(void)
                                                                  hasAttentionBiases:YES
                                                                   addsZeroAttention:YES]);
         showAttention(@"attention copy", [[MLCMultiheadAttentionDescriptor descriptorWithModelDimension:16 headCount:4] copy]);
-        showAttention(@"attention init", CharonNewOf(NSStringFromClass([MLCMultiheadAttentionDescriptor class])));
+        showAttention(@"attention init", RevenantNewOf(NSStringFromClass([MLCMultiheadAttentionDescriptor class])));
 
         printf("== MLCYOLOLossDescriptor\n");
         float anchors[8] = { 1, 2, 3, 4, 5, 6, 7, 8 };
@@ -774,6 +774,6 @@ void charon_mlcompute_cases(void)
         yolo.maximumIOUForObjectAbsence = 0.85f;
         showYolo(@"yolo after setting", yolo);
         showYolo(@"yolo copy", [yolo copy]);
-        showYolo(@"yolo init", CharonNewOf(NSStringFromClass([MLCYOLOLossDescriptor class])));
+        showYolo(@"yolo init", RevenantNewOf(NSStringFromClass([MLCYOLOLossDescriptor class])));
     }
 }

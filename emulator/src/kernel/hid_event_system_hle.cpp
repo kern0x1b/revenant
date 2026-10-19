@@ -14,7 +14,7 @@
 
 #include <string>
 
-namespace shade {
+namespace emulator {
 
 HidEventSystemHle::HidEventSystemHle(UserlandHleRegistry& registry)
     : registry_ { registry }

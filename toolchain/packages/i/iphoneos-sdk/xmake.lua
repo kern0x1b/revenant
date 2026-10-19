@@ -16,7 +16,7 @@ package("iphoneos-sdk")
     for _, version in ipairs({"16.4", "26.2"}) do
         add_resources(version, "csu", "https://github.com/apple-oss-distributions/Csu.git", "de2a331398a7d13a132a630bbf4d27c12b2466ec")
     end
-    add_deps("charon@ld64", {alias = "ld64"})
+    add_deps("revenant@ld64", {alias = "ld64"})
 
     add_configs("layout", {description = "The SDK sits in the package at Developer.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS<version>.sdk, where clang's driver finds the toolchain's libarclite and CMake's iOS platform files the SDK name.", default = "developer-folder", type = "string", readonly = true})
 

@@ -18,7 +18,7 @@
 #include "foundation/scene_coordinator.hpp"
 #include "graphics/surface_store.hpp"
 
-namespace shade {
+namespace emulator {
 
 struct PresentationRectangle {
     float x { };

@@ -36,7 +36,7 @@ int main(void)
         CHECK_EQUAL((__bridge NSString *)kCTFontMatrixAttribute, @"NSCTFontMatrixAttribute", "the matrix key of CoreText is not the one of UIKit");
         for (NSString *name in coretext)
             CHECK_EQUAL(records[name], coretext[name], [name stringByAppendingString:@" is the CoreText key of the release"].UTF8String);
-        printf("checks=%d failures=%d\n", charon_checks, charon_failures);
-        return charon_failures;
+        printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
+        return revenant_failures;
     }
 }

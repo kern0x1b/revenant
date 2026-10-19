@@ -16,7 +16,7 @@
 #include <utility>
 #include <vector>
 
-namespace shade {
+namespace emulator {
 namespace {
 
     HostRectangle union_rectangle(HostRectangle left, HostRectangle right)

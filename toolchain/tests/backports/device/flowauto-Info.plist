@@ -9,7 +9,7 @@
 	<key>CFBundleExecutable</key>
 	<string>flowauto</string>
 	<key>CFBundleIdentifier</key>
-	<string>local.charon.backports.flowauto</string>
+	<string>local.revenant.backports.flowauto</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>

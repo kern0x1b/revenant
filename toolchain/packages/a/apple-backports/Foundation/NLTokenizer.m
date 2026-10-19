@@ -1,7 +1,7 @@
 #import <Foundation/Foundation.h>
 #import <NaturalLanguage/NaturalLanguage.h>
 
-static const struct { uint32_t first, last; uint8_t flags; } charon_scalar_flags[] = {
+static const struct { uint32_t first, last; uint8_t flags; } revenant_scalar_flags[] = {
     {0x2C, 0x2C, 2},
     {0x2E, 0x2E, 2},
     {0x30, 0x39, 9},
@@ -2016,22 +2016,22 @@ static const struct { uint32_t first, last; uint8_t flags; } charon_scalar_flags
     {0x2FA1E, 0x2FFFF, 10},
 };
 
-static uint8_t charon_flags_of(uint32_t scalar)
+static uint8_t revenant_flags_of(uint32_t scalar)
 {
-    size_t low = 0, high = sizeof(charon_scalar_flags) / sizeof(charon_scalar_flags[0]);
+    size_t low = 0, high = sizeof(revenant_scalar_flags) / sizeof(revenant_scalar_flags[0]);
     while (low < high) {
         size_t middle = low + (high - low) / 2;
-        if (scalar < charon_scalar_flags[middle].first)
+        if (scalar < revenant_scalar_flags[middle].first)
             high = middle;
-        else if (scalar > charon_scalar_flags[middle].last)
+        else if (scalar > revenant_scalar_flags[middle].last)
             low = middle + 1;
         else
-            return charon_scalar_flags[middle].flags;
+            return revenant_scalar_flags[middle].flags;
     }
     return 0;
 }
 
-static int charon_token_flags(NSString *string, NSRange range)
+static int revenant_token_flags(NSString *string, NSRange range)
 {
     uint8_t flags = 0;
     BOOL keycap = NO, regional = NO;
@@ -2048,7 +2048,7 @@ static int charon_token_flags(NSString *string, NSRange range)
         }
         keycap = keycap || scalar == 0x20E3;
         regional = regional || (scalar >= 0x1F1E6 && scalar <= 0x1F1FF);
-        flags |= charon_flags_of(scalar);
+        flags |= revenant_flags_of(scalar);
     }
     if (!(flags & 8))
         return -1;
@@ -2060,7 +2060,7 @@ static int charon_token_flags(NSString *string, NSRange range)
 }
 
 
-static BOOL charon_only_breaks(NSString *string, NSRange range)
+static BOOL revenant_only_breaks(NSString *string, NSRange range)
 {
     for (NSUInteger index = range.location; index < NSMaxRange(range); index++) {
         unichar c = [string characterAtIndex:index];
@@ -2071,7 +2071,7 @@ static BOOL charon_only_breaks(NSString *string, NSRange range)
 }
 
 
-static uint32_t charon_scalar_at(NSString *string, NSUInteger index, NSUInteger end, NSUInteger *width)
+static uint32_t revenant_scalar_at(NSString *string, NSUInteger index, NSUInteger end, NSUInteger *width)
 {
     unichar unit = [string characterAtIndex:index];
     *width = 1;
@@ -2085,24 +2085,24 @@ static uint32_t charon_scalar_at(NSString *string, NSUInteger index, NSUInteger 
     return unit;
 }
 
-static BOOL charon_is_emoji_base(uint32_t scalar)
+static BOOL revenant_is_emoji_base(uint32_t scalar)
 {
-    return (charon_flags_of(scalar) & 4) && scalar != 0x200D && scalar != 0xFE0F && scalar != 0xFE0E && scalar != 0x20E3 && !(scalar >= 0x1F3FB && scalar <= 0x1F3FF);
+    return (revenant_flags_of(scalar) & 4) && scalar != 0x200D && scalar != 0xFE0F && scalar != 0xFE0E && scalar != 0x20E3 && !(scalar >= 0x1F3FB && scalar <= 0x1F3FF);
 }
 
-static BOOL charon_is_emoji_modifier(uint32_t scalar)
+static BOOL revenant_is_emoji_modifier(uint32_t scalar)
 {
     return scalar == 0xFE0F || scalar == 0xFE0E || scalar == 0x20E3 || (scalar >= 0x1F3FB && scalar <= 0x1F3FF) || (scalar >= 0xE0020 && scalar <= 0xE007F);
 }
 
-static NSUInteger charon_emoji_length(NSString *string, NSUInteger start, NSUInteger end)
+static NSUInteger revenant_emoji_length(NSString *string, NSUInteger start, NSUInteger end)
 {
     NSUInteger width;
-    uint32_t first = charon_scalar_at(string, start, end, &width);
+    uint32_t first = revenant_scalar_at(string, start, end, &width);
     NSUInteger position = start + width;
     if (first >= 0x1F1E6 && first <= 0x1F1FF) {
         if (position < end) {
-            uint32_t second = charon_scalar_at(string, position, end, &width);
+            uint32_t second = revenant_scalar_at(string, position, end, &width);
             if (second >= 0x1F1E6 && second <= 0x1F1FF)
                 return position + width - start;
         }
@@ -2112,7 +2112,7 @@ static NSUInteger charon_emoji_length(NSString *string, NSUInteger start, NSUInt
     if (keycapBase) {
         NSUInteger look = position;
         while (look < end) {
-            uint32_t next = charon_scalar_at(string, look, end, &width);
+            uint32_t next = revenant_scalar_at(string, look, end, &width);
             if (next == 0xFE0F) {
                 look += width;
                 continue;
@@ -2123,19 +2123,19 @@ static NSUInteger charon_emoji_length(NSString *string, NSUInteger start, NSUInt
         }
         return 0;
     }
-    if (!charon_is_emoji_base(first))
+    if (!revenant_is_emoji_base(first))
         return 0;
     for (;;) {
         while (position < end) {
-            uint32_t next = charon_scalar_at(string, position, end, &width);
-            if (!charon_is_emoji_modifier(next))
+            uint32_t next = revenant_scalar_at(string, position, end, &width);
+            if (!revenant_is_emoji_modifier(next))
                 break;
             position += width;
         }
         if (position < end && [string characterAtIndex:position] == 0x200D && position + 1 < end) {
             NSUInteger joinedWidth;
-            uint32_t joined = charon_scalar_at(string, position + 1, end, &joinedWidth);
-            if (charon_is_emoji_base(joined)) {
+            uint32_t joined = revenant_scalar_at(string, position + 1, end, &joinedWidth);
+            if (revenant_is_emoji_base(joined)) {
                 position += 1 + joinedWidth;
                 continue;
             }
@@ -2145,19 +2145,19 @@ static NSUInteger charon_emoji_length(NSString *string, NSUInteger start, NSUInt
     return position - start;
 }
 
-static NSMutableArray *charon_split_emoji(NSString *string, NSMutableArray *tokens)
+static NSMutableArray *revenant_split_emoji(NSString *string, NSMutableArray *tokens)
 {
     NSMutableArray *sequences = [NSMutableArray array];
     NSUInteger length = string.length;
     for (NSUInteger index = 0; index < length;) {
-        NSUInteger emoji = charon_emoji_length(string, index, length);
+        NSUInteger emoji = revenant_emoji_length(string, index, length);
         if (emoji) {
             [sequences addObject:[NSValue valueWithRange:NSMakeRange(index, emoji)]];
             index += emoji;
             continue;
         }
         NSUInteger width;
-        charon_scalar_at(string, index, length, &width);
+        revenant_scalar_at(string, index, length, &width);
         index += width;
     }
     if (!sequences.count)
@@ -2174,7 +2174,7 @@ static NSMutableArray *charon_split_emoji(NSString *string, NSMutableArray *toke
             cut = YES;
             if (emoji.location > cursor) {
                 NSRange plain = NSMakeRange(cursor, emoji.location - cursor);
-                int flags = charon_token_flags(string, plain);
+                int flags = revenant_token_flags(string, plain);
                 if (flags >= 0)
                     [result addObject:@[[NSValue valueWithRange:plain], @(flags)]];
             }
@@ -2186,13 +2186,13 @@ static NSMutableArray *charon_split_emoji(NSString *string, NSMutableArray *toke
         }
         if (cursor < NSMaxRange(range)) {
             NSRange plain = NSMakeRange(cursor, NSMaxRange(range) - cursor);
-            int flags = charon_token_flags(string, plain);
+            int flags = revenant_token_flags(string, plain);
             if (flags >= 0)
                 [result addObject:@[[NSValue valueWithRange:plain], @(flags)]];
         }
     }
     for (NSValue *value in sequences) {
-        int flags = charon_token_flags(string, value.rangeValue);
+        int flags = revenant_token_flags(string, value.rangeValue);
         [result addObject:@[value, @(flags < 0 ? 4 : flags)]];
     }
     [result sortUsingComparator:^NSComparisonResult(NSArray *a, NSArray *b) {
@@ -2202,7 +2202,7 @@ static NSMutableArray *charon_split_emoji(NSString *string, NSMutableArray *toke
     return result;
 }
 
-static BOOL charon_ends_with_abbreviation(NSString *string, NSRange token)
+static BOOL revenant_ends_with_abbreviation(NSString *string, NSRange token)
 {
     static NSArray *abbreviations;
     static dispatch_once_t once;
@@ -2224,13 +2224,13 @@ static BOOL charon_ends_with_abbreviation(NSString *string, NSRange token)
     return NO;
 }
 
-static NSMutableArray *charon_join_abbreviations(NSString *string, NSMutableArray *tokens)
+static NSMutableArray *revenant_join_abbreviations(NSString *string, NSMutableArray *tokens)
 {
     NSMutableArray *joined = [NSMutableArray arrayWithCapacity:tokens.count];
     for (NSArray *token in tokens) {
         if (joined.count) {
             NSRange previous = [joined.lastObject[0] rangeValue];
-            if (charon_ends_with_abbreviation(string, previous)) {
+            if (revenant_ends_with_abbreviation(string, previous)) {
                 joined[joined.count - 1] = @[[NSValue valueWithRange:NSUnionRange(previous, [token[0] rangeValue])], @0];
                 continue;
             }
@@ -2277,7 +2277,7 @@ static NSMutableArray *charon_join_abbreviations(NSString *string, NSMutableArra
     _tokens = nil;
 }
 
-- (NSArray *)charon_tokenList
+- (NSArray *)revenant_tokenList
 {
     if (_tokens)
         return _tokens;
@@ -2297,7 +2297,7 @@ static NSMutableArray *charon_join_abbreviations(NSString *string, NSMutableArra
                 NSRange token = NSMakeRange((NSUInteger)range.location, (NSUInteger)range.length);
                 int flags = 0;
                 if (_unit == NLTokenUnitWord) {
-                    flags = charon_token_flags(string, token);
+                    flags = revenant_token_flags(string, token);
                     if (flags < 0)
                         continue;
                 }
@@ -2309,9 +2309,9 @@ static NSMutableArray *charon_join_abbreviations(NSString *string, NSMutableArra
             if (identifier && !_language)
                 CFRelease(identifier);
             if (_unit == NLTokenUnitWord)
-                tokens = charon_split_emoji(string, tokens);
+                tokens = revenant_split_emoji(string, tokens);
             else if (_unit == NLTokenUnitSentence)
-                tokens = charon_join_abbreviations(string, tokens);
+                tokens = revenant_join_abbreviations(string, tokens);
         }
     }
     _tokens = tokens;
@@ -2320,12 +2320,12 @@ static NSMutableArray *charon_join_abbreviations(NSString *string, NSMutableArra
 
 - (NSRange)tokenRangeAtIndex:(NSUInteger)characterIndex
 {
-    NSArray *tokens = [self charon_tokenList];
+    NSArray *tokens = [self revenant_tokenList];
     for (NSUInteger index = 0; index < tokens.count; index++) {
         NSRange range = [tokens[index][0] rangeValue];
         if (characterIndex >= range.location && characterIndex < NSMaxRange(range)) {
             if (_unit == NLTokenUnitParagraph) {
-                if (index == 1 && charon_only_breaks(_string, [tokens[0][0] rangeValue]))
+                if (index == 1 && revenant_only_breaks(_string, [tokens[0][0] rangeValue]))
                     return NSUnionRange([tokens[0][0] rangeValue], range);
                 if (range.length > 1 && [_string characterAtIndex:NSMaxRange(range) - 1] == '\n' && [_string characterAtIndex:NSMaxRange(range) - 2] == '\r' && characterIndex < NSMaxRange(range) - 1)
                     return NSMakeRange(range.location, range.length - 1);
@@ -2336,7 +2336,7 @@ static NSMutableArray *charon_join_abbreviations(NSString *string, NSMutableArra
     return NSMakeRange(NSNotFound, 0);
 }
 
-- (BOOL)charon_token:(NSRange)token meets:(NSRange)range
+- (BOOL)revenant_token:(NSRange)token meets:(NSRange)range
 {
     if (NSMaxRange(range) > _string.length)
         return NO;
@@ -2345,24 +2345,24 @@ static NSMutableArray *charon_join_abbreviations(NSString *string, NSMutableArra
     return NSIntersectionRange(token, range).length > 0;
 }
 
-- (NSArray *)charon_matchesInRange:(NSRange)range
+- (NSArray *)revenant_matchesInRange:(NSRange)range
 {
     NSMutableArray *found = [NSMutableArray array];
-    NSArray *tokens = [self charon_tokenList];
+    NSArray *tokens = [self revenant_tokenList];
     for (NSUInteger index = 0; index < tokens.count; index++) {
         NSRange tokenRange = [tokens[index][0] rangeValue];
         NSNumber *flags = tokens[index][1];
         if (_unit == NLTokenUnitParagraph && tokenRange.length > 1 && [_string characterAtIndex:NSMaxRange(tokenRange) - 1] == '\n' && [_string characterAtIndex:NSMaxRange(tokenRange) - 2] == '\r') {
             NSRange first = NSMakeRange(tokenRange.location, tokenRange.length - 1), second = NSMakeRange(NSMaxRange(tokenRange) - 1, 1);
-            if ([self charon_token:first meets:range])
+            if ([self revenant_token:first meets:range])
                 [found addObject:@[[NSValue valueWithRange:first], flags]];
-            if ([self charon_token:second meets:range])
+            if ([self revenant_token:second meets:range])
                 [found addObject:@[[NSValue valueWithRange:second], flags]];
             continue;
         }
-        if (![self charon_token:tokenRange meets:range])
+        if (![self revenant_token:tokenRange meets:range])
             continue;
-        if (_unit == NLTokenUnitParagraph && index == 1 && charon_only_breaks(_string, [tokens[0][0] rangeValue]) && ![self charon_token:[tokens[0][0] rangeValue] meets:range])
+        if (_unit == NLTokenUnitParagraph && index == 1 && revenant_only_breaks(_string, [tokens[0][0] rangeValue]) && ![self revenant_token:[tokens[0][0] rangeValue] meets:range])
             tokenRange = NSUnionRange([tokens[0][0] rangeValue], tokenRange);
         [found addObject:@[[NSValue valueWithRange:tokenRange], flags]];
     }
@@ -2372,7 +2372,7 @@ static NSMutableArray *charon_join_abbreviations(NSString *string, NSMutableArra
 - (NSArray<NSValue *> *)tokensForRange:(NSRange)range
 {
     NSMutableArray *ranges = [NSMutableArray array];
-    for (NSArray *match in [self charon_matchesInRange:range])
+    for (NSArray *match in [self revenant_matchesInRange:range])
         [ranges addObject:match[0]];
     return ranges;
 }
@@ -2380,7 +2380,7 @@ static NSMutableArray *charon_join_abbreviations(NSString *string, NSMutableArra
 - (void)enumerateTokensInRange:(NSRange)range usingBlock:(void (NS_NOESCAPE ^)(NSRange tokenRange, NLTokenizerAttributes flags, BOOL *stop))block
 {
     BOOL stop = NO;
-    for (NSArray *match in [self charon_matchesInRange:range]) {
+    for (NSArray *match in [self revenant_matchesInRange:range]) {
         block([match[0] rangeValue], (NLTokenizerAttributes)[match[1] unsignedIntegerValue], &stop);
         if (stop)
             break;

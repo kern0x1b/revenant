@@ -12,7 +12,7 @@
 
 #include <cstdint>
 
-namespace shade::darwin::proc_info {
+namespace emulator::darwin::proc_info {
 
 inline constexpr std::uint32_t syscall_number = 336U;
 

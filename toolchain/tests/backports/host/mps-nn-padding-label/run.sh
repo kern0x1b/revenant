@@ -3,7 +3,7 @@
 # process, for all 64 combinations of the align, remainder and size fields and the custom bit (cases.m).
 #
 # The port's MPSNNGraph11.m is built for macOS beside Apple's MetalPerformanceShaders, with every class it defines
-# renamed CharonHost<Name>, so Apple's classes and the port's coexist. MPSImageWalk13.m is built with it because
+# renamed RevenantHost<Name>, so Apple's classes and the port's coexist. MPSImageWalk13.m is built with it because
 # MPSNNGraph11.m depends on it.
 #
 # A MUTANT runs last: the size names SizeSame and SizeFull are swapped in a copy of the port file, and the test must
@@ -28,7 +28,7 @@ for source in $sources; do
 done
 renames=""
 for name in $(sort -u "$BUILD/classes.txt"); do
-    renames="$renames -D$name=CharonHost$name"
+    renames="$renames -D$name=RevenantHost$name"
 done
 
 objects=""

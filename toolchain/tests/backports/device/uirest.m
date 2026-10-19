@@ -6,7 +6,7 @@
 
 static void log_line(NSString *line)
 {
-    charon_check(YES, [line UTF8String], @"");
+    revenant_check(YES, [line UTF8String], @"");
 }
 
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
@@ -94,16 +94,16 @@ static NSUInteger lit_pixels(UIImage *image, CGSize size)
     return count;
 }
 
-@interface UIViewController (CharonAppearingDeclaration)
+@interface UIViewController (RevenantAppearingDeclaration)
 - (void)viewIsAppearing:(BOOL)animated;
 @end
 
-@interface UITextView (CharonAttributedReplace)
+@interface UITextView (RevenantAttributedReplace)
 - (void)replaceRange:(UITextRange *)range withAttributedText:(NSAttributedString *)attributedText;
 @end
 
-@interface UIContextMenuInteraction (CharonPrivate)
-- (void)charon_beginAtLocation:(CGPoint)location;
+@interface UIContextMenuInteraction (RevenantPrivate)
+- (void)revenant_beginAtLocation:(CGPoint)location;
 @end
 
 @interface Recorder : NSObject
@@ -221,14 +221,14 @@ static NSUInteger lit_pixels(UIImage *image, CGSize size)
 
 @end
 
-@interface CharonRestSceneDelegate : UIResponder <UIWindowSceneDelegate>
+@interface RevenantRestSceneDelegate : UIResponder <UIWindowSceneDelegate>
 @property (nonatomic, strong) UIWindow *window;
 @end
 
 static NSMutableArray *scene_events;
 static UIWindow *the_window;
 
-@implementation CharonRestSceneDelegate
+@implementation RevenantRestSceneDelegate
 
 - (void)scene:(UIScene *)scene willConnectToSession:(UISceneSession *)session options:(UISceneConnectionOptions *)options
 {
@@ -246,10 +246,10 @@ static UIWindow *the_window;
 
 @end
 
-@interface CharonRestDelegate : UIResponder <UIApplicationDelegate>
+@interface RevenantRestDelegate : UIResponder <UIApplicationDelegate>
 @end
 
-@implementation CharonRestDelegate
+@implementation RevenantRestDelegate
 
 - (UISceneConfiguration *)application:(UIApplication *)application configurationForConnectingSceneSession:(UISceneSession *)session options:(UISceneConnectionOptions *)options
 {
@@ -258,7 +258,7 @@ static UIWindow *the_window;
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)options
 {
-    charon_log_to([results_folder stringByAppendingPathComponent:@"uirest.log"]);
+    revenant_log_to([results_folder stringByAppendingPathComponent:@"uirest.log"]);
     [self performSelector:@selector(runAndReport) withObject:nil afterDelay:0.5];
     return YES;
 }
@@ -268,9 +268,9 @@ static UIWindow *the_window;
     @try {
         [self run];
     } @catch (NSException *exception) {
-        charon_check(NO, "the checks raise no exception", [NSString stringWithFormat:@"%@: %@", exception.name, exception.reason]);
+        revenant_check(NO, "the checks raise no exception", [NSString stringWithFormat:@"%@: %@", exception.name, exception.reason]);
     }
-    NSString *summary = [NSString stringWithFormat:@"%@ checks=%d failures=%d\n", charon_failures ? @"FAIL" : @"ok", charon_checks, charon_failures];
+    NSString *summary = [NSString stringWithFormat:@"%@ checks=%d failures=%d\n", revenant_failures ? @"FAIL" : @"ok", revenant_checks, revenant_failures];
     [summary writeToFile:[results_folder stringByAppendingPathComponent:@"uirest.done"] atomically:YES encoding:NSUTF8StringEncoding error:NULL];
 }
 
@@ -594,7 +594,7 @@ static UIWindow *the_window;
     UIAction *open = [UIAction actionWithTitle:@"Open" image:nil identifier:nil handler:^(UIAction *action) { [chosen addObject:@"open"]; }];
     UIAction *remove = [UIAction actionWithTitle:@"Remove" image:nil identifier:nil handler:^(UIAction *action) { [chosen addObject:@"remove"]; }];
     remove.attributes = UIMenuElementAttributesDestructive;
-    UICommand *command = [UICommand commandWithTitle:@"Command" image:nil action:@selector(charonRestCommand:) propertyList:nil];
+    UICommand *command = [UICommand commandWithTitle:@"Command" image:nil action:@selector(revenantRestCommand:) propertyList:nil];
     UIMenu *menu = [UIMenu menuWithTitle:@"Things" children:@[open, command, remove]];
     UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
     button.frame = CGRectMake(20, 200, 80, 40);
@@ -637,7 +637,7 @@ static UIWindow *the_window;
     UIContextMenuConfiguration *configuration = [owner contextMenuInteraction:interaction configurationForMenuAtLocation:CGPointMake(10, 44 * 2 + 5)];
     CHECK((configuration != nil && [lists.events isEqual:@[@"configuration row 2"]]), "the delegate is asked for the row under the point");
     CHECK(([owner contextMenuInteraction:interaction configurationForMenuAtLocation:CGPointMake(10, 44 * 5 + 5)] == nil), "and for no row when there is none");
-    [interaction charon_beginAtLocation:CGPointMake(10, 44 * 2 + 5)];
+    [interaction revenant_beginAtLocation:CGPointMake(10, 44 * 2 + 5)];
     CHECK((wait_until(^BOOL { return visible_sheet() != nil; }, 10)), "a long press on a row shows its menu");
     sheet = visible_sheet();
     CHECK(([lists.events containsObject:@"will display"]), "the delegate hears the menu appear");
@@ -880,6 +880,6 @@ int main(int argc, char *argv[])
     @autoreleasepool {
         [[NSFileManager defaultManager] createDirectoryAtPath:results_folder withIntermediateDirectories:YES attributes:nil error:NULL];
         scene_events = [NSMutableArray array];
-        return UIApplicationMain(argc, argv, nil, @"CharonRestDelegate");
+        return UIApplicationMain(argc, argv, nil, @"RevenantRestDelegate");
     }
 }

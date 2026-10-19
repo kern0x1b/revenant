@@ -1,73 +1,73 @@
 #import <Foundation/Foundation.h>
 
-static NSString *const CharonAttributionKey = @"CharonAttribution";
-static NSString *const CharonRequiresDNSSECKey = @"CharonRequiresDNSSECValidation";
-static NSString *const CharonPersistentDNSKey = @"CharonAllowsPersistentDNS";
-static NSString *const CharonUltraConstrainedKey = @"CharonAllowsUltraConstrainedNetworkAccess";
-static NSString *const CharonPartitionIdentifierKey = @"CharonCookiePartitionIdentifier";
+static NSString *const RevenantAttributionKey = @"RevenantAttribution";
+static NSString *const RevenantRequiresDNSSECKey = @"RevenantRequiresDNSSECValidation";
+static NSString *const RevenantPersistentDNSKey = @"RevenantAllowsPersistentDNS";
+static NSString *const RevenantUltraConstrainedKey = @"RevenantAllowsUltraConstrainedNetworkAccess";
+static NSString *const RevenantPartitionIdentifierKey = @"RevenantCookiePartitionIdentifier";
 
-static BOOL charon_request_flag(NSURLRequest *request, NSString *key)
+static BOOL revenant_request_flag(NSURLRequest *request, NSString *key)
 {
     NSNumber *value = [NSURLProtocol propertyForKey:key inRequest:request];
     return value ? value.boolValue : NO;
 }
 
-static void charon_request_set_flag(NSMutableURLRequest *request, NSString *key, BOOL flag)
+static void revenant_request_set_flag(NSMutableURLRequest *request, NSString *key, BOOL flag)
 {
     [NSURLProtocol setProperty:@(flag) forKey:key inRequest:request];
 }
 
-@implementation NSMutableURLRequest (CharonRequestProperties)
+@implementation NSMutableURLRequest (RevenantRequestProperties)
 
 - (NSURLRequestAttribution)attribution
 {
-    NSNumber *value = [NSURLProtocol propertyForKey:CharonAttributionKey inRequest:self];
+    NSNumber *value = [NSURLProtocol propertyForKey:RevenantAttributionKey inRequest:self];
     return value ? (NSURLRequestAttribution)value.integerValue : NSURLRequestAttributionDeveloper;
 }
 
 - (void)setAttribution:(NSURLRequestAttribution)attribution
 {
-    [NSURLProtocol setProperty:@(attribution) forKey:CharonAttributionKey inRequest:self];
+    [NSURLProtocol setProperty:@(attribution) forKey:RevenantAttributionKey inRequest:self];
 }
 
 - (BOOL)requiresDNSSECValidation
 {
-    return charon_request_flag(self, CharonRequiresDNSSECKey);
+    return revenant_request_flag(self, RevenantRequiresDNSSECKey);
 }
 
 - (void)setRequiresDNSSECValidation:(BOOL)requires
 {
-    charon_request_set_flag(self, CharonRequiresDNSSECKey, requires);
+    revenant_request_set_flag(self, RevenantRequiresDNSSECKey, requires);
 }
 
 - (BOOL)allowsPersistentDNS
 {
-    return charon_request_flag(self, CharonPersistentDNSKey);
+    return revenant_request_flag(self, RevenantPersistentDNSKey);
 }
 
 - (void)setAllowsPersistentDNS:(BOOL)allows
 {
-    charon_request_set_flag(self, CharonPersistentDNSKey, allows);
+    revenant_request_set_flag(self, RevenantPersistentDNSKey, allows);
 }
 
 - (BOOL)allowsUltraConstrainedNetworkAccess
 {
-    return charon_request_flag(self, CharonUltraConstrainedKey);
+    return revenant_request_flag(self, RevenantUltraConstrainedKey);
 }
 
 - (void)setAllowsUltraConstrainedNetworkAccess:(BOOL)allows
 {
-    charon_request_set_flag(self, CharonUltraConstrainedKey, allows);
+    revenant_request_set_flag(self, RevenantUltraConstrainedKey, allows);
 }
 
 - (NSString *)cookiePartitionIdentifier
 {
-    return [NSURLProtocol propertyForKey:CharonPartitionIdentifierKey inRequest:self];
+    return [NSURLProtocol propertyForKey:RevenantPartitionIdentifierKey inRequest:self];
 }
 
 - (void)setCookiePartitionIdentifier:(NSString *)identifier
 {
-    [NSURLProtocol setProperty:identifier forKey:CharonPartitionIdentifierKey inRequest:self];
+    [NSURLProtocol setProperty:identifier forKey:RevenantPartitionIdentifierKey inRequest:self];
 }
 
 @end

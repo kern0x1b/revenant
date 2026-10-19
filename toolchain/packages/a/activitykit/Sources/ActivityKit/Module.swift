@@ -1,5 +1,5 @@
 import Foundation
-#if CHARON_CARRIES_LOCALIZED_STRING
+#if REVENANT_CARRIES_LOCALIZED_STRING
 import AppIntents
 #endif
 
@@ -175,9 +175,9 @@ public enum ActivityAuthorizationError: Error, CustomNSError, LocalizedError, Ha
 }
 
 public final class ActivityAuthorizationInfo {
-    public var areActivitiesEnabled: Bool { return CharonActivitySupport.shared.areActivitiesEnabled }
+    public var areActivitiesEnabled: Bool { return RevenantActivitySupport.shared.areActivitiesEnabled }
 
-    public var frequentPushesEnabled: Bool { return CharonActivitySupport.shared.frequentPushesEnabled }
+    public var frequentPushesEnabled: Bool { return RevenantActivitySupport.shared.frequentPushesEnabled }
 
     public let activityEnablementUpdates: ActivityEnablementUpdates
 
@@ -206,7 +206,7 @@ public final class ActivityAuthorizationInfo {
             }
         }
 
-        public func makeAsyncIterator() -> Iterator { return Iterator(enabled: CharonActivitySupport.shared.areActivitiesEnabled) }
+        public func makeAsyncIterator() -> Iterator { return Iterator(enabled: RevenantActivitySupport.shared.areActivitiesEnabled) }
     }
 
     public struct FrequentPushEnablementUpdates: AsyncSequence {
@@ -228,13 +228,13 @@ public final class ActivityAuthorizationInfo {
         }
 
         public func makeAsyncIterator() -> Iterator {
-            return Iterator(enabled: CharonActivitySupport.shared.frequentPushesEnabled)
+            return Iterator(enabled: RevenantActivitySupport.shared.frequentPushesEnabled)
         }
     }
 }
 
-public final class CharonActivitySupport {
-    public static let shared = CharonActivitySupport()
+public final class RevenantActivitySupport {
+    public static let shared = RevenantActivitySupport()
 
     public typealias AvailabilityReader = () -> Bool
     public typealias FrequentPushReader = () -> Bool

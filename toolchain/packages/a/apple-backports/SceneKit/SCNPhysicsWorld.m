@@ -1,9 +1,9 @@
-#import "CharonSCN.h"
-#import "../CharonSayOnce.h"
+#import "RevenantSCN.h"
+#import "../RevenantSayOnce.h"
 
-static void CharonSCNPhysicsWorldSay(void)
+static void RevenantSCNPhysicsWorldSay(void)
 {
-    charon_say_once_for(@"SCNPhysicsWorld", @"SCNPhysicsWorld: nothing is simulated on this port; gravity, speed, the time step, "
+    revenant_say_once_for(@"SCNPhysicsWorld", @"SCNPhysicsWorld: nothing is simulated on this port; gravity, speed, the time step, "
                                             @"behaviors and the contact delegate are kept and never act");
 }
 
@@ -30,19 +30,19 @@ static void CharonSCNPhysicsWorldSay(void)
 
 - (void)setGravity:(SCNVector3)gravity
 {
-    CharonSCNPhysicsWorldSay();
+    RevenantSCNPhysicsWorldSay();
     _gravity = gravity;
 }
 
 - (void)setSpeed:(CGFloat)speed
 {
-    CharonSCNPhysicsWorldSay();
+    RevenantSCNPhysicsWorldSay();
     _speed = speed;
 }
 
 - (void)setTimeStep:(NSTimeInterval)timeStep
 {
-    CharonSCNPhysicsWorldSay();
+    RevenantSCNPhysicsWorldSay();
     _timeStep = timeStep;
 }
 
@@ -53,7 +53,7 @@ static void CharonSCNPhysicsWorldSay(void)
 
 - (void)setContactDelegate:(id<SCNPhysicsContactDelegate>)contactDelegate
 {
-    CharonSCNPhysicsWorldSay();
+    RevenantSCNPhysicsWorldSay();
     _contactDelegate = contactDelegate;
 }
 
@@ -64,7 +64,7 @@ static void CharonSCNPhysicsWorldSay(void)
 
 - (void)addBehavior:(SCNPhysicsBehavior *)behavior
 {
-    CharonSCNPhysicsWorldSay();
+    RevenantSCNPhysicsWorldSay();
     if (behavior && ![_behaviors containsObject:behavior]) {
         [_behaviors addObject:behavior];
     }
@@ -113,7 +113,7 @@ static void CharonSCNPhysicsWorldSay(void)
 {
     if ((self = [self init])) {
         if ([coder containsValueForKey:@"gravity"]) {
-            _gravity = [CharonSCNCoding decodeVector3:coder forKey:@"gravity"];
+            _gravity = [RevenantSCNCoding decodeVector3:coder forKey:@"gravity"];
         }
         if ([coder containsValueForKey:@"speed"]) {
             _speed = [coder decodeDoubleForKey:@"speed"];
@@ -127,7 +127,7 @@ static void CharonSCNPhysicsWorldSay(void)
 
 - (void)encodeWithCoder:(NSCoder *)coder
 {
-    [CharonSCNCoding encodeVector3:_gravity coder:coder forKey:@"gravity"];
+    [RevenantSCNCoding encodeVector3:_gravity coder:coder forKey:@"gravity"];
     [coder encodeDouble:_speed forKey:@"speed"];
     [coder encodeDouble:_timeStep forKey:@"timeStep"];
 }

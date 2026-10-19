@@ -5,11 +5,11 @@
 #import <objc/runtime.h>
 #include <stdio.h>
 
-@interface CharonRecorder : NSObject
+@interface RevenantRecorder : NSObject
 @property (nonatomic, strong) NSMutableArray *calls;
 @end
 
-@implementation CharonRecorder
+@implementation RevenantRecorder
 @synthesize calls = _calls;
 
 - (instancetype)init
@@ -56,11 +56,11 @@ int main(int argc, char **argv)
 
         Class completerClass = Nil;
         if (strcmp(which, "port") == 0) {
-            const char *dylib = getenv("CHARON_PORT_DYLIB");
+            const char *dylib = getenv("REVENANT_PORT_DYLIB");
             if (dylib) {
                 dlopen(dylib, RTLD_LOCAL);
             }
-            completerClass = objc_getClass("charonHost_MKLocalSearchCompleter");
+            completerClass = objc_getClass("revenantHost_MKLocalSearchCompleter");
         } else {
             completerClass = objc_getClass("MKLocalSearchCompleter");
         }
@@ -71,8 +71,8 @@ int main(int argc, char **argv)
         printf("# %s completer in %s\n", which, class_getImageName(completerClass));
         fflush(stdout);
 
-        if (getenv("CHARON_MUTANT") != NULL) {
-            Class mutant = objc_allocateClassPair(completerClass, "CharonMutantCompleter", 0);
+        if (getenv("REVENANT_MUTANT") != NULL) {
+            Class mutant = objc_allocateClassPair(completerClass, "RevenantMutantCompleter", 0);
             IMP wrong = imp_implementationWithBlock(^(id self_, SEL _cmd) {
                 id delegate = [self_ valueForKey:@"delegate"];
                 SEL updated = NSSelectorFromString(@"completerDidUpdateResults:");
@@ -80,12 +80,12 @@ int main(int argc, char **argv)
                     ((void (*)(id, SEL, id))objc_msgSend)(delegate, updated, nil);
                 }
             });
-            class_addMethod(mutant, NSSelectorFromString(@"charon_delegateDidUpdate"), wrong, "v@:");
+            class_addMethod(mutant, NSSelectorFromString(@"revenant_delegateDidUpdate"), wrong, "v@:");
             objc_registerClassPair(mutant);
             completerClass = mutant;
             printf("#   (a subclass of the port's own, passing the WRONG argument)\n");
         }
-        CharonRecorder *recorder = [[CharonRecorder alloc] init];
+        RevenantRecorder *recorder = [[RevenantRecorder alloc] init];
         id completer = [[completerClass alloc] init];
         if (![completer respondsToSelector:@selector(setDelegate:)]) {
             printf("  it has no delegate\n");

@@ -243,12 +243,12 @@ local function ported_classes(objects)
     return classes
 end
 
-local function charon_members(text)
+local function revenant_members(text)
     local found = {}
     for at in text:gmatch("()[-+]%[") do
         local kind = text:sub(at, at)
-        local owner = text:match("^([%w_]+)%(Charon[%w_]*%) ", at + 2)
-        local selector = text:match("^[%w_]+%(Charon[%w_]*%) ([%w_:]+)%]", at + 2)
+        local owner = text:match("^([%w_]+)%(Revenant[%w_]*%) ", at + 2)
+        local selector = text:match("^[%w_]+%(Revenant[%w_]*%) ([%w_:]+)%]", at + 2)
         if owner and selector then
             table.insert(found, {kind, owner, selector})
         end
@@ -264,7 +264,7 @@ local function ported(objects)
     local names = nm_lines(objects)
     local own = ported_classes(objects)
     local found, seen = {}, {}
-    for _, member in ipairs(charon_members(names)) do
+    for _, member in ipairs(revenant_members(names)) do
         local kind, owner, selector = member[1], member[2], member[3]
         if not own[owner] and not is_runtime_hook(kind, selector) then
             local key = kind .. "\0" .. owner .. "\0" .. selector
@@ -398,7 +398,7 @@ local function declared(text)
     end
     if text:find("*", 1, true) then
         local base = strip(replace_all(text, "*", " ")):match("^[%w_]*")
-        if starts(base, "Charon") then
+        if starts(base, "Revenant") then
             return "id"
         end
     end
@@ -463,7 +463,7 @@ local function header_superclasses(flags)
             unique[flags[index + 1]] = true
         end
     end
-    local cache = path.join(RUNS, "charon-prefix-superclasses-" .. digest(join_key(sorted_keys(unique))):sub(1, 16) .. ".json")
+    local cache = path.join(RUNS, "revenant-prefix-superclasses-" .. digest(join_key(sorted_keys(unique))):sub(1, 16) .. ".json")
     local stored = cached_json(cache)
     if stored then
         return stored
@@ -517,7 +517,7 @@ local function header_conformers(flags, classes)
     for _, name in ipairs(wanted) do
         table.insert(keyed, name)
     end
-    local cache = path.join(RUNS, "charon-prefix-headers-" .. digest(join_key(keyed)):sub(1, 16) .. ".json")
+    local cache = path.join(RUNS, "revenant-prefix-headers-" .. digest(join_key(keyed)):sub(1, 16) .. ".json")
     local stored = cached_json(cache)
     if stored then
         return stored
@@ -573,7 +573,7 @@ local function conformers(sources, flags, classes)
     for _, name in ipairs(sorted_keys(classes)) do
         table.insert(keyed, name)
     end
-    local cache = path.join(RUNS, "charon-prefix-conformers-" .. digest(join_key(keyed)):sub(1, 16) .. ".json")
+    local cache = path.join(RUNS, "revenant-prefix-conformers-" .. digest(join_key(keyed)):sub(1, 16) .. ".json")
     local stored = cached_json(cache)
     local owners = {}
     if stored then
@@ -1015,7 +1015,7 @@ end
 
 local function sdk_owners(flags)
     local key = digest(sdk_key(flags)):sub(1, 16)
-    local home = os.getenv("CHARON_HOME") or path.join(os.getenv("HOME"), ".charon")
+    local home = os.getenv("REVENANT_HOME") or path.join(os.getenv("HOME"), ".revenant")
     local folder = path.join(home, "cache")
     local cached = path.join(folder, "sdk-objc-owners-" .. key .. ".json")
     local stored = cached_json(cached)
@@ -1053,15 +1053,15 @@ local function sdk_owners(flags)
 end
 
 local FIXTURE = [==[#import <Foundation/Foundation.h>
-@protocol CharonWidgetDelegate <NSObject>
+@protocol RevenantWidgetDelegate <NSObject>
 - (void)widgetSaysHello;
 - (NSString *)widgetGreeting;
 @end
-@interface CharonWidget : NSObject <CharonWidgetDelegate>
+@interface RevenantWidget : NSObject <RevenantWidgetDelegate>
 - (void)widgetSaysHello;
 - (NSString *)widgetGreeting;
 @end
-@implementation CharonWidget
+@implementation RevenantWidget
 - (void)widgetSaysHello
 {
 }
@@ -1069,15 +1069,15 @@ local FIXTURE = [==[#import <Foundation/Foundation.h>
 {
     return @"hello";
 }
-- (void)greet:(id<CharonWidgetDelegate>)delegate
+- (void)greet:(id<RevenantWidgetDelegate>)delegate
 {
     [delegate widgetSaysHello];
 }
 @end
-@interface CharonGreeting : NSObject
+@interface RevenantGreeting : NSObject
 @end
-@implementation CharonGreeting
-- (void)collect:(id<CharonWidgetDelegate>)delegate into:(NSMutableArray *)out
+@implementation RevenantGreeting
+- (void)collect:(id<RevenantWidgetDelegate>)delegate into:(NSMutableArray *)out
 {
     // The spelling that made this rewrite fail to compile, read off UITraitCollection.m: a property read
     // through a protocol-typed receiver. clang records it as a message expression whose range begins at the
@@ -1093,21 +1093,21 @@ local function selftest()
     io.writefile(work, FIXTURE)
     local dump = clang_dump({}, work, true)
     local carried = carried_index({
-        {"-", "CharonWidget", "widgetSaysHello"},
-        {"-", "CharonWidget", "widgetGreeting"},
+        {"-", "RevenantWidget", "widgetSaysHello"},
+        {"-", "RevenantWidget", "widgetGreeting"},
     })
-    local renamed = prefixed("widgetSaysHello", "charonHost")
+    local renamed = prefixed("widgetSaysHello", "revenantHost")
 
     local function rewrite(owners)
-        local rewriter = new_rewriter(FIXTURE, carried, make_chain({}), owners, {}, "charonHost", {})
+        local rewriter = new_rewriter(FIXTURE, carried, make_chain({}), owners, {}, "revenantHost", {})
         for _, document in ipairs(documents(dump)) do
             rewriter:walk(document, nil)
         end
-        return rewriter:result("charonHost")
+        return rewriter:result("revenantHost")
     end
 
-    local placed = rewrite({CharonWidgetDelegate = {CharonWidget = true}})
-    print(string.format("ok   the send to id<CharonWidgetDelegate> is placed: %s",
+    local placed = rewrite({RevenantWidgetDelegate = {RevenantWidget = true}})
+    print(string.format("ok   the send to id<RevenantWidgetDelegate> is placed: %s",
                         placed:find(renamed, 1, true) and "yes" or "NO -- the conformers did not place it"))
     local control = rewrite({})
     local as_written = "[delegate widgetSaysHello];"
@@ -1120,7 +1120,7 @@ local function selftest()
         os.exit(1)
     end
 
-    local as_send = "[(id)(delegate) charonHostWidgetGreeting]"
+    local as_send = "[(id)(delegate) revenantHostWidgetGreeting]"
     local spelled_ok = placed:find(as_send, 1, true) ~= nil and placed:find("[out addObject:delegate.widgetGreeting", 1, true) == nil
     print(string.format("%s   a protocol-typed property read is rewritten as the send it stands for: %s",
                         spelled_ok and "ok  " or "FAIL", spelled_ok and as_send or "<no addObject line>"))
@@ -1130,13 +1130,13 @@ local function selftest()
     end
 
     local rows = {
-        {"CharonListsMovement *", "id"},
-        {"CharonConfigurationHost *", "id"},
-        {"_Nullable CharonRows *", "id"},
+        {"RevenantListsMovement *", "id"},
+        {"RevenantConfigurationHost *", "id"},
+        {"_Nullable RevenantRows *", "id"},
         {"NSString *", "NSString *"},
         {"UIView *__strong", "UIView *__strong"},
         {"const char *", "const char *"},
-        {"CharonColour", "CharonColour"},
+        {"RevenantColour", "RevenantColour"},
         {"CGRect", "CGRect"},
         {"struct CGRect", "struct CGRect"},
         {"UISemanticContentAttribute", "UISemanticContentAttribute"},
@@ -1297,7 +1297,7 @@ function group_renames(flags)
     local names = {}
     for _, flag in ipairs(flags) do
         local first, second = flag:match("^%-D([%a_][%w_]*)=([%a_][%w_]*)$")
-        if first and second == "CharonHost" .. first then
+        if first and second == "RevenantHost" .. first then
             names[second] = first
         end
     end

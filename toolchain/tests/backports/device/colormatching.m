@@ -39,7 +39,7 @@ int main(int argc, char **argv)
 {
     @autoreleasepool {
         if (argc > 1)
-            charon_log_to([NSString stringWithUTF8String:argv[1]]);
+            revenant_log_to([NSString stringWithUTF8String:argv[1]]);
         CGColorSpaceRef grey = CGColorSpaceCreateDeviceGray(), rgb = CGColorSpaceCreateDeviceRGB(), cmyk = CGColorSpaceCreateDeviceCMYK();
         CGFloat values[][4] = {{1, 0, 0, 0.5}, {0, 1, 0, 1}, {0, 0, 1, 1}, {0.2, 0.4, 0.6, 1}};
         for (int i = 0; i < 4; i++) {
@@ -70,7 +70,7 @@ int main(int argc, char **argv)
             CGColorTransformRelease(back);
             CGColorRelease(colour);
         }
-        printf("checks=%d failures=%d\n", charon_checks, charon_failures);
+        printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
     }
-    return charon_failures ? 1 : 0;
+    return revenant_failures ? 1 : 0;
 }

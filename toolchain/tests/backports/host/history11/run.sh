@@ -4,15 +4,15 @@ here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 CORE=${CORE:-$here/../../../../packages/a/apple-backports/CoreData}
 harness=${HISTORY11_HARNESS:-$here/../../device}
-build=${HISTORY11_BUILD:-$(runs_folder charon-history11-host)}
+build=${HISTORY11_BUILD:-$(runs_folder revenant-history11-host)}
 sources="NSPersistentHistoryChangeRequest.m NSPersistentHistoryToken.m NSPersistentHistoryResult.m NSPersistentHistoryTransaction.m NSPersistentHistoryChange.m CoreDataConstants11.m CoreDataConstants12.m NSPersistentStoreCoordinator+HistoryToken.m NSManagedObjectContext+TransactionAuthor.m"
 renames=""
 for name in NSPersistentHistoryChangeRequest NSPersistentHistoryToken NSPersistentHistoryResult NSPersistentHistoryTransaction NSPersistentHistoryChange \
             NSPersistentHistoryTrackingKey NSBinaryStoreSecureDecodingClasses NSBinaryStoreInsecureDecodingCompatibilityOption \
             NSCoreDataCoreSpotlightExporter NSPersistentHistoryTokenKey NSPersistentStoreRemoteChangeNotification NSPersistentStoreURLKey; do
-    renames="$renames -D$name=CharonHost$name"
+    renames="$renames -D$name=RevenantHost$name"
 done
-renames="$renames -DcurrentPersistentHistoryTokenFromStores=charonHostcurrentPersistentHistoryTokenFromStores -DtransactionAuthor=charonHosttransactionAuthor -DsetTransactionAuthor=charonHostsetTransactionAuthor"
+renames="$renames -DcurrentPersistentHistoryTokenFromStores=revenantHostcurrentPersistentHistoryTokenFromStores -DtransactionAuthor=revenantHosttransactionAuthor -DsetTransactionAuthor=revenantHostsetTransactionAuthor"
 rm -rf "$build"
 mkdir -p "$build"
 objects=""

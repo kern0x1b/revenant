@@ -1,5 +1,5 @@
-#import "CharonMPS.h"
-#import "CharonMPSImage.h"
+#import "RevenantMPS.h"
+#import "RevenantMPSImage.h"
 
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
 
@@ -15,7 +15,7 @@
 @synthesize secondaryEdgeMode = _secondaryEdgeMode;
 @synthesize clipRect = _clipRect;
 
-static inline MPSOffset CharonMPSZeroOffset(void)
+static inline MPSOffset RevenantMPSZeroOffset(void)
 {
     MPSOffset offset;
     offset.x = 0;
@@ -24,7 +24,7 @@ static inline MPSOffset CharonMPSZeroOffset(void)
     return offset;
 }
 
-static inline MTLRegion CharonMPSBinaryClip(MTLRegion clip, MTLSize destinationSize)
+static inline MTLRegion RevenantMPSBinaryClip(MTLRegion clip, MTLSize destinationSize)
 {
     if (clip.size.width < 0 || clip.size.height < 0) {
         clip.origin = MTLOriginMake(0, 0, 0);
@@ -33,7 +33,7 @@ static inline MTLRegion CharonMPSBinaryClip(MTLRegion clip, MTLSize destinationS
     return clip;
 }
 
-static inline MPSRegion CharonMPSBinaryReadRegion(MTLRegion clip, MPSOffset offset)
+static inline MPSRegion RevenantMPSBinaryReadRegion(MTLRegion clip, MPSOffset offset)
 {
     MPSRegion read;
     read.origin.x = (double)(clip.origin.x + offset.x);
@@ -48,8 +48,8 @@ static inline MPSRegion CharonMPSBinaryReadRegion(MTLRegion clip, MPSOffset offs
 - (instancetype)initWithDevice:(id<MTLDevice>)device
 {
     if ((self = [super initWithDevice:device])) {
-        _primaryOffset = CharonMPSZeroOffset();
-        _secondaryOffset = CharonMPSZeroOffset();
+        _primaryOffset = RevenantMPSZeroOffset();
+        _secondaryOffset = RevenantMPSZeroOffset();
         _primaryEdgeMode = MPSImageEdgeModeZero;
         _secondaryEdgeMode = MPSImageEdgeModeZero;
         _clipRect = MPSRectNoClip;
@@ -60,8 +60,8 @@ static inline MPSRegion CharonMPSBinaryReadRegion(MTLRegion clip, MPSOffset offs
 - (instancetype)initWithCoder:(NSCoder *)aDecoder device:(id<MTLDevice>)device
 {
     if ((self = [super initWithCoder:aDecoder device:device])) {
-        _primaryOffset = CharonMPSZeroOffset();
-        _secondaryOffset = CharonMPSZeroOffset();
+        _primaryOffset = RevenantMPSZeroOffset();
+        _secondaryOffset = RevenantMPSZeroOffset();
         _primaryEdgeMode = MPSImageEdgeModeZero;
         _secondaryEdgeMode = MPSImageEdgeModeZero;
         _clipRect = MPSRectNoClip;
@@ -71,12 +71,12 @@ static inline MPSRegion CharonMPSBinaryReadRegion(MTLRegion clip, MPSOffset offs
 
 - (MPSRegion)primarySourceRegionForDestinationSize:(MTLSize)destinationSize
 {
-    return CharonMPSBinaryReadRegion(CharonMPSBinaryClip(_clipRect, destinationSize), _primaryOffset);
+    return RevenantMPSBinaryReadRegion(RevenantMPSBinaryClip(_clipRect, destinationSize), _primaryOffset);
 }
 
 - (MPSRegion)secondarySourceRegionForDestinationSize:(MTLSize)destinationSize
 {
-    return CharonMPSBinaryReadRegion(CharonMPSBinaryClip(_clipRect, destinationSize), _secondaryOffset);
+    return RevenantMPSBinaryReadRegion(RevenantMPSBinaryClip(_clipRect, destinationSize), _secondaryOffset);
 }
 
 - (void)encodeToCommandBuffer:(id<MTLCommandBuffer>)commandBuffer
@@ -84,7 +84,7 @@ static inline MPSRegion CharonMPSBinaryReadRegion(MTLRegion clip, MPSOffset offs
              secondaryTexture:(id<MTLTexture>)secondaryTexture
            destinationTexture:(id<MTLTexture>)destinationTexture
 {
-    CharonMPSRefuse(@"MPSBinaryImageKernel: the texture-path encode is not carried by this port - it is a"
+    RevenantMPSRefuse(@"MPSBinaryImageKernel: the texture-path encode is not carried by this port - it is a"
                     @" GPU kernel and this package implements the MPSImage path - so nothing was written");
 }
 
@@ -93,7 +93,7 @@ static inline MPSRegion CharonMPSBinaryReadRegion(MTLRegion clip, MPSOffset offs
                 secondaryTexture:(id<MTLTexture>)secondaryTexture
          fallbackCopyAllocator:(MPSCopyAllocator)copyAllocator
 {
-    CharonMPSRefuse(@"MPSBinaryImageKernel: the in-place encode needs MPSCopyAllocator semantics this port"
+    RevenantMPSRefuse(@"MPSBinaryImageKernel: the in-place encode needs MPSCopyAllocator semantics this port"
                     @" does not carry, so the texture was left as it was");
     return NO;
 }
@@ -103,7 +103,7 @@ static inline MPSRegion CharonMPSBinaryReadRegion(MTLRegion clip, MPSOffset offs
                   primaryTexture:(id<MTLTexture>)primaryTexture
          fallbackCopyAllocator:(MPSCopyAllocator)copyAllocator
 {
-    CharonMPSRefuse(@"MPSBinaryImageKernel: the in-place encode needs MPSCopyAllocator semantics this port"
+    RevenantMPSRefuse(@"MPSBinaryImageKernel: the in-place encode needs MPSCopyAllocator semantics this port"
                     @" does not carry, so the texture was left as it was");
     return NO;
 }

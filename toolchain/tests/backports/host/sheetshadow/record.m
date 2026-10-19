@@ -2,7 +2,7 @@
 #import <QuartzCore/QuartzCore.h>
 #import <objc/runtime.h>
 #import <objc/message.h>
-#include "CharonSheetShadow.h"
+#include "RevenantSheetShadow.h"
 
 typedef struct { float m11, m12, m13, m14, m15, m21, m22, m23, m24, m25, m31, m32, m33, m34, m35, m41, m42, m43, m44, m45; } Matrix;
 @interface NSValue (Matrix)
@@ -36,7 +36,7 @@ static void pixels(UIImage *image, CGSize size, void (^use)(const uint8_t *data,
 static UIImage *port_pixel(const float d[3])
 {
     uint8_t pixel[4] = {(uint8_t)lroundf(d[0] * 255), (uint8_t)lroundf(d[1] * 255), (uint8_t)lroundf(d[2] * 255), 255};
-    charon_sheet_shadow_pixel(pixel, 1);
+    revenant_sheet_shadow_pixel(pixel, 1);
     CGColorSpaceRef space = CGColorSpaceCreateDeviceRGB();
     CGContextRef context = CGBitmapContextCreate(NULL, 1, 1, 8, 4, space, kCGImageAlphaPremultipliedLast);
     memcpy(CGBitmapContextGetData(context), pixel, 4);
@@ -114,7 +114,7 @@ static void expected(const Matrix *m, float alpha, const float d[3], float out[3
         shadow.frame = frame;
         [self.window addSubview:shadow];
         [shadow layoutIfNeeded];
-        double cap = charon_sheet_shadow_cap(frame.size.width, frame.size.height, 10, self.window.screen.scale);
+        double cap = revenant_sheet_shadow_cap(frame.size.width, frame.size.height, 10, self.window.screen.scale);
         UIEdgeInsets insets = shadow.image.capInsets;
         check(CGRectEqualToRect(frame, CGRectInset(CGRectMake(0, 0, size.width, size.height), -150, -150)) && fabs(insets.top - cap) < 1e-6 && fabs(insets.left - cap) < 1e-6
                   && fabs(insets.bottom - cap) < 1e-6 && fabs(insets.right - cap) < 1e-6,
@@ -130,7 +130,7 @@ static void expected(const Matrix *m, float alpha, const float d[3], float out[3
             BOOL same = vibrant != nil;
             NSMutableArray *matrix = [NSMutableArray array];
             for (int i = 0; i < 20; i++) {
-                same = same && (&m.m11)[i] == charon_sheet_shadow_matrix[i];
+                same = same && (&m.m11)[i] == revenant_sheet_shadow_matrix[i];
                 [matrix addObject:@((&m.m11)[i])];
             }
             check(same, [NSString stringWithFormat:@"the lower-intensity shadow view's vibrant matrix is the port's: %@", [matrix componentsJoinedByString:@" "]]);
@@ -141,7 +141,7 @@ static void expected(const Matrix *m, float alpha, const float d[3], float out[3
 
     CGSize kitPixels = CGSizeMake(kit.size.width * kit.scale, kit.size.height * kit.scale);
     pixels(kit, kitPixels, ^(const uint8_t *d, size_t w, size_t h) {
-        const uint8_t *two = charon_sheet_shadow_corner((unsigned)kit.scale), *one = charon_sheet_shadow_corner(1);
+        const uint8_t *two = revenant_sheet_shadow_corner((unsigned)kit.scale), *one = revenant_sheet_shadow_corner(1);
         int worst = 0, worstOne = 0;
         double sum = 0;
         for (size_t i = 0; i < w * h; i++) {

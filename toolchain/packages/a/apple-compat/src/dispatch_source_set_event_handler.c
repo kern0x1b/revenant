@@ -5,9 +5,9 @@
 __asm__(".linker_option \"-lobjc\"");
 
 __attribute__((visibility("hidden")))
-void charon_dispatch_source_set_event_handler(dispatch_source_t source, dispatch_block_t handler)
+void revenant_dispatch_source_set_event_handler(dispatch_source_t source, dispatch_block_t handler)
 {
-    if (!handler || !charon_block_unseen_barrier(handler) || charon_source_activated(source)) {
+    if (!handler || !revenant_block_unseen_barrier(handler) || revenant_source_activated(source)) {
         dispatch_source_set_event_handler(source, handler);
         return;
     }
@@ -16,7 +16,7 @@ void charon_dispatch_source_set_event_handler(dispatch_source_t source, dispatch
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
         dispatch_queue_t target = dispatch_get_current_queue();
 #pragma clang diagnostic pop
-        if (charon_queue_width_here() == CHARON_WIDTH_SERIAL) {
+        if (revenant_queue_width_here() == REVENANT_WIDTH_SERIAL) {
             handler();
             return;
         }

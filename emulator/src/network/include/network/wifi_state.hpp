@@ -18,7 +18,7 @@
 
 #include "network/virtual_network.hpp"
 
-namespace shade {
+namespace emulator {
 
 inline constexpr auto wifi_interface_mac_address =
     virtual_network::interface_mac_address;

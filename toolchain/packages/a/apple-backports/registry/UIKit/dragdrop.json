@@ -819,7 +819,7 @@
    "status": "implemented",
    "effect": "asked by the port",
    "facts": "facts/UIKit/DragAndDrop.md",
-   "source": "asked by the port in UIDragInteraction.m and CharonDropSequence11.m, the two files that drive a drag and a drop; the order a drop is asked in is asserted against Apple's by tests/backports/device/dragdroprouting.m on an emulated 6.1.3, whose clean half passes and whose mutated half fails with failures=1"
+   "source": "asked by the port in UIDragInteraction.m and RevenantDropSequence11.m, the two files that drive a drag and a drop; the order a drop is asked in is asserted against Apple's by tests/backports/device/dragdroprouting.m on an emulated 6.1.3, whose clean half passes and whose mutated half fails with failures=1"
   },
   {
    "api": "-[UIDragInteractionDelegate dragInteraction:sessionAllowsMoveOperation:]",
@@ -829,7 +829,7 @@
    "status": "implemented",
    "effect": "asked by the port",
    "facts": "facts/UIKit/DragAndDrop.md",
-   "source": "asked by the port in UIDragInteraction.m and CharonDropSequence11.m, the two files that drive a drag and a drop; the order a drop is asked in is asserted against Apple's by tests/backports/device/dragdroprouting.m on an emulated 6.1.3, whose clean half passes and whose mutated half fails with failures=1"
+   "source": "asked by the port in UIDragInteraction.m and RevenantDropSequence11.m, the two files that drive a drag and a drop; the order a drop is asked in is asserted against Apple's by tests/backports/device/dragdroprouting.m on an emulated 6.1.3, whose clean half passes and whose mutated half fails with failures=1"
   },
   {
    "api": "-[UIDragInteractionDelegate dragInteraction:sessionDidMove:]",
@@ -839,7 +839,7 @@
    "status": "implemented",
    "effect": "asked by the port",
    "facts": "facts/UIKit/DragAndDrop.md",
-   "source": "asked by the port in UIDragInteraction.m and CharonDropSequence11.m, the two files that drive a drag and a drop; the order a drop is asked in is asserted against Apple's by tests/backports/device/dragdroprouting.m on an emulated 6.1.3, whose clean half passes and whose mutated half fails with failures=1"
+   "source": "asked by the port in UIDragInteraction.m and RevenantDropSequence11.m, the two files that drive a drag and a drop; the order a drop is asked in is asserted against Apple's by tests/backports/device/dragdroprouting.m on an emulated 6.1.3, whose clean half passes and whose mutated half fails with failures=1"
   },
   {
    "api": "-[UIDragInteractionDelegate dragInteraction:sessionWillBegin:]",
@@ -849,7 +849,7 @@
    "status": "implemented",
    "effect": "asked by the port",
    "facts": "facts/UIKit/DragAndDrop.md",
-   "source": "asked by the port in UIDragInteraction.m and CharonDropSequence11.m, the two files that drive a drag and a drop; the order a drop is asked in is asserted against Apple's by tests/backports/device/dragdroprouting.m on an emulated 6.1.3, whose clean half passes and whose mutated half fails with failures=1"
+   "source": "asked by the port in UIDragInteraction.m and RevenantDropSequence11.m, the two files that drive a drag and a drop; the order a drop is asked in is asserted against Apple's by tests/backports/device/dragdroprouting.m on an emulated 6.1.3, whose clean half passes and whose mutated half fails with failures=1"
   },
   {
    "api": "-[UIDropInteractionDelegate dropInteraction:canHandleSession:]",
@@ -859,7 +859,7 @@
    "status": "implemented",
    "effect": "asked by the port",
    "facts": "facts/UIKit/DragAndDrop.md",
-   "source": "asked by the port in UIDragInteraction.m and CharonDropSequence11.m, the two files that drive a drag and a drop; the order a drop is asked in is asserted against Apple's by tests/backports/device/dragdroprouting.m on an emulated 6.1.3, whose clean half passes and whose mutated half fails with failures=1"
+   "source": "asked by the port in UIDragInteraction.m and RevenantDropSequence11.m, the two files that drive a drag and a drop; the order a drop is asked in is asserted against Apple's by tests/backports/device/dragdroprouting.m on an emulated 6.1.3, whose clean half passes and whose mutated half fails with failures=1"
   },
   {
    "api": "-[UIDropInteractionDelegate dropInteraction:sessionDidEnter:]",
@@ -869,7 +869,7 @@
    "status": "implemented",
    "effect": "asked by the port",
    "facts": "facts/UIKit/DragAndDrop.md",
-   "source": "asked by the port in UIDragInteraction.m and CharonDropSequence11.m, the two files that drive a drag and a drop; the order a drop is asked in is asserted against Apple's by tests/backports/device/dragdroprouting.m on an emulated 6.1.3, whose clean half passes and whose mutated half fails with failures=1"
+   "source": "asked by the port in UIDragInteraction.m and RevenantDropSequence11.m, the two files that drive a drag and a drop; the order a drop is asked in is asserted against Apple's by tests/backports/device/dragdroprouting.m on an emulated 6.1.3, whose clean half passes and whose mutated half fails with failures=1"
   },
   {
    "api": "-[UIDropInteractionDelegate dropInteraction:sessionDidUpdate:]",
@@ -879,7 +879,7 @@
    "status": "implemented",
    "effect": "asked by the port",
    "facts": "facts/UIKit/DragAndDrop.md",
-   "source": "asked by the port in UIDragInteraction.m and CharonDropSequence11.m, the two files that drive a drag and a drop; the order a drop is asked in is asserted against Apple's by tests/backports/device/dragdroprouting.m on an emulated 6.1.3, whose clean half passes and whose mutated half fails with failures=1"
+   "source": "asked by the port in UIDragInteraction.m and RevenantDropSequence11.m, the two files that drive a drag and a drop; the order a drop is asked in is asserted against Apple's by tests/backports/device/dragdroprouting.m on an emulated 6.1.3, whose clean half passes and whose mutated half fails with failures=1"
   },
   {
    "api": "-[UIDropInteractionDelegate dropInteraction:performDrop:]",
@@ -889,7 +889,7 @@
    "status": "implemented",
    "effect": "asked by the port",
    "facts": "facts/UIKit/DragAndDrop.md",
-   "source": "asked by the port in UIDragInteraction.m and CharonDropSequence11.m, the two files that drive a drag and a drop; the order a drop is asked in is asserted against Apple's by tests/backports/device/dragdroprouting.m on an emulated 6.1.3, whose clean half passes and whose mutated half fails with failures=1"
+   "source": "asked by the port in UIDragInteraction.m and RevenantDropSequence11.m, the two files that drive a drag and a drop; the order a drop is asked in is asserted against Apple's by tests/backports/device/dragdroprouting.m on an emulated 6.1.3, whose clean half passes and whose mutated half fails with failures=1"
   },
   {
    "api": "-[UIDropInteractionDelegate dropInteraction:sessionDidExit:]",
@@ -899,7 +899,7 @@
    "status": "implemented",
    "effect": "asked by the port",
    "facts": "facts/UIKit/DragAndDrop.md",
-   "source": "asked by the port in UIDragInteraction.m and CharonDropSequence11.m, the two files that drive a drag and a drop; the order a drop is asked in is asserted against Apple's by tests/backports/device/dragdroprouting.m on an emulated 6.1.3, whose clean half passes and whose mutated half fails with failures=1"
+   "source": "asked by the port in UIDragInteraction.m and RevenantDropSequence11.m, the two files that drive a drag and a drop; the order a drop is asked in is asserted against Apple's by tests/backports/device/dragdroprouting.m on an emulated 6.1.3, whose clean half passes and whose mutated half fails with failures=1"
   },
   {
    "api": "-[UIDropInteractionDelegate dropInteraction:sessionDidEnd:]",
@@ -909,7 +909,7 @@
    "status": "implemented",
    "effect": "asked by the port",
    "facts": "facts/UIKit/DragAndDrop.md",
-   "source": "asked by the port in UIDragInteraction.m and CharonDropSequence11.m, the two files that drive a drag and a drop; the order a drop is asked in is asserted against Apple's by tests/backports/device/dragdroprouting.m on an emulated 6.1.3, whose clean half passes and whose mutated half fails with failures=1"
+   "source": "asked by the port in UIDragInteraction.m and RevenantDropSequence11.m, the two files that drive a drag and a drop; the order a drop is asked in is asserted against Apple's by tests/backports/device/dragdroprouting.m on an emulated 6.1.3, whose clean half passes and whose mutated half fails with failures=1"
   },
   {
    "api": "-[UIDropInteractionDelegate dropInteraction:concludeDrop:]",
@@ -919,7 +919,7 @@
    "status": "implemented",
    "effect": "asked by the port",
    "facts": "facts/UIKit/DragAndDrop.md",
-   "source": "asked by the port in UIDragInteraction.m and CharonDropSequence11.m, the two files that drive a drag and a drop; the order a drop is asked in is asserted against Apple's by tests/backports/device/dragdroprouting.m on an emulated 6.1.3, whose clean half passes and whose mutated half fails with failures=1"
+   "source": "asked by the port in UIDragInteraction.m and RevenantDropSequence11.m, the two files that drive a drag and a drop; the order a drop is asked in is asserted against Apple's by tests/backports/device/dragdroprouting.m on an emulated 6.1.3, whose clean half passes and whose mutated half fails with failures=1"
   },
   {
    "api": "-[UITextDragPreviewRenderer initWithLayoutManager:range:unifyRects:]",

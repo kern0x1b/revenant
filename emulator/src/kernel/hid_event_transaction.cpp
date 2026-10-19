@@ -15,7 +15,7 @@
 #include <memory>
 #include <utility>
 
-namespace shade {
+namespace emulator {
 namespace {
 
     struct Arm32DigitizerEventProfile {

@@ -1,10 +1,10 @@
-#import "CharonVDSPKernel.h"
+#import "RevenantVDSPKernel.h"
 #include <math.h>
 
 #pragma clang diagnostic ignored "-Wunguarded-availability-new"
 #pragma clang diagnostic ignored "-Wunguarded-availability"
 
-#define CHARON_VDSP_ADDSUB(Kind, Suffix)                                                                            \
+#define REVENANT_VDSP_ADDSUB(Kind, Suffix)                                                                            \
     void vDSP_vaddsub##Suffix(const Kind *__I0, vDSP_Stride __I0S, const Kind *__I1, vDSP_Stride __I1S,            \
                               Kind *__O0, vDSP_Stride __O0S, Kind *__O1, vDSP_Stride __O1S, vDSP_Length __N)           \
     {                                                                                                              \
@@ -14,10 +14,10 @@
         }                                                                                                          \
     }
 
-CHARON_VDSP_ADDSUB(float, )
-CHARON_VDSP_ADDSUB(double, D)
+REVENANT_VDSP_ADDSUB(float, )
+REVENANT_VDSP_ADDSUB(double, D)
 
-#define CHARON_VDSP_RAMP(Kind, Suffix)                                                                              \
+#define REVENANT_VDSP_RAMP(Kind, Suffix)                                                                              \
     void vDSP_vrampmul##Suffix(const Kind *__I, vDSP_Stride __IS, Kind *__Start, const Kind *__Step, Kind *__O,        \
                                vDSP_Stride __OS, vDSP_Length __N)                                                   \
     {                                                                                                              \
@@ -64,9 +64,9 @@ CHARON_VDSP_ADDSUB(double, D)
         *__Start = ramp;                                                                                            \
     }
 
-CHARON_VDSP_RAMP(double, D)
+REVENANT_VDSP_RAMP(double, D)
 
-#define CHARON_VDSP_SLIDING_WINDOW_MAXIMUM(Kind, Suffix)                                                           \
+#define REVENANT_VDSP_SLIDING_WINDOW_MAXIMUM(Kind, Suffix)                                                           \
     void vDSP_vswmax##Suffix(const Kind *__A, vDSP_Stride __IA, Kind *__C, vDSP_Stride __IC, vDSP_Length __N,          \
                              vDSP_Length __WindowLength)                                                            \
     {                                                                                                              \
@@ -82,8 +82,8 @@ CHARON_VDSP_RAMP(double, D)
         }                                                                                                          \
     }
 
-CHARON_VDSP_SLIDING_WINDOW_MAXIMUM(float, )
-CHARON_VDSP_SLIDING_WINDOW_MAXIMUM(double, D)
+REVENANT_VDSP_SLIDING_WINDOW_MAXIMUM(float, )
+REVENANT_VDSP_SLIDING_WINDOW_MAXIMUM(double, D)
 
 void vDSP_vsmsmaD(const double *__A, vDSP_Stride __IA, const double *__B, const double *__C, vDSP_Stride __IC,
                   const double *__D, double *__E, vDSP_Stride __IE, vDSP_Length __N)
@@ -122,7 +122,7 @@ void vDSP_zvmaD(const DSPDoubleSplitComplex *__A, vDSP_Stride __IA, const DSPDou
                 const DSPDoubleSplitComplex *__C, vDSP_Stride __IC, const DSPDoubleSplitComplex *__D, vDSP_Stride __ID,
                 vDSP_Length __N)
 {
-    charon_vdsp_split_vma_d((DSPDoubleSplitComplex *)__D, __ID, __A, __IA, __B, __IB, __C, __IC, __N);
+    revenant_vdsp_split_vma_d((DSPDoubleSplitComplex *)__D, __ID, __A, __IA, __B, __IB, __C, __IC, __N);
 }
 
 void vDSP_zvmmaaD(const DSPDoubleSplitComplex *__A, vDSP_Stride __IA, const DSPDoubleSplitComplex *__B,
@@ -130,6 +130,6 @@ void vDSP_zvmmaaD(const DSPDoubleSplitComplex *__A, vDSP_Stride __IA, const DSPD
                   const DSPDoubleSplitComplex *__D, vDSP_Stride __ID, const DSPDoubleSplitComplex *__E, vDSP_Stride __IE,
                   const DSPDoubleSplitComplex *__F, vDSP_Stride __IF, vDSP_Length __N)
 {
-    charon_vdsp_split_vmmaa_d((DSPDoubleSplitComplex *)__F, __IF, __A, __IA, __B, __IB, __C, __IC, __D, __ID, __E,
+    revenant_vdsp_split_vmmaa_d((DSPDoubleSplitComplex *)__F, __IF, __A, __IA, __B, __IB, __C, __IC, __D, __ID, __E,
                                __IE, __N);
 }

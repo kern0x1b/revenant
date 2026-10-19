@@ -13,7 +13,7 @@
 #include <cstdint>
 #include <limits>
 
-namespace shade {
+namespace emulator {
 
 inline constexpr std::size_t jit_native_preimport_tracker_capacity = 256U;
 inline constexpr std::size_t jit_native_preimport_tracker_hash_capacity = 512U;

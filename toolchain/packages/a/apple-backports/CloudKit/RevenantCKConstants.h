@@ -1,5 +1,5 @@
-#ifndef CHARON_CK_CONSTANTS_H
-#define CHARON_CK_CONSTANTS_H
+#ifndef REVENANT_CK_CONSTANTS_H
+#define REVENANT_CK_CONSTANTS_H
 
 #import <Foundation/Foundation.h>
 

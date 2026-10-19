@@ -1,6 +1,6 @@
 #pragma clang diagnostic ignored "-Wnullability-completeness"
 #pragma clang diagnostic ignored "-Wobjc-designated-initializers"
-#import "CharonWebExtension.h"
+#import "RevenantWebExtension.h"
 
 WKWebExtensionPermission const WKWebExtensionPermissionActiveTab = @"activeTab";
 WKWebExtensionPermission const WKWebExtensionPermissionAlarms = @"alarms";
@@ -30,7 +30,7 @@ WKWebExtensionPermission const WKWebExtensionPermissionWebRequest = @"webRequest
 {
     NSURL *base = [appExtensionBundle bundleURL];
     if (base == nil) {
-        [self charon_report:completionHandler extension:nil
+        [self revenant_report:completionHandler extension:nil
                     error:[NSError errorWithDomain:WKWebExtensionErrorDomain
                                              code:WKWebExtensionErrorResourceNotFound
                                          userInfo:nil]];
@@ -43,7 +43,7 @@ WKWebExtensionPermission const WKWebExtensionPermissionWebRequest = @"webRequest
                   completionHandler:(void (^)(WKWebExtension *, NSError *))completionHandler
 {
     if (resourceBaseURL == nil || !resourceBaseURL.isFileURL) {
-        [self charon_report:completionHandler extension:nil
+        [self revenant_report:completionHandler extension:nil
                     error:[NSError errorWithDomain:WKWebExtensionErrorDomain
                                              code:WKWebExtensionErrorResourceNotFound
                                          userInfo:nil]];
@@ -52,7 +52,7 @@ WKWebExtensionPermission const WKWebExtensionPermissionWebRequest = @"webRequest
     NSString *path = [resourceBaseURL.path stringByAppendingPathComponent:@"manifest.json"];
     NSData *data = [NSData dataWithContentsOfFile:path];
     if (data == nil) {
-        [self charon_report:completionHandler extension:nil
+        [self revenant_report:completionHandler extension:nil
                     error:[NSError errorWithDomain:WKWebExtensionErrorDomain
                                              code:WKWebExtensionErrorResourceNotFound
                                          userInfo:nil]];
@@ -61,19 +61,19 @@ WKWebExtensionPermission const WKWebExtensionPermissionWebRequest = @"webRequest
     NSError *jsonError = nil;
     id parsed = [NSJSONSerialization JSONObjectWithData:data options:0 error:&jsonError];
     if (![parsed isKindOfClass:[NSDictionary class]]) {
-        [self charon_report:completionHandler extension:nil
+        [self revenant_report:completionHandler extension:nil
                     error:[NSError errorWithDomain:WKWebExtensionErrorDomain
                                              code:WKWebExtensionErrorInvalidManifest
                                          userInfo:@{NSUnderlyingErrorKey: jsonError ?: [NSNull null]}]];
         return;
     }
-    WKWebExtension *extension = [[WKWebExtension alloc] charon_initWithManifest:parsed
+    WKWebExtension *extension = [[WKWebExtension alloc] revenant_initWithManifest:parsed
                                                                  resourcePath:resourceBaseURL.path
                                                                           errors:@[]];
-    [self charon_report:completionHandler extension:extension error:nil];
+    [self revenant_report:completionHandler extension:extension error:nil];
 }
 
-+ (void)charon_report:(void (^)(WKWebExtension *, NSError *))completionHandler
++ (void)revenant_report:(void (^)(WKWebExtension *, NSError *))completionHandler
             extension:(WKWebExtension *)extension
                 error:(NSError *)error
 {
@@ -88,7 +88,7 @@ WKWebExtensionPermission const WKWebExtensionPermissionWebRequest = @"webRequest
     }
 }
 
-- (instancetype)charon_initWithManifest:(NSDictionary<NSString *, id> *)manifest
+- (instancetype)revenant_initWithManifest:(NSDictionary<NSString *, id> *)manifest
                            resourcePath:(NSString *)resourcePath
                                  errors:(NSArray<NSError *> *)errors
 {
@@ -121,12 +121,12 @@ WKWebExtensionPermission const WKWebExtensionPermissionWebRequest = @"webRequest
     return [value isKindOfClass:[NSNumber class]] ? [value doubleValue] : 0;
 }
 
-- (NSString *)charon_manifestString:(NSString *)key
+- (NSString *)revenant_manifestString:(NSString *)key
 {
-    return [self charon_manifestString:key inDictionary:_manifest];
+    return [self revenant_manifestString:key inDictionary:_manifest];
 }
 
-- (NSString *)charon_manifestString:(NSString *)key inDictionary:(NSDictionary *)dictionary
+- (NSString *)revenant_manifestString:(NSString *)key inDictionary:(NSDictionary *)dictionary
 {
     id value = dictionary[key];
     if (![value isKindOfClass:[NSString class]])
@@ -152,22 +152,22 @@ WKWebExtensionPermission const WKWebExtensionPermissionWebRequest = @"webRequest
 
 - (NSString *)displayName
 {
-    return [self charon_manifestString:@"name"];
+    return [self revenant_manifestString:@"name"];
 }
 
 - (NSString *)displayShortName
 {
-    return [self charon_manifestString:@"short_name"];
+    return [self revenant_manifestString:@"short_name"];
 }
 
 - (NSString *)displayVersion
 {
-    return [self charon_manifestString:@"version"];
+    return [self revenant_manifestString:@"version"];
 }
 
 - (NSString *)displayDescription
 {
-    return [self charon_manifestString:@"description"];
+    return [self revenant_manifestString:@"description"];
 }
 
 - (NSString *)displayActionLabel
@@ -175,25 +175,25 @@ WKWebExtensionPermission const WKWebExtensionPermissionWebRequest = @"webRequest
     id action = _manifest[@"action"];
     if (![action isKindOfClass:[NSDictionary class]])
         return nil;
-    return [self charon_manifestString:@"default_title" inDictionary:action];
+    return [self revenant_manifestString:@"default_title" inDictionary:action];
 }
 
 - (NSString *)version
 {
-    return [self charon_manifestString:@"version"];
+    return [self revenant_manifestString:@"version"];
 }
 
 - (UIImage *)iconForSize:(CGSize)size
 {
-    return [self charon_iconNamed:_manifest[@"icons"] size:size];
+    return [self revenant_iconNamed:_manifest[@"icons"] size:size];
 }
 
 - (UIImage *)actionIconForSize:(CGSize)size
 {
-    return [self charon_iconNamed:_manifest[@"action"][@"default_icon"] size:size];
+    return [self revenant_iconNamed:_manifest[@"action"][@"default_icon"] size:size];
 }
 
-- (UIImage *)charon_iconNamed:(id)spec size:(CGSize)size
+- (UIImage *)revenant_iconNamed:(id)spec size:(CGSize)size
 {
     NSString *relative = nil;
     if ([spec isKindOfClass:[NSString class]]) {
@@ -216,7 +216,7 @@ WKWebExtensionPermission const WKWebExtensionPermissionWebRequest = @"webRequest
     return [UIImage imageWithData:data];
 }
 
-- (NSSet<WKWebExtensionPermission> *)charon_permissionsForKey:(NSString *)key
+- (NSSet<WKWebExtensionPermission> *)revenant_permissionsForKey:(NSString *)key
 {
     id value = _manifest[key];
     if (![value isKindOfClass:[NSArray class]])
@@ -226,15 +226,15 @@ WKWebExtensionPermission const WKWebExtensionPermissionWebRequest = @"webRequest
 
 - (NSSet<WKWebExtensionPermission> *)requestedPermissions
 {
-    return [self charon_permissionsForKey:@"permissions"];
+    return [self revenant_permissionsForKey:@"permissions"];
 }
 
 - (NSSet<WKWebExtensionPermission> *)optionalPermissions
 {
-    return [self charon_permissionsForKey:@"optional_permissions"];
+    return [self revenant_permissionsForKey:@"optional_permissions"];
 }
 
-- (NSSet<WKWebExtensionMatchPattern *> *)charon_patternsForKey:(NSString *)key
+- (NSSet<WKWebExtensionMatchPattern *> *)revenant_patternsForKey:(NSString *)key
 {
     id value = _manifest[key];
     if (![value isKindOfClass:[NSArray class]])
@@ -254,12 +254,12 @@ WKWebExtensionPermission const WKWebExtensionPermissionWebRequest = @"webRequest
 
 - (NSSet<WKWebExtensionMatchPattern *> *)requestedPermissionMatchPatterns
 {
-    return [self charon_patternsForKey:@"host_permissions"];
+    return [self revenant_patternsForKey:@"host_permissions"];
 }
 
 - (NSSet<WKWebExtensionMatchPattern *> *)optionalPermissionMatchPatterns
 {
-    return [self charon_patternsForKey:@"optional_host_permissions"];
+    return [self revenant_patternsForKey:@"optional_host_permissions"];
 }
 
 - (NSSet<WKWebExtensionMatchPattern *> *)allRequestedMatchPatterns
@@ -267,7 +267,7 @@ WKWebExtensionPermission const WKWebExtensionPermissionWebRequest = @"webRequest
     return [self requestedPermissionMatchPatterns];
 }
 
-- (BOOL)charon_manifestHasKey:(NSString *)key
+- (BOOL)revenant_manifestHasKey:(NSString *)key
 {
     id value = _manifest[key];
     return value != nil && ![value isKindOfClass:[NSNull class]];
@@ -275,7 +275,7 @@ WKWebExtensionPermission const WKWebExtensionPermissionWebRequest = @"webRequest
 
 - (BOOL)hasBackgroundContent
 {
-    return [self charon_manifestHasKey:@"background"];
+    return [self revenant_manifestHasKey:@"background"];
 }
 
 - (BOOL)hasPersistentBackgroundContent
@@ -288,27 +288,27 @@ WKWebExtensionPermission const WKWebExtensionPermissionWebRequest = @"webRequest
 
 - (BOOL)hasInjectedContent
 {
-    return [self charon_manifestHasKey:@"content_scripts"];
+    return [self revenant_manifestHasKey:@"content_scripts"];
 }
 
 - (BOOL)hasOptionsPage
 {
-    return [self charon_manifestHasKey:@"options_page"] || [self charon_manifestHasKey:@"options_ui"];
+    return [self revenant_manifestHasKey:@"options_page"] || [self revenant_manifestHasKey:@"options_ui"];
 }
 
 - (BOOL)hasOverrideNewTabPage
 {
-    return [self charon_manifestHasKey:@"chrome_url_overrides"];
+    return [self revenant_manifestHasKey:@"chrome_url_overrides"];
 }
 
 - (BOOL)hasCommands
 {
-    return [self charon_manifestHasKey:@"commands"];
+    return [self revenant_manifestHasKey:@"commands"];
 }
 
 - (BOOL)hasContentModificationRules
 {
-    return [self charon_manifestHasKey:@"declarative_net_request"];
+    return [self revenant_manifestHasKey:@"declarative_net_request"];
 }
 
 @end

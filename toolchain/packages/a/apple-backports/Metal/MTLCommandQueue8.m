@@ -1,6 +1,6 @@
-#import "CharonMetal.h"
+#import "RevenantMetal.h"
 
-@implementation CharonMetalQueue (Capture8)
+@implementation RevenantMetalQueue (Capture8)
 
 - (void)insertDebugCaptureBoundary
 {

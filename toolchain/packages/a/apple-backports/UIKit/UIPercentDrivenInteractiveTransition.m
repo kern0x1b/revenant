@@ -1,8 +1,8 @@
 #import <UIKit/UIKit.h>
 #import <QuartzCore/QuartzCore.h>
-#import "CharonCustomTransition.h"
+#import "RevenantCustomTransition.h"
 
-static void charon_copy_presentation(CALayer *layer)
+static void revenant_copy_presentation(CALayer *layer)
 {
     CALayer *shown = layer.presentationLayer;
     if (shown && shown != layer) {
@@ -24,23 +24,23 @@ static void charon_copy_presentation(CALayer *layer)
         layer.shadowColor = shown.shadowColor;
     }
     for (CALayer *sublayer in layer.sublayers)
-        charon_copy_presentation(sublayer);
+        revenant_copy_presentation(sublayer);
 }
 
-static void charon_remove_animations(CALayer *layer)
+static void revenant_remove_animations(CALayer *layer)
 {
     [layer removeAllAnimations];
     for (CALayer *sublayer in layer.sublayers)
-        charon_remove_animations(sublayer);
+        revenant_remove_animations(sublayer);
 }
 
-@interface CharonLinkTarget : NSObject
+@interface RevenantLinkTarget : NSObject
 @property (nonatomic, copy) void (^tick)(void);
 @property (nonatomic) BOOL done;
 - (void)fire:(CADisplayLink *)link;
 @end
 
-@implementation CharonLinkTarget
+@implementation RevenantLinkTarget
 @synthesize tick = _tick;
 @synthesize done = _done;
 
@@ -129,7 +129,7 @@ static void charon_remove_animations(CALayer *layer)
     _timingCurve = curve;
 }
 
-- (CALayer *)charon_layer
+- (CALayer *)revenant_layer
 {
     return _context.containerView.layer;
 }
@@ -139,31 +139,31 @@ static void charon_remove_animations(CALayer *layer)
     _context = transitionContext;
     _percentComplete = 0;
     _finishing = _cancelling = NO;
-    if (![transitionContext respondsToSelector:@selector(charon_animator)])
+    if (![transitionContext respondsToSelector:@selector(revenant_animator)])
         return;
-    _animator = [(CharonTransitionContext *)transitionContext charon_animator];
+    _animator = [(RevenantTransitionContext *)transitionContext revenant_animator];
     _duration = [_animator transitionDuration:transitionContext];
     [_animator animateTransition:transitionContext];
-    CALayer *layer = [self charon_layer];
+    CALayer *layer = [self revenant_layer];
     layer.speed = 0;
     layer.timeOffset = 0;
 }
 
-- (void)charon_seek:(CGFloat)percent
+- (void)revenant_seek:(CGFloat)percent
 {
     _percentComplete = MAX(0, MIN(1, percent));
-    [self charon_layer].timeOffset = MIN(_percentComplete, 0.9999f) * _duration;
+    [self revenant_layer].timeOffset = MIN(_percentComplete, 0.9999f) * _duration;
 }
 
 - (void)updateInteractiveTransition:(CGFloat)percentComplete
 {
     if (!_context || _finishing || _cancelling)
         return;
-    [self charon_seek:percentComplete];
+    [self revenant_seek:percentComplete];
     [_context updateInteractiveTransition:_percentComplete];
 }
 
-- (void)charon_runTo:(CGFloat)target completion:(void (^)(void))completion
+- (void)revenant_runTo:(CGFloat)target completion:(void (^)(void))completion
 {
     [_link invalidate];
     _linkFrom = _percentComplete;
@@ -171,14 +171,14 @@ static void charon_remove_animations(CALayer *layer)
     CGFloat speed = _completionSpeed > 0 ? _completionSpeed : 1;
     _linkSeconds = _duration > 0 ? fabsf(target - _linkFrom) * _duration / speed : 0;
     if (_linkSeconds <= 0.001f) {
-        [self charon_seek:target];
+        [self revenant_seek:target];
         completion();
         return;
     }
     _linkStart = CACurrentMediaTime();
     __weak UIPercentDrivenInteractiveTransition *weak = self;
-    CharonLinkTarget *linkTarget = [[CharonLinkTarget alloc] init];
-    __weak CharonLinkTarget *weakTarget = linkTarget;
+    RevenantLinkTarget *linkTarget = [[RevenantLinkTarget alloc] init];
+    __weak RevenantLinkTarget *weakTarget = linkTarget;
     linkTarget.tick = ^{
         UIPercentDrivenInteractiveTransition *strong = weak;
         if (!strong)
@@ -186,7 +186,7 @@ static void charon_remove_animations(CALayer *layer)
         CGFloat t = MIN(1, (CACurrentMediaTime() - strong->_linkStart) / strong->_linkSeconds);
         CGFloat percent = strong->_linkFrom + (strong->_linkTo - strong->_linkFrom) * t;
         strong->_percentComplete = percent;
-        [strong charon_layer].timeOffset = MIN(percent, 0.9999f) * strong->_duration;
+        [strong revenant_layer].timeOffset = MIN(percent, 0.9999f) * strong->_duration;
         if (t >= 1) {
             weakTarget.done = YES;
             CADisplayLink *finished = strong->_link;
@@ -208,7 +208,7 @@ static void charon_remove_animations(CALayer *layer)
     _finishing = YES;
     [_context finishInteractiveTransition];
     id<UIViewControllerContextTransitioning> context = _context;
-    CALayer *layer = [self charon_layer];
+    CALayer *layer = [self revenant_layer];
     CGFloat speed = _completionSpeed > 0 ? _completionSpeed : 1;
     CFTimeInterval paused = layer.timeOffset;
     layer.speed = speed;
@@ -229,13 +229,13 @@ static void charon_remove_animations(CALayer *layer)
     _cancelling = YES;
     [_context cancelInteractiveTransition];
     id<UIViewControllerContextTransitioning> context = _context;
-    CALayer *layer = [self charon_layer];
-    [self charon_runTo:0 completion:^{
+    CALayer *layer = [self revenant_layer];
+    [self revenant_runTo:0 completion:^{
         layer.timeOffset = 0;
         [CATransaction begin];
         [CATransaction setDisableActions:YES];
-        charon_copy_presentation(layer);
-        charon_remove_animations(layer);
+        revenant_copy_presentation(layer);
+        revenant_remove_animations(layer);
         layer.speed = 1;
         layer.timeOffset = 0;
         [CATransaction commit];

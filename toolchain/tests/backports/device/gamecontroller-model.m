@@ -108,7 +108,7 @@ int main(int argc, char **argv)
             return 0;
         }
         if (argc > 1)
-            charon_log_to(@(argv[1]));
+            revenant_log_to(@(argv[1]));
 #include "gamecontroller-model-expected.h"
         CHECK_EQUAL(image_of([GCControllerButtonInput class]), @"libGameControllerBackports.dylib", "the button comes from the backports");
         CHECK_EQUAL(image_of([GCExtendedGamepad class]), @"libGameControllerBackports.dylib", "the extended gamepad comes from the backports");
@@ -117,7 +117,7 @@ int main(int argc, char **argv)
         CHECK(lines.count == expected.count, "the script gives as many lines as the host gave");
         for (NSUInteger i = 0; i < MIN(lines.count, expected.count); i++)
             CHECK_EQUAL(lines[i], expected[i], [lines[i] UTF8String]);
-        printf("%d checks, %d failures\n", charon_checks, charon_failures);
-        return charon_failures;
+        printf("%d checks, %d failures\n", revenant_checks, revenant_failures);
+        return revenant_failures;
     }
 }

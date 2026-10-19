@@ -1,11 +1,11 @@
 #import <CarPlay/CarPlay.h>
 #import <UIKit/UIKit.h>
-#import "CharonCarPlaySessionConfiguration.h"
+#import "RevenantCarPlaySessionConfiguration.h"
 
 @implementation CPSessionConfiguration {
     __weak id<CPSessionConfigurationDelegate> _delegate;
     CPLimitableUserInterface _limitedUserInterfaces;
-    CPContentStyle _charonContentStyle;
+    CPContentStyle _revenantContentStyle;
 }
 
 @dynamic contentStyle;
@@ -16,7 +16,7 @@
     if (self) {
         _delegate = delegate;
         _limitedUserInterfaces = 0;
-        _charonContentStyle = 0;
+        _revenantContentStyle = 0;
     }
     return self;
 }
@@ -36,9 +36,9 @@
     _delegate = delegate;
 }
 
-- (CPContentStyle)charon_contentStyle
+- (CPContentStyle)revenant_contentStyle
 {
-    return _charonContentStyle;
+    return _revenantContentStyle;
 }
 
 @end

@@ -1,15 +1,15 @@
 #import <UIKit/UIKit.h>
 
-@class CharonBackdrop;
+@class RevenantBackdrop;
 
-@protocol CharonBackdropClient <NSObject>
-- (BOOL)backdropIsWanted:(CharonBackdrop *)backdrop;
-- (CGRect)backdropRegion:(CharonBackdrop *)backdrop;
-- (void)backdrop:(CharonBackdrop *)backdrop captured:(uint8_t *)pixels width:(size_t)width height:(size_t)height rowBytes:(size_t)rowBytes rect:(CGRect)captured;
+@protocol RevenantBackdropClient <NSObject>
+- (BOOL)backdropIsWanted:(RevenantBackdrop *)backdrop;
+- (CGRect)backdropRegion:(RevenantBackdrop *)backdrop;
+- (void)backdrop:(RevenantBackdrop *)backdrop captured:(uint8_t *)pixels width:(size_t)width height:(size_t)height rowBytes:(size_t)rowBytes rect:(CGRect)captured;
 @end
 
-@interface CharonBackdrop : NSObject
-- (instancetype)initWithView:(UIView *)view client:(id<CharonBackdropClient>)client;
+@interface RevenantBackdrop : NSObject
+- (instancetype)initWithView:(UIView *)view client:(id<RevenantBackdropClient>)client;
 @property (nonatomic, assign) CGFloat scale;
 - (void)start;
 - (void)stop;

@@ -1,4 +1,4 @@
-#import "CharonStreamTaskState.h"
+#import "RevenantStreamTaskState.h"
 
 @implementation NSURLSessionStreamTaskState
 

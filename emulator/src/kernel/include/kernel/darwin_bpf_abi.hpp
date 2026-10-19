@@ -19,7 +19,7 @@
 #include <string_view>
 #include <vector>
 
-namespace shade::darwin::bpf {
+namespace emulator::darwin::bpf {
 
 inline constexpr std::string_view descriptor_kind { "bpf" };
 inline constexpr std::string_view device_prefix { "/dev/bpf" };

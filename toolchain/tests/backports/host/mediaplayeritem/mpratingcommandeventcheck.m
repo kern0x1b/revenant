@@ -19,7 +19,7 @@
 @implementation MPNowPlayingInfoLanguageOption
 @end
 
-#define CHARON_MEDIAPLAYER_STANDIN 1
+#define REVENANT_MEDIAPLAYER_STANDIN 1
 #include "MPRatingCommandEvent.m"
 
 static int failures = 0;

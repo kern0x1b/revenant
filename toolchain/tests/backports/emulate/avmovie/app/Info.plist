@@ -7,13 +7,13 @@
 	<key>CFBundleDisplayName</key>
 	<string>AVMovie Probe</string>
 	<key>CFBundleExecutable</key>
-	<string>charonavmovieprobe</string>
+	<string>revenantavmovieprobe</string>
 	<key>CFBundleIdentifier</key>
-	<string>local.charon.backports.avmovieprobe</string>
+	<string>local.revenant.backports.avmovieprobe</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>charonavmovieprobe</string>
+	<string>revenantavmovieprobe</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>

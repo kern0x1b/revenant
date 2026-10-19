@@ -1,9 +1,9 @@
 #import <HealthKit/HealthKit.h>
 
-#import "CharonHKStore.h"
-#import "../charon_alias.h"
+#import "RevenantHKStore.h"
+#import "../revenant_alias.h"
 
-@interface CharonHKCDADocumentState : NSObject
+@interface RevenantHKCDADocumentState : NSObject
 @property (nonatomic, copy) NSData *documentData;
 @property (nonatomic, copy, nullable) NSString *title;
 @property (nonatomic, copy, nullable) NSString *patientName;
@@ -11,7 +11,7 @@
 @property (nonatomic, copy, nullable) NSString *custodianName;
 @end
 
-@implementation CharonHKCDADocumentState
+@implementation RevenantHKCDADocumentState
 
 @synthesize documentData = _documentData;
 @synthesize title = _title;
@@ -21,35 +21,35 @@
 
 @end
 
-CHARON_ALIAS(HKCDADocument)
+REVENANT_ALIAS(HKCDADocument)
 
-static CharonHKCDADocumentState *CharonHKCDADocumentStateOf(id document)
+static RevenantHKCDADocumentState *RevenantHKCDADocumentStateOf(id document)
 {
     static const void *key = &key;
-    CharonHKCDADocumentState *state = objc_getAssociatedObject(document, key);
+    RevenantHKCDADocumentState *state = objc_getAssociatedObject(document, key);
     if (!state) {
-        state = [[CharonHKCDADocumentState alloc] init];
+        state = [[RevenantHKCDADocumentState alloc] init];
         objc_setAssociatedObject(document, key, state, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     }
     return state;
 }
 
-@implementation CHARON_ALIAS_CLASS(HKCDADocument) (CharonHKCDADocument11)
+@implementation REVENANT_ALIAS_CLASS(HKCDADocument) (RevenantHKCDADocument11)
 
 + (BOOL)supportsSecureCoding
 {
     return YES;
 }
 
-- (instancetype)charon_initWithDocumentData:(NSData *)documentData
+- (instancetype)revenant_initWithDocumentData:(NSData *)documentData
                                       title:(nullable NSString *)title
                                  patientName:(nullable NSString *)patientName
                                   authorName:(nullable NSString *)authorName
                                custodianName:(nullable NSString *)custodianName
 {
-    CHARON_ALIAS_CLASS(HKCDADocument) *document = [super init];
+    REVENANT_ALIAS_CLASS(HKCDADocument) *document = [super init];
     if (document) {
-        CharonHKCDADocumentState *state = CharonHKCDADocumentStateOf(document);
+        RevenantHKCDADocumentState *state = RevenantHKCDADocumentStateOf(document);
         state.documentData = documentData;
         state.title = title;
         state.patientName = patientName;
@@ -61,9 +61,9 @@ static CharonHKCDADocumentState *CharonHKCDADocumentStateOf(id document)
 
 - (instancetype)initWithCoder:(NSCoder *)coder
 {
-    CHARON_ALIAS_CLASS(HKCDADocument) *document = [super init];
+    REVENANT_ALIAS_CLASS(HKCDADocument) *document = [super init];
     if (document) {
-        CharonHKCDADocumentState *state = CharonHKCDADocumentStateOf(document);
+        RevenantHKCDADocumentState *state = RevenantHKCDADocumentStateOf(document);
         state.documentData = [[coder decodeObjectOfClass:[NSData class] forKey:@"documentData"] copy];
         state.title = [[coder decodeObjectOfClass:[NSString class] forKey:@"title"] copy];
         state.patientName = [[coder decodeObjectOfClass:[NSString class] forKey:@"patientName"] copy];
@@ -75,7 +75,7 @@ static CharonHKCDADocumentState *CharonHKCDADocumentStateOf(id document)
 
 - (void)encodeWithCoder:(NSCoder *)coder
 {
-    CharonHKCDADocumentState *state = CharonHKCDADocumentStateOf(self);
+    RevenantHKCDADocumentState *state = RevenantHKCDADocumentStateOf(self);
     [coder encodeObject:state.documentData forKey:@"documentData"];
     [coder encodeObject:state.title forKey:@"title"];
     [coder encodeObject:state.patientName forKey:@"patientName"];
@@ -85,8 +85,8 @@ static CharonHKCDADocumentState *CharonHKCDADocumentStateOf(id document)
 
 - (id)copyWithZone:(NSZone *)zone
 {
-    CharonHKCDADocumentState *state = CharonHKCDADocumentStateOf(self);
-    return [[[self class] alloc] charon_initWithDocumentData:state.documentData
+    RevenantHKCDADocumentState *state = RevenantHKCDADocumentStateOf(self);
+    return [[[self class] alloc] revenant_initWithDocumentData:state.documentData
                                                title:state.title
                                           patientName:state.patientName
                                            authorName:state.authorName
@@ -95,27 +95,27 @@ static CharonHKCDADocumentState *CharonHKCDADocumentStateOf(id document)
 
 - (NSData *)documentData
 {
-    return CharonHKCDADocumentStateOf(self).documentData;
+    return RevenantHKCDADocumentStateOf(self).documentData;
 }
 
 - (NSString *)title
 {
-    return CharonHKCDADocumentStateOf(self).title;
+    return RevenantHKCDADocumentStateOf(self).title;
 }
 
 - (NSString *)patientName
 {
-    return CharonHKCDADocumentStateOf(self).patientName;
+    return RevenantHKCDADocumentStateOf(self).patientName;
 }
 
 - (NSString *)authorName
 {
-    return CharonHKCDADocumentStateOf(self).authorName;
+    return RevenantHKCDADocumentStateOf(self).authorName;
 }
 
 - (NSString *)custodianName
 {
-    return CharonHKCDADocumentStateOf(self).custodianName;
+    return RevenantHKCDADocumentStateOf(self).custodianName;
 }
 
 - (BOOL)isEqual:(id)other
@@ -124,8 +124,8 @@ static CharonHKCDADocumentState *CharonHKCDADocumentStateOf(id document)
         return YES;
     if (![other isKindOfClass:[HKCDADocument class]])
         return NO;
-    CharonHKCDADocumentState *state = CharonHKCDADocumentStateOf(self);
-    CharonHKCDADocumentState *that = CharonHKCDADocumentStateOf(other);
+    RevenantHKCDADocumentState *state = RevenantHKCDADocumentStateOf(self);
+    RevenantHKCDADocumentState *that = RevenantHKCDADocumentStateOf(other);
     return [state.documentData isEqualToData:that.documentData]
            && (state.title == that.title || [state.title isEqualToString:that.title])
            && (state.patientName == that.patientName || [state.patientName isEqualToString:that.patientName])
@@ -135,13 +135,13 @@ static CharonHKCDADocumentState *CharonHKCDADocumentStateOf(id document)
 
 - (NSUInteger)hash
 {
-    CharonHKCDADocumentState *state = CharonHKCDADocumentStateOf(self);
+    RevenantHKCDADocumentState *state = RevenantHKCDADocumentStateOf(self);
     return state.documentData.hash ^ state.title.hash;
 }
 
 - (NSString *)description
 {
-    CharonHKCDADocumentState *state = CharonHKCDADocumentStateOf(self);
+    RevenantHKCDADocumentState *state = RevenantHKCDADocumentStateOf(self);
     return [NSString stringWithFormat:@"HKCDADocument[%@ %lu bytes]", state.title,
             (unsigned long)state.documentData.length];
 }

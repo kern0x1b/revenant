@@ -24,7 +24,7 @@
 #include <optional>
 #include <string>
 
-namespace shade::kernel_bsd::interval_timer {
+namespace emulator::kernel_bsd::interval_timer {
 namespace {
 
     constexpr std::uint32_t real_timer = 0;

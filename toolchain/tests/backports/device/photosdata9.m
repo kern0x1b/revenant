@@ -20,7 +20,7 @@ static void wait_until(double seconds, BOOL (^done)(void))
 static NSURL *blue_video_of_type(NSString *fileType, int frames, int width, int height, BOOL noise)
 {
     NSString *extension = [fileType isEqualToString:AVFileTypeMPEG4] ? @"mp4" : @"mov";
-    NSURL *url = [NSURL fileURLWithPath:[NSTemporaryDirectory() stringByAppendingPathComponent:[NSString stringWithFormat:@"charon-%@.%@", [NSUUID UUID].UUIDString, extension]]];
+    NSURL *url = [NSURL fileURLWithPath:[NSTemporaryDirectory() stringByAppendingPathComponent:[NSString stringWithFormat:@"revenant-%@.%@", [NSUUID UUID].UUIDString, extension]]];
     NSError *error = nil;
     AVAssetWriter *writer = [AVAssetWriter assetWriterWithURL:url fileType:fileType error:&error];
     AVAssetWriterInput *input = [AVAssetWriterInput assetWriterInputWithMediaType:AVMediaTypeVideo outputSettings:@{
@@ -80,7 +80,7 @@ static NSString *album_name(void)
     NSDateFormatter *stamp = [[NSDateFormatter alloc] init];
     stamp.locale = [[NSLocale alloc] initWithLocaleIdentifier:@"en_US_POSIX"];
     stamp.dateFormat = @"yyyyMMdd-HHmmss";
-    return [@"CharonPhotosProbe-" stringByAppendingString:[stamp stringFromDate:[NSDate date]]];
+    return [@"RevenantPhotosProbe-" stringByAppendingString:[stamp stringFromDate:[NSDate date]]];
 }
 
 static NSData *direct_read(NSString *identifier)
@@ -106,19 +106,19 @@ static PHAsset *asset_with_identifier(NSString *identifier)
     return identifier ? [PHAsset fetchAssetsWithLocalIdentifiers:@[identifier] options:nil].firstObject : nil;
 }
 
-@interface CharonReadRecord : NSObject
+@interface RevenantReadRecord : NSObject
 @property (atomic, strong) NSMutableArray<NSData *> *chunks;
 @property (atomic, strong) NSMutableArray<NSNumber *> *progress;
 @property (atomic, strong) NSError *error;
 @property (atomic) int completions;
 @end
 
-@implementation CharonReadRecord
+@implementation RevenantReadRecord
 @end
 
-static CharonReadRecord *read_resource(PHAssetResource *resource, BOOL cancelAtFirstChunk)
+static RevenantReadRecord *read_resource(PHAssetResource *resource, BOOL cancelAtFirstChunk)
 {
-    CharonReadRecord *record = [[CharonReadRecord alloc] init];
+    RevenantReadRecord *record = [[RevenantReadRecord alloc] init];
     record.chunks = [NSMutableArray array];
     record.progress = [NSMutableArray array];
     PHAssetResourceRequestOptions *options = [[PHAssetResourceRequestOptions alloc] init];
@@ -146,7 +146,7 @@ static CharonReadRecord *read_resource(PHAssetResource *resource, BOOL cancelAtF
 
 static void check_read(PHAssetResource *resource, NSData *direct)
 {
-    CharonReadRecord *record = read_resource(resource, NO);
+    RevenantReadRecord *record = read_resource(resource, NO);
     NSMutableData *joined = [NSMutableData data];
     NSUInteger largest = 0;
     BOOL anyEmpty = NO;
@@ -168,7 +168,7 @@ static void check_read(PHAssetResource *resource, NSData *direct)
     }
     CHECK(rising && last == 1.0, "progress rises once per chunk and ends at 1.0");
 
-    CharonReadRecord *cancelled = read_resource(resource, YES);
+    RevenantReadRecord *cancelled = read_resource(resource, YES);
     CHECK(cancelled.completions == 1 && cancelled.chunks.count == 1 && cancelled.error.code == PHPhotosErrorUserCancelled,
           "a read cancelled at its first chunk hands over no other and completes once, cancelled");
 }
@@ -226,7 +226,7 @@ static NSError *add_video(NSURL *url, BOOL move, NSString **identifier)
     } error:&error];
     if (identifier)
         *identifier = added ? made : nil;
-    return added ? nil : (error ?: [NSError errorWithDomain:@"charon.test" code:0 userInfo:nil]);
+    return added ? nil : (error ?: [NSError errorWithDomain:@"revenant.test" code:0 userInfo:nil]);
 }
 
 static void check_move(void)
@@ -324,7 +324,7 @@ static void check_codes(NSString *albumIdentifier)
     printf("an asset no change made: %s\n", error.description.UTF8String ?: "no error");
     CHECK(is_photos_error(error, PHPhotosErrorIdentifierNotFound), "an asset no committed change made is not found");
 
-    CharonReadRecord *record = read_resource(((id (*)(id, SEL))objc_msgSend)([PHAssetResource alloc], @selector(init)), NO);
+    RevenantReadRecord *record = read_resource(((id (*)(id, SEL))objc_msgSend)([PHAssetResource alloc], @selector(init)), NO);
     CHECK(record.chunks.count == 0 && is_photos_error(record.error, PHPhotosErrorIdentifierNotFound), "a resource whose asset is not there reads as not found");
 }
 
@@ -376,23 +376,23 @@ static void run_checks(void)
     check_staged(AVFileTypeMPEG4);
     check_codes(albumIdentifier);
 
-    NSString *summary = [NSString stringWithFormat:@"%d checks, %d failed\n", charon_checks, charon_failures];
+    NSString *summary = [NSString stringWithFormat:@"%d checks, %d failed\n", revenant_checks, revenant_failures];
     printf("%s", summary.UTF8String);
     fflush(stdout);
     [summary writeToFile:[results_folder stringByAppendingPathComponent:@"photosdata.done"] atomically:YES encoding:NSUTF8StringEncoding error:NULL];
 }
 
-@interface CharonDataDelegate : UIResponder <UIApplicationDelegate>
+@interface RevenantDataDelegate : UIResponder <UIApplicationDelegate>
 @property (nonatomic, strong) UIWindow *window;
 @end
 
-@implementation CharonDataDelegate
+@implementation RevenantDataDelegate
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)options
 {
     [[NSFileManager defaultManager] createDirectoryAtPath:results_folder withIntermediateDirectories:YES attributes:nil error:NULL];
     [[NSFileManager defaultManager] removeItemAtPath:[results_folder stringByAppendingPathComponent:@"photosdata.done"] error:NULL];
-    charon_log_to([results_folder stringByAppendingPathComponent:@"photosdata.log"]);
+    revenant_log_to([results_folder stringByAppendingPathComponent:@"photosdata.log"]);
     self.window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
     self.window.rootViewController = [[UIViewController alloc] init];
     [self.window makeKeyAndVisible];
@@ -405,6 +405,6 @@ static void run_checks(void)
 int main(int argc, char **argv)
 {
     @autoreleasepool {
-        return UIApplicationMain(argc, argv, nil, NSStringFromClass([CharonDataDelegate class]));
+        return UIApplicationMain(argc, argv, nil, NSStringFromClass([RevenantDataDelegate class]));
     }
 }

@@ -5,8 +5,8 @@
 #include <mach-o/loader.h>
 #include <mach-o/fat.h>
 
-#define CHARON_NLIST_32 12
-#define CHARON_NLIST_64 16
+#define REVENANT_NLIST_32 12
+#define REVENANT_NLIST_64 16
 
 typedef struct {
     uint64_t address;
@@ -251,7 +251,7 @@ static uint64_t symbol_address(const Object *object, const char *name)
             const uint8_t *symbols = base + symtab->symoff;
             const char *strings = (const char *)(base + symtab->stroff);
             for (uint32_t part = 0; part < symtab->nsyms; ++part) {
-                const uint8_t *entry = symbols + (size_t)part * (is64 ? CHARON_NLIST_64 : CHARON_NLIST_32);
+                const uint8_t *entry = symbols + (size_t)part * (is64 ? REVENANT_NLIST_64 : REVENANT_NLIST_32);
                 uint32_t strx;
                 uint64_t value;
                 memcpy(&strx, entry, 4);

@@ -1,6 +1,6 @@
 #import <CoreData/CoreData.h>
 
-@implementation NSBatchDeleteRequest (CharonObjectIDs)
+@implementation NSBatchDeleteRequest (RevenantObjectIDs)
 
 - (instancetype)initWithObjectIDs:(NSArray<NSManagedObjectID *> *)objectIDs
 {

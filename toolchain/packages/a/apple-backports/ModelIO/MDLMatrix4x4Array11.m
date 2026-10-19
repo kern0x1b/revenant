@@ -42,7 +42,7 @@
     _elementCount = 0;
 }
 
-- (void)charon_reserve:(NSUInteger)count
+- (void)revenant_reserve:(NSUInteger)count
 {
     NSUInteger width = _doublePrecision ? sizeof(matrix_double4x4) : sizeof(matrix_float4x4);
     if (_storage.length < count * width) {
@@ -54,7 +54,7 @@
 - (void)setFloat4x4Array:(const matrix_float4x4 *)valuesArray count:(NSUInteger)count
 {
     _doublePrecision = NO;
-    [self charon_reserve:count];
+    [self revenant_reserve:count];
     if (valuesArray && count)
         [_storage replaceBytesInRange:NSMakeRange(0, count * sizeof(matrix_float4x4))
                             withBytes:valuesArray
@@ -64,7 +64,7 @@
 - (void)setDouble4x4Array:(const matrix_double4x4 *)valuesArray count:(NSUInteger)count
 {
     _doublePrecision = YES;
-    [self charon_reserve:count];
+    [self revenant_reserve:count];
     if (valuesArray && count)
         [_storage replaceBytesInRange:NSMakeRange(0, count * sizeof(matrix_double4x4))
                             withBytes:valuesArray

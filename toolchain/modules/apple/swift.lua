@@ -89,7 +89,7 @@ function availability(source)
 end
 
 function bundled_availability(source)
-    local lines = {"# Rewritten by charon@swift-runtime: the runtime ships with the program, so every release has it."}
+    local lines = {"# Rewritten by revenant@swift-runtime: the runtime ships with the program, so every release has it."}
     for line in io.readfile(path.join(source, "utils", "availability-macros.def")):gmatch("[^\n]+") do
         local definition = line:trim()
         if definition ~= "" and not definition:startswith("#") then

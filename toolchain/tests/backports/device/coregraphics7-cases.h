@@ -1,3 +1,3 @@
 #import <Foundation/Foundation.h>
 
-void charon_cg7_cases(void (^emit)(NSString *name, NSString *value));
+void revenant_cg7_cases(void (^emit)(NSString *name, NSString *value));

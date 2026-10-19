@@ -7,14 +7,14 @@ set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 ports=${WINDOWSCENE_PORT_DIR:-$here/../../../../packages/a/apple-backports/UIKit}
-build=${WINDOWSCENE_BUILD:-$(runs_fresh charon-windowscene-activation)}
+build=${WINDOWSCENE_BUILD:-$(runs_fresh revenant-windowscene-activation)}
 sdk=$(xcrun --show-sdk-path)
 app="$build/windowscene-activation"
 xcrun clang -target arm64-apple-ios15.0-macabi -isysroot "$sdk" -iframework "$sdk/System/iOSSupport/System/Library/Frameworks" \
     -fobjc-arc -w \
-    -DUIWindowSceneActivationConfiguration=CharonPortUIWindowSceneActivationConfiguration \
-    -DUIWindowSceneActivationRequestOptions=CharonPortUIWindowSceneActivationRequestOptions \
-    -DUIWindowSceneActivationAction=CharonPortUIWindowSceneActivationAction \
+    -DUIWindowSceneActivationConfiguration=RevenantPortUIWindowSceneActivationConfiguration \
+    -DUIWindowSceneActivationRequestOptions=RevenantPortUIWindowSceneActivationRequestOptions \
+    -DUIWindowSceneActivationAction=RevenantPortUIWindowSceneActivationAction \
     "$ports/UIWindowSceneActivationConfiguration.m" "$ports/UIWindowSceneActivationRequestOptions.m" "$ports/UIWindowSceneActivationAction.m" \
     "$here/test.m" -framework UIKit -framework Foundation -framework CoreGraphics -o "$app"
 codesign -s - --force "$app" > /dev/null 2>&1

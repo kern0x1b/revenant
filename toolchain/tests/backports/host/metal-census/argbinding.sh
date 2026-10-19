@@ -37,7 +37,7 @@ common="$common -I $S/Metal -I $S -I $S/MetalKit -I $root/tests/backports/host/m
 # assertion here a statement about Apple's class. The count is what matters, not an address: an
 # address can be a dylib's, a defined count cannot.
 prefix='_OBJC_CLASS_$_'
-class_list="CharonMetalBinding CharonMetalBufferBinding CharonMetalTextureBinding CharonMetalThreadgroupBinding CharonMetalObjectPayloadBinding"
+class_list="RevenantMetalBinding RevenantMetalBufferBinding RevenantMetalTextureBinding RevenantMetalThreadgroupBinding RevenantMetalObjectPayloadBinding"
 prove_defined() {   # $1 nm output
     for name in $class_list; do
         symbol="${prefix}${name}"
@@ -47,7 +47,7 @@ prove_defined() {   # $1 nm output
             return 1
         fi
     done
-    count=$(printf '%s\n' "$1" | awk -v p="$prefix" 'index($0, p "CharonMetal"){n++} END{print n+0}')
+    count=$(printf '%s\n' "$1" | awk -v p="$prefix" 'index($0, p "RevenantMetal"){n++} END{print n+0}')
     expected=0
     for symbol in $class_list; do expected=$((expected + 1)); done
     if [ "$count" -eq 0 ] || [ "$count" -ne "$expected" ]; then
@@ -65,7 +65,7 @@ if [ -n "${SELF_TEST:-}" ]; then
     rm -rf "$selfdir"; mkdir -p "$selfdir" || exit 1
     fake="$selfdir/symbols"
     for name in $class_list; do
-        if [ "$name" = "CharonMetalObjectPayloadBinding" ]; then continue; fi   # the one that is missing
+        if [ "$name" = "RevenantMetalObjectPayloadBinding" ]; then continue; fi   # the one that is missing
         printf '%s S %s%s\n' "0000000000000100" "$prefix" "$name" >> "$fake"
     done
     if prove_defined "$(cat "$fake")"; then
@@ -179,11 +179,11 @@ echo "  ok   RUN FAILED: the broken mutation did not build, and no binary was le
 # everything else from the base, so -type is the one member a row owns, and it is the one each of
 # these mutants breaks.
 echo "the mutations: one per row, each breaking only that row"
-mutate_type m0 CharonMetalBinding "return MTLBindingTypeTexture;"
-mutate_type m1 CharonMetalBufferBinding "return MTLBindingTypeThreadgroupMemory;"
-mutate_type m2 CharonMetalTextureBinding "return MTLBindingTypeBuffer;"
-mutate_type m3 CharonMetalThreadgroupBinding "return MTLBindingTypeTexture;"
-mutate_type m4 CharonMetalObjectPayloadBinding "return MTLBindingTypeBuffer;"
+mutate_type m0 RevenantMetalBinding "return MTLBindingTypeTexture;"
+mutate_type m1 RevenantMetalBufferBinding "return MTLBindingTypeThreadgroupMemory;"
+mutate_type m2 RevenantMetalTextureBinding "return MTLBindingTypeBuffer;"
+mutate_type m3 RevenantMetalThreadgroupBinding "return MTLBindingTypeTexture;"
+mutate_type m4 RevenantMetalObjectPayloadBinding "return MTLBindingTypeBuffer;"
 
 build mutant-m0 "$here/argbinding.m" "$work/m0.m"; expect_red "M0 MTLBinding -type" mutant-m0
 build mutant-m1 "$here/argbinding.m" "$work/m1.m"; expect_red "M1 MTLBufferBinding -type" mutant-m1

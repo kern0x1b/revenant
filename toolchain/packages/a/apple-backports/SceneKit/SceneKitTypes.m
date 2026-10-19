@@ -1,5 +1,5 @@
-#import "CharonSCN.h"
-#import "CharonSCNMath.h"
+#import "RevenantSCN.h"
+#import "RevenantSCNMath.h"
 
 bool SCNVector3EqualToVector3(SCNVector3 a, SCNVector3 b)
 {
@@ -29,27 +29,27 @@ bool SCNMatrix4EqualToMatrix4(SCNMatrix4 a, SCNMatrix4 b)
 
 SCNMatrix4 SCNMatrix4MakeRotation(float angle, float x, float y, float z)
 {
-    return CharonSCNMatrixRotation(angle, x, y, z);
+    return RevenantSCNMatrixRotation(angle, x, y, z);
 }
 
 SCNMatrix4 SCNMatrix4Scale(SCNMatrix4 m, float sx, float sy, float sz)
 {
-    return CharonSCNMatrixMultiply(SCNMatrix4MakeScale(sx, sy, sz), m);
+    return RevenantSCNMatrixMultiply(SCNMatrix4MakeScale(sx, sy, sz), m);
 }
 
 SCNMatrix4 SCNMatrix4Rotate(SCNMatrix4 m, float angle, float x, float y, float z)
 {
-    return CharonSCNMatrixMultiply(CharonSCNMatrixRotation(angle, x, y, z), m);
+    return RevenantSCNMatrixMultiply(RevenantSCNMatrixRotation(angle, x, y, z), m);
 }
 
 SCNMatrix4 SCNMatrix4Invert(SCNMatrix4 m)
 {
-    return CharonSCNMatrixInvert(m);
+    return RevenantSCNMatrixInvert(m);
 }
 
 SCNMatrix4 SCNMatrix4Mult(SCNMatrix4 a, SCNMatrix4 b)
 {
-    return CharonSCNMatrixMultiply(a, b);
+    return RevenantSCNMatrixMultiply(a, b);
 }
 
 GLKMatrix4 SCNMatrix4ToGLKMatrix4(SCNMatrix4 m)

@@ -179,7 +179,7 @@
       "status": "owed",
       "reason": "build the class PHPersistentChange",
       "effect": "until built: NSClassFromString answers nil",
-      "source": "the headers of the iOS 16.4 SDK (PHPersistentChange.h, PHPersistentChangeFetchResult.h, PHPersistentChangeToken.h, PHPersistentObjectChangeDetails.h) for the declarations and their availability; CHARON_ROOT=$PWD xmake l tools/corpus/cache-census.lua PHPersistent 6.1.3 4.3 12.0 16.0 for the class census and its control in the same run; CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua $HOME/.charon/dyld/6.1.3/dyld_shared_cache_armv7 for the 26 selectors of the release's ALAssetsLibrary; tools/cache-index/first-rung.lua for every first rung named here; facts/Photos/PersistentChange.md for the commands with their output"
+      "source": "the headers of the iOS 16.4 SDK (PHPersistentChange.h, PHPersistentChangeFetchResult.h, PHPersistentChangeToken.h, PHPersistentObjectChangeDetails.h) for the declarations and their availability; REVENANT_ROOT=$PWD xmake l tools/corpus/cache-census.lua PHPersistent 6.1.3 4.3 12.0 16.0 for the class census and its control in the same run; REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua $HOME/.revenant/dyld/6.1.3/dyld_shared_cache_armv7 for the 26 selectors of the release's ALAssetsLibrary; tools/cache-index/first-rung.lua for every first rung named here; facts/Photos/PersistentChange.md for the commands with their output"
     },
     {
       "api": "PHPersistentChangeFetchResult",
@@ -189,7 +189,7 @@
       "status": "owed",
       "reason": "build the class PHPersistentChangeFetchResult",
       "effect": "until built: NSClassFromString answers nil",
-      "source": "the headers of the iOS 16.4 SDK for the declaration of the class and of -enumerateChangesWithBlock:; CHARON_ROOT=$PWD xmake l tools/corpus/cache-census.lua PHPersistent 6.1.3 4.3 12.0 16.0 for the class census and its control; CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua $HOME/.charon/dyld/6.1.3/dyld_shared_cache_armv7 for the 26 selectors of the release's ALAssetsLibrary; tools/cache-index/first-rung.lua for every first rung named here; facts/Photos/PersistentChange.md for the commands with their output"
+      "source": "the headers of the iOS 16.4 SDK for the declaration of the class and of -enumerateChangesWithBlock:; REVENANT_ROOT=$PWD xmake l tools/corpus/cache-census.lua PHPersistent 6.1.3 4.3 12.0 16.0 for the class census and its control; REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua $HOME/.revenant/dyld/6.1.3/dyld_shared_cache_armv7 for the 26 selectors of the release's ALAssetsLibrary; tools/cache-index/first-rung.lua for every first rung named here; facts/Photos/PersistentChange.md for the commands with their output"
     },
     {
       "api": "PHPersistentChangeToken",
@@ -199,7 +199,7 @@
       "status": "owed",
       "reason": "build the class PHPersistentChangeToken",
       "effect": "until built: NSClassFromString answers nil",
-      "source": "the header PHPersistentChangeToken.h of the iOS 16.4 SDK for the declaration and its availability; CHARON_ROOT=$PWD xmake l tools/corpus/cache-census.lua PHPersistent 6.1.3 4.3 12.0 16.0 for the class census and its control in the same run; CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua $HOME/.charon/dyld/6.1.3/dyld_shared_cache_armv7 for the 26 selectors of the release's ALAssetsLibrary; tools/cache-index/first-rung.lua for every first rung named here; facts/Photos/PersistentChange.md for the commands with their output"
+      "source": "the header PHPersistentChangeToken.h of the iOS 16.4 SDK for the declaration and its availability; REVENANT_ROOT=$PWD xmake l tools/corpus/cache-census.lua PHPersistent 6.1.3 4.3 12.0 16.0 for the class census and its control in the same run; REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua $HOME/.revenant/dyld/6.1.3/dyld_shared_cache_armv7 for the 26 selectors of the release's ALAssetsLibrary; tools/cache-index/first-rung.lua for every first rung named here; facts/Photos/PersistentChange.md for the commands with their output"
     },
     {
       "api": "PHPersistentObjectChangeDetails",
@@ -209,7 +209,7 @@
       "status": "owed",
       "reason": "build the class PHPersistentObjectChangeDetails",
       "effect": "until built: NSClassFromString answers nil",
-      "source": "the header PHPersistentObjectChangeDetails.h of the iOS 16.4 SDK for the four declarations and their availability; CHARON_ROOT=$PWD xmake l tools/corpus/cache-census.lua PHPersistent 6.1.3 4.3 12.0 16.0 for the class census and its control in the same run; CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua $HOME/.charon/dyld/6.1.3/dyld_shared_cache_armv7 for the 26 selectors of the release's ALAssetsLibrary; tools/cache-index/first-rung.lua for every first rung named here; facts/Photos/PersistentChange.md for the commands with their output"
+      "source": "the header PHPersistentObjectChangeDetails.h of the iOS 16.4 SDK for the four declarations and their availability; REVENANT_ROOT=$PWD xmake l tools/corpus/cache-census.lua PHPersistent 6.1.3 4.3 12.0 16.0 for the class census and its control in the same run; REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua $HOME/.revenant/dyld/6.1.3/dyld_shared_cache_armv7 for the 26 selectors of the release's ALAssetsLibrary; tools/cache-index/first-rung.lua for every first rung named here; facts/Photos/PersistentChange.md for the commands with their output"
     },
     {
       "api": "PHAdjustmentData",

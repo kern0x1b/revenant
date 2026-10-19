@@ -14,7 +14,7 @@
 
 #include "foundation/memory_permission.hpp"
 
-namespace shade {
+namespace emulator {
 
 enum class VmInheritance : std::uint8_t {
     Share = 0,

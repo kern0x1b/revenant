@@ -7,7 +7,7 @@
       "introduced": "18.0",
       "minimum": "6.0",
       "status": "implemented",
-      "reason": "CMTagCollection arrived at iOS 17 and the SDK the toolchain resolves is 16.4, where none of CMTag, CMTagCollection or CMTaggedBufferGroup exists; CharonCMTag26.h transcribes 26.2's own declarations and the port is an Objective-C class behind 26.2's bridged reference",
+      "reason": "CMTagCollection arrived at iOS 17 and the SDK the toolchain resolves is 16.4, where none of CMTag, CMTagCollection or CMTaggedBufferGroup exists; RevenantCMTag26.h transcribes 26.2's own declarations and the port is an Objective-C class behind 26.2's bridged reference",
       "effect": "adds the tag, and leaves a tag already held alone",
       "facts": "facts/CoreMedia/TagCollection.md",
       "source": "the host's own CoreMedia, held over 208 answers by tests/backports/host/coremedia7/tagcollectionimage.m, which builds the port's file as its own image and reaches each name through dlopen(RTLD_LOCAL | RTLD_FIRST)"
@@ -18,7 +18,7 @@
       "introduced": "18.0",
       "minimum": "6.0",
       "status": "implemented",
-      "reason": "CMTagCollection arrived at iOS 17 and the SDK the toolchain resolves is 16.4, where none of CMTag, CMTagCollection or CMTaggedBufferGroup exists; CharonCMTag26.h transcribes 26.2's own declarations and the port is an Objective-C class behind 26.2's bridged reference",
+      "reason": "CMTagCollection arrived at iOS 17 and the SDK the toolchain resolves is 16.4, where none of CMTag, CMTagCollection or CMTaggedBufferGroup exists; RevenantCMTag26.h transcribes 26.2's own declarations and the port is an Objective-C class behind 26.2's bridged reference",
       "effect": "adds the given tags, skipping the ones already held",
       "facts": "facts/CoreMedia/TagCollection.md",
       "source": "the host's own CoreMedia, held over 208 answers by tests/backports/host/coremedia7/tagcollectionimage.m, which builds the port's file as its own image and reaches each name through dlopen(RTLD_LOCAL | RTLD_FIRST)"
@@ -29,7 +29,7 @@
       "introduced": "18.0",
       "minimum": "6.0",
       "status": "implemented",
-      "reason": "CMTagCollection arrived at iOS 17 and the SDK the toolchain resolves is 16.4, where none of CMTag, CMTagCollection or CMTaggedBufferGroup exists; CharonCMTag26.h transcribes 26.2's own declarations and the port is an Objective-C class behind 26.2's bridged reference",
+      "reason": "CMTagCollection arrived at iOS 17 and the SDK the toolchain resolves is 16.4, where none of CMTag, CMTagCollection or CMTaggedBufferGroup exists; RevenantCMTag26.h transcribes 26.2's own declarations and the port is an Objective-C class behind 26.2's bridged reference",
       "effect": "adds every tag of the other, skipping the ones already held",
       "facts": "facts/CoreMedia/TagCollection.md",
       "source": "the host's own CoreMedia, held over 208 answers by tests/backports/host/coremedia7/tagcollectionimage.m, which builds the port's file as its own image and reaches each name through dlopen(RTLD_LOCAL | RTLD_FIRST)"
@@ -40,7 +40,7 @@
       "introduced": "18.0",
       "minimum": "6.0",
       "status": "implemented",
-      "reason": "CMTagCollection arrived at iOS 17 and the SDK the toolchain resolves is 16.4, where none of CMTag, CMTagCollection or CMTaggedBufferGroup exists; CharonCMTag26.h transcribes 26.2's own declarations and the port is an Objective-C class behind 26.2's bridged reference",
+      "reason": "CMTagCollection arrived at iOS 17 and the SDK the toolchain resolves is 16.4, where none of CMTag, CMTagCollection or CMTaggedBufferGroup exists; RevenantCMTag26.h transcribes 26.2's own declarations and the port is an Objective-C class behind 26.2's bridged reference",
       "effect": "true for the Undefined category whatever it holds, and otherwise whether it holds tags of it",
       "facts": "facts/CoreMedia/TagCollection.md",
       "source": "the host's own CoreMedia, held over 208 answers by tests/backports/host/coremedia7/tagcollectionimage.m, which builds the port's file as its own image and reaches each name through dlopen(RTLD_LOCAL | RTLD_FIRST)"
@@ -51,7 +51,7 @@
       "introduced": "18.0",
       "minimum": "6.0",
       "status": "implemented",
-      "reason": "CMTagCollection arrived at iOS 17 and the SDK the toolchain resolves is 16.4, where none of CMTag, CMTagCollection or CMTaggedBufferGroup exists; CharonCMTag26.h transcribes 26.2's own declarations and the port is an Objective-C class behind 26.2's bridged reference",
+      "reason": "CMTagCollection arrived at iOS 17 and the SDK the toolchain resolves is 16.4, where none of CMTag, CMTagCollection or CMTaggedBufferGroup exists; RevenantCMTag26.h transcribes 26.2's own declarations and the port is an Objective-C class behind 26.2's bridged reference",
       "effect": "whether the given tags are all held",
       "facts": "facts/CoreMedia/TagCollection.md",
       "source": "the host's own CoreMedia, held over 208 answers by tests/backports/host/coremedia7/tagcollectionimage.m, which builds the port's file as its own image and reaches each name through dlopen(RTLD_LOCAL | RTLD_FIRST)"
@@ -62,7 +62,7 @@
       "introduced": "18.0",
       "minimum": "6.0",
       "status": "implemented",
-      "reason": "CMTagCollection arrived at iOS 17 and the SDK the toolchain resolves is 16.4, where none of CMTag, CMTagCollection or CMTaggedBufferGroup exists; CharonCMTag26.h transcribes 26.2's own declarations and the port is an Objective-C class behind 26.2's bridged reference",
+      "reason": "CMTagCollection arrived at iOS 17 and the SDK the toolchain resolves is 16.4, where none of CMTag, CMTagCollection or CMTaggedBufferGroup exists; RevenantCMTag26.h transcribes 26.2's own declarations and the port is an Objective-C class behind 26.2's bridged reference",
       "effect": "whether that exact tag is held",
       "facts": "facts/CoreMedia/TagCollection.md",
       "source": "the host's own CoreMedia, held over 208 answers by tests/backports/host/coremedia7/tagcollectionimage.m, which builds the port's file as its own image and reaches each name through dlopen(RTLD_LOCAL | RTLD_FIRST)"
@@ -73,7 +73,7 @@
       "introduced": "18.0",
       "minimum": "6.0",
       "status": "implemented",
-      "reason": "CMTagCollection arrived at iOS 17 and the SDK the toolchain resolves is 16.4, where none of CMTag, CMTagCollection or CMTaggedBufferGroup exists; CharonCMTag26.h transcribes 26.2's own declarations and the port is an Objective-C class behind 26.2's bridged reference",
+      "reason": "CMTagCollection arrived at iOS 17 and the SDK the toolchain resolves is 16.4, where none of CMTag, CMTagCollection or CMTaggedBufferGroup exists; RevenantCMTag26.h transcribes 26.2's own declarations and the port is an Objective-C class behind 26.2's bridged reference",
       "effect": "whether every tag of the other collection is held",
       "facts": "facts/CoreMedia/TagCollection.md",
       "source": "the host's own CoreMedia, held over 208 answers by tests/backports/host/coremedia7/tagcollectionimage.m, which builds the port's file as its own image and reaches each name through dlopen(RTLD_LOCAL | RTLD_FIRST)"
@@ -84,7 +84,7 @@
       "introduced": "18.0",
       "minimum": "6.0",
       "status": "implemented",
-      "reason": "CMTagCollection arrived at iOS 17 and the SDK the toolchain resolves is 16.4, where none of CMTag, CMTagCollection or CMTaggedBufferGroup exists; CharonCMTag26.h transcribes 26.2's own declarations and the port is an Objective-C class behind 26.2's bridged reference",
+      "reason": "CMTagCollection arrived at iOS 17 and the SDK the toolchain resolves is 16.4, where none of CMTag, CMTagCollection or CMTaggedBufferGroup exists; RevenantCMTag26.h transcribes 26.2's own declarations and the port is an Objective-C class behind 26.2's bridged reference",
       "effect": "CMTagCollection{ and one {category:'...' value:... <type>} line per tag, sorted, closed by }",
       "facts": "facts/CoreMedia/TagCollection.md",
       "source": "the host's own CoreMedia, held over 208 answers by tests/backports/host/coremedia7/tagcollectionimage.m, which builds the port's file as its own image and reaches each name through dlopen(RTLD_LOCAL | RTLD_FIRST)"
@@ -95,7 +95,7 @@
       "introduced": "18.0",
       "minimum": "6.0",
       "status": "implemented",
-      "reason": "CMTagCollection arrived at iOS 17 and the SDK the toolchain resolves is 16.4, where none of CMTag, CMTagCollection or CMTaggedBufferGroup exists; CharonCMTag26.h transcribes 26.2's own declarations and the port is an Objective-C class behind 26.2's bridged reference",
+      "reason": "CMTagCollection arrived at iOS 17 and the SDK the toolchain resolves is 16.4, where none of CMTag, CMTagCollection or CMTaggedBufferGroup exists; RevenantCMTag26.h transcribes 26.2's own declarations and the port is an Objective-C class behind 26.2's bridged reference",
       "effect": "how many tags the filter accepts",
       "facts": "facts/CoreMedia/TagCollection.md",
       "source": "the host's own CoreMedia, held over 208 answers by tests/backports/host/coremedia7/tagcollectionimage.m, which builds the port's file as its own image and reaches each name through dlopen(RTLD_LOCAL | RTLD_FIRST)"
@@ -106,7 +106,7 @@
       "introduced": "18.0",
       "minimum": "6.0",
       "status": "implemented",
-      "reason": "CMTagCollection arrived at iOS 17 and the SDK the toolchain resolves is 16.4, where none of CMTag, CMTagCollection or CMTaggedBufferGroup exists; CharonCMTag26.h transcribes 26.2's own declarations and the port is an Objective-C class behind 26.2's bridged reference",
+      "reason": "CMTagCollection arrived at iOS 17 and the SDK the toolchain resolves is 16.4, where none of CMTag, CMTagCollection or CMTaggedBufferGroup exists; RevenantCMTag26.h transcribes 26.2's own declarations and the port is an Objective-C class behind 26.2's bridged reference",
       "effect": "the collection of the given tags, held sorted by category, data type and value",
       "facts": "facts/CoreMedia/TagCollection.md",
       "source": "the host's own CoreMedia, held over 208 answers by tests/backports/host/coremedia7/tagcollectionimage.m, which builds the port's file as its own image and reaches each name through dlopen(RTLD_LOCAL | RTLD_FIRST)"
@@ -117,7 +117,7 @@
       "introduced": "18.0",
       "minimum": "6.0",
       "status": "implemented",
-      "reason": "CMTagCollection arrived at iOS 17 and the SDK the toolchain resolves is 16.4, where none of CMTag, CMTagCollection or CMTaggedBufferGroup exists; CharonCMTag26.h transcribes 26.2's own declarations and the port is an Objective-C class behind 26.2's bridged reference",
+      "reason": "CMTagCollection arrived at iOS 17 and the SDK the toolchain resolves is 16.4, where none of CMTag, CMTagCollection or CMTaggedBufferGroup exists; RevenantCMTag26.h transcribes 26.2's own declarations and the port is an Objective-C class behind 26.2's bridged reference",
       "effect": "a copy holding the same tags",
       "facts": "facts/CoreMedia/TagCollection.md",
       "source": "the host's own CoreMedia, held over 208 answers by tests/backports/host/coremedia7/tagcollectionimage.m, which builds the port's file as its own image and reaches each name through dlopen(RTLD_LOCAL | RTLD_FIRST)"
@@ -128,7 +128,7 @@
       "introduced": "18.0",
       "minimum": "6.0",
       "status": "implemented",
-      "reason": "CMTagCollection arrived at iOS 17 and the SDK the toolchain resolves is 16.4, where none of CMTag, CMTagCollection or CMTaggedBufferGroup exists; CharonCMTag26.h transcribes 26.2's own declarations and the port is an Objective-C class behind 26.2's bridged reference",
+      "reason": "CMTagCollection arrived at iOS 17 and the SDK the toolchain resolves is 16.4, where none of CMTag, CMTagCollection or CMTaggedBufferGroup exists; RevenantCMTag26.h transcribes 26.2's own declarations and the port is an Objective-C class behind 26.2's bridged reference",
       "effect": "an empty mutable collection",
       "facts": "facts/CoreMedia/TagCollection.md",
       "source": "the host's own CoreMedia, held over 208 answers by tests/backports/host/coremedia7/tagcollectionimage.m, which builds the port's file as its own image and reaches each name through dlopen(RTLD_LOCAL | RTLD_FIRST)"
@@ -139,7 +139,7 @@
       "introduced": "18.0",
       "minimum": "6.0",
       "status": "implemented",
-      "reason": "CMTagCollection arrived at iOS 17 and the SDK the toolchain resolves is 16.4, where none of CMTag, CMTagCollection or CMTaggedBufferGroup exists; CharonCMTag26.h transcribes 26.2's own declarations and the port is an Objective-C class behind 26.2's bridged reference",
+      "reason": "CMTagCollection arrived at iOS 17 and the SDK the toolchain resolves is 16.4, where none of CMTag, CMTagCollection or CMTaggedBufferGroup exists; RevenantCMTag26.h transcribes 26.2's own declarations and the port is an Objective-C class behind 26.2's bridged reference",
       "effect": "a mutable copy holding the same tags",
       "facts": "facts/CoreMedia/TagCollection.md",
       "source": "the host's own CoreMedia, held over 208 answers by tests/backports/host/coremedia7/tagcollectionimage.m, which builds the port's file as its own image and reaches each name through dlopen(RTLD_LOCAL | RTLD_FIRST)"
@@ -150,7 +150,7 @@
       "introduced": "18.0",
       "minimum": "6.0",
       "status": "implemented",
-      "reason": "CMTagCollection arrived at iOS 17 and the SDK the toolchain resolves is 16.4, where none of CMTag, CMTagCollection or CMTaggedBufferGroup exists; CharonCMTag26.h transcribes 26.2's own declarations and the port is an Objective-C class behind 26.2's bridged reference",
+      "reason": "CMTagCollection arrived at iOS 17 and the SDK the toolchain resolves is 16.4, where none of CMTag, CMTagCollection or CMTaggedBufferGroup exists; RevenantCMTag26.h transcribes 26.2's own declarations and the port is an Objective-C class behind 26.2's bridged reference",
       "effect": "how many tags the collection holds",
       "facts": "facts/CoreMedia/TagCollection.md",
       "source": "the host's own CoreMedia, held over 208 answers by tests/backports/host/coremedia7/tagcollectionimage.m, which builds the port's file as its own image and reaches each name through dlopen(RTLD_LOCAL | RTLD_FIRST)"
@@ -161,7 +161,7 @@
       "introduced": "18.0",
       "minimum": "6.0",
       "status": "implemented",
-      "reason": "CMTagCollection arrived at iOS 17 and the SDK the toolchain resolves is 16.4, where none of CMTag, CMTagCollection or CMTaggedBufferGroup exists; CharonCMTag26.h transcribes 26.2's own declarations and the port is an Objective-C class behind 26.2's bridged reference",
+      "reason": "CMTagCollection arrived at iOS 17 and the SDK the toolchain resolves is 16.4, where none of CMTag, CMTagCollection or CMTaggedBufferGroup exists; RevenantCMTag26.h transcribes 26.2's own declarations and the port is an Objective-C class behind 26.2's bridged reference",
       "effect": "how many tags of that category it holds",
       "facts": "facts/CoreMedia/TagCollection.md",
       "source": "the host's own CoreMedia, held over 208 answers by tests/backports/host/coremedia7/tagcollectionimage.m, which builds the port's file as its own image and reaches each name through dlopen(RTLD_LOCAL | RTLD_FIRST)"
@@ -172,7 +172,7 @@
       "introduced": "18.0",
       "minimum": "6.0",
       "status": "implemented",
-      "reason": "CMTagCollection arrived at iOS 17 and the SDK the toolchain resolves is 16.4, where none of CMTag, CMTagCollection or CMTaggedBufferGroup exists; CharonCMTag26.h transcribes 26.2's own declarations and the port is an Objective-C class behind 26.2's bridged reference",
+      "reason": "CMTagCollection arrived at iOS 17 and the SDK the toolchain resolves is 16.4, where none of CMTag, CMTagCollection or CMTaggedBufferGroup exists; RevenantCMTag26.h transcribes 26.2's own declarations and the port is an Objective-C class behind 26.2's bridged reference",
       "effect": "the tags into the caller's buffer, with noErr when the buffer was large enough and kCMTagCollectionError_ExhaustedBufferSize when tags were left over",
       "facts": "facts/CoreMedia/TagCollection.md",
       "source": "the host's own CoreMedia, held over 208 answers by tests/backports/host/coremedia7/tagcollectionimage.m, which builds the port's file as its own image and reaches each name through dlopen(RTLD_LOCAL | RTLD_FIRST)"
@@ -183,7 +183,7 @@
       "introduced": "18.0",
       "minimum": "6.0",
       "status": "implemented",
-      "reason": "CMTagCollection arrived at iOS 17 and the SDK the toolchain resolves is 16.4, where none of CMTag, CMTagCollection or CMTaggedBufferGroup exists; CharonCMTag26.h transcribes 26.2's own declarations and the port is an Objective-C class behind 26.2's bridged reference",
+      "reason": "CMTagCollection arrived at iOS 17 and the SDK the toolchain resolves is 16.4, where none of CMTag, CMTagCollection or CMTaggedBufferGroup exists; RevenantCMTag26.h transcribes 26.2's own declarations and the port is an Objective-C class behind 26.2's bridged reference",
       "effect": "the tags of that category into the caller's buffer, with the same two answers",
       "facts": "facts/CoreMedia/TagCollection.md",
       "source": "the host's own CoreMedia, held over 208 answers by tests/backports/host/coremedia7/tagcollectionimage.m, which builds the port's file as its own image and reaches each name through dlopen(RTLD_LOCAL | RTLD_FIRST)"
@@ -194,7 +194,7 @@
       "introduced": "18.0",
       "minimum": "6.0",
       "status": "implemented",
-      "reason": "CMTagCollection arrived at iOS 17 and the SDK the toolchain resolves is 16.4, where none of CMTag, CMTagCollection or CMTaggedBufferGroup exists; CharonCMTag26.h transcribes 26.2's own declarations and the port is an Objective-C class behind 26.2's bridged reference",
+      "reason": "CMTagCollection arrived at iOS 17 and the SDK the toolchain resolves is 16.4, where none of CMTag, CMTagCollection or CMTaggedBufferGroup exists; RevenantCMTag26.h transcribes 26.2's own declarations and the port is an Objective-C class behind 26.2's bridged reference",
       "effect": "the tags the filter accepts, the same two answers measured against how many it accepts",
       "facts": "facts/CoreMedia/TagCollection.md",
       "source": "the host's own CoreMedia, held over 208 answers by tests/backports/host/coremedia7/tagcollectionimage.m, which builds the port's file as its own image and reaches each name through dlopen(RTLD_LOCAL | RTLD_FIRST)"
@@ -205,7 +205,7 @@
       "introduced": "18.0",
       "minimum": "6.0",
       "status": "implemented",
-      "reason": "CMTagCollection arrived at iOS 17 and the SDK the toolchain resolves is 16.4, where none of CMTag, CMTagCollection or CMTaggedBufferGroup exists; CharonCMTag26.h transcribes 26.2's own declarations and the port is an Objective-C class behind 26.2's bridged reference",
+      "reason": "CMTagCollection arrived at iOS 17 and the SDK the toolchain resolves is 16.4, where none of CMTag, CMTagCollection or CMTaggedBufferGroup exists; RevenantCMTag26.h transcribes 26.2's own declarations and the port is an Objective-C class behind 26.2's bridged reference",
       "effect": "a type identifier for the collection, distinct from every other",
       "facts": "facts/CoreMedia/TagCollection.md",
       "source": "the host's own CoreMedia, held over 208 answers by tests/backports/host/coremedia7/tagcollectionimage.m, which builds the port's file as its own image and reaches each name through dlopen(RTLD_LOCAL | RTLD_FIRST)"
@@ -216,7 +216,7 @@
       "introduced": "18.0",
       "minimum": "6.0",
       "status": "implemented",
-      "reason": "CMTagCollection arrived at iOS 17 and the SDK the toolchain resolves is 16.4, where none of CMTag, CMTagCollection or CMTaggedBufferGroup exists; CharonCMTag26.h transcribes 26.2's own declarations and the port is an Objective-C class behind 26.2's bridged reference",
+      "reason": "CMTagCollection arrived at iOS 17 and the SDK the toolchain resolves is 16.4, where none of CMTag, CMTagCollection or CMTaggedBufferGroup exists; RevenantCMTag26.h transcribes 26.2's own declarations and the port is an Objective-C class behind 26.2's bridged reference",
       "effect": "whether it holds none",
       "facts": "facts/CoreMedia/TagCollection.md",
       "source": "the host's own CoreMedia, held over 208 answers by tests/backports/host/coremedia7/tagcollectionimage.m, which builds the port's file as its own image and reaches each name through dlopen(RTLD_LOCAL | RTLD_FIRST)"
@@ -227,7 +227,7 @@
       "introduced": "18.0",
       "minimum": "6.0",
       "status": "implemented",
-      "reason": "CMTagCollection arrived at iOS 17 and the SDK the toolchain resolves is 16.4, where none of CMTag, CMTagCollection or CMTaggedBufferGroup exists; CharonCMTag26.h transcribes 26.2's own declarations and the port is an Objective-C class behind 26.2's bridged reference",
+      "reason": "CMTagCollection arrived at iOS 17 and the SDK the toolchain resolves is 16.4, where none of CMTag, CMTagCollection or CMTaggedBufferGroup exists; RevenantCMTag26.h transcribes 26.2's own declarations and the port is an Objective-C class behind 26.2's bridged reference",
       "effect": "empties it",
       "facts": "facts/CoreMedia/TagCollection.md",
       "source": "the host's own CoreMedia, held over 208 answers by tests/backports/host/coremedia7/tagcollectionimage.m, which builds the port's file as its own image and reaches each name through dlopen(RTLD_LOCAL | RTLD_FIRST)"
@@ -238,7 +238,7 @@
       "introduced": "18.0",
       "minimum": "6.0",
       "status": "implemented",
-      "reason": "CMTagCollection arrived at iOS 17 and the SDK the toolchain resolves is 16.4, where none of CMTag, CMTagCollection or CMTaggedBufferGroup exists; CharonCMTag26.h transcribes 26.2's own declarations and the port is an Objective-C class behind 26.2's bridged reference",
+      "reason": "CMTagCollection arrived at iOS 17 and the SDK the toolchain resolves is 16.4, where none of CMTag, CMTagCollection or CMTaggedBufferGroup exists; RevenantCMTag26.h transcribes 26.2's own declarations and the port is an Objective-C class behind 26.2's bridged reference",
       "effect": "drops the tags of that category",
       "facts": "facts/CoreMedia/TagCollection.md",
       "source": "the host's own CoreMedia, held over 208 answers by tests/backports/host/coremedia7/tagcollectionimage.m, which builds the port's file as its own image and reaches each name through dlopen(RTLD_LOCAL | RTLD_FIRST)"
@@ -249,7 +249,7 @@
       "introduced": "18.0",
       "minimum": "6.0",
       "status": "implemented",
-      "reason": "CMTagCollection arrived at iOS 17 and the SDK the toolchain resolves is 16.4, where none of CMTag, CMTagCollection or CMTaggedBufferGroup exists; CharonCMTag26.h transcribes 26.2's own declarations and the port is an Objective-C class behind 26.2's bridged reference",
+      "reason": "CMTagCollection arrived at iOS 17 and the SDK the toolchain resolves is 16.4, where none of CMTag, CMTagCollection or CMTaggedBufferGroup exists; RevenantCMTag26.h transcribes 26.2's own declarations and the port is an Objective-C class behind 26.2's bridged reference",
       "effect": "kCMTagCollectionError_TagNotFound when it does not hold it",
       "facts": "facts/CoreMedia/TagCollection.md",
       "source": "the host's own CoreMedia, held over 208 answers by tests/backports/host/coremedia7/tagcollectionimage.m, which builds the port's file as its own image and reaches each name through dlopen(RTLD_LOCAL | RTLD_FIRST)"
@@ -260,7 +260,7 @@
       "introduced": "17.0",
       "minimum": "6.0",
       "status": "implemented",
-      "reason": "CMTag arrived at iOS 17 and the SDK the toolchain resolves is 16.4, where none of CMTag, CMTagCollection or CMTaggedBufferGroup exists; CharonCMTag26.h transcribes 26.2's own declaration",
+      "reason": "CMTag arrived at iOS 17 and the SDK the toolchain resolves is 16.4, where none of CMTag, CMTagCollection or CMTaggedBufferGroup exists; RevenantCMTag26.h transcribes 26.2's own declaration",
       "effect": "the CMTag of no category, no data type and no value - the zero quadruple - which CMTagIsValid rejects and the host's CMTagCollectionAddTag accepts and carries nothing",
       "facts": "facts/CoreMedia/TagCollection.md",
       "source": "read out of the host's own CoreMedia, and held to it by tests/backports/host/coremedia7/tagcollectionimage.m, whose AddTag invalid case compares the host's answer with the port's"
@@ -271,7 +271,7 @@
       "introduced": "17.0",
       "minimum": "6.0",
       "status": "implemented",
-      "reason": "CMTag arrived at iOS 17 and the SDK the toolchain resolves is 16.4, where the header does not exist; CharonCMTag26.h transcribes 26.2's declaration",
+      "reason": "CMTag arrived at iOS 17 and the SDK the toolchain resolves is 16.4, where the header does not exist; RevenantCMTag26.h transcribes 26.2's declaration",
       "effect": "the key a serialised entry gives its category under = CFSTR(\"category\")",
       "facts": "facts/CoreMedia/TagCollection.md",
       "source": "read out of the host's own CoreMedia and compared to the port's own, byte for byte, by the three key cases of tests/backports/host/coremedia7/tagcollectionimage.m; and used: each of the port's three keys is looked up in a dictionary the *host* built from a real collection, so a key that differs finds nothing. Changing kCMTagDataTypeKey to \"dataType\" gives 215 checks, 1 different"
@@ -282,7 +282,7 @@
       "introduced": "17.0",
       "minimum": "6.0",
       "status": "implemented",
-      "reason": "CMTag arrived at iOS 17 and the SDK the toolchain resolves is 16.4, where the header does not exist; CharonCMTag26.h transcribes 26.2's declaration",
+      "reason": "CMTag arrived at iOS 17 and the SDK the toolchain resolves is 16.4, where the header does not exist; RevenantCMTag26.h transcribes 26.2's declaration",
       "effect": "the key a serialised entry gives its value under = CFSTR(\"value\")",
       "facts": "facts/CoreMedia/TagCollection.md",
       "source": "read out of the host's own CoreMedia and compared to the port's own, byte for byte, by the three key cases of tests/backports/host/coremedia7/tagcollectionimage.m; and used: each of the port's three keys is looked up in a dictionary the *host* built from a real collection, so a key that differs finds nothing. Changing kCMTagDataTypeKey to \"dataType\" gives 215 checks, 1 different"
@@ -293,7 +293,7 @@
       "introduced": "17.0",
       "minimum": "6.0",
       "status": "implemented",
-      "reason": "CMTag arrived at iOS 17 and the SDK the toolchain resolves is 16.4, where the header does not exist; CharonCMTag26.h transcribes 26.2's declaration",
+      "reason": "CMTag arrived at iOS 17 and the SDK the toolchain resolves is 16.4, where the header does not exist; RevenantCMTag26.h transcribes 26.2's declaration",
       "effect": "the key a serialised entry gives its data type under - flags, not dataType = CFSTR(\"flags\")",
       "facts": "facts/CoreMedia/TagCollection.md",
       "source": "read out of the host's own CoreMedia and compared to the port's own, byte for byte, by the three key cases of tests/backports/host/coremedia7/tagcollectionimage.m; and used: each of the port's three keys is looked up in a dictionary the *host* built from a real collection, so a key that differs finds nothing. Changing kCMTagDataTypeKey to \"dataType\" gives 215 checks, 1 different"
@@ -304,7 +304,7 @@
       "introduced": "18.0",
       "minimum": "6.0",
       "status": "implemented",
-      "reason": "CMTagCollection arrived at iOS 17 and the SDK the toolchain resolves is 16.4, where none of CMTag, CMTagCollection or CMTaggedBufferGroup exists; CharonCMTag26.h transcribes 26.2's own declarations and the port is an Objective-C class behind 26.2's bridged reference",
+      "reason": "CMTagCollection arrived at iOS 17 and the SDK the toolchain resolves is 16.4, where none of CMTag, CMTagCollection or CMTaggedBufferGroup exists; RevenantCMTag26.h transcribes 26.2's own declarations and the port is an Objective-C class behind 26.2's bridged reference",
       "effect": "a collection holding the tags of both, each of them once",
       "facts": "facts/CoreMedia/TagCollection.md",
       "source": "the host's own CoreMedia, held over 268 answers by tests/backports/host/coremedia7/tagcollectionimage.m under AddressSanitizer, which builds the port's file as its own image and reaches each name through dlopen(RTLD_LOCAL | RTLD_FIRST)"
@@ -315,7 +315,7 @@
       "introduced": "18.0",
       "minimum": "6.0",
       "status": "implemented",
-      "reason": "CMTagCollection arrived at iOS 17 and the SDK the toolchain resolves is 16.4, where none of CMTag, CMTagCollection or CMTaggedBufferGroup exists; CharonCMTag26.h transcribes 26.2's own declarations and the port is an Objective-C class behind 26.2's bridged reference",
+      "reason": "CMTagCollection arrived at iOS 17 and the SDK the toolchain resolves is 16.4, where none of CMTag, CMTagCollection or CMTaggedBufferGroup exists; RevenantCMTag26.h transcribes 26.2's own declarations and the port is an Objective-C class behind 26.2's bridged reference",
       "effect": "a collection holding only the tags both hold",
       "facts": "facts/CoreMedia/TagCollection.md",
       "source": "the host's own CoreMedia, held over 268 answers by tests/backports/host/coremedia7/tagcollectionimage.m under AddressSanitizer, which builds the port's file as its own image and reaches each name through dlopen(RTLD_LOCAL | RTLD_FIRST)"
@@ -326,7 +326,7 @@
       "introduced": "18.0",
       "minimum": "6.0",
       "status": "implemented",
-      "reason": "CMTagCollection arrived at iOS 17 and the SDK the toolchain resolves is 16.4, where none of CMTag, CMTagCollection or CMTaggedBufferGroup exists; CharonCMTag26.h transcribes 26.2's own declarations and the port is an Objective-C class behind 26.2's bridged reference",
+      "reason": "CMTagCollection arrived at iOS 17 and the SDK the toolchain resolves is 16.4, where none of CMTag, CMTagCollection or CMTaggedBufferGroup exists; RevenantCMTag26.h transcribes 26.2's own declarations and the port is an Objective-C class behind 26.2's bridged reference",
       "effect": "a collection holding what the first holds and the second does not",
       "facts": "facts/CoreMedia/TagCollection.md",
       "source": "the host's own CoreMedia, held over 268 answers by tests/backports/host/coremedia7/tagcollectionimage.m under AddressSanitizer, which builds the port's file as its own image and reaches each name through dlopen(RTLD_LOCAL | RTLD_FIRST)"
@@ -337,7 +337,7 @@
       "introduced": "18.0",
       "minimum": "6.0",
       "status": "implemented",
-      "reason": "CMTagCollection arrived at iOS 17 and the SDK the toolchain resolves is 16.4, where none of CMTag, CMTagCollection or CMTaggedBufferGroup exists; CharonCMTag26.h transcribes 26.2's own declarations and the port is an Objective-C class behind 26.2's bridged reference",
+      "reason": "CMTagCollection arrived at iOS 17 and the SDK the toolchain resolves is 16.4, where none of CMTag, CMTagCollection or CMTaggedBufferGroup exists; RevenantCMTag26.h transcribes 26.2's own declarations and the port is an Objective-C class behind 26.2's bridged reference",
       "effect": "a collection holding the tags in one and not the other, counted once - a tag both hold is in neither",
       "facts": "facts/CoreMedia/TagCollection.md",
       "source": "the host's own CoreMedia, held over 268 answers by tests/backports/host/coremedia7/tagcollectionimage.m under AddressSanitizer, which builds the port's file as its own image and reaches each name through dlopen(RTLD_LOCAL | RTLD_FIRST)"
@@ -348,7 +348,7 @@
       "introduced": "18.0",
       "minimum": "6.0",
       "status": "implemented",
-      "reason": "CMTagCollection arrived at iOS 17 and the SDK the toolchain resolves is 16.4, where none of CMTag, CMTagCollection or CMTaggedBufferGroup exists; CharonCMTag26.h transcribes 26.2's own declarations and the port is an Objective-C class behind 26.2's bridged reference",
+      "reason": "CMTagCollection arrived at iOS 17 and the SDK the toolchain resolves is 16.4, where none of CMTag, CMTagCollection or CMTaggedBufferGroup exists; RevenantCMTag26.h transcribes 26.2's own declarations and the port is an Objective-C class behind 26.2's bridged reference",
       "effect": "a collection holding only the tags of the given categories; a count of zero is kCMTagCollectionError_ParamErr, measured",
       "facts": "facts/CoreMedia/TagCollection.md",
       "source": "the host's own CoreMedia, held over 268 answers by tests/backports/host/coremedia7/tagcollectionimage.m under AddressSanitizer, which builds the port's file as its own image and reaches each name through dlopen(RTLD_LOCAL | RTLD_FIRST)"
@@ -359,7 +359,7 @@
       "introduced": "18.0",
       "minimum": "6.0",
       "status": "implemented",
-      "reason": "CMTagCollection arrived at iOS 17 and the SDK the toolchain resolves is 16.4, where none of CMTag, CMTagCollection or CMTaggedBufferGroup exists; CharonCMTag26.h transcribes 26.2's own declarations and the port is an Objective-C class behind 26.2's bridged reference",
+      "reason": "CMTagCollection arrived at iOS 17 and the SDK the toolchain resolves is 16.4, where none of CMTag, CMTagCollection or CMTaggedBufferGroup exists; RevenantCMTag26.h transcribes 26.2's own declarations and the port is an Objective-C class behind 26.2's bridged reference",
       "effect": "calls the applier for every tag, in the collection's order",
       "facts": "facts/CoreMedia/TagCollection.md",
       "source": "the host's own CoreMedia, held over 268 answers by tests/backports/host/coremedia7/tagcollectionimage.m under AddressSanitizer, which builds the port's file as its own image and reaches each name through dlopen(RTLD_LOCAL | RTLD_FIRST)"
@@ -370,7 +370,7 @@
       "introduced": "18.0",
       "minimum": "6.0",
       "status": "implemented",
-      "reason": "CMTagCollection arrived at iOS 17 and the SDK the toolchain resolves is 16.4, where none of CMTag, CMTagCollection or CMTaggedBufferGroup exists; CharonCMTag26.h transcribes 26.2's own declarations and the port is an Objective-C class behind 26.2's bridged reference",
+      "reason": "CMTagCollection arrived at iOS 17 and the SDK the toolchain resolves is 16.4, where none of CMTag, CMTagCollection or CMTaggedBufferGroup exists; RevenantCMTag26.h transcribes 26.2's own declarations and the port is an Objective-C class behind 26.2's bridged reference",
       "effect": "calls the filter for each tag until it answers true, and answers the tag that did, or kCMTagInvalid when none did",
       "facts": "facts/CoreMedia/TagCollection.md",
       "source": "the host's own CoreMedia, held over 268 answers by tests/backports/host/coremedia7/tagcollectionimage.m under AddressSanitizer, which builds the port's file as its own image and reaches each name through dlopen(RTLD_LOCAL | RTLD_FIRST)"
@@ -381,7 +381,7 @@
       "introduced": "18.0",
       "minimum": "6.0",
       "status": "implemented",
-      "reason": "CMTagCollection arrived at iOS 17 and the SDK the toolchain resolves is 16.4, where none of CMTag, CMTagCollection or CMTaggedBufferGroup exists; CharonCMTag26.h transcribes 26.2's own declarations and the port is an Objective-C class behind 26.2's bridged reference",
+      "reason": "CMTagCollection arrived at iOS 17 and the SDK the toolchain resolves is 16.4, where none of CMTag, CMTagCollection or CMTaggedBufferGroup exists; RevenantCMTag26.h transcribes 26.2's own declarations and the port is an Objective-C class behind 26.2's bridged reference",
       "effect": "a dictionary of one entry per tag under the key tags, each entry category, value and flags as CFNumbers, flags carrying the data type",
       "facts": "facts/CoreMedia/TagCollection.md",
       "source": "the host's own CoreMedia, held over 268 answers by tests/backports/host/coremedia7/tagcollectionimage.m under AddressSanitizer, which builds the port's file as its own image and reaches each name through dlopen(RTLD_LOCAL | RTLD_FIRST)"
@@ -392,7 +392,7 @@
       "introduced": "18.0",
       "minimum": "6.0",
       "status": "implemented",
-      "reason": "CMTagCollection arrived at iOS 17 and the SDK the toolchain resolves is 16.4, where none of CMTag, CMTagCollection or CMTaggedBufferGroup exists; CharonCMTag26.h transcribes 26.2's own declarations and the port is an Objective-C class behind 26.2's bridged reference",
+      "reason": "CMTagCollection arrived at iOS 17 and the SDK the toolchain resolves is 16.4, where none of CMTag, CMTagCollection or CMTaggedBufferGroup exists; RevenantCMTag26.h transcribes 26.2's own declarations and the port is an Objective-C class behind 26.2's bridged reference",
       "effect": "the collection a dictionary of that shape describes",
       "facts": "facts/CoreMedia/TagCollection.md",
       "source": "the host's own CoreMedia, held over 268 answers by tests/backports/host/coremedia7/tagcollectionimage.m under AddressSanitizer, which builds the port's file as its own image and reaches each name through dlopen(RTLD_LOCAL | RTLD_FIRST)"
@@ -403,7 +403,7 @@
       "introduced": "18.0",
       "minimum": "6.0",
       "status": "implemented",
-      "reason": "CMTagCollection arrived at iOS 17 and the SDK the toolchain resolves is 16.4, where none of CMTag, CMTagCollection or CMTaggedBufferGroup exists; CharonCMTag26.h transcribes 26.2's own declarations and the port is an Objective-C class behind 26.2's bridged reference",
+      "reason": "CMTagCollection arrived at iOS 17 and the SDK the toolchain resolves is 16.4, where none of CMTag, CMTagCollection or CMTaggedBufferGroup exists; RevenantCMTag26.h transcribes 26.2's own declarations and the port is an Objective-C class behind 26.2's bridged reference",
       "effect": "the record the host reads back: a 44-byte header and 16 bytes per tag - a big-endian total length, the four bytes tgco, a 20, the four bytes tgin, a zero field, the string tag coll, a sub-length of 16 * (count + 1), the four bytes tgli, a zero field, the count, and per tag the category as four characters, the data type and an 8-byte big-endian value",
       "facts": "facts/CoreMedia/TagCollection.md",
       "source": "the host's own CoreMedia, held over 356 answers by tests/backports/host/coremedia7/tagcollectionimage.m under AddressSanitizer - the bytes the host writes and the port's compared byte for byte, each side's reader fed the other side's record, eight truncations and every one of the eleven header fields flipped, and every length from 0 to 48"
@@ -414,7 +414,7 @@
       "introduced": "18.0",
       "minimum": "6.0",
       "status": "implemented",
-      "reason": "CMTagCollection arrived at iOS 17 and the SDK the toolchain resolves is 16.4, where none of CMTag, CMTagCollection or CMTaggedBufferGroup exists; CharonCMTag26.h transcribes 26.2's own declarations and the port is an Objective-C class behind 26.2's bridged reference",
+      "reason": "CMTagCollection arrived at iOS 17 and the SDK the toolchain resolves is 16.4, where none of CMTag, CMTagCollection or CMTaggedBufferGroup exists; RevenantCMTag26.h transcribes 26.2's own declarations and the port is an Objective-C class behind 26.2's bridged reference",
       "effect": "the collection such a record describes, and the host's own refusal for everything else: under 8 bytes kCMTagCollectionError_ParamErr, a total length, a sub-length or the 20 that does not check out -12894, a count the length cannot fit kCMTagCollectionError_InvalidTagCollectionData, either zero field kCMTagCollectionError_InvalidTagCollectionDataVersion, and an altered tag coll kCMTagCollectionError_InvalidTagCollectionData; the three magic tags are not compared, because the host does not compare them",
       "facts": "facts/CoreMedia/TagCollection.md",
       "source": "the host's own CoreMedia, held over 356 answers by tests/backports/host/coremedia7/tagcollectionimage.m under AddressSanitizer - the bytes the host writes and the port's compared byte for byte, each side's reader fed the other side's record, eight truncations and every one of the eleven header fields flipped, and every length from 0 to 48"
@@ -557,7 +557,7 @@
       "introduced": "17.0",
       "minimum": "6.0",
       "status": "implemented",
-      "reason": "CMTagCollection arrived at iOS 17 and CMTaggedBufferGroup with it, and the SDK the toolchain resolves is 16.4, where none of CMTag, CMTagCollection or CMTaggedBufferGroup exists at all. CharonCMTag26.h transcribes 26.2's declarations for the tag collection and that half is carried; this type is not written, because nothing about the host's answers for it has been measured and a shape guessed from the header is what the brief forbids (facts/CoreMedia/TagCollection.md, the CMTaggedBufferGroup section)",
+      "reason": "CMTagCollection arrived at iOS 17 and CMTaggedBufferGroup with it, and the SDK the toolchain resolves is 16.4, where none of CMTag, CMTagCollection or CMTaggedBufferGroup exists at all. RevenantCMTag26.h transcribes 26.2's declarations for the tag collection and that half is carried; this type is not written, because nothing about the host's answers for it has been measured and a shape guessed from the header is what the brief forbids (facts/CoreMedia/TagCollection.md, the CMTaggedBufferGroup section)",
       "facts": "facts/CoreMedia/TagCollection.md",
       "source": "the host's own CoreMedia over the chain the group's 464/0 fixture already builds - a subset chain of three entries {video}, {video,track}, {video,track,gone} over three pixel buffers - measured in facts/CoreMedia/cmtag-fixtures/taggedgroup-measure.m, answers beside it, commit 2fbdb758c, and held by tests/backports/host/coremedia7/taggedgroupdescription.m at 28 checks, 0 different under AddressSanitizer, with the count-only and count-only and dropped-attachment mutants both red for their own case",
       "effect": "a format description for the group, made with CMFormatDescriptionCreate at media type video and media subtype 'tbgr' - measured 1952606066, and its CFTypeID is CMFormatDescriptionGetTypeID()'s, so a caller gets the platform's own type - carrying the group's per-entry tag collections in its extensions dictionary as CFData, a CMItemCount and that collection's tags per entry in order. A NULL group is not a failure: the host answers 0 and hands back a real description matching nothing, and the reason is visible - there are no entries to record"
@@ -568,7 +568,7 @@
       "introduced": "26.0",
       "minimum": "6.0",
       "status": "implemented",
-      "reason": "CMTagCollection arrived at iOS 17 and CMTaggedBufferGroup with it, and the SDK the toolchain resolves is 16.4, where none of CMTag, CMTagCollection or CMTaggedBufferGroup exists at all. CharonCMTag26.h transcribes 26.2's declarations for the tag collection and that half is carried; this type is not written, because nothing about the host's answers for it has been measured and a shape guessed from the header is what the brief forbids (facts/CoreMedia/TagCollection.md, the CMTaggedBufferGroup section)",
+      "reason": "CMTagCollection arrived at iOS 17 and CMTaggedBufferGroup with it, and the SDK the toolchain resolves is 16.4, where none of CMTag, CMTagCollection or CMTaggedBufferGroup exists at all. RevenantCMTag26.h transcribes 26.2's declarations for the tag collection and that half is carried; this type is not written, because nothing about the host's answers for it has been measured and a shape guessed from the header is what the brief forbids (facts/CoreMedia/TagCollection.md, the CMTaggedBufferGroup section)",
       "facts": "facts/CoreMedia/TagCollection.md",
       "source": "the host's own CoreMedia over the chain the group's 464/0 fixture already builds - a subset chain of three entries {video}, {video,track}, {video,track,gone} over three pixel buffers - measured in facts/CoreMedia/cmtag-fixtures/taggedgroup-measure.m, answers beside it, commit 2fbdb758c, and held by tests/backports/host/coremedia7/taggedgroupdescription.m at 28 checks, 0 different under AddressSanitizer, with the count-only and count-only and dropped-attachment mutants both red for their own case",
       "effect": "the same description with the caller's extensions kept under their own keys alongside the port's. The host takes NULL and a dictionary alike, and both match the group, so what it stores is not observable on this surface; the port keeps the caller's keys rather than replacing them"
@@ -579,7 +579,7 @@
       "introduced": "17.0",
       "minimum": "6.0",
       "status": "implemented",
-      "reason": "CMTagCollection arrived at iOS 17 and CMTaggedBufferGroup with it, and the SDK the toolchain resolves is 16.4, where none of CMTag, CMTagCollection or CMTaggedBufferGroup exists at all. CharonCMTag26.h transcribes 26.2's declarations for the tag collection and that half is carried; this type is not written, because nothing about the host's answers for it has been measured and a shape guessed from the header is what the brief forbids (facts/CoreMedia/TagCollection.md, the CMTaggedBufferGroup section)",
+      "reason": "CMTagCollection arrived at iOS 17 and CMTaggedBufferGroup with it, and the SDK the toolchain resolves is 16.4, where none of CMTag, CMTagCollection or CMTaggedBufferGroup exists at all. RevenantCMTag26.h transcribes 26.2's declarations for the tag collection and that half is carried; this type is not written, because nothing about the host's answers for it has been measured and a shape guessed from the header is what the brief forbids (facts/CoreMedia/TagCollection.md, the CMTaggedBufferGroup section)",
       "facts": "facts/CoreMedia/TagCollection.md",
       "source": "the host's own CoreMedia over the chain the group's 464/0 fixture already builds - a subset chain of three entries {video}, {video,track}, {video,track,gone} over three pixel buffers - measured in facts/CoreMedia/cmtag-fixtures/taggedgroup-measure.m, answers beside it, commit 2fbdb758c, and held by tests/backports/host/coremedia7/taggedgroupdescription.m at 28 checks, 0 different under AddressSanitizer, with the count-only and count-only and dropped-attachment mutants both red for their own case",
       "effect": "true when the group's per-entry tag collections equal the description's, in order and by content, and nothing else. Three cases fix that: the group it came from is 1; a group of the same tags over different buffers is 1, so buffers are not part of it; a group of the same entry SIZES over different tags is 0, so it is not a count; two entries is 0 and NULL is 0. The comparison is the port's own tag equality over each collection's sorted storage, because CFEqual has nothing to say about a bridged Objective-C class"
@@ -590,7 +590,7 @@
       "introduced": "17.0",
       "minimum": "6.0",
       "status": "implemented",
-      "reason": "CMTagCollection arrived at iOS 17 and CMTaggedBufferGroup with it, and the SDK the toolchain resolves is 16.4, where none of CMTag, CMTagCollection or CMTaggedBufferGroup exists at all. CharonCMTag26.h transcribes 26.2's declarations for the tag collection and that half is carried; this type is not written, because nothing about the host's answers for it has been measured and a shape guessed from the header is what the brief forbids (facts/CoreMedia/TagCollection.md, the CMTaggedBufferGroup section)",
+      "reason": "CMTagCollection arrived at iOS 17 and CMTaggedBufferGroup with it, and the SDK the toolchain resolves is 16.4, where none of CMTag, CMTagCollection or CMTaggedBufferGroup exists at all. RevenantCMTag26.h transcribes 26.2's declarations for the tag collection and that half is carried; this type is not written, because nothing about the host's answers for it has been measured and a shape guessed from the header is what the brief forbids (facts/CoreMedia/TagCollection.md, the CMTaggedBufferGroup section)",
       "facts": "facts/CoreMedia/TagCollection.md",
       "source": "the host's own CoreMedia over the chain the group's 464/0 fixture already builds - a subset chain of three entries {video}, {video,track}, {video,track,gone} over three pixel buffers - measured in facts/CoreMedia/cmtag-fixtures/taggedgroup-measure.m, answers beside it, commit 2fbdb758c, and held by tests/backports/host/coremedia7/taggedgroupdescription.m at 28 checks, 0 different under AddressSanitizer, with the count-only and count-only and dropped-attachment mutants both red for their own case",
       "effect": "0 and a real CMSampleBuffer - one sample, data ready, the given presentation timestamp and duration kept (measured 1/2 and 2/1) and numSamples 1 - created with that description over an empty CMBlockBuffer, with the group attached to it. The attachment is what carries the group and it retains it, under kCMAttachmentMode_ShouldNotPropagate so a copied buffer does not hand its group to the copy; the group is released with the buffer, which is CF's ownership and not a choice made here"
@@ -601,7 +601,7 @@
       "introduced": "17.0",
       "minimum": "6.0",
       "status": "implemented",
-      "reason": "CMTagCollection arrived at iOS 17 and CMTaggedBufferGroup with it, and the SDK the toolchain resolves is 16.4, where none of CMTag, CMTagCollection or CMTaggedBufferGroup exists at all. CharonCMTag26.h transcribes 26.2's declarations for the tag collection and that half is carried; this type is not written, because nothing about the host's answers for it has been measured and a shape guessed from the header is what the brief forbids (facts/CoreMedia/TagCollection.md, the CMTaggedBufferGroup section)",
+      "reason": "CMTagCollection arrived at iOS 17 and CMTaggedBufferGroup with it, and the SDK the toolchain resolves is 16.4, where none of CMTag, CMTagCollection or CMTaggedBufferGroup exists at all. RevenantCMTag26.h transcribes 26.2's declarations for the tag collection and that half is carried; this type is not written, because nothing about the host's answers for it has been measured and a shape guessed from the header is what the brief forbids (facts/CoreMedia/TagCollection.md, the CMTaggedBufferGroup section)",
       "facts": "facts/CoreMedia/TagCollection.md",
       "source": "the host's own CoreMedia over the chain the group's 464/0 fixture already builds - a subset chain of three entries {video}, {video,track}, {video,track,gone} over three pixel buffers - measured in facts/CoreMedia/cmtag-fixtures/taggedgroup-measure.m, answers beside it, commit 2fbdb758c, and held by tests/backports/host/coremedia7/taggedgroupdescription.m at 28 checks, 0 different under AddressSanitizer, with the count-only and count-only and dropped-attachment mutants both red for their own case",
       "effect": "the group the buffer was created with, the same pointer; NULL for a sample buffer not created this way, measured on one built over an image buffer, which is what makes the pair specific to this kind of sample buffer rather than a property of sample buffers in general"

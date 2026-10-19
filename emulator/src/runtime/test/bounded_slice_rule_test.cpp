@@ -19,11 +19,11 @@
 
 namespace {
 
-using shade::AddressSpace;
-using shade::Cpu;
-using shade::GuestExecutionCoordinator;
-using shade::GuestExecutionRequest;
-using shade::MemoryPermission;
+using emulator::AddressSpace;
+using emulator::Cpu;
+using emulator::GuestExecutionCoordinator;
+using emulator::GuestExecutionRequest;
+using emulator::MemoryPermission;
 
 int failures = 0;
 

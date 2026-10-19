@@ -1,14 +1,14 @@
-#import "CharonSpriteKit.h"
+#import "RevenantSpriteKit.h"
 #if !TARGET_OS_IPHONE
 #import <AppKit/AppKit.h>
 #endif
 
-static NSString *CharonSKSizeString(CGSize size)
+static NSString *RevenantSKSizeString(CGSize size)
 {
     return [NSString stringWithFormat:@"{%g, %g}", size.width, size.height];
 }
 
-static CharonSKColor *CharonSKTextureDefaultColor(void)
+static RevenantSKColor *RevenantSKTextureDefaultColor(void)
 {
 #if TARGET_OS_IPHONE
     return [UIColor colorWithWhite:1 alpha:0];
@@ -19,7 +19,7 @@ static CharonSKColor *CharonSKTextureDefaultColor(void)
 
 @implementation SKSpriteNode {
     SKTexture *_texture;
-    CharonSKColor *_color;
+    RevenantSKColor *_color;
     CGFloat _colorBlendFactor;
     SKBlendMode _blendMode;
     CGPoint _anchorPoint;
@@ -35,7 +35,7 @@ static CharonSKColor *CharonSKTextureDefaultColor(void)
 @synthesize size = _size;
 @synthesize centerRect = _centerRect;
 
-+ (instancetype)spriteNodeWithColor:(CharonSKColor *)color size:(CGSize)size
++ (instancetype)spriteNodeWithColor:(RevenantSKColor *)color size:(CGSize)size
 {
     return [[self alloc] initWithColor:color size:size];
 }
@@ -48,15 +48,15 @@ static CharonSKColor *CharonSKTextureDefaultColor(void)
 + (instancetype)spriteNodeWithTexture:(SKTexture *)texture size:(CGSize)size
 {
     if (size.width < 0 || size.height < 0) {
-        [NSException raise:NSInvalidArgumentException format:@"Invalid bounds specified: %@", CharonSKSizeString(size)];
+        [NSException raise:NSInvalidArgumentException format:@"Invalid bounds specified: %@", RevenantSKSizeString(size)];
     }
-    return [[self alloc] initWithTexture:texture color:CharonSKTextureDefaultColor() size:size];
+    return [[self alloc] initWithTexture:texture color:RevenantSKTextureDefaultColor() size:size];
 }
 
-- (instancetype)initWithColor:(CharonSKColor *)color size:(CGSize)size
+- (instancetype)initWithColor:(RevenantSKColor *)color size:(CGSize)size
 {
     if (size.width < 0 || size.height < 0) {
-        [NSException raise:NSInvalidArgumentException format:@"Invalid size specified: %@", CharonSKSizeString(size)];
+        [NSException raise:NSInvalidArgumentException format:@"Invalid size specified: %@", RevenantSKSizeString(size)];
     }
     self = [super init];
     if (self) {
@@ -70,13 +70,13 @@ static CharonSKColor *CharonSKTextureDefaultColor(void)
 
 - (instancetype)initWithTexture:(SKTexture *)texture
 {
-    return [self initWithTexture:texture color:CharonSKTextureDefaultColor() size:texture.size];
+    return [self initWithTexture:texture color:RevenantSKTextureDefaultColor() size:texture.size];
 }
 
-- (instancetype)initWithTexture:(SKTexture *)texture color:(CharonSKColor *)color size:(CGSize)size
+- (instancetype)initWithTexture:(SKTexture *)texture color:(RevenantSKColor *)color size:(CGSize)size
 {
     if (size.width < 0 || size.height < 0) {
-        [NSException raise:NSInvalidArgumentException format:@"Invalid size specified: %@", CharonSKSizeString(size)];
+        [NSException raise:NSInvalidArgumentException format:@"Invalid size specified: %@", RevenantSKSizeString(size)];
     }
     self = [super init];
     if (self) {

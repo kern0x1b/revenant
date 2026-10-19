@@ -1,10 +1,10 @@
-#import "CharonDiffable.h"
+#import "RevenantDiffable.h"
 
-static NSString *const charon_update_file = @"_UIDiffableDataSourceUpdate.m";
-static NSString *const charon_snapshot_file = @"__UIDiffableDataSourceSnapshot.m";
-static NSString *const charon_state_file = @"_UIDiffableDataSourceState.m";
+static NSString *const revenant_update_file = @"_UIDiffableDataSourceUpdate.m";
+static NSString *const revenant_snapshot_file = @"__UIDiffableDataSourceSnapshot.m";
+static NSString *const revenant_state_file = @"_UIDiffableDataSourceState.m";
 
-static NSString *charon_joined(NSArray *identifiers)
+static NSString *revenant_joined(NSArray *identifiers)
 {
     NSMutableArray *parts = [NSMutableArray array];
     for (id identifier in identifiers)
@@ -12,7 +12,7 @@ static NSString *charon_joined(NSArray *identifiers)
     return [parts componentsJoinedByString:@","];
 }
 
-static void charon_check_unique(NSArray *identifiers, NSString *kind)
+static void revenant_check_unique(NSArray *identifiers, NSString *kind)
 {
     NSMutableSet *seen = [NSMutableSet set];
     NSMutableOrderedSet *duplicates = [NSMutableOrderedSet orderedSet];
@@ -22,13 +22,13 @@ static void charon_check_unique(NSArray *identifiers, NSString *kind)
         [seen addObject:identifier];
     }
     if (duplicates.count)
-        charon_diffable_raise(charon_update_file, 81, [NSString stringWithFormat:@"Fatal: supplied %@ identifiers are not unique. Duplicate identifiers: %@", kind, duplicates]);
+        revenant_diffable_raise(revenant_update_file, 81, [NSString stringWithFormat:@"Fatal: supplied %@ identifiers are not unique. Duplicate identifiers: %@", kind, duplicates]);
 }
 
-static void charon_raise_in_list(id destination, NSArray *identifiers, NSString *action, NSInteger line, NSString *format)
+static void revenant_raise_in_list(id destination, NSArray *identifiers, NSString *action, NSInteger line, NSString *format)
 {
-    NSString *update = [NSString stringWithFormat:@"<_UIDiffableDataSourceUpdate %p - action: %@; destinationIdentifier:%@; destIsSection: 0; identifiers: [%@]>", (__bridge void *)identifiers, action, destination, charon_joined(identifiers)];
-    charon_diffable_raise(charon_update_file, line, [NSString stringWithFormat:format, destination, update]);
+    NSString *update = [NSString stringWithFormat:@"<_UIDiffableDataSourceUpdate %p - action: %@; destinationIdentifier:%@; destIsSection: 0; identifiers: [%@]>", (__bridge void *)identifiers, action, destination, revenant_joined(identifiers)];
+    revenant_diffable_raise(revenant_update_file, line, [NSString stringWithFormat:format, destination, update]);
 }
 
 @implementation NSDiffableDataSourceSnapshot {
@@ -93,31 +93,31 @@ static void charon_raise_in_list(id destination, NSArray *identifiers, NSString 
     return all;
 }
 
-- (NSUInteger)charon_indexOfSection:(id)identifier
+- (NSUInteger)revenant_indexOfSection:(id)identifier
 {
     return identifier ? [_sections indexOfObject:identifier] : NSNotFound;
 }
 
 - (NSInteger)numberOfItemsInSection:(id)sectionIdentifier
 {
-    NSUInteger index = [self charon_indexOfSection:sectionIdentifier];
+    NSUInteger index = [self revenant_indexOfSection:sectionIdentifier];
     if (index == NSNotFound)
-        charon_diffable_raise(charon_state_file, 273, @"Section identifier was not found. You can verify the section exists by calling the indexOfSectionIdentifier API (which has O(1) performance)");
+        revenant_diffable_raise(revenant_state_file, 273, @"Section identifier was not found. You can verify the section exists by calling the indexOfSectionIdentifier API (which has O(1) performance)");
     return (NSInteger)[_items[index] count];
 }
 
 - (NSArray *)itemIdentifiersInSectionWithIdentifier:(id)sectionIdentifier
 {
-    charon_diffable_require(sectionIdentifier != nil, charon_state_file, 278, @"sectionIdentifier");
-    NSUInteger index = [self charon_indexOfSection:sectionIdentifier];
+    revenant_diffable_require(sectionIdentifier != nil, revenant_state_file, 278, @"sectionIdentifier");
+    NSUInteger index = [self revenant_indexOfSection:sectionIdentifier];
     if (index == NSNotFound)
-        charon_diffable_raise(charon_state_file, 286, @"Section identifier was not found. You can verify the section exists by calling the indexOfSectionIdentifier API (which has O(1) performance)");
+        revenant_diffable_raise(revenant_state_file, 286, @"Section identifier was not found. You can verify the section exists by calling the indexOfSectionIdentifier API (which has O(1) performance)");
     return [_items[index] array];
 }
 
 - (id)sectionIdentifierForSectionContainingItemIdentifier:(id)itemIdentifier
 {
-    charon_diffable_require(itemIdentifier != nil, charon_state_file, 297, @"identifier");
+    revenant_diffable_require(itemIdentifier != nil, revenant_state_file, 297, @"identifier");
     return [_owners objectForKey:itemIdentifier];
 }
 
@@ -134,10 +134,10 @@ static void charon_raise_in_list(id destination, NSArray *identifiers, NSString 
 
 - (NSInteger)indexOfSectionIdentifier:(id)sectionIdentifier
 {
-    return (NSInteger)[self charon_indexOfSection:sectionIdentifier];
+    return (NSInteger)[self revenant_indexOfSection:sectionIdentifier];
 }
 
-- (void)charon_removeItem:(id)item
+- (void)revenant_removeItem:(id)item
 {
     id owner = [_owners objectForKey:item];
     if (!owner)
@@ -146,10 +146,10 @@ static void charon_raise_in_list(id destination, NSArray *identifiers, NSString 
     [_owners removeObjectForKey:item];
 }
 
-- (void)charon_insertItems:(NSArray *)identifiers intoSectionAtIndex:(NSUInteger)section atIndex:(NSUInteger)position
+- (void)revenant_insertItems:(NSArray *)identifiers intoSectionAtIndex:(NSUInteger)section atIndex:(NSUInteger)position
 {
     for (id item in identifiers)
-        [self charon_removeItem:item];
+        [self revenant_removeItem:item];
     NSMutableOrderedSet *items = _items[section];
     position = MIN(position, items.count);
     for (id item in identifiers) {
@@ -161,52 +161,52 @@ static void charon_raise_in_list(id destination, NSArray *identifiers, NSString 
 - (void)appendItemsWithIdentifiers:(NSArray *)identifiers
 {
     if (!_sections.count)
-        charon_diffable_raise(charon_snapshot_file, 169, @"There are currently no sections in the data source. Please add a section first.");
+        revenant_diffable_raise(revenant_snapshot_file, 169, @"There are currently no sections in the data source. Please add a section first.");
     [self appendItemsWithIdentifiers:identifiers intoSectionWithIdentifier:_sections.lastObject];
 }
 
 - (void)appendItemsWithIdentifiers:(NSArray *)identifiers intoSectionWithIdentifier:(id)sectionIdentifier
 {
     if (!_sections.count)
-        charon_diffable_raise(charon_snapshot_file, 169, @"There are currently no sections in the data source. Please add a section first.");
-    charon_diffable_require(identifiers != nil, charon_update_file, 124, @"itemIdentifiers");
-    charon_check_unique(identifiers, @"item");
-    NSUInteger section = sectionIdentifier ? [self charon_indexOfSection:sectionIdentifier] : _sections.count - 1;
-    charon_diffable_require(section != NSNotFound, charon_update_file, 298, @"section != NSNotFound");
-    [self charon_insertItems:identifiers intoSectionAtIndex:section atIndex:NSUIntegerMax];
+        revenant_diffable_raise(revenant_snapshot_file, 169, @"There are currently no sections in the data source. Please add a section first.");
+    revenant_diffable_require(identifiers != nil, revenant_update_file, 124, @"itemIdentifiers");
+    revenant_check_unique(identifiers, @"item");
+    NSUInteger section = sectionIdentifier ? [self revenant_indexOfSection:sectionIdentifier] : _sections.count - 1;
+    revenant_diffable_require(section != NSNotFound, revenant_update_file, 298, @"section != NSNotFound");
+    [self revenant_insertItems:identifiers intoSectionAtIndex:section atIndex:NSUIntegerMax];
 }
 
-- (void)charon_insertItems:(NSArray *)identifiers relativeTo:(id)destination after:(BOOL)after
+- (void)revenant_insertItems:(NSArray *)identifiers relativeTo:(id)destination after:(BOOL)after
 {
-    charon_diffable_require(identifiers != nil, charon_snapshot_file, after ? 182 : 175, @"identifiers");
-    charon_diffable_require(destination != nil, charon_snapshot_file, after ? 183 : 176, @"destinationIdentifier");
-    charon_check_unique(identifiers, @"item");
+    revenant_diffable_require(identifiers != nil, revenant_snapshot_file, after ? 182 : 175, @"identifiers");
+    revenant_diffable_require(destination != nil, revenant_snapshot_file, after ? 183 : 176, @"destinationIdentifier");
+    revenant_check_unique(identifiers, @"item");
     if ([identifiers containsObject:destination])
-        charon_raise_in_list(destination, identifiers, @"INS", 169, @"Invalid update: destination for insertion operation [%@] is in the insertion identifier list for update: %@.");
+        revenant_raise_in_list(destination, identifiers, @"INS", 169, @"Invalid update: destination for insertion operation [%@] is in the insertion identifier list for update: %@.");
     id owner = [_owners objectForKey:destination];
-    charon_diffable_require(owner != nil, charon_update_file, 298, @"section != NSNotFound");
+    revenant_diffable_require(owner != nil, revenant_update_file, 298, @"section != NSNotFound");
     NSUInteger section = [_sections indexOfObject:owner], target = 0;
     NSMutableOrderedSet *remaining = [_items[section] mutableCopy];
     [remaining removeObjectsInArray:identifiers];
     target = [remaining indexOfObject:destination] + (after ? 1 : 0);
-    [self charon_insertItems:identifiers intoSectionAtIndex:section atIndex:target];
+    [self revenant_insertItems:identifiers intoSectionAtIndex:section atIndex:target];
 }
 
 - (void)insertItemsWithIdentifiers:(NSArray *)identifiers beforeItemWithIdentifier:(id)itemIdentifier
 {
-    [self charon_insertItems:identifiers relativeTo:itemIdentifier after:NO];
+    [self revenant_insertItems:identifiers relativeTo:itemIdentifier after:NO];
 }
 
 - (void)insertItemsWithIdentifiers:(NSArray *)identifiers afterItemWithIdentifier:(id)itemIdentifier
 {
-    [self charon_insertItems:identifiers relativeTo:itemIdentifier after:YES];
+    [self revenant_insertItems:identifiers relativeTo:itemIdentifier after:YES];
 }
 
 - (void)deleteItemsWithIdentifiers:(NSArray *)identifiers
 {
-    charon_check_unique(identifiers, @"item");
+    revenant_check_unique(identifiers, @"item");
     for (id item in identifiers)
-        [self charon_removeItem:item];
+        [self revenant_removeItem:item];
 }
 
 - (void)deleteAllItems
@@ -217,48 +217,48 @@ static void charon_raise_in_list(id destination, NSArray *identifiers, NSString 
     _generation = [NSUUID UUID].UUIDString;
 }
 
-- (void)charon_moveItem:(id)item relativeTo:(id)destination after:(BOOL)after
+- (void)revenant_moveItem:(id)item relativeTo:(id)destination after:(BOOL)after
 {
     NSArray *pair = @[item];
-    charon_diffable_require(destination != nil, charon_update_file, 529, @"toIdentifier");
+    revenant_diffable_require(destination != nil, revenant_update_file, 529, @"toIdentifier");
     if ([item isEqual:destination])
-        charon_raise_in_list(destination, pair, @"MOV", 176, @"Invalid update: destination for item move is the same as the source [%@] for update: %@.");
+        revenant_raise_in_list(destination, pair, @"MOV", 176, @"Invalid update: destination for item move is the same as the source [%@] for update: %@.");
     id owner = [_owners objectForKey:item];
-    charon_diffable_require(owner != nil, charon_update_file, 614, @"fromIndex != NSNotFound");
+    revenant_diffable_require(owner != nil, revenant_update_file, 614, @"fromIndex != NSNotFound");
     id target = [_owners objectForKey:destination];
-    charon_diffable_require(target != nil, charon_update_file, 615, @"toIndex != NSNotFound");
-    [self charon_insertItems:pair relativeTo:destination after:after];
+    revenant_diffable_require(target != nil, revenant_update_file, 615, @"toIndex != NSNotFound");
+    [self revenant_insertItems:pair relativeTo:destination after:after];
 }
 
 - (void)moveItemWithIdentifier:(id)fromIdentifier beforeItemWithIdentifier:(id)toIdentifier
 {
-    [self charon_moveItem:fromIdentifier relativeTo:toIdentifier after:NO];
+    [self revenant_moveItem:fromIdentifier relativeTo:toIdentifier after:NO];
 }
 
 - (void)moveItemWithIdentifier:(id)fromIdentifier afterItemWithIdentifier:(id)toIdentifier
 {
-    [self charon_moveItem:fromIdentifier relativeTo:toIdentifier after:YES];
+    [self revenant_moveItem:fromIdentifier relativeTo:toIdentifier after:YES];
 }
 
 - (void)reloadItemsWithIdentifiers:(NSArray *)identifiers
 {
     if (!identifiers)
         return;
-    charon_check_unique(identifiers, @"item");
+    revenant_check_unique(identifiers, @"item");
     for (id item in identifiers)
         if (![_owners objectForKey:item])
-            charon_diffable_raise(charon_snapshot_file, 377, [NSString stringWithFormat:@"Attempted to reload item identifier that does not exist in the snapshot: %@", item]);
+            revenant_diffable_raise(revenant_snapshot_file, 377, [NSString stringWithFormat:@"Attempted to reload item identifier that does not exist in the snapshot: %@", item]);
     [_reloadedItems addObjectsFromArray:identifiers];
 }
 
-- (void)charon_addSections:(NSArray *)identifiers atIndex:(NSUInteger)position
+- (void)revenant_addSections:(NSArray *)identifiers atIndex:(NSUInteger)position
 {
     NSMutableArray *existing = [NSMutableArray array];
     for (id identifier in identifiers)
         if ([_sections containsObject:identifier])
             [existing addObject:identifier];
     if (existing.count)
-        charon_diffable_raise(@"_UIDiffableDataSourceHelpers.m", 99, [NSString stringWithFormat:@"Diffable data source detected an attempt to insert or append %lu section identifier%@ that already exist%@ in the snapshot. Identifiers in a snapshot must be unique. Section identifier%@ that already exist%@: %@", (unsigned long)existing.count, existing.count == 1 ? @"" : @"s", existing.count == 1 ? @"s" : @"", existing.count == 1 ? @"" : @"s", existing.count == 1 ? @"s" : @"", existing.count == 1 ? existing[0] : (id)existing]);
+        revenant_diffable_raise(@"_UIDiffableDataSourceHelpers.m", 99, [NSString stringWithFormat:@"Diffable data source detected an attempt to insert or append %lu section identifier%@ that already exist%@ in the snapshot. Identifiers in a snapshot must be unique. Section identifier%@ that already exist%@: %@", (unsigned long)existing.count, existing.count == 1 ? @"" : @"s", existing.count == 1 ? @"s" : @"", existing.count == 1 ? @"" : @"s", existing.count == 1 ? @"s" : @"", existing.count == 1 ? existing[0] : (id)existing]);
     for (id identifier in identifiers) {
         [_sections insertObject:identifier atIndex:position++];
         [_items insertObject:[[NSMutableOrderedSet alloc] init] atIndex:position - 1];
@@ -269,43 +269,43 @@ static void charon_raise_in_list(id destination, NSArray *identifiers, NSString 
 
 - (void)appendSectionsWithIdentifiers:(NSArray *)sectionIdentifiers
 {
-    charon_diffable_require(sectionIdentifiers != nil, charon_update_file, 129, @"sectionIdentifiers");
-    charon_check_unique(sectionIdentifiers, @"section");
-    [self charon_addSections:sectionIdentifiers atIndex:_sections.count];
+    revenant_diffable_require(sectionIdentifiers != nil, revenant_update_file, 129, @"sectionIdentifiers");
+    revenant_check_unique(sectionIdentifiers, @"section");
+    [self revenant_addSections:sectionIdentifiers atIndex:_sections.count];
 }
 
-- (void)charon_insertSections:(NSArray *)identifiers relativeTo:(id)destination after:(BOOL)after
+- (void)revenant_insertSections:(NSArray *)identifiers relativeTo:(id)destination after:(BOOL)after
 {
-    charon_diffable_require(identifiers != nil, charon_update_file, 119, @"sectionIdentifiers");
-    charon_check_unique(identifiers, @"section");
+    revenant_diffable_require(identifiers != nil, revenant_update_file, 119, @"sectionIdentifiers");
+    revenant_check_unique(identifiers, @"section");
     if (destination && [identifiers containsObject:destination])
-        charon_raise_in_list(destination, identifiers, @"INS", 165, @"Invalid update: destination for section operation [%@] is in the inserted section list for update: %@");
+        revenant_raise_in_list(destination, identifiers, @"INS", 165, @"Invalid update: destination for section operation [%@] is in the inserted section list for update: %@");
     NSUInteger position = _sections.count;
     if (destination) {
-        NSUInteger found = [self charon_indexOfSection:destination];
-        charon_diffable_require(found != NSNotFound, charon_update_file, 206, @"insertIndex != NSNotFound");
+        NSUInteger found = [self revenant_indexOfSection:destination];
+        revenant_diffable_require(found != NSNotFound, revenant_update_file, 206, @"insertIndex != NSNotFound");
         position = found + (after ? 1 : 0);
     }
-    [self charon_addSections:identifiers atIndex:position];
+    [self revenant_addSections:identifiers atIndex:position];
 }
 
 - (void)insertSectionsWithIdentifiers:(NSArray *)sectionIdentifiers beforeSectionWithIdentifier:(id)toSectionIdentifier
 {
-    [self charon_insertSections:sectionIdentifiers relativeTo:toSectionIdentifier after:NO];
+    [self revenant_insertSections:sectionIdentifiers relativeTo:toSectionIdentifier after:NO];
 }
 
 - (void)insertSectionsWithIdentifiers:(NSArray *)sectionIdentifiers afterSectionWithIdentifier:(id)toSectionIdentifier
 {
-    [self charon_insertSections:sectionIdentifiers relativeTo:toSectionIdentifier after:YES];
+    [self revenant_insertSections:sectionIdentifiers relativeTo:toSectionIdentifier after:YES];
 }
 
 - (void)deleteSectionsWithIdentifiers:(NSArray *)sectionIdentifiers
 {
-    charon_diffable_require(sectionIdentifiers != nil, charon_update_file, 114, @"sectionIdentifiers");
-    charon_check_unique(sectionIdentifiers, @"section");
+    revenant_diffable_require(sectionIdentifiers != nil, revenant_update_file, 114, @"sectionIdentifiers");
+    revenant_check_unique(sectionIdentifiers, @"section");
     BOOL changed = NO;
     for (id identifier in sectionIdentifiers) {
-        NSUInteger index = [self charon_indexOfSection:identifier];
+        NSUInteger index = [self revenant_indexOfSection:identifier];
         if (index == NSNotFound)
             continue;
         for (id item in [_items[index] array])
@@ -318,20 +318,20 @@ static void charon_raise_in_list(id destination, NSArray *identifiers, NSString 
         _generation = [NSUUID UUID].UUIDString;
 }
 
-- (void)charon_moveSection:(id)section relativeTo:(id)destination after:(BOOL)after
+- (void)revenant_moveSection:(id)section relativeTo:(id)destination after:(BOOL)after
 {
-    charon_diffable_require(section != nil, charon_snapshot_file, after ? 248 : 241, @"fromSectionIdentifier");
-    charon_diffable_require(destination != nil, charon_snapshot_file, after ? 249 : 242, @"toSectionIdentifier");
+    revenant_diffable_require(section != nil, revenant_snapshot_file, after ? 248 : 241, @"fromSectionIdentifier");
+    revenant_diffable_require(destination != nil, revenant_snapshot_file, after ? 249 : 242, @"toSectionIdentifier");
     if ([section isEqual:destination])
-        charon_raise_in_list(destination, @[section], @"MOV", 174, @"Invalid update: destination for section move is the same as the source [%@] for update: %@.");
-    NSUInteger from = [self charon_indexOfSection:section];
-    charon_diffable_require(from != NSNotFound, charon_update_file, 560, @"fromSection != NSNotFound");
-    NSUInteger to = [self charon_indexOfSection:destination];
-    charon_diffable_require(to != NSNotFound, charon_update_file, 561, @"toSection != NSNotFound");
+        revenant_raise_in_list(destination, @[section], @"MOV", 174, @"Invalid update: destination for section move is the same as the source [%@] for update: %@.");
+    NSUInteger from = [self revenant_indexOfSection:section];
+    revenant_diffable_require(from != NSNotFound, revenant_update_file, 560, @"fromSection != NSNotFound");
+    NSUInteger to = [self revenant_indexOfSection:destination];
+    revenant_diffable_require(to != NSNotFound, revenant_update_file, 561, @"toSection != NSNotFound");
     NSMutableOrderedSet *items = _items[from];
     [_sections removeObjectAtIndex:from];
     [_items removeObjectAtIndex:from];
-    to = [self charon_indexOfSection:destination] + (after ? 1 : 0);
+    to = [self revenant_indexOfSection:destination] + (after ? 1 : 0);
     [_sections insertObject:section atIndex:to];
     [_items insertObject:items atIndex:to];
     _generation = [NSUUID UUID].UUIDString;
@@ -339,21 +339,21 @@ static void charon_raise_in_list(id destination, NSArray *identifiers, NSString 
 
 - (void)moveSectionWithIdentifier:(id)fromSectionIdentifier beforeSectionWithIdentifier:(id)toSectionIdentifier
 {
-    [self charon_moveSection:fromSectionIdentifier relativeTo:toSectionIdentifier after:NO];
+    [self revenant_moveSection:fromSectionIdentifier relativeTo:toSectionIdentifier after:NO];
 }
 
 - (void)moveSectionWithIdentifier:(id)fromSectionIdentifier afterSectionWithIdentifier:(id)toSectionIdentifier
 {
-    [self charon_moveSection:fromSectionIdentifier relativeTo:toSectionIdentifier after:YES];
+    [self revenant_moveSection:fromSectionIdentifier relativeTo:toSectionIdentifier after:YES];
 }
 
 - (void)reloadSectionsWithIdentifiers:(NSArray *)sectionIdentifiers
 {
-    charon_diffable_require(sectionIdentifiers != nil, charon_snapshot_file, 255, @"sectionIdentifiers");
-    charon_check_unique(sectionIdentifiers, @"section");
+    revenant_diffable_require(sectionIdentifiers != nil, revenant_snapshot_file, 255, @"sectionIdentifiers");
+    revenant_check_unique(sectionIdentifiers, @"section");
     for (id identifier in sectionIdentifiers)
-        if ([self charon_indexOfSection:identifier] == NSNotFound)
-            charon_diffable_raise(charon_snapshot_file, 374, [NSString stringWithFormat:@"Attempted to reload section identifier that does not exist in the snapshot: %@", identifier]);
+        if ([self revenant_indexOfSection:identifier] == NSNotFound)
+            revenant_diffable_raise(revenant_snapshot_file, 374, [NSString stringWithFormat:@"Attempted to reload section identifier that does not exist in the snapshot: %@", identifier]);
     [_reloadedSections addObjectsFromArray:sectionIdentifiers];
 }
 
@@ -388,32 +388,32 @@ static void charon_raise_in_list(id destination, NSArray *identifiers, NSString 
     return text;
 }
 
-- (NSArray *)charon_sections
+- (NSArray *)revenant_sections
 {
     return [_sections array];
 }
 
-- (NSUInteger)charon_countInSectionAtIndex:(NSUInteger)index
+- (NSUInteger)revenant_countInSectionAtIndex:(NSUInteger)index
 {
     return [_items[index] count];
 }
 
-- (NSArray *)charon_itemsInSectionAtIndex:(NSUInteger)index
+- (NSArray *)revenant_itemsInSectionAtIndex:(NSUInteger)index
 {
     return [_items[index] array];
 }
 
-- (NSArray *)charon_reloadedItems
+- (NSArray *)revenant_reloadedItems
 {
     return [_reloadedItems array];
 }
 
-- (NSArray *)charon_reloadedSections
+- (NSArray *)revenant_reloadedSections
 {
     return [_reloadedSections array];
 }
 
-- (NSDiffableDataSourceSnapshot *)charon_copyWithoutReloads
+- (NSDiffableDataSourceSnapshot *)revenant_copyWithoutReloads
 {
     NSDiffableDataSourceSnapshot *copy = [self copy];
     [copy->_reloadedItems removeAllObjects];
@@ -421,7 +421,7 @@ static void charon_raise_in_list(id destination, NSArray *identifiers, NSString 
     return copy;
 }
 
-- (NSIndexPath *)charon_indexPathForItem:(id)item
+- (NSIndexPath *)revenant_indexPathForItem:(id)item
 {
     id owner = item ? [_owners objectForKey:item] : nil;
     if (!owner)
@@ -430,7 +430,7 @@ static void charon_raise_in_list(id destination, NSArray *identifiers, NSString 
     return [NSIndexPath indexPathForItem:(NSInteger)[_items[section] indexOfObject:item] inSection:(NSInteger)section];
 }
 
-- (id)charon_itemAtIndexPath:(NSIndexPath *)indexPath
+- (id)revenant_itemAtIndexPath:(NSIndexPath *)indexPath
 {
     if (!indexPath)
         return nil;
@@ -440,13 +440,13 @@ static void charon_raise_in_list(id destination, NSArray *identifiers, NSString 
     return _items[(NSUInteger)section][(NSUInteger)item];
 }
 
-- (void)charon_replaceItems:(NSArray *)items inSectionAtIndex:(NSUInteger)index
+- (void)revenant_replaceItems:(NSArray *)items inSectionAtIndex:(NSUInteger)index
 {
     for (id item in [_items[index] array])
         [_owners removeObjectForKey:item];
     NSMutableOrderedSet *replacement = [[NSMutableOrderedSet alloc] init];
     for (id item in items) {
-        [self charon_removeItem:item];
+        [self revenant_removeItem:item];
         [replacement addObject:item];
         [_owners setObject:_sections[index] forKey:item];
     }

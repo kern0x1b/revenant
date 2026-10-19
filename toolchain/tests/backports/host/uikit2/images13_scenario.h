@@ -14,11 +14,11 @@ static SEL ur_img_sel(const char *name)
             continue;
         char tail = name[length];
         if (tail == '\0' || (tail >= 'A' && tail <= 'Z')) {
-            snprintf(renamed, sizeof(renamed), "%sCharonHost%s", families[index], name + length);
+            snprintf(renamed, sizeof(renamed), "%sRevenantHost%s", families[index], name + length);
             return sel_registerName(renamed);
         }
     }
-    snprintf(renamed, sizeof(renamed), "charonHost%c%s", name[0] - 32, name + 1);
+    snprintf(renamed, sizeof(renamed), "revenantHost%c%s", name[0] - 32, name + 1);
     return sel_registerName(renamed);
 }
 
@@ -166,10 +166,10 @@ static NSArray *images_scenario(NSString *folder, Class symbolClass, Class confi
 
 static NSString *make_bundle(void)
 {
-    NSString *folder = [NSTemporaryDirectory() stringByAppendingPathComponent:@"charon-images13.bundle"];
+    NSString *folder = [NSTemporaryDirectory() stringByAppendingPathComponent:@"revenant-images13.bundle"];
     [[NSFileManager defaultManager] removeItemAtPath:folder error:NULL];
     [[NSFileManager defaultManager] createDirectoryAtPath:folder withIntermediateDirectories:YES attributes:nil error:NULL];
-    [@"<?xml version=\"1.0\" encoding=\"UTF-8\"?><!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\"><plist version=\"1.0\"><dict><key>CFBundleIdentifier</key><string>local.charon.images13</string></dict></plist>" writeToFile:[folder stringByAppendingPathComponent:@"Info.plist"] atomically:YES encoding:NSUTF8StringEncoding error:NULL];
+    [@"<?xml version=\"1.0\" encoding=\"UTF-8\"?><!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\"><plist version=\"1.0\"><dict><key>CFBundleIdentifier</key><string>local.revenant.images13</string></dict></plist>" writeToFile:[folder stringByAppendingPathComponent:@"Info.plist"] atomically:YES encoding:NSUTF8StringEncoding error:NULL];
     UIGraphicsBeginImageContextWithOptions(CGSizeMake(8, 6), NO, 1);
     [[UIColor blackColor] setFill];
     UIRectFill(CGRectMake(0, 0, 8, 6));

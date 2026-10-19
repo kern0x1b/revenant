@@ -5,7 +5,7 @@
 
 #include "uECC.h"
 
-#include "CharonCKWebAuth.h"
+#include "RevenantCKWebAuth.h"
 
 static const uint8_t uECCP256Order[32] = {
     0xff, 0xff, 0xff, 0xff, 0x00, 0x00, 0x00, 0x00,
@@ -51,7 +51,7 @@ static int uECC_kernel_random(uint8_t *dest, unsigned size)
     return 1;
 }
 
-static void CharonCKInstallRNG(void)
+static void RevenantCKInstallRNG(void)
 {
     static int installed = 0;
     if (!installed) {
@@ -80,7 +80,7 @@ static int uECCDERInteger(uint8_t *out, const uint8_t value[32])
     return length + 2;
 }
 
-void CharonCKSHA256(const uint8_t *message, size_t length, uint8_t *digest)
+void RevenantCKSHA256(const uint8_t *message, size_t length, uint8_t *digest)
 {
     if (!message && length != 0) {
         return;
@@ -88,14 +88,14 @@ void CharonCKSHA256(const uint8_t *message, size_t length, uint8_t *digest)
     CC_SHA256(message, (CC_LONG)length, digest);
 }
 
-int CharonCKDigestSignES256(const uint8_t *privateKey, const uint8_t *digest, uint8_t *der, size_t capacity)
+int RevenantCKDigestSignES256(const uint8_t *privateKey, const uint8_t *digest, uint8_t *der, size_t capacity)
 {
     uint8_t raw[64];
     uint8_t half[32];
     if (!privateKey || !digest) {
         return 0;
     }
-    CharonCKInstallRNG();
+    RevenantCKInstallRNG();
     if (!uECC_sign(privateKey, digest, CC_SHA256_DIGEST_LENGTH, raw, uECC_secp256r1())) {
         return 0;
     }
@@ -118,16 +118,16 @@ int CharonCKDigestSignES256(const uint8_t *privateKey, const uint8_t *digest, ui
     return (int)offset;
 }
 
-int CharonCKSignES256(const uint8_t *privateKey, const uint8_t *message, size_t length, uint8_t *der, size_t capacity)
+int RevenantCKSignES256(const uint8_t *privateKey, const uint8_t *message, size_t length, uint8_t *der, size_t capacity)
 {
     uint8_t digest[CC_SHA256_DIGEST_LENGTH];
-    CharonCKSHA256(message, length, digest);
-    return CharonCKDigestSignES256(privateKey, digest, der, capacity);
+    RevenantCKSHA256(message, length, digest);
+    return RevenantCKDigestSignES256(privateKey, digest, der, capacity);
 }
 
-const uint8_t *CharonCKGroupOrder(void) { return uECCP256Order; }
+const uint8_t *RevenantCKGroupOrder(void) { return uECCP256Order; }
 
-int CharonCKDERSignatureValues(const uint8_t *der, size_t derLength, uint8_t r[32], uint8_t s[32])
+int RevenantCKDERSignatureValues(const uint8_t *der, size_t derLength, uint8_t r[32], uint8_t s[32])
 {
     if (derLength < 8 || derLength > 72 || der[0] != 0x30 || der[1] != (uint8_t)(derLength - 2)) {
         return 0;
@@ -158,21 +158,21 @@ int CharonCKDERSignatureValues(const uint8_t *der, size_t derLength, uint8_t r[3
     return offset == derLength;
 }
 
-const uint8_t *CharonCKDERSignatureS(const uint8_t *der, size_t derLength)
+const uint8_t *RevenantCKDERSignatureS(const uint8_t *der, size_t derLength)
 {
     static uint8_t s[32];
     uint8_t r[32];
-    return CharonCKDERSignatureValues(der, derLength, r, s) ? s : NULL;
+    return RevenantCKDERSignatureValues(der, derLength, r, s) ? s : NULL;
 }
 
-const uint8_t *CharonCKGroupOrderHalf(void)
+const uint8_t *RevenantCKGroupOrderHalf(void)
 {
     static uint8_t half[32];
     uECCOrderHalf(half);
     return half;
 }
 
-int CharonCKPublicKeyES256(const uint8_t *privateKey, uint8_t *out)
+int RevenantCKPublicKeyES256(const uint8_t *privateKey, uint8_t *out)
 {
     if (!uECC_compute_public_key(privateKey, out + 1, uECC_secp256r1())) {
         return 0;
@@ -181,7 +181,7 @@ int CharonCKPublicKeyES256(const uint8_t *privateKey, uint8_t *out)
     return 65;
 }
 
-int CharonCKDigestVerifyES256(const uint8_t *publicKey, size_t publicLength, const uint8_t *digest,
+int RevenantCKDigestVerifyES256(const uint8_t *publicKey, size_t publicLength, const uint8_t *digest,
                               const uint8_t *der, size_t derLength)
 {
     uint8_t r[32], s[32];
@@ -189,7 +189,7 @@ int CharonCKDigestVerifyES256(const uint8_t *publicKey, size_t publicLength, con
     if (publicLength != 65 || publicKey[0] != 0x04 || !digest || !der) {
         return 0;
     }
-    if (!CharonCKDERSignatureValues(der, derLength, r, s)) {
+    if (!RevenantCKDERSignatureValues(der, derLength, r, s)) {
         return 0;
     }
     memcpy(raw, r, 32);
@@ -197,27 +197,27 @@ int CharonCKDigestVerifyES256(const uint8_t *publicKey, size_t publicLength, con
     return uECC_verify(publicKey + 1, digest, CC_SHA256_DIGEST_LENGTH, raw, uECC_secp256r1());
 }
 
-int CharonCKVerifyES256(const uint8_t *publicKey, size_t publicLength, const uint8_t *message, size_t length,
+int RevenantCKVerifyES256(const uint8_t *publicKey, size_t publicLength, const uint8_t *message, size_t length,
                         const uint8_t *der, size_t derLength)
 {
     if (publicLength != 65 || publicKey[0] != 0x04) {
         return 0;
     }
     uint8_t r[32], s[32];
-    if (!CharonCKDERSignatureValues(der, derLength, r, s)) {
+    if (!RevenantCKDERSignatureValues(der, derLength, r, s)) {
         return 0;
     }
     uint8_t digest[CC_SHA256_DIGEST_LENGTH];
-    CharonCKSHA256(message, length, digest);
-    return CharonCKDigestVerifyES256(publicKey, publicLength, digest, der, derLength);
+    RevenantCKSHA256(message, length, digest);
+    return RevenantCKDigestVerifyES256(publicKey, publicLength, digest, der, derLength);
 }
 
-int CharonCKSharedSecretES256(const uint8_t *privateKey, const uint8_t *peerPublic, size_t publicLength,
+int RevenantCKSharedSecretES256(const uint8_t *privateKey, const uint8_t *peerPublic, size_t publicLength,
                               uint8_t *secret)
 {
     if (!privateKey || !peerPublic || publicLength != 65 || peerPublic[0] != 0x04 || !secret) {
         return 0;
     }
-    CharonCKInstallRNG();
+    RevenantCKInstallRNG();
     return uECC_shared_secret(peerPublic + 1, privateKey, secret, uECC_secp256r1());
 }

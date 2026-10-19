@@ -5,12 +5,12 @@ import("byteorder", {rootdir = path.join(os.scriptdir(), "..", "modules")})
 
 local FRAMEWORK = "Matter"
 local MINIMUM = "6.0"
-local SOURCE = "the SDK 26.2 headers of Matter, and the exports and the Objective-C metadata of libMatterBackports.dylib, which is connectedhomeip's own Darwin framework (v1.6.1.0) built by charon@matter for this release"
+local SOURCE = "the SDK 26.2 headers of Matter, and the exports and the Objective-C metadata of libMatterBackports.dylib, which is connectedhomeip's own Darwin framework (v1.6.1.0) built by revenant@matter for this release"
 
 local function api_symbol(symbol)
     if symbol:startswith("_OBJC_METACLASS_$_") or symbol:startswith("_OBJC_IVAR_$_") or symbol:startswith("_OBJC_")
        or symbol:startswith("__Z") or symbol:startswith("___Z") or symbol:startswith("__Unwind_") or symbol:startswith("_unwind_")
-       or symbol:startswith("$") or symbol:startswith("__dso_handle") or symbol:startswith("_charon")
+       or symbol:startswith("$") or symbol:startswith("__dso_handle") or symbol:startswith("_revenant")
        or symbol:startswith("__swift") or symbol:startswith("swift_") or symbol:startswith("_swift") then
         return nil
     end
@@ -148,7 +148,7 @@ end
 
 function main(binary, corpus, outdir, facts, architecture)
     architecture = architecture or "armv7"
-    assert(os.isfile(binary), "%s is not there: build charon@matter first", binary)
+    assert(os.isfile(binary), "%s is not there: build revenant@matter first", binary)
     assert(os.isfile(corpus), "%s is not there", corpus)
     local found = surface(binary, architecture)
     local rows = read_surface(corpus)

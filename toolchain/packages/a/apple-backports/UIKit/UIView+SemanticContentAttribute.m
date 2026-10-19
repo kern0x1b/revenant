@@ -1,18 +1,18 @@
 #import <UIKit/UIKit.h>
 #import <objc/runtime.h>
 
-static char charon_semantic_key;
+static char revenant_semantic_key;
 
-@implementation UIView (CharonSemanticContentAttribute)
+@implementation UIView (RevenantSemanticContentAttribute)
 
 - (UISemanticContentAttribute)semanticContentAttribute
 {
-    return (UISemanticContentAttribute)[objc_getAssociatedObject(self, &charon_semantic_key) integerValue];
+    return (UISemanticContentAttribute)[objc_getAssociatedObject(self, &revenant_semantic_key) integerValue];
 }
 
 - (void)setSemanticContentAttribute:(UISemanticContentAttribute)semanticContentAttribute
 {
-    objc_setAssociatedObject(self, &charon_semantic_key, @(semanticContentAttribute), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, &revenant_semantic_key, @(semanticContentAttribute), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
 + (UIUserInterfaceLayoutDirection)userInterfaceLayoutDirectionForSemanticContentAttribute:(UISemanticContentAttribute)attribute

@@ -41,7 +41,7 @@ public struct EntityIdentifier: Hashable, Sendable, CustomStringConvertible {
 
     public init<Identifier>(for value: Identifier, identifier: String) where Identifier: LosslessStringConvertible {
         self.identifier = identifier
-        self.entityType = CharonNames.simple(Identifier.self)
+        self.entityType = RevenantNames.simple(Identifier.self)
     }
 
     public init?(activityIdentifier: String) {
@@ -50,7 +50,7 @@ public struct EntityIdentifier: Hashable, Sendable, CustomStringConvertible {
 
     public init<Identifier>(for value: Identifier) where Identifier: LosslessStringConvertible {
         self.identifier = value.description
-        self.entityType = CharonNames.simple(Identifier.self)
+        self.entityType = RevenantNames.simple(Identifier.self)
     }
 
     public var description: String { return identifier }
@@ -130,7 +130,7 @@ public struct _RawRepresentableStringQuery<Entity>: EntityStringQuery
     }
 
     public func entities(matching string: String) async throws -> [Entity] {
-        guard let raw: Entity.RawValue = CharonIntentValueParser.parse(string, as: Entity.RawValue.self) else {
+        guard let raw: Entity.RawValue = RevenantIntentValueParser.parse(string, as: Entity.RawValue.self) else {
             return []
         }
         let one: Entity? = Entity(rawValue: raw)
@@ -252,7 +252,7 @@ public struct UniqueAppEntityProvider<Entity>: UniqueAppEntityQuery where Entity
 
     public func results() async throws -> Entity {
         guard let entity = try await uniqueEntity() else {
-            CharonUnset.fatal("a unique-entity provider with no entity has no result")
+            RevenantUnset.fatal("a unique-entity provider with no entity has no result")
         }
         return entity
     }
@@ -261,13 +261,13 @@ public struct UniqueAppEntityProvider<Entity>: UniqueAppEntityQuery where Entity
 }
 
 public protocol IndexedEntity: AppEntity {
-    var attributeSet: CharonSpotlightAttributeSet { get }
-    static var defaultAttributeSet: CharonSpotlightAttributeSet { get }
+    var attributeSet: RevenantSpotlightAttributeSet { get }
+    static var defaultAttributeSet: RevenantSpotlightAttributeSet { get }
     static var hideInSpotlight: Bool { get }
 }
 
 extension IndexedEntity {
-    public static var defaultAttributeSet: CharonSpotlightAttributeSet { return CharonSpotlightAttributeSet() }
+    public static var defaultAttributeSet: RevenantSpotlightAttributeSet { return RevenantSpotlightAttributeSet() }
     public static var hideInSpotlight: Bool { return false }
 }
 
@@ -355,7 +355,7 @@ extension FileEntityIdentifier: _IntentValue {
     public static var defaultResolverSpecification: Specification { return Specification() }
 }
 
-public struct CharonSpotlightAttributeSet: Codable, Hashable {
+public struct RevenantSpotlightAttributeSet: Codable, Hashable {
     public var title: String
     public var contentDescription: String?
     public var contentType: String
@@ -371,7 +371,7 @@ public struct CharonSpotlightAttributeSet: Codable, Hashable {
         self.appEntityIdentifier = appEntityIdentifier
     }
 
-    public static func == (a: CharonSpotlightAttributeSet, b: CharonSpotlightAttributeSet) -> Bool {
+    public static func == (a: RevenantSpotlightAttributeSet, b: RevenantSpotlightAttributeSet) -> Bool {
         return a.title == b.title && a.contentDescription == b.contentDescription
             && a.contentType == b.contentType && a.keywords == b.keywords
             && a.appEntityIdentifier == b.appEntityIdentifier

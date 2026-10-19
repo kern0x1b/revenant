@@ -15,7 +15,7 @@ static uint32_t next(void)
 static NSString *normalized(NSString *text)
 {
     NSMutableString *result = [text mutableCopy];
-    [result replaceOccurrencesOfString:@"CharonHost" withString:@"" options:0 range:NSMakeRange(0, result.length)];
+    [result replaceOccurrencesOfString:@"RevenantHost" withString:@"" options:0 range:NSMakeRange(0, result.length)];
     for (NSString *pattern in @[@"0x[0-9a-f]+", @"[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}"]) {
         NSRegularExpression *expression = [NSRegularExpression regularExpressionWithPattern:pattern options:0 error:NULL];
         NSString *template = [pattern hasPrefix:@"0x"] ? @"0x" : @"GEN";
@@ -125,7 +125,7 @@ static void randomOperation(NSDiffableDataSourceSnapshot *target)
 int main(int argc, char **argv)
 {
     @autoreleasepool {
-        Class port = NSClassFromString(@"CharonHostNSDiffableDataSourceSnapshot");
+        Class port = NSClassFromString(@"RevenantHostNSDiffableDataSourceSnapshot");
         CHECK(port != Nil, "the port defines the snapshot");
         CHECK([port superclass] == [NSObject class] && [port conformsToProtocol:@protocol(NSCopying)] == [NSDiffableDataSourceSnapshot conformsToProtocol:@protocol(NSCopying)]
                   && [port conformsToProtocol:@protocol(NSSecureCoding)] == [NSDiffableDataSourceSnapshot conformsToProtocol:@protocol(NSSecureCoding)], "it is an NSObject that copies and does not archive, as the system's is");
@@ -182,8 +182,8 @@ int main(int argc, char **argv)
         printf("outcomes: %lu kinds\n", (unsigned long)kinds.count);
         for (NSString *kind in [kinds.allKeys sortedArrayUsingSelector:@selector(compare:)])
             printf("  %5ld %s\n", (long)[kinds[kind] integerValue], kind.UTF8String);
-        charon_check(wrong == 0, "random sequences of snapshot operations end in the system's state or exception", [NSString stringWithFormat:@"%lu differ", (unsigned long)wrong]);
+        revenant_check(wrong == 0, "random sequences of snapshot operations end in the system's state or exception", [NSString stringWithFormat:@"%lu differ", (unsigned long)wrong]);
     }
-    printf("checks=%d failures=%d\n", charon_checks, charon_failures);
-    return charon_failures;
+    printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
+    return revenant_failures;
 }

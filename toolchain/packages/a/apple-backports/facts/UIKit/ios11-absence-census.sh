@@ -2,9 +2,9 @@
 # The measurement registry/UIKit/ios11.json cites: does each name the slice's rows name exist in the
 # release a row is `absent` about, read class-scoped out of that release's own dyld shared cache.
 #
-# Usage: CHARON_ROOT=<worktree> sh packages/a/apple-backports/facts/UIKit/ios11-absence-census.sh
+# Usage: REVENANT_ROOT=<worktree> sh packages/a/apple-backports/facts/UIKit/ios11-absence-census.sh
 #
-# Needs nothing but the tree's own tools and the held caches under $HOME/.charon/dyld: no SDK, no
+# Needs nothing but the tree's own tools and the held caches under $HOME/.revenant/dyld: no SDK, no
 # compiler, no package store. Every rung prints its class and protocol counts before its answers,
 # which is the control: 11.0 is a rung the slice's names really do exist on, so a zero on 6.1.3 or
 # 4.3 beside those counts is the release's and not the reader's. Drop the 11.0 lines and a run
@@ -15,14 +15,14 @@
 # families are named by their accessors. Each name is asked as `-[Owner selector]`; the word after it
 # is PRESENT or no, and "owner absent" says the release has no such class or protocol at all.
 set -eu
-root=${CHARON_ROOT:-$PWD}
+root=${REVENANT_ROOT:-$PWD}
 inventory=$root/tools/corpus/objc-inventory.lua
 
 check() {
     owner=$1
     shift
     for cache in 6.1.3/dyld_shared_cache_armv7 4.3/dyld_shared_cache_armv7 11.0/dyld_shared_cache_arm64; do
-        CHARON_ROOT=$root xmake l "$inventory" "$HOME/.charon/dyld/$cache" 2>/dev/null |
+        REVENANT_ROOT=$root xmake l "$inventory" "$HOME/.revenant/dyld/$cache" 2>/dev/null |
         awk -F'\t' -v owner="$owner" -v cache="$cache" -v want="$*" '
             $1 == "class" || $1 == "protocol" { counted[$1]++ }
             ($1 == "class" || $1 == "protocol") && $2 == owner {
@@ -101,6 +101,6 @@ for name in UITextDropProposal UISpringLoadedInteraction UISpringLoadedInteracti
              UIAccessibilityContainerDataTableCell UIAccessibilityContentSizeCategoryImageAdjusting \
              UIAccessibilityLocationDescriptor UIDocumentBrowserAction; do
     echo "== $name"
-    CHARON_ROOT=$root xmake l "$root/tools/corpus/cache-census.lua" "$name" 6.1.3 4.3 11.0 2>/dev/null |
+    REVENANT_ROOT=$root xmake l "$root/tools/corpus/cache-census.lua" "$name" 6.1.3 4.3 11.0 2>/dev/null |
         grep -E 'of which naming|classes |protocols |^control:'
 done

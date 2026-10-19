@@ -21,7 +21,7 @@
 #include <string>
 #include <string_view>
 
-namespace shade {
+namespace emulator {
 namespace {
     constexpr const char* engine_image = "/GLEngine.bundle/GLEngine";
     constexpr const char* shared_image =

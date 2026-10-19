@@ -7,7 +7,7 @@
 #   hang  a program the deadline kills, which never flushes. A program's stdio is block buffered once it
 #         is a file, so the lines it wrote are still in the buffer when SIGKILL arrives and the only thing
 #         that can have put them in the file is the runner spawning it unbuffered - NSUnbufferedIO=YES,
-#         which this series' charon-runner sets and the installed addon does not. The runner the run used
+#         which this series' revenant-runner sets and the installed addon does not. The runner the run used
 #         is read out of the run's own verdict, and the three hang checks stand or fall together on it:
 #         with the tree's runner all three must hold, with the installed one the miss is expected and is
 #         reported as unmeasured rather than as a pass.
@@ -25,7 +25,7 @@ cd "$(dirname "$0")"
 device=${1:-iPhone2,1}
 release=${2:-6.1.3}
 out=${OUT_DIR:-.agent-work/output}
-known=charon-emulate-output
+known=revenant-emulate-output
 mkdir -p "$out"
 
 # This run's verdict: the one written after the marker. The key that says which runner wrote it is the
@@ -37,7 +37,7 @@ runner() {
   if text=$(verdict "$1" runner 2>/dev/null); then echo "$text"; else echo unknown; fi
 }
 verdicts() {
-  find "$HOME/.charon/emulator/images.noindex" -path "*/${device}_*/run/verdict.json" -newer "$marker" 2>/dev/null | sort
+  find "$HOME/.revenant/emulator/images.noindex" -path "*/${device}_*/run/verdict.json" -newer "$marker" 2>/dev/null | sort
 }
 named() { verdict "$1" "$2"; }
 

@@ -1,4 +1,4 @@
-#import "CharonDynamics.h"
+#import "RevenantDynamics.h"
 
 @implementation UIDynamicBehavior {
     __unsafe_unretained UIDynamicAnimator *_context;
@@ -12,10 +12,10 @@
 
 - (instancetype)init
 {
-    return [self charon_initPrimitive:NO];
+    return [self revenant_initPrimitive:NO];
 }
 
-- (instancetype)charon_initPrimitive:(BOOL)primitive __attribute__((objc_method_family(init)))
+- (instancetype)revenant_initPrimitive:(BOOL)primitive __attribute__((objc_method_family(init)))
 {
     if (!(self = [super init]))
         return nil;
@@ -32,14 +32,14 @@
 - (NSString *)description
 {
     NSMutableString *description = [NSMutableString stringWithString:[super description]];
-    if ([self charon_allowsAnimatorToStop])
+    if ([self revenant_allowsAnimatorToStop])
         [description appendString:@" (Stoppable)"];
     if (_action)
         [description appendString:@" (A)"];
     return description;
 }
 
-- (NSMutableArray *)charon_items
+- (NSMutableArray *)revenant_items
 {
     return _items;
 }
@@ -54,12 +54,12 @@
     return _context;
 }
 
-- (UIDynamicAnimator *)charon_context
+- (UIDynamicAnimator *)revenant_context
 {
     return _context;
 }
 
-- (void)charon_setContext:(UIDynamicAnimator *)animator
+- (void)revenant_setContext:(UIDynamicAnimator *)animator
 {
     _context = animator;
 }
@@ -80,8 +80,8 @@
         return;
     UIDynamicAnimator *context = _context;
     if (context) {
-        [context charon_checkBehavior:behavior];
-        [context charon_registerBehavior:behavior];
+        [context revenant_checkBehavior:behavior];
+        [context revenant_registerBehavior:behavior];
     } else {
         [_addedBehaviors addObject:behavior];
     }
@@ -94,7 +94,7 @@
         return;
     UIDynamicAnimator *context = _context;
     if (context)
-        [context charon_unregisterBehavior:behavior];
+        [context revenant_unregisterBehavior:behavior];
     else
         [_addedBehaviors removeObject:behavior];
     [_behaviors removeObject:behavior];
@@ -104,56 +104,56 @@
 {
 }
 
-- (BOOL)charon_isAssociated
+- (BOOL)revenant_isAssociated
 {
     return _associated;
 }
 
-- (void)charon_associate
+- (void)revenant_associate
 {
     _associated = YES;
     UIDynamicAnimator *context = _context;
     for (UIDynamicBehavior *behavior in [_addedBehaviors copy]) {
-        [context charon_checkBehavior:behavior];
-        [context charon_registerBehavior:behavior];
+        [context revenant_checkBehavior:behavior];
+        [context revenant_registerBehavior:behavior];
     }
     [_addedBehaviors removeAllObjects];
 }
 
-- (void)charon_dissociate
+- (void)revenant_dissociate
 {
     _associated = NO;
     [_addedBehaviors addObjectsFromArray:_behaviors];
     UIDynamicAnimator *context = _context;
     for (UIDynamicBehavior *behavior in [_behaviors copy])
-        [context charon_unregisterBehavior:behavior];
+        [context revenant_unregisterBehavior:behavior];
 }
 
-- (void)charon_step
+- (void)revenant_step
 {
 }
 
-- (void)charon_reevaluate:(NSInteger)mode
+- (void)revenant_reevaluate:(NSInteger)mode
 {
 }
 
-- (BOOL)charon_allowsAnimatorToStop
+- (BOOL)revenant_allowsAnimatorToStop
 {
     if (_isPrimitiveBehavior)
         return NO;
     if (_behaviors.count == 0)
         return _action == nil;
     for (UIDynamicBehavior *behavior in _behaviors) {
-        if (![behavior charon_allowsAnimatorToStop])
+        if (![behavior revenant_allowsAnimatorToStop])
             return NO;
     }
     return YES;
 }
 
-- (void)charon_changedParameterForBody:(CharonDynamicsBody *)body
+- (void)revenant_changedParameterForBody:(RevenantDynamicsBody *)body
 {
     body.resting = NO;
-    [_context charon_tickle];
+    [_context revenant_tickle];
 }
 
 @end

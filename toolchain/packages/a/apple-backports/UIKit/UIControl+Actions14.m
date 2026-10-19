@@ -1,9 +1,9 @@
-#import "CharonMenus.h"
+#import "RevenantMenus.h"
 #import <objc/runtime.h>
 
 #pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
 
-@implementation CharonControlProxy {
+@implementation RevenantControlProxy {
 @private
     __weak UIControl *_control;
     UIAction *_action;
@@ -38,37 +38,37 @@
     _action = action;
 }
 
-- (void)charon_fire:(id)sender
+- (void)revenant_fire:(id)sender
 {
-    [_action charon_performWithSender:sender ? sender : _control];
+    [_action revenant_performWithSender:sender ? sender : _control];
 }
 
 @end
 
-@interface CharonActionEntry : NSObject {
+@interface RevenantActionEntry : NSObject {
 @public
     UIAction *action;
     NSUInteger mask;
-    CharonControlProxy *proxy;
+    RevenantControlProxy *proxy;
 }
 @end
 
-@implementation CharonActionEntry
+@implementation RevenantActionEntry
 @end
 
-static const char charon_entries_key;
+static const char revenant_entries_key;
 
-static NSMutableArray *charon_entries(UIControl *control, BOOL create)
+static NSMutableArray *revenant_entries(UIControl *control, BOOL create)
 {
-    NSMutableArray *entries = objc_getAssociatedObject(control, &charon_entries_key);
+    NSMutableArray *entries = objc_getAssociatedObject(control, &revenant_entries_key);
     if (!entries && create) {
         entries = [NSMutableArray array];
-        objc_setAssociatedObject(control, &charon_entries_key, entries, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+        objc_setAssociatedObject(control, &revenant_entries_key, entries, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     }
     return entries;
 }
 
-static UIControlEvents charon_primary_event(UIControl *control)
+static UIControlEvents revenant_primary_event(UIControl *control)
 {
     if ([control isKindOfClass:[UIButton class]])
         return UIControlEventTouchUpInside;
@@ -80,28 +80,28 @@ static UIControlEvents charon_primary_event(UIControl *control)
     return 0;
 }
 
-static UIControlEvents charon_effective(UIControl *control, NSUInteger mask)
+static UIControlEvents revenant_effective(UIControl *control, NSUInteger mask)
 {
     if (mask & UIControlEventPrimaryActionTriggered)
-        mask |= charon_primary_event(control);
+        mask |= revenant_primary_event(control);
     return (UIControlEvents)mask;
 }
 
-static void charon_register(UIControl *control, CharonActionEntry *entry)
+static void revenant_register(UIControl *control, RevenantActionEntry *entry)
 {
-    [control addTarget:entry->proxy action:@selector(charon_fire:) forControlEvents:charon_effective(control, entry->mask)];
+    [control addTarget:entry->proxy action:@selector(revenant_fire:) forControlEvents:revenant_effective(control, entry->mask)];
 }
 
-static void charon_unregister(UIControl *control, CharonActionEntry *entry)
+static void revenant_unregister(UIControl *control, RevenantActionEntry *entry)
 {
     [control removeTarget:entry->proxy action:NULL forControlEvents:UIControlEventAllEvents];
 }
 
-static void charon_sync(UIControl *control)
+static void revenant_sync(UIControl *control)
 {
-    NSMutableArray *entries = charon_entries(control, NO);
+    NSMutableArray *entries = revenant_entries(control, NO);
     NSSet *targets = [control allTargets];
-    for (CharonActionEntry *entry in [entries copy]) {
+    for (RevenantActionEntry *entry in [entries copy]) {
         if (![targets containsObject:entry->proxy]) {
             [entries removeObjectIdenticalTo:entry];
             continue;
@@ -122,7 +122,7 @@ static void charon_sync(UIControl *control)
     }
 }
 
-static void charon_require(BOOL condition, NSString *format, ...)
+static void revenant_require(BOOL condition, NSString *format, ...)
 {
     if (condition)
         return;
@@ -133,7 +133,7 @@ static void charon_require(BOOL condition, NSString *format, ...)
     [NSException raise:NSInternalInconsistencyException format:@"%@", reason];
 }
 
-@implementation UIControl (CharonActions14)
+@implementation UIControl (RevenantActions14)
 
 - (instancetype)initWithFrame:(CGRect)frame primaryAction:(UIAction *)primaryAction
 {
@@ -144,37 +144,37 @@ static void charon_require(BOOL condition, NSString *format, ...)
 
 - (void)addAction:(UIAction *)action forControlEvents:(UIControlEvents)controlEvents
 {
-    charon_require(action != nil, @"Attempt to set nil action with event mask:%08lx", (unsigned long)controlEvents);
-    charon_require(controlEvents != 0, @"Attempt to set action '%@' with no event mask set", action);
-    charon_sync(self);
-    NSMutableArray *entries = charon_entries(self, YES);
+    revenant_require(action != nil, @"Attempt to set nil action with event mask:%08lx", (unsigned long)controlEvents);
+    revenant_require(controlEvents != 0, @"Attempt to set action '%@' with no event mask set", action);
+    revenant_sync(self);
+    NSMutableArray *entries = revenant_entries(self, YES);
     NSUInteger mask = (NSUInteger)controlEvents;
-    for (CharonActionEntry *entry in [entries copy]) {
+    for (RevenantActionEntry *entry in [entries copy]) {
         if ([entry->action.identifier isEqual:action.identifier]) {
             mask |= entry->mask;
-            charon_unregister(self, entry);
+            revenant_unregister(self, entry);
             [entries removeObjectIdenticalTo:entry];
         }
     }
-    CharonActionEntry *added = [[CharonActionEntry alloc] init];
+    RevenantActionEntry *added = [[RevenantActionEntry alloc] init];
     added->action = action;
     added->mask = mask;
-    added->proxy = [[CharonControlProxy alloc] initWithControl:self action:action];
+    added->proxy = [[RevenantControlProxy alloc] initWithControl:self action:action];
     [entries addObject:added];
-    charon_register(self, added);
+    revenant_register(self, added);
 }
 
-- (void)charon_removeIdentifier:(UIActionIdentifier)identifier forControlEvents:(UIControlEvents)controlEvents
+- (void)revenant_removeIdentifier:(UIActionIdentifier)identifier forControlEvents:(UIControlEvents)controlEvents
 {
-    charon_sync(self);
-    NSMutableArray *entries = charon_entries(self, NO);
-    for (CharonActionEntry *entry in [entries copy]) {
+    revenant_sync(self);
+    NSMutableArray *entries = revenant_entries(self, NO);
+    for (RevenantActionEntry *entry in [entries copy]) {
         if (![entry->action.identifier isEqual:identifier])
             continue;
-        charon_unregister(self, entry);
+        revenant_unregister(self, entry);
         entry->mask &= ~(NSUInteger)controlEvents;
         if (entry->mask)
-            charon_register(self, entry);
+            revenant_register(self, entry);
         else
             [entries removeObjectIdenticalTo:entry];
     }
@@ -183,21 +183,21 @@ static void charon_require(BOOL condition, NSString *format, ...)
 - (void)removeAction:(UIAction *)action forControlEvents:(UIControlEvents)controlEvents
 {
     if (action)
-        [self charon_removeIdentifier:action.identifier forControlEvents:controlEvents];
+        [self revenant_removeIdentifier:action.identifier forControlEvents:controlEvents];
 }
 
 - (void)removeActionForIdentifier:(UIActionIdentifier)actionIdentifier forControlEvents:(UIControlEvents)controlEvents
 {
     if (actionIdentifier)
-        [self charon_removeIdentifier:actionIdentifier forControlEvents:controlEvents];
+        [self revenant_removeIdentifier:actionIdentifier forControlEvents:controlEvents];
 }
 
 - (void)enumerateEventHandlers:(void (NS_NOESCAPE ^)(UIAction *actionHandler, id target, SEL action, UIControlEvents controlEvents, BOOL *stop))iterator
 {
-    charon_sync(self);
+    revenant_sync(self);
     BOOL stop = NO;
     for (id target in [self allTargets]) {
-        if ([target isKindOfClass:[CharonControlProxy class]])
+        if ([target isKindOfClass:[RevenantControlProxy class]])
             continue;
         id real = [target isKindOfClass:[NSNull class]] ? nil : target;
         NSMutableArray *order = [NSMutableArray array];
@@ -216,7 +216,7 @@ static void charon_require(BOOL condition, NSString *format, ...)
                 return;
         }
     }
-    for (CharonActionEntry *entry in [charon_entries(self, NO) copy]) {
+    for (RevenantActionEntry *entry in [revenant_entries(self, NO) copy]) {
         iterator(entry->action, nil, NULL, (UIControlEvents)entry->mask, &stop);
         if (stop)
             return;
@@ -225,7 +225,7 @@ static void charon_require(BOOL condition, NSString *format, ...)
 
 - (void)sendAction:(UIAction *)action
 {
-    [action charon_performWithSender:self];
+    [action revenant_performWithSender:self];
 }
 
 @end

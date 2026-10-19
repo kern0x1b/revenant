@@ -1,4 +1,4 @@
-#import "CharonSafari.h"
+#import "RevenantSafari.h"
 
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 
@@ -75,10 +75,10 @@ static void dismiss_then_attempt(UIViewController *shown, int attempts, dispatch
     NSString *_callbackScheme;
     SFAuthenticationCompletionHandler _handler;
     BOOL _running;
-    CharonSafariPage *_controller;
+    RevenantSafariPage *_controller;
 }
 
-@synthesize charon_presentationWindow = _presentationWindow;
+@synthesize revenant_presentationWindow = _presentationWindow;
 
 - (instancetype)init
 {
@@ -96,12 +96,12 @@ static void dismiss_then_attempt(UIViewController *shown, int attempts, dispatch
     return self;
 }
 
-- (NSError *)charon_canceledError
+- (NSError *)revenant_canceledError
 {
     return [NSError errorWithDomain:SFAuthenticationErrorDomain code:SFAuthenticationErrorCanceledLogin userInfo:nil];
 }
 
-- (void)charon_completeWithURL:(NSURL *)URL error:(NSError *)error
+- (void)revenant_completeWithURL:(NSURL *)URL error:(NSError *)error
 {
     if (!_running)
         return;
@@ -116,13 +116,13 @@ static void dismiss_then_attempt(UIViewController *shown, int attempts, dispatch
         });
 }
 
-- (UIViewController *)charon_presenter
+- (UIViewController *)revenant_presenter
 {
-    UIWindow *window = self.charon_presentationWindow ?: [UIApplication sharedApplication].keyWindow ?: [[UIApplication sharedApplication].windows firstObject];
+    UIWindow *window = self.revenant_presentationWindow ?: [UIApplication sharedApplication].keyWindow ?: [[UIApplication sharedApplication].windows firstObject];
     return top_controller(window);
 }
 
-- (BOOL)charon_acceptsScheme:(NSString *)scheme
+- (BOOL)revenant_acceptsScheme:(NSString *)scheme
 {
     if (_callbackScheme)
         return [scheme caseInsensitiveCompare:_callbackScheme] == NSOrderedSame;
@@ -133,14 +133,14 @@ static void dismiss_then_attempt(UIViewController *shown, int attempts, dispatch
     return NO;
 }
 
-- (void)charon_present:(CharonSafariPage *)controller from:(UIViewController *)presenter attempts:(int)attempts
+- (void)revenant_present:(RevenantSafariPage *)controller from:(UIViewController *)presenter attempts:(int)attempts
 {
     when_settled(presenter, attempts, ^{
         if (self->_controller != controller)
             return;
-        UIViewController *top = [self charon_presenter];
+        UIViewController *top = [self revenant_presenter];
         if (top != presenter && attempts > 0) {
-            [self charon_present:controller from:top attempts:attempts - 1];
+            [self revenant_present:controller from:top attempts:attempts - 1];
             return;
         }
         [presenter presentViewController:controller animated:YES completion:nil];
@@ -158,36 +158,36 @@ static void dismiss_then_attempt(UIViewController *shown, int attempts, dispatch
     current_session = self;
     [active_sessions() addObject:self];
     NSString *scheme = _URL.scheme.lowercaseString;
-    UIViewController *presenter = ([scheme isEqualToString:@"http"] || [scheme isEqualToString:@"https"]) ? [self charon_presenter] : nil;
+    UIViewController *presenter = ([scheme isEqualToString:@"http"] || [scheme isEqualToString:@"https"]) ? [self revenant_presenter] : nil;
     if (!presenter) {
         dispatch_async(dispatch_get_main_queue(), ^{
-            [self charon_completeWithURL:nil error:[self charon_canceledError]];
+            [self revenant_completeWithURL:nil error:[self revenant_canceledError]];
         });
         return YES;
     }
-    CharonSafariPage *controller = [[CharonSafariPage alloc] initWithURL:_URL];
+    RevenantSafariPage *controller = [[RevenantSafariPage alloc] initWithURL:_URL];
     controller.delegate = self;
     controller.dismissButtonStyle = SFSafariViewControllerDismissButtonStyleCancel;
     __weak SFAuthenticationSession *weak = self;
     controller.callbackMatcher = ^BOOL(NSURL *URL) {
-        return [weak charon_acceptsScheme:URL.scheme];
+        return [weak revenant_acceptsScheme:URL.scheme];
     };
     controller.callback = ^(NSURL *URL) {
         SFAuthenticationSession *session = weak;
         if (!session || !session->_running)
             return;
-        CharonSafariPage *shown = session->_controller;
+        RevenantSafariPage *shown = session->_controller;
         session->_controller = nil;
         shown.delegate = nil;
         when_settled(shown, 50, ^{
             void (^finish)(void) = ^{
-                [session charon_completeWithURL:URL error:nil];
+                [session revenant_completeWithURL:URL error:nil];
             };
             dismiss_then(shown, finish);
         });
     };
     _controller = controller;
-    [self charon_present:controller from:presenter attempts:50];
+    [self revenant_present:controller from:presenter attempts:50];
     return YES;
 }
 
@@ -195,10 +195,10 @@ static void dismiss_then_attempt(UIViewController *shown, int attempts, dispatch
 {
     if (!_running)
         return;
-    CharonSafariPage *shown = _controller;
+    RevenantSafariPage *shown = _controller;
     shown.delegate = nil;
     void (^finish)(void) = ^{
-        [self charon_completeWithURL:nil error:[self charon_canceledError]];
+        [self revenant_completeWithURL:nil error:[self revenant_canceledError]];
     };
     _controller = nil;
     if (!shown || !shown.isViewLoaded) {
@@ -212,7 +212,7 @@ static void dismiss_then_attempt(UIViewController *shown, int attempts, dispatch
 
 - (void)safariViewControllerDidFinish:(SFSafariViewController *)controller
 {
-    [self charon_completeWithURL:nil error:[self charon_canceledError]];
+    [self revenant_completeWithURL:nil error:[self revenant_canceledError]];
 }
 
 @end

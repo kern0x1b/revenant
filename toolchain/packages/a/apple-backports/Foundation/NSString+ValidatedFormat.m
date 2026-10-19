@@ -1,102 +1,102 @@
 #import <Foundation/Foundation.h>
 
-typedef NS_ENUM(NSUInteger, CharonFormatKind) {
-    CharonFormatNone,
-    CharonFormatObject,
-    CharonFormatInteger,
-    CharonFormatWideCharacter,
-    CharonFormatLongInteger,
-    CharonFormatFloating,
-    CharonFormatLongFloating,
-    CharonFormatCString,
-    CharonFormatWideString,
-    CharonFormatPascalString,
-    CharonFormatPointer,
-    CharonFormatCount,
-    CharonFormatIncomplete,
+typedef NS_ENUM(NSUInteger, RevenantFormatKind) {
+    RevenantFormatNone,
+    RevenantFormatObject,
+    RevenantFormatInteger,
+    RevenantFormatWideCharacter,
+    RevenantFormatLongInteger,
+    RevenantFormatFloating,
+    RevenantFormatLongFloating,
+    RevenantFormatCString,
+    RevenantFormatWideString,
+    RevenantFormatPascalString,
+    RevenantFormatPointer,
+    RevenantFormatCount,
+    RevenantFormatIncomplete,
 };
 
-typedef NS_ENUM(NSUInteger, CharonFormatLength) {
-    CharonFormatLengthPlain,
-    CharonFormatLengthLong,
-    CharonFormatLengthLongLong,
+typedef NS_ENUM(NSUInteger, RevenantFormatLength) {
+    RevenantFormatLengthPlain,
+    RevenantFormatLengthLong,
+    RevenantFormatLengthLongLong,
 };
 
-typedef NS_ENUM(NSUInteger, CharonFormatSize) {
-    CharonFormatSizeDefault,
-    CharonFormatSizeByte,
-    CharonFormatSizeShort,
-    CharonFormatSizeLong,
-    CharonFormatSizeLongLong,
-    CharonFormatSizeLongDouble,
+typedef NS_ENUM(NSUInteger, RevenantFormatSize) {
+    RevenantFormatSizeDefault,
+    RevenantFormatSizeByte,
+    RevenantFormatSizeShort,
+    RevenantFormatSizeLong,
+    RevenantFormatSizeLongLong,
+    RevenantFormatSizeLongDouble,
 };
 
 typedef struct {
-    CharonFormatKind kind;
-    CharonFormatLength length;
+    RevenantFormatKind kind;
+    RevenantFormatLength length;
     NSInteger main, width, precision;
     BOOL external;
     NSUInteger start, end;
     unichar plain[128];
     NSUInteger plainLength;
-    CharonFormatSize size;
-} CharonFormatSpec;
+    RevenantFormatSize size;
+} RevenantFormatSpec;
 
-static BOOL charon_format_satisfies(CharonFormatKind wanted, CharonFormatKind allowed)
+static BOOL revenant_format_satisfies(RevenantFormatKind wanted, RevenantFormatKind allowed)
 {
     if (wanted == allowed)
         return YES;
     switch (wanted) {
-        case CharonFormatWideCharacter:
-            return allowed == CharonFormatInteger;
-        case CharonFormatPointer:
-            return allowed == CharonFormatObject || allowed == CharonFormatInteger || allowed == CharonFormatCString
-                || allowed == CharonFormatWideString || allowed == CharonFormatPascalString;
-        case CharonFormatCString:
-            return allowed == CharonFormatPointer || allowed == CharonFormatPascalString;
-        case CharonFormatPascalString:
-            return allowed == CharonFormatPointer || allowed == CharonFormatCString;
-        case CharonFormatWideString:
-            return allowed == CharonFormatPointer;
+        case RevenantFormatWideCharacter:
+            return allowed == RevenantFormatInteger;
+        case RevenantFormatPointer:
+            return allowed == RevenantFormatObject || allowed == RevenantFormatInteger || allowed == RevenantFormatCString
+                || allowed == RevenantFormatWideString || allowed == RevenantFormatPascalString;
+        case RevenantFormatCString:
+            return allowed == RevenantFormatPointer || allowed == RevenantFormatPascalString;
+        case RevenantFormatPascalString:
+            return allowed == RevenantFormatPointer || allowed == RevenantFormatCString;
+        case RevenantFormatWideString:
+            return allowed == RevenantFormatPointer;
         default:
             return NO;
     }
 }
 
-static BOOL charon_format_word(unichar character)
+static BOOL revenant_format_word(unichar character)
 {
     return (character >= '0' && character <= '9') || (character >= 'A' && character <= 'Z') || (character >= 'a' && character <= 'z')
         || character == '_';
 }
 
-static void charon_format_keep(CharonFormatSpec *spec, unichar character)
+static void revenant_format_keep(RevenantFormatSpec *spec, unichar character)
 {
     if (spec->plainLength < sizeof spec->plain / sizeof spec->plain[0])
         spec->plain[spec->plainLength++] = character;
 }
 
-static NSUInteger charon_format_incomplete(CharonFormatSpec *spec, NSUInteger index)
+static NSUInteger revenant_format_incomplete(RevenantFormatSpec *spec, NSUInteger index)
 {
-    spec->kind = CharonFormatIncomplete;
+    spec->kind = RevenantFormatIncomplete;
     spec->end = index;
     return index;
 }
 
-static NSUInteger charon_format_parse(NSString *format, NSUInteger index, CharonFormatSpec *spec)
+static NSUInteger revenant_format_parse(NSString *format, NSUInteger index, RevenantFormatSpec *spec)
 {
     NSUInteger length = format.length;
     BOOL seenSharp = NO, seenBracket = NO, keyed = NO, longDouble = NO;
-    *spec = (CharonFormatSpec){CharonFormatNone, CharonFormatLengthPlain, -1, -1, -1, NO, index - 1, index, {'%'}, 1};
+    *spec = (RevenantFormatSpec){RevenantFormatNone, RevenantFormatLengthPlain, -1, -1, -1, NO, index - 1, index, {'%'}, 1};
     for (;;) {
         if (index >= length)
-            return charon_format_incomplete(spec, index);
+            return revenant_format_incomplete(spec, index);
         unichar character = [format characterAtIndex:index++];
         spec->end = index;
         if (keyed) {
-            charon_format_keep(spec, character);
-            if (!charon_format_word(character)) {
+            revenant_format_keep(spec, character);
+            if (!revenant_format_word(character)) {
                 if (character == '@') {
-                    spec->kind = CharonFormatObject;
+                    spec->kind = RevenantFormatObject;
                     spec->external = YES;
                     return index;
                 }
@@ -109,105 +109,105 @@ static NSUInteger charon_format_parse(NSString *format, NSUInteger index, Charon
         switch (character) {
             case '#':
                 seenSharp = YES;
-                charon_format_keep(spec, character);
+                revenant_format_keep(spec, character);
                 break;
             case '[':
-                charon_format_keep(spec, character);
+                revenant_format_keep(spec, character);
                 if (!seenBracket) {
                     seenBracket = YES;
                     keyed = YES;
                 }
                 break;
             case ' ': case '-': case '+': case '0':
-                charon_format_keep(spec, character);
+                revenant_format_keep(spec, character);
                 break;
             case 'h':
-                charon_format_keep(spec, character);
+                revenant_format_keep(spec, character);
                 if (index < length && [format characterAtIndex:index] == 'h') {
-                    charon_format_keep(spec, 'h');
+                    revenant_format_keep(spec, 'h');
                     index++;
                     spec->end = index;
-                    spec->size = CharonFormatSizeByte;
+                    spec->size = RevenantFormatSizeByte;
                 } else {
-                    spec->size = CharonFormatSizeShort;
+                    spec->size = RevenantFormatSizeShort;
                 }
                 break;
             case 'l':
-                charon_format_keep(spec, character);
+                revenant_format_keep(spec, character);
                 if (index < length && [format characterAtIndex:index] == 'l') {
-                    charon_format_keep(spec, 'l');
+                    revenant_format_keep(spec, 'l');
                     index++;
                     spec->end = index;
-                    spec->length = CharonFormatLengthLongLong;
-                    spec->size = CharonFormatSizeLongLong;
+                    spec->length = RevenantFormatLengthLongLong;
+                    spec->size = RevenantFormatSizeLongLong;
                 } else {
-                    spec->length = CharonFormatLengthLong;
-                    spec->size = CharonFormatSizeLong;
+                    spec->length = RevenantFormatLengthLong;
+                    spec->size = RevenantFormatSizeLong;
                 }
                 break;
             case 'q': case 'j':
-                charon_format_keep(spec, character);
-                spec->length = CharonFormatLengthLongLong;
-                spec->size = CharonFormatSizeLongLong;
+                revenant_format_keep(spec, character);
+                spec->length = RevenantFormatLengthLongLong;
+                spec->size = RevenantFormatSizeLongLong;
                 break;
             case 'z': case 't':
-                charon_format_keep(spec, character);
-                spec->length = CharonFormatLengthLong;
-                spec->size = CharonFormatSizeLong;
+                revenant_format_keep(spec, character);
+                spec->length = RevenantFormatLengthLong;
+                spec->size = RevenantFormatSizeLong;
                 break;
             case 'L':
-                charon_format_keep(spec, character);
+                revenant_format_keep(spec, character);
                 longDouble = YES;
-                spec->size = CharonFormatSizeLongDouble;
+                spec->size = RevenantFormatSizeLongDouble;
                 break;
             case 'c':
-                charon_format_keep(spec, character);
-                spec->kind = CharonFormatInteger;
-                spec->length = CharonFormatLengthPlain;
-                spec->size = CharonFormatSizeByte;
+                revenant_format_keep(spec, character);
+                spec->kind = RevenantFormatInteger;
+                spec->length = RevenantFormatLengthPlain;
+                spec->size = RevenantFormatSizeByte;
                 return index;
             case 'D': case 'd': case 'i': case 'U': case 'u': case 'O': case 'o': case 'x': case 'X':
-                charon_format_keep(spec, character);
-                spec->kind = longDouble ? CharonFormatLongInteger : CharonFormatInteger;
+                revenant_format_keep(spec, character);
+                spec->kind = longDouble ? RevenantFormatLongInteger : RevenantFormatInteger;
                 if (longDouble)
-                    spec->length = CharonFormatLengthLongLong;
+                    spec->length = RevenantFormatLengthLongLong;
                 return index;
             case 'f': case 'F': case 'g': case 'G': case 'e': case 'E': case 'a': case 'A':
-                charon_format_keep(spec, character);
-                spec->kind = longDouble ? CharonFormatLongFloating : CharonFormatFloating;
+                revenant_format_keep(spec, character);
+                spec->kind = longDouble ? RevenantFormatLongFloating : RevenantFormatFloating;
                 return index;
             case 'n':
-                charon_format_keep(spec, character);
-                spec->kind = CharonFormatCount;
+                revenant_format_keep(spec, character);
+                spec->kind = RevenantFormatCount;
                 return index;
             case 'p':
-                charon_format_keep(spec, character);
-                spec->kind = CharonFormatPointer;
+                revenant_format_keep(spec, character);
+                spec->kind = RevenantFormatPointer;
                 return index;
             case 's':
-                charon_format_keep(spec, character);
-                spec->kind = CharonFormatCString;
+                revenant_format_keep(spec, character);
+                spec->kind = RevenantFormatCString;
                 return index;
             case 'S':
-                charon_format_keep(spec, character);
-                spec->kind = CharonFormatWideString;
+                revenant_format_keep(spec, character);
+                spec->kind = RevenantFormatWideString;
                 return index;
             case 'C':
-                charon_format_keep(spec, character);
-                spec->kind = CharonFormatWideCharacter;
+                revenant_format_keep(spec, character);
+                spec->kind = RevenantFormatWideCharacter;
                 return index;
             case 'P':
-                charon_format_keep(spec, character);
-                spec->kind = CharonFormatPascalString;
+                revenant_format_keep(spec, character);
+                spec->kind = RevenantFormatPascalString;
                 return index;
             case '@':
-                charon_format_keep(spec, character);
+                revenant_format_keep(spec, character);
                 if (seenSharp) {
                     seenSharp = NO;
                     keyed = YES;
                     break;
                 }
-                spec->kind = CharonFormatObject;
+                spec->kind = RevenantFormatObject;
                 return index;
             case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9': {
                 NSInteger number = 0;
@@ -218,7 +218,7 @@ static NSUInteger charon_format_parse(NSString *format, NSUInteger index, Charon
                     if (count < sizeof digits / sizeof digits[0])
                         digits[count++] = character;
                     if (index >= length)
-                        return charon_format_incomplete(spec, index);
+                        return revenant_format_incomplete(spec, index);
                     character = [format characterAtIndex:index++];
                     spec->end = index;
                 } while (character >= '0' && character <= '9');
@@ -232,21 +232,21 @@ static NSUInteger charon_format_parse(NSString *format, NSUInteger index, Charon
                     break;
                 }
                 for (NSUInteger digit = 0; digit < count; digit++)
-                    charon_format_keep(spec, digits[digit]);
+                    revenant_format_keep(spec, digits[digit]);
                 goto again;
             }
             case '*':
-                charon_format_keep(spec, character);
+                revenant_format_keep(spec, character);
                 spec->width = -2;
                 break;
             case '.':
-                charon_format_keep(spec, character);
+                revenant_format_keep(spec, character);
                 if (index >= length)
-                    return charon_format_incomplete(spec, index);
+                    return revenant_format_incomplete(spec, index);
                 character = [format characterAtIndex:index++];
                 spec->end = index;
                 if (character == '*') {
-                    charon_format_keep(spec, character);
+                    revenant_format_keep(spec, character);
                     spec->precision = -2;
                     break;
                 }
@@ -257,9 +257,9 @@ static NSUInteger charon_format_parse(NSString *format, NSUInteger index, Charon
     }
 }
 
-typedef void (^CharonFormatVisitor)(CharonFormatSpec *spec, NSUInteger slot, NSUInteger widthSlot, NSUInteger precisionSlot);
+typedef void (^RevenantFormatVisitor)(RevenantFormatSpec *spec, NSUInteger slot, NSUInteger widthSlot, NSUInteger precisionSlot);
 
-static void charon_format_walk(NSString *format, BOOL validating, void (^text)(NSRange range), CharonFormatVisitor visit)
+static void revenant_format_walk(NSString *format, BOOL validating, void (^text)(NSRange range), RevenantFormatVisitor visit)
 {
     NSUInteger length = format.length, next = 0, index = 0, chunk = 0;
     while (index < length) {
@@ -269,14 +269,14 @@ static void charon_format_walk(NSString *format, BOOL validating, void (^text)(N
         }
         if (text && index > chunk)
             text(NSMakeRange(chunk, index - chunk));
-        CharonFormatSpec spec;
-        index = charon_format_parse(format, index + 1, &spec);
+        RevenantFormatSpec spec;
+        index = revenant_format_parse(format, index + 1, &spec);
         chunk = index;
-        if (spec.kind == CharonFormatNone || (spec.external && !validating)) {
+        if (spec.kind == RevenantFormatNone || (spec.external && !validating)) {
             visit(&spec, NSNotFound, NSNotFound, NSNotFound);
             continue;
         }
-        if (spec.kind == CharonFormatIncomplete) {
+        if (spec.kind == RevenantFormatIncomplete) {
             visit(&spec, validating ? (spec.main >= 0 ? (NSUInteger)spec.main : next++) : NSNotFound, NSNotFound, NSNotFound);
             continue;
         }
@@ -295,7 +295,7 @@ static void charon_format_walk(NSString *format, BOOL validating, void (^text)(N
         text(NSMakeRange(chunk, length - chunk));
 }
 
-static void charon_format_take(NSMutableArray *slots, NSUInteger slot, CharonFormatKind kind, CharonFormatLength length)
+static void revenant_format_take(NSMutableArray *slots, NSUInteger slot, RevenantFormatKind kind, RevenantFormatLength length)
 {
     if (slot == NSNotFound)
         return;
@@ -304,26 +304,26 @@ static void charon_format_take(NSMutableArray *slots, NSUInteger slot, CharonFor
     [slots[slot] addObject:@[@(kind), @(length)]];
 }
 
-static NSArray *charon_format_slots(NSString *format, BOOL validating)
+static NSArray *revenant_format_slots(NSString *format, BOOL validating)
 {
     NSMutableArray *slots = [NSMutableArray array];
-    charon_format_walk(format, validating, nil, ^(CharonFormatSpec *spec, NSUInteger slot, NSUInteger widthSlot, NSUInteger precisionSlot) {
-        charon_format_take(slots, widthSlot, CharonFormatInteger, CharonFormatLengthPlain);
-        charon_format_take(slots, precisionSlot, CharonFormatInteger, CharonFormatLengthPlain);
-        charon_format_take(slots, slot, spec->kind, spec->length);
+    revenant_format_walk(format, validating, nil, ^(RevenantFormatSpec *spec, NSUInteger slot, NSUInteger widthSlot, NSUInteger precisionSlot) {
+        revenant_format_take(slots, widthSlot, RevenantFormatInteger, RevenantFormatLengthPlain);
+        revenant_format_take(slots, precisionSlot, RevenantFormatInteger, RevenantFormatLengthPlain);
+        revenant_format_take(slots, slot, spec->kind, spec->length);
     });
     return slots;
 }
 
-static BOOL charon_format_allowed(NSString *format, NSString *valid)
+static BOOL revenant_format_allowed(NSString *format, NSString *valid)
 {
-    NSArray *wanted = charon_format_slots(format, YES), *allowed = charon_format_slots(valid, YES);
+    NSArray *wanted = revenant_format_slots(format, YES), *allowed = revenant_format_slots(valid, YES);
     if (wanted.count > allowed.count)
         return NO;
     for (NSUInteger index = 0; index < wanted.count; index++) {
         NSArray *offered = allowed[index];
         for (NSArray *kind in wanted[index])
-            if (!offered.count || !charon_format_satisfies([kind[0] unsignedIntegerValue], [offered[0][0] unsignedIntegerValue]))
+            if (!offered.count || !revenant_format_satisfies([kind[0] unsignedIntegerValue], [offered[0][0] unsignedIntegerValue]))
                 return NO;
     }
     return YES;
@@ -332,28 +332,28 @@ static BOOL charon_format_allowed(NSString *format, NSString *valid)
 typedef struct {
     long long integer;
     long double floating;
-} CharonFormatValue;
+} RevenantFormatValue;
 
-static CharonFormatValue charon_format_read(NSArray *described, va_list *arguments)
+static RevenantFormatValue revenant_format_read(NSArray *described, va_list *arguments)
 {
-    CharonFormatValue value = {0, 0};
-    CharonFormatKind kind = described.count ? [described[0][0] unsignedIntegerValue] : CharonFormatPointer;
-    CharonFormatLength length = described.count ? [described[0][1] unsignedIntegerValue] : CharonFormatLengthPlain;
+    RevenantFormatValue value = {0, 0};
+    RevenantFormatKind kind = described.count ? [described[0][0] unsignedIntegerValue] : RevenantFormatPointer;
+    RevenantFormatLength length = described.count ? [described[0][1] unsignedIntegerValue] : RevenantFormatLengthPlain;
     switch (kind) {
-        case CharonFormatInteger:
-        case CharonFormatWideCharacter:
-        case CharonFormatLongInteger:
-            if (length == CharonFormatLengthLongLong)
+        case RevenantFormatInteger:
+        case RevenantFormatWideCharacter:
+        case RevenantFormatLongInteger:
+            if (length == RevenantFormatLengthLongLong)
                 value.integer = va_arg(*arguments, long long);
-            else if (length == CharonFormatLengthLong)
+            else if (length == RevenantFormatLengthLong)
                 value.integer = va_arg(*arguments, long);
             else
                 value.integer = va_arg(*arguments, int);
             break;
-        case CharonFormatFloating:
+        case RevenantFormatFloating:
             value.floating = va_arg(*arguments, double);
             break;
-        case CharonFormatLongFloating:
+        case RevenantFormatLongFloating:
             value.floating = va_arg(*arguments, long double);
             break;
         default:
@@ -363,142 +363,142 @@ static CharonFormatValue charon_format_read(NSArray *described, va_list *argumen
     return value;
 }
 
-#define CHARON_FORMAT_ONE(value) \
+#define REVENANT_FORMAT_ONE(value) \
     (stars == 0 ? [[NSString alloc] initWithFormat:plain locale:locale, value] \
      : stars == 1 ? [[NSString alloc] initWithFormat:plain locale:locale, first, value] \
      : [[NSString alloc] initWithFormat:plain locale:locale, first, second, value])
 
-#define CHARON_FORMAT_C(value) \
+#define REVENANT_FORMAT_C(value) \
     (stars == 0 ? snprintf(buffer, size, raw, value) \
      : stars == 1 ? snprintf(buffer, size, raw, first, value) \
      : snprintf(buffer, size, raw, first, second, value))
 
-static BOOL charon_format_wide(CharonFormatSpec *spec)
+static BOOL revenant_format_wide(RevenantFormatSpec *spec)
 {
-    return spec->size == CharonFormatSizeLongLong || (spec->size == CharonFormatSizeLong && sizeof(long) == sizeof(long long));
+    return spec->size == RevenantFormatSizeLongLong || (spec->size == RevenantFormatSizeLong && sizeof(long) == sizeof(long long));
 }
 
-static long long charon_format_sized(CharonFormatSize size, long long value)
+static long long revenant_format_sized(RevenantFormatSize size, long long value)
 {
     switch (size) {
-        case CharonFormatSizeByte:
+        case RevenantFormatSizeByte:
             return (int8_t)value;
-        case CharonFormatSizeShort:
+        case RevenantFormatSizeShort:
             return (int16_t)value;
-        case CharonFormatSizeLong:
+        case RevenantFormatSizeLong:
             return (long)value;
-        case CharonFormatSizeLongLong:
+        case RevenantFormatSizeLongLong:
             return value;
         default:
             return (int32_t)value;
     }
 }
 
-static int charon_format_print(CharonFormatSpec *spec, const char *raw, char *buffer, size_t size, int first, int second, NSUInteger stars,
-                               CharonFormatValue value)
+static int revenant_format_print(RevenantFormatSpec *spec, const char *raw, char *buffer, size_t size, int first, int second, NSUInteger stars,
+                               RevenantFormatValue value)
 {
     switch (spec->kind) {
-        case CharonFormatFloating:
-            return CHARON_FORMAT_C((double)value.floating);
-        case CharonFormatLongFloating:
-            return CHARON_FORMAT_C((long double)value.floating);
-        case CharonFormatPointer:
-            return CHARON_FORMAT_C((void *)(intptr_t)value.integer);
-        case CharonFormatLongInteger:
-            return CHARON_FORMAT_C((long long)(int32_t)value.integer);
+        case RevenantFormatFloating:
+            return REVENANT_FORMAT_C((double)value.floating);
+        case RevenantFormatLongFloating:
+            return REVENANT_FORMAT_C((long double)value.floating);
+        case RevenantFormatPointer:
+            return REVENANT_FORMAT_C((void *)(intptr_t)value.integer);
+        case RevenantFormatLongInteger:
+            return REVENANT_FORMAT_C((long long)(int32_t)value.integer);
         default:
-            if (charon_format_wide(spec))
-                return CHARON_FORMAT_C(value.integer);
-            return CHARON_FORMAT_C((long)(int32_t)value.integer);
+            if (revenant_format_wide(spec))
+                return REVENANT_FORMAT_C(value.integer);
+            return REVENANT_FORMAT_C((long)(int32_t)value.integer);
     }
 }
 
-static NSData *charon_format_number(CharonFormatSpec *spec, int first, int second, NSUInteger stars, CharonFormatValue value)
+static NSData *revenant_format_number(RevenantFormatSpec *spec, int first, int second, NSUInteger stars, RevenantFormatValue value)
 {
     char raw[sizeof spec->plain / sizeof spec->plain[0] + 1], buffer[512];
     for (NSUInteger index = 0; index < spec->plainLength; index++)
         raw[index] = spec->plain[index] < 0x80 ? (char)spec->plain[index] : '?';
     raw[spec->plainLength] = 0;
-    int written = charon_format_print(spec, raw, buffer, sizeof buffer, first, second, stars, value);
+    int written = revenant_format_print(spec, raw, buffer, sizeof buffer, first, second, stars, value);
     if (written < 0)
         return [NSData data];
     if ((size_t)written < sizeof buffer)
         return [NSData dataWithBytes:buffer length:strlen(buffer)];
     NSMutableData *large = [NSMutableData dataWithLength:(NSUInteger)written + 1];
-    if (charon_format_print(spec, raw, large.mutableBytes, large.length, first, second, stars, value) < 0)
+    if (revenant_format_print(spec, raw, large.mutableBytes, large.length, first, second, stars, value) < 0)
         return [NSData data];
     return [NSData dataWithBytes:large.bytes length:strlen(large.bytes)];
 }
 
-static id charon_format_one(CharonFormatSpec *spec, id locale, int first, int second, NSUInteger stars, CharonFormatValue value)
+static id revenant_format_one(RevenantFormatSpec *spec, id locale, int first, int second, NSUInteger stars, RevenantFormatValue value)
 {
     NSString *plain = [NSString stringWithCharacters:spec->plain length:spec->plainLength];
-    BOOL number = spec->kind == CharonFormatInteger || spec->kind == CharonFormatLongInteger || spec->kind == CharonFormatFloating
-               || spec->kind == CharonFormatLongFloating || spec->kind == CharonFormatPointer;
-    BOOL character = spec->kind == CharonFormatInteger && spec->plain[spec->plainLength - 1] == 'c';
+    BOOL number = spec->kind == RevenantFormatInteger || spec->kind == RevenantFormatLongInteger || spec->kind == RevenantFormatFloating
+               || spec->kind == RevenantFormatLongFloating || spec->kind == RevenantFormatPointer;
+    BOOL character = spec->kind == RevenantFormatInteger && spec->plain[spec->plainLength - 1] == 'c';
     if (number && (!locale || character))
-        return charon_format_number(spec, first, second, stars, value);
+        return revenant_format_number(spec, first, second, stars, value);
     switch (spec->kind) {
-        case CharonFormatObject:
-            return CHARON_FORMAT_ONE((__bridge id)(void *)(intptr_t)value.integer);
-        case CharonFormatInteger:
-            if (charon_format_wide(spec))
-                return CHARON_FORMAT_ONE(value.integer);
-            return CHARON_FORMAT_ONE((long)(int32_t)value.integer);
-        case CharonFormatWideCharacter:
-            return CHARON_FORMAT_ONE((int)value.integer);
-        case CharonFormatLongInteger:
-            return CHARON_FORMAT_ONE((long long)(int32_t)value.integer);
-        case CharonFormatFloating:
-            return CHARON_FORMAT_ONE((double)value.floating);
-        case CharonFormatLongFloating:
-            return CHARON_FORMAT_ONE((long double)value.floating);
-        case CharonFormatCount:
+        case RevenantFormatObject:
+            return REVENANT_FORMAT_ONE((__bridge id)(void *)(intptr_t)value.integer);
+        case RevenantFormatInteger:
+            if (revenant_format_wide(spec))
+                return REVENANT_FORMAT_ONE(value.integer);
+            return REVENANT_FORMAT_ONE((long)(int32_t)value.integer);
+        case RevenantFormatWideCharacter:
+            return REVENANT_FORMAT_ONE((int)value.integer);
+        case RevenantFormatLongInteger:
+            return REVENANT_FORMAT_ONE((long long)(int32_t)value.integer);
+        case RevenantFormatFloating:
+            return REVENANT_FORMAT_ONE((double)value.floating);
+        case RevenantFormatLongFloating:
+            return REVENANT_FORMAT_ONE((long double)value.floating);
+        case RevenantFormatCount:
             return @"";
         default:
-            return CHARON_FORMAT_ONE((void *)(intptr_t)value.integer);
+            return REVENANT_FORMAT_ONE((void *)(intptr_t)value.integer);
     }
 }
 
-static NSString *charon_format_render(NSString *format, NSString *valid, id locale, va_list arguments)
+static NSString *revenant_format_render(NSString *format, NSString *valid, id locale, va_list arguments)
 {
-    NSArray *wanted = charon_format_slots(format, NO), *described = charon_format_slots(valid, NO);
+    NSArray *wanted = revenant_format_slots(format, NO), *described = revenant_format_slots(valid, NO);
     NSUInteger count = wanted.count;
-    CharonFormatValue *values = (CharonFormatValue *)calloc(count ? count : 1, sizeof(CharonFormatValue));
+    RevenantFormatValue *values = (RevenantFormatValue *)calloc(count ? count : 1, sizeof(RevenantFormatValue));
     va_list walk;
     va_copy(walk, arguments);
     for (NSUInteger slot = 0; slot < count; slot++)
-        values[slot] = charon_format_read(slot < described.count ? described[slot] : @[], &walk);
+        values[slot] = revenant_format_read(slot < described.count ? described[slot] : @[], &walk);
     va_end(walk);
     NSInteger *sizes = (NSInteger *)calloc(count ? count : 1, sizeof(NSInteger));
-    charon_format_walk(format, NO, nil, ^(CharonFormatSpec *spec, NSUInteger slot, NSUInteger widthSlot, NSUInteger precisionSlot) {
+    revenant_format_walk(format, NO, nil, ^(RevenantFormatSpec *spec, NSUInteger slot, NSUInteger widthSlot, NSUInteger precisionSlot) {
         if (slot != NSNotFound && slot < count) {
-            if (spec->kind == CharonFormatInteger || spec->kind == CharonFormatLongInteger)
+            if (spec->kind == RevenantFormatInteger || spec->kind == RevenantFormatLongInteger)
                 sizes[slot] = 1 + spec->size;
-            else if (spec->kind == CharonFormatWideCharacter)
-                sizes[slot] = 1 + CharonFormatSizeShort;
+            else if (spec->kind == RevenantFormatWideCharacter)
+                sizes[slot] = 1 + RevenantFormatSizeShort;
             else
                 sizes[slot] = 0;
         }
         if (widthSlot != NSNotFound && widthSlot < count)
-            sizes[widthSlot] = 1 + CharonFormatSizeDefault;
+            sizes[widthSlot] = 1 + RevenantFormatSizeDefault;
         if (precisionSlot != NSNotFound && precisionSlot < count)
-            sizes[precisionSlot] = 1 + CharonFormatSizeDefault;
+            sizes[precisionSlot] = 1 + RevenantFormatSizeDefault;
     });
     for (NSUInteger slot = 0; slot < count; slot++)
         if (sizes[slot])
-            values[slot].integer = charon_format_sized((CharonFormatSize)(sizes[slot] - 1), values[slot].integer);
+            values[slot].integer = revenant_format_sized((RevenantFormatSize)(sizes[slot] - 1), values[slot].integer);
     free(sizes);
     NSMutableString *made = [NSMutableString string];
     NSMutableIndexSet *bytes = [NSMutableIndexSet indexSet];
-    charon_format_walk(format, NO, ^(NSRange range) {
+    revenant_format_walk(format, NO, ^(NSRange range) {
         [made appendString:[format substringWithRange:range]];
-    }, ^(CharonFormatSpec *spec, NSUInteger slot, NSUInteger widthSlot, NSUInteger precisionSlot) {
+    }, ^(RevenantFormatSpec *spec, NSUInteger slot, NSUInteger widthSlot, NSUInteger precisionSlot) {
         if (spec->external) {
             [made appendString:[format substringWithRange:NSMakeRange(spec->start, spec->end - spec->start)]];
             return;
         }
-        if (spec->kind == CharonFormatNone) {
+        if (spec->kind == RevenantFormatNone) {
             [made appendString:[format substringWithRange:NSMakeRange(spec->start + 1, spec->end - spec->start - 1)]];
             return;
         }
@@ -517,7 +517,7 @@ static NSString *charon_format_render(NSString *format, NSString *valid, id loca
                 first = (int)values[precisionSlot].integer;
             stars++;
         }
-        id piece = charon_format_one(spec, locale, first, second, stars, values[slot]);
+        id piece = revenant_format_one(spec, locale, first, second, stars, values[slot]);
         if ([piece isKindOfClass:[NSData class]]) {
             const uint8_t *raw = [piece bytes];
             for (NSUInteger index = 0; index < [piece length]; index++)
@@ -543,28 +543,28 @@ static NSString *charon_format_render(NSString *format, NSString *valid, id loca
     return made;
 }
 
-static NSString *charon_validated_string(id receiver, SEL command, NSString *format, NSString *valid, id locale,
+static NSString *revenant_validated_string(id receiver, SEL command, NSString *format, NSString *valid, id locale,
                                          va_list arguments, NSError **error)
 {
     if (!format || !valid)
         [NSException raise:NSInvalidArgumentException format:@"*** -[%@ %@]: nil argument", [receiver class], NSStringFromSelector(command)];
-    if (!charon_format_allowed(format, valid)) {
+    if (!revenant_format_allowed(format, valid)) {
         if (error)
             *error = [NSError errorWithDomain:NSCocoaErrorDomain code:NSFormattingError
                                      userInfo:@{NSDebugDescriptionErrorKey: [NSString stringWithFormat:@"Format '%@' does not match expected '%@'", format, valid]}];
         return nil;
     }
-    return [receiver initWithString:charon_format_render(format, valid, locale, arguments)];
+    return [receiver initWithString:revenant_format_render(format, valid, locale, arguments)];
 }
 
-@implementation NSString (CharonValidatedFormat)
+@implementation NSString (RevenantValidatedFormat)
 
 - (instancetype)initWithValidatedFormat:(NSString *)format validFormatSpecifiers:(NSString *)validFormatSpecifiers
                                   error:(NSError **)error, ...
 {
     va_list arguments;
     va_start(arguments, error);
-    self = charon_validated_string(self, _cmd, format, validFormatSpecifiers, nil, arguments, error);
+    self = revenant_validated_string(self, _cmd, format, validFormatSpecifiers, nil, arguments, error);
     va_end(arguments);
     return self;
 }
@@ -574,7 +574,7 @@ static NSString *charon_validated_string(id receiver, SEL command, NSString *for
 {
     va_list arguments;
     va_start(arguments, error);
-    self = charon_validated_string(self, _cmd, format, validFormatSpecifiers, locale, arguments, error);
+    self = revenant_validated_string(self, _cmd, format, validFormatSpecifiers, locale, arguments, error);
     va_end(arguments);
     return self;
 }
@@ -582,7 +582,7 @@ static NSString *charon_validated_string(id receiver, SEL command, NSString *for
 - (instancetype)initWithValidatedFormat:(NSString *)format validFormatSpecifiers:(NSString *)validFormatSpecifiers
                                  locale:(id)locale arguments:(va_list)arguments error:(NSError **)error
 {
-    return charon_validated_string(self, _cmd, format, validFormatSpecifiers, locale, arguments, error);
+    return revenant_validated_string(self, _cmd, format, validFormatSpecifiers, locale, arguments, error);
 }
 
 + (instancetype)stringWithValidatedFormat:(NSString *)format validFormatSpecifiers:(NSString *)validFormatSpecifiers
@@ -590,7 +590,7 @@ static NSString *charon_validated_string(id receiver, SEL command, NSString *for
 {
     va_list arguments;
     va_start(arguments, error);
-    NSString *made = charon_validated_string([self alloc], _cmd, format, validFormatSpecifiers, nil, arguments, error);
+    NSString *made = revenant_validated_string([self alloc], _cmd, format, validFormatSpecifiers, nil, arguments, error);
     va_end(arguments);
     return made;
 }
@@ -600,7 +600,7 @@ static NSString *charon_validated_string(id receiver, SEL command, NSString *for
 {
     va_list arguments;
     va_start(arguments, error);
-    NSString *made = charon_validated_string([self alloc], _cmd, format, validFormatSpecifiers, [NSLocale currentLocale], arguments, error);
+    NSString *made = revenant_validated_string([self alloc], _cmd, format, validFormatSpecifiers, [NSLocale currentLocale], arguments, error);
     va_end(arguments);
     return made;
 }

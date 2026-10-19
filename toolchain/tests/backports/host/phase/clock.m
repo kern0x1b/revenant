@@ -60,7 +60,7 @@ int main(void)
 {
     @autoreleasepool {
         Class hostClass = [PHASEEngine class];
-        Class portClass = NSClassFromString(@"charon_host_PHASEEngine");
+        Class portClass = NSClassFromString(@"revenant_host_PHASEEngine");
         if (hostClass == Nil || portClass == Nil) {
             printf("FAIL a class is missing: host %s, port %s\n", hostClass ? "found" : "missing", portClass ? "found" : "missing");
             return 1;

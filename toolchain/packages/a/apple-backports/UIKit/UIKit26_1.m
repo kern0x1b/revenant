@@ -1,14 +1,14 @@
-#import "CharonUIKit26.h"
+#import "RevenantUIKit26.h"
 #import <objc/runtime.h>
 
-@implementation UIPresentationController (CharonUIKit26_1)
+@implementation UIPresentationController (RevenantUIKit26_1)
 
-static char CharonPresentationBackgroundEffectKey;
+static char RevenantPresentationBackgroundEffectKey;
 
-- (id)backgroundEffect { return objc_getAssociatedObject(self, &CharonPresentationBackgroundEffectKey); }
+- (id)backgroundEffect { return objc_getAssociatedObject(self, &RevenantPresentationBackgroundEffectKey); }
 - (void)setBackgroundEffect:(id)effect
 {
-    objc_setAssociatedObject(self, &CharonPresentationBackgroundEffectKey, effect,
+    objc_setAssociatedObject(self, &RevenantPresentationBackgroundEffectKey, effect,
                              OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 @end
@@ -19,7 +19,7 @@ static char CharonPresentationBackgroundEffectKey;
 @implementation UIColorEffect
 @end
 
-@implementation UIColorEffect (CharonUIKit26_1)
+@implementation UIColorEffect (RevenantUIKit26_1)
 + (UIColorEffect *)effectWithColor:(id)color
 {
     return (UIColorEffect *)[[UIVisualEffect alloc] init];

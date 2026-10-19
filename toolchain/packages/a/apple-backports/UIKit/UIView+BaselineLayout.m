@@ -1,6 +1,6 @@
 #import <UIKit/UIKit.h>
 
-@implementation UIView (CharonBaselineLayout)
+@implementation UIView (RevenantBaselineLayout)
 
 - (UIView *)viewForFirstBaselineLayout
 {

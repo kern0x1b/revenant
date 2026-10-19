@@ -1,54 +1,54 @@
-local charon = path.absolute(path.join(os.scriptdir(), "..", "..", ".."))
-local workspace = import("workspace", {rootdir = path.join(charon, "modules"), anonymous = true})
+local revenant = path.absolute(path.join(os.scriptdir(), "..", "..", ".."))
+local workspace = import("workspace", {rootdir = path.join(revenant, "modules"), anonymous = true})
 local mutator = import("mutate", {rootdir = path.join(os.scriptdir(), "..", "host", "common"), anonymous = true})
 
-local COPIED = {"CharonAXSettings.h", "CharonAXSettingsCommon.h", "CharonAXSettings17.m", "CharonAXSettings18.m",
-                "CharonAXSettings26.m", "CharonHearing15.m"}
+local COPIED = {"RevenantAXSettings.h", "RevenantAXSettingsCommon.h", "RevenantAXSettings17.m", "RevenantAXSettings18.m",
+                "RevenantAXSettings26.m", "RevenantHearing15.m"}
 
 local CRASHED = "the settings check died of a signal before it could finish"
 
 MUTATIONS = {
-    {"M1-value-yes", "CharonAXSettingsCommon.h", 1,
+    {"M1-value-yes", "RevenantAXSettingsCommon.h", 1,
      "    return NO;\n}",
      "    return YES;\n}"},
-    {"M2-posts-a-change", "CharonAXSettings17.m", 1,
-     "BOOL AXAnimatedImagesEnabled(void)\n{\n    return CharonAXSettingIsOffOnThisRelease();\n}",
+    {"M2-posts-a-change", "RevenantAXSettings17.m", 1,
+     "BOOL AXAnimatedImagesEnabled(void)\n{\n    return RevenantAXSettingIsOffOnThisRelease();\n}",
      "BOOL AXAnimatedImagesEnabled(void)\n{\n    [[NSNotificationCenter defaultCenter]\n"
      .. "        postNotificationName:AXAnimatedImagesEnabledDidChangeNotification object:nil];\n"
-     .. "    return CharonAXSettingIsOffOnThisRelease();\n}"},
-    {"M3-completion-never-called", "CharonAXSettings18.m", 1,
+     .. "    return RevenantAXSettingIsOffOnThisRelease();\n}"},
+    {"M3-completion-never-called", "RevenantAXSettings18.m", 1,
      "    if (!completionHandler) {\n        return;\n    }",
      "    if (completionHandler || !completionHandler) {\n        return;\n    }"},
-    {"M4-completion-called-twice", "CharonAXSettings18.m", 1,
-     "    completionHandler([NSError errorWithDomain:CharonAXSettingsErrorDomain code:feature userInfo:@{\n"
+    {"M4-completion-called-twice", "RevenantAXSettings18.m", 1,
+     "    completionHandler([NSError errorWithDomain:RevenantAXSettingsErrorDomain code:feature userInfo:@{\n"
      .. "        NSLocalizedDescriptionKey: reason,\n        @\"AXSettingsFeature\": @(feature),\n    }]);",
-     "    NSError *first = [NSError errorWithDomain:CharonAXSettingsErrorDomain code:feature userInfo:@{\n"
+     "    NSError *first = [NSError errorWithDomain:RevenantAXSettingsErrorDomain code:feature userInfo:@{\n"
      .. "        NSLocalizedDescriptionKey: reason,\n        @\"AXSettingsFeature\": @(feature),\n    }];\n"
      .. "    completionHandler(first);\n    completionHandler(first);"},
-    {"M5-completion-called-later", "CharonAXSettings18.m", 1,
-     "    completionHandler([NSError errorWithDomain:CharonAXSettingsErrorDomain code:feature userInfo:@{",
-     "    NSError *deferred = [NSError errorWithDomain:CharonAXSettingsErrorDomain code:feature userInfo:@{\n"
+    {"M5-completion-called-later", "RevenantAXSettings18.m", 1,
+     "    completionHandler([NSError errorWithDomain:RevenantAXSettingsErrorDomain code:feature userInfo:@{",
+     "    NSError *deferred = [NSError errorWithDomain:RevenantAXSettingsErrorDomain code:feature userInfo:@{\n"
      .. "        NSLocalizedDescriptionKey: reason,\n        @\"AXSettingsFeature\": @(feature),\n    }];\n"
      .. "    dispatch_async(dispatch_get_main_queue(), ^{\n        completionHandler(deferred);\n    });\n"
-     .. "    if (0) completionHandler([NSError errorWithDomain:CharonAXSettingsErrorDomain code:feature userInfo:@{"},
-    {"M6-system-domain", "CharonAXSettings18.m", 1,
-     "NSErrorDomain const CharonAXSettingsErrorDomain = @\"org.charon.Accessibility.Settings\";",
-     "NSErrorDomain const CharonAXSettingsErrorDomain = @\"com.apple.Accessibility.Settings\";"},
-    {"M7-wrong-code", "CharonAXSettings18.m", 1,
-     "    completionHandler([NSError errorWithDomain:CharonAXSettingsErrorDomain code:feature userInfo:@{",
-     "    completionHandler([NSError errorWithDomain:CharonAXSettingsErrorDomain code:0 userInfo:@{"},
-    {"M8-constant-renamed", "CharonAXSettings26.m", 1,
+     .. "    if (0) completionHandler([NSError errorWithDomain:RevenantAXSettingsErrorDomain code:feature userInfo:@{"},
+    {"M6-system-domain", "RevenantAXSettings18.m", 1,
+     "NSErrorDomain const RevenantAXSettingsErrorDomain = @\"org.revenant.Accessibility.Settings\";",
+     "NSErrorDomain const RevenantAXSettingsErrorDomain = @\"com.apple.Accessibility.Settings\";"},
+    {"M7-wrong-code", "RevenantAXSettings18.m", 1,
+     "    completionHandler([NSError errorWithDomain:RevenantAXSettingsErrorDomain code:feature userInfo:@{",
+     "    completionHandler([NSError errorWithDomain:RevenantAXSettingsErrorDomain code:0 userInfo:@{"},
+    {"M8-constant-renamed", "RevenantAXSettings26.m", 1,
      "    @\"AXShowBordersEnabledStatusDidChangeNotification\";",
      "    @\"AXShowBordersEnabledStatusDidChange\";"},
-    {"M9-hearing-ear-not-defined", "CharonHearing15.m", 1,
+    {"M9-hearing-ear-not-defined", "RevenantHearing15.m", 1,
      "AXHearingDeviceEar AXMFiHearingDeviceStreamingEar(void)",
-     "static AXHearingDeviceEar charon_port_unused(void)"},
-    {"M10-null-completion-crashes", "CharonAXSettings18.m", 1,
+     "static AXHearingDeviceEar revenant_port_unused(void)"},
+    {"M10-null-completion-crashes", "RevenantAXSettings18.m", 1,
      "    if (!completionHandler) {\n        return;\n    }",
      "    if (!completionHandler) {\n        completionHandler(nil);\n        return;\n    }", true},
-    {"M11-control-path-only", "CharonAXSettings17.m", 1,
-     "    return CharonAXSettingIsOffOnThisRelease();",
-     "    return CharonAXSettingIsOffOnThisRelease();"}
+    {"M11-control-path-only", "RevenantAXSettings17.m", 1,
+     "    return RevenantAXSettingIsOffOnThisRelease();",
+     "    return RevenantAXSettingIsOffOnThisRelease();"}
 }
 
 local function lines_of(text)
@@ -83,9 +83,9 @@ end
 
 function run(opt)
     opt = opt or {}
-    local package = path.join(charon, "packages", "a", "apple-backports")
+    local package = path.join(revenant, "packages", "a", "apple-backports")
     local sources = opt.sources or path.join(package, "Accessibility")
-    local work = opt.build or workspace.run("charon-accessibility-settings-mutants")
+    local work = opt.build or workspace.run("revenant-accessibility-settings-mutants")
     os.tryrm(work)
     os.mkdir(work)
     local counts = {ran = 0, killed = 0, run_failed = 0, survived = 0, control_green = 0}
@@ -99,8 +99,8 @@ function run(opt)
         for _, each in ipairs(COPIED) do
             os.cp(path.join(sources, each), path.join(dir, each))
         end
-        if os.isfile(path.join(package, "CharonSayOnce.h")) then
-            os.cp(path.join(package, "CharonSayOnce.h"), dir)
+        if os.isfile(path.join(package, "RevenantSayOnce.h")) then
+            os.cp(path.join(package, "RevenantSayOnce.h"), dir)
         end
         local applied, refusal = mutator.mutate(path.join(dir, file), old, new, nth)
         io.writefile(path.join(dir, "mutate.log"), applied and "" or (refusal .. "\n"))

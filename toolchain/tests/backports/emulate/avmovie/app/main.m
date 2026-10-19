@@ -1,18 +1,18 @@
 #import <UIKit/UIKit.h>
 #include <stdlib.h>
 
-int charon_avmovie_probe_main(int argc, const char **argv);
+int revenant_avmovie_probe_main(int argc, const char **argv);
 
-@interface CharonAppDelegate : UIResponder <UIApplicationDelegate>
+@interface RevenantAppDelegate : UIResponder <UIApplicationDelegate>
 @property (nonatomic, strong) UIWindow *window;
 @end
 
-@implementation CharonAppDelegate
+@implementation RevenantAppDelegate
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)options
 {
     const char *argv[] = {"probe", [[NSBundle mainBundle] resourcePath].UTF8String};
-    int status = charon_avmovie_probe_main(2, argv);
+    int status = revenant_avmovie_probe_main(2, argv);
     exit(status);
     return YES;
 }
@@ -22,6 +22,6 @@ int charon_avmovie_probe_main(int argc, const char **argv);
 int main(int argc, char *argv[])
 {
     @autoreleasepool {
-        return UIApplicationMain(argc, argv, nil, NSStringFromClass([CharonAppDelegate class]));
+        return UIApplicationMain(argc, argv, nil, NSStringFromClass([RevenantAppDelegate class]));
     }
 }

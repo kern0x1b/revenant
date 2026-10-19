@@ -1,8 +1,8 @@
 #import <Foundation/Foundation.h>
 
-#import "CharonCloudKit.h"
-#import "CharonCKConstants.h"
-#import "CharonCKSyncEngine26.h"
+#import "RevenantCloudKit.h"
+#import "RevenantCKConstants.h"
+#import "RevenantCKSyncEngine26.h"
 
 @implementation CKSyncEngineConfiguration
 {

@@ -123,12 +123,12 @@
       "source": "SDK 16.4, Metal, MTLEvent.h; the header's -newSharedEventHandle is not nullable, and the port answers it"
     },
     {
-      "api": "CharonMetalSharedEvent",
+      "api": "RevenantMetalSharedEvent",
       "kind": "class",
       "introduced": "12.0",
       "minimum": "6.0",
       "status": "owed",
-      "reason": "build the class CharonMetalSharedEvent",
+      "reason": "build the class RevenantMetalSharedEvent",
       "effect": "until built: NSClassFromString answers nil",
       "source": "SDK 16.4, Metal, MTLEvent.h, whose protocol arrived in 12.0",
       "facts": "facts/Metal/PortInternals.md"

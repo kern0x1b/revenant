@@ -10,12 +10,12 @@ set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 root=$(cd "$here/../../../.." && pwd)
 FOUNDATION=${FOUNDATION:-$root/packages/a/apple-backports/Foundation}
-CLASSES=CharonMorphology.m
+CLASSES=RevenantMorphology.m
 
 table=$FOUNDATION/$CLASSES
-named=$(grep -c 'charon_grammatical(' "$table" || true)
+named=$(grep -c 'revenant_grammatical(' "$table" || true)
 bare=$(grep -cE 'grammaticalGender = %ld' "$table" || true)
-printf 'guard  %s: charon_grammatical( %s times (want >= 8), "grammaticalGender = %%ld" %s times (want 0)\n' "$CLASSES" "$named" "$bare"
+printf 'guard  %s: revenant_grammatical( %s times (want >= 8), "grammaticalGender = %%ld" %s times (want 0)\n' "$CLASSES" "$named" "$bare"
 [ "$named" -ge 8 ] || { echo "the eight name tables are not in $CLASSES" >&2; exit 1; }
 [ "$bare" -eq 0 ] || { echo "$CLASSES prints a bare number for grammaticalGender" >&2; exit 1; }
 
@@ -23,15 +23,15 @@ printf 'guard  %s: charon_grammatical( %s times (want >= 8), "grammaticalGender 
 BUILD=${BUILD:-$root/.agent-work/build/morphology}
 rm -rf "$BUILD"
 mkdir -p "$BUILD"
-RENAME="-DNSMorphology=charonHostNSMorphology -DNSMorphologyCustomPronoun=charonHostNSMorphologyCustomPronoun
-        -DNSMorphologyPronoun=charonHostNSMorphologyPronoun -DNSInflectionRule=charonHostNSInflectionRule
-        -DNSInflectionRuleExplicit=charonHostNSInflectionRuleExplicit"
+RENAME="-DNSMorphology=revenantHostNSMorphology -DNSMorphologyCustomPronoun=revenantHostNSMorphologyCustomPronoun
+        -DNSMorphologyPronoun=revenantHostNSMorphologyPronoun -DNSInflectionRule=revenantHostNSInflectionRule
+        -DNSInflectionRuleExplicit=revenantHostNSInflectionRuleExplicit"
 flags="-fobjc-arc -Wno-deprecated-declarations -Wno-unguarded-availability-new -Wno-nullability-completeness"
 echo "link   $BUILD/differential"
 # shellcheck disable=SC2086
 xcrun clang $flags $RENAME -I "$FOUNDATION" -o "$BUILD/differential" \
     "$here/differential.m" \
-    "$FOUNDATION/CharonMorphology.m" "$FOUNDATION/NSMorphologyCustomPronoun16.m" "$FOUNDATION/NSMorphologyInflectionConcepts18.m" \
+    "$FOUNDATION/RevenantMorphology.m" "$FOUNDATION/NSMorphologyCustomPronoun16.m" "$FOUNDATION/NSMorphologyInflectionConcepts18.m" \
     "$FOUNDATION/NSMorphologyPronoun.m" "$FOUNDATION/NSInflectionRule.m" "$FOUNDATION/NSInflectionRuleExplicit.m" \
     -framework Foundation
 [ -x "$BUILD/differential" ] || { echo "no binary at $BUILD/differential" >&2; exit 1; }
@@ -40,7 +40,7 @@ echo "bytes $(wc -c < "$BUILD/differential" | tr -d ' ')"
 # Which image answered, before the verdict is read: dladdr on both sides' IMPs, so a
 # comparison that quietly compared the port with itself cannot pass unnoticed.
 xcrun clang $flags $RENAME -I "$FOUNDATION" -o "$BUILD/provenance" "$here/provenance.m" \
-    "$FOUNDATION/CharonMorphology.m" "$FOUNDATION/NSMorphologyCustomPronoun16.m" "$FOUNDATION/NSMorphologyInflectionConcepts18.m" \
+    "$FOUNDATION/RevenantMorphology.m" "$FOUNDATION/NSMorphologyCustomPronoun16.m" "$FOUNDATION/NSMorphologyInflectionConcepts18.m" \
     "$FOUNDATION/NSMorphologyPronoun.m" "$FOUNDATION/NSInflectionRule.m" \
     "$FOUNDATION/NSInflectionRuleExplicit.m" -framework Foundation
 "$BUILD/provenance"

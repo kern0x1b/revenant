@@ -12,7 +12,7 @@ int main(void) {
         show("before MIDIClientCreate kMIDIPropertyUMPActiveGroupBitmap", kMIDIPropertyUMPActiveGroupBitmap);
         show("before MIDIClientCreate kMIDIPropertyUMPCanTransmitGroupless", kMIDIPropertyUMPCanTransmitGroupless);
         MIDIClientRef client = 0;
-        OSStatus status = MIDIClientCreate(CFSTR("charon-constants"), NULL, NULL, &client);
+        OSStatus status = MIDIClientCreate(CFSTR("revenant-constants"), NULL, NULL, &client);
         printf("MIDIClientCreate=%d\n", (int)status);
         show("kMIDIPropertyAssociatedEndpoint", kMIDIPropertyAssociatedEndpoint);
         show("kMIDIPropertyUMPActiveGroupBitmap", kMIDIPropertyUMPActiveGroupBitmap);

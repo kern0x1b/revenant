@@ -2,7 +2,7 @@ set_project("found")
 set_defaultmode("release")
 set_languages("c++20")
 
-add_repositories("charon ../..")
+add_repositories("revenant ../..")
 add_requires("llvm-clang-c 21.1.0")
 
 local clang_lib = "/Library/Developer/CommandLineTools/usr/lib"

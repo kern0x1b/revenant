@@ -1,10 +1,10 @@
 #import <CoreData/CoreData.h>
 
-@interface NSManagedObjectContext (CharonRelease)
+@interface NSManagedObjectContext (RevenantRelease)
 + (void)_mergeChangesFromRemoteContextSave:(NSDictionary *)changes intoContexts:(NSArray *)contexts;
 @end
 
-@implementation NSManagedObjectContext (CharonRemoteMerge)
+@implementation NSManagedObjectContext (RevenantRemoteMerge)
 
 + (void)mergeChangesFromRemoteContextSave:(NSDictionary *)changeNotificationData intoContexts:(NSArray<NSManagedObjectContext *> *)contexts
 {

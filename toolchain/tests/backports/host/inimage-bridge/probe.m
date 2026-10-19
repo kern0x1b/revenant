@@ -7,7 +7,7 @@
 #import <IntentsUI/IntentsUI.h>
 
 #ifdef PORT
-#define BYTES_SELECTOR @"charon_imageData"
+#define BYTES_SELECTOR @"revenant_imageData"
 #else
 #define BYTES_SELECTOR @"imageData"
 #endif
@@ -18,7 +18,7 @@
 @end
 
 #ifdef PORT
-static Class image_class(void) { return NSClassFromString(@"CharonHostINImage"); }
+static Class image_class(void) { return NSClassFromString(@"RevenantHostINImage"); }
 #else
 static Class image_class(void) { return NSClassFromString(@"INImage"); }
 #endif

@@ -6,7 +6,7 @@ static Class h16_class(Class theirs, const char *name)
 {
     if (!h16_port_mode)
         return theirs;
-    NSString *renamed = [@"CharonHost" stringByAppendingString:[NSString stringWithUTF8String:name]];
+    NSString *renamed = [@"RevenantHost" stringByAppendingString:[NSString stringWithUTF8String:name]];
     return NSClassFromString(renamed);
 }
 

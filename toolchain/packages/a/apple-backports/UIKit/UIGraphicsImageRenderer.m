@@ -1,6 +1,6 @@
-#import "CharonGraphicsRenderer.h"
+#import "RevenantGraphicsRenderer.h"
 
-static CGColorSpaceRef charon_renderer_color_space(void)
+static CGColorSpaceRef revenant_renderer_color_space(void)
 {
     static CGColorSpaceRef space;
     static dispatch_once_t once;
@@ -29,7 +29,7 @@ static CGColorSpaceRef charon_renderer_color_space(void)
         return NULL;
     CGBitmapInfo info = kCGBitmapByteOrder32Little
                       | (format.opaque ? kCGImageAlphaNoneSkipFirst : kCGImageAlphaPremultipliedFirst);
-    return CGBitmapContextCreate(NULL, width, height, 8, CGBitmapGetAlignedBytesPerRow(width * 4), charon_renderer_color_space(), info);
+    return CGBitmapContextCreate(NULL, width, height, 8, CGBitmapGetAlignedBytesPerRow(width * 4), revenant_renderer_color_space(), info);
 }
 
 + (void)prepareCGContext:(CGContextRef)context withRendererContext:(UIGraphicsImageRendererContext *)rendererContext

@@ -1,9 +1,9 @@
 #import <Foundation/Foundation.h>
 #import <CloudKit/CloudKit.h>
 
-#import "CharonCKSubscription.h"
+#import "RevenantCKSubscription.h"
 
-#import "CharonCKValue.h"
+#import "RevenantCKValue.h"
 
 @implementation CKSubscription
 
@@ -194,15 +194,15 @@
            _shouldSendMutableContent == info.shouldSendMutableContent &&
            _shouldBadge == info.shouldBadge &&
            _collapseIDKey == info.collapseIDKey &&
-           CharonCKSameObjects(_desiredKeys, info.desiredKeys) && CharonCKSameObjects(_alertLocalizationArgs, info.alertLocalizationArgs) &&
-           CharonCKSameObjects(_titleLocalizationArgs, info.titleLocalizationArgs) &&
-           CharonCKSameObjects(_subtitleLocalizationArgs, info.subtitleLocalizationArgs) &&
-           CharonCKSameObject(_soundName, info.soundName) && CharonCKSameObject(_alertBody, info.alertBody) &&
-           CharonCKSameObject(_alertLocalizationKey, info.alertLocalizationKey) &&
-           CharonCKSameObject(_alertActionLocalizationKey, info.alertActionLocalizationKey) &&
-           CharonCKSameObject(_alertLaunchImage, info.alertLaunchImage) && CharonCKSameObject(_category, info.category) &&
-           CharonCKSameObject(_title, info.title) && CharonCKSameObject(_titleLocalizationKey, info.titleLocalizationKey) &&
-           CharonCKSameObject(_subtitle, info.subtitle) && CharonCKSameObject(_subtitleLocalizationKey, info.subtitleLocalizationKey);
+           RevenantCKSameObjects(_desiredKeys, info.desiredKeys) && RevenantCKSameObjects(_alertLocalizationArgs, info.alertLocalizationArgs) &&
+           RevenantCKSameObjects(_titleLocalizationArgs, info.titleLocalizationArgs) &&
+           RevenantCKSameObjects(_subtitleLocalizationArgs, info.subtitleLocalizationArgs) &&
+           RevenantCKSameObject(_soundName, info.soundName) && RevenantCKSameObject(_alertBody, info.alertBody) &&
+           RevenantCKSameObject(_alertLocalizationKey, info.alertLocalizationKey) &&
+           RevenantCKSameObject(_alertActionLocalizationKey, info.alertActionLocalizationKey) &&
+           RevenantCKSameObject(_alertLaunchImage, info.alertLaunchImage) && RevenantCKSameObject(_category, info.category) &&
+           RevenantCKSameObject(_title, info.title) && RevenantCKSameObject(_titleLocalizationKey, info.titleLocalizationKey) &&
+           RevenantCKSameObject(_subtitle, info.subtitle) && RevenantCKSameObject(_subtitleLocalizationKey, info.subtitleLocalizationKey);
 }
 
 - (NSUInteger)hash

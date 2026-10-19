@@ -2,7 +2,7 @@
 #include <CoreVideo/CoreVideo.h>
 #include <AudioToolbox/AudioToolbox.h>
 
-static OSStatus charon_ready(CMSampleBufferMakeDataReadyHandler handler, CMSampleBufferRef buffer, Boolean dataReady)
+static OSStatus revenant_ready(CMSampleBufferMakeDataReadyHandler handler, CMSampleBufferRef buffer, Boolean dataReady)
 {
     if (dataReady)
         return 0;
@@ -23,7 +23,7 @@ OSStatus CMSampleBufferCreateWithMakeDataReadyHandler(CFAllocatorRef allocator, 
     OSStatus status = CMSampleBufferCreate(allocator, dataBuffer, dataReady, NULL, NULL, formatDescription, numSamples, numSampleTimingEntries,
                                            sampleTimingArray, numSampleSizeEntries, sampleSizeArray, sampleBufferOut);
     if (status == 0 && !dataReady) {
-        status = charon_ready(makeDataReadyHandler, *sampleBufferOut, NO);
+        status = revenant_ready(makeDataReadyHandler, *sampleBufferOut, NO);
         if (status) {
             CFRelease(*sampleBufferOut);
             *sampleBufferOut = NULL;
@@ -41,7 +41,7 @@ OSStatus CMSampleBufferCreateForImageBufferWithMakeDataReadyHandler(CFAllocatorR
     *sampleBufferOut = NULL;
     OSStatus status = CMSampleBufferCreateForImageBuffer(allocator, imageBuffer, dataReady, NULL, NULL, formatDescription, sampleTiming, sampleBufferOut);
     if (status == 0 && !dataReady) {
-        status = charon_ready(makeDataReadyHandler, *sampleBufferOut, NO);
+        status = revenant_ready(makeDataReadyHandler, *sampleBufferOut, NO);
         if (status) {
             CFRelease(*sampleBufferOut);
             *sampleBufferOut = NULL;

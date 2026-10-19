@@ -14,4 +14,4 @@ VTLowLatencyFrameInterpolationConfiguration	VTLowLatencyFrameInterpolationConfig
 VTLowLatencyFrameInterpolationParameters	VTLowLatencyFrameInterpolationParameters.m	- (VTFrameProcessorFrame *)previousFrame	+ (VTFrameProcessorFrame *)previousFrame
 VTFrameProcessorOpticalFlow	VTFrameProcessorOpticalFlow.m	- (CVPixelBufferRef)forwardFlow	+ (CVPixelBufferRef)forwardFlow
 VTLowLatencySuperResolutionScalerConfiguration	VTLowLatencySuperResolutionScalerConfiguration.m	+ (BOOL)isSupported	- (BOOL)isSupported
-VTMotionBlurConfiguration	VideoToolboxValue26.m	CharonValueSet(self, @(frameHeight), @"frameHeight");	CharonValueSet(self, @(frameWidth), @"frameHeight");
+VTMotionBlurConfiguration	VideoToolboxValue26.m	RevenantValueSet(self, @(frameHeight), @"frameHeight");	RevenantValueSet(self, @(frameWidth), @"frameHeight");

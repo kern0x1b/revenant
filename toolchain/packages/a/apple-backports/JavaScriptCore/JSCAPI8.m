@@ -1,12 +1,12 @@
 #import "JSInternal.h"
-#import "../CharonSayOnce.h"
+#import "../RevenantSayOnce.h"
 
 
 void JSGlobalContextSetName(JSGlobalContextRef context, JSStringRef name)
 {
     (void)context;
     (void)name;
-    charon_say_once_for(@"JavaScriptCore.JSGlobalContextSetName",
+    revenant_say_once_for(@"JavaScriptCore.JSGlobalContextSetName",
                        @"JavaScriptCore: JSGlobalContextSetName does nothing here: a context's name is shown by a "
                        @"Web Inspector, and this port carries none. -[JSContext setName:] keeps a name in its own "
                        @"wrapper, which the two do not share.");
@@ -15,7 +15,7 @@ void JSGlobalContextSetName(JSGlobalContextRef context, JSStringRef name)
 JSStringRef JSGlobalContextCopyName(JSGlobalContextRef context)
 {
     (void)context;
-    charon_say_once_for(@"JavaScriptCore.JSGlobalContextCopyName",
+    revenant_say_once_for(@"JavaScriptCore.JSGlobalContextCopyName",
                        @"JavaScriptCore: JSGlobalContextCopyName answers NULL here: a context's name is shown by a "
                        @"Web Inspector, and this port carries none.");
     return NULL;

@@ -12,7 +12,7 @@ const UIFontWeight UIFontWeightBold = 0.4f;
 const UIFontWeight UIFontWeightHeavy = 0.56f;
 const UIFontWeight UIFontWeightBlack = 0.62f;
 
-@implementation UIFont (CharonWeights)
+@implementation UIFont (RevenantWeights)
 
 + (UIFont *)systemFontOfSize:(CGFloat)fontSize weight:(UIFontWeight)weight
 {

@@ -7,9 +7,9 @@
 #include <dlfcn.h>
 #include <stdint.h>
 
-#ifdef CHARON_PORT_BUILD
+#ifdef REVENANT_PORT_BUILD
 #import <Vision/Vision.h>
-#import "CharonVisionImage.h"
+#import "RevenantVisionImage.h"
 #endif
 
 static CGImageRef picture(size_t wide, size_t high)
@@ -53,15 +53,15 @@ static CVPixelBufferRef oracle(CGImageRef image, size_t wide, size_t high, int o
     return (CVPixelBufferRef)CVPixelBufferRetain(value.imageBufferValue);
 }
 
-#ifdef CHARON_PORT_BUILD
+#ifdef REVENANT_PORT_BUILD
 static CVPixelBufferRef port_answer(CGImageRef image, size_t wide, size_t high, VNImageCropAndScaleOption option)
 {
-    CVPixelBufferRef source = charon_vision_buffer_of_image(image);
+    CVPixelBufferRef source = revenant_vision_buffer_of_image(image);
     CVPixelBufferRef answer;
     if (source == NULL) {
         return NULL;
     }
-    answer = charon_vision_pixels(source, wide, high, option);
+    answer = revenant_vision_pixels(source, wide, high, option);
     CVPixelBufferRelease(source);
     return answer;
 }
@@ -135,10 +135,10 @@ int main(int argc, const char *argv[])
     long worst = 0;
 
     @autoreleasepool {
-#ifdef CHARON_PORT_BUILD
+#ifdef REVENANT_PORT_BUILD
         {
             char kernel[256], framework[256];
-            image_of((const void *)(uintptr_t)&charon_vision_bilinear, kernel, sizeof kernel);
+            image_of((const void *)(uintptr_t)&revenant_vision_bilinear, kernel, sizeof kernel);
             image_of((__bridge void *)NSClassFromString(@"MLFeatureValue"), framework, sizeof framework);
             printf("=== the two answers come from: the port's %s and the framework's %s\n", kernel, framework);
             if (strcmp(kernel, framework) == 0) {
@@ -162,7 +162,7 @@ int main(int argc, const char *argv[])
                 CVPixelBufferRef want = oracle(image, sizes[index].to_wide, sizes[index].to_high,
                                                option == 0 ? VNImageCropAndScaleOptionCenterCrop
                                                            : VNImageCropAndScaleOptionScaleFit);
-#ifdef CHARON_PORT_BUILD
+#ifdef REVENANT_PORT_BUILD
                 CVPixelBufferRef got = port_answer(image, sizes[index].to_wide, sizes[index].to_high,
                                                     option == 0 ? VNImageCropAndScaleOptionCenterCrop
                                                                : VNImageCropAndScaleOptionScaleFit);

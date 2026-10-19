@@ -1,6 +1,6 @@
-#import "CharonPhotosPicker.h"
+#import "RevenantPhotosPicker.h"
 
-@implementation PHPickerFilter (CharonFilter16)
+@implementation PHPickerFilter (RevenantFilter16)
 
 + (PHPickerFilter *)depthEffectPhotosFilter
 {

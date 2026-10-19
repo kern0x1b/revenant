@@ -4,8 +4,8 @@
 #import <objc/message.h>
 #include <stdio.h>
 
-#if CHARON_PORT_BUILD
-#define LOOPER_CLASS_NAME @"charon_host_AVPlayerLooper"
+#if REVENANT_PORT_BUILD
+#define LOOPER_CLASS_NAME @"revenant_host_AVPlayerLooper"
 #else
 #define LOOPER_CLASS_NAME @"AVPlayerLooper"
 #endif
@@ -188,7 +188,7 @@ static void sectionOffsetRange(Class looperClass, NSURL *movie)
 
 static void sectionFailed(Class looperClass)
 {
-    NSURL *missing = [NSURL fileURLWithPath:@"/nonexistent-charon-looper/missing.mov"];
+    NSURL *missing = [NSURL fileURLWithPath:@"/nonexistent-revenant-looper/missing.mov"];
     AVQueuePlayer *queue = [AVQueuePlayer queuePlayerWithItems:@[]];
     AVPlayerItem *template = [AVPlayerItem playerItemWithAsset:[AVURLAsset URLAssetWithURL:missing options:nil]];
     id looper = ((id (*)(id, SEL, id, id))objc_msgSend)(looperClass, sel_registerName("playerLooperWithPlayer:templateItem:"), queue, template);

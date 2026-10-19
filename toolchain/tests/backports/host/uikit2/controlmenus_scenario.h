@@ -2,7 +2,7 @@
 #import <objc/message.h>
 #import <stdio.h>
 
-static BOOL charon_has_method(Class cls, const char *name)
+static BOOL revenant_has_method(Class cls, const char *name)
 {
     if (!cls)
         return NO;
@@ -10,17 +10,17 @@ static BOOL charon_has_method(Class cls, const char *name)
     return [cls instancesRespondToSelector:selector];
 }
 
-static void charon_insert_action(UISegmentedControl *control, UIAction *action, NSUInteger index)
+static void revenant_insert_action(UISegmentedControl *control, UIAction *action, NSUInteger index)
 {
-    const char *renamed = "charonHostInsertSegmentWithAction:atIndex:animated:";
+    const char *renamed = "revenantHostInsertSegmentWithAction:atIndex:animated:";
     const char *published = "insertSegmentWithAction:atIndex:animated:";
-    SEL chosen = NSSelectorFromString(@(charon_has_method([control class], renamed) ? renamed : published));
+    SEL chosen = NSSelectorFromString(@(revenant_has_method([control class], renamed) ? renamed : published));
     ((void (*)(id, SEL, UIAction *, NSUInteger, BOOL))objc_msgSend)(control, chosen, action, index, NO);
 }
 
-typedef UISegmentedControl *(*CharonControlWithActions)(UISegmentedControl *, CGRect, NSArray *);
+typedef UISegmentedControl *(*RevenantControlWithActions)(UISegmentedControl *, CGRect, NSArray *);
 
-static UISegmentedControl *charon_control_with_actions(CharonControlWithActions entry, CGRect frame, NSArray *actions)
+static UISegmentedControl *revenant_control_with_actions(RevenantControlWithActions entry, CGRect frame, NSArray *actions)
 {
     static int reported = 0;
     if (!reported++) {
@@ -33,9 +33,9 @@ static UISegmentedControl *charon_control_with_actions(CharonControlWithActions 
     return ((id (*)(id, SEL, CGRect, NSArray *))objc_msgSend)([UISegmentedControl alloc], published, frame, actions);
 }
 
-static NSString *charon_insert_action_name(UISegmentedControl *control)
+static NSString *revenant_insert_action_name(UISegmentedControl *control)
 {
-    return charon_has_method([control class], "charonHostInsertSegmentWithAction:atIndex:animated:") ? @"the port's own"
+    return revenant_has_method([control class], "revenantHostInsertSegmentWithAction:atIndex:animated:") ? @"the port's own"
                                                                                                    : @"the host's own";
 }
 
@@ -50,41 +50,41 @@ static NSString *bar_line(UIBarButtonItem *item)
     return [NSString stringWithFormat:@"title=%@ image=%d menu=%d pa=%d width=%g style=%ld system=%@", item.title ?: @"nil", item.image != nil, item.menu != nil, item.primaryAction != nil, item.width, (long)item.style, @""];
 }
 
-static SEL charon_carried(Class cls, const char *published)
+static SEL revenant_carried(Class cls, const char *published)
 {
     char *name = malloc(strlen(published) + 16);
-    strcpy(name, "charonHost");
-    name[10] = (char)(published[0] >= 'a' && published[0] <= 'z' ? published[0] - 'a' + 'A' : published[0]);
+    strcpy(name, "revenantHost");
+    name[12] = (char)(published[0] >= 'a' && published[0] <= 'z' ? published[0] - 'a' + 'A' : published[0]);
     strcat(name, published + 1);
     SEL prefixed = sel_registerName(name);
-    BOOL has = charon_has_method(cls, name);
+    BOOL has = revenant_has_method(cls, name);
     free(name);
     return has ? prefixed : sel_registerName(published);
 }
 
-static id charon_action_at(UISegmentedControl *control, NSUInteger index)
+static id revenant_action_at(UISegmentedControl *control, NSUInteger index)
 {
-    SEL selector = charon_carried([UISegmentedControl class], "actionForSegmentAtIndex:");
+    SEL selector = revenant_carried([UISegmentedControl class], "actionForSegmentAtIndex:");
     return ((id (*)(id, SEL, NSUInteger))objc_msgSend)(control, selector, index);
 }
 
-static void charon_set_action(UISegmentedControl *control, UIAction *action, NSUInteger index)
+static void revenant_set_action(UISegmentedControl *control, UIAction *action, NSUInteger index)
 {
-    SEL selector = charon_carried([UISegmentedControl class], "setAction:forSegmentAtIndex:");
+    SEL selector = revenant_carried([UISegmentedControl class], "setAction:forSegmentAtIndex:");
     ((void (*)(id, SEL, UIAction *, NSUInteger))objc_msgSend)(control, selector, action, index);
 }
 
-static NSInteger charon_index_of(UISegmentedControl *control, NSString *identifier)
+static NSInteger revenant_index_of(UISegmentedControl *control, NSString *identifier)
 {
-    SEL selector = charon_carried([UISegmentedControl class], "segmentIndexForActionIdentifier:");
+    SEL selector = revenant_carried([UISegmentedControl class], "segmentIndexForActionIdentifier:");
     return ((NSInteger (*)(id, SEL, NSString *))objc_msgSend)(control, selector, identifier);
 }
 
-static void charon_dump_slots(const char *tag, UISegmentedControl *control)
+static void revenant_dump_slots(const char *tag, UISegmentedControl *control)
 {
     NSMutableString *text = [NSMutableString string];
     for (NSUInteger index = 0; index < control.numberOfSegments; index++) {
-        id held = charon_action_at(control, index);
+        id held = revenant_action_at(control, index);
         if (index)
             [text appendString:@" | "];
         [text appendFormat:@"%lu=%@", (unsigned long)index,
@@ -95,7 +95,7 @@ static void charon_dump_slots(const char *tag, UISegmentedControl *control)
     fprintf(stderr, "[controlmenus] %-22s %s\n", tag, [text UTF8String]);
 }
 
-static NSArray *menu_scenario(Class actionClass, Class menuClass, CharonControlWithActions entry)
+static NSArray *menu_scenario(Class actionClass, Class menuClass, RevenantControlWithActions entry)
 {
     NSMutableArray *lines = [NSMutableArray array];
     UIImage *image = [[UIImage alloc] init];
@@ -156,37 +156,37 @@ static NSArray *menu_scenario(Class actionClass, Class menuClass, CharonControlW
     [lines addObject:ur_line(@"spaces", @[@(fixed.width), fixed.menu ?: @"nil", flexible.primaryAction ?: @"nil", ur_yes(fixed != flexible)])];
 
     UIAction *b1 = [actionClass actionWithTitle:@"B" image:nil identifier:@"idy" handler:^(id x) {}];
-    UISegmentedControl *sg = charon_control_with_actions(entry, CGRectMake(0, 0, 200, 30), @[ a, b1 ]);
+    UISegmentedControl *sg = revenant_control_with_actions(entry, CGRectMake(0, 0, 200, 30), @[ a, b1 ]);
     [lines addObject:ur_line(@"segments", @[@(sg.numberOfSegments), @(sg.selectedSegmentIndex), [sg titleForSegmentAtIndex:0] ?: @"nil", [sg titleForSegmentAtIndex:1] ?: @"nil", ur_yes([sg imageForSegmentAtIndex:0] != nil),
-                                           ur_yes(charon_action_at(sg, 0) != a), ur_yes([charon_action_at(sg, 0) isEqual:a]), @(charon_index_of(sg, @"idy")), @(charon_index_of(sg, @"nope"))])];
+                                           ur_yes(revenant_action_at(sg, 0) != a), ur_yes([revenant_action_at(sg, 0) isEqual:a]), @(revenant_index_of(sg, @"idy")), @(revenant_index_of(sg, @"nope"))])];
     UIAction *cc = [actionClass actionWithTitle:@"C" image:nil identifier:@"idz" handler:^(id x) {}];
-    charon_dump_slots("built", sg);
-    charon_insert_action(sg, cc, 1);
-    charon_dump_slots("after the insert", sg);
-    [lines addObject:ur_line(@"inserted", @[@(sg.numberOfSegments), [sg titleForSegmentAtIndex:1], @(charon_index_of(sg, @"idz")), @(charon_index_of(sg, @"idy"))])];
-    [lines addObject:ur_line(@"set a taken identifier", ur_raised(^id { charon_set_action(sg, a, 1); return @"no"; }))];
+    revenant_dump_slots("built", sg);
+    revenant_insert_action(sg, cc, 1);
+    revenant_dump_slots("after the insert", sg);
+    [lines addObject:ur_line(@"inserted", @[@(sg.numberOfSegments), [sg titleForSegmentAtIndex:1], @(revenant_index_of(sg, @"idz")), @(revenant_index_of(sg, @"idy"))])];
+    [lines addObject:ur_line(@"set a taken identifier", ur_raised(^id { revenant_set_action(sg, a, 1); return @"no"; }))];
     UIAction *n9 = [actionClass actionWithTitle:@"N9" image:nil identifier:@"id9" handler:^(id x) {}];
-    charon_set_action(sg, n9, 1);
-    charon_dump_slots("after setAction", sg);
+    revenant_set_action(sg, n9, 1);
+    revenant_dump_slots("after setAction", sg);
     [lines addObject:ur_line(@"set an action", @[[sg titleForSegmentAtIndex:1], ur_yes([sg imageForSegmentAtIndex:1] != nil)])];
     [sg insertSegmentWithTitle:@"plain" atIndex:0 animated:NO];
-    charon_dump_slots("after a plain insert", sg);
-    [lines addObject:ur_line(@"a plain segment", @[charon_action_at(sg, 0) ?: @"nil", @(charon_index_of(sg, @"idx")), @(charon_index_of(sg, @"id9"))])];
+    revenant_dump_slots("after a plain insert", sg);
+    [lines addObject:ur_line(@"a plain segment", @[revenant_action_at(sg, 0) ?: @"nil", @(revenant_index_of(sg, @"idx")), @(revenant_index_of(sg, @"id9"))])];
     [sg removeSegmentAtIndex:0 animated:NO];
-    charon_dump_slots("after the removal", sg);
-    [lines addObject:ur_line(@"segment removed", @[@(charon_index_of(sg, @"idx")), @(charon_index_of(sg, @"id9"))])];
-    [lines addObject:ur_line(@"no action", @[charon_action_at(sg, 9) ?: @"nil", charon_action_at([[UISegmentedControl alloc] initWithItems:@[@"q"]], 0) ?: @"nil"])];
-    [lines addObject:ur_line(@"unique on insert", ur_raised(^id { charon_insert_action(sg, cc, 0); return @"no"; }))];
+    revenant_dump_slots("after the removal", sg);
+    [lines addObject:ur_line(@"segment removed", @[@(revenant_index_of(sg, @"idx")), @(revenant_index_of(sg, @"id9"))])];
+    [lines addObject:ur_line(@"no action", @[revenant_action_at(sg, 9) ?: @"nil", revenant_action_at([[UISegmentedControl alloc] initWithItems:@[@"q"]], 0) ?: @"nil"])];
+    [lines addObject:ur_line(@"unique on insert", ur_raised(^id { revenant_insert_action(sg, cc, 0); return @"no"; }))];
     for (NSArray *pair in @[ @[ @"the host's", NSClassFromString(@"UIAction") ], @[ @"this binary's", actionClass ] ]) {
         UIAction *one = [pair[1] actionWithTitle:@"AT" image:nil
                                        identifier:[NSString stringWithFormat:@"id-%@", pair[0]]
                                           handler:^(id x) {}];
         UISegmentedControl *own = [[UISegmentedControl alloc] initWithItems:@[ @"seed" ]];
         NSString *outcome = ur_raised(^id {
-            charon_insert_action(own, one, 0);
-            UIAction *back = charon_action_at(own, 0);
+            revenant_insert_action(own, one, 0);
+            UIAction *back = revenant_action_at(own, 0);
             fprintf(stderr, "[controlmenus] %s took %s\n", [[pair[0] description] UTF8String],
-                    [[charon_insert_action_name(own) description] UTF8String]);
+                    [[revenant_insert_action_name(own) description] UTF8String]);
             return [NSString stringWithFormat:@"segments=%ld title=%@ back=%@", (long)own.numberOfSegments,
                                               [own titleForSegmentAtIndex:0] ?: @"nil", back.title ?: @"nil"];
         });

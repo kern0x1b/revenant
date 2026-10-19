@@ -133,11 +133,11 @@
     } @finally {
         _transactionDepth--;
         if (outermost && _transactionDepth == 0)
-            [self charon_finish_outermost_transaction];
+            [self revenant_finish_outermost_transaction];
     }
 }
 
-- (void)charon_finish_outermost_transaction
+- (void)revenant_finish_outermost_transaction
 {
     if (_automaticallySynchronizesTextLayoutManagers)
         [self synchronizeTextLayoutManagers:nil];

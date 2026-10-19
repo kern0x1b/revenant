@@ -8,7 +8,7 @@ struct os_system_version_s {
     unsigned int patch;
 };
 
-int charon_os_system_version_get_current_version(struct os_system_version_s *version);
+int revenant_os_system_version_get_current_version(struct os_system_version_s *version);
 
 int main(void)
 {
@@ -19,7 +19,7 @@ int main(void)
         printf("FAIL  the host must have os_system_version_get_current_version to compare against\n");
         return 1;
     }
-    if (system(&darwins) != 0 || charon_os_system_version_get_current_version(&ours) != 0) {
+    if (system(&darwins) != 0 || revenant_os_system_version_get_current_version(&ours) != 0) {
         printf("FAIL  os_system_version_get_current_version must answer\n");
         return 1;
     }

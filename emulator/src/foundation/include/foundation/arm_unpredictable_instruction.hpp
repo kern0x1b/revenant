@@ -12,7 +12,7 @@
 
 #include "foundation/arm_cpu_model.hpp"
 
-namespace shade {
+namespace emulator {
 
 [[nodiscard]] bool emulate_arm_unpredictable_instruction(
     ArmUnpredictableInstructionPolicy profile, bool thumb,

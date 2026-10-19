@@ -8,13 +8,13 @@
 
 static NSString *const results_folder = @"/private/var/backports";
 
-@interface CharonChangeObserver : NSObject <PHPhotoLibraryChangeObserver>
+@interface RevenantChangeObserver : NSObject <PHPhotoLibraryChangeObserver>
 @property (atomic, strong) PHChange *change;
 @property (atomic) BOOL onMain;
 @property (atomic) int calls;
 @end
 
-@implementation CharonChangeObserver
+@implementation RevenantChangeObserver
 
 - (void)photoLibraryDidChange:(PHChange *)changeInstance
 {
@@ -85,9 +85,9 @@ static void check_observer(void)
     PHAsset *old = before.firstObject;
     CHECK(old != nil, "the saved photos hold an asset before the write");
 
-    CharonChangeObserver *observer = [[CharonChangeObserver alloc] init];
-    CharonChangeObserver *dropped = [[CharonChangeObserver alloc] init];
-    __weak CharonChangeObserver *weakDropped = dropped;
+    RevenantChangeObserver *observer = [[RevenantChangeObserver alloc] init];
+    RevenantChangeObserver *dropped = [[RevenantChangeObserver alloc] init];
+    __weak RevenantChangeObserver *weakDropped = dropped;
     [[PHPhotoLibrary sharedPhotoLibrary] registerChangeObserver:observer];
     [[PHPhotoLibrary sharedPhotoLibrary] registerChangeObserver:dropped];
     dropped = nil;
@@ -144,23 +144,23 @@ static void run_checks(void)
     CHECK(status == PHAuthorizationStatusAuthorized, "the application may use the photo library");
     check_raw_notification();
     check_observer();
-    NSString *summary = [NSString stringWithFormat:@"%d checks, %d failed\n", charon_checks, charon_failures];
+    NSString *summary = [NSString stringWithFormat:@"%d checks, %d failed\n", revenant_checks, revenant_failures];
     printf("%s", summary.UTF8String);
     fflush(stdout);
     [summary writeToFile:[results_folder stringByAppendingPathComponent:@"photoschanges.done"] atomically:YES encoding:NSUTF8StringEncoding error:NULL];
 }
 
-@interface CharonChangesDelegate : UIResponder <UIApplicationDelegate>
+@interface RevenantChangesDelegate : UIResponder <UIApplicationDelegate>
 @property (nonatomic, strong) UIWindow *window;
 @end
 
-@implementation CharonChangesDelegate
+@implementation RevenantChangesDelegate
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)options
 {
     [[NSFileManager defaultManager] createDirectoryAtPath:results_folder withIntermediateDirectories:YES attributes:nil error:NULL];
     [[NSFileManager defaultManager] removeItemAtPath:[results_folder stringByAppendingPathComponent:@"photoschanges.done"] error:NULL];
-    charon_log_to([results_folder stringByAppendingPathComponent:@"photoschanges.log"]);
+    revenant_log_to([results_folder stringByAppendingPathComponent:@"photoschanges.log"]);
     self.window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
     self.window.rootViewController = [[UIViewController alloc] init];
     [self.window makeKeyAndVisible];
@@ -173,6 +173,6 @@ static void run_checks(void)
 int main(int argc, char **argv)
 {
     @autoreleasepool {
-        return UIApplicationMain(argc, argv, nil, NSStringFromClass([CharonChangesDelegate class]));
+        return UIApplicationMain(argc, argv, nil, NSStringFromClass([RevenantChangesDelegate class]));
     }
 }

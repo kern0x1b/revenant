@@ -1,80 +1,80 @@
 #import <UIKit/UIKit.h>
-#import "../CharonSayOnce.h"
+#import "../RevenantSayOnce.h"
 
-typedef NS_ENUM(NSInteger, CharonGroupDirection) {
-    CharonGroupDirectionHorizontal,
-    CharonGroupDirectionVertical,
-    CharonGroupDirectionCustom
+typedef NS_ENUM(NSInteger, RevenantGroupDirection) {
+    RevenantGroupDirectionHorizontal,
+    RevenantGroupDirectionVertical,
+    RevenantGroupDirectionCustom
 };
 
-typedef NS_ENUM(NSInteger, CharonDimensionKind) {
-    CharonDimensionKindFractionalWidth,
-    CharonDimensionKindFractionalHeight,
-    CharonDimensionKindAbsolute,
-    CharonDimensionKindEstimated
+typedef NS_ENUM(NSInteger, RevenantDimensionKind) {
+    RevenantDimensionKindFractionalWidth,
+    RevenantDimensionKindFractionalHeight,
+    RevenantDimensionKindAbsolute,
+    RevenantDimensionKindEstimated
 };
 
-static inline void charon_layout_say_once(NSString *key, NSString *text)
+static inline void revenant_layout_say_once(NSString *key, NSString *text)
 {
-    charon_say_once_for(key, text);
+    revenant_say_once_for(key, text);
 }
 
-@interface NSCollectionLayoutItem (CharonLayout)
-- (instancetype)initCharonWithSize:(NSCollectionLayoutSize *)size supplementaryItems:(NSArray *)supplementaryItems;
-- (NSString *)charon_bodyDescription;
-- (NSString *)charon_kindName;
+@interface NSCollectionLayoutItem (RevenantLayout)
+- (instancetype)initRevenantWithSize:(NSCollectionLayoutSize *)size supplementaryItems:(NSArray *)supplementaryItems;
+- (NSString *)revenant_bodyDescription;
+- (NSString *)revenant_kindName;
 @end
 
-@interface NSCollectionLayoutSupplementaryItem (CharonLayout)
-- (instancetype)initCharonWithSize:(NSCollectionLayoutSize *)size elementKind:(NSString *)elementKind containerAnchor:(NSCollectionLayoutAnchor *)containerAnchor
+@interface NSCollectionLayoutSupplementaryItem (RevenantLayout)
+- (instancetype)initRevenantWithSize:(NSCollectionLayoutSize *)size elementKind:(NSString *)elementKind containerAnchor:(NSCollectionLayoutAnchor *)containerAnchor
                         itemAnchor:(NSCollectionLayoutAnchor *)itemAnchor;
 @end
 
-@interface NSCollectionLayoutBoundarySupplementaryItem (CharonLayout)
-- (instancetype)initCharonWithSize:(NSCollectionLayoutSize *)size elementKind:(NSString *)elementKind alignment:(NSRectAlignment)alignment offset:(CGPoint)offset;
+@interface NSCollectionLayoutBoundarySupplementaryItem (RevenantLayout)
+- (instancetype)initRevenantWithSize:(NSCollectionLayoutSize *)size elementKind:(NSString *)elementKind alignment:(NSRectAlignment)alignment offset:(CGPoint)offset;
 @end
 
-@interface NSCollectionLayoutDecorationItem (CharonLayout)
-- (instancetype)initCharonWithElementKind:(NSString *)elementKind;
+@interface NSCollectionLayoutDecorationItem (RevenantLayout)
+- (instancetype)initRevenantWithElementKind:(NSString *)elementKind;
 @end
 
-@interface NSCollectionLayoutGroup (CharonLayout)
-- (instancetype)initCharonWithSize:(NSCollectionLayoutSize *)size direction:(CharonGroupDirection)direction subitems:(NSArray *)subitems
+@interface NSCollectionLayoutGroup (RevenantLayout)
+- (instancetype)initRevenantWithSize:(NSCollectionLayoutSize *)size direction:(RevenantGroupDirection)direction subitems:(NSArray *)subitems
                              count:(NSInteger)count provider:(NSCollectionLayoutGroupCustomItemProvider)provider;
-- (CharonGroupDirection)charon_direction;
-- (NSInteger)charon_repeatCount;
-- (NSCollectionLayoutGroupCustomItemProvider)charon_itemProvider;
+- (RevenantGroupDirection)revenant_direction;
+- (NSInteger)revenant_repeatCount;
+- (NSCollectionLayoutGroupCustomItemProvider)revenant_itemProvider;
 @end
 
-@interface NSCollectionLayoutSection (CharonLayout)
-- (NSCollectionLayoutGroup *)charon_group;
-- (NSInteger)charon_contentInsetsReference;
-- (void)charon_setContentInsetsReference:(NSInteger)reference;
-- (NSInteger)charon_supplementaryContentInsetsReference;
+@interface NSCollectionLayoutSection (RevenantLayout)
+- (NSCollectionLayoutGroup *)revenant_group;
+- (NSInteger)revenant_contentInsetsReference;
+- (void)revenant_setContentInsetsReference:(NSInteger)reference;
+- (NSInteger)revenant_supplementaryContentInsetsReference;
 @end
 
-@interface UICollectionViewCompositionalLayoutConfiguration (CharonLayout)
-- (NSInteger)charon_contentInsetsReference;
-- (void)charon_setContentInsetsReference:(NSInteger)reference;
+@interface UICollectionViewCompositionalLayoutConfiguration (RevenantLayout)
+- (NSInteger)revenant_contentInsetsReference;
+- (void)revenant_setContentInsetsReference:(NSInteger)reference;
 @end
 
-@interface NSCollectionLayoutAnchor (CharonLayout)
-- (CGPoint)charon_anchorPoint;
+@interface NSCollectionLayoutAnchor (RevenantLayout)
+- (CGPoint)revenant_anchorPoint;
 @end
 
-@interface NSCollectionLayoutSize (CharonLayout)
-- (instancetype)initCharonWithWidth:(NSCollectionLayoutDimension *)width height:(NSCollectionLayoutDimension *)height;
+@interface NSCollectionLayoutSize (RevenantLayout)
+- (instancetype)initRevenantWithWidth:(NSCollectionLayoutDimension *)width height:(NSCollectionLayoutDimension *)height;
 @end
 
-@interface NSCollectionLayoutSpacing (CharonLayout)
-- (instancetype)initCharonWithSpacing:(CGFloat)spacing flexible:(BOOL)flexible;
+@interface NSCollectionLayoutSpacing (RevenantLayout)
+- (instancetype)initRevenantWithSpacing:(CGFloat)spacing flexible:(BOOL)flexible;
 @end
 
-@interface NSCollectionLayoutDimension (CharonLayout)
-- (instancetype)initCharonWithKind:(CharonDimensionKind)kind value:(CGFloat)value;
+@interface NSCollectionLayoutDimension (RevenantLayout)
+- (instancetype)initRevenantWithKind:(RevenantDimensionKind)kind value:(CGFloat)value;
 @end
 
-@interface CharonSolvedElement : NSObject {
+@interface RevenantSolvedElement : NSObject {
 @public
     NSInteger category;
     NSString *kind;
@@ -93,7 +93,7 @@ static inline void charon_layout_say_once(NSString *key, NSString *text)
 }
 @end
 
-@interface CharonSolvedSection : NSObject {
+@interface RevenantSolvedSection : NSObject {
 @public
     NSInteger section;
     CGRect extent;
@@ -110,26 +110,26 @@ static inline void charon_layout_say_once(NSString *key, NSString *text)
 @end
 
 
-@interface UICollectionViewLayout (CharonOrthogonal)
-- (void)charon_offsetsDidChange;
+@interface UICollectionViewLayout (RevenantOrthogonal)
+- (void)revenant_offsetsDidChange;
 @end
 
-@interface CharonOrthogonalController : NSObject <UIGestureRecognizerDelegate>
+@interface RevenantOrthogonalController : NSObject <UIGestureRecognizerDelegate>
 - (instancetype)initWithLayout:(UICollectionViewLayout *)layout;
 - (void)updateSections:(NSArray *)sections view:(UICollectionView *)view environment:(id<NSCollectionLayoutEnvironment>)environment;
 - (CGFloat)offsetOfSection:(NSInteger)section;
 - (void)scrollSection:(NSInteger)section toOffset:(CGFloat)offset settle:(BOOL)settle;
 - (CGRect)shiftedFrame:(CGRect)frame section:(NSInteger)section;
 - (BOOL)viewportShows:(CGRect)shifted section:(NSInteger)section;
-- (void)applyToAttributes:(UICollectionViewLayoutAttributes *)attributes element:(CharonSolvedElement *)element;
+- (void)applyToAttributes:(UICollectionViewLayoutAttributes *)attributes element:(RevenantSolvedElement *)element;
 - (void)detach;
 @end
 
-@interface UICollectionViewLayout (CharonSelfSizing)
-- (BOOL)charon_settleMeasurements;
-- (NSUInteger)charon_estimatedAxesForAttributes:(UICollectionViewLayoutAttributes *)attributes;
+@interface UICollectionViewLayout (RevenantSelfSizing)
+- (BOOL)revenant_settleMeasurements;
+- (NSUInteger)revenant_estimatedAxesForAttributes:(UICollectionViewLayoutAttributes *)attributes;
 @end
 
-UICollectionViewLayoutAttributes *charon_default_preferred(UICollectionReusableView *view, UICollectionViewLayoutAttributes *attributes, BOOL estimatedWidth, BOOL estimatedHeight);
-UICollectionViewLayoutAttributes *charon_preferred_attributes(UICollectionReusableView *view, UICollectionViewLayoutAttributes *attributes, BOOL estimatedWidth, BOOL estimatedHeight, CGFloat scale);
-void charon_layout_perform(UICollectionViewLayout *layout, void (^work)(UICollectionViewLayout *layout));
+UICollectionViewLayoutAttributes *revenant_default_preferred(UICollectionReusableView *view, UICollectionViewLayoutAttributes *attributes, BOOL estimatedWidth, BOOL estimatedHeight);
+UICollectionViewLayoutAttributes *revenant_preferred_attributes(UICollectionReusableView *view, UICollectionViewLayoutAttributes *attributes, BOOL estimatedWidth, BOOL estimatedHeight, CGFloat scale);
+void revenant_layout_perform(UICollectionViewLayout *layout, void (^work)(UICollectionViewLayout *layout));

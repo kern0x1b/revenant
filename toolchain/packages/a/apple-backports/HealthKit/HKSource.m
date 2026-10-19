@@ -1,21 +1,21 @@
 #import <HealthKit/HealthKit.h>
 
-#import "CharonHKStore.h"
+#import "RevenantHKStore.h"
 
 @implementation HKSource {
     NSString *_name;
     NSString *_bundleIdentifier;
 }
-CHARON_HEALTHKIT_UNCREATABLE_INIT
+REVENANT_HEALTHKIT_UNCREATABLE_INIT
 
 + (BOOL)supportsSecureCoding
 {
     return YES;
 }
 
-+ (instancetype)charon_sourceWithName:(NSString *)name bundleIdentifier:(NSString *)bundleIdentifier
++ (instancetype)revenant_sourceWithName:(NSString *)name bundleIdentifier:(NSString *)bundleIdentifier
 {
-    return [[self alloc] charon_initWithName:name bundleIdentifier:bundleIdentifier];
+    return [[self alloc] revenant_initWithName:name bundleIdentifier:bundleIdentifier];
 }
 
 + (instancetype)defaultSource
@@ -31,12 +31,12 @@ CHARON_HEALTHKIT_UNCREATABLE_INIT
         if (![name isKindOfClass:[NSString class]])
             name = @"";
         NSString *identifier = [bundle bundleIdentifier] ?: @"";
-        source = [HKSource charon_sourceWithName:name bundleIdentifier:identifier];
+        source = [HKSource revenant_sourceWithName:name bundleIdentifier:identifier];
     });
     return source;
 }
 
-- (instancetype)charon_initWithName:(NSString *)name bundleIdentifier:(NSString *)bundleIdentifier
+- (instancetype)revenant_initWithName:(NSString *)name bundleIdentifier:(NSString *)bundleIdentifier
 {
     HKSource *fresh = [super init];
     if (fresh) {
@@ -50,7 +50,7 @@ CHARON_HEALTHKIT_UNCREATABLE_INIT
 {
     NSString *name = [coder decodeObjectOfClass:[NSString class] forKey:@"name"];
     NSString *identifier = [coder decodeObjectOfClass:[NSString class] forKey:@"bundleIdentifier"];
-    return [self charon_initWithName:name ?: @"" bundleIdentifier:identifier ?: @""];
+    return [self revenant_initWithName:name ?: @"" bundleIdentifier:identifier ?: @""];
 }
 
 - (void)encodeWithCoder:(NSCoder *)coder
@@ -61,12 +61,12 @@ CHARON_HEALTHKIT_UNCREATABLE_INIT
 
 - (id)copyWithZone:(NSZone *)zone
 {
-    return [HKSource charon_sourceWithName:_name bundleIdentifier:_bundleIdentifier];
+    return [HKSource revenant_sourceWithName:_name bundleIdentifier:_bundleIdentifier];
 }
 
-- (instancetype)charon_copyForStore
+- (instancetype)revenant_copyForStore
 {
-    return [HKSource charon_sourceWithName:_name bundleIdentifier:_bundleIdentifier];
+    return [HKSource revenant_sourceWithName:_name bundleIdentifier:_bundleIdentifier];
 }
 
 - (BOOL)isEqual:(id)other
@@ -99,7 +99,7 @@ CHARON_HEALTHKIT_UNCREATABLE_INIT
     return _bundleIdentifier;
 }
 
-- (NSComparisonResult)charon_compare:(HKSource *)other
+- (NSComparisonResult)revenant_compare:(HKSource *)other
 {
     NSComparisonResult result = [_name compare:other.name];
     if (result != NSOrderedSame)

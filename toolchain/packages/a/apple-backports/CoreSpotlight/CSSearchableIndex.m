@@ -1,11 +1,11 @@
 #import <CoreSpotlight/CoreSpotlight.h>
 #import <dlfcn.h>
 #import <objc/message.h>
-#import "CharonSpotlightStore.h"
+#import "RevenantSpotlightStore.h"
 
 NSString * const CSIndexErrorDomain = @"CSIndexErrorDomain";
 
-static NSError *CharonIndexErrorBecause(CSIndexErrorCode code, NSString *reason, NSError *cause)
+static NSError *RevenantIndexErrorBecause(CSIndexErrorCode code, NSString *reason, NSError *cause)
 {
     NSMutableDictionary *info = [NSMutableDictionary dictionaryWithObject:reason forKey:NSLocalizedDescriptionKey];
     if (cause)
@@ -13,34 +13,34 @@ static NSError *CharonIndexErrorBecause(CSIndexErrorCode code, NSString *reason,
     return [NSError errorWithDomain:CSIndexErrorDomain code:code userInfo:info];
 }
 
-static NSError *CharonIndexError(CSIndexErrorCode code, NSString *reason)
+static NSError *RevenantIndexError(CSIndexErrorCode code, NSString *reason)
 {
-    return CharonIndexErrorBecause(code, reason, nil);
+    return RevenantIndexErrorBecause(code, reason, nil);
 }
 
-NSString *const CharonSpotlightSharedRoot = CHARON_SPOTLIGHT_SHARED_ROOT;
+NSString *const RevenantSpotlightSharedRoot = REVENANT_SPOTLIGHT_SHARED_ROOT;
 
-static NSString *CharonSpotlightStoreDirectory(void)
+static NSString *RevenantSpotlightStoreDirectory(void)
 {
     NSString *bundleID = [[NSBundle mainBundle] bundleIdentifier] ?: @"space.kern0x1b.corespotlight.default";
-    NSString *directory = [CharonSpotlightSharedRoot stringByAppendingPathComponent:bundleID];
+    NSString *directory = [RevenantSpotlightSharedRoot stringByAppendingPathComponent:bundleID];
     [[NSFileManager defaultManager] createDirectoryAtPath:directory withIntermediateDirectories:YES
                                                 attributes:@{NSFilePosixPermissions: @(0777)} error:NULL];
     return directory;
 }
 
-static NSString *CharonSpotlightCategory(void)
+static NSString *RevenantSpotlightCategory(void)
 {
     return [[NSBundle mainBundle] bundleIdentifier] ?: @"space.kern0x1b.corespotlight.default";
 }
 
-@interface CharonSpotlightBridge : NSObject
+@interface RevenantSpotlightBridge : NSObject
 + (instancetype)sharedBridge;
 - (void)registerCategory:(NSString *)category;
 - (void)recordsChanged:(NSArray<NSString *> *)identifiers category:(NSString *)category;
 @end
 
-@implementation CharonSpotlightBridge
+@implementation RevenantSpotlightBridge
 {
     Class _managerClass;
     id _manager;
@@ -49,7 +49,7 @@ static NSString *CharonSpotlightCategory(void)
 
 + (instancetype)sharedBridge
 {
-    static CharonSpotlightBridge *bridge;
+    static RevenantSpotlightBridge *bridge;
     static dispatch_once_t once;
     dispatch_once(&once, ^{
         bridge = [[self alloc] init];
@@ -114,7 +114,7 @@ static NSString *CharonSpotlightCategory(void)
 
 @end
 
-@interface CharonSpotlightStore : NSObject
+@interface RevenantSpotlightStore : NSObject
 @property (nonatomic, copy, readonly) NSString *name;
 @property (nonatomic, strong, readonly) NSMutableDictionary<NSString *, NSData *> *entries;
 @property (nonatomic, strong) NSData *clientState;
@@ -123,7 +123,7 @@ static NSString *CharonSpotlightCategory(void)
 - (NSError *)apply:(void (^)(void))change;
 @end
 
-@implementation CharonSpotlightStore
+@implementation RevenantSpotlightStore
 
 @synthesize name = _name;
 @synthesize entries = _entries;
@@ -131,13 +131,13 @@ static NSString *CharonSpotlightCategory(void)
 
 + (instancetype)storeNamed:(NSString *)name
 {
-    static NSMutableDictionary<NSString *, CharonSpotlightStore *> *stores;
+    static NSMutableDictionary<NSString *, RevenantSpotlightStore *> *stores;
     static dispatch_once_t once;
     dispatch_once(&once, ^{
         stores = [NSMutableDictionary dictionary];
     });
     @synchronized (stores) {
-        CharonSpotlightStore *store = stores[name];
+        RevenantSpotlightStore *store = stores[name];
         if (!store) {
             store = [[self alloc] initWithName:name];
             stores[name] = store;
@@ -159,7 +159,7 @@ static NSString *CharonSpotlightCategory(void)
 
 - (NSString *)path
 {
-    return [CharonSpotlightStoreDirectory() stringByAppendingPathComponent:[self.name stringByAppendingPathExtension:@"plist"]];
+    return [RevenantSpotlightStoreDirectory() stringByAppendingPathComponent:[self.name stringByAppendingPathExtension:@"plist"]];
 }
 
 - (NSError *)save
@@ -168,16 +168,16 @@ static NSString *CharonSpotlightCategory(void)
     NSString *directory = path.stringByDeletingLastPathComponent;
     NSError *cause = nil;
     if (![[NSFileManager defaultManager] createDirectoryAtPath:directory withIntermediateDirectories:YES attributes:nil error:&cause])
-        return CharonIndexErrorBecause(CSIndexErrorCodeIndexUnavailableError, [NSString stringWithFormat:@"cannot create %@: %@", directory, cause.localizedDescription], cause);
+        return RevenantIndexErrorBecause(CSIndexErrorCodeIndexUnavailableError, [NSString stringWithFormat:@"cannot create %@: %@", directory, cause.localizedDescription], cause);
     NSMutableDictionary *disk = [NSMutableDictionary dictionary];
     disk[@"entries"] = self.entries;
     if (self.clientState)
         disk[@"clientState"] = self.clientState;
     NSData *data = [NSPropertyListSerialization dataWithPropertyList:disk format:NSPropertyListXMLFormat_v1_0 options:0 error:&cause];
     if (!data)
-        return CharonIndexErrorBecause(CSIndexErrorCodeIndexUnavailableError, [NSString stringWithFormat:@"cannot serialize the store for %@: %@", path, cause.localizedDescription], cause);
+        return RevenantIndexErrorBecause(CSIndexErrorCodeIndexUnavailableError, [NSString stringWithFormat:@"cannot serialize the store for %@: %@", path, cause.localizedDescription], cause);
     if (![data writeToFile:path options:NSDataWritingAtomic error:&cause])
-        return CharonIndexErrorBecause(CSIndexErrorCodeIndexUnavailableError, [NSString stringWithFormat:@"cannot write %@: %@", path, cause.localizedDescription], cause);
+        return RevenantIndexErrorBecause(CSIndexErrorCodeIndexUnavailableError, [NSString stringWithFormat:@"cannot write %@: %@", path, cause.localizedDescription], cause);
     return nil;
 }
 
@@ -246,9 +246,9 @@ static NSString *CharonSpotlightCategory(void)
 
 @end
 
-NSArray<CSSearchableItem *> *CharonSpotlightDefaultItems(void)
+NSArray<CSSearchableItem *> *RevenantSpotlightDefaultItems(void)
 {
-    CharonSpotlightStore *store = [CharonSpotlightStore storeNamed:@"__defaultIndex"];
+    RevenantSpotlightStore *store = [RevenantSpotlightStore storeNamed:@"__defaultIndex"];
     NSMutableArray<CSSearchableItem *> *items = [NSMutableArray array];
     @synchronized (store) {
         NSArray<NSString *> *identifiers = [store.entries.allKeys sortedArrayUsingSelector:@selector(compare:)];
@@ -262,14 +262,14 @@ NSArray<CSSearchableItem *> *CharonSpotlightDefaultItems(void)
 }
 
 @interface CSSearchableIndex ()
-@property (nonatomic, copy) NSString *charonName;
-@property (nonatomic, strong) CharonSpotlightStore *charonStore;
+@property (nonatomic, copy) NSString *revenantName;
+@property (nonatomic, strong) RevenantSpotlightStore *revenantStore;
 @end
 
 @implementation CSSearchableIndex
 
-@synthesize charonName = _charonName;
-@synthesize charonStore = _charonStore;
+@synthesize revenantName = _revenantName;
+@synthesize revenantStore = _revenantStore;
 @synthesize indexDelegate = _indexDelegate;
 
 + (BOOL)isIndexingAvailable
@@ -295,23 +295,23 @@ NSArray<CSSearchableItem *> *CharonSpotlightDefaultItems(void)
 - (instancetype)initWithName:(NSString *)name protectionClass:(NSFileProtectionType)protectionClass
 {
     if ((self = [super init])) {
-        self.charonName = name;
-        self.charonStore = [CharonSpotlightStore storeNamed:name ?: @"__defaultIndex"];
+        self.revenantName = name;
+        self.revenantStore = [RevenantSpotlightStore storeNamed:name ?: @"__defaultIndex"];
     }
     return self;
 }
 
-- (void)charonNotifyChangedIdentifiers:(NSArray<NSString *> *)identifiers
+- (void)revenantNotifyChangedIdentifiers:(NSArray<NSString *> *)identifiers
 {
-    NSString *category = CharonSpotlightCategory();
+    NSString *category = RevenantSpotlightCategory();
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-        [[CharonSpotlightBridge sharedBridge] recordsChanged:identifiers category:category];
+        [[RevenantSpotlightBridge sharedBridge] recordsChanged:identifiers category:category];
     });
 }
 
 - (void)indexSearchableItems:(NSArray<CSSearchableItem *> *)items completionHandler:(void (^)(NSError *))completionHandler
 {
-    CharonSpotlightStore *store = self.charonStore;
+    RevenantSpotlightStore *store = self.revenantStore;
     NSError *error = nil;
     NSMutableArray<NSString *> *identifiers = [NSMutableArray array];
     @synchronized (store) {
@@ -323,14 +323,14 @@ NSArray<CSSearchableItem *> *CharonSpotlightDefaultItems(void)
         }];
     }
     if (!error)
-        [self charonNotifyChangedIdentifiers:identifiers];
+        [self revenantNotifyChangedIdentifiers:identifiers];
     if (completionHandler)
         completionHandler(error);
 }
 
 - (void)deleteSearchableItemsWithIdentifiers:(NSArray<NSString *> *)identifiers completionHandler:(void (^)(NSError *))completionHandler
 {
-    CharonSpotlightStore *store = self.charonStore;
+    RevenantSpotlightStore *store = self.revenantStore;
     NSError *error = nil;
     @synchronized (store) {
         error = [store apply:^{
@@ -338,14 +338,14 @@ NSArray<CSSearchableItem *> *CharonSpotlightDefaultItems(void)
         }];
     }
     if (!error)
-        [self charonNotifyChangedIdentifiers:identifiers];
+        [self revenantNotifyChangedIdentifiers:identifiers];
     if (completionHandler)
         completionHandler(error);
 }
 
 - (void)deleteSearchableItemsWithDomainIdentifiers:(NSArray<NSString *> *)domainIdentifiers completionHandler:(void (^)(NSError *))completionHandler
 {
-    CharonSpotlightStore *store = self.charonStore;
+    RevenantSpotlightStore *store = self.revenantStore;
     NSError *error = nil;
     @synchronized (store) {
         error = [store apply:^{
@@ -353,14 +353,14 @@ NSArray<CSSearchableItem *> *CharonSpotlightDefaultItems(void)
         }];
     }
     if (!error)
-        [self charonNotifyChangedIdentifiers:nil];
+        [self revenantNotifyChangedIdentifiers:nil];
     if (completionHandler)
         completionHandler(error);
 }
 
 - (void)deleteAllSearchableItemsWithCompletionHandler:(void (^)(NSError *))completionHandler
 {
-    CharonSpotlightStore *store = self.charonStore;
+    RevenantSpotlightStore *store = self.revenantStore;
     NSError *error = nil;
     @synchronized (store) {
         error = [store apply:^{
@@ -368,7 +368,7 @@ NSArray<CSSearchableItem *> *CharonSpotlightDefaultItems(void)
         }];
     }
     if (!error)
-        [self charonNotifyChangedIdentifiers:nil];
+        [self revenantNotifyChangedIdentifiers:nil];
     if (completionHandler)
         completionHandler(error);
 }
@@ -379,12 +379,12 @@ NSArray<CSSearchableItem *> *CharonSpotlightDefaultItems(void)
 
 - (void)endIndexBatchWithClientState:(NSData *)clientState completionHandler:(void (^)(NSError *))completionHandler
 {
-    if ([self.charonName isEqualToString:@"__defaultIndex"]) {
+    if ([self.revenantName isEqualToString:@"__defaultIndex"]) {
         if (completionHandler)
-            completionHandler(CharonIndexError(CSIndexErrorCodeInvalidClientStateError, @"batching is unsupported for the default searchable index"));
+            completionHandler(RevenantIndexError(CSIndexErrorCodeInvalidClientStateError, @"batching is unsupported for the default searchable index"));
         return;
     }
-    CharonSpotlightStore *store = self.charonStore;
+    RevenantSpotlightStore *store = self.revenantStore;
     NSError *error = nil;
     @synchronized (store) {
         error = [store apply:^{
@@ -397,7 +397,7 @@ NSArray<CSSearchableItem *> *CharonSpotlightDefaultItems(void)
 
 - (void)fetchLastClientStateWithCompletionHandler:(void (^)(NSData *, NSError *))completionHandler
 {
-    CharonSpotlightStore *store = self.charonStore;
+    RevenantSpotlightStore *store = self.revenantStore;
     NSData *state;
     @synchronized (store) {
         state = store.clientState;

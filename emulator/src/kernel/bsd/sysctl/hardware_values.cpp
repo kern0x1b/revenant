@@ -6,7 +6,7 @@
 
 #include "kernel/darwin_sysctl.hpp"
 
-namespace shade::darwin::sysctl {
+namespace emulator::darwin::sysctl {
 
 std::optional<std::string_view> hardware_string(
     std::uint32_t selector, std::string_view machine, std::string_view model)

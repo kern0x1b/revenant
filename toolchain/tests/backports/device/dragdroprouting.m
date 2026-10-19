@@ -4,17 +4,17 @@
 #import "check.h"
 #import "dragdroprouting-cases.h"
 
-static NSString *CharonDescribe(NSIndexPath *path)
+static NSString *RevenantDescribe(NSIndexPath *path)
 {
     return path ? [NSString stringWithFormat:@"{%ld, %ld}", (long)path.section, (long)path.item] : @"(nil)";
 }
 
-@interface UICollectionView (CharonDropSequenceForTest)
-- (void)charon_driveDropSessionAtPoint:(CGPoint)point;
+@interface UICollectionView (RevenantDropSequenceForTest)
+- (void)revenant_driveDropSessionAtPoint:(CGPoint)point;
 @end
 
-@interface UITableView (CharonDropSequenceForTest)
-- (void)charon_driveDropSessionAtPoint:(CGPoint)point;
+@interface UITableView (RevenantDropSequenceForTest)
+- (void)revenant_driveDropSessionAtPoint:(CGPoint)point;
 @end
 
 static NSArray *chDocumentedOrder(NSString *host)
@@ -30,7 +30,7 @@ static NSArray *chDocumentedOrder(NSString *host)
 
 static NSString *const results_folder = @"/private/var/backports";
 
-static int gCharonExit = 0;
+static int gRevenantExit = 0;
 static NSMutableArray<NSString *> *_order = nil;
 static NSString *_held = nil;
 
@@ -146,7 +146,7 @@ static NSString *_held = nil;
     if ((self = [super init])) {
         [[NSFileManager defaultManager] createDirectoryAtPath:results_folder withIntermediateDirectories:YES attributes:nil error:NULL];
         [[NSFileManager defaultManager] removeItemAtPath:[results_folder stringByAppendingPathComponent:@"dragdroprouting.done"] error:NULL];
-        charon_log_to([results_folder stringByAppendingPathComponent:@"dragdroprouting.log"]);
+        revenant_log_to([results_folder stringByAppendingPathComponent:@"dragdroprouting.log"]);
     }
     return self;
 }
@@ -161,10 +161,10 @@ static NSString *_held = nil;
     [asked writeToFile:[results_folder stringByAppendingPathComponent:@"dragdroprouting.asked"]
            atomically:YES encoding:NSUTF8StringEncoding error:NULL];
     NSString *summary = [NSString stringWithFormat:@"%@ checks=%d failures=%d\n",
-                         charon_failures ? @"FAIL" : @"ok", charon_checks, charon_failures];
+                         revenant_failures ? @"FAIL" : @"ok", revenant_checks, revenant_failures];
     [summary writeToFile:[results_folder stringByAppendingPathComponent:@"dragdroprouting.done"]
               atomically:YES encoding:NSUTF8StringEncoding error:NULL];
-    gCharonExit = charon_failures ? 1 : 0;
+    gRevenantExit = revenant_failures ? 1 : 0;
 }
 
 - (void)noteHeld:(NSString *)line
@@ -213,11 +213,11 @@ static NSString *_held = nil;
 
     probe.host = @"collection";
     [probe setDestinationForView:probe.collectionView atPoint:CGPointMake(20, 20)];
-    [probe.collectionView charon_driveDropSessionAtPoint:CGPointMake(20, 20)];
+    [probe.collectionView revenant_driveDropSessionAtPoint:CGPointMake(20, 20)];
     NSUInteger afterCollection = probe.log.count;
     probe.host = @"table";
     [probe setDestinationForView:probe.tableView atPoint:CGPointMake(20, 20)];
-    [probe.tableView charon_driveDropSessionAtPoint:CGPointMake(20, 20)];
+    [probe.tableView revenant_driveDropSessionAtPoint:CGPointMake(20, 20)];
 
     [self noteHeld:[NSString stringWithFormat:@"collection.interactionsHeld=%lu",
                     (unsigned long)probe.collectionView.interactions.count]];
@@ -230,14 +230,14 @@ static NSString *_held = nil;
     NSMutableArray *expectedCollection = [NSMutableArray array];
     for (NSString *line in chDocumentedOrder(@"collection"))
         [expectedCollection addObject:line];
-    charon_check([collectionAsked isEqualToArray:expectedCollection],
+    revenant_check([collectionAsked isEqualToArray:expectedCollection],
                  "the collection view's drop delegate is asked in the documented order, with the arguments it is given",
                  [NSString stringWithFormat:@"\n    asked   %@\n    expect  %@", collectionAsked, expectedCollection]);
 
     NSMutableArray *tableExpectation = [NSMutableArray array];
     for (NSString *line in chDocumentedOrder(@"table"))
         [tableExpectation addObject:line];
-    charon_check([tableAsked isEqualToArray:tableExpectation],
+    revenant_check([tableAsked isEqualToArray:tableExpectation],
                  "the table view's drop delegate is asked in the documented order, with the arguments it is given",
                  [NSString stringWithFormat:@"\n    asked   %@\n    expect  %@", tableAsked, tableExpectation]);
 
@@ -254,5 +254,5 @@ int main(int argc, char **argv)
         OrderDriver *driver = [[OrderDriver alloc] init];
         [driver run];
     }
-    return gCharonExit;
+    return gRevenantExit;
 }

@@ -4,7 +4,7 @@
 #import <objc/message.h>
 #import <objc/runtime.h>
 
-#import "CharonAVFDescriptorConstruction.h"
+#import "RevenantAVFDescriptorConstruction.h"
 
 #include <stdio.h>
 
@@ -38,8 +38,8 @@ static void row(const char *key, NSString *v)
 static Class lookup(const char *name)
 {
     NSString *asked = [NSString stringWithUTF8String:name];
-#ifdef CHARON_PORT_BUILD
-    asked = [@"charon_host_" stringByAppendingString:asked];
+#ifdef REVENANT_PORT_BUILD
+    asked = [@"revenant_host_" stringByAppendingString:asked];
 #endif
     return NSClassFromString(asked);
 }
@@ -95,7 +95,7 @@ static void structure(const char *name, const char *const *members, unsigned cou
     row([[label stringByAppendingString:@" PRESENT"] UTF8String], c ? @"yes" : @"NO");
     NSString *superName = c ? [NSString stringWithUTF8String:class_getName(class_getSuperclass(c))] : @"(no class)";
     row([[label stringByAppendingString:@" SUPERCLASS"] UTF8String],
-        [superName stringByReplacingOccurrencesOfString:@"charon_host_" withString:@""]);
+        [superName stringByReplacingOccurrencesOfString:@"revenant_host_" withString:@""]);
     id made = instance(name);
     row([[label stringByAppendingString:@" ALLOC-INIT"] UTF8String], made ? @"yes" : @"no");
     for (unsigned i = 0; i < count; i++) {

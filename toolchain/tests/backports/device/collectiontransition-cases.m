@@ -20,7 +20,7 @@ void collectiontransition_run(CollectionTransitionRecorder record)
     record(@"prepareAndFinalizeLeaveContentSize",
            NSStringFromCGSize(before) == NSStringFromCGSize(plain.collectionViewContentSize) ? @"same" : @"changed");
 
-    NSArray *kinds = @[UICollectionElementKindSectionHeader, UICollectionElementKindSectionFooter, @"charon.decoration"];
+    NSArray *kinds = @[UICollectionElementKindSectionHeader, UICollectionElementKindSectionFooter, @"revenant.decoration"];
     for (NSString *kind in kinds) {
         NSArray *deleteSupplementary = [plain indexPathsToDeleteForSupplementaryViewOfKind:kind];
         NSArray *insertSupplementary = [plain indexPathsToInsertForSupplementaryViewOfKind:kind];

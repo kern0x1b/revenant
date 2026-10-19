@@ -35,7 +35,7 @@ for part in ("ios6biquad.json", "ios15biquad.json"):
             print(entry["api"].rstrip("()"))
 PY
 ); do
-    renames="$renames -D$name=charon_host_$name"
+    renames="$renames -D$name=revenant_host_$name"
 done
 
 objects=""

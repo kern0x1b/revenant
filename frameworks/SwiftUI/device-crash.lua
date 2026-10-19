@@ -1,7 +1,7 @@
 local text = import("lib.text", {rootdir = os.scriptdir(), anonymous = true})
 
 local DEFAULT_REPORT = path.join(".agent-work", "runs", "device-crash", "crash.plist")
-local BINARY = path.join("eidolon", "out", "EidolonDemo.app", "EidolonDemo")
+local BINARY = path.join("SwiftUI", "out", "SwiftUIDemo.app", "SwiftUIDemo")
 
 local function output_of(program, args)
     local quoted = {"-c", '"$0" "$@" 2>/dev/null || true'}
@@ -42,7 +42,7 @@ local function app_base(report)
             local after = at + #hex
             if string.sub(report, after, after + 2) == " - " then
                 local line_end = string.find(report, "\n", after, true) or (#report + 1)
-                if string.find(string.sub(report, after + 3, line_end - 1), "+EidolonDemo", 1, true) then
+                if string.find(string.sub(report, after + 3, line_end - 1), "+SwiftUIDemo", 1, true) then
                     return hex_value(hex)
                 end
             end
@@ -69,7 +69,7 @@ function main(...)
     print(exception)
     local base = app_base(report)
     if base == nil then
-        io.stderr:write("the report has no EidolonDemo frame to take the base address from\n")
+        io.stderr:write("the report has no SwiftUIDemo frame to take the base address from\n")
         os.exit(1)
     end
 

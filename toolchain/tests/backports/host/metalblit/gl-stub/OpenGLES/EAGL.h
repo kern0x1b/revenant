@@ -1,5 +1,5 @@
-#ifndef CHARON_HOST_EAGL_H
-#define CHARON_HOST_EAGL_H
+#ifndef REVENANT_HOST_EAGL_H
+#define REVENANT_HOST_EAGL_H
 
 typedef unsigned int GLenum;
 typedef int GLint;

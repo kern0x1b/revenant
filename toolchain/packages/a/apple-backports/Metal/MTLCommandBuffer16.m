@@ -1,6 +1,6 @@
-#import "CharonMetal.h"
+#import "RevenantMetal.h"
 
-@implementation CharonMetalCommandBuffer (AccelerationStructure16)
+@implementation RevenantMetalCommandBuffer (AccelerationStructure16)
 
 - (id<MTLAccelerationStructureCommandEncoder>)accelerationStructureCommandEncoderWithDescriptor:(MTLAccelerationStructurePassDescriptor *)descriptor
 {

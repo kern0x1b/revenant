@@ -16,8 +16,8 @@ static const char *label(NSString *format, ...)
     return string.UTF8String;
 }
 
-@interface NSManagedObjectContext (CharonHost)
-- (id)charonHostexecuteRequest:(NSPersistentStoreRequest *)request error:(NSError **)error;
+@interface NSManagedObjectContext (RevenantHost)
+- (id)revenantHostexecuteRequest:(NSPersistentStoreRequest *)request error:(NSError **)error;
 @end
 
 static NSManagedObjectModel *model(void)
@@ -140,7 +140,7 @@ static NSString *normalise(NSString *text)
 {
     NSRegularExpression *expression = [NSRegularExpression regularExpressionWithPattern:@"0x[0-9a-f]+" options:0 error:NULL];
     text = [expression stringByReplacingMatchesInString:text options:0 range:NSMakeRange(0, text.length) withTemplate:@"0x"];
-    text = [text stringByReplacingOccurrencesOfString:@"CharonHost" withString:@""];
+    text = [text stringByReplacingOccurrencesOfString:@"RevenantHost" withString:@""];
     return text;
 }
 
@@ -161,7 +161,7 @@ static NSString *guarded(void (^block)(NSString **out))
 
 static Class request_class(Stack *stack)
 {
-    return NSClassFromString(stack.ours ? @"CharonHostNSBatchUpdateRequest" : @"NSBatchUpdateRequest");
+    return NSClassFromString(stack.ours ? @"RevenantHostNSBatchUpdateRequest" : @"NSBatchUpdateRequest");
 }
 
 static id named_request(Stack *stack, NSString *entityName)
@@ -177,7 +177,7 @@ static id entity_request(Stack *stack, NSString *entityName)
 
 static id execute(Stack *stack, id request, NSError **error)
 {
-    return stack.ours ? [stack.context charonHostexecuteRequest:request error:error] : [stack.context executeRequest:request error:error];
+    return stack.ours ? [stack.context revenantHostexecuteRequest:request error:error] : [stack.context executeRequest:request error:error];
 }
 
 static NSString *describe(id result, NSError *error, NSDictionary *idNames)
@@ -369,9 +369,9 @@ static void request_shape(void)
     }
     for (NSUInteger i = 0; i < answers[0].count; i++)
         CHECK_EQUAL(answers[1][i], answers[0][i], label(@"request shape %lu", (unsigned long)i));
-    CHECK([NSClassFromString(@"CharonHostNSBatchUpdateRequest") superclass] == [NSPersistentStoreRequest class], "the request is a persistent store request");
-    CHECK([NSClassFromString(@"CharonHostNSBatchUpdateResult") superclass] == NSClassFromString(@"CharonHostNSPersistentStoreResult"), "the result is a persistent store result");
-    id ourResult = [[NSClassFromString(@"CharonHostNSBatchUpdateResult") alloc] init], systemResult = [[NSBatchUpdateResult alloc] init];
+    CHECK([NSClassFromString(@"RevenantHostNSBatchUpdateRequest") superclass] == [NSPersistentStoreRequest class], "the request is a persistent store request");
+    CHECK([NSClassFromString(@"RevenantHostNSBatchUpdateResult") superclass] == NSClassFromString(@"RevenantHostNSPersistentStoreResult"), "the result is a persistent store result");
+    id ourResult = [[NSClassFromString(@"RevenantHostNSBatchUpdateResult") alloc] init], systemResult = [[NSBatchUpdateResult alloc] init];
     CHECK([ourResult resultType] == [systemResult resultType] && [ourResult result] == [systemResult result], "a result made with init");
 }
 
@@ -381,7 +381,7 @@ int main(void)
         update_scenarios();
         objects_are_left_alone();
         request_shape();
-        printf("checks=%d failures=%d\n", charon_checks, charon_failures);
+        printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
     }
-    return charon_failures ? 1 : 0;
+    return revenant_failures ? 1 : 0;
 }

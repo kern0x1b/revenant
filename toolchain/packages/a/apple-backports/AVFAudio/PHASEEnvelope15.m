@@ -1,15 +1,15 @@
-#import "CharonAVFAudio.h"
+#import "RevenantAVFAudio.h"
 #import <PHASE/PHASE.h>
 #import <simd/simd.h>
 
 @implementation PHASEEnvelope {
-    simd_double2 _charon_startPoint;
-    NSArray<PHASEEnvelopeSegment *> *_charon_segments;
-    PHASENumericPair *_charon_domain;
-    PHASENumericPair *_charon_range;
+    simd_double2 _revenant_startPoint;
+    NSArray<PHASEEnvelopeSegment *> *_revenant_segments;
+    PHASENumericPair *_revenant_domain;
+    PHASENumericPair *_revenant_range;
 }
 
-static double CharonCurve(PHASECurveType type, double t)
+static double RevenantCurve(PHASECurveType type, double t)
 {
     switch (type) {
         case PHASECurveTypeLinear:
@@ -54,25 +54,25 @@ static double CharonCurve(PHASECurveType type, double t)
 - (instancetype)initWithStartPoint:(simd_double2)startPoint segments:(NSArray<PHASEEnvelopeSegment *> *)segments
 {
     if ((self = [super init])) {
-        _charon_startPoint = startPoint;
-        _charon_segments = [segments copy] ?: @[];
+        _revenant_startPoint = startPoint;
+        _revenant_segments = [segments copy] ?: @[];
         double firstX = startPoint.x, lastX = startPoint.x;
         double firstY = startPoint.y, lastY = startPoint.y;
-        for (PHASEEnvelopeSegment *segment in _charon_segments) {
+        for (PHASEEnvelopeSegment *segment in _revenant_segments) {
             lastX = segment.endPoint.x;
             lastY = segment.endPoint.y;
         }
-        _charon_domain = [[PHASENumericPair alloc] initWithFirstValue:firstX secondValue:lastX];
-        _charon_range = [[PHASENumericPair alloc] initWithFirstValue:firstY secondValue:lastY];
+        _revenant_domain = [[PHASENumericPair alloc] initWithFirstValue:firstX secondValue:lastX];
+        _revenant_range = [[PHASENumericPair alloc] initWithFirstValue:firstY secondValue:lastY];
     }
     return self;
 }
 
 - (double)evaluateForValue:(double)x
 {
-    double xStart = _charon_startPoint.x;
-    double y = _charon_startPoint.y;
-    for (PHASEEnvelopeSegment *segment in _charon_segments) {
+    double xStart = _revenant_startPoint.x;
+    double y = _revenant_startPoint.y;
+    for (PHASEEnvelopeSegment *segment in _revenant_segments) {
         double xEnd = segment.endPoint.x;
         if (x < xStart) {
             break;
@@ -85,29 +85,29 @@ static double CharonCurve(PHASECurveType type, double t)
         double span = xEnd - xStart;
         double t = span > 0 ? (x - xStart) / span : 1.0;
         double from = y;
-        return from + (segment.endPoint.y - from) * CharonCurve(segment.curveType, t);
+        return from + (segment.endPoint.y - from) * RevenantCurve(segment.curveType, t);
     }
     return y;
 }
 
 - (simd_double2)startPoint
 {
-    return _charon_startPoint;
+    return _revenant_startPoint;
 }
 
 - (NSArray<PHASEEnvelopeSegment *> *)segments
 {
-    return [_charon_segments copy];
+    return [_revenant_segments copy];
 }
 
 - (PHASENumericPair *)domain
 {
-    return _charon_domain;
+    return _revenant_domain;
 }
 
 - (PHASENumericPair *)range
 {
-    return _charon_range;
+    return _revenant_range;
 }
 
 @end

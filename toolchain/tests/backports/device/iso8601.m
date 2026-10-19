@@ -80,7 +80,7 @@ int main(void)
         for (unsigned index = 0; index < sizeof(rounded) / sizeof(*rounded); index++) {
             NSString *written = [fraction stringFromDate:[NSDate dateWithTimeIntervalSinceReferenceDate:rounded[index].when]];
             NSString *name = [NSString stringWithFormat:@"%g seconds are written to the nearest millisecond", rounded[index].when];
-            charon_check([written isEqual:@(rounded[index].written)], name.UTF8String,
+            revenant_check([written isEqual:@(rounded[index].written)], name.UTF8String,
                          [NSString stringWithFormat:@"%@ != %s", written, rounded[index].written]);
         }
         const struct { const char *text; double when; } read[] = {
@@ -89,7 +89,7 @@ int main(void)
         for (unsigned index = 0; index < sizeof(read) / sizeof(*read); index++) {
             NSDate *date = [fraction dateFromString:@(read[index].text)];
             NSString *name = [NSString stringWithFormat:@"%s is read to the millisecond", read[index].text];
-            charon_check(date && fabs(date.timeIntervalSinceReferenceDate - read[index].when) < 1e-6, name.UTF8String,
+            revenant_check(date && fabs(date.timeIntervalSinceReferenceDate - read[index].when) < 1e-6, name.UTF8String,
                          [NSString stringWithFormat:@"%.6f", date.timeIntervalSinceReferenceDate]);
         }
         CHECK([fraction dateFromString:@"2001-01-01T12:00:00Z"] == nil,
@@ -97,7 +97,7 @@ int main(void)
         CHECK([formatter(NSISO8601DateFormatWithInternetDateTime, @"GMT") dateFromString:@"2001-01-01T12:00:00.123Z"] == nil,
               "without them asked for, a time with them is not read");
 
-        printf("%d checks, %d failures\n", charon_checks, charon_failures);
-        return charon_failures;
+        printf("%d checks, %d failures\n", revenant_checks, revenant_failures);
+        return revenant_failures;
     }
 }

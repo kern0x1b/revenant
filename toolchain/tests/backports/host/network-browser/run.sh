@@ -14,11 +14,11 @@
 #   host   the probe alone with -framework Network: it registers a Bonjour service through the release's
 #          own DNSServiceRegister and browses for it with Apple's nw_browser.
 #   port   the probe together with the port's Network/ objects and the Foundation path monitor, every
-#          name they define renamed to charonhost_*, and Apple's Network.framework NOT linked: it
+#          name they define renamed to revenanthost_*, and Apple's Network.framework NOT linked: it
 #          registers the same service and browses for it with the port's browser.
 #
 # The rename set is read out of the compiled objects rather than written down, so a call the port adds
-# is renamed with it and one the port stops defining drops out of it. The Charon classes are renamed the
+# is renamed with it and one the port stops defining drops out of it. The Revenant classes are renamed the
 # same way, so the port's objects are not the host's.
 #
 # --mutation breaks one answer per comparison in the port's own source; each has to go red naming its
@@ -31,7 +31,7 @@ W=${WORK:-$root/.agent-work/runs/network-browser}
 W=${W%./*}/$(basename "$W")
 rm -rf "$W"
 mkdir -p "$W"
-instance="charon-diff-$$"
+instance="revenant-diff-$$"
 echo "instance: $instance"
 
 sources=$(ls "$S"/Network/*.m "$S"/Foundation/NWPathMonitor.m "$S"/Foundation/NWPathMonitor14.m | sort)
@@ -39,14 +39,14 @@ mkdir -p "$W/plain"
 for source in $sources; do
     xcrun clang -fobjc-arc -w -c "$source" -o "$W/plain/$(basename "$source" .m).o"
 done
-xcrun clang -fobjc-arc -w -c "$S/Network/CharonNWSupport.c" -o "$W/plain/CharonNWSupport.o"
+xcrun clang -fobjc-arc -w -c "$S/Network/RevenantNWSupport.c" -o "$W/plain/RevenantNWSupport.o"
 
 renames=""
 for name in $(nm -gU "$W/plain"/*.o | awk '$2=="T"||$2=="D"||$2=="S"{print $3}' | sed 's/^_//' | grep -E '^_?nw_' | sort -u); do
-    renames="$renames -D$name=charonhost_$name"
+    renames="$renames -D$name=revenanthost_$name"
 done
-for class in $(nm -gU "$W/plain"/*.o | awk '$2=="S"||$2=="D"{print $3}' | sed -n -e 's/^_OBJC_CLASS_\$_//p' -e 's/^_OBJC_METACLASS_\$_//p' | grep -E '^Charon' | sort -u); do
-    renames="$renames -D$class=CharonHost$class"
+for class in $(nm -gU "$W/plain"/*.o | awk '$2=="S"||$2=="D"{print $3}' | sed -n -e 's/^_OBJC_CLASS_\$_//p' -e 's/^_OBJC_METACLASS_\$_//p' | grep -E '^Revenant' | sort -u); do
+    renames="$renames -D$class=RevenantHost$class"
 done
 rm -rf "$W/plain"
 echo "renamed $(echo "$renames" | wc -w | tr -d ' ') names"
@@ -61,7 +61,7 @@ cat "$W/host.txt"
 echo "=== port: the port's own browser, Apple's Network.framework not linked at all"
 # shellcheck disable=SC2086
 xcrun clang -fobjc-arc -w $renames -I"$S/Network" -I"$S/Foundation" "$here/probe.m" $sources \
-    "$S/Network/CharonNWSupport.c" -framework Foundation -framework Security -framework SystemConfiguration -o "$W/port"
+    "$S/Network/RevenantNWSupport.c" -framework Foundation -framework Security -framework SystemConfiguration -o "$W/port"
 "$W/port" "$instance" > "$W/port.txt" 2>&1 || true
 cat "$W/port.txt"
 
@@ -154,7 +154,7 @@ PYEOF
         done
         # shellcheck disable=SC2086
         if ! xcrun clang -fobjc-arc -w $renames -I"$S/Network" -I"$S/Foundation" "$here/probe.m" $standin \
-             "$S/Network/CharonNWSupport.c" -framework Foundation -framework Security -framework SystemConfiguration \
+             "$S/Network/RevenantNWSupport.c" -framework Foundation -framework Security -framework SystemConfiguration \
              -o "$W/mutant-$line" > "$W/mutant-$line.build" 2>&1; then
             echo "RUN FAILED $line: the mutant does not build (see $W/mutant-$line.build)" >&2
             mut_failed=$((mut_failed + 1))

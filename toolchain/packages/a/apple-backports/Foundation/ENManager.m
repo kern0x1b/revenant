@@ -1,14 +1,14 @@
 #import <Foundation/Foundation.h>
 #import <ExposureNotification/ExposureNotification.h>
 
-static NSError *CharonENUnsupportedError(void)
+static NSError *RevenantENUnsupportedError(void)
 {
     return [NSError errorWithDomain:ENErrorDomain
                                code:ENErrorCodeUnsupported
                            userInfo:@{NSLocalizedDescriptionKey: @"Operation is not supported"}];
 }
 
-static NSError *CharonENInvalidatedError(void)
+static NSError *RevenantENInvalidatedError(void)
 {
     return [NSError errorWithDomain:ENErrorDomain
                                code:ENErrorCodeInvalidated
@@ -69,7 +69,7 @@ static NSError *CharonENInvalidatedError(void)
 - (void)activateWithCompletionHandler:(void (^)(BOOL success, NSError *_Nullable error))completionHandler
 {
     if (completionHandler)
-        completionHandler(NO, self->_invalidated ? CharonENInvalidatedError() : CharonENUnsupportedError());
+        completionHandler(NO, self->_invalidated ? RevenantENInvalidatedError() : RevenantENUnsupportedError());
 }
 
 - (void)invalidate
@@ -87,14 +87,14 @@ static NSError *CharonENInvalidatedError(void)
 - (void)setExposureNotificationEnabled:(BOOL)enabled completionHandler:(void (^)(BOOL success, NSError *_Nullable error))completionHandler
 {
     if (completionHandler)
-        completionHandler(NO, self->_invalidated ? CharonENInvalidatedError() : CharonENUnsupportedError());
+        completionHandler(NO, self->_invalidated ? RevenantENInvalidatedError() : RevenantENUnsupportedError());
 }
 
 - (void)detectExposuresWithConfiguration:(ENExposureConfiguration *)configuration
                        completionHandler:(void (^)(ENExposureDetectionSummary *_Nullable summary, NSError *_Nullable error))completionHandler
 {
     if (completionHandler)
-        completionHandler(nil, self->_invalidated ? CharonENInvalidatedError() : CharonENUnsupportedError());
+        completionHandler(nil, self->_invalidated ? RevenantENInvalidatedError() : RevenantENUnsupportedError());
 }
 
 - (void)detectExposuresWithConfiguration:(ENExposureConfiguration *)configuration
@@ -102,32 +102,32 @@ static NSError *CharonENInvalidatedError(void)
                       completionHandler:(void (^)(ENExposureDetectionSummary *_Nullable summary, NSError *_Nullable error))completionHandler
 {
     if (completionHandler)
-        completionHandler(nil, self->_invalidated ? CharonENInvalidatedError() : CharonENUnsupportedError());
+        completionHandler(nil, self->_invalidated ? RevenantENInvalidatedError() : RevenantENUnsupportedError());
 }
 
 - (void)getDiagnosisKeysWithCompletionHandler:(void (^)(NSArray<ENTemporaryExposureKey *> *_Nullable diagnosisKeys, NSError *_Nullable error))completionHandler
 {
     if (completionHandler)
-        completionHandler(nil, self->_invalidated ? CharonENInvalidatedError() : CharonENUnsupportedError());
+        completionHandler(nil, self->_invalidated ? RevenantENInvalidatedError() : RevenantENUnsupportedError());
 }
 
 - (void)getTestDiagnosisKeysWithCompletionHandler:(void (^)(NSArray<ENTemporaryExposureKey *> *_Nullable testDiagnosisKeys, NSError *_Nullable error))completionHandler
 {
     if (completionHandler)
-        completionHandler(nil, self->_invalidated ? CharonENInvalidatedError() : CharonENUnsupportedError());
+        completionHandler(nil, self->_invalidated ? RevenantENInvalidatedError() : RevenantENUnsupportedError());
 }
 
 - (void)getExposureWindowsFromSummary:(ENExposureDetectionSummary *)summary
                     completionHandler:(void (^)(NSArray<ENExposureWindow *> *_Nullable exposureWindows, NSError *_Nullable error))completionHandler
 {
     if (completionHandler)
-        completionHandler(nil, self->_invalidated ? CharonENInvalidatedError() : CharonENUnsupportedError());
+        completionHandler(nil, self->_invalidated ? RevenantENInvalidatedError() : RevenantENUnsupportedError());
 }
 
 - (void)getUserTraveledWithCompletionHandler:(void (^)(BOOL userTraveled, NSError *_Nullable error))completionHandler
 {
     if (completionHandler)
-        completionHandler(NO, self->_invalidated ? CharonENInvalidatedError() : CharonENUnsupportedError());
+        completionHandler(NO, self->_invalidated ? RevenantENInvalidatedError() : RevenantENUnsupportedError());
 }
 
 @end

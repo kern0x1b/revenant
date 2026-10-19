@@ -1,14 +1,14 @@
-#include "CharonCoreMIDI.h"
+#include "RevenantCoreMIDI.h"
 
 #include <stdlib.h>
 #include <string.h>
 
-void CharonMIDIWordsAppend(CharonMIDIWords *out, UInt32 word)
+void RevenantMIDIWordsAppend(RevenantMIDIWords *out, UInt32 word)
 {
     if (out->failed)
         return;
     if (out->count == out->capacity) {
-        size_t capacity = out->capacity ? charon_grown_capacity(out->capacity, sizeof(UInt32)) : 32;
+        size_t capacity = out->capacity ? revenant_grown_capacity(out->capacity, sizeof(UInt32)) : 32;
         UInt32 *grown = NULL;
         if (capacity && out->heap) {
             grown = realloc(out->words, capacity * sizeof(UInt32));
@@ -28,12 +28,12 @@ void CharonMIDIWordsAppend(CharonMIDIWords *out, UInt32 word)
     out->words[out->count++] = word;
 }
 
-static void charon_bytes_append(CharonMIDIBytes *out, uint8_t byte)
+static void revenant_bytes_append(RevenantMIDIBytes *out, uint8_t byte)
 {
     if (out->failed)
         return;
     if (out->count == out->capacity) {
-        size_t capacity = out->capacity ? charon_grown_capacity(out->capacity, 1) : 64;
+        size_t capacity = out->capacity ? revenant_grown_capacity(out->capacity, 1) : 64;
         uint8_t *grown = NULL;
         if (capacity && out->heap) {
             grown = realloc(out->bytes, capacity);
@@ -53,7 +53,7 @@ static void charon_bytes_append(CharonMIDIBytes *out, uint8_t byte)
     out->bytes[out->count++] = byte;
 }
 
-UInt32 CharonMIDIUp16From7(UInt32 value)
+UInt32 RevenantMIDIUp16From7(UInt32 value)
 {
     if (value <= 64)
         return value << 9;
@@ -61,7 +61,7 @@ UInt32 CharonMIDIUp16From7(UInt32 value)
     return (value << 9) + 8 * above + (above >> 3);
 }
 
-UInt32 CharonMIDIUp32From7(UInt32 value)
+UInt32 RevenantMIDIUp32From7(UInt32 value)
 {
     if (value <= 64)
         return value << 25;
@@ -69,7 +69,7 @@ UInt32 CharonMIDIUp32From7(UInt32 value)
     return 0x80000000u + above * 34087042u + (2 * above + 63) / 126;
 }
 
-UInt32 CharonMIDIUp32From14(UInt32 value)
+UInt32 RevenantMIDIUp32From14(UInt32 value)
 {
     if (value <= 8192)
         return value << 18;
@@ -77,7 +77,7 @@ UInt32 CharonMIDIUp32From14(UInt32 value)
     return (value << 18) + 32 * above + (above >> 8);
 }
 
-int CharonMIDIUMPWordCount(UInt32 word)
+int RevenantMIDIUMPWordCount(UInt32 word)
 {
     switch (word >> 28) {
     case 0x0: case 0x1: case 0x2: case 0x6: case 0x7:
@@ -92,12 +92,12 @@ int CharonMIDIUMPWordCount(UInt32 word)
     return 0;
 }
 
-static int charon_system_word(uint8_t status)
+static int revenant_system_word(uint8_t status)
 {
     return (status >= 0xF1 && status <= 0xF3) || status == 0xF6 || status >= 0xF8;
 }
 
-static int charon_data_bytes(uint8_t status)
+static int revenant_data_bytes(uint8_t status)
 {
     if (status >= 0x80 && status < 0xF0)
         return (status & 0xE0) == 0xC0 ? 1 : 2;
@@ -110,122 +110,122 @@ static int charon_data_bytes(uint8_t status)
     return 0;
 }
 
-static UInt32 charon_word_channel(UInt32 group, uint8_t status, uint8_t d1, uint8_t d2)
+static UInt32 revenant_word_channel(UInt32 group, uint8_t status, uint8_t d1, uint8_t d2)
 {
     return 0x20000000u | (group << 24) | ((UInt32)status << 16) | ((UInt32)d1 << 8) | d2;
 }
 
-static UInt32 charon_word_system(UInt32 group, uint8_t status, uint8_t d1, uint8_t d2)
+static UInt32 revenant_word_system(UInt32 group, uint8_t status, uint8_t d1, uint8_t d2)
 {
     return 0x10000000u | (group << 24) | ((UInt32)status << 16) | ((UInt32)d1 << 8) | d2;
 }
 
-static void charon_emit_message(CharonMIDIWords *out, UInt32 group, int protocol, uint8_t status, uint8_t d1, uint8_t d2)
+static void revenant_emit_message(RevenantMIDIWords *out, UInt32 group, int protocol, uint8_t status, uint8_t d1, uint8_t d2)
 {
     UInt32 channel = status & 0x0F;
     UInt32 kind = status & 0xF0;
     if (status >= 0xF0) {
-        CharonMIDIWordsAppend(out, charon_word_system(group, status, d1, d2));
+        RevenantMIDIWordsAppend(out, revenant_word_system(group, status, d1, d2));
         return;
     }
     if (protocol != 2 || (kind == 0x90 && d2 == 0)) {
-        CharonMIDIWordsAppend(out, charon_word_channel(group, status, d1, d2));
+        RevenantMIDIWordsAppend(out, revenant_word_channel(group, status, d1, d2));
         return;
     }
     UInt32 base = group << 24 | channel << 16;
     switch (kind) {
     case 0x80:
-        CharonMIDIWordsAppend(out, 0x40800000u | base | (UInt32)d1 << 8);
-        CharonMIDIWordsAppend(out, CharonMIDIUp16From7(d2) << 16);
+        RevenantMIDIWordsAppend(out, 0x40800000u | base | (UInt32)d1 << 8);
+        RevenantMIDIWordsAppend(out, RevenantMIDIUp16From7(d2) << 16);
         break;
     case 0x90:
-        CharonMIDIWordsAppend(out, 0x40900000u | base | (UInt32)d1 << 8);
-        CharonMIDIWordsAppend(out, CharonMIDIUp16From7(d2) << 16);
+        RevenantMIDIWordsAppend(out, 0x40900000u | base | (UInt32)d1 << 8);
+        RevenantMIDIWordsAppend(out, RevenantMIDIUp16From7(d2) << 16);
         break;
     case 0xA0:
-        CharonMIDIWordsAppend(out, 0x40A00000u | base | (UInt32)d1 << 8);
-        CharonMIDIWordsAppend(out, CharonMIDIUp32From7(d2));
+        RevenantMIDIWordsAppend(out, 0x40A00000u | base | (UInt32)d1 << 8);
+        RevenantMIDIWordsAppend(out, RevenantMIDIUp32From7(d2));
         break;
     case 0xB0:
-        CharonMIDIWordsAppend(out, 0x40B00000u | base | (UInt32)d1 << 8);
-        CharonMIDIWordsAppend(out, CharonMIDIUp32From7(d2));
+        RevenantMIDIWordsAppend(out, 0x40B00000u | base | (UInt32)d1 << 8);
+        RevenantMIDIWordsAppend(out, RevenantMIDIUp32From7(d2));
         break;
     case 0xC0:
-        CharonMIDIWordsAppend(out, 0x40C00000u | base);
-        CharonMIDIWordsAppend(out, (UInt32)d1 << 24);
+        RevenantMIDIWordsAppend(out, 0x40C00000u | base);
+        RevenantMIDIWordsAppend(out, (UInt32)d1 << 24);
         break;
     case 0xD0:
-        CharonMIDIWordsAppend(out, 0x40D00000u | base);
-        CharonMIDIWordsAppend(out, CharonMIDIUp32From7(d1));
+        RevenantMIDIWordsAppend(out, 0x40D00000u | base);
+        RevenantMIDIWordsAppend(out, RevenantMIDIUp32From7(d1));
         break;
     case 0xE0:
-        CharonMIDIWordsAppend(out, 0x40E00000u | base);
-        CharonMIDIWordsAppend(out, CharonMIDIUp32From14((UInt32)d1 | (UInt32)d2 << 7));
+        RevenantMIDIWordsAppend(out, 0x40E00000u | base);
+        RevenantMIDIWordsAppend(out, RevenantMIDIUp32From14((UInt32)d1 | (UInt32)d2 << 7));
         break;
     }
 }
 
-static void charon_emit_sysex(CharonMIDIWords *out, UInt32 group, uint8_t status, uint8_t count, const uint8_t *bytes)
+static void revenant_emit_sysex(RevenantMIDIWords *out, UInt32 group, uint8_t status, uint8_t count, const uint8_t *bytes)
 {
     uint8_t padded[6] = {0, 0, 0, 0, 0, 0};
     memcpy(padded, bytes, count);
-    CharonMIDIWordsAppend(out, 0x30000000u | group << 24 | (UInt32)status << 20 | (UInt32)count << 16 | (UInt32)padded[0] << 8 | padded[1]);
-    CharonMIDIWordsAppend(out, (UInt32)padded[2] << 24 | (UInt32)padded[3] << 16 | (UInt32)padded[4] << 8 | padded[5]);
+    RevenantMIDIWordsAppend(out, 0x30000000u | group << 24 | (UInt32)status << 20 | (UInt32)count << 16 | (UInt32)padded[0] << 8 | padded[1]);
+    RevenantMIDIWordsAppend(out, (UInt32)padded[2] << 24 | (UInt32)padded[3] << 16 | (UInt32)padded[4] << 8 | padded[5]);
 }
 
-static void charon_sysex_chunk(CharonMIDIParser *parser, CharonMIDIWords *out, UInt32 group)
+static void revenant_sysex_chunk(RevenantMIDIParser *parser, RevenantMIDIWords *out, UInt32 group)
 {
-    charon_emit_sysex(out, group, parser->sysexSent ? 2 : 1, parser->sysexCount, parser->sysex);
+    revenant_emit_sysex(out, group, parser->sysexSent ? 2 : 1, parser->sysexCount, parser->sysex);
     parser->sysexSent = 1;
     parser->sysexCount = 0;
 }
 
-static void charon_sysex_finish(CharonMIDIParser *parser, CharonMIDIWords *out, UInt32 group)
+static void revenant_sysex_finish(RevenantMIDIParser *parser, RevenantMIDIWords *out, UInt32 group)
 {
-    charon_emit_sysex(out, group, parser->sysexSent ? 3 : 0, parser->sysexCount, parser->sysex);
+    revenant_emit_sysex(out, group, parser->sysexSent ? 3 : 0, parser->sysexCount, parser->sysex);
     parser->sysexCount = 0;
     parser->sysexSent = 0;
     parser->inSysex = 0;
 }
 
-static void charon_sysex_byte(CharonMIDIParser *parser, CharonMIDIWords *out, UInt32 group, uint8_t byte)
+static void revenant_sysex_byte(RevenantMIDIParser *parser, RevenantMIDIWords *out, UInt32 group, uint8_t byte)
 {
     if (parser->sysexCount == 6)
-        charon_sysex_chunk(parser, out, group);
+        revenant_sysex_chunk(parser, out, group);
     parser->sysex[parser->sysexCount++] = byte;
 }
 
-static void charon_sysex_realtime(CharonMIDIParser *parser, CharonMIDIWords *out, UInt32 group)
+static void revenant_sysex_realtime(RevenantMIDIParser *parser, RevenantMIDIWords *out, UInt32 group)
 {
-    charon_emit_sysex(out, group, parser->sysexSent ? 2 : 0, parser->sysexCount, parser->sysex);
+    revenant_emit_sysex(out, group, parser->sysexSent ? 2 : 0, parser->sysexCount, parser->sysex);
     parser->sysexSent = 1;
     parser->sysexCount = 0;
 }
 
-void CharonMIDIParseFlush(CharonMIDIParser *parser, uint8_t group, CharonMIDIWords *out)
+void RevenantMIDIParseFlush(RevenantMIDIParser *parser, uint8_t group, RevenantMIDIWords *out)
 {
     if (parser->inSysex && parser->sysexCount > 0)
-        charon_sysex_chunk(parser, out, group);
+        revenant_sysex_chunk(parser, out, group);
 }
 
-void CharonMIDIParseBytes(CharonMIDIParser *parser, const uint8_t *data, size_t length, int protocol,
-                          uint8_t group, CharonMIDIWords *out)
+void RevenantMIDIParseBytes(RevenantMIDIParser *parser, const uint8_t *data, size_t length, int protocol,
+                          uint8_t group, RevenantMIDIWords *out)
 {
     UInt32 g = (UInt32)(group & 0x0F);
     for (size_t i = 0; i < length; i++) {
         uint8_t byte = data[i];
         if (byte >= 0xF8) {
             if (parser->inSysex && parser->sysexCount > 0)
-                charon_sysex_realtime(parser, out, g);
-            CharonMIDIWordsAppend(out, 0x10000000u | g << 24 | (UInt32)byte << 16);
+                revenant_sysex_realtime(parser, out, g);
+            RevenantMIDIWordsAppend(out, 0x10000000u | g << 24 | (UInt32)byte << 16);
             continue;
         }
         if (parser->inSysex && byte < 0x80) {
-            charon_sysex_byte(parser, out, g, byte);
+            revenant_sysex_byte(parser, out, g, byte);
             continue;
         }
         if (parser->inSysex) {
-            charon_sysex_finish(parser, out, g);
+            revenant_sysex_finish(parser, out, g);
             if (byte == 0xF7)
                 continue;
         }
@@ -242,14 +242,14 @@ void CharonMIDIParseBytes(CharonMIDIParser *parser, const uint8_t *data, size_t 
         }
         if (byte >= 0x80) {
             parser->pendingStatus = byte;
-            parser->pendingNeed = charon_data_bytes(byte);
+            parser->pendingNeed = revenant_data_bytes(byte);
             parser->pendingHave = 0;
             if (byte < 0xF0)
                 parser->running = byte;
             else
                 parser->running = 0;
             if (parser->pendingNeed == 0) {
-                charon_emit_message(out, g, protocol, byte, 0, 0);
+                revenant_emit_message(out, g, protocol, byte, 0, 0);
                 parser->pendingNeed = 0;
             }
             continue;
@@ -258,21 +258,21 @@ void CharonMIDIParseBytes(CharonMIDIParser *parser, const uint8_t *data, size_t 
             if (parser->running == 0)
                 continue;
             parser->pendingStatus = parser->running;
-            parser->pendingNeed = charon_data_bytes(parser->running);
+            parser->pendingNeed = revenant_data_bytes(parser->running);
             parser->pendingHave = 0;
         }
         parser->pendingData[parser->pendingHave++] = byte;
         if (parser->pendingHave == parser->pendingNeed) {
             uint8_t d1 = parser->pendingData[0];
             uint8_t d2 = parser->pendingNeed > 1 ? parser->pendingData[1] : 0;
-            charon_emit_message(out, g, protocol, parser->pendingStatus, d1, d2);
+            revenant_emit_message(out, g, protocol, parser->pendingStatus, d1, d2);
             parser->pendingNeed = 0;
             parser->pendingHave = 0;
         }
     }
 }
 
-static void charon_select(CharonMIDIBytes *out, CharonMIDIRPN *state, uint8_t channel, int nrpn, uint8_t msb, uint8_t lsb)
+static void revenant_select(RevenantMIDIBytes *out, RevenantMIDIRPN *state, uint8_t channel, int nrpn, uint8_t msb, uint8_t lsb)
 {
     if (state->selected && state->nrpn == nrpn && state->msb == msb && state->lsb == lsb)
         return;
@@ -280,40 +280,40 @@ static void charon_select(CharonMIDIBytes *out, CharonMIDIRPN *state, uint8_t ch
     state->nrpn = nrpn;
     state->msb = msb;
     state->lsb = lsb;
-    charon_bytes_append(out, 0xB0 | channel);
-    charon_bytes_append(out, nrpn ? 99 : 101);
-    charon_bytes_append(out, msb);
-    charon_bytes_append(out, 0xB0 | channel);
-    charon_bytes_append(out, nrpn ? 98 : 100);
-    charon_bytes_append(out, lsb);
+    revenant_bytes_append(out, 0xB0 | channel);
+    revenant_bytes_append(out, nrpn ? 99 : 101);
+    revenant_bytes_append(out, msb);
+    revenant_bytes_append(out, 0xB0 | channel);
+    revenant_bytes_append(out, nrpn ? 98 : 100);
+    revenant_bytes_append(out, lsb);
 }
 
-void CharonMIDIUMPToBytes(const UInt32 *words, size_t count, CharonMIDIRPN rpn[16], CharonMIDIBytes *out)
+void RevenantMIDIUMPToBytes(const UInt32 *words, size_t count, RevenantMIDIRPN rpn[16], RevenantMIDIBytes *out)
 {
     size_t i = 0;
     while (i < count) {
         UInt32 word = words[i];
-        int size = CharonMIDIUMPWordCount(word);
+        int size = RevenantMIDIUMPWordCount(word);
         if (size == 0 || i + (size_t)size > count)
             break;
         UInt32 type = word >> 28;
         if (type == 0x1) {
             uint8_t status = (uint8_t)(word >> 16);
             uint8_t d1 = (uint8_t)(word >> 8), d2 = (uint8_t)word;
-            if (charon_system_word(status)) {
-                charon_bytes_append(out, status);
-                if (charon_data_bytes(status) > 0)
-                    charon_bytes_append(out, d1 & 0x7F);
-                if (charon_data_bytes(status) > 1)
-                    charon_bytes_append(out, d2 & 0x7F);
+            if (revenant_system_word(status)) {
+                revenant_bytes_append(out, status);
+                if (revenant_data_bytes(status) > 0)
+                    revenant_bytes_append(out, d1 & 0x7F);
+                if (revenant_data_bytes(status) > 1)
+                    revenant_bytes_append(out, d2 & 0x7F);
             }
         } else if (type == 0x2) {
             uint8_t status = (uint8_t)(word >> 16);
             if (status >= 0x80 && status < 0xF0) {
-                charon_bytes_append(out, status);
-                charon_bytes_append(out, (uint8_t)(word >> 8) & 0x7F);
-                if (charon_data_bytes(status) > 1)
-                    charon_bytes_append(out, (uint8_t)word & 0x7F);
+                revenant_bytes_append(out, status);
+                revenant_bytes_append(out, (uint8_t)(word >> 8) & 0x7F);
+                if (revenant_data_bytes(status) > 1)
+                    revenant_bytes_append(out, (uint8_t)word & 0x7F);
             }
         } else if (type == 0x3) {
             UInt32 status = (word >> 20) & 0x0F;
@@ -323,11 +323,11 @@ void CharonMIDIUMPToBytes(const UInt32 *words, size_t count, CharonMIDIRPN rpn[1
             if (n > 6)
                 n = 6;
             if (status == 0 || status == 1)
-                charon_bytes_append(out, 0xF0);
+                revenant_bytes_append(out, 0xF0);
             for (UInt32 k = 0; k < n; k++)
-                charon_bytes_append(out, data[k] & 0x7F);
+                revenant_bytes_append(out, data[k] & 0x7F);
             if (status == 0 || status == 3)
-                charon_bytes_append(out, 0xF7);
+                revenant_bytes_append(out, 0xF7);
         } else if (type == 0x4) {
             UInt32 opcode = (word >> 20) & 0x0F;
             uint8_t channel = (uint8_t)((word >> 16) & 0x0F);
@@ -336,60 +336,60 @@ void CharonMIDIUMPToBytes(const UInt32 *words, size_t count, CharonMIDIRPN rpn[1
             uint8_t v7 = (uint8_t)(value >> 25);
             switch (opcode) {
             case 0x8:
-                charon_bytes_append(out, 0x80 | channel);
-                charon_bytes_append(out, index & 0x7F);
-                charon_bytes_append(out, v7);
+                revenant_bytes_append(out, 0x80 | channel);
+                revenant_bytes_append(out, index & 0x7F);
+                revenant_bytes_append(out, v7);
                 break;
             case 0x9:
-                charon_bytes_append(out, 0x90 | channel);
-                charon_bytes_append(out, index & 0x7F);
-                charon_bytes_append(out, (uint8_t)(v7 ? v7 : 1));
+                revenant_bytes_append(out, 0x90 | channel);
+                revenant_bytes_append(out, index & 0x7F);
+                revenant_bytes_append(out, (uint8_t)(v7 ? v7 : 1));
                 break;
             case 0xA:
-                charon_bytes_append(out, 0xA0 | channel);
-                charon_bytes_append(out, index & 0x7F);
-                charon_bytes_append(out, v7);
+                revenant_bytes_append(out, 0xA0 | channel);
+                revenant_bytes_append(out, index & 0x7F);
+                revenant_bytes_append(out, v7);
                 break;
             case 0xB:
-                charon_bytes_append(out, 0xB0 | channel);
-                charon_bytes_append(out, index & 0x7F);
-                charon_bytes_append(out, v7);
+                revenant_bytes_append(out, 0xB0 | channel);
+                revenant_bytes_append(out, index & 0x7F);
+                revenant_bytes_append(out, v7);
                 break;
             case 0xC:
                 if (word & 1) {
-                    charon_bytes_append(out, 0xB0 | channel);
-                    charon_bytes_append(out, 0);
-                    charon_bytes_append(out, (uint8_t)(value >> 8) & 0x7F);
-                    charon_bytes_append(out, 0xB0 | channel);
-                    charon_bytes_append(out, 32);
-                    charon_bytes_append(out, (uint8_t)value & 0x7F);
+                    revenant_bytes_append(out, 0xB0 | channel);
+                    revenant_bytes_append(out, 0);
+                    revenant_bytes_append(out, (uint8_t)(value >> 8) & 0x7F);
+                    revenant_bytes_append(out, 0xB0 | channel);
+                    revenant_bytes_append(out, 32);
+                    revenant_bytes_append(out, (uint8_t)value & 0x7F);
                 }
-                charon_bytes_append(out, 0xC0 | channel);
-                charon_bytes_append(out, (uint8_t)(value >> 24) & 0x7F);
+                revenant_bytes_append(out, 0xC0 | channel);
+                revenant_bytes_append(out, (uint8_t)(value >> 24) & 0x7F);
                 break;
             case 0xD:
-                charon_bytes_append(out, 0xD0 | channel);
-                charon_bytes_append(out, v7);
+                revenant_bytes_append(out, 0xD0 | channel);
+                revenant_bytes_append(out, v7);
                 break;
             case 0xE: {
                 uint8_t lsb = (uint8_t)((value >> 18) & 0x7F), msb = (uint8_t)((value >> 25) & 0x7F);
-                charon_bytes_append(out, 0xE0 | channel);
-                charon_bytes_append(out, lsb);
-                charon_bytes_append(out, msb);
+                revenant_bytes_append(out, 0xE0 | channel);
+                revenant_bytes_append(out, lsb);
+                revenant_bytes_append(out, msb);
                 break;
             }
             case 0x2:
             case 0x3: {
                 uint8_t bank = index & 0x7F, number = (uint8_t)word & 0x7F;
-                charon_select(out, &rpn[channel], channel, opcode == 0x3, bank, number);
+                revenant_select(out, &rpn[channel], channel, opcode == 0x3, bank, number);
                 uint8_t lsb = (uint8_t)((value >> 18) & 0x7F);
-                charon_bytes_append(out, 0xB0 | channel);
-                charon_bytes_append(out, 6);
-                charon_bytes_append(out, v7);
+                revenant_bytes_append(out, 0xB0 | channel);
+                revenant_bytes_append(out, 6);
+                revenant_bytes_append(out, v7);
                 if (lsb) {
-                    charon_bytes_append(out, 0xB0 | channel);
-                    charon_bytes_append(out, 38);
-                    charon_bytes_append(out, lsb);
+                    revenant_bytes_append(out, 0xB0 | channel);
+                    revenant_bytes_append(out, 38);
+                    revenant_bytes_append(out, lsb);
                 }
                 break;
             }
@@ -401,12 +401,12 @@ void CharonMIDIUMPToBytes(const UInt32 *words, size_t count, CharonMIDIRPN rpn[1
     }
 }
 
-static UInt32 *charon_packet_words(MIDIEventPacket *packet)
+static UInt32 *revenant_packet_words(MIDIEventPacket *packet)
 {
     return (UInt32 *)((uint8_t *)packet + sizeof(MIDITimeStamp) + sizeof(UInt32));
 }
 
-MIDIEventPacket *CharonMIDIEventListAppend(MIDIEventList *list, size_t listSize, MIDIEventPacket *curPacket,
+MIDIEventPacket *RevenantMIDIEventListAppend(MIDIEventList *list, size_t listSize, MIDIEventPacket *curPacket,
                                            MIDIEventPacket **last, MIDITimeStamp time, size_t wordCount, const UInt32 *words)
 {
     uint8_t *base = (uint8_t *)list;
@@ -429,13 +429,13 @@ MIDIEventPacket *CharonMIDIEventListAppend(MIDIEventList *list, size_t listSize,
     MIDIEventPacket *packet = (MIDIEventPacket *)(base + end);
     packet->timeStamp = time;
     packet->wordCount = (UInt32)wordCount;
-    memcpy(charon_packet_words(packet), words, 4 * wordCount);
+    memcpy(revenant_packet_words(packet), words, 4 * wordCount);
     list->numPackets++;
     *last = packet;
     return (MIDIEventPacket *)(base + end + header + 4 * wordCount);
 }
 
-MIDIEventPacket *CharonMIDIEventListAdd(MIDIEventList *list, size_t listSize, MIDIEventPacket *curPacket,
+MIDIEventPacket *RevenantMIDIEventListAdd(MIDIEventList *list, size_t listSize, MIDIEventPacket *curPacket,
                                         MIDITimeStamp time, size_t wordCount, const UInt32 *words)
 {
     const size_t header = sizeof(MIDITimeStamp) + sizeof(UInt32);
@@ -451,15 +451,15 @@ MIDIEventPacket *CharonMIDIEventListAdd(MIDIEventList *list, size_t listSize, MI
         last = curPacket;
         end = (MIDIEventPacket *)((uint8_t *)curPacket + header + 4 * (size_t)curPacket->wordCount);
     }
-    if (!CharonMIDIEventListAppend(list, listSize, end, &last, time, wordCount, words))
+    if (!RevenantMIDIEventListAppend(list, listSize, end, &last, time, wordCount, words))
         return NULL;
     return wordCount == 0 ? curPacket : last;
 }
 
-static void charon_ble_status(CharonBLEParser *parser, uint8_t byte, uint8_t *out, size_t *count)
+static void revenant_ble_status(RevenantBLEParser *parser, uint8_t byte, uint8_t *out, size_t *count)
 {
     parser->inSysex = 0;
-    parser->need = charon_data_bytes(byte);
+    parser->need = revenant_data_bytes(byte);
     parser->have = 0;
     parser->running = byte < 0xF0 ? byte : 0;
     out[(*count)++] = byte;
@@ -467,7 +467,7 @@ static void charon_ble_status(CharonBLEParser *parser, uint8_t byte, uint8_t *ou
         parser->timestampDue = 1;
 }
 
-size_t CharonBLEMIDIParse(CharonBLEParser *parser, const uint8_t *data, size_t length, uint8_t *out)
+size_t RevenantBLEMIDIParse(RevenantBLEParser *parser, const uint8_t *data, size_t length, uint8_t *out)
 {
     size_t count = 0;
     if (length == 0 || (data[0] & 0x80) == 0)
@@ -500,7 +500,7 @@ size_t CharonBLEMIDIParse(CharonBLEParser *parser, const uint8_t *data, size_t l
                     parser->timestampDue = 1;
                 }
             } else {
-                charon_ble_status(parser, byte, out, &count);
+                revenant_ble_status(parser, byte, out, &count);
             }
             continue;
         }
@@ -512,7 +512,7 @@ size_t CharonBLEMIDIParse(CharonBLEParser *parser, const uint8_t *data, size_t l
         if (parser->need == 0) {
             if (parser->running == 0)
                 continue;
-            parser->need = charon_data_bytes(parser->running);
+            parser->need = revenant_data_bytes(parser->running);
             parser->have = 0;
             out[count++] = parser->running;
         }

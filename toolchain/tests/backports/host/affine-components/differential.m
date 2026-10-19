@@ -3,8 +3,8 @@
 #include <math.h>
 #include <stdio.h>
 
-CGAffineTransformComponents CharonHostDecompose(CGAffineTransform transform);
-CGAffineTransform CharonHostMakeWithComponents(CGAffineTransformComponents components);
+CGAffineTransformComponents RevenantHostDecompose(CGAffineTransform transform);
+CGAffineTransform RevenantHostMakeWithComponents(CGAffineTransformComponents components);
 
 static int checks, failures;
 static double worst;
@@ -98,7 +98,7 @@ static void battery(const char *label, double a, double b, double c, double d, d
 {
     CGAffineTransform m = CGAffineTransformMake(a, b, c, d, tx, ty);
     CGAffineTransformComponents hc = CGAffineTransformDecompose(m);
-    CGAffineTransformComponents pc = CharonHostDecompose(m);
+    CGAffineTransformComponents pc = RevenantHostDecompose(m);
     enum band band = band_of(m);
     if (band == EXACT)
         report(label, "decompose agrees with the host", accepts(m, hc, pc, band));
@@ -108,11 +108,11 @@ static void battery(const char *label, double a, double b, double c, double d, d
     else
         report(label, "both decompositions rebuild the matrix (sign within the rounding band)", accepts(m, hc, pc, band));
     report(label, "the port's components rebuild the matrix as the host's do",
-           same_matrix(CGAffineTransformMakeWithComponents(pc), CharonHostMakeWithComponents(pc)));
+           same_matrix(CGAffineTransformMakeWithComponents(pc), RevenantHostMakeWithComponents(pc)));
     if (fabs(a * d - b * c) > 1e-9 * (fabs(a * d) + fabs(b * c)))
         report(label, "the port's components rebuild the matrix", same_matrix(m, CGAffineTransformMakeWithComponents(pc)));
     report(label, "port builds the host's matrix from the host's components",
-           same_matrix(CGAffineTransformMakeWithComponents(hc), CharonHostMakeWithComponents(hc)));
+           same_matrix(CGAffineTransformMakeWithComponents(hc), RevenantHostMakeWithComponents(hc)));
 }
 
 static uint64_t seed = 20261016;
@@ -139,7 +139,7 @@ static void sweep(const char *label, int singular, int count)
         }
         CGAffineTransform m = CGAffineTransformMake(a, b, c, d, 0, 0);
         CGAffineTransformComponents hc = CGAffineTransformDecompose(m);
-        CGAffineTransformComponents pc = CharonHostDecompose(m);
+        CGAffineTransformComponents pc = RevenantHostDecompose(m);
         enum band band = band_of(m);
         bands[band]++;
         if (!accepts(m, hc, pc, band))

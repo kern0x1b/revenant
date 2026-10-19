@@ -3,7 +3,7 @@
 #import <objc/runtime.h>
 #import <objc/message.h>
 
-typedef id (*CharonMsgSend0)(id, SEL);
+typedef id (*RevenantMsgSend0)(id, SEL);
 
 int main(void)
 {
@@ -17,7 +17,7 @@ int main(void)
         const char *keyword = sel_getName(sel);
         if (!types || types[0] != '@') continue;
         if (strchr(keyword, ':')) continue;
-        CIFilter *filter = ((CharonMsgSend0)objc_msgSend)((id)[CIFilter class], sel);
+        CIFilter *filter = ((RevenantMsgSend0)objc_msgSend)((id)[CIFilter class], sel);
         if (![filter isKindOfClass:[CIFilter class]]) continue;
         [lines addObject:[NSString stringWithFormat:@"%s\t%@\t%@", keyword, filter.name,
                           [filter.inputKeys componentsJoinedByString:@","]]];

@@ -1,13 +1,13 @@
 #import <Foundation/Foundation.h>
 #import <Accounts/ACAccount.h>
 
-@interface ACAccount (CharonUserFullName)
+@interface ACAccount (RevenantUserFullName)
 
 @property (readonly, copy) NSString *userFullName;
 
 @end
 
-@implementation ACAccount (CharonUserFullName)
+@implementation ACAccount (RevenantUserFullName)
 
 @dynamic userFullName;
 

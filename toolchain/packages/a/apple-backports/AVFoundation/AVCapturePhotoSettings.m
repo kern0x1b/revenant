@@ -1,8 +1,8 @@
-#import "CharonAVCapturePhoto.h"
+#import "RevenantAVCapturePhoto.h"
 #import <CoreVideo/CoreVideo.h>
 #import <ImageIO/ImageIO.h>
 
-BOOL CharonIsBayerRAWPixelFormat(OSType format)
+BOOL RevenantIsBayerRAWPixelFormat(OSType format)
 {
     switch (format) {
     case kCVPixelFormatType_14Bayer_GRBG:
@@ -16,13 +16,13 @@ BOOL CharonIsBayerRAWPixelFormat(OSType format)
     }
 }
 
-BOOL CharonIsAppleProRAWPixelFormat(OSType format)
+BOOL RevenantIsAppleProRAWPixelFormat(OSType format)
 {
     return format == kCVPixelFormatType_64RGBALE;
 }
 
-static void CharonRaise(NSString *format, ...) NS_FORMAT_FUNCTION(1, 2);
-static void CharonRaise(NSString *format, ...)
+static void RevenantRaise(NSString *format, ...) NS_FORMAT_FUNCTION(1, 2);
+static void RevenantRaise(NSString *format, ...)
 {
     va_list arguments;
     va_start(arguments, format);
@@ -31,36 +31,36 @@ static void CharonRaise(NSString *format, ...)
     @throw [NSException exceptionWithName:NSInvalidArgumentException reason:reason userInfo:nil];
 }
 
-static NSNumber *CharonPixelFormatOf(NSDictionary *format)
+static NSNumber *RevenantPixelFormatOf(NSDictionary *format)
 {
     id value = format[(__bridge NSString *)kCVPixelBufferPixelFormatTypeKey];
     return [value isKindOfClass:[NSNumber class]] ? value : nil;
 }
 
-static NSString *CharonCodecOf(NSDictionary *format)
+static NSString *RevenantCodecOf(NSDictionary *format)
 {
     id value = format[AVVideoCodecKey];
     return [value isKindOfClass:[NSString class]] ? value : nil;
 }
 
-static void CharonCheckProcessedFormat(NSDictionary *format, NSString *method)
+static void RevenantCheckProcessedFormat(NSDictionary *format, NSString *method)
 {
     if (!format)
         return;
     if (format.count == 0)
-        CharonRaise(@"*** %@ source passthru (empty dictionary) is not supported", method);
-    BOOL pixels = CharonPixelFormatOf(format) != nil, codec = CharonCodecOf(format) != nil;
+        RevenantRaise(@"*** %@ source passthru (empty dictionary) is not supported", method);
+    BOOL pixels = RevenantPixelFormatOf(format) != nil, codec = RevenantCodecOf(format) != nil;
     if (!pixels && !codec)
-        CharonRaise(@"*** %@ Either kCVPixelBufferPixelFormatTypeKey or AVVideoCodecKey must be specified", method);
+        RevenantRaise(@"*** %@ Either kCVPixelBufferPixelFormatTypeKey or AVVideoCodecKey must be specified", method);
     if (pixels && codec)
-        CharonRaise(@"*** %@ kCVPixelBufferPixelFormatTypeKey and AVVideoCodecKey may not both be specified", method);
+        RevenantRaise(@"*** %@ kCVPixelBufferPixelFormatTypeKey and AVVideoCodecKey may not both be specified", method);
 }
 
-static NSString *CharonDefaultProcessedFileType(NSDictionary *format)
+static NSString *RevenantDefaultProcessedFileType(NSDictionary *format)
 {
-    NSString *codec = CharonCodecOf(format);
+    NSString *codec = RevenantCodecOf(format);
     if (!codec)
-        return CharonPixelFormatOf(format) ? AVFileTypeTIFF : nil;
+        return RevenantPixelFormatOf(format) ? AVFileTypeTIFF : nil;
     if ([codec isEqualToString:AVVideoCodecTypeJPEG])
         return AVFileTypeJPEG;
     if ([codec isEqualToString:AVVideoCodecTypeHEVC])
@@ -68,7 +68,7 @@ static NSString *CharonDefaultProcessedFileType(NSDictionary *format)
     return nil;
 }
 
-static NSSet *CharonMetadataKeys(void)
+static NSSet *RevenantMetadataKeys(void)
 {
     static NSSet *keys;
     static dispatch_once_t once;
@@ -87,7 +87,7 @@ static NSSet *CharonMetadataKeys(void)
     return keys;
 }
 
-static AVMetadataItem *CharonContentIdentifierItem(NSString *identifier)
+static AVMetadataItem *RevenantContentIdentifierItem(NSString *identifier)
 {
     AVMutableMetadataItem *item = [AVMutableMetadataItem metadataItem];
     item.keySpace = AVMetadataKeySpaceQuickTimeMetadata;
@@ -96,47 +96,47 @@ static AVMetadataItem *CharonContentIdentifierItem(NSString *identifier)
     return item;
 }
 
-static BOOL CharonIsContentIdentifierItem(AVMetadataItem *item)
+static BOOL RevenantIsContentIdentifierItem(AVMetadataItem *item)
 {
     return [item.keySpace isEqualToString:AVMetadataKeySpaceQuickTimeMetadata] && [(id)item.key isEqual:AVMetadataQuickTimeMetadataKeyContentIdentifier];
 }
 
 @implementation AVCapturePhotoSettings
 {
-    int64_t _charonUniqueID;
-    NSDictionary *_charonFormat;
-    NSString *_charonProcessedFileType;
-    OSType _charonRawPhotoPixelFormatType;
-    NSString *_charonRawFileType;
-    AVCaptureFlashMode _charonFlashMode;
-    BOOL _charonAutoRedEyeReductionEnabled;
-    AVCapturePhotoQualityPrioritization _charonPhotoQualityPrioritization;
-    BOOL _charonAutoStillImageStabilizationEnabled;
-    BOOL _charonAutoVirtualDeviceFusionEnabled;
-    NSArray *_charonVirtualDeviceConstituentPhotoDeliveryEnabledDevices;
-    BOOL _charonDualCameraDualPhotoDeliveryEnabled;
-    BOOL _charonHighResolutionPhotoEnabled;
-    CMVideoDimensions _charonMaxPhotoDimensions;
-    BOOL _charonDepthDataDeliveryEnabled;
-    BOOL _charonEmbedsDepthDataInPhoto;
-    BOOL _charonDepthDataFiltered;
-    BOOL _charonCameraCalibrationDataDeliveryEnabled;
-    BOOL _charonPortraitEffectsMatteDeliveryEnabled;
-    BOOL _charonEmbedsPortraitEffectsMatteInPhoto;
-    NSArray *_charonEnabledSemanticSegmentationMatteTypes;
-    BOOL _charonEmbedsSemanticSegmentationMattesInPhoto;
-    NSDictionary *_charonMetadata;
-    NSURL *_charonLivePhotoMovieFileURL;
-    NSString *_charonLivePhotoVideoCodecType;
-    NSString *_charonContentIdentifier;
-    NSArray *_charonLivePhotoMovieMetadata;
-    NSDictionary *_charonPreviewPhotoFormat;
-    NSDictionary *_charonEmbeddedThumbnailPhotoFormat;
-    NSDictionary *_charonRawEmbeddedThumbnailPhotoFormat;
-    BOOL _charonAutoContentAwareDistortionCorrectionEnabled;
+    int64_t _revenantUniqueID;
+    NSDictionary *_revenantFormat;
+    NSString *_revenantProcessedFileType;
+    OSType _revenantRawPhotoPixelFormatType;
+    NSString *_revenantRawFileType;
+    AVCaptureFlashMode _revenantFlashMode;
+    BOOL _revenantAutoRedEyeReductionEnabled;
+    AVCapturePhotoQualityPrioritization _revenantPhotoQualityPrioritization;
+    BOOL _revenantAutoStillImageStabilizationEnabled;
+    BOOL _revenantAutoVirtualDeviceFusionEnabled;
+    NSArray *_revenantVirtualDeviceConstituentPhotoDeliveryEnabledDevices;
+    BOOL _revenantDualCameraDualPhotoDeliveryEnabled;
+    BOOL _revenantHighResolutionPhotoEnabled;
+    CMVideoDimensions _revenantMaxPhotoDimensions;
+    BOOL _revenantDepthDataDeliveryEnabled;
+    BOOL _revenantEmbedsDepthDataInPhoto;
+    BOOL _revenantDepthDataFiltered;
+    BOOL _revenantCameraCalibrationDataDeliveryEnabled;
+    BOOL _revenantPortraitEffectsMatteDeliveryEnabled;
+    BOOL _revenantEmbedsPortraitEffectsMatteInPhoto;
+    NSArray *_revenantEnabledSemanticSegmentationMatteTypes;
+    BOOL _revenantEmbedsSemanticSegmentationMattesInPhoto;
+    NSDictionary *_revenantMetadata;
+    NSURL *_revenantLivePhotoMovieFileURL;
+    NSString *_revenantLivePhotoVideoCodecType;
+    NSString *_revenantContentIdentifier;
+    NSArray *_revenantLivePhotoMovieMetadata;
+    NSDictionary *_revenantPreviewPhotoFormat;
+    NSDictionary *_revenantEmbeddedThumbnailPhotoFormat;
+    NSDictionary *_revenantRawEmbeddedThumbnailPhotoFormat;
+    BOOL _revenantAutoContentAwareDistortionCorrectionEnabled;
 }
 
-+ (int64_t)charon_nextUniqueID
++ (int64_t)revenant_nextUniqueID
 {
     static int64_t counter;
     @synchronized ([AVCapturePhotoSettings class]) {
@@ -146,54 +146,54 @@ static BOOL CharonIsContentIdentifierItem(AVMetadataItem *item)
 
 - (instancetype)init
 {
-    return [self initCharonWithUniqueID:[AVCapturePhotoSettings charon_nextUniqueID]];
+    return [self initRevenantWithUniqueID:[AVCapturePhotoSettings revenant_nextUniqueID]];
 }
 
-- (instancetype)initCharonWithUniqueID:(int64_t)uniqueID
+- (instancetype)initRevenantWithUniqueID:(int64_t)uniqueID
 {
     if ((self = [super init])) {
-        _charonUniqueID = uniqueID;
-        _charonFormat = @{AVVideoCodecKey: AVVideoCodecTypeJPEG};
-        _charonProcessedFileType = AVFileTypeJPEG;
-        _charonFlashMode = AVCaptureFlashModeOff;
-        _charonPhotoQualityPrioritization = AVCapturePhotoQualityPrioritizationBalanced;
-        _charonAutoStillImageStabilizationEnabled = YES;
-        _charonAutoVirtualDeviceFusionEnabled = YES;
-        _charonVirtualDeviceConstituentPhotoDeliveryEnabledDevices = @[];
-        _charonEmbedsDepthDataInPhoto = YES;
-        _charonDepthDataFiltered = YES;
-        _charonEmbedsPortraitEffectsMatteInPhoto = YES;
-        _charonEnabledSemanticSegmentationMatteTypes = @[];
-        _charonEmbedsSemanticSegmentationMattesInPhoto = YES;
-        _charonMetadata = @{};
-        _charonLivePhotoVideoCodecType = AVVideoCodecTypeH264;
-        _charonContentIdentifier = [NSUUID UUID].UUIDString;
-        _charonLivePhotoMovieMetadata = @[CharonContentIdentifierItem(_charonContentIdentifier)];
+        _revenantUniqueID = uniqueID;
+        _revenantFormat = @{AVVideoCodecKey: AVVideoCodecTypeJPEG};
+        _revenantProcessedFileType = AVFileTypeJPEG;
+        _revenantFlashMode = AVCaptureFlashModeOff;
+        _revenantPhotoQualityPrioritization = AVCapturePhotoQualityPrioritizationBalanced;
+        _revenantAutoStillImageStabilizationEnabled = YES;
+        _revenantAutoVirtualDeviceFusionEnabled = YES;
+        _revenantVirtualDeviceConstituentPhotoDeliveryEnabledDevices = @[];
+        _revenantEmbedsDepthDataInPhoto = YES;
+        _revenantDepthDataFiltered = YES;
+        _revenantEmbedsPortraitEffectsMatteInPhoto = YES;
+        _revenantEnabledSemanticSegmentationMatteTypes = @[];
+        _revenantEmbedsSemanticSegmentationMattesInPhoto = YES;
+        _revenantMetadata = @{};
+        _revenantLivePhotoVideoCodecType = AVVideoCodecTypeH264;
+        _revenantContentIdentifier = [NSUUID UUID].UUIDString;
+        _revenantLivePhotoMovieMetadata = @[RevenantContentIdentifierItem(_revenantContentIdentifier)];
     }
     return self;
 }
 
-+ (instancetype)charon_settingsWithRaw:(OSType)raw rawFileType:(NSString *)rawFileType format:(NSDictionary *)format
++ (instancetype)revenant_settingsWithRaw:(OSType)raw rawFileType:(NSString *)rawFileType format:(NSDictionary *)format
                      processedFileType:(NSString *)processedFileType method:(NSString *)method
 {
-    if (raw && !CharonIsBayerRAWPixelFormat(raw) && !CharonIsAppleProRAWPixelFormat(raw))
-        CharonRaise(@"*** %@ Unrecognized raw pixel format type", method);
-    CharonCheckProcessedFormat(format, method);
+    if (raw && !RevenantIsBayerRAWPixelFormat(raw) && !RevenantIsAppleProRAWPixelFormat(raw))
+        RevenantRaise(@"*** %@ Unrecognized raw pixel format type", method);
+    RevenantCheckProcessedFormat(format, method);
     AVCapturePhotoSettings *settings = [[self alloc] init];
     if (format || !raw) {
-        settings->_charonFormat = format ? [format copy] : @{AVVideoCodecKey: AVVideoCodecTypeJPEG};
-        settings->_charonProcessedFileType = processedFileType ?: CharonDefaultProcessedFileType(settings->_charonFormat);
+        settings->_revenantFormat = format ? [format copy] : @{AVVideoCodecKey: AVVideoCodecTypeJPEG};
+        settings->_revenantProcessedFileType = processedFileType ?: RevenantDefaultProcessedFileType(settings->_revenantFormat);
     } else {
-        settings->_charonFormat = nil;
-        settings->_charonProcessedFileType = nil;
+        settings->_revenantFormat = nil;
+        settings->_revenantProcessedFileType = nil;
     }
     if (raw) {
-        settings->_charonRawPhotoPixelFormatType = raw;
-        settings->_charonRawFileType = rawFileType ?: AVFileTypeDNG;
-        if (CharonIsBayerRAWPixelFormat(raw)) {
-            settings->_charonPhotoQualityPrioritization = AVCapturePhotoQualityPrioritizationSpeed;
-            settings->_charonAutoStillImageStabilizationEnabled = NO;
-            settings->_charonAutoVirtualDeviceFusionEnabled = NO;
+        settings->_revenantRawPhotoPixelFormatType = raw;
+        settings->_revenantRawFileType = rawFileType ?: AVFileTypeDNG;
+        if (RevenantIsBayerRAWPixelFormat(raw)) {
+            settings->_revenantPhotoQualityPrioritization = AVCapturePhotoQualityPrioritizationSpeed;
+            settings->_revenantAutoStillImageStabilizationEnabled = NO;
+            settings->_revenantAutoVirtualDeviceFusionEnabled = NO;
         }
     }
     return settings;
@@ -206,329 +206,329 @@ static BOOL CharonIsContentIdentifierItem(AVMetadataItem *item)
 
 + (instancetype)photoSettingsWithFormat:(NSDictionary<NSString *, id> *)format
 {
-    return [self charon_settingsWithRaw:0 rawFileType:nil format:format processedFileType:nil method:@"+[AVCapturePhotoSettings photoSettingsWithFormat:]"];
+    return [self revenant_settingsWithRaw:0 rawFileType:nil format:format processedFileType:nil method:@"+[AVCapturePhotoSettings photoSettingsWithFormat:]"];
 }
 
 + (instancetype)photoSettingsWithRawPixelFormatType:(OSType)rawPixelFormatType
 {
-    return [self charon_settingsWithRaw:rawPixelFormatType rawFileType:nil format:nil processedFileType:nil
+    return [self revenant_settingsWithRaw:rawPixelFormatType rawFileType:nil format:nil processedFileType:nil
                                  method:@"+[AVCapturePhotoSettings photoSettingsWithRawPixelFormatType:]"];
 }
 
 + (instancetype)photoSettingsWithRawPixelFormatType:(OSType)rawPixelFormatType processedFormat:(NSDictionary<NSString *, id> *)processedFormat
 {
-    return [self charon_settingsWithRaw:rawPixelFormatType rawFileType:nil format:processedFormat processedFileType:nil
+    return [self revenant_settingsWithRaw:rawPixelFormatType rawFileType:nil format:processedFormat processedFileType:nil
                                  method:@"+[AVCapturePhotoSettings photoSettingsWithRawPixelFormatType:processedFormat:]"];
 }
 
 + (instancetype)photoSettingsWithRawPixelFormatType:(OSType)rawPixelFormatType rawFileType:(AVFileType)rawFileType
                                     processedFormat:(NSDictionary<NSString *, id> *)processedFormat processedFileType:(AVFileType)processedFileType
 {
-    return [self charon_settingsWithRaw:rawPixelFormatType rawFileType:rawFileType format:processedFormat processedFileType:processedFileType
+    return [self revenant_settingsWithRaw:rawPixelFormatType rawFileType:rawFileType format:processedFormat processedFileType:processedFileType
                                  method:@"+[AVCapturePhotoSettings photoSettingsWithRawPixelFormatType:rawFileType:processedFormat:processedFileType:]"];
 }
 
-- (instancetype)charon_copyWithZone:(NSZone *)zone uniqueID:(int64_t)uniqueID
+- (instancetype)revenant_copyWithZone:(NSZone *)zone uniqueID:(int64_t)uniqueID
 {
-    AVCapturePhotoSettings *copy = [[[self class] allocWithZone:zone] initCharonWithUniqueID:uniqueID];
-    copy->_charonFormat = _charonFormat;
-    copy->_charonProcessedFileType = _charonProcessedFileType;
-    copy->_charonRawPhotoPixelFormatType = _charonRawPhotoPixelFormatType;
-    copy->_charonRawFileType = _charonRawFileType;
-    copy->_charonFlashMode = _charonFlashMode;
-    copy->_charonAutoRedEyeReductionEnabled = _charonAutoRedEyeReductionEnabled;
-    copy->_charonPhotoQualityPrioritization = _charonPhotoQualityPrioritization;
-    copy->_charonAutoStillImageStabilizationEnabled = _charonAutoStillImageStabilizationEnabled;
-    copy->_charonAutoVirtualDeviceFusionEnabled = _charonAutoVirtualDeviceFusionEnabled;
-    copy->_charonVirtualDeviceConstituentPhotoDeliveryEnabledDevices = _charonVirtualDeviceConstituentPhotoDeliveryEnabledDevices;
-    copy->_charonDualCameraDualPhotoDeliveryEnabled = _charonDualCameraDualPhotoDeliveryEnabled;
-    copy->_charonHighResolutionPhotoEnabled = _charonHighResolutionPhotoEnabled;
-    copy->_charonMaxPhotoDimensions = _charonMaxPhotoDimensions;
-    copy->_charonDepthDataDeliveryEnabled = _charonDepthDataDeliveryEnabled;
-    copy->_charonEmbedsDepthDataInPhoto = _charonEmbedsDepthDataInPhoto;
-    copy->_charonDepthDataFiltered = _charonDepthDataFiltered;
-    copy->_charonCameraCalibrationDataDeliveryEnabled = _charonCameraCalibrationDataDeliveryEnabled;
-    copy->_charonPortraitEffectsMatteDeliveryEnabled = _charonPortraitEffectsMatteDeliveryEnabled;
-    copy->_charonEmbedsPortraitEffectsMatteInPhoto = _charonEmbedsPortraitEffectsMatteInPhoto;
-    copy->_charonEnabledSemanticSegmentationMatteTypes = _charonEnabledSemanticSegmentationMatteTypes;
-    copy->_charonEmbedsSemanticSegmentationMattesInPhoto = _charonEmbedsSemanticSegmentationMattesInPhoto;
-    copy->_charonMetadata = _charonMetadata;
-    copy->_charonLivePhotoMovieFileURL = _charonLivePhotoMovieFileURL;
-    copy->_charonLivePhotoVideoCodecType = _charonLivePhotoVideoCodecType;
-    copy->_charonContentIdentifier = _charonContentIdentifier;
-    copy->_charonLivePhotoMovieMetadata = _charonLivePhotoMovieMetadata;
-    copy->_charonPreviewPhotoFormat = _charonPreviewPhotoFormat;
-    copy->_charonEmbeddedThumbnailPhotoFormat = _charonEmbeddedThumbnailPhotoFormat;
-    copy->_charonRawEmbeddedThumbnailPhotoFormat = _charonRawEmbeddedThumbnailPhotoFormat;
-    copy->_charonAutoContentAwareDistortionCorrectionEnabled = _charonAutoContentAwareDistortionCorrectionEnabled;
+    AVCapturePhotoSettings *copy = [[[self class] allocWithZone:zone] initRevenantWithUniqueID:uniqueID];
+    copy->_revenantFormat = _revenantFormat;
+    copy->_revenantProcessedFileType = _revenantProcessedFileType;
+    copy->_revenantRawPhotoPixelFormatType = _revenantRawPhotoPixelFormatType;
+    copy->_revenantRawFileType = _revenantRawFileType;
+    copy->_revenantFlashMode = _revenantFlashMode;
+    copy->_revenantAutoRedEyeReductionEnabled = _revenantAutoRedEyeReductionEnabled;
+    copy->_revenantPhotoQualityPrioritization = _revenantPhotoQualityPrioritization;
+    copy->_revenantAutoStillImageStabilizationEnabled = _revenantAutoStillImageStabilizationEnabled;
+    copy->_revenantAutoVirtualDeviceFusionEnabled = _revenantAutoVirtualDeviceFusionEnabled;
+    copy->_revenantVirtualDeviceConstituentPhotoDeliveryEnabledDevices = _revenantVirtualDeviceConstituentPhotoDeliveryEnabledDevices;
+    copy->_revenantDualCameraDualPhotoDeliveryEnabled = _revenantDualCameraDualPhotoDeliveryEnabled;
+    copy->_revenantHighResolutionPhotoEnabled = _revenantHighResolutionPhotoEnabled;
+    copy->_revenantMaxPhotoDimensions = _revenantMaxPhotoDimensions;
+    copy->_revenantDepthDataDeliveryEnabled = _revenantDepthDataDeliveryEnabled;
+    copy->_revenantEmbedsDepthDataInPhoto = _revenantEmbedsDepthDataInPhoto;
+    copy->_revenantDepthDataFiltered = _revenantDepthDataFiltered;
+    copy->_revenantCameraCalibrationDataDeliveryEnabled = _revenantCameraCalibrationDataDeliveryEnabled;
+    copy->_revenantPortraitEffectsMatteDeliveryEnabled = _revenantPortraitEffectsMatteDeliveryEnabled;
+    copy->_revenantEmbedsPortraitEffectsMatteInPhoto = _revenantEmbedsPortraitEffectsMatteInPhoto;
+    copy->_revenantEnabledSemanticSegmentationMatteTypes = _revenantEnabledSemanticSegmentationMatteTypes;
+    copy->_revenantEmbedsSemanticSegmentationMattesInPhoto = _revenantEmbedsSemanticSegmentationMattesInPhoto;
+    copy->_revenantMetadata = _revenantMetadata;
+    copy->_revenantLivePhotoMovieFileURL = _revenantLivePhotoMovieFileURL;
+    copy->_revenantLivePhotoVideoCodecType = _revenantLivePhotoVideoCodecType;
+    copy->_revenantContentIdentifier = _revenantContentIdentifier;
+    copy->_revenantLivePhotoMovieMetadata = _revenantLivePhotoMovieMetadata;
+    copy->_revenantPreviewPhotoFormat = _revenantPreviewPhotoFormat;
+    copy->_revenantEmbeddedThumbnailPhotoFormat = _revenantEmbeddedThumbnailPhotoFormat;
+    copy->_revenantRawEmbeddedThumbnailPhotoFormat = _revenantRawEmbeddedThumbnailPhotoFormat;
+    copy->_revenantAutoContentAwareDistortionCorrectionEnabled = _revenantAutoContentAwareDistortionCorrectionEnabled;
     return copy;
 }
 
 - (id)copyWithZone:(NSZone *)zone
 {
-    return [self charon_copyWithZone:zone uniqueID:_charonUniqueID];
+    return [self revenant_copyWithZone:zone uniqueID:_revenantUniqueID];
 }
 
 + (instancetype)photoSettingsFromPhotoSettings:(AVCapturePhotoSettings *)photoSettings
 {
-    return [photoSettings charon_copyWithZone:NULL uniqueID:[AVCapturePhotoSettings charon_nextUniqueID]];
+    return [photoSettings revenant_copyWithZone:NULL uniqueID:[AVCapturePhotoSettings revenant_nextUniqueID]];
 }
 
 - (int64_t)uniqueID
 {
-    return _charonUniqueID;
+    return _revenantUniqueID;
 }
 
 - (NSDictionary<NSString *, id> *)format
 {
-    return _charonFormat;
+    return _revenantFormat;
 }
 
 - (AVFileType)processedFileType
 {
-    return _charonProcessedFileType;
+    return _revenantProcessedFileType;
 }
 
 - (OSType)rawPhotoPixelFormatType
 {
-    return _charonRawPhotoPixelFormatType;
+    return _revenantRawPhotoPixelFormatType;
 }
 
 - (AVFileType)rawFileType
 {
-    return _charonRawFileType;
+    return _revenantRawFileType;
 }
 
 - (AVCaptureFlashMode)flashMode
 {
-    return _charonFlashMode;
+    return _revenantFlashMode;
 }
 
 - (void)setFlashMode:(AVCaptureFlashMode)flashMode
 {
-    _charonFlashMode = flashMode;
+    _revenantFlashMode = flashMode;
 }
 
 - (BOOL)isAutoRedEyeReductionEnabled
 {
-    return _charonAutoRedEyeReductionEnabled;
+    return _revenantAutoRedEyeReductionEnabled;
 }
 
 - (void)setAutoRedEyeReductionEnabled:(BOOL)autoRedEyeReductionEnabled
 {
-    _charonAutoRedEyeReductionEnabled = autoRedEyeReductionEnabled;
+    _revenantAutoRedEyeReductionEnabled = autoRedEyeReductionEnabled;
 }
 
 - (AVCapturePhotoQualityPrioritization)photoQualityPrioritization
 {
-    return _charonPhotoQualityPrioritization;
+    return _revenantPhotoQualityPrioritization;
 }
 
 - (void)setPhotoQualityPrioritization:(AVCapturePhotoQualityPrioritization)photoQualityPrioritization
 {
     if (photoQualityPrioritization < AVCapturePhotoQualityPrioritizationSpeed || photoQualityPrioritization > AVCapturePhotoQualityPrioritizationQuality)
-        CharonRaise(@"*** -[AVCapturePhotoSettings setPhotoQualityPrioritization:] Unsupported photo quality prioritization - %ld", (long)photoQualityPrioritization);
-    _charonPhotoQualityPrioritization = photoQualityPrioritization;
+        RevenantRaise(@"*** -[AVCapturePhotoSettings setPhotoQualityPrioritization:] Unsupported photo quality prioritization - %ld", (long)photoQualityPrioritization);
+    _revenantPhotoQualityPrioritization = photoQualityPrioritization;
 }
 
 - (BOOL)isAutoStillImageStabilizationEnabled
 {
-    return _charonAutoStillImageStabilizationEnabled;
+    return _revenantAutoStillImageStabilizationEnabled;
 }
 
 - (void)setAutoStillImageStabilizationEnabled:(BOOL)autoStillImageStabilizationEnabled
 {
-    _charonAutoStillImageStabilizationEnabled = autoStillImageStabilizationEnabled;
+    _revenantAutoStillImageStabilizationEnabled = autoStillImageStabilizationEnabled;
 }
 
 - (BOOL)isAutoVirtualDeviceFusionEnabled
 {
-    return _charonAutoVirtualDeviceFusionEnabled;
+    return _revenantAutoVirtualDeviceFusionEnabled;
 }
 
 - (void)setAutoVirtualDeviceFusionEnabled:(BOOL)autoVirtualDeviceFusionEnabled
 {
-    _charonAutoVirtualDeviceFusionEnabled = autoVirtualDeviceFusionEnabled;
+    _revenantAutoVirtualDeviceFusionEnabled = autoVirtualDeviceFusionEnabled;
 }
 
 - (BOOL)isAutoDualCameraFusionEnabled
 {
-    return _charonAutoVirtualDeviceFusionEnabled;
+    return _revenantAutoVirtualDeviceFusionEnabled;
 }
 
 - (void)setAutoDualCameraFusionEnabled:(BOOL)autoDualCameraFusionEnabled
 {
-    _charonAutoVirtualDeviceFusionEnabled = autoDualCameraFusionEnabled;
+    _revenantAutoVirtualDeviceFusionEnabled = autoDualCameraFusionEnabled;
 }
 
 - (NSArray<AVCaptureDevice *> *)virtualDeviceConstituentPhotoDeliveryEnabledDevices
 {
-    return _charonVirtualDeviceConstituentPhotoDeliveryEnabledDevices;
+    return _revenantVirtualDeviceConstituentPhotoDeliveryEnabledDevices;
 }
 
 - (void)setVirtualDeviceConstituentPhotoDeliveryEnabledDevices:(NSArray<AVCaptureDevice *> *)devices
 {
-    _charonVirtualDeviceConstituentPhotoDeliveryEnabledDevices = [devices copy] ?: @[];
+    _revenantVirtualDeviceConstituentPhotoDeliveryEnabledDevices = [devices copy] ?: @[];
 }
 
 - (BOOL)isDualCameraDualPhotoDeliveryEnabled
 {
-    return _charonDualCameraDualPhotoDeliveryEnabled;
+    return _revenantDualCameraDualPhotoDeliveryEnabled;
 }
 
 - (void)setDualCameraDualPhotoDeliveryEnabled:(BOOL)dualCameraDualPhotoDeliveryEnabled
 {
-    _charonDualCameraDualPhotoDeliveryEnabled = dualCameraDualPhotoDeliveryEnabled;
+    _revenantDualCameraDualPhotoDeliveryEnabled = dualCameraDualPhotoDeliveryEnabled;
 }
 
 - (BOOL)isHighResolutionPhotoEnabled
 {
-    return _charonHighResolutionPhotoEnabled;
+    return _revenantHighResolutionPhotoEnabled;
 }
 
 - (void)setHighResolutionPhotoEnabled:(BOOL)highResolutionPhotoEnabled
 {
-    _charonHighResolutionPhotoEnabled = highResolutionPhotoEnabled;
-    _charonMaxPhotoDimensions = (CMVideoDimensions){0, 0};
+    _revenantHighResolutionPhotoEnabled = highResolutionPhotoEnabled;
+    _revenantMaxPhotoDimensions = (CMVideoDimensions){0, 0};
 }
 
 - (CMVideoDimensions)maxPhotoDimensions
 {
-    return _charonMaxPhotoDimensions;
+    return _revenantMaxPhotoDimensions;
 }
 
 - (void)setMaxPhotoDimensions:(CMVideoDimensions)maxPhotoDimensions
 {
-    _charonMaxPhotoDimensions = maxPhotoDimensions;
+    _revenantMaxPhotoDimensions = maxPhotoDimensions;
 }
 
 - (BOOL)isDepthDataDeliveryEnabled
 {
-    return _charonDepthDataDeliveryEnabled;
+    return _revenantDepthDataDeliveryEnabled;
 }
 
 - (void)setDepthDataDeliveryEnabled:(BOOL)depthDataDeliveryEnabled
 {
-    _charonDepthDataDeliveryEnabled = depthDataDeliveryEnabled;
+    _revenantDepthDataDeliveryEnabled = depthDataDeliveryEnabled;
 }
 
 - (BOOL)embedsDepthDataInPhoto
 {
-    return _charonEmbedsDepthDataInPhoto;
+    return _revenantEmbedsDepthDataInPhoto;
 }
 
 - (void)setEmbedsDepthDataInPhoto:(BOOL)embedsDepthDataInPhoto
 {
-    _charonEmbedsDepthDataInPhoto = embedsDepthDataInPhoto;
+    _revenantEmbedsDepthDataInPhoto = embedsDepthDataInPhoto;
 }
 
 - (BOOL)isDepthDataFiltered
 {
-    return _charonDepthDataFiltered;
+    return _revenantDepthDataFiltered;
 }
 
 - (void)setDepthDataFiltered:(BOOL)depthDataFiltered
 {
-    _charonDepthDataFiltered = depthDataFiltered;
+    _revenantDepthDataFiltered = depthDataFiltered;
 }
 
 - (BOOL)isCameraCalibrationDataDeliveryEnabled
 {
-    return _charonCameraCalibrationDataDeliveryEnabled;
+    return _revenantCameraCalibrationDataDeliveryEnabled;
 }
 
 - (void)setCameraCalibrationDataDeliveryEnabled:(BOOL)cameraCalibrationDataDeliveryEnabled
 {
-    _charonCameraCalibrationDataDeliveryEnabled = cameraCalibrationDataDeliveryEnabled;
+    _revenantCameraCalibrationDataDeliveryEnabled = cameraCalibrationDataDeliveryEnabled;
 }
 
 - (BOOL)isPortraitEffectsMatteDeliveryEnabled
 {
-    return _charonPortraitEffectsMatteDeliveryEnabled;
+    return _revenantPortraitEffectsMatteDeliveryEnabled;
 }
 
 - (void)setPortraitEffectsMatteDeliveryEnabled:(BOOL)portraitEffectsMatteDeliveryEnabled
 {
-    _charonPortraitEffectsMatteDeliveryEnabled = portraitEffectsMatteDeliveryEnabled;
+    _revenantPortraitEffectsMatteDeliveryEnabled = portraitEffectsMatteDeliveryEnabled;
 }
 
 - (BOOL)embedsPortraitEffectsMatteInPhoto
 {
-    return _charonEmbedsPortraitEffectsMatteInPhoto;
+    return _revenantEmbedsPortraitEffectsMatteInPhoto;
 }
 
 - (void)setEmbedsPortraitEffectsMatteInPhoto:(BOOL)embedsPortraitEffectsMatteInPhoto
 {
-    _charonEmbedsPortraitEffectsMatteInPhoto = embedsPortraitEffectsMatteInPhoto;
+    _revenantEmbedsPortraitEffectsMatteInPhoto = embedsPortraitEffectsMatteInPhoto;
 }
 
 - (NSArray<AVSemanticSegmentationMatteType> *)enabledSemanticSegmentationMatteTypes
 {
-    return _charonEnabledSemanticSegmentationMatteTypes;
+    return _revenantEnabledSemanticSegmentationMatteTypes;
 }
 
 - (void)setEnabledSemanticSegmentationMatteTypes:(NSArray<AVSemanticSegmentationMatteType> *)types
 {
-    _charonEnabledSemanticSegmentationMatteTypes = [types copy] ?: @[];
+    _revenantEnabledSemanticSegmentationMatteTypes = [types copy] ?: @[];
 }
 
 - (BOOL)embedsSemanticSegmentationMattesInPhoto
 {
-    return _charonEmbedsSemanticSegmentationMattesInPhoto;
+    return _revenantEmbedsSemanticSegmentationMattesInPhoto;
 }
 
 - (void)setEmbedsSemanticSegmentationMattesInPhoto:(BOOL)embedsSemanticSegmentationMattesInPhoto
 {
-    _charonEmbedsSemanticSegmentationMattesInPhoto = embedsSemanticSegmentationMattesInPhoto;
+    _revenantEmbedsSemanticSegmentationMattesInPhoto = embedsSemanticSegmentationMattesInPhoto;
 }
 
 - (NSDictionary<NSString *, id> *)metadata
 {
-    return _charonMetadata;
+    return _revenantMetadata;
 }
 
 - (void)setMetadata:(NSDictionary<NSString *, id> *)metadata
 {
     NSMutableSet *invalid = [NSMutableSet setWithArray:metadata.allKeys ?: @[]];
-    [invalid minusSet:CharonMetadataKeys()];
+    [invalid minusSet:RevenantMetadataKeys()];
     if (invalid.count)
-        CharonRaise(@"*** -[AVCapturePhotoSettings setMetadata:] Invalid top-level keys passed in metadata: %@", invalid);
-    _charonMetadata = [metadata copy] ?: @{};
+        RevenantRaise(@"*** -[AVCapturePhotoSettings setMetadata:] Invalid top-level keys passed in metadata: %@", invalid);
+    _revenantMetadata = [metadata copy] ?: @{};
 }
 
 - (NSURL *)livePhotoMovieFileURL
 {
-    return _charonLivePhotoMovieFileURL;
+    return _revenantLivePhotoMovieFileURL;
 }
 
 - (void)setLivePhotoMovieFileURL:(NSURL *)livePhotoMovieFileURL
 {
-    _charonLivePhotoMovieFileURL = [livePhotoMovieFileURL copy];
+    _revenantLivePhotoMovieFileURL = [livePhotoMovieFileURL copy];
 }
 
 - (AVVideoCodecType)livePhotoVideoCodecType
 {
-    return _charonLivePhotoVideoCodecType;
+    return _revenantLivePhotoVideoCodecType;
 }
 
 - (void)setLivePhotoVideoCodecType:(AVVideoCodecType)livePhotoVideoCodecType
 {
-    _charonLivePhotoVideoCodecType = [livePhotoVideoCodecType copy];
+    _revenantLivePhotoVideoCodecType = [livePhotoVideoCodecType copy];
 }
 
 - (NSArray<AVMetadataItem *> *)livePhotoMovieMetadata
 {
-    return _charonLivePhotoMovieMetadata;
+    return _revenantLivePhotoMovieMetadata;
 }
 
 - (void)setLivePhotoMovieMetadata:(NSArray<AVMetadataItem *> *)livePhotoMovieMetadata
 {
     for (AVMetadataItem *item in livePhotoMovieMetadata)
-        if (CharonIsContentIdentifierItem(item))
-            CharonRaise(@"*** -[AVCapturePhotoSettings setLivePhotoMovieMetadata:] AVMetadataKeySpaceQuickTimeMetadata/AVMetadataQuickTimeMetadataKeyContentIdentifier must not be specified");
+        if (RevenantIsContentIdentifierItem(item))
+            RevenantRaise(@"*** -[AVCapturePhotoSettings setLivePhotoMovieMetadata:] AVMetadataKeySpaceQuickTimeMetadata/AVMetadataQuickTimeMetadataKeyContentIdentifier must not be specified");
     NSMutableArray *items = [NSMutableArray arrayWithArray:livePhotoMovieMetadata ?: @[]];
-    [items addObject:CharonContentIdentifierItem(_charonContentIdentifier)];
-    _charonLivePhotoMovieMetadata = [items copy];
+    [items addObject:RevenantContentIdentifierItem(_revenantContentIdentifier)];
+    _revenantLivePhotoMovieMetadata = [items copy];
 }
 
 - (NSArray<NSNumber *> *)availablePreviewPhotoPixelFormatTypes
@@ -538,25 +538,25 @@ static BOOL CharonIsContentIdentifierItem(AVMetadataItem *item)
 
 - (NSDictionary<NSString *, id> *)previewPhotoFormat
 {
-    return _charonPreviewPhotoFormat;
+    return _revenantPreviewPhotoFormat;
 }
 
 - (void)setPreviewPhotoFormat:(NSDictionary<NSString *, id> *)previewPhotoFormat
 {
     if (previewPhotoFormat) {
-        NSNumber *pixels = CharonPixelFormatOf(previewPhotoFormat);
+        NSNumber *pixels = RevenantPixelFormatOf(previewPhotoFormat);
         if (!pixels)
-            CharonRaise(@"*** -[AVCapturePhotoSettings setPreviewPhotoFormat:] Either kCVPixelBufferPixelFormatTypeKey or AVVideoCodecKey must be specified");
+            RevenantRaise(@"*** -[AVCapturePhotoSettings setPreviewPhotoFormat:] Either kCVPixelBufferPixelFormatTypeKey or AVVideoCodecKey must be specified");
         if (![self.availablePreviewPhotoPixelFormatTypes containsObject:pixels])
-            CharonRaise(@"*** -[AVCapturePhotoSettings setPreviewPhotoFormat:] Unsupported pixel format type specified: %@. Supported pixel format types are %@",
+            RevenantRaise(@"*** -[AVCapturePhotoSettings setPreviewPhotoFormat:] Unsupported pixel format type specified: %@. Supported pixel format types are %@",
                         pixels, self.availablePreviewPhotoPixelFormatTypes);
     }
-    _charonPreviewPhotoFormat = [previewPhotoFormat copy];
+    _revenantPreviewPhotoFormat = [previewPhotoFormat copy];
 }
 
 - (NSArray<AVVideoCodecType> *)availableEmbeddedThumbnailPhotoCodecTypes
 {
-    return [CharonCodecOf(_charonFormat) isEqualToString:AVVideoCodecTypeJPEG] ? @[AVVideoCodecTypeJPEG] : @[];
+    return [RevenantCodecOf(_revenantFormat) isEqualToString:AVVideoCodecTypeJPEG] ? @[AVVideoCodecTypeJPEG] : @[];
 }
 
 - (NSArray<AVVideoCodecType> *)availableRawEmbeddedThumbnailPhotoCodecTypes
@@ -564,50 +564,50 @@ static BOOL CharonIsContentIdentifierItem(AVMetadataItem *item)
     return @[];
 }
 
-static void CharonCheckThumbnailFormat(NSDictionary *format, NSArray *available, NSString *method)
+static void RevenantCheckThumbnailFormat(NSDictionary *format, NSArray *available, NSString *method)
 {
     if (!format)
         return;
-    if (CharonPixelFormatOf(format))
-        CharonRaise(@"*** %@ kCVPixelBufferPixelFormatTypeKey is unsupported", method);
-    NSString *codec = CharonCodecOf(format);
+    if (RevenantPixelFormatOf(format))
+        RevenantRaise(@"*** %@ kCVPixelBufferPixelFormatTypeKey is unsupported", method);
+    NSString *codec = RevenantCodecOf(format);
     if (!codec)
-        CharonRaise(@"*** %@ Either kCVPixelBufferPixelFormatTypeKey or AVVideoCodecKey must be specified", method);
+        RevenantRaise(@"*** %@ Either kCVPixelBufferPixelFormatTypeKey or AVVideoCodecKey must be specified", method);
     if (![available containsObject:codec])
-        CharonRaise(@"*** %@ Unsupported codec specified: %@. Supported codecs are %@", method, codec, available);
+        RevenantRaise(@"*** %@ Unsupported codec specified: %@. Supported codecs are %@", method, codec, available);
 }
 
 - (NSDictionary<NSString *, id> *)embeddedThumbnailPhotoFormat
 {
-    return _charonEmbeddedThumbnailPhotoFormat;
+    return _revenantEmbeddedThumbnailPhotoFormat;
 }
 
 - (void)setEmbeddedThumbnailPhotoFormat:(NSDictionary<NSString *, id> *)embeddedThumbnailPhotoFormat
 {
-    CharonCheckThumbnailFormat(embeddedThumbnailPhotoFormat, self.availableEmbeddedThumbnailPhotoCodecTypes, @"-[AVCapturePhotoSettings setEmbeddedThumbnailPhotoFormat:]");
-    _charonEmbeddedThumbnailPhotoFormat = [embeddedThumbnailPhotoFormat copy];
+    RevenantCheckThumbnailFormat(embeddedThumbnailPhotoFormat, self.availableEmbeddedThumbnailPhotoCodecTypes, @"-[AVCapturePhotoSettings setEmbeddedThumbnailPhotoFormat:]");
+    _revenantEmbeddedThumbnailPhotoFormat = [embeddedThumbnailPhotoFormat copy];
 }
 
 - (NSDictionary<NSString *, id> *)rawEmbeddedThumbnailPhotoFormat
 {
-    return _charonRawEmbeddedThumbnailPhotoFormat;
+    return _revenantRawEmbeddedThumbnailPhotoFormat;
 }
 
 - (void)setRawEmbeddedThumbnailPhotoFormat:(NSDictionary<NSString *, id> *)rawEmbeddedThumbnailPhotoFormat
 {
-    CharonCheckThumbnailFormat(rawEmbeddedThumbnailPhotoFormat, self.availableRawEmbeddedThumbnailPhotoCodecTypes,
+    RevenantCheckThumbnailFormat(rawEmbeddedThumbnailPhotoFormat, self.availableRawEmbeddedThumbnailPhotoCodecTypes,
                                @"-[AVCapturePhotoSettings setRawEmbeddedThumbnailPhotoFormat:]");
-    _charonRawEmbeddedThumbnailPhotoFormat = [rawEmbeddedThumbnailPhotoFormat copy];
+    _revenantRawEmbeddedThumbnailPhotoFormat = [rawEmbeddedThumbnailPhotoFormat copy];
 }
 
 - (BOOL)isAutoContentAwareDistortionCorrectionEnabled
 {
-    return _charonAutoContentAwareDistortionCorrectionEnabled;
+    return _revenantAutoContentAwareDistortionCorrectionEnabled;
 }
 
 - (void)setAutoContentAwareDistortionCorrectionEnabled:(BOOL)autoContentAwareDistortionCorrectionEnabled
 {
-    _charonAutoContentAwareDistortionCorrectionEnabled = autoContentAwareDistortionCorrectionEnabled;
+    _revenantAutoContentAwareDistortionCorrectionEnabled = autoContentAwareDistortionCorrectionEnabled;
 }
 
 @end

@@ -25,7 +25,7 @@
 
 #include "../support.hpp"
 
-namespace shade {
+namespace emulator {
 namespace {
 
     constexpr std::uint32_t timeval_seconds_offset = 0;

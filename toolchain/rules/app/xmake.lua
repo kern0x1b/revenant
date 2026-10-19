@@ -15,7 +15,7 @@ rule("app")
 
     after_build(function (target)
         import("@self.apple.platform")
-        target:data_set("charon.bundle", platform.application(target))
+        target:data_set("revenant.bundle", platform.application(target))
     end)
 
     on_install(function (target)
@@ -24,7 +24,7 @@ rule("app")
         if not os.isdir(built) then
             built = platform.application(target)
         end
-        local folder = path.join(target:installdir(), target:values("charon.install") or "/Applications")
+        local folder = path.join(target:installdir(), target:values("revenant.install") or "/Applications")
         os.mkdir(folder)
         os.vcp(built, folder .. "/")
         platform.install_files(target)

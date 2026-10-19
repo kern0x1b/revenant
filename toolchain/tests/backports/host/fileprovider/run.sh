@@ -11,14 +11,14 @@ set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 FP=${FILEPROVIDER:-$here/../../../../packages/a/apple-backports/FileProvider}
-build=${FILEPROVIDER_BUILD:-$(runs_folder charon-fileprovider-host)}
+build=${FILEPROVIDER_BUILD:-$(runs_folder revenant-fileprovider-host)}
 rm -rf "$build"; mkdir -p "$build"
 
 # The mutant, on a COPY: the port's source is never edited, and the diff names the line that
 # changed rather than a working tree that has to be restored.
 cp "$FP/NSFileProviderManager.m" "$build/port.m"
 if [ "${1:-}" = "mutant" ]; then
-    sed -i.bak 's/CharonFileProviderUnavailable = -2001/CharonFileProviderUnavailable = -1005/' "$build/port.m"
+    sed -i.bak 's/RevenantFileProviderUnavailable = -2001/RevenantFileProviderUnavailable = -1005/' "$build/port.m"
     rm -f "$build/port.m.bak"
     echo "MUTANT: the port's unavailable code is -1005, not the host's -2001"
 fi
@@ -26,13 +26,13 @@ fi
 # The port, for the host: identifiers renamed, warnings down, and the port's own header for what
 # the macOS SDK does not declare.
 xcrun clang -fobjc-arc -w -Wno-unavailable-declarations \
-    -DNSFileProviderManager=CharonFPManager -DNSFileProviderErrorDomain=CharonFPErrorDomain \
+    -DNSFileProviderManager=RevenantFPManager -DNSFileProviderErrorDomain=RevenantFPErrorDomain \
     -I"$FP" -c "$build/port.m" -o "$build/port.o"
 
 # The probe, twice: against the framework, and against the port's renamed class.
 xcrun clang -fobjc-arc -w -Wno-unavailable-declarations \
     "$here/differential.m" -framework Foundation -framework FileProvider -o "$build/host"
-xcrun clang -fobjc-arc -w -Wno-unavailable-declarations -DCHARON_PORT=1 \
+xcrun clang -fobjc-arc -w -Wno-unavailable-declarations -DREVENANT_PORT=1 \
     "$here/differential.m" "$build/port.o" -framework Foundation -framework FileProvider -o "$build/port"
 
 "$build/host" > "$build/host.tsv" 2>/dev/null || true

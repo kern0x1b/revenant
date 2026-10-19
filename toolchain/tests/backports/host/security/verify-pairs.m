@@ -3,14 +3,14 @@
 #import <CoreFoundation/CoreFoundation.h>
 #import <stdio.h>
 
-bool CharonSecurityCarries(SecKeyOperationType operation, SecKeyAlgorithm algorithm, bool rsa, bool ec);
-SecPadding CharonSecurityPaddingFor(SecKeyAlgorithm algorithm);
+bool RevenantSecurityCarries(SecKeyOperationType operation, SecKeyAlgorithm algorithm, bool rsa, bool ec);
+SecPadding RevenantSecurityPaddingFor(SecKeyAlgorithm algorithm);
 
 static void pair(const char *label, SecKeyOperationType operation, SecKeyAlgorithm algorithm,
                  bool rsa, bool ec, bool want)
 {
-    bool got = CharonSecurityCarries(operation, algorithm, rsa, ec);
-    SecPadding padding = CharonSecurityPaddingFor(algorithm);
+    bool got = RevenantSecurityCarries(operation, algorithm, rsa, ec);
+    SecPadding padding = RevenantSecurityPaddingFor(algorithm);
     printf("%s\t%d\t%ld\n", label, got ? 1 : 0, (long)padding);
     if (got != want)
         printf("WRONG\t%s: the table said [%s] and the port claims [%s]\n", label,

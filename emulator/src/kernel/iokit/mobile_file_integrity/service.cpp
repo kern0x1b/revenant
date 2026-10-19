@@ -15,7 +15,7 @@
 #include <string>
 #include <utility>
 
-namespace shade::kernel_iokit::mobile_file_integrity {
+namespace emulator::kernel_iokit::mobile_file_integrity {
 namespace {
 
     constexpr std::uint32_t load_entitlements_selector = 1U;

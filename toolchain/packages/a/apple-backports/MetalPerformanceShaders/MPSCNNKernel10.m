@@ -1,4 +1,4 @@
-#import "CharonMPSCnn.h"
+#import "RevenantMPSCnn.h"
 
 #pragma clang diagnostic ignored "-Wprotocol"
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
@@ -80,7 +80,7 @@
 
 - (BOOL)isStateModified { return NO; }
 
-- (void)charon_mps_setWindowWidth:(NSUInteger)width
+- (void)revenant_mps_setWindowWidth:(NSUInteger)width
                            height:(NSUInteger)height
                     strideInPixelsX:(NSUInteger)strideX
                     strideInPixelsY:(NSUInteger)strideY

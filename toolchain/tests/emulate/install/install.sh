@@ -24,7 +24,7 @@ mkdir -p "$out"
 
 # The image is keyed by the project and its directory's hash, both of which are xmake's; the newest image
 # whose rootfs is this project's is found by the marker the control's package name leaves in image.json.
-image=$(grep -rl "org.charon.emulateinstall" "${HOME}/.charon/emulator/images.noindex"/*/*/image.json 2>/dev/null |
+image=$(grep -rl "org.revenant.emulateinstall" "${HOME}/.revenant/emulator/images.noindex"/*/*/image.json 2>/dev/null |
         sed 's#/image.json$##' | head -1)
 if [ -n "$image" ]; then
   echo "the image for this project is already there: $image" >&2
@@ -43,7 +43,7 @@ if [ -z "$built" ]; then
   echo "the project was not built, so there is nothing to look for in the image; see $out/configure.log" >&2
   exit 1
 fi
-image=$(grep -rl "org.charon.emulateinstall" "${HOME}/.charon/emulator/images.noindex"/*/*/image.json 2>/dev/null |
+image=$(grep -rl "org.revenant.emulateinstall" "${HOME}/.revenant/emulator/images.noindex"/*/*/image.json 2>/dev/null |
         sed 's#/image.json$##' | head -1)
 if [ -z "$image" ]; then
   echo "the install wrote no image.json, so it placed nothing it named; see $out/install.log" >&2

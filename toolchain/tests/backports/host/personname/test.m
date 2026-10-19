@@ -85,8 +85,8 @@ static NSArray<NSArray *> *sets(void)
 int main(void)
 {
     @autoreleasepool {
-        ourClass = NSClassFromString(@"CharonHostNSPersonNameComponentsFormatter");
-        charon_check(ourClass != Nil, "the port defines the formatter under its own name", @"no such class");
+        ourClass = NSClassFromString(@"RevenantHostNSPersonNameComponentsFormatter");
+        revenant_check(ourClass != Nil, "the port defines the formatter under its own name", @"no such class");
         if (!ourClass)
             return 1;
 

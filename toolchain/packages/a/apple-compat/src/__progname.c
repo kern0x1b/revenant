@@ -4,7 +4,7 @@ __attribute__((visibility("hidden")))
 const char *__progname;
 
 __attribute__((constructor(101)))
-static void charon_read_progname(void)
+static void revenant_read_progname(void)
 {
     __progname = getprogname();
 }

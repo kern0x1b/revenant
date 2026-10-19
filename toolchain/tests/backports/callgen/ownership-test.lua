@@ -1,16 +1,16 @@
-local charon = path.absolute(path.join(os.scriptdir(), "..", "..", ".."))
-local workspace = import("workspace", {rootdir = path.join(charon, "modules"), anonymous = true})
+local revenant = path.absolute(path.join(os.scriptdir(), "..", "..", ".."))
+local workspace = import("workspace", {rootdir = path.join(revenant, "modules"), anonymous = true})
 
 function run(opt)
     opt = opt or {}
-    local build = opt.build or workspace.fresh("charon-callgen")
+    local build = opt.build or workspace.fresh("revenant-callgen")
     os.mkdir(build)
-    local coding = path.join(charon, "packages", "c", "charon-coding", "files")
+    local coding = path.join(revenant, "packages", "c", "revenant-coding", "files")
     local log = path.join(build, "build.log")
     local sdk = os.iorunv("xcrun", {"--show-sdk-path"}):trim()
     local status = os.execv("xcrun", {"clang", "-target", "arm64-apple-macos26.0", "-isysroot", sdk, "-fobjc-arc", "-O0", "-Wall",
-                                      "-I" .. path.join(charon, "packages", "a", "apple-backports", "Intents"), "-I" .. coding,
-                                      path.join(os.scriptdir(), "ownership-test.m"), path.join(coding, "CharonCoding.m"),
+                                      "-I" .. path.join(revenant, "packages", "a", "apple-backports", "Intents"), "-I" .. coding,
+                                      path.join(os.scriptdir(), "ownership-test.m"), path.join(coding, "RevenantCoding.m"),
                                       "-framework", "Foundation", "-framework", "CoreLocation", "-o", path.join(build, "ownership")},
                             {stderr = log, try = true})
     if status ~= 0 then

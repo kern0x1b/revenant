@@ -12,7 +12,7 @@
 #include <algorithm>
 #include <iterator>
 
-namespace shade::darwin::sysctl {
+namespace emulator::darwin::sysctl {
 namespace {
 
     void append_string(std::vector<std::byte>& result, std::string_view value)

@@ -19,7 +19,7 @@ function main(...)
         bad[#bad + 1] = line
     end
     if tsv.first_field(rows, "port-class") ~= "found" then
-        bad[#bad + 1] = "port-class: the port's CharonSecProtocolMetadata was not found"
+        bad[#bad + 1] = "port-class: the port's RevenantSecProtocolMetadata was not found"
     end
     local all = {}
     for _, label in ipairs(NULLS) do

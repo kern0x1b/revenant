@@ -1,9 +1,9 @@
 #import <UIKit/UIKit.h>
 #import "tail2-cases.h"
 
-void charon_windowed_run(UIWindow *window);
+void revenant_windowed_run(UIWindow *window);
 
-void charon_windowed_run(UIWindow *window)
+void revenant_windowed_run(UIWindow *window)
 {
     NSMutableDictionary *records = [NSMutableDictionary dictionary];
     tail2_run(^(NSString *name, NSString *value) {

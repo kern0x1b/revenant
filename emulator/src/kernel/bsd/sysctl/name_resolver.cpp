@@ -11,7 +11,7 @@
 
 #include <array>
 
-namespace shade::darwin::sysctl {
+namespace emulator::darwin::sysctl {
 namespace {
 
     constexpr std::uint32_t readable = 0x80000000U;

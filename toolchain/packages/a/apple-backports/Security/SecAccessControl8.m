@@ -16,13 +16,13 @@ SecAccessControlRef SecAccessControlCreateWithFlags(CFAllocatorRef allocator, CF
     return NULL;
 }
 
-@interface CharonSecAccessControl : NSObject
+@interface RevenantSecAccessControl : NSObject
 @end
 
-@implementation CharonSecAccessControl
+@implementation RevenantSecAccessControl
 @end
 
 CFTypeID SecAccessControlGetTypeID(void)
 {
-    return (CFTypeID)[CharonSecAccessControl class];
+    return (CFTypeID)[RevenantSecAccessControl class];
 }

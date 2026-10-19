@@ -15,14 +15,14 @@
 #include <system_error>
 #include <vector>
 
-#if defined(SHADE_HAS_LIBPLIST)
+#if defined(REVENANT_EMULATOR_HAS_LIBPLIST)
 #include <plist/plist.h>
 #endif
 
-namespace shade {
+namespace emulator {
 namespace {
 
-#if defined(SHADE_HAS_LIBPLIST)
+#if defined(REVENANT_EMULATOR_HAS_LIBPLIST)
 
     class PlistOwner {
     public:
@@ -85,7 +85,7 @@ namespace {
 LaunchdJobCatalog LaunchdJobCatalog::load(const std::filesystem::path& rootfs)
 {
     LaunchdJobCatalog catalog;
-#if defined(SHADE_HAS_LIBPLIST)
+#if defined(REVENANT_EMULATOR_HAS_LIBPLIST)
     constexpr std::array<std::string_view, 3> directories {
         "System/Library/LaunchDaemons", "Library/LaunchDaemons",
         "System/Library/LaunchAgents"
@@ -116,7 +116,7 @@ bool LaunchdJobCatalog::executable_provides_service(
            job->second.contains(service);
 }
 
-#if defined(SHADE_HAS_LIBPLIST)
+#if defined(REVENANT_EMULATOR_HAS_LIBPLIST)
 void LaunchdJobCatalog::add_job(const std::filesystem::path& path)
 {
     const auto bytes = read_file(path);

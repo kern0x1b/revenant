@@ -1,28 +1,28 @@
 #import <MapKit/MapKit.h>
 #import <MapKit/MKTileOverlay.h>
-#import "CharonMapKit.h"
+#import "RevenantMapKit.h"
 
-@interface MKMultiPoint (CharonCoordinates)
+@interface MKMultiPoint (RevenantCoordinates)
 - (void)setCoordinates:(const CLLocationCoordinate2D *)coords count:(NSUInteger)count;
 @end
 
-@interface CharonTileCache : NSObject
-+ (instancetype)charon_shared;
-- (NSData *)charon_dataForKey:(NSString *)key;
-- (void)charon_setData:(NSData *)data forKey:(NSString *)key;
-- (void)charon_removeAll;
+@interface RevenantTileCache : NSObject
++ (instancetype)revenant_shared;
+- (NSData *)revenant_dataForKey:(NSString *)key;
+- (void)revenant_setData:(NSData *)data forKey:(NSString *)key;
+- (void)revenant_removeAll;
 @end
 
-@implementation CharonTileCache {
+@implementation RevenantTileCache {
     NSCache *_cache;
 }
 
-+ (instancetype)charon_shared
++ (instancetype)revenant_shared
 {
-    static CharonTileCache *shared;
+    static RevenantTileCache *shared;
     static dispatch_once_t once;
     dispatch_once(&once, ^{
-        shared = [[CharonTileCache alloc] init];
+        shared = [[RevenantTileCache alloc] init];
     });
     return shared;
 }
@@ -37,19 +37,19 @@
     return self;
 }
 
-- (NSData *)charon_dataForKey:(NSString *)key
+- (NSData *)revenant_dataForKey:(NSString *)key
 {
     return [_cache objectForKey:key];
 }
 
-- (void)charon_setData:(NSData *)data forKey:(NSString *)key
+- (void)revenant_setData:(NSData *)data forKey:(NSString *)key
 {
     if (data) {
         [_cache setObject:data forKey:key];
     }
 }
 
-- (void)charon_removeAll
+- (void)revenant_removeAll
 {
     [_cache removeAllObjects];
 }
@@ -125,8 +125,8 @@
         return;
     }
     NSString *key = [NSString stringWithFormat:@"%@|%ld|%ld|%ld|%.0f", url.absoluteString, (long)path.x, (long)path.y, (long)path.z, (double)path.contentScaleFactor];
-    CharonTileCache *cache = [CharonTileCache charon_shared];
-    NSData *cached = [cache charon_dataForKey:key];
+    RevenantTileCache *cache = [RevenantTileCache revenant_shared];
+    NSData *cached = [cache revenant_dataForKey:key];
     if (cached) {
         result(cached, nil);
         return;
@@ -137,7 +137,7 @@
                                              returningResponse:&response
                                                          error:&error];
     if (data) {
-        [cache charon_setData:data forKey:key];
+        [cache revenant_setData:data forKey:key];
         result(data, nil);
     } else {
         result(nil, error);

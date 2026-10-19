@@ -1,4 +1,4 @@
-#import "CharonWebKit.h"
+#import "RevenantWebKit.h"
 
 @implementation WKUserScript {
     NSString *_source;
@@ -46,13 +46,13 @@
     NSString *_name;
 }
 
-+ (instancetype)charon_messageWithBody:(id)body name:(NSString *)name webView:(WKWebView *)webView mainFrame:(BOOL)mainFrame
++ (instancetype)revenant_messageWithBody:(id)body name:(NSString *)name webView:(WKWebView *)webView mainFrame:(BOOL)mainFrame
 {
     WKScriptMessage *message = [self alloc];
     message->_body = body;
     message->_name = [name copy];
     message->_webView = webView;
-    message->_frameInfo = [WKFrameInfo charon_frameWithMainFrame:mainFrame request:nil];
+    message->_frameInfo = [WKFrameInfo revenant_frameWithMainFrame:mainFrame request:nil];
     return message;
 }
 
@@ -109,10 +109,10 @@
 {
 }
 
-- (void)charon_changed
+- (void)revenant_changed
 {
-    for (id<CharonWebKitScriptHost> host in _hosts.allObjects)
-        [host charon_scriptsDidChange];
+    for (id<RevenantWebKitScriptHost> host in _hosts.allObjects)
+        [host revenant_scriptsDidChange];
 }
 
 - (NSArray<WKUserScript *> *)userScripts
@@ -120,22 +120,22 @@
     return [_scripts copy];
 }
 
-- (NSArray<WKUserScript *> *)charon_scripts
+- (NSArray<WKUserScript *> *)revenant_scripts
 {
     return [_scripts copy];
 }
 
-- (NSArray<NSString *> *)charon_handlerNames
+- (NSArray<NSString *> *)revenant_handlerNames
 {
     return _handlers.allKeys;
 }
 
-- (id<WKScriptMessageHandler>)charon_handlerNamed:(NSString *)name
+- (id<WKScriptMessageHandler>)revenant_handlerNamed:(NSString *)name
 {
     return _handlers[name];
 }
 
-- (void)charon_attach:(id<CharonWebKitScriptHost>)host
+- (void)revenant_attach:(id<RevenantWebKitScriptHost>)host
 {
     [_hosts addObject:host];
 }
@@ -143,13 +143,13 @@
 - (void)addUserScript:(WKUserScript *)userScript
 {
     [_scripts addObject:userScript];
-    [self charon_changed];
+    [self revenant_changed];
 }
 
 - (void)removeAllUserScripts
 {
     [_scripts removeAllObjects];
-    [self charon_changed];
+    [self revenant_changed];
 }
 
 - (void)addScriptMessageHandler:(id<WKScriptMessageHandler>)scriptMessageHandler name:(NSString *)name
@@ -157,13 +157,13 @@
     if (_handlers[name])
         [NSException raise:NSInvalidArgumentException format:@"Attempt to add script message handler with name '%@' when one already exists.", name];
     _handlers[name] = scriptMessageHandler;
-    [self charon_changed];
+    [self revenant_changed];
 }
 
 - (void)removeScriptMessageHandlerForName:(NSString *)name
 {
     [_handlers removeObjectForKey:name];
-    [self charon_changed];
+    [self revenant_changed];
 }
 
 @end

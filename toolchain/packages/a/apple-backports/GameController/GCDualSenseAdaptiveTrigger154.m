@@ -1,6 +1,6 @@
-#import "CharonGC.h"
+#import "RevenantGC.h"
 
-@implementation GCDualSenseAdaptiveTrigger (Charon154)
+@implementation GCDualSenseAdaptiveTrigger (Revenant154)
 
 - (void)setModeSlopeFeedbackWithStartPosition:(float)startPosition
                                  endPosition:(float)endPosition
@@ -11,13 +11,13 @@
     (void)endPosition;
     (void)startStrength;
     (void)endStrength;
-    [self charon_setRequestedMode:GCDualSenseAdaptiveTriggerModeSlopeFeedback];
+    [self revenant_setRequestedMode:GCDualSenseAdaptiveTriggerModeSlopeFeedback];
 }
 
 - (void)setModeFeedbackWithResistiveStrengths:(GCDualSenseAdaptiveTriggerPositionalResistiveStrengths)positionalResistiveStrengths
 {
     (void)positionalResistiveStrengths;
-    [self charon_setRequestedMode:GCDualSenseAdaptiveTriggerModeFeedback];
+    [self revenant_setRequestedMode:GCDualSenseAdaptiveTriggerModeFeedback];
 }
 
 - (void)setModeVibrationWithAmplitudes:(GCDualSenseAdaptiveTriggerPositionalAmplitudes)positionalAmplitudes
@@ -25,7 +25,7 @@
 {
     (void)positionalAmplitudes;
     (void)frequency;
-    [self charon_setRequestedMode:GCDualSenseAdaptiveTriggerModeVibration];
+    [self revenant_setRequestedMode:GCDualSenseAdaptiveTriggerModeVibration];
 }
 
 @end

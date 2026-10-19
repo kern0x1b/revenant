@@ -5,22 +5,22 @@
 #import <CoreFoundation/CoreFoundation.h>
 #include <stdlib.h>
 
-@interface CharonSecProtocolCiphersuite : NSObject <OS_sec_protocol_options>
+@interface RevenantSecProtocolCiphersuite : NSObject <OS_sec_protocol_options>
 {
     SSLCipherSuite *_ciphersuites;
     size_t _count, _capacity;
     SSLCiphersuiteGroup _group;
     BOOL _hasGroup;
 }
-- (void)charonAddCiphersuite:(SSLCipherSuite)ciphersuite;
-- (SSLCipherSuite)charonCiphersuiteAt:(size_t)index;
-- (size_t)charonCiphersuiteCount;
-- (void)charonSetGroup:(SSLCiphersuiteGroup)group;
-- (SSLCiphersuiteGroup)charonGroup;
+- (void)revenantAddCiphersuite:(SSLCipherSuite)ciphersuite;
+- (SSLCipherSuite)revenantCiphersuiteAt:(size_t)index;
+- (size_t)revenantCiphersuiteCount;
+- (void)revenantSetGroup:(SSLCiphersuiteGroup)group;
+- (SSLCiphersuiteGroup)revenantGroup;
 @end
 
-@implementation CharonSecProtocolCiphersuite
-- (void)charonAddCiphersuite:(SSLCipherSuite)ciphersuite
+@implementation RevenantSecProtocolCiphersuite
+- (void)revenantAddCiphersuite:(SSLCipherSuite)ciphersuite
 {
     if (_count == _capacity) {
         size_t room = _capacity ? _capacity * 2 : 4;
@@ -32,27 +32,27 @@
     }
     _ciphersuites[_count++] = ciphersuite;
 }
-- (SSLCipherSuite)charonCiphersuiteAt:(size_t)index
+- (SSLCipherSuite)revenantCiphersuiteAt:(size_t)index
 {
     return index < _count ? _ciphersuites[index] : 0;
 }
-- (size_t)charonCiphersuiteCount { return _count; }
-- (void)charonSetGroup:(SSLCiphersuiteGroup)group { _group = group; _hasGroup = YES; }
-- (SSLCiphersuiteGroup)charonGroup { return _group; }
+- (size_t)revenantCiphersuiteCount { return _count; }
+- (void)revenantSetGroup:(SSLCiphersuiteGroup)group { _group = group; _hasGroup = YES; }
+- (SSLCiphersuiteGroup)revenantGroup { return _group; }
 - (void)dealloc { free(_ciphersuites); }
 @end
 
 void sec_protocol_options_add_tls_ciphersuite(sec_protocol_options_t options, SSLCipherSuite ciphersuite)
 {
-    if (![options isKindOfClass:CharonSecProtocolCiphersuite.class])
+    if (![options isKindOfClass:RevenantSecProtocolCiphersuite.class])
         return;
-    [(CharonSecProtocolCiphersuite *)options charonAddCiphersuite:ciphersuite];
+    [(RevenantSecProtocolCiphersuite *)options revenantAddCiphersuite:ciphersuite];
 }
 
 void sec_protocol_options_add_tls_ciphersuite_group(sec_protocol_options_t options,
                                                     SSLCiphersuiteGroup group)
 {
-    if (![options isKindOfClass:CharonSecProtocolCiphersuite.class])
+    if (![options isKindOfClass:RevenantSecProtocolCiphersuite.class])
         return;
-    [(CharonSecProtocolCiphersuite *)options charonSetGroup:group];
+    [(RevenantSecProtocolCiphersuite *)options revenantSetGroup:group];
 }

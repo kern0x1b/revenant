@@ -34,8 +34,8 @@ static NSMutableDictionary *seen;
     [[NSNotificationCenter defaultCenter] postNotificationName:@"SomethingElse" object:nil userInfo:@{@"a": @1}];
     [[NSNotificationCenter defaultCenter] removeObserver:token];
     CHECK([other isEqual:@{@"a": @1}], "a notification that is no keyboard's is left as it was");
-    printf("checks=%d failures=%d\n", charon_checks, charon_failures);
-    NSString *summary = [NSString stringWithFormat:@"%@ checks=%d failures=%d\n", charon_failures ? @"FAIL" : @"ok", charon_checks, charon_failures];
+    printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
+    NSString *summary = [NSString stringWithFormat:@"%@ checks=%d failures=%d\n", revenant_failures ? @"FAIL" : @"ok", revenant_checks, revenant_failures];
     [summary writeToFile:[results_folder stringByAppendingPathComponent:@"keyboardlocal.done"] atomically:YES encoding:NSUTF8StringEncoding error:NULL];
 }
 
@@ -43,7 +43,7 @@ static NSMutableDictionary *seen;
 {
     [[NSFileManager defaultManager] createDirectoryAtPath:results_folder withIntermediateDirectories:YES attributes:nil error:NULL];
     [[NSFileManager defaultManager] removeItemAtPath:[results_folder stringByAppendingPathComponent:@"keyboardlocal.done"] error:NULL];
-    charon_log_to([results_folder stringByAppendingPathComponent:@"keyboardlocal.log"]);
+    revenant_log_to([results_folder stringByAppendingPathComponent:@"keyboardlocal.log"]);
     seen = [NSMutableDictionary dictionary];
     for (NSString *name in @[UIKeyboardWillShowNotification, UIKeyboardDidShowNotification, UIKeyboardWillHideNotification, UIKeyboardDidHideNotification])
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(noted:) name:name object:nil];

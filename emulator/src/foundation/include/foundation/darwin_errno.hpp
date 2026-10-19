@@ -12,7 +12,7 @@
 
 #include <cstdint>
 
-namespace shade::darwin::error {
+namespace emulator::darwin::error {
     inline constexpr std::uint32_t operation_not_permitted = 1;
     inline constexpr std::uint32_t no_entry = 2;
     inline constexpr std::uint32_t no_such_process = 3;

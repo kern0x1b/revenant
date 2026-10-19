@@ -3,22 +3,22 @@
 #import <CoreVideo/CoreVideo.h>
 #import "check.h"
 
-extern CFStringRef charon_host_CGColorSpaceGetName(CGColorSpaceRef);
-extern void charon_host_CGPathApplyWithBlock(CGPathRef, CGPathApplyBlock);
-extern CGImageByteOrderInfo charon_host_CGImageGetByteOrderInfo(CGImageRef);
-extern CGImagePixelFormatInfo charon_host_CGImageGetPixelFormatInfo(CGImageRef);
-extern void charon_host_CGPDFArrayApplyBlock(CGPDFArrayRef, bool (^)(size_t, CGPDFObjectRef, void *), void *);
-extern void charon_host_CGPDFDictionaryApplyBlock(CGPDFDictionaryRef, bool (^)(const char *, CGPDFObjectRef, void *), void *);
-extern CFStringRef charon_host_CVColorPrimariesGetStringForIntegerCodePoint(int);
-extern int charon_host_CVColorPrimariesGetIntegerCodePointForString(CFStringRef);
-extern CFStringRef charon_host_CVTransferFunctionGetStringForIntegerCodePoint(int);
-extern int charon_host_CVTransferFunctionGetIntegerCodePointForString(CFStringRef);
-extern CFStringRef charon_host_CVYCbCrMatrixGetStringForIntegerCodePoint(int);
-extern int charon_host_CVYCbCrMatrixGetIntegerCodePointForString(CFStringRef);
-extern const CFStringRef charon_host_kCVImageBufferTransferFunction_sRGB, charon_host_kCVImageBufferTransferFunction_ITU_R_2100_HLG,
-    charon_host_kCVImageBufferTransferFunction_SMPTE_ST_2084_PQ, charon_host_kCVImageBufferTransferFunction_Linear,
-    charon_host_kCVImageBufferContentLightLevelInfoKey, charon_host_kCVImageBufferMasteringDisplayColorVolumeKey,
-    charon_host_kCVPixelFormatContainsGrayscale, charon_host_kCGColorSpaceGenericLab;
+extern CFStringRef revenant_host_CGColorSpaceGetName(CGColorSpaceRef);
+extern void revenant_host_CGPathApplyWithBlock(CGPathRef, CGPathApplyBlock);
+extern CGImageByteOrderInfo revenant_host_CGImageGetByteOrderInfo(CGImageRef);
+extern CGImagePixelFormatInfo revenant_host_CGImageGetPixelFormatInfo(CGImageRef);
+extern void revenant_host_CGPDFArrayApplyBlock(CGPDFArrayRef, bool (^)(size_t, CGPDFObjectRef, void *), void *);
+extern void revenant_host_CGPDFDictionaryApplyBlock(CGPDFDictionaryRef, bool (^)(const char *, CGPDFObjectRef, void *), void *);
+extern CFStringRef revenant_host_CVColorPrimariesGetStringForIntegerCodePoint(int);
+extern int revenant_host_CVColorPrimariesGetIntegerCodePointForString(CFStringRef);
+extern CFStringRef revenant_host_CVTransferFunctionGetStringForIntegerCodePoint(int);
+extern int revenant_host_CVTransferFunctionGetIntegerCodePointForString(CFStringRef);
+extern CFStringRef revenant_host_CVYCbCrMatrixGetStringForIntegerCodePoint(int);
+extern int revenant_host_CVYCbCrMatrixGetIntegerCodePointForString(CFStringRef);
+extern const CFStringRef revenant_host_kCVImageBufferTransferFunction_sRGB, revenant_host_kCVImageBufferTransferFunction_ITU_R_2100_HLG,
+    revenant_host_kCVImageBufferTransferFunction_SMPTE_ST_2084_PQ, revenant_host_kCVImageBufferTransferFunction_Linear,
+    revenant_host_kCVImageBufferContentLightLevelInfoKey, revenant_host_kCVImageBufferMasteringDisplayColorVolumeKey,
+    revenant_host_kCVPixelFormatContainsGrayscale, revenant_host_kCGColorSpaceGenericLab;
 
 static const char *label(NSString *format, ...)
 {
@@ -51,18 +51,18 @@ static void colour_space_names(void)
     for (NSUInteger i = 0; i < spaces.count; i++) {
         CGColorSpaceRef space = (__bridge CGColorSpaceRef)spaces[i];
         NSString *name = [NSString stringWithFormat:@"colourspace.%lu", (unsigned long)i];
-        CFStringRef ours = charon_host_CGColorSpaceGetName(space), system = CGColorSpaceGetName(space);
+        CFStringRef ours = revenant_host_CGColorSpaceGetName(space), system = CGColorSpaceGetName(space);
         CHECK_EQUAL(text(ours), text(system), [[name stringByAppendingString:@".name"] UTF8String]);
-        CHECK(ours == charon_host_CGColorSpaceGetName(space), [[name stringByAppendingString:@".stable"] UTF8String]);
+        CHECK(ours == revenant_host_CGColorSpaceGetName(space), [[name stringByAppendingString:@".stable"] UTF8String]);
         CHECK(!ours || CFGetRetainCount(ours) > 0, [[name stringByAppendingString:@".alive"] UTF8String]);
     }
-    CHECK(charon_host_CGColorSpaceGetName(NULL) == NULL, "colourspace.null");
+    CHECK(revenant_host_CGColorSpaceGetName(NULL) == NULL, "colourspace.null");
     CGColorSpaceRef a = CGColorSpaceCreateDeviceRGB(), b = CGColorSpaceCreateDeviceRGB();
-    CHECK(charon_host_CGColorSpaceGetName(a) == charon_host_CGColorSpaceGetName(b), "colourspace.sameNameSameObject");
+    CHECK(revenant_host_CGColorSpaceGetName(a) == revenant_host_CGColorSpaceGetName(b), "colourspace.sameNameSameObject");
     CGColorSpaceRelease(a);
     CGColorSpaceRelease(b);
     CGColorSpaceRelease(rgb);
-    CHECK_EQUAL(text(charon_host_kCGColorSpaceGenericLab), text(kCGColorSpaceGenericLab), "colourspace.genericLab");
+    CHECK_EQUAL(text(revenant_host_kCGColorSpaceGenericLab), text(kCGColorSpaceGenericLab), "colourspace.genericLab");
 }
 
 static NSString *element_text(const CGPathElement *element)
@@ -79,7 +79,7 @@ static NSArray *elements(CGPathRef path, BOOL ours)
     NSMutableArray *out = [NSMutableArray array];
     CGPathApplyBlock block = ^(const CGPathElement *element) { [out addObject:element_text(element)]; };
     if (ours)
-        charon_host_CGPathApplyWithBlock(path, block);
+        revenant_host_CGPathApplyWithBlock(path, block);
     else
         CGPathApplyWithBlock(path, block);
     return out;
@@ -102,8 +102,8 @@ static void path_apply(void)
     CGPathRef empty = CGPathCreateMutable();
     CHECK_EQUAL(elements(empty, YES), elements(empty, NO), "path.empty");
     CGPathRelease(empty);
-    charon_host_CGPathApplyWithBlock(NULL, ^(const CGPathElement *element) { charon_check(NO, "path.nullPathCalled", @""); });
-    charon_host_CGPathApplyWithBlock(path, NULL);
+    revenant_host_CGPathApplyWithBlock(NULL, ^(const CGPathElement *element) { revenant_check(NO, "path.nullPathCalled", @""); });
+    revenant_host_CGPathApplyWithBlock(path, NULL);
     CHECK(YES, "path.nullArguments");
     CGPathRelease(path);
 }
@@ -122,11 +122,11 @@ static void image_info(void)
         CGImageRef image = context ? CGBitmapContextCreateImage(context) : NULL;
         NSString *name = [NSString stringWithFormat:@"image.%zu", i];
         if (!image) {
-            charon_check(YES, [[name stringByAppendingString:@".unsupported"] UTF8String], @"");
+            revenant_check(YES, [[name stringByAppendingString:@".unsupported"] UTF8String], @"");
         } else {
-            CHECK_EQUAL(@(charon_host_CGImageGetByteOrderInfo(image)), @(CGImageGetByteOrderInfo(image)), [[name stringByAppendingString:@".byteOrder"] UTF8String]);
-            CHECK_EQUAL(@(charon_host_CGImageGetPixelFormatInfo(image)), @(CGImageGetPixelFormatInfo(image)), [[name stringByAppendingString:@".pixelFormat"] UTF8String]);
-            CHECK_EQUAL(@(charon_host_CGImageGetByteOrderInfo(image)), @(CGImageGetBitmapInfo(image) & kCGBitmapByteOrderMask), [[name stringByAppendingString:@".mask"] UTF8String]);
+            CHECK_EQUAL(@(revenant_host_CGImageGetByteOrderInfo(image)), @(CGImageGetByteOrderInfo(image)), [[name stringByAppendingString:@".byteOrder"] UTF8String]);
+            CHECK_EQUAL(@(revenant_host_CGImageGetPixelFormatInfo(image)), @(CGImageGetPixelFormatInfo(image)), [[name stringByAppendingString:@".pixelFormat"] UTF8String]);
+            CHECK_EQUAL(@(revenant_host_CGImageGetByteOrderInfo(image)), @(CGImageGetBitmapInfo(image) & kCGBitmapByteOrderMask), [[name stringByAppendingString:@".mask"] UTF8String]);
             CGImageRelease(image);
         }
         CGContextRelease(context);
@@ -140,16 +140,16 @@ static void image_info(void)
         CGImageRef image = CGImageCreate(2, 2, bits[i], pixel[i], pixel[i] / 8 * 2, rgb, (CGBitmapInfo)formats[i], provider, NULL, false, kCGRenderingIntentDefault);
         NSString *name = [NSString stringWithFormat:@"image.format.%zu", i];
         if (!image) {
-            charon_check(YES, label(@"%@.unsupported", name), @"");
+            revenant_check(YES, label(@"%@.unsupported", name), @"");
         } else {
-            CHECK_EQUAL(@(charon_host_CGImageGetByteOrderInfo(image)), @(CGImageGetByteOrderInfo(image)), label(@"%@.byteOrder", name));
-            CHECK_EQUAL(@(charon_host_CGImageGetPixelFormatInfo(image)), @(CGImageGetPixelFormatInfo(image)), label(@"%@.pixelFormat", name));
-            CHECK_EQUAL(@(charon_host_CGImageGetPixelFormatInfo(image)), @(CGImageGetBitmapInfo(image) & 0xF0000), label(@"%@.mask", name));
+            CHECK_EQUAL(@(revenant_host_CGImageGetByteOrderInfo(image)), @(CGImageGetByteOrderInfo(image)), label(@"%@.byteOrder", name));
+            CHECK_EQUAL(@(revenant_host_CGImageGetPixelFormatInfo(image)), @(CGImageGetPixelFormatInfo(image)), label(@"%@.pixelFormat", name));
+            CHECK_EQUAL(@(revenant_host_CGImageGetPixelFormatInfo(image)), @(CGImageGetBitmapInfo(image) & 0xF0000), label(@"%@.mask", name));
             CGImageRelease(image);
         }
         CGDataProviderRelease(provider);
     }
-    CHECK(charon_host_CGImageGetByteOrderInfo(NULL) == 0 && charon_host_CGImageGetPixelFormatInfo(NULL) == 0, "image.null");
+    CHECK(revenant_host_CGImageGetByteOrderInfo(NULL) == 0 && revenant_host_CGImageGetPixelFormatInfo(NULL) == 0, "image.null");
     CGColorSpaceRelease(rgb);
     CGColorSpaceRelease(gray);
 }
@@ -182,7 +182,7 @@ static NSArray *array_walk(CGPDFArrayRef array, BOOL ours, size_t stopAfter)
         return out.count < stopAfter;
     };
     if (ours)
-        charon_host_CGPDFArrayApplyBlock(array, block, (void *)0x1234);
+        revenant_host_CGPDFArrayApplyBlock(array, block, (void *)0x1234);
     else
         CGPDFArrayApplyBlock(array, block, (void *)0x1234);
     return out;
@@ -196,7 +196,7 @@ static NSArray *dictionary_walk(CGPDFDictionaryRef dictionary, BOOL ours, size_t
         return out.count < stopAfter;
     };
     if (ours)
-        charon_host_CGPDFDictionaryApplyBlock(dictionary, block, (void *)0x5678);
+        revenant_host_CGPDFDictionaryApplyBlock(dictionary, block, (void *)0x5678);
     else
         CGPDFDictionaryApplyBlock(dictionary, block, (void *)0x5678);
     return out;
@@ -237,10 +237,10 @@ static void pdf_apply(void)
     CHECK(dictionary_walk(page, YES, 100).count >= 3, "pdf.dictionary.notTrivial");
     CGPDFDictionaryRef documentInfo = CGPDFDocumentGetInfo(document);
     CHECK_EQUAL(dictionary_walk(documentInfo, YES, 100), dictionary_walk(documentInfo, NO, 100), "pdf.dictionary.info");
-    charon_host_CGPDFArrayApplyBlock(NULL, ^bool(size_t i, CGPDFObjectRef v, void *p) { charon_check(NO, "pdf.nullArrayCalled", @""); return true; }, NULL);
-    charon_host_CGPDFDictionaryApplyBlock(NULL, ^bool(const char *k, CGPDFObjectRef v, void *p) { charon_check(NO, "pdf.nullDictionaryCalled", @""); return true; }, NULL);
-    charon_host_CGPDFArrayApplyBlock(mediaBox, NULL, NULL);
-    charon_host_CGPDFDictionaryApplyBlock(page, NULL, NULL);
+    revenant_host_CGPDFArrayApplyBlock(NULL, ^bool(size_t i, CGPDFObjectRef v, void *p) { revenant_check(NO, "pdf.nullArrayCalled", @""); return true; }, NULL);
+    revenant_host_CGPDFDictionaryApplyBlock(NULL, ^bool(const char *k, CGPDFObjectRef v, void *p) { revenant_check(NO, "pdf.nullDictionaryCalled", @""); return true; }, NULL);
+    revenant_host_CGPDFArrayApplyBlock(mediaBox, NULL, NULL);
+    revenant_host_CGPDFDictionaryApplyBlock(page, NULL, NULL);
     CHECK(YES, "pdf.nullArguments");
     CGPDFDocumentRelease(document);
 }
@@ -288,28 +288,28 @@ static void compare_table(const char *table, string_for_code ours, string_for_co
 
 static void code_points(void)
 {
-    compare_table("primaries", charon_host_CVColorPrimariesGetStringForIntegerCodePoint, CVColorPrimariesGetStringForIntegerCodePoint,
-                  charon_host_CVColorPrimariesGetIntegerCodePointForString, CVColorPrimariesGetIntegerCodePointForString, [NSSet set]);
-    compare_table("transfer", charon_host_CVTransferFunctionGetStringForIntegerCodePoint, CVTransferFunctionGetStringForIntegerCodePoint,
-                  charon_host_CVTransferFunctionGetIntegerCodePointForString, CVTransferFunctionGetIntegerCodePointForString, [NSSet set]);
-    compare_table("matrix", charon_host_CVYCbCrMatrixGetStringForIntegerCodePoint, CVYCbCrMatrixGetStringForIntegerCodePoint,
-                  charon_host_CVYCbCrMatrixGetIntegerCodePointForString, CVYCbCrMatrixGetIntegerCodePointForString, [NSSet setWithObjects:@14, @15, @248, nil]);
-    CHECK_EQUAL(text(charon_host_CVYCbCrMatrixGetStringForIntegerCodePoint(14)), @"YCbCrMatrix#14", "cv.matrix.14.iOS12");
-    CHECK_EQUAL(text(charon_host_CVYCbCrMatrixGetStringForIntegerCodePoint(15)), @"YCbCrMatrix#15", "cv.matrix.15.iOS12");
-    CHECK_EQUAL(text(charon_host_CVYCbCrMatrixGetStringForIntegerCodePoint(248)), @"YCbCrMatrix#248", "cv.matrix.248.iOS12");
-    CHECK_EQUAL(@(charon_host_CVYCbCrMatrixGetIntegerCodePointForString(CFSTR("ITU_R_2100_ICtCp"))), @2, "cv.matrix.ICtCp.iOS12");
-    CHECK_EQUAL(@(charon_host_CVYCbCrMatrixGetIntegerCodePointForString(CFSTR("IPT"))), @2, "cv.matrix.IPT.iOS12");
+    compare_table("primaries", revenant_host_CVColorPrimariesGetStringForIntegerCodePoint, CVColorPrimariesGetStringForIntegerCodePoint,
+                  revenant_host_CVColorPrimariesGetIntegerCodePointForString, CVColorPrimariesGetIntegerCodePointForString, [NSSet set]);
+    compare_table("transfer", revenant_host_CVTransferFunctionGetStringForIntegerCodePoint, CVTransferFunctionGetStringForIntegerCodePoint,
+                  revenant_host_CVTransferFunctionGetIntegerCodePointForString, CVTransferFunctionGetIntegerCodePointForString, [NSSet set]);
+    compare_table("matrix", revenant_host_CVYCbCrMatrixGetStringForIntegerCodePoint, CVYCbCrMatrixGetStringForIntegerCodePoint,
+                  revenant_host_CVYCbCrMatrixGetIntegerCodePointForString, CVYCbCrMatrixGetIntegerCodePointForString, [NSSet setWithObjects:@14, @15, @248, nil]);
+    CHECK_EQUAL(text(revenant_host_CVYCbCrMatrixGetStringForIntegerCodePoint(14)), @"YCbCrMatrix#14", "cv.matrix.14.iOS12");
+    CHECK_EQUAL(text(revenant_host_CVYCbCrMatrixGetStringForIntegerCodePoint(15)), @"YCbCrMatrix#15", "cv.matrix.15.iOS12");
+    CHECK_EQUAL(text(revenant_host_CVYCbCrMatrixGetStringForIntegerCodePoint(248)), @"YCbCrMatrix#248", "cv.matrix.248.iOS12");
+    CHECK_EQUAL(@(revenant_host_CVYCbCrMatrixGetIntegerCodePointForString(CFSTR("ITU_R_2100_ICtCp"))), @2, "cv.matrix.ICtCp.iOS12");
+    CHECK_EQUAL(@(revenant_host_CVYCbCrMatrixGetIntegerCodePointForString(CFSTR("IPT"))), @2, "cv.matrix.IPT.iOS12");
 }
 
 static void constants(void)
 {
-    CHECK_EQUAL(text(charon_host_kCVImageBufferTransferFunction_sRGB), text(kCVImageBufferTransferFunction_sRGB), "constant.sRGB");
-    CHECK_EQUAL(text(charon_host_kCVImageBufferTransferFunction_ITU_R_2100_HLG), text(kCVImageBufferTransferFunction_ITU_R_2100_HLG), "constant.HLG");
-    CHECK_EQUAL(text(charon_host_kCVImageBufferTransferFunction_SMPTE_ST_2084_PQ), text(kCVImageBufferTransferFunction_SMPTE_ST_2084_PQ), "constant.PQ");
-    CHECK_EQUAL(text(charon_host_kCVImageBufferTransferFunction_Linear), text(kCVImageBufferTransferFunction_Linear), "constant.linear");
-    CHECK_EQUAL(text(charon_host_kCVImageBufferContentLightLevelInfoKey), text(kCVImageBufferContentLightLevelInfoKey), "constant.lightLevel");
-    CHECK_EQUAL(text(charon_host_kCVImageBufferMasteringDisplayColorVolumeKey), text(kCVImageBufferMasteringDisplayColorVolumeKey), "constant.masteringDisplay");
-    CHECK_EQUAL(text(charon_host_kCVPixelFormatContainsGrayscale), text(kCVPixelFormatContainsGrayscale), "constant.containsGrayscale");
+    CHECK_EQUAL(text(revenant_host_kCVImageBufferTransferFunction_sRGB), text(kCVImageBufferTransferFunction_sRGB), "constant.sRGB");
+    CHECK_EQUAL(text(revenant_host_kCVImageBufferTransferFunction_ITU_R_2100_HLG), text(kCVImageBufferTransferFunction_ITU_R_2100_HLG), "constant.HLG");
+    CHECK_EQUAL(text(revenant_host_kCVImageBufferTransferFunction_SMPTE_ST_2084_PQ), text(kCVImageBufferTransferFunction_SMPTE_ST_2084_PQ), "constant.PQ");
+    CHECK_EQUAL(text(revenant_host_kCVImageBufferTransferFunction_Linear), text(kCVImageBufferTransferFunction_Linear), "constant.linear");
+    CHECK_EQUAL(text(revenant_host_kCVImageBufferContentLightLevelInfoKey), text(kCVImageBufferContentLightLevelInfoKey), "constant.lightLevel");
+    CHECK_EQUAL(text(revenant_host_kCVImageBufferMasteringDisplayColorVolumeKey), text(kCVImageBufferMasteringDisplayColorVolumeKey), "constant.masteringDisplay");
+    CHECK_EQUAL(text(revenant_host_kCVPixelFormatContainsGrayscale), text(kCVPixelFormatContainsGrayscale), "constant.containsGrayscale");
 }
 
 int main(void)
@@ -321,7 +321,7 @@ int main(void)
         pdf_apply();
         code_points();
         constants();
-        printf("checks=%d failures=%d\n", charon_checks, charon_failures);
+        printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
     }
-    return charon_failures ? 1 : 0;
+    return revenant_failures ? 1 : 0;
 }

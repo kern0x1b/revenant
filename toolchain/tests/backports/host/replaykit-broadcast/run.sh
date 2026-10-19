@@ -25,7 +25,7 @@ frameworks="-framework UIKit -framework Foundation -framework QuartzCore -framew
 # UIKit brings the host's ReplayKit into every Catalyst process, so a port class of the same name is implemented twice and the
 # runtime keeps one of them: the port side renames its classes and the two category selectors. differential.m strips the
 # prefix when it prints a name, and the rename covers every use in both files, so the port side calls its own renamed methods.
-renames="-DRPBroadcastActivityViewController=CharonRPBroadcastActivityViewController -DRPBroadcastController=CharonRPBroadcastController -DRPBroadcastConfiguration=CharonRPBroadcastConfiguration -DRPBroadcastHandler=CharonRPBroadcastHandler -DRPBroadcastSampleHandler=CharonRPBroadcastSampleHandler -DRPBroadcastMP4ClipHandler=CharonRPBroadcastMP4ClipHandler -DRPSystemBroadcastPickerView=CharonRPSystemBroadcastPickerView -DloadBroadcastingApplicationInfoWithCompletion=charonLoadBroadcastingApplicationInfoWithCompletion -DcompleteRequestWithBroadcastURL=charonCompleteRequestWithBroadcastURL -DRPScreenRecorder=CharonRPScreenRecorder -DRPPreviewViewController=CharonRPPreviewViewController"
+renames="-DRPBroadcastActivityViewController=RevenantRPBroadcastActivityViewController -DRPBroadcastController=RevenantRPBroadcastController -DRPBroadcastConfiguration=RevenantRPBroadcastConfiguration -DRPBroadcastHandler=RevenantRPBroadcastHandler -DRPBroadcastSampleHandler=RevenantRPBroadcastSampleHandler -DRPBroadcastMP4ClipHandler=RevenantRPBroadcastMP4ClipHandler -DRPSystemBroadcastPickerView=RevenantRPSystemBroadcastPickerView -DloadBroadcastingApplicationInfoWithCompletion=revenantLoadBroadcastingApplicationInfoWithCompletion -DcompleteRequestWithBroadcastURL=revenantCompleteRequestWithBroadcastURL -DRPScreenRecorder=RevenantRPScreenRecorder -DRPPreviewViewController=RevenantRPPreviewViewController"
 cases="constants activity-nil activity-named controller configuration configuration-copy picker superclasses handler-calls clip-handler request-context extension-context recorder recorder-available preview"
 # A case whose difference is known and owed, not a failure: it is printed as KNOWN and not counted. recorder-available is the
 # port's `available` answering NO until the recorder records (ruling 5); its registry row is inert, a safe NO that says so once.
@@ -85,8 +85,8 @@ plant() {
     n=$1; file=$2; expr=$3; label=$4
     rm -rf "$build/mutant" "$build/mutant.app"
     mkdir -p "$build/mutant"
-    # The sources include the log-once header as ../CharonSayOnce.h, so the copy keeps it one level above them.
-    cp "$appledir/CharonSayOnce.h" "$build/CharonSayOnce.h"
+    # The sources include the log-once header as ../RevenantSayOnce.h, so the copy keeps it one level above them.
+    cp "$appledir/RevenantSayOnce.h" "$build/RevenantSayOnce.h"
     cp "$appledir/ReplayKit/"*.m "$build/mutant/"
     sed "$expr" "$appledir/ReplayKit/$file" > "$build/mutant/$file"
     if cmp -s "$appledir/ReplayKit/$file" "$build/mutant/$file"; then

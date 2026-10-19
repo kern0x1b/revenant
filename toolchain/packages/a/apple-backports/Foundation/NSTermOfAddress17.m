@@ -1,18 +1,18 @@
 #import <Foundation/Foundation.h>
-#import "CharonTermOfAddress.h"
+#import "RevenantTermOfAddress.h"
 #import <objc/message.h>
 #import <objc/runtime.h>
 
-static char CharonTermOfAddressStateKey;
+static char RevenantTermOfAddressStateKey;
 
-@interface CharonTermOfAddressState : NSObject
+@interface RevenantTermOfAddressState : NSObject
 @property NSString *languageIdentifier;
 @property NSArray *pronouns;
 @property BOOL currentUser;
 @property NSString *origin;
 @end
 
-@implementation CharonTermOfAddressState
+@implementation RevenantTermOfAddressState
 
 @synthesize languageIdentifier = _languageIdentifier;
 @synthesize pronouns = _pronouns;
@@ -21,7 +21,7 @@ static char CharonTermOfAddressStateKey;
 
 @end
 
-static char CharonTermOfAddressStateKey;
+static char RevenantTermOfAddressStateKey;
 
 @implementation NSTermOfAddress
 
@@ -30,22 +30,22 @@ static char CharonTermOfAddressStateKey;
     return YES;
 }
 
-+ (instancetype)charon_termWithLanguage:(NSString *)language pronouns:(NSArray *)pronouns currentUser:(BOOL)currentUser
++ (instancetype)revenant_termWithLanguage:(NSString *)language pronouns:(NSArray *)pronouns currentUser:(BOOL)currentUser
 {
-    return [self charon_termWithLanguage:language pronouns:pronouns currentUser:currentUser origin:nil];
+    return [self revenant_termWithLanguage:language pronouns:pronouns currentUser:currentUser origin:nil];
 }
 
-+ (instancetype)charon_termWithLanguage:(NSString *)language pronouns:(NSArray *)pronouns currentUser:(BOOL)currentUser origin:(NSString *)origin
++ (instancetype)revenant_termWithLanguage:(NSString *)language pronouns:(NSArray *)pronouns currentUser:(BOOL)currentUser origin:(NSString *)origin
 {
     NSTermOfAddress *term = [NSTermOfAddress alloc];
     struct objc_super super = { .receiver = term, .super_class = [NSObject class] };
     ((void (*)(struct objc_super *, SEL))objc_msgSendSuper)(&super, @selector(init));
-    CharonTermOfAddressState *state = [[CharonTermOfAddressState alloc] init];
+    RevenantTermOfAddressState *state = [[RevenantTermOfAddressState alloc] init];
     state.languageIdentifier = [language copy];
     state.pronouns = [pronouns copy];
     state.currentUser = currentUser;
     state.origin = origin;
-    objc_setAssociatedObject(term, &CharonTermOfAddressStateKey, state, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(term, &RevenantTermOfAddressStateKey, state, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     return term;
 }
 
@@ -55,8 +55,8 @@ static char CharonTermOfAddressStateKey;
         return YES;
     if (![object isKindOfClass:[NSTermOfAddress class]])
         return NO;
-    CharonTermOfAddressState *mine = objc_getAssociatedObject(self, &CharonTermOfAddressStateKey);
-    CharonTermOfAddressState *theirs = objc_getAssociatedObject(object, &CharonTermOfAddressStateKey);
+    RevenantTermOfAddressState *mine = objc_getAssociatedObject(self, &RevenantTermOfAddressStateKey);
+    RevenantTermOfAddressState *theirs = objc_getAssociatedObject(object, &RevenantTermOfAddressStateKey);
     if (!mine || !theirs)
         return NO;
     if (mine.currentUser != theirs.currentUser)
@@ -71,7 +71,7 @@ static char CharonTermOfAddressStateKey;
 
 - (NSUInteger)hash
 {
-    CharonTermOfAddressState *state = objc_getAssociatedObject(self, &CharonTermOfAddressStateKey);
+    RevenantTermOfAddressState *state = objc_getAssociatedObject(self, &RevenantTermOfAddressStateKey);
     return state.languageIdentifier.hash ^ state.pronouns.count ^ (state.currentUser ? 2u : 0u) ^ state.origin.hash;
 }
 
@@ -80,7 +80,7 @@ static char CharonTermOfAddressStateKey;
     static NSTermOfAddress *term;
     static dispatch_once_t once;
     dispatch_once(&once, ^{
-        term = [self charon_termWithLanguage:nil pronouns:nil currentUser:NO origin:@"neutral"];
+        term = [self revenant_termWithLanguage:nil pronouns:nil currentUser:NO origin:@"neutral"];
     });
     return term;
 }
@@ -90,7 +90,7 @@ static char CharonTermOfAddressStateKey;
     static NSTermOfAddress *term;
     static dispatch_once_t once;
     dispatch_once(&once, ^{
-        term = [self charon_termWithLanguage:nil pronouns:nil currentUser:NO origin:@"feminine"];
+        term = [self revenant_termWithLanguage:nil pronouns:nil currentUser:NO origin:@"feminine"];
     });
     return term;
 }
@@ -100,7 +100,7 @@ static char CharonTermOfAddressStateKey;
     static NSTermOfAddress *term;
     static dispatch_once_t once;
     dispatch_once(&once, ^{
-        term = [self charon_termWithLanguage:nil pronouns:nil currentUser:NO origin:@"masculine"];
+        term = [self revenant_termWithLanguage:nil pronouns:nil currentUser:NO origin:@"masculine"];
     });
     return term;
 }
@@ -110,14 +110,14 @@ static char CharonTermOfAddressStateKey;
     static NSTermOfAddress *term;
     static dispatch_once_t once;
     dispatch_once(&once, ^{
-        term = [self charon_termWithLanguage:nil pronouns:nil currentUser:YES origin:@"currentUser"];
+        term = [self revenant_termWithLanguage:nil pronouns:nil currentUser:YES origin:@"currentUser"];
     });
     return term;
 }
 
 + (instancetype)localizedForLanguageIdentifier:(NSString *)language withPronouns:(NSArray *)pronouns
 {
-    return [self charon_termWithLanguage:language pronouns:pronouns currentUser:NO origin:@"localized"];
+    return [self revenant_termWithLanguage:language pronouns:pronouns currentUser:NO origin:@"localized"];
 }
 
 + (instancetype)termWithLanguageIdentifier:(NSString *)language
@@ -127,13 +127,13 @@ static char CharonTermOfAddressStateKey;
 
 - (NSString *)languageIdentifier
 {
-    CharonTermOfAddressState *state = objc_getAssociatedObject(self, &CharonTermOfAddressStateKey);
+    RevenantTermOfAddressState *state = objc_getAssociatedObject(self, &RevenantTermOfAddressStateKey);
     return state ? state.languageIdentifier : nil;
 }
 
 - (NSArray *)pronouns
 {
-    CharonTermOfAddressState *state = objc_getAssociatedObject(self, &CharonTermOfAddressStateKey);
+    RevenantTermOfAddressState *state = objc_getAssociatedObject(self, &RevenantTermOfAddressStateKey);
     return state ? state.pronouns : nil;
 }
 
@@ -148,7 +148,7 @@ static char CharonTermOfAddressStateKey;
         [NSException raise:NSInvalidArgumentException format:@"NSTermOfAddress cannot be encoded by non-keyed archivers"];
         return;
     }
-    CharonTermOfAddressState *state = objc_getAssociatedObject(self, &CharonTermOfAddressStateKey);
+    RevenantTermOfAddressState *state = objc_getAssociatedObject(self, &RevenantTermOfAddressStateKey);
     [coder encodeObject:state.languageIdentifier forKey:@"NS.languageIdentifier"];
     [coder encodeObject:state.pronouns forKey:@"NS.pronouns"];
     [coder encodeBool:state.currentUser forKey:@"NS.currentUser"];
@@ -163,12 +163,12 @@ static char CharonTermOfAddressStateKey;
     self = [super init];
     if (!self)
         return nil;
-    CharonTermOfAddressState *state = [[CharonTermOfAddressState alloc] init];
+    RevenantTermOfAddressState *state = [[RevenantTermOfAddressState alloc] init];
     state.languageIdentifier = [coder decodeObjectOfClass:[NSString class] forKey:@"NS.languageIdentifier"];
     state.pronouns = [coder decodeObjectOfClasses:[NSSet setWithObjects:[NSArray class], [NSString class], nil]
                                           forKey:@"NS.pronouns"];
     state.currentUser = [coder decodeBoolForKey:@"NS.currentUser"];
-    objc_setAssociatedObject(self, &CharonTermOfAddressStateKey, state, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, &RevenantTermOfAddressStateKey, state, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     return self;
 }
 

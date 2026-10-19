@@ -1,5 +1,5 @@
-#import "CharonSensorKit.h"
-#import "CharonSensorKitValue.h"
+#import "RevenantSensorKit.h"
+#import "RevenantSensorKitValue.h"
 #import <CoreMedia/CoreMedia.h>
 #import <mach/mach_time.h>
 #import <objc/runtime.h>
@@ -7,7 +7,7 @@
 NSErrorDomain SRErrorDomain = @"SRErrorDomain";
 
 @implementation SRSensorReader
-CHARON_SENSORKIT_UNCREATABLE_NEW_AND_INIT(@"Use initWithSensor:")
+REVENANT_SENSORKIT_UNCREATABLE_NEW_AND_INIT(@"Use initWithSensor:")
 
 - (instancetype)initWithSensor:(SRSensor)sensor
 {

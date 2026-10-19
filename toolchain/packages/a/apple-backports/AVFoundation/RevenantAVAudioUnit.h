@@ -1,16 +1,16 @@
-#import "CharonAVAudioEngine.h"
+#import "RevenantAVAudioEngine.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
 @interface AVAudioUnit : AVAudioNode
-- (instancetype)initWithCharonComponentDescription:(AudioComponentDescription)description name:(NSString *)name manufacturerName:(NSString *)manufacturerName version:(NSUInteger)version;
+- (instancetype)initWithRevenantComponentDescription:(AudioComponentDescription)description name:(NSString *)name manufacturerName:(NSString *)manufacturerName version:(NSUInteger)version;
 @property (nonatomic, readonly) AudioComponentDescription audioComponentDescription;
 @property (nonatomic, readonly) AudioUnit audioUnit;
 @property (nonatomic, readonly) NSString *name;
 @property (nonatomic, readonly) NSString *manufacturerName;
 @property (nonatomic, readonly) NSUInteger version;
 - (BOOL)loadAudioUnitPresetAtURL:(NSURL *)url error:(NSError **)outError;
-- (void)charon_applyPendingParameters;
+- (void)revenant_applyPendingParameters;
 @end
 
 @interface AVAudioUnitEffect : AVAudioUnit
@@ -36,7 +36,7 @@ typedef NS_ENUM(NSInteger, AVAudioUnitEQFilterType) {
 
 @interface AVAudioUnitEQFilterParameters : NSObject
 - (instancetype)init NS_UNAVAILABLE;
-- (instancetype)initForCharonEQ:(AVAudioUnitEQ *)eq bandIndex:(NSUInteger)bandIndex;
+- (instancetype)initForRevenantEQ:(AVAudioUnitEQ *)eq bandIndex:(NSUInteger)bandIndex;
 @property (nonatomic) AVAudioUnitEQFilterType filterType;
 @property (nonatomic) float frequency;
 @property (nonatomic) float bandwidth;
@@ -48,7 +48,7 @@ typedef NS_ENUM(NSInteger, AVAudioUnitEQFilterType) {
 - (instancetype)initWithNumberOfBands:(NSUInteger)numberOfBands;
 @property (nonatomic, readonly) NSArray<AVAudioUnitEQFilterParameters *> *bands;
 @property (nonatomic) float globalGain;
-- (void)charon_setParameterID:(AudioUnitParameterID)paramID bandIndex:(NSUInteger)bandIndex value:(AudioUnitParameterValue)value;
+- (void)revenant_setParameterID:(AudioUnitParameterID)paramID bandIndex:(NSUInteger)bandIndex value:(AudioUnitParameterValue)value;
 @end
 
 NS_ASSUME_NONNULL_END

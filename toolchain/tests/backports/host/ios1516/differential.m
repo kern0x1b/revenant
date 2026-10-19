@@ -1,7 +1,7 @@
 #import <Foundation/Foundation.h>
 
-@interface NSUUID (CharonHostCompare)
-- (NSComparisonResult)charonHostCompare:(NSUUID *)otherUUID;
+@interface NSUUID (RevenantHostCompare)
+- (NSComparisonResult)revenantHostCompare:(NSUUID *)otherUUID;
 @end
 
 int main(int argc, char **argv)
@@ -17,25 +17,25 @@ int main(int argc, char **argv)
         for (int index = 0; index < 12; index++)
             [ids addObject:[NSUUID UUID]];
         NSUInteger count = ids.count, wrong = 0;
-        NSMutableString *header = [NSMutableString stringWithString:@"static const char *const charon_uuid_strings[] = {\n"];
+        NSMutableString *header = [NSMutableString stringWithString:@"static const char *const revenant_uuid_strings[] = {\n"];
         for (NSUUID *uuid in ids)
             [header appendFormat:@"    \"%@\",\n", uuid.UUIDString];
-        [header appendFormat:@"};\nstatic const int charon_uuid_count = %lu;\nstatic const signed char charon_uuid_orders[%lu][%lu] = {\n", (unsigned long)count, (unsigned long)count, (unsigned long)count];
+        [header appendFormat:@"};\nstatic const int revenant_uuid_count = %lu;\nstatic const signed char revenant_uuid_orders[%lu][%lu] = {\n", (unsigned long)count, (unsigned long)count, (unsigned long)count];
         for (NSUUID *first in ids) {
             [header appendString:@"    {"];
             for (NSUUID *second in ids) {
                 NSComparisonResult system = [first compare:second];
-                if (system != [first charonHostCompare:second])
+                if (system != [first revenantHostCompare:second])
                     wrong++;
                 [header appendFormat:@"%ld,", (long)system];
             }
             [header appendString:@"},\n"];
         }
-        [header appendString:@"};\nstatic const signed char charon_uuid_against_nil[] = {"];
+        [header appendString:@"};\nstatic const signed char revenant_uuid_against_nil[] = {"];
         NSUUID *none = nil;
         for (NSUUID *first in ids) {
             NSComparisonResult system = [first compare:none];
-            if (system != [first charonHostCompare:none])
+            if (system != [first revenantHostCompare:none])
                 wrong++;
             [header appendFormat:@"%ld,", (long)system];
         }

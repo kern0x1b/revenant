@@ -19,7 +19,7 @@
 
 #include <unistd.h>
 
-namespace shade {
+namespace emulator {
 namespace {
 
     constexpr std::array<std::uint32_t, 64> round_constants {

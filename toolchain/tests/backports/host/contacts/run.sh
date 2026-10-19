@@ -1,6 +1,6 @@
 #!/bin/sh
 # run.sh — records what the host's Contacts answers for every case of device/contacts-cases.m in a Mac Catalyst binary, holds the port's
-# Contacts classes, compiled under names of their own (Charon<name>), to the same records, and tells apart mutants of the port.
+# Contacts classes, compiled under names of their own (Revenant<name>), to the same records, and tells apart mutants of the port.
 #
 # Every case builds its objects in memory: no CNContactStore instance is ever asked for a permission, a fetch or a save, because the host
 # runs as whoever is signed into this Mac, and this package promised never to touch that person's own address book. What is compared is
@@ -14,7 +14,7 @@ device=${DEVICE:-$here/../../device}
 contacts=${CONTACTS:-$here/../../../../packages/a/apple-backports/Contacts}
 registry9=${REGISTRY9:-$here/../../../../packages/a/apple-backports/registry/Contacts/ios9.json}
 registry10=${REGISTRY10:-$here/../../../../packages/a/apple-backports/registry/Contacts/ios10.json}
-build=${BUILD:-$(runs_fresh charon-contacts)}
+build=${BUILD:-$(runs_fresh revenant-contacts)}
 mkdir -p "$build"
 sdk=$(xcrun --show-sdk-path --sdk macosx)
 frameworks="-iframework $sdk/System/iOSSupport/System/Library/Frameworks"
@@ -42,7 +42,7 @@ port() {
         "$dir"/*.m $libs -framework AddressBook -o "$dir/run"
 }
 rm -rf "$build/port"; mkdir -p "$build/port"
-cp "$contacts"/*.m "$contacts/CharonContacts.h" "$build/port/"
+cp "$contacts"/*.m "$contacts/RevenantContacts.h" "$build/port/"
 port "$build/port"
 CONTACTS_RECORDS="$build/port.json" "$build/port/run"
 python3 "$here/compare.py" "$build/system.json" "$build/port.json" "$divergent"
@@ -56,26 +56,26 @@ survived=0
 mutant() {
     file=$1; from=$2; to=$3
     rm -rf "$build/mutant"; mkdir -p "$build/mutant"
-    cp "$contacts"/*.m "$contacts/CharonContacts.h" "$build/mutant/"
+    cp "$contacts"/*.m "$contacts/RevenantContacts.h" "$build/mutant/"
     python3 "$here/mutate.py" "$build/mutant/$file" "$from" "$to"
     port "$build/mutant"
     rm -f "$build/mutant.json"
     CONTACTS_RECORDS="$build/mutant.json" timeout 60 "$build/mutant/run" > /dev/null 2>&1 || true
     if cmp -s "$build/port.json" "$build/mutant.json"; then echo "MUTANT SURVIVED: $file $from -> $to"; survived=$((survived + 1)); fi
 }
-mutant CNPhoneNumber9.m "_charonStringValue = [string copy];" "_charonStringValue = @\"mutated\";"
-mutant CNLabeledValue9.m "_charonLabel = [label copy];" "_charonLabel = @\"mutated\";"
-mutant CNLabeledValue9.m "made->_charonIdentifier = [_charonIdentifier copy];" "made->_charonIdentifier = [[NSUUID UUID] UUIDString];"
-mutant CNPostalAddress9.m "- (NSString *)city { return [self charon_fieldForKey:CNPostalAddressCityKey]; }" "- (NSString *)city { return [self charon_fieldForKey:CNPostalAddressStateKey]; }"
+mutant CNPhoneNumber9.m "_revenantStringValue = [string copy];" "_revenantStringValue = @\"mutated\";"
+mutant CNLabeledValue9.m "_revenantLabel = [label copy];" "_revenantLabel = @\"mutated\";"
+mutant CNLabeledValue9.m "made->_revenantIdentifier = [_revenantIdentifier copy];" "made->_revenantIdentifier = [[NSUUID UUID] UUIDString];"
+mutant CNPostalAddress9.m "- (NSString *)city { return [self revenant_fieldForKey:CNPostalAddressCityKey]; }" "- (NSString *)city { return [self revenant_fieldForKey:CNPostalAddressStateKey]; }"
 mutant CNPostalAddressFormatter9.m "[cityLine appendString:stateZip];" "[cityLine appendString:@\"X\"];"
-mutant CNContact9.m "- (NSString *)givenName { return [self charon_stringForKey:CNContactGivenNameKey]; }" "- (NSString *)givenName { return [self charon_stringForKey:CNContactFamilyNameKey]; }"
+mutant CNContact9.m "- (NSString *)givenName { return [self revenant_stringForKey:CNContactGivenNameKey]; }" "- (NSString *)givenName { return [self revenant_stringForKey:CNContactFamilyNameKey]; }"
 mutant CNContactFormatter9.m "return composite.length > 0 ? composite : nil;" "return nil;"
-mutant CNGroup9.m "return _charonName ?: @\"\";" "return @\"mutated\";"
+mutant CNGroup9.m "return _revenantName ?: @\"\";" "return @\"mutated\";"
 mutant CNContactsUserDefaults9.m "return code.length > 0 ? [code lowercaseString] : @\"us\";" "return @\"\";"
-mutant CharonContactsBook.m "@\"identifier IN %@\"" "@\"identifier == %@\""
-mutant CharonContactsBook.m "[coder encodeObject:_value forKey:@\"value\"];" ";"
-mutant CharonContactsBook.m "return other->_match == _match &&" "return other->_match != _match ||"
-mutant CNContactFetchRequest9.m "[coder encodeObject:_charonPredicate forKey:@\"predicate\"];" ";"
-mutant CNContactFetchRequest9.m "_charonPredicate = [coder decodeObjectOfClass:[NSPredicate class] forKey:@\"predicate\"];" ";"
+mutant RevenantContactsBook.m "@\"identifier IN %@\"" "@\"identifier == %@\""
+mutant RevenantContactsBook.m "[coder encodeObject:_value forKey:@\"value\"];" ";"
+mutant RevenantContactsBook.m "return other->_match == _match &&" "return other->_match != _match ||"
+mutant CNContactFetchRequest9.m "[coder encodeObject:_revenantPredicate forKey:@\"predicate\"];" ";"
+mutant CNContactFetchRequest9.m "_revenantPredicate = [coder decodeObjectOfClass:[NSPredicate class] forKey:@\"predicate\"];" ";"
 echo "mutants surviving: $survived"
 [ "$survived" -eq 0 ]

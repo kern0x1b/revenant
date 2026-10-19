@@ -1,10 +1,10 @@
 #import <CoreML/CoreML.h>
 
-#include "CharonMLBridge.h"
-#include "CharonMLInternal.h"
-#include "CharonMLModel.h"
-#include "CharonMLPredict.h"
-#include "CharonMLTensor.h"
+#include "RevenantMLBridge.h"
+#include "RevenantMLInternal.h"
+#include "RevenantMLModel.h"
+#include "RevenantMLPredict.h"
+#include "RevenantMLTensor.h"
 
 
 @implementation MLModelDescription {
@@ -19,7 +19,7 @@
     BOOL _isUpdatable;
 }
 
-- (instancetype)charon_initWithModel:(const charon_ml_model *)model
+- (instancetype)revenant_initWithModel:(const revenant_ml_model *)model
 {
     NSMutableDictionary *inputs = [NSMutableDictionary dictionary];
     NSMutableDictionary *outputs = [NSMutableDictionary dictionary];
@@ -32,20 +32,20 @@
         return nil;
     }
     for (index = 0; index < model->input_count; index++) {
-        MLFeatureDescription *described = [[MLFeatureDescription alloc] charon_initWithFeature:&model->inputs[index]];
+        MLFeatureDescription *described = [[MLFeatureDescription alloc] revenant_initWithFeature:&model->inputs[index]];
         if (described != nil && model->inputs[index].name != NULL) {
             inputs[@(model->inputs[index].name)] = described;
         }
     }
     for (index = 0; index < model->output_count; index++) {
-        MLFeatureDescription *described = [[MLFeatureDescription alloc] charon_initWithFeature:&model->outputs[index]];
+        MLFeatureDescription *described = [[MLFeatureDescription alloc] revenant_initWithFeature:&model->outputs[index]];
         if (described != nil && model->outputs[index].name != NULL) {
             outputs[@(model->outputs[index].name)] = described;
         }
     }
     for (index = 0; index < model->training_input_count; index++) {
         MLFeatureDescription *described =
-            [[MLFeatureDescription alloc] charon_initWithFeature:&model->training_inputs[index]];
+            [[MLFeatureDescription alloc] revenant_initWithFeature:&model->training_inputs[index]];
         if (described != nil && model->training_inputs[index].name != NULL) {
             training[@(model->training_inputs[index].name)] = described;
         }
@@ -65,27 +65,27 @@
         metadata[MLModelCreatorDefinedKey] = own;
     }
     for (index = 0; index < model->parameter_count; index++) {
-        const charon_ml_parameter *parameter = &model->parameters[index];
+        const revenant_ml_parameter *parameter = &model->parameters[index];
         MLParameterKey *key;
         id value;
         MLNumericConstraint *constraint;
         if (parameter->key == NULL) {
             continue;
         }
-        key = [MLParameterKey charon_keyNamed:@(parameter->key)];
+        key = [MLParameterKey revenant_keyNamed:@(parameter->key)];
         if (key == nil) {
             continue;
         }
-        value = parameter->type == CHARON_ML_FEATURE_INT64 ? @((int64_t)parameter->number)
+        value = parameter->type == REVENANT_ML_FEATURE_INT64 ? @((int64_t)parameter->number)
                                                           : @(parameter->number);
         if (parameter->has_range) {
-            constraint = [[MLNumericConstraint alloc] charon_initWithMinNumber:@(parameter->range_min)
+            constraint = [[MLNumericConstraint alloc] revenant_initWithMinNumber:@(parameter->range_min)
                                                               maxNumber:@(parameter->range_max)
                                                      enumeratedNumbers:nil];
         } else {
             constraint = nil;
         }
-        parameters[key] = [[MLParameterDescription alloc] charon_initWithKey:key
+        parameters[key] = [[MLParameterDescription alloc] revenant_initWithKey:key
                                                          defaultValue:value
                                                     numericConstraint:constraint];
     }
@@ -112,7 +112,7 @@
     return built;
 }
 
-- (instancetype)charon_initWithFunction:(const charon_ml_function *)function
+- (instancetype)revenant_initWithFunction:(const revenant_ml_function *)function
 {
     MLModelDescription *built = [super init];
     if (built != nil) {
@@ -120,13 +120,13 @@
         NSMutableDictionary *inputs = [NSMutableDictionary dictionary];
         NSMutableDictionary *outputs = [NSMutableDictionary dictionary];
         for (index = 0; index < function->input_count; index++) {
-            MLFeatureDescription *described = [[MLFeatureDescription alloc] charon_initWithFeature:&function->inputs[index]];
+            MLFeatureDescription *described = [[MLFeatureDescription alloc] revenant_initWithFeature:&function->inputs[index]];
             if (described != nil && function->inputs[index].name != NULL) {
                 inputs[@(function->inputs[index].name)] = described;
             }
         }
         for (index = 0; index < function->output_count; index++) {
-            MLFeatureDescription *described = [[MLFeatureDescription alloc] charon_initWithFeature:&function->outputs[index]];
+            MLFeatureDescription *described = [[MLFeatureDescription alloc] revenant_initWithFeature:&function->outputs[index]];
             if (described != nil && function->outputs[index].name != NULL) {
                 outputs[@(function->outputs[index].name)] = described;
             }
@@ -302,18 +302,18 @@
         return nil;
     }
     if (specificationData.length == 0) {
-        charon_ml_error(error, CHARON_ML_ERROR_GENERIC, @"there were no specification bytes to make a model of");
+        revenant_ml_error(error, REVENANT_ML_ERROR_GENERIC, @"there were no specification bytes to make a model of");
         return nil;
     }
     {
-        charon_ml_model probe;
+        revenant_ml_model probe;
         char message[512];
-        if (!charon_ml_model_read_data(&probe, specificationData.bytes, specificationData.length, message,
+        if (!revenant_ml_model_read_data(&probe, specificationData.bytes, specificationData.length, message,
                                        sizeof message)) {
-            charon_ml_error(error, CHARON_ML_ERROR_GENERIC, @(message));
+            revenant_ml_error(error, REVENANT_ML_ERROR_GENERIC, @(message));
             return nil;
         }
-        charon_ml_model_release(&probe);
+        revenant_ml_model_release(&probe);
     }
     asset->_specification = [specificationData copy];
     return asset;
@@ -326,7 +326,7 @@
     if (blobMapping.count == 0) {
         return [self modelAssetWithSpecificationData:specificationData error:error];
     }
-    charon_ml_error(error, CHARON_ML_ERROR_GENERIC,
+    revenant_ml_error(error, REVENANT_ML_ERROR_GENERIC,
                     @"this model keeps its weights in blob files, which are the mlProgram form of a model and "
                     @"are not read by this port; the model is refused rather than run without its weights");
     return nil;
@@ -336,7 +336,7 @@
 {
     NSData *container;
     if (compiledModelURL == nil || !compiledModelURL.isFileURL) {
-        charon_ml_error(error, CHARON_ML_ERROR_GENERIC, @"a model asset is read from a file's URL");
+        revenant_ml_error(error, REVENANT_ML_ERROR_GENERIC, @"a model asset is read from a file's URL");
         return nil;
     }
     {
@@ -346,7 +346,7 @@
             container = [NSData dataWithContentsOfFile:inside];
         } else if ([[NSFileManager defaultManager] fileExistsAtPath:compiledModelURL.path isDirectory:&directory] &&
                    directory) {
-            charon_ml_error(error, CHARON_ML_ERROR_GENERIC,
+            revenant_ml_error(error, REVENANT_ML_ERROR_GENERIC,
                             [NSString stringWithFormat:@"the bundle at %@ holds no coremldata.bin, which is "
                                                        @"where a compiled model keeps its program", compiledModelURL.path]);
             return nil;
@@ -355,7 +355,7 @@
         }
     }
     if (container.length == 0) {
-        charon_ml_error(error, CHARON_ML_ERROR_GENERIC,
+        revenant_ml_error(error, REVENANT_ML_ERROR_GENERIC,
                         [NSString stringWithFormat:@"the model at %@ could not be read", compiledModelURL.path]);
         return nil;
     }
@@ -389,21 +389,21 @@
 {
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         NSError *failure = nil;
-        NSArray<NSString *> *names = [self charon_functionNamesWithError:&failure];
+        NSArray<NSString *> *names = [self revenant_functionNamesWithError:&failure];
         if (handler != nil) {
             handler(names, names != nil ? nil : failure);
         }
     });
 }
 
-- (NSArray<NSString *> *)charon_functionNamesWithError:(NSError **)error
+- (NSArray<NSString *> *)revenant_functionNamesWithError:(NSError **)error
 {
-    charon_ml_model read;
+    revenant_ml_model read;
     char message[512];
     NSMutableArray<NSString *> *names;
     size_t index;
-    if (!charon_ml_model_read_data(&read, _specification.bytes, _specification.length, message, sizeof message)) {
-        charon_ml_error(error, CHARON_ML_ERROR_GENERIC, @(message));
+    if (!revenant_ml_model_read_data(&read, _specification.bytes, _specification.length, message, sizeof message)) {
+        revenant_ml_error(error, REVENANT_ML_ERROR_GENERIC, @(message));
         return nil;
     }
     names = [NSMutableArray arrayWithCapacity:read.function_count];
@@ -412,22 +412,22 @@
             [names addObject:@(read.functions[index].name)];
         }
     }
-    charon_ml_model_release(&read);
+    revenant_ml_model_release(&read);
     return names;
 }
 
 - (MLModelDescription *)descriptionOfFunctionNamed:(NSString *)functionName error:(NSError **)error
 {
-    charon_ml_model read;
+    revenant_ml_model read;
     char message[512];
-    const charon_ml_function *function = NULL;
+    const revenant_ml_function *function = NULL;
     MLModelDescription *description;
-    if (!charon_ml_model_read_data(&read, _specification.bytes, _specification.length, message, sizeof message)) {
-        charon_ml_error(error, CHARON_ML_ERROR_GENERIC, @(message));
+    if (!revenant_ml_model_read_data(&read, _specification.bytes, _specification.length, message, sizeof message)) {
+        revenant_ml_error(error, REVENANT_ML_ERROR_GENERIC, @(message));
         return nil;
     }
     if (functionName != nil) {
-        function = charon_ml_model_function_named(&read, [functionName UTF8String]);
+        function = revenant_ml_model_function_named(&read, [functionName UTF8String]);
         if (function == NULL) {
             NSMutableArray<NSString *> *named = [NSMutableArray array];
             size_t index;
@@ -436,20 +436,20 @@
                     [named addObject:@(read.functions[index].name)];
                 }
             }
-            charon_ml_model_release(&read);
-            charon_ml_error(error, CHARON_ML_ERROR_GENERIC,
+            revenant_ml_model_release(&read);
+            revenant_ml_error(error, REVENANT_ML_ERROR_GENERIC,
                             [NSString stringWithFormat:@"this model has no function called '%@'; it has %@",
                                                        functionName, [named componentsJoinedByString:@", "]]);
             return nil;
         }
     }
-    description = function != NULL ? [[MLModelDescription alloc] charon_initWithFunction:function]
-                                   : [[MLModelDescription alloc] charon_initWithModel:&read];
-    charon_ml_model_release(&read);
+    description = function != NULL ? [[MLModelDescription alloc] revenant_initWithFunction:function]
+                                   : [[MLModelDescription alloc] revenant_initWithModel:&read];
+    revenant_ml_model_release(&read);
     return description;
 }
 
-- (NSData *)charon_specificationData
+- (NSData *)revenant_specificationData
 {
     return _specification;
 }
@@ -463,7 +463,7 @@
 
 
 @implementation MLModel {
-    charon_ml_model _model;
+    revenant_ml_model _model;
     MLModelDescription *_description;
     MLModelConfiguration *_configuration;
     NSURL *_url;
@@ -472,8 +472,8 @@
 - (id<MLFeatureProvider>)predictionFromFeatures:(id<MLFeatureProvider>)input
                                           error:(NSError **)error
 {
-    charon_ml_features *inputs = calloc(1, sizeof *inputs);
-    charon_ml_features *outputs = calloc(1, sizeof *outputs);
+    revenant_ml_features *inputs = calloc(1, sizeof *inputs);
+    revenant_ml_features *outputs = calloc(1, sizeof *outputs);
     NSMutableDictionary<NSString *, MLFeatureValue *> *answered;
     char message[1024];
     NSEnumerator *names;
@@ -483,24 +483,24 @@
     if (input == nil || inputs == NULL || outputs == NULL) {
         free(inputs);
         free(outputs);
-        charon_ml_error(error, CHARON_ML_ERROR_FEATURE_TYPE, @"a prediction needs a provider of values");
+        revenant_ml_error(error, REVENANT_ML_ERROR_FEATURE_TYPE, @"a prediction needs a provider of values");
         return nil;
     }
-    charon_ml_features_init(inputs);
-    charon_ml_features_init(outputs);
+    revenant_ml_features_init(inputs);
+    revenant_ml_features_init(outputs);
     for (index = 0; index < _model.input_count; index++) {
-        const charon_ml_feature *described = &_model.inputs[index];
+        const revenant_ml_feature *described = &_model.inputs[index];
         NSString *wanted = described->name != NULL ? @(described->name) : nil;
         MLFeatureValue *value = wanted != nil ? [input featureValueForName:wanted] : nil;
         if (described->optional != 0 || wanted == nil) {
             continue;
         }
         if (value == nil || value.isUndefined) {
-            charon_ml_features_release(inputs);
-            charon_ml_features_release(outputs);
+            revenant_ml_features_release(inputs);
+            revenant_ml_features_release(outputs);
             free(inputs);
             free(outputs);
-            charon_ml_error(error, CHARON_ML_ERROR_GENERIC,
+            revenant_ml_error(error, REVENANT_ML_ERROR_GENERIC,
                             [NSString stringWithFormat:@"Feature %@ is required but not specified.", wanted]);
             return nil;
         }
@@ -508,34 +508,34 @@
     names = [input.featureNames objectEnumerator];
     while ((name = [names nextObject]) != nil) {
         MLFeatureValue *value = [input featureValueForName:name];
-        charon_ml_value held;
+        revenant_ml_value held;
         if (value == nil || value.isUndefined) {
             continue;
         }
-        held = charon_ml_value_owned_copy([value charonValue]);
-        if (!charon_ml_features_put(inputs, [name UTF8String], held)) {
-            charon_ml_features_release(inputs);
+        held = revenant_ml_value_owned_copy([value revenantValue]);
+        if (!revenant_ml_features_put(inputs, [name UTF8String], held)) {
+            revenant_ml_features_release(inputs);
             free(inputs);
             free(outputs);
-            charon_ml_error(error, CHARON_ML_ERROR_GENERIC,
+            revenant_ml_error(error, REVENANT_ML_ERROR_GENERIC,
                             [NSString stringWithFormat:@"there is no room for a feature named '%@'", name]);
             return nil;
         }
     }
-    if (!charon_ml_predict(&_model, inputs, outputs, message, sizeof message)) {
-        charon_ml_features_release(inputs);
-        charon_ml_features_release(outputs);
+    if (!revenant_ml_predict(&_model, inputs, outputs, message, sizeof message)) {
+        revenant_ml_features_release(inputs);
+        revenant_ml_features_release(outputs);
         free(inputs);
         free(outputs);
-        charon_ml_error(error, CHARON_ML_ERROR_GENERIC, @(message));
+        revenant_ml_error(error, REVENANT_ML_ERROR_GENERIC, @(message));
         return nil;
     }
-    charon_ml_features_release(inputs);
+    revenant_ml_features_release(inputs);
     free(inputs);
     answered = [NSMutableDictionary dictionaryWithCapacity:outputs->count];
     for (index = 0; index < outputs->count; index++) {
         const char *answer_name = outputs->entries[index].name;
-        charon_ml_feature *described = NULL;
+        revenant_ml_feature *described = NULL;
         MLFeatureValue *value;
         MLFeatureType type = MLFeatureTypeInvalid;
         for (size_t out = 0; out < _model.output_count; out++) {
@@ -546,18 +546,18 @@
             }
         }
         if (described != NULL) {
-            type = charon_ml_feature_type_of(described->type);
+            type = revenant_ml_feature_type_of(described->type);
         }
-        value = [MLFeatureValue charon_featureValueWithOwned:&outputs->entries[index].value type:type];
+        value = [MLFeatureValue revenant_featureValueWithOwned:&outputs->entries[index].value type:type];
         if (value == nil || answer_name == nil) {
-            charon_ml_features_release(outputs);
-            charon_ml_error(error, CHARON_ML_ERROR_GENERIC, @"the model's answer had nowhere to go");
+            revenant_ml_features_release(outputs);
+            revenant_ml_error(error, REVENANT_ML_ERROR_GENERIC, @"the model's answer had nowhere to go");
             free(outputs);
             return nil;
         }
         answered[@(answer_name)] = value;
     }
-    charon_ml_features_release(outputs);
+    revenant_ml_features_release(outputs);
     free(outputs);
     return [[MLDictionaryFeatureProvider alloc] initWithDictionary:answered error:error];
 }
@@ -634,7 +634,7 @@
     NSMutableArray<id<MLFeatureProvider>> *answers;
     NSInteger index, count;
     if (inputBatch == nil) {
-        charon_ml_error(error, CHARON_ML_ERROR_FEATURE_TYPE, @"a batch prediction needs a batch");
+        revenant_ml_error(error, REVENANT_ML_ERROR_FEATURE_TYPE, @"a batch prediction needs a batch");
         return nil;
     }
     count = inputBatch.count;
@@ -643,7 +643,7 @@
         id<MLFeatureProvider> one = [inputBatch featuresAtIndex:index];
         id<MLFeatureProvider> answer;
         if (one == nil) {
-            charon_ml_error(error, CHARON_ML_ERROR_FEATURE_TYPE,
+            revenant_ml_error(error, REVENANT_ML_ERROR_FEATURE_TYPE,
                             [NSString stringWithFormat:@"the batch has %ld providers, and there is none at %ld",
                                                        (long)count, (long)index]);
             return nil;
@@ -651,7 +651,7 @@
         answer = [self predictionFromFeatures:one options:options error:error];
         if (answer == nil) {
             if (error != NULL && *error != nil) {
-                charon_ml_error(error, [*error code],
+                revenant_ml_error(error, [*error code],
                                 [NSString stringWithFormat:@"the prediction of element %ld failed: %@",
                                                            (long)index, [*error localizedDescription]]);
             }
@@ -666,26 +666,26 @@
 {
     size_t index;
     if (key == nil || key.name == nil) {
-        charon_ml_error(error, CHARON_ML_ERROR_PARAMETERS, @"a parameter is asked for by its key");
+        revenant_ml_error(error, REVENANT_ML_ERROR_PARAMETERS, @"a parameter is asked for by its key");
         return nil;
     }
     for (index = 0; index < _model.parameter_count; index++) {
-        const charon_ml_parameter *parameter = &_model.parameters[index];
+        const revenant_ml_parameter *parameter = &_model.parameters[index];
         if (parameter->key == NULL || ![key.name isEqualToString:@(parameter->key)]) {
             continue;
         }
         if (key.scope != nil) {
-            charon_ml_error(error, CHARON_ML_ERROR_PARAMETERS,
+            revenant_ml_error(error, REVENANT_ML_ERROR_PARAMETERS,
                             [NSString stringWithFormat:@"'%@' is a parameter of the part called '%@', and this "
                                                        @"model has no part of that name", key.name, key.scope]);
             return nil;
         }
-        if (parameter->type == CHARON_ML_FEATURE_INT64) {
+        if (parameter->type == REVENANT_ML_FEATURE_INT64) {
             return @((int64_t)parameter->number);
         }
         return @(parameter->number);
     }
-    charon_ml_error(error, CHARON_ML_ERROR_PARAMETERS,
+    revenant_ml_error(error, REVENANT_ML_ERROR_PARAMETERS,
                     [NSString stringWithFormat:@"this model has no parameter called '%@'", key.name]);
     return nil;
 }
@@ -693,7 +693,7 @@
 - (MLModelDescription *)modelDescription
 {
     if (_description == nil) {
-        _description = [[MLModelDescription alloc] charon_initWithModel:&_model];
+        _description = [[MLModelDescription alloc] revenant_initWithModel:&_model];
     }
     return _description;
 }
@@ -705,7 +705,7 @@
 
 - (void)dealloc
 {
-    charon_ml_model_release(&_model);
+    revenant_ml_model_release(&_model);
 }
 
 #pragma mark - loading
@@ -720,12 +720,12 @@
         return nil;
     }
     if (url == nil || !url.isFileURL) {
-        charon_ml_error(error, CHARON_ML_ERROR_IO,
+        revenant_ml_error(error, REVENANT_ML_ERROR_IO,
                         @"a model is read from a file, and the URL given is not a file's");
         return nil;
     }
-    if (!charon_ml_model_read(&_model, url.fileSystemRepresentation, message, sizeof message)) {
-        charon_ml_error(error, CHARON_ML_ERROR_GENERIC, @(message));
+    if (!revenant_ml_model_read(&_model, url.fileSystemRepresentation, message, sizeof message)) {
+        revenant_ml_error(error, REVENANT_ML_ERROR_GENERIC, @(message));
         return nil;
     }
     _url = [url copy];
@@ -766,9 +766,9 @@
         NSError *failure = nil;
         MLModel *model = nil;
         if (asset == nil) {
-            charon_ml_error(&failure, CHARON_ML_ERROR_GENERIC, @"there was no model asset to load");
+            revenant_ml_error(&failure, REVENANT_ML_ERROR_GENERIC, @"there was no model asset to load");
         } else {
-            model = [[MLModel alloc] charon_initWithContentsOfAsset:asset configuration:configuration error:&failure];
+            model = [[MLModel alloc] revenant_initWithContentsOfAsset:asset configuration:configuration error:&failure];
         }
         if (handler != nil) {
             handler(model, model != nil ? nil : failure);
@@ -776,7 +776,7 @@
     });
 }
 
-- (instancetype)charon_initWithContentsOfAsset:(MLModelAsset *)asset
+- (instancetype)revenant_initWithContentsOfAsset:(MLModelAsset *)asset
                            configuration:(MLModelConfiguration *)configuration
                                    error:(NSError **)error
 {
@@ -785,9 +785,9 @@
     if (built == nil) {
         return nil;
     }
-    if (!charon_ml_model_read_data(&_model, asset.charon_specificationData.bytes, asset.charon_specificationData.length,
+    if (!revenant_ml_model_read_data(&_model, asset.revenant_specificationData.bytes, asset.revenant_specificationData.length,
                                    message, sizeof message)) {
-        charon_ml_error(error, CHARON_ML_ERROR_GENERIC, @(message));
+        revenant_ml_error(error, REVENANT_ML_ERROR_GENERIC, @(message));
         return nil;
     }
     _configuration = configuration != nil ? configuration : [[MLModelConfiguration alloc] init];
@@ -796,27 +796,27 @@
 
 #pragma mark - compiling
 
-+ (NSURL *)charon_compiledModelAtURL:(NSURL *)modelURL error:(NSError **)error
++ (NSURL *)revenant_compiledModelAtURL:(NSURL *)modelURL error:(NSError **)error
 {
     NSData *container = [NSData dataWithContentsOfFile:modelURL.path];
     NSString *name;
     NSString *directory;
     NSFileManager *files = [NSFileManager defaultManager];
     if (container.length == 0) {
-        charon_ml_error(error, CHARON_ML_ERROR_GENERIC,
+        revenant_ml_error(error, REVENANT_ML_ERROR_GENERIC,
                         [NSString stringWithFormat:@"the model at %@ could not be read", modelURL.path]);
         return nil;
     }
     name = [[[modelURL.path lastPathComponent] stringByDeletingPathExtension]
         stringByAppendingPathExtension:@"mlmodelc"];
     directory = [NSTemporaryDirectory() stringByAppendingPathComponent:
-                                           [@"charon-coreml-" stringByAppendingString:
+                                           [@"revenant-coreml-" stringByAppendingString:
                                                          [[NSUUID UUID] UUIDString]]];
     directory = [directory stringByAppendingPathComponent:name];
     if (![files createDirectoryAtPath:directory withIntermediateDirectories:YES attributes:nil error:NULL] ||
         ![[container copy] writeToFile:[directory stringByAppendingPathComponent:@"coremldata.bin"]
                            atomically:YES]) {
-        charon_ml_error(error, CHARON_ML_ERROR_GENERIC,
+        revenant_ml_error(error, REVENANT_ML_ERROR_GENERIC,
                         [NSString stringWithFormat:@"the bundle at %@ could not be written", directory]);
         return nil;
     }
@@ -826,10 +826,10 @@
 + (NSURL *)compileModelAtURL:(NSURL *)modelURL error:(NSError **)error
 {
     if (modelURL == nil || !modelURL.isFileURL) {
-        charon_ml_error(error, CHARON_ML_ERROR_GENERIC, @"a model is compiled from a file's URL");
+        revenant_ml_error(error, REVENANT_ML_ERROR_GENERIC, @"a model is compiled from a file's URL");
         return nil;
     }
-    return [self charon_compiledModelAtURL:modelURL error:error];
+    return [self revenant_compiledModelAtURL:modelURL error:error];
 }
 
 + (void)compileModelAtURL:(NSURL *)modelURL

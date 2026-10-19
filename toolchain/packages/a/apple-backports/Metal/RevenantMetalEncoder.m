@@ -1,5 +1,5 @@
-#import "CharonMetal.h"
-#import "CharonMetalDebugGroups.h"
+#import "RevenantMetal.h"
+#import "RevenantMetalDebugGroups.h"
 #import <objc/runtime.h>
 
 #pragma clang diagnostic ignored "-Wprotocol"
@@ -18,35 +18,35 @@ static float halfToFloat(uint16_t h)
     return sign ? -value : value;
 }
 
-@implementation CharonMetalEncoder {
-    CharonMetalDevice *_device;
-    CharonMetalPipeline *_pipeline;
-    __strong CharonMetalBuffer *_vertexBuffers[31];
+@implementation RevenantMetalEncoder {
+    RevenantMetalDevice *_device;
+    RevenantMetalPipeline *_pipeline;
+    __strong RevenantMetalBuffer *_vertexBuffers[31];
     NSUInteger _vertexOffsets[31];
-    __strong CharonMetalBuffer *_fragmentBuffers[31];
+    __strong RevenantMetalBuffer *_fragmentBuffers[31];
     NSUInteger _fragmentOffsets[31];
-    __strong CharonMetalTexture *_fragmentTextures[16];
-    __strong CharonMetalSampler *_fragmentSamplers[16];
-    CharonMetalTexture *_target;
+    __strong RevenantMetalTexture *_fragmentTextures[16];
+    __strong RevenantMetalSampler *_fragmentSamplers[16];
+    RevenantMetalTexture *_target;
     MTLViewport _viewport;
     BOOL _viewportSet;
     MTLCullMode _cull;
     MTLWinding _winding;
     BOOL _ended;
     NSUInteger _instance;
-    const CharonPlan *_applied;
+    const RevenantPlan *_applied;
     BOOL _uniformsDirty, _attributesDirty, _texturesDirty, _viewportDirty;
     int _cullApplied;
     MTLWinding _windingApplied;
     uint32_t _enabled;
     GLuint _boundTexture[16];
     NSUInteger _epoch;
-    __strong CharonMetalTexture *_targets[4];
+    __strong RevenantMetalTexture *_targets[4];
     NSUInteger _targetCount;
     BOOL _hasDepth, _hasStencil, _depthDirty;
-    CharonMetalDepthStencil *_depthStencil;
+    RevenantMetalDepthStencil *_depthStencil;
     uint32_t _frontReference, _backReference;
-    __strong CharonMetalHeap *_heaps[8];
+    __strong RevenantMetalHeap *_heaps[8];
     NSUInteger _heapCount;
     NSMutableArray *_groups;
 }
@@ -56,11 +56,11 @@ static float halfToFloat(uint16_t h)
 - (instancetype)initWithDescriptor:(MTLRenderPassDescriptor *)descriptor
 {
     MTLRenderPassColorAttachmentDescriptor *color = descriptor.colorAttachments[0];
-    CharonMetalTexture *texture = (CharonMetalTexture *)color.texture;
-    if (![texture isKindOfClass:[CharonMetalTexture class]])
+    RevenantMetalTexture *texture = (RevenantMetalTexture *)color.texture;
+    if (![texture isKindOfClass:[RevenantMetalTexture class]])
         return nil;
     if ((self = [super init])) {
-        _device = [CharonMetalDevice shared];
+        _device = [RevenantMetalDevice shared];
         [_device acquire];
         _groups = [NSMutableArray array];
         _target = texture;
@@ -68,16 +68,16 @@ static float halfToFloat(uint16_t h)
         _cullApplied = -1;
         _viewportDirty = _viewportSet;
         for (int i = 0; i < 4; i++) {
-            CharonMetalTexture *t = (CharonMetalTexture *)descriptor.colorAttachments[i].texture;
-            if (![t isKindOfClass:[CharonMetalTexture class]])
+            RevenantMetalTexture *t = (RevenantMetalTexture *)descriptor.colorAttachments[i].texture;
+            if (![t isKindOfClass:[RevenantMetalTexture class]])
                 break;
             _targets[_targetCount++] = t;
         }
-        CharonMetalTexture *depth = (CharonMetalTexture *)descriptor.depthAttachment.texture;
-        CharonMetalTexture *stencil = (CharonMetalTexture *)descriptor.stencilAttachment.texture;
-        if (![depth isKindOfClass:[CharonMetalTexture class]] || !(depth.attachmentKind == 1 || depth.attachmentKind == 2))
+        RevenantMetalTexture *depth = (RevenantMetalTexture *)descriptor.depthAttachment.texture;
+        RevenantMetalTexture *stencil = (RevenantMetalTexture *)descriptor.stencilAttachment.texture;
+        if (![depth isKindOfClass:[RevenantMetalTexture class]] || !(depth.attachmentKind == 1 || depth.attachmentKind == 2))
             depth = nil;
-        if (![stencil isKindOfClass:[CharonMetalTexture class]] || !(stencil.attachmentKind == 2 || stencil.attachmentKind == 3))
+        if (![stencil isKindOfClass:[RevenantMetalTexture class]] || !(stencil.attachmentKind == 2 || stencil.attachmentKind == 3))
             stencil = nil;
         _hasDepth = depth != nil;
         _hasStencil = stencil != nil;
@@ -86,7 +86,7 @@ static float halfToFloat(uint16_t h)
         glDisable(GL_POLYGON_OFFSET_FILL);
         glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
         for (NSUInteger i = 0; i < _targetCount; i++) {
-            CharonMetalTexture *t = _targets[i];
+            RevenantMetalTexture *t = _targets[i];
             glBindFramebuffer(GL_FRAMEBUFFER, [t renderTarget]);
             if (depth)
                 glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depth.name, 0);
@@ -138,7 +138,7 @@ static float halfToFloat(uint16_t h)
 
 - (void)setRenderPipelineState:(id<MTLRenderPipelineState>)pipelineState
 {
-    _pipeline = (CharonMetalPipeline *)pipelineState;
+    _pipeline = (RevenantMetalPipeline *)pipelineState;
     _uniformsDirty = _attributesDirty = _texturesDirty = YES;
 }
 
@@ -166,7 +166,7 @@ static float halfToFloat(uint16_t h)
 
 - (void)setDepthStencilState:(id<MTLDepthStencilState>)depthStencilState
 {
-    _depthStencil = (CharonMetalDepthStencil *)depthStencilState;
+    _depthStencil = (RevenantMetalDepthStencil *)depthStencilState;
     _depthDirty = YES;
 }
 
@@ -205,14 +205,14 @@ static float halfToFloat(uint16_t h)
     glScissor((GLint)rect.x, _target.screen ? (GLint)(_target.height - rect.y - rect.height) : (GLint)rect.y, (GLsizei)rect.width, (GLsizei)rect.height);
 }
 
-- (void)charonUseHeaps:(id<MTLHeap> const *)heaps count:(NSUInteger)count
+- (void)revenantUseHeaps:(id<MTLHeap> const *)heaps count:(NSUInteger)count
 {
     _heapCount = 0;
     for (NSUInteger index = 0; index < count && index < 8; index++)
         _heaps[_heapCount++] = heaps[index];
 }
 
-- (void)charonCheckHeapOf:(id)resource what:(const char *)what
+- (void)revenantCheckHeapOf:(id)resource what:(const char *)what
 {
     if (!_heapCount || !resource)
         return;
@@ -223,10 +223,10 @@ static float halfToFloat(uint16_t h)
                 return;
     }
     NSLog(@"Metal: %s of a resource that did not come from one of the %lu heaps this encoder was given; the heaps were %@",
-          what, (unsigned long)_heapCount, [self charonHeapNames]);
+          what, (unsigned long)_heapCount, [self revenantHeapNames]);
 }
 
-- (NSString *)charonHeapNames
+- (NSString *)revenantHeapNames
 {
     NSMutableArray *names = [NSMutableArray array];
     for (NSUInteger index = 0; index < _heapCount; index++)
@@ -237,9 +237,9 @@ static float halfToFloat(uint16_t h)
 
 - (void)setVertexBuffer:(id<MTLBuffer>)buffer offset:(NSUInteger)offset atIndex:(NSUInteger)index
 {
-    [self charonCheckHeapOf:buffer what:"a vertex buffer"];
+    [self revenantCheckHeapOf:buffer what:"a vertex buffer"];
     if (index < 31) {
-        _vertexBuffers[index] = (CharonMetalBuffer *)buffer;
+        _vertexBuffers[index] = (RevenantMetalBuffer *)buffer;
         _vertexOffsets[index] = offset;
         _uniformsDirty = _attributesDirty = YES;
     }
@@ -247,14 +247,14 @@ static float halfToFloat(uint16_t h)
 
 - (void)setVertexBytes:(const void *)bytes length:(NSUInteger)length atIndex:(NSUInteger)index
 {
-    [self setVertexBuffer:(id<MTLBuffer>)[[CharonMetalBuffer alloc] initWithLength:length bytes:bytes] offset:0 atIndex:index];
+    [self setVertexBuffer:(id<MTLBuffer>)[[RevenantMetalBuffer alloc] initWithLength:length bytes:bytes] offset:0 atIndex:index];
 }
 
 - (void)setFragmentBuffer:(id<MTLBuffer>)buffer offset:(NSUInteger)offset atIndex:(NSUInteger)index
 {
-    [self charonCheckHeapOf:buffer what:"a fragment buffer"];
+    [self revenantCheckHeapOf:buffer what:"a fragment buffer"];
     if (index < 31) {
-        _fragmentBuffers[index] = (CharonMetalBuffer *)buffer;
+        _fragmentBuffers[index] = (RevenantMetalBuffer *)buffer;
         _fragmentOffsets[index] = offset;
         _uniformsDirty = YES;
     }
@@ -262,15 +262,15 @@ static float halfToFloat(uint16_t h)
 
 - (void)setFragmentBytes:(const void *)bytes length:(NSUInteger)length atIndex:(NSUInteger)index
 {
-    [self setFragmentBuffer:(id<MTLBuffer>)[[CharonMetalBuffer alloc] initWithLength:length bytes:bytes] offset:0 atIndex:index];
+    [self setFragmentBuffer:(id<MTLBuffer>)[[RevenantMetalBuffer alloc] initWithLength:length bytes:bytes] offset:0 atIndex:index];
 }
 
 - (void)setFragmentTexture:(id<MTLTexture>)texture atIndex:(NSUInteger)index
 {
-    [self charonCheckHeapOf:texture what:"a fragment texture"];
+    [self revenantCheckHeapOf:texture what:"a fragment texture"];
     if (index < 16)
     {
-        _fragmentTextures[index] = (CharonMetalTexture *)texture;
+        _fragmentTextures[index] = (RevenantMetalTexture *)texture;
         _texturesDirty = YES;
     }
 }
@@ -279,24 +279,24 @@ static float halfToFloat(uint16_t h)
 {
     if (index < 16)
     {
-        _fragmentSamplers[index] = (CharonMetalSampler *)sampler;
+        _fragmentSamplers[index] = (RevenantMetalSampler *)sampler;
         _texturesDirty = YES;
     }
 }
 
-static void uploadUniforms(const CharonUniformPlan *plans, unsigned count, CharonMetalBuffer *__strong *buffers, const NSUInteger *offsets, NSUInteger instance)
+static void uploadUniforms(const RevenantUniformPlan *plans, unsigned count, RevenantMetalBuffer *__strong *buffers, const NSUInteger *offsets, NSUInteger instance)
 {
     for (unsigned k = 0; k < count; k++) {
-        const CharonUniformPlan *u = &plans[k];
-        CharonMetalBuffer *buffer = u->buffer < 31 ? buffers[u->buffer] : nil;
+        const RevenantUniformPlan *u = &plans[k];
+        RevenantMetalBuffer *buffer = u->buffer < 31 ? buffers[u->buffer] : nil;
         if (!buffer)
             continue;
         const uint8_t *p = (const uint8_t *)buffer.bytes + offsets[u->buffer] + u->offset + u->instanceStride * instance;
         int n = u->components;
-        if (u->scalar == CharonScalarFloat || u->scalar == CharonScalarHalf) {
+        if (u->scalar == RevenantScalarFloat || u->scalar == RevenantScalarHalf) {
             GLfloat converted[4];
             const GLfloat *f = (const GLfloat *)p;
-            if (u->scalar == CharonScalarHalf) {
+            if (u->scalar == RevenantScalarHalf) {
                 for (int i = 0; i < n; i++)
                     converted[i] = halfToFloat(((const uint16_t *)p)[i]);
                 f = converted;
@@ -310,7 +310,7 @@ static void uploadUniforms(const CharonUniformPlan *plans, unsigned count, Charo
         } else {
             GLint v[4] = {0, 0, 0, 0};
             for (int i = 0; i < n; i++)
-                v[i] = u->scalar == CharonScalarI32 ? ((const int32_t *)p)[i] : u->scalar == CharonScalarI16 ? ((const int16_t *)p)[i] : ((const int8_t *)p)[i];
+                v[i] = u->scalar == RevenantScalarI32 ? ((const int32_t *)p)[i] : u->scalar == RevenantScalarI16 ? ((const int16_t *)p)[i] : ((const int8_t *)p)[i];
             switch (n) {
             case 1: glUniform1iv(u->location, 1, v); break;
             case 2: glUniform2iv(u->location, 1, v); break;
@@ -353,7 +353,7 @@ static const GLfloat *rampOf(NSUInteger count)
 
 - (void)applyDepth
 {
-    const CharonDepthStencil *state = _depthStencil.state;
+    const RevenantDepthStencil *state = _depthStencil.state;
     if (_hasDepth) {
         glEnable(GL_DEPTH_TEST);
         glDepthFunc(state ? state->depthFunction : GL_ALWAYS);
@@ -379,7 +379,7 @@ static const GLfloat *rampOf(NSUInteger count)
 {
     if (!_pipeline)
         return NO;
-    const CharonPlan *plan = _pipeline.plan;
+    const RevenantPlan *plan = _pipeline.plan;
     if (plan != _applied) {
         glUseProgram(plan->program);
         if (plan->blending) {
@@ -425,8 +425,8 @@ static const GLfloat *rampOf(NSUInteger count)
     }
     if (_attributesDirty) {
         for (unsigned k = 0; k < plan->attributeCount; k++) {
-            const CharonAttributePlan *a = &plan->attributes[k];
-            CharonMetalBuffer *buffer = a->buffer < 31 ? _vertexBuffers[a->buffer] : nil;
+            const RevenantAttributePlan *a = &plan->attributes[k];
+            RevenantMetalBuffer *buffer = a->buffer < 31 ? _vertexBuffers[a->buffer] : nil;
             if (!buffer) {
                 [self setAttribute:a->location enabled:NO];
                 continue;
@@ -435,8 +435,8 @@ static const GLfloat *rampOf(NSUInteger count)
             glVertexAttribPointer(a->location, a->components, a->type, GL_FALSE, (GLsizei)a->stride, (const uint8_t *)buffer.bytes + _vertexOffsets[a->buffer] + a->offset);
         }
         for (unsigned k = 0; k < plan->inputCount; k++) {
-            const CharonInputPlan *in = &plan->inputs[k];
-            CharonMetalBuffer *buffer = in->buffer < 31 ? _vertexBuffers[in->buffer] : nil;
+            const RevenantInputPlan *in = &plan->inputs[k];
+            RevenantMetalBuffer *buffer = in->buffer < 31 ? _vertexBuffers[in->buffer] : nil;
             if (!buffer) {
                 [self setAttribute:in->location enabled:NO];
                 continue;
@@ -448,7 +448,7 @@ static const GLfloat *rampOf(NSUInteger count)
             } else {
                 NSUInteger element = in->step == MTLVertexStepFunctionConstant ? 0 : _instance / in->stepRate;
                 GLfloat v[4];
-                CharonMetalDecodeVertex(in->format, base + element * in->stride, v);
+                RevenantMetalDecodeVertex(in->format, base + element * in->stride, v);
                 [self setAttribute:in->location enabled:NO];
                 glVertexAttrib4f(in->location, v[0], v[1], v[2], v[3]);
             }
@@ -460,15 +460,15 @@ static const GLfloat *rampOf(NSUInteger count)
         uploadUniforms(plan->fragmentUniforms, plan->fragmentUniformCount, _fragmentBuffers, _fragmentOffsets, _instance);
         _uniformsDirty = NO;
     }
-    if (_epoch != CharonMetalBindEpoch) {
+    if (_epoch != RevenantMetalBindEpoch) {
         memset(_boundTexture, 0, sizeof _boundTexture);
-        _epoch = CharonMetalBindEpoch;
+        _epoch = RevenantMetalBindEpoch;
         _texturesDirty = YES;
     }
     if (_texturesDirty) {
         for (unsigned k = 0; k < plan->textureCount; k++) {
             unsigned unit = plan->textures[k].unit;
-            CharonMetalTexture *texture = unit < 8 ? _fragmentTextures[unit] : nil;
+            RevenantMetalTexture *texture = unit < 8 ? _fragmentTextures[unit] : nil;
             if (!texture)
                 continue;
             glActiveTexture(GL_TEXTURE0 + unit);
@@ -476,11 +476,11 @@ static const GLfloat *rampOf(NSUInteger count)
                 glBindTexture(GL_TEXTURE_2D, texture.name);
                 _boundTexture[unit] = texture.name;
             }
-            CharonMetalSampler *sampler = _fragmentSamplers[unit];
+            RevenantMetalSampler *sampler = _fragmentSamplers[unit];
             int compare = plan->textures[k].compare ? 1 : 0;
             if (sampler && (texture.appliedSampler != sampler || texture.appliedCompare != compare)) {
                 BOOL depth = texture.attachmentKind != 0;
-                if (!depth && sampler.minFilter == GL_LINEAR && ![texture charonCanFilter]) {
+                if (!depth && sampler.minFilter == GL_LINEAR && ![texture revenantCanFilter]) {
                     static NSMutableSet *refused;
                     static dispatch_once_t once;
                     dispatch_once(&once, ^{ refused = [NSMutableSet set]; });
@@ -505,7 +505,7 @@ static const GLfloat *rampOf(NSUInteger count)
             glUniform1i(plan->textures[k].location, (GLint)unit);
         }
         for (unsigned k = 0; k < plan->fetchCount; k++) {
-            CharonMetalTexture *attachment = plan->fetches[k].attachment < _targetCount ? _targets[plan->fetches[k].attachment] : nil;
+            RevenantMetalTexture *attachment = plan->fetches[k].attachment < _targetCount ? _targets[plan->fetches[k].attachment] : nil;
             if (!attachment)
                 continue;
             unsigned unit = plan->fetches[k].unit;
@@ -542,7 +542,7 @@ static GLenum primitive(MTLPrimitiveType type)
 
 - (void)issue:(GLenum)mode first:(GLint)first count:(GLsizei)count indices:(const void *)indices type:(GLenum)type
 {
-    const CharonPlan *plan = _pipeline.plan;
+    const RevenantPlan *plan = _pipeline.plan;
     if (plan->outputCount == 1 && plan->outputIndex[0] == 0) {
         if (indices)
             glDrawElements(mode, count, type, indices);
@@ -554,7 +554,7 @@ static GLenum primitive(MTLPrimitiveType type)
         unsigned k = plan->outputIndex[n];
         if (k >= _targetCount)
             continue;
-        const CharonBlend *b = &plan->blends[k];
+        const RevenantBlend *b = &plan->blends[k];
         glBindFramebuffer(GL_FRAMEBUFFER, [_targets[k] renderTarget]);
         if (b->blending) {
             glEnable(GL_BLEND);
@@ -614,7 +614,7 @@ static GLenum primitive(MTLPrimitiveType type)
 
 - (void)drawIndexedPrimitives:(MTLPrimitiveType)primitiveType indexCount:(NSUInteger)indexCount indexType:(MTLIndexType)indexType indexBuffer:(id<MTLBuffer>)indexBuffer indexBufferOffset:(NSUInteger)indexBufferOffset
 {
-    CharonMetalBuffer *buffer = (CharonMetalBuffer *)indexBuffer;
+    RevenantMetalBuffer *buffer = (RevenantMetalBuffer *)indexBuffer;
     const uint8_t *indices = (const uint8_t *)buffer.bytes + indexBufferOffset;
     NSUInteger maximum = 0;
     for (NSUInteger i = 0; _pipeline.plan->vertexId >= 0 && i < indexCount; i++) {
@@ -629,12 +629,12 @@ static GLenum primitive(MTLPrimitiveType type)
 
 - (void)pushDebugGroup:(NSString *)string
 {
-    CharonMetalPushDebugGroup(_groups, string);
+    RevenantMetalPushDebugGroup(_groups, string);
 }
 
 - (void)popDebugGroup
 {
-    CharonMetalPopDebugGroup(_groups, self);
+    RevenantMetalPopDebugGroup(_groups, self);
 }
 
 - (void)insertDebugSignpost:(NSString *)string

@@ -5,7 +5,7 @@
 #include <math.h>
 #include <string.h>
 
-static inline BOOL CharonMPSDataTypeIsElement(MPSDataType type)
+static inline BOOL RevenantMPSDataTypeIsElement(MPSDataType type)
 {
     switch (type) {
     case MPSDataTypeFloat32:
@@ -22,12 +22,12 @@ static inline BOOL CharonMPSDataTypeIsElement(MPSDataType type)
     }
 }
 
-static inline BOOL CharonMPSDataTypeIsFloat(MPSDataType type)
+static inline BOOL RevenantMPSDataTypeIsFloat(MPSDataType type)
 {
     return type == MPSDataTypeFloat32 || type == MPSDataTypeFloat16;
 }
 
-static inline float CharonMPSHalfToFloat(uint16_t half)
+static inline float RevenantMPSHalfToFloat(uint16_t half)
 {
     uint32_t sign = ((uint32_t)half & 0x8000u) << 16;
     uint32_t exponent = ((uint32_t)half >> 10) & 0x1Fu;
@@ -54,7 +54,7 @@ static inline float CharonMPSHalfToFloat(uint16_t half)
     return value;
 }
 
-static inline uint16_t CharonMPSFloatToHalfRounded(float value, int awayFromZero)
+static inline uint16_t RevenantMPSFloatToHalfRounded(float value, int awayFromZero)
 {
     uint32_t bits, sign, mantissa, half, rest, halfway;
     int32_t biased, exponent;
@@ -88,12 +88,12 @@ static inline uint16_t CharonMPSFloatToHalfRounded(float value, int awayFromZero
     return (uint16_t)(sign | half);
 }
 
-static inline uint16_t CharonMPSFloatToHalf(float value)
+static inline uint16_t RevenantMPSFloatToHalf(float value)
 {
-    return CharonMPSFloatToHalfRounded(value, 0);
+    return RevenantMPSFloatToHalfRounded(value, 0);
 }
 
-static inline double CharonMPSLoad(const void *bytes, MPSDataType type, size_t index)
+static inline double RevenantMPSLoad(const void *bytes, MPSDataType type, size_t index)
 {
     switch (type) {
     case MPSDataTypeFloat32: {
@@ -102,7 +102,7 @@ static inline double CharonMPSLoad(const void *bytes, MPSDataType type, size_t i
         return (double)value;
     }
     case MPSDataTypeFloat16:
-        return (double)CharonMPSHalfToFloat(((const uint16_t *)bytes)[index]);
+        return (double)RevenantMPSHalfToFloat(((const uint16_t *)bytes)[index]);
     case MPSDataTypeInt8:
         return (double)((const int8_t *)bytes)[index];
     case MPSDataTypeInt16:
@@ -122,13 +122,13 @@ static inline double CharonMPSLoad(const void *bytes, MPSDataType type, size_t i
     }
 }
 
-static inline void CharonMPSStoreRounded(void *bytes, MPSDataType type, size_t index, double value,
+static inline void RevenantMPSStoreRounded(void *bytes, MPSDataType type, size_t index, double value,
                                          int awayFromZero)
 {
-#if defined(CHARON_PLANT)
-#if CHARON_PLANT == 1
+#if defined(REVENANT_PLANT)
+#if REVENANT_PLANT == 1
     value = value + 1.0;
-#elif CHARON_PLANT == 2
+#elif REVENANT_PLANT == 2
     if (index == 0)
         value = value + 1.0;
 #endif
@@ -140,7 +140,7 @@ static inline void CharonMPSStoreRounded(void *bytes, MPSDataType type, size_t i
         break;
     }
     case MPSDataTypeFloat16:
-        ((uint16_t *)bytes)[index] = CharonMPSFloatToHalfRounded((float)value, awayFromZero);
+        ((uint16_t *)bytes)[index] = RevenantMPSFloatToHalfRounded((float)value, awayFromZero);
         break;
     case MPSDataTypeInt8:
         ((int8_t *)bytes)[index] = (int8_t)value;
@@ -168,9 +168,9 @@ static inline void CharonMPSStoreRounded(void *bytes, MPSDataType type, size_t i
     }
 }
 
-static inline void CharonMPSStore(void *bytes, MPSDataType type, size_t index, double value)
+static inline void RevenantMPSStore(void *bytes, MPSDataType type, size_t index, double value)
 {
-    CharonMPSStoreRounded(bytes, type, index, value, 0);
+    RevenantMPSStoreRounded(bytes, type, index, value, 0);
 }
 
 typedef struct {
@@ -182,11 +182,11 @@ typedef struct {
     NSUInteger rows;
     NSUInteger columns;
     NSUInteger matrices;
-} CharonMPSMatrixView;
+} RevenantMPSMatrixView;
 
-static inline CharonMPSMatrixView CharonMPSMatrixViewOf(MPSMatrix *matrix)
+static inline RevenantMPSMatrixView RevenantMPSMatrixViewOf(MPSMatrix *matrix)
 {
-    CharonMPSMatrixView view;
+    RevenantMPSMatrixView view;
     view.bytes = (char *)[matrix.data contents] + matrix.offset;
     view.dataType = matrix.dataType;
     view.elementSize = MPSSizeofMPSDataType(matrix.dataType);
@@ -198,12 +198,12 @@ static inline CharonMPSMatrixView CharonMPSMatrixViewOf(MPSMatrix *matrix)
     return view;
 }
 
-static inline void *CharonMPSMatrixElement(const CharonMPSMatrixView *view, NSUInteger matrix, NSUInteger row, NSUInteger column)
+static inline void *RevenantMPSMatrixElement(const RevenantMPSMatrixView *view, NSUInteger matrix, NSUInteger row, NSUInteger column)
 {
     return (char *)view->bytes + matrix * view->matrixBytes + row * view->rowBytes + column * view->elementSize;
 }
 
-static inline BOOL CharonMPSMatrixHolds(const CharonMPSMatrixView *view, NSUInteger matrix, NSUInteger originRow, NSUInteger originColumn, NSUInteger rows, NSUInteger columns)
+static inline BOOL RevenantMPSMatrixHolds(const RevenantMPSMatrixView *view, NSUInteger matrix, NSUInteger originRow, NSUInteger originColumn, NSUInteger rows, NSUInteger columns)
 {
     if (matrix >= view->matrices)
         return NO;
@@ -221,11 +221,11 @@ typedef struct {
     size_t vectorBytes;
     NSUInteger length;
     NSUInteger vectors;
-} CharonMPSVectorView;
+} RevenantMPSVectorView;
 
-static inline CharonMPSVectorView CharonMPSVectorViewOf(MPSVector *vector)
+static inline RevenantMPSVectorView RevenantMPSVectorViewOf(MPSVector *vector)
 {
-    CharonMPSVectorView view;
+    RevenantMPSVectorView view;
     view.bytes = (char *)[vector.data contents] + vector.offset;
     view.dataType = vector.dataType;
     view.elementSize = MPSSizeofMPSDataType(vector.dataType);
@@ -235,17 +235,17 @@ static inline CharonMPSVectorView CharonMPSVectorViewOf(MPSVector *vector)
     return view;
 }
 
-static inline void *CharonMPSVectorElement(const CharonMPSVectorView *view, NSUInteger index, NSUInteger component)
+static inline void *RevenantMPSVectorElement(const RevenantMPSVectorView *view, NSUInteger index, NSUInteger component)
 {
     return (char *)view->bytes + index * view->vectorBytes + component * view->elementSize;
 }
 
-static inline BOOL CharonMPSVectorHolds(const CharonMPSVectorView *view, NSUInteger index, NSUInteger length)
+static inline BOOL RevenantMPSVectorHolds(const RevenantMPSVectorView *view, NSUInteger index, NSUInteger length)
 {
     return index < view->vectors && length <= view->length;
 }
 
-static inline double CharonMPSInverseNormal(double p)
+static inline double RevenantMPSInverseNormal(double p)
 {
     static const double a[6] = {-3.969683028665376e+01, 2.209460984245205e+02, -2.759285104469687e+02,
                                  1.383577518672690e+02, -3.066479806614716e+01, 2.506628277459239e+00};
@@ -275,7 +275,7 @@ static inline double CharonMPSInverseNormal(double p)
             ((((d[0] * q + d[1]) * q + d[2]) * q + d[3]) * q + 1.0);
 }
 
-static inline void CharonMPSBatch(NSUInteger batchStart, NSUInteger batchSize, NSUInteger available, NSUInteger *start, NSUInteger *count)
+static inline void RevenantMPSBatch(NSUInteger batchStart, NSUInteger batchSize, NSUInteger available, NSUInteger *start, NSUInteger *count)
 {
     NSUInteger first = batchStart < available ? batchStart : available;
     NSUInteger last = available;
@@ -285,35 +285,35 @@ static inline void CharonMPSBatch(NSUInteger batchStart, NSUInteger batchSize, N
     *count = last - first;
 }
 
-#define CharonMPSRefuse(...) NSLog(__VA_ARGS__)
+#define RevenantMPSRefuse(...) NSLog(__VA_ARGS__)
 
-@interface MPSPredicate (CharonMPS)
-- (BOOL)charon_mps_permitsExecution;
+@interface MPSPredicate (RevenantMPS)
+- (BOOL)revenant_mps_permitsExecution;
 @end
 
-@interface MPSStateResourceList (CharonMPS)
-- (NSArray<NSNumber *> *)charon_mps_bufferSizes;
-- (NSArray<MTLTextureDescriptor *> *)charon_mps_textureDescriptors;
+@interface MPSStateResourceList (RevenantMPS)
+- (NSArray<NSNumber *> *)revenant_mps_bufferSizes;
+- (NSArray<MTLTextureDescriptor *> *)revenant_mps_textureDescriptors;
 @end
 
-@interface MPSState (CharonMPS)
-- (void)charon_mps_appendBuffer:(size_t)size;
-- (void)charon_mps_appendTexture:(MTLTextureDescriptor *)descriptor;
-- (void)charon_mps_appendResource:(id<MTLResource>)resource;
+@interface MPSState (RevenantMPS)
+- (void)revenant_mps_appendBuffer:(size_t)size;
+- (void)revenant_mps_appendTexture:(MTLTextureDescriptor *)descriptor;
+- (void)revenant_mps_appendResource:(id<MTLResource>)resource;
 @end
 
-@interface MPSTemporaryMatrix (CharonMPS)
-- (instancetype)charon_mps_withReadCount:(NSUInteger)readCount;
+@interface MPSTemporaryMatrix (RevenantMPS)
+- (instancetype)revenant_mps_withReadCount:(NSUInteger)readCount;
 @end
 
-@interface MPSTemporaryVector (CharonMPS)
-- (instancetype)charon_mps_withReadCount:(NSUInteger)readCount;
+@interface MPSTemporaryVector (RevenantMPS)
+- (instancetype)revenant_mps_withReadCount:(NSUInteger)readCount;
 @end
 
-static inline BOOL CharonMPSCommandBufferPermits(id<MTLCommandBuffer> commandBuffer)
+static inline BOOL RevenantMPSCommandBufferPermits(id<MTLCommandBuffer> commandBuffer)
 {
     if ([commandBuffer isKindOfClass:[MPSCommandBuffer class]])
-        return [[(MPSCommandBuffer *)commandBuffer predicate] charon_mps_permitsExecution];
+        return [[(MPSCommandBuffer *)commandBuffer predicate] revenant_mps_permitsExecution];
     return YES;
 }
 
@@ -322,63 +322,63 @@ typedef struct {
     float a, b, c;
     const float *prelu;
     NSUInteger channels;
-} CharonMPSNeuron;
+} RevenantMPSNeuron;
 
-static inline double CharonMPSNeuronA(const CharonMPSNeuron *neuron, NSUInteger channel)
+static inline double RevenantMPSNeuronA(const RevenantMPSNeuron *neuron, NSUInteger channel)
 {
     return neuron->prelu ? (double)neuron->prelu[channel] : (double)neuron->a;
 }
 
-@interface MPSMatrixNeuron (CharonMPS)
-- (CharonMPSNeuron)charon_mps_neuron;
+@interface MPSMatrixNeuron (RevenantMPS)
+- (RevenantMPSNeuron)revenant_mps_neuron;
 @end
 
-@interface MPSMatrixNeuronGradient (CharonMPS)
-- (CharonMPSNeuron)charon_mps_neuron;
+@interface MPSMatrixNeuronGradient (RevenantMPS)
+- (RevenantMPSNeuron)revenant_mps_neuron;
 @end
 
-@interface MPSMatrixFullyConnected (CharonMPS)
-- (CharonMPSNeuron)charon_mps_neuron;
+@interface MPSMatrixFullyConnected (RevenantMPS)
+- (RevenantMPSNeuron)revenant_mps_neuron;
 @end
 
-@interface MPSMatrixBatchNormalization (CharonMPS)
-- (CharonMPSNeuron)charon_mps_neuron;
+@interface MPSMatrixBatchNormalization (RevenantMPS)
+- (RevenantMPSNeuron)revenant_mps_neuron;
 @end
 
-@interface MPSMatrixBatchNormalizationGradient (CharonMPS)
-- (CharonMPSNeuron)charon_mps_neuron;
+@interface MPSMatrixBatchNormalizationGradient (RevenantMPS)
+- (RevenantMPSNeuron)revenant_mps_neuron;
 @end
 
-@interface MPSMatrixSum (CharonMPS)
-- (CharonMPSNeuron)charon_mps_neuron;
+@interface MPSMatrixSum (RevenantMPS)
+- (RevenantMPSNeuron)revenant_mps_neuron;
 @end
 
-@interface MPSMatrixRandom (CharonMPS)
-- (id)initWithDevice:(id<MTLDevice>)device charonRandom:(BOOL)philox;
-- (id)charon_mps_configureWithDataType:(MPSDataType)dataType
+@interface MPSMatrixRandom (RevenantMPS)
+- (id)initWithDevice:(id<MTLDevice>)device revenantRandom:(BOOL)philox;
+- (id)revenant_mps_configureWithDataType:(MPSDataType)dataType
                                   seed:(uint32_t)seed
                             distribution:(MPSMatrixRandomDistributionDescriptor *)distribution;
-- (uint32_t)charon_mps_wordAtIndex:(NSUInteger)index;
-- (void)charon_mps_batchOver:(NSUInteger)available first:(NSUInteger *)first count:(NSUInteger *)count;
+- (uint32_t)revenant_mps_wordAtIndex:(NSUInteger)index;
+- (void)revenant_mps_batchOver:(NSUInteger)available first:(NSUInteger *)first count:(NSUInteger *)count;
 @end
 
-@interface MPSNNOptimizer (CharonMPS)
-- (instancetype)charon_initWithDevice:(id<MTLDevice>)device;
+@interface MPSNNOptimizer (RevenantMPS)
+- (instancetype)revenant_initWithDevice:(id<MTLDevice>)device;
 @end
 
-@interface MPSMatrixSoftMax (CharonMPS)
-- (void)charon_mps_setLogarithmic:(BOOL)logarithmic;
+@interface MPSMatrixSoftMax (RevenantMPS)
+- (void)revenant_mps_setLogarithmic:(BOOL)logarithmic;
 @end
 
-@interface MPSMatrixCopyDescriptor (CharonMPS)
-- (id)charon_mps_withCount:(NSUInteger)count;
-- (NSUInteger)charon_mps_count;
-- (MPSMatrix *)charon_mps_sourceAtIndex:(NSUInteger)index;
-- (MPSMatrix *)charon_mps_destinationAtIndex:(NSUInteger)index;
-- (MPSMatrixCopyOffsets)charon_mps_offsetsAtIndex:(NSUInteger)index;
+@interface MPSMatrixCopyDescriptor (RevenantMPS)
+- (id)revenant_mps_withCount:(NSUInteger)count;
+- (NSUInteger)revenant_mps_count;
+- (MPSMatrix *)revenant_mps_sourceAtIndex:(NSUInteger)index;
+- (MPSMatrix *)revenant_mps_destinationAtIndex:(NSUInteger)index;
+- (MPSMatrixCopyOffsets)revenant_mps_offsetsAtIndex:(NSUInteger)index;
 @end
 
-static inline void CharonMPSConsumeReadCount(id object)
+static inline void RevenantMPSConsumeReadCount(id object)
 {
     if ([object isKindOfClass:[MPSTemporaryMatrix class]] || [object isKindOfClass:[MPSTemporaryVector class]]) {
         NSUInteger count = [(MPSTemporaryVector *)object readCount];
@@ -393,10 +393,10 @@ static inline void CharonMPSConsumeReadCount(id object)
     }
 }
 
-static inline size_t CharonMPSRowBytesForColumns(NSUInteger columns, MPSDataType dataType)
+static inline size_t RevenantMPSRowBytesForColumns(NSUInteger columns, MPSDataType dataType)
 {
     size_t elementSize = MPSSizeofMPSDataType(dataType);
-    size_t alignment = CharonMPSDataTypeIsFloat(dataType) ? 16 : 4 * elementSize;
+    size_t alignment = RevenantMPSDataTypeIsFloat(dataType) ? 16 : 4 * elementSize;
     if (columns == 0)
         return 0;
     if (columns == 1)
@@ -404,7 +404,7 @@ static inline size_t CharonMPSRowBytesForColumns(NSUInteger columns, MPSDataType
     return (columns * elementSize + alignment - 1) / alignment * alignment;
 }
 
-static inline double CharonMPSApplyNeuron(MPSCNNNeuronType type, double x, double a, double b, double c, double aPerChannel)
+static inline double RevenantMPSApplyNeuron(MPSCNNNeuronType type, double x, double a, double b, double c, double aPerChannel)
 {
     switch (type) {
     case MPSCNNNeuronTypeNone:
@@ -451,7 +451,7 @@ static inline double CharonMPSApplyNeuron(MPSCNNNeuronType type, double x, doubl
     }
 }
 
-static inline double CharonMPSApplyNeuronGradient(MPSCNNNeuronType type, double x, double y, double a, double b, double c, double aPerChannel)
+static inline double RevenantMPSApplyNeuronGradient(MPSCNNNeuronType type, double x, double y, double a, double b, double c, double aPerChannel)
 {
     switch (type) {
     case MPSCNNNeuronTypeNone:

@@ -13,7 +13,7 @@ python3 "$here/tables.py" --check
 
 # The port's own API name is renamed in its own translation unit, so this one can hold the port's answers
 # and the host's side by side.
-xcrun clang -fobjc-arc -w -Dquadrature_integrate=charon_host_quadrature_integrate \
+xcrun clang -fobjc-arc -w -Dquadrature_integrate=revenant_host_quadrature_integrate \
     -I"$ACCELERATE" -c "$ACCELERATE/Quadrature10.m" -o "$build/Quadrature10.o"
 xcrun clang -fobjc-arc -Wall -Wno-deprecated-declarations "$here/differential.m" "$build/Quadrature10.o" \
     -framework Foundation -framework Accelerate -o "$build/differential"

@@ -12,7 +12,7 @@
 #include <mutex>
 #include <optional>
 
-namespace shade {
+namespace emulator {
 
 std::optional<CompatibilityKernel::MachReceiveResult>
 CompatibilityKernel::receive_kevent_mach_message(

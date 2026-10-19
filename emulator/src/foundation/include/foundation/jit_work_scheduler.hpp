@@ -15,7 +15,7 @@
 
 #include "foundation/jit_work_policy.hpp"
 
-namespace shade {
+namespace emulator {
 
 enum class JitScheduledTarget : std::uint8_t {
     NativeCode,

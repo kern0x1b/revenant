@@ -6,7 +6,7 @@
 
 #include <cstdint>
 
-namespace shade {
+namespace emulator {
 
 enum class DarwinAddressLayout { ClassicArm, ExpandedArmSharedRegion };
 

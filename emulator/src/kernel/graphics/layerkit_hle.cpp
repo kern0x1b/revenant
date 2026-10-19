@@ -19,7 +19,7 @@
 #include <utility>
 #include <vector>
 
-namespace shade {
+namespace emulator {
 namespace {
 
     constexpr const char* layerkit_image = "LayerKit.framework/LayerKit";

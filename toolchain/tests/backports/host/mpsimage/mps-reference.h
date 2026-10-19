@@ -1,5 +1,5 @@
-#ifndef CHARON_MPS_REFERENCE_H
-#define CHARON_MPS_REFERENCE_H
+#ifndef REVENANT_MPS_REFERENCE_H
+#define REVENANT_MPS_REFERENCE_H
 
 #include <math.h>
 #include <stdint.h>
@@ -7,24 +7,24 @@
 #include <string.h>
 
 typedef enum {
-    CharonRefToZero,
-    CharonRefToZeroInverse,
-    CharonRefBinary,
-    CharonRefBinaryInverse,
-    CharonRefTruncate,
-} CharonRefThreshold;
+    RevenantRefToZero,
+    RevenantRefToZeroInverse,
+    RevenantRefBinary,
+    RevenantRefBinaryInverse,
+    RevenantRefTruncate,
+} RevenantRefThreshold;
 
 typedef enum {
-    CharonRefAdd,
-    CharonRefSubtract,
-    CharonRefMultiply,
-    CharonRefDivide,
-} CharonRefOperation;
+    RevenantRefAdd,
+    RevenantRefSubtract,
+    RevenantRefMultiply,
+    RevenantRefDivide,
+} RevenantRefOperation;
 
 static NSUInteger gCompared = 0;
 static NSUInteger gMismatches = 0;
 
-static double CharonOneUlp(double value)
+static double RevenantOneUlp(double value)
 {
     float f = (float)value;
     if (!(f == f))
@@ -44,35 +44,35 @@ static double CharonOneUlp(double value)
     return delta < 0.0 ? -delta : delta;
 }
 
-static double CharonReferenceThreshold(CharonRefThreshold which, double src, double threshold, double maximum)
+static double RevenantReferenceThreshold(RevenantRefThreshold which, double src, double threshold, double maximum)
 {
     switch (which) {
-    case CharonRefToZero: return src > threshold ? src : 0.0;
-    case CharonRefToZeroInverse: return src > threshold ? 0.0 : src;
-    case CharonRefBinary: return src > threshold ? maximum : 0.0;
-    case CharonRefBinaryInverse: return src > threshold ? 0.0 : maximum;
-    case CharonRefTruncate: return src > threshold ? threshold : src;
+    case RevenantRefToZero: return src > threshold ? src : 0.0;
+    case RevenantRefToZeroInverse: return src > threshold ? 0.0 : src;
+    case RevenantRefBinary: return src > threshold ? maximum : 0.0;
+    case RevenantRefBinaryInverse: return src > threshold ? 0.0 : maximum;
+    case RevenantRefTruncate: return src > threshold ? threshold : src;
     }
     return src;
 }
 
-static double CharonReferenceArithmetic(CharonRefOperation op, double primary, double secondary)
+static double RevenantReferenceArithmetic(RevenantRefOperation op, double primary, double secondary)
 {
     switch (op) {
-    case CharonRefAdd: return primary + secondary;
-    case CharonRefSubtract: return primary - secondary;
-    case CharonRefMultiply: return primary * secondary;
-    case CharonRefDivide: return secondary == 0.0 ? 0.0 : primary / secondary;
+    case RevenantRefAdd: return primary + secondary;
+    case RevenantRefSubtract: return primary - secondary;
+    case RevenantRefMultiply: return primary * secondary;
+    case RevenantRefDivide: return secondary == 0.0 ? 0.0 : primary / secondary;
     }
     return primary;
 }
 
-static void CharonRecord(const char *name, NSUInteger index, double want, double got)
+static void RevenantRecord(const char *name, NSUInteger index, double want, double got)
 {
     gCompared++;
     if (want == 0.0 && got == 0.0)
         return;
-    double ulp = CharonOneUlp(want);
+    double ulp = RevenantOneUlp(want);
     if (fabs(got - want) > ulp) {
         gMismatches++;
         printf("  MISMATCH %s [%lu] reference %.9g port %.9g, one ulp %.3g\n",
@@ -80,31 +80,31 @@ static void CharonRecord(const char *name, NSUInteger index, double want, double
     }
 }
 
-static void CharonCompareUnary(const char *name, const float *src, NSUInteger n, const float *out,
-                              CharonRefThreshold kind, double threshold, double maximum)
+static void RevenantCompareUnary(const char *name, const float *src, NSUInteger n, const float *out,
+                              RevenantRefThreshold kind, double threshold, double maximum)
 {
     printf("reference %s %lu", name, (unsigned long)n);
     for (NSUInteger i = 0; i < n; i++) {
-        double want = CharonReferenceThreshold(kind, (double)src[i], threshold, maximum);
+        double want = RevenantReferenceThreshold(kind, (double)src[i], threshold, maximum);
         printf(" %.9g", want);
-        CharonRecord(name, i, want, (double)out[i]);
+        RevenantRecord(name, i, want, (double)out[i]);
     }
     printf("\n");
 }
 
-static void CharonCompareBinary(const char *name, const float *primary, const float *secondary,
-                                NSUInteger n, const float *out, CharonRefOperation op)
+static void RevenantCompareBinary(const char *name, const float *primary, const float *secondary,
+                                NSUInteger n, const float *out, RevenantRefOperation op)
 {
     printf("reference %s %lu", name, (unsigned long)n);
     for (NSUInteger i = 0; i < n; i++) {
-        double want = CharonReferenceArithmetic(op, (double)primary[i], (double)secondary[i]);
+        double want = RevenantReferenceArithmetic(op, (double)primary[i], (double)secondary[i]);
         printf(" %.9g", want);
-        CharonRecord(name, i, want, (double)out[i]);
+        RevenantRecord(name, i, want, (double)out[i]);
     }
     printf("\n");
 }
 
-static void CharonReferenceTranspose(const char *name, const float *src, NSUInteger srcWidth,
+static void RevenantReferenceTranspose(const char *name, const float *src, NSUInteger srcWidth,
                                      NSUInteger srcHeight, const float *out, NSUInteger dstWidth,
                                      NSUInteger dstHeight)
 {
@@ -127,7 +127,7 @@ static void CharonReferenceTranspose(const char *name, const float *src, NSUInte
 }
 
 
-static void CharonReferenceImageCopyToMatrix(const char *name, const float *src, NSUInteger width,
+static void RevenantReferenceImageCopyToMatrix(const char *name, const float *src, NSUInteger width,
                                              NSUInteger height, NSUInteger channels, NSUInteger images,
                                              MPSDataLayout layout, NSUInteger originRow, NSUInteger originColumn,
                                              const float *out, NSUInteger rowElements)
@@ -165,15 +165,15 @@ static void CharonReferenceImageCopyToMatrix(const char *name, const float *src,
 }
 
 typedef enum {
-    CharonRefReduceMin,
-    CharonRefReduceMax,
-    CharonRefReduceMean,
-    CharonRefReduceSum,
-} CharonRefReduce;
+    RevenantRefReduceMin,
+    RevenantRefReduceMax,
+    RevenantRefReduceMean,
+    RevenantRefReduceSum,
+} RevenantRefReduce;
 
-static void CharonReferenceImageReduce(const char *name, const float *src, NSUInteger rows, NSUInteger cols,
+static void RevenantReferenceImageReduce(const char *name, const float *src, NSUInteger rows, NSUInteger cols,
                                         NSUInteger srcX, NSUInteger srcY, int byColumn,
-                                        CharonRefReduce which, const float *out, NSUInteger values)
+                                        RevenantRefReduce which, const float *out, NSUInteger values)
 {
     printf("reference %s %lu", name, (unsigned long)values);
     NSUInteger runs = byColumn ? cols : rows;
@@ -192,13 +192,13 @@ static void CharonReferenceImageReduce(const char *name, const float *src, NSUIn
             total += (double)v;
         }
         double want;
-        if (which == CharonRefReduceMin) want = smallest;
-        else if (which == CharonRefReduceMax) want = largest;
-        else if (which == CharonRefReduceSum) want = total;
+        if (which == RevenantRefReduceMin) want = smallest;
+        else if (which == RevenantRefReduceMax) want = largest;
+        else if (which == RevenantRefReduceSum) want = total;
         else want = total / (double)span;
         gCompared++;
         double got = (double)out[r];
-        double bound = (which == CharonRefReduceMin || which == CharonRefReduceMax) ? 0.0 : CharonOneUlp(want);
+        double bound = (which == RevenantRefReduceMin || which == RevenantRefReduceMax) ? 0.0 : RevenantOneUlp(want);
         if (fabs(got - want) > bound) {
             gMismatches++;
             printf("\n  MISMATCH %s %s %lu reference %.9g port %.9g%s\n", name,
@@ -211,7 +211,7 @@ static void CharonReferenceImageReduce(const char *name, const float *src, NSUIn
 }
 
 
-static void CharonReferenceImageConvolution(const char *name, const float *src, NSUInteger rows, NSUInteger cols,
+static void RevenantReferenceImageConvolution(const char *name, const float *src, NSUInteger rows, NSUInteger cols,
                                              NSUInteger kernelWidth, NSUInteger kernelHeight,
                                              const float *weights, double bias,
                                              NSUInteger originX, NSUInteger originY,
@@ -236,7 +236,7 @@ static void CharonReferenceImageConvolution(const char *name, const float *src, 
         double want = total + bias;
         gCompared++;
         double got = (double)out[r];
-        if (fabs(got - want) > CharonOneUlp(want)) {
+        if (fabs(got - want) > RevenantOneUlp(want)) {
             gMismatches++;
             printf("\n  MISMATCH %s [%lu] reference %.9g port %.9g, one float32 ulp is the bound\n",
                    name, (unsigned long)r, want, got);
@@ -247,7 +247,7 @@ static void CharonReferenceImageConvolution(const char *name, const float *src, 
 }
 
 
-static void CharonReferenceImageMorphology(const char *name, const float *src, NSUInteger rows, NSUInteger cols,
+static void RevenantReferenceImageMorphology(const char *name, const float *src, NSUInteger rows, NSUInteger cols,
                                             NSUInteger channels, NSUInteger kernelWidth, NSUInteger kernelHeight,
                                             const float *probe, int takeMax, NSUInteger originX, NSUInteger originY,
                                             const float *out, NSUInteger values)
@@ -288,7 +288,7 @@ static void CharonReferenceImageMorphology(const char *name, const float *src, N
 }
 
 
-static void CharonReferenceImageHistogram(const char *name, const unsigned char *rgba, NSUInteger rows,
+static void RevenantReferenceImageHistogram(const char *name, const unsigned char *rgba, NSUInteger rows,
                                           NSUInteger cols, NSUInteger bins, double lo, double hi,
                                           BOOL histogramForAlpha, const uint32_t *got, NSUInteger channels)
 {

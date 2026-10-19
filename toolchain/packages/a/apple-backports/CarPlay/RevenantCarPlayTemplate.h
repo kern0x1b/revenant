@@ -1,68 +1,68 @@
-#ifndef CHARON_CARPLAY_TEMPLATE_H
-#define CHARON_CARPLAY_TEMPLATE_H
+#ifndef REVENANT_CARPLAY_TEMPLATE_H
+#define REVENANT_CARPLAY_TEMPLATE_H
 
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
 #import <CarPlay/CarPlay.h>
-#import "CharonCarPlay260.h"
+#import "RevenantCarPlay260.h"
 
-@interface CPListSection (CharonSectionHeader)
+@interface CPListSection (RevenantSectionHeader)
 
-- (void)charon_setHeaderSubtitle:(NSString *)headerSubtitle;
-- (void)charon_setHeaderImage:(UIImage *)headerImage;
-- (void)charon_setHeaderButton:(CPButton *)headerButton;
-
-@end
-
-@interface CPAlertAction (CharonAlertActionColor)
-
-- (void)charon_setColor:(UIColor *)color;
+- (void)revenant_setHeaderSubtitle:(NSString *)headerSubtitle;
+- (void)revenant_setHeaderImage:(UIImage *)headerImage;
+- (void)revenant_setHeaderButton:(CPButton *)headerButton;
 
 @end
 
-@interface CPGridButton (CharonGridButton26)
+@interface CPAlertAction (RevenantAlertActionColor)
 
-- (CPMessageGridItemConfiguration *)charon_messageConfiguration;
-- (void)charon_setMessageConfiguration:(CPMessageGridItemConfiguration *)messageConfiguration;
-- (void)charon_setTitleVariants:(NSArray<NSString *> *)titleVariants;
-
-- (void)charon_setImage:(UIImage *)image;
+- (void)revenant_setColor:(UIColor *)color;
 
 @end
 
-@interface CPImageSet (CharonImageSetState)
+@interface CPGridButton (RevenantGridButton26)
 
-- (void)charon_setLightContentImage:(UIImage *)lightImage darkContentImage:(UIImage *)darkImage;
+- (CPMessageGridItemConfiguration *)revenant_messageConfiguration;
+- (void)revenant_setMessageConfiguration:(CPMessageGridItemConfiguration *)messageConfiguration;
+- (void)revenant_setTitleVariants:(NSArray<NSString *> *)titleVariants;
 
-@end
-
-@interface CPMapTemplate (CharonMapTemplateState)
-
-- (CPNavigationAlert *)charon_navigationAlert;
-- (void)charon_setNavigationAlert:(CPNavigationAlert *)navigationAlert;
-- (UIView *)charon_mapButtons;
-- (BOOL)charon_panningInterfaceVisible;
-- (void)charon_setPanningInterfaceVisible:(BOOL)visible;
-- (NSArray *)charon_tripPreviews;
-- (void)charon_setTripPreviews:(NSArray *)previews selectedTrip:(CPTrip *)selectedTrip;
-- (CPTrip *)charon_selectedTrip;
-- (void)charon_setEstimates:(CPTravelEstimates *)estimates forTrip:(CPTrip *)trip;
-- (CPTravelEstimates *)charon_estimatesForTrip:(CPTrip *)trip;
-- (void)charon_setTimeRemainingColor:(CPTimeRemainingColor)color;
-- (CPTimeRemainingColor)charon_timeRemainingColor;
-- (void)charon_drawTripPreviews;
-- (void)charon_showCurrentAlert;
-- (UIView *)charon_mapView;
+- (void)revenant_setImage:(UIImage *)image;
 
 @end
 
-@interface CPListTemplate (CharonListTemplateState)
+@interface CPImageSet (RevenantImageSetState)
 
-- (BOOL)charon_showsSpinnerWhileEmpty;
-- (void)charon_setShowsSpinnerWhileEmpty:(BOOL)showsSpinnerWhileEmpty;
+- (void)revenant_setLightContentImage:(UIImage *)lightImage darkContentImage:(UIImage *)darkImage;
 
-- (NSArray<CPGridButton *> *)charon_headerGridButtons;
-- (void)charon_setHeaderGridButtons:(NSArray<CPGridButton *> *)headerGridButtons;
+@end
+
+@interface CPMapTemplate (RevenantMapTemplateState)
+
+- (CPNavigationAlert *)revenant_navigationAlert;
+- (void)revenant_setNavigationAlert:(CPNavigationAlert *)navigationAlert;
+- (UIView *)revenant_mapButtons;
+- (BOOL)revenant_panningInterfaceVisible;
+- (void)revenant_setPanningInterfaceVisible:(BOOL)visible;
+- (NSArray *)revenant_tripPreviews;
+- (void)revenant_setTripPreviews:(NSArray *)previews selectedTrip:(CPTrip *)selectedTrip;
+- (CPTrip *)revenant_selectedTrip;
+- (void)revenant_setEstimates:(CPTravelEstimates *)estimates forTrip:(CPTrip *)trip;
+- (CPTravelEstimates *)revenant_estimatesForTrip:(CPTrip *)trip;
+- (void)revenant_setTimeRemainingColor:(CPTimeRemainingColor)color;
+- (CPTimeRemainingColor)revenant_timeRemainingColor;
+- (void)revenant_drawTripPreviews;
+- (void)revenant_showCurrentAlert;
+- (UIView *)revenant_mapView;
+
+@end
+
+@interface CPListTemplate (RevenantListTemplateState)
+
+- (BOOL)revenant_showsSpinnerWhileEmpty;
+- (void)revenant_setShowsSpinnerWhileEmpty:(BOOL)showsSpinnerWhileEmpty;
+
+- (NSArray<CPGridButton *> *)revenant_headerGridButtons;
+- (void)revenant_setHeaderGridButtons:(NSArray<CPGridButton *> *)headerGridButtons;
 
 @end
 

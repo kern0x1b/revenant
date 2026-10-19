@@ -3,51 +3,51 @@
 #include <dlfcn.h>
 #include <pthread.h>
 
-@class CharonMapEntry, CharonWeakMapTable;
+@class RevenantMapEntry, RevenantWeakMapTable;
 
-static pthread_mutex_t charon_weak_lock;
-static pthread_once_t charon_weak_lock_once = PTHREAD_ONCE_INIT;
-static BOOL charon_native_weak;
+static pthread_mutex_t revenant_weak_lock;
+static pthread_once_t revenant_weak_lock_once = PTHREAD_ONCE_INIT;
+static BOOL revenant_native_weak;
 
-static void charon_weak_lock_make(void)
+static void revenant_weak_lock_make(void)
 {
     pthread_mutexattr_t attributes;
     pthread_mutexattr_init(&attributes);
     pthread_mutexattr_settype(&attributes, PTHREAD_MUTEX_RECURSIVE);
-    pthread_mutex_init(&charon_weak_lock, &attributes);
+    pthread_mutex_init(&revenant_weak_lock, &attributes);
     pthread_mutexattr_destroy(&attributes);
     void *objc = dlopen("/usr/lib/libobjc.A.dylib", RTLD_LAZY | RTLD_NOLOAD);
     if (objc) {
-        charon_native_weak = dlsym(objc, "objc_loadWeakRetained") != NULL;
+        revenant_native_weak = dlsym(objc, "objc_loadWeakRetained") != NULL;
         dlclose(objc);
     }
 }
 
-static void charon_lock(void)
+static void revenant_lock(void)
 {
-    pthread_once(&charon_weak_lock_once, charon_weak_lock_make);
-    pthread_mutex_lock(&charon_weak_lock);
+    pthread_once(&revenant_weak_lock_once, revenant_weak_lock_make);
+    pthread_mutex_lock(&revenant_weak_lock);
 }
 
-static BOOL charon_has_native_weak(void)
+static BOOL revenant_has_native_weak(void)
 {
-    pthread_once(&charon_weak_lock_once, charon_weak_lock_make);
-    return charon_native_weak;
+    pthread_once(&revenant_weak_lock_once, revenant_weak_lock_make);
+    return revenant_native_weak;
 }
 
-static void charon_unlock(void)
+static void revenant_unlock(void)
 {
-    pthread_mutex_unlock(&charon_weak_lock);
+    pthread_mutex_unlock(&revenant_weak_lock);
 }
 
-@interface CharonSideWatch : NSObject {
+@interface RevenantSideWatch : NSObject {
 @public
-    __unsafe_unretained CharonMapEntry *_entry;
+    __unsafe_unretained RevenantMapEntry *_entry;
     BOOL _onKey;
 }
 @end
 
-@interface CharonMapEntry : NSObject {
+@interface RevenantMapEntry : NSObject {
 @public
     __unsafe_unretained id _key;
     __unsafe_unretained id _value;
@@ -55,51 +55,51 @@ static void charon_unlock(void)
     __weak id _weakRefValue;
     BOOL _nativeKey;
     BOOL _nativeValue;
-    __unsafe_unretained CharonSideWatch *_keyWatch;
-    __unsafe_unretained CharonSideWatch *_valueWatch;
-    __unsafe_unretained CharonWeakMapTable *_table;
+    __unsafe_unretained RevenantSideWatch *_keyWatch;
+    __unsafe_unretained RevenantSideWatch *_valueWatch;
+    __unsafe_unretained RevenantWeakMapTable *_table;
     id _heldKey;
     id _heldValue;
     BOOL _weakValue;
     NSUInteger _hash;
 }
 - (instancetype)initWithKey:(id)key;
-- (instancetype)initWithWeakKey:(id)key weakValue:(BOOL)weakValue table:(CharonWeakMapTable *)table;
-- (instancetype)initWithHeldKey:(id)key weakValue:(BOOL)weakValue table:(CharonWeakMapTable *)table;
+- (instancetype)initWithWeakKey:(id)key weakValue:(BOOL)weakValue table:(RevenantWeakMapTable *)table;
+- (instancetype)initWithHeldKey:(id)key weakValue:(BOOL)weakValue table:(RevenantWeakMapTable *)table;
 - (id)key;
 - (id)value;
 - (void)setValue:(id)value;
 - (void)detach;
 @end
 
-@interface CharonWeakMapTable : NSMapTable {
+@interface RevenantWeakMapTable : NSMapTable {
 @public
     NSMutableArray *_pending;
 }
 - (instancetype)initWithWeakKeys:(BOOL)weakKeys weakValues:(BOOL)weakValues;
 @end
 
-static void *charon_watch(id object, CharonMapEntry *entry, BOOL onKey)
+static void *revenant_watch(id object, RevenantMapEntry *entry, BOOL onKey)
 {
-    CharonSideWatch *watch = [[CharonSideWatch alloc] init];
+    RevenantSideWatch *watch = [[RevenantSideWatch alloc] init];
     watch->_entry = entry;
     watch->_onKey = onKey;
     objc_setAssociatedObject(object, (__bridge const void *)watch, watch, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     return (__bridge void *)watch;
 }
 
-static void charon_unwatch(__unsafe_unretained id object, const void *watch)
+static void revenant_unwatch(__unsafe_unretained id object, const void *watch)
 {
     if (watch && object)
         objc_setAssociatedObject(object, watch, nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
-@implementation CharonSideWatch
+@implementation RevenantSideWatch
 
 - (void)dealloc
 {
-    charon_lock();
-    __unsafe_unretained CharonMapEntry *entry = _entry;
+    revenant_lock();
+    __unsafe_unretained RevenantMapEntry *entry = _entry;
     if (entry) {
         if (_onKey) {
             entry->_key = nil;
@@ -108,19 +108,19 @@ static void charon_unwatch(__unsafe_unretained id object, const void *watch)
             entry->_value = nil;
             entry->_valueWatch = nil;
         }
-        __unsafe_unretained CharonWeakMapTable *table = entry->_table;
+        __unsafe_unretained RevenantWeakMapTable *table = entry->_table;
         if (table) {
             if (!table->_pending)
                 table->_pending = [[NSMutableArray alloc] init];
             [table->_pending addObject:entry];
         }
     }
-    charon_unlock();
+    revenant_unlock();
 }
 
 @end
 
-@implementation CharonMapEntry
+@implementation RevenantMapEntry
 
 - (instancetype)initWithKey:(id)key
 {
@@ -131,13 +131,13 @@ static void charon_unwatch(__unsafe_unretained id object, const void *watch)
     return self;
 }
 
-- (instancetype)initWithWeakKey:(id)key weakValue:(BOOL)weakValue table:(CharonWeakMapTable *)table
+- (instancetype)initWithWeakKey:(id)key weakValue:(BOOL)weakValue table:(RevenantWeakMapTable *)table
 {
     if ((self = [self initWithKey:key])) {
         _weakValue = weakValue;
         _table = table;
-        _keyWatch = (__bridge CharonSideWatch *)charon_watch(key, self, YES);
-        if (charon_has_native_weak()) {
+        _keyWatch = (__bridge RevenantSideWatch *)revenant_watch(key, self, YES);
+        if (revenant_has_native_weak()) {
             _weakRefKey = key;
             _nativeKey = YES;
         }
@@ -145,7 +145,7 @@ static void charon_unwatch(__unsafe_unretained id object, const void *watch)
     return self;
 }
 
-- (instancetype)initWithHeldKey:(id)key weakValue:(BOOL)weakValue table:(CharonWeakMapTable *)table
+- (instancetype)initWithHeldKey:(id)key weakValue:(BOOL)weakValue table:(RevenantWeakMapTable *)table
 {
     if ((self = [self initWithKey:key])) {
         _weakValue = weakValue;
@@ -167,7 +167,7 @@ static void charon_unwatch(__unsafe_unretained id object, const void *watch)
     __unsafe_unretained id key = nil, value = nil;
     const void *keyWatch = NULL, *valueWatch = NULL;
     __attribute__((objc_precise_lifetime)) id heldKey, heldValue, liveKey, liveValue;
-    charon_lock();
+    revenant_lock();
     if (_keyWatch) {
         key = _nativeKey ? (liveKey = _weakRefKey) : _key;
         keyWatch = (__bridge const void *)_keyWatch;
@@ -187,18 +187,18 @@ static void charon_unwatch(__unsafe_unretained id object, const void *watch)
     heldValue = _heldValue;
     _heldKey = nil;
     _heldValue = nil;
-    charon_unwatch(key, keyWatch);
-    charon_unwatch(value, valueWatch);
-    charon_unlock();
+    revenant_unwatch(key, keyWatch);
+    revenant_unwatch(value, valueWatch);
+    revenant_unlock();
 }
 
 - (id)key
 {
     if (_nativeKey)
         return _weakRefKey;
-    charon_lock();
+    revenant_lock();
     id key = _key;
-    charon_unlock();
+    revenant_unlock();
     return key;
 }
 
@@ -206,21 +206,21 @@ static void charon_unwatch(__unsafe_unretained id object, const void *watch)
 {
     if (_nativeValue)
         return _weakRefValue;
-    charon_lock();
+    revenant_lock();
     id value = _value;
-    charon_unlock();
+    revenant_unlock();
     return value;
 }
 
 - (void)setValue:(id)value
 {
-    __unsafe_unretained CharonSideWatch *fresh = nil;
+    __unsafe_unretained RevenantSideWatch *fresh = nil;
     if (_weakValue && value)
-        fresh = (__bridge CharonSideWatch *)charon_watch(value, self, NO);
+        fresh = (__bridge RevenantSideWatch *)revenant_watch(value, self, NO);
     __unsafe_unretained id old = nil;
     const void *oldWatch = NULL;
     __attribute__((objc_precise_lifetime)) id heldOld, liveOld;
-    charon_lock();
+    revenant_lock();
     if (_valueWatch) {
         old = _nativeValue ? (liveOld = _weakRefValue) : _value;
         oldWatch = (__bridge const void *)_valueWatch;
@@ -229,14 +229,14 @@ static void charon_unwatch(__unsafe_unretained id object, const void *watch)
     heldOld = _heldValue;
     _value = value;
     if (_weakValue) {
-        _nativeValue = charon_has_native_weak();
+        _nativeValue = revenant_has_native_weak();
         if (_nativeValue)
             _weakRefValue = value;
     }
     _valueWatch = fresh;
     _heldValue = _weakValue ? nil : value;
-    charon_unwatch(old, oldWatch);
-    charon_unlock();
+    revenant_unwatch(old, oldWatch);
+    revenant_unlock();
 }
 
 - (NSUInteger)hash
@@ -248,17 +248,17 @@ static void charon_unwatch(__unsafe_unretained id object, const void *watch)
 {
     if (other == self)
         return YES;
-    if (![other isKindOfClass:[CharonMapEntry class]])
+    if (![other isKindOfClass:[RevenantMapEntry class]])
         return NO;
-    if (_hash != ((CharonMapEntry *)other)->_hash)
+    if (_hash != ((RevenantMapEntry *)other)->_hash)
         return NO;
-    id key = [self key], theirs = [(CharonMapEntry *)other key];
+    id key = [self key], theirs = [(RevenantMapEntry *)other key];
     return key && theirs && (key == theirs || [key isEqual:theirs]);
 }
 
 @end
 
-@implementation CharonWeakMapTable {
+@implementation RevenantWeakMapTable {
     NSMutableSet *_entries;
     unsigned long _mutations;
     BOOL _weakKeys, _weakValues;
@@ -284,37 +284,37 @@ static void charon_unwatch(__unsafe_unretained id object, const void *watch)
 
 - (void)dealloc
 {
-    for (CharonMapEntry *entry in _entries)
+    for (RevenantMapEntry *entry in _entries)
         [entry detach];
     [self takePending];
 }
 
 - (NSArray *)takePending
 {
-    charon_lock();
+    revenant_lock();
     NSArray *pending = _pending;
     _pending = nil;
-    charon_unlock();
+    revenant_unlock();
     return pending;
 }
 
 - (void)forgetReleasedKeys
 {
-    for (CharonMapEntry *entry in [self takePending]) {
+    for (RevenantMapEntry *entry in [self takePending]) {
         [_entries removeObject:entry];
         [entry detach];
     }
 }
 
-- (CharonMapEntry *)entryForKey:(id)key
+- (RevenantMapEntry *)entryForKey:(id)key
 {
-    return [_entries member:[[CharonMapEntry alloc] initWithKey:key]];
+    return [_entries member:[[RevenantMapEntry alloc] initWithKey:key]];
 }
 
 - (void)enumerateLive:(void (^)(id key, id value))body
 {
     [self forgetReleasedKeys];
-    for (CharonMapEntry *entry in _entries) {
+    for (RevenantMapEntry *entry in _entries) {
         id key = entry.key, value = entry.value;
         if (key && value)
             body(key, value);
@@ -350,10 +350,10 @@ static void charon_unwatch(__unsafe_unretained id object, const void *watch)
     if (!key || !object)
         return;
     [self forgetReleasedKeys];
-    CharonMapEntry *entry = [self entryForKey:key];
+    RevenantMapEntry *entry = [self entryForKey:key];
     if (!entry) {
-        entry = _weakKeys ? [[CharonMapEntry alloc] initWithWeakKey:key weakValue:_weakValues table:self]
-                          : [[CharonMapEntry alloc] initWithHeldKey:key weakValue:_weakValues table:self];
+        entry = _weakKeys ? [[RevenantMapEntry alloc] initWithWeakKey:key weakValue:_weakValues table:self]
+                          : [[RevenantMapEntry alloc] initWithHeldKey:key weakValue:_weakValues table:self];
         [_entries addObject:entry];
     }
     entry.value = object;
@@ -363,7 +363,7 @@ static void charon_unwatch(__unsafe_unretained id object, const void *watch)
 - (void)removeObjectForKey:(id)key
 {
     [self forgetReleasedKeys];
-    CharonMapEntry *entry = key ? [self entryForKey:key] : nil;
+    RevenantMapEntry *entry = key ? [self entryForKey:key] : nil;
     if (entry) {
         [_entries removeObject:entry];
         [entry detach];
@@ -373,7 +373,7 @@ static void charon_unwatch(__unsafe_unretained id object, const void *watch)
 
 - (void)removeAllObjects
 {
-    for (CharonMapEntry *entry in _entries)
+    for (RevenantMapEntry *entry in _entries)
         [entry detach];
     [_entries removeAllObjects];
     [self takePending];
@@ -431,7 +431,7 @@ static void charon_unwatch(__unsafe_unretained id object, const void *watch)
 
 - (id)copyWithZone:(NSZone *)zone
 {
-    CharonWeakMapTable *copy = [[CharonWeakMapTable alloc] initWithWeakKeys:_weakKeys weakValues:_weakValues];
+    RevenantWeakMapTable *copy = [[RevenantWeakMapTable alloc] initWithWeakKeys:_weakKeys weakValues:_weakValues];
     [self enumerateLive:^(id key, id value) {
         [copy setObject:value forKey:key];
     }];
@@ -485,7 +485,7 @@ static void charon_unwatch(__unsafe_unretained id object, const void *watch)
 
 @end
 
-@implementation NSMapTable (CharonObjects6)
+@implementation NSMapTable (RevenantObjects6)
 
 + (instancetype)strongToStrongObjectsMapTable
 {
@@ -494,17 +494,17 @@ static void charon_unwatch(__unsafe_unretained id object, const void *watch)
 
 + (instancetype)weakToStrongObjectsMapTable
 {
-    return [[CharonWeakMapTable alloc] initWithWeakKeys:YES weakValues:NO];
+    return [[RevenantWeakMapTable alloc] initWithWeakKeys:YES weakValues:NO];
 }
 
 + (instancetype)strongToWeakObjectsMapTable
 {
-    return [[CharonWeakMapTable alloc] initWithWeakKeys:NO weakValues:YES];
+    return [[RevenantWeakMapTable alloc] initWithWeakKeys:NO weakValues:YES];
 }
 
 + (instancetype)weakToWeakObjectsMapTable
 {
-    return [[CharonWeakMapTable alloc] initWithWeakKeys:YES weakValues:YES];
+    return [[RevenantWeakMapTable alloc] initWithWeakKeys:YES weakValues:YES];
 }
 
 @end

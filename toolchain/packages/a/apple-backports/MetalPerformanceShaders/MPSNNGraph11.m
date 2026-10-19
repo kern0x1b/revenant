@@ -1,11 +1,11 @@
-#import "CharonMPSNN.h"
+#import "RevenantMPSNN.h"
 
 @implementation MPSNNImageNode {
     id<MPSHandle> _handle;
     MPSImageFeatureChannelFormat _format;
     id<MPSImageAllocator> _imageAllocator;
     BOOL _exportFromGraph;
-    MPSImage *_charonImage;
+    MPSImage *_revenantImage;
 }
 
 @synthesize handle = _handle;
@@ -36,21 +36,21 @@
     return node;
 }
 
-- (MPSImage *)charon_mps_image { return _charonImage; }
-- (void)charon_mps_setImage:(MPSImage *)image { _charonImage = image; }
+- (MPSImage *)revenant_mps_image { return _revenantImage; }
+- (void)revenant_mps_setImage:(MPSImage *)image { _revenantImage = image; }
 
 - (NSString *)description
 {
     return [NSString stringWithFormat:@"<%@ %p handle=%@ channels=%lu>", NSStringFromClass([self class]), (void *)self,
-            _handle, (unsigned long)_charonImage.featureChannels];
+            _handle, (unsigned long)_revenantImage.featureChannels];
 }
 
 @end
 
 
-@implementation MPSImage (CharonMPSNN)
+@implementation MPSImage (RevenantMPSNN)
 
-- (MPSImageDescriptor *)charon_mps_descriptor
+- (MPSImageDescriptor *)revenant_mps_descriptor
 {
     MPSImageDescriptor *descriptor = [MPSImageDescriptor new];
     descriptor.width = self.width;
@@ -72,7 +72,7 @@
     NSString *_label;
 }
 
-static NSString *CharonMPSNNPaddingLabel(MPSNNPaddingMethod method)
+static NSString *RevenantMPSNNPaddingLabel(MPSNNPaddingMethod method)
 {
     static NSString *const aligns[] = { @"AlignCentered", @"AlignTopLeft", @"AlignBottomRight" };
     static NSString *const remainders[] = { @"AddRemainderToTopLeft", @"AddRemainderToTopRight",
@@ -95,7 +95,7 @@ static NSString *CharonMPSNNPaddingLabel(MPSNNPaddingMethod method)
         return nil;
     MPSNNDefaultPadding *padding = [[self alloc] init];
     padding->_paddingMethod = method;
-    padding->_label = CharonMPSNNPaddingLabel(method);
+    padding->_label = RevenantMPSNNPaddingLabel(method);
     return padding;
 }
 
@@ -109,7 +109,7 @@ static NSString *CharonMPSNNPaddingLabel(MPSNNPaddingMethod method)
     MPSImage *source = sourceImages.firstObject;
     if (!source)
         return inDescriptor;
-    MPSImageDescriptor *sourceDescriptor = [source charon_mps_descriptor];
+    MPSImageDescriptor *sourceDescriptor = [source revenant_mps_descriptor];
     if (!sourceDescriptor)
         return inDescriptor;
 
@@ -124,15 +124,15 @@ static NSString *CharonMPSNNPaddingLabel(MPSNNPaddingMethod method)
     if (!strideY) strideY = 1;
 
     MPSNNPaddingMethod method = _paddingMethod;
-    long destinationWidth = CharonMPSNNDestSize((long)sourceDescriptor.width, (long)strideX, (long)kernelWidth, method);
-    long destinationHeight = CharonMPSNNDestSize((long)sourceDescriptor.height, (long)strideY, (long)kernelHeight, method);
+    long destinationWidth = RevenantMPSNNDestSize((long)sourceDescriptor.width, (long)strideX, (long)kernelWidth, method);
+    long destinationHeight = RevenantMPSNNDestSize((long)sourceDescriptor.height, (long)strideY, (long)kernelHeight, method);
     if (destinationWidth < 1) destinationWidth = 1;
     if (destinationHeight < 1) destinationHeight = 1;
 
     if ([kernel respondsToSelector:@selector(setOffset:)]) {
         MPSOffset offset;
-        offset.x = (NSInteger)CharonMPSNNOffset((long)sourceDescriptor.width, (long)strideX, (long)kernelWidth, method);
-        offset.y = (NSInteger)CharonMPSNNOffset((long)sourceDescriptor.height, (long)strideY, (long)kernelHeight, method);
+        offset.x = (NSInteger)RevenantMPSNNOffset((long)sourceDescriptor.width, (long)strideX, (long)kernelWidth, method);
+        offset.y = (NSInteger)RevenantMPSNNOffset((long)sourceDescriptor.height, (long)strideY, (long)kernelHeight, method);
         offset.z = 0;
         [(MPSCNNKernel *)kernel setOffset:offset];
     }
@@ -173,19 +173,19 @@ static NSString *CharonMPSNNPaddingLabel(MPSNNPaddingMethod method)
 
 
 @implementation MPSNNAdditionNode
-+ (Class)charon_mps_kernelClass { return [MPSImageAdd class]; }
++ (Class)revenant_mps_kernelClass { return [MPSImageAdd class]; }
 @end
 
 @implementation MPSNNSubtractionNode
-+ (Class)charon_mps_kernelClass { return [MPSImageSubtract class]; }
++ (Class)revenant_mps_kernelClass { return [MPSImageSubtract class]; }
 @end
 
 @implementation MPSNNMultiplicationNode
-+ (Class)charon_mps_kernelClass { return [MPSImageMultiply class]; }
++ (Class)revenant_mps_kernelClass { return [MPSImageMultiply class]; }
 @end
 
 @implementation MPSNNDivisionNode
-+ (Class)charon_mps_kernelClass { return [MPSImageDivide class]; }
++ (Class)revenant_mps_kernelClass { return [MPSImageDivide class]; }
 @end
 
 
@@ -202,18 +202,18 @@ static NSString *CharonMPSNNPaddingLabel(MPSNNPaddingMethod method)
 {
     if ((self = [super initWithDevice:nil]))
         for (MPSNNImageNode *node in sourceNodes)
-            [self charon_mps_addSourceNode:node];
+            [self revenant_mps_addSourceNode:node];
     return self;
 }
 
-- (MPSKernel *)charon_mps_kernel { return _kernel; }
+- (MPSKernel *)revenant_mps_kernel { return _kernel; }
 
-- (MPSImageDescriptor *)charon_mps_destinationDescriptorForSource:(MPSImageDescriptor *)source
+- (MPSImageDescriptor *)revenant_mps_destinationDescriptorForSource:(MPSImageDescriptor *)source
 {
     NSUInteger channels = 0, width = 0, height = 0;
-    for (NSUInteger index = 0; index < self.charon_mps_sourceNodes.count; index++) {
-        MPSImage *image = [self charon_mps_sourceImageAtIndex:index];
-        MPSImageDescriptor *descriptor = [image charon_mps_descriptor];
+    for (NSUInteger index = 0; index < self.revenant_mps_sourceNodes.count; index++) {
+        MPSImage *image = [self revenant_mps_sourceImageAtIndex:index];
+        MPSImageDescriptor *descriptor = [image revenant_mps_descriptor];
         if (!descriptor)
             continue;
         channels += (descriptor.featureChannels + 3) & ~(NSUInteger)3;
@@ -235,39 +235,39 @@ static NSString *CharonMPSNNPaddingLabel(MPSNNPaddingMethod method)
     return destination;
 }
 
-- (void)charon_mps_encodeToCommandBuffer:(id<MTLCommandBuffer>)commandBuffer
+- (void)revenant_mps_encodeToCommandBuffer:(id<MTLCommandBuffer>)commandBuffer
 {
-    if (!CharonMPSCommandBufferPermits(commandBuffer))
+    if (!RevenantMPSCommandBufferPermits(commandBuffer))
         return;
-    MPSImage *destination = [self charon_mps_destinationImage];
-    if (!destination || !self.charon_mps_sourceNodes.count) {
-        CharonMPSRefuse(@"%@: a concatenation node needs at least one source and a destination",
+    MPSImage *destination = [self revenant_mps_destinationImage];
+    if (!destination || !self.revenant_mps_sourceNodes.count) {
+        RevenantMPSRefuse(@"%@: a concatenation node needs at least one source and a destination",
                         NSStringFromClass([self class]));
         return;
     }
     NSString *what = NSStringFromClass([self class]);
     NSUInteger offset = 0;
-    for (NSUInteger index = 0; index < self.charon_mps_sourceNodes.count; index++) {
-        MPSImage *source = [self charon_mps_sourceImageAtIndex:index];
+    for (NSUInteger index = 0; index < self.revenant_mps_sourceNodes.count; index++) {
+        MPSImage *source = [self revenant_mps_sourceImageAtIndex:index];
         if (!source)
             continue;
-        CharonMPSImageLayout inLayout = CharonMPSImageLayoutOf(source);
-        CharonMPSImageLayout outLayout = CharonMPSImageLayoutOf(destination);
+        RevenantMPSImageLayout inLayout = RevenantMPSImageLayoutOf(source);
+        RevenantMPSImageLayout outLayout = RevenantMPSImageLayoutOf(destination);
 
         size_t rowElements = (size_t)destination.width * outLayout.channels;
         size_t bytes = rowElements * destination.height * outLayout.elementSize;
         if (!bytes || !outLayout.elementSize) {
-            CharonMPSRefuse(@"%@: the destination's channel format names no element size, so nothing was joined", what);
+            RevenantMPSRefuse(@"%@: the destination's channel format names no element size, so nothing was joined", what);
             continue;
         }
         unsigned char *row = calloc(bytes, 1);
         if (!row) {
-            CharonMPSRefuse(@"%@: no memory for a %lux%lux%lu join, so nothing was joined", what,
+            RevenantMPSRefuse(@"%@: no memory for a %lux%lux%lu join, so nothing was joined", what,
                             (unsigned long)destination.width, (unsigned long)destination.height,
                             (unsigned long)outLayout.channels);
             continue;
         }
-        MPSImageDescriptor *descriptor = [source charon_mps_descriptor];
+        MPSImageDescriptor *descriptor = [source revenant_mps_descriptor];
         NSUInteger channels = descriptor ? descriptor.featureChannels : 0;
         if (channels && channels < 4) {
             for (NSUInteger y = 0; y < destination.height; y++)
@@ -279,12 +279,12 @@ static NSString *CharonMPSNNPaddingLabel(MPSNNPaddingMethod method)
                         *(float *)cell = 1.0f;
                 }
         }
-        void *sourceBytes = CharonMPSImageReadRegion(source, &inLayout, CharonMPSImageResolvedRegion(source, MPSRectNoClip), what);
+        void *sourceBytes = RevenantMPSImageReadRegion(source, &inLayout, RevenantMPSImageResolvedRegion(source, MPSRectNoClip), what);
         if (sourceBytes) {
-            if (CharonMPSImageConcatRows(&inLayout, &outLayout, offset, sourceBytes, row))
-                CharonMPSImageWriteRegion(destination, &outLayout, CharonMPSImageResolvedRegion(destination, MPSRectNoClip), row, what);
+            if (RevenantMPSImageConcatRows(&inLayout, &outLayout, offset, sourceBytes, row))
+                RevenantMPSImageWriteRegion(destination, &outLayout, RevenantMPSImageResolvedRegion(destination, MPSRectNoClip), row, what);
             else
-                CharonMPSRefuse(@"%@: source %lu holds %lux%lux%lu and the destination %lux%lux%lu, so it was not joined",
+                RevenantMPSRefuse(@"%@: source %lu holds %lux%lux%lu and the destination %lux%lux%lu, so it was not joined",
                                 what, (unsigned long)index,
                                 (unsigned long)inLayout.width, (unsigned long)inLayout.height, (unsigned long)inLayout.channels,
                                 (unsigned long)outLayout.width, (unsigned long)outLayout.height, (unsigned long)outLayout.channels);
@@ -293,18 +293,18 @@ static NSString *CharonMPSNNPaddingLabel(MPSNNPaddingMethod method)
         free(row);
         offset += (channels + 3) & ~(NSUInteger)3;
     }
-    [self.resultImage charon_mps_setImage:destination];
+    [self.resultImage revenant_mps_setImage:destination];
 }
 
 @end
 
 
 @implementation MPSCNNPoolingAverageNode
-+ (Class)charon_mps_kernelClass { return [MPSCNNPoolingAverage class]; }
++ (Class)revenant_mps_kernelClass { return [MPSCNNPoolingAverage class]; }
 @end
 
 @implementation MPSCNNPoolingMaxNode
-+ (Class)charon_mps_kernelClass { return [MPSCNNPoolingMax class]; }
++ (Class)revenant_mps_kernelClass { return [MPSCNNPoolingMax class]; }
 @end
 
 
@@ -322,27 +322,27 @@ static NSString *CharonMPSNNPaddingLabel(MPSNNPaddingMethod method)
     BOOL _walked;
 }
 
-- (void)charon_mps_walkFrom:(MPSNNImageNode *)result
+- (void)revenant_mps_walkFrom:(MPSNNImageNode *)result
 {
     [_filters removeAllObjects];
     [_sources removeAllObjects];
     [_order removeAllObjects];
-    [self charon_mps_visit:result seen:[NSMutableSet set]];
+    [self revenant_mps_visit:result seen:[NSMutableSet set]];
     _walked = YES;
 }
 
-- (void)charon_mps_visit:(MPSNNImageNode *)node seen:(NSMutableSet *)seen
+- (void)revenant_mps_visit:(MPSNNImageNode *)node seen:(NSMutableSet *)seen
 {
     if (!node || [seen containsObject:node])
         return;
     [seen addObject:node];
-    MPSNNFilterNode *producer = [[MPSNNFilterNode charon_mps_producers] objectForKey:node];
+    MPSNNFilterNode *producer = [[MPSNNFilterNode revenant_mps_producers] objectForKey:node];
     if (!producer) {
         [_sources addObject:node];
         return;
     }
-    for (MPSNNImageNode *source in producer.charon_mps_sourceNodes)
-        [self charon_mps_visit:source seen:seen];
+    for (MPSNNImageNode *source in producer.revenant_mps_sourceNodes)
+        [self revenant_mps_visit:source seen:seen];
     [_order addObject:node];
     [_filters addObject:producer];
 }
@@ -360,7 +360,7 @@ static NSString *CharonMPSNNPaddingLabel(MPSNNPaddingMethod method)
         _destinationImageAllocator = nil;
         _resultImageIsNeeded = resultIsNeeded;
         if (resultImage)
-            [self charon_mps_walkFrom:resultImage];
+            [self revenant_mps_walkFrom:resultImage];
     }
     return self;
 }
@@ -409,49 +409,49 @@ static NSString *CharonMPSNNPaddingLabel(MPSNNPaddingMethod method)
                       sourceImages:(NSArray<MPSImage *> *)sourceImages
 {
     if (!_walked) {
-        CharonMPSRefuse(@"MPSNNGraph: the graph was built with no result image, so there is nothing to walk");
+        RevenantMPSRefuse(@"MPSNNGraph: the graph was built with no result image, so there is nothing to walk");
         return nil;
     }
-    if (!CharonMPSCommandBufferPermits(commandBuffer))
+    if (!RevenantMPSCommandBufferPermits(commandBuffer))
         return nil;
 
     for (NSUInteger index = 0; index < _sources.count && index < sourceImages.count; index++)
-        [_sources[index] charon_mps_setImage:sourceImages[index]];
+        [_sources[index] revenant_mps_setImage:sourceImages[index]];
 
     for (MPSNNFilterNode *filter in _filters) {
-        [filter charon_mps_setDevice:self.device];
+        [filter revenant_mps_setDevice:self.device];
         NSMutableArray *bound = [NSMutableArray array];
         MPSImage *first = nil;
-        for (MPSNNImageNode *sourceNode in filter.charon_mps_sourceNodes) {
-            MPSImage *image = sourceNode.charon_mps_image;
+        for (MPSNNImageNode *sourceNode in filter.revenant_mps_sourceNodes) {
+            MPSImage *image = sourceNode.revenant_mps_image;
             if (image)
                 [bound addObject:image];
             if (!first)
                 first = image;
         }
-        [filter charon_mps_setSourceImages:bound];
+        [filter revenant_mps_setSourceImages:bound];
 
-        MPSImageDescriptor *sourceDescriptor = [first charon_mps_descriptor];
+        MPSImageDescriptor *sourceDescriptor = [first revenant_mps_descriptor];
         if (!sourceDescriptor) {
-            CharonMPSRefuse(@"%@: the node's source holds no image, so it was not run",
+            RevenantMPSRefuse(@"%@: the node's source holds no image, so it was not run",
                             NSStringFromClass([filter class]));
             continue;
         }
-        MPSImageDescriptor *destinationDescriptor = [filter charon_mps_destinationDescriptorForSource:sourceDescriptor];
+        MPSImageDescriptor *destinationDescriptor = [filter revenant_mps_destinationDescriptorForSource:sourceDescriptor];
         if (!destinationDescriptor) {
-            CharonMPSRefuse(@"%@: the node has no shape to produce, so it was not run",
+            RevenantMPSRefuse(@"%@: the node has no shape to produce, so it was not run",
                             NSStringFromClass([filter class]));
             continue;
         }
         MPSImage *destination = [[MPSImage alloc] initWithDevice:self.device imageDescriptor:destinationDescriptor];
-        [filter charon_mps_setDestinationImage:destination];
-        [filter charon_mps_encodeToCommandBuffer:commandBuffer];
+        [filter revenant_mps_setDestinationImage:destination];
+        [filter revenant_mps_encodeToCommandBuffer:commandBuffer];
     }
 
     MPSNNImageNode *result = _order.lastObject;
     if (!_resultImageIsNeeded || !result)
         return nil;
-    return result.charon_mps_image;
+    return result.revenant_mps_image;
 }
 
 - (MPSImage *)encodeToCommandBuffer:(id<MTLCommandBuffer>)commandBuffer
@@ -463,8 +463,8 @@ static NSString *CharonMPSNNPaddingLabel(MPSNNPaddingMethod method)
     MPSImage *image = [self encodeToCommandBuffer:commandBuffer sourceImages:sourceImages];
     if (intermediateImages) {
         for (MPSNNImageNode *node in _order) {
-            if (node.exportFromGraph && node.charon_mps_image)
-                [intermediateImages addObject:node.charon_mps_image];
+            if (node.exportFromGraph && node.revenant_mps_image)
+                [intermediateImages addObject:node.revenant_mps_image];
         }
     }
     (void)sourceStates;
@@ -479,7 +479,7 @@ static NSString *CharonMPSNNPaddingLabel(MPSNNPaddingMethod method)
     id<MTLCommandQueue> queue = [device newCommandQueue];
     id<MTLCommandBuffer> commandBuffer = [queue commandBuffer];
     if (!commandBuffer) {
-        CharonMPSRefuse(@"MPSNNGraph: no command buffer could be made for the graph's device, so it was not run");
+        RevenantMPSRefuse(@"MPSNNGraph: no command buffer could be made for the graph's device, so it was not run");
         if (handler)
             handler(nil, [NSError errorWithDomain:@"MPSNNGraph" code:1 userInfo:nil]);
         return nil;

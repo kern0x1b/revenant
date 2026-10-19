@@ -1,42 +1,42 @@
-#import "CharonGKRandomCommon.h"
+#import "RevenantGKRandomCommon.h"
 #import <GameplayKit/GameplayKit.h>
 
-#define CharonGKMT_N 624
-#define CharonGKMT_M 397
-static uint32_t CharonGKMTState[CharonGKMT_N];
-static int CharonGKMTIndex;
-static uint64_t CharonGKMTSeedValue;
+#define RevenantGKMT_N 624
+#define RevenantGKMT_M 397
+static uint32_t RevenantGKMTState[RevenantGKMT_N];
+static int RevenantGKMTIndex;
+static uint64_t RevenantGKMTSeedValue;
 
-static void CharonGKMTSeed(uint32_t seed)
-{ CharonGKMTState[0] = seed;
-    for (CharonGKMTIndex = 1; CharonGKMTIndex < CharonGKMT_N; CharonGKMTIndex++)
-        CharonGKMTState[CharonGKMTIndex] =
-            1812433253U * (CharonGKMTState[CharonGKMTIndex-1] ^ (CharonGKMTState[CharonGKMTIndex-1] >> 30))
-            + (uint32_t)CharonGKMTIndex; }
+static void RevenantGKMTSeed(uint32_t seed)
+{ RevenantGKMTState[0] = seed;
+    for (RevenantGKMTIndex = 1; RevenantGKMTIndex < RevenantGKMT_N; RevenantGKMTIndex++)
+        RevenantGKMTState[RevenantGKMTIndex] =
+            1812433253U * (RevenantGKMTState[RevenantGKMTIndex-1] ^ (RevenantGKMTState[RevenantGKMTIndex-1] >> 30))
+            + (uint32_t)RevenantGKMTIndex; }
 
-static uint32_t CharonGKMTDraw(void *context)
+static uint32_t RevenantGKMTDraw(void *context)
 { uint32_t y; static const uint32_t mag[2] = { 0x0U, 0x9908b0dfU }; (void)context;
-    if (CharonGKMTIndex >= CharonGKMT_N) { int k;
-        for (k = 0; k < CharonGKMT_N - CharonGKMT_M; k++) {
-            y = (CharonGKMTState[k] & 0x80000000U) | (CharonGKMTState[k+1] & 0x7fffffffU);
-            CharonGKMTState[k] = CharonGKMTState[k+CharonGKMT_M] ^ (y >> 1) ^ mag[y & 1U]; }
-        for (; k < CharonGKMT_N - 1; k++) {
-            y = (CharonGKMTState[k] & 0x80000000U) | (CharonGKMTState[k+1] & 0x7fffffffU);
-            CharonGKMTState[k] = CharonGKMTState[k + (CharonGKMT_M - CharonGKMT_N)] ^ (y >> 1) ^ mag[y & 1U]; }
-        y = (CharonGKMTState[CharonGKMT_N-1] & 0x80000000U) | (CharonGKMTState[0] & 0x7fffffffU);
-        CharonGKMTState[CharonGKMT_N-1] = CharonGKMTState[CharonGKMT_M-1] ^ (y >> 1) ^ mag[y & 1U];
-        CharonGKMTIndex = 0; }
-    y = CharonGKMTState[CharonGKMTIndex++];
+    if (RevenantGKMTIndex >= RevenantGKMT_N) { int k;
+        for (k = 0; k < RevenantGKMT_N - RevenantGKMT_M; k++) {
+            y = (RevenantGKMTState[k] & 0x80000000U) | (RevenantGKMTState[k+1] & 0x7fffffffU);
+            RevenantGKMTState[k] = RevenantGKMTState[k+RevenantGKMT_M] ^ (y >> 1) ^ mag[y & 1U]; }
+        for (; k < RevenantGKMT_N - 1; k++) {
+            y = (RevenantGKMTState[k] & 0x80000000U) | (RevenantGKMTState[k+1] & 0x7fffffffU);
+            RevenantGKMTState[k] = RevenantGKMTState[k + (RevenantGKMT_M - RevenantGKMT_N)] ^ (y >> 1) ^ mag[y & 1U]; }
+        y = (RevenantGKMTState[RevenantGKMT_N-1] & 0x80000000U) | (RevenantGKMTState[0] & 0x7fffffffU);
+        RevenantGKMTState[RevenantGKMT_N-1] = RevenantGKMTState[RevenantGKMT_M-1] ^ (y >> 1) ^ mag[y & 1U];
+        RevenantGKMTIndex = 0; }
+    y = RevenantGKMTState[RevenantGKMTIndex++];
     y ^= (y >> 11); y ^= (y << 7) & 0x9d2c5680U; y ^= (y << 15) & 0xefc60000U; y ^= (y >> 18);
     return y; }
 
 @implementation GKMersenneTwisterRandomSource
 - (instancetype)init { return [self initWithSeed:5489u]; }
 - (instancetype)initWithSeed:(uint64_t)seed { self = [super init];
-    if (self) { CharonGKMTSeedValue = seed; CharonGKMTSeed((uint32_t)seed); }
+    if (self) { RevenantGKMTSeedValue = seed; RevenantGKMTSeed((uint32_t)seed); }
     return self; }
-- (uint64_t)seed { return CharonGKMTSeedValue; }
-- (void)setSeed:(uint64_t)seed { CharonGKMTSeedValue = seed; CharonGKMTSeed((uint32_t)seed); }
-- (instancetype)initWithCoder:(NSCoder *)coder { return [self initWithSeed:CharonGKMTSeedValue]; }
-- (NSInteger)nextInt { return [self charon_nextWord:CharonGKMTDraw context:NULL]; }
+- (uint64_t)seed { return RevenantGKMTSeedValue; }
+- (void)setSeed:(uint64_t)seed { RevenantGKMTSeedValue = seed; RevenantGKMTSeed((uint32_t)seed); }
+- (instancetype)initWithCoder:(NSCoder *)coder { return [self initWithSeed:RevenantGKMTSeedValue]; }
+- (NSInteger)nextInt { return [self revenant_nextWord:RevenantGKMTDraw context:NULL]; }
 @end

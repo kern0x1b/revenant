@@ -2,44 +2,44 @@
 #import <Foundation/Foundation.h>
 #import <objc/runtime.h>
 
-#import "CharonAVMetadataConstruction.h"
+#import "RevenantAVMetadataConstruction.h"
 
-static const void *CharonAVMetadataStartDateKey = &CharonAVMetadataStartDateKey;
+static const void *RevenantAVMetadataStartDateKey = &RevenantAVMetadataStartDateKey;
 
-static NSDate *CharonAVMetadataStartDate(id item)
+static NSDate *RevenantAVMetadataStartDate(id item)
 {
-    return objc_getAssociatedObject(item, CharonAVMetadataStartDateKey);
+    return objc_getAssociatedObject(item, RevenantAVMetadataStartDateKey);
 }
 
-static AVMetadataIdentifier CharonAVMetadataItemIdentifier(AVMetadataItem *item)
+static AVMetadataIdentifier RevenantAVMetadataItemIdentifier(AVMetadataItem *item)
 {
     return [item identifier];
 }
 
-@implementation AVMetadataItem (CharonAVMetadataStart9)
+@implementation AVMetadataItem (RevenantAVMetadataStart9)
 
 - (NSDate *)startDate
 {
-    return CharonAVMetadataStartDate(self);
+    return RevenantAVMetadataStartDate(self);
 }
 
 @end
 
-@implementation AVMutableMetadataItem (CharonAVMetadataStart9)
+@implementation AVMutableMetadataItem (RevenantAVMetadataStart9)
 
 - (NSDate *)startDate
 {
-    return CharonAVMetadataStartDate(self);
+    return RevenantAVMetadataStartDate(self);
 }
 
 - (void)setStartDate:(NSDate *)startDate
 {
-    objc_setAssociatedObject(self, CharonAVMetadataStartDateKey, startDate, OBJC_ASSOCIATION_COPY);
+    objc_setAssociatedObject(self, RevenantAVMetadataStartDateKey, startDate, OBJC_ASSOCIATION_COPY);
 }
 
 @end
 
-@implementation AVMetadataItem (CharonAVMetadataFilters7)
+@implementation AVMetadataItem (RevenantAVMetadataFilters7)
 
 + (NSArray<AVMetadataItem *> *)metadataItemsFromArray:(NSArray<AVMetadataItem *> *)items
                        filteredByMetadataItemFilter:(AVMetadataItemFilter *)filter
@@ -50,7 +50,7 @@ static AVMetadataIdentifier CharonAVMetadataItemIdentifier(AVMetadataItem *item)
     NSArray<AVMetadataIdentifier> *wanted = filter.identifiers;
     NSMutableArray<AVMetadataItem *> *kept = [NSMutableArray arrayWithCapacity:items.count];
     for (AVMetadataItem *item in items) {
-        AVMetadataIdentifier identifier = CharonAVMetadataItemIdentifier(item);
+        AVMetadataIdentifier identifier = RevenantAVMetadataItemIdentifier(item);
         if (!wanted.count || [wanted containsObject:identifier]) {
             [kept addObject:item];
         }
@@ -69,7 +69,7 @@ static AVMetadataIdentifier CharonAVMetadataItemIdentifier(AVMetadataItem *item)
     }
     NSMutableArray<AVMetadataItem *> *kept = [NSMutableArray arrayWithCapacity:items.count];
     for (AVMetadataItem *item in items) {
-        if ([CharonAVMetadataItemIdentifier(item) isEqualToString:identifier]) {
+        if ([RevenantAVMetadataItemIdentifier(item) isEqualToString:identifier]) {
             [kept addObject:item];
         }
     }

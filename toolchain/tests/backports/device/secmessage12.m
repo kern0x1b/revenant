@@ -21,7 +21,7 @@ int main(int argc, char **argv)
 {
     @autoreleasepool {
         if (argc > 1)
-            charon_log_to(@(argv[1]));
+            revenant_log_to(@(argv[1]));
         CHECK(SecCopyErrorMessageString != NULL, "the function is there");
         CHECK_EQUAL(image_of((void *)SecCopyErrorMessageString), @"libSecurityBackports.dylib", "it comes from the backports");
         CHECK_EQUAL(message(errSecItemNotFound), @"The specified item could not be found in the keychain.", "item not found");
@@ -34,7 +34,7 @@ int main(int argc, char **argv)
         CHECK_EQUAL(message(12345), @"OSStatus 12345", "an unknown code is named by its number");
         CHECK_EQUAL(message(-1), @"OSStatus -1", "a negative unknown code too");
         CHECK_EQUAL(message(INT_MIN), @"OSStatus -2147483648", "the smallest status");
-        printf("checks=%d failures=%d\n", charon_checks, charon_failures);
+        printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
     }
-    return charon_failures ? 1 : 0;
+    return revenant_failures ? 1 : 0;
 }

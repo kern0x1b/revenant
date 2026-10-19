@@ -1,4 +1,4 @@
-#import "CharonSCN.h"
+#import "RevenantSCN.h"
 
 @implementation SCNCamera
 
@@ -45,18 +45,18 @@
             _fieldOfView = [coder decodeDoubleForKey:@"fov"];
             fovFound = YES;
         }
-        [CharonSCNCoding markFound:fovFound forKey:@"fieldOfView" onObject:self];
+        [RevenantSCNCoding markFound:fovFound forKey:@"fieldOfView" onObject:self];
         if ([coder containsValueForKey:@"zNear"]) {
             _zNear = [coder decodeDoubleForKey:@"zNear"];
         }
         if ([coder containsValueForKey:@"zFar"]) {
             _zFar = [coder decodeDoubleForKey:@"zFar"];
         }
-        _usesOrthographicProjection = [CharonSCNCoding decodeBool:coder forKey:@"usesOrthographicProjection" default:NO];
+        _usesOrthographicProjection = [RevenantSCNCoding decodeBool:coder forKey:@"usesOrthographicProjection" default:NO];
         if ([coder containsValueForKey:@"orthographicScale"]) {
             _orthographicScale = [coder decodeDoubleForKey:@"orthographicScale"];
         }
-        _automaticallyAdjustsZRange = [CharonSCNCoding decodeBool:coder forKey:@"automaticallyAdjustsZRange" default:NO];
+        _automaticallyAdjustsZRange = [RevenantSCNCoding decodeBool:coder forKey:@"automaticallyAdjustsZRange" default:NO];
     }
     return self;
 }

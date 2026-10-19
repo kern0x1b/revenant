@@ -27,7 +27,7 @@
 #include "mach/thread_act_mig_ids.hpp"
 #include "mach/vm_map_mig_ids.hpp"
 
-namespace shade::xnu::mig {
+namespace emulator::xnu::mig {
 namespace {
 
     template <typename Range>

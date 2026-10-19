@@ -33,24 +33,24 @@ static void decode(const char *name, const uint8_t *sps, size_t spsSize, const u
     CMFormatDescriptionRef description = NULL;
     OSStatus status = CMVideoFormatDescriptionCreateFromH264ParameterSets(NULL, 2, sets, sizes, 4, &description);
     snprintf(label, sizeof label, "%s: a description from the encoder's SPS and PPS", name);
-    charon_check(status == noErr && description, label, [NSString stringWithFormat:@"status %d", (int)status]);
+    revenant_check(status == noErr && description, label, [NSString stringWithFormat:@"status %d", (int)status]);
     if (!description)
         return;
     CMVideoDimensions dimensions = CMVideoFormatDescriptionGetDimensions(description);
     snprintf(label, sizeof label, "%s: its dimensions", name);
-    charon_check(dimensions.width == width && dimensions.height == height, label, [NSString stringWithFormat:@"%dx%d", dimensions.width, dimensions.height]);
+    revenant_check(dimensions.width == width && dimensions.height == height, label, [NSString stringWithFormat:@"%dx%d", dimensions.width, dimensions.height]);
     const uint8_t *back = NULL;
     size_t backSize = 0, count = 0;
     status = CMVideoFormatDescriptionGetH264ParameterSetAtIndex(description, 1, &back, &backSize, &count, NULL);
     snprintf(label, sizeof label, "%s: the PPS reads back out of it", name);
-    charon_check(status == noErr && count == 2 && backSize == ppsSize && !memcmp(back, pps, ppsSize), label, [NSString stringWithFormat:@"status %d count %zu", (int)status, count]);
+    revenant_check(status == noErr && count == 2 && backSize == ppsSize && !memcmp(back, pps, ppsSize), label, [NSString stringWithFormat:@"status %d count %zu", (int)status, count]);
 
     VTDecompressionOutputCallbackRecord callback = {output, NULL};
     NSDictionary *attributes = @{(__bridge NSString *)kCVPixelBufferPixelFormatTypeKey: @(kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange)};
     VTDecompressionSessionRef session = NULL;
     status = VTDecompressionSessionCreate(NULL, description, NULL, (__bridge CFDictionaryRef)attributes, &callback, &session);
     snprintf(label, sizeof label, "%s: the release's decoder takes the description", name);
-    charon_check(status == noErr && session, label, [NSString stringWithFormat:@"status %d", (int)status]);
+    revenant_check(status == noErr && session, label, [NSString stringWithFormat:@"status %d", (int)status]);
     if (!session) {
         CFRelease(description);
         return;
@@ -68,11 +68,11 @@ static void decode(const char *name, const uint8_t *sps, size_t spsSize, const u
     status = VTDecompressionSessionDecodeFrame(session, sample, 0, NULL, NULL);
     VTDecompressionSessionWaitForAsynchronousFrames(session);
     snprintf(label, sizeof label, "%s: the IDR frame decodes", name);
-    charon_check(status == noErr && decoded == 1 && decodedStatus == noErr, label, [NSString stringWithFormat:@"decode %d, %d frames, frame status %d", (int)status, decoded, (int)decodedStatus]);
+    revenant_check(status == noErr && decoded == 1 && decodedStatus == noErr, label, [NSString stringWithFormat:@"decode %d, %d frames, frame status %d", (int)status, decoded, (int)decodedStatus]);
     snprintf(label, sizeof label, "%s: the decoded picture has the description's size", name);
-    charon_check(decodedWidth == (size_t)width && decodedHeight == (size_t)height, label, [NSString stringWithFormat:@"%zux%zu", decodedWidth, decodedHeight]);
+    revenant_check(decodedWidth == (size_t)width && decodedHeight == (size_t)height, label, [NSString stringWithFormat:@"%zux%zu", decodedWidth, decodedHeight]);
     snprintf(label, sizeof label, "%s: the checkerboard the host encoded comes back dark then light", name);
-    charon_check(decodedLuma[0] < 90 && decodedLuma[1] > 150, label, [NSString stringWithFormat:@"%u %u", decodedLuma[0], decodedLuma[1]]);
+    revenant_check(decodedLuma[0] < 90 && decodedLuma[1] > 150, label, [NSString stringWithFormat:@"%u %u", decodedLuma[0], decodedLuma[1]]);
 
     VTDecompressionSessionInvalidate(session);
     CFRelease(session);
@@ -119,11 +119,11 @@ int main(int argc, char **argv)
 {
     @autoreleasepool {
         if (argc > 1)
-            charon_log_to([NSString stringWithUTF8String:argv[1]]);
+            revenant_log_to([NSString stringWithUTF8String:argv[1]]);
         decode("baseline 320x240", baseline_sps, sizeof baseline_sps, baseline_pps, sizeof baseline_pps, baseline_frame, sizeof baseline_frame, 320, 240);
         decode("high 640x480", high_sps, sizeof high_sps, high_pps, sizeof high_pps, high_frame, sizeof high_frame, 640, 480);
         encode();
-        printf("checks=%d failures=%d\n", charon_checks, charon_failures);
+        printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
     }
-    return charon_failures ? 1 : 0;
+    return revenant_failures ? 1 : 0;
 }

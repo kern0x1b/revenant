@@ -1,4 +1,4 @@
-#import "CharonMetal.h"
+#import "RevenantMetal.h"
 
 #pragma clang diagnostic ignored "-Wprotocol"
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
@@ -6,7 +6,7 @@
 
 #include <dlfcn.h>
 
-@implementation CharonMetalComputePipeline {
+@implementation RevenantMetalComputePipeline {
     void *_function;
     uint32_t _threads;
     uint32_t _blockBytes;
@@ -32,7 +32,7 @@
     });
     if (!table) {
         if (error)
-            *error = CharonMetalError(20, @"this library carries no kernel the port could translate: tools/air2cpu has not been run over it, or every kernel in it was refused by name, and the log of the build that ran it says which");
+            *error = RevenantMetalError(20, @"this library carries no kernel the port could translate: tools/air2cpu has not been run over it, or every kernel in it was refused by name, and the log of the build that ran it says which");
         return nil;
     }
     for (unsigned index = 0; index < count; index++) {
@@ -46,32 +46,32 @@
         return self;
     }
     if (error)
-        *error = CharonMetalError(21, [NSString stringWithFormat:@"%@ is not a kernel this port could translate: tools/air2cpu refused it, and the refusal is in the log of the build that ran it",
+        *error = RevenantMetalError(21, [NSString stringWithFormat:@"%@ is not a kernel this port could translate: tools/air2cpu refused it, and the refusal is in the log of the build that ran it",
                                    name ? name : @"that function"]);
     return nil;
 }
 
 - (id<MTLDevice>)device
 {
-    return [CharonMetalDevice shared];
+    return [RevenantMetalDevice shared];
 }
 
-- (void *)charonKernelFunction
+- (void *)revenantKernelFunction
 {
     return _function;
 }
 
-- (uint32_t)charonBlockBytes
+- (uint32_t)revenantBlockBytes
 {
     return _blockBytes;
 }
 
-- (uint32_t)charonThreads
+- (uint32_t)revenantThreads
 {
     return _threads;
 }
 
-- (void)charonSetThreads:(uint32_t)threads
+- (void)revenantSetThreads:(uint32_t)threads
 {
     _threads = threads;
 }
@@ -96,7 +96,7 @@
     return index == 0 ? _blockBytes : 0;
 }
 
-- (void)charonSetBlockBytes:(uint32_t)bytes
+- (void)revenantSetBlockBytes:(uint32_t)bytes
 {
     _blockBytes = bytes;
 }

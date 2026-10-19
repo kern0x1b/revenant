@@ -17,7 +17,7 @@ static const char *label(NSString *format, ...)
 int main(void)
 {
     @autoreleasepool {
-        Class port = NSClassFromString(@"CharonHostNSDateComponentsFormatter");
+        Class port = NSClassFromString(@"RevenantHostNSDateComponentsFormatter");
         NSCalendar *calendar = [NSCalendar calendarWithIdentifier:NSCalendarIdentifierGregorian];
         calendar.timeZone = [NSTimeZone timeZoneForSecondsFromGMT:0];
         NSDateFormatter *dates = [[NSDateFormatter alloc] init];
@@ -75,7 +75,7 @@ int main(void)
             [shape[side] addObject:formatter.referenceDate ? @"set" : @"nil"];
         }
         CHECK_EQUAL(shape[1], shape[0], "the reference date is kept, copied with the formatter and cleared as the system's is");
-        printf("checks=%d failures=%d\n", charon_checks, charon_failures);
+        printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
     }
-    return charon_failures ? 1 : 0;
+    return revenant_failures ? 1 : 0;
 }

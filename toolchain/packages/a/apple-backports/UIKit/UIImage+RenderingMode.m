@@ -3,13 +3,13 @@
 #pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
 #import <objc/runtime.h>
 
-static char charon_rendering_mode_key;
+static char revenant_rendering_mode_key;
 
-@implementation UIImage (CharonRenderingMode)
+@implementation UIImage (RevenantRenderingMode)
 
 - (UIImageRenderingMode)renderingMode
 {
-    NSNumber *stored = objc_getAssociatedObject(self, &charon_rendering_mode_key);
+    NSNumber *stored = objc_getAssociatedObject(self, &revenant_rendering_mode_key);
     return stored ? (UIImageRenderingMode)stored.integerValue : UIImageRenderingModeAutomatic;
 }
 
@@ -30,24 +30,24 @@ static char charon_rendering_mode_key;
     UIEdgeInsets alignmentInsets = self.alignmentRectInsets;
     if (image != self && !UIEdgeInsetsEqualToEdgeInsets(alignmentInsets, UIEdgeInsetsZero))
         image = [image imageWithAlignmentRectInsets:alignmentInsets];
-    objc_setAssociatedObject(image, &charon_rendering_mode_key, @(renderingMode), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(image, &revenant_rendering_mode_key, @(renderingMode), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     return image;
 }
 
 @end
 
-static UIImage *charon_keep_mode(UIImage *source, UIImage *result)
+static UIImage *revenant_keep_mode(UIImage *source, UIImage *result)
 {
-    NSNumber *stored = objc_getAssociatedObject(source, &charon_rendering_mode_key);
+    NSNumber *stored = objc_getAssociatedObject(source, &revenant_rendering_mode_key);
     if (stored && result != source)
-        objc_setAssociatedObject(result, &charon_rendering_mode_key, stored, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+        objc_setAssociatedObject(result, &revenant_rendering_mode_key, stored, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     return result;
 }
 
-@interface CharonImageModeKeeper : NSObject
+@interface RevenantImageModeKeeper : NSObject
 @end
 
-@implementation CharonImageModeKeeper
+@implementation RevenantImageModeKeeper
 
 + (void)load
 {
@@ -57,17 +57,17 @@ static UIImage *charon_keep_mode(UIImage *source, UIImage *result)
     SEL caps = @selector(resizableImageWithCapInsets:);
     UIImage *(*originalCaps)(id, SEL, UIEdgeInsets) = (UIImage *(*)(id, SEL, UIEdgeInsets))class_getMethodImplementation(image, caps);
     class_replaceMethod(image, caps, imp_implementationWithBlock(^UIImage *(UIImage *self_, UIEdgeInsets insets) {
-        return charon_keep_mode(self_, originalCaps(self_, caps, insets));
+        return revenant_keep_mode(self_, originalCaps(self_, caps, insets));
     }), method_getTypeEncoding(class_getInstanceMethod(image, caps)));
     SEL capsMode = @selector(resizableImageWithCapInsets:resizingMode:);
     UIImage *(*originalCapsMode)(id, SEL, UIEdgeInsets, NSInteger) = (UIImage *(*)(id, SEL, UIEdgeInsets, NSInteger))class_getMethodImplementation(image, capsMode);
     class_replaceMethod(image, capsMode, imp_implementationWithBlock(^UIImage *(UIImage *self_, UIEdgeInsets insets, NSInteger mode) {
-        return charon_keep_mode(self_, originalCapsMode(self_, capsMode, insets, mode));
+        return revenant_keep_mode(self_, originalCapsMode(self_, capsMode, insets, mode));
     }), method_getTypeEncoding(class_getInstanceMethod(image, capsMode)));
     SEL alignment = @selector(imageWithAlignmentRectInsets:);
     UIImage *(*originalAlignment)(id, SEL, UIEdgeInsets) = (UIImage *(*)(id, SEL, UIEdgeInsets))class_getMethodImplementation(image, alignment);
     class_replaceMethod(image, alignment, imp_implementationWithBlock(^UIImage *(UIImage *self_, UIEdgeInsets insets) {
-        return charon_keep_mode(self_, originalAlignment(self_, alignment, insets));
+        return revenant_keep_mode(self_, originalAlignment(self_, alignment, insets));
     }), method_getTypeEncoding(class_getInstanceMethod(image, alignment)));
 }
 

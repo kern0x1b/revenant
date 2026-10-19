@@ -1,17 +1,17 @@
-#import "CharonNW.h"
+#import "RevenantNW.h"
 
 nw_parameters_t nw_parameters_create_application_service(void)
 {
-    CharonNWParameters *parameters = [[CharonNWParameters alloc] init];
-    CharonNWProtocolStack *stack = [[CharonNWProtocolStack alloc] init];
+    RevenantNWParameters *parameters = [[RevenantNWParameters alloc] init];
+    RevenantNWProtocolStack *stack = [[RevenantNWProtocolStack alloc] init];
     stack->_application = [NSMutableArray array];
-    CharonNWProtocolOptions *internet = [[CharonNWProtocolOptions alloc] init];
-    internet->_definition = (CharonNWProtocolDefinition *)nw_protocol_copy_ip_definition();
+    RevenantNWProtocolOptions *internet = [[RevenantNWProtocolOptions alloc] init];
+    internet->_definition = (RevenantNWProtocolDefinition *)nw_protocol_copy_ip_definition();
     internet->_values = [NSMutableDictionary dictionary];
     internet->_objects = [NSMutableDictionary dictionary];
     stack->_internet = internet;
-    CharonNWProtocolOptions *transport = [[CharonNWProtocolOptions alloc] init];
-    transport->_definition = (CharonNWProtocolDefinition *)nw_protocol_copy_tcp_definition();
+    RevenantNWProtocolOptions *transport = [[RevenantNWProtocolOptions alloc] init];
+    transport->_definition = (RevenantNWProtocolDefinition *)nw_protocol_copy_tcp_definition();
     transport->_values = [NSMutableDictionary dictionary];
     transport->_objects = [NSMutableDictionary dictionary];
     stack->_transport = transport;
@@ -28,13 +28,13 @@ nw_parameters_t nw_parameters_create_application_service(void)
 
 bool nw_parameters_requires_dnssec_validation(nw_parameters_t parameters)
 {
-    CharonNWParameters *value = (CharonNWParameters *)parameters;
+    RevenantNWParameters *value = (RevenantNWParameters *)parameters;
     return value ? value->_requiresDNSSEC : false;
 }
 
 void nw_parameters_set_requires_dnssec_validation(nw_parameters_t parameters, bool requires_dnssec_validation)
 {
-    CharonNWParameters *value = (CharonNWParameters *)parameters;
+    RevenantNWParameters *value = (RevenantNWParameters *)parameters;
     if (value)
         value->_requiresDNSSEC = requires_dnssec_validation;
 }

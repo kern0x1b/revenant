@@ -1,11 +1,11 @@
 #ifdef __OBJC__
 
-static inline void CharonMetalPushDebugGroup(NSMutableArray *groups, NSString *name)
+static inline void RevenantMetalPushDebugGroup(NSMutableArray *groups, NSString *name)
 {
     [groups addObject:name ? name : @""];
 }
 
-static inline void CharonMetalPopDebugGroup(NSMutableArray *groups, id owner)
+static inline void RevenantMetalPopDebugGroup(NSMutableArray *groups, id owner)
 {
     if (groups.count) {
         [groups removeLastObject];

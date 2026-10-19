@@ -8,7 +8,7 @@ index 8d398b1..97e539b 100644
  
 -import Darwin
 +// os_unfair_lock arrived in iOS 10, macOS 10.12, tvOS 10 and watchOS 3, and the SDK's declaration carries those releases,
-+// so importing it holds this library to them. A runtime that ships with the program runs on older releases, where Charon's
++// so importing it holds this library to them. A runtime that ships with the program runs on older releases, where Revenant's
 +// libc++abi exports the same three calls, one copy for the process; they are named here instead, and the lock is the single
 +// 32-bit word os_unfair_lock is (OS_UNFAIR_LOCK_INIT is a zero word).
 +@_extern(c, "os_unfair_lock_lock")

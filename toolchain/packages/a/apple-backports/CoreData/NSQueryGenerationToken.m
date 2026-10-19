@@ -1,6 +1,6 @@
 #import <CoreData/CoreData.h>
 
-static NSQueryGenerationToken *charon_current_token;
+static NSQueryGenerationToken *revenant_current_token;
 
 @implementation NSQueryGenerationToken {
     BOOL _current;
@@ -10,10 +10,10 @@ static NSQueryGenerationToken *charon_current_token;
 {
     static dispatch_once_t once;
     dispatch_once(&once, ^{
-        charon_current_token = [[NSQueryGenerationToken alloc] init];
-        charon_current_token->_current = YES;
+        revenant_current_token = [[NSQueryGenerationToken alloc] init];
+        revenant_current_token->_current = YES;
     });
-    return charon_current_token;
+    return revenant_current_token;
 }
 
 + (BOOL)supportsSecureCoding

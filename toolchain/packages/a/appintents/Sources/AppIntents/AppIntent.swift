@@ -6,11 +6,11 @@ public protocol PersistentlyIdentifiable {
 
 extension PersistentlyIdentifiable {
     public static var persistentIdentifier: String {
-        return CharonNames.qualified(Self.self)
+        return RevenantNames.qualified(Self.self)
     }
 }
 
-public enum CharonNames {
+public enum RevenantNames {
     public static func qualified(_ type: Any.Type) -> String {
         return String(describing: type)
     }
@@ -80,7 +80,7 @@ public final class AppDependencyManager {
         lock.lock()
         defer { lock.unlock() }
         guard let found = storage[key] as? Dependency else {
-            CharonUnset.fatal("the dependency \(key) was never added")
+            RevenantUnset.fatal("the dependency \(key) was never added")
         }
         return found
     }
@@ -287,15 +287,15 @@ public final class IntentProjection<Intent: AppIntent> {
     }
 
     public subscript<Value>(dynamicMember keyPath: KeyPath<Intent, Value>) -> Value.UnwrappedType where Value: _IntentValue {
-        guard let value = CharonIntentStorage.shared.value(for: IntentParameterDependency.name(keyPath)) as? Value.UnwrappedType else {
-            CharonUnset.fatal("a parameter read before the framework filled it in")
+        guard let value = RevenantIntentStorage.shared.value(for: IntentParameterDependency.name(keyPath)) as? Value.UnwrappedType else {
+            RevenantUnset.fatal("a parameter read before the framework filled it in")
         }
         return value
     }
 }
 
-public final class CharonIntentStorage {
-    public static let shared = CharonIntentStorage()
+public final class RevenantIntentStorage {
+    public static let shared = RevenantIntentStorage()
 
     private var storage: [String: any _IntentValue] = [:]
     private let lock = NSLock()
@@ -309,11 +309,11 @@ public final class CharonIntentStorage {
     func value(for key: String) -> any _IntentValue {
         lock.lock()
         defer { lock.unlock() }
-        return storage[key] ?? CharonEmptyValue()
+        return storage[key] ?? RevenantEmptyValue()
     }
 }
 
-public struct CharonEmptyValue: _IntentValue, Sendable {
+public struct RevenantEmptyValue: _IntentValue, Sendable {
     public typealias ValueType = Never
     public typealias UnwrappedType = Never
     public typealias Specification = EmptyResolverSpecification<Never>
@@ -353,7 +353,7 @@ extension AppIntent {
     public static var description: IntentDescription? { return nil }
     public static var systemContext: IntentSystemContext { return IntentSystemContext() }
 
-    public static var persistentIdentifier: String { return CharonNames.qualified(Self.self) }
+    public static var persistentIdentifier: String { return RevenantNames.qualified(Self.self) }
 
     @discardableResult
     public func donate() async throws -> IntentDonationIdentifier {
@@ -362,7 +362,7 @@ extension AppIntent {
 
     @discardableResult
     public func donate() -> IntentDonationIdentifier {
-        return CharonRun.await { try await self.donate() } ?? IntentDonationIdentifier()
+        return RevenantRun.await { try await self.donate() } ?? IntentDonationIdentifier()
     }
 
     @discardableResult
@@ -372,7 +372,7 @@ extension AppIntent {
 
     @discardableResult
     public func donate(result: some IntentResult) -> IntentDonationIdentifier {
-        return (try? CharonRun.await { try await self.donate(result: result) }) ?? IntentDonationIdentifier()
+        return (try? RevenantRun.await { try await self.donate(result: result) }) ?? IntentDonationIdentifier()
     }
 
     public func callAsFunction(donate donateOnCompletion: Bool = true) async throws -> PerformResult.Value?
@@ -431,12 +431,12 @@ extension AppIntent {
     }
 
     public func continueInForeground(_ mode: IntentModes.ForegroundMode, alwaysConfirm: Bool = true) async throws {
-        CharonForeground.current = mode
+        RevenantForeground.current = mode
     }
 
     public func needsToContinueInForegroundError(_ mode: IntentModes.ForegroundMode,
                                                  alwaysConfirm: Bool = true) -> any Swift.Error {
-        return CharonForeground.continuationError(mode: mode)
+        return RevenantForeground.continuationError(mode: mode)
     }
 }
 
@@ -476,10 +476,10 @@ public enum IntentChoiceRequest {
     }
 }
 
-public enum CharonForeground {
+public enum RevenantForeground {
     public static var current: IntentModes.ForegroundMode = .immediate
 
-    public static var mode: IntentModes.Current { return CharonForeground.inForeground ? .foreground : .background }
+    public static var mode: IntentModes.Current { return RevenantForeground.inForeground ? .foreground : .background }
 
     public static var inForeground = false
 
@@ -493,7 +493,7 @@ public enum CharonForeground {
     }
 }
 
-public enum CharonRun {
+public enum RevenantRun {
     public static func await<T>(_ body: @escaping () async throws -> T) -> T? {
         let finished = DispatchSemaphore(value: 0)
         var value: T?
@@ -552,10 +552,10 @@ public struct IntentDeprecation<ReplacementIntent: AppIntent> {
 }
 
 public protocol UndoableIntent: SystemIntent {
-    var undoManager: CharonUndoManager { get }
+    var undoManager: RevenantUndoManager { get }
 }
 
-public typealias CharonUndoManager = UndoManager
+public typealias RevenantUndoManager = UndoManager
 
 public struct IntentModes: OptionSet, Hashable, Sendable {
     public let rawValue: Int
@@ -586,7 +586,7 @@ public struct IntentModes: OptionSet, Hashable, Sendable {
         public static var background: Current { return Current(rawValue: 0) }
         public static var foreground: Current { return Current(rawValue: 1) }
 
-        public var canContinueInForeground: Bool { return CharonForeground.inForeground }
+        public var canContinueInForeground: Bool { return RevenantForeground.inForeground }
 
         public var debugDescription: String { return canContinueInForeground ? "foreground" : "background" }
     }
@@ -626,6 +626,6 @@ extension ForegroundContinuableIntent {
     }
 
     public func needsToContinueInForegroundError(_ mode: IntentModes.ForegroundMode) -> any Error {
-        return CharonForeground.continuationError(mode: mode)
+        return RevenantForeground.continuationError(mode: mode)
     }
 }

@@ -10,7 +10,7 @@ here=$(cd "$(dirname "$0")" && pwd)
 # `.agent-work/pending-shears/`, a folder nothing tracks, which is why the sweep found them missing.
 ACCELERATE=$here/../../../../packages/a/apple-backports/Accelerate
 SHEARS=${SHEARS:-$ACCELERATE}
-build=${SHEAR_BUILD:-$(runs_folder charon-shear-host)}
+build=${SHEAR_BUILD:-$(runs_folder revenant-shear-host)}
 rm -rf "$build"
 mkdir -p "$build"
 
@@ -42,7 +42,7 @@ if [ -n "${PLANT:-}" ]; then
     for source in vImageShear70.m vImageShear80.m vImageShear100.m vImageShear150.m; do
         cp "$SHEARS/$source" "$build/planted/$source"
     done
-    for source in CharonShear.h CharonChannels.h CharonResampling.h CharonVImageFixed.h; do
+    for source in RevenantShear.h RevenantChannels.h RevenantResampling.h RevenantVImageFixed.h; do
         cp "$ACCELERATE/$source" "$build/planted/$source"
     done
     # PLANT_REPLACE chooses what the needle becomes; the default removes a whole statement, so what is left is
@@ -76,7 +76,7 @@ names=$(grep -h "^vImage_Error vImage" "$SHEARS"/vImageShear*.m | cut -d'(' -f1 
 
 renames=""
 for name in $names; do
-    renames="$renames -D$name=charon_host_$name"
+    renames="$renames -D$name=revenant_host_$name"
 done
 
 objects=""

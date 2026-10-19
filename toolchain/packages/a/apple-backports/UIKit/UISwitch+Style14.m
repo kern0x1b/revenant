@@ -1,11 +1,11 @@
-#import "CharonMenus.h"
+#import "RevenantMenus.h"
 #import <objc/runtime.h>
 
 #pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
 
-static const char charon_preferred_key, charon_title_key;
+static const char revenant_preferred_key, revenant_title_key;
 
-@implementation UISwitch (CharonStyle14)
+@implementation UISwitch (RevenantStyle14)
 
 - (UISwitchStyle)style
 {
@@ -14,24 +14,24 @@ static const char charon_preferred_key, charon_title_key;
 
 - (UISwitchStyle)preferredStyle
 {
-    return (UISwitchStyle)[objc_getAssociatedObject(self, &charon_preferred_key) integerValue];
+    return (UISwitchStyle)[objc_getAssociatedObject(self, &revenant_preferred_key) integerValue];
 }
 
 - (void)setPreferredStyle:(UISwitchStyle)preferredStyle
 {
-    objc_setAssociatedObject(self, &charon_preferred_key, @(preferredStyle), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, &revenant_preferred_key, @(preferredStyle), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
 - (NSString *)title
 {
-    return objc_getAssociatedObject(self, &charon_title_key);
+    return objc_getAssociatedObject(self, &revenant_title_key);
 }
 
 - (void)setTitle:(NSString *)title
 {
     if (title.length)
-        charon_menus_say_once(@"switch-title", @"UISwitch.title: the title belongs to the checkbox style of the Mac idiom, so on this release it is kept and not drawn");
-    objc_setAssociatedObject(self, &charon_title_key, [title copy], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+        revenant_menus_say_once(@"switch-title", @"UISwitch.title: the title belongs to the checkbox style of the Mac idiom, so on this release it is kept and not drawn");
+    objc_setAssociatedObject(self, &revenant_title_key, [title copy], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
 @end

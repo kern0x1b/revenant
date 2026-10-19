@@ -35,7 +35,7 @@ public struct ControlWidgetDescriptionContext {
 }
 
 public enum ControlWidget {
-    public static func main() -> [ControlInfo] { return CharonWidgetRegistry.shared.controls() }
+    public static func main() -> [ControlInfo] { return RevenantWidgetRegistry.shared.controls() }
 }
 
 public struct ControlWidgetButton<Content: WidgetBody>: ControlWidgetConfiguration, ControlWidgetTemplate {
@@ -130,7 +130,7 @@ public struct ControlWidgetToggle<Value: ControlValueProvider, Content: WidgetBo
 
     public var _controlType: String { return "toggle" }
 
-    public var valueProvider: ControlValueProvider { return named ?? CharonBoolProvider(isOn: isOn) }
+    public var valueProvider: ControlValueProvider { return named ?? RevenantBoolProvider(isOn: isOn) }
 }
 
 public struct ControlWidgetToggleDefaultLabel: WidgetBody {
@@ -145,7 +145,7 @@ extension ControlWidgetToggleDefaultLabel {
     public typealias BodyType = Never
 }
 
-public struct CharonBoolProvider: ControlValueProvider {
+public struct RevenantBoolProvider: ControlValueProvider {
     public let isOn: Bool
 
     public init(isOn: Bool) {
@@ -156,7 +156,7 @@ public struct CharonBoolProvider: ControlValueProvider {
     public var previewValue: Bool { return isOn }
 }
 
-public struct CharonControlLabel<Content>: WidgetBody {
+public struct RevenantControlLabel<Content>: WidgetBody {
     public typealias BodyType = Content
 
     let value: Content

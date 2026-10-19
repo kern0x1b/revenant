@@ -1,7 +1,7 @@
 #import <Foundation/Foundation.h>
 #import <GameplayKit/GameplayKit.h>
 #import <objc/runtime.h>
-#import "CharonGKScriptedSource.h"
+#import "RevenantGKScriptedSource.h"
 
 @interface ProbeOne : GKComponent @end
 @implementation ProbeOne @end
@@ -428,7 +428,7 @@ int main(void)
                    (long)overMoments.highestValue, (unsigned long)overMoments.numberOfPossibleOutcomes);
         }
         {
-            CharonGKScriptedSource *source = [[CharonGKScriptedSource alloc]
+            RevenantGKScriptedSource *source = [[RevenantGKScriptedSource alloc]
                                               initWithScript:@[@"bounded:6=2", @"bounded:6=5", @"bounded:6=1",
                                                                @"bounded:6=4", @"bounded:6=0", @"bounded:6=3",
                                                                @"bool=1", @"bool=0"]];
@@ -440,21 +440,21 @@ int main(void)
             }
             printf("a d6 over the script: %s\n", [floats(draws) UTF8String]);
             printf("  asked: %s\n", [source.log UTF8String]);
-            CharonGKScriptedSource *bools = [[CharonGKScriptedSource alloc]
+            RevenantGKScriptedSource *bools = [[RevenantGKScriptedSource alloc]
                                              initWithScript:@[@"bool=1", @"bool=0", @"bool=1", @"bool=1", @"bool=0"]];
             GKRandomDistribution *coin = [[GKRandomDistribution alloc] initWithRandomSource:bools
                                                                                  lowestValue:0 highestValue:1];
             printf("nextBool over the script: %d %d %d\n", (int)[coin nextBool], (int)[coin nextBool],
                    (int)[coin nextBool]);
             printf("  asked: %s\n", [bools.log UTF8String]);
-            CharonGKScriptedSource *uniform = [[CharonGKScriptedSource alloc]
+            RevenantGKScriptedSource *uniform = [[RevenantGKScriptedSource alloc]
                                                initWithScript:@[@"bounded:6=3", @"bounded:6=0", @"bounded:6=5"]];
             GKRandomDistribution *faces = [[GKRandomDistribution alloc] initWithRandomSource:uniform
                                                                                   lowestValue:1 highestValue:6];
             printf("nextUniform over the script: %g %g %g\n", [faces nextUniform], [faces nextUniform],
                    [faces nextUniform]);
             printf("  asked: %s\n", [uniform.log UTF8String]);
-            CharonGKScriptedSource *bounded = [[CharonGKScriptedSource alloc]
+            RevenantGKScriptedSource *bounded = [[RevenantGKScriptedSource alloc]
                                                initWithScript:@[@"bounded:3=1", @"bounded:4=2", @"bounded:7=3",
                                                                 @"bounded:7=6", @"bounded:1=0"]];
             GKRandomDistribution *over = [[GKRandomDistribution alloc] initWithRandomSource:bounded
@@ -470,7 +470,7 @@ int main(void)
             }
             printf("nextIntWithUpperBound over 2..5: %s\n", [[withBound componentsJoinedByString:@" "] UTF8String]);
             printf("  asked: %s\n", [bounded.log UTF8String]);
-            CharonGKScriptedSource *below = [[CharonGKScriptedSource alloc] initWithScript:@[]];
+            RevenantGKScriptedSource *below = [[RevenantGKScriptedSource alloc] initWithScript:@[]];
             GKRandomDistribution *negative = [[GKRandomDistribution alloc] initWithRandomSource:below
                                                                                     lowestValue:-2 highestValue:2];
             NSMutableArray *underBounds = [NSMutableArray array];
@@ -485,7 +485,7 @@ int main(void)
             printf("nextIntWithUpperBound over -2..2: %s\n", [[underBounds componentsJoinedByString:@" "] UTF8String]);
             printf("  asked: %s\n", [below.log UTF8String]);
             for (NSUInteger bound = 0; bound <= 8; bound++) {
-                CharonGKScriptedSource *fresh = [[CharonGKScriptedSource alloc] initWithScript:@[]];
+                RevenantGKScriptedSource *fresh = [[RevenantGKScriptedSource alloc] initWithScript:@[]];
                 GKRandomDistribution *single = [[GKRandomDistribution alloc] initWithRandomSource:fresh
                                                                                      lowestValue:3
                                                                                     highestValue:3];
@@ -496,7 +496,7 @@ int main(void)
                     printf("  3..3 b%lu raised %s\n", (unsigned long)bound, [[exception name] UTF8String]);
                 }
             }
-            CharonGKScriptedSource *normal = [[CharonGKScriptedSource alloc]
+            RevenantGKScriptedSource *normal = [[RevenantGKScriptedSource alloc]
                                               initWithScript:@[@"uniform=0.25", @"uniform=0.75", @"uniform=0.5",
                                                                @"uniform=0.1", @"uniform=0.9"]];
             GKGaussianDistribution *gaussian = [[GKGaussianDistribution alloc] initWithRandomSource:normal
@@ -508,7 +508,7 @@ int main(void)
             }
             printf("a gaussian over the script: %s\n", [floats(normals) UTF8String]);
             printf("  asked: %s\n", [normal.log UTF8String]);
-            CharonGKScriptedSource *shuffling = [[CharonGKScriptedSource alloc]
+            RevenantGKScriptedSource *shuffling = [[RevenantGKScriptedSource alloc]
                                                  initWithScript:@[@"bounded:1=0", @"bounded:2=1", @"bounded:3=2",
                                                                   @"bounded:4=0", @"bounded:5=3", @"bounded:6=5",
                                                                   @"bounded:1=0", @"bounded:2=1", @"bounded:3=0"]];
@@ -524,17 +524,17 @@ int main(void)
 
         printf("== the shuffle NSArray carries ==\n");
         {
-            CharonGKScriptedSource *source = [[CharonGKScriptedSource alloc]
+            RevenantGKScriptedSource *source = [[RevenantGKScriptedSource alloc]
                                               initWithScript:@[@"bounded:1=0", @"bounded:2=1", @"bounded:3=2",
                                                                @"bounded:4=0", @"bounded:5=3", @"bounded:6=5",
                                                                @"bounded:7=1", @"bounded:8=6"]];
             NSArray *shuffled = [@[@1, @2, @3, @4, @5, @6, @7, @8] shuffledArrayWithRandomSource:source];
             printf("eight over the script: %s\n", [[shuffled componentsJoinedByString:@" "] UTF8String]);
             printf("  asked: %s\n", [source.log UTF8String]);
-            CharonGKScriptedSource *none = [[CharonGKScriptedSource alloc] initWithScript:@[]];
+            RevenantGKScriptedSource *none = [[RevenantGKScriptedSource alloc] initWithScript:@[]];
             printf("an empty array: %lu\n",
                    (unsigned long)[@[] shuffledArrayWithRandomSource:none].count);
-            CharonGKScriptedSource *one = [[CharonGKScriptedSource alloc] initWithScript:@[]];
+            RevenantGKScriptedSource *one = [[RevenantGKScriptedSource alloc] initWithScript:@[]];
             NSArray *single = @[@1];
             NSArray *oneShuffled = [single shuffledArrayWithRandomSource:one];
             printf("one object: %s count %lu asked '%s'\n", [[oneShuffled description] UTF8String],

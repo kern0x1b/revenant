@@ -1,5 +1,5 @@
 #import <Foundation/Foundation.h>
-#import "CharonDimension.h"
+#import "RevenantDimension.h"
 
 @implementation NSUnitFuelEfficiency
 
@@ -23,7 +23,7 @@
     static NSUnitFuelEfficiency *unit;
     static dispatch_once_t once;
     dispatch_once(&once, ^{
-        unit = [[NSUnitFuelEfficiency alloc] initWithSpecifier:3331 symbol:@"mpg" converter:charon_reciprocal_converter(282.481)];
+        unit = [[NSUnitFuelEfficiency alloc] initWithSpecifier:3331 symbol:@"mpg" converter:revenant_reciprocal_converter(282.481)];
     });
     return unit;
 }
@@ -33,7 +33,7 @@
     static NSUnitFuelEfficiency *unit;
     static dispatch_once_t once;
     dispatch_once(&once, ^{
-        unit = [[NSUnitFuelEfficiency alloc] initWithSpecifier:3329 symbol:@"mpg" converter:charon_reciprocal_converter(235.215)];
+        unit = [[NSUnitFuelEfficiency alloc] initWithSpecifier:3329 symbol:@"mpg" converter:revenant_reciprocal_converter(235.215)];
     });
     return unit;
 }

@@ -250,7 +250,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "reason": "a CATEGORY on a class the release already carries: added_members() skips a class with an image, which is every class the release has, and that is right for what the release already answers -- but these members are the release's own MKMapView plus what this category adds, and a caller's method IS reached through the category, so the registry names each one",
-      "effect": "the delegate the release's own map view asks through CharonCarPlayInterface's proxy, the two gesture-recogniser delegate answers that keep the release's own gestures working beside the rotation this port adds, and the two camera setters that put the boundary and the zoom range onto the region this port's own camera asks for",
+      "effect": "the delegate the release's own map view asks through RevenantCarPlayInterface's proxy, the two gesture-recogniser delegate answers that keep the release's own gestures working beside the rotation this port adds, and the two camera setters that put the boundary and the zoom range onto the region this port's own camera asks for",
       "facts": "facts/MapKit/MapKit.md",
       "source": "coordination/registry-gap-2026-09-28.tsv, whose six MapKit rows this closes, and MKMapView+Transform.m, which implements them"
     },
@@ -272,7 +272,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "reason": "a CATEGORY on a class the release already carries: added_members() skips a class with an image, which is every class the release has, and that is right for what the release already answers -- but these members are the release's own MKMapView plus what this category adds, and a caller's method IS reached through the category, so the registry names each one",
-      "effect": "the delegate the release's own map view asks through CharonCarPlayInterface's proxy, the two gesture-recogniser delegate answers that keep the release's own gestures working beside the rotation this port adds, and the two camera setters that put the boundary and the zoom range onto the region this port's own camera asks for",
+      "effect": "the delegate the release's own map view asks through RevenantCarPlayInterface's proxy, the two gesture-recogniser delegate answers that keep the release's own gestures working beside the rotation this port adds, and the two camera setters that put the boundary and the zoom range onto the region this port's own camera asks for",
       "facts": "facts/MapKit/MapKit.md",
       "source": "coordination/registry-gap-2026-09-28.tsv, whose six MapKit rows this closes, and MKMapView+Transform.m, which implements them"
     },
@@ -283,7 +283,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "reason": "a CATEGORY on a class the release already carries: added_members() skips a class with an image, which is every class the release has, and that is right for what the release already answers -- but these members are the release's own MKMapView plus what this category adds, and a caller's method IS reached through the category, so the registry names each one",
-      "effect": "the delegate the release's own map view asks through CharonCarPlayInterface's proxy, the two gesture-recogniser delegate answers that keep the release's own gestures working beside the rotation this port adds, and the two camera setters that put the boundary and the zoom range onto the region this port's own camera asks for",
+      "effect": "the delegate the release's own map view asks through RevenantCarPlayInterface's proxy, the two gesture-recogniser delegate answers that keep the release's own gestures working beside the rotation this port adds, and the two camera setters that put the boundary and the zoom range onto the region this port's own camera asks for",
       "facts": "facts/MapKit/MapKit.md",
       "source": "coordination/registry-gap-2026-09-28.tsv, whose six MapKit rows this closes, and MKMapView+Transform.m, which implements them"
     },
@@ -338,7 +338,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "reason": "a CATEGORY on a class the release already carries: added_members() skips a class with an image, which is every class the release has, and that is right for what the release already answers -- but these members are the release's own MKMapView plus what this category adds, and a caller's method IS reached through the category, so the registry names each one",
-      "effect": "the delegate the release's own map view asks through CharonCarPlayInterface's proxy, the two gesture-recogniser delegate answers that keep the release's own gestures working beside the rotation this port adds, and the two camera setters that put the boundary and the zoom range onto the region this port's own camera asks for",
+      "effect": "the delegate the release's own map view asks through RevenantCarPlayInterface's proxy, the two gesture-recogniser delegate answers that keep the release's own gestures working beside the rotation this port adds, and the two camera setters that put the boundary and the zoom range onto the region this port's own camera asks for",
       "facts": "facts/MapKit/MapKit.md",
       "source": "coordination/registry-gap-2026-09-28.tsv, whose six MapKit rows this closes, and MKMapView+Transform.m, which implements them"
     },
@@ -349,7 +349,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "reason": "a CATEGORY on a class the release already carries: added_members() skips a class with an image, which is every class the release has, and that is right for what the release already answers -- but these members are the release's own MKMapView plus what this category adds, and a caller's method IS reached through the category, so the registry names each one",
-      "effect": "the delegate the release's own map view asks through CharonCarPlayInterface's proxy, the two gesture-recogniser delegate answers that keep the release's own gestures working beside the rotation this port adds, and the two camera setters that put the boundary and the zoom range onto the region this port's own camera asks for",
+      "effect": "the delegate the release's own map view asks through RevenantCarPlayInterface's proxy, the two gesture-recogniser delegate answers that keep the release's own gestures working beside the rotation this port adds, and the two camera setters that put the boundary and the zoom range onto the region this port's own camera asks for",
       "facts": "facts/MapKit/MapKit.md",
       "source": "coordination/registry-gap-2026-09-28.tsv, whose six MapKit rows this closes, and MKMapView+Transform.m, which implements them"
     },
@@ -360,7 +360,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "reason": "a CATEGORY on a class the release already carries: added_members() skips a class with an image, which is every class the release has, and that is right for what the release already answers -- but these members are the release's own MKMapView plus what this category adds, and a caller's method IS reached through the category, so the registry names each one",
-      "effect": "the delegate the release's own map view asks through CharonCarPlayInterface's proxy, the two gesture-recogniser delegate answers that keep the release's own gestures working beside the rotation this port adds, and the two camera setters that put the boundary and the zoom range onto the region this port's own camera asks for",
+      "effect": "the delegate the release's own map view asks through RevenantCarPlayInterface's proxy, the two gesture-recogniser delegate answers that keep the release's own gestures working beside the rotation this port adds, and the two camera setters that put the boundary and the zoom range onto the region this port's own camera asks for",
       "facts": "facts/MapKit/MapKit.md",
       "source": "coordination/registry-gap-2026-09-28.tsv, whose six MapKit rows this closes, and MKMapView+Transform.m, which implements them"
     },
@@ -381,7 +381,7 @@
       "introduced": "11.0",
       "minimum": "6.0",
       "status": "implemented",
-      "reason": "the PORT'S OWN protocol, declared in CharonMapKit.h behind CHARON_HOST_PROBE, and the PORT'S OWN proxy (MKMapViewDelegateRenderers.m) asks: the release's own map view will not ask, so the proxy does",
+      "reason": "the PORT'S OWN protocol, declared in RevenantMapKit.h behind REVENANT_HOST_PROBE, and the PORT'S OWN proxy (MKMapViewDelegateRenderers.m) asks: the release's own map view will not ask, so the proxy does",
       "effect": "the annotation standing for a group, asked of the program's own delegate by the port's own proxy, and where the program does not implement it the port's own cluster view is used",
       "facts": "facts/MapKit/MapKit.md",
       "source": "apple.objc.inventory on the armv7 dyld shared cache of 6.1.3: the release's own MKMapViewDelegate has the iOS 6 set and NONE of these nine, and the release's own map view asks for none of them. CHECKED, one case per message, by tests/backports/host/mapkit-delegate: a Catalyst probe that drives the port's own proxy on the HOST'S own MKMapView with a recording delegate, and all nine reach it; the mutant -- a run-time subclass of the host's own MKMapView whose proxy method hands the program the wrong argument -- changes rendererForOverlay from MKPolyline to nil, so the comparison does see the value it is checking"
@@ -392,7 +392,7 @@
       "introduced": "7.0",
       "minimum": "6.0",
       "status": "implemented",
-      "reason": "the PORT'S OWN protocol, declared in CharonMapKit.h behind CHARON_HOST_PROBE, and the PORT'S OWN proxy (MKMapViewDelegateRenderers.m) asks: the release's own map view will not ask, so the proxy does",
+      "reason": "the PORT'S OWN protocol, declared in RevenantMapKit.h behind REVENANT_HOST_PROBE, and the PORT'S OWN proxy (MKMapViewDelegateRenderers.m) asks: the release's own map view will not ask, so the proxy does",
       "effect": "the renderers just added, SENT by the port's own map view code when the port's own renderer tree adds one, with the array the header's own signature names",
       "facts": "facts/MapKit/MapKit.md",
       "source": "apple.objc.inventory on the armv7 dyld shared cache of 6.1.3: the release's own MKMapViewDelegate has the iOS 6 set and NONE of these nine, and the release's own map view asks for none of them. CHECKED, one case per message, by tests/backports/host/mapkit-delegate: a Catalyst probe that drives the port's own proxy on the HOST'S own MKMapView with a recording delegate, and all nine reach it; the mutant -- a run-time subclass of the host's own MKMapView whose proxy method hands the program the wrong argument -- changes rendererForOverlay from MKPolyline to nil, so the comparison does see the value it is checking"
@@ -403,7 +403,7 @@
       "introduced": "10.0",
       "minimum": "6.0",
       "status": "implemented",
-      "reason": "the PORT'S OWN protocol, declared in CharonMapKit.h behind CHARON_HOST_PROBE, and the PORT'S OWN proxy (MKMapViewDelegateRenderers.m) asks: the release's own map view will not ask, so the proxy does",
+      "reason": "the PORT'S OWN protocol, declared in RevenantMapKit.h behind REVENANT_HOST_PROBE, and the PORT'S OWN proxy (MKMapViewDelegateRenderers.m) asks: the release's own map view will not ask, so the proxy does",
       "effect": "sent by the port's own map view code when the release's own map view deselects one",
       "facts": "facts/MapKit/MapKit.md",
       "source": "apple.objc.inventory on the armv7 dyld shared cache of 6.1.3: the release's own MKMapViewDelegate has the iOS 6 set and NONE of these nine, and the release's own map view asks for none of them. CHECKED, one case per message, by tests/backports/host/mapkit-delegate: a Catalyst probe that drives the port's own proxy on the HOST'S own MKMapView with a recording delegate, and all nine reach it; the mutant -- a run-time subclass of the host's own MKMapView whose proxy method hands the program the wrong argument -- changes rendererForOverlay from MKPolyline to nil, so the comparison does see the value it is checking"
@@ -414,7 +414,7 @@
       "introduced": "10.0",
       "minimum": "6.0",
       "status": "implemented",
-      "reason": "the PORT'S OWN protocol, declared in CharonMapKit.h behind CHARON_HOST_PROBE, and the PORT'S OWN proxy (MKMapViewDelegateRenderers.m) asks: the release's own map view will not ask, so the proxy does",
+      "reason": "the PORT'S OWN protocol, declared in RevenantMapKit.h behind REVENANT_HOST_PROBE, and the PORT'S OWN proxy (MKMapViewDelegateRenderers.m) asks: the release's own map view will not ask, so the proxy does",
       "effect": "sent by the port's own map view code when the release's own map view selects an annotation, with the annotation the release selected",
       "facts": "facts/MapKit/MapKit.md",
       "source": "apple.objc.inventory on the armv7 dyld shared cache of 6.1.3: the release's own MKMapViewDelegate has the iOS 6 set and NONE of these nine, and the release's own map view asks for none of them. CHECKED, one case per message, by tests/backports/host/mapkit-delegate: a Catalyst probe that drives the port's own proxy on the HOST'S own MKMapView with a recording delegate, and all nine reach it; the mutant -- a run-time subclass of the host's own MKMapView whose proxy method hands the program the wrong argument -- changes rendererForOverlay from MKPolyline to nil, so the comparison does see the value it is checking"
@@ -425,7 +425,7 @@
       "introduced": "7.0",
       "minimum": "6.0",
       "status": "implemented",
-      "reason": "the PORT'S OWN protocol, declared in CharonMapKit.h behind CHARON_HOST_PROBE, and the PORT'S OWN proxy (MKMapViewDelegateRenderers.m) asks: the release's own map view will not ask, so the proxy does",
+      "reason": "the PORT'S OWN protocol, declared in RevenantMapKit.h behind REVENANT_HOST_PROBE, and the PORT'S OWN proxy (MKMapViewDelegateRenderers.m) asks: the release's own map view will not ask, so the proxy does",
       "effect": "the renderer for an overlay, asked of the program's own delegate by the port's own proxy, because the release's map view never asks; where the program does not implement it the port's own default renderer is used, which is the one in CarPlay-terms: MKCircleRenderer, MKPolygonRenderer, MKPolylineRenderer, MKTileOverlayRenderer and the multi ones -- so an overlay is always drawn by something",
       "facts": "facts/MapKit/MapKit.md",
       "source": "apple.objc.inventory on the armv7 dyld shared cache of 6.1.3: the release's own MKMapViewDelegate has the iOS 6 set and NONE of these nine, and the release's own map view asks for none of them. CHECKED, one case per message, by tests/backports/host/mapkit-delegate: a Catalyst probe that drives the port's own proxy on the HOST'S own MKMapView with a recording delegate, and all nine reach it; the mutant -- a run-time subclass of the host's own MKMapView whose proxy method hands the program the wrong argument -- changes rendererForOverlay from MKPolyline to nil, so the comparison does see the value it is checking"
@@ -436,7 +436,7 @@
       "introduced": "11.0",
       "minimum": "6.0",
       "status": "implemented",
-      "reason": "the PORT'S OWN protocol, declared in CharonMapKit.h behind CHARON_HOST_PROBE, and the PORT'S OWN proxy (MKMapViewDelegateRenderers.m) asks: the release's own map view will not ask, so the proxy does",
+      "reason": "the PORT'S OWN protocol, declared in RevenantMapKit.h behind REVENANT_HOST_PROBE, and the PORT'S OWN proxy (MKMapViewDelegateRenderers.m) asks: the release's own map view will not ask, so the proxy does",
       "effect": "the accessory for a selected annotation, asked of the program's own delegate by the port's own proxy, and where the program does not implement it the release's own callout is left as it is",
       "facts": "facts/MapKit/MapKit.md",
       "source": "apple.objc.inventory on the armv7 dyld shared cache of 6.1.3: the release's own MKMapViewDelegate has the iOS 6 set and NONE of these nine, and the release's own map view asks for none of them. CHECKED, one case per message, by tests/backports/host/mapkit-delegate: a Catalyst probe that drives the port's own proxy on the HOST'S own MKMapView with a recording delegate, and all nine reach it; the mutant -- a run-time subclass of the host's own MKMapView whose proxy method hands the program the wrong argument -- changes rendererForOverlay from MKPolyline to nil, so the comparison does see the value it is checking"
@@ -447,7 +447,7 @@
       "introduced": "10.0",
       "minimum": "6.0",
       "status": "implemented",
-      "reason": "the PORT'S OWN protocol, declared in CharonMapKit.h behind CHARON_HOST_PROBE, and the PORT'S OWN proxy (MKMapViewDelegateRenderers.m) asks: the release's own map view will not ask, so the proxy does",
+      "reason": "the PORT'S OWN protocol, declared in RevenantMapKit.h behind REVENANT_HOST_PROBE, and the PORT'S OWN proxy (MKMapViewDelegateRenderers.m) asks: the release's own map view will not ask, so the proxy does",
       "effect": "sent by the port's own map view code when the region changes, so a program's own map code is told",
       "facts": "facts/MapKit/MapKit.md",
       "source": "apple.objc.inventory on the armv7 dyld shared cache of 6.1.3: the release's own MKMapViewDelegate has the iOS 6 set and NONE of these nine, and the release's own map view asks for none of them. CHECKED, one case per message, by tests/backports/host/mapkit-delegate: a Catalyst probe that drives the port's own proxy on the HOST'S own MKMapView with a recording delegate, and all nine reach it; the mutant -- a run-time subclass of the host's own MKMapView whose proxy method hands the program the wrong argument -- changes rendererForOverlay from MKPolyline to nil, so the comparison does see the value it is checking"
@@ -458,7 +458,7 @@
       "introduced": "7.0",
       "minimum": "6.0",
       "status": "implemented",
-      "reason": "the PORT'S OWN protocol, declared in CharonMapKit.h behind CHARON_HOST_PROBE, and the PORT'S OWN proxy (MKMapViewDelegateRenderers.m) asks: the release's own map view will not ask, so the proxy does",
+      "reason": "the PORT'S OWN protocol, declared in RevenantMapKit.h behind REVENANT_HOST_PROBE, and the PORT'S OWN proxy (MKMapViewDelegateRenderers.m) asks: the release's own map view will not ask, so the proxy does",
       "effect": "sent by the port's own map view code when a render finishes, with the flag the header's own signature names, true when every overlay of the region was drawn",
       "facts": "facts/MapKit/MapKit.md",
       "source": "apple.objc.inventory on the armv7 dyld shared cache of 6.1.3: the release's own MKMapViewDelegate has the iOS 6 set and NONE of these nine, and the release's own map view asks for none of them. CHECKED, one case per message, by tests/backports/host/mapkit-delegate: a Catalyst probe that drives the port's own proxy on the HOST'S own MKMapView with a recording delegate, and all nine reach it; the mutant -- a run-time subclass of the host's own MKMapView whose proxy method hands the program the wrong argument -- changes rendererForOverlay from MKPolyline to nil, so the comparison does see the value it is checking"
@@ -469,7 +469,7 @@
       "introduced": "7.0",
       "minimum": "6.0",
       "status": "implemented",
-      "reason": "the PORT'S OWN protocol, declared in CharonMapKit.h behind CHARON_HOST_PROBE, and the PORT'S OWN proxy (MKMapViewDelegateRenderers.m) asks: the release's own map view will not ask, so the proxy does",
+      "reason": "the PORT'S OWN protocol, declared in RevenantMapKit.h behind REVENANT_HOST_PROBE, and the PORT'S OWN proxy (MKMapViewDelegateRenderers.m) asks: the release's own map view will not ask, so the proxy does",
       "effect": "sent by the port's own map view code when a render begins, so a program can see the render start",
       "facts": "facts/MapKit/MapKit.md",
       "source": "apple.objc.inventory on the armv7 dyld shared cache of 6.1.3: the release's own MKMapViewDelegate has the iOS 6 set and NONE of these nine, and the release's own map view asks for none of them. CHECKED, one case per message, by tests/backports/host/mapkit-delegate: a Catalyst probe that drives the port's own proxy on the HOST'S own MKMapView with a recording delegate, and all nine reach it; the mutant -- a run-time subclass of the host's own MKMapView whose proxy method hands the program the wrong argument -- changes rendererForOverlay from MKPolyline to nil, so the comparison does see the value it is checking"

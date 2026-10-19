@@ -1,6 +1,6 @@
 #import <HealthKit/HealthKit.h>
 
-#import "CharonHKStore.h"
+#import "RevenantHKStore.h"
 
 @implementation HKFitzpatrickSkinTypeObject {
     HKFitzpatrickSkinType _skinType;
@@ -11,13 +11,13 @@
     return YES;
 }
 
-+ (instancetype)charon_fitzpatrickSkinTypeObject:(HKFitzpatrickSkinType)skinType
++ (instancetype)revenant_fitzpatrickSkinTypeObject:(HKFitzpatrickSkinType)skinType
 {
-    HKFitzpatrickSkinTypeObject *object = [[HKFitzpatrickSkinTypeObject alloc] charon_initWithSkinType:skinType];
+    HKFitzpatrickSkinTypeObject *object = [[HKFitzpatrickSkinTypeObject alloc] revenant_initWithSkinType:skinType];
     return object;
 }
 
-- (instancetype)charon_initWithSkinType:(HKFitzpatrickSkinType)skinType
+- (instancetype)revenant_initWithSkinType:(HKFitzpatrickSkinType)skinType
 {
     HKFitzpatrickSkinTypeObject *fresh = [super init];
     if (fresh)
@@ -40,7 +40,7 @@
 
 - (id)copyWithZone:(NSZone *)zone
 {
-    return [HKFitzpatrickSkinTypeObject charon_fitzpatrickSkinTypeObject:_skinType];
+    return [HKFitzpatrickSkinTypeObject revenant_fitzpatrickSkinTypeObject:_skinType];
 }
 
 - (HKFitzpatrickSkinType)skinType

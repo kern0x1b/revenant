@@ -2,7 +2,7 @@
 
 #pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
 
-@implementation UISearchBar (CharonScopeBar13)
+@implementation UISearchBar (RevenantScopeBar13)
 
 - (void)setShowsScopeBar:(BOOL)showsScopeBar animated:(BOOL)animated
 {

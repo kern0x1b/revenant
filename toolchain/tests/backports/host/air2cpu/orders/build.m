@@ -10,7 +10,7 @@ int main(int argc, const char **argv) {
         if (!source) { printf("no source: %s\n", error.localizedDescription.UTF8String); return 2; }
         MTLCompileOptions *options = [MTLCompileOptions new];
         options.libraryType = MTLLibraryTypeDynamic;
-        options.installName = @"charon.orders";
+        options.installName = @"revenant.orders";
         id<MTLLibrary> library = [device newLibraryWithSource:source options:options error:&error];
         if (!library) { printf("REFUSED %s: %s\n", argv[1], error.localizedDescription.UTF8String); return 2; }
         id<MTLDynamicLibrary> dynamic = [device newDynamicLibrary:library error:&error];

@@ -274,7 +274,7 @@ local ROUND_TRIP_GUARD_ELSE = {
 
 local MUTANT_SOURCE_OVERRIDE = {VTMotionBlurConfiguration = "VideoToolboxValue26.m"}
 
-local STORE_LINE_PREFIX = "    CharonValueSet(self, @("
+local STORE_LINE_PREFIX = "    RevenantValueSet(self, @("
 
 local function read_headers(sdk)
     local directory = join(sdk, "System/Library/Frameworks/VideoToolbox.framework/Headers")
@@ -392,7 +392,7 @@ local function emit_classes(order, protocols, classes, text, out)
         end
         if uses_macro then
             table.insert(value, 1, "")
-            table.insert(value, 1, "CHARON_VIDEO_TOOLBOX_VALUE_STORE(" .. cls .. ")")
+            table.insert(value, 1, "REVENANT_VIDEO_TOOLBOX_VALUE_STORE(" .. cls .. ")")
         end
         local typedefs = G.macro_typedefs(spelled)
         local has_typedef = false
@@ -517,7 +517,7 @@ local function emit_round_trip(order, protocols, classes, text)
     for _, line in ipairs(expected_arrays) do
         all[#all + 1] = line
     end
-    all[#all + 1] = "#ifdef CHARON_HOST_DIFFERENTIAL"
+    all[#all + 1] = "#ifdef REVENANT_HOST_DIFFERENTIAL"
     for _, line in ipairs(constructors) do
         all[#all + 1] = line
     end
@@ -564,7 +564,7 @@ local function emit_mutants(order, protocols, classes, text, out)
         end
         if scalars[2] ~= nil then
             local first, other = scalars[1], scalars[2]
-            local line = 'CharonValueSet(self, @(' .. first .. '), @"' .. first .. '");'
+            local line = 'RevenantValueSet(self, @(' .. first .. '), @"' .. first .. '");'
             if count_in(body, line) == 1 then
                 rows[#rows + 1] = cls .. "\t" .. source .. "\t" .. line .. "\t"
                     .. replace_all(line, '@"' .. first .. '"', '@"' .. other .. '"')
@@ -587,7 +587,7 @@ local function emit_mutants(order, protocols, classes, text, out)
                         if arg[1] == dk.keyword then
                             local key = G.store_key(arg[1], known_properties, init[1], cls)
                             if not (key == arg[1] or key ~= dk.property) then
-                                local line = 'CharonValueSet(self, @(' .. arg[1] .. '), @"' .. key .. '");'
+                                local line = 'RevenantValueSet(self, @(' .. arg[1] .. '), @"' .. key .. '");'
                                 if count_in(body, line) == 1 then
                                     rows[#rows + 1] = cls .. "\t" .. source .. "\t" .. line .. "\t"
                                         .. replace_all(line, '@"' .. key .. '"', '@"' .. arg[1] .. '"')
@@ -608,7 +608,7 @@ local function emit_mutants(order, protocols, classes, text, out)
                     end
                     local other_keyword = dk.keyword
                     if own_key[other_keyword] ~= nil and own_key[other_keyword] ~= dk.property then
-                        local line = 'CharonValueSet(self, @(' .. other_keyword .. '), @"'
+                        local line = 'RevenantValueSet(self, @(' .. other_keyword .. '), @"'
                             .. own_key[other_keyword] .. '");'
                         if count_in(body, line) == 1 then
                             rows[#rows + 1] = cls .. "\t" .. source .. "\t" .. line .. "\t"

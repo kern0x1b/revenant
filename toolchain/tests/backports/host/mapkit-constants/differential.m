@@ -5,7 +5,7 @@
 static int failures = 0;
 static int checked = 0;
 
-void charonCompareString(NSString *symbol, NSString *ours, NSString *theirs)
+void revenantCompareString(NSString *symbol, NSString *ours, NSString *theirs)
 {
     checked++;
     if (theirs == nil) {
@@ -29,7 +29,7 @@ void charonCompareString(NSString *symbol, NSString *ours, NSString *theirs)
     printf("ok %s = \"%s\"\n", [symbol UTF8String], [theirs UTF8String]);
 }
 
-void charonCompareNumber(NSString *symbol, double ours, double theirs)
+void revenantCompareNumber(NSString *symbol, double ours, double theirs)
 {
     checked++;
     if (ours != theirs) {
@@ -43,8 +43,8 @@ void charonCompareNumber(NSString *symbol, double ours, double theirs)
 
 int main(void)
 {
-    for (unsigned index = 0; index < charonCount; index++) {
-        charonChecks[index]();
+    for (unsigned index = 0; index < revenantCount; index++) {
+        revenantChecks[index]();
     }
     fflush(stdout);
     printf("%d constants, %d failures\n", checked, failures);

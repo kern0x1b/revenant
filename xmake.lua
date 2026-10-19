@@ -1,24 +1,24 @@
-set_project("hades")
+set_project("revenant")
 set_xmakever("3.1.2")
 
 add_rules("mode.release", "mode.debug")
 set_defaultmode("release")
 
-add_repositories("hades-third-party third_party")
-add_repositories("charon " .. (os.getenv("CHARON_REPO") or "charon"))
-add_addons("charon", {sourcedir = "charon"})
+add_repositories("revenant-third-party third_party")
+add_repositories("revenant " .. (os.getenv("REVENANT_REPO") or "toolchain"))
+add_addons("revenant", {sourcedir = "toolchain"})
 
 set_config("apple_minimum", "6.0")
 if is_plat("iphoneos") then
-    includes("@addon/charon/apple-ios")
-    add_requires("charon@swift-runtime", {alias = "swift-runtime", configs = {backports = true}})
-    add_requires("charon@libcxx", {alias = "libcxx"})
-    add_requires("charon@apple-backports", {alias = "apple-backports", configs = {coredata = true, uikit = true}})
-    add_requires("charon@apple-compat", {alias = "apple-compat"})
+    includes("@addon/revenant/apple-ios")
+    add_requires("revenant@swift-runtime", {alias = "swift-runtime", configs = {backports = true}})
+    add_requires("revenant@libcxx", {alias = "libcxx"})
+    add_requires("revenant@apple-backports", {alias = "apple-backports", configs = {coredata = true, uikit = true}})
+    add_requires("revenant@apple-compat", {alias = "apple-compat"})
 end
 
 if is_plat("iphoneos") then
-    includes("frameworks/styx", "frameworks/eidolon")
+    includes("frameworks/Combine", "frameworks/SwiftUI")
 else
-    includes("shade", "katabasis", "frameworks/styx", "frameworks/eidolon")
+    includes("emulator", "recompiler", "frameworks/Combine", "frameworks/SwiftUI")
 end

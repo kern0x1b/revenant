@@ -1,6 +1,6 @@
-#import "CharonMetal.h"
+#import "RevenantMetal.h"
 
-@implementation CharonMetalBuffer (DebugMarkers10)
+@implementation RevenantMetalBuffer (DebugMarkers10)
 
 - (void)addDebugMarker:(NSString *)marker range:(NSRange)range
 {

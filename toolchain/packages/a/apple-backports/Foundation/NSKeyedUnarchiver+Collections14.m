@@ -1,6 +1,6 @@
 #import <Foundation/Foundation.h>
 
-static id charon_unarchive_collection(NSData *data, NSError **error, id (^decode)(NSKeyedUnarchiver *unarchiver))
+static id revenant_unarchive_collection(NSData *data, NSError **error, id (^decode)(NSKeyedUnarchiver *unarchiver))
 {
     NSError *failure = nil;
     NSKeyedUnarchiver *unarchiver = [[NSKeyedUnarchiver alloc] initForReadingFromData:data error:&failure];
@@ -24,7 +24,7 @@ static id charon_unarchive_collection(NSData *data, NSError **error, id (^decode
     return decoded;
 }
 
-@implementation NSKeyedUnarchiver (CharonCollections)
+@implementation NSKeyedUnarchiver (RevenantCollections)
 
 + (NSArray *)unarchivedArrayOfObjectsOfClass:(Class)cls fromData:(NSData *)data error:(NSError **)error
 {
@@ -33,7 +33,7 @@ static id charon_unarchive_collection(NSData *data, NSError **error, id (^decode
 
 + (NSArray *)unarchivedArrayOfObjectsOfClasses:(NSSet<Class> *)classes fromData:(NSData *)data error:(NSError **)error
 {
-    return charon_unarchive_collection(data, error, ^id(NSKeyedUnarchiver *unarchiver) {
+    return revenant_unarchive_collection(data, error, ^id(NSKeyedUnarchiver *unarchiver) {
         return [unarchiver decodeArrayOfObjectsOfClasses:classes forKey:NSKeyedArchiveRootObjectKey];
     });
 }
@@ -45,7 +45,7 @@ static id charon_unarchive_collection(NSData *data, NSError **error, id (^decode
 
 + (NSDictionary *)unarchivedDictionaryWithKeysOfClasses:(NSSet<Class> *)keyClasses objectsOfClasses:(NSSet<Class> *)valueClasses fromData:(NSData *)data error:(NSError **)error
 {
-    return charon_unarchive_collection(data, error, ^id(NSKeyedUnarchiver *unarchiver) {
+    return revenant_unarchive_collection(data, error, ^id(NSKeyedUnarchiver *unarchiver) {
         return [unarchiver decodeDictionaryWithKeysOfClasses:keyClasses objectsOfClasses:valueClasses forKey:NSKeyedArchiveRootObjectKey];
     });
 }

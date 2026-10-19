@@ -1,6 +1,6 @@
 #if TARGET_OS_IPHONE
-#import "CharonSpriteKit.h"
-#import "CharonSpriteKitProtocols.h"
+#import "RevenantSpriteKit.h"
+#import "RevenantSpriteKitProtocols.h"
 #import <QuartzCore/QuartzCore.h>
 #import <OpenGLES/EAGL.h>
 #import <OpenGLES/EAGLDrawable.h>
@@ -38,7 +38,7 @@
 {
     self = [super initWithFrame:frame];
     if (self) {
-        [self charon_setUp];
+        [self revenant_setUp];
     }
     return self;
 }
@@ -47,12 +47,12 @@
 {
     self = [super initWithCoder:coder];
     if (self) {
-        [self charon_setUp];
+        [self revenant_setUp];
     }
     return self;
 }
 
-- (void)charon_setUp
+- (void)revenant_setUp
 {
     CAEAGLLayer *layer = (CAEAGLLayer *)self.layer;
     layer.opaque = YES;
@@ -64,7 +64,7 @@
     _frameInterval = 1;
 }
 
-- (void)charon_makeBuffers
+- (void)revenant_makeBuffers
 {
     if (_context == nil) {
         return;
@@ -84,14 +84,14 @@
 - (void)layoutSubviews
 {
     [super layoutSubviews];
-    [self charon_makeBuffers];
+    [self revenant_makeBuffers];
 }
 
 - (void)didMoveToWindow
 {
     [super didMoveToWindow];
     if (self.window != nil && _displayLink == nil) {
-        _displayLink = [CADisplayLink displayLinkWithTarget:self selector:@selector(charon_frame:)];
+        _displayLink = [CADisplayLink displayLinkWithTarget:self selector:@selector(revenant_frame:)];
         _displayLink.frameInterval = _frameInterval;
         [_displayLink addToRunLoop:[NSRunLoop mainRunLoop] forMode:NSRunLoopCommonModes];
     } else if (self.window == nil && _displayLink != nil) {
@@ -120,22 +120,22 @@
 {
     SKScene *previous = _scene;
     [previous willMoveFromView:self];
-    [previous charon_setView:nil];
+    [previous revenant_setView:nil];
     _scene = scene;
-    [scene charon_setView:self];
+    [scene revenant_setView:self];
     [scene didMoveToView:self];
 }
 
-- (void)charon_frame:(CADisplayLink *)link
+- (void)revenant_frame:(CADisplayLink *)link
 {
     SKScene *scene = _scene;
     if (scene != nil && !_paused) {
-        [self charon_stepScene:scene time:link.timestamp];
+        [self revenant_stepScene:scene time:link.timestamp];
     }
-    [self charon_draw];
+    [self revenant_draw];
 }
 
-- (void)charon_stepScene:(SKScene *)scene time:(NSTimeInterval)time
+- (void)revenant_stepScene:(SKScene *)scene time:(NSTimeInterval)time
 {
     [scene update:time];
     if ([scene respondsToSelector:@selector(delegate)] && [scene.delegate respondsToSelector:@selector(update:forScene:)]) {
@@ -163,7 +163,7 @@
     }
 }
 
-- (void)charon_draw
+- (void)revenant_draw
 {
     if (_context == nil || _framebuffer == 0) {
         return;

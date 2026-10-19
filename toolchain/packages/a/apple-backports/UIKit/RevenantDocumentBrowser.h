@@ -2,24 +2,24 @@
 
 @class UIDocumentPickerViewController;
 
-@interface UIDocumentPickerViewController (CharonBrowser)
-- (BOOL)charon_acceptsPath:(NSString *)path;
-- (BOOL)charon_showsExtensions;
-- (BOOL)charon_choosesFiles;
-- (BOOL)charon_allowsMultiple;
-- (void)charon_cancel;
-- (void)charon_pickPaths:(NSArray<NSString *> *)paths;
-- (void)charon_chooseFolder:(NSString *)path;
-- (NSArray<NSDictionary *> *)charon_locations;
-- (NSString *)charon_startFolder;
-- (UIBarButtonItem *)charon_cancelItem;
-- (NSString *)charon_destinationTitle;
+@interface UIDocumentPickerViewController (RevenantBrowser)
+- (BOOL)revenant_acceptsPath:(NSString *)path;
+- (BOOL)revenant_showsExtensions;
+- (BOOL)revenant_choosesFiles;
+- (BOOL)revenant_allowsMultiple;
+- (void)revenant_cancel;
+- (void)revenant_pickPaths:(NSArray<NSString *> *)paths;
+- (void)revenant_chooseFolder:(NSString *)path;
+- (NSArray<NSDictionary *> *)revenant_locations;
+- (NSString *)revenant_startFolder;
+- (UIBarButtonItem *)revenant_cancelItem;
+- (NSString *)revenant_destinationTitle;
 @end
 
-@interface CharonFileFolderController : UITableViewController
+@interface RevenantFileFolderController : UITableViewController
 - (instancetype)initWithPath:(NSString *)path title:(NSString *)title picker:(UIDocumentPickerViewController *)picker;
 @end
 
-@interface CharonFileLocationsController : UITableViewController
+@interface RevenantFileLocationsController : UITableViewController
 - (instancetype)initWithPicker:(UIDocumentPickerViewController *)picker;
 @end

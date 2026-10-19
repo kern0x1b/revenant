@@ -5,9 +5,9 @@
 #import <OpenGLES/ES2/glext.h>
 #include "../air2cpu-abi.h"
 
-@class CharonMetalTexture;
-@class CharonMetalSampler;
-@class CharonMetalHeap;
+@class RevenantMetalTexture;
+@class RevenantMetalSampler;
+@class RevenantMetalHeap;
 
 typedef struct {
     GLenum type;
@@ -15,16 +15,16 @@ typedef struct {
     GLboolean normalized;
     NSUInteger bytes;
     BOOL floating;
-} CharonVertexFormat;
+} RevenantVertexFormat;
 
-BOOL CharonMetalVertexFormat(MTLVertexFormat format, CharonVertexFormat *out);
-void CharonMetalDecodeVertex(MTLVertexFormat format, const uint8_t *bytes, GLfloat out[4]);
+BOOL RevenantMetalVertexFormat(MTLVertexFormat format, RevenantVertexFormat *out);
+void RevenantMetalDecodeVertex(MTLVertexFormat format, const uint8_t *bytes, GLfloat out[4]);
 
-@interface MTLFunctionConstantValues (CharonValues)
+@interface MTLFunctionConstantValues (RevenantValues)
 - (NSDictionary *)valueAtIndex:(NSUInteger)index name:(NSString *)name;
 @end
 
-enum { CharonScalarFloat, CharonScalarHalf, CharonScalarI32, CharonScalarI16, CharonScalarI8 };
+enum { RevenantScalarFloat, RevenantScalarHalf, RevenantScalarI32, RevenantScalarI16, RevenantScalarI8 };
 
 typedef struct {
     GLint location;
@@ -33,7 +33,7 @@ typedef struct {
     NSUInteger instanceStride;
     int scalar;
     int components;
-} CharonUniformPlan;
+} RevenantUniformPlan;
 
 typedef struct {
     GLint location;
@@ -42,42 +42,42 @@ typedef struct {
     NSUInteger stride;
     GLenum type;
     int components;
-} CharonAttributePlan;
+} RevenantAttributePlan;
 
 typedef struct {
     GLint location;
     MTLVertexFormat format;
-    CharonVertexFormat decoded;
+    RevenantVertexFormat decoded;
     unsigned buffer;
     NSUInteger offset;
     NSUInteger stride;
     NSUInteger stepRate;
     MTLVertexStepFunction step;
-} CharonInputPlan;
+} RevenantInputPlan;
 
 typedef struct {
     GLint location;
     unsigned unit;
     BOOL depth;
     BOOL compare;
-} CharonTexturePlan;
+} RevenantTexturePlan;
 
 typedef struct {
     GLint location;
     unsigned unit;
-} CharonSizePlan;
+} RevenantSizePlan;
 
 typedef struct {
     GLint location;
     unsigned attachment;
     unsigned unit;
-} CharonFetchPlan;
+} RevenantFetchPlan;
 
 typedef struct {
     BOOL blending;
     GLenum sourceRGB, destinationRGB, sourceAlpha, destinationAlpha, equationRGB, equationAlpha;
     GLboolean mask[4];
-} CharonBlend;
+} RevenantBlend;
 
 typedef struct {
     GLuint program;
@@ -85,17 +85,17 @@ typedef struct {
     GLint instance;
     GLint target;
     GLint vertexId;
-    CharonUniformPlan *vertexUniforms;
+    RevenantUniformPlan *vertexUniforms;
     unsigned vertexUniformCount;
-    CharonUniformPlan *fragmentUniforms;
+    RevenantUniformPlan *fragmentUniforms;
     unsigned fragmentUniformCount;
-    CharonAttributePlan *attributes;
+    RevenantAttributePlan *attributes;
     unsigned attributeCount;
-    CharonInputPlan *inputs;
+    RevenantInputPlan *inputs;
     unsigned inputCount;
-    CharonTexturePlan *textures;
+    RevenantTexturePlan *textures;
     unsigned textureCount;
-    CharonSizePlan *sizes;
+    RevenantSizePlan *sizes;
     unsigned sizeCount;
     BOOL blending;
     GLenum sourceRGB, destinationRGB, sourceAlpha, destinationAlpha, equationRGB, equationAlpha;
@@ -103,27 +103,27 @@ typedef struct {
     unsigned outputCount;
     unsigned outputIndex[4];
     GLint output;
-    CharonFetchPlan *fetches;
+    RevenantFetchPlan *fetches;
     unsigned fetchCount;
-    CharonBlend blends[4];
-} CharonPlan;
+    RevenantBlend blends[4];
+} RevenantPlan;
 
 
-@interface CharonMetalDevice : NSObject <MTLDevice>
+@interface RevenantMetalDevice : NSObject <MTLDevice>
 @property (nonatomic, readonly) EAGLContext *context;
-+ (CharonMetalDevice *)shared;
++ (RevenantMetalDevice *)shared;
 - (void)acquire;
 - (void)relinquish;
 @end
 
-@interface CharonMetalBuffer : NSObject <MTLBuffer>
+@interface RevenantMetalBuffer : NSObject <MTLBuffer>
 @property (nonatomic, readonly) void *bytes;
 @property (nonatomic, readonly) NSUInteger length;
 - (instancetype)initWithLength:(NSUInteger)length bytes:(const void *)bytes;
-- (instancetype)initWithHeap:(CharonMetalHeap *)heap offset:(NSUInteger)offset length:(NSUInteger)length;
+- (instancetype)initWithHeap:(RevenantMetalHeap *)heap offset:(NSUInteger)offset length:(NSUInteger)length;
 @end
 
-@interface CharonMetalTexture : NSObject <MTLTexture>
+@interface RevenantMetalTexture : NSObject <MTLTexture>
 @property (nonatomic, readonly) GLuint name;
 @property (nonatomic, readonly) GLuint framebuffer;
 @property (nonatomic, readonly) BOOL screen;
@@ -137,34 +137,34 @@ typedef struct {
 @property (nonatomic, readonly) GLuint renderbuffer;
 @property (nonatomic) GLuint checkedDepth;
 @property (nonatomic) GLuint checkedStencil;
-@property (nonatomic, unsafe_unretained) CharonMetalSampler *appliedSampler;
+@property (nonatomic, unsafe_unretained) RevenantMetalSampler *appliedSampler;
 @property (nonatomic) int appliedCompare;
-- (BOOL)charonReadRegion:(MTLRegion)region level:(NSUInteger)level bytesPerRow:(NSUInteger)bytesPerRow into:(void *)pointer;
-- (BOOL)charonWriteRegion:(MTLRegion)region level:(NSUInteger)level bytes:(const void *)pointer bytesPerRow:(NSUInteger)bytesPerRow;
-- (BOOL)charonGenerateMipmaps;
-- (BOOL)charonIsColour;
-- (BOOL)charonCanFilter;
-- (NSUInteger)charonChannels;
-- (NSUInteger)charonStorageSize;
-- (void)charonSetHeap:(CharonMetalHeap *)heap offset:(NSUInteger)offset;
+- (BOOL)revenantReadRegion:(MTLRegion)region level:(NSUInteger)level bytesPerRow:(NSUInteger)bytesPerRow into:(void *)pointer;
+- (BOOL)revenantWriteRegion:(MTLRegion)region level:(NSUInteger)level bytes:(const void *)pointer bytesPerRow:(NSUInteger)bytesPerRow;
+- (BOOL)revenantGenerateMipmaps;
+- (BOOL)revenantIsColour;
+- (BOOL)revenantCanFilter;
+- (NSUInteger)revenantChannels;
+- (NSUInteger)revenantStorageSize;
+- (void)revenantSetHeap:(RevenantMetalHeap *)heap offset:(NSUInteger)offset;
 @end
 
-extern const NSUInteger CharonMetalHeapAlignment;
+extern const NSUInteger RevenantMetalHeapAlignment;
 
-@interface CharonMetalHeap : NSObject <MTLHeap>
+@interface RevenantMetalHeap : NSObject <MTLHeap>
 - (instancetype)initWithDescriptor:(MTLHeapDescriptor *)descriptor error:(NSError **)error;
-- (void *)charonBytesAtOffset:(NSUInteger)offset;
-- (BOOL)charonReserve:(NSUInteger)length atOffset:(NSUInteger *)offset error:(NSError **)error;
-- (BOOL)charonPlace:(NSUInteger)length atOffset:(NSUInteger)offset error:(NSError **)error;
-- (NSUInteger)charonAligned:(NSUInteger)offset;
-- (void)charonDidAllocate:(NSUInteger)length;
-- (NSUInteger)charonAllocated;
-- (MTLHeapType)charonType;
-- (MTLHazardTrackingMode)charonHazardTracking;
-- (MTLStorageMode)charonStorageMode;
+- (void *)revenantBytesAtOffset:(NSUInteger)offset;
+- (BOOL)revenantReserve:(NSUInteger)length atOffset:(NSUInteger *)offset error:(NSError **)error;
+- (BOOL)revenantPlace:(NSUInteger)length atOffset:(NSUInteger)offset error:(NSError **)error;
+- (NSUInteger)revenantAligned:(NSUInteger)offset;
+- (void)revenantDidAllocate:(NSUInteger)length;
+- (NSUInteger)revenantAllocated;
+- (MTLHeapType)revenantType;
+- (MTLHazardTrackingMode)revenantHazardTracking;
+- (MTLStorageMode)revenantStorageMode;
 @end
 
-@interface CharonMetalSampler : NSObject <MTLSamplerState>
+@interface RevenantMetalSampler : NSObject <MTLSamplerState>
 @property (nonatomic, readonly) GLint minFilter;
 @property (nonatomic, readonly) GLint magFilter;
 @property (nonatomic, readonly) GLint wrapS;
@@ -173,23 +173,23 @@ extern const NSUInteger CharonMetalHeapAlignment;
 - (instancetype)initWithDescriptor:(MTLSamplerDescriptor *)descriptor;
 @end
 
-@interface CharonMetalFunction : NSObject <MTLFunction>
+@interface RevenantMetalFunction : NSObject <MTLFunction>
 @property (nonatomic, readonly) NSString *name;
 @property (nonatomic, readonly) NSString *stage;
 @property (nonatomic, readonly) NSString *source;
 @property (nonatomic, readonly) NSDictionary *reflection;
 - (instancetype)initWithName:(NSString *)name stage:(NSString *)stage source:(NSString *)source reflection:(NSDictionary *)reflection;
-- (CharonMetalFunction *)specializedWith:(MTLFunctionConstantValues *)values error:(NSError **)error;
-- (CharonMetalFunction *)specializedWith:(MTLFunctionConstantValues *)values name:(NSString *)name options:(MTLFunctionOptions)options error:(NSError **)error;
+- (RevenantMetalFunction *)specializedWith:(MTLFunctionConstantValues *)values error:(NSError **)error;
+- (RevenantMetalFunction *)specializedWith:(MTLFunctionConstantValues *)values name:(NSString *)name options:(MTLFunctionOptions)options error:(NSError **)error;
 @end
 
-@interface CharonMetalLibrary : NSObject <MTLLibrary>
+@interface RevenantMetalLibrary : NSObject <MTLLibrary>
 - (instancetype)initWithFolder:(NSString *)folder error:(NSError **)error;
-- (NSString *)charonInstallName;
-- (id<MTLFunction>)charonFunctionNamed:(NSString *)name specializedName:(NSString *)specializedName options:(MTLFunctionOptions)options constantValues:(MTLFunctionConstantValues *)constantValues error:(NSError **)error;
+- (NSString *)revenantInstallName;
+- (id<MTLFunction>)revenantFunctionNamed:(NSString *)name specializedName:(NSString *)specializedName options:(MTLFunctionOptions)options constantValues:(MTLFunctionConstantValues *)constantValues error:(NSError **)error;
 @end
 
-@interface CharonMetalPipeline : NSObject <MTLRenderPipelineState>
+@interface RevenantMetalPipeline : NSObject <MTLRenderPipelineState>
 @property (nonatomic, readonly) GLuint program;
 @property (nonatomic, readonly) NSDictionary *vertexReflection;
 @property (nonatomic, readonly) NSDictionary *fragmentReflection;
@@ -197,64 +197,64 @@ extern const NSUInteger CharonMetalHeapAlignment;
 - (instancetype)initWithDescriptor:(MTLRenderPipelineDescriptor *)descriptor error:(NSError **)error;
 - (GLint)locationForName:(NSString *)name;
 - (GLint)attributeForName:(NSString *)name;
-- (const CharonPlan *)plan;
+- (const RevenantPlan *)plan;
 @end
 
-@interface CharonMetalComputePipeline : NSObject <MTLComputePipelineState>
+@interface RevenantMetalComputePipeline : NSObject <MTLComputePipelineState>
 - (instancetype)initWithFunction:(id<MTLFunction>)function error:(NSError **)error;
-- (void *)charonKernelFunction;
-- (uint32_t)charonBlockBytes;
-- (uint32_t)charonThreads;
-- (void)charonSetThreads:(uint32_t)threads;
-- (void)charonSetBlockBytes:(uint32_t)bytes;
+- (void *)revenantKernelFunction;
+- (uint32_t)revenantBlockBytes;
+- (uint32_t)revenantThreads;
+- (void)revenantSetThreads:(uint32_t)threads;
+- (void)revenantSetBlockBytes:(uint32_t)bytes;
 - (NSString *)kernelName;
 @end
 
-@interface CharonMetalComputeEncoder : NSObject <MTLComputeCommandEncoder>
+@interface RevenantMetalComputeEncoder : NSObject <MTLComputeCommandEncoder>
 @end
 
-@interface CharonMetalQueue : NSObject <MTLCommandQueue>
-- (id<MTLCommandBuffer>)charonCommandBufferRetainingReferences:(BOOL)retaining errorOptions:(MTLCommandBufferErrorOption)options;
+@interface RevenantMetalQueue : NSObject <MTLCommandQueue>
+- (id<MTLCommandBuffer>)revenantCommandBufferRetainingReferences:(BOOL)retaining errorOptions:(MTLCommandBufferErrorOption)options;
 @end
 
-@interface CharonMetalCommandBuffer : NSObject <MTLCommandBuffer>
-- (instancetype)initWithQueue:(CharonMetalQueue *)queue retainingReferences:(BOOL)retaining errorOptions:(MTLCommandBufferErrorOption)options;
-- (MTLCommandBufferErrorOption)charonErrorOptions;
-- (CFTimeInterval)charonStartTime;
-- (CFTimeInterval)charonEndTime;
-- (void)charonPushDebugGroup:(NSString *)name;
-- (void)charonPopDebugGroup;
+@interface RevenantMetalCommandBuffer : NSObject <MTLCommandBuffer>
+- (instancetype)initWithQueue:(RevenantMetalQueue *)queue retainingReferences:(BOOL)retaining errorOptions:(MTLCommandBufferErrorOption)options;
+- (MTLCommandBufferErrorOption)revenantErrorOptions;
+- (CFTimeInterval)revenantStartTime;
+- (CFTimeInterval)revenantEndTime;
+- (void)revenantPushDebugGroup:(NSString *)name;
+- (void)revenantPopDebugGroup;
 @end
 
-@interface CharonMetalEncoder : NSObject <MTLRenderCommandEncoder>
+@interface RevenantMetalEncoder : NSObject <MTLRenderCommandEncoder>
 - (instancetype)initWithDescriptor:(MTLRenderPassDescriptor *)descriptor;
-- (void)charonUseHeaps:(id<MTLHeap> const *)heaps count:(NSUInteger)count;
-- (void)charonCheckHeapOf:(id)resource what:(const char *)what;
-- (NSString *)charonHeapNames;
+- (void)revenantUseHeaps:(id<MTLHeap> const *)heaps count:(NSUInteger)count;
+- (void)revenantCheckHeapOf:(id)resource what:(const char *)what;
+- (NSString *)revenantHeapNames;
 @end
 
-@interface CharonMetalDrawable : NSObject <CAMetalDrawable>
-- (instancetype)initWithTexture:(CharonMetalTexture *)texture layer:(CAMetalLayer *)layer context:(EAGLContext *)context;
+@interface RevenantMetalDrawable : NSObject <CAMetalDrawable>
+- (instancetype)initWithTexture:(RevenantMetalTexture *)texture layer:(CAMetalLayer *)layer context:(EAGLContext *)context;
 @end
 
-@interface CharonMetalBlitEncoder : NSObject <MTLBlitCommandEncoder>
-- (uint64_t)charonEncodedCount;
-- (BOOL)charonBlitTexture:(CharonMetalTexture *)source from:(MTLRegion)from level:(NSUInteger)sourceLevel
-                      to:(CharonMetalTexture *)destination region:(MTLRegion)to level:(NSUInteger)destinationLevel;
+@interface RevenantMetalBlitEncoder : NSObject <MTLBlitCommandEncoder>
+- (uint64_t)revenantEncodedCount;
+- (BOOL)revenantBlitTexture:(RevenantMetalTexture *)source from:(MTLRegion)from level:(NSUInteger)sourceLevel
+                      to:(RevenantMetalTexture *)destination region:(MTLRegion)to level:(NSUInteger)destinationLevel;
 @end
 
-@interface CharonMetalEventState : NSObject
+@interface RevenantMetalEventState : NSObject
 - (uint64_t)signaledValue;
 - (void)setSignaledValue:(uint64_t)value;
 - (void)waitForValue:(uint64_t)value timeout:(NSTimeInterval)seconds;
 - (void)notifyValue:(uint64_t)value queue:(dispatch_queue_t)queue block:(MTLSharedEventNotificationBlock)block;
 @end
 
-@interface CharonMetalSharedEvent : NSObject <MTLSharedEvent>
-@property (nonatomic, readonly) CharonMetalEventState *state;
-- (BOOL)charonWaitForValue:(uint64_t)value;
-- (BOOL)charonWaitForValue:(uint64_t)value timeout:(NSTimeInterval)seconds;
-+ (instancetype)charonEventWithState:(CharonMetalEventState *)state;
+@interface RevenantMetalSharedEvent : NSObject <MTLSharedEvent>
+@property (nonatomic, readonly) RevenantMetalEventState *state;
+- (BOOL)revenantWaitForValue:(uint64_t)value;
+- (BOOL)revenantWaitForValue:(uint64_t)value timeout:(NSTimeInterval)seconds;
++ (instancetype)revenantEventWithState:(RevenantMetalEventState *)state;
 @end
 
 
@@ -262,21 +262,21 @@ extern const NSUInteger CharonMetalHeapAlignment;
 typedef struct {
     GLenum function, failure, depthFailure, pass;
     uint32_t readMask, writeMask;
-} CharonStencil;
+} RevenantStencil;
 
 typedef struct {
     GLenum depthFunction;
     GLboolean depthWrite;
     BOOL stencilEnabled;
-    CharonStencil front, back;
-} CharonDepthStencil;
+    RevenantStencil front, back;
+} RevenantDepthStencil;
 
-@interface CharonMetalDepthStencil : NSObject <MTLDepthStencilState>
+@interface RevenantMetalDepthStencil : NSObject <MTLDepthStencilState>
 - (instancetype)initWithDescriptor:(MTLDepthStencilDescriptor *)descriptor;
-- (const CharonDepthStencil *)state;
+- (const RevenantDepthStencil *)state;
 @end
 
-@interface CharonMetalLogContainer : NSObject <MTLLogContainer>
+@interface RevenantMetalLogContainer : NSObject <MTLLogContainer>
 {
     NSMutableArray *_logs;
 }
@@ -284,8 +284,8 @@ typedef struct {
 - (void)addLog:(id<MTLFunctionLog>)log;
 @end
 
-extern NSUInteger CharonMetalBindEpoch;
+extern NSUInteger RevenantMetalBindEpoch;
 
-extern NSString *const CharonMetalErrorDomain;
-NSError *CharonMetalError(NSInteger code, NSString *message);
-id<CAMetalDrawable> CharonMetalNextDrawable(CAMetalLayer *layer);
+extern NSString *const RevenantMetalErrorDomain;
+NSError *RevenantMetalError(NSInteger code, NSString *message);
+id<CAMetalDrawable> RevenantMetalNextDrawable(CAMetalLayer *layer);

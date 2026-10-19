@@ -2,35 +2,35 @@
 #import <objc/runtime.h>
 #import "check.h"
 
-@interface CharonHostUIContextMenuInteraction : NSObject <UIInteraction>
+@interface RevenantHostUIContextMenuInteraction : NSObject <UIInteraction>
 - (instancetype)initWithDelegate:(id)delegate;
 - (id)delegate;
 - (CGPoint)locationInView:(UIView *)view;
 - (void)dismissMenu;
 - (NSInteger)menuAppearance;
 - (void)updateVisibleMenuWithBlock:(id (^)(id menu))block;
-- (void)charon_beginAtLocation:(CGPoint)location;
+- (void)revenant_beginAtLocation:(CGPoint)location;
 @end
 
-@interface CharonHostUIContextMenuConfiguration : NSObject
+@interface RevenantHostUIContextMenuConfiguration : NSObject
 + (instancetype)configurationWithIdentifier:(id<NSCopying>)identifier previewProvider:(id)previewProvider actionProvider:(id)actionProvider;
 - (id<NSCopying>)identifier;
 @end
 
-@interface CharonHostUIMenuSystem : NSObject
+@interface RevenantHostUIMenuSystem : NSObject
 + (instancetype)mainSystem;
 + (instancetype)contextSystem;
 - (void)setNeedsRebuild;
 - (void)setNeedsRevalidate;
 @end
 
-@interface CharonHostUIPreviewParameters : NSObject <NSCopying>
+@interface RevenantHostUIPreviewParameters : NSObject <NSCopying>
 - (instancetype)initWithTextLineRects:(NSArray *)rects;
 - (UIBezierPath *)shadowPath;
 - (void)setShadowPath:(UIBezierPath *)path;
 @end
 
-@interface CharonHostUIPreviewTarget : NSObject <NSCopying>
+@interface RevenantHostUIPreviewTarget : NSObject <NSCopying>
 - (instancetype)initWithContainer:(UIView *)container center:(CGPoint)center transform:(CGAffineTransform)transform;
 - (instancetype)initWithContainer:(UIView *)container center:(CGPoint)center;
 - (UIView *)container;
@@ -38,7 +38,7 @@
 - (CGAffineTransform)transform;
 @end
 
-@interface CharonHostUITargetedPreview : NSObject <NSCopying>
+@interface RevenantHostUITargetedPreview : NSObject <NSCopying>
 - (instancetype)initWithView:(UIView *)view parameters:(id)parameters target:(id)target;
 - (instancetype)initWithView:(UIView *)view parameters:(id)parameters;
 - (instancetype)initWithView:(UIView *)view;
@@ -55,15 +55,15 @@
     X(Font) X(TextSize) X(TextColor) X(TextStylePasteboard) X(Text) X(WritingDirection) X(Alignment) X(Toolbar) X(Fullscreen) X(MinimizeAndZoom) \
     X(BringAllToFront) X(Root) X(Open)
 
-#define DECLARE(name) extern NSString *const CharonHostUIMenu##name;
+#define DECLARE(name) extern NSString *const RevenantHostUIMenu##name;
 NAMES(DECLARE)
 
-void charon_windowed_run(UIWindow *window);
+void revenant_windowed_run(UIWindow *window);
 
 static NSString *norm(id object)
 {
     NSString *text = [NSString stringWithFormat:@"%@", object];
-    text = [text stringByReplacingOccurrencesOfString:@"CharonHost" withString:@""];
+    text = [text stringByReplacingOccurrencesOfString:@"RevenantHost" withString:@""];
     NSRegularExpression *pointer = [NSRegularExpression regularExpressionWithPattern:@"0x[0-9a-f]+" options:0 error:nil];
     text = [pointer stringByReplacingMatchesInString:text options:0 range:NSMakeRange(0, text.length) withTemplate:@"PTR"];
     NSRegularExpression *uuid = [NSRegularExpression regularExpressionWithPattern:@"[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}" options:0 error:nil];
@@ -97,7 +97,7 @@ static void agree(NSString *name, NSArray *ours, NSArray *system)
         if (![a isEqual:b])
             [detail appendFormat:@"\n    port   %@\n    system %@", a, b];
     }
-    charon_check(detail.length == 0, name.UTF8String, detail);
+    revenant_check(detail.length == 0, name.UTF8String, detail);
 }
 
 static NSArray *action_lines(Class cls)
@@ -437,30 +437,30 @@ static NSArray *preview_lines(Class cls, Class parametersClass, Class targetClas
 
 static void preview_checks(UIWindow *window)
 {
-    Class ourParameters = NSClassFromString(@"CharonHostUIPreviewParameters"), ourTarget = NSClassFromString(@"CharonHostUIPreviewTarget"), ourPreview = NSClassFromString(@"CharonHostUITargetedPreview");
+    Class ourParameters = NSClassFromString(@"RevenantHostUIPreviewParameters"), ourTarget = NSClassFromString(@"RevenantHostUIPreviewTarget"), ourPreview = NSClassFromString(@"RevenantHostUITargetedPreview");
     UIView *container = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 200, 200)];
     [window addSubview:container];
     UIView *loose = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 10, 10)];
     agree(@"preview parameters", parameters_lines(ourParameters), parameters_lines([UIPreviewParameters class]));
     agree(@"preview target", target_lines(ourTarget, container, loose, window), target_lines([UIPreviewTarget class], container, loose, window));
     agree(@"targeted preview", preview_lines(ourPreview, ourParameters, ourTarget, container, loose, window), preview_lines([UITargetedPreview class], [UIPreviewParameters class], [UIPreviewTarget class], container, loose, window));
-    charon_check([[ourParameters new] isEqual:[ourParameters new]] == NO, "two preview parameters are two objects", @"they are equal");
+    revenant_check([[ourParameters new] isEqual:[ourParameters new]] == NO, "two preview parameters are two objects", @"they are equal");
     UIView *anchor = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 10, 10)];
     [window addSubview:anchor];
     UIPreviewTarget *first = [[ourTarget alloc] initWithContainer:anchor center:CGPointMake(3, 4)];
     UIPreviewTarget *second = [[ourTarget alloc] initWithContainer:anchor center:CGPointMake(3, 4)];
-    charon_check([first isEqual:second] && first.hash == second.hash, "equal preview targets hash alike, which the system's do not", @"the hashes differ");
+    revenant_check([first isEqual:second] && first.hash == second.hash, "equal preview targets hash alike, which the system's do not", @"the hashes differ");
     UIPreviewParameters *held = [[ourParameters alloc] init];
-    charon_check([held isEqual:held], "preview parameters equal themselves, which the system's answer to itself does not", @"they are not");
+    revenant_check([held isEqual:held], "preview parameters equal themselves, which the system's answer to itself does not", @"they are not");
 }
 
-void charon_windowed_run(UIWindow *window)
+void revenant_windowed_run(UIWindow *window)
 {
     {
-        Class ourElement = NSClassFromString(@"CharonHostUIMenuElement"), ourAction = NSClassFromString(@"CharonHostUIAction"), ourMenu = NSClassFromString(@"CharonHostUIMenu"),
-              ourDeferred = NSClassFromString(@"CharonHostUIDeferredMenuElement");
-        charon_check(ourAction && ourMenu && ourDeferred && ourElement, "the port's classes are linked under their host names", @"one is missing");
-        charon_check(class_getSuperclass(ourAction) == ourElement && class_getSuperclass(ourMenu) == ourElement && class_getSuperclass(ourDeferred) == ourElement
+        Class ourElement = NSClassFromString(@"RevenantHostUIMenuElement"), ourAction = NSClassFromString(@"RevenantHostUIAction"), ourMenu = NSClassFromString(@"RevenantHostUIMenu"),
+              ourDeferred = NSClassFromString(@"RevenantHostUIDeferredMenuElement");
+        revenant_check(ourAction && ourMenu && ourDeferred && ourElement, "the port's classes are linked under their host names", @"one is missing");
+        revenant_check(class_getSuperclass(ourAction) == ourElement && class_getSuperclass(ourMenu) == ourElement && class_getSuperclass(ourDeferred) == ourElement
                          && class_getSuperclass(ourElement) == [NSObject class],
                      "the classes descend as the system's do", @"a superclass differs");
 
@@ -469,8 +469,8 @@ void charon_windowed_run(UIWindow *window)
         agree(@"deferred element values", deferred_lines(ourDeferred, ourMenu), deferred_lines([UIDeferredMenuElement class], [UIMenu class]));
 
         NSDictionary *toPort = @{@"UIAction": ourAction, @"UIMenu": ourMenu, @"UIDeferredMenuElement": ourDeferred, @"UIMenuElement": ourElement};
-        NSDictionary *toSystem = @{@"CharonHostUIAction": [UIAction class], @"CharonHostUIMenu": [UIMenu class], @"CharonHostUIDeferredMenuElement": [UIDeferredMenuElement class],
-                                   @"CharonHostUIMenuElement": [UIMenuElement class]};
+        NSDictionary *toSystem = @{@"RevenantHostUIAction": [UIAction class], @"RevenantHostUIMenu": [UIMenu class], @"RevenantHostUIDeferredMenuElement": [UIDeferredMenuElement class],
+                                   @"RevenantHostUIMenuElement": [UIMenuElement class]};
         agree(@"archive round trip of the port", archive_lines(ourAction, ourMenu, ourDeferred, [UIMenuElement class], toSystem, [UIAction class], [UIDeferredMenuElement class]), archive_lines([UIAction class], [UIMenu class], [UIDeferredMenuElement class], [UIMenuElement class], @{}, [UIAction class], [UIDeferredMenuElement class]));
         NSArray *system = archive_lines([UIAction class], [UIMenu class], [UIDeferredMenuElement class], [UIMenuElement class], @{}, [UIAction class], [UIDeferredMenuElement class]);
         NSArray *carried = archive_lines(ourAction, ourMenu, ourDeferred, ourElement, @{}, ourAction, ourDeferred);
@@ -479,43 +479,43 @@ void charon_windowed_run(UIWindow *window)
 
         BOOL constants = YES;
         NSMutableString *wrong = [NSMutableString string];
-#define COMPARE(name) if (![CharonHostUIMenu##name isEqualToString:UIMenu##name]) { constants = NO; [wrong appendFormat:@" %s", #name]; }
+#define COMPARE(name) if (![RevenantHostUIMenu##name isEqualToString:UIMenu##name]) { constants = NO; [wrong appendFormat:@" %s", #name]; }
         NAMES(COMPARE)
-        charon_check(constants, "the 45 menu identifiers have the system's strings", wrong);
+        revenant_check(constants, "the 45 menu identifiers have the system's strings", wrong);
 
-        Class ourSystem = NSClassFromString(@"CharonHostUIMenuSystem");
+        Class ourSystem = NSClassFromString(@"RevenantHostUIMenuSystem");
         id main = [ourSystem mainSystem], context = [ourSystem contextSystem];
-        charon_check(main == [ourSystem mainSystem] && context == [ourSystem contextSystem] && main != context && [UIMenuSystem mainSystem] == [UIMenuSystem mainSystem]
+        revenant_check(main == [ourSystem mainSystem] && context == [ourSystem contextSystem] && main != context && [UIMenuSystem mainSystem] == [UIMenuSystem mainSystem]
                          && [UIMenuSystem mainSystem] != [UIMenuSystem contextSystem],
                      "the two menu systems are two shared objects", @"they differ");
         [main setNeedsRebuild];
         [main setNeedsRevalidate];
         [context setNeedsRebuild];
-        charon_check(YES, "a menu system answers a rebuild and a revalidate", @"");
+        revenant_check(YES, "a menu system answers a rebuild and a revalidate", @"");
 
-        Class ourConfiguration = NSClassFromString(@"CharonHostUIContextMenuConfiguration");
+        Class ourConfiguration = NSClassFromString(@"RevenantHostUIContextMenuConfiguration");
         agree(@"context menu configuration", configuration_lines(ourConfiguration), configuration_lines([UIContextMenuConfiguration class]));
 
-        Class ourInteraction = NSClassFromString(@"CharonHostUIContextMenuInteraction");
+        Class ourInteraction = NSClassFromString(@"RevenantHostUIContextMenuInteraction");
         UIView *view = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 100, 100)];
         [window addSubview:view];
         agree(@"context menu interaction at rest", interaction_lines(ourInteraction, ourConfiguration, ourAction, ourMenu, view),
              interaction_lines([UIContextMenuInteraction class], [UIContextMenuConfiguration class], [UIAction class], [UIMenu class], view));
         id sample = [[ourInteraction alloc] initWithDelegate:nil];
-        charon_check([sample menuAppearance] == UIContextMenuInteractionAppearanceCompact && [[[UIContextMenuInteraction alloc] initWithDelegate:nil] menuAppearance] == UIContextMenuInteractionAppearanceRich,
+        revenant_check([sample menuAppearance] == UIContextMenuInteractionAppearanceCompact && [[[UIContextMenuInteraction alloc] initWithDelegate:nil] menuAppearance] == UIContextMenuInteractionAppearanceRich,
                      "a menu is compact where the system's is rich: the port draws no preview", @"the appearances are not the documented pair");
 
         NSUInteger before = view.gestureRecognizers.count;
         [view addInteraction:sample];
         NSArray *added = [view.gestureRecognizers subarrayWithRange:NSMakeRange(before, view.gestureRecognizers.count - before)];
-        charon_check(added.count == 1 && [added[0] isKindOfClass:[UILongPressGestureRecognizer class]] && [(id)[sample valueForKey:@"view"] isEqual:view],
+        revenant_check(added.count == 1 && [added[0] isKindOfClass:[UILongPressGestureRecognizer class]] && [(id)[sample valueForKey:@"view"] isEqual:view],
                      "adding the interaction to a view puts one long press on it", [NSString stringWithFormat:@"%lu added", (unsigned long)added.count]);
         Recipient *recipient = [[Recipient alloc] init];
         recipient.log = [NSMutableArray array];
         id begun = [[ourInteraction alloc] initWithDelegate:recipient];
         [view addInteraction:begun];
-        [begun charon_beginAtLocation:CGPointMake(3, 4)];
-        charon_check([recipient.log isEqual:@[@"asked at 3 4"]], "a press asks the delegate for a configuration at the touch", recipient.log.description);
+        [begun revenant_beginAtLocation:CGPointMake(3, 4)];
+        revenant_check([recipient.log isEqual:@[@"asked at 3 4"]], "a press asks the delegate for a configuration at the touch", recipient.log.description);
         __block NSArray *suggested = nil;
         __block int provided = 0;
         recipient.configuration = [ourConfiguration configurationWithIdentifier:nil previewProvider:nil actionProvider:^UIMenu *(NSArray *actions) {
@@ -528,12 +528,12 @@ void charon_windowed_run(UIWindow *window)
             return [ourMenu menuWithTitle:@"" children:@[hidden, disabled]];
         }];
         [recipient.log removeAllObjects];
-        [begun charon_beginAtLocation:CGPointMake(5, 6)];
-        charon_check(provided == 1 && suggested.count == 0 && [recipient.log isEqual:@[@"asked at 5 6"]],
+        [begun revenant_beginAtLocation:CGPointMake(5, 6)];
+        revenant_check(provided == 1 && suggested.count == 0 && [recipient.log isEqual:@[@"asked at 5 6"]],
                      "the action provider is called with no suggested actions, and a menu of only hidden and disabled elements is not shown", recipient.log.description);
         [view removeInteraction:begun];
         preview_checks(window);
         [view removeInteraction:sample];
-        charon_check(view.gestureRecognizers.count == before, "removing the interactions takes their gestures off again", [NSString stringWithFormat:@"%lu left", (unsigned long)view.gestureRecognizers.count]);
+        revenant_check(view.gestureRecognizers.count == before, "removing the interactions takes their gestures off again", [NSString stringWithFormat:@"%lu left", (unsigned long)view.gestureRecognizers.count]);
     }
 }

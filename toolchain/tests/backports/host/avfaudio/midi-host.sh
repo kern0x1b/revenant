@@ -4,7 +4,7 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-build=${AVFAUDIO_MIDIHOST_BUILD:-$(runs_folder charon-avfaudio-midi-host)}
+build=${AVFAUDIO_MIDIHOST_BUILD:-$(runs_folder revenant-avfaudio-midi-host)}
 rm -rf "$build"
 mkdir -p "$build"
 

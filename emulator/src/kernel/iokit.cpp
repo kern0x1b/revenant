@@ -51,7 +51,7 @@
 #include "iokit/power.hpp"
 #include "mach/support.hpp"
 
-namespace shade {
+namespace emulator {
 namespace {
 
     constexpr std::uint32_t single_service_message_id(DarwinIOKitMatchingRpcAbi abi)
@@ -844,7 +844,7 @@ namespace {
             KernelSharedState::IOKitRegistryProperty {
                 KernelSharedState::IOKitRegistryProperty::Kind::Data,
                 bytes_from_string(shared_state.device_model_number) });
-        const auto serial = std::string { "Shade-" } +
+        const auto serial = std::string { "Revenant-" } +
                             shared_state.device_product_type + "-" +
                             shared_state.device_model_number;
         service.properties.emplace(

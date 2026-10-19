@@ -1,5 +1,5 @@
-#ifndef CHARON_MPS9_REFERENCE_H
-#define CHARON_MPS9_REFERENCE_H
+#ifndef REVENANT_MPS9_REFERENCE_H
+#define REVENANT_MPS9_REFERENCE_H
 
 #include <math.h>
 #include <stdint.h>
@@ -9,22 +9,22 @@
 static NSUInteger gCompared9 = 0;
 static NSUInteger gMismatches9 = 0;
 
-static double CharonMPS9Ulp(float stored)
+static double RevenantMPS9Ulp(float stored)
 {
     return (double)fabsf(stored) * 1.19209290e-07 + 1.0e-30;
 }
 
-static void CharonMPS9Compare(const char *name, double want, float got)
+static void RevenantMPS9Compare(const char *name, double want, float got)
 {
     gCompared9++;
-    double ulp = CharonMPS9Ulp(got);
+    double ulp = RevenantMPS9Ulp(got);
     if (fabs((double)got - want) > ulp) {
         gMismatches9++;
         printf("  MISMATCH %s reference %.9g port %.9g, one ulp %.3g\n", name, want, (double)got, ulp);
     }
 }
 
-static double CharonMPS9Integral(const double *values, NSUInteger w, NSUInteger h, NSInteger x,
+static double RevenantMPS9Integral(const double *values, NSUInteger w, NSUInteger h, NSInteger x,
                                  NSInteger y, BOOL squared)
 {
     if (x < 0 || y < 0)
@@ -38,19 +38,19 @@ static double CharonMPS9Integral(const double *values, NSUInteger w, NSUInteger 
     return total;
 }
 
-static void CharonMPS9CheckIntegral(const char *name, const double *values, NSUInteger w, NSUInteger h,
+static void RevenantMPS9CheckIntegral(const char *name, const double *values, NSUInteger w, NSUInteger h,
                                     const float *got, BOOL squared)
 {
     for (NSUInteger y = 0; y < h; y++)
         for (NSUInteger x = 0; x < w; x++) {
-            double want = CharonMPS9Integral(values, w, h, (NSInteger)x, (NSInteger)y, squared);
+            double want = RevenantMPS9Integral(values, w, h, (NSInteger)x, (NSInteger)y, squared);
             char label[256];
             snprintf(label, sizeof(label), "%s (%lu,%lu)", name, (unsigned long)x, (unsigned long)y);
-            CharonMPS9Compare(label, want, got[y * w + x]);
+            RevenantMPS9Compare(label, want, got[y * w + x]);
         }
 }
 
-static void CharonMPS9CheckSobel(const char *name, const double *values, NSUInteger w, NSUInteger h,
+static void RevenantMPS9CheckSobel(const char *name, const double *values, NSUInteger w, NSUInteger h,
                                  const float *got, NSUInteger channels, const float *transform)
 {
     static const int kx[9] = { -1, 0, 1, -2, 0, 2, -1, 0, 1 };
@@ -79,7 +79,7 @@ static void CharonMPS9CheckSobel(const char *name, const double *values, NSUInte
                 char label[256];
                 snprintf(label, sizeof(label), "%s channel %lu (%lu,%lu)", name, (unsigned long)c,
                          (unsigned long)x, (unsigned long)y);
-                CharonMPS9Compare(label, sqrt(gx * gx + gy * gy), got[(y * w + x) * channels + c]);
+                RevenantMPS9Compare(label, sqrt(gx * gx + gy * gy), got[(y * w + x) * channels + c]);
             }
     }
 }

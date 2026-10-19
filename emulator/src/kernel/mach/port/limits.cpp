@@ -20,7 +20,7 @@
 
 #include "../support.hpp"
 
-namespace shade {
+namespace emulator {
 
 bool CompatibilityKernel::dispatch_mach_port_limit_message(
     Cpu& cpu, const MachMessageRequest& request)

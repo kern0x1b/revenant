@@ -69,7 +69,7 @@ static void send_key(UIApplication *application, long type, NSString *characters
 {
     [[NSFileManager defaultManager] createDirectoryAtPath:results_folder withIntermediateDirectories:YES attributes:nil error:NULL];
     [[NSFileManager defaultManager] removeItemAtPath:[results_folder stringByAppendingPathComponent:@"keycommand.done"] error:NULL];
-    charon_log_to([results_folder stringByAppendingPathComponent:@"keycommand.log"]);
+    revenant_log_to([results_folder stringByAppendingPathComponent:@"keycommand.log"]);
     self.fired = [NSMutableArray array];
     self.window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
     CommandController *controller = [[CommandController alloc] init];
@@ -159,8 +159,8 @@ static void send_key(UIApplication *application, long type, NSString *characters
     send_key(application, 10, @"x", @"x", 0, 27);
     CHECK([field.text isEqual:@"x"], "a key that is no command goes on to the keyboard");
 
-    printf("checks=%d failures=%d\n", charon_checks, charon_failures);
-    NSString *summary = [NSString stringWithFormat:@"%@ checks=%d failures=%d\n", charon_failures ? @"FAIL" : @"ok", charon_checks, charon_failures];
+    printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
+    NSString *summary = [NSString stringWithFormat:@"%@ checks=%d failures=%d\n", revenant_failures ? @"FAIL" : @"ok", revenant_checks, revenant_failures];
     [summary writeToFile:[results_folder stringByAppendingPathComponent:@"keycommand.done"] atomically:YES encoding:NSUTF8StringEncoding error:NULL];
 }
 

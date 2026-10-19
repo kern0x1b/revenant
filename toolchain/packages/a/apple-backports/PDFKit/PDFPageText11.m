@@ -1,8 +1,8 @@
 #import "PDFPageText11.h"
 
-@implementation CharonPDFTextRun {
-    CGRect *_charon_rects;
-    NSUInteger _charon_rectCount;
+@implementation RevenantPDFTextRun {
+    CGRect *_revenant_rects;
+    NSUInteger _revenant_rectCount;
 }@synthesize text = _text;
 @synthesize offset = _offset;
 @synthesize x = _x;
@@ -12,42 +12,42 @@
 
 - (void)dealloc
 {
-    free(_charon_rects);
+    free(_revenant_rects);
 }
 
 @end
 
-@implementation CharonPDFTextRun (CharonGeometry)
+@implementation RevenantPDFTextRun (RevenantGeometry)
 
-- (void)charon_setGlyphRects:(const CGRect *)rects count:(NSUInteger)count
+- (void)revenant_setGlyphRects:(const CGRect *)rects count:(NSUInteger)count
 {
-    free(_charon_rects);
-    _charon_rects = NULL;
-    _charon_rectCount = 0;
+    free(_revenant_rects);
+    _revenant_rects = NULL;
+    _revenant_rectCount = 0;
     if (rects == NULL || count == 0)
         return;
-    _charon_rects = malloc(sizeof(CGRect) * count);
-    if (_charon_rects == NULL)
+    _revenant_rects = malloc(sizeof(CGRect) * count);
+    if (_revenant_rects == NULL)
         return;
-    memcpy(_charon_rects, rects, sizeof(CGRect) * count);
-    _charon_rectCount = count;
+    memcpy(_revenant_rects, rects, sizeof(CGRect) * count);
+    _revenant_rectCount = count;
 }
 
 - (CGRect)rectAtIndex:(NSUInteger)index
 {
-    if (_charon_rects == NULL || index >= _charon_rectCount)
+    if (_revenant_rects == NULL || index >= _revenant_rectCount)
         return CGRectNull;
-    return _charon_rects[index];
+    return _revenant_rects[index];
 }
 
 @end
 
-@interface CharonBase14Widths : NSObject
+@interface RevenantBase14Widths : NSObject
 + (int)widthForCode:(int)code inFaceNamed:(const char *)name;
 + (double)descentForFaceNamed:(const char *)name;
 @end
 
-@implementation CharonPDFFontMetrics {
+@implementation RevenantPDFFontMetrics {
     NSArray<NSNumber *> *_advances;
     CGPDFInteger _firstChar;
     char *_faceName;
@@ -61,7 +61,7 @@
 {
     if (fontDictionary == NULL)
         return nil;
-    CharonPDFFontMetrics *metrics = [[CharonPDFFontMetrics alloc] init];
+    RevenantPDFFontMetrics *metrics = [[RevenantPDFFontMetrics alloc] init];
     metrics->_size = size;
     metrics->_firstChar = 0;
     CGPDFDictionaryGetInteger(fontDictionary, "FirstChar", &metrics->_firstChar);
@@ -100,7 +100,7 @@
             descent = (CGFloat)value * (size / 1000.0);
     }
     if (descent == 0 && metrics->_faceName != nil)
-        descent = (CGFloat)[CharonBase14Widths descentForFaceNamed:metrics->_faceName] * (size / 1000.0);
+        descent = (CGFloat)[RevenantBase14Widths descentForFaceNamed:metrics->_faceName] * (size / 1000.0);
     metrics->_descent = descent;
     metrics->_hasWidths = metrics->_advances != nil || metrics->_faceName != nil;
     return metrics;
@@ -121,7 +121,7 @@
     }
     if (_faceName == nil)
         return 0;
-    int width = [CharonBase14Widths widthForCode:code inFaceNamed:_faceName];
+    int width = [RevenantBase14Widths widthForCode:code inFaceNamed:_faceName];
     if (width < 0)
         return 0;
     return (CGFloat)width * _size / 1000.0;
@@ -129,7 +129,7 @@
 
 @end
 
-@implementation CharonPDFPageText {
+@implementation RevenantPDFPageText {
     NSUInteger *_breaks;
     NSUInteger _breakCount;
     NSArray<NSNumber *> *_charOffsets;
@@ -138,7 +138,7 @@
 @synthesize string = _string;
 @synthesize runs = _runs;
 
-static NSString *charonCloseLine(NSString *line, NSUInteger **mapping, NSUInteger *mappingCount)
+static NSString *revenantCloseLine(NSString *line, NSUInteger **mapping, NSUInteger *mappingCount)
 {
     NSUInteger length = line.length;
     NSUInteger start = 0;
@@ -175,14 +175,14 @@ static NSString *charonCloseLine(NSString *line, NSUInteger **mapping, NSUIntege
     return closed;
 }
 
-+ (instancetype)layoutWithRuns:(NSArray<CharonPDFTextRun *> *)drawnRuns
++ (instancetype)layoutWithRuns:(NSArray<RevenantPDFTextRun *> *)drawnRuns
 {
     if (drawnRuns == nil)
         return nil;
-    CharonPDFPageText *layout = [[CharonPDFPageText alloc] init];
-    NSArray<CharonPDFTextRun *> *ordered = [drawnRuns sortedArrayWithOptions:NSSortStable
+    RevenantPDFPageText *layout = [[RevenantPDFPageText alloc] init];
+    NSArray<RevenantPDFTextRun *> *ordered = [drawnRuns sortedArrayWithOptions:NSSortStable
                                                         usingComparator:^NSComparisonResult(id a, id b) {
-        CharonPDFTextRun *left = a, *right = b;
+        RevenantPDFTextRun *left = a, *right = b;
         if (left.y > right.y)
             return NSOrderedAscending;
         if (left.y < right.y)
@@ -190,21 +190,21 @@ static NSString *charonCloseLine(NSString *line, NSUInteger **mapping, NSUIntege
         return NSOrderedSame;
     }];
     NSMutableString *text = [NSMutableString string];
-    NSMutableArray<CharonPDFTextRun *> *runs = [NSMutableArray arrayWithCapacity:ordered.count];
+    NSMutableArray<RevenantPDFTextRun *> *runs = [NSMutableArray arrayWithCapacity:ordered.count];
     NSMutableArray<NSNumber *> *breaks = [NSMutableArray array];
     NSMutableArray<NSNumber *> *charOffsets = [NSMutableArray array];
     NSMutableString *line = [NSMutableString string];
-    NSMutableArray<CharonPDFTextRun *> *lineRuns = [NSMutableArray array];
+    NSMutableArray<RevenantPDFTextRun *> *lineRuns = [NSMutableArray array];
     CGFloat previousY = 0;
     BOOL first = YES;
     void (^closeLine)(void) = ^{
         NSUInteger *mapping = NULL;
         NSUInteger mappingCount = 0;
-        NSString *closed = charonCloseLine(line, &mapping, &mappingCount);
+        NSString *closed = revenantCloseLine(line, &mapping, &mappingCount);
         NSUInteger lineStart = text.length;
         if (closed != nil)
             [text appendString:closed];
-        for (CharonPDFTextRun *run in lineRuns) {
+        for (RevenantPDFTextRun *run in lineRuns) {
             NSUInteger base = run.offset;
             run.offset = mappingCount > base && base != NSUIntegerMax ? lineStart + mapping[base]
                                                                      : lineStart;
@@ -220,7 +220,7 @@ static NSString *charonCloseLine(NSString *line, NSUInteger **mapping, NSUIntege
         free(mapping);        [lineRuns removeAllObjects];
         [line setString:@""];
     };
-    for (CharonPDFTextRun *run in ordered) {
+    for (RevenantPDFTextRun *run in ordered) {
         if (run.text == nil || run.text.length == 0)
             continue;
         if (!first && run.y != previousY) {
@@ -299,7 +299,7 @@ static NSString *charonCloseLine(NSString *line, NSUInteger **mapping, NSUIntege
     NSUInteger last = NSMaxRange(range);
     CGRect answer = CGRectNull;
     NSUInteger at = 0;
-    for (CharonPDFTextRun *run in _runs) {
+    for (RevenantPDFTextRun *run in _runs) {
         NSUInteger count = run.text.length;
         for (NSUInteger i = 0; i < count && at < _charOffsets.count; i++, at++) {
             NSUInteger offset = [[_charOffsets objectAtIndex:at] unsignedIntegerValue];
@@ -323,11 +323,11 @@ static NSString *charonCloseLine(NSString *line, NSUInteger **mapping, NSUIntege
     return [_string substringWithRange:range];
 }
 
-- (CharonPDFTextRun *)runForOffset:(NSUInteger)offset
+- (RevenantPDFTextRun *)runForOffset:(NSUInteger)offset
 {
     if (_string == nil || offset >= _string.length)
         return nil;
-    for (CharonPDFTextRun *run in _runs) {
+    for (RevenantPDFTextRun *run in _runs) {
         if (offset >= run.offset && offset < run.offset + run.text.length)
             return run;
     }

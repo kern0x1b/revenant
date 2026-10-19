@@ -1,5 +1,5 @@
-#import "CharonNW.h"
-#import "CharonNWSupport.h"
+#import "RevenantNW.h"
+#import "RevenantNWSupport.h"
 
 #include <string.h>
 
@@ -7,7 +7,7 @@ nw_advertise_descriptor_t nw_advertise_descriptor_create_bonjour_service(const c
 {
     if (!type || !*type)
         return NULL;
-    CharonNWAdvertiseDescriptor *descriptor = [[CharonNWAdvertiseDescriptor alloc] init];
+    RevenantNWAdvertiseDescriptor *descriptor = [[RevenantNWAdvertiseDescriptor alloc] init];
     descriptor->_bonjourName = name && *name ? @(name) : nil;
     descriptor->_bonjourType = @(type);
     descriptor->_bonjourDomain = domain ? @(domain) : @"local.";
@@ -16,7 +16,7 @@ nw_advertise_descriptor_t nw_advertise_descriptor_create_bonjour_service(const c
 
 void nw_advertise_descriptor_set_txt_record(nw_advertise_descriptor_t advertise_descriptor, const void *txt_record, size_t txt_length)
 {
-    CharonNWAdvertiseDescriptor *value = (CharonNWAdvertiseDescriptor *)advertise_descriptor;
+    RevenantNWAdvertiseDescriptor *value = (RevenantNWAdvertiseDescriptor *)advertise_descriptor;
     if (!value)
         return;
     value->_txtRecord = txt_record ? [NSData dataWithBytes:txt_record length:txt_length] : nil;
@@ -24,13 +24,13 @@ void nw_advertise_descriptor_set_txt_record(nw_advertise_descriptor_t advertise_
 
 bool nw_advertise_descriptor_get_no_auto_rename(nw_advertise_descriptor_t advertise_descriptor)
 {
-    CharonNWAdvertiseDescriptor *value = (CharonNWAdvertiseDescriptor *)advertise_descriptor;
+    RevenantNWAdvertiseDescriptor *value = (RevenantNWAdvertiseDescriptor *)advertise_descriptor;
     return value ? value->_noAutoRename : false;
 }
 
 void nw_advertise_descriptor_set_no_auto_rename(nw_advertise_descriptor_t advertise_descriptor, bool no_auto_rename)
 {
-    CharonNWAdvertiseDescriptor *value = (CharonNWAdvertiseDescriptor *)advertise_descriptor;
+    RevenantNWAdvertiseDescriptor *value = (RevenantNWAdvertiseDescriptor *)advertise_descriptor;
     if (value)
         value->_noAutoRename = no_auto_rename;
 }

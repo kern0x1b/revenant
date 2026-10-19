@@ -22,7 +22,7 @@
 
 #include "graphics/display.hpp"
 
-namespace shade {
+namespace emulator {
 namespace {
 
     class ReferenceGlesRenderer final : public GlesRenderer {
@@ -75,7 +75,7 @@ namespace {
 
         [[nodiscard]] std::string_view name() const override
         {
-            return "Shade GLES 1.1 reference";
+            return "Revenant GLES 1.1 reference";
         }
 
         [[nodiscard]] bool accelerated() const override { return false; }

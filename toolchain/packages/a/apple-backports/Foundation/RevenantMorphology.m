@@ -2,7 +2,7 @@
 #import <objc/runtime.h>
 #include <string.h>
 
-#import "CharonMorphology.h"
+#import "RevenantMorphology.h"
 
 typedef struct {
     NSGrammaticalCase case_;
@@ -10,28 +10,28 @@ typedef struct {
     NSGrammaticalPerson person;
     NSGrammaticalPronounType pronounType;
     NSGrammaticalDefiniteness definiteness;
-} CharonGrammatical17;
+} RevenantGrammatical17;
 
-static char CharonGrammatical17Key;
+static char RevenantGrammatical17Key;
 
-static CharonGrammatical17 *charon_grammatical17(NSMorphology *morphology, BOOL create)
+static RevenantGrammatical17 *revenant_grammatical17(NSMorphology *morphology, BOOL create)
 {
-    NSMutableData *boxed = objc_getAssociatedObject(morphology, &CharonGrammatical17Key);
+    NSMutableData *boxed = objc_getAssociatedObject(morphology, &RevenantGrammatical17Key);
     if (!boxed && !create) {
-        static const CharonGrammatical17 empty;
-        return (CharonGrammatical17 *)&empty;
+        static const RevenantGrammatical17 empty;
+        return (RevenantGrammatical17 *)&empty;
     }
     if (!boxed && create) {
-        CharonGrammatical17 empty;
+        RevenantGrammatical17 empty;
         memset(&empty, 0, sizeof(empty));
         boxed = [NSMutableData dataWithBytes:&empty length:sizeof(empty)];
-        objc_setAssociatedObject(morphology, &CharonGrammatical17Key, boxed, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+        objc_setAssociatedObject(morphology, &RevenantGrammatical17Key, boxed, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     }
-    return (CharonGrammatical17 *)boxed.mutableBytes;
+    return (RevenantGrammatical17 *)boxed.mutableBytes;
 }
 
 
-static NSArray *CharonCustomPronounLanguages(void)
+static NSArray *RevenantCustomPronounLanguages(void)
 {
     static NSArray *languages;
     static dispatch_once_t once;
@@ -39,7 +39,7 @@ static NSArray *CharonCustomPronounLanguages(void)
     return languages;
 }
 
-NSArray<NSString *> *CharonCustomPronounRequiredKeys(void)
+NSArray<NSString *> *RevenantCustomPronounRequiredKeys(void)
 {
     static NSArray *keys;
     static dispatch_once_t once;
@@ -49,23 +49,23 @@ NSArray<NSString *> *CharonCustomPronounRequiredKeys(void)
     return keys;
 }
 
-BOOL CharonCustomPronounSupportedLanguage(NSString *language)
+BOOL RevenantCustomPronounSupportedLanguage(NSString *language)
 {
-    return language != nil && [CharonCustomPronounLanguages() containsObject:language];
+    return language != nil && [RevenantCustomPronounLanguages() containsObject:language];
 }
 
-@implementation NSMorphology (CharonGrammatical17)
+@implementation NSMorphology (RevenantGrammatical17)
 
-- (NSGrammaticalCase)grammaticalCase { return charon_grammatical17(self, NO)->case_; }
-- (void)setGrammaticalCase:(NSGrammaticalCase)value { charon_grammatical17(self, YES)->case_ = value; }
-- (NSGrammaticalDetermination)determination { return charon_grammatical17(self, NO)->determination; }
-- (void)setDetermination:(NSGrammaticalDetermination)value { charon_grammatical17(self, YES)->determination = value; }
-- (NSGrammaticalPerson)grammaticalPerson { return charon_grammatical17(self, NO)->person; }
-- (void)setGrammaticalPerson:(NSGrammaticalPerson)value { charon_grammatical17(self, YES)->person = value; }
-- (NSGrammaticalPronounType)pronounType { return charon_grammatical17(self, NO)->pronounType; }
-- (void)setPronounType:(NSGrammaticalPronounType)value { charon_grammatical17(self, YES)->pronounType = value; }
-- (NSGrammaticalDefiniteness)definiteness { return charon_grammatical17(self, NO)->definiteness; }
-- (void)setDefiniteness:(NSGrammaticalDefiniteness)value { charon_grammatical17(self, YES)->definiteness = value; }
+- (NSGrammaticalCase)grammaticalCase { return revenant_grammatical17(self, NO)->case_; }
+- (void)setGrammaticalCase:(NSGrammaticalCase)value { revenant_grammatical17(self, YES)->case_ = value; }
+- (NSGrammaticalDetermination)determination { return revenant_grammatical17(self, NO)->determination; }
+- (void)setDetermination:(NSGrammaticalDetermination)value { revenant_grammatical17(self, YES)->determination = value; }
+- (NSGrammaticalPerson)grammaticalPerson { return revenant_grammatical17(self, NO)->person; }
+- (void)setGrammaticalPerson:(NSGrammaticalPerson)value { revenant_grammatical17(self, YES)->person = value; }
+- (NSGrammaticalPronounType)pronounType { return revenant_grammatical17(self, NO)->pronounType; }
+- (void)setPronounType:(NSGrammaticalPronounType)value { revenant_grammatical17(self, YES)->pronounType = value; }
+- (NSGrammaticalDefiniteness)definiteness { return revenant_grammatical17(self, NO)->definiteness; }
+- (void)setDefiniteness:(NSGrammaticalDefiniteness)value { revenant_grammatical17(self, YES)->definiteness = value; }
 
 @end
 
@@ -136,9 +136,9 @@ BOOL CharonCustomPronounSupportedLanguage(NSString *language)
         return YES;
     }
     NSString *missing = nil;
-    if (!CharonCustomPronounSupportedLanguage(language)) {
+    if (!RevenantCustomPronounSupportedLanguage(language)) {
         missing = @"self";
-    } else if ((missing = [features charon_firstMissingKey]) != nil) {
+    } else if ((missing = [features revenant_firstMissingKey]) != nil) {
     }
     if (missing) {
         if (error)
@@ -182,7 +182,7 @@ BOOL CharonCustomPronounSupportedLanguage(NSString *language)
     return self;
 }
 
-static NSString *charon_grammatical(NSString *enumName, NSString *const *names, NSUInteger count, NSInteger value)
+static NSString *revenant_grammatical(NSString *enumName, NSString *const *names, NSUInteger count, NSInteger value)
 {
     if (value >= 0 && (NSUInteger)value < count)
         return names[value];
@@ -206,16 +206,16 @@ static NSString *charon_grammatical(NSString *enumName, NSString *const *names, 
                                       @"case = %@, definiteness = %@, determination = %@, grammaticalPerson = %@, "
                                       @"pronounType = %@, customPronouns = %@ }",
                                       [NSString stringWithUTF8String:"NSMorphology"], self,
-                                      charon_grammatical(@"NSGrammaticalGender", genders, 4, _grammaticalGender),
-                                      charon_grammatical(@"NSGrammaticalNumber", numbers, 7, _number),
-                                      charon_grammatical(@"NSGrammaticalPartOfSpeech", parts,
+                                      revenant_grammatical(@"NSGrammaticalGender", genders, 4, _grammaticalGender),
+                                      revenant_grammatical(@"NSGrammaticalNumber", numbers, 7, _number),
+                                      revenant_grammatical(@"NSGrammaticalPartOfSpeech", parts,
                                                         sizeof(parts) / sizeof(*parts), _partOfSpeech),
-                                      charon_grammatical(@"NSGrammaticalCase", cases, sizeof(cases) / sizeof(*cases),
+                                      revenant_grammatical(@"NSGrammaticalCase", cases, sizeof(cases) / sizeof(*cases),
                                                         self.grammaticalCase),
-                                      charon_grammatical(@"NSGrammaticalDefiniteness", definiteness, 3, self.definiteness),
-                                      charon_grammatical(@"NSGrammaticalDetermination", determination, 3, self.determination),
-                                      charon_grammatical(@"NSGrammaticalPerson", persons, 4, self.grammaticalPerson),
-                                      charon_grammatical(@"NSGrammaticalPronounType", pronounTypes, 4, self.pronounType),
+                                      revenant_grammatical(@"NSGrammaticalDefiniteness", definiteness, 3, self.definiteness),
+                                      revenant_grammatical(@"NSGrammaticalDetermination", determination, 3, self.determination),
+                                      revenant_grammatical(@"NSGrammaticalPerson", persons, 4, self.grammaticalPerson),
+                                      revenant_grammatical(@"NSGrammaticalPronounType", pronounTypes, 4, self.pronounType),
                                       _customPronouns ? [_customPronouns description] : @"(null)"];
 }
 

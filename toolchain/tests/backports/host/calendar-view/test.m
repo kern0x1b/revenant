@@ -1,6 +1,6 @@
 #import <UIKit/UIKit.h>
 #include <stdio.h>
-#include "CharonCalendar.h"
+#include "RevenantCalendar.h"
 
 static void report(const char *side, const char *check, NSString *value)
 {
@@ -49,11 +49,11 @@ static NSString *raised(void (^call)(void))
     }
 }
 
-@interface CharonCalendarProbeDelegate : NSObject <UICalendarViewDelegate>
+@interface RevenantCalendarProbeDelegate : NSObject <UICalendarViewDelegate>
 @property (nonatomic) NSInteger decorationCalls;
 @end
 
-@implementation CharonCalendarProbeDelegate
+@implementation RevenantCalendarProbeDelegate
 - (UICalendarViewDecoration *)calendarView:(UICalendarView *)view decorationForDateComponents:(NSDateComponents *)components
 {
     self.decorationCalls++;
@@ -140,7 +140,7 @@ static void run(const char *side, Class cls)
 
 static void runPortOnly(void)
 {
-    CharonCalendarProbeDelegate *probe = [[CharonCalendarProbeDelegate alloc] init];
+    RevenantCalendarProbeDelegate *probe = [[RevenantCalendarProbeDelegate alloc] init];
     UICalendarView *view = [[UICalendarView alloc] initWithFrame:CGRectMake(0, 0, 280, 304)];
     view.delegate = probe;
     [view setVisibleDateComponents:month(2024, 5) animated:NO];
@@ -157,15 +157,15 @@ static void runPortOnly(void)
     NSInteger weekday = [calendar components:NSCalendarUnitWeekday fromDate:firstOfMay].weekday;
     NSInteger column = (weekday - calendar.firstWeekday + 7) % 7;
     CGPoint firstDay = CGPointMake(column * 40 + 20, 64 + 20);
-    NSDateComponents *hit = [(id)view charon_dateAtPoint:firstDay];
+    NSDateComponents *hit = [(id)view revenant_dateAtPoint:firstDay];
     report("only", "tap-first-day-of-may", [NSString stringWithFormat:@"%@", components_text(hit)]);
     report("only", "tap-first-day-is-the-first", yes_no(hit && hit.day == 1 && hit.month == 5 && hit.year == 2024));
-    report("only", "tap-blank-before-first-day", yes_no(column == 0 || [(id)view charon_dateAtPoint:CGPointMake(20, 84)] == nil));
-    report("only", "tap-header-is-nothing", yes_no([(id)view charon_dateAtPoint:CGPointMake(100, 10)] == nil));
-    report("only", "tap-weekday-row-is-nothing", yes_no([(id)view charon_dateAtPoint:CGPointMake(100, 50)] == nil));
+    report("only", "tap-blank-before-first-day", yes_no(column == 0 || [(id)view revenant_dateAtPoint:CGPointMake(20, 84)] == nil));
+    report("only", "tap-header-is-nothing", yes_no([(id)view revenant_dateAtPoint:CGPointMake(100, 10)] == nil));
+    report("only", "tap-weekday-row-is-nothing", yes_no([(id)view revenant_dateAtPoint:CGPointMake(100, 50)] == nil));
 
     [view setAvailableDateRange:[[NSDateInterval alloc] initWithStartDate:utc(2024, 5, 10) endDate:utc(2024, 5, 31)]];
-    report("only", "tap-day-outside-range-is-nothing", yes_no([(id)view charon_dateAtPoint:firstDay] == nil));
+    report("only", "tap-day-outside-range-is-nothing", yes_no([(id)view revenant_dateAtPoint:firstDay] == nil));
 }
 
 int main(void)

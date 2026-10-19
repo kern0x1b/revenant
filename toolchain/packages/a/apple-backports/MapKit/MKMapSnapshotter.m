@@ -2,7 +2,7 @@
 #import <MapKit/MKMapSnapshotter.h>
 #import <UIKit/UIKit.h>
 #import <objc/message.h>
-#import "CharonMapKit.h"
+#import "RevenantMapKit.h"
 
 @interface MKMapSnapshotOptions ()
 @property (nonatomic, copy) MKMapConfiguration *preferredConfiguration;
@@ -81,8 +81,8 @@
 
 @implementation MKMapSnapshot {
     UIImage *_image;
-    MKMapRect _charon_rect;
-    BOOL _charon_rect_set;
+    MKMapRect _revenant_rect;
+    BOOL _revenant_rect_set;
 }
 
 @synthesize image = _image;
@@ -92,15 +92,15 @@
     self = [super init];
     if (self) {
         _image = image;
-        _charon_rect = mapRect;
-        _charon_rect_set = YES;
+        _revenant_rect = mapRect;
+        _revenant_rect_set = YES;
     }
     return self;
 }
 
 - (CGPoint)pointForCoordinate:(CLLocationCoordinate2D)coordinate
 {
-    MKMapRect rect = _charon_rect_set ? _charon_rect : MKMapRectWorld;
+    MKMapRect rect = _revenant_rect_set ? _revenant_rect : MKMapRectWorld;
     MKMapPoint point = MKMapPointForCoordinate(coordinate);
     CGFloat width = _image ? (CGFloat)_image.size.width * _image.scale : 0.0;
     CGFloat height = _image ? (CGFloat)_image.size.height * _image.scale : 0.0;
@@ -148,24 +148,24 @@
     }
     if (_loading) {
         dispatch_async(dispatch_get_main_queue(), ^{
-            completionHandler(nil, [self charon_errorForReason:@"MKMapSnapshotter is already loading"]);
+            completionHandler(nil, [self revenant_errorForReason:@"MKMapSnapshotter is already loading"]);
         });
         return;
     }
     _loading = YES;
     dispatch_queue_t work = queue;
     if (!work) {
-        work = dispatch_queue_create("org.charon.apple-backports.MapKitSnapshotter", DISPATCH_QUEUE_SERIAL);
+        work = dispatch_queue_create("org.revenant.apple-backports.MapKitSnapshotter", DISPATCH_QUEUE_SERIAL);
     }
 
     dispatch_async(work, ^{
-        MKMapSnapshot *snapshot = [self charon_snapshot];
+        MKMapSnapshot *snapshot = [self revenant_snapshot];
         dispatch_async(dispatch_get_main_queue(), ^{
             self->_loading = NO;
             if (snapshot) {
                 completionHandler(snapshot, nil);
             } else {
-                completionHandler(nil, [self charon_errorForReason:@"the map view of the release drew no image"]);
+                completionHandler(nil, [self revenant_errorForReason:@"the map view of the release drew no image"]);
             }
         });
     });
@@ -181,13 +181,13 @@
     _loading = NO;
 }
 
-- (NSError *)charon_errorForReason:(NSString *)reason
+- (NSError *)revenant_errorForReason:(NSString *)reason
 {
     return [NSError errorWithDomain:@"MKErrorDomain" code:1
                            userInfo:@{NSLocalizedDescriptionKey: reason}];
 }
 
-- (MKMapSnapshot *)charon_snapshot
+- (MKMapSnapshot *)revenant_snapshot
 {
     MKMapSnapshotOptions *options = _options;
     if (!options) {

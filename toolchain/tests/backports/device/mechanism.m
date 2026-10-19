@@ -43,12 +43,12 @@ int main(void)
         CHECK_EQUAL([[NSURLQueryItem queryItemWithName:@"x" value:nil] pair], @"x=(null)", "class works through the class method");
         CHECK([@"backports" containsString:@"port"], "missing method is added to an existing class");
         CHECK_EQUAL(image_of(class_getMethodImplementation([NSString class], @selector(containsString:))), @"libFoundationBackports.dylib", "added method comes from the backports library");
-        CHECK(![NSString instancesRespondToSelector:@selector(charonMissing)], "nothing else is added");
+        CHECK(![NSString instancesRespondToSelector:@selector(revenantMissing)], "nothing else is added");
         NSString *owner = image_of(class_getMethodImplementation([NSArray class], @selector(firstObject)));
         CHECK(![owner isEqualToString:@"libFoundationBackports.dylib"], "a method the system already has keeps its implementation");
         printf("firstObject implemented in %s\n", owner.UTF8String);
         CHECK_EQUAL([([NSArray arrayWithObjects:@1, @2, nil]) firstObject], @1, "system method still works");
     }
-    printf("checks=%d failures=%d\n", charon_checks, charon_failures);
-    return charon_failures;
+    printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
+    return revenant_failures;
 }

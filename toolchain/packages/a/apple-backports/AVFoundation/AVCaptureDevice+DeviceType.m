@@ -1,7 +1,7 @@
-#import "CharonAVCapture.h"
+#import "RevenantAVCapture.h"
 
 
-@implementation AVCaptureDevice (CharonDeviceType)
+@implementation AVCaptureDevice (RevenantDeviceType)
 
 - (AVCaptureDeviceType)deviceType
 {
@@ -19,7 +19,7 @@
         return nil;
     if (!deviceType)
         [NSException raise:NSInvalidArgumentException format:@"*** +[%@ %@] The deviceType cannot be nil", NSStringFromClass(self), NSStringFromSelector(_cmd)];
-    return [charon_capture_devices(@[deviceType], mediaType, position) firstObject];
+    return [revenant_capture_devices(@[deviceType], mediaType, position) firstObject];
 }
 
 @end

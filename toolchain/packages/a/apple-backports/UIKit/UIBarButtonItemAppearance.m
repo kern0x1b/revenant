@@ -1,18 +1,18 @@
-#import "CharonBarAppearance.h"
+#import "RevenantBarAppearance.h"
 
-static NSString *const CharonTitle = @"title";
-static NSString *const CharonTitleOffset = @"titleOffset";
-static NSString *const CharonBackground = @"background";
-static NSString *const CharonBackgroundOffset = @"backgroundOffset";
-static NSString *const CharonBackIndicator = @"backIndicator";
-static NSString *const CharonBackMask = @"backMask";
+static NSString *const RevenantTitle = @"title";
+static NSString *const RevenantTitleOffset = @"titleOffset";
+static NSString *const RevenantBackground = @"background";
+static NSString *const RevenantBackgroundOffset = @"backgroundOffset";
+static NSString *const RevenantBackIndicator = @"backIndicator";
+static NSString *const RevenantBackMask = @"backMask";
 
-static NSDictionary *charon_button_classes(void)
+static NSDictionary *revenant_button_classes(void)
 {
-    return @{CharonTitle: [NSDictionary class], CharonTitleOffset: [NSArray class], CharonBackground: [UIImage class], CharonBackgroundOffset: [NSArray class]};
+    return @{RevenantTitle: [NSDictionary class], RevenantTitleOffset: [NSArray class], RevenantBackground: [UIImage class], RevenantBackgroundOffset: [NSArray class]};
 }
 
-static NSArray *charon_button_chain(NSInteger state)
+static NSArray *revenant_button_chain(NSInteger state)
 {
     switch (state) {
     case 1:
@@ -25,25 +25,25 @@ static NSArray *charon_button_chain(NSInteger state)
     return @[@0];
 }
 
-static id charon_button_resolve(NSInteger style, UIBarButtonItemAppearance *basedOn, NSArray *customs, NSInteger state, NSString *key)
+static id revenant_button_resolve(NSInteger style, UIBarButtonItemAppearance *basedOn, NSArray *customs, NSInteger state, NSString *key)
 {
-    NSArray *chain = charon_button_chain(state);
-    if ([key isEqual:CharonTitle]) {
-        NSDictionary *resolved = basedOn ? charon_attributes_carried([basedOn charon_resolveState:state key:key], YES, NO)
-                                         : @{NSFontAttributeName: charon_font(17, style == 2 ? UIFontWeightSemibold : UIFontWeightMedium)};
+    NSArray *chain = revenant_button_chain(state);
+    if ([key isEqual:RevenantTitle]) {
+        NSDictionary *resolved = basedOn ? revenant_attributes_carried([basedOn revenant_resolveState:state key:key], YES, NO)
+                                         : @{NSFontAttributeName: revenant_font(17, style == 2 ? UIFontWeightSemibold : UIFontWeightMedium)};
         for (NSInteger index = (NSInteger)chain.count - 1; index >= 0; index--) {
             NSInteger from = [chain[index] integerValue];
             NSDictionary *own = customs[from][key];
-            resolved = charon_attributes_merge(resolved, from == state ? own : charon_attributes_carried(own, YES, state == 2));
+            resolved = revenant_attributes_merge(resolved, from == state ? own : revenant_attributes_carried(own, YES, state == 2));
         }
         return resolved;
     }
-    if ([key isEqual:CharonBackground])
-        return customs[state][key] ?: [basedOn charon_customOfState:state][key];
+    if ([key isEqual:RevenantBackground])
+        return customs[state][key] ?: [basedOn revenant_customOfState:state][key];
     for (NSNumber *from in chain)
         if (customs[[from integerValue]][key])
             return customs[[from integerValue]][key];
-    return [basedOn charon_customOfState:state][key] ?: charon_offset_pack(UIOffsetZero);
+    return [basedOn revenant_customOfState:state][key] ?: revenant_offset_pack(UIOffsetZero);
 }
 
 @implementation UIBarButtonItemStateAppearance {
@@ -53,7 +53,7 @@ static id charon_button_resolve(NSInteger style, UIBarButtonItemAppearance *base
     NSMutableDictionary *_custom;
 }
 
-- (instancetype)initCharonWithOwner:(UIBarButtonItemAppearance *)owner state:(NSInteger)state
+- (instancetype)initRevenantWithOwner:(UIBarButtonItemAppearance *)owner state:(NSInteger)state
 {
     if ((self = [super init])) {
         _owner = owner;
@@ -63,85 +63,85 @@ static id charon_button_resolve(NSInteger style, UIBarButtonItemAppearance *base
     return self;
 }
 
-- (NSMutableDictionary *)charon_custom
+- (NSMutableDictionary *)revenant_custom
 {
     return _custom;
 }
 
-- (id)charon_resolve:(NSString *)key
+- (id)revenant_resolve:(NSString *)key
 {
     if (_owner)
-        return [_owner charon_resolveState:_state key:key];
+        return [_owner revenant_resolveState:_state key:key];
     NSMutableArray *customs = [NSMutableArray array];
     for (NSInteger state = 0; state < 4; state++)
         [customs addObject:state == _state ? _custom : @{}];
-    return charon_button_resolve(0, nil, customs, _state, key);
+    return revenant_button_resolve(0, nil, customs, _state, key);
 }
 
-- (void)charon_setValue:(id)value key:(NSString *)key
+- (void)revenant_setValue:(id)value key:(NSString *)key
 {
     if (!value)
         [_custom removeObjectForKey:key];
-    else if (!charon_same(value, [self charon_resolve:key]))
+    else if (!revenant_same(value, [self revenant_resolve:key]))
         _custom[key] = value;
 }
 
 - (NSDictionary *)titleTextAttributes
 {
-    return [self charon_resolve:CharonTitle];
+    return [self revenant_resolve:RevenantTitle];
 }
 
 - (void)setTitleTextAttributes:(NSDictionary *)titleTextAttributes
 {
     if (!titleTextAttributes.count)
-        [_custom removeObjectForKey:CharonTitle];
-    else if (![titleTextAttributes isEqual:[self charon_resolve:CharonTitle]])
-        _custom[CharonTitle] = [titleTextAttributes copy];
-    [_owner charon_notify];
+        [_custom removeObjectForKey:RevenantTitle];
+    else if (![titleTextAttributes isEqual:[self revenant_resolve:RevenantTitle]])
+        _custom[RevenantTitle] = [titleTextAttributes copy];
+    [_owner revenant_notify];
 }
 
 - (UIOffset)titlePositionAdjustment
 {
-    return charon_offset_unpack([self charon_resolve:CharonTitleOffset]);
+    return revenant_offset_unpack([self revenant_resolve:RevenantTitleOffset]);
 }
 
 - (void)setTitlePositionAdjustment:(UIOffset)titlePositionAdjustment
 {
-    [self charon_setValue:charon_offset_pack(titlePositionAdjustment) key:CharonTitleOffset];
-    [_owner charon_notify];
+    [self revenant_setValue:revenant_offset_pack(titlePositionAdjustment) key:RevenantTitleOffset];
+    [_owner revenant_notify];
 }
 
 - (UIImage *)backgroundImage
 {
-    return [self charon_resolve:CharonBackground];
+    return [self revenant_resolve:RevenantBackground];
 }
 
 - (void)setBackgroundImage:(UIImage *)backgroundImage
 {
-    [self charon_setValue:backgroundImage key:CharonBackground];
-    [_owner charon_notify];
+    [self revenant_setValue:backgroundImage key:RevenantBackground];
+    [_owner revenant_notify];
 }
 
 - (UIOffset)backgroundImagePositionAdjustment
 {
-    return charon_offset_unpack([self charon_resolve:CharonBackgroundOffset]);
+    return revenant_offset_unpack([self revenant_resolve:RevenantBackgroundOffset]);
 }
 
 - (void)setBackgroundImagePositionAdjustment:(UIOffset)backgroundImagePositionAdjustment
 {
-    [self charon_setValue:charon_offset_pack(backgroundImagePositionAdjustment) key:CharonBackgroundOffset];
-    [_owner charon_notify];
+    [self revenant_setValue:revenant_offset_pack(backgroundImagePositionAdjustment) key:RevenantBackgroundOffset];
+    [_owner revenant_notify];
 }
 
-- (NSString *)charon_text
+- (NSString *)revenant_text
 {
-    NSMutableArray *parts = [NSMutableArray arrayWithObject:[NSString stringWithFormat:@"titleTextAttributes=%@", charon_attributes_text(_custom[CharonTitle])]];
-    if (_custom[CharonTitleOffset])
-        [parts addObject:[NSString stringWithFormat:@"titlePositionAdjustment=%@", charon_offset_text(_custom[CharonTitleOffset])]];
-    if (_custom[CharonBackground])
-        [parts addObject:[NSString stringWithFormat:@"backgroundImage=%@", _custom[CharonBackground]]];
-    if (_custom[CharonBackground] && _custom[CharonBackgroundOffset])
-        [parts addObject:[NSString stringWithFormat:@"backgroundImagePositionAdjustment=%@", charon_offset_text(_custom[CharonBackgroundOffset])]];
+    NSMutableArray *parts = [NSMutableArray arrayWithObject:[NSString stringWithFormat:@"titleTextAttributes=%@", revenant_attributes_text(_custom[RevenantTitle])]];
+    if (_custom[RevenantTitleOffset])
+        [parts addObject:[NSString stringWithFormat:@"titlePositionAdjustment=%@", revenant_offset_text(_custom[RevenantTitleOffset])]];
+    if (_custom[RevenantBackground])
+        [parts addObject:[NSString stringWithFormat:@"backgroundImage=%@", _custom[RevenantBackground]]];
+    if (_custom[RevenantBackground] && _custom[RevenantBackgroundOffset])
+        [parts addObject:[NSString stringWithFormat:@"backgroundImagePositionAdjustment=%@", revenant_offset_text(_custom[RevenantBackgroundOffset])]];
     return [NSString stringWithFormat:@"(%@)", [parts componentsJoinedByString:@", "]];
 }
 
@@ -162,7 +162,7 @@ static id charon_button_resolve(NSInteger style, UIBarButtonItemAppearance *base
     return YES;
 }
 
-static void charon_check_button_style(NSInteger style)
+static void revenant_check_button_style(NSInteger style)
 {
     if (style != 0 && style != 2 && style != 7)
         [NSException raise:NSInternalInconsistencyException format:@"Unsupported style: %ld", (long)style];
@@ -175,25 +175,25 @@ static void charon_check_button_style(NSInteger style)
 
 - (instancetype)initWithStyle:(UIBarButtonItemStyle)style
 {
-    charon_check_button_style(style);
+    revenant_check_button_style(style);
     if ((self = [super init]))
-        [self charon_setUpStyle:style == 7 ? 0 : style];
+        [self revenant_setUpStyle:style == 7 ? 0 : style];
     return self;
 }
 
-- (void)charon_setUpStyle:(NSInteger)style
+- (void)revenant_setUpStyle:(NSInteger)style
 {
     _style = style;
     NSMutableArray *states = [NSMutableArray array];
     for (NSInteger state = 0; state < 4; state++)
-        [states addObject:[[UIBarButtonItemStateAppearance alloc] initCharonWithOwner:self state:state]];
+        [states addObject:[[UIBarButtonItemStateAppearance alloc] initRevenantWithOwner:self state:state]];
     _states = states;
 }
 
-- (instancetype)initCharonWithStyle:(NSInteger)style
+- (instancetype)initRevenantWithStyle:(NSInteger)style
 {
     if ((self = [self initWithStyle:UIBarButtonItemStylePlain]))
-        [self charon_setUpStyle:style];
+        [self revenant_setUpStyle:style];
     return self;
 }
 
@@ -201,16 +201,16 @@ static void charon_check_button_style(NSInteger style)
 {
     NSInteger style = [coder decodeIntegerForKey:@"style"];
     if ((self = [super init])) {
-        [self charon_setUpStyle:(style == 2 || style == 3) ? style : 0];
+        [self revenant_setUpStyle:(style == 2 || style == 3) ? style : 0];
         NSArray *names = @[@"normal", @"highlighted", @"disabled", @"focused"];
         for (NSInteger state = 0; state < 4; state++) {
-            id packed = [coder decodeObjectOfClasses:charon_plist_classes() forKey:names[state]];
-            [[_states[state] charon_custom] setDictionary:charon_sanitised(charon_plist_unpack(packed), charon_button_classes(), nil)];
+            id packed = [coder decodeObjectOfClasses:revenant_plist_classes() forKey:names[state]];
+            [[_states[state] revenant_custom] setDictionary:revenant_sanitised(revenant_plist_unpack(packed), revenant_button_classes(), nil)];
         }
-        NSDictionary *indicator = charon_sanitised(charon_plist_unpack([coder decodeObjectOfClasses:charon_plist_classes() forKey:@"indicator"]),
-                                                   @{CharonBackIndicator: [UIImage class], CharonBackMask: [UIImage class]}, nil);
-        _backIndicator = indicator[CharonBackIndicator];
-        _backMask = indicator[CharonBackMask];
+        NSDictionary *indicator = revenant_sanitised(revenant_plist_unpack([coder decodeObjectOfClasses:revenant_plist_classes() forKey:@"indicator"]),
+                                                   @{RevenantBackIndicator: [UIImage class], RevenantBackMask: [UIImage class]}, nil);
+        _backIndicator = indicator[RevenantBackIndicator];
+        _backMask = indicator[RevenantBackMask];
     }
     return self;
 }
@@ -220,20 +220,20 @@ static void charon_check_button_style(NSInteger style)
     [coder encodeInteger:_style forKey:@"style"];
     NSArray *names = @[@"normal", @"highlighted", @"disabled", @"focused"];
     for (NSInteger state = 0; state < 4; state++)
-        [coder encodeObject:charon_plist_pack([_states[state] charon_custom]) forKey:names[state]];
+        [coder encodeObject:revenant_plist_pack([_states[state] revenant_custom]) forKey:names[state]];
     NSMutableDictionary *indicator = [NSMutableDictionary dictionary];
     if (_backIndicator)
-        indicator[CharonBackIndicator] = _backIndicator;
+        indicator[RevenantBackIndicator] = _backIndicator;
     if (_backMask)
-        indicator[CharonBackMask] = _backMask;
-    [coder encodeObject:charon_plist_pack(indicator) forKey:@"indicator"];
+        indicator[RevenantBackMask] = _backMask;
+    [coder encodeObject:revenant_plist_pack(indicator) forKey:@"indicator"];
 }
 
 - (id)copyWithZone:(NSZone *)zone
 {
-    UIBarButtonItemAppearance *copy = [[[self class] allocWithZone:zone] initCharonWithStyle:_style];
+    UIBarButtonItemAppearance *copy = [[[self class] allocWithZone:zone] initRevenantWithStyle:_style];
     for (NSInteger state = 0; state < 4; state++)
-        [[copy->_states[state] charon_custom] setDictionary:[_states[state] charon_custom]];
+        [[copy->_states[state] revenant_custom] setDictionary:[_states[state] revenant_custom]];
     copy->_basedOn = _basedOn;
     copy->_backIndicator = _backIndicator;
     copy->_backMask = _backMask;
@@ -247,14 +247,14 @@ static void charon_check_button_style(NSInteger style)
 
 - (void)configureWithDefaultForStyle:(UIBarButtonItemStyle)style
 {
-    charon_check_button_style(style);
+    revenant_check_button_style(style);
     _style = style == 7 ? 0 : style;
     _basedOn = nil;
     _backIndicator = nil;
     _backMask = nil;
     for (UIBarButtonItemStateAppearance *state in _states)
-        [[state charon_custom] removeAllObjects];
-    [self charon_notify];
+        [[state revenant_custom] removeAllObjects];
+    [self revenant_notify];
 }
 
 - (UIBarButtonItemStateAppearance *)normal
@@ -277,64 +277,64 @@ static void charon_check_button_style(NSInteger style)
     return _states[3];
 }
 
-- (void)charon_setChangeObserver:(void (^)(void))observer
+- (void)revenant_setChangeObserver:(void (^)(void))observer
 {
     _changeObserver = [observer copy];
 }
 
-- (void)charon_notify
+- (void)revenant_notify
 {
     if (_changeObserver)
         _changeObserver();
 }
 
-- (NSInteger)charon_style
+- (NSInteger)revenant_style
 {
     return _style;
 }
 
-- (UIBarButtonItemAppearance *)charon_basedOn
+- (UIBarButtonItemAppearance *)revenant_basedOn
 {
     return _basedOn;
 }
 
-- (NSDictionary *)charon_customOfState:(NSInteger)state
+- (NSDictionary *)revenant_customOfState:(NSInteger)state
 {
-    return [_states[state] charon_custom];
+    return [_states[state] revenant_custom];
 }
 
-- (id)charon_resolveState:(NSInteger)state key:(NSString *)key
+- (id)revenant_resolveState:(NSInteger)state key:(NSString *)key
 {
     NSMutableArray *customs = [NSMutableArray array];
     for (UIBarButtonItemStateAppearance *one in _states)
-        [customs addObject:[one charon_custom]];
-    return charon_button_resolve(_style, _basedOn, customs, state, key);
+        [customs addObject:[one revenant_custom]];
+    return revenant_button_resolve(_style, _basedOn, customs, state, key);
 }
 
-- (void)charon_becomeBackButtonBasedOn:(UIBarButtonItemAppearance *)button
+- (void)revenant_becomeBackButtonBasedOn:(UIBarButtonItemAppearance *)button
 {
     _style = 3;
     _basedOn = button;
 }
 
-- (void)charon_setBackIndicator:(UIImage *)image mask:(UIImage *)mask
+- (void)revenant_setBackIndicator:(UIImage *)image mask:(UIImage *)mask
 {
     _backIndicator = image;
     _backMask = mask;
-    [self charon_notify];
+    [self revenant_notify];
 }
 
-- (UIImage *)charon_backIndicator
+- (UIImage *)revenant_backIndicator
 {
     return _backIndicator;
 }
 
-- (UIImage *)charon_backMask
+- (UIImage *)revenant_backMask
 {
     return _backMask;
 }
 
-- (NSString *)charon_text
+- (NSString *)revenant_text
 {
     NSString *styles[] = {@"plain", @"plain", @"prominent", @"backButton"};
     NSMutableString *text = [NSMutableString stringWithFormat:@"baseStyle=%@", styles[_style]];
@@ -344,7 +344,7 @@ static void charon_check_button_style(NSInteger style)
     }
     NSArray *names = @[@"normal", @"highlighted", @"disabled", @"focused"];
     for (NSInteger state = 0; state < 4; state++)
-        [text appendFormat:@" %@=%@", names[state], [_states[state] charon_text]];
+        [text appendFormat:@" %@=%@", names[state], [_states[state] revenant_text]];
     if (_style == 3)
         [text appendFormat:@" basedOn=%p", _basedOn];
     return text;
@@ -352,16 +352,16 @@ static void charon_check_button_style(NSInteger style)
 
 - (NSString *)description
 {
-    return [NSString stringWithFormat:@"<%@: %p> %@", [self class], self, [self charon_text]];
+    return [NSString stringWithFormat:@"<%@: %p> %@", [self class], self, [self revenant_text]];
 }
 
-- (NSArray *)charon_signature
+- (NSArray *)revenant_signature
 {
     NSMutableArray *signature = [NSMutableArray arrayWithObject:@(_style)];
     for (UIBarButtonItemStateAppearance *state in _states) {
-        NSMutableDictionary *custom = [NSMutableDictionary dictionaryWithDictionary:[state charon_custom]];
-        if ([custom[CharonTitleOffset] isEqual:charon_offset_pack(UIOffsetZero)])
-            [custom removeObjectForKey:CharonTitleOffset];
+        NSMutableDictionary *custom = [NSMutableDictionary dictionaryWithDictionary:[state revenant_custom]];
+        if ([custom[RevenantTitleOffset] isEqual:revenant_offset_pack(UIOffsetZero)])
+            [custom removeObjectForKey:RevenantTitleOffset];
         [signature addObject:custom];
     }
     [signature addObject:_backIndicator && _backMask ? _backIndicator : [NSNull null]];
@@ -371,12 +371,12 @@ static void charon_check_button_style(NSInteger style)
 
 - (BOOL)isEqual:(id)object
 {
-    return object == self || ([object isKindOfClass:[UIBarButtonItemAppearance class]] && [[self charon_signature] isEqual:[object charon_signature]]);
+    return object == self || ([object isKindOfClass:[UIBarButtonItemAppearance class]] && [[self revenant_signature] isEqual:[object revenant_signature]]);
 }
 
 - (NSUInteger)hash
 {
-    return [[self charon_signature] hash];
+    return [[self revenant_signature] hash];
 }
 
 @end

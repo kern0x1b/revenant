@@ -13,7 +13,7 @@
 #include <array>
 #include <limits>
 
-namespace shade::mach_ipc {
+namespace emulator::mach_ipc {
 namespace {
 
     std::uint32_t read_word(

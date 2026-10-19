@@ -31,7 +31,7 @@ function failures(opts)
         return out
     end
 
-    local scratch = path.join(os.tmpdir(), "charon-cache-sweep-test-" .. os.getpid())
+    local scratch = path.join(os.tmpdir(), "revenant-cache-sweep-test-" .. os.getpid())
     if os.isdir(scratch) then os.tryrm(scratch) end
     local checkout = path.join(scratch, "broken")
     local cache = path.join(scratch, "cache")

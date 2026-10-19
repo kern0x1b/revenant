@@ -1,5 +1,5 @@
-Package: space.kern0x1b.styx.tests
-Name: Styx tests
+Package: space.kern0x1b.combine.tests
+Name: Combine tests
 Architecture: iphoneos-arm
 Description: OpenCombine's own tests against the patched Combine as one binary, which xmake emulate run starts in the
  guest and whose exit status is the verdict.

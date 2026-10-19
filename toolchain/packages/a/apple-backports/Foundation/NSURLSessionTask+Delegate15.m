@@ -1,15 +1,15 @@
 #import <Foundation/Foundation.h>
 #import <objc/runtime.h>
 
-#import "CharonTaskDelegate15.h"
+#import "RevenantTaskDelegate15.h"
 
-static char CharonTaskDelegateKey;
+static char RevenantTaskDelegateKey;
 
-@implementation NSURLSessionTask (CharonTaskDelegate15)
+@implementation NSURLSessionTask (RevenantTaskDelegate15)
 
 - (id<NSURLSessionTaskDelegate>)delegate
 {
-    return objc_getAssociatedObject(self, &CharonTaskDelegateKey);
+    return objc_getAssociatedObject(self, &RevenantTaskDelegateKey);
 }
 
 - (void)setDelegate:(id<NSURLSessionTaskDelegate>)delegate
@@ -18,12 +18,12 @@ static char CharonTaskDelegateKey;
         [NSException raise:NSGenericException
                     format:@"Cannot set task delegate after resumption"];
     }
-    objc_setAssociatedObject(self, &CharonTaskDelegateKey, delegate, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, &RevenantTaskDelegateKey, delegate, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
-- (void)charon_resetTaskDelegate
+- (void)revenant_resetTaskDelegate
 {
-    objc_setAssociatedObject(self, &CharonTaskDelegateKey, nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, &RevenantTaskDelegateKey, nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
 @end

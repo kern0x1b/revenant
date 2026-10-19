@@ -3,7 +3,7 @@
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 #pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
 
-@implementation CLLocationManager (CharonRanging)
+@implementation CLLocationManager (RevenantRanging)
 
 - (void)startRangingBeaconsInRegion:(CLBeaconRegion *)region
 {

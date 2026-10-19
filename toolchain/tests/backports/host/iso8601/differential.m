@@ -5,7 +5,7 @@
 
 CF_EXPORT CFDateFormatterRef CFDateFormatterCreateISO8601Formatter(CFAllocatorRef allocator,
                                                                    CFISO8601DateFormatOptions options);
-extern NSString *charon_iso8601_pattern(NSISO8601DateFormatOptions options);
+extern NSString *revenant_iso8601_pattern(NSISO8601DateFormatOptions options);
 
 static int checks;
 static int failures;
@@ -31,7 +31,7 @@ static void same_object(id ours, id theirs, NSString *what)
 int main(void)
 {
     @autoreleasepool {
-        Class mine = NSClassFromString(@"CharonHostNSISO8601DateFormatter");
+        Class mine = NSClassFromString(@"RevenantHostNSISO8601DateFormatter");
         if (!mine) {
             printf("FAIL the backport defines no NSISO8601DateFormatter\n");
             return 1;
@@ -50,7 +50,7 @@ int main(void)
                     options |= flags[bit];
             CFDateFormatterRef theirs = CFDateFormatterCreateISO8601Formatter(NULL, (CFISO8601DateFormatOptions)options);
             NSString *theirPattern = theirs ? (__bridge NSString *)CFDateFormatterGetFormat(theirs) : @"";
-            NSString *ourPattern = charon_iso8601_pattern(options);
+            NSString *ourPattern = revenant_iso8601_pattern(options);
             same_object(ourPattern ? ourPattern : @"", theirPattern ? theirPattern : @"",
                         [NSString stringWithFormat:@"the pattern for options %#lx", (unsigned long)options]);
             if (theirs)

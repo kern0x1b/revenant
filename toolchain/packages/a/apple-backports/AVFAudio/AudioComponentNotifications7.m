@@ -1,4 +1,4 @@
 #import <AudioToolbox/AudioComponent.h>
-#import "CharonAudioToolboxNames.h"
+#import "RevenantAudioToolboxNames.h"
 
-const CFStringRef kAudioComponentRegistrationsChangedNotification = (__bridge CFStringRef)CharonAudioComponentRegistrationsChangedName;
+const CFStringRef kAudioComponentRegistrationsChangedNotification = (__bridge CFStringRef)RevenantAudioComponentRegistrationsChangedName;

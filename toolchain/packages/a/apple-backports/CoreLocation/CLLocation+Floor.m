@@ -1,6 +1,6 @@
 #import <CoreLocation/CoreLocation.h>
 
-@implementation CLLocation (CharonFloor)
+@implementation CLLocation (RevenantFloor)
 
 - (CLFloor *)floor
 {

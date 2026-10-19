@@ -3,7 +3,7 @@
 #include <dlfcn.h>
 #include <string.h>
 
-static void charon_es3_error(void)
+static void revenant_es3_error(void)
 {
     void (*bind)(GLenum, GLuint) = (void (*)(GLenum, GLuint))dlsym(RTLD_DEFAULT, "glBindTexture");
     if (bind)
@@ -25,7 +25,7 @@ void glGenQueries(GLsizei n, GLuint* ids)
         fn = (void (*)(GLsizei n, GLuint* ids))dlsym(RTLD_DEFAULT, "glGenQueriesEXT");
     if (fn)
         { fn(n, ids); return; }
-    charon_es3_error();
+    revenant_es3_error();
 }
 
 void glDeleteQueries(GLsizei n, const GLuint* ids)
@@ -35,7 +35,7 @@ void glDeleteQueries(GLsizei n, const GLuint* ids)
         fn = (void (*)(GLsizei n, const GLuint* ids))dlsym(RTLD_DEFAULT, "glDeleteQueriesEXT");
     if (fn)
         { fn(n, ids); return; }
-    charon_es3_error();
+    revenant_es3_error();
 }
 
 GLboolean glIsQuery(GLuint id)
@@ -45,7 +45,7 @@ GLboolean glIsQuery(GLuint id)
         fn = (GLboolean (*)(GLuint id))dlsym(RTLD_DEFAULT, "glIsQueryEXT");
     if (fn)
         return fn(id);
-    charon_es3_error();
+    revenant_es3_error();
     return (GLboolean)0;
 }
 
@@ -56,7 +56,7 @@ void glBeginQuery(GLenum target, GLuint id)
         fn = (void (*)(GLenum target, GLuint id))dlsym(RTLD_DEFAULT, "glBeginQueryEXT");
     if (fn)
         { fn(target, id); return; }
-    charon_es3_error();
+    revenant_es3_error();
 }
 
 void glEndQuery(GLenum target)
@@ -66,7 +66,7 @@ void glEndQuery(GLenum target)
         fn = (void (*)(GLenum target))dlsym(RTLD_DEFAULT, "glEndQueryEXT");
     if (fn)
         { fn(target); return; }
-    charon_es3_error();
+    revenant_es3_error();
 }
 
 void glGetQueryiv(GLenum target, GLenum pname, GLint* params)
@@ -76,7 +76,7 @@ void glGetQueryiv(GLenum target, GLenum pname, GLint* params)
         fn = (void (*)(GLenum target, GLenum pname, GLint* params))dlsym(RTLD_DEFAULT, "glGetQueryivEXT");
     if (fn)
         { fn(target, pname, params); return; }
-    charon_es3_error();
+    revenant_es3_error();
 }
 
 void glGetQueryObjectuiv(GLuint id, GLenum pname, GLuint* params)
@@ -86,5 +86,5 @@ void glGetQueryObjectuiv(GLuint id, GLenum pname, GLuint* params)
         fn = (void (*)(GLuint id, GLenum pname, GLuint* params))dlsym(RTLD_DEFAULT, "glGetQueryObjectuivEXT");
     if (fn)
         { fn(id, pname, params); return; }
-    charon_es3_error();
+    revenant_es3_error();
 }

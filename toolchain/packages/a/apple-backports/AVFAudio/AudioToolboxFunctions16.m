@@ -2,7 +2,7 @@
 #import <Foundation/Foundation.h>
 #import <dispatch/dispatch.h>
 
-static AudioComponentValidationResult CharonValidateComponent(AudioComponent component)
+static AudioComponentValidationResult RevenantValidateComponent(AudioComponent component)
 {
     AudioComponentInstance instance = NULL;
     if (AudioComponentInstanceNew(component, &instance) != noErr) {
@@ -18,7 +18,7 @@ OSStatus AudioComponentValidate(AudioComponent inComponent, CFDictionaryRef inVa
     if (inComponent == NULL || outValidationResult == NULL) {
         return kAudio_ParamError;
     }
-    *outValidationResult = CharonValidateComponent(inComponent);
+    *outValidationResult = RevenantValidateComponent(inComponent);
     return noErr;
 }
 
@@ -28,7 +28,7 @@ OSStatus AudioComponentValidateWithResults(AudioComponent inComponent, CFDiction
     if (inComponent == NULL || inCompletionBlock == nil) {
         return kAudio_ParamError;
     }
-    AudioComponentValidationResult result = CharonValidateComponent(inComponent);
+    AudioComponentValidationResult result = RevenantValidateComponent(inComponent);
     NSDictionary *details = @{ @"Result": @(result), @"WasCached": @NO, @"Output": @[], @"Tests": @[] };
     dispatch_async(dispatch_get_global_queue(QOS_CLASS_DEFAULT, 0), ^{
         inCompletionBlock(result, (__bridge CFDictionaryRef)details);

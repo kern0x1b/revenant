@@ -3,19 +3,19 @@
 
 #pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
 
-static const char charon_preferred_style_key = 0;
+static const char revenant_preferred_style_key = 0;
 
-static UIBehavioralStyle charon_preferred_style(id view)
+static UIBehavioralStyle revenant_preferred_style(id view)
 {
-    return [objc_getAssociatedObject(view, &charon_preferred_style_key) unsignedIntegerValue];
+    return [objc_getAssociatedObject(view, &revenant_preferred_style_key) unsignedIntegerValue];
 }
 
-static void charon_set_preferred_style(id view, UIBehavioralStyle style)
+static void revenant_set_preferred_style(id view, UIBehavioralStyle style)
 {
-    objc_setAssociatedObject(view, &charon_preferred_style_key, @(style), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(view, &revenant_preferred_style_key, @(style), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
-@implementation UIButton (CharonBehavioralStyle15)
+@implementation UIButton (RevenantBehavioralStyle15)
 
 - (UIBehavioralStyle)behavioralStyle
 {
@@ -24,17 +24,17 @@ static void charon_set_preferred_style(id view, UIBehavioralStyle style)
 
 - (UIBehavioralStyle)preferredBehavioralStyle
 {
-    return charon_preferred_style(self);
+    return revenant_preferred_style(self);
 }
 
 - (void)setPreferredBehavioralStyle:(UIBehavioralStyle)preferredBehavioralStyle
 {
-    charon_set_preferred_style(self, preferredBehavioralStyle);
+    revenant_set_preferred_style(self, preferredBehavioralStyle);
 }
 
 @end
 
-@implementation UISlider (CharonBehavioralStyle15)
+@implementation UISlider (RevenantBehavioralStyle15)
 
 - (UIBehavioralStyle)behavioralStyle
 {
@@ -43,17 +43,17 @@ static void charon_set_preferred_style(id view, UIBehavioralStyle style)
 
 - (UIBehavioralStyle)preferredBehavioralStyle
 {
-    return charon_preferred_style(self);
+    return revenant_preferred_style(self);
 }
 
 - (void)setPreferredBehavioralStyle:(UIBehavioralStyle)preferredBehavioralStyle
 {
-    charon_set_preferred_style(self, preferredBehavioralStyle);
+    revenant_set_preferred_style(self, preferredBehavioralStyle);
 }
 
 @end
 
-@implementation UINavigationBar (CharonBehavioralStyle16)
+@implementation UINavigationBar (RevenantBehavioralStyle16)
 
 - (UIBehavioralStyle)behavioralStyle
 {
@@ -62,12 +62,12 @@ static void charon_set_preferred_style(id view, UIBehavioralStyle style)
 
 - (UIBehavioralStyle)preferredBehavioralStyle
 {
-    return charon_preferred_style(self);
+    return revenant_preferred_style(self);
 }
 
 - (void)setPreferredBehavioralStyle:(UIBehavioralStyle)preferredBehavioralStyle
 {
-    charon_set_preferred_style(self, preferredBehavioralStyle);
+    revenant_set_preferred_style(self, preferredBehavioralStyle);
 }
 
 - (UINavigationBarNSToolbarSection)currentNSToolbarSection

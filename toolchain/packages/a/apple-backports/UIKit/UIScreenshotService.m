@@ -1,7 +1,7 @@
-#import "CharonMenus.h"
+#import "RevenantMenus.h"
 #import <objc/runtime.h>
 
-static const char charon_service_key;
+static const char revenant_service_key;
 
 @implementation UIScreenshotService {
 @private
@@ -9,7 +9,7 @@ static const char charon_service_key;
     __weak UIWindowScene *_windowScene;
 }
 
-- (instancetype)initCharonWithWindowScene:(UIWindowScene *)windowScene
+- (instancetype)initRevenantWithWindowScene:(UIWindowScene *)windowScene
 {
     if ((self = [super init]))
         _windowScene = windowScene;
@@ -25,7 +25,7 @@ static const char charon_service_key;
 {
     _delegate = delegate;
     if (delegate)
-        charon_menus_say_once(@"screenshot-service", @"UIScreenshotService: iOS 6 takes screenshots itself and asks an application for no PDF, so the delegate is never called");
+        revenant_menus_say_once(@"screenshot-service", @"UIScreenshotService: iOS 6 takes screenshots itself and asks an application for no PDF, so the delegate is never called");
 }
 
 - (UIWindowScene *)windowScene
@@ -35,14 +35,14 @@ static const char charon_service_key;
 
 @end
 
-@implementation UIWindowScene (CharonScreenshotService)
+@implementation UIWindowScene (RevenantScreenshotService)
 
 - (UIScreenshotService *)screenshotService
 {
-    UIScreenshotService *service = objc_getAssociatedObject(self, &charon_service_key);
+    UIScreenshotService *service = objc_getAssociatedObject(self, &revenant_service_key);
     if (!service) {
-        service = [[UIScreenshotService alloc] initCharonWithWindowScene:self];
-        objc_setAssociatedObject(self, &charon_service_key, service, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+        service = [[UIScreenshotService alloc] initRevenantWithWindowScene:self];
+        objc_setAssociatedObject(self, &revenant_service_key, service, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     }
     return service;
 }

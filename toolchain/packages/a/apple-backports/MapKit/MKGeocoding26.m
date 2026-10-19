@@ -2,7 +2,7 @@
 #import <CoreLocation/CoreLocation.h>
 #import <UIKit/UIKit.h>
 #import <objc/message.h>
-#import "CharonMapKit.h"
+#import "RevenantMapKit.h"
 
 typedef NS_ENUM(NSInteger, MKAddressRepresentationsContextStyle) {
     MKAddressRepresentationsContextStyleAutomatic = 0,
@@ -234,7 +234,7 @@ typedef NS_ENUM(NSInteger, MKAddressRepresentationsContextStyle) {
 @property (nonatomic, readonly, getter=isCancelled) BOOL cancelled;
 @end
 
-@interface CLGeocoder (CharonGeocoding)
+@interface CLGeocoder (RevenantGeocoding)
 - (void)geocodeAddressString:(NSString *)addressString
            completionHandler:(void (^)(NSArray<CLPlacemark *> *, NSError *))completionHandler;
 - (void)reverseGeocodeLocation:(CLLocation *)location
@@ -242,13 +242,13 @@ typedef NS_ENUM(NSInteger, MKAddressRepresentationsContextStyle) {
 - (void)cancelGeocode;
 @end
 
-@interface MKMapItem (CharonGeocoding)
+@interface MKMapItem (RevenantGeocoding)
 - (instancetype)initWithPlacemark:(MKPlacemark *)placemark;
 - (void)setPlacemark:(MKPlacemark *)placemark;
 - (void)setName:(NSString *)name;
 @end
 
-@interface MKPlacemark (CharonGeocoding)
+@interface MKPlacemark (RevenantGeocoding)
 - (instancetype)initWithCoordinate:(CLLocationCoordinate2D)coordinate addressDictionary:(NSDictionary *)address;
 @property (nonatomic, readonly) CLLocationCoordinate2D coordinate;
 @end
@@ -313,7 +313,7 @@ typedef NS_ENUM(NSInteger, MKAddressRepresentationsContextStyle) {
     CLGeocoder *geocoder = _geocoder;
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         [geocoder geocodeAddressString:address completionHandler:^(NSArray<CLPlacemark *> *placemarks, NSError *error) {
-            NSArray<MKMapItem *> *items = [MKGeocodingRequest charon_mapItemsOf:placemarks];
+            NSArray<MKMapItem *> *items = [MKGeocodingRequest revenant_mapItemsOf:placemarks];
             dispatch_async(dispatch_get_main_queue(), ^{
                 MKGeocodingRequest *strong = weak;
                 if (!strong) {
@@ -334,7 +334,7 @@ typedef NS_ENUM(NSInteger, MKAddressRepresentationsContextStyle) {
     });
 }
 
-+ (NSArray<MKMapItem *> *)charon_mapItemsOf:(NSArray<CLPlacemark *> *)placemarks
++ (NSArray<MKMapItem *> *)revenant_mapItemsOf:(NSArray<CLPlacemark *> *)placemarks
 {
     NSMutableArray *items = [NSMutableArray array];
     for (CLPlacemark *placemark in placemarks) {
@@ -414,7 +414,7 @@ typedef NS_ENUM(NSInteger, MKAddressRepresentationsContextStyle) {
     CLGeocoder *geocoder = _geocoder;
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         [geocoder reverseGeocodeLocation:location completionHandler:^(NSArray<CLPlacemark *> *placemarks, NSError *error) {
-            NSArray<MKMapItem *> *items = [MKGeocodingRequest charon_mapItemsOf:placemarks];
+            NSArray<MKMapItem *> *items = [MKGeocodingRequest revenant_mapItemsOf:placemarks];
             dispatch_async(dispatch_get_main_queue(), ^{
                 MKReverseGeocodingRequest *strong = weak;
                 if (!strong) {

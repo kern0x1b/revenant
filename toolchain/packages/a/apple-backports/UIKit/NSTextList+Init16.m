@@ -3,7 +3,7 @@
 #pragma clang diagnostic ignored "-Wobjc-designated-initializers"
 #pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
 
-@implementation NSTextList (CharonInit16)
+@implementation NSTextList (RevenantInit16)
 
 - (instancetype)initWithMarkerFormat:(NSTextListMarkerFormat)markerFormat options:(NSTextListOptions)options startingItemNumber:(NSInteger)startingItemNumber
 {

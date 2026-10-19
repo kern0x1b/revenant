@@ -20,7 +20,7 @@ function main(...)
         bad[#bad + 1] = line
     end
     if tsv.first_field(rows, "port-class") ~= "found" then
-        bad[#bad + 1] = "port-class: the port's CharonSecProtocolFlags was not found"
+        bad[#bad + 1] = "port-class: the port's RevenantSecProtocolFlags was not found"
     end
     if #wrong == 0 and row_count < #NAMES + #CLEARED then
         bad[#bad + 1] = "the case printed only " .. row_count .. " rows, so the alone-pass did not run"

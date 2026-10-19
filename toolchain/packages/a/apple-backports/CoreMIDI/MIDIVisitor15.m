@@ -1,21 +1,21 @@
 #import <CoreMIDI/CoreMIDI.h>
 
-#import "CharonCoreMIDI.h"
+#import "RevenantCoreMIDI.h"
 
 #include <stdio.h>
 #include <string.h>
 
-static const UInt32 charon_unknown_type = 0xFF;
+static const UInt32 revenant_unknown_type = 0xFF;
 
-static void charon_fill_unknown(MIDIUniversalMessage *message, UInt32 group, const UInt32 *words, int count)
+static void revenant_fill_unknown(MIDIUniversalMessage *message, UInt32 group, const UInt32 *words, int count)
 {
-    message->type = (MIDIMessageType)charon_unknown_type;
+    message->type = (MIDIMessageType)revenant_unknown_type;
     message->group = (UInt8)group;
     for (int i = 0; i < 4; i++)
         message->unknown.words[i] = i < count ? words[i] : 0;
 }
 
-static void charon_parse(const UInt32 *words, int size, MIDIUniversalMessage *message)
+static void revenant_parse(const UInt32 *words, int size, MIDIUniversalMessage *message)
 {
     memset(message, 0, sizeof(*message));
     UInt32 first = words[0];
@@ -25,7 +25,7 @@ static void charon_parse(const UInt32 *words, int size, MIDIUniversalMessage *me
     case 0x0: {
         UInt32 status = (first >> 20) & 0x0F;
         if (status == 0 || status > 2) {
-            charon_fill_unknown(message, 0xFF, words, size);
+            revenant_fill_unknown(message, 0xFF, words, size);
             return;
         }
         message->type = (MIDIMessageType)kMIDIMessageTypeUtility;
@@ -38,7 +38,7 @@ static void charon_parse(const UInt32 *words, int size, MIDIUniversalMessage *me
         UInt32 status = (first >> 16) & 0xFF;
         UInt32 d1 = (first >> 8) & 0xFF, d2 = first & 0xFF;
         if (status >= 0xF8) {
-            charon_fill_unknown(message, group, words, size);
+            revenant_fill_unknown(message, group, words, size);
             return;
         }
         message->type = (MIDIMessageType)kMIDIMessageTypeSystem;
@@ -145,7 +145,7 @@ static void charon_parse(const UInt32 *words, int size, MIDIUniversalMessage *me
         return;
     }
     default:
-        charon_fill_unknown(message, 0xFF, words, size);
+        revenant_fill_unknown(message, 0xFF, words, size);
         return;
     }
 }
@@ -156,11 +156,11 @@ void MIDIEventListForEachEvent(const MIDIEventList *evtlist, MIDIEventVisitor vi
     for (UInt32 i = 0; i < evtlist->numPackets; i++) {
         UInt32 index = 0;
         while (index < packet->wordCount) {
-            int size = CharonMIDIUMPWordCount(packet->words[index]);
+            int size = RevenantMIDIUMPWordCount(packet->words[index]);
             if (size == 0 || index + (UInt32)size > packet->wordCount)
                 break;
             MIDIUniversalMessage message;
-            charon_parse(&packet->words[index], size, &message);
+            revenant_parse(&packet->words[index], size, &message);
             visitor(visitorContext, packet->timeStamp, message);
             index += (UInt32)size;
         }

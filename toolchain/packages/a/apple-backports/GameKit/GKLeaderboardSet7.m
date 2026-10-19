@@ -43,7 +43,7 @@
     return self;
 }
 
-+ (NSError *)charonNoSetsError
++ (NSError *)revenantNoSetsError
 {
     return [NSError errorWithDomain:@"GKErrorDomain" code:3
                            userInfo:@{NSLocalizedDescriptionKey: @"The leaderboard sets could not be loaded."}];
@@ -54,22 +54,22 @@
     if (!completionHandler) {
         return;
     }
-#ifdef CHARON_MUTATE_SETLOAD
-    completionHandler(@[[[self alloc] initWithIdentifier:@"charon.mutation" title:@"charon mutation" groupIdentifier:nil]], nil);
+#ifdef REVENANT_MUTATE_SETLOAD
+    completionHandler(@[[[self alloc] initWithIdentifier:@"revenant.mutation" title:@"revenant mutation" groupIdentifier:nil]], nil);
 #else
-    completionHandler(@[], [self charonNoSetsError]);
+    completionHandler(@[], [self revenantNoSetsError]);
 #endif
 }
 
 - (void)loadImageWithCompletionHandler:(void (^)(UIImage *image, NSError *error))completionHandler
 {
     if (completionHandler) {
-        completionHandler(nil, [GKLeaderboardSet charonNoSetsError]);
+        completionHandler(nil, [GKLeaderboardSet revenantNoSetsError]);
     }
 }
 
-#ifdef CHARON_MUTATE_SETIMAGE
-- (void)charonMutatedImageWithCompletionHandler:(void (^)(id image, NSError *error))completionHandler
+#ifdef REVENANT_MUTATE_SETIMAGE
+- (void)revenantMutatedImageWithCompletionHandler:(void (^)(id image, NSError *error))completionHandler
 {
     if (completionHandler) {
         completionHandler((id)[NSNull null], nil);
@@ -80,7 +80,7 @@
 - (void)loadLeaderboardsWithCompletionHandler:(void (^)(NSArray<GKLeaderboard *> *leaderboards, NSError *error))completionHandler
 {
     if (completionHandler) {
-        completionHandler(@[], [GKLeaderboardSet charonNoSetsError]);
+        completionHandler(@[], [GKLeaderboardSet revenantNoSetsError]);
     }
 }
 

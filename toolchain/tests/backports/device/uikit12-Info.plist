@@ -9,7 +9,7 @@
 	<key>CFBundleExecutable</key>
 	<string>uikit12</string>
 	<key>CFBundleIdentifier</key>
-	<string>local.charon.backports.uikit12</string>
+	<string>local.revenant.backports.uikit12</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>

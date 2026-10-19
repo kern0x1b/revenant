@@ -1,6 +1,6 @@
 #import <Foundation/Foundation.h>
-#if defined(CHARON_PASSKIT_STANDIN)
-#import "CharonPassKitStandin.h"
+#if defined(REVENANT_PASSKIT_STANDIN)
+#import "RevenantPassKitStandin.h"
 #else
 #import <PassKit/PassKit.h>
 #endif

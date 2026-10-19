@@ -60,7 +60,7 @@ static void suite_run(NSUserDefaults *(^make)(void), SuiteRecorder record)
     record(@"data", suite_describe([d dataForKey:@"data"]));
     record(@"data as string", suite_describe([d stringForKey:@"data"]));
 
-    [d setURL:[NSURL fileURLWithPath:@"/tmp/charon-suite"] forKey:@"fileurl"];
+    [d setURL:[NSURL fileURLWithPath:@"/tmp/revenant-suite"] forKey:@"fileurl"];
     record(@"file url object", suite_describe([d objectForKey:@"fileurl"]));
     record(@"file url", suite_describe([[d URLForKey:@"fileurl"] path]));
     [d setURL:[NSURL URLWithString:@"https://example.invalid/a?b=c"] forKey:@"weburl"];

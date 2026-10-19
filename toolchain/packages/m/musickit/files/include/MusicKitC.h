@@ -7,7 +7,7 @@
 extern "C" {
 #endif
 
-int CharonMusicKitSignES256(const unsigned char *keyDer,
+int RevenantMusicKitSignES256(const unsigned char *keyDer,
                             size_t keyDerLength,
                             const unsigned char *message,
                             size_t messageLength,

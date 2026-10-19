@@ -1,15 +1,15 @@
 #import <Intents/Intents.h>
 
-typedef NS_ENUM(NSInteger, CharonIntentsResolutionStatus) {
-    CharonIntentsResolutionNeedsValue = 0,
-    CharonIntentsResolutionNotRequired,
-    CharonIntentsResolutionUnsupported,
-    CharonIntentsResolutionSuccess,
-    CharonIntentsResolutionDisambiguation,
-    CharonIntentsResolutionConfirmationRequired,
+typedef NS_ENUM(NSInteger, RevenantIntentsResolutionStatus) {
+    RevenantIntentsResolutionNeedsValue = 0,
+    RevenantIntentsResolutionNotRequired,
+    RevenantIntentsResolutionUnsupported,
+    RevenantIntentsResolutionSuccess,
+    RevenantIntentsResolutionDisambiguation,
+    RevenantIntentsResolutionConfirmationRequired,
 };
 
-@interface INIntentResolutionResult (CharonIntentsResolution)
+@interface INIntentResolutionResult (RevenantIntentsResolution)
 
 - (id)resolvedValue;
 
@@ -17,20 +17,20 @@ typedef NS_ENUM(NSInteger, CharonIntentsResolutionStatus) {
 
 - (id)valueToConfirm;
 
-- (CharonIntentsResolutionStatus)resolutionStatus;
+- (RevenantIntentsResolutionStatus)resolutionStatus;
 
-- (NSInteger)charon_unsupportedReason;
+- (NSInteger)revenant_unsupportedReason;
 
 @end
 
-@interface INIntentResolutionResult (CharonIntentsBuilding)
+@interface INIntentResolutionResult (RevenantIntentsBuilding)
 
-+ (instancetype)charon_resolutionWithStatus:(CharonIntentsResolutionStatus)status
++ (instancetype)revenant_resolutionWithStatus:(RevenantIntentsResolutionStatus)status
                             resolvedValue:(id)resolvedValue
                       valuesToDisambiguate:(NSArray *)valuesToDisambiguate
                              valueToConfirm:(id)valueToConfirm;
 
-+ (instancetype)charon_resolutionWithStatus:(CharonIntentsResolutionStatus)status
++ (instancetype)revenant_resolutionWithStatus:(RevenantIntentsResolutionStatus)status
                             resolvedValue:(id)resolvedValue
                       valuesToDisambiguate:(NSArray *)valuesToDisambiguate
                              valueToConfirm:(id)valueToConfirm
@@ -38,6 +38,6 @@ typedef NS_ENUM(NSInteger, CharonIntentsResolutionStatus) {
 
 + (instancetype)confirmationRequiredWithItemToConfirm:(id)itemToConfirm forReason:(NSInteger)reason;
 
-- (void)charon_adoptResolutionOf:(id)inner;
+- (void)revenant_adoptResolutionOf:(id)inner;
 
 @end

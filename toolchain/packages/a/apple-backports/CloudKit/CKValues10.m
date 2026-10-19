@@ -1,8 +1,8 @@
 #import <Foundation/Foundation.h>
 #import <CloudKit/CloudKit.h>
 
-#import "CharonCKSubscription.h"
-#import "CharonCKValue.h"
+#import "RevenantCKSubscription.h"
+#import "RevenantCKValue.h"
 
 #pragma mark - CKQuerySubscription
 
@@ -14,7 +14,7 @@
 {
     return [self initWithRecordType:recordType
                           predicate:predicate
-                     subscriptionID:CharonCKNewSubscriptionID()
+                     subscriptionID:RevenantCKNewSubscriptionID()
                            options:options];
 }
 
@@ -103,7 +103,7 @@
 
 - (instancetype)initWithZoneID:(CKRecordZoneID *)zoneID
 {
-    return [self initWithZoneID:zoneID subscriptionID:CharonCKNewSubscriptionID()];
+    return [self initWithZoneID:zoneID subscriptionID:RevenantCKNewSubscriptionID()];
 }
 
 - (instancetype)initWithZoneID:(CKRecordZoneID *)zoneID subscriptionID:(CKSubscriptionID)subscriptionID
@@ -178,7 +178,7 @@
 
 - (instancetype)initWithSubscriptionID:(CKSubscriptionID)subscriptionID
 {
-    return [super initWithSubscriptionID:subscriptionID ?: CharonCKNewSubscriptionID()];
+    return [super initWithSubscriptionID:subscriptionID ?: RevenantCKNewSubscriptionID()];
 }
 
 - (instancetype)initWithCoder:(NSCoder *)coder

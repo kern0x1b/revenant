@@ -1,21 +1,21 @@
-#import "CharonCloudKit.h"
-#import "CharonCKConstants.h"
+#import "RevenantCloudKit.h"
+#import "RevenantCKConstants.h"
 
-extern int CharonCKSignES256(const unsigned char *privateKey, const unsigned char *message,
+extern int RevenantCKSignES256(const unsigned char *privateKey, const unsigned char *message,
                            size_t messageLength, unsigned char *der, size_t derLength);
 
 #import <CommonCrypto/CommonDigest.h>
 #import <CoreFoundation/CoreFoundation.h>
 
-NSString *const CharonCKHost = @"https://api.apple-cloudkit.com";
-NSString *const CharonCKDevelopmentEnvironment = @"development";
-NSString *const CharonCKProductionEnvironment = @"production";
+NSString *const RevenantCKHost = @"https://api.apple-cloudkit.com";
+NSString *const RevenantCKDevelopmentEnvironment = @"development";
+NSString *const RevenantCKProductionEnvironment = @"production";
 
-static NSString *const CharonCKTokenKey = @"CharonCKToken";
-static NSString *const CharonCKTokenExpiryKey = @"CharonCKTokenExpiry";
-static NSString *const CharonCKUserRecordIDKey = @"CharonCKUserRecordID";
+static NSString *const RevenantCKTokenKey = @"RevenantCKToken";
+static NSString *const RevenantCKTokenExpiryKey = @"RevenantCKTokenExpiry";
+static NSString *const RevenantCKUserRecordIDKey = @"RevenantCKUserRecordID";
 
-static CKErrorCode CharonCKCodeForServerError(NSString *server)
+static CKErrorCode RevenantCKCodeForServerError(NSString *server)
 {
     static NSDictionary *codes;
     if (!codes) {
@@ -35,7 +35,7 @@ static CKErrorCode CharonCKCodeForServerError(NSString *server)
     return found ? (CKErrorCode)found.integerValue : CKErrorInternalError;
 }
 
-NSError *CharonCKError(CKErrorCode code, NSString *message, NSDictionary *extra)
+NSError *RevenantCKError(CKErrorCode code, NSString *message, NSDictionary *extra)
 {
     NSMutableDictionary *info = [NSMutableDictionary dictionary];
     if (message.length) {
@@ -47,17 +47,17 @@ NSError *CharonCKError(CKErrorCode code, NSString *message, NSDictionary *extra)
     return [NSError errorWithDomain:CKErrorDomain code:code userInfo:info];
 }
 
-NSError *CharonCKErrorFromPayload(NSDictionary *payload, NSDictionary *extra)
+NSError *RevenantCKErrorFromPayload(NSDictionary *payload, NSDictionary *extra)
 {
     if (![payload isKindOfClass:[NSDictionary class]]) {
-        return CharonCKError(CKErrorInternalError, nil, extra);
+        return RevenantCKError(CKErrorInternalError, nil, extra);
     }
     NSString *server = payload[@"serverErrorCode"];
     NSString *message = [payload[@"reason"] isKindOfClass:[NSString class]] ? payload[@"reason"] : nil;
     if (!message && [payload[@"errorMessage"] isKindOfClass:[NSString class]]) {
         message = payload[@"errorMessage"];
     }
-    CKErrorCode code = [server isKindOfClass:[NSString class]] ? CharonCKCodeForServerError(server)
+    CKErrorCode code = [server isKindOfClass:[NSString class]] ? RevenantCKCodeForServerError(server)
                                                              : CKErrorInternalError;
     NSNumber *numeric = payload[@"code"];
     if ([numeric isKindOfClass:[NSNumber class]] && numeric.integerValue > 0 &&
@@ -84,29 +84,29 @@ NSError *CharonCKErrorFromPayload(NSDictionary *payload, NSDictionary *extra)
             NSString *outgoing = [key isEqualToString:@"serverRecord"] ? CKRecordChangedErrorServerRecordKey
                              : [key isEqualToString:@"clientRecord"] ? CKRecordChangedErrorClientRecordKey
                              : CKRecordChangedErrorAncestorRecordKey;
-            merged[outgoing] = CharonCKRecordFromResult(record, nil);
+            merged[outgoing] = RevenantCKRecordFromResult(record, nil);
         }
     }
     NSString *reset = payload[@"userDidResetEncryptedData"];
     if ([reset isKindOfClass:[NSString class]]) {
         merged[CKErrorUserDidResetEncryptedDataKey] = @([(NSString *)reset boolValue]);
     }
-    return CharonCKError(code, message, merged);
+    return RevenantCKError(code, message, merged);
 }
 
-NSError *CharonCKNotAuthenticated(void)
+NSError *RevenantCKNotAuthenticated(void)
 {
-    return CharonCKError(CKErrorNotAuthenticated, @"Not authenticated", nil);
+    return RevenantCKError(CKErrorNotAuthenticated, @"Not authenticated", nil);
 }
 
-NSError *CharonCKBadContainer(NSString *containerIdentifier)
+NSError *RevenantCKBadContainer(NSString *containerIdentifier)
 {
-    return CharonCKError(CKErrorBadContainer,
+    return RevenantCKError(CKErrorBadContainer,
                          containerIdentifier.length ? @"Un-provisioned or unauthorized container" : @"No container",
                          nil);
 }
 
-NSError *CharonCKTransportError(NSError *underlying)
+NSError *RevenantCKTransportError(NSError *underlying)
 {
     BOOL refused = [underlying.domain isEqualToString:NSURLErrorDomain] ||
                    [underlying.domain isEqualToString:NSPOSIXErrorDomain] ||
@@ -122,11 +122,11 @@ NSError *CharonCKTransportError(NSError *underlying)
                            userInfo:info];
 }
 
-@implementation CharonCKCredentials
+@implementation RevenantCKCredentials
 
 + (instancetype)shared
 {
-    static CharonCKCredentials *shared;
+    static RevenantCKCredentials *shared;
     static dispatch_once_t once;
     dispatch_once(&once, ^{
         shared = [[self alloc] init];
@@ -136,7 +136,7 @@ NSError *CharonCKTransportError(NSError *underlying)
 
 - (NSMutableDictionary *)keysForContainer:(NSString *)containerIdentifier
 {
-    NSMutableDictionary *keys = [[NSUserDefaults standardUserDefaults] objectForKey:CharonCKTokenKey];
+    NSMutableDictionary *keys = [[NSUserDefaults standardUserDefaults] objectForKey:RevenantCKTokenKey];
     if (!keys) {
         keys = [NSMutableDictionary dictionary];
     }
@@ -147,13 +147,13 @@ NSError *CharonCKTransportError(NSError *underlying)
 - (void)setDeveloperToken:(NSString *)token
 {
     if (!token) {
-        [[NSUserDefaults standardUserDefaults] removeObjectForKey:CharonCKTokenKey];
+        [[NSUserDefaults standardUserDefaults] removeObjectForKey:RevenantCKTokenKey];
         return;
     }
     NSMutableDictionary *keys = [self keysForContainer:nil];
-    keys[@"developer"] = [NSDictionary dictionaryWithObjectsAndKeys:token, CharonCKTokenKey,
-                                                 [NSDate distantFuture], CharonCKTokenExpiryKey, nil];
-    [[NSUserDefaults standardUserDefaults] setObject:keys forKey:CharonCKTokenKey];
+    keys[@"developer"] = [NSDictionary dictionaryWithObjectsAndKeys:token, RevenantCKTokenKey,
+                                                 [NSDate distantFuture], RevenantCKTokenExpiryKey, nil];
+    [[NSUserDefaults standardUserDefaults] setObject:keys forKey:RevenantCKTokenKey];
 }
 
 - (NSString *)signingKeyForContainer:(NSString *)containerIdentifier
@@ -171,7 +171,7 @@ NSError *CharonCKTransportError(NSError *underlying)
     } else {
         keys[containerIdentifier] = pem;
     }
-    [[NSUserDefaults standardUserDefaults] setObject:keys forKey:CharonCKTokenKey];
+    [[NSUserDefaults standardUserDefaults] setObject:keys forKey:RevenantCKTokenKey];
 }
 
 - (NSString *)provisionedKeyForContainer:(NSString *)containerIdentifier
@@ -192,7 +192,7 @@ NSError *CharonCKTransportError(NSError *underlying)
     }
     NSString *pem = [NSString stringWithContentsOfFile:path encoding:NSUTF8StringEncoding error:NULL];
     keys[containerIdentifier] = pem;
-    [[NSUserDefaults standardUserDefaults] setObject:keys forKey:CharonCKTokenKey];
+    [[NSUserDefaults standardUserDefaults] setObject:keys forKey:RevenantCKTokenKey];
     return pem;
 }
 
@@ -200,15 +200,15 @@ NSError *CharonCKTransportError(NSError *underlying)
 {
     if (!containerIdentifier.length) {
         if (error) {
-            *error = CharonCKBadContainer(nil);
+            *error = RevenantCKBadContainer(nil);
         }
         return nil;
     }
     NSMutableDictionary *keys = [self keysForContainer:containerIdentifier];
     NSDictionary *developer = [keys[@"developer"] isKindOfClass:[NSDictionary class]] ? keys[@"developer"] : nil;
     if (developer) {
-        NSString *token = developer[CharonCKTokenKey];
-        NSDate *expiry = developer[CharonCKTokenExpiryKey];
+        NSString *token = developer[RevenantCKTokenKey];
+        NSDate *expiry = developer[RevenantCKTokenExpiryKey];
         if ([token isKindOfClass:[NSString class]] && token.length && [expiry timeIntervalSinceNow] > 60) {
             return token;
         }
@@ -216,7 +216,7 @@ NSError *CharonCKTransportError(NSError *underlying)
     NSString *pem = [self provisionedKeyForContainer:containerIdentifier];
     if (!pem.length) {
         if (error) {
-            *error = CharonCKNotAuthenticated();
+            *error = RevenantCKNotAuthenticated();
         }
         return nil;
     }
@@ -227,26 +227,26 @@ NSError *CharonCKTransportError(NSError *underlying)
     }
     if (![team isKindOfClass:[NSString class]] || !team.length) {
         if (error) {
-            *error = CharonCKBadContainer(containerIdentifier);
+            *error = RevenantCKBadContainer(containerIdentifier);
         }
         return nil;
     }
-    NSString *token = CharonCKWebAuthToken(keyID, team, [NSDate date]);
+    NSString *token = RevenantCKWebAuthToken(keyID, team, [NSDate date]);
     if (!token) {
         if (error) {
-            *error = CharonCKNotAuthenticated();
+            *error = RevenantCKNotAuthenticated();
         }
         return nil;
     }
-    keys[@"developer"] = [NSDictionary dictionaryWithObjectsAndKeys:token, CharonCKTokenKey,
-                                                [NSDate dateWithTimeIntervalSinceNow:55 * 60], CharonCKTokenExpiryKey, nil];
-    [[NSUserDefaults standardUserDefaults] setObject:keys forKey:CharonCKTokenKey];
+    keys[@"developer"] = [NSDictionary dictionaryWithObjectsAndKeys:token, RevenantCKTokenKey,
+                                                [NSDate dateWithTimeIntervalSinceNow:55 * 60], RevenantCKTokenExpiryKey, nil];
+    [[NSUserDefaults standardUserDefaults] setObject:keys forKey:RevenantCKTokenKey];
     return token;
 }
 
 - (NSString *)userRecordIDForContainer:(NSString *)containerIdentifier
 {
-    NSDictionary *identities = [[NSUserDefaults standardUserDefaults] objectForKey:CharonCKUserRecordIDKey];
+    NSDictionary *identities = [[NSUserDefaults standardUserDefaults] objectForKey:RevenantCKUserRecordIDKey];
     NSString *found = identities[containerIdentifier];
     return [found isKindOfClass:[NSString class]] ? found : nil;
 }
@@ -254,7 +254,7 @@ NSError *CharonCKTransportError(NSError *underlying)
 - (void)setUserRecordID:(NSString *)userRecordID forContainer:(NSString *)containerIdentifier
 {
     NSMutableDictionary *identities = [[[NSUserDefaults standardUserDefaults]
-                                       objectForKey:CharonCKUserRecordIDKey] mutableCopy];
+                                       objectForKey:RevenantCKUserRecordIDKey] mutableCopy];
     if (!identities) {
         identities = [NSMutableDictionary dictionary];
     }
@@ -263,12 +263,12 @@ NSError *CharonCKTransportError(NSError *underlying)
     } else {
         [identities removeObjectForKey:containerIdentifier];
     }
-    [[NSUserDefaults standardUserDefaults] setObject:identities forKey:CharonCKUserRecordIDKey];
+    [[NSUserDefaults standardUserDefaults] setObject:identities forKey:RevenantCKUserRecordIDKey];
 }
 
 @end
 
-NSString *CharonCKBase64URL(NSData *data)
+NSString *RevenantCKBase64URL(NSData *data)
 {
     NSString *encoded = [data base64EncodedStringWithOptions:0];
     NSMutableString *text = [encoded mutableCopy];
@@ -278,7 +278,7 @@ NSString *CharonCKBase64URL(NSData *data)
     return text;
 }
 
-NSData *CharonCKPEMPrivateKey(NSString *pem)
+NSData *RevenantCKPEMPrivateKey(NSString *pem)
 {
     if (![pem isKindOfClass:[NSString class]]) {
         return nil;
@@ -300,7 +300,7 @@ NSData *CharonCKPEMPrivateKey(NSString *pem)
                                               options:NSDataBase64DecodingIgnoreUnknownCharacters];
 }
 
-NSString *CharonCKWebAuthToken(NSString *keyID, NSString *teamID, NSDate *now)
+NSString *RevenantCKWebAuthToken(NSString *keyID, NSString *teamID, NSDate *now)
 {
     NSDictionary *header = @{@"alg": @"ES256", @"kid": keyID, @"typ": @"JWT"};
     NSDictionary *payload = @{@"iss": teamID,
@@ -314,15 +314,15 @@ NSString *CharonCKWebAuthToken(NSString *keyID, NSString *teamID, NSDate *now)
     }
     NSMutableData *signing = [NSMutableData dataWithData:headerData];
     [signing appendData:payloadData];
-    NSData *privateKey = CharonCKPEMPrivateKey([[CharonCKCredentials shared] signingKeyForContainer:keyID]);
+    NSData *privateKey = RevenantCKPEMPrivateKey([[RevenantCKCredentials shared] signingKeyForContainer:keyID]);
     if (!privateKey || privateKey.length != 32) {
         return nil;
     }
     uint8_t signature[80];
-    int length = CharonCKSignES256(privateKey.bytes, signing.bytes, signing.length, signature, sizeof signature);
+    int length = RevenantCKSignES256(privateKey.bytes, signing.bytes, signing.length, signature, sizeof signature);
     if (length <= 0) {
         return nil;
     }
-    return [NSString stringWithFormat:@"%@.%@.%@", CharonCKBase64URL(headerData), CharonCKBase64URL(payloadData),
-            CharonCKBase64URL([NSData dataWithBytes:signature length:(NSUInteger)length])];
+    return [NSString stringWithFormat:@"%@.%@.%@", RevenantCKBase64URL(headerData), RevenantCKBase64URL(payloadData),
+            RevenantCKBase64URL([NSData dataWithBytes:signature length:(NSUInteger)length])];
 }

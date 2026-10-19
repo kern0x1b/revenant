@@ -10,7 +10,7 @@
 #include <cstdint>
 #include <span>
 
-namespace shade {
+namespace emulator {
 
 [[nodiscard]] bool validate_dynarmic_ir(std::span<const std::byte> bytes);
 

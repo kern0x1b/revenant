@@ -7,7 +7,7 @@ here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 port=${PORT:-$here/../../../../packages/a/apple-backports/GameKit}
 harness=${GAMEKIT_HARNESS:-$here/../../device}
-build=${GAMEKIT_BUILD:-$(runs_fresh charon-gamekit)}
+build=${GAMEKIT_BUILD:-$(runs_fresh revenant-gamekit)}
 rm -rf "$build"
 mkdir -p "$build"
 # The rename list is generated from what the port's objects actually carry, not from the names this
@@ -27,8 +27,8 @@ done
 # of them is that the release has no such call. So the switch is in the port, and this run is red because
 # the port answers something else.
 if [ "${1:-}" = "--mutated" ]; then
-    mutate="-DCHARON_MUTATE_SETLOAD"
-    printf '%s\n' "the port is built with CHARON_MUTATE_SETLOAD, and the checks below must fail"
+    mutate="-DREVENANT_MUTATE_SETLOAD"
+    printf '%s\n' "the port is built with REVENANT_MUTATE_SETLOAD, and the checks below must fail"
 else
     mutate=""
 fi
@@ -38,7 +38,7 @@ classes=$(for object in "$build"/*.o; do
 done | sort -u)
 [ -n "$classes" ] || { echo "FAIL no GameKit object in $build, so the rename list would be empty"; exit 1; }
 for name in $classes; do
-    renames="$renames -D$name=CharonHost$name"
+    renames="$renames -D$name=RevenantHost$name"
 done
 printf 'the port objects carry: %s\n' "$(echo $classes | tr '\n' ' ')"
 

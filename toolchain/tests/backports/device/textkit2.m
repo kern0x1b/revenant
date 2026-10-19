@@ -161,37 +161,37 @@ static void check_unavailable(void)
 {
     @try {
         (void)[[NSTextRange alloc] init];
-        charon_check(NO, "a range refuses a bare -init", "it made one");
+        revenant_check(NO, "a range refuses a bare -init", "it made one");
     } @catch (NSException *exception) {
-        charon_check([exception.name isEqualToString:NSInternalInconsistencyException], "a range refuses a bare -init",
+        revenant_check([exception.name isEqualToString:NSInternalInconsistencyException], "a range refuses a bare -init",
                      exception.name);
     }
     @try {
         (void)[NSTextRange new];
-        charon_check(NO, "a range refuses +new", "it made one");
+        revenant_check(NO, "a range refuses +new", "it made one");
     } @catch (NSException *exception) {
-        charon_check([exception.name isEqualToString:NSInternalInconsistencyException], "a range refuses +new",
+        revenant_check([exception.name isEqualToString:NSInternalInconsistencyException], "a range refuses +new",
                      exception.name);
     }
     @try {
         (void)[[NSTextSelection alloc] init];
-        charon_check(NO, "a selection refuses a bare -init", "it made one");
+        revenant_check(NO, "a selection refuses a bare -init", "it made one");
     } @catch (NSException *exception) {
-        charon_check([exception.name isEqualToString:NSInternalInconsistencyException],
+        revenant_check([exception.name isEqualToString:NSInternalInconsistencyException],
                      "a selection refuses a bare -init", exception.name);
     }
     @try {
         (void)[[NSTextSelectionNavigation alloc] init];
-        charon_check(NO, "a navigation object refuses a bare -init", "it made one");
+        revenant_check(NO, "a navigation object refuses a bare -init", "it made one");
     } @catch (NSException *exception) {
-        charon_check([exception.name isEqualToString:NSInternalInconsistencyException],
+        revenant_check([exception.name isEqualToString:NSInternalInconsistencyException],
                      "a navigation object refuses a bare -init", exception.name);
     }
     @try {
         (void)[NSTextSelectionNavigation new];
-        charon_check(NO, "a navigation object refuses +new", "it made one");
+        revenant_check(NO, "a navigation object refuses +new", "it made one");
     } @catch (NSException *exception) {
-        charon_check([exception.name isEqualToString:NSInternalInconsistencyException],
+        revenant_check([exception.name isEqualToString:NSInternalInconsistencyException],
                      "a navigation object refuses +new", exception.name);
     }
 }
@@ -199,37 +199,37 @@ static void check_unavailable(void)
 static void check_ranges(void)
 {
     NSTextRange *empty = range(3, -1);
-    charon_check(empty.isEmpty, "a range with no end is empty", "it is not");
-    charon_check([empty.endLocation isEqual:empty.location], "and answers its start as its end", "it does not");
-    charon_check([empty description] != nil, "a range describes itself", "it does not");
+    revenant_check(empty.isEmpty, "a range with no end is empty", "it is not");
+    revenant_check([empty.endLocation isEqual:empty.location], "and answers its start as its end", "it does not");
+    revenant_check([empty description] != nil, "a range describes itself", "it does not");
 
     NSTextRange *a = range(0, 10), *b = range(5, 15), *c = range(20, 25);
     for (NSInteger where = 0; where <= 11; where++)
-        charon_check([a containsLocation:at(where)] == (where >= 0 && where < 10),
+        revenant_check([a containsLocation:at(where)] == (where >= 0 && where < 10),
                      NAMED("0...10 holds location %ld", (long)where), "the rule is not the header's");
-    charon_check(![empty containsLocation:at(3)], "an empty range holds nothing, itself included", "it holds itself");
-    charon_check([a containsRange:b] == NO && [a containsRange:a] && [a containsRange:range(0, 5)] &&
+    revenant_check(![empty containsLocation:at(3)], "an empty range holds nothing, itself included", "it holds itself");
+    revenant_check([a containsRange:b] == NO && [a containsRange:a] && [a containsRange:range(0, 5)] &&
                      [a containsRange:range(3, 3)] && ![a containsRange:range(10, 10)] && [a containsRange:c] == NO,
                  @"0...10 holds a range with contents closed at both ends and an empty one inside it", "the rule differs");
-    charon_check(![a intersectsWithTextRange:c] && [a intersectsWithTextRange:b] && ![a intersectsWithTextRange:empty],
+    revenant_check(![a intersectsWithTextRange:c] && [a intersectsWithTextRange:b] && ![a intersectsWithTextRange:empty],
                  @"two ranges share contents only when each starts before the other ends", "the rule differs");
-    charon_check([[a textRangeByIntersectingWithTextRange:b] description] == @"5...10" &&
+    revenant_check([[a textRangeByIntersectingWithTextRange:b] description] == @"5...10" &&
                      [a textRangeByIntersectingWithTextRange:c] == nil &&
                      [[a textRangeByIntersectingWithTextRange:range(0, 15)] description] == @"0...10",
                  @"the intersection is the later start and the earlier end", "the rule differs");
-    charon_check([[a textRangeByFormingUnionWithTextRange:b] description] == @"0...15" &&
+    revenant_check([[a textRangeByFormingUnionWithTextRange:b] description] == @"0...15" &&
                      [[a textRangeByFormingUnionWithTextRange:c] description] == @"0...25" &&
                      [[a textRangeByFormingUnionWithTextRange:empty] description] == @"0...10" &&
                      [[range(0, 0) textRangeByFormingUnionWithTextRange:b] description] == @"5...10" &&
                      [[range(0, 0) textRangeByFormingUnionWithTextRange:range(3, 3)] description] == @"3...3",
                  @"the union is the envelope, or the range that has contents", "the rule differs");
-    charon_check([a isEqualToTextRange:range(0, 10)] && ![a isEqualToTextRange:b] && [a isEqual:a] &&
+    revenant_check([a isEqualToTextRange:range(0, 10)] && ![a isEqualToTextRange:b] && [a isEqual:a] &&
                      [a isKindOfClass:[NSObject class]],
                  @"a range is equal to a range over the same two places", "the rule differs");
-    charon_check([a hash] == [range(0, 10) hash], "and hashes by its value", "two equal ranges hash differently");
-    charon_check([[NSTextRange class] instancesRespondToSelector:@selector(copyWithZone:)] == NO,
+    revenant_check([a hash] == [range(0, 10) hash], "and hashes by its value", "two equal ranges hash differently");
+    revenant_check([[NSTextRange class] instancesRespondToSelector:@selector(copyWithZone:)] == NO,
                  "a range is not copied", "it has a copyWithZone:");
-    charon_check([[NSTextRange class] respondsToSelector:@selector(supportsSecureCoding)] == NO,
+    revenant_check([[NSTextRange class] respondsToSelector:@selector(supportsSecureCoding)] == NO,
                  "and does not say it supports secure coding", "it says it does");
 }
 
@@ -238,44 +238,44 @@ static void check_selections(void)
     NSTextSelection *one = [[NSTextSelection alloc] initWithRange:range(0, 5)
                                                         affinity:NSTextSelectionAffinityDownstream
                                                      granularity:NSTextSelectionGranularityCharacter];
-    charon_check(one.textRanges.count == 1 && one.affinity == NSTextSelectionAffinityDownstream &&
+    revenant_check(one.textRanges.count == 1 && one.affinity == NSTextSelectionAffinityDownstream &&
                      one.granularity == NSTextSelectionGranularityCharacter && !one.isTransient &&
                      one.anchorPositionOffset == 0 && one.isLogical && one.secondarySelectionLocation == nil,
                  "a selection keeps what it was made with", "one of the answers differs");
-    charon_check(one.typingAttributes == nil, "and answers nil for typing attributes it was never given", "it does not");
+    revenant_check(one.typingAttributes == nil, "and answers nil for typing attributes it was never given", "it does not");
     id none = nil;
     [one setTypingAttributes:none];
-    charon_check(one.typingAttributes != nil && one.typingAttributes.count == 0,
+    revenant_check(one.typingAttributes != nil && one.typingAttributes.count == 0,
                  "an empty dictionary once the setter has been called at all", "it answers nil");
     [one setSecondarySelectionLocation:at(8)];
-    charon_check(!one.isLogical, "a secondary location makes a selection not logical", "it is still logical");
+    revenant_check(!one.isLogical, "a secondary location makes a selection not logical", "it is still logical");
     [one setLogical:YES];
-    charon_check(one.isLogical, "and the flag can be set back", "it cannot");
+    revenant_check(one.isLogical, "and the flag can be set back", "it cannot");
 
     NSTextSelection *messy = [[NSTextSelection alloc] initWithRanges:@[ range(20, 25), range(0, 10), range(5, 15) ]
                                                             affinity:NSTextSelectionAffinityUpstream
                                                          granularity:NSTextSelectionGranularityWord];
-    charon_check(messy.textRanges.count == 3, "three ranges in, three ranges out", "a side merged or dropped one");
-    charon_check([[messy.textRanges objectAtIndex:0] description] == @"20...25" &&
+    revenant_check(messy.textRanges.count == 3, "three ranges in, three ranges out", "a side merged or dropped one");
+    revenant_check([[messy.textRanges objectAtIndex:0] description] == @"20...25" &&
                      [[messy.textRanges objectAtIndex:2] description] == @"5...15",
                  @"and the order they went in is the order they came out in", "the order differs");
     NSTextSelection *cursor = [[NSTextSelection alloc] initWithLocation:at(4)
                                                               affinity:NSTextSelectionAffinityDownstream];
-    charon_check(cursor.granularity == NSTextSelectionGranularityCharacter && cursor.textRanges.count == 1 &&
+    revenant_check(cursor.granularity == NSTextSelectionGranularityCharacter && cursor.textRanges.count == 1 &&
                      [[[cursor textRanges] firstObject] description] == @"4...4",
                  "a cursor is one 0-length range of a character granularity", "it is not");
     NSTextSelection *none2 = [[NSTextSelection alloc] initWithRanges:@[]
                                                             affinity:NSTextSelectionAffinityDownstream
                                                          granularity:NSTextSelectionGranularityCharacter];
-    charon_check(none2.textRanges.count == 0, "a selection of no ranges is empty", "it is not");
+    revenant_check(none2.textRanges.count == 0, "a selection of no ranges is empty", "it is not");
 
     NSTextSelection *copy = [one textSelectionWithTextRanges:@[ range(1, 2) ]];
-    charon_check(copy.textRanges.count == 1 && copy.affinity == one.affinity && copy.isLogical &&
+    revenant_check(copy.textRanges.count == 1 && copy.affinity == one.affinity && copy.isLogical &&
                      [copy.secondarySelectionLocation isEqual:at(8)] && copy.typingAttributes != nil &&
                      one.textRanges.count == 1,
                  @"a copy carries the affinity, the logical flag, the secondary location and the typing attributes",
                  "one of the answers differs");
-    charon_check([one isEqual:[one textSelectionWithTextRanges:one.textRanges]] == NO ||
+    revenant_check([one isEqual:[one textSelectionWithTextRanges:one.textRanges]] == NO ||
                      [one isEqual:[[NSTextSelection alloc] initWithRange:range(0, 5)
                                                                  affinity:NSTextSelectionAffinityDownstream
                                                               granularity:NSTextSelectionGranularityCharacter]] ==
@@ -286,44 +286,44 @@ static void check_selections(void)
     NSTextSelection *equal = [[NSTextSelection alloc] initWithRange:range(0, 5)
                                                            affinity:NSTextSelectionAffinityDownstream
                                                         granularity:NSTextSelectionGranularityCharacter];
-    charon_check([[NSSet setWithObjects:one, equal, nil] count] == 2,
+    revenant_check([[NSSet setWithObjects:one, equal, nil] count] == 2,
                  @"two selections differing in one key are not equal", "a set holds one");
-    charon_check([[NSTextSelection class] supportsSecureCoding], "a selection says it supports secure coding",
+    revenant_check([[NSTextSelection class] supportsSecureCoding], "a selection says it supports secure coding",
                  "it says it does not");
-    charon_check([described(one) rangeOfString:@"NSTextSelection:<"].location != NSNotFound &&
+    revenant_check([described(one) rangeOfString:@"NSTextSelection:<"].location != NSNotFound &&
                      [described(one) rangeOfString:@"granularity=character"].location != NSNotFound,
                  @"and describes itself the host's way", described(one));
-    charon_check(messy.description != nil && none2.description != nil && cursor.description != nil,
+    revenant_check(messy.description != nil && none2.description != nil && cursor.description != nil,
                  "every selection describes itself", "one does not");
 }
 
 static void check_elements(void)
 {
     NSTextParagraph *plain = [[NSTextParagraph alloc] initWithAttributedString:[[NSAttributedString alloc] initWithString:@"Hello"]];
-    charon_check(plain.attributedString.length == 5, "a paragraph keeps the string it was given", "it does not");
-    charon_check(plain.isRepresentedElement, "and is a represented element", "it is not");
-    charon_check(plain.childElements.count == 0 && plain.parentElement == nil,
+    revenant_check(plain.attributedString.length == 5, "a paragraph keeps the string it was given", "it does not");
+    revenant_check(plain.isRepresentedElement, "and is a represented element", "it is not");
+    revenant_check(plain.childElements.count == 0 && plain.parentElement == nil,
                  "with no children and no parent", "it has some");
-    charon_check(plain.textContentManager == nil, "and no content manager", "it has one");
+    revenant_check(plain.textContentManager == nil, "and no content manager", "it has one");
     plain.elementRange = range(0, 5);
-    charon_check([[plain.elementRange description] isEqualToString:@"0...5"], "and the range it keeps", "it differs");
+    revenant_check([[plain.elementRange description] isEqualToString:@"0...5"], "and the range it keeps", "it differs");
     for (NSString *text in @[ @"Hello", @"Hello\n", @"Hello\r\n", @"\n" ]) {
         NSTextParagraph *paragraph = [[NSTextParagraph alloc] initWithAttributedString:[[NSAttributedString alloc] initWithString:text]];
         paragraph.elementRange = range(0, (NSInteger)text.length);
-        charon_check(paragraph.paragraphContentRange == nil && paragraph.paragraphSeparatorRange == nil,
+        revenant_check(paragraph.paragraphContentRange == nil && paragraph.paragraphSeparatorRange == nil,
                      NAMED(@"%@ derives no range with no content manager", text), "one side derives one");
     }
     NSTextElement *element = [[NSTextElement alloc] initWithTextContentManager:nil];
-    charon_check(element.isRepresentedElement && element.childElements.count == 0 && element.parentElement == nil,
+    revenant_check(element.isRepresentedElement && element.childElements.count == 0 && element.parentElement == nil,
                  "a bare element is a represented element with no children and no parent", "it is not");
-    charon_check([element isEqual:element] && ![element isEqual:[[NSTextElement alloc] initWithTextContentManager:nil]],
+    revenant_check([element isEqual:element] && ![element isEqual:[[NSTextElement alloc] initWithTextContentManager:nil]],
                  "and is equal to itself and to no other element", "the rule differs");
-    charon_check([[NSTextElement alloc] init] != nil, "an element made with -init is one with no manager", "it is nil");
-    charon_check([described(element) rangeOfString:@"<NSTextElement:"].location != NSNotFound &&
+    revenant_check([[NSTextElement alloc] init] != nil, "an element made with -init is one with no manager", "it is nil");
+    revenant_check([described(element) rangeOfString:@"<NSTextElement:"].location != NSNotFound &&
                      [described(plain) rangeOfString:@"\"Hello\""].location != NSNotFound,
                  @"and both describe themselves the host's way", described(plain));
     NSTextParagraph *noString = [[NSTextParagraph alloc] initWithAttributedString:nil];
-    charon_check(noString.attributedString == nil && [described(noString) rangeOfString:@"(null)"].location != NSNotFound,
+    revenant_check(noString.attributedString == nil && [described(noString) rangeOfString:@"(null)"].location != NSNotFound,
                  @"a paragraph over no string keeps none and says so", described(noString));
 }
 
@@ -331,44 +331,44 @@ static void check_navigation(void)
 {
     CallTestSource *source = [[CallTestSource alloc] initWithLength:10];
     NSTextSelectionNavigation *navigation = [[NSTextSelectionNavigation alloc] initWithDataSource:source];
-    charon_check(navigation != nil, "a navigation object is made with a data source", "it is not");
-    charon_check(navigation.textSelectionDataSource == source, "and holds it", "it does not");
-    charon_check(navigation.allowsNonContiguousRanges && !navigation.rotatesCoordinateSystemForLayoutOrientation,
+    revenant_check(navigation != nil, "a navigation object is made with a data source", "it is not");
+    revenant_check(navigation.textSelectionDataSource == source, "and holds it", "it does not");
+    revenant_check(navigation.allowsNonContiguousRanges && !navigation.rotatesCoordinateSystemForLayoutOrientation,
                  @"and starts with the host's own two flags", "one differs");
     [navigation setAllowsNonContiguousRanges:NO];
     [navigation setRotatesCoordinateSystemForLayoutOrientation:YES];
-    charon_check(!navigation.allowsNonContiguousRanges && navigation.rotatesCoordinateSystemForLayoutOrientation,
+    revenant_check(!navigation.allowsNonContiguousRanges && navigation.rotatesCoordinateSystemForLayoutOrientation,
                  "and both are settable", "one did not take the value");
     [navigation flushLayoutCache];
-    charon_check(YES, "flushing the cache answers nothing", "something answered");
+    revenant_check(YES, "flushing the cache answers nothing", "something answered");
 
     NSTextSelection *cursor = [[NSTextSelection alloc] initWithLocation:at(4)
                                                               affinity:NSTextSelectionAffinityDownstream];
-    charon_check([[[navigation destinationSelectionForTextSelection:cursor
+    revenant_check([[[navigation destinationSelectionForTextSelection:cursor
                                                           direction:NSTextSelectionNavigationDirectionForward
                                                         destination:NSTextSelectionNavigationDestinationCharacter
                                                          extending:NO
                                                            confined:NO].textRanges firstObject] description] == @"4...5",
                  @"a move forward over a character is the character it lands on", "it is not");
-    charon_check([[[navigation destinationSelectionForTextSelection:cursor
+    revenant_check([[[navigation destinationSelectionForTextSelection:cursor
                                                           direction:NSTextSelectionNavigationDirectionBackward
                                                         destination:NSTextSelectionNavigationDestinationCharacter
                                                          extending:NO
                                                            confined:NO].textRanges firstObject] description] == @"3...4",
                  @"and backward is the one before", "it is not");
-    charon_check([[[navigation destinationSelectionForTextSelection:cursor
+    revenant_check([[[navigation destinationSelectionForTextSelection:cursor
                                                           direction:NSTextSelectionNavigationDirectionForward
                                                         destination:NSTextSelectionNavigationDestinationDocument
                                                          extending:NO
                                                            confined:NO].textRanges firstObject] description] == @"4...10",
                  @"and a move to the document's end lands there", "it is not");
-    charon_check([navigation destinationSelectionForTextSelection:cursor
+    revenant_check([navigation destinationSelectionForTextSelection:cursor
                                                           direction:NSTextSelectionNavigationDirectionForward
                                                         destination:NSTextSelectionNavigationDestinationContainer
                                                          extending:NO
                                                            confined:NO] == nil,
                  "a move to a container boundary with none to move to answers nil", "it answered something");
-    charon_check([[[navigation destinationSelectionForTextSelection:cursor
+    revenant_check([[[navigation destinationSelectionForTextSelection:cursor
                                                           direction:NSTextSelectionNavigationDirectionForward
                                                         destination:NSTextSelectionNavigationDestinationCharacter
                                                          extending:YES
@@ -381,47 +381,47 @@ static void check_navigation(void)
                  @"extending keeps the first location and moves only the end", "it does not");
     NSTextSelection *word = [navigation textSelectionForSelectionGranularity:NSTextSelectionGranularityWord
                                                             enclosingTextSelection:cursor];
-    charon_check(word != nil && word.granularity == NSTextSelectionGranularityWord && word.textRanges.count == 1,
+    revenant_check(word != nil && word.granularity == NSTextSelectionGranularityWord && word.textRanges.count == 1,
                  "a selection is expanded to the word around it", "it was not");
-    charon_check([navigation textSelectionForSelectionGranularity:NSTextSelectionGranularityWord
+    revenant_check([navigation textSelectionForSelectionGranularity:NSTextSelectionGranularityWord
                                                   enclosingPoint:CGPointMake(1, 1)
                                         inContainerAtLocation:at(0)] != nil,
                  "and a point is enclosed in one too", "there was none");
-    charon_check([navigation textSelectionsInteractingAtPoint:CGPointMake(1, 1)
+    revenant_check([navigation textSelectionsInteractingAtPoint:CGPointMake(1, 1)
                                      inContainerAtLocation:at(0)
                                                   anchors:@[ cursor ]
                                                 modifiers:NSTextSelectionNavigationModifierExtend
                                                 selecting:YES
                                                     bounds:CGRectMake(0, 0, 10, 10)].count == 1,
                  "a point with a line under it interacts with one selection", "it did not");
-    charon_check([navigation resolvedInsertionLocationForTextSelection:cursor
+    revenant_check([navigation resolvedInsertionLocationForTextSelection:cursor
                                                      writingDirection:NSTextSelectionNavigationWritingDirectionLeftToRight] == nil,
                  "a logical selection has no insertion location", "it has one");
     [cursor setSecondarySelectionLocation:at(4)];
-    charon_check([[navigation resolvedInsertionLocationForTextSelection:cursor
+    revenant_check([[navigation resolvedInsertionLocationForTextSelection:cursor
                                                        writingDirection:NSTextSelectionNavigationWritingDirectionLeftToRight] description] == @"4",
                  @"and a selection that is not logical inserts at its secondary location", "it does not");
     NSTextSelection *withContents = [[NSTextSelection alloc] initWithRange:range(2, 5)
                                                                   affinity:NSTextSelectionAffinityDownstream
                                                                granularity:NSTextSelectionGranularityCharacter];
-    charon_check([[[navigation deletionRangesForTextSelection:withContents
+    revenant_check([[[navigation deletionRangesForTextSelection:withContents
                                                       direction:NSTextSelectionNavigationDirectionForward
                                                     destination:NSTextSelectionNavigationDestinationDocument
                                               allowsDecomposition:NO] firstObject] description] == @"2...5",
                  @"a delete of a selection with contents removes it", "it does not");
-    charon_check([[[navigation deletionRangesForTextSelection:cursor
+    revenant_check([[[navigation deletionRangesForTextSelection:cursor
                                                       direction:NSTextSelectionNavigationDirectionBackward
                                                     destination:NSTextSelectionNavigationDestinationCharacter
                                               allowsDecomposition:YES] firstObject] description] == @"3...4",
                  @"and a delete at a cursor removes what a move over one character would have selected", "it does not");
     NSTextSelectionNavigation *bare = [[NSTextSelectionNavigation alloc] initWithDataSource:nil];
-    charon_check(bare != nil && bare.textSelectionDataSource == nil &&
+    revenant_check(bare != nil && bare.textSelectionDataSource == nil &&
                      [bare deletionRangesForTextSelection:cursor
                                                 direction:NSTextSelectionNavigationDirectionForward
                                               destination:NSTextSelectionNavigationDestinationCharacter
                                         allowsDecomposition:NO].count == 1,
                  "and one with no data source answers the header's own way", "it did not");
-    charon_check([described(navigation) rangeOfString:@"<NSTextSelectionNavigation:"].location != NSNotFound,
+    revenant_check([described(navigation) rangeOfString:@"<NSTextSelectionNavigation:"].location != NSNotFound,
                  @"a navigation object describes itself the host's way", described(navigation));
 }
 
@@ -433,7 +433,7 @@ int main(void)
         check_selections();
         check_elements();
         check_navigation();
-        printf("checks=%d failures=%d\n", charon_checks, charon_failures);
+        printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
     }
     return 0;
 }

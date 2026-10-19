@@ -108,7 +108,7 @@ source = open(path).read()
 # becomes read-write, and an argument declared write-only is neither readable nor read-write.
 old = """- (MTLArgumentAccess)access
 {
-    return CharonAccessFromWord(_argument[@"access"]);
+    return RevenantAccessFromWord(_argument[@"access"]);
 }"""
 new = """- (MTLArgumentAccess)access
 {

@@ -1,4 +1,4 @@
-#import "CharonScenes.h"
+#import "RevenantScenes.h"
 
 @implementation UIScene {
     UISceneSession *_session;
@@ -15,7 +15,7 @@
         _session = session;
         _activationState = UISceneActivationStateUnattached;
         _activationConditions = [[UISceneActivationConditions alloc] init];
-        [session charon_setScene:self];
+        [session revenant_setScene:self];
     }
     return self;
 }
@@ -40,7 +40,7 @@
     return _activationState;
 }
 
-- (void)charon_setActivationState:(UISceneActivationState)state
+- (void)revenant_setActivationState:(UISceneActivationState)state
 {
     _activationState = state;
 }

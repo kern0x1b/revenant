@@ -11,7 +11,7 @@
 
 #include <cstdint>
 
-namespace shade {
+namespace emulator {
 
 [[nodiscard]] GuestImageTable read_guest_image_table(
     const AddressSpace& memory, std::uint32_t all_image_info_address);

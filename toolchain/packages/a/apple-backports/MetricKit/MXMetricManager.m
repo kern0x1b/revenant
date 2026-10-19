@@ -1,32 +1,32 @@
-#import "CharonMetricValue.h"
-#import "CharonMetricKit.h"
-#import "../Foundation/CharonOSLog.h"
-#import "../Foundation/CharonOSSignpost.h"
-#import "../CharonSayOnce.h"
+#import "RevenantMetricValue.h"
+#import "RevenantMetricKit.h"
+#import "../Foundation/RevenantOSLog.h"
+#import "../Foundation/RevenantOSSignpost.h"
+#import "../RevenantSayOnce.h"
 #import <objc/runtime.h>
 #import <sys/time.h>
 
-static NSString *const CharonMXErrorDomain = @"MXErrorDomain";
+static NSString *const RevenantMXErrorDomain = @"MXErrorDomain";
 
-static NSString *const CharonPayloadsKey = @"org.charon.apple-backports.MetricKit.payloads";
-static NSString *const CharonLaunchMeasurementsKey = @"org.charon.apple-backports.MetricKit.extendedLaunch";
+static NSString *const RevenantPayloadsKey = @"org.revenant.apple-backports.MetricKit.payloads";
+static NSString *const RevenantLaunchMeasurementsKey = @"org.revenant.apple-backports.MetricKit.extendedLaunch";
 
-static NSString *CharonPayloadFolder(void)
+static NSString *RevenantPayloadFolder(void)
 {
     NSArray *paths = NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, YES);
     NSString *root = paths.firstObject ?: NSTemporaryDirectory();
-    NSString *folder = [root stringByAppendingPathComponent:@"org.charon.apple-backports.MetricKit"];
+    NSString *folder = [root stringByAppendingPathComponent:@"org.revenant.apple-backports.MetricKit"];
     [[NSFileManager defaultManager] createDirectoryAtPath:folder withIntermediateDirectories:YES attributes:nil error:NULL];
     return folder;
 }
 
-static NSMutableDictionary *CharonLaunchMeasurements(void)
+static NSMutableDictionary *RevenantLaunchMeasurements(void)
 {
-    NSDictionary *held = [[NSUserDefaults standardUserDefaults] dictionaryForKey:CharonLaunchMeasurementsKey];
+    NSDictionary *held = [[NSUserDefaults standardUserDefaults] dictionaryForKey:RevenantLaunchMeasurementsKey];
     return held ? [held mutableCopy] : [NSMutableDictionary dictionary];
 }
 
-static double CharonMonotonicSeconds(void)
+static double RevenantMonotonicSeconds(void)
 {
     struct timeval now;
     gettimeofday(&now, NULL);
@@ -52,17 +52,17 @@ static double CharonMonotonicSeconds(void)
 
 - (NSArray<MXMetricPayload *> *)pastPayloads
 {
-    return [self charon_payloadsOfClass:[MXMetricPayload class] extension:@"metric"];
+    return [self revenant_payloadsOfClass:[MXMetricPayload class] extension:@"metric"];
 }
 
 - (NSArray<MXDiagnosticPayload *> *)pastDiagnosticPayloads
 {
-    return [self charon_payloadsOfClass:[MXDiagnosticPayload class] extension:@"diagnostic"];
+    return [self revenant_payloadsOfClass:[MXDiagnosticPayload class] extension:@"diagnostic"];
 }
 
-- (NSArray *)charon_payloadsOfClass:(Class)cls extension:(NSString *)extension
+- (NSArray *)revenant_payloadsOfClass:(Class)cls extension:(NSString *)extension
 {
-    NSString *folder = CharonPayloadFolder();
+    NSString *folder = RevenantPayloadFolder();
     NSArray *names = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:folder error:NULL];
     NSMutableArray *payloads = [NSMutableArray array];
     NSMutableArray *dated = [NSMutableArray array];
@@ -73,7 +73,7 @@ static double CharonMonotonicSeconds(void)
         if (!data)
             continue;
         NSError *error = nil;
-        id payload = [NSKeyedUnarchiver unarchivedObjectOfClasses:[CharonMetricValue decodableClasses] fromData:data error:&error];
+        id payload = [NSKeyedUnarchiver unarchivedObjectOfClasses:[RevenantMetricValue decodableClasses] fromData:data error:&error];
         if (![payload isKindOfClass:cls] || error)
             continue;
         [dated addObject:@{@"name": name, @"payload": payload}];
@@ -90,7 +90,7 @@ static double CharonMonotonicSeconds(void)
 {
     if (!subscriber)
         return;
-    NSHashTable *table = [self charon_subscriberTable];
+    NSHashTable *table = [self revenant_subscriberTable];
     if (![table containsObject:subscriber])
         [table addObject:subscriber];
 }
@@ -99,10 +99,10 @@ static double CharonMonotonicSeconds(void)
 {
     if (!subscriber)
         return;
-    [[self charon_subscriberTable] removeObject:subscriber];
+    [[self revenant_subscriberTable] removeObject:subscriber];
 }
 
-- (void)charon_deliverTo:(id<MXMetricManagerSubscriber>)subscriber
+- (void)revenant_deliverTo:(id<MXMetricManagerSubscriber>)subscriber
 {
     if ([subscriber respondsToSelector:@selector(didReceiveMetricPayloads:)]) {
         NSArray<MXMetricPayload *> *payloads = self.pastPayloads;
@@ -118,7 +118,7 @@ static double CharonMonotonicSeconds(void)
     }
 }
 
-- (NSHashTable *)charon_subscriberTable
+- (NSHashTable *)revenant_subscriberTable
 {
     static const char key;
     NSHashTable *table = objc_getAssociatedObject(self, &key);
@@ -133,12 +133,12 @@ static double CharonMonotonicSeconds(void)
 {
     if (!taskID) {
         if (error)
-            *error = [NSError errorWithDomain:CharonMXErrorDomain code:1 userInfo:nil];
+            *error = [NSError errorWithDomain:RevenantMXErrorDomain code:1 userInfo:nil];
         return NO;
     }
-    NSMutableDictionary *measurements = CharonLaunchMeasurements();
-    measurements[[taskID description]] = @(CharonMonotonicSeconds());
-    [[NSUserDefaults standardUserDefaults] setObject:measurements forKey:CharonLaunchMeasurementsKey];
+    NSMutableDictionary *measurements = RevenantLaunchMeasurements();
+    measurements[[taskID description]] = @(RevenantMonotonicSeconds());
+    [[NSUserDefaults standardUserDefaults] setObject:measurements forKey:RevenantLaunchMeasurementsKey];
     return YES;
 }
 
@@ -146,58 +146,58 @@ static double CharonMonotonicSeconds(void)
 {
     if (!taskID) {
         if (error)
-            *error = [NSError errorWithDomain:CharonMXErrorDomain code:1 userInfo:nil];
+            *error = [NSError errorWithDomain:RevenantMXErrorDomain code:1 userInfo:nil];
         return NO;
     }
     NSString *key = [taskID description];
-    NSMutableDictionary *measurements = CharonLaunchMeasurements();
+    NSMutableDictionary *measurements = RevenantLaunchMeasurements();
     NSNumber *began = measurements[key];
     if (!began) {
         if (error)
-            *error = [NSError errorWithDomain:CharonMXErrorDomain code:2 userInfo:nil];
+            *error = [NSError errorWithDomain:RevenantMXErrorDomain code:2 userInfo:nil];
         return NO;
     }
-    double interval = CharonMonotonicSeconds() - [began doubleValue];
+    double interval = RevenantMonotonicSeconds() - [began doubleValue];
     [measurements removeObjectForKey:key];
-    [[NSUserDefaults standardUserDefaults] setObject:measurements forKey:CharonLaunchMeasurementsKey];
+    [[NSUserDefaults standardUserDefaults] setObject:measurements forKey:RevenantLaunchMeasurementsKey];
 
     MXAppLaunchMetric *metric = [[MXAppLaunchMetric alloc] init];
     MXHistogram<NSUnitDuration *> *histogram = [[MXHistogram alloc] init];
     NSMeasurement<NSUnitDuration *> *duration =
         [[NSMeasurement alloc] initWithDoubleValue:interval unit:[NSUnitDuration seconds]];
-    [histogram charon_setValue:@1 forKey:@"totalBucketCount"];
+    [histogram revenant_setValue:@1 forKey:@"totalBucketCount"];
     MXHistogramBucket<NSUnitDuration *> *bucket = [[MXHistogramBucket alloc] init];
-    [bucket charon_setValue:duration forKey:@"bucketStart"];
-    [bucket charon_setValue:duration forKey:@"bucketEnd"];
-    [bucket charon_setValue:@1 forKey:@"bucketCount"];
-    [histogram charon_setValue:[@[bucket] objectEnumerator] forKey:@"bucketEnumerator"];
-    [metric charon_setValue:histogram forKey:@"histogrammedExtendedLaunch"];
+    [bucket revenant_setValue:duration forKey:@"bucketStart"];
+    [bucket revenant_setValue:duration forKey:@"bucketEnd"];
+    [bucket revenant_setValue:@1 forKey:@"bucketCount"];
+    [histogram revenant_setValue:[@[bucket] objectEnumerator] forKey:@"bucketEnumerator"];
+    [metric revenant_setValue:histogram forKey:@"histogrammedExtendedLaunch"];
     return YES;
 }
 
 @end
 
-@interface CharonMetricSnapshot : NSObject
-@property (nonatomic, copy) NSArray<CharonSignpostInterval *> *intervals;
+@interface RevenantMetricSnapshot : NSObject
+@property (nonatomic, copy) NSArray<RevenantSignpostInterval *> *intervals;
 @end
 
-@implementation CharonMetricSnapshot
+@implementation RevenantMetricSnapshot
 @synthesize intervals = _intervals;
 @end
 
-static Class CharonSignpostStoreClass(void)
+static Class RevenantSignpostStoreClass(void)
 {
     static Class store;
     static dispatch_once_t once;
     dispatch_once(&once, ^{
-        store = NSClassFromString(@"CharonSignpostStore");
+        store = NSClassFromString(@"RevenantSignpostStore");
     });
     return store;
 }
 
-static NSArray<CharonSignpostInterval *> *CharonRecordedIntervals(void)
+static NSArray<RevenantSignpostInterval *> *RevenantRecordedIntervals(void)
 {
-    Class store = CharonSignpostStoreClass();
+    Class store = RevenantSignpostStoreClass();
     if (!store || ![store respondsToSelector:@selector(intervals)])
         return @[];
     return [store performSelector:@selector(intervals)] ?: @[];
@@ -205,33 +205,33 @@ static NSArray<CharonSignpostInterval *> *CharonRecordedIntervals(void)
 
 void *_Nonnull _MXSignpostMetricsSnapshot(void)
 {
-    CharonMetricSnapshot *snapshot = [[CharonMetricSnapshot alloc] init];
-    snapshot.intervals = CharonRecordedIntervals();
+    RevenantMetricSnapshot *snapshot = [[RevenantMetricSnapshot alloc] init];
+    snapshot.intervals = RevenantRecordedIntervals();
     return (__bridge_retained void *)snapshot;
 }
 
-NSArray<MXSignpostMetric *> *CharonSignpostMetrics(void)
+NSArray<MXSignpostMetric *> *RevenantSignpostMetrics(void)
 {
     NSMutableArray<MXSignpostMetric *> *metrics = [NSMutableArray array];
     NSMutableDictionary<NSString *, MXSignpostMetric *> *byKey = [NSMutableDictionary dictionary];
-    for (CharonSignpostInterval *interval in CharonRecordedIntervals()) {
+    for (RevenantSignpostInterval *interval in RevenantRecordedIntervals()) {
         NSString *key = [NSString stringWithFormat:@"%@%c%@", interval.subsystem, 0, interval.name];
         MXSignpostMetric *metric = byKey[key];
         if (!metric) {
             metric = [[MXSignpostMetric alloc] init];
-            [metric charon_setValue:interval.name forKey:@"signpostName"];
-            [metric charon_setValue:interval.category forKey:@"signpostCategory"];
+            [metric revenant_setValue:interval.name forKey:@"signpostName"];
+            [metric revenant_setValue:interval.category forKey:@"signpostCategory"];
             byKey[key] = metric;
             [metrics addObject:metric];
         }
-        MXSignpostIntervalData *data = [metric charon_signpostIntervalData] ?: ({
+        MXSignpostIntervalData *data = [metric revenant_signpostIntervalData] ?: ({
             MXSignpostIntervalData *made = [[MXSignpostIntervalData alloc] init];
-            [metric charon_setValue:made forKey:@"signpostIntervalData"];
+            [metric revenant_setValue:made forKey:@"signpostIntervalData"];
             made;
         });
-        MXHistogram *histogram = [data charon_histogrammedSignpostDuration] ?: ({
+        MXHistogram *histogram = [data revenant_histogrammedSignpostDuration] ?: ({
             MXHistogram *made = [[MXHistogram alloc] init];
-            [data charon_setValue:made forKey:@"histogrammedSignpostDuration"];
+            [data revenant_setValue:made forKey:@"histogrammedSignpostDuration"];
             made;
         });
         NSMutableArray *buckets = objc_getAssociatedObject(histogram, @selector(bucketEnumerator));
@@ -242,20 +242,20 @@ NSArray<MXSignpostMetric *> *CharonSignpostMetrics(void)
         NSMeasurement<NSUnitDuration *> *duration =
             [[NSMeasurement alloc] initWithDoubleValue:interval.seconds unit:[NSUnitDuration seconds]];
         MXHistogramBucket<NSUnitDuration *> *bucket = [[MXHistogramBucket alloc] init];
-        [bucket charon_setValue:duration forKey:@"bucketStart"];
-        [bucket charon_setValue:duration forKey:@"bucketEnd"];
-        [bucket charon_setValue:@(interval.count) forKey:@"bucketCount"];
+        [bucket revenant_setValue:duration forKey:@"bucketStart"];
+        [bucket revenant_setValue:duration forKey:@"bucketEnd"];
+        [bucket revenant_setValue:@(interval.count) forKey:@"bucketCount"];
         [buckets addObject:bucket];
-        [histogram charon_setValue:@(buckets.count) forKey:@"totalBucketCount"];
-        [histogram charon_setValue:[buckets objectEnumerator] forKey:@"bucketEnumerator"];
-        [metric charon_setValue:@((NSUInteger)[metric charon_totalCount] + interval.count) forKey:@"totalCount"];
+        [histogram revenant_setValue:@(buckets.count) forKey:@"totalBucketCount"];
+        [histogram revenant_setValue:[buckets objectEnumerator] forKey:@"bucketEnumerator"];
+        [metric revenant_setValue:@((NSUInteger)[metric revenant_totalCount] + interval.count) forKey:@"totalCount"];
 
-        NSMeasurement<NSUnitDuration *> *cpu = [data charon_cumulativeCPUTime] ?: ({
+        NSMeasurement<NSUnitDuration *> *cpu = [data revenant_cumulativeCPUTime] ?: ({
             NSMeasurement *made = [[NSMeasurement alloc] initWithDoubleValue:0.0 unit:[NSUnitDuration seconds]];
-            [data charon_setValue:made forKey:@"cumulativeCPUTime"];
+            [data revenant_setValue:made forKey:@"cumulativeCPUTime"];
             (NSMeasurement *)made;
         });
-        [data charon_setValue:[[NSMeasurement alloc] initWithDoubleValue:[cpu doubleValue] + interval.seconds
+        [data revenant_setValue:[[NSMeasurement alloc] initWithDoubleValue:[cpu doubleValue] + interval.seconds
                                                              unit:[NSUnitDuration seconds]]
                    forKey:@"cumulativeCPUTime"];
     }

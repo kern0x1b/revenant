@@ -16,11 +16,11 @@ static const char *label(NSString *format, ...)
     return string.UTF8String;
 }
 
-@interface NSEntityDescription (CharonHost)
-- (NSArray *)charonHostindexes;
-- (void)charonHostsetIndexes:(NSArray *)indexes;
-- (NSExpression *)charonHostcoreSpotlightDisplayNameExpression;
-- (void)charonHostsetCoreSpotlightDisplayNameExpression:(NSExpression *)expression;
+@interface NSEntityDescription (RevenantHost)
+- (NSArray *)revenantHostindexes;
+- (void)revenantHostsetIndexes:(NSArray *)indexes;
+- (NSExpression *)revenantHostcoreSpotlightDisplayNameExpression;
+- (void)revenantHostsetCoreSpotlightDisplayNameExpression:(NSExpression *)expression;
 @end
 
 @interface NSObject (FetchIndexAccess)
@@ -44,8 +44,8 @@ typedef struct {
     BOOL ours;
 } Kit;
 
-static Class element_class(Kit kit) { return NSClassFromString(kit.ours ? @"CharonHostNSFetchIndexElementDescription" : @"NSFetchIndexElementDescription"); }
-static Class index_class(Kit kit) { return NSClassFromString(kit.ours ? @"CharonHostNSFetchIndexDescription" : @"NSFetchIndexDescription"); }
+static Class element_class(Kit kit) { return NSClassFromString(kit.ours ? @"RevenantHostNSFetchIndexElementDescription" : @"NSFetchIndexElementDescription"); }
+static Class index_class(Kit kit) { return NSClassFromString(kit.ours ? @"RevenantHostNSFetchIndexDescription" : @"NSFetchIndexDescription"); }
 
 static id make_element(Kit kit, NSPropertyDescription *property, NSInteger collation)
 {
@@ -62,14 +62,14 @@ static NSString *raised(void (^block)(void))
     @try {
         block();
     } @catch (NSException *exception) {
-        return [NSString stringWithFormat:@"%@: %@", exception.name, [exception.reason stringByReplacingOccurrencesOfString:@"CharonHost" withString:@""]];
+        return [NSString stringWithFormat:@"%@: %@", exception.name, [exception.reason stringByReplacingOccurrencesOfString:@"RevenantHost" withString:@""]];
     }
     return @"ok";
 }
 
 static NSString *plain(NSString *text)
 {
-    return [text stringByReplacingOccurrencesOfString:@"CharonHost" withString:@""];
+    return [text stringByReplacingOccurrencesOfString:@"RevenantHost" withString:@""];
 }
 
 static NSAttributeDescription *attribute(NSString *name, NSAttributeType type)
@@ -248,8 +248,8 @@ static void entities(void)
         World w = make_world();
         NSMutableArray *out = [NSMutableArray array];
         NSEntityDescription *e = w.entity;
-        NSArray *(^get)(void) = ^NSArray *{ return kit.ours ? [e charonHostindexes] : [e indexes]; };
-        void (^set)(NSArray *) = ^(NSArray *x) { if (kit.ours) [e charonHostsetIndexes:x]; else [e setIndexes:x]; };
+        NSArray *(^get)(void) = ^NSArray *{ return kit.ours ? [e revenantHostindexes] : [e indexes]; };
+        void (^set)(NSArray *) = ^(NSArray *x) { if (kit.ours) [e revenantHostsetIndexes:x]; else [e setIndexes:x]; };
         [out addObject:[NSString stringWithFormat:@"default %lu", (unsigned long)get().count]];
         id a = make_element(kit, w.name, 0), b = make_element(kit, w.i16, 1);
         id ix = make_index(kit, @"byname", @[a]), ix2 = make_index(kit, @"byi16", @[b]);
@@ -270,20 +270,20 @@ static void entities(void)
         [out addObject:raised(^{ set(nil); }) ];
         [out addObject:[NSString stringWithFormat:@"after nil %lu %d", (unsigned long)get().count, [relIndex entity] == e]];
         NSExpression *expression = [NSExpression expressionForKeyPath:@"name"];
-        [out addObject:[NSString stringWithFormat:@"expression default %d", (kit.ours ? [e charonHostcoreSpotlightDisplayNameExpression] : [e coreSpotlightDisplayNameExpression]) == nil]];
+        [out addObject:[NSString stringWithFormat:@"expression default %d", (kit.ours ? [e revenantHostcoreSpotlightDisplayNameExpression] : [e coreSpotlightDisplayNameExpression]) == nil]];
         if (kit.ours)
-            [e charonHostsetCoreSpotlightDisplayNameExpression:expression];
+            [e revenantHostsetCoreSpotlightDisplayNameExpression:expression];
         else
             [e setCoreSpotlightDisplayNameExpression:expression];
-        [out addObject:[NSString stringWithFormat:@"expression set %d", (kit.ours ? [e charonHostcoreSpotlightDisplayNameExpression] : [e coreSpotlightDisplayNameExpression]) == expression]];
+        [out addObject:[NSString stringWithFormat:@"expression set %d", (kit.ours ? [e revenantHostcoreSpotlightDisplayNameExpression] : [e coreSpotlightDisplayNameExpression]) == expression]];
         NSEntityDescription *frozen = [[NSEntityDescription alloc] init];
         frozen.name = @"Frozen";
         frozen.properties = @[attribute(@"name", NSStringAttributeType)];
         NSManagedObjectModel *model = [[NSManagedObjectModel alloc] init];
         model.entities = @[frozen];
         (void)[[NSPersistentStoreCoordinator alloc] initWithManagedObjectModel:model];
-        [out addObject:raised(^{ if (kit.ours) [frozen charonHostsetIndexes:@[]]; else [frozen setIndexes:@[]]; })];
-        [out addObject:raised(^{ if (kit.ours) [frozen charonHostsetCoreSpotlightDisplayNameExpression:nil]; else [frozen setCoreSpotlightDisplayNameExpression:nil]; })];
+        [out addObject:raised(^{ if (kit.ours) [frozen revenantHostsetIndexes:@[]]; else [frozen setIndexes:@[]]; })];
+        [out addObject:raised(^{ if (kit.ours) [frozen revenantHostsetCoreSpotlightDisplayNameExpression:nil]; else [frozen setCoreSpotlightDisplayNameExpression:nil]; })];
         [rows addObject:out];
     }
     CHECK_EQUAL(rows[1], rows[0], "entity indexes");
@@ -330,7 +330,7 @@ int main(void)
         values();
         entities();
         coding();
-        printf("checks=%d failures=%d\n", charon_checks, charon_failures);
+        printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
     }
-    return charon_failures ? 1 : 0;
+    return revenant_failures ? 1 : 0;
 }

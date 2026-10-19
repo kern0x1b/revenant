@@ -1,6 +1,6 @@
 #import <HealthKit/HealthKit.h>
 
-#import "CharonHKStore.h"
+#import "RevenantHKStore.h"
 
 #pragma mark - HKActivitySummary
 
@@ -26,7 +26,7 @@
     return YES;
 }
 
-- (instancetype)charon_initWithStartDate:(NSDate *)startDate
+- (instancetype)revenant_initWithStartDate:(NSDate *)startDate
 {
     HKActivitySummary *summary = [super init];
     if (summary) {
@@ -74,7 +74,7 @@
 
 - (id)copyWithZone:(NSZone *)zone
 {
-    HKActivitySummary *copy = [[HKActivitySummary alloc] charon_initWithStartDate:_startDate];
+    HKActivitySummary *copy = [[HKActivitySummary alloc] revenant_initWithStartDate:_startDate];
     copy->_dateComponents = [_dateComponents copy];
     copy->_activeEnergyBurned = [_activeEnergyBurned copy];
     copy->_activeEnergyBurnedGoal = [_activeEnergyBurnedGoal copy];
@@ -160,7 +160,7 @@
     return [calendar components:units fromDate:_startDate];
 }
 
-+ (nullable instancetype)charon_objectFromArchive:(NSData *)archive type:(HKObjectType *)type store:(CharonHKStore *)store
++ (nullable instancetype)revenant_objectFromArchive:(NSData *)archive type:(HKObjectType *)type store:(RevenantHKStore *)store
 {
     if (!archive.length || ![self supportsSecureCoding])
         return nil;

@@ -22,7 +22,7 @@
 #include "kernel/mach_clock_abi.hpp"
 #include "mach/mig_wire_abi.hpp"
 
-namespace shade {
+namespace emulator {
 namespace {
 
     constexpr std::uint32_t mach_rcv_too_large = 0x10004004U;

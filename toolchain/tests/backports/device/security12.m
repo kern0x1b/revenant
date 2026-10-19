@@ -49,8 +49,8 @@ int main(int argc, char **argv)
 {
     @autoreleasepool {
         if (argc > 1)
-            charon_log_to(@(argv[1]));
-#ifndef CHARON_HOST
+            revenant_log_to(@(argv[1]));
+#ifndef REVENANT_HOST
         CHECK_EQUAL(image_of((void *)&SecTrustEvaluateWithError), @"libSecurityBackports.dylib", "SecTrustEvaluateWithError comes from the backports");
         CHECK_EQUAL(image_of((void *)&SecCertificateCopyKey), @"libSecurityBackports.dylib", "SecCertificateCopyKey comes from the backports");
         CHECK_EQUAL(image_of((void *)&SecCertificateCopySerialNumberData), @"libSecurityBackports.dylib", "SecCertificateCopySerialNumberData comes from the backports");
@@ -58,21 +58,21 @@ int main(int argc, char **argv)
         const NSTimeInterval valid = 1798761600, expired = 2208988800;
         NSString *domain = @"NSOSStatusErrorDomain";
         expect("a trusted certificate with the basic policy", SecPolicyCreateBasicX509(), YES, valid, @"");
-        expect("a trusted certificate with the SSL policy and its name", SecPolicyCreateSSL(true, CFSTR("charon.test")), YES, valid, @"");
+        expect("a trusted certificate with the SSL policy and its name", SecPolicyCreateSSL(true, CFSTR("revenant.test")), YES, valid, @"");
         expect("an untrusted root", SecPolicyCreateBasicX509(), NO, valid,
-               [domain stringByAppendingString:@" -67843 [“charon.test” certificate is not trusted] | NSOSStatusErrorDomain -67843 [Certificate 0 “charon.test” has errors: Root is not trusted;]"]);
-        expect("an untrusted root with the SSL policy", SecPolicyCreateSSL(true, CFSTR("charon.test")), NO, valid,
-               [domain stringByAppendingString:@" -67843 [“charon.test” certificate is not trusted] | NSOSStatusErrorDomain -67843 [Certificate 0 “charon.test” has errors: Root is not trusted;]"]);
+               [domain stringByAppendingString:@" -67843 [“revenant.test” certificate is not trusted] | NSOSStatusErrorDomain -67843 [Certificate 0 “revenant.test” has errors: Root is not trusted;]"]);
+        expect("an untrusted root with the SSL policy", SecPolicyCreateSSL(true, CFSTR("revenant.test")), NO, valid,
+               [domain stringByAppendingString:@" -67843 [“revenant.test” certificate is not trusted] | NSOSStatusErrorDomain -67843 [Certificate 0 “revenant.test” has errors: Root is not trusted;]"]);
         expect("a name that does not match", SecPolicyCreateSSL(true, CFSTR("other.test")), YES, valid,
-               [domain stringByAppendingString:@" -67602 [“charon.test” certificate name does not match input] | NSOSStatusErrorDomain -67602 [Certificate 0 “charon.test” has errors: SSL hostname does not match name(s) in certificate;]"]);
+               [domain stringByAppendingString:@" -67602 [“revenant.test” certificate name does not match input] | NSOSStatusErrorDomain -67602 [Certificate 0 “revenant.test” has errors: SSL hostname does not match name(s) in certificate;]"]);
         expect("an expired certificate", SecPolicyCreateBasicX509(), YES, expired,
-               [domain stringByAppendingString:@" -67818 [“charon.test” certificate is expired] | NSOSStatusErrorDomain -67818 [Certificate 0 “charon.test” has errors: Certificate is not temporally valid;]"]);
+               [domain stringByAppendingString:@" -67818 [“revenant.test” certificate is expired] | NSOSStatusErrorDomain -67818 [Certificate 0 “revenant.test” has errors: Certificate is not temporally valid;]"]);
         expect("a name that does not match and an expired certificate", SecPolicyCreateSSL(true, CFSTR("other.test")), YES, expired,
-               [domain stringByAppendingString:@" -67602 [“charon.test” certificate name does not match input] | NSOSStatusErrorDomain -67602 [Certificate 0 “charon.test” has errors: SSL hostname does not match name(s) in certificate, Certificate is not temporally valid;]"]);
+               [domain stringByAppendingString:@" -67602 [“revenant.test” certificate name does not match input] | NSOSStatusErrorDomain -67602 [Certificate 0 “revenant.test” has errors: SSL hostname does not match name(s) in certificate, Certificate is not temporally valid;]"]);
         expect("an untrusted root and a name that does not match", SecPolicyCreateSSL(true, CFSTR("other.test")), NO, valid,
-               [domain stringByAppendingString:@" -67843 [“charon.test” certificate is not trusted] | NSOSStatusErrorDomain -67843 [Certificate 0 “charon.test” has errors: SSL hostname does not match name(s) in certificate, Root is not trusted;]"]);
+               [domain stringByAppendingString:@" -67843 [“revenant.test” certificate is not trusted] | NSOSStatusErrorDomain -67843 [Certificate 0 “revenant.test” has errors: SSL hostname does not match name(s) in certificate, Root is not trusted;]"]);
         expect("an untrusted root, a name and the time", SecPolicyCreateSSL(true, CFSTR("other.test")), NO, expired,
-               [domain stringByAppendingString:@" -67843 [“charon.test” certificate is not trusted] | NSOSStatusErrorDomain -67843 [Certificate 0 “charon.test” has errors: SSL hostname does not match name(s) in certificate, Certificate is not temporally valid, Root is not trusted;]"]);
+               [domain stringByAppendingString:@" -67843 [“revenant.test” certificate is not trusted] | NSOSStatusErrorDomain -67843 [Certificate 0 “revenant.test” has errors: SSL hostname does not match name(s) in certificate, Certificate is not temporally valid, Root is not trusted;]"]);
         SecCertificateRef certificate = SecCertificateCreateWithData(NULL, (__bridge CFDataRef)[NSData dataWithBytes:der length:sizeof der]);
         SecTrustRef trust = NULL;
         SecTrustCreateWithCertificates(certificate, SecPolicyCreateBasicX509(), &trust);
@@ -85,7 +85,7 @@ int main(int argc, char **argv)
         CHECK(again && failure == NULL, "a serial number is answered without an error");
         SecKeyRef key = SecCertificateCopyKey(certificate);
         CHECK(key != NULL && SecKeyGetBlockSize(key) == 256, "the key of the certificate is a 2048 bit key");
-        printf("%d of %d checks failed\n", charon_failures, charon_checks);
-        return charon_failures;
+        printf("%d of %d checks failed\n", revenant_failures, revenant_checks);
+        return revenant_failures;
     }
 }

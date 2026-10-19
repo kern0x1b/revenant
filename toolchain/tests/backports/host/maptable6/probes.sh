@@ -7,7 +7,7 @@
 # registrationprobe (probes/registration.m): whether dispatch_resume calls a source's registration handler before it returns or only enqueues it, with the target queue held, on all four releases - what the registration half of the barrier source entry rests on.
 # The verdicts are read, not asserted: a crash on 4.3 is what the facts say. Logs in $MAPTABLE6_BUILD.
 # MAPTABLE6_BOOT is the whole-boot timeout in seconds (xmake emulate's -t, 900 by default). A release with no golden image
-# yet in ~/.charon/emulator has to boot once past its first-boot migration before it can run anything, and on a machine
+# yet in ~/.revenant/emulator has to boot once past its first-boot migration before it can run anything, and on a machine
 # busy with two gate bands that first boot is the one that gives out - measured on 2026-10-03: the build and all three
 # installs finished ("imports: every non-weak import ... resolves against 85386 exports", "install ok!") and
 # "booting iPhone2,1 9A334 once past its first-boot migration for a golden image" answered "error: <no error object>".
@@ -16,7 +16,7 @@ here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 export MAPTABLE6_ROOT=$(cd "$here/../../../.." && pwd)
 export MAPTABLE6_PROBES=1
-build=${MAPTABLE6_BUILD:-$(runs_folder charon-maptable6-probes)}
+build=${MAPTABLE6_BUILD:-$(runs_folder revenant-maptable6-probes)}
 device=${MAPTABLE6_DEVICE:-iPhone2,1}
 : ${MAPTABLE6_BOOT:=1800}
 rm -rf "$build"

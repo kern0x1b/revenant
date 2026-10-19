@@ -746,7 +746,7 @@ static BOOL near(const uint8_t *p, int r, int g, int b, int tolerance)
     id<CAMetalDrawable> second = [layer nextDrawable];
     CHECK(second != nil && second != drawable, "the next drawable is another");
 
-    NSString *summary = [NSString stringWithFormat:@"%d checks, %d failed\n", charon_checks, charon_failures];
+    NSString *summary = [NSString stringWithFormat:@"%d checks, %d failed\n", revenant_checks, revenant_failures];
     [summary writeToFile:[results_folder stringByAppendingPathComponent:@"metal.done"] atomically:YES encoding:NSUTF8StringEncoding error:NULL];
 }
 
@@ -754,7 +754,7 @@ static BOOL near(const uint8_t *p, int r, int g, int b, int tolerance)
 {
     [[NSFileManager defaultManager] createDirectoryAtPath:results_folder withIntermediateDirectories:YES attributes:nil error:NULL];
     [[NSFileManager defaultManager] removeItemAtPath:[results_folder stringByAppendingPathComponent:@"metal.done"] error:NULL];
-    charon_log_to([results_folder stringByAppendingPathComponent:@"metal.log"]);
+    revenant_log_to([results_folder stringByAppendingPathComponent:@"metal.log"]);
     self.window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
     self.window.rootViewController = [[UIViewController alloc] init];
     self.window.rootViewController.view.backgroundColor = [UIColor whiteColor];

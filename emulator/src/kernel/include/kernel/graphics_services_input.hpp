@@ -19,13 +19,13 @@
 #include "foundation/system_button_input.hpp"
 #include "foundation/touch_input.hpp"
 
-namespace shade {
+namespace emulator {
 class PresentationTracker;
 class SceneCoordinator;
 class UserlandHleRegistry;
 }
 
-namespace shade::graphics_services_input {
+namespace emulator::graphics_services_input {
 
 inline constexpr std::string_view system_event_service {
     "PurpleSystemEventPort"

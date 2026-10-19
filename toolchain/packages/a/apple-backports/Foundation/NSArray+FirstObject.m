@@ -1,6 +1,6 @@
 #import <Foundation/Foundation.h>
 
-@implementation NSArray (CharonFirstObject)
+@implementation NSArray (RevenantFirstObject)
 
 - (id)firstObject
 {

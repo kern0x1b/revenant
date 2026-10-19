@@ -28,7 +28,7 @@ typedef NS_OPTIONS(NSUInteger, UIAccessibilityDirectTouchOptions) {
 } API_AVAILABLE(ios(17.0));
 
 API_AVAILABLE(ios(17.0), tvos(17.0)) API_UNAVAILABLE(watchos)
-@interface NSObject (CharonAccessibilityBlocks17)
+@interface NSObject (RevenantAccessibilityBlocks17)
 
 @property (nullable, nonatomic, copy) AXBoolReturnBlock isAccessibilityElementBlock;
 @property (nullable, nonatomic, copy) AXStringReturnBlock accessibilityLabelBlock;

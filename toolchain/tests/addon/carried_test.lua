@@ -35,7 +35,7 @@ local function packages_step(platform, found)
     if fixtures.refusal(function () platform.verify_packages(packages_target({"ldid"}, {ldid = {}})) end) then
         table.insert(found, "a package the target receives must leave it alone")
     end
-    if fixtures.refusal(function () platform.verify_packages(packages_target({"charon@absent"}, {})) end) then
+    if fixtures.refusal(function () platform.verify_packages(packages_target({"revenant@absent"}, {})) end) then
         table.insert(found, "a name the project requires nowhere is no package of this target")
     end
 end
@@ -43,22 +43,22 @@ end
 local function bundled_step(bundle, found)
     local target = {
         name = function () return "tweak" end,
-        values = function (_, key) return key == "charon.libraries" and {"charon@apple-backports"} or nil end,
+        values = function (_, key) return key == "revenant.libraries" and {"revenant@apple-backports"} or nil end,
         dep = function () return nil end,
         pkg = function () return nil end
     }
-    local refused = fixtures.refusal(function () bundle.carried_libraries(target, "charon.libraries") end)
+    local refused = fixtures.refusal(function () bundle.carried_libraries(target, "revenant.libraries") end)
     if not (refused and refused:find("which is apple-backports", 1, true)) then
         table.insert(found, "a package bundled under the name of its repository must be told the name to use, not " .. tostring(refused))
     end
 end
 
 local function waivers_step(platform, found)
-    local declared = {["charon.waive.pagezero"] = "a reason", ["charon.waive.weak-imports"] = "guarded"}
+    local declared = {["revenant.waive.pagezero"] = "a reason", ["revenant.waive.weak-imports"] = "guarded"}
     local target = {values = function (_, key) return declared[key] end}
     local waived = platform.waivers(target)
     if waived.pagezero ~= "a reason" or waived["weak-imports"] ~= "guarded" then
-        table.insert(found, "the waivers a target declares with charon.waive.<check> must reach the checks: " .. tostring(waived.pagezero) .. ", " .. tostring(waived["weak-imports"]))
+        table.insert(found, "the waivers a target declares with revenant.waive.<check> must reach the checks: " .. tostring(waived.pagezero) .. ", " .. tostring(waived["weak-imports"]))
     end
     if waived.entitlements or waived["thumb-interworking"] then
         table.insert(found, "a check the target does not waive must not be waived")
@@ -68,7 +68,7 @@ end
 local function one_runtime_step(platform, folder, found)
     local function package(name, mark, linkdir)
         return {name = function () return name end,
-                envs = function () return mark and {CHARON_SWIFT_RUNTIME_MARK = {mark}} or {} end,
+                envs = function () return mark and {REVENANT_SWIFT_RUNTIME_MARK = {mark}} or {} end,
                 get = function (_, key) return key == "linkdirs" and {linkdir} or nil end}
     end
     local function target(...)
@@ -81,15 +81,15 @@ local function one_runtime_step(platform, folder, found)
         io.writefile(path.join(dir, "libc++.dylib"), "")
     end
     local none = path.join(folder, "empty")
-    if fixtures.refusal(function () platform.verify_one_runtime(target(package("swift-runtime", "charon_swift_runtime_one", none), package("styx", "charon_swift_runtime_one", none), package("libcxx", nil, first))) end) then
+    if fixtures.refusal(function () platform.verify_one_runtime(target(package("swift-runtime", "revenant_swift_runtime_one", none), package("combine", "revenant_swift_runtime_one", none), package("libcxx", nil, first))) end) then
         table.insert(found, "packages built against one runtime and one libc++ must pass")
     end
-    local refused = fixtures.refusal(function () platform.verify_one_runtime(target(package("swift-runtime", "charon_swift_runtime_one", none), package("styx", "charon_swift_runtime_two", none))) end) or ""
-    if not refused:find("2 builds of swift-runtime", 1, true) or not refused:find("charon_swift_runtime_one (swift-runtime)", 1, true) or not refused:find("charon_swift_runtime_two (styx)", 1, true) then
+    local refused = fixtures.refusal(function () platform.verify_one_runtime(target(package("swift-runtime", "revenant_swift_runtime_one", none), package("combine", "revenant_swift_runtime_two", none))) end) or ""
+    if not refused:find("2 builds of swift-runtime", 1, true) or not refused:find("revenant_swift_runtime_one (swift-runtime)", 1, true) or not refused:find("revenant_swift_runtime_two (combine)", 1, true) then
         table.insert(found, "a package built against another runtime must be refused, naming each build and who asks for it: " .. refused)
     end
-    refused = fixtures.refusal(function () platform.verify_one_runtime(target(package("libcxx", nil, first), package("styx", nil, second))) end) or ""
-    if not refused:find("2 builds of libcxx", 1, true) or not refused:find("(styx)", 1, true) then
+    refused = fixtures.refusal(function () platform.verify_one_runtime(target(package("libcxx", nil, first), package("combine", nil, second))) end) or ""
+    if not refused:find("2 builds of libcxx", 1, true) or not refused:find("(combine)", 1, true) then
         table.insert(found, "two builds of libc++ in one link must be refused: " .. refused)
     end
 end
@@ -122,24 +122,24 @@ function failures(opt)
     local binary = path.join(root, "Library", "MobileSubstrate", "DynamicLibraries", "tweak.dylib")
     os.mkdir(path.directory(binary))
     os.cp(built, binary)
-    local target = fake_target(folder, {["charon.libraries"] = "runtime", ["charon.control"] = "control"}, runtime)
+    local target = fake_target(folder, {["revenant.libraries"] = "runtime", ["revenant.control"] = "control"}, runtime)
     local placed, runtime_images = platform.place_carried(target, root, binary)
-    local carried = path.join(root, "usr", "lib", "charon", "org.example.carried")
+    local carried = path.join(root, "usr", "lib", "revenant", "org.example.carried")
     if #runtime_images ~= 0 then
         table.insert(found, "a library carried from a package that is not the runtime is the program's to answer for, and must not be exempted: " .. table.concat(runtime_images, " "))
     end
     if #placed ~= 2 or not os.isfile(path.join(carried, "libabi.1.dylib")) then
-        table.insert(found, "a tweak carries the library it loads into /usr/lib/charon/<Package>, got " .. table.concat(placed, " "))
+        table.insert(found, "a tweak carries the library it loads into /usr/lib/revenant/<Package>, got " .. table.concat(placed, " "))
     end
     if os.isfile(path.join(carried, "libcxx.1.dylib")) then
         table.insert(found, "a library of the package that no placed image loads must not be carried")
     end
     local listed = references(folder, binary)
-    if not listed:find("/usr/lib/charon/org.example.carried/libabi.1.dylib", 1, true) or listed:find("@rpath", 1, true) then
+    if not listed:find("/usr/lib/revenant/org.example.carried/libabi.1.dylib", 1, true) or listed:find("@rpath", 1, true) then
         table.insert(found, "the tweak must load its runtime from its package's folder: " .. listed)
     end
     local identity = references(folder, path.join(carried, "libabi.1.dylib"))
-    if not identity:startswith("/usr/lib/charon/org.example.carried/libabi.1.dylib") then
+    if not identity:startswith("/usr/lib/revenant/org.example.carried/libabi.1.dylib") then
         table.insert(found, "the carried library must be identified by its installed path: " .. identity)
     end
 
@@ -147,9 +147,9 @@ function failures(opt)
     local runtime_binary = path.join(runtime_root, "Library", "MobileSubstrate", "DynamicLibraries", "tweak.dylib")
     os.mkdir(path.directory(runtime_binary))
     os.cp(built, runtime_binary)
-    local carrying = fake_target(folder, {["charon.libraries"] = "swift-runtime", ["charon.control"] = "control"}, runtime, "swift-runtime")
+    local carrying = fake_target(folder, {["revenant.libraries"] = "swift-runtime", ["revenant.control"] = "control"}, runtime, "swift-runtime")
     local _, exempted = platform.place_carried(carrying, runtime_root, runtime_binary)
-    local expected = path.join(runtime_root, "usr", "lib", "charon", "org.example.carried", "libabi.1.dylib")
+    local expected = path.join(runtime_root, "usr", "lib", "revenant", "org.example.carried", "libabi.1.dylib")
     if #exempted ~= 1 or exempted[1] ~= expected then
         table.insert(found, "the copy of a library carried from the runtime package must be exempted as the runtime's image, got " .. table.concat(exempted, " "))
     end
@@ -180,24 +180,24 @@ function failures(opt)
         end
     end
 
-    local unnamed = fake_target(folder, {["charon.libraries"] = "runtime"}, runtime)
+    local unnamed = fake_target(folder, {["revenant.libraries"] = "runtime"}, runtime)
     local errors = fixtures.refusal(function () platform.place_carried(unnamed, path.join(folder, "unnamed"), built) end) or ""
-    if not errors:find("charon.control", 1, true) then
+    if not errors:find("revenant.control", 1, true) then
         table.insert(found, "a tweak that carries a library without naming its package must be refused: " .. errors)
     end
 
     io.writefile(path.join(folder, "nameless"), "Name: Carried\nArchitecture: iphoneos-arm\n")
-    local nameless = fake_target(folder, {["charon.libraries"] = "runtime", ["charon.control"] = "nameless"}, runtime)
+    local nameless = fake_target(folder, {["revenant.libraries"] = "runtime", ["revenant.control"] = "nameless"}, runtime)
     errors = fixtures.refusal(function () platform.place_carried(nameless, path.join(folder, "nameless-root"), built) end) or ""
     if not errors:find("no Package field", 1, true) then
         table.insert(found, "a control file without Package cannot name the folder, and must be refused: " .. errors)
     end
     local shared = path.join(folder, "shared-tweak.dylib")
     os.cp(built, shared)
-    local provided = {["libabi.1.dylib"] = "/usr/lib/charon/org.example.shared/libabi.1.dylib"}
+    local provided = {["libabi.1.dylib"] = "/usr/lib/revenant/org.example.shared/libabi.1.dylib"}
     bundle.retarget({shared}, {}, {provided = provided})
     listed = references(folder, shared)
-    if not listed:find("/usr/lib/charon/org.example.shared/libabi.1.dylib", 1, true) or listed:find("@rpath", 1, true) then
+    if not listed:find("/usr/lib/revenant/org.example.shared/libabi.1.dylib", 1, true) or listed:find("@rpath", 1, true) then
         table.insert(found, "a program must load a library its dependency installs from that package's folder: " .. listed)
     end
     os.cp(built, shared)

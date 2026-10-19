@@ -1,9 +1,9 @@
 #import <UIKit/UIKit.h>
 #import "directionaledges-cases.h"
 
-extern const NSDirectionalEdgeInsets CharonHostNSDirectionalEdgeInsetsZero;
-extern NSString *CharonHostNSStringFromDirectionalEdgeInsets(NSDirectionalEdgeInsets);
-extern NSDirectionalEdgeInsets CharonHostNSDirectionalEdgeInsetsFromString(NSString *);
+extern const NSDirectionalEdgeInsets RevenantHostNSDirectionalEdgeInsetsZero;
+extern NSString *RevenantHostNSStringFromDirectionalEdgeInsets(NSDirectionalEdgeInsets);
+extern NSDirectionalEdgeInsets RevenantHostNSDirectionalEdgeInsetsFromString(NSString *);
 void host_attach_prefixed(const char *prefix);
 
 int main(int argc, char **argv)
@@ -13,7 +13,7 @@ int main(int argc, char **argv)
             fprintf(stderr, "usage: %s expectations.json\n", argv[0]);
             return 2;
         }
-        host_attach_prefixed("charonHost_");
+        host_attach_prefixed("revenantHost_");
 
         DirectionalEdgesRecorder *system = [DirectionalEdgesRecorder new];
         DirectionalEdgesImplementation systemImplementation = {
@@ -23,8 +23,8 @@ int main(int argc, char **argv)
 
         DirectionalEdgesRecorder *ours = [DirectionalEdgesRecorder new];
         DirectionalEdgesImplementation ourImplementation = {
-            .prefix = @"charonHost_", .zero = &CharonHostNSDirectionalEdgeInsetsZero,
-            .string = CharonHostNSStringFromDirectionalEdgeInsets, .parse = CharonHostNSDirectionalEdgeInsetsFromString};
+            .prefix = @"revenantHost_", .zero = &RevenantHostNSDirectionalEdgeInsetsZero,
+            .string = RevenantHostNSStringFromDirectionalEdgeInsets, .parse = RevenantHostNSDirectionalEdgeInsetsFromString};
         directionaledges_run(ourImplementation, ours);
 
         int failures = 0;

@@ -16,7 +16,7 @@ int main(int argc, char **argv)
 {
     @autoreleasepool {
         if (argc > 1)
-            charon_log_to(@(argv[1]));
+            revenant_log_to(@(argv[1]));
         NSArray *names = @[@"GCColor", @"GCEventViewController", @"GCXboxGamepad", @"GCDualShockGamepad", @"GCControllerTouchpad", @"GCDeviceBattery", @"GCDeviceLight", @"GCDeviceHaptics",
                            @"GCKeyboardInput", @"GCMouseInput", @"GCDeviceCursor", @"GCDirectionalGamepad", @"GCDualSenseGamepad", @"GCDualSenseAdaptiveTrigger"];
         int carried = 0;
@@ -46,7 +46,7 @@ int main(int argc, char **argv)
         CHECK(!controller.controllerUserInteractionEnabled, "the event view controller starts with controller events kept from the responder chain");
         controller.controllerUserInteractionEnabled = YES;
         CHECK(controller.controllerUserInteractionEnabled && [controller isKindOfClass:[UIViewController class]], "it keeps what is set and is a view controller");
-        printf("%d checks, %d failures\n", charon_checks, charon_failures);
-        return charon_failures;
+        printf("%d checks, %d failures\n", revenant_checks, revenant_failures);
+        return revenant_failures;
     }
 }

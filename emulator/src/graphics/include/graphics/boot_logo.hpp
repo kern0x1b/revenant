@@ -10,7 +10,7 @@
 
 #include "foundation/display_geometry.hpp"
 
-namespace shade {
+namespace emulator {
 
 class BootLogo {
 public:

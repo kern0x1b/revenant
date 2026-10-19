@@ -1,5 +1,5 @@
 #!/bin/sh
-# run.sh - the port's kUTType names (renamed charonHost_*) against the host's own CoreServices, which
+# run.sh - the port's kUTType names (renamed revenantHost_*) against the host's own CoreServices, which
 # exports every one of them. The values were read out of the arm64e shared cache of iOS 18.0; this is
 # the second, independent source, and a value mistyped on the way out of the cache shows up here.
 set -eu
@@ -7,12 +7,12 @@ here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 port=${PORT:-$here/../../../../packages/a/apple-backports/.gen/CoreServices}
 harness=${CORESERVICESNAMES_HARNESS:-$here/../../device}
-build=${CORESERVICESNAMES_BUILD:-$(runs_fresh charon-coreservicesnames)}
+build=${CORESERVICESNAMES_BUILD:-$(runs_fresh revenant-coreservicesnames)}
 rm -rf "$build"
 mkdir -p "$build"
 renames=""
 for name in $(sed -e '1,3d' "$here/names.txt"); do
-    renames="$renames -D$name=charonHost_$name"
+    renames="$renames -D$name=revenantHost_$name"
 done
 objects=""
 for source in CoreServicesNames80 CoreServicesNames90 CoreServicesNames91; do

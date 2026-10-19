@@ -3,22 +3,22 @@
 
 #pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
 
-static const char CharonTablePrefetchEnabled15Key;
+static const char RevenantTablePrefetchEnabled15Key;
 
-@interface UITableView (CharonPrefetchingEnabled15)
+@interface UITableView (RevenantPrefetchingEnabled15)
 - (BOOL)isPrefetchingEnabled;
 - (void)setPrefetchingEnabled:(BOOL)prefetchingEnabled;
-- (BOOL)charon_prefetchingAllowed;
+- (BOOL)revenant_prefetchingAllowed;
 @end
 
-@interface UITableView (CharonPrefetchRows10)
-- (void)charon_prefetchRows;
+@interface UITableView (RevenantPrefetchRows10)
+- (void)revenant_prefetchRows;
 @end
 
-@interface CharonTablePrefetchEnabled15Installer : NSObject
+@interface RevenantTablePrefetchEnabled15Installer : NSObject
 @end
 
-@implementation CharonTablePrefetchEnabled15Installer
+@implementation RevenantTablePrefetchEnabled15Installer
 
 + (void)load
 {
@@ -31,11 +31,11 @@ static const char CharonTablePrefetchEnabled15Key;
     class_replaceMethod([UITableView class], @selector(layoutSubviews),
                         imp_implementationWithBlock(^(UITableView *table) {
         ((void (*)(id, SEL))original)(table, @selector(layoutSubviews));
-        if (!table.charon_prefetchingAllowed)
+        if (!table.revenant_prefetchingAllowed)
             return;
-        if ([table respondsToSelector:@selector(charon_prefetchRows)])
-            [table charon_prefetchRows];
-    }), "ccharon_layoutSubviews_prefetch15");
+        if ([table respondsToSelector:@selector(revenant_prefetchRows)])
+            [table revenant_prefetchRows];
+    }), "crevenant_layoutSubviews_prefetch15");
 }
 
 @end
@@ -43,19 +43,19 @@ static const char CharonTablePrefetchEnabled15Key;
 
 
 
-@implementation UITableView (CharonPrefetchingEnabled15)
+@implementation UITableView (RevenantPrefetchingEnabled15)
 
 - (BOOL)isPrefetchingEnabled
 {
-    return [objc_getAssociatedObject(self, &CharonTablePrefetchEnabled15Key) boolValue];
+    return [objc_getAssociatedObject(self, &RevenantTablePrefetchEnabled15Key) boolValue];
 }
 
 - (void)setPrefetchingEnabled:(BOOL)prefetchingEnabled
 {
-    objc_setAssociatedObject(self, &CharonTablePrefetchEnabled15Key, @(prefetchingEnabled), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, &RevenantTablePrefetchEnabled15Key, @(prefetchingEnabled), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
-- (BOOL)charon_prefetchingAllowed
+- (BOOL)revenant_prefetchingAllowed
 {
     return self.isPrefetchingEnabled;
 }

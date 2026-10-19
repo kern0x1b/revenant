@@ -1,10 +1,10 @@
-#ifndef CHARON_ML_WRITE_H
-#define CHARON_ML_WRITE_H
+#ifndef REVENANT_ML_WRITE_H
+#define REVENANT_ML_WRITE_H
 
 #include <stddef.h>
 
-#include "CharonMLProto.h"
+#include "RevenantMLProto.h"
 
-int charon_ml_write(const charon_ml_node *document, unsigned char **bytes, size_t *length);
+int revenant_ml_write(const revenant_ml_node *document, unsigned char **bytes, size_t *length);
 
 #endif

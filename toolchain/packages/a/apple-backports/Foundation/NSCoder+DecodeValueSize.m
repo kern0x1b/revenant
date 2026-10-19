@@ -1,6 +1,6 @@
 #import <Foundation/Foundation.h>
 
-@implementation NSCoder (CharonDecodeValueSize)
+@implementation NSCoder (RevenantDecodeValueSize)
 
 - (void)decodeValueOfObjCType:(const char *)type at:(void *)data size:(NSUInteger)size
 {

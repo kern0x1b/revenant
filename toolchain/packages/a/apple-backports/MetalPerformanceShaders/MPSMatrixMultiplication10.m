@@ -1,4 +1,4 @@
-#import "CharonMPS.h"
+#import "RevenantMPS.h"
 
 
 @implementation MPSMatrixMultiplication {
@@ -101,11 +101,11 @@
                   rightMatrix:(MPSMatrix *)rightMatrix
                  resultMatrix:(MPSMatrix *)resultMatrix
 {
-    if (!CharonMPSCommandBufferPermits(commandBuffer))
+    if (!RevenantMPSCommandBufferPermits(commandBuffer))
         return;
-    CharonMPSMatrixView left = CharonMPSMatrixViewOf(leftMatrix), right = CharonMPSMatrixViewOf(rightMatrix), result = CharonMPSMatrixViewOf(resultMatrix);
-    if (!CharonMPSDataTypeIsElement(left.dataType) || !CharonMPSDataTypeIsElement(right.dataType) || !CharonMPSDataTypeIsElement(result.dataType)) {
-        CharonMPSRefuse(@"MPSMatrixMultiplication: a matrix of data type %u, %u or %u is not one of the eight element types", (unsigned)left.dataType, (unsigned)right.dataType, (unsigned)result.dataType);
+    RevenantMPSMatrixView left = RevenantMPSMatrixViewOf(leftMatrix), right = RevenantMPSMatrixViewOf(rightMatrix), result = RevenantMPSMatrixViewOf(resultMatrix);
+    if (!RevenantMPSDataTypeIsElement(left.dataType) || !RevenantMPSDataTypeIsElement(right.dataType) || !RevenantMPSDataTypeIsElement(result.dataType)) {
+        RevenantMPSRefuse(@"MPSMatrixMultiplication: a matrix of data type %u, %u or %u is not one of the eight element types", (unsigned)left.dataType, (unsigned)right.dataType, (unsigned)result.dataType);
         return;
     }
     NSUInteger leftRows = _transposeLeft ? _interiorColumns : _resultRows;
@@ -113,20 +113,20 @@
     NSUInteger rightRows = _transposeRight ? _resultColumns : _interiorColumns;
     NSUInteger rightColumns = _transposeRight ? _interiorColumns : _resultColumns;
     NSUInteger start, count;
-    CharonMPSBatch(_batchStart, _batchSize, result.matrices, &start, &count);
+    RevenantMPSBatch(_batchStart, _batchSize, result.matrices, &start, &count);
     count = count < left.matrices ? count : left.matrices;
     count = count < right.matrices ? count : right.matrices;
     BOOL whole = YES;
     for (NSUInteger b = start; b < start + count; b++) {
-        if (!CharonMPSMatrixHolds(&left, b, _leftMatrixOrigin.x, _leftMatrixOrigin.y, leftRows, leftColumns) ||
-            !CharonMPSMatrixHolds(&right, b, _rightMatrixOrigin.x, _rightMatrixOrigin.y, rightRows, rightColumns) ||
-            !CharonMPSMatrixHolds(&result, b, _resultMatrixOrigin.x, _resultMatrixOrigin.y, _resultRows, _resultColumns)) {
+        if (!RevenantMPSMatrixHolds(&left, b, _leftMatrixOrigin.x, _leftMatrixOrigin.y, leftRows, leftColumns) ||
+            !RevenantMPSMatrixHolds(&right, b, _rightMatrixOrigin.x, _rightMatrixOrigin.y, rightRows, rightColumns) ||
+            !RevenantMPSMatrixHolds(&result, b, _resultMatrixOrigin.x, _resultMatrixOrigin.y, _resultRows, _resultColumns)) {
             whole = NO;
             break;
         }
     }
     if (!whole) {
-        CharonMPSRefuse(@"MPSMatrixMultiplication: a matrix of the batch [%lu, %lu) does not hold the %lux%lu, %lux%lu, %lux%lu region its origin names", (unsigned long)start, (unsigned long)(start + count), (unsigned long)leftRows, (unsigned long)leftColumns, (unsigned long)rightRows, (unsigned long)rightColumns, (unsigned long)_resultRows, (unsigned long)_resultColumns);
+        RevenantMPSRefuse(@"MPSMatrixMultiplication: a matrix of the batch [%lu, %lu) does not hold the %lux%lu, %lux%lu, %lux%lu region its origin names", (unsigned long)start, (unsigned long)(start + count), (unsigned long)leftRows, (unsigned long)leftColumns, (unsigned long)rightRows, (unsigned long)rightColumns, (unsigned long)_resultRows, (unsigned long)_resultColumns);
         return;
     }
     for (NSUInteger b = start; b < start + count; b++) {
@@ -136,18 +136,18 @@
                 for (NSUInteger k = 0; k < _interiorColumns; k++) {
                     NSUInteger lr = _transposeLeft ? k : row, lc = _transposeLeft ? row : k;
                     NSUInteger rr = _transposeRight ? column : k, rc = _transposeRight ? k : column;
-                    double a = CharonMPSLoad(CharonMPSMatrixElement(&left, b, _leftMatrixOrigin.x + lr, _leftMatrixOrigin.y + lc), left.dataType, 0);
-                    double c = CharonMPSLoad(CharonMPSMatrixElement(&right, b, _rightMatrixOrigin.x + rr, _rightMatrixOrigin.y + rc), right.dataType, 0);
+                    double a = RevenantMPSLoad(RevenantMPSMatrixElement(&left, b, _leftMatrixOrigin.x + lr, _leftMatrixOrigin.y + lc), left.dataType, 0);
+                    double c = RevenantMPSLoad(RevenantMPSMatrixElement(&right, b, _rightMatrixOrigin.x + rr, _rightMatrixOrigin.y + rc), right.dataType, 0);
                     sum += a * c;
                 }
-                void *element = CharonMPSMatrixElement(&result, b, _resultMatrixOrigin.x + row, _resultMatrixOrigin.y + column);
-                double value = CharonMPSLoad(element, result.dataType, 0);
-                CharonMPSStore(element, result.dataType, 0, _alpha * sum + _beta * value);
+                void *element = RevenantMPSMatrixElement(&result, b, _resultMatrixOrigin.x + row, _resultMatrixOrigin.y + column);
+                double value = RevenantMPSLoad(element, result.dataType, 0);
+                RevenantMPSStore(element, result.dataType, 0, _alpha * sum + _beta * value);
             }
         }
     }
-    CharonMPSConsumeReadCount(leftMatrix);
-    CharonMPSConsumeReadCount(rightMatrix);
+    RevenantMPSConsumeReadCount(leftMatrix);
+    RevenantMPSConsumeReadCount(rightMatrix);
 }
 
 @end

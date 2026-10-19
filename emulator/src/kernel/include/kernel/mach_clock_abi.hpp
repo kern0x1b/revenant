@@ -12,7 +12,7 @@
 
 #include <cstdint>
 
-namespace shade::darwin::mach::clock {
+namespace emulator::darwin::mach::clock {
 
 constexpr std::uint32_t sleep_trap = 62;
 constexpr std::uint32_t null_clock_name = 0;

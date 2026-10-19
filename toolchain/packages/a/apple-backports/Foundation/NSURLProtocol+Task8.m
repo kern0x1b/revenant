@@ -1,9 +1,9 @@
 #import <Foundation/Foundation.h>
 #import <objc/runtime.h>
 
-static char CharonProtocolTaskKey;
+static char RevenantProtocolTaskKey;
 
-@implementation NSURLProtocol (CharonTask)
+@implementation NSURLProtocol (RevenantTask)
 
 + (BOOL)canInitWithTask:(NSURLSessionTask *)task
 {
@@ -18,13 +18,13 @@ static char CharonProtocolTaskKey;
     NSURLRequest *request = task.currentRequest ?: task.originalRequest;
     self = [self initWithRequest:request cachedResponse:cachedResponse client:client];
     if (self)
-        objc_setAssociatedObject(self, &CharonProtocolTaskKey, task, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+        objc_setAssociatedObject(self, &RevenantProtocolTaskKey, task, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     return self;
 }
 
 - (NSURLSessionTask *)task
 {
-    return objc_getAssociatedObject(self, &CharonProtocolTaskKey);
+    return objc_getAssociatedObject(self, &RevenantProtocolTaskKey);
 }
 
 @end

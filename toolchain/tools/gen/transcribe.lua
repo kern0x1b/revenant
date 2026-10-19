@@ -60,7 +60,7 @@ end
 local function have_of(tree)
     local have = {}
     for _, filepath in ipairs(files.glob(path.join(tree, "packages", "**.h"))) do
-        if not string.match(path.filename(filepath), "^Charon[%w]+Protocols%.h$") then
+        if not string.match(path.filename(filepath), "^Revenant[%w]+Protocols%.h$") then
             for line in string.gmatch(strings.universal(io.readfile(filepath)), "[^\n]*") do
                 for name in string.gmatch(line, "@protocol%s+([%w_]+)") do
                     if have[name] == nil and string.find(line, "@protocol%s+" .. name .. "%s*;") == nil then
@@ -430,7 +430,7 @@ local function header_text(tree, sdk, framework, entries, defined16, have, proto
             wants_framework = true
         end
     end
-    local lines = {"// Charon" .. framework .. "Protocols.h \u{2014} the " .. framework .. " protocols the generated protocol sources name, written by",
+    local lines = {"// Revenant" .. framework .. "Protocols.h \u{2014} the " .. framework .. " protocols the generated protocol sources name, written by",
                    "// xmake l tools/gen.lua protocols. One the SDK this package compiles against already defines, or a",
                    "// header of this folder does, is forward-declared and its body comes from that import; any other is",
                    "// transcribed from the SDK that declares it: the base list, each member with its kind and types,",

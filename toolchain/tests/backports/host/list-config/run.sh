@@ -5,7 +5,7 @@ set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 uikit=$here/../../../../packages/a/apple-backports/UIKit
-build=${LIST_CONFIG_BUILD:-$(runs_fresh charon-list-config)}
+build=${LIST_CONFIG_BUILD:-$(runs_fresh revenant-list-config)}
 . "$here/../../common/twoprocess.sh"
 if [ -n "${LIST_CONFIG_PORT_SOURCES:-}" ]; then
     set -- $LIST_CONFIG_PORT_SOURCES

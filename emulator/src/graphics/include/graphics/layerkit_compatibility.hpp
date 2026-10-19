@@ -13,7 +13,7 @@
 #include <set>
 #include <span>
 
-namespace shade {
+namespace emulator {
 
 struct LayerKitApplicationPlacement {
     std::uint32_t position_y { };

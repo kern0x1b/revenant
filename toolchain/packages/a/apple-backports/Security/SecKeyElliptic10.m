@@ -9,18 +9,18 @@ extern CFDictionaryRef SecKeyCopyAttributeDictionary(SecKeyRef key);
 extern OSStatus SecKeyCopyPublicBytes(SecKeyRef key, CFDataRef *serialized);
 extern SecKeyRef SecKeyCreateFromPublicData(CFAllocatorRef allocator, CFIndex algorithmID, CFDataRef serialized);
 
-extern int CharonCKPublicKeyES256(const uint8_t *privateKey, uint8_t *out);
-extern int CharonCKDigestSignES256(const uint8_t *privateKey, const uint8_t *digest, uint8_t *der, size_t capacity);
-extern int CharonCKDigestVerifyES256(const uint8_t *publicKey, size_t publicLength, const uint8_t *digest,
+extern int RevenantCKPublicKeyES256(const uint8_t *privateKey, uint8_t *out);
+extern int RevenantCKDigestSignES256(const uint8_t *privateKey, const uint8_t *digest, uint8_t *der, size_t capacity);
+extern int RevenantCKDigestVerifyES256(const uint8_t *publicKey, size_t publicLength, const uint8_t *digest,
                                     const uint8_t *der, size_t derLength);
-extern int CharonCKSharedSecretES256(const uint8_t *privateKey, const uint8_t *peerPublic, size_t publicLength,
+extern int RevenantCKSharedSecretES256(const uint8_t *privateKey, const uint8_t *peerPublic, size_t publicLength,
                                     uint8_t *secret);
-static void charon_elliptic_sha256(const uint8_t *message, size_t length, uint8_t digest[32])
+static void revenant_elliptic_sha256(const uint8_t *message, size_t length, uint8_t digest[32])
 {
     CC_SHA256(message, (CC_LONG)length, digest);
 }
 
-void CharonSecKeyFail(CFErrorRef *error, OSStatus status, NSString *description)
+void RevenantSecKeyFail(CFErrorRef *error, OSStatus status, NSString *description)
 {
     if (!error) {
         return;
@@ -29,21 +29,21 @@ void CharonSecKeyFail(CFErrorRef *error, OSStatus status, NSString *description)
                            (__bridge CFDictionaryRef)@{@"NSDescription": description});
 }
 
-#define kCharonSecKeyMarker "CharonSecKeyScalar"
+#define kRevenantSecKeyMarker "RevenantSecKeyScalar"
 
-bool CharonSecurityKeyIsPortEC(SecKeyRef key)
+bool RevenantSecurityKeyIsPortEC(SecKeyRef key)
 {
     CFDictionaryRef attributes = SecKeyCopyAttributeDictionary(key);
     if (!attributes) {
         return NO;
     }
-    CFTypeRef marker = CFDictionaryGetValue(attributes, CFSTR(kCharonSecKeyMarker));
+    CFTypeRef marker = CFDictionaryGetValue(attributes, CFSTR(kRevenantSecKeyMarker));
     BOOL ours = marker != NULL;
     CFRelease(attributes);
     return ours;
 }
 
-static BOOL charon_elliptic_port_scalar(SecKeyRef key, uint8_t scalar[32])
+static BOOL revenant_elliptic_port_scalar(SecKeyRef key, uint8_t scalar[32])
 {
     CFDictionaryRef attributes = SecKeyCopyAttributeDictionary(key);
     if (!attributes) {
@@ -58,7 +58,7 @@ static BOOL charon_elliptic_port_scalar(SecKeyRef key, uint8_t scalar[32])
     return whole;
 }
 
-static const uint8_t *charon_elliptic_value(const uint8_t *cursor, const uint8_t *end, uint8_t tag, size_t *length)
+static const uint8_t *revenant_elliptic_value(const uint8_t *cursor, const uint8_t *end, uint8_t tag, size_t *length)
 {
     if (cursor >= end || *cursor++ != tag || cursor >= end) {
         return NULL;
@@ -81,7 +81,7 @@ static const uint8_t *charon_elliptic_value(const uint8_t *cursor, const uint8_t
     return cursor;
 }
 
-static BOOL charon_elliptic_point(SecKeyRef key, uint8_t point[65])
+static BOOL revenant_elliptic_point(SecKeyRef key, uint8_t point[65])
 {
     CFDataRef serialized = NULL;
     if (SecKeyCopyPublicBytes(key, &serialized) != errSecSuccess || !serialized) {
@@ -93,12 +93,12 @@ static BOOL charon_elliptic_point(SecKeyRef key, uint8_t point[65])
     const uint8_t *bytes = CFDataGetBytePtr(serialized);
     const uint8_t *end = bytes + CFDataGetLength(serialized);
     size_t length = 0;
-    const uint8_t *content = charon_elliptic_value(bytes, end, 0x30, &length);
+    const uint8_t *content = revenant_elliptic_value(bytes, end, 0x30, &length);
     const uint8_t *innerEnd = content ? content + length : NULL;
     size_t algorithm = 0;
-    const uint8_t *algorithmValue = content ? charon_elliptic_value(content, innerEnd, 0x30, &algorithm) : NULL;
+    const uint8_t *algorithmValue = content ? revenant_elliptic_value(content, innerEnd, 0x30, &algorithm) : NULL;
     size_t bits = 0;
-    const uint8_t *bitString = algorithmValue ? charon_elliptic_value(algorithmValue + algorithm, innerEnd, 0x03, &bits) : NULL;
+    const uint8_t *bitString = algorithmValue ? revenant_elliptic_value(algorithmValue + algorithm, innerEnd, 0x03, &bits) : NULL;
     BOOL whole = bitString && bits == 66 && bitString[0] == 0x00 && bitString[1] == 0x04;
     if (whole) {
         memcpy(point, bitString + 1, 65);
@@ -112,7 +112,7 @@ static const uint8_t uECCP256Order[32] = {0xff, 0xff, 0xff, 0xff, 0x00, 0x00, 0x
                                           0xbc, 0xe6, 0xfa, 0xad, 0xa7, 0x17, 0x9e, 0x84,
                                           0xf3, 0xb9, 0xca, 0xc2, 0xfc, 0x63, 0x25, 0x51};
 
-static void charon_elliptic_order_half(uint8_t half[32])
+static void revenant_elliptic_order_half(uint8_t half[32])
 {
     memset(half, 0, 32);
     for (int index = 0; index < 31; index++) {
@@ -121,7 +121,7 @@ static void charon_elliptic_order_half(uint8_t half[32])
     half[31] = (uint8_t)(uECCP256Order[31] >> 1);
 }
 
-static void charon_elliptic_order_minus(uint8_t out[32], const uint8_t value[32])
+static void revenant_elliptic_order_minus(uint8_t out[32], const uint8_t value[32])
 {
     unsigned borrow = 0;
     for (int index = 31; index >= 0; index--) {
@@ -131,7 +131,7 @@ static void charon_elliptic_order_minus(uint8_t out[32], const uint8_t value[32]
     }
 }
 
-static int charon_elliptic_der_integer(uint8_t *out, const uint8_t value[32])
+static int revenant_elliptic_der_integer(uint8_t *out, const uint8_t value[32])
 {
     int first = 0;
     while (first < 31 && value[first] == 0) {
@@ -151,10 +151,10 @@ static int charon_elliptic_der_integer(uint8_t *out, const uint8_t value[32])
     return length + 2;
 }
 
-static CFDataRef charon_elliptic_der(CFDataRef raw, CFErrorRef *error)
+static CFDataRef revenant_elliptic_der(CFDataRef raw, CFErrorRef *error)
 {
     if (!raw) {
-        CharonSecKeyFail(error, errSecInternalError, @"the release's own signing handed back nothing");
+        RevenantSecKeyFail(error, errSecInternalError, @"the release's own signing handed back nothing");
         return NULL;
     }
     const uint8_t *bytes = CFDataGetBytePtr(raw);
@@ -163,7 +163,7 @@ static CFDataRef charon_elliptic_der(CFDataRef raw, CFErrorRef *error)
         return (CFDataRef)CFRetain(raw);
     }
     if (length != 64) {
-        CharonSecKeyFail(error, errSecInternalError,
+        RevenantSecKeyFail(error, errSecInternalError,
                              [NSString stringWithFormat:@"the release's own signing answered %lu bytes for a P-256 signature, which is neither the two 32 byte halves nor their DER",
                                                       (unsigned long)length]);
         return NULL;
@@ -171,22 +171,22 @@ static CFDataRef charon_elliptic_der(CFDataRef raw, CFErrorRef *error)
     uint8_t halves[64];
     memcpy(halves, bytes, 64);
     uint8_t half[32];
-    charon_elliptic_order_half(half);
+    revenant_elliptic_order_half(half);
     if (memcmp(halves + 32, half, 32) > 0) {
-        charon_elliptic_order_minus(halves + 32, halves + 32);
+        revenant_elliptic_order_minus(halves + 32, halves + 32);
     }
     uint8_t der[72];
     size_t offset = 0;
     der[offset++] = 0x30;
     der[offset++] = 0;
     size_t content = offset;
-    offset += (size_t)charon_elliptic_der_integer(der + offset, halves);
-    offset += (size_t)charon_elliptic_der_integer(der + offset, halves + 32);
+    offset += (size_t)revenant_elliptic_der_integer(der + offset, halves);
+    offset += (size_t)revenant_elliptic_der_integer(der + offset, halves + 32);
     der[1] = (uint8_t)(offset - content);
     return CFDataCreate(kCFAllocatorDefault, der, (CFIndex)offset);
 }
 
-static BOOL charon_elliptic_exchange(SecKeyAlgorithm algorithm, BOOL *hashed)
+static BOOL revenant_elliptic_exchange(SecKeyAlgorithm algorithm, BOOL *hashed)
 {
     if (!algorithm) {
         return NO;
@@ -200,7 +200,7 @@ static BOOL charon_elliptic_exchange(SecKeyAlgorithm algorithm, BOOL *hashed)
     return YES;
 }
 
-bool CharonSecKeyECCarries(SecKeyOperationType operation, SecKeyAlgorithm algorithm)
+bool RevenantSecKeyECCarries(SecKeyOperationType operation, SecKeyAlgorithm algorithm)
 {
     if (!operation || !algorithm) {
         return false;
@@ -210,130 +210,130 @@ bool CharonSecKeyECCarries(SecKeyOperationType operation, SecKeyAlgorithm algori
         return operation == kSecKeyOperationTypeSign || operation == kSecKeyOperationTypeVerify;
     }
     BOOL hashed = NO;
-    if (!charon_elliptic_exchange(algorithm, &hashed)) {
+    if (!revenant_elliptic_exchange(algorithm, &hashed)) {
         return false;
     }
     return operation == kSecKeyOperationTypeKeyExchange;
 }
 
-CFDataRef CharonSecKeyECSign(SecKeyRef key, SecKeyAlgorithm algorithm, CFDataRef data, CFErrorRef *error)
+CFDataRef RevenantSecKeyECSign(SecKeyRef key, SecKeyAlgorithm algorithm, CFDataRef data, CFErrorRef *error)
 {
     if (!key || !data) {
-        CharonSecKeyFail(error, errSecParam, @"a signature needs a key and the data to sign");
+        RevenantSecKeyFail(error, errSecParam, @"a signature needs a key and the data to sign");
         return NULL;
     }
     BOOL digest = CFEqual(algorithm, kSecKeyAlgorithmECDSASignatureMessageX962SHA256)
         || CFEqual(algorithm, kSecKeyAlgorithmECDSASignatureDigestX962SHA256);
     if (!digest) {
-        CharonSecKeyFail(error, errSecParam,
+        RevenantSecKeyFail(error, errSecParam,
                              [NSString stringWithFormat:@"algid:sign:%@: this port signs P-256 with SHA-256 and nothing else", algorithm]);
         return NULL;
     }
     BOOL ofMessage = CFEqual(algorithm, kSecKeyAlgorithmECDSASignatureMessageX962SHA256);
     uint8_t hashed[32];
     if (ofMessage) {
-        charon_elliptic_sha256(CFDataGetBytePtr(data), (size_t)CFDataGetLength(data), hashed);
+        revenant_elliptic_sha256(CFDataGetBytePtr(data), (size_t)CFDataGetLength(data), hashed);
     } else {
         if (CFDataGetLength(data) != 32) {
-            CharonSecKeyFail(error, errSecParam,
+            RevenantSecKeyFail(error, errSecParam,
                                  [NSString stringWithFormat:@"a P-256 signature is of a 32 byte digest and %ld were given", (long)CFDataGetLength(data)]);
             return NULL;
         }
         memcpy(hashed, CFDataGetBytePtr(data), 32);
     }
-    if (!CharonSecurityKeyIsPortEC(key)) {
-        CharonSecKeyFail(error, errSecParam, @"this is the curve's own signing, and the key is not one of the port's");
+    if (!RevenantSecurityKeyIsPortEC(key)) {
+        RevenantSecKeyFail(error, errSecParam, @"this is the curve's own signing, and the key is not one of the port's");
         return NULL;
     }
     uint8_t scalar[32];
-    if (!charon_elliptic_port_scalar(key, scalar)) {
-        CharonSecKeyFail(error, errSecParam, @"this key of the port's keeps no private scalar to sign with");
+    if (!revenant_elliptic_port_scalar(key, scalar)) {
+        RevenantSecKeyFail(error, errSecParam, @"this key of the port's keeps no private scalar to sign with");
         return NULL;
     }
     uint8_t der[72];
-    int written = CharonCKDigestSignES256(scalar, hashed, der, sizeof der);
+    int written = RevenantCKDigestSignES256(scalar, hashed, der, sizeof der);
     if (written <= 0) {
-        CharonSecKeyFail(error, errSecInternalError, @"micro-ecc made no signature of the digest");
+        RevenantSecKeyFail(error, errSecInternalError, @"micro-ecc made no signature of the digest");
         return NULL;
     }
     return CFDataCreate(kCFAllocatorDefault, der, (CFIndex)written);
 }
 
-Boolean CharonSecKeyECVerify(SecKeyRef key, SecKeyAlgorithm algorithm, CFDataRef data, CFDataRef signature, CFErrorRef *error)
+Boolean RevenantSecKeyECVerify(SecKeyRef key, SecKeyAlgorithm algorithm, CFDataRef data, CFDataRef signature, CFErrorRef *error)
 {
     if (!key || !data || !signature) {
-        CharonSecKeyFail(error, errSecParam, @"a verification needs a key, the data and the signature");
+        RevenantSecKeyFail(error, errSecParam, @"a verification needs a key, the data and the signature");
         return false;
     }
     BOOL digest = CFEqual(algorithm, kSecKeyAlgorithmECDSASignatureMessageX962SHA256)
         || CFEqual(algorithm, kSecKeyAlgorithmECDSASignatureDigestX962SHA256);
     if (!digest) {
-        CharonSecKeyFail(error, errSecParam,
+        RevenantSecKeyFail(error, errSecParam,
                              [NSString stringWithFormat:@"algid:verify:%@: this port verifies P-256 with SHA-256 and nothing else", algorithm]);
         return false;
     }
-    if (!CharonSecurityKeyIsPortEC(key)) {
-        CharonSecKeyFail(error, errSecParam, @"this is the curve's own verification, and the key is not one of the port's");
+    if (!RevenantSecurityKeyIsPortEC(key)) {
+        RevenantSecKeyFail(error, errSecParam, @"this is the curve's own verification, and the key is not one of the port's");
         return false;
     }
     CFIndex length = CFDataGetLength(data);
     uint8_t hashed[32];
     if (CFEqual(algorithm, kSecKeyAlgorithmECDSASignatureMessageX962SHA256)) {
-        charon_elliptic_sha256(CFDataGetBytePtr(data), (size_t)length, hashed);
+        revenant_elliptic_sha256(CFDataGetBytePtr(data), (size_t)length, hashed);
     } else {
         if (length != 32) {
-            CharonSecKeyFail(error, errSecParam,
+            RevenantSecKeyFail(error, errSecParam,
                                  [NSString stringWithFormat:@"a P-256 signature is of a 32 byte digest and %ld were given", (long)length]);
             return false;
         }
         memcpy(hashed, CFDataGetBytePtr(data), 32);
     }
     uint8_t point[65];
-    if (!charon_elliptic_point(key, point)) {
-        CharonSecKeyFail(error, errSecParam, @"this key publishes no uncompressed public point to verify with");
+    if (!revenant_elliptic_point(key, point)) {
+        RevenantSecKeyFail(error, errSecParam, @"this key publishes no uncompressed public point to verify with");
         return false;
     }
-    return CharonCKDigestVerifyES256(point, sizeof point, hashed, CFDataGetBytePtr(signature),
+    return RevenantCKDigestVerifyES256(point, sizeof point, hashed, CFDataGetBytePtr(signature),
                                      (size_t)CFDataGetLength(signature)) != 0;
 }
 
-CFDataRef CharonSecKeyECExchange(SecKeyRef privateKey, SecKeyAlgorithm algorithm, SecKeyRef publicKey,
+CFDataRef RevenantSecKeyECExchange(SecKeyRef privateKey, SecKeyAlgorithm algorithm, SecKeyRef publicKey,
                                   CFDictionaryRef options, CFErrorRef *error)
 {
     (void)options;
     if (!privateKey || !publicKey) {
-        CharonSecKeyFail(error, errSecParam, @"an exchange needs both keys");
+        RevenantSecKeyFail(error, errSecParam, @"an exchange needs both keys");
         return NULL;
     }
     BOOL hashed = NO;
-    if (!charon_elliptic_exchange(algorithm, &hashed)) {
-        CharonSecKeyFail(error, errSecParam, [NSString stringWithFormat:@"algid:exchange:%@: this port exchanges over P-256 and nothing else", algorithm]);
+    if (!revenant_elliptic_exchange(algorithm, &hashed)) {
+        RevenantSecKeyFail(error, errSecParam, [NSString stringWithFormat:@"algid:exchange:%@: this port exchanges over P-256 and nothing else", algorithm]);
         return NULL;
     }
-    if (!CharonSecurityKeyIsPortEC(privateKey)) {
-        CharonSecKeyFail(error, errSecParam,
+    if (!RevenantSecurityKeyIsPortEC(privateKey)) {
+        RevenantSecKeyFail(error, errSecParam,
                              @"the release has no elliptic key agreement: its Security exports SecKeyRawSign and SecKeyRawVerify and only the finite-field SecDH family, so a key of its keychain cannot exchange");
         return NULL;
     }
     uint8_t scalar[32];
-    if (!charon_elliptic_port_scalar(privateKey, scalar)) {
-        CharonSecKeyFail(error, errSecParam, @"this key of the port's keeps no private scalar to exchange with");
+    if (!revenant_elliptic_port_scalar(privateKey, scalar)) {
+        RevenantSecKeyFail(error, errSecParam, @"this key of the port's keeps no private scalar to exchange with");
         return NULL;
     }
     uint8_t peer[65];
-    if (!charon_elliptic_point(publicKey, peer)) {
-        CharonSecKeyFail(error, errSecParam, @"the peer's key publishes no uncompressed public point to exchange with");
+    if (!revenant_elliptic_point(publicKey, peer)) {
+        RevenantSecKeyFail(error, errSecParam, @"the peer's key publishes no uncompressed public point to exchange with");
         return NULL;
     }
     uint8_t secret[32];
-    if (!CharonCKSharedSecretES256(scalar, peer, sizeof peer, secret)) {
-        CharonSecKeyFail(error, errSecInternalError, @"micro-ecc made no shared secret of the two keys");
+    if (!RevenantCKSharedSecretES256(scalar, peer, sizeof peer, secret)) {
+        RevenantSecKeyFail(error, errSecInternalError, @"micro-ecc made no shared secret of the two keys");
         return NULL;
     }
     if (!hashed) {
         return CFDataCreate(kCFAllocatorDefault, secret, (CFIndex)sizeof secret);
     }
     uint8_t digest[32];
-    charon_elliptic_sha256(secret, sizeof secret, digest);
+    revenant_elliptic_sha256(secret, sizeof secret, digest);
     return CFDataCreate(kCFAllocatorDefault, digest, (CFIndex)sizeof digest);
 }

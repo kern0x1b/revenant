@@ -4,7 +4,7 @@
 #import <stdio.h>
 #import <math.h>
 
-@interface charonHost_MKDistanceFormatter : NSFormatter
+@interface revenantHost_MKDistanceFormatter : NSFormatter
 @property (nonatomic, assign) NSUInteger units;
 @property (nonatomic, assign) NSUInteger unitStyle;
 @property (nonatomic, copy) NSLocale *locale;
@@ -12,7 +12,7 @@
 - (CLLocationDistance)distanceFromString:(NSString *)distance;
 @end
 
-@interface charonHost_MKMapCamera : NSObject
+@interface revenantHost_MKMapCamera : NSObject
 @property (nonatomic) CLLocationCoordinate2D centerCoordinate;
 @property (nonatomic) CLLocationDistance centerCoordinateDistance;
 @property (nonatomic) CLLocationDirection heading;
@@ -23,12 +23,12 @@
                                    eyeAltitude:(CLLocationDistance)eyeAltitude;
 @end
 
-@interface charonHost_CharonMapKit : NSObject
-+ (double)charon_metresPerMapPointAtZoomScale:(MKZoomScale)zoomScale forMapRect:(MKMapRect)mapRect;
-+ (CLLocationDirection)charon_bearingFromCoordinate:(CLLocationCoordinate2D)from toCoordinate:(CLLocationCoordinate2D)to;
-+ (MKMapSize)charon_mapSizeAtZoomScale:(MKZoomScale)zoomScale;
-+ (MKZoomScale)charon_zoomScaleForMapSize:(MKMapSize)mapSize;
-+ (MKMapRect)charon_mapRectForRegion:(MKCoordinateRegion)region;
+@interface revenantHost_RevenantMapKit : NSObject
++ (double)revenant_metresPerMapPointAtZoomScale:(MKZoomScale)zoomScale forMapRect:(MKMapRect)mapRect;
++ (CLLocationDirection)revenant_bearingFromCoordinate:(CLLocationCoordinate2D)from toCoordinate:(CLLocationCoordinate2D)to;
++ (MKMapSize)revenant_mapSizeAtZoomScale:(MKZoomScale)zoomScale;
++ (MKZoomScale)revenant_zoomScaleForMapSize:(MKMapSize)mapSize;
++ (MKMapRect)revenant_mapRectForRegion:(MKCoordinateRegion)region;
 @end
 
 static int failures = 0;
@@ -81,10 +81,10 @@ static void check_projection(void)
 static void check_metres(void)
 {
     MKMapRect world = MKMapRectWorld;
-    double ours = [charonHost_CharonMapKit charon_metresPerMapPointAtZoomScale:0.0 forMapRect:world];
+    double ours = [revenantHost_RevenantMapKit revenant_metresPerMapPointAtZoomScale:0.0 forMapRect:world];
     agrees(@"metres per map point at zoom 0, against the host's own MKMetersPerMapPointAtLatitude",
             ours, MKMetersPerMapPointAtLatitude(0.0), 1e-12);
-    double atTen = [charonHost_CharonMapKit charon_metresPerMapPointAtZoomScale:10.0 forMapRect:world];
+    double atTen = [revenantHost_RevenantMapKit revenant_metresPerMapPointAtZoomScale:10.0 forMapRect:world];
     agrees(@"metres per map point at zoom 10 is a thousandth less than at zoom 0",
             atTen, ours / 1024.0, 1e-12);
 }
@@ -99,7 +99,7 @@ static void check_bearing(void)
     for (unsigned index = 0; index < sizeof(pairs) / sizeof(pairs[0]); index++) {
         CLLocationCoordinate2D from = pairs[index][0];
         CLLocationCoordinate2D to = pairs[index][1];
-        double ours = [charonHost_CharonMapKit charon_bearingFromCoordinate:from toCoordinate:to];
+        double ours = [revenantHost_RevenantMapKit revenant_bearingFromCoordinate:from toCoordinate:to];
         double lat1 = from.latitude * M_PI / 180.0;
         double lat2 = to.latitude * M_PI / 180.0;
         double dLon = (to.longitude - from.longitude) * M_PI / 180.0;
@@ -115,10 +115,10 @@ static void check_bearing(void)
 static void check_zoom(void)
 {
     for (int zoom = 0; zoom <= 18; zoom++) {
-        MKMapSize size = [charonHost_CharonMapKit charon_mapSizeAtZoomScale:zoom];
+        MKMapSize size = [revenantHost_RevenantMapKit revenant_mapSizeAtZoomScale:zoom];
         NSString *what = [NSString stringWithFormat:@"map size at zoom %d", zoom];
         agrees([what stringByAppendingString:@" width"], size.width, (double)MKMapSizeWorld.width / pow(2.0, zoom), 1e-9);
-        MKZoomScale back = [charonHost_CharonMapKit charon_zoomScaleForMapSize:size];
+        MKZoomScale back = [revenantHost_RevenantMapKit revenant_zoomScaleForMapSize:size];
         agrees([what stringByAppendingString:@" round trip"], back, zoom, 1e-9);
     }
 }
@@ -129,7 +129,7 @@ static void check_distance_formatter(void)
     for (NSString *identifier in locales) {
         NSLocale *locale = [NSLocale localeWithLocaleIdentifier:identifier];
         BOOL metric = [locale usesMetricSystem];
-        charonHost_MKDistanceFormatter *ours = [[charonHost_MKDistanceFormatter alloc] init];
+        revenantHost_MKDistanceFormatter *ours = [[revenantHost_MKDistanceFormatter alloc] init];
         [ours setLocale:locale];
         checked++;
         NSString *theirString = [ours stringFromDistance:1000.0];
@@ -147,20 +147,20 @@ static void check_distance_formatter(void)
     }
 }
 
-typedef struct { double eyeLat, eyeLon, centreLat, centreLon, altitude; } CharonCameraCase;
+typedef struct { double eyeLat, eyeLon, centreLat, centreLon, altitude; } RevenantCameraCase;
 
 static int diverging = 0;
 
 static void check_camera(void)
 {
-    CharonCameraCase cases[] = {
+    RevenantCameraCase cases[] = {
         {51.5007, -0.1246, 48.8566, 2.3522, 1200.0},
         {51.5007, -0.1246, 48.8566, 2.3522, 500.0},
         {51.5007, -0.1246, 48.8566, 2.3522, 20000.0},
         {40.7484, -73.9857, 51.5007, -0.1246, 5000.0},
     };
     for (unsigned index = 0; index < sizeof(cases) / sizeof(cases[0]); index++) {
-        CharonCameraCase given = cases[index];
+        RevenantCameraCase given = cases[index];
         CLLocationCoordinate2D eye = {given.eyeLat, given.eyeLon};
         CLLocationCoordinate2D centre = {given.centreLat, given.centreLon};
 
@@ -177,7 +177,7 @@ static void check_camera(void)
         agrees(@"the host's distance is the hypotenuse of the great circle and its altitude",
                hostGround, [hostEye distanceFromLocation:hostCentre], 1e-4);
 
-        charonHost_MKMapCamera *ours = [charonHost_MKMapCamera cameraLookingAtCenterCoordinate:centre
+        revenantHost_MKMapCamera *ours = [revenantHost_MKMapCamera cameraLookingAtCenterCoordinate:centre
                                                                      fromEyeCoordinate:eye
                                                                            eyeAltitude:given.altitude];
         NSString *what = [NSString stringWithFormat:@"camera %.4f,%.4f at %.0f m", eye.latitude, eye.longitude, given.altitude];

@@ -1,9 +1,9 @@
 #import <PhotosUI/PhotosUI.h>
 
-@interface PHPickerFilter (Charon)
-- (NSArray<NSString *> *)charon_mediaTypes;
+@interface PHPickerFilter (Revenant)
+- (NSArray<NSString *> *)revenant_mediaTypes;
 @end
 
-@interface PHPickerResult (Charon)
-- (instancetype)initWithCharonItemProvider:(NSItemProvider *)itemProvider;
+@interface PHPickerResult (Revenant)
+- (instancetype)initWithRevenantItemProvider:(NSItemProvider *)itemProvider;
 @end

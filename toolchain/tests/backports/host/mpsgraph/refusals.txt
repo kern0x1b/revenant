@@ -216,7 +216,7 @@ concat-shapes-differ 134 invalid input tensor shapes, all input shapes must matc
 # The operands of DIFFERING LENGTH ON THE AXIS THEY ARE LAID ALONG: end to end that is a 2x5 and answers
 # (concat-unequal-axis1 in the differential), and interleaved it is REFUSED. That refusal is the whole of the
 # invariant the walk's division by the number of operands rests on, so it is recorded here and enforced in
-# the plan - see CharonMPSGraphConcatPlan.
+# the plan - see RevenantMPSGraphConcatPlan.
 concat-interleave-unequal 134 all input shapes must match along axis dimension when interleaving
 # An operand of extent ZERO on the axis they are laid along: the regions' offsets collapse, so a walk that
 # lays them out by offset has two operands starting in the same place. The release builds the result tensor

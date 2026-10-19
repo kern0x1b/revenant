@@ -1,13 +1,13 @@
 #include "dispatch_block.h"
 
-struct charon_group_barrier {
+struct revenant_group_barrier {
     dispatch_group_t group;
     dispatch_block_t block;
 };
 
-static void charon_group_barrier_invoke(void *context)
+static void revenant_group_barrier_invoke(void *context)
 {
-    struct charon_group_barrier *work = context;
+    struct revenant_group_barrier *work = context;
     work->block();
     Block_release(work->block);
     dispatch_group_leave(work->group);
@@ -16,18 +16,18 @@ static void charon_group_barrier_invoke(void *context)
 }
 
 __attribute__((visibility("hidden")))
-void charon_dispatch_group_async(dispatch_group_t group, dispatch_queue_t queue, dispatch_block_t block)
+void revenant_dispatch_group_async(dispatch_group_t group, dispatch_queue_t queue, dispatch_block_t block)
 {
-    if (!charon_block_unseen_barrier(block)) {
+    if (!revenant_block_unseen_barrier(block)) {
         dispatch_group_async(group, queue, block);
         return;
     }
-    struct charon_group_barrier *work = malloc(sizeof *work);
+    struct revenant_group_barrier *work = malloc(sizeof *work);
     if (!work)
         abort();
     dispatch_retain(group);
     work->group = group;
     work->block = Block_copy(block);
     dispatch_group_enter(group);
-    dispatch_barrier_async_f(queue, work, charon_group_barrier_invoke);
+    dispatch_barrier_async_f(queue, work, revenant_group_barrier_invoke);
 }

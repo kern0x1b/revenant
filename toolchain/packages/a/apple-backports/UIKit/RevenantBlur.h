@@ -7,12 +7,12 @@ typedef struct {
     CGFloat tintGreen;
     CGFloat tintBlue;
     CGFloat tintAlpha;
-} CharonBlurParameters;
+} RevenantBlurParameters;
 
-@interface UIBlurEffect (CharonStyle)
-- (UIBlurEffectStyle)charon_style;
+@interface UIBlurEffect (RevenantStyle)
+- (UIBlurEffectStyle)revenant_style;
 @end
 
-CharonBlurParameters charon_blur_parameters(UIBlurEffectStyle style);
+RevenantBlurParameters revenant_blur_parameters(UIBlurEffectStyle style);
 
-void charon_blur_pixels(uint8_t *pixels, size_t width, size_t height, size_t rowBytes, CGFloat sigma, CGFloat saturation, CGFloat tintRed, CGFloat tintGreen, CGFloat tintBlue, CGFloat tintAlpha);
+void revenant_blur_pixels(uint8_t *pixels, size_t width, size_t height, size_t rowBytes, CGFloat sigma, CGFloat saturation, CGFloat tintRed, CGFloat tintGreen, CGFloat tintBlue, CGFloat tintAlpha);

@@ -2,21 +2,21 @@
 
 typedef void (^Answer)(NSString *name, NSString *value);
 
-static NSString *const kPortRendererName = @"CharonHostCopyTextDragPreviewRenderer";
+static NSString *const kPortRendererName = @"RevenantHostCopyTextDragPreviewRenderer";
 
-static NSString *CharonRect(CGRect rect)
+static NSString *RevenantRect(CGRect rect)
 {
     return [NSString stringWithFormat:@"%.1f,%.1f,%.1f,%.1f",
             rect.origin.x, rect.origin.y, rect.size.width, rect.size.height];
 }
 
-static NSString *CharonShape(CGRect rect)
+static NSString *RevenantShape(CGRect rect)
 {
     return [NSString stringWithFormat:@"null=%d empty=%d",
             CGRectIsNull(rect) ? 1 : 0, CGRectIsEmpty(rect) ? 1 : 0];
 }
 
-static NSLayoutManager *CharonMakeLayout(void)
+static NSLayoutManager *RevenantMakeLayout(void)
 {
     UIFont *body = [UIFont systemFontOfSize:14];
     UIFont *bold = [UIFont boldSystemFontOfSize:20];
@@ -39,7 +39,7 @@ static NSLayoutManager *CharonMakeLayout(void)
     return layout;
 }
 
-static NSArray<NSValue *> *CharonCases(void)
+static NSArray<NSValue *> *RevenantCases(void)
 {
     NSMutableArray *cases = [NSMutableArray array];
     for (NSUInteger length = 1; length <= 45; length += 11)
@@ -48,7 +48,7 @@ static NSArray<NSValue *> *CharonCases(void)
     return cases;
 }
 
-@protocol CharonAsksRenderer <NSObject>
+@protocol RevenantAsksRenderer <NSObject>
 @property (nonatomic, readonly) CGRect firstLineRect;
 @property (nonatomic, readonly) CGRect bodyRect;
 @property (nonatomic, readonly) CGRect lastLineRect;
@@ -58,26 +58,26 @@ static NSArray<NSValue *> *CharonCases(void)
                 lastLineRect:(inout CGRect *)last textOrigin:(CGPoint)origin;
 @end
 
-static void CharonAsk(id<CharonAsksRenderer> renderer, NSString *tag, Answer host)
+static void RevenantAsk(id<RevenantAsksRenderer> renderer, NSString *tag, Answer host)
 {
-    host([tag stringByAppendingString:@".firstLineRect"], CharonRect(renderer.firstLineRect));
-    host([tag stringByAppendingString:@".bodyRect"], CharonRect(renderer.bodyRect));
-    host([tag stringByAppendingString:@".lastLineRect"], CharonRect(renderer.lastLineRect));
+    host([tag stringByAppendingString:@".firstLineRect"], RevenantRect(renderer.firstLineRect));
+    host([tag stringByAppendingString:@".bodyRect"], RevenantRect(renderer.bodyRect));
+    host([tag stringByAppendingString:@".lastLineRect"], RevenantRect(renderer.lastLineRect));
     host([tag stringByAppendingString:@".hasLayoutManager"], renderer.layoutManager ? @"yes" : @"no");
     UIImage *image = renderer.image;
     host([tag stringByAppendingString:@".imageSize"],
-         image ? CharonRect(CGRectMake(0, 0, image.size.width, image.size.height)) : @"(nil)");
+         image ? RevenantRect(CGRectMake(0, 0, image.size.width, image.size.height)) : @"(nil)");
 
     CGRect first = renderer.firstLineRect;
     CGRect body = renderer.bodyRect;
     CGRect last = renderer.lastLineRect;
-    host([tag stringByAppendingString:@".firstShape"], CharonShape(first));
-    host([tag stringByAppendingString:@".bodyShape"], CharonShape(body));
-    host([tag stringByAppendingString:@".lastShape"], CharonShape(last));
+    host([tag stringByAppendingString:@".firstShape"], RevenantShape(first));
+    host([tag stringByAppendingString:@".bodyShape"], RevenantShape(body));
+    host([tag stringByAppendingString:@".lastShape"], RevenantShape(last));
     [renderer adjustFirstLineRect:&first bodyRect:&body lastLineRect:&last textOrigin:CGPointMake(7, 11)];
-    host([tag stringByAppendingString:@".adjustedFirst"], CharonRect(first));
-    host([tag stringByAppendingString:@".adjustedBody"], CharonRect(body));
-    host([tag stringByAppendingString:@".adjustedLast"], CharonRect(last));
+    host([tag stringByAppendingString:@".adjustedFirst"], RevenantRect(first));
+    host([tag stringByAppendingString:@".adjustedBody"], RevenantRect(body));
+    host([tag stringByAppendingString:@".adjustedLast"], RevenantRect(last));
 }
 
 int main(void)
@@ -85,43 +85,43 @@ int main(void)
     @autoreleasepool {
         NSMutableDictionary *host = [NSMutableDictionary dictionary];
         NSMutableDictionary *port = [NSMutableDictionary dictionary];
-        NSLayoutManager *hostLayout = CharonMakeLayout();
-        NSLayoutManager *portLayout = CharonMakeLayout();
+        NSLayoutManager *hostLayout = RevenantMakeLayout();
+        NSLayoutManager *portLayout = RevenantMakeLayout();
         if (!hostLayout || !portLayout) {
             printf("the release's text storage or fonts are unavailable here, nothing to compare\n");
             return 2;
         }
 
-        for (NSValue *value in CharonCases()) {
+        for (NSValue *value in RevenantCases()) {
             NSRange range = value.rangeValue;
             for (NSNumber *unify in @[@NO, @YES]) {
                 NSString *tag = [NSString stringWithFormat:@"unify%@.%lu+%lu",
                                  unify ? @"1" : @"0", (unsigned long)range.location, (unsigned long)range.length];
                 UITextDragPreviewRenderer *system = [[UITextDragPreviewRenderer alloc]
                     initWithLayoutManager:hostLayout range:range unifyRects:unify.boolValue];
-                CharonAsk(system, tag, ^(NSString *n, NSString *v) {
+                RevenantAsk(system, tag, ^(NSString *n, NSString *v) {
                     host[n] = v;
                 });
                 Class portClass = NSClassFromString(kPortRendererName);
                 id ours = [[portClass alloc] initWithLayoutManager:portLayout range:range unifyRects:unify.boolValue];
                 if (ours)
-                    CharonAsk(ours, tag, ^(NSString *n, NSString *v) {
+                    RevenantAsk(ours, tag, ^(NSString *n, NSString *v) {
                         port[n] = v;
                     });
             }
         }
 
-        host[@"nullrect.shape"] = CharonShape(CGRectNull);
+        host[@"nullrect.shape"] = RevenantShape(CGRectNull);
         port[@"nullrect.shape"] = host[@"nullrect.shape"];
 
         UITextDragPreviewRenderer *systemEmpty = [[UITextDragPreviewRenderer alloc]
             initWithLayoutManager:nil range:NSMakeRange(0, 10) unifyRects:NO];
-        host[@"empty.firstLineRect"] = CharonRect(systemEmpty.firstLineRect);
+        host[@"empty.firstLineRect"] = RevenantRect(systemEmpty.firstLineRect);
         host[@"empty.image"] = systemEmpty.image ? @"drew" : @"(nil)";
         Class portEmptyClass = NSClassFromString(kPortRendererName);
         id portEmpty = [[portEmptyClass alloc] initWithLayoutManager:nil range:NSMakeRange(0, 10) unifyRects:NO];
         if (portEmpty) {
-            port[@"empty.firstLineRect"] = CharonRect([portEmpty firstLineRect]);
+            port[@"empty.firstLineRect"] = RevenantRect([portEmpty firstLineRect]);
             port[@"empty.image"] = [portEmpty image] ? @"drew" : @"(nil)";
         }
 

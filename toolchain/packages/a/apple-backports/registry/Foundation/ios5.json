@@ -16,7 +16,7 @@
    "minimum": "5.0",
    "status": "implemented",
    "facts": "facts/Foundation/NSOrderedCollectionDifference.md",
-   "source": "the release's own class: the 4.3 gate named it among the weak imports the release it is checked against does not export, because CharonDocumentBrowser.m keeps its selection in one and the registry named no class to place that object by"
+   "source": "the release's own class: the 4.3 gate named it among the weak imports the release it is checked against does not export, because RevenantDocumentBrowser.m keeps its selection in one and the registry named no class to place that object by"
   }
  ]
 }

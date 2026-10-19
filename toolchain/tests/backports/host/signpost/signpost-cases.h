@@ -1,5 +1,5 @@
-#ifndef CHARON_SIGNPOST_CASES_H
-#define CHARON_SIGNPOST_CASES_H
+#ifndef REVENANT_SIGNPOST_CASES_H
+#define REVENANT_SIGNPOST_CASES_H
 
 #import <Foundation/Foundation.h>
 

@@ -4,20 +4,20 @@
 #import <objc/runtime.h>
 #import <objc/message.h>
 
-static NSString *const PREFIX = @"charonHost_";
+static NSString *const PREFIX = @"revenantHost_";
 #define WINDOW_W 32
 #define WINDOW_H 32
 
-typedef id (*CharonMsgSend0)(id, SEL);
+typedef id (*RevenantMsgSend0)(id, SEL);
 
 static NSString *unprefixed(const char *keyword)
 {
-    if (strncmp(keyword, "charonHost_", 11) == 0) return [NSString stringWithUTF8String:keyword + 11];
+    if (strncmp(keyword, "revenantHost_", 13) == 0) return [NSString stringWithUTF8String:keyword + 13];
     for (NSString *family in @[@"mutableCopy", @"copy", @"init", @"new", @"alloc"]) {
         if (!strncmp(keyword, family.UTF8String, family.length)) {
             const char *rest = keyword + family.length;
-            if (strncmp(rest, "CharonHost", 10) == 0 && rest[10] >= 'A' && rest[10] <= 'Z')
-                return [NSString stringWithFormat:@"%@%s", family, rest + 10];
+            if (strncmp(rest, "RevenantHost", 12) == 0 && rest[12] >= 'A' && rest[12] <= 'Z')
+                return [NSString stringWithFormat:@"%@%s", family, rest + 12];
         }
     }
     return nil;
@@ -29,7 +29,7 @@ static NSString *prefixed(NSString *keyword)
         if ([keyword hasPrefix:family]) {
             NSString *rest = [keyword substringFromIndex:family.length];
             if (!rest.length || (rest.length && [rest characterAtIndex:0] >= 'A' && [rest characterAtIndex:0] <= 'Z'))
-                return [NSString stringWithFormat:@"%@CharonHost%@", family, rest];
+                return [NSString stringWithFormat:@"%@RevenantHost%@", family, rest];
         }
     }
     return [PREFIX stringByAppendingString:keyword];
@@ -67,9 +67,9 @@ static NSArray *supplied_values(NSDictionary *attribute, NSString *key, CIImage 
         if ([key rangeOfString:@"Cube" options:NSCaseInsensitiveSearch].location != NSNotFound) return @[cube];
         return @[input];
     }
-    if ([klass isEqualToString:@"NSAttributedString"]) return @[[[NSAttributedString alloc] initWithString:@"charon"]];
-    if ([klass isEqualToString:@"NSString"]) return @[@"charon"];
-    if ([klass isEqualToString:@"NSData"]) return @[[@"charon" dataUsingEncoding:NSUTF8StringEncoding]];
+    if ([klass isEqualToString:@"NSAttributedString"]) return @[[[NSAttributedString alloc] initWithString:@"revenant"]];
+    if ([klass isEqualToString:@"NSString"]) return @[@"revenant"];
+    if ([klass isEqualToString:@"NSData"]) return @[[@"revenant" dataUsingEncoding:NSUTF8StringEncoding]];
     if ([klass isEqualToString:@"NSNumber"] || [type isEqualToString:@"CIAttributeTypeScalar"] ||
         [type isEqualToString:@"CIAttributeTypeFloat"] || [type isEqualToString:@"CIAttributeTypeInteger"]) {
         NSMutableArray *numbers = [NSMutableArray array];
@@ -99,7 +99,7 @@ static CIQRCodeDescriptor *any_qr_descriptor(void)
 {
     static CIQRCodeDescriptor *descriptor;
     if (descriptor) return descriptor;
-    NSData *payload = [@"charon" dataUsingEncoding:NSUTF8StringEncoding];
+    NSData *payload = [@"revenant" dataUsingEncoding:NSUTF8StringEncoding];
     for (NSInteger version = 1; version <= 40 && !descriptor; version++)
         for (NSUInteger mask = 0; mask <= 7 && !descriptor; mask++)
             for (NSUInteger level = 0; level <= 3 && !descriptor; level++)
@@ -166,8 +166,8 @@ int main(void)
             tell([NSString stringWithFormat:@"the host has no +%@, so there is nothing to compare against", selector]);
             continue;
         }
-        CIFilter *theirs = ((CharonMsgSend0)objc_msgSend)((id)[CIFilter class], host);
-        CIFilter *ours = ((CharonMsgSend0)objc_msgSend)((id)[CIFilter class], own);
+        CIFilter *theirs = ((RevenantMsgSend0)objc_msgSend)((id)[CIFilter class], host);
+        CIFilter *ours = ((RevenantMsgSend0)objc_msgSend)((id)[CIFilter class], own);
         compared++;
         if (ours != theirs && ![ours.name isEqualToString:theirs.name]) {
             tell([NSString stringWithFormat:@"+%@ answers %@ where the host answers %@", selector,
@@ -205,8 +205,8 @@ int main(void)
         NSData *bytes[2] = {nil, nil};
         NSUInteger pass = 0;
         for (pass = 0; pass < 5; pass++) {
-            CIFilter *pair[2] = {((CharonMsgSend0)objc_msgSend)((id)[CIFilter class], own),
-                                 ((CharonMsgSend0)objc_msgSend)((id)[CIFilter class], host)};
+            CIFilter *pair[2] = {((RevenantMsgSend0)objc_msgSend)((id)[CIFilter class], own),
+                                 ((RevenantMsgSend0)objc_msgSend)((id)[CIFilter class], host)};
             for (int i = 0; i < 2; i++) {
                 for (NSString *key in pair[i].inputKeys) {
                     NSArray *candidates = ranges[key];
@@ -228,8 +228,8 @@ int main(void)
         if (bytes[0] && bytes[1]) {
             rendered++;
             if (![bytes[0] isEqualToData:bytes[1]]) tell([NSString stringWithFormat:@"+%@ output bytes", selector]);
-        } else if (getenv("CHARON_WHY")) {
-            CIFilter *probe = ((CharonMsgSend0)objc_msgSend)((id)[CIFilter class], host);
+        } else if (getenv("REVENANT_WHY")) {
+            CIFilter *probe = ((RevenantMsgSend0)objc_msgSend)((id)[CIFilter class], host);
             for (NSString *key in ranges) {
                 NSArray *candidates = ranges[key];
                 [probe setValue:candidates[MIN(pass, candidates.count - 1)] forKey:key];

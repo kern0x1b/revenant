@@ -10,8 +10,8 @@
 - (NSUInteger)indexForJointName:(NSString *)jointName;
 @end
 
-@interface CharonPortARSkeletonDefinition : NSObject
-@property (class, nonatomic, readonly) CharonPortARSkeletonDefinition *defaultBody2DSkeletonDefinition;
+@interface RevenantPortARSkeletonDefinition : NSObject
+@property (class, nonatomic, readonly) RevenantPortARSkeletonDefinition *defaultBody2DSkeletonDefinition;
 @property (nonatomic, readonly) NSUInteger jointCount;
 @property (nonatomic, readonly) NSArray<NSString *> *jointNames;
 @property (nonatomic, readonly) NSArray<NSNumber *> *parentIndices;
@@ -55,7 +55,7 @@ int main(void)
     }
 
     id host = [host_class defaultBody2DSkeletonDefinition];
-    CharonPortARSkeletonDefinition *port = [CharonPortARSkeletonDefinition defaultBody2DSkeletonDefinition];
+    RevenantPortARSkeletonDefinition *port = [RevenantPortARSkeletonDefinition defaultBody2DSkeletonDefinition];
     if (!host || !port) {
         printf("FAIL one of the two definitions is nil host=%p port=%p\n", host, port);
         return 1;

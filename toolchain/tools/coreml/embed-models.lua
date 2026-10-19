@@ -18,13 +18,13 @@ function main(models, out)
         " * tools/coreml/make-models.lua writes. Do not edit by hand: run the generator and read the",
         " * diff. The bytes are the CoreML specification's own message, so what the device reads is what",
         " * the host differential and the interpreter check read. */",
-        "#ifndef CHARON_COREML_MODELS_H\n#define CHARON_COREML_MODELS_H\n",
+        "#ifndef REVENANT_COREML_MODELS_H\n#define REVENANT_COREML_MODELS_H\n",
     }
     for _, name in ipairs(WANTED) do
         local file = path.join(models, name .. ".mlmodel")
         if os.isfile(file) then
             local data = io.readfile(file, {encoding = "binary"})
-            local guard = "charon_ml_model_" .. name
+            local guard = "revenant_ml_model_" .. name
             table.insert(lines, string.format("static const unsigned char %s[] = {%s\n};\n", guard, escape(data)))
             table.insert(written, {name = name, guard = guard, length = #data})
         end
@@ -33,12 +33,12 @@ function main(models, out)
         .. "    const char *name;\n"
         .. "    const unsigned char *bytes;\n"
         .. "    unsigned long length;\n"
-        .. "} charon_ml_embedded_model;\n")
-    table.insert(lines, "static const charon_ml_embedded_model charon_ml_embedded_models[] = {")
+        .. "} revenant_ml_embedded_model;\n")
+    table.insert(lines, "static const revenant_ml_embedded_model revenant_ml_embedded_models[] = {")
     for _, w in ipairs(written) do
         table.insert(lines, string.format('    { "%s", %s, %dul },', w.name, w.guard, w.length))
     end
-    table.insert(lines, "    { 0, 0, 0 }\n};\n\n#endif /* CHARON_COREML_MODELS_H */")
+    table.insert(lines, "    { 0, 0, 0 }\n};\n\n#endif /* REVENANT_COREML_MODELS_H */")
     io.writefile(out, table.concat(lines, "\n") .. "\n", {encoding = "binary"})
     for _, w in ipairs(written) do
         print(string.format("embedded %s: %d bytes", w.name, w.length))

@@ -31,7 +31,7 @@ SceneKit=$repo/packages/a/apple-backports/SceneKit
 runs=${RUNS:-$repo/.agent-work/runs/arkit-host}
 mkdir -p "$runs"
 
-# the declarations the port's own ARKit classes need, and the UIKit types CharonSCN.h:2 imports. They
+# the declarations the port's own ARKit classes need, and the UIKit types RevenantSCN.h:2 imports. They
 # are force-included rather than imported through <ARKit/…>, because a shim that re-declares what the
 # host's own AppKit and SceneKit already declare collides with them.
 shim="$runs/shim"
@@ -62,7 +62,7 @@ port() {
         "$here/arkit-scnview-diff.m" \
         "$src/ARSCNView11.m" "$src/ARSCNView12.m" "$src/ARSCNPlaneGeometry.m" \
         "$SceneKit/SCNGeometry.m" "$SceneKit/SCNGeometrySource.m" \
-        "$SceneKit/SCNGeometryElement.m" "$SceneKit/CharonSCNCoding.m" \
+        "$SceneKit/SCNGeometryElement.m" "$SceneKit/RevenantSCNCoding.m" \
         -framework Foundation -framework SceneKit -framework AppKit -framework CoreGraphics \
         -o "$runs/diff"
 }
@@ -98,7 +98,7 @@ mutant() {
     copy="$runs/mutant"
     rm -rf "$copy"; mkdir -p "$copy"
     cp "$ARKit/ARSCNView11.m" "$ARKit/ARSCNView12.m" "$ARKit/ARSCNPlaneGeometry.m" \
-       "$ARKit/CharonARKitPrivate.h" "$ARKit/CharonARTracker.h" "$copy/"
+       "$ARKit/RevenantARKitPrivate.h" "$ARKit/RevenantARTracker.h" "$copy/"
     python3 "$here/mutate.py" "$copy/$file" "$from" "$to" || { echo "MUTANT NOT APPLIED: $label"; survived=$((survived + 1)); return; }
     if port "$copy" >/dev/null 2>&1 && "$runs/diff" > "$runs/mutant.txt" 2>&1 && grep -q '^VERDICT ok' "$runs/mutant.txt"; then
         echo "MUTANT SURVIVED: $label"
@@ -119,8 +119,8 @@ mutant "nodeForAnchor: reads the node-keyed map" ARSCNView11.m \
     if (node)
         return node;'
 mutant "the geometry update drops its coordinate source" ARSCNPlaneGeometry.m \
-    '[self charon_replaceSources:@[ positionsSource, textureSource ] elements:@[ element ]];' \
-    '[self charon_replaceSources:@[ positionsSource ] elements:@[ element ]];'
+    '[self revenant_replaceSources:@[ positionsSource, textureSource ] elements:@[ element ]];' \
+    '[self revenant_replaceSources:@[ positionsSource ] elements:@[ element ]];'
 
 # The `willUpdateNode:` message dropped: the pairing is still made, still moved and still broken, and
 # the only thing wrong is that the renderer is not told the change is coming. That is a mutation rather

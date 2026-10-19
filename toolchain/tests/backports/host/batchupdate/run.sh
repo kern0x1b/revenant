@@ -4,13 +4,13 @@ here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 CORE=${CORE:-$here/../../../../packages/a/apple-backports/CoreData}
 harness=${BATCHUPDATE_HARNESS:-$here/../../device}
-build=${BATCHUPDATE_BUILD:-$(runs_folder charon-batchupdate-host)}
+build=${BATCHUPDATE_BUILD:-$(runs_folder revenant-batchupdate-host)}
 sources="NSPersistentStoreResult.m NSBatchUpdateRequest.m NSAsynchronousFetchRequest.m NSBatchDeleteRequest.m NSBatchDeleteRequest+ObjectIDs.m NSBatchDeleteResult.m NSManagedObjectContext+ExecuteRequest.m"
 renames=""
 for name in NSPersistentStoreResult NSPersistentStoreAsynchronousResult NSAsynchronousFetchResult NSAsynchronousFetchRequest NSBatchUpdateRequest NSBatchUpdateResult NSBatchDeleteRequest NSBatchDeleteResult; do
-    renames="$renames -D$name=CharonHost$name"
+    renames="$renames -D$name=RevenantHost$name"
 done
-renames="$renames -DexecuteRequest=charonHostexecuteRequest -DinitWithObjectIDs=charonHostinitWithObjectIDs"
+renames="$renames -DexecuteRequest=revenantHostexecuteRequest -DinitWithObjectIDs=revenantHostinitWithObjectIDs"
 rm -rf "$build"
 mkdir -p "$build"
 objects=""

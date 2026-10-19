@@ -4,7 +4,7 @@
 
 static Class cls(BOOL ours, NSString *name)
 {
-    return NSClassFromString(ours ? [@"CharonHost" stringByAppendingString:name] : name);
+    return NSClassFromString(ours ? [@"RevenantHost" stringByAppendingString:name] : name);
 }
 
 static const char *label(NSString *format, ...)
@@ -49,7 +49,7 @@ static void proposals(void)
         id ourCopy = [ours copy], systemCopy = [system copy];
         CHECK_EQUAL(describe(ourCopy), describe(systemCopy), label(@"proposal %lu copy", (unsigned long)operation));
         CHECK(ourCopy != ours && systemCopy != system, label(@"proposal %lu copy is new", (unsigned long)operation));
-        CHECK_EQUAL(NSStringFromClass([ourCopy class]), @"CharonHostUIDropProposal", label(@"proposal %lu copy class", (unsigned long)operation));
+        CHECK_EQUAL(NSStringFromClass([ourCopy class]), @"RevenantHostUIDropProposal", label(@"proposal %lu copy class", (unsigned long)operation));
     }
 }
 
@@ -132,7 +132,7 @@ static void interactions(void)
 
 static void session(void)
 {
-    id<UIDropSession> session = [[NSClassFromString(@"CharonHostDragDropSession") alloc] init];
+    id<UIDropSession> session = [[NSClassFromString(@"RevenantHostDragDropSession") alloc] init];
     CHECK(session != nil, "drop session is constructible");
     CHECK([session canLoadObjectsOfClass:[NSString class]] == NO, "drop session canLoadObjectsOfClass answers NO");
     __block BOOL called = NO;
@@ -152,7 +152,7 @@ int main(void)
         items();
         interactions();
         session();
-        printf("checks=%d failures=%d\n", charon_checks, charon_failures);
+        printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
     }
-    return charon_failures ? 1 : 0;
+    return revenant_failures ? 1 : 0;
 }

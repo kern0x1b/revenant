@@ -1,15 +1,15 @@
-#import "CharonMetal.h"
+#import "RevenantMetal.h"
 
-@implementation CharonMetalCommandBuffer (DebugGroups11)
+@implementation RevenantMetalCommandBuffer (DebugGroups11)
 
 - (void)pushDebugGroup:(NSString *)string
 {
-    [self charonPushDebugGroup:string];
+    [self revenantPushDebugGroup:string];
 }
 
 - (void)popDebugGroup
 {
-    [self charonPopDebugGroup];
+    [self revenantPopDebugGroup];
 }
 
 @end

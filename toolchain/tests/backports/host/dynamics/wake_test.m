@@ -43,7 +43,7 @@ static void test_wake(void)
     [superview addSubview:view];
     Resumes *resumes = [Resumes new];
     UIDynamicAnimator *animator = animator_over(view, resumes);
-    charon_check(resumes.count == 1, "adding a behavior with an item starts the animator", @"ours");
+    revenant_check(resumes.count == 1, "adding a behavior with an item starts the animator", @"ours");
 
     CHECK(wakes(animator, resumes, ^{ view.frame = CGRectMake(0, 0, 300, 600); }), "(a) view.frame wakes");
     CHECK(wakes(animator, resumes, ^{ view.bounds = CGRectMake(0, 0, 320, 600); }), "(b) view.bounds wakes");
@@ -71,7 +71,7 @@ static void test_lifetime(void)
     CHECK(wakes(first, resumes, ^{ view.frame = CGRectMake(0, 0, 300, 500); }), "an animator over the same view still wakes after another went");
     first = nil;
     view.frame = CGRectMake(0, 0, 300, 600);
-    charon_check(YES, "a view whose animators all went can be resized", @"ours");
+    revenant_check(YES, "a view whose animators all went can be resized", @"ours");
 
     UIDynamicAnimator *orphan;
     @autoreleasepool {
@@ -80,7 +80,7 @@ static void test_lifetime(void)
     }
     CHECK(orphan.referenceView == nil, "the animator does not keep its reference view");
     orphan = nil;
-    charon_check(YES, "an animator outliving its view goes without a fault", @"ours");
+    revenant_check(YES, "an animator outliving its view goes without a fault", @"ours");
 }
 
 int main(void)

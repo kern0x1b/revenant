@@ -7,79 +7,79 @@
 #define NAMED(...) ([NSString stringWithFormat:__VA_ARGS__].UTF8String)
 
 
-@interface UINavigationBar (CharonAppearanceRefresh)
-- (void)charonHostCharon_refreshForced:(BOOL)force;
+@interface UINavigationBar (RevenantAppearanceRefresh)
+- (void)revenantHostRevenant_refreshForced:(BOOL)force;
 @end
 
-@interface UITabBar (CharonAppearanceRefresh)
-- (void)charonHostCharon_refreshForced:(BOOL)force;
+@interface UITabBar (RevenantAppearanceRefresh)
+- (void)revenantHostRevenant_refreshForced:(BOOL)force;
 @end
 
-@interface UINavigationBar (CharonHostAppearances)
-- (id)charonHostStandardAppearance;
-- (void)charonHostSetStandardAppearance:(id)appearance;
-- (id)charonHostCompactAppearance;
-- (void)charonHostSetCompactAppearance:(id)appearance;
-- (id)charonHostScrollEdgeAppearance;
-- (void)charonHostSetScrollEdgeAppearance:(id)appearance;
-- (id)charonHostCompactScrollEdgeAppearance;
-- (void)charonHostSetCompactScrollEdgeAppearance:(id)appearance;
+@interface UINavigationBar (RevenantHostAppearances)
+- (id)revenantHostStandardAppearance;
+- (void)revenantHostSetStandardAppearance:(id)appearance;
+- (id)revenantHostCompactAppearance;
+- (void)revenantHostSetCompactAppearance:(id)appearance;
+- (id)revenantHostScrollEdgeAppearance;
+- (void)revenantHostSetScrollEdgeAppearance:(id)appearance;
+- (id)revenantHostCompactScrollEdgeAppearance;
+- (void)revenantHostSetCompactScrollEdgeAppearance:(id)appearance;
 @end
 
-@interface UIToolbar (CharonHostAppearances)
-- (id)charonHostStandardAppearance;
-- (void)charonHostSetStandardAppearance:(id)appearance;
-- (id)charonHostCompactAppearance;
-- (void)charonHostSetCompactAppearance:(id)appearance;
-- (id)charonHostScrollEdgeAppearance;
-- (void)charonHostSetScrollEdgeAppearance:(id)appearance;
-- (id)charonHostCompactScrollEdgeAppearance;
-- (void)charonHostSetCompactScrollEdgeAppearance:(id)appearance;
+@interface UIToolbar (RevenantHostAppearances)
+- (id)revenantHostStandardAppearance;
+- (void)revenantHostSetStandardAppearance:(id)appearance;
+- (id)revenantHostCompactAppearance;
+- (void)revenantHostSetCompactAppearance:(id)appearance;
+- (id)revenantHostScrollEdgeAppearance;
+- (void)revenantHostSetScrollEdgeAppearance:(id)appearance;
+- (id)revenantHostCompactScrollEdgeAppearance;
+- (void)revenantHostSetCompactScrollEdgeAppearance:(id)appearance;
 @end
 
-@interface UITabBar (CharonHostAppearances)
-- (id)charonHostStandardAppearance;
-- (void)charonHostSetStandardAppearance:(id)appearance;
-- (id)charonHostScrollEdgeAppearance;
-- (void)charonHostSetScrollEdgeAppearance:(id)appearance;
+@interface UITabBar (RevenantHostAppearances)
+- (id)revenantHostStandardAppearance;
+- (void)revenantHostSetStandardAppearance:(id)appearance;
+- (id)revenantHostScrollEdgeAppearance;
+- (void)revenantHostSetScrollEdgeAppearance:(id)appearance;
 @end
 
-@interface UINavigationItem (CharonHostAppearances)
-- (id)charonHostStandardAppearance;
-- (void)charonHostSetStandardAppearance:(id)appearance;
-- (id)charonHostCompactAppearance;
-- (void)charonHostSetCompactAppearance:(id)appearance;
-- (id)charonHostScrollEdgeAppearance;
-- (void)charonHostSetScrollEdgeAppearance:(id)appearance;
-- (id)charonHostCompactScrollEdgeAppearance;
-- (void)charonHostSetCompactScrollEdgeAppearance:(id)appearance;
+@interface UINavigationItem (RevenantHostAppearances)
+- (id)revenantHostStandardAppearance;
+- (void)revenantHostSetStandardAppearance:(id)appearance;
+- (id)revenantHostCompactAppearance;
+- (void)revenantHostSetCompactAppearance:(id)appearance;
+- (id)revenantHostScrollEdgeAppearance;
+- (void)revenantHostSetScrollEdgeAppearance:(id)appearance;
+- (id)revenantHostCompactScrollEdgeAppearance;
+- (void)revenantHostSetCompactScrollEdgeAppearance:(id)appearance;
 @end
 
-@interface UITabBarItem (CharonHostAppearances)
-- (id)charonHostStandardAppearance;
-- (void)charonHostSetStandardAppearance:(id)appearance;
-- (id)charonHostScrollEdgeAppearance;
-- (void)charonHostSetScrollEdgeAppearance:(id)appearance;
+@interface UITabBarItem (RevenantHostAppearances)
+- (id)revenantHostStandardAppearance;
+- (void)revenantHostSetStandardAppearance:(id)appearance;
+- (id)revenantHostScrollEdgeAppearance;
+- (void)revenantHostSetScrollEdgeAppearance:(id)appearance;
 @end
 
 #import "appearances-cases.h"
 
-#define images charon_images
+#define images revenant_images
 
 static Class port_class(NSString *name)
 {
-    return NSClassFromString([@"CharonHost" stringByAppendingString:name]);
+    return NSClassFromString([@"RevenantHost" stringByAppendingString:name]);
 }
 
-#define snap charon_snapshot
-#define tok charon_token
+#define snap revenant_snapshot
+#define tok revenant_token
 
 static NSMutableArray *masks;
 
 static NSString *normalised(id object)
 {
     NSMutableString *text = [[object description] mutableCopy];
-    [text replaceOccurrencesOfString:@"CharonHost" withString:@"" options:0 range:NSMakeRange(0, text.length)];
+    [text replaceOccurrencesOfString:@"RevenantHost" withString:@"" options:0 range:NSMakeRange(0, text.length)];
     for (NSArray *pair in masks)
         [text replaceOccurrencesOfString:pair[0] withString:pair[1] options:0 range:NSMakeRange(0, text.length)];
     NSRegularExpression *pointer = [NSRegularExpression regularExpressionWithPattern:@"0x[0-9a-f]+" options:0 error:NULL];
@@ -352,7 +352,7 @@ static NSArray *shared_bar_operations(NSString *kind)
     [operations addObject:named(@"fromother", ^id(id root, unsigned pick) {
         NSArray *kinds = @[@"UIBarAppearance", @"UINavigationBarAppearance", @"UIToolbarAppearance", @"UITabBarAppearance"];
         NSString *other = kinds[(pick >> 3) % 4];
-        BOOL port = [NSStringFromClass([root class]) hasPrefix:@"CharonHost"];
+        BOOL port = [NSStringFromClass([root class]) hasPrefix:@"RevenantHost"];
         id source = make_kind(other, port);
         if (pick & 1)
             [source configureWithOpaqueBackground];
@@ -480,15 +480,15 @@ static void check_accessors(NSString *name, id ourBar, id systemBar, NSArray *sl
 {
     for (NSString *slot in slots) {
         NSString *capital = [[slot substringToIndex:1].uppercaseString stringByAppendingString:[slot substringFromIndex:1]];
-        SEL ourGetter = NSSelectorFromString([@"charonHost" stringByAppendingString:capital]);
-        SEL ourSetter = NSSelectorFromString([NSString stringWithFormat:@"charonHostSet%@:", capital]);
+        SEL ourGetter = NSSelectorFromString([@"revenantHost" stringByAppendingString:capital]);
+        SEL ourSetter = NSSelectorFromString([NSString stringWithFormat:@"revenantHostSet%@:", capital]);
         SEL systemGetter = NSSelectorFromString(slot);
         SEL systemSetter = NSSelectorFromString([NSString stringWithFormat:@"set%@:", capital]);
-        charon_check([ourBar respondsToSelector:ourGetter] && [ourBar respondsToSelector:ourSetter], NAMED(@"%@ answers %@", name, slot), @"the accessors are missing");
+        revenant_check([ourBar respondsToSelector:ourGetter] && [ourBar respondsToSelector:ourSetter], NAMED(@"%@ answers %@", name, slot), @"the accessors are missing");
         id ourDefault = ((id (*)(id, SEL))objc_msgSend)(ourBar, ourGetter), systemDefault = ((id (*)(id, SEL))objc_msgSend)(systemBar, systemGetter);
-        charon_check((ourDefault == nil) == (systemDefault == nil), NAMED(@"%@.%@ starts %@ as the system's does", name, slot, systemDefault ? @"with a default" : @"nil"), @"the default differs");
+        revenant_check((ourDefault == nil) == (systemDefault == nil), NAMED(@"%@.%@ starts %@ as the system's does", name, slot, systemDefault ? @"with a default" : @"nil"), @"the default differs");
         if (ourDefault)
-            charon_check([normalised(ourDefault) isEqual:normalised(systemDefault)] && ((id (*)(id, SEL))objc_msgSend)(ourBar, ourGetter) == ourDefault, NAMED(@"%@.%@ starts with the default appearance and answers the one object", name, slot),
+            revenant_check([normalised(ourDefault) isEqual:normalised(systemDefault)] && ((id (*)(id, SEL))objc_msgSend)(ourBar, ourGetter) == ourDefault, NAMED(@"%@.%@ starts with the default appearance and answers the one object", name, slot),
                          [NSString stringWithFormat:@"%@", difference(normalised(ourDefault), normalised(systemDefault))]);
         id ourValue = make_kind(kind, YES), systemValue = make_kind(kind, NO);
         [ourValue configureWithOpaqueBackground];
@@ -498,16 +498,16 @@ static void check_accessors(NSString *name, id ourBar, id systemBar, NSArray *sl
         ((void (*)(id, SEL, id))objc_msgSend)(ourBar, ourSetter, ourValue);
         ((void (*)(id, SEL, id))objc_msgSend)(systemBar, systemSetter, systemValue);
         id ourStored = ((id (*)(id, SEL))objc_msgSend)(ourBar, ourGetter), systemStored = ((id (*)(id, SEL))objc_msgSend)(systemBar, systemGetter);
-        charon_check((ourStored != ourValue) == (systemStored != systemValue) && ourStored == ((id (*)(id, SEL))objc_msgSend)(ourBar, ourGetter) && [ourStored isEqual:ourValue] && [systemStored isEqual:systemValue],
+        revenant_check((ourStored != ourValue) == (systemStored != systemValue) && ourStored == ((id (*)(id, SEL))objc_msgSend)(ourBar, ourGetter) && [ourStored isEqual:ourValue] && [systemStored isEqual:systemValue],
                      NAMED(@"%@.%@ keeps a copy of what it is given", name, slot), @"the copy differs");
         [ourStored setBackgroundColor:[UIColor blueColor]];
         [systemStored setBackgroundColor:[UIColor blueColor]];
-        charon_check([[((id (*)(id, SEL))objc_msgSend)(ourBar, ourGetter) backgroundColor] isEqual:[UIColor blueColor]] == [[((id (*)(id, SEL))objc_msgSend)(systemBar, systemGetter) backgroundColor] isEqual:[UIColor blueColor]],
+        revenant_check([[((id (*)(id, SEL))objc_msgSend)(ourBar, ourGetter) backgroundColor] isEqual:[UIColor blueColor]] == [[((id (*)(id, SEL))objc_msgSend)(systemBar, systemGetter) backgroundColor] isEqual:[UIColor blueColor]],
                      NAMED(@"%@.%@ hands back the object it keeps", name, slot), @"a change to the answer does not reach the bar");
         ((void (*)(id, SEL, id))objc_msgSend)(ourBar, ourSetter, nil);
         ((void (*)(id, SEL, id))objc_msgSend)(systemBar, systemSetter, nil);
         id ourCleared = ((id (*)(id, SEL))objc_msgSend)(ourBar, ourGetter), systemCleared = ((id (*)(id, SEL))objc_msgSend)(systemBar, systemGetter);
-        charon_check((ourCleared == nil) == (systemCleared == nil) && (!ourCleared || [normalised(ourCleared) isEqual:normalised(systemCleared)]), NAMED(@"%@.%@ goes back to its default when cleared", name, slot), @"the cleared value differs");
+        revenant_check((ourCleared == nil) == (systemCleared == nil) && (!ourCleared || [normalised(ourCleared) isEqual:normalised(systemCleared)]), NAMED(@"%@.%@ goes back to its default when cleared", name, slot), @"the cleared value differs");
     }
 }
 
@@ -527,48 +527,48 @@ static void check_application(void)
     [[navigationAppearance buttonAppearance].normal setBackgroundImage:images[0]];
     [[navigationAppearance doneButtonAppearance].normal setBackgroundImage:images[1]];
     [[navigationAppearance backButtonAppearance].normal setBackgroundImage:images[1]];
-    [navigation charonHostSetStandardAppearance:navigationAppearance];
-    charon_check([pixel([navigation backgroundImageForBarMetrics:UIBarMetricsDefault]) hasPrefix:@"255 0 0 255"], "a background colour becomes a solid background image of the bar", pixel([navigation backgroundImageForBarMetrics:UIBarMetricsDefault]));
-    charon_check([navigation backgroundImageForBarMetrics:UIBarMetricsLandscapePhone] == nil, "without a compact appearance the landscape metrics keep no image of their own", @"an image is set");
+    [navigation revenantHostSetStandardAppearance:navigationAppearance];
+    revenant_check([pixel([navigation backgroundImageForBarMetrics:UIBarMetricsDefault]) hasPrefix:@"255 0 0 255"], "a background colour becomes a solid background image of the bar", pixel([navigation backgroundImageForBarMetrics:UIBarMetricsDefault]));
+    revenant_check([navigation backgroundImageForBarMetrics:UIBarMetricsLandscapePhone] == nil, "without a compact appearance the landscape metrics keep no image of their own", @"an image is set");
     NSDictionary *legacy = navigation.titleTextAttributes;
-    charon_check([legacy[UITextAttributeTextColor] isEqual:[UIColor blueColor]] && [[legacy[UITextAttributeFont] fontName] length] && [legacy[UITextAttributeFont] pointSize] == 19, "the title attributes are handed on as the bar's own", [NSString stringWithFormat:@"%@", legacy]);
-    charon_check([navigation titleVerticalPositionAdjustmentForBarMetrics:UIBarMetricsDefault] == 2, "the vertical title offset is applied", [NSString stringWithFormat:@"%g", [navigation titleVerticalPositionAdjustmentForBarMetrics:UIBarMetricsDefault]]);
+    revenant_check([legacy[UITextAttributeTextColor] isEqual:[UIColor blueColor]] && [[legacy[UITextAttributeFont] fontName] length] && [legacy[UITextAttributeFont] pointSize] == 19, "the title attributes are handed on as the bar's own", [NSString stringWithFormat:@"%@", legacy]);
+    revenant_check([navigation titleVerticalPositionAdjustmentForBarMetrics:UIBarMetricsDefault] == 2, "the vertical title offset is applied", [NSString stringWithFormat:@"%g", [navigation titleVerticalPositionAdjustmentForBarMetrics:UIBarMetricsDefault]]);
     UIBarButtonItem *proxy = [UIBarButtonItem appearanceWhenContainedIn:[UINavigationBar class], nil];
-    charon_check([[proxy titleTextAttributesForState:UIControlStateNormal][UITextAttributeTextColor] isEqual:[UIColor greenColor]], "the plain button title attributes reach the buttons of navigation bars", @"the colour is missing");
-    charon_check([proxy backgroundImageForState:UIControlStateNormal style:UIBarButtonItemStylePlain barMetrics:UIBarMetricsDefault] == images[0] &&
+    revenant_check([[proxy titleTextAttributesForState:UIControlStateNormal][UITextAttributeTextColor] isEqual:[UIColor greenColor]], "the plain button title attributes reach the buttons of navigation bars", @"the colour is missing");
+    revenant_check([proxy backgroundImageForState:UIControlStateNormal style:UIBarButtonItemStylePlain barMetrics:UIBarMetricsDefault] == images[0] &&
                  [proxy backgroundImageForState:UIControlStateNormal style:UIBarButtonItemStyleDone barMetrics:UIBarMetricsDefault] == images[1] &&
                  [proxy backButtonBackgroundImageForState:UIControlStateNormal barMetrics:UIBarMetricsDefault] == images[1], "the button background images reach the plain, done and back buttons", @"an image is missing");
-    charon_check([navigation.shadowImage isKindOfClass:[UIImage class]] && navigation.shadowImage.size.width == 1, "the default shadow of an opaque bar is a hairline", @"no hairline");
+    revenant_check([navigation.shadowImage isKindOfClass:[UIImage class]] && navigation.shadowImage.size.width == 1, "the default shadow of an opaque bar is a hairline", @"no hairline");
 
     [navigationAppearance setBackgroundColor:[UIColor blueColor]];
     settle();
-    charon_check([pixel([navigation backgroundImageForBarMetrics:UIBarMetricsDefault]) hasPrefix:@"255 0 0 255"], "changing the appearance that was set later does not reach the bar", @"the bar changed");
-    [[navigation charonHostStandardAppearance] setBackgroundColor:[UIColor blueColor]];
+    revenant_check([pixel([navigation backgroundImageForBarMetrics:UIBarMetricsDefault]) hasPrefix:@"255 0 0 255"], "changing the appearance that was set later does not reach the bar", @"the bar changed");
+    [[navigation revenantHostStandardAppearance] setBackgroundColor:[UIColor blueColor]];
     settle();
-    charon_check([pixel([navigation backgroundImageForBarMetrics:UIBarMetricsDefault]) hasPrefix:@"0 0 255 255"], "a change to the appearance the bar keeps reaches the bar", pixel([navigation backgroundImageForBarMetrics:UIBarMetricsDefault]));
+    revenant_check([pixel([navigation backgroundImageForBarMetrics:UIBarMetricsDefault]) hasPrefix:@"0 0 255 255"], "a change to the appearance the bar keeps reaches the bar", pixel([navigation backgroundImageForBarMetrics:UIBarMetricsDefault]));
 
     id compact = make_kind(@"UINavigationBarAppearance", YES);
     [compact configureWithOpaqueBackground];
     [compact setBackgroundColor:[UIColor greenColor]];
-    [navigation charonHostSetCompactAppearance:compact];
-    charon_check([pixel([navigation backgroundImageForBarMetrics:UIBarMetricsLandscapePhone]) hasPrefix:@"0 255 0 255"], "the compact appearance is applied to the landscape metrics", pixel([navigation backgroundImageForBarMetrics:UIBarMetricsLandscapePhone]));
-    [navigation charonHostSetCompactAppearance:nil];
-    charon_check([navigation backgroundImageForBarMetrics:UIBarMetricsLandscapePhone] == nil, "clearing the compact appearance clears the landscape image", @"the image stays");
+    [navigation revenantHostSetCompactAppearance:compact];
+    revenant_check([pixel([navigation backgroundImageForBarMetrics:UIBarMetricsLandscapePhone]) hasPrefix:@"0 255 0 255"], "the compact appearance is applied to the landscape metrics", pixel([navigation backgroundImageForBarMetrics:UIBarMetricsLandscapePhone]));
+    [navigation revenantHostSetCompactAppearance:nil];
+    revenant_check([navigation backgroundImageForBarMetrics:UIBarMetricsLandscapePhone] == nil, "clearing the compact appearance clears the landscape image", @"the image stays");
 
     id scroll = make_kind(@"UINavigationBarAppearance", YES);
     [scroll configureWithOpaqueBackground];
     [scroll setBackgroundColor:[UIColor yellowColor]];
-    [navigation charonHostSetScrollEdgeAppearance:scroll];
-    charon_check([pixel([navigation backgroundImageForBarMetrics:UIBarMetricsDefault]) hasPrefix:@"255 255 0 255"] && [navigation charonHostScrollEdgeAppearance] != nil,
+    [navigation revenantHostSetScrollEdgeAppearance:scroll];
+    revenant_check([pixel([navigation backgroundImageForBarMetrics:UIBarMetricsDefault]) hasPrefix:@"255 255 0 255"] && [navigation revenantHostScrollEdgeAppearance] != nil,
                  "a bar with no scroll view is at its edge and takes the scroll edge appearance", pixel([navigation backgroundImageForBarMetrics:UIBarMetricsDefault]));
     id compactEdge = make_kind(@"UINavigationBarAppearance", YES);
     [compactEdge configureWithOpaqueBackground];
     [compactEdge setBackgroundColor:[UIColor purpleColor]];
-    [navigation charonHostSetCompactScrollEdgeAppearance:compactEdge];
-    charon_check([pixel([navigation backgroundImageForBarMetrics:UIBarMetricsLandscapePhone]) hasPrefix:@"128 0 128 255"], "the compact scroll edge appearance goes to the landscape metrics at the edge", pixel([navigation backgroundImageForBarMetrics:UIBarMetricsLandscapePhone]));
-    [navigation charonHostSetCompactScrollEdgeAppearance:nil];
-    [navigation charonHostSetScrollEdgeAppearance:nil];
-    charon_check([pixel([navigation backgroundImageForBarMetrics:UIBarMetricsDefault]) hasPrefix:@"0 0 255 255"] && [navigation backgroundImageForBarMetrics:UIBarMetricsLandscapePhone] == nil, "without a scroll edge appearance the standard one is used at the edge", pixel([navigation backgroundImageForBarMetrics:UIBarMetricsDefault]));
+    [navigation revenantHostSetCompactScrollEdgeAppearance:compactEdge];
+    revenant_check([pixel([navigation backgroundImageForBarMetrics:UIBarMetricsLandscapePhone]) hasPrefix:@"128 0 128 255"], "the compact scroll edge appearance goes to the landscape metrics at the edge", pixel([navigation backgroundImageForBarMetrics:UIBarMetricsLandscapePhone]));
+    [navigation revenantHostSetCompactScrollEdgeAppearance:nil];
+    [navigation revenantHostSetScrollEdgeAppearance:nil];
+    revenant_check([pixel([navigation backgroundImageForBarMetrics:UIBarMetricsDefault]) hasPrefix:@"0 0 255 255"] && [navigation backgroundImageForBarMetrics:UIBarMetricsLandscapePhone] == nil, "without a scroll edge appearance the standard one is used at the edge", pixel([navigation backgroundImageForBarMetrics:UIBarMetricsDefault]));
 
     UINavigationItem *first = [[UINavigationItem alloc] initWithTitle:@"one"], *second = [[UINavigationItem alloc] initWithTitle:@"two"];
     [navigation pushNavigationItem:first animated:NO];
@@ -576,25 +576,25 @@ static void check_application(void)
     id itemGreen = make_kind(@"UINavigationBarAppearance", YES);
     [itemGreen configureWithOpaqueBackground];
     [itemGreen setBackgroundColor:[UIColor greenColor]];
-    [second charonHostSetStandardAppearance:itemGreen];
-    [navigation charonHostCharon_refreshForced:NO];
-    charon_check([pixel([navigation backgroundImageForBarMetrics:UIBarMetricsDefault]) hasPrefix:@"0 255 0 255"], "the appearance of the top item is the bar's", pixel([navigation backgroundImageForBarMetrics:UIBarMetricsDefault]));
-    [[second charonHostStandardAppearance] setBackgroundColor:[UIColor purpleColor]];
+    [second revenantHostSetStandardAppearance:itemGreen];
+    [navigation revenantHostRevenant_refreshForced:NO];
+    revenant_check([pixel([navigation backgroundImageForBarMetrics:UIBarMetricsDefault]) hasPrefix:@"0 255 0 255"], "the appearance of the top item is the bar's", pixel([navigation backgroundImageForBarMetrics:UIBarMetricsDefault]));
+    [[second revenantHostStandardAppearance] setBackgroundColor:[UIColor purpleColor]];
     settle();
-    charon_check([pixel([navigation backgroundImageForBarMetrics:UIBarMetricsDefault]) hasPrefix:@"128 0 128 255"], "a change to the appearance of the top item is applied", pixel([navigation backgroundImageForBarMetrics:UIBarMetricsDefault]));
+    revenant_check([pixel([navigation backgroundImageForBarMetrics:UIBarMetricsDefault]) hasPrefix:@"128 0 128 255"], "a change to the appearance of the top item is applied", pixel([navigation backgroundImageForBarMetrics:UIBarMetricsDefault]));
     id itemEdge = make_kind(@"UINavigationBarAppearance", YES);
     [itemEdge configureWithOpaqueBackground];
     [itemEdge setBackgroundColor:[UIColor orangeColor]];
-    [second charonHostSetScrollEdgeAppearance:itemEdge];
-    charon_check([pixel([navigation backgroundImageForBarMetrics:UIBarMetricsDefault]) hasPrefix:@"255 128 0 255"], "the scroll edge appearance of the top item comes before its standard one at the edge", pixel([navigation backgroundImageForBarMetrics:UIBarMetricsDefault]));
-    [second charonHostSetScrollEdgeAppearance:nil];
+    [second revenantHostSetScrollEdgeAppearance:itemEdge];
+    revenant_check([pixel([navigation backgroundImageForBarMetrics:UIBarMetricsDefault]) hasPrefix:@"255 128 0 255"], "the scroll edge appearance of the top item comes before its standard one at the edge", pixel([navigation backgroundImageForBarMetrics:UIBarMetricsDefault]));
+    [second revenantHostSetScrollEdgeAppearance:nil];
     [navigation popNavigationItemAnimated:NO];
-    [navigation charonHostCharon_refreshForced:NO];
-    charon_check([pixel([navigation backgroundImageForBarMetrics:UIBarMetricsDefault]) hasPrefix:@"0 0 255 255"], "popping the item returns the bar to its own appearance", pixel([navigation backgroundImageForBarMetrics:UIBarMetricsDefault]));
-    [first charonHostSetStandardAppearance:itemGreen];
-    charon_check([pixel([navigation backgroundImageForBarMetrics:UIBarMetricsDefault]) hasPrefix:@"0 255 0 255"], "setting the appearance of the top item applies it at once", pixel([navigation backgroundImageForBarMetrics:UIBarMetricsDefault]));
-    [first charonHostSetStandardAppearance:nil];
-    charon_check([pixel([navigation backgroundImageForBarMetrics:UIBarMetricsDefault]) hasPrefix:@"0 0 255 255"], "clearing it returns the bar to its own", pixel([navigation backgroundImageForBarMetrics:UIBarMetricsDefault]));
+    [navigation revenantHostRevenant_refreshForced:NO];
+    revenant_check([pixel([navigation backgroundImageForBarMetrics:UIBarMetricsDefault]) hasPrefix:@"0 0 255 255"], "popping the item returns the bar to its own appearance", pixel([navigation backgroundImageForBarMetrics:UIBarMetricsDefault]));
+    [first revenantHostSetStandardAppearance:itemGreen];
+    revenant_check([pixel([navigation backgroundImageForBarMetrics:UIBarMetricsDefault]) hasPrefix:@"0 255 0 255"], "setting the appearance of the top item applies it at once", pixel([navigation backgroundImageForBarMetrics:UIBarMetricsDefault]));
+    [first revenantHostSetStandardAppearance:nil];
+    revenant_check([pixel([navigation backgroundImageForBarMetrics:UIBarMetricsDefault]) hasPrefix:@"0 0 255 255"], "clearing it returns the bar to its own", pixel([navigation backgroundImageForBarMetrics:UIBarMetricsDefault]));
 
     UITabBar *itemTabs = [[UITabBar alloc] init];
     UITabBarItem *tabOne = [[UITabBarItem alloc] initWithTitle:@"a" image:nil tag:0], *tabTwo = [[UITabBarItem alloc] initWithTitle:@"b" image:nil tag:1];
@@ -604,55 +604,55 @@ static void check_application(void)
     [tabOwn setBackgroundColor:[UIColor redColor]];
     [tabItemApp configureWithOpaqueBackground];
     [tabItemApp setBackgroundColor:[UIColor greenColor]];
-    [itemTabs charonHostSetStandardAppearance:tabOwn];
-    [tabTwo charonHostSetStandardAppearance:tabItemApp];
+    [itemTabs revenantHostSetStandardAppearance:tabOwn];
+    [tabTwo revenantHostSetStandardAppearance:tabItemApp];
     itemTabs.selectedItem = tabOne;
-    [itemTabs charonHostCharon_refreshForced:NO];
-    charon_check([pixel(itemTabs.backgroundImage) hasPrefix:@"255 0 0 255"], "a tab bar with an item that has no appearance keeps its own", pixel(itemTabs.backgroundImage));
+    [itemTabs revenantHostRevenant_refreshForced:NO];
+    revenant_check([pixel(itemTabs.backgroundImage) hasPrefix:@"255 0 0 255"], "a tab bar with an item that has no appearance keeps its own", pixel(itemTabs.backgroundImage));
     itemTabs.selectedItem = tabTwo;
-    [itemTabs charonHostCharon_refreshForced:NO];
-    charon_check([pixel(itemTabs.backgroundImage) hasPrefix:@"0 255 0 255"], "the appearance of the selected tab item is the bar's", pixel(itemTabs.backgroundImage));
+    [itemTabs revenantHostRevenant_refreshForced:NO];
+    revenant_check([pixel(itemTabs.backgroundImage) hasPrefix:@"0 255 0 255"], "the appearance of the selected tab item is the bar's", pixel(itemTabs.backgroundImage));
 
     id transparent = make_kind(@"UINavigationBarAppearance", YES);
-    [navigation charonHostSetStandardAppearance:transparent];
-    charon_check([pixel([navigation backgroundImageForBarMetrics:UIBarMetricsDefault]) hasPrefix:@"0 0 0 0"] && navigation.shadowImage.size.width == 0, "a transparent appearance clears the bar and its shadow", pixel([navigation backgroundImageForBarMetrics:UIBarMetricsDefault]));
+    [navigation revenantHostSetStandardAppearance:transparent];
+    revenant_check([pixel([navigation backgroundImageForBarMetrics:UIBarMetricsDefault]) hasPrefix:@"0 0 0 0"] && navigation.shadowImage.size.width == 0, "a transparent appearance clears the bar and its shadow", pixel([navigation backgroundImageForBarMetrics:UIBarMetricsDefault]));
     id blur = make_kind(@"UINavigationBarAppearance", YES);
     [blur setBackgroundEffect:[UIBlurEffect effectWithStyle:UIBlurEffectStyleLight]];
-    [navigation charonHostSetStandardAppearance:blur];
-    charon_check([navigation backgroundImageForBarMetrics:UIBarMetricsDefault] == nil, "a blur effect leaves the bar its own look", @"an image is set");
+    [navigation revenantHostSetStandardAppearance:blur];
+    revenant_check([navigation backgroundImageForBarMetrics:UIBarMetricsDefault] == nil, "a blur effect leaves the bar its own look", @"an image is set");
     id image = make_kind(@"UINavigationBarAppearance", YES);
     [image setBackgroundImage:images[1]];
     [image setShadowImage:images[0]];
-    [navigation charonHostSetStandardAppearance:image];
-    charon_check(CGSizeEqualToSize([navigation backgroundImageForBarMetrics:UIBarMetricsDefault].size, ((UIImage *)images[1]).size) && CGSizeEqualToSize(navigation.shadowImage.size, ((UIImage *)images[0]).size), "a background image and a shadow image are handed on as they are", [NSString stringWithFormat:@"%@ %@", [navigation backgroundImageForBarMetrics:UIBarMetricsDefault], navigation.shadowImage]);
-    [navigation charonHostSetStandardAppearance:nil];
+    [navigation revenantHostSetStandardAppearance:image];
+    revenant_check(CGSizeEqualToSize([navigation backgroundImageForBarMetrics:UIBarMetricsDefault].size, ((UIImage *)images[1]).size) && CGSizeEqualToSize(navigation.shadowImage.size, ((UIImage *)images[0]).size), "a background image and a shadow image are handed on as they are", [NSString stringWithFormat:@"%@ %@", [navigation backgroundImageForBarMetrics:UIBarMetricsDefault], navigation.shadowImage]);
+    [navigation revenantHostSetStandardAppearance:nil];
     settle();
-    charon_check([navigation backgroundImageForBarMetrics:UIBarMetricsDefault] == nil && navigation.shadowImage == nil && navigation.titleTextAttributes == nil, "clearing the standard appearance takes the look back", @"something stays");
-    charon_check([proxy titleTextAttributesForState:UIControlStateNormal][UITextAttributeTextColor] == nil && [proxy backgroundImageForState:UIControlStateNormal style:UIBarButtonItemStylePlain barMetrics:UIBarMetricsDefault] == nil, "the buttons are cleared as well", @"they stay");
+    revenant_check([navigation backgroundImageForBarMetrics:UIBarMetricsDefault] == nil && navigation.shadowImage == nil && navigation.titleTextAttributes == nil, "clearing the standard appearance takes the look back", @"something stays");
+    revenant_check([proxy titleTextAttributesForState:UIControlStateNormal][UITextAttributeTextColor] == nil && [proxy backgroundImageForState:UIControlStateNormal style:UIBarButtonItemStylePlain barMetrics:UIBarMetricsDefault] == nil, "the buttons are cleared as well", @"they stay");
 
     UINavigationBar *untouched = [[UINavigationBar alloc] init];
-    id defaultAppearance = [untouched charonHostStandardAppearance];
+    id defaultAppearance = [untouched revenantHostStandardAppearance];
     (void)defaultAppearance;
-    [untouched charonHostSetCompactAppearance:nil];
+    [untouched revenantHostSetCompactAppearance:nil];
     settle();
-    charon_check([untouched backgroundImageForBarMetrics:UIBarMetricsDefault] == nil && untouched.titleTextAttributes == nil, "reading the default appearance changes nothing", @"the bar changed");
-    [[untouched charonHostStandardAppearance] setTitleTextAttributes:@{NSForegroundColorAttributeName: red}];
+    revenant_check([untouched backgroundImageForBarMetrics:UIBarMetricsDefault] == nil && untouched.titleTextAttributes == nil, "reading the default appearance changes nothing", @"the bar changed");
+    [[untouched revenantHostStandardAppearance] setTitleTextAttributes:@{NSForegroundColorAttributeName: red}];
     settle();
-    charon_check([untouched.titleTextAttributes[UITextAttributeTextColor] isEqual:red], "changing the default appearance in place applies it", @"the title colour is missing");
+    revenant_check([untouched.titleTextAttributes[UITextAttributeTextColor] isEqual:red], "changing the default appearance in place applies it", @"the title colour is missing");
 
     UIToolbar *toolbar = [[UIToolbar alloc] init];
     id toolbarAppearance = make_kind(@"UIToolbarAppearance", YES);
     [toolbarAppearance configureWithOpaqueBackground];
     [toolbarAppearance setBackgroundColor:red];
     [[toolbarAppearance doneButtonAppearance].normal setBackgroundImage:images[1]];
-    [toolbar charonHostSetStandardAppearance:toolbarAppearance];
-    charon_check([pixel([toolbar backgroundImageForToolbarPosition:UIBarPositionAny barMetrics:UIBarMetricsDefault]) hasPrefix:@"255 0 0 255"], "a toolbar takes the background colour as a solid image", pixel([toolbar backgroundImageForToolbarPosition:UIBarPositionAny barMetrics:UIBarMetricsDefault]));
-    charon_check([toolbar shadowImageForToolbarPosition:UIBarPositionAny].size.width == 1, "a toolbar takes the shadow as a hairline", @"no hairline");
+    [toolbar revenantHostSetStandardAppearance:toolbarAppearance];
+    revenant_check([pixel([toolbar backgroundImageForToolbarPosition:UIBarPositionAny barMetrics:UIBarMetricsDefault]) hasPrefix:@"255 0 0 255"], "a toolbar takes the background colour as a solid image", pixel([toolbar backgroundImageForToolbarPosition:UIBarPositionAny barMetrics:UIBarMetricsDefault]));
+    revenant_check([toolbar shadowImageForToolbarPosition:UIBarPositionAny].size.width == 1, "a toolbar takes the shadow as a hairline", @"no hairline");
     UIBarButtonItem *toolbarProxy = [UIBarButtonItem appearanceWhenContainedIn:[UIToolbar class], nil];
-    charon_check([toolbarProxy backgroundImageForState:UIControlStateNormal style:UIBarButtonItemStyleDone barMetrics:UIBarMetricsDefault] == images[1], "the done button image reaches the buttons of toolbars", @"the image is missing");
-    [toolbar charonHostSetStandardAppearance:nil];
+    revenant_check([toolbarProxy backgroundImageForState:UIControlStateNormal style:UIBarButtonItemStyleDone barMetrics:UIBarMetricsDefault] == images[1], "the done button image reaches the buttons of toolbars", @"the image is missing");
+    [toolbar revenantHostSetStandardAppearance:nil];
     settle();
-    charon_check([toolbar backgroundImageForToolbarPosition:UIBarPositionAny barMetrics:UIBarMetricsDefault] == nil, "clearing the toolbar appearance takes the look back", @"an image stays");
+    revenant_check([toolbar backgroundImageForToolbarPosition:UIBarPositionAny barMetrics:UIBarMetricsDefault] == nil, "clearing the toolbar appearance takes the look back", @"an image stays");
 
     RecordingTabBar *tabs = [[RecordingTabBar alloc] init];
     id tabAppearance = make_kind(@"UITabBarAppearance", YES);
@@ -662,15 +662,15 @@ static void check_application(void)
     [[tabAppearance stackedLayoutAppearance].selected setIconColor:[UIColor greenColor]];
     [[tabAppearance stackedLayoutAppearance].normal setTitleTextAttributes:@{NSForegroundColorAttributeName: [UIColor blueColor]}];
     [[tabAppearance stackedLayoutAppearance].selected setTitleTextAttributes:@{NSForegroundColorAttributeName: [UIColor yellowColor]}];
-    [tabs charonHostSetStandardAppearance:tabAppearance];
-    charon_check([pixel(tabs.backgroundImage) hasPrefix:@"255 0 0 255"] && tabs.shadowImage.size.width == 1, "a tab bar takes the background colour and the shadow", pixel(tabs.backgroundImage));
-    charon_check(CGSizeEqualToSize(tabs.selectionIndicatorImage.size, ((UIImage *)images[0]).size) && [tabs.recordedTint isEqual:[UIColor greenColor]], "the selection indicator image and the selected icon colour are applied", [NSString stringWithFormat:@"%@ %@", tabs.selectionIndicatorImage, tabs.recordedTint]);
+    [tabs revenantHostSetStandardAppearance:tabAppearance];
+    revenant_check([pixel(tabs.backgroundImage) hasPrefix:@"255 0 0 255"] && tabs.shadowImage.size.width == 1, "a tab bar takes the background colour and the shadow", pixel(tabs.backgroundImage));
+    revenant_check(CGSizeEqualToSize(tabs.selectionIndicatorImage.size, ((UIImage *)images[0]).size) && [tabs.recordedTint isEqual:[UIColor greenColor]], "the selection indicator image and the selected icon colour are applied", [NSString stringWithFormat:@"%@ %@", tabs.selectionIndicatorImage, tabs.recordedTint]);
     UITabBarItem *itemProxy = [UITabBarItem appearanceWhenContainedIn:[UITabBar class], nil];
-    charon_check([[itemProxy titleTextAttributesForState:UIControlStateNormal][UITextAttributeTextColor] isEqual:[UIColor blueColor]] && [[itemProxy titleTextAttributesForState:UIControlStateSelected][UITextAttributeTextColor] isEqual:[UIColor yellowColor]],
+    revenant_check([[itemProxy titleTextAttributesForState:UIControlStateNormal][UITextAttributeTextColor] isEqual:[UIColor blueColor]] && [[itemProxy titleTextAttributesForState:UIControlStateSelected][UITextAttributeTextColor] isEqual:[UIColor yellowColor]],
                  "the normal and selected tab titles reach the tab items", @"a colour is missing");
-    [tabs charonHostSetStandardAppearance:nil];
+    [tabs revenantHostSetStandardAppearance:nil];
     settle();
-    charon_check(tabs.backgroundImage == nil && tabs.selectionIndicatorImage == nil && tabs.recordedTint == nil, "clearing the tab bar appearance takes the look back", @"something stays");
+    revenant_check(tabs.backgroundImage == nil && tabs.selectionIndicatorImage == nil && tabs.recordedTint == nil, "clearing the tab bar appearance takes the look back", @"something stays");
 }
 
 
@@ -679,32 +679,32 @@ static void check_equality(void)
     NSArray *kinds = @[@"UIBarAppearance", @"UINavigationBarAppearance", @"UIToolbarAppearance", @"UITabBarAppearance", @"UIBarButtonItemAppearance", @"UITabBarItemAppearance"];
     for (NSString *kind in kinds) {
         id ours = make_kind(kind, YES), system = make_kind(kind, NO), oursAgain = make_kind(kind, YES), systemAgain = make_kind(kind, NO);
-        charon_check([ours isEqual:oursAgain] == [system isEqual:systemAgain] && [ours hash] == [oursAgain hash] && [ours isEqual:ours] && ![ours isEqual:nil] && ![ours isEqual:@"text"] && ![system isEqual:@"text"],
+        revenant_check([ours isEqual:oursAgain] == [system isEqual:systemAgain] && [ours hash] == [oursAgain hash] && [ours isEqual:ours] && ![ours isEqual:nil] && ![ours isEqual:@"text"] && ![system isEqual:@"text"],
                      NAMED(@"two new %@ are equal with equal hashes", kind), @"the equality differs");
         for (NSString *other in kinds)
             if (![other isEqual:kind])
-                charon_check([ours isEqual:make_kind(other, YES)] == [system isEqual:make_kind(other, NO)], NAMED(@"a new %@ is not equal to a new %@", kind, other), @"the equality differs");
+                revenant_check([ours isEqual:make_kind(other, YES)] == [system isEqual:make_kind(other, NO)], NAMED(@"a new %@ is not equal to a new %@", kind, other), @"the equality differs");
     }
     id ours = make_kind(@"UIBarAppearance", YES), system = make_kind(@"UIBarAppearance", NO), oursAgain = make_kind(@"UIBarAppearance", YES), systemAgain = make_kind(@"UIBarAppearance", NO);
     [ours setBackgroundColor:[UIColor redColor]];
     [system setBackgroundColor:[UIColor redColor]];
-    charon_check([ours isEqual:oursAgain] == [system isEqual:systemAgain] && ![ours isEqual:oursAgain], "a different colour is a different appearance", @"the equality differs");
+    revenant_check([ours isEqual:oursAgain] == [system isEqual:systemAgain] && ![ours isEqual:oursAgain], "a different colour is a different appearance", @"the equality differs");
     [oursAgain setBackgroundColor:[UIColor redColor]];
     [systemAgain setBackgroundColor:[UIColor redColor]];
-    charon_check([ours isEqual:oursAgain] == [system isEqual:systemAgain] && [ours hash] == [oursAgain hash], "the same colour is the same appearance", @"the equality differs");
+    revenant_check([ours isEqual:oursAgain] == [system isEqual:systemAgain] && [ours hash] == [oursAgain hash], "the same colour is the same appearance", @"the equality differs");
     id ourTab = make_kind(@"UITabBarAppearance", YES), systemTab = make_kind(@"UITabBarAppearance", NO);
     [[ourTab stackedLayoutAppearance].normal setIconColor:[UIColor redColor]];
     [[systemTab stackedLayoutAppearance].normal setIconColor:[UIColor redColor]];
-    charon_check([ourTab isEqual:make_kind(@"UITabBarAppearance", YES)] == [systemTab isEqual:make_kind(@"UITabBarAppearance", NO)] && ![ourTab isEqual:make_kind(@"UITabBarAppearance", YES)], "an icon colour makes a tab bar appearance different", @"the equality differs");
+    revenant_check([ourTab isEqual:make_kind(@"UITabBarAppearance", YES)] == [systemTab isEqual:make_kind(@"UITabBarAppearance", NO)] && ![ourTab isEqual:make_kind(@"UITabBarAppearance", YES)], "an icon colour makes a tab bar appearance different", @"the equality differs");
 
     for (NSString *kind in kinds) {
         id ourObject = make_kind(kind, YES), systemObject = make_kind(kind, NO);
         NSData *data = archive(ourObject);
         id decoded = [NSKeyedUnarchiver unarchivedObjectOfClass:[ourObject class] fromData:data error:NULL];
         id systemDecoded = [NSKeyedUnarchiver unarchivedObjectOfClass:[systemObject class] fromData:archive(systemObject) error:NULL];
-        charon_check(decoded && systemDecoded && [decoded isKindOfClass:[ourObject class]] && [decoded isEqual:ourObject] && [systemDecoded isEqual:systemObject] && [[decoded copy] isEqual:decoded],
+        revenant_check(decoded && systemDecoded && [decoded isKindOfClass:[ourObject class]] && [decoded isEqual:ourObject] && [systemDecoded isEqual:systemObject] && [[decoded copy] isEqual:decoded],
                      NAMED(@"%@ makes a secure archive and reads it back equal", kind), @"the round trip differs");
-        charon_check([normalised(decoded) isEqual:normalised(ourObject)], NAMED(@"%@ reads back with the description it was archived with", kind), @"the description differs");
+        revenant_check([normalised(decoded) isEqual:normalised(ourObject)], NAMED(@"%@ reads back with the description it was archived with", kind), @"the description differs");
     }
     id ourNavigation = make_kind(@"UINavigationBarAppearance", YES);
     [ourNavigation configureWithOpaqueBackground];
@@ -717,7 +717,7 @@ static void check_equality(void)
     [[ourNavigation buttonAppearance].highlighted setBackgroundImage:images[1]];
     [ourNavigation setBackIndicatorImage:images[0] transitionMaskImage:images[1]];
     id round = unarchive(ourNavigation);
-    charon_check([snap(round) hasPrefix:@"idiom"] && [[round backgroundColor] isEqual:[ourNavigation backgroundColor]] && [round shadowColor] == nil && [round backgroundEffect] == nil && CGSizeEqualToSize([round backgroundImage].size, ((UIImage *)images[0]).size) &&
+    revenant_check([snap(round) hasPrefix:@"idiom"] && [[round backgroundColor] isEqual:[ourNavigation backgroundColor]] && [round shadowColor] == nil && [round backgroundEffect] == nil && CGSizeEqualToSize([round backgroundImage].size, ((UIImage *)images[0]).size) &&
                  [[round titleTextAttributes][NSKernAttributeName] isEqual:@2] && UIOffsetEqualToOffset([round titlePositionAdjustment], UIOffsetMake(2, 3)) && [[[round buttonAppearance].normal titleTextAttributes][NSForegroundColorAttributeName] isEqual:[UIColor blueColor]] &&
                  CGSizeEqualToSize([[round buttonAppearance].highlighted backgroundImage].size, ((UIImage *)images[1]).size) && CGSizeEqualToSize([round backIndicatorImage].size, ((UIImage *)images[0]).size) &&
                  CGSizeEqualToSize([round backIndicatorTransitionMaskImage].size, ((UIImage *)images[1]).size) && [round isEqual:ourNavigation] == NO,
@@ -728,7 +728,7 @@ static void check_equality(void)
     [tab setStackedItemWidth:9];
     [tab setSelectionIndicatorTintColor:[UIColor blueColor]];
     id tabRound = unarchive(tab);
-    charon_check([tabRound isEqual:tab] && [[tabRound stackedLayoutAppearance].selected iconColor] == nil && [[[tabRound stackedLayoutAppearance].normal iconColor] isEqual:[UIColor redColor]] && [tabRound stackedItemWidth] == 9,
+    revenant_check([tabRound isEqual:tab] && [[tabRound stackedLayoutAppearance].selected iconColor] == nil && [[[tabRound stackedLayoutAppearance].normal iconColor] isEqual:[UIColor redColor]] && [tabRound stackedItemWidth] == 9,
                  "a tab bar appearance keeps its icon colour on the state it was set on through an archive", @"a value differs");
 }
 
@@ -761,30 +761,30 @@ static void check_selectors(void)
             if (ourAnswer != systemAnswer)
                 [missing addObject:selector];
         }
-        charon_check(!missing.count, NAMED(@"%@ answers the selectors the system's answers", name), [missing componentsJoinedByString:@" "]);
+        revenant_check(!missing.count, NAMED(@"%@ answers the selectors the system's answers", name), [missing componentsJoinedByString:@" "]);
     }
 }
 
 
 static void check_cases(void)
 {
-    NSArray *cases = charon_appearance_cases();
-    CharonAppearanceMaker portMaker = ^id(NSString *kind) { return make_kind(kind, YES); };
-    CharonAppearanceMaker systemMaker = ^id(NSString *kind) { return make_kind(kind, NO); };
-    int before = charon_failures;
+    NSArray *cases = revenant_appearance_cases();
+    RevenantAppearanceMaker portMaker = ^id(NSString *kind) { return make_kind(kind, YES); };
+    RevenantAppearanceMaker systemMaker = ^id(NSString *kind) { return make_kind(kind, NO); };
+    int before = revenant_failures;
     NSMutableArray *expectations = [NSMutableArray array];
     for (NSDictionary *one in cases) {
-        id ours = ((CharonAppearanceCase)one[@"body"])(portMaker), system = ((CharonAppearanceCase)one[@"body"])(systemMaker);
-        charon_check(ours && system && [snap(ours) isEqual:snap(system)] && [normalised(ours) isEqual:normalised(system)], NAMED(@"scripted case: %@", one[@"name"]),
+        id ours = ((RevenantAppearanceCase)one[@"body"])(portMaker), system = ((RevenantAppearanceCase)one[@"body"])(systemMaker);
+        revenant_check(ours && system && [snap(ours) isEqual:snap(system)] && [normalised(ours) isEqual:normalised(system)], NAMED(@"scripted case: %@", one[@"name"]),
                      [NSString stringWithFormat:@"%@", difference([snap(ours) stringByAppendingString:normalised(ours)], [snap(system) stringByAppendingString:normalised(system)])]);
     }
-    charon_font_names = NO;
+    revenant_font_names = NO;
     for (NSDictionary *one in cases)
-        [expectations addObject:snap(((CharonAppearanceCase)one[@"body"])(systemMaker))];
-    charon_font_names = YES;
+        [expectations addObject:snap(((RevenantAppearanceCase)one[@"body"])(systemMaker))];
+    revenant_font_names = YES;
     const char *path = getenv("APPEARANCES_EXPECTATIONS");
-    if (path && charon_failures == before) {
-        NSMutableString *text = [NSMutableString stringWithString:@"static NSString *const charon_appearance_expectations[] = {\n"];
+    if (path && revenant_failures == before) {
+        NSMutableString *text = [NSMutableString stringWithString:@"static NSString *const revenant_appearance_expectations[] = {\n"];
         for (NSString *expected in expectations) {
             NSString *escaped = [[expected stringByReplacingOccurrencesOfString:@"\\" withString:@"\\\\"] stringByReplacingOccurrencesOfString:@"\"" withString:@"\\\""];
             [text appendFormat:@"    @\"%@\",\n", escaped];
@@ -825,18 +825,18 @@ static void run_fuzz(const char *name, id (^make)(BOOL port), NSArray *operation
         }
         if (problem) {
             failures++;
-            charon_check(NO, NAMED(@"%s run %d", name, run), [NSString stringWithFormat:@"after %@: %@", trace, problem]);
+            revenant_check(NO, NAMED(@"%s run %d", name, run), [NSString stringWithFormat:@"after %@: %@", trace, problem]);
         }
     }
     if (!failures)
-        charon_check(YES, NAMED(@"%s matches the system over %d random sequences of %d changes", name, runs, length), @"");
+        revenant_check(YES, NAMED(@"%s matches the system over %d random sequences of %d changes", name, runs, length), @"");
 }
 
 int main(void)
 {
     @autoreleasepool {
-        charon_font_names = YES;
-        charon_prepare_images();
+        revenant_font_names = YES;
+        revenant_prepare_images();
         if (getenv("FUZZ_SEED"))
             state_random = (unsigned)atoi(getenv("FUZZ_SEED"));
         masks = [NSMutableArray array];
@@ -852,14 +852,14 @@ int main(void)
         UINavigationBarAppearance *systemNavigation = [[UINavigationBarAppearance alloc] init];
         id portNavigation = [[port_class(@"UINavigationBarAppearance") alloc] init];
         add_mask(systemNavigation.titleTextAttributes[NSForegroundColorAttributeName], [portNavigation titleTextAttributes][NSForegroundColorAttributeName], @"<LABEL>");
-        charon_check(port_class(@"UIBarAppearance") && port_class(@"UINavigationBarAppearance") && port_class(@"UIToolbarAppearance") && port_class(@"UITabBarAppearance") &&
+        revenant_check(port_class(@"UIBarAppearance") && port_class(@"UINavigationBarAppearance") && port_class(@"UIToolbarAppearance") && port_class(@"UITabBarAppearance") &&
                      port_class(@"UIBarButtonItemAppearance") && port_class(@"UIBarButtonItemStateAppearance") && port_class(@"UITabBarItemAppearance") && port_class(@"UITabBarItemStateAppearance"),
                      "the eight classes are there", @"one is missing");
         for (NSString *name in @[@"UIBarAppearance", @"UINavigationBarAppearance", @"UIToolbarAppearance", @"UITabBarAppearance", @"UIBarButtonItemAppearance", @"UITabBarItemAppearance"]) {
             Class ours = port_class(name), system = NSClassFromString(name);
-            charon_check([ours supportsSecureCoding] == [system supportsSecureCoding] && [ours conformsToProtocol:@protocol(NSCopying)] == [system conformsToProtocol:@protocol(NSCopying)],
+            revenant_check([ours supportsSecureCoding] == [system supportsSecureCoding] && [ours conformsToProtocol:@protocol(NSCopying)] == [system conformsToProtocol:@protocol(NSCopying)],
                          NAMED(@"%@ adopts NSCopying and secure coding as the system's does", name), @"the adoption differs");
-            charon_check(class_getSuperclass(ours) == port_class(class_getName(class_getSuperclass(system)) ? [NSString stringWithUTF8String:class_getName(class_getSuperclass(system))] : @"")
+            revenant_check(class_getSuperclass(ours) == port_class(class_getName(class_getSuperclass(system)) ? [NSString stringWithUTF8String:class_getName(class_getSuperclass(system))] : @"")
                          || (class_getSuperclass(system) == [NSObject class] && class_getSuperclass(ours) == [NSObject class]),
                          NAMED(@"%@ has the superclass of the system's", name), @"the superclass differs");
         }
@@ -881,7 +881,7 @@ int main(void)
         check_accessors(@"UIToolbar", ourToolbar, systemToolbar, @[@"standardAppearance", @"compactAppearance", @"scrollEdgeAppearance", @"compactScrollEdgeAppearance"], @"UIToolbarAppearance");
         UITabBar *ourTabs = [[UITabBar alloc] init], *systemTabs = [[UITabBar alloc] init];
         check_accessors(@"UITabBar", ourTabs, systemTabs, @[@"standardAppearance", @"scrollEdgeAppearance"], @"UITabBarAppearance");
-        charon_check(![ourTabs respondsToSelector:NSSelectorFromString(@"charonHostCompactAppearance")] && ![systemTabs respondsToSelector:NSSelectorFromString(@"compactAppearance")], "a tab bar has no compact appearance, as the system's has none", @"it answers");
+        revenant_check(![ourTabs respondsToSelector:NSSelectorFromString(@"revenantHostCompactAppearance")] && ![systemTabs respondsToSelector:NSSelectorFromString(@"compactAppearance")], "a tab bar has no compact appearance, as the system's has none", @"it answers");
         UINavigationItem *ourItem = [[UINavigationItem alloc] initWithTitle:@"t"], *systemItem = [[UINavigationItem alloc] initWithTitle:@"t"];
         check_accessors(@"UINavigationItem", ourItem, systemItem, @[@"standardAppearance", @"compactAppearance", @"scrollEdgeAppearance", @"compactScrollEdgeAppearance"], @"UINavigationBarAppearance");
         UITabBarItem *ourTabItem = [[UITabBarItem alloc] initWithTitle:@"t" image:nil tag:0], *systemTabItem = [[UITabBarItem alloc] initWithTitle:@"t" image:nil tag:0];
@@ -890,7 +890,7 @@ int main(void)
         check_equality();
         check_selectors();
         check_cases();
-        printf("checks=%d failures=%d\n", charon_checks, charon_failures);
-        return charon_failures;
+        printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
+        return revenant_failures;
     }
 }

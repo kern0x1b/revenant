@@ -16,8 +16,8 @@ static const char *label(NSString *format, ...)
     return string.UTF8String;
 }
 
-@interface NSManagedObjectContext (CharonHost)
-- (id)charonHostexecuteRequest:(NSPersistentStoreRequest *)request error:(NSError **)error;
+@interface NSManagedObjectContext (RevenantHost)
+- (id)revenantHostexecuteRequest:(NSPersistentStoreRequest *)request error:(NSError **)error;
 @end
 
 static NSManagedObjectModel *model(void)
@@ -94,20 +94,20 @@ static NSDictionary *id_names(Stack *stack)
 
 static id async_request(Stack *stack, NSFetchRequest *fetch, void (^block)(id result))
 {
-    Class cls = NSClassFromString(stack.ours ? @"CharonHostNSAsynchronousFetchRequest" : @"NSAsynchronousFetchRequest");
+    Class cls = NSClassFromString(stack.ours ? @"RevenantHostNSAsynchronousFetchRequest" : @"NSAsynchronousFetchRequest");
     return ((id (*)(id, SEL, id, id))objc_msgSend)([cls alloc], @selector(initWithFetchRequest:completionBlock:), fetch, block);
 }
 
 static id execute(Stack *stack, NSManagedObjectContext *context, id request, NSError **error)
 {
-    return stack.ours ? [context charonHostexecuteRequest:request error:error] : [context executeRequest:request error:error];
+    return stack.ours ? [context revenantHostexecuteRequest:request error:error] : [context executeRequest:request error:error];
 }
 
 static NSString *normalise(NSString *text)
 {
     NSRegularExpression *expression = [NSRegularExpression regularExpressionWithPattern:@"0x[0-9a-f]+" options:0 error:NULL];
     text = [expression stringByReplacingMatchesInString:text options:0 range:NSMakeRange(0, text.length) withTemplate:@"0x"];
-    text = [text stringByReplacingOccurrencesOfString:@"CharonHost" withString:@""];
+    text = [text stringByReplacingOccurrencesOfString:@"RevenantHost" withString:@""];
     NSRegularExpression *url = [NSRegularExpression regularExpressionWithPattern:@"x-coredata://[0-9A-F-]+/" options:0 error:NULL];
     return [url stringByReplacingMatchesInString:text options:0 range:NSMakeRange(0, text.length) withTemplate:@"x-coredata://S/"];
 }
@@ -321,9 +321,9 @@ static void confinement_and_shape(void)
     }
     for (NSUInteger i = 0; i < answers[0].count; i++)
         CHECK_EQUAL(answers[1][i], answers[0][i], label(@"shape %lu", (unsigned long)i));
-    CHECK([NSClassFromString(@"CharonHostNSAsynchronousFetchRequest") superclass] == [NSPersistentStoreRequest class], "the request is a persistent store request");
-    CHECK([NSClassFromString(@"CharonHostNSAsynchronousFetchResult") superclass] == NSClassFromString(@"CharonHostNSPersistentStoreAsynchronousResult"), "the fetch result is an asynchronous result");
-    CHECK([NSClassFromString(@"CharonHostNSPersistentStoreAsynchronousResult") superclass] == NSClassFromString(@"CharonHostNSPersistentStoreResult"), "which is a persistent store result");
+    CHECK([NSClassFromString(@"RevenantHostNSAsynchronousFetchRequest") superclass] == [NSPersistentStoreRequest class], "the request is a persistent store request");
+    CHECK([NSClassFromString(@"RevenantHostNSAsynchronousFetchResult") superclass] == NSClassFromString(@"RevenantHostNSPersistentStoreAsynchronousResult"), "the fetch result is an asynchronous result");
+    CHECK([NSClassFromString(@"RevenantHostNSPersistentStoreAsynchronousResult") superclass] == NSClassFromString(@"RevenantHostNSPersistentStoreResult"), "which is a persistent store result");
 }
 
 int main(void)
@@ -331,7 +331,7 @@ int main(void)
     @autoreleasepool {
         scenarios();
         confinement_and_shape();
-        printf("checks=%d failures=%d\n", charon_checks, charon_failures);
+        printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
     }
-    return charon_failures ? 1 : 0;
+    return revenant_failures ? 1 : 0;
 }

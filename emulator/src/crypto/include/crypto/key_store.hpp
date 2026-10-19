@@ -16,7 +16,7 @@
 #include <span>
 #include <vector>
 
-namespace shade {
+namespace emulator {
 
 class KeyStore {
 public:

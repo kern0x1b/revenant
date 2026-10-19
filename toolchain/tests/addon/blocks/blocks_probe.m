@@ -3,8 +3,8 @@
 #include <string.h>
 #include <objc/runtime.h>
 
-#ifdef CHARON_WITHOUT_NATIVE
-void *charon_test_dlsym(void *handle, const char *name) { return NULL; }
+#ifdef REVENANT_WITHOUT_NATIVE
+void *revenant_test_dlsym(void *handle, const char *name) { return NULL; }
 #endif
 extern void *_Block_copy(const void *);
 extern void _Block_release(const void *);

@@ -1,18 +1,18 @@
 #import <HealthKit/HealthKit.h>
 
-#import "CharonHKStore.h"
+#import "RevenantHKStore.h"
 
-@interface HKWorkoutEvent (CharonIOS100Internal)
-- (instancetype)charon_initWithType:(HKWorkoutEventType)type date:(NSDate *)date;
+@interface HKWorkoutEvent (RevenantIOS100Internal)
+- (instancetype)revenant_initWithType:(HKWorkoutEventType)type date:(NSDate *)date;
 @end
 
 @implementation HKWorkoutEvent {
     HKWorkoutEventType _type;
     NSDate *_date;
-    NSDictionary *_charonMetadata;
-    NSDateInterval *_charonDateInterval;
+    NSDictionary *_revenantMetadata;
+    NSDateInterval *_revenantDateInterval;
 }
-CHARON_HEALTHKIT_UNCREATABLE_INIT
+REVENANT_HEALTHKIT_UNCREATABLE_INIT
 
 @dynamic dateInterval;
 @dynamic metadata;
@@ -25,11 +25,11 @@ CHARON_HEALTHKIT_UNCREATABLE_INIT
 
 + (instancetype)workoutEventWithType:(HKWorkoutEventType)type date:(NSDate *)date
 {
-    HKWorkoutEvent *event = [[HKWorkoutEvent alloc] charon_initWithType:type date:date];
+    HKWorkoutEvent *event = [[HKWorkoutEvent alloc] revenant_initWithType:type date:date];
     return event;
 }
 
-- (instancetype)charon_initWithType:(HKWorkoutEventType)type date:(NSDate *)date
+- (instancetype)revenant_initWithType:(HKWorkoutEventType)type date:(NSDate *)date
 {
     HKWorkoutEvent *fresh = [super init];
     if (fresh) {
@@ -70,24 +70,24 @@ CHARON_HEALTHKIT_UNCREATABLE_INIT
     return _date;
 }
 
-- (nullable NSDictionary *)charon_storedMetadata
+- (nullable NSDictionary *)revenant_storedMetadata
 {
-    return _charonMetadata;
+    return _revenantMetadata;
 }
 
-- (void)charon_setMetadata:(nullable NSDictionary *)metadata
+- (void)revenant_setMetadata:(nullable NSDictionary *)metadata
 {
-    _charonMetadata = [metadata copy];
+    _revenantMetadata = [metadata copy];
 }
 
-- (nullable NSDateInterval *)charon_storedDateInterval
+- (nullable NSDateInterval *)revenant_storedDateInterval
 {
-    return _charonDateInterval;
+    return _revenantDateInterval;
 }
 
-- (void)charon_setDateInterval:(nullable NSDateInterval *)dateInterval
+- (void)revenant_setDateInterval:(nullable NSDateInterval *)dateInterval
 {
-    _charonDateInterval = [dateInterval copy];
+    _revenantDateInterval = [dateInterval copy];
 }
 
 - (NSString *)description
@@ -105,8 +105,8 @@ CHARON_HEALTHKIT_UNCREATABLE_INIT
     HKQuantity *_totalDistance;
     NSArray<HKWorkoutEvent *> *_workoutEvents;
     NSTimeInterval _duration;
-    HKQuantity *_charonStrokeCount;
-    HKQuantity *_charonFlightsClimbed;
+    HKQuantity *_revenantStrokeCount;
+    HKQuantity *_revenantFlightsClimbed;
 }
 
 @dynamic totalSwimmingStrokeCount;
@@ -129,8 +129,8 @@ CHARON_HEALTHKIT_UNCREATABLE_INIT
         workout->_workoutEvents = [[coder decodeObjectOfClass:[NSArray class] forKey:@"workoutEvents"] copy] ?: @[];
         workout->_totalEnergyBurned = [[coder decodeObjectOfClass:[HKQuantity class] forKey:@"totalEnergyBurned"] copy];
         workout->_totalDistance = [[coder decodeObjectOfClass:[HKQuantity class] forKey:@"totalDistance"] copy];
-        workout->_charonStrokeCount = [[coder decodeObjectOfClass:[HKQuantity class] forKey:@"totalSwimmingStrokeCount"] copy];
-        workout->_charonFlightsClimbed = [[coder decodeObjectOfClass:[HKQuantity class] forKey:@"totalFlightsClimbed"] copy];
+        workout->_revenantStrokeCount = [[coder decodeObjectOfClass:[HKQuantity class] forKey:@"totalSwimmingStrokeCount"] copy];
+        workout->_revenantFlightsClimbed = [[coder decodeObjectOfClass:[HKQuantity class] forKey:@"totalFlightsClimbed"] copy];
     }
     return workout;
 }
@@ -143,17 +143,17 @@ CHARON_HEALTHKIT_UNCREATABLE_INIT
     [coder encodeObject:_workoutEvents forKey:@"workoutEvents"];
     [coder encodeObject:_totalEnergyBurned forKey:@"totalEnergyBurned"];
     [coder encodeObject:_totalDistance forKey:@"totalDistance"];
-    [coder encodeObject:_charonStrokeCount forKey:@"totalSwimmingStrokeCount"];
-    [coder encodeObject:_charonFlightsClimbed forKey:@"totalFlightsClimbed"];
+    [coder encodeObject:_revenantStrokeCount forKey:@"totalSwimmingStrokeCount"];
+    [coder encodeObject:_revenantFlightsClimbed forKey:@"totalFlightsClimbed"];
 }
 
-- (instancetype)charon_initWithType:(HKObjectType *)type
+- (instancetype)revenant_initWithType:(HKObjectType *)type
                            metadata:(nullable NSDictionary *)metadata
                           startDate:(NSDate *)startDate
                             endDate:(NSDate *)endDate
                            duration:(NSTimeInterval)duration
 {
-    HKWorkout *workout = [super charon_initWithType:(HKSampleType *)type
+    HKWorkout *workout = [super revenant_initWithType:(HKSampleType *)type
                                           metadata:metadata
                                          startDate:startDate
                                            endDate:endDate];
@@ -166,7 +166,7 @@ CHARON_HEALTHKIT_UNCREATABLE_INIT
                               startDate:(NSDate *)startDate
                                 endDate:(NSDate *)endDate
 {
-    HKWorkout *workout = [[HKWorkout alloc] charon_initWithType:[HKObjectType workoutType]
+    HKWorkout *workout = [[HKWorkout alloc] revenant_initWithType:[HKObjectType workoutType]
                                                        metadata:nil
                                                       startDate:startDate
                                                         endDate:endDate
@@ -184,7 +184,7 @@ CHARON_HEALTHKIT_UNCREATABLE_INIT
                           totalDistance:(nullable HKQuantity *)totalDistance
                                metadata:(nullable NSDictionary *)metadata
 {
-    HKWorkout *workout = [[HKWorkout alloc] charon_initWithType:[HKObjectType workoutType]
+    HKWorkout *workout = [[HKWorkout alloc] revenant_initWithType:[HKObjectType workoutType]
                                                        metadata:metadata
                                                       startDate:startDate
                                                         endDate:[startDate dateByAddingTimeInterval:duration]
@@ -205,7 +205,7 @@ CHARON_HEALTHKIT_UNCREATABLE_INIT
                       totalDistance:(nullable HKQuantity *)totalDistance
                              metadata:(nullable NSDictionary *)metadata
 {
-    HKWorkout *workout = [[HKWorkout alloc] charon_initWithType:[HKObjectType workoutType]
+    HKWorkout *workout = [[HKWorkout alloc] revenant_initWithType:[HKObjectType workoutType]
                                                        metadata:metadata
                                                       startDate:startDate
                                                         endDate:endDate
@@ -224,37 +224,37 @@ CHARON_HEALTHKIT_UNCREATABLE_INIT
     return _workoutActivityType;
 }
 
-- (void)charon_setWorkoutActivityType:(HKWorkoutActivityType)activityType
+- (void)revenant_setWorkoutActivityType:(HKWorkoutActivityType)activityType
 {
     _workoutActivityType = activityType;
 }
 
-- (void)charon_setWorkoutEvents:(NSArray<HKWorkoutEvent *> *)workoutEvents
+- (void)revenant_setWorkoutEvents:(NSArray<HKWorkoutEvent *> *)workoutEvents
 {
     _workoutEvents = [workoutEvents copy] ?: @[];
 }
 
-- (nullable HKQuantity *)charon_totalSwimmingStrokeCount
+- (nullable HKQuantity *)revenant_totalSwimmingStrokeCount
 {
-    return _charonStrokeCount;
+    return _revenantStrokeCount;
 }
 
-- (void)charon_setTotalSwimmingStrokeCount:(nullable HKQuantity *)count
+- (void)revenant_setTotalSwimmingStrokeCount:(nullable HKQuantity *)count
 {
-    _charonStrokeCount = (HKQuantity *)[count copy];
+    _revenantStrokeCount = (HKQuantity *)[count copy];
 }
 
-- (nullable HKQuantity *)charon_storedTotalFlightsClimbed
+- (nullable HKQuantity *)revenant_storedTotalFlightsClimbed
 {
-    return _charonFlightsClimbed;
+    return _revenantFlightsClimbed;
 }
 
-- (void)charon_setTotalFlightsClimbed:(nullable HKQuantity *)flights
+- (void)revenant_setTotalFlightsClimbed:(nullable HKQuantity *)flights
 {
-    _charonFlightsClimbed = (HKQuantity *)[flights copy];
+    _revenantFlightsClimbed = (HKQuantity *)[flights copy];
 }
 
-- (void)charon_setTotalEnergyBurned:(nullable HKQuantity *)energy totalDistance:(nullable HKQuantity *)distance
+- (void)revenant_setTotalEnergyBurned:(nullable HKQuantity *)energy totalDistance:(nullable HKQuantity *)distance
 {
     _totalEnergyBurned = (HKQuantity *)[energy copy];
     _totalDistance = (HKQuantity *)[distance copy];
@@ -280,7 +280,7 @@ CHARON_HEALTHKIT_UNCREATABLE_INIT
     return _workoutEvents;
 }
 
-- (NSInteger)charon_storeKind
+- (NSInteger)revenant_storeKind
 {
     return 3;
 }
@@ -292,8 +292,8 @@ CHARON_HEALTHKIT_UNCREATABLE_INIT
 
 @end
 
-@interface HKWorkout (CharonHKStorable) <CharonHKStorable>
+@interface HKWorkout (RevenantHKStorable) <RevenantHKStorable>
 @end
 
-@implementation HKWorkout (CharonHKStorable)
+@implementation HKWorkout (RevenantHKStorable)
 @end

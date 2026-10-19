@@ -2,7 +2,7 @@
 # accessibilitymap/run.sh - AXBrailleMap against the host's own Accessibility.framework.
 #
 # The system builds this class as the pin state of a braille display, and the port builds the same class
-# in Accessibility/CharonBrailleMap.m. The check is: build the same tree in both and ask both the same
+# in Accessibility/RevenantBrailleMap.m. The check is: build the same tree in both and ask both the same
 # questions, and the two answers must be the same.
 #
 # The map comes out of NSClassFromString and alloc on both sides because the header marks -init and +new
@@ -14,7 +14,7 @@
 # before the run:
 #
 #   * how a map of a given size behaves. The header gives no way to make one, so the port adds
-#     `+charon_mapWithDimensions:` and factory-probe.m checks that, building the port half alone.
+#     `+revenant_mapWithDimensions:` and factory-probe.m checks that, building the port half alone.
 #   * whether every protocol the registry claims resolves by the name the registry gives it. The port
 #     emits the protocol's metadata and the name DOES resolve: protocol-check.sh looks up every
 #     `kind: protocol` / `status: implemented` row of registry/Accessibility, with a control that a name
@@ -34,7 +34,7 @@ here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 root=$(cd "$here/../../../.." && pwd)
 sources=${ACCESSIBILITY_SRC:-$root/packages/a/apple-backports/Accessibility}
-build=${BUILD:-$(runs_folder charon-accessibilitymap)}
+build=${BUILD:-$(runs_folder revenant-accessibilitymap)}
 rm -rf "$build"
 mkdir -p "$build"
 sdk=$(xcrun --show-sdk-path)
@@ -47,9 +47,9 @@ common="-target $target -isysroot $sdk -fobjc-arc -O0 -Wall -Wno-nonnull -Wno-ob
 
 # The port's own spelling of the class, and of the name the case looks it up by. A -D renames the
 # declaration as well, which is what keeps the two halves from colliding.
-renames="-DAXBrailleMap=CharonPortAXBrailleMap
--DAXBrailleMapRenderer=CharonPortAXBrailleMapRenderer
--DAXBRAILLEMAP_CLASS=@\"CharonPortAXBrailleMap\""
+renames="-DAXBrailleMap=RevenantPortAXBrailleMap
+-DAXBrailleMapRenderer=RevenantPortAXBrailleMapRenderer
+-DAXBRAILLEMAP_CLASS=@\"RevenantPortAXBrailleMap\""
 
 # The protocol's metadata is what lets a caller declare conformance, and in the port it comes from the
 # object modules/apple/backports.lua generates out of the registry's implemented protocol rows. The host
@@ -59,8 +59,8 @@ renames="-DAXBrailleMap=CharonPortAXBrailleMap
 cat > "$build/protocols.m" <<'PROTOCOLS'
 #import <Foundation/Foundation.h>
 #import <Accessibility/Accessibility.h>
-static void charon_case_protocols(void) __attribute__((used));
-static void charon_case_protocols(void)
+static void revenant_case_protocols(void) __attribute__((used));
+static void revenant_case_protocols(void)
 {
     (void)@protocol(AXBrailleMapRenderer);
 }
@@ -73,7 +73,7 @@ host_build() {
 port_build() {
     # the renames are a list of -D flags and have to reach the shell unquoted
     # shellcheck disable=SC2086
-    xcrun clang $common $renames "$here/cases.m" "$sources/CharonBrailleMap.m" "$build/protocols.m" \
+    xcrun clang $common $renames "$here/cases.m" "$sources/RevenantBrailleMap.m" "$build/protocols.m" \
         -I"$root/packages/a/apple-backports" -framework Foundation -framework CoreGraphics \
         -o "$build/port" 2> "$build/port-build.log" || return 1
 }

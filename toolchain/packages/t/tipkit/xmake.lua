@@ -1,6 +1,6 @@
 package("tipkit")
-    set_homepage("https://github.com/kern0x1b/charon")
-    set_description("The TipKit framework of iOS 17, as one Swift module a port writes `import TipKit` for, built against the charon@swift-runtime a port carries: the tips, the rules that decide which one is shown, the events the app donates, the datastore, and the popover the tip is drawn in. The rules, the display count, the donations and the datastore are the app's own and are real; the presentation is the system's own service, which these releases do not run, so the tip is drawn in the app by the TipUI views this module declares. facts/TipKit/Rendering.md")
+    set_homepage("https://github.com/kern0x1b/revenant/tree/main/toolchain")
+    set_description("The TipKit framework of iOS 17, as one Swift module a port writes `import TipKit` for, built against the revenant@swift-runtime a port carries: the tips, the rules that decide which one is shown, the events the app donates, the datastore, and the popover the tip is drawn in. The rules, the display count, the donations and the datastore are the app's own and are real; the presentation is the system's own service, which these releases do not run, so the tip is drawn in the app by the TipUI views this module declares. facts/TipKit/Rendering.md")
     set_license("MIT")
     set_policy("package.strict_compatibility", true)
 
@@ -17,9 +17,9 @@ package("tipkit")
     add_configs("backports_uikit", {description = "With backports: the runtime whose UIKit overlay is linked to the UIKit backports, for an application.", default = false, type = "boolean"})
 
     on_load("iphoneos", function (package)
-        package:add("deps", "charon@swift-runtime", {alias = "swift-runtime", configs = {shared = package:config("shared") or nil,
+        package:add("deps", "revenant@swift-runtime", {alias = "swift-runtime", configs = {shared = package:config("shared") or nil,
                     backports = package:config("backports") or nil, backports_uikit = package:config("backports_uikit") or nil}})
-        package:add("deps", "charon@appintents", {alias = "appintents", configs = {shared = package:config("shared") or nil,
+        package:add("deps", "revenant@appintents", {alias = "appintents", configs = {shared = package:config("shared") or nil,
                     backports = package:config("backports") or nil, backports_uikit = package:config("backports_uikit") or nil}})
         package:add("links", "TipKit")
         package:add("frameworks", "Foundation", "CoreFoundation")
@@ -30,7 +30,7 @@ package("tipkit")
         local swift = import("apple.swift", {rootdir = modules, anonymous = true})
         local toolchain = assert(package:toolchains(), "TipKit is built with the apple-ios toolchain")[1]
         toolchain:load()
-        local runtime = assert(package:dep("swift-runtime"), "TipKit is compiled against charon@swift-runtime")
+        local runtime = assert(package:dep("swift-runtime"), "TipKit is compiled against revenant@swift-runtime")
         local swiftc = assert(table.wrap((runtime:envs() or {}).SWIFT_EXEC)[1], "swift-runtime names no compiler; reinstall it")
         local minimum = toolchain:config("deployment")
         local triple = package:arch() .. "-apple-ios" .. minimum
@@ -49,21 +49,21 @@ package("tipkit")
                 architecture = package:arch(), deployment = minimum, sdk = sdk,
                 resources = path.join(runtime:installdir(), "lib", "swift"),
                 plugins = table.wrap((runtime:envs() or {}).SWIFT_PLUGIN_PATH)[1],
-                module = "CharonTipKitProbe", optimize = "none", prefix_map = os.curdir() .. "=/tipkit"}),
+                module = "RevenantTipKitProbe", optimize = "none", prefix_map = os.curdir() .. "=/tipkit"}),
                 {"-I", path.join(runtime:installdir(), "lib", "swift", "iphoneos"), "-typecheck", platform_resource}))
             return true
         end}
         os.tryrm(platform_resource)
         local defs, module_paths = {}, {}
         if has then
-            table.insert(defs, "-DCHARON_PLATFORM_LOCALIZED_STRING")
+            table.insert(defs, "-DREVENANT_PLATFORM_LOCALIZED_STRING")
             print("%s: this runtime's Foundation has LocalizedStringResource, the module uses the platform's", package:name())
         else
             local appintents = package:dep("appintents")
-            table.insert(defs, "-DCHARON_CARRIES_LOCALIZED_STRING")
+            table.insert(defs, "-DREVENANT_CARRIES_LOCALIZED_STRING")
             table.insert(module_paths, "-I")
             table.insert(module_paths, path.join(appintents:installdir("lib"), "swift", "iphoneos"))
-            print("%s: this runtime's Foundation has no LocalizedStringResource, the module takes the one charon@appintents carries",
+            print("%s: this runtime's Foundation has no LocalizedStringResource, the module takes the one revenant@appintents carries",
                   package:name())
         end
 
@@ -87,7 +87,7 @@ package("tipkit")
                  path.join(objects, "TipKit.o")})
 
         os.tryrm(probe_dir)
-        package:setenv("CHARON_SWIFT_MODULES", swiftdir)
+        package:setenv("REVENANT_SWIFT_MODULES", swiftdir)
         os.cp(path.join(os.scriptdir(), "..", "..", "..", "LICENSE"), path.join(package:installdir("licenses")))
         os.cp("README.md", path.join(package:installdir("share")))
     end)

@@ -20,9 +20,9 @@
 # coordination/crutches.md as the native fix.
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
-charon=${CHARON:-$here/../../../..}
+revenant=${REVENANT:-$here/../../../..}
 # absolute, because anything resolved against a build directory rather than the working directory
-charon=$(cd "$charon" && pwd)
+revenant=$(cd "$revenant" && pwd)
 
 status=0
 python3 "$here/ast_check.py" || status=1

@@ -1,8 +1,8 @@
 #import <ARKit/ARKit.h>
 #import <string.h>
 
-#import "CharonARTracker.h"
-#import "CharonARKitPrivate.h"
+#import "RevenantARTracker.h"
+#import "RevenantARKitPrivate.h"
 
 @implementation ARRaycastQuery
 {
@@ -64,12 +64,12 @@
 
 
 
-- (instancetype)initWithHitValue:(CharonARValue *)value
+- (instancetype)initWithHitValue:(RevenantARValue *)value
 {
     self = [super init];
     if (!self)
         return nil;
-    CharonARHit hit;
+    RevenantARHit hit;
     [value getValue:&hit];
     _worldPosition = hit.position;
     _localNormal = hit.localNormal;
@@ -86,12 +86,12 @@
 @end
 @implementation ARTrackedRaycast
 {
-    NSMutableArray<CharonARValue *> *_rawResults;
+    NSMutableArray<RevenantARValue *> *_rawResults;
     NSInteger _state;
     NSUUID *_identifier;
 }
 
-- (instancetype)initWithResults:(NSArray<CharonARValue *> *)results
+- (instancetype)initWithResults:(NSArray<RevenantARValue *> *)results
 {
     self = [super init];
     if (self) {
@@ -113,7 +113,7 @@
 - (NSArray<ARRaycastResult *> *)results
 {
     NSMutableArray<ARRaycastResult *> *out = [NSMutableArray array];
-    for (CharonARValue *value in _rawResults)
+    for (RevenantARValue *value in _rawResults)
         [out addObject:[[ARRaycastResult alloc] initWithHitValue:value]];
     return out;
 }

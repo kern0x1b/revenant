@@ -1,14 +1,14 @@
 #import <UIKit/UIKit.h>
 #import <objc/runtime.h>
 
-static const char charon_invalidating_key;
-static void (*charon_layout_original)(id, SEL);
-static void (*charon_flow_original)(id, SEL);
+static const char revenant_invalidating_key;
+static void (*revenant_layout_original)(id, SEL);
+static void (*revenant_flow_original)(id, SEL);
 
-@interface CharonLayoutInvalidation : NSObject
+@interface RevenantLayoutInvalidation : NSObject
 @end
 
-@implementation CharonLayoutInvalidation
+@implementation RevenantLayoutInvalidation
 
 + (void)load
 {
@@ -26,11 +26,11 @@ static void (*charon_flow_original)(id, SEL);
             continue;
         void (*original)(id, SEL) = (void (*)(id, SEL))method_getImplementation(own);
         if (layout == [UICollectionViewFlowLayout class])
-            charon_flow_original = original;
+            revenant_flow_original = original;
         else
-            charon_layout_original = original;
+            revenant_layout_original = original;
         method_setImplementation(own, imp_implementationWithBlock(^(UICollectionViewLayout *self_) {
-            if (objc_getAssociatedObject(self_, &charon_invalidating_key)) {
+            if (objc_getAssociatedObject(self_, &revenant_invalidating_key)) {
                 original(self_, @selector(invalidateLayout));
                 return;
             }
@@ -41,7 +41,7 @@ static void (*charon_flow_original)(id, SEL);
 
 @end
 
-@implementation UICollectionViewLayout (CharonInvalidation7)
+@implementation UICollectionViewLayout (RevenantInvalidation7)
 
 + (Class)invalidationContextClass
 {
@@ -50,10 +50,10 @@ static void (*charon_flow_original)(id, SEL);
 
 - (void)invalidateLayoutWithContext:(UICollectionViewLayoutInvalidationContext *)context
 {
-    objc_setAssociatedObject(self, &charon_invalidating_key, @YES, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-    void (*original)(id, SEL) = ([self isKindOfClass:[UICollectionViewFlowLayout class]] && charon_flow_original) ? charon_flow_original : charon_layout_original;
+    objc_setAssociatedObject(self, &revenant_invalidating_key, @YES, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    void (*original)(id, SEL) = ([self isKindOfClass:[UICollectionViewFlowLayout class]] && revenant_flow_original) ? revenant_flow_original : revenant_layout_original;
     original(self, @selector(invalidateLayout));
-    objc_setAssociatedObject(self, &charon_invalidating_key, nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, &revenant_invalidating_key, nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
 - (UICollectionViewLayoutInvalidationContext *)invalidationContextForBoundsChange:(CGRect)newBounds
@@ -63,7 +63,7 @@ static void (*charon_flow_original)(id, SEL);
 
 @end
 
-@implementation UICollectionViewFlowLayout (CharonInvalidation7)
+@implementation UICollectionViewFlowLayout (RevenantInvalidation7)
 
 + (Class)invalidationContextClass
 {

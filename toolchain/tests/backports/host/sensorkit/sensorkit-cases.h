@@ -1,5 +1,5 @@
-#ifndef CHARON_SENSORKIT_CASES_H
-#define CHARON_SENSORKIT_CASES_H
+#ifndef REVENANT_SENSORKIT_CASES_H
+#define REVENANT_SENSORKIT_CASES_H
 
 #import <Foundation/Foundation.h>
 

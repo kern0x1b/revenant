@@ -1,7 +1,7 @@
 #import <ModelIO/ModelIO.h>
 
 
-static NSUInteger CharonMDLComponentSize(MDLVertexFormat format)
+static NSUInteger RevenantMDLComponentSize(MDLVertexFormat format)
 {
     switch (format & 0xFF0000) {
         case MDLVertexFormatUCharBits:
@@ -138,7 +138,7 @@ static NSUInteger CharonMDLComponentSize(MDLVertexFormat format)
         if (attribute.format == MDLVertexFormatInvalid)
             continue;
         NSUInteger components = attribute.format & 0x1F;
-        NSUInteger size = attribute.offset + CharonMDLComponentSize(attribute.format) * components;
+        NSUInteger size = attribute.offset + RevenantMDLComponentSize(attribute.format) * components;
         NSNumber *key = @(attribute.bufferIndex);
         strides[key] = @(MAX(strides[key].unsignedIntegerValue, size));
     }
@@ -159,7 +159,7 @@ static NSUInteger CharonMDLComponentSize(MDLVertexFormat format)
         NSUInteger offset = offsets[key].unsignedIntegerValue;
         attribute.offset = offset;
         NSUInteger components = attribute.format & 0x1F;
-        offsets[key] = @(offset + CharonMDLComponentSize(attribute.format) * components);
+        offsets[key] = @(offset + RevenantMDLComponentSize(attribute.format) * components);
     }
 }
 

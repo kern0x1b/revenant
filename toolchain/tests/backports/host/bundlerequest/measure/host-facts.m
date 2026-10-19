@@ -3,7 +3,7 @@
 #import <objc/runtime.h>
 #import <dlfcn.h>
 
-static double charon_priority(id object)
+static double revenant_priority(id object)
 {
     SEL selector = NSSelectorFromString(@"loadingPriority");
     if (![object respondsToSelector:selector])
@@ -28,10 +28,10 @@ static void P(NSString *f, ...)
     printf("%s\n", s.UTF8String);
 }
 
-@interface CharonKeys : NSKeyedUnarchiver
+@interface RevenantKeys : NSKeyedUnarchiver
 @end
 
-@implementation CharonKeys
+@implementation RevenantKeys
 - (id)decodeObjectOfClass:(Class)cls forKey:(NSString *)key
 {
     id value = [super decodeObjectOfClass:cls forKey:key];
@@ -95,7 +95,7 @@ int main(int argc, char **argv)
             P(@"-init          -> %s", bare ? class_getName([bare class]) : "(nil)");
             if (bare) {
                 P(@"  tags=%s bundle=%s priority=%g progress=%s", [[(id)[bare tags] description] UTF8String],
-                  [[(id)[bare bundle] description] UTF8String], charon_priority(bare),
+                  [[(id)[bare bundle] description] UTF8String], revenant_priority(bare),
                   [[(id)[bare progress] description] UTF8String]);
                 P(@"  describes |%@|", [bare description]);
                 P(@"  isEqual to a second -init: %d",
@@ -106,7 +106,7 @@ int main(int argc, char **argv)
             P(@"-initWithTags: -> %s", withTags ? class_getName([withTags class]) : "(nil)");
             if (withTags) {
                 P(@"  tags=%s bundle=%s priority=%g", [[(id)[withTags tags] description] UTF8String],
-                  [[(id)[withTags bundle] description] UTF8String], charon_priority(withTags));
+                  [[(id)[withTags bundle] description] UTF8String], revenant_priority(withTags));
                 id givenTags = (id)[withTags tags];
                 P(@"  the tags are the set the caller gave: %d", (int)(givenTags == tags));
                 P(@"  progress is %s", [[(id)[withTags progress] description] UTF8String]);
@@ -151,13 +151,13 @@ int main(int argc, char **argv)
             two = ((id (*)(id, SEL, id))objc_msgSend)(two, @selector(initWithTags:), tags);
             for (double value = -1; value <= 2; value += 0.25) {
                 [(id)one setValue:@(value) forKey:@"loadingPriority"];
-                P(@"  priority %6g -> reads %g", value, charon_priority(one));
+                P(@"  priority %6g -> reads %g", value, revenant_priority(one));
             }
             [(id)one setValue:@"high" forKey:@"loadingPriority"];
-            P(@"  a string through the key reads back: %g", charon_priority(one));
+            P(@"  a string through the key reads back: %g", revenant_priority(one));
             id copy = [(id)one copy];
             P(@"copy: %s tags=%s priority=%g isEqual=%d same object=%d", copy ? class_getName([copy class]) : "(nil)",
-              [[(id)[copy tags] description] UTF8String], charon_priority(copy), (int)[copy isEqual:one],
+              [[(id)[copy tags] description] UTF8String], revenant_priority(copy), (int)[copy isEqual:one],
               (int)(copy == one));
                 id copiedTags = (id)[copy tags];
                 id originalTags = (id)[one tags];
@@ -217,13 +217,13 @@ int main(int argc, char **argv)
             [a encodeObject:one forKey:NSKeyedArchiveRootObjectKey];
             [a finishEncoding];
             P(@"%lu bytes", (unsigned long)d.length);
-            CharonKeys *u = [[CharonKeys alloc] initForReadingWithData:d];
+            RevenantKeys *u = [[RevenantKeys alloc] initForReadingWithData:d];
             u.requiresSecureCoding = NO;
             id back = [u decodeObjectOfClass:[request class] forKey:NSKeyedArchiveRootObjectKey];
             P(@"  read back: %s", back ? class_getName([back class]) : "(nil)");
             if (back)
                 P(@"  tags=%s bundle=%s priority=%g progress=%s isEqual=%d", [[(id)[back tags] description] UTF8String],
-                  [[(id)[back bundle] description] UTF8String], charon_priority(back),
+                  [[(id)[back bundle] description] UTF8String], revenant_priority(back),
                   [[(id)[back progress] description] UTF8String], (int)[back isEqual:one]);
             [u finishDecoding];
             P(@"+supportsSecureCoding=%d", (int)[request supportsSecureCoding]);

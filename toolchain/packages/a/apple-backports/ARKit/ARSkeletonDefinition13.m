@@ -1,6 +1,6 @@
 #import <Foundation/Foundation.h>
 
-#import "CharonARKitSkeleton.h"
+#import "RevenantARKitSkeleton.h"
 
 @implementation ARSkeletonDefinition
 {
@@ -9,7 +9,7 @@
     NSUInteger _jointCount;
 }
 
-+ (NSArray<NSString *> *)charon_body2DJointNames
++ (NSArray<NSString *> *)revenant_body2DJointNames
 {
     static NSArray<NSString *> *names;
     static dispatch_once_t once;
@@ -35,7 +35,7 @@
     return names;
 }
 
-+ (NSArray<NSNumber *> *)charon_body2DParentIndices
++ (NSArray<NSNumber *> *)revenant_body2DParentIndices
 {
     static NSArray<NSNumber *> *parents;
     static dispatch_once_t once;
@@ -50,13 +50,13 @@
     static ARSkeletonDefinition *definition;
     static dispatch_once_t once;
     dispatch_once(&once, ^{
-        definition = [[self alloc] initWithCharonJointNames:[self charon_body2DJointNames]
-                                              parentIndices:[self charon_body2DParentIndices]];
+        definition = [[self alloc] initWithRevenantJointNames:[self revenant_body2DJointNames]
+                                              parentIndices:[self revenant_body2DParentIndices]];
     });
     return definition;
 }
 
-- (instancetype)initWithCharonJointNames:(NSArray<NSString *> *)jointNames
+- (instancetype)initWithRevenantJointNames:(NSArray<NSString *> *)jointNames
                             parentIndices:(NSArray<NSNumber *> *)parentIndices
 {
     self = [super init];

@@ -1,6 +1,6 @@
 #import <Foundation/Foundation.h>
 
-@implementation NSIndexPath (CharonIndexes)
+@implementation NSIndexPath (RevenantIndexes)
 
 - (void)getIndexes:(NSUInteger *)indexes range:(NSRange)positionRange
 {

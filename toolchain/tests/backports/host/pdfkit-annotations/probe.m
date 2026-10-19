@@ -1,6 +1,6 @@
 #import <Foundation/Foundation.h>
-#ifdef CHARON_PORT
-#import "CharonPDFKit.h"
+#ifdef REVENANT_PORT
+#import "RevenantPDFKit.h"
 #else
 #import <PDFKit/PDFKit.h>
 #endif

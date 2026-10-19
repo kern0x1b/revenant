@@ -11,15 +11,15 @@ struct os_system_version_s {
     unsigned int patch;
 };
 
-static _Atomic(uintptr_t) charon_system_version;
+static _Atomic(uintptr_t) revenant_system_version;
 
 __attribute__((constructor))
-static void charon_resolve_system_version(void)
+static void revenant_resolve_system_version(void)
 {
-    charon_system_function(&charon_system_version, CHARON_LIBSYSTEM, "os_system_version_get_current_version");
+    revenant_system_function(&revenant_system_version, REVENANT_LIBSYSTEM, "os_system_version_get_current_version");
 }
 
-static int charon_version_from_plist(struct os_system_version_s *version)
+static int revenant_version_from_plist(struct os_system_version_s *version)
 {
     FILE *file = fopen("/System/Library/CoreServices/SystemVersion.plist", "rb");
     if (!file)
@@ -57,9 +57,9 @@ static int charon_version_from_plist(struct os_system_version_s *version)
 }
 
 __attribute__((visibility("hidden")))
-int charon_os_system_version_get_current_version(struct os_system_version_s *version)
+int revenant_os_system_version_get_current_version(struct os_system_version_s *version)
 {
     int (*system)(struct os_system_version_s *) =
-        charon_system_function(&charon_system_version, CHARON_LIBSYSTEM, "os_system_version_get_current_version");
-    return system ? system(version) : charon_version_from_plist(version);
+        revenant_system_function(&revenant_system_version, REVENANT_LIBSYSTEM, "os_system_version_get_current_version");
+    return system ? system(version) : revenant_version_from_plist(version);
 }

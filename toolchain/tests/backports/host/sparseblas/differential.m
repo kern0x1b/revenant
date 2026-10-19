@@ -9,7 +9,7 @@
 #include <unistd.h>
 
 
-#define RENAME(name) charon_host_##name
+#define RENAME(name) revenant_host_##name
 
 sparse_matrix_float RENAME(sparse_matrix_create_float)(sparse_dimension, sparse_dimension);
 sparse_matrix_double RENAME(sparse_matrix_create_double)(sparse_dimension, sparse_dimension);

@@ -1,7 +1,7 @@
-#import "CharonMPS.h"
-#import "CharonMPSImage.h"
+#import "RevenantMPS.h"
+#import "RevenantMPSImage.h"
 
-MPSDataType CharonMPSImageDataTypeOf(MPSImageFeatureChannelFormat format)
+MPSDataType RevenantMPSImageDataTypeOf(MPSImageFeatureChannelFormat format)
 {
     switch (format) {
     case MPSImageFeatureChannelFormatUnorm8: return MPSDataTypeUInt8;
@@ -12,7 +12,7 @@ MPSDataType CharonMPSImageDataTypeOf(MPSImageFeatureChannelFormat format)
     }
 }
 
-size_t CharonMPSImageFeatureChannelSize(MPSImageFeatureChannelFormat format)
+size_t RevenantMPSImageFeatureChannelSize(MPSImageFeatureChannelFormat format)
 {
     switch (format) {
     case MPSImageFeatureChannelFormatUnorm8: return 1;
@@ -23,59 +23,59 @@ size_t CharonMPSImageFeatureChannelSize(MPSImageFeatureChannelFormat format)
     }
 }
 
-CharonMPSImageLayout CharonMPSImageLayoutOf(MPSImage *image)
+RevenantMPSImageLayout RevenantMPSImageLayoutOf(MPSImage *image)
 {
-    CharonMPSImageLayout layout;
+    RevenantMPSImageLayout layout;
     memset(&layout, 0, sizeof(layout));
     if (!image)
         return layout;
     layout.width = image.width;
     layout.height = image.height;
     layout.channels = image.featureChannels ? image.featureChannels : 1;
-    layout.dataType = CharonMPSImageDataTypeOf(image.featureChannelFormat);
-    layout.elementSize = CharonMPSImageFeatureChannelSize(image.featureChannelFormat);
+    layout.dataType = RevenantMPSImageDataTypeOf(image.featureChannelFormat);
+    layout.elementSize = RevenantMPSImageFeatureChannelSize(image.featureChannelFormat);
     layout.pixelFormat = (int)image.pixelFormat;
     layout.bytesPerPixel = layout.channels * layout.elementSize;
     layout.bytesPerRow = layout.bytesPerPixel * layout.width;
     return layout;
 }
 
-BOOL CharonMPSImageUsable(MPSImage *image, NSString *what)
+BOOL RevenantMPSImageUsable(MPSImage *image, NSString *what)
 {
     if (!image) {
-        CharonMPSRefuse(@"%@: no image, so nothing was written", what);
+        RevenantMPSRefuse(@"%@: no image, so nothing was written", what);
         return NO;
     }
     if (!image.texture) {
-        CharonMPSRefuse(@"%@: the image holds no texture, so nothing was written", what);
+        RevenantMPSRefuse(@"%@: the image holds no texture, so nothing was written", what);
         return NO;
     }
-    MPSDataType dataType = CharonMPSImageDataTypeOf(image.featureChannelFormat);
-    if (!CharonMPSDataTypeIsElement(dataType) || !MPSSizeofMPSDataType(dataType)) {
-        CharonMPSRefuse(@"%@: the image's channel format %lu is not one of the four the 16.4 surface names, so nothing was written",
+    MPSDataType dataType = RevenantMPSImageDataTypeOf(image.featureChannelFormat);
+    if (!RevenantMPSDataTypeIsElement(dataType) || !MPSSizeofMPSDataType(dataType)) {
+        RevenantMPSRefuse(@"%@: the image's channel format %lu is not one of the four the 16.4 surface names, so nothing was written",
                         what, (unsigned long)image.featureChannelFormat);
         return NO;
     }
     if (!image.width || !image.height) {
-        CharonMPSRefuse(@"%@: the image's shape is %lux%lu, so nothing was written",
+        RevenantMPSRefuse(@"%@: the image's shape is %lux%lu, so nothing was written",
                         what, (unsigned long)image.width, (unsigned long)image.height);
         return NO;
     }
     return YES;
 }
 
-NSUInteger CharonMPSImageIndex(const CharonMPSImageLayout *layout, NSUInteger pixel, NSUInteger channel)
+NSUInteger RevenantMPSImageIndex(const RevenantMPSImageLayout *layout, NSUInteger pixel, NSUInteger channel)
 {
     if (channel >= layout->channels)
         return (NSUInteger)-1;
     return pixel * layout->channels + channel;
 }
 
-double CharonMPSImageLoad(const void *buffer, const CharonMPSImageLayout *layout, NSUInteger index)
+double RevenantMPSImageLoad(const void *buffer, const RevenantMPSImageLayout *layout, NSUInteger index)
 {
     NSUInteger count = layout->count;
     if (index >= count) {
-        CharonMPSRefuse(@"MPSImage: the walk asked for element %lu of a region of %lu element(s) "
+        RevenantMPSRefuse(@"MPSImage: the walk asked for element %lu of a region of %lu element(s) "
                         "(%lux%lu pixels, %lu channel(s), elementSize %lu, dataType %d, pixelFormat %d), "
                         "so the value is 0 and nothing was read",
                         (unsigned long)index, (unsigned long)count,
@@ -84,15 +84,15 @@ double CharonMPSImageLoad(const void *buffer, const CharonMPSImageLayout *layout
                         (int)layout->dataType, (int)layout->pixelFormat);
         return 0.0;
     }
-    return CharonMPSLoad((const unsigned char *)buffer, layout->dataType, index);
+    return RevenantMPSLoad((const unsigned char *)buffer, layout->dataType, index);
 }
 
-void CharonMPSImageStore(void *buffer, const CharonMPSImageLayout *layout, NSUInteger index, double value)
+void RevenantMPSImageStore(void *buffer, const RevenantMPSImageLayout *layout, NSUInteger index, double value)
 {
-    CharonMPSStore((unsigned char *)buffer, layout->dataType, index, value);
+    RevenantMPSStore((unsigned char *)buffer, layout->dataType, index, value);
 }
 
-MTLRegion CharonMPSImageResolvedRegion(MPSImage *image, MTLRegion clip)
+MTLRegion RevenantMPSImageResolvedRegion(MPSImage *image, MTLRegion clip)
 {
     NSUInteger width = image.width, height = image.height;
     NSInteger ox = (NSInteger)clip.origin.x, oy = (NSInteger)clip.origin.y;
@@ -115,12 +115,12 @@ MTLRegion CharonMPSImageResolvedRegion(MPSImage *image, MTLRegion clip)
     return MTLRegionMake2D((NSUInteger)ox, (NSUInteger)oy, right - (NSUInteger)ox, bottom - (NSUInteger)oy);
 }
 
-BOOL CharonMPSImageRegionIsEmpty(MTLRegion region)
+BOOL RevenantMPSImageRegionIsEmpty(MTLRegion region)
 {
     return region.size.width == 0 || region.size.height == 0;
 }
 
-void *_Nullable CharonMPSImageReadRegion(MPSImage *image, const CharonMPSImageLayout *layout,
+void *_Nullable RevenantMPSImageReadRegion(MPSImage *image, const RevenantMPSImageLayout *layout,
                                         MTLRegion region, NSString *what)
 {
     NSUInteger w = region.size.width, h = region.size.height;
@@ -129,16 +129,16 @@ void *_Nullable CharonMPSImageReadRegion(MPSImage *image, const CharonMPSImageLa
     NSUInteger perRow = w * layout->channels;
     size_t bytes = (size_t)perRow * h * layout->elementSize;
     if (!layout->elementSize) {
-        CharonMPSRefuse(@"MPSImage: the channel format names data type %d, which has no element size, so a "
+        RevenantMPSRefuse(@"MPSImage: the channel format names data type %d, which has no element size, so a "
                         "%lux%lu read has no buffer and nothing was read", (int)layout->dataType,
                         (unsigned long)w, (unsigned long)h);
         return NULL;
     }
-    CharonMPSImageLayout here = *layout;
+    RevenantMPSImageLayout here = *layout;
     here.count = (NSUInteger)w * (NSUInteger)h * layout->channels;
     unsigned char *buffer = calloc(bytes, 1);
     if (!buffer) {
-        CharonMPSRefuse(@"%@: no memory for a %lux%lu walk of %lu channel(s), so nothing was written",
+        RevenantMPSRefuse(@"%@: no memory for a %lux%lu walk of %lu channel(s), so nothing was written",
                         what, (unsigned long)w, (unsigned long)h, (unsigned long)layout->channels);
         return NULL;
     }
@@ -151,21 +151,21 @@ void *_Nullable CharonMPSImageReadRegion(MPSImage *image, const CharonMPSImageLa
     return buffer;
 }
 
-BOOL CharonMPSImageWriteRegion(MPSImage *image, const CharonMPSImageLayout *layout,
+BOOL RevenantMPSImageWriteRegion(MPSImage *image, const RevenantMPSImageLayout *layout,
                                MTLRegion region, const void *buffer, NSString *what)
 {
     NSUInteger w = region.size.width, h = region.size.height;
     if (!w || !h)
         return YES;
     NSUInteger perRow = w * layout->channels;
-#if defined(CHARON_PLANT)
+#if defined(REVENANT_PLANT)
     if (layout->dataType == MPSDataTypeFloat32 && layout->elementSize == 4) {
         float *out = (float *)buffer;
         size_t elements = (size_t)perRow * h;
         for (size_t i = 0; i < elements; i++) {
-#if CHARON_PLANT == 1
+#if REVENANT_PLANT == 1
             out[i] = out[i] + 1.0f;
-#elif CHARON_PLANT == 2
+#elif REVENANT_PLANT == 2
             if (i == 0)
                 out[i] = out[i] + 1.0f;
 #endif
@@ -181,57 +181,57 @@ BOOL CharonMPSImageWriteRegion(MPSImage *image, const CharonMPSImageLayout *layo
     return YES;
 }
 
-static BOOL CharonMPSImageWalkable(MPSImage *a, MPSImage *b, NSString *what)
+static BOOL RevenantMPSImageWalkable(MPSImage *a, MPSImage *b, NSString *what)
 {
     if (!a || !b)
         return NO;
     if (a.width != b.width || a.height != b.height) {
-        CharonMPSRefuse(@"%@: the two images are %lux%lu and %lux%lu, and a walk reads one pixel of each, so nothing was written",
+        RevenantMPSRefuse(@"%@: the two images are %lux%lu and %lux%lu, and a walk reads one pixel of each, so nothing was written",
                         what, (unsigned long)a.width, (unsigned long)a.height,
                         (unsigned long)b.width, (unsigned long)b.height);
         return NO;
     }
-    MPSDataType da = CharonMPSImageDataTypeOf(a.featureChannelFormat);
-    MPSDataType db = CharonMPSImageDataTypeOf(b.featureChannelFormat);
+    MPSDataType da = RevenantMPSImageDataTypeOf(a.featureChannelFormat);
+    MPSDataType db = RevenantMPSImageDataTypeOf(b.featureChannelFormat);
     if (da != db) {
-        CharonMPSRefuse(@"%@: the two images hold channel formats %lu and %lu, and a walk reads one element of each, so nothing was written",
+        RevenantMPSRefuse(@"%@: the two images hold channel formats %lu and %lu, and a walk reads one element of each, so nothing was written",
                         what, (unsigned long)a.featureChannelFormat, (unsigned long)b.featureChannelFormat);
         return NO;
     }
     if (a.featureChannels != b.featureChannels) {
-        CharonMPSRefuse(@"%@: the two images hold %lu and %lu feature channels, so nothing was written",
+        RevenantMPSRefuse(@"%@: the two images hold %lu and %lu feature channels, so nothing was written",
                         what, (unsigned long)a.featureChannels, (unsigned long)b.featureChannels);
         return NO;
     }
     return YES;
 }
 
-BOOL CharonMPSImageMapUnary(MPSImage *source, MPSImage *destination, MTLRegion region,
-                            CharonMPSImageUnary fn, NSString *what)
+BOOL RevenantMPSImageMapUnary(MPSImage *source, MPSImage *destination, MTLRegion region,
+                            RevenantMPSImageUnary fn, NSString *what)
 {
-    if (!CharonMPSImageUsable(source, what) || !CharonMPSImageUsable(destination, what))
+    if (!RevenantMPSImageUsable(source, what) || !RevenantMPSImageUsable(destination, what))
         return NO;
-    region = CharonMPSImageResolvedRegion(destination, region);
-    if (CharonMPSImageRegionIsEmpty(region)) {
-        CharonMPSRefuse(@"%@: the clip rectangle leaves no pixel of a %lux%lu image, so nothing was written",
+    region = RevenantMPSImageResolvedRegion(destination, region);
+    if (RevenantMPSImageRegionIsEmpty(region)) {
+        RevenantMPSRefuse(@"%@: the clip rectangle leaves no pixel of a %lux%lu image, so nothing was written",
                         what, (unsigned long)destination.width, (unsigned long)destination.height);
         return YES;
     }
-    if (!CharonMPSImageWalkable(source, destination, what))
+    if (!RevenantMPSImageWalkable(source, destination, what))
         return NO;
-    CharonMPSImageLayout in = CharonMPSImageLayoutOf(source);
-    CharonMPSImageLayout out = CharonMPSImageLayoutOf(destination);
+    RevenantMPSImageLayout in = RevenantMPSImageLayoutOf(source);
+    RevenantMPSImageLayout out = RevenantMPSImageLayoutOf(destination);
     NSUInteger regionCount = region.size.width * region.size.height;
     in.count = regionCount * in.channels;
     out.count = regionCount * out.channels;
-    unsigned char *primary = CharonMPSImageReadRegion(source, &in, region, what);
+    unsigned char *primary = RevenantMPSImageReadRegion(source, &in, region, what);
     if (region.size.width && !primary)
         return NO;
     size_t bytes = (size_t)region.size.width * out.channels * region.size.height * out.elementSize;
     unsigned char *result = calloc(bytes ? bytes : 1, 1);
     if (!result) {
         free(primary);
-        CharonMPSRefuse(@"%@: no memory for a %lux%lu answer, so nothing was written", what,
+        RevenantMPSRefuse(@"%@: no memory for a %lux%lu answer, so nothing was written", what,
                         (unsigned long)region.size.width, (unsigned long)region.size.height);
 
         return NO;
@@ -243,45 +243,45 @@ BOOL CharonMPSImageMapUnary(MPSImage *source, MPSImage *destination, MTLRegion r
                 NSUInteger pixel = y * w + x;
                 if (pixel >= in.width * in.height)
                     continue;
-                NSUInteger at = CharonMPSImageIndex(&in, pixel, c);
+                NSUInteger at = RevenantMPSImageIndex(&in, pixel, c);
                 double value = at == (NSUInteger)-1 ? 0.0
-                    : CharonMPSImageLoad(primary, &in, at);
-                NSUInteger to = CharonMPSImageIndex(&out, pixel, c);
+                    : RevenantMPSImageLoad(primary, &in, at);
+                NSUInteger to = RevenantMPSImageIndex(&out, pixel, c);
                 if (to != (NSUInteger)-1)
-                    CharonMPSImageStore(result, &out, to, fn(pixel, c, value));
+                    RevenantMPSImageStore(result, &out, to, fn(pixel, c, value));
             }
         }
     }
     free(primary);
-    BOOL ok = CharonMPSImageWriteRegion(destination, &out, region, result, what);
+    BOOL ok = RevenantMPSImageWriteRegion(destination, &out, region, result, what);
     free(result);
     return ok;
 }
 
-BOOL CharonMPSImageMapBinary(MPSImage *primaryImage, MPSImage *secondaryImage, MPSImage *destination,
-                             MTLRegion region, CharonMPSImageBinary fn, NSString *what)
+BOOL RevenantMPSImageMapBinary(MPSImage *primaryImage, MPSImage *secondaryImage, MPSImage *destination,
+                             MTLRegion region, RevenantMPSImageBinary fn, NSString *what)
 {
-    if (!CharonMPSImageUsable(primaryImage, what) || !CharonMPSImageUsable(secondaryImage, what) ||
-        !CharonMPSImageUsable(destination, what))
+    if (!RevenantMPSImageUsable(primaryImage, what) || !RevenantMPSImageUsable(secondaryImage, what) ||
+        !RevenantMPSImageUsable(destination, what))
         return NO;
-    if (!CharonMPSImageWalkable(primaryImage, secondaryImage, what) ||
-        !CharonMPSImageWalkable(primaryImage, destination, what))
+    if (!RevenantMPSImageWalkable(primaryImage, secondaryImage, what) ||
+        !RevenantMPSImageWalkable(primaryImage, destination, what))
         return NO;
-    region = CharonMPSImageResolvedRegion(destination, region);
-    if (CharonMPSImageRegionIsEmpty(region)) {
-        CharonMPSRefuse(@"%@: the clip rectangle leaves no pixel of a %lux%lu image, so nothing was written",
+    region = RevenantMPSImageResolvedRegion(destination, region);
+    if (RevenantMPSImageRegionIsEmpty(region)) {
+        RevenantMPSRefuse(@"%@: the clip rectangle leaves no pixel of a %lux%lu image, so nothing was written",
                         what, (unsigned long)destination.width, (unsigned long)destination.height);
         return YES;
     }
-    CharonMPSImageLayout a = CharonMPSImageLayoutOf(primaryImage);
-    CharonMPSImageLayout b = CharonMPSImageLayoutOf(secondaryImage);
-    CharonMPSImageLayout out = CharonMPSImageLayoutOf(destination);
+    RevenantMPSImageLayout a = RevenantMPSImageLayoutOf(primaryImage);
+    RevenantMPSImageLayout b = RevenantMPSImageLayoutOf(secondaryImage);
+    RevenantMPSImageLayout out = RevenantMPSImageLayoutOf(destination);
     NSUInteger regionCount = region.size.width * region.size.height;
     a.count = regionCount * a.channels;
     b.count = regionCount * b.channels;
     out.count = regionCount * out.channels;
-    unsigned char *first = CharonMPSImageReadRegion(primaryImage, &a, region, what);
-    unsigned char *second = CharonMPSImageReadRegion(secondaryImage, &b, region, what);
+    unsigned char *first = RevenantMPSImageReadRegion(primaryImage, &a, region, what);
+    unsigned char *second = RevenantMPSImageReadRegion(secondaryImage, &b, region, what);
     if (region.size.width && (!first || !second)) {
         free(first); free(second);
         return NO;
@@ -291,7 +291,7 @@ BOOL CharonMPSImageMapBinary(MPSImage *primaryImage, MPSImage *secondaryImage, M
     unsigned char *result = calloc(bytes ? bytes : 1, 1);
     if (!result) {
         free(first); free(second);
-        CharonMPSRefuse(@"%@: no memory for a %lux%lu answer, so nothing was written", what,
+        RevenantMPSRefuse(@"%@: no memory for a %lux%lu answer, so nothing was written", what,
                         (unsigned long)w, (unsigned long)h);
         return NO;
     }
@@ -299,23 +299,23 @@ BOOL CharonMPSImageMapBinary(MPSImage *primaryImage, MPSImage *secondaryImage, M
         for (NSUInteger x = 0; x < w; x++) {
             for (NSUInteger c = 0; c < out.channels; c++) {
                 NSUInteger pixel = y * w + x;
-                NSUInteger at = CharonMPSImageIndex(&a, pixel, c);
-                NSUInteger at2 = CharonMPSImageIndex(&b, pixel, c);
-                double primary = at == (NSUInteger)-1 ? 0.0 : CharonMPSImageLoad(first, &a, at);
-                double secondary = at2 == (NSUInteger)-1 ? 0.0 : CharonMPSImageLoad(second, &b, at2);
-                NSUInteger to = CharonMPSImageIndex(&out, pixel, c);
+                NSUInteger at = RevenantMPSImageIndex(&a, pixel, c);
+                NSUInteger at2 = RevenantMPSImageIndex(&b, pixel, c);
+                double primary = at == (NSUInteger)-1 ? 0.0 : RevenantMPSImageLoad(first, &a, at);
+                double secondary = at2 == (NSUInteger)-1 ? 0.0 : RevenantMPSImageLoad(second, &b, at2);
+                NSUInteger to = RevenantMPSImageIndex(&out, pixel, c);
                 if (to != (NSUInteger)-1)
-                    CharonMPSImageStore(result, &out, to, fn(pixel, c, primary, secondary));
+                    RevenantMPSImageStore(result, &out, to, fn(pixel, c, primary, secondary));
             }
         }
     }
     free(first); free(second);
-    BOOL ok = CharonMPSImageWriteRegion(destination, &out, region, result, what);
+    BOOL ok = RevenantMPSImageWriteRegion(destination, &out, region, result, what);
     free(result);
     return ok;
 }
 
-BOOL CharonMPSImageConcatRows(const CharonMPSImageLayout *source, const CharonMPSImageLayout *destination,
+BOOL RevenantMPSImageConcatRows(const RevenantMPSImageLayout *source, const RevenantMPSImageLayout *destination,
                               NSUInteger offset, const void *sourceBytes, void *destinationBytes)
 {
     if (!source || !destination || !sourceBytes || !destinationBytes)

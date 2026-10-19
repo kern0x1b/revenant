@@ -7,7 +7,7 @@
 
 #pragma once
 
-namespace shade {
+namespace emulator {
 
 class UserlandHleRegistry;
 void register_core_animation_software_hle(UserlandHleRegistry& registry);

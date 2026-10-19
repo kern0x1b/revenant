@@ -5,7 +5,7 @@
 #include <stdio.h>
 
 #ifdef PORT
-#define PREFIX "CharonHost"
+#define PREFIX "RevenantHost"
 #else
 #define PREFIX ""
 #endif
@@ -114,7 +114,7 @@ int main(void)
                [ndef instancesRespondToSelector:@selector(isReady)],
                [ndef instancesRespondToSelector:NSSelectorFromString(@"ready")]);
 
-        dispatch_queue_t queue = dispatch_queue_create("charon.nfc.test", DISPATCH_QUEUE_SERIAL);
+        dispatch_queue_t queue = dispatch_queue_create("revenant.nfc.test", DISPATCH_QUEUE_SERIAL);
         dispatch_queue_set_specific(queue, kQueue, (void *)kQueue, NULL);
         id s2 = [[(id)ndef alloc] initWithDelegate:full queue:queue invalidateAfterFirstRead:NO];
         [keep addObject:s2];

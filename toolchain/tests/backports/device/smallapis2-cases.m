@@ -61,7 +61,7 @@ void smallapis2_run(UIWindow *window, SmallApis2Recorder record)
     record(@"tasks", [NSString stringWithFormat:@"%d %d %d", named != UIBackgroundTaskInvalid, unnamed != UIBackgroundTaskInvalid, named != unnamed]);
     [application endBackgroundTask:named];
     [application endBackgroundTask:unnamed];
-    NSNetService *service = [[NSNetService alloc] initWithDomain:@"local." type:@"_charon._tcp." name:@"charon" port:9];
+    NSNetService *service = [[NSNetService alloc] initWithDomain:@"local." type:@"_revenant._tcp." name:@"revenant" port:9];
     NSNetServiceBrowser *browser = [[NSNetServiceBrowser alloc] init];
     record(@"peer to peer defaults", [NSString stringWithFormat:@"%d %d", service.includesPeerToPeer, browser.includesPeerToPeer]);
     service.includesPeerToPeer = YES;

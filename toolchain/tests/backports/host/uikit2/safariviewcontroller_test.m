@@ -2,7 +2,7 @@
 #import <SafariServices/SafariServices.h>
 #import "check.h"
 
-@interface CharonHostSFSafariViewController : UIViewController
+@interface RevenantHostSFSafariViewController : UIViewController
 @property (nonatomic, weak) id delegate;
 @property (nonatomic, readonly, copy) id configuration;
 @property (nonatomic) UIColor *preferredBarTintColor;
@@ -14,19 +14,19 @@
 + (id)prewarmConnectionsToURLs:(NSArray *)URLs;
 @end
 
-@interface CharonHostSFSafariViewControllerConfiguration : NSObject <NSCopying>
+@interface RevenantHostSFSafariViewControllerConfiguration : NSObject <NSCopying>
 @property (nonatomic) BOOL entersReaderIfAvailable;
 @property (nonatomic) BOOL barCollapsingEnabled;
 @property (nonatomic, copy) id activityButton;
 @end
 
-@interface CharonHostSFSafariViewControllerActivityButton : NSObject <NSCopying, NSSecureCoding>
+@interface RevenantHostSFSafariViewControllerActivityButton : NSObject <NSCopying, NSSecureCoding>
 - (instancetype)initWithTemplateImage:(UIImage *)image extensionIdentifier:(NSString *)identifier;
 @property (nonatomic, readonly, copy) UIImage *templateImage;
 @property (nonatomic, readonly, copy) NSString *extensionIdentifier;
 @end
 
-@interface CharonHostSFAuthenticationSession : NSObject
+@interface RevenantHostSFAuthenticationSession : NSObject
 - (instancetype)initWithURL:(NSURL *)URL callbackURLScheme:(NSString *)scheme completionHandler:(void (^)(NSURL *, NSError *))handler;
 - (BOOL)start;
 - (void)cancel;
@@ -53,7 +53,7 @@ static NSString *state(id controller)
 int main(void)
 {
     @autoreleasepool {
-        Class system = [SFSafariViewController class], ours = [CharonHostSFSafariViewController class];
+        Class system = [SFSafariViewController class], ours = [RevenantHostSFSafariViewController class];
         NSArray *addresses = @[@"http://example.com", @"https://example.com/a?b#c", @"HTTPS://EXAMPLE.COM", @"Http://x.y", @"ftp://x.com", @"file:///tmp/a", @"about:blank", @"example.com", @"mailto:a@b.c", @"javascript:alert(1)", @"data:text/html,x", @""];
         for (NSString *address in addresses) {
             NSURL *URL = [NSURL URLWithString:address];
@@ -72,7 +72,7 @@ int main(void)
         CHECK_EQUAL(state([[ours alloc] initWithURL:page entersReaderIfAvailable:YES]), state([[system alloc] initWithURL:page entersReaderIfAvailable:YES]), "the reader flag lands in the configuration");
         CHECK_EQUAL(state([[ours alloc] initWithURL:page configuration:nil]), state([[system alloc] initWithURL:page configuration:nil]), "no configuration leaves none");
 
-        Class systemConfiguration = [SFSafariViewControllerConfiguration class], ourConfiguration = [CharonHostSFSafariViewControllerConfiguration class];
+        Class systemConfiguration = [SFSafariViewControllerConfiguration class], ourConfiguration = [RevenantHostSFSafariViewControllerConfiguration class];
         id (^configured)(Class, Class, BOOL, BOOL) = ^id(Class configurationClass, Class controllerClass, BOOL reader, BOOL collapsing) {
             id configuration = [[configurationClass alloc] init];
             [configuration setEntersReaderIfAvailable:reader];
@@ -104,16 +104,16 @@ int main(void)
         CHECK_EQUAL(outcome(^{ [token invalidate]; [token invalidate]; return token; }), @"made", "a token can be invalidated twice");
 
         UIImage *image = [[UIImage alloc] init];
-        id button = [[CharonHostSFSafariViewControllerActivityButton alloc] initWithTemplateImage:image extensionIdentifier:@"x.y"];
+        id button = [[RevenantHostSFSafariViewControllerActivityButton alloc] initWithTemplateImage:image extensionIdentifier:@"x.y"];
         id copy = [button copy];
         CHECK([[copy extensionIdentifier] isEqualToString:@"x.y"] && [copy templateImage] == image, "an activity button keeps and copies its image and extension");
         NSData *data = [NSKeyedArchiver archivedDataWithRootObject:button requiringSecureCoding:YES error:NULL];
-        id decoded = [NSKeyedUnarchiver unarchivedObjectOfClass:[CharonHostSFSafariViewControllerActivityButton class] fromData:data error:NULL];
+        id decoded = [NSKeyedUnarchiver unarchivedObjectOfClass:[RevenantHostSFSafariViewControllerActivityButton class] fromData:data error:NULL];
         CHECK([[decoded extensionIdentifier] isEqualToString:@"x.y"], "and survives a secure archive");
-        Class systemSession = [SFAuthenticationSession class], ourSession = [CharonHostSFAuthenticationSession class];
+        Class systemSession = [SFAuthenticationSession class], ourSession = [RevenantHostSFAuthenticationSession class];
         NSString *(^session)(Class, NSString *, NSString *, int) = ^NSString *(Class sessionClass, NSString *address, NSString *scheme, int script) {
             NSMutableArray *log = [NSMutableArray array];
-            CharonHostSFAuthenticationSession *made = [[sessionClass alloc] initWithURL:address.length ? [NSURL URLWithString:address] : nil callbackURLScheme:scheme completionHandler:^(NSURL *URL, NSError *error) {
+            RevenantHostSFAuthenticationSession *made = [[sessionClass alloc] initWithURL:address.length ? [NSURL URLWithString:address] : nil callbackURLScheme:scheme completionHandler:^(NSURL *URL, NSError *error) {
                 [log addObject:[NSString stringWithFormat:@"handler url=%@ error=%@/%ld/%@", URL, error.domain, (long)error.code, error.userInfo ?: @"none"]];
             }];
             if (script == 1)
@@ -131,7 +131,7 @@ int main(void)
         }
         CHECK_EQUAL(session(ourSession, @"https://example.com", nil, 0), session(systemSession, @"https://example.com", nil, 0), "no scheme is accepted");
         CHECK_EQUAL(outcome(^{ return [[ourSession alloc] performSelector:NSSelectorFromString(@"init")]; }), outcome(^{ return [[systemSession alloc] performSelector:NSSelectorFromString(@"init")]; }), "init of a session");
-        printf("checks=%d failures=%d\n", charon_checks, charon_failures);
+        printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
     }
-    return charon_failures;
+    return revenant_failures;
 }

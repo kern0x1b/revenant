@@ -20,14 +20,14 @@ function failures(opt)
                        depends = {first .. " (= 1.0+11111111)"}, libraries = {path.join(folder, "libtop.1.dylib")}}},
                   root = root, metadata = described, strip = {"-x"}})
 
-    local top = path.join(root, "usr", "lib", "charon", second, "libtop.1.dylib")
+    local top = path.join(root, "usr", "lib", "revenant", second, "libtop.1.dylib")
     local names = fixtures.run(folder, "xcrun", {"otool", "-L", top}) .. fixtures.run(folder, "xcrun", {"otool", "-D", top})
-    if not names:find("/usr/lib/charon/" .. first .. "/libbase.1.dylib", 1, true) or
-       not names:find("/usr/lib/charon/" .. second .. "/libtop.1.dylib", 1, true) or names:find("@rpath", 1, true) then
+    if not names:find("/usr/lib/revenant/" .. first .. "/libbase.1.dylib", 1, true) or
+       not names:find("/usr/lib/revenant/" .. second .. "/libtop.1.dylib", 1, true) or names:find("@rpath", 1, true) then
         table.insert(found, "a staged library must be named by its package's folder and reach the library of another package by that one's folder: " .. names)
     end
     local description = shared.metadata(described, second)
-    if description.version ~= "1.0+11111111" or description.folder ~= "/usr/lib/charon/" .. second or
+    if description.version ~= "1.0+11111111" or description.folder ~= "/usr/lib/revenant/" .. second or
        description.depends[1] ~= first .. " (= 1.0+11111111)" then
         table.insert(found, "what a staged package is must be left for the program that writes its Debian package: " .. table.concat(table.keys(description), " "))
     end
@@ -41,7 +41,7 @@ function failures(opt)
     os.mkdir(extracted)
     fixtures.run(extracted, "ar", {"x", written})
     local members = fixtures.run(extracted, "tar", {"tzf", "data.tar.gz"})
-    if not members:find("usr/lib/charon/" .. second .. "/libtop.1.dylib", 1, true) or members:find(first, 1, true) then
+    if not members:find("usr/lib/revenant/" .. second .. "/libtop.1.dylib", 1, true) or members:find(first, 1, true) then
         table.insert(found, "a package holds its own folder and nothing of another's: " .. members)
     end
     fixtures.run(extracted, "tar", {"xzf", "data.tar.gz"})
@@ -50,7 +50,7 @@ function failures(opt)
     if not control:find("Package: " .. second, 1, true) or not control:find("Depends: " .. first .. " (= 1.0+11111111)", 1, true) then
         table.insert(found, "the control file names the package and the exact package it needs: " .. control)
     end
-    local inside = path.join(extracted, "usr", "lib", "charon", second, "libtop.1.dylib")
+    local inside = path.join(extracted, "usr", "lib", "revenant", second, "libtop.1.dylib")
     local signed = fixtures.run(extracted, "xcrun", {"otool", "-l", inside})
     if not signed:find("LC_CODE_SIGNATURE", 1, true) then
         table.insert(found, "the library of a written package must be signed")
@@ -62,7 +62,7 @@ function failures(opt)
 
     for _, recipe in ipairs({"packages/l/libcxx/xmake.lua", "packages/s/swift-runtime/xmake.lua"}) do
         local text = io.readfile(path.join(opt.modules, "..", recipe))
-        if text:find("charon@ldid", 1, true) then
+        if text:find("revenant@ldid", 1, true) then
             table.insert(found, recipe .. " must not depend on ldid: a host tool's dependencies (openssl) reach every package that depends on this one")
         end
     end

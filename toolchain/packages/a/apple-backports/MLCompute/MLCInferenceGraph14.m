@@ -1,7 +1,7 @@
-#import "CharonMLCompute.h"
-#import "CharonMLCGraph.h"
+#import "RevenantMLCompute.h"
+#import "RevenantMLCGraph.h"
 
-static NSError *CharonMLCGraphError(NSInteger code, NSString *message)
+static NSError *RevenantMLCGraphError(NSInteger code, NSString *message)
 {
     return [NSError errorWithDomain:@"MLCompute" code:code userInfo:@{NSLocalizedDescriptionKey: message}];
 }
@@ -49,7 +49,7 @@ static NSError *CharonMLCGraphError(NSInteger code, NSString *message)
 - (NSArray<MLCLayer *> *)layers
 {
     NSMutableArray<MLCLayer *> *layers = [NSMutableArray array];
-    for (MLCGraph *graph in [self charon_mlc_everyGraph])
+    for (MLCGraph *graph in [self revenant_mlc_everyGraph])
         for (MLCLayer *layer in graph.layers)
             if (![layers containsObject:layer])
                 [layers addObject:layer];
@@ -59,7 +59,7 @@ static NSError *CharonMLCGraphError(NSInteger code, NSString *message)
 - (NSArray<MLCTensor *> *)sourceTensorsForLayer:(MLCLayer *)layer
 {
     NSMutableArray<MLCTensor *> *tensors = [NSMutableArray array];
-    for (MLCGraph *graph in [self charon_mlc_everyGraph])
+    for (MLCGraph *graph in [self revenant_mlc_everyGraph])
         for (MLCTensor *tensor in [graph sourceTensorsForLayer:layer])
             if (![tensors containsObject:tensor])
                 [tensors addObject:tensor];
@@ -69,14 +69,14 @@ static NSError *CharonMLCGraphError(NSInteger code, NSString *message)
 - (NSArray<MLCTensor *> *)resultTensorsForLayer:(MLCLayer *)layer
 {
     NSMutableArray<MLCTensor *> *tensors = [NSMutableArray array];
-    for (MLCGraph *graph in [self charon_mlc_everyGraph])
+    for (MLCGraph *graph in [self revenant_mlc_everyGraph])
         for (MLCTensor *tensor in [graph resultTensorsForLayer:layer])
             if (![tensors containsObject:tensor])
                 [tensors addObject:tensor];
     return tensors;
 }
 
-- (NSArray<MLCGraph *> *)charon_mlc_everyGraph
+- (NSArray<MLCGraph *> *)revenant_mlc_everyGraph
 {
     return _graphObjects;
 }
@@ -106,7 +106,7 @@ static NSError *CharonMLCGraphError(NSInteger code, NSString *message)
 
 - (BOOL)addInputs:(NSDictionary<NSString *, MLCTensor *> *)inputs
 {
-    [self charon_mlc_take:inputs into:_inputs];
+    [self revenant_mlc_take:inputs into:_inputs];
     return YES;
 }
 
@@ -114,15 +114,15 @@ static NSError *CharonMLCGraphError(NSInteger code, NSString *message)
        lossLabels:(NSDictionary<NSString *, MLCTensor *> *)lossLabels
  lossLabelWeights:(NSDictionary<NSString *, MLCTensor *> *)lossLabelWeights
 {
-    [self charon_mlc_take:inputs into:_inputs];
-    [self charon_mlc_take:lossLabels into:_lossLabels];
-    [self charon_mlc_take:lossLabelWeights into:_lossLabelWeights];
+    [self revenant_mlc_take:inputs into:_inputs];
+    [self revenant_mlc_take:lossLabels into:_lossLabels];
+    [self revenant_mlc_take:lossLabelWeights into:_lossLabelWeights];
     return YES;
 }
 
 - (BOOL)addOutputs:(NSDictionary<NSString *, MLCTensor *> *)outputs
 {
-    [self charon_mlc_take:outputs into:_outputs];
+    [self revenant_mlc_take:outputs into:_outputs];
     return YES;
 }
 
@@ -136,7 +136,7 @@ static NSError *CharonMLCGraphError(NSInteger code, NSString *message)
     return YES;
 }
 
-- (void)charon_mlc_take:(NSDictionary<NSString *, MLCTensor *> *)tensors
+- (void)revenant_mlc_take:(NSDictionary<NSString *, MLCTensor *> *)tensors
                    into:(NSMutableDictionary<NSString *, MLCTensor *> *)bindings
 {
     if (!tensors) {
@@ -169,7 +169,7 @@ static NSError *CharonMLCGraphError(NSInteger code, NSString *message)
                       options:(MLCExecutionOptions)options
             completionHandler:(MLCGraphCompletionHandler)completionHandler
 {
-    return [self charon_mlc_executeWithInputsData:inputsData
+    return [self revenant_mlc_executeWithInputsData:inputsData
                                        outputsData:nil
                                     lossLabelsData:nil
                              lossLabelWeightsData:nil
@@ -184,7 +184,7 @@ static NSError *CharonMLCGraphError(NSInteger code, NSString *message)
                       options:(MLCExecutionOptions)options
             completionHandler:(MLCGraphCompletionHandler)completionHandler
 {
-    return [self charon_mlc_executeWithInputsData:inputsData
+    return [self revenant_mlc_executeWithInputsData:inputsData
                                        outputsData:outputsData
                                     lossLabelsData:nil
                              lossLabelWeightsData:nil
@@ -200,7 +200,7 @@ static NSError *CharonMLCGraphError(NSInteger code, NSString *message)
                       options:(MLCExecutionOptions)options
             completionHandler:(MLCGraphCompletionHandler)completionHandler
 {
-    return [self charon_mlc_executeWithInputsData:inputsData
+    return [self revenant_mlc_executeWithInputsData:inputsData
                                        outputsData:nil
                                     lossLabelsData:lossLabelsData
                              lossLabelWeightsData:lossLabelWeightsData
@@ -217,7 +217,7 @@ static NSError *CharonMLCGraphError(NSInteger code, NSString *message)
                       options:(MLCExecutionOptions)options
             completionHandler:(MLCGraphCompletionHandler)completionHandler
 {
-    return [self charon_mlc_executeWithInputsData:inputsData
+    return [self revenant_mlc_executeWithInputsData:inputsData
                                        outputsData:outputsData
                                     lossLabelsData:lossLabelsData
                              lossLabelWeightsData:lossLabelWeightsData
@@ -226,7 +226,7 @@ static NSError *CharonMLCGraphError(NSInteger code, NSString *message)
                                  completionHandler:completionHandler];
 }
 
-- (BOOL)charon_mlc_executeWithInputsData:(NSDictionary<NSString *, MLCTensorData *> *)inputsData
+- (BOOL)revenant_mlc_executeWithInputsData:(NSDictionary<NSString *, MLCTensorData *> *)inputsData
                               outputsData:(NSDictionary<NSString *, MLCTensorData *> *)outputsData
                            lossLabelsData:(NSDictionary<NSString *, MLCTensorData *> *)lossLabelsData
                     lossLabelWeightsData:(NSDictionary<NSString *, MLCTensorData *> *)lossLabelWeightsData
@@ -239,7 +239,7 @@ static NSError *CharonMLCGraphError(NSInteger code, NSString *message)
     NSError *error = nil;
     MLCTensor *computed = nil;
     NSDate *started = [NSDate date];
-    BOOL done = [self charon_mlc_computeWithInputsData:inputsData
+    BOOL done = [self revenant_mlc_computeWithInputsData:inputsData
                                           outputsData:outputsData
                                        lossLabelsData:lossLabelsData
                                 lossLabelWeightsData:lossLabelWeightsData
@@ -251,24 +251,24 @@ static NSError *CharonMLCGraphError(NSInteger code, NSString *message)
     return done;
 }
 
-- (BOOL)charon_mlc_computeWithInputsData:(NSDictionary<NSString *, MLCTensorData *> *)inputsData
+- (BOOL)revenant_mlc_computeWithInputsData:(NSDictionary<NSString *, MLCTensorData *> *)inputsData
                              outputsData:(NSDictionary<NSString *, MLCTensorData *> *)outputsData
                           lossLabelsData:(NSDictionary<NSString *, MLCTensorData *> *)lossLabelsData
                    lossLabelWeightsData:(NSDictionary<NSString *, MLCTensorData *> *)lossLabelWeightsData
                                  result:(MLCTensor **)result
                                   error:(NSError **)error
 {
-    if (![self charon_mlc_bind:inputsData tensors:_inputs] || ![self charon_mlc_bind:lossLabelsData tensors:_lossLabels] ||
-        ![self charon_mlc_bind:lossLabelWeightsData tensors:_lossLabelWeights]) {
+    if (![self revenant_mlc_bind:inputsData tensors:_inputs] || ![self revenant_mlc_bind:lossLabelsData tensors:_lossLabels] ||
+        ![self revenant_mlc_bind:lossLabelWeightsData tensors:_lossLabelWeights]) {
         if (error) {
-            *error = CharonMLCGraphError(1, @"an input of the execute is not one the graph holds");
+            *error = RevenantMLCGraphError(1, @"an input of the execute is not one the graph holds");
         }
         return NO;
     }
     NSArray<MLCLayer *> *layers = self.layers;
     if (layers.count == 0) {
         if (error) {
-            *error = CharonMLCGraphError(2, @"the graph has no layer to compute");
+            *error = RevenantMLCGraphError(2, @"the graph has no layer to compute");
         }
         return NO;
     }
@@ -280,15 +280,15 @@ static NSError *CharonMLCGraphError(NSInteger code, NSString *message)
         for (NSUInteger index = 0; index < count; index++) {
             MLCTensor *source = sources[index];
             computed = results[index];
-            if (![self charon_mlc_giveStorageTo:computed]) {
+            if (![self revenant_mlc_giveStorageTo:computed]) {
                 if (error) {
-                    *error = CharonMLCGraphError(3, @"a result of the graph has no storage of its own width");
+                    *error = RevenantMLCGraphError(3, @"a result of the graph has no storage of its own width");
                 }
                 return NO;
             }
-            if (!CharonMLCElementwise(layer, source, computed)) {
+            if (!RevenantMLCElementwise(layer, source, computed)) {
                 if (error) {
-                    *error = CharonMLCGraphError(4, @"this port's engine carries no such layer");
+                    *error = RevenantMLCGraphError(4, @"this port's engine carries no such layer");
                 }
                 return NO;
             }
@@ -300,7 +300,7 @@ static NSError *CharonMLCGraphError(NSInteger code, NSString *message)
         if (!tensor || !data || !data.bytes ||
             ![tensor copyDataFromDeviceMemoryToBytes:data.bytes length:data.length synchronizeWithDevice:YES]) {
             if (error) {
-                *error = CharonMLCGraphError(5, @"an output of the execute is not one the graph holds");
+                *error = RevenantMLCGraphError(5, @"an output of the execute is not one the graph holds");
             }
             return NO;
         }
@@ -311,7 +311,7 @@ static NSError *CharonMLCGraphError(NSInteger code, NSString *message)
     return YES;
 }
 
-- (BOOL)charon_mlc_giveStorageTo:(MLCTensor *)tensor
+- (BOOL)revenant_mlc_giveStorageTo:(MLCTensor *)tensor
 {
     NSUInteger width = tensor.descriptor.tensorAllocationSizeInBytes;
     if (width == 0) {
@@ -327,7 +327,7 @@ static NSError *CharonMLCGraphError(NSInteger code, NSString *message)
     return bound;
 }
 
-- (BOOL)charon_mlc_bind:(NSDictionary<NSString *, MLCTensorData *> *)data
+- (BOOL)revenant_mlc_bind:(NSDictionary<NSString *, MLCTensorData *> *)data
                tensors:(NSDictionary<NSString *, MLCTensor *> *)tensors
 {
     for (NSString *name in data) {

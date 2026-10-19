@@ -3,11 +3,11 @@
 <plist version="1.0">
 <dict>
     <key>CFBundleExecutable</key>
-    <string>CharonFocusEffects</string>
+    <string>RevenantFocusEffects</string>
     <key>CFBundleIdentifier</key>
-    <string>org.charon.hostfocus-effects</string>
+    <string>org.revenant.hostfocus-effects</string>
     <key>CFBundleName</key>
-    <string>CharonFocusEffects</string>
+    <string>RevenantFocusEffects</string>
     <key>CFBundlePackageType</key>
     <string>APPL</string>
     <key>CFBundleVersion</key>
@@ -30,7 +30,7 @@
                     <key>UISceneConfigurationName</key>
                     <string>Default</string>
                     <key>UISceneDelegateClassName</key>
-                    <string>CharonSceneDelegate</string>
+                    <string>RevenantSceneDelegate</string>
                 </dict>
             </array>
         </dict>

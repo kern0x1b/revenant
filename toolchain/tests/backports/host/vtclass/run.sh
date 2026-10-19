@@ -46,7 +46,7 @@ if [ "${VT_SKIP_LIGHT:-0}" != "1" ] && [ -f "$light_tests" ]; then
     }
 fi
 
-build=${BUILD:-$(runs_fresh charon-vtclass)}
+build=${BUILD:-$(runs_fresh revenant-vtclass)}
 mkdir -p "$build"
 sdk=$(xcrun --show-sdk-path --sdk macosx)
 common="-target arm64-apple-ios15.0-macabi -isysroot $sdk -F $sdk/System/Library/Frameworks -iframework $sdk/System/iOSSupport/System/Library/Frameworks -fobjc-arc -w"
@@ -128,7 +128,7 @@ echo "the host answered: $(xmake l "$here/count_records.lua" "$build/system.json
 
 # 2. the port's own build, every class under names of its own
 xmake l "$here/rename.lua" "$build/rename.h"
-xcrun clang $common -DCHARON_HOST_DIFFERENTIAL=1 -DCHARON_VT_DECLARE_FOR_CASE=1 -include "$build/rename.h" -I"$here" -I"$vt" \
+xcrun clang $common -DREVENANT_HOST_DIFFERENTIAL=1 -DREVENANT_VT_DECLARE_FOR_CASE=1 -include "$build/rename.h" -I"$here" -I"$vt" \
     "$here/record.m" "$here/cases.m" "$here/cases-roundtrip.m" -I"$gen" "$vt"/*.m $libs -o "$build/port"
 VTCLASS_COVERED="$covered" VTCLASS_RECORDS="$build/port.json" "$build/port"
 for side in system port; do
@@ -158,7 +158,7 @@ while IFS="$(printf '\t')" read -r cls file from to; do
         survived=$((survived + 1))
         continue
     fi
-    if ! xcrun clang $common -DCHARON_HOST_DIFFERENTIAL=1 -DCHARON_VT_DECLARE_FOR_CASE=1 -include "$build/rename.h" -I"$here" \
+    if ! xcrun clang $common -DREVENANT_HOST_DIFFERENTIAL=1 -DREVENANT_VT_DECLARE_FOR_CASE=1 -include "$build/rename.h" -I"$here" \
         -I"$build/mutant" -I"$vt" "$here/record.m" "$here/cases.m" "$here/cases-roundtrip.m" -I"$gen" "$build/mutant"/*.m $libs \
         -o "$build/mutant/run" >"$build/mutant/compile.log" 2>&1; then
         echo "MUTANT DID NOT COMPILE: $label"

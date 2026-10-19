@@ -3,9 +3,9 @@
 
 #pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
 
-static const char CharonPreferredInputKey;
+static const char RevenantPreferredInputKey;
 
-@implementation AVAudioSession (CharonInputs)
+@implementation AVAudioSession (RevenantInputs)
 
 - (NSArray<AVAudioSessionPortDescription *> *)availableInputs
 {
@@ -14,7 +14,7 @@ static const char CharonPreferredInputKey;
 
 - (AVAudioSessionPortDescription *)preferredInput
 {
-    AVAudioSessionPortDescription *preferred = objc_getAssociatedObject(self, &CharonPreferredInputKey);
+    AVAudioSessionPortDescription *preferred = objc_getAssociatedObject(self, &RevenantPreferredInputKey);
     for (AVAudioSessionPortDescription *input in self.currentRoute.inputs) {
         if ([input.UID isEqualToString:preferred.UID])
             return input;
@@ -25,12 +25,12 @@ static const char CharonPreferredInputKey;
 - (BOOL)setPreferredInput:(AVAudioSessionPortDescription *)inPort error:(NSError **)outError
 {
     if (!inPort) {
-        objc_setAssociatedObject(self, &CharonPreferredInputKey, nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+        objc_setAssociatedObject(self, &RevenantPreferredInputKey, nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
         return YES;
     }
     for (AVAudioSessionPortDescription *input in self.currentRoute.inputs) {
         if ([input.UID isEqualToString:inPort.UID]) {
-            objc_setAssociatedObject(self, &CharonPreferredInputKey, input, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+            objc_setAssociatedObject(self, &RevenantPreferredInputKey, input, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
             return YES;
         }
     }

@@ -5,7 +5,7 @@
 @class UIBarButtonItem, UIDocumentBrowserAction, UIDocumentBrowserViewController;
 @protocol UIDocumentBrowserViewControllerDelegate;
 
-#import "CharonDocumentBrowserTypes.h"
+#import "RevenantDocumentBrowserTypes.h"
 #import "UIDocumentBrowserViewController.h"
 #import "UIDocumentBrowserTransitionController.h"
 
@@ -23,8 +23,8 @@ static void check(BOOL passed, NSString *what, NSString *detail)
     }
 }
 
-@interface UIDocumentBrowserTransitionController (CharonProbe)
-+ (instancetype)charon_makeForBrowser;
+@interface UIDocumentBrowserTransitionController (RevenantProbe)
++ (instancetype)revenant_makeForBrowser;
 @end
 
 @interface ProbeContext : NSObject <UIViewControllerContextTransitioning>
@@ -56,8 +56,8 @@ int main(void)
     @autoreleasepool {
         NSFileManager *files = [NSFileManager defaultManager];
 
-        NSURL *from = MakeDir(@"charon-dbr-from");
-        NSURL *to = MakeDir(@"charon-dbr-to");
+        NSURL *from = MakeDir(@"revenant-dbr-from");
+        NSURL *to = MakeDir(@"revenant-dbr-to");
         NSURL *source = [from URLByAppendingPathComponent:@"a.txt"];
         NSURL *beside = [to URLByAppendingPathComponent:@"b.txt"];
         Write(source, @"copied");
@@ -137,7 +137,7 @@ int main(void)
               @"an unwritable place is an error and no URL",
               failed ? failed.localizedDescription : @"no error given");
 
-        NSURL *elsewhere = MakeDir(@"charon-dbr-elsewhere");
+        NSURL *elsewhere = MakeDir(@"revenant-dbr-elsewhere");
         NSURL *wanted = [elsewhere URLByAppendingPathComponent:@"wanted.txt"];
         Write(wanted, @"revealed");
 
@@ -183,17 +183,17 @@ int main(void)
         check(at.loadingProgress == nil,
               @"a document that is not being brought across has no progress, as the header says it may be nil", nil);
 
-        UIDocumentBrowserTransitionController *here_ = [UIDocumentBrowserTransitionController charon_makeForBrowser];
+        UIDocumentBrowserTransitionController *here_ = [UIDocumentBrowserTransitionController revenant_makeForBrowser];
         here_.targetView = [[UIView alloc] init];
         check([here_ transitionDuration:nil] > 0,
               @"a document that is here takes a positive time to show", nil);
 
-        UIDocumentBrowserTransitionController *loading = [UIDocumentBrowserTransitionController charon_makeForBrowser];
+        UIDocumentBrowserTransitionController *loading = [UIDocumentBrowserTransitionController revenant_makeForBrowser];
         loading.loadingProgress = [NSProgress progressWithTotalUnitCount:1];
         check([loading transitionDuration:nil] == 0,
               @"a document still being brought across takes no time, because there is nothing to show yet", nil);
 
-        UIDocumentBrowserTransitionController *run_ = [UIDocumentBrowserTransitionController charon_makeForBrowser];
+        UIDocumentBrowserTransitionController *run_ = [UIDocumentBrowserTransitionController revenant_makeForBrowser];
         UIView *arriving = [[UIView alloc] init];
         run_.targetView = arriving;
         ProbeContext *context = [[ProbeContext alloc] init];
@@ -204,7 +204,7 @@ int main(void)
         check(context.completed,
               @"running the transition completes it, so a caller waiting is not left waiting", nil);
 
-        UIDocumentBrowserTransitionController *nowhere = [UIDocumentBrowserTransitionController charon_makeForBrowser];
+        UIDocumentBrowserTransitionController *nowhere = [UIDocumentBrowserTransitionController revenant_makeForBrowser];
         ProbeContext *lonely = [[ProbeContext alloc] init];
         [nowhere animateTransition:lonely];
         check(lonely.completed,

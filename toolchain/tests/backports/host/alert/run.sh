@@ -4,7 +4,7 @@ here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 sources=${ALERT_SOURCES:-$here/../../../../packages/a/apple-backports/UIKit}
 harness=${ALERT_HARNESS:-$here/../../device}
-build=${ALERT_BUILD:-$(runs_folder charon-alert-host)}
+build=${ALERT_BUILD:-$(runs_folder revenant-alert-host)}
 frameworks="$(xcrun --show-sdk-path)/System/iOSSupport/System/Library/Frameworks"
 flags="-target arm64-apple-ios15.0-macabi -iframework $frameworks -fobjc-arc -fvisibility=hidden -Wall -Wno-deprecated-declarations"
 files="UIAlertAction.m UIAlertController.m UIAlertController+PreferredAction.m"
@@ -13,7 +13,7 @@ defines=""
 for file in $files; do
     xcrun clang $flags -c "$sources/$file" -o "$build/plain.o"
     for class in $(nm "$build/plain.o" | sed -n 's/.* [SsDd] _OBJC_CLASS_\$_\(.*\)$/\1/p'); do
-        defines="$defines -D$class=CharonHost$class"
+        defines="$defines -D$class=RevenantHost$class"
     done
 done
 objects=""

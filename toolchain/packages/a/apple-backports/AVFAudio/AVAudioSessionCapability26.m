@@ -1,52 +1,52 @@
-#import "CharonAVFAudio.h"
-#import "CharonAVFAudioNew.h"
+#import "RevenantAVFAudio.h"
+#import "RevenantAVFAudioNew.h"
 
 @implementation AVAudioSessionCapability {
-    BOOL _charon_supported;
+    BOOL _revenant_supported;
 }
 
-- (instancetype)initWithCharonSupported:(BOOL)supported
+- (instancetype)initWithRevenantSupported:(BOOL)supported
 {
     if ((self = [super init])) {
-        _charon_supported = supported;
+        _revenant_supported = supported;
     }
     return self;
 }
 
 - (BOOL)isSupported
 {
-    return _charon_supported;
+    return _revenant_supported;
 }
 
 - (BOOL)isEnabled
 {
-    return _charon_supported;
+    return _revenant_supported;
 }
 
 @end
 
 @implementation AVAudioSessionPortExtensionBluetoothMicrophone {
-    AVAudioSessionCapability *_charon_highQualityRecording;
-    AVAudioSessionCapability *_charon_farFieldCapture;
+    AVAudioSessionCapability *_revenant_highQualityRecording;
+    AVAudioSessionCapability *_revenant_farFieldCapture;
 }
 
 - (instancetype)init
 {
     if ((self = [super init])) {
-        _charon_highQualityRecording = [[AVAudioSessionCapability alloc] initWithCharonSupported:NO];
-        _charon_farFieldCapture = [[AVAudioSessionCapability alloc] initWithCharonSupported:NO];
+        _revenant_highQualityRecording = [[AVAudioSessionCapability alloc] initWithRevenantSupported:NO];
+        _revenant_farFieldCapture = [[AVAudioSessionCapability alloc] initWithRevenantSupported:NO];
     }
     return self;
 }
 
 - (AVAudioSessionCapability *)highQualityRecording
 {
-    return _charon_highQualityRecording;
+    return _revenant_highQualityRecording;
 }
 
 - (AVAudioSessionCapability *)farFieldCapture
 {
-    return _charon_farFieldCapture;
+    return _revenant_farFieldCapture;
 }
 
 @end

@@ -7,7 +7,7 @@ here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 device=${DEVICE:-$here/../../device}
 uikit=${UIKIT:-$here/../../../../packages/a/apple-backports/UIKit}
-build=${BUILD:-$(runs_fresh charon-traits11)}
+build=${BUILD:-$(runs_fresh revenant-traits11)}
 sdk=$(xcrun --show-sdk-path)
 common="-target arm64-apple-ios15.0-macabi -isysroot $sdk -iframework $sdk/System/iOSSupport/System/Library/Frameworks -fobjc-arc -w"
 libs="-framework UIKit -framework Foundation -framework CoreGraphics"
@@ -20,12 +20,12 @@ sed -i.bak 's/foundation2_expectations/traits11_expectations/' "$device/traits11
 echo "records: $(python3 -c "import json; print(len(json.load(open('$build/system.json'))))")"
 
 cat > "$build/rename.h" <<'HEADER'
-#define UITextInputPasswordRules CharonUITextInputPasswordRules
-#define UIScreenCapturedDidChangeNotification CharonUIScreenCapturedDidChangeNotification
-#define verticalScrollIndicatorInsets charonVerticalScrollIndicatorInsets
-#define setVerticalScrollIndicatorInsets setCharonVerticalScrollIndicatorInsets
-#define horizontalScrollIndicatorInsets charonHorizontalScrollIndicatorInsets
-#define setHorizontalScrollIndicatorInsets setCharonHorizontalScrollIndicatorInsets
+#define UITextInputPasswordRules RevenantUITextInputPasswordRules
+#define UIScreenCapturedDidChangeNotification RevenantUIScreenCapturedDidChangeNotification
+#define verticalScrollIndicatorInsets revenantVerticalScrollIndicatorInsets
+#define setVerticalScrollIndicatorInsets setRevenantVerticalScrollIndicatorInsets
+#define horizontalScrollIndicatorInsets revenantHorizontalScrollIndicatorInsets
+#define setHorizontalScrollIndicatorInsets setRevenantHorizontalScrollIndicatorInsets
 HEADER
 cat > "$build/constant.m" <<'STUB'
 #import <UIKit/UIKit.h>
@@ -38,7 +38,7 @@ port() {
     xcrun clang $common -include "$build/rename.h" -I"$device" -I"$uikit" "$here/record.m" "$device/traits11-cases.m" $sources "$build/constant.m" $libs -o "$dir/run"
 }
 mkdir -p "$build/port"
-for file in $files CharonMenus.h; do cp "$uikit/$file" "$build/port/$file"; done
+for file in $files RevenantMenus.h; do cp "$uikit/$file" "$build/port/$file"; done
 port "$build/port"
 TRAITS11_RECORDS="$build/port.json" "$build/port/run"
 if cmp -s "$build/system.json" "$build/port.json"; then echo "port: same as the system"; else
@@ -57,7 +57,7 @@ fi
 survived=0
 mutant() {
     rm -rf "$build/mutant"; mkdir -p "$build/mutant"
-    for each in $files CharonMenus.h; do cp "$uikit/$each" "$build/mutant/$each"; done
+    for each in $files RevenantMenus.h; do cp "$uikit/$each" "$build/mutant/$each"; done
     python3 - "$build/mutant/$1" "$2" "$3" <<'PY'
 import sys
 path, old, new = sys.argv[1:4]
@@ -70,9 +70,9 @@ PY
     TRAITS11_RECORDS="$build/mutant.json" timeout 60 "$build/mutant/run" > /dev/null 2>&1 || true
     if cmp -s "$build/system.json" "$build/mutant.json"; then echo "MUTANT SURVIVED: $2 -> $3"; survived=$((survived + 1)); fi
 }
-mutant UITextInputTraits11.m "objc_setAssociatedObject(self, &charon_quotes_key, @(smartQuotesType)" "objc_setAssociatedObject(self, &charon_dashes_key, @(smartQuotesType)"
-mutant UITextInputTraits11.m "objc_setAssociatedObject(self, &charon_dashes_key, @(smartDashesType)" "objc_setAssociatedObject(self, &charon_insert_key, @(smartDashesType)"
-mutant UITextInputTraits11.m "objc_setAssociatedObject(self, &charon_insert_key, @(smartInsertDeleteType)" "objc_setAssociatedObject(self, &charon_quotes_key, @(smartInsertDeleteType)"
+mutant UITextInputTraits11.m "objc_setAssociatedObject(self, &revenant_quotes_key, @(smartQuotesType)" "objc_setAssociatedObject(self, &revenant_dashes_key, @(smartQuotesType)"
+mutant UITextInputTraits11.m "objc_setAssociatedObject(self, &revenant_dashes_key, @(smartDashesType)" "objc_setAssociatedObject(self, &revenant_insert_key, @(smartDashesType)"
+mutant UITextInputTraits11.m "objc_setAssociatedObject(self, &revenant_insert_key, @(smartInsertDeleteType)" "objc_setAssociatedObject(self, &revenant_quotes_key, @(smartInsertDeleteType)"
 mutant UITextInputTraits11.m "[passwordRules copy]" "nil"
 mutant UITextInputPasswordRules.m "rules->_passwordRulesDescriptor = [passwordRulesDescriptor copy];" "rules->_passwordRulesDescriptor = @\"x\";"
 mutant UITextInputPasswordRules.m "return _passwordRulesDescriptor == other || [_passwordRulesDescriptor isEqual:other];" "return YES;"
@@ -86,7 +86,7 @@ mutant UITextInputPasswordRules.m "return YES;
 + (instancetype)passwordRulesWithDescriptor"
 mutant UITextInputPasswordRules.m "[description appendString:@\">\"];" ""
 mutant UIView+InvertColors.m "@(ignores ? YES : NO)" "@(NO)"
-mutant UIView+InvertColors.m "return [objc_getAssociatedObject(self, &charon_ignores_key) boolValue];" "return YES;"
+mutant UIView+InvertColors.m "return [objc_getAssociatedObject(self, &revenant_ignores_key) boolValue];" "return YES;"
 mutant UIScrollView+IndicatorInsets11.m "return held ? held.UIEdgeInsetsValue : self.scrollIndicatorInsets;
 }
 
@@ -101,13 +101,13 @@ mutant UIScrollView+IndicatorInsets11.m "return held ? held.UIEdgeInsetsValue : 
 }
 
 - (void)setHorizontalScrollIndicatorInsets"
-mutant UIScrollView+IndicatorInsets11.m "            objc_setAssociatedObject(view, &charon_vertical_key, nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);" ""
-mutant UIScrollView+IndicatorInsets11.m "            objc_setAssociatedObject(view, &charon_horizontal_key, nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);" ""
-mutant UIScrollView+IndicatorInsets11.m "charon_hold(self, &charon_vertical_key, insets);" "charon_hold(self, &charon_horizontal_key, insets);"
-mutant UIScrollView+IndicatorInsets11.m "charon_hold(self, &charon_horizontal_key, insets);
+mutant UIScrollView+IndicatorInsets11.m "            objc_setAssociatedObject(view, &revenant_vertical_key, nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);" ""
+mutant UIScrollView+IndicatorInsets11.m "            objc_setAssociatedObject(view, &revenant_horizontal_key, nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);" ""
+mutant UIScrollView+IndicatorInsets11.m "revenant_hold(self, &revenant_vertical_key, insets);" "revenant_hold(self, &revenant_horizontal_key, insets);"
+mutant UIScrollView+IndicatorInsets11.m "revenant_hold(self, &revenant_horizontal_key, insets);
 }
 
-@end" "charon_hold(self, &charon_vertical_key, insets);
+@end" "revenant_hold(self, &revenant_vertical_key, insets);
 }
 
 @end"

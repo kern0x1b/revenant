@@ -3,30 +3,30 @@
 #import <objc/message.h>
 #import <objc/runtime.h>
 
-#import "CharonAVMetadataConstruction.h"
+#import "RevenantAVMetadataConstruction.h"
 
-@implementation AVMetadataItemFilter (CharonAVMetadataIdentifiers7)
+@implementation AVMetadataItemFilter (RevenantAVMetadataIdentifiers7)
 
-- (instancetype)charon_initWithIdentifiers:(NSArray<AVMetadataIdentifier> *)identifiers
+- (instancetype)revenant_initWithIdentifiers:(NSArray<AVMetadataIdentifier> *)identifiers
 {
     self = ((id (*)(id, SEL))objc_msgSend)(self, sel_registerName("init"));
-    if (self && [self respondsToSelector:@selector(charon_setIdentifiers:)]) {
-        ((void (*)(id, SEL, id))objc_msgSend)(self, @selector(charon_setIdentifiers:), identifiers);
+    if (self && [self respondsToSelector:@selector(revenant_setIdentifiers:)]) {
+        ((void (*)(id, SEL, id))objc_msgSend)(self, @selector(revenant_setIdentifiers:), identifiers);
     }
     return self;
 }
 
-+ (instancetype)charon_metadataItemFilterWithIdentifiers:(NSArray<AVMetadataIdentifier> *)identifiers
++ (instancetype)revenant_metadataItemFilterWithIdentifiers:(NSArray<AVMetadataIdentifier> *)identifiers
 {
-    return [[self alloc] charon_initWithIdentifiers:identifiers];
+    return [[self alloc] revenant_initWithIdentifiers:identifiers];
 }
 
 - (NSArray<AVMetadataIdentifier> *)identifiers
 {
-    if (![self respondsToSelector:@selector(charon_storedIdentifiers)]) {
+    if (![self respondsToSelector:@selector(revenant_storedIdentifiers)]) {
         return @[];
     }
-    return ((id (*)(id, SEL))objc_msgSend)(self, @selector(charon_storedIdentifiers));
+    return ((id (*)(id, SEL))objc_msgSend)(self, @selector(revenant_storedIdentifiers));
 }
 
 @end

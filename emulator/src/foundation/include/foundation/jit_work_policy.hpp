@@ -12,7 +12,7 @@
 #include <cstdint>
 #include <optional>
 
-namespace shade {
+namespace emulator {
 
 inline constexpr std::size_t jit_work_policy_maximum_translation_lanes = 4U;
 

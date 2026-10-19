@@ -1,18 +1,18 @@
 #import <UIKit/UIKit.h>
 #import <objc/runtime.h>
 
-static const void *CharonUserActivityKey = &CharonUserActivityKey;
+static const void *RevenantUserActivityKey = &RevenantUserActivityKey;
 
-@implementation UIResponder (CharonUserActivity)
+@implementation UIResponder (RevenantUserActivity)
 
 - (NSUserActivity *)userActivity
 {
-    return objc_getAssociatedObject(self, CharonUserActivityKey);
+    return objc_getAssociatedObject(self, RevenantUserActivityKey);
 }
 
 - (void)setUserActivity:(NSUserActivity *)activity
 {
-    objc_setAssociatedObject(self, CharonUserActivityKey, activity, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, RevenantUserActivityKey, activity, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
 - (void)updateUserActivityState:(NSUserActivity *)activity

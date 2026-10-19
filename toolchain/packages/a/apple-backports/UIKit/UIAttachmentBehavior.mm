@@ -1,24 +1,24 @@
-#import "CharonDynamics.h"
+#import "RevenantDynamics.h"
 
-typedef NS_ENUM(NSInteger, CharonAttachmentKind) {
-    CharonAttachmentDistance,
-    CharonAttachmentFixed,
-    CharonAttachmentPin,
-    CharonAttachmentSliding,
-    CharonAttachmentLimit,
+typedef NS_ENUM(NSInteger, RevenantAttachmentKind) {
+    RevenantAttachmentDistance,
+    RevenantAttachmentFixed,
+    RevenantAttachmentPin,
+    RevenantAttachmentSliding,
+    RevenantAttachmentLimit,
 };
 
 enum {
-    CharonDampingSet = 1 << 0,
-    CharonFrequencySet = 1 << 1,
-    CharonLengthSet = 1 << 2,
-    CharonRevolute = 1 << 3,
-    CharonRangeSet = 1 << 4,
-    CharonFrictionTorqueSet = 1 << 5,
+    RevenantDampingSet = 1 << 0,
+    RevenantFrequencySet = 1 << 1,
+    RevenantLengthSet = 1 << 2,
+    RevenantRevolute = 1 << 3,
+    RevenantRangeSet = 1 << 4,
+    RevenantFrictionTorqueSet = 1 << 5,
 };
 
 @implementation UIAttachmentBehavior {
-    CharonAttachmentKind _kind;
+    RevenantAttachmentKind _kind;
     NSInteger _type;
     UIAttachmentBehaviorType _attachedBehaviorType;
     CGPoint _anchorPoint;
@@ -31,7 +31,7 @@ enum {
     CGFloat _frictionTorque;
     UIFloatRange _attachmentRange;
     NSUInteger _stateFlags;
-    CharonDynamicsBody *_anchorBody;
+    RevenantDynamicsBody *_anchorBody;
     b2Joint *_joint;
 }
 
@@ -41,11 +41,11 @@ enum {
     return nil;
 }
 
-- (instancetype)charon_initWithItems:(NSArray *)items kind:(CharonAttachmentKind)kind type:(NSInteger)type __attribute__((objc_method_family(init)))
+- (instancetype)revenant_initWithItems:(NSArray *)items kind:(RevenantAttachmentKind)kind type:(NSInteger)type __attribute__((objc_method_family(init)))
 {
-    if (!(self = [super charon_initPrimitive:YES]))
+    if (!(self = [super revenant_initPrimitive:YES]))
         return nil;
-    [[self charon_items] addObjectsFromArray:items];
+    [[self revenant_items] addObjectsFromArray:items];
     _kind = kind;
     _type = type;
     return self;
@@ -58,7 +58,7 @@ enum {
 
 - (instancetype)initWithItem:(id<UIDynamicItem>)item offsetFromCenter:(UIOffset)offset attachedToAnchor:(CGPoint)point
 {
-    if (!(self = [self charon_initWithItems:@[item] kind:CharonAttachmentDistance type:1]))
+    if (!(self = [self revenant_initWithItems:@[item] kind:RevenantAttachmentDistance type:1]))
         return nil;
     _anchorPoint = point;
     _anchorPointA = CGPointMake(offset.horizontal, offset.vertical);
@@ -72,7 +72,7 @@ enum {
 
 - (instancetype)initWithItem:(id<UIDynamicItem>)item offsetFromCenter:(UIOffset)offset attachedToItem:(id<UIDynamicItem>)other offsetFromCenter:(UIOffset)otherOffset
 {
-    if (!(self = [self charon_initWithItems:@[item, other] kind:CharonAttachmentDistance type:0]))
+    if (!(self = [self revenant_initWithItems:@[item, other] kind:RevenantAttachmentDistance type:0]))
         return nil;
     _anchorPointA = CGPointMake(offset.horizontal, offset.vertical);
     _anchorPointB = CGPointMake(otherOffset.horizontal, otherOffset.vertical);
@@ -81,14 +81,14 @@ enum {
 
 + (instancetype)fixedAttachmentWithItem:(id<UIDynamicItem>)item attachedToItem:(id<UIDynamicItem>)other attachmentAnchor:(CGPoint)point
 {
-    UIAttachmentBehavior *behavior = [[self alloc] charon_initWithItems:@[item, other] kind:CharonAttachmentFixed type:0];
+    UIAttachmentBehavior *behavior = [[self alloc] revenant_initWithItems:@[item, other] kind:RevenantAttachmentFixed type:0];
     behavior->_anchorPoint = point;
     return behavior;
 }
 
 + (instancetype)pinAttachmentWithItem:(id<UIDynamicItem>)item attachedToItem:(id<UIDynamicItem>)other attachmentAnchor:(CGPoint)point
 {
-    UIAttachmentBehavior *behavior = [[self alloc] charon_initWithItems:@[item, other] kind:CharonAttachmentPin type:0];
+    UIAttachmentBehavior *behavior = [[self alloc] revenant_initWithItems:@[item, other] kind:RevenantAttachmentPin type:0];
     behavior->_anchorPoint = point;
     behavior->_attachmentRange = (UIFloatRange){-INFINITY, INFINITY};
     return behavior;
@@ -96,7 +96,7 @@ enum {
 
 + (instancetype)slidingAttachmentWithItem:(id<UIDynamicItem>)item attachedToItem:(id<UIDynamicItem>)other attachmentAnchor:(CGPoint)point axisOfTranslation:(CGVector)axis
 {
-    UIAttachmentBehavior *behavior = [[self alloc] charon_initWithItems:@[item, other] kind:CharonAttachmentSliding type:0];
+    UIAttachmentBehavior *behavior = [[self alloc] revenant_initWithItems:@[item, other] kind:RevenantAttachmentSliding type:0];
     behavior->_anchorPoint = point;
     behavior->_axis = axis;
     behavior->_attachmentRange = (UIFloatRange){-INFINITY, INFINITY};
@@ -105,7 +105,7 @@ enum {
 
 + (instancetype)slidingAttachmentWithItem:(id<UIDynamicItem>)item attachmentAnchor:(CGPoint)point axisOfTranslation:(CGVector)axis
 {
-    UIAttachmentBehavior *behavior = [[self alloc] charon_initWithItems:@[item] kind:CharonAttachmentSliding type:1];
+    UIAttachmentBehavior *behavior = [[self alloc] revenant_initWithItems:@[item] kind:RevenantAttachmentSliding type:1];
     behavior->_anchorPoint = point;
     behavior->_axis = axis;
     behavior->_attachmentRange = (UIFloatRange){-INFINITY, INFINITY};
@@ -114,7 +114,7 @@ enum {
 
 + (instancetype)limitAttachmentWithItem:(id<UIDynamicItem>)item offsetFromCenter:(UIOffset)offset attachedToItem:(id<UIDynamicItem>)other offsetFromCenter:(UIOffset)otherOffset
 {
-    UIAttachmentBehavior *behavior = [[self alloc] charon_initWithItems:@[item, other] kind:CharonAttachmentLimit type:0];
+    UIAttachmentBehavior *behavior = [[self alloc] revenant_initWithItems:@[item, other] kind:RevenantAttachmentLimit type:0];
     behavior->_anchorPointA = CGPointMake(offset.horizontal, offset.vertical);
     behavior->_anchorPointB = CGPointMake(otherOffset.horizontal, otherOffset.vertical);
     CGPoint first = item.center, second = other.center;
@@ -124,15 +124,15 @@ enum {
 
 - (NSString *)description
 {
-    NSArray *items = [self charon_items];
+    NSArray *items = [self revenant_items];
     NSMutableString *description = [NSMutableString stringWithString:[super description]];
     [description appendFormat:@" %@ <-", items.firstObject];
-    if (_stateFlags & (CharonDampingSet | CharonFrequencySet)) {
+    if (_stateFlags & (RevenantDampingSet | RevenantFrequencySet)) {
         [description appendString:@"("];
-        if (_stateFlags & CharonDampingSet)
+        if (_stateFlags & RevenantDampingSet)
             [description appendFormat:@"D:%f", _damping];
         [description appendString:@" "];
-        if (_stateFlags & CharonFrequencySet)
+        if (_stateFlags & RevenantFrequencySet)
             [description appendFormat:@"F:%f", _frequency];
         [description appendString:@")"];
     }
@@ -142,7 +142,7 @@ enum {
 
 - (NSArray *)items
 {
-    return [NSArray arrayWithArray:[self charon_items]];
+    return [NSArray arrayWithArray:[self revenant_items]];
 }
 
 - (UIAttachmentBehaviorType)attachedBehaviorType
@@ -150,9 +150,9 @@ enum {
     return _attachedBehaviorType;
 }
 
-- (BOOL)charon_distanceJoint
+- (BOOL)revenant_distanceJoint
 {
-    return _joint && _kind == CharonAttachmentDistance && !(_stateFlags & CharonRevolute);
+    return _joint && _kind == RevenantAttachmentDistance && !(_stateFlags & RevenantRevolute);
 }
 
 - (CGPoint)anchorPoint
@@ -166,14 +166,14 @@ enum {
         return;
     _anchorPoint = point;
     _anchorBody.position = point;
-    [self charon_changedParameter];
+    [self revenant_changedParameter];
 }
 
 - (CGFloat)length
 {
-    if (_joint && _kind == CharonAttachmentLimit)
-        return (double)(CHARON_DYNAMICS_PTM * static_cast<b2RopeJoint *>(_joint)->GetMaxLength());
-    return [self charon_distanceJoint] ? (double)(CHARON_DYNAMICS_PTM * static_cast<b2DistanceJoint *>(_joint)->GetLength()) : _length;
+    if (_joint && _kind == RevenantAttachmentLimit)
+        return (double)(REVENANT_DYNAMICS_PTM * static_cast<b2RopeJoint *>(_joint)->GetMaxLength());
+    return [self revenant_distanceJoint] ? (double)(REVENANT_DYNAMICS_PTM * static_cast<b2DistanceJoint *>(_joint)->GetLength()) : _length;
 }
 
 - (void)setLength:(CGFloat)length
@@ -181,28 +181,28 @@ enum {
     CGFloat old = self.length;
     if (length == old) {
         if (!_joint)
-            _stateFlags |= CharonLengthSet;
+            _stateFlags |= RevenantLengthSet;
         return;
     }
     _length = length;
-    _stateFlags |= CharonLengthSet;
-    if (_kind != CharonAttachmentDistance)
+    _stateFlags |= RevenantLengthSet;
+    if (_kind != RevenantAttachmentDistance)
         return;
     if (length == 0 || old == 0) {
-        [self charon_reevaluateJoint];
-        [self charon_changedParameter];
+        [self revenant_reevaluateJoint];
+        [self revenant_changedParameter];
         return;
     }
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1), dispatch_get_main_queue(), ^{
-        if ([self charon_distanceJoint])
-            static_cast<b2DistanceJoint *>(self->_joint)->SetLength((float)(self->_length * CHARON_DYNAMICS_INVERSE_PTM));
-        [self charon_changedParameter];
+        if ([self revenant_distanceJoint])
+            static_cast<b2DistanceJoint *>(self->_joint)->SetLength((float)(self->_length * REVENANT_DYNAMICS_INVERSE_PTM));
+        [self revenant_changedParameter];
     });
 }
 
 - (CGFloat)damping
 {
-    return [self charon_distanceJoint] ? static_cast<b2DistanceJoint *>(_joint)->GetDampingRatio() : _damping;
+    return [self revenant_distanceJoint] ? static_cast<b2DistanceJoint *>(_joint)->GetDampingRatio() : _damping;
 }
 
 - (void)setDamping:(CGFloat)damping
@@ -210,15 +210,15 @@ enum {
     if (damping == self.damping)
         return;
     _damping = damping;
-    _stateFlags |= CharonDampingSet;
-    if ([self charon_distanceJoint])
+    _stateFlags |= RevenantDampingSet;
+    if ([self revenant_distanceJoint])
         static_cast<b2DistanceJoint *>(_joint)->SetDampingRatio((float)damping);
-    [self charon_changedParameter];
+    [self revenant_changedParameter];
 }
 
 - (CGFloat)frequency
 {
-    return [self charon_distanceJoint] ? static_cast<b2DistanceJoint *>(_joint)->GetFrequency() : _frequency;
+    return [self revenant_distanceJoint] ? static_cast<b2DistanceJoint *>(_joint)->GetFrequency() : _frequency;
 }
 
 - (void)setFrequency:(CGFloat)frequency
@@ -227,12 +227,12 @@ enum {
         return;
     CGFloat old = _frequency;
     _frequency = frequency;
-    _stateFlags |= CharonFrequencySet;
+    _stateFlags |= RevenantFrequencySet;
     if (frequency == 0 || old == 0)
-        [self charon_reevaluateJoint];
-    else if ([self charon_distanceJoint])
+        [self revenant_reevaluateJoint];
+    else if ([self revenant_distanceJoint])
         static_cast<b2DistanceJoint *>(_joint)->SetFrequency((float)frequency);
-    [self charon_changedParameter];
+    [self revenant_changedParameter];
 }
 
 - (CGFloat)frictionTorque
@@ -242,12 +242,12 @@ enum {
 
 - (void)setFrictionTorque:(CGFloat)torque
 {
-    if (_kind != CharonAttachmentPin || torque == _frictionTorque)
+    if (_kind != RevenantAttachmentPin || torque == _frictionTorque)
         return;
     _frictionTorque = torque;
-    _stateFlags |= CharonFrictionTorqueSet;
-    [self charon_applyPinAndSlider];
-    [self charon_changedParameter];
+    _stateFlags |= RevenantFrictionTorqueSet;
+    [self revenant_applyPinAndSlider];
+    [self revenant_changedParameter];
 }
 
 - (UIFloatRange)attachmentRange
@@ -257,111 +257,111 @@ enum {
 
 - (void)setAttachmentRange:(UIFloatRange)range
 {
-    if (_kind != CharonAttachmentPin && _kind != CharonAttachmentSliding)
+    if (_kind != RevenantAttachmentPin && _kind != RevenantAttachmentSliding)
         return;
     _attachmentRange = range;
-    _stateFlags |= CharonRangeSet;
-    [self charon_applyPinAndSlider];
-    [self charon_changedParameter];
+    _stateFlags |= RevenantRangeSet;
+    [self revenant_applyPinAndSlider];
+    [self revenant_changedParameter];
 }
 
-- (void)charon_applyPinAndSlider
+- (void)revenant_applyPinAndSlider
 {
     if (!_joint)
         return;
-    if (_kind == CharonAttachmentPin) {
+    if (_kind == RevenantAttachmentPin) {
         b2RevoluteJoint *pin = static_cast<b2RevoluteJoint *>(_joint);
-        if (_stateFlags & CharonRangeSet) {
+        if (_stateFlags & RevenantRangeSet) {
             pin->EnableLimit(true);
             pin->SetLimits((float)_attachmentRange.minimum, (float)_attachmentRange.maximum);
         }
-        if (_stateFlags & CharonFrictionTorqueSet) {
+        if (_stateFlags & RevenantFrictionTorqueSet) {
             pin->EnableMotor(true);
             pin->SetMotorSpeed(0);
             pin->SetMaxMotorTorque((float)_frictionTorque);
         }
-    } else if (_kind == CharonAttachmentSliding && (_stateFlags & CharonRangeSet)) {
+    } else if (_kind == RevenantAttachmentSliding && (_stateFlags & RevenantRangeSet)) {
         b2PrismaticJoint *slider = static_cast<b2PrismaticJoint *>(_joint);
         slider->EnableLimit(true);
-        slider->SetLimits((float)(_attachmentRange.minimum * CHARON_DYNAMICS_INVERSE_PTM), (float)(_attachmentRange.maximum * CHARON_DYNAMICS_INVERSE_PTM));
+        slider->SetLimits((float)(_attachmentRange.minimum * REVENANT_DYNAMICS_INVERSE_PTM), (float)(_attachmentRange.maximum * REVENANT_DYNAMICS_INVERSE_PTM));
     }
 }
 
-- (void)charon_changedParameter
+- (void)revenant_changedParameter
 {
-    UIDynamicAnimator *context = [self charon_context];
-    NSArray *items = [self charon_items];
-    [context charon_bodyForItem:items.firstObject].resting = NO;
+    UIDynamicAnimator *context = [self revenant_context];
+    NSArray *items = [self revenant_items];
+    [context revenant_bodyForItem:items.firstObject].resting = NO;
     if (_anchorBody)
         _anchorBody.resting = NO;
     else if (items.count > 1)
-        [context charon_bodyForItem:items[1]].resting = NO;
-    [context charon_tickle];
+        [context revenant_bodyForItem:items[1]].resting = NO;
+    [context revenant_tickle];
 }
 
-- (void)charon_associate
+- (void)revenant_associate
 {
-    [super charon_associate];
-    UIDynamicAnimator *context = [self charon_context];
-    for (id<UIDynamicItem> item in [self charon_items])
-        [context charon_registerBodyForItem:item shape:CharonDynamicsShapeBox];
+    [super revenant_associate];
+    UIDynamicAnimator *context = [self revenant_context];
+    for (id<UIDynamicItem> item in [self revenant_items])
+        [context revenant_registerBodyForItem:item shape:RevenantDynamicsShapeBox];
     if (_type == 1)
-        _anchorBody = [context charon_anchorBodyAtPoint:_anchorPoint];
-    [self charon_reevaluateJoint];
+        _anchorBody = [context revenant_anchorBodyAtPoint:_anchorPoint];
+    [self revenant_reevaluateJoint];
 }
 
-- (void)charon_destroyJoint
+- (void)revenant_destroyJoint
 {
     if (_joint)
-        [[self charon_context] charon_world]->DestroyJoint(_joint);
+        [[self revenant_context] revenant_world]->DestroyJoint(_joint);
     _joint = NULL;
 }
 
-- (void)charon_reevaluateJoint
+- (void)revenant_reevaluateJoint
 {
-    UIDynamicAnimator *context = [self charon_context];
-    b2World *world = [context charon_world];
-    if (!world || ![self charon_isAssociated])
+    UIDynamicAnimator *context = [self revenant_context];
+    b2World *world = [context revenant_world];
+    if (!world || ![self revenant_isAssociated])
         return;
-    NSArray *items = [self charon_items];
-    b2Body *bodyA = [context charon_bodyForItem:items.firstObject].b2Body;
-    b2Body *bodyB = _anchorBody ? _anchorBody.b2Body : [context charon_bodyForItem:items.lastObject].b2Body;
-    [self charon_destroyJoint];
-    _stateFlags &= ~CharonRevolute;
-    b2Vec2 anchor = charon_metres(_anchorPoint);
+    NSArray *items = [self revenant_items];
+    b2Body *bodyA = [context revenant_bodyForItem:items.firstObject].b2Body;
+    b2Body *bodyB = _anchorBody ? _anchorBody.b2Body : [context revenant_bodyForItem:items.lastObject].b2Body;
+    [self revenant_destroyJoint];
+    _stateFlags &= ~RevenantRevolute;
+    b2Vec2 anchor = revenant_metres(_anchorPoint);
     switch (_kind) {
-    case CharonAttachmentDistance: {
+    case RevenantAttachmentDistance: {
         b2DistanceJointDef definition;
-        definition.Initialize(bodyA, bodyB, bodyA->GetWorldPoint(charon_metres(_anchorPointA)), bodyB->GetWorldPoint(charon_metres(_anchorPointB)));
+        definition.Initialize(bodyA, bodyB, bodyA->GetWorldPoint(revenant_metres(_anchorPointA)), bodyB->GetWorldPoint(revenant_metres(_anchorPointB)));
         definition.collideConnected = _type == 0;
-        definition.frequencyHz = (_stateFlags & CharonFrequencySet) ? (float)_frequency : 0.0f;
-        definition.dampingRatio = (_stateFlags & CharonDampingSet) ? (float)_damping : 0.0f;
+        definition.frequencyHz = (_stateFlags & RevenantFrequencySet) ? (float)_frequency : 0.0f;
+        definition.dampingRatio = (_stateFlags & RevenantDampingSet) ? (float)_damping : 0.0f;
         _joint = world->CreateJoint(&definition);
         b2DistanceJoint *distance = static_cast<b2DistanceJoint *>(_joint);
-        if (_stateFlags & CharonLengthSet)
-            distance->SetLength((float)(_length * CHARON_DYNAMICS_INVERSE_PTM));
-        if (CHARON_DYNAMICS_PTM * distance->GetLength() < 1.0f && _frequency == 0 && _type == 1 && !(_stateFlags & CharonLengthSet)) {
-            [self charon_destroyJoint];
+        if (_stateFlags & RevenantLengthSet)
+            distance->SetLength((float)(_length * REVENANT_DYNAMICS_INVERSE_PTM));
+        if (REVENANT_DYNAMICS_PTM * distance->GetLength() < 1.0f && _frequency == 0 && _type == 1 && !(_stateFlags & RevenantLengthSet)) {
+            [self revenant_destroyJoint];
             b2RevoluteJointDef pin;
             pin.Initialize(bodyA, bodyB, bodyB->GetPosition());
             _joint = world->CreateJoint(&pin);
-            _stateFlags |= CharonRevolute;
+            _stateFlags |= RevenantRevolute;
         }
         break;
     }
-    case CharonAttachmentFixed: {
+    case RevenantAttachmentFixed: {
         b2WeldJointDef definition;
         definition.Initialize(bodyA, bodyB, anchor);
         _joint = world->CreateJoint(&definition);
         break;
     }
-    case CharonAttachmentPin: {
+    case RevenantAttachmentPin: {
         b2RevoluteJointDef definition;
         definition.Initialize(bodyA, bodyB, anchor);
         _joint = world->CreateJoint(&definition);
         break;
     }
-    case CharonAttachmentSliding: {
+    case RevenantAttachmentSliding: {
         b2Vec2 axis((float)_axis.dx, (float)_axis.dy);
         axis.Normalize();
         b2PrismaticJointDef definition;
@@ -369,10 +369,10 @@ enum {
         _joint = world->CreateJoint(&definition);
         break;
     }
-    case CharonAttachmentLimit: {
-        CGPoint centreA = charon_points(bodyA->GetPosition()), centreB = charon_points(bodyB->GetPosition());
-        b2Vec2 worldA = charon_metres(CGPointMake(centreA.x - _anchorPointA.x, centreA.y - _anchorPointA.y));
-        b2Vec2 worldB = charon_metres(CGPointMake(centreB.x - _anchorPointB.x, centreB.y - _anchorPointB.y));
+    case RevenantAttachmentLimit: {
+        CGPoint centreA = revenant_points(bodyA->GetPosition()), centreB = revenant_points(bodyB->GetPosition());
+        b2Vec2 worldA = revenant_metres(CGPointMake(centreA.x - _anchorPointA.x, centreA.y - _anchorPointA.y));
+        b2Vec2 worldB = revenant_metres(CGPointMake(centreB.x - _anchorPointB.x, centreB.y - _anchorPointB.y));
         b2RopeJointDef definition;
         definition.bodyA = bodyA;
         definition.bodyB = bodyB;
@@ -383,20 +383,20 @@ enum {
         break;
     }
     }
-    [self charon_applyPinAndSlider];
+    [self revenant_applyPinAndSlider];
 }
 
-- (void)charon_dissociate
+- (void)revenant_dissociate
 {
-    UIDynamicAnimator *context = [self charon_context];
-    [self charon_destroyJoint];
+    UIDynamicAnimator *context = [self revenant_context];
+    [self revenant_destroyJoint];
     if (_anchorBody) {
-        [context charon_removeBody:_anchorBody];
+        [context revenant_removeBody:_anchorBody];
         _anchorBody = nil;
     }
-    for (id<UIDynamicItem> item in [self charon_items])
-        [context charon_unregisterBodyForItem:item action:nil];
-    [super charon_dissociate];
+    for (id<UIDynamicItem> item in [self revenant_items])
+        [context revenant_unregisterBodyForItem:item action:nil];
+    [super revenant_dissociate];
 }
 
 @end

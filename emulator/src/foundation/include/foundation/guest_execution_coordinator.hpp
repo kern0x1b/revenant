@@ -16,7 +16,7 @@
 
 #include "foundation/cpu.hpp"
 
-namespace shade {
+namespace emulator {
 
 struct GuestExecutionRequest {
     Cpu* cpu { };

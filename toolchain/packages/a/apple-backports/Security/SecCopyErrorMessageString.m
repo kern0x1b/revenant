@@ -1,7 +1,7 @@
 #import <CoreFoundation/CoreFoundation.h>
 #import <Security/Security.h>
 
-static const struct { int32_t status; const char *message; } charon_messages[] = {
+static const struct { int32_t status; const char *message; } revenant_messages[] = {
     {-67903, "The certificate contains multiple extensions with the same extension ID."},
     {-67902, "The verified certificate is a CA rather than an end-entity"},
     {-67901, "The validity period in the certificate exceeds the maximum allowed."},
@@ -540,12 +540,12 @@ static const struct { int32_t status; const char *message; } charon_messages[] =
 
 CFStringRef SecCopyErrorMessageString(OSStatus status, void *reserved)
 {
-    size_t low = 0, high = sizeof(charon_messages) / sizeof(charon_messages[0]);
+    size_t low = 0, high = sizeof(revenant_messages) / sizeof(revenant_messages[0]);
     while (low < high) {
         size_t middle = low + (high - low) / 2;
-        if (charon_messages[middle].status == status)
-            return CFStringCreateWithCString(kCFAllocatorDefault, charon_messages[middle].message, kCFStringEncodingUTF8);
-        if (charon_messages[middle].status < status)
+        if (revenant_messages[middle].status == status)
+            return CFStringCreateWithCString(kCFAllocatorDefault, revenant_messages[middle].message, kCFStringEncodingUTF8);
+        if (revenant_messages[middle].status < status)
             low = middle + 1;
         else
             high = middle;

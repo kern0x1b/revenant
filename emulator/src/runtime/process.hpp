@@ -47,7 +47,7 @@
 #include "foundation/performance.hpp"
 #include "kernel/kernel.hpp"
 
-namespace shade::runtime_detail {
+namespace emulator::runtime_detail {
 
 constexpr std::size_t fault_stack_word_count = 32;
 constexpr std::size_t maximum_watchpoint_traces = 64;

@@ -3,7 +3,7 @@
 #
 # The names are the 549 the UIKit band draws (tests/backports/host/uikit2/symbols-names.txt, read where it is, not
 # copied) and a few names nothing draws. The host build links the system's Intents and UIKit. The port build compiles
-# the port's CharonIntents100.m and the objects it needs with CHARON_HOST_BUILD and their classes renamed CharonHost*,
+# the port's RevenantIntents100.m and the objects it needs with REVENANT_HOST_BUILD and their classes renamed RevenantHost*,
 # and links the system's UIKit, which is where +[UIImage systemImageNamed:] lives in this process. The two runs must
 # print the same lines. The plant: a port whose INImage answers nil for every name; its run must differ.
 #
@@ -13,19 +13,19 @@ set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 P=${PORT_DIR:-$here/../../../../packages/a/apple-backports}
-CODING=$P/../../c/charon-coding/files
-build=${INTENTS_SYMBOL_BUILD:-$(runs_fresh charon-intents-symbol)}
+CODING=$P/../../c/revenant-coding/files
+build=${INTENTS_SYMBOL_BUILD:-$(runs_fresh revenant-intents-symbol)}
 sdk=$(xcrun --show-sdk-path)
 target="-target arm64-apple-ios15.0-macabi -isysroot $sdk -iframework $sdk/System/iOSSupport/System/Library/Frameworks"
-flags="$target -fobjc-arc -fvisibility=hidden -w -DCHARON_HOST_BUILD"
+flags="$target -fobjc-arc -fvisibility=hidden -w -DREVENANT_HOST_BUILD"
 probe_flags="$target -fno-objc-arc -fvisibility=hidden -w"
 frameworks="-framework Foundation -framework UIKit -framework CoreGraphics -framework EventKit -framework Intents"
 includes="-I$P/Intents -I$CODING"
-sources="$CODING/CharonCoding.m $P/Intents/CharonIntentsStore.m $P/Intents/CharonIntents100.m $P/Intents/IN10_0_1.m $P/Intents/IN11_0.m"
+sources="$CODING/RevenantCoding.m $P/Intents/RevenantIntentsStore.m $P/Intents/RevenantIntents100.m $P/Intents/IN10_0_1.m $P/Intents/IN11_0.m"
 
 names="$build/names.txt"
 cat "$here/../uikit2/symbols-names.txt" > "$names"
-printf 'charon.no-such-symbol\nzz.not.a.symbol\n \n' >> "$names"
+printf 'revenant.no-such-symbol\nzz.not.a.symbol\n \n' >> "$names"
 
 # The host: the system's Intents and UIKit. Its UIImage column is the oracle: the port's INImage must answer where
 # UIImage answers, and nowhere else. The host's own INImage column is not the oracle: the system's INImage answers an
@@ -46,7 +46,7 @@ for source in $sources; do
 done
 renames=""
 for name in $(xcrun nm -gU "$build"/plain/*.o | awk 'NF == 3 {print $3}' | grep -E '^_OBJC_CLASS_\$_' | sed -e 's/^_OBJC_CLASS_\$_//' | sort -u); do
-    renames="$renames -D$name=CharonHost$name"
+    renames="$renames -D$name=RevenantHost$name"
 done
 for source in $sources; do
     xcrun clang $flags $renames $includes -c "$source" -o "$build/port/$(basename "$source" .m).o"
@@ -61,13 +61,13 @@ echo "PASS: $(wc -l < "$build/port.txt") names, the port's INImage answers where
 
 # The plant: the port's INImage answers nil for every name.
 cp "$build"/port/*.o "$build/plant/"
-rm -f "$build/plant/CharonIntents100.o"
-sed 's/UIImage \*image = \[UIImage systemImageNamed:name\];/UIImage *image = nil;/' "$P/Intents/CharonIntents100.m" > "$build/plant/CharonIntents100.src.m"
-if cmp -s "$P/Intents/CharonIntents100.m" "$build/plant/CharonIntents100.src.m"; then
+rm -f "$build/plant/RevenantIntents100.o"
+sed 's/UIImage \*image = \[UIImage systemImageNamed:name\];/UIImage *image = nil;/' "$P/Intents/RevenantIntents100.m" > "$build/plant/RevenantIntents100.src.m"
+if cmp -s "$P/Intents/RevenantIntents100.m" "$build/plant/RevenantIntents100.src.m"; then
     echo "FAIL: the plant edit changed nothing, so the plant is not a plant"
     exit 1
 fi
-xcrun clang $flags $renames $includes -c "$build/plant/CharonIntents100.src.m" -o "$build/plant/CharonIntents100.o"
+xcrun clang $flags $renames $includes -c "$build/plant/RevenantIntents100.src.m" -o "$build/plant/RevenantIntents100.o"
 xcrun clang $probe_flags -DPORT "$here/probe.m" "$build"/plant/*.o $frameworks -o "$build/plant-probe"
 "$build/plant-probe" "$names" > "$build/plant.txt"
 if diff -q "$build/expected.txt" "$build/plant.txt" >/dev/null; then

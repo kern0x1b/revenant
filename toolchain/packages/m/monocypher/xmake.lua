@@ -18,11 +18,11 @@ package("monocypher")
         local project = import("core.project.project")
         local llvm = (project:required_packages() or {})["llvm"]
         if not llvm then
-            raise("charon@monocypher is built with the charon toolchain's clang, which comes from the llvm package; this package's graph does not hold it")
+            raise("revenant@monocypher is built with the revenant toolchain's clang, which comes from the llvm package; this package's graph does not hold it")
         end
         local compiler = path.join(llvm:installdir(), "bin", "clang")
         if not os.isfile(compiler) then
-            raise("charon@monocypher needs the charon clang at %s, and there is none there", compiler)
+            raise("revenant@monocypher needs the revenant clang at %s, and there is none there", compiler)
         end
         local staged = path.join("build", "src")
         os.mkdir(staged)

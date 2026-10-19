@@ -201,7 +201,7 @@ int main(void)
                portDate && CFGetTypeID(portDate) == CFDateGetTypeID() ? 1 : 0,
                hostDate && CFGetTypeID(hostDate) == CFDateGetTypeID() ? 1 : 0);
 
-        dispatch_queue_t queue = dispatch_queue_create("charon.security.async", DISPATCH_QUEUE_SERIAL);
+        dispatch_queue_t queue = dispatch_queue_create("revenant.security.async", DISPATCH_QUEUE_SERIAL);
         __block int portCalled = 0, hostCalled = 0, portInline = 0, hostInline = 0;
         __block int portAsyncVerdict = -1, hostAsyncVerdict = -1;
         OSStatus portAsyncStatus = portAsync(trust, queue, ^(SecTrustRef t, SecTrustResultType r) {

@@ -1,9 +1,9 @@
-#import "CharonGC.h"
+#import "RevenantGC.h"
 
 #pragma clang diagnostic ignored "-Wobjc-missing-property-synthesis"
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
 
-static id charon_nullable(id value)
+static id revenant_nullable(id value)
 {
     return value == [NSNull null] ? nil : value;
 }
@@ -23,32 +23,32 @@ static id charon_nullable(id value)
     NSSet<NSString *> *_aliases;
 }
 
-- (instancetype)initWithCharonSpec:(NSDictionary *)spec
+- (instancetype)initWithRevenantSpec:(NSDictionary *)spec
 {
     self = [super init];
     if (self) {
         _analog = [spec[@"analog"] boolValue];
         _boundToSystemGesture = [spec[@"system"] boolValue];
         _aliases = [NSSet setWithArray:spec[@"aliases"]];
-        _defaultLocalizedName = charon_nullable(spec[@"local"]);
-        _defaultUnmappedLocalizedName = charon_nullable(spec[@"unmappedLocal"]);
-        _sfSymbolsName = charon_nullable(spec[@"sf"]);
-        _unmappedSfSymbolsName = charon_nullable(spec[@"unmappedSf"]);
+        _defaultLocalizedName = revenant_nullable(spec[@"local"]);
+        _defaultUnmappedLocalizedName = revenant_nullable(spec[@"unmappedLocal"]);
+        _sfSymbolsName = revenant_nullable(spec[@"sf"]);
+        _unmappedSfSymbolsName = revenant_nullable(spec[@"unmappedSf"]);
     }
     return self;
 }
 
-- (void)charon_attachToProfile:(GCPhysicalInputProfile *)profile
+- (void)revenant_attachToProfile:(GCPhysicalInputProfile *)profile
 {
     _profile = profile;
 }
 
-- (void)charon_setCollection:(GCControllerElement *)collection
+- (void)revenant_setCollection:(GCControllerElement *)collection
 {
     _collection = collection;
 }
 
-- (void)charon_enqueue:(dispatch_block_t)block
+- (void)revenant_enqueue:(dispatch_block_t)block
 {
     id<GCDevice> device = _profile.device;
     dispatch_queue_t queue = device.handlerQueue ?: dispatch_get_main_queue();
@@ -103,7 +103,7 @@ static id charon_nullable(id value)
 
 @end
 
-static const float charon_touchThreshold = 0.001953125f;
+static const float revenant_touchThreshold = 0.001953125f;
 
 @implementation GCControllerButtonInput {
     float _value;
@@ -113,14 +113,14 @@ static const float charon_touchThreshold = 0.001953125f;
     float _sign;
 }
 
-- (void)charon_deriveFromAxis:(GCControllerAxisInput *)axis sign:(float)sign
+- (void)revenant_deriveFromAxis:(GCControllerAxisInput *)axis sign:(float)sign
 {
     _axis = axis;
     _sign = sign;
     _value = sign < 0 ? -0.0f : 0;
 }
 
-- (float)charon_derivedValue
+- (float)revenant_derivedValue
 {
     float axis = _axis.value;
     if (_sign > 0)
@@ -131,12 +131,12 @@ static const float charon_touchThreshold = 0.001953125f;
 
 - (float)value
 {
-    return _axis ? [self charon_derivedValue] : _value;
+    return _axis ? [self revenant_derivedValue] : _value;
 }
 
 - (BOOL)isPressed
 {
-    return _axis ? [self charon_derivedValue] > 0 : _pressed;
+    return _axis ? [self revenant_derivedValue] > 0 : _pressed;
 }
 
 - (BOOL)isTouched
@@ -148,30 +148,30 @@ static const float charon_touchThreshold = 0.001953125f;
 {
     if (_axis)
         value *= _sign;
-    [self charon_update:value < 0 ? 0 : value > 1 ? 1 : value];
+    [self revenant_update:value < 0 ? 0 : value > 1 ? 1 : value];
 }
 
-- (void)charon_axisChanged
+- (void)revenant_axisChanged
 {
     float scale = _sign < 0 ? 16777216.0f : 33554432.0f;
-    [self charon_update:rintf([self charon_derivedValue] * scale) / scale];
+    [self revenant_update:rintf([self revenant_derivedValue] * scale) / scale];
 }
 
-- (void)charon_update:(float)value
+- (void)revenant_update:(float)value
 {
     if (value == _value)
         return;
     BOOL wasPressed = _pressed;
     BOOL wasTouched = _touched;
     _value = value;
-    _pressed = _axis ? value > 0 : value > charon_touchThreshold;
-    _touched = value > charon_touchThreshold;
+    _pressed = _axis ? value > 0 : value > revenant_touchThreshold;
+    _touched = value > revenant_touchThreshold;
     BOOL pressed = _pressed;
     BOOL touched = _touched;
     GCControllerButtonValueChangedHandler changed = self.valueChangedHandler;
     GCControllerButtonTouchedChangedHandler touchedHandler = self.touchedChangedHandler;
     GCControllerButtonValueChangedHandler pressedHandler = self.pressedChangedHandler;
-    [self charon_enqueue:^{
+    [self revenant_enqueue:^{
         if (changed)
             changed(self, value, pressed);
         if (touchedHandler && touched != wasTouched)
@@ -195,34 +195,34 @@ static const float charon_touchThreshold = 0.001953125f;
     return _value;
 }
 
-- (void)charon_linkPositive:(GCControllerButtonInput *)positive negative:(GCControllerButtonInput *)negative dpad:(GCControllerDirectionPad *)dpad
+- (void)revenant_linkPositive:(GCControllerButtonInput *)positive negative:(GCControllerButtonInput *)negative dpad:(GCControllerDirectionPad *)dpad
 {
     _positive = positive;
     _negative = negative;
     _dpad = dpad;
-    [positive charon_deriveFromAxis:self sign:1];
-    [negative charon_deriveFromAxis:self sign:-1];
+    [positive revenant_deriveFromAxis:self sign:1];
+    [negative revenant_deriveFromAxis:self sign:-1];
 }
 
 - (void)setValue:(float)value
 {
-    [self charon_setValue:value];
+    [self revenant_setValue:value];
 }
 
-- (void)charon_setValue:(float)raw
+- (void)revenant_setValue:(float)raw
 {
     float value = fmaxf(-1, fminf(1, raw));
     if (raw == _value)
         return;
     _value = value;
-    [_negative charon_axisChanged];
-    [_positive charon_axisChanged];
+    [_negative revenant_axisChanged];
+    [_positive revenant_axisChanged];
     GCControllerAxisValueChangedHandler changed = self.valueChangedHandler;
-    [self charon_enqueue:^{
+    [self revenant_enqueue:^{
         if (changed)
             changed(self, raw);
     }];
-    [_dpad charon_axisChanged];
+    [_dpad revenant_axisChanged];
 }
 
 @end
@@ -236,7 +236,7 @@ static const float charon_touchThreshold = 0.001953125f;
     GCControllerButtonInput *_right;
 }
 
-- (void)charon_linkXAxis:(GCControllerAxisInput *)x yAxis:(GCControllerAxisInput *)y up:(GCControllerButtonInput *)up down:(GCControllerButtonInput *)down
+- (void)revenant_linkXAxis:(GCControllerAxisInput *)x yAxis:(GCControllerAxisInput *)y up:(GCControllerButtonInput *)up down:(GCControllerButtonInput *)down
                     left:(GCControllerButtonInput *)left right:(GCControllerButtonInput *)right
 {
     _xAxis = x;
@@ -279,16 +279,16 @@ static const float charon_touchThreshold = 0.001953125f;
 
 - (void)setValueForXAxis:(float)xAxis yAxis:(float)yAxis
 {
-    [_xAxis charon_setValue:xAxis];
-    [_yAxis charon_setValue:yAxis];
+    [_xAxis revenant_setValue:xAxis];
+    [_yAxis revenant_setValue:yAxis];
 }
 
-- (void)charon_axisChanged
+- (void)revenant_axisChanged
 {
     float x = _xAxis.value;
     float y = _yAxis.value;
     GCControllerDirectionPadValueChangedHandler changed = self.valueChangedHandler;
-    [self charon_enqueue:^{
+    [self revenant_enqueue:^{
         if (changed)
             changed(self, x, y);
     }];

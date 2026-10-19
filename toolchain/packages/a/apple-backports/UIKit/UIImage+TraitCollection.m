@@ -1,6 +1,6 @@
 #import <UIKit/UIKit.h>
 
-@implementation UIImage (CharonTraitCollection)
+@implementation UIImage (RevenantTraitCollection)
 
 - (UITraitCollection *)traitCollection
 {

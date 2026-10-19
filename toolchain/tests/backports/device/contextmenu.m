@@ -37,12 +37,12 @@ static UIActionSheet *visible_sheet(void)
     return nil;
 }
 
-@interface CharonMenuHost : UIViewController <UIContextMenuInteractionDelegate>
+@interface RevenantMenuHost : UIViewController <UIContextMenuInteractionDelegate>
 @property (nonatomic, strong) NSMutableArray *log;
 @property (nonatomic, strong) UIContextMenuInteraction *interaction;
 @end
 
-@implementation CharonMenuHost
+@implementation RevenantMenuHost
 
 - (UIContextMenuConfiguration *)contextMenuInteraction:(UIContextMenuInteraction *)interaction configurationForMenuAtLocation:(CGPoint)location
 {
@@ -71,18 +71,18 @@ static UIActionSheet *visible_sheet(void)
 
 @end
 
-@interface CharonContextMenuDelegate : UIResponder <UIApplicationDelegate>
+@interface RevenantContextMenuDelegate : UIResponder <UIApplicationDelegate>
 @property (nonatomic, strong) UIWindow *window;
-@property (nonatomic, strong) CharonMenuHost *host;
+@property (nonatomic, strong) RevenantMenuHost *host;
 @end
 
-@implementation CharonContextMenuDelegate
+@implementation RevenantContextMenuDelegate
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)options
 {
-    charon_log_to([results_folder stringByAppendingPathComponent:@"contextmenu.log"]);
+    revenant_log_to([results_folder stringByAppendingPathComponent:@"contextmenu.log"]);
     self.window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
-    self.host = [[CharonMenuHost alloc] init];
+    self.host = [[RevenantMenuHost alloc] init];
     self.host.log = [NSMutableArray array];
     self.window.rootViewController = self.host;
     [self.window makeKeyAndVisible];
@@ -95,9 +95,9 @@ static UIActionSheet *visible_sheet(void)
     @try {
         [self run];
     } @catch (NSException *exception) {
-        charon_check(NO, "the checks raise no exception", [NSString stringWithFormat:@"%@: %@", exception.name, exception.reason]);
+        revenant_check(NO, "the checks raise no exception", [NSString stringWithFormat:@"%@: %@", exception.name, exception.reason]);
     }
-    NSString *summary = [NSString stringWithFormat:@"%@ checks=%d failures=%d\n", charon_failures ? @"FAIL" : @"ok", charon_checks, charon_failures];
+    NSString *summary = [NSString stringWithFormat:@"%@ checks=%d failures=%d\n", revenant_failures ? @"FAIL" : @"ok", revenant_checks, revenant_failures];
     [summary writeToFile:[results_folder stringByAppendingPathComponent:@"contextmenu.done"] atomically:YES encoding:NSUTF8StringEncoding error:NULL];
 }
 
@@ -111,7 +111,7 @@ static UIActionSheet *visible_sheet(void)
     [view addInteraction:interaction];
     CHECK(interaction.view == view && interaction.delegate == self.host, "an interaction added to a view knows its view and delegate");
     CHECK([interaction locationInView:view].x >= 0, "and can answer a location");
-    ((void (*)(id, SEL, CGPoint))objc_msgSend)(interaction, NSSelectorFromString(@"charon_beginAtLocation:"), CGPointMake(50, 50));
+    ((void (*)(id, SEL, CGPoint))objc_msgSend)(interaction, NSSelectorFromString(@"revenant_beginAtLocation:"), CGPointMake(50, 50));
     CHECK(wait_until(^BOOL { return visible_sheet() != nil; }, 10), "a menu is shown as an action sheet");
     UIActionSheet *sheet = visible_sheet();
     NSMutableArray *titles = [NSMutableArray array];
@@ -135,6 +135,6 @@ int main(int argc, char *argv[])
 {
     @autoreleasepool {
         [[NSFileManager defaultManager] createDirectoryAtPath:results_folder withIntermediateDirectories:YES attributes:nil error:NULL];
-        return UIApplicationMain(argc, argv, nil, @"CharonContextMenuDelegate");
+        return UIApplicationMain(argc, argv, nil, @"RevenantContextMenuDelegate");
     }
 }

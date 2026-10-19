@@ -1,6 +1,6 @@
 #import <Foundation/Foundation.h>
 
-@implementation NSValue (CharonSize)
+@implementation NSValue (RevenantSize)
 
 - (void)getValue:(void *)value size:(NSUInteger)size
 {

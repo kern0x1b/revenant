@@ -1,4 +1,4 @@
-#import "CharonPhotosPicker.h"
+#import "RevenantPhotosPicker.h"
 
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
 #pragma clang diagnostic ignored "-Wobjc-designated-initializers"
@@ -36,9 +36,9 @@
     _delegate = delegate;
 }
 
-- (NSArray<NSString *> *)charon_mediaTypes
+- (NSArray<NSString *> *)revenant_mediaTypes
 {
-    NSArray *wanted = _configuration.filter ? [_configuration.filter charon_mediaTypes] : @[@"public.image", @"public.movie"];
+    NSArray *wanted = _configuration.filter ? [_configuration.filter revenant_mediaTypes] : @[@"public.image", @"public.movie"];
     NSArray *available = [UIImagePickerController availableMediaTypesForSourceType:UIImagePickerControllerSourceTypePhotoLibrary];
     NSMutableArray *types = [NSMutableArray array];
     for (NSString *type in wanted)
@@ -50,7 +50,7 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    NSArray *types = [self charon_mediaTypes];
+    NSArray *types = [self revenant_mediaTypes];
     if (!types.count)
         return;
     _picker = [[UIImagePickerController alloc] init];
@@ -70,11 +70,11 @@
     [super viewDidAppear:animated];
     if (!_picker)
         dispatch_async(dispatch_get_main_queue(), ^{
-            [self charon_finishWithResults:@[]];
+            [self revenant_finishWithResults:@[]];
         });
 }
 
-- (void)charon_finishWithResults:(NSArray<PHPickerResult *> *)results
+- (void)revenant_finishWithResults:(NSArray<PHPickerResult *> *)results
 {
     if (_finished)
         return;
@@ -84,7 +84,7 @@
         [delegate picker:self didFinishPicking:results];
 }
 
-- (NSString *)charon_typeOfReferenceURL:(NSURL *)URL
+- (NSString *)revenant_typeOfReferenceURL:(NSURL *)URL
 {
     for (NSString *pair in [[URL query] componentsSeparatedByString:@"&"]) {
         if (![pair hasPrefix:@"ext="])
@@ -100,7 +100,7 @@
     return @"public.jpeg";
 }
 
-- (NSItemProvider *)charon_providerForInfo:(NSDictionary *)info
+- (NSItemProvider *)revenant_providerForInfo:(NSDictionary *)info
 {
     NSItemProvider *provider = [[NSItemProvider alloc] init];
     NSString *mediaType = info[UIImagePickerControllerMediaType];
@@ -120,7 +120,7 @@
     UIImage *image = info[UIImagePickerControllerOriginalImage];
     if (!image)
         return nil;
-    NSString *type = [self charon_typeOfReferenceURL:info[UIImagePickerControllerReferenceURL]];
+    NSString *type = [self revenant_typeOfReferenceURL:info[UIImagePickerControllerReferenceURL]];
     [provider registerDataRepresentationForTypeIdentifier:type visibility:NSItemProviderRepresentationVisibilityAll loadHandler:^NSProgress *(void (^completion)(NSData *, NSError *)) {
         NSData *data = [type isEqualToString:@"public.png"] ? UIImagePNGRepresentation(image) : UIImageJPEGRepresentation(image, 1.0);
         completion(data, data ? nil : [NSError errorWithDomain:NSCocoaErrorDomain code:NSFileReadUnknownError userInfo:nil]);
@@ -131,14 +131,14 @@
 
 - (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary *)info
 {
-    NSItemProvider *provider = [self charon_providerForInfo:info];
-    NSArray *results = provider ? @[[[PHPickerResult alloc] initWithCharonItemProvider:provider]] : @[];
-    [self charon_finishWithResults:results];
+    NSItemProvider *provider = [self revenant_providerForInfo:info];
+    NSArray *results = provider ? @[[[PHPickerResult alloc] initWithRevenantItemProvider:provider]] : @[];
+    [self revenant_finishWithResults:results];
 }
 
 - (void)imagePickerControllerDidCancel:(UIImagePickerController *)picker
 {
-    [self charon_finishWithResults:@[]];
+    [self revenant_finishWithResults:@[]];
 }
 
 @end

@@ -10,7 +10,7 @@
 #include <algorithm>
 #include <limits>
 
-namespace shade {
+namespace emulator {
 namespace {
 
     [[nodiscard]] std::size_t saturating_add(

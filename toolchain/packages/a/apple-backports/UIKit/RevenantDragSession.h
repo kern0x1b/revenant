@@ -1,6 +1,6 @@
 #import <UIKit/UIKit.h>
 
-@interface CharonDragSession : NSObject <UIDragSession>
+@interface RevenantDragSession : NSObject <UIDragSession>
 @property (nonatomic, strong) NSMutableArray<UIDragItem *> *items;
 @property (nonatomic, strong) id localContext;
 @property (nonatomic, assign) CGPoint location;
@@ -9,18 +9,18 @@
 - (instancetype)initWithItems:(NSArray<UIDragItem *> *)items interaction:(UIDragInteraction *)interaction;
 @end
 
-@interface CharonDropSession : NSObject <UIDropSession>
-@property (nonatomic, strong) CharonDragSession *dragSession;
+@interface RevenantDropSession : NSObject <UIDropSession>
+@property (nonatomic, strong) RevenantDragSession *dragSession;
 @property (nonatomic, strong) NSProgress *progress;
 @property (nonatomic, assign) UIDropSessionProgressIndicatorStyle progressIndicatorStyle;
 @property (nonatomic, weak) UIDropInteraction *interaction;
-- (instancetype)initWithDragSession:(CharonDragSession *)dragSession interaction:(UIDropInteraction *)interaction;
+- (instancetype)initWithDragSession:(RevenantDragSession *)dragSession interaction:(UIDropInteraction *)interaction;
 @end
 
-@interface UIDragInteraction (CharonSessionQueries)
-@property (nonatomic, strong, readonly) CharonDragSession *session;
+@interface UIDragInteraction (RevenantSessionQueries)
+@property (nonatomic, strong, readonly) RevenantDragSession *session;
 @end
 
-@interface UIDropInteraction (CharonSessionQueries)
-@property (nonatomic, strong, readonly) CharonDropSession *currentDrop;
+@interface UIDropInteraction (RevenantSessionQueries)
+@property (nonatomic, strong, readonly) RevenantDropSession *currentDrop;
 @end

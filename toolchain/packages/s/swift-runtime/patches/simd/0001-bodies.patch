@@ -968,13 +968,13 @@
      lhs = lhs / rhs
    }
  }
-+// charon: `log` names two functions here - the one the Darwin overlay generates from
++// revenant: `log` names two functions here - the one the Darwin overlay generates from
 +// tgmath.swift and the one <math.h> declares - and a scalar argument cannot choose between them.
 +// The overlay's own __tg_log is unambiguous.
-+@inline(__always) internal func __charon_natural_log(_ x: Double) -> Double {
++@inline(__always) internal func __revenant_natural_log(_ x: Double) -> Double {
 +  return __tg_log(SIMD2<Double>(x, 0)).x
 +}
-+@inline(__always) internal func __charon_natural_log(_ x: Float) -> Float {
++@inline(__always) internal func __revenant_natural_log(_ x: Float) -> Float {
 +  return __tg_log(SIMD2<Float>(x, 0)).x
 +}
  @_transparent public func dot(_ lhs: simd.simd_quatf, _ rhs: simd.simd_quatf) -> Swift.Float {
@@ -987,7 +987,7 @@
 +  guard simd_length(v) > 0 else { return simd_quatf(ix: 0, iy: 0, iz: 0, r: 0) }
 +  let angle = Darwin.acos(Swift.min(1, Swift.max(-1, q.real / magnitude)))
 +  let scale = angle / simd_length(v)
-+  return simd_quatf(ix: v.x * scale, iy: v.y * scale, iz: v.z * scale, r: __charon_natural_log(magnitude))
++  return simd_quatf(ix: v.x * scale, iy: v.y * scale, iz: v.z * scale, r: __revenant_natural_log(magnitude))
 +}
  @_transparent public func exp(_ q: simd.simd_quatf) -> simd.simd_quatf {
    return __tg_exp(q)
@@ -1025,7 +1025,7 @@
 +  guard simd_length(v) > 0 else { return simd_quatd(ix: 0, iy: 0, iz: 0, r: 0) }
 +  let angle = Darwin.acos(Swift.min(1, Swift.max(-1, q.real / magnitude)))
 +  let scale = angle / simd_length(v)
-+  return simd_quatd(ix: v.x * scale, iy: v.y * scale, iz: v.z * scale, r: __charon_natural_log(magnitude))
++  return simd_quatd(ix: v.x * scale, iy: v.y * scale, iz: v.z * scale, r: __revenant_natural_log(magnitude))
 +}
  @_transparent public func exp(_ q: simd.simd_quatd) -> simd.simd_quatd {
    return __tg_exp(q)

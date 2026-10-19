@@ -9,14 +9,14 @@ set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 source=${SOURCE:-$here/../../../../packages/a/apple-backports/UIKit/UISheetPresentationController.m}
-build=${BUILD:-$(runs_fresh charon-sheetmetrics)}
+build=${BUILD:-$(runs_fresh revenant-sheetmetrics)}
 sdk=$(xcrun --show-sdk-path)
 xcrun clang -target arm64-apple-ios16.0-macabi -isysroot "$sdk" -iframework "$sdk/System/iOSSupport/System/Library/Frameworks" -fobjc-arc -w \
     "$here/metrics.m" -framework UIKit -framework Foundation -o "$build/metrics"
 "$build/metrics" > "$build/metrics.txt"
 port() {
-    value=$(sed -n "s/^static const [A-Za-z]* charon_sheet_$1 = \([0-9.]*\);.*/\1/p" "$source")
-    [ -n "$value" ] || { echo "FAIL the port declares no charon_sheet_$1 in $source"; exit 1; }
+    value=$(sed -n "s/^static const [A-Za-z]* revenant_sheet_$1 = \([0-9.]*\);.*/\1/p" "$source")
+    [ -n "$value" ] || { echo "FAIL the port declares no revenant_sheet_$1 in $source"; exit 1; }
     echo "$value"
 }
 host() {

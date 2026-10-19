@@ -85,7 +85,7 @@ void xl_manual_kevent(void *pack)
 }
 static void xl_diag(const char *line)
 {
-    int fd = open("/private/var/charon/xlate-crash.log", O_WRONLY | O_CREAT | O_APPEND, 0666);
+    int fd = open("/private/var/revenant/xlate-crash.log", O_WRONLY | O_CREAT | O_APPEND, 0666);
     if (fd >= 0) { dprintf(fd, "%s", line); close(fd); }
 }
 
@@ -108,9 +108,9 @@ int xl_shim_openat(int dirfd, const char *path, int flags, int mode)
 {
     static int trace = -1;
     if (trace < 0)
-        trace = access("/private/var/charon/xl-trace-errno", F_OK) == 0;
+        trace = access("/private/var/revenant/xl-trace-errno", F_OK) == 0;
     if (trace && (flags & O_CREAT)) {
-        int fd = open("/private/var/charon/xl-errno.log", O_WRONLY | O_CREAT | O_APPEND, 0666);
+        int fd = open("/private/var/revenant/xl-errno.log", O_WRONLY | O_CREAT | O_APPEND, 0666);
         if (fd >= 0) { dprintf(fd, "openat O_CREAT dirfd=%d [%s] flags=0x%x mode=0%o\n", dirfd, path ? path : "(null)", flags, mode); close(fd); }
     }
     if (!path)
@@ -394,7 +394,7 @@ void xl_errno_trace(const char *name, int64_t result, uint64_t first_argument, u
     int saved = errno;
     static int enabled = -1;
     if (enabled < 0)
-        enabled = access("/private/var/charon/xl-trace-errno", F_OK) == 0;
+        enabled = access("/private/var/revenant/xl-trace-errno", F_OK) == 0;
     if (enabled) {
         static int devnull = -1;
         if (devnull < 0)
@@ -411,7 +411,7 @@ void xl_errno_trace(const char *name, int64_t result, uint64_t first_argument, u
                 text[k][n] = 0;
             }
         }
-        int fd = open("/private/var/charon/xl-errno.log", O_WRONLY | O_CREAT | O_APPEND, 0666);
+        int fd = open("/private/var/revenant/xl-errno.log", O_WRONLY | O_CREAT | O_APPEND, 0666);
         if (fd >= 0) {
             dprintf(fd, "%s errno=%d a0=0x%llx [%s] a1=0x%llx [%s]\n", name, saved, (unsigned long long)first_argument, text[0],
                     (unsigned long long)second_argument, text[1]);

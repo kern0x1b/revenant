@@ -4,13 +4,13 @@ here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 CORE=${CORE:-$here/../../../../packages/a/apple-backports/CoreData}
 harness=${BATCHDELETE_HARNESS:-$here/../../device}
-build=${BATCHDELETE_BUILD:-$(runs_folder charon-batchdelete-host)}
+build=${BATCHDELETE_BUILD:-$(runs_folder revenant-batchdelete-host)}
 sources="NSPersistentStoreResult.m NSBatchDeleteRequest.m NSBatchDeleteRequest+ObjectIDs.m NSBatchDeleteResult.m NSManagedObjectContext+ExecuteRequest.m"
 renames=""
 for name in NSPersistentStoreResult NSBatchDeleteRequest NSBatchDeleteResult; do
-    renames="$renames -D$name=CharonHost$name"
+    renames="$renames -D$name=RevenantHost$name"
 done
-renames="$renames -DexecuteRequest=charonHostexecuteRequest -DinitWithObjectIDs=charonHostinitWithObjectIDs"
+renames="$renames -DexecuteRequest=revenantHostexecuteRequest -DinitWithObjectIDs=revenantHostinitWithObjectIDs"
 rm -rf "$build"
 mkdir -p "$build"
 objects=""

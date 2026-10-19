@@ -1,14 +1,14 @@
 #!/bin/sh
 # run.sh: a differential of UNNotificationSettings, read from UNUserNotificationCenter's getNotificationSettings in a bundled Mac Catalyst app
 # that has never asked for authorization. The host app is app/main.m alone. The port app adds the port's UNUserNotificationCenter.m with its two
-# classes renamed to CharonPort<name>, so the host's classes are still the ones the center is. Each app writes its checks to a file, and the
+# classes renamed to RevenantPort<name>, so the host's classes are still the ones the center is. Each app writes its checks to a file, and the
 # two files must be the same line for line. NOTIFICATION_SETTINGS_PORT_SOURCES replaces the port's file, so a planted wrong port can be run as
 # a control: it must fail.
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 uikit=$here/../../../../packages/a/apple-backports/UIKit
-build=${NOTIFICATION_SETTINGS_BUILD:-$(runs_fresh charon-notification-settings)}
+build=${NOTIFICATION_SETTINGS_BUILD:-$(runs_fresh revenant-notification-settings)}
 sdk=$(xcrun --show-sdk-path)
 common="-target arm64-apple-ios15.0-macabi -isysroot $sdk -iframework $sdk/System/iOSSupport/System/Library/Frameworks -fobjc-arc -w -I $uikit"
 if [ -n "${NOTIFICATION_SETTINGS_PORT_SOURCES:-}" ]; then
@@ -32,24 +32,24 @@ for f in $port_sources; do
     fi
     catalyst_sources="$catalyst_sources $copy"
 done
-renames=$(grep -h '^@implementation ' $catalyst_sources | grep -v '(' | awk '{ print "-D" $2 "=CharonPort" $2 }' | sort -u)
+renames=$(grep -h '^@implementation ' $catalyst_sources | grep -v '(' | awk '{ print "-D" $2 "=RevenantPort" $2 }' | sort -u)
 plist="$here/app/Info.plist"
 for side in host port; do
-    bundle="$build/$side/CharonNotificationSettings.app"
+    bundle="$build/$side/RevenantNotificationSettings.app"
     mkdir -p "$bundle/Contents/MacOS"
     cp "$plist" "$bundle/Contents/Info.plist"
     if [ "$side" = host ]; then
         # shellcheck disable=SC2086
         xcrun clang $common "$here/app/main.m" -framework UIKit -framework Foundation -framework UserNotifications -framework CoreLocation -framework CoreGraphics \
-            -o "$bundle/Contents/MacOS/CharonNotificationSettings"
+            -o "$bundle/Contents/MacOS/RevenantNotificationSettings"
     else
         # shellcheck disable=SC2086
-        xcrun clang $common $renames -DCHARON_PORT_SIDE "$here/app/main.m" $catalyst_sources \
+        xcrun clang $common $renames -DREVENANT_PORT_SIDE "$here/app/main.m" $catalyst_sources \
             -framework UIKit -framework Foundation -framework UserNotifications -framework CoreLocation -framework CoreGraphics \
-            -o "$bundle/Contents/MacOS/CharonNotificationSettings"
+            -o "$bundle/Contents/MacOS/RevenantNotificationSettings"
     fi
     codesign -s - --force --deep "$bundle" > /dev/null 2>&1
-    CHARON_SCENE_OUT="$build/$side.txt" timeout 120 "$bundle/Contents/MacOS/CharonNotificationSettings" > "$build/$side.log" 2>&1 || true
+    REVENANT_SCENE_OUT="$build/$side.txt" timeout 120 "$bundle/Contents/MacOS/RevenantNotificationSettings" > "$build/$side.log" 2>&1 || true
 done
 if [ ! -s "$build/host.txt" ] || [ ! -s "$build/port.txt" ]; then
     echo "FAIL notification-settings: an app wrote no checks (see $build/*.log)"

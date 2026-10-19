@@ -7,8 +7,8 @@
 
 #include <Accelerate/Accelerate.h>
 
-#include "CharonResampling.h"
-#include "CharonShear.h"
+#include "RevenantResampling.h"
+#include "RevenantShear.h"
 
 enum {
     ShearSrcAlong = 24,
@@ -33,7 +33,7 @@ typedef struct ShearPair {
 
 typedef struct ShearRun {
     ResamplingFilter filter;
-    CharonResampleFilter ours;
+    RevenantResampleFilter ours;
     vImage_Buffer src8, dst8;
     vImage_Buffer src16, dst16;
     unsigned char *src8Data, *dst8Data;
@@ -51,7 +51,7 @@ static double ShearStore(double value, double max)
     return floor(value + 0.5);
 }
 
-static double ShearPredict(const CharonResampleFilter *filter, unsigned phase, long first, long c,
+static double ShearPredict(const RevenantResampleFilter *filter, unsigned phase, long first, long c,
                            double amplitude, int divisorMode, double max)
 {
     long j = c - first;
@@ -61,12 +61,12 @@ static double ShearPredict(const CharonResampleFilter *filter, unsigned phase, l
     if (at < 0 || at >= (long)ShearSrcAlong)
         return 0.0;
     double divisor = divisorMode == ShearDivisorRowSum
-        ? CharonResampleRowSum(filter, phase)
+        ? RevenantResampleRowSum(filter, phase)
         : 16384.0;
     return ShearStore((double)filter->row[(size_t)phase * filter->width + (size_t)j] * amplitude / divisor, max);
 }
 
-static unsigned ShearIdentify(const CharonResampleFilter *filter, const unsigned short *observed,
+static unsigned ShearIdentify(const RevenantResampleFilter *filter, const unsigned short *observed,
                               double amplitude, int divisorMode, double max, ShearPair *list, unsigned room)
 {
     unsigned found = 0;
@@ -125,36 +125,36 @@ static int ShearSameList(const ShearPair *a, unsigned na, const ShearPair *b, un
     return 1;
 }
 
-static long long ShearAccumulator(const CharonResampleFilter *filter, int horizontal, double translate,
+static long long ShearAccumulator(const RevenantResampleFilter *filter, int horizontal, double translate,
                                   vImagePixelCount dstAlong, vImagePixelCount along)
 {
     long long position = 0;
     if (horizontal) {
         double scaled = 0.0 - filter->reciprocal * translate;
         scaled = scaled + (double)filter->taps * -0.5;
-        position = CharonResampleQ32((scaled + 1.0) * 4294967296.0);
+        position = RevenantResampleQ32((scaled + 1.0) * 4294967296.0);
     } else {
         double oneMinusReciprocal = 1.0 - filter->reciprocal;
         double scaled = (double)dstAlong * oneMinusReciprocal;
         scaled = scaled + filter->reciprocal * translate;
         scaled = scaled + (double)filter->taps * -0.5;
-        position = CharonResampleQ32((scaled + 1.0) * 4294967296.0);
+        position = RevenantResampleQ32((scaled + 1.0) * 4294967296.0);
     }
-    return position + (long long)along * CharonResampleStep(filter);
+    return position + (long long)along * RevenantResampleStep(filter);
 }
 
-static void ShearPortFunction(const CharonResampleFilter *filter, int horizontal, double translate,
+static void ShearPortFunction(const RevenantResampleFilter *filter, int horizontal, double translate,
                               vImagePixelCount dstAlong, vImagePixelCount along, ShearPair *out)
 {
     long base = 0;
     unsigned phase = 0;
-    CharonResamplePhase(filter, ShearAccumulator(filter, horizontal, translate, dstAlong, along),
+    RevenantResamplePhase(filter, ShearAccumulator(filter, horizontal, translate, dstAlong, along),
                         &phase, &base);
     out->phase = phase;
     out->base = base;
 }
 
-static double ShearCentre(const CharonResampleFilter *filter, int horizontal, double translate,
+static double ShearCentre(const RevenantResampleFilter *filter, int horizontal, double translate,
                           vImagePixelCount dstAlong, vImagePixelCount along)
 {
     long long position = ShearAccumulator(filter, horizontal, translate, dstAlong, along);
@@ -228,12 +228,12 @@ static vImagePixelCount ShearSweep(ShearRun *run, int horizontal, float scale, d
             printf("  delta %u: the release's own shear answered %d\n", (unsigned)c, (int)theirs);
             continue;
         }
-        vImage_Error ready = CharonShearReady(&run->src16, &run->dst16, &run->ours, horizontal, 0, 0);
+        vImage_Error ready = RevenantShearReady(&run->src16, &run->dst16, &run->ours, horizontal, 0, 0);
         if (ready != kvImageNoError) {
             printf("  delta %u: the port refused the shape with %d\n", (unsigned)c, (int)ready);
             continue;
         }
-        vImage_Error ours = CharonShearRun(&run->src16, &run->dst16, &run->ours, CharonARGB16U, horizontal,
+        vImage_Error ours = RevenantShearRun(&run->src16, &run->dst16, &run->ours, RevenantARGB16U, horizontal,
                                            translate, 0.0, 0, 0, back16, kvImageNoFlags);
         if (ours != kvImageNoError) {
             printf("  delta %u: the port's engine answered %d\n", (unsigned)c, (int)ours);
@@ -313,7 +313,7 @@ static int ShearArmPort(int horizontal)
     return horizontal ? ShearArmPortHorizontal : ShearArmPortVertical;
 }
 
-static void ShearArmPair(const CharonResampleFilter *filter, int index, int horizontal, double translate,
+static void ShearArmPair(const RevenantResampleFilter *filter, int index, int horizontal, double translate,
                          vImagePixelCount dstAlong, vImagePixelCount along, ShearPair *out)
 {
     const ShearArm *arm = &ShearArmTable[index];
@@ -445,22 +445,22 @@ int main(void)
                         fflush(stdout);
                         _exit(0);
                     }
-                    if (!CharonResampleFilterOf(run.filter, &run.ours)) {
+                    if (!RevenantResampleFilterOf(run.filter, &run.ours)) {
                         const char *base = (const char *)run.filter;
                         printf("  the port refused the release's own filter at a scale of %g\n", (double)scale);
-                        printf("    object %p, slot %d bytes\n", (void *)run.filter, (int)CharonResampleSlot);
-                        printf("    word 0 reciprocal %g\n", *(double *)(void *)(base + 0 * CharonResampleSlot));
-                        printf("    word 1 taps       %u\n", *(unsigned *)(void *)(base + 1 * CharonResampleSlot));
-                        printf("    word 2 floatStride %u\n", *(unsigned *)(void *)(base + 2 * CharonResampleSlot));
-                        printf("    word 3 int16Stride %u\n", *(unsigned *)(void *)(base + 3 * CharonResampleSlot));
-                        printf("    word 4 phases     %u\n", *(unsigned *)(void *)(base + 4 * CharonResampleSlot));
-                        printf("    word 5 exponent   %u\n", *(unsigned *)(void *)(base + 5 * CharonResampleSlot));
-                        printf("    word 6 offset     %u\n", *(unsigned *)(void *)(base + 6 * CharonResampleSlot));
-                        const char *table = *(const char *const *)(void *)(base + 7 * CharonResampleSlot);
-                        const char *fbase = *(const char *const *)(void *)(base + 8 * CharonResampleSlot);
-                        unsigned i16 = *(unsigned *)(void *)(base + 3 * CharonResampleSlot);
-                        unsigned ph = *(unsigned *)(void *)(base + 4 * CharonResampleSlot);
-                        unsigned off = *(unsigned *)(void *)(base + 6 * CharonResampleSlot);
+                        printf("    object %p, slot %d bytes\n", (void *)run.filter, (int)RevenantResampleSlot);
+                        printf("    word 0 reciprocal %g\n", *(double *)(void *)(base + 0 * RevenantResampleSlot));
+                        printf("    word 1 taps       %u\n", *(unsigned *)(void *)(base + 1 * RevenantResampleSlot));
+                        printf("    word 2 floatStride %u\n", *(unsigned *)(void *)(base + 2 * RevenantResampleSlot));
+                        printf("    word 3 int16Stride %u\n", *(unsigned *)(void *)(base + 3 * RevenantResampleSlot));
+                        printf("    word 4 phases     %u\n", *(unsigned *)(void *)(base + 4 * RevenantResampleSlot));
+                        printf("    word 5 exponent   %u\n", *(unsigned *)(void *)(base + 5 * RevenantResampleSlot));
+                        printf("    word 6 offset     %u\n", *(unsigned *)(void *)(base + 6 * RevenantResampleSlot));
+                        const char *table = *(const char *const *)(void *)(base + 7 * RevenantResampleSlot);
+                        const char *fbase = *(const char *const *)(void *)(base + 8 * RevenantResampleSlot);
+                        unsigned i16 = *(unsigned *)(void *)(base + 3 * RevenantResampleSlot);
+                        unsigned ph = *(unsigned *)(void *)(base + 4 * RevenantResampleSlot);
+                        unsigned off = *(unsigned *)(void *)(base + 6 * RevenantResampleSlot);
                         printf("    word 7 table      %p (inside %ld)\n", (const void *)table,
                                table ? (long)(table - base) : -1L);
                         printf("    word 8 base       %p\n", (const void *)fbase);
@@ -471,7 +471,7 @@ int main(void)
                                    " %u against %ld + %u\n", off, (long)(table - base), i16);
                             printf("    identity 3 table - base == floatStride*(phases+1): %ld against %u\n",
                                    (long)(table - fbase),
-                                   *(unsigned *)(void *)(base + 2 * CharonResampleSlot) * (ph + 1));
+                                   *(unsigned *)(void *)(base + 2 * RevenantResampleSlot) * (ph + 1));
                         }
                         printf("    first 40 bytes of the object:");
                         for (int z = 0; z < 40; z++)

@@ -11,7 +11,7 @@
 #include <mutex>
 #include <stdexcept>
 
-namespace shade {
+namespace emulator {
 
 void GuestExclusiveAddressResolver::bind(std::size_t processor_base,
     std::size_t processor_count, AddressSpace& memory)

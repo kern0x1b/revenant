@@ -16,7 +16,7 @@
 #include <cstddef>
 #include <cstdint>
 
-namespace shade::darwin::tty {
+namespace emulator::darwin::tty {
 
 inline constexpr std::uint32_t ioctl_void = 0x2000'0000U;
 inline constexpr std::uint32_t ioctl_output = 0x4000'0000U;

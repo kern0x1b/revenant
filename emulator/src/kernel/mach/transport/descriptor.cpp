@@ -14,7 +14,7 @@
 
 #include <limits>
 
-namespace shade::mach_transport {
+namespace emulator::mach_transport {
 namespace {
 
     std::uint32_t read_word(

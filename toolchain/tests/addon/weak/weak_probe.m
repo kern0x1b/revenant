@@ -2,8 +2,8 @@
 #include <pthread.h>
 #include <stdatomic.h>
 
-#ifdef CHARON_WITHOUT_NATIVE
-void *charon_test_dlsym(void *handle, const char *name) { return NULL; }
+#ifdef REVENANT_WITHOUT_NATIVE
+void *revenant_test_dlsym(void *handle, const char *name) { return NULL; }
 #endif
 
 static atomic_int deallocated;

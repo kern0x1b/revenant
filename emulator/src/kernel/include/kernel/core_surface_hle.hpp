@@ -18,7 +18,7 @@
 
 #include "graphics/surface_transport_abi.hpp"
 
-namespace shade {
+namespace emulator {
 
 class AddressSpace;
 class DisplayState;

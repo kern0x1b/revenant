@@ -9,7 +9,7 @@
 	<key>CFBundleExecutable</key>
 	<string>keyboarddismiss</string>
 	<key>CFBundleIdentifier</key>
-	<string>local.charon.backports.keyboarddismiss</string>
+	<string>local.revenant.backports.keyboarddismiss</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>

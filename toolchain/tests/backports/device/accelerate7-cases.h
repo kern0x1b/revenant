@@ -1,3 +1,3 @@
 #import <Foundation/Foundation.h>
 
-void charon_vimage_cases(void (^emit)(NSString *name, NSString *value));
+void revenant_vimage_cases(void (^emit)(NSString *name, NSString *value));

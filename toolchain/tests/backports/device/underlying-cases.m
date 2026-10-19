@@ -50,7 +50,7 @@ static NSString *exception_text(void (^block)(void))
 
 void underlying_run(NSOperationQueue *(^make)(void), UnderlyingRecorder record)
 {
-    dispatch_queue_t serial = dispatch_queue_create("charon.underlying.serial", DISPATCH_QUEUE_SERIAL);
+    dispatch_queue_t serial = dispatch_queue_create("revenant.underlying.serial", DISPATCH_QUEUE_SERIAL);
     dispatch_queue_set_specific(serial, UnderlyingKey, (void *)1, NULL);
     dispatch_queue_t global = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
     NSLock *lock = [[NSLock alloc] init];

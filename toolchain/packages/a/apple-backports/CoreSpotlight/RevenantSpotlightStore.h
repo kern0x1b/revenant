@@ -1,5 +1,5 @@
-#define CHARON_SPOTLIGHT_SHARED_ROOT @"/var/mobile/Library/Caches/org.charon.corespotlight"
+#define REVENANT_SPOTLIGHT_SHARED_ROOT @"/var/mobile/Library/Caches/org.revenant.corespotlight"
 
 #import <Foundation/Foundation.h>
 @class CSSearchableItem;
-NSArray<CSSearchableItem *> *CharonSpotlightDefaultItems(void);
+NSArray<CSSearchableItem *> *RevenantSpotlightDefaultItems(void);

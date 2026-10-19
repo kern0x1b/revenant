@@ -1,5 +1,5 @@
 #import <UIKit/UIKit.h>
-#import "CharonCalendar.h"
+#import "RevenantCalendar.h"
 
 @implementation UICalendarViewDecoration {
 @private
@@ -53,7 +53,7 @@
     return [[self alloc] initWithCustomViewProvider:customViewProvider];
 }
 
-- (CGFloat)charon_discSide
+- (CGFloat)revenant_discSide
 {
     switch (_size) {
         case UICalendarViewDecorationSizeMedium: return 6;
@@ -62,7 +62,7 @@
     }
 }
 
-- (CGFloat)charon_imageSide
+- (CGFloat)revenant_imageSide
 {
     switch (_size) {
         case UICalendarViewDecorationSizeMedium: return 14;
@@ -71,16 +71,16 @@
     }
 }
 
-- (void)charon_drawInRect:(CGRect)rect
+- (void)revenant_drawInRect:(CGRect)rect
 {
     if (_customViewProvider) {
         UIView *view = _customViewProvider();
         if (view)
-            [self charon_drawView:view inRect:rect];
+            [self revenant_drawView:view inRect:rect];
         return;
     }
     if (_image) {
-        CGFloat side = [self charon_imageSide];
+        CGFloat side = [self revenant_imageSide];
         CGRect frame = CGRectMake(CGRectGetMidX(rect) - side / 2.0, CGRectGetMaxY(rect) - side - 2, side, side);
         [_image drawInRect:frame];
         if (_color) {
@@ -90,14 +90,14 @@
         return;
     }
     if (_color) {
-        CGFloat side = [self charon_discSide];
+        CGFloat side = [self revenant_discSide];
         CGContextRef context = UIGraphicsGetCurrentContext();
         CGContextSetFillColorWithColor(context, _color.CGColor);
         CGContextFillEllipseInRect(context, CGRectMake(CGRectGetMidX(rect) - side / 2.0, CGRectGetMaxY(rect) - side - 2, side, side));
     }
 }
 
-- (void)charon_drawView:(UIView *)view inRect:(CGRect)rect
+- (void)revenant_drawView:(UIView *)view inRect:(CGRect)rect
 {
     CGSize size = view.frame.size;
     CGRect frame = CGRectMake(CGRectGetMidX(rect) - size.width / 2.0, CGRectGetMaxY(rect) - size.height, size.width, size.height);

@@ -1,26 +1,26 @@
-#import "CharonMLCompute.h"
+#import "RevenantMLCompute.h"
 
-@interface MLCOptimizer (CharonMLCOptimizer15)
+@interface MLCOptimizer (RevenantMLCOptimizer15)
 @property (readonly, nonatomic) MLCGradientClippingType gradientClippingType;
 @property (readonly, nonatomic) float maximumClippingNorm;
 @property (readonly, nonatomic) float customGlobalNorm;
 @end
 
-@implementation MLCOptimizer (CharonMLCOptimizer15)
+@implementation MLCOptimizer (RevenantMLCOptimizer15)
 
 - (MLCGradientClippingType)gradientClippingType
 {
-    return [self charon_mlc_state].gradientClippingType;
+    return [self revenant_mlc_state].gradientClippingType;
 }
 
 - (float)maximumClippingNorm
 {
-    return [self charon_mlc_state].maximumClippingNorm;
+    return [self revenant_mlc_state].maximumClippingNorm;
 }
 
 - (float)customGlobalNorm
 {
-    return [self charon_mlc_state].customGlobalNorm;
+    return [self revenant_mlc_state].customGlobalNorm;
 }
 
 @end
@@ -30,7 +30,7 @@
 + (instancetype)optimizerWithDescriptor:(MLCOptimizerDescriptor *)optimizerDescriptor
 {
     MLCAdamWOptimizer *optimizer = [self alloc];
-    [optimizer charon_mlc_takeStateFrom:optimizerDescriptor];
+    [optimizer revenant_mlc_takeStateFrom:optimizerDescriptor];
     return optimizer;
 }
 
@@ -42,37 +42,37 @@
                                timeStep:(NSUInteger)timeStep
 {
     MLCAdamWOptimizer *optimizer = [self optimizerWithDescriptor:optimizerDescriptor];
-    [optimizer charon_mlc_state].beta1 = beta1;
-    [optimizer charon_mlc_state].beta2 = beta2;
-    [optimizer charon_mlc_state].epsilon = epsilon;
-    [optimizer charon_mlc_state].usesAMSGrad = usesAMSGrad;
-    [optimizer charon_mlc_state].timeStep = timeStep;
+    [optimizer revenant_mlc_state].beta1 = beta1;
+    [optimizer revenant_mlc_state].beta2 = beta2;
+    [optimizer revenant_mlc_state].epsilon = epsilon;
+    [optimizer revenant_mlc_state].usesAMSGrad = usesAMSGrad;
+    [optimizer revenant_mlc_state].timeStep = timeStep;
     return optimizer;
 }
 
 - (float)beta1
 {
-    return [self charon_mlc_state].beta1;
+    return [self revenant_mlc_state].beta1;
 }
 
 - (float)beta2
 {
-    return [self charon_mlc_state].beta2;
+    return [self revenant_mlc_state].beta2;
 }
 
 - (float)epsilon
 {
-    return [self charon_mlc_state].epsilon;
+    return [self revenant_mlc_state].epsilon;
 }
 
 - (BOOL)usesAMSGrad
 {
-    return [self charon_mlc_state].usesAMSGrad;
+    return [self revenant_mlc_state].usesAMSGrad;
 }
 
 - (NSUInteger)timeStep
 {
-    return [self charon_mlc_state].timeStep;
+    return [self revenant_mlc_state].timeStep;
 }
 
 @end

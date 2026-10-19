@@ -3,19 +3,19 @@
 #include <stdlib.h>
 #include "system_function.h"
 
-static _Atomic(uintptr_t) charon_system_strtonum;
+static _Atomic(uintptr_t) revenant_system_strtonum;
 
 __attribute__((constructor))
-static void charon_resolve_strtonum(void)
+static void revenant_resolve_strtonum(void)
 {
-    charon_system_function(&charon_system_strtonum, CHARON_LIBSYSTEM, "strtonum");
+    revenant_system_function(&revenant_system_strtonum, REVENANT_LIBSYSTEM, "strtonum");
 }
 
 __attribute__((visibility("default")))
 long long strtonum(const char *numstr, long long minval, long long maxval, const char **errstrp)
 {
     long long (*system)(const char *, long long, long long, const char **) =
-        charon_system_function(&charon_system_strtonum, CHARON_LIBSYSTEM, "strtonum");
+        revenant_system_function(&revenant_system_strtonum, REVENANT_LIBSYSTEM, "strtonum");
     if (system)
         return system(numstr, minval, maxval, errstrp);
 

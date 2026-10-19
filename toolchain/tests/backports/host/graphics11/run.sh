@@ -4,7 +4,7 @@ here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 GRAPHICS=${GRAPHICS:-$here/../../../../packages/a/apple-backports/Graphics}
 harness=${GRAPHICS11_HARNESS:-$here/../../device}
-build=${GRAPHICS11_BUILD:-$(runs_folder charon-graphics11-host)}
+build=${GRAPHICS11_BUILD:-$(runs_folder revenant-graphics11-host)}
 sources="CVCodePoints.m CVConstants.m CVConstants11.m CVConstants12.m CGColorSpaceGetName.m CGImageInfo.m CGPathApplyWithBlock.m CGPDFApplyBlocks.m"
 renames=""
 for name in CGColorSpaceGetName CGPathApplyWithBlock CGImageGetByteOrderInfo CGImageGetPixelFormatInfo CGPDFArrayApplyBlock CGPDFDictionaryApplyBlock \
@@ -14,7 +14,7 @@ for name in CGColorSpaceGetName CGPathApplyWithBlock CGImageGetByteOrderInfo CGI
             kCVImageBufferTransferFunction_sRGB kCVImageBufferTransferFunction_ITU_R_2100_HLG kCVImageBufferTransferFunction_SMPTE_ST_2084_PQ \
             kCVImageBufferTransferFunction_Linear kCVImageBufferContentLightLevelInfoKey kCVImageBufferMasteringDisplayColorVolumeKey \
             kCVPixelFormatContainsGrayscale kCGColorSpaceGenericLab; do
-    renames="$renames -D$name=charon_host_$name"
+    renames="$renames -D$name=revenant_host_$name"
 done
 rm -rf "$build"
 mkdir -p "$build"

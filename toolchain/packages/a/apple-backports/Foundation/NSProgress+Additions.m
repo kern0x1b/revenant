@@ -4,23 +4,23 @@
 NSProgressUserInfoKey const NSProgressEstimatedTimeRemainingKey = @"NSProgressEstimatedTimeRemainingKey";
 NSProgressFileOperationKind const NSProgressFileOperationKindReceiving = @"NSProgressFileOperationKindReceiving";
 
-static id charon_progress_value(NSProgress *progress, NSString *key)
+static id revenant_progress_value(NSProgress *progress, NSString *key)
 {
     return [progress.userInfo objectForKey:key];
 }
 
-static void charon_progress_set(NSProgress *progress, NSString *key, id value)
+static void revenant_progress_set(NSProgress *progress, NSString *key, id value)
 {
     [progress setUserInfoObject:value forKey:key];
 }
 
-static id charon_progress_handler(NSProgress *progress, const char *name)
+static id revenant_progress_handler(NSProgress *progress, const char *name)
 {
     Ivar ivar = class_getInstanceVariable([progress class], name);
     return ivar ? object_getIvar(progress, ivar) : nil;
 }
 
-@implementation NSProgress (CharonAdditions)
+@implementation NSProgress (RevenantAdditions)
 
 + (NSProgress *)discreteProgressWithTotalUnitCount:(int64_t)unitCount
 {
@@ -56,72 +56,72 @@ static id charon_progress_handler(NSProgress *progress, const char *name)
 
 - (void (^)(void))cancellationHandler
 {
-    return charon_progress_handler(self, "_cancellationHandler");
+    return revenant_progress_handler(self, "_cancellationHandler");
 }
 
 - (void (^)(void))pausingHandler
 {
-    return charon_progress_handler(self, "_pausingHandler");
+    return revenant_progress_handler(self, "_pausingHandler");
 }
 
 - (NSNumber *)estimatedTimeRemaining
 {
-    return charon_progress_value(self, NSProgressEstimatedTimeRemainingKey);
+    return revenant_progress_value(self, NSProgressEstimatedTimeRemainingKey);
 }
 
 - (void)setEstimatedTimeRemaining:(NSNumber *)value
 {
-    charon_progress_set(self, NSProgressEstimatedTimeRemainingKey, [value copy]);
+    revenant_progress_set(self, NSProgressEstimatedTimeRemainingKey, [value copy]);
 }
 
 - (NSNumber *)throughput
 {
-    return charon_progress_value(self, NSProgressThroughputKey);
+    return revenant_progress_value(self, NSProgressThroughputKey);
 }
 
 - (void)setThroughput:(NSNumber *)value
 {
-    charon_progress_set(self, NSProgressThroughputKey, [value copy]);
+    revenant_progress_set(self, NSProgressThroughputKey, [value copy]);
 }
 
 - (NSProgressFileOperationKind)fileOperationKind
 {
-    return charon_progress_value(self, NSProgressFileOperationKindKey);
+    return revenant_progress_value(self, NSProgressFileOperationKindKey);
 }
 
 - (void)setFileOperationKind:(NSProgressFileOperationKind)value
 {
-    charon_progress_set(self, NSProgressFileOperationKindKey, [value copy]);
+    revenant_progress_set(self, NSProgressFileOperationKindKey, [value copy]);
 }
 
 - (NSURL *)fileURL
 {
-    return charon_progress_value(self, NSProgressFileURLKey);
+    return revenant_progress_value(self, NSProgressFileURLKey);
 }
 
 - (void)setFileURL:(NSURL *)value
 {
-    charon_progress_set(self, NSProgressFileURLKey, [value copy]);
+    revenant_progress_set(self, NSProgressFileURLKey, [value copy]);
 }
 
 - (NSNumber *)fileTotalCount
 {
-    return charon_progress_value(self, NSProgressFileTotalCountKey);
+    return revenant_progress_value(self, NSProgressFileTotalCountKey);
 }
 
 - (void)setFileTotalCount:(NSNumber *)value
 {
-    charon_progress_set(self, NSProgressFileTotalCountKey, [value copy]);
+    revenant_progress_set(self, NSProgressFileTotalCountKey, [value copy]);
 }
 
 - (NSNumber *)fileCompletedCount
 {
-    return charon_progress_value(self, NSProgressFileCompletedCountKey);
+    return revenant_progress_value(self, NSProgressFileCompletedCountKey);
 }
 
 - (void)setFileCompletedCount:(NSNumber *)value
 {
-    charon_progress_set(self, NSProgressFileCompletedCountKey, [value copy]);
+    revenant_progress_set(self, NSProgressFileCompletedCountKey, [value copy]);
 }
 
 @end

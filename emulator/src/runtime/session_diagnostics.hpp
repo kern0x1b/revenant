@@ -13,7 +13,7 @@
 #include <string_view>
 #include <vector>
 
-namespace shade {
+namespace emulator {
 class DisplayPresenter;
 class Output;
 class XnuScheduler;

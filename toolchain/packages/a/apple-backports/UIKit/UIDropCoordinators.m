@@ -1,12 +1,12 @@
 #import <UIKit/UIKit.h>
 
-#import "CharonDragSession.h"
+#import "RevenantDragSession.h"
 #import "UIDropCoordinators.h"
 
 #pragma clang diagnostic ignored "-Wobjc-property-implementation"
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
 
-@implementation CharonCollectionDropItem
+@implementation RevenantCollectionDropItem
 @synthesize item = _item;
 @synthesize source = _source;
 @synthesize size = _size;
@@ -27,7 +27,7 @@
 }
 @end
 
-@implementation CharonTableDropItem
+@implementation RevenantTableDropItem
 @synthesize item = _item;
 @synthesize source = _source;
 @synthesize size = _size;

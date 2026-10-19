@@ -6,11 +6,11 @@ typedef struct {
     NSInteger idiom;
     NSInteger style;
     NSInteger direction;
-} CharonImageVariantTraits;
+} RevenantImageVariantTraits;
 
-static CharonImageVariantTraits charon_traitsOf(id key)
+static RevenantImageVariantTraits revenant_traitsOf(id key)
 {
-    CharonImageVariantTraits traits = { 0, UIUserInterfaceIdiomUnspecified, UIUserInterfaceStyleUnspecified,
+    RevenantImageVariantTraits traits = { 0, UIUserInterfaceIdiomUnspecified, UIUserInterfaceStyleUnspecified,
         UITraitEnvironmentLayoutDirectionUnspecified };
     if ([key isKindOfClass:[UITraitCollection class]]) {
         UITraitCollection *collection = key;
@@ -22,7 +22,7 @@ static CharonImageVariantTraits charon_traitsOf(id key)
     return traits;
 }
 
-static BOOL charon_sameRendition(CharonImageVariantTraits a, CharonImageVariantTraits b)
+static BOOL revenant_sameRendition(RevenantImageVariantTraits a, RevenantImageVariantTraits b)
 {
     return (a.scale > 0 ? a.scale : 1) == (b.scale > 0 ? b.scale : 1) && a.idiom == b.idiom && a.style == b.style
         && a.direction == b.direction;
@@ -33,9 +33,9 @@ typedef struct {
     BOOL idiom;
     CGFloat scale;
     BOOL direction;
-} CharonImageVariantRank;
+} RevenantImageVariantRank;
 
-static BOOL charon_ranksAtLeast(CharonImageVariantRank a, CharonImageVariantRank b)
+static BOOL revenant_ranksAtLeast(RevenantImageVariantRank a, RevenantImageVariantRank b)
 {
     if (a.style != b.style)
         return a.style;
@@ -82,7 +82,7 @@ static BOOL charon_ranksAtLeast(CharonImageVariantRank a, CharonImageVariantRank
     return YES;
 }
 
-- (void)charon_registerImage:(UIImage *)image forKey:(id)key
+- (void)revenant_registerImage:(UIImage *)image forKey:(id)key
 {
     if (!image)
         return;
@@ -95,22 +95,22 @@ static BOOL charon_ranksAtLeast(CharonImageVariantRank a, CharonImageVariantRank
     [_images addObject:image];
 }
 
-- (void)charon_unregisterKey:(id)key
+- (void)revenant_unregisterKey:(id)key
 {
     if (!key)
         return;
-    CharonImageVariantTraits named = charon_traitsOf(key);
+    RevenantImageVariantTraits named = revenant_traitsOf(key);
     for (NSUInteger index = _keys.count; index-- > 0;) {
-        if (charon_sameRendition(named, charon_traitsOf(_keys[index]))) {
+        if (revenant_sameRendition(named, revenant_traitsOf(_keys[index]))) {
             [_keys removeObjectAtIndex:index];
             [_images removeObjectAtIndex:index];
         }
     }
 }
 
-- (UIImage *)charon_imageForKey:(id)key
+- (UIImage *)revenant_imageForKey:(id)key
 {
-    CharonImageVariantTraits want = charon_traitsOf(key);
+    RevenantImageVariantTraits want = revenant_traitsOf(key);
     if (want.scale <= 0)
         want.scale = [UIScreen mainScreen].scale;
     if (want.idiom == UIUserInterfaceIdiomUnspecified)
@@ -119,21 +119,21 @@ static BOOL charon_ranksAtLeast(CharonImageVariantRank a, CharonImageVariantRank
         want.style = UIUserInterfaceStyleLight;
 
     NSUInteger best = NSNotFound;
-    CharonImageVariantRank bestRank = { NO, NO, 0, NO };
+    RevenantImageVariantRank bestRank = { NO, NO, 0, NO };
     for (NSUInteger index = 0; index < _keys.count; index++) {
-        CharonImageVariantTraits have = charon_traitsOf(_keys[index]);
+        RevenantImageVariantTraits have = revenant_traitsOf(_keys[index]);
         if (have.idiom != UIUserInterfaceIdiomUnspecified && have.idiom != want.idiom)
             continue;
         if (have.style != UIUserInterfaceStyleUnspecified && have.style != want.style)
             continue;
         CGFloat scale = have.scale > 0 ? have.scale : 1;
-        CharonImageVariantRank rank = {
+        RevenantImageVariantRank rank = {
             have.style != UIUserInterfaceStyleUnspecified,
             have.idiom != UIUserInterfaceIdiomUnspecified,
             want.scale > 0 && scale == want.scale ? CGFLOAT_MAX : scale,
             have.direction != UITraitEnvironmentLayoutDirectionUnspecified,
         };
-        if (best == NSNotFound || charon_ranksAtLeast(rank, bestRank)) {
+        if (best == NSNotFound || revenant_ranksAtLeast(rank, bestRank)) {
             best = index;
             bestRank = rank;
         }
@@ -142,31 +142,31 @@ static BOOL charon_ranksAtLeast(CharonImageVariantRank a, CharonImageVariantRank
         return nil;
 
     UIImage *image = _images[best];
-    CharonImageVariantTraits matched = charon_traitsOf(_keys[best]);
+    RevenantImageVariantTraits matched = revenant_traitsOf(_keys[best]);
     CGFloat scale = matched.scale > 0 ? matched.scale : image.scale;
     return [UIImage imageWithCGImage:image.CGImage scale:scale orientation:image.imageOrientation];
 }
 
 - (UIImage *)imageWithConfiguration:(UIImageConfiguration *)configuration
 {
-    return [self charon_imageForKey:configuration];
+    return [self revenant_imageForKey:configuration];
 }
 
 - (void)registerImage:(UIImage *)image withConfiguration:(UIImageConfiguration *)configuration
 {
     if (!configuration)
         [NSException raise:NSInternalInconsistencyException format:@"scale must be > 0"];
-    [self charon_registerImage:image forKey:configuration];
+    [self revenant_registerImage:image forKey:configuration];
 }
 
 - (void)unregisterImageWithConfiguration:(UIImageConfiguration *)configuration
 {
-    [self charon_unregisterKey:configuration];
+    [self revenant_unregisterKey:configuration];
 }
 
 - (UIImage *)imageWithTraitCollection:(UITraitCollection *)traitCollection
 {
-    return [self charon_imageForKey:traitCollection];
+    return [self revenant_imageForKey:traitCollection];
 }
 
 - (void)registerImage:(UIImage *)image withTraitCollection:(UITraitCollection *)traitCollection
@@ -178,12 +178,12 @@ static BOOL charon_ranksAtLeast(CharonImageVariantRank a, CharonImageVariantRank
         [NSException raise:NSInternalInconsistencyException
                     format:@"scale %u in rendition key does not match with scale %f passed in the image description",
                            (unsigned)(uint16_t)(int)scale, scale];
-    [self charon_registerImage:image forKey:traitCollection];
+    [self revenant_registerImage:image forKey:traitCollection];
 }
 
 - (void)unregisterImageWithTraitCollection:(UITraitCollection *)traitCollection
 {
-    [self charon_unregisterKey:traitCollection];
+    [self revenant_unregisterKey:traitCollection];
 }
 
 @end

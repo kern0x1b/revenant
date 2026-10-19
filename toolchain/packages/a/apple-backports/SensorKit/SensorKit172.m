@@ -1,8 +1,8 @@
-#import "CharonSensorKit.h"
-#import "CharonSensorKitValue.h"
-#import "../CharonValueStore.h"
+#import "RevenantSensorKit.h"
+#import "RevenantSensorKitValue.h"
+#import "../RevenantValueStore.h"
 
-@implementation SRSpeechMetrics (CharonSensorKit172)
+@implementation SRSpeechMetrics (RevenantSensorKit172)
 @dynamic timeSinceAudioStart;
-CHARON_SCALAR_PROPERTY(NSTimeInterval, timeSinceAudioStart)
+REVENANT_SCALAR_PROPERTY(NSTimeInterval, timeSinceAudioStart)
 @end

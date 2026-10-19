@@ -4,40 +4,40 @@
 
 #pragma clang diagnostic ignored "-Wobjc-missing-property-synthesis"
 
-static NSString *const CharonCITTTypePNG = @"public.png";
-static NSString *const CharonCITTTypeTIFF = @"public.tiff";
-static NSString *const CharonCITTTypeJPEG = @"public.jpeg";
+static NSString *const RevenantCITTTypePNG = @"public.png";
+static NSString *const RevenantCITTTypeTIFF = @"public.tiff";
+static NSString *const RevenantCITTTypeJPEG = @"public.jpeg";
 
-static BOOL CharonCIEncodedFormat(CIFormat format, CFStringRef *type, CIFormat *rendered)
+static BOOL RevenantCIEncodedFormat(CIFormat format, CFStringRef *type, CIFormat *rendered)
 {
     if (format == kCIFormatRGBA8) {
-        *type = (__bridge CFStringRef)CharonCITTTypePNG, *rendered = kCIFormatRGBA8;
+        *type = (__bridge CFStringRef)RevenantCITTTypePNG, *rendered = kCIFormatRGBA8;
         return YES;
     }
     if (format == kCIFormatBGRA8) {
-        *type = (__bridge CFStringRef)CharonCITTTypePNG, *rendered = kCIFormatBGRA8;
+        *type = (__bridge CFStringRef)RevenantCITTTypePNG, *rendered = kCIFormatBGRA8;
         return YES;
     }
     if (format == kCIFormatL8) {
-        *type = (__bridge CFStringRef)CharonCITTTypeTIFF, *rendered = kCIFormatL8;
+        *type = (__bridge CFStringRef)RevenantCITTTypeTIFF, *rendered = kCIFormatL8;
         return YES;
     }
     if (format == kCIFormatLA8) {
-        *type = (__bridge CFStringRef)CharonCITTTypeTIFF, *rendered = kCIFormatLA8;
+        *type = (__bridge CFStringRef)RevenantCITTTypeTIFF, *rendered = kCIFormatLA8;
         return YES;
     }
     if (format == kCIFormatRGBAf) {
-        *type = (__bridge CFStringRef)CharonCITTTypeTIFF, *rendered = kCIFormatRGBAh;
+        *type = (__bridge CFStringRef)RevenantCITTTypeTIFF, *rendered = kCIFormatRGBAh;
         return YES;
     }
     if (format == kCIFormatRGBAh) {
-        *type = (__bridge CFStringRef)CharonCITTTypeTIFF, *rendered = kCIFormatRGBAh;
+        *type = (__bridge CFStringRef)RevenantCITTTypeTIFF, *rendered = kCIFormatRGBAh;
         return YES;
     }
     return NO;
 }
 
-@implementation CIContext (CharonRepresentations)
+@implementation CIContext (RevenantRepresentations)
 
 - (CGImageRef)createCGImage:(CIImage *)image
                    fromRect:(CGRect)rect
@@ -68,28 +68,28 @@ static BOOL CharonCIEncodedFormat(CIFormat format, CFStringRef *type, CIFormat *
 - (NSData *)PNGRepresentationOfImage:(CIImage *)image format:(CIFormat)format colorSpace:(CGColorSpaceRef)colorSpace
                              options:(NSDictionary *)options
 {
-    return [self charon_representationOfImage:image format:format colorSpace:colorSpace type:(__bridge CFStringRef)CharonCITTTypePNG];
+    return [self revenant_representationOfImage:image format:format colorSpace:colorSpace type:(__bridge CFStringRef)RevenantCITTTypePNG];
 }
 
 - (NSData *)TIFFRepresentationOfImage:(CIImage *)image format:(CIFormat)format colorSpace:(CGColorSpaceRef)colorSpace
                               options:(NSDictionary *)options
 {
-    return [self charon_representationOfImage:image format:format colorSpace:colorSpace type:(__bridge CFStringRef)CharonCITTTypeTIFF];
+    return [self revenant_representationOfImage:image format:format colorSpace:colorSpace type:(__bridge CFStringRef)RevenantCITTTypeTIFF];
 }
 
 - (NSData *)JPEGRepresentationOfImage:(CIImage *)image colorSpace:(CGColorSpaceRef)colorSpace options:(NSDictionary *)options
 {
-    return [self charon_representationOfImage:image format:kCIFormatL8 colorSpace:colorSpace type:(__bridge CFStringRef)CharonCITTTypeJPEG];
+    return [self revenant_representationOfImage:image format:kCIFormatL8 colorSpace:colorSpace type:(__bridge CFStringRef)RevenantCITTTypeJPEG];
 }
 
-- (NSData *)charon_representationOfImage:(CIImage *)image format:(CIFormat)format colorSpace:(CGColorSpaceRef)colorSpace
+- (NSData *)revenant_representationOfImage:(CIImage *)image format:(CIFormat)format colorSpace:(CGColorSpaceRef)colorSpace
                                       type:(CFStringRef)type
 {
     CFStringRef fileType = NULL;
     CIFormat rendered = kCIFormatRGBA8;
-    if (!CharonCIEncodedFormat(format, &fileType, &rendered))
+    if (!RevenantCIEncodedFormat(format, &fileType, &rendered))
         return nil;
-    if (CFEqual(type, (__bridge CFStringRef)CharonCITTTypeJPEG)) {
+    if (CFEqual(type, (__bridge CFStringRef)RevenantCITTTypeJPEG)) {
         rendered = kCIFormatRGBAf;
     }
     CGImageRef made = [self createCGImage:image fromRect:image.extent format:rendered colorSpace:colorSpace deferred:NO];
@@ -114,8 +114,8 @@ static BOOL CharonCIEncodedFormat(CIFormat format, CFStringRef *type, CIFormat *
                              options:(NSDictionary *)options
                                error:(NSError **)error
 {
-    return [self charon_writeRepresentationOfImage:image toURL:url format:format colorSpace:colorSpace
-                                               type:(__bridge CFStringRef)CharonCITTTypePNG error:error];
+    return [self revenant_writeRepresentationOfImage:image toURL:url format:format colorSpace:colorSpace
+                                               type:(__bridge CFStringRef)RevenantCITTTypePNG error:error];
 }
 
 - (BOOL)writeTIFFRepresentationOfImage:(CIImage *)image
@@ -125,8 +125,8 @@ static BOOL CharonCIEncodedFormat(CIFormat format, CFStringRef *type, CIFormat *
                               options:(NSDictionary *)options
                                 error:(NSError **)error
 {
-    return [self charon_writeRepresentationOfImage:image toURL:url format:format colorSpace:colorSpace
-                                               type:(__bridge CFStringRef)CharonCITTTypeTIFF error:error];
+    return [self revenant_writeRepresentationOfImage:image toURL:url format:format colorSpace:colorSpace
+                                               type:(__bridge CFStringRef)RevenantCITTTypeTIFF error:error];
 }
 
 - (BOOL)writeJPEGRepresentationOfImage:(CIImage *)image
@@ -135,18 +135,18 @@ static BOOL CharonCIEncodedFormat(CIFormat format, CFStringRef *type, CIFormat *
                               options:(NSDictionary *)options
                                 error:(NSError **)error
 {
-    return [self charon_writeRepresentationOfImage:image toURL:url format:kCIFormatRGBAf colorSpace:colorSpace
-                                               type:(__bridge CFStringRef)CharonCITTTypeJPEG error:error];
+    return [self revenant_writeRepresentationOfImage:image toURL:url format:kCIFormatRGBAf colorSpace:colorSpace
+                                               type:(__bridge CFStringRef)RevenantCITTTypeJPEG error:error];
 }
 
-- (BOOL)charon_writeRepresentationOfImage:(CIImage *)image
+- (BOOL)revenant_writeRepresentationOfImage:(CIImage *)image
                                    toURL:(NSURL *)url
                                   format:(CIFormat)format
                               colorSpace:(CGColorSpaceRef)colorSpace
                                     type:(CFStringRef)type
                                    error:(NSError **)error
 {
-    NSData *data = [self charon_representationOfImage:image format:format colorSpace:colorSpace type:type];
+    NSData *data = [self revenant_representationOfImage:image format:format colorSpace:colorSpace type:type];
     if (!data) {
         if (error)
             *error = [NSError errorWithDomain:@"kCIErrorDomain" code:-1 userInfo:nil];

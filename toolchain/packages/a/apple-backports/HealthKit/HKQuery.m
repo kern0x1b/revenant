@@ -1,8 +1,8 @@
 #import <HealthKit/HealthKit.h>
 
-#import "CharonHKStore.h"
+#import "RevenantHKStore.h"
 
-static NSString *CharonHKOperatorSpelling(NSPredicateOperatorType type)
+static NSString *RevenantHKOperatorSpelling(NSPredicateOperatorType type)
 {
     switch (type) {
     case NSEqualToPredicateOperatorType:
@@ -23,14 +23,14 @@ static NSString *CharonHKOperatorSpelling(NSPredicateOperatorType type)
     }
 }
 
-@interface HKQuery (CharonHKRunnable) <CharonHKRunnableQuery>
+@interface HKQuery (RevenantHKRunnable) <RevenantHKRunnableQuery>
 @end
 
 @implementation HKQuery {
     HKObjectType *_objectType;
     NSPredicate *_predicate;
-    dispatch_queue_t _charonQueue;
-    BOOL _charonExecuted;
+    dispatch_queue_t _revenantQueue;
+    BOOL _revenantExecuted;
 }
 
 + (BOOL)supportsSecureCoding
@@ -53,12 +53,12 @@ static NSString *CharonHKOperatorSpelling(NSPredicateOperatorType type)
     return _predicate;
 }
 
-- (void)charon_setPredicate:(nullable NSPredicate *)predicate
+- (void)revenant_setPredicate:(nullable NSPredicate *)predicate
 {
     _predicate = predicate;
 }
 
-- (instancetype)initWithCharonObjectType:(nullable HKObjectType *)objectType
+- (instancetype)initWithRevenantObjectType:(nullable HKObjectType *)objectType
 {
     self = [super init];
     if (self)
@@ -66,37 +66,37 @@ static NSString *CharonHKOperatorSpelling(NSPredicateOperatorType type)
     return self;
 }
 
-- (instancetype)initWithCharonSampleType:(nullable HKSampleType *)sampleType
+- (instancetype)initWithRevenantSampleType:(nullable HKSampleType *)sampleType
 {
-    return [self initWithCharonObjectType:sampleType];
+    return [self initWithRevenantObjectType:sampleType];
 }
 
-- (void)charon_perform:(dispatch_block_t)block
+- (void)revenant_perform:(dispatch_block_t)block
 {
-    dispatch_async(_charonQueue ?: dispatch_get_main_queue(), block);
+    dispatch_async(_revenantQueue ?: dispatch_get_main_queue(), block);
 }
 
-- (void)charon_setQueue:(dispatch_queue_t)queue
+- (void)revenant_setQueue:(dispatch_queue_t)queue
 {
-    _charonQueue = queue;
+    _revenantQueue = queue;
 }
 
-- (void)charon_setHasBeenExecuted:(BOOL)executed
+- (void)revenant_setHasBeenExecuted:(BOOL)executed
 {
-    _charonExecuted = executed;
+    _revenantExecuted = executed;
 }
 
-- (BOOL)charon_hasBeenExecuted
+- (BOOL)revenant_hasBeenExecuted
 {
-    return _charonExecuted;
+    return _revenantExecuted;
 }
 
-- (nullable NSPredicate *)charon_predicate
+- (nullable NSPredicate *)revenant_predicate
 {
     return _predicate;
 }
 
-- (nullable HKObjectType *)charon_objectType
+- (nullable HKObjectType *)revenant_objectType
 {
     return _objectType;
 }
@@ -146,7 +146,7 @@ static NSString *CharonHKOperatorSpelling(NSPredicateOperatorType type)
     if (!key)
         return nil;
     return [NSPredicate predicateWithFormat:@"%K.%K %@ %@", HKPredicateKeyPathMetadata, key,
-                                         CharonHKOperatorSpelling(type), value];
+                                         RevenantHKOperatorSpelling(type), value];
 }
 
 + (NSPredicate *)predicateForObjectsWithNoCorrelation
@@ -166,13 +166,13 @@ static NSString *CharonHKOperatorSpelling(NSPredicateOperatorType type)
     if (!quantity)
         return nil;
     return [NSPredicate predicateWithFormat:@"%K %@ %@", HKPredicateKeyPathQuantity,
-                                         CharonHKOperatorSpelling(type), quantity];
+                                         RevenantHKOperatorSpelling(type), quantity];
 }
 
 + (NSPredicate *)predicateForCategorySamplesWithOperatorType:(NSPredicateOperatorType)type value:(NSInteger)value
 {
     return [NSPredicate predicateWithFormat:@"%K %@ %d", HKPredicateKeyPathCategoryValue,
-                                         CharonHKOperatorSpelling(type), (int)value];
+                                         RevenantHKOperatorSpelling(type), (int)value];
 }
 
 + (NSPredicate *)predicateForCategorySamplesEqualToValues:(NSSet<NSNumber *> *)values
@@ -206,7 +206,7 @@ static NSString *CharonHKOperatorSpelling(NSPredicateOperatorType type)
 + (NSPredicate *)predicateForWorkoutsWithOperatorType:(NSPredicateOperatorType)type duration:(NSTimeInterval)duration
 {
     return [NSPredicate predicateWithFormat:@"%K %@ %f", HKPredicateKeyPathWorkoutDuration,
-                                         CharonHKOperatorSpelling(type), duration];
+                                         RevenantHKOperatorSpelling(type), duration];
 }
 
 + (NSPredicate *)predicateForWorkoutsWithOperatorType:(NSPredicateOperatorType)type totalDistance:(HKQuantity *)distance
@@ -214,7 +214,7 @@ static NSString *CharonHKOperatorSpelling(NSPredicateOperatorType type)
     if (!distance)
         return nil;
     return [NSPredicate predicateWithFormat:@"%K %@ %@", HKPredicateKeyPathWorkoutTotalDistance,
-                                         CharonHKOperatorSpelling(type), distance];
+                                         RevenantHKOperatorSpelling(type), distance];
 }
 
 + (NSPredicate *)predicateForWorkoutsWithOperatorType:(NSPredicateOperatorType)type totalEnergyBurned:(HKQuantity *)energy
@@ -222,20 +222,20 @@ static NSString *CharonHKOperatorSpelling(NSPredicateOperatorType type)
     if (!energy)
         return nil;
     return [NSPredicate predicateWithFormat:@"%K %@ %@", HKPredicateKeyPathWorkoutTotalEnergyBurned,
-                                         CharonHKOperatorSpelling(type), energy];
+                                         RevenantHKOperatorSpelling(type), energy];
 }
 
-- (void)charon_run
+- (void)revenant_run
 {
     [NSException raise:NSInvalidArgumentException
                 format:@"An %@ is a request and not a query: execute one of its subclasses.", NSStringFromClass(self.class)];
 }
 
-- (void)charon_stop
+- (void)revenant_stop
 {
 }
 
 @end
 
-@implementation HKQuery (CharonHKRunnable)
+@implementation HKQuery (RevenantHKRunnable)
 @end

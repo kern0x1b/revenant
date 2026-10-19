@@ -91,7 +91,7 @@ static NSString *environment_style(void)
 {
     if (flavor == [UITraitCollection class])
         return style_of([UIScreen mainScreen].traitCollection);
-    SEL built = @selector(charon_traitCollectionForScreen:);
+    SEL built = @selector(revenant_traitCollectionForScreen:);
     if (![flavor respondsToSelector:built])
         return @"the port builds no collection for a screen";
     UITraitCollection *screen = ((id (*)(Class, SEL, UIScreen *))objc_msgSend)(flavor, built, [UIScreen mainScreen]);
@@ -106,7 +106,7 @@ int main(void)
         script(system);
         NSString *systemScreen = environment_style();
 
-        Class ported = NSClassFromString(@"CharonHostUITraitCollection");
+        Class ported = NSClassFromString(@"RevenantHostUITraitCollection");
         BOOL carried = ported != Nil
             && [ported respondsToSelector:@selector(traitCollectionWithUserInterfaceStyle:)]
             && [ported instancesRespondToSelector:@selector(userInterfaceStyle)];
@@ -115,18 +115,18 @@ int main(void)
             flavor = ported;
             script(ours);
             NSString *ourScreen = environment_style();
-            charon_check([ourScreen isEqual:systemScreen], "the collection a screen is given carries the style",
+            revenant_check([ourScreen isEqual:systemScreen], "the collection a screen is given carries the style",
                          [NSString stringWithFormat:@"%@ != %@", ourScreen, systemScreen]);
         }
         for (NSUInteger index = 0; index < system.count; index++) {
             NSArray *mine = index < ours.count ? ours[index] : nil;
             NSString *expected = system[index][1], *actual = mine ? mine[1] : @"nothing";
             printf("  %s: %s\n", [system[index][0] UTF8String], expected.UTF8String);
-            charon_check([expected isEqual:actual], [system[index][0] UTF8String],
+            revenant_check([expected isEqual:actual], [system[index][0] UTF8String],
                          [NSString stringWithFormat:@"%@ != %@", actual, expected]);
         }
         printf("  a screen: %s\n", systemScreen.UTF8String);
     }
-    printf("checks=%d failures=%d\n", charon_checks, charon_failures);
-    return charon_failures;
+    printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
+    return revenant_failures;
 }

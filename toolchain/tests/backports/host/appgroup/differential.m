@@ -18,7 +18,7 @@ int main(void)
         NSMutableString *header = [NSMutableString stringWithString:@"static const char *const appgroup_expectations[] = {\n"];
         for (NSString *identifier in APPGROUP_IDENTIFIERS) {
             NSString *system = appgroup_relative([manager containerURLForSecurityApplicationGroupIdentifier:identifier], realHome);
-            NSURL *ours = ((NSURL * (*)(id, SEL, id))objc_msgSend)(manager, NSSelectorFromString(@"charonHost_containerURLForSecurityApplicationGroupIdentifier:"), identifier);
+            NSURL *ours = ((NSURL * (*)(id, SEL, id))objc_msgSend)(manager, NSSelectorFromString(@"revenantHost_containerURLForSecurityApplicationGroupIdentifier:"), identifier);
             NSString *answer = appgroup_relative(ours, home);
             checks++;
             if ([system isEqual:answer]) {

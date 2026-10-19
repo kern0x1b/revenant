@@ -10,7 +10,7 @@
 #include <cstdint>
 #include <string_view>
 
-namespace shade {
+namespace emulator {
 
 inline constexpr std::string_view ringer_switch_notification_name {
     "com.apple.system.ringerstate"

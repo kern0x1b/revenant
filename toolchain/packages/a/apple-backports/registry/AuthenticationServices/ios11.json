@@ -160,7 +160,7 @@
       "introduced": "13.0",
       "minimum": "6.0",
       "status": "implemented",
-      "effect": "the base every request in this framework is: -provider, -copyWithZone:, -encodeWithCoder: and -initWithCoder:, and a -init that leaves a request with no provider, which is the state the release's own -init leaves it in. The release marks -init and +new unavailable, so the port's construction is -charon_initWithProvider: carrying objc_method_family(init), declared in CharonASConstruction.h",
+      "effect": "the base every request in this framework is: -provider, -copyWithZone:, -encodeWithCoder: and -initWithCoder:, and a -init that leaves a request with no provider, which is the state the release's own -init leaves it in. The release marks -init and +new unavailable, so the port's construction is -revenant_initWithProvider: carrying objc_method_family(init), declared in RevenantASConstruction.h",
       "facts": "facts/AuthenticationServices/ASAuthorizationRequest.md",
       "source": "macOS 27.0's own AuthenticationServices, dlopened and asked with class_getInstanceMethod for each member, by tests/backports/host/authservices; and the 26.2 header's contract"
     },

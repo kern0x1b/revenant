@@ -1,9 +1,9 @@
 #import <UIKit/UIKit.h>
 #import <objc/runtime.h>
 #import <stdlib.h>
-#import "CharonMenus.h"
+#import "RevenantMenus.h"
 
-@interface NSLayoutManager (CharonNative)
+@interface NSLayoutManager (RevenantNative)
 - (NSUInteger)glyphAtIndex:(NSUInteger)index;
 - (NSUInteger)glyphAtIndex:(NSUInteger)index isValidIndex:(BOOL *)valid;
 - (BOOL)notShownAttributeForGlyphAtIndex:(NSUInteger)index;
@@ -30,10 +30,10 @@ static CGRect used_rect_for_container(NSLayoutManager *self, SEL selector, NSTex
     return native_used_rect(self, selector, container);
 }
 
-@interface CharonLayoutManager7 : NSObject
+@interface RevenantLayoutManager7 : NSObject
 @end
 
-@implementation CharonLayoutManager7
+@implementation RevenantLayoutManager7
 
 + (void)load
 {
@@ -48,7 +48,7 @@ static CGRect used_rect_for_container(NSLayoutManager *self, SEL selector, NSTex
 
 @end
 
-@implementation NSLayoutManager (CharonText7)
+@implementation NSLayoutManager (RevenantText7)
 
 - (CGGlyph)CGGlyphAtIndex:(NSUInteger)index
 {
@@ -99,7 +99,7 @@ static CGRect used_rect_for_container(NSLayoutManager *self, SEL selector, NSTex
         NSDictionary *attributes = [self.textStorage attributesAtIndex:characterIndexes[0] effectiveRange:NULL];
         UIFont *attributeFont = attributes[NSFontAttributeName];
         if (attributeFont && (![attributeFont.fontName isEqualToString:aFont.fontName] || attributeFont.pointSize != aFont.pointSize))
-            charon_menus_say_once(@"glyph-font-substitution", @"-[NSLayoutManager setGlyphs:properties:characterIndexes:font:forGlyphRange:] "
+            revenant_menus_say_once(@"glyph-font-substitution", @"-[NSLayoutManager setGlyphs:properties:characterIndexes:font:forGlyphRange:] "
                 @"was given a font that differs from the character's own font attribute (a substitution, e.g. font fallback); "
                 @"the glyphs are stored, but nothing in this port measures or draws glyphs against a per-glyph substituted font yet, "
                 @"so metrics and drawing use the character's own attribute, not the font this call named");

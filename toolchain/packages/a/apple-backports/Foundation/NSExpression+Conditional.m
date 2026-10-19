@@ -1,10 +1,10 @@
 #import <Foundation/Foundation.h>
 
-@interface NSExpression (CharonTernary)
+@interface NSExpression (RevenantTernary)
 + (NSExpression *)expressionForTernaryWithPredicate:(NSPredicate *)predicate trueExpression:(NSExpression *)trueExpression falseExpression:(NSExpression *)falseExpression;
 @end
 
-@implementation NSExpression (CharonConditional)
+@implementation NSExpression (RevenantConditional)
 
 + (NSExpression *)expressionForConditional:(NSPredicate *)predicate trueExpression:(NSExpression *)trueExpression falseExpression:(NSExpression *)falseExpression
 {

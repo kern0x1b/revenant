@@ -67,7 +67,7 @@
 
 @end
 
-@implementation UIResponder (CharonPresses)
+@implementation UIResponder (RevenantPresses)
 
 - (void)pressesBegan:(NSSet<UIPress *> *)presses withEvent:(UIPressesEvent *)event
 {

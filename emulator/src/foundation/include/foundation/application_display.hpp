@@ -15,7 +15,7 @@
 
 #include "foundation/display_geometry.hpp"
 
-namespace shade {
+namespace emulator {
 
 enum class ApplicationDisplayMode : std::uint8_t {
     Native,

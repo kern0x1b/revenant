@@ -16,7 +16,7 @@
 #include "foundation/output.hpp"
 #include "kernel/kernel.hpp"
 
-namespace shade::runtime_detail {
+namespace emulator::runtime_detail {
 
 SessionCatalog::SessionCatalog(std::filesystem::path rootfs,
     ArmArchitectureVersion architecture, std::string manifest, Output& output)

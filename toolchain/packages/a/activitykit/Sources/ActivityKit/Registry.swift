@@ -1,12 +1,12 @@
 import Foundation
 
-public protocol CharonRegisteredActivity {
+public protocol RevenantRegisteredActivity {
     var id: String { get }
-    var charonActivityState: ActivityState { get }
+    var revenantActivityState: ActivityState { get }
 }
 
-public final class CharonActivityRegistry {
-    public static let shared = CharonActivityRegistry()
+public final class RevenantActivityRegistry {
+    public static let shared = RevenantActivityRegistry()
 
     private struct Entry {
         let id: String
@@ -43,7 +43,7 @@ public final class CharonActivityRegistry {
         return activity
     }
 
-    func setStyle(_ style: ActivityStyle, for activity: CharonRegisteredActivity) {
+    func setStyle(_ style: ActivityStyle, for activity: RevenantRegisteredActivity) {
         lock.lock()
         if let index = entries.firstIndex(where: { $0.id == activity.id }) {
             entries[index].style = style
@@ -51,7 +51,7 @@ public final class CharonActivityRegistry {
         lock.unlock()
     }
 
-    func setAlert(_ configuration: AlertConfiguration, starting start: Date, for activity: CharonRegisteredActivity) {
+    func setAlert(_ configuration: AlertConfiguration, starting start: Date, for activity: RevenantRegisteredActivity) {
         lock.lock()
         if let index = entries.firstIndex(where: { $0.id == activity.id }) {
             entries[index].alert = (configuration, start)
@@ -59,15 +59,15 @@ public final class CharonActivityRegistry {
         lock.unlock()
     }
 
-    func didUpdate(activity: CharonRegisteredActivity) {
+    func didUpdate(activity: RevenantRegisteredActivity) {
         lock.lock()
         if let index = entries.firstIndex(where: { $0.id == activity.id }) {
-            entries[index].state = activity.charonActivityState
+            entries[index].state = activity.revenantActivityState
         }
         lock.unlock()
     }
 
-    func didPush(_ activity: CharonRegisteredActivity, at date: Date) {
+    func didPush(_ activity: RevenantRegisteredActivity, at date: Date) {
         lock.lock()
         if let index = entries.firstIndex(where: { $0.id == activity.id }) {
             entries[index].endedAt = entries[index].endedAt ?? date
@@ -75,7 +75,7 @@ public final class CharonActivityRegistry {
         lock.unlock()
     }
 
-    func didEnd(activity: CharonRegisteredActivity, dismissalPolicy: ActivityUIDismissalPolicy,
+    func didEnd(activity: RevenantRegisteredActivity, dismissalPolicy: ActivityUIDismissalPolicy,
                 at date: Date? = nil) {
         lock.lock()
         if let index = entries.firstIndex(where: { $0.id == activity.id }) {

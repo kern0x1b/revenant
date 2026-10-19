@@ -1,4 +1,4 @@
-#import "CharonMenus.h"
+#import "RevenantMenus.h"
 
 @implementation UIPreviewTarget {
 @private
@@ -11,9 +11,9 @@
 {
     if (!container)
         [NSException raise:NSInternalInconsistencyException format:@"The preview target must have a valid container."];
-    if (!charon_window_of(container))
+    if (!revenant_window_of(container))
         [NSException raise:NSInternalInconsistencyException format:@"UIPreviewTarget requires that the container view is in a window, but it is not. (container: %@)",
-                                                                   charon_short_description(container)];
+                                                                   revenant_short_description(container)];
     if ((self = [super init])) {
         _container = container;
         _center = center;
@@ -65,7 +65,7 @@
 - (NSString *)description
 {
     NSMutableString *text = [NSMutableString stringWithFormat:@"<%@: %p; container = %@; center = (%g %g)", [self class], self,
-                                                              charon_short_description(_container), (double)_center.x, (double)_center.y];
+                                                              revenant_short_description(_container), (double)_center.x, (double)_center.y];
     if (!CGAffineTransformIsIdentity(_transform))
         [text appendFormat:@"; transform = %@", NSStringFromCGAffineTransform(_transform)];
     [text appendString:@">"];

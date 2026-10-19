@@ -57,36 +57,36 @@ text = open(path).read()
 MUTATIONS = {
     # the pass the writer's -startWriting begins. Read by every "currentPassDescription after startWriting"
     # row, which the port answers {0/1,0/0} and the host answers too.
-    "beginpass": ("            for (AVAssetWriterInput *each in self_.inputs)\n                charon_begin_pass(each);",
+    "beginpass": ("            for (AVAssetWriterInput *each in self_.inputs)\n                revenant_begin_pass(each);",
                   "            for (AVAssetWriterInput *each in self_.inputs)\n                (void)each;"),
     # the time range of that pass: zero to POSITIVE INFINITY, which is what both halves print.
     "ranges": ("CMTimeRangeMake(kCMTimeZero, kCMTimePositiveInfinity)",
                "CMTimeRangeMake(kCMTimeZero, kCMTimeZero)"),
     # the final invocation of the block after the pass ends. Read by "block calls after
     # markCurrentPassAsFinished", which is 2 on both sides.
-    "finalcall": ("""    dispatch_queue_t queue = objc_getAssociatedObject(self, &charon_multipass_queue);
+    "finalcall": ("""    dispatch_queue_t queue = objc_getAssociatedObject(self, &revenant_multipass_queue);
     if (queue) {
         dispatch_async(queue, ^{
-            charon_invoke_pass_callback(self);
+            revenant_invoke_pass_callback(self);
         });
     }""", "    (void)0;"),
     # THE LEFTOVER'S DEFECT. -markCurrentPassAsFinished forwarding to the release's -markAsFinished
     # finishes the input a second time; read by "markCurrentPassAsFinished called markAsFinished itself",
     # which is NO on both sides.
-    "forward": ("""    charon_end_pass(self);
-    dispatch_queue_t queue""", """    charon_end_pass(self);
+    "forward": ("""    revenant_end_pass(self);
+    dispatch_queue_t queue""", """    revenant_end_pass(self);
     [self markAsFinished];
     dispatch_queue_t queue"""),
     # the setter's own precondition: "This property cannot be set after writing on the receiver's
     # AVAssetWriter has started". Read by "performsMultiPassEncodingIfSupported set YES after
     # startWriting", which RAISES on both sides.
-    "setafter": ("""    if (objc_getAssociatedObject(self, &charon_multipass_writing))
-        charon_raise(@"-[AVAssetWriterInput setPerformsMultiPassEncodingIfSupported:] cannot be called after the input's asset writer has started writing");""",
+    "setafter": ("""    if (objc_getAssociatedObject(self, &revenant_multipass_writing))
+        revenant_raise(@"-[AVAssetWriterInput setPerformsMultiPassEncodingIfSupported:] cannot be called after the input's asset writer has started writing");""",
                  "    (void)0;"),
     # the export's own precondition, same sentence for the export session. Read by
     # "canPerformMultiplePassesOverSourceMediaData set YES after the export started", which RAISES.
-    "exportafter": ("""    if (objc_getAssociatedObject(self, &charon_export_started))
-        charon_raise(@"-[AVAssetExportSession setCanPerformMultiplePassesOverSourceMediaData:] cannot be called after the export has started");""",
+    "exportafter": ("""    if (objc_getAssociatedObject(self, &revenant_export_started))
+        revenant_raise(@"-[AVAssetExportSession setCanPerformMultiplePassesOverSourceMediaData:] cannot be called after the export has started");""",
                     "    (void)0;"),
 }
 before, after = MUTATIONS[which]

@@ -284,7 +284,7 @@
       "status": "implemented",
       "facts": "facts/Intents/Intents.md",
       "source": "the header of iPhoneOS 16.4 for the contract, and the armv7 release caches for the release each object file is carried from (tools/intents/measure-intents.lua)",
-      "reason": "behaviour that is more than the class's own storage, written by hand in packages/a/apple-backports/Intents/CharonIntents100.m",
+      "reason": "behaviour that is more than the class's own storage, written by hand in packages/a/apple-backports/Intents/RevenantIntents100.m",
       "effect": "the class carries nothing but NSObject's, as its own surface is empty; the one requirement it inherits from INIntentHandlerProviding, handlerForIntent:, answers the instance of the loaded class that conforms to the intent's own handling protocol and responds to -handleIntent:, and answers nil where there is none, which is what a release with no assistant daemon to launch an extension has to say"
     },
     {
@@ -449,7 +449,7 @@
       "status": "implemented",
       "facts": "facts/Intents/Intents.md",
       "source": "the header of iPhoneOS 16.4 for the contract, and the armv7 release caches for the release each object file is carried from (tools/intents/measure-intents.lua)",
-      "reason": "behaviour that is more than the class's own storage, written by hand in packages/a/apple-backports/Intents/CharonIntents100.m",
+      "reason": "behaviour that is more than the class's own storage, written by hand in packages/a/apple-backports/Intents/RevenantIntents100.m",
       "effect": "imageNamed: resolves the name in the app's own asset catalogue through UIKit and carries the image's data, and answers no image for a name the app has none of; systemImageNamed: answers no image, because the system images are SF Symbols and this release has no set of them; imageWithImageData: carries the data it is given; imageWithURL: and imageWithURL:width:height: read the URL and carry what it holds, with the size when one is given; the data, the name and the size are carried by the coding and the copy"
     },
     {
@@ -471,7 +471,7 @@
       "status": "implemented",
       "facts": "facts/Intents/Intents.md",
       "source": "the header of iPhoneOS 16.4 for the contract, and the armv7 release caches for the release each object file is carried from (tools/intents/measure-intents.lua)",
-      "reason": "behaviour that is more than the class's own storage, written by hand in packages/a/apple-backports/Intents/CharonIntents100.m",
+      "reason": "behaviour that is more than the class's own storage, written by hand in packages/a/apple-backports/Intents/RevenantIntents100.m",
       "effect": "init makes a UUID string identifier, which is the key the interaction store of this port keeps a donation under and the value the system writes itself at donation time; intentDescription is the class's own words with the framework's IN prefix and Intent suffix off, computed once and kept, since the SDK does not document how the framework derives it; setImage:forParameterNamed: and imageForParameterNamed: keep a real map of the intent's images by parameter name and keyImage returns the first parameter that has one, in parameter name order so the answer is the same on every call; the coding and copying walk the whole ivar chain, so a subclass keeps the identifier, the description and the images its parent has; donationMetadata is not answered and says so in its own entry"
     },
     {
@@ -482,8 +482,8 @@
       "status": "implemented",
       "facts": "facts/Intents/Intents.md",
       "source": "the header of iPhoneOS 16.4 for the contract, and the armv7 release caches for the release each object file is carried from (tools/intents/measure-intents.lua)",
-      "reason": "behaviour that is more than the class's own storage, written by hand in packages/a/apple-backports/Intents/CharonIntents100.m",
-      "effect": "needsValue, notRequired and unsupported each answer a new result of the class that was asked, carrying the status the name says; the three answers a typed resolution result is built from - a resolved value, values to disambiguate, a value to confirm - are read back through the four accessors of CharonIntentsResolution.h, which is where a port reads what it resolved, because on a release with Siri the system is the reader"
+      "reason": "behaviour that is more than the class's own storage, written by hand in packages/a/apple-backports/Intents/RevenantIntents100.m",
+      "effect": "needsValue, notRequired and unsupported each answer a new result of the class that was asked, carrying the status the name says; the three answers a typed resolution result is built from - a resolved value, values to disambiguate, a value to confirm - are read back through the four accessors of RevenantIntentsResolution.h, which is where a port reads what it resolved, because on a release with Siri the system is the reader"
     },
     {
       "api": "INIntentResponse",
@@ -504,8 +504,8 @@
       "status": "implemented",
       "facts": "facts/Intents/Intents.md",
       "source": "the header of iPhoneOS 16.4 for the contract, and the armv7 release caches for the release each object file is carried from (tools/intents/measure-intents.lua)",
-      "reason": "behaviour that is more than the class's own storage, written by hand in packages/a/apple-backports/Intents/CharonIntents100.m",
-      "effect": "initWithIntent:response: copies the intent and the response and makes a UUID string identifier, and the direction is outgoing; donateInteractionWithCompletion: stamps the date interval with the moment of the donation, archives the interaction into this application's own store under Application Support and calls the handler with nil, or with the error the write failed with; the three deletion methods remove by identifier, by group identifier and all of them, and say so the same way; the two charon_interactions accessors read the store back, newest last"
+      "reason": "behaviour that is more than the class's own storage, written by hand in packages/a/apple-backports/Intents/RevenantIntents100.m",
+      "effect": "initWithIntent:response: copies the intent and the response and makes a UUID string identifier, and the direction is outgoing; donateInteractionWithCompletion: stamps the date interval with the moment of the donation, archives the interaction into this application's own store under Application Support and calls the handler with nil, or with the error the write failed with; the three deletion methods remove by identifier, by group identifier and all of them, and say so the same way; the two revenant_interactions accessors read the store back, newest last"
     },
     {
       "api": "INListRideOptionsIntent",
@@ -658,7 +658,7 @@
       "status": "implemented",
       "facts": "facts/Intents/Intents.md",
       "source": "the header of iPhoneOS 16.4 for the contract, and the armv7 release caches for the release each object file is carried from (tools/intents/measure-intents.lua)",
-      "reason": "behaviour that is more than the class's own storage, written by hand in packages/a/apple-backports/Intents/CharonIntents100.m",
+      "reason": "behaviour that is more than the class's own storage, written by hand in packages/a/apple-backports/Intents/RevenantIntents100.m",
       "effect": "the initialiser keeps the type, the name, the identification hint and the icon, copying each of the three objects; applePayPaymentMethod is the one object of that kind for the whole process, of the type the header gives and with no name, hint or icon of its own, because this release has no image of it and no name for it"
     },
     {
@@ -735,7 +735,7 @@
       "status": "implemented",
       "facts": "facts/Intents/Intents.md",
       "source": "the header of iPhoneOS 16.4 for the contract, and the armv7 release caches for the release each object file is carried from (tools/intents/measure-intents.lua)",
-      "reason": "behaviour that is more than the class's own storage, written by hand in packages/a/apple-backports/Intents/CharonIntents100.m",
+      "reason": "behaviour that is more than the class's own storage, written by hand in packages/a/apple-backports/Intents/RevenantIntents100.m",
       "effect": "siriAuthorizationStatus answers INSiriAuthorizationStatusRestricted, which is the header's own wording for a system where Siri services are restricted and the user cannot change the answer; requestSiriAuthorization: answers the handler with that same status instead of waiting for a prompt this release cannot show, and does nothing for a handler of nil; siriLanguageCode answers the language the release itself is set to, which is the one a voice would use, since this release has no Siri setting to read"
     },
     {
@@ -944,7 +944,7 @@
       "status": "implemented",
       "facts": "facts/Intents/Intents.md",
       "source": "the header of iPhoneOS 16.4 for the contract, and the armv7 release caches for the release each object file is carried from (tools/intents/measure-intents.lua)",
-      "reason": "behaviour that is more than the class's own storage, written by hand in packages/a/apple-backports/Intents/CharonIntents100.m",
+      "reason": "behaviour that is more than the class's own storage, written by hand in packages/a/apple-backports/Intents/RevenantIntents100.m",
       "effect": "the six factory methods answer a real status: completed is completed and not outstanding, the two with a payment amount carry it, the one with a feedback type is outstanding and carries the type, canceled by service and canceled by the user are both canceled and neither missed the pickup, and canceledMissedPickup is canceled and missed it; the five derived answers - isCompleted, isCanceled, isMissedPickup, isOutstanding, paymentAmount and feedbackType - are computed from that state, and completionUserActivity and defaultTippingOptions are kept"
     },
     {
@@ -1351,7 +1351,7 @@
       "status": "implemented",
       "facts": "facts/Intents/Intents.md",
       "source": "the header of iPhoneOS 16.4 for the contract, and the armv7 release caches for the release each object file is carried from (tools/intents/measure-intents.lua)",
-      "reason": "behaviour that is more than the class's own storage, written by hand in packages/a/apple-backports/Intents/CharonIntents100.m",
+      "reason": "behaviour that is more than the class's own storage, written by hand in packages/a/apple-backports/Intents/RevenantIntents100.m",
       "effect": "the three initialisers keep the phrase, the pronunciation hint and the vocabulary identifier they are given, copying each; the deprecated initWithIdentifier: keeps the identifier as well and the identifier accessor answers the vocabulary identifier, which is what the header's own deprecation message says it should be used for; initWithSpokenPhrase: keeps the phrase alone and invents no vocabulary identifier for it; INSpeakable's own properties are carried and read"
     },
     {
@@ -1494,8 +1494,8 @@
       "status": "implemented",
       "facts": "facts/Intents/Intents.md",
       "source": "the header of iPhoneOS 16.4 for the contract, and the armv7 release caches for the release each object file is carried from (tools/intents/measure-intents.lua)",
-      "reason": "behaviour that is more than the class's own storage, written by hand in packages/a/apple-backports/Intents/CharonIntents100.m",
-      "effect": "sharedVocabulary is one instance for the process; setVocabularyStrings:ofType: replaces the phrases of that type in this application's own store, in the order they were offered; setVocabulary:ofType: keeps the spoken phrase of each speakable value it is given; removeAllVocabularyStrings empties the store; charon_vocabularyStringsOfType: reads a type back, which is where a port reads what it offered, because on a release with Siri the system is the reader"
+      "reason": "behaviour that is more than the class's own storage, written by hand in packages/a/apple-backports/Intents/RevenantIntents100.m",
+      "effect": "sharedVocabulary is one instance for the process; setVocabularyStrings:ofType: replaces the phrases of that type in this application's own store, in the order they were offered; setVocabulary:ofType: keeps the spoken phrase of each speakable value it is given; removeAllVocabularyStrings empties the store; revenant_vocabularyStringsOfType: reads a type back, which is where a port reads what it offered, because on a release with Siri the system is the reader"
     },
     {
       "api": "INWorkoutGoalUnitTypeResolutionResult",
@@ -1980,24 +1980,24 @@
       "source": "the header of iPhoneOS 16.4 for the contract, and the armv7 release caches for the release each object file is carried from (tools/intents/measure-intents.lua)"
     },
     {
-      "api": "-[INImage charon_imageData]",
+      "api": "-[INImage revenant_imageData]",
       "kind": "method",
       "introduced": "10.0",
       "minimum": "6.0",
       "status": "implemented",
       "reason": "a name no SDK header declares: the bytes an image carries, which IntentsUI's category on INImage (INImage+IntentsUI100.m, INImage+IntentsUI110.m) encodes, decodes and hands back, and an application never calls",
       "facts": "facts/IntentsUI/IntentsUI.md",
-      "source": "the port's own INImage, which keeps the bytes the factories give it (Intents/CharonIntents100.m)"
+      "source": "the port's own INImage, which keeps the bytes the factories give it (Intents/RevenantIntents100.m)"
     },
     {
-      "api": "+[INImage charon_imageWithName:data:width:height:]",
+      "api": "+[INImage revenant_imageWithName:data:width:height:]",
       "kind": "method",
       "introduced": "10.0",
       "minimum": "6.0",
       "status": "implemented",
       "reason": "a name no SDK header declares: the constructor that keeps the bytes it is given, nil included, which IntentsUI's category on INImage uses for the factories whose images may hold no bytes, and an application never calls",
       "facts": "facts/IntentsUI/IntentsUI.md",
-      "source": "the port's own INImage, which keeps the bytes the factories give it (Intents/CharonIntents100.m)"
+      "source": "the port's own INImage, which keeps the bytes the factories give it (Intents/RevenantIntents100.m)"
     },
     {
       "api": "+[INImage systemImageNamed:]",
@@ -2006,7 +2006,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "reason": "the port answers the names +[UIImage systemImageNamed:] answers, through the one symbol table of the UIKit band, and nil for the rest; the host's own INImage answers an image for any non-empty name, which the port does not (facts/Intents/Intents.md, \"+[INImage systemImageNamed:]\"); tests/backports/host/intents-symbol compares the port's INImage with the host's UIImage name by name over 551 names, and a planted port is red",
-      "source": "tests/backports/host/intents-symbol (the host UIImage as the oracle, the port's CharonIntents100.m built with renamed classes) and tests/backports/host/uikit2 (the symbols group, for the table)",
+      "source": "tests/backports/host/intents-symbol (the host UIImage as the oracle, the port's RevenantIntents100.m built with renamed classes) and tests/backports/host/uikit2 (the symbols group, for the table)",
       "facts": "facts/Intents/Intents.md"
     },
     {
@@ -2966,7 +2966,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "reason": "the port's category on INDateComponentsRange answers what the host answers, measured on Catalyst and macOS by tests/backports/host/intents-ek: the frequency is mapped and the interval kept, the first day of the rule's days is kept as the start weekday and week number, a range with no weekday raises from EventKit as the host does, a nil rule is a daily rule of interval 0, and minute and hourly rules answer nil",
-      "source": "tests/backports/host/intents-ek (golden expected.txt, macOS and Catalyst agree; the port's CharonIntents100.m against the Catalyst host, with a planted port red) and the EventKit framework the library now links",
+      "source": "tests/backports/host/intents-ek (golden expected.txt, macOS and Catalyst agree; the port's RevenantIntents100.m against the Catalyst host, with a planted port red) and the EventKit framework the library now links",
       "facts": "facts/Intents/Intents.md"
     },
     {
@@ -2976,7 +2976,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "reason": "the port's category on INDateComponentsRange answers what the host answers, measured on Catalyst and macOS by tests/backports/host/intents-ek: the frequency is mapped and the interval kept, the first day of the rule's days is kept as the start weekday and week number, a range with no weekday raises from EventKit as the host does, a nil rule is a daily rule of interval 0, and minute and hourly rules answer nil",
-      "source": "tests/backports/host/intents-ek (golden expected.txt, macOS and Catalyst agree; the port's CharonIntents100.m against the Catalyst host, with a planted port red) and the EventKit framework the library now links",
+      "source": "tests/backports/host/intents-ek (golden expected.txt, macOS and Catalyst agree; the port's RevenantIntents100.m against the Catalyst host, with a planted port red) and the EventKit framework the library now links",
       "facts": "facts/Intents/Intents.md"
     },
     {
@@ -3389,9 +3389,9 @@
       "minimum": "6.0",
       "status": "implemented",
       "facts": "facts/Intents/Intents.md",
-      "reason": "the 26.2 header's own 18.0 declaration, which the port's SDK (iPhoneOS 16.4) does not declare at all, so the contract is read from iPhoneOS 26.2 and CharonIntents180.m writes it for the class IN10_0_1.m implements: the initialiser chains to the class's own 13.2 initialiser, which keeps every value its parameters name, and stores the reaction through its own setter",
-      "source": "the contract from the header of iPhoneOS 26.2 (INMessage.h:139-149 for this initialiser); that a release answers the name is measured on the arm64e cache of iOS 18.0 and is absent from the armv7 cache of 6.1.3, by the literal selector search tools/release-split.lua names for a member no exported symbol answers - `strings -a ~/.charon/dyld/18.0/* | grep -x -c -F -e SELECTOR` reads 2 for this selector, 0 for the nonsense control charonNoSuchSelector18Probe:, and 0 on 6.1.3 for this selector and for the class's own earlier controls alike, because 6.1.3 carries no Intents; that the port's SDK lacks it is `grep -n 'sticker|reaction|referencedMessage|DESIGNATED' INMessage.h` over each of the three iPhoneOS 16.4 SDKs on this machine, which answers only the three NS_DESIGNATED_INITIALIZER lines of 11.0, 13.2 and 16.0 and no property at all. The output of all of it, with every control beside it, is in facts/Intents/Intents.md under 'INMessage of iOS 18'",
-      "effect": "a caller that builds a message with a reaction gets an object that keeps it: -reaction answers the value the setter was handed, as a copy, and the message's own values of 10.0 through 16.0 come from the class's designated initialiser this one chains to. A copy and a keyed archive of the message carry the reaction as well - CharonIntents180.m carries those three selectors because an ivar walk cannot see what a category holds beside the object"
+      "reason": "the 26.2 header's own 18.0 declaration, which the port's SDK (iPhoneOS 16.4) does not declare at all, so the contract is read from iPhoneOS 26.2 and RevenantIntents180.m writes it for the class IN10_0_1.m implements: the initialiser chains to the class's own 13.2 initialiser, which keeps every value its parameters name, and stores the reaction through its own setter",
+      "source": "the contract from the header of iPhoneOS 26.2 (INMessage.h:139-149 for this initialiser); that a release answers the name is measured on the arm64e cache of iOS 18.0 and is absent from the armv7 cache of 6.1.3, by the literal selector search tools/release-split.lua names for a member no exported symbol answers - `strings -a ~/.revenant/dyld/18.0/* | grep -x -c -F -e SELECTOR` reads 2 for this selector, 0 for the nonsense control revenantNoSuchSelector18Probe:, and 0 on 6.1.3 for this selector and for the class's own earlier controls alike, because 6.1.3 carries no Intents; that the port's SDK lacks it is `grep -n 'sticker|reaction|referencedMessage|DESIGNATED' INMessage.h` over each of the three iPhoneOS 16.4 SDKs on this machine, which answers only the three NS_DESIGNATED_INITIALIZER lines of 11.0, 13.2 and 16.0 and no property at all. The output of all of it, with every control beside it, is in facts/Intents/Intents.md under 'INMessage of iOS 18'",
+      "effect": "a caller that builds a message with a reaction gets an object that keeps it: -reaction answers the value the setter was handed, as a copy, and the message's own values of 10.0 through 16.0 come from the class's designated initialiser this one chains to. A copy and a keyed archive of the message carry the reaction as well - RevenantIntents180.m carries those three selectors because an ivar walk cannot see what a category holds beside the object"
     },
     {
       "api": "-[INMessage initWithIdentifier:conversationIdentifier:content:dateSent:sender:recipients:groupName:serviceName:messageType:referencedMessage:sticker:reaction:]",
@@ -3400,9 +3400,9 @@
       "minimum": "6.0",
       "status": "implemented",
       "facts": "facts/Intents/Intents.md",
-      "reason": "the 26.2 header's own 18.0 declaration, which the port's SDK (iPhoneOS 16.4) does not declare at all, so the contract is read from iPhoneOS 26.2 and CharonIntents180.m writes it for the class IN10_0_1.m implements: the initialiser chains to the class's own 13.2 initialiser and stores the sticker and the reaction through their own setters. The 26.2 header marks this one NS_DESIGNATED_INITIALIZER and the marking is not repeated, because this port's INMessage has the designated initialiser the 16.4 header names, the marking is a compile-time convention with no runtime effect, and a category cannot change which initialiser of a class is designated",
-      "source": "the contract from the header of iPhoneOS 26.2 (INMessage.h:167-178 for this initialiser, the doc comment above it naming all eleven parameters); that a release answers the name is measured on the arm64e cache of iOS 18.0 and is absent from the armv7 cache of 6.1.3, by the literal selector search tools/release-split.lua names for a member no exported symbol answers - `strings -a ~/.charon/dyld/18.0/* | grep -x -c -F -e SELECTOR` reads 2 for this selector, 0 for the nonsense control charonNoSuchSelector18Probe:, and 0 on 6.1.3 for this selector and for the class's own earlier controls alike, because 6.1.3 carries no Intents; that the port's SDK lacks it is `grep -n 'sticker|reaction|referencedMessage|DESIGNATED' INMessage.h` over each of the three iPhoneOS 16.4 SDKs on this machine, which answers only the three NS_DESIGNATED_INITIALIZER lines of 11.0, 13.2 and 16.0 and no property at all. The output of all of it, with every control beside it, is in facts/Intents/Intents.md under 'INMessage of iOS 18'",
-      "effect": "a caller that builds a message with a sticker and a reaction gets an object that keeps both, each readable through -sticker and -reaction as a copy of what it handed, with the message's own values of 10.0 through 16.0 from the class's designated initialiser this one chains to. The referenced message it also hands is kept, and nothing reads it back, because the header declares no accessor for it. A copy and a keyed archive carry the sticker and the reaction as well - CharonIntents180.m carries those three selectors because an ivar walk cannot see what a category holds beside the object"
+      "reason": "the 26.2 header's own 18.0 declaration, which the port's SDK (iPhoneOS 16.4) does not declare at all, so the contract is read from iPhoneOS 26.2 and RevenantIntents180.m writes it for the class IN10_0_1.m implements: the initialiser chains to the class's own 13.2 initialiser and stores the sticker and the reaction through their own setters. The 26.2 header marks this one NS_DESIGNATED_INITIALIZER and the marking is not repeated, because this port's INMessage has the designated initialiser the 16.4 header names, the marking is a compile-time convention with no runtime effect, and a category cannot change which initialiser of a class is designated",
+      "source": "the contract from the header of iPhoneOS 26.2 (INMessage.h:167-178 for this initialiser, the doc comment above it naming all eleven parameters); that a release answers the name is measured on the arm64e cache of iOS 18.0 and is absent from the armv7 cache of 6.1.3, by the literal selector search tools/release-split.lua names for a member no exported symbol answers - `strings -a ~/.revenant/dyld/18.0/* | grep -x -c -F -e SELECTOR` reads 2 for this selector, 0 for the nonsense control revenantNoSuchSelector18Probe:, and 0 on 6.1.3 for this selector and for the class's own earlier controls alike, because 6.1.3 carries no Intents; that the port's SDK lacks it is `grep -n 'sticker|reaction|referencedMessage|DESIGNATED' INMessage.h` over each of the three iPhoneOS 16.4 SDKs on this machine, which answers only the three NS_DESIGNATED_INITIALIZER lines of 11.0, 13.2 and 16.0 and no property at all. The output of all of it, with every control beside it, is in facts/Intents/Intents.md under 'INMessage of iOS 18'",
+      "effect": "a caller that builds a message with a sticker and a reaction gets an object that keeps both, each readable through -sticker and -reaction as a copy of what it handed, with the message's own values of 10.0 through 16.0 from the class's designated initialiser this one chains to. The referenced message it also hands is kept, and nothing reads it back, because the header declares no accessor for it. A copy and a keyed archive carry the sticker and the reaction as well - RevenantIntents180.m carries those three selectors because an ivar walk cannot see what a category holds beside the object"
     },
     {
       "api": "-[INMessage initWithIdentifier:conversationIdentifier:content:dateSent:sender:recipients:messageType:]",
@@ -3921,7 +3921,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "reason": "the port implements both deprecated INRideDriver initialisers in IN10_0_1.m, storing what the Catalyst runtime stores: the handle as an INPersonHandle of type Unknown even when nil, a nil displayName as the handle, and with name components a displayName of the given and family names joined by one space, the handle when that is empty; tests/backports/host/intents-ride-driver shows the port and the host agree on every line of probe.m, and a planted port that answers \"\" for a nil displayName differs",
-      "source": "tests/backports/host/intents-ride-driver for the host answer (probe.m and expected.txt) and for the port, IN10_0_1.m built with CHARON_HOST_BUILD against the Catalyst SDK and diffed by run.sh; the 16.4 header declares neither initialiser, so the runtime is the measured contract",
+      "source": "tests/backports/host/intents-ride-driver for the host answer (probe.m and expected.txt) and for the port, IN10_0_1.m built with REVENANT_HOST_BUILD against the Catalyst SDK and diffed by run.sh; the 16.4 header declares neither initialiser, so the runtime is the measured contract",
       "facts": "facts/Intents/Intents.md"
     },
     {
@@ -3931,7 +3931,7 @@
       "minimum": "6.0",
       "status": "implemented",
       "reason": "the port implements both deprecated INRideDriver initialisers in IN10_0_1.m, storing what the Catalyst runtime stores: the handle as an INPersonHandle of type Unknown even when nil, a nil displayName as the handle, and with name components a displayName of the given and family names joined by one space, the handle when that is empty; tests/backports/host/intents-ride-driver shows the port and the host agree on every line of probe.m, and a planted port that answers \"\" for a nil displayName differs",
-      "source": "tests/backports/host/intents-ride-driver for the host answer (probe.m and expected.txt) and for the port, IN10_0_1.m built with CHARON_HOST_BUILD against the Catalyst SDK and diffed by run.sh; the 16.4 header declares neither initialiser, so the runtime is the measured contract",
+      "source": "tests/backports/host/intents-ride-driver for the host answer (probe.m and expected.txt) and for the port, IN10_0_1.m built with REVENANT_HOST_BUILD against the Catalyst SDK and diffed by run.sh; the 16.4 header declares neither initialiser, so the runtime is the measured contract",
       "facts": "facts/Intents/Intents.md"
     },
     {
@@ -5954,9 +5954,9 @@
       "minimum": "6.0",
       "status": "implemented",
       "facts": "facts/Intents/Intents.md",
-      "reason": "the 26.2 header's own 18.0 property, which the port's SDK (iPhoneOS 16.4) does not declare at all, so the contract is read from iPhoneOS 26.2 and CharonIntents180.m answers it for the class IN10_0_1.m implements: a getter that answers what the setter kept and a setter that copies, which is what the header's own readwrite, copy, nullable, NS_NONATOMIC_IOSONLY says. The value is held beside the object rather than in it, because a category cannot add an ivar to a class another object implements - the same arrangement Photos/PHPickerConfiguration15.m uses for PHPickerConfiguration's own iOS 15 properties",
-      "source": "the contract from the header of iPhoneOS 26.2 (INMessage.h:209-210 for this property); that a release answers the name is measured on the arm64e cache of iOS 18.0 and is absent from the armv7 cache of 6.1.3, by the literal selector search tools/release-split.lua names for a member no exported symbol answers - `strings -a ~/.charon/dyld/18.0/* | grep -x -c -F -e SELECTOR` reads 3 for setReaction: and 28 for reaction, 0 for the nonsense control charonNoSuchSelector18Probe:, and 0 on 6.1.3 for both and for the class's own earlier controls alike, because 6.1.3 carries no Intents; that the port's SDK lacks it is `grep -n 'sticker|reaction|referencedMessage|DESIGNATED' INMessage.h` over each of the three iPhoneOS 16.4 SDKs on this machine, which answers only the three NS_DESIGNATED_INITIALIZER lines of 11.0, 13.2 and 16.0 and no property at all. The output of all of it, with every control beside it, is in facts/Intents/Intents.md under 'INMessage of iOS 18'",
-      "effect": "-[INMessage reaction] answers nil until something sets it, and afterwards the value the setter was handed as a copy; both initialisers of iOS 18 store through this setter, and -initWithCoder: reads it back from a keyed archive. A copy and an archive carry it, which is why CharonIntents180.m carries -copyWithZone:, -encodeWithCoder: and -initWithCoder: for this class"
+      "reason": "the 26.2 header's own 18.0 property, which the port's SDK (iPhoneOS 16.4) does not declare at all, so the contract is read from iPhoneOS 26.2 and RevenantIntents180.m answers it for the class IN10_0_1.m implements: a getter that answers what the setter kept and a setter that copies, which is what the header's own readwrite, copy, nullable, NS_NONATOMIC_IOSONLY says. The value is held beside the object rather than in it, because a category cannot add an ivar to a class another object implements - the same arrangement Photos/PHPickerConfiguration15.m uses for PHPickerConfiguration's own iOS 15 properties",
+      "source": "the contract from the header of iPhoneOS 26.2 (INMessage.h:209-210 for this property); that a release answers the name is measured on the arm64e cache of iOS 18.0 and is absent from the armv7 cache of 6.1.3, by the literal selector search tools/release-split.lua names for a member no exported symbol answers - `strings -a ~/.revenant/dyld/18.0/* | grep -x -c -F -e SELECTOR` reads 3 for setReaction: and 28 for reaction, 0 for the nonsense control revenantNoSuchSelector18Probe:, and 0 on 6.1.3 for both and for the class's own earlier controls alike, because 6.1.3 carries no Intents; that the port's SDK lacks it is `grep -n 'sticker|reaction|referencedMessage|DESIGNATED' INMessage.h` over each of the three iPhoneOS 16.4 SDKs on this machine, which answers only the three NS_DESIGNATED_INITIALIZER lines of 11.0, 13.2 and 16.0 and no property at all. The output of all of it, with every control beside it, is in facts/Intents/Intents.md under 'INMessage of iOS 18'",
+      "effect": "-[INMessage reaction] answers nil until something sets it, and afterwards the value the setter was handed as a copy; both initialisers of iOS 18 store through this setter, and -initWithCoder: reads it back from a keyed archive. A copy and an archive carry it, which is why RevenantIntents180.m carries -copyWithZone:, -encodeWithCoder: and -initWithCoder: for this class"
     },
     {
       "api": "INMessage.recipients",
@@ -5995,9 +5995,9 @@
       "minimum": "6.0",
       "status": "implemented",
       "facts": "facts/Intents/Intents.md",
-      "reason": "the 26.2 header's own 18.0 property, which the port's SDK (iPhoneOS 16.4) does not declare at all, so the contract is read from iPhoneOS 26.2 and CharonIntents180.m answers it for the class IN10_0_1.m implements: a getter that answers what the setter kept and a setter that copies, which is what the header's own readwrite, copy, nullable, NS_NONATOMIC_IOSONLY says. The value is held beside the object rather than in it, because a category cannot add an ivar to a class another object implements - the same arrangement Photos/PHPickerConfiguration15.m uses for PHPickerConfiguration's own iOS 15 properties",
-      "source": "the contract from the header of iPhoneOS 26.2 (INMessage.h:206-207 for this property); that a release answers the name is measured on the arm64e cache of iOS 18.0 and is absent from the armv7 cache of 6.1.3, by the literal selector search tools/release-split.lua names for a member no exported symbol answers - `strings -a ~/.charon/dyld/18.0/* | grep -x -c -F -e SELECTOR` reads 9 for setSticker: and 57 for sticker, 0 for the nonsense control charonNoSuchSelector18Probe:, and 0 on 6.1.3 for both and for the class's own earlier controls alike, because 6.1.3 carries no Intents; that the port's SDK lacks it is `grep -n 'sticker|reaction|referencedMessage|DESIGNATED' INMessage.h` over each of the three iPhoneOS 16.4 SDKs on this machine, which answers only the three NS_DESIGNATED_INITIALIZER lines of 11.0, 13.2 and 16.0 and no property at all. The output of all of it, with every control beside it, is in facts/Intents/Intents.md under 'INMessage of iOS 18'",
-      "effect": "-[INMessage sticker] answers nil until something sets it, and afterwards the value the setter was handed as a copy; both initialisers of iOS 18 store through this setter, and -initWithCoder: reads it back from a keyed archive. A copy and an archive carry it, which is why CharonIntents180.m carries -copyWithZone:, -encodeWithCoder: and -initWithCoder: for this class"
+      "reason": "the 26.2 header's own 18.0 property, which the port's SDK (iPhoneOS 16.4) does not declare at all, so the contract is read from iPhoneOS 26.2 and RevenantIntents180.m answers it for the class IN10_0_1.m implements: a getter that answers what the setter kept and a setter that copies, which is what the header's own readwrite, copy, nullable, NS_NONATOMIC_IOSONLY says. The value is held beside the object rather than in it, because a category cannot add an ivar to a class another object implements - the same arrangement Photos/PHPickerConfiguration15.m uses for PHPickerConfiguration's own iOS 15 properties",
+      "source": "the contract from the header of iPhoneOS 26.2 (INMessage.h:206-207 for this property); that a release answers the name is measured on the arm64e cache of iOS 18.0 and is absent from the armv7 cache of 6.1.3, by the literal selector search tools/release-split.lua names for a member no exported symbol answers - `strings -a ~/.revenant/dyld/18.0/* | grep -x -c -F -e SELECTOR` reads 9 for setSticker: and 57 for sticker, 0 for the nonsense control revenantNoSuchSelector18Probe:, and 0 on 6.1.3 for both and for the class's own earlier controls alike, because 6.1.3 carries no Intents; that the port's SDK lacks it is `grep -n 'sticker|reaction|referencedMessage|DESIGNATED' INMessage.h` over each of the three iPhoneOS 16.4 SDKs on this machine, which answers only the three NS_DESIGNATED_INITIALIZER lines of 11.0, 13.2 and 16.0 and no property at all. The output of all of it, with every control beside it, is in facts/Intents/Intents.md under 'INMessage of iOS 18'",
+      "effect": "-[INMessage sticker] answers nil until something sets it, and afterwards the value the setter was handed as a copy; both initialisers of iOS 18 store through this setter, and -initWithCoder: reads it back from a keyed archive. A copy and an archive carry it, which is why RevenantIntents180.m carries -copyWithZone:, -encodeWithCoder: and -initWithCoder: for this class"
     },
     {
       "api": "INPauseWorkoutIntent.workoutName",

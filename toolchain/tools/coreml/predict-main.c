@@ -1,5 +1,5 @@
-#include "CharonMLModel.h"
-#include "CharonMLPredict.h"
+#include "RevenantMLModel.h"
+#include "RevenantMLPredict.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -7,15 +7,15 @@
 
 int main(int argc, char **argv)
 {
-    charon_ml_model model;
-    charon_ml_features inputs, outputs;
+    revenant_ml_model model;
+    revenant_ml_features inputs, outputs;
     char error[512];
     const char *path = NULL;
     int index, want_kind = 0;
 
     error[0] = 0;
-    charon_ml_features_init(&inputs);
-    charon_ml_features_init(&outputs);
+    revenant_ml_features_init(&inputs);
+    revenant_ml_features_init(&outputs);
     for (index = 1; index < argc; index++) {
         if (strcmp(argv[index], "--kind") == 0) {
             want_kind = 1;
@@ -26,7 +26,7 @@ int main(int argc, char **argv)
             float *data;
             int64_t shape[8];
             int rank = 0, dimension = 0;
-            charon_ml_array array;
+            revenant_ml_array array;
             if (index + 2 >= argc) {
                 fprintf(stderr, "%s takes a name and a count\n", argv[index]);
                 return 2;
@@ -60,11 +60,11 @@ int main(int argc, char **argv)
             for (at = 0; at < count; at++) {
                 data[at] = (float)strtod(argv[++index], NULL);
             }
-            array = charon_ml_array_alloc(CHARON_ML_ARRAY_FLOAT32, shape, rank);
+            array = revenant_ml_array_alloc(REVENANT_ML_ARRAY_FLOAT32, shape, rank);
             for (at = 0; at < count; at++) {
-                charon_ml_array_set(&array, at, data[at]);
+                revenant_ml_array_set(&array, at, data[at]);
             }
-            if (!charon_ml_features_put(&inputs, name, charon_ml_value_array(array))) {
+            if (!revenant_ml_features_put(&inputs, name, revenant_ml_value_array(array))) {
                 fprintf(stderr, "no room for %s\n", name);
                 return 1;
             }
@@ -79,47 +79,47 @@ int main(int argc, char **argv)
                 "                  [--setr <name> <dxd..> <count> <value> ...]\n");
         return 2;
     }
-    if (!charon_ml_model_read(&model, path, error, sizeof error)) {
+    if (!revenant_ml_model_read(&model, path, error, sizeof error)) {
         fprintf(stderr, "ml-predict: %s\n", error);
         return 1;
     }
     if (want_kind) {
-        printf("%s\n", charon_ml_kind_name(model.kind));
-        charon_ml_model_release(&model);
+        printf("%s\n", revenant_ml_kind_name(model.kind));
+        revenant_ml_model_release(&model);
         return 0;
     }
-    if (!charon_ml_predict(&model, &inputs, &outputs, error, sizeof error)) {
+    if (!revenant_ml_predict(&model, &inputs, &outputs, error, sizeof error)) {
         fprintf(stderr, "ml-predict: %s\n", error);
-        charon_ml_model_release(&model);
+        revenant_ml_model_release(&model);
         return 1;
     }
     for (index = 0; index < (int)outputs.count; index++) {
-        const charon_ml_value *value = &outputs.entries[index].value;
+        const revenant_ml_value *value = &outputs.entries[index].value;
         size_t at;
-        if (value->kind == CHARON_ML_VALUE_STRING) {
+        if (value->kind == REVENANT_ML_VALUE_STRING) {
             printf("%s = '%.*s'\n", outputs.entries[index].name, (int)value->string.length,
                    value->string.bytes);
-        } else if (value->kind == CHARON_ML_VALUE_ARRAY) {
+        } else if (value->kind == REVENANT_ML_VALUE_ARRAY) {
             printf("%s = [", outputs.entries[index].name);
             for (at = 0; at < value->array.count; at++) {
-                printf("%s%.9g", at ? ", " : "", charon_ml_array_get(&value->array, (int64_t)at));
+                printf("%s%.9g", at ? ", " : "", revenant_ml_array_get(&value->array, (int64_t)at));
             }
             printf("]\n");
-        } else if (value->kind == CHARON_ML_VALUE_DICTIONARY) {
+        } else if (value->kind == REVENANT_ML_VALUE_DICTIONARY) {
             printf("%s = {", outputs.entries[index].name);
             for (at = 0; at < value->dictionary.count; at++) {
                 printf("%s'%s': %.9g", at ? ", " : "", value->dictionary.keys[at],
                        value->dictionary.values[at]);
             }
             printf("}\n");
-        } else if (value->kind == CHARON_ML_VALUE_NUMBER) {
+        } else if (value->kind == REVENANT_ML_VALUE_NUMBER) {
             printf("%s = %.9g\n", outputs.entries[index].name, value->number);
         } else {
-            printf("%s = (%s)\n", outputs.entries[index].name, charon_ml_value_name(value->kind));
+            printf("%s = (%s)\n", outputs.entries[index].name, revenant_ml_value_name(value->kind));
         }
     }
-    charon_ml_features_release(&outputs);
-    charon_ml_features_release(&inputs);
-    charon_ml_model_release(&model);
+    revenant_ml_features_release(&outputs);
+    revenant_ml_features_release(&inputs);
+    revenant_ml_model_release(&model);
     return 0;
 }

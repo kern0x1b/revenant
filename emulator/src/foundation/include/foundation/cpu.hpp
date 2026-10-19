@@ -26,7 +26,7 @@
 #include "foundation/guest_exclusive_address_resolver.hpp"
 #include "foundation/jit_work_signal.hpp"
 
-namespace shade {
+namespace emulator {
 
 enum class JitPrecompilePhase : std::uint8_t {
     Bootstrap,

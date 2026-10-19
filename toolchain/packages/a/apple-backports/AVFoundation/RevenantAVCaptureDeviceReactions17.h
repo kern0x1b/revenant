@@ -11,7 +11,7 @@ typedef NSString *AVCaptureReactionType NS_TYPED_ENUM;
 
 @class AVZoomRange;
 
-@interface AVCaptureDevice (CharonCaptureDeviceReactions17)
+@interface AVCaptureDevice (RevenantCaptureDeviceReactions17)
 
 @property(nonatomic, readonly) NSSet<AVCaptureReactionType> *availableReactionTypes;
 @property(nonatomic, readonly) BOOL canPerformReactionEffects;
@@ -24,14 +24,14 @@ typedef NSString *AVCaptureReactionType NS_TYPED_ENUM;
 
 @end
 
-@interface AVCaptureDeviceFormat (CharonCaptureDeviceFormatReactions17)
+@interface AVCaptureDeviceFormat (RevenantCaptureDeviceFormatReactions17)
 
 @property(nonatomic, readonly) BOOL reactionEffectsSupported;
 @property(nonatomic, readonly, nullable) AVFrameRateRange *videoFrameRateRangeForReactionEffectsInProgress;
 
 @end
 
-@interface AVCaptureDeviceFormat (CharonCaptureDeviceFormatDepthZoom17)
+@interface AVCaptureDeviceFormat (RevenantCaptureDeviceFormatDepthZoom17)
 
 @property(nonatomic, readonly) NSArray<AVZoomRange *> *supportedVideoZoomRangesForDepthDataDelivery;
 @property(nonatomic, readonly) BOOL zoomFactorsOutsideOfVideoZoomRangesForDepthDeliverySupported;

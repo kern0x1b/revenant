@@ -1,9 +1,9 @@
-#import "CharonSpriteKit.h"
+#import "RevenantSpriteKit.h"
 #if !TARGET_OS_IPHONE
 #import <AppKit/AppKit.h>
 #endif
 
-static CharonSKColor *CharonSKSRGBColor(CharonSKColor *colour)
+static RevenantSKColor *RevenantSKSRGBColor(RevenantSKColor *colour)
 {
 #if TARGET_OS_IPHONE
     return colour;
@@ -13,7 +13,7 @@ static CharonSKColor *CharonSKSRGBColor(CharonSKColor *colour)
 #endif
 }
 
-static CGPathRef CharonSKRoundedRectPath(CGRect rect, CGFloat radius)
+static CGPathRef RevenantSKRoundedRectPath(CGRect rect, CGFloat radius)
 {
     CGMutablePathRef path = CGPathCreateMutable();
     CGFloat limit = MIN(CGRectGetWidth(rect), CGRectGetHeight(rect)) / 2;
@@ -27,15 +27,15 @@ static CGPathRef CharonSKRoundedRectPath(CGRect rect, CGFloat radius)
     return path;
 }
 
-static CGRect CharonSKCentredRect(CGSize size)
+static CGRect RevenantSKCentredRect(CGSize size)
 {
     return CGRectMake(-size.width / 2, -size.height / 2, size.width, size.height);
 }
 
 @implementation SKShapeNode {
     CGPathRef _path;
-    CharonSKColor *_strokeColor;
-    CharonSKColor *_fillColor;
+    RevenantSKColor *_strokeColor;
+    RevenantSKColor *_fillColor;
     SKBlendMode _blendMode;
     BOOL _antialiased;
     CGFloat _lineWidth;
@@ -59,8 +59,8 @@ static CGRect CharonSKCentredRect(CGSize size)
 {
     self = [super init];
     if (self) {
-        _strokeColor = [CharonSKColor colorWithRed:1 green:1 blue:1 alpha:1];
-        _fillColor = [CharonSKColor colorWithRed:0 green:0 blue:0 alpha:0];
+        _strokeColor = [RevenantSKColor colorWithRed:1 green:1 blue:1 alpha:1];
+        _fillColor = [RevenantSKColor colorWithRed:0 green:0 blue:0 alpha:0];
         _antialiased = YES;
         _lineWidth = 1;
         _lineCap = kCGLineCapButt;
@@ -108,12 +108,12 @@ static CGRect CharonSKCentredRect(CGSize size)
 
 + (instancetype)shapeNodeWithRectOfSize:(CGSize)size
 {
-    return [self shapeNodeWithRect:CharonSKCentredRect(size)];
+    return [self shapeNodeWithRect:RevenantSKCentredRect(size)];
 }
 
 + (instancetype)shapeNodeWithRect:(CGRect)rect cornerRadius:(CGFloat)cornerRadius
 {
-    CGPathRef path = CharonSKRoundedRectPath(rect, cornerRadius);
+    CGPathRef path = RevenantSKRoundedRectPath(rect, cornerRadius);
     SKShapeNode *node = [self shapeNodeWithPath:path];
     CGPathRelease(path);
     return node;
@@ -121,7 +121,7 @@ static CGRect CharonSKCentredRect(CGSize size)
 
 + (instancetype)shapeNodeWithRectOfSize:(CGSize)size cornerRadius:(CGFloat)cornerRadius
 {
-    return [self shapeNodeWithRect:CharonSKCentredRect(size) cornerRadius:cornerRadius];
+    return [self shapeNodeWithRect:RevenantSKCentredRect(size) cornerRadius:cornerRadius];
 }
 
 + (instancetype)shapeNodeWithCircleOfRadius:(CGFloat)radius
@@ -140,17 +140,17 @@ static CGRect CharonSKCentredRect(CGSize size)
 
 + (instancetype)shapeNodeWithEllipseOfSize:(CGSize)size
 {
-    return [self shapeNodeWithEllipseInRect:CharonSKCentredRect(size)];
+    return [self shapeNodeWithEllipseInRect:RevenantSKCentredRect(size)];
 }
 
-- (void)setStrokeColor:(CharonSKColor *)strokeColor
+- (void)setStrokeColor:(RevenantSKColor *)strokeColor
 {
-    _strokeColor = CharonSKSRGBColor(strokeColor);
+    _strokeColor = RevenantSKSRGBColor(strokeColor);
 }
 
-- (void)setFillColor:(CharonSKColor *)fillColor
+- (void)setFillColor:(RevenantSKColor *)fillColor
 {
-    _fillColor = CharonSKSRGBColor(fillColor);
+    _fillColor = RevenantSKSRGBColor(fillColor);
 }
 
 - (CGPathRef)path

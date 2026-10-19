@@ -236,7 +236,7 @@ if [ "${1:-}" = "--mutation" ]; then
       "register.returned|NEHotspotHelper.m|return NO; /* registerWithOptions:|return YES; /* registerWithOptions:" \
       "command.commandType|NEHotspotHelperCommand.m|return kNEHotspotHelperCommandTypeNone;|return kNEHotspotHelperCommandTypeLogoff;" \
       "response.setNetworkList|NEHotspotHelperResponse.m|_networkList = [networkList copy];|_networkList = [networkList copy]; abort();" \
-      "bind.after|NEHotspotHelper.m|/* binds nothing */|[self setAllHTTPHeaderFields:@{@\"X-Charon\": @\"1\"}];" \
+      "bind.after|NEHotspotHelper.m|/* binds nothing */|[self setAllHTTPHeaderFields:@{@\"X-Revenant\": @\"1\"}];" \
       "eap.copy.username|NEHotspotEAPSettings.m|    copy.username = _username;|    copy.username = nil;" \
       "eap.identity|NEHotspotEAPSettings.m|- (BOOL)setIdentity:(SecIdentityRef)identity|- (BOOL)setIdentity:(SecIdentityRef)identity { return YES; }\n- (BOOL)unusedIdentity:(SecIdentityRef)identity" \
       "eap.roundTrip.tls|NEHotspotEAPSettings.m|_tlsClientCertificateRequired = [coder decodeBoolForKey:@\"tlsClientCertificateRequired\"];|_tlsClientCertificateRequired = NO;" \

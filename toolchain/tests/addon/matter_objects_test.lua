@@ -37,7 +37,7 @@ function failures(opt)
         end
     end
 
-    local files = os.files(path.join(objects, "CharonMatter*.m"))
+    local files = os.files(path.join(objects, "RevenantMatter*.m"))
     for _, file in ipairs(files) do
         local impl = io.readfile(file):match("@implementation%s+([%w_]+)")
         local shown = path.filename(file)
@@ -53,7 +53,7 @@ function failures(opt)
         end
     end
     if #files ~= pinned then
-        table.insert(out, "Matter/CharonMatter*.m has " .. #files .. " objects, pinned at " .. pinned)
+        table.insert(out, "Matter/RevenantMatter*.m has " .. #files .. " objects, pinned at " .. pinned)
     end
     return out
 end

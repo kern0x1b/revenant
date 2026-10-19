@@ -28,7 +28,7 @@ out=$work/runs/defaults-$minimum-$stamp
 mkdir -p "$out"
 cd "$here"
 
-# No charon@apple-backports in the graph, so the binary links the RELEASE's Security.framework and its
+# No revenant@apple-backports in the graph, so the binary links the RELEASE's Security.framework and its
 # answer is the release's. A dependency here would make the probe measure the port it is meant to measure.
 xmake f -p iphoneos -a armv7 -y >"$out/configure.log" 2>&1 || {
     echo "the probe did not configure; $out/configure.log says why" >&2

@@ -1,6 +1,6 @@
 #import "hover16_scenario.h"
 
-void charon_windowed_run(UIWindow *window)
+void revenant_windowed_run(UIWindow *window)
 {
     @autoreleasepool {
         UIView *host = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 200, 100)];
@@ -13,6 +13,6 @@ void charon_windowed_run(UIWindow *window)
                 field = (UITextField *)sub;
         NSArray *lines = hover16_scenario([UIHoverGestureRecognizer class], host, bar, field);
         NSString *text = [lines componentsJoinedByString:@"\n"];
-        [text writeToFile:[NSString stringWithUTF8String:getenv("CHARON_EXPECTED")] atomically:YES encoding:NSUTF8StringEncoding error:NULL];
+        [text writeToFile:[NSString stringWithUTF8String:getenv("REVENANT_EXPECTED")] atomically:YES encoding:NSUTF8StringEncoding error:NULL];
     }
 }

@@ -1,5 +1,5 @@
-#ifndef CHARON_UIKIT18_H
-#define CHARON_UIKIT18_H
+#ifndef REVENANT_UIKIT18_H
+#define REVENANT_UIKIT18_H
 
 #import <UIKit/UIKit.h>
 

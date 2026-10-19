@@ -4,7 +4,7 @@
 # for both sides.
 #
 # matrix.m is built twice: plain, against the host's UIKit, and with the port's classes compiled beside it under a
-# CharonHost name (the renames of uikit2/renames.sh), so both live in one process. Each build prints one line per
+# RevenantHost name (the renames of uikit2/renames.sh), so both live in one process. Each build prints one line per
 # measurement, and the two outputs must be equal line for line, except the lines that start with `open:`: those name a
 # difference the port does not match on purpose (the host's own archive does not decode, facts/UIKit/UIPrinterDestination.md).
 # They are printed from both sides instead.
@@ -81,7 +81,7 @@ echo "port:"; grep '^open:' "$build/port/run.txt" | sed 's/^/    /'
 
 echo
 echo "== the planted control: a failed connection forced to YES in a scratch copy of the port's UIPrinter.m"
-sed '/int fd = charon_connect(host, port, deadline);/{n;n;s/return NO;/return YES;/;}' "$port/UIPrinter.m" > "$build/plant/UIPrinter.m"
+sed '/int fd = revenant_connect(host, port, deadline);/{n;n;s/return NO;/return YES;/;}' "$port/UIPrinter.m" > "$build/plant/UIPrinter.m"
 cmp -s "$port/UIPrinter.m" "$build/plant/UIPrinter.m" && {
     echo "PLANT: the sed changed nothing, so the control proves nothing"; exit 1; }
 renamed "$build/plant/run" "$build/plant/UIPrinter.m" "$port/UIPrintServiceExtension.m" "$port/UIPrinterDestination.m" "$port/UIPrinterPickerController.m" || exit 1

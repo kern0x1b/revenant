@@ -1,4 +1,4 @@
-#import "CharonFetchIndex.h"
+#import "RevenantFetchIndex.h"
 
 @implementation NSFetchIndexDescription {
     NSString *_name;
@@ -7,11 +7,11 @@
     NSPredicate *_partialIndexPredicate;
 }
 
-- (void)_charon_check:(NSArray<NSFetchIndexElementDescription *> *)elements
+- (void)_revenant_check:(NSArray<NSFetchIndexElementDescription *> *)elements
 {
     NSFetchIndexElementType first = elements.count ? [elements.firstObject collationType] : NSFetchIndexElementTypeBinary;
     for (NSFetchIndexElementDescription *element in elements) {
-        if (element.property && !charon_index_property_allowed(element.property))
+        if (element.property && !revenant_index_property_allowed(element.property))
             [NSException raise:NSInvalidArgumentException format:@"Unsupported property type for index."];
         if (element.collationType != first)
             [NSException raise:NSInvalidArgumentException format:@"Can't mix and match collation types."];
@@ -23,31 +23,31 @@
     if (!name)
         [NSException raise:NSInvalidArgumentException format:@"Can't create an index with no name"];
     if (elements)
-        [self _charon_check:elements];
+        [self _revenant_check:elements];
     self = [super init];
     if (self) {
         _name = name;
         _elements = [elements copy];
         for (NSFetchIndexElementDescription *element in _elements)
-            [element _charon_setIndexDescription:self];
+            [element _revenant_setIndexDescription:self];
     }
     return self;
 }
 
-- (void)_charon_throwIfNotEditable
+- (void)_revenant_throwIfNotEditable
 {
     NSEntityDescription *entity = _entity;
     if ([entity respondsToSelector:@selector(_throwIfNotEditable)])
         [entity performSelector:@selector(_throwIfNotEditable)];
 }
 
-- (void)_charon_validateCollationTypeChangeFrom:(NSFetchIndexElementType)from to:(NSFetchIndexElementType)to
+- (void)_revenant_validateCollationTypeChangeFrom:(NSFetchIndexElementType)from to:(NSFetchIndexElementType)to
 {
     if (from != to && _elements.count <= 1)
         [NSException raise:NSInvalidArgumentException format:@"Can't change an collation type in a multi-element index"];
 }
 
-- (void)_charon_setEntity:(NSEntityDescription *)entity
+- (void)_revenant_setEntity:(NSEntityDescription *)entity
 {
     _entity = entity;
 }
@@ -61,7 +61,7 @@
 {
     if (!name)
         [NSException raise:NSInvalidArgumentException format:@"Can't set an index name to nil"];
-    [self _charon_throwIfNotEditable];
+    [self _revenant_throwIfNotEditable];
     if (![name isEqual:_name] && _entity) {
         for (NSFetchIndexDescription *other in _entity.indexes)
             if (other != self && [other.name isEqual:name])
@@ -77,9 +77,9 @@
 
 - (void)setElements:(NSArray<NSFetchIndexElementDescription *> *)elements
 {
-    [self _charon_throwIfNotEditable];
+    [self _revenant_throwIfNotEditable];
     if (elements)
-        [self _charon_check:elements];
+        [self _revenant_check:elements];
     _elements = [elements copy];
 }
 
@@ -95,7 +95,7 @@
 
 - (void)setPartialIndexPredicate:(NSPredicate *)predicate
 {
-    [self _charon_throwIfNotEditable];
+    [self _revenant_throwIfNotEditable];
     _partialIndexPredicate = predicate;
 }
 
@@ -152,7 +152,7 @@
         _entity = [coder decodeObjectOfClass:[NSEntityDescription class] forKey:@"NSEntity"];
         _partialIndexPredicate = [coder decodeObjectOfClass:[NSPredicate class] forKey:@"NSPartialIndexPredicate"];
         for (NSFetchIndexElementDescription *element in _elements)
-            [element _charon_setIndexDescription:self];
+            [element _revenant_setIndexDescription:self];
     }
     return self;
 }

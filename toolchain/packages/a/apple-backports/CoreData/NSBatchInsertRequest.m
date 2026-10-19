@@ -1,24 +1,24 @@
 #import <CoreData/CoreData.h>
-#import "CharonCoreData.h"
+#import "RevenantCoreData.h"
 
 @interface NSBatchInsertRequest () {
-    NSString *_charonEntityName;
-    NSEntityDescription *_charonEntity;
-    NSArray<NSDictionary<NSString *, id> *> *_charonObjectsToInsert;
-    BOOL (^_charonDictionaryHandler)(NSMutableDictionary<NSString *, id> *);
-    BOOL (^_charonManagedObjectHandler)(NSManagedObject *);
-    NSBatchInsertRequestResultType _charonResultType;
+    NSString *_revenantEntityName;
+    NSEntityDescription *_revenantEntity;
+    NSArray<NSDictionary<NSString *, id> *> *_revenantObjectsToInsert;
+    BOOL (^_revenantDictionaryHandler)(NSMutableDictionary<NSString *, id> *);
+    BOOL (^_revenantManagedObjectHandler)(NSManagedObject *);
+    NSBatchInsertRequestResultType _revenantResultType;
 }
 @end
 
 @implementation NSBatchInsertRequest
 
-@synthesize entityName = _charonEntityName;
-@synthesize entity = _charonEntity;
-@synthesize objectsToInsert = _charonObjectsToInsert;
-@synthesize dictionaryHandler = _charonDictionaryHandler;
-@synthesize managedObjectHandler = _charonManagedObjectHandler;
-@synthesize resultType = _charonResultType;
+@synthesize entityName = _revenantEntityName;
+@synthesize entity = _revenantEntity;
+@synthesize objectsToInsert = _revenantObjectsToInsert;
+@synthesize dictionaryHandler = _revenantDictionaryHandler;
+@synthesize managedObjectHandler = _revenantManagedObjectHandler;
+@synthesize resultType = _revenantResultType;
 
 #pragma mark - The initialiser the header deprecates -init in favour of
 
@@ -31,12 +31,12 @@
 
 - (NSEntityDescription *)entity
 {
-    if (!_charonEntity && _charonEntityName) {
+    if (!_revenantEntity && _revenantEntityName) {
         [NSException raise:NSObjectInaccessibleException
                     format:@"This batch insert request (%p) was created with a string name (%@), and cannot respond to -entity until used by an NSManagedObjectContext",
-                           (void *)self, _charonEntityName];
+                           (void *)self, _revenantEntityName];
     }
-    return _charonEntity;
+    return _revenantEntity;
 }
 
 - (instancetype)initWithEntityName:(NSString *)entityName
@@ -44,8 +44,8 @@
 {
     self = [super init];
     if (self && dictionaries.count) {
-        _charonEntityName = [entityName copy];
-        _charonObjectsToInsert = [dictionaries copy];
+        _revenantEntityName = [entityName copy];
+        _revenantObjectsToInsert = [dictionaries copy];
     }
     return self;
 }
@@ -55,9 +55,9 @@
 {
     self = [super init];
     if (self && dictionaries.count) {
-        _charonEntity = entity;
-        _charonEntityName = [entity.name copy];
-        _charonObjectsToInsert = [dictionaries copy];
+        _revenantEntity = entity;
+        _revenantEntityName = [entity.name copy];
+        _revenantObjectsToInsert = [dictionaries copy];
     }
     return self;
 }
@@ -69,8 +69,8 @@
 {
     self = [self initWithEntityName:entityName objects:@[]];
     if (self) {
-        _charonEntityName = [entityName copy];
-        _charonDictionaryHandler = [handler copy];
+        _revenantEntityName = [entityName copy];
+        _revenantDictionaryHandler = [handler copy];
     }
     return self;
 }
@@ -80,8 +80,8 @@
 {
     self = [self initWithEntityName:entityName objects:@[]];
     if (self) {
-        _charonEntityName = [entityName copy];
-        _charonManagedObjectHandler = [handler copy];
+        _revenantEntityName = [entityName copy];
+        _revenantManagedObjectHandler = [handler copy];
     }
     return self;
 }
@@ -91,9 +91,9 @@
 {
     self = [self initWithEntity:entity objects:@[]];
     if (self) {
-        _charonEntity = entity;
-        _charonEntityName = [entity.name copy];
-        _charonDictionaryHandler = [handler copy];
+        _revenantEntity = entity;
+        _revenantEntityName = [entity.name copy];
+        _revenantDictionaryHandler = [handler copy];
     }
     return self;
 }
@@ -103,9 +103,9 @@
 {
     self = [self initWithEntity:entity objects:@[]];
     if (self) {
-        _charonEntity = entity;
-        _charonEntityName = [entity.name copy];
-        _charonManagedObjectHandler = [handler copy];
+        _revenantEntity = entity;
+        _revenantEntityName = [entity.name copy];
+        _revenantManagedObjectHandler = [handler copy];
     }
     return self;
 }

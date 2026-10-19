@@ -1,3 +1,3 @@
-#import "CharonMPS.h"
+#import "RevenantMPS.h"
 
-id<MPSImageAllocator> CharonMPSTemporaryImageDefaultAllocator(void);
+id<MPSImageAllocator> RevenantMPSTemporaryImageDefaultAllocator(void);

@@ -13,11 +13,11 @@
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-build=${MATTER_HOST_BUILD:-$(runs_folder charon-matter-host)}
+build=${MATTER_HOST_BUILD:-$(runs_folder revenant-matter-host)}
 out=${1:-$build/host-members.tsv}
 # The surface the function rows are asked about, named by the corpus it was read from. Eight levels up from here is the
 # workspace that holds both this checkout and the corpus: matter, host, backports, tests, the checkout, worktrees,
-# .agent-work, charon, ios.
+# .agent-work, revenant, ios.
 surface=${2:-$here/../../../../../../../../coordination/corpus/sdk-26.2-surface.tsv}
 rm -rf "$build"
 mkdir -p "$build"

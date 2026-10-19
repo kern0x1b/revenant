@@ -1,38 +1,38 @@
-#include "CharonSheetShadow.h"
+#include "RevenantSheetShadow.h"
 #include <math.h>
 #include <pthread.h>
 #include <stdlib.h>
 
-const float charon_sheet_shadow_matrix[20] = {
+const float revenant_sheet_shadow_matrix[20] = {
     0.796875f, -0.1875f, 0.078125f, 0, 0,
     -0.09375f, 0.71875f, 0.09375f, 0, 0.015625f,
     -0.09375f, -0.1875f, 0.96875f, 0, -0.015625f,
     -0.25f, -0.5f, -0.09375f, 1, 0,
 };
 
-static const double charon_shadow_image = 400;
-static const double charon_shadow_corner_points = 200;
+static const double revenant_shadow_image = 400;
+static const double revenant_shadow_corner_points = 200;
 
 typedef struct {
     double k, e, s, r;
-} CharonShadowTerm;
+} RevenantShadowTerm;
 
-static const CharonShadowTerm charon_shadow_terms[2] = {
+static const RevenantShadowTerm revenant_shadow_terms[2] = {
     {0.4874, 83.3059, 34.0324, 37.7051},
     {0.9917, 132.5797, 21.4618, 3.8867},
 };
 
-static double charon_phi(double x)
+static double revenant_phi(double x)
 {
     return 0.5 * erfc(-x / M_SQRT2);
 }
 
-static double charon_clamp01(double x)
+static double revenant_clamp01(double x)
 {
     return x < 0 ? 0 : x > 1 ? 1 : x;
 }
 
-static int charon_shadow_term(const CharonShadowTerm *t, size_t n, double scale, double *out)
+static int revenant_shadow_term(const RevenantShadowTerm *t, size_t n, double scale, double *out)
 {
     size_t first = (size_t)floor(t->e * scale), last = (size_t)ceil((t->e + t->r) * scale);
     if (last > n)
@@ -48,7 +48,7 @@ static int charon_shadow_term(const CharonShadowTerm *t, size_t n, double scale,
         return 0;
     }
     for (size_t i = 0; i < n; i++)
-        edge[i] = charon_phi(((i + 0.5) / scale - t->e) / t->s);
+        edge[i] = revenant_phi(((i + 0.5) / scale - t->e) / t->s);
     const int steps = 8;
     for (size_t j = 0; j < rows; j++)
         for (int q = 0; q < steps; q++) {
@@ -57,7 +57,7 @@ static int charon_shadow_term(const CharonShadowTerm *t, size_t n, double scale,
                 continue;
             double end = t->e + t->r - sqrt(t->r * t->r - dy * dy);
             for (size_t i = 0; i < n; i++)
-                cut[j * n + i] += (edge[i] - charon_phi(((i + 0.5) / scale - end) / t->s)) / (steps * scale);
+                cut[j * n + i] += (edge[i] - revenant_phi(((i + 0.5) / scale - end) / t->s)) / (steps * scale);
         }
     for (size_t y = 0; y < n; y++) {
         for (size_t j = 0; j < rows; j++) {
@@ -77,26 +77,26 @@ static int charon_shadow_term(const CharonShadowTerm *t, size_t n, double scale,
     return 1;
 }
 
-static uint8_t *charon_shadow_make_corner(unsigned scale)
+static uint8_t *revenant_shadow_make_corner(unsigned scale)
 {
-    size_t n = (size_t)(charon_shadow_corner_points * scale);
+    size_t n = (size_t)(revenant_shadow_corner_points * scale);
     double *a = malloc(n * n * sizeof(double)), *b = malloc(n * n * sizeof(double));
     uint8_t *corner = malloc(n * n);
-    if (!a || !b || !corner || !charon_shadow_term(&charon_shadow_terms[0], n, scale, a)
-        || !charon_shadow_term(&charon_shadow_terms[1], n, scale, b)) {
+    if (!a || !b || !corner || !revenant_shadow_term(&revenant_shadow_terms[0], n, scale, a)
+        || !revenant_shadow_term(&revenant_shadow_terms[1], n, scale, b)) {
         free(a);
         free(b);
         free(corner);
         return NULL;
     }
     for (size_t i = 0; i < n * n; i++)
-        corner[i] = (uint8_t)lround(255 * charon_clamp01(1 - (1 - a[i]) * (1 - b[i])));
+        corner[i] = (uint8_t)lround(255 * revenant_clamp01(1 - (1 - a[i]) * (1 - b[i])));
     free(a);
     free(b);
     return corner;
 }
 
-const uint8_t *charon_sheet_shadow_corner(unsigned scale)
+const uint8_t *revenant_sheet_shadow_corner(unsigned scale)
 {
     static pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
     static uint8_t *made[4];
@@ -106,16 +106,16 @@ const uint8_t *charon_sheet_shadow_corner(unsigned scale)
         scale = 4;
     pthread_mutex_lock(&lock);
     if (!made[scale - 1])
-        made[scale - 1] = charon_shadow_make_corner(scale);
+        made[scale - 1] = revenant_shadow_make_corner(scale);
     uint8_t *corner = made[scale - 1];
     pthread_mutex_unlock(&lock);
     return corner;
 }
 
-double charon_sheet_shadow_cap(double width, double height, double radius, double scale)
+double revenant_sheet_shadow_cap(double width, double height, double radius, double scale)
 {
-    double cap = charon_shadow_corner_points - 1 / scale;
-    if (width < charon_shadow_image || height < charon_shadow_image) {
+    double cap = revenant_shadow_corner_points - 1 / scale;
+    if (width < revenant_shadow_image || height < revenant_shadow_image) {
         double small = fmax(radius + 150, 170);
         if (small < cap)
             cap = small;
@@ -123,42 +123,42 @@ double charon_sheet_shadow_cap(double width, double height, double radius, doubl
     return cap;
 }
 
-static inline float charon_clamp255(float x)
+static inline float revenant_clamp255(float x)
 {
     return x < 0 ? 0 : x > 255 ? 255 : x;
 }
 
-static inline void charon_shadow_pixel(uint8_t *pixel, float alpha)
+static inline void revenant_shadow_pixel(uint8_t *pixel, float alpha)
 {
-    const float *m = charon_sheet_shadow_matrix;
+    const float *m = revenant_sheet_shadow_matrix;
     float r = pixel[0], g = pixel[1], b = pixel[2];
-    float a = alpha * charon_clamp255(m[15] * r + m[16] * g + m[17] * b + 255 * (m[18] + m[19])) * (1 / 255.0f);
+    float a = alpha * revenant_clamp255(m[15] * r + m[16] * g + m[17] * b + 255 * (m[18] + m[19])) * (1 / 255.0f);
     for (int c = 0; c < 3; c++)
-        pixel[c] = (uint8_t)(a * charon_clamp255(m[c * 5] * r + m[c * 5 + 1] * g + m[c * 5 + 2] * b + 255 * (m[c * 5 + 3] + m[c * 5 + 4])) + 0.5f);
+        pixel[c] = (uint8_t)(a * revenant_clamp255(m[c * 5] * r + m[c * 5 + 1] * g + m[c * 5 + 2] * b + 255 * (m[c * 5 + 3] + m[c * 5 + 4])) + 0.5f);
     pixel[3] = (uint8_t)(a * 255 + 0.5f);
 }
 
-void charon_sheet_shadow_pixel(uint8_t *pixel, double alpha)
+void revenant_sheet_shadow_pixel(uint8_t *pixel, double alpha)
 {
-    charon_shadow_pixel(pixel, (float)alpha);
+    revenant_shadow_pixel(pixel, (float)alpha);
 }
 
-static double charon_shadow_corner_coordinate(double x, double length, double cap, unsigned scale)
+static double revenant_shadow_corner_coordinate(double x, double length, double cap, unsigned scale)
 {
     double u;
     if (x < cap && x <= length / 2)
         u = x;
     else if (length - x < cap)
-        u = charon_shadow_image - (length - x);
+        u = revenant_shadow_image - (length - x);
     else
-        u = cap + fmod(x - cap, charon_shadow_image - 2 * cap);
-    return fmin(u, charon_shadow_image - u) * scale - 0.5;
+        u = cap + fmod(x - cap, revenant_shadow_image - 2 * cap);
+    return fmin(u, revenant_shadow_image - u) * scale - 0.5;
 }
 
-int charon_sheet_shadow_shade(uint8_t *pixels, size_t columns, size_t rows, size_t rowBytes, double x, double y, double dx, double dy,
+int revenant_sheet_shadow_emulator(uint8_t *pixels, size_t columns, size_t rows, size_t rowBytes, double x, double y, double dx, double dy,
                               double width, double height, double cap, unsigned scale)
 {
-    const uint8_t *corner = charon_sheet_shadow_corner(scale);
+    const uint8_t *corner = revenant_sheet_shadow_corner(scale);
     size_t *index = malloc(columns * sizeof(size_t));
     float *fraction = malloc(columns * sizeof(float));
     if (!corner || !index || !fraction) {
@@ -166,14 +166,14 @@ int charon_sheet_shadow_shade(uint8_t *pixels, size_t columns, size_t rows, size
         free(fraction);
         return 0;
     }
-    size_t n = (size_t)(charon_shadow_corner_points * (scale < 1 ? 1 : scale > 4 ? 4 : scale));
+    size_t n = (size_t)(revenant_shadow_corner_points * (scale < 1 ? 1 : scale > 4 ? 4 : scale));
     for (size_t column = 0; column < columns; column++) {
-        double u = fmax(charon_shadow_corner_coordinate(x + (column + 0.5) * dx, width, cap, scale), 0);
+        double u = fmax(revenant_shadow_corner_coordinate(x + (column + 0.5) * dx, width, cap, scale), 0);
         index[column] = (size_t)u < n - 1 ? (size_t)u : n - 2;
         fraction[column] = (float)fmin(u - index[column], 1);
     }
     for (size_t row = 0; row < rows; row++) {
-        double v = fmax(charon_shadow_corner_coordinate(y + (row + 0.5) * dy, height, cap, scale), 0);
+        double v = fmax(revenant_shadow_corner_coordinate(y + (row + 0.5) * dy, height, cap, scale), 0);
         size_t j = (size_t)v < n - 1 ? (size_t)v : n - 2;
         float fy = (float)fmin(v - j, 1);
         const uint8_t *top = corner + j * n, *bottom = top + n;
@@ -182,7 +182,7 @@ int charon_sheet_shadow_shade(uint8_t *pixels, size_t columns, size_t rows, size
             size_t i = index[column];
             float fx = fraction[column];
             float alpha = ((1 - fy) * ((1 - fx) * top[i] + fx * top[i + 1]) + fy * ((1 - fx) * bottom[i] + fx * bottom[i + 1])) * (1 / 255.0f);
-            charon_shadow_pixel(line + column * 4, alpha);
+            revenant_shadow_pixel(line + column * 4, alpha);
         }
     }
     free(fraction);

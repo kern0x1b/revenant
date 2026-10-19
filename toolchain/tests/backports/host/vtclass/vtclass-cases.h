@@ -1,5 +1,5 @@
-#ifndef CHARON_VTCLASS_CASES_H
-#define CHARON_VTCLASS_CASES_H
+#ifndef REVENANT_VTCLASS_CASES_H
+#define REVENANT_VTCLASS_CASES_H
 
 #import <Foundation/Foundation.h>
 

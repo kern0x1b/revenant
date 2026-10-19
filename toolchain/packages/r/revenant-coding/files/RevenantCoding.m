@@ -1,4 +1,4 @@
-#import "CharonCoding.h"
+#import "RevenantCoding.h"
 
 #import <string.h>
 
@@ -7,7 +7,7 @@
 #import <objc/message.h>
 #import <objc/runtime.h>
 
-static BOOL charon_intents_ivar_is_copy(Class owner, const char *name)
+static BOOL revenant_intents_ivar_is_copy(Class owner, const char *name)
 {
     unsigned count = 0;
     objc_property_t *properties = class_copyPropertyList(owner, &count);
@@ -44,13 +44,13 @@ static BOOL charon_intents_ivar_is_copy(Class owner, const char *name)
     return copy;
 }
 
-id charon_intents_super_init(id object, Class superclass)
+id revenant_intents_super_init(id object, Class superclass)
 {
     struct objc_super parent = { object, superclass };
     return ((id (*)(struct objc_super *, SEL, Class))objc_msgSendSuper)(&parent, @selector(init), superclass);
 }
 
-NSSet *charon_intents_allowed_classes(void)
+NSSet *revenant_intents_allowed_classes(void)
 {
     static NSSet *allowed;
     static dispatch_once_t once;
@@ -86,49 +86,49 @@ NSSet *charon_intents_allowed_classes(void)
     return allowed;
 }
 
-static NSString *charon_intents_key(Class owner, const char *name)
+static NSString *revenant_intents_key(Class owner, const char *name)
 {
     return [NSString stringWithFormat:@"%s.%s", class_getName(owner), name];
 }
 
-enum { CharonIntentsObject, CharonIntentsOpaque, CharonIntentsValue };
+enum { RevenantIntentsObject, RevenantIntentsOpaque, RevenantIntentsValue };
 
-static int charon_intents_kind(Ivar ivar, NSUInteger *size)
+static int revenant_intents_kind(Ivar ivar, NSUInteger *size)
 {
     const char *encoding = ivar_getTypeEncoding(ivar);
     if (!encoding) {
-        return CharonIntentsOpaque;
+        return RevenantIntentsOpaque;
     }
     if (encoding[0] == '@') {
-        return CharonIntentsObject;
+        return RevenantIntentsObject;
     }
     if (encoding[0] == '^' || encoding[0] == '#' || encoding[0] == ':') {
-        return CharonIntentsOpaque;
+        return RevenantIntentsOpaque;
     }
     NSGetSizeAndAlignment(encoding, size, NULL);
-    return CharonIntentsValue;
+    return RevenantIntentsValue;
 }
 
-int charon_copy_is_copy_for_testing(Class owner, const char *ivar)
+int revenant_copy_is_copy_for_testing(Class owner, const char *ivar)
 {
-    return charon_intents_ivar_is_copy(owner, ivar) ? 1 : 0;
+    return revenant_intents_ivar_is_copy(owner, ivar) ? 1 : 0;
 }
 
-void charon_intents_encode(id object, NSCoder *coder)
+void revenant_intents_encode(id object, NSCoder *coder)
 {
     for (Class owner = [object class]; owner && owner != [NSObject class]; owner = class_getSuperclass(owner)) {
         unsigned count = 0;
         Ivar *ivars = class_copyIvarList(owner, &count);
         for (unsigned index = 0; index < count; index++) {
             NSUInteger size = 0;
-            int kind = charon_intents_kind(ivars[index], &size);
-            NSString *key = charon_intents_key(owner, ivar_getName(ivars[index]));
-            if (kind == CharonIntentsObject) {
+            int kind = revenant_intents_kind(ivars[index], &size);
+            NSString *key = revenant_intents_key(owner, ivar_getName(ivars[index]));
+            if (kind == RevenantIntentsObject) {
                 id value = object_getIvar(object, ivars[index]);
                 if (value) {
                     [coder encodeObject:value forKey:key];
                 }
-            } else if (kind == CharonIntentsValue && size > 0) {
+            } else if (kind == RevenantIntentsValue && size > 0) {
                 const char *bytes = (const char *)(__bridge void *)object + ivar_getOffset(ivars[index]);
                 [coder encodeObject:[NSData dataWithBytes:bytes length:size] forKey:key];
             }
@@ -137,22 +137,22 @@ void charon_intents_encode(id object, NSCoder *coder)
     }
 }
 
-void charon_intents_decode(id object, NSCoder *coder)
+void revenant_intents_decode(id object, NSCoder *coder)
 {
     for (Class owner = [object class]; owner && owner != [NSObject class]; owner = class_getSuperclass(owner)) {
         unsigned count = 0;
         Ivar *ivars = class_copyIvarList(owner, &count);
         for (unsigned index = 0; index < count; index++) {
             NSUInteger size = 0;
-            int kind = charon_intents_kind(ivars[index], &size);
-            NSString *key = charon_intents_key(owner, ivar_getName(ivars[index]));
+            int kind = revenant_intents_kind(ivars[index], &size);
+            NSString *key = revenant_intents_key(owner, ivar_getName(ivars[index]));
             char *bytes = (char *)(__bridge void *)object + ivar_getOffset(ivars[index]);
-            if (kind == CharonIntentsObject) {
-                id value = [coder decodeObjectOfClasses:charon_intents_allowed_classes() forKey:key];
+            if (kind == RevenantIntentsObject) {
+                id value = [coder decodeObjectOfClasses:revenant_intents_allowed_classes() forKey:key];
                 if (value) {
                     object_setIvar(object, ivars[index], value);
                 }
-            } else if (kind == CharonIntentsValue && size > 0) {
+            } else if (kind == RevenantIntentsValue && size > 0) {
                 NSData *data = [coder decodeObjectOfClass:[NSData class] forKey:key];
                 if (data.length == size) {
                     memcpy(bytes, data.bytes, size);
@@ -163,20 +163,20 @@ void charon_intents_decode(id object, NSCoder *coder)
     }
 }
 
-void charon_intents_copy(id copy, id object)
+void revenant_intents_copy(id copy, id object)
 {
     for (Class owner = [object class]; owner && owner != [NSObject class]; owner = class_getSuperclass(owner)) {
         unsigned count = 0;
         Ivar *ivars = class_copyIvarList(owner, &count);
         for (unsigned index = 0; index < count; index++) {
             NSUInteger size = 0;
-            int kind = charon_intents_kind(ivars[index], &size);
-            if (kind == CharonIntentsObject) {
+            int kind = revenant_intents_kind(ivars[index], &size);
+            if (kind == RevenantIntentsObject) {
                 id value = object_getIvar(object, ivars[index]);
-                id owned = (value && charon_intents_ivar_is_copy(owner, ivar_getName(ivars[index])) &&
+                id owned = (value && revenant_intents_ivar_is_copy(owner, ivar_getName(ivars[index])) &&
                             [value respondsToSelector:@selector(copy)]) ? [value copy] : value;
                 object_setIvar(copy, ivars[index], owned);
-            } else if (kind == CharonIntentsValue && size > 0) {
+            } else if (kind == RevenantIntentsValue && size > 0) {
                 NSUInteger offset = ivar_getOffset(ivars[index]);
                 memcpy((char *)(__bridge void *)copy + offset,
                        (const char *)(__bridge void *)object + offset, size);

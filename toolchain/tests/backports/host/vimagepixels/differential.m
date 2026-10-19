@@ -3,21 +3,21 @@
 #include <stdio.h>
 #include <string.h>
 
-vImage_Error charon_host_vImageConvert_RGB565toBGRA8888(Pixel_8 alpha, const vImage_Buffer *src, const vImage_Buffer *dest,
+vImage_Error revenant_host_vImageConvert_RGB565toBGRA8888(Pixel_8 alpha, const vImage_Buffer *src, const vImage_Buffer *dest,
                                                vImage_Flags flags);
-vImage_Error charon_host_vImageConvert_BGRA8888toRGB565(const vImage_Buffer *src, const vImage_Buffer *dest, vImage_Flags flags);
-vImage_Error charon_host_vImageConvert_RGB565toRGBA8888(Pixel_8 alpha, const vImage_Buffer *src, const vImage_Buffer *dest,
+vImage_Error revenant_host_vImageConvert_BGRA8888toRGB565(const vImage_Buffer *src, const vImage_Buffer *dest, vImage_Flags flags);
+vImage_Error revenant_host_vImageConvert_RGB565toRGBA8888(Pixel_8 alpha, const vImage_Buffer *src, const vImage_Buffer *dest,
                                                vImage_Flags flags);
-vImage_Error charon_host_vImageConvert_RGBA5551toRGBA8888(const vImage_Buffer *src, const vImage_Buffer *dest, vImage_Flags flags);
-vImage_Error charon_host_vImageConvert_RGBA8888toRGB565(const vImage_Buffer *src, const vImage_Buffer *dest, vImage_Flags flags);
-vImage_Error charon_host_vImageConvert_RGBA8888toRGBA5551(const vImage_Buffer *src, const vImage_Buffer *dest, vImage_Flags flags);
-vImage_Error charon_host_vImageConvert_RGB565toRGB888(const vImage_Buffer *src, const vImage_Buffer *dest, vImage_Flags flags);
-vImage_Error charon_host_vImageConvert_ARGB1555toRGB565(const vImage_Buffer *src, const vImage_Buffer *dest, vImage_Flags flags);
-vImage_Error charon_host_vImageConvert_RGB565toARGB1555(const vImage_Buffer *src, const vImage_Buffer *dest, int dither,
+vImage_Error revenant_host_vImageConvert_RGBA5551toRGBA8888(const vImage_Buffer *src, const vImage_Buffer *dest, vImage_Flags flags);
+vImage_Error revenant_host_vImageConvert_RGBA8888toRGB565(const vImage_Buffer *src, const vImage_Buffer *dest, vImage_Flags flags);
+vImage_Error revenant_host_vImageConvert_RGBA8888toRGBA5551(const vImage_Buffer *src, const vImage_Buffer *dest, vImage_Flags flags);
+vImage_Error revenant_host_vImageConvert_RGB565toRGB888(const vImage_Buffer *src, const vImage_Buffer *dest, vImage_Flags flags);
+vImage_Error revenant_host_vImageConvert_ARGB1555toRGB565(const vImage_Buffer *src, const vImage_Buffer *dest, vImage_Flags flags);
+vImage_Error revenant_host_vImageConvert_RGB565toARGB1555(const vImage_Buffer *src, const vImage_Buffer *dest, int dither,
                                                 vImage_Flags flags);
-vImage_Error charon_host_vImageConvert_RGB565toRGBA5551(const vImage_Buffer *src, const vImage_Buffer *dest, int dither,
+vImage_Error revenant_host_vImageConvert_RGB565toRGBA5551(const vImage_Buffer *src, const vImage_Buffer *dest, int dither,
                                                  vImage_Flags flags);
-vImage_Error charon_host_vImageConvert_RGBA5551toRGB565(const vImage_Buffer *src, const vImage_Buffer *dest, vImage_Flags flags);
+vImage_Error revenant_host_vImageConvert_RGBA5551toRGB565(const vImage_Buffer *src, const vImage_Buffer *dest, vImage_Flags flags);
 
 static int checks;
 static int failures;
@@ -88,9 +88,9 @@ int main(void)
                 vImage_Error (*theirs)(const vImage_Buffer *, const vImage_Buffer *, int, vImage_Flags);
             } cases[] = {
                 {"vImageConvert_RGB565toARGB1555 with a dither of zero", vImageConvert_RGB565toARGB1555,
-                 charon_host_vImageConvert_RGB565toARGB1555},
+                 revenant_host_vImageConvert_RGB565toARGB1555},
                 {"vImageConvert_RGB565toRGBA5551 with a dither of zero", vImageConvert_RGB565toRGBA5551,
-                 charon_host_vImageConvert_RGB565toRGBA5551},
+                 revenant_host_vImageConvert_RGB565toRGBA5551},
             };
             for (unsigned at = 0; at < sizeof cases / sizeof *cases; at++) {
                 int agreed = 1;
@@ -113,10 +113,10 @@ int main(void)
                 vImage_Error (*theirs)(const vImage_Buffer *, const vImage_Buffer *, vImage_Flags);
                 size_t bytes;
             } cases[] = {
-                {"vImageConvert_ARGB1555toRGB565", vImageConvert_ARGB1555toRGB565, charon_host_vImageConvert_ARGB1555toRGB565, PIXELS * 2},
-                {"vImageConvert_RGBA5551toRGB565", vImageConvert_RGBA5551toRGB565, charon_host_vImageConvert_RGBA5551toRGB565,
+                {"vImageConvert_ARGB1555toRGB565", vImageConvert_ARGB1555toRGB565, revenant_host_vImageConvert_ARGB1555toRGB565, PIXELS * 2},
+                {"vImageConvert_RGBA5551toRGB565", vImageConvert_RGBA5551toRGB565, revenant_host_vImageConvert_RGBA5551toRGB565,
                  PIXELS * 2},
-                {"vImageConvert_RGBA5551toRGBA8888", vImageConvert_RGBA5551toRGBA8888, charon_host_vImageConvert_RGBA5551toRGBA8888,
+                {"vImageConvert_RGBA5551toRGBA8888", vImageConvert_RGBA5551toRGBA8888, revenant_host_vImageConvert_RGBA5551toRGBA8888,
                  PIXELS * 4},
             };
             for (unsigned at = 0; at < sizeof cases / sizeof *cases; at++) {
@@ -142,7 +142,7 @@ int main(void)
                 vImage_Error (*mine)(const vImage_Buffer *, const vImage_Buffer *, vImage_Flags);
                 vImage_Error (*theirs)(const vImage_Buffer *, const vImage_Buffer *, vImage_Flags);
             } cases[] = {
-                {"vImageConvert_RGB565toRGB888", vImageConvert_RGB565toRGB888, charon_host_vImageConvert_RGB565toRGB888},
+                {"vImageConvert_RGB565toRGB888", vImageConvert_RGB565toRGB888, revenant_host_vImageConvert_RGB565toRGB888},
             };
             for (unsigned at = 0; at < sizeof cases / sizeof *cases; at++) {
                 int agreed;
@@ -165,7 +165,7 @@ int main(void)
                 {"vImageConvert_RGB565toRGBA8888", (vImage_Error(*)(Pixel_8, const vImage_Buffer *, const vImage_Buffer *,
                                                                   vImage_Flags))vImageConvert_RGB565toRGBA8888,
                  (vImage_Error(*)(Pixel_8, const vImage_Buffer *, const vImage_Buffer *, vImage_Flags))
-                     charon_host_vImageConvert_RGB565toRGBA8888},
+                     revenant_host_vImageConvert_RGB565toRGBA8888},
             };
             for (unsigned at = 0; at < sizeof cases / sizeof *cases; at++) {
                 int agreed;
@@ -186,9 +186,9 @@ int main(void)
                 vImage_Error (*mine)(const vImage_Buffer *, const vImage_Buffer *, vImage_Flags);
                 vImage_Error (*theirs)(const vImage_Buffer *, const vImage_Buffer *, vImage_Flags);
             } cases[] = {
-                {"vImageConvert_BGRA8888toRGB565", vImageConvert_BGRA8888toRGB565, charon_host_vImageConvert_BGRA8888toRGB565},
-                {"vImageConvert_RGBA8888toRGB565", vImageConvert_RGBA8888toRGB565, charon_host_vImageConvert_RGBA8888toRGB565},
-                {"vImageConvert_RGBA8888toRGBA5551", vImageConvert_RGBA8888toRGBA5551, charon_host_vImageConvert_RGBA8888toRGBA5551},
+                {"vImageConvert_BGRA8888toRGB565", vImageConvert_BGRA8888toRGB565, revenant_host_vImageConvert_BGRA8888toRGB565},
+                {"vImageConvert_RGBA8888toRGB565", vImageConvert_RGBA8888toRGB565, revenant_host_vImageConvert_RGBA8888toRGB565},
+                {"vImageConvert_RGBA8888toRGBA5551", vImageConvert_RGBA8888toRGBA5551, revenant_host_vImageConvert_RGBA8888toRGBA5551},
             };
             vImage_Buffer mine_to16n = buffer_of(mine_out, PIXELS * 2, PIXELS, 1);
             vImage_Buffer theirs_to16n = buffer_of(theirs_out, PIXELS * 2, PIXELS, 1);
@@ -219,15 +219,15 @@ int main(void)
             vImage_Buffer small = buffer_of(mine_out, 8, 1, 1);
             vImage_Buffer large = buffer_of(mine_out, 8, 4, 1);
             vImage_Error mine_error = vImageConvert_RGB565toRGB888(&small, &large, 0);
-            vImage_Error host_error = charon_host_vImageConvert_RGB565toRGB888(&small, &large, 0);
+            vImage_Error host_error = revenant_host_vImageConvert_RGB565toRGB888(&small, &large, 0);
             report(mine_error == kvImageRoiLargerThanInputBuffer && host_error == kvImageRoiLargerThanInputBuffer,
                    "a destination larger than the source is kvImageRoiLargerThanInputBuffer on both sides", "");
             mine_error = vImageConvert_RGB565toRGB888(&small, &small, 0x4000);
-            host_error = charon_host_vImageConvert_RGB565toRGB888(&small, &small, 0x4000);
+            host_error = revenant_host_vImageConvert_RGB565toRGB888(&small, &small, 0x4000);
             report(mine_error == kvImageUnknownFlagsBit && host_error == kvImageUnknownFlagsBit,
                    "a flag outside the set the header lists is kvImageUnknownFlagsBit on both sides", "");
             mine_error = vImageConvert_RGB565toRGB888(&small, &small, kvImageGetTempBufferSize);
-            host_error = charon_host_vImageConvert_RGB565toRGB888(&small, &small, kvImageGetTempBufferSize);
+            host_error = revenant_host_vImageConvert_RGB565toRGB888(&small, &small, kvImageGetTempBufferSize);
             report(mine_error == 0 && host_error == 0, "kvImageGetTempBufferSize does no work and answers zero on both sides",
                    "");
         }

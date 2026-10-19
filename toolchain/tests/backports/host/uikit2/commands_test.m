@@ -10,11 +10,11 @@
 #pragma clang diagnostic ignored "-Wincompatible-pointer-types"
 #pragma clang diagnostic ignored "-Wundeclared-selector"
 
-@interface CharonRecorder : NSCoder
+@interface RevenantRecorder : NSCoder
 @property (nonatomic, strong) NSMutableArray *rows;
 @end
 
-@implementation CharonRecorder
+@implementation RevenantRecorder
 
 - (instancetype)init
 {
@@ -63,7 +63,7 @@
 static NSString *norm(id object)
 {
     NSString *text = [NSString stringWithFormat:@"%@", object];
-    text = [text stringByReplacingOccurrencesOfString:@"CharonHost" withString:@""];
+    text = [text stringByReplacingOccurrencesOfString:@"RevenantHost" withString:@""];
     NSRegularExpression *pointer = [NSRegularExpression regularExpressionWithPattern:@"0x[0-9a-f]+" options:0 error:nil];
     return [pointer stringByReplacingMatchesInString:text options:0 range:NSMakeRange(0, text.length) withTemplate:@"PTR"];
 }
@@ -99,18 +99,18 @@ static void agree(NSString *name, NSArray *ours, NSArray *system)
         if (![a isEqual:b])
             [detail appendFormat:@"\n    port   %@\n    system %@", a, b];
     }
-    charon_check(detail.length == 0, name.UTF8String, detail);
+    revenant_check(detail.length == 0, name.UTF8String, detail);
 }
 
 static NSArray *archive_rows(id object)
 {
-    CharonRecorder *recorder = [[CharonRecorder alloc] init];
+    RevenantRecorder *recorder = [[RevenantRecorder alloc] init];
     [object encodeWithCoder:recorder];
     NSMutableArray *rows = [NSMutableArray array];
     for (NSString *row in recorder.rows) {
         if ([row hasPrefix:@"object accessibilityIdentifier"] || [row hasPrefix:@"object internalIdentifier"] || [row hasPrefix:@"object eventDeferringEnvironment"] || [row hasPrefix:@"bool "] || [row hasPrefix:@"int32 enumerationPriority"])
             continue;
-        [rows addObject:[[row stringByReplacingOccurrencesOfString:@"CharonHost" withString:@""] copy]];
+        [rows addObject:[[row stringByReplacingOccurrencesOfString:@"RevenantHost" withString:@""] copy]];
     }
     [rows sortUsingSelector:@selector(compare:)];
     return rows;
@@ -238,8 +238,8 @@ static NSArray *key_lines(Class key, Class command, Class alternate, UIImage *im
 int main(void)
 {
     @autoreleasepool {
-        Class ourCommand = NSClassFromString(@"CharonHostUICommand"), ourAlternate = NSClassFromString(@"CharonHostUICommandAlternate"), ourKey = NSClassFromString(@"CharonHostUIKeyCommand");
-        charon_check(ourCommand && ourAlternate && ourKey, "the port's classes are linked under their host names", @"one is missing");
+        Class ourCommand = NSClassFromString(@"RevenantHostUICommand"), ourAlternate = NSClassFromString(@"RevenantHostUICommandAlternate"), ourKey = NSClassFromString(@"RevenantHostUIKeyCommand");
+        revenant_check(ourCommand && ourAlternate && ourKey, "the port's classes are linked under their host names", @"one is missing");
         agree(@"command values", command_lines(ourCommand, ourAlternate), command_lines([UICommand class], [UICommandAlternate class]));
         UIImage *image = one_pixel_image();
         agree(@"key command values", key_lines(ourKey, ourCommand, ourAlternate, image), key_lines([UIKeyCommand class], [UICommand class], [UICommandAlternate class], image));
@@ -255,7 +255,7 @@ int main(void)
             NSString *answer = [NSString stringWithFormat:@"%@ title %@ action %@ propertyList %@ image %@ input %@ flags %lu",
                                 NSStringFromClass([ours class]), [ours title], NSStringFromSelector([ours action]), [ours propertyList] ?: @"nil",
                                 [ours image] == keyImage ? @"kept" : @"lost", [ours input] ?: @"nil", (unsigned long)[ours modifierFlags]];
-            charon_check(ours != nil && [answer hasPrefix:@"CharonHostUIKeyCommand"] && [refusal hasPrefix:@"raised"],
+            revenant_check(ours != nil && [answer hasPrefix:@"RevenantHostUIKeyCommand"] && [refusal hasPrefix:@"raised"],
                          "the factory of 7.0 answers on the port, and the host has no answer to compare with",
                          [NSString stringWithFormat:@"port %@ | host %@", answer, refusal]);
         }
@@ -267,18 +267,18 @@ int main(void)
             });
             NSString *answer = [NSString stringWithFormat:@"%@ title %@ alternates %lu action %@",
                                 NSStringFromClass([ours class]), [ours title], (unsigned long)[ours alternates].count, NSStringFromSelector([ours action])];
-            charon_check(ours != nil && [answer hasPrefix:@"CharonHostUIKeyCommand"] && [ours alternates].count == 1 && [refusal hasPrefix:@"raised"],
+            revenant_check(ours != nil && [answer hasPrefix:@"RevenantHostUIKeyCommand"] && [ours alternates].count == 1 && [refusal hasPrefix:@"raised"],
                          "the factory of 7.0 with alternates answers on the port, and the host has none",
                          [NSString stringWithFormat:@"port %@ | host %@", answer, refusal]);
         }
-        charon_check([[NSString stringWithUTF8String:class_getName(class_getSuperclass(ourKey))] isEqualToString:@"CharonHostUICommand"], "a key command is a command", @"it is not");
-        charon_check(![ourCommand instancesRespondToSelector:@selector(subtitle)] && ![ourCommand instancesRespondToSelector:@selector(selectedImage)] && ![ourCommand instancesRespondToSelector:@selector(repeatBehavior)] &&
+        revenant_check([[NSString stringWithUTF8String:class_getName(class_getSuperclass(ourKey))] isEqualToString:@"RevenantHostUICommand"], "a key command is a command", @"it is not");
+        revenant_check(![ourCommand instancesRespondToSelector:@selector(subtitle)] && ![ourCommand instancesRespondToSelector:@selector(selectedImage)] && ![ourCommand instancesRespondToSelector:@selector(repeatBehavior)] &&
                          ![ourCommand instancesRespondToSelector:@selector(sender)] && ![ourCommand instancesRespondToSelector:@selector(performWithSender:target:)],
                      "a command answers none of the members of iOS 16 and later", @"it answers one");
-        charon_check([ourCommand supportsSecureCoding] && [ourAlternate supportsSecureCoding] && [ourKey supportsSecureCoding], "the classes support secure coding", @"one does not");
-        NSString *ourTag = *(NSString *const *)dlsym(RTLD_DEFAULT, "CharonHostUICommandTagShare");
-        charon_check([ourTag isEqualToString:UICommandTagShare], "the share tag is the system's", @"it differs");
-        printf("checks=%d failures=%d\n", charon_checks, charon_failures);
-        return charon_failures ? 1 : 0;
+        revenant_check([ourCommand supportsSecureCoding] && [ourAlternate supportsSecureCoding] && [ourKey supportsSecureCoding], "the classes support secure coding", @"one does not");
+        NSString *ourTag = *(NSString *const *)dlsym(RTLD_DEFAULT, "RevenantHostUICommandTagShare");
+        revenant_check([ourTag isEqualToString:UICommandTagShare], "the share tag is the system's", @"it differs");
+        printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
+        return revenant_failures ? 1 : 0;
     }
 }

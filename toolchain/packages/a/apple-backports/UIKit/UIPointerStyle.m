@@ -1,14 +1,14 @@
-#import "CharonPointer.h"
+#import "RevenantPointer.h"
 #import <objc/message.h>
 
 #pragma clang diagnostic ignored "-Wprotocol"
 #pragma clang diagnostic ignored "-Woverriding-method-mismatch"
 #pragma clang diagnostic ignored "-Wmethod-signatures"
 
-static const NSUInteger CharonShapeDefaultRadius = 8;
+static const NSUInteger RevenantShapeDefaultRadius = 8;
 
-@interface UIPointerShape (CharonPointer)
-- (instancetype)initCharon;
+@interface UIPointerShape (RevenantPointer)
+- (instancetype)initRevenant;
 @end
 
 @implementation UIPointerShape {
@@ -24,7 +24,7 @@ static const NSUInteger CharonShapeDefaultRadius = 8;
 
 + (instancetype)shapeWithPath:(UIBezierPath *)path
 {
-    UIPointerShape *shape = [[self alloc] initCharon];
+    UIPointerShape *shape = [[self alloc] initRevenant];
     shape->_type = 1;
     shape->_path = [path copy];
     return shape;
@@ -32,7 +32,7 @@ static const NSUInteger CharonShapeDefaultRadius = 8;
 
 + (instancetype)shapeWithRoundedRect:(CGRect)rect
 {
-    UIPointerShape *shape = [[self alloc] initCharon];
+    UIPointerShape *shape = [[self alloc] initRevenant];
     shape->_rect = rect;
     return shape;
 }
@@ -47,14 +47,14 @@ static const NSUInteger CharonShapeDefaultRadius = 8;
 
 + (instancetype)beamWithPreferredLength:(CGFloat)length axis:(UIAxis)axis
 {
-    UIPointerShape *shape = [[self alloc] initCharon];
+    UIPointerShape *shape = [[self alloc] initRevenant];
     shape->_type = 2;
     shape->_beamLength = length;
     shape->_beamHorizontal = axis == UIAxisHorizontal;
     return shape;
 }
 
-- (instancetype)initCharon
+- (instancetype)initRevenant
 {
     return [super init];
 }
@@ -68,7 +68,7 @@ static const NSUInteger CharonShapeDefaultRadius = 8;
 
 - (id)copyWithZone:(NSZone *)zone
 {
-    UIPointerShape *copy = [[[self class] allocWithZone:zone] initCharon];
+    UIPointerShape *copy = [[[self class] allocWithZone:zone] initRevenant];
     copy->_type = _type;
     copy->_rect = _rect;
     copy->_cornerRadius = _cornerRadius;
@@ -79,7 +79,7 @@ static const NSUInteger CharonShapeDefaultRadius = 8;
     return copy;
 }
 
-- (UIBezierPath *)charon_path
+- (UIBezierPath *)revenant_path
 {
     return _path;
 }
@@ -108,9 +108,9 @@ static const NSUInteger CharonShapeDefaultRadius = 8;
 {
     CGRect rect = _type == 1 ? (_path ? CGPathGetBoundingBox(_path.CGPath) : CGRectZero) : _rect;
     if (_type == 2)
-        return charon_hash_part(_beamLength) ^ (_beamHorizontal ? 17 : 16);
-    return charon_hash_part(rect.origin.x) ^ charon_hash_part(rect.origin.y) ^ charon_hash_part(rect.size.width) ^ charon_hash_part(rect.size.height)
-        ^ (_type == 0 && _radiusSet ? charon_hash_part(_cornerRadius) : 0) ^ CharonShapeDefaultRadius ^ (NSUInteger)_type;
+        return revenant_hash_part(_beamLength) ^ (_beamHorizontal ? 17 : 16);
+    return revenant_hash_part(rect.origin.x) ^ revenant_hash_part(rect.origin.y) ^ revenant_hash_part(rect.size.width) ^ revenant_hash_part(rect.size.height)
+        ^ (_type == 0 && _radiusSet ? revenant_hash_part(_cornerRadius) : 0) ^ RevenantShapeDefaultRadius ^ (NSUInteger)_type;
 }
 
 - (NSString *)description
@@ -131,8 +131,8 @@ static const NSUInteger CharonShapeDefaultRadius = 8;
 
 @end
 
-@interface UIPointerEffect (CharonPointer)
-- (instancetype)initCharonWithPreview:(UITargetedPreview *)preview;
+@interface UIPointerEffect (RevenantPointer)
+- (instancetype)initRevenantWithPreview:(UITargetedPreview *)preview;
 @end
 
 @implementation UIPointerEffect {
@@ -142,10 +142,10 @@ static const NSUInteger CharonShapeDefaultRadius = 8;
 
 + (instancetype)effectWithPreview:(UITargetedPreview *)preview
 {
-    return [[self alloc] initCharonWithPreview:preview];
+    return [[self alloc] initRevenantWithPreview:preview];
 }
 
-- (instancetype)initCharonWithPreview:(UITargetedPreview *)preview
+- (instancetype)initRevenantWithPreview:(UITargetedPreview *)preview
 {
     if ((self = [super init]))
         _preview = preview;
@@ -159,7 +159,7 @@ static const NSUInteger CharonShapeDefaultRadius = 8;
 
 - (id)copyWithZone:(NSZone *)zone
 {
-    return [[[self class] allocWithZone:zone] initCharonWithPreview:_preview];
+    return [[[self class] allocWithZone:zone] initRevenantWithPreview:_preview];
 }
 
 - (BOOL)isEqual:(id)object
@@ -197,9 +197,9 @@ static const NSUInteger CharonShapeDefaultRadius = 8;
     BOOL _prefersScaledContent;
 }
 
-- (instancetype)initCharonWithPreview:(UITargetedPreview *)preview
+- (instancetype)initRevenantWithPreview:(UITargetedPreview *)preview
 {
-    if ((self = [super initCharonWithPreview:preview])) {
+    if ((self = [super initRevenantWithPreview:preview])) {
         _preferredTintMode = UIPointerEffectTintModeOverlay;
         _prefersScaledContent = YES;
     }
@@ -262,8 +262,8 @@ static const NSUInteger CharonShapeDefaultRadius = 8;
 
 @end
 
-@interface UIPointerStyle (CharonPointer)
-- (instancetype)initCharonWithType:(NSInteger)type effect:(UIPointerEffect *)effect shape:(UIPointerShape *)shape axes:(UIAxis)axes;
+@interface UIPointerStyle (RevenantPointer)
+- (instancetype)initRevenantWithType:(NSInteger)type effect:(UIPointerEffect *)effect shape:(UIPointerShape *)shape axes:(UIAxis)axes;
 @end
 
 @implementation UIPointerStyle {
@@ -277,20 +277,20 @@ static const NSUInteger CharonShapeDefaultRadius = 8;
 
 + (instancetype)styleWithEffect:(UIPointerEffect *)effect shape:(UIPointerShape *)shape
 {
-    return [[self alloc] initCharonWithType:1 effect:effect shape:shape axes:(UIAxis)0];
+    return [[self alloc] initRevenantWithType:1 effect:effect shape:shape axes:(UIAxis)0];
 }
 
 + (instancetype)styleWithShape:(UIPointerShape *)shape constrainedAxes:(UIAxis)axes
 {
-    return [[self alloc] initCharonWithType:2 effect:nil shape:shape axes:axes];
+    return [[self alloc] initRevenantWithType:2 effect:nil shape:shape axes:axes];
 }
 
 + (instancetype)hiddenPointerStyle
 {
-    return [[self alloc] initCharonWithType:0 effect:nil shape:nil axes:(UIAxis)0];
+    return [[self alloc] initRevenantWithType:0 effect:nil shape:nil axes:(UIAxis)0];
 }
 
-- (instancetype)initCharonWithType:(NSInteger)type effect:(UIPointerEffect *)effect shape:(UIPointerShape *)shape axes:(UIAxis)axes
+- (instancetype)initRevenantWithType:(NSInteger)type effect:(UIPointerEffect *)effect shape:(UIPointerShape *)shape axes:(UIAxis)axes
 {
     struct objc_super parent = {self, class_getSuperclass([UIPointerStyle class])};
     if ((self = ((id (*)(struct objc_super *, SEL))objc_msgSendSuper)(&parent, @selector(init)))) {
@@ -302,17 +302,17 @@ static const NSUInteger CharonShapeDefaultRadius = 8;
     return self;
 }
 
-- (UIPointerEffect *)charon_effect
+- (UIPointerEffect *)revenant_effect
 {
     return _effect;
 }
 
-- (UIPointerShape *)charon_shape
+- (UIPointerShape *)revenant_shape
 {
     return _shape;
 }
 
-- (UIAxis)charon_axes
+- (UIAxis)revenant_axes
 {
     return _axes;
 }
@@ -329,7 +329,7 @@ static const NSUInteger CharonShapeDefaultRadius = 8;
 
 - (id)copyWithZone:(NSZone *)zone
 {
-    UIPointerStyle *copy = [[[self class] allocWithZone:zone] initCharonWithType:_type effect:[_effect copy] shape:[_shape copy] axes:_axes];
+    UIPointerStyle *copy = [[[self class] allocWithZone:zone] initRevenantWithType:_type effect:[_effect copy] shape:[_shape copy] axes:_axes];
     copy->_accessories = [_accessories copy];
     return copy;
 }

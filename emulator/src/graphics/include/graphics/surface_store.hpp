@@ -18,7 +18,7 @@
 
 #include "foundation/file_page_cache.hpp"
 
-namespace shade {
+namespace emulator {
 
 class AddressSpace;
 class HostSurface;

@@ -1,11 +1,11 @@
 set_project("textdragdrop")
 set_version("0.0.1")
 local root = os.getenv("DDR_ROOT") or path.join(os.scriptdir(), "../../../..")
-add_repositories("charon " .. root)
-add_addons("charon v0.8.14")
+add_repositories("revenant " .. root)
+add_addons("revenant v0.8.14")
 set_config("apple_minimum", "6.1.3")
-includes("@addon/charon/apple-ios")
-includes("@addon/charon/emulate")
+includes("@addon/revenant/apple-ios")
+includes("@addon/revenant/emulate")
 set_allowedplats("iphoneos")
 set_allowedarchs("iphoneos|armv7")
 set_defaultplat("iphoneos")
@@ -13,12 +13,12 @@ set_defaultarchs("iphoneos|armv7")
 
 local ui = os.getenv("DDR_UIKIT") or path.join(root, "packages/a/apple-backports/UIKit")
 target("textdragdrop")
-    add_rules("@addon/charon/daemon")
+    add_rules("@addon/revenant/daemon")
     add_files(path.join(root, "tests/backports/device/textdragdrop.m"),
               path.join(root, "tests/backports/device/check.m"),
               path.join(ui, "ViewDragDropRouting11.m"),
-              path.join(ui, "CharonDropSequence11.m"),
-              path.join(ui, "CharonDropCoordinatorObjects.m"),
+              path.join(ui, "RevenantDropSequence11.m"),
+              path.join(ui, "RevenantDropCoordinatorObjects.m"),
               path.join(ui, "UIDropCoordinators.m"),
               path.join(ui, "UIDropSession.m"),
               path.join(ui, "UIDropProposal.m"),
@@ -27,7 +27,7 @@ target("textdragdrop")
               path.join(ui, "UIDragItem.m"),
               path.join(ui, "UITextView+TextDragDrop11.m"),
               path.join(ui, "UITextDragPreviewRenderer11.m"),
-              path.join(ui, "CharonDragDrop.m"),
+              path.join(ui, "RevenantDragDrop.m"),
               path.join(ui, "UIView+Interactions.m"),
               path.join(ui, "UICollectionView+DragDrop.m"),
               path.join(ui, "UITableView+DragDrop.m"),
@@ -38,7 +38,7 @@ target("textdragdrop")
     add_mflags("-fobjc-arc", "-fvisibility=hidden", "-Wno-deprecated-declarations")
     add_ldflags("-fobjc-arc")
     add_frameworks("UIKit", "Foundation", "CoreGraphics", "QuartzCore")
-    set_values("charon.version", "1.0")
-    set_values("charon.control", "control")
-    set_values("charon.waive.weak-imports",
+    set_values("revenant.version", "1.0")
+    set_values("revenant.control", "control")
+    set_values("revenant.waive.weak-imports",
         "measurement harness, not a released image: the iOS 11 types it names are each used behind a class test")

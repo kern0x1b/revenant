@@ -1,9 +1,9 @@
-#import "CharonMenus.h"
+#import "RevenantMenus.h"
 #import <objc/runtime.h>
 
-static const char CharonButtonMaskRequiredKey;
+static const char RevenantButtonMaskRequiredKey;
 
-@implementation UIGestureRecognizer (CharonPointer)
+@implementation UIGestureRecognizer (RevenantPointer)
 
 - (UIKeyModifierFlags)modifierFlags
 {
@@ -22,11 +22,11 @@ static const char CharonButtonMaskRequiredKey;
 
 @end
 
-@implementation UITapGestureRecognizer (CharonPointer)
+@implementation UITapGestureRecognizer (RevenantPointer)
 
 - (UIEventButtonMask)buttonMaskRequired
 {
-    NSNumber *held = objc_getAssociatedObject(self, &CharonButtonMaskRequiredKey);
+    NSNumber *held = objc_getAssociatedObject(self, &RevenantButtonMaskRequiredKey);
     return held ? (UIEventButtonMask)held.integerValue : UIEventButtonMaskPrimary;
 }
 
@@ -34,7 +34,7 @@ static const char CharonButtonMaskRequiredKey;
 {
     if (buttonMaskRequired <= 0)
         [NSException raise:NSInternalInconsistencyException format:@"buttonMaskRequired must be greater than 0"];
-    objc_setAssociatedObject(self, &CharonButtonMaskRequiredKey, @((NSInteger)buttonMaskRequired), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, &RevenantButtonMaskRequiredKey, @((NSInteger)buttonMaskRequired), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
 @end

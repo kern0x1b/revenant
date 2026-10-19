@@ -1,4 +1,4 @@
-#import "CharonGK.h"
+#import "RevenantGK.h"
 
 @implementation GKState {
     __weak GKStateMachine *_machine;
@@ -36,7 +36,7 @@
     return _machine;
 }
 
-- (void)charon_attachToStateMachine:(GKStateMachine *)machine
+- (void)revenant_attachToStateMachine:(GKStateMachine *)machine
 {
     _machine = machine;
 }
@@ -59,7 +59,7 @@
     if (self) {
         _states = [states copy];
         for (GKState *state in _states) {
-            [state charon_attachToStateMachine:self];
+            [state revenant_attachToStateMachine:self];
         }
     }
     return self;
@@ -107,7 +107,7 @@
     GKState *previous = _current;
     [previous willExitWithNextState:next];
     _current = next;
-    [next charon_attachToStateMachine:self];
+    [next revenant_attachToStateMachine:self];
     [next didEnterWithPreviousState:previous];
     return YES;
 }

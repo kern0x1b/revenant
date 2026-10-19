@@ -8,42 +8,42 @@ NSString *const NSItemProviderPreferredImageSizeKey = @"NSItemProviderPreferredI
 NSString *const NSExtensionJavaScriptPreprocessingResultsKey = @"NSExtensionJavaScriptPreprocessingResultsKey";
 NSString *const NSExtensionJavaScriptFinalizeArgumentKey = @"NSExtensionJavaScriptFinalizeArgumentKey";
 
-typedef Boolean (*CharonConformsFunction)(CFStringRef, CFStringRef);
-typedef CFStringRef (*CharonIdentifierFunction)(CFStringRef, CFStringRef, CFStringRef);
+typedef Boolean (*RevenantConformsFunction)(CFStringRef, CFStringRef);
+typedef CFStringRef (*RevenantIdentifierFunction)(CFStringRef, CFStringRef, CFStringRef);
 
-static CharonConformsFunction charon_conforms_function;
-static CharonIdentifierFunction charon_identifier_function;
+static RevenantConformsFunction revenant_conforms_function;
+static RevenantIdentifierFunction revenant_identifier_function;
 
-static void charon_load_uti(void)
+static void revenant_load_uti(void)
 {
     static dispatch_once_t once;
     dispatch_once(&once, ^{
-        charon_conforms_function = (CharonConformsFunction)dlsym(RTLD_DEFAULT, "UTTypeConformsTo");
-        charon_identifier_function = (CharonIdentifierFunction)dlsym(RTLD_DEFAULT, "UTTypeCreatePreferredIdentifierForTag");
-        if (!charon_conforms_function || !charon_identifier_function) {
+        revenant_conforms_function = (RevenantConformsFunction)dlsym(RTLD_DEFAULT, "UTTypeConformsTo");
+        revenant_identifier_function = (RevenantIdentifierFunction)dlsym(RTLD_DEFAULT, "UTTypeCreatePreferredIdentifierForTag");
+        if (!revenant_conforms_function || !revenant_identifier_function) {
             void *image = dlopen("/System/Library/Frameworks/MobileCoreServices.framework/MobileCoreServices", RTLD_LAZY);
-            charon_conforms_function = (CharonConformsFunction)dlsym(image, "UTTypeConformsTo");
-            charon_identifier_function = (CharonIdentifierFunction)dlsym(image, "UTTypeCreatePreferredIdentifierForTag");
+            revenant_conforms_function = (RevenantConformsFunction)dlsym(image, "UTTypeConformsTo");
+            revenant_identifier_function = (RevenantIdentifierFunction)dlsym(image, "UTTypeCreatePreferredIdentifierForTag");
         }
     });
 }
 
-static BOOL charon_conforms(NSString *type, NSString *parent)
+static BOOL revenant_conforms(NSString *type, NSString *parent)
 {
     if ([type isEqualToString:parent])
         return YES;
-    charon_load_uti();
-    return charon_conforms_function && charon_conforms_function((__bridge CFStringRef)type, (__bridge CFStringRef)parent);
+    revenant_load_uti();
+    return revenant_conforms_function && revenant_conforms_function((__bridge CFStringRef)type, (__bridge CFStringRef)parent);
 }
 
-static NSError *charon_error(NSInteger code)
+static NSError *revenant_error(NSInteger code)
 {
     return [NSError errorWithDomain:NSItemProviderErrorDomain code:code userInfo:nil];
 }
 
-static Class charon_expected_class(id block)
+static Class revenant_expected_class(id block)
 {
-    struct CharonBlock {
+    struct RevenantBlock {
         void *isa;
         int flags;
         int reserved;
@@ -52,7 +52,7 @@ static Class charon_expected_class(id block)
             unsigned long reserved;
             unsigned long size;
         } *descriptor;
-    } *layout = (__bridge struct CharonBlock *)block;
+    } *layout = (__bridge struct RevenantBlock *)block;
     const int hasCopyDispose = 1 << 25, hasSignature = 1 << 30;
     if (!layout || !(layout->flags & hasSignature))
         return Nil;
@@ -79,19 +79,19 @@ static Class charon_expected_class(id block)
     return name[0] ? NSClassFromString(@(name)) : Nil;
 }
 
-static id charon_image(NSData *data)
+static id revenant_image(NSData *data)
 {
     Class image = NSClassFromString(@"UIImage");
     return data.length && image ? ((id (*)(Class, SEL, NSData *))objc_msgSend)(image, NSSelectorFromString(@"imageWithData:"), data) : nil;
 }
 
-static id charon_coerce(id item, NSString *type, Class expected, NSInteger *code)
+static id revenant_coerce(id item, NSString *type, Class expected, NSInteger *code)
 {
     *code = 0;
     if (!expected || [item isKindOfClass:expected])
         return item;
     BOOL fileURL = [item isKindOfClass:[NSURL class]] && [item isFileURL];
-    BOOL urlType = charon_conforms(type, @"public.url");
+    BOOL urlType = revenant_conforms(type, @"public.url");
     NSString *urlString = nil;
     if (urlType && [item isKindOfClass:[NSData class]])
         urlString = [[NSString alloc] initWithData:item encoding:NSUTF8StringEncoding];
@@ -100,7 +100,7 @@ static id charon_coerce(id item, NSString *type, Class expected, NSInteger *code
             return [item absoluteString];
         if (urlString)
             return urlString;
-        if ([item isKindOfClass:[NSData class]] && charon_conforms(type, @"public.text")) {
+        if ([item isKindOfClass:[NSData class]] && revenant_conforms(type, @"public.text")) {
             NSString *string = [[NSString alloc] initWithData:item encoding:NSUTF8StringEncoding];
             if (string)
                 return string;
@@ -120,7 +120,7 @@ static id charon_coerce(id item, NSString *type, Class expected, NSInteger *code
     } else if ([expected isSubclassOfClass:(NSClassFromString(@"UIImage") ?: [NSNull class])]) {
         NSData *data = [item isKindOfClass:[NSData class]] ? item : fileURL ? [NSData dataWithContentsOfURL:item] : nil;
         if (data) {
-            id image = charon_image(data);
+            id image = revenant_image(data);
             if (image)
                 return image;
             *code = -1100;
@@ -128,7 +128,7 @@ static id charon_coerce(id item, NSString *type, Class expected, NSInteger *code
         }
     } else if ([expected isSubclassOfClass:[NSAttributedString class]]) {
         NSString *string = [item isKindOfClass:[NSString class]] ? item : nil;
-        if (!string && [item isKindOfClass:[NSData class]] && charon_conforms(type, @"public.text"))
+        if (!string && [item isKindOfClass:[NSData class]] && revenant_conforms(type, @"public.text"))
             string = [[NSString alloc] initWithData:item encoding:NSUTF8StringEncoding];
         if (string)
             return [[NSAttributedString alloc] initWithString:string];
@@ -137,7 +137,7 @@ static id charon_coerce(id item, NSString *type, Class expected, NSInteger *code
     return nil;
 }
 
-@interface CharonRepresentation : NSObject {
+@interface RevenantRepresentation : NSObject {
 @public
     NSString *_type;
     NSItemProviderLoadHandler _loader;
@@ -149,11 +149,11 @@ static id charon_coerce(id item, NSString *type, Class expected, NSInteger *code
 }
 @end
 
-@implementation CharonRepresentation
+@implementation RevenantRepresentation
 @end
 
 @implementation NSItemProvider {
-    NSMutableArray<CharonRepresentation *> *_representations;
+    NSMutableArray<RevenantRepresentation *> *_representations;
     NSString *_suggestedName;
     NSItemProviderLoadHandler _previewImageHandler;
 }
@@ -172,7 +172,7 @@ static id charon_coerce(id item, NSString *type, Class expected, NSInteger *code
     if (self) {
         if (!typeIdentifier)
             [NSException raise:NSInvalidArgumentException format:@"*** -[NSMutableOrderedSet addObject:]: object cannot be nil"];
-        CharonRepresentation *representation = [self charon_representationForType:typeIdentifier];
+        RevenantRepresentation *representation = [self revenant_representationForType:typeIdentifier];
         representation->_itemBacked = YES;
         representation->_loader = [^(NSItemProviderCompletionHandler completionHandler, Class expectedValueClass, NSDictionary *options) {
             completionHandler(item, nil);
@@ -186,25 +186,25 @@ static id charon_coerce(id item, NSString *type, Class expected, NSInteger *code
     self = [self init];
     if (self && fileURL) {
         if (fileURL.isFileURL) {
-            charon_load_uti();
+            revenant_load_uti();
             NSString *type = nil;
-            if (charon_identifier_function && fileURL.pathExtension.length)
-                type = CFBridgingRelease(charon_identifier_function(CFSTR("public.filename-extension"), (__bridge CFStringRef)fileURL.pathExtension, NULL));
+            if (revenant_identifier_function && fileURL.pathExtension.length)
+                type = CFBridgingRelease(revenant_identifier_function(CFSTR("public.filename-extension"), (__bridge CFStringRef)fileURL.pathExtension, NULL));
             if (type) {
-                CharonRepresentation *representation = [self charon_representationForType:type];
+                RevenantRepresentation *representation = [self revenant_representationForType:type];
                 representation->_itemBacked = YES;
                 representation->_loader = [^(NSItemProviderCompletionHandler completionHandler, Class expectedValueClass, NSDictionary *options) {
                     NSData *data = [NSData dataWithContentsOfURL:fileURL];
                     completionHandler(data, nil);
                 } copy];
             }
-            CharonRepresentation *fileRepresentation = [self charon_representationForType:@"public.file-url"];
+            RevenantRepresentation *fileRepresentation = [self revenant_representationForType:@"public.file-url"];
             fileRepresentation->_itemBacked = YES;
             fileRepresentation->_loader = [^(NSItemProviderCompletionHandler completionHandler, Class expectedValueClass, NSDictionary *options) {
                 completionHandler([fileURL.absoluteString dataUsingEncoding:NSUTF8StringEncoding], nil);
             } copy];
         }
-        CharonRepresentation *representation = [self charon_representationForType:@"public.url"];
+        RevenantRepresentation *representation = [self revenant_representationForType:@"public.url"];
         representation->_itemBacked = YES;
         representation->_loader = [^(NSItemProviderCompletionHandler completionHandler, Class expectedValueClass, NSDictionary *options) {
             completionHandler([fileURL.absoluteString dataUsingEncoding:NSUTF8StringEncoding], nil);
@@ -222,9 +222,9 @@ static id charon_coerce(id item, NSString *type, Class expected, NSInteger *code
     return copy;
 }
 
-- (CharonRepresentation *)charon_representationForType:(NSString *)type
+- (RevenantRepresentation *)revenant_representationForType:(NSString *)type
 {
-    for (CharonRepresentation *representation in _representations) {
+    for (RevenantRepresentation *representation in _representations) {
         if ([representation->_type isEqualToString:type]) {
             representation->_loader = nil;
             representation->_dataLoader = nil;
@@ -232,7 +232,7 @@ static id charon_coerce(id item, NSString *type, Class expected, NSInteger *code
             return representation;
         }
     }
-    CharonRepresentation *representation = [[CharonRepresentation alloc] init];
+    RevenantRepresentation *representation = [[RevenantRepresentation alloc] init];
     representation->_type = type;
     [_representations addObject:representation];
     return representation;
@@ -242,14 +242,14 @@ static id charon_coerce(id item, NSString *type, Class expected, NSInteger *code
 {
     if (!typeIdentifier)
         [NSException raise:NSInvalidArgumentException format:@"*** -[NSMutableOrderedSet addObject:]: object cannot be nil"];
-    CharonRepresentation *representation = [self charon_representationForType:typeIdentifier];
+    RevenantRepresentation *representation = [self revenant_representationForType:typeIdentifier];
     representation->_loader = loadHandler;
 }
 
 - (NSArray<NSString *> *)registeredTypeIdentifiers
 {
     NSMutableArray *types = [NSMutableArray array];
-    for (CharonRepresentation *representation in _representations)
+    for (RevenantRepresentation *representation in _representations)
         [types addObject:representation->_type];
     return types;
 }
@@ -257,7 +257,7 @@ static id charon_coerce(id item, NSString *type, Class expected, NSInteger *code
 - (NSArray<NSString *> *)registeredTypeIdentifiersWithFileOptions:(NSItemProviderFileOptions)fileOptions
 {
     NSMutableArray *types = [NSMutableArray array];
-    for (CharonRepresentation *representation in _representations) {
+    for (RevenantRepresentation *representation in _representations) {
         if (representation->_fileLoader ? (representation->_fileOptions & fileOptions) == fileOptions : fileOptions == 0)
             [types addObject:representation->_type];
     }
@@ -266,8 +266,8 @@ static id charon_coerce(id item, NSString *type, Class expected, NSInteger *code
 
 - (BOOL)hasItemConformingToTypeIdentifier:(NSString *)typeIdentifier
 {
-    for (CharonRepresentation *representation in _representations) {
-        if (charon_conforms(representation->_type, typeIdentifier))
+    for (RevenantRepresentation *representation in _representations) {
+        if (revenant_conforms(representation->_type, typeIdentifier))
             return YES;
     }
     return NO;
@@ -275,52 +275,52 @@ static id charon_coerce(id item, NSString *type, Class expected, NSInteger *code
 
 - (BOOL)hasRepresentationConformingToTypeIdentifier:(NSString *)typeIdentifier fileOptions:(NSItemProviderFileOptions)fileOptions
 {
-    for (CharonRepresentation *representation in _representations) {
+    for (RevenantRepresentation *representation in _representations) {
         BOOL matchesOptions = representation->_fileLoader ? (representation->_fileOptions & fileOptions) == fileOptions : fileOptions == 0;
-        if (matchesOptions && charon_conforms(representation->_type, typeIdentifier))
+        if (matchesOptions && revenant_conforms(representation->_type, typeIdentifier))
             return YES;
     }
     return NO;
 }
 
-- (CharonRepresentation *)charon_representationConformingTo:(NSString *)typeIdentifier
+- (RevenantRepresentation *)revenant_representationConformingTo:(NSString *)typeIdentifier
 {
-    for (CharonRepresentation *representation in _representations) {
-        if (charon_conforms(representation->_type, typeIdentifier))
+    for (RevenantRepresentation *representation in _representations) {
+        if (revenant_conforms(representation->_type, typeIdentifier))
             return representation;
     }
     return nil;
 }
 
-- (CharonRepresentation *)charon_representationConformingTo:(NSString *)typeIdentifier preferring:(BOOL (^)(CharonRepresentation *))preferred
+- (RevenantRepresentation *)revenant_representationConformingTo:(NSString *)typeIdentifier preferring:(BOOL (^)(RevenantRepresentation *))preferred
 {
-    for (CharonRepresentation *representation in _representations) {
-        if (charon_conforms(representation->_type, typeIdentifier) && preferred(representation))
+    for (RevenantRepresentation *representation in _representations) {
+        if (revenant_conforms(representation->_type, typeIdentifier) && preferred(representation))
             return representation;
     }
-    return [self charon_representationConformingTo:typeIdentifier];
+    return [self revenant_representationConformingTo:typeIdentifier];
 }
 
 - (void)loadItemForTypeIdentifier:(NSString *)typeIdentifier options:(NSDictionary *)options completionHandler:(NSItemProviderCompletionHandler)completionHandler
 {
     if (!completionHandler)
         return;
-    CharonRepresentation *representation = typeIdentifier ? [self charon_representationConformingTo:typeIdentifier] : nil;
+    RevenantRepresentation *representation = typeIdentifier ? [self revenant_representationConformingTo:typeIdentifier] : nil;
     if (!representation) {
-        completionHandler(nil, charon_error(-1000));
+        completionHandler(nil, revenant_error(-1000));
         return;
     }
-    Class expected = charon_expected_class(completionHandler);
+    Class expected = revenant_expected_class(completionHandler);
     NSItemProviderCompletionHandler reply = [completionHandler copy];
     NSString *type = representation->_type;
     void (^deliver)(id, NSError *) = ^(id item, NSError *error) {
         if (!item || error) {
-            reply(nil, charon_error(-1000));
+            reply(nil, revenant_error(-1000));
             return;
         }
         NSInteger code = 0;
-        id coerced = charon_coerce(item, type, expected, &code);
-        reply(coerced, coerced ? nil : charon_error(code));
+        id coerced = revenant_coerce(item, type, expected, &code);
+        reply(coerced, coerced ? nil : revenant_error(code));
     };
     if (representation->_loader) {
         NSItemProviderLoadHandler loader = representation->_loader;
@@ -345,7 +345,7 @@ static id charon_coerce(id item, NSString *type, Class expected, NSInteger *code
         });
         return;
     }
-    reply(nil, charon_error(-1000));
+    reply(nil, revenant_error(-1000));
 }
 
 - (NSItemProviderLoadHandler)previewImageHandler
@@ -364,19 +364,19 @@ static id charon_coerce(id item, NSString *type, Class expected, NSInteger *code
         return;
     NSItemProviderLoadHandler handler = _previewImageHandler;
     if (!handler) {
-        completionHandler(nil, charon_error(-1000));
+        completionHandler(nil, revenant_error(-1000));
         return;
     }
-    Class expected = charon_expected_class(completionHandler);
+    Class expected = revenant_expected_class(completionHandler);
     NSItemProviderCompletionHandler reply = [completionHandler copy];
     handler(^(id<NSSecureCoding> item, NSError *error) {
         if (!item || error) {
-            reply(nil, charon_error(-1000));
+            reply(nil, revenant_error(-1000));
             return;
         }
         NSInteger code = 0;
-        id coerced = charon_coerce(item, @"public.image", expected, &code);
-        reply(coerced, coerced ? nil : charon_error(code));
+        id coerced = revenant_coerce(item, @"public.image", expected, &code);
+        reply(coerced, coerced ? nil : revenant_error(code));
     }, expected, options ?: @{});
 }
 
@@ -392,14 +392,14 @@ static id charon_coerce(id item, NSString *type, Class expected, NSInteger *code
 
 - (void)registerDataRepresentationForTypeIdentifier:(NSString *)typeIdentifier visibility:(NSItemProviderRepresentationVisibility)visibility loadHandler:(NSProgress *(^)(void (^)(NSData *, NSError *)))loadHandler
 {
-    CharonRepresentation *representation = [self charon_representationForType:typeIdentifier];
+    RevenantRepresentation *representation = [self revenant_representationForType:typeIdentifier];
     representation->_dataLoader = loadHandler;
     representation->_visibility = visibility;
 }
 
 - (void)registerFileRepresentationForTypeIdentifier:(NSString *)typeIdentifier fileOptions:(NSItemProviderFileOptions)fileOptions visibility:(NSItemProviderRepresentationVisibility)visibility loadHandler:(NSProgress *(^)(void (^)(NSURL *, BOOL, NSError *)))loadHandler
 {
-    CharonRepresentation *representation = [self charon_representationForType:typeIdentifier];
+    RevenantRepresentation *representation = [self revenant_representationForType:typeIdentifier];
     representation->_fileLoader = loadHandler;
     representation->_fileOptions = fileOptions;
     representation->_visibility = visibility;
@@ -408,20 +408,20 @@ static id charon_coerce(id item, NSString *type, Class expected, NSInteger *code
 - (NSProgress *)loadDataRepresentationForTypeIdentifier:(NSString *)typeIdentifier completionHandler:(void (^)(NSData *, NSError *))completionHandler
 {
     NSProgress *progress = [NSProgress progressWithTotalUnitCount:1];
-    CharonRepresentation *representation = [self charon_representationConformingTo:typeIdentifier preferring:^BOOL(CharonRepresentation *candidate) { return candidate->_dataLoader != nil; }];
+    RevenantRepresentation *representation = [self revenant_representationConformingTo:typeIdentifier preferring:^BOOL(RevenantRepresentation *candidate) { return candidate->_dataLoader != nil; }];
     void (^reply)(NSData *, NSError *) = [completionHandler copy];
     if (!representation) {
-        reply(nil, charon_error(-1000));
+        reply(nil, revenant_error(-1000));
         return progress;
     }
     if (representation->_dataLoader) {
         NSProgress *inner = representation->_dataLoader(^(NSData *data, NSError *error) {
-            reply(data, data ? nil : (error ?: charon_error(-1000)));
+            reply(data, data ? nil : (error ?: revenant_error(-1000)));
         });
         return inner ?: progress;
     }
     [self loadItemForTypeIdentifier:representation->_type options:nil completionHandler:^(id<NSSecureCoding> item, NSError *error) {
-        reply([(id)item isKindOfClass:[NSData class]] ? (NSData *)item : nil, error ?: ([(id)item isKindOfClass:[NSData class]] ? nil : charon_error(-1200)));
+        reply([(id)item isKindOfClass:[NSData class]] ? (NSData *)item : nil, error ?: ([(id)item isKindOfClass:[NSData class]] ? nil : revenant_error(-1200)));
     }];
     return progress;
 }
@@ -429,10 +429,10 @@ static id charon_coerce(id item, NSString *type, Class expected, NSInteger *code
 - (NSProgress *)loadFileRepresentationForTypeIdentifier:(NSString *)typeIdentifier completionHandler:(void (^)(NSURL *, NSError *))completionHandler
 {
     NSProgress *progress = [NSProgress progressWithTotalUnitCount:1];
-    CharonRepresentation *representation = [self charon_representationConformingTo:typeIdentifier preferring:^BOOL(CharonRepresentation *candidate) { return candidate->_fileLoader != nil; }];
+    RevenantRepresentation *representation = [self revenant_representationConformingTo:typeIdentifier preferring:^BOOL(RevenantRepresentation *candidate) { return candidate->_fileLoader != nil; }];
     void (^reply)(NSURL *, NSError *) = [completionHandler copy];
     if (!representation) {
-        reply(nil, charon_error(-1000));
+        reply(nil, revenant_error(-1000));
         return progress;
     }
     void (^copyOut)(NSURL *) = ^(NSURL *source) {
@@ -453,14 +453,14 @@ static id charon_coerce(id item, NSString *type, Class expected, NSInteger *code
                 if (URL)
                     copyOut(URL);
                 else
-                    reply(nil, error ?: charon_error(-1000));
+                    reply(nil, error ?: revenant_error(-1000));
             });
         });
         return inner ?: progress;
     }
     [self loadDataRepresentationForTypeIdentifier:typeIdentifier completionHandler:^(NSData *data, NSError *error) {
         if (!data) {
-            reply(nil, error ?: charon_error(-1000));
+            reply(nil, error ?: revenant_error(-1000));
             return;
         }
         NSString *folder = [NSTemporaryDirectory() stringByAppendingPathComponent:[[NSUUID UUID] UUIDString]];
@@ -476,11 +476,11 @@ static id charon_coerce(id item, NSString *type, Class expected, NSInteger *code
 - (NSProgress *)loadInPlaceFileRepresentationForTypeIdentifier:(NSString *)typeIdentifier completionHandler:(void (^)(NSURL *, BOOL, NSError *))completionHandler
 {
     NSProgress *progress = [NSProgress progressWithTotalUnitCount:1];
-    CharonRepresentation *representation = [self charon_representationConformingTo:typeIdentifier preferring:^BOOL(CharonRepresentation *candidate) { return candidate->_fileLoader != nil; }];
+    RevenantRepresentation *representation = [self revenant_representationConformingTo:typeIdentifier preferring:^BOOL(RevenantRepresentation *candidate) { return candidate->_fileLoader != nil; }];
     void (^reply)(NSURL *, BOOL, NSError *) = [completionHandler copy];
     if (representation->_fileLoader && (representation->_fileOptions & NSItemProviderFileOptionOpenInPlace)) {
         NSProgress *inner = representation->_fileLoader(^(NSURL *URL, BOOL coordinated, NSError *error) {
-            reply(URL, YES, URL ? nil : (error ?: charon_error(-1000)));
+            reply(URL, YES, URL ? nil : (error ?: revenant_error(-1000)));
         });
         return inner ?: progress;
     }
@@ -511,7 +511,7 @@ static id charon_coerce(id item, NSString *type, Class expected, NSInteger *code
     (void)typeIdentifier;
     NSItemProviderRepresentationVisibility narrowest = NSItemProviderRepresentationVisibilityAll;
     BOOL any = NO;
-    for (CharonRepresentation *representation in _representations) {
+    for (RevenantRepresentation *representation in _representations) {
         any = YES;
         if (representation->_visibility > narrowest)
             narrowest = representation->_visibility;
@@ -528,7 +528,7 @@ static id charon_coerce(id item, NSString *type, Class expected, NSInteger *code
 {
     if (!typeIdentifier.length || !data) {
         if (error)
-            *error = charon_error(-1000);
+            *error = revenant_error(-1000);
         return nil;
     }
     NSItemProvider *provider = [[NSItemProvider alloc] init];
@@ -564,7 +564,7 @@ static id charon_coerce(id item, NSString *type, Class expected, NSInteger *code
         [self registerDataRepresentationForTypeIdentifier:type visibility:visibility loadHandler:^NSProgress *(void (^completionHandler)(NSData *, NSError *)) {
             return loadHandler(^(id<NSItemProviderWriting> object, NSError *error) {
                 if (!object) {
-                    completionHandler(nil, error ?: charon_error(-1000));
+                    completionHandler(nil, error ?: revenant_error(-1000));
                     return;
                 }
                 [object loadDataWithTypeIdentifier:type forItemProviderCompletionHandler:completionHandler];
@@ -598,7 +598,7 @@ static id charon_coerce(id item, NSString *type, Class expected, NSInteger *code
             }];
         }
     }
-    reply(nil, charon_error(-1000));
+    reply(nil, revenant_error(-1000));
     return [NSProgress progressWithTotalUnitCount:1];
 }
 

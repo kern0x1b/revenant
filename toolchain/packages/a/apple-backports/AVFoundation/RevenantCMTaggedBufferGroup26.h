@@ -2,7 +2,7 @@
 #import <CoreVideo/CoreVideo.h>
 #import <Foundation/Foundation.h>
 #if !__has_include(<CoreMedia/CMTag.h>)
-#import "CharonCMTag26.h"
+#import "RevenantCMTag26.h"
 #endif
 
 #if !__has_include(<CoreMedia/CMTaggedBufferGroup.h>)
@@ -67,17 +67,17 @@ typedef CF_ENUM(OSStatus, CMTaggedBufferGroupError) {
 
 #endif
 
-@interface CharonCMTaggedBufferGroup : NSObject
-- (instancetype)charon_initWithCollections:(NSArray *)collections buffers:(NSArray *)buffers
+@interface RevenantCMTaggedBufferGroup : NSObject
+- (instancetype)revenant_initWithCollections:(NSArray *)collections buffers:(NSArray *)buffers
     __attribute__((objc_method_family(init)));
-@property (nonatomic, readonly) NSArray *charon_collections;
-@property (nonatomic, readonly) NSArray *charon_buffers;
-- (NSInteger)charon_count;
-- (const CMTag *)charon_tags;
-- (CMItemCount)charon_tagCount;
-- (CMItemCount)charon_tagOffsetAtIndex:(NSInteger)index;
-- (CMTagCollectionRef)charon_collectionAtIndex:(NSInteger)index;
-- (CVBufferRef)charon_bufferAtIndex:(NSInteger)index;
-- (CVBufferRef)charon_bufferForTags:(const CMTag *)tags count:(CMItemCount)count index:(NSInteger *)index;
-- (NSInteger)charon_matchesForTags:(const CMTag *)tags count:(CMItemCount)count;
+@property (nonatomic, readonly) NSArray *revenant_collections;
+@property (nonatomic, readonly) NSArray *revenant_buffers;
+- (NSInteger)revenant_count;
+- (const CMTag *)revenant_tags;
+- (CMItemCount)revenant_tagCount;
+- (CMItemCount)revenant_tagOffsetAtIndex:(NSInteger)index;
+- (CMTagCollectionRef)revenant_collectionAtIndex:(NSInteger)index;
+- (CVBufferRef)revenant_bufferAtIndex:(NSInteger)index;
+- (CVBufferRef)revenant_bufferForTags:(const CMTag *)tags count:(CMItemCount)count index:(NSInteger *)index;
+- (NSInteger)revenant_matchesForTags:(const CMTag *)tags count:(CMItemCount)count;
 @end

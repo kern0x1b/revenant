@@ -20,7 +20,7 @@
 #include <thread>
 #include <vector>
 
-namespace shade {
+namespace emulator {
 
 enum class HostWorkKind : std::uint8_t {
     ForegroundPrepare,

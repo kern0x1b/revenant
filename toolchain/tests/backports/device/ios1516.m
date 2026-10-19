@@ -27,21 +27,21 @@ static NSString *raised(void (^block)(void))
 static void check_uuid_compare(void)
 {
     NSMutableArray *ids = [NSMutableArray array];
-    for (int index = 0; index < charon_uuid_count; index++)
-        [ids addObject:[[NSUUID alloc] initWithUUIDString:@(charon_uuid_strings[index])]];
+    for (int index = 0; index < revenant_uuid_count; index++)
+        [ids addObject:[[NSUUID alloc] initWithUUIDString:@(revenant_uuid_strings[index])]];
     CHECK_EQUAL(image_of_method([NSUUID class], @selector(compare:)), @"libFoundationBackports.dylib", "NSUUID compare: comes from the backports");
     int wrong = 0;
-    for (int first = 0; first < charon_uuid_count; first++) {
-        for (int second = 0; second < charon_uuid_count; second++) {
-            if ([ids[first] compare:ids[second]] != charon_uuid_orders[first][second])
+    for (int first = 0; first < revenant_uuid_count; first++) {
+        for (int second = 0; second < revenant_uuid_count; second++) {
+            if ([ids[first] compare:ids[second]] != revenant_uuid_orders[first][second])
                 wrong++;
         }
     }
     CHECK(wrong == 0, "every pair of UUIDs is ordered as the host orders it");
     int against_nil = 0;
     NSUUID *none = nil;
-    for (int index = 0; index < charon_uuid_count; index++) {
-        if ([ids[index] compare:none] != charon_uuid_against_nil[index])
+    for (int index = 0; index < revenant_uuid_count; index++) {
+        if ([ids[index] compare:none] != revenant_uuid_against_nil[index])
             against_nil++;
     }
     CHECK(against_nil == 0, "a UUID against nil is ordered as the host orders it");
@@ -83,12 +83,12 @@ int main(int argc, char **argv)
 {
     @autoreleasepool {
         if (argc > 1)
-            charon_log_to(@(argv[1]));
+            revenant_log_to(@(argv[1]));
         check_uuid_compare();
         check_orientation_update();
         check_section_header_top_padding();
         check_key_command_flags();
-        printf("%d checks, %d failed\n", charon_checks, charon_failures);
+        printf("%d checks, %d failed\n", revenant_checks, revenant_failures);
     }
-    return charon_failures;
+    return revenant_failures;
 }

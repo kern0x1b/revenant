@@ -1,52 +1,52 @@
-#import "CharonMetal.h"
+#import "RevenantMetal.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
-extern id _Nullable CharonTypedNode(NSDictionary *_Nullable node, Class wanted);
+extern id _Nullable RevenantTypedNode(NSDictionary *_Nullable node, Class wanted);
 
-extern MTLDataType CharonDataTypeFromScalar(NSString *_Nullable scalar);
+extern MTLDataType RevenantDataTypeFromScalar(NSString *_Nullable scalar);
 
-extern MTLArgumentAccess CharonAccessFromWord(NSString *_Nullable word);
+extern MTLArgumentAccess RevenantAccessFromWord(NSString *_Nullable word);
 
-@interface MTLType (CharonTypeTreeStorage)
+@interface MTLType (RevenantTypeTreeStorage)
 
 - (instancetype)initWithNode:(NSDictionary *)node;
 
-@property (nonatomic, readonly, strong, nullable) NSDictionary *charonNode;
-@property (nonatomic, readonly, strong, nullable) MTLType *charonElement;
-@property (nonatomic, readonly, strong) NSMutableArray<MTLStructMember *> *charonMemberList;
-@property (nonatomic, readonly, copy) NSString *charonKind;
-- (MTLDataType)charonDataType;
-- (NSUInteger)charonSize;
-- (NSUInteger)charonAlignment;
+@property (nonatomic, readonly, strong, nullable) NSDictionary *revenantNode;
+@property (nonatomic, readonly, strong, nullable) MTLType *revenantElement;
+@property (nonatomic, readonly, strong) NSMutableArray<MTLStructMember *> *revenantMemberList;
+@property (nonatomic, readonly, copy) NSString *revenantKind;
+- (MTLDataType)revenantDataType;
+- (NSUInteger)revenantSize;
+- (NSUInteger)revenantAlignment;
 
 @end
 
-@interface MTLStructMember (CharonTypeTreeStorage)
-- (void)charonSetName:(NSString *)name offset:(NSUInteger)offset node:(nullable NSDictionary *)node;
-@property (nonatomic, readonly, copy) NSString *charonMemberName;
-@property (nonatomic, readonly) NSUInteger charonMemberOffset;
-@property (nonatomic, readonly, strong, nullable) NSDictionary *charonMemberNode;
-- (MTLDataType)charonDataType;
+@interface MTLStructMember (RevenantTypeTreeStorage)
+- (void)revenantSetName:(NSString *)name offset:(NSUInteger)offset node:(nullable NSDictionary *)node;
+@property (nonatomic, readonly, copy) NSString *revenantMemberName;
+@property (nonatomic, readonly) NSUInteger revenantMemberOffset;
+@property (nonatomic, readonly, strong, nullable) NSDictionary *revenantMemberNode;
+- (MTLDataType)revenantDataType;
 - (MTLDataType)dataType;
 - (NSUInteger)offset;
-- (MTLStructType *_Nullable)charonStructType;
-- (MTLArrayType *_Nullable)charonArrayType;
-- (MTLTextureReferenceType *_Nullable)charonTextureReferenceType;
-- (MTLPointerType *_Nullable)charonPointerType;
+- (MTLStructType *_Nullable)revenantStructType;
+- (MTLArrayType *_Nullable)revenantArrayType;
+- (MTLTextureReferenceType *_Nullable)revenantTextureReferenceType;
+- (MTLPointerType *_Nullable)revenantPointerType;
 - (NSUInteger)argumentIndex;
 @end
 
-@interface CharonMetalFunction (CharonArgumentNode)
-@property (nonatomic, readonly, strong, nullable) NSDictionary *charonArgumentNode;
+@interface RevenantMetalFunction (RevenantArgumentNode)
+@property (nonatomic, readonly, strong, nullable) NSDictionary *revenantArgumentNode;
 @end
 
-@interface MTLArgument (CharonTypeTreeStorage)
+@interface MTLArgument (RevenantTypeTreeStorage)
 - (instancetype)initWithNode:(NSDictionary *)node;
-- (NSUInteger)charonArgumentIndex;
+- (NSUInteger)revenantArgumentIndex;
 @end
 
-@interface CharonMetalTypeTree : NSObject
+@interface RevenantMetalTypeTree : NSObject
 + (instancetype)treeWithContentsOfFile:(NSString *)path;
 - (NSArray<NSDictionary *> *)functions;
 - (NSDictionary *_Nullable)functionNamed:(NSString *)name;

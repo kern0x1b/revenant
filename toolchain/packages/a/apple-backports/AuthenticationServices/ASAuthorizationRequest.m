@@ -1,13 +1,13 @@
 #import <AuthenticationServices/AuthenticationServices.h>
-#import "CharonASConstruction.h"
+#import "RevenantASConstruction.h"
 
-static NSString *const ASCharonProviderCodingKey = @"org.charon.authservices.provider";
+static NSString *const ASRevenantProviderCodingKey = @"org.revenant.authservices.provider";
 
 @implementation ASAuthorizationRequest
 
 @synthesize provider = _provider;
 
-- (instancetype)charon_initWithProvider:(id<ASAuthorizationProvider>)provider
+- (instancetype)revenant_initWithProvider:(id<ASAuthorizationProvider>)provider
 {
     self = [super init];
     if (self)
@@ -21,7 +21,7 @@ static NSString *const ASCharonProviderCodingKey = @"org.charon.authservices.pro
     if (self) {
         id provider = nil;
         if ([coder respondsToSelector:@selector(decodeObjectForKey:)]) {
-            id decoded = [coder decodeObjectOfClass:[NSObject class] forKey:ASCharonProviderCodingKey];
+            id decoded = [coder decodeObjectOfClass:[NSObject class] forKey:ASRevenantProviderCodingKey];
             if (decoded)
                 provider = decoded;
         }
@@ -33,7 +33,7 @@ static NSString *const ASCharonProviderCodingKey = @"org.charon.authservices.pro
 - (void)encodeWithCoder:(NSCoder *)coder
 {
     if (_provider && [coder respondsToSelector:@selector(encodeObject:forKey:)])
-        [coder encodeObject:_provider forKey:ASCharonProviderCodingKey];
+        [coder encodeObject:_provider forKey:ASRevenantProviderCodingKey];
 }
 
 - (id<ASAuthorizationProvider>)provider
@@ -50,7 +50,7 @@ static NSString *const ASCharonProviderCodingKey = @"org.charon.authservices.pro
 
 - (id)copyWithZone:(NSZone *)zone
 {
-    ASAuthorizationRequest *copy = [[[self class] allocWithZone:zone] charon_initWithProvider:_provider];
+    ASAuthorizationRequest *copy = [[[self class] allocWithZone:zone] revenant_initWithProvider:_provider];
     return copy;
 }
 

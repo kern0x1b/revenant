@@ -1,4 +1,4 @@
-#import "CharonSpriteKit.h"
+#import "RevenantSpriteKit.h"
 
 @implementation SKTexture {
     CGRect _textureRect;

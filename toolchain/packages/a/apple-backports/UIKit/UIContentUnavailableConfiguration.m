@@ -1,30 +1,30 @@
 #import <UIKit/UIKit.h>
 #import <objc/runtime.h>
 #import "UIContentUnavailableConfiguration.h"
-#import "CharonLists.h"
+#import "RevenantLists.h"
 
-typedef NS_ENUM(NSInteger, CharonUnavailableKind) {
-    CharonUnavailableKindEmpty = 0,
-    CharonUnavailableKindLoading = 1,
-    CharonUnavailableKindSearch = 2,
+typedef NS_ENUM(NSInteger, RevenantUnavailableKind) {
+    RevenantUnavailableKindEmpty = 0,
+    RevenantUnavailableKindLoading = 1,
+    RevenantUnavailableKindSearch = 2,
 };
 
-static UIFont *charon_unavailable_title_font(void)
+static UIFont *revenant_unavailable_title_font(void)
 {
     return [UIFont boldSystemFontOfSize:22];
 }
 
-static UIFont *charon_unavailable_body_font(void)
+static UIFont *revenant_unavailable_body_font(void)
 {
     return [UIFont systemFontOfSize:15];
 }
 
-static UIColor *charon_unavailable_label_color(void)
+static UIColor *revenant_unavailable_label_color(void)
 {
     return [UIColor darkTextColor];
 }
 
-static UIColor *charon_unavailable_secondary_label_color(void)
+static UIColor *revenant_unavailable_secondary_label_color(void)
 {
     return [UIColor darkGrayColor];
 }
@@ -51,7 +51,7 @@ static UIColor *charon_unavailable_secondary_label_color(void)
     CGFloat _textToSecondaryTextPadding;
     CGFloat _textToButtonPadding;
     CGFloat _buttonToSecondaryButtonPadding;
-    CharonUnavailableKind _kind;
+    RevenantUnavailableKind _kind;
 }
 
 + (BOOL)supportsSecureCoding
@@ -59,7 +59,7 @@ static UIColor *charon_unavailable_secondary_label_color(void)
     return YES;
 }
 
-- (instancetype)initCharonWithKind:(CharonUnavailableKind)kind
+- (instancetype)initRevenantWithKind:(RevenantUnavailableKind)kind
 {
     if ((self = [super init])) {
         _kind = kind;
@@ -79,32 +79,32 @@ static UIColor *charon_unavailable_secondary_label_color(void)
         _textToButtonPadding = 20;
         _buttonToSecondaryButtonPadding = 15;
 
-        BOOL loading = kind == CharonUnavailableKindLoading;
-        _textProperties.font = loading ? charon_unavailable_body_font() : charon_unavailable_title_font();
-        _textProperties.color = loading ? charon_unavailable_secondary_label_color() : charon_unavailable_label_color();
+        BOOL loading = kind == RevenantUnavailableKindLoading;
+        _textProperties.font = loading ? revenant_unavailable_body_font() : revenant_unavailable_title_font();
+        _textProperties.color = loading ? revenant_unavailable_secondary_label_color() : revenant_unavailable_label_color();
         _textProperties.lineBreakMode = NSLineBreakByTruncatingTail;
         _textProperties.numberOfLines = 0;
-        _secondaryTextProperties.font = charon_unavailable_body_font();
-        _secondaryTextProperties.color = charon_unavailable_secondary_label_color();
+        _secondaryTextProperties.font = revenant_unavailable_body_font();
+        _secondaryTextProperties.color = revenant_unavailable_secondary_label_color();
         _secondaryTextProperties.lineBreakMode = NSLineBreakByTruncatingTail;
         _secondaryTextProperties.numberOfLines = 0;
 
         CGFloat symbolPointSize = loading ? 32 : 48;
         _imageProperties.preferredSymbolConfiguration = [UIImageSymbolConfiguration configurationWithPointSize:symbolPointSize];
-        _imageProperties.tintColor = charon_unavailable_secondary_label_color();
+        _imageProperties.tintColor = revenant_unavailable_secondary_label_color();
 
         _imageToTextPadding = loading ? 8 : 15;
         switch (kind) {
-        case CharonUnavailableKindLoading:
+        case RevenantUnavailableKindLoading:
             _text = @"Loading\u2026";
             break;
-        case CharonUnavailableKindSearch:
+        case RevenantUnavailableKindSearch:
             _text = @"No Results";
             _secondaryText = @"Check the spelling or try a new search.";
             _image = [UIImage systemImageNamed:@"magnifyingglass"
                               withConfiguration:_imageProperties.preferredSymbolConfiguration];
             break;
-        case CharonUnavailableKindEmpty:
+        case RevenantUnavailableKindEmpty:
             break;
         }
     }
@@ -113,12 +113,12 @@ static UIColor *charon_unavailable_secondary_label_color(void)
 
 - (instancetype)init
 {
-    return [self initCharonWithKind:CharonUnavailableKindEmpty];
+    return [self initRevenantWithKind:RevenantUnavailableKindEmpty];
 }
 
-- (instancetype)charon_copy
+- (instancetype)revenant_copy
 {
-    UIContentUnavailableConfiguration *copy = [[UIContentUnavailableConfiguration alloc] initCharonWithKind:_kind];
+    UIContentUnavailableConfiguration *copy = [[UIContentUnavailableConfiguration alloc] initRevenantWithKind:_kind];
     copy->_image = _image;
     copy->_text = [_text copy];
     copy->_attributedText = [_attributedText copy];
@@ -144,12 +144,12 @@ static UIColor *charon_unavailable_secondary_label_color(void)
 
 - (id)copyWithZone:(NSZone *)zone
 {
-    return [self charon_copy];
+    return [self revenant_copy];
 }
 
 - (instancetype)updatedConfigurationForState:(id<UIConfigurationState>)state
 {
-    return [self charon_copy];
+    return [self revenant_copy];
 }
 
 - (__kindof UIView<UIContentView> *)makeContentView
@@ -181,7 +181,7 @@ static UIColor *charon_unavailable_secondary_label_color(void)
 
 - (instancetype)initWithCoder:(NSCoder *)coder
 {
-    if ((self = [self initCharonWithKind:CharonUnavailableKindEmpty])) {
+    if ((self = [self initRevenantWithKind:RevenantUnavailableKindEmpty])) {
         _image = [coder decodeObjectOfClass:[UIImage class] forKey:@"image"];
         _text = [coder decodeObjectOfClass:[NSString class] forKey:@"text"];
         _attributedText = [coder decodeObjectOfClass:[NSAttributedString class] forKey:@"attributedText"];
@@ -240,17 +240,17 @@ static UIColor *charon_unavailable_secondary_label_color(void)
 
 + (instancetype)emptyConfiguration
 {
-    return [[self alloc] initCharonWithKind:CharonUnavailableKindEmpty];
+    return [[self alloc] initRevenantWithKind:RevenantUnavailableKindEmpty];
 }
 
 + (instancetype)loadingConfiguration
 {
-    return [[self alloc] initCharonWithKind:CharonUnavailableKindLoading];
+    return [[self alloc] initRevenantWithKind:RevenantUnavailableKindLoading];
 }
 
 + (instancetype)searchConfiguration
 {
-    return [[self alloc] initCharonWithKind:CharonUnavailableKindSearch];
+    return [[self alloc] initRevenantWithKind:RevenantUnavailableKindSearch];
 }
 
 - (UIImage *)image { return _image; }
@@ -375,12 +375,12 @@ static UIColor *charon_unavailable_secondary_label_color(void)
     [self setNeedsLayout];
 }
 
-- (UIView *)charon_host
+- (UIView *)revenant_host
 {
     return _scrollEnabled && _contentView ? _contentView : self;
 }
 
-- (UILabel *)charon_labelWithProperties:(UIContentUnavailableTextProperties *)properties
+- (UILabel *)revenant_labelWithProperties:(UIContentUnavailableTextProperties *)properties
 {
     UILabel *label = [[UILabel alloc] initWithFrame:CGRectZero];
     label.backgroundColor = [UIColor clearColor];
@@ -395,17 +395,17 @@ static UIColor *charon_unavailable_secondary_label_color(void)
     return label;
 }
 
-- (UIButton *)charon_makeButton
+- (UIButton *)revenant_makeButton
 {
     UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
     button.frame = CGRectZero;
     return button;
 }
 
-- (void)charon_buildSubviews
+- (void)revenant_buildSubviews
 {
     UIContentUnavailableConfiguration *configuration = _configuration;
-    UIView *host = [self charon_host];
+    UIView *host = [self revenant_host];
 
     if (configuration.image && !_imageView) {
         _imageView = [[UIImageView alloc] initWithFrame:CGRectZero];
@@ -417,7 +417,7 @@ static UIColor *charon_unavailable_secondary_label_color(void)
 
     NSString *text = configuration.text;
     if (text && !_textLabel) {
-        _textLabel = [self charon_labelWithProperties:configuration.textProperties];
+        _textLabel = [self revenant_labelWithProperties:configuration.textProperties];
         [host addSubview:_textLabel];
     } else if (!text && _textLabel) {
         [_textLabel removeFromSuperview];
@@ -426,7 +426,7 @@ static UIColor *charon_unavailable_secondary_label_color(void)
 
     NSString *secondaryText = configuration.secondaryText;
     if (secondaryText && !_secondaryLabel) {
-        _secondaryLabel = [self charon_labelWithProperties:configuration.secondaryTextProperties];
+        _secondaryLabel = [self revenant_labelWithProperties:configuration.secondaryTextProperties];
         [host addSubview:_secondaryLabel];
     } else if (!secondaryText && _secondaryLabel) {
         [_secondaryLabel removeFromSuperview];
@@ -434,25 +434,25 @@ static UIColor *charon_unavailable_secondary_label_color(void)
     }
 
     if (!_button) {
-        _button = [self charon_makeButton];
+        _button = [self revenant_makeButton];
         [host addSubview:_button];
     }
     if (!_secondaryButton) {
-        _secondaryButton = [self charon_makeButton];
+        _secondaryButton = [self revenant_makeButton];
         [host addSubview:_secondaryButton];
     }
 
     _button.enabled = configuration.buttonProperties.isEnabled;
     _secondaryButton.enabled = configuration.secondaryButtonProperties.isEnabled;
-    [self charon_wireAction:_button from:_buttonAction to:configuration.buttonProperties.primaryAction];
-    [self charon_wireAction:_secondaryButton from:_secondaryButtonAction to:configuration.secondaryButtonProperties.primaryAction];
+    [self revenant_wireAction:_button from:_buttonAction to:configuration.buttonProperties.primaryAction];
+    [self revenant_wireAction:_secondaryButton from:_secondaryButtonAction to:configuration.secondaryButtonProperties.primaryAction];
     _buttonAction = configuration.buttonProperties.primaryAction;
     _secondaryButtonAction = configuration.secondaryButtonProperties.primaryAction;
     _button.configuration = configuration.button;
     _secondaryButton.configuration = configuration.secondaryButton;
 }
 
-- (void)charon_wireAction:(UIButton *)button from:(UIAction *)was to:(UIAction *)now
+- (void)revenant_wireAction:(UIButton *)button from:(UIAction *)was to:(UIAction *)now
 {
     if (was == now)
         return;
@@ -462,7 +462,7 @@ static UIColor *charon_unavailable_secondary_label_color(void)
         [button addAction:now forControlEvents:UIControlEventPrimaryActionTriggered];
 }
 
-- (NSDirectionalEdgeInsets)charon_effectiveMargins
+- (NSDirectionalEdgeInsets)revenant_effectiveMargins
 {
     NSDirectionalEdgeInsets margins = _configuration.directionalLayoutMargins;
     UIView *superview = self.superview;
@@ -485,12 +485,12 @@ static UIColor *charon_unavailable_secondary_label_color(void)
     return margins;
 }
 
-- (CGSize)charon_layoutInSize:(CGSize)size apply:(BOOL)apply
+- (CGSize)revenant_layoutInSize:(CGSize)size apply:(BOOL)apply
 {
     UIContentUnavailableConfiguration *configuration = _configuration;
-    NSDirectionalEdgeInsets margins = [self charon_effectiveMargins];
+    NSDirectionalEdgeInsets margins = [self revenant_effectiveMargins];
     CGFloat available = MAX(size.width - margins.leading - margins.trailing, 0);
-    CGFloat scale = charon_screen_scale();
+    CGFloat scale = revenant_screen_scale();
 
     CGFloat total = margins.top + margins.bottom;
     CGFloat textTop = 0, secondaryTop = 0, buttonTop = 0, secondaryHeight_measured = 0;
@@ -516,7 +516,7 @@ static UIColor *charon_unavailable_secondary_label_color(void)
         _textLabel.text = configuration.attributedText ? nil : configuration.text;
         _textLabel.textAlignment = configuration.alignment == UIContentUnavailableAlignmentCenter ? NSTextAlignmentCenter : NSTextAlignmentNatural;
         CGSize fitted = [_textLabel sizeThatFits:CGSizeMake(available, CGFLOAT_MAX)];
-        textHeight = charon_pixel_ceil(fitted.height, scale);
+        textHeight = revenant_pixel_ceil(fitted.height, scale);
         if (_imageView)
             total += configuration.imageToTextPadding;
         total += textHeight;
@@ -530,7 +530,7 @@ static UIColor *charon_unavailable_secondary_label_color(void)
         if (_textLabel)
             total += configuration.textToSecondaryTextPadding;
         CGSize fitted = [_secondaryLabel sizeThatFits:CGSizeMake(available, CGFLOAT_MAX)];
-        CGFloat secondaryHeight = charon_pixel_ceil(fitted.height, scale);
+        CGFloat secondaryHeight = revenant_pixel_ceil(fitted.height, scale);
         total += secondaryHeight;
         secondaryTop = total - secondaryHeight;
         secondaryHeight_measured = secondaryHeight;
@@ -540,7 +540,7 @@ static UIColor *charon_unavailable_secondary_label_color(void)
     if (_button || _secondaryButton) {
         CGSize primary = [_button sizeThatFits:CGSizeMake(available, CGFLOAT_MAX)];
         CGSize secondary = [_secondaryButton sizeThatFits:CGSizeMake(available, CGFLOAT_MAX)];
-        buttonRow = MAX(charon_pixel_ceil(primary.height, scale), charon_pixel_ceil(secondary.height, scale));
+        buttonRow = MAX(revenant_pixel_ceil(primary.height, scale), revenant_pixel_ceil(secondary.height, scale));
         if (_textLabel || _secondaryLabel)
             total += configuration.textToButtonPadding;
         if (_button && _secondaryButton)
@@ -582,14 +582,14 @@ static UIColor *charon_unavailable_secondary_label_color(void)
 - (void)layoutSubviews
 {
     [super layoutSubviews];
-    [self charon_buildSubviews];
+    [self revenant_buildSubviews];
     _scrollView.frame = self.bounds;
-    [self charon_layoutInSize:self.bounds.size apply:YES];
+    [self revenant_layoutInSize:self.bounds.size apply:YES];
 }
 
 - (CGSize)sizeThatFits:(CGSize)size
 {
-    CGSize fitted = [self charon_layoutInSize:size apply:NO];
+    CGSize fitted = [self revenant_layoutInSize:size apply:NO];
     return CGSizeMake(size.width, fitted.height);
 }
 

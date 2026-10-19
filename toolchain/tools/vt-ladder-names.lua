@@ -3,7 +3,7 @@ import("apple.dyld", {rootdir = path.join(os.scriptdir(), "..", "modules")})
 import("byteorder", {rootdir = path.join(os.scriptdir(), "..", "modules")})
 
 local POSITIVE = "_kVTProfileLevel_H264_Baseline_4_0"
-local NEGATIVE = "_kVTCharonNegativeControlNameThatIsInNothing"
+local NEGATIVE = "_kVTRevenantNegativeControlNameThatIsInNothing"
 
 function names_from(path)
     local names = {}

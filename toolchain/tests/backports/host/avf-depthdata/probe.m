@@ -152,7 +152,7 @@ int main(void)
 
         printf("respond init=%d new=%d\n", [AVCameraCalibrationData instancesRespondToSelector:NSSelectorFromString(@"init")],
                [AVCameraCalibrationData respondsToSelector:NSSelectorFromString(@"new")]);
-#ifdef CHARON_PORT
+#ifdef REVENANT_PORT
         SEL zeroSelector = NSSelectorFromString(@"init");
 #else
         SEL zeroSelector = NSSelectorFromString(@"_initEmpty");

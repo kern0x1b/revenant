@@ -4,19 +4,19 @@
 #include <unistd.h>
 #import "check.h"
 
-@interface NSMapTable (CharonHostObjects6)
-+ (instancetype)charonHost_weakToStrongObjectsMapTable;
-+ (instancetype)charonHost_strongToWeakObjectsMapTable;
-+ (instancetype)charonHost_weakToWeakObjectsMapTable;
-+ (instancetype)charonHost_strongToStrongObjectsMapTable;
+@interface NSMapTable (RevenantHostObjects6)
++ (instancetype)revenantHost_weakToStrongObjectsMapTable;
++ (instancetype)revenantHost_strongToWeakObjectsMapTable;
++ (instancetype)revenantHost_weakToWeakObjectsMapTable;
++ (instancetype)revenantHost_strongToStrongObjectsMapTable;
 @end
 
-@interface CharonHostArchivedTable : NSObject <NSCoding>
+@interface RevenantHostArchivedTable : NSObject <NSCoding>
 @property (nonatomic, readonly) NSString *fields;
 @property (nonatomic, readonly) BOOL later;
 @end
 
-@implementation CharonHostArchivedTable
+@implementation RevenantHostArchivedTable
 
 - (instancetype)initWithCoder:(NSCoder *)coder
 {
@@ -240,22 +240,22 @@ static void weak_checks(const char *variant, NSMapTable *(^make)(void), NSMapTab
             continue;
         NSString *theirs = outcome(^(NSMutableArray *said) { run(host(), said); });
         printf("release %s %s: %s\n", variant, scenarios[i].name, theirs.UTF8String);
-        charon_check([ours isEqual:theirs], label(variant, scenarios[i].name), [NSString stringWithFormat:@"%@ != %@", ours, theirs]);
+        revenant_check([ours isEqual:theirs], label(variant, scenarios[i].name), [NSString stringWithFormat:@"%@ != %@", ours, theirs]);
     }
 }
 
-static CharonHostArchivedTable *archived(NSMapTable *table)
+static RevenantHostArchivedTable *archived(NSMapTable *table)
 {
     [table setObject:@"v" forKey:@"k"];
     NSKeyedUnarchiver *unarchiver = [[NSKeyedUnarchiver alloc] initForReadingWithData:[NSKeyedArchiver archivedDataWithRootObject:table]];
-    [unarchiver setClass:[CharonHostArchivedTable class] forClassName:@"NSMapTable"];
+    [unarchiver setClass:[RevenantHostArchivedTable class] forClassName:@"NSMapTable"];
     return [unarchiver decodeObjectForKey:@"root"];
 }
 
 static void archive_checks(const char *variant, NSMapTable *ours, NSMapTable *theirs, NSString *fields)
 {
-    CharonHostArchivedTable *port = archived(ours), *release = theirs ? archived(theirs) : nil;
-    CHECK([port isKindOfClass:[CharonHostArchivedTable class]], label(variant, "port archives as NSMapTable"));
+    RevenantHostArchivedTable *port = archived(ours), *release = theirs ? archived(theirs) : nil;
+    CHECK([port isKindOfClass:[RevenantHostArchivedTable class]], label(variant, "port archives as NSMapTable"));
     if (release && !release.later)
         CHECK_EQUAL(port.fields, release.fields, label(variant, "port archives as the release does"));
     else
@@ -375,7 +375,7 @@ static void cost_checks(const char *variant, BOOL weakKeys, NSMapTable *(^make)(
         [table setObject:@"v" forKey:keys.lastObject];
     }
     CHECK_EQUAL(@([table count]), @(n), label(variant, "a thousand keys in"));
-    charon_check(key_calls < 20 * n, label(variant, "building a table of n keys reads entries a few times each"),
+    revenant_check(key_calls < 20 * n, label(variant, "building a table of n keys reads entries a few times each"),
                  [NSString stringWithFormat:@"%ld reads of an entry's key for %d keys", key_calls, n]);
     NSMapTable *dying = make();
     NSMutableArray *held = [NSMutableArray array];
@@ -504,10 +504,10 @@ static void enumeration_checks(const char *variant, BOOL port, NSMapTable *(^mak
                 label(variant, "and after the enumerations the live entry is alone"));
 }
 
-@interface CharonHostRefusesWeak : NSObject
+@interface RevenantHostRefusesWeak : NSObject
 @end
 
-@implementation CharonHostRefusesWeak
+@implementation RevenantHostRefusesWeak
 - (BOOL)allowsWeakReference
 {
     return NO;
@@ -517,7 +517,7 @@ static void enumeration_checks(const char *variant, BOOL port, NSMapTable *(^mak
 static int refusal(const char *who, const char *variant, const char *side)
 {
     BOOL port = strcmp(who, "port") == 0, key = strcmp(side, "key") == 0;
-    NSString *selector = [NSString stringWithFormat:port ? @"charonHost_%sObjectsMapTable" : @"%sObjectsMapTable", variant];
+    NSString *selector = [NSString stringWithFormat:port ? @"revenantHost_%sObjectsMapTable" : @"%sObjectsMapTable", variant];
     if (![NSMapTable respondsToSelector:NSSelectorFromString(selector)]) {
         printf("outcome %s %s %s: no such factory\n", who, variant, side);
         return 0;
@@ -526,7 +526,7 @@ static int refusal(const char *who, const char *variant, const char *side)
 #pragma clang diagnostic ignored "-Warc-performSelector-leaks"
     NSMapTable *table = [NSMapTable performSelector:NSSelectorFromString(selector)];
 #pragma clang diagnostic pop
-    id refuses = [CharonHostRefusesWeak new], other = [NSObject new];
+    id refuses = [RevenantHostRefusesWeak new], other = [NSObject new];
     printf("outcome %s %s %s: ", who, variant, side);
     fflush(stdout);
     [table setObject:key ? other : refuses forKey:key ? refuses : other];
@@ -543,9 +543,9 @@ int main(int argc, char **argv)
         }
     }
     @autoreleasepool {
-        count_calls(NSClassFromString(@"CharonSideWatch"), @selector(init), ^{ __sync_fetch_and_add(&watches_made, 1); });
-        count_calls(NSClassFromString(@"CharonSideWatch"), NSSelectorFromString(@"dealloc"), ^{ __sync_fetch_and_add(&watches_gone, 1); });
-        count_calls(NSClassFromString(@"CharonMapEntry"), @selector(key), ^{ key_calls++; });
+        count_calls(NSClassFromString(@"RevenantSideWatch"), @selector(init), ^{ __sync_fetch_and_add(&watches_made, 1); });
+        count_calls(NSClassFromString(@"RevenantSideWatch"), NSSelectorFromString(@"dealloc"), ^{ __sync_fetch_and_add(&watches_gone, 1); });
+        count_calls(NSClassFromString(@"RevenantMapEntry"), @selector(key), ^{ key_calls++; });
 
         struct {
             const char *name;
@@ -557,7 +557,7 @@ int main(int argc, char **argv)
         };
         for (unsigned i = 0; i < sizeof variants / sizeof *variants; i++) {
             const char *name = variants[i].name;
-            SEL port = NSSelectorFromString([NSString stringWithFormat:@"charonHost_%sObjectsMapTable", name]);
+            SEL port = NSSelectorFromString([NSString stringWithFormat:@"revenantHost_%sObjectsMapTable", name]);
             SEL release = NSSelectorFromString([NSString stringWithFormat:@"%sObjectsMapTable", name]);
             BOOL released = [NSMapTable respondsToSelector:release];
 #pragma clang diagnostic push
@@ -585,7 +585,7 @@ int main(int argc, char **argv)
         }
 
         BOOL released = [NSMapTable respondsToSelector:@selector(strongToStrongObjectsMapTable)];
-        NSMapTable *ours = [NSMapTable charonHost_strongToStrongObjectsMapTable];
+        NSMapTable *ours = [NSMapTable revenantHost_strongToStrongObjectsMapTable];
         NSMapTable *theirs = released ? [NSMapTable strongToStrongObjectsMapTable] : [NSMapTable mapTableWithKeyOptions:0 valueOptions:0];
         for (NSMapTable *table in @[ours, theirs]) {
             NSMutableString *key = [NSMutableString stringWithString:@"k"];
@@ -601,7 +601,7 @@ int main(int argc, char **argv)
         }
         CHECK_EQUAL(@([ours keyPointerFunctions].usesStrongWriteBarrier), @([theirs keyPointerFunctions].usesStrongWriteBarrier), "strongToStrong key functions");
         CHECK_EQUAL(NSStringFromClass([ours class]), NSStringFromClass([theirs class]), "strongToStrong is the release's own table");
-        printf("%d checks, %d failures\n", charon_checks, charon_failures);
+        printf("%d checks, %d failures\n", revenant_checks, revenant_failures);
     }
-    return charon_failures ? 1 : 0;
+    return revenant_failures ? 1 : 0;
 }

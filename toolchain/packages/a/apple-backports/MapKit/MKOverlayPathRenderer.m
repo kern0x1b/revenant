@@ -1,6 +1,6 @@
 #import <MapKit/MapKit.h>
 #import <UIKit/UIKit.h>
-#import "CharonMapKit.h"
+#import "RevenantMapKit.h"
 
 @implementation MKOverlayPathRenderer {
     UIColor *_fillColor;
@@ -79,7 +79,7 @@
     }
 }
 
-- (CGFloat)charon_lineWidthAtZoomScale:(MKZoomScale)zoomScale
+- (CGFloat)revenant_lineWidthAtZoomScale:(MKZoomScale)zoomScale
 {
     if (_lineWidth > 0.0) {
         return _lineWidth;
@@ -89,7 +89,7 @@
 
 - (void)applyStrokePropertiesToContext:(CGContextRef)context atZoomScale:(MKZoomScale)zoomScale
 {
-    CGContextSetLineWidth(context, (CGFloat)[self charon_lineWidthAtZoomScale:zoomScale]);
+    CGContextSetLineWidth(context, (CGFloat)[self revenant_lineWidthAtZoomScale:zoomScale]);
     CGContextSetLineJoin(context, _lineJoin);
     CGContextSetLineCap(context, _lineCap);
     CGContextSetMiterLimit(context, (CGFloat)_miterLimit);
@@ -123,7 +123,7 @@
         return;
     }
     CGContextSaveGState(context);
-    [self applyStrokePropertiesToContext:context atZoomScale:[self charon_zoomScale]];
+    [self applyStrokePropertiesToContext:context atZoomScale:[self revenant_zoomScale]];
     [self.strokeColor setStroke];
     CGContextAddPath(context, path);
     CGContextStrokePath(context);
@@ -139,13 +139,13 @@
         return;
     }
     CGContextSaveGState(context);
-    [self applyFillPropertiesToContext:context atZoomScale:[self charon_zoomScale]];
+    [self applyFillPropertiesToContext:context atZoomScale:[self revenant_zoomScale]];
     CGContextAddPath(context, path);
     CGContextFillPath(context);
     CGContextRestoreGState(context);
 }
 
-- (void)charon_drawRasterizedInContext:(CGContextRef)context zoomScale:(MKZoomScale)zoomScale
+- (void)revenant_drawRasterizedInContext:(CGContextRef)context zoomScale:(MKZoomScale)zoomScale
 {
     CGPathRef path = self.path;
     if (!path) {
@@ -192,14 +192,14 @@
     }
 }
 
-- (void)charon_drawInContext:(CGContextRef)context zoomScale:(MKZoomScale)zoomScale mapRect:(MKMapRect)mapRect
+- (void)revenant_drawInContext:(CGContextRef)context zoomScale:(MKZoomScale)zoomScale mapRect:(MKMapRect)mapRect
 {
     CGPathRef path = self.path;
     if (!path) {
         return;
     }
     if (_shouldRasterize) {
-        [self charon_drawRasterizedInContext:context zoomScale:zoomScale];
+        [self revenant_drawRasterizedInContext:context zoomScale:zoomScale];
         return;
     }
     if (_fillColor) {

@@ -18,7 +18,7 @@
 #include <cstdint>
 #include <span>
 
-namespace shade::mach_vm_support {
+namespace emulator::mach_vm_support {
 
 inline constexpr std::uint32_t kern_success = 0;
 inline constexpr std::uint32_t kern_invalid_address = 1;

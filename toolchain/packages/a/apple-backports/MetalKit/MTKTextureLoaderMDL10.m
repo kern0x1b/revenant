@@ -2,7 +2,7 @@
 #import <Metal/Metal.h>
 #import <ModelIO/ModelIO.h>
 
-static BOOL CharonMTKFormatForMDL(MDLTexture *texture, MTLPixelFormat *out)
+static BOOL RevenantMTKFormatForMDL(MDLTexture *texture, MTLPixelFormat *out)
 {
     NSUInteger channels = texture.channelCount;
     switch (texture.channelEncoding) {
@@ -29,7 +29,7 @@ static BOOL CharonMTKFormatForMDL(MDLTexture *texture, MTLPixelFormat *out)
     return NO;
 }
 
-@implementation MTKTextureLoader (CharonMDLTexture10)
+@implementation MTKTextureLoader (RevenantMDLTexture10)
 
 - (id<MTLTexture>)newTextureWithMDLTexture:(MDLTexture *)texture
                                    options:(NSDictionary<MTKTextureLoaderOption, id> *)options
@@ -47,7 +47,7 @@ static BOOL CharonMTKFormatForMDL(MDLTexture *texture, MTLPixelFormat *out)
         why = @"an MDLTexture that is a cube is six faces and this port holds 2D textures only, so its texels are loaded as the single 2D texture they are";
     } else {
         MTLPixelFormat format = MTLPixelFormatInvalid;
-        if (!CharonMTKFormatForMDL(texture, &format)) {
+        if (!RevenantMTKFormatForMDL(texture, &format)) {
             why = [NSString stringWithFormat:
                    @"an MDLTexture of %lu channel(s) with channel encoding %lu has no Metal pixel format this port holds (facts/Metal/PixelFormats.md)",
                    (unsigned long)texture.channelCount, (unsigned long)texture.channelEncoding];

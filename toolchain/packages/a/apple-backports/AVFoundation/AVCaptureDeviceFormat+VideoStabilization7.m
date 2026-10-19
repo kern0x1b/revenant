@@ -2,11 +2,11 @@
 
 #pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
 
-@interface AVCaptureDeviceFormat (CharonReleaseStabilization)
+@interface AVCaptureDeviceFormat (RevenantReleaseStabilization)
 - (int)supportedStabilizationMethod;
 @end
 
-@implementation AVCaptureDeviceFormat (CharonVideoStabilization)
+@implementation AVCaptureDeviceFormat (RevenantVideoStabilization)
 
 - (BOOL)isVideoStabilizationSupported
 {

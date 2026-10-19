@@ -5,11 +5,11 @@
 
 #pragma clang diagnostic ignored "-Wunguarded-availability-new"
 
-static const vImage_Flags charon_init_flags = kvImageNoAllocate | kvImagePrintDiagnosticsToConsole;
+static const vImage_Flags revenant_init_flags = kvImageNoAllocate | kvImagePrintDiagnosticsToConsole;
 
 vImage_Error vImageBuffer_Init(vImage_Buffer *buf, vImagePixelCount height, vImagePixelCount width, uint32_t pixelBits, vImage_Flags flags)
 {
-    if (flags & ~charon_init_flags)
+    if (flags & ~revenant_init_flags)
         return kvImageUnknownFlagsBit;
     size_t bytes = 0;
     if (width && pixelBits) {

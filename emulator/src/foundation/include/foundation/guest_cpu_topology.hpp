@@ -12,7 +12,7 @@
 #include <cstdint>
 #include <limits>
 
-namespace shade {
+namespace emulator {
 
 namespace guest_cpu_isa {
 

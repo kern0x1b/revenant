@@ -3,7 +3,7 @@
 # Apple's own objects, member by member, from the header MPSRNNLayer.h of the iOS 16.4 SDK.
 #
 # The four port files are built for Catalyst beside Apple's MetalPerformanceShaders in one process. Every class any of the
-# four files defines is renamed CharonHost<Name> in all four, with one shared rename list: the subclasses name their
+# four files defines is renamed RevenantHost<Name> in all four, with one shared rename list: the subclasses name their
 # superclass through the renamed base, so a per-file list would leave a subclass inheriting Apple's base by mistake.
 #
 # A MUTANT runs last: the GRU's gatePnormValue default is 2, not Apple's 1 (measured), and the defaults comparison must
@@ -25,7 +25,7 @@ for source in $sources; do
 done
 renames=""
 for name in $(for object in "$BUILD"/plain/*.o; do xcrun nm -gU "$object"; done | awk 'NF == 3 {print $3}' | grep -E '^_OBJC_CLASS_\$_' | sed -e 's/^_OBJC_CLASS_\$_//' | sort -u); do
-    renames="$renames -D$name=CharonHost$name"
+    renames="$renames -D$name=RevenantHost$name"
 done
 echo "renamed:$renames"
 objects=""

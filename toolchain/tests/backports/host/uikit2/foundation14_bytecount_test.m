@@ -12,7 +12,7 @@ static uint32_t next(void)
 
 static NSString *host_selector(NSString *name)
 {
-    return [@"charonHost" stringByAppendingString:[[name substringToIndex:1].uppercaseString stringByAppendingString:[name substringFromIndex:1]]];
+    return [@"revenantHost" stringByAppendingString:[[name substringToIndex:1].uppercaseString stringByAppendingString:[name substringFromIndex:1]]];
 }
 
 static NSString *significant(NSString *text)
@@ -64,7 +64,7 @@ static NSString *safely(NSString *(^block)(void))
     @try {
         return block() ?: @"(nil)";
     } @catch (NSException *exception) {
-        return [NSString stringWithFormat:@"raises %@ | %@", exception.name, [[exception.reason stringByReplacingOccurrencesOfString:@"CharonHost" withString:@""] stringByReplacingOccurrencesOfString:@"_NSStatic_" withString:@""]];
+        return [NSString stringWithFormat:@"raises %@ | %@", exception.name, [[exception.reason stringByReplacingOccurrencesOfString:@"RevenantHost" withString:@""] stringByReplacingOccurrencesOfString:@"_NSStatic_" withString:@""]];
     }
 }
 
@@ -86,9 +86,9 @@ static BOOL last_digits_only(NSString *a, NSString *b)
 int main(int argc, char **argv)
 {
     @autoreleasepool {
-        Class ours = NSClassFromString(@"CharonHostNSUnitInformationStorage");
-        Class ourMeasurement = NSClassFromString(@"CharonHostNSMeasurement");
-        Class ourLength = NSClassFromString(@"CharonHostNSUnitLength");
+        Class ours = NSClassFromString(@"RevenantHostNSUnitInformationStorage");
+        Class ourMeasurement = NSClassFromString(@"RevenantHostNSMeasurement");
+        Class ourLength = NSClassFromString(@"RevenantHostNSUnitLength");
         NSArray *names = @[@"bits", @"nibbles", @"bytes", @"kilobits", @"kilobytes", @"kibibits", @"kibibytes", @"megabits", @"megabytes", @"mebibits", @"mebibytes", @"gigabits", @"gigabytes",
                            @"gibibits", @"gibibytes", @"terabits", @"terabytes", @"tebibits", @"tebibytes", @"petabits", @"petabytes", @"pebibits", @"pebibytes", @"exabits", @"exabytes",
                            @"exbibits", @"exbibytes", @"zettabits", @"zettabytes", @"zebibits", @"zebibytes", @"yottabits", @"yottabytes", @"yobibits", @"yobibytes"];
@@ -127,7 +127,7 @@ int main(int argc, char **argv)
         }
         for (NSString *sample in samples)
             printf("  %s\n", sample.UTF8String);
-        charon_check(wrong == 0, "random measurements in random units read as the system's formatter writes them", [NSString stringWithFormat:@"%lu of %lu differ", (unsigned long)wrong, (unsigned long)cases]);
+        revenant_check(wrong == 0, "random measurements in random units read as the system's formatter writes them", [NSString stringWithFormat:@"%lu of %lu differ", (unsigned long)wrong, (unsigned long)cases]);
 
         for (NSNumber *style in @[@0, @1, @2, @3]) {
             NSMeasurement *system = [[NSMeasurement alloc] initWithDoubleValue:1234.5 unit:[NSUnitInformationStorage kilobytes]];
@@ -144,6 +144,6 @@ int main(int argc, char **argv)
         b = safely(^{ return [formatter stringFromMeasurement:nil]; });
         CHECK_EQUAL(a, b, "no measurement raises the system's exception");
     }
-    printf("checks=%d failures=%d\n", charon_checks, charon_failures);
-    return charon_failures;
+    printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
+    return revenant_failures;
 }

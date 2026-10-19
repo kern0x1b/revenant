@@ -1,10 +1,10 @@
 #!/bin/sh
 # AVAudioUnitDistortion's presets, preGain and wetDryMix against the host's unit: distortion.m, built against the port's
-# CharonDistortionPresets.h, the table the port's class sends.
+# RevenantDistortionPresets.h, the table the port's class sends.
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
-build=${AVFAUDIO_DISTORTION_BUILD:-$(runs_folder charon-avfaudio-distortion)}
+build=${AVFAUDIO_DISTORTION_BUILD:-$(runs_folder revenant-avfaudio-distortion)}
 rm -rf "$build"
 mkdir -p "$build"
 

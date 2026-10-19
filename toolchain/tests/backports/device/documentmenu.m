@@ -50,7 +50,7 @@ static UIActionSheet *visible_sheet(void)
 {
     [[NSFileManager defaultManager] createDirectoryAtPath:results_folder withIntermediateDirectories:YES attributes:nil error:NULL];
     [[NSFileManager defaultManager] removeItemAtPath:[results_folder stringByAppendingPathComponent:@"documentmenu.done"] error:NULL];
-    charon_log_to([results_folder stringByAppendingPathComponent:@"documentmenu.log"]);
+    revenant_log_to([results_folder stringByAppendingPathComponent:@"documentmenu.log"]);
     self.window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
     self.window.rootViewController = [[UIViewController alloc] init];
     [self.window makeKeyAndVisible];
@@ -63,9 +63,9 @@ static UIActionSheet *visible_sheet(void)
         });
         for (NSString *name in [expected.allKeys sortedArrayUsingSelector:@selector(compare:)]) {
             if ([expected[name] isEqualToString:records[name]] )
-                charon_check(YES, name.UTF8String, nil);
+                revenant_check(YES, name.UTF8String, nil);
             else
-                charon_check(NO, name.UTF8String, [NSString stringWithFormat:@"\n    device %@\n    host   %@", records[name], expected[name]]);
+                revenant_check(NO, name.UTF8String, [NSString stringWithFormat:@"\n    device %@\n    host   %@", records[name], expected[name]]);
         }
         self.events = [NSMutableArray array];
         UIViewController *root = self.window.rootViewController;
@@ -76,7 +76,7 @@ static UIActionSheet *visible_sheet(void)
             menu.popoverPresentationController.sourceView = anchor;
             [root presentViewController:menu animated:NO completion:nil];
         };
-        NSString *file = [NSTemporaryDirectory() stringByAppendingPathComponent:@"charon-menu.txt"];
+        NSString *file = [NSTemporaryDirectory() stringByAppendingPathComponent:@"revenant-menu.txt"];
         [@"menu" writeToFile:file atomically:YES encoding:NSUTF8StringEncoding error:NULL];
         __block BOOL first = NO, last = NO;
         UIDocumentMenuViewController *menu = [[UIDocumentMenuViewController alloc] initWithDocumentTypes:@[@"public.data"] inMode:UIDocumentPickerModeImport];
@@ -88,27 +88,27 @@ static UIActionSheet *visible_sheet(void)
         NSMutableArray *titles = [NSMutableArray array];
         for (NSInteger index = 0; index < sheet.numberOfButtons; index++)
             [titles addObject:[sheet buttonTitleAtIndex:index]];
-        charon_check([titles isEqual:@[@"First option", @"Browse", @"Last option", @"Cancel"]], "with the options the application added around the way to the picker, and Cancel last", titles.description);
+        revenant_check([titles isEqual:@[@"First option", @"Browse", @"Last option", @"Cancel"]], "with the options the application added around the way to the picker, and Cancel last", titles.description);
         printf("titles %s\n", titles.description.UTF8String);
         [sheet dismissWithClickedButtonIndex:[titles indexOfObject:@"First option"] animated:NO];
         CHECK(first && !last && self.events.count == 0, "a chosen option of the application runs its handler and tells the delegate nothing");
         show(menu);
         sheet = visible_sheet();
         [sheet dismissWithClickedButtonIndex:[titles indexOfObject:@"Browse"] animated:NO];
-        charon_check([self.events isEqual:@[@"picked"]], "the way to the picker answers the delegate with a picker", self.events.description);
+        revenant_check([self.events isEqual:@[@"picked"]], "the way to the picker answers the delegate with a picker", self.events.description);
         CHECK([self.picked isKindOfClass:[UIDocumentPickerViewController class]] && self.picked.documentPickerMode == UIDocumentPickerModeImport, "made for the mode of the menu");
         show(menu);
         sheet = visible_sheet();
         [sheet dismissWithClickedButtonIndex:sheet.cancelButtonIndex animated:NO];
-        charon_check([self.events isEqual:@[@"picked", @"cancelled"]], "and Cancel tells the delegate that the menu was cancelled", self.events.description);
+        revenant_check([self.events isEqual:@[@"picked", @"cancelled"]], "and Cancel tells the delegate that the menu was cancelled", self.events.description);
         UIDocumentMenuViewController *export = [[UIDocumentMenuViewController alloc] initWithURL:[NSURL fileURLWithPath:file] inMode:UIDocumentPickerModeExportToService];
         [self.events removeAllObjects];
         show(export);
         sheet = visible_sheet();
         [sheet dismissWithClickedButtonIndex:0 animated:NO];
-        charon_check([self.events isEqual:@[@"picked"]] && self.picked.documentPickerMode == UIDocumentPickerModeExportToService, "a menu for export answers a picker for export", self.events.description);
-        printf("checks=%d failures=%d\n", charon_checks, charon_failures);
-        NSString *summary = [NSString stringWithFormat:@"%@ checks=%d failures=%d\n", charon_failures ? @"FAIL" : @"ok", charon_checks, charon_failures];
+        revenant_check([self.events isEqual:@[@"picked"]] && self.picked.documentPickerMode == UIDocumentPickerModeExportToService, "a menu for export answers a picker for export", self.events.description);
+        printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
+        NSString *summary = [NSString stringWithFormat:@"%@ checks=%d failures=%d\n", revenant_failures ? @"FAIL" : @"ok", revenant_checks, revenant_failures];
         [summary writeToFile:[results_folder stringByAppendingPathComponent:@"documentmenu.done"] atomically:YES encoding:NSUTF8StringEncoding error:NULL];
     });
     return YES;

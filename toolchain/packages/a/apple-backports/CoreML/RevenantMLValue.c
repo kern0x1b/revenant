@@ -1,10 +1,10 @@
-#include "CharonMLValue.h"
+#include "RevenantMLValue.h"
 
 #include <stdlib.h>
 #include <string.h>
 #include <string.h>
 
-char *charon_ml_strndup(const char *bytes, size_t length)
+char *revenant_ml_strndup(const char *bytes, size_t length)
 {
     char *copy = (char *)malloc(length + 1);
     if (copy == NULL) {
@@ -17,65 +17,65 @@ char *charon_ml_strndup(const char *bytes, size_t length)
     return copy;
 }
 
-size_t charon_ml_type_size(int data_type)
+size_t revenant_ml_type_size(int data_type)
 {
     switch (data_type) {
-    case CHARON_ML_ARRAY_FLOAT16:
-    case CHARON_ML_ARRAY_INT8:
+    case REVENANT_ML_ARRAY_FLOAT16:
+    case REVENANT_ML_ARRAY_INT8:
         return 1;
-    case CHARON_ML_ARRAY_FLOAT32:
-    case CHARON_ML_ARRAY_INT32:
+    case REVENANT_ML_ARRAY_FLOAT32:
+    case REVENANT_ML_ARRAY_INT32:
         return 4;
-    case CHARON_ML_ARRAY_DOUBLE:
+    case REVENANT_ML_ARRAY_DOUBLE:
         return 8;
     default:
         return 0;
     }
 }
 
-const char *charon_ml_type_name(int data_type)
+const char *revenant_ml_type_name(int data_type)
 {
     switch (data_type) {
-    case CHARON_ML_ARRAY_FLOAT32:
+    case REVENANT_ML_ARRAY_FLOAT32:
         return "float32";
-    case CHARON_ML_ARRAY_DOUBLE:
+    case REVENANT_ML_ARRAY_DOUBLE:
         return "double";
-    case CHARON_ML_ARRAY_INT32:
+    case REVENANT_ML_ARRAY_INT32:
         return "int32";
-    case CHARON_ML_ARRAY_INT8:
+    case REVENANT_ML_ARRAY_INT8:
         return "int8";
-    case CHARON_ML_ARRAY_FLOAT16:
+    case REVENANT_ML_ARRAY_FLOAT16:
         return "float16";
     default:
         return "invalid";
     }
 }
 
-const char *charon_ml_value_name(charon_ml_value_kind kind)
+const char *revenant_ml_value_name(revenant_ml_value_kind kind)
 {
     switch (kind) {
-    case CHARON_ML_VALUE_NUMBER:
+    case REVENANT_ML_VALUE_NUMBER:
         return "a number";
-    case CHARON_ML_VALUE_STRING:
+    case REVENANT_ML_VALUE_STRING:
         return "a string";
-    case CHARON_ML_VALUE_IMAGE:
+    case REVENANT_ML_VALUE_IMAGE:
         return "an image";
-    case CHARON_ML_VALUE_DICTIONARY:
+    case REVENANT_ML_VALUE_DICTIONARY:
         return "a dictionary";
-    case CHARON_ML_VALUE_ARRAY:
+    case REVENANT_ML_VALUE_ARRAY:
         return "an array";
-    case CHARON_ML_VALUE_SEQUENCE:
+    case REVENANT_ML_VALUE_SEQUENCE:
         return "a sequence";
     default:
         return "no value";
     }
 }
 
-int charon_ml_count_of_shape(const int64_t *shape, int rank)
+int revenant_ml_count_of_shape(const int64_t *shape, int rank)
 {
     int index;
     int64_t count = 1;
-    if (rank < 0 || rank > CHARON_ML_MAX_RANK) {
+    if (rank < 0 || rank > REVENANT_ML_MAX_RANK) {
         return 0;
     }
     for (index = 0; index < rank; index++) {
@@ -100,27 +100,27 @@ static void strides_of(const int64_t *shape, int rank, int64_t *strides)
     }
 }
 
-charon_ml_array charon_ml_array_make(int data_type, const int64_t *shape, int rank, void *data)
+revenant_ml_array revenant_ml_array_make(int data_type, const int64_t *shape, int rank, void *data)
 {
-    charon_ml_array array;
+    revenant_ml_array array;
     memset(&array, 0, sizeof array);
     array.data_type = data_type;
     array.rank = rank;
-    if (rank > CHARON_ML_MAX_RANK) {
-        array.rank = CHARON_ML_MAX_RANK;
+    if (rank > REVENANT_ML_MAX_RANK) {
+        array.rank = REVENANT_ML_MAX_RANK;
     }
     memcpy(array.shape, shape, (size_t)array.rank * sizeof *shape);
     strides_of(shape, rank, array.strides);
-    array.count = (size_t)charon_ml_count_of_shape(shape, rank);
+    array.count = (size_t)revenant_ml_count_of_shape(shape, rank);
     array.data = data;
     array.owns_data = 0;
     return array;
 }
 
-charon_ml_array charon_ml_array_alloc(int data_type, const int64_t *shape, int rank)
+revenant_ml_array revenant_ml_array_alloc(int data_type, const int64_t *shape, int rank)
 {
-    charon_ml_array array = charon_ml_array_make(data_type, shape, rank, NULL);
-    size_t width = charon_ml_type_size(data_type);
+    revenant_ml_array array = revenant_ml_array_make(data_type, shape, rank, NULL);
+    size_t width = revenant_ml_type_size(data_type);
     if (array.count == 0 || width == 0) {
         return array;
     }
@@ -129,7 +129,7 @@ charon_ml_array charon_ml_array_alloc(int data_type, const int64_t *shape, int r
     return array;
 }
 
-void charon_ml_array_free(charon_ml_array *array)
+void revenant_ml_array_free(revenant_ml_array *array)
 {
     if (array == NULL) {
         return;
@@ -142,22 +142,22 @@ void charon_ml_array_free(charon_ml_array *array)
     array->count = 0;
 }
 
-charon_ml_array charon_ml_array_subview(const charon_ml_array *array, const int64_t *shape, int rank, int64_t at)
+revenant_ml_array revenant_ml_array_subview(const revenant_ml_array *array, const int64_t *shape, int rank, int64_t at)
 {
-    charon_ml_array view = *array;
-    if (rank > CHARON_ML_MAX_RANK) {
-        rank = CHARON_ML_MAX_RANK;
+    revenant_ml_array view = *array;
+    if (rank > REVENANT_ML_MAX_RANK) {
+        rank = REVENANT_ML_MAX_RANK;
     }
     view.rank = rank;
     memcpy(view.shape, shape, (size_t)rank * sizeof *shape);
     strides_of(shape, rank, view.strides);
-    view.count = (size_t)charon_ml_count_of_shape(shape, rank);
-    view.data = array->data == NULL ? NULL : (char *)array->data + at * (int64_t)charon_ml_type_size(array->data_type);
+    view.count = (size_t)revenant_ml_count_of_shape(shape, rank);
+    view.data = array->data == NULL ? NULL : (char *)array->data + at * (int64_t)revenant_ml_type_size(array->data_type);
     view.owns_data = 0;
     return view;
 }
 
-int charon_ml_array_as(const charon_ml_array *array, int data_type, charon_ml_array *out)
+int revenant_ml_array_as(const revenant_ml_array *array, int data_type, revenant_ml_array *out)
 {
     *out = *array;
     out->data_type = data_type;
@@ -165,10 +165,10 @@ int charon_ml_array_as(const charon_ml_array *array, int data_type, charon_ml_ar
     if (array->data_type == data_type) {
         return 1;
     }
-    return charon_ml_type_size(array->data_type) == charon_ml_type_size(data_type);
+    return revenant_ml_type_size(array->data_type) == revenant_ml_type_size(data_type);
 }
 
-float charon_ml_half_to_float(uint16_t half)
+float revenant_ml_half_to_float(uint16_t half)
 {
     unsigned sign = (unsigned)(half >> 15) & 1u;
     int exponent = (int)((half >> 10) & 0x1fu);
@@ -197,7 +197,7 @@ float charon_ml_half_to_float(uint16_t half)
     return value;
 }
 
-uint16_t charon_ml_float_to_half(float value)
+uint16_t revenant_ml_float_to_half(float value)
 {
     uint32_t bits;
     unsigned sign, exponent, mantissa;
@@ -227,68 +227,68 @@ uint16_t charon_ml_float_to_half(float value)
     return (uint16_t)((sign << 15) | (uint16_t)((unbiased + 15) << 10) | (uint16_t)(mantissa >> 13));
 }
 
-double charon_ml_array_get(const charon_ml_array *array, int64_t index)
+double revenant_ml_array_get(const revenant_ml_array *array, int64_t index)
 {
     const char *at;
     if (array->data == NULL || index < 0 || (size_t)index >= array->count) {
         return 0.0;
     }
-    at = (const char *)array->data + (size_t)index * charon_ml_type_size(array->data_type);
+    at = (const char *)array->data + (size_t)index * revenant_ml_type_size(array->data_type);
     switch (array->data_type) {
-    case CHARON_ML_ARRAY_FLOAT32: {
+    case REVENANT_ML_ARRAY_FLOAT32: {
         float value;
         memcpy(&value, at, sizeof value);
         return (double)value;
     }
-    case CHARON_ML_ARRAY_DOUBLE: {
+    case REVENANT_ML_ARRAY_DOUBLE: {
         double value;
         memcpy(&value, at, sizeof value);
         return value;
     }
-    case CHARON_ML_ARRAY_INT32: {
+    case REVENANT_ML_ARRAY_INT32: {
         int32_t value;
         memcpy(&value, at, sizeof value);
         return (double)value;
     }
-    case CHARON_ML_ARRAY_INT8:
+    case REVENANT_ML_ARRAY_INT8:
         return (double)*(const int8_t *)at;
-    case CHARON_ML_ARRAY_FLOAT16: {
+    case REVENANT_ML_ARRAY_FLOAT16: {
         uint16_t half;
         memcpy(&half, at, sizeof half);
-        return (double)charon_ml_half_to_float(half);
+        return (double)revenant_ml_half_to_float(half);
     }
     default:
         return 0.0;
     }
 }
 
-void charon_ml_array_set(charon_ml_array *array, int64_t index, double value)
+void revenant_ml_array_set(revenant_ml_array *array, int64_t index, double value)
 {
     char *at;
     if (array->data == NULL || index < 0 || (size_t)index >= array->count) {
         return;
     }
-    at = (char *)array->data + (size_t)index * charon_ml_type_size(array->data_type);
+    at = (char *)array->data + (size_t)index * revenant_ml_type_size(array->data_type);
     switch (array->data_type) {
-    case CHARON_ML_ARRAY_FLOAT32: {
+    case REVENANT_ML_ARRAY_FLOAT32: {
         float narrow = (float)value;
         memcpy(at, &narrow, sizeof narrow);
         break;
     }
-    case CHARON_ML_ARRAY_DOUBLE:
+    case REVENANT_ML_ARRAY_DOUBLE:
         memcpy(at, &value, sizeof value);
         break;
-    case CHARON_ML_ARRAY_INT32: {
+    case REVENANT_ML_ARRAY_INT32: {
         int32_t narrow = (int32_t)value;
         memcpy(at, &narrow, sizeof narrow);
         break;
     }
-    case CHARON_ML_ARRAY_INT8:
+    case REVENANT_ML_ARRAY_INT8:
         *(int8_t *)at = (int8_t)value;
         break;
-    case CHARON_ML_ARRAY_FLOAT16: {
+    case REVENANT_ML_ARRAY_FLOAT16: {
         float narrow = (float)value;
-        memcpy(at, &(uint16_t){charon_ml_float_to_half(narrow)}, sizeof(uint16_t));
+        memcpy(at, &(uint16_t){revenant_ml_float_to_half(narrow)}, sizeof(uint16_t));
         break;
     }
     default:
@@ -296,7 +296,7 @@ void charon_ml_array_set(charon_ml_array *array, int64_t index, double value)
     }
 }
 
-int64_t charon_ml_array_offset(const charon_ml_array *array, const int64_t *position, int rank)
+int64_t revenant_ml_array_offset(const revenant_ml_array *array, const int64_t *position, int rank)
 {
     int64_t offset = 0;
     int index;
@@ -312,28 +312,28 @@ int64_t charon_ml_array_offset(const charon_ml_array *array, const int64_t *posi
     return offset;
 }
 
-charon_ml_value charon_ml_value_number(double number)
+revenant_ml_value revenant_ml_value_number(double number)
 {
-    charon_ml_value value;
+    revenant_ml_value value;
     memset(&value, 0, sizeof value);
-    value.kind = CHARON_ML_VALUE_NUMBER;
+    value.kind = REVENANT_ML_VALUE_NUMBER;
     value.number = number;
     return value;
 }
 
-charon_ml_value charon_ml_value_string(const char *bytes, size_t length)
+revenant_ml_value revenant_ml_value_string(const char *bytes, size_t length)
 {
-    charon_ml_value value;
+    revenant_ml_value value;
     memset(&value, 0, sizeof value);
-    value.kind = CHARON_ML_VALUE_STRING;
+    value.kind = REVENANT_ML_VALUE_STRING;
     value.string.bytes = bytes;
     value.string.length = length;
     return value;
 }
 
-charon_ml_value charon_ml_value_string_copy(const char *bytes, size_t length)
+revenant_ml_value revenant_ml_value_string_copy(const char *bytes, size_t length)
 {
-    charon_ml_value value = charon_ml_value_string(bytes, length);
+    revenant_ml_value value = revenant_ml_value_string(bytes, length);
     char *copy = (char *)malloc(length + 1);
     if (copy == NULL) {
         memset(&value, 0, sizeof value);
@@ -348,31 +348,31 @@ charon_ml_value charon_ml_value_string_copy(const char *bytes, size_t length)
     return value;
 }
 
-charon_ml_value charon_ml_value_array(charon_ml_array array)
+revenant_ml_value revenant_ml_value_array(revenant_ml_array array)
 {
-    charon_ml_value value;
+    revenant_ml_value value;
     memset(&value, 0, sizeof value);
-    value.kind = array.data_type == CHARON_ML_ARRAY_INVALID ? CHARON_ML_VALUE_NONE : CHARON_ML_VALUE_ARRAY;
+    value.kind = array.data_type == REVENANT_ML_ARRAY_INVALID ? REVENANT_ML_VALUE_NONE : REVENANT_ML_VALUE_ARRAY;
     value.array = array;
     return value;
 }
 
-charon_ml_value charon_ml_value_dictionary(void)
+revenant_ml_value revenant_ml_value_dictionary(void)
 {
-    charon_ml_value value;
+    revenant_ml_value value;
     memset(&value, 0, sizeof value);
-    value.kind = CHARON_ML_VALUE_DICTIONARY;
+    value.kind = REVENANT_ML_VALUE_DICTIONARY;
     return value;
 }
 
-int charon_ml_dictionary_put(charon_ml_value *value, const char *key, double number)
+int revenant_ml_dictionary_put(revenant_ml_value *value, const char *key, double number)
 {
     char *copy;
-    if (value == NULL || value->kind != CHARON_ML_VALUE_DICTIONARY || key == NULL ||
-        value->dictionary.count >= CHARON_ML_DICTIONARY_PAIRS) {
+    if (value == NULL || value->kind != REVENANT_ML_VALUE_DICTIONARY || key == NULL ||
+        value->dictionary.count >= REVENANT_ML_DICTIONARY_PAIRS) {
         return 0;
     }
-    copy = charon_ml_strndup(key, strlen(key));
+    copy = revenant_ml_strndup(key, strlen(key));
     if (copy == NULL) {
         return 0;
     }
@@ -382,13 +382,13 @@ int charon_ml_dictionary_put(charon_ml_value *value, const char *key, double num
     return 1;
 }
 
-const char *charon_ml_dictionary_get(const charon_ml_value *value, const char *key, double *number, int *found)
+const char *revenant_ml_dictionary_get(const revenant_ml_value *value, const char *key, double *number, int *found)
 {
     size_t index;
     if (number != NULL) {
         *number = 0.0;
     }
-    if (value == NULL || value->kind != CHARON_ML_VALUE_DICTIONARY || key == NULL) {
+    if (value == NULL || value->kind != REVENANT_ML_VALUE_DICTIONARY || key == NULL) {
         if (found != NULL) {
             *found = 0;
         }
@@ -411,19 +411,19 @@ const char *charon_ml_dictionary_get(const charon_ml_value *value, const char *k
     return NULL;
 }
 
-void charon_ml_value_free(charon_ml_value *value)
+void revenant_ml_value_free(revenant_ml_value *value)
 {
     size_t index;
     if (value == NULL) {
         return;
     }
-    if (value->kind == CHARON_ML_VALUE_ARRAY) {
-        charon_ml_array_free(&value->array);
+    if (value->kind == REVENANT_ML_VALUE_ARRAY) {
+        revenant_ml_array_free(&value->array);
     }
-    if (value->kind == CHARON_ML_VALUE_STRING && value->string.owned) {
+    if (value->kind == REVENANT_ML_VALUE_STRING && value->string.owned) {
         free((void *)value->string.bytes);
     }
-    if (value->kind == CHARON_ML_VALUE_DICTIONARY) {
+    if (value->kind == REVENANT_ML_VALUE_DICTIONARY) {
         for (index = 0; index < value->dictionary.count; index++) {
             free(value->dictionary.keys[index]);
         }

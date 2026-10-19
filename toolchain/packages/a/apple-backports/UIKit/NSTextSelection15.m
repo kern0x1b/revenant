@@ -148,7 +148,7 @@
     return hash;
 }
 
-static NSString *charon_granularity_name(NSTextSelectionGranularity granularity)
+static NSString *revenant_granularity_name(NSTextSelectionGranularity granularity)
 {
     switch (granularity) {
     case NSTextSelectionGranularityWord:
@@ -164,12 +164,12 @@ static NSString *charon_granularity_name(NSTextSelectionGranularity granularity)
     }
 }
 
-static NSString *charon_affinity_name(NSTextSelectionAffinity affinity)
+static NSString *revenant_affinity_name(NSTextSelectionAffinity affinity)
 {
     return affinity == NSTextSelectionAffinityUpstream ? @"upstream" : @"downstream";
 }
 
-static NSString *charon_ranges_text(NSArray *ranges)
+static NSString *revenant_ranges_text(NSArray *ranges)
 {
     NSMutableString *text = [NSMutableString stringWithString:@"(\n"];
     for (NSTextRange *range in ranges) {
@@ -184,8 +184,8 @@ static NSString *charon_ranges_text(NSArray *ranges)
 - (NSString *)description
 {
     return [NSString stringWithFormat:@"NSTextSelection:<%p> granularity=%@, affinity=%@, textRanges=%@", self,
-                                      charon_granularity_name(_granularity), charon_affinity_name(_affinity),
-                                      charon_ranges_text(_textRanges)];
+                                      revenant_granularity_name(_granularity), revenant_affinity_name(_affinity),
+                                      revenant_ranges_text(_textRanges)];
 }
 
 @end

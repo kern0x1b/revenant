@@ -8,7 +8,7 @@
 extern NSUInteger gCompared;
 extern NSUInteger gMismatches;
 
-static inline double CharonMPSStatisticsOneUlp(double want)
+static inline double RevenantMPSStatisticsOneUlp(double want)
 {
     if (want == 0.0)
         return 0.0;
@@ -23,13 +23,13 @@ static inline double CharonMPSStatisticsOneUlp(double want)
 }
 
 typedef enum {
-    CharonMPSStatisticsMinMax = 0,
-    CharonMPSStatisticsMeanVar,
-    CharonMPSStatisticsMean,
-} CharonMPSStatisticsOp;
+    RevenantMPSStatisticsMinMax = 0,
+    RevenantMPSStatisticsMeanVar,
+    RevenantMPSStatisticsMean,
+} RevenantMPSStatisticsOp;
 
-static void CharonMPSStatisticsReference(const char *name, const float *src, NSUInteger rows, NSUInteger cols,
-                                         NSUInteger channels, CharonMPSStatisticsOp op, const float *dst)
+static void RevenantMPSStatisticsReference(const char *name, const float *src, NSUInteger rows, NSUInteger cols,
+                                         NSUInteger channels, RevenantMPSStatisticsOp op, const float *dst)
 {
     NSUInteger count = rows * cols * channels;
     double smallest = INFINITY, largest = -INFINITY, sum = 0.0;
@@ -41,7 +41,7 @@ static void CharonMPSStatisticsReference(const char *name, const float *src, NSU
     }
     double mean = count ? sum / (double)count : 0.0;
     double variance = 0.0;
-    if (op != CharonMPSStatisticsMinMax && count) {
+    if (op != RevenantMPSStatisticsMinMax && count) {
         double squared = 0.0;
         for (NSUInteger i = 0; i < count; i++) {
             double d = (double)src[i] - mean;
@@ -52,11 +52,11 @@ static void CharonMPSStatisticsReference(const char *name, const float *src, NSU
 
     int wanted;
     switch (op) {
-        case CharonMPSStatisticsMinMax:
+        case RevenantMPSStatisticsMinMax:
             printf("reference %s min %g max %g\n", name, smallest, largest);
             wanted = 2;
             break;
-        case CharonMPSStatisticsMeanVar:
+        case RevenantMPSStatisticsMeanVar:
             printf("reference %s mean %g variance %g\n", name, mean, variance);
             wanted = 2;
             break;
@@ -71,11 +71,11 @@ static void CharonMPSStatisticsReference(const char *name, const float *src, NSU
     answer[0] = smallest;
     answer[1] = largest;
     bound[0] = bound[1] = 0.0;
-    if (op != CharonMPSStatisticsMinMax) {
+    if (op != RevenantMPSStatisticsMinMax) {
         answer[0] = mean;
         answer[1] = variance;
-        bound[0] = CharonMPSStatisticsOneUlp(mean);
-        bound[1] = CharonMPSStatisticsOneUlp(variance);
+        bound[0] = RevenantMPSStatisticsOneUlp(mean);
+        bound[1] = RevenantMPSStatisticsOneUlp(variance);
     }
     for (int i = 0; i < wanted; i++) {
         double got = (double)dst[i];

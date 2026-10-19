@@ -26,7 +26,7 @@ ensure_generated "$here" Accessibility
 root=$(cd "$here/../../../.." && pwd)
 sources=${ACCESSIBILITY_SRC:-$root/packages/a/apple-backports/Accessibility}
 registry=${REGISTRY_ROOT:-$root/packages/a/apple-backports}
-build=${PROTOCOL_BUILD:-$(runs_folder charon-accessibilitymap-protocol)}
+build=${PROTOCOL_BUILD:-$(runs_folder revenant-accessibilitymap-protocol)}
 rm -rf "$build"
 mkdir -p "$build"
 sdk=$(xcrun --show-sdk-path)
@@ -45,8 +45,8 @@ with open(header, "w") as out:
     out.write("// Written by protocol-check.sh from registry/Accessibility's protocol rows, so that this check\n")
     out.write("// asks about what the registry claims. One macro per implemented protocol row.\n")
     out.write("#import <Foundation/Foundation.h>\n\n")
-    out.write("#define CHARON_PROTOCOLS @[%s]\n" % ", ".join('@"%s"' % n for n in rows))
-    out.write("#define CHARON_PROTOCOL_COUNT %d\n" % len(rows))
+    out.write("#define REVENANT_PROTOCOLS @[%s]\n" % ", ".join('@"%s"' % n for n in rows))
+    out.write("#define REVENANT_PROTOCOL_COUNT %d\n" % len(rows))
 print("registry protocol rows read: %d" % len(rows))
 for index, name in enumerate(rows, 1):
     print("  [%d] %s" % (index, name))
@@ -60,8 +60,8 @@ cat "$build/generated.log"
 sources_m=$(ls "$build/generated"/*.m)
 
 xcrun clang -target arm64-apple-macos26.0 -isysroot "$sdk" -fobjc-arc -O0 -Wall -Wno-nonnull \
-    -include "$sources/CharonBrailleMap.h" \
-    "$here/protocol-check.m" "$sources/CharonBrailleMap.m" $sources_m \
+    -include "$sources/RevenantBrailleMap.h" \
+    "$here/protocol-check.m" "$sources/RevenantBrailleMap.m" $sources_m \
     -I"$root/packages/a/apple-backports" -I"$sources" -I"$build" -I"$root/packages/a/apple-backports/.gen/Accessibility" \
     -framework Foundation -framework CoreGraphics -o "$build/protocol" 2> "$build/build.log" || {
         echo "the protocol check did not build" >&2

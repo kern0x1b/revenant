@@ -6,7 +6,7 @@ set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 uikit=$here/../../../../packages/a/apple-backports/UIKit
-build=${NOTIFICATION_CONTENT_BUILD:-$(runs_fresh charon-notification-content)}
+build=${NOTIFICATION_CONTENT_BUILD:-$(runs_fresh revenant-notification-content)}
 # The port file and the test use UserNotifications, which the two links name.
 TWOPROCESS_FRAMEWORKS="-framework UserNotifications"
 . "$here/../../common/twoprocess.sh"

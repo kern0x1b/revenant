@@ -83,7 +83,7 @@ function toolchain_file(package, opt)
         "set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)",
         "set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE ONLY)"
     })
-    local file = path.absolute(path.join(opt.builddir or "build_charon", "apple-ios.toolchain.cmake"))
+    local file = path.absolute(path.join(opt.builddir or "build_revenant", "apple-ios.toolchain.cmake"))
     io.writefile(file, table.concat(lines, "\n") .. "\n")
     return file
 end
@@ -99,7 +99,7 @@ function install(package, configs, opt)
     end
     local cmake = assert(find_tool("cmake"), "cmake is needed to build " .. package:name())
     local ninja = assert(find_tool("ninja"), "ninja is needed to build " .. package:name())
-    local builddir = path.absolute(opt.builddir or ("build_charon-" .. package:buildhash()))
+    local builddir = path.absolute(opt.builddir or ("build_revenant-" .. package:buildhash()))
     os.mkdir(builddir)
     local argv = {"-G", "Ninja", "-S", path.absolute(opt.sourcedir or "."), "-B", builddir,
                   "-DCMAKE_MAKE_PROGRAM=" .. ninja.program,

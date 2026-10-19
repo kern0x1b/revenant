@@ -1,16 +1,16 @@
 #import <Foundation/Foundation.h>
-#if defined(CHARON_MEDIAPLAYER_STANDIN)
+#if defined(REVENANT_MEDIAPLAYER_STANDIN)
 #import "MPMediaItemStandin.h"
 #else
 #import <MediaPlayer/MediaPlayer.h>
 #endif
 
-@interface MPMediaItem (Charon145)
+@interface MPMediaItem (Revenant145)
 @end
 
 extern NSString * const MPMediaItemPropertyIsPreorder;
 
-@implementation MPMediaItem (Charon145)
+@implementation MPMediaItem (Revenant145)
 
 @end
 

@@ -21,7 +21,7 @@
 #include <mutex>
 #include <string>
 
-namespace shade::kernel_iokit::camera {
+namespace emulator::kernel_iokit::camera {
 namespace {
 
     namespace device_mig = xnu::mig::device;

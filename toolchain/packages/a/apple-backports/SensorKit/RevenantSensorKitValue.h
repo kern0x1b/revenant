@@ -1,68 +1,68 @@
-#ifndef CHARON_SENSORKIT_VALUE_H
-#define CHARON_SENSORKIT_VALUE_H
+#ifndef REVENANT_SENSORKIT_VALUE_H
+#define REVENANT_SENSORKIT_VALUE_H
 
 #import <Foundation/Foundation.h>
-#import "CharonSensorKit.h"
+#import "RevenantSensorKit.h"
 
-#define CHARON_SENSORKIT_VALUE_STORE_DECLARATION                                        \
-    - (NSMutableDictionary *)charon_values;                                              \
-    - (id)charon_valueForKey:(NSString *)key;                                            \
-    - (void)charon_setValue:(id)value forKey:(NSString *)key;
+#define REVENANT_SENSORKIT_VALUE_STORE_DECLARATION                                        \
+    - (NSMutableDictionary *)revenant_values;                                              \
+    - (id)revenant_valueForKey:(NSString *)key;                                            \
+    - (void)revenant_setValue:(id)value forKey:(NSString *)key;
 
-#define CHARON_DECLARE_SENSORKIT_VALUE_CLASS(Name)                                       \
-    @interface Name (CharonSensorKitValue)                                               \
-    CHARON_SENSORKIT_VALUE_STORE_DECLARATION                                             \
+#define REVENANT_DECLARE_SENSORKIT_VALUE_CLASS(Name)                                       \
+    @interface Name (RevenantSensorKitValue)                                               \
+    REVENANT_SENSORKIT_VALUE_STORE_DECLARATION                                             \
     @end
 
-CHARON_DECLARE_SENSORKIT_VALUE_CLASS(SRAmbientLightSample)
-CHARON_DECLARE_SENSORKIT_VALUE_CLASS(SRAcousticSettings)
-CHARON_DECLARE_SENSORKIT_VALUE_CLASS(SRAcousticSettingsAccessibility)
-CHARON_DECLARE_SENSORKIT_VALUE_CLASS(SRAcousticSettingsAccessibilityBackgroundSounds)
-CHARON_DECLARE_SENSORKIT_VALUE_CLASS(SRAcousticSettingsAccessibilityHeadphoneAccommodations)
-CHARON_DECLARE_SENSORKIT_VALUE_CLASS(SRAcousticSettingsMusicEQ)
-CHARON_DECLARE_SENSORKIT_VALUE_CLASS(SRAudioLevel)
-CHARON_DECLARE_SENSORKIT_VALUE_CLASS(SRApplicationUsage)
-CHARON_DECLARE_SENSORKIT_VALUE_CLASS(SRDeletionRecord)
-CHARON_DECLARE_SENSORKIT_VALUE_CLASS(SRDevice)
-CHARON_DECLARE_SENSORKIT_VALUE_CLASS(SRDeviceUsageReport)
-CHARON_DECLARE_SENSORKIT_VALUE_CLASS(SRElectrocardiogramData)
-CHARON_DECLARE_SENSORKIT_VALUE_CLASS(SRElectrocardiogramSample)
-CHARON_DECLARE_SENSORKIT_VALUE_CLASS(SRElectrocardiogramSession)
-CHARON_DECLARE_SENSORKIT_VALUE_CLASS(SRFetchRequest)
-CHARON_DECLARE_SENSORKIT_VALUE_CLASS(SRFetchResult)
-CHARON_DECLARE_SENSORKIT_VALUE_CLASS(SRFaceMetrics)
-CHARON_DECLARE_SENSORKIT_VALUE_CLASS(SRFaceMetricsExpression)
-CHARON_DECLARE_SENSORKIT_VALUE_CLASS(SRKeyboardMetrics)
-CHARON_DECLARE_SENSORKIT_VALUE_CLASS(SRKeyboardProbabilityMetric)
-CHARON_DECLARE_SENSORKIT_VALUE_CLASS(SRMediaEvent)
-CHARON_DECLARE_SENSORKIT_VALUE_CLASS(SRMessagesUsageReport)
-CHARON_DECLARE_SENSORKIT_VALUE_CLASS(SRNotificationUsage)
-CHARON_DECLARE_SENSORKIT_VALUE_CLASS(SRPhotoplethysmogramSample)
-CHARON_DECLARE_SENSORKIT_VALUE_CLASS(SRPhotoplethysmogramAccelerometerSample)
-CHARON_DECLARE_SENSORKIT_VALUE_CLASS(SRPhotoplethysmogramOpticalSample)
-CHARON_DECLARE_SENSORKIT_VALUE_CLASS(SRPhoneUsageReport)
-CHARON_DECLARE_SENSORKIT_VALUE_CLASS(SRSensorReader)
-CHARON_DECLARE_SENSORKIT_VALUE_CLASS(SRSleepSession)
-CHARON_DECLARE_SENSORKIT_VALUE_CLASS(SRSpeechExpression)
-CHARON_DECLARE_SENSORKIT_VALUE_CLASS(SRSpeechMetrics)
-CHARON_DECLARE_SENSORKIT_VALUE_CLASS(SRSupplementalCategory)
-CHARON_DECLARE_SENSORKIT_VALUE_CLASS(SRTextInputSession)
-CHARON_DECLARE_SENSORKIT_VALUE_CLASS(SRVisit)
-CHARON_DECLARE_SENSORKIT_VALUE_CLASS(SRWebUsage)
-CHARON_DECLARE_SENSORKIT_VALUE_CLASS(SRWristDetection)
-CHARON_DECLARE_SENSORKIT_VALUE_CLASS(SRWristTemperature)
-CHARON_DECLARE_SENSORKIT_VALUE_CLASS(SRWristTemperatureSession)
+REVENANT_DECLARE_SENSORKIT_VALUE_CLASS(SRAmbientLightSample)
+REVENANT_DECLARE_SENSORKIT_VALUE_CLASS(SRAcousticSettings)
+REVENANT_DECLARE_SENSORKIT_VALUE_CLASS(SRAcousticSettingsAccessibility)
+REVENANT_DECLARE_SENSORKIT_VALUE_CLASS(SRAcousticSettingsAccessibilityBackgroundSounds)
+REVENANT_DECLARE_SENSORKIT_VALUE_CLASS(SRAcousticSettingsAccessibilityHeadphoneAccommodations)
+REVENANT_DECLARE_SENSORKIT_VALUE_CLASS(SRAcousticSettingsMusicEQ)
+REVENANT_DECLARE_SENSORKIT_VALUE_CLASS(SRAudioLevel)
+REVENANT_DECLARE_SENSORKIT_VALUE_CLASS(SRApplicationUsage)
+REVENANT_DECLARE_SENSORKIT_VALUE_CLASS(SRDeletionRecord)
+REVENANT_DECLARE_SENSORKIT_VALUE_CLASS(SRDevice)
+REVENANT_DECLARE_SENSORKIT_VALUE_CLASS(SRDeviceUsageReport)
+REVENANT_DECLARE_SENSORKIT_VALUE_CLASS(SRElectrocardiogramData)
+REVENANT_DECLARE_SENSORKIT_VALUE_CLASS(SRElectrocardiogramSample)
+REVENANT_DECLARE_SENSORKIT_VALUE_CLASS(SRElectrocardiogramSession)
+REVENANT_DECLARE_SENSORKIT_VALUE_CLASS(SRFetchRequest)
+REVENANT_DECLARE_SENSORKIT_VALUE_CLASS(SRFetchResult)
+REVENANT_DECLARE_SENSORKIT_VALUE_CLASS(SRFaceMetrics)
+REVENANT_DECLARE_SENSORKIT_VALUE_CLASS(SRFaceMetricsExpression)
+REVENANT_DECLARE_SENSORKIT_VALUE_CLASS(SRKeyboardMetrics)
+REVENANT_DECLARE_SENSORKIT_VALUE_CLASS(SRKeyboardProbabilityMetric)
+REVENANT_DECLARE_SENSORKIT_VALUE_CLASS(SRMediaEvent)
+REVENANT_DECLARE_SENSORKIT_VALUE_CLASS(SRMessagesUsageReport)
+REVENANT_DECLARE_SENSORKIT_VALUE_CLASS(SRNotificationUsage)
+REVENANT_DECLARE_SENSORKIT_VALUE_CLASS(SRPhotoplethysmogramSample)
+REVENANT_DECLARE_SENSORKIT_VALUE_CLASS(SRPhotoplethysmogramAccelerometerSample)
+REVENANT_DECLARE_SENSORKIT_VALUE_CLASS(SRPhotoplethysmogramOpticalSample)
+REVENANT_DECLARE_SENSORKIT_VALUE_CLASS(SRPhoneUsageReport)
+REVENANT_DECLARE_SENSORKIT_VALUE_CLASS(SRSensorReader)
+REVENANT_DECLARE_SENSORKIT_VALUE_CLASS(SRSleepSession)
+REVENANT_DECLARE_SENSORKIT_VALUE_CLASS(SRSpeechExpression)
+REVENANT_DECLARE_SENSORKIT_VALUE_CLASS(SRSpeechMetrics)
+REVENANT_DECLARE_SENSORKIT_VALUE_CLASS(SRSupplementalCategory)
+REVENANT_DECLARE_SENSORKIT_VALUE_CLASS(SRTextInputSession)
+REVENANT_DECLARE_SENSORKIT_VALUE_CLASS(SRVisit)
+REVENANT_DECLARE_SENSORKIT_VALUE_CLASS(SRWebUsage)
+REVENANT_DECLARE_SENSORKIT_VALUE_CLASS(SRWristDetection)
+REVENANT_DECLARE_SENSORKIT_VALUE_CLASS(SRWristTemperature)
+REVENANT_DECLARE_SENSORKIT_VALUE_CLASS(SRWristTemperatureSession)
 
-#define CHARON_SENSORKIT_VALUE_STORE_IMPLEMENTATION                                     \
-    -(NSMutableDictionary *)charon_values { return CharonValueStore(self); }              \
-    -(id)charon_valueForKey:(NSString *)key { return [self charon_values][key]; }         \
-    -(void)charon_setValue:(id)value forKey:(NSString *)key {                            \
+#define REVENANT_SENSORKIT_VALUE_STORE_IMPLEMENTATION                                     \
+    -(NSMutableDictionary *)revenant_values { return RevenantValueStore(self); }              \
+    -(id)revenant_valueForKey:(NSString *)key { return [self revenant_values][key]; }         \
+    -(void)revenant_setValue:(id)value forKey:(NSString *)key {                            \
         if (!key) return;                                                                  \
-        if (value) CharonValueStore(self)[key] = value;                                   \
-        else [CharonValueStore(self) removeObjectForKey:key];                             \
+        if (value) RevenantValueStore(self)[key] = value;                                   \
+        else [RevenantValueStore(self) removeObjectForKey:key];                             \
     }
 
-#define CHARON_SENSORKIT_UNCREATABLE_NEW_AND_INIT(reason_text)                           \
+#define REVENANT_SENSORKIT_UNCREATABLE_NEW_AND_INIT(reason_text)                           \
     -(instancetype)init                                                                   \
     {                                                                                    \
         [NSException raise:NSInternalInconsistencyException format:reason_text];          \

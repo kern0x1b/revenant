@@ -2,11 +2,11 @@
 #import <PassKit/PassKit.h>
 #import <UIKit/UIKit.h>
 
-@interface PKPass (CharonPaymentPass9)
+@interface PKPass (RevenantPaymentPass9)
 @property (nonatomic, copy, readonly) NSString *deviceName;
 @end
 
-@implementation PKPass (CharonPaymentPass9)
+@implementation PKPass (RevenantPaymentPass9)
 
 - (NSString *)deviceName
 {

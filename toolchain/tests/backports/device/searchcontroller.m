@@ -125,7 +125,7 @@ static BOOL shown(UIView *view)
 {
     [[NSFileManager defaultManager] createDirectoryAtPath:results_folder withIntermediateDirectories:YES attributes:nil error:NULL];
     [[NSFileManager defaultManager] removeItemAtPath:[results_folder stringByAppendingPathComponent:@"searchcontroller.done"] error:NULL];
-    charon_log_to([results_folder stringByAppendingPathComponent:@"searchcontroller.log"]);
+    revenant_log_to([results_folder stringByAppendingPathComponent:@"searchcontroller.log"]);
     self.table = [[UITableViewController alloc] initWithStyle:UITableViewStylePlain];
     self.table.title = @"Search";
     self.navigation = [[UINavigationController alloc] initWithRootViewController:self.table];
@@ -142,9 +142,9 @@ static BOOL shown(UIView *view)
 - (void)run:(NSArray *)steps index:(NSUInteger)index
 {
     if (index == steps.count) {
-        printf("checks=%d failures=%d\n", charon_checks, charon_failures);
+        printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
         after(1, ^{
-            NSString *summary = [NSString stringWithFormat:@"%@ checks=%d failures=%d\n", charon_failures ? @"FAIL" : @"ok", charon_checks, charon_failures];
+            NSString *summary = [NSString stringWithFormat:@"%@ checks=%d failures=%d\n", revenant_failures ? @"FAIL" : @"ok", revenant_checks, revenant_failures];
             [summary writeToFile:[results_folder stringByAppendingPathComponent:@"searchcontroller.done"] atomically:YES encoding:NSUTF8StringEncoding error:NULL];
         });
         return;
@@ -161,7 +161,7 @@ static BOOL shown(UIView *view)
     };
     after(step_timeout_seconds, ^{
         if (!finished) {
-            charon_check(NO, "step finishes in time", [NSString stringWithFormat:@"step %lu timed out", (unsigned long)index + 1]);
+            revenant_check(NO, "step finishes in time", [NSString stringWithFormat:@"step %lu timed out", (unsigned long)index + 1]);
             done();
         }
     });
@@ -240,7 +240,7 @@ static BOOL shown(UIView *view)
             [(id<UISearchBarDelegate>)controller searchBarSearchButtonClicked:bar];
             CHECK(controller.active && ![bar isFirstResponder], "the search button leaves the controller active and takes the keyboard away");
             [(id<UISearchBarDelegate>)controller searchBarCancelButtonClicked:bar];
-            charon_check(recorder.log.count == 3 && [recorder.log[0] isEqual:@"app cancel"] && [recorder.log[1] isEqual:@"willDismiss active=0"] && [recorder.log[2] isEqual:@"update text="], "cancel tells the application's delegate, then the controller's, and the results are updated with no text", [NSString stringWithFormat:@"%@", recorder.log]);
+            revenant_check(recorder.log.count == 3 && [recorder.log[0] isEqual:@"app cancel"] && [recorder.log[1] isEqual:@"willDismiss active=0"] && [recorder.log[2] isEqual:@"update text="], "cancel tells the application's delegate, then the controller's, and the results are updated with no text", [NSString stringWithFormat:@"%@", recorder.log]);
             CHECK(!controller.active, "the controller is inactive as soon as it starts to dismiss");
             after(1, ^{
                 CHECK_EQUAL(recorder.log.lastObject, @"didDismiss active=0", "the delegate hears of the dismissal once it is done");
@@ -322,11 +322,11 @@ static BOOL shown(UIView *view)
                 });
                 for (NSString *name in [expected.allKeys sortedArrayUsingSelector:@selector(compare:)]) {
                     if ([expected[name] isEqualToString:records[name]])
-                        charon_check(YES, name.UTF8String, nil);
+                        revenant_check(YES, name.UTF8String, nil);
                     else if (tolerance(name))
                         printf("tolerated %s: %s\n    device %s\n    host   %s\n", tolerance(name).UTF8String, name.UTF8String, [records[name] UTF8String], [expected[name] UTF8String]);
                     else
-                        charon_check(NO, name.UTF8String, [NSString stringWithFormat:@"\n    device %@\n    host   %@", records[name], expected[name]]);
+                        revenant_check(NO, name.UTF8String, [NSString stringWithFormat:@"\n    device %@\n    host   %@", records[name], expected[name]]);
                 }
                 done();
             }] selector:@selector(main) userInfo:nil repeats:NO];

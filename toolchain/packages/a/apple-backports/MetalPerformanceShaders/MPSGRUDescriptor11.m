@@ -1,4 +1,4 @@
-#import "CharonMPS.h"
+#import "RevenantMPS.h"
 
 @implementation MPSGRUDescriptor {
     id <MPSCNNConvolutionDataSource> _inputGateInputWeights;

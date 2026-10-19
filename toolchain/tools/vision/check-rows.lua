@@ -1,5 +1,5 @@
-import("apple.backports", {rootdir = path.join(os.getenv("CHARON_ROOT"), "modules"), anonymous = true})
-local backports = import("apple.backports", {rootdir = path.join(os.getenv("CHARON_ROOT"), "modules"), anonymous = true})
+import("apple.backports", {rootdir = path.join(os.getenv("REVENANT_ROOT"), "modules"), anonymous = true})
+local backports = import("apple.backports", {rootdir = path.join(os.getenv("REVENANT_ROOT"), "modules"), anonymous = true})
 local root = os.getenv("REGISTRY_ROOT")
 backports.generate(root)
 local listed = backports.registry(root)

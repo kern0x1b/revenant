@@ -13,7 +13,7 @@
 #include <span>
 #include <string_view>
 
-namespace shade::surface_transport {
+namespace emulator::surface_transport {
 
 enum class Kind : std::uint8_t {
     CoreSurfaceClientBuffer,

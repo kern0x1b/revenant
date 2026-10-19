@@ -1,11 +1,11 @@
 #import <Foundation/Foundation.h>
 #import <os/log.h>
 #include <stdio.h>
-#ifdef CHARON_PORT
-#include "CharonOSLog.h"
+#ifdef REVENANT_PORT
+#include "RevenantOSLog.h"
 extern struct os_log_s _os_log_disabled;
 #define DISABLED ((__bridge os_log_t)&_os_log_disabled)
-#define ENABLED(log, type) charon_os_log_type_enabled((log), (type))
+#define ENABLED(log, type) revenant_os_log_type_enabled((log), (type))
 #else
 #define DISABLED OS_LOG_DISABLED
 #define ENABLED(log, type) os_log_type_enabled((log), (type))

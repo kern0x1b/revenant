@@ -1,6 +1,6 @@
 #import <Foundation/Foundation.h>
 #import <CarPlay/CarPlay.h>
-#import "CharonCarPlay174.h"
+#import "RevenantCarPlay174.h"
 
 @implementation CPLaneGuidance {
     NSArray<CPLane *> *_lanes;
@@ -50,8 +50,8 @@
 
 - (void)encodeWithCoder:(NSCoder *)coder
 {
-    [coder encodeObject:_lanes forKey:@"charon.lanes"];
-    [coder encodeObject:_instructionVariants forKey:@"charon.instructionVariants"];
+    [coder encodeObject:_lanes forKey:@"revenant.lanes"];
+    [coder encodeObject:_instructionVariants forKey:@"revenant.instructionVariants"];
 }
 
 - (instancetype)initWithCoder:(NSCoder *)coder
@@ -59,10 +59,10 @@
     self = [super init];
     if (self) {
         _lanes = [coder decodeObjectOfClasses:
-            [NSSet setWithObjects:[NSArray class], [CPLane class], nil] forKey:@"charon.lanes"];
+            [NSSet setWithObjects:[NSArray class], [CPLane class], nil] forKey:@"revenant.lanes"];
         _instructionVariants = [coder decodeObjectOfClasses:
             [NSSet setWithObjects:[NSArray class], [NSString class], nil]
-                                                    forKey:@"charon.instructionVariants"];
+                                                    forKey:@"revenant.instructionVariants"];
     }
     return self;
 }

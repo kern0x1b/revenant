@@ -1,8 +1,8 @@
 #import <Foundation/Foundation.h>
 #import <CoreServices/CoreServices.h>
 
-Boolean CharonHostUTTypeIsDynamic(CFStringRef);
-Boolean CharonHostUTTypeIsDeclared(CFStringRef);
+Boolean RevenantHostUTTypeIsDynamic(CFStringRef);
+Boolean RevenantHostUTTypeIsDeclared(CFStringRef);
 
 int main(void)
 {
@@ -16,7 +16,7 @@ int main(void)
             int length = random() % 9;
             for (int i = 0; i < length; i++)
                 [identifier appendString:pieces[random() % pieces.count]];
-            Boolean host = UTTypeIsDynamic((__bridge CFStringRef)identifier), port = CharonHostUTTypeIsDynamic((__bridge CFStringRef)identifier);
+            Boolean host = UTTypeIsDynamic((__bridge CFStringRef)identifier), port = RevenantHostUTTypeIsDynamic((__bridge CFStringRef)identifier);
             checks++;
             dynamic += host;
             if (host != port && different++ < 20)
@@ -28,18 +28,18 @@ int main(void)
                               @"dyn.ah62d4rv4ge80e5pe", (__bridge NSString *)made];
         for (NSString *identifier in declared) {
             checks += 2;
-            if (UTTypeIsDeclared((__bridge CFStringRef)identifier) != CharonHostUTTypeIsDeclared((__bridge CFStringRef)identifier)) {
+            if (UTTypeIsDeclared((__bridge CFStringRef)identifier) != RevenantHostUTTypeIsDeclared((__bridge CFStringRef)identifier)) {
                 different++;
                 printf("UTTypeIsDeclared(%s) differs\n", identifier.UTF8String);
             }
-            if (UTTypeIsDynamic((__bridge CFStringRef)identifier) != CharonHostUTTypeIsDynamic((__bridge CFStringRef)identifier)) {
+            if (UTTypeIsDynamic((__bridge CFStringRef)identifier) != RevenantHostUTTypeIsDynamic((__bridge CFStringRef)identifier)) {
                 different++;
                 printf("UTTypeIsDynamic(%s) differs\n", identifier.UTF8String);
             }
         }
         CFRelease(made);
         checks += 2;
-        if (UTTypeIsDynamic(NULL) != CharonHostUTTypeIsDynamic(NULL) || UTTypeIsDeclared(NULL) != CharonHostUTTypeIsDeclared(NULL)) {
+        if (UTTypeIsDynamic(NULL) != RevenantHostUTTypeIsDynamic(NULL) || UTTypeIsDeclared(NULL) != RevenantHostUTTypeIsDeclared(NULL)) {
             different++;
             printf("NULL differs\n");
         }

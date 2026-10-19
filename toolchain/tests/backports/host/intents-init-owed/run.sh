@@ -3,8 +3,8 @@
 # answer for the same five, from one probe source (owed.m).
 #
 # owed.m is built twice. The host build links the system's Intents and nothing of the port. The port build (-DPORT)
-# links the port's objects: CharonIntents100.m, which defines all five classes, with the coding and store it needs.
-# Its classes are compiled under renamed symbols (CharonHostINInteraction and so on), because two Intents classes
+# links the port's objects: RevenantIntents100.m, which defines all five classes, with the coding and store it needs.
+# Its classes are compiled under renamed symbols (RevenantHostINInteraction and so on), because two Intents classes
 # of one name in one process answer for each other (as tests/backports/host/inimage-bridge found).
 #
 # The diff is the verdict: the port's answer for each class must be the host's, line for line. Then the plant: a
@@ -14,19 +14,19 @@ set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 P=${PORT_DIR:-$here/../../../../packages/a/apple-backports}
-CODING=$P/../../c/charon-coding/files
-build=${OWED_INIT_BUILD:-$(runs_fresh charon-intents-init-owed)}
-# Catalyst, as the INImage bridge is: CharonIntents100.m imports UIKit, so the port cannot be built for macOS here,
+CODING=$P/../../c/revenant-coding/files
+build=${OWED_INIT_BUILD:-$(runs_fresh revenant-intents-init-owed)}
+# Catalyst, as the INImage bridge is: RevenantIntents100.m imports UIKit, so the port cannot be built for macOS here,
 # and both builds must share one target to be linked into one probe. The host is the Catalyst Intents of iOSSupport.
 sdk=$(xcrun --show-sdk-path)
 target="-target arm64-apple-ios15.0-macabi -isysroot $sdk -iframework $sdk/System/iOSSupport/System/Library/Frameworks"
-flags="$target -fobjc-arc -fvisibility=hidden -w -DCHARON_HOST_BUILD"
+flags="$target -fobjc-arc -fvisibility=hidden -w -DREVENANT_HOST_BUILD"
 # The probe is built without ARC, so it owns what it allocates: an ARC probe holding [cls alloc] in a strong local
 # releases a second time when a planted -init returns nil, because an init consumes its receiver.
 probe_flags="$target -fno-objc-arc -fvisibility=hidden -w"
 frameworks="-framework Foundation -framework UIKit -framework CoreGraphics -framework EventKit -framework Intents"
 includes="-I$P/Intents -I$CODING"
-sources="$CODING/CharonCoding.m $P/Intents/CharonIntentsStore.m $P/Intents/CharonIntents100.m $P/Intents/IN11_0.m"
+sources="$CODING/RevenantCoding.m $P/Intents/RevenantIntentsStore.m $P/Intents/RevenantIntents100.m $P/Intents/IN11_0.m"
 
 # The host: the system's Intents, nothing of the port.
 xcrun clang $probe_flags "$here/owed.m" -framework Foundation -framework Intents -o "$build/host"
@@ -38,7 +38,7 @@ for source in $sources; do
 done
 renames=""
 for name in $(xcrun nm -gU "$build"/plain/*.o | awk 'NF == 3 {print $3}' | grep -E '^_OBJC_CLASS_\$_' | sed -e 's/^_OBJC_CLASS_\$_//' | sort -u); do
-    renames="$renames -D$name=CharonHost$name"
+    renames="$renames -D$name=RevenantHost$name"
 done
 for source in $sources; do
     xcrun clang $flags $renames $includes -c "$source" -o "$build/port/$(basename "$source" .m).o"
@@ -69,11 +69,11 @@ cat "$build/host.txt"
 # The plant: the port with INSpeakableString's -init answering nil, inserted after its one @synthesize that
 # anchors the class body. Its diff must be non-empty.
 cp "$build"/port/*.o "$build/plant/"
-rm -f "$build/plant/CharonIntents100.o"
+rm -f "$build/plant/RevenantIntents100.o"
 sed '/^@synthesize spokenPhrase = _spokenPhrase;/a\
 - (instancetype)init { return nil; }
-' "$P/Intents/CharonIntents100.m" > "$build/plant/CharonIntents100.src.m"
-xcrun clang $flags $renames $includes -c "$build/plant/CharonIntents100.src.m" -o "$build/plant/CharonIntents100.o"
+' "$P/Intents/RevenantIntents100.m" > "$build/plant/RevenantIntents100.src.m"
+xcrun clang $flags $renames $includes -c "$build/plant/RevenantIntents100.src.m" -o "$build/plant/RevenantIntents100.o"
 xcrun clang $probe_flags -DPORT "$here/owed.m" "$build"/plant/*.o $frameworks -o "$build/plant-probe"
 "$build/plant-probe" > "$build/plant.txt"
 if diff -q "$build/host.txt" "$build/plant.txt" >/dev/null; then

@@ -3,29 +3,29 @@
 #pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
 #import <objc/runtime.h>
 
-@interface UITraitCollection (CharonTraitEnvironment)
-+ (UITraitCollection *)charon_traitCollectionForScreen:(UIScreen *)screen;
-+ (void)charon_deliverChangesInEnvironments:(NSArray *)environments change:(void (^)(void))change;
+@interface UITraitCollection (RevenantTraitEnvironment)
++ (UITraitCollection *)revenant_traitCollectionForScreen:(UIScreen *)screen;
++ (void)revenant_deliverChangesInEnvironments:(NSArray *)environments change:(void (^)(void))change;
 @end
 
-static char charon_overrides_key;
+static char revenant_overrides_key;
 
-@interface UIViewController (CharonTraitEnvironment) <UITraitEnvironment>
-- (UITraitCollection *)charon_environmentTraitCollection;
+@interface UIViewController (RevenantTraitEnvironment) <UITraitEnvironment>
+- (UITraitCollection *)revenant_environmentTraitCollection;
 @end
 
-@implementation UIViewController (CharonTraitEnvironment)
+@implementation UIViewController (RevenantTraitEnvironment)
 
 - (UITraitCollection *)traitCollection
 {
-    UITraitCollection *inherited = [self charon_environmentTraitCollection];
+    UITraitCollection *inherited = [self revenant_environmentTraitCollection];
     UIUserInterfaceStyle style = self.overrideUserInterfaceStyle;
     if (style == UIUserInterfaceStyleUnspecified)
         return inherited;
     return [UITraitCollection traitCollectionWithTraitsFromCollections:@[inherited, [UITraitCollection traitCollectionWithUserInterfaceStyle:style]]];
 }
 
-- (UITraitCollection *)charon_environmentTraitCollection
+- (UITraitCollection *)revenant_environmentTraitCollection
 {
     UIViewController *parent = self.parentViewController;
     if (parent) {
@@ -39,7 +39,7 @@ static char charon_overrides_key;
     UIView *superview = self.isViewLoaded ? self.view.superview : nil;
     if (superview)
         return [superview traitCollection];
-    return [UITraitCollection charon_traitCollectionForScreen:self.isViewLoaded ? self.view.window.screen : nil];
+    return [UITraitCollection revenant_traitCollectionForScreen:self.isViewLoaded ? self.view.window.screen : nil];
 }
 
 - (void)traitCollectionDidChange:(UITraitCollection *)previousTraitCollection
@@ -50,15 +50,15 @@ static char charon_overrides_key;
 {
     if (!childViewController)
         return;
-    NSMapTable *overrides = objc_getAssociatedObject(self, &charon_overrides_key);
+    NSMapTable *overrides = objc_getAssociatedObject(self, &revenant_overrides_key);
     if (!overrides && !collection)
         return;
     if (!overrides) {
         overrides = [NSMapTable weakToStrongObjectsMapTable];
-        objc_setAssociatedObject(self, &charon_overrides_key, overrides, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+        objc_setAssociatedObject(self, &revenant_overrides_key, overrides, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     }
     UITraitCollection *stored = [collection copy];
-    [UITraitCollection charon_deliverChangesInEnvironments:@[childViewController] change:^{
+    [UITraitCollection revenant_deliverChangesInEnvironments:@[childViewController] change:^{
         if (stored)
             [overrides setObject:stored forKey:childViewController];
         else
@@ -68,7 +68,7 @@ static char charon_overrides_key;
 
 - (UITraitCollection *)overrideTraitCollectionForChildViewController:(UIViewController *)childViewController
 {
-    return [objc_getAssociatedObject(self, &charon_overrides_key) objectForKey:childViewController];
+    return [objc_getAssociatedObject(self, &revenant_overrides_key) objectForKey:childViewController];
 }
 
 @end

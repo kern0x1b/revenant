@@ -2,7 +2,7 @@
 -- License, v. 2.0. If a copy of the MPL was not distributed with this
 -- file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-target("shade_debug")
+target("emulator_debug")
     set_kind("static")
     add_files("gdb_rsp.cpp")
-    add_deps("shade_foundation", {public = true})
+    add_deps("emulator_foundation", {public = true})

@@ -14,7 +14,7 @@
 #include <limits>
 #include <sstream>
 
-namespace shade {
+namespace emulator {
 namespace {
 
     void add_if_enabled(std::atomic<std::uint64_t>& counter,

@@ -8,7 +8,7 @@
 #
 # The mechanism is the repository's own (accelerate7, animatorscrub, appgroup): the port's sources
 # are compiled with the class names they define renamed, so the port's AUAudioUnit is literally
-# charon_host_AUAudioUnit and sits beside Apple's in one binary. The rename list is written out
+# revenant_host_AUAudioUnit and sits beside Apple's in one binary. The rename list is written out
 # rather than derived, and it names every class in the compiled subset and nothing else: a derived
 # list spans the whole AVFoundation folder, renames classes this binary does not compile, and turns
 # a class the port *uses from the host* into one it does not have.
@@ -21,35 +21,35 @@ here=$(cd "$(dirname "$0")" && pwd)
 root=${AVFAUDIO_ROOT:-$(cd "$here/../../../.." && pwd)}
 AVFAUDIO="$root/packages/a/apple-backports/AVFAudio"
 AVFOUNDATION="$root/packages/a/apple-backports/AVFoundation"
-build=${AVFAUDIO_PORT_BUILD:-$(runs_folder charon-avfaudio-port)}
+build=${AVFAUDIO_PORT_BUILD:-$(runs_folder revenant-avfaudio-port)}
 rm -rf "$build"
 mkdir -p "$build"
 
 # Every class the compiled subset defines. If a source below grows a class, it is added here with
 # the rest: a class left out collides with Apple's at link, which is a failure the link names.
-renames="-DAUAudioUnit=charon_host_AUAudioUnit
--DAUAudioUnitBus=charon_host_AUAudioUnitBus
--DAUAudioUnitBusArray=charon_host_AUAudioUnitBusArray
--DAUAudioUnitPreset=charon_host_AUAudioUnitPreset
--DAUParameter=charon_host_AUParameter
--DAUParameterGroup=charon_host_AUParameterGroup
--DAUParameterNode=charon_host_AUParameterNode
--DAUParameterTree=charon_host_AUParameterTree
--DAVAudioChannelLayout=charon_host_AVAudioChannelLayout
--DAVAudioConnectionPoint=charon_host_AVAudioConnectionPoint
--DAVAudioFormat=charon_host_AVAudioFormat
--DAVAudioMixingDestination=charon_host_AVAudioMixingDestination
--DAVAudioNode=charon_host_AVAudioNode
--DAVAudioPCMBuffer=charon_host_AVAudioPCMBuffer
--DAVAudioPlayerNode=charon_host_AVAudioPlayerNode
--DAVAudioTime=charon_host_AVAudioTime
--DAVAudioIONode=charon_host_AVAudioIONode
--DAVAudioInputNode=charon_host_AVAudioInputNode
--DAVAudioMixerNode=charon_host_AVAudioMixerNode
--DAVAudioOutputNode=charon_host_AVAudioOutputNode
--DCharonAudioBuffer=charon_host_CharonAudioBuffer
--DCharonScheduledBuffer=charon_host_CharonScheduledBuffer
--DCharonAUParameterImpl=charon_host_CharonAUParameterImpl"
+renames="-DAUAudioUnit=revenant_host_AUAudioUnit
+-DAUAudioUnitBus=revenant_host_AUAudioUnitBus
+-DAUAudioUnitBusArray=revenant_host_AUAudioUnitBusArray
+-DAUAudioUnitPreset=revenant_host_AUAudioUnitPreset
+-DAUParameter=revenant_host_AUParameter
+-DAUParameterGroup=revenant_host_AUParameterGroup
+-DAUParameterNode=revenant_host_AUParameterNode
+-DAUParameterTree=revenant_host_AUParameterTree
+-DAVAudioChannelLayout=revenant_host_AVAudioChannelLayout
+-DAVAudioConnectionPoint=revenant_host_AVAudioConnectionPoint
+-DAVAudioFormat=revenant_host_AVAudioFormat
+-DAVAudioMixingDestination=revenant_host_AVAudioMixingDestination
+-DAVAudioNode=revenant_host_AVAudioNode
+-DAVAudioPCMBuffer=revenant_host_AVAudioPCMBuffer
+-DAVAudioPlayerNode=revenant_host_AVAudioPlayerNode
+-DAVAudioTime=revenant_host_AVAudioTime
+-DAVAudioIONode=revenant_host_AVAudioIONode
+-DAVAudioInputNode=revenant_host_AVAudioInputNode
+-DAVAudioMixerNode=revenant_host_AVAudioMixerNode
+-DAVAudioOutputNode=revenant_host_AVAudioOutputNode
+-DRevenantAudioBuffer=revenant_host_RevenantAudioBuffer
+-DRevenantScheduledBuffer=revenant_host_RevenantScheduledBuffer
+-DRevenantAUParameterImpl=revenant_host_RevenantAUParameterImpl"
 
 # The one naming difference between the iOS SDK the port compiles against and the macOS SDK this
 # harness builds with: the header declares k3DMixerParam_BusEnable the replacement for the iOS
@@ -66,8 +66,8 @@ for source in \
     "$AVFAUDIO/AUParameter9.m" \
     "$AVFAUDIO/AUParameters9.m" \
     "$AVFAUDIO/AUParameters10.m" \
-    "$AVFAUDIO/CharonAUAudioUnitRender.m" \
-    "$AVFAUDIO/CharonAVFAudioCommon.m" \
+    "$AVFAUDIO/RevenantAUAudioUnitRender.m" \
+    "$AVFAUDIO/RevenantAVFAudioCommon.m" \
     "$AVFAUDIO/AVAudioUnitMixing9.m" \
     "$AVFAUDIO/AVAudioTime8.m" \
     "$AVFAUDIO/AVAudioChannelLayout8.m" \

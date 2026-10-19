@@ -6,7 +6,7 @@
 # CATEGORY on AVCaptureDevice and AVCaptureDeviceFormat, and those are APPLE's classes on this host. A copy
 # compiled here unchanged would replace Apple's own implementations in this process and the probe would be
 # comparing the port against itself. So the copies are renamed at their @implementation lines and land on
-# stand-in owners this build declares (charon_host_AVCaptureDevice, charon_host_AVCaptureDeviceFormat), while
+# stand-in owners this build declares (revenant_host_AVCaptureDevice, revenant_host_AVCaptureDeviceFormat), while
 # the category names stay, so a category the port spells differently still fails to compile.
 #
 # WHAT MAKES IT A CHECK AND NOT A COMPARISON:
@@ -48,10 +48,10 @@ for source in AVCaptureDeviceReactions17.m AVCaptureDeviceFormatDepthZoom17.m AV
         exit 1
     }
 done
-for header in CharonAVCaptureDeviceReactions17.h CharonAVCaptureDeviceCapabilities18.h \
-            CharonAVCaptureDeviceRectsOfInterest26.h CharonAVCaptureDeviceCinematicVideo26.h \
-            CharonAVCaptureDeviceExternalSync26.h CharonAVCaptureDeviceDynamic26.h \
-            CharonAVCaptureDeferredStart26.h; do
+for header in RevenantAVCaptureDeviceReactions17.h RevenantAVCaptureDeviceCapabilities18.h \
+            RevenantAVCaptureDeviceRectsOfInterest26.h RevenantAVCaptureDeviceCinematicVideo26.h \
+            RevenantAVCaptureDeviceExternalSync26.h RevenantAVCaptureDeviceDynamic26.h \
+            RevenantAVCaptureDeferredStart26.h; do
     [ -f "$avf/$header" ] || {
         echo "FAIL: $avf/$header does not exist, so these members are declared nowhere"
         exit 1
@@ -62,28 +62,28 @@ done
 # SELECTOR THE HEADER DECLARES is asked for, so a row whose getter= is something other than the property's
 # name asks a selector both sides have. A property the header does not declare is reported, not guessed at.
 #
-# The pair with no registry file is CharonAVFoundationProtocols.h: the two protocol methods of the deferred-start
+# The pair with no registry file is RevenantAVFoundationProtocols.h: the two protocol methods of the deferred-start
 # family are declared THERE and not in the slice's own header, and a row whose declaration is not in a header
 # this generator reads is reported as undeclared rather than asked. Its prefix (protocols) matches no registry
 # file, so it contributes declarations and no rows.
 #
 # One header and one registry prefix per argument pair, because each slice of this family is one release's API
 # in its own header and its own registry file (AVCaptureDeviceReactions17.h + reactions*.json carry the 17.0 and
-# 17.2 rows, CharonAVCaptureDeviceCapabilities18.h + capabilities18.json the 18.0 ones,
-# CharonAVCaptureDeviceRectsOfInterest26.h + rectsofinterest26.json the 26.0 rectangles and
-# CharonAVCaptureDeviceCinematicVideo26.h + cinematicvideo26.json the 26.0 Cinematic Video ones and
-# CharonAVCaptureDeviceExternalSync26.h + externalsync26.json the 26.0 external-sync ones and
-# CharonAVCaptureDeviceDynamic26.h + dynamic26.json the 26.0 dynamic-aspect-ratio, smudge-detection and
-# aperture ones, and CharonAVCaptureDeferredStart26.h + deferredstart26.json the 26.0 deferred-start ones), and
+# 17.2 rows, RevenantAVCaptureDeviceCapabilities18.h + capabilities18.json the 18.0 ones,
+# RevenantAVCaptureDeviceRectsOfInterest26.h + rectsofinterest26.json the 26.0 rectangles and
+# RevenantAVCaptureDeviceCinematicVideo26.h + cinematicvideo26.json the 26.0 Cinematic Video ones and
+# RevenantAVCaptureDeviceExternalSync26.h + externalsync26.json the 26.0 external-sync ones and
+# RevenantAVCaptureDeviceDynamic26.h + dynamic26.json the 26.0 dynamic-aspect-ratio, smudge-detection and
+# aperture ones, and RevenantAVCaptureDeferredStart26.h + deferredstart26.json the 26.0 deferred-start ones), and
 # a row is asked for through the header that declares it.
 python3 - 8 "$avf/CharonAVCaptureDeviceReactions17.h:reactions" \
-        "$avf/CharonAVCaptureDeviceCapabilities18.h:capabilities18" \
-        "$avf/CharonAVCaptureDeviceRectsOfInterest26.h:rectsofinterest26" \
-        "$avf/CharonAVCaptureDeviceCinematicVideo26.h:cinematicvideo26" \
-        "$avf/CharonAVCaptureDeviceExternalSync26.h:externalsync26" \
-        "$avf/CharonAVCaptureDeviceDynamic26.h:dynamic26" \
-        "$avf/CharonAVCaptureDeferredStart26.h:deferredstart26" \
-        "$avf_gen/CharonAVFoundationProtocols.h:protocols" \
+        "$avf/RevenantAVCaptureDeviceCapabilities18.h:capabilities18" \
+        "$avf/RevenantAVCaptureDeviceRectsOfInterest26.h:rectsofinterest26" \
+        "$avf/RevenantAVCaptureDeviceCinematicVideo26.h:cinematicvideo26" \
+        "$avf/RevenantAVCaptureDeviceExternalSync26.h:externalsync26" \
+        "$avf/RevenantAVCaptureDeviceDynamic26.h:dynamic26" \
+        "$avf/RevenantAVCaptureDeferredStart26.h:deferredstart26" \
+        "$avf_gen/RevenantAVFoundationProtocols.h:protocols" \
         "$root/packages/a/apple-backports/registry/AVFoundation" \
         "$build/members.tsv" <<'MEMBERS'
 import json, os, re, sys
@@ -110,7 +110,7 @@ for pair in pairs:
             current = (owner.group(1), owner.group(2))
             continue
         # A PROTOCOL is an owner too: the two deferred-start delegate methods are declared inside
-        # @protocol AVCaptureSessionDeferredStartDelegate <NSObject> in CharonAVFoundationProtocols.h, and a
+        # @protocol AVCaptureSessionDeferredStartDelegate <NSObject> in RevenantAVFoundationProtocols.h, and a
         # generator that only knows @interface owners skips every line of a protocol body - which it did, and the
         # run then reported those two rows as undeclared while holding the header that declares them. A forward
         # declaration (`@protocol X;`) is not a body and sets no context.
@@ -142,7 +142,7 @@ for pair in pairs:
 
 # THE ROWS, and in a SECOND LOOP on purpose: a declaration in ANY header this run reads has to be visible to
 # every registry file, not only to the one whose pair names that header. The two deferred-start delegate methods
-# are declared in CharonAVFoundationProtocols.h and their rows are in deferredstart26.json, and with one loop the
+# are declared in RevenantAVFoundationProtocols.h and their rows are in deferredstart26.json, and with one loop the
 # second pair's declarations did not exist yet when the first pair's rows were read - so the run reported two
 # rows as undeclared while holding both of the files that declare them (measured, 2026-10-03).
 for pair in pairs:
@@ -215,9 +215,9 @@ MEMBERS
 # stand-in behind the port's back, is the preferred-camera phase: its steps change with the list this run hands
 # the stand-in, which only the port's own code can do.
 python3 - "$avf/CharonAVCaptureDeviceReactions17.h" "$avf/CharonAVCaptureDeviceCapabilities18.h" \
-        "$avf/CharonAVCaptureDeviceRectsOfInterest26.h" "$avf/CharonAVCaptureDeviceCinematicVideo26.h" \
-        "$avf/CharonAVCaptureDeviceExternalSync26.h" "$avf/CharonAVCaptureDeviceDynamic26.h" \
-        "$avf/CharonAVCaptureDeferredStart26.h" "$avf_gen/CharonAVFoundationProtocols.h" \
+        "$avf/RevenantAVCaptureDeviceRectsOfInterest26.h" "$avf/RevenantAVCaptureDeviceCinematicVideo26.h" \
+        "$avf/RevenantAVCaptureDeviceExternalSync26.h" "$avf/RevenantAVCaptureDeviceDynamic26.h" \
+        "$avf/RevenantAVCaptureDeferredStart26.h" "$avf_gen/RevenantAVFoundationProtocols.h" \
         "$build/src/prologue.h" <<'PROLOGUE'
 import re, sys
 out = sys.argv[-1]
@@ -245,14 +245,14 @@ lines = ["// Generated by tests/backports/host/avf-capabilities/run.sh from " + 
          "// clang says the type is unavailable there, which is an error and not a warning.",
          "// This rename gives the copy its own name for it, which is the same arrangement the three class renames",
          "// below use, and the port's own build - the iOS SDK, where the type is available - is untouched.",
-         "typedef NSString *charon_host_AVCaptureAspectRatio NS_TYPED_ENUM;",
-         "#define AVCaptureAspectRatio charon_host_AVCaptureAspectRatio",
+         "typedef NSString *revenant_host_AVCaptureAspectRatio NS_TYPED_ENUM;",
+         "#define AVCaptureAspectRatio revenant_host_AVCaptureAspectRatio",
          "",
          "// The format is named before the device because the device holds one (activeFormat, below).",
-         "@class charon_host_AVCaptureDeviceFormat;",
+         "@class revenant_host_AVCaptureDeviceFormat;",
          "",
-         "@interface charon_host_AVCaptureDevice : NSObject",
-         "+ (void)charon_host_setPresentDevices:(NSArray *)devices;",
+         "@interface revenant_host_AVCaptureDevice : NSObject",
+         "+ (void)revenant_host_setPresentDevices:(NSArray *)devices;",
          "+ (NSArray *)devicesWithMediaType:(NSString *)mediaType;",
          "+ (id)defaultDeviceWithMediaType:(NSString *)mediaType;",
          "@property(nonatomic, copy) NSString *uniqueID;",
@@ -261,15 +261,15 @@ lines = ["// Generated by tests/backports/host/avf-capabilities/run.sh from " + 
          "@property(nonatomic) BOOL connected;",
          "// What -setAutoVideoFrameRateEnabled: asks before it accepts or refuses a value, so the stand-in is",
          "// given one here rather than having the probe answer for it.",
-         "@property(nonatomic, strong) charon_host_AVCaptureDeviceFormat *activeFormat;",
+         "@property(nonatomic, strong) revenant_host_AVCaptureDeviceFormat *activeFormat;",
          "// THE RELEASE'S OWN SUBSTRATE, which the 26.0 rectangles of interest are built on: a rectangle of",
          "// interest is applied through the release's point of interest (AVCaptureDevice.h:1171), so on this",
          "// host, where there is no 6.1.3 release, the stand-in carries the members that release carries. All",
          "// of them are in 6.1.3's own AVCaptureDevice (measured: tools/corpus/objc-inventory.lua over",
-         "// ~/.charon/dyld/6.1.3/dyld_shared_cache_armv7), and the two refusals below are the ones the SDK 16.4",
+         "// ~/.revenant/dyld/6.1.3/dyld_shared_cache_armv7), and the two refusals below are the ones the SDK 16.4",
          "// header states for them (:1083 and :1269), which are the two the 26.2 header states for the",
          "// rectangle. The support flag is what the harness sets, so both branches of the port's rule are asked.",
-         "+ (void)charon_host_setPointsOfInterestSupported:(BOOL)supported;",
+         "+ (void)revenant_host_setPointsOfInterestSupported:(BOOL)supported;",
          "- (BOOL)isFocusPointOfInterestSupported;",
          "- (BOOL)isExposurePointOfInterestSupported;",
          "- (CGPoint)focusPointOfInterest;",
@@ -281,7 +281,7 @@ lines = ["// Generated by tests/backports/host/avf-capabilities/run.sh from " + 
          "- (void)unlockForConfiguration;",
          "@end",
          "",
-         "@interface charon_host_AVCaptureDeviceFormat : NSObject",
+         "@interface revenant_host_AVCaptureDeviceFormat : NSObject",
          "@end",
          "",
          "// The input's device, which 6.1.3's own AVCaptureDeviceInput carries and the 26.0 Cinematic Video",
@@ -291,29 +291,29 @@ lines = ["// Generated by tests/backports/host/avf-capabilities/run.sh from " + 
          "// The deferred-start family's three owners. They carry NOTHING of their own: the port's categories on",
          "// them refuse or answer the header's absent case without asking the release anything, so what is",
          "// asked here is the port's own answer and Apple's, side by side.",
-         "@interface charon_host_AVCaptureOutput : NSObject",
+         "@interface revenant_host_AVCaptureOutput : NSObject",
          "@end",
          "",
-         "@interface charon_host_AVCaptureSession : NSObject",
+         "@interface revenant_host_AVCaptureSession : NSObject",
          "@end",
          "",
-         "@interface charon_host_AVCaptureVideoPreviewLayer : NSObject",
+         "@interface revenant_host_AVCaptureVideoPreviewLayer : NSObject",
          "@end",
          "",
-         "@interface charon_host_AVCaptureDeviceInput : NSObject",
-         "+ (void)charon_host_setDevice:(id)device;",
+         "@interface revenant_host_AVCaptureDeviceInput : NSObject",
+         "+ (void)revenant_host_setDevice:(id)device;",
          "- (id)device;",
          "@end",
          ""]
 for owner, category in categories:
-    lines += ["@interface charon_host_%s (%s)" % (owner, category), "@end", ""]
+    lines += ["@interface revenant_host_%s (%s)" % (owner, category), "@end", ""]
 lines += ["// The rename. Defined after every declaration above, which already carry the stand-in names.",
-          "#define AVCaptureDevice charon_host_AVCaptureDevice",
-          "#define AVCaptureDeviceFormat charon_host_AVCaptureDeviceFormat",
-          "#define AVCaptureDeviceInput charon_host_AVCaptureDeviceInput",
-         "#define AVCaptureOutput charon_host_AVCaptureOutput",
-         "#define AVCaptureSession charon_host_AVCaptureSession",
-         "#define AVCaptureVideoPreviewLayer charon_host_AVCaptureVideoPreviewLayer",
+          "#define AVCaptureDevice revenant_host_AVCaptureDevice",
+          "#define AVCaptureDeviceFormat revenant_host_AVCaptureDeviceFormat",
+          "#define AVCaptureDeviceInput revenant_host_AVCaptureDeviceInput",
+         "#define AVCaptureOutput revenant_host_AVCaptureOutput",
+         "#define AVCaptureSession revenant_host_AVCaptureSession",
+         "#define AVCaptureVideoPreviewLayer revenant_host_AVCaptureVideoPreviewLayer",
           ""]
 open(out, "w").write("\n".join(lines) + "\n")
 print("the host build's prologue declares %d stand-in categories over %d stand-in owners, and renames their"
@@ -322,19 +322,19 @@ print("  owner names in the port's sources, in a method body as well as at an @i
 PROLOGUE
 # The stand-ins' own OBJECTS, in a source of their own and not in the prologue: the prologue is prepended to
 # both copies, so an @implementation in it would define each class twice ("duplicate symbol
-# _OBJC_CLASS_$_charon_host_AVCaptureDevice").
+# _OBJC_CLASS_$_revenant_host_AVCaptureDevice").
 {
     echo '#import "prologue.h"'
     cat <<'STANDINS'
 
 // The list this build hands the port. One entry per camera of a device of this port's bands.
-static NSArray *charon_host_present_devices;
+static NSArray *revenant_host_present_devices;
 
-@implementation charon_host_AVCaptureDevice
+@implementation revenant_host_AVCaptureDevice
 
-+ (void)charon_host_setPresentDevices:(NSArray *)devices
++ (void)revenant_host_setPresentDevices:(NSArray *)devices
 {
-    charon_host_present_devices = [devices copy];
+    revenant_host_present_devices = [devices copy];
 }
 
 // "+devicesWithMediaType: ... devices currently connected and available for capture" (AVCaptureDevice.h:105):
@@ -342,7 +342,7 @@ static NSArray *charon_host_present_devices;
 + (NSArray *)devicesWithMediaType:(NSString *)mediaType
 {
     NSMutableArray *found = [NSMutableArray array];
-    for (id device in charon_host_present_devices)
+    for (id device in revenant_host_present_devices)
         if ([(id)device connected])
             [found addObject:device];
     return found;
@@ -367,104 +367,104 @@ static NSArray *charon_host_present_devices;
 // device does not support the point (AVCaptureDevice.h:1083 for the focus pair, :1269 for the exposure pair).
 // The port's 26.0 rectangle object asks all of this, so the harness has to answer it; what it does NOT answer
 // is the rectangle itself, which is the port's own and is asked of the port's own copy.
-static BOOL charon_host_points_supported = YES;
-static BOOL charon_host_locked = NO;
-static CGPoint charon_host_focus_point = { 0.5, 0.5 };
-static CGPoint charon_host_exposure_point = { 0.5, 0.5 };
+static BOOL revenant_host_points_supported = YES;
+static BOOL revenant_host_locked = NO;
+static CGPoint revenant_host_focus_point = { 0.5, 0.5 };
+static CGPoint revenant_host_exposure_point = { 0.5, 0.5 };
 
-+ (void)charon_host_setPointsOfInterestSupported:(BOOL)supported
++ (void)revenant_host_setPointsOfInterestSupported:(BOOL)supported
 {
-    charon_host_points_supported = supported;
+    revenant_host_points_supported = supported;
 }
 
 - (BOOL)isLockedForConfiguration
 {
-    return charon_host_locked;
+    return revenant_host_locked;
 }
 
 - (void)lockForConfiguration
 {
-    charon_host_locked = YES;
+    revenant_host_locked = YES;
 }
 
 - (void)unlockForConfiguration
 {
-    charon_host_locked = NO;
+    revenant_host_locked = NO;
 }
 
 - (BOOL)isFocusPointOfInterestSupported
 {
-    return charon_host_points_supported;
+    return revenant_host_points_supported;
 }
 
 - (BOOL)isExposurePointOfInterestSupported
 {
-    return charon_host_points_supported;
+    return revenant_host_points_supported;
 }
 
 - (CGPoint)focusPointOfInterest
 {
-    return charon_host_focus_point;
+    return revenant_host_focus_point;
 }
 
 - (void)setFocusPointOfInterest:(CGPoint)point
 {
-    if (!charon_host_locked)
+    if (!revenant_host_locked)
         @throw [NSException exceptionWithName:NSGenericException
                                        reason:@"setFocusPointOfInterest: cannot be set without first"
                                                " successfully gaining exclusive ownership of the device using"
                                                " -lockForConfiguration:"
                                      userInfo:nil];
-    if (!charon_host_points_supported)
+    if (!revenant_host_points_supported)
         @throw [NSException exceptionWithName:NSInvalidArgumentException
                                        reason:@"*** -[AVCaptureDevice setFocusPointOfInterest:] Not supported -"
                                                " use -isFocusPointOfInterestSupported"
                                      userInfo:nil];
-    charon_host_focus_point = point;
+    revenant_host_focus_point = point;
 }
 
 - (CGPoint)exposurePointOfInterest
 {
-    return charon_host_exposure_point;
+    return revenant_host_exposure_point;
 }
 
 - (void)setExposurePointOfInterest:(CGPoint)point
 {
-    if (!charon_host_locked)
+    if (!revenant_host_locked)
         @throw [NSException exceptionWithName:NSGenericException
                                        reason:@"setExposurePointOfInterest: cannot be set without first"
                                                " successfully gaining exclusive ownership of the device using"
                                                " -lockForConfiguration:"
                                      userInfo:nil];
-    if (!charon_host_points_supported)
+    if (!revenant_host_points_supported)
         @throw [NSException exceptionWithName:NSInvalidArgumentException
                                        reason:@"*** -[AVCaptureDevice setExposurePointOfInterest:] Not supported -"
                                                " use -isExposurePointOfInterestSupported"
                                      userInfo:nil];
-    charon_host_exposure_point = point;
+    revenant_host_exposure_point = point;
 }
 
 @end
 
-@implementation charon_host_AVCaptureDeviceFormat
+@implementation revenant_host_AVCaptureDeviceFormat
 
 @end
 
 // The input the 18.0 and 26.0 slices' members are asked of. It carries nothing of its own but the device the
 // release's own input carries: the port's code reads no other member of the release's input except the values
 // it keeps itself, and every answer below is the port's own category's, which is what the rename is for.
-static id charon_host_input_device;
+static id revenant_host_input_device;
 
-@implementation charon_host_AVCaptureDeviceInput
+@implementation revenant_host_AVCaptureDeviceInput
 
-+ (void)charon_host_setDevice:(id)device
++ (void)revenant_host_setDevice:(id)device
 {
-    charon_host_input_device = device;
+    revenant_host_input_device = device;
 }
 
 - (id)device
 {
-    return charon_host_input_device;
+    return revenant_host_input_device;
 }
 
 @end
@@ -472,15 +472,15 @@ static id charon_host_input_device;
 // The deferred-start family's three owners. Empty on purpose: the port's categories on them refuse or answer
 // the header's absent case without asking the release anything, so the harness asks the PORT's answer of the
 // stand-in and Apple's of Apple's own class, and there is nothing to model.
-@implementation charon_host_AVCaptureOutput
+@implementation revenant_host_AVCaptureOutput
 
 @end
 
-@implementation charon_host_AVCaptureSession
+@implementation revenant_host_AVCaptureSession
 
 @end
 
-@implementation charon_host_AVCaptureVideoPreviewLayer
+@implementation revenant_host_AVCaptureVideoPreviewLayer
 
 @end
 STANDINS
@@ -497,14 +497,14 @@ STANDINS
 # question about a file that no longer is the one this harness was written against.
 # The fourth field is how many bodies of the copy are expected to send a message to a renamed class, so the
 # "the macros have something to rename" assertion is not applied to the format-only object, which has none.
-for triple in "AVCaptureDeviceReactions17.m:CharonAVCaptureDeviceReactions17.h:reactions17.rn:2:4" \
-             "AVCaptureDeviceFormatDepthZoom17.m:CharonAVCaptureDeviceReactions17.h:depthzoom17.rn:1:0" \
-             "AVCaptureDeviceCapabilities18.m:CharonAVCaptureDeviceCapabilities18.h:capabilities18.rn:3:0" \
-             "AVCaptureDeviceRectsOfInterest26.m:CharonAVCaptureDeviceRectsOfInterest26.h:rects26.rn:2:0" \
-             "AVCaptureDeviceCinematicVideo26.m:CharonAVCaptureDeviceCinematicVideo26.h:cinematic26.rn:3:0" \
-             "AVCaptureDeviceExternalSync26.m:CharonAVCaptureDeviceExternalSync26.h:externalsync26.rn:3:0" \
-             "AVCaptureDeviceDynamic26.m:CharonAVCaptureDeviceDynamic26.h:dynamic26.rn:3:0" \
-             "AVCaptureDeferredStart26.m:CharonAVCaptureDeferredStart26.h:deferredstart26.rn:3:0"; do
+for triple in "AVCaptureDeviceReactions17.m:RevenantAVCaptureDeviceReactions17.h:reactions17.rn:2:4" \
+             "AVCaptureDeviceFormatDepthZoom17.m:RevenantAVCaptureDeviceReactions17.h:depthzoom17.rn:1:0" \
+             "AVCaptureDeviceCapabilities18.m:RevenantAVCaptureDeviceCapabilities18.h:capabilities18.rn:3:0" \
+             "AVCaptureDeviceRectsOfInterest26.m:RevenantAVCaptureDeviceRectsOfInterest26.h:rects26.rn:2:0" \
+             "AVCaptureDeviceCinematicVideo26.m:RevenantAVCaptureDeviceCinematicVideo26.h:cinematic26.rn:3:0" \
+             "AVCaptureDeviceExternalSync26.m:RevenantAVCaptureDeviceExternalSync26.h:externalsync26.rn:3:0" \
+             "AVCaptureDeviceDynamic26.m:RevenantAVCaptureDeviceDynamic26.h:dynamic26.rn:3:0" \
+             "AVCaptureDeferredStart26.m:RevenantAVCaptureDeferredStart26.h:deferredstart26.rn:3:0"; do
     src=$(printf '%s\n' "$triple" | cut -d: -f1)
     header=$(printf '%s\n' "$triple" | cut -d: -f2)
     python3 - "$avf/$src" "$header" "$build/src/prologue.h" \
@@ -601,7 +601,7 @@ plants = {
     return YES; /* PLANTED */
 }"""),
     "prefcam": ("""    [[NSUserDefaults standardUserDefaults] setObject:[history copy]
-                                              forKey:CHARON_CAPTURE_USER_PREFERRED_HISTORY_KEY];""",
+                                              forKey:REVENANT_CAPTURE_USER_PREFERRED_HISTORY_KEY];""",
                  """    /* PLANTED: the choice is not persisted, so the next launch forgets it. */
     (void)[history copy];"""),
     # The 18.0 slice's first plant. A format that claims the auto video frame rate makes two rows differ at
@@ -666,8 +666,8 @@ plants = {
     # And the linked-on-or-after read itself: asking about a version every band already passes. A band links
     # against 16.4, so a comparison against 4.0 is TRUE where it must be false, and the session's default row
     # moves the wrong way - which the two-build check above sees as well as the table.
-    "linkread": ("""    return charon_program_linked_on_or_after(26.0, 0);""",
-                 """    return charon_program_linked_on_or_after(4.0, 0); /* PLANTED */"""),
+    "linkread": ("""    return revenant_program_linked_on_or_after(26.0, 0);""",
+                 """    return revenant_program_linked_on_or_after(4.0, 0); /* PLANTED */"""),
     "cinematic": ("""- (BOOL)isCinematicVideoCaptureSupported
 {
     return NO;
@@ -731,7 +731,7 @@ fi
 # THE PROBE IS LINKED TWICE, and the second link is what makes the 26.0 deferred-start defaults checkable at
 # all: "By default, for apps that are linked on or after iOS 26, this value is true" (AVCaptureSession.h:685) is
 # a property of the APPLICATION, which this port can only read out of the main executable's own load command
-# (packages/a/apple-backports/CharonProgramSDK.h). One binary answers one branch, so both are asked: the
+# (packages/a/apple-backports/RevenantProgramSDK.h). One binary answers one branch, so both are asked: the
 # default link carries this host's SDK and the second carries an explicit pre-26 field. Each probe PRINTS the
 # field it was linked with (a CONTROL line, read back with the port's own helper), and run.sh refuses either
 # binary whose measurement does not match the branch it was linked for - so the label on a row is a measurement
@@ -778,9 +778,9 @@ check_control() {
 check_control AVCaptureNoSuchClass ABSENT
 check_control AVCaptureDevice HAS
 check_control AVCaptureDeviceFormat HAS
-check_control charon_host_AVCaptureDevice HAS
-check_control charon_host_AVCaptureDeviceFormat HAS
-check_control charon_host_AVCaptureDeviceInput HAS
+check_control revenant_host_AVCaptureDevice HAS
+check_control revenant_host_AVCaptureDeviceFormat HAS
+check_control revenant_host_AVCaptureDeviceInput HAS
 # The host's own microphone input, which the 18.0 slice's AVCaptureDeviceInput rows are asked of. Checked
 # separately because this control prints a fourth field: a microphone and an input of its own are what make
 # the host's column of those three rows a measurement and not an absence.
@@ -1048,7 +1048,7 @@ cat > "$build/two-launches.app/Contents/Info.plist" <<'PLIST'
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0"><dict>
   <key>CFBundleExecutable</key><string>probe</string>
-  <key>CFBundleIdentifier</key><string>org.charon.probe.avf-two-launches</string>
+  <key>CFBundleIdentifier</key><string>org.revenant.probe.avf-two-launches</string>
   <key>CFBundleName</key><string>avf-two-launches</string>
   <key>CFBundlePackageType</key><string>APPL</string>
 </dict></plist>
@@ -1078,7 +1078,7 @@ fi
 # And a bundle of its own must see nothing: the choice is the application's, not the system's.
 mkdir -p "$build/other-launch.app/Contents/MacOS"
 cp "$build/probe" "$build/other-launch.app/Contents/MacOS/probe"
-sed 's/org.charon.probe.avf-two-launches/org.charon.probe.avf-other-launch/' \
+sed 's/org.revenant.probe.avf-two-launches/org.revenant.probe.avf-other-launch/' \
     "$build/two-launches.app/Contents/Info.plist" > "$build/other-launch.app/Contents/Info.plist"
 "$build/other-launch.app/Contents/MacOS/probe" "$build/members.tsv" read > "$build/launch3.table" 2>&1 || {
     echo "FAIL: the third launch did not run"; head -8 "$build/launch3.table"; exit 1; }

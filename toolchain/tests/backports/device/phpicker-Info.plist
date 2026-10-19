@@ -9,7 +9,7 @@
 	<key>CFBundleExecutable</key>
 	<string>phpicker</string>
 	<key>CFBundleIdentifier</key>
-	<string>local.charon.backports.phpicker</string>
+	<string>local.revenant.backports.phpicker</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>

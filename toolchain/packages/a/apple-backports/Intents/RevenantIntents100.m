@@ -7,9 +7,9 @@
 
 #pragma clang diagnostic ignored "-Wobjc-designated-initializers"
 
-#import "../../../c/charon-coding/files/CharonCoding.h"
-#import "CharonIntentsResolution.h"
-#import "CharonIntentsStore.h"
+#import "../../../c/revenant-coding/files/RevenantCoding.h"
+#import "RevenantIntentsResolution.h"
+#import "RevenantIntentsStore.h"
 
 #pragma mark - INImage
 
@@ -25,7 +25,7 @@
     return [NSString stringWithFormat:@"<INImage %@%@>", _name ?: @"", _data ? @" data" : @""];
 }
 
-- (NSData *)charon_imageData
+- (NSData *)revenant_imageData
 {
     return _data;
 }
@@ -40,7 +40,7 @@
     if (!data) {
         return nil;
     }
-    return [self charon_imageWithName:name data:data width:image.size.width height:image.size.height];
+    return [self revenant_imageWithName:name data:data width:image.size.width height:image.size.height];
 }
 
 + (instancetype)systemImageNamed:(NSString *)name
@@ -53,7 +53,7 @@
     if (!data) {
         return nil;
     }
-    return [self charon_imageWithName:name data:data width:image.size.width height:image.size.height];
+    return [self revenant_imageWithName:name data:data width:image.size.width height:image.size.height];
 }
 
 + (instancetype)imageWithImageData:(NSData *)imageData
@@ -61,7 +61,7 @@
     if (!imageData) {
         return nil;
     }
-    return [self charon_imageWithName:nil data:imageData width:0 height:0];
+    return [self revenant_imageWithName:nil data:imageData width:0 height:0];
 }
 
 + (instancetype)imageWithURL:(NSURL *)URL
@@ -75,10 +75,10 @@
     if (!data) {
         return nil;
     }
-    return [self charon_imageWithName:URL.lastPathComponent data:data width:width height:height];
+    return [self revenant_imageWithName:URL.lastPathComponent data:data width:width height:height];
 }
 
-+ (instancetype)charon_imageWithName:(NSString *)name data:(NSData *)data width:(double)width height:(double)height
++ (instancetype)revenant_imageWithName:(NSString *)name data:(NSData *)data width:(double)width height:(double)height
 {
     INImage *image = [[self alloc] init];
     image->_name = [name copy];
@@ -96,19 +96,19 @@
 - (instancetype)initWithCoder:(NSCoder *)coder
 {
     if ((self = [super init]))
-        charon_intents_decode(self, coder);
+        revenant_intents_decode(self, coder);
     return self;
 }
 
 - (void)encodeWithCoder:(NSCoder *)coder
 {
-    charon_intents_encode(self, coder);
+    revenant_intents_encode(self, coder);
 }
 
 - (id)copyWithZone:(NSZone *)zone
 {
     INImage *copy = [[[self class] allocWithZone:zone] init];
-    charon_intents_copy(copy, self);
+    revenant_intents_copy(copy, self);
     return copy;
 }
 
@@ -234,19 +234,19 @@
 - (instancetype)initWithCoder:(NSCoder *)coder
 {
     if ((self = [super init]))
-        charon_intents_decode(self, coder);
+        revenant_intents_decode(self, coder);
     return self;
 }
 
 - (void)encodeWithCoder:(NSCoder *)coder
 {
-    charon_intents_encode(self, coder);
+    revenant_intents_encode(self, coder);
 }
 
 - (id)copyWithZone:(NSZone *)zone
 {
     INIntent *copy = [[[self class] allocWithZone:zone] init];
-    charon_intents_copy(copy, self);
+    revenant_intents_copy(copy, self);
     return copy;
 }
 
@@ -255,7 +255,7 @@
 #pragma mark - INIntentResolutionResult
 
 @implementation INIntentResolutionResult {
-    CharonIntentsResolutionStatus _status;
+    RevenantIntentsResolutionStatus _status;
     id _resolvedValue;
     NSArray *_valuesToDisambiguate;
     id _valueToConfirm;
@@ -265,7 +265,7 @@
 
 + (instancetype)needsValue
 {
-    return [self charon_resolutionWithStatus:CharonIntentsResolutionNeedsValue
+    return [self revenant_resolutionWithStatus:RevenantIntentsResolutionNeedsValue
                              resolvedValue:nil
                        valuesToDisambiguate:nil
                               valueToConfirm:nil];
@@ -273,7 +273,7 @@
 
 + (instancetype)notRequired
 {
-    return [self charon_answerWithStatus:CharonIntentsResolutionNotRequired
+    return [self revenant_answerWithStatus:RevenantIntentsResolutionNotRequired
                            resolvedValue:nil
                     valuesToDisambiguate:nil
                           valueToConfirm:nil
@@ -282,7 +282,7 @@
 
 + (instancetype)unsupported
 {
-    return [self charon_resolutionWithStatus:CharonIntentsResolutionUnsupported
+    return [self revenant_resolutionWithStatus:RevenantIntentsResolutionUnsupported
                              resolvedValue:nil
                        valuesToDisambiguate:nil
                               valueToConfirm:nil];
@@ -290,7 +290,7 @@
 
 + (instancetype)unsupportedWithReason:(NSInteger)reason
 {
-    return [self charon_resolutionWithStatus:CharonIntentsResolutionUnsupported
+    return [self revenant_resolutionWithStatus:RevenantIntentsResolutionUnsupported
                              resolvedValue:nil
                        valuesToDisambiguate:nil
                               valueToConfirm:nil
@@ -299,7 +299,7 @@
 
 + (instancetype)confirmationRequiredWithItemToConfirm:(id)itemToConfirm forReason:(NSInteger)reason
 {
-    INIntentResolutionResult *result = [self charon_resolutionWithStatus:CharonIntentsResolutionConfirmationRequired
+    INIntentResolutionResult *result = [self revenant_resolutionWithStatus:RevenantIntentsResolutionConfirmationRequired
                                                            resolvedValue:nil
                                                      valuesToDisambiguate:nil
                                                             valueToConfirm:itemToConfirm];
@@ -307,44 +307,44 @@
     return result;
 }
 
-+ (instancetype)charon_resolutionWithStatus:(CharonIntentsResolutionStatus)status
++ (instancetype)revenant_resolutionWithStatus:(RevenantIntentsResolutionStatus)status
                             resolvedValue:(id)resolvedValue
                       valuesToDisambiguate:(NSArray *)valuesToDisambiguate
                              valueToConfirm:(id)valueToConfirm
 {
-    return [self charon_resolutionWithStatus:status
+    return [self revenant_resolutionWithStatus:status
                                resolvedValue:resolvedValue
                          valuesToDisambiguate:valuesToDisambiguate
                                 valueToConfirm:valueToConfirm
                             unsupportedReason:0];
 }
 
-+ (instancetype)charon_resolutionWithStatus:(CharonIntentsResolutionStatus)status
++ (instancetype)revenant_resolutionWithStatus:(RevenantIntentsResolutionStatus)status
                             resolvedValue:(id)resolvedValue
                       valuesToDisambiguate:(NSArray *)valuesToDisambiguate
                              valueToConfirm:(id)valueToConfirm
                          unsupportedReason:(NSInteger)unsupportedReason
 {
-    if (status == CharonIntentsResolutionDisambiguation && valuesToDisambiguate.count == 0) {
+    if (status == RevenantIntentsResolutionDisambiguation && valuesToDisambiguate.count == 0) {
         return nil;
     }
-    if (resolvedValue == nil && (status == CharonIntentsResolutionSuccess || status == CharonIntentsResolutionNotRequired)) {
+    if (resolvedValue == nil && (status == RevenantIntentsResolutionSuccess || status == RevenantIntentsResolutionNotRequired)) {
         return nil;
     }
-    return [self charon_answerWithStatus:status
+    return [self revenant_answerWithStatus:status
                            resolvedValue:resolvedValue
                     valuesToDisambiguate:valuesToDisambiguate
                           valueToConfirm:valueToConfirm
                        unsupportedReason:unsupportedReason];
 }
 
-+ (instancetype)charon_answerWithStatus:(CharonIntentsResolutionStatus)status
++ (instancetype)revenant_answerWithStatus:(RevenantIntentsResolutionStatus)status
                           resolvedValue:(id)resolvedValue
                    valuesToDisambiguate:(NSArray *)valuesToDisambiguate
                          valueToConfirm:(id)valueToConfirm
                       unsupportedReason:(NSInteger)unsupportedReason
 {
-    INIntentResolutionResult *result = [self charon_adopted:NULL];
+    INIntentResolutionResult *result = [self revenant_adopted:NULL];
     result->_status = status;
     result->_resolvedValue = [resolvedValue copy];
     result->_valuesToDisambiguate = [valuesToDisambiguate copy];
@@ -353,10 +353,10 @@
     return result;
 }
 
-+ (instancetype)charon_adopted:(INIntentResolutionResult *)inner
++ (instancetype)revenant_adopted:(INIntentResolutionResult *)inner
 {
     INIntentResolutionResult *result = [self alloc];
-    result = charon_intents_super_init(result, [INIntentResolutionResult class]);
+    result = revenant_intents_super_init(result, [INIntentResolutionResult class]);
     if (inner) {
         result->_status = inner->_status;
         result->_resolvedValue = [inner->_resolvedValue copy];
@@ -365,12 +365,12 @@
         result->_unsupportedReason = inner->_unsupportedReason;
         result->_confirmationReason = inner->_confirmationReason;
     } else {
-        result->_status = CharonIntentsResolutionNeedsValue;
+        result->_status = RevenantIntentsResolutionNeedsValue;
     }
     return result;
 }
 
-- (void)charon_adoptResolutionOf:(id)inner
+- (void)revenant_adoptResolutionOf:(id)inner
 {
     if (![inner isKindOfClass:[INIntentResolutionResult class]]) {
         return;
@@ -384,7 +384,7 @@
     _confirmationReason = wrapped->_confirmationReason;
 }
 
-- (NSInteger)charon_unsupportedReason
+- (NSInteger)revenant_unsupportedReason
 {
     return _unsupportedReason;
 }
@@ -392,17 +392,17 @@
 - (NSInteger)resolutionResultCode
 {
     switch (_status) {
-        case CharonIntentsResolutionSuccess:
+        case RevenantIntentsResolutionSuccess:
             return 0;
-        case CharonIntentsResolutionUnsupported:
+        case RevenantIntentsResolutionUnsupported:
             return 1;
-        case CharonIntentsResolutionDisambiguation:
+        case RevenantIntentsResolutionDisambiguation:
             return _valuesToDisambiguate.count == 1 ? 3 : 2;
-        case CharonIntentsResolutionConfirmationRequired:
+        case RevenantIntentsResolutionConfirmationRequired:
             return 3;
-        case CharonIntentsResolutionNeedsValue:
+        case RevenantIntentsResolutionNeedsValue:
             return 4;
-        case CharonIntentsResolutionNotRequired:
+        case RevenantIntentsResolutionNotRequired:
             return 5;
     }
     return 0;
@@ -410,10 +410,10 @@
 
 - (id)itemToConfirm
 {
-    if (_status == CharonIntentsResolutionConfirmationRequired) {
+    if (_status == RevenantIntentsResolutionConfirmationRequired) {
         return _valueToConfirm;
     }
-    if (_status == CharonIntentsResolutionDisambiguation && _valuesToDisambiguate.count == 1) {
+    if (_status == RevenantIntentsResolutionDisambiguation && _valuesToDisambiguate.count == 1) {
         return _valuesToDisambiguate[0];
     }
     return nil;
@@ -431,7 +431,7 @@
 
 - (NSArray *)disambiguationItems
 {
-    if (_status != CharonIntentsResolutionDisambiguation || _valuesToDisambiguate.count == 1) {
+    if (_status != RevenantIntentsResolutionDisambiguation || _valuesToDisambiguate.count == 1) {
         return nil;
     }
     return _valuesToDisambiguate;
@@ -452,7 +452,7 @@
     return _valueToConfirm;
 }
 
-- (CharonIntentsResolutionStatus)resolutionStatus
+- (RevenantIntentsResolutionStatus)resolutionStatus
 {
     return _status;
 }
@@ -528,19 +528,19 @@
 - (instancetype)initWithCoder:(NSCoder *)coder
 {
     if ((self = [super init]))
-        charon_intents_decode(self, coder);
+        revenant_intents_decode(self, coder);
     return self;
 }
 
 - (void)encodeWithCoder:(NSCoder *)coder
 {
-    charon_intents_encode(self, coder);
+    revenant_intents_encode(self, coder);
 }
 
 - (id)copyWithZone:(NSZone *)zone
 {
     INSpeakableString *copy = [[[self class] allocWithZone:zone] init];
-    charon_intents_copy(copy, self);
+    revenant_intents_copy(copy, self);
     return copy;
 }
 
@@ -550,7 +550,7 @@
 
 @implementation INExtension
 
-+ (NSString *)charon_handlingProtocolNameForIntent:(INIntent *)intent
++ (NSString *)revenant_handlingProtocolNameForIntent:(INIntent *)intent
 {
     NSString *name = [NSString stringWithCString:class_getName([intent class]) encoding:NSUTF8StringEncoding];
     return [name stringByAppendingString:@"Handling"];
@@ -561,7 +561,7 @@
     if (!intent) {
         return nil;
     }
-    NSString *wanted = [[self class] charon_handlingProtocolNameForIntent:intent];
+    NSString *wanted = [[self class] revenant_handlingProtocolNameForIntent:intent];
     unsigned count = objc_getClassList(NULL, 0);
     if (!count) {
         return nil;
@@ -585,11 +585,11 @@
     if (!candidate) {
         return nil;
     }
-    id instance = [[self class] charon_newHandlerOfClass:candidate];
+    id instance = [[self class] revenant_newHandlerOfClass:candidate];
     return [instance respondsToSelector:@selector(handleIntent:)] ? instance : nil;
 }
 
-+ (id)charon_newHandlerOfClass:(Class)candidate
++ (id)revenant_newHandlerOfClass:(Class)candidate
 {
     return [[candidate alloc] init];
 }
@@ -645,19 +645,19 @@
 - (instancetype)initWithCoder:(NSCoder *)coder
 {
     if ((self = [super init]))
-        charon_intents_decode(self, coder);
+        revenant_intents_decode(self, coder);
     return self;
 }
 
 - (void)encodeWithCoder:(NSCoder *)coder
 {
-    charon_intents_encode(self, coder);
+    revenant_intents_encode(self, coder);
 }
 
 - (id)copyWithZone:(NSZone *)zone
 {
     INPaymentMethod *copy = [[[self class] allocWithZone:zone] init];
-    charon_intents_copy(copy, self);
+    revenant_intents_copy(copy, self);
     return copy;
 }
 
@@ -665,14 +665,14 @@
 
 #pragma mark - INRideCompletionStatus
 
-typedef NS_ENUM(NSInteger, CharonIntentsRideOutcome) {
-    CharonIntentsRideCompleted = 0,
-    CharonIntentsRideCanceled,
-    CharonIntentsRideMissedPickup,
+typedef NS_ENUM(NSInteger, RevenantIntentsRideOutcome) {
+    RevenantIntentsRideCompleted = 0,
+    RevenantIntentsRideCanceled,
+    RevenantIntentsRideMissedPickup,
 };
 
 @implementation INRideCompletionStatus {
-    CharonIntentsRideOutcome _outcome;
+    RevenantIntentsRideOutcome _outcome;
     BOOL _outstanding;
     INCurrencyAmount *_paymentAmount;
     INRideFeedbackTypeOptions _feedbackType;
@@ -683,7 +683,7 @@ typedef NS_ENUM(NSInteger, CharonIntentsRideOutcome) {
 @synthesize completionUserActivity = _completionUserActivity;
 @synthesize defaultTippingOptions = _defaultTippingOptions;
 
-+ (instancetype)charon_completionWithOutcome:(CharonIntentsRideOutcome)outcome
++ (instancetype)revenant_completionWithOutcome:(RevenantIntentsRideOutcome)outcome
                                   outstanding:(BOOL)outstanding
                                 paymentAmount:(INCurrencyAmount *)paymentAmount
                                  feedbackType:(INRideFeedbackTypeOptions)feedbackType
@@ -698,7 +698,7 @@ typedef NS_ENUM(NSInteger, CharonIntentsRideOutcome) {
 
 + (instancetype)completed
 {
-    return [self charon_completionWithOutcome:CharonIntentsRideCompleted
+    return [self revenant_completionWithOutcome:RevenantIntentsRideCompleted
                                     outstanding:NO
                                   paymentAmount:nil
                                    feedbackType:0];
@@ -706,7 +706,7 @@ typedef NS_ENUM(NSInteger, CharonIntentsRideOutcome) {
 
 + (instancetype)completedWithSettledPaymentAmount:(INCurrencyAmount *)settledPaymentAmount
 {
-    return [self charon_completionWithOutcome:CharonIntentsRideCompleted
+    return [self revenant_completionWithOutcome:RevenantIntentsRideCompleted
                                     outstanding:NO
                                   paymentAmount:settledPaymentAmount
                                    feedbackType:0];
@@ -714,7 +714,7 @@ typedef NS_ENUM(NSInteger, CharonIntentsRideOutcome) {
 
 + (instancetype)completedWithOutstandingPaymentAmount:(INCurrencyAmount *)outstandingPaymentAmount
 {
-    return [self charon_completionWithOutcome:CharonIntentsRideCompleted
+    return [self revenant_completionWithOutcome:RevenantIntentsRideCompleted
                                     outstanding:YES
                                   paymentAmount:outstandingPaymentAmount
                                    feedbackType:0];
@@ -722,7 +722,7 @@ typedef NS_ENUM(NSInteger, CharonIntentsRideOutcome) {
 
 + (instancetype)completedWithOutstandingFeedbackType:(INRideFeedbackTypeOptions)feedbackType
 {
-    return [self charon_completionWithOutcome:CharonIntentsRideCompleted
+    return [self revenant_completionWithOutcome:RevenantIntentsRideCompleted
                                     outstanding:YES
                                   paymentAmount:nil
                                    feedbackType:feedbackType];
@@ -730,7 +730,7 @@ typedef NS_ENUM(NSInteger, CharonIntentsRideOutcome) {
 
 + (instancetype)canceledByService
 {
-    return [self charon_completionWithOutcome:CharonIntentsRideCanceled
+    return [self revenant_completionWithOutcome:RevenantIntentsRideCanceled
                                     outstanding:NO
                                   paymentAmount:nil
                                    feedbackType:0];
@@ -743,7 +743,7 @@ typedef NS_ENUM(NSInteger, CharonIntentsRideOutcome) {
 
 + (instancetype)canceledMissedPickup
 {
-    return [self charon_completionWithOutcome:CharonIntentsRideMissedPickup
+    return [self revenant_completionWithOutcome:RevenantIntentsRideMissedPickup
                                     outstanding:NO
                                   paymentAmount:nil
                                    feedbackType:0];
@@ -751,17 +751,17 @@ typedef NS_ENUM(NSInteger, CharonIntentsRideOutcome) {
 
 - (BOOL)isCompleted
 {
-    return _outcome == CharonIntentsRideCompleted;
+    return _outcome == RevenantIntentsRideCompleted;
 }
 
 - (BOOL)isCanceled
 {
-    return _outcome != CharonIntentsRideCompleted;
+    return _outcome != RevenantIntentsRideCompleted;
 }
 
 - (BOOL)isMissedPickup
 {
-    return _outcome == CharonIntentsRideMissedPickup;
+    return _outcome == RevenantIntentsRideMissedPickup;
 }
 
 - (BOOL)isOutstanding
@@ -787,19 +787,19 @@ typedef NS_ENUM(NSInteger, CharonIntentsRideOutcome) {
 - (instancetype)initWithCoder:(NSCoder *)coder
 {
     if ((self = [super init]))
-        charon_intents_decode(self, coder);
+        revenant_intents_decode(self, coder);
     return self;
 }
 
 - (void)encodeWithCoder:(NSCoder *)coder
 {
-    charon_intents_encode(self, coder);
+    revenant_intents_encode(self, coder);
 }
 
 - (id)copyWithZone:(NSZone *)zone
 {
     INRideCompletionStatus *copy = [[[self class] allocWithZone:zone] init];
-    charon_intents_copy(copy, self);
+    revenant_intents_copy(copy, self);
     return copy;
 }
 
@@ -844,7 +844,7 @@ typedef NS_ENUM(NSInteger, CharonIntentsRideOutcome) {
 
 - (void)setVocabularyStrings:(NSOrderedSet *)vocabulary ofType:(INVocabularyStringType)type
 {
-    charon_intents_store_vocabulary(type, [vocabulary array]);
+    revenant_intents_store_vocabulary(type, [vocabulary array]);
 }
 
 - (void)setVocabulary:(NSOrderedSet *)vocabulary ofType:(INVocabularyStringType)type
@@ -856,17 +856,17 @@ typedef NS_ENUM(NSInteger, CharonIntentsRideOutcome) {
             [phrases addObject:phrase];
         }
     }
-    charon_intents_store_vocabulary(type, phrases);
+    revenant_intents_store_vocabulary(type, phrases);
 }
 
 - (void)removeAllVocabularyStrings
 {
-    charon_intents_remove_vocabulary();
+    revenant_intents_remove_vocabulary();
 }
 
-- (NSOrderedSet *)charon_vocabularyStringsOfType:(INVocabularyStringType)type
+- (NSOrderedSet *)revenant_vocabularyStringsOfType:(INVocabularyStringType)type
 {
-    return charon_intents_vocabulary(type);
+    return revenant_intents_vocabulary(type);
 }
 
 @end
@@ -907,7 +907,7 @@ typedef NS_ENUM(NSInteger, CharonIntentsRideOutcome) {
     if (!_dateInterval) {
         _dateInterval = [[NSDateInterval alloc] initWithStartDate:[NSDate date] endDate:[NSDate date]];
     }
-    NSError *error = charon_intents_store_interaction(self);
+    NSError *error = revenant_intents_store_interaction(self);
     if (completion) {
         completion(error);
     }
@@ -916,21 +916,21 @@ typedef NS_ENUM(NSInteger, CharonIntentsRideOutcome) {
 + (void)deleteAllInteractionsWithCompletion:(void (^)(NSError *))completion
 {
     if (completion) {
-        completion(charon_intents_delete_interactions(nil, nil));
+        completion(revenant_intents_delete_interactions(nil, nil));
     }
 }
 
 + (void)deleteInteractionsWithIdentifiers:(NSArray *)identifiers completion:(void (^)(NSError *))completion
 {
     if (completion) {
-        completion(charon_intents_delete_interactions(identifiers, nil));
+        completion(revenant_intents_delete_interactions(identifiers, nil));
     }
 }
 
 + (void)deleteInteractionsWithGroupIdentifier:(NSString *)groupIdentifier completion:(void (^)(NSError *))completion
 {
     if (completion) {
-        completion(charon_intents_delete_interactions(nil, groupIdentifier));
+        completion(revenant_intents_delete_interactions(nil, groupIdentifier));
     }
 }
 
@@ -949,14 +949,14 @@ typedef NS_ENUM(NSInteger, CharonIntentsRideOutcome) {
     return value == [NSNull null] ? nil : value;
 }
 
-+ (NSArray *)charon_interactions
++ (NSArray *)revenant_interactions
 {
-    return charon_intents_stored_interactions(nil);
+    return revenant_intents_stored_interactions(nil);
 }
 
-+ (NSArray *)charon_interactionsWithGroupIdentifier:(NSString *)groupIdentifier
++ (NSArray *)revenant_interactionsWithGroupIdentifier:(NSString *)groupIdentifier
 {
-    return charon_intents_stored_interactions(groupIdentifier);
+    return revenant_intents_stored_interactions(groupIdentifier);
 }
 
 + (BOOL)supportsSecureCoding
@@ -967,27 +967,27 @@ typedef NS_ENUM(NSInteger, CharonIntentsRideOutcome) {
 - (instancetype)initWithCoder:(NSCoder *)coder
 {
     if ((self = [super init]))
-        charon_intents_decode(self, coder);
+        revenant_intents_decode(self, coder);
     return self;
 }
 
 - (void)encodeWithCoder:(NSCoder *)coder
 {
-    charon_intents_encode(self, coder);
+    revenant_intents_encode(self, coder);
 }
 
 - (id)copyWithZone:(NSZone *)zone
 {
     INInteraction *copy = [[[self class] allocWithZone:zone] init];
-    charon_intents_copy(copy, self);
+    revenant_intents_copy(copy, self);
     return copy;
 }
 
 @end
 
-@implementation INRideDriver (CharonDeprecatedInitialisers)
+@implementation INRideDriver (RevenantDeprecatedInitialisers)
 
-static NSString *CharonRideDriverNameFromComponents(NSPersonNameComponents *components)
+static NSString *RevenantRideDriverNameFromComponents(NSPersonNameComponents *components)
 {
     NSMutableArray *parts = [NSMutableArray array];
     if (components.givenName.length) {
@@ -1009,13 +1009,13 @@ static NSString *CharonRideDriverNameFromComponents(NSPersonNameComponents *comp
 - (instancetype)initWithHandle:(NSString *)handle nameComponents:(NSPersonNameComponents *)nameComponents image:(INImage *)image rating:(NSString *)rating phoneNumber:(NSString *)phoneNumber
 {
     INPersonHandle *personHandle = [[INPersonHandle alloc] initWithValue:handle type:INPersonHandleTypeUnknown];
-    NSString *name = CharonRideDriverNameFromComponents(nameComponents) ?: (handle ?: @"");
+    NSString *name = RevenantRideDriverNameFromComponents(nameComponents) ?: (handle ?: @"");
     return [self initWithPersonHandle:personHandle nameComponents:nameComponents displayName:name image:image rating:rating phoneNumber:phoneNumber];
 }
 
 @end
 
-static INRecurrenceFrequency CharonRecurrenceFrequencyFromEventKit(EKRecurrenceFrequency frequency)
+static INRecurrenceFrequency RevenantRecurrenceFrequencyFromEventKit(EKRecurrenceFrequency frequency)
 {
     switch (frequency) {
         case EKRecurrenceFrequencyWeekly:
@@ -1030,7 +1030,7 @@ static INRecurrenceFrequency CharonRecurrenceFrequencyFromEventKit(EKRecurrenceF
     }
 }
 
-static BOOL CharonEventKitFrequencyFromRecurrence(INRecurrenceFrequency frequency, EKRecurrenceFrequency *eventKit)
+static BOOL RevenantEventKitFrequencyFromRecurrence(INRecurrenceFrequency frequency, EKRecurrenceFrequency *eventKit)
 {
     switch (frequency) {
         case INRecurrenceFrequencyDaily:
@@ -1050,7 +1050,7 @@ static BOOL CharonEventKitFrequencyFromRecurrence(INRecurrenceFrequency frequenc
     }
 }
 
-@implementation INDateComponentsRange (CharonEventKit)
+@implementation INDateComponentsRange (RevenantEventKit)
 
 - (instancetype)initWithEKRecurrenceRule:(EKRecurrenceRule *)recurrenceRule
 {
@@ -1058,7 +1058,7 @@ static BOOL CharonEventKitFrequencyFromRecurrence(INRecurrenceFrequency frequenc
     NSUInteger interval = 0;
     NSDateComponents *start = nil;
     if (recurrenceRule) {
-        frequency = CharonRecurrenceFrequencyFromEventKit(recurrenceRule.frequency);
+        frequency = RevenantRecurrenceFrequencyFromEventKit(recurrenceRule.frequency);
         interval = recurrenceRule.interval;
         NSArray<EKRecurrenceDayOfWeek *> *days = recurrenceRule.daysOfTheWeek;
         if (days.count) {
@@ -1074,7 +1074,7 @@ static BOOL CharonEventKitFrequencyFromRecurrence(INRecurrenceFrequency frequenc
 - (EKRecurrenceRule *)EKRecurrenceRule
 {
     EKRecurrenceFrequency frequency;
-    if (!self.recurrenceRule || !CharonEventKitFrequencyFromRecurrence(self.recurrenceRule.frequency, &frequency)) {
+    if (!self.recurrenceRule || !RevenantEventKitFrequencyFromRecurrence(self.recurrenceRule.frequency, &frequency)) {
         return nil;
     }
     NSInteger weekday = [self.startDateComponents valueForComponent:NSCalendarUnitWeekday];

@@ -2,7 +2,7 @@
 # run.sh - the thirteen data and skeleton classes of ARKit that this series carries, against the host's own ARKit
 # and SceneKit on Mac Catalyst (check.m says what is compared, and what is not: no session runs on either side).
 #
-# Each of the port's files is compiled with its one class renamed to CharonPort<name>, so the port's classes and
+# Each of the port's files is compiled with its one class renamed to RevenantPort<name>, so the port's classes and
 # the host's are in one process. The rename reaches the SDK's declaration of that class as well, which is the
 # point: the port's @interface is the one compiled. Nothing here is a mutant run: the mutants of the neighbouring
 # harnesses are written in python, and this package does not run python.
@@ -22,7 +22,7 @@ classes="ARFaceGeometry ARSCNFaceGeometry ARReferenceObject ARMeshGeometry ARGeo
 
 for cls in $classes; do
     xcrun clang -fobjc-arc -w -O1 $target -isysroot "$sdk" -iframework "$ios" \
-        -D"$cls=CharonPort$cls" -c "$ARKit/$cls.m" -o "$runs/$cls.o"
+        -D"$cls=RevenantPort$cls" -c "$ARKit/$cls.m" -o "$runs/$cls.o"
 done
 
 xcrun clang -fobjc-arc -w -O1 $target -isysroot "$sdk" -iframework "$ios" \

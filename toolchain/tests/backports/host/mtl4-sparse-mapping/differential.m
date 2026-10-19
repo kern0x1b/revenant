@@ -6,10 +6,10 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
-NSString *CharonMetal4SparseBufferUpdateRefusal(BOOL bufferIsPlacementSparse, BOOL heapPresent, BOOL heapIsPlacement, BOOL mappingMode);
-NSString *CharonMetal4SparseBufferCopyRefusal(BOOL sourceIsPlacementSparse, BOOL destinationIsPlacementSparse);
-NSString *CharonMetal4SparseTextureUpdateRefusal(BOOL textureIsPlacementSparse, BOOL heapPresent, BOOL heapIsPlacement, BOOL mappingMode);
-NSString *CharonMetal4SparseTextureCopyRefusal(BOOL sourceIsPlacementSparse, BOOL destinationIsPlacementSparse);
+NSString *RevenantMetal4SparseBufferUpdateRefusal(BOOL bufferIsPlacementSparse, BOOL heapPresent, BOOL heapIsPlacement, BOOL mappingMode);
+NSString *RevenantMetal4SparseBufferCopyRefusal(BOOL sourceIsPlacementSparse, BOOL destinationIsPlacementSparse);
+NSString *RevenantMetal4SparseTextureUpdateRefusal(BOOL textureIsPlacementSparse, BOOL heapPresent, BOOL heapIsPlacement, BOOL mappingMode);
+NSString *RevenantMetal4SparseTextureCopyRefusal(BOOL sourceIsPlacementSparse, BOOL destinationIsPlacementSparse);
 
 static int checks;
 static int failures;
@@ -170,41 +170,41 @@ int main(int argc, const char *argv[])
         folder = argv[1];
 
         same_refusal("buffer-plain", CaseBufferPlain,
-                     CharonMetal4SparseBufferUpdateRefusal(NO, YES, NO, YES),
+                     RevenantMetal4SparseBufferUpdateRefusal(NO, YES, NO, YES),
                      @"a plain buffer, automatic heap");
         same_refusal("buffer-sparse-auto", CaseBufferSparseAutoHeap,
-                     CharonMetal4SparseBufferUpdateRefusal(YES, YES, NO, YES),
+                     RevenantMetal4SparseBufferUpdateRefusal(YES, YES, NO, YES),
                      @"a sparse buffer, automatic heap");
         same_refusal("buffer-sparse-nil", CaseBufferSparseNilHeapMap,
-                     CharonMetal4SparseBufferUpdateRefusal(YES, NO, NO, YES),
+                     RevenantMetal4SparseBufferUpdateRefusal(YES, NO, NO, YES),
                      @"a sparse buffer, nil heap, map");
         same_acceptance("buffer-sparse-placement", CaseBufferSparsePlacement,
-                        CharonMetal4SparseBufferUpdateRefusal(YES, YES, YES, YES),
+                        RevenantMetal4SparseBufferUpdateRefusal(YES, YES, YES, YES),
                         @"a sparse buffer, placement heap, map");
 
         same_refusal("copy-sparse-source", CaseBufferCopySparseSource,
-                     CharonMetal4SparseBufferCopyRefusal(YES, NO),
+                     RevenantMetal4SparseBufferCopyRefusal(YES, NO),
                      @"a sparse source, plain destination");
         same_refusal("copy-plain-source", CaseBufferCopyPlainSource,
-                     CharonMetal4SparseBufferCopyRefusal(NO, NO),
+                     RevenantMetal4SparseBufferCopyRefusal(NO, NO),
                      @"a plain source, plain destination");
 
         checks++;
         if (run_metal(CaseTextureUpdatePlain, "texture-update-plain") != 0)
             fail(@"texture update: Metal did not accept a plain texture with an automatic heap");
-        if (!CharonMetal4SparseTextureUpdateRefusal(NO, YES, NO, YES))
+        if (!RevenantMetal4SparseTextureUpdateRefusal(NO, YES, NO, YES))
             fail(@"texture update: the port's decision accepts a plain texture, and the port cannot map a tile");
         checks++;
         if (run_metal(CaseTextureCopyPlain, "texture-copy-plain") != 0)
             fail(@"texture copy: Metal did not accept plain textures");
-        if (!CharonMetal4SparseTextureCopyRefusal(NO, NO))
+        if (!RevenantMetal4SparseTextureCopyRefusal(NO, NO))
             fail(@"texture copy: the port's decision accepts plain textures, and the port cannot map a tile");
 
         checks++;
-        if (CharonMetal4SparseBufferUpdateRefusal(YES, YES, YES, YES) != nil)
+        if (RevenantMetal4SparseBufferUpdateRefusal(YES, YES, YES, YES) != nil)
             fail(@"the requirements hold for a sparse buffer and a placement heap, and the decision refuses them");
         checks++;
-        if (![CharonMetal4SparseBufferUpdateRefusal(NO, YES, YES, NO) isEqualToString:@"Buffer is not a Placement Sparse Buffer"])
+        if (![RevenantMetal4SparseBufferUpdateRefusal(NO, YES, YES, NO) isEqualToString:@"Buffer is not a Placement Sparse Buffer"])
             fail(@"the buffer check is not first: a plain buffer with a placement heap is named for the heap");
 
         printf("checks=%d failures=%d\n", checks, failures);

@@ -15,7 +15,7 @@
 
 #include "graphics/gles_abi.hpp"
 
-namespace shade {
+namespace emulator {
 namespace {
 
     constexpr float quad_epsilon = 1.0e-4F;

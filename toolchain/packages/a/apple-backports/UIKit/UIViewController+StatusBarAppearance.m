@@ -3,9 +3,9 @@
 
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 
-static char charon_captures_key;
+static char revenant_captures_key;
 
-static UIViewController *charon_responsible(UIViewController *root, BOOL hidden)
+static UIViewController *revenant_responsible(UIViewController *root, BOOL hidden)
 {
     UIViewController *current = root;
     for (;;) {
@@ -21,7 +21,7 @@ static UIViewController *charon_responsible(UIViewController *root, BOOL hidden)
     }
 }
 
-@implementation UIViewController (CharonStatusBarAppearance)
+@implementation UIViewController (RevenantStatusBarAppearance)
 
 - (UIStatusBarStyle)preferredStatusBarStyle
 {
@@ -50,12 +50,12 @@ static UIViewController *charon_responsible(UIViewController *root, BOOL hidden)
 
 - (BOOL)modalPresentationCapturesStatusBarAppearance
 {
-    return [objc_getAssociatedObject(self, &charon_captures_key) boolValue];
+    return [objc_getAssociatedObject(self, &revenant_captures_key) boolValue];
 }
 
 - (void)setModalPresentationCapturesStatusBarAppearance:(BOOL)captures
 {
-    objc_setAssociatedObject(self, &charon_captures_key, @(captures), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, &revenant_captures_key, @(captures), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
 - (void)setNeedsStatusBarAppearanceUpdate
@@ -64,8 +64,8 @@ static UIViewController *charon_responsible(UIViewController *root, BOOL hidden)
     UIViewController *root = application.keyWindow.rootViewController;
     if (!root)
         return;
-    UIViewController *styled = charon_responsible(root, NO);
-    UIViewController *hiding = charon_responsible(root, YES);
+    UIViewController *styled = revenant_responsible(root, NO);
+    UIViewController *hiding = revenant_responsible(root, YES);
     BOOL animated = [UIView areAnimationsEnabled];
     [application setStatusBarStyle:[styled preferredStatusBarStyle] animated:animated];
     [application setStatusBarHidden:[hiding prefersStatusBarHidden] withAnimation:animated ? [hiding preferredStatusBarUpdateAnimation] : UIStatusBarAnimationNone];

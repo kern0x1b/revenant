@@ -1,15 +1,15 @@
-#import "CharonPhotos.h"
+#import "RevenantPhotos.h"
 
 #pragma clang diagnostic ignored "-Wobjc-missing-property-synthesis"
 
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 
-static NSString *const CharonPhotosErrorDomain = @"PHPhotosErrorDomain";
+static NSString *const RevenantPhotosErrorDomain = @"PHPhotosErrorDomain";
 
-@interface CharonPhotosThread : NSThread
+@interface RevenantPhotosThread : NSThread
 @end
 
-@implementation CharonPhotosThread
+@implementation RevenantPhotosThread
 
 - (void)main
 {
@@ -22,12 +22,12 @@ static NSString *const CharonPhotosErrorDomain = @"PHPhotosErrorDomain";
 
 @end
 
-@interface CharonPhotosBlock : NSObject
+@interface RevenantPhotosBlock : NSObject
 @property (nonatomic, copy) dispatch_block_t block;
 - (void)run;
 @end
 
-@implementation CharonPhotosBlock
+@implementation RevenantPhotosBlock
 
 - (void)run
 {
@@ -36,14 +36,14 @@ static NSString *const CharonPhotosErrorDomain = @"PHPhotosErrorDomain";
 
 @end
 
-@implementation CharonPhotosStore
+@implementation RevenantPhotosStore
 
-+ (CharonPhotosThread *)thread
++ (RevenantPhotosThread *)thread
 {
-    static CharonPhotosThread *thread;
+    static RevenantPhotosThread *thread;
     static dispatch_once_t once;
     dispatch_once(&once, ^{
-        thread = [[CharonPhotosThread alloc] init];
+        thread = [[RevenantPhotosThread alloc] init];
         thread.name = @"space.kern0x1b.photos";
         [thread start];
     });
@@ -67,7 +67,7 @@ static NSString *const CharonPhotosErrorDomain = @"PHPhotosErrorDomain";
         return;
     }
     dispatch_semaphore_t finished = dispatch_semaphore_create(0);
-    CharonPhotosBlock *wrapped = [[CharonPhotosBlock alloc] init];
+    RevenantPhotosBlock *wrapped = [[RevenantPhotosBlock alloc] init];
     wrapped.block = ^{
         work(^{
             dispatch_semaphore_signal(finished);
@@ -118,7 +118,7 @@ static NSString *const CharonPhotosErrorDomain = @"PHPhotosErrorDomain";
     [group setAssetsFilter:filter ?: [ALAssetsFilter allAssets]];
     [group enumerateAssetsUsingBlock:^(ALAsset *asset, NSUInteger index, BOOL *stop) {
         if (asset)
-            [found addObject:[[assetClass alloc] initWithCharonAsset:asset sourceType:sourceType]];
+            [found addObject:[[assetClass alloc] initWithRevenantAsset:asset sourceType:sourceType]];
     }];
     return found;
 }
@@ -185,7 +185,7 @@ static NSString *const CharonPhotosErrorDomain = @"PHPhotosErrorDomain";
 
 + (PHAssetCollection *)collectionForGroup:(ALAssetsGroup *)group
 {
-    return [[NSClassFromString(@"PHAssetCollection") alloc] initWithCharonGroup:group];
+    return [[NSClassFromString(@"PHAssetCollection") alloc] initWithRevenantGroup:group];
 }
 
 + (NSArray<PHAssetCollection *> *)collectionsOfGroupTypes:(ALAssetsGroupType)types
@@ -205,8 +205,8 @@ static NSString *const CharonPhotosErrorDomain = @"PHPhotosErrorDomain";
 + (PHAssetCollection *)collectionWithIdentifier:(NSString *)identifier
 {
     Class collectionClass = NSClassFromString(@"PHAssetCollection");
-    if ([identifier hasPrefix:@"CHARON/SMART/"])
-        return [[collectionClass alloc] initWithCharonSmartSubtype:(PHAssetCollectionSubtype)[[identifier substringFromIndex:13] integerValue]];
+    if ([identifier hasPrefix:@"REVENANT/SMART/"])
+        return [[collectionClass alloc] initWithRevenantSmartSubtype:(PHAssetCollectionSubtype)[[identifier substringFromIndex:13] integerValue]];
     NSURL *url = [NSURL URLWithString:[self resolvedIdentifier:identifier]];
     if (!url || ![self canRead])
         return nil;
@@ -232,7 +232,7 @@ static NSString *const CharonPhotosErrorDomain = @"PHPhotosErrorDomain";
     [self work:^(dispatch_block_t done) {
         [[self library] assetForURL:url resultBlock:^(ALAsset *asset) {
             if (asset)
-                found = [[NSClassFromString(@"PHAsset") alloc] initWithCharonAsset:asset sourceType:PHAssetSourceTypeUserLibrary];
+                found = [[NSClassFromString(@"PHAsset") alloc] initWithRevenantAsset:asset sourceType:PHAssetSourceTypeUserLibrary];
             done();
         } failureBlock:^(NSError *error) {
             done();
@@ -246,7 +246,7 @@ static NSString *const CharonPhotosErrorDomain = @"PHPhotosErrorDomain";
     NSString *resolved = [self resolvedIdentifier:identifier];
     NSMutableArray *found = [NSMutableArray array];
     for (PHAssetCollection *collection in [self collectionsOfGroupTypes:ALAssetsGroupAlbum | ALAssetsGroupEvent | ALAssetsGroupFaces | ALAssetsGroupSavedPhotos | ALAssetsGroupPhotoStream | ALAssetsGroupLibrary]) {
-        for (PHAsset *asset in [collection charon_assets]) {
+        for (PHAsset *asset in [collection revenant_assets]) {
             if ([asset.localIdentifier isEqualToString:resolved]) {
                 [found addObject:collection];
                 break;
@@ -293,7 +293,7 @@ static NSString *const CharonPhotosErrorDomain = @"PHPhotosErrorDomain";
 
 + (NSError *)errorWithCode:(NSInteger)code reason:(NSString *)reason
 {
-    return [NSError errorWithDomain:CharonPhotosErrorDomain code:code userInfo:@{NSLocalizedDescriptionKey: reason}];
+    return [NSError errorWithDomain:RevenantPhotosErrorDomain code:code userInfo:@{NSLocalizedDescriptionKey: reason}];
 }
 
 + (NSString *)identifierOfWrite:(void (^)(ALAssetsLibraryWriteImageCompletionBlock completion))write error:(NSError **)error

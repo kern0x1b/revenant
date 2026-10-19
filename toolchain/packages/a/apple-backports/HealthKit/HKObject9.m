@@ -1,58 +1,58 @@
 #import <HealthKit/HealthKit.h>
 
-#import "CharonHKStore.h"
+#import "RevenantHKStore.h"
 
 #pragma mark - HKObject
 
-@implementation HKObject (CharonIOS9)
+@implementation HKObject (RevenantIOS9)
 
 - (HKSourceRevision *)sourceRevision
 {
-    HKSourceRevision *stored = [self charon_storedSourceRevision];
+    HKSourceRevision *stored = [self revenant_storedSourceRevision];
     if (stored)
         return stored;
-    return [[HKSourceRevision alloc] charon_initWithSource:self.source ?: [HKSource defaultSource]
-                                                    version:[HKSource charon_processVersion]];
+    return [[HKSourceRevision alloc] revenant_initWithSource:self.source ?: [HKSource defaultSource]
+                                                    version:[HKSource revenant_processVersion]];
 }
 
 - (nullable HKDevice *)device
 {
-    return [self charon_storedDevice];
+    return [self revenant_storedDevice];
 }
 
-- (void)charon_setSourceRevision:(nullable HKSourceRevision *)revision device:(nullable HKDevice *)device
+- (void)revenant_setSourceRevision:(nullable HKSourceRevision *)revision device:(nullable HKDevice *)device
 {
-    [self charon_setStoredSourceRevision:revision];
+    [self revenant_setStoredSourceRevision:revision];
     if (device)
-        [self charon_setDevice:device];
+        [self revenant_setDevice:device];
 }
 
 @end
 
 #pragma mark - HKUnit
 
-@implementation HKUnit (CharonIOS9)
+@implementation HKUnit (RevenantIOS9)
 
 + (instancetype)yardUnit
 {
-    return [self charon_namedUnit:@"yd"];
+    return [self revenant_namedUnit:@"yd"];
 }
 
 + (instancetype)cupUSUnit
 {
-    return [self charon_namedUnit:@"cup_us"];
+    return [self revenant_namedUnit:@"cup_us"];
 }
 
 + (instancetype)cupImperialUnit
 {
-    return [self charon_namedUnit:@"cup_imp"];
+    return [self revenant_namedUnit:@"cup_imp"];
 }
 
 @end
 
 #pragma mark - The sample factories that take a device
 
-@implementation HKCategorySample (CharonIOS9)
+@implementation HKCategorySample (RevenantIOS9)
 
 + (instancetype)categorySampleWithType:(HKCategoryType *)type
                                  value:(NSInteger)value
@@ -66,13 +66,13 @@
                                                   startDate:startDate
                                                     endDate:endDate
                                                    metadata:metadata];
-    [sample charon_setDevice:device];
+    [sample revenant_setDevice:device];
     return sample;
 }
 
 @end
 
-@implementation HKQuantitySample (CharonIOS9)
+@implementation HKQuantitySample (RevenantIOS9)
 
 + (instancetype)quantitySampleWithType:(HKQuantityType *)type
                              quantity:(HKQuantity *)quantity
@@ -86,13 +86,13 @@
                                                     startDate:startDate
                                                       endDate:endDate
                                                      metadata:metadata];
-    [sample charon_setDevice:device];
+    [sample revenant_setDevice:device];
     return sample;
 }
 
 @end
 
-@implementation HKCorrelation (CharonIOS9)
+@implementation HKCorrelation (RevenantIOS9)
 
 + (instancetype)correlationWithType:(HKCorrelationType *)type
                           startDate:(NSDate *)startDate
@@ -106,13 +106,13 @@
                                                    endDate:endDate
                                                    objects:objects
                                                   metadata:metadata];
-    [correlation charon_setDevice:device];
+    [correlation revenant_setDevice:device];
     return correlation;
 }
 
 @end
 
-@implementation HKWorkout (CharonIOS9)
+@implementation HKWorkout (RevenantIOS9)
 
 + (instancetype)workoutWithActivityType:(HKWorkoutActivityType)activityType
                               startDate:(NSDate *)startDate
@@ -123,15 +123,15 @@
                                  device:(nullable HKDevice *)device
                                metadata:(nullable NSDictionary *)metadata
 {
-    HKWorkout *workout = [[HKWorkout alloc] charon_initWithType:[HKObjectType workoutType]
+    HKWorkout *workout = [[HKWorkout alloc] revenant_initWithType:[HKObjectType workoutType]
                                                            metadata:metadata
                                                           startDate:startDate
                                                             endDate:[startDate dateByAddingTimeInterval:duration]
                                                            duration:duration];
     if (workout) {
-        [workout charon_setDevice:device];
-        [workout charon_setWorkoutActivityType:activityType];
-        [workout charon_setTotalEnergyBurned:totalEnergyBurned totalDistance:totalDistance];
+        [workout revenant_setDevice:device];
+        [workout revenant_setWorkoutActivityType:activityType];
+        [workout revenant_setTotalEnergyBurned:totalEnergyBurned totalDistance:totalDistance];
     }
     return workout;
 }
@@ -152,7 +152,7 @@
                                     totalEnergyBurned:totalEnergyBurned
                                       totalDistance:totalDistance
                                                metadata:metadata];
-    [workout charon_setDevice:device];
+    [workout revenant_setDevice:device];
     return workout;
 }
 
@@ -160,7 +160,7 @@
 
 #pragma mark - HKQuery
 
-@implementation HKQuery (CharonIOS9)
+@implementation HKQuery (RevenantIOS9)
 
 + (NSPredicate *)predicateForObjectsFromDevices:(NSSet<HKDevice *> *)devices
 {

@@ -10,7 +10,7 @@
 #include "foundation/address_space.hpp"
 #include <limits>
 
-namespace shade {
+namespace emulator {
 
 std::optional<PrimeFieldLayout> PrimeFieldLayout::resolve(
     const AddressSpace& memory, std::uint32_t context,

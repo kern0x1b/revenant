@@ -1,6 +1,6 @@
 #import <Foundation/Foundation.h>
 
-@implementation NSDateFormatter (CharonLocalizedTemplate)
+@implementation NSDateFormatter (RevenantLocalizedTemplate)
 
 - (void)setLocalizedDateFormatFromTemplate:(NSString *)dateFormatTemplate
 {

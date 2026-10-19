@@ -137,11 +137,11 @@ int main(void)
                          "MTLCreateSystemDefaultDevice gave nil, and the EAGL context line above says why");
         }
 
-        Class portQueueClass = NSClassFromString(@"CharonMetal4CommandQueue");
+        Class portQueueClass = NSClassFromString(@"RevenantMetal4CommandQueue");
         id queue = nil;
         if (!portQueueClass) {
             not_answered("the_ports_own_queue_answers_as_apples_does",
-                         "this image has no CharonMetal4CommandQueue class");
+                         "this image has no RevenantMetal4CommandQueue class");
         } else {
             queue = [[portQueueClass alloc] init];
         }
@@ -209,7 +209,7 @@ int main(void)
 
             if (portQueueClass) {
                 verdict(queue == [[portQueueClass alloc] init] ? YES : YES, "the_ports_own_queue_answers_as_apples_does",
-                        "the queue under test is an instance of the port's own CharonMetal4CommandQueue");
+                        "the queue under test is an instance of the port's own RevenantMetal4CommandQueue");
             }
         }
 
@@ -352,11 +352,11 @@ int main(void)
                 verdict(first && second, "MTL4CommandQueue_inert_once", line);
             }
 
-            Class eventClass = NSClassFromString(@"CharonMetalSharedEvent");
+            Class eventClass = NSClassFromString(@"RevenantMetalSharedEvent");
             id event = eventClass ? [[eventClass alloc] init] : nil;
             if (!event) {
-                not_answered("MTL4CommandQueue_signalEvent", "this image has no CharonMetalSharedEvent class");
-                not_answered("MTL4CommandQueue_waitForEvent", "this image has no CharonMetalSharedEvent class");
+                not_answered("MTL4CommandQueue_signalEvent", "this image has no RevenantMetalSharedEvent class");
+                not_answered("MTL4CommandQueue_waitForEvent", "this image has no RevenantMetalSharedEvent class");
             } else {
                 BOOL returned = refuses2wide(queue, "signalEvent:value:", event, 7);
                 uint64_t readBack = [event signaledValue];

@@ -1,8 +1,8 @@
 #import <UIKit/UIKit.h>
 
-static NSString *const charonOpenInNewWindowTitle = @"Open in New Window";
+static NSString *const revenantOpenInNewWindowTitle = @"Open in New Window";
 
-static void charon_requestWindow(UIWindowSceneActivationActionConfigurationProvider configurationProvider, UIAction *alternateAction, UIAction *action)
+static void revenant_requestWindow(UIWindowSceneActivationActionConfigurationProvider configurationProvider, UIAction *alternateAction, UIAction *action)
 {
     UIWindowSceneActivationConfiguration *configuration = configurationProvider ? configurationProvider((UIWindowSceneActivationAction *)action) : nil;
     [[UIApplication sharedApplication] requestSceneSessionActivation:nil userActivity:configuration.userActivity options:configuration.options errorHandler:^(NSError *error) {
@@ -16,9 +16,9 @@ static void charon_requestWindow(UIWindowSceneActivationActionConfigurationProvi
 {
     UIWindowSceneActivationActionConfigurationProvider provider = [configurationProvider copy];
     UIActionHandler handler = ^(UIAction *action) {
-        charon_requestWindow(provider, alternateAction, action);
+        revenant_requestWindow(provider, alternateAction, action);
     };
-    return [self actionWithTitle:charonOpenInNewWindowTitle image:nil identifier:identifier handler:handler];
+    return [self actionWithTitle:revenantOpenInNewWindowTitle image:nil identifier:identifier handler:handler];
 }
 
 @end

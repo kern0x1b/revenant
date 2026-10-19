@@ -1,2 +1,2 @@
-            double deviation = CharonMPSImageLoad(buffer, &from, CharonMPSImageIndex(&from, pixel, channel)) - mean;
+            double deviation = RevenantMPSImageLoad(buffer, &from, RevenantMPSImageIndex(&from, pixel, channel)) - mean;
             squared += deviation * deviation;

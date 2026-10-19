@@ -1,41 +1,41 @@
-#import "CharonMenus.h"
+#import "RevenantMenus.h"
 #import <objc/runtime.h>
 
-static const void *CharonDefaultHyphenationKey = &CharonDefaultHyphenationKey;
+static const void *RevenantDefaultHyphenationKey = &RevenantDefaultHyphenationKey;
 
-static BOOL charon_default_hyphenation(id style)
+static BOOL revenant_default_hyphenation(id style)
 {
-    return [objc_getAssociatedObject(style, CharonDefaultHyphenationKey) boolValue];
+    return [objc_getAssociatedObject(style, RevenantDefaultHyphenationKey) boolValue];
 }
 
-static void charon_set_default_hyphenation(id style, BOOL value)
+static void revenant_set_default_hyphenation(id style, BOOL value)
 {
     if (value)
-        charon_menus_say_once(@"default-hyphenation",
+        revenant_menus_say_once(@"default-hyphenation",
                               @"NSParagraphStyle.usesDefaultHyphenation: the text system of iOS 6 hyphenates nothing by "
                               @"default, so the flag is kept and read back and lines break as before");
-    objc_setAssociatedObject(style, CharonDefaultHyphenationKey, @(value), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(style, RevenantDefaultHyphenationKey, @(value), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
-@implementation NSParagraphStyle (CharonText15)
+@implementation NSParagraphStyle (RevenantText15)
 
 - (BOOL)usesDefaultHyphenation
 {
-    return charon_default_hyphenation(self);
+    return revenant_default_hyphenation(self);
 }
 
 - (void)setUsesDefaultHyphenation:(BOOL)usesDefaultHyphenation
 {
-    charon_set_default_hyphenation(self, usesDefaultHyphenation);
+    revenant_set_default_hyphenation(self, usesDefaultHyphenation);
 }
 
 @end
 
-@implementation NSMutableParagraphStyle (CharonText15)
+@implementation NSMutableParagraphStyle (RevenantText15)
 
 - (void)setUsesDefaultHyphenation:(BOOL)usesDefaultHyphenation
 {
-    charon_set_default_hyphenation(self, usesDefaultHyphenation);
+    revenant_set_default_hyphenation(self, usesDefaultHyphenation);
 }
 
 @end

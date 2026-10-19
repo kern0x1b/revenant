@@ -185,7 +185,7 @@ function main()
     check(header_pass.answer_of(diagnostics[3], "6.1.3").status == "missing", "an introduction after the release is missing")
     check(header_pass.answer_of(diagnostics[4], "6.1.3").status == "undecided", "an undeclared name is undecided")
     local probe, line_of = header_pass.probe_of("AVFAudio", {"AVAudioSession.h"}, {"(void)(X);", "(void)(Y);"})
-    check(probe == "#import <AVFAudio/AVAudioSession.h>\nvoid charon_probe(void) {\n(void)(X);\n(void)(Y);\n}\n",
+    check(probe == "#import <AVFAudio/AVAudioSession.h>\nvoid revenant_probe(void) {\n(void)(X);\n(void)(Y);\n}\n",
           "the probe imports the headers and names each declaration on its own line")
     check(line_of[3] == 1 and line_of[4] == 2, "each statement's line is kept")
 

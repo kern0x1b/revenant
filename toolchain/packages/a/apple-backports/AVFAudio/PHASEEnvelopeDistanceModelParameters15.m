@@ -1,8 +1,8 @@
-#import "CharonAVFAudio.h"
+#import "RevenantAVFAudio.h"
 #import <PHASE/PHASE.h>
 
 @implementation PHASEEnvelopeDistanceModelParameters {
-    PHASEEnvelope *_charon_envelope;
+    PHASEEnvelope *_revenant_envelope;
 }
 
 - (instancetype)init
@@ -20,14 +20,14 @@
 - (instancetype)initWithEnvelope:(PHASEEnvelope *)envelope
 {
     if ((self = [PHASEEnvelopeDistanceModelParameters alloc])) {
-        _charon_envelope = envelope;
+        _revenant_envelope = envelope;
     }
     return self;
 }
 
 - (PHASEEnvelope *)envelope
 {
-    return _charon_envelope;
+    return _revenant_envelope;
 }
 
 @end

@@ -85,9 +85,9 @@ static void spin(NSTimeInterval seconds)
                        @"timelapseVideosFilter", @"depthEffectPhotosFilter", @"burstsFilter", @"cinematicVideosFilter"];
     for (NSString *kind in kinds) {
         SEL selector = NSSelectorFromString(kind);
-        charon_check([PHPickerFilter respondsToSelector:selector], "PHPickerFilter answers every filter the SDK declares",
+        revenant_check([PHPickerFilter respondsToSelector:selector], "PHPickerFilter answers every filter the SDK declares",
                      [NSString stringWithFormat:@"+%@ is not answered", kind]);
-        charon_check([PHPickerFilter performSelector:selector] != nil, "every filter of a kind makes a filter",
+        revenant_check([PHPickerFilter performSelector:selector] != nil, "every filter of a kind makes a filter",
                      [NSString stringWithFormat:@"+%@ made nothing", kind]);
     }
     CHECK(([PHPickerFilter allFilterMatchingSubfilters:@[[PHPickerFilter imagesFilter], [PHPickerFilter videosFilter]]] != nil), "a filter of every kind of both is made");
@@ -190,7 +190,7 @@ static void spin(NSTimeInterval seconds)
             if ([candidate isKindOfClass:[UIImagePickerController class]])
                 shown = (UIImagePickerController *)candidate;
         NSArray *wanted = each[2];
-        charon_check(wanted.count == 0 ? shown == nil : [shown.mediaTypes isEqualToArray:wanted],
+        revenant_check(wanted.count == 0 ? shown == nil : [shown.mediaTypes isEqualToArray:wanted],
                      "a composed filter shows what it names",
                      [NSString stringWithFormat:@"%@: wanted %@, the release's picker was given %@",
                       each[0], wanted, shown ? shown.mediaTypes : @"nothing"]);
@@ -242,9 +242,9 @@ static void spin(NSTimeInterval seconds)
     @try {
         [self run];
     } @catch (NSException *exception) {
-        charon_check(NO, "the picker runs without an exception", [NSString stringWithFormat:@"%@: %@", exception.name, exception.reason]);
+        revenant_check(NO, "the picker runs without an exception", [NSString stringWithFormat:@"%@: %@", exception.name, exception.reason]);
     }
-    NSString *summary = [NSString stringWithFormat:@"%d checks, %d failed\n", charon_checks, charon_failures];
+    NSString *summary = [NSString stringWithFormat:@"%d checks, %d failed\n", revenant_checks, revenant_failures];
     [summary writeToFile:[results_folder stringByAppendingPathComponent:@"phpicker.done"] atomically:YES encoding:NSUTF8StringEncoding error:NULL];
 }
 
@@ -252,7 +252,7 @@ static void spin(NSTimeInterval seconds)
 {
     [[NSFileManager defaultManager] createDirectoryAtPath:results_folder withIntermediateDirectories:YES attributes:nil error:NULL];
     [[NSFileManager defaultManager] removeItemAtPath:[results_folder stringByAppendingPathComponent:@"phpicker.done"] error:NULL];
-    charon_log_to([results_folder stringByAppendingPathComponent:@"phpicker.log"]);
+    revenant_log_to([results_folder stringByAppendingPathComponent:@"phpicker.log"]);
     self.window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
     self.window.rootViewController = [[UIViewController alloc] init];
     self.window.rootViewController.view.backgroundColor = [UIColor whiteColor];

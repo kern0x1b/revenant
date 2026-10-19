@@ -3,7 +3,7 @@ set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 GRAPHICS=${GRAPHICS:-$here/../../../../packages/a/apple-backports/Graphics}
-BUILD=${BUILD:-$(runs_fresh charon-ciimage)}
+BUILD=${BUILD:-$(runs_fresh revenant-ciimage)}
 # CoreImage is on the host itself: the categories are built for macOS with their selectors
 # prefixed, so the port and the system answer side by side in one process.
 quiet="-Wno-nonnull -Wno-deprecated-declarations -Wno-unguarded-availability-new -Wno-objc-protocol-method-implementation -Wno-nullability-completeness -Wno-availability"
@@ -19,7 +19,7 @@ for file in $carried; do
 done
 for file in $carried; do
     xcrun clang -fobjc-arc -fvisibility=hidden $quiet -include "$BUILD/prefixed/declarations.h" -c "$BUILD/prefixed/$file" -o "$BUILD/renamed/$file.o"
-    perl -0777 -pi -e 's/__objc_catlist\0\0/__charon_catlist/g' "$BUILD/renamed/$file.o"
+    perl -0777 -pi -e 's/__objc_catlist\0\0/__revenant_catlist/g' "$BUILD/renamed/$file.o"
 done
 xcrun clang -fobjc-arc $quiet "$here/differential.m" "$here/../foundation2/host-attach.c" "$BUILD"/renamed/*.o -framework CoreImage -framework CoreVideo -framework CoreGraphics -framework Foundation -o "$BUILD/differential"
 "$BUILD/differential"

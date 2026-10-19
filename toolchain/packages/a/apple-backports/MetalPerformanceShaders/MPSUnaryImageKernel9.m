@@ -1,5 +1,5 @@
-#import "CharonMPS.h"
-#import "CharonMPSImage.h"
+#import "RevenantMPS.h"
+#import "RevenantMPSImage.h"
 
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
 
@@ -54,7 +54,7 @@
                 sourceTexture:(id<MTLTexture>)sourceTexture
            destinationTexture:(id<MTLTexture>)destinationTexture
 {
-    CharonMPSRefuse(@"MPSUnaryImageKernel: -encodeToCommandBuffer:sourceTexture:destinationTexture: is"
+    RevenantMPSRefuse(@"MPSUnaryImageKernel: -encodeToCommandBuffer:sourceTexture:destinationTexture: is"
                     @" not carried by this port - it is a GPU kernel and this package implements the"
                     @" MPSImage path - so nothing was written");
 }
@@ -63,7 +63,7 @@
                 inPlaceTexture:(id<MTLTexture> __strong *)texture
        fallbackCopyAllocator:(MPSCopyAllocator)copyAllocator
 {
-    CharonMPSRefuse(@"MPSUnaryImageKernel: the in-place encode needs MPSCopyAllocator semantics this port"
+    RevenantMPSRefuse(@"MPSUnaryImageKernel: the in-place encode needs MPSCopyAllocator semantics this port"
                     @" does not carry, so the texture was left as it was");
     return NO;
 }

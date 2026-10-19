@@ -1,6 +1,6 @@
 #import "JSInternal.h"
 
-static const char CharonPromiseSource[] =
+static const char RevenantPromiseSource[] =
     "(function (makePromise, promiseState, callFunction, noteJobs, reportError) {\n"
     "'use strict';\n"
     "var TypeErrorConstructor = TypeError, isArray = Array.isArray, toTag = Object.prototype.toString;\n"
@@ -258,7 +258,7 @@ static const char CharonPromiseSource[] =
     "return Promise;\n"
     "})";
 
-static NSString *const CharonPromiseStateName = @"charon.promise.state";
+static NSString *const RevenantPromiseStateName = @"revenant.promise.state";
 
 static JSClassRef PromiseClass(void)
 {
@@ -280,11 +280,11 @@ static JSValueRef MakePromise(JSContextRef ctx, JSObjectRef function, JSObjectRe
     (void)thisObject;
     JSObjectRef promise = JSObjectMake(ctx, PromiseClass(), NULL);
     JSObjectSetPrototype(ctx, promise, arguments[0]);
-    JSStringRef name = charon_js_string(CharonPromiseStateName);
+    JSStringRef name = revenant_js_string(RevenantPromiseStateName);
     bool kept = argumentCount == 2 && JSObjectSetPrivateProperty(ctx, promise, name, arguments[1]);
     JSStringRelease(name);
     if (!kept) {
-        *exception = charon_js_type_error(ctx, @"this release's JavaScriptCore keeps no private property on a promise object");
+        *exception = revenant_js_type_error(ctx, @"this release's JavaScriptCore keeps no private property on a promise object");
         return JSValueMakeUndefined(ctx);
     }
     return promise;
@@ -297,7 +297,7 @@ static JSValueRef PromiseState(JSContextRef ctx, JSObjectRef function, JSObjectR
     (void)exception;
     if (argumentCount < 1 || !JSValueIsObjectOfClass(ctx, arguments[0], PromiseClass()))
         return JSValueMakeUndefined(ctx);
-    JSStringRef name = charon_js_string(CharonPromiseStateName);
+    JSStringRef name = revenant_js_string(RevenantPromiseStateName);
     JSValueRef state = JSObjectGetPrivateProperty(ctx, (JSObjectRef)arguments[0], name);
     JSStringRelease(name);
     return state ?: JSValueMakeUndefined(ctx);
@@ -310,7 +310,7 @@ static JSValueRef CallFunction(JSContextRef ctx, JSObjectRef function, JSObjectR
     JSObjectRef callee = argumentCount > 0 ? JSValueToObject(ctx, arguments[0], exception) : NULL;
     if (!callee || !JSObjectIsFunction(ctx, callee)) {
         if (!*exception)
-            *exception = charon_js_type_error(ctx, @"the value is not a function");
+            *exception = revenant_js_type_error(ctx, @"the value is not a function");
         return JSValueMakeUndefined(ctx);
     }
     JSObjectRef receiver = argumentCount > 1 ? JSValueToObject(ctx, arguments[1], exception) : NULL;
@@ -326,7 +326,7 @@ static JSValueRef NoteJobs(JSContextRef ctx, JSObjectRef function, JSObjectRef t
     (void)thisObject;
     JSObjectRef drain = argumentCount > 0 ? JSValueToObject(ctx, arguments[0], exception) : NULL;
     if (drain)
-        charon_js_note_jobs(ctx, drain);
+        revenant_js_note_jobs(ctx, drain);
     return JSValueMakeUndefined(ctx);
 }
 
@@ -336,7 +336,7 @@ static JSValueRef ReportError(JSContextRef ctx, JSObjectRef function, JSObjectRe
     (void)thisObject;
     (void)exception;
     if (argumentCount > 0)
-        [[JSContext charon_wrapperForGlobalContext:JSContextGetGlobalContext(ctx) create:YES] charon_noteException:arguments[0]];
+        [[JSContext revenant_wrapperForGlobalContext:JSContextGetGlobalContext(ctx) create:YES] revenant_noteException:arguments[0]];
     return JSValueMakeUndefined(ctx);
 }
 
@@ -348,16 +348,16 @@ static JSObjectRef PromiseHelper(JSContextRef ctx, const char *name, JSObjectCal
     return helper;
 }
 
-typedef struct CharonPromiseCapture {
+typedef struct RevenantPromiseCapture {
     JSValueRef resolve;
     JSValueRef reject;
-} CharonPromiseCapture;
+} RevenantPromiseCapture;
 
 static JSValueRef CaptureExecutor(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception)
 {
     (void)thisObject;
     (void)exception;
-    CharonPromiseCapture *capture = JSObjectGetPrivate(function);
+    RevenantPromiseCapture *capture = JSObjectGetPrivate(function);
     if (capture && argumentCount >= 2) {
         capture->resolve = arguments[0];
         capture->reject = arguments[1];
@@ -371,23 +371,23 @@ static JSClassRef CaptureClass(void)
     static dispatch_once_t once;
     dispatch_once(&once, ^{
         JSClassDefinition definition = kJSClassDefinitionEmpty;
-        definition.className = "CharonPromiseExecutor";
+        definition.className = "RevenantPromiseExecutor";
         definition.callAsFunction = CaptureExecutor;
         captureClass = JSClassCreate(&definition);
     });
     return captureClass;
 }
 
-JSObjectRef charon_js_promise_constructor(JSContext *context)
+JSObjectRef revenant_js_promise_constructor(JSContext *context)
 {
     JSGlobalContextRef ctx = context.JSGlobalContextRef;
     JSWeakObjectMapRef weak;
-    JSGlobalContextRef weakContext = [context.virtualMachine charon_weakContext:&weak];
+    JSGlobalContextRef weakContext = [context.virtualMachine revenant_weakContext:&weak];
     void *key = JSContextGetGlobalObject(ctx);
     JSObjectRef constructor = JSWeakObjectMapGet(weakContext, weak, key);
     if (constructor)
         return constructor;
-    JSStringRef source = JSStringCreateWithUTF8CString(CharonPromiseSource);
+    JSStringRef source = JSStringCreateWithUTF8CString(RevenantPromiseSource);
     JSValueRef exception = NULL;
     JSValueRef factory = JSEvaluateScript(ctx, source, NULL, NULL, 1, &exception);
     JSStringRelease(source);
@@ -404,7 +404,7 @@ JSObjectRef charon_js_promise_constructor(JSContext *context)
     }
     if (exception || !made || !JSValueIsObject(ctx, made)) {
         NSLog(@"JSValue: this context's Promise constructor could not be made");
-        [context charon_noteException:exception];
+        [context revenant_noteException:exception];
         return NULL;
     }
     constructor = (JSObjectRef)made;
@@ -412,17 +412,17 @@ JSObjectRef charon_js_promise_constructor(JSContext *context)
     return constructor;
 }
 
-JSObjectRef charon_js_deferred_promise(JSContext *context, JSObjectRef *outResolve, JSObjectRef *outReject, JSValueRef *outException)
+JSObjectRef revenant_js_deferred_promise(JSContext *context, JSObjectRef *outResolve, JSObjectRef *outReject, JSValueRef *outException)
 {
     JSGlobalContextRef ctx = context.JSGlobalContextRef;
-    charon_js_enter();
-    JSObjectRef constructor = charon_js_promise_constructor(context);
+    revenant_js_enter();
+    JSObjectRef constructor = revenant_js_promise_constructor(context);
     if (!constructor) {
-        charon_js_leave();
+        revenant_js_leave();
         *outException = NULL;
         return NULL;
     }
-    CharonPromiseCapture capture = {NULL, NULL};
+    RevenantPromiseCapture capture = {NULL, NULL};
     JSObjectRef executor = JSObjectMake(ctx, CaptureClass(), &capture);
     JSValueRef argument = executor;
     JSValueRef exception = NULL;
@@ -431,7 +431,7 @@ JSObjectRef charon_js_deferred_promise(JSContext *context, JSObjectRef *outResol
     *outResolve = NULL;
     *outReject = NULL;
     if (exception || !promise || !capture.resolve || !capture.reject) {
-        charon_js_leave();
+        revenant_js_leave();
         *outException = exception;
         return NULL;
     }

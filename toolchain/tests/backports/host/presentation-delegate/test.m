@@ -11,14 +11,14 @@ static NSString *yes_no(BOOL answer)
     return answer ? @"yes" : @"no";
 }
 
-UIPresentationController *charon_presentation_controller_of(UIViewController *controller)
+UIPresentationController *revenant_presentation_controller_of(UIViewController *controller)
 {
     return nil;
 }
 
-@interface CharonProbeDelegate : NSObject
+@interface RevenantProbeDelegate : NSObject
 @end
-@implementation CharonProbeDelegate
+@implementation RevenantProbeDelegate
 @end
 
 int main(void)
@@ -27,7 +27,7 @@ int main(void)
         setvbuf(stdout, NULL, _IONBF, 0);
         UIViewController *presented = [[UIViewController alloc] init];
         UIViewController *presenting = [[UIViewController alloc] init];
-        CharonProbeDelegate *delegate = [[CharonProbeDelegate alloc] init];
+        RevenantProbeDelegate *delegate = [[RevenantProbeDelegate alloc] init];
 
         UIPopoverPresentationController *popover = [[UIPopoverPresentationController alloc] initWithPresentedViewController:presented presentingViewController:presenting];
         report("popover-getter-answers", yes_no([UIPopoverPresentationController instancesRespondToSelector:@selector(delegate)]));

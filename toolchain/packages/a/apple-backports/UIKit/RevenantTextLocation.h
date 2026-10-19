@@ -4,7 +4,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @class NSTextContentStorage;
 
-@interface CharonTextLocation : NSObject <NSTextLocation>
+@interface RevenantTextLocation : NSObject <NSTextLocation>
 
 @property (nonatomic, readonly, weak) NSTextContentStorage *textContentStorage;
 @property (nonatomic, readonly) NSInteger offset;

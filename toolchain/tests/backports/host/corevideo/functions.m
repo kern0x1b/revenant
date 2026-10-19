@@ -6,12 +6,12 @@
 
 extern CFArrayRef CVPixelFormatDescriptionGetPixelFormatTypes(void);
 
-extern CFDictionaryRef charonHost_CVBufferCopyAttachments(CVBufferRef buffer, CVAttachmentMode mode);
-extern CFTypeRef charonHost_CVBufferCopyAttachment(CVBufferRef buffer, CFStringRef key, CVAttachmentMode *mode);
-extern Boolean charonHost_CVBufferHasAttachment(CVBufferRef buffer, CFStringRef key);
-extern CFDictionaryRef charonHost_CVPixelBufferCopyCreationAttributes(CVPixelBufferRef pixelBuffer);
-extern CGColorSpaceRef charonHost_CVImageBufferCreateColorSpaceFromAttachments(CFDictionaryRef attachments);
-extern Boolean charonHost_CVIsCompressedPixelFormatAvailable(OSType pixelFormatType);
+extern CFDictionaryRef revenantHost_CVBufferCopyAttachments(CVBufferRef buffer, CVAttachmentMode mode);
+extern CFTypeRef revenantHost_CVBufferCopyAttachment(CVBufferRef buffer, CFStringRef key, CVAttachmentMode *mode);
+extern Boolean revenantHost_CVBufferHasAttachment(CVBufferRef buffer, CFStringRef key);
+extern CFDictionaryRef revenantHost_CVPixelBufferCopyCreationAttributes(CVPixelBufferRef pixelBuffer);
+extern CGColorSpaceRef revenantHost_CVImageBufferCreateColorSpaceFromAttachments(CFDictionaryRef attachments);
+extern Boolean revenantHost_CVIsCompressedPixelFormatAvailable(OSType pixelFormatType);
 
 static int checks = 0, same = 0, different = 0;
 
@@ -68,7 +68,7 @@ int main(void)
 
     keys_of(CVBufferCopyAttachments(buffer, kCVAttachmentMode_ShouldPropagate), hostKeys, sizeof(hostKeys));
 #ifdef HAVE_PORT
-    keys_of(charonHost_CVBufferCopyAttachments(buffer, kCVAttachmentMode_ShouldPropagate), portKeys, sizeof(portKeys));
+    keys_of(revenantHost_CVBufferCopyAttachments(buffer, kCVAttachmentMode_ShouldPropagate), portKeys, sizeof(portKeys));
     line("CVBufferCopyAttachments keys", hostKeys, portKeys, same_text(hostKeys, portKeys));
 #else
     strlcpy(portKeys, hostKeys, sizeof(portKeys));
@@ -82,7 +82,7 @@ int main(void)
     CFTypeRef hostOne = CVBufferCopyAttachment(buffer, kCVImageBufferColorPrimariesKey, &hostMode);
     cstr((CFStringRef)hostOne, h, sizeof(h));
 #ifdef HAVE_PORT
-    CFTypeRef portOne = charonHost_CVBufferCopyAttachment(buffer, kCVImageBufferColorPrimariesKey, &portMode);
+    CFTypeRef portOne = revenantHost_CVBufferCopyAttachment(buffer, kCVImageBufferColorPrimariesKey, &portMode);
     cstr((CFStringRef)portOne, p, sizeof(p));
     line("CVBufferCopyAttachment present", h, p, same_text(h, p));
     checks++;
@@ -95,7 +95,7 @@ int main(void)
 #endif
     cstr((CFStringRef)CVBufferCopyAttachment(buffer, absentKey, NULL), h, sizeof(h));
 #ifdef HAVE_PORT
-    cstr((CFStringRef)charonHost_CVBufferCopyAttachment(buffer, absentKey, NULL), p, sizeof(p));
+    cstr((CFStringRef)revenantHost_CVBufferCopyAttachment(buffer, absentKey, NULL), p, sizeof(p));
     line("CVBufferCopyAttachment absent key", h, p, same_text(h, p));
 #else
     strlcpy(p, h, sizeof(p));
@@ -106,8 +106,8 @@ int main(void)
         Boolean hostHas = CVBufferHasAttachment(buffer, kCVImageBufferColorPrimariesKey);
         Boolean hostHasNot = CVBufferHasAttachment(buffer, absentKey);
 #ifdef HAVE_PORT
-        Boolean portHas = charonHost_CVBufferHasAttachment(buffer, kCVImageBufferColorPrimariesKey);
-        Boolean portHasNot = charonHost_CVBufferHasAttachment(buffer, absentKey);
+        Boolean portHas = revenantHost_CVBufferHasAttachment(buffer, kCVImageBufferColorPrimariesKey);
+        Boolean portHasNot = revenantHost_CVBufferHasAttachment(buffer, absentKey);
         line("CVBufferHasAttachment present", hostHas ? "true" : "false", portHas ? "true" : "false",
              hostHas == portHas);
         line("CVBufferHasAttachment absent", hostHasNot ? "true" : "false", portHasNot ? "true" : "false",
@@ -120,7 +120,7 @@ int main(void)
 
     keys_of(CVPixelBufferCopyCreationAttributes(buffer), hostKeys, sizeof(hostKeys));
 #ifdef HAVE_PORT
-    keys_of(charonHost_CVPixelBufferCopyCreationAttributes(buffer), portKeys, sizeof(portKeys));
+    keys_of(revenantHost_CVPixelBufferCopyCreationAttributes(buffer), portKeys, sizeof(portKeys));
     line("CVPixelBufferCopyCreationAttributes keys", hostKeys, portKeys, same_text(hostKeys, portKeys));
 #else
     printf("host CVPixelBufferCopyCreationAttributes keys: %s\n", hostKeys);
@@ -135,7 +135,7 @@ int main(void)
         CGColorSpaceRef h1 = CVImageBufferCreateColorSpaceFromAttachments(d1);
         cstr(h1 ? CGColorSpaceGetName(h1) : NULL, h, sizeof(h));
 #ifdef HAVE_PORT
-        CGColorSpaceRef p1 = charonHost_CVImageBufferCreateColorSpaceFromAttachments(d1);
+        CGColorSpaceRef p1 = revenantHost_CVImageBufferCreateColorSpaceFromAttachments(d1);
         cstr(p1 ? CGColorSpaceGetName(p1) : NULL, p, sizeof(p));
         line("CreateColorSpaceFromAttachments ICC", h, p, same_text(h, p));
 #else
@@ -171,7 +171,7 @@ int main(void)
             CGColorSpaceRef hv = CVImageBufferCreateColorSpaceFromAttachments(d);
             cstr(hv ? CGColorSpaceGetName(hv) : NULL, h, sizeof(h));
 #ifdef HAVE_PORT
-            CGColorSpaceRef pv = charonHost_CVImageBufferCreateColorSpaceFromAttachments(d);
+            CGColorSpaceRef pv = revenantHost_CVImageBufferCreateColorSpaceFromAttachments(d);
             cstr(pv ? CGColorSpaceGetName(pv) : NULL, p, sizeof(p));
             line(label, h, p, same_text(h, p));
 #else
@@ -184,7 +184,7 @@ int main(void)
         CGColorSpaceRef he = CVImageBufferCreateColorSpaceFromAttachments(empty);
         cstr(he ? CGColorSpaceGetName(he) : NULL, h, sizeof(h));
 #ifdef HAVE_PORT
-        CGColorSpaceRef pe = charonHost_CVImageBufferCreateColorSpaceFromAttachments(empty);
+        CGColorSpaceRef pe = revenantHost_CVImageBufferCreateColorSpaceFromAttachments(empty);
         cstr(pe ? CGColorSpaceGetName(pe) : NULL, p, sizeof(p));
         line("CreateColorSpace empty dictionary", h, p, same_text(h, p));
 #else
@@ -204,7 +204,7 @@ int main(void)
             CGColorSpaceRef hv = CVImageBufferCreateColorSpaceFromAttachments(d);
             cstr(hv ? CGColorSpaceGetName(hv) : NULL, h, sizeof(h));
 #ifdef HAVE_PORT
-            CGColorSpaceRef pv = charonHost_CVImageBufferCreateColorSpaceFromAttachments(d);
+            CGColorSpaceRef pv = revenantHost_CVImageBufferCreateColorSpaceFromAttachments(d);
             cstr(pv ? CGColorSpaceGetName(pv) : NULL, p, sizeof(p));
             line("CreateColorSpace triple plus gamma", h, p, same_text(h, p));
 #else
@@ -225,7 +225,7 @@ int main(void)
             CGColorSpaceRef hv = CVImageBufferCreateColorSpaceFromAttachments(d);
             cstr(hv ? CGColorSpaceGetName(hv) : NULL, h, sizeof(h));
 #ifdef HAVE_PORT
-            CGColorSpaceRef pv = charonHost_CVImageBufferCreateColorSpaceFromAttachments(d);
+            CGColorSpaceRef pv = revenantHost_CVImageBufferCreateColorSpaceFromAttachments(d);
             cstr(pv ? CGColorSpaceGetName(pv) : NULL, p, sizeof(p));
             line("CreateColorSpace ICC and triple", h, p, same_text(h, p));
 #else
@@ -263,7 +263,7 @@ int main(void)
                 printf("     rule disagrees: %s host=%s codec=%s\n", label,
                        host ? "true" : "false", codec ? "yes" : "no"); }
 #ifdef HAVE_PORT
-            Boolean port = charonHost_CVIsCompressedPixelFormatAvailable(fmt);
+            Boolean port = revenantHost_CVIsCompressedPixelFormatAvailable(fmt);
             line(label, host ? "true" : "false", port ? "true" : "false", host == port);
 #else
             printf("host %-44s %s (codec=%s, rule=%s)\n", label, host ? "true" : "false",
